@@ -9,7 +9,11 @@ status: live
 
 **Outbound (Wednesday → Kam):** run
 `"$PROJECT_DIR/2_Project_Files/voice/speak.sh" "message"` via Bash.
-Uses macOS `say` with **Moira (en_IE)** — an actual Irish voice. Non-blocking.
+Uses macOS `say` with **Matilda (Premium)** — neural en_AU, chosen by Kam
+2026-07-31 after auditioning the voices (compact Moira was too robotic; he
+valued natural over Irish). The Irishness lives in the *writing*, not the
+synthesizer. Fallback chain in speak.sh: Matilda Premium → Matilda Enhanced →
+Moira Enhanced → Moira (PORTABILITY.md item 2). Non-blocking.
 
 **Inbound (Kam → Wednesday):** Kam dictates via **Whisperflow**; it arrives as
 ordinary prompt text. Expect dictation artifacts — filler words, odd punctuation,

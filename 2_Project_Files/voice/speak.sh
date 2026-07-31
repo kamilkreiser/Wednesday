@@ -10,13 +10,16 @@
 
 set -u
 
-# Prefer the neural "Moira (Enhanced)" / "(Premium)" voice when installed
-# (System Settings > Accessibility > Spoken Content > Manage Voices > Irish).
-# The compact Moira is the robotic fallback. WEDNESDAY_VOICE overrides both.
+# Voice preference (Kam, 2026-07-31: auditioned and chose Matilda Premium —
+# neural en_AU). Fallback chain covers machines without the download
+# (PORTABILITY.md item 2). WEDNESDAY_VOICE overrides everything.
 if [ -z "${WEDNESDAY_VOICE:-}" ]; then
-  if say -v '?' 2>/dev/null | grep -q '^Moira (Premium)'; then
-    VOICE="Moira (Premium)"
-  elif say -v '?' 2>/dev/null | grep -q '^Moira (Enhanced)'; then
+  INSTALLED="$(say -v '?' 2>/dev/null)"
+  if echo "$INSTALLED" | grep -q '^Matilda (Premium)'; then
+    VOICE="Matilda (Premium)"
+  elif echo "$INSTALLED" | grep -q '^Matilda (Enhanced)'; then
+    VOICE="Matilda (Enhanced)"
+  elif echo "$INSTALLED" | grep -q '^Moira (Enhanced)'; then
     VOICE="Moira (Enhanced)"
   else
     VOICE="Moira"
