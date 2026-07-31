@@ -20,6 +20,17 @@ an explicit learning loop so the relationship improves over time.
 
 ## Key design decisions (log — newest at top)
 
+- **2026-07-31 · Index feed shipped:** one Step 2c in the vault end-of-session
+  skill (not 15 launcher edits); mount-tolerant; entries/ is the only place other
+  agents write in Wednesday's brain.
+- **2026-07-31 · Linear = task source of truth:** dedicated workspace
+  `wednesday-agent` (account IS "Wednesday"), team WED; TASKS.md is a pointer.
+- **2026-07-31 · Portability:** T9 is the master copy; on-drive deploy key chosen
+  deliberately over keychain (travels with the drive); PORTABILITY.md tracks the
+  few machine-local deps.
+- **2026-07-31 · Voice = Matilda (Premium):** Kam auditioned; natural beat Irish.
+  Persona's Irishness lives in the writing, not the synthesizer.
+
 - **2026-07-31 · Brain layout:** three-tier memory in `0_Brain/` (daily=episodic,
   learnings+people=semantic, identity=procedural); full `learnings/` read at boot
   (Kam accepted token cost); index-first pattern deferred until scale demands it.
