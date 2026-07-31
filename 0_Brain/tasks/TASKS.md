@@ -11,7 +11,7 @@ Move finished items to Done with the completion date. Keep this file current.
 - [ ] Wednesday: migrate this task board into Linear once Step 3 done (Linear = source of truth per Kam) — added 2026-07-31
 - [ ] Wednesday: draft the architecture doc from discovery answers — added 2026-07-31
 - [ ] Wednesday: populate `projects_index/INDEX.md` with a first sweep of all live projects on DevMASTER — added 2026-07-31
-- [ ] Wednesday: WhatsApp research → recommendation to Kam (agent dispatched 2026-07-31; Kam leans dedicated number, wants no-number options assessed)
+- [ ] Kam (when convenient): buy ALDI $2 PAYG SIM + $15/365-day recharge, register WhatsApp on the old phone (research verdict 2026-07-31: dedicated number is the only viable path — see Discovery/research/)
 
 ## Next
 

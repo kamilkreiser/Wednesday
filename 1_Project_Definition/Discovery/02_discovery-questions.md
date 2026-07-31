@@ -55,8 +55,14 @@ each question and marks it ✅. Nothing gets built from an unanswered question.
    summarizer-on-demand? Any hard rules for family chats?
    **Partial answer (2026-07-31):** Kam leans toward a dedicated old phone + new
    SIM/number for Wednesday, added to selected groups. He does NOT want Wednesday
-   seeing his own WhatsApp. Research commissioned: is a phone number necessary, or
-   is there a no-number approach? Recommendation pending (research/ folder).
+   seeing his own WhatsApp.
+   **Research verdict (2026-07-31):** Kam's plan is the ONLY viable one — no
+   number-free path exists, and the official Cloud API cannot join user-created
+   groups. Recommended build: old phone + ALDI $2 PAYG SIM (~$15/yr), phone
+   permanently on home Wi-Fi, account aged 1-2 weeks, Mac paired via
+   mautrix-whatsapp or Baileys. Ring-fenced ban risk accepted. Full report:
+   `research/2026-07-31_whatsapp-channel-options.md`. Still open: which groups,
+   and observer-vs-participant behaviour per group.
 9. **Interrupt policy:** when may Wednesday proactively ping you (voice, WhatsApp,
    email) vs. hold things for the next session?
 
