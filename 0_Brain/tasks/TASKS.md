@@ -6,7 +6,7 @@ Move finished items to Done with the completion date. Keep this file current.
 ## Now (discovery / architecture phase) — Kam-action queue, ONE at a time
 
 - [x] **Step 1 — Kam:** voice upgrade — Kam auditioned and downloaded **Matilda (Premium)** (en_AU neural); speak.sh switched, protocol updated — done 2026-07-31
-- [ ] **Step 2 — Kam:** create private GitHub repo `wednesday` on personal account + paste deploy key (key ready in `3_Access_Keys/github_deploy_rw.pub`; repo initialized + first commit done) — added 2026-07-31
+- [x] **Step 2 — Kam:** GitHub live — private repo `kamilkreiser/Wednesday`, write deploy key verified, main pushed + tracking — done 2026-07-31
 - [ ] **Step 3 — Kam:** create the dedicated Linear account/workspace; then Wednesday guides API key → `4_Credentials/.env` (`LINEAR_API_KEY`) — launcher check already wired — added 2026-07-31
 - [ ] Wednesday: migrate this task board into Linear once Step 3 done (Linear = source of truth per Kam) — added 2026-07-31
 - [ ] Wednesday: draft the architecture doc from discovery answers — added 2026-07-31
