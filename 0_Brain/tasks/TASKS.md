@@ -1,30 +1,20 @@
 # Wednesday — task board
 
-Format: `- [ ] task — owner (Kam / Wednesday / delegated:<project>) — added YYYY-MM-DD`
-Move finished items to Done with the completion date. Keep this file current.
+**Linear is the source of truth** (Kam's rule, 2026-07-31): workspace
+`wednesday-agent`, team **WED** — https://linear.app/wednesday-agent
+API access: `LINEAR_API_KEY` + `LINEAR_TEAM_ID` in `4_Credentials/.env`
+(GraphQL, key in `Authorization` header, no "Bearer" prefix).
 
-## Now (discovery / architecture phase) — Kam-action queue, ONE at a time
+Every action item gets a WED issue. This file is only a pointer + offline
+fallback — do NOT maintain parallel task lists here.
 
-- [x] **Step 1 — Kam:** voice upgrade — Kam auditioned and downloaded **Matilda (Premium)** (en_AU neural); speak.sh switched, protocol updated — done 2026-07-31
-- [x] **Step 2 — Kam:** GitHub live — private repo `kamilkreiser/Wednesday`, write deploy key verified, main pushed + tracking — done 2026-07-31
-- [ ] **Step 3 — Kam:** create the dedicated Linear account/workspace; then Wednesday guides API key → `4_Credentials/.env` (`LINEAR_API_KEY`) — launcher check already wired — added 2026-07-31
-- [ ] Wednesday: migrate this task board into Linear once Step 3 done (Linear = source of truth per Kam) — added 2026-07-31
-- [ ] Wednesday: draft the architecture doc from discovery answers — added 2026-07-31
-- [ ] Wednesday: populate `projects_index/INDEX.md` with a first sweep of all live projects on DevMASTER — added 2026-07-31
-- [ ] Kam (when convenient): buy ALDI $2 PAYG SIM + $15/365-day recharge, register WhatsApp on the old phone (research verdict 2026-07-31: dedicated number is the only viable path — see Discovery/research/)
+## Offline fallback notes
+- If Linear is unreachable at session start, say so in one line, work from the
+  most recent daily note + history.md, and reconcile Linear when it's back.
 
-## Next
-
-- [ ] Agent Mail: create wednesday@agentmail.to inbox (decided 2026-07-31: own identity + monitor shared coagent@ early on; API key from vault `Access/Agent Mail.md`) — added 2026-07-31
-- [ ] Modify other projects' launchers/end-of-session to write index entries (spec in `projects_index/README.md`; needs Kam's explicit go-ahead) — added 2026-07-31
-- [ ] Define send-permission limits for Wednesday's mailbox (open sub-question of discovery Q7) — added 2026-07-31
-
-## Parked
-
-- [ ] Local model integration (Kimi-K2 etc.) for background training/tasks — Claude-only for now — added 2026-07-31
-- [ ] Dedicated Mac Studio deployment — contingent on project success — added 2026-07-31
-- [ ] Voice upgrade beyond `say`/Moira (Rhodes-style whisper.cpp + neural TTS loop) — added 2026-07-31
-
-## Done
-
-- [x] Folder structure, brain, launcher, voice script created — 2026-07-31
+## Setup milestones (completed 2026-07-31)
+- [x] Voice: Matilda (Premium) auditioned + selected by Kam
+- [x] GitHub: private repo `kamilkreiser/Wednesday`, write deploy key, main pushed
+- [x] Linear: account "Wednesday" (kreiser.org+wednesday@me.com), workspace
+      `wednesday-agent`, team WED, API key stored, task board migrated
+      (WED-5…WED-15), onboarding samples archived
