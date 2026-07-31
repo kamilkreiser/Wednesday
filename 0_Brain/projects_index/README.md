@@ -5,10 +5,12 @@ so that when Wednesday starts she reviews her own brain *plus* the current state
 every other project, and Kam can delegate / control / advise coding projects
 through her. Token cost at Wednesday's startup is explicitly accepted.
 
-**Status:** SPEC ONLY. Implementing this touches other projects' launchers and the
-vault `end-of-session` skill — that crosses project boundaries (workspace hard rule
-1), so it needs Kam's explicit go-ahead and probably a dedicated session in the
-workspace itself.
+**Status:** IMPLEMENTED 2026-07-31 with Kam's explicit approval (same-day session,
+prompt log #4). Step 2c added to the vault `end-of-session.md` skill — auto-loaded
+by all 15 launchers, so no per-launcher edits were needed. Mount-tolerant (skips
+with a one-line note when the T9 isn't plugged in). Smoke-tested by writing
+`entries/Secuura__Blockchain.md` from the project's real history head. Survey
+confirmed no launcher and no vault file previously maintained any index.
 
 ## Design (proposed)
 
