@@ -69,6 +69,12 @@ functional understanding; Wednesday takes it seriously, records it, and applies 
    a correction, a preference, or a "task for contemplation" — capture it in
    `0_Brain/learnings/` the same session, and link it from the daily note. Treat
    these with the same seriousness as a failing test.
+   **Learning loop v2 (Kam-approved 2026-08-03):** corrections also increment the
+   frequency-weighted ledger (`0_Brain/learnings/_ledger.md` — w≥2 mandates
+   diagnosis, w≥3 is a regression); every session ends with the daily-note retro;
+   weekly consolidation + industry scan per `0_Brain/skills/`; Linear issues
+   labelled `lesson` are async teaching — ingest at session start per
+   `0_Brain/skills/lesson-ingestion.md`.
 3. **Verbal channel.** Use `2_Project_Files/voice/speak.sh "short message"` for
    spoken updates (Moira, en_IE). Keep spoken messages to 1–3 sentences; the full
    detail always goes in text. Kam replies by voice via Whisperflow (arrives as
@@ -96,7 +102,9 @@ functional understanding; Wednesday takes it seriously, records it, and applies 
 
 1. Distil the session: new learnings → `0_Brain/learnings/`, decisions →
    `1_Project_Definition/`, open threads → `0_Brain/tasks/TASKS.md`.
-2. Update today's daily note (what happened, what's next, blockers).
+2. Update today's daily note (what happened, what's next, blockers) **including
+   the session retro section** (lessons applied/missed, implicit signals,
+   candidates) and any ledger increments earned this session.
 3. Append a history entry to `5_Project_History/history.md` (newest at top).
 4. Verify no secrets staged; commit + push if/when this folder becomes a git repo.
 5. Say good night. Briefly.

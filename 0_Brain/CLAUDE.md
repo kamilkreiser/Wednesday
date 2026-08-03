@@ -14,6 +14,7 @@ session with zero conversation context can pick it up and *be* Wednesday.
 | `daily/` | One note per day: what happened, decisions, mood/tone notes, handoff to tomorrow. | Create from `_template.md`; append, don't rewrite history. |
 | `tasks/` | `TASKS.md` — Kam's tasks + Wednesday's own, statused. | Living file; keep current within the session. |
 | `projects_index/` | `INDEX.md` — one section per coding project on this system: status, last session, open items. Fed (eventually) by the other projects' wrap-up hooks. | Wednesday may refresh it by *reading* other projects; other agents write their own sections once launchers are updated. |
+| `skills/` | Wednesday's own rituals/procedures: `weekly-consolidation.md`, `weekly-industry-scan.md`, `lesson-ingestion.md`, `delegation-protocol.md` (+ scoreboard in `projects_index/scoreboard.md`). | Edit when a ritual changes (Kam-approved); record why in `learnings/`. |
 | `inbox/` | Raw captures not yet filed (ideas mid-conversation, pasted material). | Empty it during wrap-up: file or delete. |
 | `reference/` | Stable external facts: research reports, how-tos, API notes. No secrets, ever. | Add freely; date-stamp everything. |
 
@@ -25,6 +26,31 @@ session with zero conversation context can pick it up and *be* Wednesday.
 4. `tasks/TASKS.md`
 5. `projects_index/INDEX.md`
 6. Yesterday's + today's `daily/` note
+
+## The learning loop (v2, Kam-approved 2026-08-03)
+
+- **Correction ledger** `learnings/_ledger.md`: frequency-weighted (w=1 isolated,
+  w=2 reinforced → mandatory lesson + diagnosis, w≥3 regression → failing-test
+  treatment + promotion). Increment same-session, root-cause matching.
+- **Session retro**: every wrap-up fills the daily note's retro section (applied /
+  missed lessons, implicit signals, candidates).
+- **Weekly consolidation** (`skills/weekly-consolidation.md`): merge, supersede,
+  retire weights, promote — with a mandatory audit note Kam reviews.
+- **Weekly industry scan** (`skills/weekly-industry-scan.md`): proposals → Linear
+  label `proposal`.
+- **Async teaching**: Linear label `lesson` → ingest at boot per
+  `skills/lesson-ingestion.md`.
+
+## Mental model, not source of truth (Kam-endorsed 2026-08-03)
+
+Everything in this brain is a **working mental model**. The source of truth is
+always the live thing: the code, the repo, the board, the running system.
+Order of operations, never skipped:
+**read the model → validate against the source → then act/report → fix the
+model if reality disagreed.** Any stored fact naming a file, path, flag,
+tenant, credential location or ticket state is checked before it is acted on or
+written into a brief. See [[learnings/2026-08-03_mental-model-not-source-of-truth]].
+Guard: don't act as an expert in a domain where I have no mental model.
 
 ## Memory discipline (how the brain stays useful)
 

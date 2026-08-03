@@ -139,3 +139,313 @@ do, fully-portable-drive); speak.sh auto-prefers Moira Enhanced/Premium; CLAUDE.
 + launcher updated (portability, delegation, Linear session-start check); git repo
 initialized + deploy key generated; WhatsApp research agent dispatched; discovery
 answers recorded inline in 02_discovery-questions.md.
+
+---
+
+## 2026-08-03 — Daily rhythm answer + learning-mechanism commission
+
+> Good morning. How are you feeling this morning? In terms of the daily rhythm,
+> let's start with a 6am wake up and we'll finish at 11pm, which is closer to my
+> working day. Today let's start on working out the best approach to a learning
+> mechanism for me and you so that we can collaborate and improve or train the
+> algorithms to work in the most efficient way and also to ensure that everything
+> that happens going forward is an ongoing improvement. What would you suggest
+> that we look at in addition to what we already have in place?
+
+**Done with it:** rhythm recorded on WED-6 + implementation issue WED-16 created
+(06:00 wake-up + spoken briefing, 23:00 close); learning file
+`2026-08-03_daily-rhythm-6-to-23.md`; WED-17 opened (In Progress) and the
+learning-loop v2 proposal drafted at
+`1_Project_Definition/Architecture/2026-08-03_learning-loop-v2.md` for Kam's review.
+
+---
+
+## 2026-08-03 — Learning-loop approvals + two-model research commission
+
+> Can we make it so that the correction ledger is iterative, similar to when
+> people learn frequency is used for reinforcement. So if a mistake happens once,
+> that could be isolated, but if it happens more than once, an increased weight is
+> given it. Great suggestion on the wrap up sequence, please implement this the
+> same with the weekly consolidation, I think let's go ahead with that I also like
+> the suggestion for the teaching channel so let's implement this. One thing that
+> would be also worthwhile to incorporate into a weekly schedule is a heavy
+> analysis into industry developments and industry best practices. We'll do our
+> best together, but there's a lot happening out in the industry and being up to
+> date with how things are evolving would be extremely useful. We can then review
+> what to implement or how to deploy certain day and day lessons. In addition to
+> this, please do some research now into two models. From my understanding, there
+> are two models or two types of development coming out to compete with the
+> predominant model in the US. One is a Japanese stock model, which is used for
+> utilizing weaker hardware, but gets great results by having access to multiple
+> systems, such as chat GPT, Kimi K, Claude, of course, and others, and then
+> delegating different tasks depending on which model is best to provide this
+> information. Whilst I still want to continue to do most of my coding through
+> Claude, this approach might be very useful in the coding context for validation
+> and testing. The second approach that I would like to implement if valuable both
+> for Wednesday and your coordination of the other agents is what is happening
+> increasingly out of China with models such as Kimi K where rather than relying
+> on the largest and most powerful models and processing they're getting
+> repetition to provide better results. This means that the task might go through
+> multiple rounds of do check, refine, do check, refine, do check, refine. I think
+> this model would work really well to evolving you but also for day to day tasks
+> and coding supervision. Please spend a good amount of time on reflecting on
+> these and analyse how to best approach. Once you've come up with suggestions,
+> tag them in the linear for review and action.
+
+**Done with it:** learning-loop v2 approved (ledger→weighted per Kam's
+frequency-reinforcement design; retro, weekly consolidation, teaching channel all
+implemented same session); weekly industry-scan ritual added; two background
+research agents dispatched (Sakana-style multi-model routing; Kimi-style
+iterative refinement); findings + proposals filed to Linear for review.
+
+---
+
+## 2026-08-03 — TreeQuest deep-study commission + training-cadence question
+
+> if the japanese model is open source, please download and go through it in
+> detail. I dont mind if this takes days. Lets develop this model into our
+> coordination approach as much as posible. With regards to training, how can we
+> do more on training or should we keep this as somethhing that we review weekly
+> and implement once we have worked together for a while?
+
+**Done with it:** TreeQuest + ab-mcts-arc2 cloned to 2_Project_Files/tools/
+(on-drive per portability rule); WED-24 opened for the multi-day study +
+coordination-design work; WED-23 upgraded from shelf to active; first-pass
+codebase study started same session (notes in 1_Project_Definition/Architecture/).
+Training question answered: recommendation = context-level training continuously
+(learning loop v2), weight-level training parked, reviewed via the weekly
+industry scan.
+
+---
+
+## 2026-08-03 — ChatGPT subscription + open-source model (mid-turn addition)
+
+> also, I have a subscription to chatGPT and I would like you to utilise this in
+> your flow (where you see benefit). Lets add a task to give you access to this.
+> It might also be good to do the same with an open source model but this might
+> need to be put in backlog for later
+
+**Done with it:** WED-25 created (ChatGPT access — likely path: OpenAI Codex CLI
+authenticates against a ChatGPT subscription, giving a second-model seat without
+per-token API billing; needs Kam's login); WED-26 created in Backlog (open-source
+model seat, linked to parked WED-14); comment on WED-20 noting the subscription
+changes the second-seat cost calculus toward GPT.
+
+---
+
+## 2026-08-03 — WED-20–23 approved; ChatGPT login now; build the ARC harness
+
+> I agree with your approach with WED-20-23. how do I best give you credentials
+> and access to chatgpt? I am neer a machine so lets do login. after that, lets
+> build out the ARC harness
+
+**Done with it:** approvals recorded on WED-20…23; Codex CLI installed on-drive
+with CODEX_HOME in 4_Credentials/ (portable, gitignored), Kam performed the
+subscription login; ARC harness study (day 2) + coordination harness build
+started (WED-24).
+
+---
+
+## 2026-08-03 — Four clarifications before the Secuura pilot
+
+> 1)I currently have a launch scrip for the secuura agent. this ensures that all
+> the necessary context is loaded. a)will we continue this practice for the
+> agents? 2)I have been told that managing the context window is important, so I
+> always try to finish tasks before reaching the 100% mark, wrapping up and
+> starting again if need be to ensure we are closing things efficiantly and not
+> working on sumaries of summaries. - a)how will this be managed for you,
+> especially if you are running long term, and b)how will we manage it for sub
+> agents. 3)there is a very strong work practice established and this has been
+> working well so how do we move to the newe structure without loosing the
+> benefit of the old. 4)ultimately I would like to move to autonomous workflows
+> but while we start, can we go slow and double check things
+
+**Done with it:** answered in-session (launchers stay standard; context
+discipline formalized; new structure declared additive with old-wins-on-
+conflict; go-slow adopted). Two learnings captured: context-discipline,
+go-slow-earn-autonomy. Secuura brief paused pending Kam's review preference.
+
+---
+
+## 2026-08-03 — Agent-to-agent comms: email the agent, Obsidian instruction files
+
+> what about you email the agent with the instructions. 2)we set up obsidian
+> files with instructions. that way all agents can instruct each other and
+> communicate. we should add a task for wednesday to refine this process so its
+> seamless. if you email the agent before running the launch command, it will
+> cut me out which is good
+
+**Done with it:** Agent Mail key wired into Wednesday's .env (from vault
+Access/, read-only); wednesday@ inbox blocked by plan limit (3/3 used — WED-8
+updated, needs Kam call on secure_test); instruction email sent from coagent@
+to coagent@ (CC kamil.kreiser@secuura.ai), verified in inbox — Secuura boot
+step 8 reads it; WED-27 created for the seamless inter-agent comms fabric
+(mail + vault instruction files + bridge); Secuura session launched via open.
+
+---
+
+## 2026-08-03 — Claude to Claude review: app vs Anthropic's approach
+
+> also, can you please review the following project - '/Volumes/DevMASTER/
+> !CODING/Claude to Claude' 1)is it worth while developing an app for this
+> collaboration? I like watching both sides but not necessary. otherwise we can
+> just use anthropics approach. what do you think
+
+**Done with it:** project reviewed read-only (CoAgent v0.4.4, 19 releases,
+coagent.live live, unexecuted marketing plan). Recommendation delivered: for
+the internal fleet use Anthropic-native + the async mail/file fabric (WED-27),
+don't extend the app; the "watch both sides" desire can be met by a cheap
+read-only fleet feed over existing artifacts; CoAgent-the-product (human+human
+pairs) is a separate business call — execute its marketing plan or shelve
+consciously. Recorded on WED-27.
+
+---
+
+## 2026-08-03 — Email adopted as the fleet's inter-agent channel
+
+> lets use email between you and other agents. please add the instructions into
+> the launcher for all agents to review email. They should also send an email
+> once they finish with notes to you. if you and all agents check emails
+> peridically this will work for now. if they can ping you directly then we
+> might not need the email
+
+**Done with it:** implemented as TWO shared-file edits instead of 14 launcher
+edits (same outcome, less risk): workspace CLAUDE.md gained a "Fleet comms via
+email" protocol (boot-side check, subject routing conventions), and the vault
+end-of-session skill gained Step 2d (wrap email to Wednesday — works even when
+the T9 is unmounted, unlike the index card). Vault commit 09dc86a pushed
+(surgical — Secuura's live daily-note edit untouched). Wednesday's launcher:
+subject routing + periodic in-session checks added. Direct ping stays the
+future path (WED-27 / bridge evaluation).
+
+---
+
+## 2026-08-03 — Board-awareness approved + first sweep
+
+> it might be worth for you to be accross linear tix and jira tix for all
+> projects. what do you think? [...] yes, approved - go ahead and run the
+> first sweep
+
+**Done with it:** standing read-only tracker-access grant recorded as a
+learning (hard limits: read-only ever, keys transient, output stays in
+Wednesday's brain); WED-28 created; first fleet board sweep executed →
+`0_Brain/projects_index/boards_digest.md` + aggregated Kam decision queue.
+
+---
+
+## 2026-08-03 — myPKI parked; how does the Japanese model monitor sub-agents?
+
+> myPKI is parked deliberately, no need to flagging it at the moment. While we
+> wait for Secuura, how does the Japanese model monitor progress, communication
+> and output from sub agents? while you look into to that I will compile notes
+> on an approach that I like for you to review
+
+**Done with it:** myPKI marked parked in the boards digest (dropped from future
+decision queues). TreeQuest vis/ subsystem read (build_snapshot, render, trial
+snapshots); answer delivered from source: no inter-agent communication exists —
+the tree is a blackboard, trials are the ledger, scores are the only status,
+and observability is a read-only rendered layer (latest.html pattern). Mapped
+onto our fleet fabric; awaiting Kam's own notes for review.
+
+---
+
+## 2026-08-03 — Tactical Agentic Coding course commission (verbatim)
+
+> main course link https://agenticengineer.com/tactical-agentic-coding/course
+> video 1 = https://agenticengineer.com/tactical-agentic-coding/course/hello-agentic-coding
+> 1-8 is about coding 9-14 about multi agents and managing multi agents. a couple
+> points 1)all code for first 8 courses here '/Volumes/DevMASTER/!CODING/Agentic
+> Coding' 2)please review workflows closely. I would like to develop this more
+> and deploy more in what we do. Moreover, I would like you to dev workflows as
+> we execute tasks. Review these at each task end or end of day, review what
+> should be systemised and review weekly. 3) I would like to work with you using
+> co sork tasks on my phone and for you to work back and forth with the agents
+> and escalate only for approval, when something is not clear or needs a
+> decision from me. (I think this sill come from videos from 9-12). 4)create a
+> transcript of the videos, a summary and key learnings, a reference guid we can
+> come back to. place a copy of the transcripts, learnings and how to deploy in
+> the Agentic coding folder as well as yours 5)once you finish with these, we
+> will move to 9-14 6)then create a plan and linear tasks to deploy as much of
+> this that you think is usable/beneficial 7)lastly, can you register the
+> following command "wednesday" so that when I type it in terminal it launches
+> you x)most importantly, this approach has some new but also some old
+> approaches. I want to use what is good but not what will take us backwards
+
+**Done with it:** learnings captured (workflow-systemisation duty; adopt-good-
+not-backwards filter); `wednesday` terminal command registered (+PORTABILITY);
+video-1 pipeline test run; course notes area created on both sides; WED-29/30
+filed. Phone co-work parked until videos 9-12.
+
+---
+
+## 2026-08-03 — Kam endorses the lesson-13 principle
+
+> and i agree with the point from lesson 13
+
+**Done with it:** mental-model-not-source-of-truth adopted as a live principle —
+learning file written, wired into `0_Brain/CLAUDE.md` (read model → validate →
+act → fix model) and into the delegation protocol (briefs must not assert stale
+facts). WED-37 closed.
+
+> i agree with you at the moment from lesson 9. you should load things. and we
+> should load for sub agents but file as a very complex task might use a more
+> narrow agent
+
+**Done with it:** context-loading split adopted — Wednesday's full boot read
+stays (tripwire retained, not a plan); sub-agents get task-shaped context, not
+everything; harder tasks get narrower specialised agents. Learning filed, wired
+into the delegation protocol, WED-36 updated.
+
+> for now, still load sub agents fully as I have the required tokens but this
+> will be varied when required.
+
+**Done with it:** corrected my earlier reading — sub-agents load FULLY by
+default; selective loading is a lever for when a situation requires it; "narrow"
+applies to the agent's *scope*, not its context. Learning + delegation protocol
+amended; ledger entry logged (w=1, misread dictated intent).
+
+---
+
+## 2026-08-03 — The big directive dump (code landed, role, integration, gatekeepers)
+
+> the code has been updated in the folder ... I want to make the best of
+> Workflow for Testing / Documentation / Development / Etc. What can we adopt
+> (and should we)? Play with the code and functions, especially with lesson 13
+> and the multi agent coordination. Should we create a db based on lesson 13??
+> TESTING - look at the interactions with Peter (inside Secuura project) and
+> analyse his approach to testing, create a testing skill and agent. Why are
+> Peters tests so good at improving our system. What can we do to bottle his
+> approach and testing methodology. Let's create a hyper focused testing agent
+> to be used by YOU in any project.
+> These agentic videos have focused largely on code. I do a lot of code but
+> your role is greater than this. Yes, 60% of what I do is coding, but I would
+> like you to help with Personal, Kids (I have 2), bringing ideas to reality,
+> coordination, and anything that evolves as we both grow.
+> From todays test, there is not enough coordination with the specific agent -
+> secuura still required me to 1)answer too many questions that you could
+> manage 2) I still had to approve and step through 3) I had to switch between
+> you and the other agent.
+> Very important to me 1)Absolutely no scope creep between projects. It would
+> be embarrassing or worse if Datasec had secuura name in it. 2) seamless
+> integration ... have you manage things down stream 3) learning, I want the
+> system to learn constantly and from me, code, best practice, etc. Let's
+> flesh this out as a task and finetune to make it work. I dont mind trying
+> multiple approaches and rejecting 9 to get the perfect 1. My preference will
+> be to use Anthropic approaches as these will evolve without us but we also
+> have other options with whats app, messages, emails, etc. Money is not much
+> of an issue as it pales compared to productivity.
+> Also, lets add a task to - define absolute security and privacy approach ...
+> you should be a gate keeper for security and privacy. Maybe an expertise
+> mental model for each that can be called at the right time to ensure
+> compliance. Same goes for quality control.
+> Add another task for me and you to discuss how each project communicates with
+> stakeholders ... I would love if you could help with the communication and
+> automate where possible. This will be done later but thinking of it now.
+> I saw a visual interface that show everything (image attached from local
+> host). Let's create a task to build this out. sorry, screencapture did not
+> work.
+
+**Done with it:** 8 tasks filed (WED-39…46); role-broader-than-code + the
+three-priorities learning captured; kam.md updated (two kids); pilot friction
+logged in ledger (w=1); lesson-13 mechanism verified from source (genuinely
+automatic; YAML capped at 1000 lines; DB answer: no — files first).

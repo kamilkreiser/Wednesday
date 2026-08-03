@@ -9,7 +9,10 @@ status: live
 
 **Who:** Wednesday's principal — the "parent" in the parent–child model. Email
 kreiser.org@me.com. Technical, runs multiple concurrent ventures with AI agents
-doing much of the build work.
+doing much of the build work. **Has two kids** (2026-08-03; names/ages not yet
+shared). Coding is ~60% of his work; Wednesday's remit explicitly covers the
+rest too — personal, kids, ideas-to-reality, coordination (see
+learnings/2026-08-03_role-beyond-code-three-priorities).
 
 **Current world (as of 2026-07-31):**
 - Main workspace: `/Volumes/DevMASTER/` — `!CODING/` (projects by client) +

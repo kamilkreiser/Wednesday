@@ -2,6 +2,90 @@
 
 ---
 
+## 2026-08-03 — The compounding day: learning loop v2, TreeQuest→harness, first delegation, full TAC course
+
+**Accomplished**
+- **Learning loop v2 designed, Kam-approved, and implemented same day** — with
+  Kam's own design change: frequency-weighted correction ledger (w=1 isolated /
+  w=2 reinforced+diagnose / w≥3 regression+promote). Session retro in every
+  wrap; weekly consolidation ("dreaming") + weekly industry scan rituals;
+  `lesson` Linear label = async teaching channel. Ledger took its first two
+  honest entries the same day.
+- **Two-schools research** (Sakana AB-MCTS · Chinese iterate-over-scale) →
+  synthesis: *repetition against a VERIFIER is the magic*. Four proposals
+  (WED-20–23) — all approved by Kam.
+- **TreeQuest: download → full core read → working multi-model coordination
+  harness in ONE day** (`2_Project_Files/coordination/`: ABMCTSA over
+  subscription seats gpt/claude/haiku, unittest verifier, checkpoints, priors).
+  Day-3 finding, honestly reported: 4 runs, tree never branched — 2026 models
+  one-shot well-specified katas; search = break-glass insurance, empirically.
+  Coordination Protocol v1 (8 rules) + delegation-protocol skill + channel
+  scoreboard shipped.
+- **ChatGPT seat live** (Codex CLI on-drive, CODEX_HOME in 4_Credentials, Kam
+  logged in, verified). `wednesday` terminal command registered.
+- **First real delegation executed** (Secuura decisions-sitting + KS-538
+  cross-model pilot): briefs Kam-reviewed, instructions delivered by EMAIL to
+  the inbox their boot ritual reads, session launched by Wednesday via `open`
+  — Kam removed from the relay by his own design. Their agent VERIFIED the
+  email rather than trusting it and caught my stale DRAFT line (fleet culture
+  working). **Email adopted as the fleet channel**: workspace CLAUDE.md fleet-
+  comms section + vault end-of-session Step 2d wrap-email (commit 09dc86a).
+- **Board awareness live** (WED-28): read-only grant recorded; first sweep of
+  all trackers (Jira CPKEY/MYP/RD + Linear KS/PS/WED) → boards digest +
+  aggregated Kam decision queue. Found: NexusAI aging security pair (RD-55/54),
+  6-ticket Release-Ready stack, myPKI confirmed deliberately parked.
+- **Entire TAC course (14 lessons) + all codebases captured and reviewed** via
+  a self-built pipeline (DRM'd Mux video, but subtitle tracks = transcripts;
+  documented in HOW-TO-HARVEST.md). Notes + adopt/reject verdicts filed both
+  sides. Deployment plan → WED-29…38. Adopted: KPIs, work-class templates,
+  health checks, ADW structure, orchestrator three-pillar spec, agent-expert
+  mental-model discipline (Kam-endorsed). Refused: ZTE-to-prod, yolo
+  workflows, dropping review, presence-to-zero as universal.
+- **Kam's evening directive batch** → WED-39…46: 9-14 code deep-play, workflow
+  lanes, Peter-testing bottling, seamless-integration v1 (Urgent), security+
+  privacy+QC gatekeeper expertise models, stakeholder comms, visual fleet
+  dashboard.
+
+**Decisions Made**
+- Daily rhythm: **wake 06:00, close 23:00** (WED-16, now Urgent) — *matches
+  Kam's working day.*
+- Ledger is frequency-weighted — *"frequency is reinforcement", Kam's design.*
+- Email = fleet inter-agent channel for now; direct ping later — *works today,
+  auditable, mount-independent.*
+- Context loading: **full for Wednesday AND sub-agents** (tokens are not the
+  constraint); "narrow" = agent SCOPE on complex tasks; selective loading is a
+  situational lever — *corrected from my misread, ledger entry 1.*
+- Brain = mental model, NOT source of truth — read → validate vs live source →
+  act → fix model. *Kam-endorsed from TAC lesson 13.*
+- No DB for expertise files (files-in-repo, 1000-line cap, self-improve
+  pattern); DB belongs to the orchestrator runtime — *verified from source.*
+- Role explicitly broader than code: personal, two kids, ideas-to-reality —
+  *~60% of Kam's work is code; 0% of the relationship is only code.*
+- myPKI deliberately parked; CoAgent app not extended internally (fleet feed
+  instead); Anthropic-native preferred for integration approaches.
+
+**State at End of Session**
+- Operating system fully live: learning loop + ledger + retro (first one
+  written tonight) + rituals; delegation protocol + scoreboard; fleet email
+  channel wired both directions; board sweep mechanism; coordination harness
+  tested; course knowledge base on both drives. One delegation in flight
+  (Secuura — first wrap email expected). wednesday@ inbox blocked on a
+  ten-second Kam decision (WED-8). No secrets committed (verified).
+
+**Next Session** (2026-08-04)
+- [ ] Boot: expect FIRST Step-2d wrap email from Platform K → score it
+- [ ] Light consolidation pass (today created half the brain)
+- [ ] WED-39 code deep-play (agent-experts + orchestrator, fresh context)
+- [ ] WED-42 seamless integration design (Urgent; interim brief rule active)
+- [ ] WED-41 Peter testing analysis
+- [ ] Kam: WED-8 inbox decision; WED-16 scheduler now Urgent
+
+**Suggested opening prompt for next session:**
+> Launch via `wednesday` (new terminal command) or Launch_Wednesday.command.
+> Boot ritual covers everything; expect the first project wrap-email in
+> coagent@; then WED-39 (9-14 code deep-play) and WED-42 per the 08-03 handoff.
+
+
 ## 2026-07-31 (later) — Setup complete: voice, GitHub, Linear, index feed
 
 **Accomplished**
