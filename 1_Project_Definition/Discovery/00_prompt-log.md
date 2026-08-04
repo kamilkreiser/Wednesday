@@ -462,3 +462,16 @@ automatic; YAML capped at 1000 lines; DB answer: no — files first).
 > a core concern and rule will be to ensure no bleed between clients
 
 *Done with it: delegation PAUSED (standing constraint); ledger w=2 (delegation-mechanism family) + learning 2026-08-04_delegation-v2-observability (R0 = no client bleed); WED-50 opened; research run on iTerm2 + Agent Teams + the video; v2 design proposal drafted for Kam.*
+
+## 2026-08-04 (evening) — v2 approved + full implementation commission
+> the design is good.  later we will need to build out how we communicate as this might include a combination of natural conversation - voice to voice in chat style, claude app through either code option or tasks, email, whatsapp or something up.  keep this in mind and make sure there is a task to work on this once this phase is done.  implement this approach but do it completely.  everything that is necessary and any other components that you think would be good.  this video is 5 months old and I am sure there are other approaches on the net or done by either Anthropic or open source projects.  Please research all very thoroughly as we might as well leverage the latest progress and ideas.  once you have looked at all possibilities (along this approach which I like and we might end up just deploying this) create a plan, tickets and execute
+
+*Done with it: WED-51 (Kam↔Wednesday comms build-out, queued post-v2); state-of-the-art research sweep (Anthropic changelog, open-source orchestrators, observability tooling); v2 plan finalised + tickets + execution begun (WED-50 receipts).*
+
+> also, look at other designs.  just because it looks good to me (which it does) does not mean there is not a better approach or improvements that we are not aware of which is why a wide sweep is necessary now that we agree what we are trying to achieve
+
+*Done with it: research widened from "implement the approved layout" to a full design-paradigm sweep (terminal cockpit, native Agent View, hooks web dashboards, TUI managers, desktop apps, board-as-interface, chat-as-interface) evaluated against the agreed goal; options matrix added to the v2 design doc.*
+
+> it might be good to add a sowtrare tool and dependancy check to launch.  I am thinking about what happens when I plug the portable drive into my laptop.
+
+*Done with it: doctor.sh preflight built (checks every machine-local dependency against PORTABILITY.md, prints fix hints), wired into Launch_Wednesday.command as a boot step.*

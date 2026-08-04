@@ -130,6 +130,31 @@ teammates on Sonnet, tasks pre-listed below").
    hook runs the test suite. Metrics to scoreboard.
 5. Review with Kam → adopt/adjust → delegation constraint lifts.
 
+## Wide-sweep addendum (Kam: "look at other designs" — evening, same day)
+
+Goal restated for the sweep: *Kam monitors the whole fleet short-term;
+Wednesday gets machine-readable insight into tasks/activities; zero client
+bleed.* Every known paradigm evaluated against that:
+
+| Paradigm | Exemplars | Verdict for us |
+|---|---|---|
+| Terminal cockpit (panes) | the approved design; Cole's layout | **ADOPT** — only paradigm that hosts launcher-isolated processes unchanged (R0) with live view for both of us |
+| Native session dashboard | **Anthropic Agent View** (`claude agents`, v2.1.139+, research preview) | **ADOPT as data source, not as the cockpit**: sees only BACKGROUNDED sessions (launcher-interactive panes are invisible to it), but `claude agents --json` gives clean state (working/blocked/waiting-for) for anything we background — monitor merges it when relevant |
+| Phone/remote steering | **Anthropic Remote Control** (v2.1.154+, research preview): steer a local session from the Claude mobile app, push notifications, QR pairing | **DEFER → WED-51** — the star Anthropic-native candidate for the Kam↔Wednesday comms phase; doesn't help isolation, hugely helps reachability |
+| Hooks→event web dashboards | disler multi-agent-observability, agents-observe (swim-lanes, replay) | **DEFER → WED-46 feed** — richest observability; heavier build; cockpit covers short-term need. Spike ticketed |
+| Desktop control planes | Conductor (Mac, worktrees, diff-first, Linear/GitHub), Nimbalyst | **REJECT as platform** — worktree-per-workspace targets single-repo scale-out, not multi-client identity isolation; third-party owns dispatch (env control opaque = R0 risk); non-Anthropic. Adopt its *diff-first review* idea into wrap rituals later |
+| TUI agent managers | Claude Squad (tmux+worktrees+TUI) | REJECT as platform, same isolation blindspot; its detached-session pattern is already ours via tmux |
+| Heavy orchestrators | Gastown (20-30 agents, watchdogs, merge queue), Agent Farm | REJECT — built for agent-count scale we don't have; adopt the *health-watchdog* idea (monitor.sh IS ours) |
+| Board-as-interface | Gastown issues, our Linear | Already ours (WED-34 phone co-work queued) |
+
+**Sweep conclusions:** (1) Nothing — official or third-party — provides
+per-agent env override; the launcher pattern is confirmed as the ONLY
+R0-safe base, so the approved two-layer topology stands. (2) Three upgrades
+adopted: `claude agents --json` as a monitor data source; Remote Control
+into WED-51; hooks-observability spike queued for WED-46. (3) Session
+naming (`--name`, v2.1.196+) adopted: launchers should name sessions
+`<client>-<project>` for identification everywhere.
+
 ## Rejected on the way (reject-nine discipline)
 
 - **One mega-team under Wednesday spanning clients** — fails R0 (shared env).

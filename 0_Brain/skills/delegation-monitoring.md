@@ -1,4 +1,14 @@
-# Delegation monitoring — attending a live delegation (WED-42 v1)
+# Delegation monitoring — attending a live delegation (WED-42 v1, cockpit v2)
+
+**v2 cockpit layer (2026-08-04, WED-50 — Kam-approved design):** when
+delegations run, prefer launching project sessions as PANES of the tmux
+`fleet` session (`2_Project_Files/fleet/cockpit/cockpit.sh add "<Client>/<Project>"
+'bash "<launcher>"'`) instead of `open`-ing separate Terminal windows — Kam
+watches everything in one iTerm2 window (`tmux -CC attach -t fleet`), and
+`monitor.sh` watches every pane (DEATH/STALL/INPUT → alerts.log + spoken tap
+on death). Mail remains the durable record; the cockpit is the live layer.
+Delegation itself remains PAUSED until the WED-54 pilot review (Kam's
+standing constraint).
 
 The ritual for the window between "project session launched" and "wrap email
 received". Companion to [[delegation-protocol]] (which governs the brief and

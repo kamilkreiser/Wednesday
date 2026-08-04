@@ -20,3 +20,10 @@ Keep this file updated whenever a new machine-local dependency appears.
 | 10 | `wednesday` terminal command | Machine-local: `/opt/homebrew/bin/wednesday` (execs the on-drive launcher; fails politely if T9 unmounted). Recreate on a new machine by copying that 6-line script | typed command won't exist until recreated |
 | 11 | Media pipeline (course ingestion) | ON-DRIVE: yt-dlp + faster-whisper venv at `2_Project_Files/tools/media/`; whisper model downloads into `tools/media/models/` (on-drive, portable). Needs machine ffmpeg (`brew install ffmpeg`) | transcription fails until ffmpeg installed |
 | 12 | Daily-rhythm scheduler (WED-16) | Machine-local: two launchd plists in `~/Library/LaunchAgents` (com.wednesday.wake 06:00, com.wednesday.close 23:00). Re-run `2_Project_Files/scheduler/install_scheduler.command` on the new Mac (plists embed the drive path at install time). Optional for true sleep-wake: `sudo pmset repeat wakeorpoweron MTWRFSU 05:58:00` | no scheduled wake/close until installer re-run; scripts guard against odd-hour coalesced fires |
+
+13. **tmux** (machine-local, brew): `brew install tmux` — the fleet cockpit
+    engine (2_Project_Files/fleet/cockpit/). Scripts are pure shell + tmux
+    CLI and travel with the drive; only the binary is machine-local.
+14. **iTerm2** (machine-local, brew cask): `brew install --cask iterm2` —
+    the cockpit glass. View: `tmux -CC attach -t fleet`. Optional `it2`
+    Python API not currently load-bearing.

@@ -38,6 +38,17 @@ fi
 
 cd "$PROJECT_DIR" || exit 1
 
+# ── Machine preflight (Kam, 2026-08-04: dependency check for the laptop case) ──
+# Non-blocking on warnings; hard failures pause so they're seen before launch.
+if [ -x "$PROJECT_DIR/2_Project_Files/doctor.sh" ]; then
+  if ! "$PROJECT_DIR/2_Project_Files/doctor.sh" --quiet; then
+    echo ""
+    echo "Preflight found HARD failures (above). Continue anyway? [y/N]"
+    read -r -n 1 REPLY; echo
+    [[ "$REPLY" =~ ^[Yy]$ ]] || exit 1
+  fi
+fi
+
 # ── Per-project az / gh isolation (same pattern as all other launchers) ──
 mkdir -p "$PROJECT_DIR/4_Credentials/.azure" "$PROJECT_DIR/4_Credentials/.gh-config"
 export AZURE_CONFIG_DIR="$PROJECT_DIR/4_Credentials/.azure"
