@@ -19,6 +19,12 @@ me; only approval/ambiguity/reserved-decision items reach him.
    checkpoints otherwise. Anti-eager-polling: never tighter than 2 min; the
    digest is the summaries firewall — do NOT fetch full bodies unless acting
    on that mail (`full <inbox> <message_id>` on demand).
+   **NEVER run `mark-seen` mid-monitoring** — it blanket-marks everything new
+   at call time and races concurrent arrivals (it swallowed a live QUESTION
+   on 08-04, see [[../learnings/2026-08-04_never-blanket-markseen-mid-monitoring]]).
+   Baseline use at session start only. Outbound sender-copies are absorbed by
+   the loop's own digest cycle; the fire condition ignores `[OUTBOUND]`.
+   Any wrap saying "no ANSWER by fallback" → audit the seen-state immediately.
 3. **Triage every [QUESTION]** into exactly one of:
    - **ANSWER** — I can resolve it. Compose from: the brief + the target
      project's own tree (read-only) + that client's entry card. **Validate

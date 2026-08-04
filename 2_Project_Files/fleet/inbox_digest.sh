@@ -8,6 +8,10 @@
 #   inbox_digest.sh --all          digest ignoring seen-state (last 15 per inbox)
 #   inbox_digest.sh full <inbox> <message_id>   raw body of one message
 #   inbox_digest.sh mark-seen      record current mail as seen without printing
+#                                  ⚠ SESSION-BASELINE ONLY. Never mid-monitoring:
+#                                  it blanket-marks and RACES concurrent arrivals
+#                                  (swallowed a live QUESTION 2026-08-04 — see
+#                                  learnings/2026-08-04_never-blanket-markseen…)
 #
 # State: state/seen_ids.txt (gitignored — pre-commit hook also blocks state/).
 # Never prints or stores the API key.
