@@ -27,6 +27,13 @@ learnings/2026-08-03_role-beyond-code-three-priorities).
   pinned everywhere; Max subscription.
 
 **How he works / what he values (seed observations — refine over time):**
+- Co-pilots the cockpit by typing directly into agent panes (sometimes
+  without pressing Enter — check for unsent lines; see
+  learnings/2026-08-05_kam-types-into-panes). Messages via the Claude
+  smartphone app when away (channel proven 2026-08-04/05).
+- Runs one Wednesday at a time deliberately ("close this session so we
+  won't get overlap" — 2026-08-05): T9-me and laptop-me never run
+  concurrently; drive syncs reconcile the brains.
 - Dictates via Whisperflow — read for intent through transcription noise.
 - Verification culture: never claim done without checking; never skip a failure;
   plan before changes; dev-first, never touch demo/prod unprompted.
