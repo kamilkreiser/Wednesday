@@ -71,8 +71,14 @@ check() {
       # log — INPUT/STALL are always false positives for both (fired
       # 2026-08-04 21:45 + 21:52). DEATH still applies to both.
       case "$name" in wednesday|fleet-monitor) continue;; esac
+      # Claude Code panes idling at prompt while a BACKGROUND SHELL works
+      # (status bar shows "N shell(s)") are healthy holding patterns, not
+      # input-waits — e.g. a CI watcher (false-fired 2026-08-05 07:27).
+      # STALL still applies: a dead bg shell eventually stops changing output.
+      if printf '%s' "$content" | grep -qE '[0-9]+ shells? (still running)?|· [0-9]+ shell'; then
+        clear_flag INPUT "$name"
       # INPUT: quiet AND showing an interactive prompt pattern
-      if printf '%s' "$content" | grep -qE 'esc to interrupt|Do you want|y/n\)|❯|permission|(A|a)llow.*\?' && [ "$quiet" -ge 2 ]; then
+      elif printf '%s' "$content" | grep -qE 'esc to interrupt|Do you want|y/n\)|❯|permission|(A|a)llow.*\?' && [ "$quiet" -ge 2 ]; then
         alert INPUT "$name" "waiting on input ~${quiet}m"
       elif [ "$quiet" -ge "$STALL_MIN" ]; then
         alert STALL "$name" "no output change for ${quiet}m"
