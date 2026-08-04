@@ -475,3 +475,7 @@ automatic; YAML capped at 1000 lines; DB answer: no — files first).
 > it might be good to add a sowtrare tool and dependancy check to launch.  I am thinking about what happens when I plug the portable drive into my laptop.
 
 *Done with it: doctor.sh preflight built (checks every machine-local dependency against PORTABILITY.md, prints fix hints), wired into Launch_Wednesday.command as a boot step.*
+
+> add to wrapup to add anything to this software tool and check.  1) I can watch now.  I am screen shaing (remote login) from my laptop to the mac studio so this will be the worst visual which is a good worst case check.  2)agreed
+
+*Done with it: CLAUDE.md session-end step 3a (doctor+PORTABILITY check at wrap); live cockpit run launched on the Studio screen for Kam's screen-share worst-case check; WED-54 pilot target KS-560 confirmed.*

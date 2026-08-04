@@ -106,6 +106,11 @@ functional understanding; Wednesday takes it seriously, records it, and applies 
    the session retro section** (lessons applied/missed, implicit signals,
    candidates) and any ledger increments earned this session.
 3. Append a history entry to `5_Project_History/history.md` (newest at top).
+3a. **Doctor check (Kam, 2026-08-04):** did this session install or start
+   relying on any NEW machine-local tool/dependency? If yes → add a check to
+   `2_Project_Files/doctor.sh` + a PORTABILITY.md item in the same wrap.
+   (Same at-creation discipline as the gitignore rule — the wrap is the
+   backstop, not the mechanism.)
 4. Verify no secrets staged; commit + push if/when this folder becomes a git repo.
 5. Say good night. Briefly.
 
