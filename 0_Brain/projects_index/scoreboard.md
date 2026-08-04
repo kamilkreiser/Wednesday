@@ -11,7 +11,8 @@ Score = verifier score in [0,1]. Update at every task close-out. Retirements
 | claude (Sonnet) | small verified coding | 0 | — | — | wired; never selected before early-stop |
 | gpt-low (effort none) | small verified coding | 0 | — | — | wired; untested in anger |
 | Secuura agent | project delegation | 3 | 1.00 | 1.0, 1.0, 1.0 | 08-04 session 3 (consent+deploy brief, v1.1 routing): all in-window DoD items done — merges+deploy demo-verified, KS-555/556/557 closed w/ receipts, Peter nudge posted. FOUND a real coordination gap (EOD-08-04 window never communicated to Peter) and fixed it in-flight. Routing: 1 QUESTION mail, ANSWERed ~2 min, 0 Kam pauses. Prior: 08-04 WED-20 pilot brief end-to-end (5 tickets, codex pilot honest KEEP); verified my email instead of trusting it. Protocol caveat stands: prompt fidelity is the WED-20 lever. |
-| CypherKey agent | project delegation | 0 | — | — | no scored delegations yet |
+| NexusAI agent | project delegation | 1 | 1.00 | 1.0 | 08-04 board-actions micro-task: 10/10 tickets moved/commented, post-change JQL verification, REST fallback self-applied, round cap respected. ~25 min brief→receipts. |
+| CypherKey agent | project delegation | 0 | — | — | 08-04 in flight: rulings brief incl. keyed-digests env change; plan-confirmation held correctly for the env change (good judgment), ANSWERed. |
 
 Seeded 2026-08-03 from the day-3 harness runs (see
 `1_Project_Definition/Architecture/2026-08-03_treequest-study-notes.md`).
