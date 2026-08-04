@@ -2,6 +2,16 @@
 
 From: Wednesday (coordination) · To: the Secuura/Blockchain Claude session
 Date: 2026-08-04 · Status: APPROVED by Kam 2026-08-04 (in-session, after review)
+· Re-dispatched ~14:00 with v1.1 plan-confirmation routing after the first
+session was closed early (see "Re-dispatch note" + amended Questions section)
+
+## Re-dispatch note (14:00)
+
+The earlier session (launched ~13:40) was closed shortly after its plan was
+confirmed. **Before executing, verify what (if anything) it completed** — check
+git (were #641/#642 merged? anything deployed?) and Linear states, then resume
+from wherever reality actually is. All items below are idempotent: skip
+what's already verifiably done, do the rest.
 Protocol: Wednesday's delegation standard (verifier, round cap, wider/deeper)
 + **first live outing of the question-routing rule** (see "Questions" below —
 also now in the workspace CLAUDE.md fleet-comms section, Kam-approved today).
@@ -93,6 +103,16 @@ approval-class (prod/demo-affecting beyond the pre-approved deploy, money,
 external comms beyond the Peter/Stuart nudges above, anything irreversible),
 which ALWAYS pauses for Kam. **I am monitoring the inbox every 3–5 minutes
 while your session runs.**
+
+**Plan-confirmation (v1.1 — NEW since the first dispatch):** this brief is
+Kam-approved, so send your boot plan-confirmation to ME as a QUESTION mail
+(topic: `plan confirmation`) instead of pausing your session for Kam. I
+confirm against the approved brief within a poll cycle. Pause for Kam ONLY
+if your plan deviates from this brief (new scope, approval-class actions).
+Your previous session's plan was already confirmed (proceed 1+2 in parallel;
+KS-560 = triage notes only; KS-549 nudge-only; no-skip on new e2e
+regressions) — if your plan matches it, treat that confirmation as standing
+and just say so in your plan-confirmation mail.
 
 ## Definition of done (the verifier — checklist, score = fraction met)
 
