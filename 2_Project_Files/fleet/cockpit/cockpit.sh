@@ -12,6 +12,9 @@
 #   cockpit.sh up                 create session from cockpit.conf (idempotent)
 #   cockpit.sh add <name> <cmd>   add a pane running <cmd> (e.g. a launcher)
 #   cockpit.sh status             list panes: name, alive, last activity
+#   cockpit.sh say <name> <text>  type a line into a pane's prompt (the live
+#                                 "tap on the shoulder" — substantive
+#                                 instructions still go by mail for the record)
 #   cockpit.sh down               kill the whole fleet session (asks first via -f)
 #
 # cockpit.conf format (same dir):  <pane-name>|<command to run>
@@ -36,7 +39,7 @@ add_pane() { # name, cmd
   local pane_id
   pane_id=$("$TMUX_BIN" split-window -t "$SESSION:0" -P -F '#{pane_id}' -d "$cmd; echo; echo '[cockpit] $name exited — pane stays for inspection'; exec bash")
   "$TMUX_BIN" set-option -p -t "$pane_id" @cockpit_name "$name"
-  "$TMUX_BIN" select-layout -t "$SESSION:0" tiled >/dev/null
+  "$TMUX_BIN" set-option -t "$SESSION:0" main-pane-width "45%" 2>/dev/null; "$TMUX_BIN" select-layout -t "$SESSION:0" main-vertical >/dev/null
   echo "pane '$name' added ($pane_id)"
 }
 
@@ -59,7 +62,7 @@ case "${1:-}" in
           add_pane "$name" "$cmd"
         fi
       done < "$CONF"
-      "$TMUX_BIN" select-layout -t "$SESSION:0" tiled >/dev/null
+      "$TMUX_BIN" set-option -t "$SESSION:0" main-pane-width "45%" 2>/dev/null; "$TMUX_BIN" select-layout -t "$SESSION:0" main-vertical >/dev/null
       echo "fleet session created. Attach: tmux -CC attach -t fleet (iTerm2) or tmux attach -t fleet"
     fi
     ;;
@@ -75,6 +78,15 @@ case "${1:-}" in
     while IFS='|' read -r name id dead act; do
       printf "  %-28s %-6s %s  last-activity: %s\n" "${name:-unnamed}" "$id" "$([ "$dead" = 1 ] && echo DEAD || echo alive)" "$act"
     done
+    ;;
+  say)
+    [ $# -eq 3 ] || die "usage: cockpit.sh say <pane-name> <text>"
+    "$TMUX_BIN" has-session -t "$SESSION" 2>/dev/null || die "no fleet session"
+    PANE=$("$TMUX_BIN" list-panes -t "$SESSION:0" -F '#{@cockpit_name}|#{pane_id}' | awk -F'|' -v n="$2" '$1==n{print $2}')
+    [ -n "$PANE" ] || die "no pane named '$2'"
+    "$TMUX_BIN" send-keys -t "$PANE" -l "$3"
+    "$TMUX_BIN" send-keys -t "$PANE" Enter
+    echo "sent to '$2'"
     ;;
   down)
     "$TMUX_BIN" kill-session -t "$SESSION" 2>/dev/null && echo "fleet session killed" || echo "no fleet session"
