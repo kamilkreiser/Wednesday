@@ -80,7 +80,7 @@ single-codebase work. Teammates inherit *that client's* identity — R0 holds.
 
 Unchanged: briefs (verifier-first, pre-answered questions, §7 routing),
 scoreboard, wraps, Kam-escalation classes. New: cockpit-composer (open the
-window, arrange panes per active work), live monitor (it2 watcher — stall /
+window, arrange panes per active work), live monitor (tmux watcher — stall /
 input-wait / death alerts), and teams appear in briefs as a RESOURCE the
 project agent may use ("this is 3-way parallelizable; consider a team,
 teammates on Sonnet, tasks pre-listed below").
@@ -118,8 +118,9 @@ teammates on Sonnet, tasks pre-listed below").
 1. **Kam signs off this design** (or amends).
 2. **Cockpit v0:** tmux-based script on-drive (`2_Project_Files/fleet/cockpit/`) —
    opens the window, panes for Wednesday + active projects, badges. Manual
-   trial with Kam watching. (PORTABILITY: iTerm2 + `pip3 install it2` are
-   machine-local — checklist items.)
+   trial with Kam watching. (PORTABILITY: tmux + iTerm2 are machine-local
+   installs — checklist items; the cockpit/monitor scripts themselves are
+   pure shell + tmux CLI and travel with the drive.)
 3. **Monitor v0:** stall/input-wait/death alerts to Wednesday's pane +
    spoken tap for red flags. Success test: a deliberately-killed session is
    flagged < 5 min (the Tokenomics case, replayed).
