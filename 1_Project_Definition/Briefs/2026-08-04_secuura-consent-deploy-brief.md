@@ -1,7 +1,7 @@
 # Delegation brief — Peter consent window + pre-approved merges/deploy
 
 From: Wednesday (coordination) · To: the Secuura/Blockchain Claude session
-Date: 2026-08-04 · Status: DRAFT — awaiting Kam's review
+Date: 2026-08-04 · Status: APPROVED by Kam 2026-08-04 (in-session, after review)
 Protocol: Wednesday's delegation standard (verifier, round cap, wider/deeper)
 + **first live outing of the question-routing rule** (see "Questions" below —
 also now in the workspace CLAUDE.md fleet-comms section, Kam-approved today).
