@@ -33,6 +33,22 @@ Every brief contains, explicitly:
 4. **Definition of done + verifier** — how the result is checked and scored
    0–1 (tests > build/typecheck > checklist > Kam). No verifier → brief not ready.
 5. **Round cap** — max 3 refinement rounds, then escalate.
+6. **Pre-answered questions** (WED-42) — before sending, ask: *what would this
+   agent plausibly ask mid-session?* (env/tenant to verify against, merge vs
+   PR, what's pre-approved, deploy or not, test scope). Answer those IN the
+   brief. The pilot's false starts were predictable questions left open.
+7. **Question routing paragraph** (WED-42) — every brief to a project agent
+   carries verbatim:
+   > Questions the brief doesn't answer: do NOT ask Kam by default. Email
+   > wednesday-agent@agentmail.to, subject
+   > `[<Client>/<Project> -> Wednesday] QUESTION: <topic>`, body: Context /
+   > one Question / Meanwhile (what you'll keep doing, or BLOCKED) /
+   > Needed-by. If blocked, re-check your inbox every ~3 min for the ANSWER
+   > (mirrored topic). After ~15 min unanswered: proceed on the safest
+   > interpretation and note it in your wrap — UNLESS the item is
+   > approval-class (prod/demo-affecting, money, external comms,
+   > irreversible), which always pauses for Kam.
+   While the delegation is live, I monitor per [[delegation-monitoring]].
 
 ## The loop (per task)
 
