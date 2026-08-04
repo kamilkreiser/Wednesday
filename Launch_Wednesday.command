@@ -113,8 +113,10 @@ FIRST ACTIONS (token cost is accepted — do the full reads, don't skim):
    unset, say 'Linear not configured yet' in one line and continue — never block.
 8. Agent Mail check (email is the FLEET'S inter-agent channel, Kam 2026-08-03):
    if AGENTMAIL_API_KEY is set in 4_Credentials/.env, list recent messages for
-   the shared coagent@agentmail.to (and wednesday@agentmail.to once it exists)
-   — GET https://api.agentmail.to/v0/inboxes/<inbox>/messages, 'Authorization:
+   BOTH wednesday-agent@agentmail.to (Wednesday's own inbox, live 2026-08-04;
+   wednesday@ was taken platform-wide) AND the shared coagent@agentmail.to
+   (legacy fleet bus — keep checking until every project's wrap flow targets
+   wednesday-agent@) — GET https://api.agentmail.to/v0/inboxes/<inbox>/messages, 'Authorization:
    Bearer <key>'. ROUTE on subject: '[<Client>/<Project> -> Wednesday] Session
    wrap ...' = a project agent reporting in — read it, update INDEX.md +
    scoreboard, close any loop your own '[Wednesday -> ...]' email opened.
@@ -166,6 +168,23 @@ cat <<EOF
 ==========================================
 
 EOF
+
+# ── Scheduled-wake marker (WED-16): set by scheduler/wake_wednesday.sh ──
+# If present and fresh, this launch is the 06:00 morning wake — tell the session
+# so it leads with the morning briefing. Consume (delete) the marker either way.
+WAKE_MODE_FILE="$PROJECT_DIR/2_Project_Files/scheduler/state/wake_mode"
+if [ -f "$WAKE_MODE_FILE" ]; then
+  rm -f "$WAKE_MODE_FILE"
+  INITIAL_PROMPT="$INITIAL_PROMPT
+
+SCHEDULED MORNING WAKE (WED-16): this session was opened by the 06:00 scheduler,
+not by Kam. He may not be at the desk yet. After the boot ritual: (1) do the
+morning consolidation/contemplation pass BEFORE he surfaces (light: route mail,
+refresh index, review yesterday's retro + any ledger movement); (2) prepare the
+day's briefing and speak the greeting as usual — if he doesn't answer, leave the
+briefing on screen and wait quietly; do NOT start executing priorities without
+his confirm. Quiet-hours rule stands: nothing spoken before 06:00."
+fi
 
 # Pin Fable 5 (Kam's standing preference, 2026-07-29). Override with /model.
 exec claude --dangerously-skip-permissions --model claude-fable-5 "$INITIAL_PROMPT"

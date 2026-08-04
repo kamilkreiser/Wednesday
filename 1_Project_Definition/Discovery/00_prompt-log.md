@@ -449,3 +449,9 @@ amended; ledger entry logged (w=1, misread dictated intent).
 three-priorities learning captured; kam.md updated (two kids); pilot friction
 logged in ledger (w=1); lesson-13 mechanism verified from source (genuinely
 automatic; YAML capped at 1000 lines; DB answer: no — files first).
+
+## 2026-08-04
+1. *"That order works — start with WED-8. Also there's an additional code base that I downloaded from the agentic tutorial so please review this as part of yesterday's learnings, '/Volumes/DevMASTER/!CODING/Agentic Coding/Resources and Lesson Material/orchestrator-agent-with-adws'"* — day plan confirmed; WED-8 executed (wednesday-agent@ inbox); orchestrator repo reviewed → 8 adoptions / 5 rejections filed.
+2. *"Yes, go ahead with both edits"* — named go-ahead for the two DevMASTER fleet-convention edits (workspace CLAUDE.md + vault Step 2d → wednesday-agent@).
+3. *"Go ahead with WED-16"* — daily-rhythm scheduler built + installed; supervised pilot tonight/tomorrow.
+4. *"do the code review from yesterdays agentic work, then Wrap it up and take WED-42 fresh"* — coordination harness reviewed (1 crash bug + cwd/secrets surface + artifact hygiene fixed, smoke re-verified); session wrapped; WED-42 to a fresh window.

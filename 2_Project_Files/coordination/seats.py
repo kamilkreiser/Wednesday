@@ -19,6 +19,12 @@ DRIVE_ROOT = Path(__file__).resolve().parents[2]
 CODEX_BIN = DRIVE_ROOT / "2_Project_Files/tools/codex-cli/node_modules/.bin/codex"
 CODEX_HOME = DRIVE_ROOT / "4_Credentials/.codex"
 
+# Seats are bare code generators: run them from an EMPTY scratch dir so neither
+# CLI inherits Wednesday's project context or gets file-read reach over the
+# drive (code-review finding #2, 2026-08-04). Gitignored.
+SEAT_CWD = Path(__file__).resolve().parent / "seat_scratch"
+SEAT_CWD.mkdir(exist_ok=True)
+
 CALL_COUNTS: Counter[str] = Counter()
 
 TIMEOUT_S = 600
@@ -31,7 +37,7 @@ def gpt_seat(prompt: str) -> str:
     out = subprocess.run(
         [str(CODEX_BIN), "exec", "--skip-git-repo-check", "-s", "read-only", prompt],
         capture_output=True, text=True, timeout=TIMEOUT_S, env=env,
-        cwd=str(DRIVE_ROOT),
+        cwd=str(SEAT_CWD),
     )
     if out.returncode != 0:
         raise RuntimeError(f"codex exec failed: {out.stderr[-500:]}")
@@ -44,7 +50,7 @@ def claude_seat(prompt: str) -> str:
     out = subprocess.run(
         ["claude", "-p", prompt, "--model", "claude-sonnet-5"],
         capture_output=True, text=True, timeout=TIMEOUT_S,
-        cwd=str(DRIVE_ROOT),
+        cwd=str(SEAT_CWD),
     )
     if out.returncode != 0:
         raise RuntimeError(f"claude -p failed: {out.stderr[-500:]}")
@@ -59,7 +65,7 @@ def gpt_low_seat(prompt: str) -> str:
         [str(CODEX_BIN), "exec", "--skip-git-repo-check", "-s", "read-only",
          "-c", 'model_reasoning_effort="none"', prompt],
         capture_output=True, text=True, timeout=TIMEOUT_S, env=env,
-        cwd=str(DRIVE_ROOT),
+        cwd=str(SEAT_CWD),
     )
     if out.returncode != 0:
         raise RuntimeError(f"codex exec failed: {out.stderr[-500:]}")
@@ -72,7 +78,7 @@ def haiku_seat(prompt: str) -> str:
     out = subprocess.run(
         ["claude", "-p", prompt, "--model", "claude-haiku-4-5-20251001"],
         capture_output=True, text=True, timeout=TIMEOUT_S,
-        cwd=str(DRIVE_ROOT),
+        cwd=str(SEAT_CWD),
     )
     if out.returncode != 0:
         raise RuntimeError(f"claude -p failed: {out.stderr[-500:]}")

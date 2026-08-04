@@ -12,6 +12,7 @@ from __future__ import annotations
 
 import json
 import pickle
+import subprocess
 import time
 from dataclasses import dataclass
 from pathlib import Path
@@ -76,7 +77,14 @@ def make_generate_fn(seat_name: str, seat: Callable[[str], str], task: Task):
             verdict = Verdict(score=0.0, passed=0, total=0, report=f"seat error: {e}")
             return Attempt(code="", seat=seat_name, verdict=verdict), 0.0
         code = extract_python(raw)
-        verdict = test_suite_verifier(code, task.test_file)
+        try:
+            verdict = test_suite_verifier(code, task.test_file)
+        except subprocess.TimeoutExpired:
+            # a candidate that loops forever must cost the SEAT, not the run
+            print(f"  verifier timeout on candidate from '{seat_name}' — scored 0")
+            verdict = Verdict(score=0.0, passed=0, total=0,
+                              report="verifier timeout: candidate exceeded the test time limit "
+                                     "(likely an infinite loop or pathological complexity)")
         return Attempt(code=code, seat=seat_name, verdict=verdict), verdict.score
     return generate
 

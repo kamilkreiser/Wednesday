@@ -2,6 +2,48 @@
 
 ---
 
+## 2026-08-04 — Rhythm day: wednesday-agent@ live, fleet convention switched, scheduler installed, two code reviews
+
+**Accomplished**
+- **First delegation SCORED:** Secuura 08-04 wrap closed the loop on my 08-03
+  instruction email — brief executed end-to-end, scoreboard entry 1.0. Four
+  wrap emails routed (Secuura + NexusAI × 08-03/08-04); the Step-2d feed works.
+- **WED-8:** secure_test deleted (inspected first), wednesday@ taken platform-
+  wide → Kam chose **wednesday-agent@agentmail.to**; created + round-trip
+  verified both directions. Remaining: Kam's plan upgrade only.
+- **Fleet convention switched** (Kam named go-ahead): workspace CLAUDE.md +
+  vault Step 2d wraps → wednesday-agent@ (coagent@ fallback); vault 3c5f41f.
+  My launcher checks both inboxes at boot.
+- **Orchestrator-adws repo reviewed** (Kam's commission → WED-39): survey agent
+  + source validation. 8 adoptions / 5 rejections;
+  `0_Brain/reference/tac-course/orchestrator-adws-code-review.md`, mirrored to
+  Wednesday Notes. WED-42 blueprint identified (summaries-firewall +
+  completion-oracle monitoring). Their PASS/FAIL substring parse is buggy —
+  ours uses a structured VERDICT line.
+- **WED-16 daily rhythm BUILT + INSTALLED:** launchd pair (06:00 wake → normal
+  launcher with morning-wake marker; 23:00 close → deterministic note-stamp +
+  inbox snapshot + spoken good night), idempotent installer, PORTABILITY #12.
+  All components verified; Mac never sleeps. **Supervised pilot: tonight 23:00
+  + tomorrow 06:00.** Issue stays In Progress until evidence reviewed.
+- **Coordination harness code-reviewed** (Kam's commission): 3 HIGH — uncaught
+  verifier timeout (FIXED), seats cwd=drive-root context/secrets surface
+  (FIXED → seat_scratch/), unsandboxed generated-code execution (accepted risk,
+  precondition for break-glass use). Artifacts hygiene fixed (gitignore +
+  untrack). Smoke re-verified green post-fix (gpt 1.0, 11.7s).
+
+**Learning loop**
+- Ledger w=2: artifacts-not-gitignored-at-creation (Codex binary 08-03 + pyc/
+  pkl 08-04, same commit). Lesson filed incl. the meta-rule: retro candidates
+  that matter become FILES same-session — un-filed candidates don't fire.
+- Workflow candidates: self-review pass at wrap for code-shipping sessions;
+  meta_prompt house format for briefs/skills.
+
+**Next session:** WED-16 pilot evidence FIRST (scheduler logs), then WED-42
+seamless integration v1 in a fresh window (blueprint on disk). Kam outstanding:
+Agent Mail plan upgrade, RD-64 confirm, Secuura decisions, Release-Ready pile.
+
+---
+
 ## 2026-08-03 — The compounding day: learning loop v2, TreeQuest→harness, first delegation, full TAC course
 
 **Accomplished**

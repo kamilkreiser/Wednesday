@@ -6,8 +6,9 @@ file is refreshed by Wednesday reading each project's `5_Project_History/history
 (newest at top) and vault notes — read-only.
 
 Last full sweep: **never** (first sweep = WED-7). Partial freshness via the
-end-of-session feed: see `entries/` cards (currently Secuura__Blockchain 07-31,
-Datasec__CypherKey 08-02, Datasec__Vision_Sales_Portal 08-02 — summarised below).
+end-of-session feed: see `entries/` cards (currently Secuura__Blockchain 08-04,
+Datasec__NexusAI 08-04, Datasec__CypherKey 08-02, Datasec__Vision_Sales_Portal
+08-02 — summarised below). Wrap emails routed through 2026-08-04 boot.
 
 ---
 
@@ -25,12 +26,25 @@ Datasec__CypherKey 08-02, Datasec__Vision_Sales_Portal 08-02 — summarised belo
 ## Fresh (from entry cards)
 
 ### Secuura / Blockchain (Platform K) — most active
-- **Status:** active · **Last session:** 2026-07-31 — zombie Container Apps killed
-  (~$375/mo saved), KS-537 PII-encryption shipped, Stuart weekly → KS-538–542.
-- **Open / next:** Kam decision backlog (unhandledRejection posture, mnemonic
-  rotation, KS-518, CI billing, pricing docs) · KS-535/543 High bugs · KS-480
-  waits on Stuart.
-- **Wednesday can help by:** packaging the pending Kam-decisions into one sitting.
+- **Status:** active · **Last session:** 2026-08-04 (started 08-03 evening) —
+  WED-20 pilot brief executed end-to-end: KS-547/554/538 closed, codex
+  cross-model pilot RUN (verdict keep), KS-555 merged, KS-556/557 PR'd green.
+- **Open / next:** merge #641+#642 (pre-approved) → ONE VM deploy → demo verify
+  → close KS-555/556/557 · **Peter §4/§5 consent window closed EOD 08-04 — act**
+  · Stuart silent (PS-498, KS-539) · KS-560 e2e residuals · KS-559 dep sweep.
+- **Kam decisions open:** KS-518 by-design · #633 repoint · KS-539 sign-off ·
+  stale-tenant-refs to-do.
+- **Wednesday can help by:** folding the prompt-fidelity finding into the WED-20
+  protocol; packaging Kam decisions into one sitting.
+
+### Datasec / NexusAI
+- **Status:** active · **Last session:** 2026-08-04 — RD-64 fixed (Settings 403
+  was a CSRF token-rotation race, not AI), deployed rev 69, verified end-to-end.
+  Side find RD-65 (Low).
+- **Open / next:** Kam to confirm RD-64 + close · RD-62 data-freshness surface ·
+  RD-61 dead ABTDEMO feed (needs fleet owner, not code) · Release-Ready pile
+  awaiting Kam: RD-59/60/63, RD-45, RD-41, RD-23.
+- **Blockers:** RD-61 external owner; RD-18 Kam's legal decision.
 
 ### Datasec / CypherKey (OneTimePad)
 - **Status:** active · **Last session:** 2026-08-02 — ADR-0013 HSM-keyed digests
