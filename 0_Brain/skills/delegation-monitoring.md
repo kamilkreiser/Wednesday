@@ -73,6 +73,20 @@ mirrors the question EXACTLY (it is the correlation key).
 Body: the answer → the validation line ("checked: <path/board>") → what to do
 next ("continue with…" / "pause only if…").
 
+**ANSWER + nudge (standard, 2026-08-04 — polish item 4, Kam-approved):**
+every ANSWER to an agent running in a cockpit pane is followed immediately by
+`cockpit.sh say "<pane-name>" "<one-line: answer landed, check inbox + gist>"`
+— mail is the durable record, the nudge kills the agent's poll-cycle wait
+(seconds instead of up-to-3-minutes, and a blocked agent never burns its
+15-min fallback). If the agent has no pane (externally launched session),
+mail alone — and note the coverage gap in the daily note.
+
+**Launch by registry (standard, same date):** start agent panes with
+`cockpit.sh launch <Client/Project>` (registry: `cockpit/launchers.conf`,
+paths validated at entry AND at launch time). `add` is the fallback for
+unregistered one-offs. Everything launches through the cockpit — a session
+the monitor can't see is a session that can die silently (08-04 lesson).
+
 ## What this skill is not
 
 - Not a license to do their work: answers guide; edits stay theirs

@@ -37,7 +37,10 @@ Datasec__NexusAI 08-04, Datasec__CypherKey 08-02, Datasec__Vision_Sales_Portal
 - **Open / next:** Peter consent window **EXTENDED to EOD 08-06 (Kam ruled
   08-04** after Wednesday's fairness flag; micro-task dispatched same hour to
   post the extension on KS-480 + amend Peter's to-do; recording step moves to
-  after EOD 08-06) · KS-560 residuals (buildable) · KS-559 dep sweep.
+  after EOD 08-06) · KS-560 TRIAGE-ONLY (reserved for WED-54 team pilot) ·
+  KS-559 dep sweep. Evening wrap-only session (21:21) closed clean: nothing
+  executed, carries KS-518 close + #633 repoint (Kam-ruled) + workspace
+  CLAUDE.md tenant-line fix (Kam-authorized) to their next boot.
 - **Kam decisions open:** KS-518 by-design · #633 repoint · KS-539 sign-off ·
   stale-tenant-refs to-do → all packaged in `decision_queue.md`.
 - **Wednesday can help by:** consent-window recording brief; prompt-fidelity

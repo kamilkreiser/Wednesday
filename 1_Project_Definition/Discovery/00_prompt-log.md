@@ -479,3 +479,11 @@ automatic; YAML capped at 1000 lines; DB answer: no — files first).
 > add to wrapup to add anything to this software tool and check.  1) I can watch now.  I am screen shaing (remote login) from my laptop to the mac studio so this will be the worst visual which is a good worst case check.  2)agreed
 
 *Done with it: CLAUDE.md session-end step 3a (doctor+PORTABILITY check at wrap); live cockpit run launched on the Studio screen for Kam's screen-share worst-case check; WED-54 pilot target KS-560 confirmed.*
+
+---
+
+**2026-08-04 (evening, cockpit live-test session)** — verbatim:
+
+> fantastic.  this worked well.    1)blockchain launched at the same time as you.  is this because it remembered the previous run? I think it will be important for nothing to launch before you.  that way you can launch 1 or as many agents as necessary.  2)yes, good to go on KS-560 but can you kill the other agent first.  clear the view so its just you on the left and then launch it fresh.  I want to test this while we are here
+
+*Done with it:* (1) diagnosed — not memory: a stale `Secuura/Blockchain` line in cockpit.conf auto-booted it at `up`; conf trimmed to wednesday+monitor only, Kam's rule ("nothing launches before Wednesday; she launches 1 or as many agents as necessary") written into the conf as the enforced design. (2) auto-launched pane killed, layout cleared, WED-54 KS-560 pilot brief emailed to the fleet bus, fresh Blockchain pane launched via the on-demand `cockpit.sh add` path — the flow Kam wanted tested.

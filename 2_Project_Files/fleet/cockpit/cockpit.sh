@@ -10,7 +10,11 @@
 #
 # Usage:
 #   cockpit.sh up                 create session from cockpit.conf (idempotent)
-#   cockpit.sh add <name> <cmd>   add a pane running <cmd> (e.g. a launcher)
+#   cockpit.sh launch <Client/Project>   start a REGISTERED launcher pane by
+#                                 name (launchers.conf) — the standard way to
+#                                 start an agent; keeps monitor coverage full
+#   cockpit.sh resolve <Client/Project>  print what launch would run (dry-run)
+#   cockpit.sh add <name> <cmd>   add a pane running <cmd> (unregistered/raw)
 #   cockpit.sh status             list panes: name, alive, last activity
 #   cockpit.sh say <name> <text>  type a line into a pane's prompt (the live
 #                                 "tap on the shoulder" — substantive
@@ -71,6 +75,19 @@ case "${1:-}" in
     "$TMUX_BIN" has-session -t "$SESSION" 2>/dev/null || die "no fleet session — run 'cockpit.sh up' first"
     add_pane "$2" "$3"
     ;;
+  launch|resolve)
+    # launch <Client/Project>: start a registered project's launcher in a new
+    # pane, by name. resolve <Client/Project>: print what launch WOULD run.
+    [ $# -eq 2 ] || die "usage: cockpit.sh $1 <Client/Project>  (see launchers.conf)"
+    REG="$SCRIPT_DIR/launchers.conf"
+    [ -f "$REG" ] || die "no launchers.conf at $REG"
+    LPATH=$(awk -F'|' -v n="$2" '$1==n{print $2}' "$REG" | head -1)
+    [ -n "$LPATH" ] || die "'$2' not in launchers.conf — register it (validated path) or use 'add'"
+    [ -f "$LPATH" ] || die "registered launcher missing on disk: $LPATH (registry stale — fix launchers.conf)"
+    if [ "$1" = resolve ]; then echo "would launch pane '$2': bash \"$LPATH\""; exit 0; fi
+    "$TMUX_BIN" has-session -t "$SESSION" 2>/dev/null || die "no fleet session — run 'cockpit.sh up' first"
+    add_pane "$2" "bash \"$LPATH\""
+    ;;
   status)
     "$TMUX_BIN" has-session -t "$SESSION" 2>/dev/null || { echo "fleet session: DOWN"; exit 0; }
     echo "fleet session: UP"
@@ -92,6 +109,6 @@ case "${1:-}" in
     "$TMUX_BIN" kill-session -t "$SESSION" 2>/dev/null && echo "fleet session killed" || echo "no fleet session"
     ;;
   *)
-    die "usage: cockpit.sh up|add|status|down"
+    die "usage: cockpit.sh up|launch|resolve|add|status|say|down"
     ;;
 esac
