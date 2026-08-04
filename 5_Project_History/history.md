@@ -1,3 +1,12 @@
+## 2026-08-04 (session 2, afternoon–evening) — WED-42 shipped·closed, decision sitting 17/17, delegation v2 built
+
+- **WED-42 seamless integration v1+v1.1 BUILT, verified, CLOSED:** mail QUESTION/ANSWER convention + inbox_digest.sh (summaries firewall) + delegation-monitoring skill + brief template §6/§7 + fleet CLAUDE.md rules (Kam-approved) + v1.1 plan-confirmations route to Wednesday. First outing: zero Kam touches brief→wrap.
+- **Fleet day: 8 delegation cycles, 7×1.0** (Secuura ×3 incl. Peter-window extension micro-task, NexusAI board actions, CypherKey keyed-digests one-way door, Vision dependabot+prod deploy) **+ 1×0.0** (Tokenomics session death; my circular brief — ledger w=2 validate-brief-pointers; rebrief scored 1.0).
+- **Decision sitting: 17/17 ruled in 4 batches** (format per Kam: 5 at a time, problem/options/rec). All actioned same evening via 5 consolidated briefs + 4 micro-sessions. Finds en route: dead Secuura tenant in workspace CLAUDE.md hard-rule 4 (fix authorized via Blockchain agent at wrap); kksecura global-gh flip (Kam queue); KS-539 distilled for ruling (pending).
+- **Delegation v2 (Kam correction, ledger w=2 → WED-50):** approach "lacking" = observability. R0 = no client bleed, by construction. Wide sweep (7 paradigms): NOTHING provides per-agent env override → launcher isolation confirmed; two-layer design approved. BUILT: tmux+iTerm2 installed, cockpit.sh (main-vertical: Wednesday left column, agents right rows) + monitor.sh watchdog (DEATH/STALL/INPUT — kill-drill <1 min) + say command (live pane nudge, self-tested) + doctor.sh preflight (Kam's ask; all-clear; wired into launcher) + Launch_Cockpit.command + alerts background watcher. Live cockpit run WITH Kam watching (screen-share worst case): watchdog caught the agent's INPUT wait before I did.
+- Tickets: WED-51 (comms build-out, Remote Control head-start) · WED-53 cockpit (Done) · WED-54 team pilot (KS-560 Kam-confirmed) · WED-55 hooks spike · WED-47/48/49 (RD-61 tomorrow / Twilio tickler / KS-539 distillation Done). WED-8, WED-42 closed. Ledger: w=2 ×3 families + w=1 ×2 (all filed same-session); wrap ritual gains step 3a (doctor check).
+- Corrections of mine, honestly: swallowed Vision QUESTION (mark-seen race — lesson + fix), circular Tokenomics brief (w=2 lesson), delegation-observability w=2.
+
 # WEDNESDAY — session history (newest at TOP)
 
 ---
