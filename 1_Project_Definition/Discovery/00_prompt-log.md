@@ -455,3 +455,10 @@ automatic; YAML capped at 1000 lines; DB answer: no — files first).
 2. *"Yes, go ahead with both edits"* — named go-ahead for the two DevMASTER fleet-convention edits (workspace CLAUDE.md + vault Step 2d → wednesday-agent@).
 3. *"Go ahead with WED-16"* — daily-rhythm scheduler built + installed; supervised pilot tonight/tomorrow.
 4. *"do the code review from yesterdays agentic work, then Wrap it up and take WED-42 fresh"* — coordination harness reviewed (1 crash bug + cwd/secrets surface + artifact hygiene fixed, smoke re-verified); session wrapped; WED-42 to a fresh window.
+
+## 2026-08-04 (evening) — delegation v2 commission
+> this approach of managing other agents and flows / tasks is a little lacking.  lets spend more time to get this right before we do more on delegation of work.  Can you please 1)look into iTerm2 2)look into Agent Teams 3) look at this video https://www.youtube.com/watch?v=-1K_ZWDKpU0 4)this layout is good for me as I can monitor things and know whats going on in the short term and hopefully this will give you more insight into tasks, activities, etc.  [screenshot: Claude Code Agent Teams split-pane layout, coleam terminal]
+
+> a core concern and rule will be to ensure no bleed between clients
+
+*Done with it: delegation PAUSED (standing constraint); ledger w=2 (delegation-mechanism family) + learning 2026-08-04_delegation-v2-observability (R0 = no client bleed); WED-50 opened; research run on iTerm2 + Agent Teams + the video; v2 design proposal drafted for Kam.*
