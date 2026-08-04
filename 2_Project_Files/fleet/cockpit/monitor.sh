@@ -66,6 +66,10 @@ check() {
     else
       prevtime=$(cat "$timefile" 2>/dev/null || echo "$now")
       local quiet=$(( (now - prevtime) / 60 ))
+      # Wednesday's own pane: idle-at-prompt IS her normal state between
+      # turns — INPUT/STALL are always false positives there (first fired
+      # 2026-08-04 21:45, 2 min after she ended a turn). DEATH still applies.
+      [ "$name" = "wednesday" ] && continue
       # INPUT: quiet AND showing an interactive prompt pattern
       if printf '%s' "$content" | grep -qE 'esc to interrupt|Do you want|y/n\)|❯|permission|(A|a)llow.*\?' && [ "$quiet" -ge 2 ]; then
         alert INPUT "$name" "waiting on input ~${quiet}m"
