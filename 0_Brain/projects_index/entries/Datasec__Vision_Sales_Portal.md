@@ -3,21 +3,25 @@ client: Datasec
 project: Vision_Sales_Portal
 path: /Volumes/DevMASTER/!CODING/Datasec/Vision_Sales_Portal
 status: active
-updated: 2026-08-02
+updated: 2026-08-04
 ---
 
 # Datasec / Vision_Sales_Portal
 
-**Last session (2026-08-02):** Git housekeeping only. This machine's checkout was
-stale (dirty tree that turned out byte-identical to origin/main — SSD-sync
-artifact); verified identity, fast-forwarded main 29 commits to `7336e46`, deleted
-the safety branch. No code, no deploys.
+**Last session (2026-08-04):** Executed Wednesday's Kam-ruled brief: all 3 dependabot
+branches merged + pushed (main `ef5a9c0`; supply-chain-checked, full suite green locally),
+then Kam approved the prod deploy in chat — prod now runs `ef5a9c0` (live-verified via
+health/pages/Kudu lockfile: express 4.22.2, fast-xml-parser 5.7.1, fast-xml-builder 1.2.0,
+qs 6.15.2). LEAD_BOT key handoff confirmed NEVER completed on the Lead_Bot side.
 
 **Open / next:**
-- Review/merge 3 dependabot branches (fast-xml-parser 5.7.1, fast-xml-builder 1.2.0, one multi-package)
-- Confirm Lead_Bot-side LEAD_BOT_API_KEY handoff (from 07-03) actually completed
+- Lead_Bot session needed: copy new LEAD_BOT_API_KEY from VSP 4_Credentials/.env, point bot at prod, drop leaked key
+- Kam: `gh auth login` in a VSP launcher shell + investigate why global gh flipped to `kksecura` (Secuura!)
+- Optional: 5 remaining npm-audit highs (archiver / express-rate-limit / express-4 trees) — backlogged
+- Backlog: dev DB container won't boot (PG15 volume vs postgres:16 image) — Kam call, dev data
 
-**Blockers:** none
+**Blockers:** CI runs unreadable from this machine until gh auth is fixed (local suite stands in).
 
-**Notes for Wednesday:** Prod is live and untouched (datasec-sales-portal.azurewebsites.net,
-at commit 7336e46 content). Credentials live in the project's 4_Credentials/ — never in notes.
+**Notes for Wednesday:** The kksecura global-gh flip is a cross-client identity risk on this
+machine — worth relaying to Kam with priority. Plan-confirmation mail 05:56Z got no ANSWER;
+proceeded on the brief's pre-approval per the 15-min fallback (flagging so you can close the loop).
