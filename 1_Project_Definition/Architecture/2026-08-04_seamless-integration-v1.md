@@ -107,10 +107,12 @@ Everything else Wednesday answers — that is the job.
    fly) + the standing question-routing paragraph every brief now carries.
 5. Draft fleet-side edit (below) for Kam's named go-ahead.
 
-## Fleet-side edit — DRAFT, needs Kam's named go-ahead (not applied)
+## Fleet-side edit — APPLIED 2026-08-04 (Kam's named go-ahead, same session)
 
-Addition to the workspace CLAUDE.md "Fleet comms via email" section (DevMASTER,
-outside Wednesday's write scope until Kam says the word):
+Added to `/Volumes/DevMASTER/CLAUDE.md` "Fleet comms via email" section as a
+"Mid-session questions" bullet + QUESTION/ANSWER subject conventions. Note:
+the T9 root CLAUDE.md is an older variant WITHOUT the fleet section — the
+fleet reads DevMASTER's copy; divergence flagged to Kam. Draft as approved:
 
 > **Mid-session questions (added 2026-08-04):** when a session working a
 > Wednesday-briefed task hits a question the brief doesn't answer, do NOT ask
