@@ -34,9 +34,10 @@ Datasec__NexusAI 08-04, Datasec__CypherKey 08-02, Datasec__Vision_Sales_Portal
   amendment re-confirm + §4/§5 DR posture; 07-29 §5/§6 sign-off stands).
   Stuart P3 nudges sent (PS-498, KS-539). (Session 2 same day: WED-20 pilot,
   KS-547/554/538, codex verdict keep. Entry card still reflects session 2.)
-- **Open / next:** **after-EOD consent recording on KS-480** (evening/next
-  session — Wednesday flagged window-fairness question to Kam) · KS-560
-  residuals (buildable) · KS-559 dep sweep.
+- **Open / next:** Peter consent window **EXTENDED to EOD 08-06 (Kam ruled
+  08-04** after Wednesday's fairness flag; micro-task dispatched same hour to
+  post the extension on KS-480 + amend Peter's to-do; recording step moves to
+  after EOD 08-06) · KS-560 residuals (buildable) · KS-559 dep sweep.
 - **Kam decisions open:** KS-518 by-design · #633 repoint · KS-539 sign-off ·
   stale-tenant-refs to-do → all packaged in `decision_queue.md`.
 - **Wednesday can help by:** consent-window recording brief; prompt-fidelity
