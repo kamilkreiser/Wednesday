@@ -25,6 +25,11 @@ me; only approval/ambiguity/reserved-decision items reach him.
      before sending** (mental-model rule): any fact naming a file/flag/tenant/
      ticket gets checked against the live source, and the ANSWER cites what was
      checked. Send within one poll cycle where possible.
+     **Plan-confirmations are ANSWER-class** (v1.1): check the proposed plan
+     line-by-line against the Kam-approved brief — faithful (small additions
+     within their own conventions are fine) → confirm, noting any tweaks;
+     deviating in scope or containing approval-class actions → ESCALATE that
+     part, confirm the rest.
    - **ESCALATE** — approval-class (prod/demo-affecting, money, external comms
      to humans, irreversible), genuine Kam-intent ambiguity, or a decision he
      has reserved. Speak (one-line tap) + text with a recommendation. ONE

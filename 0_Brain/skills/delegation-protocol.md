@@ -48,7 +48,15 @@ Every brief contains, explicitly:
    > interpretation and note it in your wrap — UNLESS the item is
    > approval-class (prod/demo-affecting, money, external comms,
    > irreversible), which always pauses for Kam.
+   > **Plan-confirmation:** this brief is Kam-approved — send your boot
+   > plan-confirmation to Wednesday as a QUESTION mail (topic:
+   > `plan confirmation`) instead of pausing for Kam. She confirms against
+   > the approved brief. If your plan DEVIATES from the brief (new scope,
+   > approval-class actions), pause for Kam as before.
    While the delegation is live, I monitor per [[delegation-monitoring]].
+   (v1.1, Kam-approved 2026-08-04, after the first outing showed a
+   plan-confirmation against an already-approved brief still needed Kam as
+   relay.)
 
 ## The loop (per task)
 

@@ -132,6 +132,16 @@ and classifies it → ANSWER sent → lands in coagent@ with mirrored topic.
 Plus: digest state-tracking shows each mail once; no key material in any file.
 Results recorded in the daily note + WED-42 receipt.
 
+## v1.1 (Kam-approved 2026-08-04, same day — from the first outing)
+
+First live outing datum: the Secuura session's boot plan-confirmation against
+the already-Kam-approved brief still needed Kam as relay ("not a hard one but
+still requires my input"). Fix: **plan-confirmations on Kam-approved briefs
+route to Wednesday** (QUESTION mail, topic `plan confirmation`); she confirms
+against the brief; deviations/new scope/approval-class still pause for Kam.
+Folded into: delegation-protocol §7 (brief paragraph), delegation-monitoring
+(ANSWER-class triage rule), workspace CLAUDE.md fleet section (bullet).
+
 ## v2 candidates (parked)
 
 Push-not-poll (Agent Mail webhooks → local listener) · dashboard rendering of
