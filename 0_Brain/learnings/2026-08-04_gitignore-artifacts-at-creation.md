@@ -32,5 +32,15 @@ supersedes: ""
 3. Retro candidates that pass the importance filter get a lesson file
    immediately — "candidate" is a queue, not a destination.
 
+**Escalated to w=3 the same day:** scheduler `logs/` was committed minutes
+after this lesson was filed (caught in push-output review — the lesson fired
+but didn't PREVENT). Per ledger rules, promoted to enforcement: a pre-commit
+hook in the repo's on-drive `.git/hooks/` blocks staged artifact classes
+(`__pycache__`/`.pyc`/`.pkl`/`logs/`/`state/`/`out*/`/`seat_scratch/`/
+`node_modules/`), additions/modifications only so cleanups pass. Self-tested
+both directions 2026-08-04. Travels with the drive; after any fresh clone,
+re-create it (this is the one non-travelling piece — the hook body is quoted
+in the 2026-08-04 history entry's commit c3a231f).
+
 **Related:** [[_ledger]], [[2026-08-03_frequency-weighted-reinforcement]],
 [[2026-08-03_workflow-systemisation-duty]]
