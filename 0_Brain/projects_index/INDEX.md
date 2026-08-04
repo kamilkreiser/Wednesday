@@ -26,23 +26,20 @@ Datasec__NexusAI 08-04, Datasec__CypherKey 08-02, Datasec__Vision_Sales_Portal
 ## Fresh (from entry cards)
 
 ### Secuura / Blockchain (Platform K) — most active
-- **Status:** active · **Last session:** 2026-08-04 session 3 (Wednesday-briefed,
-  v1.1 routing, wrap 14:34) — #641/#642 merged, ONE combined VM deploy
-  demo-verified (occurredAt + verb trio live-matrix green), KS-555/556/557
-  Done w/ receipts. Peter nudge posted on KS-480 (found: the EOD-08-04 window
-  had never been communicated to him — fixed; his outstanding set = §4
-  amendment re-confirm + §4/§5 DR posture; 07-29 §5/§6 sign-off stands).
-  Stuart P3 nudges sent (PS-498, KS-539). (Session 2 same day: WED-20 pilot,
-  KS-547/554/538, codex verdict keep. Entry card still reflects session 2.)
-- **Open / next:** Peter consent window **EXTENDED to EOD 08-06 (Kam ruled
-  08-04** after Wednesday's fairness flag; micro-task dispatched same hour to
-  post the extension on KS-480 + amend Peter's to-do; recording step moves to
-  after EOD 08-06) · KS-560 TRIAGE-ONLY (reserved for WED-54 team pilot) ·
-  KS-559 dep sweep. Evening wrap-only session (21:21) closed clean: nothing
-  executed, carries KS-518 close + #633 repoint (Kam-ruled) + workspace
-  CLAUDE.md tenant-line fix (Kam-authorized) to their next boot.
-- **Kam decisions open:** KS-518 by-design · #633 repoint · KS-539 sign-off ·
-  stale-tenant-refs to-do → all packaged in `decision_queue.md`.
+- **Status:** active · **Last session:** 2026-08-04 NIGHT (WED-54 Agent Teams
+  pilot, wrap 23:34) — **11/11 KS-560 residuals = ONE root cause: KS-561, a
+  REAL platform bug** (refresh op mis-declared bearer-authed since #483
+  07-11 → silent-refresh 401s everywhere). Harness PR #645 merged (upload
+  8/8 demo-green); platform fix #644 DRAFT proven-local, ship AWAITS KAM.
+  KS-518/551 Done, #633 merged, KS-559 7/11 patched (PR #646 on CI),
+  KS-562 filed. 4 Sonnet teammates, 0 escalations, deploy hold honored.
+  (Day sessions: consent+deploy 14:34 wrap; wrap-only 21:21.)
+- **Open / next:** merge #646 on CI green · execute #644 merge+demo-ship on
+  Kam's ruling, then fresh tier-3 run = KS-560 final receipt · restart akto
+  stack when needed · Peter consent window EOD 08-06 (recording after).
+- **Kam decisions open (NEW from night run):** #644 KS-561 fix merge + demo
+  ship · KS-559 undici acceptance (permanent vs expiring) · #633 main-landing
+  (release vs cherry-pick) · KS-539 sign-off (carried) — for decision_queue.
 - **Wednesday can help by:** consent-window recording brief; prompt-fidelity
   fold into WED-20 protocol.
 
