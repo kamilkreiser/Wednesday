@@ -26,16 +26,21 @@ Datasec__NexusAI 08-04, Datasec__CypherKey 08-02, Datasec__Vision_Sales_Portal
 ## Fresh (from entry cards)
 
 ### Secuura / Blockchain (Platform K) — most active
-- **Status:** active · **Last session:** 2026-08-04 (started 08-03 evening) —
-  WED-20 pilot brief executed end-to-end: KS-547/554/538 closed, codex
-  cross-model pilot RUN (verdict keep), KS-555 merged, KS-556/557 PR'd green.
-- **Open / next:** merge #641+#642 (pre-approved) → ONE VM deploy → demo verify
-  → close KS-555/556/557 · **Peter §4/§5 consent window closed EOD 08-04 — act**
-  · Stuart silent (PS-498, KS-539) · KS-560 e2e residuals · KS-559 dep sweep.
+- **Status:** active · **Last session:** 2026-08-04 session 3 (Wednesday-briefed,
+  v1.1 routing, wrap 14:34) — #641/#642 merged, ONE combined VM deploy
+  demo-verified (occurredAt + verb trio live-matrix green), KS-555/556/557
+  Done w/ receipts. Peter nudge posted on KS-480 (found: the EOD-08-04 window
+  had never been communicated to him — fixed; his outstanding set = §4
+  amendment re-confirm + §4/§5 DR posture; 07-29 §5/§6 sign-off stands).
+  Stuart P3 nudges sent (PS-498, KS-539). (Session 2 same day: WED-20 pilot,
+  KS-547/554/538, codex verdict keep. Entry card still reflects session 2.)
+- **Open / next:** **after-EOD consent recording on KS-480** (evening/next
+  session — Wednesday flagged window-fairness question to Kam) · KS-560
+  residuals (buildable) · KS-559 dep sweep.
 - **Kam decisions open:** KS-518 by-design · #633 repoint · KS-539 sign-off ·
-  stale-tenant-refs to-do.
-- **Wednesday can help by:** folding the prompt-fidelity finding into the WED-20
-  protocol; packaging Kam decisions into one sitting.
+  stale-tenant-refs to-do → all packaged in `decision_queue.md`.
+- **Wednesday can help by:** consent-window recording brief; prompt-fidelity
+  fold into WED-20 protocol.
 
 ### Datasec / NexusAI
 - **Status:** active · **Last session:** 2026-08-04 — RD-64 fixed (Settings 403
