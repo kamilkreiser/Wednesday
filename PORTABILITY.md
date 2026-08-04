@@ -27,3 +27,15 @@ Keep this file updated whenever a new machine-local dependency appears.
 14. **iTerm2** (machine-local, brew cask): `brew install --cask iterm2` —
     the cockpit glass. View: `tmux -CC attach -t fleet`. Optional `it2`
     Python API not currently load-bearing.
+15. **Scheduler TCC grant (machine-local, GUI-only — REQUIRED for WED-16):**
+    launchd-spawned background jobs are DENIED access to removable volumes by
+    macOS TCC (no prompt is ever shown; bash exits 126 "Operation not
+    permitted" reading anything on the T9 — diagnosed 2026-08-04 23:4x after
+    both scheduled fires failed). One-time fix per machine: System Settings →
+    Privacy & Security → Full Disk Access → add `/bin/bash` (or at minimum
+    grant it Removable Volumes access), then `launchctl kickstart
+    gui/$UID/com.wednesday.close` to verify exit 0. ALSO machine-local:
+    launchd stdio logs live at `~/Library/Logs/wednesday_{close,wake}.{out,err}`
+    (launchd cannot even open stdio paths on the external drive — plists +
+    installer point there since 2026-08-04; the scripts' own logs still land
+    on-drive in scheduler/logs/ once execution is possible).

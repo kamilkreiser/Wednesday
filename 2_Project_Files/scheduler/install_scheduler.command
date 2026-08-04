@@ -39,8 +39,8 @@ install_job() {
     <key>Minute</key><integer>$minute</integer>
   </dict>
   <key>RunAtLoad</key><false/>
-  <key>StandardOutPath</key><string>$SELF_DIR/logs/launchd_$label.out</string>
-  <key>StandardErrorPath</key><string>$SELF_DIR/logs/launchd_$label.err</string>
+  <key>StandardOutPath</key><string>$HOME/Library/Logs/wednesday_${label##*.}.out</string>
+  <key>StandardErrorPath</key><string>$HOME/Library/Logs/wednesday_${label##*.}.err</string>
 </dict>
 </plist>
 PLIST
