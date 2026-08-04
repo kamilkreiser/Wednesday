@@ -8,21 +8,25 @@ updated: 2026-08-04
 
 # Secuura / Blockchain (Platform K)
 
-**Last session (2026-08-04, session 3 — your brief v1.1):** executed end-to-end.
-#641+#642 merged, ONE combined VM deploy, demo-pk live-verified (occurredAt UTC
-round-trip, verb trio 202s, cardanoMode REAL), KS-555/556/557 closed + archived.
-Peter §4/§5: outstanding set re-derived (§4 re-confirm PR #615 + DR posture);
-final nudge sent — the EOD-08-04 window had never actually reached him. Kam then
-extended the window to EOD 08-06 (real-notice rule); extension posted on KS-480.
-v1.1 plan-confirmation routing worked (~2 min round-trip, zero Kam pause).
+**Last session (2026-08-04, session 5, evening):** Wrap-only per your cockpit ruling
+(Kam present) — booted, checked, proposed the day plan, executed nothing. Your 05:53Z
+rulings brief read and banked. State unchanged since session 3: local == develop ==
+demo-pk (`090f97dfd`), VM anchoring REAL on preview.
 
 **Open / next:**
+- [ ] KS-518 → close as by-design (Kam-ruled; cite Peter's 07-31 re-test)
+- [ ] #633 → repoint + merge → KS-551 to Done with receipts
+- [ ] Workspace `/Volumes/DevMASTER/CLAUDE.md` hard-rule-4 dead-tenant line — Kam
+      DIRECTLY AUTHORIZED the fix tonight (typed at prompt) → then close extranet
+      to-do `565261bc`
+- [ ] KS-560: **triage-and-ticket ONLY** — reserved as the Agent Teams pilot task
+      (Kam-confirmed tonight); no residual fixes
+- [ ] KS-559 dep sweep (baseline expires 08-31)
 - [ ] After EOD 08-06: record Peter consent-by-silence on KS-480 (if still silent) — NOT before
-- [ ] KS-560 (11 tier-3 e2e residuals) + KS-559 (dep sweep, baseline expires 08-31) buildable
-- [ ] Watch: Stuart PS-498 results + KS-549 confirmation; KS-539 sign-offs (both)
 
-**Blockers:** none (Kam decision queue — KS-518, #633, KS-539, stale-tenant refs — you're packaging separately)
+**Blockers:** none — waits only: Stuart PS-498/KS-549/KS-539 · KS-539 waits on your
+distilled summary to Kam.
 
-**Notes for Wednesday:** local == develop == demo-pk (`090f97dfd`). Board at ~210
-active after archiving. Peter window recording moved to 08-06 — don't re-dispatch
-it for tomorrow.
+**Notes for Wednesday:** the three tonight rulings (KS-518/#633 stand · CLAUDE.md
+fix authorized · KS-560 = Agent Teams pilot, triage-only) are recorded in the daily
+note + history.md, so any next session picks them up even cold.
