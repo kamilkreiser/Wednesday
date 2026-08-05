@@ -537,3 +537,9 @@ automatic; YAML capped at 1000 lines; DB answer: no — files first).
 > how freequently do you poll the agent teams?  if I did not interrupt, how long would it have been before you got notificaiton from blockchain screen?
 
 *Done with it: honest answer (no guaranteed bound while conversing — Kam's interrupt had been load-bearing); w=3 ledger row for the observability family; enforcement built + proven same hour: fleet/cockpit/wake_watch.sh (mail ~1 min, idle-pane ~3 min, 10-min ceiling).*
+
+## 2026-08-06 (morning)
+
+> great.  can I make a suggestion to the pre 6am start.  Last night was a great 1st run.  please get all agents working to wrap up and finish so that when I start with them and you I can launch and refresh to start fresh sessions
+
+*Done with it:* built the 05:30 **morning shift change** (scheduler/shift_change.sh + com.wednesday.shiftchange launchd job, installed): taps every live cockpit pane with a wrap-up instruction + drops a for-the-record bus mail, so all night sessions are wrapped before Kam's 06:00 start and he launches fresh. Wake session now verifies the wraps arrived (launcher 1b step).

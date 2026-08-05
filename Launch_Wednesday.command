@@ -233,7 +233,10 @@ if [ -f "$WAKE_MODE_FILE" ]; then
 SCHEDULED MORNING WAKE (WED-16): this session was opened by the 06:00 scheduler,
 not by Kam. He may not be at the desk yet. After the boot ritual: (1) do the
 morning consolidation/contemplation pass BEFORE he surfaces (light: route mail,
-refresh index, review yesterday's retro + any ledger movement); (2) prepare the
+refresh index, review yesterday's retro + any ledger movement); (1b) VERIFY the
+05:30 shift change (scheduler/logs/shift_change_<today>.log): every pane it
+tapped should have a wrap email in wednesday-agent@ — report any session that
+did not wrap so Kam knows before he relaunches; (2) prepare the
 day's briefing and speak the greeting as usual — if he doesn't answer, leave the
 briefing on screen and wait quietly; do NOT start executing priorities without
 his confirm. Quiet-hours rule stands: nothing spoken before 06:00."

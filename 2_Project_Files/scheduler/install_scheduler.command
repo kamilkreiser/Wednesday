@@ -4,6 +4,7 @@
 # replaces the existing jobs (e.g. after the drive path changes).
 #
 # What it installs (machine-local, ~/Library/LaunchAgents — PORTABILITY.md #12):
+#   com.wednesday.shiftchange → 05:30 daily → shift_change.sh (wrap the night crew: taps live agent panes to run their end-of-session ritual so Kam starts fresh — Kam directive 2026-08-06)
 #   com.wednesday.wake   → 06:00 daily → wake_wednesday.sh  (morning session)
 #   com.wednesday.close  → 23:00 daily → close_wednesday.sh (day-end stamp + good night)
 # The scripts themselves live on-drive; the plists just point at them.
@@ -50,12 +51,13 @@ PLIST
 }
 
 mkdir -p "$SELF_DIR/logs" "$SELF_DIR/state"
+install_job "com.wednesday.shiftchange" "shift_change.sh" 5 30
 install_job "com.wednesday.wake"  "wake_wednesday.sh"  6  0
 install_job "com.wednesday.close" "close_wednesday.sh" 23 0
 
 echo ""
 echo "── verification ──"
-for label in com.wednesday.wake com.wednesday.close; do
+for label in com.wednesday.shiftchange com.wednesday.wake com.wednesday.close; do
   if launchctl print "gui/$(id -u)/$label" >/dev/null 2>&1; then
     echo "OK: $label loaded"
   else

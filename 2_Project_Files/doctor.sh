@@ -85,7 +85,7 @@ command -v jq >/dev/null 2>&1 && ok "jq (statusline)" || warn "jq missing" "stat
 # unreachable below the exit): launchd jobs must execute from this drive.
 # Exit code 126 on kickstart = TCC ungranted (PORTABILITY 15: Full Disk
 # Access for /bin/bash, GUI-only, per machine).
-for job in com.wednesday.wake com.wednesday.close; do
+for job in com.wednesday.shiftchange com.wednesday.wake com.wednesday.close; do
   if launchctl print "gui/$(id -u)/$job" >/dev/null 2>&1; then
     lec=$(launchctl print "gui/$(id -u)/$job" 2>/dev/null | awk '/last exit code/{print $NF}')
     case "$lec" in
