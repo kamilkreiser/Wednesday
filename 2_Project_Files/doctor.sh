@@ -64,6 +64,39 @@ else warn "scheduler jobs not loaded" "run 2_Project_Files/scheduler/install.sh 
 # --- Repo hooks (ledger w=3 enforcement travels per-clone) ---
 [ -x "$PROJECT_DIR/.git/hooks/pre-commit" ] && ok "pre-commit artifact gate" || warn "pre-commit hook missing" "re-create per learnings/2026-08-04_gitignore-artifacts-at-creation (fresh clone?)"
 
+# --- Calendar probe (added 2026-08-05: dashboard EventKit feed; PORTABILITY 18) ---
+# On an ungranted machine the macOS calendar prompt appears HERE at launch —
+# the 25s window is for clicking "Allow Full Access" (Kam's ask: surface the
+# Studio re-grant at boot). perl alarm = portable timeout (macOS has no GNU timeout).
+if [ -x "$PROJECT_DIR/2_Project_Files/tools/calendar_probe" ]; then
+  cp_out=$(perl -e 'alarm 25; exec @ARGV' "$PROJECT_DIR/2_Project_Files/tools/calendar_probe" 2>/dev/null || echo BLOCKED)
+  case "$cp_out" in
+    '{"calendars"'*) ok "calendar probe (EventKit access granted)";;
+    *) warn "calendar access not granted" "click Allow on the calendar prompt, or System Settings > Privacy & Security > Calendars (PORTABILITY 18)";;
+  esac
+else
+  warn "calendar_probe missing/not executable" "swiftc 2_Project_Files/tools/calendar_probe.swift (exec bit: PORTABILITY 16)"
+fi
+
+# --- Statusline dependency (added 2026-08-05: tools/statusline.sh needs jq) ---
+command -v jq >/dev/null 2>&1 && ok "jq (statusline)" || warn "jq missing" "statusline degrades to bare label — brew install jq"
+
+# WED-16 scheduler TCC health (added 2026-08-05; relocated same day — was
+# unreachable below the exit): launchd jobs must execute from this drive.
+# Exit code 126 on kickstart = TCC ungranted (PORTABILITY 15: Full Disk
+# Access for /bin/bash, GUI-only, per machine).
+for job in com.wednesday.wake com.wednesday.close; do
+  if launchctl print "gui/$(id -u)/$job" >/dev/null 2>&1; then
+    lec=$(launchctl print "gui/$(id -u)/$job" 2>/dev/null | awk '/last exit code/{print $NF}')
+    case "$lec" in
+      126|78:*|78) warn "scheduler $job last exit $lec" "TCC/stdio blocked (PORTABILITY 15)";;
+      *) ok "scheduler $job loaded (last exit ${lec:-never})";;
+    esac
+  else
+    warn "scheduler $job not loaded" "run scheduler/install_scheduler.command"
+  fi
+done
+
 echo
 if [ "$HARD_FAIL" = "1" ]; then
   echo "PREFLIGHT: HARD FAILURES above — fix before relying on this machine."
@@ -74,18 +107,3 @@ else
   echo "PREFLIGHT: all clear."
 fi
 exit 0
-
-# WED-16 scheduler TCC health (added 2026-08-05): launchd jobs must be able to
-# execute from this drive. Exit code 126 on kickstart = TCC ungranted
-# (PORTABILITY 15: Full Disk Access for /bin/bash, GUI-only, per machine).
-for job in com.wednesday.wake com.wednesday.close; do
-  if launchctl print "gui/$(id -u)/$job" >/dev/null 2>&1; then
-    lec=$(launchctl print "gui/$(id -u)/$job" 2>/dev/null | awk '/last exit code/{print $NF}')
-    case "$lec" in
-      126|78:*|78) echo "WARN  scheduler $job last exit $lec — TCC/stdio blocked (PORTABILITY 15)";;
-      *) echo "ok    scheduler $job loaded (last exit ${lec:-never})";;
-    esac
-  else
-    echo "WARN  scheduler $job not loaded (run scheduler/install_scheduler.command)"
-  fi
-done

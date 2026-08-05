@@ -55,13 +55,20 @@ export AZURE_CONFIG_DIR="$PROJECT_DIR/4_Credentials/.azure"
 export GH_CONFIG_DIR="$PROJECT_DIR/4_Credentials/.gh-config"
 
 # ── Project-local statusline: [Wednesday] ──
-# Uses the shared helper from DevMASTER when mounted; plain label otherwise.
-mkdir -p .claude
-STATUSLINE_SH="$DEVMASTER/Setup and System/statusline.sh"
+# Prefers the shared DevMASTER helper (refreshing the project-local copy from
+# it when mounted), else the drive-local copy in 2_Project_Files/tools/ so the
+# full statusline works on ANY machine (portability rule; added 2026-08-05
+# after the laptop session booted with the bare-label fallback).
+mkdir -p .claude "$PROJECT_DIR/2_Project_Files/tools"
+STATUSLINE_SHARED="$DEVMASTER/Setup and System/statusline.sh"
+STATUSLINE_LOCAL="$PROJECT_DIR/2_Project_Files/tools/statusline.sh"
+if [ -f "$STATUSLINE_SHARED" ] && ! cmp -s "$STATUSLINE_SHARED" "$STATUSLINE_LOCAL" 2>/dev/null; then
+  cp "$STATUSLINE_SHARED" "$STATUSLINE_LOCAL" && chmod +x "$STATUSLINE_LOCAL"
+fi
 LABEL="[Wednesday]"
-python3 - "$LABEL" "$STATUSLINE_SH" <<'PYEOF'
+python3 - "$LABEL" "$STATUSLINE_SHARED" "$STATUSLINE_LOCAL" <<'PYEOF'
 import json, os, sys, shlex
-label, script = sys.argv[1], sys.argv[2]
+label, shared, local = sys.argv[1], sys.argv[2], sys.argv[3]
 path = ".claude/settings.local.json"
 data = {}
 if os.path.exists(path):
@@ -72,7 +79,8 @@ if os.path.exists(path):
             data = {}
     except Exception:
         data = {}
-if os.path.exists(script):
+script = next((s for s in (shared, local) if os.path.exists(s)), None)
+if script:
     cmd = f"sh {shlex.quote(script)} {shlex.quote(label)}"
 else:
     cmd = f"echo {shlex.quote(label)}"
@@ -81,6 +89,32 @@ with open(path, "w") as f:
     json.dump(data, f, indent=2)
     f.write("\n")
 PYEOF
+
+# ── Day Dashboard (WED-59): ensure running + open in browser (Kam, 2026-08-05) ──
+# Dedicated port from Wednesday's reserved block 47780-47789 (never common
+# dev/Docker ports — Secuura/Datasec stacks own those). Registry:
+# 2_Project_Files/PORTS.md. serve.sh self-guards against double-starts and
+# refuses (loudly, without killing) if a foreign process holds the port.
+DASH_PORT="${WEDNESDAY_DASHBOARD_PORT:-47787}"
+export WEDNESDAY_DASHBOARD_PORT="$DASH_PORT"
+DASH_URL="http://127.0.0.1:${DASH_PORT}"
+DASH_LOG_DIR="$PROJECT_DIR/2_Project_Files/dashboard/logs"
+mkdir -p "$DASH_LOG_DIR"
+if curl -s -m 2 "$DASH_URL/api/health" 2>/dev/null | grep -q wednesday-dashboard; then
+  DASH_STATE="already running"
+else
+  nohup "$PROJECT_DIR/2_Project_Files/dashboard/serve.sh" \
+    >> "$DASH_LOG_DIR/serve.log" 2>&1 &
+  DASH_STATE="START FAILED — see 2_Project_Files/dashboard/logs/serve.log"
+  for _ in 1 2 3 4 5 6 7 8 9 10; do
+    sleep 1
+    if curl -s -m 2 "$DASH_URL/api/health" 2>/dev/null | grep -q wednesday-dashboard; then
+      DASH_STATE="started"
+      break
+    fi
+  done
+fi
+open "$DASH_URL" 2>/dev/null || true
 
 # ── Initial prompt ──
 INITIAL_PROMPT="ultrathink
@@ -156,6 +190,13 @@ STANDING BEHAVIOUR:
   in ${BRAIN_DIR}/learnings/ the same session (this is the project's core loop).
 - During discovery/architecture: append Kam's substantive prompts verbatim to
   1_Project_Definition/Discovery/00_prompt-log.md.
+- Day Dashboard: the launcher ensures it is live at ${DASH_URL} (this launch:
+  ${DASH_STATE}) and opens it in the browser. Its port comes from Wednesday's
+  reserved block 47780-47789 (2_Project_Files/PORTS.md) — never move it to a
+  common port. At boot and at checkpoints, read the dashboard chat inbox
+  (0_Brain/dashboard/data/chat_log.json) — messages Kam types there are real
+  input. If the launch state above says FAILED or the port was held, diagnose
+  per no-skip before relying on the dashboard.
 - Fleet comms: re-check the coagent@ inbox PERIODICALLY during long sessions —
   at natural checkpoints (a long task finishes, before proposing next steps),
   not just at boot. Delegated agents wrap by email (end-of-session Step 2d);
@@ -174,6 +215,7 @@ cat <<EOF
  Dir:       ${PROJECT_DIR}
  Brain:     ${BRAIN_DIR}
  DevMASTER: ${DEVMASTER_STATE}
+ Dashboard: ${DASH_URL} (${DASH_STATE})
  Voice:     Moira (en_IE) via speak.sh
  Mode:      --dangerously-skip-permissions
 ==========================================

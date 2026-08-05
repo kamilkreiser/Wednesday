@@ -26,22 +26,25 @@ Datasec__NexusAI 08-04, Datasec__CypherKey 08-02, Datasec__Vision_Sales_Portal
 ## Fresh (from entry cards)
 
 ### Secuura / Blockchain (Platform K) — most active
-- **Status:** active · **Last session:** 2026-08-04 NIGHT (WED-54 Agent Teams
-  pilot, wrap 23:34) — **11/11 KS-560 residuals = ONE root cause: KS-561, a
-  REAL platform bug** (refresh op mis-declared bearer-authed since #483
-  07-11 → silent-refresh 401s everywhere). Harness PR #645 merged (upload
-  8/8 demo-green); platform fix #644 DRAFT proven-local, ship AWAITS KAM.
-  KS-518/551 Done, #633 merged, KS-559 7/11 patched (PR #646 on CI),
-  KS-562 filed. 4 Sonnet teammates, 0 escalations, deploy hold honored.
-  (Day sessions: consent+deploy 14:34 wrap; wrap-only 21:21.)
-- **Open / next:** merge #646 on CI green · execute #644 merge+demo-ship on
-  Kam's ruling, then fresh tier-3 run = KS-560 final receipt · restart akto
-  stack when needed · Peter consent window EOD 08-06 (recording after).
-- **Kam decisions open (NEW from night run):** #644 KS-561 fix merge + demo
-  ship · KS-559 undici acceptance (permanent vs expiring) · #633 main-landing
-  (release vs cherry-pick) · KS-539 sign-off (carried) — for decision_queue.
-- **Wednesday can help by:** consent-window recording brief; prompt-fidelity
-  fold into WED-20 protocol.
+- **Status:** active · **Last session:** 2026-08-05 session 8 (21:00–22:3x,
+  WED-65 rulings executed, scored 1.0) — **KS-539 SIGNED OFF** (G-1 split, PR
+  #648 merged, develop c9be578c3; contradictions flagged not merged; KS-566
+  alignment ticket; Stuart+Peter verdicts unblocked) · **KS-559 CLOSED** (#646
+  merged 955aa0f11 on FULL green — real root cause = GitHub secondary rate
+  limit on the ~29-image push burst after cache invalidation; my
+  Schemathesis/Akto-reds hypothesis corrected: outcome=skipped boot
+  casualties, no test ever ran; durable fix = KS-567 retry/backoff) · undici
+  PERMANENT in baseline · #633 next-train note · vault conflict copy deleted
+  under authorization w/ diff receipt. Local stack DOWN, demo untouched.
+  (Wrap mail 22:15 + history validated 08-06 06:0x.)
+- **Open / next (today's openers, Kam-ruled):** staged local bring-up +
+  rebuild to c9be578c3 FIRST → **KS-563 (Urgent**, false "Certified by
+  issuer" on merely-anchored docs) → **KS-564 (High**, users/stub recipient
+  resolution 500s on demo-pk). Both carry a demo-deploy leg when fixed —
+  ship ruling needed then. **Peter KS-480 consent: record only AFTER EOD
+  TODAY 08-06.** Watch: KS-539 Stuart/Peter verdicts · 2 flaky tier-3 tests.
+- **Wednesday can help by:** launching their session (Kam's go), ship ruling
+  when KS-563/564 land; prompt-fidelity fold into WED-20 protocol.
 
 ### Datasec / NexusAI
 - **Status:** active · **Last session:** 2026-08-04 — RD-64 fixed (Settings 403

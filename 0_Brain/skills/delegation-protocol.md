@@ -79,3 +79,17 @@ Every brief contains, explicitly:
 - One line per (channel × work class); update at close-out, newest evidence
   first. Repeated channel failure (w≥3) retires it for that class — note why.
 - Weekly consolidation reviews trends + whether my wider/deeper calls paid.
+
+## WED-internal threshold delegation (Kam-approved 2026-08-05)
+
+Wednesday's OWN dev items follow a size split so the Kam conversation never
+queues behind a build (full rationale:
+learnings/2026-08-05_wed-work-threshold-delegation.md):
+- **< ~15 min / single-file / instantly verifiable → build directly** (the
+  live-steering cadence is ledger-protected).
+- **Chunky (multi-feature, new subsystem, refactor) → background teammate**,
+  briefed per this protocol; Wednesday stays conversational, runs the final
+  browser-E2E as verifier, and scores the run ("WED teammate
+  (self-delegation)" scoreboard row).
+- While a teammate holds WED files, Wednesday does NOT edit the same files —
+  one writer per file set, always.

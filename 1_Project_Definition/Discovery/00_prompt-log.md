@@ -487,3 +487,53 @@ automatic; YAML capped at 1000 lines; DB answer: no — files first).
 > fantastic.  this worked well.    1)blockchain launched at the same time as you.  is this because it remembered the previous run? I think it will be important for nothing to launch before you.  that way you can launch 1 or as many agents as necessary.  2)yes, good to go on KS-560 but can you kill the other agent first.  clear the view so its just you on the left and then launch it fresh.  I want to test this while we are here
 
 *Done with it:* (1) diagnosed — not memory: a stale `Secuura/Blockchain` line in cockpit.conf auto-booted it at `up`; conf trimmed to wednesday+monitor only, Kam's rule ("nothing launches before Wednesday; she launches 1 or as many agents as necessary") written into the conf as the enforced design. (2) auto-launched pane killed, layout cleared, WED-54 KS-560 pilot brief emailed to the fleet bus, fresh Blockchain pane launched via the on-demand `cockpit.sh add` path — the flow Kam wanted tested.
+
+---
+
+## 2026-08-05 (laptop session) — Life-OS dashboard commission (major scope expansion)
+
+> The plan works well but before we go ahead with this lets continue the setup.  Can you please investigate the following and work it into the plan.  1)this is a great way for us to interact for coding tasks but there is a great opportunity to take it further for all my life and companies as well.  Not in stead of but in addition to.  I will choose in which way I interact so the two systems must be interoperable.  2)please look at the following video https://www.youtube.com/watch?v=OZ3ZNhrPbF4 3)it is important for you to take into consideration the visuals not just the transcript 4)I have logged into the resource repositorry he mentions skool so you shoudl be able to find the code. 5)what I would like is either a obsidian dashboard like this or a web page.  the optimal one for you and me to use.  It will be used locally but must be available remotely as well 6) what I am looking for is  Day Dashboard- [ ] Snapshot of calendars.  I have 3 - ical, Datasec Microsoft one and Secuura google one- [ ] Work life (split into multiple sections for different companies then projects    - [ ] Things to follow up    - [ ] Emails    - [ ] Etc- [ ] Flag of what is upcoming or should be looked at today    - [ ] Tickets    - [ ] Meetings     - [ ] Outstanding tasks    - [ ] Upcoming bills    - [ ] Dates    - [ ] Etc (we should flesh out but also add to)- [ ] Family    - [ ] I have 2 kids and want to be aware of key dates    - [ ] Exams    - [ ] Homework due    - [ ] Things from their school WhatsApp and school portal- [ ] Coding projects- [ ] Personal ideas, personal projects, etc- [ ] Ability to drill into different areas- [ ] In the news    - [ ] War    - [ ] Tech    - [ ] Quantum    - [ ] Security    - [ ] Bio tech and meicine- [ ] Other things as we add to thisMost importantly, I would like you to control, add to and manage this dashboard and through it my day to day.This is a massive planning task but very important so lets take our timeAlso, I know we talked about waking at 6 but it would be great if you could work on these things through the night to have everything ready by 6 am.I will dedicate the Mac Studio so this will be on and you can operate from that (for local and remote login).  Security will be important for whether we use obsidian or web.  Also, as we build this out I will provide API access or worst case give you credentials (I would prefer to find other ways which include API, your own phone, etc)
+
+*Done with it: video analysed visually (15 frames, 8 chapters); Skool checked (free Standard plan; premium $57 holds the excluded `emai-command-center` plugin); Kam ruled free-packs-first ("do I need to upgrade to premium? I can for a month if need be" → not needed); 3 free packs downloaded (alias kreiser.org+emai@me.com, Kam-approved) to Research/emai/; plan written (Architecture/2026-08-05_life-os-dashboard-research-and-plan.md); WED-58 epic; learning filed.*
+
+> yes, go ahead with phase 0 tonight.  document and plan now.  I have a meeting in 15 min so lets document everything and store all tickets so we can action later today.
+
+*Done with it: plan doc flipped PROPOSED→APPROVED; tickets stored — WED-59 (Phase 0, tonight, P1), WED-60 (calendars, Kam-blocked), WED-61 (work+news+email), WED-62 (family+bills), WED-63 (remote+polish), WED-64 (Kam input queue, one-at-a-time), WED-65 (later-today sitting: WED-54 pilot review + rulings batch); WED-58 epic → In Progress with receipt comment.*
+
+**2026-08-05 (session 2, laptop) — launcher + ports directive:**
+
+> the new launch seequence worked.  great! can you add to the launch seeequence a command to launch the the dashboard website.  Also, ensure this uses ports that will never be used by other processes or agents as the common ports are used by default.  secuura uses some in docka, datasec uses others, etc.  after this, please go ahead with the plan for today
+
+*Done with it: dashboard 8787 → 47787; Wednesday reserved port block 47780-47789 founded (2_Project_Files/PORTS.md); launcher now health-checks/starts the dashboard + opens the browser; serve.sh double-start + foreign-port guards, both tested; then the day plan (Secuura brief sent, parking-lot research run, WED-70 UI built).*
+
+**2026-08-05 (session 2, mid-turn) — chat-with-Wed view commission:**
+
+> Chat with wednesday, when I click 'Full View'  shoudl go to a view (I can save a layout called 'chat with Wed') where you occupy the left column (30%) of screen and show the live chat.  not just an expanded item but a mirror of the terminal (or as close to as we can)
+
+*Done with it: sidebar view shipped same hour — fixed 30% left column, terminal styling (mono, kam›/wednesday› prompts), live 4s mirror via new GET /api/chatlog, send-without-reload; mode persisted in layout.json; verified both directions live in Chrome. His three chat-channel asks (separators, named favourite views, subtle tile colours) → WED-72.*
+
+**2026-08-05 (session 2) — WED threshold-delegation approval:**
+
+> can you please evaluate whether this idea is good.  You occupy the column on the left.  you are currently executing many dev items.  I feel like I am interrupting when I add ideas.  When you supervvise other agents they show up on the right.  Is it worth you doing the same when working on WED tasks so that our conversation continues but work is done by another team agent that you supervise?
+
+> great.  lets implement the approach as per your reccomendation.  then we can work on items while we interact on other items
+
+*Done with it: evaluated honestly (size-split hybrid recommended over blanket delegation, protecting the live-steering cadence); Kam approved; rule filed (learnings/2026-08-05_wed-work-threshold-delegation.md + delegation-protocol section); WED-72 launched as the supervised-teammate pilot.*
+
+**2026-08-05 (session 2) — separators ruling + ack-visuals commission:**
+
+> b on the dashboard grid please.  ALso, can you add a visual so that I can see if an item (especially chat and tickets) has been recieved by you, or being actioned and then an option for me to say, action now (as part of the right click most liekely
+
+*Done with it: separators = grid (WED-72 round 2); ack-visuals designed + WED-73 created (ack_state.json, seen/actioning/action-requested marks, right-click "action now" routed into the chat log, honesty rule: "seen" only when the session really read it); both queued as the teammate's round 2.*
+
+**2026-08-05 (session 3, evening at the Studio) — cockpit default layout:**
+
+> can we do it so that you are always in the column on the left and agent teams are rows (1 per agent) on the right.  then save this as a default that always starts when we launch
+
+*Done with it: apply_layout() in cockpit.sh — Wednesday forced to the left main pane (45%), agents+monitor stacked right; enforced on up/add/launch + manual `layout` subcommand; applied live, confirmed by Kam ("better").*
+
+**2026-08-05 (session 3) — observability challenge (became the wake-watcher):**
+
+> how freequently do you poll the agent teams?  if I did not interrupt, how long would it have been before you got notificaiton from blockchain screen?
+
+*Done with it: honest answer (no guaranteed bound while conversing — Kam's interrupt had been load-bearing); w=3 ledger row for the observability family; enforcement built + proven same hour: fleet/cockpit/wake_watch.sh (mail ~1 min, idle-pane ~3 min, 10-min ceiling).*

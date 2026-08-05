@@ -95,3 +95,46 @@ the monitor can't see is a session that can die silently (08-04 lesson).
   delegated — the tight cadence applies only while a briefed session runs.
 - Escalation is not failure. Approval-class traffic SHOULD reach Kam; the test
   of v1 is that *only* that class does.
+
+## Dashboard chat inbox (added 2026-08-05, WED-59)
+
+Kam can message Wednesday from the Day Dashboard's chat tile. Messages append
+to `0_Brain/dashboard/data/chat_log.json` (role "kam"). At EVERY session boot
+AND at every monitoring check-in: read the tail of chat_log.json; any kam
+message newer than the last "wednesday" entry is unanswered — answer by
+appending a {"role":"wednesday","text":...,"ts":...} entry (then regenerate
+the dashboard if the server isn't running its loop). Same seriousness as the
+QUESTION mail channel; approval-class items still pause for Kam explicitly.
+
+## Ack-state duty (WED-73, live 2026-08-05)
+
+At EVERY checkpoint where the dashboard chat log or WED board is read, write
+the truth back to `0_Brain/dashboard/data/ack_state.json`
+({key: {state, ts, label}} — keys are chat-message ts strings / WED-ids /
+row data-keys):
+- read a kam message → `seen` · start work on it → `actioning` · shipped →
+  `done` (renders into the archived panel automatically).
+- The UI/server may only ever write `action_requested` (Kam's "action now").
+  NEVER let any automation fake `seen`/`actioning`/`done` — the ticks are
+  trusted precisely because they mean a session really did it.
+- An `action_requested` found at checkpoint = a Kam instruction: triage it
+  like a QUESTION mail (act or answer, then update its state).
+
+## Wake-watcher duty (w=3 enforcement, live 2026-08-05)
+
+Whenever ANY agent pane is live in the fleet session, keep the tripwire armed
+as a background task from Wednesday's own session:
+
+    bash 2_Project_Files/fleet/cockpit/wake_watch.sh <baseline-UTC-ts> 3 60
+
+(baseline = `date -u '+%Y-%m-%dT%H:%M'` at arm time, so own outbound copies
+never fire it.) It wakes the session on: new wednesday-agent@ mail (~1 min) ·
+an agent pane idle-at-prompt with stable content ~3 min (catches IN-PANE
+questions/confirmations that never became mail — the failure Kam caught
+2026-08-05). The bg runner caps runs at 10 min → RE-ARM on every completion
+notification until the fleet is quiet. Never rely on checkpoint-only polling
+while agents run: the watcher is the bound, checkpoints are the routine.
+
+Companion brief rule: briefs + confirmations RESTATE "plan-confirmation and
+questions go BY MAIL" — pane-posted plans still get answered (mail + say-
+nudge for the record) but count as a convention slip to note in the wrap.

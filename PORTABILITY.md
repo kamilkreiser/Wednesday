@@ -39,3 +39,21 @@ Keep this file updated whenever a new machine-local dependency appears.
     (launchd cannot even open stdio paths on the external drive — plists +
     installer point there since 2026-08-04; the scripts' own logs still land
     on-drive in scheduler/logs/ once execution is possible).
+16. **Executable bits on scripts (check after every copy of the project):**
+    copying the project through anything that doesn't preserve POSIX
+    permissions (cloud-sync round trip, archive extraction, some copy tools)
+    strips `chmod +x` from every `.sh`/`.command` file. Symptom: Finder says
+    "could not be executed because you do not have appropriate access
+    privileges" when double-clicking a launcher (hit 2026-08-05 on
+    KK_DEV_Local). Fix from the project root:
+    `find . -name "*.sh" -o -name "*.command" | xargs chmod +x`
+17. **jq** (statusline dependency) — `tools/statusline.sh` (drive-local copy of
+    the DevMASTER shared helper, added 2026-08-05) needs `jq` on each machine:
+    `brew install jq`. doctor.sh checks it; missing = statusline degrades to
+    the bare `[Wednesday]` label. Launcher refreshes the drive-local copy from
+    DevMASTER when mounted and falls back to it when not.
+18. **Calendar TCC grant (per machine, per terminal host):** the dashboard's
+    `tools/calendar_probe` (EventKit, read-only, compiled on-drive) needs a
+    one-time "Allow Full Access" calendar prompt approved on each machine —
+    granted on the laptop 2026-08-05; the Studio will prompt on first run.
+    doctor.sh warns if the probe can't read calendars.

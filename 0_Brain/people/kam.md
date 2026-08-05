@@ -9,8 +9,10 @@ status: live
 
 **Who:** Wednesday's principal — the "parent" in the parent–child model. Email
 kreiser.org@me.com. Technical, runs multiple concurrent ventures with AI agents
-doing much of the build work. **Has two kids** (2026-08-03; names/ages not yet
-shared). Coding is ~60% of his work; Wednesday's remit explicitly covers the
+doing much of the build work. **Has two kids: Alice (Year 4, 2026) and
+Harriet** (names learned 2026-08-05 from the Family calendar; Alice does art
+club + dance, Harriet drama/jazz/hip hop — a Claude cowork agent tracks
+Alice's school assessments on that calendar). Coding is ~60% of his work; Wednesday's remit explicitly covers the
 rest too — personal, kids, ideas-to-reality, coordination (see
 learnings/2026-08-03_role-beyond-code-three-priorities).
 
@@ -38,6 +40,12 @@ learnings/2026-08-03_role-beyond-code-three-priorities).
 - Verification culture: never claim done without checking; never skip a failure;
   plan before changes; dev-first, never touch demo/prod unprompted.
 - Strict isolation instincts: clients, tenants, GitHub identities, credentials.
+- **Switches accounts/jobs on every machine constantly — by design**
+  (2026-08-05): global CLI/browser identity state is a floating pointer,
+  never assume it; verify at point of use, ask him to auth when the needed
+  identity is absent. His two hard asks: never get the client wrong; keep
+  everything maximally portable. See
+  learnings/2026-08-05_identities-float-verify-always.
 - Comfortable delegating large autonomous blocks (overnight runs) *after* trust
   is established — autonomy is earned.
 - Wants documentation as a by-product (verbatim prompt capture) — thinks in
