@@ -58,8 +58,8 @@ if ! command -v tmux >/dev/null; then
   echo "  ✗ tmux missing — the cockpit engine (PORTABILITY 13)"
   if [ "$BREW" = 1 ]; then
     printf "    Install tmux now via Homebrew? [y/N] "
-    read -r -n 1 REPLY; echo
-    if [[ "$REPLY" =~ ^[Yy]$ ]]; then
+    read -r REPLY
+    if [[ "$REPLY" =~ ^[Yy] ]]; then
       brew install tmux || echo "    brew install tmux FAILED (output above)"
     fi
   fi
@@ -75,8 +75,8 @@ else
   echo "  ⚠ iTerm2 missing — cockpit glass (PORTABILITY 14)"
   if [ "$BREW" = 1 ]; then
     printf "    Install iTerm2 now via Homebrew? [y/N] "
-    read -r -n 1 REPLY; echo
-    if [[ "$REPLY" =~ ^[Yy]$ ]]; then
+    read -r REPLY
+    if [[ "$REPLY" =~ ^[Yy] ]]; then
       brew install --cask iterm2 && ITERM=1
     fi
   fi
@@ -107,8 +107,13 @@ if "$TMUX_BIN" has-session -t fleet 2>/dev/null; then
   echo "  [F]resh   — kill it and boot clean (context is LOST unless Wednesday"
   echo "              wrapped first — if unsure, Resume and say 'let's wrap')"
   echo "  [Q]uit    — do nothing"
-  printf "Choice [R/f/q]: "
-  read -r -n 1 CHOICE; echo
+  printf "Choice [R/f/q] then Enter: "
+  # Line read, NOT read -n 1: a single-char read leaves the user's Enter in the
+  # buffer, and the YES confirm below then consumes it as an empty answer and
+  # silently aborts to Resume (Kam hit exactly this 2026-08-06 — "clicked
+  # fresh but it resumed").
+  read -r CHOICE
+  CHOICE="${CHOICE:0:1}"
   case "$CHOICE" in
     [Ff])
       if [ -n "$AGENTS" ]; then
