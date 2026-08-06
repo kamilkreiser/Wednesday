@@ -40,25 +40,16 @@ Datasec__NexusAI 08-04, Datasec__CypherKey 08-02, Datasec__Vision_Sales_Portal
   mock-mode by design since KS-535). See
   [[../learnings/2026-08-06_local-proof-is-not-target-evidence]].
 
-- **Status:** active · **Last session:** 2026-08-05 session 8 (21:00–22:3x,
-  WED-65 rulings executed, scored 1.0) — **KS-539 SIGNED OFF** (G-1 split, PR
-  #648 merged, develop c9be578c3; contradictions flagged not merged; KS-566
-  alignment ticket; Stuart+Peter verdicts unblocked) · **KS-559 CLOSED** (#646
-  merged 955aa0f11 on FULL green — real root cause = GitHub secondary rate
-  limit on the ~29-image push burst after cache invalidation; my
-  Schemathesis/Akto-reds hypothesis corrected: outcome=skipped boot
-  casualties, no test ever ran; durable fix = KS-567 retry/backoff) · undici
-  PERMANENT in baseline · #633 next-train note · vault conflict copy deleted
-  under authorization w/ diff receipt. Local stack DOWN, demo untouched.
-  (Wrap mail 22:15 + history validated 08-06 06:0x.)
-- **Open / next (today's openers, Kam-ruled):** staged local bring-up +
-  rebuild to c9be578c3 FIRST → **KS-563 (Urgent**, false "Certified by
-  issuer" on merely-anchored docs) → **KS-564 (High**, users/stub recipient
-  resolution 500s on demo-pk). Both carry a demo-deploy leg when fixed —
-  ship ruling needed then. **Peter KS-480 consent: record only AFTER EOD
-  TODAY 08-06.** Watch: KS-539 Stuart/Peter verdicts · 2 flaky tier-3 tests.
-- **Wednesday can help by:** launching their session (Kam's go), ship ruling
-  when KS-563/564 land; prompt-fidelity fold into WED-20 protocol.
+- **Status:** active · scored 1.0 twice today (ship + protocol adherence).
+- **Open / next:** KS-564 live proof then a ship ruling (all three legs as one
+  piece) · **Peter KS-480 consent — after EOD 08-06 only** · Stuart's KS-539
+  verdict · 2 flaky tier-3 tests.
+- **Prior (08-05 session 8):** KS-539 signed off (G-1 split, #648, develop
+  c9be578c3) · KS-559 closed (#646 merged 955aa0f11; root cause = GitHub
+  secondary rate limit, not the suites I had blamed; durable fix KS-567) ·
+  undici PERMANENT · #633 next train.
+- **Wednesday can help by:** getting ship rulings Kam-traceable (their v1.2
+  hold today proved why that matters); prompt-fidelity fold into WED-20.
 
 ### Datasec / NexusAI
 - **Status:** active · **Last session:** 2026-08-06 (LIVE now, pane %3) —
