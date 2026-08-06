@@ -1,0 +1,1024 @@
+<!doctype html><html data-theme="light" lang="en"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Wednesday — Day Dashboard</title>
+<style>
+:root { color-scheme: dark;
+  --surface-1:#1a1a19; --surface-2:#232322; --line:#33332f;
+  --text-primary:#ffffff; --text-secondary:#c3c2b7; --text-muted:#8a897f;
+  --series-1:#3987e5; --series-2:#d95926; --series-3:#199e70; }
+:root[data-theme="light"] { color-scheme: light;
+  --surface-1:#f7f7f4; --surface-2:#ffffff; --line:#dcdcd4;
+  --text-primary:#1b1b19; --text-secondary:#4a4a44; --text-muted:#78776e;
+  --series-1:#1f63b8; --series-2:#b8431a; --series-3:#127956; }
+:root[data-theme="light"] .tilebox { box-shadow:0 1px 2px rgba(0,0,0,.05); }
+:root[data-theme="light"] li.nowline span { color:#b8431a; }
+:root[data-theme="light"] .resetbtn { background:#fdf3e0; border-color:#d8b878; color:#7a5a1a; }
+:root[data-theme="light"] .allhidden { background:#fdf3e0; border-color:#d8b878; color:#7a5a1a; }
+:root[data-theme="light"] .flagbtn.on { color:#b8860b; }
+:root[data-theme="light"] .keptmark, :root[data-theme="light"] details.srcweek.kept > summary { color:#b8860b; }
+* { box-sizing:border-box; margin:0; }
+body { background:var(--surface-1); color:var(--text-primary);
+  font:15px/1.5 -apple-system, "SF Pro Text", Helvetica, Arial, sans-serif; padding:18px 22px; }
+.topbar { display:flex; align-items:baseline; gap:14px; flex-wrap:wrap;
+  position:sticky; top:0; z-index:40; background:var(--surface-1); padding:6px 0 8px;
+  border-bottom:1px solid var(--line); }
+.topbar h1 { font-size:21px; font-weight:650; }
+.topbar .sub { color:var(--text-secondary); }
+.topbar .legend { color:var(--text-secondary); font-size:13px; }
+.topbar .menu { margin-left:auto; }
+.menu button { background:var(--surface-2); color:var(--text-secondary); border:1px solid var(--line);
+  border-radius:7px; font:inherit; font-size:13px; padding:5px 12px; cursor:pointer; }
+.menu button.on, .menu button:hover { color:var(--text-primary); border-color:var(--text-muted); }
+.topbar .menu { position:relative; }
+#burger-drop { position:absolute; right:0; top:calc(100% + 6px); z-index:60; display:flex;
+  flex-direction:column; gap:6px; background:var(--surface-2); border:1px solid var(--line);
+  border-radius:8px; padding:8px; min-width:190px; box-shadow:0 6px 24px rgba(0,0,0,.45); }
+#burger-drop button { text-align:left; }
+#burger-drop[hidden] { display:none; }
+/* cascading submenus (Kam 2026-08-06): top level = intent, second level = action */
+#burger-drop { gap:2px; padding:6px; min-width:210px; }
+.mgroup { position:relative; display:block; }
+.mgroup > .mparent { display:flex; width:100%; align-items:center; justify-content:space-between;
+  background:none; border:none; color:var(--text-secondary); cursor:pointer;
+  padding:7px 10px; border-radius:6px; font-size:13px; }
+.mgroup > .mparent:hover, .mgroup.open > .mparent { background:var(--surface-1); color:var(--text-primary); }
+.mgroup > .mparent .carat { color:var(--text-muted); font-size:10px; }
+.mgroup.open > .mparent .carat { transform:rotate(90deg); display:inline-block; }
+.msub { display:none; flex-direction:column; gap:1px; padding:2px 0 4px 10px;
+  margin-left:6px; border-left:1px solid var(--line); }
+.mgroup.open > .msub { display:flex; }
+.msub button, .msub a { display:block; width:100%; text-align:left; background:none; border:none;
+  color:var(--text-secondary); cursor:pointer; padding:6px 10px; border-radius:6px;
+  font-size:12.5px; text-decoration:none; }
+.msub button:hover, .msub a:hover { background:var(--surface-1); color:var(--text-primary); }
+.grid { display:grid; grid-template-columns:repeat(auto-fill,minmax(300px,1fr)); gap:14px; margin-top:14px;
+  grid-auto-rows:8px; grid-auto-flow:dense; }
+.tilebox { background:var(--surface-2); border:1px solid var(--line); border-radius:10px; padding:14px 16px;
+  overflow:hidden; }
+.tilebox.scroll .tilebody { overflow-y:auto; height:calc(100% - 34px); scrollbar-width:thin; }
+.tilehead { display:flex; align-items:center; gap:8px; margin-bottom:8px; }
+.tilehead h2 { font-size:1.0em; font-weight:650; }
+.grip { color:var(--text-muted); cursor:grab; display:none; letter-spacing:-3px; }
+.sizer { margin-left:auto; display:none; gap:4px; }
+.sizer button { background:var(--surface-1); color:var(--text-secondary); border:1px solid var(--line);
+  border-radius:5px; font-size:11px; padding:1px 7px; cursor:pointer; }
+body.organise .grip, body.organise .sizer { display:inline-flex; }
+body.organise .tilebox { outline:1px dashed var(--text-muted); }
+.tilebox.dragging { opacity:.4; }
+.tiles { display:grid; grid-template-columns:repeat(auto-fit,minmax(120px,1fr)); gap:10px; }
+.tile { background:var(--surface-1); border:1px solid var(--line); border-radius:8px; padding:10px 12px; }
+.tile .v { font-size:24px; font-weight:700; font-variant-numeric:tabular-nums; }
+.tile .v.small { font-size:14px; font-weight:600; padding-top:5px; }
+.tile .k { color:var(--text-muted); font-size:11.5px; margin-top:2px; }
+section h3 { font-size:.83em; font-weight:600; color:var(--text-secondary);
+  text-transform:uppercase; letter-spacing:.04em; margin:10px 0 4px; }
+.count { color:var(--text-muted); font-weight:400; text-transform:none; letter-spacing:0; }
+ul.events { list-style:none; }
+ul.events li { display:flex; gap:8px; align-items:baseline; padding:3px 0; border-bottom:1px solid var(--line); }
+ul.events li:last-child { border-bottom:none; }
+.dot { width:8px; height:8px; border-radius:50%; display:inline-block; flex:none; align-self:center; }
+.src { color:var(--text-muted); font-size:.78em; width:3.6rem; flex:none; }
+.time { color:var(--text-secondary); font-variant-numeric:tabular-nums; font-size:.88em; width:4.2rem; flex:none; }
+ul.plain .time { width:4.2rem; }
+.ev { color:var(--text-primary); }
+.cal { color:var(--text-muted); font-size:.8em; }
+.flagdue { color:var(--text-secondary); font-size:.85em; width:6em; flex:none; font-variant-numeric:tabular-nums; }
+.empty { color:var(--text-muted); }
+.note { color:var(--text-muted); font-size:.8em; margin-top:6px; }
+/* Kam 2026-08-06: a tile's trailing note / input sits at the BOTTOM of the tile,
+   not immediately under the content — so every tile in a row ends on the same line. */
+.tilebody { display:flex; flex-direction:column; }
+
+/* Scrolling tiles pin their trailing note/input too: the CONTENT scrolls, the
+   input stays put. Kam's ask was explicitly "chat with wednesday input". */
+.tilebox.scroll .tilebody { display:flex; flex-direction:column; }
+.tilebox.scroll .tilebody > .scrollpart { flex:1 1 auto; overflow-y:auto; min-height:0; scrollbar-width:thin; }
+.tilebox.scroll .tilebody > .note, .tilebox.scroll .tilebody > .chatinput,
+.tilebox.scroll .tilebody > .addbox, .tilebox.scroll .tilebody > .parkadd { flex:none; }
+/* EVERY tile gets a .scrollpart wrapper at load (see JS): content scrolls inside it,
+   trailing notes/inputs pin to the tile floor. Kam 2026-08-06 round 7 — the earlier
+   rule only reached tiles that already had one, which was almost none of them. */
+.tilebody > .scrollpart { flex:1 1 auto; min-height:0; }
+.tilebox.scroll .tilebody > .scrollpart { overflow-y:auto; scrollbar-width:thin; }
+.tilebody > .note, .tilebody > .chatinput, .tilebody > .addbox, .tilebody > .parkadd { flex:none; }
+.tilebody > .note:last-child { margin-top:6px; padding-top:4px; }
+/* ⚑ flag-for-Wed toggle */
+.flagbtn { background:none; border:none; color:var(--text-muted); cursor:pointer; padding:0 4px;
+  font-size:1.05em; line-height:1; flex:none; opacity:.45; }
+.flagbtn:hover { opacity:1; color:var(--text-primary); }
+.flagbtn.on { opacity:1; color:#e0a33e; }
+li:hover .flagbtn { opacity:.85; }
+li:hover .flagbtn.on { opacity:1; }
+.newsrow { align-items:flex-start; }
+.newsrow .nbody { flex:1; }
+.resetbtn { background:#3a2a1a; border:1px solid #7a5a2a; color:#f0c98a; border-radius:6px;
+  cursor:pointer; padding:2px 8px; font-size:14px; line-height:1.3; margin-right:6px; }
+.resetbtn:hover { background:#4a3520; color:#fff; }
+.tgbar { display:flex; gap:5px; flex-wrap:wrap; margin:0 0 8px; }
+.tgchip { background:var(--surface-1); border:1px solid var(--line); color:var(--text-secondary);
+  border-radius:999px; padding:1px 9px; font-size:.72em; cursor:pointer; }
+.tgchip:hover { color:var(--text-primary); }
+.tgchip.off { opacity:.4; text-decoration:line-through; }
+.allhidden { background:#3a2a1a; border:1px solid #7a5a2a; color:#f0c98a; border-radius:8px;
+  padding:10px 14px; margin-top:12px; font-size:13px; display:flex; gap:12px; align-items:center; }
+.allhidden button { background:var(--surface-2); color:var(--text-primary); border:1px solid var(--line);
+  border-radius:6px; padding:4px 10px; cursor:pointer; font-size:12.5px; }
+.dot.flagslot { background:none; border-radius:0; display:inline-flex; align-items:center;
+  justify-content:center; overflow:visible; }
+.dot.flagslot .attn { font-size:.8em; }
+.bell { background:none; border:none; cursor:pointer; padding:0 2px; font-size:.85em;
+  line-height:1; margin-left:auto; flex:none; opacity:.35; filter:grayscale(1); }
+li:hover .bell { opacity:.9; }
+.bell.off { opacity:.55; }
+
+.keptmark { color:#e0a33e; font-size:.7em; margin-left:6px; text-transform:uppercase;
+  letter-spacing:.04em; vertical-align:middle; }
+details.srcweek.kept > summary { color:#e0a33e; }
+.stub { color:var(--text-muted); font-style:italic; }
+.prio { font-size:.74em; font-weight:700; border-radius:4px; padding:0 5px; flex:none; align-self:center; }
+.prio.p1 { color:#e66767; border:1px solid #e66767; } .prio.p2 { color:#c98500; border:1px solid #c98500; }
+.prio.p3, .prio.p4 { color:var(--text-muted); border:1px solid var(--line); }
+.acts { margin-left:auto; flex:none; display:flex; gap:4px; opacity:.35; }
+li:hover .acts { opacity:1; }
+.acts button { background:var(--surface-1); color:var(--text-secondary); border:1px solid var(--line);
+  border-radius:5px; font-size:.74em; padding:1px 7px; cursor:pointer; }
+.acts button:hover { color:var(--text-primary); border-color:var(--text-muted); }
+.addbox { display:flex; gap:6px; margin-top:12px; }
+.addbox input[type=text] { flex:1; background:var(--surface-1); border:1px solid var(--line);
+  color:var(--text-primary); border-radius:6px; padding:6px 9px; font:inherit; font-size:.9em; }
+.addbox select, .addbox button { background:var(--surface-1); color:var(--text-secondary);
+  border:1px solid var(--line); border-radius:6px; font:inherit; font-size:.87em; padding:5px 8px; }
+.addbox button { cursor:pointer; } .addbox button:hover { color:var(--text-primary); }
+#add-msg { align-self:center; font-size:.8em; color:var(--text-muted); }
+.pmode { font-size:.74em; font-weight:600; border-radius:4px; padding:0 5px; flex:none; align-self:center; }
+.pmode.parked { color:var(--text-muted); border:1px solid var(--line); }
+.pmode.research { color:var(--series-1); border:1px solid var(--series-1); }
+.penr { color:var(--series-3); font-size:.8em; flex:none; align-self:center; }
+.parkadd #park-src { flex:0 0 34%; }
+.parkchoice { margin-top:6px; }
+#park-msg { align-self:center; font-size:.8em; color:var(--text-muted); }
+#modal-park { margin-top:12px; display:flex; gap:6px; flex-wrap:wrap; align-items:center; }
+#modal-park[hidden] { display:none; }
+#modal-park button { background:var(--surface-1); color:var(--text-secondary); border:1px solid var(--line);
+  border-radius:6px; font:inherit; font-size:13px; padding:5px 12px; cursor:pointer; }
+#modal-park button:hover { color:var(--text-primary); }
+#modal-park-msg { font-size:12px; color:var(--text-muted); }
+#modal-body { max-height:62vh; overflow-y:auto; scrollbar-width:thin; }
+li.mutable { cursor:pointer; }
+li.muted { font-size:60%; opacity:.55; }   /* Kam round 9: +20% on the previous 50% */
+/* Kam round 10: a muted row keeps the SAME column geometry as its full-size
+   neighbours — only the TEXT shrinks. Widths are already in rem (root-relative),
+   so they do not scale with the row's 60% font-size; the dot and the row gap
+   must be pinned too or the columns still drift. */
+li.muted { gap:8px; }
+li.muted .dot { width:8px; height:8px; }
+li.muted .ev, li.muted .src, li.muted .time, li.muted .cal { color:var(--text-muted); }
+li.muted .dot { opacity:.4; }
+details.srcweek { border-bottom:1px solid var(--line); padding:4px 0; }
+details.srcweek summary { cursor:pointer; color:var(--text-secondary); font-size:.9em;
+  list-style:none; display:flex; gap:8px; align-items:center; padding:3px 0; }
+details.srcweek summary::before { content:"▸"; color:var(--text-muted); font-size:.75em; }
+details.srcweek[open] summary::before { content:"▾"; }
+details.srcweek .events { margin:2px 0 6px 18px; }
+#customise-panel { display:flex; gap:26px; background:var(--surface-2); border:1px solid var(--line);
+  border-radius:10px; padding:14px 18px; margin-top:12px; }
+#customise-panel[hidden] { display:none; }
+#views-panel { background:var(--surface-2); border:1px solid var(--line); border-radius:10px;
+  padding:12px 16px; margin-top:12px; max-width:420px; }
+#views-panel[hidden] { display:none; }
+#views-panel h4 { font-size:12px; text-transform:uppercase; letter-spacing:.05em;
+  color:var(--text-secondary); margin-bottom:6px; }
+.vrow { display:flex; gap:6px; align-items:center; padding:2px 0; }
+.vrow .vapply { flex:1; text-align:left; background:var(--surface-1); color:var(--text-primary);
+  border:1px solid var(--line); border-radius:6px; font:inherit; font-size:13px; padding:4px 10px; cursor:pointer; }
+.vrow .vapply:hover { border-color:var(--text-muted); }
+.vrow .vdel { background:none; border:none; color:var(--text-muted); cursor:pointer; font-size:12px; padding:2px 4px; }
+.vrow .vdel:hover { color:#e66767; }
+.vempty { color:var(--text-muted); font-size:12.5px; }
+.vsave { display:flex; gap:6px; margin-top:8px; }
+.vsave input { flex:1; background:var(--surface-1); border:1px solid var(--line); color:var(--text-primary);
+  border-radius:6px; padding:5px 9px; font:inherit; font-size:13px; }
+.vsave button { background:var(--surface-1); color:var(--text-secondary); border:1px solid var(--line);
+  border-radius:6px; font:inherit; font-size:13px; padding:4px 12px; cursor:pointer; }
+.vsave button:hover { color:var(--text-primary); }
+.tintsel { margin-left:8px; background:var(--surface-1); color:var(--text-secondary); border:1px solid var(--line);
+  border-radius:5px; font:inherit; font-size:11.5px; padding:1px 4px; }
+.verr { color:#e66767; font-size:12px; }
+.cprow { display:flex; align-items:center; gap:6px; padding:2px 0; }
+.cprow label { min-width:150px; }
+.seplab { width:110px; background:var(--surface-1); border:1px solid var(--line); color:var(--text-primary);
+  border-radius:5px; font:inherit; font-size:11.5px; padding:2px 6px; }
+.gridsep { margin:18px 0 4px; display:flex; align-items:center; gap:10px; min-height:0; }
+.gridsep::before { content:""; width:18px; border-top:1px solid var(--line); }
+.gridsep::after { content:""; flex:1; border-top:1px solid var(--line); }
+.gridsep span { color:var(--text-muted); font-size:11px; text-transform:uppercase; letter-spacing:.06em;
+  white-space:nowrap; }
+.gridsep span:empty { display:none; }
+.ackline { font-size:.74em; margin-top:2px; }
+.ackline.seen { color:var(--text-muted); } .ackline.actioning { color:#3987e5; }
+.ackline.action_requested { color:#c98500; } .ackline.done { color:#199e70; }
+.ackdot { width:7px; height:7px; border-radius:50%; display:inline-block; flex:none; align-self:center; }
+.msg { position:relative; }
+.msg .acknow { display:none; position:absolute; top:5px; right:0; background:var(--surface-1); color:#c98500;
+  border:1px solid var(--line); border-radius:5px; font-size:10.5px; padding:1px 7px; cursor:pointer; }
+.msg:hover .acknow { display:inline-block; }
+.msg .acknow:hover { border-color:#c98500; }
+#acting-panel, #archived-panel { background:var(--surface-2); border:1px solid var(--line); border-radius:10px;
+  padding:12px 16px; margin-top:12px; max-width:520px; }
+#acting-panel[hidden], #archived-panel[hidden] { display:none; }
+#acting-panel h4, #archived-panel h4 { font-size:12px; text-transform:uppercase; letter-spacing:.05em;
+  color:var(--text-secondary); margin-bottom:6px; }
+.strow { display:flex; gap:8px; align-items:baseline; padding:3px 0; border-bottom:1px solid var(--line);
+  font-size:13px; }
+.strow:last-child { border-bottom:none; }
+.stlabel { flex:1; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
+.sts { color:var(--text-muted); font-size:11px; white-space:nowrap; font-variant-numeric:tabular-nums; }
+.sticon { color:var(--text-muted); }
+.cpcol h4 { font-size:12px; text-transform:uppercase; letter-spacing:.05em; color:var(--text-secondary); margin-bottom:6px; }
+.cpcol label { display:block; font-size:13.5px; color:var(--text-primary); padding:2px 0; cursor:pointer; }
+.cpcol input { accent-color:var(--series-1); margin-right:6px; }
+.cpnote { color:var(--text-muted); font-size:12px; max-width:260px; }
+#customise-save { margin-top:8px; background:var(--surface-1); color:var(--text-secondary);
+  border:1px solid var(--line); border-radius:6px; font:inherit; font-size:13px; padding:4px 14px; cursor:pointer; }
+#customise-save:hover { color:var(--text-primary); }
+.chatmode { position:absolute; top:12px; right:14px; background:var(--surface-1); color:var(--text-muted);
+  border:1px solid var(--line); border-radius:5px; font-size:11px; padding:1px 8px; cursor:pointer; }
+.chatmode:hover { color:var(--text-primary); }
+.tilebox[data-tile="chat"] { position:relative; }
+.chatlog { margin:4px 0 8px; }
+.chatlog.chatfull { height:340px; overflow-y:auto; scrollbar-width:thin; }
+.msg { padding:6px 0; border-bottom:1px solid var(--line); }
+.msg .who { font-size:.78em; font-weight:650; color:var(--text-secondary); margin-right:8px; }
+.msg.kam .who { color:var(--series-1); }
+.msg .mts { font-size:.75em; color:var(--text-muted); }
+.msg .mtext { margin-top:2px; white-space:pre-wrap; }
+.chatinput { display:flex; gap:6px; }
+.chatinput input { flex:1; background:var(--surface-1); border:1px solid var(--line);
+  color:var(--text-primary); border-radius:6px; padding:6px 9px; font:inherit; font-size:.9em; }
+.chatinput button { background:var(--surface-1); color:var(--text-secondary); border:1px solid var(--line);
+  border-radius:6px; font:inherit; font-size:.87em; padding:5px 12px; cursor:pointer; }
+.chatinput button:hover { color:var(--text-primary); }
+.attn { color:#c98500; margin-right:2px; }
+.tilebox[data-tile="email"] .ev { white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+li.needsack .ev { font-weight:600; }
+.newslist li { display:block; }
+.nhead { color:var(--text-primary); font-weight:600; }
+.ntake { color:var(--text-muted); font-size:.85em; margin-top:1px;
+  display:-webkit-box; -webkit-line-clamp:2; -webkit-box-orient:vertical; overflow:hidden; }
+#modal-link { display:inline-block; margin:12px 12px 0 0; color:var(--series-1); font-size:13.5px; }
+.headlink { margin-left:auto; color:var(--text-muted); font-size:12px; text-decoration:none; }
+.headlink:hover { color:var(--text-primary); }
+.legchip { cursor:pointer; } .legchip:hover { color:var(--text-primary); }
+li.nowline { border-bottom:none !important; padding:0 !important; }
+li.nowline span { display:block; width:100%; text-align:left; color:#e66767; font-size:.72em;
+  border-top:1px solid #e66767; line-height:1; padding-top:1px; opacity:.8; }
+.tlink { text-decoration:none; } .tlink:hover { text-decoration:underline; color:var(--text-primary); }
+#modal-backdrop { position:fixed; inset:0; background:rgba(0,0,0,.55); z-index:100;
+  display:flex; align-items:center; justify-content:center; }
+#modal-backdrop[hidden] { display:none; }
+#modal { background:var(--surface-2); border:1px solid var(--line); border-radius:12px;
+  padding:20px 22px; max-width:480px; width:92%; position:relative; }
+#modal-close { position:absolute; top:10px; right:12px; background:none; border:none;
+  color:var(--text-muted); font-size:15px; cursor:pointer; }
+#modal-close:hover { color:var(--text-primary); }
+#modal-body .mrow { padding:5px 0; border-bottom:1px solid var(--line); }
+#modal-body .mrow:last-child { border-bottom:none; }
+#modal-body .mk { font-size:11px; text-transform:uppercase; letter-spacing:.05em; color:var(--text-muted); }
+#modal-body .mv { color:var(--text-primary); margin-top:1px; white-space:pre-wrap; }
+#modal-mute { margin-top:12px; background:var(--surface-1); color:var(--text-secondary);
+  border:1px solid var(--line); border-radius:6px; font:inherit; font-size:13px; padding:5px 12px; cursor:pointer; }
+#modal-mute:hover { color:var(--text-primary); }
+#focuschip { background:var(--surface-2); border:1px solid #c98500; color:var(--text-primary);
+  border-radius:7px; padding:2px 10px; font-size:13px; display:inline-flex; gap:7px; align-items:center;
+  max-width:420px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+#focuschip button { background:none; border:none; color:var(--text-muted); cursor:pointer; font-size:11px; padding:0; }
+#focuschip button:hover { color:var(--text-primary); }
+#ctxmenu { position:fixed; z-index:200; background:var(--surface-2); border:1px solid var(--line);
+  border-radius:9px; padding:4px; min-width:180px; max-width:280px; box-shadow:0 8px 24px rgba(0,0,0,.5); }
+#ctxmenu[hidden] { display:none; }
+#ctxmenu .cmk { color:var(--text-muted); font-size:11px; padding:3px 10px 5px; border-bottom:1px solid var(--line);
+  margin-bottom:3px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+#ctxmenu button { display:block; width:100%; text-align:left; background:none; border:none;
+  color:var(--text-primary); font:inherit; font-size:13.5px; padding:6px 10px; border-radius:6px; cursor:pointer; }
+#ctxmenu button:hover { background:var(--surface-1); }
+/* ── chat-with-Wed view: fixed 30% left column, terminal mirror ── */
+body.chatview { padding-left:calc(30vw + 20px); }
+#chatside { position:fixed; left:0; top:0; bottom:0; width:30vw; min-width:320px; z-index:60;
+  background:#141413; border-right:1px solid var(--line); display:flex; flex-direction:column;
+  padding:12px 14px; }
+.cs-head { display:flex; align-items:center; gap:10px; padding-bottom:8px; border-bottom:1px solid var(--line); }
+.cs-title { font-family:"SF Mono", Menlo, monospace; font-size:14px; font-weight:700; }
+.cs-live { color:#199e70; font-size:11px; }
+.cs-head button { margin-left:auto; background:var(--surface-2); color:var(--text-muted); border:1px solid var(--line);
+  border-radius:5px; font-size:11px; padding:1px 8px; cursor:pointer; }
+.cs-head button:hover { color:var(--text-primary); }
+.chatlog.term { flex:1; overflow-y:auto; scrollbar-width:thin; font-family:"SF Mono", Menlo, monospace;
+  font-size:12.5px; line-height:1.5; padding:10px 2px; }
+.chatlog.term .msg { border:none; padding:3px 0; }
+.chatlog.term .who { color:var(--series-3); }
+.chatlog.term .msg.kam .who { color:var(--series-1); }
+.chatlog.term .mts { color:var(--text-muted); font-size:.85em; }
+.chatlog.term .mtext { white-space:pre-wrap; word-break:break-word; color:var(--text-primary); }
+.chatinput.term { align-items:center; border-top:1px solid var(--line); padding-top:8px; }
+.cs-prompt { font-family:"SF Mono", Menlo, monospace; color:var(--series-3); font-weight:700; }
+.chatinput.term input { font-family:"SF Mono", Menlo, monospace; font-size:12.5px; background:#1a1a19; }
+@media (max-width:900px) {
+  body.chatview { padding-left:12px; }
+  #chatside { position:static; width:auto; min-width:0; height:50vh; margin-bottom:14px;
+    border:1px solid var(--line); border-radius:10px; }
+}
+@media (max-width:700px) {
+  .tilebox { grid-column:1 / -1 !important; }
+  .topbar h1 { font-size:17px; }
+  body { padding:10px 12px; }
+}
+footer { margin-top:16px; color:var(--text-muted); font-size:12px; }
+footer .ok { color:var(--text-secondary); } footer .bad { color:#e66767; font-weight:600; }
+</style></head><body class="">
+
+<div class="topbar">
+ <h1>Wednesday — Day Dashboard</h1>
+ <span class="sub">Thursday 6 August 2026 · 19:45 AEST</span>
+ <span class="legend"><span class="legchip" data-group="datasec" title="click to hide Datasec everywhere"><span class="dot" style="background:var(--series-1)"></span> Datasec</span>&nbsp; <span class="legchip" data-group="secuura" title="click to hide Secuura everywhere"><span class="dot" style="background:var(--series-2)"></span> Secuura</span>&nbsp; <span class="legchip" data-group="personal" title="click to hide Personal everywhere"><span class="dot" style="background:var(--series-3)"></span> Personal</span>&nbsp; <span class="legchip" data-group="family" title="click to hide Family everywhere"><span class="dot" style="background:var(--series-3)"></span> Family</span></span>
+ 
+ <span class="menu"><button id="burger-btn" title="menu">&#9776;</button>
+ <span id="burger-drop" hidden>
+   <span class="mgroup">
+     <button class="mparent">&#9881; Customise <span class="carat">&#9656;</span></button>
+     <span class="msub">
+       <button id="preset-save-btn">&#128190; Save layout&#8230;</button>
+       <button id="views-btn">&#9734; Load layout</button>
+       <button id="organise-btn">&#9998; Organise (drag tiles)</button>
+       <button id="customise-btn">&#9636; Tile setup</button>
+     </span>
+   </span>
+   <span class="mgroup">
+     <button class="mparent">&#9873; Review <span class="carat">&#9656;</span></button>
+     <span class="msub">
+       <button id="flagged-btn">&#9873; Flagged for Wednesday</button>
+       <button id="acting-btn">&#9679; actioning</button>
+       <button id="archived-btn">&#9634; archived (4)</button>
+     </span>
+   </span>
+   <span class="mgroup">
+     <button class="mparent">&#10530; Full pages <span class="carat">&#9656;</span></button>
+     <span class="msub">
+       <a href="area_board.html">WED board</a>
+       <a href="area_news.html">News</a>
+       <a href="area_family.html">Family</a>
+       <a href="area_datasec.html">Datasec week</a>
+       <a href="area_secuura.html">Secuura week</a>
+     </span>
+   </span>
+   <span class="mgroup">
+     <button class="mparent">&#8635; Data <span class="carat">&#9656;</span></button>
+     <span class="msub">
+       <button id="refresh-btn">&#8635; Refresh now</button>
+       <button id="clearfocus-btn">&#10005; Clear focus</button>
+     </span>
+   </span>
+   <span class="mgroup">
+     <button class="mparent">&#9681; Appearance <span class="carat">&#9656;</span></button>
+     <span class="msub">
+       <button class="themebtn" data-theme-set="dark">&#9789; Dark</button>
+       <button class="themebtn" data-theme-set="light">&#9788; Light &#10003;</button>
+     </span>
+   </span>
+ </span></span>
+</div>
+<div id="acting-panel" hidden><h4>Being actioned</h4><p class="vempty">nothing being actioned right now</p><p class="cpnote" style="margin-top:6px">&#9889; action requested &middot; &#9679; Wednesday actioning &mdash; states are written by Wednesday&#39;s own session, never faked by the dashboard</p></div><div id="flagged-panel" hidden><h4>Flagged for Wednesday</h4><p class="vempty">nothing flagged for Wednesday</p><p class="cpnote" style="margin-top:6px">NB. flagging changes nothing upstream &mdash; no ticket moves and no status changes until Wednesday has seen it. Clear a flag by clicking the &#9873; on the row again.</p></div><div id="archived-panel" hidden><h4>Archived</h4><div class="strow"><span style="color:#199e70" title="done">&#10003;</span><span class="stlabel">separators -&gt; shipped (grid separators, round 2)</span><span class="sts">08-05 16:13</span></div><div class="strow"><span style="color:#199e70" title="done">&#10003;</span><span class="stlabel">named favourite views -&gt; shipped (round 1)</span><span class="sts">08-05 16:13</span></div><div class="strow"><span style="color:#199e70" title="done">&#10003;</span><span class="stlabel">tile colours -&gt; shipped (round 1)</span><span class="sts">08-05 16:13</span></div><div class="strow"><span style="color:#199e70" title="done">&#10003;</span><span class="stlabel">actioned-&gt;archive + topbar buttons -&gt; shipped (round 2)</span><span class="sts">08-05 16:13</span></div></div>
+<div id="views-panel" hidden><h4>Favourite views</h4><div class="vrow"><button class="vapply" data-name="chat with Wed" title="apply this view">chat with Wed</button><button class="vdel" data-name="chat with Wed" title="delete this view">&#10005;</button></div><div class="vrow"><button class="vapply" data-name="Cal Pref Default" title="apply this view">Cal Pref Default</button><button class="vdel" data-name="Cal Pref Default" title="delete this view">&#10005;</button></div><div class="vrow"><button class="vapply" data-name="studioMac" title="apply this view">studioMac</button><button class="vdel" data-name="studioMac" title="delete this view">&#10005;</button></div><div class="vsave"><select id="view-update"><option value="">— update an existing layout —</option><option value="chat with Wed">chat with Wed</option><option value="Cal Pref Default">Cal Pref Default</option><option value="studioMac">studioMac</option></select><button id="view-update-btn">update</button></div><div class="vsave"><input id="view-name" type="text" maxlength="40" placeholder="save as a NEW layout&#8230;"><button id="view-save">save new</button></div><span id="views-msg" class="verr"></span><p class="cpnote" style="margin-top:6px">a view snapshots the whole layout (order, sizes, tints, separators, hidden tiles &amp; sources, chat mode) &middot; max 12 &middot; NB. browser page zoom is a Chrome per-site setting, not part of a view</p></div>
+<div id="customise-panel" hidden>
+ <div class="cpcol"><h4>Tiles</h4><div class="cprow"><label><input type="checkbox" data-kind="tile" value="stats" checked> Overview</label><select class="tintsel" data-tile="stats" title="tile background tint" style="background:#eef3ea"><option value="none">no tint</option><option value="slate" style="background:#eef1f6">slate</option><option value="moss" style="background:#eef3ea" selected>moss</option><option value="plum" style="background:#f4eef5">plum</option><option value="sand" style="background:#f6f2e6">sand</option><option value="teal" style="background:#e9f2f1">teal</option></select><input type="checkbox" class="sepchk" data-tile="stats" title="separator above this tile"><input type="text" class="seplab" data-tile="stats" maxlength="40" placeholder="section label" value=""></div><div class="cprow"><label><input type="checkbox" data-kind="tile" value="calendars" checked> Calendars</label><select class="tintsel" data-tile="calendars" title="tile background tint" style="background:#f4eef5"><option value="none">no tint</option><option value="slate" style="background:#eef1f6">slate</option><option value="moss" style="background:#eef3ea">moss</option><option value="plum" style="background:#f4eef5" selected>plum</option><option value="sand" style="background:#f6f2e6">sand</option><option value="teal" style="background:#e9f2f1">teal</option></select><input type="checkbox" class="sepchk" data-tile="calendars" title="separator above this tile"><input type="text" class="seplab" data-tile="calendars" maxlength="40" placeholder="section label" value=""></div><div class="cprow"><label><input type="checkbox" data-kind="tile" value="flags" checked> Today's flags</label><select class="tintsel" data-tile="flags" title="tile background tint" style="background:#eef3ea"><option value="none">no tint</option><option value="slate" style="background:#eef1f6">slate</option><option value="moss" style="background:#eef3ea" selected>moss</option><option value="plum" style="background:#f4eef5">plum</option><option value="sand" style="background:#f6f2e6">sand</option><option value="teal" style="background:#e9f2f1">teal</option></select><input type="checkbox" class="sepchk" data-tile="flags" title="separator above this tile"><input type="text" class="seplab" data-tile="flags" maxlength="40" placeholder="section label" value=""></div><div class="cprow"><label><input type="checkbox" data-kind="tile" value="family" checked> Family</label><select class="tintsel" data-tile="family" title="tile background tint"><option value="none" selected>no tint</option><option value="slate" style="background:#eef1f6">slate</option><option value="moss" style="background:#eef3ea">moss</option><option value="plum" style="background:#f4eef5">plum</option><option value="sand" style="background:#f6f2e6">sand</option><option value="teal" style="background:#e9f2f1">teal</option></select><input type="checkbox" class="sepchk" data-tile="family" title="separator above this tile"><input type="text" class="seplab" data-tile="family" maxlength="40" placeholder="section label" value=""></div><div class="cprow"><label><input type="checkbox" data-kind="tile" value="board" checked> Coding — WED board</label><select class="tintsel" data-tile="board" title="tile background tint" style="background:#f4eef5"><option value="none">no tint</option><option value="slate" style="background:#eef1f6">slate</option><option value="moss" style="background:#eef3ea">moss</option><option value="plum" style="background:#f4eef5" selected>plum</option><option value="sand" style="background:#f6f2e6">sand</option><option value="teal" style="background:#e9f2f1">teal</option></select><input type="checkbox" class="sepchk" data-tile="board" title="separator above this tile" checked><input type="text" class="seplab" data-tile="board" maxlength="40" placeholder="section label" value=""></div><div class="cprow"><label><input type="checkbox" data-kind="tile" value="chat" checked> Chat with Wednesday</label><select class="tintsel" data-tile="chat" title="tile background tint"><option value="none" selected>no tint</option><option value="slate" style="background:#eef1f6">slate</option><option value="moss" style="background:#eef3ea">moss</option><option value="plum" style="background:#f4eef5">plum</option><option value="sand" style="background:#f6f2e6">sand</option><option value="teal" style="background:#e9f2f1">teal</option></select><input type="checkbox" class="sepchk" data-tile="chat" title="separator above this tile" checked><input type="text" class="seplab" data-tile="chat" maxlength="40" placeholder="section label" value=""></div><div class="cprow"><label><input type="checkbox" data-kind="tile" value="tickets" checked> Tickets by Project</label><select class="tintsel" data-tile="tickets" title="tile background tint"><option value="none" selected>no tint</option><option value="slate" style="background:#eef1f6">slate</option><option value="moss" style="background:#eef3ea">moss</option><option value="plum" style="background:#f4eef5">plum</option><option value="sand" style="background:#f6f2e6">sand</option><option value="teal" style="background:#e9f2f1">teal</option></select><input type="checkbox" class="sepchk" data-tile="tickets" title="separator above this tile"><input type="text" class="seplab" data-tile="tickets" maxlength="40" placeholder="section label" value=""></div><div class="cprow"><label><input type="checkbox" data-kind="tile" value="email" checked> Email flags</label><select class="tintsel" data-tile="email" title="tile background tint"><option value="none" selected>no tint</option><option value="slate" style="background:#eef1f6">slate</option><option value="moss" style="background:#eef3ea">moss</option><option value="plum" style="background:#f4eef5">plum</option><option value="sand" style="background:#f6f2e6">sand</option><option value="teal" style="background:#e9f2f1">teal</option></select><input type="checkbox" class="sepchk" data-tile="email" title="separator above this tile"><input type="text" class="seplab" data-tile="email" maxlength="40" placeholder="section label" value=""></div><div class="cprow"><label><input type="checkbox" data-kind="tile" value="news" checked> News</label><select class="tintsel" data-tile="news" title="tile background tint"><option value="none" selected>no tint</option><option value="slate" style="background:#eef1f6">slate</option><option value="moss" style="background:#eef3ea">moss</option><option value="plum" style="background:#f4eef5">plum</option><option value="sand" style="background:#f6f2e6">sand</option><option value="teal" style="background:#e9f2f1">teal</option></select><input type="checkbox" class="sepchk" data-tile="news" title="separator above this tile" checked><input type="text" class="seplab" data-tile="news" maxlength="40" placeholder="section label" value="World &amp; News"></div><div class="cprow"><label><input type="checkbox" data-kind="tile" value="parkinglot" checked> Parking lot</label><select class="tintsel" data-tile="parkinglot" title="tile background tint"><option value="none" selected>no tint</option><option value="slate" style="background:#eef1f6">slate</option><option value="moss" style="background:#eef3ea">moss</option><option value="plum" style="background:#f4eef5">plum</option><option value="sand" style="background:#f6f2e6">sand</option><option value="teal" style="background:#e9f2f1">teal</option></select><input type="checkbox" class="sepchk" data-tile="parkinglot" title="separator above this tile"><input type="text" class="seplab" data-tile="parkinglot" maxlength="40" placeholder="section label" value=""></div></div>
+ <div class="cpcol"><h4>Sources</h4><label><input type="checkbox" data-kind="group" value="datasec" checked> Datasec</label><label><input type="checkbox" data-kind="group" value="secuura" checked> Secuura</label><label><input type="checkbox" data-kind="group" value="personal" checked> Personal</label><label><input type="checkbox" data-kind="group" value="family" checked> Family</label></div>
+ <div class="cpcol cpnote">Source toggles filter every tile at once (calendars, counts, family, next-event). Tints give a tile a subtle background shade. Changes apply on save.<br><button id="customise-save">save</button></div>
+</div>
+<div id="grid"><div class="grid">
+<section class="tilebox" data-tile="flags" data-w="3" data-h="4" style="font-size:1.0em;background:#eef3ea"><div class="tilehead"><span class="grip" title="drag to move">&#8942;&#8942;</span><h2>Today's flags</h2><span class="sizer"><button data-size="-" title="smaller text">A&#8722;</button><button data-size="+" title="bigger text">A+</button><button data-dim="w-" title="narrower">&#8676;</button><button data-dim="w+" title="wider">&#8677;</button><button data-dim="h-" title="shorter (0 = full height)">&#8593;</button><button data-dim="h+" title="taller / adds scroller">&#8595;</button></span></div><div class="tilebody"><ul class='events plain'><li><span class="flagdue">2026-08-06</span><span class="ev">Peter consent-by-silence window closes EOD (KS-480) — record after, not before</span></li><li><span class="flagdue">2026-09-04</span><span class="ev">CypherKey Twilio token rotation (CPKEY-165 / WED-48)</span></li><li><span class="flagdue">watch</span><span class="ev">Datasec admin consent verdict email (calendar feed goes live on arrival)</span></li></ul></div></section>
+<section class="tilebox" data-tile="stats" data-w="2" data-h="4" style="font-size:0.7em;background:#eef3ea"><div class="tilehead"><span class="grip" title="drag to move">&#8942;&#8942;</span><h2>Overview</h2><span class="sizer"><button data-size="-" title="smaller text">A&#8722;</button><button data-size="+" title="bigger text">A+</button><button data-dim="w-" title="narrower">&#8676;</button><button data-dim="w+" title="wider">&#8677;</button><button data-dim="h-" title="shorter (0 = full height)">&#8593;</button><button data-dim="h+" title="taller / adds scroller">&#8595;</button></span></div><div class="tilebody"><div class="tiles">
+ <div class="tile"><div class="v">9</div><div class="k">events today</div></div>
+ <div class="tile"><div class="v">5</div><div class="k">WED in progress</div></div>
+ <div class="tile"><div class="v">3</div><div class="k">flags watched</div></div>
+ <div class="tile wide"><div class="v small">20:00 Secuura and DSS (Zoom)</div><div class="k">next timed event</div></div>
+</div></div></section>
+<section class="tilebox" data-tile="parkinglot" data-w="3" data-h="4" style="font-size:1.0em"><div class="tilehead"><span class="grip" title="drag to move">&#8942;&#8942;</span><h2>Parking lot</h2><span class="sizer"><button data-size="-" title="smaller text">A&#8722;</button><button data-size="+" title="bigger text">A+</button><button data-dim="w-" title="narrower">&#8676;</button><button data-dim="w+" title="wider">&#8677;</button><button data-dim="h-" title="shorter (0 = full height)">&#8593;</button><button data-dim="h+" title="taller / adds scroller">&#8595;</button></span></div><div class="tilebody"><ul class='events plain'><li class="evrow parkrow" data-detail="{&quot;fields&quot;: [[&quot;What&quot;, &quot;AU privacy regulation changing Dec 2026 — agent/client-data reporting&quot;], [&quot;One-liner&quot;, &quot;Australian privacy regulation changes in December; organisations will need to report when AI agents are interacting with client data; Microsoft has already added this capability to Purview.&quot;], [&quot;Mode&quot;, &quot;Wednesday researches it&quot;], [&quot;Status&quot;, &quot;open&quot;], [&quot;Added&quot;, &quot;2026-08-05 · Kam, in-session (parking lot founding item)&quot;], [&quot;Full note&quot;, &quot;# AU privacy regulation changing Dec 2026 — agent/client-data reporting\n\nOne-liner: Australian privacy regulation changes in December; organisations\nwill need to report when AI agents are interacting with client data;\nMicrosoft has already added this capability to Purview.\n\nFacets:\n1. What exactly changes in the Dec reform (which schedule/act, thresholds).\n2. The agent-interaction reporting obligation — scope, who must report, when.\n3. Microsoft Purview&#x27;s new coverage — what it detects/reports, gaps.\n\nWhy it matters here: directly touches Datasec (compliance product angle?),\nSecuura (agents on Platform K touch client documents), and Wednesday&#x27;s own\nfleet (agents interacting with client data is literally our architecture).\n\nResearch (run 2026-08-05, session 2 — full report w/ sources:\n[[2026-08-05_au-privacy-research-report]]; first live run of the park-vs-research flow):\n\n**Verdict on the one-liner: half right.**\n- **TRUE — the date and the reform.** 10 December 2026: APPs 1.7–1.9 (from the\n  *Privacy and Other Legislation Amendment Act 2024*, Sch 1 Pt 15) commence,\n  plus the OAIC Children&#x27;s Online Privacy Code.\n- **FALSE — the \&quot;report when AI agents touch client data\&quot; framing.** There is\n  NO reporting/logging obligation to anyone. The real duty is a\n  **privacy-policy disclosure** of automated decision-making (any computer\n  program, not just AI) that uses personal information and could significantly\n  affect an individual&#x27;s rights/interests. APP entities only (&gt;A$3M turnover;\n  small-business exemption survives — its removal is tranche 2: no bill, no\n  date). Penalties via s 13K civil-penalty tier. OAIC guidance ~Sep 2026.\n- **PARTLY TRUE — Purview.** DSPM AI Observability + Insider Risk Management\n  for agents went GA mid-June–end-July 2026 (needs M365 E7 / Agent 365); the\n  unified audit log captures agent prompts/responses. But it&#x27;s generic AI\n  governance, Microsoft-ecosystem-deep only, and its compliance assessments\n  target EU AI Act/NIST/ISO — not the Australian rule.\n- Adjacent: statutory privacy tort live since 10 Jun 2025 (applies at ANY\n  size); mandatory AI guardrails shelved Dec 2025; \&quot;Australian Standards for\n  AI\&quot; announced 15 Jul 2026 for early 2027 — announced, not law.\n\n**Implications:**\n- **Datasec — real product angle, deadline-driven.** ADM/AI discovery audits,\n  privacy-policy uplift, Purview-for-agents deployments before 10 Dec 2026;\n  demand spike expected after the OAIC guidance lands (~Sep). Datasec must\n  also self-check its own tools (lead scoring, NexusAI flows) against the\n  three-limb test.\n- **Secuura — client-facing asset, not a vendor duty.** The obligation falls\n  on Secuura&#x27;s CLIENTS; OAIC expects entities to oversee third-party ADM →\n  a disclosure pack (what Platform K decides vs assists, what personal data\n  its agents touch) becomes a sales asset. Secuura&#x27;s own policy needs the\n  update only if it&#x27;s an APP entity itself.\n- **Wednesday&#x27;s fleet — not caught.** Internal coding/ops agents make no\n  rights-affecting decisions about individuals; small-business exemption\n  likely applies anyway. Real exposures: the statutory tort (any size) and\n  client contract flow-down. The fleet&#x27;s agent inventory + logging discipline\n  = cheap insurance, not a current legal duty.\n\n**Proposed next step (Kam&#x27;s call):** park until ~Sep 2026 (OAIC guidance),\nTHEN decide whether Datasec productises. If he wants the Datasec angle\nexplored sooner, promote to a ticket on their board via their agent.&quot;]], &quot;park&quot;: {&quot;file&quot;: &quot;2026-08-05_au-privacy-reform-agent-reporting.md&quot;, &quot;title&quot;: &quot;AU privacy regulation changing Dec 2026 — agent/client-data reporting&quot;, &quot;status&quot;: &quot;open&quot;}}" title="click for details"><span class="pmode research">research</span><span class="ev">AU privacy regulation changing Dec 2026 — agent/client-data reporting</span><span class="penr" title="research notes attached">&#9670;</span></li></ul><div class='addbox parkadd'><input id='park-text' type='text' maxlength='500' placeholder='park an idea&#8230; (one-liner)'><input id='park-src' type='text' maxlength='200' placeholder='source (optional)'></div><div class='addbox parkchoice'><button id='park-add-p' title='save it for later, no action'>just park it</button><button id='park-add-r' title='Wednesday researches it next session'>Wednesday researches it</button><span id='park-msg'></span></div><p class='note'>NB. brain files in 0_Brain/parkinglot — &#9670; = research notes attached · click a row to read / promote / drop</p></div></section>
+</div><div class="gridsep" data-before="chat"><span></span></div><div class="grid">
+<section class="tilebox" data-tile="chat" data-w="2" data-h="15" style="font-size:1.0em"><div class="tilehead"><span class="grip" title="drag to move">&#8942;&#8942;</span><h2>Chat with Wednesday</h2><span class="sizer"><button data-size="-" title="smaller text">A&#8722;</button><button data-size="+" title="bigger text">A+</button><button data-dim="w-" title="narrower">&#8676;</button><button data-dim="w+" title="wider">&#8677;</button><button data-dim="h-" title="shorter (0 = full height)">&#8593;</button><button data-dim="h+" title="taller / adds scroller">&#8595;</button></span></div><div class="tilebody"><div class="scrollpart"><button id="chat-mode" class="chatmode" data-mode="sidebar" title="open the chat-with-Wed view (left column, live)">&#9634; chat with Wed</button><div class="chatlog"><div class="msg wednesday"><span class="who">Wednesday</span><span class="mts">16:02</span><div class="mtext">Seen and folded in — the build agent is on it right now: grid separators, the received/actioning marks (honest ticks: they flip when I actually read the item, only &#x27;action now&#x27; is instant), plus your two new topbar buttons — &#x27;actioning&#x27; and &#x27;archived&#x27; — with actioned items flowing into archived automatically. Views and tile colours already shipped: try the ☆ views button, your &#x27;chat with Wed&#x27; view is saved there.</div></div><div class="msg wednesday"><span class="who">Wednesday</span><span class="mts">16:15</span><div class="mtext">Round 2 shipped and verified — separators, the honest ticks (your four asks from today already show green ✓ done), &#x27;action now&#x27; in the right-click, and the actioning/archived buttons up top. I left two demo separators (Work, World &amp; News) — remove or rename them in customise. Wrapping for the day now; the board, this chat, and the archived panel will be exactly as you left them tomorrow. Good night, Kam.</div></div></div></div><div class="chatinput"><input id="chat-text" type="text" maxlength="2000" placeholder="message Wednesday…"><button id="chat-send">send</button></div><p class="note">NB. async channel — read at every boot &amp; check-in</p></div></section>
+<section class="tilebox" data-tile="calendars" data-w="3" data-h="15" style="font-size:1.0em;background:#f4eef5"><div class="tilehead"><span class="grip" title="drag to move">&#8942;&#8942;</span><h2>Calendars</h2><span class="sizer"><button data-size="-" title="smaller text">A&#8722;</button><button data-size="+" title="bigger text">A+</button><button data-dim="w-" title="narrower">&#8676;</button><button data-dim="w+" title="wider">&#8677;</button><button data-dim="h-" title="shorter (0 = full height)">&#8593;</button><button data-dim="h+" title="taller / adds scroller">&#8595;</button></span></div><div class="tilebody"><div class="tgbar"><button class="tgchip" data-tile="calendars" data-group="datasec" title="hide Datasec in this tile only">Datasec</button><button class="tgchip" data-tile="calendars" data-group="secuura" title="hide Secuura in this tile only">Secuura</button><button class="tgchip" data-tile="calendars" data-group="personal" title="hide Personal in this tile only">Personal</button><button class="tgchip" data-tile="calendars" data-group="family" title="hide Family in this tile only">Family</button></div>
+<h3>Today <span class='count'>9</span></h3><ul class='events'><li class="evrow" data-detail="{&quot;fields&quot;: [[&quot;What&quot;, &quot;Olive and Lola’s birthday (2024)&quot;], [&quot;When&quot;, &quot;Thursday 06 August (all-day)&quot;], [&quot;Source&quot;, &quot;Personal · Family&quot;]], &quot;key&quot;: &quot;personal|Olive and Lola’s birthday (2024)&quot;}" data-key="personal|Olive and Lola’s birthday (2024)" title="click for details"><span class="dot" style="background:var(--series-3)"></span><span class="src">Personal</span><span class="time">all-day</span><span class="ev">Olive and Lola’s birthday (2024)</span> <span class="cal">Family</span></li>
+<li class="evrow muted" data-detail="{&quot;fields&quot;: [[&quot;What&quot;, &quot;Alice: HSIE Cycle Test (Maps &amp; Directions)&quot;], [&quot;When&quot;, &quot;Thursday 06 August, 09:00&quot;], [&quot;Source&quot;, &quot;Personal · Family&quot;]], &quot;key&quot;: &quot;personal|Alice: HSIE Cycle Test (Maps &amp; Directions)&quot;}" data-key="personal|Alice: HSIE Cycle Test (Maps &amp; Directions)" title="click for details"><span class="dot" style="background:var(--series-3)"></span><span class="src">Personal</span><span class="time">09:00</span><span class="ev">Alice: HSIE Cycle Test (Maps &amp; Directions)</span> <span class="cal">Family</span></li>
+<li class="evrow" data-detail="{&quot;fields&quot;: [[&quot;What&quot;, &quot;Pilates&quot;], [&quot;When&quot;, &quot;Thursday 06 August, 09:30&quot;], [&quot;Source&quot;, &quot;Personal · Family&quot;]], &quot;key&quot;: &quot;personal|Pilates&quot;}" data-key="personal|Pilates" title="click for details"><span class="dot" style="background:var(--series-3)"></span><span class="src">Personal</span><span class="time">09:30</span><span class="ev">Pilates</span> <span class="cal">Family</span></li>
+<li class="evrow" data-detail="{&quot;fields&quot;: [[&quot;What&quot;, &quot;Commercialisation readiness (Zoom)&quot;], [&quot;When&quot;, &quot;Thursday 06 August, 12:00&quot;], [&quot;Source&quot;, &quot;Secuura&quot;]], &quot;key&quot;: &quot;secuura|Commercialisation readiness (Zoom)&quot;}" data-key="secuura|Commercialisation readiness (Zoom)" title="click for details"><span class="dot" style="background:var(--series-2)"></span><span class="src">Secuura</span><span class="time">12:00</span><span class="ev">Commercialisation readiness (Zoom)</span></li>
+<li class="evrow" data-detail="{&quot;fields&quot;: [[&quot;What&quot;, &quot;Alice dance&quot;], [&quot;When&quot;, &quot;Thursday 06 August, 15:25&quot;], [&quot;Source&quot;, &quot;Personal · Family&quot;]], &quot;key&quot;: &quot;personal|Alice dance&quot;}" data-key="personal|Alice dance" title="click for details"><span class="dot" style="background:var(--series-3)"></span><span class="src">Personal</span><span class="time">15:25</span><span class="ev">Alice dance</span> <span class="cal">Family</span></li>
+<li class="evrow" data-detail="{&quot;fields&quot;: [[&quot;What&quot;, &quot;Harriet hip hop&quot;], [&quot;When&quot;, &quot;Thursday 06 August, 15:25&quot;], [&quot;Source&quot;, &quot;Personal · Family&quot;]], &quot;key&quot;: &quot;personal|Harriet hip hop&quot;}" data-key="personal|Harriet hip hop" title="click for details"><span class="dot" style="background:var(--series-3)"></span><span class="src">Personal</span><span class="time">15:25</span><span class="ev">Harriet hip hop</span> <span class="cal">Family</span></li>
+<li class="evrow" data-detail="{&quot;fields&quot;: [[&quot;What&quot;, &quot;Obeden-LinkedIn&quot;], [&quot;When&quot;, &quot;Thursday 06 August, 17:30&quot;], [&quot;Source&quot;, &quot;Secuura&quot;]], &quot;key&quot;: &quot;secuura|Obeden-LinkedIn&quot;}" data-key="secuura|Obeden-LinkedIn" title="click for details"><span class="dot" style="background:var(--series-2)"></span><span class="src">Secuura</span><span class="time">17:30</span><span class="ev">Obeden-LinkedIn</span></li>
+<li class="nowline"><span>now · 19:45</span></li>
+<li class="evrow" data-detail="{&quot;fields&quot;: [[&quot;What&quot;, &quot;Secuura and DSS (Zoom)&quot;], [&quot;When&quot;, &quot;Thursday 06 August, 20:00&quot;], [&quot;Source&quot;, &quot;Secuura&quot;]], &quot;key&quot;: &quot;secuura|Secuura and DSS (Zoom)&quot;}" data-key="secuura|Secuura and DSS (Zoom)" title="click for details"><span class="dot" style="background:var(--series-2)"></span><span class="src">Secuura</span><span class="time">20:00</span><span class="ev">Secuura and DSS (Zoom)</span></li>
+<li class="evrow" data-detail="{&quot;fields&quot;: [[&quot;What&quot;, &quot;Blocker for DSS&quot;], [&quot;When&quot;, &quot;Thursday 06 August, 20:00&quot;], [&quot;Source&quot;, &quot;Secuura&quot;]], &quot;key&quot;: &quot;secuura|Blocker for DSS&quot;}" data-key="secuura|Blocker for DSS" title="click for details"><span class="dot" style="background:var(--series-2)"></span><span class="src">Secuura</span><span class="time">20:00</span><span class="ev">Blocker for DSS</span></li></ul>
+<h3>Tomorrow <span class='count'>5</span></h3><ul class='events'><li class="evrow" data-detail="{&quot;fields&quot;: [[&quot;What&quot;, &quot;Alice: Computers Assessment 1 due - Newspaper Article (Canvas upload)&quot;], [&quot;When&quot;, &quot;Friday 07 August (all-day)&quot;], [&quot;Source&quot;, &quot;Personal · Family&quot;]], &quot;key&quot;: &quot;personal|Alice: Computers Assessment 1 due - Newspaper Article (Canvas upload)&quot;}" data-key="personal|Alice: Computers Assessment 1 due - Newspaper Article (Canvas upload)" title="click for details"><span class="dot" style="background:var(--series-3)"></span><span class="src">Personal</span><span class="time">all-day</span><span class="ev">Alice: Computers Assessment 1 due - Newspaper Article (Canvas upload)</span> <span class="cal">Family</span></li>
+<li class="evrow muted" data-detail="{&quot;fields&quot;: [[&quot;What&quot;, &quot;Steve Travel to Europe &amp; USA (slow response)&quot;], [&quot;When&quot;, &quot;Friday 07 August (all-day)&quot;], [&quot;Source&quot;, &quot;Secuura&quot;]], &quot;key&quot;: &quot;secuura|Steve Travel to Europe &amp; USA (slow response)&quot;}" data-key="secuura|Steve Travel to Europe &amp; USA (slow response)" title="click for details"><span class="dot" style="background:var(--series-2)"></span><span class="src">Secuura</span><span class="time">all-day</span><span class="ev">Steve Travel to Europe &amp; USA (slow response)</span></li>
+<li class="evrow" data-detail="{&quot;fields&quot;: [[&quot;What&quot;, &quot;FW: Security Services Playbook Scoping Touch-base.&quot;], [&quot;When&quot;, &quot;Friday 07 August, 07:35&quot;], [&quot;Source&quot;, &quot;Datasec&quot;], [&quot;Where&quot;, &quot;Microsoft Teams Meeting&quot;]], &quot;key&quot;: &quot;datasec|FW: Security Services Playbook Scoping Touch-base.&quot;}" data-key="datasec|FW: Security Services Playbook Scoping Touch-base." title="click for details"><span class="dot" style="background:var(--series-1)"></span><span class="src">Datasec</span><span class="time">07:35</span><span class="ev">FW: Security Services Playbook Scoping Touch-base.</span></li>
+<li class="evrow" data-detail="{&quot;fields&quot;: [[&quot;What&quot;, &quot;Comms workshop &quot;], [&quot;When&quot;, &quot;Friday 07 August, 10:00&quot;], [&quot;Source&quot;, &quot;Personal · Family&quot;]], &quot;key&quot;: &quot;personal|Comms workshop &quot;}" data-key="personal|Comms workshop " title="click for details"><span class="dot" style="background:var(--series-3)"></span><span class="src">Personal</span><span class="time">10:00</span><span class="ev">Comms workshop </span> <span class="cal">Family</span></li>
+<li class="evrow" data-detail="{&quot;fields&quot;: [[&quot;What&quot;, &quot;Harriet swimming &quot;], [&quot;When&quot;, &quot;Friday 07 August, 17:00&quot;], [&quot;Source&quot;, &quot;Personal · Family&quot;]], &quot;key&quot;: &quot;personal|Harriet swimming &quot;}" data-key="personal|Harriet swimming " title="click for details"><span class="dot" style="background:var(--series-3)"></span><span class="src">Personal</span><span class="time">17:00</span><span class="ev">Harriet swimming </span> <span class="cal">Family</span></li></ul>
+<h3>Week by company <span class='count'>click to expand</span></h3>
+<details class='srcweek'><summary><span class='dot' style='background:var(--series-1)'></span>Datasec <span class='count'>6</span><a class='headlink' href='area_datasec.html'>full page &#10530;</a></summary><ul class='events'><li class="evrow" data-detail="{&quot;fields&quot;: [[&quot;What&quot;, &quot;FW: Security Services Playbook Scoping Touch-base.&quot;], [&quot;When&quot;, &quot;Friday 07 August, 07:35&quot;], [&quot;Source&quot;, &quot;Datasec&quot;], [&quot;Where&quot;, &quot;Microsoft Teams Meeting&quot;]], &quot;key&quot;: &quot;datasec|FW: Security Services Playbook Scoping Touch-base.&quot;}" data-key="datasec|FW: Security Services Playbook Scoping Touch-base." title="click for details"><span class="dot" style="background:var(--series-1)"></span><span class="src">Datasec</span><span class="time">Fri 07 07:35</span><span class="ev">FW: Security Services Playbook Scoping Touch-base.</span></li>
+<li class="evrow" data-detail="{&quot;fields&quot;: [[&quot;What&quot;, &quot;Datasec and MS Catch-Up&quot;], [&quot;When&quot;, &quot;Monday 10 August, 10:00&quot;], [&quot;Source&quot;, &quot;Datasec&quot;], [&quot;Where&quot;, &quot;Microsoft Teams Meeting&quot;]], &quot;key&quot;: &quot;datasec|Datasec and MS Catch-Up&quot;}" data-key="datasec|Datasec and MS Catch-Up" title="click for details"><span class="dot" style="background:var(--series-1)"></span><span class="src">Datasec</span><span class="time">Mon 10 10:00</span><span class="ev">Datasec and MS Catch-Up</span></li>
+<li class="evrow" data-detail="{&quot;fields&quot;: [[&quot;What&quot;, &quot;Sync on Datasec Vision and Quote Tooling&quot;], [&quot;When&quot;, &quot;Monday 10 August, 15:00&quot;], [&quot;Source&quot;, &quot;Datasec&quot;], [&quot;Where&quot;, &quot;Microsoft Teams Meeting&quot;]], &quot;key&quot;: &quot;datasec|Sync on Datasec Vision and Quote Tooling&quot;}" data-key="datasec|Sync on Datasec Vision and Quote Tooling" title="click for details"><span class="dot" style="background:var(--series-1)"></span><span class="src">Datasec</span><span class="time">Mon 10 15:00</span><span class="ev">Sync on Datasec Vision and Quote Tooling</span></li>
+<li class="evrow" data-detail="{&quot;fields&quot;: [[&quot;What&quot;, &quot;Sales Meeting&quot;], [&quot;When&quot;, &quot;Tuesday 11 August, 10:00&quot;], [&quot;Source&quot;, &quot;Datasec&quot;], [&quot;Where&quot;, &quot;Microsoft Teams Meeting&quot;]], &quot;key&quot;: &quot;datasec|Sales Meeting&quot;}" data-key="datasec|Sales Meeting" title="click for details"><span class="dot" style="background:var(--series-1)"></span><span class="src">Datasec</span><span class="time">Tue 11 10:00</span><span class="ev">Sales Meeting</span></li>
+<li class="evrow" data-detail="{&quot;fields&quot;: [[&quot;What&quot;, &quot;AI discussion&quot;], [&quot;When&quot;, &quot;Tuesday 11 August, 12:00&quot;], [&quot;Source&quot;, &quot;Datasec&quot;], [&quot;Where&quot;, &quot;Microsoft Teams Meeting&quot;]], &quot;key&quot;: &quot;datasec|AI discussion&quot;}" data-key="datasec|AI discussion" title="click for details"><span class="dot" style="background:var(--series-1)"></span><span class="src">Datasec</span><span class="time">Tue 11 12:00</span><span class="ev">AI discussion</span></li>
+<li class="evrow" data-detail="{&quot;fields&quot;: [[&quot;What&quot;, &quot;Pilates - KK&quot;], [&quot;When&quot;, &quot;Thursday 13 August, 09:30&quot;], [&quot;Source&quot;, &quot;Datasec&quot;]], &quot;key&quot;: &quot;datasec|Pilates - KK&quot;}" data-key="datasec|Pilates - KK" title="click for details"><span class="dot" style="background:var(--series-1)"></span><span class="src">Datasec</span><span class="time">Thu 13 09:30</span><span class="ev">Pilates - KK</span></li></ul></details>
+<details class='srcweek'><summary><span class='dot' style='background:var(--series-2)'></span>Secuura <span class='count'>18</span><a class='headlink' href='area_secuura.html'>full page &#10530;</a></summary><ul class='events'><li class="evrow" data-detail="{&quot;fields&quot;: [[&quot;What&quot;, &quot;Commercialisation readiness (Zoom)&quot;], [&quot;When&quot;, &quot;Thursday 06 August, 12:00&quot;], [&quot;Source&quot;, &quot;Secuura&quot;]], &quot;key&quot;: &quot;secuura|Commercialisation readiness (Zoom)&quot;}" data-key="secuura|Commercialisation readiness (Zoom)" title="click for details"><span class="dot" style="background:var(--series-2)"></span><span class="src">Secuura</span><span class="time">Thu 06 12:00</span><span class="ev">Commercialisation readiness (Zoom)</span></li>
+<li class="evrow" data-detail="{&quot;fields&quot;: [[&quot;What&quot;, &quot;Obeden-LinkedIn&quot;], [&quot;When&quot;, &quot;Thursday 06 August, 17:30&quot;], [&quot;Source&quot;, &quot;Secuura&quot;]], &quot;key&quot;: &quot;secuura|Obeden-LinkedIn&quot;}" data-key="secuura|Obeden-LinkedIn" title="click for details"><span class="dot" style="background:var(--series-2)"></span><span class="src">Secuura</span><span class="time">Thu 06 17:30</span><span class="ev">Obeden-LinkedIn</span></li>
+<li class="evrow" data-detail="{&quot;fields&quot;: [[&quot;What&quot;, &quot;Secuura and DSS (Zoom)&quot;], [&quot;When&quot;, &quot;Thursday 06 August, 20:00&quot;], [&quot;Source&quot;, &quot;Secuura&quot;]], &quot;key&quot;: &quot;secuura|Secuura and DSS (Zoom)&quot;}" data-key="secuura|Secuura and DSS (Zoom)" title="click for details"><span class="dot" style="background:var(--series-2)"></span><span class="src">Secuura</span><span class="time">Thu 06 20:00</span><span class="ev">Secuura and DSS (Zoom)</span></li>
+<li class="evrow" data-detail="{&quot;fields&quot;: [[&quot;What&quot;, &quot;Blocker for DSS&quot;], [&quot;When&quot;, &quot;Thursday 06 August, 20:00&quot;], [&quot;Source&quot;, &quot;Secuura&quot;]], &quot;key&quot;: &quot;secuura|Blocker for DSS&quot;}" data-key="secuura|Blocker for DSS" title="click for details"><span class="dot" style="background:var(--series-2)"></span><span class="src">Secuura</span><span class="time">Thu 06 20:00</span><span class="ev">Blocker for DSS</span></li>
+<li class="evrow muted" data-detail="{&quot;fields&quot;: [[&quot;What&quot;, &quot;Steve Travel to Europe &amp; USA (slow response)&quot;], [&quot;When&quot;, &quot;Fri 07–Thu 13 · all-day, 7 days&quot;], [&quot;Source&quot;, &quot;Secuura&quot;]], &quot;key&quot;: &quot;secuura|Steve Travel to Europe &amp; USA (slow response)&quot;}" data-key="secuura|Steve Travel to Europe &amp; USA (slow response)" title="click for details"><span class="dot" style="background:var(--series-2)"></span><span class="src">Secuura</span><span class="time">Fri 07–Thu 13</span><span class="ev">Steve Travel to Europe &amp; USA (slow response) <span class="cal">&times;7 days</span></span></li>
+<li class="evrow" data-detail="{&quot;fields&quot;: [[&quot;What&quot;, &quot;Blocker for Plan B time with Simplicytas&quot;], [&quot;When&quot;, &quot;Monday 10 August, 09:00&quot;], [&quot;Source&quot;, &quot;Secuura&quot;]], &quot;key&quot;: &quot;secuura|Blocker for Plan B time with Simplicytas&quot;}" data-key="secuura|Blocker for Plan B time with Simplicytas" title="click for details"><span class="dot" style="background:var(--series-2)"></span><span class="src">Secuura</span><span class="time">Mon 10 09:00</span><span class="ev">Blocker for Plan B time with Simplicytas</span></li>
+<li class="evrow" data-detail="{&quot;fields&quot;: [[&quot;What&quot;, &quot;Secuura and Simplicytas (Zoom)&quot;], [&quot;When&quot;, &quot;Monday 10 August, 09:00&quot;], [&quot;Source&quot;, &quot;Secuura&quot;]], &quot;key&quot;: &quot;secuura|Secuura and Simplicytas (Zoom)&quot;}" data-key="secuura|Secuura and Simplicytas (Zoom)" title="click for details"><span class="dot" style="background:var(--series-2)"></span><span class="src">Secuura</span><span class="time">Mon 10 09:00</span><span class="ev">Secuura and Simplicytas (Zoom)</span></li>
+<li class="evrow" data-detail="{&quot;fields&quot;: [[&quot;What&quot;, &quot;Technical Weekly Catch up&quot;], [&quot;When&quot;, &quot;Monday 10 August, 11:30&quot;], [&quot;Source&quot;, &quot;Secuura&quot;]], &quot;key&quot;: &quot;secuura|Technical Weekly Catch up&quot;}" data-key="secuura|Technical Weekly Catch up" title="click for details"><span class="dot" style="background:var(--series-2)"></span><span class="src">Secuura</span><span class="time">Mon 10 11:30</span><span class="ev">Technical Weekly Catch up</span></li>
+<li class="evrow" data-detail="{&quot;fields&quot;: [[&quot;What&quot;, &quot;Phil and Kamil (Zoom)&quot;], [&quot;When&quot;, &quot;Tuesday 11 August, 12:00&quot;], [&quot;Source&quot;, &quot;Secuura&quot;]], &quot;key&quot;: &quot;secuura|Phil and Kamil (Zoom)&quot;}" data-key="secuura|Phil and Kamil (Zoom)" title="click for details"><span class="dot" style="background:var(--series-2)"></span><span class="src">Secuura</span><span class="time">Tue 11 12:00</span><span class="ev">Phil and Kamil (Zoom)</span></li>
+<li class="evrow" data-detail="{&quot;fields&quot;: [[&quot;What&quot;, &quot;Obeden-LinkedIn&quot;], [&quot;When&quot;, &quot;Tuesday 11 August, 17:30&quot;], [&quot;Source&quot;, &quot;Secuura&quot;]], &quot;key&quot;: &quot;secuura|Obeden-LinkedIn&quot;}" data-key="secuura|Obeden-LinkedIn" title="click for details"><span class="dot" style="background:var(--series-2)"></span><span class="src">Secuura</span><span class="time">Tue 11 17:30</span><span class="ev">Obeden-LinkedIn</span></li>
+<li class="evrow" data-detail="{&quot;fields&quot;: [[&quot;What&quot;, &quot;Commercialisation readiness (Zoom)&quot;], [&quot;When&quot;, &quot;Wednesday 12 August, 12:00&quot;], [&quot;Source&quot;, &quot;Secuura&quot;]], &quot;key&quot;: &quot;secuura|Commercialisation readiness (Zoom)&quot;}" data-key="secuura|Commercialisation readiness (Zoom)" title="click for details"><span class="dot" style="background:var(--series-2)"></span><span class="src">Secuura</span><span class="time">Wed 12 12:00</span><span class="ev">Commercialisation readiness (Zoom)</span></li>
+<li class="evrow" data-detail="{&quot;fields&quot;: [[&quot;What&quot;, &quot;Obeden-LinkedIn&quot;], [&quot;When&quot;, &quot;Thursday 13 August, 17:30&quot;], [&quot;Source&quot;, &quot;Secuura&quot;]], &quot;key&quot;: &quot;secuura|Obeden-LinkedIn&quot;}" data-key="secuura|Obeden-LinkedIn" title="click for details"><span class="dot" style="background:var(--series-2)"></span><span class="src">Secuura</span><span class="time">Thu 13 17:30</span><span class="ev">Obeden-LinkedIn</span></li></ul></details>
+<details class='srcweek'><summary><span class='dot' style='background:var(--series-3)'></span>Personal <span class='count'>26</span><a class='headlink' href='area_personal.html'>full page &#10530;</a></summary><ul class='events'><li class="evrow" data-detail="{&quot;fields&quot;: [[&quot;What&quot;, &quot;Olive and Lola’s birthday (2024)&quot;], [&quot;When&quot;, &quot;Thursday 06 August (all-day)&quot;], [&quot;Source&quot;, &quot;Personal · Family&quot;]], &quot;key&quot;: &quot;personal|Olive and Lola’s birthday (2024)&quot;}" data-key="personal|Olive and Lola’s birthday (2024)" title="click for details"><span class="dot" style="background:var(--series-3)"></span><span class="src">Personal</span><span class="time">Thu 06</span><span class="ev">Olive and Lola’s birthday (2024)</span> <span class="cal">Family</span></li>
+<li class="evrow muted" data-detail="{&quot;fields&quot;: [[&quot;What&quot;, &quot;Alice: HSIE Cycle Test (Maps &amp; Directions)&quot;], [&quot;When&quot;, &quot;Thursday 06 August, 09:00&quot;], [&quot;Source&quot;, &quot;Personal · Family&quot;]], &quot;key&quot;: &quot;personal|Alice: HSIE Cycle Test (Maps &amp; Directions)&quot;}" data-key="personal|Alice: HSIE Cycle Test (Maps &amp; Directions)" title="click for details"><span class="dot" style="background:var(--series-3)"></span><span class="src">Personal</span><span class="time">Thu 06 09:00</span><span class="ev">Alice: HSIE Cycle Test (Maps &amp; Directions)</span> <span class="cal">Family</span></li>
+<li class="evrow" data-detail="{&quot;fields&quot;: [[&quot;What&quot;, &quot;Pilates&quot;], [&quot;When&quot;, &quot;Thursday 06 August, 09:30&quot;], [&quot;Source&quot;, &quot;Personal · Family&quot;]], &quot;key&quot;: &quot;personal|Pilates&quot;}" data-key="personal|Pilates" title="click for details"><span class="dot" style="background:var(--series-3)"></span><span class="src">Personal</span><span class="time">Thu 06 09:30</span><span class="ev">Pilates</span> <span class="cal">Family</span></li>
+<li class="evrow" data-detail="{&quot;fields&quot;: [[&quot;What&quot;, &quot;Alice dance&quot;], [&quot;When&quot;, &quot;Thursday 06 August, 15:25&quot;], [&quot;Source&quot;, &quot;Personal · Family&quot;]], &quot;key&quot;: &quot;personal|Alice dance&quot;}" data-key="personal|Alice dance" title="click for details"><span class="dot" style="background:var(--series-3)"></span><span class="src">Personal</span><span class="time">Thu 06 15:25</span><span class="ev">Alice dance</span> <span class="cal">Family</span></li>
+<li class="evrow" data-detail="{&quot;fields&quot;: [[&quot;What&quot;, &quot;Harriet hip hop&quot;], [&quot;When&quot;, &quot;Thursday 06 August, 15:25&quot;], [&quot;Source&quot;, &quot;Personal · Family&quot;]], &quot;key&quot;: &quot;personal|Harriet hip hop&quot;}" data-key="personal|Harriet hip hop" title="click for details"><span class="dot" style="background:var(--series-3)"></span><span class="src">Personal</span><span class="time">Thu 06 15:25</span><span class="ev">Harriet hip hop</span> <span class="cal">Family</span></li>
+<li class="evrow" data-detail="{&quot;fields&quot;: [[&quot;What&quot;, &quot;Alice: Computers Assessment 1 due - Newspaper Article (Canvas upload)&quot;], [&quot;When&quot;, &quot;Friday 07 August (all-day)&quot;], [&quot;Source&quot;, &quot;Personal · Family&quot;]], &quot;key&quot;: &quot;personal|Alice: Computers Assessment 1 due - Newspaper Article (Canvas upload)&quot;}" data-key="personal|Alice: Computers Assessment 1 due - Newspaper Article (Canvas upload)" title="click for details"><span class="dot" style="background:var(--series-3)"></span><span class="src">Personal</span><span class="time">Fri 07</span><span class="ev">Alice: Computers Assessment 1 due - Newspaper Article (Canvas upload)</span> <span class="cal">Family</span></li>
+<li class="evrow" data-detail="{&quot;fields&quot;: [[&quot;What&quot;, &quot;Comms workshop &quot;], [&quot;When&quot;, &quot;Friday 07 August, 10:00&quot;], [&quot;Source&quot;, &quot;Personal · Family&quot;]], &quot;key&quot;: &quot;personal|Comms workshop &quot;}" data-key="personal|Comms workshop " title="click for details"><span class="dot" style="background:var(--series-3)"></span><span class="src">Personal</span><span class="time">Fri 07 10:00</span><span class="ev">Comms workshop </span> <span class="cal">Family</span></li>
+<li class="evrow" data-detail="{&quot;fields&quot;: [[&quot;What&quot;, &quot;Harriet swimming &quot;], [&quot;When&quot;, &quot;Friday 07 August, 17:00&quot;], [&quot;Source&quot;, &quot;Personal · Family&quot;]], &quot;key&quot;: &quot;personal|Harriet swimming &quot;}" data-key="personal|Harriet swimming " title="click for details"><span class="dot" style="background:var(--series-3)"></span><span class="src">Personal</span><span class="time">Fri 07 17:00</span><span class="ev">Harriet swimming </span> <span class="cal">Family</span></li>
+<li class="evrow" data-detail="{&quot;fields&quot;: [[&quot;What&quot;, &quot;PAY AMELIA FOR LOAN ($1,388.89)&quot;], [&quot;When&quot;, &quot;Saturday 08 August (all-day)&quot;], [&quot;Source&quot;, &quot;Personal · KREISER.org&quot;]], &quot;key&quot;: &quot;personal|PAY AMELIA FOR LOAN ($1,388.89)&quot;}" data-key="personal|PAY AMELIA FOR LOAN ($1,388.89)" title="click for details"><span class="dot" style="background:var(--series-3)"></span><span class="src">Personal</span><span class="time">Sat 08</span><span class="ev">PAY AMELIA FOR LOAN ($1,388.89)</span> <span class="cal">KREISER.org</span></li>
+<li class="evrow" data-detail="{&quot;fields&quot;: [[&quot;What&quot;, &quot;Berry &quot;], [&quot;When&quot;, &quot;Saturday 08 August (all-day)&quot;], [&quot;Source&quot;, &quot;Personal · Family&quot;]], &quot;key&quot;: &quot;personal|Berry &quot;}" data-key="personal|Berry " title="click for details"><span class="dot" style="background:var(--series-3)"></span><span class="src">Personal</span><span class="time">Sat 08</span><span class="ev">Berry </span> <span class="cal">Family</span></li>
+<li class="evrow" data-detail="{&quot;fields&quot;: [[&quot;What&quot;, &quot;Amelia &amp; Kam - QUALITY TIME&quot;], [&quot;When&quot;, &quot;Sunday 09 August (all-day)&quot;], [&quot;Source&quot;, &quot;Personal · KREISER.org&quot;]], &quot;key&quot;: &quot;personal|Amelia &amp; Kam - QUALITY TIME&quot;}" data-key="personal|Amelia &amp; Kam - QUALITY TIME" title="click for details"><span class="dot" style="background:var(--series-3)"></span><span class="src">Personal</span><span class="time">Sun 09</span><span class="ev">Amelia &amp; Kam - QUALITY TIME</span> <span class="cal">KREISER.org</span></li>
+<li class="evrow" data-detail="{&quot;fields&quot;: [[&quot;What&quot;, &quot;Secuura and Simplicytas (Zoom)&quot;], [&quot;When&quot;, &quot;Monday 10 August, 09:00&quot;], [&quot;Source&quot;, &quot;Personal · Family&quot;]], &quot;key&quot;: &quot;personal|Secuura and Simplicytas (Zoom)&quot;}" data-key="personal|Secuura and Simplicytas (Zoom)" title="click for details"><span class="dot" style="background:var(--series-3)"></span><span class="src">Personal</span><span class="time">Mon 10 09:00</span><span class="ev">Secuura and Simplicytas (Zoom)</span> <span class="cal">Family</span></li>
+<li class="evrow" data-detail="{&quot;fields&quot;: [[&quot;What&quot;, &quot;Change Claude $$&quot;], [&quot;When&quot;, &quot;Monday 10 August, 10:00&quot;], [&quot;Source&quot;, &quot;Personal · Family&quot;]], &quot;key&quot;: &quot;personal|Change Claude $$&quot;}" data-key="personal|Change Claude $$" title="click for details"><span class="dot" style="background:var(--series-3)"></span><span class="src">Personal</span><span class="time">Mon 10 10:00</span><span class="ev">Change Claude $$</span> <span class="cal">Family</span></li>
+<li class="evrow" data-detail="{&quot;fields&quot;: [[&quot;What&quot;, &quot;Phil and Kamil (Zoom)&quot;], [&quot;When&quot;, &quot;Monday 10 August, 13:00&quot;], [&quot;Source&quot;, &quot;Personal · KREISER.org&quot;]], &quot;key&quot;: &quot;personal|Phil and Kamil (Zoom)&quot;}" data-key="personal|Phil and Kamil (Zoom)" title="click for details"><span class="dot" style="background:var(--series-3)"></span><span class="src">Personal</span><span class="time">Mon 10 13:00</span><span class="ev">Phil and Kamil (Zoom)</span> <span class="cal">KREISER.org</span></li>
+<li class="evrow" data-detail="{&quot;fields&quot;: [[&quot;What&quot;, &quot;Maths tutor&quot;], [&quot;When&quot;, &quot;Monday 10 August, 17:15&quot;], [&quot;Source&quot;, &quot;Personal · Family&quot;]], &quot;key&quot;: &quot;personal|Maths tutor&quot;}" data-key="personal|Maths tutor" title="click for details"><span class="dot" style="background:var(--series-3)"></span><span class="src">Personal</span><span class="time">Mon 10 17:15</span><span class="ev">Maths tutor</span> <span class="cal">Family</span></li>
+<li class="evrow" data-detail="{&quot;fields&quot;: [[&quot;What&quot;, &quot;Flea treatment&quot;], [&quot;When&quot;, &quot;Wednesday 12 August (all-day)&quot;], [&quot;Source&quot;, &quot;Personal · Amelia&quot;]], &quot;key&quot;: &quot;personal|Flea treatment&quot;}" data-key="personal|Flea treatment" title="click for details"><span class="dot" style="background:var(--series-3)"></span><span class="src">Personal</span><span class="time">Wed 12</span><span class="ev">Flea treatment</span> <span class="cal">Amelia</span></li>
+<li class="evrow" data-detail="{&quot;fields&quot;: [[&quot;What&quot;, &quot;Harriet drama&quot;], [&quot;When&quot;, &quot;Wednesday 12 August, 08:00&quot;], [&quot;Source&quot;, &quot;Personal · Family&quot;]], &quot;key&quot;: &quot;personal|Harriet drama&quot;}" data-key="personal|Harriet drama" title="click for details"><span class="dot" style="background:var(--series-3)"></span><span class="src">Personal</span><span class="time">Wed 12 08:00</span><span class="ev">Harriet drama</span> <span class="cal">Family</span></li>
+<li class="evrow" data-detail="{&quot;fields&quot;: [[&quot;What&quot;, &quot;Commercialisation roadmap (Zoom)&quot;], [&quot;When&quot;, &quot;Wednesday 12 August, 13:00&quot;], [&quot;Source&quot;, &quot;Personal · Family&quot;]], &quot;key&quot;: &quot;personal|Commercialisation roadmap (Zoom)&quot;}" data-key="personal|Commercialisation roadmap (Zoom)" title="click for details"><span class="dot" style="background:var(--series-3)"></span><span class="src">Personal</span><span class="time">Wed 12 13:00</span><span class="ev">Commercialisation roadmap (Zoom)</span> <span class="cal">Family</span></li>
+<li class="evrow" data-detail="{&quot;fields&quot;: [[&quot;What&quot;, &quot;Harriet Jazz&quot;], [&quot;When&quot;, &quot;Wednesday 12 August, 15:00&quot;], [&quot;Source&quot;, &quot;Personal · Family&quot;]], &quot;key&quot;: &quot;personal|Harriet Jazz&quot;}" data-key="personal|Harriet Jazz" title="click for details"><span class="dot" style="background:var(--series-3)"></span><span class="src">Personal</span><span class="time">Wed 12 15:00</span><span class="ev">Harriet Jazz</span> <span class="cal">Family</span></li>
+<li class="evrow" data-detail="{&quot;fields&quot;: [[&quot;What&quot;, &quot;Alice art club&quot;], [&quot;When&quot;, &quot;Wednesday 12 August, 15:25&quot;], [&quot;Source&quot;, &quot;Personal · Family&quot;]], &quot;key&quot;: &quot;personal|Alice art club&quot;}" data-key="personal|Alice art club" title="click for details"><span class="dot" style="background:var(--series-3)"></span><span class="src">Personal</span><span class="time">Wed 12 15:25</span><span class="ev">Alice art club</span> <span class="cal">Family</span></li>
+<li class="evrow" data-detail="{&quot;fields&quot;: [[&quot;What&quot;, &quot;Alice: French Cycle Test&quot;], [&quot;When&quot;, &quot;Thursday 13 August, 09:00&quot;], [&quot;Source&quot;, &quot;Personal · Family&quot;]], &quot;key&quot;: &quot;personal|Alice: French Cycle Test&quot;}" data-key="personal|Alice: French Cycle Test" title="click for details"><span class="dot" style="background:var(--series-3)"></span><span class="src">Personal</span><span class="time">Thu 13 09:00</span><span class="ev">Alice: French Cycle Test</span> <span class="cal">Family</span></li>
+<li class="evrow" data-detail="{&quot;fields&quot;: [[&quot;What&quot;, &quot;Pilates&quot;], [&quot;When&quot;, &quot;Thursday 13 August, 09:30&quot;], [&quot;Source&quot;, &quot;Personal · Family&quot;]], &quot;key&quot;: &quot;personal|Pilates&quot;}" data-key="personal|Pilates" title="click for details"><span class="dot" style="background:var(--series-3)"></span><span class="src">Personal</span><span class="time">Thu 13 09:30</span><span class="ev">Pilates</span> <span class="cal">Family</span></li>
+<li class="evrow" data-detail="{&quot;fields&quot;: [[&quot;What&quot;, &quot;Cleaners&quot;], [&quot;When&quot;, &quot;Thursday 13 August, 14:00&quot;], [&quot;Source&quot;, &quot;Personal · Family&quot;]], &quot;key&quot;: &quot;personal|Cleaners&quot;}" data-key="personal|Cleaners" title="click for details"><span class="dot" style="background:var(--series-3)"></span><span class="src">Personal</span><span class="time">Thu 13 14:00</span><span class="ev">Cleaners</span> <span class="cal">Family</span></li>
+<li class="evrow" data-detail="{&quot;fields&quot;: [[&quot;What&quot;, &quot;Alice dance&quot;], [&quot;When&quot;, &quot;Thursday 13 August, 15:25&quot;], [&quot;Source&quot;, &quot;Personal · Family&quot;]], &quot;key&quot;: &quot;personal|Alice dance&quot;}" data-key="personal|Alice dance" title="click for details"><span class="dot" style="background:var(--series-3)"></span><span class="src">Personal</span><span class="time">Thu 13 15:25</span><span class="ev">Alice dance</span> <span class="cal">Family</span></li>
+<li class="evrow" data-detail="{&quot;fields&quot;: [[&quot;What&quot;, &quot;Harriet hip hop&quot;], [&quot;When&quot;, &quot;Thursday 13 August, 15:25&quot;], [&quot;Source&quot;, &quot;Personal · Family&quot;]], &quot;key&quot;: &quot;personal|Harriet hip hop&quot;}" data-key="personal|Harriet hip hop" title="click for details"><span class="dot" style="background:var(--series-3)"></span><span class="src">Personal</span><span class="time">Thu 13 15:25</span><span class="ev">Harriet hip hop</span> <span class="cal">Family</span></li>
+<li class="evrow" data-detail="{&quot;fields&quot;: [[&quot;What&quot;, &quot;Amelia Dinner&quot;], [&quot;When&quot;, &quot;Thursday 13 August, 19:00&quot;], [&quot;Source&quot;, &quot;Personal · Family&quot;]], &quot;key&quot;: &quot;personal|Amelia Dinner&quot;}" data-key="personal|Amelia Dinner" title="click for details"><span class="dot" style="background:var(--series-3)"></span><span class="src">Personal</span><span class="time">Thu 13 19:00</span><span class="ev">Amelia Dinner</span> <span class="cal">Family</span></li></ul></details></div></section>
+<section class="tilebox" data-tile="family" data-w="3" data-h="15" style="font-size:1.0em"><div class="tilehead"><span class="grip" title="drag to move">&#8942;&#8942;</span><h2>Family</h2><a class="headlink" href="area_family.html">full page &#10530;</a><span class="sizer"><button data-size="-" title="smaller text">A&#8722;</button><button data-size="+" title="bigger text">A+</button><button data-dim="w-" title="narrower">&#8676;</button><button data-dim="w+" title="wider">&#8677;</button><button data-dim="h-" title="shorter (0 = full height)">&#8593;</button><button data-dim="h+" title="taller / adds scroller">&#8595;</button></span></div><div class="tilebody"><div class="tgbar"><button class="tgchip" data-tile="family" data-group="datasec" title="hide Datasec in this tile only">Datasec</button><button class="tgchip" data-tile="family" data-group="secuura" title="hide Secuura in this tile only">Secuura</button><button class="tgchip" data-tile="family" data-group="personal" title="hide Personal in this tile only">Personal</button><button class="tgchip" data-tile="family" data-group="family" title="hide Family in this tile only">Family</button></div><h3>Today · Thu 6 Aug <span class='count'>5</span></h3>
+<ul class='events plain'><li class="evrow" data-detail="{&quot;fields&quot;: [[&quot;What&quot;, &quot;Olive and Lola’s birthday (2024)&quot;], [&quot;When&quot;, &quot;Thursday 06 August&quot;], [&quot;Calendar&quot;, &quot;Family&quot;]], &quot;key&quot;: &quot;personal|Olive and Lola’s birthday (2024)&quot;}" data-key="personal|Olive and Lola’s birthday (2024)" title="click for details"><span class="dot" style="background:var(--series-3)"></span><span class="src">Home</span><span class="time">all-day</span><span class="ev">Olive and Lola’s birthday (2024)</span><button class="bell" data-mute="personal|Olive and Lola’s birthday (2024)" title="quieten this item">&#128276;</button></li>
+<li class="evrow muted" data-detail="{&quot;fields&quot;: [[&quot;What&quot;, &quot;Alice: HSIE Cycle Test (Maps &amp; Directions)&quot;], [&quot;When&quot;, &quot;Thursday 06 August, 09:00&quot;], [&quot;Calendar&quot;, &quot;Family&quot;]], &quot;key&quot;: &quot;personal|Alice: HSIE Cycle Test (Maps &amp; Directions)&quot;}" data-key="personal|Alice: HSIE Cycle Test (Maps &amp; Directions)" title="click for details"><span class="dot" style="background:var(--series-3)"></span><span class="src">Alice</span><span class="time">09:00</span><span class="ev">Alice: HSIE Cycle Test (Maps &amp; Directions)</span><button class="bell off" data-mute="personal|Alice: HSIE Cycle Test (Maps &amp; Directions)" title="muted — click to restore">&#128277;</button></li>
+<li class="evrow" data-detail="{&quot;fields&quot;: [[&quot;What&quot;, &quot;Pilates&quot;], [&quot;When&quot;, &quot;Thursday 06 August, 09:30&quot;], [&quot;Calendar&quot;, &quot;Family&quot;]], &quot;key&quot;: &quot;personal|Pilates&quot;}" data-key="personal|Pilates" title="click for details"><span class="dot" style="background:var(--series-3)"></span><span class="src">Home</span><span class="time">09:30</span><span class="ev">Pilates</span><button class="bell" data-mute="personal|Pilates" title="quieten this item">&#128276;</button></li>
+<li class="evrow" data-detail="{&quot;fields&quot;: [[&quot;What&quot;, &quot;Alice dance&quot;], [&quot;When&quot;, &quot;Thursday 06 August, 15:25&quot;], [&quot;Calendar&quot;, &quot;Family&quot;]], &quot;key&quot;: &quot;personal|Alice dance&quot;}" data-key="personal|Alice dance" title="click for details"><span class="dot" style="background:var(--series-3)"></span><span class="src">Alice</span><span class="time">15:25</span><span class="ev">Alice dance</span><button class="bell" data-mute="personal|Alice dance" title="quieten this item">&#128276;</button></li>
+<li class="evrow" data-detail="{&quot;fields&quot;: [[&quot;What&quot;, &quot;Harriet hip hop&quot;], [&quot;When&quot;, &quot;Thursday 06 August, 15:25&quot;], [&quot;Calendar&quot;, &quot;Family&quot;]], &quot;key&quot;: &quot;personal|Harriet hip hop&quot;}" data-key="personal|Harriet hip hop" title="click for details"><span class="dot" style="background:var(--series-3)"></span><span class="src">Harriet</span><span class="time">15:25</span><span class="ev">Harriet hip hop</span><button class="bell" data-mute="personal|Harriet hip hop" title="quieten this item">&#128276;</button></li></ul>
+<h3>Tomorrow · Fri 7 Aug <span class='count'>3</span></h3>
+<ul class='events plain'><li class="evrow" data-detail="{&quot;fields&quot;: [[&quot;What&quot;, &quot;Alice: Computers Assessment 1 due - Newspaper Article (Canvas upload)&quot;], [&quot;When&quot;, &quot;Friday 07 August&quot;], [&quot;Calendar&quot;, &quot;Family&quot;]], &quot;key&quot;: &quot;personal|Alice: Computers Assessment 1 due - Newspaper Article (Canvas upload)&quot;}" data-key="personal|Alice: Computers Assessment 1 due - Newspaper Article (Canvas upload)" title="click for details"><span class="dot" style="background:var(--series-3)"></span><span class="src">Alice</span><span class="time">all-day</span><span class="ev">Alice: Computers Assessment 1 due - Newspaper Article (Canvas upload)</span><button class="bell" data-mute="personal|Alice: Computers Assessment 1 due - Newspaper Article (Canvas upload)" title="quieten this item">&#128276;</button></li>
+<li class="evrow" data-detail="{&quot;fields&quot;: [[&quot;What&quot;, &quot;Comms workshop &quot;], [&quot;When&quot;, &quot;Friday 07 August, 10:00&quot;], [&quot;Calendar&quot;, &quot;Family&quot;]], &quot;key&quot;: &quot;personal|Comms workshop &quot;}" data-key="personal|Comms workshop " title="click for details"><span class="dot" style="background:var(--series-3)"></span><span class="src">Home</span><span class="time">10:00</span><span class="ev">Comms workshop </span><button class="bell" data-mute="personal|Comms workshop " title="quieten this item">&#128276;</button></li>
+<li class="evrow" data-detail="{&quot;fields&quot;: [[&quot;What&quot;, &quot;Harriet swimming &quot;], [&quot;When&quot;, &quot;Friday 07 August, 17:00&quot;], [&quot;Calendar&quot;, &quot;Family&quot;]], &quot;key&quot;: &quot;personal|Harriet swimming &quot;}" data-key="personal|Harriet swimming " title="click for details"><span class="dot" style="background:var(--series-3)"></span><span class="src">Harriet</span><span class="time">17:00</span><span class="ev">Harriet swimming </span><button class="bell" data-mute="personal|Harriet swimming " title="quieten this item">&#128276;</button></li></ul>
+<h3>Sat 8 Aug <span class='count'>1</span></h3>
+<ul class='events plain'><li class="evrow" data-detail="{&quot;fields&quot;: [[&quot;What&quot;, &quot;Berry &quot;], [&quot;When&quot;, &quot;Saturday 08 August&quot;], [&quot;Calendar&quot;, &quot;Family&quot;]], &quot;key&quot;: &quot;personal|Berry &quot;}" data-key="personal|Berry " title="click for details"><span class="dot" style="background:var(--series-3)"></span><span class="src">Home</span><span class="time">all-day</span><span class="ev">Berry </span><button class="bell" data-mute="personal|Berry " title="quieten this item">&#128276;</button></li></ul>
+<h3>Mon 10 Aug <span class='count'>3</span></h3>
+<ul class='events plain'><li class="evrow" data-detail="{&quot;fields&quot;: [[&quot;What&quot;, &quot;Secuura and Simplicytas (Zoom)&quot;], [&quot;When&quot;, &quot;Monday 10 August, 09:00&quot;], [&quot;Calendar&quot;, &quot;Family&quot;]], &quot;key&quot;: &quot;personal|Secuura and Simplicytas (Zoom)&quot;}" data-key="personal|Secuura and Simplicytas (Zoom)" title="click for details"><span class="dot" style="background:var(--series-3)"></span><span class="src">Home</span><span class="time">09:00</span><span class="ev">Secuura and Simplicytas (Zoom)</span><button class="bell" data-mute="personal|Secuura and Simplicytas (Zoom)" title="quieten this item">&#128276;</button></li>
+<li class="evrow" data-detail="{&quot;fields&quot;: [[&quot;What&quot;, &quot;Change Claude $$&quot;], [&quot;When&quot;, &quot;Monday 10 August, 10:00&quot;], [&quot;Calendar&quot;, &quot;Family&quot;]], &quot;key&quot;: &quot;personal|Change Claude $$&quot;}" data-key="personal|Change Claude $$" title="click for details"><span class="dot" style="background:var(--series-3)"></span><span class="src">Home</span><span class="time">10:00</span><span class="ev">Change Claude $$</span><button class="bell" data-mute="personal|Change Claude $$" title="quieten this item">&#128276;</button></li>
+<li class="evrow" data-detail="{&quot;fields&quot;: [[&quot;What&quot;, &quot;Maths tutor&quot;], [&quot;When&quot;, &quot;Monday 10 August, 17:15&quot;], [&quot;Calendar&quot;, &quot;Family&quot;]], &quot;key&quot;: &quot;personal|Maths tutor&quot;}" data-key="personal|Maths tutor" title="click for details"><span class="dot" style="background:var(--series-3)"></span><span class="src">Home</span><span class="time">17:15</span><span class="ev">Maths tutor</span><button class="bell" data-mute="personal|Maths tutor" title="quieten this item">&#128276;</button></li></ul>
+<h3>Wed 12 Aug <span class='count'>4</span></h3>
+<ul class='events plain'><li class="evrow" data-detail="{&quot;fields&quot;: [[&quot;What&quot;, &quot;Harriet drama&quot;], [&quot;When&quot;, &quot;Wednesday 12 August, 08:00&quot;], [&quot;Calendar&quot;, &quot;Family&quot;]], &quot;key&quot;: &quot;personal|Harriet drama&quot;}" data-key="personal|Harriet drama" title="click for details"><span class="dot" style="background:var(--series-3)"></span><span class="src">Harriet</span><span class="time">08:00</span><span class="ev">Harriet drama</span><button class="bell" data-mute="personal|Harriet drama" title="quieten this item">&#128276;</button></li>
+<li class="evrow" data-detail="{&quot;fields&quot;: [[&quot;What&quot;, &quot;Commercialisation roadmap (Zoom)&quot;], [&quot;When&quot;, &quot;Wednesday 12 August, 13:00&quot;], [&quot;Calendar&quot;, &quot;Family&quot;]], &quot;key&quot;: &quot;personal|Commercialisation roadmap (Zoom)&quot;}" data-key="personal|Commercialisation roadmap (Zoom)" title="click for details"><span class="dot" style="background:var(--series-3)"></span><span class="src">Home</span><span class="time">13:00</span><span class="ev">Commercialisation roadmap (Zoom)</span><button class="bell" data-mute="personal|Commercialisation roadmap (Zoom)" title="quieten this item">&#128276;</button></li>
+<li class="evrow" data-detail="{&quot;fields&quot;: [[&quot;What&quot;, &quot;Harriet Jazz&quot;], [&quot;When&quot;, &quot;Wednesday 12 August, 15:00&quot;], [&quot;Calendar&quot;, &quot;Family&quot;]], &quot;key&quot;: &quot;personal|Harriet Jazz&quot;}" data-key="personal|Harriet Jazz" title="click for details"><span class="dot" style="background:var(--series-3)"></span><span class="src">Harriet</span><span class="time">15:00</span><span class="ev">Harriet Jazz</span><button class="bell" data-mute="personal|Harriet Jazz" title="quieten this item">&#128276;</button></li>
+<li class="evrow" data-detail="{&quot;fields&quot;: [[&quot;What&quot;, &quot;Alice art club&quot;], [&quot;When&quot;, &quot;Wednesday 12 August, 15:25&quot;], [&quot;Calendar&quot;, &quot;Family&quot;]], &quot;key&quot;: &quot;personal|Alice art club&quot;}" data-key="personal|Alice art club" title="click for details"><span class="dot" style="background:var(--series-3)"></span><span class="src">Alice</span><span class="time">15:25</span><span class="ev">Alice art club</span><button class="bell" data-mute="personal|Alice art club" title="quieten this item">&#128276;</button></li></ul><p class='note'>NB. Family calendar is display-only (cowork agent's territory).</p></div></section>
+</div><div class="gridsep" data-before="board"><span></span></div><div class="grid">
+<section class="tilebox" data-tile="board" data-w="3" data-h="16" style="font-size:1.0em;background:#f4eef5"><div class="tilehead"><span class="grip" title="drag to move">&#8942;&#8942;</span><h2>Coding — WED board</h2><a class="headlink" href="area_board.html">full page &#10530;</a><span class="sizer"><button data-size="-" title="smaller text">A&#8722;</button><button data-size="+" title="bigger text">A+</button><button data-dim="w-" title="narrower">&#8676;</button><button data-dim="w+" title="wider">&#8677;</button><button data-dim="h-" title="shorter (0 = full height)">&#8593;</button><button data-dim="h+" title="taller / adds scroller">&#8595;</button></span></div><div class="tilebody"><h3>In progress</h3><ul class='events plain'><li data-wed="WED-16"><a class="time tlink" href="https://linear.app/wednesday-agent/issue/WED-16" target="_blank" rel="noopener">WED-16</a><span class="prio p1">P1</span><span class="ev">Implement daily rhythm: 6:00 scheduled wake-up + spoken briefing, 23:00 close</span><span class="acts"><button class="flagbtn" data-flag="WED-16" data-flabel="Implement daily rhythm: 6:00 scheduled wake-up + spoken briefing, 23:00 close" data-fkind="wed" title="flag for Wed">&#9873;</button></span></li>
+<li data-wed="WED-50"><a class="time tlink" href="https://linear.app/wednesday-agent/issue/WED-50" target="_blank" rel="noopener">WED-50</a><span class="prio p1">P1</span><span class="ev">Delegation v2: Agent Teams + iTerm2 cockpit — observability with zero client bleed (R0)</span><span class="acts"><button class="flagbtn" data-flag="WED-50" data-flabel="Delegation v2: Agent Teams + iTerm2 cockpit — observability with zero client bleed (R0)" data-fkind="wed" title="flag for Wed">&#9873;</button></span></li>
+<li data-wed="WED-58"><a class="time tlink" href="https://linear.app/wednesday-agent/issue/WED-58" target="_blank" rel="noopener">WED-58</a><span class="prio p1">P1</span><span class="ev">Life-OS Day Dashboard — whole-of-life command center (epic)</span><span class="acts"><button class="flagbtn" data-flag="WED-58" data-flabel="Life-OS Day Dashboard — whole-of-life command center (epic)" data-fkind="wed" title="flag for Wed">&#9873;</button></span></li>
+<li data-wed="WED-39"><a class="time tlink" href="https://linear.app/wednesday-agent/issue/WED-39" target="_blank" rel="noopener">WED-39</a><span class="prio p2">P2</span><span class="ev">9-14 code deep-play: agent experts + orchestrator (and the DB question)</span><span class="acts"><button class="flagbtn" data-flag="WED-39" data-flabel="9-14 code deep-play: agent experts + orchestrator (and the DB question)" data-fkind="wed" title="flag for Wed">&#9873;</button><button data-act="prioritise" data-id="WED-39" title="prioritise — set Urgent">&#9650;</button></span></li>
+<li data-wed="WED-28"><a class="time tlink" href="https://linear.app/wednesday-agent/issue/WED-28" target="_blank" rel="noopener">WED-28</a><span class="prio p2">P2</span><span class="ev">Fleet board awareness: read-only Linear+Jira sweep + aggregated Kam decision queue</span><span class="acts"><button class="flagbtn" data-flag="WED-28" data-flabel="Fleet board awareness: read-only Linear+Jira sweep + aggregated Kam decision queue" data-fkind="wed" title="flag for Wed">&#9873;</button><button data-act="prioritise" data-id="WED-28" title="prioritise — set Urgent">&#9650;</button></span></li></ul><h3>Up next</h3><ul class='events plain'><li data-wed="WED-36"><a class="time tlink" href="https://linear.app/wednesday-agent/issue/WED-36" target="_blank" rel="noopener">WED-36</a><span class="prio p3">P3</span><span class="ev">P6 - Context discipline: measure boot cost, add task-specific priming, set the index-first trigger</span><span class="acts"><button class="flagbtn" data-flag="WED-36" data-flabel="P6 - Context discipline: measure boot cost, add task-specific priming, set the index-first trigger" data-fkind="wed" title="flag for Wed">&#9873;</button><button data-act="prioritise" data-id="WED-36" title="prioritise — set Urgent">&#9650;</button><button data-act="start" data-id="WED-36" title="move to In Progress">&#9654;</button></span></li>
+<li data-wed="WED-40"><a class="time tlink" href="https://linear.app/wednesday-agent/issue/WED-40" target="_blank" rel="noopener">WED-40</a><span class="prio p1">P1</span><span class="ev">Workflow adoption: Testing / Documentation / Development lanes</span><span class="acts"><button class="flagbtn" data-flag="WED-40" data-flabel="Workflow adoption: Testing / Documentation / Development lanes" data-fkind="wed" title="flag for Wed">&#9873;</button><button data-act="start" data-id="WED-40" title="move to In Progress">&#9654;</button></span></li>
+<li data-wed="WED-51"><a class="time tlink" href="https://linear.app/wednesday-agent/issue/WED-51" target="_blank" rel="noopener">WED-51</a><span class="prio p2">P2</span><span class="ev">Kam↔Wednesday communication build-out: voice-to-voice chat, Claude app (code/tasks), email, WhatsApp — design the blend</span><span class="acts"><button class="flagbtn" data-flag="WED-51" data-flabel="Kam↔Wednesday communication build-out: voice-to-voice chat, Claude app (code/tasks), email, WhatsApp — design the blend" data-fkind="wed" title="flag for Wed">&#9873;</button><button data-act="prioritise" data-id="WED-51" title="prioritise — set Urgent">&#9650;</button><button data-act="start" data-id="WED-51" title="move to In Progress">&#9654;</button></span></li>
+<li data-wed="WED-48"><a class="time tlink" href="https://linear.app/wednesday-agent/issue/WED-48" target="_blank" rel="noopener">WED-48</a><span class="prio p3">P3</span><span class="ev">Tickler: CypherKey Twilio token rotation due 2026-09-04</span> <span class="flagdue">due 2026-09-04</span><span class="acts"><button class="flagbtn" data-flag="WED-48" data-flabel="Tickler: CypherKey Twilio token rotation due 2026-09-04" data-fkind="wed" title="flag for Wed">&#9873;</button><button data-act="prioritise" data-id="WED-48" title="prioritise — set Urgent">&#9650;</button><button data-act="start" data-id="WED-48" title="move to In Progress">&#9654;</button></span></li>
+<li data-wed="WED-46"><a class="time tlink" href="https://linear.app/wednesday-agent/issue/WED-46" target="_blank" rel="noopener">WED-46</a><span class="prio p2">P2</span><span class="ev">Visual fleet interface: build the everything-dashboard</span><span class="acts"><button class="flagbtn" data-flag="WED-46" data-flabel="Visual fleet interface: build the everything-dashboard" data-fkind="wed" title="flag for Wed">&#9873;</button><button data-act="prioritise" data-id="WED-46" title="prioritise — set Urgent">&#9650;</button><button data-act="start" data-id="WED-46" title="move to In Progress">&#9654;</button></span></li>
+<li data-wed="WED-44"><a class="time tlink" href="https://linear.app/wednesday-agent/issue/WED-44" target="_blank" rel="noopener">WED-44</a><span class="prio p2">P2</span><span class="ev">Quality control gatekeeper: same expertise-model pattern</span><span class="acts"><button class="flagbtn" data-flag="WED-44" data-flabel="Quality control gatekeeper: same expertise-model pattern" data-fkind="wed" title="flag for Wed">&#9873;</button><button data-act="prioritise" data-id="WED-44" title="prioritise — set Urgent">&#9650;</button><button data-act="start" data-id="WED-44" title="move to In Progress">&#9654;</button></span></li>
+<li data-wed="WED-43"><a class="time tlink" href="https://linear.app/wednesday-agent/issue/WED-43" target="_blank" rel="noopener">WED-43</a><span class="prio p2">P2</span><span class="ev">Security &amp; privacy gatekeeper: expertise mental models + Wednesday as gate</span><span class="acts"><button class="flagbtn" data-flag="WED-43" data-flabel="Security &amp; privacy gatekeeper: expertise mental models + Wednesday as gate" data-fkind="wed" title="flag for Wed">&#9873;</button><button data-act="prioritise" data-id="WED-43" title="prioritise — set Urgent">&#9650;</button><button data-act="start" data-id="WED-43" title="move to In Progress">&#9654;</button></span></li>
+<li data-wed="WED-41"><a class="time tlink" href="https://linear.app/wednesday-agent/issue/WED-41" target="_blank" rel="noopener">WED-41</a><span class="prio p2">P2</span><span class="ev">Peter&#x27;s testing methodology: analyse, bottle, build the hyper-focused testing agent</span><span class="acts"><button class="flagbtn" data-flag="WED-41" data-flabel="Peter&#x27;s testing methodology: analyse, bottle, build the hyper-focused testing agent" data-fkind="wed" title="flag for Wed">&#9873;</button><button data-act="prioritise" data-id="WED-41" title="prioritise — set Urgent">&#9650;</button><button data-act="start" data-id="WED-41" title="move to In Progress">&#9654;</button></span></li>
+<li data-wed="WED-38"><a class="time tlink" href="https://linear.app/wednesday-agent/issue/WED-38" target="_blank" rel="noopener">WED-38</a><span class="prio p3">P3</span><span class="ev">P8 - Orchestrator three-pillar self-assessment (single interface + CRUD + observability)</span><span class="acts"><button class="flagbtn" data-flag="WED-38" data-flabel="P8 - Orchestrator three-pillar self-assessment (single interface + CRUD + observability)" data-fkind="wed" title="flag for Wed">&#9873;</button><button data-act="prioritise" data-id="WED-38" title="prioritise — set Urgent">&#9650;</button><button data-act="start" data-id="WED-38" title="move to In Progress">&#9654;</button></span></li>
+<li data-wed="WED-34"><a class="time tlink" href="https://linear.app/wednesday-agent/issue/WED-34" target="_blank" rel="noopener">WED-34</a><span class="prio p2">P2</span><span class="ev">P5 - Phone co-work: Linear board as prompt input, claim-dispatch-escalate</span><span class="acts"><button class="flagbtn" data-flag="WED-34" data-flabel="P5 - Phone co-work: Linear board as prompt input, claim-dispatch-escalate" data-fkind="wed" title="flag for Wed">&#9873;</button><button data-act="prioritise" data-id="WED-34" title="prioritise — set Urgent">&#9650;</button><button data-act="start" data-id="WED-34" title="move to In Progress">&#9654;</button></span></li></ul><div class='addbox'><input id='add-title' type='text' maxlength='200' placeholder='add an item…'><select id='add-prio'><option value='1'>P1 urgent</option><option value='2'>P2 high</option><option value='3' selected>P3 medium</option><option value='4'>P4 low</option></select><button id='add-btn'>add</button><span id='add-msg'></span></div></div></section>
+<section class="tilebox" data-tile="tickets" data-w="2" data-h="12" style="font-size:1.0em"><div class="tilehead"><span class="grip" title="drag to move">&#8942;&#8942;</span><h2>Tickets by Project</h2><span class="sizer"><button data-size="-" title="smaller text">A&#8722;</button><button data-size="+" title="bigger text">A+</button><button data-dim="w-" title="narrower">&#8676;</button><button data-dim="w+" title="wider">&#8677;</button><button data-dim="h-" title="shorter (0 = full height)">&#8593;</button><button data-dim="h+" title="taller / adds scroller">&#8595;</button></span></div><div class="tilebody"><div class="tgbar"><button class="tgchip" data-tile="tickets" data-group="datasec" title="hide Datasec in this tile only">Datasec</button><button class="tgchip" data-tile="tickets" data-group="secuura" title="hide Secuura in this tile only">Secuura</button><button class="tgchip" data-tile="tickets" data-group="personal" title="hide Personal in this tile only">Personal</button><button class="tgchip" data-tile="tickets" data-group="family" title="hide Family in this tile only">Family</button></div>
+<details class='srcweek' open><summary>Datasec / CypherKey <span class='count'>as of 2026-08-04</span></summary><ul class='events plain'><li data-key="ticket|Datasec/CypherKey|CPKEY-161 — activation-window countdown + expiry messaging (both platforms; top "><span class="ev">CPKEY-161 — activation-window countdown + expiry messaging (both platforms; top of queue)</span><span class="acts"><button class="flagbtn" data-flag="ticket|Datasec/CypherKey|CPKEY-161 — activation-window countdown + expiry messaging (both platforms; top " data-flabel="CPKEY-161 — activation-window countdown + expiry messaging (both platforms; top of queue)" data-fkind="ticket" title="flag for Wed">&#9873;</button></span></li><li data-key="ticket|Datasec/CypherKey|CPKEY-162 — top-up ceremony (low-watermark dead end)"><span class="ev">CPKEY-162 — top-up ceremony (low-watermark dead end)</span><span class="acts"><button class="flagbtn" data-flag="ticket|Datasec/CypherKey|CPKEY-162 — top-up ceremony (low-watermark dead end)" data-flabel="CPKEY-162 — top-up ceremony (low-watermark dead end)" data-fkind="ticket" title="flag for Wed">&#9873;</button></span></li><li data-key="ticket|Datasec/CypherKey|CPKEY-163 — build to the ruled FAIL-CLOSED app-lock posture"><span class="ev">CPKEY-163 — build to the ruled FAIL-CLOSED app-lock posture</span><span class="acts"><button class="flagbtn" data-flag="ticket|Datasec/CypherKey|CPKEY-163 — build to the ruled FAIL-CLOSED app-lock posture" data-flabel="CPKEY-163 — build to the ruled FAIL-CLOSED app-lock posture" data-fkind="ticket" title="flag for Wed">&#9873;</button></span></li><li data-key="ticket|Datasec/CypherKey|CPKEY-93 store publishing waits behind 161+162 (Kam ruling)"><span class="ev">CPKEY-93 store publishing waits behind 161+162 (Kam ruling)</span><span class="acts"><button class="flagbtn" data-flag="ticket|Datasec/CypherKey|CPKEY-93 store publishing waits behind 161+162 (Kam ruling)" data-flabel="CPKEY-93 store publishing waits behind 161+162 (Kam ruling)" data-fkind="ticket" title="flag for Wed">&#9873;</button></span></li><li data-key="ticket|Datasec/CypherKey|`gh auth login` still pending on this machine (CI runs unverifiable; ls-remote c"><span class="ev">`gh auth login` still pending on this machine (CI runs unverifiable; ls-remote covers PRs)</span><span class="acts"><button class="flagbtn" data-flag="ticket|Datasec/CypherKey|`gh auth login` still pending on this machine (CI runs unverifiable; ls-remote c" data-flabel="`gh auth login` still pending on this machine (CI runs unverifiable; ls-remote covers PRs)" data-fkind="ticket" title="flag for Wed">&#9873;</button></span></li></ul></details>
+<details class='srcweek' open><summary>Datasec / NexusAI <span class='count'>as of 2026-08-04</span></summary><ul class='events plain'><li data-key="ticket|Datasec/NexusAI|Kam publisher actions on RD-15: upload video to YouTube/Vimeo, then Partner"><span class="ev">Kam publisher actions on RD-15: upload video to YouTube/Vimeo, then Partner</span><span class="acts"><button class="flagbtn" data-flag="ticket|Datasec/NexusAI|Kam publisher actions on RD-15: upload video to YouTube/Vimeo, then Partner" data-flabel="Kam publisher actions on RD-15: upload video to YouTube/Vimeo, then Partner" data-fkind="ticket" title="flag for Wed">&#9873;</button></span></li><li data-key="ticket|Datasec/NexusAI|RD-66: triage 2 new moderate Dependabot alerts (needs launcher shell / gh auth)"><span class="ev">RD-66: triage 2 new moderate Dependabot alerts (needs launcher shell / gh auth)</span><span class="acts"><button class="flagbtn" data-flag="ticket|Datasec/NexusAI|RD-66: triage 2 new moderate Dependabot alerts (needs launcher shell / gh auth)" data-flabel="RD-66: triage 2 new moderate Dependabot alerts (needs launcher shell / gh auth)" data-fkind="ticket" title="flag for Wed">&#9873;</button></span></li><li data-key="ticket|Datasec/NexusAI|RD-62 next code item (data-freshness on /api/health + status page); RD-61"><span class="ev">RD-62 next code item (data-freshness on /api/health + status page); RD-61</span><span class="acts"><button class="flagbtn" data-flag="ticket|Datasec/NexusAI|RD-62 next code item (data-freshness on /api/health + status page); RD-61" data-flabel="RD-62 next code item (data-freshness on /api/health + status page); RD-61" data-fkind="ticket" title="flag for Wed">&#9873;</button></span></li></ul></details>
+<details class='srcweek' open><summary>Datasec / Vision_Sales_Portal <span class='count'>as of 2026-08-04</span></summary><ul class='events plain'><li data-key="ticket|Datasec/Vision_Sales_Portal|Lead_Bot session needed: copy new LEAD_BOT_API_KEY from VSP 4_Credentials/.env, "><span class="ev">Lead_Bot session needed: copy new LEAD_BOT_API_KEY from VSP 4_Credentials/.env, point bot at prod, drop leaked key</span><span class="acts"><button class="flagbtn" data-flag="ticket|Datasec/Vision_Sales_Portal|Lead_Bot session needed: copy new LEAD_BOT_API_KEY from VSP 4_Credentials/.env, " data-flabel="Lead_Bot session needed: copy new LEAD_BOT_API_KEY from VSP 4_Credentials/.env, point bot at prod, drop leaked key" data-fkind="ticket" title="flag for Wed">&#9873;</button></span></li><li data-key="ticket|Datasec/Vision_Sales_Portal|Kam: `gh auth login` in a VSP launcher shell + investigate why global gh flipped"><span class="ev">Kam: `gh auth login` in a VSP launcher shell + investigate why global gh flipped to `kksecura` (Secuura!)</span><span class="acts"><button class="flagbtn" data-flag="ticket|Datasec/Vision_Sales_Portal|Kam: `gh auth login` in a VSP launcher shell + investigate why global gh flipped" data-flabel="Kam: `gh auth login` in a VSP launcher shell + investigate why global gh flipped to `kksecura` (Secuura!)" data-fkind="ticket" title="flag for Wed">&#9873;</button></span></li><li data-key="ticket|Datasec/Vision_Sales_Portal|Optional: 5 remaining npm-audit highs (archiver / express-rate-limit / express-4"><span class="ev">Optional: 5 remaining npm-audit highs (archiver / express-rate-limit / express-4 trees) — backlogged</span><span class="acts"><button class="flagbtn" data-flag="ticket|Datasec/Vision_Sales_Portal|Optional: 5 remaining npm-audit highs (archiver / express-rate-limit / express-4" data-flabel="Optional: 5 remaining npm-audit highs (archiver / express-rate-limit / express-4 trees) — backlogged" data-fkind="ticket" title="flag for Wed">&#9873;</button></span></li><li data-key="ticket|Datasec/Vision_Sales_Portal|Backlog: dev DB container won&#x27;t boot (PG15 volume vs postgres:16 image) — Kam ca"><span class="ev">Backlog: dev DB container won&#x27;t boot (PG15 volume vs postgres:16 image) — Kam call, dev data</span><span class="acts"><button class="flagbtn" data-flag="ticket|Datasec/Vision_Sales_Portal|Backlog: dev DB container won&#x27;t boot (PG15 volume vs postgres:16 image) — Kam ca" data-flabel="Backlog: dev DB container won&#x27;t boot (PG15 volume vs postgres:16 image) — Kam call, dev data" data-fkind="ticket" title="flag for Wed">&#9873;</button></span></li></ul></details>
+<details class='srcweek' open><summary>Secuura / Blockchain <span class='count'>as of 2026-08-06</span></summary><ul class='events plain'><li data-key="ticket|Secuura/Blockchain|On Kam&#x27;s channel-of-record confirmation: merge #651 → demo deploy (rsync + rebui"><span class="ev">On Kam&#x27;s channel-of-record confirmation: merge #651 → demo deploy (rsync + rebuild</span><span class="acts"><button class="flagbtn" data-flag="ticket|Secuura/Blockchain|On Kam&#x27;s channel-of-record confirmation: merge #651 → demo deploy (rsync + rebui" data-flabel="On Kam&#x27;s channel-of-record confirmation: merge #651 → demo deploy (rsync + rebuild" data-fkind="ticket" title="flag for Wed">&#9873;</button></span></li><li data-key="ticket|Secuura/Blockchain|Then KS-564: live-prove Option A end-to-end, ship all three legs as one piece (#"><span class="ev">Then KS-564: live-prove Option A end-to-end, ship all three legs as one piece (#652).</span><span class="acts"><button class="flagbtn" data-flag="ticket|Secuura/Blockchain|Then KS-564: live-prove Option A end-to-end, ship all three legs as one piece (#" data-flabel="Then KS-564: live-prove Option A end-to-end, ship all three legs as one piece (#652)." data-fkind="ticket" title="flag for Wed">&#9873;</button></span></li><li data-key="ticket|Secuura/Blockchain|**Peter KS-480 consent-by-silence — record AFTER EOD 2026-08-06.** Kam&#x27;s ruling "><span class="ev">**Peter KS-480 consent-by-silence — record AFTER EOD 2026-08-06.** Kam&#x27;s ruling today:</span><span class="acts"><button class="flagbtn" data-flag="ticket|Secuura/Blockchain|**Peter KS-480 consent-by-silence — record AFTER EOD 2026-08-06.** Kam&#x27;s ruling " data-flabel="**Peter KS-480 consent-by-silence — record AFTER EOD 2026-08-06.** Kam&#x27;s ruling today:" data-fkind="ticket" title="flag for Wed">&#9873;</button></span></li><li data-key="ticket|Secuura/Blockchain|Watch: Stuart&#x27;s KS-539 verdict (Peter approved 08-05) · 2 flaky tier-3 tests."><span class="ev">Watch: Stuart&#x27;s KS-539 verdict (Peter approved 08-05) · 2 flaky tier-3 tests.</span><span class="acts"><button class="flagbtn" data-flag="ticket|Secuura/Blockchain|Watch: Stuart&#x27;s KS-539 verdict (Peter approved 08-05) · 2 flaky tier-3 tests." data-flabel="Watch: Stuart&#x27;s KS-539 verdict (Peter approved 08-05) · 2 flaky tier-3 tests." data-fkind="ticket" title="flag for Wed">&#9873;</button></span></li></ul></details>
+<p class="note">NB. Project boards are cached entry-card snapshots; live client feeds arrive with the Studio/fleet session. Wednesday's own items live in the WED board tile.</p></div></section>
+<section class="tilebox" data-tile="email" data-w="3" data-h="12" style="font-size:1.0em"><div class="tilehead"><span class="grip" title="drag to move">&#8942;&#8942;</span><h2>Email flags</h2><span class="sizer"><button data-size="-" title="smaller text">A&#8722;</button><button data-size="+" title="bigger text">A+</button><button data-dim="w-" title="narrower">&#8676;</button><button data-dim="w+" title="wider">&#8677;</button><button data-dim="h-" title="shorter (0 = full height)">&#8593;</button><button data-dim="h+" title="taller / adds scroller">&#8595;</button></span></div><div class="tilebody"><ul class='events plain'><li class="evrow" data-detail="{&quot;fields&quot;: [[&quot;Subject&quot;, &quot;[Datasec/Lead_Bot -&gt; Wednesday] BLUF convention adopted — plus: my pane&#x27;s ghost text was the end-of-session trigger phrase&quot;], [&quot;From&quot;, &quot;CoAgent &lt;coagent@agentmail.to&gt;&quot;], [&quot;Inboxes&quot;, &quot;coagent+wednesday-agent&quot;], [&quot;Received&quot;, &quot;2026-08-06 09:38&quot;]]}"><span class="dot flagslot"></span><span class="src">coagent+wednesda</span><span class="time">08-06 09:38</span><span class="ev">[Datasec/Lead_Bot -&gt; Wednesday] BLUF convention adopted — plus: my pane&#x27;s ghost </span></li><li class="evrow needsack" data-detail="{&quot;fields&quot;: [[&quot;Subject&quot;, &quot;[Secuura/Blockchain -&gt; Wednesday] QUESTION: plan confirmation — KS-480 corrected scope accepted, 4 items, proceeding&quot;], [&quot;From&quot;, &quot;CoAgent &lt;coagent@agentmail.to&gt;&quot;], [&quot;Inboxes&quot;, &quot;coagent+wednesday-agent&quot;], [&quot;Received&quot;, &quot;2026-08-06 09:37&quot;], [&quot;Attention&quot;, &quot;QUESTION — check whether an ANSWER went out&quot;]]}"><span class="dot flagslot"><span class="attn">&#9873;</span></span><span class="src">coagent+wednesda</span><span class="time">08-06 09:37</span><span class="ev">[Secuura/Blockchain -&gt; Wednesday] QUESTION: plan confirmation — KS-480 corrected</span></li><li class="evrow" data-detail="{&quot;fields&quot;: [[&quot;Subject&quot;, &quot;[Wednesday -&gt; all agents] STANDING CONVENTION (Kam): BLUF / Recommendation / Detail on every ticket comment and update&quot;], [&quot;From&quot;, &quot;Wednesday &lt;wednesday-agent@agentmail.to&gt;&quot;], [&quot;Inboxes&quot;, &quot;wednesday-agent+coagent&quot;], [&quot;Received&quot;, &quot;2026-08-06 09:35&quot;]]}"><span class="dot flagslot"></span><span class="src">wednesday-agent+</span><span class="time">08-06 09:35</span><span class="ev">[Wednesday -&gt; all agents] STANDING CONVENTION (Kam): BLUF / Recommendation / Det</span></li><li class="evrow" data-detail="{&quot;fields&quot;: [[&quot;Subject&quot;, &quot;[Wednesday -&gt; Secuura/Blockchain] URGENT ADDENDUM: use BLUF / Recommendation / Detail headings on the KS-480 comment you are writing now&quot;], [&quot;From&quot;, &quot;Wednesday &lt;wednesday-agent@agentmail.to&gt;&quot;], [&quot;Inboxes&quot;, &quot;wednesday-agent+coagent&quot;], [&quot;Received&quot;, &quot;2026-08-06 09:34&quot;]]}"><span class="dot flagslot"></span><span class="src">wednesday-agent+</span><span class="time">08-06 09:34</span><span class="ev">[Wednesday -&gt; Secuura/Blockchain] URGENT ADDENDUM: use BLUF / Recommendation / D</span></li><li class="evrow" data-detail="{&quot;fields&quot;: [[&quot;Subject&quot;, &quot;[Wednesday -&gt; Secuura/Blockchain] KS-480 CORRECTED SCOPE: Peter CONFIRMED explicitly — do NOT record consent-by-silence; record it accurately + size his bulk re-key ask&quot;], [&quot;From&quot;, &quot;Wednesday &lt;wednesday-agent@agentmail.to&gt;&quot;], [&quot;Inboxes&quot;, &quot;wednesday-agent+coagent&quot;], [&quot;Received&quot;, &quot;2026-08-06 09:30&quot;]]}"><span class="dot flagslot"></span><span class="src">wednesday-agent+</span><span class="time">08-06 09:30</span><span class="ev">[Wednesday -&gt; Secuura/Blockchain] KS-480 CORRECTED SCOPE: Peter CONFIRMED explic</span></li><li class="evrow" data-detail="{&quot;fields&quot;: [[&quot;Subject&quot;, &quot;[Wednesday -&gt; all agents] RESOLVED: the phantom pane instructions were Claude&#x27;s own ghost suggestions — you were innocent, v1.2 stands stronger&quot;], [&quot;From&quot;, &quot;Wednesday &lt;wednesday-agent@agentmail.to&gt;&quot;], [&quot;Inboxes&quot;, &quot;wednesday-agent+coagent&quot;], [&quot;Received&quot;, &quot;2026-08-06 09:16&quot;]]}"><span class="dot flagslot"></span><span class="src">wednesday-agent+</span><span class="time">08-06 09:16</span><span class="ev">[Wednesday -&gt; all agents] RESOLVED: the phantom pane instructions were Claude&#x27;s </span></li><li class="evrow" data-detail="{&quot;fields&quot;: [[&quot;Subject&quot;, &quot;[Wednesday -&gt; Datasec/NexusAI] WED-80 recon (no changes): does tester feedback reach an agent as instructions?&quot;], [&quot;From&quot;, &quot;Wednesday &lt;wednesday-agent@agentmail.to&gt;&quot;], [&quot;Inboxes&quot;, &quot;wednesday-agent+coagent&quot;], [&quot;Received&quot;, &quot;2026-08-06 06:41&quot;]]}"><span class="dot flagslot"></span><span class="src">wednesday-agent+</span><span class="time">08-06 06:41</span><span class="ev">[Wednesday -&gt; Datasec/NexusAI] WED-80 recon (no changes): does tester feedback r</span></li><li class="evrow" data-detail="{&quot;fields&quot;: [[&quot;Subject&quot;, &quot;[Wednesday -&gt; all agents] METHOD RULE from today&#x27;s KS-563 ship: a green LOCAL proof is not evidence about an env that differs by design&quot;], [&quot;From&quot;, &quot;Wednesday &lt;wednesday-agent@agentmail.to&gt;&quot;], [&quot;Inboxes&quot;, &quot;wednesday-agent+coagent&quot;], [&quot;Received&quot;, &quot;2026-08-06 06:38&quot;]]}"><span class="dot flagslot"></span><span class="src">wednesday-agent+</span><span class="time">08-06 06:38</span><span class="ev">[Wednesday -&gt; all agents] METHOD RULE from today&#x27;s KS-563 ship: a green LOCAL pr</span></li></ul><p class='note'>NB. fleet inboxes (wednesday-agent + coagent), read-only — acks stay session-scoped; your personal mailboxes join in Phase 2.</p></div></section>
+</div><div class="gridsep" data-before="news"><span>World &amp; News</span></div><div class="grid">
+<section class="tilebox" data-tile="news" data-w="3" data-h="0" style="font-size:1.0em"><div class="tilehead"><span class="grip" title="drag to move">&#8942;&#8942;</span><h2>News</h2><a class="headlink" href="area_news.html">full page &#10530;</a><span class="sizer"><button data-size="-" title="smaller text">A&#8722;</button><button data-size="+" title="bigger text">A+</button><button data-dim="w-" title="narrower">&#8676;</button><button data-dim="w+" title="wider">&#8677;</button><button data-dim="h-" title="shorter (0 = full height)">&#8593;</button><button data-dim="h+" title="taller / adds scroller">&#8595;</button></span></div><div class="tilebody"><details class='srcweek' open><summary>War & geopolitics <span class='count'>3</span></summary><ul class='events plain newslist'><li class="evrow newsrow" data-detail="{&quot;fields&quot;: [[&quot;Headline&quot;, &quot;In Odesa, no-one is safe from Russia&#x27;s new Black Sea strikes&quot;], [&quot;Source&quot;, &quot;BBC World · Thu, 06 Aug 2026 05:00&quot;], [&quot;Summary&quot;, &quot;Blackened ships and smashed docks mark Russia&#x27;s recent surge of attacks on Ukraine&#x27;s coastline.&quot;]], &quot;url&quot;: &quot;https://www.bbc.co.uk/news/articles/cy8ev4y172yo?at_medium=RSS&amp;at_campaign=rss&quot;}" data-key="news|In Odesa, no-one is safe from Russia&#x27;s new Black Sea strikes"><button class="flagbtn" data-flag="news|In Odesa, no-one is safe from Russia&#x27;s new Black Sea strikes" data-flabel="In Odesa, no-one is safe from Russia&#x27;s new Black Sea strikes" data-fkind="news" data-fpayload="{&quot;title&quot;: &quot;In Odesa, no-one is safe from Russia&#x27;s new Black Sea strikes&quot;, &quot;summary&quot;: &quot;Blackened ships and smashed docks mark Russia&#x27;s recent surge of attacks on Ukraine&#x27;s coastline.&quot;, &quot;link&quot;: &quot;https://www.bbc.co.uk/news/articles/cy8ev4y172yo?at_medium=RSS&amp;at_campaign=rss&quot;, &quot;source&quot;: &quot;BBC World&quot;, &quot;date&quot;: &quot;Thu, 06 Aug 2026 05:00&quot;}" title="flag for Wed">&#9873;</button><div class="nbody"><div class="nhead">In Odesa, no-one is safe from Russia&#x27;s new Black Sea strikes</div><div class="ntake">Blackened ships and smashed docks mark Russia&#x27;s recent surge of attacks on Ukraine&#x27;s coastline.</div></div></li><li class="evrow newsrow" data-detail="{&quot;fields&quot;: [[&quot;Headline&quot;, &quot;Iran says deal with Oman on Strait of Hormuz is in final stages&quot;], [&quot;Source&quot;, &quot;BBC World · Thu, 06 Aug 2026 01:19&quot;], [&quot;Summary&quot;, &quot;Neither the US or Oman have commented on the proposed agreement on the vital waterway.&quot;]], &quot;url&quot;: &quot;https://www.bbc.co.uk/news/articles/ckg9d3eyeggo?at_medium=RSS&amp;at_campaign=rss&quot;}" data-key="news|Iran says deal with Oman on Strait of Hormuz is in final stages"><button class="flagbtn" data-flag="news|Iran says deal with Oman on Strait of Hormuz is in final stages" data-flabel="Iran says deal with Oman on Strait of Hormuz is in final stages" data-fkind="news" data-fpayload="{&quot;title&quot;: &quot;Iran says deal with Oman on Strait of Hormuz is in final stages&quot;, &quot;summary&quot;: &quot;Neither the US or Oman have commented on the proposed agreement on the vital waterway.&quot;, &quot;link&quot;: &quot;https://www.bbc.co.uk/news/articles/ckg9d3eyeggo?at_medium=RSS&amp;at_campaign=rss&quot;, &quot;source&quot;: &quot;BBC World&quot;, &quot;date&quot;: &quot;Thu, 06 Aug 2026 01:19&quot;}" title="flag for Wed">&#9873;</button><div class="nbody"><div class="nhead">Iran says deal with Oman on Strait of Hormuz is in final stages</div><div class="ntake">Neither the US or Oman have commented on the proposed agreement on the vital waterway.</div></div></li><li class="evrow newsrow" data-detail="{&quot;fields&quot;: [[&quot;Headline&quot;, &quot;Indian journalist Tarun Tejpal convicted in 2013 rape case&quot;], [&quot;Source&quot;, &quot;BBC World · Thu, 06 Aug 2026 07:27&quot;], [&quot;Summary&quot;, &quot;The Goa bench of the Bombay High Court overturned a 2021 trial court verdict clearing Tejpal of all charges.&quot;]], &quot;url&quot;: &quot;https://www.bbc.co.uk/news/articles/cx2v551w9v8o?at_medium=RSS&amp;at_campaign=rss&quot;}" data-key="news|Indian journalist Tarun Tejpal convicted in 2013 rape case"><button class="flagbtn" data-flag="news|Indian journalist Tarun Tejpal convicted in 2013 rape case" data-flabel="Indian journalist Tarun Tejpal convicted in 2013 rape case" data-fkind="news" data-fpayload="{&quot;title&quot;: &quot;Indian journalist Tarun Tejpal convicted in 2013 rape case&quot;, &quot;summary&quot;: &quot;The Goa bench of the Bombay High Court overturned a 2021 trial court verdict clearing Tejpal of all charges.&quot;, &quot;link&quot;: &quot;https://www.bbc.co.uk/news/articles/cx2v551w9v8o?at_medium=RSS&amp;at_campaign=rss&quot;, &quot;source&quot;: &quot;BBC World&quot;, &quot;date&quot;: &quot;Thu, 06 Aug 2026 07:27&quot;}" title="flag for Wed">&#9873;</button><div class="nbody"><div class="nhead">Indian journalist Tarun Tejpal convicted in 2013 rape case</div><div class="ntake">The Goa bench of the Bombay High Court overturned a 2021 trial court verdict clearing Tejpal of all charges.</div></div></li></ul></details>
+<details class='srcweek' open><summary>Tech <span class='count'>3</span></summary><ul class='events plain newslist'><li class="evrow newsrow" data-detail="{&quot;fields&quot;: [[&quot;Headline&quot;, &quot;Thousands of servers can be backdoored by exploiting buggy motherboard controllers&quot;], [&quot;Source&quot;, &quot;Ars Technica · Wed, 05 Aug 2026 22:35&quot;], [&quot;Summary&quot;, &quot;Baseboard management controllers from the world&#x27;s biggest manufacturers are a security mess.&quot;]], &quot;url&quot;: &quot;https://arstechnica.com/security/2026/08/thousands-of-servers-can-be-backdoored-by-exploiting-buggy-motherboard-controllers/&quot;}" data-key="news|Thousands of servers can be backdoored by exploiting buggy motherboard controllers"><button class="flagbtn" data-flag="news|Thousands of servers can be backdoored by exploiting buggy motherboard controllers" data-flabel="Thousands of servers can be backdoored by exploiting buggy motherboard controllers" data-fkind="news" data-fpayload="{&quot;title&quot;: &quot;Thousands of servers can be backdoored by exploiting buggy motherboard controllers&quot;, &quot;summary&quot;: &quot;Baseboard management controllers from the world&#x27;s biggest manufacturers are a security mess.&quot;, &quot;link&quot;: &quot;https://arstechnica.com/security/2026/08/thousands-of-servers-can-be-backdoored-by-exploiting-buggy-motherboard-controllers/&quot;, &quot;source&quot;: &quot;Ars Technica&quot;, &quot;date&quot;: &quot;Wed, 05 Aug 2026 22:35&quot;}" title="flag for Wed">&#9873;</button><div class="nbody"><div class="nhead">Thousands of servers can be backdoored by exploiting buggy motherboard controllers</div><div class="ntake">Baseboard management controllers from the world&#x27;s biggest manufacturers are a security mess.</div></div></li><li class="evrow newsrow" data-detail="{&quot;fields&quot;: [[&quot;Headline&quot;, &quot;Schwartz confirmed as CDC director after bungling confirmation hearing&quot;], [&quot;Source&quot;, &quot;Ars Technica · Wed, 05 Aug 2026 21:03&quot;], [&quot;Summary&quot;, &quot;Schwartz is well-qualified for the role, but crashed and burned in Senate hearing.&quot;]], &quot;url&quot;: &quot;https://arstechnica.com/health/2026/08/schwartz-confirmed-as-cdc-director-after-bungling-confirmation-hearing/&quot;}" data-key="news|Schwartz confirmed as CDC director after bungling confirmation hearing"><button class="flagbtn" data-flag="news|Schwartz confirmed as CDC director after bungling confirmation hearing" data-flabel="Schwartz confirmed as CDC director after bungling confirmation hearing" data-fkind="news" data-fpayload="{&quot;title&quot;: &quot;Schwartz confirmed as CDC director after bungling confirmation hearing&quot;, &quot;summary&quot;: &quot;Schwartz is well-qualified for the role, but crashed and burned in Senate hearing.&quot;, &quot;link&quot;: &quot;https://arstechnica.com/health/2026/08/schwartz-confirmed-as-cdc-director-after-bungling-confirmation-hearing/&quot;, &quot;source&quot;: &quot;Ars Technica&quot;, &quot;date&quot;: &quot;Wed, 05 Aug 2026 21:03&quot;}" title="flag for Wed">&#9873;</button><div class="nbody"><div class="nhead">Schwartz confirmed as CDC director after bungling confirmation hearing</div><div class="ntake">Schwartz is well-qualified for the role, but crashed and burned in Senate hearing.</div></div></li><li class="evrow newsrow" data-detail="{&quot;fields&quot;: [[&quot;Headline&quot;, &quot;Anthropic’s AI used fake identities, malware in rogue attack on GitHub project&quot;], [&quot;Source&quot;, &quot;Ars Technica · Wed, 05 Aug 2026 20:47&quot;], [&quot;Summary&quot;, &quot;Anthropic and OpenAI models’ unprompted actions forced halt to UK cyber tests.&quot;]], &quot;url&quot;: &quot;https://arstechnica.com/security/2026/08/anthropics-ai-used-fake-identities-malware-in-rogue-attack-on-github-project/&quot;}" data-key="news|Anthropic’s AI used fake identities, malware in rogue attack on GitHub project"><button class="flagbtn" data-flag="news|Anthropic’s AI used fake identities, malware in rogue attack on GitHub project" data-flabel="Anthropic’s AI used fake identities, malware in rogue attack on GitHub project" data-fkind="news" data-fpayload="{&quot;title&quot;: &quot;Anthropic’s AI used fake identities, malware in rogue attack on GitHub project&quot;, &quot;summary&quot;: &quot;Anthropic and OpenAI models’ unprompted actions forced halt to UK cyber tests.&quot;, &quot;link&quot;: &quot;https://arstechnica.com/security/2026/08/anthropics-ai-used-fake-identities-malware-in-rogue-attack-on-github-project/&quot;, &quot;source&quot;: &quot;Ars Technica&quot;, &quot;date&quot;: &quot;Wed, 05 Aug 2026 20:47&quot;}" title="flag for Wed">&#9873;</button><div class="nbody"><div class="nhead">Anthropic’s AI used fake identities, malware in rogue attack on GitHub project</div><div class="ntake">Anthropic and OpenAI models’ unprompted actions forced halt to UK cyber tests.</div></div></li></ul></details>
+<details class='srcweek' open><summary>Quantum <span class='count'>3</span></summary><ul class='events plain newslist'><li class="evrow newsrow" data-detail="{&quot;fields&quot;: [[&quot;Headline&quot;, &quot;Unifying quantum measurement constructions via a relative-entropy minimum change principle&quot;], [&quot;Source&quot;, &quot;arXiv quant-ph · Thu, 06 Aug 2026 00:00&quot;], [&quot;Summary&quot;, &quot;arXiv:2608.04055v1 Announce Type: new Abstract: The minimum change principle provides an information-theoretic characterization of the Bayes reversal channel in classical probability theory and has recently been proposed as a framework for extending Bayes&#x27; rule to quantum information theory. Using quantum relative entropy, we investigate a minimum change principle for the setting of quantum statis&quot;]], &quot;url&quot;: &quot;https://arxiv.org/abs/2608.04055&quot;}" data-key="news|Unifying quantum measurement constructions via a relative-entropy minimum change principle"><button class="flagbtn" data-flag="news|Unifying quantum measurement constructions via a relative-entropy minimum change principle" data-flabel="Unifying quantum measurement constructions via a relative-entropy minimum change principle" data-fkind="news" data-fpayload="{&quot;title&quot;: &quot;Unifying quantum measurement constructions via a relative-entropy minimum change principle&quot;, &quot;summary&quot;: &quot;arXiv:2608.04055v1 Announce Type: new Abstract: The minimum change principle provides an information-theoretic characterization of the Bayes reversal channel in classical probability theory and has recently been proposed as a framework for extending Bayes&#x27; rule to quantum information theory. Using quantum relative entropy, we investigate a minimum change principle for the setting of quantum statis&quot;, &quot;link&quot;: &quot;https://arxiv.org/abs/2608.04055&quot;, &quot;source&quot;: &quot;arXiv quant-ph&quot;, &quot;date&quot;: &quot;Thu, 06 Aug 2026 00:00&quot;}" title="flag for Wed">&#9873;</button><div class="nbody"><div class="nhead">Unifying quantum measurement constructions via a relative-entropy minimum change principle</div><div class="ntake">arXiv:2608.04055v1 Announce Type: new Abstract: The minimum change principle provides an information-theoretic characterization of the Bayes</div></div></li><li class="evrow newsrow" data-detail="{&quot;fields&quot;: [[&quot;Headline&quot;, &quot;Graph-Aware Exact Branch-and-Bound with Device Profiles for Static Qubit Allocation&quot;], [&quot;Source&quot;, &quot;arXiv quant-ph · Thu, 06 Aug 2026 00:00&quot;], [&quot;Summary&quot;, &quot;arXiv:2608.04058v1 Announce Type: new Abstract: Static qubit allocation maps a circuit&#x27;s logical qubits to a sparse physical device while minimising an interaction-weighted physical-distance cost function, yielding a rectangular quadratic assignment problem. Existing work combines strong lower bounds with distributed branch-and-bound. We integrate graph-aware exact reductions with an engineering b&quot;]], &quot;url&quot;: &quot;https://arxiv.org/abs/2608.04058&quot;}" data-key="news|Graph-Aware Exact Branch-and-Bound with Device Profiles for Static Qubit Allocation"><button class="flagbtn" data-flag="news|Graph-Aware Exact Branch-and-Bound with Device Profiles for Static Qubit Allocation" data-flabel="Graph-Aware Exact Branch-and-Bound with Device Profiles for Static Qubit Allocation" data-fkind="news" data-fpayload="{&quot;title&quot;: &quot;Graph-Aware Exact Branch-and-Bound with Device Profiles for Static Qubit Allocation&quot;, &quot;summary&quot;: &quot;arXiv:2608.04058v1 Announce Type: new Abstract: Static qubit allocation maps a circuit&#x27;s logical qubits to a sparse physical device while minimising an interaction-weighted physical-distance cost function, yielding a rectangular quadratic assignment problem. Existing work combines strong lower bounds with distributed branch-and-bound. We integrate graph-aware exact reductions with an engineering b&quot;, &quot;link&quot;: &quot;https://arxiv.org/abs/2608.04058&quot;, &quot;source&quot;: &quot;arXiv quant-ph&quot;, &quot;date&quot;: &quot;Thu, 06 Aug 2026 00:00&quot;}" title="flag for Wed">&#9873;</button><div class="nbody"><div class="nhead">Graph-Aware Exact Branch-and-Bound with Device Profiles for Static Qubit Allocation</div><div class="ntake">arXiv:2608.04058v1 Announce Type: new Abstract: Static qubit allocation maps a circuit&#x27;s logical qubits to a sparse physical device while mi</div></div></li><li class="evrow newsrow" data-detail="{&quot;fields&quot;: [[&quot;Headline&quot;, &quot;Guiding Compiler Optimizations for Neutral Atom Quantum Computers Through Visualizations&quot;], [&quot;Source&quot;, &quot;arXiv quant-ph · Thu, 06 Aug 2026 00:00&quot;], [&quot;Summary&quot;, &quot;arXiv:2608.04081v1 Announce Type: new Abstract: The scale of Neutral Atom (NA) quantum computers requires automated compilation tools. Designing the required heuristic methods demands a deep understanding of complex hardware trade-offs, for which visualizations can provide crucial insights. This work introduces NAViz, the first publicly available app to visualize quantum computations on NA devices&quot;]], &quot;url&quot;: &quot;https://arxiv.org/abs/2608.04081&quot;}" data-key="news|Guiding Compiler Optimizations for Neutral Atom Quantum Computers Through Visualizations"><button class="flagbtn" data-flag="news|Guiding Compiler Optimizations for Neutral Atom Quantum Computers Through Visualizations" data-flabel="Guiding Compiler Optimizations for Neutral Atom Quantum Computers Through Visualizations" data-fkind="news" data-fpayload="{&quot;title&quot;: &quot;Guiding Compiler Optimizations for Neutral Atom Quantum Computers Through Visualizations&quot;, &quot;summary&quot;: &quot;arXiv:2608.04081v1 Announce Type: new Abstract: The scale of Neutral Atom (NA) quantum computers requires automated compilation tools. Designing the required heuristic methods demands a deep understanding of complex hardware trade-offs, for which visualizations can provide crucial insights. This work introduces NAViz, the first publicly available app to visualize quantum computations on NA devices&quot;, &quot;link&quot;: &quot;https://arxiv.org/abs/2608.04081&quot;, &quot;source&quot;: &quot;arXiv quant-ph&quot;, &quot;date&quot;: &quot;Thu, 06 Aug 2026 00:00&quot;}" title="flag for Wed">&#9873;</button><div class="nbody"><div class="nhead">Guiding Compiler Optimizations for Neutral Atom Quantum Computers Through Visualizations</div><div class="ntake">arXiv:2608.04081v1 Announce Type: new Abstract: The scale of Neutral Atom (NA) quantum computers requires automated compilation tools. Desig</div></div></li></ul></details>
+<details class='srcweek' open><summary>Security <span class='count'>3</span></summary><ul class='events plain newslist'><li class="evrow newsrow" data-detail="{&quot;fields&quot;: [[&quot;Headline&quot;, &quot;Attackers Compile khunt Inside Oracle to Turn SQL Injection Into Windows SYSTEM Access&quot;], [&quot;Source&quot;, &quot;The Hacker News · Thu, 06 Aug 2026 14:49&quot;], [&quot;Summary&quot;, &quot;Attackers broke into an organization&#x27;s Oracle database through a SQL injection flaw in a public-facing web application, then installed a post-exploitation toolkit without writing an executable to disk. They fed Java source code to the database, let Oracle compile it into stored schema objects, and ran commands from inside the database engine. Huntress, which tracks the toolkit as khunt,&quot;]], &quot;url&quot;: &quot;https://thehackernews.com/2026/08/attackers-compile-khunt-inside-oracle.html&quot;}" data-key="news|Attackers Compile khunt Inside Oracle to Turn SQL Injection Into Windows SYSTEM Access"><button class="flagbtn" data-flag="news|Attackers Compile khunt Inside Oracle to Turn SQL Injection Into Windows SYSTEM Access" data-flabel="Attackers Compile khunt Inside Oracle to Turn SQL Injection Into Windows SYSTEM Access" data-fkind="news" data-fpayload="{&quot;title&quot;: &quot;Attackers Compile khunt Inside Oracle to Turn SQL Injection Into Windows SYSTEM Access&quot;, &quot;summary&quot;: &quot;Attackers broke into an organization&#x27;s Oracle database through a SQL injection flaw in a public-facing web application, then installed a post-exploitation toolkit without writing an executable to disk. They fed Java source code to the database, let Oracle compile it into stored schema objects, and ran commands from inside the database engine. Huntress, which tracks the toolkit as khunt,&quot;, &quot;link&quot;: &quot;https://thehackernews.com/2026/08/attackers-compile-khunt-inside-oracle.html&quot;, &quot;source&quot;: &quot;The Hacker News&quot;, &quot;date&quot;: &quot;Thu, 06 Aug 2026 14:49&quot;}" title="flag for Wed">&#9873;</button><div class="nbody"><div class="nhead">Attackers Compile khunt Inside Oracle to Turn SQL Injection Into Windows SYSTEM Access</div><div class="ntake">Attackers broke into an organization&#x27;s Oracle database through a SQL injection flaw in a public-facing web application, then installed a pos</div></div></li><li class="evrow newsrow" data-detail="{&quot;fields&quot;: [[&quot;Headline&quot;, &quot;AWS, Google, and Vercel Agent Flaws Let Attackers Trigger Tools Without Running the Model&quot;], [&quot;Source&quot;, &quot;The Hacker News · Thu, 06 Aug 2026 14:27&quot;], [&quot;Summary&quot;, &quot;Security flaws in agent infrastructure from Amazon Web Services (AWS), Google, and Vercel let untrusted or forged instructions reach an agent&#x27;s tools with no check that a model turn had authorized them. In several of the attack paths, the model never ran at all, so system prompts, content filters, and model-level guardrails never got a chance to intervene. The affected products include Amazon&quot;]], &quot;url&quot;: &quot;https://thehackernews.com/2026/08/aws-google-and-vercel-patch-agent-flaws.html&quot;}" data-key="news|AWS, Google, and Vercel Agent Flaws Let Attackers Trigger Tools Without Running the Model"><button class="flagbtn" data-flag="news|AWS, Google, and Vercel Agent Flaws Let Attackers Trigger Tools Without Running the Model" data-flabel="AWS, Google, and Vercel Agent Flaws Let Attackers Trigger Tools Without Running the Model" data-fkind="news" data-fpayload="{&quot;title&quot;: &quot;AWS, Google, and Vercel Agent Flaws Let Attackers Trigger Tools Without Running the Model&quot;, &quot;summary&quot;: &quot;Security flaws in agent infrastructure from Amazon Web Services (AWS), Google, and Vercel let untrusted or forged instructions reach an agent&#x27;s tools with no check that a model turn had authorized them. In several of the attack paths, the model never ran at all, so system prompts, content filters, and model-level guardrails never got a chance to intervene. The affected products include Amazon&quot;, &quot;link&quot;: &quot;https://thehackernews.com/2026/08/aws-google-and-vercel-patch-agent-flaws.html&quot;, &quot;source&quot;: &quot;The Hacker News&quot;, &quot;date&quot;: &quot;Thu, 06 Aug 2026 14:27&quot;}" title="flag for Wed">&#9873;</button><div class="nbody"><div class="nhead">AWS, Google, and Vercel Agent Flaws Let Attackers Trigger Tools Without Running the Model</div><div class="ntake">Security flaws in agent infrastructure from Amazon Web Services (AWS), Google, and Vercel let untrusted or forged instructions reach an agen</div></div></li><li class="evrow newsrow" data-detail="{&quot;fields&quot;: [[&quot;Headline&quot;, &quot;Chinese-Made Zbtlink Routers Ship With Backdoor That Opens Unauthenticated Root Shells&quot;], [&quot;Source&quot;, &quot;The Hacker News · Thu, 06 Aug 2026 13:35&quot;], [&quot;Summary&quot;, &quot;Cybersecurity researchers have disclosed details of a \&quot;factory-shipped backdoor\&quot; implanted in at least 20 Chinese router models from Zbtlink. According to a new report from VulnCheck, the implant appears in all 21 firmware images currently available from Zbtlink that span more than 2 years. The backdoors are designed such that they start automatically and attempt to beacon to Chinese&quot;]], &quot;url&quot;: &quot;https://thehackernews.com/2026/08/chinese-made-zbtlink-routers-ship-with.html&quot;}" data-key="news|Chinese-Made Zbtlink Routers Ship With Backdoor That Opens Unauthenticated Root Shells"><button class="flagbtn" data-flag="news|Chinese-Made Zbtlink Routers Ship With Backdoor That Opens Unauthenticated Root Shells" data-flabel="Chinese-Made Zbtlink Routers Ship With Backdoor That Opens Unauthenticated Root Shells" data-fkind="news" data-fpayload="{&quot;title&quot;: &quot;Chinese-Made Zbtlink Routers Ship With Backdoor That Opens Unauthenticated Root Shells&quot;, &quot;summary&quot;: &quot;Cybersecurity researchers have disclosed details of a \&quot;factory-shipped backdoor\&quot; implanted in at least 20 Chinese router models from Zbtlink. According to a new report from VulnCheck, the implant appears in all 21 firmware images currently available from Zbtlink that span more than 2 years. The backdoors are designed such that they start automatically and attempt to beacon to Chinese&quot;, &quot;link&quot;: &quot;https://thehackernews.com/2026/08/chinese-made-zbtlink-routers-ship-with.html&quot;, &quot;source&quot;: &quot;The Hacker News&quot;, &quot;date&quot;: &quot;Thu, 06 Aug 2026 13:35&quot;}" title="flag for Wed">&#9873;</button><div class="nbody"><div class="nhead">Chinese-Made Zbtlink Routers Ship With Backdoor That Opens Unauthenticated Root Shells</div><div class="ntake">Cybersecurity researchers have disclosed details of a &quot;factory-shipped backdoor&quot; implanted in at least 20 Chinese router models from Zbtlink</div></div></li></ul></details>
+<p class="note">NB. takes are source summaries for now — Wednesday-curated takes arrive with the morning-generation duty · click a headline for the full summary + article link · &#9873; keeps an item across tomorrow's refresh until you clear it</p></div></section>
+</div></div>
+<script type="application/json" id="tile-groups-state">{}</script>
+<div id="ctxmenu" hidden></div>
+<div id="modal-backdrop" hidden><div id="modal">
+ <button id="modal-close" title="close">&#10005;</button>
+ <div id="modal-body"></div>
+ <button id="modal-mute" hidden>de-prioritise / restore</button>
+ <div id="modal-park" hidden>
+  <button id="park-promote">&#8599; promote to WED ticket</button>
+  <button id="park-drop">drop</button>
+  <button id="park-discuss">discuss with Wed</button>
+  <span id="modal-park-msg"></span>
+ </div>
+</div></div>
+<footer>feeds: <span class="ok">personal 19:44</span> · <span class="ok">secuura 19:44</span> · <span class="ok">datasec 19:44</span> · <span class="ok">linear 19:44</span> · <span class="ok">brain 19:44</span> · regenerated 19:45:34 · auto-refresh 5 min (paused while organising) · right-click any row for actions · read-only everywhere</footer>
+<script>
+// Bottom-align every tile's trailing note / input (Kam round 7): wrap the CONTENT
+// in .scrollpart so the note or input box sits on the tile floor whatever the
+// content height, and never overlaps it.
+document.querySelectorAll(".tilebody").forEach(body => {
+  if (body.querySelector(":scope > .scrollpart")) return;      // chat already has one
+  const kids = [...body.children];
+  const isTail = el => el.matches(".note, .addbox, .chatinput, .parkadd");
+  let cut = kids.length;
+  while (cut > 0 && isTail(kids[cut - 1])) cut--;
+  if (cut === kids.length || cut === 0) return;                // nothing to pin / nothing above
+  const wrap = document.createElement("div");
+  wrap.className = "scrollpart";
+  kids.slice(0, cut).forEach(k => wrap.appendChild(k));
+  body.insertBefore(wrap, body.firstChild);
+});
+async function api(path, payload) {
+  const r = await fetch(path, {method:"POST", headers:{"Content-Type":"application/json"},
+    body: JSON.stringify(payload)});
+  return r.json();
+}
+let organise = false;
+setInterval(() => {
+  const ct = document.getElementById("chat-text");
+  if (!organise && document.getElementById("customise-panel").hidden
+      && document.getElementById("views-panel").hidden
+      && document.getElementById("acting-panel").hidden
+      && document.getElementById("archived-panel").hidden
+      && !(ct && (ct.value.trim() || document.activeElement === ct))) location.reload();
+}, 300000);
+// ── drill-down modal (mute lives inside it now) ──
+const mb = document.getElementById("modal-backdrop"), mbody = document.getElementById("modal-body"),
+      mmute = document.getElementById("modal-mute");
+let modalKey = null, parkCur = null;
+function openDetail(li) {
+  const d = JSON.parse(li.dataset.detail);
+  mbody.innerHTML = d.fields.map(f =>
+    `<div class="mrow"><div class="mk">${f[0]}</div><div class="mv"></div></div>`).join("");
+  [...mbody.querySelectorAll(".mv")].forEach((el, i) => el.textContent = d.fields[i][1]);
+  modalKey = d.key || null;
+  mmute.hidden = !modalKey;
+  parkCur = d.park || null;
+  document.getElementById("modal-park").hidden = !parkCur;
+  if (parkCur) {
+    for (const id of ["park-promote", "park-drop", "park-discuss"]) {
+      const b = document.getElementById(id); b.disabled = false;
+    }
+    document.getElementById("park-promote").hidden = parkCur.status !== "open";
+    document.getElementById("modal-park-msg").textContent = "";
+  }
+  const oldLink = document.getElementById("modal-link");
+  if (oldLink) oldLink.remove();
+  if (d.url) {
+    const a = document.createElement("a");
+    a.id = "modal-link"; a.href = d.url; a.target = "_blank"; a.rel = "noopener";
+    a.textContent = "open article ↗";
+    document.getElementById("modal").appendChild(a);
+  }
+  mb.hidden = false;
+}
+document.querySelectorAll("li.evrow").forEach(li => li.addEventListener("click", (ev) => {
+  if (organise || ev.target.closest("button") || ev.target.closest("a")) return;
+  openDetail(li);
+}));
+// ── right-click context menu (WED-70): expand · prioritise/pin · do now · discuss · archive ──
+const PINNED_JS = [];
+const cm = document.getElementById("ctxmenu");
+function cmHide() { cm.hidden = true; }
+document.addEventListener("click", cmHide);
+document.addEventListener("contextmenu", e => {
+  const li = e.target.closest("li[data-key], li[data-wed], li[data-pin], li.evrow");
+  if (!li || organise) return;               // everywhere else keeps the native menu
+  e.preventDefault();
+  const wed = li.dataset.wed || null, key = li.dataset.key || null, pin = li.dataset.pin || null;
+  const text = ((li.querySelector(".nhead") || li.querySelector(".ev") || li).textContent || "").trim().slice(0, 200);
+  const label = wed ? wed + " — " + text : text;
+  const items = [];
+  if (li.dataset.detail) items.push(["expand", () => openDetail(li)]);
+  else if (wed) items.push(["expand in Linear ↗",
+    () => window.open("https://linear.app/wednesday-agent/issue/" + wed, "_blank")]);
+  if (wed) items.push(["prioritise — set P1",
+    async () => { await api("/api/prioritise", {id: wed}); location.reload(); }]);
+  else if (pin || PINNED_JS.includes(text)) items.push(["unpin from flags",
+    async () => { await api("/api/pin", {text: pin || text}); location.reload(); }]);
+  else items.push(["pin to flags",
+    async () => { await api("/api/pin", {text}); location.reload(); }]);
+  items.push(["do now — set focus", async () => {
+    if (wed) await api("/api/start", {id: wed});
+    await api("/api/focus", {text: label});
+    location.reload();
+  }]);
+  const srcTile = li.closest(".tilebox");
+  if ((wed || key) && srcTile && (srcTile.dataset.tile === "board" || srcTile.dataset.tile === "tickets"))
+    items.push(["action now ⚡", async () => {
+      await api("/api/actionnow", {key: wed || key, label});
+      location.reload();
+    }]);
+  items.push(["discuss with Wednesday",
+    async () => { await api("/api/chat", {text: "Discuss: " + label}); location.reload(); }]);
+  if (wed) items.push(["archive ticket",
+    async () => { await api("/api/archive", {id: wed, label}); location.reload(); }]);
+  else if (key) items.push(["archive — hide row",
+    async () => { await api("/api/archive", {key, label}); location.reload(); }]);
+  cm.innerHTML = "";
+  const hd = document.createElement("div"); hd.className = "cmk"; hd.textContent = label; cm.appendChild(hd);
+  for (const [lab, fn] of items) {
+    const b = document.createElement("button"); b.textContent = lab;
+    b.addEventListener("click", ev => { ev.stopPropagation(); cmHide(); fn(); });
+    cm.appendChild(b);
+  }
+  cm.hidden = false;
+  cm.style.left = Math.min(e.clientX, innerWidth - cm.offsetWidth - 8) + "px";
+  cm.style.top = Math.min(e.clientY, innerHeight - cm.offsetHeight - 8) + "px";
+});
+document.getElementById("focus-clear")?.addEventListener("click", async () => {
+  await api("/api/focus", {text: ""}); location.reload();
+});
+document.getElementById("modal-close").addEventListener("click", () => mb.hidden = true);
+mb.addEventListener("click", e => { if (e.target === mb) mb.hidden = true; });
+document.addEventListener("keydown", e => { if (e.key === "Escape") { mb.hidden = true; cmHide(); } });
+mmute.addEventListener("click", async () => {
+  if (!modalKey) return;
+  const r = await api("/api/mute", {key: modalKey});
+  if (r.ok) location.reload();
+});
+// ── parking-lot modal actions (inline messages only — no browser dialogs) ──
+const pmsg = document.getElementById("modal-park-msg");
+document.getElementById("park-promote").addEventListener("click", async e => {
+  if (!parkCur) return;
+  e.target.disabled = true; pmsg.textContent = "creating WED ticket…";
+  const r = await api("/api/parkpromote", {file: parkCur.file});
+  if (r.ok) { pmsg.textContent = "promoted → " + r.created; setTimeout(() => location.reload(), 800); }
+  else { pmsg.textContent = r.error || "failed"; e.target.disabled = false; }
+});
+document.getElementById("park-drop").addEventListener("click", async e => {
+  if (!parkCur) return;
+  e.target.disabled = true; pmsg.textContent = "dropping…";
+  const r = await api("/api/parkdrop", {file: parkCur.file});
+  if (r.ok) location.reload();
+  else { pmsg.textContent = r.error || "failed"; e.target.disabled = false; }
+});
+document.getElementById("park-discuss").addEventListener("click", async e => {
+  if (!parkCur) return;
+  e.target.disabled = true; pmsg.textContent = "sending to chat…";
+  const r = await api("/api/parkdiscuss", {file: parkCur.file});
+  if (r.ok) location.reload();
+  else { pmsg.textContent = r.error || "failed"; e.target.disabled = false; }
+});
+// ── parking-lot add flow: the two buttons ARE the mode choice (no default) ──
+const parkAdd = async mode => {
+  const t = document.getElementById("park-text"), s = document.getElementById("park-src"),
+        m = document.getElementById("park-msg"),
+        bp = document.getElementById("park-add-p"), br = document.getElementById("park-add-r");
+  if (!t.value.trim()) { m.textContent = "type the one-liner first"; t.focus(); return; }
+  bp.disabled = true; br.disabled = true;
+  m.textContent = mode === "research" ? "parking for research…" : "parking…";
+  const r = await api("/api/parkadd", {text: t.value, mode, source: s.value});
+  if (r.ok) { m.textContent = "parked: " + r.file; setTimeout(() => location.reload(), 700); }
+  else { m.textContent = r.error || "failed"; bp.disabled = false; br.disabled = false; }
+};
+document.getElementById("park-add-p")?.addEventListener("click", () => parkAdd("parked"));
+document.getElementById("park-add-r")?.addEventListener("click", () => parkAdd("research"));
+document.getElementById("park-text")?.addEventListener("keydown", e => {
+  if (e.key === "Enter") document.getElementById("park-msg").textContent =
+    "choose: just park it, or Wednesday researches it";
+});
+// ── clickable legend: hide a source everywhere (re-enable in customise) ──
+const HIDDEN_GROUPS_JS = [];
+document.querySelectorAll(".legchip").forEach(c => c.addEventListener("click", async () => {
+  const hg = HIDDEN_GROUPS_JS.concat([c.dataset.group]);
+  const r = await api("/api/layout", {hidden_groups: hg});
+  if (r.ok) location.reload();
+}));
+document.querySelectorAll(".acts button:not(.flagbtn)").forEach(b => b.addEventListener("click", async () => {
+  b.disabled = true; b.textContent = "…";
+  const r = await api("/api/" + b.dataset.act, {id: b.dataset.id});
+  if (r.ok) location.reload(); else { b.textContent = "!"; b.title = r.error || "failed"; }
+}));
+const addBtn = document.getElementById("add-btn");
+if (addBtn) addBtn.addEventListener("click", async () => {
+  const t = document.getElementById("add-title"), m = document.getElementById("add-msg");
+  if (!t.value.trim()) { m.textContent = "type something first"; return; }
+  addBtn.disabled = true; m.textContent = "adding…";
+  const r = await api("/api/add", {title: t.value, priority: +document.getElementById("add-prio").value});
+  if (r.ok) { m.textContent = r.created + " added"; setTimeout(() => location.reload(), 700); }
+  else { m.textContent = r.error || "failed"; addBtn.disabled = false; }
+});
+document.getElementById("add-title")?.addEventListener("keydown", e => { if (e.key === "Enter") addBtn.click(); });
+const IS_CHATVIEW = document.body.classList.contains("chatview");
+const chatSend = document.getElementById("chat-send");
+if (chatSend) {
+  const doSend = async () => {
+    const t = document.getElementById("chat-text");
+    if (!t.value.trim()) return;
+    chatSend.disabled = true;
+    const r = await api("/api/chat", {text: t.value});
+    if (IS_CHATVIEW) { if (r.ok) t.value = ""; chatSend.disabled = false; await csPoll(true); t.focus(); }
+    else if (r.ok) location.reload(); else chatSend.disabled = false;
+  };
+  chatSend.addEventListener("click", doSend);
+  document.getElementById("chat-text").addEventListener("keydown", e => { if (e.key === "Enter") doSend(); });
+}
+// ── action-now buttons on kam chat messages (compact tile: server-rendered) ──
+document.querySelectorAll(".acknow[data-key]").forEach(b => b.addEventListener("click", async () => {
+  b.disabled = true;
+  const r = await api("/api/actionnow", {key: b.dataset.key, label: b.dataset.label || ""});
+  if (r.ok) location.reload(); else { b.disabled = false; b.textContent = r.error || "failed"; }
+}));
+const chatMode = document.getElementById("chat-mode");
+if (chatMode) chatMode.addEventListener("click", async () => {
+  const r = await api("/api/layout", {chat_mode: chatMode.dataset.mode});
+  if (r.ok) location.reload();
+});
+// ── chat-with-Wed live mirror: poll the log every 4s, no page reloads ──
+let csCount = -1;
+async function csPoll(force) {
+  const log = document.getElementById("cs-log");
+  if (!log) return;
+  try {
+    const d = await (await fetch("/api/chatlog")).json();
+    const msgs = d.messages || [];
+    const live = document.getElementById("cs-live");
+    if (live) live.textContent = "● live";
+    if (!force && msgs.length === csCount) return;
+    csCount = msgs.length;
+    const nearBottom = log.scrollHeight - log.scrollTop - log.clientHeight < 80;
+    log.innerHTML = "";
+    for (const m of msgs) {
+      const div = document.createElement("div"); div.className = "msg " + m.role;
+      const who = document.createElement("span"); who.className = "who";
+      who.textContent = (m.role === "kam" ? "kam" : "wednesday") + " › ";
+      const ts = document.createElement("span"); ts.className = "mts"; ts.textContent = (m.ts || "").slice(11, 16);
+      const tx = document.createElement("div"); tx.className = "mtext"; tx.textContent = m.text;
+      div.append(who, ts, tx);
+      if (m.role === "kam") {
+        if (m.ack && m.ack.state) {   // rendered from Wednesday-written state, never faked
+          const al = document.createElement("div"); al.className = "ackline " + m.ack.state;
+          const at = (m.ack.ts || "").slice(11, 16);
+          al.textContent = m.ack.state === "seen" ? "✓ seen by Wed" + (at ? " " + at : "")
+            : m.ack.state === "actioning" ? "● actioning"
+            : m.ack.state === "done" ? "✓ done" + (at ? " " + at : "")
+            : "⚡ action requested";
+          div.appendChild(al);
+        }
+        const ab = document.createElement("button"); ab.className = "acknow";
+        ab.textContent = "⚡ action now"; ab.title = "ask Wednesday to action this now";
+        ab.addEventListener("click", async () => {
+          ab.disabled = true;
+          const r = await api("/api/actionnow", {key: m.ts, label: (m.text || "").slice(0, 200)});
+          if (r.ok) await csPoll(true); else ab.disabled = false;
+        });
+        div.appendChild(ab);
+      }
+      log.appendChild(div);
+    }
+    if (nearBottom || force) log.scrollTop = log.scrollHeight;
+  } catch (e) {
+    const live = document.getElementById("cs-live");
+    if (live) live.textContent = "○ reconnecting…";
+  }
+}
+if (IS_CHATVIEW) { csPoll(true); setInterval(csPoll, 4000); }
+const cpanel = document.getElementById("customise-panel");
+const cbtn = document.getElementById("customise-btn");
+cbtn.addEventListener("click", () => {
+  cpanel.hidden = !cpanel.hidden;
+  cbtn.classList.toggle("on", !cpanel.hidden);
+  organise = !cpanel.hidden ? organise : organise;  // no-op; refresh pause handled below
+});
+document.getElementById("customise-save").addEventListener("click", async () => {
+  const hidden_tiles = [...cpanel.querySelectorAll('input[data-kind="tile"]:not(:checked)')].map(i => i.value);
+  const hidden_groups = [...cpanel.querySelectorAll('input[data-kind="group"]:not(:checked)')].map(i => i.value);
+  const tints = {};
+  cpanel.querySelectorAll("select.tintsel").forEach(s => {
+    if (s.value !== "none") tints[s.dataset.tile] = s.value;
+  });
+  const separators = [];
+  cpanel.querySelectorAll("input.sepchk:checked").forEach(c => {
+    const lab = cpanel.querySelector('input.seplab[data-tile="' + c.dataset.tile + '"]');
+    separators.push({before: c.dataset.tile, label: lab ? lab.value.slice(0, 40) : ""});
+  });
+  const r = await api("/api/layout", {hidden_tiles, hidden_groups, tints, separators});
+  if (r.ok) location.reload();
+});
+// ── topbar panels: actioning / archived / favourite views ──
+for (const [bid, pid] of [["acting-btn", "acting-panel"], ["archived-btn", "archived-panel"],
+                          ["flagged-btn", "flagged-panel"], ["views-btn", "views-panel"]]) {
+  const bt = document.getElementById(bid), pn = document.getElementById(pid);
+  if (!bt || !pn) continue;
+  bt.addEventListener("click", () => {
+    pn.hidden = !pn.hidden;
+    bt.classList.toggle("on", !pn.hidden);
+  });
+}
+// favourite views: save / apply / delete named layout snapshots
+// (no browser dialogs — errors go to the inline #views-msg line)
+const vpanel = document.getElementById("views-panel");
+const vmsg = document.getElementById("views-msg");
+vpanel.querySelectorAll(".vapply").forEach(b => b.addEventListener("click", async () => {
+  const r = await api("/api/views", {action: "apply", name: b.dataset.name});
+  if (r.ok) location.reload(); else vmsg.textContent = r.error || "failed";
+}));
+vpanel.querySelectorAll(".vdel").forEach(b => b.addEventListener("click", async () => {
+  const r = await api("/api/views", {action: "delete", name: b.dataset.name});
+  if (r.ok) location.reload(); else vmsg.textContent = r.error || "failed";
+}));
+const viewSave = document.getElementById("view-save");
+viewSave.addEventListener("click", async () => {
+  const inp = document.getElementById("view-name");
+  if (!inp.value.trim()) { vmsg.textContent = "type a name first"; inp.focus(); return; }
+  viewSave.disabled = true;
+  const r = await api("/api/views", {action: "save", name: inp.value.trim()});
+  if (r.ok) location.reload();
+  else { vmsg.textContent = r.error || "failed"; viewSave.disabled = false; }
+});
+document.getElementById("view-name").addEventListener("keydown", e => {
+  if (e.key === "Enter") viewSave.click();
+});
+// UPDATE an existing layout in place (same save action, existing name = overwrite)
+const viewUpdBtn = document.getElementById("view-update-btn");
+if (viewUpdBtn) viewUpdBtn.addEventListener("click", async () => {
+  const sel = document.getElementById("view-update");
+  const name = sel.value;
+  if (!name) { vmsg.textContent = "pick a layout to update"; sel.focus(); return; }
+  viewUpdBtn.disabled = true;
+  const r = await api("/api/views", {action: "save", name});
+  if (r.ok) location.reload();
+  else { vmsg.textContent = r.error || "failed"; viewUpdBtn.disabled = false; }
+});
+const burger = document.getElementById("burger-btn"), bdrop = document.getElementById("burger-drop");
+burger.addEventListener("click", e => { e.stopPropagation(); bdrop.hidden = !bdrop.hidden; burger.classList.toggle("on", !bdrop.hidden); });
+document.addEventListener("click", e => {
+  if (!bdrop.hidden && !e.target.closest("#burger-drop") && e.target !== burger) { bdrop.hidden = true; burger.classList.remove("on"); }
+});
+// submenu parents toggle their own group and must NOT close the menu
+bdrop.querySelectorAll(".mparent").forEach(p => p.addEventListener("click", e => {
+  e.stopPropagation();
+  const g = p.parentElement, wasOpen = g.classList.contains("open");
+  bdrop.querySelectorAll(".mgroup").forEach(x => x.classList.remove("open"));
+  if (!wasOpen) g.classList.add("open");
+}));
+// leaf actions close the whole menu
+bdrop.querySelectorAll(".msub button, .msub a").forEach(b => b.addEventListener("click", () => {
+  bdrop.hidden = true; burger.classList.remove("on");
+  bdrop.querySelectorAll(".mgroup").forEach(x => x.classList.remove("open"));
+}));
+// reset EVERYTHING that is filtered — site-wide groups and every per-tile filter
+// light/dark switch — stored in the layout so it travels with the dashboard
+// rather than living in one browser (Kam round 11)
+document.querySelectorAll(".themebtn").forEach(b => b.addEventListener("click", async () => {
+  const want = b.dataset.themeSet;
+  document.documentElement.setAttribute("data-theme", want);   // instant, before the round trip
+  const r = await api("/api/layout", {theme: want});
+  if (r.ok) location.reload();
+}));
+const resetBtn = document.getElementById("reset-filters");
+if (resetBtn) resetBtn.addEventListener("click", async () => {
+  resetBtn.disabled = true;
+  const r = await api("/api/layout", {hidden_groups: [], tile_groups: {}});
+  if (r.ok) location.reload(); else resetBtn.disabled = false;
+});
+// per-tile source chips: hide/show a client in THIS tile only
+document.querySelectorAll(".tgchip").forEach(c => c.addEventListener("click", async () => {
+  const tile = c.dataset.tile, grp = c.dataset.group;
+  const cur = JSON.parse(document.getElementById("tile-groups-state").textContent || "{}");
+  const list = new Set(cur[tile] || []);
+  if (list.has(grp)) list.delete(grp); else list.add(grp);
+  cur[tile] = [...list];
+  const r = await api("/api/layout", {tile_groups: cur});
+  if (r.ok) location.reload();
+}));
+const showAllBtn = document.getElementById("showall-btn");
+if (showAllBtn) showAllBtn.addEventListener("click", async () => {
+  const r = await api("/api/layout", {hidden_groups: []});
+  if (r.ok) location.reload();
+});
+// 🔔 bell on family rows — quieten/restore an item using the SAME persisted mute
+// the calendar already uses, so a quietened item stays quiet across refreshes.
+document.addEventListener("click", async e => {
+  const b = e.target.closest(".bell");
+  if (!b) return;
+  e.preventDefault(); e.stopPropagation();
+  try {
+    const r = await fetch("/api/mute", { method:"POST", headers:{"Content-Type":"application/json"},
+      body: JSON.stringify({ key: b.dataset.mute }) });
+    if (!r.ok) throw new Error(await r.text());
+    setTimeout(() => location.reload(), 250);
+  } catch (err) { console.error("mute failed", err); }
+});
+// ⚑ flag for Wed — flags the item for Wednesday and changes NOTHING upstream
+document.addEventListener("click", async e => {
+  const b = e.target.closest(".flagbtn");
+  if (!b) return;
+  e.preventDefault(); e.stopPropagation();
+  const on = !b.classList.contains("on");
+  b.classList.toggle("on", on);            // optimistic; reverted if the call fails
+  let payload = null;
+  try { payload = b.dataset.fpayload ? JSON.parse(b.dataset.fpayload) : null; } catch (_) {}
+  try {
+    const r = await fetch("/api/flag", { method:"POST", headers:{"Content-Type":"application/json"},
+      body: JSON.stringify({ key:b.dataset.flag, label:b.dataset.flabel || "",
+                              kind:b.dataset.fkind || "item", on, payload }) });
+    if (!r.ok) throw new Error(await r.text());
+    setTimeout(() => location.reload(), 250);
+  } catch (err) { b.classList.toggle("on", !on); console.error("flag failed", err); }
+});
+const refreshBtn = document.getElementById("refresh-btn");
+if (refreshBtn) refreshBtn.addEventListener("click", () => location.reload());
+const clearFocusBtn = document.getElementById("clearfocus-btn");
+if (clearFocusBtn) clearFocusBtn.addEventListener("click", async () => {
+  try { await fetch("/api/focus", { method:"POST", headers:{"Content-Type":"application/json"},
+        body: JSON.stringify({ clear:true }) }); } catch (_) {}
+  location.reload();
+});
+document.getElementById("preset-save-btn").addEventListener("click", () => {
+  const vp = document.getElementById("views-panel");
+  if (vp && vp.hidden) document.getElementById("views-btn").click();
+  const inp = document.getElementById("view-name");
+  if (inp) setTimeout(() => inp.focus(), 50);
+});
+const grid = document.getElementById("grid");
+const obtn = document.getElementById("organise-btn");
+obtn.addEventListener("click", () => {
+  organise = !organise;
+  document.body.classList.toggle("organise", organise);
+  obtn.classList.toggle("on", organise);
+  obtn.innerHTML = organise ? "&#10003; done" : "&#9998; organise";
+  document.querySelectorAll(".tilebox").forEach(t => t.draggable = organise);
+  if (!organise) saveLayout();
+});
+function layoutState() {
+  const order = [...grid.querySelectorAll(".tilebox")].map(t => t.dataset.tile);
+  const scales = {}, sizes = {};
+  grid.querySelectorAll(".tilebox").forEach(t => {
+    const s = parseFloat(t.style.fontSize) || 1;
+    if (Math.abs(s - 1) > 0.01) scales[t.dataset.tile] = Math.round(s * 100) / 100;
+    const w = parseInt(t.dataset.w || 1), h = parseInt(t.dataset.h || 0);
+    if (w !== 1 || h !== 0) sizes[t.dataset.tile] = {w, h};
+  });
+  return {order, scales, sizes};
+}
+async function saveLayout() { await api("/api/layout", layoutState()); }
+let dragEl = null;
+grid.addEventListener("dragstart", e => {
+  dragEl = e.target.closest(".tilebox"); if (dragEl) dragEl.classList.add("dragging");
+});
+grid.addEventListener("dragend", () => { if (dragEl) dragEl.classList.remove("dragging"); dragEl = null; });
+grid.addEventListener("dragover", e => {
+  if (!dragEl) return; e.preventDefault();
+  const over = e.target.closest(".tilebox");
+  if (over && over !== dragEl) {
+    const r = over.getBoundingClientRect();
+    const before = (e.clientY - r.top) < r.height / 2;
+    over.parentNode.insertBefore(dragEl, before ? over : over.nextSibling);
+  }
+});
+grid.addEventListener("drop", e => e.preventDefault());
+document.querySelectorAll('.sizer button[data-size]').forEach(b => b.addEventListener("click", () => {
+  const tile = b.closest(".tilebox");
+  let s = parseFloat(tile.style.fontSize) || 1;
+  s = Math.min(1.8, Math.max(0.7, s + (b.dataset.size === "+" ? 0.1 : -0.1)));
+  tile.style.fontSize = s.toFixed(2) + "em";
+  sizeAll(); saveLayout();
+}));
+// ── masonry sizing: width span 1-3, height 0=auto(full) or fixed units w/ scroller ──
+const ROWU = 8, GAPU = 14, HUNIT = 44;
+function sizeAll() {
+  document.querySelectorAll(".tilebox").forEach(t => {
+    const w = Math.min(4, Math.max(1, parseInt(t.dataset.w || 1)));
+    const h = Math.max(0, parseInt(t.dataset.h || 0));
+    t.style.gridColumn = w >= 4 ? "1 / -1" : "span " + w;
+    if (h > 0) { t.style.height = (h * HUNIT) + "px"; t.classList.add("scroll"); }
+    else { t.style.height = ""; t.classList.remove("scroll"); }
+    t.style.gridRowEnd = "";
+    const px = h > 0 ? h * HUNIT : t.scrollHeight + 2;   // scrollHeight = real content, immune to grid clipping
+    t.style.gridRowEnd = "span " + Math.max(3, Math.ceil((px + GAPU) / (ROWU + GAPU)));
+  });
+}
+sizeAll();
+window.addEventListener("resize", () => sizeAll());
+document.querySelectorAll("details").forEach(d => d.addEventListener("toggle", () => sizeAll()));
+document.querySelectorAll('.sizer button[data-dim]').forEach(b => b.addEventListener("click", () => {
+  const t = b.closest(".tilebox"), d = b.dataset.dim;
+  let w = parseInt(t.dataset.w || 1), h = parseInt(t.dataset.h || 0);
+  if (d === "w+") w = Math.min(4, w + 1);  // 4 = full row (footer)
+  if (d === "w-") w = Math.max(1, w - 1);
+  if (d === "h+") h = Math.min(20, (h || Math.round(t.getBoundingClientRect().height / HUNIT)) + 1);
+  if (d === "h-") h = Math.max(0, (h || Math.round(t.getBoundingClientRect().height / HUNIT)) - 1);
+  t.dataset.w = w; t.dataset.h = h;
+  sizeAll(); saveLayout();
+}));
+</script>
+</body></html>
