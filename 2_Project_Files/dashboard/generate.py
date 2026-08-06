@@ -156,7 +156,15 @@ PROJECT_HUES = {
     },
     "light": {
         "datasec": ["#2a78d6", "#005cb8", "#00419a"],
-        "secuura": ["#eb6834", "#cb4b0c", "#ac2c00"],
+        # round 13: was #eb6834. MEASURED IN THE BROWSER at 2.80:1 against the
+        # tinted tile surfaces (worst: plum #f4eef5) — under the 3:1 floor this
+        # palette claims. The original validation ran against the PLAIN light
+        # surface; tiles carry Kam's tints, so the real surface is not the one
+        # the palette was checked on. #dc6131 clears 3.17:1 on the worst tint.
+        # Cost, stated rather than buried: Secuura's own step0↔step1 separation
+        # falls from ΔE 10.2 to 7.2 (still perceptible, still in family with the
+        # other ramps at 8.9–10.4). Cross-family all-pairs unaffected (worst 42.4).
+        "secuura": ["#dc6131", "#cb4b0c", "#ac2c00"],
         "life":    ["#009360", "#007747", "#005c35"],
     },
 }
@@ -164,9 +172,11 @@ PROJECT_HUES = {
 # Wednesday's own board is deliberately NEUTRAL: it is not a client, and leaving
 # it uncoloured keeps the client hues meaningful rather than decorative.
 PROJECT_SLOT = {
+    "datasec":                     ("datasec", 0),   # the client itself (calendars, mail)
     "datasec/nexusai":             ("datasec", 0),
     "datasec/cypherkey":           ("datasec", 1),
     "datasec/vision_sales_portal": ("datasec", 2),
+    "secuura":                     ("secuura", 0),   # the client itself
     "secuura/blockchain":          ("secuura", 0),
     "secuura/tokenomics":          ("secuura", 1),
     "secuura/extranet":            ("secuura", 2),
@@ -181,12 +191,94 @@ def project_key(client, project=None):
     return k
 
 def project_color(key):
-    """Hex for an entity, or None for 'no colour' (Wednesday's own work)."""
+    """Hex for an entity, or None for 'no colour' (Wednesday's own work).
+
+    Round 13 — GRACEFUL FALLBACK. Only three lightness steps per hue survive the
+    all-pairs validator, so a family cannot hold more than three projects. Datasec
+    already has more than three real projects (Lead_Bot, myPKI, Task_Dispatcher…),
+    so an unlisted project must NOT fall through to neutral — neutral means
+    "Wednesday's own work" and would say something false. It inherits its CLIENT's
+    base hue instead: the client is always right, the step is a bonus where one
+    was assigned. This also makes Kam's open question on WED-82 (steps vs
+    client-level only) a config change, not a rebuild."""
+    if not key:
+        return None                     # no entity = neutral, and callers may pass None
     slot = PROJECT_SLOT.get(key)
+    if not slot and "/" in key:
+        slot = PROJECT_SLOT.get(key.split("/", 1)[0])   # unlisted project → its client
     if not slot:
         return None
     fam, step = slot
     return PROJECT_HUES["light" if THEME == "light" else "dark"][fam][step]
+
+# Calendar/mail sources are CLIENT-level entities; Family is its own life step.
+AREA_OF = {"datasec": "datasec", "secuura": "secuura", "personal": "personal"}
+
+# Distinctive tokens only — a false colour is worse than no colour, so anything
+# ambiguous ("vision", "portal") is matched on its full multi-word form.
+ENTITY_ALIASES = (
+    ("vision sales portal", "datasec/vision_sales_portal"),
+    ("cypherkey",           "datasec/cypherkey"),
+    ("onetimepad",          "datasec/cypherkey"),
+    ("nexusai",             "datasec/nexusai"),
+    ("lead_bot",            "datasec/lead_bot"),
+    ("lead bot",            "datasec/lead_bot"),
+    ("mypki",               "datasec/mypki"),
+    ("tokenomics",          "secuura/tokenomics"),
+    ("extranet",            "secuura/extranet"),
+    ("blockchain",          "secuura/blockchain"),
+    ("platform k",          "secuura/blockchain"),
+    ("datasec",             "datasec"),
+    ("secuura",             "secuura"),
+)
+
+# Ticket prefixes are unambiguous identity — a KS- number can only be Secuura's
+# board — so they are checked BEFORE the word aliases. WED- is deliberately
+# absent: Wednesday's own work is neutral.
+TICKET_PREFIX = (
+    (re.compile(r"\bKS-\d+", re.I),    "secuura/blockchain"),
+    (re.compile(r"\bRD-\d+", re.I),    "datasec/nexusai"),
+    (re.compile(r"\bCPKEY-\d+", re.I), "datasec/cypherkey"),
+)
+
+def entity_from_text(text):
+    """Best-effort entity for free text (flag lines). Ticket prefixes first, then
+    the most distinctive alias — the list is ordered project-before-client.
+    Returns None when nothing matches: neutral is the honest answer, not a guess."""
+    t = (text or "").lower()
+    for pat, key in TICKET_PREFIX:
+        if pat.search(text or ""):
+            return key
+    for alias, key in ENTITY_ALIASES:
+        if alias in t:
+            return key
+    return None
+
+MAIL_PREFIX = re.compile(r"^\s*\[([^\]]+)\]")
+
+def entity_from_subject(subject):
+    """Fleet mail subjects ARE routing: '[Client/Project -> Wednesday] topic'.
+    Parse the prefix rather than scanning the whole subject — the topic text
+    often names other projects, and the sender is what the row is about."""
+    m = MAIL_PREFIX.match(subject or "")
+    if not m:
+        return None
+    for side in [p.strip() for p in re.split(r"->|→", m.group(1))]:
+        low = side.lower()
+        if low.startswith("wednesday") or low in ("all agents", "coagent"):
+            continue                      # my own end of the conversation
+        if "/" in side:
+            client, _, project = side.partition("/")
+            return project_key(client, project)
+        return entity_from_text(side)
+    return None
+
+def src_color(src, cal=None):
+    """Identity colour for a calendar/mail row. The Family calendar is its own
+    entity (life step 1) regardless of which account carries it."""
+    if cal == "Family":
+        return project_color("family")
+    return project_color(AREA_OF.get(src, src))
 
 def project_rail(key):
     """Inline style for a left identity rail — the monday.com pattern: the same
@@ -264,7 +356,7 @@ def ev_row(e, show_day=False):
               ("Source", s["label"] + (f' · {e["cal"]}' if e["cal"] not in ("Secuura", "Datasec") else ""))]
     if e.get("loc"): fields.append(("Where", e["loc"]))
     return (f'<li class="{cls}" data-detail="{detail_attr(fields, key)}" data-key="{html.escape(key, quote=True)}" title="click for details">'
-            f'<span class="dot" style="background:{s["color"]}"></span>'
+            f'<span class="dot" style="background:{src_color(e["src"], e["cal"])}"></span>'
             f'<span class="src">{s["label"]}</span><span class="time">{t}</span>'
             f'<span class="ev">{html.escape(e["title"])}</span>{cal}</li>')
 
@@ -293,7 +385,7 @@ def run_row(group):
     rng = f'{e["start"].strftime("%a %d")}–{last["start"].strftime("%a %d")}'
     fields = [("What", e["title"]), ("When", f'{rng} · all-day, {len(group)} days'), ("Source", s["label"])]
     return (f'<li class="{cls}" data-detail="{detail_attr(fields, key)}" data-key="{html.escape(key, quote=True)}" title="click for details">'
-            f'<span class="dot" style="background:{s["color"]}"></span>'
+            f'<span class="dot" style="background:{src_color(e["src"], e["cal"])}"></span>'
             f'<span class="src">{s["label"]}</span><span class="time">{rng}</span>'
             f'<span class="ev">{html.escape(e["title"])} <span class="cal">&times;{len(group)} days</span></span></li>')
 
@@ -348,20 +440,29 @@ def tile_calendars():
         items = collapse_allday(wk)
         rows = "\n".join(run_row(it[1]) if it[0] == "run" else ev_row(it[1], show_day=True)
                           for it in items) or '<li class="empty">nothing this week</li>'
+        # round 13: the group carries the same rail+dot its rows carry
         out.append(
-            f"<details class='srcweek'><summary><span class='dot' style='background:{meta['color']}'></span>"
-            f"{meta['label']} <span class='count'>{len(wk)}</span>"
+            f"<details class='srcweek proj'{project_rail(AREA_OF.get(src, src))}>"
+            f"<summary>{project_chip(AREA_OF.get(src, src), meta['label'])}"
+            f" <span class='count'>{len(wk)}</span>"
             f"<a class='headlink' href='area_{src}.html'>full page &#10530;</a></summary>"
             f"<ul class='events'>{rows}</ul></details>")
     return "\n".join(out)
 
 def tile_flags():
+    # round 13: today's flags carry the rail of whichever project they belong to,
+    # inferred from the flag text (entity_from_text is deliberately conservative —
+    # no match means no rail, never a guessed one).
     rows = ""
     for p in PINNED:
-        rows += (f'<li data-pin="{html.escape(p, quote=True)}"><span class="flagdue">&#128204; pinned</span>'
+        rows += (f'<li data-pin="{html.escape(p, quote=True)}"'
+                 f'{project_rail(entity_from_text(p)) if entity_from_text(p) else ""}>'
+                 f'<span class="flagdue">&#128204; pinned</span>'
                  f'<span class="ev">{html.escape(p)}</span></li>')
     for f in (brain["data"]["flags"] if brain else []):
-        rows += (f'<li><span class="flagdue">{html.escape(f["due"])}</span>'
+        ek = entity_from_text(f["what"])
+        rows += (f'<li{project_rail(ek) if ek else ""}>'
+                 f'<span class="flagdue">{html.escape(f["due"])}</span>'
                  f'<span class="ev">{html.escape(f["what"])}</span></li>')
     return f"<ul class='events plain'>{rows}</ul>" if rows else '<p class="empty">no flags</p>'
 
@@ -426,7 +527,7 @@ def tile_family():
         rows.append(
             f'<li class="evrow{" muted" if muted else ""}" data-detail="{detail_attr(fields, key)}" '
             f'data-key="{html.escape(key, quote=True)}" title="click for details">'
-            f'<span class="dot" style="background:{s["color"]}"></span>'
+            f'<span class="dot" style="background:{src_color(e["src"], e["cal"])}"></span>'
             f'<span class="src">{who_label(e)}</span><span class="time">{t}</span>'
             f'<span class="ev">{html.escape(e["title"])}</span>{bell}</li>')
     if rows:
@@ -451,7 +552,13 @@ def issue_row(i, todo=False):
         btns += f'<button data-act="start" data-id="{i["identifier"]}" title="move to In Progress">&#9654;</button>'
     btns += "</span>"
     url = f'https://linear.app/wednesday-agent/issue/{i["identifier"]}'
-    return (f'<li data-wed="{i["identifier"]}"><a class="time tlink" href="{url}" target="_blank" rel="noopener">{i["identifier"]}</a>{badge}'
+    # round 13: WED items stay NEUTRAL by design — Wednesday is not a client, and
+    # colouring her own board would make the client hues decorative. The rail is
+    # still drawn in --line so this column aligns with the coloured tiles beside
+    # it, EXCEPT where a WED item is plainly about one client's work.
+    ek = entity_from_text(i.get("title", ""))
+    return (f'<li data-wed="{i["identifier"]}"{project_rail(ek)}>'
+            f'<a class="time tlink" href="{url}" target="_blank" rel="noopener">{i["identifier"]}</a>{badge}'
             f'{ack_dot(i["identifier"])}<span class="ev">{html.escape(i["title"])}</span>{due}{btns}</li>')
 
 def tile_board():
@@ -522,12 +629,15 @@ def focus_chip():
             f'<button id="focus-clear" title="clear focus">&#10005;</button></span>')
 
 def legend_html():
+    # round 13: the legend is now driven by the same palette the rows use, so it
+    # is a key rather than a decoration. Personal and Family previously shared
+    # var(--series-3) — identical dots for two different groups; they are now the
+    # two life steps and actually distinguishable.
     parts = []
-    if "datasec" not in HIDDEN_GROUPS: parts.append(("var(--series-1)", "Datasec", "datasec"))
-    if "secuura" not in HIDDEN_GROUPS: parts.append(("var(--series-2)", "Secuura", "secuura"))
-    for g, l in (("personal", "Personal"), ("family", "Family")):
+    for g, l in (("datasec", "Datasec"), ("secuura", "Secuura"),
+                 ("personal", "Personal"), ("family", "Family")):
         if g not in HIDDEN_GROUPS:
-            parts.append(("var(--series-3)", l, g))
+            parts.append((project_color(g) or "var(--line)", l, g))
     return "&nbsp; ".join(
         f'<span class="legchip" data-group="{g}" title="click to hide {l} everywhere">'
         f'<span class="dot" style="background:{c}"></span> {l}</span>' for c, l, g in parts)
@@ -642,7 +752,12 @@ def tile_email():
         if m["attn"]: fields.append(("Attention", "QUESTION — check whether an ANSWER went out"))
         # same column order as calendars/family (dot · category · time · text) so
         # tiles stacked in a column line up — Kam round 10 item (b)
-        rows += (f'<li class="evrow{" needsack" if m["attn"] else ""}" data-detail="{detail_attr(fields)}">'
+        # round 13: the sending project's colour on the rail, so a glance down the
+        # column says WHICH project is talking. Wednesday's own broadcasts stay
+        # neutral — the same rule as her board.
+        ek = entity_from_subject(m["subject"])
+        rows += (f'<li class="evrow{" needsack" if m["attn"] else ""}"'
+                 f'{project_rail(ek) if ek else ""} data-detail="{detail_attr(fields)}">'
                  f'<span class="dot flagslot">{attn}</span>'
                  f'<span class="src">{html.escape(inboxes[:16])}</span><span class="time">{ts}</span>'
                  f'<span class="ev">{html.escape(m["subject"][:80])}</span></li>')
