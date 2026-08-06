@@ -80,9 +80,13 @@ VIEWS = json.loads(_v.read_text()) if _v.exists() else {}   # {"name": layout sn
 if not isinstance(VIEWS, dict): VIEWS = {}
 TINTS = LAYOUT.get("tints", {})                             # {"tile-id": tint key}
 if not isinstance(TINTS, dict): TINTS = {}
-TINT_COLORS = {  # subtle same-lightness hue shifts of --surface-2 (#232322); text unchanged
-    "slate": "#20242b", "moss": "#21261f", "plum": "#262028",
-    "sand": "#262319", "teal": "#1e2626"}
+# Subtle same-lightness hue shifts of --surface-2, PER THEME. Kam round 11: tints
+# are written inline on the tile, so a dark tint survived the switch to light mode
+# and rendered dark-on-dark text — invisible. Each tint needs a light twin.
+TINT_DARK = {"slate": "#20242b", "moss": "#21261f", "plum": "#262028",
+             "sand": "#262319", "teal": "#1e2626"}
+TINT_LIGHT = {"slate": "#eef1f6", "moss": "#eef3ea", "plum": "#f4eef5",
+              "sand": "#f6f2e6", "teal": "#e9f2f1"}
 # grid section separators: [{"before": tile-id, "label": str}] — bound to a tile
 # id, so they follow the tile when the grid is reordered
 SEP_BY_TILE = {}
@@ -619,7 +623,7 @@ def render_tiles():
         scale = float(SCALES.get(tid, 1.0))
         sz = SIZES.get(tid, {})
         w = int(sz.get("w", 1)); h = int(sz.get("h", 0))
-        tint = TINT_COLORS.get(TINTS.get(tid, ""))
+        tint = (TINT_LIGHT if THEME == "light" else TINT_DARK).get(TINTS.get(tid, ""))
         style = f"font-size:{scale}em" + (f";background:{tint}" if tint else "")
         out.append(
             f'<section class="tilebox" data-tile="{tid}" data-w="{w}" data-h="{h}" style="{style}">'
@@ -866,8 +870,9 @@ def customise_tile_rows():
         cur = TINTS.get(tid, "none")
         opts = f'<option value="none"{" selected" if cur == "none" else ""}>no tint</option>' + "".join(
             f'<option value="{k}" style="background:{c}"{" selected" if k == cur else ""}>{k}</option>'
-            for k, c in TINT_COLORS.items())
-        selstyle = f' style="background:{TINT_COLORS[cur]}"' if cur in TINT_COLORS else ""
+            for k, c in (TINT_LIGHT if THEME == "light" else TINT_DARK).items())
+        _tp = TINT_LIGHT if THEME == "light" else TINT_DARK
+        selstyle = f' style="background:{_tp[cur]}"' if cur in _tp else ""
         sep = SEP_BY_TILE.get(tid)
         out.append(
             f'<div class="cprow"><label><input type="checkbox" data-kind="tile" value="{tid}"'
