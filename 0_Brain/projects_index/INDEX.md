@@ -26,6 +26,20 @@ Datasec__NexusAI 08-04, Datasec__CypherKey 08-02, Datasec__Vision_Sales_Portal
 ## Fresh (from entry cards)
 
 ### Secuura / Blockchain (Platform K) — most active
+- **2026-08-06 session 9 (SHIPPED):** KS-563 (Urgent) **live on demo** — #651
+  merged to develop `be2d60ef2`, plus fix `4f1152ed7`. Demo verify matrix green:
+  upload-only w/ real confirmed anchor → verified true · isCertified FALSE ·
+  isAnchored TRUE · certification absent; genuinely certified → full
+  certification object. Verifier-portal rendering fix shipped with it (Kam ruled
+  it stays in). Demo anchoring confirmed still REAL (47h up, wallet present).
+  **KS-564: all three legs built, NOT merged** (branch `9c24b5c1e`) — Option A
+  unit-proven only; ships as one piece after live proof, then a ship ruling.
+  **Peter KS-480 consent: NOT recorded — record only AFTER EOD 2026-08-06.**
+- **Their finding, now a fleet rule:** the demo deploy caught a FALSE NEGATIVE
+  in their own fix that local proof could never find (local anchoring is
+  mock-mode by design since KS-535). See
+  [[../learnings/2026-08-06_local-proof-is-not-target-evidence]].
+
 - **Status:** active · **Last session:** 2026-08-05 session 8 (21:00–22:3x,
   WED-65 rulings executed, scored 1.0) — **KS-539 SIGNED OFF** (G-1 split, PR
   #648 merged, develop c9be578c3; contradictions flagged not merged; KS-566
@@ -57,6 +71,13 @@ Datasec__NexusAI 08-04, Datasec__CypherKey 08-02, Datasec__Vision_Sales_Portal
 - **RD-61 root cause (their verification):** upstream, not code — the ABTDEMO lab
   fleet was only ever 3 devices and they dropped off one at a time (May 6 → May 28
   → Jun 1); last event was a Service job, not a user print. Nothing to reconnect.
+- **2026-08-06 (SHIPPED):** RD-61 synthetic feed **deployed to demo** and
+  verified; RD-67 + RD-68 done; scoped-Contributor redeploy test PASSED (proved
+  the downgrade first: `az group list` 7 → 3 RGs). ACR now pulls via managed
+  identity with the admin account DISABLED — a push-capable stored credential
+  removed. Identity: `nexusai-claude-deploy`, no subscription-scope rights.
+  Open: RD-15 demo video no longer matches the new synthetic fleet (their
+  ticket); WED-80 feedback recon requested.
 - **In flight:** synthetic feed as a provider mirroring the AzureLogAnalytics
   surface; **code defaults to the REAL feed**, demo Container App sets the flag
   (their deviation, confirmed — a synthetic default would ship fake telemetry to
