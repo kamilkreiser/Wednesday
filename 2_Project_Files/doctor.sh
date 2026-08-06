@@ -97,6 +97,19 @@ for job in com.wednesday.shiftchange com.wednesday.wake com.wednesday.close; do
   fi
 done
 
+# --- Executable bits on on-drive scripts (added 2026-08-06) ---
+# Drive syncs move CONTENT but not always MODES. This bit twice in one day:
+# wake_watch.sh failed to arm ("Permission denied") and serve.sh could not
+# restart, taking the dashboard down until it was diagnosed. Cheap to check,
+# expensive to debug when a launcher silently fails instead.
+NOEXEC="$(find "$SCRIPT_DIR" \( -name '*.sh' -o -name '*.command' \) ! -perm -u+x 2>/dev/null)"
+if [ -n "$NOEXEC" ]; then
+  warn "scripts have lost their executable bit (drive sync drops modes)" \
+       "chmod +x on: $(echo "$NOEXEC" | tr '\n' ' ')"
+else
+  ok "all on-drive scripts are executable"
+fi
+
 echo
 if [ "$HARD_FAIL" = "1" ]; then
   echo "PREFLIGHT: HARD FAILURES above — fix before relying on this machine."

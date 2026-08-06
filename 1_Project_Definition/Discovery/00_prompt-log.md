@@ -557,3 +557,41 @@ Wednesday has no CLI access to environment 5 today (her global `az` sits on
 the corporate tenant with zero subscriptions), and the mentioned tenant
 cleanup is an unaudited change — the fleet may hold references to resources
 that no longer exist.
+
+## 2026-08-06 (afternoon) — the dashboard rounds
+
+**Round 6 — nine changes (with two annotated screenshots):**
+
+> a couple changes to the dashboard.  please see the images attached.  1)review the burger menu.  create a logical 2 o3 3 level cascading menu.  e.g. customise with the following sub items - save layuout, load layout, organise, tile setup (currently customise).  do the same for other items and add things that should be there.  2)make overview as wide as calandar 3) move parking lot to top right 4)bottom align comments or inputs from each tile e.g. chat with wednesday ionput, 'Family calendar is display-only (cowork agent's territory).' add NB. to this etc.  5)remove WED tickets from tickets by client as Wednesday (you) have your own tile 6) auto expand the tickets so I can see all 7)it would be good to have the same 'move to in progress' (but call it ' action by Wednesday' and flag it for you.  no need to change ticket or status until you see it which is why the label should be flag for Wed  and add a ' prioritise button'. 8)make the email flags tile taller and align to the other on that row. 9)make the news tile 100%width, auto expand all categories and add a button on left to flag.  this will keep the item for me to look at (which I will set) so that next morning when things change this item will stay (until I untick flag)
+
+*Done with it:* all nine shipped + browser-verified. Notable design point in (7):
+flagging deliberately changes NOTHING upstream — no ticket move, no status
+change — which is why the label is "flag for Wed". In (9) the flag stores the
+whole item so a flagged headline survives the next feed refresh.
+
+**Round 7 — six follow-ups:**
+
+> 1)when saving a layout, I should be able to select to save / update an existing layour or save a new one 2)for the family tile, please add an icon with a bell, when clicked, it will do a crossed out bell and reduce the item to be the same as "Steve Travel to Europe & USA (slow response)" in calandar.  clicking it again will make it the default size and colour.  3)make the date and time style same as calandar but but instead of client it will say date with day of the week as the category (same as tomorro, etc, in calandar).  4)the NB items are still not bottom aligned (at bottom of tile regardless of where the actual text or entries finish).  Naturally, do not overlap 5) same for input boxes as previous point.  6)I made the view 150% of layout.  it looks good at this size.  Does this setting also save?
+
+*Done with it:* (4)/(5) were a genuine miss in round 6 — the rule only reached
+tiles that already had a scroll wrapper. (6) answered rather than built: Chrome
+persists page zoom per-site itself (proven in a fresh tab, devicePixelRatio 1.5),
+and it is NOT part of a saved view.
+
+**Round 8 — the source filter made whole:**
+
+> when I click on the client names at the top, it removes calandar items for that client, but categories still remain, these should be hidden too. 2)the same filter should be applied to all other tiles, wednesdays tickets, client tickets, etc. this should be a site wide action  3)there is a refresh data item in the menu great but can you also create a refresh icon next to burger menu to undo item 2 as right now, once a client is hidden, there is no way to unhide it. 4)in tickets by client tile, and the calandar tile, ther should be an option to have these same buttns to hide it just in tickets or calandar.  5)change heading for 'tickets by client' to 'Tickets by Project'
+
+*Done with it:* item (3) also explained the morning's mystery — hiding a client
+was a one-way door, which is how all four sources ended up hidden and every
+calendar tile rendered empty. Not a phantom; a missing control.
+
+**Round 9 — family tile polish:**
+
+> 1)please make the text in family (when it goes smaller) a little larger.  I dont know how much so increase by 20% to test.  2)create day headings like calandar (as per screenshot) 3)order things in family tile by time
+
+*Done with it:* muted rows 7.5px → 9px (measured). Day headings matching the
+calendar's own type size. Time-ordered within each day. Two flagged judgement
+calls: the per-row date chip became redundant so it now shows whose item it is,
+and the tile had always been leading with yesterday — visible only once days
+were labelled — so it now starts at today.
