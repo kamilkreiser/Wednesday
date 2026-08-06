@@ -53,14 +53,35 @@ PW="$(AZURE_CONFIG_DIR="$WED_AZ" az ad app credential reset \
         --id "$APP_ID" --years 1 --query password -o tsv 2>/dev/null)"
 [ -n "$PW" ] || { echo "FAILED to generate a secret (are you logged in as an owner?)" >&2; exit 1; }
 
-# 2. Consume it immediately in the target project's isolated config dir.
+# 2. Consume it in the target project's isolated config dir.
+#    RETRY IS REQUIRED, not defensive padding: a freshly-created Azure AD client
+#    secret is not immediately usable. Measured 2026-08-06 against this very app —
+#    attempts at 0s and 5s both returned AADSTS7000215 "Invalid client secret",
+#    and the same secret authenticated fine at 10s. The first version of this
+#    script tried once and reported LOGIN FAILED, which was pure propagation lag.
+#    Errors are PRINTED, never discarded — the first version swallowed the
+#    AADSTS code and left nothing to diagnose.
 echo "==> logging the project session in as the scoped identity…"
-AZURE_CONFIG_DIR="$TARGET" az login --service-principal \
-  -u "$APP_ID" -p "$PW" --tenant "$TENANT" -o none 2>/dev/null
-RC=$?
+RC=1
+for attempt in 1 2 3 4 5 6 7 8; do
+  ERR="$(AZURE_CONFIG_DIR="$TARGET" az login --service-principal \
+          -u "$APP_ID" -p "$PW" --tenant "$TENANT" -o none 2>&1)"
+  RC=$?
+  [ $RC -eq 0 ] && { echo "    authenticated on attempt $attempt (~$(( (attempt-1)*5 ))s)"; break; }
+  case "$ERR" in
+    *AADSTS7000215*) echo "    attempt $attempt: secret not propagated yet, waiting 5s…" ;;
+    *)               echo "    attempt $attempt failed: $(echo "$ERR" | head -1)" ;;
+  esac
+  sleep 5
+done
 PW=""; unset PW   # gone from this process either way
 
-[ $RC -eq 0 ] || { echo "LOGIN FAILED (rc=$RC) — secret was rotated, so re-run this script" >&2; exit 1; }
+if [ $RC -ne 0 ]; then
+  echo "LOGIN FAILED after 8 attempts (~40s). Last error:" >&2
+  echo "$ERR" | head -3 >&2
+  echo "The secret was rotated, so simply re-run this script — nothing is left in a bad state." >&2
+  exit 1
+fi
 
 # 3. Verify: who is it, and can it see only what it should?
 echo "==> verifying…"
