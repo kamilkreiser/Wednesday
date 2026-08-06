@@ -295,14 +295,15 @@ def tile_flags():
     return f"<ul class='events plain'>{rows}</ul>" if rows else '<p class="empty">no flags</p>'
 
 def day_label(e):
-    """Category chip for the family tile: the DATE with its weekday, in the same
-    language the calendar uses for its own groupings (Kam round 7)."""
+    """Day heading for the family tile. Kam round 10: Today/Tomorrow now carry the
+    DATE too, so a gap in the run of days is obvious rather than puzzling — the
+    tile shows the next days that actually HAVE items, not consecutive days."""
     d = e["start"].date()
-    today = NOW.date()
-    delta = (d - today).days
-    if delta == 0:  return "Today"
-    if delta == 1:  return "Tomorrow"
-    return e["start"].strftime("%a %d %b")
+    delta = (d - NOW.date()).days
+    stamp = e["start"].strftime("%a %-d %b")
+    if delta == 0:  return f"Today · {stamp}"
+    if delta == 1:  return f"Tomorrow · {stamp}"
+    return stamp
 
 def who_label(e):
     """Under a day heading the date is already stated, so the category column
@@ -559,8 +560,11 @@ def tile_email():
         fields = [("Subject", m["subject"]), ("From", m["from"]), ("Inboxes", inboxes),
                   ("Received", m["ts"][:16].replace("T", " "))]
         if m["attn"]: fields.append(("Attention", "QUESTION — check whether an ANSWER went out"))
-        rows += (f'<li class="evrow{" needsack" if m["attn"] else ""}" data-detail="{detail_attr(fields)}">{attn}'
-                 f'<span class="time">{ts}</span><span class="src">{html.escape(inboxes[:16])}</span>'
+        # same column order as calendars/family (dot · category · time · text) so
+        # tiles stacked in a column line up — Kam round 10 item (b)
+        rows += (f'<li class="evrow{" needsack" if m["attn"] else ""}" data-detail="{detail_attr(fields)}">'
+                 f'<span class="dot flagslot">{attn}</span>'
+                 f'<span class="src">{html.escape(inboxes[:16])}</span><span class="time">{ts}</span>'
                  f'<span class="ev">{html.escape(m["subject"][:80])}</span></li>')
     return (f"<ul class='events plain'>{rows}</ul>"
             "<p class='note'>NB. fleet inboxes (wednesday-agent + coagent), read-only — acks stay session-scoped; "
@@ -935,9 +939,9 @@ ul.events {{ list-style:none; }}
 ul.events li {{ display:flex; gap:8px; align-items:baseline; padding:3px 0; border-bottom:1px solid var(--line); }}
 ul.events li:last-child {{ border-bottom:none; }}
 .dot {{ width:8px; height:8px; border-radius:50%; display:inline-block; flex:none; align-self:center; }}
-.src {{ color:var(--text-muted); font-size:.78em; width:56px; flex:none; }}
-.time {{ color:var(--text-secondary); font-variant-numeric:tabular-nums; font-size:.88em; width:4.6em; flex:none; }}
-ul.plain .time {{ width:6.2em; }}
+.src {{ color:var(--text-muted); font-size:.78em; width:3.6rem; flex:none; }}
+.time {{ color:var(--text-secondary); font-variant-numeric:tabular-nums; font-size:.88em; width:4.2rem; flex:none; }}
+ul.plain .time {{ width:4.2rem; }}
 .ev {{ color:var(--text-primary); }}
 .cal {{ color:var(--text-muted); font-size:.8em; }}
 .flagdue {{ color:var(--text-secondary); font-size:.85em; width:6em; flex:none; font-variant-numeric:tabular-nums; }}
@@ -981,11 +985,14 @@ li:hover .flagbtn.on {{ opacity:1; }}
   padding:10px 14px; margin-top:12px; font-size:13px; display:flex; gap:12px; align-items:center; }}
 .allhidden button {{ background:var(--surface-2); color:var(--text-primary); border:1px solid var(--line);
   border-radius:6px; padding:4px 10px; cursor:pointer; font-size:12.5px; }}
+.dot.flagslot {{ background:none; border-radius:0; display:inline-flex; align-items:center;
+  justify-content:center; overflow:visible; }}
+.dot.flagslot .attn {{ font-size:.8em; }}
 .bell {{ background:none; border:none; cursor:pointer; padding:0 2px; font-size:.85em;
   line-height:1; margin-left:auto; flex:none; opacity:.35; filter:grayscale(1); }}
 li:hover .bell {{ opacity:.9; }}
 .bell.off {{ opacity:.55; }}
-.tilebox[data-tile="family"] .src {{ width:6.6em; }}
+
 .keptmark {{ color:#e0a33e; font-size:.7em; margin-left:6px; text-transform:uppercase;
   letter-spacing:.04em; vertical-align:middle; }}
 details.srcweek.kept > summary {{ color:#e0a33e; }}
@@ -1021,6 +1028,12 @@ li:hover .acts {{ opacity:1; }}
 #modal-body {{ max-height:62vh; overflow-y:auto; scrollbar-width:thin; }}
 li.mutable {{ cursor:pointer; }}
 li.muted {{ font-size:60%; opacity:.55; }}   /* Kam round 9: +20% on the previous 50% */
+/* Kam round 10: a muted row keeps the SAME column geometry as its full-size
+   neighbours — only the TEXT shrinks. Widths are already in rem (root-relative),
+   so they do not scale with the row's 60% font-size; the dot and the row gap
+   must be pinned too or the columns still drift. */
+li.muted {{ gap:8px; }}
+li.muted .dot {{ width:8px; height:8px; }}
 li.muted .ev, li.muted .src, li.muted .time, li.muted .cal {{ color:var(--text-muted); }}
 li.muted .dot {{ opacity:.4; }}
 details.srcweek {{ border-bottom:1px solid var(--line); padding:4px 0; }}
