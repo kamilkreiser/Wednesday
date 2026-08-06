@@ -6,9 +6,11 @@ file is refreshed by Wednesday reading each project's `5_Project_History/history
 (newest at top) and vault notes — read-only.
 
 Last full sweep: **never** (first sweep = WED-7). Partial freshness via the
-end-of-session feed: see `entries/` cards (currently Secuura__Blockchain 08-04,
-Datasec__NexusAI 08-04, Datasec__CypherKey 08-02, Datasec__Vision_Sales_Portal
-08-02 — summarised below). Wrap emails routed through 2026-08-04 boot.
+end-of-session feed: see `entries/` cards. **Refreshed 2026-08-07 06:0x** from
+the three 05:30 shift-change wrap emails (Secuura/Blockchain, Datasec/NexusAI,
+Datasec/Lead_Bot — all read in full, not from subject lines) plus Blockchain's
+own `history.md` session-10 entry. CypherKey (08-02) and Vision Sales Portal
+(08-04) have had no session since and are unchanged.
 
 ---
 
@@ -26,6 +28,31 @@ Datasec__NexusAI 08-04, Datasec__CypherKey 08-02, Datasec__Vision_Sales_Portal
 ## Fresh (from entry cards)
 
 ### Secuura / Blockchain (Platform K) — most active
+- **2026-08-06 session 10 (evening, NEWEST — read from their history.md +
+  shift-change wrap, 2026-08-07 06:0x):** KS-480 consent **recorded accurately,
+  NOT by silence** (Peter had answered explicitly 08-05 11:36). Sizing Peter's
+  bulk re-key turned up **two verified live defects on the client platform**:
+  1. **`rotate: true` mints a new key and NEVER revokes the old one** — today's
+     "rotation" is *issue an additional credential*, not *replace one*, so
+     re-keying a lost key does not contain it. Known at code level
+     (`platform.ts:501` concedes it); what is absent is evidence the semantics
+     were decided deliberately for the DR case §4/§5 rests on.
+  2. **An admin cannot list an org's keys on demo at all** — `GET /api/keys`
+     serves a boot-warm memory cache filled by unscoped queries under
+     fail-closed RLS. Live proof: table holds **25 rows** while the boot log
+     reads `apiKeys: 0`. Masked because validation is unaffected and the cache
+     lazily re-warms only keys **in active use** — precisely not a lost one.
+  - **Net: neither half of "lose a key, re-key" has a working admin path on
+    demo today.** Honest size for a bulk re-key that actually recovers:
+    **~1–1.5 weeks, dominated by two decisions, not code.**
+  - 7-way ticket split PROPOSED, nothing created. **KS-532 is Done+archived so
+    it rejects comments** — Peter's DR rehearsal has no home, and as he wrote it
+    (3 steps) it would PASS today while leaving the compromised credential live;
+    it needs a 4th step confirming the old key is dead.
+  - **KS-570 (High, assigned to Kam) sitting in Backlog** — revoked-session JWTs
+    accepted on `/api/status` + `/api/leaderboard/*`. Looks mis-triaged.
+  - State: branch `docs/ks480-rotation-and-key-listing-findings` (`1597ab72d`)
+    pushed, **no PR**, deploy hold respected. Nothing built, nothing deployed.
 - **2026-08-06 session 9 (SHIPPED):** KS-563 (Urgent) **live on demo** — #651
   merged to develop `be2d60ef2`, plus fix `4f1152ed7`. Demo verify matrix green:
   upload-only w/ real confirmed anchor → verified true · isCertified FALSE ·
@@ -40,10 +67,16 @@ Datasec__NexusAI 08-04, Datasec__CypherKey 08-02, Datasec__Vision_Sales_Portal
   mock-mode by design since KS-535). See
   [[../learnings/2026-08-06_local-proof-is-not-target-evidence]].
 
-- **Status:** active · scored 1.0 twice today (ship + protocol adherence).
-- **Open / next:** KS-564 live proof then a ship ruling (all three legs as one
-  piece) · **Peter KS-480 consent — after EOD 08-06 only** · Stuart's KS-539
-  verdict · 2 flaky tier-3 tests.
+- **Status:** active · scored 1.0 three times 08-06 (ship + protocol adherence +
+  the KS-480 evening wrap). Session CLOSED clean at the 05:30 shift change.
+- **Open / next — all three openers are blocked on KAM, not on work:**
+  1. **Three KS-480 rulings** — (a) revoke-on-rotate + cutover semantics
+     (**gates everything**), (b) go/no-go on the standalone key-listing fix
+     (~0.5 day), (c) approve the 7-way split + give the rehearsal a live home.
+  2. **KS-564** live-prove Option A end-to-end, ship all three legs as one
+     piece (needs the auth rebuild).
+  3. **KS-570** triage decision.
+  · Stuart's KS-539 verdict · 2 flaky tier-3 tests.
 - **Prior (08-05 session 8):** KS-539 signed off (G-1 split, #648, develop
   c9be578c3) · KS-559 closed (#646 merged 955aa0f11; root cause = GitHub
   secondary rate limit, not the suites I had blamed; durable fix KS-567) ·
@@ -52,8 +85,27 @@ Datasec__NexusAI 08-04, Datasec__CypherKey 08-02, Datasec__Vision_Sales_Portal
   hold today proved why that matters); prompt-fidelity fold into WED-20.
 
 ### Datasec / NexusAI
-- **Status:** active · **Last session:** 2026-08-06 (LIVE now, pane %3) —
-  RD-61 synthetic demo feed per Kam's 08-05 ruling.
+- **Status:** active · **Last session:** 2026-08-06, CLOSED clean at the 05:30
+  shift change (wrap read 2026-08-07 06:0x). Nothing in flight, nothing blocked
+  on their agent.
+- **Needs Kam, two small things:** (1) sign in to the demo, confirm RD-61 looks
+  right, close it — expect a **fictional 10-printer DEMO- fleet**, not the old
+  3-device ABTDEMO lab (deliberate; RD-69 tracks the knock-on to the RD-15
+  marketing video); (2) one ruling to ship **RD-67 + RD-68** — single commit,
+  they go together or not at all.
+- **⚠ RD-71 — their highest-value board item:** the Dockerfile COPYs a directory
+  whose contents are gitignored with nothing tracked keeping it, so **a clean
+  clone simply fails to build**. CI hides it behind a `|| mkdir -p` fallback and
+  Kam's working tree has the folder — so it builds for Kam and for CI and for
+  **nobody else**. A contractor, or a release build from a tag, hits a wall.
+- **Fleet-wide gotcha from their permission test:** Azure's `runningState` read
+  "Activating" and never flipped to "Running" despite health OK on 20 consecutive
+  polls and 0 restarts — **automation gating on that field would hang.**
+- **Honest gap they named:** the three operations predicted to FAIL under scoped
+  Contributor (`az group create/delete`, `az provider register`) were NOT
+  empirically tested — that half is confirmed by the permission model, not by
+  experiment. A Marketplace pre-publish dry-run will need a temporary grant.
+- **Prior (08-06 day):** RD-61 synthetic demo feed per Kam's 08-05 ruling.
 - **Board (live-corrected by their agent 2026-08-06 — my card was days stale):**
   RD-64 **already Done** (not awaiting confirm) · the Release-Ready pile is
   **gone**: RD-59/60/63/45/23 closed at the 08-04 sweep, RD-41 Put on Hold with
@@ -99,9 +151,21 @@ Datasec__NexusAI 08-04, Datasec__CypherKey 08-02, Datasec__Vision_Sales_Portal
   40-char key. Lead_Bot is swapping it today; pointing the bot at the prod
   portal is **Kam-held at localhost** pending discovery of any running instance.
 
-### Datasec / Lead_Bot — dormant since 2026-07-03, session live today (%4)
-- **Status:** active today (WED-75) · no git repo, no history.md until today,
-  which is exactly why its state was invisible to the fleet.
+### Datasec / Lead_Bot — WED-75 CLOSED 2026-08-06, session wrapped at shift change
+- **Honest state, their words, and it must not be misread: "credential fixed,
+  wiring open" — NOT "handoff complete".** The LEAD_BOT_API_KEY handoff is done
+  and the leaked key is gone from disk, but **`SALES_PORTAL_URL` is still
+  localhost on Kam's HOLD**, so Lead_Bot → Vision is not live end-to-end.
+- **Artefacts that did not exist before and now do:** `history.md`, `BACKLOG.md`,
+  a root `.gitignore`, and their index card.
+- **⚠ There is still NO git repository in this project** — not a clean tree,
+  none exists at the root or in `2_Project_Files`. `history.md` is a single copy
+  on one SSD. Needs Kam's `gh auth login` as `datasecau`.
+- **WED-78 ordering they recommend (and I agree):** (b) Kam names this project's
+  Datasec tenant so someone can look for a running instance, THEN (a) the prod
+  wiring decision. (b) genuinely gates (a) — deciding to point the bot at prod
+  without knowing what is already running is deciding blind.
+- **Status:** WED-75 closed · no Linear team, no LINEAR_* keys in its .env.
 - **Findings:** handoff genuinely never done (key hashes differ; BOT_USER_ID
   matches) · the residual key is the gitleaks-found leaked value → this is leak
   remediation, not a sync · nothing running that we can see (no .env in
