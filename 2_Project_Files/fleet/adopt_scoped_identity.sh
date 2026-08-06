@@ -34,8 +34,14 @@ case "${1:-}" in
     LABEL="Datasec / CypherKey (OneTimePad)"
     EXPECT_RG="rg-otp-demo"
     ;;
+  mypki)
+    APP_ID="4da256f7-c3fc-4d89-b05d-55b103134808"
+    TARGET="/Volumes/DevMASTER/!CODING/Datasec/myPKI/4_Credentials/.azure"
+    LABEL="Datasec / myPKI"
+    EXPECT_RG="mypki-demo-rg"
+    ;;
   *)
-    echo "usage: $0 vision|cypherkey" >&2; exit 2 ;;
+    echo "usage: $0 vision|cypherkey|mypki" >&2; exit 2 ;;
 esac
 
 command -v az >/dev/null || { echo "az not on PATH" >&2; exit 2; }
@@ -54,11 +60,15 @@ PW="$(AZURE_CONFIG_DIR="$WED_AZ" az ad app credential reset \
 [ -n "$PW" ] || { echo "FAILED to generate a secret (are you logged in as an owner?)" >&2; exit 1; }
 
 # 2. Consume it in the target project's isolated config dir.
-#    RETRY IS REQUIRED, not defensive padding: a freshly-created Azure AD client
-#    secret is not immediately usable. Measured 2026-08-06 against this very app —
-#    attempts at 0s and 5s both returned AADSTS7000215 "Invalid client secret",
-#    and the same secret authenticated fine at 10s. The first version of this
-#    script tried once and reported LOGIN FAILED, which was pure propagation lag.
+#    RETRY IS REQUIRED, not defensive padding. TWO distinct eventual-consistency
+#    delays were measured 2026-08-06, and a fresh identity can hit both:
+#      (a) SECRET propagation — AADSTS7000215 "Invalid client secret" at 0s and
+#          5s, authenticating at 10s (Vision, CypherKey);
+#      (b) ROLE-ASSIGNMENT propagation — auth succeeds but "No subscriptions
+#          found for <appId>" until the Contributor grant lands; seen through
+#          15s, succeeded at 20s (myPKI, a brand-new SP).
+#    The first version of this script tried once and reported LOGIN FAILED,
+#    which was pure propagation lag in case (a).
 #    Errors are PRINTED, never discarded — the first version swallowed the
 #    AADSTS code and left nothing to diagnose.
 echo "==> logging the project session in as the scoped identity…"
