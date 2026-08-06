@@ -866,7 +866,9 @@ def sub_ev_row(e):
     s = SRC[e["src"]]
     cal = f' <span class="cal">{html.escape(e["cal"])}</span>' if e["cal"] not in ("Secuura", "Datasec") else ""
     loc = f' <span class="cal">{html.escape(e.get("loc", ""))}</span>' if e.get("loc") else ""
-    return (f'<li class="{cls}"><span class="dot" style="background:{s["color"]}"></span>'
+    # round 13: subpages render rows through THIS function, not ev_row — they were
+    # missed in the first pass of the rollout and kept the legacy series colours.
+    return (f'<li class="{cls}"><span class="dot" style="background:{src_color(e["src"], e["cal"])}"></span>'
             f'<span class="time">{t}</span><span class="ev">{html.escape(e["title"])}</span>{cal}{loc}</li>')
 
 def render_subpage(fname, title, body):
@@ -898,7 +900,13 @@ def area_tickets_html(client):
         if pr["client"].lower() != client.lower():
             continue
         rows = "".join(f'<li><span class="ev">{html.escape(it)}</span></li>' for it in pr["items"]) or                '<li class="empty">nothing carried</li>'
-        out.append(f'<h3>{html.escape(pr["project"])} <span class="cal">as of {pr["updated"]}</span></h3><ul>{rows}</ul>')
+        # same identity mark the tile uses, so a project reads the same on both surfaces
+        pk = project_key(pr["client"], pr["project"])
+        c = project_color(pk)
+        dot = f'<span class="dot" style="background:{c}"></span> ' if c else ""
+        rail = f' style="border-left:3px solid {c}; padding-left:8px"' if c else ""
+        out.append(f'<h3{rail}>{dot}{html.escape(pr["project"])} '
+                   f'<span class="cal">as of {pr["updated"]}</span></h3><ul>{rows}</ul>')
     return "".join(out) or '<p class="empty">no cached project cards</p>'
 
 def area_mail_html(needle):
