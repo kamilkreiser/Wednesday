@@ -269,15 +269,44 @@ def tile_flags():
                  f'<span class="ev">{html.escape(f["what"])}</span></li>')
     return f"<ul class='events plain'>{rows}</ul>" if rows else '<p class="empty">no flags</p>'
 
+def day_label(e):
+    """Category chip for the family tile: the DATE with its weekday, in the same
+    language the calendar uses for its own groupings (Kam round 7)."""
+    d = e["start"].date()
+    today = NOW.date()
+    delta = (d - today).days
+    if delta == 0:  return "Today"
+    if delta == 1:  return "Tomorrow"
+    return e["start"].strftime("%a %d %b")
+
 def tile_family():
     fam = [e for e in EVENTS if e["cal"] == "Family" and
            (KID_PAT.search(e["title"]) or "school" in e["title"].lower())][:12]
     if not fam:
         return '<p class="empty">no kid/school items in the next stretch</p>'
-    rows = "\n".join(
-        f'<li><span class="time">{e["start"].strftime("%a %d %H:%M") if not e["allday"] else e["start"].strftime("%a %d")}</span>'
-        f'<span class="ev">{html.escape(e["title"])}</span></li>' for e in fam)
-    return f"<ul class='events plain'>{rows}</ul><p class='note'>NB. Family calendar is display-only (cowork agent's territory).</p>"
+    rows = []
+    for e in fam:
+        key = mute_key(e)
+        muted = key in MUTED
+        t = "all-day" if e["allday"] else e["start"].strftime("%H:%M")
+        s = SRC[e["src"]]
+        fields = [("What", e["title"]),
+                  ("When", e["start"].strftime("%A %d %B") + ("" if e["allday"] else e["start"].strftime(", %H:%M"))),
+                  ("Calendar", e["cal"])]
+        if e.get("loc"): fields.append(("Where", e["loc"]))
+        # bell = quieten this item to the same muted treatment the calendar uses;
+        # crossed bell = already quiet, click to restore. Persisted via /api/mute.
+        bell = (f'<button class="bell{" off" if muted else ""}" data-mute="{html.escape(key, quote=True)}" '
+                f'title="{"muted — click to restore" if muted else "quieten this item"}">'
+                f'{"&#128277;" if muted else "&#128276;"}</button>')
+        rows.append(
+            f'<li class="evrow{" muted" if muted else ""}" data-detail="{detail_attr(fields, key)}" '
+            f'data-key="{html.escape(key, quote=True)}" title="click for details">'
+            f'<span class="dot" style="background:{s["color"]}"></span>'
+            f'<span class="src">{day_label(e)}</span><span class="time">{t}</span>'
+            f'<span class="ev">{html.escape(e["title"])}</span>{bell}</li>')
+    return ("<ul class='events plain'>" + "\n".join(rows) + "</ul>"
+            "<p class='note'>NB. Family calendar is display-only (cowork agent's territory).</p>")
 
 PRIO = {0: "", 1: "P1", 2: "P2", 3: "P3", 4: "P4"}
 
@@ -671,12 +700,20 @@ def views_panel_html():
         for n in VIEWS)
     if not rows:
         rows = '<p class="vempty">no saved views yet — arrange the board, then save it here</p>'
+    # Kam round 7: saving must offer UPDATE-an-existing as well as save-as-new,
+    # so re-saving a tweak to "Cal Pref Default" doesn't silently make a duplicate.
+    opts = "".join(f'<option value="{html.escape(n, quote=True)}">{html.escape(n)}</option>' for n in VIEWS)
+    upd = (f'<div class="vsave"><select id="view-update">'
+           f'<option value="">— update an existing layout —</option>{opts}</select>'
+           f'<button id="view-update-btn">update</button></div>') if VIEWS else ""
     return (f'<div id="views-panel" hidden><h4>Favourite views</h4>{rows}'
+            f'{upd}'
             f'<div class="vsave"><input id="view-name" type="text" maxlength="40" '
-            f'placeholder="save current as&#8230;"><button id="view-save">save</button></div>'
+            f'placeholder="save as a NEW layout&#8230;"><button id="view-save">save new</button></div>'
             f'<span id="views-msg" class="verr"></span>'
             f'<p class="cpnote" style="margin-top:6px">a view snapshots the whole layout '
-            f'(order, sizes, tints, separators, hidden tiles &amp; sources, chat mode) &middot; max 12</p></div>')
+            f'(order, sizes, tints, separators, hidden tiles &amp; sources, chat mode) &middot; max 12 &middot; '
+            f'NB. browser page zoom is a Chrome per-site setting, not part of a view</p></div>')
 
 def status_panels_html():
     """Topbar "actioning" / "archived" panels. Lifecycle rule: ack state "done"
@@ -741,6 +778,11 @@ N_ACTING, N_ARCHIVED, N_FLAGGED, STATUS_PANELS = status_panels_html()
 ACTING_BTN = "&#9679; actioning" + (f" ({N_ACTING})" if N_ACTING else "")
 ARCHIVED_BTN = "&#9634; archived" + (f" ({N_ARCHIVED})" if N_ARCHIVED else "")
 FLAG_CT = f" ({N_FLAGGED})" if N_FLAGGED else ""
+# Every source hidden renders a dashboard with no events at all — which reads as
+# "broken" rather than "filtered". Say so loudly, with a one-click way back.
+ALLHIDDEN_BANNER = ('<div class="allhidden">All sources are hidden, so every calendar tile is empty. '
+                    '<button id="showall-btn">show all sources</button></div>'
+                    if set(GROUPS) and set(GROUPS) <= HIDDEN_GROUPS else "")
 
 def customise_tile_rows():
     out = []
@@ -840,17 +882,21 @@ ul.plain .time {{ width:6.2em; }}
 .note {{ color:var(--text-muted); font-size:.8em; margin-top:6px; }}
 /* Kam 2026-08-06: a tile's trailing note / input sits at the BOTTOM of the tile,
    not immediately under the content — so every tile in a row ends on the same line. */
-.tilebody {{ display:flex; flex-direction:column; height:100%; }}
-.tilebody > .note:last-child, .tilebody > .addbox:last-child,
-.tilebody > .chatbox:last-child, .tilebody > .parkadd:last-child {{ margin-top:auto; padding-top:8px; }}
+.tilebody {{ display:flex; flex-direction:column; }}
+
 /* Scrolling tiles pin their trailing note/input too: the CONTENT scrolls, the
    input stays put. Kam's ask was explicitly "chat with wednesday input". */
 .tilebox.scroll .tilebody {{ display:flex; flex-direction:column; }}
 .tilebox.scroll .tilebody > .scrollpart {{ flex:1 1 auto; overflow-y:auto; min-height:0; scrollbar-width:thin; }}
 .tilebox.scroll .tilebody > .note, .tilebox.scroll .tilebody > .chatinput,
 .tilebox.scroll .tilebody > .addbox, .tilebox.scroll .tilebody > .parkadd {{ flex:none; }}
-/* tiles without an explicit scrollpart keep the old whole-body scroller */
-.tilebox.scroll .tilebody:not(:has(> .scrollpart)) {{ display:block; overflow-y:auto; }}
+/* EVERY tile gets a .scrollpart wrapper at load (see JS): content scrolls inside it,
+   trailing notes/inputs pin to the tile floor. Kam 2026-08-06 round 7 — the earlier
+   rule only reached tiles that already had one, which was almost none of them. */
+.tilebody > .scrollpart {{ flex:1 1 auto; min-height:0; }}
+.tilebox.scroll .tilebody > .scrollpart {{ overflow-y:auto; scrollbar-width:thin; }}
+.tilebody > .note, .tilebody > .chatinput, .tilebody > .addbox, .tilebody > .parkadd {{ flex:none; }}
+.tilebody > .note:last-child {{ margin-top:6px; padding-top:4px; }}
 /* ⚑ flag-for-Wed toggle */
 .flagbtn {{ background:none; border:none; color:var(--text-muted); cursor:pointer; padding:0 4px;
   font-size:1.05em; line-height:1; flex:none; opacity:.45; }}
@@ -860,6 +906,15 @@ li:hover .flagbtn {{ opacity:.85; }}
 li:hover .flagbtn.on {{ opacity:1; }}
 .newsrow {{ align-items:flex-start; }}
 .newsrow .nbody {{ flex:1; }}
+.allhidden {{ background:#3a2a1a; border:1px solid #7a5a2a; color:#f0c98a; border-radius:8px;
+  padding:10px 14px; margin-top:12px; font-size:13px; display:flex; gap:12px; align-items:center; }}
+.allhidden button {{ background:var(--surface-2); color:var(--text-primary); border:1px solid var(--line);
+  border-radius:6px; padding:4px 10px; cursor:pointer; font-size:12.5px; }}
+.bell {{ background:none; border:none; cursor:pointer; padding:0 2px; font-size:.85em;
+  line-height:1; margin-left:auto; flex:none; opacity:.35; filter:grayscale(1); }}
+li:hover .bell {{ opacity:.9; }}
+.bell.off {{ opacity:.55; }}
+.tilebox[data-tile="family"] .src {{ width:6.6em; }}
 .keptmark {{ color:#e0a33e; font-size:.7em; margin-left:6px; text-transform:uppercase;
   letter-spacing:.04em; vertical-align:middle; }}
 details.srcweek.kept > summary {{ color:#e0a33e; }}
@@ -1111,7 +1166,7 @@ footer .ok {{ color:var(--text-secondary); }} footer .bad {{ color:#e66767; font
    f'{" checked" if g not in HIDDEN_GROUPS else ""}> {label}</label>' for g, label in GROUPS.items())}</div>
  <div class="cpcol cpnote">Source toggles filter every tile at once (calendars, counts, family, next-event). Tints give a tile a subtle background shade. Changes apply on save.<br><button id="customise-save">save</button></div>
 </div>
-<div id="grid"><div class="grid">
+{ALLHIDDEN_BANNER}<div id="grid"><div class="grid">
 {render_tiles()}
 </div></div>
 <div id="ctxmenu" hidden></div>
@@ -1128,6 +1183,21 @@ footer .ok {{ color:var(--text-secondary); }} footer .bad {{ color:#e66767; font
 </div></div>
 <footer>feeds: {feed_health()} · regenerated {NOW.strftime("%H:%M:%S")} · auto-refresh 5 min (paused while organising) · right-click any row for actions · read-only everywhere</footer>
 <script>
+// Bottom-align every tile's trailing note / input (Kam round 7): wrap the CONTENT
+// in .scrollpart so the note or input box sits on the tile floor whatever the
+// content height, and never overlaps it.
+document.querySelectorAll(".tilebody").forEach(body => {{
+  if (body.querySelector(":scope > .scrollpart")) return;      // chat already has one
+  const kids = [...body.children];
+  const isTail = el => el.matches(".note, .addbox, .chatinput, .parkadd");
+  let cut = kids.length;
+  while (cut > 0 && isTail(kids[cut - 1])) cut--;
+  if (cut === kids.length || cut === 0) return;                // nothing to pin / nothing above
+  const wrap = document.createElement("div");
+  wrap.className = "scrollpart";
+  kids.slice(0, cut).forEach(k => wrap.appendChild(k));
+  body.insertBefore(wrap, body.firstChild);
+}});
 async function api(path, payload) {{
   const r = await fetch(path, {{method:"POST", headers:{{"Content-Type":"application/json"}},
     body: JSON.stringify(payload)}});
@@ -1285,7 +1355,7 @@ document.querySelectorAll(".legchip").forEach(c => c.addEventListener("click", a
   const r = await api("/api/layout", {{hidden_groups: hg}});
   if (r.ok) location.reload();
 }}));
-document.querySelectorAll(".acts button").forEach(b => b.addEventListener("click", async () => {{
+document.querySelectorAll(".acts button:not(.flagbtn)").forEach(b => b.addEventListener("click", async () => {{
   b.disabled = true; b.textContent = "…";
   const r = await api("/api/" + b.dataset.act, {{id: b.dataset.id}});
   if (r.ok) location.reload(); else {{ b.textContent = "!"; b.title = r.error || "failed"; }}
@@ -1430,6 +1500,17 @@ viewSave.addEventListener("click", async () => {{
 document.getElementById("view-name").addEventListener("keydown", e => {{
   if (e.key === "Enter") viewSave.click();
 }});
+// UPDATE an existing layout in place (same save action, existing name = overwrite)
+const viewUpdBtn = document.getElementById("view-update-btn");
+if (viewUpdBtn) viewUpdBtn.addEventListener("click", async () => {{
+  const sel = document.getElementById("view-update");
+  const name = sel.value;
+  if (!name) {{ vmsg.textContent = "pick a layout to update"; sel.focus(); return; }}
+  viewUpdBtn.disabled = true;
+  const r = await api("/api/views", {{action: "save", name}});
+  if (r.ok) location.reload();
+  else {{ vmsg.textContent = r.error || "failed"; viewUpdBtn.disabled = false; }}
+}});
 const burger = document.getElementById("burger-btn"), bdrop = document.getElementById("burger-drop");
 burger.addEventListener("click", e => {{ e.stopPropagation(); bdrop.hidden = !bdrop.hidden; burger.classList.toggle("on", !bdrop.hidden); }});
 document.addEventListener("click", e => {{
@@ -1447,6 +1528,24 @@ bdrop.querySelectorAll(".msub button, .msub a").forEach(b => b.addEventListener(
   bdrop.hidden = true; burger.classList.remove("on");
   bdrop.querySelectorAll(".mgroup").forEach(x => x.classList.remove("open"));
 }}));
+const showAllBtn = document.getElementById("showall-btn");
+if (showAllBtn) showAllBtn.addEventListener("click", async () => {{
+  const r = await api("/api/layout", {{hidden_groups: []}});
+  if (r.ok) location.reload();
+}});
+// 🔔 bell on family rows — quieten/restore an item using the SAME persisted mute
+// the calendar already uses, so a quietened item stays quiet across refreshes.
+document.addEventListener("click", async e => {{
+  const b = e.target.closest(".bell");
+  if (!b) return;
+  e.preventDefault(); e.stopPropagation();
+  try {{
+    const r = await fetch("/api/mute", {{ method:"POST", headers:{{"Content-Type":"application/json"}},
+      body: JSON.stringify({{ key: b.dataset.mute }}) }});
+    if (!r.ok) throw new Error(await r.text());
+    setTimeout(() => location.reload(), 250);
+  }} catch (err) {{ console.error("mute failed", err); }}
+}});
 // ⚑ flag for Wed — flags the item for Wednesday and changes NOTHING upstream
 document.addEventListener("click", async e => {{
   const b = e.target.closest(".flagbtn");
