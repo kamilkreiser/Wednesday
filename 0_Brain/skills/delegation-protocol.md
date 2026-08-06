@@ -93,6 +93,20 @@ Every brief contains, explicitly:
    > real and the fix belongs in the protocol, not in good intentions.
    > See [[../learnings/_ledger]] w=5 row.
 
+## Writing for humans — BLUF (Kam, standing, 2026-08-06)
+
+Every brief I send, and every ticket comment or update an agent posts, uses:
+**## BLUF** (shortest logical summary — correct on its own, no teaser) →
+**## Recommendation** (the one ask, or "No action needed") →
+**## Detail** (evidence, commits, caveats, reasoning).
+
+Kam's reason: stakeholders read every ticket personally and it takes them a long
+time — their reading is the scarcest resource in the loop, and *"we should make
+it as easy for them as possible."* A human gate only works if the humans can
+keep standing at it. Two rules that follow: a decision request never lives only
+in Detail, and never write a BLUF you would have to walk back.
+See [[../learnings/2026-08-06_bluf-write-for-the-reader]].
+
 ## The loop (per task)
 
 1. **Route** using `../projects_index/scoreboard.md` (best channel for this

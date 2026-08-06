@@ -214,6 +214,8 @@ class Handler(SimpleHTTPRequestHandler):
                     layout["chat_mode"] = data["chat_mode"]
                 if "hidden_groups" in data:
                     layout["hidden_groups"] = [g for g in data["hidden_groups"] if g in groups]
+                if "theme" in data and data["theme"] in ("dark", "light"):
+                    layout["theme"] = data["theme"]
                 if "tile_groups" in data and isinstance(data["tile_groups"], dict):
                     # per-tile source filters: {tile: [group,...]} — both keys validated,
                     # empty lists dropped so the reset control really clears the state

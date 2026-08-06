@@ -64,6 +64,8 @@ HIDDEN_TILES = set(LAYOUT.get("hidden_tiles", []))
 HIDDEN_GROUPS = set(LAYOUT.get("hidden_groups", []))   # datasec/secuura/personal/family
 # Per-tile source filters: {tile_id: [group,...]} — hide a client in ONE tile without
 # hiding it site-wide (Kam round 8). Site-wide HIDDEN_GROUPS still wins over these.
+THEME = LAYOUT.get("theme", "dark")
+if THEME not in ("dark", "light"): THEME = "dark"
 TILE_GROUPS = LAYOUT.get("tile_groups", {})
 if not isinstance(TILE_GROUPS, dict): TILE_GROUPS = {}
 def tile_hidden(tile):
@@ -309,16 +311,21 @@ def who_label(e):
     """Under a day heading the date is already stated, so the category column
     carries whose item it is (Alice / Harriet) — falling back to the calendar."""
     m = KID_PAT.search(e["title"])
-    return m.group(0).title() if m else e["cal"]
+    if m:
+        return m.group(0).title()
+    return "School" if "school" in e["title"].lower() else "Home"
 
 def tile_family():
     if "family" in tile_hidden("family"):
         return '<p class="empty">Family is hidden — use the reset arrow beside the menu to restore</p>'
-    # Past days were always in here; the new day headings made it obvious that the
-    # tile was leading with YESTERDAY. Start at today, like the calendar does.
+    # Kam round 11 — I had this wrong. The tile filtered to titles containing a
+    # child's name or "school", so genuinely family items were dropped: "Maths
+    # tutor" (Mon) and "Berry" (Sat) both vanished, which is what made the day
+    # sequence jump Fri → Wed and look like a bug. It was my filter, not the data.
+    # The Family calendar is already curated by the family; everything on it
+    # belongs here, and the bell exists to quieten anything Kam doesn't want.
     fam = [e for e in EVENTS if e["cal"] == "Family"
-           and e["start"].date() >= NOW.date()
-           and (KID_PAT.search(e["title"]) or "school" in e["title"].lower())][:12]
+           and e["start"].date() >= NOW.date()][:16]
     if not fam:
         return '<p class="empty">no kid/school items in the next stretch</p>'
     # Kam round 9: calendar-style DAY HEADINGS, and strictly time-ordered within a day.
@@ -675,7 +682,7 @@ def sub_ev_row(e):
             f'<span class="time">{t}</span><span class="ev">{html.escape(e["title"])}</span>{cal}{loc}</li>')
 
 def render_subpage(fname, title, body):
-    page = (f'<!doctype html><html lang="en"><head><meta charset="utf-8">'
+    page = (f'<!doctype html><html data-theme="{THEME}" lang="en"><head><meta charset="utf-8">'
             f'<meta name="viewport" content="width=device-width, initial-scale=1">'
             f'<title>{html.escape(title)} — Wednesday</title><style>{SUBCSS}</style></head><body>'
             f'<a class="back" href="index.html">&larr; dashboard</a><h1>{html.escape(title)}</h1>'
@@ -838,6 +845,8 @@ N_ACTING, N_ARCHIVED, N_FLAGGED, STATUS_PANELS = status_panels_html()
 ACTING_BTN = "&#9679; actioning" + (f" ({N_ACTING})" if N_ACTING else "")
 ARCHIVED_BTN = "&#9634; archived" + (f" ({N_ARCHIVED})" if N_ARCHIVED else "")
 FLAG_CT = f" ({N_FLAGGED})" if N_FLAGGED else ""
+DARK_TICK = " &#10003;" if THEME == "dark" else ""
+LIGHT_TICK = " &#10003;" if THEME == "light" else ""
 # Every source hidden renders a dashboard with no events at all — which reads as
 # "broken" rather than "filtered". Say so loudly, with a one-click way back.
 # Kam round 8 item 3: once a source is hidden there was NO way back without the
@@ -870,7 +879,7 @@ def customise_tile_rows():
             f'placeholder="section label" value="{html.escape(sep or "", quote=True)}"></div>')
     return "".join(out)
 
-PAGE = f"""<!doctype html><html lang="en"><head><meta charset="utf-8">
+PAGE = f"""<!doctype html><html data-theme="{THEME}" lang="en"><head><meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Wednesday — Day Dashboard</title>
 <style>
@@ -878,6 +887,16 @@ PAGE = f"""<!doctype html><html lang="en"><head><meta charset="utf-8">
   --surface-1:#1a1a19; --surface-2:#232322; --line:#33332f;
   --text-primary:#ffffff; --text-secondary:#c3c2b7; --text-muted:#8a897f;
   --series-1:#3987e5; --series-2:#d95926; --series-3:#199e70; }}
+:root[data-theme="light"] {{ color-scheme: light;
+  --surface-1:#f7f7f4; --surface-2:#ffffff; --line:#dcdcd4;
+  --text-primary:#1b1b19; --text-secondary:#4a4a44; --text-muted:#78776e;
+  --series-1:#1f63b8; --series-2:#b8431a; --series-3:#127956; }}
+:root[data-theme="light"] .tilebox {{ box-shadow:0 1px 2px rgba(0,0,0,.05); }}
+:root[data-theme="light"] li.nowline span {{ color:#b8431a; }}
+:root[data-theme="light"] .resetbtn {{ background:#fdf3e0; border-color:#d8b878; color:#7a5a1a; }}
+:root[data-theme="light"] .allhidden {{ background:#fdf3e0; border-color:#d8b878; color:#7a5a1a; }}
+:root[data-theme="light"] .flagbtn.on {{ color:#b8860b; }}
+:root[data-theme="light"] .keptmark, :root[data-theme="light"] details.srcweek.kept > summary {{ color:#b8860b; }}
 * {{ box-sizing:border-box; margin:0; }}
 body {{ background:var(--surface-1); color:var(--text-primary);
   font:15px/1.5 -apple-system, "SF Pro Text", Helvetica, Arial, sans-serif; padding:18px 22px; }}
@@ -1237,6 +1256,13 @@ footer .ok {{ color:var(--text-secondary); }} footer .bad {{ color:#e66767; font
      <span class="msub">
        <button id="refresh-btn">&#8635; Refresh now</button>
        <button id="clearfocus-btn">&#10005; Clear focus</button>
+     </span>
+   </span>
+   <span class="mgroup">
+     <button class="mparent">&#9681; Appearance <span class="carat">&#9656;</span></button>
+     <span class="msub">
+       <button class="themebtn" data-theme-set="dark">&#9789; Dark{DARK_TICK}</button>
+       <button class="themebtn" data-theme-set="light">&#9788; Light{LIGHT_TICK}</button>
      </span>
    </span>
  </span></span>
@@ -1614,6 +1640,14 @@ bdrop.querySelectorAll(".msub button, .msub a").forEach(b => b.addEventListener(
   bdrop.querySelectorAll(".mgroup").forEach(x => x.classList.remove("open"));
 }}));
 // reset EVERYTHING that is filtered — site-wide groups and every per-tile filter
+// light/dark switch — stored in the layout so it travels with the dashboard
+// rather than living in one browser (Kam round 11)
+document.querySelectorAll(".themebtn").forEach(b => b.addEventListener("click", async () => {{
+  const want = b.dataset.themeSet;
+  document.documentElement.setAttribute("data-theme", want);   // instant, before the round trip
+  const r = await api("/api/layout", {{theme: want}});
+  if (r.ok) location.reload();
+}}));
 const resetBtn = document.getElementById("reset-filters");
 if (resetBtn) resetBtn.addEventListener("click", async () => {{
   resetBtn.disabled = true;
