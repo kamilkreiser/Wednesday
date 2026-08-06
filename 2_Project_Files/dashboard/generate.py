@@ -304,15 +304,35 @@ def day_label(e):
     if delta == 1:  return "Tomorrow"
     return e["start"].strftime("%a %d %b")
 
+def who_label(e):
+    """Under a day heading the date is already stated, so the category column
+    carries whose item it is (Alice / Harriet) — falling back to the calendar."""
+    m = KID_PAT.search(e["title"])
+    return m.group(0).title() if m else e["cal"]
+
 def tile_family():
     if "family" in tile_hidden("family"):
         return '<p class="empty">Family is hidden — use the reset arrow beside the menu to restore</p>'
-    fam = [e for e in EVENTS if e["cal"] == "Family" and
-           (KID_PAT.search(e["title"]) or "school" in e["title"].lower())][:12]
+    # Past days were always in here; the new day headings made it obvious that the
+    # tile was leading with YESTERDAY. Start at today, like the calendar does.
+    fam = [e for e in EVENTS if e["cal"] == "Family"
+           and e["start"].date() >= NOW.date()
+           and (KID_PAT.search(e["title"]) or "school" in e["title"].lower())][:12]
     if not fam:
         return '<p class="empty">no kid/school items in the next stretch</p>'
+    # Kam round 9: calendar-style DAY HEADINGS, and strictly time-ordered within a day.
+    fam = sorted(fam, key=lambda e: (e["start"].date(), e["allday"] is False, e["start"]))
+    out, current_day = [], None
     rows = []
     for e in fam:
+        d = e["start"].date()
+        if d != current_day:
+            if rows:
+                out.append("<ul class='events plain'>" + "\n".join(rows) + "</ul>")
+                rows = []
+            same_day = [x for x in fam if x["start"].date() == d]
+            out.append(f"<h3>{day_label(e)} <span class='count'>{len(same_day)}</span></h3>")
+            current_day = d
         key = mute_key(e)
         muted = key in MUTED
         t = "all-day" if e["allday"] else e["start"].strftime("%H:%M")
@@ -330,9 +350,11 @@ def tile_family():
             f'<li class="evrow{" muted" if muted else ""}" data-detail="{detail_attr(fields, key)}" '
             f'data-key="{html.escape(key, quote=True)}" title="click for details">'
             f'<span class="dot" style="background:{s["color"]}"></span>'
-            f'<span class="src">{day_label(e)}</span><span class="time">{t}</span>'
+            f'<span class="src">{who_label(e)}</span><span class="time">{t}</span>'
             f'<span class="ev">{html.escape(e["title"])}</span>{bell}</li>')
-    return ("<ul class='events plain'>" + "\n".join(rows) + "</ul>"
+    if rows:
+        out.append("<ul class='events plain'>" + "\n".join(rows) + "</ul>")
+    return (group_chips("family") + "\n".join(out) +
             "<p class='note'>NB. Family calendar is display-only (cowork agent's territory).</p>")
 
 PRIO = {0: "", 1: "P1", 2: "P2", 3: "P3", 4: "P4"}
@@ -998,7 +1020,7 @@ li:hover .acts {{ opacity:1; }}
 #modal-park-msg {{ font-size:12px; color:var(--text-muted); }}
 #modal-body {{ max-height:62vh; overflow-y:auto; scrollbar-width:thin; }}
 li.mutable {{ cursor:pointer; }}
-li.muted {{ font-size:50%; opacity:.55; }}
+li.muted {{ font-size:60%; opacity:.55; }}   /* Kam round 9: +20% on the previous 50% */
 li.muted .ev, li.muted .src, li.muted .time, li.muted .cal {{ color:var(--text-muted); }}
 li.muted .dot {{ opacity:.4; }}
 details.srcweek {{ border-bottom:1px solid var(--line); padding:4px 0; }}
