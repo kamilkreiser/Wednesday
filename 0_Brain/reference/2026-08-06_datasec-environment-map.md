@@ -139,3 +139,33 @@ against what the fleet's docs claim — cheap once CLI access exists.
 **Related:** [[../learnings/2026-08-05_identities-float-verify-always]],
 [[../learnings/2026-08-03_mental-model-not-source-of-truth]],
 [[../projects_index/INDEX]]
+
+## RBAC remediation (Kam ruled the RBAC option, 2026-08-06)
+
+**The access model as found — sharper than the ticket assumed:**
+
+| Principal | Role | Scope | Verdict |
+|---|---|---|---|
+| `kreiser.org@me.com` | Owner | subscription | Correct, unchanged. RBAC cannot restrict Kam's own account without locking Kam out; Azure deny-assignments aren't directly creatable. |
+| **`nexusai-claude-deploy`** (SP, appId a71b85e7-…) | **Owner** | **subscription** | **The breach.** NexusAI's agent authenticates as this SP — so an agent identity had full control of Vision's live site, prod Postgres and key vault. |
+| `datasec-sales-portal` (managed identity) | Key Vault Secrets User | datasec-sales-kv | Legitimate — the app reading its own secrets. |
+| 2× deleted principals | Contributor / KV Secrets Officer | subscription | **Orphaned** — identities gone, assignments left. Almost certainly the residue of Kam's half-remembered tenant cleanup. Removed. |
+
+**Done (additive-first, so there is never an access gap):** scoped Contributor
+granted to the SP on `nexusai-dev-rg`, `nexusai-staging-rg`,
+`nexusai-marketplace-validate`; both orphaned assignments removed.
+
+**Held deliberately:** the SP's subscription-scope Owner removal waits until the
+RD-61 demo deploy — running on that identity right now — completes and
+verifies. Pulling subscription rights mid-deploy is how you half-ship a
+container app. Agent informed and asked to report scope gaps by mail rather
+than routing around a permissions error.
+
+**The residue, needing Kam:** Vision, CypherKey and myPKI agents authenticate as
+`kreiser.org@me.com` (Owner), so they keep full production reach. Closing that
+means a scoped SP per project — their credentials and launchers, so their
+agents' work, not mine. Vision first, before go-live prep makes it daily.
+
+**The general lesson:** "agents can act here safely" was never true of this
+environment; it was believed because nobody had listed who actually holds what.
+An access model is a live system like any other — read it, don't assume it.
