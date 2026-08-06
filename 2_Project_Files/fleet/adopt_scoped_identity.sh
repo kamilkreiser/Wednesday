@@ -83,8 +83,31 @@ if [ $RC -ne 0 ]; then
   exit 1
 fi
 
+# 2b. PURGE any other identity from this project's config.
+#     Found 2026-08-06 on Vision: after adopting the scoped SP, Kam's
+#     kreiser.org@me.com (Owner) was STILL in the same profile as a non-default
+#     account — so the agent could `az account set` straight back to Owner and
+#     reach every project. Scoping an identity is worthless if a broader one is
+#     still sitting beside it. The config must hold exactly ONE identity.
+echo "==> purging any other identity from this project's config…"
+OTHERS="$(AZURE_CONFIG_DIR="$TARGET" az account list --all \
+           --query "[?user.name!='$APP_ID'].user.name" -o tsv 2>/dev/null | sort -u)"
+if [ -n "$OTHERS" ]; then
+  while IFS= read -r who; do
+    [ -n "$who" ] || continue
+    AZURE_CONFIG_DIR="$TARGET" az logout --username "$who" 2>/dev/null \
+      && echo "    removed: $who" \
+      || echo "    WARNING: could not remove $who — check manually" >&2
+  done <<< "$OTHERS"
+else
+  echo "    none present (config holds only the scoped identity)"
+fi
+
 # 3. Verify: who is it, and can it see only what it should?
 echo "==> verifying…"
+echo "==> identities remaining in this config (must be exactly one):"
+AZURE_CONFIG_DIR="$TARGET" az account list --all \
+  --query "[].{identity:user.name,type:user.type}" -o tsv 2>/dev/null | sed 's/^/    /'
 AZURE_CONFIG_DIR="$TARGET" az account show \
   --query "{identity:user.name, type:user.type, subscription:name}" -o json 2>/dev/null
 
