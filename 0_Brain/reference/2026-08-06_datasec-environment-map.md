@@ -60,6 +60,55 @@ integrates with Vision (which is verified #5), writes to Vision's database as a
 fallback, and is agent-touched work rather than production. Kam has not
 confirmed this. Do not run `az` against Lead_Bot on that basis.
 
+## What is ACTUALLY in environment #5 (read-only sweep, 2026-08-06 ~11:0x)
+
+Kam granted CLI access the same hour; swept immediately. **Environment #5 holds
+TWO subscriptions, not one** (he mentioned one):
+
+**`Azure subscription 1` — `0c57ab37-349c-47ae-a10f-e284a380bbb9`** (28 resources)
+
+| Resource group | What's in it |
+|---|---|
+| `datasec-sales-portal-rg` | **Vision Sales Portal — the LIVE site** `datasec-sales-portal` (Running, Australia East, `datasec-sales-portal.azurewebsites.net`), Postgres flexible server `datasec-sales-db`, key vault `datasec-sales-kv`, app plan |
+| `nexusai-dev-rg` | NexusAI dev: container app `nexusaidev-app`, ACR, Azure OpenAI account, KV, insights, runtime logs |
+| `nexusai-staging-rg` | NexusAI staging: `nexusai-staging` site, container apps incl. `nexusai-ollama`, Redis, 2 log workspaces, storage |
+| `nexusai-marketplace-validate` | Marketplace app definition `nexusai-v1-3-0-combined` |
+| `mypki-demo-rg` | myPKI demo site + plan |
+| `datasec-backups-rg` | storage `datasecbackups` |
+| `NetworkWatcherRG` | 2 network watchers (westeurope, australiaeast) |
+
+**`CypherKey` — `29b5c7de-bbdd-409f-a4a2-30fc9e1ae4a6`** (14 resources) — Kam did
+not mention this one: `rg-otp-demo` (container apps `otp-server`, `otp-connector`,
+`otp-portal`, `otp-xbank`, Postgres, ACR, log workspace, alerts) and
+`onetimepad-email-rg` (Azure Communication Services + managed email domain).
+
+**ZERO virtual machines in either subscription.** Combined with the Telegram
+single-consumer test, this closes the Lead_Bot question completely: no host
+exists here and none was removed (see below).
+
+**The "tenant cleanup" did NOT touch environment #5.** Activity-log audit over
+the full 90-day retention window: **zero successful deletions** in either
+subscription. Whatever Kam removed was in another environment (#1–#4) or longer
+than 90 days ago. Nothing here was lost.
+
+## ⚠️ Model-vs-reality conflict worth Kam's attention
+
+Kam described #5 as *"separate because it can be controlled by agents… not
+linked to anything production."* But **Vision Sales Portal's production site
+lives here** — `datasec-sales-portal.azurewebsites.net` is the exact URL
+Vision's own `CLAUDE.md` line 5 names as **Live**, and its 08-04 history
+records a Kam-approved production zip-deploy to it, plus the production
+Postgres and key vault in the same resource group. Real customer leads, real
+data.
+
+So #5 is not production-free: it is the agent-controllable environment AND the
+home of at least one genuinely live customer-facing system. Both things are
+true, and the tension is the point — the safety story for #5 ("agents can act
+here because nothing production is here") does not hold as stated. Raised with
+Kam rather than quietly assumed either way; it matters most right now because
+Vision go-live prep is starting and agents will be working in exactly this
+subscription.
+
 ## Consequences for how I work
 
 1. **Wednesday currently has NO CLI access to environment #5.** Her global `az`
