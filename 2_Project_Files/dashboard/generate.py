@@ -41,6 +41,12 @@ _f = DATA / "focus.json"
 FOCUS = json.loads(_f.read_text()) if _f.exists() else None
 _arc = DATA / "archived.json"
 ARCHIVED = set(json.loads(_arc.read_text())) if _arc.exists() else set()
+# "Flag for Wed" store (Kam 2026-08-06). Keyed by row key; the stored payload lets a
+# flagged item outlive its source feed — a flagged headline is still there tomorrow
+# after the news has moved on, until Kam unflags it.
+_wf = DATA / "wedflags.json"
+FLAGGED = json.loads(_wf.read_text()) if _wf.exists() else {}
+if not isinstance(FLAGGED, dict): FLAGGED = {}
 _l = DATA / "layout.json"
 LAYOUT = json.loads(_l.read_text()) if _l.exists() else {}
 if not isinstance(LAYOUT, dict): LAYOUT = {}
@@ -116,6 +122,15 @@ SRC = {  # fixed categorical assignment — never re-ordered
     "secuura":  {"label": "Secuura",  "color": "var(--series-2)"},
     "personal": {"label": "Personal", "color": "var(--series-3)"},
 }
+
+def flag_btn(key, label="", kind="item", payload=None):
+    """The ⚑ toggle. Filled = flagged for Wednesday; nothing upstream changes."""
+    on = key in FLAGGED
+    pl = html.escape(json.dumps(payload, ensure_ascii=False), quote=True) if payload else ""
+    return (f'<button class="flagbtn{" on" if on else ""}" data-flag="{html.escape(key, quote=True)}" '
+            f'data-flabel="{html.escape(label[:200], quote=True)}" data-fkind="{kind}"'
+            f'{f" data-fpayload=\"{pl}\"" if pl else ""} '
+            f'title="{"flagged for Wednesday — click to clear" if on else "flag for Wed"}">&#9873;</button>')
 
 def norm_events():
     evs = []
@@ -262,7 +277,7 @@ def tile_family():
     rows = "\n".join(
         f'<li><span class="time">{e["start"].strftime("%a %d %H:%M") if not e["allday"] else e["start"].strftime("%a %d")}</span>'
         f'<span class="ev">{html.escape(e["title"])}</span></li>' for e in fam)
-    return f"<ul class='events plain'>{rows}</ul><p class='note'>Family calendar is display-only (cowork agent's territory).</p>"
+    return f"<ul class='events plain'>{rows}</ul><p class='note'>NB. Family calendar is display-only (cowork agent's territory).</p>"
 
 PRIO = {0: "", 1: "P1", 2: "P2", 3: "P3", 4: "P4"}
 
@@ -270,9 +285,13 @@ def issue_row(i, todo=False):
     due = f' <span class="flagdue">due {i["dueDate"]}</span>' if i.get("dueDate") else ""
     pr = PRIO.get(i.get("priority") or 0, "")
     badge = f'<span class="prio p{i.get("priority")}">{pr}</span>' if pr else ""
+    # Kam 2026-08-06: every row gets BOTH — "flag for Wed" (no ticket change at all,
+    # it just tells Wednesday to look) and prioritise. The status change is hers to
+    # make once she has actually seen it, which is the whole point of the label.
     btns = '<span class="acts">'
+    btns += flag_btn(i["identifier"], i.get("title", ""), "wed")
     if (i.get("priority") or 5) > 1:
-        btns += f'<button data-act="prioritise" data-id="{i["identifier"]}" title="set Urgent">&#9650;</button>'
+        btns += f'<button data-act="prioritise" data-id="{i["identifier"]}" title="prioritise — set Urgent">&#9650;</button>'
     if todo:
         btns += f'<button data-act="start" data-id="{i["identifier"]}" title="move to In Progress">&#9654;</button>'
     btns += "</span>"
@@ -296,30 +315,48 @@ def tile_board():
 NEWS_LABELS = {"world": "War & geopolitics", "tech": "Tech", "quantum": "Quantum",
                "security": "Security", "biotech": "Biotech & medicine"}
 
-def news_row(n):
+def news_row(n, kept=False):
     fields = [("Headline", n["title"]), ("Source", f'{n["source"]} · {n["date"]}'),
               ("Summary", n["summary"] or "(no summary in feed)")]
     payload = {"fields": fields, "url": n["link"]}
     d = html.escape(json.dumps(payload, ensure_ascii=False), quote=True)
     take = html.escape((n["summary"] or "")[:140])
     key = f'news|{n["title"]}'
-    return (f'<li class="evrow newsrow" data-detail="{d}" data-key="{html.escape(key, quote=True)}">'
-            f'<div class="nhead">{html.escape(n["title"])}</div>'
-            f'<div class="ntake">{take}</div></li>')
+    # the flag stores the whole item, so it survives tomorrow's feed refresh
+    fp = {"title": n["title"], "summary": n["summary"], "link": n["link"],
+          "source": n["source"], "date": n["date"]}
+    keep = '<span class="keptmark" title="kept by your flag — the feed has moved on">kept</span>' if kept else ""
+    return (f'<li class="evrow newsrow{" kept" if kept else ""}" data-detail="{d}" data-key="{html.escape(key, quote=True)}">'
+            f'{flag_btn(key, n["title"], "news", fp)}'
+            f'<div class="nbody"><div class="nhead">{html.escape(n["title"])}{keep}</div>'
+            f'<div class="ntake">{take}</div></div></li>')
 
 def tile_news():
     if not news or not any(news["data"]["topics"].values()):
         return '<p class="empty">news feeds unavailable</p>'
     out = []
+    live_titles = set()
     for topic, label in NEWS_LABELS.items():
         items = [n for n in news["data"]["topics"].get(topic, [])
                  if f'news|{n["title"]}' not in ARCHIVED][:3]
         if not items:
             continue
+        live_titles.update(n["title"] for n in items)
         rows = "".join(news_row(n) for n in items)
-        out.append(f"<details class='srcweek'><summary>{label} <span class='count'>{len(items)}</span></summary>"
+        # open by default (Kam): all categories visible without clicking
+        out.append(f"<details class='srcweek' open><summary>{label} <span class='count'>{len(items)}</span></summary>"
                    f"<ul class='events plain newslist'>{rows}</ul></details>")
-    out.append('<p class="note">takes are source summaries for now — Wednesday-curated takes arrive with the morning-generation duty · click a headline for the full summary + article link</p>')
+    # Flagged headlines the feed has since dropped — Kam's ask: a flagged item stays
+    # until HE unflags it, so tomorrow's refresh cannot quietly take it away.
+    kept = [v["payload"] for k, v in FLAGGED.items()
+            if v.get("kind") == "news" and v.get("payload")
+            and v["payload"].get("title") not in live_titles]
+    if kept:
+        rows = "".join(news_row(n, kept=True) for n in kept)
+        out.insert(0, f"<details class='srcweek kept' open><summary>&#9873; Flagged — kept for you "
+                      f"<span class='count'>{len(kept)}</span></summary>"
+                      f"<ul class='events plain newslist'>{rows}</ul></details>")
+    out.append('<p class="note">NB. takes are source summaries for now — Wednesday-curated takes arrive with the morning-generation duty · click a headline for the full summary + article link · &#9873; keeps an item across tomorrow\'s refresh until you clear it</p>')
     return "\n".join(out)
 
 def focus_chip():
@@ -356,8 +393,8 @@ def tile_chat():
     rows = rows or '<p class="empty">say something…</p>'
     box = ('<div class="chatinput"><input id="chat-text" type="text" maxlength="2000" '
            'placeholder="message Wednesday…"><button id="chat-send">send</button></div>')
-    return (f'{mode_btn}<div class="chatlog">{rows}</div>'
-            f'{box}<p class="note">async channel — read at every boot & check-in</p>')
+    return (f'<div class="scrollpart">{mode_btn}<div class="chatlog">{rows}</div></div>'
+            f'{box}<p class="note">NB. async channel — read at every boot &amp; check-in</p>')
 
 def chat_sidebar():
     """The chat-with-Wed view: fixed left column, live chat, terminal-mirror styling."""
@@ -369,17 +406,13 @@ def chat_sidebar():
  <div class="chatinput term"><span class="cs-prompt">&gt;</span>
   <input id="chat-text" type="text" maxlength="2000" placeholder="message Wednesday…" autocomplete="off">
   <button id="chat-send">send</button></div>
- <p class="note">live mirror of the message log (4s poll) — Wednesday replies from her session at boot &amp; checkpoints</p>
+ <p class="note">NB. live mirror of the message log (4s poll) — Wednesday replies from her session at boot &amp; checkpoints</p>
 </aside>"""
 
 def tile_tickets():
+    # WED items deliberately NOT shown here (Kam 2026-08-06): Wednesday's own work
+    # has its own board tile, and duplicating it just made this tile longer.
     out = []
-    if linear:
-        act = linear["data"]["active"]
-        rows = "".join(f'<li data-wed="{i["identifier"]}"><span class="time">{i["identifier"]}</span>{ack_dot(i["identifier"])}'
-                       f'<span class="ev">{html.escape(i["title"])}</span></li>' for i in act[:6])
-        out.append(f"<details class='srcweek' open><summary>Wednesday <span class='count'>live · "
-                   f"{len(act)} in progress</span></summary><ul class='events plain'>{rows}</ul></details>")
     for p in (tickets["data"]["projects"] if tickets else []):
         rows = ""
         for it in p["items"]:
@@ -387,12 +420,16 @@ def tile_tickets():
             if k in ARCHIVED:   # same row-hide filter events + news apply
                 continue
             rows += (f'<li data-key="{html.escape(k, quote=True)}">{ack_dot(k)}'
-                     f'<span class="ev">{html.escape(it)}</span></li>')
+                     f'<span class="ev">{html.escape(it)}</span>'
+                     f'<span class="acts">{flag_btn(k, it, "ticket")}</span></li>')
         rows = rows or '<li class="empty">nothing carried</li>'
-        out.append(f"<details class='srcweek'><summary>{html.escape(p['client'])} / "
+        # open by default (Kam): every client's items visible without a click
+        out.append(f"<details class='srcweek' open><summary>{html.escape(p['client'])} / "
                    f"{html.escape(p['project'])} <span class='count'>as of {p['updated']}</span></summary>"
                    f"<ul class='events plain'>{rows}</ul></details>")
-    out.append('<p class="note">Client boards are cached entry-card snapshots; live client feeds arrive with the Studio/fleet session.</p>')
+    if not out:
+        out.append('<p class="empty">no client boards cached</p>')
+    out.append('<p class="note">NB. Client boards are cached entry-card snapshots; live client feeds arrive with the Studio/fleet session. Wednesday\'s own items live in the WED board tile.</p>')
     return "\n".join(out)
 
 def park_row(it):
@@ -423,7 +460,7 @@ def tile_parking():
               "<button id='park-add-r' title='Wednesday researches it next session'>Wednesday researches it</button>"
               "<span id='park-msg'></span></div>")
     return (f"<ul class='events plain'>{rows}</ul>{addbox}"
-            "<p class='note'>brain files in 0_Brain/parkinglot — &#9670; = research notes attached · "
+            "<p class='note'>NB. brain files in 0_Brain/parkinglot — &#9670; = research notes attached · "
             "click a row to read / promote / drop</p>")
 
 def tile_email():
@@ -441,7 +478,7 @@ def tile_email():
                  f'<span class="time">{ts}</span><span class="src">{html.escape(inboxes[:16])}</span>'
                  f'<span class="ev">{html.escape(m["subject"][:80])}</span></li>')
     return (f"<ul class='events plain'>{rows}</ul>"
-            "<p class='note'>fleet inboxes (wednesday-agent + coagent), read-only — acks stay session-scoped; "
+            "<p class='note'>NB. fleet inboxes (wednesday-agent + coagent), read-only — acks stay session-scoped; "
             "your personal mailboxes join in Phase 2.</p>")
 
 TILES = {
@@ -600,7 +637,7 @@ def write_subpages():
     render_subpage("area_personal.html", "Personal",
         f'<section>{area_week_html(lambda e: e["src"] == "personal" and e["cal"] != "Family")}</section>')
     fam_body = (f'<section>{area_week_html(lambda e: e["cal"] == "Family")}</section>'
-                '<p class="note">Family calendar is display-only (cowork agent&#39;s territory).</p>')
+                '<p class="note">NB. Family calendar is display-only (cowork agent&#39;s territory).</p>')
     render_subpage("area_family.html", "Family", fam_body)
     if linear:
         rows_a = "".join(f'<li><a class="tlink time" href="https://linear.app/wednesday-agent/issue/{i["identifier"]}" target="_blank" rel="noopener">{i["identifier"]}</a>'
@@ -677,16 +714,33 @@ def status_panels_html():
     n_act, n_arch = len(acting_rows), len(arch_rows)
     acting = "".join(acting_rows) or '<p class="vempty">nothing being actioned right now</p>'
     arch = "".join(arch_rows) or '<p class="vempty">nothing archived yet</p>'
+    # Flagged-for-Wednesday panel — Kam flags, nothing upstream moves until Wednesday
+    # has actually looked. This panel is her queue and his receipt that it landed.
+    flag_rows = []
+    for k, v in sorted(FLAGGED.items(), key=lambda kv: kv[1].get("ts", ""), reverse=True):
+        lbl = str(v.get("label") or k)
+        ts = str(v.get("ts") or "")[5:16].replace("T", " ")
+        kind = str(v.get("kind") or "item")
+        flag_rows.append(f'<div class="strow"><span style="color:#e0a33e" title="flagged for Wednesday">&#9873;</span>'
+                         f'<span class="stlabel">{html.escape(lbl[:90])}</span>'
+                         f'<span class="sts">{kind} · {ts}</span></div>')
+    n_flag = len(flag_rows)
+    flagged = "".join(flag_rows) or '<p class="vempty">nothing flagged for Wednesday</p>'
     panels = (f'<div id="acting-panel" hidden><h4>Being actioned</h4>{acting}'
               f'<p class="cpnote" style="margin-top:6px">&#9889; action requested &middot; '
               f'&#9679; Wednesday actioning &mdash; states are written by Wednesday&#39;s own '
               f'session, never faked by the dashboard</p></div>'
+              f'<div id="flagged-panel" hidden><h4>Flagged for Wednesday</h4>{flagged}'
+              f'<p class="cpnote" style="margin-top:6px">NB. flagging changes nothing upstream &mdash; '
+              f'no ticket moves and no status changes until Wednesday has seen it. '
+              f'Clear a flag by clicking the &#9873; on the row again.</p></div>'
               f'<div id="archived-panel" hidden><h4>Archived</h4>{arch}</div>')
-    return n_act, n_arch, panels
+    return n_act, n_arch, n_flag, panels
 
-N_ACTING, N_ARCHIVED, STATUS_PANELS = status_panels_html()
+N_ACTING, N_ARCHIVED, N_FLAGGED, STATUS_PANELS = status_panels_html()
 ACTING_BTN = "&#9679; actioning" + (f" ({N_ACTING})" if N_ACTING else "")
 ARCHIVED_BTN = "&#9634; archived" + (f" ({N_ARCHIVED})" if N_ARCHIVED else "")
+FLAG_CT = f" ({N_FLAGGED})" if N_FLAGGED else ""
 
 def customise_tile_rows():
     out = []
@@ -734,6 +788,22 @@ body {{ background:var(--surface-1); color:var(--text-primary);
   border-radius:8px; padding:8px; min-width:190px; box-shadow:0 6px 24px rgba(0,0,0,.45); }}
 #burger-drop button {{ text-align:left; }}
 #burger-drop[hidden] {{ display:none; }}
+/* cascading submenus (Kam 2026-08-06): top level = intent, second level = action */
+#burger-drop {{ gap:2px; padding:6px; min-width:210px; }}
+.mgroup {{ position:relative; display:block; }}
+.mgroup > .mparent {{ display:flex; width:100%; align-items:center; justify-content:space-between;
+  background:none; border:none; color:var(--text-secondary); cursor:pointer;
+  padding:7px 10px; border-radius:6px; font-size:13px; }}
+.mgroup > .mparent:hover, .mgroup.open > .mparent {{ background:var(--surface-1); color:var(--text-primary); }}
+.mgroup > .mparent .carat {{ color:var(--text-muted); font-size:10px; }}
+.mgroup.open > .mparent .carat {{ transform:rotate(90deg); display:inline-block; }}
+.msub {{ display:none; flex-direction:column; gap:1px; padding:2px 0 4px 10px;
+  margin-left:6px; border-left:1px solid var(--line); }}
+.mgroup.open > .msub {{ display:flex; }}
+.msub button, .msub a {{ display:block; width:100%; text-align:left; background:none; border:none;
+  color:var(--text-secondary); cursor:pointer; padding:6px 10px; border-radius:6px;
+  font-size:12.5px; text-decoration:none; }}
+.msub button:hover, .msub a:hover {{ background:var(--surface-1); color:var(--text-primary); }}
 .grid {{ display:grid; grid-template-columns:repeat(auto-fill,minmax(300px,1fr)); gap:14px; margin-top:14px;
   grid-auto-rows:8px; grid-auto-flow:dense; }}
 .tilebox {{ background:var(--surface-2); border:1px solid var(--line); border-radius:10px; padding:14px 16px;
@@ -768,6 +838,31 @@ ul.plain .time {{ width:6.2em; }}
 .flagdue {{ color:var(--text-secondary); font-size:.85em; width:6em; flex:none; font-variant-numeric:tabular-nums; }}
 .empty {{ color:var(--text-muted); }}
 .note {{ color:var(--text-muted); font-size:.8em; margin-top:6px; }}
+/* Kam 2026-08-06: a tile's trailing note / input sits at the BOTTOM of the tile,
+   not immediately under the content — so every tile in a row ends on the same line. */
+.tilebody {{ display:flex; flex-direction:column; height:100%; }}
+.tilebody > .note:last-child, .tilebody > .addbox:last-child,
+.tilebody > .chatbox:last-child, .tilebody > .parkadd:last-child {{ margin-top:auto; padding-top:8px; }}
+/* Scrolling tiles pin their trailing note/input too: the CONTENT scrolls, the
+   input stays put. Kam's ask was explicitly "chat with wednesday input". */
+.tilebox.scroll .tilebody {{ display:flex; flex-direction:column; }}
+.tilebox.scroll .tilebody > .scrollpart {{ flex:1 1 auto; overflow-y:auto; min-height:0; scrollbar-width:thin; }}
+.tilebox.scroll .tilebody > .note, .tilebox.scroll .tilebody > .chatinput,
+.tilebox.scroll .tilebody > .addbox, .tilebox.scroll .tilebody > .parkadd {{ flex:none; }}
+/* tiles without an explicit scrollpart keep the old whole-body scroller */
+.tilebox.scroll .tilebody:not(:has(> .scrollpart)) {{ display:block; overflow-y:auto; }}
+/* ⚑ flag-for-Wed toggle */
+.flagbtn {{ background:none; border:none; color:var(--text-muted); cursor:pointer; padding:0 4px;
+  font-size:1.05em; line-height:1; flex:none; opacity:.45; }}
+.flagbtn:hover {{ opacity:1; color:var(--text-primary); }}
+.flagbtn.on {{ opacity:1; color:#e0a33e; }}
+li:hover .flagbtn {{ opacity:.85; }}
+li:hover .flagbtn.on {{ opacity:1; }}
+.newsrow {{ align-items:flex-start; }}
+.newsrow .nbody {{ flex:1; }}
+.keptmark {{ color:#e0a33e; font-size:.7em; margin-left:6px; text-transform:uppercase;
+  letter-spacing:.04em; vertical-align:middle; }}
+details.srcweek.kept > summary {{ color:#e0a33e; }}
 .stub {{ color:var(--text-muted); font-style:italic; }}
 .prio {{ font-size:.74em; font-weight:700; border-radius:4px; padding:0 5px; flex:none; align-self:center; }}
 .prio.p1 {{ color:#e66767; border:1px solid #e66767; }} .prio.p2 {{ color:#c98500; border:1px solid #c98500; }}
@@ -971,12 +1066,40 @@ footer .ok {{ color:var(--text-secondary); }} footer .bad {{ color:#e66767; font
  {focus_chip()}
  <span class="menu"><button id="burger-btn" title="menu">&#9776;</button>
  <span id="burger-drop" hidden>
- <button id="acting-btn">{ACTING_BTN}</button>
- <button id="archived-btn">{ARCHIVED_BTN}</button>
- <button id="views-btn">&#9734; view presets</button>
- <button id="preset-save-btn">&#128190; save this setup&#8230;</button>
- <button id="customise-btn">&#9881; customise</button>
- <button id="organise-btn">&#9998; organise</button>
+   <span class="mgroup">
+     <button class="mparent">&#9881; Customise <span class="carat">&#9656;</span></button>
+     <span class="msub">
+       <button id="preset-save-btn">&#128190; Save layout&#8230;</button>
+       <button id="views-btn">&#9734; Load layout</button>
+       <button id="organise-btn">&#9998; Organise (drag tiles)</button>
+       <button id="customise-btn">&#9636; Tile setup</button>
+     </span>
+   </span>
+   <span class="mgroup">
+     <button class="mparent">&#9873; Review <span class="carat">&#9656;</span></button>
+     <span class="msub">
+       <button id="flagged-btn">&#9873; Flagged for Wednesday{FLAG_CT}</button>
+       <button id="acting-btn">{ACTING_BTN}</button>
+       <button id="archived-btn">{ARCHIVED_BTN}</button>
+     </span>
+   </span>
+   <span class="mgroup">
+     <button class="mparent">&#10530; Full pages <span class="carat">&#9656;</span></button>
+     <span class="msub">
+       <a href="area_board.html">WED board</a>
+       <a href="area_news.html">News</a>
+       <a href="area_family.html">Family</a>
+       <a href="area_datasec.html">Datasec week</a>
+       <a href="area_secuura.html">Secuura week</a>
+     </span>
+   </span>
+   <span class="mgroup">
+     <button class="mparent">&#8635; Data <span class="carat">&#9656;</span></button>
+     <span class="msub">
+       <button id="refresh-btn">&#8635; Refresh now</button>
+       <button id="clearfocus-btn">&#10005; Clear focus</button>
+     </span>
+   </span>
  </span></span>
 </div>
 {STATUS_PANELS}
@@ -1275,8 +1398,9 @@ document.getElementById("customise-save").addEventListener("click", async () => 
 }});
 // ── topbar panels: actioning / archived / favourite views ──
 for (const [bid, pid] of [["acting-btn", "acting-panel"], ["archived-btn", "archived-panel"],
-                          ["views-btn", "views-panel"]]) {{
+                          ["flagged-btn", "flagged-panel"], ["views-btn", "views-panel"]]) {{
   const bt = document.getElementById(bid), pn = document.getElementById(pid);
+  if (!bt || !pn) continue;
   bt.addEventListener("click", () => {{
     pn.hidden = !pn.hidden;
     bt.classList.toggle("on", !pn.hidden);
@@ -1311,7 +1435,43 @@ burger.addEventListener("click", e => {{ e.stopPropagation(); bdrop.hidden = !bd
 document.addEventListener("click", e => {{
   if (!bdrop.hidden && !e.target.closest("#burger-drop") && e.target !== burger) {{ bdrop.hidden = true; burger.classList.remove("on"); }}
 }});
-bdrop.querySelectorAll("button").forEach(b => b.addEventListener("click", () => {{ bdrop.hidden = true; burger.classList.remove("on"); }}));
+// submenu parents toggle their own group and must NOT close the menu
+bdrop.querySelectorAll(".mparent").forEach(p => p.addEventListener("click", e => {{
+  e.stopPropagation();
+  const g = p.parentElement, wasOpen = g.classList.contains("open");
+  bdrop.querySelectorAll(".mgroup").forEach(x => x.classList.remove("open"));
+  if (!wasOpen) g.classList.add("open");
+}}));
+// leaf actions close the whole menu
+bdrop.querySelectorAll(".msub button, .msub a").forEach(b => b.addEventListener("click", () => {{
+  bdrop.hidden = true; burger.classList.remove("on");
+  bdrop.querySelectorAll(".mgroup").forEach(x => x.classList.remove("open"));
+}}));
+// ⚑ flag for Wed — flags the item for Wednesday and changes NOTHING upstream
+document.addEventListener("click", async e => {{
+  const b = e.target.closest(".flagbtn");
+  if (!b) return;
+  e.preventDefault(); e.stopPropagation();
+  const on = !b.classList.contains("on");
+  b.classList.toggle("on", on);            // optimistic; reverted if the call fails
+  let payload = null;
+  try {{ payload = b.dataset.fpayload ? JSON.parse(b.dataset.fpayload) : null; }} catch (_) {{}}
+  try {{
+    const r = await fetch("/api/flag", {{ method:"POST", headers:{{"Content-Type":"application/json"}},
+      body: JSON.stringify({{ key:b.dataset.flag, label:b.dataset.flabel || "",
+                              kind:b.dataset.fkind || "item", on, payload }}) }});
+    if (!r.ok) throw new Error(await r.text());
+    setTimeout(() => location.reload(), 250);
+  }} catch (err) {{ b.classList.toggle("on", !on); console.error("flag failed", err); }}
+}});
+const refreshBtn = document.getElementById("refresh-btn");
+if (refreshBtn) refreshBtn.addEventListener("click", () => location.reload());
+const clearFocusBtn = document.getElementById("clearfocus-btn");
+if (clearFocusBtn) clearFocusBtn.addEventListener("click", async () => {{
+  try {{ await fetch("/api/focus", {{ method:"POST", headers:{{"Content-Type":"application/json"}},
+        body: JSON.stringify({{ clear:true }}) }}); }} catch (_) {{}}
+  location.reload();
+}});
 document.getElementById("preset-save-btn").addEventListener("click", () => {{
   const vp = document.getElementById("views-panel");
   if (vp && vp.hidden) document.getElementById("views-btn").click();

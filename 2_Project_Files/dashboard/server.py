@@ -404,6 +404,33 @@ class Handler(SimpleHTTPRequestHandler):
                 cpath.write_text(json.dumps(log, indent=1, ensure_ascii=False))
                 subprocess.run(["python3", str(HERE / "generate.py")], timeout=60)
                 return self._json(200, {"ok": True})
+            if self.path == "/api/flag":
+                # "Flag for Wed" — marks an item for Wednesday's attention WITHOUT
+                # touching the ticket, its status, or anything upstream. Kam's point:
+                # nothing should change until Wednesday has actually seen it, which is
+                # exactly why the label is "flag for Wed" and not "move to in progress".
+                key = (data.get("key") or "").strip()[:300]
+                if not key:
+                    return self._json(400, {"error": "need key"})
+                on = bool(data.get("on", True))
+                fpath = ROOT / "0_Brain" / "dashboard" / "data" / "wedflags.json"
+                fl = json.loads(fpath.read_text()) if fpath.exists() else {}
+                if not isinstance(fl, dict):
+                    fl = {}
+                if on:
+                    import datetime as _dt
+                    fl[key] = {"label": (data.get("label") or "").strip()[:300],
+                               "kind": (data.get("kind") or "item").strip()[:24],
+                               # payload lets a flagged item SURVIVE its source feed:
+                               # a flagged headline stays put tomorrow even once the
+                               # news feed has moved on, until Kam unflags it.
+                               "payload": data.get("payload") if isinstance(data.get("payload"), dict) else None,
+                               "ts": _dt.datetime.now().astimezone().isoformat()}
+                else:
+                    fl.pop(key, None)
+                fpath.write_text(json.dumps(fl, indent=1, ensure_ascii=False))
+                subprocess.run(["python3", str(HERE / "generate.py")], timeout=60)
+                return self._json(200, {"ok": True, "flagged": on, "key": key})
             if self.path in ("/api/prioritise", "/api/start"):
                 ident = data.get("id", "")
                 if not ident.startswith("WED-"):
