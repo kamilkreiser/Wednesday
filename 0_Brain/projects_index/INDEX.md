@@ -96,6 +96,20 @@ Datasec__NexusAI 08-04, Datasec__CypherKey 08-02, Datasec__Vision_Sales_Portal
   2_Project_Files so compose would fail; no launchd agent; data last written
   2026-02-19) · **no az/gh auth at all** in that session (correctly reported,
   not requested) so the Azure-VM/systemd possibility is unverifiable.
+- **Resources it depends on** (read from `2_Project_Files/README.md` +
+  `config.js`, 2026-08-06): **Telegram Bot API** (the entry point — QR codes
+  point at `t.me/<bot>?start=client`) · **Sales Portal API** `POST /api/bot/leads`
+  · **PostgreSQL** (silent fallback when the API fails) · **SMTP** (notifications,
+  currently non-functional — creds empty) · a host: Azure VM/systemd,
+  Docker, or a macOS launch agent. Listens on port 4902.
+- **Telegram bot state, live-checked 2026-08-06 ~10:4x:** `getMe` returns
+  **ALIVE — @Datasec_Lead_Bot, id 8477664019**; `getWebhookInfo` shows polling
+  mode, **0 pending updates, no errors**. So the bot account was NOT deleted,
+  and nothing is queuing unanswered. Kam believed it had been deleted — the
+  deleted resource is therefore something else (likely the Azure VM host);
+  confirm which before concluding anything about a running instance.
+- **Not running on this Mac:** no launch agent installed, no lead-bot job
+  loaded, nothing listening on 4902.
 - **Open:** point-at-prod (Kam-held) + locate any running instance (needs the
   Datasec tenant confirmed — rule 4, still TBD for this project).
 
