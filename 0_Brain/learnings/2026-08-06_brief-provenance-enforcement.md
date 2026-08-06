@@ -45,6 +45,28 @@ especially a summary written by a different project, and especially my own
 ticket titles.* Direction, ownership, and causality are exactly the facts that
 get flattened in summarising. Read the entry that documents the event.
 
+## Extension, same day (w=4): instructions to HUMANS need it too
+
+Hours after the gate shipped, the same root cause got through it — because the
+gate only covers briefs sent to agents. I asked Kam to run
+`ssh-add --apple-use-keychain ~/.ssh/secuura_blockchain_deploy_rw`, copied
+verbatim from a launcher F-02 warning. The file did not exist on his Mac, and
+git never needed it: the repo's local `core.sshCommand` already points at the
+on-drive `3_Access_Keys/github_deploy_rw`, and `git ls-remote` succeeds with it.
+The warning was honest about a keychain identity being absent; I turned its
+generic hint into a personal instruction without checking either precondition.
+
+**The rule, extended:** before asking a human to run anything —
+1. verify the preconditions myself, read-only (does the path exist? is the
+   command even needed? does the thing it fixes actually block us?);
+2. if I cannot verify, say so in the ask ("I believe X; I could not check Y")
+   rather than presenting a guess as a step;
+3. prefer proving the problem is real *before* spending someone's hands on it.
+
+A failed instruction to an agent costs a mail. A failed instruction to Kam
+costs trust in every future instruction — and he is the one person whose time I
+am supposed to be protecting.
+
 **Related:** [[_ledger]], [[2026-08-04_validate-brief-pointers]] (family parent),
 [[2026-08-03_mental-model-not-source-of-truth]],
 [[2026-08-06_artifact-presence-is-not-execution]]
