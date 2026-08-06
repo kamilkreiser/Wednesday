@@ -136,6 +136,71 @@ SRC = {  # fixed categorical assignment — never re-ordered
     "personal": {"label": "Personal", "color": "var(--series-3)"},
 }
 
+# ── Project colour system (Kam round 12) ───────────────────────────────────
+# Method: dataviz skill. Hue = the AREA; a lightness step within that hue = the
+# project. Only THREE hues are used because that is the honest ceiling — the
+# validator fails 4+ flat hues on all-pairs in both modes (worst offenders
+# red↔orange ΔE 7.1 normal-vision, violet↔blue 9.8; magenta↔aqua 1.6 deutan).
+# Three hues PASS all-pairs in both modes: dark worst CVD ΔE 9.4 / normal 20.9;
+# light worst CVD 9.2 / normal 24.0.
+#
+# Steps are computed in OKLab and stepped TOWARD contrast — lighter on the dark
+# surface, darker on the light one — so every step clears 3:1 against its own
+# surface. Colour never carries identity alone: every row also states its name
+# (the relief rule for light-mode aqua, which sits at 2.82:1 on white).
+PROJECT_HUES = {
+    "dark": {
+        "datasec": ["#3987e5", "#56a4ff", "#72c1ff"],
+        "secuura": ["#d95926", "#f97645", "#ff9363"],
+        "life":    ["#199e70", "#43bb8b", "#64d8a6"],
+    },
+    "light": {
+        "datasec": ["#2a78d6", "#005cb8", "#00419a"],
+        "secuura": ["#eb6834", "#cb4b0c", "#ac2c00"],
+        "life":    ["#009360", "#007747", "#005c35"],
+    },
+}
+# entity -> (family, step). Fixed assignment, never cycled, never re-ordered.
+# Wednesday's own board is deliberately NEUTRAL: it is not a client, and leaving
+# it uncoloured keeps the client hues meaningful rather than decorative.
+PROJECT_SLOT = {
+    "datasec/nexusai":             ("datasec", 0),
+    "datasec/cypherkey":           ("datasec", 1),
+    "datasec/vision_sales_portal": ("datasec", 2),
+    "secuura/blockchain":          ("secuura", 0),
+    "secuura/tokenomics":          ("secuura", 1),
+    "secuura/extranet":            ("secuura", 2),
+    "personal":                    ("life", 0),
+    "family":                      ("life", 1),
+}
+
+def project_key(client, project=None):
+    k = (str(client or "").strip().lower().replace(" ", "_"))
+    if project:
+        k += "/" + str(project).strip().lower().replace(" ", "_")
+    return k
+
+def project_color(key):
+    """Hex for an entity, or None for 'no colour' (Wednesday's own work)."""
+    slot = PROJECT_SLOT.get(key)
+    if not slot:
+        return None
+    fam, step = slot
+    return PROJECT_HUES["light" if THEME == "light" else "dark"][fam][step]
+
+def project_rail(key):
+    """Inline style for a left identity rail — the monday.com pattern: the same
+    colour repeats on the group and on its items, so identity reads at a glance
+    without tinting text."""
+    c = project_color(key)
+    return f' style="border-left:3px solid {c}"' if c else ' style="border-left:3px solid var(--line)"'
+
+def project_chip(key, label):
+    c = project_color(key)
+    dot = (f'<span class="pdot" style="background:{c}"></span>' if c
+           else '<span class="pdot neutral"></span>')
+    return f'{dot}<span class="plabel">{html.escape(label)}</span>'
+
 def flag_btn(key, label="", kind="item", payload=None):
     """The ⚑ toggle. Filled = flagged for Wednesday; nothing upstream changes."""
     on = key in FLAGGED
@@ -520,9 +585,13 @@ def tile_tickets():
                      f'<span class="ev">{html.escape(it)}</span>'
                      f'<span class="acts">{flag_btn(k, it, "ticket")}</span></li>')
         rows = rows or '<li class="empty">nothing carried</li>'
-        # open by default (Kam): every client's items visible without a click
-        out.append(f"<details class='srcweek' open><summary>{html.escape(p['client'])} / "
-                   f"{html.escape(p['project'])} <span class='count'>as of {p['updated']}</span></summary>"
+        # open by default (Kam): every client's items visible without a click.
+        # Round 12: identity rail + dot in the same hue — the group and its items
+        # carry the same colour, which is the pattern that makes monday.com scan.
+        pk = project_key(p["client"], p["project"])
+        out.append(f"<details class='srcweek proj' open{project_rail(pk)}>"
+                   f"<summary>{project_chip(pk, p['client'] + ' / ' + p['project'])}"
+                   f" <span class='count'>as of {p['updated']}</span></summary>"
                    f"<ul class='events plain'>{rows}</ul></details>")
     if not out:
         out.append('<p class="empty">no client boards cached</p>')
@@ -997,6 +1066,14 @@ li:hover .flagbtn {{ opacity:.85; }}
 li:hover .flagbtn.on {{ opacity:1; }}
 .newsrow {{ align-items:flex-start; }}
 .newsrow .nbody {{ flex:1; }}
+/* project identity marks (round 12) — colour sits on a MARK, never on text */
+.pdot {{ width:9px; height:9px; border-radius:2.5px; display:inline-block; flex:none;
+  margin-right:7px; vertical-align:middle; }}
+.pdot.neutral {{ background:var(--text-muted); opacity:.45; }}
+.plabel {{ vertical-align:middle; }}
+details.srcweek.proj {{ padding-left:10px; border-radius:3px; }}
+details.srcweek.proj > summary {{ margin-left:0; }}
+.legchip .pdot {{ margin-right:5px; }}
 .resetbtn {{ background:#3a2a1a; border:1px solid #7a5a2a; color:#f0c98a; border-radius:6px;
   cursor:pointer; padding:2px 8px; font-size:14px; line-height:1.3; margin-right:6px; }}
 .resetbtn:hover {{ background:#4a3520; color:#fff; }}
