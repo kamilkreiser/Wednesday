@@ -47,13 +47,22 @@ Datasec__NexusAI 08-04, Datasec__CypherKey 08-02, Datasec__Vision_Sales_Portal
   when KS-563/564 land; prompt-fidelity fold into WED-20 protocol.
 
 ### Datasec / NexusAI
-- **Status:** active · **Last session:** 2026-08-04 — RD-64 fixed (Settings 403
-  was a CSRF token-rotation race, not AI), deployed rev 69, verified end-to-end.
-  Side find RD-65 (Low).
-- **Open / next:** Kam to confirm RD-64 + close · RD-62 data-freshness surface ·
-  RD-61 dead ABTDEMO feed (needs fleet owner, not code) · Release-Ready pile
-  awaiting Kam: RD-59/60/63, RD-45, RD-41, RD-23.
-- **Blockers:** RD-61 external owner; RD-18 Kam's legal decision.
+- **Status:** active · **Last session:** 2026-08-06 (LIVE now, pane %3) —
+  RD-61 synthetic demo feed per Kam's 08-05 ruling.
+- **Board (live-corrected by their agent 2026-08-06 — my card was days stale):**
+  RD-64 **already Done** (not awaiting confirm) · the Release-Ready pile is
+  **gone**: RD-59/60/63/45/23 closed at the 08-04 sweep, RD-41 Put on Hold with
+  an explicit do-NOT-deploy note · actual Release Ready today = **RD-58 + RD-56**
+  (both Low, both new since my card).
+- **RD-61 root cause (their verification):** upstream, not code — the ABTDEMO lab
+  fleet was only ever 3 devices and they dropped off one at a time (May 6 → May 28
+  → Jun 1); last event was a Service job, not a user print. Nothing to reconnect.
+- **In flight:** synthetic feed as a provider mirroring the AzureLogAnalytics
+  surface; **code defaults to the REAL feed**, demo Container App sets the flag
+  (their deviation, confirmed — a synthetic default would ship fake telemetry to
+  Marketplace customers). Demo deploy is approval-class, awaiting a Kam ship
+  ruling after local proof.
+- **Blockers:** RD-18 Kam's legal decision.
 
 ### Datasec / CypherKey (OneTimePad)
 - **Status:** active · **Last session:** 2026-08-02 — ADR-0013 HSM-keyed digests
@@ -62,11 +71,33 @@ Datasec__NexusAI 08-04, Datasec__CypherKey 08-02, Datasec__Vision_Sales_Portal
   Twilio rotation, store publishing) · build queue CPKEY-161/162/163/164.
 - **Wednesday can help by:** same pattern — a Kam-decisions sitting.
 
-### Datasec / Vision Sales Portal
-- **Status:** active · **Last session:** 2026-08-02 — git housekeeping only;
-  main fast-forwarded to 7336e46; prod untouched.
-- **Open / next:** 3 dependabot branches to review/merge · confirm Lead_Bot
-  LEAD_BOT_API_KEY handoff completed.
+### Datasec / Vision Sales Portal — GO-LIVE PREP INCOMING (WED-77)
+- **Status:** active · **Last session:** 2026-08-04 — 3 dependabot branches
+  merged (`3dd24fa`), supply-chain checked, 144 tests green locally, then
+  Kam-approved zip deploy: **main == origin == prod at `ef5a9c0`**.
+- **Kam signal 2026-08-06:** multiple Vision meetings this week and next →
+  changes + live preparation coming shortly. Heads-up brief already on the bus
+  (state-of-play, go-live blockers, anything needing Kam's hands).
+- **Go-live risk list:** 5 remaining npm audit highs · dev DB won't boot (PG15
+  volume vs postgres:16) · no auto-deploy wiring (manual zip via az, verified
+  twice) · their GH_CONFIG_DIR unauthenticated and global `gh` floats, so CI
+  reads may need Kam.
+- **Lead_Bot link (corrected today):** direction is **Vision → Lead_Bot**.
+  Vision generated the 64-hex key on 07-03; Lead_Bot held the old *leaked*
+  40-char key. Lead_Bot is swapping it today; pointing the bot at the prod
+  portal is **Kam-held at localhost** pending discovery of any running instance.
+
+### Datasec / Lead_Bot — dormant since 2026-07-03, session live today (%4)
+- **Status:** active today (WED-75) · no git repo, no history.md until today,
+  which is exactly why its state was invisible to the fleet.
+- **Findings:** handoff genuinely never done (key hashes differ; BOT_USER_ID
+  matches) · the residual key is the gitleaks-found leaked value → this is leak
+  remediation, not a sync · nothing running that we can see (no .env in
+  2_Project_Files so compose would fail; no launchd agent; data last written
+  2026-02-19) · **no az/gh auth at all** in that session (correctly reported,
+  not requested) so the Azure-VM/systemd possibility is unverifiable.
+- **Open:** point-at-prod (Kam-held) + locate any running instance (needs the
+  Datasec tenant confirmed — rule 4, still TBD for this project).
 
 ---
 

@@ -42,22 +42,38 @@ if [ -f "$ENV_FILE" ]; then
   # shellcheck disable=SC1090
   source "$ENV_FILE" 2>/dev/null || true
   if [ -n "${AGENTMAIL_API_KEY:-}" ]; then
-    COUNTS="$(python3 - "$TODAY" <<'PYEOF' 2>/dev/null
-import json, sys, urllib.request, os
+    # Errors go to the LOG, never /dev/null — the 08-05 "unreachable" close
+    # left no diagnosable trace (WED-16 defect). 3 tries/inbox rides out blips.
+    COUNTS="$(python3 - "$TODAY" <<'PYEOF' 2>>"$LOG"
+import json, sys, time, urllib.request, os
+from datetime import datetime
 today = sys.argv[1]
 key = os.environ.get("AGENTMAIL_API_KEY", "")
 out = []
-for inbox in ("wednesday-agent@agentmail.to", "coagent@agentmail.to"):
+def local_date(ts):
+    # API timestamps are UTC ("...Z"); compare against the LOCAL day or the
+    # 23:00 AEST close misses everything before 10:00 local.
     try:
-        req = urllib.request.Request(
-            f"https://api.agentmail.to/v0/inboxes/{inbox}/messages?limit=50",
-            headers={"Authorization": f"Bearer {key}"})
-        with urllib.request.urlopen(req, timeout=10) as r:
-            msgs = json.load(r).get("messages", [])
-        n = sum(1 for m in msgs if str(m.get("timestamp", "")).startswith(today))
-        out.append(f"{inbox.split('@')[0]}@: {n} today")
+        return datetime.fromisoformat(str(ts).replace("Z", "+00:00")).astimezone().date().isoformat()
     except Exception:
-        out.append(f"{inbox.split('@')[0]}@: unreachable")
+        return ""
+for inbox in ("wednesday-agent@agentmail.to", "coagent@agentmail.to"):
+    for attempt in range(3):
+        try:
+            req = urllib.request.Request(
+                f"https://api.agentmail.to/v0/inboxes/{inbox}/messages?limit=50",
+                headers={"Authorization": f"Bearer {key}"})
+            with urllib.request.urlopen(req, timeout=10) as r:
+                msgs = json.load(r).get("messages", [])
+            n = sum(1 for m in msgs if local_date(m.get("timestamp", "")) == today)
+            out.append(f"{inbox.split('@')[0]}@: {n} today")
+            break
+        except Exception as e:
+            print(f"inbox check {inbox} attempt {attempt+1}/3: {type(e).__name__}: {e}", file=sys.stderr)
+            if attempt == 2:
+                out.append(f"{inbox.split('@')[0]}@: unreachable")
+            else:
+                time.sleep(5)
 print(" · ".join(out))
 PYEOF
 )"
