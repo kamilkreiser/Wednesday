@@ -108,8 +108,18 @@ Datasec__NexusAI 08-04, Datasec__CypherKey 08-02, Datasec__Vision_Sales_Portal
   and nothing is queuing unanswered. Kam believed it had been deleted — the
   deleted resource is therefore something else (likely the Azure VM host);
   confirm which before concluding anything about a running instance.
-- **Not running on this Mac:** no launch agent installed, no lead-bot job
-  loaded, nothing listening on 4902.
+- **NO INSTANCE IS RUNNING ANYWHERE — resolved 2026-08-06 without az.** The
+  decisive test: Telegram allows exactly ONE `getUpdates` consumer per bot, so
+  a second caller gets 409 Conflict. My call returned **no conflict** → nothing
+  is polling → no live bot (it polls continuously; no webhook is set). Backed
+  by: 0 pending updates · no host record anywhere in the fleet (the README's
+  `azureuser@<vm-ip>` is a placeholder) · nothing local (no launch agent, no
+  job, nothing on 4902; submissions.json last written 2026-02-19).
+- **Never successfully submitted to prod, ever:** the vault's 2026-07-03 note
+  records that before Vision wired it up that day, prod had NO
+  `LEAD_BOT_API_KEY` at all — "Lead Bot can't submit to prod, pre-existing 401".
+- **Net:** Lead_Bot is a fully-built, now correctly-keyed bot that has never
+  been deployed. This is a deployment decision, not a live risk.
 - **Open:** point-at-prod (Kam-held) + locate any running instance (needs the
   Datasec tenant confirmed — rule 4, still TBD for this project).
 

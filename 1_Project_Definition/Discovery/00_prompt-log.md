@@ -543,3 +543,17 @@ automatic; YAML capped at 1000 lines; DB answer: no — files first).
 > great.  can I make a suggestion to the pre 6am start.  Last night was a great 1st run.  please get all agents working to wrap up and finish so that when I start with them and you I can launch and refresh to start fresh sessions
 
 *Done with it:* built the 05:30 **morning shift change** (scheduler/shift_change.sh + com.wednesday.shiftchange launchd job, installed): taps every live cockpit pane with a wrap-up instruction + drops a for-the-record bus mail, so all night sessions are wrapped before Kam's 06:00 start and he launches fresh. Wake session now verifies the wraps arrived (launcher 1b step).
+
+**2026-08-06 (fleet day) — the Datasec environment map (resolves the "tenant TBD" ambiguity):**
+
+> not sure. there was a tenant cleanup.  I could not remember what was removed.  For datasec here is a short high level - 1)corporate environment - email, sharepoint etc 2)production environment 3)dev environment 4)sales demo environment (global variables) what nexus uses 5)our datasec environment, linked to kreiser.org@me.com.  this is where vision, nexus and other things live.  you should have cli access to control this environment and its seperate because it can be controlled by agents.  its not linked to anything production
+
+*Done with it:* captured as the authoritative structure of Datasec's five
+environments, pinned to live-verified tenant IDs where evidence existed
+(`az account show` on this Studio + Vision's isolated AZURE_CONFIG_DIR) and
+explicitly marked where it did NOT. Written to
+`0_Brain/reference/2026-08-06_datasec-environment-map.md`. Two follow-ons:
+Wednesday has no CLI access to environment 5 today (her global `az` sits on
+the corporate tenant with zero subscriptions), and the mentioned tenant
+cleanup is an unaudited change — the fleet may hold references to resources
+that no longer exist.
