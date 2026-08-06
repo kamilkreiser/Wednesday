@@ -62,6 +62,13 @@ if "tickets" not in SIZES: SIZES["tickets"] = {"w": 1, "h": 8}
 if "parkinglot" not in SIZES: SIZES["parkinglot"] = {"w": 1, "h": 8}
 HIDDEN_TILES = set(LAYOUT.get("hidden_tiles", []))
 HIDDEN_GROUPS = set(LAYOUT.get("hidden_groups", []))   # datasec/secuura/personal/family
+# Per-tile source filters: {tile_id: [group,...]} — hide a client in ONE tile without
+# hiding it site-wide (Kam round 8). Site-wide HIDDEN_GROUPS still wins over these.
+TILE_GROUPS = LAYOUT.get("tile_groups", {})
+if not isinstance(TILE_GROUPS, dict): TILE_GROUPS = {}
+def tile_hidden(tile):
+    v = TILE_GROUPS.get(tile) or []
+    return set(v) | HIDDEN_GROUPS if isinstance(v, list) else HIDDEN_GROUPS
 GROUPS = {"datasec": "Datasec", "secuura": "Secuura", "personal": "Personal", "family": "Family"}
 CHAT_MODE = LAYOUT.get("chat_mode", "message")
 if CHAT_MODE == "full":       # legacy expanded-tile mode → the chat-with-Wed view
@@ -232,10 +239,25 @@ def tile_stats():
  <div class="tile wide"><div class="v small">{html.escape(nxt_txt)}</div><div class="k">next timed event</div></div>
 </div>"""
 
+def group_chips(tile):
+    """Per-tile source toggles (Kam round 8 item 4): hide a client just here."""
+    hid = set(TILE_GROUPS.get(tile) or [])
+    bits = []
+    for g, label in GROUPS.items():
+        if g in HIDDEN_GROUPS:
+            continue                     # already gone site-wide; nothing to toggle
+        off = g in hid
+        bits.append(f'<button class="tgchip{" off" if off else ""}" data-tile="{tile}" data-group="{g}" '
+                    f'title="{"show" if off else "hide"} {label} in this tile only">{label}</button>')
+    return f'<div class="tgbar">{"".join(bits)}</div>' if bits else ""
+
 def tile_calendars():
-    out = []
+    hid = tile_hidden("calendars")
+    out = [group_chips("calendars")]
     for off, name in ((0, "Today"), (1, "Tomorrow")):
-        evs = day_events(off)
+        evs = [e for e in day_events(off) if ev_group(e) not in hid]
+        if not evs:
+            continue                     # Kam item 1: no rows, no heading
         parts, now_done = [], off != 0
         for e in evs:
             if not now_done and not e["allday"] and e["start"] > NOW:
@@ -246,9 +268,12 @@ def tile_calendars():
             parts.append(f'<li class="nowline"><span>now · {NOW.strftime("%H:%M")}</span></li>')
         rows = "\n".join(parts) or '<li class="empty">nothing scheduled</li>'
         out.append(f"<h3>{name} <span class='count'>{len(evs)}</span></h3><ul class='events'>{rows}</ul>")
-    out.append("<h3>Week by company <span class='count'>click to expand</span></h3>")
-    for src, meta in SRC.items():
-        wk = [e for e in EVENTS if e["src"] == src and 0 <= (e["start"].date() - NOW.date()).days <= 7]
+    week_srcs = [(src, meta) for src, meta in SRC.items() if src not in hid]
+    if week_srcs:
+        out.append("<h3>Week by company <span class='count'>click to expand</span></h3>")
+    for src, meta in week_srcs:
+        wk = [e for e in EVENTS if e["src"] == src and ev_group(e) not in hid
+              and 0 <= (e["start"].date() - NOW.date()).days <= 7]
         items = collapse_allday(wk)
         rows = "\n".join(run_row(it[1]) if it[0] == "run" else ev_row(it[1], show_day=True)
                           for it in items) or '<li class="empty">nothing this week</li>'
@@ -280,6 +305,8 @@ def day_label(e):
     return e["start"].strftime("%a %d %b")
 
 def tile_family():
+    if "family" in tile_hidden("family"):
+        return '<p class="empty">Family is hidden — use the reset arrow beside the menu to restore</p>'
     fam = [e for e in EVENTS if e["cal"] == "Family" and
            (KID_PAT.search(e["title"]) or "school" in e["title"].lower())][:12]
     if not fam:
@@ -438,11 +465,18 @@ def chat_sidebar():
  <p class="note">NB. live mirror of the message log (4s poll) — Wednesday replies from her session at boot &amp; checkpoints</p>
 </aside>"""
 
+CLIENT_GROUP = {"datasec": "datasec", "secuura": "secuura"}
+
 def tile_tickets():
     # WED items deliberately NOT shown here (Kam 2026-08-06): Wednesday's own work
     # has its own board tile, and duplicating it just made this tile longer.
-    out = []
+    hid = tile_hidden("tickets")
+    out = [group_chips("tickets")]
     for p in (tickets["data"]["projects"] if tickets else []):
+        # a client section belongs to the group of the same name (Kam item 2:
+        # hiding Datasec anywhere hides its projects here too)
+        if CLIENT_GROUP.get(str(p.get("client", "")).lower()) in hid:
+            continue
         rows = ""
         for it in p["items"]:
             k = "ticket|" + p["client"] + "/" + p["project"] + "|" + it[:80]
@@ -458,7 +492,7 @@ def tile_tickets():
                    f"<ul class='events plain'>{rows}</ul></details>")
     if not out:
         out.append('<p class="empty">no client boards cached</p>')
-    out.append('<p class="note">NB. Client boards are cached entry-card snapshots; live client feeds arrive with the Studio/fleet session. Wednesday\'s own items live in the WED board tile.</p>')
+    out.append('<p class="note">NB. Project boards are cached entry-card snapshots; live client feeds arrive with the Studio/fleet session. Wednesday\'s own items live in the WED board tile.</p>')
     return "\n".join(out)
 
 def park_row(it):
@@ -517,7 +551,7 @@ TILES = {
     "family":    ("Family",             tile_family),
     "board":     ("Coding — WED board", tile_board),
     "chat":      ("Chat with Wednesday", tile_chat),
-    "tickets":   ("Tickets by client",   tile_tickets),
+    "tickets":   ("Tickets by Project",  tile_tickets),
     "email":     ("Email flags",         tile_email),
     "news":      ("News",               tile_news),
     "parkinglot": ("Parking lot",        tile_parking),
@@ -780,6 +814,13 @@ ARCHIVED_BTN = "&#9634; archived" + (f" ({N_ARCHIVED})" if N_ARCHIVED else "")
 FLAG_CT = f" ({N_FLAGGED})" if N_FLAGGED else ""
 # Every source hidden renders a dashboard with no events at all — which reads as
 # "broken" rather than "filtered". Say so loudly, with a one-click way back.
+# Kam round 8 item 3: once a source is hidden there was NO way back without the
+# customise panel. This sits beside the burger and lights up whenever anything is
+# filtered — site-wide or per-tile — and clears the lot in one click.
+_ANY_HIDDEN = bool(HIDDEN_GROUPS) or any(TILE_GROUPS.get(t) for t in TILE_GROUPS)
+RESET_BTN = ('<button id="reset-filters" class="resetbtn" title="restore all hidden clients '
+             '(site-wide and per-tile)">&#8635;</button>' if _ANY_HIDDEN else "")
+TILE_GROUPS_JSON = json.dumps(TILE_GROUPS)
 ALLHIDDEN_BANNER = ('<div class="allhidden">All sources are hidden, so every calendar tile is empty. '
                     '<button id="showall-btn">show all sources</button></div>'
                     if set(GROUPS) and set(GROUPS) <= HIDDEN_GROUPS else "")
@@ -906,6 +947,14 @@ li:hover .flagbtn {{ opacity:.85; }}
 li:hover .flagbtn.on {{ opacity:1; }}
 .newsrow {{ align-items:flex-start; }}
 .newsrow .nbody {{ flex:1; }}
+.resetbtn {{ background:#3a2a1a; border:1px solid #7a5a2a; color:#f0c98a; border-radius:6px;
+  cursor:pointer; padding:2px 8px; font-size:14px; line-height:1.3; margin-right:6px; }}
+.resetbtn:hover {{ background:#4a3520; color:#fff; }}
+.tgbar {{ display:flex; gap:5px; flex-wrap:wrap; margin:0 0 8px; }}
+.tgchip {{ background:var(--surface-1); border:1px solid var(--line); color:var(--text-secondary);
+  border-radius:999px; padding:1px 9px; font-size:.72em; cursor:pointer; }}
+.tgchip:hover {{ color:var(--text-primary); }}
+.tgchip.off {{ opacity:.4; text-decoration:line-through; }}
 .allhidden {{ background:#3a2a1a; border:1px solid #7a5a2a; color:#f0c98a; border-radius:8px;
   padding:10px 14px; margin-top:12px; font-size:13px; display:flex; gap:12px; align-items:center; }}
 .allhidden button {{ background:var(--surface-2); color:var(--text-primary); border:1px solid var(--line);
@@ -1119,7 +1168,7 @@ footer .ok {{ color:var(--text-secondary); }} footer .bad {{ color:#e66767; font
  <span class="sub">{NOW.strftime("%A %-d %B %Y · %H:%M %Z")}</span>
  <span class="legend">{legend_html()}</span>
  {focus_chip()}
- <span class="menu"><button id="burger-btn" title="menu">&#9776;</button>
+ <span class="menu">{RESET_BTN}<button id="burger-btn" title="menu">&#9776;</button>
  <span id="burger-drop" hidden>
    <span class="mgroup">
      <button class="mparent">&#9881; Customise <span class="carat">&#9656;</span></button>
@@ -1169,6 +1218,7 @@ footer .ok {{ color:var(--text-secondary); }} footer .bad {{ color:#e66767; font
 {ALLHIDDEN_BANNER}<div id="grid"><div class="grid">
 {render_tiles()}
 </div></div>
+<script type="application/json" id="tile-groups-state">{TILE_GROUPS_JSON}</script>
 <div id="ctxmenu" hidden></div>
 <div id="modal-backdrop" hidden><div id="modal">
  <button id="modal-close" title="close">&#10005;</button>
@@ -1527,6 +1577,23 @@ bdrop.querySelectorAll(".mparent").forEach(p => p.addEventListener("click", e =>
 bdrop.querySelectorAll(".msub button, .msub a").forEach(b => b.addEventListener("click", () => {{
   bdrop.hidden = true; burger.classList.remove("on");
   bdrop.querySelectorAll(".mgroup").forEach(x => x.classList.remove("open"));
+}}));
+// reset EVERYTHING that is filtered — site-wide groups and every per-tile filter
+const resetBtn = document.getElementById("reset-filters");
+if (resetBtn) resetBtn.addEventListener("click", async () => {{
+  resetBtn.disabled = true;
+  const r = await api("/api/layout", {{hidden_groups: [], tile_groups: {{}}}});
+  if (r.ok) location.reload(); else resetBtn.disabled = false;
+}});
+// per-tile source chips: hide/show a client in THIS tile only
+document.querySelectorAll(".tgchip").forEach(c => c.addEventListener("click", async () => {{
+  const tile = c.dataset.tile, grp = c.dataset.group;
+  const cur = JSON.parse(document.getElementById("tile-groups-state").textContent || "{{}}");
+  const list = new Set(cur[tile] || []);
+  if (list.has(grp)) list.delete(grp); else list.add(grp);
+  cur[tile] = [...list];
+  const r = await api("/api/layout", {{tile_groups: cur}});
+  if (r.ok) location.reload();
 }}));
 const showAllBtn = document.getElementById("showall-btn");
 if (showAllBtn) showAllBtn.addEventListener("click", async () => {{
