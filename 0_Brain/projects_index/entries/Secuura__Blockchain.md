@@ -3,30 +3,36 @@ client: Secuura
 project: Blockchain
 path: /Volumes/DevMASTER/!CODING/Secuura/Blockchain
 status: active
-updated: 2026-08-04
+updated: 2026-08-06
 ---
 
 # Secuura / Blockchain (Platform K)
 
-**Last session (2026-08-04, session 5, evening):** Wrap-only per your cockpit ruling
-(Kam present) — booted, checked, proposed the day plan, executed nothing. Your 05:53Z
-rulings brief read and banked. State unchanged since session 3: local == develop ==
-demo-pk (`090f97dfd`), VM anchoring REAL on preview.
+**Last session (2026-08-06, session 9):** Built and proved BOTH of today's ruled fixes,
+then stopped short of shipping either. KS-563 (Urgent — false "Certified by issuer") is
+complete to Kam's Option B and live-proven; KS-564's two 500s are fixed and reproduced
+500-before / 201-after with a real `sk_` key; its third leg (Option A — connector token on
+`/api/users/stub` only) is implemented and unit-proven. Both pre-merge tiers were run for
+KS-563: **Akto PASS**, **Schemathesis better than baseline** (68 failing ops vs 88) with
+zero failures on the changed endpoints.
 
 **Open / next:**
-- [ ] KS-518 → close as by-design (Kam-ruled; cite Peter's 07-31 re-test)
-- [ ] #633 → repoint + merge → KS-551 to Done with receipts
-- [ ] Workspace `/Volumes/DevMASTER/CLAUDE.md` hard-rule-4 dead-tenant line — Kam
-      DIRECTLY AUTHORIZED the fix tonight (typed at prompt) → then close extranet
-      to-do `565261bc`
-- [ ] KS-560: **triage-and-ticket ONLY** — reserved as the Agent Teams pilot task
-      (Kam-confirmed tonight); no residual fixes
-- [ ] KS-559 dep sweep (baseline expires 08-31)
-- [ ] After EOD 08-06: record Peter consent-by-silence on KS-480 (if still silent) — NOT before
+- [ ] On Kam's channel-of-record confirmation: merge #651 → demo deploy (rsync + rebuild
+      originate/verifier-frontend, restart api-gateway for the bind-mounted spec) → verify.
+- [ ] Then KS-564: live-prove Option A end-to-end, ship all three legs as one piece (#652).
+- [ ] **Peter KS-480 consent-by-silence — record AFTER EOD 2026-08-06.** Kam's ruling today:
+      a short evening session does this; do NOT hold a day session waiting for EOD.
+- [ ] Watch: Stuart's KS-539 verdict (Peter approved 08-05) · 2 flaky tier-3 tests.
 
-**Blockers:** none — waits only: Stuart PS-498/KS-549/KS-539 · KS-539 waits on your
-distilled summary to Kam.
+**Blockers:** Merge + demo deploy **HELD under PROTOCOL v1.2** — both ship rulings arrived
+as pane text, which v1.2 declassifies as a channel of record, and a demo deploy is
+approval-class. Waiting on Kam-traceable confirmation. Nothing is on demo; develop untouched.
 
-**Notes for Wednesday:** the three tonight rulings (KS-518/#633 stand · CLAUDE.md
-fix authorized · KS-560 = Agent Teams pilot, triage-only) are recorded in the daily
-note + history.md, so any next session picks them up even cold.
+**Notes for Wednesday:** Two findings worth relaying fleet-wide. (1) **The Schemathesis
+sweep locks itself out of `demo@secuura.io`** — the account it authenticates with — by
+fuzzing `POST /api/users/me/change-password`; every other seeded account still logs in, and
+an auth restart repairs it via the demo seed. Very likely the true root of the recurring
+"sweep auth 401/403" class we have been blaming on stale .env tokens. (2) A **wedged Docker
+Desktop daemon** cost ~35 min: builds hang at `load metadata` while host networking is fine
+and `docker manifest inspect` hangs too; only `docker desktop restart` (CLI plugin) fixes
+it — quitting the app does not.
