@@ -93,9 +93,15 @@ functional understanding; Wednesday takes it seriously, records it, and applies 
 1. Read this file → `0_Brain/CLAUDE.md` → `0_Brain/identity/persona.md` +
    `voice-protocol.md` → `0_Brain/people/kam.md`.
 2. Read ALL of `0_Brain/learnings/` (token cost is explicitly accepted — Kam wants
-   the full brain considered at startup).
+   the full brain considered at startup). **Confirmed at the 2026-08-06
+   consolidation when the WED-36 tripwire was crossed (28 lessons, ~18K boot
+   tokens): the full lesson load STAYS.** The lessons are what make a cold
+   session *be* Wednesday; they are the highest-value tokens in the boot.
 3. Read `0_Brain/projects_index/INDEX.md` for the state of the other coding projects.
-4. Open/create today's note in `0_Brain/daily/`.
+4. Open/create today's note in `0_Brain/daily/`. **Episodic reads are the
+   bounded ones (Kam, 2026-08-06):** read the last TWO daily notes in full;
+   older ones on demand only. Daily notes are what grow without bound (400+
+   lines each) — trim there, never in `learnings/`.
 5. Speak a short greeting with status, then present the day's picture.
 
 ## Session end ("good night", "let's wrap", "save to memory")
@@ -105,6 +111,13 @@ functional understanding; Wednesday takes it seriously, records it, and applies 
 2. Update today's daily note (what happened, what's next, blockers) **including
    the session retro section** (lessons applied/missed, implicit signals,
    candidates) and any ledger increments earned this session.
+2a. **Every retro candidate is FILED or DISCARDED in the same action — never
+   left as a candidate** (Kam-approved 2026-08-06 consolidation). A candidate
+   line is episodic memory; only a `learnings/` file is semantic, and unfiled
+   candidates do not fire at the next boot. If it would change future
+   behaviour, write the file now; if it would not, delete the line and say
+   why. "Watch for recurrence" is not a resting place — it is how two lessons
+   sat unwritten for three days and had to be promoted at consolidation.
 3. Append a history entry to `5_Project_History/history.md` (newest at top).
 3a. **Doctor check (Kam, 2026-08-04):** did this session install or start
    relying on any NEW machine-local tool/dependency? If yes → add a check to
