@@ -1,3 +1,36 @@
+## 2026-08-06 (06:00 scheduled wake → 20:00 Kam close, overnight continues, STUDIO/T9) — fleet day: 3 agents, 4× 1.0 · identity scoping complete + proven · two false premises caught · dashboard rounds 6–12
+
+**Kam's close: "Thank you very much. See you in the morning." Overnight work authorised on WED-82 (dashboard project colour).**
+
+### Fleet (all Kam-ruled, all scored)
+- **Secuura/Blockchain ×3 runs, all 1.0.** KS-563 (Urgent, false "Certified by issuer") SHIPPED to demo — #651 → develop `be2d60ef2` + fix `4f1152ed7`. **Their deploy caught a false negative in their own fix that local proof could never find**: real anchoring never writes the `blockchain.anchored` key the fix required, so every real document under-reported its anchor while eleven unit tests (written against an invented shape) stayed green. Propagated fleet-wide as a method rule. Also **held a finished Urgent fix at the merge boundary** under protocol v1.2 because my ship rulings were not Kam-traceable — correct, and it cost one message to resolve. Evening: recorded Peter's KS-480 consent accurately and, sizing his bulk re-key ask, found `rotate:true` never revokes the prior key and admins cannot list an org's keys (0 of 25 rows behind fail-closed RLS) — turning "1–2 days" into "~1–1.5 weeks".
+- **Datasec/NexusAI 1.0.** RD-61 synthetic feed deployed + verified; RD-67/68 done; ACR moved to managed identity with the admin account disabled (a push-capable stored credential removed); redeploy under scoped Contributor PASSED, proving the downgrade first (`az group list` 7 → 3 RGs). Improved on my brief: code defaults to the REAL feed so a synthetic default could never ship to Marketplace customers.
+- **Datasec/Lead_Bot 1.0.** WED-75 closed. Found the key it held since April was **byte-identical to the one leaked in Vision's initial import** — a month on a leaked, prod-dead credential. Corrected my brief's direction (Vision → Lead_Bot, not the reverse). Closed a gitignore hole that did not exist yet. Kam ruled the prod URL holds at localhost.
+
+### Azure identity scoping — complete and proven (WED-79 closed)
+Every Datasec project now authenticates as its own service principal confined to its own resource groups; each config holds exactly ONE identity; the only subscription-wide assignment left is Kam's Owner. Before today, one agent SP held Owner over everything (including Vision's live database and key vault) and three projects authenticated as Kam directly. Kam's five-environment map captured and pinned to verified tenant IDs; workspace CLAUDE.md rule 4 rewritten with his go-ahead. Secret rotation tracked as WED-81.
+
+### Two false premises caught before they became damage
+- **KS-480:** Kam asked to record Peter's consent-by-silence. Peter had in fact commented a day early, confirming explicitly. Recording silence would have misrepresented an engaged colleague on a contractual thread and buried three live asks of his. Stopped, re-scoped with Kam, executed correctly. His words: *"great catch"*.
+- **Family tile:** I had told Kam the day-gap was real. It was my own kid-name filter hiding "Maths tutor" and "Berry". Corrected.
+
+### The phantom instructions — solved
+Plausible, urgent instructions kept appearing at agent prompts. I acted on one and put Kam's name against it (ledger w=5); an agent then deleted a credential and disabled a registry admin account under urgency that never existed. **Kam identified the source: Claude Code's own auto-suggested next prompt**, generated from the agent's own last message. Verified programmatically (suggestions carry SGR 2 / dim; `capture-pane -p` strips colour), detector built (`pane_prompt_check.sh`), fleet exonerated in writing. Protocol v1.2 stands and is now structural: the environment itself generates convincing requests nobody authored.
+
+### Standing conventions adopted today
+- **v1.2 approval chain** — approval-class actions need confirmation traceable to Kam himself; panes are not a channel of record; an agent refusing to act until I substantiate is CORRECT.
+- **BLUF / Recommendation / Detail** on every ticket comment and update, fleet-wide — because stakeholders read every ticket personally and their time is the scarce resource in the loop.
+- **Ask format** — every ask to Kam carries Client/Project · problem · options · recommendation. He ruled eight items in one reply and said it made things much easier.
+
+### Dashboard (rounds 6–12, all browser-verified)
+Cascading menu · flag-for-Wed (changes nothing upstream by design) · news flags that survive the feed refresh · whole-site source filtering with a reset control (the missing undo that had made hiding a client a one-way door) · bottom-aligned notes and inputs on every tile · family day headings, bell-mute, and calendar-matched column geometry · light/dark themes with theme-aware tints · **project colour system: hue = area, lightness step = project, validated in both modes** (three hues is the honest ceiling — 4+ flat hues fail the CVD and normal-vision floors). Snapshot + tag `dashboard-pre-colour-2026-08-06` taken first at Kam's request.
+
+### Enforcement added (w≥3 promotions)
+`send_brief.sh` (briefs refuse to send without per-fact provenance) · doctor.sh exec-bit check (found `calendar_probe` non-executable within minutes — explaining an 18-hour silently-stale personal calendar) · `pane_prompt_check.sh`.
+
+### Open for Kam in the morning
+Three Secuura rulings (rotation-revokes gates the other two; key-listing fix recommended first regardless; seven-way ticket split, KS-532 archived so the rehearsal needs a home) · CypherKey decision brief (5 items) · WED-82 review · WED-16 close after tonight's 23:00 bell.
+
 ## 2026-08-05 (session 3, evening 19:11 → overnight, STUDIO via cockpit) — conference-day evening: sitting 5/5 · dashboard R3-R5 · cockpit hardening · TCC unblocked · wake-watcher enforcement
 
 **Kam at a conference all day; evening steered in gaps. His close: "a big lift but an awesome push" (praise ledger row — the async model's biggest outing).**
