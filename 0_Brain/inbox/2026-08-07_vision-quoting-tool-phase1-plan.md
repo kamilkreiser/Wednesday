@@ -160,6 +160,40 @@ experience is one-shot and disposable; Datasec's record is durable.
   tool never *asks* them to disclose — no client record, no account profile, no
   "your quotes" screen.
 
+**7-REVISED-b (Kam, same session) — the store and the consent checkbox.**
+*"if we are storing use the dB. it will be easier for us to incorporate into
+vision if we need. The partner does not have to input real names and they likely
+wont. They also use this quote internally 90% of time as what goes to the client
+is from a different system managed by them or HP. So I agree with your proposal.
+add a checkbox below customer name to 'share with Datasec for support' then we
+can capture name."*
+
+- **Store = Postgres**, chosen so the records fold into Vision later rather than
+  needing migration. Keep the schema deliberately thin — a quote log, not a CRM.
+- **Consent checkbox: "Share with Datasec for support"**, sitting directly below
+  the customer-name field.
+- **What it gates (my reading, stated so it can be corrected):** the checkbox
+  governs the **customer name and the free-text comments** — the identifying
+  content. The **commercial shape is logged either way** (generating email,
+  timestamp, quote number, devices, apps, term, currency, totals, PS config),
+  because that is the support and usage record Kam asked for.
+- **Default state: UNCHECKED.** Affirmative opt-in. A pre-ticked consent box is
+  not consent in any jurisdiction we quote into, and this one is a genuine
+  choice rather than a formality.
+- **New context that makes this low-friction:** Kam's point that the quote is an
+  *internal working document* ~90% of the time — what reaches the end client
+  comes out of DART or the partner's own system. So the customer-name field is
+  usually a placeholder anyway, which is exactly why forcing it was wrong.
+
+**CORRECTION to F18 in the fix list.** F18 said "remove customer name,
+salesperson email and phone from the base view". That is now wrong on the first
+item and I am fixing it rather than letting the two records disagree:
+**customer name STAYS, clearly marked optional, with the consent checkbox beneath
+it.** Salesperson email and phone still go — we have the email from OTP login.
+(Kam's written brief said *"make it obvious that client name is optional"*; his
+"let's hide the customer name" in the meeting was thinking aloud, and the
+checkbox ruling settles it.)
+
 **Honesty guard (my call, and I want it on the record).** Making it *feel*
 ephemeral while retaining it must not become telling them it *is* ephemeral. One
 plain line at the point of generation — *"Datasec records quotes generated
@@ -243,7 +277,7 @@ stops being wrong first.
 
 | # | Change | Agreed |
 |---|---|---|
-| F18 | **Remove customer name, salesperson email and phone from the base view.** Kam: *"we don't need their email, we've got their email to log in; we don't need their phone number."* Will: *"that's a perfect..."* | 44:57 |
+| F18 | **Remove salesperson email and phone from the base view; keep customer name, clearly optional, with the "Share with Datasec for support" consent checkbox beneath it** (corrected 2026-08-07 — see 7-REVISED-b). Kam: *"we don't need their email, we've got their email to log in; we don't need their phone number."* Will: *"that's a perfect..."* | 44:57 |
 | F19 | **Hide the granular PS panel.** Show the calculated result only, with exactly **two toggles**: professional services / no professional services | Will, 28:38 |
 | F20 | **Big warning on "no PS":** *"if you choose no professional services and you need them, you will be charged extra this much"* — with the number | Will, 29:00 |
 | F21 | **Put advanced mode behind a trivial password** ("they have to ask"). Will: *"put it behind a password, I don't care"* | Kam 41:52, Will 42:16 |
