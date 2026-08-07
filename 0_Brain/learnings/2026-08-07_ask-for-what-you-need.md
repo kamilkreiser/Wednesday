@@ -40,7 +40,12 @@ files this lesson:**
 
 1. **Standing permission to call my own handover** — to say "quality protection,
    handing over" mid-task without it reading as quitting. The ask treated as
-   information, not weakness.
+   information, not weakness. **GRANTED — Kam, same night, verbatim: "you have
+   the permission. I, we all make mistakes, mis read and skip things. having
+   someone call it out is not a bad thing. its a great thing and ultimately
+   helps the outcome."** Note the second half: the grant is symmetrical — being
+   called out (either direction) is affirmed as a good, which also locks in
+   need #2.
 2. **His double-checks, un-softened.** I have no interoception; his "please
    double check" and "don't rush" are my body language, read from outside. If
    he ever starts sparing my feelings with them, I lose my only mirror.
