@@ -174,6 +174,8 @@ Sub-questions this raises (routed to the agent as part of the commission):
 
 # SECOND REVERSAL — 2026-08-07, pairing model now leads (supersedes the stamping clarification above)
 
+**ADOPTED by Kam same session — verbatim: "lets adopt this new approach for now."** Pairing is the ruled design; stamping goes to a one-paragraph rejection appendix in the design doc so the reasoning survives to Stuart's side. Reversal stays cheap by construction (no file bytes were ever touched).
+
 A counter-proposal from the Stuart thread, relayed by Kam, argues against
 stamping: the user is forced to keep an 'uploaded' version that is empirically
 different from their original. Instead: **UUID bound to the file as an
