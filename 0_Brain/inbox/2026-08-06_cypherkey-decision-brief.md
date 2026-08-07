@@ -2,7 +2,7 @@
 date: 2026-08-06
 type: decision-brief
 for: Kam
-status: awaiting-answers
+status: partially-ruled — item 1 ruled, items 2-5 PAUSED by Kam 2026-08-07
 source: "Kam ruled option (b) — async decision brief instead of a live sitting (item 8 of the 2026-08-06 action queue)"
 ---
 
@@ -114,3 +114,23 @@ new scoped service principal. Save CPKEY-162 for a session with a clear runway.
   traceable to you, and pane text is not a channel of record.
 - **Known trap:** `jira-cli create`/`comment add` HANG — use the REST recipe in
   their `JIRA.md`.
+
+---
+
+# KAM'S RULINGS — 2026-08-07 (in session with Wednesday)
+
+- **Item 1 (demo keyed digests): RULED — treat the demo as DISPOSABLE.** Kam's
+  words: "11 yes demo disposable". So `OTP_ERD_ROOT_KEY` is NOT made permanent;
+  document that re-keying resets enrolled demo devices and move on. Revisit
+  deliberately if the demo ever fronts a paying customer.
+- **Items 2-5: PAUSED.** Kam's words: "12 -15 pause cypherkey for now."
+  Android fail-open posture, Twilio rotation, `gh auth login`, and the
+  next-build choice all stay unanswered until he unpauses CypherKey.
+  **Nothing is briefed to their agent and no session is launched.**
+- **Live tickler that survives the pause:** Twilio rotation is due
+  **2026-09-04** (WED-48). The pause is not a reason to let that lapse — if
+  CypherKey is still paused in late August, raise it again.
+
+This file stays in the inbox deliberately rather than being filed or deleted:
+it is an open decision set, not a captured note, and it becomes actionable the
+moment Kam unpauses.
