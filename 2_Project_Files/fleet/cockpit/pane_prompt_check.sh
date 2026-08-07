@@ -37,6 +37,23 @@ for id in "${panes[@]}"; do
   name="$("$TMUX_BIN" display-message -p -t "$id" '#{@cockpit_name}' 2>/dev/null)"
   # NOTE: the prompt char is followed by a NON-BREAKING space (U+00A0, \xc2\xa0),
   # not an ordinary one — matching on '❯ ' silently finds nothing.
+  # A modal selector (model picker, permission prompt) renders its highlighted
+  # option with the SAME glyph and the same non-breaking space as the real input
+  # prompt — checked with xxd 2026-08-07, both are U+00A0 — so neither the glyph
+  # nor the spacing separates them, and the naive read reported a menu option as
+  # "a human wrote this". That is a false positive in the dangerous direction:
+  # noise on the one signal that is supposed to mean stop. The modal's footer is
+  # the reliable discriminator, and "this pane is blocked on a modal" is more
+  # useful to report than either classification.
+  body="$("$TMUX_BIN" capture-pane -t "$id" -p 2>/dev/null)"
+  case "$body" in
+    *"Enter to confirm"*|*"Esc to cancel"*)
+      sel="$(printf '%s' "$body" | LC_ALL=C grep -a '❯' | LC_ALL=C tail -1 \
+             | LC_ALL=C sed 's/^.*❯//' | LC_ALL=C sed 's/^\xc2\xa0*//' | LC_ALL=C sed 's/^ *//')"
+      echo "  ${name:-$id}: ⏸ MODAL PROMPT — pane is blocked on a menu, nobody typed this :: ${sel}"
+      continue ;;
+  esac
+
   # Take the last ❯ line that is NOT Claude Code's own UI chrome. When messages
   # are queued the client renders "❯ Press up to edit queued messages" BELOW the
   # real prompt line — and it is dim, so the naive last-line read reported chrome
