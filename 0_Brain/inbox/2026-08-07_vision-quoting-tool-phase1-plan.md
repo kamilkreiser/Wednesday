@@ -66,6 +66,102 @@ not inside the live portal.** Reasons in §4.
   under-charged professional services. Nobody is being told. That is Kam's call
   and it is recorded here so it is not lost at handover.
 
+## 0-1. KAM'S RULINGS — 2026-08-07. These supersede Will's model where they differ.
+
+**1. The per-device multiplier applies to EVERY device.** Kam's domain
+correction, which is the piece that was missing: HPAM and the suite only run on
+**WorkPath-enabled printers**, and this tool will only ever be used by people
+whose printers are suitable. *"Non-ready devices mean new out-of-the-box devices"*
+— WorkPath must be loaded and the printer registered, **two extra steps**.
+**The rest of the process is identical for every device.** So:
+- base install effort = `0.1h × ALL devices`;
+- WorkPath onboarding = the two extra steps, `ceil(nonReady × 0.1)` hours, as a
+  separate line — which is what the tool already does, now with a real
+  justification rather than an inferred one.
+
+**2. The tier model — CHECKED AGAINST THE RULE, and it holds.**
+
+| Devices | Charge | Verified |
+|---|---|---|
+| 1–10 | **half day, 4 hr** (Basic, $1,400) | `0.1h × 10 = 1h` — comfortably inside 4h |
+| 11–50 | **minimum 1 day, 8 hr, inclusive** (Advanced, $2,100) | `0.1h × 50 = 5h` — inside the 8h day with room to spare |
+| >50 | **POA, with an estimate shown where the price is displayed** | see below |
+
+Boundaries computed, not assumed: the per-device figure first exceeds the 4-hour
+half day at **41 devices** and the 8-hour day at **81 devices**. So the 1-day
+minimum genuinely absorbs everything up to 50 — *"minimum of 1 day but
+inclusive"* is exactly right.
+
+**GAP FOUND IN THE CHECK:** between **51 and 80 devices** the estimate computes to
+**less than one day**, which would undercut the 1-day tier immediately below it.
+The estimate needs a **1-day floor**. With that floor:
+
+| Devices | Estimate |
+|---|---|
+| 51 | 6h → 1 day → $2,100 |
+| 80 | 8h → 1 day → $2,100 |
+| 100 | 10h → 2 days → $4,200 |
+| 200 | 20h → 3 days → $6,300 |
+| **374** | **38h → 5 days → $10,500** ← matches Will's hand-quote to Joshua exactly |
+
+Formula: `days = max(1, ceil(ceil(devices × 0.1) / 8))`, charged at the Advanced
+day rate. Note the code's current POA threshold is **100** and must move to **50**.
+
+*Tension, resolved rather than hidden:* Will said flatly *"they don't want a
+POA"*. Kam keeps POA as the **commercial position** but shows an estimate
+alongside, so the rep is never stuck without a number. That satisfies both.
+
+**3. PoC — DELIBERATE REVERSAL of WIL-34.** Kam: *"doing a PoC is extra work so if
+they want a PoC they have to pay extra for it. The PoC will never be a full
+deployment so we should capture how many devices will be in the PoC. The extra
+cost will be only on these devices."*
+
+- **New input: PoC device count.** Does not exist today.
+- PoC cost = the install calculation applied to **the PoC device count only**.
+- This **replaces** Will's "you pay for the installation twice" (a second unit of
+  the tier). Recorded loudly because §8 lists that as a decision not to reverse
+  by accident — this one is being reversed **on purpose**, and the handover pack
+  must say so and why.
+- Sanity check on the change: on 374 devices the old model would have doubled a
+  5-day charge to 10 days ($21,000). The new model charges only for the PoC
+  fleet, which is both smaller and far easier to defend.
+
+**4. AUD regional rates ship as defaults** — A$500 / A$1,200 / A$150. Kam has seen
+that this makes Australian PS roughly a third of the US price and ruled yes.
+
+**5. Hosting: separate app, own resource group.** Agreed.
+
+**6. Access.** Quotes logged against the email that generated them. **Pro mode
+lives in the same resource group**, gated by a **simple static password `HPAM`** —
+Kam: *"lets start simple… it's more about making it simple until someone knows
+how to use it and then giving them more features."* Changeable later.
+**Implementation note (my call, stated so it can be overruled):** I will honour
+the exact UX — type `HPAM` — but enforce it **server-side**, so the margin and
+buy-price tooling is never sent to the browser for an unauthenticated visitor.
+Today advanced mode is a `localStorage` boolean anyone can flip; a client-side
+password would be the same protection with extra steps.
+
+**7. NO DATABASE, NO STORAGE.** Kam corrected my assumption: *"I did not mean
+persistence but rather no dB and storage. A pushback has been that sales people
+don't want to share anything when they are partners. Phase 2 and vision will
+store info, quotes and stages. This tool is a one-time use more than anything
+else."*
+
+Consequences I am taking as decided:
+- **No quote database, no history, no recall, no editing.** Generate → email →
+  gone. This matches Kam's meeting description exactly (*"you can't log into it
+  anymore… it's yours"*).
+- **F13 (quote-number collisions) is solved WITHOUT storage** by making the
+  number time-derived — `DSQ-YYYYMMDD-HHMMSS-NNN` is unique in practice with no
+  registry. The random 100–999 still goes.
+- **The one tension to confirm:** "log quotes against emails" and "no storage"
+  pull against each other. **My reading — log the EVENT, never the CONTENT:**
+  email address, timestamp and quote number only. No customer name, no device
+  counts, no prices, no quote body. That gives us who-is-using-it without holding
+  anything a partner would object to sharing. Flagged rather than assumed.
+- OTP login needs ephemeral state for the code itself. That is transient auth
+  state, not "storage" in the sense ruled above.
+
 ## 0-A. THE FIX LIST (Kam: "add this to the list of things to fix")
 
 Consolidated from all four sources. **P1 = wrong money. P2 = wrong behaviour.
