@@ -1,3 +1,41 @@
+## 2026-08-07 — The biggest day: 13-ruling sitting, 3-agent fleet, quoting tool Stage 1 done, K/S architecture READY, protocol v1.3 signed
+
+**Fleet:** Secuura/Blockchain, Datasec/NexusAI, Datasec/Vision_Sales_Portal run
+all day (Opus 5 after the Fable cap); 5 runs scored 1.0. Shipped: RD-67+68 to
+demo (DKIM-verified authored approval), KS-564 all three legs, KS-570→High/Todo
++ KS-586, the KS-480 8-ticket split. Vision quoting tool: handover reviewed
+(4 sources incl. a locally-transcribed 56-min walkthrough), 23-item fix list,
+engine extracted pure with first-ever tests, v2.08 wired — F1–F10 fixed in the
+running tool, measured. K/S architecture: Kam's unrecorded-meeting braindump
+captured verbatim, commissioned, delivered (K already has the model in schema —
+wiring not architecture), verified, staged READY (S-pack v1.0 + cover note for
+Kam's signature + plan sheet).
+
+**Protocol v1.3:** Kam moved the signature from every ruling to one DKIM-signed
+delegation grant; all three agents verified it independently and found two real
+issues in it (rule-7 collision — ruled, pending confirm; workspace CLAUDE.md
+gap — Kam's hands). Built on the DKIM-authorship mechanism the NexusAI agent
+invented the same morning.
+
+**Own defects, root-caused:** WED-82 overnight miss (promise-is-not-a-mechanism)
+· subpage rollout gap (enumerate-every-surface) · ghost text nearly returned as
+Kam's own words via my warning quoting it · send_brief.sh never CC'd Kam (w=5,
+agent-caught) · close-bell 403 was set -a, not rate limiting (my diagnosis was
+wrong; reproduced off-schedule to find it) · manufactured urgency from Kam's
+meeting · relayed a finding as "verified" that wasn't mine and wasn't real.
+8 lesson files, 11 ledger rows. Fleet handed back two doctrines now adopted:
+DKIM authorship, and "a check that cannot fail is not a check."
+
+**Dashboard:** WED-82 colour system completed in-session both themes (found a
+real contrast failure in verification), kept by Kam's ruling, closed Done.
+Close bell genuinely fixed + both paths proven; first real fire tonight.
+
+**Open at wrap:** Kam's decision pack items 5, 6, 8–12; RD-61/RD-76; Stuart
+send (cover note ready, his signature); Vision F11–F23 queued next session;
+CypherKey paused (items 2–5); Lead_Bot parked on WED-78.
+
+---
+
 ## 2026-08-06 (06:00 scheduled wake → 20:00 Kam close, overnight continues, STUDIO/T9) — fleet day: 3 agents, 4× 1.0 · identity scoping complete + proven · two false premises caught · dashboard rounds 6–12
 
 **Kam's close: "Thank you very much. See you in the morning." Overnight work authorised on WED-82 (dashboard project colour).**
