@@ -145,3 +145,43 @@ having retained the mail, which a fresh session will not have.
 date, subject, Message-ID, and that it is verifiable on the bus by DKIM. I have
 drafted nothing into that file because it is outside my scope and I am not going
 to make an exception for a document that expands my own authority.
+
+## 7. PRODUCT DECISION (Stuart's, via Kam) — what does a duplicate upload MEAN?
+
+Stuart's finding, forwarded 2026-08-07: **S and K disagree on what a document
+is.** K's registry is claimed to be `UNIQUE (content_hash, tenant_id)` with
+`ON CONFLICT … DO UPDATE`, so re-uploading identical bytes silently overwrites
+the prior registry pointer; S inserts a new row every time with no duplicate
+check. **S says two documents, K says one and the newer wins.** He believes it
+sits upstream of a class of symptoms they have both been chasing. Kam's read:
+*"a start but a good one."*
+
+**The decision he is actually asking for — and it is Kam's, because Stuart says
+so himself: "It's a product call, not a technical one."**
+
+Same org, same bytes:
+- **(a) Dedupe** — reuse the row. One document, shared twice. Matches K's model;
+  means a user who uploads the same file twice cannot have two separate
+  registrations even if they meant to.
+- **(b) Warn the uploader** — surface it at upload time and let them choose.
+  Honest, but puts a question in front of a user who may not understand it.
+- **(c) Keep both deliberately** — two documents, by design. Matches S's current
+  behaviour; requires K to stop treating hash as identity, which is the larger
+  change.
+
+**No recommendation from me yet, deliberately.** I have asked Secuura to verify
+the K half against the real schema and code first, because **Stuart's analysis is
+itself AI-generated** — his own attribution is *"(so from Claude …)"* — and I
+made exactly this mistake today by relaying an agent's finding to Kam as
+"verified". A product decision built on an unverified premise is the expensive
+version of that error, not the cheap one.
+
+**One thing worth Kam seeing now, because it is the trap in Stuart's option 4:**
+stamping identity into the file (watermark, XMP, embedded id) does make documents
+genuinely distinct — but it **changes the artefact the user handed us, and
+therefore changes the hash they would compute independently.** On a product whose
+proposition is "this is provably the document you gave us", that is substantive.
+Stuart has noticed it; it should not pass as a footnote.
+
+**Nothing has gone to Stuart or Peter.** Under v1.3 a new topic with them needs
+Kam's signature.
