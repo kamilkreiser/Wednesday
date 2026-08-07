@@ -50,7 +50,92 @@ not inside the live portal.** Reasons in §4.
 
 ---
 
-## 1. The maths defect, precisely
+## 0. ADDED AFTER THE CODE REVIEW — the defect nobody had found
+
+**Professional services are FX-converted TWICE.** This is not WIL-155, is not in
+any handover document, and is larger than the bug Will's dev found. **Verified
+by me directly in the source, not taken from the review.**
+
+The chain, three lines from three different places:
+
+1. `applyPsvRates()` (L2155-2172) writes **local currency** into the price field:
+   `basic = CONFIG.services.basic.defaultPrice * rate` → `$("price-basic").value`.
+2. `calc()` (L1261) reads that field **as USD** into `svcTotal`.
+3. `render()` (L1324-1326) prints `fmt(c.svcTotal)`, and `fmt()` multiplies by
+   the rate **again**.
+
+Net: `PS = USD × rate × rate`. The grand total is worse still —
+`fmt(licenceTotal + svcTotal)` **adds a USD number to a local-currency number**
+and converts the sum.
+
+| Currency | rate | Basic tier shows | should show | error |
+|---|---|---|---|---|
+| AUD | 1.55 | 3,363.50 | 2,170.00 | **+1,193.50** |
+| NZD | 1.67 | 3,904.46 | 2,338.00 | +1,566.46 |
+| SGD | 1.35 | 2,551.50 | 1,890.00 | +661.50 |
+| **EUR** | 0.93 | 1,210.86 | 1,302.00 | **−91.14 (under-charged)** |
+| **GBP** | 0.79 | 873.74 | 1,106.00 | **−232.26 (under-charged)** |
+| **DKK** | 6.93 | 67,234.86 | 9,702.00 | **+57,532.86** |
+
+**Two things make this urgent rather than merely wrong:**
+
+1. **It defeats the feature it was built for.** Regional PS rates exist
+   *precisely* so service pricing does not track FX (Will: *"1.4181 on $280 an
+   hour ain't going to fly in Australia"*). An AM who saves a genuine A$2,500
+   rate gets **A$3,875** on the quote.
+2. **EUR and GBP are UNDER-stated.** Every euro or sterling quote has
+   under-charged professional services by 7–21%. That is margin already given
+   away if any such quote has been issued.
+
+**It is a regression, with evidence:** the shipped reference PDF
+`tool/docs/…AUD.pdf` (June build, before `applyPsvRates` existed) shows PS Basic
+at A$2,325 = US$1,500 × 1.55 — a single, correct conversion. The double
+conversion arrived with the regional-rates feature.
+
+**Commercial action, not a code action:** someone needs to establish which
+non-USD quotes have been issued since that feature shipped. I cannot determine
+that — nothing is persisted, quotes exist only as emailed PDFs.
+
+**Root cause, and why it matters for the rebuild:** PS pricing does not live in
+`calc()`. It lives **in the DOM**, written by three functions that disagree about
+units — `applyPsvRates()` writes local currency, `applyServiceRule()` (L2007)
+writes raw USD, and `applyPoc()` rewrites quantities. One input, three owners,
+three unit conventions. Seven of the nine confirmed defects are symptoms of the
+same design: *the input element is the state store.*
+
+### Other confirmed defects from the code review
+
+- **PoC charges nothing when the tier was manually overridden** (L1968-1976):
+  `applyPoc()` keys off device count, not the selected radio. Choose Advanced at
+  8 devices with PoC on → the second engagement is silently not charged,
+  **US$2,100 missing**.
+- **Editing device count or WorkPath-Ready silently resets PS quantities to 1**
+  (L1977-1982) — a deliberately-set quantity of 3 reverts with no warning.
+- **Device count overrides a deliberate PS selection** (L1996-1997): choose "No
+  professional services", then touch the device field, and PS silently
+  reappears in the total.
+- **Saving PS rates does not refresh the grand total** — setting `.value` in JS
+  fires no event, so `render()` never runs; line items change, total goes stale.
+- **PS converts at the seed rate while licences use the live rate** — the live
+  fetch calls `render()` but never `applyPsvRates()`.
+- **"Both" print mode emits two different quote numbers**, contradicting the
+  documented rule that the pages share one.
+- **The printed quote never states the FX rate** — `fxLine` is computed at L1448
+  and never interpolated, though the UI promises "the printed quote records the
+  rate used". A regression: the June PDF carried it.
+- **166 lines of dead code** (`buildQuote()`, L1592-1757) that has already
+  drifted from the live renderer. Anyone fixing the maths is even money to fix
+  the dead copy.
+
+**This changes stage 1 of the plan below:** the currency work is no longer a
+one-bug fix. The honest scope is *extract pricing out of the DOM into a single
+pure function that takes state and returns a priced quote in one explicit
+currency* — which is the only way a unit error becomes a testable assertion
+rather than a screen-reading exercise. There are currently **no tests at all**.
+
+---
+
+## 1. The maths defect Will's dev found (WIL-155), precisely
 
 **WIL-155 (High, open).** The Custom Pricing Override fields hold **USD** but are
 **labelled with the selected currency**. `cpState` is USD; `cpSyncFrom()` reads
