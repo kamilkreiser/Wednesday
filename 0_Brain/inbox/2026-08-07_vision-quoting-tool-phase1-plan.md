@@ -50,6 +50,22 @@ not inside the live portal.** Reasons in §4.
 
 ---
 
+## 0-0. OWNERSHIP RULING (Kam, 2026-08-07)
+
+> *"no need to communicate with Will, the project is ours now. We'll get it to
+> the team once we finish all the proposed and necessary changes."*
+
+**Consequences, recorded so nobody re-derives them:**
+- **No outbound contact with Will** about this tool until the work is done. The
+  "tell Will about the under-charging today" recommendation is **withdrawn**.
+- **Every question previously routed to Will now goes to Kam**, or is decided by
+  me under the 2026-08-07 autonomy grant where it is not a money/scope call.
+- The handover pack we eventually give the team must carry the decisions we made
+  on Will's behalf, with reasoning — he is the domain authority and will audit it.
+- **Residual risk parked, not closed:** any EUR/GBP quote already issued has
+  under-charged professional services. Nobody is being told. That is Kam's call
+  and it is recorded here so it is not lost at handover.
+
 ## 0-A. THE FIX LIST (Kam: "add this to the list of things to fix")
 
 Consolidated from all four sources. **P1 = wrong money. P2 = wrong behaviour.
