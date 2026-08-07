@@ -50,11 +50,120 @@ not inside the live portal.** Reasons in §4.
 
 ---
 
-## 0. ADDED AFTER THE CODE REVIEW — the defect nobody had found
+## 0-A. THE FIX LIST (Kam: "add this to the list of things to fix")
 
-**Professional services are FX-converted TWICE.** This is not WIL-155, is not in
-any handover document, and is larger than the bug Will's dev found. **Verified
-by me directly in the source, not taken from the review.**
+Consolidated from all four sources. **P1 = wrong money. P2 = wrong behaviour.
+P3 = simplification Kam and Will agreed in the meeting.** Ordered so the money
+stops being wrong first.
+
+### P1 — money is wrong today
+
+| # | Defect | Effect |
+|---|---|---|
+| F1 | **PS FX-converted twice** (`applyPsvRates` writes local currency → `calc()` reads it as USD → `fmt()` converts again) | AUD +55%, NZD +67%, SGD +35%, DKK +593%, **EUR −7% and GBP −21% under-charged**. Will's own case: $212/hr instead of A$150. **Defeats the regional-rates feature entirely.** |
+| F2 | **Grand total adds USD to local currency** then converts the sum (`fmt(licenceTotal + svcTotal)`) | Same root cause as F1; the total is wrong in a different way from either component |
+| F3 | **Custom Pricing Override fields hold USD, labelled in the selected currency** (WIL-155) | Annual A$341.62 vs A$240.90. Will in the meeting: *"the total down here is getting screwed up somehow... that is a bug."* Fix per his Option B — make the maths honour the label |
+| F4 | **PoC charges nothing when the tier was manually overridden** — `applyPoc()` keys off device count, not the selected radio | US$2,100 silently missing from the quote |
+| F5 | **Editing device count or WorkPath-Ready silently resets PS quantities to 1** | A deliberately-set quantity of 3 reverts with no warning; price drops silently |
+| F6 | **Device count re-selects PS after "None" was chosen** (`applyServiceRule` L1996-1997) | Thousands reappear in the total after the customer opted out |
+| F7 | **Saving PS rates does not refresh the grand total** — setting `.value` fires no event | Line items change, total stays stale |
+| F8 | **PS converts at the seed rate while licences use the live rate** | Two different FX rates in one quote |
+| F9 | **`/device/year` derived from the rounded day figure** (0.66×365=240.90) while the annual charge uses the unrounded monthly (240.96) | ~6c/device/year mismatch that survives fixing F1–F3. **There is no stated rounding policy anywhere** |
+| F10 | **A zero-priced service prints "POA"**, not $0 (`price > 0` should be `>= 0`) | A deliberately waived service reads as unpriced |
+
+### P2 — behaviour and output wrong
+
+| # | Defect | Source |
+|---|---|---|
+| F11 | **"Both" print mode emits two different quote numbers**, contradicting its own documented rule that the pages share one | code review |
+| F12 | **The printed quote never states the FX rate** — `fxLine` computed at L1448, never interpolated — though the UI promises "the printed quote records the rate used". A regression: the June reference PDF carried it | code review |
+| F13 | **Quote numbers are random 100–999**, not registered, ~1-in-900 same-day collision. Fatal once a quote is emailed as a binding artefact | handover |
+| F14 | **166 lines of dead code** (`buildQuote()`) already drifted from the live renderer — a trap for anyone fixing the maths | code review |
+| F15 | **SKUs do not appear under the individual apps** for the selected term — only under pro services. **This is what confused Joshua** and caused the wrong-SKU quote | Will, 15:47 |
+| F16 | **Nothing makes Auth Manager's mandatory status obvious** — Joshua quoted OneDrive alone, without it | Will, 16:42 |
+| F17 | **No "first year vs subsequent years" split.** Will: *"it's adding this plus two times this, but it's not showing that the professional services one time is just the one time. We need a one-time fee for the first year and then a year-after cost."* | Will, 41:22 — **new requirement, not in any doc** |
+
+### P3 — simplification, agreed live by Kam and Will
+
+| # | Change | Agreed |
+|---|---|---|
+| F18 | **Remove customer name, salesperson email and phone from the base view.** Kam: *"we don't need their email, we've got their email to log in; we don't need their phone number."* Will: *"that's a perfect..."* | 44:57 |
+| F19 | **Hide the granular PS panel.** Show the calculated result only, with exactly **two toggles**: professional services / no professional services | Will, 28:38 |
+| F20 | **Big warning on "no PS":** *"if you choose no professional services and you need them, you will be charged extra this much"* — with the number | Will, 29:00 |
+| F21 | **Put advanced mode behind a trivial password** ("they have to ask"). Will: *"put it behind a password, I don't care"* | Kam 41:52, Will 42:16 |
+| F22 | **Rename the button** to "Generate BOM details (printable quote)" | Kam, 25:26 |
+| F23 | Currency selector under the pricing tile, live by default — **licences convert, PS never does** | Kam's brief + Will 30:08 |
+
+---
+
+## 0-B. THE PS RULES — settled by the walkthrough, no longer open
+
+The walkthrough answers the questions I had listed as needing Will. **These are
+his words, not my inference.**
+
+1. **The threshold is 50, not 100.** *"Originally, the idea was up to 100 devices…
+   what Indonesia have found is it's up to 50. So imagine this is 50, not 100."*
+   (10:01) The code still says 100 (`applyServiceRule` L2002).
+2. **POA is dead.** Kam: *"will a salesperson accept POA or do they want an
+   estimate?"* Will: **"They don't want a POA."** (20:52)
+3. **The over-50 rule, verbatim:** *"the way we deal with devices over 50 is it
+   starts with one day plus this… if it's 38 hours, you don't charge it in the
+   billable additional hours, this just simply goes to five [days], but it's
+   calculated the same way."* (21:00) So: **one Advanced day, plus the per-device
+   hours converted into whole days.**
+4. **The per-device unit and its rounding:** *"six minutes per non-ready device,
+   building one hour blocks, and what we need to do is translate that across to
+   build in the nearest day."* (29:22) So
+   `hours = ceil(nonReady × 0.1)` → `days = ceil(hours / 8)` → `days × dayRate`.
+   Worked: 374 → 37.4 → **38 hours** → 4.75 → **5 days × $2,100 = $10,500**, which
+   is exactly what Will quoted Joshua.
+   *(Will says "4.45 days" at 29:36 and "4.74" in the earlier session — both are
+   mental-arithmetic slips for 4.75. The answer, 5, is unaffected. Spec the
+   formula, not his arithmetic.)*
+5. **Note the ambiguity I am NOT resolving myself:** rule 4 says *non-ready*
+   devices, but the 374-device worked example uses the whole fleet. Whether the
+   multiplier applies to all devices or only non-WorkPath-ready ones is the one
+   genuine question left, and it changes the price materially.
+6. **The AUD regional PS rates Will actually uses: Basic A$500, Advanced
+   A$1,200, hourly A$150** — against US$1,400 / $2,100 / $280. Nowhere near an FX
+   conversion, which is exactly why F1 matters: *"if you just do a straight
+   calculation on that, our professional services is mind-blowingly wrong."*
+   (32:50)
+
+## 0-C. Dates that constrain this
+
+- **~18 August** — ABT's extended Rio Tinto deadline (the 374-device deal).
+- **1 September** — John Spears starts. Will: *"the most important tool to give
+  John Spears when he starts."*
+- **Monday** — Will and Kam agreed a follow-up session.
+
+---
+
+## 0. The systemic defect — and its true provenance
+
+**Professional services are FX-converted TWICE.** Verified by me directly in the
+source, not taken from the code review.
+
+**PROVENANCE CORRECTION (made when the walkthrough transcript landed).** I first
+reported this as a defect nobody had found. That was wrong, and I had no right to
+say it: **Will identified it himself in the walkthrough**, diagnosed it correctly,
+and deliberately said so on the record —
+
+> *"it's using two hundred and twelve dollars an hour instead of 150… it's
+> inherited the Australian dollar that we've asked for up here but then it's
+> double converted it… I was using specific language so that it's in the
+> transcript: that's a bug, not a feature."* (33:36–34:22)
+
+His $212 is A$150 × 1.4181 exactly. So the finding is a **confirmation**, not a
+discovery. What is genuinely new is (a) that it **never reached a ticket or any
+handover document** — it exists only as spoken words in a recording that had no
+transcript — (b) the mechanism traced through all three code paths, and (c) the
+per-currency quantification, including that **EUR and GBP are under-charged**,
+which nobody has stated anywhere.
+
+The framing to Will must therefore be *"your verbal finding never made it into
+the ticket list, and here is what it costs in every currency"* — never *"we found
+what you missed."*
 
 The chain, three lines from three different places:
 
