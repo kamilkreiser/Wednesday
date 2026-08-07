@@ -3,32 +3,30 @@ client: Datasec
 project: Vision_Sales_Portal
 path: /Volumes/DevMASTER/!CODING/Datasec/Vision_Sales_Portal
 status: active
-updated: 2026-08-07
+updated: 2026-08-08
 ---
 
 # Datasec / Vision Sales Portal
 
-**Last session (2026-08-07):** Took over the **HPAS QuickQuote** sub-project from
-Will Parker. Imported his full history to `datasecau/vision_hpas-quickquote`
-(30 commits, byte-verified against the handover), then extracted a pure pricing
-engine and **wired it in — v2.08 `49b3dfc`, the whole money fix-list F1–F10 is
-closed in the live tool**, plus F7/F8. Measured, not asserted: professional
-services in AUD went from A$5,045.25 to A$3,255.00. 35 tests green, print
-verified as a real PDF in both themes.
+**Last session (2026-08-07 → 08, wrapped 05:30):** **The standalone HPAS
+QuickQuote fix list is COMPLETE — v2.12 `f67bef0`.** F1–F17 and F19–F23 all
+shipped; F18 is Stage-3 gated by design. 45 tests green; regression pack re-run
+through the real UI across 72 scenarios with ground truth intact at 374 → 5 days
+→ $10,500 and every AUD total exactly 1.55× its USD twin. Print-verified as real
+PDFs in light, dark and a GBP no-services quote.
 
 **Open / next:**
-- F15 (SKUs under individual apps) then F16 (Auth Manager mandatory) — these are
-  what confused Joshua and caused a wrong-SKU quote on the live ABT deal
-- F17, F11, F13, F12; then simplifications F18–F23
-- CI — the 35 tests only run when a human types `node --test`. Cheapest win left.
+- Merge `stage1/pricing-engine` — 8 commits ahead of `main`, unmerged by design
+- Add CI: 45 tests that only run when a human types `node --test`. Cheapest item left
+- WIL-54 (per-app chips show USD) — a product decision, not a patch
+- Page-1 print overflow (pre-existing, reproduced on v2.06) — needs its own pass
+- Then hosted Stage 3: OTP, Postgres, emailed PDF, server-side HPAM gate, F18
 
-**Blockers:** `stage1/pricing-engine` is 4 commits ahead of `main` and
-**unmerged by design** — needs Wednesday's word under protocol v1.3. WIL-54
-(per-app price chips showing USD) needs a product decision, not a patch.
+**Blockers:** the merge needs your word under v1.3. WIL-54 needs a product call.
+No contact with Will (Kam's ruling).
 
-**Notes for Wednesday:** The tool lives at `Quoting Tool/hpas-quoting-tool/` —
-its **own** repo, NOT inside `2_Project_Files`. Vision's live site, DB and key
-vault (`datasec-sales-portal-rg`) were untouched all session and nothing in this
-sub-project should approach them. **No contact with Will** (Kam's ruling).
-Known and deferred: page 1 overflows to 3 pages on mix-and-match + custom note +
-comments — reproduced on v2.06, so pre-existing, not a regression.
+**Notes for Wednesday:** Tool lives at `Quoting Tool/hpas-quoting-tool/` — its
+**own** repo, NOT inside `2_Project_Files`. Vision prod (`datasec-sales-portal-rg`)
+was untouched across the whole session; nothing in this sub-project should
+approach it. F21's gate is a speed bump not protection, and that is stated in
+`BACKLOG.md` rather than implied — real enforcement is Stage 3.
