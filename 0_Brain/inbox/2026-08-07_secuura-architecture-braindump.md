@@ -169,3 +169,20 @@ Sub-questions this raises (routed to the agent as part of the commission):
   supported formats;
 - the stamped UUID remains a lookup hint, never proof — it is strippable and
   forgeable; identity evidence stays the hash + registry.
+
+---
+
+# SECOND REVERSAL — 2026-08-07, pairing model now leads (supersedes the stamping clarification above)
+
+A counter-proposal from the Stuart thread, relayed by Kam, argues against
+stamping: the user is forced to keep an 'uploaded' version that is empirically
+different from their original. Instead: **UUID bound to the file as an
+indivisible pair in registration metadata** — user verifies the file they
+actually kept; S actions that change the document produce new unique versions;
+org + user UUIDs (possibly combined/SHA'd) carried as metadata to ratify chain
+updates. **Kam: "This approach appeals"**, with one open question — how it works
+fully distributed, documents stored by the user (per the blockchain project's
+distributed notes).
+
+Design stance now: **pairing leads, stamping is the assessed fallback.** Routed
+to the agent to ground against the project's own self-sovereign notes.
