@@ -21,7 +21,12 @@ LOG="$LOG_DIR/close_$(date +%F).log"
 log() { echo "$(date '+%F %T') $*" >> "$LOG"; }
 
 TODAY="$(date +%F)"
-HOUR="$((10#$(date +%H)))"
+# WEDNESDAY_TEST_HOUR lets the window guard be exercised outside 22:30-23:59 so
+# a change to the close ritual can be proven in its real environment rather than
+# only in extracted form. Same pattern as shift_change.sh. It only overrides the
+# guard's clock; everything downstream runs for real, so pair it with
+# WEDNESDAY_DRYRUN=1 unless a genuine close is intended.
+HOUR="$((10#${WEDNESDAY_TEST_HOUR:-$(date +%H)}))"
 MIN="$((10#$(date +%M)))"
 
 if [ -f "$STATE_DIR/last_close" ] && [ "$(cat "$STATE_DIR/last_close")" = "$TODAY" ]; then
@@ -39,8 +44,23 @@ DRYRUN="${WEDNESDAY_DRYRUN:-0}"
 MAIL_LINE="fleet inboxes: unreachable (key unset or API down)"
 ENV_FILE="$PROJECT_DIR/4_Credentials/.env"
 if [ -f "$ENV_FILE" ]; then
+  # ROOT CAUSE OF THE 23:00 "unreachable" CLOSES, found 2026-08-07 by reproducing
+  # the failure at 13:00 instead of waiting for 23:00. `.env` uses BARE
+  # assignments (no `export`), so a plain `source` makes AGENTMAIL_API_KEY a
+  # SHELL variable and not an environment variable. The bash guard below then
+  # passes — bash can see it — while the python heredoc's os.environ.get()
+  # returns "". An empty Bearer token is answered with 403, on every attempt,
+  # every night. `set -a` is what exports it, and is why the same key works from
+  # an interactive session that uses `set -a && . .env`.
+  #
+  # The lesson, because the earlier diagnosis was wrong in an instructive way:
+  # I confirmed the key was VALID (a live call returned 200) and inferred it
+  # REACHED the code. Those are different claims, and only the second one was
+  # ever in doubt.
+  set -a
   # shellcheck disable=SC1090
   source "$ENV_FILE" 2>/dev/null || true
+  set +a
   if [ -n "${AGENTMAIL_API_KEY:-}" ]; then
     # Errors go to the LOG, never /dev/null — the 08-05 "unreachable" close
     # left no diagnosable trace (WED-16 defect). 3 tries/inbox rides out blips.
