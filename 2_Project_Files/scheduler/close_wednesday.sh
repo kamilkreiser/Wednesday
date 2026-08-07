@@ -57,8 +57,23 @@ def local_date(ts):
         return datetime.fromisoformat(str(ts).replace("Z", "+00:00")).astimezone().date().isoformat()
     except Exception:
         return ""
-for inbox in ("wednesday-agent@agentmail.to", "coagent@agentmail.to"):
-    for attempt in range(3):
+# Backoff design, 2026-08-07. The 23:00 close failed two nights running with
+# HTTP 403 on BOTH inboxes, three attempts each ~5s apart. Diagnosed the same
+# morning: the key is valid (a live call returns 200 minutes later) and is
+# byte-identical to the one the session uses, so this is not a credential fault
+# and not the launchd-env theory. A 403 that clears on its own is rate limiting
+# or a transient auth-service refusal — and flat 5s retries inside a 15-second
+# window are exactly the wrong shape for that. Now: exponential backoff with
+# jitter across ~2 minutes, and the two inboxes staggered rather than hammered
+# back to back. 403 is reported as its own case so a future failure is not
+# re-diagnosed from scratch.
+import random
+ATTEMPTS = 4
+BACKOFF = (7, 21, 55)          # seconds, before attempts 2, 3, 4
+for idx, inbox in enumerate(("wednesday-agent@agentmail.to", "coagent@agentmail.to")):
+    if idx:
+        time.sleep(3)          # stagger: don't fire both inboxes in the same instant
+    for attempt in range(ATTEMPTS):
         try:
             req = urllib.request.Request(
                 f"https://api.agentmail.to/v0/inboxes/{inbox}/messages?limit=50",
@@ -66,14 +81,27 @@ for inbox in ("wednesday-agent@agentmail.to", "coagent@agentmail.to"):
             with urllib.request.urlopen(req, timeout=10) as r:
                 msgs = json.load(r).get("messages", [])
             n = sum(1 for m in msgs if local_date(m.get("timestamp", "")) == today)
-            out.append(f"{inbox.split('@')[0]}@: {n} today")
+            note = f" (recovered on attempt {attempt+1})" if attempt else ""
+            out.append(f"{inbox.split('@')[0]}@: {n} today{note}")
             break
         except Exception as e:
-            print(f"inbox check {inbox} attempt {attempt+1}/3: {type(e).__name__}: {e}", file=sys.stderr)
-            if attempt == 2:
-                out.append(f"{inbox.split('@')[0]}@: unreachable")
+            code = getattr(e, "code", None)
+            kind = "403 auth refused" if code == 403 else f"{type(e).__name__}: {e}"
+            print(f"inbox check {inbox} attempt {attempt+1}/{ATTEMPTS}: {kind}", file=sys.stderr)
+            if attempt == ATTEMPTS - 1:
+                # Do NOT assert which cause. Tested 2026-08-07: a deliberately
+                # invalid key returns 403 on every attempt too, so 403 alone
+                # cannot separate rate limiting from a bad or revoked key. The
+                # discriminator is whether a later call succeeds — which is what
+                # happened on 08-07 (200 minutes after the 23:00 failure), and
+                # is why THAT night was transient. Say what is known, and name
+                # the check rather than guessing the cause.
+                why = ("403 auth refused after ~2min backoff — rate limit or bad key; "
+                       "run a live API call to tell them apart") if code == 403 else "unreachable"
+                out.append(f"{inbox.split('@')[0]}@: {why}")
             else:
-                time.sleep(5)
+                # jitter so a retry never lands in lockstep with another job's
+                time.sleep(BACKOFF[attempt] + random.uniform(0, 4))
 print(" · ".join(out))
 PYEOF
 )"
