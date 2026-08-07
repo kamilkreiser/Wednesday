@@ -141,7 +141,51 @@ buy-price tooling is never sent to the browser for an unauthenticated visitor.
 Today advanced mode is a `localStorage` boolean anyone can flip; a client-side
 password would be the same protection with extra steps.
 
-**7. NO DATABASE, NO STORAGE.** Kam corrected my assumption: *"I did not mean
+**7-REVISED (Kam, same session, supersedes 7 below — read this one).**
+*"capture what you can and log it. But dont let users resume sessions. there is a
+risk this will create duplication but the bigger issue is them feeling like they
+have to disclose everything. Datasec staff will know what was generated and will
+be able to use this to support the partners."*
+
+**The rule, restated so it cannot be misread:** we **do** keep a server-side
+record of what was generated. What we do **not** build is any user-facing
+resume, history, account, saved-draft or recall feature. The partner's
+experience is one-shot and disposable; Datasec's record is durable.
+- **This reverses "no dB and storage" below.** There IS a store. The earlier
+  wording stands only as the *user-facing* rule.
+- **Duplication is accepted, explicitly.** Partners will re-generate rather than
+  resume. That is the intended trade.
+- **The reason is a feeling, and that is legitimate:** partners disengage when a
+  tool looks like it is harvesting their pipeline. The design goal is that the
+  tool never *asks* them to disclose — no client record, no account profile, no
+  "your quotes" screen.
+
+**Honesty guard (my call, and I want it on the record).** Making it *feel*
+ephemeral while retaining it must not become telling them it *is* ephemeral. One
+plain line at the point of generation — *"Datasec records quotes generated
+through this tool to support partners"* — costs nothing, and a partner who later
+discovers an unmentioned record loses trust in a way no feature recovers. Same
+principle as the BLUF rule: the human stays in the loop only if the loop is
+honest with them.
+
+**Data minimisation, which matters more here than usual.** Quotes carry
+**end-customer names** — the walkthrough example was a named defence-force
+contact. Supported currencies include EUR, GBP and DKK, so European partners are
+in scope for GDPR, and Datasec sells a security product. My proposal:
+- **Log:** generating email, timestamp, quote number, device count, apps, term,
+  currency, totals, PS configuration. That is everything staff need to support a
+  partner.
+- **Do not log:** the end-customer name and the free-text comments, unless Kam
+  wants them. Customer name is already optional in the tool ("Client X").
+- **Set a retention period** rather than keeping forever by default.
+- Store choice is mine unless overruled: an append-only store with a simple query
+  surface for staff. Postgres if we want real queries; Azure Table Storage if
+  cheap-and-simple wins. Not a full relational schema — there are no relations.
+
+---
+
+**7-ORIGINAL (superseded by 7-REVISED above — kept for the reasoning).**
+Kam corrected my assumption: *"I did not mean
 persistence but rather no dB and storage. A pushback has been that sales people
 don't want to share anything when they are partners. Phase 2 and vision will
 store info, quotes and stages. This tool is a one-time use more than anything
