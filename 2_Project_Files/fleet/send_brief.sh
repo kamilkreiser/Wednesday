@@ -86,10 +86,22 @@ fi
 set -a; . "$ENV_FILE" 2>/dev/null; set +a
 [ -n "${AGENTMAIL_API_KEY:-}" ] || { echo "AGENTMAIL_API_KEY unset" >&2; exit 2; }
 
+# Kam is CC'd on every brief. This is NOT cosmetic: my briefs routinely tell an
+# agent "Kam is CC'd — one line from him closes it", and that sentence names the
+# ONLY path by which an approval-class action becomes Kam-traceable under v1.2.
+# Until 2026-08-07 this script sent no cc at all, so that path never existed and
+# every such sentence I wrote was false. Found by the Datasec/NexusAI agent, who
+# checked the cc field through the API and held a built, verified deploy rather
+# than accept a relay whose named closing mechanism was broken. Same family as
+# validate-brief-pointers: I pointed an agent at a verification path without
+# opening it myself.
+KAM_CC="${KAM_EMAIL:-kreiser.org@me.com}"
+
 FULL_SUBJECT="[Wednesday -> $TO] $SUBJECT"
-CODE="$(BODY="$BODY" SUBJ="$FULL_SUBJECT" BUSADDR="$BUS" INBOXADDR="$INBOX" python3 - <<'PYEOF'
+CODE="$(BODY="$BODY" SUBJ="$FULL_SUBJECT" BUSADDR="$BUS" INBOXADDR="$INBOX" KAMCC="$KAM_CC" python3 - <<'PYEOF'
 import json, os, urllib.request
-payload = {"to": [os.environ["BUSADDR"]], "subject": os.environ["SUBJ"], "text": os.environ["BODY"]}
+payload = {"to": [os.environ["BUSADDR"]], "cc": [os.environ["KAMCC"]],
+           "subject": os.environ["SUBJ"], "text": os.environ["BODY"]}
 req = urllib.request.Request(
     f"https://api.agentmail.to/v0/inboxes/{os.environ['INBOXADDR']}/messages/send",
     data=json.dumps(payload).encode(),
