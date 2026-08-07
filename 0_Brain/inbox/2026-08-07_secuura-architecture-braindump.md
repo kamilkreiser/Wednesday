@@ -137,3 +137,35 @@ across BOTH platforms' concerns · produce a proposed action plan covering
 Platform K modifications and the APIs Stuart uses · prepare material for
 Stuart's agent so Platform S can incorporate its side (**Stuart does not have
 these notes**; delivery to him goes through Kam under v1.3).
+
+---
+
+# KAM'S CLARIFICATION — 2026-08-07, supersedes my reading above
+
+Verbatim: *"There will be multiple UUIDs. The document UUID (generated for every
+single document) will be stored in the document metadata. The user UUID and the
+company UUID will be generated for each and stored in platform S and most likely
+platform K."*
+
+**So my earlier reading was WRONG and is corrected here:** the document UUID IS
+stamped into the file's metadata — this is Stuart's option 4, chosen
+deliberately. User and org UUIDs live platform-side (S, most likely K too),
+never in the file.
+
+**The consequence that must now be a design decision, not an accident:** stamping
+changes the bytes, so the hash of the stamped file differs from the hash of what
+the user originally submitted. The clean resolution is ordering: **stamp FIRST,
+then hash and register the STAMPED artefact, and return the stamped file to the
+user as the canonical copy.** Then the file the user holds matches the registered
+hash, and independent verification works. The problem only bites if K hashes the
+pre-stamp bytes or the user keeps only their unstamped original. Watermarking
+already sets this precedent if it produces the canonical copy today.
+
+Sub-questions this raises (routed to the agent as part of the commission):
+- confirm where in the current pipeline the hash is computed relative to any
+  byte-modifying step (this was already question 1 of the five);
+- formats with no metadata container (plain text, CSV) cannot carry the doc
+  UUID — fallback needed: registration-metadata-only for those, or restrict
+  supported formats;
+- the stamped UUID remains a lookup hint, never proof — it is strippable and
+  forgeable; identity evidence stays the hash + registry.
