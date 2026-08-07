@@ -103,3 +103,45 @@ because it is a client board and read-only to me.
 - **RD-76 (NexusAI):** the demo sits behind Entra SSO, so no session can visually
   verify a deploy. Needs Kam's eyes once, and will recur every deploy.
 - **Vision Stage 1** is running well and needs nothing.
+
+---
+
+# ADDED AFTER v1.3 LANDED — two items, both surfaced by the agents
+
+## 5. CONFIRM OR CORRECT — does v1.3 stop the routine Peter/Stuart notifications?
+
+Secuura caught a collision the moment they read the grant. It names Peter and
+Stuart as external humans requiring Kam's signature, **but Platform K's standing
+rule 7 requires notifying them on every environment push** — a routine action
+they performed 40 minutes before the grant landed.
+
+**My ruling, pending Kam's confirmation: rule 7 notifications continue.** Their
+authority originates with Kam, who approved rule 7 before v1.3 existed, so
+sending them is executing a decision he already made — not authority originating
+with me, which is the grant's actual test. The alternative reading is worse on
+its own terms: a partner who reads every ticket would silently stop hearing
+about pushes, and a protocol written to protect the relationship would be the
+thing damaging it.
+
+**Still requiring his signature, and I have told them so:** a NEW topic with
+Peter or Stuart · anything committing us (dates, scope, prices, undertakings) ·
+a change to rule 7 itself · any message whose substance is mine rather than a
+relay.
+
+**Kam: confirm or narrow.** If he narrows it, rule 7 pauses the same day.
+
+## 6. NEEDS KAM'S HANDS — v1.3 is not in the file every session reads first
+
+NexusAI flagged it: the grant is recorded in each project's own `CLAUDE.md` and
+in the vault, **but the workspace-level `/Volumes/DevMASTER/CLAUDE.md` is outside
+every agent's write scope — and mine.** That is the first file every project
+session reads.
+
+**So a cold session in any project will not know v1.3 exists** until someone with
+write access to that file adds it. Until then, adoption depends on each agent
+having retained the mail, which a fresh session will not have.
+
+**Recommend:** Kam adds a short pointer to the workspace CLAUDE.md — the grant's
+date, subject, Message-ID, and that it is verifiable on the bus by DKIM. I have
+drafted nothing into that file because it is outside my scope and I am not going
+to make an exception for a document that expands my own authority.
