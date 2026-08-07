@@ -37,9 +37,22 @@ for id in "${panes[@]}"; do
   name="$("$TMUX_BIN" display-message -p -t "$id" '#{@cockpit_name}' 2>/dev/null)"
   # NOTE: the prompt char is followed by a NON-BREAKING space (U+00A0, \xc2\xa0),
   # not an ordinary one — matching on '❯ ' silently finds nothing.
-  raw="$("$TMUX_BIN" capture-pane -t "$id" -p -e 2>/dev/null | LC_ALL=C grep -a '❯' | LC_ALL=C tail -1)"
-  text="$(printf '%s' "$raw" | LC_ALL=C sed 's/\x1b\[[0-9;]*m//g' \
-          | LC_ALL=C sed 's/^.*❯//' | LC_ALL=C sed 's/^\xc2\xa0*//' | LC_ALL=C sed 's/^ *//')"
+  # Take the last ❯ line that is NOT Claude Code's own UI chrome. When messages
+  # are queued the client renders "❯ Press up to edit queued messages" BELOW the
+  # real prompt line — and it is dim, so the naive last-line read reported chrome
+  # as a SUGGESTION and, worse, could MASK a genuine typed-unsent line above it.
+  # A safety tool that hides the thing it exists to find is worse than none.
+  # (Found 2026-08-07 while nudging a pane mid-task.)
+  raw=""; text=""
+  while IFS= read -r line; do
+    [ -n "$line" ] || continue
+    cand="$(printf '%s' "$line" | LC_ALL=C sed 's/\x1b\[[0-9;]*m//g' \
+            | LC_ALL=C sed 's/^.*❯//' | LC_ALL=C sed 's/^\xc2\xa0*//' | LC_ALL=C sed 's/^ *//')"
+    case "$cand" in
+      "Press up to edit queued messages"*|"Try "*|"for shortcuts"*) continue ;;
+    esac
+    raw="$line"; text="$cand"
+  done < <("$TMUX_BIN" capture-pane -t "$id" -p -e 2>/dev/null | LC_ALL=C grep -a '❯')
   if [ -z "$text" ]; then
     echo "  ${name:-$id}: prompt empty"
     continue
