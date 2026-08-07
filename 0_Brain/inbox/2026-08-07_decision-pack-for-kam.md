@@ -185,3 +185,61 @@ Stuart has noticed it; it should not pass as a footnote.
 
 **Nothing has gone to Stuart or Peter.** Under v1.3 a new topic with them needs
 Kam's signature.
+
+---
+
+# THE ARCHITECTURE DECISION SET — added after the commission delivered (2026-08-07 evening)
+
+The Secuura agent's response is in and verified. Headline: **K already has the
+identity model in its schema — UUID primary key, UNIQUE external_id, org/user
+columns, GitHub-shaped org tables. The model is built and unused (0 org members,
+0 documents with an org set). This is a wiring-and-contract job, not a schema
+job.** Three findings Kam should read in their words (in
+`1_Project_Definition/architecture/2026-08-07_K-S-architecture-response.md`):
+K never sees document bytes (the hash is S's assertion, not K's observation);
+no smart contract has ever executed (all 234 anchors are metadata, the compiled
+validators have never run); the hash is not even stored canonically (two
+spellings, two shapes, tie-break arbitrary in 8 of 9 real duplicate groups).
+
+## 8. APPROVE THE PLAN — P1 → P5 → P2 → P3 → P4
+
+P1 accept the three UUIDs (optional) + populate org column + neutralise the
+dormant multi-tenancy upsert, 3–5 days · P5 hash canonicalisation, 2–3 days ·
+P2 org membership + upload-time org selection, 1–1.5 wks · P3 UUID as primary
+identity, verify-by-hash returns a list with a count (breaking, versioned),
+1 wk · P4 rules as a versioned hashed anchored document, 2–3 wks. P6 (on-chain
+thread identity) and P7 (enforcement contracts) explicitly gated on the
+self-sovereign trigger, not a date. **Recommend: approve.**
+
+## 9–12. The four remaining questions, each with a recommendation
+
+**9. Duplicate uploads = two registrations?** Recommend **yes** — it follows
+from Kam's own "generated for every single document", and the idempotent
+registration endpoint (re-POST of a known UUID returns the existing row) makes
+accidental duplicates structurally impossible while keeping deliberate ones.
+This also closes decision-pack item 7.
+
+**10. Rules precedence (user vs org).** Recommend **fixed precedence, org wins,
+for the first release** — the agent notes variable precedence is materially more
+expensive, and no customer has asked for it yet. Revisit when one does.
+
+**11. Governance of governance.** Recommend **offering "no one, ever" as a
+per-contract option** — the agent's point: cheapest to implement and the
+strongest claim the product could make. Alongside it, a named-role variation
+path for contracts that need one.
+
+**12. The bridge state.** Recommend **adopting the agent's reading**: from P1,
+K is authoritative for identity, hash and anchor; S stays authoritative for
+workflow state and presentation indefinitely; rules move to K at P4.
+
+## The question the smart-contract stage turns on (no action now — P4+ framing)
+
+Their words, worth reading before any P6/P7 decision: *"do we need the chain to
+PROVE the rules, or to ENFORCE them? For authenticity and dispute resolution,
+proving is usually what customers actually ask for. Enforcement earns its cost
+when a party we do not control could act against the rules — which, while both
+platforms are ours, is not yet true. Self-sovereign documents outside the
+platform is exactly that trigger."*
+
+## Awaiting from the agent (in flight): the finalised S-pack v1.0 + a cover note
+for Kam to send Stuart under his own name + the one-page plan sheet.
