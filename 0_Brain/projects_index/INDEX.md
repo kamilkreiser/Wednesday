@@ -6,11 +6,11 @@ file is refreshed by Wednesday reading each project's `5_Project_History/history
 (newest at top) and vault notes — read-only.
 
 Last full sweep: **never** (first sweep = WED-7). Partial freshness via the
-end-of-session feed: see `entries/` cards. **Refreshed 2026-08-07 06:0x** from
-the three 05:30 shift-change wrap emails (Secuura/Blockchain, Datasec/NexusAI,
-Datasec/Lead_Bot — all read in full, not from subject lines) plus Blockchain's
-own `history.md` session-10 entry. CypherKey (08-02) and Vision Sales Portal
-(08-04) have had no session since and are unchanged.
+end-of-session feed: see `entries/` cards. **Refreshed 2026-08-08 06:0x** from
+the 05:30 shift-change mails (Vision full wrap; Secuura + NexusAI "already
+wrapped" closes with re-verified clean state — all bodies read in full) plus
+the overnight handover. CypherKey (08-02) and Lead_Bot (08-06) unchanged since
+their last sessions.
 
 ---
 
@@ -67,16 +67,29 @@ own `history.md` session-10 entry. CypherKey (08-02) and Vision Sales Portal
   mock-mode by design since KS-535). See
   [[../learnings/2026-08-06_local-proof-is-not-target-evidence]].
 
-- **Status:** active · scored 1.0 three times 08-06 (ship + protocol adherence +
-  the KS-480 evening wrap). Session CLOSED clean at the 05:30 shift change.
-- **Open / next — all three openers are blocked on KAM, not on work:**
-  1. **Three KS-480 rulings** — (a) revoke-on-rotate + cutover semantics
-     (**gates everything**), (b) go/no-go on the standalone key-listing fix
-     (~0.5 day), (c) approve the 7-way split + give the rehearsal a live home.
-  2. **KS-564** live-prove Option A end-to-end, ship all three legs as one
-     piece (needs the auth rebuild).
-  3. **KS-570** triage decision.
-  · Stuart's KS-539 verdict · 2 flaky tier-3 tests.
+- **Status:** active · scored 1.0 again 08-07 (architecture commission — best
+  analysis the fleet has produced). Session 11 CLOSED clean; at the 08-08 shift
+  change it correctly declined to re-run the ritual (state re-verified:
+  `develop` @ `5a7aa3ebb`, 0 uncommitted, 0 ahead/behind; vault in sync).
+- **Open / next (per their 08-08 close — sits with Kam or Stuart, not work):**
+  1. **Kam:** approve the architecture plan sheet (P1→P5→P2→P3→P4), answer
+     questions (b)–(e), rule the P3 standalone-functionality tension. **No
+     tickets for the new architecture until he does.** Stuart cover note +
+     S-pack v1.0 READY to send after his nod.
+  2. **Stuart:** KS-577 cutover shape (blocks KS-576) · S-side confirm on
+     KS-564 before it leaves In Review.
+  3. **KS-587** — 84 demo anchors flagged `simulated=false, confirmed` while
+     carrying `mock_tx_` hashes. **KS-586/KS-570** — one test decides High vs
+     Urgent (does any verify path consult `/api/status`?). **KS-585** before
+     the js-yaml baseline acceptance expires **2026-09-05**.
+  4. Housekeeping: delete demo org `ks564-demo-verify-20260807` once Stuart
+     confirms · open branch no PR `docs/ks480-rotation-and-key-listing-findings`.
+  - **⚠ Two systemic finds worth fleet broadcast:** the **baked-migrations
+    deploy trap** (runner reports `failed=0` while never seeing the file) and
+    **branch protection on `develop` is advisory for their identity** (ruleset
+    warned, then accepted a direct push).
+  - **KS-564 SHIPPED 08-07** (Kam's authored 03:19Z approval). Finding B
+    retracted — key listing works; ruling 2a moot.
 - **Prior (08-05 session 8):** KS-539 signed off (G-1 split, #648, develop
   c9be578c3) · KS-559 closed (#646 merged 955aa0f11; root cause = GitHub
   secondary rate limit, not the suites I had blamed; durable fix KS-567) ·
@@ -85,14 +98,27 @@ own `history.md` session-10 entry. CypherKey (08-02) and Vision Sales Portal
   hold today proved why that matters); prompt-fidelity fold into WED-20.
 
 ### Datasec / NexusAI
-- **Status:** active · **Last session:** 2026-08-06, CLOSED clean at the 05:30
-  shift change (wrap read 2026-08-07 06:0x). Nothing in flight, nothing blocked
-  on their agent.
-- **Needs Kam, two small things:** (1) sign in to the demo, confirm RD-61 looks
-  right, close it — expect a **fictional 10-printer DEMO- fleet**, not the old
-  3-device ABTDEMO lab (deliberate; RD-69 tracks the knock-on to the RD-15
-  marketing video); (2) one ruling to ship **RD-67 + RD-68** — single commit,
-  they go together or not at all.
+- **Status:** active · **Last session:** 2026-08-07 (RD-67+68 DEPLOYED, rev
+  --0000076 Healthy, --0000075 retained as rollback; DKIM authorship
+  verification originated here, now fleet standard). CLOSED clean; at the
+  08-08 shift change it correctly declined to re-run the ritual (re-verified:
+  repo clean @ `c5c385f` in sync, vault in sync, demo healthy on --0000076).
+- **First item next session (their call, and I agree): RD-77 (High)** — the
+  gitleaks gate only scans push deltas, so nothing committed before 2026-04-25
+  has ever been examined, and it stays green while **two Azure client secrets
+  sit in TRACKED files on main**. Triage existing findings before widening the
+  scan, or it goes permanently red.
+- **RD-55** — confirm whether the Entra ID app secret is live, rotate if so,
+  then the history scrub. Irreversible-class → **Kam's signed mail**.
+- **RD-73** — deploy.yml still deploys to the decommissioned 4.x VM on every
+  push. Reversible dev/CI config → inside Wednesday's v1.3 scope.
+- **Needs Kam:** RD-61 demo sign-off (expect the fictional 10-printer DEMO-
+  fleet — deliberate; RD-69 tracks the RD-15 video knock-on) · RD-76 (Entra SSO
+  blocks all visual demo verification) · RD-74 · purge-or-keep on the dangling
+  141 MB ACR manifest.
+- **Caveat their agent flagged:** the project CLAUDE.md carrying the v1.3
+  section sits OUTSIDE the git repo (not version-controlled); the vault
+  decision file is the deliberate redundancy.
 - **⚠ RD-71 — their highest-value board item:** the Dockerfile COPYs a directory
   whose contents are gitignored with nothing tracked keeping it, so **a clean
   clone simply fails to build**. CI hides it behind a `|| mkdir -p` fallback and
@@ -136,9 +162,25 @@ own `history.md` session-10 entry. CypherKey (08-02) and Vision Sales Portal
 - **Wednesday can help by:** same pattern — a Kam-decisions sitting.
 
 ### Datasec / Vision Sales Portal — GO-LIVE PREP INCOMING (WED-77)
-- **Status:** active · **Last session:** 2026-08-04 — 3 dependabot branches
-  merged (`3dd24fa`), supply-chain checked, 144 tests green locally, then
-  Kam-approved zip deploy: **main == origin == prod at `ef5a9c0`**.
+- **QUOTING TOOL (sub-project, own repo `datasecau/vision_hpas-quickquote`):
+  Stage 1+2 COMPLETE at v2.12 `f67bef0` (08-08 overnight, scored 1.0).** Whole
+  fix list F1–F23 shipped (F18 Stage-3 gated by design); 45 tests + 72-scenario
+  UI regression green; ground truth 374→5 days→$10,500 intact; AUD exactly
+  1.55× USD across all 36 pairs. **F15/F16 — the wrong-SKU ABT quote defects —
+  are closed with ~10 days to the 18 Aug deadline.**
+  - **Open:** merge `stage1/pricing-engine` (8 commits ahead of main —
+    Wednesday's to authorise under v1.3) · CI (cheapest item, v1.3 scope) ·
+    **WIL-54 product call** (per-app chips show USD rate-card figures in every
+    currency) · pre-existing page-1 print overflow · then hosted Stage 3 (OTP,
+    Postgres, emailed PDF, server-side HPAM gate, F18).
+  - **For Kam, in the agent's own words: the HPAM gate does not protect the
+    margin data** — one offline HTML file ships margin logic, buy prices and
+    the check itself in page source. "Start simple" is what shipped; partners
+    not seeing buy prices only becomes true at Stage 3.
+  - `main` remains Will's untouched v2.06 (`7428f39`), byte-verified provenance.
+- **Status:** active · **Portal last session:** 2026-08-04 — 3 dependabot
+  branches merged (`3dd24fa`), supply-chain checked, 144 tests green locally,
+  then Kam-approved zip deploy: **main == origin == prod at `ef5a9c0`**.
 - **Kam signal 2026-08-06:** multiple Vision meetings this week and next →
   changes + live preparation coming shortly. Heads-up brief already on the bus
   (state-of-play, go-live blockers, anything needing Kam's hands).

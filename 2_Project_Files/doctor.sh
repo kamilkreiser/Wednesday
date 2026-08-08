@@ -110,6 +110,27 @@ else
   ok "all on-drive scripts are executable"
 fi
 
+# --- Fleet send queue not draining (added 2026-08-08) ---
+# AgentMail enforces a daily send cap. Mail that could not go out is parked in
+# fleet/state/send_queue and drained by send_queue.sh. The failure mode worth
+# catching is the SILENT one: an item that sits there because nothing ever
+# retried it looks exactly like an empty queue from the outside. Anything older
+# than 6 hours means the trigger did not fire, or the provenance gate refused it
+# and it needs a human. (learnings/2026-08-07_a-promise-is-not-a-mechanism)
+QDIR="$PROJECT_DIR/2_Project_Files/fleet/state/send_queue"
+if [ -d "$QDIR" ]; then
+  STALE="$(find "$QDIR" -maxdepth 1 -name '*.item' -mmin +360 2>/dev/null)"
+  PENDING_N="$(find "$QDIR" -maxdepth 1 -name '*.item' 2>/dev/null | wc -l | tr -d ' ')"
+  if [ -n "$STALE" ]; then
+    warn "fleet mail queued >6h and still unsent ($PENDING_N pending)" \
+         "run 2_Project_Files/fleet/send_queue.sh drain — and read the log; a provenance REFUSAL never self-resolves"
+  elif [ "$PENDING_N" -gt 0 ]; then
+    ok "fleet send queue: $PENDING_N pending (recent — drain armed)"
+  else
+    ok "fleet send queue empty"
+  fi
+fi
+
 echo
 if [ "$HARD_FAIL" = "1" ]; then
   echo "PREFLIGHT: HARD FAILURES above — fix before relying on this machine."
