@@ -2,7 +2,7 @@
 date: 2026-08-07
 type: decision-pack
 for: Kam
-status: awaiting-answers
+status: answered 2026-08-10 (13 rulings in session; item 4 retracted 08-07 by Secuura as page-size artefact)
 ---
 
 # Decision pack — held for Kam's check-in, 2026-08-07 afternoon

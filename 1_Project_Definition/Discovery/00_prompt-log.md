@@ -595,3 +595,11 @@ calendar's own type size. Time-ordered within each day. Two flagged judgement
 calls: the per-row date chip became redundant so it now shows whose item it is,
 and the tile had always been leading with yesterday — visible only once days
 were labelled — so it now starts at today.
+
+---
+
+## 2026-08-10 (morning, in-session — the thirteen rulings)
+
+> 1) yes.  approve.  2) yes 3) yes, org wins 4)governance is defined in the smart contract - documents have these case by case or by selecting flow.  once set it can only be amended based on the rules set in the smart contract 5)yes.  agree 6)agree a 7)agreed 8) confirm 9)sign off 10) needs review after 2 meetings.  please flag in 3 hours 11) purge 12)needs review after 2 meetings.  please flag in 3 hours 13) I will do after meetings
+
+**Done with it:** rulings 1–8 relayed to Secuura (architecture unlocked — note ruling 4 is Kam's own design, NOT my recommendation: governance defined per-contract at creation, case-by-case or via flow selection, amendable only per the contract's own rules); 9+11 relayed to NexusAI (RD-61 signed off, ACR manifest purge); 10/12/13 + Stuart send + hands-on trio queued behind a 3h timer (background task + WED-86 backstop).
