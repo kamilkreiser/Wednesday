@@ -49,6 +49,15 @@ if [ -x "$PROJECT_DIR/2_Project_Files/doctor.sh" ]; then
   fi
 fi
 
+# ── Arm the fleet wake watcher (2026-08-10, ledger w=5) ──
+# Hand-arming died within a day, three times. The launcher is in the path of
+# every session, so it arms; doctor.sh checks. Non-fatal on failure — the
+# doctor hard-fail is the gate when agent panes are live.
+if [ -x "$PROJECT_DIR/2_Project_Files/fleet/cockpit/arm_wake_watch.sh" ]; then
+  "$PROJECT_DIR/2_Project_Files/fleet/cockpit/arm_wake_watch.sh" || \
+    echo "WARNING: wake_watch failed to arm — report this in the session (no-skip)."
+fi
+
 # ── Per-project az / gh isolation (same pattern as all other launchers) ──
 mkdir -p "$PROJECT_DIR/4_Credentials/.azure" "$PROJECT_DIR/4_Credentials/.gh-config"
 export AZURE_CONFIG_DIR="$PROJECT_DIR/4_Credentials/.azure"

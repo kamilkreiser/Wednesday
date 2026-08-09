@@ -6,10 +6,13 @@ file is refreshed by Wednesday reading each project's `5_Project_History/history
 (newest at top) and vault notes — read-only.
 
 Last full sweep: **never** (first sweep = WED-7). Partial freshness via the
-end-of-session feed: see `entries/` cards. **Refreshed 2026-08-09 06:0x** from
-the 05:30 shift-change mails (NexusAI boot-only wrap; Vision "already wrapped"
-close — bodies read in full) plus the overnight handover. Secuura (08-08),
-CypherKey (08-02) and Lead_Bot (08-06) unchanged since their last sessions.
+end-of-session feed: see `entries/` cards. **Refreshed 2026-08-10 07:1x** —
+05:30 shift change: 3 panes tapped, 3 accounted for (Vision "idle since last
+close", NexusAI "already wrapped, ritual NOT re-run", overnight handover
+05:33). History files re-checked on DevMASTER: Blockchain newest 08-07
+(session 11), Vision 08-08, CypherKey 08-04, Lead_Bot 08-06, NexusAI wrap
+86416fe — all unchanged since their last recorded sessions; no card edits
+needed. Nothing has run since Saturday night's wraps.
 
 ---
 
