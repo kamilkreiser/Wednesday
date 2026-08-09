@@ -131,6 +131,25 @@ if [ -d "$QDIR" ]; then
   fi
 fi
 
+# --- Fleet wake watcher armed (added 2026-08-09) ---
+# w=4 ledger row 2026-08-09: wake_watch.sh existed, would have caught two
+# unanswered agent QUESTIONs, and was NOT running — nothing armed it, nothing
+# checked it was armed. A safeguard that runs beside the work needs both
+# (learnings/2026-08-09_an-enforcement-you-must-arm-is-not-one). Rule: any
+# live agent pane in the fleet tmux session ⇒ the watcher must be running.
+TMUX_CHK="$(command -v tmux || echo /opt/homebrew/bin/tmux)"
+AGENT_PANES="$("$TMUX_CHK" list-panes -t fleet:0 -F '#{@cockpit_name}' 2>/dev/null | grep -vE '^(wednesday|fleet-monitor)$' | grep -c . || true)"
+if [ "${AGENT_PANES:-0}" -gt 0 ] 2>/dev/null; then
+  if pgrep -f 'wake_watch\.sh' >/dev/null 2>&1; then
+    ok "wake_watch armed ($AGENT_PANES agent pane(s) live)"
+  else
+    fail "wake_watch NOT running — $AGENT_PANES agent pane(s) live unwatched" \
+         "arm: fleet/cockpit/wake_watch.sh '<latest-inbound-mail-ts>' as a background task"
+  fi
+else
+  ok "no agent panes live — wake_watch not required"
+fi
+
 echo
 if [ "$HARD_FAIL" = "1" ]; then
   echo "PREFLIGHT: HARD FAILURES above — fix before relying on this machine."

@@ -6,11 +6,10 @@ file is refreshed by Wednesday reading each project's `5_Project_History/history
 (newest at top) and vault notes — read-only.
 
 Last full sweep: **never** (first sweep = WED-7). Partial freshness via the
-end-of-session feed: see `entries/` cards. **Refreshed 2026-08-08 06:0x** from
-the 05:30 shift-change mails (Vision full wrap; Secuura + NexusAI "already
-wrapped" closes with re-verified clean state — all bodies read in full) plus
-the overnight handover. CypherKey (08-02) and Lead_Bot (08-06) unchanged since
-their last sessions.
+end-of-session feed: see `entries/` cards. **Refreshed 2026-08-09 06:0x** from
+the 05:30 shift-change mails (NexusAI boot-only wrap; Vision "already wrapped"
+close — bodies read in full) plus the overnight handover. Secuura (08-08),
+CypherKey (08-02) and Lead_Bot (08-06) unchanged since their last sessions.
 
 ---
 
@@ -98,11 +97,20 @@ their last sessions.
   hold today proved why that matters); prompt-fidelity fold into WED-20.
 
 ### Datasec / NexusAI
-- **Status:** active · **Last session:** 2026-08-07 (RD-67+68 DEPLOYED, rev
-  --0000076 Healthy, --0000075 retained as rollback; DKIM authorship
-  verification originated here, now fleet standard). CLOSED clean; at the
-  08-08 shift change it correctly declined to re-run the ritual (re-verified:
-  repo clean @ `c5c385f` in sync, vault in sync, demo healthy on --0000076).
+- **Status:** active · **Last session:** 2026-08-08/09 — **boot-only, ZERO
+  execution.** Briefed RD-77→RD-73 (02:11Z), plan confirmed and ANSWERED
+  (02:15Z), then sat idle ~17h at 9% context and never picked the answer up;
+  wrapped honestly at the 05:30 tap ("execution handed to next session").
+  Their own named cause: no 3-min inbox re-check loop after asking. The
+  confirmed plan is intact — brief + QUESTION + ANSWER thread is the full
+  spec; next session re-verifies the v1.3 DKIM grant and executes. Receipt:
+  HISTORY.md pushed @ `86416fe`, repo clean, both tracked Azure secrets
+  untouched/unexamined (triage never began).
+- **Prior (2026-08-07):** RD-67+68 DEPLOYED, rev --0000076 Healthy,
+  --0000075 retained as rollback; DKIM authorship verification originated
+  here, now fleet standard. CLOSED clean; at the 08-08 shift change it
+  correctly declined to re-run the ritual (re-verified: repo clean @
+  `c5c385f` in sync, vault in sync, demo healthy on --0000076).
 - **First item next session (their call, and I agree): RD-77 (High)** — the
   gitleaks gate only scans push deltas, so nothing committed before 2026-04-25
   has ever been examined, and it stays green while **two Azure client secrets
@@ -162,6 +170,17 @@ their last sessions.
 - **Wednesday can help by:** same pattern — a Kam-decisions sitting.
 
 ### Datasec / Vision Sales Portal — GO-LIVE PREP INCOMING (WED-77)
+- **2026-08-08/09 (NEWEST): MERGED + CI WIRED, runs UNOBSERVED.** Stage 1+2
+  merged to `main` (`3afee8d`, `--no-ff`, proven from clean clones before and
+  after) and CI added (`c628b6e`); QuickQuote `main == origin @ 8422617`.
+  **DoD 3–4 deliberately UNCLAIMED — nobody on this machine can see the
+  workflow runs** (no datasecau GitHub access; routes in BACKLOG.md).
+  `ci-proof/forced-red @ 2704141` stays on the remote until someone watches
+  its run go red. Close-out = one `gh auth login` by Kam in a Vision launcher
+  shell, then: main green? forced-red red? delete branch, tick BACKLOG.
+  **Run NOT yet scored** — score after the CI runs are observed. Their two
+  QUESTION mails (plan confirmation, CI observation) went unanswered — the
+  gap was Wednesday's; acknowledge in the next brief.
 - **QUOTING TOOL (sub-project, own repo `datasecau/vision_hpas-quickquote`):
   Stage 1+2 COMPLETE at v2.12 `f67bef0` (08-08 overnight, scored 1.0).** Whole
   fix list F1–F23 shipped (F18 Stage-3 gated by design); 45 tests + 72-scenario
