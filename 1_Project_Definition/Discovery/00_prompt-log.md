@@ -631,3 +631,10 @@ were labelled — so it now starts at today.
 > can you authorise vision to go ahead or do you need me to?  2)lets build stage 3 of vision and make it operational.  3)lets put the Wed-84 plan into action but double sheck what element is shared and what element is ours.  Our elements do not need to respect chiese walls
 
 **Done with it:** (1) confirmed Vision already authorized under v1.3 (relay + go both sent earlier); (2) scope expanded to FULL Stage 3 by mail (server-side HPAM gate, persistence, emailed PDFs; same holds); (3) shared-vs-ours audit delivered (sharp edge: the wall inside a project folder is the git remote) + two builds launched — unified attention queue v1 (local, all-clients, Wednesday-only) and the protocol v1.4 + org DRAFT (for review, open questions preserved for Kam).
+
+## 2026-08-10 (day-close)
+
+> Vision has finished the changes as well.  Please review the conversation.  I appreciate that multiple items could only be flagged by you and escalated for approval but we should work towards you ensuring alignment to spec, testing and refinement.  A great session today Wednesday, thank you, especially work on Wed-84.
+> when you are ready, please go through the process to close everything and start fresh
+
+**Done with it:** conversation reviewed (12 Kam turns vs delivered record, 1:1 match); guidance captured as [[learning: own-the-spec-not-just-the-escalation]] + ledger praise row; full close ritual executed; fresh session directed to run weekly consolidation first.
