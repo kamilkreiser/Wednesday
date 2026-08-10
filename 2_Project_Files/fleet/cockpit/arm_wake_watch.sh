@@ -65,13 +65,21 @@ fi
 pkill -f 'wake_watch\.sh' 2>/dev/null && sleep 1
 
 RUNNER='
+  # Baseline discipline (fixed 2026-08-10 after a QUESTION mail fell into the
+  # fire->re-arm gap, ledger w=2 on the 08-04 blanket-markseen root cause):
+  # the baseline NEVER advances to "now" — it advances ONLY to the timestamp
+  # of a mail/chat event that actually fired a wake (so I was provably tapped
+  # about everything up to it). A refire on an already-read mail costs one
+  # tap; a swallowed mail costs a 15-minute fallback. Always err toward refire.
+  BASELINE=$(date -u +%Y-%m-%dT%H:%M)   # first arm only: session boot has read everything
   while true; do
-    BASELINE=$(date -u +%Y-%m-%dT%H:%M)
     AGENTS=$('"$TMUX_BIN"' list-panes -t fleet:0 -F "#{@cockpit_name}" 2>/dev/null | grep -vE "^(wednesday|fleet-monitor)$" | grep -c . || true)
     if [ "${AGENTS:-0}" -gt 0 ] 2>/dev/null; then N=3; else N=9999; fi
     echo "$(date "+%Y-%m-%d %H:%M:%S") armed: baseline=$BASELINE stable_n=$N agents=$AGENTS"
     OUT=$('"$HERE"'/wake_watch.sh "$BASELINE" "$N" 60 2>&1)
     echo "$(date "+%Y-%m-%d %H:%M:%S") $OUT"
+    NEWTS=$(printf "%s" "$OUT" | sed -nE "s/.*(new mail at|message from Kam at) ([0-9T:-]+).*/\2/p" | tail -1)
+    [ -n "$NEWTS" ] && BASELINE="$NEWTS"
     case "$OUT" in
       *"new mail"*|*"idle at prompt"*)
         MSG="[wake_watch] $OUT — check the fleet inbox / pane now."
