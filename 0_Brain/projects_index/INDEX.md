@@ -69,15 +69,21 @@ needed. Nothing has run since Saturday night's wraps.
   mock-mode by design since KS-535). See
   [[../learnings/2026-08-06_local-proof-is-not-target-evidence]].
 
-- **Status:** active · scored 1.0 again 08-07 (architecture commission — best
-  analysis the fleet has produced). Session 11 CLOSED clean; at the 08-08 shift
-  change it correctly declined to re-run the ritual (state re-verified:
-  `develop` @ `5a7aa3ebb`, 0 uncommitted, 0 ahead/behind; vault in sync).
-- **Open / next (per their 08-08 close — sits with Kam or Stuart, not work):**
-  1. **Kam:** approve the architecture plan sheet (P1→P5→P2→P3→P4), answer
-     questions (b)–(e), rule the P3 standalone-functionality tension. **No
-     tickets for the new architecture until he does.** Stuart cover note +
-     S-pack v1.0 READY to send after his nod.
+- **Status:** active · **session 12 (2026-08-10 morning) scored 1.0** — Kam's
+  thirteen rulings unlocked the architecture; P1 tickets created
+  (KS-596/597/598), **KS-587 + KS-586 SHIPPED to develop+demo** (#659
+  `521c78d41`, #660 `f217bc1ee`; verified independently: develop==origin,
+  clean), 08-04 test-red proven stale (fresh e2e 210/0; real defect = the
+  Schemathesis leg renders no-results as FAIL → KS-492/Peter), KS-585
+  deferred in-window (to 09-05). P4 resized 2–3wk → 3–4wk by Kam's ruling
+  (d) — accepted, informational. Rule-7 notify done. Wrapped clean; pane
+  closed.
+- **Open / next:**
+  0. **Kam (new, on the 11:45 flag):** KS-587 residue (83 honest-but-confirmed
+     incident docs: re-anchor vs mark failed) · **Secuura Linear cap now a
+     REAL hard block** (~259 active, USAGE_LIMIT_EXCEEDED; upgrade = money,
+     or cull) · joint authorization-model ruling (KS-539/547/586, one
+     decision). Stuart cover note + S-pack v1.0 still await his send.
   2. **Stuart:** KS-577 cutover shape (blocks KS-576) · S-side confirm on
      KS-564 before it leaves In Review.
   3. **KS-587** — 84 demo anchors flagged `simulated=false, confirmed` while
