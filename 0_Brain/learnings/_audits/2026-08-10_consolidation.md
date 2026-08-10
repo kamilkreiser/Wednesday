@@ -89,6 +89,14 @@ handle as a heading. Est. saving ~15–20K boot tokens without losing a
 handle. Needs your explicit go — it touches the "never delete a lesson"
 discipline (supersede-with-links would be used, per the routing rules).
 
+**KAM RULED, same night (~22:30): merge DEFERRED.** *"For now its fine but
+will require review. Lets not rush to cutting this down until we can find a
+system that gives us the best result and reduces the load. So a regular
+review is wise."* → No cutting/merging until a load-reducing system is found
+that provably loses nothing; boot-cost number + trend become a standing line
+in every consolidation audit. Ruling folded into
+[[../2026-08-03_context-loading-split]] and commented on WED-36.
+
 ## Deferred, with owners (nothing left implicit)
 
 - **Boundary-reads → fleet doctrine (Vision's fix):** detail lives in

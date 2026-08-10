@@ -46,6 +46,15 @@ discipline goes into **scoping the job** rather than rationing the input.
   or a task where irrelevant context is actively misleading.
 - Re-check my own boot cost at consolidation; the tripwire keeps this a
   decision, not a drift.
+- **Kam's review ruling, 2026-08-10 (at 46 lessons / ~65K boot tokens, on my
+  merge recommendation):** *"For now its fine but will require review. Lets
+  not rush to cutting this down until we can find a system that gives us the
+  best result and reduces the load. So a regular review is wise."* Operative
+  rules: (1) NO lesson merging/cutting yet — not until a system is found that
+  keeps the best result AND reduces load, i.e. reduction proposals must come
+  with evidence they lose nothing, not just token savings; (2) boot-cost
+  review is a STANDING item at every weekly consolidation (number + trend in
+  every audit note), not a one-off tripwire.
 
 **Related:** [[2026-08-03_mental-model-not-source-of-truth]],
 [[2026-08-03_context-discipline-close-before-full]],
