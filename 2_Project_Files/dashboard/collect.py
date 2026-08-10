@@ -251,6 +251,22 @@ def linear_board():
     write("linear_wed.json", {"active": [i for i in issues if i["state"]["name"] == "In Progress"],
                               "todo": [i for i in issues if i["state"]["name"] == "Todo"]})
 
+# ── Linear WED personal actions (issues labelled "personal") ─────────────
+def linear_personal():
+    q = {"query": """query{ issues(filter:{team:{key:{eq:"WED"}},
+          labels:{name:{eq:"personal"}},
+          state:{type:{nin:["completed","canceled"]}}}, first:60, orderBy: updatedAt){
+          nodes{ identifier title priority dueDate updatedAt state{name type} } } }"""}
+    req = urllib.request.Request("https://api.linear.app/graphql",
+        data=json.dumps(q).encode(),
+        headers={"Authorization": ENV["LINEAR_API_KEY"], "Content-Type": "application/json"})
+    r = json.load(urllib.request.urlopen(req, timeout=30))
+    nodes = r["data"]["issues"]["nodes"]
+    # priority first (urgent=1 … low=4, no-priority last), then most recently updated
+    items = sorted(sorted(nodes, key=lambda i: i.get("updatedAt") or "", reverse=True),
+                   key=lambda i: i.get("priority") or 5)
+    write("linear_personal.json", {"items": items})
+
 # ── brain files (paths only read; content summarized) ────────────────────
 def brain_state():
     b = ROOT / "0_Brain"
@@ -382,7 +398,7 @@ def news_feed():
 FEEDS = {"personal": personal_calendar, "secuura": secuura_calendar,
          "datasec": datasec_calendar, "linear": linear_board, "brain": brain_state,
          "agentmail": agentmail_feed, "tickets": tickets_feed, "news": news_feed,
-         "parkinglot": parkinglot_feed}
+         "parkinglot": parkinglot_feed, "linear_personal": linear_personal}
 
 if __name__ == "__main__":
     failures = 0

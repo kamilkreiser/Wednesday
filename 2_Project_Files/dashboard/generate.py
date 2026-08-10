@@ -24,6 +24,7 @@ personal = load("personal_calendar.json")
 secuura = load("secuura_calendar.json")
 datasec = load("datasec_calendar.json")
 linear = load("linear_wed.json")
+personal_actions = load("linear_personal.json")   # WED issues labelled "personal"
 brain = load("brain_state.json")
 agentmail = load("agentmail.json")
 tickets = load("tickets.json")
@@ -50,7 +51,7 @@ if not isinstance(FLAGGED, dict): FLAGGED = {}
 _l = DATA / "layout.json"
 LAYOUT = json.loads(_l.read_text()) if _l.exists() else {}
 if not isinstance(LAYOUT, dict): LAYOUT = {}
-TILE_ORDER_DEFAULT = ["stats", "calendars", "flags", "family", "board", "chat", "tickets", "email", "news", "parkinglot"]
+TILE_ORDER_DEFAULT = ["stats", "calendars", "flags", "personal", "family", "board", "chat", "tickets", "email", "news", "parkinglot"]
 ORDER = [t for t in LAYOUT.get("order", TILE_ORDER_DEFAULT) if t in TILE_ORDER_DEFAULT]
 ORDER += [t for t in TILE_ORDER_DEFAULT if t not in ORDER]
 SCALES = LAYOUT.get("scales", {})
@@ -60,6 +61,7 @@ if "board" not in SIZES: SIZES["board"] = {"w": 2}
 if "email" not in SIZES: SIZES["email"] = {"w": 1, "h": 8}
 if "tickets" not in SIZES: SIZES["tickets"] = {"w": 1, "h": 8}
 if "parkinglot" not in SIZES: SIZES["parkinglot"] = {"w": 1, "h": 8}
+if "personal" not in SIZES: SIZES["personal"] = {"w": 1, "h": 8}
 HIDDEN_TILES = set(LAYOUT.get("hidden_tiles", []))
 HIDDEN_GROUPS = set(LAYOUT.get("hidden_groups", []))   # datasec/secuura/personal/family
 # Per-tile source filters: {tile_id: [group,...]} — hide a client in ONE tile without
@@ -574,6 +576,40 @@ def tile_board():
     return (f"<h3>In progress</h3><ul class='events plain'>{a}</ul>"
             f"<h3>Up next</h3><ul class='events plain'>{t}</ul>{addbox}")
 
+PRIO_NAMES = {0: "none", 1: "urgent", 2: "high", 3: "medium", 4: "low"}
+
+def personal_row(i):
+    due = f' <span class="flagdue">due {i["dueDate"]}</span>' if i.get("dueDate") else ""
+    p = i.get("priority") or 0
+    pr = PRIO.get(p, "")
+    badge = f'<span class="prio p{p}">{pr}</span>' if pr else ""
+    # ▲ cycles urgent→high→medium→low→urgent (no-priority starts at urgent);
+    # ✓ moves the issue to the team's completed state. Both ride the shared
+    # .acts button handler: POST /api/<data-act> {"id": <data-id>}.
+    nxt = PRIO_NAMES[{0: 1, 1: 2, 2: 3, 3: 4, 4: 1}[p if p in PRIO_NAMES else 0]]
+    btns = ('<span class="acts">'
+            f'<button data-act="personal_prio" data-id="{i["identifier"]}" '
+            f'title="priority: {PRIO_NAMES.get(p, "none")} — click to set {nxt}">&#9650;</button>'
+            f'<button data-act="personal_done" data-id="{i["identifier"]}" '
+            f'title="done — move to the completed state">&#10003;</button></span>')
+    url = f'https://linear.app/wednesday-agent/issue/{i["identifier"]}'
+    return (f'<li data-wed="{i["identifier"]}">'
+            f'<a class="time tlink" href="{url}" target="_blank" rel="noopener">{i["identifier"]}</a>{badge}'
+            f'<span class="ev">{html.escape(i["title"])}</span>{due}{btns}</li>')
+
+def tile_personal():
+    addbox = ("<div class='addbox'>"
+              "<input id='padd-title' type='text' maxlength='200' placeholder='add a personal action&#8230;'>"
+              "<button id='padd-btn'>add</button><span id='padd-msg'></span></div>")
+    if not personal_actions:
+        return ("<p class='empty'>personal feed not collected yet — run collect.py linear_personal</p>"
+                + addbox)
+    rows = "\n".join(personal_row(i) for i in personal_actions["data"]["items"]) or \
+        '<li class="empty">nothing personal on the list — add one below</li>'
+    return (f"<ul class='events plain'>{rows}</ul>{addbox}"
+            "<p class='note'>NB. WED issues labelled <i>personal</i> — &#9650; cycles priority · "
+            "&#10003; completes the ticket</p>")
+
 NEWS_LABELS = {"world": "War & geopolitics", "tech": "Tech", "quantum": "Quantum",
                "security": "Security", "biotech": "Biotech & medicine"}
 
@@ -771,6 +807,7 @@ TILES = {
     "flags":     ("Today's flags",      tile_flags),
     "family":    ("Family",             tile_family),
     "board":     ("Coding — WED board", tile_board),
+    "personal":  ("Personal Actions",   tile_personal),
     "chat":      ("Chat with Wednesday", tile_chat),
     "tickets":   ("Tickets by Project",  tile_tickets),
     "email":     ("Email flags",         tile_email),
@@ -1686,6 +1723,17 @@ if (addBtn) addBtn.addEventListener("click", async () => {{
   else {{ m.textContent = r.error || "failed"; addBtn.disabled = false; }}
 }});
 document.getElementById("add-title")?.addEventListener("keydown", e => {{ if (e.key === "Enter") addBtn.click(); }});
+// ── Personal Actions add flow (WED issue, personal label, Todo state) ──
+const paddBtn = document.getElementById("padd-btn");
+if (paddBtn) paddBtn.addEventListener("click", async () => {{
+  const t = document.getElementById("padd-title"), m = document.getElementById("padd-msg");
+  if (!t.value.trim()) {{ m.textContent = "type something first"; return; }}
+  paddBtn.disabled = true; m.textContent = "adding…";
+  const r = await api("/api/personal_add", {{title: t.value}});
+  if (r.ok) {{ m.textContent = r.created + " added"; setTimeout(() => location.reload(), 700); }}
+  else {{ m.textContent = r.error || "failed"; paddBtn.disabled = false; }}
+}});
+document.getElementById("padd-title")?.addEventListener("keydown", e => {{ if (e.key === "Enter") paddBtn.click(); }});
 const IS_CHATVIEW = document.body.classList.contains("chatview");
 const chatSend = document.getElementById("chat-send");
 if (chatSend) {{

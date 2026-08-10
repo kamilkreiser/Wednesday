@@ -7,6 +7,9 @@ workspace (never any client board). Endpoints:
   POST /api/add         → {"title": str, "priority": 1..4} → new WED issue (Todo)
   POST /api/prioritise  → {"id": "WED-xx"} → set priority Urgent (1)
   POST /api/start       → {"id": "WED-xx"} → move to In Progress
+  POST /api/personal_add  → {"title": str} → new WED issue, 'personal' label, Todo
+  POST /api/personal_prio → {"id": "WED-xx"} → cycle priority urgent→high→medium→low
+  POST /api/personal_done → {"id": "WED-xx"} → move to the completed-type state
 After any write: linear collector + generator re-run so the page reflects it.
 NOTE before any remote exposure (Phase 4/Tailscale): add auth to this API.
 """
@@ -51,8 +54,38 @@ def state_id(name):
             {"id": ENV["LINEAR_TEAM_ID"]})
     return {s["name"]: s["id"] for s in r["data"]["team"]["states"]["nodes"]}[name]
 
+def completed_state_id():
+    """The team's completed-type workflow state (type is authoritative, not the name)."""
+    r = gql('query($id:String!){ team(id:$id){ states{ nodes{ id name type } } } }',
+            {"id": ENV["LINEAR_TEAM_ID"]})
+    done = [s for s in r["data"]["team"]["states"]["nodes"] if s["type"] == "completed"]
+    if not done:
+        raise RuntimeError("team WED has no completed-type workflow state")
+    return done[0]["id"]
+
+PERSONAL_LABEL = "personal"
+_label_cache = {}
+
+def personal_label_id():
+    """Find (or create, once) the WED team's 'personal' label; cached per process."""
+    if "id" not in _label_cache:
+        r = gql('query($id:String!){ team(id:$id){ labels{ nodes{ id name } } } }',
+                {"id": ENV["LINEAR_TEAM_ID"]})
+        for l in r["data"]["team"]["labels"]["nodes"]:
+            if l["name"].lower() == PERSONAL_LABEL:
+                _label_cache["id"] = l["id"]
+        if "id" not in _label_cache:
+            r = gql('mutation($input: IssueLabelCreateInput!){ issueLabelCreate(input:$input){ issueLabel{ id } } }',
+                    {"input": {"teamId": ENV["LINEAR_TEAM_ID"], "name": PERSONAL_LABEL}})
+            _label_cache["id"] = r["data"]["issueLabelCreate"]["issueLabel"]["id"]
+    return _label_cache["id"]
+
 def refresh_site():
     subprocess.run(["python3", str(HERE / "collect.py"), "linear"], timeout=60)
+    subprocess.run(["python3", str(HERE / "generate.py")], timeout=60)
+
+def refresh_personal():
+    subprocess.run(["python3", str(HERE / "collect.py"), "linear_personal"], timeout=60)
     subprocess.run(["python3", str(HERE / "generate.py")], timeout=60)
 
 # ── parking lot (WED-71 v1): one .md per item in 0_Brain/parkinglot ──────
@@ -189,7 +222,7 @@ class Handler(SimpleHTTPRequestHandler):
                 subprocess.run(["python3", str(HERE / "generate.py")], timeout=60)
                 return self._json(200, {"ok": True, "state": state})
             if self.path == "/api/layout":
-                tiles = {"stats", "calendars", "flags", "family", "board",
+                tiles = {"stats", "calendars", "flags", "personal", "family", "board",
                          "chat", "tickets", "email", "news", "parkinglot"}
                 tint_keys = {"slate", "moss", "plum", "sand", "teal"}
                 groups = {"datasec", "secuura", "personal", "family"}
@@ -443,6 +476,37 @@ class Handler(SimpleHTTPRequestHandler):
                 fpath.write_text(json.dumps(fl, indent=1, ensure_ascii=False))
                 subprocess.run(["python3", str(HERE / "generate.py")], timeout=60)
                 return self._json(200, {"ok": True, "flagged": on, "key": key})
+            if self.path == "/api/personal_add":
+                # Personal Actions tile: new WED issue, 'personal' label, Todo state.
+                title = (data.get("title") or "").strip()[:200]
+                if not title:
+                    return self._json(400, {"error": "empty title"})
+                r = gql('mutation($input: IssueCreateInput!){ issueCreate(input:$input){ issue{ identifier } } }',
+                        {"input": {"teamId": ENV["LINEAR_TEAM_ID"], "title": title,
+                                   "stateId": state_id("Todo"),
+                                   "labelIds": [personal_label_id()],
+                                   "description": "Added from the Personal Actions tile."}})
+                ident = r["data"]["issueCreate"]["issue"]["identifier"]
+                refresh_personal()
+                return self._json(200, {"ok": True, "created": ident})
+            if self.path in ("/api/personal_prio", "/api/personal_done"):
+                ident = data.get("id", "")
+                if not ident.startswith("WED-"):
+                    return self._json(400, {"error": "WED ids only"})
+                iid = issue_id(ident)
+                if self.path == "/api/personal_prio":
+                    # cycle urgent→high→medium→low→urgent; no-priority starts at urgent
+                    cur = gql('query($id:String!){ issue(id:$id){ priority } }',
+                              {"id": iid})["data"]["issue"]["priority"] or 0
+                    nxt = {0: 1, 1: 2, 2: 3, 3: 4, 4: 1}.get(cur, 1)
+                    gql('mutation($id:String!,$p:Int!){ issueUpdate(id:$id, input:{priority:$p}){ success } }',
+                        {"id": iid, "p": nxt})
+                    refresh_personal()
+                    return self._json(200, {"ok": True, "issue": ident, "priority": nxt})
+                gql('mutation($id:String!,$s:String!){ issueUpdate(id:$id, input:{stateId:$s}){ success } }',
+                    {"id": iid, "s": completed_state_id()})
+                refresh_personal()
+                return self._json(200, {"ok": True, "issue": ident, "done": True})
             if self.path in ("/api/prioritise", "/api/start"):
                 ident = data.get("id", "")
                 if not ident.startswith("WED-"):
