@@ -619,3 +619,11 @@ were labelled — so it now starts at today.
 > go ahead with the stage 3 work
 
 **Done with it:** build gate lifted same minute — agent builds straight through; holds only for Kam-hands actions, external signups, >~AU$50/mo components, and the standing hard lines (prod RG untouched, OTP test-only, partner go-live separate).
+
+## 2026-08-10 (WED-84 session — walls scope ruling + dialogue design)
+
+> this single que works for me under one critical condition - anything external keeps everything seperate. [...] Having a master que local, or in our linear wed tickets is fine.
+> [network thought exercise — used to test the dialogue protocol; surfaced: task worksheet, advice-vs-halt verbs, change envelope]
+> local version do not need to adhere to chiese walls.  only externally visable systems.
+
+**Done with it:** Chinese-walls boundary set at EXTERNAL VISIBILITY — local/on-drive structures may mix clients (master attention queue = full local store; functional experts = one per discipline, cross-client context, ADVISORY-ONLY); all externally visible writes remain with per-client project agents + mechanical gates at the write path. Thought exercise added three components to the v1.4 draft: shared task worksheet (durable discovery-state, rotation-safe), advice(queue)-vs-halt(tap) verbs, pre-debated change envelope + independent closing acceptance test. v1.4 + org draft = first item, tomorrow's fresh session.
