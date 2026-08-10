@@ -627,3 +627,7 @@ were labelled — so it now starts at today.
 > local version do not need to adhere to chiese walls.  only externally visable systems.
 
 **Done with it:** Chinese-walls boundary set at EXTERNAL VISIBILITY — local/on-drive structures may mix clients (master attention queue = full local store; functional experts = one per discipline, cross-client context, ADVISORY-ONLY); all externally visible writes remain with per-client project agents + mechanical gates at the write path. Thought exercise added three components to the v1.4 draft: shared task worksheet (durable discovery-state, rotation-safe), advice(queue)-vs-halt(tap) verbs, pre-debated change envelope + independent closing acceptance test. v1.4 + org draft = first item, tomorrow's fresh session.
+
+> can you authorise vision to go ahead or do you need me to?  2)lets build stage 3 of vision and make it operational.  3)lets put the Wed-84 plan into action but double sheck what element is shared and what element is ours.  Our elements do not need to respect chiese walls
+
+**Done with it:** (1) confirmed Vision already authorized under v1.3 (relay + go both sent earlier); (2) scope expanded to FULL Stage 3 by mail (server-side HPAM gate, persistence, emailed PDFs; same holds); (3) shared-vs-ours audit delivered (sharp edge: the wall inside a project folder is the git remote) + two builds launched — unified attention queue v1 (local, all-clients, Wednesday-only) and the protocol v1.4 + org DRAFT (for review, open questions preserved for Kam).
