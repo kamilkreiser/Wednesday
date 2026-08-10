@@ -35,6 +35,22 @@ print(ms[0].get('timestamp','')[:16] if ms else '')" 2>/dev/null)
   if [ -n "$ts" ] && [[ "$ts" > "$BASELINE" ]]; then
     echo "WAKE: new mail at $ts (baseline $BASELINE)"; exit 0
   fi
+  # (a2) dashboard-chat tripwire — Kam's messages in chat_log.json are real
+  # input with NO other watcher (added 2026-08-10 after his 08:45 message sat
+  # unread 3h; ledger row same day). Newest role=="kam" ts, converted to UTC
+  # minute-precision to match BASELINE's format.
+  cts=$(python3 -c "
+import json,datetime,sys
+try:
+    log=json.load(open('$(cd "$(dirname "${BASH_SOURCE[0]}")/../../.." && pwd)/0_Brain/dashboard/data/chat_log.json'))
+    ks=[m for m in log if m.get('role')=='kam' and m.get('ts')]
+    if not ks: print(''); sys.exit()
+    t=datetime.datetime.fromisoformat(ks[-1]['ts']).astimezone(datetime.timezone.utc)
+    print(t.strftime('%Y-%m-%dT%H:%M'))
+except Exception: print('')" 2>/dev/null)
+  if [ -n "$cts" ] && [[ "$cts" > "$BASELINE" ]]; then
+    echo "WAKE: new dashboard-chat message from Kam at $cts UTC (baseline $BASELINE)"; exit 0
+  fi
   # (b) pane idle-at-prompt tripwire
   "$TMUX_BIN" list-panes -t fleet:0 -F '#{pane_id}|#{@cockpit_name}' 2>/dev/null | \
   while IFS='|' read -r pid name; do
