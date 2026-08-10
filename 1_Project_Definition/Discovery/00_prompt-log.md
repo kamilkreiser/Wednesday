@@ -615,3 +615,7 @@ were labelled — so it now starts at today.
 > OK.  thanks.  After the two changes are made, please get the agent to put the site live and activate the OTP login
 
 **Done with it:** relayed as a Stage-3a commission (hosting + email-OTP — nothing existed to "activate"; corrected to Kam in-session) with a plan-first gate: architecture + size + monthly cost + scoped-SP permission gaps by mail before any provisioning; prod RG boundary restated; OTP mail test-only until a separate partner-facing go-live ruling.
+
+> go ahead with the stage 3 work
+
+**Done with it:** build gate lifted same minute — agent builds straight through; holds only for Kam-hands actions, external signups, >~AU$50/mo components, and the standing hard lines (prod RG untouched, OTP test-only, partner go-live separate).
