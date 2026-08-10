@@ -82,9 +82,18 @@ except Exception: print('')" 2>/dev/null)
     # status line shows "N shell(s)") is working (e.g. watching CI), not
     # waiting on Wednesday — its QUESTION mail / next turn is the real signal.
     # (Refined 2026-08-05 after two identical fires on a CI-watching agent.)
+    # Ghost-text-aware prompt read (added 2026-08-10 consolidation: Vision
+    # idled 90 min with 5 unseen mails because its prompt held a dim machine
+    # SUGGESTION and the plain-capture test below saw a non-empty prompt).
+    # Capture with -e, strip SGR-2 (dim) spans — the pane_prompt_check.sh
+    # discriminator: dim = suggestion, nobody typed it — then strip all SGR
+    # and NBSP. A prompt that is empty-after-ghost-removal IS idle. TYPED
+    # unsent text (not dim) still deliberately reads as not-idle.
+    pline=$("$TMUX_BIN" capture-pane -t "$pid" -p -e 2>/dev/null | grep -a '❯' | tail -1 | \
+      LC_ALL=C perl -pe 's/\x1b\[2m.*?(?=\x1b|$)//g; s/\x1b\[[0-9;]*m//g; s/\xc2\xa0/ /g' 2>/dev/null)
     if printf '%s' "$tail" | grep -qE 'shell still running|· [0-9]+ shell'; then
       cnt=0
-    elif printf '%s' "$tail" | grep -qE '^❯[[:space:]]*$|Pick or adjust'; then
+    elif printf '%s\n' "$pline" | grep -qE '^❯[[:space:]]*$' || printf '%s' "$tail" | grep -qE 'Pick or adjust'; then
       if [ "$prev" = "$h" ]; then cnt=$((cnt + 1)); else cnt=1; fi
     else
       cnt=0

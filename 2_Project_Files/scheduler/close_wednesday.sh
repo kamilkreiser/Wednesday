@@ -129,8 +129,41 @@ PYEOF
   fi
 fi
 
-# ── Stamp the daily note (create from template if the day left none) ──
+# ── Unwrapped-session detection (2026-08-10 consolidation; ledger w=5/w=6:
+# "a ritual nothing triggers is not a ritual") ──
+# A session can go quiet without wrapping, and going quiet is indistinguishable
+# from working — so the one event guaranteed to fire daily checks the wrap
+# artifacts: retro filled, tree committed, daily note tracked. This is also the
+# VERIFIER half of coordinator auto-rotation (Kam's 2026-08-10 post-wrap catch):
+# the rotation step, when built, arms only on a night this writes "verified".
+# Dashboard data JSONs are collector churn (rewritten every few minutes) and are
+# excluded — an alarm that fires every night is a check that cannot pass, which
+# is as useless as one that cannot fail.
 NOTE="$BRAIN_DIR/daily/$TODAY.md"
+WRAP_ISSUES=""
+if [ ! -f "$NOTE" ]; then
+  WRAP_ISSUES="no daily note exists for today"
+elif grep -qF -- '- Went well / do differently:' "$NOTE"; then
+  WRAP_ISSUES="retro still on its template placeholder"
+fi
+GIT_DIRTY="$(cd "$PROJECT_DIR" && /usr/bin/git status --porcelain -- . ':(exclude)0_Brain/dashboard/data' 2>>"$LOG")"
+if [ -n "$GIT_DIRTY" ]; then
+  N_DIRTY="$(printf '%s\n' "$GIT_DIRTY" | grep -c .)"
+  WRAP_ISSUES="${WRAP_ISSUES:+$WRAP_ISSUES · }$N_DIRTY uncommitted/untracked file(s) outside dashboard churn"
+fi
+# Untracked is worse than uncommitted (the 08-09 note was never git-added at
+# all — invisible to every habit). Name it separately even though it also
+# appears in the dirty count.
+if [ -f "$NOTE" ] && ! (cd "$PROJECT_DIR" && /usr/bin/git ls-files --error-unmatch "0_Brain/daily/$TODAY.md" >/dev/null 2>&1); then
+  WRAP_ISSUES="${WRAP_ISSUES:+$WRAP_ISSUES · }today's daily note is NOT tracked by git"
+fi
+if [ -n "$WRAP_ISSUES" ]; then
+  log "WRAP CHECK: UNWRAPPED OR IN-FLIGHT — $WRAP_ISSUES"
+else
+  log "WRAP CHECK: verified (retro filled, tree clean outside churn, note tracked)"
+fi
+
+# ── Stamp the daily note (create from template if the day left none) ──
 if [ "$DRYRUN" = "1" ]; then
   log "DRYRUN: would stamp $NOTE with close block ($MAIL_LINE) and speak good night"
   exit 0
@@ -144,11 +177,28 @@ fi
   echo "## 23:00 close (scheduler, WED-16)"
   echo "- Day closed at $(date '+%H:%M') by the scheduled close ritual."
   echo "- $MAIL_LINE"
+  if [ -n "$WRAP_ISSUES" ]; then
+    echo "- ⚠ **WRAP CHECK FAILED at close: $WRAP_ISSUES.** Either a session"
+    echo "  went quiet without wrapping (the 08-09 failure) or work was still"
+    echo "  in flight at the bell. Next boot: reconcile FIRST — commit what the"
+    echo "  day left, fill the retro from evidence, then proceed."
+  else
+    echo "- Wrap check: verified (retro filled, tree clean outside churn, note tracked)."
+  fi
   echo "- If a session was mid-flight, next boot reconciles from this note + Linear."
 } >> "$NOTE"
 echo "$TODAY" > "$STATE_DIR/last_close"
+if [ -n "$WRAP_ISSUES" ]; then
+  echo "$WRAP_ISSUES" > "$STATE_DIR/wrap_check_$TODAY"
+else
+  echo "verified" > "$STATE_DIR/wrap_check_$TODAY"
+fi
 log "daily note stamped; $MAIL_LINE"
 
 # ── One short good night (23:00 sharp is the boundary, not past it) ──
-"$PROJECT_DIR/2_Project_Files/voice/speak.sh" "That's the day closed, Kam. Everything still open is safely on the board for the morning. Good night." || log "speak failed (voice unavailable?)"
+if [ -n "$WRAP_ISSUES" ]; then
+  "$PROJECT_DIR/2_Project_Files/voice/speak.sh" "That's the day closed, Kam — one flag: the wrap check found work not yet committed, so the morning session will reconcile it first. Good night." || log "speak failed (voice unavailable?)"
+else
+  "$PROJECT_DIR/2_Project_Files/voice/speak.sh" "That's the day closed, Kam. Everything still open is safely on the board for the morning. Good night." || log "speak failed (voice unavailable?)"
+fi
 log "close complete"
