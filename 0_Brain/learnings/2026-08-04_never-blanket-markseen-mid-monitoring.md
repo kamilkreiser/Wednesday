@@ -5,7 +5,7 @@ source: "Self-caught: Vision's plan-confirmation QUESTION (05:57Z) swallowed by 
 status: live
 ---
 
-# Never blanket mark-seen mid-monitoring — acknowledge only what you processed
+# Acknowledgments cover what you PROCESSED, never "everything as of now" — in any tool, not just mark-seen
 
 **The failure:** during live monitoring I ran `inbox_digest.sh mark-seen` as
 post-send hygiene (to stop my own outbound copies false-firing the monitor).
@@ -31,5 +31,24 @@ deleting "handled" files.
    the agent's problem.
 4. If a future need for mid-flight acking appears, extend the script to ack
    explicit message IDs (ack-what-you-processed), don't reach for mark-seen.
+
+## Generalised at the 2026-08-10 consolidation (after the w=2 recurrence)
+
+The rule recurred in a NEW costume on 2026-08-10: the `arm_wake_watch.sh`
+runner set `baseline = now` on every cycle — a blanket acknowledgment with no
+`mark-seen` call anywhere in sight — and swallowed Vision's 03:51Z QUESTION
+into the fire→re-arm gap. The 08-04 lesson never fired while I wrote it,
+because its retrieval handle was the SCRIPT, not the CLASS.
+
+**The class, stated so it matches any costume:** any time a watermark, seen
+flag, baseline timestamp, cursor, offset, or "handled" marker advances, it may
+advance ONLY to cover events that provably reached the processor — a displayed
+message, a fired wake, a written receipt. Setting it to `now`, to `latest`, or
+to "everything currently visible" races every concurrent arrival, in ANY
+at-least-once pipeline: mail seen-state, watcher baselines, queue offsets,
+notification clears, "handled" file moves. When in doubt, err toward re-fire —
+a duplicate tap costs one interruption; a swallow costs a silent fallback
+window. Enforced in the runner 2026-08-10: baseline advances only to the
+timestamp of the event that fired the wake.
 
 **Related:** [[_ledger]], [[../skills/delegation-monitoring]]
