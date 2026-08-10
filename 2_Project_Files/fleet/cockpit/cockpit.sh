@@ -19,6 +19,15 @@
 #   cockpit.sh say <name> <text>  type a line into a pane's prompt (the live
 #                                 "tap on the shoulder" — substantive
 #                                 instructions still go by mail for the record)
+#   cockpit.sh rotate <Client/Project> [--timeout-min N]
+#                                 working-rhythm §3 session rotation: tap the
+#                                 pane with the wrap instruction, wait for its
+#                                 "Session wrap" mail on the bus (default 10
+#                                 min), then kill + relaunch fresh from
+#                                 launchers.conf. Timeout = force path: kill
+#                                 anyway, LOUD notice, exit 2 — never silent.
+#                                 'rotate wednesday' is refused: the
+#                                 coordinator rotates via her own ritual.
 #   cockpit.sh down               kill the whole fleet session (asks first via -f)
 #
 # cockpit.conf format (same dir):  <pane-name>|<command to run>
@@ -71,6 +80,34 @@ add_pane() { # name, cmd
   "$TMUX_BIN" set-option -p -t "$pane_id" @cockpit_name "$name"
   apply_layout
   echo "pane '$name' added ($pane_id)"
+}
+
+rotate_wrap_mail_ts() { # <name> <start-ts-utc-seconds> — print wrap-mail ts + exit 0 when a
+  # NEW "[<name> -> Wednesday] Session wrap" mail (timestamp > start) is on the
+  # bus inbox wednesday-agent@; exit 1 otherwise. Test hook: if
+  # COCKPIT_ROTATE_MAIL_CHECK is set it is run instead, as: <cmd> <name> <start-ts>.
+  if [ -n "${COCKPIT_ROTATE_MAIL_CHECK:-}" ]; then
+    "$COCKPIT_ROTATE_MAIL_CHECK" "$1" "$2"
+    return $?
+  fi
+  # key stays inside the subshell; never echoed (workspace hard rule #3)
+  ( set -a; . "$PROJECT_DIR/4_Credentials/.env" 2>/dev/null; set +a
+    curl -s -m 15 "https://api.agentmail.to/v0/inboxes/wednesday-agent@agentmail.to/messages?limit=20" \
+      -H "Authorization: Bearer ${AGENTMAIL_API_KEY:-}" ) | \
+  ROTATE_NAME="$1" ROTATE_START="$2" python3 -c '
+import json, os, sys
+name = os.environ["ROTATE_NAME"]; start = os.environ["ROTATE_START"]
+want = "[%s -> Wednesday] Session wrap" % name
+try:
+    ms = json.load(sys.stdin).get("messages", [])
+except Exception:
+    sys.exit(1)
+hits = [str(m.get("timestamp",""))[:19] for m in ms
+        if str(m.get("subject","")).startswith(want)]
+hits = [t for t in hits if t and t > start]
+if hits:
+    print(max(hits)); sys.exit(0)
+sys.exit(1)'
 }
 
 case "${1:-}" in
@@ -137,10 +174,77 @@ case "${1:-}" in
     "$TMUX_BIN" send-keys -t "$PANE" Enter
     echo "sent to '$2'"
     ;;
+  rotate)
+    # Session rotation (working-rhythm §3, built 2026-08-10): tap → wrap mail
+    # → kill → relaunch. The unit of continuity is the DISK; a restart is as
+    # safe as the wrap ritual is enforced. Force path only on deadline, NEVER
+    # silent. Test hooks (disposable-pane tests only; unset in production):
+    #   COCKPIT_LAUNCHERS_CONF   alternate registry file
+    #   COCKPIT_ROTATE_MAIL_CHECK  replacement for the bus poll (see function)
+    #   COCKPIT_ROTATE_POLL_S    poll interval seconds (default 30)
+    shift
+    [ $# -ge 1 ] || die "usage: cockpit.sh rotate <Client/Project> [--timeout-min N]"
+    NAME="$1"; shift
+    TIMEOUT_MIN=10
+    while [ $# -gt 0 ]; do
+      case "$1" in
+        --timeout-min)
+          [ $# -ge 2 ] || die "--timeout-min needs a value (minutes)"
+          TIMEOUT_MIN="$2"; shift 2 ;;
+        *) die "unknown rotate flag: $1" ;;
+      esac
+    done
+    [ "$TIMEOUT_MIN" -ge 1 ] 2>/dev/null || die "--timeout-min must be a positive integer (minutes)"
+    if [ "$NAME" = "wednesday" ]; then
+      die "refusing to rotate 'wednesday' — the coordinator rotates via her own checkpoint ritual, tapped from outside (working-rhythm §3); rotate is for agent panes only"
+    fi
+    "$TMUX_BIN" has-session -t "$SESSION" 2>/dev/null || die "no fleet session — nothing to rotate"
+    REG="${COCKPIT_LAUNCHERS_CONF:-$SCRIPT_DIR/launchers.conf}"
+    [ -f "$REG" ] || die "no launchers registry at $REG"
+    LPATH=$(awk -F'|' -v n="$NAME" '$1==n{print $2}' "$REG" | head -1)
+    [ -n "$LPATH" ] || die "'$NAME' not in $REG — rotate needs a registered relaunch path (no relaunch path = no rotation, use say+manual instead)"
+    [ -f "$LPATH" ] || die "registered launcher missing on disk: $LPATH (registry stale — fix it before rotating)"
+    PANE=$("$TMUX_BIN" list-panes -t "$SESSION:0" -F '#{@cockpit_name}|#{pane_id}' | awk -F'|' -v n="$NAME" '$1==n{print $2}' | head -1)
+    [ -n "$PANE" ] || die "no pane named '$NAME'"
+    mkdir -p "$SCRIPT_DIR/logs"
+    RLOG="$SCRIPT_DIR/logs/rotate.log"
+    START_TS=$(date -u +%Y-%m-%dT%H:%M:%S)
+    POLL="${COCKPIT_ROTATE_POLL_S:-30}"
+    # (a) the tap — same text/mechanism as the daily-proven 05:30 shift change
+    WRAP_MSG="[Wednesday, session rotation] Please wrap up and finish this session now: complete or safely checkpoint the current step, then run your end-of-session ritual (commit+push, history entry, wrap email to wednesday-agent@agentmail.to). Do not start new work — a fresh session relaunches when your wrap mail lands."
+    "$TMUX_BIN" send-keys -t "$PANE" -l "$WRAP_MSG"
+    "$TMUX_BIN" send-keys -t "$PANE" Enter
+    echo "$(date '+%F %T') rotate '$NAME' ($PANE): tapped, waiting ${TIMEOUT_MIN}m for wrap mail (poll ${POLL}s)" >> "$RLOG"
+    echo "rotate: tapped '$NAME' ($PANE); waiting up to ${TIMEOUT_MIN}m for its Session wrap mail (poll ${POLL}s)"
+    # (b) poll the bus for a wrap mail NEWER than the rotate start
+    WRAPPED=""
+    DEADLINE=$((SECONDS + TIMEOUT_MIN * 60))
+    while [ "$SECONDS" -lt "$DEADLINE" ]; do
+      sleep "$POLL"
+      if TS=$(rotate_wrap_mail_ts "$NAME" "$START_TS"); then
+        WRAPPED="$TS"
+        break
+      fi
+    done
+    # (c)/(d) kill either way — then relaunch fresh via the registered launcher
+    "$TMUX_BIN" kill-pane -t "$PANE"
+    add_pane "$NAME" "bash \"$LPATH\""
+    if [ -n "$WRAPPED" ]; then
+      echo "$(date '+%F %T') rotate '$NAME': wrap mail at $WRAPPED UTC — clean rotation" >> "$RLOG"
+      echo "rotate: '$NAME' wrapped (mail at $WRAPPED UTC) — old pane killed, fresh session launched"
+    else
+      {
+        echo "!!!! ROTATE FORCED WITHOUT WRAP !!!! pane '$NAME' produced NO Session wrap mail within ${TIMEOUT_MIN}m of the tap (start $START_TS UTC)."
+        echo "!!!! An unwrapped session was force-rotated: its work may be uncommitted and its record incomplete."
+        echo "!!!! Check NOW: that project's repo status + 5_Project_History/history.md, the bus for a late wrap mail, today's daily note. Logged to $RLOG for the close bell."
+      } | tee -a "$RLOG" >&2
+      exit 2
+    fi
+    ;;
   down)
     "$TMUX_BIN" kill-session -t "$SESSION" 2>/dev/null && echo "fleet session killed" || echo "no fleet session"
     ;;
   *)
-    die "usage: cockpit.sh up|launch|resolve|add|layout|status|say|down"
+    die "usage: cockpit.sh up|launch|resolve|add|layout|status|say|rotate|down"
     ;;
 esac

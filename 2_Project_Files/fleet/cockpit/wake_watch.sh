@@ -7,7 +7,16 @@
 # EXITS (task-notification wakes Wednesday) when either:
 #   (a) MAIL: a new message lands in wednesday-agent@ (timestamp > baseline), or
 #   (b) PANE: an agent pane (not wednesday/fleet-monitor) sits idle at a
-#       prompt with unchanged content for STABLE_N consecutive samples.
+#       prompt with unchanged content for STABLE_N consecutive samples, or
+#   (c) CTX: any Claude pane's statusline ctx% crosses a working-rhythm §2
+#       threshold — 50% admission gate + checkpoint, 65% mechanical tails
+#       only (added 2026-08-10, WED-84 rotation build; taps are questions
+#       about task state, not wrap commands — sessions rotate at task
+#       boundaries). INCLUDES wednesday's own pane — she is read
+#       from outside like everyone else. Each threshold fires ONCE per pane
+#       per session-generation: markers persist in cockpit/state/ (NOT this
+#       run's temp dir) keyed by pane_id+pane_pid, so runner re-arms never
+#       re-fire but a fresh session in the same pane starts clean.
 # Pane state lives in files under a per-run temp dir (bash-3.2-safe).
 # The background runner caps runs at 10 min, so this re-arms on that heartbeat.
 #
@@ -20,6 +29,14 @@ ENVF="$(cd "$(dirname "${BASH_SOURCE[0]}")/../../.." && pwd)/4_Credentials/.env"
 TMUX_BIN="$(command -v tmux || echo /opt/homebrew/bin/tmux)"
 STATE_DIR="$(mktemp -d /tmp/wake_watch.XXXXXX)"
 trap 'rm -rf "$STATE_DIR"' EXIT
+# Test hook (rotation build 2026-08-10): point pane checks at another tmux
+# session so fire-path tests never touch the live fleet. Production = fleet.
+FLEET="${WAKE_WATCH_TMUX_SESSION:-fleet}:0"
+# Persistent ctx-threshold markers (survive re-arm; per-generation, see (c))
+CTX_STATE="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)/state"
+mkdir -p "$CTX_STATE"
+# markers older than 3 days belong to dead pane generations — prune quietly
+find "$CTX_STATE" -name 'ctx_fired_*' -mtime +3 -delete 2>/dev/null
 end=$((SECONDS + 14400))
 while [ $SECONDS -lt $end ]; do
   # (a) mail tripwire
@@ -52,7 +69,7 @@ except Exception: print('')" 2>/dev/null)
     echo "WAKE: new dashboard-chat message from Kam at $cts UTC (baseline $BASELINE)"; exit 0
   fi
   # (b) pane idle-at-prompt tripwire
-  "$TMUX_BIN" list-panes -t fleet:0 -F '#{pane_id}|#{@cockpit_name}' 2>/dev/null | \
+  "$TMUX_BIN" list-panes -t "$FLEET" -F '#{pane_id}|#{@cockpit_name}' 2>/dev/null | \
   while IFS='|' read -r pid name; do
     case "$name" in wednesday|fleet-monitor|'') continue;; esac
     key=$(printf '%s' "$pid" | tr -c 'A-Za-z0-9' '_')
@@ -78,6 +95,32 @@ except Exception: print('')" 2>/dev/null)
     fi
   done
   if [ -f "$STATE_DIR/fired" ]; then cat "$STATE_DIR/fired"; exit 0; fi
+  # (c) context-saturation tripwire (working-rhythm §2 — Kam's numbers,
+  # adopted 2026-08-10): parse each pane's Claude statusline "ctx:NN%" from a
+  # read-only capture; the LAST match in the visible pane is the statusline
+  # (it renders below the transcript). "ctx:-" (no API call yet) simply
+  # doesn't match — quiet. fleet-monitor has no statusline — skipped.
+  # One wake per cycle: first pane over an unfired threshold wins; any other
+  # crossing fires on the next 60s sample.
+  "$TMUX_BIN" list-panes -t "$FLEET" -F '#{pane_id}|#{@cockpit_name}|#{pane_pid}' 2>/dev/null | \
+  while IFS='|' read -r pid name ppid; do
+    case "$name" in fleet-monitor|'') continue;; esac
+    pct=$("$TMUX_BIN" capture-pane -t "$pid" -p 2>/dev/null | grep -oE 'ctx:[0-9]+%' | tail -1 | tr -dc '0-9')
+    [ -n "$pct" ] || continue
+    gen=$(printf '%s_%s' "$pid" "$ppid" | tr -c 'A-Za-z0-9' '_')
+    if [ "$pct" -ge 65 ] 2>/dev/null; then
+      if [ ! -f "$CTX_STATE/ctx_fired_${gen}_65" ] && [ ! -f "$STATE_DIR/ctx_wake" ]; then
+        touch "$CTX_STATE/ctx_fired_${gen}_65" "$CTX_STATE/ctx_fired_${gen}_50"
+        echo "WAKE: pane '$name' ctx at ${pct}% — mechanical tails only, then handover (rhythm §2)" > "$STATE_DIR/ctx_wake"
+      fi
+    elif [ "$pct" -ge 50 ] 2>/dev/null; then
+      if [ ! -f "$CTX_STATE/ctx_fired_${gen}_50" ] && [ ! -f "$STATE_DIR/ctx_wake" ]; then
+        touch "$CTX_STATE/ctx_fired_${gen}_50"
+        echo "WAKE: pane '$name' ctx at ${pct}% — checkpoint: finish the current task, START nothing new that won't fit the budget (rhythm §2)" > "$STATE_DIR/ctx_wake"
+      fi
+    fi
+  done
+  if [ -f "$STATE_DIR/ctx_wake" ]; then cat "$STATE_DIR/ctx_wake"; exit 0; fi
   sleep "$INTERVAL"
 done
 echo "WAKE: 4h max runtime reached with no tripwire — re-arm from the session"

@@ -80,9 +80,14 @@ RUNNER='
     echo "$(date "+%Y-%m-%d %H:%M:%S") $OUT"
     NEWTS=$(printf "%s" "$OUT" | sed -nE "s/.*(new mail at|message from Kam at) ([0-9T:-]+).*/\2/p" | tail -1)
     [ -n "$NEWTS" ] && BASELINE="$NEWTS"
+    # ctx wakes (working-rhythm §2, 2026-08-10) pass through EXACTLY like pane
+    # fires: tap, no baseline movement (the sed above only matches mail/chat).
     case "$OUT" in
-      *"new mail"*|*"idle at prompt"*)
-        MSG="[wake_watch] $OUT — check the fleet inbox / pane now."
+      *"new mail"*|*"idle at prompt"*) MSG="[wake_watch] $OUT — check the fleet inbox / pane now." ;;
+      *"ctx at"*) MSG="[wake_watch] $OUT — apply rhythm §2 now; rotate at the task boundary via cockpit.sh rotate <Client/Project> (wednesday pane: own checkpoint ritual)." ;;
+      *) MSG="" ;;
+    esac
+    if [ -n "$MSG" ]; then
         if '"$TMUX_BIN"' list-panes -t fleet:0 -F "#{@cockpit_name}|#{pane_id}" 2>/dev/null | grep -q "^wednesday|"; then
           WPANE=$('"$TMUX_BIN"' list-panes -t fleet:0 -F "#{@cockpit_name}|#{pane_id}" 2>/dev/null | grep "^wednesday|" | head -1 | cut -d"|" -f2)
           '"$TMUX_BIN"' send-keys -t "$WPANE" -l "$MSG" && '"$TMUX_BIN"' send-keys -t "$WPANE" Enter \
@@ -92,8 +97,7 @@ RUNNER='
           echo "$(date "+%Y-%m-%d %H:%M:%S") no wednesday pane — WAKE logged only"
         fi
         sleep 120   # give the session time to read before re-arming
-        ;;
-    esac
+    fi
   done
 '
 nohup bash -c "$RUNNER" >> "$LOG" 2>&1 &
