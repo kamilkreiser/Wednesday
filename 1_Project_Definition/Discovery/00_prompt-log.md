@@ -603,3 +603,15 @@ were labelled — so it now starts at today.
 > 1) yes.  approve.  2) yes 3) yes, org wins 4)governance is defined in the smart contract - documents have these case by case or by selecting flow.  once set it can only be amended based on the rules set in the smart contract 5)yes.  agree 6)agree a 7)agreed 8) confirm 9)sign off 10) needs review after 2 meetings.  please flag in 3 hours 11) purge 12)needs review after 2 meetings.  please flag in 3 hours 13) I will do after meetings
 
 **Done with it:** rulings 1–8 relayed to Secuura (architecture unlocked — note ruling 4 is Kam's own design, NOT my recommendation: governance defined per-contract at creation, case-by-case or via flow selection, amendable only per the contract's own rules); 9+11 relayed to NexusAI (RD-61 signed off, ACR manifest purge); 10/12/13 + Stuart send + hands-on trio queued behind a 3h timer (background task + WED-86 backstop).
+
+## 2026-08-10 (WED-84 session — comms architecture ruling)
+
+> the antropic-native approach seems most sensible.  most of this work will be done by claude.  keeping email is also a great idea as 1)it gives a great approval process, and 2)it provides a channel that could be used with other agnets.
+
+**Done with it:** ruling recorded on WED-27 — fast path goes Anthropic-native (session-to-session messaging; rationale: the work is Claude-run, native mechanisms evolve without us); email RETAINED permanently for (1) the approval/record layer (DKIM, cc-Kam, audit) and (2) the interop channel for non-Claude/external agents. Spike next: same brief over mail vs native, measured on round-trip latency + lost messages, R0 client-isolation as veto test.
+
+## 2026-08-10 (~14:5x — Stage 3a commission)
+
+> OK.  thanks.  After the two changes are made, please get the agent to put the site live and activate the OTP login
+
+**Done with it:** relayed as a Stage-3a commission (hosting + email-OTP — nothing existed to "activate"; corrected to Kam in-session) with a plan-first gate: architecture + size + monthly cost + scoped-SP permission gaps by mail before any provisioning; prod RG boundary restated; OTP mail test-only until a separate partner-facing go-live ruling.
