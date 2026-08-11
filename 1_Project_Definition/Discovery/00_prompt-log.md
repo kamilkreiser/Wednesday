@@ -666,3 +666,13 @@ were labelled — so it now starts at today.
 > change the rulling
 
 *(Done with it: SUPERSEDES the earlier same-day "keep allowlist, fix delivery" ruling. New ruling of record: OTP goes to the entered address for ANY entrant — allowlist removed — shipped now; QA F2 (margin-word guessability + no lockout) follows same day, not "soon". Kam's risk acceptance recorded: he judges URL-secrecy sufficient and public access acceptable. Relayed to Vision as a superseding brief; asked them to confirm-or-refute the factual premise "no secret on the page" against F2's evidence and report back.)*
+
+## 2026-08-11 ~midday — KS-584 ruling (verbatim)
+
+> Secuura - go, ship the interim fix, let stuart know through the ticket the approach (interim first, full change ASAP) and have QA verify it.  once verified, start on the full fix
+
+*(Done with it: relayed as a four-part brief with the sequencing consequence named — pulls P3 ahead of the approved P1→P5→P2→P3→P4 and lands mid-KS-596; agent asked to park KS-596 cleanly and flag the cost. QA invocation held pending their deployed+acceptance-criteria mail.)*
+
+## 2026-08-11 — praise on the coordinator-review model (verbatim)
+
+> this is a great finding and proof the new approach (your review) is working really well
