@@ -91,7 +91,17 @@ except Exception: print('')" 2>/dev/null)
     # unsent text (not dim) still deliberately reads as not-idle.
     pline=$("$TMUX_BIN" capture-pane -t "$pid" -p -e 2>/dev/null | grep -a '❯' | tail -1 | \
       LC_ALL=C perl -pe 's/\x1b\[2m.*?(?=\x1b|$)//g; s/\x1b\[[0-9;]*m//g; s/\xc2\xa0/ /g' 2>/dev/null)
-    if printf '%s' "$tail" | grep -qE 'shell still running|· [0-9]+ shell'; then
+    # Busy-detection covers EVERY kind of Claude background work, not just
+    # shells (widened 2026-08-11: Vision was polling an ACS throttle window via
+    # a MONITOR — statusline "· 1 monitor" — and the shell-only regex read a
+    # working agent as idle. Same failure shape as the ghost-text blind spot:
+    # the enforcement was scoped narrower than the rule it encodes). Plural
+    # tolerant; add new indicators here the day they appear.
+    # DELIBERATELY EXCLUDES "agent": the cockpit footer always renders a pane
+    # count ("← 3 agents"). Matching it would make EVERY pane read busy forever
+    # and silently disable this tripwire permanently — a watcher that can never
+    # fire. Caught by my own test asserting the wrong expectation, 2026-08-11.
+    if printf '%s' "$tail" | grep -qE 'shell still running|· [0-9]+ (shell|monitor|task)s?([^A-Za-z]|$)'; then
       cnt=0
     elif printf '%s\n' "$pline" | grep -qE '^❯[[:space:]]*$' || printf '%s' "$tail" | grep -qE 'Pick or adjust'; then
       if [ "$prev" = "$h" ]; then cnt=$((cnt + 1)); else cnt=1; fi
