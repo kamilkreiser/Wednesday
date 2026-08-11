@@ -122,10 +122,14 @@ Kam described **Wednesday** to Stuart and Phil — coordinator over specialized
 per-company agents (QA, security), iTerm sub-terminals, shift from reading all
 output to managing rules/gates. They're **adopting the model**: a matrix of
 subject-matter agents (engineers per company, a privacy-act expert, a **system
-architect** role Stuart suggested) coordinated by Wednesday. Personas: **Tron**
-(master-control metaphor), **Allan** (reliable senior SWE agent), **Flynn**
-(disruptive/creative agent). Commitment to formalize via a ticket. Stuart's
-health note (BP from manually juggling 20–30 Claude tasks) is the human driver.
+architect** role Stuart suggested) coordinated by Wednesday. Personas
+(CORRECTED per Kam 2026-08-11): **Tron = Wednesday** — Stuart referred to
+Wednesday using *Tron* (the film) references, i.e. Tron is the coordinator/
+master-control figure, which is Wednesday's role. **Allan** = reliable senior
+SWE agent · **Flynn** = disruptive/creative agent. (My earlier reading listed
+Tron as a separate master-control persona — wrong; Tron IS Wednesday.)
+Commitment to formalize via a ticket. Stuart's health note (BP from manually
+juggling 20–30 Claude tasks) is the human driver.
 → This validates today's coordinator-not-carrier + QA/security-agent commission.
 Worth a WED-side note; may inform WED-41/43/44 (QA + security + a new architect agent).
 
