@@ -676,3 +676,9 @@ were labelled — so it now starts at today.
 ## 2026-08-11 — praise on the coordinator-review model (verbatim)
 
 > this is a great finding and proof the new approach (your review) is working really well
+
+## 2026-08-11 ~midday — advanced mode is a nudge, not a gate (verbatim)
+
+> the secret does not matter.  we actually do not need to unlock advance mode.  its more of a trigger for them to use the simple mode until we tell them what it is.  For the secret, keep secret as "HPAM"
+
+*(Done with it: F2's "guessable secret" half reclassified BY DESIGN — owner ruled, not a defect; no rotation; v0.3.1 lockout + plumbing retained as hygiene; F2 closed. Consequence recorded and stated to Kam once, not re-litigated: with open sign-in live, margin logic and buy prices are reachable by any visitor entering a four-letter word. Second knowing risk acceptance in this area today. Vision instructed to keep the honest position visible in BACKLOG rather than describing the app as having a margin gate, and to revisit identity-based margin visibility when the service moves to a properly deployed home.)*
