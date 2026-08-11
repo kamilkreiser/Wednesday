@@ -656,3 +656,13 @@ were labelled — so it now starts at today.
 > the QA agent should never make changes.  only findings, reports and reccomendaitons
 
 *(Done with it: absolute override of the Q2 opt-in from an hour earlier — findings-only, no write-scope any brief can grant. Applied to charter §1/§8 + invocation contract, brief template §6, QA project CLAUDE.md + ORIGIN.md; design doc Q2 marked superseded. Caught the freshly-scaffolded QA project which had copied the stale charter — resynced byte-identical. Pilot target ruled same message: QuickQuote Stage 3.)*
+
+## 2026-08-11 ~late morning — QuickQuote OTP access model, ruling CHANGED (verbatim)
+
+> for change 1, change so that OTPs go to the person (their email entered on the initial screen)
+
+> [on my chain-risk question] option 2.   there is no secret on the page.  URL is secret but not a problem is anyone accesses it
+
+> change the rulling
+
+*(Done with it: SUPERSEDES the earlier same-day "keep allowlist, fix delivery" ruling. New ruling of record: OTP goes to the entered address for ANY entrant — allowlist removed — shipped now; QA F2 (margin-word guessability + no lockout) follows same day, not "soon". Kam's risk acceptance recorded: he judges URL-secrecy sufficient and public access acceptable. Relayed to Vision as a superseding brief; asked them to confirm-or-refute the factual premise "no secret on the page" against F2's evidence and report back.)*
