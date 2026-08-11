@@ -164,7 +164,7 @@ cap vs new tickets · Q4 minor ambiguities (Japanese-name ticket; scope of share
   session (Kam agreed the recommendation).
 - **Q4 → the "Japanese name" is KINSUGI** (Kintsugi — the art of mending broken
   things with gold, which highlights the break and makes the thing better for it).
-  **Kinsugi is the name of the NEW Platform K DEVELOPMENT server.** Kam asked for a
+  **Kintsugi is the name of the NEW Platform K DEVELOPMENT server.** Kam asked for a
   clarification ticket (drafted below). NB this is a SERVER hostname, additive —
   not a platform rename, so no conflict with Q1.
 
@@ -172,43 +172,41 @@ cap vs new tickets · Q4 minor ambiguities (Japanese-name ticket; scope of share
 (Wednesday cannot create it: read-only tracker grant + Linear cap hard-blocks
 creation until the cull. Content is ready so the agent creates it verbatim.)
 
-**Title:** [Infra] New Platform K dev server "Kinsugi" — restore dev/demo split;
+**Title:** [Infra] New Platform K dev server "Kintsugi" — restore dev/demo split;
 promote to demo+staging only on Kam+Peter+Stuart sign-off
 
 **## BLUF**
-A new Platform K server named **Kinsugi** becomes the DEVELOPMENT server. The
+A new Platform K server named **Kintsugi** becomes the DEVELOPMENT server. The
 current Platform K server becomes **DEMO + STAGING** (stable). Restore the prior
-workflow: develop and test against **Kinsugi**, and promote to the current
+workflow: develop and test against **Kintsugi**, and promote to the current
 (demo/staging) server ONLY once **Kam, Peter and Stuart** give the go-ahead.
 Decided at the 2026-08-11 technical weekly; directly fixes the instability caused
 by merging dev and demo into one system.
 
 **## Recommendation / actions**
-- Stand up **Kinsugi** (new VM, Cardano-connected) as the dev environment
+- Stand up **Kintsugi** (new VM, Cardano-connected) as the dev environment
   (Kam-led; the Blockchain Manager agent assists with the service deploy).
 - Current Platform K server → **demo + staging only**; no development against it.
-- **Promotion gate:** no push Kinsugi → current server without explicit
+- **Promotion gate:** no push Kintsugi → current server without explicit
   Kam + Peter + Stuart sign-off.
 - **P3 dependency:** the permanent verify-by-hash fix (KS-584 P3) is BUILT now and
-  DEPLOYS into Kinsugi once it is operational — never against the demo/staging box
+  DEPLOYS into Kintsugi once it is operational — never against the demo/staging box
   mid-development (Kam's "avoid breaking existing systems").
 
 **## Detail**
-Name rationale (worth keeping): *Kinsugi/Kintsugi* mends a break with gold so the
+Name rationale (worth keeping): *Kintsugi/Kintsugi* mends a break with gold so the
 mended object is stronger for the break — fitting for the server where breaking
-changes are made, healed and proven before promotion. [SPELLING PENDING KAM: he
-wrote "Kinsugi"; the traditional art is "Kintsugi" with a t — confirm the
-canonical hostname spelling before it is baked into DNS/config/tickets.]
+changes are made, healed and proven before promotion. [SPELLING CONFIRMED by Kam 2026-08-11: canonical = **Kintsugi** (with the t).]
 
 ## FRESH-SESSION EXECUTION PLAN (hand-off; Wednesday hit her 50% checkpoint)
 Do these in a fresh Wednesday session, in order:
 1. Relaunch Secuura/Blockchain fresh for P3 — brief: build P3 now (legs 1+2),
-   **deploy target = Kinsugi once it exists** (Q2a), hold at ready-to-land for
+   **deploy target = Kintsugi once it exists** (Q2a), hold at ready-to-land for
    Kam's cutover word (versioned, ruling (a)).
 2. Have the agent run the **Linear cull FIRST** (archive already-actioned tickets;
    never close anything live; ambiguous → list for Kam; report before/after
    active count).
-3. Then the agent creates: the **Kinsugi ticket** (verbatim above, once Kam
+3. Then the agent creates: the **Kintsugi ticket** (verbatim above, once Kam
    confirms spelling) + the meeting task set (BM-1 certification model, BM-2
    verification-as-workflow, BM-5 system-details for Peter/Stuart) — BLUF format,
    in the KS team.
