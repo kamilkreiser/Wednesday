@@ -1,3 +1,45 @@
+## 2026-08-11 — Coordinator/QA model's first full day: two production catches, PS-556 resolved by debate, Stuart/Phil meeting operationalised
+
+**The commission executed on day one.** Kam defined the coordinator-not-carrier
+role + stood up a cross-project QA/testing agent (charter from Peter's corpus +
+industry research; findings-only, advisory) at its own project
+`/Volumes/KK_T9_External_HDD/QA_AGENT/`. Within the session it paid out twice:
+QA session 1 verified QuickQuote Stage 3 (margin boundary held; found F1
+anti-enumeration + F2 guessable-word, F2 later ruled by-design); QA session 2
+cold-verified the KS-584 interim and found a NEW High (anonymous verify returns
+a false-negative anchor) — both reproduced by Wednesday before escalation.
+
+**Fleet (all scored 1.0):** Vision — open-OTP sign-in shipped (allowlist removed
+on Kam's changed ruling) + requester-tagged sales mail + F2 lockout, merged to
+main, F2 closed by-design (HPAM word stays). Secuura — KS-584 board-sweep catch
+(P1 parked in Backlog, root of Stuart's PS-557), interim shipped + independently
+verified, KS-596 landed, anonymous-path High root-caused (caller's-bearer
+forwarded on the heal call) and folded into P3; P3 ruled a versioned coordinated
+cutover (ruling a), build deferred to a fresh session per rhythm §2.
+
+**PS-556 resolved by genuine debate with Kam:** verification is a public
+repeatable read, no one holds a record of it; K holds the anchor + controls the
+process; if a verification act is recorded, S records it for reporting/lineage
+annotation; a verification is a read, outside canonical lineage. K does not
+become a source of record for verification acts.
+
+**Stuart/Phil technical weekly operationalised:** certification redefined
+(umbrella: attestation + signing + optional watermarking; modification → new
+version → re-certification); verification-as-configurable-workflow; environment
+separation → new Platform K dev server **Kintsugi** (linked to KS-584: deploy the
+VM once Stuart confirms verification displays properly); current server →
+demo+staging. Notes + tickets handed to a fresh Secuura board-admin session
+(cull Linear + create tickets). Stuart/Phil adopting the coordinator model
+(Tron = Wednesday).
+
+**Model routing:** diagnosed the Fable→Opus-4.8 switch as content-triggered
+safety-classifier routing (not a cap); set `ANTHROPIC_DEFAULT_OPUS_MODEL=
+claude-opus-5` in Wednesday's launcher (verified the var present in the binary,
+not taken from third-party docs). Two self-caught tooling defects (wake_watch
+monitor-vs-shell false idle; a `path` zsh-reserved var wiping PATH), each caught
+by contradicting an already-known fact. Session wrapped at Kam's rotate + the 50%
+ctx checkpoint, applied to Wednesday herself.
+
 ## 2026-08-10 — Densest day on record: 13 rulings, WED-84 closed on due date, Stage 3 built-to-LIVE in one evening, consolidation same night
 
 **(Gap note: no history entries were written for 08-08/09 — the 08-09 session
