@@ -12,7 +12,13 @@ overnight, no reboot. History files re-checked on DevMASTER: Blockchain
 newest 08-10 (session 12, matches card), NexusAI newest 08-10 (RD-77 +
 RD-73 SHIPPED — card updated below), Vision portal history still 08-08
 (the 08-10 Stage-3 work lives in the QuickQuote repo — card updated below),
-CypherKey 08-04, Lead_Bot 08-06.
+CypherKey 08-04, Lead_Bot 08-06. **Re-checked 2026-08-11 ~17:3x post-reboot
+(Tahoe update):** Secuura 08-11 session wrapped 03:44Z scored 1.0 (KS-584
+interim + KS-596 shipped, QA session 2's anonymous-path High ruled (a) by Kam,
+folded into P3); board-admin session KILLED by the reboot — reconciled from
+Linear: KS-601 Kintsugi (linked KS-584) + KS-602/603/604/605 + PS-556
+resolution comment ALL created 06:58Z; **cull NOT run** (KS 128 + PS 143 =
+271 active unchanged). Vision 08-11 wrapped 02:15Z (F2 closed, merged to main).
 
 ---
 
