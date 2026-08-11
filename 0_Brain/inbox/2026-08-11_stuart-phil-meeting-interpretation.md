@@ -147,3 +147,69 @@ recorded; casual verification is not."** Bringing to the debate, not deciding.
 ## OPEN QUESTIONS FOR KAM (must answer before Wednesday shares with the agent)
 See the message to Kam. Q1 naming adoption · Q2 P3/dev-VM dependency · Q3 Linear
 cap vs new tickets · Q4 minor ambiguities (Japanese-name ticket; scope of share).
+
+---
+
+## KAM'S ANSWERS (2026-08-11, decisions RESOLVED)
+
+- **Q1 naming → DO NOT change anything internal.** External-facing names (Legacy
+  UAT / Blockchain Manager) are noted for context only; internally Kam and Stuart
+  still say S and K. Keep KS/PS, cockpit name, launchers, INDEX unchanged.
+- **Q2 P3 → (a).** Build P3 now; **deploy into the new dev server once it exists.**
+- **Q3 Linear cap → cull first**, then create the meeting tickets in the same
+  session (Kam agreed the recommendation).
+- **Q4 → the "Japanese name" is KINSUGI** (Kintsugi — the art of mending broken
+  things with gold, which highlights the break and makes the thing better for it).
+  **Kinsugi is the name of the NEW Platform K DEVELOPMENT server.** Kam asked for a
+  clarification ticket (drafted below). NB this is a SERVER hostname, additive —
+  not a platform rename, so no conflict with Q1.
+
+## DRAFTED TICKET — for the Secuura/Blockchain agent to CREATE after the cull
+(Wednesday cannot create it: read-only tracker grant + Linear cap hard-blocks
+creation until the cull. Content is ready so the agent creates it verbatim.)
+
+**Title:** [Infra] New Platform K dev server "Kinsugi" — restore dev/demo split;
+promote to demo+staging only on Kam+Peter+Stuart sign-off
+
+**## BLUF**
+A new Platform K server named **Kinsugi** becomes the DEVELOPMENT server. The
+current Platform K server becomes **DEMO + STAGING** (stable). Restore the prior
+workflow: develop and test against **Kinsugi**, and promote to the current
+(demo/staging) server ONLY once **Kam, Peter and Stuart** give the go-ahead.
+Decided at the 2026-08-11 technical weekly; directly fixes the instability caused
+by merging dev and demo into one system.
+
+**## Recommendation / actions**
+- Stand up **Kinsugi** (new VM, Cardano-connected) as the dev environment
+  (Kam-led; the Blockchain Manager agent assists with the service deploy).
+- Current Platform K server → **demo + staging only**; no development against it.
+- **Promotion gate:** no push Kinsugi → current server without explicit
+  Kam + Peter + Stuart sign-off.
+- **P3 dependency:** the permanent verify-by-hash fix (KS-584 P3) is BUILT now and
+  DEPLOYS into Kinsugi once it is operational — never against the demo/staging box
+  mid-development (Kam's "avoid breaking existing systems").
+
+**## Detail**
+Name rationale (worth keeping): *Kinsugi/Kintsugi* mends a break with gold so the
+mended object is stronger for the break — fitting for the server where breaking
+changes are made, healed and proven before promotion. [SPELLING PENDING KAM: he
+wrote "Kinsugi"; the traditional art is "Kintsugi" with a t — confirm the
+canonical hostname spelling before it is baked into DNS/config/tickets.]
+
+## FRESH-SESSION EXECUTION PLAN (hand-off; Wednesday hit her 50% checkpoint)
+Do these in a fresh Wednesday session, in order:
+1. Relaunch Secuura/Blockchain fresh for P3 — brief: build P3 now (legs 1+2),
+   **deploy target = Kinsugi once it exists** (Q2a), hold at ready-to-land for
+   Kam's cutover word (versioned, ruling (a)).
+2. Have the agent run the **Linear cull FIRST** (archive already-actioned tickets;
+   never close anything live; ambiguous → list for Kam; report before/after
+   active count).
+3. Then the agent creates: the **Kinsugi ticket** (verbatim above, once Kam
+   confirms spelling) + the meeting task set (BM-1 certification model, BM-2
+   verification-as-workflow, BM-5 system-details for Peter/Stuart) — BLUF format,
+   in the KS team.
+4. Share the meeting INTERPRETATION (sections A/B/C/D, NOT section E / PS-556) with
+   the agent as context for BM-1/BM-2.
+5. Carry the certification-redefinition + verification-as-workflow clarifications
+   into the P3/architecture context (they bear on what "certified" means).
+6. Leave PS-556 (section E) OUT — it is Kam's open debate.
