@@ -52,9 +52,12 @@ brief supplies only WHAT and WHERE.
 - **Sanctioned pattern for this project:** `<disposable identity you may provision | scoped teardown | exclude-and-report-only>`
 - **Reachable-on-demand product states:** `<list; anything not here is a documented coverage gap, not a silent omission>`
 
-## 6. Write scope
-- **[ ] Findings only (default)** — report; the project agent applies any test PRs.
-- **[ ] Findings + regression tests** into: `<named test tree path>` (report-only skip/xfail that auto-flip when the fix lands).
+## 6. Output boundary (fixed — not a choice)
+- **Findings, reports and recommendations ONLY.** The QA agent makes NO changes
+  of any kind — no code, no tests, no fixtures, no tickets, no config. It
+  describes the fix-shape and the regression test the owner should add, in
+  prose in its report; the project's own agent authors and commits everything.
+  (Kam ruling 2026-08-11, absolute — supersedes the earlier opt-in.)
 
 ## 7. Known-fragile / known-changed areas
 - **Known-fragile:** `<areas historically brittle — hunt the class here first>`

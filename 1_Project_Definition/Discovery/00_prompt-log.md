@@ -650,3 +650,9 @@ were labelled — so it now starts at today.
 > 1)its its own project.  this QA agent will float between all projects and we can call it when we need.  It will operate based on testing harnesses and we will need to vreate a testing harness per project or per task. 2)yes
 
 *(Done with it: WED-91 approved as standing practice (grant noted in coordinator-not-carrier lesson); QA-as-own-project structure designed, location question put to Kam; harness-per-project model folded into design — client harnesses live WITH their client project per Q4/R0, the QA project holds only neutral framework.)*
+
+## 2026-08-11 ~mid-morning — QA agent NEVER makes changes (verbatim, mid-turn override)
+
+> the QA agent should never make changes.  only findings, reports and reccomendaitons
+
+*(Done with it: absolute override of the Q2 opt-in from an hour earlier — findings-only, no write-scope any brief can grant. Applied to charter §1/§8 + invocation contract, brief template §6, QA project CLAUDE.md + ORIGIN.md; design doc Q2 marked superseded. Caught the freshly-scaffolded QA project which had copied the stale charter — resynced byte-identical. Pilot target ruled same message: QuickQuote Stage 3.)*

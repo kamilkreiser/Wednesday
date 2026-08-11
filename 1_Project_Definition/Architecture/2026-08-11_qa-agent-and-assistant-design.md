@@ -2,11 +2,15 @@
 
 Date: 2026-08-11 · Tickets: WED-41 (QA agent), WED-91 (Wednesday assistant) ·
 Status: **RULED — Kam, 2026-08-11 morning: "approve all six as recommended."**
-Q1(a) shared-core+envelope · Q2(b) opt-in report-only regression tests ·
-Q3 per-brief safest-default cleanup · Q4(c) hybrid, project owns artefacts ·
-Q5(a) advisory-only, deterministic-probe constraint if teeth ever wanted ·
-Q6(a) hard rule (charter §6 updated same hour). **Still open: pilot target
-(Kam's pick) · Wednesday-assistant pattern approval (WED-91).**
+Q1(a) shared-core+envelope · **Q2 SUPERSEDED same day → findings-only,
+absolute: the QA agent NEVER makes changes (Kam: "the QA agent should never
+make changes. only findings, reports and reccomendaitons"). The opt-in
+regression-test grant is retired; charter §1/§8, brief §6, CLAUDE.md all
+updated.** · Q3 per-brief safest-default cleanup · Q4(c) hybrid, project owns
+artefacts · Q5(a) advisory-only, deterministic-probe constraint if teeth ever
+wanted · Q6(a) hard rule (charter §6). WED-91 assistant pattern GRANTED. QA is
+its OWN project at `/Volumes/KK_T9_External_HDD/QA_AGENT/` (scaffolded).
+**Still open: pilot target — Kam picked QuickQuote Stage 3 (in flight).**
 Commission: Kam, 2026-08-11 morning (verbatim in
 `1_Project_Definition/Discovery/00_prompt-log.md`). Built from two research
 reports: `1_Project_Definition/Research/2026-08-11_peter-testing-corpus.md`
