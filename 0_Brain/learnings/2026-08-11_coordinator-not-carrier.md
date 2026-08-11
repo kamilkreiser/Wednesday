@@ -49,6 +49,14 @@ rules, agents build.
    org design — R0: bottles METHODOLOGY client-neutrally, never carries
    one client's content into another's session).
 
+**GRANTED — Kam, 2026-08-11 ("yes" on WED-91):** the assistant pattern is
+standing practice, recorded per go-slow rule 5. Same day he ruled the QA
+agent is ITS OWN PROJECT — floats between all projects, called when needed,
+operating on testing harnesses created per project or per task (client
+harnesses live WITH their client project per Q4/R0; the QA project holds
+only the neutral framework). Scored like any adopted mechanism at
+consolidation.
+
 **Related:** [[2026-08-10_own-the-spec-not-just-the-escalation]],
 [[2026-08-05_wed-work-threshold-delegation]], [[2026-08-03_context-loading-split]],
 [[2026-07-31_manage-dont-do]], [[../people/kam]]
