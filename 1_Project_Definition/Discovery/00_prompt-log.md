@@ -682,3 +682,9 @@ were labelled — so it now starts at today.
 > the secret does not matter.  we actually do not need to unlock advance mode.  its more of a trigger for them to use the simple mode until we tell them what it is.  For the secret, keep secret as "HPAM"
 
 *(Done with it: F2's "guessable secret" half reclassified BY DESIGN — owner ruled, not a defect; no rotation; v0.3.1 lockout + plumbing retained as hygiene; F2 closed. Consequence recorded and stated to Kam once, not re-litigated: with open sign-in live, margin logic and buy prices are reachable by any visitor entering a four-letter word. Second knowing risk acceptance in this area today. Vision instructed to keep the honest position visible in BACKLOG rather than describing the app as having a margin gate, and to revisit identity-based margin visibility when the service moves to a properly deployed home.)*
+
+## 2026-08-11 — anonymous verify is public (verbatim)
+
+> a.  anyone can verify.  This will be complicated through workflows ( a company might set a workflow that requires auth) but that is part of the smart contract / platform S but this is a big discussion for later.
+
+*(Done with it: ruling (a) routed — anonymous verify supported/public, 200-to-anonymous correct, fix is caller-independent honest anchor selection + stale-status reconciliation, folded into P3. Workflow-gated verify parked as Platform-S/smart-contract, future discussion; Secuura told not to build or preclude it.)*
