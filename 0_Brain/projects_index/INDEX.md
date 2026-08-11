@@ -183,6 +183,32 @@ CypherKey 08-04, Lead_Bot 08-06.
 - **Wednesday can help by:** same pattern — a Kam-decisions sitting.
 
 ### Datasec / Vision Sales Portal — GO-LIVE PREP INCOMING (WED-77)
+- **2026-08-11 (NEWEST) — QuickQuote Stage 3, session scored 1.0.** OPEN OTP
+  sign-in shipped (allowlist REMOVED on Kam's changed ruling — OTP to the
+  entered address for any entrant) + requester address on every sales mail
+  (subject + body; Kam: "the only way we can track who filled in the quick
+  quote"). F2 unlock lockout live-verified wire-level (5×403 → 429 → correct
+  word also 429 fail-closed → module still 403). Merged --no-ff to main.
+  **F2's guessable-secret half CLOSED as BY DESIGN — Kam ruled advanced/HPAM
+  mode a workflow nudge, not a security control; word stays "HPAM", rotation
+  cancelled.**
+  - **Accepted exposure, recorded so it is not misread:** with open sign-in
+    live, margin logic and buy prices are reachable by any visitor who enters
+    the guessable word. "F2 closed" does NOT mean margin data is protected —
+    Kam's knowing acceptance, URL secrecy as the outer gate. Revisit
+    identity-based margin visibility when the service moves to its properly
+    deployed home.
+  - **Open:** ACS managed-domain hourly cap (~30/hr) caused a live OTP outage
+    from ~01:00Z — **Kam ruled the cap acceptable** (service moves when ready
+    to deploy), so the custom Datasec sending domain rides with that move, not
+    urgent. Confirm sales@datasec.com.au actually RECEIVES the BCC copies.
+    Reworded advanced-unlock boot log ships with the next deploy. Merged
+    branch stage3/open-signin may be deleted with authz.
+  - **Kept as real work despite the quota being accepted:** "surface OTP send
+    failures" (a user told "code on its way" who receives nothing is the
+    honesty class) and the App Service container-log capture fix (today's logs
+    were lost to auto-expiry, which is why this was only diagnosable by
+    reproducing against ACS directly).
 - **2026-08-10 (NEWEST): QuickQuote STAGE 3 LIVE —
   hpas-quickquote.azurewebsites.net (v0.2.1, main @ ed5b995), session scored
   1.0, wrapped 11:52Z.** OTP sign-in (allowlist, anti-enumeration),

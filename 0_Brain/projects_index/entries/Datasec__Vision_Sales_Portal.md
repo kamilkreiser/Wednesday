@@ -3,30 +3,31 @@ client: Datasec
 project: Vision_Sales_Portal
 path: /Volumes/DevMASTER/!CODING/Datasec/Vision_Sales_Portal
 status: active
-updated: 2026-08-08
+updated: 2026-08-11
 ---
 
-# Datasec / Vision Sales Portal
+# Datasec / Vision_Sales_Portal
 
-**Last session (2026-08-07 → 08, wrapped 05:30):** **The standalone HPAS
-QuickQuote fix list is COMPLETE — v2.12 `f67bef0`.** F1–F17 and F19–F23 all
-shipped; F18 is Stage-3 gated by design. 45 tests green; regression pack re-run
-through the real UI across 72 scenarios with ground truth intact at 374 → 5 days
-→ $10,500 and every AUD total exactly 1.55× its USD twin. Print-verified as real
-PDFs in light, dark and a GBP no-services quote.
+**Last session (2026-08-11):** HPAS QuickQuote Stage 3 — shipped OPEN OTP sign-in
+(allowlist removed, OTP to the entered address for any entrant) + requester-tagged
+quote mail (v0.3.0), and F2 unlock lockout (v0.3.1), both live on
+hpas-quickquote and merged to main @ d5bdd00. Kam released the cold-acceptance
+hold and ruled advanced/HPAM mode a workflow nudge, not a security control — F2
+closed, HPAM word stays by design (no rotation). Lockout + open sign-in + margin
+boundary all wire-verified LIVE; F2's attempt-budget-reset path is unit-only.
 
 **Open / next:**
-- Merge `stage1/pricing-engine` — 8 commits ahead of `main`, unmerged by design
-- Add CI: 45 tests that only run when a human types `node --test`. Cheapest item left
-- WIL-54 (per-app chips show USD) — a product decision, not a patch
-- Page-1 print overflow (pre-existing, reproduced on v2.06) — needs its own pass
-- Then hosted Stage 3: OTP, Postgres, emailed PDF, server-side HPAM gate, F18
+- Confirm ACS quota recovered + OTP delivery working; set up custom Datasec
+  sending domain (DNS) — escalated to Kam as load-bearing under open sign-in.
+- Confirm sales@datasec.com.au receives the BCC quote copies (only Kam/sales can).
+- Next deploy (any reason): confirm reworded advanced-unlock boot log went live.
+- Optional (needs authz): delete merged branch stage3/open-signin.
 
-**Blockers:** the merge needs your word under v1.3. WIL-54 needs a product call.
-No contact with Will (Kam's ruling).
+**Blockers:** ACS managed-domain hourly send cap caused a live OTP outage from
+~01:00Z (real users get no code); self-clears, custom sending domain is the fix.
 
-**Notes for Wednesday:** Tool lives at `Quoting Tool/hpas-quoting-tool/` — its
-**own** repo, NOT inside `2_Project_Files`. Vision prod (`datasec-sales-portal-rg`)
-was untouched across the whole session; nothing in this sub-project should
-approach it. F21's gate is a speed bump not protection, and that is stated in
-`BACKLOG.md` rather than implied — real enforcement is Stage 3.
+**Notes for Wednesday:** F2 rotation step I sent earlier is CANCELLED (Kam ruled
+by-design). Honest position, recorded in BACKLOG: margin/buy prices are reachable
+by any visitor who knows the guessable word — "F2 closed" ≠ "margin protected".
+Boot-log reword is committed but rides the next deploy (Kam: no swap for a log
+string) — pending-cosmetic, not live yet.
