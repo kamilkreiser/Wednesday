@@ -61,3 +61,36 @@ the record: the party's own system, or the neutral platform? Product call, his.
 ## Constraints alive
 - PS-556 stays Kam's; the in-flight KS-539 joint-authz work must NOT decide
   verification-act recording by implication (told Secuura; still queued).
+
+---
+
+## MEETING INPUT (2026-08-11 Stuart/Phil/Kam) — folded in, NOT resolving the debate
+
+The technical-weekly transcript speaks almost directly to PS-556. Key lines
+(attributed, from the notes):
+- **Kam + Stuart:** "the workflow path must be verified against the smart
+  contract" and recorded, but **"simple interactions like document viewing
+  should not be recorded on the blockchain to avoid noise."** → This is my
+  reads-are-private / recording-casual-verification-is-noise argument, stated by
+  Kam himself. Strong corroboration of the "no general recording" half.
+- **Kam (recruiter scenario):** verification is done via the **workflows** feature
+  which **tracks and DISPLAYS the specific steps** (identity checks, domain
+  matching) for the third-party verifier to **inspect.** → This is close to my
+  "opt-in verifiable RECEIPT" concept: a client-defined, inspectable record of
+  the verification workflow, not a blanket log of every verify.
+- **Compliance vs simplicity:** system supports full rigor for audit/legal;
+  end-user sees a binary "verified." → Both my scenarios coexist: the inspectable
+  workflow record (scenario 2) under a simple badge (scenario 1).
+- **Buffet-style / client-defined workflows via smart contracts; Secuura does not
+  prescribe compliance.** → The record-keeper question may not be Secuura's to
+  answer globally: **the CLIENT'S smart-contract workflow defines what is
+  recorded.** That reframes PS-556.
+
+**Likely reframe to test with Kam:** PS-556 is not "should K be the global source
+of record for verification acts?" (my original yes/no) but "**the client's
+configured workflow (smart contract) defines which verification steps are
+recorded and inspectable; casual verification is not recorded.**" If so, my
+"no-general-recording + yes-opt-in-receipt" position and the meeting's
+"workflow-path-recorded + views-not" converge — and PS-556 (Stuart's badge) is
+the simple-binary surface over a client-configurable, inspectable workflow record.
+Still Kam's call; bring it, do not encode it.
