@@ -1,7 +1,12 @@
 # QA Agent + Wednesday-Assistant — design & rulings needed
 
 Date: 2026-08-11 · Tickets: WED-41 (QA agent), WED-91 (Wednesday assistant) ·
-Status: DESIGN — needs Kam's rulings on the open questions in §Detail
+Status: **RULED — Kam, 2026-08-11 morning: "approve all six as recommended."**
+Q1(a) shared-core+envelope · Q2(b) opt-in report-only regression tests ·
+Q3 per-brief safest-default cleanup · Q4(c) hybrid, project owns artefacts ·
+Q5(a) advisory-only, deterministic-probe constraint if teeth ever wanted ·
+Q6(a) hard rule (charter §6 updated same hour). **Still open: pilot target
+(Kam's pick) · Wednesday-assistant pattern approval (WED-91).**
 Commission: Kam, 2026-08-11 morning (verbatim in
 `1_Project_Definition/Discovery/00_prompt-log.md`). Built from two research
 reports: `1_Project_Definition/Research/2026-08-11_peter-testing-corpus.md`
