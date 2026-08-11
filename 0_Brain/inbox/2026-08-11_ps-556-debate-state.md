@@ -94,3 +94,50 @@ recorded and inspectable; casual verification is not recorded.**" If so, my
 "workflow-path-recorded + views-not" converge — and PS-556 (Stuart's badge) is
 the simple-binary surface over a client-configurable, inspectable workflow record.
 Still Kam's call; bring it, do not encode it.
+
+---
+
+## RESOLVED — 2026-08-11, Kam ("record PS-556 resolved")
+
+**Decision (architectural, Kam's, reached by debate + the 2026-08-11 meeting):**
+
+1. **Verification is a public, stateless, repeatable read** against the immutable
+   chain. "If anyone can verify, no one holds that record" (Kam). The durable
+   record that matters is the **certification / anchor itself, on-chain — K holds
+   that.** A separate "verification receipt" is redundant (the chain is
+   permanently re-verifiable) and is retired; the only thing it would add is
+   who-verified-when, which is exactly the data we do NOT want held.
+2. **K controls the PROCESS** of certification and verification (the logic, the
+   anchor check). **S is the client-facing layer.**
+3. **If a verification act is recorded at all, S records it — for S's own
+   reporting or its own annotation of document lineage.** Internal to S's tenant,
+   not authoritative, NOT K's business. **K does NOT become a source of record
+   for verification acts.** (This is the PS-556 question, answered: NO for K.)
+4. **A verification is a READ, not a lineage event** (Kam confirmed). Lineage =
+   the document's version history (certifications, modifications, watermarks that
+   create new versions) and is K's on-chain record. A verification does not modify
+   the document, so it never enters canonical lineage. If S shows "verified by X,"
+   that is S annotating its OWN view for reporting — not a lineage entry.
+
+**Two load-bearing precisions carried with the decision:**
+- **S's record is only ever as honest as K's verification ANSWER.** So the
+  caller-independent honest-verify standard enforced on K today (KS-584 / P3) is
+  the dependency under every record S keeps — not merely one ticket's fix.
+- PS-556 (the badge / recording) and KS-584 (verify returning the WRONG answer)
+  were always two different problems; the badge tangled them. PS-556 recording =
+  S-side; KS-584 wrong-answer = K-side (fixed interim, permanent in P3).
+
+**What this means concretely:**
+- **PS-556 is an S-side task** — S records + renders its own verification/badge
+  state (its PS-522 ledger machinery); **K provides nothing new.**
+- The Secuura/Blockchain agent's ORIGINAL triage instinct (PS-556 = S-side) was
+  right; KS-584 was a distinct K defect that briefly looked related.
+- Feeds the meeting's **"define terminology"** task: certification (umbrella:
+  attestation + signing + optional watermarking) · verification (a public read,
+  outside lineage) · signing · watermarking (→ new version → re-certification).
+
+**Execution (fresh session, no longer held from the agent):** the agent may now
+post the PS-556 resolution as a follow-up comment on the ticket (S-side, K stays
+out), attributed as Kam's ruling; and carry the verification-outside-lineage +
+"if recorded, S records for reporting" boundary into the terminology + BM-2
+verification-as-workflow work.

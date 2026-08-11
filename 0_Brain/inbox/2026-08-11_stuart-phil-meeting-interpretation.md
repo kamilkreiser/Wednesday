@@ -214,4 +214,7 @@ Do these in a fresh Wednesday session, in order:
    the agent as context for BM-1/BM-2.
 5. Carry the certification-redefinition + verification-as-workflow clarifications
    into the P3/architecture context (they bear on what "certified" means).
-6. Leave PS-556 (section E) OUT — it is Kam's open debate.
+6. PS-556 is now RESOLVED (Kam 2026-08-11) — see the debate note's RESOLVED
+   section. The agent MAY post the resolution as a follow-up comment on PS-556
+   (S-side recording, K stays out) and carry verification-outside-lineage into
+   BM-2 + the terminology task. No longer held out.
