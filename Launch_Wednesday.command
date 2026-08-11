@@ -252,4 +252,13 @@ his confirm. Quiet-hours rule stands: nothing spoken before 06:00."
 fi
 
 # Pin Fable 5 (Kam's standing preference, 2026-07-29). Override with /model.
+# Safety-classifier routing target (Kam, 2026-08-11). Claude Code reruns
+# security-flagged turns on a higher-assurance Opus model — content-triggered,
+# NOT an availability fallback, and unaffected by the --model pin below. Left
+# unset it lands on Opus 4.8; Kam wants Opus 5. Verified before adopting:
+# ANTHROPIC_DEFAULT_OPUS_MODEL appears 40x in the claude binary (strings on
+# /Users/.../claude/versions/2.1.227), i.e. the CLI genuinely reads it — the
+# documentation for this is third-party, so the binary is the source of truth.
+export ANTHROPIC_DEFAULT_OPUS_MODEL=claude-opus-5
+
 exec claude --dangerously-skip-permissions --model claude-fable-5 "$INITIAL_PROMPT"
