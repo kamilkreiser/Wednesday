@@ -95,12 +95,17 @@ set -a; . "$ENV_FILE" 2>/dev/null; set +a
 # than accept a relay whose named closing mechanism was broken. Same family as
 # validate-brief-pointers: I pointed an agent at a verification path without
 # opening it myself.
-KAM_CC="${KAM_EMAIL:-kreiser.org@me.com}"
+# CC REMOVED 2026-08-12 on Kam's explicit instruction ("no need to copy me on
+# emails to agents. I am happy tracking things this way"). Under v1.3 the
+# signed delegation grant is the authority mechanism, so the cc had become
+# informational only. Consequence of the history above still binds: NEVER
+# write "Kam is CC'd" (or any closing-mechanism claim) into a brief — there
+# is no cc to point at. Re-add only on a recorded Kam instruction.
 
 FULL_SUBJECT="[Wednesday -> $TO] $SUBJECT"
-CODE="$(BODY="$BODY" SUBJ="$FULL_SUBJECT" BUSADDR="$BUS" INBOXADDR="$INBOX" KAMCC="$KAM_CC" python3 - <<'PYEOF'
+CODE="$(BODY="$BODY" SUBJ="$FULL_SUBJECT" BUSADDR="$BUS" INBOXADDR="$INBOX" python3 - <<'PYEOF'
 import json, os, urllib.request
-payload = {"to": [os.environ["BUSADDR"]], "cc": [os.environ["KAMCC"]],
+payload = {"to": [os.environ["BUSADDR"]],
            "subject": os.environ["SUBJ"], "text": os.environ["BODY"]}
 req = urllib.request.Request(
     f"https://api.agentmail.to/v0/inboxes/{os.environ['INBOXADDR']}/messages/send",

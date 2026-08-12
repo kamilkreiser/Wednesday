@@ -694,3 +694,11 @@ were labelled — so it now starts at today.
 > good morning.  I was thinking, can we please amend the start up process for the morning a little.  In the morning, please check if there are any tickets tasks outstanding for each project and if so, you might as well instruct the agents to start working on them.  Skip myPKI, cypherkey and leadbot projects for now.  This morning, with Secuura, see if there are any responses from Stuart and in adition to any responses or new tickets, lets start cleaning up the tickets and actioning the backlog
 
 *(Done with it: standing grant recorded in learnings/2026-08-12_morning-ticket-sweep-autostart.md; launcher boot prompt amended same hour (mechanism, not intention); executed immediately — boards swept, Secuura briefed on Stuart responses + cull + backlog actioning, NexusAI/Vision briefed on their outstanding tickets.)*
+
+## 2026-08-12 — the thirteen-item decision sitting (verbatim)
+
+> Decisions on the questions above 1)b 2)a as per reccomendation 3)d 4)a 5)a 6)c 7)a 8)b and I can also log in when necessary for agents to test 9)a 10)a 11)yes, call, archive and action backlog items 12)Stuart is sick so lets give him time.  ALSO, no need to copy me on emails to agents.  I am happy tracking things this way
+
+> 13) a
+
+*(Done with it: all 13 routed same hour — Secuura (KS-587 mark-honest, authz verify-close, PS-559 park comment, PS-560 confirm comment, cull proceed, NO Stuart nudges), NexusAI (RD-81 gated CI deploy, RD-55/54 runbook for signed mail, RD-76 Kam-assisted verification + his log-in-when-needed grant, mail migration ticket at go-live class), Vision (WIL-54 convert chips, ACS sender stays). send_brief.sh cc removed same hour and proven cc=None at destination before the rulings mails went out. Stuart-sick noted. Industry scan tonight; WED-90 spec + rollout briefs sent.)*
