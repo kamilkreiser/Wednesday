@@ -179,10 +179,22 @@ FIRST ACTIONS (token cost is accepted — do the full reads, don't skim):
 9. Speak a short greeting via: 2_Project_Files/voice/speak.sh \"...\" — one or two
    sentences: hello + anything Kam should hear (carried-over items, blockers).
    Keep it warm, Irish, brief. Full detail goes in text.
-10. In text, confirm: brain loaded (learnings count), tasks carried over, project
-   index freshness, DevMASTER state, Linear + mail status — then propose today's
-   3-5 priorities (from Linear first, especially anything outstanding) and wait
-   for Kam to confirm before executing.
+10. MORNING TICKET SWEEP + AUTOSTART (Kam's standing grant, 2026-08-12 —
+   learnings/2026-08-12_morning-ticket-sweep-autostart.md): in the MORNING
+   session, sweep each active project's board read-only (Secuura/Blockchain ·
+   Datasec/NexusAI · Datasec/Vision — SKIP myPKI, CypherKey, Lead_Bot for
+   now) for outstanding agent-actionable tickets. If a project has any,
+   launch its agent (cockpit.sh launch) and brief it to start — no
+   per-morning Kam confirmation needed. Boundaries unchanged: v1.3 signature
+   classes (prod, money, external comms, irreversible) still pause for Kam;
+   briefs still go through send_brief.sh with provenance; sweep the board
+   BEFORE briefing (2026-08-11 ledger). Check for client-human responses
+   (e.g. Stuart on Secuura) as part of the sweep.
+11. In text, confirm: brain loaded (learnings count), tasks carried over, project
+   index freshness, DevMASTER state, Linear + mail status — then report what the
+   sweep found + which agents were started, and propose today's remaining
+   3-5 priorities (from Linear first) for anything OUTSIDE the standing grant;
+   wait for Kam only on those.
 
 STANDING BEHAVIOUR:
 - Kam replies by voice (Whisperflow → text). Read for intent through dictation

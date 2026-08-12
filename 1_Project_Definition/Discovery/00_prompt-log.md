@@ -688,3 +688,9 @@ were labelled — so it now starts at today.
 > a.  anyone can verify.  This will be complicated through workflows ( a company might set a workflow that requires auth) but that is part of the smart contract / platform S but this is a big discussion for later.
 
 *(Done with it: ruling (a) routed — anonymous verify supported/public, 200-to-anonymous correct, fix is caller-independent honest anchor selection + stale-status reconciliation, folded into P3. Workflow-gated verify parked as Platform-S/smart-contract, future discussion; Secuura told not to build or preclude it.)*
+
+## 2026-08-12 morning — standing morning-process amendment + today's Secuura focus (verbatim)
+
+> good morning.  I was thinking, can we please amend the start up process for the morning a little.  In the morning, please check if there are any tickets tasks outstanding for each project and if so, you might as well instruct the agents to start working on them.  Skip myPKI, cypherkey and leadbot projects for now.  This morning, with Secuura, see if there are any responses from Stuart and in adition to any responses or new tickets, lets start cleaning up the tickets and actioning the backlog
+
+*(Done with it: standing grant recorded in learnings/2026-08-12_morning-ticket-sweep-autostart.md; launcher boot prompt amended same hour (mechanism, not intention); executed immediately — boards swept, Secuura briefed on Stuart responses + cull + backlog actioning, NexusAI/Vision briefed on their outstanding tickets.)*
