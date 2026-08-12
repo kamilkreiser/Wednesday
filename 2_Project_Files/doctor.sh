@@ -162,7 +162,10 @@ if [ -f "$LCONF" ]; then
   while IFS='|' read -r LNAME LPATH; do
     case "$LNAME" in \#*|"") continue ;; esac
     [ -f "$LPATH" ] || continue
-    if grep -qE -- '--model claude-fable-5' "$LPATH" 2>/dev/null; then
+    # Comments excluded: Secuura's launcher keeps "Was `--model claude-fable-5`"
+    # as a history note, which made this check warn on an already-fixed pin
+    # (false alarm, 2026-08-13). Only a live (non-#) line counts.
+    if grep -vE '^\s*#' "$LPATH" 2>/dev/null | grep -qE -- '--model claude-fable-5'; then
       STALE_PINS="$STALE_PINS $LNAME"
     fi
   done < "$LCONF"

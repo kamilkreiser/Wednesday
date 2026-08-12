@@ -782,3 +782,9 @@ were labelled — so it now starts at today.
 > great finding.  please make sure findings from review f are in a ticket and we resolve these.  I see Secuura agent is still going so I wont do a hard reboot.  I will wait.  How did the HPSM agent go?  whats the status today?
 
 *(Done with it: KS-612..616 verified on the board; resolution instruction relayed into session 20 with Kam-attribution — Review F tickets pulled ahead of the H queue, KS-614 first (exposed DB ports). Reboot hold noted — session told to work tight and wrap at threshold. HPSM status answered in chat.)*
+
+---
+**2026-08-13 ~08:4x (cockpit chat, morning):**
+> please get the secuura agent to continue with cleaning up and actioning tickets.  Please get the HPSM agent to work through the straw man, solution architecture so we can discuss in detail and refine on monday
+
+*Done with it:* Secuura session-21 brief (standing burn continuation: #677 merge-on-green → KS-613 → 615/616 → 617 → 612 → H queue) + HPSM architecture deep-work brief (strawman worked through for the MONDAY 2026-08-17 refinement session, FOR-DISCUSSION only per the 24h readiness grant). Both queued through the gate (mail capped until ~10:06 AEST), panes launched, pointers tapped.
