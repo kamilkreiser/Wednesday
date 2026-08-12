@@ -714,3 +714,9 @@ were labelled — so it now starts at today.
 > 1)c 2) b 3) I confirm.  I created a github repo.  please generate a key I can paste to generate deploy keys with write access
 
 *(Done with it: 1c = PRD credentials left as-is (HP's document; our containment stands) · 2b = SOW payment-table error folds into Kam's next HP conversation · 3 = readiness-callout removal confirmed intentional. Kam created datasecau/hpsm himself (device-flow step retired). Deploy keypair generated at HPSM/3_Access_Keys/github_deploy_rw, public key handed to him for paste with write access. Rulings → HPSM-9/10/12 ticket updates briefed to next HPSM session. Paul Waite chase question still open.)*
+
+## 2026-08-12 — HPSM repo created by Kam + key added (verbatim)
+
+> keys generate.  location https://github.com/datasecau/HPSM/settings/keys
+
+*(Done with it: key proven read-only (ls-remote exit 0, empty repo); HPSM session 2 briefed+launched — wire UPPERCASE remote, push, rulings onto HPSM-9/10/12.)*
