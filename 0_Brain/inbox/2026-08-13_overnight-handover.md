@@ -1,0 +1,9 @@
+## BLUF
+Quiet night, clean floor. No agents ran overnight (both programmes at deliberate pauses since ~22:30); watcher heartbeats only; the 23:00 close bell's "retro placeholder" flag was a half-false-positive (retro existed in the day-close section, not the template stanza — stanza now filled + pointed, consolidation note filed).
+
+## For the 06:00 session, in order
+1. **Mail is CAPPED until ~00:06Z (10:06 AEST).** You cannot send before then; reads work. FOUR items queued (HPSM ANSWER + 3 SCORE mails); a one-shot drain is armed to fire ~10:15 AEST — VERIFY it fired (send_queue.sh status + the scheduler log), do not assume. HPSM + Secuura also hold disk wraps (5_Project_History/pending_wrap_*.md) they will retry from their side.
+2. **The day's centrepiece: the HPSM structure sitting with Kam** (his ask). Memo ready: 0_Brain/inbox/2026-08-12_WED-102_structure-verification-memo.md — headline: proposal survives, but the spine drops the Compliance section the SOW contracts by name; adopt-with-amendments.
+3. **Kam's desk (priority order): the Amplify NTP decision is FRIDAY 14 AUG — tomorrow.** Then: the one file-open (unlocks 87 files) · who is Paul Waite · HPSM versioning option · AgentMail upgrade-vs-ration (money) · KS-386 retention · KS-329 design · KS-256 sign-off · 415 ruling · KS-130/169/229 · Kintsugi (KS-601).
+4. **Morning sweep grant applies** (Secuura/NexusAI/Vision; skip myPKI/CypherKey/Lead_Bot): Secuura's next-session queue is written in their s19 disk wrap (KS-458 demo check + GUC sweep first, fail-safe-but-silent caveat). HPSM is PAUSED for Kam — do NOT relaunch it without his word or the sitting. Remember: no briefs can SEND until the cap clears — use queue + pane pointer as last night did, or launch after 10:15.
+5. Yesterday's note carries everything else (nine 1.0 sessions, ledger rows, ghost-text new shapes → consolidation).
