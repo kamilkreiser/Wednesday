@@ -720,3 +720,9 @@ were labelled — so it now starts at today.
 > keys generate.  location https://github.com/datasecau/HPSM/settings/keys
 
 *(Done with it: key proven read-only (ls-remote exit 0, empty repo); HPSM session 2 briefed+launched — wire UPPERCASE remote, push, rulings onto HPSM-9/10/12.)*
+
+## 2026-08-12 — strawman approved (verbatim)
+
+> yes, prepare the strawman for the refinement session
+
+*(Done with it: commissioned to the live HPSM session 2 as its main task after the mechanical items — strawman architecture + draft development plan + refinement-session pack, all FOR-DISCUSSION, dated citations on GA claims, no build tickets/resources/HP-facing output.)*
