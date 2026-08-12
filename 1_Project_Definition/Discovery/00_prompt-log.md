@@ -776,3 +776,9 @@ were labelled — so it now starts at today.
 > once HPSM agent finishes, and proposes a structure, please check this agains the PPT and SOW.  Tomorrow, lets discuss and flesh out
 
 *(Done with it: WED ticket created; my verification pass runs on the session-8 wrap — the proposed structure (eight-module spine + P05 proposal + schema) checked against the v3 Playbook deck and SOW-01 directly, claims-to-slide/section, before it reaches tomorrow's discussion. Tomorrow's session opens with the fleshing-out sitting.)*
+
+## 2026-08-13 — Review F resolution + reboot hold (verbatim)
+
+> great finding.  please make sure findings from review f are in a ticket and we resolve these.  I see Secuura agent is still going so I wont do a hard reboot.  I will wait.  How did the HPSM agent go?  whats the status today?
+
+*(Done with it: KS-612..616 verified on the board; resolution instruction relayed into session 20 with Kam-attribution — Review F tickets pulled ahead of the H queue, KS-614 first (exposed DB ports). Reboot hold noted — session told to work tight and wrap at threshold. HPSM status answered in chat.)*
