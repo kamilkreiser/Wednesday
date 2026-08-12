@@ -732,3 +732,9 @@ were labelled — so it now starts at today.
 > done, az account show confirms d500ebad
 
 *(Done with it: HPSM session 4 briefed + launched for HPSM-7 — hpsm-dev-rg + scoped SP, nothing billable.)*
+
+## 2026-08-12 — Secuura backlog burn (verbatim)
+
+> can you please get the secuura agent to start working its way through all backlog tickets.  once closed, get them archived
+
+*(Done with it: standing backlog-burn commissioned — fresh Secuura session briefed + launched; approved next-session trio first (KS-587 D1 leg, KS-585 deadline 09-05, KS-599), then backlog in priority order, close-and-archive as-you-go, Kam-gated items flagged not started. Carries forward into every Secuura session until the backlog is burned.)*
