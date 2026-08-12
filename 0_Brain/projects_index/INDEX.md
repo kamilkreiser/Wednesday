@@ -75,7 +75,21 @@ resolution comment ALL created 06:58Z; **cull NOT run** (KS 128 + PS 143 =
   mock-mode by design since KS-535). See
   [[../learnings/2026-08-06_local-proof-is-not-target-evidence]].
 
-- **Status:** active · **session 12 (2026-08-10 morning) scored 1.0** — Kam's
+- **Status:** active · **session 16-R (2026-08-12 afternoon) scored 1.0** —
+  approved trio done end-to-end: KS-587 document-blob leg MERGED (#667
+  `3c208d17c`, 16 new units, D1/D4 live green) · KS-585+KS-599 dependency
+  pass MERGED (#669 `f97410847`, both Done+ARCHIVED before the 09-05
+  expiry) · 329-op scoped: Peter already built it (14→344 schemas on the
+  KS-256 branch); needs Kam sign-off + half-day review, NOT new authoring.
+  Both merges verified by me on origin/develop. Latent honesty-invariant
+  arithmetic flaw found+fixed (`b64ca9dcf`), Peter flagged non-blocking.
+  Backlog burn: 75→75 (trio consumed the session); next session starts at
+  the oldest High under the 03:09Z STANDING brief; KS-531 pairs with the
+  lock work. Kam-gated: KS-256 sign-off · 415 ruling · KS-130/169/229 ·
+  Kintsugi stand-up (KS-601, money class — unlocks P3 + KS-587 demo
+  deploys). Earlier same day: cutover session scored 1.0 (#666 merged =
+  origin/develop parent, cull 274→271, 3 ambiguous held for Kam).
+- **Prior: session 12 (2026-08-10 morning) scored 1.0** — Kam's
   thirteen rulings unlocked the architecture; P1 tickets created
   (KS-596/597/598), **KS-587 + KS-586 SHIPPED to develop+demo** (#659
   `521c78d41`, #660 `f217bc1ee`; verified independently: develop==origin,
