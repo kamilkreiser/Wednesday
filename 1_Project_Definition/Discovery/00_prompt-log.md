@@ -744,3 +744,17 @@ were labelled — so it now starts at today.
 > lets start a list (probably as a ticket) to track all the things we need to ask HP for.  This can include access to code, tools, documents etc.  This list should include things like API access or even firmware access to various elements.  The PPT in hte HPSM folder should include various tools that HP already has that we would need or could use to build out the project.  This list should include - [ ] API to HP Security Manager - [ ] Firmware 5.10 will have threat asses - [ ] HPSM quick asses tool - [ ] HPSM quick asses lite.  also, please get the agent to review the following - OXPD 2 SDK will have a lot of telematry information.  Webjet admin should provide some insight.  Here is the folder, store this in the DevMaster project folder. /Users/kam_code/Downloads/OneDrive_1_12-08-2026.zip   also, did the agent review the SOW and put together a plan of attack and strawman?  did you review it?
 
 *(Done with it: HPSM session 5 launched + briefed through the gate — HP-asks ticket on board 539 seeded with Kam's four items + PPT mining, 7.6 GB zip ingest into the project folder (gitignore-at-creation flagged), OXPD 2 SDK + WebJet Admin review. His two questions answered directly by Wednesday: yes — SOW reviewed in session 1 (found the §14 payment-table error), strawman + plan delivered session 3 and breadth-reviewed by me, scored 1.0.)*
+
+## 2026-08-12 — HPSM deep document/scope study + stakeholders register (verbatim)
+
+> great to see the secuura agent plowing through the tickets - thank you!  please get the HPSM agent to keep reviewing the documents and especially the PPT docs and scope of the project.  I need the agent to be up to speed as much as possible.  the qute has not been signed off yet but if it does, the timeline for development is short.  Also, get the agent to start creating a list of stakeholders, info we need and a project scope
+
+*(Done with it: HPSM session 6 briefed + launched — sustained document/PPT study for readiness (SOW not signed; short runway if it is), plus three deliverables: stakeholder register, information-we-need register (extends HPSM-21 rather than duplicating it), and a project scope document. Input-only: no build tickets, nothing HP-facing.)*
+
+## 2026-08-12 — auto-mode posture + fleet model pins to Opus 5 (verbatim)
+
+> set the auto mode posture before thursday
+
+> as we are close to fable 5 limit - for now, set all models to opus 5 except HPSM.  I did this manually now.  or if you think HPSM work is more routine, I would set all models to opus 5 except you (my preference)
+
+*(Done with it: auto-mode claim VERIFIED against the official docs before acting — true and documented, 2026-08-14, Pro/Max/Team, new sessions only, and a self-set defaultMode survives it. Material finding: every fleet launcher runs --dangerously-skip-permissions (bypassPermissions), which the flip does not touch; the deny-under-bypass question was put back to the docs before any posture change. Models: recommended Kam's stated preference — all projects Opus 5, Wednesday alone on Fable 5, since HPSM's current work is document study/extraction and the hard architecture session is a one-off ~08-17. Both live agents instructed to change their OWN launcher pins (hard rule 1); HPSM rotated onto Opus 5, Secuura switches at its natural wrap. Flagged to Kam: his manual change set the GLOBAL default (~/.claude/settings.json "model": "opus[1m]") but every launcher's --model flag overrides it, so the next launch would have gone back to Fable.)*
