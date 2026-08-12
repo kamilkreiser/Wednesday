@@ -20,6 +20,19 @@ Linear: KS-601 Kintsugi (linked KS-584) + KS-602/603/604/605 + PS-556
 resolution comment ALL created 06:58Z; **cull NOT run** (KS 128 + PS 143 =
 271 active unchanged). Vision 08-11 wrapped 02:15Z (F2 closed, merged to main).
 
+**Refreshed 2026-08-13 06:1x (morning sweep):** Secuura ran FOUR sessions
+08-12 (16-R/17/18/19, all scored 1.0; develop `bd9abdfe4`; KS-531 Done 19→1,
+KS-62 operationId leg #670, KS-519 merged by PETER overnight + his KS-587
+good-news nudge; new Peter tickets KS-610/611; board 250 active KS+PS).
+HPSM sessions 5–8 all 1.0, programme PAUSED for Kam (structure sitting +
+Amplify decision due FRI 14 Aug). Vision 08-12 wrap shipped whole morning
+brief (v0.3.2-tool2.19 live = main @ 637d788); WIL Jira 0 open — idle,
+remaining items Kam-gated/uncommissioned, NOT relaunched today. Fleet mail
+SEND capped until 00:06Z 08-13 (plan-level); queue drain armed ~10:15 AEST.
+**Morning autostart run 2: Secuura s20 + NexusAI launched 06:1x** (briefs
+queued through the gate, in-pane pointers tapped + verified; Vision skipped
+— no non-gated tickets).
+
 ---
 
 ## Template per project
