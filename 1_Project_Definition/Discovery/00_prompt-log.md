@@ -702,3 +702,9 @@ were labelled — so it now starts at today.
 > 13) a
 
 *(Done with it: all 13 routed same hour — Secuura (KS-587 mark-honest, authz verify-close, PS-559 park comment, PS-560 confirm comment, cull proceed, NO Stuart nudges), NexusAI (RD-81 gated CI deploy, RD-55/54 runbook for signed mail, RD-76 Kam-assisted verification + his log-in-when-needed grant, mail migration ticket at go-live class), Vision (WIL-54 convert chips, ACS sender stays). send_brief.sh cc removed same hour and proven cc=None at destination before the rulings mails went out. Stuart-sick noted. Industry scan tonight; WED-90 spec + rollout briefs sent.)*
+
+## 2026-08-12 — Secuura P3 cutover word (verbatim)
+
+> secuura - go on the cutover for #666
+
+*(Done with it: relayed same minute as a ruling mail + pane tap — un-draft #666, pre-merge suites, deploy leg still gated on Kintsugi standing (KS-601), then the S adoption window. The 415 ruling and 3 ambiguous cull tickets remain open on Kam's queue, explicitly not blocked by this.)*
