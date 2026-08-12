@@ -764,3 +764,9 @@ were labelled — so it now starts at today.
 > the 150 slide PPT is from HP.  this represents the customers views so its the closest insight into what they hope to achieve.  Make sure you review this carefully.  this document is too much for me so I would ask many follow up questions from HP and request access to multiple existing solutions.  This is the right approach.  Please start tracking what does not make full sense, what tools and information we should request and what needs further digging
 
 *(Done with it: captured to the record (his pane instructions must never stay chat-only). Verified SENT, not left unsent at the prompt. Folded into session 6 as a fourth deliverable — an open-questions register with three tracked classes: doesn't-make-full-sense · tools/info to request from HP · needs-further-digging. Consequence: I CANCELLED the Opus rotation I had ordered minutes earlier — rotating would have discarded the document understanding his instruction depends on. Launcher pin still moves to Opus 5 so the successor session inherits it.)*
+
+## 2026-08-12 — HPSM continuous-readiness grant (verbatim)
+
+> the HPSM project is not yet started (thats the caviat).  but this project worries me because its a complex project with short timelines.  if there is more the the HPSM agent to do, I am happy for it to keep running 24 hours a day to get the necessary understanding to deliver the project.
+
+*(Done with it: standing grant recorded (learning file + go-slow rule 5). Session 7 launched immediately on the standing readiness brief: Track C self-closable digs + the board's content/data prerequisite tickets (HPSM-15/16/17/18/12/13), all INPUT-ONLY/FOR-DISCUSSION since the SOW is unsigned. Session-chain mechanism: self-wrap at context threshold → Wednesday relaunches on the wrap mail; honest overnight gap stated (no relauncher 23:00–05:30 — a mid-night wrap resumes at the 06:00 sweep).)*
