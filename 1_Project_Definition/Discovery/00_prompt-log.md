@@ -770,3 +770,9 @@ were labelled — so it now starts at today.
 > the HPSM project is not yet started (thats the caviat).  but this project worries me because its a complex project with short timelines.  if there is more the the HPSM agent to do, I am happy for it to keep running 24 hours a day to get the necessary understanding to deliver the project.
 
 *(Done with it: standing grant recorded (learning file + go-slow rule 5). Session 7 launched immediately on the standing readiness brief: Track C self-closable digs + the board's content/data prerequisite tickets (HPSM-15/16/17/18/12/13), all INPUT-ONLY/FOR-DISCUSSION since the SOW is unsigned. Session-chain mechanism: self-wrap at context threshold → Wednesday relaunches on the wrap mail; honest overnight gap stated (no relauncher 23:00–05:30 — a mid-night wrap resumes at the 06:00 sweep).)*
+
+## 2026-08-12 — HPSM structure: Wednesday verifies vs PPT+SOW, discussion tomorrow (verbatim)
+
+> once HPSM agent finishes, and proposes a structure, please check this agains the PPT and SOW.  Tomorrow, lets discuss and flesh out
+
+*(Done with it: WED ticket created; my verification pass runs on the session-8 wrap — the proposed structure (eight-module spine + P05 proposal + schema) checked against the v3 Playbook deck and SOW-01 directly, claims-to-slide/section, before it reaches tomorrow's discussion. Tomorrow's session opens with the fleshing-out sitting.)*
