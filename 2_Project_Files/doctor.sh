@@ -150,6 +150,29 @@ else
   ok "no agent panes live — wake_watch not required"
 fi
 
+# --- Fleet model pins (Kam ruling 2026-08-12: all projects Opus 5; only Wednesday
+# stays on Fable 5 while the usage limit is tight). Launchers pin --model on the
+# exec line, which OVERRIDES the global default — a stale fable pin silently
+# reverts a project at its next launch. Wednesday never edits other projects'
+# launchers (hard rule 1): a warning here routes the fix to that project's own
+# agent or to Kam. Read-only check; remove when Kam lifts the ruling.
+LCONF="$PROJECT_DIR/2_Project_Files/fleet/cockpit/launchers.conf"
+if [ -f "$LCONF" ]; then
+  STALE_PINS=""
+  while IFS='|' read -r LNAME LPATH; do
+    case "$LNAME" in \#*|"") continue ;; esac
+    [ -f "$LPATH" ] || continue
+    if grep -qE -- '--model claude-fable-5' "$LPATH" 2>/dev/null; then
+      STALE_PINS="$STALE_PINS $LNAME"
+    fi
+  done < "$LCONF"
+  if [ -n "$STALE_PINS" ]; then
+    warn "fable-5 pin still in launcher(s):$STALE_PINS" "next launch reverts to Fable — route the pin edit to that project's agent (or Kam)"
+  else
+    ok "fleet launchers carry no fable-5 pins"
+  fi
+fi
+
 echo
 if [ "$HARD_FAIL" = "1" ]; then
   echo "PREFLIGHT: HARD FAILURES above — fix before relying on this machine."
