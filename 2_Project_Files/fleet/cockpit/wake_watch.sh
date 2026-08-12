@@ -101,7 +101,14 @@ except Exception: print('')" 2>/dev/null)
     # count ("← 3 agents"). Matching it would make EVERY pane read busy forever
     # and silently disable this tripwire permanently — a watcher that can never
     # fire. Caught by my own test asserting the wrong expectation, 2026-08-11.
-    if printf '%s' "$tail" | grep -qE 'shell still running|· [0-9]+ (shell|monitor|task)s?([^A-Za-z]|$)'; then
+    # Widened 2026-08-12: a long IN-TURN tool call renders an empty prompt +
+    # a working spinner ("· Testing… (28m 36s · ↓ 98.7k tokens)") — no
+    # shell/monitor/task status, so the 08-11 regex read a 28-min local proof
+    # as idle (false wake on Secuura). The spinner's own artifacts are the
+    # signal: the token counter and the run-in-background/interrupt hints
+    # render ONLY during active work — verified absent from the statusline
+    # ("ctx:NN%…") and the footer ("← N agents"), so no always-busy hazard.
+    if printf '%s' "$tail" | grep -qE 'shell still running|· [0-9]+ (shell|monitor|task)s?([^A-Za-z]|$)|↓ [0-9.]+k? tokens|to run in background|esc to interrupt'; then
       cnt=0
     elif printf '%s\n' "$pline" | grep -qE '^❯[[:space:]]*$' || printf '%s' "$tail" | grep -qE 'Pick or adjust'; then
       if [ "$prev" = "$h" ]; then cnt=$((cnt + 1)); else cnt=1; fi

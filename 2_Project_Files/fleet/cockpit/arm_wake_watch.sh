@@ -90,9 +90,31 @@ RUNNER='
     if [ -n "$MSG" ]; then
         if '"$TMUX_BIN"' list-panes -t fleet:0 -F "#{@cockpit_name}|#{pane_id}" 2>/dev/null | grep -q "^wednesday|"; then
           WPANE=$('"$TMUX_BIN"' list-panes -t fleet:0 -F "#{@cockpit_name}|#{pane_id}" 2>/dev/null | grep "^wednesday|" | head -1 | cut -d"|" -f2)
-          '"$TMUX_BIN"' send-keys -t "$WPANE" -l "$MSG" && '"$TMUX_BIN"' send-keys -t "$WPANE" Enter \
-            && echo "$(date "+%Y-%m-%d %H:%M:%S") tapped wednesday pane $WPANE" \
-            || echo "$(date "+%Y-%m-%d %H:%M:%S") FAILED to tap wednesday pane"
+          # KAM-TYPING GUARD (2026-08-12): the tap presses Enter in the
+          # wednesday pane — if Kam is mid-typing there, it SUBMITS his
+          # half-written message (happened twice today, both truncated at the
+          # wake text). Before tapping: read the prompt line, strip SGR-2
+          # ghost spans + colour codes + NBSP; if any real text sits after
+          # the prompt char, wait 30s and re-check, up to 20 tries (10 min).
+          # Still occupied -> log-only wake; losing immediacy beats
+          # destroying his input. (Ghost text does NOT block the tap - it is
+          # not his.)
+          TRIES=0
+          while [ "$TRIES" -lt 20 ]; do
+            PTXT=$('"$TMUX_BIN"' capture-pane -t "$WPANE" -p -e 2>/dev/null | grep -a "$(printf "\342\235\257")" | tail -1 | \
+              LC_ALL=C perl -pe "s/\x1b\[2m.*?(?=\x1b|\$)//g; s/\x1b\[[0-9;]*m//g; s/\xc2\xa0/ /g; s/^.*\xe2\x9d\xaf//" 2>/dev/null | tr -d "[:space:]")
+            [ -z "$PTXT" ] && break
+            TRIES=$((TRIES + 1))
+            echo "$(date "+%Y-%m-%d %H:%M:%S") tap held - text at wednesday prompt (try $TRIES/20)"
+            sleep 30
+          done
+          if [ -n "$PTXT" ]; then
+            echo "$(date "+%Y-%m-%d %H:%M:%S") WAKE LOG-ONLY (prompt still occupied after 10 min): $MSG"
+          else
+            '"$TMUX_BIN"' send-keys -t "$WPANE" -l "$MSG" && '"$TMUX_BIN"' send-keys -t "$WPANE" Enter \
+              && echo "$(date "+%Y-%m-%d %H:%M:%S") tapped wednesday pane $WPANE" \
+              || echo "$(date "+%Y-%m-%d %H:%M:%S") FAILED to tap wednesday pane"
+          fi
         else
           echo "$(date "+%Y-%m-%d %H:%M:%S") no wednesday pane — WAKE logged only"
         fi
