@@ -726,3 +726,9 @@ were labelled — so it now starts at today.
 > yes, prepare the strawman for the refinement session
 
 *(Done with it: commissioned to the live HPSM session 2 as its main task after the mechanical items — strawman architecture + draft development plan + refinement-session pack, all FOR-DISCUSSION, dated citations on GA claims, no build tickets/resources/HP-facing output.)*
+
+## 2026-08-12 — HPSM az login done (verbatim)
+
+> done, az account show confirms d500ebad
+
+*(Done with it: HPSM session 4 briefed + launched for HPSM-7 — hpsm-dev-rg + scoped SP, nothing billable.)*
