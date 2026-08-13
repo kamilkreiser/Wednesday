@@ -1,3 +1,45 @@
+## 2026-08-13/14 — Overnight session (22:0x → 05:30 shift change)
+
+**Kam's order before bed:** continue the boot sequence, and work Secuura tickets +
+HPSM research overnight. Treated as authorisation for two standing grants already
+recorded (Secuura's continue-order; the HPSM continuous-readiness grant), not new scope.
+
+**Nine fleet sessions, all scored 1.0** — HPSM 17–20, Secuura 28–32. Every headline
+claim re-derived from sources: contract `.docx` extractions in my own scratchpad,
+`git ls-remote` against the remote for every merge, the .pptx package read directly.
+
+**Delivered (HPSM, readiness only — programme not started):** E8 gap classification ·
+Monday run sheet · Delivery Plan v2-vs-v3 diff · Guardrails-Preview position · P16
+pricing shapes · X5 precedence-correction item · X6 acceptance-clock position · H17
+rewritten · G7 draft · reconciliation case · non-money reconciliation slice.
+**Headline: SOW §3 binds Delivery & Investment Plan v2 while §14's payment table is
+v3's verbatim, and all six SOWs cite v2. Second: CT §18 is a clause pack Datasec
+drafted, four of six clauses never fully reached SOW-01, and in every partial case
+the binding half arrived while the protecting half did not.**
+
+**Delivered (Secuura):** migration to its own inbox · #684, #685, #688, #689, #690,
+#691 merged · #686 left honestly red on KS-628 · #692, #693 in flight at wrap ·
+KS-626/627/628/629/630/631/632/633 filed. **B-3 would have reset Kam's real
+SYSTEM_ADMIN account to a repo-published password — fixed, unshipped.**
+
+**Built (mine):** `fleet/inbox_routing.conf` + per-project routing in `send_brief.sh`
+(WED-104, closed) · path-ownership check in `send_brief.sh` (+ its false-positive fix)
+· `arm_wake_watch.sh cycle`. All exercised on both paths before use.
+
+**Filed:** two lessons (headline-must-match-the-operative-case;
+establish-authority-before-reconciling), a-check-that-cannot-fail extended four times,
+six ledger rows, WED-107/108/109.
+
+**My failures, all agent-caught or caught by running a failure path:** a false
+"already invoiced" premise · two unreachable-path citations · killing the watcher
+runner a third time · a new gate that passed everything · a destructive step chained
+behind a step that could refuse.
+
+**State at wrap:** no agent live, watcher mail-only, tree clean and pushed, doctor OK
+with one warning (stale model pins in three other projects' launchers).
+
+---
+
 ## 2026-08-13 (evening) — HP architecture pass completed + Monday deck built; per-project inboxes built and proven; four of my own claims killed by my own fleet
 
 **The evening's shape: seven fleet sessions scored (HPSM 12–16, Secuura 25/27),
