@@ -117,9 +117,16 @@ EOF
       *) continue ;;
     esac
     src="$(printf '%s' "$line" | awk -F'|' '{print $2}')"
-    # a relative path = contains a slash, does not start with / or a scheme
+    # a relative path = contains a slash, does not start with / or a scheme.
+    # FALSE POSITIVE fixed 2026-08-14, one hour after this gate shipped: a source
+    # that is a COMMAND rather than a file (`git ls-remote origin refs/heads/develop`,
+    # `GET /v0/inboxes/...`) contains slashes and was being refused. A gate that
+    # blocks legitimate sends is worse than no gate, because the next session routes
+    # around it. Commands are marked by backticks or an HTTP verb; skip those.
     case "$src" in
       *" /"*|*"http://"*|*"https://"*) continue ;;
+      *'`'*) continue ;;
+      *GET\ *|*POST\ *|*PUT\ *|*DELETE\ *) continue ;;
     esac
     printf '%s' "$src" | grep -q '/' || continue
     # NOTE: two greps on purpose. The phrase markers are case-insensitive; the
