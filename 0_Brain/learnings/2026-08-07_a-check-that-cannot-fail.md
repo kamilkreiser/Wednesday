@@ -134,3 +134,33 @@ message-layer twin of).
 [[2026-08-06_never-discard-stderr]],
 [[2026-08-06_exercise-mechanisms-before-arming]],
 [[2026-08-07_enumerate-every-surface-before-done]], [[_ledger]]
+
+### The family, completed overnight 2026-08-13/14 (Secuura/Blockchain s28–s32)
+
+One agent produced five more members in five sessions. Kept together because the
+shared property is what matters: **the check failed in a way that looked like the
+answer.** None of them involved the code under test.
+
+- **cannot see** — a status query with a short SHA returned "0 runs, 0 failures".
+- **cannot parse** — a strict JSON load died on a control byte and reported zero
+  matches; a CI poll ran blind for ten minutes the same way.
+- **cannot receive input** — a `docker exec` heredoc with no `-i`, so psql silently
+  never ran and the empty result read as clean.
+- **runs before its own setup** — a test setting `process.env` after ESM had
+  hoisted its imports.
+- **run by the WRONG RUNNER** — vitest against a jest suite: "38 files failed, no
+  tests", which reads as the code being broken when nothing ran at all.
+
+Their generalisation, adopted verbatim: **a check that cannot parse, cannot receive
+input, or runs before its own setup is the same defect as a check that cannot fail.**
+
+**The inverse, done right, belongs here too:** when two auth test files showed red,
+the agent stashed its own changes and re-ran clean before attributing them — they
+were pre-existing and unrelated. *Blaming your own change for someone else's red is
+the same error as missing your own.*
+
+**And the measurement that makes the positive-control rule concrete**, taken three
+times on different code: with the guard set to refuse everything, **24 of 35 tests
+still passed** (image validation), **9 of 16** (token encryption), **7 of 10**
+(billing idempotency). Every survivor was a rejection case. A suite without a
+must-succeed case cannot tell you which of those numbers you are looking at.
