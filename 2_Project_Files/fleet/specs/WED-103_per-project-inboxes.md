@@ -142,6 +142,31 @@ model stated above is corrected: a scoped key is not "read and send for one
 inbox", it is **"read, send, and mint further keys for one inbox"**. Accepted as
 a residual, not a design defect.
 
+**3. Migrated agents can no longer re-verify Kam's v1.3 grant (found 2026-08-14,
+Secuura/Blockchain s30 boot).** The signed delegation grant
+(`<8DF1B897-3EC1-453C-8301-51F4090B3DA9@me.com>`, dkim=pass header.i=@me.com) lives
+on `coagent@`. A project's inbox-scoped key returns **404** there by construction —
+which is the isolation working — so **the artefact the protocol requires every
+agent to re-check each session is now permanently unreachable from every migrated
+project.** HPSM was already in this position and had not noticed; NexusAI and
+Vision inherit it on migration.
+
+**This is a defect in this design, not in any agent.** It was surfaced by an agent
+doing its boot verification properly and flagging that it could not complete a
+required check, rather than skipping it silently.
+
+**The fix is Kam's hand and cannot be mine: he re-sends the signed grant to each
+per-project inbox.** A forward from me carries the platform's signature and mine,
+not his — the relay v1.3 exists to refuse. *A grant I could send myself would
+authorise nothing* ([[2026-08-07_protocol-v1.3-signed-delegation]] point 3). **If I
+ever offer an agent a forwarded copy, the correct response is to refuse it.**
+
+**Interim (in force):** each agent's own recorded verification — Message-ID plus
+full auth results in its `history.md` from its last bus-access session — is
+provenance for **non-approval-class work only**. On the first approval-class
+action, the agent HOLDS. Tracked as **WED-108** (P1). Add the re-send to the
+create-an-inbox checklist so a new project never starts in this state.
+
 **2. Five LEGACY ORG-WIDE keys predate this migration and each spans every
 inbox** — `multi-agent`, `secure_cursor`, `secure_test_claude`, `coAgent`,
 `Clara`, all created 2026-03-15 → 2026-04-19, i.e. months before the per-project
