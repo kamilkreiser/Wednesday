@@ -101,6 +101,34 @@ distinguishes "the guard is discriminating" from "nothing is getting through".
   character broke a strict JSON parse, and a status query used a short SHA and
   returned "0 runs, 0 failures".
 
+### The third member: a check that MISREPORTS what it saw (2026-08-14, same agent)
+
+One GitHub secondary rate limit on a GHCR pull, wearing three disguises at once:
+1. **Docker renders a 403 rate limit as** *"repository does not exist or may
+   require 'docker login'"* — printed after `Login Succeeded!`, with a correct tag.
+2. **The enforce step renders a SKIPPED suite as** *"k6 smoke failed"*.
+3. **Re-running relocates the failure to a different suite**, so the second red
+   reads as a different problem.
+
+An operator reading only the top line audits PAT scopes and package visibility and
+finds nothing. That is not hypothetical: it happened on **2026-08-05** with PR
+#646, and I mis-attributed those reds to real Schemathesis/Akto findings when no
+test had run — a Secuura session caught it. **Same mechanism, eight days apart.**
+
+**And the nastiest variant, worth its own name: a remedy that hides its own
+ineffectiveness by MOVING the symptom.** Re-running felt like new information and
+was the same information; only comparing the two runs' *victim suites* showed the
+retry had changed nothing. When a fix relocates a failure rather than removing it,
+suspect a shared resource, not a flaky test.
+
+**How to apply:** when a failure message names a cause, check that the message
+*could* have named a different one. Error strings are written by whoever expected
+a different failure than the one you have — a 403 rendered as "does not exist", a
+skip rendered as a fail, a rate limit rendered as a permissions problem. **Find
+the first failure and read the raw step output, not the summary that interprets
+it** (see [[2026-08-06_artifact-presence-is-not-execution]], which this is the
+message-layer twin of).
+
 **Related:** [[2026-08-07_valid-is-not-delivered]] (my instance),
 [[2026-08-06_artifact-presence-is-not-execution]],
 [[2026-08-06_never-discard-stderr]],
