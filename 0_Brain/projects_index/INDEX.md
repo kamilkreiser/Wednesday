@@ -33,6 +33,20 @@ SEND capped until 00:06Z 08-13 (plan-level); queue drain armed ~10:15 AEST.
 queued through the gate, in-pane pointers tapped + verified; Vision skipped
 — no non-gated tickets).
 
+**Refreshed 2026-08-13 ~22:1x (overnight session, after the evening wrap).**
+Fleet floor was clean at boot — no agents live, no unanswered mail in either
+fleet inbox or any of the four per-project inboxes, dashboard chat quiet since
+08-10. Histories re-read on DevMASTER: **Secuura newest = session 27**
+(`develop` at `eb4ebbca3`, #683 SSRF guard merged; **PR #684 KS-488 C-1 open
+with CI in flight at hand-off**; migration to `secuura-blockchain@` deliberately
+deferred to next boot; 239 active KS+PS). **HPSM newest = session 16** (Monday
+deck delivered, 40 slides / 40 notes, 32 verdict slots still empty, board at 33;
+**already migrated to `datasec-hpsm@` and off the shared bus** — the first
+project to move). NexusAI + Vision idle, Kam-gated, not launched.
+**Launched under Kam's overnight order:** Secuura **s28** (%2) and HPSM **s17**
+(%3), both Opus 5, briefs delivered through the fixed routing gate and verified
+at their destinations. Watcher re-armed agents=2, baseline preserved at 11:54.
+
 ---
 
 ## Template per project

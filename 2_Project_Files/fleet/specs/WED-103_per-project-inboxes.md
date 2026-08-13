@@ -128,6 +128,35 @@ this drive.
 - It does not stop an agent quoting client content into the wrong file; it
   stops it acquiring that content by accident in the first place.
 
+### Two residuals found AFTER arming (2026-08-13 ~22:2x)
+
+**1. A scoped key is also a key-MINTING authority for its own inbox.** Found by
+the Secuura/Blockchain agent during its migration and disclosed unprompted:
+`POST /v0/api-keys` with an inbox-scoped key returns **200** and creates a
+further key — scoped to that same inbox (verified on the created key's
+`inbox_id`). `POST /v0/inboxes` is refused **403**, and `GET /v0/api-keys` with
+a scoped key returns **count 1** (its own only, no enumeration of other
+clients'). **So containment holds and the blast radius is unchanged** — this is
+key proliferation *inside* one boundary, not privilege escalation. But the
+model stated above is corrected: a scoped key is not "read and send for one
+inbox", it is **"read, send, and mint further keys for one inbox"**. Accepted as
+a residual, not a design defect.
+
+**2. Five LEGACY ORG-WIDE keys predate this migration and each spans every
+inbox** — `multi-agent`, `secure_cursor`, `secure_test_claude`, `coAgent`,
+`Clara`, all created 2026-03-15 → 2026-04-19, i.e. months before the per-project
+inboxes existed. **This is the real bound on the isolation proven above.** The
+404s are genuine for the scoped keys; they say nothing about a process still
+holding one of these five. Whoever holds `coAgent` or `Clara` today can read
+every project's inbox, including all four new ones — which is exactly the
+cross-client exposure WED-103 exists to remove, reachable by a different door.
+**Not actionable by me:** deleting a key is irreversible and may break a running
+side project, so it is Kam's signature class. Raised as an audit item
+(**WED-107**): identify what holds each of the five, retire or re-scope what is
+dead, and keep only what genuinely needs breadth. Discovered while independently
+verifying the Secuura agent's incident disclosure — the audit was not the
+purpose of the check, which is usually how these are found.
+
 **Related:** `0_Brain/learnings/2026-08-13_shared-bus-tag-filter-or-leak.md` ·
 `0_Brain/learnings/2026-08-04_delegation-v2-observability.md` (R0) ·
 `0_Brain/learnings/2026-08-06_exercise-mechanisms-before-arming.md` ·

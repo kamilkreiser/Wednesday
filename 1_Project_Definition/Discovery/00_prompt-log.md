@@ -821,3 +821,8 @@ were labelled — so it now starts at today.
 > I have been thinking of the best way to review things.  On Monday, can you please present  to me as if I was the client.  Present the scope, present a high level of the architecture and solution, present the plan of action and then we can review the detail of the architecture.  Once you are ready for this, please create a PPT that can be used as the basis of this presentation
 
 *Done with: Monday format set — Wednesday PRESENTS (voice) to Kam-as-client: scope → high-level architecture/solution → plan of action → then detail review. HPSM s16 queued to BUILD the .pptx (client-facing narrative deck + clearly-separated internal annex; recommendations stay marked as recommendations, verdicts empty). Sequenced after s14 (ask-list/P15) and s15 (post-go-live) so it presents finished content.*
+
+## 2026-08-13 (~22:0x, after the evening wrap — overnight order)
+> hello.  I am back.  please continue with the seequence.  I will head to bed but if there are any other tickets to close for secuura or any other research refinement for HPSM please do that over night
+
+*Done with: full boot sequence run (55 lessons + ledger, Linear 69 active, both fleet inboxes + all four per-project inboxes read, dashboard chat, DevMASTER histories). Treated as the overnight authorisation for two standing grants already recorded: Secuura's continue-order (ticket-outstanding work) and the HPSM continuous-readiness grant (2026-08-12). Blocking tool debt fixed first (WED-104 — send_brief.sh routed to the retired shared bus). Boards swept read-only BEFORE briefing; Secuura s28 + HPSM s17 briefed and launched.*

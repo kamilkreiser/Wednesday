@@ -21,6 +21,7 @@ PROJECT_DIR="$(cd -P "$SELF_DIR/../.." && pwd)"
 ENV_FILE="$PROJECT_DIR/4_Credentials/.env"
 INBOX="wednesday-agent@agentmail.to"
 BUS="coagent@agentmail.to"
+ROUTING="$SELF_DIR/inbox_routing.conf"
 
 TO=""; SUBJECT=""; BODY_FILE=""; KIND="brief"
 while [ $# -gt 0 ]; do
@@ -38,6 +39,24 @@ done
 [ -f "$BODY_FILE" ] || { echo "body file not found: $BODY_FILE" >&2; exit 2; }
 
 BODY="$(cat "$BODY_FILE")"
+
+# ── ROUTING (WED-104) ─────────────────────────────────────────────────────
+# Which inbox actually receives this. A project not listed in the routing file
+# is REFUSED — never silently defaulted to the shared bus, which is exactly the
+# channel the per-project migration exists to stop using.
+[ -f "$ROUTING" ] || { echo "no routing file at $ROUTING" >&2; exit 2; }
+ROUTE_LINE="$(grep -v '^[[:space:]]*#' "$ROUTING" | grep -F "$TO|" | head -1)"
+[ -n "$ROUTE_LINE" ] || {
+  echo "BRIEF REFUSED — '$TO' is not in $ROUTING." >&2
+  echo "Add '<Client>/<Project>|<inbox>|<yes|no>' there (and create the inbox) before briefing it." >&2
+  exit 1; }
+PROJ_INBOX="$(printf '%s' "$ROUTE_LINE" | cut -d'|' -f2)"
+MIGRATED="$(printf '%s' "$ROUTE_LINE" | cut -d'|' -f3)"
+case "$MIGRATED" in
+  yes) RECIPIENTS="$PROJ_INBOX" ;;
+  no)  RECIPIENTS="$PROJ_INBOX,$BUS" ;;
+  *)   echo "BRIEF REFUSED — routing entry for '$TO' has a bad migrated flag: '$MIGRATED' (want yes|no)" >&2; exit 1 ;;
+esac
 
 # ── THE GATE ──────────────────────────────────────────────────────────────
 # A brief must carry a PROVENANCE block. Each entry states a fact, WHERE it was
@@ -103,9 +122,9 @@ set -a; . "$ENV_FILE" 2>/dev/null; set +a
 # is no cc to point at. Re-add only on a recorded Kam instruction.
 
 FULL_SUBJECT="[Wednesday -> $TO] $SUBJECT"
-CODE="$(BODY="$BODY" SUBJ="$FULL_SUBJECT" BUSADDR="$BUS" INBOXADDR="$INBOX" python3 - <<'PYEOF'
+CODE="$(BODY="$BODY" SUBJ="$FULL_SUBJECT" RCPTS="$RECIPIENTS" INBOXADDR="$INBOX" python3 - <<'PYEOF'
 import json, os, urllib.request
-payload = {"to": [os.environ["BUSADDR"]],
+payload = {"to": os.environ["RCPTS"].split(","),
            "subject": os.environ["SUBJ"], "text": os.environ["BODY"]}
 req = urllib.request.Request(
     f"https://api.agentmail.to/v0/inboxes/{os.environ['INBOXADDR']}/messages/send",
@@ -119,6 +138,7 @@ PYEOF
 )"
 if [ "$CODE" = "200" ]; then
   echo "sent: $FULL_SUBJECT"
+  echo "  -> $RECIPIENTS"
 else
   echo "SEND FAILED ($CODE)" >&2; exit 2
 fi
