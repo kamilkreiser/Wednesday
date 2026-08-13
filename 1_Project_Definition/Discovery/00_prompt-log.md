@@ -788,3 +788,27 @@ were labelled — so it now starts at today.
 > please get the secuura agent to continue with cleaning up and actioning tickets.  Please get the HPSM agent to work through the straw man, solution architecture so we can discuss in detail and refine on monday
 
 *Done with it:* Secuura session-21 brief (standing burn continuation: #677 merge-on-green → KS-613 → 615/616 → 617 → 612 → H queue) + HPSM architecture deep-work brief (strawman worked through for the MONDAY 2026-08-17 refinement session, FOR-DISCUSSION only per the 24h readiness grant). Both queued through the gate (mail capped until ~10:06 AEST), panes launched, pointers tapped.
+
+## 2026-08-13 (evening session)
+> thank you.  I saw you already got secuura agent working.  can you please get the HPSM agent going on the review as well.
+
+*Done with: HPSM s10 launched on a review-pass brief (adversarial architecture review + HPSM-28/rollback options + evidence bucket), readiness-only constraints unchanged.*
+
+## 2026-08-13 (evening, cont.)
+> great find.  did the HPSM agent do a full review of the HP PPT (the 150 page one).  this is a great resource to understand all HP thoughts, what they need, how it should operate and other tools we will need to use or incorporate
+
+> can you get the agent to do an architecture pass.  we will review and workshop on monday
+
+*Done with: verified existing PPT coverage (full-deck scope study + s87–146 content inventory; architecture pass explicitly NOT done), then commissioned HPSM s11: architecture-lens pass over v3 + technical decks → HP tools & operational-model register, feeding the Monday workshop.*
+> incorporate the SOW and other info into this pass
+
+*Folded into the s11 brief before send: reconciliation pass — every register row carries a contract-position column (SOW-01/PRD/Commercial Terms/GTM/MS Solution Architecture: aligned/silent/divergent).*
+> for HPSM we will need to automate as much as possible, incorporate into micrsosoft infrastructure or on prem as much as possible and utilise AI where possible.  one of the bigest problems thus far has been that security analyssis required a lot of experience and getting information was hard.  If we can 1)automate 2)use multi agents in cetralised as well as on device and in the edge we can get a full (fuller) picture to then be useful.  has this approach been worked into the architecture?
+
+*Done with: checked the worked-through architecture (grep-verified: "automat" 0, "multi-agent" 0, "on-device" 0, "on-prem" 0 — agents appear only as Foundry runtime choices). Answered honestly: NOT worked in as a design philosophy. Commissioned it into s12 as a new position (P14) with contract reconciliation, for Monday.*
+> the idea is to use a similar approach to Claude to claude or how you operate where localised agents can test ageinst existing environemnts and create a full picture.  this will never be a one command prompt so back and forth is necessary.  At the same time, clients will not trust that data going to 3rd parties so we will need to work on a way that the data is tokenised or controlled locally and shared only if required and with full permissions / gates
+
+*Done with: relayed into the running s12 session as P14 refinement — (a) the interaction model is a conversational orchestrator↔local-agent loop (the Wednesday-fleet / Claude-to-Claude pattern), not one-shot prompting; (b) data tokenised/controlled locally, shared only if required behind permission gates, as a first-class P14 design constraint.*
+> OK.  for monday, we will use whats already there.  I will get you to read or communicate the whole prompt so you can communicate the components to me verbally.  Not today but when we are ready
+
+*Done with: Monday workshop mode = existing tooling (his mic of choice + my speech, full replies not taps). Wednesday reads/voices the whole architecture pack component by component when Kam says ready. No build. Logged as a WED-51 note, not a task for today.*
