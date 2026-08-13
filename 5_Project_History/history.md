@@ -1,3 +1,105 @@
+## 2026-08-13 (evening) — HP architecture pass completed + Monday deck built; per-project inboxes built and proven; four of my own claims killed by my own fleet
+
+**The evening's shape: seven fleet sessions scored (HPSM 12–16, Secuura 25/27),
+and the most valuable output was the four times I was wrong and an agent proved
+it.** Every score was verified against sources rather than wraps — SOW/PRD
+`.docx` extractions, git reads on `origin/develop`, Linear/Jira, the `.pptx`
+binary, and running the deck's own verifier (2,618 checks, all passed).
+
+**HPSM — the architecture pass, commissioned and finished tonight.** Kam asked
+whether the 151-slide HP playbook had been read as architecture. It had been
+read for scope, not architecture, so s11–s13 produced the tools-and-operational-
+model register (clause-reconciled against SOW-01, PRD, the Commercial Alignment
+Addendum, GTM and the MS Solution Architecture), then s13's skeleton sweep found
+**eight citation divergences in our own decision pack** — including a SOW "§4.7"
+cited three times that does not exist, and a precedence clause read backwards.
+Two findings reshape Monday: **Control Hub already computes the per-device
+security score we thought had no source** (H3 made concrete), and **HP's plan of
+record names our MVP as the channel licence portal** while §4.2 excludes commerce
+(H14, a CR question). The rank-4 Commercial Alignment Addendum — read at the
+clause for the first time — carries the commercial fields the PRD lacks entirely,
+which repeats HPSM-29's exposure across the whole commercial surface (H10).
+
+**Kam's design steer became P14/D-20.** Automate, Microsoft-native or on-prem,
+multi-agent gathering centralised/on-device/edge, with a conversational
+orchestrator↔local-agent loop and data tokenised or held locally behind
+permission gates. My answer that it was absent from the architecture was **half
+wrong**: the MS Solution Architecture §19 — a document HP holds — already names
+"Agentic Security Services Platform: multi-agent orchestration with explicit
+human approval/control plane". The direction was HP-facing; the DESIGN never
+existed. Monday now asks which seams the MVP builds, not whether to raise it.
+
+**Three commissions from my own end-to-end read of the stack** (Kam approved
+two, then a third): the **consolidated HP ask-list** (301 lines, everything
+HP-owned in eight conversation clusters, each row costed with its payment gate
+and typed correction/confirmation/decision, plus a silence calendar dating every
+assumption — P02 ranked first because *the approver of the security evidence
+pack does not exist*); the **security-evidence phase as a risk position**; and
+the **post-go-live gap**. Both of the latter killed my framing and produced
+better findings — see below.
+
+**The Monday deck (s16).** 40 slides: 28 client-facing in Kam's order (scope →
+architecture → plan of action → what needs deciding) and 12 in an internal annex
+behind an unmistakable divider, with build/verify scripts and a generated outline
+that cannot drift from the slides. Speaker notes written to be spoken from under
+interruption. **Its best output was a containment bug in its own safety switch:**
+the client-safe build mode stripped the annex slides and shipped internal
+reasoning in the SPEAKER NOTES — including a payment defect in a document HP
+holds — while a slide already asserted that route was clean. Found by running the
+switch rather than documenting it; fixed as a build-time marker plus a verifier
+that fails on leak. Filed fleet-wide as
+`learnings/2026-08-13_containment-never-run-is-a-claim.md`.
+
+**WED-103 built and proven: per-project inboxes.** Kam upgraded Agent Mail to
+Developer (US$20/mo) after two cap outages in a day; verified live by draining
+the queue rather than trusting the plan page. Four inboxes created; **inbox-
+scoped keys turn hard rule 2 from instruction into construction** — exercised on
+four paths before briefing anyone: own inbox 200, another client's 404, the
+shared bus 404, and inbox enumeration returning `count: 1`, so an agent cannot
+learn from the mail layer that another client exists. Migration designed so no
+secret travels (each agent mints its own key in its own project). **HPSM migrated
+the same night** and added a cross-client probe I had not asked for. Revocation
+measured at ~5–8 minutes eventually-consistent.
+
+**Secuura (s25/s27, one 0.9).** KS-612's re-recon completed across all streams —
+the only register movement since v1 is our own remediation. Then #683 merged
+(`eb4ebbca3`): one SSRF guard for both webhook sinks at registration and send
+time, which surfaced **a third defect nobody had asked about — originate's entire
+IPv6 branch was inert** (bracketed hostnames), with `[::ffff:169.254.169.254]`
+reaching Azure IMDS; live-proved with a positive control. It also found the unit
+suite RED on develop since #674, in no brief. The 0.9 was s26 stopping early
+without a QUESTION mail; the cadence rule now says a mid-batch scope question
+goes by mail while unblocked items continue.
+
+**What I got wrong, in the open (all ledgered with diagnoses).** My
+security-evidence challenge died on five contract clauses. My "absent from every
+document" claim was made without opening the Commercial Terms — **w=4, three
+hours after I filed that rule at w=3**. A CONFIRMED asserted a closed loop for a
+mail that never sent. A pane tap claimed to *be* the instruction, in a message
+warning about ghost text, and the agent correctly refused it. And a vendor bug
+report went to AgentMail support before my own measurement finished; corrected in
+the same channel within minutes. **The pattern: when the channel of record
+degraded under the send cap, I improvised onto the pane and stopped labelling the
+substitution — degraded operation is exactly when provenance must tighten.**
+Every one of these cost nothing because the agents were briefed to test rather
+than confirm, and because Kam's double-check culture makes being called out
+cheap. His words tonight: *"good catch, that's why we double check."*
+
+**Monday's format, set by Kam:** Wednesday presents to him as if he were the
+client — scope, high-level architecture, plan of action — then the detail
+review, spoken, from the deck's notes, using the tooling already in place.
+
+**Open on Kam's desk:** Amplify (HPSM-25) **due Friday 14 Aug** · the CT §16
+warranty retro-fit (**free before signature, a CR after** — the earliest new
+clock) · the CSPA (rank 1, above the SOW, absent from the corpus) · the org
+boundary ruling gating KS-486/621 · the workspace `CLAUDE.md` inbox text (his
+hand) · Kintsugi, now carrying eight unshipped changes including a security fix.
+
+**Linear:** WED-104 (send_brief per-project routing — blocking), WED-105 (tap
+wording template), WED-106 (absence-claim pre-flight).
+
+---
+
 ## 2026-08-11 — Coordinator/QA model's first full day: two production catches, PS-556 resolved by debate, Stuart/Phil meeting operationalised
 
 **The commission executed on day one.** Kam defined the coordinator-not-carrier
