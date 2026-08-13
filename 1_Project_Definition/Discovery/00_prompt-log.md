@@ -812,3 +812,6 @@ were labelled — so it now starts at today.
 > OK.  for monday, we will use whats already there.  I will get you to read or communicate the whole prompt so you can communicate the components to me verbally.  Not today but when we are ready
 
 *Done with: Monday workshop mode = existing tooling (his mic of choice + my speech, full replies not taps). Wednesday reads/voices the whole architecture pack component by component when Kam says ready. No build. Logged as a WED-51 note, not a task for today.*
+> [on Wednesday's HPSM assessment — 5 challenges] yes to both
+
+*Done with: HPSM s14 commissioned — (1) consolidated prioritised HP ask-list with money attached (one document for Kam's next HP conversation), (2) the P7 one-week security-evidence-pack challenge written as a proper risk position with options. Other three challenges (P02 as risk position, D-12 productivity assumption, post-go-live gap) noted as Kam-desk/not commissioned.*
