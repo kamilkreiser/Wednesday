@@ -64,6 +64,43 @@ have come out differently?"**
 while I was diagnosing my own instance of it. That is the second protocol
 improvement the fleet handed me today. My job is to notice and propagate them.
 
+## The concrete remedy, added 2026-08-13 (Secuura/Blockchain s28)
+
+The rule above asks *"what would make this check fail?"* — good, but it is a
+question you have to remember to ask. The Secuura agent found the **structural**
+version, and it is cheap enough to be non-negotiable:
+
+> **A negative-only test suite cannot distinguish "correctly rejecting" from
+> "refusing everything". Every rejection suite needs a case that MUST succeed.**
+
+**The case that taught it.** Its first HTTP matrix for the KYC callback guard
+returned **401 for every probe — including the positive control.** Six rejections,
+all "correct". Without the must-succeed case that reads as *"every rejection works,
+confirmed"*, and it would have been reported that way. The logs showed why: the
+route is JWT-gated, so **none of the six probes ever reached the guard being
+tested.** Two real defects fell out of asking why the positive control failed
+(the route Microsoft is told to call does not exist — registered URL 404, real
+route 200; and the provider authenticates with an api-key and cannot hold a
+Secuura JWT).
+
+**Why this generalises past HTTP:** a blanket refusal, an empty result set, a
+universally-failing parse and a permanently-down dependency all *look identical*
+to a working negative test. The positive control is the only thing that
+distinguishes "the guard is discriminating" from "nothing is getting through".
+
+**How to apply:**
+- Any suite that asserts things are rejected/blocked/filtered/denied carries at
+  least one case that must be **accepted**, and it is a failure of the suite if
+  that case does not pass.
+- Same for absence checks: prove the search *can* find something before reporting
+  that it found nothing. (My own `cycle` subcommand shipped its first draft with
+  an unbound variable, so it searched for nothing and reported "no child" — the
+  same defect, in the code written to fix a repeated failure.)
+- A check that cannot fail and **a check that cannot see** are the same defect —
+  their phrase, after a CI poll ran blind for ten minutes because a control
+  character broke a strict JSON parse, and a status query used a short SHA and
+  returned "0 runs, 0 failures".
+
 **Related:** [[2026-08-07_valid-is-not-delivered]] (my instance),
 [[2026-08-06_artifact-presence-is-not-execution]],
 [[2026-08-06_never-discard-stderr]],
