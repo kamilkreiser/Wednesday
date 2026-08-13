@@ -25,6 +25,7 @@
 #
 # Usage: arm_wake_watch.sh            (arm if not armed)
 #        arm_wake_watch.sh status     (report, exit 0 armed / 1 not)
+#        arm_wake_watch.sh cycle      (re-arm NOW: kill the CHILD only, never the runner)
 #        arm_wake_watch.sh disarm     (stop runner + watcher)
 
 set -u
@@ -52,8 +53,38 @@ case "${1:-arm}" in
     echo "disarmed"
     exit 0
     ;;
+  cycle)
+    # Force the runner to re-arm NOW, so stable_n/agents are recomputed after a
+    # pane is added or closed — WITHOUT touching the runner itself.
+    #
+    # Why this is a subcommand and not a command I type (ledger w=3, 2026-08-13):
+    # three times in one day I cycled by hand with a grep on 'wake_watch.sh' and
+    # a positional head -1, and the RUNNER matched too — its bash -c body quotes
+    # the child's path. Twice that killed the watcher I was trying to refresh.
+    # The discriminator is not greppable by eye but it is exact: the runner's pid
+    # is in PIDFILE; every other match is a child. Encoding it is the fix,
+    # because the selector lesson had already been written and still did not
+    # prevent the third occurrence.
+    runner_alive || { echo "NOT armed — nothing to cycle (run 'arm' first)" >&2; exit 1; }
+    RPID="$(cat "$PIDFILE")"
+    [ -x "$HERE/wake_watch.sh" ] || { echo "cycle ABORTED — $HERE/wake_watch.sh not found or not executable" >&2; exit 2; }
+    KILLED=0
+    while IFS= read -r line; do
+      cpid="${line%% *}"
+      [ "$cpid" = "$RPID" ] && continue          # never the runner
+      kill "$cpid" 2>/dev/null && KILLED=$((KILLED + 1))
+    done <<EOF
+$(ps -eo pid=,command= | awk -v s="$HERE/wake_watch.sh" '$2 == s || $3 == s {print $1" "$0}')
+EOF
+    if [ "$KILLED" -eq 0 ]; then
+      echo "runner $RPID alive; no child to cycle (it will re-arm on its own timer)"
+    else
+      echo "cycled: killed $KILLED child process(es); runner $RPID untouched, re-arms within ~60s"
+    fi
+    exit 0
+    ;;
   arm) ;;
-  *) echo "usage: arm_wake_watch.sh [status|disarm]"; exit 2 ;;
+  *) echo "usage: arm_wake_watch.sh [arm|status|cycle|disarm]"; exit 2 ;;
 esac
 
 if runner_alive; then
