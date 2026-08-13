@@ -97,6 +97,60 @@ MSG
 $(printf '%s' "$BODY" | sed -n '/^PROVENANCE:/,$p' | tail -n +2)
 EOF
   [ "$BAD" -eq 0 ] || exit 1
+
+  # ── PATH-OWNERSHIP CHECK (ledger w=8, 2026-08-14) ────────────────────────
+  # A PROVENANCE source that is a RELATIVE path resolves in whoever's tree the
+  # reader is standing in. Three times now I have cited a path that exists only
+  # in MY project to an agent who cannot open it — an unverifiable pointer
+  # wearing a citation's clothes. The gate cannot know whose tree a path belongs
+  # to, but it CAN insist the writer says. The third occurrence came one session
+  # after I adopted the rule by hand, which is the definition of a rule that
+  # needs a mechanism.
+  #
+  # Accepted: an absolute path (/...), a URL, a bare filename with no directory,
+  # or a relative path whose line names an owner ("my project", "your project",
+  # "not yours", "your own", "this project", or an explicit <Client>/<Project>).
+  BADPATH=0
+  while IFS= read -r line; do
+    case "$line" in
+      "- "*) ;;
+      *) continue ;;
+    esac
+    src="$(printf '%s' "$line" | awk -F'|' '{print $2}')"
+    # a relative path = contains a slash, does not start with / or a scheme
+    case "$src" in
+      *" /"*|*"http://"*|*"https://"*) continue ;;
+    esac
+    printf '%s' "$src" | grep -q '/' || continue
+    # NOTE: two greps on purpose. The phrase markers are case-insensitive; the
+    # <Client>/<Project> pattern must be case-SENSITIVE. A single `grep -qiE`
+    # made `[A-Z]` match lowercase, so every ordinary path like
+    # `2_Project_Files/fleet/...` satisfied the Client/Project alternative and
+    # the gate passed everything — caught by exercising the refuse path, which
+    # is the only reason this comment exists rather than a silent hole.
+    if ! printf '%s' "$line" | grep -qiE 'my project|your project|not yours|your own|this project' \
+       && ! printf '%s' "$line" | grep -qE '[A-Z][A-Za-z_]+/[A-Z][A-Za-z_]+'; then
+      echo "BRIEF REFUSED — PROVENANCE cites a RELATIVE path without saying whose tree it is in:" >&2
+      echo "  $line" >&2
+      BADPATH=1
+    fi
+  done <<EOF
+$(printf '%s' "$BODY" | sed -n '/^PROVENANCE:/,$p' | tail -n +2)
+EOF
+  if [ "$BADPATH" -ne 0 ]; then
+    cat >&2 <<'MSG'
+
+Fix by doing ONE of:
+  - make it absolute:      /Volumes/KK_T9_External_HDD/WEDNESDAY/0_Brain/...
+  - name the owner:        ... | 0_Brain/learnings/x.md - my project, not yours | read YYYY-MM-DD
+  - point at THEIR tree:   ... | your own 5_Project_History/history.md | read YYYY-MM-DD
+
+Ledger w=8 (validate-brief-pointers family): a relative path resolves in whoever's
+tree the reader is standing in. Twice the receiving agent had to tell me the file
+did not exist in their project.
+MSG
+    exit 1
+  fi
 fi
 
 # ── Send ──────────────────────────────────────────────────────────────────
