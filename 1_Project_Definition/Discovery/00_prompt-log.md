@@ -815,3 +815,9 @@ were labelled — so it now starts at today.
 > [on Wednesday's HPSM assessment — 5 challenges] yes to both
 
 *Done with: HPSM s14 commissioned — (1) consolidated prioritised HP ask-list with money attached (one document for Kam's next HP conversation), (2) the P7 one-week security-evidence-pack challenge written as a proper risk position with options. Other three challenges (P02 as risk position, D-12 productivity assumption, post-go-live gap) noted as Kam-desk/not commissioned.*
+> yes, work up the post-go-live gap too
+
+*Done with: HPSM s15 brief queued on the bus (starts when s14 wraps) — the hypercare-to-commercial-activation gap worked as a position + options paper: what the contract says (P11 prod-support ownership is an unfilled HP prerequisite), what the platform needs in that window, the ramp, the commercial shapes incl. P14's loop as the retainer product, and the timing question.*
+> I have been thinking of the best way to review things.  On Monday, can you please present  to me as if I was the client.  Present the scope, present a high level of the architecture and solution, present the plan of action and then we can review the detail of the architecture.  Once you are ready for this, please create a PPT that can be used as the basis of this presentation
+
+*Done with: Monday format set — Wednesday PRESENTS (voice) to Kam-as-client: scope → high-level architecture/solution → plan of action → then detail review. HPSM s16 queued to BUILD the .pptx (client-facing narrative deck + clearly-separated internal annex; recommendations stay marked as recommendations, verdicts empty). Sequenced after s14 (ask-list/P15) and s15 (post-go-live) so it presents finished content.*
