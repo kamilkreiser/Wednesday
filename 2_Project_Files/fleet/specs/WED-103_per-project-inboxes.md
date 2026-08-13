@@ -82,36 +82,40 @@ workflow is the defect.* So no key is ever mailed, pasted, or relayed.
    Until then it stays readable — Wednesday keeps reading both, since the
    coordinator is the one role legitimately spanning clients.
 
-## ⚠ Revocation does NOT appear to work — measured, and it is a real finding
+## Revocation is EVENTUALLY CONSISTENT — measured, ~5–8 minutes
+
+**Corrected 2026-08-13, same session, before this spec was relied on.**
 
 Deleting an inbox-scoped key returns **HTTP 204** and the key vanishes from
-the account listing (`api-keys` returns `count: 0`) — **and the deleted key
-keeps authenticating.** Measured twice on 2026-08-13 with two separate keys:
-the first still returned 200 immediately after its 204; a second key, minted
-purely to time it, was still returning **200 several minutes after deletion**
-with the account insisting no keys exist.
+the account listing (`count: 0`) **immediately** — but the key keeps
+authenticating for several minutes afterwards. Measured with a polling probe:
+repeated `200`s, then **`403` at t+299s on the probe's own clock**, with the
+DELETE occurring shortly before the probe started. So the real
+deletion-to-invalidation window is **roughly five to eight minutes** — bounded,
+not pinned, because the timer started after the delete.
 
-**Why this matters beyond tidiness:** the entire value of a scoped key is that
-a compromised one can be revoked and replaced. If deletion does not invalidate
-issued keys promptly, then **"rotate the key" is not an available response to
-a leak** — only Kam changing the plan/account or AgentMail support would be.
-That is a control we believed we had.
+**My first reading of this was wrong and is recorded so nobody re-derives it:**
+two spot checks inside that window showed 200 and I concluded revocation was
+not enforced, which would have meant *"rotate the key" is not an available
+incident response*. It is available. The observations were real; the
+conclusion was premature. A report and then a correction both went to
+AgentMail support the same evening.
 
-**Operational rules until this is understood:**
+**Operational rules — unchanged in substance, and they are what caught it:**
 1. **Never report a credential retired on the strength of a 204.** Poll the
-   old key until it actually fails, exactly as with any eventually-consistent
-   cloud identity (`learnings/2026-08-06_never-discard-stderr`, corollary 3:
-   distinguish "failed" from "not ready yet" — this is the inverse case).
-2. Treat every issued scoped key as **live until proven dead**, and keep the
-   count of issued keys minimal: one per project, named, no throwaways left
-   behind.
-3. **Open question for Kam / AgentMail support:** is deletion asynchronous
-   with a long TTL, cached at the edge, or genuinely not implemented for
-   issued tokens? Worth asking before we depend on rotation. Until answered,
-   assume a leaked key cannot be recalled.
+   old key until it actually fails. This is
+   `learnings/2026-08-06_never-discard-stderr` corollary 3 (distinguish
+   "failed" from "not ready yet") pointed at teardown instead of setup —
+   cloud identity is eventually consistent in BOTH directions.
+2. Treat an issued scoped key as **live until proven dead**, and keep issued
+   keys minimal and named — one per project, no throwaways left behind.
+3. **If a key is known-leaked, five minutes is the exposure.** Plan for it:
+   revoke first, then treat the window as live-compromised rather than
+   assuming instant containment. Asked support whether immediate forced
+   invalidation exists; answer pending.
 
-The account-side hygiene is fine — no orphan key records remain, and no key
-material is stored on this drive. The gap is server-side enforcement.
+The account-side hygiene is clean — no orphan key records, no key material on
+this drive.
 
 ## What this does NOT fix
 
