@@ -43,17 +43,22 @@ the over-strict behaviour we are removing. The agent is proceeding on ≥5 with 
 value in **one named constant**, so your ruling is a one-line change either way.
 
 ### 4. Datasec / Vision — **do you need to tell Will that quotes went out without a PoC line?**
-**Problem:** the current rule does not block — **it silently drops the PoC line**, with
-no charge, no flag and no explanation on screen or in the PDF, and a test locks that
-in. It has been live. I have asked the agent for the commit date that moved the gate
-(to bound the exposure) and an honest "unknown beyond this" — **no production access
-to find out**.
+**Problem:** the current rule does not block — **it silently dropped the PoC line**, with
+no charge, no flag and no explanation on screen or in the PDF, and a test locked that
+in. **DATED NOW: live since 2026-08-07** — `pocMinDevices` enters in `b9e3763` and
+reaches the shipped path in `49b3dfc`, both 08-07 (I ran `git log --all -S` myself).
+**So the exposure window is roughly seven days, 2026-08-07 to 2026-08-14.**
+**Whether any real quote hit it is unknown** — that needs production data and I have
+not gone near it. The fix is on main as v2.20 but **NOT deployed**; the live image is
+still v0.3.2-tool2.19, and the repo has no deploy automation, so shipping it is a
+deliberate act you choose.
 **Options:** (a) tell Will now with the dated bound and the honest gap · (b) wait
 until the fix ships and tell him once · (c) say nothing.
 **Recommendation:** **(a) or (b), your call and your conversation** — but not (c). I
-lean (a) if any real quote could plausibly be affected, because he found the rule
-himself and will connect the two. **External comms are your class; I have not
-contacted anyone.**
+lean (a): it is a bounded, honest message — *"for about a week, a ticked PoC on a
+small deal produced a quote with the PoC line missing and no warning; it is fixed and
+not yet deployed"* — and he found the rule himself, so he will connect the two.
+**External comms are your class; I have not contacted anyone.**
 
 ### 5. Secuura / Blockchain — **the Kintsugi deploy, now ONE decision covering thirteen changes**
 **Problem:** thirteen merged-but-unshipped changes sit behind the hold, **four of them
