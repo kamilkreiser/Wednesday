@@ -47,6 +47,23 @@ project to move). NexusAI + Vision idle, Kam-gated, not launched.
 (%3), both Opus 5, briefs delivered through the fixed routing gate and verified
 at their destinations. Watcher re-armed agents=2, baseline preserved at 11:54.
 
+**Refreshed 2026-08-14 ~12:4x (fresh session, successor to the overnight+morning
+run).** Fleet floor was clean at boot — no panes, watcher on mail-only, no mail
+awaiting an answer in any of the six inboxes. **Secuura/Blockchain: `origin/develop`
+verified by my own `ls-remote` at `6c2a8caa14f77c38e082225bdd02540cbe1a3507`**,
+history at session 33. Sessions 28–33 all scored 1.0; **s33's five new tickets
+(KS-634/635/636/637/638) are one defect — signals firing into channels nobody reads**
+— and are on Kam's queue as item A. **Session 34 LAUNCHED on the Kintsugi deploy**
+(demo only; the extranet stays held and I have not extended Kam's lift).
+**Datasec/HPSM: session 21 scored 0.9** — the M0 acceptance finding is real and
+re-derived from the SOW `.docx` by me, but its gate register miscounts nine gates as
+eight, an error inherited from session 13's E6 pass. Programme still paused for Kam;
+HPSM-25 (Amplify) overdue and his alone. **Datasec/Vision: v2.20 on `main`
+(`e711771`), NOT deployed** — the QuickQuote repo has no deploy automation at all, so
+**the silent PoC-line drop has been live since 2026-08-07 and still is**; Kam's queue
+item 4. **NexusAI and CypherKey: idle, unlaunched, Kam-gated.** Lead_Bot and myPKI
+remain on his explicit skip list.
+
 ---
 
 ## Template per project

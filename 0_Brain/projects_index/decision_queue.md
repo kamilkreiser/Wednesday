@@ -1,5 +1,13 @@
 # Kam decision sitting — 2026-08-14
 
+> **Status at ~12:5x (fresh session).** The Kintsugi deploy you authorised is
+> **RUNNING** — Secuura session 34, launched as this session's first act, demo only.
+> **Items A, B, 1, 2, 3, 4, 4b, 5b and 7 below are still open and still yours.**
+> Nothing here has been actioned on your behalf; items 5 and 6 are struck through
+> because you ruled them.
+> **The two most time-bound: item 4 (a live defect in Will's tool, now in its seventh
+> day) and HPSM-25 Amplify, which was due today.**
+
 ## ✅ RULED 2026-08-14 ~12:4x — all 18 backlog decisions CLOSED
 Twelve accepted as recommended. The six that needed him:
 - **KS-621 — `organization` IS A SECURITY BOUNDARY.** Net-new enforcement; neither
