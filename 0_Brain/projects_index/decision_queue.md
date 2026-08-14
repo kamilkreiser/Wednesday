@@ -65,6 +65,33 @@ fixed in the field". **Not (c)** — he found the rule himself and will connect 
 have not gone near it. **External comms and the deploy are both your class; I have
 done neither.**
 
+### 4b. Datasec / HPSM — 🔴 **M0's acceptance evidence cannot be produced by either party**
+**Problem (new, 2026-08-14):** **M0 — 25% / A$187,500, the FIRST and LARGEST payment**
+— is accepted on SOW §7.1's *"SOW/funding authority, named owners, delivery plan and
+backlog mobilisation confirmed."* **P01 is unsigned, P02 is past due and unfilled, and
+no Datasec staff are named in any document either** (§11's nine roles; D-13, open five
+sessions). So neither side can currently produce the evidence for the first invoice.
+**Stated narrowly, and this is the agent's own framing:** it is **not** a drafting
+defect — "named owners" is unqualified and a mobilisation list could satisfy it.
+**The defect is our own tracking:** every register records P02 as an input reshaping
+*later* gates, never as the acceptance evidence for the *first* one. The ask-list
+front page named M1, M6 and M8 as the money behind P02. **M0 is larger than all three
+and comes first.**
+**It also re-prices D-13:** the two open pod-lead names are not a resourcing question,
+they are **half of M0's acceptance evidence** — a commercial argument for Monday.
+**Options:** (a) raise it in the Monday session as a commercial item and fold it into
+the HP correction bundle · (b) treat it as internal tracking only and fix our own
+registers · (c) both.
+**Recommendation:** **(c)** — the register fix is ours and free; the naming question
+is HP's and belongs in the bundle. **Not yet verified by me** — flagged for the next
+session to check against the SOW extraction before it reaches HP.
+**Related, same session:** all eight gates read against the §6 prerequisite table for
+the first time — **7 of 8 depend on a prerequisite, and all 6 paying gates do**, split
+honestly between *unanswered* and *our proposal awaiting HP approval*. And a
+correction in our favour: the silence calendar dated the content freeze to **M2**, a
+gate carrying **no payment and naming no content**; the content actually lands on
+**M3, 20% / A$150,000**, so we had been claiming relief against nothing.
+
 ### 5. Secuura / Blockchain — **the Kintsugi deploy, now ONE decision covering thirteen changes**
 **Problem:** thirteen merged-but-unshipped changes sit behind the hold, **four of them
 security fixes** — including KS-617, which restores gateway **session revocation**
