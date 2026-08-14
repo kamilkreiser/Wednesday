@@ -222,10 +222,30 @@ by-design-or-remediate · F-1 WAF · F-5 CAPTCHA · KS-386 retention · KS-329 �
 verify-file 415 · KS-130/169/229 · the HP correction bundle (X1–X5 + X6 + CT §18
 carriage) · four modelled revenue streams with one contract vehicle.
 
+### 🔴 7b. Datasec / HPSM — **the Monday deck may not open, and this is now your 30 seconds well spent**
+**Problem:** this was on your awareness list for two days as a formality. I tried to
+close it and it did not close. **The system Quick Look renderer on this Mac produces
+nothing for our Monday deck** — two runs, still going minutes later, empty logs — while
+it renders **HP's own Playbook v3 (153 MB, 151 slides, 133 media) inside 25 seconds.**
+Ours is 190 KB, 43 slides, no media at all. So it is not size and it is not complexity.
+The file is structurally valid — I parsed the package independently, every CRC clean,
+zero malformed XML.
+**What it does not prove:** Quick Look is not PowerPoint, and python-pptx output usually
+opens fine. **What changed is that the answer is no longer assumed** — one real renderer
+refuses it while accepting a far heavier file.
+**Options:** (a) you double-click the deck now — if PowerPoint opens it, this closes and
+HPSM investigates at leisure · (b) treat it as broken and have HPSM regenerate before
+Monday regardless · (c) leave it.
+**Recommendation:** **(a), today.** It is thirty seconds and it is the difference
+between finding this out now and finding it out in the room on Monday. HPSM already has
+the finding with the controls attached and a bisect plan (the 28-slide client-safe build
+is the first comparison). **Not (c)** — you present from this file in three days.
+
 ### 8. Awareness only — no decision
 - Secuura B-3 would have reset your real `kam@secuura.ai` SYSTEM_ADMIN account to a
   repo-published password. Fixed in #686, unshipped.
-- **PowerPoint-opens check** on the Monday deck — 30 seconds, still unverified.
+- ~~PowerPoint-opens check — 30 seconds, still unverified.~~ **Promoted to item 7b: it
+  is no longer a formality.**
 - **Local Docker cannot pull base images on this Mac** (KS-631) — bounds what any
   local agent session can verify. CI unaffected.
 - The 06:00 wake will keep dying until Fable-5 credits renew (~2 days), per your
