@@ -274,6 +274,30 @@ you would rather not, **(b) with the gap written on each ticket** is honest and 
 that myself — **(c) is the one to avoid**, because five open tickets that are actually
 finished make the board lie in the other direction.
 
+### 🔴 9. WED — **AgentMail: deletion is NOT revocation, the vendor will not say when it will be, and WED-107's plan is now wrong**
+**Problem:** the 08-13 session proved that deleting an inbox-scoped API key returns 204 and
+removes it from the listing **while the key keeps authenticating** — reproduced twice, two
+independent keys. **AgentMail replied 2026-08-14: *"We will consider fixing it in the
+future."*** None of the four questions answered — no TTL, no propagation window, no forced
+invalidation, no statement on other scoping gaps.
+**Why it is yours and not mine:** it changes the security posture of the fleet's entire
+comms layer. **Every key we have issued must now be treated as permanently valid.**
+**What it breaks specifically:** the per-project migration's premise was *"a compromised key
+can be revoked and replaced."* The isolation half works exactly as advertised; **the
+revocation half does not exist.** And **WED-107's plan — delete the five legacy org-wide
+keys — would make them vanish from the listing while leaving them live**, which is strictly
+worse than leaving them visible.
+**Options:** (a) press AgentMail for a supported forced-invalidation path or a date, naming
+the impact — external comms, so yours · (b) treat keys as unrevocable and adapt: minimise
+issuance, no test keys, and neutralise the legacy five some other way (rotate the account,
+or migrate off the shared key entirely) · (c) accept and document the risk as it stands.
+**Recommendation:** **(b) now, (a) alongside it.** (b) is entirely ours and does not wait on
+a vendor who has just declined to commit. **Not (c) alone** — a documented risk that nobody
+can act on is where WED-107 already sits.
+**Note:** re-testing whether this is still broken **requires issuing a key that may never be
+revocable**, so I have not re-tested and the 08-13 evidence stands. The cost of verifying
+the defect is an instance of the defect.
+
 ### 8. Awareness only — no decision
 - Secuura B-3 would have reset your real `kam@secuura.ai` SYSTEM_ADMIN account to a
   repo-published password. Fixed in #686, unshipped.
