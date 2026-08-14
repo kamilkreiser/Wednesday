@@ -165,6 +165,31 @@ still passed** (image validation), **9 of 16** (token encryption), **7 of 10**
 (billing idempotency). Every survivor was a rejection case. A suite without a
 must-succeed case cannot tell you which of those numbers you are looking at.
 
+### The condition we had not stated: on a side-effecting system, the positive control IS an action (2026-08-14, Secuura s34)
+
+The rule above says *always prove the search can find something before trusting that it
+found nothing*. Three separate catches today came from it. **Secuura s34 found its limit.**
+
+**The case.** Verifying KS-472's control-byte guard needs both directions. The negative half
+— a document title containing U+0000 — returned **400** and created nothing, free of charge.
+**The positive half, the identical payload without the NUL, returned 201 and originate
+auto-anchored it on the real Cardano preview testnet within seconds** — a permanent
+transaction, `simulated=false`.
+
+**And it did NOT clean it up, correctly.** The chain write cannot be un-made and the local
+row is the only thing linking it to a document; deleting the row would manufacture **an
+on-chain proof with no local record — exactly the KS-587 defect the same deploy was shipping
+the fix for.** It relabelled the artefact instead and wrote the behaviour into the runbook.
+
+**The generalisation, now standing:** the negative half of a validation test is usually
+free; **the positive half writes.** Before running a positive control, ask what the success
+path DOES — a chain write, an email, a webhook, a payment, an audit row, a notification. If
+it commits something, either run it where those effects do not land, or run it knowingly and
+**label the artefact so the next reader knows it was a probe.**
+
+**Never skip it** — an unproven negative is still worthless, and that is the whole lesson
+above. **Just stop treating it as free.**
+
 ### The mirror: an ABSENCE claim needs a positive control too (2026-08-14)
 
 The family above is about checks that cannot report a failure. This is its mirror —
