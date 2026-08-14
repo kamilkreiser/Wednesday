@@ -253,6 +253,10 @@ consequence is a growing pile of shipped-but-unproven work rather than a false g
 **Options:** (a) give agent sessions a verification path to the demo (a service-principal
 or a test identity that can sign in) · (b) accept it and let those five close on
 code-deployed evidence with the gap stated · (c) leave them open indefinitely.
+🔴 **Refinement from the agent, and it changes the ask:** the fifth item is an **admin-gated
+JSON endpoint, not a page** — so the blocker is **any authenticated surface**, not "pages
+behind SSO". **An acceptance criterion written around rendering pages would leave the API
+case still blocked while looking closed.**
 **Recommendation:** **(a)**, and it is a one-time setup rather than a per-ticket cost. If
 you would rather not, **(b) with the gap written on each ticket** is honest and I can rule
 that myself — **(c) is the one to avoid**, because five open tickets that are actually
