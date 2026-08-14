@@ -28,6 +28,41 @@ session revocation that is currently off.
 
 ## STILL OPEN — needs Kam
 
+### 🔴 A. Secuura / Blockchain — **five findings that are one defect: signals firing into channels nobody reads**
+Filed by session 33. **Four of the five were found by reading a red that already
+existed** — nothing was hidden. Three are time-sensitive.
+
+- **KS-636 — a CRITICAL CVE in the base image of all ten services, unread for 13
+  days.** The watchdog flagged `node:24-alpine` CVE-2026-59873 on **2026-08-01**. It
+  worked. Its failure — which its own header calls the reminder — went unread.
+- **KS-637 — the nightly Internal Audit has failed 40 runs straight** (2 successes in
+  its last 100), dying at "Boot dev stack" before any job runs. **DAST,
+  tenant-isolation, licence-compliance and the Aiken contract tests run NOWHERE
+  else.** Tenant isolation matters especially now: **you have just ruled `organization`
+  a security boundary**, and the tests that would prove it have not run in weeks.
+- **KS-635 — a dated failure: an audit-baseline exception expires 2026-08-31**, and
+  the gate then **blocks every push**. Its owning ticket is closed *and archived*, so
+  **nothing on the board names the date.** Two and a half weeks away.
+- **KS-638 — the team's own test board has never shown a green run**: 22 runs since
+  2026-05-25, **0 passed**. The latest red is E2E passing 210/0 while the generator is
+  *structurally incapable* of reporting passed. **The worst of the five, because it is
+  read and disbelieved** rather than unread.
+- **KS-634 — no CI gate runs the services' unit suites** since 2026-03-12.
+
+**Recommendation:** these are not backlog items, they are the reason backlog items go
+unnoticed. **KS-636 and KS-637 want action this week** (a critical CVE and the only
+place four security suites run); **KS-635 wants a date in the diary before 08-31**;
+KS-634 and KS-638 batch with the other CI work.
+
+### ⚠ B. Scope guard on the hold lift — please confirm if I have it wrong
+You authorised *"deploy the kintsugi queue"*, which I have scoped to **the demo VM
+queue only**. **The extranet auto-deploys on push to main and remains held** — the
+agent correctly declined to fix KS-638's one-line verdict bug for exactly that reason.
+**I have not extended your lift to the extranet or anything else.** Say the word if you
+want that surface unblocked too; otherwise it stays where it is.
+
+
+
 ### 1. Datasec / HPSM — **E14: does an executed CSPA exist, and can we read it?**
 **Problem:** the CSPA sits at **rank 1 in SOW §3, above the SOW itself**, and it is
 not in our corpus. It now gates four separate threads: the money half of the
