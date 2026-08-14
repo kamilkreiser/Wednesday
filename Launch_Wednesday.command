@@ -165,6 +165,14 @@ FIRST ACTIONS (token cost is accepted — do the full reads, don't skim):
    ingest per \${BRAIN_DIR}/skills/lesson-ingestion.md (learning file + ledger
    if a correction, close the issue with a receipt comment). If the key is
    unset, say 'Linear not configured yet' in one line and continue — never block.
+   **ANY COUNT you report from ANY board — yours or a project's — comes from
+   2_Project_Files/fleet/board_count.sh, never from a hand-written query with a
+   'first:'/'maxResults' you chose.** It refuses to print a total when the
+   result equals its own limit or another page exists. Built at ledger w=5,
+   2026-08-14, after I reported a row cap as a board total three times in one
+   day (Secuura twelve-vs-fourteen, NexusAI 30-vs-46, and my own boot saying 60
+   WED issues when there were 71). A cap quoted as a count is a silent
+   truncation, and the two agents caught it before I did.
 8. Agent Mail check (email is the FLEET'S inter-agent channel, Kam 2026-08-03):
    if AGENTMAIL_API_KEY is set in 4_Credentials/.env, list recent messages for
    BOTH wednesday-agent@agentmail.to (Wednesday's own inbox, live 2026-08-04;
