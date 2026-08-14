@@ -848,3 +848,7 @@ were labelled — so it now starts at today.
 > first 12 - I agree with you.  13)security boundary 14)sign off 15)we do not hold PII.  you need to record what was done (typically with partners) to what level, etc.  not the actual data 16)Leave this until next week 17) I will discuss with Phil and Steve.  Stuart was working on this last 18)Request info from Stuart. but Platform K does not need it as no commercialisation in near future
 
 *Rulings recorded. Note 15 is BIGGER than the ticket asked: it is not a retention answer, it is a data-model ruling — Platform K should not hold KYC images at all; it records the ATTESTATION (what was done, with which partner, to what level), not the data. Note 18 carries a priority drop as well as an action: Platform K does not need the Stripe consolidation because there is no near-term commercialisation. 17 and 18 are external-human contact = Kam's own; I contact nobody.*
+
+> yes, that read on the PII is right
+
+*Kam CONFIRMS the wide reading of ruling 15: Platform K does not hold KYC images at all; it keeps the attestation. My interpretation is now his confirmed instruction, not my inference — relayed to the agent so its design rests on a confirmed reading rather than mine.*
