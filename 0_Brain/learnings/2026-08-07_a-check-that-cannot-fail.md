@@ -190,6 +190,12 @@ it commits something, either run it where those effects do not land, or run it k
 **Never skip it** — an unproven negative is still worthless, and that is the whole lesson
 above. **Just stop treating it as free.**
 
+**And the agent's own note on why this is easy to miss, which is the sharpest part:** *the
+asymmetry trains the habit.* **You can run the negative half of a validation test a hundred
+times for nothing**, which teaches you that controls are cheap — **and then the one that
+costs you is the half you added in order to be rigorous.** The discipline and the trap
+arrive together.
+
 ### The mirror: an ABSENCE claim needs a positive control too (2026-08-14)
 
 The family above is about checks that cannot report a failure. This is its mirror —
