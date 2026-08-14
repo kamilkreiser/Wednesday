@@ -97,6 +97,11 @@ gate carrying **no payment and naming no content**; the content actually lands o
 security fixes** — including KS-617, which restores gateway **session revocation**
 that is currently not running on demo. The backlog sweep cannot close any of them
 without asserting a fix is live when it is not.
+**Now countable:** the agent measured the In Review column and **19 of 23 tickets have
+a merged PR** — it is a merge-residue pile, not a review queue. **Twelve are moving to
+"Tested Not Deployed" and deliberately NOT being archived**, so the deploy debt stays
+visible as a standing number rather than disappearing off the board. **Your one deploy
+decision clears all twelve at once.**
 **Options:** (a) lift the hold and deploy the queue · (b) keep the hold and accept
 that the demo runs without those controls, with the tickets openly labelled
 "awaiting deploy" · (c) deploy a security-only subset.
@@ -104,6 +109,17 @@ that the demo runs without those controls, with the tickets openly labelled
 product/environment call, not a technical one. What I would flag: **the longer the
 queue, the riskier the eventual single deploy**, and KS-617 is a control people may
 assume exists.
+
+### 5b. Secuura / Blockchain — **KS-634: no CI gate has run the services' unit suites since March**
+**Problem:** `ci.yml` is `workflow_dispatch`-only and **last ran 2026-03-12**; the `pr`
+workflow's `test:unit` is Playwright's own suite, not the services'. **So for five
+months a unit suite could die at module load and nothing would report it — and one
+did** (a 73-test suite found dead on `develop` this morning and revived).
+**This is not a backlog item; it is why several backlog items exist.**
+**Options:** (a) fix it as a scoped CI session, alongside KS-628 and #687 which are
+also `pr`-workflow work · (b) leave it and keep finding dead suites by hand.
+**Recommendation:** **(a)**, batched with the other CI work — it is shared CI that
+Peter and Stuart depend on, which is why nobody has changed it at short notice.
 
 ### 6. Secuura / Blockchain — **the consolidated backlog residue** (arriving today)
 The agent is sweeping 87 backlog items plus 16 In Review stalls, closing and
