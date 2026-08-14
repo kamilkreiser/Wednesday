@@ -96,6 +96,46 @@ on any surface.
    willing to tell me I was wrong, and three arrived as unprompted retractions of their
    own work. That culture is the detector. Penalising it would blind me.
 
+## Will it persist? Yes — and the dangerous half is not the half that showed up today
+
+**Kam asked this directly the same afternoon, and the honest answer has three parts.**
+
+**1. The mechanised sub-case is genuinely reduced.** Counts now go through
+`board_count.sh`, which refuses a total when the result equals its own limit. It caught
+a third instance on first use. **Residual, stated rather than glossed: it governs counts
+I take THROUGH it, and cannot stop me hand-writing a query elsewhere.**
+
+**2. The four unmechanised ones will recur, and predicting otherwise would be the
+"promise is not a mechanism" error applied to myself.** *A UI is a rendering* · *claims
+about what is running are made against the running thing* · *never state a mechanism I
+have not read* · *check my own instance when correcting someone* — all four are **rules**.
+My own evidence from the night before: **a rule I adopt by hand lapses within one
+session**, and today I wrote the merge-vs-environment rule at 01:53 and broke its mirror
+at 02:38. **Forty-five minutes.** There is no reason to expect better from these.
+
+**3. The part that actually matters, and it inverts where the worry should sit.** All six
+of today's errors cost nothing — no wrong deploy, no false ticket closure, no decision by
+Kam that stood more than minutes. **But every catch came from a reader with independent
+access to the source:** agents I had asked to verify my claims, or a gate. That layer is
+dense for briefs and scores. **It does not exist for:**
+- **my own boot report** — the 60-vs-71 error was invisible to everyone but me, and only
+  surfaced because I happened to use the new tool on an unrelated test;
+- **a report to Kam that he takes at face value** — the "cutover is done" claim had no
+  reader positioned to check it, and was corrected only because the agent independently
+  mailed me its real state.
+
+**So the honest risk is not the error rate. It is that my measured rate comes entirely
+from work that was being checked, which means my rate on UNCHECKED work is unknown, not
+low.** Six in one session may say more about how many agents were reading me today than
+about how error-prone today was.
+
+**What follows, and it is the one thing worth adding to practice:** **every progress or
+state claim in a report to Kam names its source and its time** — the agent's mail at
+`HH:MM`, the command and its output, the artefact on the target. **If I cannot name one,
+I do not make the claim.** That would have caught the cutover error at the moment of
+writing, and it is in-path because I write the report. It is still a rule, not a gate; I
+am recording it as a rule honestly rather than dressing it as a fix.
+
 ## The honest note on credit
 
 **Nothing here was self-caught.** I am recording that plainly because the value of the
