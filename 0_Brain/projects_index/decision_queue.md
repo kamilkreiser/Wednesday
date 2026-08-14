@@ -241,6 +241,23 @@ between finding this out now and finding it out in the room on Monday. HPSM alre
 the finding with the controls attached and a bisect plan (the 28-slide client-safe build
 is the first comparison). **Not (c)** — you present from this file in three days.
 
+### 7c. Datasec / NexusAI — **RD-76 (Entra SSO) now blocks FIVE verifications, and that is a measured cost**
+**Problem:** Entra SSO blocks agent browser-verification of the NexusAI demo. It has been
+sitting as a standing inconvenience. **Today it stopped being one:** the project has five
+items it can build and deploy but cannot prove — RD-85 (pill labels clip), RD-65 (dark
+mode), RD-79 (session-expiry UX), RD-80 (SSE model label), and the new RD-89 health field,
+which landed in an admin-gated endpoint the agent cannot curl.
+**Why it matters more than it reads:** the agent is doing the right thing — refusing to
+substitute *"the right code is deployed"* for *"the behaviour is verified"* — so the honest
+consequence is a growing pile of shipped-but-unproven work rather than a false green.
+**Options:** (a) give agent sessions a verification path to the demo (a service-principal
+or a test identity that can sign in) · (b) accept it and let those five close on
+code-deployed evidence with the gap stated · (c) leave them open indefinitely.
+**Recommendation:** **(a)**, and it is a one-time setup rather than a per-ticket cost. If
+you would rather not, **(b) with the gap written on each ticket** is honest and I can rule
+that myself — **(c) is the one to avoid**, because five open tickets that are actually
+finished make the board lie in the other direction.
+
 ### 8. Awareness only — no decision
 - Secuura B-3 would have reset your real `kam@secuura.ai` SYSTEM_ADMIN account to a
   repo-published password. Fixed in #686, unshipped.
