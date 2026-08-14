@@ -1,4 +1,98 @@
-# Kam decision sitting — 2026-08-04
+# Kam decision sitting — 2026-08-14 (live queue at the top; 08-04 archive below)
+
+Format per Kam's 2026-08-06 rule: **Client/Project · problem · options · my
+recommendation.** He is unwell today, so this is built to be ruled in one pass.
+
+---
+
+## OPEN — needs Kam, ranked
+
+### 1. Datasec / HPSM — **E14: does an executed CSPA exist, and can we read it?**
+**Problem:** the CSPA sits at **rank 1 in SOW §3, above the SOW itself**, and it is
+not in our corpus. It now gates four separate threads: the money half of the
+reconciliation, X5's precedence question, X6's payment-terms deferral, and whether
+the reconciliation day is worth commissioning at all.
+**Options:** (a) it exists and Kam can share it → we read it and four threads unblock ·
+(b) it exists and cannot be shared → we mark those four as permanently
+assumption-based and say so in the Monday pack · (c) none was ever executed → that is
+itself a finding and changes the precedence argument.
+**Recommendation:** answer (a)/(b)/(c) — five minutes, highest-value open item across
+the programme for five sessions running.
+
+### 2. WED — **WED-108 (P1): re-send your signed v1.3 grant to each per-project inbox**
+**Problem:** the per-project migration cut every migrated agent off from `coagent@`,
+where your grant lives. **Two projects have now independently confirmed it** (Secuura
+s30, HPSM s21) — both are running on provenance-by-history rather than a check they
+ran today.
+**Options:** (a) re-send the signed grant to `secuura-blockchain@`, `datasec-hpsm@`,
+`datasec-nexusai@`, `datasec-vision@` · (b) leave it and accept that agents hold work
+whenever an approval-class item appears.
+**Recommendation:** (a). **Your hand only — a forward from me authorises nothing**,
+and the agents have been told to refuse one if I ever offer it.
+
+### 3. Datasec / Vision — **Will's PoC threshold: >5 or ≥5, and does 10 get encoded?**
+**Problem:** Will writes both *">5 devices"* and *"less than 5 devices"* in one
+paragraph, and *"really should be 10+ in a perfect world"*. The readings differ only
+at exactly 5 devices.
+**Options:** (a) **≥5** — a deal of 5 is acceptable, 1–4 raises the advisory ·
+(b) **>5** — 5 itself raises the advisory · (c) also encode 10 as a second threshold.
+**Recommendation:** **(a) ≥5**, because *"less than 5"* is his operative exclusion,
+which puts 5 on the acceptable side. **Reject (c)** — he calls 10 a perfect world and
+in the same breath says PoCs get insisted on with a couple; a live 10-gate rebuilds
+the over-strict behaviour we are removing. The agent is proceeding on ≥5 with the
+value in **one named constant**, so your ruling is a one-line change either way.
+
+### 4. Datasec / Vision — **do you need to tell Will that quotes went out without a PoC line?**
+**Problem:** the current rule does not block — **it silently drops the PoC line**, with
+no charge, no flag and no explanation on screen or in the PDF, and a test locks that
+in. It has been live. I have asked the agent for the commit date that moved the gate
+(to bound the exposure) and an honest "unknown beyond this" — **no production access
+to find out**.
+**Options:** (a) tell Will now with the dated bound and the honest gap · (b) wait
+until the fix ships and tell him once · (c) say nothing.
+**Recommendation:** **(a) or (b), your call and your conversation** — but not (c). I
+lean (a) if any real quote could plausibly be affected, because he found the rule
+himself and will connect the two. **External comms are your class; I have not
+contacted anyone.**
+
+### 5. Secuura / Blockchain — **the Kintsugi deploy, now ONE decision covering thirteen changes**
+**Problem:** thirteen merged-but-unshipped changes sit behind the hold, **four of them
+security fixes** — including KS-617, which restores gateway **session revocation**
+that is currently not running on demo. The backlog sweep cannot close any of them
+without asserting a fix is live when it is not.
+**Options:** (a) lift the hold and deploy the queue · (b) keep the hold and accept
+that the demo runs without those controls, with the tickets openly labelled
+"awaiting deploy" · (c) deploy a security-only subset.
+**Recommendation:** ruling needed rather than a specific option from me — this is a
+product/environment call, not a technical one. What I would flag: **the longer the
+queue, the riskier the eventual single deploy**, and KS-617 is a control people may
+assume exists.
+
+### 6. Secuura / Blockchain — **the consolidated backlog residue** (arriving today)
+The agent is sweeping 87 backlog items plus 16 In Review stalls, closing and
+archiving what is genuinely done. **Everything that cannot close because it needs your
+decision arrives as ONE list**, each with the question in a line and its
+recommendation. Not ready yet; it will land in its wrap.
+
+### 7. Standing, unchanged
+**Amplify HPSM-25 — overdue as of today.** · WED-107 (five legacy org-wide AgentMail
+keys spanning every inbox) · KS-486/KS-621 org boundary-or-label · KS-624/625
+by-design-or-remediate · F-1 WAF · F-5 CAPTCHA · KS-386 retention · KS-329 · KS-256 ·
+verify-file 415 · KS-130/169/229 · the HP correction bundle (X1–X5 + X6 + CT §18
+carriage) · four modelled revenue streams with one contract vehicle.
+
+### 8. Awareness only — no decision
+- Secuura B-3 would have reset your real `kam@secuura.ai` SYSTEM_ADMIN account to a
+  repo-published password. Fixed in #686, unshipped.
+- **PowerPoint-opens check** on the Monday deck — 30 seconds, still unverified.
+- **Local Docker cannot pull base images on this Mac** (KS-631) — bounds what any
+  local agent session can verify. CI unaffected.
+- The 06:00 wake will keep dying until Fable-5 credits renew (~2 days), per your
+  ruling to leave the pin.
+
+---
+
+## ARCHIVE — 2026-08-04 sitting
 
 ## RULINGS (live, batch of 5 format per Kam)
 
