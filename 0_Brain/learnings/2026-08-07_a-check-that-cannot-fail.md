@@ -164,3 +164,48 @@ times on different code: with the guard set to refuse everything, **24 of 35 tes
 still passed** (image validation), **9 of 16** (token encryption), **7 of 10**
 (billing idempotency). Every survivor was a rejection case. A suite without a
 must-succeed case cannot tell you which of those numbers you are looking at.
+
+### The mirror: an ABSENCE claim needs a positive control too (2026-08-14)
+
+The family above is about checks that cannot report a failure. This is its mirror —
+**a search that could not have found the thing, reported as evidence the thing is not
+there.**
+
+**The case.** A Secuura session flagged that a claim in its own previous wrap was
+false: an entry it said had been written to `BACKLOG.md` was in neither backlog file
+nor Linear. It had grepped, found nothing, and disclosed it. **I amended my scoreboard
+on the strength of it.** Then it retracted: the entry existed all along, committed on
+an unmerged branch, and its grep had run from a tree that forked before that commit.
+Its own formulation:
+
+> an artefact-claim needs the same check as any other, and that includes the claim
+> that an artefact is **missing** — before reporting "nothing matches", prove the
+> search can find something
+
+**Why this is harder than the errors above, and worth its own entry:** diligence was
+performed. The agent did search, the search ran cleanly, and the negative was real
+*for the tree it ran in*. Nothing errored, nothing was swallowed. The defect was
+entirely in the **scope** of the search, which is invisible from inside its result.
+
+**This is the same class as my own w=4 slip the night before**, mirrored: I claimed
+something was "absent from every document" without opening the one document that
+disproved it. Mine was an absence asserted without looking; theirs was an absence
+asserted after looking somewhere that could not have contained it.
+
+**How to apply:**
+1. **Every "X does not exist" carries the corpus it was measured against** — the file
+   set, the command, the count, and for a repository, **which ref**. `git log --all
+   -S` would have settled this in one command; a working-tree grep never could.
+2. **Prove the search can find something before trusting that it found nothing** —
+   run it against a case you know is present. This is the positive control, applied
+   to absence.
+3. **Distinguish "I could not find why this still matters" from "here is what
+   replaced it."** In a list of closed tickets those look identical and are not the
+   same claim.
+4. A bulk triage is a pile of negative claims — dozens of "is this still real?"
+   judgements, each able to fail exactly this way. That is where this rule earns most.
+
+**The meta-note worth keeping:** the disclosure AND the retraction were both
+unprompted, and the churn is left visible in the scoreboard rather than tidied away.
+A record that quietly returns to its original wording hides that a correction cycle
+happened — and the cycle is the evidence the loop works.
