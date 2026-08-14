@@ -28,9 +28,21 @@ Twelve accepted as recommended. The six that needed him:
   his and I have contacted nobody.
 
 **Also ruled: the Kintsugi hold is LIFTED and the deploy is authorised** (demo only;
-production untouched and still his signature). Briefed as the next Secuura session's
-first and only priority — twelve merged fixes, four security, KS-617 restoring gateway
-session revocation that is currently off.
+production untouched and still his signature).
+
+> ✅ **DONE 2026-08-14 05:07Z — cutover complete, 33/33 healthy, `cardanoMode: REAL`,
+> zero build failures across 30 images.**
+> 🔴 **CORRECTION to what I told you: revocation was NOT off beforehand.** My brief and
+> this queue both said KS-617 "restores gateway session revocation, currently off on
+> demo". **It was on.** The agent measured it: revoked tokens returned 401 on covered
+> endpoints both before and after. **What was missing is the guarantee that a Redis
+> outage cannot silently switch it off** — now proven over a 45-second outage with both
+> controls. A narrower and true claim. The wrong sentence came from my own project's
+> notes and I relayed it without checking it against the system.
+> **Also less precise than I reported: the "seven already live" split** rested on a
+> marker sweep that grepped only `/app/dist` while three fixes live in a shared package.
+> The old images are gone, so it cannot be re-run. **Five are proven by behavioural
+> probes taken before cutover; the rest are inference and the board will say so.**
 
 ---
 
