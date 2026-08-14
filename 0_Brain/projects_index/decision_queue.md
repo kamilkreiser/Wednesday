@@ -121,11 +121,35 @@ also `pr`-workflow work · (b) leave it and keep finding dead suites by hand.
 **Recommendation:** **(a)**, batched with the other CI work — it is shared CI that
 Peter and Stuart depend on, which is why nobody has changed it at short notice.
 
-### 6. Secuura / Blockchain — **the consolidated backlog residue** (arriving today)
-The agent is sweeping 87 backlog items plus 16 In Review stalls, closing and
-archiving what is genuinely done. **Everything that cannot close because it needs your
-decision arrives as ONE list**, each with the question in a line and its
-recommendation. Not ready yet; it will land in its wrap.
+### 6. Secuura / Blockchain — **the backlog cannot go to zero, and here is the honest shape**
+**DELIVERED.** Full document in the Secuura vault folder:
+`Notes (MASTER)/Secuura/platform-k-backlog-decisions-2026-08-14.md`.
+
+**The agent went through all 87 Backlog items and pushed back on the premise, which I
+think is right:** *"the backlog cannot be cleared to zero by triage, because it is not
+full of stale tickets — it is full of real work."* **Exactly ONE** was genuinely
+finished-and-unclosed (KS-400, closed and archived, with the superseding commit
+`7cffe4341` and mechanism named).
+
+| Why it is open | Count | Who moves it |
+|---|---|---|
+| Real engineering work, specified, nobody has done it | ~50 | any session |
+| Blocked on a **decision** | ~20 | **you** |
+| Blocked on the **Kintsugi deploy** | 12 | **one deploy** |
+| Owned by Peter or Stuart | ~10 | them |
+| Fixed today, in review | 3 | — |
+
+**The highest-leverage item on the page is not a decision at all — it is the deploy**
+(item 5 above). One action closes twelve.
+
+**What the sweep actually found was not stale tickets: it was twelve tickets whose
+DESCRIPTIONS were wrong**, corrected today with evidence — including four that each
+said "the dependabot PR is left open so it stays fresh" when **every one of those PRs
+was closed on 2026-07-14**. *"A backlog item that misdescribes its own state is worse
+than a stale one: someone acts on it and wastes the afternoon."* It also declined to
+close KS-341 despite its technical content being about deleted infrastructure, because
+the underlying ask survives the platform it was written against — **the difference
+between clearing a board and emptying one.**
 
 ### 7. Standing, unchanged
 **Amplify HPSM-25 — overdue as of today.** · WED-107 (five legacy org-wide AgentMail
