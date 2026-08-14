@@ -1,11 +1,32 @@
-# Kam decision sitting — 2026-08-14 (live queue at the top; 08-04 archive below)
+# Kam decision sitting — 2026-08-14
 
-Format per Kam's 2026-08-06 rule: **Client/Project · problem · options · my
-recommendation.** He is unwell today, so this is built to be ruled in one pass.
+## ✅ RULED 2026-08-14 ~12:4x — all 18 backlog decisions CLOSED
+Twelve accepted as recommended. The six that needed him:
+- **KS-621 — `organization` IS A SECURITY BOUNDARY.** Net-new enforcement; neither
+  layer scopes by org today, so this is a model to build and **it changes the schema**.
+  Design comes to me before any code.
+- **KS-239 — SIGNED OFF.** Erasure irreversible and complete; downstream GDPR tickets
+  can stop citing it as open.
+- **KS-386 — a DATA-MODEL ruling, not a retention answer.** *"we do not hold PII. you
+  need to record what was done (typically with partners) to what level, etc. not the
+  actual data"* — Platform K should not hold the KYC images at all; it keeps the
+  **attestation**. Split: design + stop-storing is the agent's; **disposal of existing
+  data is irreversible and stays Kam's explicit signature.**
+- **KS-263 — deferred to next week.**
+- **KS-339 — Kam discusses access with Phil and Steve himself**; Stuart worked on it
+  last. Nobody contacted.
+- **KS-101 — priority DOWN**: Platform K does not need the Stripe consolidation, no
+  near-term commercialisation. Kam requests the info from Stuart; external contact is
+  his and I have contacted nobody.
+
+**Also ruled: the Kintsugi hold is LIFTED and the deploy is authorised** (demo only;
+production untouched and still his signature). Briefed as the next Secuura session's
+first and only priority — twelve merged fixes, four security, KS-617 restoring gateway
+session revocation that is currently off.
 
 ---
 
-## OPEN — needs Kam, ranked
+## STILL OPEN — needs Kam
 
 ### 1. Datasec / HPSM — **E14: does an executed CSPA exist, and can we read it?**
 **Problem:** the CSPA sits at **rank 1 in SOW §3, above the SOW itself**, and it is
@@ -92,7 +113,7 @@ correction in our favour: the silence calendar dated the content freeze to **M2*
 gate carrying **no payment and naming no content**; the content actually lands on
 **M3, 20% / A$150,000**, so we had been claiming relief against nothing.
 
-### 5. Secuura / Blockchain — **the Kintsugi deploy, now ONE decision covering thirteen changes**
+### ~~5. Secuura / Blockchain — the Kintsugi deploy~~ ✅ RULED: DEPLOY AUTHORISED 2026-08-14
 **Problem:** thirteen merged-but-unshipped changes sit behind the hold, **four of them
 security fixes** — including KS-617, which restores gateway **session revocation**
 that is currently not running on demo. The backlog sweep cannot close any of them
@@ -121,7 +142,7 @@ also `pr`-workflow work · (b) leave it and keep finding dead suites by hand.
 **Recommendation:** **(a)**, batched with the other CI work — it is shared CI that
 Peter and Stuart depend on, which is why nobody has changed it at short notice.
 
-### 6. Secuura / Blockchain — **the backlog cannot go to zero, and here is the honest shape**
+### ~~6. Secuura / Blockchain — the backlog residue~~ ✅ RULED: all 18 decided (see top)
 **DELIVERED.** Full document in the Secuura vault folder:
 `Notes (MASTER)/Secuura/platform-k-backlog-decisions-2026-08-14.md`.
 
