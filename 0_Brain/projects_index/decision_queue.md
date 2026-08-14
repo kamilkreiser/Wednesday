@@ -42,23 +42,28 @@ in the same breath says PoCs get insisted on with a couple; a live 10-gate rebui
 the over-strict behaviour we are removing. The agent is proceeding on ≥5 with the
 value in **one named constant**, so your ruling is a one-line change either way.
 
-### 4. Datasec / Vision — **do you need to tell Will that quotes went out without a PoC line?**
-**Problem:** the current rule does not block — **it silently dropped the PoC line**, with
-no charge, no flag and no explanation on screen or in the PDF, and a test locked that
-in. **DATED NOW: live since 2026-08-07** — `pocMinDevices` enters in `b9e3763` and
-reaches the shipped path in `49b3dfc`, both 08-07 (I ran `git log --all -S` myself).
-**So the exposure window is roughly seven days, 2026-08-07 to 2026-08-14.**
-**Whether any real quote hit it is unknown** — that needs production data and I have
-not gone near it. The fix is on main as v2.20 but **NOT deployed**; the live image is
-still v0.3.2-tool2.19, and the repo has no deploy automation, so shipping it is a
-deliberate act you choose.
-**Options:** (a) tell Will now with the dated bound and the honest gap · (b) wait
-until the fix ships and tell him once · (c) say nothing.
-**Recommendation:** **(a) or (b), your call and your conversation** — but not (c). I
-lean (a): it is a bounded, honest message — *"for about a week, a ticked PoC on a
-small deal produced a quote with the PoC line missing and no warning; it is fixed and
-not yet deployed"* — and he found the rule himself, so he will connect the two.
-**External comms are your class; I have not contacted anyone.**
+### 4. Datasec / Vision — 🔴 **the LIVE tool is still dropping PoC lines right now**
+**Problem:** on a deal of 1–4 devices, ticking the PoC box **silently drops the PoC
+line** — no charge, no flag, nothing on screen or in the PDF. **Live since 2026-08-07
+19:16 (`49b3dfc`, v2.08) and STILL LIVE** — the fix is on main as v2.20 but **not
+deployed**; `hpas-quickquote.azurewebsites.net` is running v0.3.2-tool2.19. Window so
+far: **6 days 16 hours and open.**
+**Two things that make it worse than it first looked:** the field seeded to
+`min(dealDevices, 5)`, so **ticking the box was enough** — no unusual input needed —
+and that is **exactly Will's population**, the small deals he wrote in about. Before
+v2.08 the control was *disabled*, so an AM could see the rule refusing them; now they
+tick it and get nothing back with no signal at all.
+**Not a reversal by anyone:** collateral from the pricing-engine extraction — the
+floor went into the engine against the wrong number and the UI's correct deal-size
+gate was deleted as redundant in the same commit. **Nobody decided this.**
+**Options:** (a) deploy v2.20 now, then tell Will with the dates · (b) tell Will now,
+deploy when convenient · (c) deploy quietly and say nothing.
+**Recommendation:** **(a).** The deploy is the part that stops the bleeding and it is
+one action; the telling is yours and reads far better alongside "and it is already
+fixed in the field". **Not (c)** — he found the rule himself and will connect the two.
+**Whether any real quote was affected is unknown** — that needs production data and I
+have not gone near it. **External comms and the deploy are both your class; I have
+done neither.**
 
 ### 5. Secuura / Blockchain — **the Kintsugi deploy, now ONE decision covering thirteen changes**
 **Problem:** thirteen merged-but-unshipped changes sit behind the hold, **four of them
