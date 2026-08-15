@@ -189,6 +189,42 @@ about a place, and the place is part of the claim.** Same family as
 the corollary from 2026-08-14 that **the positive control must run in the SAME PLACE as the
 real query** — this is that rule pointed at suites rather than at searches.
 
+
+### The inverse: a REPRODUCTION that cannot reproduce (2026-08-15, Datasec/NexusAI)
+
+**Every member above is a check that cannot report a failure. This one is a check that cannot
+find one — and it fails in the most expensive direction available, because "cannot reproduce"
+CLOSES tickets.**
+
+**The case.** Chasing a flaky test, the agent ran the failing test alone — `jest -t '<name>'` —
+and got **20 runs, 20 green**. It was about to report that the flake does not reproduce. Then
+it ran the full suite before believing its own result: **red the entire time, 1 failed / 162
+passed, exactly as the ticket said.**
+
+**Why isolation lied.** Running the test alone left the first call **cold**, and that cold
+start supplied the exact millisecond whose absence was the bug. **The isolation did not fail to
+find the defect — it removed the defect's PRECONDITION and then reported its absence as
+evidence.** The narrowing that makes a test easier to study is the same narrowing that can
+delete what you are studying.
+
+**How to apply:**
+1. **Before believing "cannot reproduce", ask what the reproduction ENVIRONMENT changed** —
+   ordering, warm/cold state, parallelism, fixtures, a shared cache, the clock. A minimal
+   repro is a different system, not a smaller one.
+2. **Run the failing case in the configuration that FAILS before running it in the one that is
+   convenient.** The full suite first, the isolated test second.
+3. **"20/20 green" is a zero, and zeros are suspects** — the same rule as everywhere else in
+   this file, pointed at a negative result you WANT to be true because it would close the
+   ticket.
+4. **Same shape as the mirror above** (an absence claim whose search could not have found the
+   thing) — here the search is a test run and the scope is the runtime environment.
+
+**And the unifying formulation, from the same agent, which is better than the one I had:**
+
+> *"You accepted a claim because it fitted a pattern; I accepted a measurement because it was
+> convenient and came from a method I had not questioned. Both are the same failure — **a
+> result that arrives pre-confirmed and never gets asked for evidence.**"*
+
 **Related:** [[2026-08-07_valid-is-not-delivered]] (my instance),
 [[2026-08-06_artifact-presence-is-not-execution]],
 [[2026-08-06_never-discard-stderr]],

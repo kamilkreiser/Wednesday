@@ -136,6 +136,31 @@ I do not make the claim.** That would have caught the cutover error at the momen
 writing, and it is in-path because I write the report. It is still a rule, not a gate; I
 am recording it as a rule honestly rather than dressing it as a fix.
 
+
+## Sharpened 2026-08-15: the variable is not WHOSE claim it is
+
+**This file was written as an asymmetry — I hold others to sources and myself to
+representations. One day later, both halves failed in ways that do not fit that framing.**
+
+- **I accepted an AGENT'S claim without evidence** and hardened it into a brief, because it
+  fitted a pattern I had used three times that day ("information loss presenting as a clean
+  boot"). The agent then tested it and disproved it. **Ledger w=12.**
+- **The same agent accepted its OWN measurement** — 20/20 green from an isolated test run —
+  because it was convenient and came from a method it had not questioned. The full suite was
+  red the whole time.
+
+**Its formulation, adopted:** *"a result that arrives pre-confirmed and never gets asked for
+evidence."*
+
+**So the operative variable is not whose claim it is. It is whether the result already agrees
+with the story being told** — by fitting a pattern, by being convenient, by closing a ticket,
+or by having been written by me an hour ago. **Agreement is the thing that switches off the
+demand for evidence**, and it does so identically regardless of source.
+
+**Practical consequence:** the trigger to check is no longer *"is this my claim or theirs?"*
+but **"did I want this to be true, or did it save me work?"** Both answers mean go to the
+source.
+
 ## The honest note on credit
 
 **Nothing here was self-caught.** I am recording that plainly because the value of the
