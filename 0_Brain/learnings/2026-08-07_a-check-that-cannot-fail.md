@@ -166,6 +166,29 @@ without the package's own `vitest.unit.config.ts`, returns `ReferenceError: befo
 defined` **instead of the real assertion** — the wrong-runner member above, failing in the
 direction that looks like a worse bug than you have.
 
+
+### A positive control proves the suite it RAN IN, and nothing about its neighbour (2026-08-15, Secuura s35)
+
+**The condition that caught this was "run the positive control PER SITE", and I set it without
+knowing it would earn its keep this specifically.**
+
+**The case.** One defect, two packages. In the first, restoring the broken call reddened the
+suite — a genuine control. In the second, **the suite passed 290/290 with the defect fully
+restored.** Its existing test only ever created the pointer from scratch, so it passed whether
+or not the removal step worked at all. The failure originally reported there had been **leaked
+state from a real output tree, not a test reding on the bug.**
+
+**Consequence had the control been run once instead of per site:** a correct fix ships with
+**no evidence for half of it**, under a PR that says "verified" — because the first package's
+honest red would have been silently inherited by the second.
+
+**The rule:** a positive control certifies **the suite it ran in**. Two packages, two
+codepaths, two environments, two runners → two controls. **"The control passed" is a claim
+about a place, and the place is part of the claim.** Same family as
+[[2026-08-05_verify-the-chain-not-the-legs]] (a green leg says nothing about the chain) and as
+the corollary from 2026-08-14 that **the positive control must run in the SAME PLACE as the
+real query** — this is that rule pointed at suites rather than at searches.
+
 **Related:** [[2026-08-07_valid-is-not-delivered]] (my instance),
 [[2026-08-06_artifact-presence-is-not-execution]],
 [[2026-08-06_never-discard-stderr]],
