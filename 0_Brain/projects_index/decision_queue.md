@@ -77,11 +77,25 @@ re-deriving its own premises."*
 **Recommendation:** decide the fallback before Monday rather than in the room. **I have not
 actioned HPSM-25 and nobody has contacted HP.**
 
-⚠️ **Related, and NOT verified by me:** the same pass found that NTP 31 Aug ⇒ hypercare
-ending **4 Jan 2027** by business-day arithmetic, against **1 Jan** as recorded — before
-Christmas/New Year holidays push it further, and against SOW-02 contracted to start 1 Dec.
-**The overlap is worse than we had recorded.** I do not hold the hypercare duration, so this
-is the agent's reading, labelled as such.
+~~⚠️ **Related, and NOT verified by me:** NTP 31 Aug ⇒ hypercare ending **4 Jan 2027**
+against **1 Jan** as recorded — the overlap is worse than we had recorded.~~
+✅ **WITHDRAWN 2026-08-15 by the next session, which established the source.** CT §16 says
+*"10 business days following production deployment"*, and **the inclusive reading is the only
+one that reproduces §17's own baseline** (30 Nov → 11 Dec). **So 1 Jan was right and 4 Jan is
+withdrawn.** It reached you labelled as unverified precisely because I could not re-derive it,
+and that labelling is why the correction costs nothing.
+*(I verified the instrument claim myself: `verify_deck.py:116` hardcodes
+`hypercare_end = 2026-12-11` and counts business days between two fixed dates — it asserts what
+the deck says and cannot establish a duration. An instrument mistaken for a source.)*
+
+🔴 **What replaced it is REAL, and one half bears directly on your Amplify decision:**
+1. **"Business day" is undefined in all four documents** — and the window crosses the Christmas
+   shutdown, where the difference is not academic.
+2. 🔴 **§17 does not rebaseline while everything else does.** **So on a slipped NTP, the SOW
+   schedules hypercare BEFORE the release it supports.** That is a direct consequence of the
+   slip option in item 0 above, and it should be priced into whichever fallback you choose.
+*(Both are the agent's measurements. My own corpus grep errored — and its positive control
+errored with it — so I am reporting no number of my own in either direction.)*
 
 ### 🔴 0b. Datasec / HPSM — **an M6 evidence pack can be assembled from the PRD's own identifiers, PASS, and prove the wrong thing. A$75,000.**
 **NEW 2026-08-15, and it is a Monday item.**
