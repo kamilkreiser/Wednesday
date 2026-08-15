@@ -234,6 +234,28 @@ by-design-or-remediate · F-1 WAF · F-5 CAPTCHA · KS-386 retention · KS-329 �
 verify-file 415 · KS-130/169/229 · the HP correction bundle (X1–X5 + X6 + CT §18
 carriage) · four modelled revenue streams with one contract vehicle.
 
+### ~~7b. Datasec / HPSM — the Monday deck may not open~~ ✅ **CLOSED 2026-08-15 ~12:0x — IT OPENS**
+**Answer: the deck is fine and Monday is not at risk.** I opened it in PowerPoint on this
+Mac; **PowerPoint's own document model reports 43 slides with no repair dialog**, and
+**LibreOffice independently converted the same file to a complete 604 KB PDF**. Kam
+confirmed on his own screen: *"PPT looks good. I have not reviewed the content. This can
+wait for monday."*
+**So two independent renderers accept the file and only Quick Look does not** — which
+inverts the finding from "our deck may be broken" to "Quick Look stalls on something in
+our deck". HPSM session 22 had already reproduced the stall independently at a 90-second
+timeout (excluding a threshold artefact) and honestly flagged that its HP-deck control was
+probably a warm cache rather than quoting a 450× ratio.
+**Residual, kept but not chased:** anyone who PREVIEWS rather than opens the deck — Finder
+space-bar, a Mail/Teams attachment preview, a document-management thumbnailer — may see
+nothing. That matters only if this deck is sent to HP as an attachment. Parked as a
+low-priority ticket with the reproduction and both controls recorded; HPSM stood down off
+the bisect and moved to the register gate-count.
+**Honest note on my own evidence:** my System Events dialog probe returned zero windows AND
+zero sheets — a sheet count taken from an empty window list is a check that cannot fail, so
+it proves nothing. What carries the weight is PowerPoint's own slide count plus Kam's eyes.
+
+<details><summary>Original item as raised (kept for the record)</summary>
+
 ### 🔴 7b. Datasec / HPSM — **the Monday deck may not open, and this is now your 30 seconds well spent**
 **Problem:** this was on your awareness list for two days as a formality. I tried to
 close it and it did not close. **The system Quick Look renderer on this Mac produces
@@ -252,6 +274,8 @@ Monday regardless · (c) leave it.
 between finding this out now and finding it out in the room on Monday. HPSM already has
 the finding with the controls attached and a bisect plan (the 28-slide client-safe build
 is the first comparison). **Not (c)** — you present from this file in three days.
+
+</details>
 
 ### 7c. Datasec / NexusAI — **RD-76 (Entra SSO) now blocks FIVE verifications, and that is a measured cost**
 **Problem:** Entra SSO blocks agent browser-verification of the NexusAI demo. It has been
