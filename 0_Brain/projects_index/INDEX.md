@@ -96,6 +96,42 @@ chat quiet since 08-10.
   issues, and **all of them are Done** — a genuine zero. Vision's one live item (the
   silent PoC drop, live since 2026-08-07) is Kam's class: deploy plus telling Will.
 
+**Refreshed 2026-08-16 ~09:3x (Sunday morning session, successor to the 05:30 shift-change
+wrap).** Fleet floor clean at boot — no agent panes, watcher armed mail-only, **nothing
+awaiting an answer in any of the six inboxes** (newest traffic anywhere is my own 19:32Z
+handover; zero inbound in ~4 hours). Dashboard live on 47787, chat silent since 08-10.
+Linear: **71 active WED, 0 labelled `lesson`** (both through `board_count.sh`).
+🔴 **KAM PRESENTS HPSM TOMORROW, MONDAY 08-17.**
+
+**Morning sweep — every board read with a control before any brief was written:**
+- **Secuura/Blockchain: 135 active KS, 46 started/unstarted** (was 133/44 on 08-15).
+  **s35 left five PRs open and nothing merged, deliberately** — #700/#701/#702 in flight,
+  #697 red on KS-639 (unblocks when #701 lands, NOT a docs problem), #686 red on the GHCR
+  secondary rate limit KS-628 and **left honestly red**. `origin/develop` at `5f3cc8fef`.
+  ⚠️ **All PR/CI states are s35's readings — Secuura's `gh` is unauthenticated in my hands
+  and I have confirmed none of them.** **Session 36 LAUNCHED** (%2): merge on green in
+  dependency order, then B-6's retitle (the unauthenticated `POST /demo-api/persona/switch`
+  returning a real admin token — the passwords in its title are incidental), then the
+  KS-486–491/612 security stream.
+- **Datasec/NexusAI: 51 open of 93 total, 2 In Progress.** **Session LAUNCHED** (%3) on
+  RD-95 then RD-93, both queued with shapes by the 08-15 session. Briefed explicitly NOT to
+  burn the session browser-verifying the Testing pile — **RD-76 blocks every authenticated
+  surface and the fifth blocked item is an admin-gated JSON endpoint, not a page.**
+- **Datasec/HPSM: 20 open, all Backlog — NOT launched, and that is the grant working.**
+  Every remaining item is tagged `[KAM-…]` or `[MONDAY 08-17]`; s23 reported the queue
+  genuinely dry and D01 v0.4's 35 verdict slots are empty **by design — Monday fills them.**
+  The HPSM continuous-readiness grant's own diminishing-returns clause says stop and say so
+  rather than manufacture study. **Running 24h is permission, not a quota.**
+- **Datasec/Vision: NOT launched — 0 open, and the zero is verified.** Positive control on
+  the same project key returns **64 issues, all Done**; a bogus key returns 0 identically,
+  which is why the control is the whole point (`WIL` never existed on this site — the key
+  is `VSP`).
+
+⚠️ **Watcher deliberately not hand-cycled to agents=2.** Its runner re-arms on a 4h cycle
+(next ~09:50) and reads the pane count itself. **Cycling it by hand is the exact operation
+that killed the runner instead of its child three times on 08-13** (ledger w=3); the cost of
+waiting is ~14 minutes during which both agents are still booting. Recorded rather than done.
+
 ---
 
 ## Template per project
