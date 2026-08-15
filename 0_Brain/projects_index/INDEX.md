@@ -64,6 +64,38 @@ HPSM-25 (Amplify) overdue and his alone. **Datasec/Vision: v2.20 on `main`
 item 4. **NexusAI and CypherKey: idle, unlaunched, Kam-gated.** Lead_Bot and myPKI
 remain on his explicit skip list.
 
+**Refreshed 2026-08-15 ~12:0x (morning session, successor to the 05:30 shift-change
+wrap).** Fleet floor clean at boot — only my own pane and the monitor, watcher armed,
+**nothing awaiting an answer in any of the six inboxes** (newest inbound everywhere is
+2026-08-14 and every one already has my reply after it). Linear: **71 active WED
+issues, 0 labelled `lesson`** (both through `board_count.sh`). Dashboard live on 47787,
+chat quiet since 08-10.
+
+**Morning sweep run — three agents started under Kam's standing grant:**
+- **Secuura/Blockchain (s35):** board **133 active KS, 44 in started/unstarted**.
+  🔴 **Peter worked the board overnight (12:20Z–13:33Z) and left a SEVEN-ITEM post-merge
+  review of PR #698 on KS-441, marked "RECORDED, NOT ACTIONED" — items 1 and 2 are live
+  on `develop` now** (a Mongo 8.2.12 override on a merge-blocking Akto gate, and a
+  pre-merge poll budget of 54 min against a 30-min job cap that can never fire). His
+  comment carries a live instruction: **do not dispatch `pre-merge-platform-suites.yml`
+  until the cap is raised.** Briefed to read it first and bring me a recommendation
+  rather than touching shared CI unilaterally; security review stream (KS-486–491, 612)
+  is the substantive work.
+- **Datasec/NexusAI:** **50 open RD issues.** RD-88 first under the Option A ruling,
+  four conditions restated verbatim from the 03:02Z source mail (not from my notes),
+  then RD-96/94/95/93.
+- **Datasec/HPSM:** **20 open, all Backlog.** Deck-render risk outranks the queue —
+  Kam presents Monday 08-17 and the system renderer will not open our deck while it
+  renders HP's 800×-larger one in 25s.
+- **Datasec/Vision: NOT launched — no open tickets, and that zero is verified.**
+  🔴 **Index-card correction: there is no `WIL` project on this Jira site.** The visible
+  key is **`VSP` (Vision Sales Portal)**; `project = WIL` returns 0 exactly as
+  `project = NONSENSEKEY` does, because this endpoint answers an unknown key with an
+  empty result rather than an error. **So every past "WIL Jira 0 open" reading was a
+  check that could not fail.** The real state, positive-control verified: VSP holds
+  issues, and **all of them are Done** — a genuine zero. Vision's one live item (the
+  silent PoC drop, live since 2026-08-07) is Kam's class: deploy plus telling Will.
+
 ---
 
 ## Template per project
