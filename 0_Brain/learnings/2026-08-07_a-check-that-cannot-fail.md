@@ -129,6 +129,43 @@ the first failure and read the raw step output, not the summary that interprets
 it** (see [[2026-08-06_artifact-presence-is-not-execution]], which this is the
 message-layer twin of).
 
+
+### A test that cannot CLEAN UP starts asserting against live data (2026-08-15, Secuura s35)
+
+**The formulation is the agent's and it is the newest member of the family.** A cleanup
+`fs.rmSync(link, { force: true })` **throws `ERR_FS_EISDIR` when the path is a symlink pointing
+at a directory** — so a test's tmp-dir teardown silently failed, `ensureRunDir` resolved against
+the **real** `output/reports` tree instead, and the assertion diff showed a live repo path where
+a `/var/folders/...` path was expected.
+
+**Why it belongs here rather than in a list of bugs:** the test still ran, still asserted, still
+reported. It had simply changed *what it was testing* — from a controlled fixture to live data —
+**and nothing in its output said so.** That is the family's defining property: the check failed
+in a way that looked like the answer.
+
+**The runtime half of the same defect is worse and is the reason to care.** At the two runtime
+sites the block sits inside a **bare `catch {}`** documented "best-effort", so the throw is
+swallowed and a `latest` symlink keeps pointing at the **first** run. The summary resolver reads
+that link first, and its scan fallback only fires for a *different* scenario — so **re-running
+the same scenario, the commonest workflow there is, makes a CI gate report on a stale run's
+data.** A swallowed exception that changes which data a gate reads is not a convenience; it is a
+gate that cannot fail, built out of an error nobody sees.
+
+**How to apply:**
+1. **Teardown is part of the check.** A test whose cleanup can fail silently can begin asserting
+   against whatever the failed cleanup left behind. Assert that cleanup succeeded, or make it
+   incapable of failing quietly.
+2. **A bare `catch {}` around cleanup is [[2026-08-06_never-discard-stderr]] in costume** —
+   narrow it to the expected conditions and LOG anything else. Deleting the catch is the wrong
+   fix: cleanup that legitimately cannot proceed must not break the run.
+3. **Verify at the destination:** "`rmSync` no longer throws" is the leg; "after a same-scenario
+   re-run the link points at the NEWEST run and the resolver reads it" is the claim.
+
+**And the reproduction trap found alongside it:** `npx vitest run <file>` in those packages, run
+without the package's own `vitest.unit.config.ts`, returns `ReferenceError: beforeEach is not
+defined` **instead of the real assertion** — the wrong-runner member above, failing in the
+direction that looks like a worse bug than you have.
+
 **Related:** [[2026-08-07_valid-is-not-delivered]] (my instance),
 [[2026-08-06_artifact-presence-is-not-execution]],
 [[2026-08-06_never-discard-stderr]],
