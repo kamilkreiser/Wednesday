@@ -72,6 +72,35 @@ framing, which I have adopted: **a message is the weaker half; a guard does not 
 rather than us touching a merge-blocking workflow he has claimed. **Nothing is broken right
 now; the exposure is entirely "first person to dispatch".**
 
+### 🔴 7d. Datasec / NexusAI — **RD-55 sits at LOW while a plaintext secret is in a TRACKED file**
+**Found today by the NexusAI agent during a condition-3 credential audit, not by looking for
+it.** A `COORDINATOR_SECRET` value is not merely in git history — it is **in the current
+working tree in plaintext**, at `docs/PEN-TEST-REPORT-2026-04-25.md:296`, because the
+pen-test report quotes the vulnerable line *including its value*.
+**Why that is a different thing from the history problem:** history needs a scrub; **a
+tracked file needs a commit.** RD-55 covers both and is priority **Low**.
+**Live config is clean** — `docker-compose.yml:89` is now fail-fast with no default, so
+nothing runs on the burned value. The agent did not quote the value anywhere and I have not
+either.
+**Options:** (a) raise RD-55 and treat the tracked-file half as its own near-term item ·
+(b) leave the priority and handle it with the eventual scrub · (c) redact the report.
+**Recommendation: (a).** **Not (c) without you deciding it** — that file is evidence in a
+security report and redacting it is a judgement about the document, not a cleanup. **Rotation
+and scrub are your signature; I have touched neither and told the agent not to edit the file.**
+
+### ⚠ 7e. Datasec / NexusAI — **the near-miss worth knowing even though nothing is exposed**
+RD-88 exempts two coordinator routes from sign-in on the demo. The agent stopped on my own
+condition 4 and checked what that change would mean for the shipped Marketplace image.
+**No current template sets `COORDINATOR_SECRET`, so a customer would get an endpoint that is
+exempt from sign-in and still 403s everyone** — exempted but unreachable. **The retired
+VM-era templates, however, set it to the literal string `disabled`.** One template generation
+earlier, that change would have shipped every customer an unauthenticated read/write endpoint
+whose secret was a publicly-readable word.
+**No action needed from you.** I ruled the fix must be **gated on a configured secret**, so
+the shipped artifact is unchanged by construction rather than by the current contents of
+templates nobody is watching. Recording it because the near-miss is the argument for the
+boundary, and because it is the first time condition 4 has fired.
+
 ### 🔴 A. Secuura / Blockchain — **five findings that are one defect: signals firing into channels nobody reads**
 Filed by session 33. **Four of the five were found by reading a red that already
 existed** — nothing was hidden. Three are time-sensitive.
