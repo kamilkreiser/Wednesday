@@ -107,6 +107,35 @@ framing, which I have adopted: **a message is the weaker half; a guard does not 
 rather than us touching a merge-blocking workflow he has claimed. **Nothing is broken right
 now; the exposure is entirely "first person to dispatch".**
 
+### ⚠ 2b. WORKSPACE (all 13 projects) — **`Launch_Claude.command` is not tracked in git, so launcher fixes live on one machine only**
+**NEW 2026-08-15. Raised by the NexusAI agent, ruled by me as one workspace item rather than
+thirteen project tickets — and it is above my authority because it changes a convention you
+set across the whole workspace.**
+
+**The finding:** each project's repo is `2_Project_Files/`; the launcher sits **above** it and
+is therefore untracked. So when an agent fixes a real launcher bug — as NexusAI did today at
+line 169 — the fix is **not committed, not backed up beyond a manual `.bak`, does not
+propagate to your laptop or the T9, and is invisible to anyone verifying the ticket by pulling
+the repo.** A reviewer would correctly conclude nothing was fixed.
+
+**Why it is not cosmetic:** your two standing requirements are never getting the client wrong
+and **maximum portability**. This is squarely the second. **And it is invisible from inside any
+single project**, which is why it has not been raised in thirteen tries — the agent only saw it
+because it was asked to fix the launcher and then asked what "fixed" meant.
+
+**The care needed, stated so it is not waved through:** launchers export per-project
+`AZURE_CONFIG_DIR` / `GH_CONFIG_DIR` and key paths. They are the mechanism that keeps client
+identities isolated (hard rules 4 and 5). **Tracking them is a decision about where
+identity-isolating config lives**, not a tidy-up — which is exactly why I am not making it.
+
+**Options:** (a) track each launcher in its own project repo · (b) keep them untracked but add
+them to a drive-level backup/sync so fixes survive and propagate · (c) leave as is and accept
+that launcher fixes are per-machine, recording that on any ticket that touches one.
+**Recommendation: (b) as the cheap immediate step, (a) considered separately per project** —
+(b) closes the portability gap without changing what any repo contains or where identity config
+lives. **Not (c) alone**, though (c)'s recording discipline should apply regardless, and I have
+already required it on RD-96.
+
 ### 🔴 7d. Datasec / NexusAI — **RD-55 sits at LOW while a plaintext secret is in a TRACKED file**
 **Found today by the NexusAI agent during a condition-3 credential audit, not by looking for
 it.** A `COORDINATOR_SECRET` value is not merely in git history — it is **in the current
