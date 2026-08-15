@@ -56,6 +56,41 @@ something meaningful at one end.
 5. **A prose list that counts itself is a capped list too** — the count and the items are two
    artefacts that can disagree, and the count is the one people quote. **Count the items.**
 
+## The sibling, found the next morning: an EXCLUSION SET is not neutral either — state the predicate, not just the bound
+
+**The operative case widens:** I am about to quote a count from any filtered query. The cap
+rule above makes me state the **bound**. **It does not make me state the PREDICATE** — and a
+filter decides what exists just as surely as a limit does.
+
+**The case (2026-08-16, caught by the Secuura agent within ten minutes of my brief).** I
+briefed "135 active KS issues". It counted **134** and — rather than assuming my number had
+drifted — said the one thing that made the gap findable: ***"I cannot tell you which without
+knowing your query's state set."***
+
+**Both counts were right.** My filter was `state.type nin ["completed","canceled"]`. Linear
+also has `triage` and **`duplicate`** state types, and **KS-620 sits in a state named
+`Duplicate`** — closed by any operational meaning, counted by me as work. (The remaining
+issue was real board movement: KS-641 created two minutes before its mail.)
+
+**Why this is the cap lesson's sibling and not an instance of it:** `board_count.sh` did its
+job perfectly — the total was not a cap, `hasNextPage` was false, the arithmetic was sound.
+**A correct count of the wrong set is invisible to every guard I have built**, because every
+guard I have built asks about truncation. **Negation filters are where this hides:** `nin`
+and `!=` silently admit every category you did not think to name, and new ones appear without
+telling you.
+
+**How to apply:**
+1. **Any count I hand to anyone carries its predicate**, not just its bound — "134 in
+   started/unstarted/backlog", never a bare "active".
+2. **Prefer allow-lists to deny-lists when counting.** `in ["backlog","unstarted","started"]`
+   states what you meant; `nin ["completed","canceled"]` states what you happened to think of.
+3. **When two counts disagree, get the breakdown before deciding who drifted.** One query
+   grouping by the dimension you filtered on settles it, and the answer here was "neither".
+4. **The receiving agent could not check my number and said so.** That sentence is what made
+   this findable — **a reader who names what they would need in order to verify you is doing
+   the most useful thing available to them**, and it only works if the number's provenance is
+   something I can actually supply.
+
 **Related:** [[2026-08-14_i-read-representations-they-read-sources]] (a cap quoted as a count
 is the arithmetic half of this; this is the selection half), [[2026-08-07_a-check-that-cannot-fail]]
 (a truncated result and a complete one look identical),
