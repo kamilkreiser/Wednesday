@@ -48,6 +48,41 @@ production untouched and still his signature).
 
 ## STILL OPEN — needs Kam
 
+### 🔴🔴 0. Datasec / HPSM — **THE AMPLIFY WINDOW HAS CLOSED. This is a premise that expired, not a deadline to hit**
+**NEW 2026-08-15, and it outranks everything else on this page.**
+
+The 112-day plan cannot reach the **Sat 5 Dec** Amplify anchor from any start date after
+today. **I computed this myself rather than relaying it:**
+
+| NTP | Release (NTP + 112d) | vs Amplify Sat 5 Dec |
+|---|---|---|
+| Fri 14 Aug — last business day | Fri 4 Dec | 1 day before |
+| Sat 15 Aug — today, the exact cutoff | Sat 5 Dec | the day itself |
+| **Mon 17 Aug — the day of your session** | **Mon 7 Dec** | **two days after** |
+
+(5 Dec 2026 is indeed a Saturday — checked, since the whole anchor rests on it.)
+
+**Stated carefully: I do not know whether you actioned HPSM-25 on Friday, and the project
+cannot know either.** If you did, this is moot and I would like to hear so. If you did not,
+**Monday's session opens on a premise that no longer holds** — and D-11 stops being *settle
+the date* and becomes *which fallback*: slip with §6 relief · compress · re-anchor · or
+announce-at-Amplify-then-release.
+
+**How it surfaced, which is the part worth keeping:** a routine tracker-maintenance pass
+re-derived row zero instead of carrying it forward. The row still read *"STILL OPEN — one
+day left. Today is Thu 13 Aug."* **The cheapest possible discipline caught the most
+expensive available finding.** Session 9 predicted exactly this: *"Monday would open by
+re-deriving its own premises."*
+
+**Recommendation:** decide the fallback before Monday rather than in the room. **I have not
+actioned HPSM-25 and nobody has contacted HP.**
+
+⚠️ **Related, and NOT verified by me:** the same pass found that NTP 31 Aug ⇒ hypercare
+ending **4 Jan 2027** by business-day arithmetic, against **1 Jan** as recorded — before
+Christmas/New Year holidays push it further, and against SOW-02 contracted to start 1 Dec.
+**The overlap is worse than we had recorded.** I do not hold the hypercare duration, so this
+is the agent's reading, labelled as such.
+
 ### ⚠ A2. Secuura / Blockchain — **NEW 2026-08-15: a CI landmine whose only mitigation is that people happen to remember it**
 **Peter merged PR #698 yesterday and then reviewed his own merged diff, finding EIGHT items**
 (his headline says seven; the agent counted and found the eighth — and **my own report to
