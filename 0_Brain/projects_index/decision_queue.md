@@ -48,6 +48,30 @@ production untouched and still his signature).
 
 ## STILL OPEN — needs Kam
 
+### ⚠ A2. Secuura / Blockchain — **NEW 2026-08-15: a CI landmine whose only mitigation is that people happen to remember it**
+**Peter merged PR #698 yesterday and then reviewed his own merged diff, finding EIGHT items**
+(his headline says seven; the agent counted and found the eighth — and **my own report to
+you said seven too, because I took his count instead of counting**).
+
+**The one that needs you is item 2.** `PRE_MERGE_TIMEOUT_MS` was raised to 3600s while
+`Akto pre-merge (full)` still carries `timeout-minutes: 30`. The poll budget is 54 minutes
+against a 30-minute cap, **so whoever dispatches `pre-merge-platform-suites.yml` first gets
+a job killed at 30 minutes with no report and no artifact — which reads as a failure of the
+thing being tested, not as a cap nobody raised.** Peter's own words: the old landmine was
+*"relocated, not defused"*.
+
+**Why it reaches you:** the warning currently lives in a comment on **KS-441, a ticket about
+Akto scan throughput assigned to Peter** — correctly recorded and badly placed. The agent's
+framing, which I have adopted: **a message is the weaker half; a guard does not decay.**
+- **Done by me today (stopgap):** the agent posts the arithmetic and consequence on the
+  ticket a dispatcher would actually look at, **@-mentioning Stuart** (a Linear @-mention is
+  my scope; a mail to him is yours, and I have sent none).
+- **Yours:** the durable fix is the workflow itself refusing or announcing the mismatch when
+  dispatched. **That is shared CI — Peter's or Stuart's change, not ours.**
+**Recommendation:** let the stopgap stand today, and raise the guard with Peter next week
+rather than us touching a merge-blocking workflow he has claimed. **Nothing is broken right
+now; the exposure is entirely "first person to dispatch".**
+
 ### 🔴 A. Secuura / Blockchain — **five findings that are one defect: signals firing into channels nobody reads**
 Filed by session 33. **Four of the five were found by reading a red that already
 existed** — nothing was hidden. Three are time-sensitive.
@@ -95,7 +119,50 @@ itself a finding and changes the precedence argument.
 **Recommendation:** answer (a)/(b)/(c) — five minutes, highest-value open item across
 the programme for five sessions running.
 
+### 🔴 2a. WED — **NEW 2026-08-15: two Datasec projects hold a key that can read another client's mailbox**
+**This supersedes how I framed item 2, and it is the more important half.**
+
+**Measured today, values never printed — full sha256 of each project's `AGENTMAIL_API_KEY`:**
+
+| Project | Key | Reads `coagent@`? |
+|---|---|---|
+| **Datasec/NexusAI** | **byte-identical to Wednesday's** — legacy **org-wide**, len 70 | yes (200) |
+| **Datasec/Vision** | **byte-identical to Wednesday's** — legacy **org-wide**, len 70 | yes |
+| Secuura/Blockchain | distinct, len 76 — **inbox-scoped** | no |
+| Datasec/HPSM | distinct, len 76 — **inbox-scoped** | no |
+
+**That org-wide key returns HTTP 200 on `secuura-blockchain@` and `datasec-hpsm@`**, with a
+nonexistent inbox returning 404 as the negative control — so the 200s are real reads, not
+masked failures. **Two Datasec projects therefore each hold a credential that can read a
+Secuura mailbox.** Hard rule 2 / your "very important #1".
+
+**Stated precisely, because the distinction matters:** this is a **capability, not an
+incident.** There is **no evidence any cross-client read has occurred**; NexusAI probed
+`coagent@`, its own inbox and a control, and reported all three. Nothing was read across.
+
+**What makes it hard to close:** the 08-13 finding that **deletion is not revocation on
+AgentMail** — deleting these keys removes them from the listing while they keep
+authenticating. **So this cannot be fixed by deleting the key**, which is exactly what
+WED-107's plan said to do.
+**Options:** (a) issue inbox-scoped keys to NexusAI and Vision and finish the migration —
+the org-wide key stays alive but stops being *in* those projects' `.env` files, which is
+the part we control · (b) rotate the whole AgentMail account, if the vendor supports it ·
+(c) accept and document.
+**Recommendation: (a) now, (b) investigated alongside.** (a) is entirely ours, does not
+wait on a vendor who has declined to commit to a fix, and closes the exposure that
+actually sits on disk. **I can do (a) — say the word.** It is not approval-class, but it
+touches two projects' credentials, so I am asking rather than assuming.
+
 ### 2. WED — **WED-108 (P1): re-send your signed v1.3 grant to each per-project inbox**
+> 🔴 **CORRECTED 2026-08-15 — I had this wrong twice this morning and told you so both
+> times.** I said the migration cut **every** migrated agent off from `coagent@` "by
+> construction" and that **three** live agents were running on provenance-by-history.
+> **False for NexusAI**, which measured `coagent@` at 200 with a 404 control and
+> DKIM-verified your grant *today*. I generalised from two projects' reports and then
+> quoted my own spec's wording as if it were a measurement.
+> **The true scope: it affects the TWO genuinely migrated projects — Secuura/Blockchain
+> and Datasec/HPSM.** NexusAI and Vision still hold the org-wide key and can read the
+> grant. **The ask is still worth doing and is now half the size** — two inboxes, not four.
 **Problem:** the per-project migration cut every migrated agent off from `coagent@`,
 where your grant lives. **Two projects have now independently confirmed it** (Secuura
 s30, HPSM s21) — both are running on provenance-by-history rather than a check they
