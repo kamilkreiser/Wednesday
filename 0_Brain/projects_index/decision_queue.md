@@ -97,6 +97,37 @@ the deck says and cannot establish a duration. An instrument mistaken for a sour
 *(Both are the agent's measurements. My own corpus grep errored — and its positive control
 errored with it — so I am reporting no number of my own in either direction.)*
 
+### 🔴 2c. Datasec / HPSM — **six sessions of analysis exist on ONE DRIVE, outside version control**
+**NEW 2026-08-15. Found by the agent at its own wrap and disclosed as *"the wrap exposed
+something the wrap cannot fix"*. I verified it myself, with a control.**
+
+**`2_Project_Files` tracks exactly two files: `.gitignore` and `README.md`.** And
+**`1_Project_Definition` — which holds all 30 registers, D01, BACKLOG.md and every artefact of
+six sessions — is not inside any git repository at all.** (Positive control: NexusAI's repo
+returns 471 tracked files, so the command works.)
+
+🔴 **It also invalidates a check I ran twice today.** I verified "pushed, not merely committed"
+on this project before closing its pane and again in a score — `status -sb` 0/0, `rev-parse`
+matching. **Both true, both meaningless: a clean in-sync repo containing nothing is
+indistinguishable, by every command I ran, from one containing the work.** Ledgered.
+
+**Why it is yours and not mine:** the agent named the reasons and they are real — **K5 is your
+decision, `Source_Documents` was deliberately kept structurally outside git, and part of the
+corpus is NDA-adjacent.** Committing an analysis tree that sits beside HP's own documents is a
+call with consequences. **It did not act, and it was right not to.**
+
+**This is the same class as item 2b** (launchers untracked across all 13 projects): **work that
+exists on one drive, where the ritual that is supposed to protect it fires and has nothing to
+carry.** Your standing requirement is maximum portability; these two are where it is currently
+untrue.
+
+**Options:** (a) version the analysis tree in the project repo, with `Source_Documents` staying
+excluded · (b) leave it out of git but bring it into a drive-level backup that actually runs ·
+(c) a separate private repo for analysis only, keeping the NDA corpus structurally apart.
+**Recommendation: (b) now — it is reversible, needs no decision about NDA material, and closes
+the "one drive" exposure today — then (a) or (c) deliberately when you have time to weigh the
+corpus question.** I have changed nothing.
+
 ### 🔴 0b. Datasec / HPSM — **an M6 evidence pack can be assembled from the PRD's own identifiers, PASS, and prove the wrong thing. A$75,000.**
 **NEW 2026-08-15, and it is a Monday item.**
 
