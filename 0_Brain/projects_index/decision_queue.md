@@ -83,6 +83,46 @@ Christmas/New Year holidays push it further, and against SOW-02 contracted to st
 **The overlap is worse than we had recorded.** I do not hold the hypercare duration, so this
 is the agent's reading, labelled as such.
 
+### 🔴 0b. Datasec / HPSM — **an M6 evidence pack can be assembled from the PRD's own identifiers, PASS, and prove the wrong thing. A$75,000.**
+**NEW 2026-08-15, and it is a Monday item.**
+
+**§17.1 gives EPIC-011 the identifier range AI-001…AI-020. All five AI-nnn rows in PRD
+Appendix F are assessment-integrity tests — 5 of 5.** So anyone building M6's AI acceptance
+evidence by following the PRD's own numbering **assembles assessment evidence, and it passes.**
+
+**A complete-looking, internally-consistent, WRONG evidence pack for a 10% / A$75,000 gate** —
+dangerous precisely because it succeeds. Nobody re-examines a green pack whose identifiers
+match the contract's own scheme.
+
+🔴 **And it gates on something unresolved: three of the four contracted assistants do not
+appear in the PRD under their contracted names.** The SOW contracts *"Assessment Copilot,
+Opportunity Agent, Proposal Agent and QBR Agent"*; **Opportunity / Proposal / QBR return zero
+occurrences in the PRD, and the PRD's names return zero in the SOW.** The two documents name
+the same four capabilities and **share exactly one name.** For three of four, *"relevant"* must
+be settled by inference **before evidence can start** — and if nobody settles it deliberately,
+it gets settled accidentally by whoever builds the pack.
+
+**Also found, same sweep:** the AI scope conflict is in **three** places, not the one the
+ticket named — §14's MVP Status column, the functional-requirements table (of thirteen priority
+rows, ten Must, two Should, and the single Future/Should row is the AI row), and the API table
+marking the QBR endpoint "Future scoped".
+
+**A proposal already exists** —
+`Registers/2026-08-15_HPSM-29_M6-AI-acceptance-criteria-PROPOSAL.md`: seven cross-cutting
+criteria plus one per assistant, **each traced to a clause already binding, so accepting them
+adds no scope.** Every criterion is a governance property, no model-quality bar, because that is
+what §4 and §9 contract. **Partner Training Copilot deliberately EXCLUDED** — §4 does not name
+it and §18 puts it in the 2027 expansion as "Separate SOW / CR", so including it would be us
+widening our own scope.
+**All 36 citations machine-checked against freshly extracted text, 36/36, with two positive
+controls** (a fabricated quote and a real quote with one word altered — both correctly reported
+missing).
+
+**Recommendation:** take the naming/mapping question into Monday explicitly. **It is cheap now
+and expensive later** — it decides what M6's evidence has to prove, and the current default
+answer is one that passes while proving something else. **Not verified by me:** these are the
+agent's measurements; I have re-derived only that M6 is 10% / A$75,000, from the SOW `.docx`.
+
 ### ⚠ A2. Secuura / Blockchain — **NEW 2026-08-15: a CI landmine whose only mitigation is that people happen to remember it**
 **Peter merged PR #698 yesterday and then reviewed his own merged diff, finding EIGHT items**
 (his headline says seven; the agent counted and found the eighth — and **my own report to
