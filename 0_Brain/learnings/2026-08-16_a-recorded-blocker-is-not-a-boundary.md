@@ -70,6 +70,34 @@ headline-vs-operative-case rule (Secuura). **All five arrived unprompted from an
 examining its own work, and this one arrived in the same mail where it was correcting my
 brief.** Correcting plainly and then listening to what comes back keeps paying.
 
+## Widened the same day by the same agent: a recorded EXCLUSION is a claim too
+
+**Their formulation, adopted verbatim:** *"a recorded exclusion is a claim too."*
+
+**The case.** RD-90 shipped with arrays explicitly excluded from its fix, on the stated
+grounds that they *"were already rendering correctly."* That sentence sat in the fix comment
+and in the code. **It had never been measured.** Re-running the closed ticket's own control
+matrix instead of trusting its write-up showed arrays being char-spread into index keys — the
+exact defect RD-90 existed to remove — and **in the JSON transport the elements landed as
+top-level fields on the record**, i.e. arbitrary index-named columns in a Log Analytics ingest.
+
+**Live, not latent, and the way it hid is the lesson:** a scan of all **764** logger calls
+found **zero array literals** in the meta position, so a literal-only check would have cleared
+it. The real caller passes a computed `backupKeys.filter(...)` **on the settings partial-loss
+recovery path** — the line that tells a human which settings were lost, during the incident
+where that is the only thing that matters.
+
+**Three instances in one day, and the common property is the finding:** a recorded blocker
+(RD-93), a recorded exclusion (RD-90), and my own appended "reversible"
+([[2026-08-16_classification-is-the-field-that-grants-authority]]). **Each rode on the
+credibility of an adjacent verified thing.** None was checked, because each sat next to
+something that had been.
+
+**So the rule generalises past blockers:** *blocked by X · excluded because Y · not applicable
+since Z · handled by · out of scope · already correct* — **every one is a past judgement
+wearing a finding's clothes.** Re-running a closed ticket's own control matrix is cheap, and
+here it found a live defect in a persistence-loss recovery path.
+
 **Related:** [[2026-08-16_classification-is-the-field-that-grants-authority]] (the mirror,
 same day, mine), [[2026-08-07_a-check-that-cannot-fail]],
 [[2026-08-13_establish-authority-before-reconciling]],
