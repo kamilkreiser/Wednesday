@@ -48,6 +48,63 @@ production untouched and still his signature).
 
 ## STILL OPEN — needs Kam
 
+### 🔴🔴🔴 0c. Secuura / Blockchain — **KS-486 ESTABLISHED: a tenant-scoped org admin can mint a live `sk_` key into ANY tenant, and the credentials to be one are in tracked source**
+**NEW 2026-08-16, established by session 37 with controls, not inferred. Nothing has been
+touched, no code written, no probe run against the demo. This outranks everything below it.**
+
+**What is live** (their measurement, run as a pure function against the real `decideMint` —
+no service booted, nothing written, **4 denies and 4 allows on the same call path** so it
+discriminates):
+- Any caller in `KEY_ADMIN_ROLES` mints an `sk_` key into **any tenant**. That set includes
+  **`ORG_ADMIN` and `ISSUER_ADMIN`, which are tenant-scoped roles** — so **one customer's org
+  admin mints a live key into another customer's tenant.**
+- It can also mint a **wildcard `*`** scope and **`organizations:register`** — **the two limits
+  the provisioning branch enforces explicitly and the admin branch skips.**
+- Reachability traced, not assumed: `POST /api/security/keys` → `proxy.ts:902-904`
+  (`authenticateToken` only, **no** `enforceAdminProxy` — that is applied to `/api/admin/`, not
+  here) → rewritten to `POST /api/keys`. **The gateway contributes no tenancy check.**
+
+**What I verified myself, because it decides the severity:** the seeded org-admin credentials
+are present in **TRACKED source — 12 tracked files for one, 7 for the other** (positive control:
+`ORG_ADMIN` resolves in 76 files; negative control returns 0; **values not printed**). **So the
+precondition is not "an attacker who has compromised an org admin" — it is "anyone who can read
+the repository."** I have **re-rated it Urgent**, which is inside my scope.
+⚠️ **The honest limit: I established the values are in tracked source. I did NOT establish the
+repository's visibility** (my `gh` is unauthenticated for that project). **"In the repo" is
+proven; "published to the world" is NOT.** Please do not let that sentence get upgraded.
+
+**Half the register row was WRONG and that matters too:** *"no role check / any authed user"* is
+**false** — KS-480's gate landed 2026-07-30 and the row was written 2026-07-21, so the cited
+lines now contain the fix. **Four further rows in the same file are live** and all share one
+shape: *the role gate landed, a tenant/ownership check never did* — `GET /api/keys` leaking key
+ids across tenants, `DELETE /api/keys/:id` revoking on id alone with no ownership check (**those
+two compose into cross-tenant revoke, i.e. auth denial-of-service against another customer**),
+`/api/events` ungated entirely, and `/api/rate-limit/reset` ungated.
+
+🔴 **WHY THIS IS YOURS AND NOT MINE, and it is your own ruling doing the work.** The remediation
+is one line in a unit-testable pure function and would ordinarily sit inside my v1.3 scope.
+**But on 2026-08-14 you ruled on KS-621: *"`organization` IS A SECURITY BOUNDARY. Net-new
+enforcement; neither layer scopes by org today, so this is a model to build and it changes the
+schema. Design comes to me before any code."*** **This fix is that model arriving through a
+different door** — binding mint to platform-admin-only decides *who may provision across
+tenants*, which is the model itself rather than an implementation of it. **So I stopped it, and
+told the agent I could not waive your ruling.**
+
+**Options:** (a) rule the design now — platform-admin-only for cross-tenant mint, plus
+wildcard/self-replication limits on tenant-scoped admins — and I commission it under your design
+· (b) fold it into KS-621's model work and accept the exposure until that lands · (c) authorise
+a narrow containment change only (deny cross-tenant mint for tenant-scoped roles, nothing else)
+while the model is designed properly.
+**Recommendation: (c) now, (a) deliberately.** (c) is the smallest change that closes a live
+cross-tenant path, is behaviourally testable in one file, and does not pre-commit the model;
+(a) needs your design time and should not be rushed on a Sunday. **Not (b) alone** — KS-621 is
+schema work and this is reachable today.
+
+**Also yours, and I have done neither:** whether Peter or Stuart are told, and when. **External
+comms are your class.** The demo credential question is the part they would most want to know.
+
+
+
 ### 🔴🔴 0. Datasec / HPSM — **THE AMPLIFY WINDOW HAS CLOSED. This is a premise that expired, not a deadline to hit**
 **NEW 2026-08-15, and it outranks everything else on this page.**
 
