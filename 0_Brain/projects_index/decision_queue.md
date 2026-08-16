@@ -221,6 +221,52 @@ that launcher fixes are per-machine, recording that on any ticket that touches o
 lives. **Not (c) alone**, though (c)'s recording discipline should apply regardless, and I have
 already required it on RD-96.
 
+### 🔴 7f. Datasec / NexusAI — **NEW 2026-08-16: the gitleaks gate is blind on `package-lock.json`, and it stays green over it (RD-99)**
+**Found by the agent while satisfying RD-77's own criterion 4 — "review the allowlist" — not by
+looking for it. Its method is a canary matrix: one secret value, varying only the PATH, with a
+caught control at the top, run on a CI-equivalent tree.**
+
+| path | result |
+|---|---|
+| `backend/probe_plain.js` | **exit 1 — CAUGHT** (control) |
+| `__tests__/probe.test.js` | caught |
+| `backend/__tests__/probe_fixture.js` | **exit 0 — NOT caught** |
+| `docs/PEN-TEST-REPORT-2026-04-25.md` | **exit 0 — NOT caught** |
+| **`package-lock.json`** | **exit 0 — NOT caught** |
+
+🔴 **The material one is `package-lock.json`, allowlisted wholesale.** It changes on nearly
+every dependency operation and **it is exactly where registry credentials embed themselves. A
+secret landing there today commits under a green gate.**
+
+**And an inconsistency nobody could predict from reading the config:** the test-path pattern
+requires a parent directory before the slash, so **this repo's root `__tests__/` is scanned
+while nested test dirs are blind.** The agent's framing, which I am quoting because it is the
+point: **the current safety is an accident of where the tests happen to live, not a decision.**
+
+**Context that makes this the right week for it:** RD-77 (which fixed *value*-based
+allowlisting and widened the scan to full history) verified clean this morning — **`history
+without .gitleaksignore` returns 37 real findings**, proving the scanner genuinely scans. The
+path allowlist predates that work and was never revisited.
+
+**Options:** (a) remove the `package-lock.json` path allowlist and triage whatever it surfaces ·
+(b) narrow it to the noisy fields rather than the whole file · (c) fix the nested-`__tests__`
+pattern only and accept the lockfile hole · (d) leave and document.
+**Recommendation: (b) then (a)** — narrow first so the gate does not go red on integrity
+hashes, then remove entirely once triaged. **Not (d)** — an undocumented blind spot in the one
+file that changes constantly is how this survived in the first place. **Reversible CI config,
+so this is inside my scope to commission once you have ruled on the lockfile question** — I am
+asking because it changes what a merge-blocking gate accepts, not because I cannot act.
+
+### 🔴 7d-bis. Datasec / NexusAI — **RD-55's scrub, as currently scoped, would leave the secret on `main`**
+**NEW 2026-08-16, and it changes a ticket already on this page.** `.gitleaks.toml` carries the
+PT-002 secret **value literally in its canary rule** — a normal pattern for a gitleaks config,
+but it means **the value lives in a tracked file independent of the pen-test report.**
+
+**So if RD-55's scrub is scoped to the report plus git history, that copy survives it, and
+RD-55 closes with the value still on `main`.** Neither file has been edited and the value has
+not been quoted anywhere. **Fold this into RD-55's scope before it is actioned** — it does not
+change the rotation decision, only what "done" has to cover.
+
 ### 🔴 7d. Datasec / NexusAI — **RD-55 sits at LOW while a plaintext secret is in a TRACKED file**
 **Found today by the NexusAI agent during a condition-3 credential audit, not by looking for
 it.** A `COORDINATOR_SECRET` value is not merely in git history — it is **in the current
