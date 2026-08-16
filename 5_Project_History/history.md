@@ -1,5 +1,35 @@
 ## 2026-08-13/14 — Overnight session (22:0x → 05:30 shift change)
 
+## 2026-08-16 (Sunday) — six fleet sessions, six 1.0s; and five of my own errors, all caught by agents
+
+**Fleet.** Secuura s36/s37/s38 · NexusAI four queues · HPSM s24. ~20 tickets moved. Secuura's
+`develop` `5f3cc8fef` -> `2129cdc8b` (four PRs merged, verified by my own `ls-remote`), four
+security reviews established, closed 3 / corrected 6 / filed 2 — **zero code, because zero code
+was the right answer twice.**
+
+**Escalated to Kam.** KS-486 URGENT (a tenant-scoped org admin mints a live `sk_` key into any
+tenant; credentials in tracked source; repo private, 0 forks) — **fix REFUSED under his own
+KS-621 ruling that design comes to him before any code.** Plus prism delete/implement/fail-closed,
+RD-99 (gitleaks blind on `package-lock.json`), and the HPSM structure findings for Monday.
+**Closed a queue item read-only:** Review F's edge protections ARE live (mounted conf md5 +
+container start time) — no probe, no maintenance window.
+
+**Weekly consolidation.** Boot cost measured at **~155K tokens, and lessons are only 35% of it** —
+dailies, ledger and decision queue are the other 65%. A three-part proposal takes it to ~75K
+**without deleting a lesson**; Kam said "keep an eye on this", so **nothing was run.**
+
+**Enforcement built + armed:** `send_brief.sh` scope-claim gate (w=9 promotion) and
+`SEND_BRIEF_DRY_RUN=1`. Exercising it against the day's *real* briefs found two false positives
+synthetic tests missed.
+
+**My errors, all caught by agents, none by noticing:** a classification with no source that
+manufactured my own delegation authority · a count from an exclusion set · a wrong Compliance
+diagnosis · an instruction based on a defect that did not exist · an answer left undelivered
+17 minutes. **And at the wrap: I asked Kam a non-approval-class question and held 17.5 hours,
+holding a grant he had already given me.**
+
+**Lessons:** 59 -> 63. Ledger: 6 corrections, 4 praise/insight.
+
 **Kam's order before bed:** continue the boot sequence, and work Secuura tickets +
 HPSM research overnight. Treated as authorisation for two standing grants already
 recorded (Secuura's continue-order; the HPSM continuous-readiness grant), not new scope.
