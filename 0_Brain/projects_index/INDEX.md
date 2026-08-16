@@ -132,6 +132,29 @@ Linear: **71 active WED, 0 labelled `lesson`** (both through `board_count.sh`).
 that killed the runner instead of its child three times on 08-13** (ledger w=3); the cost of
 waiting is ~14 minutes during which both agents are still booting. Recorded rather than done.
 
+**Refreshed 2026-08-17 06:1x (Monday 06:00 scheduled wake — KAM PRESENTS HPSM TODAY).**
+Shift change verified from the log body: 1 pane tapped (mine), no agent sessions overnight,
+nothing unwrapped. Zero inbound mail since the 19:33Z handover. Dashboard chat silent since
+08-10. Linear: 71 active WED (backlog/unstarted/started), 0 `lesson` — via board_count.sh.
+
+**Morning sweep (controls on every count) + autostart:**
+- **Secuura/Blockchain: 136 in the work queue** (backlog/unstarted/started; 41
+  unstarted+started). No client-human movement since our own 08-16 01:42Z updates;
+  Peter's last touch 08-15 (KS-441). **KS-646 + KS-647 confirmed on the board — the s37
+  carry-forward loop below is CLOSED.** **s39 LAUNCHED** (%7): KS-490 E-2/E-3 → C-5 SMTP →
+  Review F CSP residue → KS-647. KS-486/642–645 held for Kam's sitting today.
+- **Datasec/NexusAI: 53 open of 95** (statusCategory != Done; 21 To Do · 14 Release Ready ·
+  11 Testing · 5 On Hold · 2 In Progress). **Session LAUNCHED** (%8): RD-62 → board
+  re-read → demo deploy of RD-95+RD-98 authorised under v1.3 with running-revision
+  verification. RD-55/99 Kam-held; RD-93 stays held.
+- **Datasec/HPSM: NOT launched — the sitting is TODAY.** All open items `[KAM-…]` or
+  `[MONDAY 08-17]`.
+- **Datasec/Vision: NOT launched — 0 open, control passed** (same-path total 64, all Done).
+
+### ✅ CLOSED CARRY-FORWARD (was: first items for the next Secuura session, set 2026-08-16)
+Item 1 (`!test-wallet.env` ticket) = **KS-646, filed by s38 2026-08-16 01:30Z.** Items 2–4
+folded into the s39 brief 2026-08-17. Kept below for the record.
+
 ### 🔴 CARRY-FORWARD — first items for the NEXT Secuura/Blockchain session (set 2026-08-16)
 **Read this before writing that session's brief.** s37 wrapped having established four security
 reviews; these are what it handed on, in order:
