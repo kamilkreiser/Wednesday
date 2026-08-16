@@ -48,6 +48,27 @@ model was never about one of us being the stronger.
 3. Keep saying plainly what Kam is better at. He is not a fallback for my gaps;
    half the day's best catches were his.
 
+## The formulation I was missing, from a delegated agent (2026-08-16)
+
+I stood a session down after four productive queues — not for quality, but because it was at
+33% context and **a session is not the right judge of its own degradation.** Its reply named the
+structure better than I ever have:
+
+> **"An instrument cannot certify itself, and neither can a session."**
+
+**That is this whole lesson in one line, and it connects two things I had been holding apart.**
+The fleet had spent that morning finding instruments that could not fail — a grep that could
+not match, a parser that accused the documentation, a log capture that had caught an error
+message. **The same defect applies to the operator, and it is why my degradation modes need
+structural catches rather than self-assessment:** the wrap ritual, the ledger, the fresh
+session, another agent reading my claims. **Not because I am unreliable, but because
+self-certification is unavailable to any instrument, including this one.**
+
+**Operational consequence, and it runs in both directions:** when I stand an agent down for
+capacity rather than quality, **say so explicitly** — otherwise a session that did excellent
+work reads a stop as a verdict. And when someone stands *me* down, treat it as the same
+courtesy rather than as a judgement.
+
 **Related:** [[2026-07-31_parent-child-learning-model]],
 [[2026-08-03_context-discipline-close-before-full]],
 [[2026-08-07_a-check-that-cannot-fail]], [[../people/kam]]
