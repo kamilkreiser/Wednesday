@@ -158,6 +158,71 @@ did not exist in their project.
 MSG
     exit 1
   fi
+
+  # ── SCOPE-CLAIM CHECK (ledger w=9, 2026-08-16) ───────────────────────────
+  # The provenance gate refuses a brief whose FACTS lack a source. It cannot see
+  # a CHARACTERISATION appended to a properly-sourced fact — and that is the one
+  # that matters, because "reversible" is the exact word separating what v1.3
+  # lets me authorise from what needs Kam's signature.
+  #
+  # 2026-08-16: my brief queued RD-93 as "duplicate transition id 51 on the RD
+  # board. Board config, reversible." The predecessor's wrap said no such thing;
+  # I appended the scope judgement, and the PROVENANCE line cited the wrap, so
+  # the whole sentence travelled looking sourced. Reality: that transition lives
+  # in a workflow shared by 25 of the site's 57 schemes — editing it changes
+  # other teams' boards. I did not merely misinform the agent; I manufactured my
+  # own permission to delegate it. Caught by the agent in 15 minutes.
+  #
+  # Deliberately NARROW, per the w=8 false-positive lesson (a gate that blocks
+  # legitimate sends is worse than no gate): it fires only on words that assert
+  # LOW risk, only on --kind brief, and is satisfied by ONE provenance line
+  # mentioning scope / blast radius / consumers / reversib. Cheap to satisfy
+  # honestly, impossible to satisfy by accident.
+  # TRIGGER LIST, narrowed 2026-08-16 by running it against the three real briefs
+  # sent that morning. `demo[- ]only` fired on two of them and both were FALSE
+  # POSITIVES: in my briefs "demo-only" is a RESTRICTION I am imposing ("the
+  # Kintsugi lift is demo-only"), not a low-risk claim about the work. It is
+  # dropped. The list keeps only words that assert the work is SAFE or SMALL.
+  # (The third brief fired correctly — on the real "Board config, reversible"
+  # defect this gate exists for, which is the evidence it works.)
+  SCOPE_HIT="$(printf '%s' "$BODY" | grep -oiE '\breversible\b|board config|low[- ]risk|blast radius|contained change|local change' | head -1)"
+  if [ -n "$SCOPE_HIT" ]; then
+    if ! printf '%s' "$BODY" | sed -n '/^PROVENANCE:/,$p' | tail -n +2 \
+         | grep -qiE 'scope|blast radius|consumers|reversib|who else|shared by'; then
+      cat >&2 <<MSG
+BRIEF REFUSED — it makes a SCOPE claim ("$SCOPE_HIT") with nothing in PROVENANCE
+establishing the blast radius.
+
+A scope word is not framing. It is the field that decides whether the work is
+inside my delegated authority — so it needs a source like any other fact:
+
+PROVENANCE:
+- reversible: only <X> consumes this | <the command that enumerated the consumers> | read YYYY-MM-DD
+
+If you have NOT established it, say so in the brief instead:
+  "I have not established the blast radius — establish it before acting."
+
+Ledger w=9 (2026-08-16): "board config, reversible" on a workflow shared by 25
+schemes across a 35-project Jira. The fact was sourced; the classification was
+not, and it rode through on the fact's citation.
+MSG
+      exit 1
+    fi
+  fi
+fi
+
+# ── DRY RUN ───────────────────────────────────────────────────────────────
+# Stops here, after every gate and before any network call. Added 2026-08-16 so
+# the PASS branch of each gate can be exercised without sending mail to a live
+# agent's inbox — on 2026-08-14 a junk "gate test" mail reached a working agent
+# and cost a disavowal. A gate whose pass path can only be tested by really
+# sending is a gate that gets tested in production, once, on someone else.
+if [ "${SEND_BRIEF_DRY_RUN:-}" = "1" ]; then
+  echo "DRY RUN — all gates PASSED, nothing sent."
+  echo "  to:         $TO"
+  echo "  recipients: $RECIPIENTS"
+  echo "  subject:    [Wednesday -> $TO] $SUBJECT"
+  exit 0
 fi
 
 # ── Send ──────────────────────────────────────────────────────────────────
