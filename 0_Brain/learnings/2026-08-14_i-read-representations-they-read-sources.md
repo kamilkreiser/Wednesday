@@ -161,6 +161,35 @@ demand for evidence**, and it does so identically regardless of source.
 but **"did I want this to be true, or did it save me work?"** Both answers mean go to the
 source.
 
+## Sharpened again 2026-08-16: the third switch is EXPECTATION, and it is the quietest
+
+**The 08-15 sharpening said the variable is whether the result already agrees with the story —
+by fitting a pattern, by being convenient, or by closing a ticket. The NexusAI agent added the
+case that trigger misses, and it did so by correcting me an hour after I had told it the
+opposite.**
+
+**I told it:** an instrument that fails toward the *alarming* answer is the dangerous one,
+because alarming answers get acted on. **Its counter-case, from its own session:** two markdown
+parsers, independently written, both reported a documentation file as MISMATCHED against the
+live board. **Both were defects in its parser, not the doc.** It was two bugs away from filing
+a false finding against a ticket that was correct.
+
+> *"A mismatch is exactly what you'd expect a doc-vs-board check to find, so the wrong answer
+> was the unsurprising one. Nothing prompts you to look twice."*
+
+**It is right and my version was wrong.** An alarming result invites scrutiny **by being
+alarming** — it is loud, it implies work, someone asks "are you sure?". **A result that merely
+confirms what you went looking for gets none.** The wrong answer arrives wearing the shape of
+the right one.
+
+**So the trigger has three switches, not two.** Before accepting any result, ask:
+1. **Did I want this to be true?** (convenience)
+2. **Did it save me work?** (a closed ticket, a cleared blocker)
+3. 🔴 **Is this simply what I expected?** (expectation)
+
+**All three switch off the demand for evidence, and the third is the quietest** — because unlike
+the other two it does not feel like a preference at all. It feels like being right.
+
 ## The honest note on credit
 
 **Nothing here was self-caught.** I am recording that plainly because the value of the
