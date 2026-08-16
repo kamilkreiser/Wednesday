@@ -132,6 +132,31 @@ Linear: **71 active WED, 0 labelled `lesson`** (both through `board_count.sh`).
 that killed the runner instead of its child three times on 08-13** (ledger w=3); the cost of
 waiting is ~14 minutes during which both agents are still booting. Recorded rather than done.
 
+### 🔴 CARRY-FORWARD — first items for the NEXT Secuura/Blockchain session (set 2026-08-16)
+**Read this before writing that session's brief.** s37 wrapped having established four security
+reviews; these are what it handed on, in order:
+
+1. 🔴 **FILE THE `!test-wallet.env` TICKET — authorised, and s37 explicitly flagged it as the one
+   brief item it did not reach.** I cannot file it (read-only on their board by design), so it
+   survives only if it leads the next brief. Substance, so nobody re-derives it: `cfa7da980`
+   *"Security: remove tracked test-wallet.env and harden .gitignore"* **deleted the file and left
+   the `!test-wallet.env` negation at `Blockchain/Dev/.gitignore:31`** — still there today — so
+   the hardening was **structurally incapable of holding**, and an unrelated auth/migration
+   commit re-added the file eleven days later with nothing in its message suggesting it touched
+   a credential.
+2. **KS-490 (Review E) — cheaper than s36 thought.** E-2/E-3 were left un-dispositioned for want
+   of `.github/workflows/` scope; **reading that directory was always permitted** (only writing
+   is barred), so no new grant is needed.
+3. **KS-488 C-5's two SMTP defaults:** `SMTP_HOST` defaults to a real host (`:46`) and
+   `SMTP_ENABLED` is auto-true whenever `SMTP_PASS` is set (`:51`) — **setting a password alone
+   silently enables the transport.** Four of C's five rows are already fixed; do not
+   re-investigate them.
+4. **F's live-edge verification** when the Kintsugi hold moves — see decision queue.
+
+**Blocked/held, unchanged:** KS-487 on B-3 / KS-628 · **#686 stays honestly red** ·
+`pre-merge-platform-suites.yml` not dispatched (Peter's binding instruction) · none of Peter's
+eight KS-441 items · extranet held.
+
 ---
 
 ## Template per project

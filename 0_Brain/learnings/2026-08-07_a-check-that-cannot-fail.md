@@ -231,6 +231,33 @@ delete what you are studying.
 [[2026-08-06_exercise-mechanisms-before-arming]],
 [[2026-08-07_enumerate-every-surface-before-done]], [[_ledger]]
 
+### The refinement that makes the positive-control rule actually work (2026-08-16, Secuura s37)
+
+**The rule everywhere above is "pair a zero-result check with a control that must be non-zero."
+That rule can fail, and it failed twice in one session — caught both times.**
+
+> **A control only discriminates if it can fail INDEPENDENTLY of the check. When a control
+> agrees suspiciously with a null result, suspect the harness rather than the finding.**
+
+**The case, and it is the cleanest possible one.** A role sweep ran `grep --include=*.ts`
+**unquoted**, so zsh glob-expanded it and **grep never ran**, returning `0`. The paired positive
+control — an occurrence count that must be non-zero — **returned `0` as well**, because it went
+through the same broken invocation. Quoted, the real answer is **133**.
+
+**The control did not catch the defect by failing. It caught it by agreeing.** Two independent
+questions returning the identical impossible answer is the signal — and it only reads as a
+signal if you expect a control to *disagree*. The same agent hit it again the same session on a
+published-ports regex and **rewrote the instrument rather than believing its zero.**
+
+**How to apply:**
+1. **Run the control through a different path than the check wherever possible** — a different
+   command, a different tool, a hardcoded known-present value. A control sharing the check's
+   invocation shares its failure modes.
+2. **Suspicious agreement is as informative as disagreement.** If check and control both return
+   zero, both return empty, or both time out, **the harness is the suspect, not the subject.**
+3. **A zero that means "the command could not run" is indistinguishable from a zero that means
+   "no such code"** — and quoting/globbing/shell differences are the commonest cause on macOS.
+
 ### The family, completed overnight 2026-08-13/14 (Secuura/Blockchain s28–s32)
 
 One agent produced five more members in five sessions. Kept together because the

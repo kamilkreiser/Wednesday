@@ -280,6 +280,27 @@ and expensive later** — it decides what M6's evidence has to prove, and the cu
 answer is one that passes while proving something else. **Not verified by me:** these are the
 agent's measurements; I have re-derived only that M6 is 10% / A$75,000, from the SOW `.docx`.
 
+### ⚠ 0e. Secuura / Blockchain — **Review F's edge protections are merged, and nobody can say whether they are RUNNING on the internet-facing demo**
+**NEW 2026-08-16.** F-2/F-3/F-6/F-7 are confirmed fixed **in code** on `develop` — 9 `limit_req`,
+4 `limit_conn`, a body cap, compose ports loopback-bound, against **0/0/0** as originally filed.
+**Whether any of it is live at the edge is UNESTABLISHED**, and a prior note says not yet,
+pending the Kintsugi hold.
+
+🔴 **The agent's sentence is the reason this is on your page: *"a merged-but-undeployed edge
+protection provides exactly zero protection"* — and the demo is internet-facing.**
+
+**Why it could not just be checked:** a single read-only GET returns HSTS, CSP and
+X-Frame-Options and **none of them discriminate** — the CSP cannot have come from that config
+because its own CSP is commented out, and Caddy terminates TLS in front, so HSTS is
+unattributable. **The checks that WOULD discriminate — tripping `limit_req` for a 429, or
+exceeding the body cap — are abuse-shaped against a live demo, and it did not run them.**
+Recorded as unestablished rather than inferred from the merge, which is right.
+
+**Recommendation (the agent's, and I have adopted it):** make live-edge verification a
+**condition on whatever lifts the Kintsugi hold**, with a deliberate 429 probe **in a
+maintenance window** — not opportunistically. That pairs a write-shaped check with the one
+moment it is appropriate. **Nothing has been run and nothing deployed.**
+
 ### ⚠ A2. Secuura / Blockchain — **NEW 2026-08-15: a CI landmine whose only mitigation is that people happen to remember it**
 **Peter merged PR #698 yesterday and then reviewed his own merged diff, finding EIGHT items**
 (his headline says seven; the agent counted and found the eighth — and **my own report to
