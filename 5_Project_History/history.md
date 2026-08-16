@@ -1,5 +1,3 @@
-## 2026-08-13/14 — Overnight session (22:0x → 05:30 shift change)
-
 ## 2026-08-16 (Sunday) — six fleet sessions, six 1.0s; and five of my own errors, all caught by agents
 
 **Fleet.** Secuura s36/s37/s38 · NexusAI four queues · HPSM s24. ~20 tickets moved. Secuura's
@@ -69,6 +67,8 @@ behind a step that could refuse.
 with one warning (stale model pins in three other projects' launchers).
 
 ---
+
+## 2026-08-13/14 — Overnight session (22:0x → 05:30 shift change)
 
 ## 2026-08-13 (evening) — HP architecture pass completed + Monday deck built; per-project inboxes built and proven; four of my own claims killed by my own fleet
 
