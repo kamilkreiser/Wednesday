@@ -280,6 +280,70 @@ and expensive later** — it decides what M6's evidence has to prove, and the cu
 answer is one that passes while proving something else. **Not verified by me:** these are the
 agent's measurements; I have re-derived only that M6 is 10% / A$75,000, from the SOW `.docx`.
 
+### 🔴🔴 0b-bis. Datasec / HPSM — **THE STRUCTURE, for tomorrow's sitting: three things changed today and one of them was mine**
+**NEW 2026-08-16, from the session you commissioned. D01 is now v0.5; the Monday pack is `s1h`
+of the existing session package. 36 verdict slots, none filled — by design, you fill them.**
+
+**1. Compliance's home — RESOLVED, and my own memo was wrong about WHY.** I told you the spine
+drops Compliance because Module 5 only *"partially"* covers it. **`Datasec_05` actually carries a
+named "Framework Alignment" section** (ISO 27001, NIST CSF, NIST 800-53, Essential Eight, SOC 2)
+**and ships "Framework Alignment and Control Mapping" as output document #7** — the same object
+PRD §9 describes. **It was mis-graded because the mapping table was built against the GTM price
+list, which has module names and dollar values and no content.**
+
+🔴 **The argument to take into the room, which is stronger than anything I had:** SOW §4's three
+contracted sections — business/fleet/compliance, a **Must** — are **exactly the intersection of
+the PRD's two disagreeing enumerations**, and Business and Fleet score nothing. **So Compliance
+is the only scored section that survives all three lists in the stack, and the spine drops it.**
+That is what a reviewer with §4 open finds first.
+
+**Recommendation: option (i) with three amendments** — rename section 5 to *"Security Operating
+Model, Governance & Compliance Readiness"* (**which satisfies §4's contracted three by the
+wizard's own labels, converting a possible §13 change request into a naming choice we make
+ourselves**) · 🔴 **restore the weight to 15%** — C2 quietly cut it to 10% to fund the two orphan
+modules **and nobody said that out loud**; take the 5% from Hardening and it closes to 100 ·
+give P08 (approved compliance mappings, due 18 Sep) somewhere to land. **A ninth section was
+considered and rejected on the proposal's own logic** — no ninth module means a compliance
+finding triggers no service.
+
+**2. Defect 1 is bigger than I told you — it is 100% of the score, not 30%.**
+🔴 **`ControlDomainScore` is defined NOWHERE.** PRD §9 states
+`WeightedScore = Σ(ControlDomainScore × DomainWeight)`, supplies the weights, and **the term
+occurs exactly once in the entire document stack — inside the formula that consumes it.**
+Counted across SOW/PRD/CT/GTM/MSA with a positive control on every document.
+**And the reason this is the one to lead with:** `section` and `controlDomain` are **already
+separate fields** on the PRD's `Question` model, so HP can close my narrower "undefined input
+mapping" version in one sentence — *"sections are navigation, domains are scoring"* — at no cost.
+**They have no equivalent answer to "define ControlDomainScore."**
+**Commercial consequence: M3 is 20% / A$150,000**, accepted on *"deterministic score/findings"*
+while §8.1 accepts against PRD criteria describing **autosave**. **Two conforming builds can
+return different scores for identical answers and both pass.** The split that settles it —
+engine determinism (testable today) vs content correctness (needs P05, **due 21 Aug**) — is one
+sentence added to an ask HP already owes.
+
+**3. My "re-extract the templates" item was based on a defect that does not exist.** 13 of 13
+present. What is true: **0 of 13 are byte-identical, so a hash check reports 13 defects**, and
+10/11/12 differ by four whitespace characters plus a MIP label — they are simply the three that
+were re-saved. **No action needed, and chasing it was still worth it**: reading those files
+produced both findings above, because the register had recorded them as *"filenames only, 0
+occurrences"* — **present, listed, and never opened.**
+
+### ✅ 0e. Secuura / Blockchain — **Review F's live edge: ANSWERED, no probe needed. Drop the condition I proposed.**
+**I escalated this at ~10:50 asking you to make live-edge verification a condition on lifting the
+Kintsugi hold, with a deliberate 429 probe in a maintenance window. That is no longer needed and
+the session established it read-only, for nothing:**
+- the VM's `nginx-demo.conf` is **byte-identical to the repo** (md5 `8be17f5b…`),
+- **the running container serves the same md5** at `/etc/nginx/conf.d/default.conf`,
+- and it **started 05:06:57Z, after the conf's 08-13 00:09Z mtime**, so it cannot be serving an
+  older copy — **9 `limit_req` / 4 `limit_conn` / body cap 12m against the register's 0/0/0.**
+
+**The edge protections ARE live.** s37 was right that the merge proved nothing (the conf is
+bind-mounted, not baked) and right that a GET could not discriminate — **reading the mount was
+the check that could.** **F-9's CSP remains commented out at `:595`; that half stays open.**
+**Nothing to decide here any more.**
+
+<details><summary>Original item as escalated (kept for the record)</summary>
+
 ### ⚠ 0e. Secuura / Blockchain — **Review F's edge protections are merged, and nobody can say whether they are RUNNING on the internet-facing demo**
 **NEW 2026-08-16.** F-2/F-3/F-6/F-7 are confirmed fixed **in code** on `develop` — 9 `limit_req`,
 4 `limit_conn`, a body cap, compose ports loopback-bound, against **0/0/0** as originally filed.
@@ -300,6 +364,8 @@ Recorded as unestablished rather than inferred from the merge, which is right.
 **condition on whatever lifts the Kintsugi hold**, with a deliberate 429 probe **in a
 maintenance window** — not opportunistically. That pairs a write-shaped check with the one
 moment it is appropriate. **Nothing has been run and nothing deployed.**
+
+</details>
 
 ### ⚠ A2. Secuura / Blockchain — **NEW 2026-08-15: a CI landmine whose only mitigation is that people happen to remember it**
 **Peter merged PR #698 yesterday and then reviewed his own merged diff, finding EIGHT items**

@@ -1,5 +1,49 @@
 # WED-102 — Verification of the HPSM structure proposal against the PPT and SOW
 
+> 🔴 **AMENDED 2026-08-16 — two of this memo's claims did NOT hold when HPSM session 24
+> re-derived them from the source `.docx`. Annotated in place rather than rewritten, per the
+> convention that a record shows what was believed at the time.** Six of eight verified claims
+> survived verbatim. The two that did not:
+>
+> **1. "The gap the proposal misses — Compliance loses its home" (section B below): the GAP IS
+> REAL, my DIAGNOSIS WAS WRONG, and the correct reason is stronger.** I accepted the proposal's
+> own mapping-table grade — *"partial — governance ≠ compliance evidence"* — as a finding.
+> **`Datasec_05` in fact carries a named "Framework Alignment" section** mapping controls to
+> ISO 27001, NIST CSF, NIST 800-53, Essential Eight and SOC 2, **and ships "Framework Alignment
+> and Control Mapping" as output document #7.** Against PRD §9's *"policy evidence, audit
+> trails, regulatory alignment"* that is the same object, not a partial match.
+> **Why it was mis-graded, and this is the transferable part: the mapping table was built
+> against the GTM PRICE LIST, which carries module names and dollar values and no content.**
+> On the name alone the grade is fair. *(I trusted a recorded grade the same way I trusted a
+> recorded blocker and a recorded exclusion this same week — see
+> `learnings/2026-08-16_a-recorded-blocker-is-not-a-boundary`.)*
+> **The argument to lead with instead, which neither of us had:** SOW §4's three contracted
+> sections are **exactly the intersection of the PRD's two disagreeing enumerations**, and
+> Business and Fleet score nothing — **so Compliance is the only scored section surviving all
+> three lists in the stack, and the spine drops it.** My recommendation of option (i) stands;
+> the reason changes. **Also found: C2 §3.1 quietly cuts Compliance Readiness from 15% to 10%
+> to fund the two orphan modules, and nobody said so out loud.**
+>
+> **2. "The on-disk template extraction is missing Datasec_10/11/12" (Also surfaced by
+> extraction, below): FALSE. 13 zip entries, 13 files on disk, 0 missing, 0 extra**
+> (Python `zipfile`). **So "re-extract before the refinement session" was an instruction based
+> on a defect that did not exist.** What is true: **0 of 13 are byte-identical, so a size-or-hash
+> check reports 13 defects** — `Datasec_00-09` are textually identical (the delta is container
+> parts from a Word re-save), and **10/11/12 differ by four whitespace characters and carry a
+> MIP label where the others carry a thumbnail.** They are simply the three that were re-saved.
+> My instrument almost certainly read that difference as absence; **I cannot prove what it did,
+> and session 24 was right not to assert it on my behalf.**
+>
+> **Also corrected by that session:** HPSM-16's *"every one of the 12 content templates
+> instantiates the same 11-block skeleton"* is **true of the eight module templates and false of
+> the four level templates.** The platform's document model has **two shapes, not one.**
+>
+> **Defect 1 (section A below) was OVERTAKEN, not refuted:** the reframe should be made at
+> **100%, not 30%** — `ControlDomainScore` appears **exactly once across the entire document
+> stack, inside the formula that consumes it**, and is defined nowhere. And `section` and
+> `controlDomain` are already separate fields on `Question`, **so HP can close my narrower
+> version in one sentence at no cost and has no answer to "define ControlDomainScore."**
+
 **For: Kam · the 2026-08-13 flesh-out sitting.**
 **Method:** I read the proposal (C2, 264 lines) in full, then judged every load-bearing
 claim against verbatim extracts of the SOURCES — PRD §7.2/§9, SOW-01 §3/§4/§14,
