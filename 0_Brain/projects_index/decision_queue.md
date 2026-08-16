@@ -69,9 +69,18 @@ are present in **TRACKED source — 12 tracked files for one, 7 for the other** 
 `ORG_ADMIN` resolves in 76 files; negative control returns 0; **values not printed**). **So the
 precondition is not "an attacker who has compromised an org admin" — it is "anyone who can read
 the repository."** I have **re-rated it Urgent**, which is inside my scope.
-⚠️ **The honest limit: I established the values are in tracked source. I did NOT establish the
-repository's visibility** (my `gh` is unauthenticated for that project). **"In the repo" is
-proven; "published to the world" is NOT.** Please do not let that sentence get upgraded.
+✅ **BOUND, 20 minutes later, by the agent — and this is a correction to what I first told you.**
+I said I could not establish the repository's visibility. **It measured it: `Secuura/Distributed_Secuura`
+is `private`, 0 forks** — with controls both ways (a nonexistent repo returns 404; a known
+public repo returns `public`, so the field is not a constant). **So "published to the world" is
+now DISPROVEN rather than merely unestablished.**
+
+🔴 **What that changes and what it does not.** It **narrows the population, not the ceiling.**
+The exposed set is everyone with read access to that repo — collaborators, any future fork, any
+leak — which is still categorically wider than "someone who compromised an org admin". **Urgent
+stands**, and the agent wrote the bound onto the ticket in those words specifically so it cannot
+be quoted back as a downgrade. **My original sentence is recorded as mine, with its limit
+intact, beside its correction.**
 
 **Half the register row was WRONG and that matters too:** *"no role check / any authed user"* is
 **false** — KS-480's gate landed 2026-07-30 and the row was written 2026-07-21, so the cited
@@ -102,6 +111,52 @@ schema work and this is reachable today.
 
 **Also yours, and I have done neither:** whether Peter or Stuart are told, and when. **External
 comms are your class.** The demo credential question is the part they would most want to know.
+
+**Executed under my ruling, no code:** KS-486 re-rated to Urgent (read-back confirmed), the
+five-row verdict table on the ticket **with the stale half stated as loudly as the live half**,
+the `x-tenant-id` vector killed on the ticket so the fixer is not sent to the wrong file, and
+the four live rows filed and linked — **KS-642** (`GET /api/keys` BOLA) · **KS-643**
+(`DELETE /api/keys/:id` ownership) · **KS-644** (`/api/events` ungated) · **KS-645**
+(`/api/rate-limit/reset` ungated). **KS-644 is the one to look at first of those four: it is the
+only one whose precondition is ANY authenticated user, no admin role — the widest door of the
+set.** Your KS-621 ruling is quoted on KS-486 as the reason no code was taken, so nobody picks
+it up as a quick win.
+
+### 🔴 0d. Secuura / Blockchain — **KS-489: prism forges VC signatures and verifies nothing, unconditionally in every environment — but nothing outside can reach it**
+**NEW 2026-08-16, established the same session and deliberately NOT escalated to Urgent by
+analogy with 0c, which I think was the right call.**
+
+**Both code halves are live and exactly where filed.** A `proofValue` of
+`crypto.randomBytes(64)` presented as an `Ed25519Signature2020`; and the verifier passes on **the
+presence of a `proof` object** without ever reading `proofValue` — **so any credential a caller
+supplies verifies `true`**, not merely prism's own forgeries.
+
+🔴 **The register's risk shape was wrong and the truth is worse: there is no flag to forget.**
+It was filed as *"a prod deploy that forgets the flag"*. `PRISM_MODE` appears five times and is
+**branched on zero times** (control: `NODE_ENV` **is** branched at three sites in the same file).
+**So mock issuance and mock verification run unconditionally in every environment — a gate that
+does not exist cannot be closed by a deploy checklist.** Both deploy paths already set it to no
+effect. **Plus an honesty defect: prism reports `mode: "basic"` while behaving as a mock**,
+misreporting its own trustworthiness to anything auditing it.
+
+✅ **Why it is not Urgent: there is no external route.** The gateway proxies `/api/credentials`
+to **vc-issuer**, not prism; prism is exposed only at `/api/did`, and it publishes no host port
+(control: the same file publishes 7 ports elsewhere, so the instrument can see ports when they
+exist). **Kept High on artefact-integrity grounds — a forged VC is portable and outlives the
+network boundary containing its issuer — so reachability is a reason to SCHEDULE it, not to
+downgrade it.**
+
+**YOUR CALL, and it is a scope question rather than a remediation:** prism and vc-issuer both
+implement `/api/credentials/*` and only vc-issuer is wired to the edge. The register itself says
+the fraud pattern was *removed from vc-issuer* and *remains here*.
+**Options:** (a) **delete** prism's credential surface — removes the class outright and is the
+smallest change, but decides prism's purpose by default · (b) **implement** real Ed25519 —
+largest change, possibly for a service nothing calls · (c) **fail closed** — the mock paths
+refuse rather than forge, and `mode` reports what it is actually doing.
+**Recommendation: (c) now, then (a) or (b) deliberately.** (c) contains the artefact-integrity
+risk **without deciding whether prism is a product surface**, which is the part that is yours.
+**Nothing has been taken — not even (c).** I stopped it for the same reason as 0c: deciding what
+a service IS is a scope change, and that is your class, not mine.
 
 
 
