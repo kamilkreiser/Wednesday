@@ -66,6 +66,28 @@
 > known-broken and must be excluded or the gate is red on arrival) are already on the ticket
 > for whoever builds it.
 
+> ## NEW 2026-08-17 ~20:4x — Datasec/HPSM: POST-SIGNATURE build questions from the Purview analysis (s26, scored 1.0)
+> Surface AFTER the ink tomorrow, with the amendment queue. From the 42KB analysis:
+> 1. **What does "client" mean?** End customer / partner / both-by-choice — decides whether
+>    D-07's shared-DB+RLS model survives or inverts to per-client deployments (HPSM-38;
+>    SOW §9's 41 negative tests are specified against the shared model, so this is a scope
+>    conversation, not a refactor).
+> 2. **Slide-15 reaction: framing or gate?** (O7) — §9 is a contracted release gate; the
+>    plain reading is the privacy ARGUMENT changed (and strengthens under client-tenant),
+>    not the gate. The gate reading would be a CR.
+> 3. **§4.2 middle rung** (O6): drafting a remediation as an artifact — arguably in scope,
+>    unsettled, the valuable half of the premium leg. APPLYING it is excluded regardless of
+>    approval (object-shaped bullet, no CR rider) — Purview itself stops at the deep-link,
+>    so MVP matches the admired model in full without touching §4.2.
+> 4. **Standards-content licensing:** engine is contracted; the CONTENT (licensed ISO/NIST
+>    text) is not held, not priced, not in the SOW; maintenance unowned. Binds the moment we
+>    say "scored against ISO 27001" to a customer. Purchasing question.
+> 5. **K5 grew again** (+65KB tonight): the whole analysis tree is still outside version
+>    control; backups reduce loss, not the gap. Scope call.
+> Plus: the clinic (still undated, 1 of 36 verdict slots filled) must create a USABILITY
+> decision row — Kam named simplicity first-class ("salespeople shy away from selling
+> security") and D01 has nowhere for it to land.
+
 > ## ⏸ RE-SCOPED by Kam 2026-08-17 20:25 (verbatim in prompt-log): "Let's not worry about
 > tomorrow's meeting; the focus should be on getting sign-off." → NOTHING below rides into
 > tomorrow's room. Meeting-shaped items (hypercare phrase · §14 wording set X1-X4 · P05
