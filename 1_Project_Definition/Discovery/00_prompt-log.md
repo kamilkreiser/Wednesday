@@ -868,3 +868,23 @@ were labelled — so it now starts at today.
 > Let's work on a way to interact. Typically, it is perfect to go back and forth in this format; however, longer and more complicated discussions are handled by prompts from other agents, actions taken, and update messages. This makes it difficult for me to keep track when I'm reading a component and then it disappears down the page. Is there another way for us to keep the conversation in a different panel, and for all this to either happen in the background or on a separate panel?
 
 *(Done with it: learning filed (conversation-needs-a-stable-panel); dashboard chat promoted to the stable conversation surface with chat_reply.sh mirror, wired into the launcher standing behaviour; long content → documents (sitting-pack pattern); two-panel dashboard build filed as a WED ticket.)*
+
+## 2026-08-17 ~19:0x — Design agent commission (verbatim)
+> Please create a generic design agent that can be used across all projects. A part of this
+> design agent will be to treat each assignment in the same way as a design studio Wood asking
+> or trying to ascertain a brief a style a target audience visual elements preferences etc. It
+> should not get at these. It should interview the client and most cases me and try to define
+> all these components.  Please also look at design best practices skills best practice design
+> deployment for AI and anthropic's design widget which was launched recently. I cannot
+> remember the name of it.  Also the following Video and left out anything that would be
+> relevant.
+> https://youtu.be/7FU98O0JLHs?si=2DB77NDlgTHekITW
+> In addition to this do a fair bit of research to create the best possible design agent which
+> acts like a design agency when going through its task.
+> Put the agent in its own folder on Dave master
+
+*(Read through dictation: "Wood asking" = "would, asking"; "should not get at these" = "should
+not GUESS at these"; "left out" = "pull out"; "Dave master" = DevMASTER.)*
+**Done with it:** DESIGN_AGENT scaffolded at /Volumes/DevMASTER/!CODING/DESIGN_AGENT on the
+QA_AGENT floating-agent pattern (R0 client-neutral); two research agents fanned out first
+(Anthropic design tooling + the video · design-agency discovery practice + AI-era deployment).
