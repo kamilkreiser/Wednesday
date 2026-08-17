@@ -1,5 +1,27 @@
 # Kam decision sitting — 2026-08-14
 
+> ## 🔴 NEW 2026-08-17 ~18:5x — Secuura/Blockchain: CI DEAD, develop RED — likely the org Actions spending limit. TWO-MINUTE CHECK (KS-660, Urgent)
+> **Every `needs: build` CI job dies in 3-4s with zero steps since ~08:27Z** (build itself
+> passes; short jobs without the dependency pass — so not a blanket outage). Same tree passed
+> at 07:55 and failed at 08:27, proven environmental. **The likely cause is the org Actions
+> spending limit (the recorded prior failure mode), which only you can see** — the project
+> PAT 403s on billing and annotations. **Ask: check the org's Actions billing/spending page
+> (~2 min). If it is the limit, raising it is your money call.** Until confirmed, nothing
+> merges green: #718 (a correctness revert) is open and honestly red, and **I have PAUSED the
+> burn relay** — five legs, five 1.0s, board 135→140, every movement evidenced.
+
+> ## UPDATED 2026-08-17 ~18:5x — Secuura/Blockchain: what IS the demo? (one sitting item, MEDIUM — folds the docs-exposure entry below)
+> **KS-658 (s44): all 26 Node services on the demo VM run NODE_ENV=development** — while the
+> code names `demo` prod-like. ~6 protections silently inert: the 342-endpoint public spec
+> (the entry below), raw internal err.message on 5xx, cookies without Secure on an HTTPS-only
+> origin, PII fail-fast unable to fire. **Bounded honestly: mocks are OFF, CSRF/PII secrets
+> ARE set — nothing is leaking; these are inert safety nets, not live breaches.** And the fix
+> is NOT a .env flip: compose hardcodes NODE_ENV=development at 26 sites and parameterises 1,
+> so a naive flip moves one service and looks applied. **Ask: rule what the demo is supposed
+> to be (dev-like or prod-like), then the fix is commissioned as one deliberate change.**
+> Recommendation: prod-like posture (it is internet-facing and client-shown), sequenced after
+> tomorrow's signing — nothing here is urgent, stated deliberately.
+
 > ## NEW 2026-08-17 ~17:2x — Secuura/Blockchain: demo serves its FULL API spec publicly — keep or close? (MEDIUM)
 > **s44 measured it read-only at the internet-facing edge:** `/api/docs/openapi.yaml` and
 > `.json` both 200 with real spec (1.15MB / 860KB — 342 endpoints, every parameter and auth
