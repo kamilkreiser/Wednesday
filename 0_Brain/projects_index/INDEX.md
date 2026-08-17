@@ -151,6 +151,30 @@ nothing unwrapped. Zero inbound mail since the 19:33Z handover. Dashboard chat s
   `[MONDAY 08-17]`.
 - **Datasec/Vision: NOT launched — 0 open, control passed** (same-path total 64, all Done).
 
+**Refreshed 2026-08-17 ~10:1x (post-reboot session — the Mac restarted 09:28:52 AEST, killing
+the 06:00 floor).** Both morning agents had wrapped THEMSELVES minutes before the cut:
+- **Secuura/Blockchain s39 (wrap 23:22Z): boot + triage only, queue unstarted** — Kam launched
+  and wrapped it himself. `develop` unchanged at `2129cdc8b`. Its triage killed two non-fixes
+  in my s39 queue (C-5 defaults live in BOTH `services/auth` and `services/originate`
+  email.ts; F-9's `:595` is inside a dead block — the real fix ADDS a CSP to the live
+  `nginx-demo.conf:246-258` block, which is bind-mounted live on the demo VM). 14 Done
+  archived with a control. **s40 LAUNCHED (%2)** on the corrected queue; demo deploy of
+  C-5 + F-9 authorised under v1.3 with edge-verify + rollback conditions.
+- **Datasec/NexusAI (wrap 23:20Z): deploy HELD, correctly** — RD-94 (`1a18d5f`) is a git
+  ancestor of RD-95/RD-98, its plan-confirmation went unanswered (no coordinator), and it
+  refused to let silence resolve a scope question. Also self-caught a dead-green verify gate
+  (`npm test | tail` → exit 0 over ZERO tests; node_modules production-pruned; repaired via
+  npm ci, 183/183) and filed RD-100. `origin/main` at `8f2ce5f` (HISTORY only).
+  **Session RELAUNCHED (%3)** with the ANSWER: **RD-94 rides along, deploy authorised**;
+  the RD-62 demo threshold mis-set is **HELD for Kam** (new decision-queue item).
+- **Coordinator-leak root cause FIXED (WED-111, Done):** the 06:00 launchd wake was spawning
+  a paneless Terminal coordinator daily (Fri/Sat/Sun strays found alive by the closing
+  session; the reboot cleared them). `wake_wednesday.sh` now wakes INTO the cockpit pane —
+  no session → `cockpit.sh up`; idle pane → respawn; live coordinator → tap, never spawn.
+  All branches exercised; first live fire 2026-08-18 06:00. Test near-miss ledgered w=1
+  with a refuse-guard added (test mode may not default to the real launcher).
+- HPSM + Vision: not launched (sitting is TODAY; Vision verified 0 open on 08-17 sweep).
+
 ### ✅ CLOSED CARRY-FORWARD (was: first items for the next Secuura session, set 2026-08-16)
 Item 1 (`!test-wallet.env` ticket) = **KS-646, filed by s38 2026-08-16 01:30Z.** Items 2–4
 folded into the s39 brief 2026-08-17. Kept below for the record.

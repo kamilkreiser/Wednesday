@@ -456,6 +456,21 @@ file that changes constantly is how this survived in the first place. **Reversib
 so this is inside my scope to commission once you have ruled on the lockfile question** — I am
 asking because it changes what a merge-blocking gate accepts, not because I cannot act.
 
+### ⚠ 7g. Datasec / NexusAI — **NEW 2026-08-17: may the demo carry a temporary threshold mis-set so RD-62's stale-data branch can be proven?**
+**Problem:** RD-62's fix (stale-branch detection) can only be proven live by making the demo's
+active data source LOOK stale — a deliberate, reversible mis-set of a threshold on the running
+demo. Two of its three acceptance criteria are observable at the unauthenticated `/api/health`;
+the third (dashboard banner) is behind RD-76 regardless.
+**Why it is yours:** the demo is the system Datasec shows customers, and a deliberate wrong
+value on a live system — however reversible — is a call about the demo's integrity, not a
+technical one. The 06:00 session's closing coordinator recommended holding it and I agree.
+**Options:** (a) authorise a bounded window (mis-set → verify → restore, all in one session,
+logged on the ticket) · (b) refuse — RD-62 closes on code-deployed evidence with the gap
+stated · (c) defer until RD-76 gives a verification identity and revisit.
+**Recommendation: (a) with the window named** — it is the only path to a real proof, and the
+restore is part of the same action. The agent is proceeding on everything ELSE meanwhile;
+nothing waits on this except RD-62's final verdict.
+
 ### 🔴 7d-bis. Datasec / NexusAI — **RD-55's scrub, as currently scoped, would leave the secret on `main`**
 **NEW 2026-08-16, and it changes a ticket already on this page.** `.gitleaks.toml` carries the
 PT-002 secret **value literally in its canary rule** — a normal pattern for a gitleaks config,
