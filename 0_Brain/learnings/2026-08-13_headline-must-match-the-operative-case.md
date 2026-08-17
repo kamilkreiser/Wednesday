@@ -60,6 +60,18 @@ differently-shaped than the situation the rule was supposed to govern.**
    BLUF rule and this one are the same discipline pointed at different readers:
    the reader who stops early must not be misled.
 
+## The tooling costume (2026-08-17, Secuura s43): a check whose MESSAGE rots while its measurement stays correct
+
+KS-78's launcher drift warning printed *"N commit(s) on main"* while its `git log` (no
+revision argument) counted HEAD — and it was RIGHT the day it shipped: main was the
+integration line then. Git Flow moved integration to develop ten days later; the
+measurement silently followed HEAD and stayed correct, **the hardcoded label did not** —
+and two sessions discounted a TRUE warning because its label named a branch that had not
+moved. Same law, pointed at tool output: **the message a check prints is its headline, and
+a headline nobody re-reads after the world changes becomes a lie wrapped around a truth.**
+When writing any checker: print the MEASURED thing (the actual revision, the actual set),
+never a prose assumption about what was measured.
+
 **The meta-note, and it is now a pattern rather than an anecdote.** This is the
 **fourth** protocol improvement handed to me by a delegated agent — after the
 local-proof rule (Secuura, 08-06), the DKIM authorship check (NexusAI, 08-07),

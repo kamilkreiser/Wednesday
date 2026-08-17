@@ -1,5 +1,12 @@
 # Kam decision sitting — 2026-08-14
 
+> ## ✅ RULED 2026-08-17 20:2x (Kam, verbatim in prompt-log): CI cause CONFIRMED — "github is
+> out of money. I need to discuss this with the team on Wednesday as I should not be the one
+> paying for it all. continue with what you can without this on Secuura and HPSM."
+> → KS-660 cause settled (org Actions spend exhausted) · resolution parked to the TEAM
+> DISCUSSION WEDNESDAY 2026-08-20 (cost-sharing) · fleet works CI-independent until then;
+> nothing merges against the red pipeline. Original entry below for the record.
+
 > ## 🔴 NEW 2026-08-17 ~18:5x — Secuura/Blockchain: CI DEAD, develop RED — likely the org Actions spending limit. TWO-MINUTE CHECK (KS-660, Urgent)
 > **Every `needs: build` CI job dies in 3-4s with zero steps since ~08:27Z** (build itself
 > passes; short jobs without the dependency pass — so not a blanket outage). Same tree passed

@@ -990,3 +990,13 @@ opened in chat: decision 1 (hypercare §17) presented with recommendation (a).
 phrase, §14 set, P05 sentence) moved to the POST-SIGNATURE amendment queue (hypercare stays
 fixable any time via §17's "unless otherwise agreed"); build/mobilisation items (clinic
 date, pod-leads, Amplify fallback, HPSM-29) wait for after the ink. Queue re-labelled.
+
+## 2026-08-17 20:2x — Final ruling of the night (verbatim, terminal)
+> Fantastic. Thank you very much. With regards to the secuura problem - github is out of
+> money.  I need to discuss this with the team on Wednesday as I should not be the one
+> paying for it all.  continue with what you can without this on Secuura and HPSM.  Good
+> night
+**Done with it:** KS-660 cause CONFIRMED by Kam (org Actions money exhausted); resolution =
+team discussion Wednesday 2026-08-20 (cost-sharing — he should not pay alone); standing
+overnight order: continue CI-independent work on Secuura + HPSM. Secuura leg 6 launched
+no-merge; HPSM s26 already running. Good-night ritual executed.
