@@ -114,7 +114,13 @@ RUNNER='
     # ctx wakes (working-rhythm §2, 2026-08-10) pass through EXACTLY like pane
     # fires: tap, no baseline movement (the sed above only matches mail/chat).
     case "$OUT" in
-      *"new mail"*|*"idle at prompt"*) MSG="[wake_watch] $OUT — check the fleet inbox / pane now." ;;
+      # message-from-Kam added 2026-08-17: the chat leg wake wording never
+      # matched this case, so chat wakes advanced the baseline and SILENTLY
+      # skipped the tap (the 12:08 chat message sat unseen ~10 min). Family:
+      # enforcement-scoped-narrower, ledger 2026-08-12 w=3 -> now w=4. NOTE:
+      # this whole runner body is a single-quoted string - no apostrophes in
+      # comments here, ever; one broke the arm path on the first fix attempt.
+      *"new mail"*|*"idle at prompt"*|*"message from Kam"*) MSG="[wake_watch] $OUT — check the fleet inbox / pane now." ;;
       *"ctx at"*) MSG="[wake_watch] $OUT — apply rhythm §2 now; rotate at the task boundary via cockpit.sh rotate <Client/Project> (wednesday pane: own checkpoint ritual)." ;;
       *) MSG="" ;;
     esac

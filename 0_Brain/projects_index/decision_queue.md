@@ -1,5 +1,26 @@
 # Kam decision sitting — 2026-08-14
 
+> ## 🔴 NEW 2026-08-17 ~12:0x — TWO ITEMS FOR TOMORROW'S SIGN-OFF, from HPSM session 25
+> **1. The §17 hypercare clock INVERTS on 22 Aug.** SOW §17 fixes hypercare at 30 Nov–11 Dec
+> in stated dates; hypercare is not an M0–M8 gate, so §6's day-for-day relief never reaches
+> it. NTP 18 Aug → 3 days of hypercare left after release · 20 Aug → 1 · 21 Aug → 0 ·
+> **22 Aug or later → hypercare ends BEFORE the release it supports.** Fix is one phrase that
+> §17's own "unless otherwise agreed" permits — it is in block one of the signature fix list
+> (HPSM-32/35). The only queue item that worsens with inaction.
+> **2. The architecture clinic never happened and has NO DATE.** Four instruments called
+> Mon 08-17 the refinement clinic; it did not occur. D01 is SOW deliverable #1, due ~4 days
+> post-NTP (≈22 Aug on an 18 Aug signature) with **35 of 36 verdict slots empty**. Kam: date
+> the clinic this week.
+> **Softened, honestly:** Amplify is a SIX-DAY event (5–10 Dec, deck s48) — an 18 Aug NTP
+> lands release 8 Dec = **day 4 of the show**, not after it. The "cliff" was overstated; the
+> announce-at-Amplify option is easier than previously framed. Also: T+n language is OUR
+> derivation, not an HP clause — never cite it to HP as theirs.
+> **For the room:** HP's own deck declares NO currency on any of its 253 figures while their
+> s74 gate requires "currency/tax treatment" — a collaborative opening; and the deck's bare
+> $750,000 is a HEADCOUNT line, not our fee (ours is the $650,000 line) — do not let anyone
+> reconcile the wrong number into agreement. The undeclared label is worth ~A$267K; FX drift
+> is noise (~US$1.4K). Pack: `Architecture/2026-08-17_signature-meeting-package.md` (HPSM tree).
+
 > ## ✅ RULED 2026-08-17 ~12:0x (Kam's PDF review, in chat — verbatim in prompt-log)
 > 🔴 **THE HP SIGN-OFF MEETING IS TOMORROW MORNING (Tue 2026-08-18). The project starts when
 > they sign. Today is prep.** (Supersedes the "Kam presents today" framing.)

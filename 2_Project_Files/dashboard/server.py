@@ -244,10 +244,24 @@ class Handler(SimpleHTTPRequestHandler):
                     return self._json(400, {"error": "empty message"})
                 cpath = ROOT / "0_Brain" / "dashboard" / "data" / "chat_log.json"
                 log = json.loads(cpath.read_text()) if cpath.exists() else []
-                log.append({"role": "kam", "text": text,
-                            "ts": datetime.datetime.now().astimezone().isoformat()})
+                now = datetime.datetime.now().astimezone().isoformat()
+                log.append({"role": "kam", "text": text, "ts": now})
                 cpath.write_text(json.dumps(log, indent=1, ensure_ascii=False))
                 subprocess.run(["python3", str(HERE / "generate.py")], timeout=60)
+                # PUSH delivery (Kam, 2026-08-17): tap the wednesday pane so chat
+                # stops being a 60s-poll waiting game. Detached, best-effort —
+                # tap problems must never block or fail the HTTP response. The
+                # watcher stays as the backstop; a duplicate tap is acceptable
+                # (refire-over-swallow). Guard logic lives in tap_wednesday.sh.
+                try:
+                    subprocess.Popen(
+                        [str(ROOT / "2_Project_Files" / "tools" / "tap_wednesday.sh"),
+                         f"[chat-push] New chat message from Kam at {now} — read the dashboard chat now."],
+                        stdout=subprocess.DEVNULL, start_new_session=True)
+                except OSError as e:
+                    import sys as _sys
+                    print(f"chat-push: failed to spawn tap_wednesday.sh: {e}",
+                          file=_sys.stderr, flush=True)
                 return self._json(200, {"ok": True})
             if self.path == "/api/speak":
                 ts = (data.get("ts") or "").strip()[:64]
