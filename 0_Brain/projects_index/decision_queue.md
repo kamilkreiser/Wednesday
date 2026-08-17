@@ -1,5 +1,19 @@
 # Kam decision sitting — 2026-08-14
 
+> ## NEW 2026-08-17 ~14:1x — Secuura/Blockchain: KS-652 routing (from s41's wrap, verified)
+> **Finding:** no CI job has EVER run any `services/*` unit suite — `npm test` appears 0
+> times across all 17 workflow files (control: `systemTest/` → 59 hits, so the search
+> discriminates). 1,219 tests across 23 services are ungated on every PR; the step *named*
+> "Quality gate — unit suite" runs playwright's tests. KS-649's 41 dead tests (22 cross-tenant
+> isolation + 16 KS-486 role-escalation guards) were never missed by a gate — none exists.
+> **Why it needs you:** the fix writes under `.github/workflows/` (standing hold) and touches
+> shared CI, which is Peter's domain per your 08-15 precedent. **Options:** (a) raise with
+> Peter and let him own the gate; (b) a scoped one-time exception for our agent to add the
+> job, with Peter @-mentioned for review. **Recommendation: (a)** — Peter runs these pipelines
+> daily and s41's two traps (watch-mode `vitest` hangs a naive step; two jest services are
+> known-broken and must be excluded or the gate is red on arrival) are already on the ticket
+> for whoever builds it.
+
 > ## 🔴 NEW 2026-08-17 ~12:0x — TWO ITEMS FOR TOMORROW'S SIGN-OFF, from HPSM session 25
 > **1. The §17 hypercare clock INVERTS on 22 Aug.** SOW §17 fixes hypercare at 30 Nov–11 Dec
 > in stated dates; hypercare is not an M0–M8 gate, so §6's day-for-day relief never reaches

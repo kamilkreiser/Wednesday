@@ -175,6 +175,16 @@ the 06:00 floor).** Both morning agents had wrapped THEMSELVES minutes before th
   with a refuse-guard added (test mode may not default to the real launcher).
 - HPSM + Vision: not launched (sitting is TODAY; Vision verified 0 open on 08-17 sweep).
 
+**Refreshed 2026-08-17 ~13:0x (fresh session after the 65% handover).** Fleet floor: my pane +
+monitor + **Secuura s41 (%10) LIVE on burn-relay leg 2** — plan confirmed by mailed ANSWER
+(02:58:53Z, pane-provenance stated) in its own order: #707 → KS-649 → KS-508 (only deployable;
+demo deploy authorised v1.3) → KS-482 → standing classes, wrap ~75–80%. s40 wrapped+scored 1.0
+earlier (C-5 shipped to demo, KS-647 merged, burn 5 closed / 4 filed, board 136→135). NexusAI
+wrapped/stood down pending Kam's gh auth (K2). HPSM stood down — **Kam signs with HP TOMORROW
+morning (Tue 08-18); he is mid-deck-review, Part 2 (slides 8–15) resumes on his word.**
+Vision 0 open (verified 08-17). K5: KK_DEV_Local ✓ + T9 ✓ (both content-verified);
+NAS leg restarted ~13:02 after dying with the handover.
+
 ### ✅ CLOSED CARRY-FORWARD (was: first items for the next Secuura session, set 2026-08-16)
 Item 1 (`!test-wallet.env` ticket) = **KS-646, filed by s38 2026-08-16 01:30Z.** Items 2–4
 folded into the s39 brief 2026-08-17. Kept below for the record.
