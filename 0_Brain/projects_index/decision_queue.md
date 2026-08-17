@@ -1,5 +1,15 @@
 # Kam decision sitting — 2026-08-14
 
+> ## NEW 2026-08-17 ~16:0x — Secuura/Blockchain: demo-overlay — revive or retire? (LOW priority)
+> **s43 disproved KS-654's premise with controls: NOTHING serves the demo-overlay bundle** —
+> the nginx `location /demo-overlay/` + `sub_filter` blocks were deliberately removed (the
+> conf's own comment: "no functional value... visible errors on every page load"), the
+> bind-mount was inert on BOTH targets, and the build had been broken 33 days with nobody
+> noticing. The hygiene half is done (lockfile + a build that can go red + the dead mount
+> deleted). **The product question remains: revive the overlay (restore serving) or retire it
+> (delete the frontend)?** **Recommendation: RETIRE** — a feature nobody missed for a month is
+> telling us its value. Nothing hangs on this; rule it whenever convenient.
+
 > ## NEW 2026-08-17 ~14:1x — Secuura/Blockchain: KS-652 routing (from s41's wrap, verified)
 > **Finding:** no CI job has EVER run any `services/*` unit suite — `npm test` appears 0
 > times across all 17 workflow files (control: `systemTest/` → 59 hits, so the search
