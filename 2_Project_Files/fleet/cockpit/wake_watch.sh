@@ -65,8 +65,22 @@ try:
     t=datetime.datetime.fromisoformat(ks[-1]['ts']).astimezone(datetime.timezone.utc)
     print(t.strftime('%Y-%m-%dT%H:%M'))
 except Exception: print('')" 2>/dev/null)
+  # De-dup vs the push channel (Kam, 2026-08-17: "reading the prompt once is
+  # enough"). chat_push.sh writes state/chat_pushed_through ONLY after a tap
+  # that provably delivered (exit 0) — so skipping cts <= watermark can never
+  # swallow an undelivered message; a failed/log-only push leaves the
+  # watermark untouched and this backstop fires exactly as before.
+  # NB: NOT $STATE_DIR (that is a per-invocation mktemp) — the watermark lives
+  # in the PERSISTENT cockpit state dir, where chat_push.sh writes it. First
+  # draft read $STATE_DIR and was a de-dup that could never suppress; caught
+  # by exercising before arming.
+  cpw=$(cat "$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)/state/chat_pushed_through" 2>/dev/null || echo "")
   if [ -n "$cts" ] && [[ "$cts" > "$BASELINE" ]]; then
-    echo "WAKE: new dashboard-chat message from Kam at $cts UTC (baseline $BASELINE)"; exit 0
+    if [ -n "$cpw" ] && ! [[ "$cts" > "$cpw" ]]; then
+      : # already push-delivered — stay quiet, baseline advances via runner on other fires
+    else
+      echo "WAKE: new dashboard-chat message from Kam at $cts UTC (baseline $BASELINE)"; exit 0
+    fi
   fi
   # (b) pane idle-at-prompt tripwire
   "$TMUX_BIN" list-panes -t "$FLEET" -F '#{pane_id}|#{@cockpit_name}' 2>/dev/null | \

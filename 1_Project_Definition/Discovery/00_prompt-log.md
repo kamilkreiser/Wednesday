@@ -888,3 +888,36 @@ not GUESS at these"; "left out" = "pull out"; "Dave master" = DevMASTER.)*
 **Done with it:** DESIGN_AGENT scaffolded at /Volumes/DevMASTER/!CODING/DESIGN_AGENT on the
 QA_AGENT floating-agent pattern (R0 client-neutral); two research agents fanned out first
 (Anthropic design tooling + the video · design-agency discovery practice + AI-era deployment).
+
+## 2026-08-17 20:01 — HPSM architecture input: hybrid/localized deployment (verbatim, chat)
+> First of all, I've noticed that you read the prompt twice. Please look at that. Reading the
+> prompt once is enough.Second of all, one of the biggest points of this deployment will be
+> leveraging localized deployment through partners and clients. Therefore, we will have very
+> little to no access to client data. Consider something like Microsoft Fabric's hybrid
+> deployments, where you have cloud and localized options, or potentially mark a task to
+> review fully localized models. When deploying this approach, we will need to give clients
+> the choice of deploying through Azure on their own infrastructure or to cloud models.
+> Alternatively, they can deploy through Azure infrastructure while selecting how they want
+> to configure the AI, meaning they can choose sovereignty-compliant AI or even fully
+> localized AI. Naturally, the setup will differ.The question that remains is how do we
+> leverage the information without collecting it. This will need to be carefully considered,
+> as you pointed out, whether it's through tokenization or coming up with recommendations,
+> but doing all the work locally.In principle, I completely agree with your point and have it
+> in mind. But just wanted to mention the other things just in case they're not clear in this
+> scope.Once you've looked at the message twice, let's proceed to the next slide.
+**Done with it:** double-read fixed same hour (chat_push watermark + backstop de-dup, proven
+live); hybrid/sovereignty input captured as clinic INPUT for HPSM (briefed to its next
+session) + woven into the slide-12 talk track.
+
+## 2026-08-17 20:05 — HPSM architecture input: residency reframe (verbatim, chat)
+> Australia is not relevant as Azure deployment will deploy in the region where the client is
+> resident. We need to ensure that the architecture considers client data always living in
+> that Azure tenant. So, a better way of looking at where the data lives is to say that
+> client data always lives in the client's tenant, in the region where they are domiciled.
+> Anything that we need to centralise for analysis needs to be considered going forward.
+> Although Datasec is Australian, this will be a global project, and further thought needs to
+> be taken to determine how data is processed.
+**Done with it:** slide-12 talk track rewritten around client-tenant residency (speak over
+the slide, no deck edit the night before); "centralise-for-analysis / leverage without
+collecting" logged as the headline clinic design question; both inputs queued for the HPSM
+agent's next session as INPUT-ONLY architecture material.

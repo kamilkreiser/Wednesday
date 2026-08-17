@@ -253,10 +253,14 @@ class Handler(SimpleHTTPRequestHandler):
                 # tap problems must never block or fail the HTTP response. The
                 # watcher stays as the backstop; a duplicate tap is acceptable
                 # (refire-over-swallow). Guard logic lives in tap_wednesday.sh.
+                # chat_push.sh wraps tap_wednesday.sh AND records the delivered-push
+                # watermark so the watcher's backstop does not re-fire on a message
+                # the push already delivered (Kam, 2026-08-17: "reading the prompt
+                # once is enough"). Failed/log-only pushes leave the watermark
+                # untouched — the backstop still covers them.
                 try:
                     subprocess.Popen(
-                        [str(ROOT / "2_Project_Files" / "tools" / "tap_wednesday.sh"),
-                         f"[chat-push] New chat message from Kam at {now} — read the dashboard chat now."],
+                        [str(ROOT / "2_Project_Files" / "tools" / "chat_push.sh"), now],
                         stdout=subprocess.DEVNULL, start_new_session=True)
                 except OSError as e:
                     import sys as _sys
