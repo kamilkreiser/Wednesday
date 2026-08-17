@@ -175,6 +175,18 @@ the 06:00 floor).** Both morning agents had wrapped THEMSELVES minutes before th
   with a refuse-guard added (test mode may not default to the real launcher).
 - HPSM + Vision: not launched (sitting is TODAY; Vision verified 0 open on 08-17 sweep).
 
+**Refreshed 2026-08-17 ~21:2x (overnight close).** Burn relay COMPLETE at SIX legs, six 1.0s
+(s41→s45 + the no-merge overnight leg), board 135→141 with every movement evidenced; **CI dead
+until the team's Wednesday 08-20 money discussion (Kam-confirmed) — NOTHING MERGES; #721 (CLEAN
+banner) → #720 → #718 merge in that order on CI's return, then re-push anything opened in the
+window.** Next-session carry: re-set KS-660 to Blocked with cause (integration bot reverted the
+agent's deliberate state on the correctly-named #721 branch — automation trap 3rd strike, setting
+question routed) · register comments on KS-486 (admin status-vocabulary silent no-op, verified,
+open since 07-01) + KS-489 (lucid triple-pin) authorised, s37 precedent · KS-652 figure stale
+(real count 1,677/25). HPSM s26 wrapped 1.0 (Purview: NO flexible weights — tension dissolved;
+§4.2 object-shaped exclusion; HPSM-37/38/39 their-claim). 🔴 KAM SIGNS TUE 08-18 MORNING; his
+20:25 ruling: sign-off only, nothing rides into the room; post-signature queue block current.
+
 **Refreshed 2026-08-17 ~13:0x (fresh session after the 65% handover).** Fleet floor: my pane +
 monitor + **Secuura s41 (%10) LIVE on burn-relay leg 2** — plan confirmed by mailed ANSWER
 (02:58:53Z, pane-provenance stated) in its own order: #707 → KS-649 → KS-508 (only deployable;
