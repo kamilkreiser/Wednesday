@@ -24,6 +24,14 @@ header a { color:var(--text-muted); font-size:12.5px; text-decoration:none; }
 header a:hover { color:var(--text-primary); }
 #live { margin-left:auto; font-size:12px; color:var(--text-muted); }
 #live.on { color:var(--series-3); }
+#autoplay { background:var(--surface-2); border:1px solid var(--line); border-radius:7px;
+  color:var(--text-muted); font:inherit; font-size:12px; padding:3px 10px; cursor:pointer; }
+#autoplay:hover { color:var(--text-primary); }
+#autoplay.on { color:var(--series-3); border-color:var(--series-3); }
+.playbtn { background:none; border:none; color:var(--text-muted); cursor:pointer;
+  font-size:11px; padding:0 2px; margin-left:4px; line-height:1; vertical-align:baseline; }
+.playbtn:hover { color:var(--text-primary); }
+.playbtn:disabled { opacity:.4; cursor:default; }
 #log { flex:1; overflow-y:auto; scrollbar-width:thin; }
 #log .col { padding-top:16px; padding-bottom:16px; }
 .msg { margin:0 0 14px; max-width:88%; }
@@ -57,7 +65,9 @@ footer .col { display:flex; gap:8px; padding-top:10px; padding-bottom:
 #send:disabled { opacity:.5; cursor:default; }
 </style></head><body>
 <header><div class="col"><h1>Chat with Wednesday</h1>
- <a href="/">&larr; dashboard</a><span id="live">&#9675; connecting&hellip;</span></div></header>
+ <a href="/">&larr; dashboard</a>
+ <button id="autoplay" title="speak newly-arriving Wednesday replies aloud">&#128266; auto-play replies</button>
+ <span id="live">&#9675; connecting&hellip;</span></div></header>
 <div id="log"><div class="col" id="msgs"><p id="empty">no messages yet</p></div></div>
 <footer><div class="col">
  <input id="text" type="text" maxlength="2000" placeholder="message Wednesday&hellip;" autocomplete="off">
@@ -106,6 +116,12 @@ function render(msgs) {
     const who = document.createElement("span"); who.className = "who";
     who.textContent = role === "kam" ? "Kam" : "Wednesday";
     meta.append(who, "  " + (m.ts || "").slice(11, 16));
+    if (role === "wednesday" && m.ts) {
+      const pb = document.createElement("button"); pb.className = "playbtn";
+      pb.textContent = "▶"; pb.title = "speak this message aloud";
+      pb.addEventListener("click", () => speak(m.ts, pb));
+      meta.appendChild(pb);
+    }
     const body = document.createElement("div"); body.className = "body";
     if (role === "wednesday") body.innerHTML = mdLite(m.text || "");
     else body.textContent = m.text || "";
@@ -126,11 +142,44 @@ function render(msgs) {
   // the scroll position out from under someone reading history.
   if (stick) log.scrollTop = log.scrollHeight;
 }
+// ── speak-aloud: server-side lookup by ts, real Wednesday voice ──
+async function speak(ts, btn) {
+  if (btn) btn.disabled = true;
+  try { await fetch("/api/speak", {
+    method: "POST", headers: {"Content-Type": "application/json"},
+    body: JSON.stringify({ts})});
+  } finally { if (btn) setTimeout(() => { btn.disabled = false; }, 800); }
+}
+// autoplay: default OFF, persisted; only wednesday messages ARRIVING after
+// page load are spoken — never the back-history.
+const AP_KEY = "wed_chat_autoplay";
+const apBtn = document.getElementById("autoplay");
+let autoplayOn = localStorage.getItem(AP_KEY) === "1";
+apBtn.classList.toggle("on", autoplayOn);
+apBtn.addEventListener("click", () => {
+  autoplayOn = !autoplayOn;
+  localStorage.setItem(AP_KEY, autoplayOn ? "1" : "0");
+  apBtn.classList.toggle("on", autoplayOn);
+});
+let knownTs = null;   // null until the first successful poll seeds the history
 async function poll(force) {
   try {
     const d = await (await fetch("/api/chatlog")).json();
     const msgs = d.messages || [];
     live.textContent = "● live"; live.classList.add("on");
+    if (knownTs === null) {
+      knownTs = new Set(msgs.map(m => m.ts));   // back-history: never auto-spoken
+    } else {
+      let latestNew = null;
+      for (const m of msgs) {
+        if (m.ts && !knownTs.has(m.ts)) {
+          knownTs.add(m.ts);
+          if (m.role === "wednesday") latestNew = m;
+        }
+      }
+      // several at once would overlap-kill each other — speak only the latest
+      if (autoplayOn && latestNew) speak(latestNew.ts, null);
+    }
     const sig = JSON.stringify(msgs);
     if (!force && sig === lastSig) return;
     render(msgs);
