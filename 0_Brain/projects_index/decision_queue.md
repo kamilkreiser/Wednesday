@@ -1,5 +1,18 @@
 # Kam decision sitting — 2026-08-14
 
+> ## NEW 2026-08-17 ~17:2x — Secuura/Blockchain: demo serves its FULL API spec publicly — keep or close? (MEDIUM)
+> **s44 measured it read-only at the internet-facing edge:** `/api/docs/openapi.yaml` and
+> `.json` both 200 with real spec (1.15MB / 860KB — 342 endpoints, every parameter and auth
+> mechanism, no credential), with an SPA-catch-all control proving the 200s are genuine.
+> **The code's own guard comment says "never in demo/prod" (audit F-04) and bicep sets it
+> dev-only — but the VM's own .env sets `ENABLE_PUBLIC_API_DOCS=true`.** Tracked NOWHERE in
+> Linear until s44 filed it. **Two artefacts disagree and the authority is unestablished** —
+> someone (Stuart? Peter?) may use Swagger against demo deliberately. **Options:** (a) close
+> it (flip the VM .env at the next authorised touch); (b) keep it deliberately and amend the
+> comment/bicep so the record stops lying; (c) ask Stuart/Peter first. **Recommendation: (c)
+> then (a)** — it is a surface map, not a credential leak; no urgency inflation, but it
+> should not stay in the current state where the config contradicts its own documentation.
+
 > ## NEW 2026-08-17 ~16:0x — Secuura/Blockchain: demo-overlay — revive or retire? (LOW priority)
 > **s43 disproved KS-654's premise with controls: NOTHING serves the demo-overlay bundle** —
 > the nginx `location /demo-overlay/` + `sub_filter` blocks were deliberately removed (the
