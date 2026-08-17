@@ -959,3 +959,25 @@ all three evening inputs as INPUT-ONLY clinic material; slide-14 talk track wove
 **Done with it:** addendum mailed to HPSM s26 (dynamic event-level posture + custom criteria
 mapping, north-star-not-MVP-scope framing); slide 15 delivered with the continuous-evidence ↔
 continuous-posture unification for tomorrow's delivery.
+
+## 2026-08-17 20:23 — HPSM: findings-to-action model + sales-usability driver (verbatim, chat)
+> Having read slide 15, much of what we've discussed above negates it.  Great point; I agree
+> with your logic above.In addition to that, I think you should consider two things. First,
+> in my experience, with the exception of a few, most salespeople shy away from selling
+> security and privacy policies.  The second thing to keep in mind is the purview model,
+> where, following an analysis of the environment, very specific solutions are suggested,
+> such as turning on 2FA for this user. To be compliant with X, Y, and Z. If we take these
+> two points together, the model we need to build has to have two components working
+> together: first, a strong analysis of the environment, and second, very clear suggestions
+> of how to articulate this to the client, and most importantly, what to do to resolve it.
+> In the same way that purview or even AI interaction can create a blunt-style summary—this
+> is a problem, this is what it means, and this is what you should do about it—we should
+> strive to make it very simple for people to run the tool. Once the tool finishes, we can
+> utilise the AI and analysis to map a clear path for suggestions, and in some cases, even
+> resolve it for the clients with their approval.Please consider this in the review of
+> Purview, and in the way we architect the solution. I think that if we do so, especially if
+> the actual client data is in their tenant, security and privacy become less of an issue.
+**Done with it:** second addendum to HPSM s26 (two-component model: analysis + blunt
+articulate-and-resolve output; approval-gated remediation named as a §4.2-boundary scope
+question; sales-usability as first-class driver; residency-as-objection-killer). Element 2
+opened in chat: decision 1 (hypercare §17) presented with recommendation (a).
