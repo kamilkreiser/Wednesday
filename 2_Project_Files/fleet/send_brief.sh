@@ -209,6 +209,47 @@ MSG
       exit 1
     fi
   fi
+
+  # ── QUEUED-TICKET FRESHNESS CHECK (w=7 in the stale-brief family, 2026-08-17) ──
+  # Twice now a brief has queued work that was ALREADY DONE, because the queue
+  # was built from a frozen record (a history entry, a carry-forward block, a
+  # predecessor's wrap) instead of the newest record OF THAT WORK — the ticket.
+  # 2026-08-13: briefed HPSM to redo work my own SCORE mail had verified done.
+  # 2026-08-17: queued KS-490 E-2/E-3 as work; s38 had dispositioned both in a
+  # ticket comment 19 hours before my brief. The agent re-verified instead of
+  # redoing, both times — the catch cost them a read; the gate makes it mine.
+  #
+  # NARROW, per the w=8 false-positive lesson: fires only on a "## QUEUE"
+  # section (my brief template's work list), and only requires that each ticket
+  # ID queued there appears in SOME provenance line — i.e. I opened the ticket,
+  # or at least had to write a false line saying I did. Holds, context and
+  # ANSWER mails are untouched.
+  if printf '%s' "$BODY" | grep -qiE '^## *QUEUE'; then
+    QUEUE_IDS="$(printf '%s' "$BODY" | sed -n '/^## *[Qq][Uu][Ee][Uu][Ee]/,/^## /p' \
+                 | grep -oE '\b(KS|PS|RD|WED|HPSM|CPKEY|VSP|WIL)-[0-9]+\b' | sort -u)"
+    PROV_BLOCK="$(printf '%s' "$BODY" | sed -n '/^PROVENANCE:/,$p')"
+    MISSING=""
+    for id in $QUEUE_IDS; do
+      printf '%s' "$PROV_BLOCK" | grep -q "$id" || MISSING="$MISSING $id"
+    done
+    if [ -n "$MISSING" ]; then
+      cat >&2 <<MSG
+BRIEF REFUSED — the QUEUE section names ticket(s) with no provenance line:
+ $MISSING
+
+A queued ticket is a claim that the work is still open. The newest record of
+that work is the TICKET, not a wrap, a history entry or a carry-forward block.
+Open each one and add:
+
+PROVENANCE:
+- <ticket> state (open, last comment <when>) | Linear/Jira ticket <id> | read YYYY-MM-DD
+
+Stale-brief family w=7 (2026-08-13 HPSM redo-brief; 2026-08-17 KS-490 E-2/E-3
+queued 19 hours after the ticket said done).
+MSG
+      exit 1
+    fi
+  fi
 fi
 
 # ── DRY RUN ───────────────────────────────────────────────────────────────
