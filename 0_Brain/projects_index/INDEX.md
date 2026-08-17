@@ -187,6 +187,29 @@ open since 07-01) + KS-489 (lucid triple-pin) authorised, s37 precedent · KS-65
 §4.2 object-shaped exclusion; HPSM-37/38/39 their-claim). 🔴 KAM SIGNS TUE 08-18 MORNING; his
 20:25 ruling: sign-off only, nothing rides into the room; post-signature queue block current.
 
+**Refreshed 2026-08-18 06:1x (Tuesday 06:00 scheduled wake — 🔴 SIGNING DAY, Kam signs
+with HP this morning).** WED-111 wake fix passed its FIRST LIVE FIRE (tap into %0, no
+second coordinator; ps shows exactly one). Zero inbound overnight; both overnight wraps
+(Secuura s45 leg 6, HPSM s26 Purview) were scored 1.0 by the overnight session.
+**Morning sweep (controls on every count):**
+- **Secuura/Blockchain: 142 in the work queue** (backlog/unstarted/started; 42
+  unstarted+started; +1 = Peter's new KS-662). **Peter worked the board after our close:**
+  KS-662 filed (In Review, his — negative_data_rejection guard mirroring
+  integration_5xx_guard) + KS-588 comment 17:59Z independently re-verifying test 7 from a
+  from-scratch stack (`/api/leaderboard` 200 on a revoked token, control 401s; feeds
+  KS-570, no new ticket). Bot re-reverted KS-660 to In Progress (11:08Z, known).
+  **s46 LAUNCHED (%16)** on the CI-independent carry queue (KS-660 Blocked re-set with
+  cause · KS-486 + KS-489 register comments authorised · KS-652 figure 1,219→1,677 ·
+  Peter's movement · standing burn). **NOTHING MERGES** until the team's Wed 08-20 cost
+  discussion; brief gated, verified at destination 20:08:28Z before launch.
+- **Datasec/NexusAI: 57 open** (22 To Do · 16 Release Ready · 12 Testing · 5 On Hold ·
+  2 In Progress). NOT launched — stood down pending K2 (Kam's gh auth).
+- **Datasec/HPSM: NOT launched — post-signature queue** (O1 Compliance Manager read API
+  leads once Kam confirms ink).
+- **Datasec/Vision: 0 open, control passed** (same-path total 64, all Done). Not launched.
+Signing-day brief delivered to Kam on the chat panel 06:1x (deck hash on record, .env
+deviation disclosure with overrule available, CI status, post-signature list).
+
 **Refreshed 2026-08-17 ~13:0x (fresh session after the 65% handover).** Fleet floor: my pane +
 monitor + **Secuura s41 (%10) LIVE on burn-relay leg 2** — plan confirmed by mailed ANSWER
 (02:58:53Z, pane-provenance stated) in its own order: #707 → KS-649 → KS-508 (only deployable;
