@@ -981,3 +981,12 @@ continuous-posture unification for tomorrow's delivery.
 articulate-and-resolve output; approval-gated remediation named as a §4.2-boundary scope
 question; sales-usability as first-class driver; residency-as-objection-killer). Element 2
 opened in chat: decision 1 (hypercare §17) presented with recommendation (a).
+
+## 2026-08-17 20:25 — Ruling: tomorrow is sign-off, not amendments (verbatim, chat)
+> Let's not worry about tomorrow's meeting; the focus should be on getting sign-off. Today's
+> discussion and the details we've covered are more about the build and how we put the
+> program into action.
+**Done with it:** entire decision sitting stood down — meeting-shaped items (hypercare
+phrase, §14 set, P05 sentence) moved to the POST-SIGNATURE amendment queue (hypercare stays
+fixable any time via §17's "unless otherwise agreed"); build/mobilisation items (clinic
+date, pod-leads, Amplify fallback, HPSM-29) wait for after the ink. Queue re-labelled.

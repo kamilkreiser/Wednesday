@@ -59,6 +59,14 @@
 > known-broken and must be excluded or the gate is red on arrival) are already on the ticket
 > for whoever builds it.
 
+> ## ⏸ RE-SCOPED by Kam 2026-08-17 20:25 (verbatim in prompt-log): "Let's not worry about
+> tomorrow's meeting; the focus should be on getting sign-off." → NOTHING below rides into
+> tomorrow's room. Meeting-shaped items (hypercare phrase · §14 wording set X1-X4 · P05
+> sentence) move to the POST-SIGNATURE amendment queue — hypercare remains fixable any time
+> via §17's own "unless otherwise agreed". Build/mobilisation items (clinic date · pod-lead
+> names · Amplify fallback · HPSM-29) wait for after the ink. Original entries kept below
+> for the record.
+
 > ## 🔴 NEW 2026-08-17 ~12:0x — TWO ITEMS FOR TOMORROW'S SIGN-OFF, from HPSM session 25
 > **1. The §17 hypercare clock INVERTS on 22 Aug.** SOW §17 fixes hypercare at 30 Nov–11 Dec
 > in stated dates; hypercare is not an M0–M8 gate, so §6's day-for-day relief never reaches
