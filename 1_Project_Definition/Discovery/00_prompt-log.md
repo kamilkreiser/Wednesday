@@ -852,3 +852,19 @@ were labelled — so it now starts at today.
 > yes, that read on the PII is right
 
 *Kam CONFIRMS the wide reading of ruling 15: Platform K does not hold KYC images at all; it keeps the attestation. My interpretation is now his confirmed instruction, not my inference — relayed to the agent so its design rests on a confirmed reading rather than mine.*
+
+---
+**2026-08-17 ~12:0x — Kam, HPSM PDF review rulings (chat, verbatim):**
+> lets go through the gap analysis now.  comments on HPSM  HPSM PDF
+> - [ ] D-26 - yes go ahead
+> - [ ] Meeting with HP to sign off on the project is tomorrow morning.  The project will start when they sign.  This is prep work for now.
+> - [ ] K5 - yes.  Back up and sync all drives.  All drives plugged in and once synced, sync to NAS
+> - [ ] E14 - not yet
+> - [ ] Some docs refer to USD and some to AUD.  This will be the main difference.  No naming mapping at this stage and will review during tomorrow's meeting.  Also, as exchange varies, the figures are indicative until signed
+
+*(Done with it: D-26 verdict + currency sweep + tomorrow-pack re-cut briefed to HPSM (launched %9); K5 sync delegated to a background teammate under the churn-aware ritual; E14 marked deferred; queue updated; earlier same sitting: "please also do the neccesary work to split or implement the 2 system approach for secuura" → KS-601 commissioned in stages with the money checkpoint held.)*
+
+**2026-08-17 ~12:2x — Kam, interaction design (chat, verbatim):**
+> Let's work on a way to interact. Typically, it is perfect to go back and forth in this format; however, longer and more complicated discussions are handled by prompts from other agents, actions taken, and update messages. This makes it difficult for me to keep track when I'm reading a component and then it disappears down the page. Is there another way for us to keep the conversation in a different panel, and for all this to either happen in the background or on a separate panel?
+
+*(Done with it: learning filed (conversation-needs-a-stable-panel); dashboard chat promoted to the stable conversation surface with chat_reply.sh mirror, wired into the launcher standing behaviour; long content → documents (sitting-pack pattern); two-panel dashboard build filed as a WED ticket.)*

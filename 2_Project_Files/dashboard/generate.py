@@ -1144,6 +1144,10 @@ body {{ background:var(--surface-1); color:var(--text-primary);
 .menu button {{ background:var(--surface-2); color:var(--text-secondary); border:1px solid var(--line);
   border-radius:7px; font:inherit; font-size:13px; padding:5px 12px; cursor:pointer; }}
 .menu button.on, .menu button:hover {{ color:var(--text-primary); border-color:var(--text-muted); }}
+.menu a.menubtn {{ display:inline-block; background:var(--surface-2); color:var(--text-secondary);
+  border:1px solid var(--line); border-radius:7px; font-size:13px; padding:5px 12px;
+  text-decoration:none; }}
+.menu a.menubtn:hover {{ color:var(--text-primary); border-color:var(--text-muted); }}
 .topbar .menu {{ position:relative; }}
 #burger-drop {{ position:absolute; right:0; top:calc(100% + 6px); z-index:60; display:flex;
   flex-direction:column; gap:6px; background:var(--surface-2); border:1px solid var(--line);
@@ -1464,7 +1468,7 @@ footer .ok {{ color:var(--text-secondary); }} footer .bad {{ color:#e66767; font
  <span class="sub">{NOW.strftime("%A %-d %B %Y · %H:%M %Z")}</span>
  <span class="legend">{legend_html()}</span>
  {focus_chip()}
- <span class="menu">{RESET_BTN}<button id="burger-btn" title="menu">&#9776;</button>
+ <span class="menu"><a class="menubtn" href="/chat" title="open the full-window chat with Wednesday">&#128172; Chat</a> {RESET_BTN}<button id="burger-btn" title="menu">&#9776;</button>
  <span id="burger-drop" hidden>
    <span class="mgroup">
      <button class="mparent">&#9881; Customise <span class="carat">&#9656;</span></button>

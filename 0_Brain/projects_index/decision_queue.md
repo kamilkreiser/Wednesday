@@ -1,5 +1,22 @@
 # Kam decision sitting — 2026-08-14
 
+> ## ✅ RULED 2026-08-17 ~12:0x (Kam's PDF review, in chat — verbatim in prompt-log)
+> 🔴 **THE HP SIGN-OFF MEETING IS TOMORROW MORNING (Tue 2026-08-18). The project starts when
+> they sign. Today is prep.** (Supersedes the "Kam presents today" framing.)
+> - **D-26 — GO.** Option (i) + three amendments adopted. → HPSM agent records the verdict
+>   in D01 and propagates (weights 15%, section-5 rename, P08 landing).
+> - **K5 — YES:** back up and sync ALL drives (all plugged in), and once synced, **sync to
+>   NAS.** → Executing via WED sync teammate under the two-pass churn-aware ritual.
+> - **E14 — NOT YET.** CSPA question deferred; the four dependent threads stay
+>   assumption-based and say so.
+> - **Currency:** some docs USD, some AUD — "this will be the main difference." **No naming
+>   mapping at this stage** (0b's assistant-name question folds into tomorrow's meeting).
+>   **All figures indicative until signed** (FX varies) — covers the US$650k-vs-A$750k point.
+> - Still un-ruled from the pack: **the P05 "deterministic" sentence** (due 21 Aug — fits
+>   naturally into tomorrow's meeting) · **the Amplify fallback** (NTP≈tomorrow ⇒ release
+>   lands ~8 Dec, after the Sat 5 Dec anchor — needs a fallback named before signing) ·
+>   whether **X1–X4's ten minutes of §14 corrections** are raised tomorrow before signature.
+
 > **Status at ~12:5x (fresh session).** The Kintsugi deploy you authorised is
 > **RUNNING** — Secuura session 34, launched as this session's first act, demo only.
 > **Items A, B, 1, 2, 3, 4, 4b, 5b and 7 below are still open and still yours.**
@@ -455,6 +472,24 @@ hashes, then remove entirely once triaged. **Not (d)** — an undocumented blind
 file that changes constantly is how this survived in the first place. **Reversible CI config,
 so this is inside my scope to commission once you have ruled on the lockfile question** — I am
 asking because it changes what a merge-blocking gate accepts, not because I cannot act.
+
+### 🔵 K2. Datasec / NexusAI — **two-minute machine task when you're next at the keyboard: `gh auth login` at the NexusAI project (clears RD-74)**
+The project's `GH_CONFIG_DIR` is already wired; the login is interactive so it is your hands.
+It unblocks: RD-101's proper red-proof in Actions (the agent rightly refused to push a failing
+test it cannot observe), all future CI verification for this repo, and it is the read path the
+RD-101/RD-100 gate family keeps needing. Not urgent; queue it behind the sitting.
+
+### 🔵 K1. Secuura / Blockchain — **KS-601 Kintsugi COMMISSIONED 2026-08-17 (your instruction); two checkpoints come back to you**
+Kam's words, ~11:5x: *"please also do the necessary work to split or implement the 2 system
+approach for secuura."* Staged so the money moment is explicit: **Stage A running** (sizing +
+cost proposal, provisioning scripts written-not-run, Kintsugi's own faucet-funded preview
+wallet, promotion-gate process in docs, DNS plan only — no spend, no records created).
+**Checkpoint 1 (money):** the VM create waits on your one-word go against the monthly figure
+the sizing proposal will carry. **Checkpoint 2 (your own gate):** KS-601 recorded *"once
+Stuart confirms verification displays properly, we deploy the new VM"* — Stuart's confirmation
+is still not on record, so the Stage B ask will restate it; lifting it is your deliberate call.
+Naming: `kintsugi.secuura.net` collides with Stuart's PS-estate naming proposal — settle
+ownership before any DNS record (your reply to Stuart covers it).
 
 ### ⚠ 7g. Datasec / NexusAI — **NEW 2026-08-17: may the demo carry a temporary threshold mis-set so RD-62's stale-data branch can be proven?**
 **Problem:** RD-62's fix (stale-branch detection) can only be proven live by making the demo's

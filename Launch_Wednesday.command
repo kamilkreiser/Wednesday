@@ -226,6 +226,13 @@ STANDING BEHAVIOUR:
   (0_Brain/dashboard/data/chat_log.json) — messages Kam types there are real
   input. If the launch state above says FAILED or the port was held, diagnose
   per no-skip before relying on the dashboard.
+  **STABLE CONVERSATION SURFACE (Kam, 2026-08-17 — learnings/2026-08-17_conversation-needs-a-stable-panel.md):**
+  the chat tile is where Kam READS; the terminal buries conversation under
+  fleet mechanics. MIRROR every substantive conversational reply to Kam via
+  2_Project_Files/tools/chat_reply.sh — short form, pointers to documents for
+  anything long (the 2026-08-17 HPSM sitting-pack PDF is the template; long
+  content becomes a file, never scrollback-only). Fleet mechanics NEVER go
+  into the chat mirror.
 - Fleet comms: re-check the coagent@ inbox PERIODICALLY during long sessions —
   at natural checkpoints (a long task finishes, before proposing next steps),
   not just at boot. Delegated agents wrap by email (end-of-session Step 2d);
