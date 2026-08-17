@@ -250,6 +250,64 @@ MSG
       exit 1
     fi
   fi
+
+  # ── SELF-CONSISTENCY ATTESTATION (three-strike promotion, 2026-08-18) ─────
+  # Three times a brief of mine has CONTRADICTED ITSELF while every per-line
+  # gate passed, because per-line gates cannot see a document arguing with
+  # itself:
+  #   2026-08-13 (w=5): "the A$187,500 already invoiced" in a brief whose own
+  #     constraints section said "SOW unsigned" — the disproof travelled in the
+  #     same document.
+  #   2026-08-14 (w=8): the ownership rule applied to two provenance lines and
+  #     not the third, inside one mail.
+  #   2026-08-17 (w=2 family): QUEUE said Purview appears "exactly once" while
+  #     the same brief's PROVENANCE line said "2 hits". Caught by the agent.
+  # A self-contradiction is a READING defect, not a line defect, so the
+  # mechanism is the provenance gate's: convert "never noticed I hadn't done
+  # the read" into "I would have to write a false line". The brief must carry a
+  # fresh, TODAY-dated attestation that the end-to-end contradiction read was
+  # done:
+  #     SELF-CHECK: re-read end-to-end for contradictions | YYYY-MM-DD HH:MM
+  # The date must be today — a copy-pasted line from yesterday's brief refuses,
+  # which is what makes the attestation a fresh act rather than a template
+  # fossil. HONEST LIMIT (same as the provenance gate's, stated there too): it
+  # cannot know whether the read actually happened. It makes skipping it a
+  # deliberate falsehood instead of an omission — that shift is the mechanism.
+  # Helper: fleet/self_check_view.sh <body-file> prints the claim-bearing lines
+  # (numbers, ticket IDs, absolutes) grouped, so the re-read is targeted.
+  # NARROW per the w=8 false-positive lesson: --kind brief only; ANSWER mails
+  # and holds are untouched.
+  # LOCAL date only. The first draft also accepted the UTC date — and because
+  # AEST is UTC+10, every morning before 10:00 the UTC date is still YESTERDAY,
+  # so a stale attestation carried from last night would have passed. Caught by
+  # exercising the refuse path before arming (the stale test did not refuse).
+  TODAY_LOCAL="$(date +%Y-%m-%d)"
+  SC_LINE="$(printf '%s' "$BODY" | grep -E '^SELF-CHECK: *re-read end-to-end for contradictions \| [0-9]{4}-[0-9]{2}-[0-9]{2} [0-9]{2}:[0-9]{2}' | tail -1)"
+  if [ -z "$SC_LINE" ]; then
+    cat >&2 <<MSG
+BRIEF REFUSED — no SELF-CHECK attestation.
+
+Per-line gates cannot see a document contradicting itself (three instances:
+2026-08-13 "already invoiced" vs its own constraints; the w=8 mixed block;
+2026-08-17 "exactly once" vs "2 hits"). Re-read the WHOLE brief asking one
+question — does any sentence contradict another? — then attest it, freshly:
+
+SELF-CHECK: re-read end-to-end for contradictions | $TODAY_LOCAL $(date +%H:%M)
+
+Targeted view of the claim-bearing lines:
+  2_Project_Files/fleet/self_check_view.sh <body-file>
+MSG
+    exit 1
+  fi
+  SC_DATE="$(printf '%s' "$SC_LINE" | grep -oE '[0-9]{4}-[0-9]{2}-[0-9]{2}')"
+  if [ "$SC_DATE" != "$TODAY_LOCAL" ]; then
+    cat >&2 <<MSG
+BRIEF REFUSED — SELF-CHECK attestation is STALE ($SC_DATE, today is $TODAY_LOCAL).
+A carried-forward attestation is a template fossil, not a read. Do the read on
+THIS version of the brief, then re-date the line.
+MSG
+    exit 1
+  fi
 fi
 
 # ── DRY RUN ───────────────────────────────────────────────────────────────
