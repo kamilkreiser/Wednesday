@@ -24,10 +24,11 @@ header a { color:var(--text-muted); font-size:12.5px; text-decoration:none; }
 header a:hover { color:var(--text-primary); }
 #live { margin-left:auto; font-size:12px; color:var(--text-muted); }
 #live.on { color:var(--series-3); }
-#autoplay { background:var(--surface-2); border:1px solid var(--line); border-radius:7px;
+#autoplay, #stopvoice { background:var(--surface-2); border:1px solid var(--line); border-radius:7px;
   color:var(--text-muted); font:inherit; font-size:12px; padding:3px 10px; cursor:pointer; }
-#autoplay:hover { color:var(--text-primary); }
+#autoplay:hover, #stopvoice:hover { color:var(--text-primary); }
 #autoplay.on { color:var(--series-3); border-color:var(--series-3); }
+#stopvoice:disabled { opacity:.5; cursor:default; }
 .playbtn { background:none; border:none; color:var(--text-muted); cursor:pointer;
   font-size:11px; padding:0 2px; margin-left:4px; line-height:1; vertical-align:baseline; }
 .playbtn:hover { color:var(--text-primary); }
@@ -67,6 +68,7 @@ footer .col { display:flex; gap:8px; padding-top:10px; padding-bottom:
 <header><div class="col"><h1>Chat with Wednesday</h1>
  <a href="/">&larr; dashboard</a>
  <button id="autoplay" title="speak newly-arriving Wednesday replies aloud">&#128266; auto-play replies</button>
+ <button id="stopvoice" title="stop the voice that is speaking now (autoplay stays on)">&#9209; stop</button>
  <span id="live">&#9675; connecting&hellip;</span></div></header>
 <div id="log"><div class="col" id="msgs"><p id="empty">no messages yet</p></div></div>
 <footer><div class="col">
@@ -150,6 +152,15 @@ async function speak(ts, btn) {
     body: JSON.stringify({ts})});
   } finally { if (btn) setTimeout(() => { btn.disabled = false; }, 800); }
 }
+// stop button (Kam, 2026-08-19): kill the CURRENT utterance server-side.
+// Autoplay stays as it was — this stops one voice, not the feature.
+const svBtn = document.getElementById("stopvoice");
+svBtn.addEventListener("click", async () => {
+  svBtn.disabled = true;
+  try { await fetch("/api/speak/stop", {
+    method: "POST", headers: {"Content-Type": "application/json"}, body: "{}"});
+  } finally { setTimeout(() => { svBtn.disabled = false; }, 400); }
+});
 // autoplay: default OFF, persisted; only wednesday messages ARRIVING after
 // page load are spoken — never the back-history.
 const AP_KEY = "wed_chat_autoplay";

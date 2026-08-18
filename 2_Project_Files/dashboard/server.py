@@ -8,6 +8,8 @@ workspace (never any client board). Endpoints:
                           reads /api/chatlog, posts via /api/chat — no new writes)
   POST /api/speak       → {"ts": str} → speak that wednesday-role chat message
                           aloud via voice/speak.sh (server-side lookup; 202/404/400)
+  POST /api/speak/stop  → {} → kill the currently-playing voice (idempotent 200;
+                          autoplay setting untouched)
   POST /api/add         → {"title": str, "priority": 1..4} → new WED issue (Todo)
   POST /api/prioritise  → {"id": "WED-xx"} → set priority Urgent (1)
   POST /api/start       → {"id": "WED-xx"} → move to In Progress
@@ -299,6 +301,17 @@ class Handler(SimpleHTTPRequestHandler):
                     return self._json(500, {"error": f"speak launch failed: {e}"})
                 _speak_state["pgid"] = proc.pid   # pgid == pid (new session)
                 return self._json(202, {"ok": True, "spoken_chars": len(text)})
+            if self.path == "/api/speak/stop":
+                # Stop button (Kam, 2026-08-19): kill the current voice mid-speech.
+                # Idempotent — stop with nothing playing is a no-op success, so the
+                # client never needs to know whether audio is live. Autoplay state
+                # is untouched: this stops THIS utterance, not the feature.
+                pgid = _speak_state.get("pgid")
+                if pgid:
+                    subprocess.run(["pkill", "-g", str(pgid)],
+                                   stdout=subprocess.DEVNULL, timeout=10)
+                    _speak_state["pgid"] = None
+                return self._json(200, {"ok": True, "stopped": bool(pgid)})
             if self.path == "/api/mute":
                 key = (data.get("key") or "").strip()[:300]
                 if not key:
