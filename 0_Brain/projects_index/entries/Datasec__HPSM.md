@@ -3,7 +3,7 @@ client: Datasec
 project: HPSM
 path: /Volumes/DevMASTER/!CODING/Datasec/HPSM
 status: active
-updated: 2026-08-13
+updated: 2026-08-20
 ---
 
 # Datasec / HPSM
@@ -39,9 +39,19 @@ product docs — Kam's API ask is evidence-backed. Findings note in
 Document_Pass.
 
 **Open / next:**
-- Kam prunes HPSM-21 asks; only he sends anything to HP
-- ~08-17 refinement session consumes the pack (HPSM-13) + OXPd2 OpenAPI findings feed D01
-- In-session lookups still open: hosted-agents AU-East, Go-Local rate
+- **Kam's big three (they gate any relaunch):** clinic date · the HP schedule
+  conversation (§7 expired calendar + §6 relief one-pager filed) · K5 scope.
+- HPSM-21 (Backlog, retitled): [SIGN-OFF ~08-25/28] HP asks register — Group C
+  corrections; Kam prunes, only he sends anything to HP.
+- Signature window ~2026-08-25→28; post-signature queue leads with O1
+  (Secure Score / Defender export path — the Compliance Manager read-API premise
+  is dead, inverted favourably).
+- Locked docs still need Kam/HP: `OXPD/Steves Readme Notes.docx` password ·
+  MIP-locked WJA guides.
+
+**Completed (moved off the dashboard 2026-08-20):** the 08-17 refinement sitting
+happened and HPSM-13 (refinement pack) is Done on the board — verified via Jira
+2026-08-20.
 
 **Blockers:** two locked documents need Kam/HP: password for
 `OXPD/Steves Readme Notes.docx` (CDFV2-encrypted), unprotected WJA

@@ -187,6 +187,27 @@ open since 07-01) + KS-489 (lucid triple-pin) authorised, s37 precedent · KS-65
 §4.2 object-shaped exclusion; HPSM-37/38/39 their-claim). 🔴 KAM SIGNS TUE 08-18 MORNING; his
 20:25 ruling: sign-off only, nothing rides into the room; post-signature queue block current.
 
+**Refreshed 2026-08-20 06:1x (Thursday 06:00 scheduled wake).** 🔴 **FLEET MAIL SEND
+STILL DOWN** (boot probe: HTTP 403 message_rejected, "Sending paused for this account…
+check the inbox of the email address associated with your AWS account"; receive alive;
+zero inbound since s48's 08-19 02:18Z wrap) — **no briefs deliverable, NO agents
+launched despite actionable work.** Sweep (controls on every count):
+- **Secuura/Blockchain: 146 work queue** (43 unstarted+started; +4 overnight =
+  KS-663/664/665/666, all Peter's). 🔴 **Peter cleared BOTH KS-256 merge blockers**
+  (documentUuid build fix pushed — all services tsc clean; PII checkbox with evidence),
+  closed 8/10 of s47's review points, and **built our ack condition**
+  (schemathesis-baseline.json, 97 pairs, gate wired + calibrated). Head `867b25728`.
+  His close: *"@kksecura's re-review — the only thing genuinely blocking."*
+  **KS-665 (High) is assigned to kksecura** (5 example-fixable 400s · 132/2 param
+  gap · §10 · new userAgent Demo Issuer). KS-664 branch pushed no-PR. KS-666 (Peter):
+  shared-VM isolation, names concurrent-agent work as the cost — strengthens Kintsugi
+  Stage C (which stays the standing default on Kam's 08-19 ask-with-default).
+  CI still dead at his 13:18Z comment; merge order on return #721→#720→#718, then
+  #568 on Kam sign-off after our re-review.
+- **Datasec/NexusAI: 57 open** (22/16/12/5/2) — unchanged, K2-gated, not launched.
+- **Datasec/Vision: 0 open, control passed** (total 64 all Done). Not launched.
+- **Datasec/HPSM: not launched** — big three Kam-blocked; signature window ~08-25→28.
+
 **Refreshed 2026-08-18 06:1x (Tuesday 06:00 scheduled wake — 🔴 SIGNING DAY, Kam signs
 with HP this morning).** WED-111 wake fix passed its FIRST LIVE FIRE (tap into %0, no
 second coordinator; ps shows exactly one). Zero inbound overnight; both overnight wraps
