@@ -1023,3 +1023,14 @@ preference filed as learnings/2026-08-20_dashboard-shows-only-live-work.md.)*
 *("Sakura" = Secuura, dictation. Stuart's DNS record verified resolving from here;
 Peter's re-review ask matches the 13:18Z board comment. Both folded into the s49
 brief.)*
+
+## 2026-08-20 (~08:3x, terminal)
+
+> go ahead with Stage C once s49 wraps
+
+*(Kintsugi Stage C authorised, launch-on-wrap: stack bring-up + own wallet
+on-box (KS-535 absolute) + Caddy on kintsugi.secuura.net + KS-584 P3 deploy
+into Kintsugi + dev-ps allowed origins + Stuart notification via board. The
+ask-with-default sent 08-19 is now an explicit go. Spend note: Stage B's ~USD
+77/mo already authorised ("77 is fine"); Stage C adds software only — any NEW
+spend (e.g. a paid Blockfrost tier) still pauses per money class.)*
