@@ -1034,3 +1034,12 @@ into Kintsugi + dev-ps allowed origins + Stuart notification via board. The
 ask-with-default sent 08-19 is now an explicit go. Spend note: Stage B's ~USD
 77/mo already authorised ("77 is fine"); Stage C adds software only — any NEW
 spend (e.g. a paid Blockfrost tier) still pauses per money class.)*
+
+## 2026-08-20 (~09:1x, terminal)
+
+> go ahead with the Blockfrost project
+
+*(Approves option 1 from the panel ask: a DEDICATED free-tier Blockfrost preview
+project for Kintsugi, agent-created with secuura-blockchain@agentmail.to as the
+login. Free tier only — any paid-tier requirement still pauses. Relayed to s50
+mid-session for real-mode cutover + faucet funding + §4 acceptance.)*
