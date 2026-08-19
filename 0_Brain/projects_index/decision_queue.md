@@ -1,5 +1,26 @@
 # Kam decision sitting — 2026-08-14
 
+> ## 🔴 NEW 2026-08-20 ~07:5x — WED/fleet: re-issue the v1.3 delegation grant to the
+> per-project inboxes (needs YOUR signed send, ~5 min)
+> s49 could not re-verify your v1.3 grant at source: the signed mail lives only in
+> `coagent@` (the shared bus), and migrated projects' inbox-scoped keys 404 there **by
+> design** (WED-108 — the isolation working). The mail itself is fine — I re-fetched it
+> today (HTTP 200, `<8DF1B897-3EC1-453C-8301-51F4090B3DA9@me.com>`, 2026-08-07). But an
+> agent that cannot independently re-verify its own authority at a cold boot is leaning
+> on retained records. **Ask: forward/resend the same signed grant from kreiser.org@me.com
+> to each per-project inbox** (secuura-blockchain@, datasec-hpsm@, + the others as they
+> migrate) so every agent holds a DKIM-verifiable copy its own key can reach.
+> Recommendation: yes, this week — before a session actually needs a signature-class check.
+
+> ## ℹ️ FYI 2026-08-20 ~07:5x — Secuura/Blockchain: Peter merged #723 + #724 into develop
+> UNDER the CI hold (no action needed unless you read it differently)
+> With CI dead, Peter merged two of his own PRs on 08-19 (perf-gate 0.1%→1% split-out —
+> the exact split s47's review recommended — and a preflight bash fix). Both low-risk;
+> both merged on zero executed checks, the same condition under which he is correctly
+> holding #568. The "nothing merges" hold continues to bind OUR sessions absolutely.
+> Flagging only because the hold's scope is now demonstrably read differently across the
+> team — worth one line in the CI cost conversation if you want a shared rule.
+
 > ## 🔴 NEW 2026-08-19 ~11:1x — Secuura/Blockchain: the DEMO VM's SSH is open to the
 > world (MEDIUM, cheap fix)
 > Found by s48 while looking for a port-22 precedent for Kintsugi: `secuura02-demo-vmNSG`
