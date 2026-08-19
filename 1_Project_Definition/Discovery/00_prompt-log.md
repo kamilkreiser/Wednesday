@@ -1009,3 +1009,17 @@ minutes earlier in chat). Preceded by both recorded gates falling this morning:
 Stuart's KS-584 verification confirmation (comment 00:54Z) and his KS-601
 "$5000 Founders credits live" (00:58Z). Used as the money-class authorisation
 in the s48 Stage B provisioning brief.
+
+## 2026-08-20 (morning, terminal — after the 06:00 briefing)
+
+> Right, please go ahead with tasks as identified. Also on the dashboard, please review if any items have been completed, and once they get complete, did move them off the dashboard
+
+*(Done with: proceed-go on the day's identified priorities; dashboard completed-items
+review executed same hour — tickets tile cleaned with source verification, standing
+preference filed as learnings/2026-08-20_dashboard-shows-only-live-work.md.)*
+
+> Please also look at two messages for Sakura. First one's from Stuart, the second one is from Peter. [19/8/2026, 4:09:08 pm] Stuart: kintsugi.secuura.net in DNS and propogating [...] (as a CNAME: secuura02-kintsugi.southeastasia.cloudapp.azure.com (ike demo-pk)) [nslookup output] · Hi Kam — PR ready for re-review: https://github.com/Secuura/Distributed_Secuura/pull/568
+
+*("Sakura" = Secuura, dictation. Stuart's DNS record verified resolving from here;
+Peter's re-review ask matches the 13:18Z board comment. Both folded into the s49
+brief.)*
