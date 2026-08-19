@@ -1,5 +1,15 @@
 # Kam decision sitting — 2026-08-14
 
+> ## 🔴 NEW 2026-08-20 ~09:4x — Secuura/Kintsugi: two dev-box calls from s50 (both small)
+> **(1) Seeded `*123` accounts vs unique credentials on the dev box.** The stack ships
+> demo's seeded logins; scanners were probing the host within MINUTES of 443 opening.
+> Rec: unique credentials (one session's work, agent can generate + record properly).
+> **(2) Wallet mnemonic backup location.** Agent correctly refused to write into demo's
+> Key Vault on its own authority. Rec: NO dev secrets in demo's vault — it is a
+> faucet-funded test wallet, cheap to regenerate; backup waits for Kintsugi's own vault
+> if ever needed. One word each.
+> *(Also pending your hands: the faucet minute — address + steps on the panel.)*
+
 > ## 🔴 NEW 2026-08-20 ~08:4x — Secuura: does Stuart's "$5000 Founders credits live"
 > actually move the 6 Sep expiry? (portal-only check, ~2 min, YOUR eyes)
 > Stuart posted on KS-601 (08-19 00:58Z, with screenshot): "Founder credits are live
