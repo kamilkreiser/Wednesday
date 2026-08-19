@@ -1,5 +1,22 @@
 # Kam decision sitting — 2026-08-14
 
+> ## 🔴 NEW 2026-08-20 ~08:4x — Secuura: does Stuart's "$5000 Founders credits live"
+> actually move the 6 Sep expiry? (portal-only check, ~2 min, YOUR eyes)
+> Stuart posted on KS-601 (08-19 00:58Z, with screenshot): "Founder credits are live
+> ($5000) so good to go." **A new grant does not by itself move the existing credit's
+> 6 Sep expiry** — and 6 Sep has been the only dated clock on Kintsugi. The credits
+> API 404s for the scoped SP (verified 08-19), so only the portal billing view can
+> answer: do the $5000 credits REPLACE/extend the expiring grant, or sit alongside
+> it? **Ask: one look at the billing view.** Until you rule, every record keeps the
+> 6 Sep clock standing — s50 flagged it precisely so the screenshot does not silently
+> read as "the clock moved."
+
+> ## ℹ️ PATTERN FYI 2026-08-20 (extends the #723/#724 item below): s50 found P3 was
+> already ON DEMO (#666 merged 08-12, shipped with the 08-14 discharge) while KS-584's
+> "never against demo mid-development" hold read otherwise. Third instance of team
+> holds being read differently by different hands — one shared rule at the CI cost
+> conversation would close the class.
+
 > ## ✅ DONE 2026-08-20 ~08:1x — Kam SENT the re-issue same hour ("email sent").
 > Landed in ALL SIX inboxes (HTTP 200 by Message-ID each), signature verified
 > (spf/dkim/dmarc all pass over me.com), body byte-matches the draft (2382/2382).
