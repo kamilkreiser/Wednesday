@@ -29,7 +29,20 @@ updated: 2026-08-20
   OLDEST comments — always `first:50` + client-side sort.**
 
 **Open / next:**
-- **KS-256 re-review — Peter's explicit ask ("the only thing genuinely blocking").**
+- **s50 LIVE on Kintsugi Stage C** (launched 2026-08-20 ~08:3x on Kam's recorded
+  go): stack + own wallet on-box + Caddy on kintsugi.secuura.net + KS-584 P3 +
+  dev-ps origins + Stuart via KS-601. Demo untouched, no new spend.
+- **KS-256 re-review DONE (s49, 1.0):** verdict ready pending CI + Kam; PR-body
+  ack-wording fix requested (audit trail claimed a ruling nobody issued);
+  baseline union under-covers (third-run control: 18/91) + gate is ANDed.
+- **KS-665 items 1/3/4 shipped** (two branches pushed, no PR); item 2 (132 path
+  params) + PERSON_FIELDS class question + webhook decision carry to the next
+  board session; re-base when #568 lands, drop chore(deps) when KS-664 lands.
+- 🔴 **Repo-wide PUSH wall until KS-664 lands** (preflight fails every pusher on
+  the deepmerge-ts advisory; fix branch is BEHIND develop and reverts #723/#724
+  if merged wholesale — warning on the ticket).
+- ~~KS-256 re-review — Peter's explicit ask ("the only thing genuinely blocking.")~~
+  **DONE 2026-08-20, see above.**
   Both s47 blockers CLEARED 08-19 (documentUuid fix pushed, all services tsc clean;
   PII checkbox with evidence); 8/10 review points closed; our ack condition built
   (schemathesis-baseline.json, 97 pairs, gate enforced). Head `867b25728`. Merge
