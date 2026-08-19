@@ -3,10 +3,30 @@ client: Secuura
 project: Blockchain
 path: /Volumes/DevMASTER/!CODING/Secuura/Blockchain
 status: active
-updated: 2026-08-17
+updated: 2026-08-19
 ---
 
 # Secuura / Blockchain (Platform K)
+
+**Last sessions (2026-08-19, s47 + s48, both 1.0):**
+- **s48: 🎉 KINTSUGI IS UP** — `secuura02-kintsugi.southeastasia.cloudapp.azure.com`
+  (20.198.226.148), D2ps_v6 **zone 1** (zone 3 sub-restricted), 128 GiB, USD
+  **77.05/mo list** (Kam-authorised). NSG pre-built at create: 22 from
+  157.211.46.94/32 only · 80/443 open · deny-all. **Stage C NOT started** (own
+  wallet on-box is absolute per KS-535; Blockfrost own-key rec pending; stack +
+  Caddy + KS-584 P3 deploy queued). Plan defect on record: §3's `--image
+  Ubuntu2404` is x64 — ARM64 image string required (KS-601 comment). KS-601 → In
+  Progress. 🔴 Demo NSG has SSH open to 0.0.0.0/0 → Kam's queue. Wiring settled:
+  **dev-ps consumes Kintsugi's API (Stuart wires it), uat-ps stays on demo's** —
+  next brief carries dev-ps into Kintsugi's allowed origins + tell Stuart when up.
+- **s47: KS-256/PR #568 review done** (comment d94fc204): merge NOT YET — pushed
+  head fails originate tsc (Peter's fix uncommitted) + PII checkbox unticked;
+  ack rec = per-PR yes, standing rule needs a schemathesis-baseline.json; "Demo
+  Issuer" in all 16 `address` fields (E5 certifies it). Kam messaged Peter.
+- **CI still dead** (org Actions money; discussion date ambiguous "Wed 08-20").
+  Merge order on return: #721 → #720 → #718, then #568 on Kam sign-off.
+- **Instrument rule, confirmed ×2 on 08-19: Linear `comments(last:N)` returns the
+  OLDEST comments — always `first:50` + client-side sort.**
 
 **Last session (2026-08-17, s39):** Boot + triage only — Kam launched the session himself and
 wrapped it before confirming the queue, so **nothing on your s39 brief was executed**. `develop`

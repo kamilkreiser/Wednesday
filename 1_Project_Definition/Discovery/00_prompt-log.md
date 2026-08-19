@@ -1000,3 +1000,12 @@ date, pod-leads, Amplify fallback, HPSM-29) wait for after the ink. Queue re-lab
 team discussion Wednesday 2026-08-20 (cost-sharing — he should not pay alone); standing
 overnight order: continue CI-independent work on Secuura + HPSM. Secuura leg 6 launched
 no-merge; HPSM s26 already running. Good-night ritual executed.
+
+---
+**2026-08-19 ~11:0x (terminal):** "Yes, go ahead with Stage B" — Kam's explicit
+recurring-spend authorisation for Kintsugi Stage B (KS-601, Option B
+Standard_D2ps_v6 + 128 GiB, ~USD 76/mo list; he had confirmed "77 is fine"
+minutes earlier in chat). Preceded by both recorded gates falling this morning:
+Stuart's KS-584 verification confirmation (comment 00:54Z) and his KS-601
+"$5000 Founders credits live" (00:58Z). Used as the money-class authorisation
+in the s48 Stage B provisioning brief.

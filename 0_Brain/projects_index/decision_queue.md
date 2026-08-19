@@ -1,5 +1,16 @@
 # Kam decision sitting — 2026-08-14
 
+> ## 🔴 NEW 2026-08-19 ~11:1x — Secuura/Blockchain: the DEMO VM's SSH is open to the
+> world (MEDIUM, cheap fix)
+> Found by s48 while looking for a port-22 precedent for Kintsugi: `secuura02-demo-vmNSG`
+> rule `default-allow-ssh` reads `dstPort=22 src=*` — **SSH on the internet-facing demo VM
+> accepts connections from 0.0.0.0/0 today** (key-auth still required; this is exposure,
+> not breach). Kintsugi was deliberately NOT built that way (22 scoped to a /32, recorded
+> on KS-601). **Ask: authorise tightening demo's rule to the same recorded source set**
+> (one `az network nsg rule update`, reversible, ~2 min) — demo-affecting config, so your
+> call per never-touch-demo-unprompted. Recommendation: yes, align it with Kintsugi's
+> posture once Peter's and Stuart's source IPs are on KS-601 (so nobody gets locked out).
+
 > ## ✅ RULED 2026-08-17 20:2x (Kam, verbatim in prompt-log): CI cause CONFIRMED — "github is
 > out of money. I need to discuss this with the team on Wednesday as I should not be the one
 > paying for it all. continue with what you can without this on Secuura and HPSM."
