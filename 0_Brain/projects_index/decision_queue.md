@@ -1,6 +1,15 @@
 # Kam decision sitting — 2026-08-14
 
-> ## 🔴 NEW 2026-08-20 ~07:5x — WED/fleet: re-issue the v1.3 delegation grant to the
+> ## ✅ DONE 2026-08-20 ~08:1x — Kam SENT the re-issue same hour ("email sent").
+> Landed in ALL SIX inboxes (HTTP 200 by Message-ID each), signature verified
+> (spf/dkim/dmarc all pass over me.com), body byte-matches the draft (2382/2382).
+> ⚠️ Subject reads "Team collaboration", not the drafted one — agents are pointed
+> at Message-ID `<096604C5-237F-4467-9ECF-B79F975FCB11@me.com>`, never the subject.
+> s49 notified + tapped; other agents get verify-and-retain in their next boot
+> briefs. STILL OPEN from the same block: identify `secure_abacus@agentmail.to`
+> (unknown inbox in the account, left off the recipients). Original ask below.
+>
+> ## (was) 🔴 NEW 2026-08-20 ~07:5x — WED/fleet: re-issue the v1.3 delegation grant to the
 > per-project inboxes (needs YOUR signed send, ~5 min)
 > s49 could not re-verify your v1.3 grant at source: the signed mail lives only in
 > `coagent@` (the shared bus), and migrated projects' inbox-scoped keys 404 there **by
