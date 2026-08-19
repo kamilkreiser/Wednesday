@@ -1043,3 +1043,12 @@ spend (e.g. a paid Blockfrost tier) still pauses per money class.)*
 project for Kintsugi, agent-created with secuura-blockchain@agentmail.to as the
 login. Free tier only — any paid-tier requirement still pauses. Relayed to s50
 mid-session for real-mode cutover + faucet funding + §4 acceptance.)*
+
+## 2026-08-20 (~09:2x, terminal)
+
+> done, magic link should be with the agent now
+
+*(Kam completed the Blockfrost CAPTCHA screen per Option 1. Link presence
+verified in secuura-blockchain@ (23:19:05Z, headers only — body never opened by
+me); agent tapped first (link expiry), confirmation mail behind it. Real-mode
+cutover now in the agent's hands.)*
