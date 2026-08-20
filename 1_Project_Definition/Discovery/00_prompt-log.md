@@ -1098,3 +1098,11 @@ that is what he means by "dev chain," it is minutes whenever he says go.
 > use kintsugi's own blockfrost project
 
 *(Done with it: s53 launched — credential switch to kintsugi-dev-preview + real-mode cutover + §4, plus the staged KS-670 caller hunt, health-check defect work, KS-669 reconcile. Wording coincides with ghost instance 18 — accepted on CHANNEL provenance: arrived via Kam's own prompt, matching my prior recommendation; noted per the 08-07 echo lesson. KS-670's demo-quota half remains OPEN on his queue.)*
+
+## 2026-08-20 ~20:4x — Kintsugi name ratified + Peter/Stuart WhatsApp relay
+> keep the kintsugi name as is  and look at the following message from Peter - [20/8/2026, 8:38:03 pm] ~ Douglas Peter: Hi Kam,
+> https://github.com/Secuura/Distributed_Secuura/pull/568 updated. (KS-256)
+> [20/8/2026, 8:39:06 pm] Kam: Thank you. I will look into it tomorrow
+> [20/8/2026, 8:40:20 pm] Stuart: @Kam Dev-ps and Kintsugi are connected ... users are sync'd (ing) and document anchoring on simple smoke testing, but more involved testing tomorrow !
+
+*(Done with it: naming ratification recorded (board comment rides the next Secuura session); #568-updated staged for Kam's tomorrow review + next-session verification; ALERT raised to Kam — Stuart is smoke-testing anchoring against a REAL-mode box with an UNFUNDED wallet (s53's recorded risk, now live): anchor writes fail deterministically until the faucet minute; recommended funding tonight before his "more involved testing tomorrow", Stuart-reply draft offered.)*
