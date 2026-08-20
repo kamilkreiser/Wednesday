@@ -38,14 +38,23 @@ supplies/security/webHook), needs FW ≥ 6.38. HPSM 3.14.1 has no REST API in
 product docs — Kam's API ask is evidence-backed. Findings note in
 Document_Pass.
 
-**Open / next:**
-- **Kam's big three (they gate any relaunch):** clinic date · the HP schedule
-  conversation (§7 expired calendar + §6 relief one-pager filed) · K5 scope.
-- HPSM-21 (Backlog, retitled): [SIGN-OFF ~08-25/28] HP asks register — Group C
-  corrections; Kam prunes, only he sends anything to HP.
-- Signature window ~2026-08-25→28; post-signature queue leads with O1
-  (Secure Score / Defender export path — the Compliance Manager read-API premise
-  is dead, inverted favourably).
+**Open / next (refreshed 2026-08-20, s28 scored 1.0 — pre-signature drafting sprint done):**
+- **For Kam (new, from s28):** the ONE-ASK clause-pack alignment (CT §18 already
+  holds the six missing clauses in contractual voice — ask HP to align, not to
+  concede) · §4.2 score-change design law (rescore may PROPOSE, human ACCEPTS;
+  an auto-updating score is out of MVP scope by the SOW's own words) · s6
+  claims narrowed: press P02 (15–18d overdue) + P05 only; P01/P03/P04 are
+  JOINT — which makes the clinic the delivery vehicle for two overdue
+  prerequisites · **M0 (A$187,500) cannot be accepted on signing day** — §7.1
+  accepts on "named owners" (=P02, furthest overdue) · W5 deemed-acceptance
+  drafting must ride WITH R2/R3.
+- **Kam's big three unchanged:** clinic date · HP schedule conversation · K5
+  scope (sharpened: ~2.5 MB now untracked incl. every signing-room artifact).
+- Drafted and waiting on disk (FOR-DISCUSSION): redline pack (HPSM-35) ·
+  warranty retrofit draft (HPSM-32) · weekly-status instrument w/ real W0
+  (HPSM-19) · O1 readiness design · HPSM-39 continuity addendum (tier ranking
+  inverts; 2027-04-14 cliff lands inside HPSM-32's uncovered window).
+- Signature window ~2026-08-25→28.
 - Locked docs still need Kam/HP: `OXPD/Steves Readme Notes.docx` password ·
   MIP-locked WJA guides.
 
