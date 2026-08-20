@@ -29,9 +29,17 @@ updated: 2026-08-20
   OLDEST comments — always `first:50` + client-side sort.**
 
 **Open / next:**
-- **s50 LIVE on Kintsugi Stage C** (launched 2026-08-20 ~08:3x on Kam's recorded
-  go): stack + own wallet on-box + Caddy on kintsugi.secuura.net + KS-584 P3 +
-  dev-ps origins + Stuart via KS-601. Demo untouched, no new spend.
+- 🎉 **KINTSUGI LIVE (s50 wrapped 1.0, 2026-08-20):** https://kintsugi.secuura.net —
+  31/31 healthy, real LE cert, KS-584 P3 verified, unique creds applied, Stuart's
+  wiring READY (CORS proven; API base https://kintsugi.secuura.net/api; caveats
+  on KS-601). **Anchoring = MOCK, HELD by owner decision** ("dev chain until
+  closer to clients"); Blockfrost key parked, cutover = minutes on Kam's word.
+- **Next Secuura session's brief carries:** file the compose-findings ticket
+  (ALLOW_DEFAULT_SEED_PASSWORDS default-true + 11 unforwarded rotation vars —
+  fleet-wide, evidence in KS-601 comment 4ada1e3a) · KS-667 owner routing
+  (DR-path: demo fine by accident of history) · Caddyfile + compose override
+  into the repo when KS-664's push wall clears · guardian/queue absent on
+  Kintsugi vs demo — deliberate or gap?
 - **KS-256 re-review DONE (s49, 1.0):** verdict ready pending CI + Kam; PR-body
   ack-wording fix requested (audit trail claimed a ruling nobody issued);
   baseline union under-covers (third-run control: 18/91) + gate is ANDed.
