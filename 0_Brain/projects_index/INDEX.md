@@ -187,6 +187,24 @@ open since 07-01) + KS-489 (lucid triple-pin) authorised, s37 precedent · KS-65
 §4.2 object-shaped exclusion; HPSM-37/38/39 their-claim). 🔴 KAM SIGNS TUE 08-18 MORNING; his
 20:25 ruling: sign-off only, nothing rides into the room; post-signature queue block current.
 
+**Refreshed 2026-08-21 ~09:5x (Friday morning respawn — the 06:00 wake found the
+overnight session live; this is the fresh session).** Send path RESTORED (05:30
+shift-change mail + handover both landed 19:30/19:31Z). Sweep (controls on every
+count): **Secuura 150 work queue / 47 unstarted+started** — morning movement:
+Peter squashed #568 to `c114ceddd` (sign-off re-pin requested, his KS-256
+comment 10:36Z) · KS-672..675 filed-and-canceled overnight · KS-480/136
+updatedAt 09:26 AEST no-comment (likely Stuart's dev-ps↔Kintsugi sync). 🔴
+**Kintsugi wallet STILL UNFUNDED, real-mode, Stuart testing anchoring today —
+re-surfaced to Kam first thing (chat + voice).** **NexusAI 52 open (21/14/9/6/2)**
+unchanged; **Vision 0 open, control passed** (total 64 all Done); HPSM parked on
+Kam's big three. **Launched under the standing grant: Secuura s54 (%2)** — PR
+#729 review (Peter's ask via Kam 09:47, stack-slot/KS-666 work + the two
+bash-4-on-macOS scripts he names as ours) → #568 re-pin → KS-601 name-ratification
+comment → KS-669 reconcile → KS-665 post-squash; **NexusAI (%3)** — the seven
+Release Ready dispositions (all seven fresh-read Release Ready today; RD-76 still
+To Do). Both briefs gated + verified at destination (23:50:37Z / 23:51:31Z)
+BEFORE launch; send → verify → launch as separate actions.
+
 **Refreshed 2026-08-20 06:1x (Thursday 06:00 scheduled wake).** 🔴 **FLEET MAIL SEND
 STILL DOWN** (boot probe: HTTP 403 message_rejected, "Sending paused for this account…
 check the inbox of the email address associated with your AWS account"; receive alive;
