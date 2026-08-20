@@ -1076,3 +1076,10 @@ that is what he means by "dev chain," it is minutes whenever he says go.
 > With regards to Secura, Stuart and I will be meeting early next week to discuss a new flow which adopts a manual merge. Once everyone, or Peter, has approved and tested various changes, this will remove the need for GitHub payment. Take me through the process for GitHub on Nexus AI and give the go-ahead for HPSM to move on with the next components. I'm still waiting on the approval to come through, but we might as well do what we can to get ahead of the timeline. I have connected TailScale on my laptop and it's working. Mind you, it's fairly slow but I'll continue to test throughout the day.
 
 *(Done with it: manual-merge premise recorded — CI-return merge order may be superseded, next-week meeting is the decision point; NexusAI gh walkthrough given after verifying preconditions; HPSM session launched on the next readiness components with pre-signature boundaries held; Tailscale slowness diagnosed via `tailscale status` — see daily note.)*
+
+## 2026-08-20 ~11:5x–12:0x — network diagnosis confirmed; NexusAI gh done; start collaborating (dictated, three messages)
+> I switched networks.  my problem with not seeing text and slowness was due to cellular network speed.  Its better over wifi.  I will test from a different location.  take me through nexus and I will continue with other work after
+> I opened up the agent and did the GitHub.
+> I closed the other terminal for Nexus, so please start collaborating with the agent now.
+
+*(Done with it: gh auth verified kamilDatasec with repo/workflow scopes — K2 CLEARED; his agent session filed RD-104 (gh keychain vs per-project store) — leak path measured and narrowed by me (gh api refuses w/o hosts.yml; gh auth token leaks from any config dir, rc-proven); NexusAI launched in the cockpit on RD-104 + board re-derivation.)*
