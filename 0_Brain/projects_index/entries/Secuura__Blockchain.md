@@ -34,12 +34,17 @@ updated: 2026-08-20
   wiring READY (CORS proven; API base https://kintsugi.secuura.net/api; caveats
   on KS-601). **Anchoring = MOCK, HELD by owner decision** ("dev chain until
   closer to clients"); Blockfrost key parked, cutover = minutes on Kam's word.
-- **Next Secuura session's brief carries:** file the compose-findings ticket
-  (ALLOW_DEFAULT_SEED_PASSWORDS default-true + 11 unforwarded rotation vars —
-  fleet-wide, evidence in KS-601 comment 4ada1e3a) · KS-667 owner routing
-  (DR-path: demo fine by accident of history) · Caddyfile + compose override
-  into the repo when KS-664's push wall clears · guardian/queue absent on
-  Kintsugi vs demo — deliberate or gap?
+- **Next Secuura session's brief LEADS with the KS-667 rescoped fix (s51's
+  inversion diagnosis, its 02:22Z mail is the provenance):** remove the
+  api-gateway runtime-DDL vault_entries block (key-vault shape, ZERO
+  consumers, wins the CREATE-IF-NOT-EXISTS race) · make 033 self-sufficient
+  (create 003's shape when absent) · non-destructive repair migration for
+  existing envs (add token, id default, relax unused NOT NULLs — NEVER a
+  drop; demo row count from the granted read decides in-place vs recreate).
+  Severity: vault tokenise/detokenise/rotate non-functional on EVERY measured
+  env, not just fresh deploys. Push-only while CI dead.
+  (s51 items done: KS-668 filed · KS-667 assigned+diagnosed · KS-665
+  continuation · guardian question — see wrap when scored.)
 - **KS-256 re-review DONE (s49, 1.0):** verdict ready pending CI + Kam; PR-body
   ack-wording fix requested (audit trail claimed a ruling nobody issued);
   baseline union under-covers (third-run control: 18/91) + gate is ANDed.
