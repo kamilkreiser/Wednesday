@@ -34,7 +34,18 @@ updated: 2026-08-20
   wiring READY (CORS proven; API base https://kintsugi.secuura.net/api; caveats
   on KS-601). **Anchoring = MOCK, HELD by owner decision** ("dev chain until
   closer to clients"); Blockfrost key parked, cutover = minutes on Kam's word.
-- **Next Secuura session's brief LEADS with the KS-667 rescoped fix (s51's
+- **s52 (scored 1.0, 2026-08-20 ~14:0x): #725 MERGED (for-sale domain gone,
+  push wall LIFTED, Peter's authorship preserved) · KS-667 FIXED (PR #726, In
+  Review, no-merge — tokenisation works for the first time) · #568 sign-off
+  recorded · Kintsugi cutover BLOCKED on demo's dead Blockfrost quota →
+  reverted to honest mock · 🔴 KS-670 Urgent: demo verification DOWN 6 DAYS.**
+- **Kam (new): Kintsugi credential** (rec: own kintsugi-dev-preview, free) ·
+  **KS-670 quota** (wait/re-point/UPGRADE=spend) — with the ~6.7/min caller
+  hunt + healthy-while-402 health-check defect staged as next-session work.
+- Next session also: KS-669 board-state reconciling comment (automation
+  trails the merge) · #726 merge decision on CI's return/manual-merge flow.
+- ~~Next Secuura session's brief LEADS with the KS-667 rescoped fix~~ (DONE
+  s52; historical block follows) (s51's
   inversion diagnosis, its 02:22Z mail is the provenance):** remove the
   api-gateway runtime-DDL vault_entries block (key-vault shape, ZERO
   consumers, wins the CREATE-IF-NOT-EXISTS race) · make 033 self-sufficient
