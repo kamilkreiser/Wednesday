@@ -54,6 +54,14 @@ Document_Pass.
   warranty retrofit draft (HPSM-32) · weekly-status instrument w/ real W0
   (HPSM-19) · O1 readiness design · HPSM-39 continuity addendum (tier ranking
   inverts; 2027-04-14 cliff lands inside HPSM-32's uncovered window).
+- **s29 (scored 1.0, 2026-08-20 midday):** K5 LOCAL HALF DONE (root repo, 98
+  tracked, no remote — **HPSM-40: Kam's 2-minute gh auth creates
+  datasecau/HPSM-analysis private**) · rulings 1(b)/2(b) on the board · D-27
+  (proposal queue = only path a score moves; WHO accepts = the one open
+  sub-question) + D-28 (observations pinned at scoring time — completes D-19)
+  into D01, 47 slots · weekly ledger = PRIMARY control while R1 deferred (red
+  risk) · **clinic date is now the ONLY W0 item on Kam's desk** · fleet-wide
+  stale-tenant launcher defect routed to Wednesday/Kam.
 - Signature window ~2026-08-25→28.
 - Locked docs still need Kam/HP: `OXPD/Steves Readme Notes.docx` password ·
   MIP-locked WJA guides.
