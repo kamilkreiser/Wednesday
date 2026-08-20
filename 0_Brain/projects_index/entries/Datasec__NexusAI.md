@@ -16,12 +16,18 @@ rides along" cannot be satisfied from `main`. Separately the local jest suite ha
 silently dead — devDependencies pruned, and a piped `npm test` reports the pipe's exit
 status, so it read exit 0 over zero tests. Repaired (`npm ci`, 183/183), filed as RD-100.
 
-**Open / next:**
-- [ ] **K2 — Kam's `gh auth login` (RD-74)** gates the resume; stood down since 08-18.
-- [ ] RD-62's live half — the demo threshold mis-set is **HELD for Kam** (decision queue).
-- [ ] On relaunch: re-derive the queue from the board (57 open verified 2026-08-20:
-      22 To Do · 16 Release Ready · 12 Testing · 5 On Hold · 2 In Progress).
-- [ ] Kam's desk, unchanged: RD-99 · `.gitleaks.toml` rescope of RD-55 · RD-93 · RD-76.
+**Open / next (refreshed 2026-08-20 midday — K2 CLEARED, session scored 1.0):**
+- **Next session's pre-approved lead:** disposition the seven remaining Release
+  Ready (RD-94 · RD-91 · RD-82 · RD-77 · RD-71 · RD-61 · RD-58) — no deploy needed.
+- **Kam's desk:** RD-104 gh-storage policy (neither option closes the no-hosts
+  fallback while a keychain entry survives; clearing the keychain = irreversible,
+  signature-class) · **RD-76 now priced: FOUR finished tickets parked behind the
+  SSO block (RD-56/67/68/89)** · RD-62 threshold · RD-99 · RD-55 rescope ·
+  RD-93 · RD-103.
+- Board 52 open (21 To Do · 14 Release Ready · 9 Testing · 6 On Hold · 2 In
+  Progress); five closed today with controls; RD-105 new (orphan scripts).
+- RD-101/RD-100/RD-102 Release Ready (gate proven red on run 32323894047 —
+  labelled probe).
 
 **Completed (moved off the dashboard 2026-08-20, verified in HISTORY.md sessions
 29–30):** both asks ANSWERED (RD-94 rode along); the deploy SHIPPED — demo live on
