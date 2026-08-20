@@ -1071,3 +1071,8 @@ clients." Clarification offered without pressing: the staged cutover targets
 preview TESTNET (test coins, no value — demo's own chain), never mainnet; if
 that is what he means by "dev chain," it is minutes whenever he says go.
 §4 recharacterised from deferred-pending-funding to HELD-BY-DECISION.)*
+
+## 2026-08-20 ~11:4x — Secuura manual-merge flow + NexusAI gh + HPSM go-ahead + Tailscale laptop (dictated)
+> With regards to Secura, Stuart and I will be meeting early next week to discuss a new flow which adopts a manual merge. Once everyone, or Peter, has approved and tested various changes, this will remove the need for GitHub payment. Take me through the process for GitHub on Nexus AI and give the go-ahead for HPSM to move on with the next components. I'm still waiting on the approval to come through, but we might as well do what we can to get ahead of the timeline. I have connected TailScale on my laptop and it's working. Mind you, it's fairly slow but I'll continue to test throughout the day.
+
+*(Done with it: manual-merge premise recorded — CI-return merge order may be superseded, next-week meeting is the decision point; NexusAI gh walkthrough given after verifying preconditions; HPSM session launched on the next readiness components with pre-signature boundaries held; Tailscale slowness diagnosed via `tailscale status` — see daily note.)*
