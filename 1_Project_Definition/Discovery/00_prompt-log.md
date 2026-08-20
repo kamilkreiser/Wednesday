@@ -1083,3 +1083,8 @@ that is what he means by "dev chain," it is minutes whenever he says go.
 > I closed the other terminal for Nexus, so please start collaborating with the agent now.
 
 *(Done with it: gh auth verified kamilDatasec with repo/workflow scopes — K2 CLEARED; his agent session filed RD-104 (gh keychain vs per-project store) — leak path measured and narrowed by me (gh api refuses w/o hosts.yml; gh auth token leaks from any config dir, rc-proven); NexusAI launched in the cockpit on RD-104 + board re-derivation.)*
+
+## 2026-08-20 ~12:1x — KS-667 routing ruled
+> assign KS-667 to the agent stream
+
+*(Done with it: relayed to s51 by gated ANSWER — assign to kksecura, fix queued behind the current brief items / next session's lead; recorded on the decision queue as ruled.)*
