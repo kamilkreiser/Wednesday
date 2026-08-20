@@ -1060,3 +1060,14 @@ cutover now in the agent's hands.)*
 *(Answers the access-vs-sharing question implicitly: his own remote access.
 Tailscale approved for the Studio; laptop joins after. Public dashboard ruled
 out per the assessment.)*
+
+## 2026-08-20 (~11:1x, terminal)
+
+> we are not yet ready for onchain.  we will use the dev chain until we are closer to clients
+
+*(Read conservatively: the faucet/real-mode cutover is STOOD DOWN by owner
+decision — mock anchoring is Kintsugi's sanctioned state until "closer to
+clients." Clarification offered without pressing: the staged cutover targets
+preview TESTNET (test coins, no value — demo's own chain), never mainnet; if
+that is what he means by "dev chain," it is minutes whenever he says go.
+§4 recharacterised from deferred-pending-funding to HELD-BY-DECISION.)*
