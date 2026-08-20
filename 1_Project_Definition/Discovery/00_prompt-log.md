@@ -1093,3 +1093,8 @@ that is what he means by "dev chain," it is minutes whenever he says go.
 > 1) b 2)b 3)we start working in the background as HP will take time signing.  4)a 5)a 6)a 7)deploy 8)a 9)will look but not today 10)wait 11)will review 12)use same credentials as demo against testnet 13-15 will action shortly. 16)I need more detail from you 17)tailscale will be case by case. I will ask or turn it on when I need.  Keep it dormant in the meantime.  18)deciding which entity.  will complete when that is ready
 
 *(Done with it: rulings recorded per item; s52 Secuura launched on KS-669 exception + KS-667 fix + #568 sign-off record + Kintsugi real-mode w/ demo Blockfrost creds (his 12 overrides my scoping ruling — recorded); HPSM s29 on K5 repo init + ruling records; Tailscale made dormant; WED-118..122 detail note delivered; ONE clarifier back on item 7 ("deploy").)*
+
+## 2026-08-20 ~19:52 AEST — Kintsugi credential ruled (time CORRECTED: I first wrote ~14:1x from narrative continuation without reading the clock — ledger w=17, self-caught within minutes via an 'impossible' board timestamp)
+> use kintsugi's own blockfrost project
+
+*(Done with it: s53 launched — credential switch to kintsugi-dev-preview + real-mode cutover + §4, plus the staged KS-670 caller hunt, health-check defect work, KS-669 reconcile. Wording coincides with ghost instance 18 — accepted on CHANNEL provenance: arrived via Kam's own prompt, matching my prior recommendation; noted per the 08-07 echo lesson. KS-670's demo-quota half remains OPEN on his queue.)*
