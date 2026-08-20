@@ -39,7 +39,17 @@ updated: 2026-08-20
   Review, no-merge — tokenisation works for the first time) · #568 sign-off
   recorded · Kintsugi cutover BLOCKED on demo's dead Blockfrost quota →
   reverted to honest mock · 🔴 KS-670 Urgent: demo verification DOWN 6 DAYS.**
-- **Kam (new): Kintsugi credential** (rec: own kintsugi-dev-preview, free) ·
+- **s53 (scored 1.0, evening): KINTSUGI REAL on its own Blockfrost project**
+  (key validated then moved by stdin; up -d not restart; KS-535 at address
+  level) · **KS-670 caller = 52.74.18.212** (authenticated, 99.99% of demo
+  traffic; allowance-arithmetic unresolved — pre-spent or period wrong) ·
+  KS-671 filed+fixed (#728 unmerged; passive check — no budget-consuming
+  probe) · naming DECIDED-BY-DEFAULT surfaced (cert 08-19; Kam to ratify) ·
+  real+unfunded = KS-535-class risk recorded on KS-601.
+- **Kam (s53 adds):** fund the wallet (1 min, address on KS-601) · ratify
+  kintsugi.secuura.net · is 52.74.18.212 a Platform S host? (decides KS-670's
+  fix) · KS-635 audit baseline expires 08-31 (blocks every push).
+- ~~Kintsugi credential~~ RULED + EXECUTED (own kintsugi-dev-preview) ·
   **KS-670 quota** (wait/re-point/UPGRADE=spend) — with the ~6.7/min caller
   hunt + healthy-while-402 health-check defect staged as next-session work.
 - Next session also: KS-669 board-state reconciling comment (automation
