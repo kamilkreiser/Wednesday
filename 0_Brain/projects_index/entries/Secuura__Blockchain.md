@@ -43,8 +43,15 @@ updated: 2026-08-20
   drop; demo row count from the granted read decides in-place vs recreate).
   Severity: vault tokenise/detokenise/rotate non-functional on EVERY measured
   env, not just fresh deploys. Push-only while CI dead.
-  (s51 items done: KS-668 filed · KS-667 assigned+diagnosed · KS-665
-  continuation · guardian question — see wrap when scored.)
+  (s51 WRAPPED, scored 1.0: KS-668 + KS-669 filed · KS-667 Urgent, assigned,
+  demo answered (token ABSENT, 0 rows) · KS-665 42/132 pushed · guardian
+  proven deliberate · Kintsugi files committed 590acdade · vault pull-block
+  CLEARED at 20b1a26.)
+- **Kam (new): KS-669's one-line exports.secuura.com fix** — domain FOR SALE
+  in the published spec; an exception to the no-merge hold is his call, or it
+  waits for CI's return. KS-665 remainder: 90 path params/63 families + 57
+  query params; re-base on #568 merge; drop chore(deps) cherry-pick ×3 when
+  KS-664 lands.
 - **KS-256 re-review DONE (s49, 1.0):** verdict ready pending CI + Kam; PR-body
   ack-wording fix requested (audit trail claimed a ruling nobody issued);
   baseline union under-covers (third-run control: 18/91) + gate is ANDed.
