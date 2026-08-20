@@ -176,24 +176,27 @@ if [ -f "$LCONF" ]; then
   fi
 fi
 
-# ── Tailscale remote-access leg (added 2026-08-20, Kam's Tailscale commission) ──
-# The dashboard is reachable off-machine ONLY via tailscale serve. Warn-class:
-# local use is unaffected when it is down, but Kam's remote access silently
-# dies — and a stopped backend after a reboot is the expected failure mode.
+# ── Tailscale remote-access leg (added 2026-08-20; DORMANT-BY-DEFAULT per Kam
+# 2026-08-20 ruling 17: "case by case. I will ask or turn it on when I need.
+# Keep it dormant in the meantime."). Down is the EXPECTED state — report it
+# as ok/informational, never as a warning. Warn only on the half-states
+# (up without serve, or serve without 47787) which mean an activation was
+# started and not finished. To activate on Kam's ask:
+#   $TS_BIN up && $TS_BIN serve --bg --http=80 --set-path=/ http://127.0.0.1:47787
 TS_BIN="/Applications/Tailscale.app/Contents/MacOS/Tailscale"
 if [ -x "$TS_BIN" ]; then
   TS_STATE=$("$TS_BIN" status --json 2>/dev/null | python3 -c 'import json,sys; print(json.load(sys.stdin).get("BackendState",""))' 2>/dev/null)
   if [ "$TS_STATE" = "Running" ]; then
     if "$TS_BIN" serve status 2>/dev/null | grep -q "proxy http://127.0.0.1:47787"; then
-      ok "tailscale up + dashboard served on the tailnet"
+      ok "tailscale ACTIVE + dashboard served (Kam asked for it — make dormant again when he is done)"
     else
-      warn "tailscale up but NO serve config for 47787" "run: $TS_BIN serve --bg --http=80 --set-path=/ http://127.0.0.1:47787"
+      warn "tailscale up but NO serve config for 47787 — half-activated" "finish: $TS_BIN serve --bg --http=80 --set-path=/ http://127.0.0.1:47787   (or make dormant: $TS_BIN down)"
     fi
   else
-    warn "tailscale backend not Running (state: ${TS_STATE:-unknown})" "Kam's remote dashboard access is DOWN — run: $TS_BIN up"
+    ok "tailscale dormant (expected state per Kam 2026-08-20; activate on his ask only)"
   fi
 else
-  warn "Tailscale.app missing" "remote dashboard access unavailable on this machine — see PORTABILITY.md"
+  warn "Tailscale.app missing" "remote access unavailable on this machine — see PORTABILITY.md"
 fi
 
 echo

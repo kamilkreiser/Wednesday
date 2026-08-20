@@ -1088,3 +1088,8 @@ that is what he means by "dev chain," it is minutes whenever he says go.
 > assign KS-667 to the agent stream
 
 *(Done with it: relayed to s51 by gated ANSWER — assign to kksecura, fix queued behind the current brief items / next session's lead; recorded on the decision queue as ruled.)*
+
+## 2026-08-20 ~12:4x — the 18-item queue ruled in one message (verbatim)
+> 1) b 2)b 3)we start working in the background as HP will take time signing.  4)a 5)a 6)a 7)deploy 8)a 9)will look but not today 10)wait 11)will review 12)use same credentials as demo against testnet 13-15 will action shortly. 16)I need more detail from you 17)tailscale will be case by case. I will ask or turn it on when I need.  Keep it dormant in the meantime.  18)deciding which entity.  will complete when that is ready
+
+*(Done with it: rulings recorded per item; s52 Secuura launched on KS-669 exception + KS-667 fix + #568 sign-off record + Kintsugi real-mode w/ demo Blockfrost creds (his 12 overrides my scoping ruling — recorded); HPSM s29 on K5 repo init + ruling records; Tailscale made dormant; WED-118..122 detail note delivered; ONE clarifier back on item 7 ("deploy").)*
