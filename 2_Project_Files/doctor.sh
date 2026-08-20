@@ -176,6 +176,26 @@ if [ -f "$LCONF" ]; then
   fi
 fi
 
+# ── Tailscale remote-access leg (added 2026-08-20, Kam's Tailscale commission) ──
+# The dashboard is reachable off-machine ONLY via tailscale serve. Warn-class:
+# local use is unaffected when it is down, but Kam's remote access silently
+# dies — and a stopped backend after a reboot is the expected failure mode.
+TS_BIN="/Applications/Tailscale.app/Contents/MacOS/Tailscale"
+if [ -x "$TS_BIN" ]; then
+  TS_STATE=$("$TS_BIN" status --json 2>/dev/null | python3 -c 'import json,sys; print(json.load(sys.stdin).get("BackendState",""))' 2>/dev/null)
+  if [ "$TS_STATE" = "Running" ]; then
+    if "$TS_BIN" serve status 2>/dev/null | grep -q "proxy http://127.0.0.1:47787"; then
+      ok "tailscale up + dashboard served on the tailnet"
+    else
+      warn "tailscale up but NO serve config for 47787" "run: $TS_BIN serve --bg --http=80 --set-path=/ http://127.0.0.1:47787"
+    fi
+  else
+    warn "tailscale backend not Running (state: ${TS_STATE:-unknown})" "Kam's remote dashboard access is DOWN — run: $TS_BIN up"
+  fi
+else
+  warn "Tailscale.app missing" "remote dashboard access unavailable on this machine — see PORTABILITY.md"
+fi
+
 echo
 if [ "$HARD_FAIL" = "1" ]; then
   echo "PREFLIGHT: HARD FAILURES above — fix before relying on this machine."

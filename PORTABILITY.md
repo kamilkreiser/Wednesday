@@ -57,3 +57,20 @@ Keep this file updated whenever a new machine-local dependency appears.
     one-time "Allow Full Access" calendar prompt approved on each machine —
     granted on the laptop 2026-08-05; the Studio will prompt on first run.
     doctor.sh warns if the probe can't read calendars.
+
+## Tailscale remote dashboard access (added 2026-08-20)
+- **Machine-local:** Tailscale.app (v1.98.2 at install), its login state
+  (Kam's Apple-ID private-relay identity, tailnet `tail99c01e.ts.net`), and
+  the serve config (`--http=80 / → 127.0.0.1:47787`).
+- **New machine bring-up:** `brew install --cask tailscale` → open the app,
+  log into the SAME tailnet (Kam authenticates — identities float, never
+  assume) → `/Applications/Tailscale.app/Contents/MacOS/Tailscale serve --bg
+  --http=80 --set-path=/ http://127.0.0.1:47787`.
+- **Known limit:** the GUI-app variant starts at LOGIN, not boot — after a
+  reboot the dashboard is tailnet-unreachable until someone logs in (same
+  window as the WED-117 scheduler gap). doctor.sh warns when the backend is
+  not Running. Serve config itself persists across restarts (proven 2026-08-20
+  by a down/up cycle).
+- HTTP-not-HTTPS is deliberate for v1: traffic rides inside WireGuard; the
+  `tailscale serve` HTTPS-cert path hung on the tailnet's cert toggle
+  (admin-console setting) and can be upgraded later if Kam enables it.

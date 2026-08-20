@@ -1052,3 +1052,11 @@ mid-session for real-mode cutover + faucet funding + §4 acceptance.)*
 verified in secuura-blockchain@ (23:19:05Z, headers only — body never opened by
 me); agent tapped first (link expiry), confirmation mail behind it. Real-mode
 cutover now in the agent's hands.)*
+
+## 2026-08-20 (~10:1x, terminal)
+
+> ok.  lets set up tailscale.  Please install and set thing up on this mac.  Once ready, I will get my laptop
+
+*(Answers the access-vs-sharing question implicitly: his own remote access.
+Tailscale approved for the Studio; laptop joins after. Public dashboard ruled
+out per the assessment.)*
