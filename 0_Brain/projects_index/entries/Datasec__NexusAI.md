@@ -3,12 +3,34 @@ client: Datasec
 project: NexusAI
 path: /Volumes/DevMASTER/!CODING/Datasec/NexusAI
 status: active
-updated: 2026-08-21
+updated: 2026-08-22
 ---
 
 # Datasec / NexusAI
 
-**Last session (2026-08-21):** Swept the Release Ready pile 14 → 7 and
+**Last session (2026-08-22 morning, scored 1.0):** The security-gate sprint —
+RD-106/108/109 all fixed BEYOND their tickets (the briefed [:=] fix measured
+insufficient → quote-aware rules; RD-109's names derived from ARM's own
+securestring predicate found FIVE secret params where the ticket named two).
+RD-105 (18 orphans not 15; 13 deleted, 57→44 tracked scripts) + RD-103 done.
+Three lying instruments refused (ignore-path silent default · candidate-set-
+only cross-ref · whole-tree canary harness). Six filed: RD-108..113. Board
+44 → 50 open (new filings outpace closes — five sit in Testing). Five commits,
+origin/main 92ade28. Launcher turn-end line added (:315). No live credential
+anywhere; nothing signature-class.
+
+**Open / next:**
+- **RD-110 LEADS the next brief** (ruled): canary step in the gitleaks
+  workflow, assert by RuleID — three freshly-widened rules currently have no
+  regression guard.
+- RD-112 ruled DELETE next session (both-direction invocation check first).
+- RD-76 premise NARROWED: /api/health answers 200 unauthenticated — "SSO
+  blocks the demo" is about app pages, not every surface; next brief says
+  which parked tickets that unblocks, if any.
+- Kam's queue unchanged: RD-61 · RD-75 (NEW wording) · RD-15 · RD-107 tenant
+  · RD-76 itself.
+
+**Prior:** **Last session (2026-08-21):** Swept the Release Ready pile 14 → 7 and
 dispositioned all nine Testing tickets. Eleven closed, each with a control shown
 able to report the defect; two filed. **RD-89 recovered from its 08-20
 hand-back** — the auth wall gates the health blob, not the logs, so Container

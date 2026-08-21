@@ -70,5 +70,169 @@
   "status": "ruled",
   "ruled_choice": "delete",
   "ruled_ts": "2026-08-21T20:42:14.585997+10:00"
+ },
+ {
+  "id": "attio-attr-cap",
+  "client_project": "Datasec/ATTIO",
+  "title": "Attribute cap: hold at 27 or expand for templates",
+  "bluf": "Schema is 26+1 attrs vs the ≤25 target (both overages are your own rulings). Clearing all 12 blocked templates would need 16 MORE attrs (→42) — no cheap subset exists. The 12-of-12 blocker (reference_material) is NOT an attribute: it's collateral links, a content decision costing nothing.",
+  "default_action": "Hold at cap (a) — templates stay with FILL markers, target restated to 27",
+  "options": [
+   {
+    "key": "hold",
+    "label": "Hold at cap",
+    "detail": "fix reference_material as content, keep [[FILL]] markers, formally move target to 27"
+   },
+   {
+    "key": "all16",
+    "label": "Approve all 16",
+    "detail": "schema goes to 42, all templates clear"
+   },
+   {
+    "key": "named7",
+    "label": "Middle 7",
+    "detail": "schema 33, only 6 of 12 templates clear"
+   }
+  ],
+  "recommended": "hold",
+  "ts": "2026-08-21T21:29:32.557574+10:00",
+  "status": "open",
+  "ruled_choice": null,
+  "ruled_ts": null
+ },
+ {
+  "id": "attio-nfr-onhold",
+  "client_project": "Datasec/ATTIO",
+  "title": "nfr leads → which stage at migration",
+  "bluf": "53 real prod leads carry legacy stage nfr (figure re-verified: real but ~7 weeks old, from Vision history line 412; prod firewall blocks a fresh count — see the prod-DB card). Today this moves 2 synthetic cards; after migration it moves the 53.",
+  "default_action": "On hold (a)",
+  "options": [
+   {
+    "key": "onhold",
+    "label": "Map nfr → On hold",
+    "detail": "only terminal state claiming nothing commercially"
+   },
+   {
+    "key": "newstage",
+    "label": "Dedicated NFR stage",
+    "detail": "adds a stage to your pipeline vocabulary"
+   },
+   {
+    "key": "unstaged",
+    "label": "Leave for human triage",
+    "detail": "53 leads land unstaged at migration"
+   }
+  ],
+  "recommended": "onhold",
+  "ts": "2026-08-21T21:29:32.632031+10:00",
+  "status": "open",
+  "ruled_choice": null,
+  "ruled_ts": null
+ },
+ {
+  "id": "attio-security-pack",
+  "client_project": "Datasec/ATTIO",
+  "title": "Attio security pack — send the request (HARD BLOCK)",
+  "bluf": "The single gate between built and usable-with-real-data. Exact request drafted (SOC2 Type II · data residency incl. AU/EU · sub-processors · audit logs by plan · DPA/breach · deletion on exit) — goes to Attio sales/support since their trust page is JS-walled. Packs take days-to-weeks: sending now costs nothing and starts the clock. External comms = your send; the drafted text is in the ask-pack doc.",
+  "default_action": "No default possible — build stays synthetic until ruled",
+  "options": [
+   {
+    "key": "send",
+    "label": "Send the drafted request now",
+    "detail": "I hand you the ready-to-paste text"
+   },
+   {
+    "key": "publicok",
+    "label": "Rule public posture sufficient",
+    "detail": "faster, no contractual footing, no residency answer"
+   }
+  ],
+  "recommended": "send",
+  "ts": "2026-08-21T21:29:32.687676+10:00",
+  "status": "open",
+  "ruled_choice": null,
+  "ruled_ts": null
+ },
+ {
+  "id": "attio-prod-db",
+  "client_project": "Datasec/ATTIO",
+  "title": "Prod DB read access for migration prep",
+  "bluf": "Vision prod Postgres firewalls dev machines (your own no-standing-dev-IP ruling — deliberate). Cost today, measured: the 53-nfr count can't be refreshed, 3 of 16 stage values stay UNKNOWN, ATTIO-21 untestable.",
+  "default_action": "Defer (c) — nothing breaks, unknowns stay unknown until migration",
+  "options": [
+   {
+    "key": "bridge",
+    "label": "Read from inside Azure via the bridge",
+    "detail": "security posture unchanged AND it's the path production will use"
+   },
+   {
+    "key": "firewall",
+    "label": "Temporary one-machine firewall grant",
+    "detail": "fastest, briefly widens the posture"
+   },
+   {
+    "key": "defer",
+    "label": "Defer to migration day",
+    "detail": "survivable — unmapped stages THROW rather than silently bucket"
+   }
+  ],
+  "recommended": "bridge",
+  "ts": "2026-08-21T21:29:32.738476+10:00",
+  "status": "open",
+  "ruled_choice": null,
+  "ruled_ts": null
+ },
+ {
+  "id": "attio-rate-card",
+  "client_project": "Datasec/ATTIO",
+  "title": "Canonical rate card (HARD BLOCK — pricing)",
+  "bluf": "Two live rate cards disagree: Portal 1000/1500/200·30d vs QuickQuote 1400/2100/280·45d. HANDOVER names QuickQuote canonical and it is the newer ruling — but you never confirmed it in as many words, and this is the one item where a wrong guess sends a wrong number to a customer. No default will be applied.",
+  "default_action": "None — pricing is never defaulted; ATTIO-19 waits",
+  "options": [
+   {
+    "key": "quickquote",
+    "label": "Confirm QuickQuote's card",
+    "detail": "1400/2100/280 · 45d — the newer ruling"
+   },
+   {
+    "key": "portal",
+    "label": "Portal's card",
+    "detail": "1000/1500/200 · 30d"
+   }
+  ],
+  "recommended": "quickquote",
+  "ts": "2026-08-21T21:29:32.791842+10:00",
+  "status": "open",
+  "ruled_choice": null,
+  "ruled_ts": null
+ },
+ {
+  "id": "attio-agent-browser",
+  "client_project": "Datasec/ATTIO",
+  "title": "Agent browser access at its own seat",
+  "bluf": "Every no-API Attio change (reports, templates, sequences, views) hits the agent's permission wall — it's standing, not one-off. Tonight's deletion had to route through me.",
+  "default_action": "Route through Wednesday (b) — tonight's pattern continues",
+  "options": [
+   {
+    "key": "reads",
+    "label": "Clear for READS, Wednesday does WRITES",
+    "detail": "reading is the friction and it's safe; writes keep a second pair of eyes"
+   },
+   {
+    "key": "wednesday",
+    "label": "Everything routes through Wednesday",
+    "detail": "as tonight — works, slower"
+   },
+   {
+    "key": "full",
+    "label": "Clear fully for this project",
+    "detail": "fastest, least oversight on clicks"
+   }
+  ],
+  "recommended": "reads",
+  "ts": "2026-08-21T21:29:32.846149+10:00",
+  "status": "open",
+  "ruled_choice": null,
+  "ruled_ts": null
  }
 ]
