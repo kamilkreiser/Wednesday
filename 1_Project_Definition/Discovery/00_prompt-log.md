@@ -1127,3 +1127,18 @@ that is what he means by "dev chain," it is minutes whenever he says go.
 > 1) a 2)c 3)a 4)a (are there any other limitations that affect us?  if so, its not much for 1 license) 5)tell me what you need 6)please elaborate
 
 **Executed:** rulings 1(a) hosting/2(c) hybrid/3(a) Deal Type relayed to the live ATTIO session with money-class conditions + a tier-limits verification task feeding his Q4; Q5 answered with spaced dev-workspace steps; Q6 elaborated with a keep-while-building rec.
+
+## 2026-08-21 13:58 (dashboard chat)
+> Are all the workflows and sequences loaded? And can you create a daily workflow that checks whatever follow-up is required? Companies that haven't responded to or haven't been contacted for a while, and anyone with an upcoming renewal. Or anyone with an upcoming POC and flag these to do for the day.
+
+*Done with it:* answered the status question honestly (templates/sequences NOT loaded — ATTIO-16 In Progress, half gated on his ≤25 ruling, Attio has no template API so it is hand-entry). The daily follow-up digest taken as a new ATTIO commission — briefed to the ATTIO agent (ticket filed by the agent, bridge-hosted daily job, Attio tasks + morning-brief digest as the default surfaces, data gaps reported honestly).
+
+## 2026-08-21 14:00 (dashboard chat)
+> The main idea behind using this tool and integrating it with the existing version of Vision is to capture all the workflows, all the sequences, all the logic behind Vision. Please make sure that this is done and loaded into ATIO.
+
+*Done with it:* folded into the ATTIO s3 brief as the LEAD item — a Vision-logic completeness pass: capture everything capturable now + a traceability matrix (every Vision workflow/sequence/logic element → where it lives in Attio, or NOT-CAPTURED + what unblocks it), so "make sure it is done" is checkable rather than asserted. Honest constraint carried: templates/sequences have no API (hand-entry) and the field-curation half is gated on his ≤25 ruling — the matrix makes that ruling an informed one.
+
+## 2026-08-21 14:01 (dashboard chat)
+> Also, please create some standard reports such as deals at each stage, total deals in the pipeline, deals older than X. Look at standard sales reporting and apply this to the reports for ATIO.
+
+*Done with it:* added to the ATTIO s3 brief as queue item 3 — standard sales reporting pack (his three named reports + a researched standard set: pipeline value/velocity, conversion between stages, aging, win/loss when data exists), built where Attio's native reporting allows and via the bridge/digest where it does not, with plan-tier limits on native reports checked honestly.
