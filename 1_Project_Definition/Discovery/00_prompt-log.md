@@ -1210,3 +1210,8 @@ that is what he means by "dev chain," it is minutes whenever he says go.
 > Fantastic. Create a ticket that articulates everything and draft a simple message that I can send to Stuart through WhatsApp, and action everything necessary from our side.
 
 *Done with it:* WhatsApp draft delivered on the panel (simple, no-blame, three asks: his terminal-state fix · our API-flag check underway · the credential question). Secuura s60 briefed + launched: file the standoff ticket (full articulation, Stuart's agent credited), MEASURE whether K's status API exposes simulated machine-readably + confirm the create-vs-verify Blockfrost split in code, comment/link KS-670. Read-only demo, NOTHING MERGES.
+
+## 2026-08-21 20:14 (dashboard chat)
+> For future reference, it would be perfect for you to say "you should wait for the message until I get the ticket" and then draft a message only once the ticket is ready. I don't mind waiting, especially when you tell me an update I'm waiting for.
+
+*Done with it:* filed as [[0_Brain/learnings/2026-08-21_deliver-whole-or-say-wait]] + ledger w=1; acknowledged; the final Stuart draft now goes out ONLY when the KS number exists, complete.
