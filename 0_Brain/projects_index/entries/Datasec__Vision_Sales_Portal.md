@@ -3,34 +3,29 @@ client: Datasec
 project: Vision_Sales_Portal
 path: /Volumes/DevMASTER/!CODING/Datasec/Vision_Sales_Portal
 status: active
-updated: 2026-08-12
+updated: 2026-08-21
 ---
 
 # Datasec / Vision_Sales_Portal
 
-**Last session (2026-08-12):** Whole morning brief shipped. QuickQuote stage3
-v0.3.2: OTP send failures surface honestly (502 in 4s grace window, mail
-health on /healthz, retry w/ jitter) — proven by live forced ACS failure +
-recovery. Log capture fixed both layers (filesystem 7-day + Log Analytics
-`hpas-quickquote-logs` 30-day via diag setting). Page-1 print overflow fixed
-at ROOT CAUSE (v2.19): the compact @media print block was dead CSS (cascade
-order); restored, verified with real PDFs incl. live emailed PDF (2 pages).
-CI split (stage3 suite needs npm ci; bare node --test was failing runners).
-Branches open-signin + pricing-engine deleted (merged; your "8 ahead" card
-was stale — corrected). WED-90 launcher tee implemented + dry-run proven.
-Live image `v0.3.2-tool2.19` = main @ 637d788. Vision portal itself untouched.
+**Last session (2026-08-21):** Nothing changed in this repo. The session ran
+from Vision's launcher but all work landed in the coupled sibling ATTIO — see
+`Datasec__ATTIO.md`. Vision was read extensively as the migration's source of
+truth: the six-stage CHECK, the 16-value data-driven stage map, the ~90
+stage_data fields and the 13 email templates. Repo clean, main, 0/0, prod
+untouched.
 
 **Open / next:**
-- Verify Actions green for b7043cf/637d788 (blocked: no datasecau gh auth on
-  this machine — one-time `gh auth login` in a launcher shell, Kam)
-- WED-90 two real-launch exercises (warning-present, then clean)
-- Uncommissioned BACKLOG: hosted sign-out control, QA F3 headers, mail-spray
-  per-IP budget, session swap-durability test, FX provenance in emailed PDFs
+- QuickQuote v2.20 deploy, on Kam's signed word — nothing else is Vision-side.
+- Otherwise the next session is ATTIO work; see that card.
 
-**Blockers:** none for commissioned work.
+**Blockers:** QuickQuote main is AHEAD of live. `hpas-quickquote.azurewebsites.net`
+runs v0.3.2-tool2.19 while main carries the corrected v2.20 PoC rule — a
+customer-facing pricing fix that has never shipped. Unchanged since 2026-08-14.
+Production deploy is a v1.3 signature class, so it needs Kam's own mail.
 
-**Notes for Wednesday:** Kam-gated list unchanged: sales@ delivery confirm ·
-WIL-54 chip currency · custom sending domain (lifts the ~30/hr ACS OTP cap —
-load-bearing since open sign-in) · margin-visibility revisit. Deploy gotcha
-for any session touching the webapp: after a container swap /healthz may
-briefly answer from the OLD process — poll until the mail block resets.
+**Notes for Wednesday:** Two facts worth carrying into ATTIO planning. Prod's
+`leads.current_stage` has NO CHECK constraint (it silently failed to re-add), so
+the live vocabulary is open-ended — 16 candidates known, 13 observed, 3 unresolvable
+until someone queries prod from inside Azure. And prod Postgres firewalls dev
+machines, which gates the real migration as much as the security pack does.

@@ -3,7 +3,7 @@ client: Secuura
 project: Blockchain
 path: /Volumes/DevMASTER/!CODING/Secuura/Blockchain
 status: active
-updated: 2026-08-20
+updated: 2026-08-21
 ---
 
 # Secuura / Blockchain (Platform K)
@@ -29,11 +29,20 @@ updated: 2026-08-20
   OLDEST comments — always `first:50` + client-side sort.**
 
 **Open / next:**
-- 🎉 **KINTSUGI LIVE (s50 wrapped 1.0, 2026-08-20):** https://kintsugi.secuura.net —
-  31/31 healthy, real LE cert, KS-584 P3 verified, unique creds applied, Stuart's
-  wiring READY (CORS proven; API base https://kintsugi.secuura.net/api; caveats
-  on KS-601). **Anchoring = MOCK, HELD by owner decision** ("dev chain until
-  closer to clients"); Blockfrost key parked, cutover = minutes on Kam's word.
+- **s54 (scored 1.0, 2026-08-21 morning): 🎉 §4 CLOSED ON-CHAIN** (wallet funded
+  by Kam, real anchor verified at source, Stuart told via board — collision
+  DEFUSED) · #729 reviewed (3 findings for Peter) + KS-676 bash-3.2 fix branch
+  pushed no-PR · 14 KS archived, cap lifted + proven, edge map on KS-485 ·
+  #568 sign-off NOT re-pinned (real +204/−84 delta; pinned at 867b25728,
+  Peter's bounded pass requested) · KS-665 rebase REFUSED on measurement
+  (branch retired; its 42 already in Peter's base).
+- **KS-665 remaining: 90/132 params — HELD on sequencing until #568 merges,
+  then cut fresh from develop.** Fixture-design-on-ticket subset (≈15 FX
+  entries) PRE-APPROVED if wanted sooner — the judgement half, no branch.
+- 🎉 **KINTSUGI LIVE + REAL + FUNDED:** https://kintsugi.secuura.net — 31/31
+  healthy, real LE cert, own Blockfrost project, first real anchor proven
+  end-to-end (s54). Stuart's wiring READY (API base
+  https://kintsugi.secuura.net/api; caveats on KS-601).
 - **s52 (scored 1.0, 2026-08-20 ~14:0x): #725 MERGED (for-sale domain gone,
   push wall LIFTED, Peter's authorship preserved) · KS-667 FIXED (PR #726, In
   Review, no-merge — tokenisation works for the first time) · #568 sign-off
@@ -46,9 +55,10 @@ updated: 2026-08-20
   KS-671 filed+fixed (#728 unmerged; passive check — no budget-consuming
   probe) · naming DECIDED-BY-DEFAULT surfaced (cert 08-19; Kam to ratify) ·
   real+unfunded = KS-535-class risk recorded on KS-601.
-- **Kam (s53 adds):** fund the wallet (1 min, address on KS-601) · ratify
-  kintsugi.secuura.net · is 52.74.18.212 a Platform S host? (decides KS-670's
-  fix) · KS-635 audit baseline expires 08-31 (blocks every push).
+- **Kam:** is 52.74.18.212 a Platform S host? (asked of Stuart, answer
+  pending — decides KS-670's fix) · KS-635 audit baseline expires 08-31
+  (blocks every push) · PS-archive include/exclude (20 held). ~~fund wallet~~
+  DONE 08-21 · ~~ratify name~~ RATIFIED 08-21 (KS-601 comment).
 - ~~Kintsugi credential~~ RULED + EXECUTED (own kintsugi-dev-preview) ·
   **KS-670 quota** (wait/re-point/UPGRADE=spend) — with the ~6.7/min caller
   hunt + healthy-while-402 health-check defect staged as next-session work.
