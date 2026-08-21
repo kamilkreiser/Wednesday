@@ -155,6 +155,13 @@ def refresh_park():
 # start_new_session + pkill -g on the stored group id).
 SPEAK_SH = ROOT / "2_Project_Files" / "voice" / "speak.sh"
 _speak_state = {"pgid": None}
+# Autoplay dedup (Kam, 2026-08-21: two open windows both auto-fired the same
+# message; the second POST killed the first voice mid-sentence and restarted
+# it). Every open tab/window/machine polls independently, so the dedup lives
+# HERE at the single speaking resource: an autoplay request (auto:true) for a
+# ts already auto-spoken is a 200 no-op. Manual ▶ clicks carry no auto flag
+# and always speak — replaying a message on purpose stays possible.
+_auto_spoken = set()
 
 def ear_text(text):
     """Written-for-the-eye → written-for-the-ear (voice protocol)."""
@@ -327,6 +334,13 @@ class Handler(SimpleHTTPRequestHandler):
                 ts = (data.get("ts") or "").strip()[:64]
                 if not ts:
                     return self._json(400, {"error": "need ts"})
+                if data.get("auto"):
+                    if ts in _auto_spoken:
+                        return self._json(200, {"ok": True, "deduped": True})
+                    _auto_spoken.add(ts)
+                    if len(_auto_spoken) > 2000:   # bounded; session-lifetime set
+                        _auto_spoken.clear()
+                        _auto_spoken.add(ts)
                 cpath = ROOT / "0_Brain" / "dashboard" / "data" / "chat_log.json"
                 log = json.loads(cpath.read_text()) if cpath.exists() else []
                 if not isinstance(log, list):

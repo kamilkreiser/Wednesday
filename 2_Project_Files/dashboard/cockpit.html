@@ -304,11 +304,11 @@ function render(msgs) {
 let lastRendered = null;
 
 /* ── voice (carried verbatim from chat.html, round-2 item 3) ── */
-async function speak(ts, btn) {
+async function speak(ts, btn, auto) {
   if (btn) btn.disabled = true;
   try { await fetch("/api/speak", {
     method: "POST", headers: {"Content-Type": "application/json"},
-    body: JSON.stringify({ts})});
+    body: JSON.stringify(auto ? {ts, auto: true} : {ts})});
   } finally { if (btn) setTimeout(() => { btn.disabled = false; }, 800); }
 }
 const svBtn = document.getElementById("stopvoice");
@@ -348,7 +348,8 @@ async function poll(force) {
         }
       }
       // several at once would overlap-kill each other — speak only the latest
-      if (autoplayOn && latestNew) speak(latestNew.ts, null);
+      // auto:true → the server dedups per-message across every open window
+      if (autoplayOn && latestNew) speak(latestNew.ts, null, true);
     }
     const sig = JSON.stringify(msgs);
     if (!force && sig === lastSig && !pendingMsgs) return;
