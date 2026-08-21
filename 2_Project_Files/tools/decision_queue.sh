@@ -1,0 +1,188 @@
+#!/bin/bash
+# decision_queue.sh — Wednesday's decision queue CLI (WED-113 round 3).
+# Maintains 0_Brain/dashboard/data/decisions.json — the "requires action from
+# Kam" source the cockpit's NEEDS-YOU section renders. Wednesday writes here;
+# Kam's cockpit buttons only ever send chat messages (his click is a message
+# to Wednesday, never a state write — Wednesday rules the file on processing).
+#
+# Usage:
+#   decision_queue.sh add --id ID --client-project "Client/Project" \
+#       --title "..." --bluf "..." \
+#       --option key:label[:detail]   (repeat, >=2) \
+#       --recommended KEY --default-action "..."
+#   decision_queue.sh add --json      # one JSON object on stdin (same fields:
+#                                     # id, client_project, title, bluf,
+#                                     # options[{key,label,detail?}],
+#                                     # recommended, default_action)
+#   decision_queue.sh rule ID CHOICE_KEY
+#   decision_queue.sh list [open|ruled|all]
+#
+# Guarantees: the file stays valid JSON (atomic tmp+rename write); malformed
+# input or an unreadable existing file FAILS LOUDLY (exit 2) and never
+# clobbers what is on disk.
+set -u
+DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+export DQ_FILE="${DQ_FILE:-$DIR/../../0_Brain/dashboard/data/decisions.json}"
+# The python below is delivered on stdin (heredoc), so a `--json` payload
+# cannot also ride stdin — capture it into DQ_JSON first.
+DQ_JSON=""
+for a in "$@"; do
+  if [ "$a" = "--json" ]; then DQ_JSON="$(cat)"; break; fi
+done
+export DQ_JSON
+exec python3 - "$@" <<'PYEOF'
+import datetime, json, os, sys, tempfile
+
+FILE = os.environ["DQ_FILE"]
+
+def die(msg, code=2):
+    print(f"decision_queue: ERROR: {msg}", file=sys.stderr)
+    sys.exit(code)
+
+def now():
+    return datetime.datetime.now().astimezone().isoformat()
+
+def load():
+    if not os.path.exists(FILE):
+        return []
+    try:
+        data = json.loads(open(FILE).read())
+    except Exception as e:
+        die(f"{FILE} is not valid JSON ({e}) — refusing to touch it. Fix it by hand.")
+    if not isinstance(data, list):
+        die(f"{FILE} is not a JSON list — refusing to touch it.")
+    return data
+
+def save(data):
+    # atomic: write a sibling tmp file, validate by re-parsing, then rename
+    d = os.path.dirname(os.path.abspath(FILE))
+    fd, tmp = tempfile.mkstemp(dir=d, prefix=".decisions-", suffix=".json")
+    try:
+        with os.fdopen(fd, "w") as f:
+            json.dump(data, f, indent=1, ensure_ascii=False)
+        json.loads(open(tmp).read())          # paranoia: never install unparseable bytes
+        os.replace(tmp, FILE)
+    except BaseException:
+        try: os.unlink(tmp)
+        except OSError: pass
+        raise
+
+def validate(d, existing_ids):
+    if not isinstance(d, dict):
+        die("decision must be a JSON object")
+    dec = {}
+    for k in ("id", "client_project", "title", "bluf", "default_action"):
+        v = d.get(k)
+        if not isinstance(v, str) or not v.strip():
+            die(f"missing/empty required field: {k}")
+        dec[k] = v.strip()
+    if dec["id"] in existing_ids:
+        die(f"id already exists: {dec['id']}")
+    opts = d.get("options")
+    if not isinstance(opts, list) or len(opts) < 2:
+        die("options must be a list of at least 2 {key,label[,detail]} objects")
+    seen, out = set(), []
+    for o in opts:
+        if not isinstance(o, dict) or not str(o.get("key", "")).strip() \
+           or not str(o.get("label", "")).strip():
+            die("every option needs a non-empty key and label")
+        k = str(o["key"]).strip()
+        if k in seen:
+            die(f"duplicate option key: {k}")
+        seen.add(k)
+        out.append({"key": k, "label": str(o["label"]).strip(),
+                    "detail": str(o.get("detail", "")).strip()})
+    dec["options"] = out
+    rec = str(d.get("recommended", "")).strip()
+    if rec not in seen:
+        die(f"recommended must be one of the option keys ({', '.join(sorted(seen))})")
+    dec["recommended"] = rec
+    dec["ts"] = str(d.get("ts", "")).strip() or now()
+    dec["status"] = "open"
+    dec["ruled_choice"] = None
+    dec["ruled_ts"] = None
+    return dec
+
+def cmd_add(args):
+    if args == ["--json"]:
+        try:
+            d = json.loads(os.environ.get("DQ_JSON", ""))
+        except Exception as e:
+            die(f"stdin is not valid JSON ({e})")
+    else:
+        d = {"options": []}
+        flag_map = {"--id": "id", "--client-project": "client_project",
+                    "--title": "title", "--bluf": "bluf",
+                    "--recommended": "recommended", "--default-action": "default_action"}
+        i = 0
+        while i < len(args):
+            a = args[i]
+            if a == "--option":
+                if i + 1 >= len(args): die("--option needs key:label[:detail]")
+                parts = args[i + 1].split(":", 2)
+                if len(parts) < 2: die(f"--option must be key:label[:detail], got {args[i+1]!r}")
+                d["options"].append({"key": parts[0], "label": parts[1],
+                                     "detail": parts[2] if len(parts) > 2 else ""})
+                i += 2
+            elif a in flag_map:
+                if i + 1 >= len(args): die(f"{a} needs a value")
+                d[flag_map[a]] = args[i + 1]
+                i += 2
+            else:
+                die(f"unknown flag: {a}")
+    data = load()
+    dec = validate(d, {x.get("id") for x in data if isinstance(x, dict)})
+    data.append(dec)
+    save(data)
+    print(f"added: {dec['id']} ({dec['client_project']}) — {dec['title']} [rec: {dec['recommended']}]")
+
+def cmd_rule(args):
+    if len(args) != 2:
+        die("usage: rule ID CHOICE_KEY")
+    did, choice = args
+    data = load()
+    for dec in data:
+        if isinstance(dec, dict) and dec.get("id") == did:
+            if dec.get("status") == "ruled":
+                die(f"{did} is already ruled ({dec.get('ruled_choice')} @ {dec.get('ruled_ts')})")
+            keys = {o.get("key") for o in dec.get("options", []) if isinstance(o, dict)}
+            if choice not in keys:
+                die(f"choice {choice!r} is not an option of {did} ({', '.join(sorted(k for k in keys if k))})")
+            dec["status"] = "ruled"
+            dec["ruled_choice"] = choice
+            dec["ruled_ts"] = now()
+            save(data)
+            print(f"ruled: {did} -> {choice}")
+            return
+    die(f"no decision with id {did!r}")
+
+def cmd_list(args):
+    which = args[0] if args else "all"
+    if which not in ("open", "ruled", "all"):
+        die("usage: list [open|ruled|all]")
+    data = load()
+    shown = 0
+    for dec in data:
+        if not isinstance(dec, dict):
+            print("  (skipping one malformed entry)", file=sys.stderr)
+            continue
+        st = dec.get("status", "?")
+        if which != "all" and st != which:
+            continue
+        shown += 1
+        line = f"[{st:5}] {dec.get('id','?')}  {dec.get('client_project','?')} — {dec.get('title','?')}"
+        if st == "ruled":
+            line += f"  => {dec.get('ruled_choice')} @ {str(dec.get('ruled_ts') or '')[:16]}"
+        else:
+            line += f"  (rec: {dec.get('recommended','?')}; default: {dec.get('default_action','?')})"
+        print(line)
+    print(f"{shown} decision(s) [{which}]")
+
+if len(sys.argv) < 2:
+    die("usage: decision_queue.sh add|rule|list ...", 1)
+cmd, rest = sys.argv[1], sys.argv[2:]
+if cmd == "add":   cmd_add(rest)
+elif cmd == "rule": cmd_rule(rest)
+elif cmd == "list": cmd_list(rest)
+else: die(f"unknown command: {cmd}", 1)
+PYEOF

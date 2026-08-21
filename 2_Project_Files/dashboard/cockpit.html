@@ -129,6 +129,36 @@ main { flex:1; display:flex; min-height:0; width:100%; }
 .evt.open-q { border-color:color-mix(in srgb, var(--amber) 55%, var(--line));
   box-shadow:inset 3px 0 0 var(--amber); }
 .evt.open-q .needs { font-size:11px; font-weight:600; color:var(--amber); }
+/* ── round 3: NEEDS-YOU / UPDATES split + decision cards ── */
+.sechead { font-size:11px; font-weight:650; letter-spacing:.07em; text-transform:uppercase;
+  color:var(--text-muted); margin:2px 0 8px; }
+.sechead.needs { color:var(--amber); }
+.sechead:not(:first-child) { margin-top:14px; }
+.t-decision { color:var(--amber); background:color-mix(in srgb, var(--amber) 14%, transparent); }
+.t-ruled { color:var(--text-muted); background:color-mix(in srgb, var(--text-muted) 12%, transparent); }
+.evt.ruledrow { opacity:.62; cursor:default; }
+.evt.dec { border-color:color-mix(in srgb, var(--amber) 55%, var(--line));
+  box-shadow:inset 3px 0 0 var(--amber); }
+.dec .title { font-weight:600; font-size:13px; color:var(--text-primary); margin-top:3px; }
+.recbadge { font-size:10.5px; color:var(--series-3); white-space:nowrap;
+  border:1px solid color-mix(in srgb, var(--series-3) 40%, transparent);
+  border-radius:5px; padding:1px 7px; margin-left:8px; vertical-align:1px; }
+.dec .bluf { margin-top:7px; font-size:13px; color:var(--text-primary); }
+.opt { border:1px solid var(--line); border-radius:7px; padding:6px 9px; margin-top:6px;
+  font-size:12.5px; color:var(--text-secondary); }
+.opt b { color:var(--text-primary); font-weight:600; }
+.opt.rec { border-color:color-mix(in srgb, var(--series-3) 45%, var(--line));
+  background:color-mix(in srgb, var(--series-3) 7%, var(--surface-2)); }
+.opt.rec b::after { content:" · recommended"; color:var(--series-3); font-weight:600; font-size:11px; }
+.defline { margin-top:6px; font-size:11.5px; color:var(--text-muted); }
+.decbtns { display:flex; gap:6px; flex-wrap:wrap; margin-top:9px; }
+.decbtn { background:var(--surface-1); border:1px solid var(--line); border-radius:7px;
+  color:var(--text-secondary); font:inherit; font-size:12px; padding:5px 11px; cursor:pointer; }
+.decbtn:hover { color:var(--text-primary); border-color:var(--series-1); }
+.decbtn.rec { border-color:var(--series-3); color:var(--series-3); font-weight:600; }
+.decbtn:disabled { opacity:.5; cursor:default; }
+.decsent { margin-top:7px; font-size:12px; color:var(--series-3); }
+.qerr { font-size:12px; color:var(--series-2); margin:0 0 8px; }
 #feed-note { flex:none; font-size:11.5px; color:var(--text-muted);
   border-top:1px solid var(--line); padding:7px 18px; }
 
@@ -188,7 +218,7 @@ function selectionIn(el) {
 }
 function flushPending() {
   if (pendingMsgs && !convoBusy()) { render(pendingMsgs); }
-  if (pendingFeed && !feedBusy()) { renderFeed(pendingFeed); }
+  if (pendingRender && !feedBusy()) { renderFeed(); }
 }
 
 /* ══ LEFT: conversation (data pattern from chat.html) ══════════════════════ */
@@ -353,9 +383,13 @@ const feedNote = document.getElementById("feed-note");
 const tallyEl = document.getElementById("tally");
 const filtersEl = document.getElementById("filters");
 let feedSig = null;
-let pendingFeed = null;
+let decSig = null;
+let pendingRender = false;             // one flag: renderFeed() reads current state
 let lastEventsRaw = null;
+let lastDecisionsRaw = null;
+let decisionsErr = null;               // /api/decisions parse-error note (never hidden)
 const expandedKeys = new Set();        // survives re-renders — no collapse under a tap
+const sentDecisions = new Set();       // decision ids whose button was clicked this page-life
 armGuards(feedScroll, "feed");
 
 function feedBusy() {
@@ -480,12 +514,13 @@ function renderTally(events) {
     tallyEl.appendChild(c);
   }
 }
-const TYPE_ORDER = ["brief", "confirmed", "status", "question", "answer", "wrap", "score", "mail"];
-const TYPE_LABEL = {brief: "BRIEF", confirmed: "CONFIRMED", status: "STATUS", question: "QUESTION",
-                    answer: "ANSWER", wrap: "WRAP", score: "SCORE", mail: "MAIL"};
-function renderFilters(events) {
+const TYPE_ORDER = ["decision", "question", "brief", "confirmed", "status", "answer", "wrap", "score", "mail"];
+const TYPE_LABEL = {decision: "DECISION", brief: "BRIEF", confirmed: "CONFIRMED", status: "STATUS",
+                    question: "QUESTION", answer: "ANSWER", wrap: "WRAP", score: "SCORE", mail: "MAIL"};
+function renderFilters(events, decisions) {
   filtersEl.innerHTML = "";
   const typesPresent = new Set(events.map(e => e.type));
+  if (decisions.length) typesPresent.add("decision");
   for (const t of TYPE_ORDER) {
     if (!typesPresent.has(t) && !filters.types.includes(t)) continue;
     const b = document.createElement("button");
@@ -498,7 +533,8 @@ function renderFilters(events) {
     });
     filtersEl.appendChild(b);
   }
-  const projects = [...new Set(events.map(e => e.project))].sort();
+  const projects = [...new Set(events.map(e => e.project)
+                    .concat(decisions.map(d => d.project)))].sort();
   for (const p of projects.concat(filters.projects.filter(x => !projects.includes(x)))) {
     const b = document.createElement("button");
     b.className = "fchip" + (filters.projects.includes(p) ? " on" : "");
@@ -527,102 +563,289 @@ function askWednesday(ev) {
   textEl.focus();
   try { textEl.setSelectionRange(textEl.value.length, textEl.value.length); } catch (e) {}
 }
-function renderFeed(msgs, opts) {
-  if (feedBusy()) { pendingFeed = msgs; return; }
-  pendingFeed = null;
-  lastEventsRaw = msgs;
-  const {events, skipped} = parseAll(msgs);
+function eventRow(ev) {
+  const row = document.createElement("div");
+  row.className = "evt" + (ev.open ? " open-q" : "") +
+                  (expandedKeys.has(ev.key) ? " expanded" : "");
+  const top = document.createElement("div"); top.className = "top";
+  const chip = document.createElement("span");
+  chip.className = "chip t-" + ev.type; chip.textContent = ev.label;
+  const proj = document.createElement("span"); proj.className = "proj";
+  proj.textContent = ev.project;
+  top.append(chip, proj);
+  if (ev.open) {
+    const nb = document.createElement("span"); nb.className = "needs";
+    nb.textContent = "needs Wednesday"; top.appendChild(nb);
+  }
+  const ask = document.createElement("button"); ask.className = "askbtn";
+  ask.textContent = "⤷ ask Wed"; ask.title = "draft a chat message referencing this event (not sent)";
+  ask.addEventListener("click", e => { e.stopPropagation(); askWednesday(ev); });
+  top.appendChild(ask);
+  const when = document.createElement("span"); when.className = "when";
+  when.textContent = aest(ev.t) + " AEST"; top.appendChild(when);
+  const sum = document.createElement("div"); sum.className = "sum";
+  sum.textContent = ev.sum || ev.topic;
+  row.append(top, sum);
+  // expand detail (round-2 item 4a): full subject payload + metadata +
+  // the collector's short excerpt; honest note when none was captured
+  const det = document.createElement("div"); det.className = "detail";
+  const mk = (k, v) => {
+    const r = document.createElement("div"); r.className = "row";
+    const ks = document.createElement("span"); ks.className = "k"; ks.textContent = k;
+    r.append(ks, v); return r;
+  };
+  det.appendChild(mk("subject", ev.topic));
+  if (ev.from) det.appendChild(mk("from", ev.from));
+  if (ev.inboxes.length) det.appendChild(mk("inbox", ev.inboxes.join(", ")));
+  det.appendChild(mk("received", aestFull(ev.t) + " AEST"));
+  if (ev.excerpt) {
+    const ex = document.createElement("div"); ex.className = "excerpt";
+    ex.textContent = ev.excerpt;
+    det.appendChild(ex);
+  } else {
+    const ex = document.createElement("div"); ex.className = "noexcerpt";
+    ex.textContent = "body excerpt not captured";
+    det.appendChild(ex);
+  }
+  row.appendChild(det);
+  row.addEventListener("click", () => {
+    if (selectionIn(row)) return;          // selecting text is not a toggle
+    if (expandedKeys.has(ev.key)) expandedKeys.delete(ev.key);
+    else expandedKeys.add(ev.key);
+    row.classList.toggle("expanded");
+  });
+  return row;
+}
+/* ── round 3: decision queue (the real "requires action from Kam" source) ── */
+function parseDecisions(raw) {
+  // decisions.json items → open + ruled-today, skip-and-count on bad items
+  const open = [], ruledToday = [];
+  let skipped = 0;
+  const today = aestDay(Date.now());
+  for (const d of (Array.isArray(raw) ? raw : [])) {
+    try {
+      if (!d || typeof d !== "object" || typeof d.id !== "string" ||
+          typeof d.title !== "string" || !Array.isArray(d.options) ||
+          !d.options.length ||
+          !d.options.every(o => o && typeof o.key === "string" && typeof o.label === "string")) {
+        skipped++; continue;
+      }
+      const dec = {
+        id: d.id, title: d.title,
+        project: typeof d.client_project === "string" ? d.client_project : "?",
+        bluf: typeof d.bluf === "string" ? d.bluf : "",
+        options: d.options.map(o => ({key: o.key, label: o.label,
+                                      detail: typeof o.detail === "string" ? o.detail : ""})),
+        recommended: typeof d.recommended === "string" ? d.recommended : "",
+        default_action: typeof d.default_action === "string" ? d.default_action : "",
+        t: Date.parse(d.ts || "") || 0,
+        status: d.status, ruled_choice: d.ruled_choice,
+        ruledT: Date.parse(d.ruled_ts || "") || 0
+      };
+      if (dec.status === "open") open.push(dec);
+      else if (dec.status === "ruled" && dec.ruledT && aestDay(dec.ruledT) === today)
+        ruledToday.push(dec);   // older ruled decisions are history, not feed
+    } catch (e) { skipped++; }
+  }
+  open.sort((a, b) => b.t - a.t);
+  return {open, ruledToday, skipped};
+}
+function decisionCard(dec) {
+  const row = document.createElement("div");
+  const key = "dec|" + dec.id;
+  row.className = "evt dec" + (expandedKeys.has(key) ? " expanded" : "");
+  const top = document.createElement("div"); top.className = "top";
+  const chip = document.createElement("span");
+  chip.className = "chip t-decision"; chip.textContent = "DECISION";
+  const proj = document.createElement("span"); proj.className = "proj";
+  proj.textContent = dec.project;
+  top.append(chip, proj);
+  const when = document.createElement("span"); when.className = "when";
+  when.textContent = dec.t ? aest(dec.t) + " AEST" : "";
+  top.appendChild(when);
+  const title = document.createElement("div"); title.className = "title";
+  title.textContent = dec.title;
+  const rec = dec.options.find(o => o.key === dec.recommended);
+  if (rec) {
+    const rb = document.createElement("span"); rb.className = "recbadge";
+    rb.textContent = "rec: " + rec.label;
+    title.appendChild(rb);
+  }
+  row.append(top, title);
+  // expanded: BLUF, every option (recommendation highlighted), the default,
+  // and BUTTONS — one per option plus "go with recommendation"
+  const det = document.createElement("div"); det.className = "detail";
+  if (dec.bluf) {
+    const b = document.createElement("div"); b.className = "bluf";
+    b.textContent = dec.bluf; det.appendChild(b);
+  }
+  for (const o of dec.options) {
+    const od = document.createElement("div");
+    od.className = "opt" + (o.key === dec.recommended ? " rec" : "");
+    const ob = document.createElement("b"); ob.textContent = o.label;
+    od.appendChild(ob);
+    if (o.detail) od.append(" — " + o.detail);
+    det.appendChild(od);
+  }
+  if (dec.default_action) {
+    const dl = document.createElement("div"); dl.className = "defline";
+    dl.textContent = "if you say nothing: " + dec.default_action;
+    det.appendChild(dl);
+  }
+  const btns = document.createElement("div"); btns.className = "decbtns";
+  const lockBtns = v => { [...btns.querySelectorAll("button")].forEach(x => { x.disabled = v; }); };
+  const mkBtn = (label, opt, isRec) => {
+    const b = document.createElement("button");
+    b.className = "decbtn" + (isRec ? " rec" : "");
+    b.textContent = label;
+    b.addEventListener("click", async e => {
+      e.stopPropagation();
+      // the click is a MESSAGE to Wednesday through the normal chat channel;
+      // it never mutates decisions.json — Wednesday rules the file when she
+      // processes the message
+      lockBtns(true);
+      try {
+        const r = await (await fetch("/api/chat", {
+          method: "POST", headers: {"Content-Type": "application/json"},
+          body: JSON.stringify({text: `Decision ${dec.id}: ${opt.key} — ${opt.label}`})})).json();
+        if (r.ok) {
+          sentDecisions.add(dec.id);
+          const note = document.createElement("div"); note.className = "decsent";
+          note.textContent = "✓ sent to Wednesday: " + opt.key + " — she rules the queue from here";
+          det.appendChild(note);
+          await poll(true);
+        } else lockBtns(false);
+      } catch (err) { lockBtns(false); }
+    });
+    return b;
+  };
+  if (rec) btns.appendChild(mkBtn("✓ go with recommendation", rec, true));
+  for (const o of dec.options) btns.appendChild(mkBtn(o.label, o, false));
+  det.appendChild(btns);
+  if (sentDecisions.has(dec.id)) {
+    const note = document.createElement("div"); note.className = "decsent";
+    note.textContent = "✓ answer sent to Wednesday — awaiting her ruling";
+    det.appendChild(note);
+    lockBtns(true);
+  }
+  row.appendChild(det);
+  row.addEventListener("click", () => {
+    if (selectionIn(row)) return;
+    if (expandedKeys.has(key)) expandedKeys.delete(key);
+    else expandedKeys.add(key);
+    row.classList.toggle("expanded");
+  });
+  return row;
+}
+function ruledRow(dec) {
+  // ruled today: greyed one-liner in UPDATES so the day's record stays visible
+  const row = document.createElement("div");
+  row.className = "evt ruledrow";
+  const top = document.createElement("div"); top.className = "top";
+  const chip = document.createElement("span");
+  chip.className = "chip t-ruled"; chip.textContent = "RULED";
+  const proj = document.createElement("span"); proj.className = "proj";
+  proj.textContent = dec.project;
+  const when = document.createElement("span"); when.className = "when";
+  when.textContent = aest(dec.ruledT) + " AEST";
+  top.append(chip, proj, when);
+  const sum = document.createElement("div"); sum.className = "sum";
+  const chosen = dec.options.find(o => o.key === dec.ruled_choice);
+  sum.textContent = dec.title + " → " + (chosen ? chosen.label : String(dec.ruled_choice));
+  row.append(top, sum);
+  return row;
+}
+function renderFeed(opts) {
+  if (feedBusy()) { pendingRender = true; return; }
+  pendingRender = false;
+  const {events, skipped} = parseAll(lastEventsRaw || []);
+  const dp = parseDecisions(lastDecisionsRaw || []);
   renderTally(events);
-  renderFilters(events);
-  const shown = events.filter(ev =>
-    (!filters.types.length || filters.types.includes(ev.type)) &&
-    (!filters.projects.length || filters.projects.includes(ev.project)));
+  renderFilters(events, dp.open.concat(dp.ruledToday));
+  const typeOk = t => !filters.types.length || filters.types.includes(t);
+  const projOk = p => !filters.projects.length || filters.projects.includes(p);
+  // NEEDS YOU = open decisions + unanswered questions (promoted out of updates)
+  const needDecs = dp.open.filter(d => typeOk("decision") && projOk(d.project));
+  const needQs = events.filter(ev => ev.type === "question" && ev.open &&
+                                     typeOk("question") && projOk(ev.project));
+  // UPDATES = the typed rows (answered questions stay, as history) plus
+  // today's ruled decisions, greyed, merged by time
+  const updates = events.filter(ev => !(ev.type === "question" && ev.open) &&
+                                      typeOk(ev.type) && projOk(ev.project))
+    .concat(dp.ruledToday.filter(d => typeOk("decision") && projOk(d.project))
+      .map(d => ({ruled: d, t: d.ruledT})))
+    .sort((a, b) => b.t - a.t);
   // scroll anchoring: keep the rows he is looking at where they are when new
   // items are prepended above; a filter change resets to the top instead.
   const prevTop = feedScroll.scrollTop;
   const prevH = feedScroll.scrollHeight;
   feedEl.innerHTML = "";
-  if (!shown.length) {
-    const p = document.createElement("p"); p.className = "empty";
-    p.textContent = events.length ? "no events match the filters" : "no fleet events yet";
+  const nh = document.createElement("div"); nh.className = "sechead needs";
+  nh.textContent = "Needs you (" + (needDecs.length + needQs.length) + ")";
+  feedEl.appendChild(nh);
+  if (decisionsErr) {
+    // a broken decisions.json is REPORTED, never a silently empty section
+    const p = document.createElement("p"); p.className = "qerr";
+    p.textContent = "⚠ decision queue unreadable — showing the rest without it (" + decisionsErr + ")";
     feedEl.appendChild(p);
   }
-  for (const ev of shown) {
-    const row = document.createElement("div");
-    row.className = "evt" + (ev.open ? " open-q" : "") +
-                    (expandedKeys.has(ev.key) ? " expanded" : "");
-    const top = document.createElement("div"); top.className = "top";
-    const chip = document.createElement("span");
-    chip.className = "chip t-" + ev.type; chip.textContent = ev.label;
-    const proj = document.createElement("span"); proj.className = "proj";
-    proj.textContent = ev.project;
-    top.append(chip, proj);
-    if (ev.open) {
-      const nb = document.createElement("span"); nb.className = "needs";
-      nb.textContent = "needs Wednesday"; top.appendChild(nb);
-    }
-    const ask = document.createElement("button"); ask.className = "askbtn";
-    ask.textContent = "⤷ ask Wed"; ask.title = "draft a chat message referencing this event (not sent)";
-    ask.addEventListener("click", e => { e.stopPropagation(); askWednesday(ev); });
-    top.appendChild(ask);
-    const when = document.createElement("span"); when.className = "when";
-    when.textContent = aest(ev.t) + " AEST"; top.appendChild(when);
-    const sum = document.createElement("div"); sum.className = "sum";
-    sum.textContent = ev.sum || ev.topic;
-    row.append(top, sum);
-    // expand detail (round-2 item 4a): full subject payload + metadata +
-    // the collector's short excerpt; honest note when none was captured
-    const det = document.createElement("div"); det.className = "detail";
-    const mk = (k, v) => {
-      const r = document.createElement("div"); r.className = "row";
-      const ks = document.createElement("span"); ks.className = "k"; ks.textContent = k;
-      r.append(ks, v); return r;
-    };
-    det.appendChild(mk("subject", ev.topic));
-    if (ev.from) det.appendChild(mk("from", ev.from));
-    if (ev.inboxes.length) det.appendChild(mk("inbox", ev.inboxes.join(", ")));
-    det.appendChild(mk("received", aestFull(ev.t) + " AEST"));
-    if (ev.excerpt) {
-      const ex = document.createElement("div"); ex.className = "excerpt";
-      ex.textContent = ev.excerpt;
-      det.appendChild(ex);
-    } else {
-      const ex = document.createElement("div"); ex.className = "noexcerpt";
-      ex.textContent = "body excerpt not captured";
-      det.appendChild(ex);
-    }
-    row.appendChild(det);
-    row.addEventListener("click", () => {
-      if (selectionIn(row)) return;          // selecting text is not a toggle
-      if (expandedKeys.has(ev.key)) expandedKeys.delete(ev.key);
-      else expandedKeys.add(ev.key);
-      row.classList.toggle("expanded");
-    });
-    feedEl.appendChild(row);
+  if (!needDecs.length && !needQs.length && !decisionsErr) {
+    const p = document.createElement("p"); p.className = "empty";
+    p.textContent = "nothing needs you right now";
+    feedEl.appendChild(p);
   }
+  for (const d of needDecs) feedEl.appendChild(decisionCard(d));
+  for (const ev of needQs) feedEl.appendChild(eventRow(ev));
+  const uh = document.createElement("div"); uh.className = "sechead";
+  uh.textContent = "Updates";
+  feedEl.appendChild(uh);
+  if (!updates.length) {
+    const p = document.createElement("p"); p.className = "empty";
+    p.textContent = events.length ? "no updates match the filters" : "no fleet events yet";
+    feedEl.appendChild(p);
+  }
+  for (const u of updates) feedEl.appendChild(u.ruled ? ruledRow(u.ruled) : eventRow(u));
   if (opts && opts.resetScroll) feedScroll.scrollTop = 0;
   else if (prevTop > 4) feedScroll.scrollTop = prevTop + (feedScroll.scrollHeight - prevH);
   else feedScroll.scrollTop = 0;
-  feedNote.textContent = shown.length + " of " + events.length + " events" +
-    (skipped ? " · " + skipped + " unparsed (skipped)" : "");
+  const allSkipped = skipped + dp.skipped;
+  feedNote.textContent = (needDecs.length + needQs.length) + " need you · " +
+    updates.length + " updates" +
+    (allSkipped ? " · " + allSkipped + " unparsed (skipped)" : "");
 }
 function applyRender(opts) {
-  if (lastEventsRaw) renderFeed(lastEventsRaw, opts);
+  renderFeed(opts);
 }
 async function pollFeed() {
   try {
     const d = await (await fetch("/api/agentmail")).json();
     const msgs = d.messages || [];
     const sig = JSON.stringify(msgs);
-    if (sig === feedSig && !pendingFeed) return;
+    if (sig === feedSig && !pendingRender) return;
     feedSig = sig;
-    renderFeed(msgs);      // defers itself if Kam is mid-read in the feed
+    lastEventsRaw = msgs;
+    renderFeed();          // defers itself if Kam is mid-read in the feed
   } catch (e) {
     feedNote.textContent = "feed unreachable — retrying";
   }
 }
+async function pollDecisions() {
+  try {
+    const d = await (await fetch("/api/decisions")).json();
+    const decs = Array.isArray(d.decisions) ? d.decisions : [];
+    const err = d.error || null;
+    const sig = JSON.stringify([decs, err]);
+    if (sig === decSig && !pendingRender) return;
+    decSig = sig;
+    lastDecisionsRaw = decs;
+    decisionsErr = err;
+    renderFeed();
+  } catch (e) { /* transient — the feed keeps its last decisions */ }
+}
 poll(true);
 pollFeed();
+pollDecisions();
 setInterval(poll, 3000);
 setInterval(pollFeed, 20000);
+setInterval(pollDecisions, 20000);
 </script></body></html>

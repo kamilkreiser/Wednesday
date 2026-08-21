@@ -11,6 +11,9 @@ workspace (never any client board). Endpoints:
                           posts via the existing /api/chat)
   GET  /api/agentmail   → fleet mail SUBJECTS snapshot (agentmail.json passthrough;
                           bodies are never collected, never served)
+  GET  /api/decisions   → decision queue snapshot (decisions.json passthrough;
+                          maintained by tools/decision_queue.sh — parse errors
+                          are reported in the payload, never hidden)
   POST /api/speak       → {"ts": str} → speak that wednesday-role chat message
                           aloud via voice/speak.sh (server-side lookup; 202/404/400)
   POST /api/speak/stop  → {} → kill the currently-playing voice (idempotent 200;
@@ -211,6 +214,20 @@ class Handler(SimpleHTTPRequestHandler):
                 msgs = []
             return self._json(200, {"collected_at": raw.get("collected_at") if isinstance(raw, dict) else None,
                                     "messages": msgs})
+        if self.path == "/api/decisions":
+            # Cockpit decision queue (WED-113 round 3): read-only view of
+            # 0_Brain/dashboard/data/decisions.json (Wednesday maintains it via
+            # tools/decision_queue.sh). A parse error is REPORTED, not hidden —
+            # the page shows a note instead of a vanished queue.
+            dpath = ROOT / "0_Brain" / "dashboard" / "data" / "decisions.json"
+            err = None
+            try:
+                raw = json.loads(dpath.read_text()) if dpath.exists() else []
+            except Exception as e:
+                raw, err = [], f"decisions.json unreadable: {e}"
+            if not isinstance(raw, list):
+                raw, err = [], err or "decisions.json is not a list"
+            return self._json(200, {"decisions": raw, "error": err})
         if self.path == "/cockpit":
             # WED-113 two-panel view (Kam, 2026-08-21): conversation + fleet
             # activity feed. ADDITIVE — same theme/template pattern as /chat,

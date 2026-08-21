@@ -1468,7 +1468,7 @@ footer .ok {{ color:var(--text-secondary); }} footer .bad {{ color:#e66767; font
  <span class="sub">{NOW.strftime("%A %-d %B %Y · %H:%M %Z")}</span>
  <span class="legend">{legend_html()}</span>
  {focus_chip()}
- <span class="menu"><a class="menubtn" href="/chat" title="open the full-window chat with Wednesday">&#128172; Chat</a> {RESET_BTN}<button id="burger-btn" title="menu">&#9776;</button>
+ <span class="menu"><a class="menubtn" href="/cockpit" title="open the cockpit: conversation with Wednesday + fleet activity (plain chat stays at /chat)">&#128172; Chat</a> {RESET_BTN}<button id="burger-btn" title="menu">&#9776;</button>
  <span id="burger-drop" hidden>
    <span class="mgroup">
      <button class="mparent">&#9881; Customise <span class="carat">&#9656;</span></button>
