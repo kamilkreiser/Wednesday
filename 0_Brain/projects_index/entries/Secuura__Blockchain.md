@@ -29,6 +29,18 @@ updated: 2026-08-21
   OLDEST comments — always `first:50` + client-side sort.**
 
 **Open / next:**
+**s58 (2026-08-21 evening, scored 1.0):** KS-670 owner recorded (Platform S,
+Stuart-via-Kam) + Stuart asked via board to stop the ~3,850/hr loop (still
+live, 99.99% of demo traffic; recovery probes staged, blocked on him) ·
+KS-676 defect (c) fixed `efe06501b` (bash-3.2-vs-4.1 errexit-on-arithmetic
+polarity: latent on macOS, FATAL on CI — the ticket title's mirror image) ·
+KS-680 filed (validate-env.sh truncates its own validation on 4.1+; Medium
+because the prod deploy checklist is its single prescribed consumer) ·
+🔴 **#568: Peter handed MERGE AUTHORITY over ("merge when you are ready") —
+custody comment posted, merge HELD (Kam's NOTHING-MERGES + sign-off pinned
+867b25728 vs the unreviewed +204/−84 delta); decision with Kam.** Branch
+fix/bash32 at d2729475c, nothing merged.
+
 - **s54 (scored 1.0, 2026-08-21 morning): 🎉 §4 CLOSED ON-CHAIN** (wallet funded
   by Kam, real anchor verified at source, Stuart told via board — collision
   DEFUSED) · #729 reviewed (3 findings for Peter) + KS-676 bash-3.2 fix branch
