@@ -18,8 +18,13 @@ supersedes: ""
    answers. Raise structural friction proactively at consolidations rather
    than waiting to be asked.
 
-2. **The 50–70% rotation structure is VALIDATED (2026-08-21: two mid-day
-   rotations, zero dropped stitches).** The grounding is the 08-16 lesson —
+2. **The rotation point is 70% — Kam's explicit ruling (19:42 same day):
+   "the context of boot is large but I think it's worth it, and for that
+   reason I don't think 50% is realistic. We're more likely to be renewing
+   at 70%."** 50% remains a CHECKPOINT only (sweep, declare default, start
+   nothing heavy) — never a rotation trigger by itself. The structure
+   itself is VALIDATED (2026-08-21: two mid-day rotations, zero dropped
+   stitches). The grounding is the 08-16 lesson —
    a session cannot judge its own degradation, so a numeric tripwire replaces
    a judgement I structurally cannot make. The honest cost is the boot weight
    (full lesson-load × 2–3 rotations/day); it stays a DECISION reviewed at
