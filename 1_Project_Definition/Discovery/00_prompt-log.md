@@ -1215,3 +1215,8 @@ that is what he means by "dev chain," it is minutes whenever he says go.
 > For future reference, it would be perfect for you to say "you should wait for the message until I get the ticket" and then draft a message only once the ticket is ready. I don't mind waiting, especially when you tell me an update I'm waiting for.
 
 *Done with it:* filed as [[0_Brain/learnings/2026-08-21_deliver-whole-or-say-wait]] + ledger w=1; acknowledged; the final Stuart draft now goes out ONLY when the KS number exists, complete.
+
+## 2026-08-21 20:19 (dashboard chat)
+> That sounds great. The pains with the decision component, please add an element where I can type additional context or additional information to the recommendation or element.
+
+*Done with it:* cockpit ROUND 4 spec'd and queued in the successor pack (my rotation gate was already closing): each decision card gains a free-text field — a click WITH text posts "Decision <id>: <key> — <label> | note: <text>"; text can also be sent WITHOUT a choice ("send note only") so he can add information before ruling. Successor briefs a fresh builder against the committed r3 code.
