@@ -1205,3 +1205,8 @@ that is what he means by "dev chain," it is minutes whenever he says go.
 > With regards to the new view and the activity on the right, it would be very helpful if the activity was categorized by requiring action from me, Update or anything else. If it requires action from me when I click on it, it would be good if it was categorized according to Bluff with various suggestions and an ability to click on the recommended action. Please make this the default view when I click on chat.
 
 *Done with it:* round 3 briefed to the cockpit builder — feed categorised ACTION-vs-UPDATE with action rows sourced from a new machine-readable decision queue (decisions.json + writer tool for me), each action opening as BLUF/options/recommendation with one-click choice posting into chat; the dashboard's chat entry point re-linked to /cockpit (additive — /chat stays alive at its URL).
+
+## 2026-08-21 20:10 (dashboard chat)
+> Fantastic. Create a ticket that articulates everything and draft a simple message that I can send to Stuart through WhatsApp, and action everything necessary from our side.
+
+*Done with it:* WhatsApp draft delivered on the panel (simple, no-blame, three asks: his terminal-state fix · our API-flag check underway · the credential question). Secuura s60 briefed + launched: file the standoff ticket (full articulation, Stuart's agent credited), MEASURE whether K's status API exposes simulated machine-readably + confirm the create-vs-verify Blockfrost split in code, comment/link KS-670. Read-only demo, NOTHING MERGES.
