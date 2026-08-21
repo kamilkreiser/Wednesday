@@ -8,7 +8,28 @@ updated: 2026-08-21
 
 # Datasec / ATTIO
 
-**Last session (2026-08-21 s2, scored 0.9):** Kam's four rulings executed.
+**Last session (2026-08-21 s3, scored 0.95):** Kam's commission burst delivered —
+completeness matrix committed (337 lines: 4/9 domains full, 3 partial, 2
+not-captured, every gap blocker-named) · **daily follow-up job LIVE + ARMED**
+(first-ever scheduled fire 21:00Z tonight; run-origin footer with trigger
+hard-wired so manual runs cannot impersonate the schedule; 1 real Attio task
+written) · **13/13 email templates entered VIA BROWSER and read-back verified**
+(wrong-variable insert caught on read-back; [[FILL:]] markers = the concrete
+≤25 candidate list). ATTIO-28 Done · ATTIO-29 In Review deliberately ("an In
+Review with reasons beats a Done that is a claim") · ATTIO-16 In Progress
+(sequences half is PRO-ONLY — Kam's money question). Two failures
+self-disclosed (silent-zero digest bug hardened to throw; 12-min bridge
+outage, runbook updated with the fix's limit). The 0.05 = three turn-end
+stalls (fleet class, instances 6–8).
+
+**Next-session checks (first items):**
+- 🔎 **Verify the 21:00Z fire:** tomorrow's digest must carry
+  `trigger: scheduled` — its absence IS the finding.
+- **ATTIO-30** reports pack against the three-report Free budget (Free allows
+  exactly 3; Kam named exactly 3; funnel/velocity Plus+, win-loss Pro).
+- Sequences only if Kam rules Pro.
+
+**Prior (2026-08-21 s2, scored 0.9):** Kam's four rulings executed.
 **Bridge LIVE** — `attio-bridge-rg` / B1 Linux / `datasec-attio-bridge.azurewebsites.net`
 (httpsOnly + TLS1.2 + AlwaysOn, Node 22), secrets in Key Vault via references,
 proven by hash-match + a post-migration HMAC-verified real delivery. **ATTIO-18
