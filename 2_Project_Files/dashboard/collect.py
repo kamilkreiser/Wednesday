@@ -296,7 +296,11 @@ def agentmail_feed():
             subj = m.get("subject") or "(no subject)"
             msgs.append({"inbox": inbox.split("@")[0], "from": (m.get("from") or "?"),
                          "subject": subj, "ts": m.get("timestamp", ""),
-                         "attn": "QUESTION" in subj.upper()})
+                         "attn": "QUESTION" in subj.upper(),
+                         # WED-113 round 2 (additive): the API's own preview
+                         # snippet (~200 chars, BLUF line) for the cockpit's
+                         # expand-row view — no extra requests, no body fetch.
+                         "excerpt": (m.get("preview") or "").strip()[:300]})
     by_subj = {}
     for m in sorted(msgs, key=lambda x: x["ts"], reverse=True):
         k = re.sub(r"\s+", " ", m["subject"].strip().lower())

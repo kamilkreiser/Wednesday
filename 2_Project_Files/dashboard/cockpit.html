@@ -2,8 +2,11 @@
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Wednesday — Cockpit</title>
 <style>
-/* WED-113 two-panel cockpit (2026-08-21). ADDITIVE page — chat.html is the
-   styling parent: same palette tokens, same message bubbles, same endpoints. */
+/* WED-113 two-panel cockpit — round 2 (2026-08-21).
+   Round-2 changes: scramble fix (interaction-aware re-render + scroll
+   preservation in BOTH panels), true full-window layout, voice controls
+   carried over from chat.html, feed row expand + ask-Wednesday + filters +
+   day tally. chat.html remains the styling parent: same palette tokens. */
 :root { color-scheme: dark;
   --surface-1:#1a1a19; --surface-2:#232322; --line:#33332f;
   --text-primary:#ffffff; --text-secondary:#c3c2b7; --text-muted:#8a897f;
@@ -17,17 +20,23 @@
 * { box-sizing:border-box; margin:0; }
 html, body { height:100%; }
 body { background:var(--surface-1); color:var(--text-primary);
+  height:100vh; height:100dvh; width:100%; overflow:hidden;   /* full window; panels own all scrolling */
   font:15px/1.55 -apple-system, "SF Pro Text", Helvetica, Arial, sans-serif;
   display:flex; flex-direction:column; }
 header { border-bottom:1px solid var(--line); flex:none;
-  display:flex; align-items:baseline; gap:12px; padding:12px 18px 10px; }
+  display:flex; align-items:baseline; gap:12px; padding:12px 18px 10px; flex-wrap:wrap; }
 header h1 { font-size:17px; font-weight:650; }
 header a { color:var(--text-muted); font-size:12.5px; text-decoration:none; }
 header a:hover { color:var(--text-primary); }
 #live { margin-left:auto; font-size:12px; color:var(--text-muted); }
 #live.on { color:var(--series-3); }
+#autoplay, #stopvoice { background:var(--surface-2); border:1px solid var(--line); border-radius:7px;
+  color:var(--text-muted); font:inherit; font-size:12px; padding:3px 10px; cursor:pointer; }
+#autoplay:hover, #stopvoice:hover { color:var(--text-primary); }
+#autoplay.on { color:var(--series-3); border-color:var(--series-3); }
+#stopvoice:disabled { opacity:.5; cursor:default; }
 
-main { flex:1; display:flex; min-height:0; }
+main { flex:1; display:flex; min-height:0; width:100%; }
 .panel { flex:1 1 50%; min-width:0; display:flex; flex-direction:column; min-height:0; }
 #convo-panel { border-right:1px solid var(--line); }
 .panel h2 { flex:none; font-size:12px; font-weight:650; letter-spacing:.06em;
@@ -42,6 +51,10 @@ main { flex:1; display:flex; min-height:0; }
 .msg .who { font-weight:600; }
 .msg.wednesday .who { color:var(--series-3); }
 .msg.kam .who { color:var(--series-1); }
+.playbtn { background:none; border:none; color:var(--text-muted); cursor:pointer;
+  font-size:11px; padding:0 2px; margin-left:4px; line-height:1; vertical-align:baseline; }
+.playbtn:hover { color:var(--text-primary); }
+.playbtn:disabled { opacity:.4; cursor:default; }
 .msg .body { background:var(--surface-2); border:1px solid var(--line);
   border-radius:10px; padding:8px 12px; white-space:pre-wrap; word-break:break-word;
   color:var(--text-primary); }
@@ -66,14 +79,41 @@ main { flex:1; display:flex; min-height:0; }
 #send:disabled { opacity:.5; cursor:default; }
 
 /* ── RIGHT: fleet activity feed ── */
+#tally { flex:none; display:flex; gap:6px; flex-wrap:wrap; align-items:baseline;
+  font-size:11.5px; color:var(--text-muted); padding:8px 18px 0; }
+#tally .tchip { background:var(--surface-2); border:1px solid var(--line); border-radius:6px;
+  padding:2px 8px; color:var(--text-secondary); }
+#tally .tchip b { font-weight:650; color:var(--text-primary); }
+#filters { flex:none; display:flex; gap:5px; flex-wrap:wrap; padding:7px 18px 9px;
+  border-bottom:1px solid var(--line); }
+.fchip { background:var(--surface-2); border:1px solid var(--line); border-radius:6px;
+  color:var(--text-muted); font:inherit; font-size:11px; padding:2px 8px; cursor:pointer; }
+.fchip:hover { color:var(--text-primary); }
+.fchip.on { color:var(--text-primary); border-color:var(--series-1);
+  background:color-mix(in srgb, var(--series-1) 12%, var(--surface-2)); }
+.fchip.clear { border-style:dashed; }
 .evt { border:1px solid var(--line); border-radius:9px; background:var(--surface-2);
-  padding:7px 11px 8px; margin:0 0 9px; }
+  padding:7px 11px 8px; margin:0 0 9px; cursor:pointer; }
 .evt .top { display:flex; align-items:baseline; gap:8px; flex-wrap:wrap; }
 .evt .proj { font-weight:600; font-size:13px; color:var(--text-primary); }
 .evt .when { margin-left:auto; font-size:11.5px; color:var(--text-muted); white-space:nowrap; }
+.askbtn { background:none; border:1px solid var(--line); border-radius:6px;
+  color:var(--text-muted); font:inherit; font-size:10.5px; padding:1px 7px; cursor:pointer; }
+.askbtn:hover { color:var(--text-primary); border-color:var(--series-1); }
 .evt .sum { font-size:13px; color:var(--text-secondary); margin-top:2px;
   overflow:hidden; text-overflow:ellipsis; display:-webkit-box;
   -webkit-line-clamp:2; -webkit-box-orient:vertical; }
+.evt.expanded .sum { display:block; -webkit-line-clamp:unset; }
+.evt .detail { display:none; margin-top:7px; border-top:1px solid var(--line);
+  padding-top:7px; font-size:12.5px; color:var(--text-secondary); }
+.evt.expanded .detail { display:block; }
+.evt .detail .row { margin:0 0 3px; }
+.evt .detail .k { color:var(--text-muted); font-size:11px; text-transform:uppercase;
+  letter-spacing:.05em; margin-right:6px; }
+.evt .detail .excerpt { margin-top:5px; padding:6px 9px; border-left:3px solid var(--line);
+  background:color-mix(in srgb, var(--surface-1) 55%, var(--surface-2));
+  border-radius:0 6px 6px 0; white-space:pre-wrap; word-break:break-word; }
+.evt .detail .noexcerpt { color:var(--text-muted); font-style:italic; }
 .chip { flex:none; font-size:10.5px; font-weight:650; letter-spacing:.04em;
   border-radius:5px; padding:1px 7px; border:1px solid transparent; }
 .t-brief     { color:var(--series-1); background:color-mix(in srgb, var(--series-1) 12%, transparent); }
@@ -92,15 +132,17 @@ main { flex:1; display:flex; min-height:0; }
 #feed-note { flex:none; font-size:11.5px; color:var(--text-muted);
   border-top:1px solid var(--line); padding:7px 18px; }
 
-/* ── narrow screens: stack panels vertically ── */
+/* ── narrow screens: stack panels vertically, each still owns its scroll ── */
 @media (max-width: 880px) {
-  main { flex-direction:column; overflow-y:auto; }
-  .panel { flex:none; min-height:45vh; max-height:75vh; }
+  main { flex-direction:column; }
+  .panel { flex:1 1 50%; min-height:0; }
   #convo-panel { border-right:none; border-bottom:1px solid var(--line); }
 }
 </style></head><body>
 <header><h1>Cockpit</h1>
  <a href="/">&larr; dashboard</a> <a href="/chat">chat view</a>
+ <button id="autoplay" title="speak newly-arriving Wednesday replies aloud">&#128266; auto-play replies</button>
+ <button id="stopvoice" title="stop the voice that is speaking now (autoplay stays on)">&#9209; stop</button>
  <span id="live">&#9675; connecting&hellip;</span></header>
 <main>
  <section class="panel" id="convo-panel" aria-label="Conversation with Wednesday">
@@ -112,18 +154,58 @@ main { flex:1; display:flex; min-height:0; }
  </section>
  <section class="panel" id="feed-panel" aria-label="Fleet activity feed">
   <h2>Fleet activity</h2>
+  <div id="tally"></div>
+  <div id="filters"></div>
   <div class="scroll" id="feedscroll"><div id="feed"><p class="empty" id="feed-empty">no fleet events yet</p></div></div>
   <div id="feed-note"></div>
  </section>
 </main>
 <script>
 "use strict";
-/* ───────────── LEFT: conversation (same pattern as chat.html) ───────────── */
+/* ══ interaction guard (round-2 scramble fix) ═══════════════════════════════
+   Never re-render a panel under the user's hands: while the pointer is down
+   in it, while a text selection lives in it, or (conversation only) while a
+   draft sits in the input. Deferred data is retried on pointer-up and at the
+   next poll tick. Scroll is preserved on every re-render: the conversation
+   sticks to the tail ONLY if the reader was already there; the feed anchors
+   the rows in view when new items are prepended above them. */
+const pointerDown = { convo: false, feed: false };
+function armGuards(el, key) {
+  el.addEventListener("pointerdown", () => { pointerDown[key] = true; });
+}
+window.addEventListener("pointerup", () => {
+  pointerDown.convo = pointerDown.feed = false;
+  flushPending();
+});
+window.addEventListener("pointercancel", () => {
+  pointerDown.convo = pointerDown.feed = false;
+  flushPending();
+});
+function selectionIn(el) {
+  const s = window.getSelection();
+  if (!s || s.isCollapsed || !s.anchorNode) return false;
+  return el.contains(s.anchorNode) || (s.focusNode && el.contains(s.focusNode));
+}
+function flushPending() {
+  if (pendingMsgs && !convoBusy()) { render(pendingMsgs); }
+  if (pendingFeed && !feedBusy()) { renderFeed(pendingFeed); }
+}
+
+/* ══ LEFT: conversation (data pattern from chat.html) ══════════════════════ */
 const log = document.getElementById("log");
 const msgsEl = document.getElementById("msgs");
 const live = document.getElementById("live");
+const textEl = document.getElementById("text");
 let lastSig = null;
+let pendingMsgs = null;
+armGuards(log, "convo");
 
+function convoBusy() {
+  // a non-empty draft means Kam is composing — don't repaint under him;
+  // an empty focused input still updates live (send-echo depends on it)
+  return pointerDown.convo || selectionIn(log) ||
+         (document.activeElement === textEl && textEl.value.trim() !== "");
+}
 function esc(s) {
   return String(s).replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;")
                   .replace(/"/g, "&quot;").replace(/'/g, "&#39;");
@@ -145,7 +227,10 @@ function nearBottom() {
   return log.scrollHeight - log.scrollTop - log.clientHeight < 80;
 }
 function render(msgs) {
-  const stick = nearBottom() || lastSig === null;
+  if (convoBusy()) { pendingMsgs = msgs; return; }
+  pendingMsgs = null;
+  const stick = nearBottom() || lastRendered === null;
+  const keepTop = log.scrollTop;                 // reading position, if not at tail
   msgsEl.innerHTML = "";
   if (!msgs.length) {
     const p = document.createElement("p"); p.className = "empty"; p.textContent = "no messages yet";
@@ -158,6 +243,12 @@ function render(msgs) {
     const who = document.createElement("span"); who.className = "who";
     who.textContent = role === "kam" ? "Kam" : "Wednesday";
     meta.append(who, "  " + (m.ts || "").slice(11, 16));
+    if (role === "wednesday" && m.ts) {
+      const pb = document.createElement("button"); pb.className = "playbtn";
+      pb.textContent = "▶"; pb.title = "speak this message aloud";
+      pb.addEventListener("click", e => { e.stopPropagation(); speak(m.ts, pb); });
+      meta.appendChild(pb);
+    }
     const body = document.createElement("div"); body.className = "body";
     if (role === "wednesday") body.innerHTML = mdLite(m.text || "");
     else body.textContent = m.text || "";
@@ -174,24 +265,70 @@ function render(msgs) {
     }
     msgsEl.appendChild(div);
   }
-  // Only follow the tail when the reader is already AT the tail.
-  if (stick) log.scrollTop = log.scrollHeight;
+  // Stick to the tail only when the reader was already there; otherwise put
+  // the scroll position back exactly (the innerHTML swap clamps it to 0 —
+  // that clamp was Kam's round-2 "scrambled view").
+  log.scrollTop = stick ? log.scrollHeight : keepTop;
+  lastRendered = true;
 }
+let lastRendered = null;
+
+/* ── voice (carried verbatim from chat.html, round-2 item 3) ── */
+async function speak(ts, btn) {
+  if (btn) btn.disabled = true;
+  try { await fetch("/api/speak", {
+    method: "POST", headers: {"Content-Type": "application/json"},
+    body: JSON.stringify({ts})});
+  } finally { if (btn) setTimeout(() => { btn.disabled = false; }, 800); }
+}
+const svBtn = document.getElementById("stopvoice");
+svBtn.addEventListener("click", async () => {
+  svBtn.disabled = true;
+  try { await fetch("/api/speak/stop", {
+    method: "POST", headers: {"Content-Type": "application/json"}, body: "{}"});
+  } finally { setTimeout(() => { svBtn.disabled = false; }, 400); }
+});
+// autoplay: default OFF, persisted (same key as /chat so the preference is
+// one setting, not two); only wednesday messages ARRIVING after page load are
+// spoken — never the back-history.
+const AP_KEY = "wed_chat_autoplay";
+const apBtn = document.getElementById("autoplay");
+let autoplayOn = false;
+try { autoplayOn = localStorage.getItem(AP_KEY) === "1"; } catch (e) {}
+apBtn.classList.toggle("on", autoplayOn);
+apBtn.addEventListener("click", () => {
+  autoplayOn = !autoplayOn;
+  try { localStorage.setItem(AP_KEY, autoplayOn ? "1" : "0"); } catch (e) {}
+  apBtn.classList.toggle("on", autoplayOn);
+});
+let knownTs = null;   // null until the first successful poll seeds the history
 async function poll(force) {
   try {
     const d = await (await fetch("/api/chatlog")).json();
     const msgs = d.messages || [];
     live.textContent = "● live"; live.classList.add("on");
+    if (knownTs === null) {
+      knownTs = new Set(msgs.map(m => m.ts));   // back-history: never auto-spoken
+    } else {
+      let latestNew = null;
+      for (const m of msgs) {
+        if (m.ts && !knownTs.has(m.ts)) {
+          knownTs.add(m.ts);
+          if (m.role === "wednesday") latestNew = m;
+        }
+      }
+      // several at once would overlap-kill each other — speak only the latest
+      if (autoplayOn && latestNew) speak(latestNew.ts, null);
+    }
     const sig = JSON.stringify(msgs);
-    if (!force && sig === lastSig) return;
-    render(msgs);
+    if (!force && sig === lastSig && !pendingMsgs) return;
     lastSig = sig;
+    render(msgs);          // defers itself if Kam is mid-read/mid-draft
   } catch (e) {
     live.textContent = "○ reconnecting…"; live.classList.remove("on");
   }
 }
 const sendBtn = document.getElementById("send");
-const textEl = document.getElementById("text");
 async function doSend() {
   const t = textEl.value.trim();
   if (!t) return;
@@ -206,18 +343,40 @@ async function doSend() {
 sendBtn.addEventListener("click", doSend);
 textEl.addEventListener("keydown", e => { if (e.key === "Enter") doSend(); });
 
-/* ───────────── RIGHT: fleet activity feed (subjects → typed events) ───────
-   Source: /api/agentmail (collector snapshot of fleet mail SUBJECTS — bodies
-   are never in the file and never rendered here). Distilled, not raw. */
+/* ══ RIGHT: fleet activity feed (subjects → typed events) ══════════════════
+   Source: /api/agentmail — subjects plus the collector's short excerpt
+   (~300 chars, the mail's own preview snippet); full bodies are never
+   collected and never rendered. */
 const feedEl = document.getElementById("feed");
+const feedScroll = document.getElementById("feedscroll");
 const feedNote = document.getElementById("feed-note");
+const tallyEl = document.getElementById("tally");
+const filtersEl = document.getElementById("filters");
 let feedSig = null;
+let pendingFeed = null;
+let lastEventsRaw = null;
+const expandedKeys = new Set();        // survives re-renders — no collapse under a tap
+armGuards(feedScroll, "feed");
+
+function feedBusy() {
+  return pointerDown.feed || selectionIn(feedScroll);
+}
+// filters: multi-select by type and project; empty = all. Persisted, but the
+// page must work with storage unavailable (try/catch everywhere).
+const FILTER_KEY = "wed_cockpit_feed_filters";
+let filters = {types: [], projects: []};
+try {
+  const raw = JSON.parse(localStorage.getItem(FILTER_KEY) || "{}");
+  if (raw && Array.isArray(raw.types)) filters.types = raw.types.filter(x => typeof x === "string");
+  if (raw && Array.isArray(raw.projects)) filters.projects = raw.projects.filter(x => typeof x === "string");
+} catch (e) {}
+function saveFilters() {
+  try { localStorage.setItem(FILTER_KEY, JSON.stringify(filters)); } catch (e) {}
+}
 
 // [A -> B] rest   (fleet routing convention — subjects ARE the events)
 const TAG_RE = /^\[([^\][]+?)\s*->\s*([^\][]+?)\]\s*(.*)$/;
-
 function classify(rest) {
-  // returns {type, label} from the post-tag part of the subject
   if (/^BRIEF\b/i.test(rest))                    return {type: "brief", label: "BRIEF"};
   if (/^ANSWER:\s*plan confirmation/i.test(rest) ||
       /^plan confirmation\b.*CONFIRMED/i.test(rest)) return {type: "confirmed", label: "CONFIRMED"};
@@ -229,7 +388,6 @@ function classify(rest) {
   return {type: "mail", label: "MAIL"};
 }
 function parseEvent(m) {
-  // one mail → one event row, or null (malformed → skip-and-count)
   if (!m || typeof m !== "object") return null;
   const subj = m.subject, ts = m.ts;
   if (typeof subj !== "string" || typeof ts !== "string") return null;
@@ -239,29 +397,43 @@ function parseEvent(m) {
   if (!tag) return null;                    // probes / non-fleet mail: not events
   const [, from, to, rest] = tag;
   const isWed = s => /^wednesday$/i.test(s.trim());
-  // project = whichever side of the arrow is not Wednesday ("all agents" kept as-is)
   const project = isWed(from) ? to.trim() : from.trim();
   const cls = classify(rest);
-  // one-line summary = payload after the first em-dash; else rest minus type prefix
   let sum = "";
   const dash = rest.split(/\s+—\s+/);
   if (dash.length > 1) sum = dash.slice(1).join(" — ");
   else sum = rest.replace(/^(BRIEF|STATUS|QUESTION|ANSWER|SCORE)[:\s]*/i, "");
   return {t, ts, project, dir: isWed(from) ? "out" : "in",
-          type: cls.type, label: cls.label, topic: rest, sum: sum.trim()};
+          type: cls.type, label: cls.label, topic: rest, sum: sum.trim(),
+          from: typeof m.from === "string" ? m.from : "",
+          inboxes: Array.isArray(m.inboxes) ? m.inboxes.filter(x => typeof x === "string") : [],
+          excerpt: typeof m.excerpt === "string" ? m.excerpt : "",
+          key: ts + "|" + subj};
 }
+const AEST = "Australia/Brisbane";
 function aest(t) {
   try {
-    return new Intl.DateTimeFormat("en-AU", {timeZone: "Australia/Brisbane",
+    return new Intl.DateTimeFormat("en-AU", {timeZone: AEST,
       weekday: "short", hour: "2-digit", minute: "2-digit", hour12: false}).format(new Date(t));
   } catch (e) { return new Date(t).toISOString().slice(11, 16) + "Z"; }
 }
+function aestFull(t) {
+  try {
+    return new Intl.DateTimeFormat("en-AU", {timeZone: AEST, dateStyle: "medium",
+      timeStyle: "short", hour12: false}).format(new Date(t));
+  } catch (e) { return new Date(t).toISOString(); }
+}
+function aestDay(t) {
+  try {
+    return new Intl.DateTimeFormat("en-CA", {timeZone: AEST,
+      year: "numeric", month: "2-digit", day: "2-digit"}).format(new Date(t));
+  } catch (e) { return new Date(t).toISOString().slice(0, 10); }
+}
 function topicKey(rest) {
-  // QUESTION/ANSWER pairing: topic is mirrored exactly per the mail convention
   const m = rest.match(/^(?:QUESTION|ANSWER):\s*([^—]*)/i);
   return m ? m[1].trim().toLowerCase() : null;
 }
-function renderFeed(msgs) {
+function parseAll(msgs) {
   const events = [];
   let skipped = 0;
   for (const m of (Array.isArray(msgs) ? msgs : [])) {
@@ -271,7 +443,6 @@ function renderFeed(msgs) {
     } catch (e) { skipped++; }
   }
   events.sort((a, b) => b.t - a.t);          // newest at top
-  // unanswered QUESTIONs: no later ANSWER/CONFIRMED for the same project
   for (const q of events) {
     if (q.type !== "question") continue;
     const qKey = topicKey(q.topic);
@@ -280,15 +451,106 @@ function renderFeed(msgs) {
       a.project.toLowerCase() === q.project.toLowerCase() &&
       (qKey === null || topicKey(a.topic) === null || topicKey(a.topic) === qKey));
   }
+  return {events, skipped};
+}
+function renderTally(events) {
+  // today's WRAP and SCORE counts by project (AEST day)
+  const today = aestDay(Date.now());
+  const per = {};
+  for (const ev of events) {
+    if (aestDay(ev.t) !== today) continue;
+    if (ev.type !== "wrap" && ev.type !== "score") continue;
+    per[ev.project] = per[ev.project] || {wrap: 0, score: 0};
+    per[ev.project][ev.type]++;
+  }
+  tallyEl.innerHTML = "";
+  const head = document.createElement("span"); head.textContent = "today:";
+  tallyEl.appendChild(head);
+  const names = Object.keys(per).sort();
+  if (!names.length) {
+    const s = document.createElement("span");
+    s.textContent = "no wraps or scores yet";
+    tallyEl.appendChild(s);
+    return;
+  }
+  for (const p of names) {
+    const c = document.createElement("span"); c.className = "tchip";
+    const b = document.createElement("b"); b.textContent = p;
+    c.append(b, ` ${per[p].wrap} wrap${per[p].wrap === 1 ? "" : "s"} · ${per[p].score} score${per[p].score === 1 ? "" : "s"}`);
+    tallyEl.appendChild(c);
+  }
+}
+const TYPE_ORDER = ["brief", "confirmed", "status", "question", "answer", "wrap", "score", "mail"];
+const TYPE_LABEL = {brief: "BRIEF", confirmed: "CONFIRMED", status: "STATUS", question: "QUESTION",
+                    answer: "ANSWER", wrap: "WRAP", score: "SCORE", mail: "MAIL"};
+function renderFilters(events) {
+  filtersEl.innerHTML = "";
+  const typesPresent = new Set(events.map(e => e.type));
+  for (const t of TYPE_ORDER) {
+    if (!typesPresent.has(t) && !filters.types.includes(t)) continue;
+    const b = document.createElement("button");
+    b.className = "fchip" + (filters.types.includes(t) ? " on" : "");
+    b.textContent = TYPE_LABEL[t];
+    b.addEventListener("click", () => {
+      filters.types = filters.types.includes(t)
+        ? filters.types.filter(x => x !== t) : filters.types.concat(t);
+      saveFilters(); applyRender({resetScroll: true});
+    });
+    filtersEl.appendChild(b);
+  }
+  const projects = [...new Set(events.map(e => e.project))].sort();
+  for (const p of projects.concat(filters.projects.filter(x => !projects.includes(x)))) {
+    const b = document.createElement("button");
+    b.className = "fchip" + (filters.projects.includes(p) ? " on" : "");
+    b.textContent = p;
+    b.addEventListener("click", () => {
+      filters.projects = filters.projects.includes(p)
+        ? filters.projects.filter(x => x !== p) : filters.projects.concat(p);
+      saveFilters(); applyRender({resetScroll: true});
+    });
+    filtersEl.appendChild(b);
+  }
+  if (filters.types.length || filters.projects.length) {
+    const b = document.createElement("button");
+    b.className = "fchip clear"; b.textContent = "✕ clear";
+    b.addEventListener("click", () => {
+      filters = {types: [], projects: []};
+      saveFilters(); applyRender({resetScroll: true});
+    });
+    filtersEl.appendChild(b);
+  }
+}
+function askWednesday(ev) {
+  // reference line into the chat input, focused, NOT sent (round-2 item 4b)
+  const topic = ev.topic.length > 160 ? ev.topic.slice(0, 157) + "…" : ev.topic;
+  textEl.value = `Re: [${ev.project}] ${topic} (${aest(ev.t)} AEST) — `;
+  textEl.focus();
+  try { textEl.setSelectionRange(textEl.value.length, textEl.value.length); } catch (e) {}
+}
+function renderFeed(msgs, opts) {
+  if (feedBusy()) { pendingFeed = msgs; return; }
+  pendingFeed = null;
+  lastEventsRaw = msgs;
+  const {events, skipped} = parseAll(msgs);
+  renderTally(events);
+  renderFilters(events);
+  const shown = events.filter(ev =>
+    (!filters.types.length || filters.types.includes(ev.type)) &&
+    (!filters.projects.length || filters.projects.includes(ev.project)));
+  // scroll anchoring: keep the rows he is looking at where they are when new
+  // items are prepended above; a filter change resets to the top instead.
+  const prevTop = feedScroll.scrollTop;
+  const prevH = feedScroll.scrollHeight;
   feedEl.innerHTML = "";
-  if (!events.length) {
+  if (!shown.length) {
     const p = document.createElement("p"); p.className = "empty";
-    p.textContent = "no fleet events yet";
+    p.textContent = events.length ? "no events match the filters" : "no fleet events yet";
     feedEl.appendChild(p);
   }
-  for (const ev of events) {
+  for (const ev of shown) {
     const row = document.createElement("div");
-    row.className = "evt" + (ev.open ? " open-q" : "");
+    row.className = "evt" + (ev.open ? " open-q" : "") +
+                    (expandedKeys.has(ev.key) ? " expanded" : "");
     const top = document.createElement("div"); top.className = "top";
     const chip = document.createElement("span");
     chip.className = "chip t-" + ev.type; chip.textContent = ev.label;
@@ -299,25 +561,62 @@ function renderFeed(msgs) {
       const nb = document.createElement("span"); nb.className = "needs";
       nb.textContent = "needs Wednesday"; top.appendChild(nb);
     }
+    const ask = document.createElement("button"); ask.className = "askbtn";
+    ask.textContent = "⤷ ask Wed"; ask.title = "draft a chat message referencing this event (not sent)";
+    ask.addEventListener("click", e => { e.stopPropagation(); askWednesday(ev); });
+    top.appendChild(ask);
     const when = document.createElement("span"); when.className = "when";
     when.textContent = aest(ev.t) + " AEST"; top.appendChild(when);
     const sum = document.createElement("div"); sum.className = "sum";
     sum.textContent = ev.sum || ev.topic;
-    sum.title = ev.topic;                     // full subject payload on hover
     row.append(top, sum);
+    // expand detail (round-2 item 4a): full subject payload + metadata +
+    // the collector's short excerpt; honest note when none was captured
+    const det = document.createElement("div"); det.className = "detail";
+    const mk = (k, v) => {
+      const r = document.createElement("div"); r.className = "row";
+      const ks = document.createElement("span"); ks.className = "k"; ks.textContent = k;
+      r.append(ks, v); return r;
+    };
+    det.appendChild(mk("subject", ev.topic));
+    if (ev.from) det.appendChild(mk("from", ev.from));
+    if (ev.inboxes.length) det.appendChild(mk("inbox", ev.inboxes.join(", ")));
+    det.appendChild(mk("received", aestFull(ev.t) + " AEST"));
+    if (ev.excerpt) {
+      const ex = document.createElement("div"); ex.className = "excerpt";
+      ex.textContent = ev.excerpt;
+      det.appendChild(ex);
+    } else {
+      const ex = document.createElement("div"); ex.className = "noexcerpt";
+      ex.textContent = "body excerpt not captured";
+      det.appendChild(ex);
+    }
+    row.appendChild(det);
+    row.addEventListener("click", () => {
+      if (selectionIn(row)) return;          // selecting text is not a toggle
+      if (expandedKeys.has(ev.key)) expandedKeys.delete(ev.key);
+      else expandedKeys.add(ev.key);
+      row.classList.toggle("expanded");
+    });
     feedEl.appendChild(row);
   }
-  feedNote.textContent = events.length + " events" +
+  if (opts && opts.resetScroll) feedScroll.scrollTop = 0;
+  else if (prevTop > 4) feedScroll.scrollTop = prevTop + (feedScroll.scrollHeight - prevH);
+  else feedScroll.scrollTop = 0;
+  feedNote.textContent = shown.length + " of " + events.length + " events" +
     (skipped ? " · " + skipped + " unparsed (skipped)" : "");
+}
+function applyRender(opts) {
+  if (lastEventsRaw) renderFeed(lastEventsRaw, opts);
 }
 async function pollFeed() {
   try {
     const d = await (await fetch("/api/agentmail")).json();
     const msgs = d.messages || [];
     const sig = JSON.stringify(msgs);
-    if (sig === feedSig) return;
-    renderFeed(msgs);
+    if (sig === feedSig && !pendingFeed) return;
     feedSig = sig;
+    renderFeed(msgs);      // defers itself if Kam is mid-read in the feed
   } catch (e) {
     feedNote.textContent = "feed unreachable — retrying";
   }

@@ -29,6 +29,12 @@ fi
     sleep 300
   done ) &
 LOOP_PID=$!
-trap 'kill $LOOP_PID 2>/dev/null' EXIT
 echo "dashboard: http://127.0.0.1:$PORT (refresh loop pid $LOOP_PID)"
-exec python3 "$DIR/server.py"
+# Supervisor pattern (WED-113 round 2 hygiene): the old `exec python3` replaced
+# this shell and DESTROYED the trap, so killing the server orphaned the
+# collect/generate loop. Now the shell stays as supervisor: however this ends
+# (server killed directly, or this script signalled), BOTH sides die together.
+python3 "$DIR/server.py" &
+SRV_PID=$!
+trap 'kill $LOOP_PID $SRV_PID 2>/dev/null' EXIT INT TERM
+wait $SRV_PID
