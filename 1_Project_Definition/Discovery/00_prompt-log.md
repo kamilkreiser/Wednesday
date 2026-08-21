@@ -1153,3 +1153,15 @@ that is what he means by "dev chain," it is minutes whenever he says go.
 
 *(Dictation: "The IP belongs to Platform S" — Stuart's answer to the 52.74.18.212 question, relayed by Kam.)*
 *Done with it:* the pre-agreed KS-670 decision tree executed — his-loop → FREE FIX, no spend, no upgrade. Secuura session briefed: record the identification on KS-670 with provenance, Stuart-facing board comment asking Platform S's retry loop be stopped/fixed (evidence package included), re-measure the caller before claiming it is still live, quota-recovery check staged. NOTHING MERGES unchanged.
+
+## 2026-08-21 ~19:20 (terminal — Stuart WhatsApp thread relayed by Kam, verbatim)
+> [18:39:38] Stuart: uat-ps.secuura.net 52.74.18.212 AWS ap-southeast-1 — Yep its uat-ps
+> [18:39:59] Kam: Thank you. That is all I needed to know
+> [18:43:42] Stuart: Ok so its also the local development K stack on my machine which is using credits as well. PLatform s repolls infinetly ... raising a ticket to fix that (was ok when it was one, up for a short time and back down again)
+> [18:44:17] Stuart: I'll put it into uat-ps very shortly
+> [18:44:43] Stuart: 100/min to 78/min and falling
+> [18:48:15] Stuart: 2/min now
+> [18:48:29] Stuart: Issue was actually local stacks
+> [18:48:58] Kam: Almost. I am acting on the other side
+
+*Done with it:* micro-session briefed to close the KS-670 arc — confirm the rate drop from demo's own logs, run the staged recovery probes (402 state), record the resolution on the ticket (host = uat-ps; deeper cause = Stuart's local K stacks; durable fix = his Platform S repoll ticket), and flag one question gently: if his local stack holds demo's Blockfrost key, the credential-scoping recommendation revives. Provenance chain = WhatsApp-via-Kam throughout.
