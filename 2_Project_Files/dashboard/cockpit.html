@@ -1,0 +1,329 @@
+<!doctype html><html data-theme="__THEME__" lang="en"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Wednesday — Cockpit</title>
+<style>
+/* WED-113 two-panel cockpit (2026-08-21). ADDITIVE page — chat.html is the
+   styling parent: same palette tokens, same message bubbles, same endpoints. */
+:root { color-scheme: dark;
+  --surface-1:#1a1a19; --surface-2:#232322; --line:#33332f;
+  --text-primary:#ffffff; --text-secondary:#c3c2b7; --text-muted:#8a897f;
+  --series-1:#3987e5; --series-2:#d95926; --series-3:#199e70;
+  --amber:#d99a26; --plum:#9a6fd0; --teal:#2a9d9d; }
+:root[data-theme="light"] { color-scheme: light;
+  --surface-1:#f7f7f4; --surface-2:#ffffff; --line:#dcdcd4;
+  --text-primary:#1b1b19; --text-secondary:#4a4a44; --text-muted:#78776e;
+  --series-1:#1f63b8; --series-2:#b8431a; --series-3:#127956;
+  --amber:#9c6d12; --plum:#6f46a8; --teal:#177878; }
+* { box-sizing:border-box; margin:0; }
+html, body { height:100%; }
+body { background:var(--surface-1); color:var(--text-primary);
+  font:15px/1.55 -apple-system, "SF Pro Text", Helvetica, Arial, sans-serif;
+  display:flex; flex-direction:column; }
+header { border-bottom:1px solid var(--line); flex:none;
+  display:flex; align-items:baseline; gap:12px; padding:12px 18px 10px; }
+header h1 { font-size:17px; font-weight:650; }
+header a { color:var(--text-muted); font-size:12.5px; text-decoration:none; }
+header a:hover { color:var(--text-primary); }
+#live { margin-left:auto; font-size:12px; color:var(--text-muted); }
+#live.on { color:var(--series-3); }
+
+main { flex:1; display:flex; min-height:0; }
+.panel { flex:1 1 50%; min-width:0; display:flex; flex-direction:column; min-height:0; }
+#convo-panel { border-right:1px solid var(--line); }
+.panel h2 { flex:none; font-size:12px; font-weight:650; letter-spacing:.06em;
+  text-transform:uppercase; color:var(--text-muted);
+  padding:10px 18px 8px; border-bottom:1px solid var(--line); }
+.scroll { flex:1; overflow-y:auto; scrollbar-width:thin; padding:14px 18px; }
+.empty { color:var(--text-muted); font-size:13px; padding:10px 0; }
+
+/* ── LEFT: conversation (same bubble grammar as /chat) ── */
+.msg { margin:0 0 14px; max-width:88%; }
+.msg .meta { font-size:11.5px; color:var(--text-muted); margin:0 2px 2px; }
+.msg .who { font-weight:600; }
+.msg.wednesday .who { color:var(--series-3); }
+.msg.kam .who { color:var(--series-1); }
+.msg .body { background:var(--surface-2); border:1px solid var(--line);
+  border-radius:10px; padding:8px 12px; white-space:pre-wrap; word-break:break-word;
+  color:var(--text-primary); }
+.msg.kam { margin-left:auto; }
+.msg.kam .meta { text-align:right; }
+.msg.kam .body { border-color:color-mix(in srgb, var(--series-1) 35%, var(--line));
+  border-radius:10px 10px 2px 10px; }
+.msg.wednesday .body { border-radius:10px 10px 10px 2px; }
+.msg .body a { color:var(--series-1); word-break:break-all; }
+.msg .body strong { font-weight:650; }
+.ackline { font-size:11.5px; color:var(--text-muted); margin:3px 2px 0; text-align:right; }
+.ackline.done, .ackline.seen { color:var(--series-3); }
+.ackline.actioning, .ackline.action_requested { color:var(--series-2); }
+#convo-foot { flex:none; border-top:1px solid var(--line);
+  display:flex; gap:8px; padding:10px 18px calc(12px + env(safe-area-inset-bottom, 0px)); }
+#text { flex:1; min-width:0; background:var(--surface-2); border:1px solid var(--line);
+  border-radius:8px; color:var(--text-primary); font:inherit; padding:8px 12px; }
+#text:focus { outline:none; border-color:var(--series-1); }
+#send { background:var(--surface-2); color:var(--text-secondary); border:1px solid var(--line);
+  border-radius:8px; font:inherit; font-size:14px; padding:8px 16px; cursor:pointer; }
+#send:hover { color:var(--text-primary); }
+#send:disabled { opacity:.5; cursor:default; }
+
+/* ── RIGHT: fleet activity feed ── */
+.evt { border:1px solid var(--line); border-radius:9px; background:var(--surface-2);
+  padding:7px 11px 8px; margin:0 0 9px; }
+.evt .top { display:flex; align-items:baseline; gap:8px; flex-wrap:wrap; }
+.evt .proj { font-weight:600; font-size:13px; color:var(--text-primary); }
+.evt .when { margin-left:auto; font-size:11.5px; color:var(--text-muted); white-space:nowrap; }
+.evt .sum { font-size:13px; color:var(--text-secondary); margin-top:2px;
+  overflow:hidden; text-overflow:ellipsis; display:-webkit-box;
+  -webkit-line-clamp:2; -webkit-box-orient:vertical; }
+.chip { flex:none; font-size:10.5px; font-weight:650; letter-spacing:.04em;
+  border-radius:5px; padding:1px 7px; border:1px solid transparent; }
+.t-brief     { color:var(--series-1); background:color-mix(in srgb, var(--series-1) 12%, transparent); }
+.t-confirmed { color:var(--series-3); background:color-mix(in srgb, var(--series-3) 12%, transparent); }
+.t-status    { color:var(--teal);     background:color-mix(in srgb, var(--teal) 12%, transparent); }
+.t-question  { color:var(--amber);    background:color-mix(in srgb, var(--amber) 14%, transparent); }
+.t-answer    { color:var(--series-3); background:color-mix(in srgb, var(--series-3) 12%, transparent);
+               border-color:color-mix(in srgb, var(--series-3) 30%, transparent); }
+.t-wrap      { color:var(--plum);     background:color-mix(in srgb, var(--plum) 12%, transparent); }
+.t-score     { color:var(--series-2); background:color-mix(in srgb, var(--series-2) 12%, transparent); }
+.t-mail      { color:var(--text-muted); background:color-mix(in srgb, var(--text-muted) 12%, transparent); }
+/* unanswered QUESTION = "needs Wednesday" — amber flag on the whole row */
+.evt.open-q { border-color:color-mix(in srgb, var(--amber) 55%, var(--line));
+  box-shadow:inset 3px 0 0 var(--amber); }
+.evt.open-q .needs { font-size:11px; font-weight:600; color:var(--amber); }
+#feed-note { flex:none; font-size:11.5px; color:var(--text-muted);
+  border-top:1px solid var(--line); padding:7px 18px; }
+
+/* ── narrow screens: stack panels vertically ── */
+@media (max-width: 880px) {
+  main { flex-direction:column; overflow-y:auto; }
+  .panel { flex:none; min-height:45vh; max-height:75vh; }
+  #convo-panel { border-right:none; border-bottom:1px solid var(--line); }
+}
+</style></head><body>
+<header><h1>Cockpit</h1>
+ <a href="/">&larr; dashboard</a> <a href="/chat">chat view</a>
+ <span id="live">&#9675; connecting&hellip;</span></header>
+<main>
+ <section class="panel" id="convo-panel" aria-label="Conversation with Wednesday">
+  <h2>Conversation — Kam &amp; Wednesday</h2>
+  <div class="scroll" id="log"><div id="msgs"><p class="empty" id="convo-empty">no messages yet</p></div></div>
+  <div id="convo-foot">
+   <input id="text" type="text" maxlength="2000" placeholder="message Wednesday&hellip;" autocomplete="off">
+   <button id="send">send</button></div>
+ </section>
+ <section class="panel" id="feed-panel" aria-label="Fleet activity feed">
+  <h2>Fleet activity</h2>
+  <div class="scroll" id="feedscroll"><div id="feed"><p class="empty" id="feed-empty">no fleet events yet</p></div></div>
+  <div id="feed-note"></div>
+ </section>
+</main>
+<script>
+"use strict";
+/* ───────────── LEFT: conversation (same pattern as chat.html) ───────────── */
+const log = document.getElementById("log");
+const msgsEl = document.getElementById("msgs");
+const live = document.getElementById("live");
+let lastSig = null;
+
+function esc(s) {
+  return String(s).replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;")
+                  .replace(/"/g, "&quot;").replace(/'/g, "&#39;");
+}
+// Wednesday messages only: escape FIRST, then minimal transforms (bold, links).
+// Line breaks are preserved by white-space:pre-wrap — no <br> injection needed.
+function mdLite(s) {
+  let h = esc(s);
+  h = h.replace(/https?:\/\/[^\s*]+/g, u => {
+    const m = u.match(/[.,)\]!?;:]+$/);
+    const trail = m ? m[0] : "";
+    if (trail) u = u.slice(0, -trail.length);
+    return '<a href="' + u + '" target="_blank" rel="noopener noreferrer">' + u + "</a>" + trail;
+  });
+  h = h.replace(/\*\*([^*\n][^*]*?)\*\*/g, "<strong>$1</strong>");
+  return h;
+}
+function nearBottom() {
+  return log.scrollHeight - log.scrollTop - log.clientHeight < 80;
+}
+function render(msgs) {
+  const stick = nearBottom() || lastSig === null;
+  msgsEl.innerHTML = "";
+  if (!msgs.length) {
+    const p = document.createElement("p"); p.className = "empty"; p.textContent = "no messages yet";
+    msgsEl.appendChild(p);
+  }
+  for (const m of msgs) {
+    const role = m.role === "kam" ? "kam" : "wednesday";
+    const div = document.createElement("div"); div.className = "msg " + role;
+    const meta = document.createElement("div"); meta.className = "meta";
+    const who = document.createElement("span"); who.className = "who";
+    who.textContent = role === "kam" ? "Kam" : "Wednesday";
+    meta.append(who, "  " + (m.ts || "").slice(11, 16));
+    const body = document.createElement("div"); body.className = "body";
+    if (role === "wednesday") body.innerHTML = mdLite(m.text || "");
+    else body.textContent = m.text || "";
+    div.append(meta, body);
+    if (role === "kam" && m.ack && m.ack.state) {
+      // rendered from Wednesday-written state, never faked (WED-73 honesty rule)
+      const al = document.createElement("div"); al.className = "ackline " + m.ack.state;
+      const at = (m.ack.ts || "").slice(11, 16);
+      al.textContent = m.ack.state === "seen" ? "✓ seen by Wed" + (at ? " " + at : "")
+        : m.ack.state === "actioning" ? "● actioning"
+        : m.ack.state === "done" ? "✓ done" + (at ? " " + at : "")
+        : "⚡ action requested";
+      div.appendChild(al);
+    }
+    msgsEl.appendChild(div);
+  }
+  // Only follow the tail when the reader is already AT the tail.
+  if (stick) log.scrollTop = log.scrollHeight;
+}
+async function poll(force) {
+  try {
+    const d = await (await fetch("/api/chatlog")).json();
+    const msgs = d.messages || [];
+    live.textContent = "● live"; live.classList.add("on");
+    const sig = JSON.stringify(msgs);
+    if (!force && sig === lastSig) return;
+    render(msgs);
+    lastSig = sig;
+  } catch (e) {
+    live.textContent = "○ reconnecting…"; live.classList.remove("on");
+  }
+}
+const sendBtn = document.getElementById("send");
+const textEl = document.getElementById("text");
+async function doSend() {
+  const t = textEl.value.trim();
+  if (!t) return;
+  sendBtn.disabled = true;
+  try {
+    const r = await (await fetch("/api/chat", {
+      method: "POST", headers: {"Content-Type": "application/json"},
+      body: JSON.stringify({text: t})})).json();
+    if (r.ok) { textEl.value = ""; await poll(true); log.scrollTop = log.scrollHeight; }
+  } finally { sendBtn.disabled = false; textEl.focus(); }
+}
+sendBtn.addEventListener("click", doSend);
+textEl.addEventListener("keydown", e => { if (e.key === "Enter") doSend(); });
+
+/* ───────────── RIGHT: fleet activity feed (subjects → typed events) ───────
+   Source: /api/agentmail (collector snapshot of fleet mail SUBJECTS — bodies
+   are never in the file and never rendered here). Distilled, not raw. */
+const feedEl = document.getElementById("feed");
+const feedNote = document.getElementById("feed-note");
+let feedSig = null;
+
+// [A -> B] rest   (fleet routing convention — subjects ARE the events)
+const TAG_RE = /^\[([^\][]+?)\s*->\s*([^\][]+?)\]\s*(.*)$/;
+
+function classify(rest) {
+  // returns {type, label} from the post-tag part of the subject
+  if (/^BRIEF\b/i.test(rest))                    return {type: "brief", label: "BRIEF"};
+  if (/^ANSWER:\s*plan confirmation/i.test(rest) ||
+      /^plan confirmation\b.*CONFIRMED/i.test(rest)) return {type: "confirmed", label: "CONFIRMED"};
+  if (/^STATUS\b/i.test(rest))                   return {type: "status", label: "STATUS"};
+  if (/^QUESTION\b/i.test(rest))                 return {type: "question", label: "QUESTION"};
+  if (/^ANSWER\b/i.test(rest))                   return {type: "answer", label: "ANSWER"};
+  if (/^Session (wrap|close)\b/i.test(rest))     return {type: "wrap", label: "WRAP"};
+  if (/^SCORE\b/i.test(rest))                    return {type: "score", label: "SCORE"};
+  return {type: "mail", label: "MAIL"};
+}
+function parseEvent(m) {
+  // one mail → one event row, or null (malformed → skip-and-count)
+  if (!m || typeof m !== "object") return null;
+  const subj = m.subject, ts = m.ts;
+  if (typeof subj !== "string" || typeof ts !== "string") return null;
+  const t = Date.parse(ts);
+  if (isNaN(t)) return null;
+  const tag = subj.match(TAG_RE);
+  if (!tag) return null;                    // probes / non-fleet mail: not events
+  const [, from, to, rest] = tag;
+  const isWed = s => /^wednesday$/i.test(s.trim());
+  // project = whichever side of the arrow is not Wednesday ("all agents" kept as-is)
+  const project = isWed(from) ? to.trim() : from.trim();
+  const cls = classify(rest);
+  // one-line summary = payload after the first em-dash; else rest minus type prefix
+  let sum = "";
+  const dash = rest.split(/\s+—\s+/);
+  if (dash.length > 1) sum = dash.slice(1).join(" — ");
+  else sum = rest.replace(/^(BRIEF|STATUS|QUESTION|ANSWER|SCORE)[:\s]*/i, "");
+  return {t, ts, project, dir: isWed(from) ? "out" : "in",
+          type: cls.type, label: cls.label, topic: rest, sum: sum.trim()};
+}
+function aest(t) {
+  try {
+    return new Intl.DateTimeFormat("en-AU", {timeZone: "Australia/Brisbane",
+      weekday: "short", hour: "2-digit", minute: "2-digit", hour12: false}).format(new Date(t));
+  } catch (e) { return new Date(t).toISOString().slice(11, 16) + "Z"; }
+}
+function topicKey(rest) {
+  // QUESTION/ANSWER pairing: topic is mirrored exactly per the mail convention
+  const m = rest.match(/^(?:QUESTION|ANSWER):\s*([^—]*)/i);
+  return m ? m[1].trim().toLowerCase() : null;
+}
+function renderFeed(msgs) {
+  const events = [];
+  let skipped = 0;
+  for (const m of (Array.isArray(msgs) ? msgs : [])) {
+    try {
+      const ev = parseEvent(m);
+      if (ev) events.push(ev); else skipped++;
+    } catch (e) { skipped++; }
+  }
+  events.sort((a, b) => b.t - a.t);          // newest at top
+  // unanswered QUESTIONs: no later ANSWER/CONFIRMED for the same project
+  for (const q of events) {
+    if (q.type !== "question") continue;
+    const qKey = topicKey(q.topic);
+    q.open = !events.some(a =>
+      (a.type === "answer" || a.type === "confirmed") && a.t >= q.t &&
+      a.project.toLowerCase() === q.project.toLowerCase() &&
+      (qKey === null || topicKey(a.topic) === null || topicKey(a.topic) === qKey));
+  }
+  feedEl.innerHTML = "";
+  if (!events.length) {
+    const p = document.createElement("p"); p.className = "empty";
+    p.textContent = "no fleet events yet";
+    feedEl.appendChild(p);
+  }
+  for (const ev of events) {
+    const row = document.createElement("div");
+    row.className = "evt" + (ev.open ? " open-q" : "");
+    const top = document.createElement("div"); top.className = "top";
+    const chip = document.createElement("span");
+    chip.className = "chip t-" + ev.type; chip.textContent = ev.label;
+    const proj = document.createElement("span"); proj.className = "proj";
+    proj.textContent = ev.project;
+    top.append(chip, proj);
+    if (ev.open) {
+      const nb = document.createElement("span"); nb.className = "needs";
+      nb.textContent = "needs Wednesday"; top.appendChild(nb);
+    }
+    const when = document.createElement("span"); when.className = "when";
+    when.textContent = aest(ev.t) + " AEST"; top.appendChild(when);
+    const sum = document.createElement("div"); sum.className = "sum";
+    sum.textContent = ev.sum || ev.topic;
+    sum.title = ev.topic;                     // full subject payload on hover
+    row.append(top, sum);
+    feedEl.appendChild(row);
+  }
+  feedNote.textContent = events.length + " events" +
+    (skipped ? " · " + skipped + " unparsed (skipped)" : "");
+}
+async function pollFeed() {
+  try {
+    const d = await (await fetch("/api/agentmail")).json();
+    const msgs = d.messages || [];
+    const sig = JSON.stringify(msgs);
+    if (sig === feedSig) return;
+    renderFeed(msgs);
+    feedSig = sig;
+  } catch (e) {
+    feedNote.textContent = "feed unreachable — retrying";
+  }
+}
+poll(true);
+pollFeed();
+setInterval(poll, 3000);
+setInterval(pollFeed, 20000);
+</script></body></html>
