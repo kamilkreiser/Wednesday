@@ -715,7 +715,7 @@ function decisionCard(dec) {
   const noteEl = document.createElement("input");
   noteEl.type = "text"; noteEl.className = "decnote";
   noteEl.maxLength = 2000; noteEl.autocomplete = "off";
-  noteEl.placeholder = "add context or a note (optional)";
+  noteEl.placeholder = "add context or a note — Enter sends";
   noteEl.value = decDrafts.get(dec.id) || "";
   noteEl.addEventListener("click", e => e.stopPropagation());
   noteEl.addEventListener("input", () => {
@@ -723,9 +723,18 @@ function decisionCard(dec) {
     else decDrafts.delete(dec.id);
     syncNote();
   });
+  // Enter commits the note (Kam, 2026-08-21 20:43: "Enter does not commit the
+  // comment"). Enter is always send-note-only, NEVER a ruling — picking an
+  // option stays a deliberate click.
+  noteEl.addEventListener("keydown", e => {
+    e.stopPropagation();
+    if (e.key === "Enter") { e.preventDefault(); if (!noteBtn.disabled) noteBtn.click(); }
+  });
   const btns = document.createElement("div"); btns.className = "decbtns";
-  const lockBtns = v => { [...btns.querySelectorAll("button")].forEach(x => { x.disabled = v; });
-                          noteEl.disabled = v; if (!v) syncNote(); };
+  // a ruling locks the OPTION buttons only — the note path stays open, because
+  // a note is a message, not a ruling, and follow-up context after ruling is a
+  // legitimate flow (same 20:43 report: no way to post once ruled)
+  const lockBtns = v => { [...btns.querySelectorAll("button[data-ruling]")].forEach(x => { x.disabled = v; }); };
   const noteBtn = document.createElement("button");
   noteBtn.type = "button"; noteBtn.className = "decbtn noteonly";
   noteBtn.textContent = "send note only";
@@ -756,6 +765,7 @@ function decisionCard(dec) {
   const mkBtn = (label, opt, isRec) => {
     const b = document.createElement("button");
     b.className = "decbtn" + (isRec ? " rec" : "");
+    b.dataset.ruling = "1";     // lockBtns targets ruling buttons only
     b.textContent = label;
     b.addEventListener("click", async e => {
       e.stopPropagation();
