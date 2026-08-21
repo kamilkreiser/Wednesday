@@ -1142,3 +1142,8 @@ that is what he means by "dev chain," it is minutes whenever he says go.
 > Also, please create some standard reports such as deals at each stage, total deals in the pipeline, deals older than X. Look at standard sales reporting and apply this to the reports for ATIO.
 
 *Done with it:* added to the ATTIO s3 brief as queue item 3 — standard sales reporting pack (his three named reports + a researched standard set: pipeline value/velocity, conversion between stages, aging, win/loss when data exists), built where Attio's native reporting allows and via the bridge/digest where it does not, with plan-tier limits on native reports checked honestly.
+
+## 2026-08-21 14:05 (dashboard chat)
+> Sorry, I need to clarify one of those components. The flags should be built into ATIO because they will become flags and follow-up actions for the salespeople. Ultimately, we want to create sequences, workflows, and anything else that is necessary to make ATIO as usable as possible. Secondly, there is a Claude browser open with Atio. This should give the Atio agent the ability to use the browser and import things manually. Please instruct them to go ahead. It has been done, please check thoroughly.
+
+*Done with it:* interjected to the running ATTIO s3 — (1) daily-workflow output re-ruled: PRIMARY surface is in-Attio (tasks/flags native to the salespeople's workflow; my digest demoted to secondary), and sequences/workflows-in-Attio moved in-scope; (2) browser channel opened: Claude-in-Chrome on Kam's signed-in Attio session authorises MANUAL IMPORT of the templates/sequences from the port pack — with workspace-identity verification before any write and per-item read-back diff against the pack ("check thoroughly" honoured as a verification standard, not a vibe).
