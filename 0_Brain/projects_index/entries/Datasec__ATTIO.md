@@ -42,7 +42,14 @@ over-claims (board-Done unread; "all four executed") — both corrected in-sessi
 the second self-disclosed; hence 0.9.
 
 **Open / next:**
-- **Everything actionable is Kam-gated.** His decisions: ≤25 attribute target
+- **KAM RULED (2026-08-21 21:02, via the cockpit note-then-rule flow): STAY
+  FREE until the system is proven and implemented — Pro fires at rollout
+  evidence, his word then, not a calendar.** Build-to-Free is now a ruling,
+  not a default. Companies-by-Country deletion RULED (delete) — next ATTIO
+  session's FIRST item (browser lane; reports have no API). Before the
+  ~09-04 trial lapse, close the two load-bearing NOT-GOTs (system
+  deal→company link + webhooks on Free).
+- **Everything else actionable is Kam-gated.** His decisions: ≤25 attribute target
   (now ALSO unblocks 2c's rest + ATTIO-16) · nfr → On hold landing (D5 red;
   53 real leads at migration) · security pack → real migration (ATTIO-21
   Postgres role rides with it) · [KAM] tickets ATTIO-6..10 · key rotation at
