@@ -3,7 +3,7 @@ client: Secuura
 project: Blockchain
 path: /Volumes/DevMASTER/!CODING/Secuura/Blockchain
 status: active
-updated: 2026-08-21
+updated: 2026-08-22
 ---
 
 # Secuura / Blockchain (Platform K)
@@ -29,6 +29,26 @@ updated: 2026-08-21
   OLDEST comments — always `first:50` + client-side sort.**
 
 **Open / next:**
+**s61 (2026-08-22 morning, scored 1.0): the uat-ps loop is GONE — proven by
+signature, not silence** (~3,906/hr → 60/hr; 71 anchors polled exactly once
+each at the 6h revisit mark, gap a proven zero) — **but demo's quota has NOT
+rolled: still 402, verification down day 7** (the quiet error log was the
+caller stopping, not recovery — failure-only logs can't tell those apart;
+probe settled it). All three s54 #729 findings verified FIXED with
+reproduce-the-defect controls; Peter's 16/16 discriminates (one question
+left him: concurrent or serial rounds?). Kam's #568 HOLD recorded on KS-256
+(+ the honest delta method: 867b25728 not an ancestor of c114ceddd — rebase;
+tree-diff 15 files +205/−85 hand-written, reconciling the recorded figure).
+🔴 **KS-635 measured: SEVEN expiring exceptions on FOUR dates, not one cliff**
+(08-31 · 09-30 ×4 · 10-31 · 11-11); one entry cites a Done+archived ticket
+while its real blocker (KS-409) lives open under another number; "blocks
+every push" corrected (only pushes touching Blockchain/Dev/). **Kam should
+settle the PATTERN, not the August date.** 🔴 **#718 reads UNSTABLE** ahead
+of #568 in the merge order (2 files +34/−13, cheap). **Next session:**
+Blockfrost period re-probe (one request; draw now ~2.8/hr) · Layer-3
+residual (a 1/min document poller = demo's whole inbound now) · Layer-4
+credential answer when Stuart replies · #718 flag to Peter.
+**Prior:**
 **s60 (2026-08-21 late evening, scored 1.0): the standoff PREMISE INVERTED —
 K's labelling was already honest** (simulated=true/failed/explicit error, the
 KS-587 fix; zero simulated-confirmed rows in 285) and the status API already

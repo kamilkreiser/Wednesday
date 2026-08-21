@@ -101,6 +101,29 @@ distinguishes "the guard is discriminating" from "nothing is getting through".
   character broke a strict JSON parse, and a status query used a short SHA and
   returned "0 runs, 0 failures".
 
+### A failure-only log going quiet is not recovery (2026-08-22, Secuura s61)
+
+**The case.** Demo's Blockfrost quota errors ran 450–460/hr for days, stopped
+dead at 12:15:54Z, and stayed at zero for eight hours — a textbook recovery
+curve. The key still 402'd at that moment (403 wrong-key control
+discriminating). **A successful verify-by-hash logs nothing** (verified in the
+shipped image: only failure-side messages exist), so *"no errors"* and *"no
+calls at all"* are the same picture in that log — and the second is what
+happened: the CALLER had stopped, not the error.
+
+**The rule, the agent's formulation adopted verbatim:** an error counter
+falling to zero means the error stopped **or** the thing that could produce it
+stopped. **Wherever only failures are logged, those two are indistinguishable
+— and the cheap discriminator is a direct probe, not more log-reading.** One
+request settled what eight hours of clean logs could not.
+
+**The sibling caught in the same hour:** the traffic collapse timestamped at
+minute resolution (12:17Z) PRECEDED the deploy credited with it (12:51Z) by
+34 minutes — so the silence proved nothing about the fix; the fix's real
+signature was elsewhere (71 anchors × exactly 1 poll at the 6-hour revisit
+mark, against a proven-zero gap). **Attribute an effect to a cause only when
+the evidence carries the cause's own fingerprint, not merely its timing.**
+
 ### The third member: a check that MISREPORTS what it saw (2026-08-14, same agent)
 
 One GitHub secondary rate limit on a GHCR pull, wearing three disguises at once:
