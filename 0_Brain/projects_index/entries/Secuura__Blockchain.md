@@ -29,6 +29,21 @@ updated: 2026-08-21
   OLDEST comments — always `first:50` + client-side sort.**
 
 **Open / next:**
+**s60 (2026-08-21 late evening, scored 1.0): the standoff PREMISE INVERTED —
+K's labelling was already honest** (simulated=true/failed/explicit error, the
+KS-587 fix; zero simulated-confirmed rows in 285) and the status API already
+exposes the flag in the shipped image, so **the whole fix is consumer-side:
+KS-683 filed (Todo/High)** — the uat-ps loop polls 71 anchors that are ALL
+terminally failed (68 simulated + 3 real-failed; cross-instance hypothesis
+killed with controls). Both prior agents reconciled right-on-different-routes
+(status-read = no Blockfrost; verify-by-hash = the 457 quota errors). Stuart's
+next move via board; **the complete WhatsApp draft (KS-683 woven in) is on
+Kam's panel awaiting his send.** Still open: the credential question (demo's
+key in his local stacks?) · allowance PERIOD unverified — size nothing on
+50k/day · **KS-666 reassigned to us with Peter's merge ask = next session's
+lead** · KS-635 baseline expires 08-31 · credits 6 Sep · turn-end launcher
+line now IN their launcher (first project rolled out).
+
 **s58 (2026-08-21 evening, scored 1.0):** KS-670 owner recorded (Platform S,
 Stuart-via-Kam) + Stuart asked via board to stop the ~3,850/hr loop (still
 live, 99.99% of demo traffic; recovery probes staged, blocked on him) ·
