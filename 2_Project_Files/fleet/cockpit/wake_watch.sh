@@ -122,14 +122,32 @@ except Exception: print('')" 2>/dev/null)
     # signal: the token counter and the run-in-background/interrupt hints
     # render ONLY during active work — verified absent from the statusline
     # ("ctx:NN%…") and the footer ("← N agents"), so no always-busy hazard.
+    ff="$STATE_DIR/f_$key"
+    fcnt=$(cat "$ff" 2>/dev/null || echo 0)
     if printf '%s' "$tail" | grep -qE 'shell still running|· [0-9]+ (shell|monitor|task)s?([^A-Za-z]|$)|↓ [0-9.]+k? tokens|to run in background|esc to interrupt'; then
       cnt=0
+      # FROZEN-BUSY discriminator (consolidation 2026-08-23; class evidence
+      # 2026-08-21/22: turn-end stalls at 10+ instances, several wearing the
+      # busy costume — "Brewed for 20m 0s" STATIC across 20+ min of checks,
+      # "← 2 agents" stale, report mailed or in-pane, turn ENDED). A genuinely
+      # working pane repaints its spinner timer/token counter every sample, so
+      # its capture hash CHANGES; busy indicators over a FROZEN hash for
+      # FROZEN_N consecutive samples = the render is a fossil and the turn has
+      # likely ended. Fires with its own message so triage starts at the inbox
+      # then the transcript (the 08-21 diagnostic order), never at the pane.
+      FROZEN_N="${WAKE_WATCH_FROZEN_N:-6}"
+      if [ "$prev" = "$h" ]; then fcnt=$((fcnt + 1)); else fcnt=0; fi
+      if [ "$fcnt" -ge "$FROZEN_N" ]; then
+        echo "WAKE: pane '$name' ($pid) shows BUSY indicators but content FROZEN ~$((FROZEN_N * INTERVAL / 60)) min — turn likely ENDED (mailed-report/turn-end stall class); check inbox FIRST, then transcript mtime, then detector at the pane" > "$STATE_DIR/fired"
+      fi
     elif printf '%s\n' "$pline" | grep -qE '^❯[[:space:]]*$' || printf '%s' "$tail" | grep -qE 'Pick or adjust'; then
       if [ "$prev" = "$h" ]; then cnt=$((cnt + 1)); else cnt=1; fi
+      fcnt=0
     else
       cnt=0
+      fcnt=0
     fi
-    printf '%s' "$h" > "$hf"; printf '%s' "$cnt" > "$cf"
+    printf '%s' "$h" > "$hf"; printf '%s' "$cnt" > "$cf"; printf '%s' "$fcnt" > "$ff"
     if [ "$cnt" -ge "$STABLE_N" ]; then
       echo "WAKE: pane '$name' ($pid) idle at prompt ~$((STABLE_N * INTERVAL / 60)) min — likely waiting on Wednesday" > "$STATE_DIR/fired"
     fi

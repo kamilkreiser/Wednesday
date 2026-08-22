@@ -91,6 +91,25 @@ telling you.
    the most useful thing available to them**, and it only works if the number's provenance is
    something I can actually supply.
 
+## The second sibling (2026-08-23): a TIME WINDOW is a predicate too — the headline must not outrun the window
+
+**The case (mine, agent-caught at plan confirmation, w=2 in the predicate
+family).** My s62 brief said *"Stuart and Peter both quiet"* over probes whose
+windows opened at 08-22T10:00Z (KS) and 02:00Z (PS). Stuart's burst — the
+KS-661 go-ahead a person was waiting on, plus 18 PS moves — landed 23:40Z→
+01:05Z, entirely BEFORE both windows. The probes returned honest zeros; the
+PROSE generalised them to "quiet since s61", which was false. The provenance
+even stated the windows — **stating the predicate in the provenance does not
+stop the headline from outrunning it** (the headline-vs-operative-case law,
+pointed at my own sentence).
+
+**The rule:** a quiet/unchanged/no-movement claim carries its window IN THE
+CLAIM ("zero KS movement inside 10:00Z→now"), and a claim shaped "quiet since
+EVENT" requires a window that OPENS AT THE EVENT — measured from the
+counterpart's last write, not from a round number I chose. The agent's method
+is the standard now: open the movement window at the other party's last known
+write.
+
 **Related:** [[2026-08-14_i-read-representations-they-read-sources]] (a cap quoted as a count
 is the arithmetic half of this; this is the selection half), [[2026-08-07_a-check-that-cannot-fail]]
 (a truncated result and a complete one look identical),
