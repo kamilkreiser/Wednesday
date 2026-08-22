@@ -282,5 +282,29 @@
   "status": "open",
   "ruled_choice": null,
   "ruled_ts": null
+ },
+ {
+  "id": "nexusai-key-sprawl",
+  "client_project": "Datasec/NexusAI",
+  "title": "SSH key sprawl: 3 distinct private keys across 9 loose in-tree copies — consolidation/rotation is your signature",
+  "bluf": "The agent found (by SHA-256, contents never read, nothing probed or touched): the demo-VM SSH key (dev-reporting-dashboard-hpam-key.pem) duplicated byte-identical in storage/ outside 3_Access_Keys/ — a rotation aimed at the canonical folder would miss it. The other key exists in SEVEN copies (backend/, scripts/, five build-output trees); five were invisible until RD-99 emptied the gitleaks path allowlist this morning. All untracked/gitignored — no repo leak event; the risk is rotation-miss and sprawl. Deleting or consolidating copies of a live credential is irreversible credential-class = your signature under v1.3, so nothing has been moved, deleted, rotated or probed.",
+  "default_action": "Nothing is touched; the inventory stays on RD-111 with acceptance criterion 2 explicitly open.",
+  "options": [
+   {
+    "key": "consolidate",
+    "label": "Consolidate + rotate",
+    "detail": "One canonical copy in 3_Access_Keys/, delete the rest, rotate the key afterwards so stale copies die anyway (agent recommendation-shape; needs your signed mail)"
+   },
+   {
+    "key": "record",
+    "label": "Record only for now",
+    "detail": "Keep the hash inventory on RD-111, revisit at the next security pass"
+   }
+  ],
+  "recommended": "consolidate",
+  "ts": "2026-08-23T07:13:01.051830+10:00",
+  "status": "open",
+  "ruled_choice": null,
+  "ruled_ts": null
  }
 ]
