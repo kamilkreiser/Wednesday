@@ -281,7 +281,28 @@ published-ports regex and **rewrote the instrument rather than believing its zer
 3. **A zero that means "the command could not run" is indistinguishable from a zero that means
    "no such code"** — and quoting/globbing/shell differences are the commonest cause on macOS.
 
-### The family, completed overnight 2026-08-13/14 (Secuura/Blockchain s28–s32)
+### The control needs its own control (2026-08-23, Datasec/NexusAI)
+
+**The case.** Proving a gitleaks allowlist fix, the agent injected a sabotage
+regex to break the config — and the suite still PASSED, because the injected
+regex was double-escaped and matched nothing. The "fix works" verdict was
+real; the thing it was tested against was not. Caught only because *a control
+passing is itself suspicious* (the 08-16 suspicious-agreement rule applied
+one level down).
+
+**The rule, its formulation kept:** *"check the sabotage actually sabotages
+before believing the verdict it produces."* A positive control that never
+fired is indistinguishable from a fix that works — so the sabotage needs its
+own proof of effect (see it FAIL before the fix, or see the injected pattern
+actually match) before its pass means anything. This is the positive-control
+rule made recursive, and one level is enough: the discipline is "prove the
+instrument can move" at whichever layer you just added.
+
+**Same session's sibling, kept with it:** content over exit status — three
+shell footguns in one day (two pipe-destroyed exit codes; zsh's unquoted
+`$VAR` passing one two-word argument) all caught because the TEXT disagreed
+with the status line. When output and status disagree, the status is the
+suspect.
 
 One agent produced five more members in five sessions. Kept together because the
 shared property is what matters: **the check failed in a way that looked like the
