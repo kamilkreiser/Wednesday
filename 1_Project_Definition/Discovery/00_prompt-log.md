@@ -1220,3 +1220,14 @@ that is what he means by "dev chain," it is minutes whenever he says go.
 > That sounds great. The pains with the decision component, please add an element where I can type additional context or additional information to the recommendation or element.
 
 *Done with it:* cockpit ROUND 4 spec'd and queued in the successor pack (my rotation gate was already closing): each decision card gains a free-text field — a click WITH text posts "Decision <id>: <key> — <label> | note: <text>"; text can also be sent WITHOUT a choice ("send note only") so he can add information before ruling. Successor briefs a fresh builder against the committed r3 code.
+
+## 2026-08-22 19:51 (dashboard chat) — security-pack request overruled: public posture sufficient
+> This is fantastic by policy and a great idea in theory. Unfortunately, no
+> vendor will reply to this request, and having a look through what they do,
+> it's not necessary.I'm really happy that you are looking at best practice,
+> but unfortunately in some cases this will not be achievable.The rules ATIO
+> has in place are sufficient now.
+Done with it: security-pack ruling superseded send→public-posture-sufficient
+(his own option (b)); D6's gate re-defined as satisfied by his informed
+acceptance; learning filed (vendor asks scaled to leverage); informed-
+acceptance browser read offered.
