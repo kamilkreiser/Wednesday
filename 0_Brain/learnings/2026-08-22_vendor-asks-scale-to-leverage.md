@@ -30,7 +30,12 @@ the application.
 3. A gate we control (like D6) can be re-defined by the owner's informed
    acceptance; the record must show the decision and its date, never a
    silently vanished gate.
-4. Keep proposing best practice — he explicitly valued the instinct. The
+4. Keep proposing best practice — he explicitly valued the instinct, TWICE
+   (19:51 and again 19:55: "please continue to challenge or ask for best
+   practice. However, this is not always possible, and we can make a
+   judgement case by case"). The standing shape: I raise the best-practice
+   bar every time; HE holds the case-by-case judgement on whether it is
+   achievable; a ruled-down bar is recorded, never silently dropped. The
    correction is about the DELIVERY: scale the mechanism to leverage;
    escalate to the heavy ask only when the relationship's weight justifies
    it (an Enterprise-tier negotiation is the moment for the full pack).

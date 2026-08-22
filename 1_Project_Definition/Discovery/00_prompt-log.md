@@ -1231,3 +1231,16 @@ Done with it: security-pack ruling superseded send→public-posture-sufficient
 (his own option (b)); D6's gate re-defined as satisfied by his informed
 acceptance; learning filed (vendor asks scaled to leverage); informed-
 acceptance browser read offered.
+
+## 2026-08-22 19:55 (dashboard chat) — model-split validated · best-practice stance amended · ATTIO UX test commission
+> I just saw that we've used 85% of our Fable tokens, so this new approach of
+> you being assigned Fable and the other agents being assigned Opus works
+> well.In regards to best practice, I really appreciate you questioning and
+> enforcing the utmost of security and best practice. However, this is not
+> always possible, and we can make a judgement case by case, but please
+> continue to challenge or ask for best practice.In relation to ADO, can you
+> please use the browser and Playwright MCP to use the system and test how
+> well it works from the perspective of a salesperson as well as a manager?
+("ADO" = ATTIO, dictation.) Done with it: learning amended (keep challenging;
+case-by-case is the judgement layer), UX test commission accepted at my seat
+(Attio UI = my seat by his 08:00 ruling), two-persona test run in the browser.

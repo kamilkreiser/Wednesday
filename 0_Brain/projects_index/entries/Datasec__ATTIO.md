@@ -3,29 +3,30 @@ client: Datasec
 project: ATTIO
 path: /Volumes/DevMASTER/!CODING/Datasec/ATTIO
 status: active
-updated: 2026-08-21
+updated: 2026-08-22
 ---
 
 # Datasec / ATTIO
 
-**Last session (2026-08-21, s5 — worked from the Vision_Sales_Portal seat, coupled pair):**
-Delivered the ask-pack: nine rulings Kam owns, six now live cockpit cards. Closed the
-last pre-lapse tier unknown — the built-in deal→company link survives Free on
-documented evidence, so nothing in attio-bridge is at risk when the trial lapses
-~2026-09-04 and the fallback bridge link is not being built. Fixed a drifted citation
-at its source (tests 237/237). Closed ATTIO-6.
+**Last session (2026-08-22):** Six of Kam's rulings recorded (each verified
+first-party at the chatlog, not from the relay). ATTIO-21 done — bridge now reads
+Vision prod on a least-privilege role, delivery proven byte-exact by sha256.
+attr-cap and nfr-onhold rulings implemented, tested and applied live. ATTIO-19
+assessed and skipped with nothing faked. 246 tests pass.
 
 **Open / next:**
-- Act on whatever Kam rules on the six cards (attr cap · nfr · security pack · prod DB · rate card · agent browser)
-- ATTIO-30 closes when the Companies-by-Country report is resolved
-- ATTIO-29 needs the renewal-schema ruling (signal b); signal (c) needs no ruling
+- **UI seat (yours):** drag NFR from the end of the board to between Won and
+  On hold; re-read the one hand-entered template against the new marker table.
+  Neither is possible by API.
+- Evidence-label split into two orthogonal columns (mapping-confidence vs
+  observed-in-prod) — your recommendation, cheap now all 13 values are measured.
+- ATTIO-7 closes only when Kam confirms the security-pack request actually went.
 
-**Blockers:** Two hard blocks are Kam's hands only — the Attio security pack request
-(ATTIO-7) and the canonical rate card (ATTIO-9). No Attio UI writes possible from the
-agent seat until the browser permission is cleared.
+**Blockers:** D6 still absolute — no real customer PII into Attio until the
+security pack lands. ATTIO-19 additionally has no source data at all.
 
-**Notes for Wednesday:** The Companies-by-Country deletion is NOT settled — your
-empty-check found the report renders live data (1/1/8), so Kam's "delete the empty
-report" ruling was made on a wrong premise and he has been re-asked. Free report
-budget stays breached at 4/3 meanwhile. Also: attio.com/pricing ticks are icons with
-no accessible text — never read that table by text extraction.
+**Notes for Wednesday:** Prod is 153 leads over 13 stage values (53 is the `nfr`
+SUBSET, not the total — it appears three ways and reads like corroboration).
+Attio's status API has NO order field, so any new stage is appended and must be
+dragged. The NFR stage is currently last on the board — known, reported by
+`apply-pipeline.js`, and outstanding at your seat.

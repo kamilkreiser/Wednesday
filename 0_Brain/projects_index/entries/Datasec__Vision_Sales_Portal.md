@@ -3,29 +3,32 @@ client: Datasec
 project: Vision_Sales_Portal
 path: /Volumes/DevMASTER/!CODING/Datasec/Vision_Sales_Portal
 status: active
-updated: 2026-08-21
+updated: 2026-08-22
 ---
 
-# Datasec / Vision_Sales_Portal
+# Datasec / Vision Sales Portal
 
-**Last session (2026-08-21):** Nothing changed in this repo. The session ran
-from Vision's launcher but all work landed in the coupled sibling ATTIO — see
-`Datasec__ATTIO.md`. Vision was read extensively as the migration's source of
-truth: the six-stage CHECK, the 16-value data-driven stage map, the ~90
-stage_data fields and the 13 email templates. Repo clean, main, 0/0, prod
-untouched.
+**Last session (2026-08-22):** Ran from this seat but the work was ATTIO's
+(coupled pair). One change to Vision PRODUCTION: a least-privilege read-only
+Postgres role (`attio_bridge_ro`, SELECT on 4 tables only) for the ATTIO bridge,
+proven by 15 probes with real 42501 refusals. Vision's code was read, not
+modified. Prod measured for the first time.
 
 **Open / next:**
-- QuickQuote v2.20 deploy, on Kam's signed word — nothing else is Vision-side.
-- Otherwise the next session is ATTIO work; see that card.
+- Production has **1 quote**, status "generated", `lead_id` NULL — no lead has a
+  quote. ATTIO-19's cutover criterion depends on data that does not exist. No
+  ticket owns this.
+- **Leads table frozen since 2026-07-02** (newest lead 2026-06-24) while 149 of
+  153 rows carry a `monday:*` source — Monday sync or upstream board stalled.
+  With Kam.
+- Portal rate card is exactly **1.4x below** QuickQuote's on every line
+  (1000/1500/200 · 30d vs 1400/2100/280 · 45d). Flagged on ATTIO-9, not resolved.
 
-**Blockers:** QuickQuote main is AHEAD of live. `hpas-quickquote.azurewebsites.net`
-runs v0.3.2-tool2.19 while main carries the corrected v2.20 PoC rule — a
-customer-facing pricing fix that has never shipped. Unchanged since 2026-08-14.
-Production deploy is a v1.3 signature class, so it needs Kam's own mail.
+**Blockers:** none at this seat.
 
-**Notes for Wednesday:** Two facts worth carrying into ATTIO planning. Prod's
-`leads.current_stage` has NO CHECK constraint (it silently failed to re-add), so
-the live vocabulary is open-ended — 16 candidates known, 13 observed, 3 unresolvable
-until someone queries prod from inside Azure. And prod Postgres firewalls dev
-machines, which gates the real migration as much as the security pack does.
+**Notes for Wednesday:** Prod Postgres is unreachable from dev machines; the only
+firewall rule is AllowAllAzureServices, so DB work runs from inside Azure via
+Kudu on `datasec-attio-bridge` with an Entra bearer. The prod admin credential in
+`datasec-sales-kv/DATABASE-URL` IS the server admin — treat any task needing it as
+prod-class. Do not "fix" the portal rate card by pasting QuickQuote's numbers: the
+1.4x may be a deliberate cost-vs-sell split, and it is Kam's call.
