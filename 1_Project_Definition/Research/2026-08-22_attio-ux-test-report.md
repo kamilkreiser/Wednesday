@@ -47,6 +47,18 @@ pass is healthy: all three reports render and their numbers reproduce.
    contacts**. Since [SYN] is the rehearsal for the real 153-lead migration,
    the real migration must create/link People or reps can't email anyone from
    a deal. → migration ruling set.
+   **[CORRECTED 2026-08-23, agent-measured — this finding was a SAMPLE OF
+   ONE. Live measurement: 14 of 18 deals ARE linked to People; exactly four
+   are not (Blank Holdings, Ashgrove Partners, Larkspur Freight, Copperfield
+   Council), and Ashgrove — the one deal the test opened — is one of the
+   four. The migration's People path is BUILT and running (peopleFrom parses
+   Vision contact fields, upserted by email); the four have no person because
+   their synthetic leads carry no contact data. The requirement changes
+   shape: not "build People creation" but "MEASURE contact coverage across
+   the 153 real leads before migrating, and report it as a first-class
+   number" — unparseable-contact leads are the deals that arrive unemailable.
+   Original text kept above for churn-visibility; the same correction applies
+   to line ~109's REQUIRED-step wording.]**
 5. **Deal record quality reads well** (stage, owner, Vision lead id, "Open in
    Vision" link, backdated notes) but several curated attributes render as
    empty "Set X…" prompts (Deal value, Sales motion, Opportunity size, Budget,

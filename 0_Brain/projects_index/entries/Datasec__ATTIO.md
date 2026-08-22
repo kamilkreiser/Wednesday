@@ -31,9 +31,12 @@ acceptance + mechanics.
 - Record the security-pack ruling + close ATTIO-7 · datasec@attio.email
   BCC-ingestion assessment (no M365 consent needed) · evidence-label
   two-column split · ATTIO-19 source-data owner question.
-- **Migration plan requirement (evidence from the UX test):** [SYN] deals have
-  ZERO addressable contacts — the real 153-lead migration must create/link
-  People or reps cannot email from a deal.
+- **Migration plan requirement (CORRECTED 2026-08-23 — the UX-test "zero
+  addressable contacts" was a sample of one; 14 of 18 deals ARE linked, the
+  People path is built and running):** MEASURE contact coverage across the
+  153 real leads before migrating and report it as a first-class number —
+  leads with no parseable contact arrive as unemailable deals. One Azure-side
+  read answers this AND ATTIO-19's quote-usage question together.
 - **UI seat (mine):** NFR drag = Kam's 10 seconds (not automatable) ·
   Companies-by-Country awaits Kam's fresh word (HOLD; report has live data).
 - At ATTIO-8 (M365 consent — now the biggest single unlock: email, templates,
