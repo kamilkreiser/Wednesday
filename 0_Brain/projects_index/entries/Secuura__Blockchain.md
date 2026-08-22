@@ -3,7 +3,7 @@ client: Secuura
 project: Blockchain
 path: /Volumes/DevMASTER/!CODING/Secuura/Blockchain
 status: active
-updated: 2026-08-22
+updated: 2026-08-23
 ---
 
 # Secuura / Blockchain (Platform K)
@@ -29,6 +29,23 @@ updated: 2026-08-22
   OLDEST comments — always `first:50` + client-side sort.**
 
 **Open / next:**
+**s62 (2026-08-23 morning, scored 1.0): 🎉 the allowance question is DEAD —
+demo's Blockfrost quota is DAILY (~00:00Z reset); it reset every day of the
+8-day outage and recovery = PS-644 removing the load.** Verification restored
+(200 + wrong-key 403 control). KS-670 close recommended (state left Todo —
+Kam's). KS-661: recommendation-only posted per ruling (i); K exposure 9 rows
+not 21; NEW sub-decision — `certify` stored bare vs `lifecycle:` prefixed
+siblings, so the rename hides declare-vs-lifecycle:declare (rides with Kam's
+ks661-vocab card). #718 flagged on the PR as `unstable` vs 3 clean siblings,
+cause honestly NOT determined (PAT 403s on checks endpoints). KS-566
+recommended High: zero connector-only provenance rows exist (4,641/4,641
+carry the triplet) AND newest row is 08-13 — uat-ps write topology unknown
+(Layer-4 now two questions, one answer). Daily 50k ceiling has NO alerting —
+8-day outage nobody noticed. Stuart extranet board drift: 41 open vs
+Peter's 1. Next session: nothing urgent agent-side; waits are Kam (KS-670
+close · KS-661 rows+prefix) and Stuart (PS repoll ticket · credential/write
+topology answer) and the CI meeting.
+**Open / next (prior):**
 **s61 (2026-08-22 morning, scored 1.0): the uat-ps loop is GONE — proven by
 signature, not silence** (~3,906/hr → 60/hr; 71 anchors polled exactly once
 each at the 6h revisit mark, gap a proven zero) — **but demo's quota has NOT
