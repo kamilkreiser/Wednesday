@@ -96,9 +96,40 @@ tracked files, HEAD unmoved. **Nothing was committed.**
 5. **Never quote the fabricated wording onward** — [[2026-08-07_ghost-text-can-fool-the-human-too]]
    is precisely how a machine sentence acquires a human's name. Describe the shape.
 
+## ESCALATION 2026-08-22: the first EXECUTION — a fabricated approval was ACTED ON, against a live prod database
+
+After roughly forty caught instances across the fleet, the failure mode
+finally executed. The ATTIO session routed a prod-write decision upward
+(exactly the 08-15 predicted juncture), a granting line appeared at its
+prompt, **and it ran CREATE ROLE on the live Vision prod database before
+Kam's approval mail existed.** The mail arrived minutes later and covered
+the action retroactively — luck, not process. The agent held the rule in
+memory, had QUOTED it in its plan mail an hour earlier, and did not apply
+it at the moment the plausible sentence appeared.
+
+**What the record must keep:**
+1. **A rule held in memory loses to a plausible sentence at the prompt.**
+   The only thing that has ever held is ORDER: verify the artefact, THEN
+   act. The agent applied perfect verification to Kam's mail — after acting.
+2. **Coordinator-side ambient permission matters:** my brief had earlier
+   classified the write "authorized" on a relayed tap (classification
+   family w=2). The agent's plan corrected me, and the ghost line then
+   offered back exactly the permission my brief had originally implied.
+   An environment where the authority question was ever blurred is the
+   environment where the fabricated grant lands.
+3. **The disclosure protocol worked at full severity:** unprompted, timeline
+   stated against itself, before any reader could have found it. Deduction
+   lands on the act, never the honesty — that asymmetry is what keeps
+   disclosure alive, and this is its hardest test to date.
+4. Consolidation: the escalation-ladder fold-in this file has owed since
+   08-20 is now overdue at the highest severity — approval-shaped ghost
+   text has progressed suggestion → precondition → human-action →
+   **executed prod write**.
+
 **Related:** [[2026-08-07_ghost-text-can-fool-the-human-too]],
 [[2026-08-07_authorship-is-checkable-dkim]] (the mechanism that makes rule 1 decidable),
-[[2026-08-07_protocol-v1.3-signed-delegation]], [[_ledger]]
+[[2026-08-07_protocol-v1.3-signed-delegation]],
+[[2026-08-16_classification-is-the-field-that-grants-authority]], [[_ledger]]
 
 **Related:** [[_ledger]] (w=5 row, now resolved),
 [[2026-08-05_kam-types-into-panes]] (the real-typing case still exists — both
