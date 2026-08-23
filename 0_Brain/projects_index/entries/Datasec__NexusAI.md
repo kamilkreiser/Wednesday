@@ -3,59 +3,34 @@ client: Datasec
 project: NexusAI
 path: /Volumes/DevMASTER/!CODING/Datasec/NexusAI
 status: active
-updated: 2026-08-22
+updated: 2026-08-23
 ---
 
 # Datasec / NexusAI
 
-**Last session (2026-08-22 morning, scored 1.0):** The security-gate sprint —
-RD-106/108/109 all fixed BEYOND their tickets (the briefed [:=] fix measured
-insufficient → quote-aware rules; RD-109's names derived from ARM's own
-securestring predicate found FIVE secret params where the ticket named two).
-RD-105 (18 orphans not 15; 13 deleted, 57→44 tracked scripts) + RD-103 done.
-Three lying instruments refused (ignore-path silent default · candidate-set-
-only cross-ref · whole-tree canary harness). Six filed: RD-108..113. Board
-44 → 50 open (new filings outpace closes — five sit in Testing). Five commits,
-origin/main 92ade28. Launcher turn-end line added (:315). No live credential
-anywhere; nothing signature-class.
+**Last session (2026-08-23):** Seven tickets advanced to Testing —
+RD-110/112/113/114 from the morning brief, then RD-99/115/111 after the CONTINUE
+ruling. The gitleaks gate now proves its own coverage on every run: 5 canary
+assertions asserted by RuleID, each demonstrated able to fail. The path allowlist
+is empty (7 of its 11 patterns matched nothing tracked; the 6 real findings are
+pinned by fingerprint). RD-114 and RD-115 were filed mid-task as distinct root
+causes and fixed in the same commits as their parents. No deploys, nothing merged.
 
 **Open / next:**
-- **RD-110 LEADS the next brief** (ruled): canary step in the gitleaks
-  workflow, assert by RuleID — three freshly-widened rules currently have no
-  regression guard.
-- RD-112 ruled DELETE next session (both-direction invocation check first).
-- RD-76 premise NARROWED: /api/health answers 200 unauthenticated — "SSO
-  blocks the demo" is about app pages, not every surface; next brief says
-  which parked tickets that unblocks, if any.
-- Kam's queue unchanged: RD-61 · RD-75 (NEW wording) · RD-15 · RD-107 tenant
-  · RD-76 itself.
+- [ ] BLOCKED ON KAM — key sprawl disposition (RD-111 criterion 2, decision card
+      `nexusai-key-sprawl`). Nothing touched; default is "nothing touched".
+- [ ] RD-107 HPAM ingest root cause — HELD by Wednesday, needs-decision class.
+      Highest commercial value on the board.
+- [ ] 18 tickets in Testing awaiting review / promotion to Release Ready.
+- [ ] PT-002 / PT-011 secret liveness still unverified — needs Datasec dev-tenant
+      admin, same blocker as RD-54 / RD-55.
 
-**Prior:** **Last session (2026-08-21):** Swept the Release Ready pile 14 → 7 and
-dispositioned all nine Testing tickets. Eleven closed, each with a control shown
-able to report the defect; two filed. **RD-89 recovered from its 08-20
-hand-back** — the auth wall gates the health blob, not the logs, so Container
-Apps boot history in Log Analytics gave positive evidence where absence-of-failure
-had rightly been refused. No deploy, nothing merged, no code changed.
-Board **52 → 44 open**; `origin/main` at `eb7e102`.
+**Blockers:** Kam's ruling on the key card. Dev-tenant admin access for the
+PT-002/PT-011 rotation question.
 
-**Open / next:**
-- Kam's queue: RD-61 signed-in eyeball · RD-75 one paste into workspace
-  `CLAUDE.md` · RD-15 narration + re-shoot as ONE decision before Partner Center
-  upload · RD-107 needs the `bf504a5d` tenant · RD-76 itself.
-- RD-106 — widen the gitleaks rule to `[:=]`, re-run the canary matrix, triage a
-  full history scan rather than fingerprinting it.
-- Next agent-doable cut: RD-105 (15 unreferenced scripts) and RD-103 (4 npm
-  scripts pointing at files that never existed).
-
-**Blockers:** actionable surface is dry — everything remaining on the board is
-Kam's or blocked behind RD-76 (Entra SSO blocks browser verification of the demo).
-
-**Notes for Wednesday:**
-- **RD-75's paste must use the NEW wording** — per-project inbox, retrieve by
-  Message-ID, check all three of spf/dkim/dmarc. The 08-13 paragraph is written
-  around `coagent@` and names the superseded 2026-08-07 Message-ID; pasting it
-  verbatim would push a stale pointer to six projects.
-- **RD-76 has a growing price tag** — RD-85, RD-79, RD-65 and RD-61 are all
-  complete as code and parked solely on a human with demo access.
-- **RD-106 is a live security gap**, not housekeeping: a realistic Azure secret in
-  YAML/JSON/compose/ARM colon syntax passes the gate entirely.
+**Notes for Wednesday:** `storage/dev-reporting-dashboard-hpam-key.pem` is
+byte-identical to the canonical demo-VM SSH key in `3_Access_Keys/`, and
+`ReportingDashboard_key.pem` exists in 7 copies (5 were invisible until the
+allowlist was emptied). All untracked, gitignored, never committed — recorded by
+hash, contents never read. STOP upheld, routed to Kam. Do not let a
+"delete-a-redundant-copy" framing move this into agent scope.
