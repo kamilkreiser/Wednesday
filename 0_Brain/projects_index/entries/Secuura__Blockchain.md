@@ -3,7 +3,7 @@ client: Secuura
 project: Blockchain
 path: /Volumes/DevMASTER/!CODING/Secuura/Blockchain
 status: active
-updated: 2026-08-23
+updated: 2026-08-24
 ---
 
 # Secuura / Blockchain (Platform K)
@@ -29,6 +29,18 @@ updated: 2026-08-23
   OLDEST comments — always `first:50` + client-side sort.**
 
 **Open / next:**
+**🔴 STUART'S WEEK (his 08-24 message via Kam, verbatim in the prompt log):
+Kintsugi is his ACTIVE TESTING SURFACE this week** — K↔S interactions (local
++ dev/Kintsugi), dev-ps USER-LIFECYCLE testing on Kintsugi (create/test/clear
+users — expect test-user churn, do not read it as anomalies), debugging
+dev→UAT UX/UI. Consequences: (1) NO uncoordinated K-side work touching
+Kintsugi/dev this week — coordinate on the board first; (2) Stuart
+reduced-capacity 08-24 (sunstroke) — do not chase; KS-661 mirror + KS-683
+layers 3/4 arrive as he catches up; (3) **the 6-Sep Founders Hub credit
+expiry now has a USER attached** (Kintsugi = his testing platform) — flagged
+to Kam. s63 (08-24) recorded Kam's KS-661 residue ruling on the board
+(comment 1e134e31); Stuart mirrors for his 21 UAT rows when he's up to it.
+
 **s62 (2026-08-23 morning, scored 1.0): 🎉 the allowance question is DEAD —
 demo's Blockfrost quota is DAILY (~00:00Z reset); it reset every day of the
 8-day outage and recovery = PS-644 removing the load.** Verification restored

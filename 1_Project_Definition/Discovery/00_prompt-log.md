@@ -1272,3 +1272,8 @@ case-by-case is the judgement layer), UX test commission accepted at my seat
 > The reason why it says the APIs are not available is because they're only available privately. And as we will be working on the solution, we have access to those APIs for HPSM.
 
 *(Done with them: card ruled cr; HPSM micro-session commissioned — record ruling + access clarification on HPSM-41, draft the CR into the execution bundle [nothing to HP without his explicit send], D-18 re-read, architecture inputs updated to in-scope-pending-CR with partner API access confirmed.)*
+
+## 2026-08-24 11:27 AEST (dashboard chat — Kam relaying Stuart)
+> Please consider the following message from Stuart regarding Secura. [dictation-duplicated] Good morning ! Yep no problem ... probably not in too great a shape today anyway, as heavy dose of sunstroke yesterday. So for me … Will focus on k and s interactions this week (both local and on dev/kintsugi) Also I'll be using kintusgi for dev-ps user testing (checking we can create and test and clear out users) And basically debugging dev and hence uat ux/ui It all sort of links together, in essence basically catch up
+
+*(Done with it: folded into Secuura coordination state — Kintsugi is Stuart's active testing surface this week [no disruptive K-side work uncoordinated; expect test-user churn on dev-ps]; Stuart reduced-capacity today [no chasing]; KS-661 mirror + KS-683 layers arrive as he catches up; 6-Sep credit expiry now has a USER attached [Kintsugi = his testing platform] — flagged to Kam.)*
