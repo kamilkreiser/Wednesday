@@ -1292,3 +1292,8 @@ case-by-case is the judgement layer), UX test commission accepted at my seat
 > For now, the sample data is very useful, and I'd like to keep it in there for going forward. Can you make sure and confirm that log analytics to global variables is still active and the link works, even if the printers aren't sending any additional information?
 
 *(Done with it: restore-path card ruled status-quo [sample data stays — his standing ruling]; NexusAI s3 commissioned: link-health confirmation via the app's own credential path + RD-118 fix reshaped to keep-the-link/make-the-promise-truthful + RD-119/120 fixes + the wider isolation-audit question + rulings recorded on RD-107/board.)*
+
+## 2026-08-24 14:17 AEST (dashboard chat)
+> The system configures authentication separately to Log Analytics. I want to make sure that the Log Analytics link is active, can you please double check?
+
+*(Done with it: s3 priority addendum — item 1 elevated to FIRST + interim report immediately on a FRESH live probe [the LAW data-source credential specifically, not the app's user-auth path]; his auth-separate framing carried into the check design.)*
