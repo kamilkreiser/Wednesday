@@ -30,21 +30,23 @@ named + digest-chained before). ACR: Basic SKU, nothing prunes; **RD-124
 found** (soft-delete DISABLED while its policy reads 7 days). RD-122 Done on
 Wednesday's ruling; RD-123 filed for the residual. origin/main 458cdfb.
 
+**s5 (2026-08-25 09:2x, 1.0):** Kam ruled RD-124 → ACR soft-delete ENABLED on
+nexusaidevacrfa39 (7-day recovery proved with an isolated probe; NOT retroactive —
+deletes before 2026-08-24T23:25:12Z stay gone; preview feature) and RD-123 → Single
+stays (recorded, no infra change). Both Done. Board 57. origin/main e590b35.
+
 **Open / next:**
 - [ ] RD-121 in Testing — promote once a customer-shaped workspace exercises
       the metadata path (demo blocks it by design under SYNTHETIC_DEMO_FEED).
-- [ ] **Kam:** RD-123 revision mode (default: Single stays) · RD-124 ACR
-      soft-delete (default: record only) — both carded on his panel.
 - [ ] RD-76/RD-116 browser eyeball on demo (Kam or my browser seat) — the one
       remaining independent leg on the feedback widget + AI-path fixes.
-- [ ] ACR tag-pruning check (does any retention policy threaten the
-      rollback-by-image-tag path?) — next brief.
-- [ ] RD-122 (Medium, low urgency) — Single vs Multiple revision mode;
-      needs Kam/Wednesday, no default action.
 - [ ] 18+ tickets in Testing awaiting review / promotion — only if
       commissioned.
 - [ ] PT-002 / PT-011 secret liveness still unverified — needs Datasec
       dev-tenant admin (same blocker as RD-54/55).
+
+**Completed (moved off the dashboard 2026-08-25, verified by my Jira read):** RD-123 Done ·
+RD-124 Done · ACR tag-pruning check done (s4: nothing prunes at Basic SKU).
 
 **Completed (moved off the dashboard 2026-08-24, verified at source):**
 RD-107 Done (Kam's ruling, comment 36681) · key-sprawl card ruled RECORD ONLY

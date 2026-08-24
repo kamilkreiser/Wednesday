@@ -35,7 +35,20 @@ Peter + systemTest/ read (AKTO_MONGO_CONTAINER defaulted-var finding, gate-6f2 b
 FIXED, PR #730, In Review, not merged** (authorization half still open on Kam) · s63
 history backfilled · extranet left unmarked per ruling.
 
-**Open / next (refreshed 2026-08-25 after s64):**
+**s65 (2026-08-25 09:2x, 1.0): Kam RULED KS-662 → Option A (property).** On the board for Peter (comment 16aa42bd) with KS-518's own arithmetic (3 status-list ops + audit-log tolerated; six stay on KS-592, mirrored 0c2c8f41). Edge flagged not widened: users/admin/list's unknown-query-param half under the 2026-07-29 rule — separate call if Peter asks. CI 312 dead runs.
+
+**Open / next (refreshed 2026-08-25 after s65):**
+- 🔴 **Kam:** CI billing (only unblocker) · KS-635 pattern (expires 08-31) · 6-Sep credits
+  (no plan for demo VM / Kintsugi) · KS-570 authorization half · KS-670 close · stale
+  "[Decision] Agent Mail send limit" extranet to-do · users/admin/list edge (if raised).
+- **Peter:** review PR #730 (KS-570) · unblocked on KS-662 (#722 waits on CI only) · two
+  tickets offered (KS-666 findings, admin/create defence-in-depth).
+- Local gateway runs the KS-570 branch build (recorded, not drift).
+
+**Completed (moved off the dashboard 2026-08-25, verified by my Linear read):** KS-662
+ruling recorded (16aa42bd) · KS-592 scope mirrored (0c2c8f41).
+
+**Open / next (as of s64 — superseded above, kept for the record):**
 - 🔴 **Kam:** CI billing (unblocks everyone) · KS-662 reading A/B/C · KS-635 pattern
   (expires 08-31) · 6-Sep credits (no plan for demo VM / Kintsugi) · KS-570
   authorization half · KS-670 close · stale "[Decision] Agent Mail send limit"

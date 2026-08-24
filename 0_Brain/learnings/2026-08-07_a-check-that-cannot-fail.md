@@ -429,3 +429,11 @@ asserted after looking somewhere that could not have contained it.
 unprompted, and the churn is left visible in the scoreboard rather than tidied away.
 A record that quietly returns to its original wording hides that a correction cycle
 happened — and the cycle is the evidence the loop works.
+
+### Three "cannot see" members from one micro-session (2026-08-25, Datasec/NexusAI s5) — and a derivation lesson from its neighbour
+
+1. **A paginator whose unknown parameter is silently ignored.** The AgentMail list API accepts `page_token`; passing `last_key` errors nowhere and re-serves page 1 on every call. The loop reports a plausible scan count (550 "messages"), terminates, and says NOT FOUND with full confidence. Caught only by running three candidate parameter names against each other and noticing two returned byte-identical first pages. **Rule: a "not found" from a paginator nobody has proven can paginate is worth exactly nothing — prove the second page differs from the first before believing the scan.**
+2. **A query for a field that lives on a different object.** `az acr manifest show --query digest` returns EMPTY because the manifest CONTENT has no digest field (it lives on `list-metadata`). The blank reads exactly like an absent image. Same shape as the wrong-runner member: the instrument answered a different question than the one asked.
+3. **An index that lags the write.** Jira's JQL search index trails transitions by tens of seconds; a `statusCategory != Done` query returned a ticket already displaying Done, and the board count read 59 when the truth was 57. **The issue endpoint is authoritative; a board count taken straight after a transition is a stale rendering** ([[2026-08-14_i-read-representations-they-read-sources]]).
+
+**And from Secuura s65 the same morning, the derivation half:** s64's decision pack reached the RIGHT answer (six operations stay on KS-592) via a list that summed to 11 against a ticket naming ten. *"A correct conclusion is not evidence of a correct derivation"* — and a correct conclusion is precisely what lets a wrong derivation survive review. Re-derive from the source when the record will be cited; a matching bottom line is not a check of the arithmetic above it.
