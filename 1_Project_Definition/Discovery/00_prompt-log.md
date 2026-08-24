@@ -1277,3 +1277,8 @@ case-by-case is the judgement layer), UX test commission accepted at my seat
 > Please consider the following message from Stuart regarding Secura. [dictation-duplicated] Good morning ! Yep no problem ... probably not in too great a shape today anyway, as heavy dose of sunstroke yesterday. So for me … Will focus on k and s interactions this week (both local and on dev/kintsugi) Also I'll be using kintusgi for dev-ps user testing (checking we can create and test and clear out users) And basically debugging dev and hence uat ux/ui It all sort of links together, in essence basically catch up
 
 *(Done with it: folded into Secuura coordination state — Kintsugi is Stuart's active testing surface this week [no disruptive K-side work uncoordinated; expect test-user churn on dev-ps]; Stuart reduced-capacity today [no chasing]; KS-661 mirror + KS-683 layers arrive as he catches up; 6-Sep credit expiry now has a USER attached [Kintsugi = his testing platform] — flagged to Kam.)*
+
+## 2026-08-24 13:53 AEST (dashboard chat)
+> Where is the data populating Nexus AI coming from? Please give me specific addresses as it looks like there's data that's not linked to our tenant.
+
+*(Done with it: immediate model-based answer on the panel [likely the RD-61 synthetic DEMO- fleet, his own 08-05 ruling] + NexusAI data-provenance session commissioned: full source inventory with exact addresses on the RUNNING demo revision, tenant linkage per source, stop-and-report on anything outside our tenants.)*
