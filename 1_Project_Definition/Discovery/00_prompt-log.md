@@ -1255,3 +1255,8 @@ case-by-case is the judgement layer), UX test commission accepted at my seat
 > Thank you. While you're checking, also check whether the workflows and sequences were set up. I was under the impression that we commissioned the agent to reproduce the workflows and sequences that we created in Vision, especially the logic and resources.Furthermore, having the resources available would be very useful. So can you check on that as well?
 
 *(Done with them: Monday-direct answered — no native connector, verified at attio.com/apps primary source; bridge-vs-CSV menu given, live-vs-quiet question with Kam. Dashboard + workflows/sequences/resources became the ATTIO s2 commission — brief 00:13:36Z + addendum 00:15:00Z, session launched %24. "Atio" = Attio, dictation noise. **CORRECTED same hour, agent-caught: "Vision Pro" was NOT noise — it is the literal Pro-mode "Vision PRO — Control Panel" (public/pro/dashboard.html, VSP-60) in the Vision repo; the parity spec comes from that screen. My original annotation classified Kam's accurate words from my model of his dictation instead of checking the repo — ledgered.**)*
+
+## 2026-08-24 ~10:45 AEST (session terminal)
+> Please look at the Nexus AI system and the feedback function. It does not look like a user can attach screenshots or forms, make it work.
+
+*(Done with it: NexusAI commission — brief sent 00:47:24Z with reproduce → fix (images + documents, untrusted-upload standards, end-to-end wiring + both-direction tests) → RD ticket + demo deploy under v1.3; STOP boundary if the function lives in the separate Feedback_System project. "forms" read as files/documents, question-back path in the brief if a literal forms concept exists in-app.)*
