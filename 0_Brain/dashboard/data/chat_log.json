@@ -1893,5 +1893,15 @@
   "role": "wednesday",
   "ts": "2026-08-24T16:35:45.665947+10:00",
   "text": "Heads-up, small delay on NexusAI: Anthropic is having a service wobble (status page: 'Elevated errors for multiple models', identified ~15:27 AEST) and the NexusAI agent's model lane is refusing requests, so its session is paused mid-housekeeping. The important part is safe: the secret-rotation fix is ALREADY DEPLOYED and healthy (revision 88, booted clean, 100%), and the isolation fix work was committed before the outage. What's pending is only the paperwork — the ticket closure and one honest correction it was mid-writing (the app runs single-revision mode, so rollback means redeploying revision 87 rather than 'old revision retained'). My own seat is unaffected. I'll resume the agent the moment the incident clears — nothing needs you."
+ },
+ {
+  "role": "wednesday",
+  "ts": "2026-08-24T17:42:49.136111+10:00",
+  "text": "NexusAI is back — the Anthropic wobble let a request through (~1.5h outage for that lane) and the agent resumed exactly where it died: it's re-verifying what the interrupted turn actually saved before trusting any of it, then finishing the ticket closures. Deploy was never at risk — revision 88 stayed healthy throughout. Wrap report follows when it lands."
+ },
+ {
+  "role": "wednesday",
+  "ts": "2026-08-24T17:47:56.297541+10:00",
+  "text": "NexusAI is wrapped — the whole day's arc on that project closed at 1.0 (three sessions today). Where things landed:\n\nSHIPPED TO DEMO, verified on the board and in git by my own reads: the isolation fix (RD-118 — the AI can no longer touch the real workspace; 3 hours running, ZERO real-workspace authentications vs 374/30d before), the secret rotation (RD-119 — SESSION_SECRET now a proper secretRef, existing sessions invalidated), and the retired-workspace footgun (RD-120). RD-107 closed on your ruling.\n\nTWO THINGS STILL OPEN, deliberately: RD-121 (the AI gets told the wrong tables — demo lost the symptom but any customer with printers quiet 7+ days still hits it; kept open on its own root cause) and the RD-116 feedback-widget eyeball on demo, still yours or my browser seat when convenient.\n\nONE HONEST CORRECTION the agent volunteered: the app runs single-revision mode, so 'previous revision retained for rollback' was never literally true — rollback there means redeploying a retained image tag (all three tags verified in the registry). I've reworded the standing deploy condition for single-revision apps accordingly and filed RD-122; whether to switch the app to multiple-revision mode is queued as a low-urgency question, no action needed now.\n\nFloor is quiet — every agent wrapped, day tally EIGHT sessions, eight 1.0s."
  }
 ]
