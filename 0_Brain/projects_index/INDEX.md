@@ -20,6 +20,8 @@ Linear: KS-601 Kintsugi (linked KS-584) + KS-602/603/604/605 + PS-556
 resolution comment ALL created 06:58Z; **cull NOT run** (KS 128 + PS 143 =
 271 active unchanged). Vision 08-11 wrapped 02:15Z (F2 closed, merged to main).
 
+**Re-checked 2026-08-25 09:1x (respawn session after the 06:02 session went silent post-07:01):** all counts unchanged from 06:1x except NexusAI 58→59 (s4 filed RD-123/124, closed RD-122); every row moved since 06:00 is s64/s4's own; Peter/Stuart/Kam quiet; HPSM ink unconfirmed. **No launches** — leads are Kam-gated or human-waits. Cards open: secuura-ci-billing · secuura-ks662-scope · nexusai-revision-mode · nexusai-acr-softdelete.
+
 **Refreshed 2026-08-25 06:1x (Tuesday 06:00 wake — 🔴 HPSM SIGNATURE WINDOW OPEN
 ~08-25→28).** Floor clean at boot, zero inbound overnight, chat silent since Kam's
 14:19 Monday. Sweep (controls on every count): **Secuura 158 work queue / 56
