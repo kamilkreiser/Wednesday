@@ -1282,3 +1282,8 @@ case-by-case is the judgement layer), UX test commission accepted at my seat
 > Where is the data populating Nexus AI coming from? Please give me specific addresses as it looks like there's data that's not linked to our tenant.
 
 *(Done with it: immediate model-based answer on the panel [likely the RD-61 synthetic DEMO- fleet, his own 08-05 ruling] + NexusAI data-provenance session commissioned: full source inventory with exact addresses on the RUNNING demo revision, tenant linkage per source, stop-and-report on anything outside our tenants.)*
+
+## 2026-08-24 13:56 AEST (dashboard chat)
+> Can you please investigate why the link went dead and what we need to do to address it?
+
+*(Done with it: ADDENDUM to the NexusAI s2 data-source brief — dead-ingest root-cause investigation from the LAW workspace evidence + restore-path options for Kam.)*
