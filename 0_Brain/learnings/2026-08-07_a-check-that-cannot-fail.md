@@ -281,6 +281,28 @@ published-ports regex and **rewrote the instrument rather than believing its zer
 3. **A zero that means "the command could not run" is indistinguishable from a zero that means
    "no such code"** — and quoting/globbing/shell differences are the commonest cause on macOS.
 
+### An indicator that can MISS its own event (2026-08-24, Datasec/NexusAI)
+
+**The case.** Building upload limits, the size cap genuinely cut the stream
+at the boundary — the CONTROL worked — but the truncation flag never set,
+because the 'limit' listener attached after an `await` and the event fired
+into that gap. Result: HTTP 201 and a corrupt 2KB fragment stored as the
+user's screenshot. **Worse than accepting whole and worse than refusing: the
+user is told it arrived.** Every green signal stayed green; only reading the
+stored bytes exposed it.
+
+**The family property, new costume:** not a check that cannot fail — a
+check whose SUCCESS INDICATOR depends on catching an asynchronous event, and
+the event can be missed while the enforcement still executes. Control firing
+and indicator reporting are two separate things wherever an event loop sits
+between them.
+
+**The fix shape, adopted as the standard:** the failure was a dependency on
+an event firing, so the fix must not depend on an event firing — attach
+listeners synchronously AND detect by measured state (size counted vs cap),
+plus an exact-boundary regression test. Belt from mechanism, braces from
+measurement.
+
 ### The control needs its own control (2026-08-23, Datasec/NexusAI)
 
 **The case.** Proving a gitleaks allowlist fix, the agent injected a sabotage
