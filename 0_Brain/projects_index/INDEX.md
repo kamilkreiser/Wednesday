@@ -20,6 +20,24 @@ Linear: KS-601 Kintsugi (linked KS-584) + KS-602/603/604/605 + PS-556
 resolution comment ALL created 06:58Z; **cull NOT run** (KS 128 + PS 143 =
 271 active unchanged). Vision 08-11 wrapped 02:15Z (F2 closed, merged to main).
 
+**Refreshed 2026-08-25 06:1x (Tuesday 06:00 wake — 🔴 HPSM SIGNATURE WINDOW OPEN
+~08-25→28).** Floor clean at boot, zero inbound overnight, chat silent since Kam's
+14:19 Monday. Sweep (controls on every count): **Secuura 158 work queue / 56
+unstarted+started** — 🔴 **Peter worked the board all Monday afternoon**: KS-666
+answered ("concurrent", Kam's two corrections accepted, merge held on his own word),
+**KS-662 BLOCKED ON KAM** (KS-518-closure vs KS-592 four-vs-ten scope; asked again on
+PR #722; KS-684 lands first), KS-570 new red sample (fix direction on the ticket),
+KS-684 filed (jsonschema-rs 0.51.0 breaks Schemathesis generation — pin 0.49.9),
+KS-667 reproduced on his fresh stack; **Stuart mirroring the KS-661 ruling** (PS-612
++ PS-658). **NexusAI 58 open** (22/21/7/6/2) unchanged; **ATTIO 16 open** unchanged;
+**Vision 0, control passed**; **HPSM 26 Backlog** — not launched, ink unconfirmed.
+**Launched under the standing grant: Secuura s64 (%30)** — answer Peter on KS-666 +
+systemTest/ shared-state read · KS-662 decision pack for Kam (holding comment only) ·
+KS-570 fix push-only · s63 carry + history backfill check; **NexusAI s4 (%31)** —
+RD-121 both faults · ACR tag-pruning · RD-122 ruling recorded · deploy under the
+Single-mode wording. Both briefs gated → verified at destination (20:08:44Z /
+20:08:46Z) → launched as separate actions. Entry cards: Secuura + HPSM refreshed.
+
 **Refreshed 2026-08-13 06:1x (morning sweep):** Secuura ran FOUR sessions
 08-12 (16-R/17/18/19, all scored 1.0; develop `bd9abdfe4`; KS-531 Done 19→1,
 KS-62 operationId leg #670, KS-519 merged by PETER overnight + his KS-587

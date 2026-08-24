@@ -3,7 +3,7 @@ client: Datasec
 project: HPSM
 path: /Volumes/DevMASTER/!CODING/Datasec/HPSM
 status: active
-updated: 2026-08-20
+updated: 2026-08-25
 ---
 
 # Datasec / HPSM
@@ -38,7 +38,28 @@ supplies/security/webHook), needs FW ≥ 6.38. HPSM 3.14.1 has no REST API in
 product docs — Kam's API ask is evidence-backed. Findings note in
 Document_Pass.
 
-**Open / next (refreshed 2026-08-20, s28 scored 1.0 — pre-signature drafting sprint done):**
+**Open / next (refreshed 2026-08-25 — 🔴 SIGNATURE WINDOW OPEN ~08-25→28; 26 open, all Backlog; s30 + s31 on 2026-08-24 both 1.0):**
+- **For Kam at signature (nearly free, gates the whole CR-1 bundle):** name
+  the **§13 Change Control approver** — §13 has no nominated approver and §12
+  seats unnamed executive sponsors (s31). Ink confirmation fires the
+  post-signature queue.
+- **Kam ruled the §4.2 telemetry collision → raise the §13 CR** (card
+  `hpsm-41-telemetry-cr`, 2026-08-24). CR-1 is DRAFTED on disk (s31), riding
+  the R1–R6/W1–W5 bundle — nothing goes to HP without his explicit send;
+  SOW unsigned. Kam's clarification: the APIs are PRIVATE and as solution
+  partners Datasec HAS access.
+- **The 26_0172 REST API reference (156 endpoints) FALSIFIED "HPSM has no
+  REST API"** — six documents superseded with pointers (s30); §16's
+  "UNLESS CR APPROVED" rider recovered (the CR exercises §4.2, it does not
+  amend it); D-18 row split (category vs route conflation) verdict intact.
+- **HPSM-40 (Kam's 2-min gh auth → `datasecau/HPSM-analysis` private)** still
+  gates K5's remote push — root repo EXISTS locally since s29 (08-20), 19+
+  sessions with NO REMOTE. (Card corrected 2026-08-25: the older "no repo"
+  shape below is superseded.)
+- A1/A2 to HP await his explicit send. Big three unchanged: clinic date ·
+  HP schedule conversation · K5 scope.
+
+**Open / next (prior — refreshed 2026-08-20, s28 scored 1.0 — pre-signature drafting sprint done):**
 - **For Kam (new, from s28):** the ONE-ASK clause-pack alignment (CT §18 already
   holds the six missing clauses in contractual voice — ask HP to align, not to
   concede) · §4.2 score-change design law (rescore may PROPOSE, human ACCEPTS;

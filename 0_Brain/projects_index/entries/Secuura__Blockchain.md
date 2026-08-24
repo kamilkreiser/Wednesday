@@ -3,7 +3,7 @@ client: Secuura
 project: Blockchain
 path: /Volumes/DevMASTER/!CODING/Secuura/Blockchain
 status: active
-updated: 2026-08-24
+updated: 2026-08-25
 ---
 
 # Secuura / Blockchain (Platform K)
@@ -28,7 +28,31 @@ updated: 2026-08-24
 - **Instrument rule, confirmed ×2 on 08-19: Linear `comments(last:N)` returns the
   OLDEST comments — always `first:50` + client-side sort.**
 
-**Open / next:**
+**Open / next (refreshed 2026-08-25 06:1x — s64 launched on it):**
+- 🔴 **KS-662 is blocked on KAM** (Peter, 2026-08-24 11:14Z): the four-vs-ten
+  scope conflict between the KS-518 closure and KS-592 (three of four
+  `/api/status/*` ops back in KS-592's fix set, `audit-log` carved out) —
+  "both are Kamil's rulings, so the reconciliation is his. Asked again on
+  the PR today." KS-684 (Schemathesis 4.25.1) lands BEFORE KS-662 by
+  agreement and may dissolve part of the scope. **s64 builds the decision
+  pack; Wednesday cards it; Kam rules.**
+- **KS-666 answered by Peter** ("concurrent", Kam's two corrections accepted,
+  merge held on his own word) — s64 posts the close-out + does the
+  targeted read of fixed-path shared state under `systemTest/`.
+- **KS-570:** Peter's new red sample (pre-merge tier caught it, 2 in 5);
+  fix direction on the ticket (`proxy.ts:786` + shared `authenticate()`,
+  deterministic probe as the gate) — s64 builds it push-only.
+- **KS-684 (Peter's, new):** jsonschema-rs 0.51.0 breaks Schemathesis
+  generation (310 harness errors that read as findings) — pin 0.49.9 in any
+  fresh worktree until his bump lands.
+- KS-667 reproduced by Peter on a from-scratch deploy (our fix #726 still
+  unmerged under the hold). KS-611/575/441 are Peter's.
+- **Stuart is mirroring the KS-661 ruling** (PS-612 comment 01:48Z, PS-658
+  filed) — nothing to chase.
+- History gap: no s63 entry visible in history.md (newest s62) — s64 asked
+  to verify/backfill.
+
+**Open / next (prior):**
 **🔴 STUART'S WEEK (his 08-24 message via Kam, verbatim in the prompt log):
 Kintsugi is his ACTIVE TESTING SURFACE this week** — K↔S interactions (local
 + dev/Kintsugi), dev-ps USER-LIFECYCLE testing on Kintsugi (create/test/clear
