@@ -143,6 +143,11 @@ NOTE="$BRAIN_DIR/daily/$TODAY.md"
 WRAP_ISSUES=""
 if [ ! -f "$NOTE" ]; then
   WRAP_ISSUES="no daily note exists for today"
+elif ! grep -qE '^## Session retro' "$NOTE"; then
+  # 2026-08-24: a note built WITHOUT the template passed this check ("retro
+  # filled") because the only thing it looked for was the placeholder line —
+  # a check that cannot fail. Presence of the section is required first.
+  WRAP_ISSUES="daily note has NO retro section at all"
 elif grep -qF -- '- Went well / do differently:' "$NOTE"; then
   WRAP_ISSUES="retro still on its template placeholder"
 fi
