@@ -364,5 +364,34 @@
   "status": "ruled",
   "ruled_choice": "cr",
   "ruled_ts": "2026-08-24T11:25:43.285961+10:00"
+ },
+ {
+  "id": "nexusai-restore-path",
+  "client_project": "Datasec/NexusAI",
+  "title": "Real telemetry feed: restore, repoint, or keep synthetic — and name tenant bf504a5d",
+  "bluf": "The measured answer to your question is in the report: dashboard data is fabricated by design (DEMO- fleet, no tenant); the address you saw is Log Analytics workspace 9c976d57 in tenant bf504a5d — not in our recorded tenant set, and only you can name it in seconds (Datasec prod? sales-demo? the HP/ABTDEMO lab?). The real feed died because the 3 lab printers stopped sending one at a time (May 6 / May 28 / Jun 1) — the 4.x VM suspect is CLEARED by the fade pattern; nothing our side broke. Bonus findings filed: RD-118 High (the synthetic feed still makes live authenticated calls into that workspace — table names only), RD-119 High (SESSION_SECRET as plaintext env var), RD-120 (retired-workspace footgun).",
+  "default_action": "Status quo continues; RD-118/119/120 fixes proceed under v1.3 (dev/demo scope) regardless of this choice; the 9c976d57 pointer decision waits for you to name the tenant",
+  "options": [
+   {
+    "key": "status-quo",
+    "label": "Keep synthetic + one lab conversation (recommended)",
+    "detail": "Demo stays synthetic by design; you ask the ABTDEMO owner whether the 3 printers still exist; the 9c976d57 pointer gets re-verified-or-removed rather than left as a live credential into an unnamed tenant"
+   },
+   {
+    "key": "reconnect",
+    "label": "Reconnect the real lab fleet",
+    "detail": "Entirely lab-side — our workspace access, ingestion and service principal are healthy; viability depends on whether the printers still exist"
+   },
+   {
+    "key": "repoint",
+    "label": "Point the real feed at a different live fleet",
+    "detail": "Only if one exists and may legitimately be read — a you-or-HP question"
+   }
+  ],
+  "recommended": "status-quo",
+  "ts": "2026-08-24T14:10:17.645549+10:00",
+  "status": "open",
+  "ruled_choice": null,
+  "ruled_ts": null
  }
 ]
