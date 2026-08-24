@@ -28,7 +28,23 @@ updated: 2026-08-25
 - **Instrument rule, confirmed ×2 on 08-19: Linear `comments(last:N)` returns the
   OLDEST comments — always `first:50` + client-side sort.**
 
-**Open / next (refreshed 2026-08-25 06:1x — s64 launched on it):**
+**s64 (2026-08-25, 1.0): 🔴 CI FREEZE = GITHUB ORG BILLING** (payments failed / spending
+limit; 305 startup_failures since 08-17; Kam-only, carded) · KS-666 closed out with
+Peter + systemTest/ read (AKTO_MONGO_CONTAINER defaulted-var finding, gate-6f2 blind) ·
+**KS-662 ruling pack for Kam** (rec A: honour the property, #722 already is it) · **KS-570
+FIXED, PR #730, In Review, not merged** (authorization half still open on Kam) · s63
+history backfilled · extranet left unmarked per ruling.
+
+**Open / next (refreshed 2026-08-25 after s64):**
+- 🔴 **Kam:** CI billing (unblocks everyone) · KS-662 reading A/B/C · KS-635 pattern
+  (expires 08-31) · 6-Sep credits (no plan for demo VM / Kintsugi) · KS-570
+  authorization half · KS-670 close · stale "[Decision] Agent Mail send limit"
+  extranet to-do to close.
+- **Peter:** review PR #730 (KS-570) · two tickets offered (KS-666 findings,
+  admin/create defence-in-depth) — file if he nods.
+- Local gateway runs the KS-570 branch build (recorded, not drift).
+
+**Open / next (as briefed 06:1x — now executed by s64):**
 - 🔴 **KS-662 is blocked on KAM** (Peter, 2026-08-24 11:14Z): the four-vs-ten
   scope conflict between the KS-518 closure and KS-592 (three of four
   `/api/status/*` ops back in KS-592's fix set, `audit-log` carved out) —
