@@ -1260,3 +1260,8 @@ case-by-case is the judgement layer), UX test commission accepted at my seat
 > Please look at the Nexus AI system and the feedback function. It does not look like a user can attach screenshots or forms, make it work.
 
 *(Done with it: NexusAI commission — brief sent 00:47:24Z with reproduce → fix (images + documents, untrusted-upload standards, end-to-end wiring + both-direction tests) → RD ticket + demo deploy under v1.3; STOP boundary if the function lives in the separate Feedback_System project. "forms" read as files/documents, question-back path in the brief if a literal forms concept exists in-app.)*
+
+## 2026-08-24 ~10:52 AEST (session terminal)
+> We have also got REST APIs for HPSM to be used as part of the project. This will be the core of the telemetry data that we require for the build. Please log and analyze this and incorporate it into the architecture and build information for HPSM. /Users/kam_code/Downloads/HPSM_REST_API _26_0172.xlsx
+
+*(Done with it: file validated by me — 384,105 bytes, 24 sheets, per-resource REST API reference with Feature/Method/URI/sample-request/sample-response/status-code columns, OAuth2 password+refresh auth. HPSM readiness session commissioned: secure the artifact into their tree, scan-then-log, full API inventory + telemetry mapping, incorporate into architecture/build inputs per their conventions.)*
