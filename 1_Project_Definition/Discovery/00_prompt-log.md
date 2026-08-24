@@ -1244,3 +1244,14 @@ acceptance browser read offered.
 ("ADO" = ATTIO, dictation.) Done with it: learning amended (keep challenging;
 case-by-case is the judgement layer), UX test commission accepted at my seat
 (Attio UI = my seat by his 08:00 ruling), two-persona test run in the browser.
+
+## 2026-08-24 ~10:08–10:13 AEST (dashboard chat, dictated)
+> With Atio, can we integrate Monday the same way that Vision was integrated, or do we need Vision as middleware?
+
+> Can you please look whether there's a native connector?
+
+> What about creating a dashboard similar to what we did in Vision Pro where we can see everything on the home screen? Can the home screen be configured? And can you please get the agent to create either a report or a dashboard for Atio similar to what we had in Vision Pro?
+
+> Thank you. While you're checking, also check whether the workflows and sequences were set up. I was under the impression that we commissioned the agent to reproduce the workflows and sequences that we created in Vision, especially the logic and resources.Furthermore, having the resources available would be very useful. So can you check on that as well?
+
+*(Done with them: Monday-direct answered — no native connector, verified at attio.com/apps primary source; bridge-vs-CSV menu given, live-vs-quiet question with Kam. Dashboard + workflows/sequences/resources became the ATTIO s2 commission — brief 00:13:36Z + addendum 00:15:00Z, session launched %24. "Vision Pro" = Vision Sales Portal, "Atio" = Attio, dictation noise.)*
