@@ -1265,3 +1265,10 @@ case-by-case is the judgement layer), UX test commission accepted at my seat
 > We have also got REST APIs for HPSM to be used as part of the project. This will be the core of the telemetry data that we require for the build. Please log and analyze this and incorporate it into the architecture and build information for HPSM. /Users/kam_code/Downloads/HPSM_REST_API _26_0172.xlsx
 
 *(Done with it: file validated by me — 384,105 bytes, 24 sheets, per-resource REST API reference with Feature/Method/URI/sample-request/sample-response/status-code columns, OAuth2 password+refresh auth. HPSM readiness session commissioned: secure the artifact into their tree, scan-then-log, full API inventory + telemetry mapping, incorporate into architecture/build inputs per their conventions.)*
+
+## 2026-08-24 11:25 AEST (dashboard chat)
+> Decision hpsm-41-telemetry-cr: cr — Raise the §13 CR (recommended)
+
+> The reason why it says the APIs are not available is because they're only available privately. And as we will be working on the solution, we have access to those APIs for HPSM.
+
+*(Done with them: card ruled cr; HPSM micro-session commissioned — record ruling + access clarification on HPSM-41, draft the CR into the execution bundle [nothing to HP without his explicit send], D-18 re-read, architecture inputs updated to in-scope-pending-CR with partner API access confirmed.)*
