@@ -1287,3 +1287,8 @@ case-by-case is the judgement layer), UX test commission accepted at my seat
 > Can you please investigate why the link went dead and what we need to do to address it?
 
 *(Done with it: ADDENDUM to the NexusAI s2 data-source brief — dead-ingest root-cause investigation from the LAW workspace evidence + restore-path options for Kam.)*
+
+## 2026-08-24 ~14:1x AEST (session terminal)
+> For now, the sample data is very useful, and I'd like to keep it in there for going forward. Can you make sure and confirm that log analytics to global variables is still active and the link works, even if the printers aren't sending any additional information?
+
+*(Done with it: restore-path card ruled status-quo [sample data stays — his standing ruling]; NexusAI s3 commissioned: link-health confirmation via the app's own credential path + RD-118 fix reshaped to keep-the-link/make-the-promise-truthful + RD-119/120 fixes + the wider isolation-audit question + rulings recorded on RD-107/board.)*
