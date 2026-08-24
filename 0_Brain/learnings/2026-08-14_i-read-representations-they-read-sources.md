@@ -226,3 +226,26 @@ positive control, or another agent — or it is nothing.
 first-person case), [[2026-08-13_headline-must-match-the-operative-case]] (why the older
 rules stayed silent), [[2026-08-06_artifact-presence-is-not-execution]],
 [[2026-08-07_a-check-that-cannot-fail]], [[2026-08-07_we-each-have-strengths]], [[_ledger]]
+
+## The fourth switch (2026-08-25, Datasec/NexusAI s4): the option you can VERIFY WITHOUT EFFORT
+
+**Its own disclosure, kept verbatim:** *"Before your answer arrived I had talked
+myself out of the metadata endpoint on the grounds that I could not prove it
+from this seat, and was going to fall back to the ticket's literal 'remove the
+timespan' — which the ticket had already measured as working. That would have
+been the smaller, worse fix, chosen because it was the one I could verify
+without effort. The credential path turned out to be reachable; I had not
+looked before deciding it was not."*
+
+**Why it belongs with the three switches above.** Convenience, work-saved and
+expectation all switch off the demand for evidence on a RESULT. This one acts
+one step earlier, on the CHOICE of what to build: an option gets picked because
+its verification is already in hand, and the better option is discarded on an
+unmeasured claim that it cannot be verified from here. The unmeasured claim
+("I cannot reach that credential") is itself a representation — and it was
+never checked, because it justified the easy path.
+
+**Trigger to add:** when I find myself preferring the option I can already
+prove, ask **"have I measured that the other option is unprovable, or did I
+assume it because the assumption saves me a probe?"** Same family, fourth
+costume. Cited: s4's wrap 2026-08-24T20:32Z, scored 1.0 partly for saying it.

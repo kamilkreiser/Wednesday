@@ -3,7 +3,7 @@ client: Datasec
 project: NexusAI
 path: /Volumes/DevMASTER/!CODING/Datasec/NexusAI
 status: active
-updated: 2026-08-24
+updated: 2026-08-25
 ---
 
 # Datasec / NexusAI
@@ -20,10 +20,21 @@ shipped to demo (rev 88, SESSION_SECRET on secretRef); 3h post-fix window:
 ZERO real-workspace SP tokens vs 374/30d baseline. RD-107 closed on Kam's
 sample-data-stays ruling. HEAD 695aa98 == origin/main (verified).
 
+**s4 (2026-08-25, 1.0):** RD-121 fixed at root cause — discovery now reads the
+workspace METADATA endpoint (what exists in schema: 682 tables, relevance
+filter → exactly the 3 HpamPrinterLogs_* tables, pinned by a test), full-
+retention scan as a warn-logged fallback, `slice(0,50)` gone with a canary;
+metadata path asserted inside the RD-118 guard with a non-vacuous control.
+Deployed rev 0000089 under the reworded Single-mode condition (rollback tag
+named + digest-chained before). ACR: Basic SKU, nothing prunes; **RD-124
+found** (soft-delete DISABLED while its policy reads 7 days). RD-122 Done on
+Wednesday's ruling; RD-123 filed for the residual. origin/main 458cdfb.
+
 **Open / next:**
-- [ ] RD-121 (High) — AI handed the wrong table list (7-day discovery window
-      + a fallback that discards the filter's verdict). Root cause untouched;
-      demo lost only the symptom. Must NOT be closed on RD-118's back.
+- [ ] RD-121 in Testing — promote once a customer-shaped workspace exercises
+      the metadata path (demo blocks it by design under SYNTHETIC_DEMO_FEED).
+- [ ] **Kam:** RD-123 revision mode (default: Single stays) · RD-124 ACR
+      soft-delete (default: record only) — both carded on his panel.
 - [ ] RD-76/RD-116 browser eyeball on demo (Kam or my browser seat) — the one
       remaining independent leg on the feedback widget + AI-path fixes.
 - [ ] ACR tag-pruning check (does any retention policy threaten the

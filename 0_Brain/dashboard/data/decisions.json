@@ -417,5 +417,53 @@
   "status": "open",
   "ruled_choice": null,
   "ruled_ts": null
+ },
+ {
+  "id": "nexusai-revision-mode",
+  "client_project": "Datasec/NexusAI",
+  "title": "RD-123: move nexusaidev-app to multiple-revision mode?",
+  "bluf": "Single mode deactivates the prior revision minutes after each deploy, so rollback is redeploy-by-image-tag (seconds-not-minutes rollback and no registry dependency only come with Multiple mode, at the cost of two running revisions and an unmeasured mode change).",
+  "default_action": "Single stays; deploy condition = image tag named before + verified in ACR",
+  "options": [
+   {
+    "key": "single",
+    "label": "Stay Single (rollback by image tag, condition already reworded)",
+    "detail": "No infra change; rollback depends on the tag surviving in ACR"
+   },
+   {
+    "key": "multiple",
+    "label": "Switch to Multiple revision mode",
+    "detail": "Traffic-split rollback in seconds; two revisions' compute; an unmeasured mode change on the demo"
+   }
+  ],
+  "recommended": "single",
+  "ts": "2026-08-25T06:33:33.780926+10:00",
+  "status": "open",
+  "ruled_choice": null,
+  "ruled_ts": null
+ },
+ {
+  "id": "nexusai-acr-softdelete",
+  "client_project": "Datasec/NexusAI",
+  "title": "RD-124: ACR soft-delete is DISABLED on nexusaidevacrfa39 — enable it?",
+  "bluf": "The policy object reads retentionDays 7 but the feature is off, so a manual delete of the rollback tag is immediate and unrecoverable. Nothing automatic prunes (Basic SKU, no tasks, no webhooks) — the risk is a human delete. Registry config is your call.",
+  "default_action": "Record only until you rule",
+  "options": [
+   {
+    "key": "enable",
+    "label": "Enable soft-delete (7-day grace on deleted tags)",
+    "detail": "Registry config change, reversible; may carry storage cost for deleted manifests"
+   },
+   {
+    "key": "record",
+    "label": "Record only, no change",
+    "detail": "Rollback tag remains one manual delete from gone"
+   }
+  ],
+  "recommended": "enable",
+  "ts": "2026-08-25T06:33:33.825464+10:00",
+  "status": "open",
+  "ruled_choice": null,
+  "ruled_ts": null
  }
 ]
