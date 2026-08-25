@@ -280,7 +280,9 @@ def brain_state():
             # resolved 2026-08-06 (Peter answered explicitly 08-05 11:36; consent
             # recorded properly, never by silence; verified against the live board).
             {"due": "2026-09-04", "what": "CypherKey Twilio token rotation (CPKEY-165 / WED-48)"},
-            {"due": "watch", "what": "Datasec admin consent verdict email (calendar feed goes live on arrival)"},
+            # admin-consent watch flag removed 2026-08-25: the Datasec calendar feed
+            # IS live (real events in datasec_calendar.json, fresh collect cycles) —
+            # the arrival it watched for happened.
         ]})
 
 # ── Agent Mail (fleet inboxes; read-only, NO acks — at-least-once lesson) ──
@@ -323,7 +325,10 @@ def tickets_feed():
         fm = {}
         if text.startswith("---"):
             fm = dict(re.findall(r"^(\w+):\s*(.+)$", text.split("---")[1], re.M))
-        m = re.search(r"\*\*Open / next:\*\*\n(.*?)(?:\n\*\*|\Z)", text, re.S)
+        # Heading may carry an annotation — "**Open / next (refreshed 2026-08-25 …):**".
+        # The strict form silently rendered annotated cards as EMPTY (found 2026-08-25:
+        # the two most-active projects showed no items the same day they were refreshed).
+        m = re.search(r"\*\*Open / next[^\n]*:\*\*\n(.*?)(?:\n\*\*|\Z)", text, re.S)
         items = [re.sub(r"^[-\s\[\]x]+", "", l).strip()
                  for l in (m.group(1).splitlines() if m else []) if l.strip().startswith("-")]
         entries.append({"client": fm.get("client", "?"), "project": fm.get("project", "?"),
