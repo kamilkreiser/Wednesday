@@ -276,7 +276,9 @@ def brain_state():
         "scoreboard_excerpt": scoreboard,
         "decision_queue_excerpt": dq,
         "flags": [
-            {"due": "2026-08-06", "what": "Peter consent-by-silence window closes EOD (KS-480) — record after, not before"},
+            # KS-480 consent-by-silence flag removed 2026-08-25 on Kam's ask —
+            # resolved 2026-08-06 (Peter answered explicitly 08-05 11:36; consent
+            # recorded properly, never by silence; verified against the live board).
             {"due": "2026-09-04", "what": "CypherKey Twilio token rotation (CPKEY-165 / WED-48)"},
             {"due": "watch", "what": "Datasec admin consent verdict email (calendar feed goes live on arrival)"},
         ]})
