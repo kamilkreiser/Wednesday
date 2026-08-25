@@ -98,3 +98,11 @@ Keep this file updated whenever a new machine-local dependency appears.
     `travel-pointers` check sweeps all project repos' core.sshCommand and warns on
     dangling pointers. Route warnings to the projects' own launchers/agents; never edit
     their repos from Wednesday's hands.**
+
+19. **Laptop sleep kills in-flight agent turns (found 2026-08-25 evening — two s66
+    wrap-turn deaths, one a 5-hour lid-closed gap):** the Studio never sleeps; the
+    laptop defaults to sleeping on lid-close/idle, and every running Claude turn dies
+    with "Your computer went to sleep mid-response". On the laptop, arm
+    `caffeinate -dims -t <seconds>` alongside any fleet launch (same action, not
+    afterwards). Recovery for a slept turn: re-verify the dead turn's writes, then
+    mirror mail + resume tap (the 08-24 dead-turn rule).

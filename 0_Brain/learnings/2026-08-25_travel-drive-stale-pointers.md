@@ -60,6 +60,14 @@ pointers came along frozen" is the right one.
    sweep the same session (gitignore-at-creation discipline, pointed at
    paths).
 
+**Addendum, same day (evening): the laptop SLEEPS, and sleep kills agent turns
+mid-response.** s66's wrap turn died TWICE to "Your computer went to sleep
+mid-response" (one ~5-hour lid-closed gap at the conference, one shorter). The
+Studio never sleeps; the laptop does by default. **Rule: any fleet run on the
+laptop gets `caffeinate -dims` armed for its expected duration in the same
+action as the launch** — and a dead turn's recovery is the 08-24 pattern:
+re-verify what the dead turn wrote, mirror mail + tap to resume.
+
 **What did NOT break, recorded so the model stays honest:** keys (0600 modes
 held via the rsync), .env files, per-project gh/az config dirs, the WEDNESDAY
 repo itself (launcher refreshes its pointer unconditionally), boards, mail,
