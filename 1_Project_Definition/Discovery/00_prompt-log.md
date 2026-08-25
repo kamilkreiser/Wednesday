@@ -1303,3 +1303,6 @@ case-by-case is the judgement layer), UX test commission accepted at my seat
 > "once done, i will unplug t9 as well and launch you from dev master so we use 1 drive for you and dev code"
 
 Done with: three-leg sync via his Sync-All-Drives engine (verified by content at each destination), then the relocation of Wednesday's master from the T9 to DevMASTER — `.git` copied (unison excludes it), path references made self-locating, scheduler re-installed from the DevMASTER path, `wednesday` command repointed, handover wrap of the T9-launched session. Learning: `0_Brain/learnings/2026-08-25_one-drive-devmaster-is-master.md` (supersedes the 07-31 T9-master rule).
+> (10:3x) "make sure kk_dev has everything as well.  no exclusions. i will travel with this drive and keep t9 as a seperate backup"
+
+Done with: after the unison legs, a full additive rsync DevMASTER → KK_DEV_Local (modes preserved, `.git` directories carried as one-way snapshots, only macOS metadata folders left out) + content/mode verification; T9 becomes the backup copy. Recorded in the 2026-08-25 learning.

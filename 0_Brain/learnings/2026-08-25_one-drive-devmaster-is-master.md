@@ -14,6 +14,13 @@ me from DevMASTER from 2026-08-25; the T9 travels with him and stays current onl
 through his unison engine (`!SYNC FILES/Sync All Drives.command`, bidirectional,
 prefer-newer, `.git` excluded by design).
 
+**Drive roles (Kam, same day, 10:3x): DevMASTER = master (Studio); KK_DEV_Local = the
+TRAVEL drive and must carry EVERYTHING, no exclusions ("I will travel with this drive");
+T9 = a separate backup.** So a sync to KK_DEV_Local is unison (bidirectional, his engine)
+PLUS a one-way additive rsync from DevMASTER that carries what unison skips — the `.git`
+directories (as snapshots; `git pull` reconciles on the laptop), the ignored paths, and
+the file MODES (unison `perms=0` drops exec bits and leaves the deploy key 0644).
+
 **What does NOT change:** the portability principle (everything on-drive,
 machine-local pieces on PORTABILITY.md + doctor.sh), the read-only rule on the
 DevMASTER vault and other projects' folders, hard rule 1 (writes stay under
