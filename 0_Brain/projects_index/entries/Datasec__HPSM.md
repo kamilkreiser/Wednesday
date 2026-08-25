@@ -39,6 +39,10 @@ product docs — Kam's API ask is evidence-backed. Findings note in
 Document_Pass.
 
 **Open / next (refreshed 2026-08-25 — 🔴 SIGNATURE WINDOW OPEN ~08-25→28; 26 open, all Backlog; s30 + s31 on 2026-08-24 both 1.0):**
+- 🔴 **Signature timing intel (Kam, terminal, 2026-08-25 ~14:1x AEST): HP's
+  project manager meets HP's FINANCING COMMITTEE tomorrow (Wed 2026-08-26).**
+  Expect the ink signal after that meeting, not before — the queue still fires
+  only on Kam's explicit ink confirmation, nothing pre-empted.
 - **For Kam at signature (nearly free, gates the whole CR-1 bundle):** name
   the **§13 Change Control approver** — §13 has no nominated approver and §12
   seats unnamed executive sponsors (s31). Ink confirmation fires the

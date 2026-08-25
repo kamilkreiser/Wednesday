@@ -1306,3 +1306,13 @@ Done with: three-leg sync via his Sync-All-Drives engine (verified by content at
 > (10:3x) "make sure kk_dev has everything as well.  no exclusions. i will travel with this drive and keep t9 as a seperate backup"
 
 Done with: after the unison legs, a full additive rsync DevMASTER → KK_DEV_Local (modes preserved, `.git` directories carried as one-way snapshots, only macOS metadata folders left out) + content/mode verification; T9 becomes the backup copy. Recorded in the 2026-08-25 learning.
+
+## 2026-08-25 ~14:0x AEST — Kam (terminal, travelling — laptop + KK_DEV_Local), verbatim
+> "can you please confirm - is this a good structure to work this time and in the future.  I wont have much time today but next time I am out of the office it will be good to know that we can replicate this process.   As a second quesiton, can you please confirm that the quick quote tool is 100% operational"
+
+*(Done with it: travel-drive structure assessed honestly [works, three named gaps: no scheduler on the laptop, voice fallback, sync-before-departure is the load-bearing step]; QuickQuote verified LIVE — healthz 200, OTP flow run end-to-end with wednesday-agent@ [request → mail in <10s → verify → authenticated v2.19 app served], mail telemetry healthy; quote-submission leg deliberately NOT fired [sends a real sales mail].)*
+
+## 2026-08-25 ~14:1x AEST — Kam (terminal), verbatim
+> "for Secuura - please create a ticket, flag Stuart to define the process of work, test and commit with manual mege going forward.  For HPSM, the project manager from HP is meeting with financing committee tomorrow"
+
+*(Done with it: Secuura micro-session briefed via brief_and_launch.sh to create the KS ticket flagging Stuart to define the work→test→commit→manual-merge process [my board access is read-only by design]; NOTHING-MERGES hold explicitly unchanged until the process is defined. HPSM: financing-committee intel recorded on the entry card + daily note — ink signal expected after that meeting; queue still fires only on Kam's ink confirmation.)*

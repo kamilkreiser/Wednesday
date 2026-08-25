@@ -147,7 +147,19 @@ case "${1:-}" in
     [ -f "$REG" ] || die "no launchers.conf at $REG"
     LPATH=$(awk -F'|' -v n="$2" '$1==n{print $2}' "$REG" | head -1)
     [ -n "$LPATH" ] || die "'$2' not in launchers.conf — register it (validated path) or use 'add'"
-    [ -f "$LPATH" ] || die "registered launcher missing on disk: $LPATH (registry stale — fix launchers.conf)"
+    if [ ! -f "$LPATH" ]; then
+      # Travel-drive fallback (2026-08-25): the registry pins DevMASTER paths;
+      # when Wednesday runs from another drive carrying the same tree (the
+      # KK_DEV_Local travel copy), retry with THIS drive's root swapped in.
+      DRIVE_ROOT="${SCRIPT_DIR%/WEDNESDAY/*}"
+      ALT="$DRIVE_ROOT${LPATH#/Volumes/DevMASTER}"
+      if [ "$ALT" != "$LPATH" ] && [ -f "$ALT" ]; then
+        echo "launcher volume not mounted — using this drive's copy: $ALT" >&2
+        LPATH="$ALT"
+      else
+        die "registered launcher missing on disk: $LPATH (registry stale — fix launchers.conf)"
+      fi
+    fi
     if [ "$1" = resolve ]; then echo "would launch pane '$2': bash \"$LPATH\""; exit 0; fi
     "$TMUX_BIN" has-session -t "$SESSION" 2>/dev/null || die "no fleet session — run 'cockpit.sh up' first"
     add_pane "$2" "bash \"$LPATH\""
