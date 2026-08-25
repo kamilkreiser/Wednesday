@@ -16,3 +16,16 @@ No secrets here — inbox addresses only.
 The re-issued v1.3 grant (2026-08-19T22:08:45Z) sits in the six active inboxes:
 Message-ID `<096604C5-237F-4467-9ECF-B79F975FCB11@me.com>`, subject reads
 "Team collaboration" — **retrieve by Message-ID, never by subject.**
+
+## API-key revocation semantics (AgentMail support, authoritative, 2026-08-25 mail <f335a081-34a5-4076-a56f-54324dd8edf6@mtasv.net>)
+- Authorization decisions are CACHED up to 300s. DELETE removes the key from the
+  source of truth immediately; already-cached decisions stay valid until expiry.
+  (Our 08-13 measurement of ~299s flip is exactly this.)
+- **No supported way to force immediate invalidation of a single key.**
+- **Leak response:** delete the key + rotate the secret immediately, and treat
+  the old key as potentially USABLE for up to 5 more minutes.
+- Delay materially beyond 5 min after DELETE = unexpected → report timestamps +
+  request IDs to support.
+- Not documented on their side (their admission); this note is the record.
+- Closes the 08-13 QUESTION thread (our correction mail + their reply). No
+  further reply owed; any future mail to support is Kam's class.
