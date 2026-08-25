@@ -17,7 +17,7 @@ fact names where it was read and when.
 
 ## Charter (read first, in full)
 
-`/Volumes/KK_T9_External_HDD/WEDNESDAY/2_Project_Files/fleet/qa-agent/QA_AGENT_CHARTER.md`
+`/Volumes/DevMASTER/WEDNESDAY/2_Project_Files/fleet/qa-agent/QA_AGENT_CHARTER.md`
 
 Read it end-to-end before running anything. It defines mission, the two
 hard-coded rules (state the FAIL condition before each test; untested areas are

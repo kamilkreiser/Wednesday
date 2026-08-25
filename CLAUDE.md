@@ -2,7 +2,7 @@
 
 **Owner:** Kam Kreiser (kreiser.org@me.com)
 **Status:** Discovery / Architecture phase (started 2026-07-31)
-**Master folder:** `/Volumes/KK_T9_External_HDD/WEDNESDAY` — everything for this project lives here, in a logical place.
+**Master folder:** `/Volumes/DevMASTER/WEDNESDAY` — everything for this project lives here, in a logical place. **(Kam, 2026-08-25: one drive for Wednesday AND the dev code — DevMASTER is the master; the T9 becomes a unison sync copy/backup via `!SYNC FILES/Sync All Drives.command`. Before 2026-08-25 the T9 SSD was the master.)**
 
 ---
 

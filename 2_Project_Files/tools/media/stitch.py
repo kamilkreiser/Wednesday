@@ -1,5 +1,6 @@
 import re, sys, json, glob, os
-D="/Volumes/KK_T9_External_HDD/WEDNESDAY/0_Brain/reference/tac-course/transcripts"
+import os as _os
+D=_os.path.join(_os.path.dirname(_os.path.dirname(_os.path.dirname(_os.path.dirname(_os.path.abspath(__file__))))), "0_Brain/reference/tac-course/transcripts")  # self-locating
 def parse(text):
     out={}
     for m in re.finditer(r"\[(\d+):(\d+)\] ([^\n]*)", text):

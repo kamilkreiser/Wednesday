@@ -148,7 +148,7 @@ EOF
     cat >&2 <<'MSG'
 
 Fix by doing ONE of:
-  - make it absolute:      /Volumes/KK_T9_External_HDD/WEDNESDAY/0_Brain/...
+  - make it absolute:      /Volumes/DevMASTER/WEDNESDAY/0_Brain/...
   - name the owner:        ... | 0_Brain/learnings/x.md - my project, not yours | read YYYY-MM-DD
   - point at THEIR tree:   ... | your own 5_Project_History/history.md | read YYYY-MM-DD
 

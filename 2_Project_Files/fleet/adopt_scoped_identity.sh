@@ -18,7 +18,7 @@
 #         ./adopt_scoped_identity.sh cypherkey
 set -u
 
-WED_AZ="/Volumes/KK_T9_External_HDD/WEDNESDAY/4_Credentials/.azure"
+WED_AZ="$(cd -P "$(dirname "${BASH_SOURCE[0]}")/../.." && pwd)/4_Credentials/.azure"   # self-locating (2026-08-25: master moved to DevMASTER)
 TENANT="d500ebad-cf53-4f2a-a501-f831289e67fc"
 
 case "${1:-}" in

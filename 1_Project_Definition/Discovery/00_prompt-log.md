@@ -1297,3 +1297,9 @@ case-by-case is the judgement layer), UX test commission accepted at my seat
 > The system configures authentication separately to Log Analytics. I want to make sure that the Log Analytics link is active, can you please double check?
 
 *(Done with it: s3 priority addendum — item 1 elevated to FIRST + interim report immediately on a FRESH live probe [the LAW data-source credential specifically, not the app's user-auth path]; his auth-separate framing carried into the check design.)*
+
+## 2026-08-25 ~10:2x — Kam (terminal), verbatim
+> "I have a conference to go to. Can you please sync the portable drives with code and Wednesday"
+> "once done, i will unplug t9 as well and launch you from dev master so we use 1 drive for you and dev code"
+
+Done with: three-leg sync via his Sync-All-Drives engine (verified by content at each destination), then the relocation of Wednesday's master from the T9 to DevMASTER — `.git` copied (unison excludes it), path references made self-locating, scheduler re-installed from the DevMASTER path, `wednesday` command repointed, handover wrap of the T9-launched session. Learning: `0_Brain/learnings/2026-08-25_one-drive-devmaster-is-master.md` (supersedes the 07-31 T9-master rule).

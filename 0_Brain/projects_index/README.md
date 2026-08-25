@@ -22,7 +22,7 @@ confirmed no launcher and no vault file previously maintained any index.
    projects inherit it) with a final step: "if the Wednesday drive is mounted,
    write/refresh this project's index entry". Launchers need no per-project edits
    beyond pulling the updated skill — keeping change surface to ONE file.
-3. **Mount-tolerant:** if `/Volumes/KK_T9_External_HDD/WEDNESDAY` isn't mounted,
+3. **Mount-tolerant:** if `/Volumes/DevMASTER/WEDNESDAY` isn't mounted,
    the step is skipped silently (never blocks another project's wrap-up).
 4. **Wednesday's startup** reads `INDEX.md` + every file in `entries/` (accepted
    token cost), and rebuilds the INDEX.md summary table from the entries.

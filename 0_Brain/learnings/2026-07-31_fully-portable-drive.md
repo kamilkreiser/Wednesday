@@ -2,7 +2,7 @@
 date: 2026-07-31
 type: principle
 source: "Kam, discovery session (prompt #2), point 1"
-status: live
+status: superseded — the "T9 is the master" half by [[2026-08-25_one-drive-devmaster-is-master]] (2026-08-25); the portability principle itself still lives
 supersedes: ""
 ---
 

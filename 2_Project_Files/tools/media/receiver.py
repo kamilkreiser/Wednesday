@@ -1,6 +1,7 @@
 from http.server import BaseHTTPRequestHandler, HTTPServer
 import os, urllib.parse
-DEST = "/Volumes/KK_T9_External_HDD/WEDNESDAY/0_Brain/reference/tac-course/transcripts"
+import os as _os
+DEST = _os.path.join(_os.path.dirname(_os.path.dirname(_os.path.dirname(_os.path.dirname(_os.path.abspath(__file__))))), "0_Brain/reference/tac-course/transcripts")  # self-locating
 class H(BaseHTTPRequestHandler):
     def _cors(self):
         self.send_header("Access-Control-Allow-Origin", "*")

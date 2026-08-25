@@ -24,7 +24,7 @@ learnings/2026-08-03_role-beyond-code-three-priorities).
   Portal, HP Auth Suite work), side projects (Visualiser at coagent.live/VI,
   Clara local-AI experiments, myPKI).
 - Hardware: Mac Studio M3 Ultra (possible future dedicated Wednesday machine),
-  Windows 11 PC on direct Ethernet, T9 external SSD (Wednesday's home).
+  Windows 11 PC on direct Ethernet, DevMASTER SSD (Wednesday's home since 2026-08-25 — one drive for her and the dev code; the T9 SSD was her home 07-31→08-25 and is now a sync copy).
 - Uses Claude Code extensively; launchers per project; Fable 5 + ultrathink
   pinned everywhere; Max subscription.
 
