@@ -209,6 +209,25 @@ else
   warn "Tailscale.app missing" "remote access unavailable on this machine — see PORTABILITY.md"
 fi
 
+# --- Travel pointers (PORTABILITY 18, 2026-08-25): a drive sync copies files but
+# freezes stored ABSOLUTE PATHS. Sweep every project repo's core.sshCommand and warn
+# on pointers to paths that do not exist on THIS machine. Read-only: warnings are
+# routed to the projects' own launchers/agents — Wednesday never edits their repos.
+DRIVE_ROOT="${PROJECT_DIR%/WEDNESDAY}"
+STALE_PTRS=0
+for cfg in "$DRIVE_ROOT"/!CODING/*/*/2_Project_Files/.git/config; do
+  [ -f "$cfg" ] || continue
+  SSHCMD=$(git config -f "$cfg" core.sshCommand 2>/dev/null) || continue
+  [ -n "$SSHCMD" ] || continue
+  KEYPATH=$(printf '%s' "$SSHCMD" | sed -n 's/.*-i "\{0,1\}\([^" ]*\)"\{0,1\}.*/\1/p')
+  if [ -n "$KEYPATH" ] && [ ! -f "$KEYPATH" ]; then
+    PROJ=$(printf '%s' "$cfg" | sed "s|$DRIVE_ROOT/!CODING/||; s|/2_Project_Files/.git/config||")
+    warn "stale ssh pointer: $PROJ" "core.sshCommand -> $KEYPATH (missing here) — heals at that project's next launch, or its agent repoints"
+    STALE_PTRS=$((STALE_PTRS+1))
+  fi
+done
+[ "$STALE_PTRS" = "0" ] && ok "travel pointers: no project repo points at a missing key path"
+
 echo
 if [ "$HARD_FAIL" = "1" ]; then
   echo "PREFLIGHT: HARD FAILURES above — fix before relying on this machine."

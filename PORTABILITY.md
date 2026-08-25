@@ -84,3 +84,17 @@ Keep this file updated whenever a new machine-local dependency appears.
     (`doctor.sh` now checks both). `.git` never syncs — seed it once by copy, then it
     lives by git; `core.sshCommand` in `.git/config` names the key by ABSOLUTE path and
     must be re-pointed when the mount path changes (done 2026-08-25 for DevMASTER).
+
+18. **Stale absolute pointers after moving to another drive/machine (found 2026-08-25,
+    first travel session — full write-up in
+    `0_Brain/learnings/2026-08-25_travel-drive-stale-pointers.md`):** the sync copies
+    credentials perfectly but freezes every stored ABSOLUTE PATH pointing at the old
+    volume. Four classes found day one: per-project repo `core.sshCommand` (6 repos
+    pointing at unmounted DevMASTER + 2 at a drive dead since May; most launchers
+    self-heal at launch, Secuura's only with keychain seeded or
+    `SECUURA_ALLOW_ONDISK_KEY=1`); `fleet/cockpit/launchers.conf` (fixed permanently —
+    cockpit.sh falls back to the running drive); hardcoded facts in collectors; strict
+    parser contracts. **Post-sync ritual on the other machine: run `doctor.sh` — its
+    `travel-pointers` check sweeps all project repos' core.sshCommand and warns on
+    dangling pointers. Route warnings to the projects' own launchers/agents; never edit
+    their repos from Wednesday's hands.**
