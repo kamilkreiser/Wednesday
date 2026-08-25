@@ -29,3 +29,8 @@ Message-ID `<096604C5-237F-4467-9ECF-B79F975FCB11@me.com>`, subject reads
 - Not documented on their side (their admission); this note is the record.
 - Closes the 08-13 QUESTION thread (our correction mail + their reply). No
   further reply owed; any future mail to support is Kam's class.
+- **Second support reply (Harry Du, 19:36Z):** frames the same delay as DELIBERATE
+  ("some customers accidentally delete keys so we add this for them") vs Shaban's
+  cache-expiry framing. The two explanations differ on WHY; the operational facts
+  agree and are what we act on (≤5 min window, no forced invalidation, delete +
+  rotate + assume 5-min tail). Support invites future findings. No reply owed.
