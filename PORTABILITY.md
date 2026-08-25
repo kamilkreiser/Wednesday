@@ -75,3 +75,12 @@ Keep this file updated whenever a new machine-local dependency appears.
 - HTTP-not-HTTPS is deliberate for v1: traffic rides inside WireGuard; the
   `tailscale serve` HTTPS-cert path hung on the tailnet's cert toggle
   (admin-console setting) and can be upgraded later if Kam enables it.
+
+17. **File modes after a drive sync (found 2026-08-25, DevMASTER relocation):** Kam's
+    unison engine (`!SYNC FILES/devnas-sync.sh`, `perms = 0`) does not carry modes, so
+    a synced copy lands scripts non-executable AND the deploy key as 0644 — ssh refuses
+    the key and every push fails "publickey". After ANY sync into a copy you will run
+    from: `chmod 600 3_Access_Keys/* 4_Credentials/.env` and re-set exec bits
+    (`doctor.sh` now checks both). `.git` never syncs — seed it once by copy, then it
+    lives by git; `core.sshCommand` in `.git/config` names the key by ABSOLUTE path and
+    must be re-pointed when the mount path changes (done 2026-08-25 for DevMASTER).

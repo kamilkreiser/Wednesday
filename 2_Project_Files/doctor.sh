@@ -33,6 +33,16 @@ command -v python3 >/dev/null && ok "python3" || fail "python3 missing" "brew in
 command -v curl   >/dev/null && ok "curl"   || fail "curl missing" "part of macOS — PATH problem?"
 
 [ -f "$PROJECT_DIR/4_Credentials/.env" ] && ok ".env present" || fail "4_Credentials/.env missing" "restore from password manager — never in git"
+# Key/credential MODES (2026-08-25, the DevMASTER relocation): Kam's unison sync engine
+# runs perms=0 (SMB-safe), so a synced copy lands the deploy key as 0644 and ssh REFUSES
+# it ("UNPROTECTED PRIVATE KEY FILE") — git push dies with "Permission denied (publickey)"
+# on a tree that looks complete. Same family as the stripped-exec-bit check below.
+if [ -f "$PROJECT_DIR/3_Access_Keys/github_deploy_rw" ]; then
+  KM="$(stat -f '%Lp' "$PROJECT_DIR/3_Access_Keys/github_deploy_rw" 2>/dev/null)"
+  [ "$KM" = "600" ] && ok "deploy key mode 0600" || fail "deploy key mode $KM (ssh will refuse it)" "chmod 600 3_Access_Keys/* — a drive sync reset it"
+fi
+EM="$(stat -f '%Lp' "$PROJECT_DIR/4_Credentials/.env" 2>/dev/null)"
+case "$EM" in 600|400) ok ".env mode $EM" ;; *) warn ".env mode ${EM:-?} (world/group readable)" "chmod 600 4_Credentials/.env" ;; esac
 if [ -f "$PROJECT_DIR/4_Credentials/.env" ]; then
   for key in LINEAR_API_KEY AGENTMAIL_API_KEY; do
     grep -qE "^${key}=." "$PROJECT_DIR/4_Credentials/.env" && ok "$key set" || warn "$key unset in .env" "Linear/Agent Mail features degrade"
