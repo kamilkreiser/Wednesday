@@ -1409,3 +1409,6 @@ Done with it: ADDENDUM to the Vision/QuickQuote session — item 1 placement = n
 
 ## 2026-08-26 ~15:1x AEST — Kam (terminal): "put a feedback box on the page (similar to vision and nexus)"
 Done with it: ADDENDUM item 10 to the Vision/QuickQuote session — feedback widget on the hosted tool, patterned on the Vision portal's and NexusAI's (RD-116) implementations; second PR after the five ship.
+
+## 2026-08-26 ~15:1x AEST — Kam (terminal): "when they click email PDF, add PDF and CSV"
+Done with it: ADDENDUM item 11 to the Vision/QuickQuote session — the emailed quote carries a CSV alongside the PDF.
