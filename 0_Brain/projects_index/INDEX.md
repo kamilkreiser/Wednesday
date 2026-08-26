@@ -20,6 +20,15 @@ Linear: KS-601 Kintsugi (linked KS-584) + KS-602/603/604/605 + PS-556
 resolution comment ALL created 06:58Z; **cull NOT run** (KS 128 + PS 143 =
 271 active unchanged). Vision 08-11 wrapped 02:15Z (F2 closed, merged to main).
 
+**Refreshed 2026-08-26 ~16:38 (successor after the 16:29 rotation).** NAS unison leg FINISHED 16:25 rc=0,
+`Deleting`=0 (verified in the log body); 61 churn-failed files (live working trees + WEDNESDAY dashboard churn)
+await a quiet-hour cleanup leg; both NAS cards closed. Sweep (controls on every count): **Secuura KS 161 / 70
+unstarted+started / KS+PS 248** — only movement since s71's 06:26Z wrap = PS-675 (Stuart); **NexusAI 59 ·
+ATTIO 16 · HPSM 26 Backlog · Vision 0 (control 64)**, zero rows moved in 3h. HP ink: no signal. **Live:
+Datasec/Vision (%8)** on QuickQuote item 10 (v2.23 feedback box; build running). **Launching under the
+standing grant: Secuura s72** on s70's ranked no-ruling list (KS-578 → KS-680 → wallet-script wire/retire →
+GHSA-ggr8 row; KS-679 held on Peter's KS-665 reply). Open cards: 6.
+
 **Refreshed 2026-08-26 ~14:1x (successor after the 14:03 rotation).** Sweep (controls on
 every count): **Secuura 249 KS+PS work queue / 90 unstarted+started / 163 KS-only** — movement
 since s69's 02:50Z wrap = 9 PS rows, all Stuart's platform-s work (five Done incl. PS-282 merged
