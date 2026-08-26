@@ -1381,3 +1381,8 @@ Done with: after the unison legs, a full additive rsync DevMASTER → KK_DEV_Loc
 > "I approved the PR"
 
 *(Done with it: KS-661 PR not yet open → addendum 2 to s69: identify which PR carries the approval via the reviews endpoint; merge if #733 (docs), else report and wait for sequencing.)*
+
+## 2026-08-26 ~13:1x AEST — Kam (terminal), verbatim
+> "Are there any other secure backlog tickets or items that can be addressed or solved without waiting on Peter or Stuart?"
+
+*(Done with it: board swept read-only (163; 134 Kam/unassigned not Blocked); Secuura s70 launched on the no-dependency security batch KS-641/645/622/578/646/514 (+680/679 if context); the rest triaged to Kam's desk on the panel: KS-486 tenancy ruling unlocks 642/643/644; KS-635 pattern; KS-577 decision.)*
