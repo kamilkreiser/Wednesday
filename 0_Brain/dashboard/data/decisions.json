@@ -692,5 +692,34 @@
   "status": "open",
   "ruled_choice": null,
   "ruled_ts": null
+ },
+ {
+  "id": "secuura-agent-github-identity",
+  "client_project": "Secuura/Blockchain",
+  "title": "Your Approve was refused: GitHub won't let kksecura approve kksecura's PRs — give the agent its own GitHub identity, or Stuart/Peter approve",
+  "bluf": "Measured on the reviews endpoint: 0 approvals on all 31 open PRs (control: #568 shows Peter's 7 comments), #733 has no review event at all. Every one of our 11 PRs is authored by kksecura = your account; GitHub disables 'Approve' on your own PR and drops the click silently. So under the adopted flow YOU cannot be the approver for any agent-authored PR — only Stuart (StuJam-Secuura/SJP-Secuura) or Peter can, and Peter is on Platform S. That is the real shape of the review-capacity constraint. The durable fix is structural: the agent commits/pushes under its OWN GitHub identity (a Secuura org member/bot account with the deploy key), so the author is the agent and you can approve as the second pair of eyes — which also makes 'ticket ≠ reviewer' true by construction. Today: #733 (docs) and KS-661's PR need an approver.",
+  "default_action": "Agent asks Stuart on the tickets for #733 + KS-661; nothing merges until an approval exists (15-min fallback withdrawn — it assumed your approval was possible)",
+  "options": [
+   {
+    "key": "identity",
+    "label": "Create an agent GitHub identity in the Secuura org (rec) + Stuart approves today's two",
+    "detail": "Your one-time action: invite the account, give it write on Distributed_Secuura; the agent's launcher switches its PAT/deploy key; from then on you approve"
+   },
+   {
+    "key": "stuart",
+    "label": "Stuart approves #733 and KS-661 (ask goes on the tickets)",
+    "detail": "Works today; leaves you barred from approving agent PRs"
+   },
+   {
+    "key": "owner",
+    "label": "You merge #733 yourself as owner (docs-only), Stuart approves KS-661",
+    "detail": "Uses the admin override once; not a pattern"
+   }
+  ],
+  "recommended": "identity",
+  "ts": "2026-08-26T12:37:07.872766+10:00",
+  "status": "open",
+  "ruled_choice": null,
+  "ruled_ts": null
  }
 ]
