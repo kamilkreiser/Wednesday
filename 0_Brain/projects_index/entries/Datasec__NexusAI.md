@@ -30,6 +30,8 @@ named + digest-chained before). ACR: Basic SKU, nothing prunes; **RD-124
 found** (soft-delete DISABLED while its policy reads 7 days). RD-122 Done on
 Wednesday's ruling; RD-123 filed for the residual. origin/main 458cdfb.
 
+**s8 (2026-08-26 17:1x, micro, 1.0):** Kam's ruling (sweep + report only) LIVE: `scripts/feedback-sweep.sh` read-only, wired into CLAUDE.md Session Start + launcher FIRST ACTIONS step 6 (both machine-local — outside the repo; HISTORY says so). First live output: 2 items / 0 unreferenced, controls both ways. **RD-129 filed (Medium): a dead Jira token reads as an EMPTY BOARD, not an error** — `jira issue list` exits 0 with "No result", REST returns 200 `[]`; a negative control alone cannot detect a blind search. Boot is guarded by the /myself probe; mid-session token death + JIRA.md recipes are not. RD-125 comment 36707 (does NOT fix RD-125). main fc3bf0d. Board 60. Next session first: REPOINT the stale `curl https://4.198.168.215` Session-Start check (VM wound down 05-22) at the Container Apps health endpoint (ruled).
+
 **s7 (2026-08-26, micro):** Kam's "ticket both feedback items" → agent HELD: both were delivered by
 Kam on 2026-05-08 (91dab1bc, deployed) → recorded as **RD-126 (Bug) / RD-127 (Story), both Done**
 for the trail; **RD-128 (Bug, Medium, To Do)** new: Export CSV → Job History ignores Copy/Fax
@@ -49,6 +51,8 @@ deletes before 2026-08-24T23:25:12Z stay gone; preview feature) and RD-123 → S
 stays (recorded, no infra change). Both Done. Board 57. origin/main e590b35.
 
 **Open / next (refreshed 2026-08-26):**
+- [ ] Repoint the stale Session-Start reachability check (dead VM → Container Apps health) — ruled 08-26.
+- [ ] RD-129 dead-token-reads-empty (Medium) — fix when commissioned (mid-session + JIRA.md recipes).
 - [ ] RD-128 CSV export ignores Copy/Fax filters (Medium) — one-line fix + audit the other nine export functions, when commissioned.
 - [ ] RD-125 retention-sweep no-op (Medium) — fix when commissioned.
 - [ ] Feedback→Jira mechanism — Kam's card (nexusai-feedback-loop-mechanism).
