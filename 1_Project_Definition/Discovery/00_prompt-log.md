@@ -1406,3 +1406,6 @@ Done with it: relayed to the Vision agent as context (terminal = my pane, not fi
 
 ## 2026-08-26 ~15:1x AEST — Kam (terminal): "put the register deal next to customer name - No sub text needed"
 Done with it: ADDENDUM to the Vision/QuickQuote session — item 1 placement = next to the Customer name field; no note/helper text under it.
+
+## 2026-08-26 ~15:1x AEST — Kam (terminal): "put a feedback box on the page (similar to vision and nexus)"
+Done with it: ADDENDUM item 10 to the Vision/QuickQuote session — feedback widget on the hosted tool, patterned on the Vision portal's and NexusAI's (RD-116) implementations; second PR after the five ship.
