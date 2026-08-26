@@ -3,7 +3,7 @@ client: Secuura
 project: Blockchain
 path: /Volumes/DevMASTER/!CODING/Secuura/Blockchain
 status: active
-updated: 2026-08-26
+updated: 2026-08-27
 ---
 
 # Secuura / Blockchain (Platform K)
@@ -27,6 +27,14 @@ updated: 2026-08-26
   Merge order on return: #721 → #720 → #718, then #568 on Kam sign-off.
 - **Instrument rule, confirmed ×2 on 08-19: Linear `comments(last:N)` returns the
   OLDEST comments — always `first:50` + client-side sort.**
+
+**s73 (2026-08-27 06:10, LIVE):** 🎉 **Stuart MERGED #736 (KS-661) himself at 16:24Z 08-26 (0d98ad3f0) — first merge under the adopted flow; develop now 576ebef85.** 🔴 **`SJP-Secuura` is NOT Stuart (Stuart 16:19Z); `StuJam-Secuura` is shadow-flagged (its approvals are invisible/void); `PeterObeden` is the ONLY working approver** — s73 re-routes our SJP requests to Peter. Peter: KS-570 evidence accepted, "No merge from me", /api/status authz ticket handed to us; KS-687/688 onto a project.
+
+**Open / next (refreshed 2026-08-27 06:1x):**
+- 🔴 **Kam:** create the agent GitHub identity (steps on the panel 08-26 17:52 — still the structural fix; Peter is a single point of approval until then) · CI billing day 11 · KS-642 enumeration (KS-486 sitting) · KS-670 / KS-667 Urgent · credits 6 Sep · KS-635 row expires 08-31 (#738 waits on approval).
+- **s73 (running):** reconcile develop → KS-661 demo deploy (rebuild gateway) + PS-612 ping → SJP→Peter re-route + census → /api/status authz ticket → KS-687/688 project → KS-691.
+- **Stuart:** GitHub appeal on StuJam-Secuura; PS-612 switch after the demo deploy; PS-616 reconciliation (KS-566).
+- **Peter:** approvals on our PRs are now his alone (#733/#735/#737–#745/#742/#732/#734/#730).
 
 **s72 (2026-08-26 16:39–17:49, 0.95): the product was a REFUSAL — KS-578 as briefed would have made KS-643 (open High cross-tenant revoke IDOR) fully reliable; measured before building, held, Kam ruled "together" → PR #744 (KS-643 + KS-578, five live cases incl. the 404→403 interlock).** Also: #743 KS-680 · #745 KS-622 option B (backup codes at login, /verify 410 + deprecated:true, spec regenerated, dud-code defect retired free) · #735 amended for Kam's KS-592 check-not-operation ruling · KS-566 question to Stuart (PS-616) · KS-685: agent-identity ruling recorded + Stuart asked for #733/#736 (#733 had NO reviewer requested) · GHSA-ggr8 measured NOT dead (s70's call was scan-scope confusion; the unmatched row is qs GHSA-q8mj) · KS-690/691 filed (Low). 🔴 Automation trap widened: ANY PR touch walks attached tickets (KS-685 walked twice today; reverted). develop 29287565e unmoved. **41 PRs / 0 approvals.**
 

@@ -20,6 +20,19 @@ Linear: KS-601 Kintsugi (linked KS-584) + KS-602/603/604/605 + PS-556
 resolution comment ALL created 06:58Z; **cull NOT run** (KS 128 + PS 143 =
 271 active unchanged). Vision 08-11 wrapped 02:15Z (F2 closed, merged to main).
 
+**Refreshed 2026-08-27 06:1x (Thursday 06:00 wake — fresh session).** Floor quiet at boot; zero
+inbound overnight; Kam silent since his 17:11:38 08-26 ruling — **`quickquote-publish-v225` UNRULED
+(live QuickQuote still ships the Feedback button on emailed quotes).** Owed KK_DEV leg RUN (nodeletion,
+`Deleting`=0, content verified); NAS cleanup leg carried to the next quiet floor. Sweep (controls on
+every count): **Secuura KS 163 / 72 unstarted+started** — 🎉 **Stuart MERGED #736 (KS-661) himself
+at 16:24Z (0d98ad3f0), first merge under the new flow; develop now 576ebef85**; 🔴 **`SJP-Secuura` is
+NOT Stuart — `StuJam-Secuura` is shadow-flagged by GitHub, `PeterObeden` is the only working
+approver** (his ask: re-route #733 to Peter); Peter hands over the /api/status authz ticket (KS-570)
+and asks KS-687/688 onto a project. **NexusAI 60 · ATTIO 16 · HPSM 26 Backlog (no HP ink) · Vision 0
+(control 64)** — zero human movement. **Launched under the standing grant: Secuura s73 (%13)** —
+reconcile develop → KS-661 demo deploy (rebuild gateway, v1.3) → SJP→Peter re-route → file the authz
+ticket; **NexusAI s9 (%14)** — ruled repoint + RD-128/125/129 → demo deploy. Open cards: 1 (publish).
+
 **Refreshed 2026-08-26 ~16:38 (successor after the 16:29 rotation).** NAS unison leg FINISHED 16:25 rc=0,
 `Deleting`=0 (verified in the log body); 61 churn-failed files (live working trees + WEDNESDAY dashboard churn)
 await a quiet-hour cleanup leg; both NAS cards closed. Sweep (controls on every count): **Secuura KS 161 / 70
