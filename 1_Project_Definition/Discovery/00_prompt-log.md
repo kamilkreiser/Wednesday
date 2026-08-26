@@ -1336,3 +1336,8 @@ Done with: after the unison legs, a full additive rsync DevMASTER → KK_DEV_Loc
 > [25/8/2026, 8:29:05 pm] Kam: Happy with that   Work this into our current flow and follow it going forward."
 
 *(Done with it: adopted as the Secuura merge flow — addendum to the live s67 brief: record on KS-685 as the ADOPTED process, fold into their contributing docs, add test-evidence blocks to our open PRs; the NOTHING-MERGES hold becomes "merge only after Peter's PR approval".)*
+
+## 2026-08-26 10:51 AEST — Kam (dashboard chat), verbatim
+> "Do not delete any files, especially files that we are working on. Better cleanup is worthwhile.Don't delete any files, especially files that we are working on."
+
+*(Done with it: learning filed — learnings/2026-08-26_never-delete-cleanup-means-quarantine.md; ledger w=1; panel ack; HPSM conflict copies left in place; rule carried into future briefs.)*
