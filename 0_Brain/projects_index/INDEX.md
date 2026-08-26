@@ -20,6 +20,16 @@ Linear: KS-601 Kintsugi (linked KS-584) + KS-602/603/604/605 + PS-556
 resolution comment ALL created 06:58Z; **cull NOT run** (KS 128 + PS 143 =
 271 active unchanged). Vision 08-11 wrapped 02:15Z (F2 closed, merged to main).
 
+**Refreshed 2026-08-26 ~14:1x (successor after the 14:03 rotation).** Sweep (controls on
+every count): **Secuura 249 KS+PS work queue / 90 unstarted+started / 163 KS-only** — movement
+since s69's 02:50Z wrap = 9 PS rows, all Stuart's platform-s work (five Done incl. PS-282 merged
+#606; PS-672 new); zero Peter, zero human KS movement. **NexusAI 59 · ATTIO 16 · HPSM 26
+Backlog · Vision 0 (control 64)** unchanged. HP ink: no signal yet. **Live: Secuura s70 (%7)** on
+the no-dependency security batch (KS-641/645/622/578/646/514), plan confirmation pending. 🔴 NAS
+unison leg (nodeletion) crawling at ~17 KiB/s, ETA ~8 days, 0 Deleting — Kam told, default leave.
+Cards open: secuura-agent-github-identity · secuura-ks592-check-not-operation ·
+nexusai-feedback-loop-mechanism · nas-case-fold-datasec (executing).
+
 **Refreshed 2026-08-26 ~10:2x (first Studio boot after the travel day; DevMASTER was 7
 commits behind origin at boot — fast-forwarded before any write).** 🔴 **DATA-LOSS FINDING:
 the 08-25 NAS sync leg (started 10:14:23, cut by the 10:41 shutdown) propagated deletions
