@@ -28,12 +28,14 @@ updated: 2026-08-26
 - **Instrument rule, confirmed ×2 on 08-19: Linear `comments(last:N)` returns the
   OLDEST comments — always `first:50` + client-side sort.**
 
+**s69 (2026-08-26, 1.0): KS-661 certify→declare BUILT + proved, PR #736 open awaiting Stuart's approval** (review requested from SJP-Secuura). 🔴 **Kam cannot approve any of our PRs — GitHub self-approval bar (all authored by kksecura)** → card secuura-agent-github-identity. Next session: merge on approval → demo deploy under v1.3 (**REBUILD the gateway — the spec is BAKED, rsync does nothing**) → PS-612 ping on deploy; Kintsugi only on Stuart's word.
+
 **s68 (2026-08-26, micro, 1.0):** dev-process v2 (Kam-approved) in the repo at `Blockchain/Dev/docs/DEV-PROCESS.md` on PR #733 (5b9614a30) + KS-685 pointer comment; CONTRIBUTING pointer names the reviewer-proposal caveat. CI 344 dead runs; 16 human PRs / 0 approvals. develop 29287565e.
 
 **s67 (2026-08-26, 1.0 — two halves):** Kam ADOPTED the Stuart/Peter merge flow → recorded on KS-685 (Stuart's, Todo) + CONTRIBUTING/CLAUDE (PR #733); evidence blocks on our 7 PRs; KS-687/688 (KS-666 findings, F1 fixed live-on-develop → PR #732), KS-689 (admin/create, Peter's handover); three Kam rulings recorded — KS-611 .strict() BUILT at runtime + spec (PR #734), KS-686 tolerate-until-KS-627 (verbatim, cross-refs on KS-627/593), KS-592 whole-operation (verbatim, register row PR #735) with the two-500s gap flagged → **card `secuura-ks592-check-not-operation`**. **Zero approvals on all 16 of our PRs — review capacity, not CI, is the constraint; Peter moved to platform-s.** develop 29287565e.
 
 **Open / next (refreshed 2026-08-26 after s67):**
-- 🔴 **Kam:** KS-592 check-vs-operation (card, one word) · CI billing (ruled WAIT for the team's cost discussion) · name a reviewer for #730 · KS-635 pattern (expires 08-31) · 6-Sep credits · KS-570 authorization half · KS-670 close · HP ink.
+- 🔴 **Kam:** agent GitHub identity / who approves (card — he is barred from approving kksecura PRs) · KS-592 check-vs-operation (card, one word) · CI billing (ruled WAIT for the team's cost discussion) · name a reviewer for #730 · KS-635 pattern (expires 08-31) · 6-Sep credits · KS-570 authorization half · KS-670 close · HP ink.
 - **Peter:** approvals are the gate now — our 16 PRs carry evidence blocks; KS-686 guard lands on #731 while open; KS-611 fix is ours (PR #734, both declarations); KS-592's limit-rows are ordinary fixes, the offset=-1 500s belong to KS-593/KS-544.
 - **Next session:** confirm KS-592/KS-611 In Progress = automation flip (history endpoint), one line on KS-611 for Peter; watch for Peter's approvals → first merge under the new flow gets one explicit go from me; F2/F3 after #729.
 - **Stuart:** KS-685 write-up (adopted baseline posted); PS-669 P0 / PS-670 P1 his.
