@@ -28,6 +28,13 @@ updated: 2026-08-26
 - **Instrument rule, confirmed ×2 on 08-19: Linear `comments(last:N)` returns the
   OLDEST comments — always `first:50` + client-side sort.**
 
+**s72 (2026-08-26 16:39–17:49, 0.95): the product was a REFUSAL — KS-578 as briefed would have made KS-643 (open High cross-tenant revoke IDOR) fully reliable; measured before building, held, Kam ruled "together" → PR #744 (KS-643 + KS-578, five live cases incl. the 404→403 interlock).** Also: #743 KS-680 · #745 KS-622 option B (backup codes at login, /verify 410 + deprecated:true, spec regenerated, dud-code defect retired free) · #735 amended for Kam's KS-592 check-not-operation ruling · KS-566 question to Stuart (PS-616) · KS-685: agent-identity ruling recorded + Stuart asked for #733/#736 (#733 had NO reviewer requested) · GHSA-ggr8 measured NOT dead (s70's call was scan-scope confusion; the unmatched row is qs GHSA-q8mj) · KS-690/691 filed (Low). 🔴 Automation trap widened: ANY PR touch walks attached tickets (KS-685 walked twice today; reverted). develop 29287565e unmoved. **41 PRs / 0 approvals.**
+
+**Open / next (refreshed 2026-08-26 after s72):**
+- 🔴 **Kam:** create the agent GitHub identity (his hands; steps to follow) · CI billing day 10 · KS-642 enumeration (KS-486 sitting) · KS-670 / KS-667 Urgent · credits 6 Sep · KS-635 row expires 08-31 (#738 waits on approval).
+- **Stuart:** approve #733 + #736 (asked on KS-685); PS-616 reconciliation (KS-566); reviews on #735/#743/#744/#745 requested once.
+- **Next session (no ruling needed):** KS-679 stays gated on KS-665 (Peter) · KS-691 worktree preflight fix (own ticket) · login-side e2e for second-factor expiry/brute force (BACKLOG) · 22-vs-20 activeApiKeys observation (demo-side, undiagnosed).
+
 **s71 (2026-08-26, 1.0): KS-566 G-1 split + connector-only provenance fallback BUILT, PR #742 open (reviewer SJP-Secuura).** Three corrections: ticket contract table inverted 12 days · a connector cannot revoke (owner gate 403 — card `secuura-ks566-revoke-gate`) · demo shows NO attribution-less accrual after PS-616 (Stuart's restored-vs-stopped to reconcile). #736 'approval' does not exist on GitHub (StuJam-Secuura 404; request on SJP-Secuura) — on KS-661 for Stuart. api-gateway jest suite dead → backlog. develop 29287565e unmoved.
 
 **Open / next (refreshed 2026-08-26 after s71):**
