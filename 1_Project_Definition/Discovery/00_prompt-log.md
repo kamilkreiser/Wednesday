@@ -1371,3 +1371,8 @@ Done with: after the unison legs, a full additive rsync DevMASTER → KK_DEV_Loc
 > "from stuart - Also can I get KS-661 (to free up certify as a verb) done ... as it will unblock a few things"
 
 *(Done with it: Secuura s69 briefed + launched — build the certify→declare rename on a branch, PR with evidence block, Stuart @-mentioned once to review (not the author; Peter on platform-s), merge only after approval + my explicit go (first merge under the new flow), then demo deploy under v1.3 + PS-612 ping; Kintsugi only on Stuart's word.)*
+
+## 2026-08-26 ~12:5x AEST — Kam (terminal), verbatim
+> "go ahead and merge"
+
+*(Done with it: read as advance authorisation of the KS-661 merge (his last topic); relayed to s69 as an addendum — my explicit-go step satisfied; Approve requested on the PR from Kam/Stuart to keep the flow's record; 15-min fallback merges on his quoted word; branch-protection refusal = stop and report.)*
