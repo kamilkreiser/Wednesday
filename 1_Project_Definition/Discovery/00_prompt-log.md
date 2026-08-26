@@ -1346,3 +1346,8 @@ Done with: after the unison legs, a full additive rsync DevMASTER → KK_DEV_Loc
 > "Please check whether there's been any feedback submitted for Nexus on the feedback portal."
 
 *(Done with it: feedback list is behind requireAuth on the demo (401 anonymous); NexusAI s6 read-only micro-session launched to read the feedbackItems store and report human vs auto-created; Kam given the /feedback-admin.html one-click path meanwhile.)*
+
+## 2026-08-26 ~11:2x AEST — Kam (terminal), verbatim
+> "I did not, but it's possible that the agent did, so don't worry about it, skip."
+
+*(Done with it: the missing feedback item #1 closed as skip; recorded in the daily note; no further investigation.)*
