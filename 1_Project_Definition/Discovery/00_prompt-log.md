@@ -1351,3 +1351,8 @@ Done with: after the unison legs, a full additive rsync DevMASTER → KK_DEV_Loc
 > "I did not, but it's possible that the agent did, so don't worry about it, skip."
 
 *(Done with it: the missing feedback item #1 closed as skip; recorded in the daily note; no further investigation.)*
+
+## 2026-08-26 ~11:3x AEST — Kam (terminal), verbatim
+> "Yes, ticket both of those in Jira."
+
+*(Done with it: NexusAI s7 micro-session briefed + launched via brief_and_launch.sh to file the two May feedback items (#2, #3) as RD tickets from the store's own text, mapping recorded in their HISTORY.)*
