@@ -1412,3 +1412,7 @@ Done with it: ADDENDUM item 10 to the Vision/QuickQuote session — feedback wid
 
 ## 2026-08-26 ~15:1x AEST — Kam (terminal): "when they click email PDF, add PDF and CSV"
 Done with it: ADDENDUM item 11 to the Vision/QuickQuote session — the emailed quote carries a CSV alongside the PDF.
+
+## 2026-08-26 ~15:1x AEST — Kam (terminal, dictated; "Generate Bomb" = Generate BOM): BOM + PDF layout clarity
+> When a user clicks the Generate Bomb as well as the PDF generated, can you please look at the layout? A little bit confusing as to what adds up to what certain components are elements which identify the unit price, and other components total up the yearly price. But the way that it looks at the moment, it's not obvious to see how the total comes up together. Can you please look at this? If you want further input from me, let me know.
+Done with it: ADDENDUM item 12 — agent analyses the BOM + PDF layout and delivers a rendered before/after PROPOSAL (file) for Kam's ruling before building; Kam offered input.
