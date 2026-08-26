@@ -832,5 +832,29 @@
   "status": "open",
   "ruled_choice": null,
   "ruled_ts": null
+ },
+ {
+  "id": "secuura-ks578-ks643-ownership",
+  "client_project": "Secuura/Blockchain",
+  "title": "KS-578 revoke fix would make the open KS-643 cross-tenant revoke IDOR fully reliable — authorise the ownership check with it?",
+  "bluf": "s72 measured before building: KS-578's cold-cache 404 is today an accidental LIMITER on KS-643 (High: a tenant-scoped ISSUER_ADMIN revoked another tenant's key, HTTP 200, proven with role controls). Wrapping the lookup in platform scope without an ownership check makes that IDOR fully reliable. KS-643 is under your KS-621 ruling (organisation = security boundary, design before code), so I have HELD KS-578 and not authorised the check. Red acceptance tests are being pushed (no PR).",
+  "default_action": "HOLD: nothing built on KS-578 or KS-643; red tests pushed on a branch, no PR; both tickets carry the measurement",
+  "options": [
+   {
+    "key": "together",
+    "label": "Authorise the ownership check in the same PR as KS-578",
+    "detail": "Minimal shape: non-platform KEY_ADMIN roles act only on own-tenant keys; platform admin cross-tenant revoke preserved (KS-577 needs it). One PR, one review. KS-642 (list enumeration) stays for the KS-486 sitting."
+   },
+   {
+    "key": "hold",
+    "label": "Hold both for the KS-486 tenancy design sitting",
+    "detail": "Nothing built; KS-578's tests stay red on their branch; the IDOR stays exactly as exploitable as today, no worse."
+   }
+  ],
+  "recommended": "together",
+  "ts": "2026-08-26T16:58:06.494356+10:00",
+  "status": "open",
+  "ruled_choice": null,
+  "ruled_ts": null
  }
 ]
