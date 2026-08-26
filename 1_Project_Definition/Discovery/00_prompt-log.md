@@ -1366,3 +1366,8 @@ Done with: after the unison legs, a full additive rsync DevMASTER → KK_DEV_Loc
 > "Yes, put it in the repo and link it from KS-685"
 
 *(Done with it: v2 copied into 1_Project_Definition/Discovery/2026-08-26_secuura-dev-process-v2.md as the source the agent reads; Secuura s68 micro-session briefed + launched to add it on the #733 docs branch and link it from KS-685; nothing merges.)*
+
+## 2026-08-26 ~12:4x AEST — Kam (terminal), verbatim — relaying Stuart
+> "from stuart - Also can I get KS-661 (to free up certify as a verb) done ... as it will unblock a few things"
+
+*(Done with it: Secuura s69 briefed + launched — build the certify→declare rename on a branch, PR with evidence block, Stuart @-mentioned once to review (not the author; Peter on platform-s), merge only after approval + my explicit go (first merge under the new flow), then demo deploy under v1.3 + PS-612 ping; Kintsugi only on Stuart's word.)*
