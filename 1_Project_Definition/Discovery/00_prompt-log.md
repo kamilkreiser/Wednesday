@@ -1431,3 +1431,9 @@ Done with it: ADDENDUM item 13 to the Vision/QuickQuote session — bug: app sel
 > Please add the following logo to the Quick Quote tool. On the top left corner, you can remove the HPARS Quick Quote heading and the sub line as a result. The logo should also be added to the printable quote and PDF.
 
 Done with it: logo file located/obtained → ADDENDUM to the running Vision/QuickQuote session (item 14: replace the top-left "HPAS Quick Quote" heading + subline with the logo; logo on the printable quote and the emailed PDF; same deploy hold).
+
+## 2026-08-27 09:05 — Kam (terminal, verbatim)
+
+> publish QuickQuote
+
+_Done with it:_ ruled card quickquote-publish-v225 → publish; Datasec/Vision briefed to deploy main 424f049 (v2.25) to the hosted QuickQuote under his first-party word (this turn in my transcript), one-send mail budget, rollback image named first.
