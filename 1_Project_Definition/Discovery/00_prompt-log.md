@@ -1341,3 +1341,8 @@ Done with: after the unison legs, a full additive rsync DevMASTER → KK_DEV_Loc
 > "Do not delete any files, especially files that we are working on. Better cleanup is worthwhile.Don't delete any files, especially files that we are working on."
 
 *(Done with it: learning filed — learnings/2026-08-26_never-delete-cleanup-means-quarantine.md; ledger w=1; panel ack; HPSM conflict copies left in place; rule carried into future briefs.)*
+
+## 2026-08-26 ~11:1x AEST — Kam (terminal), verbatim
+> "Please check whether there's been any feedback submitted for Nexus on the feedback portal."
+
+*(Done with it: feedback list is behind requireAuth on the demo (401 anonymous); NexusAI s6 read-only micro-session launched to read the feedbackItems store and report human vs auto-created; Kam given the /feedback-admin.html one-click path meanwhile.)*
