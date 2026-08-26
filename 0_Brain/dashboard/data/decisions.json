@@ -856,5 +856,39 @@
   "status": "open",
   "ruled_choice": null,
   "ruled_ts": null
+ },
+ {
+  "id": "quickquote-otp-mail-spof",
+  "client_project": "Datasec/Vision_Sales_Portal",
+  "title": "QuickQuote sign-in has a single point of failure in the ACS mail cap — today's test burst blocked ALL sign-in for ~an hour",
+  "bluf": "OTP is the only auth path; the Azure-managed sending domain's cap (~30/hr, the one you accepted 08-11) was hit by the agent's item-10 test volume at 06:49Z and every sign-in failed until it cleared (time-only recovery, no defect, disclosed by the agent). A real burst — a partner demo, one customer retrying a code — does the same. Fix is a decision, not a patch.",
+  "default_action": "Nothing built; agent testing rate-limited by instruction; re-raised at go-live",
+  "options": [
+   {
+    "key": "cooldown",
+    "label": "Per-address resend cooldown now (code, one PR) + custom domain at go-live",
+    "detail": "Stops retries burning the cap; the domain move is already on the go-live list. Cheapest, no money."
+   },
+   {
+    "key": "domain",
+    "label": "Move to the verified Datasec custom domain now",
+    "detail": "Lifts the cap; needs your DNS/ACS hands (the go-live item pulled forward)."
+   },
+   {
+    "key": "quota",
+    "label": "Raise the ACS quota / request a limit increase",
+    "detail": "Support ticket + possibly cost; keeps the managed domain."
+   },
+   {
+    "key": "accept",
+    "label": "Accept as-is until the service moves",
+    "detail": "Your 08-11 ruling stands; nothing built."
+   }
+  ],
+  "recommended": "cooldown",
+  "ts": "2026-08-26T16:59:44.425251+10:00",
+  "status": "open",
+  "ruled_choice": null,
+  "ruled_ts": null
  }
 ]
