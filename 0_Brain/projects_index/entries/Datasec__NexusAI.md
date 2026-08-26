@@ -3,7 +3,7 @@ client: Datasec
 project: NexusAI
 path: /Volumes/DevMASTER/!CODING/Datasec/NexusAI
 status: active
-updated: 2026-08-25
+updated: 2026-08-26
 ---
 
 # Datasec / NexusAI
@@ -30,12 +30,20 @@ named + digest-chained before). ACR: Basic SKU, nothing prunes; **RD-124
 found** (soft-delete DISABLED while its policy reads 7 days). RD-122 Done on
 Wednesday's ruling; RD-123 filed for the residual. origin/main 458cdfb.
 
+**s6 (2026-08-26, micro, read-only — Kam's feedback-portal question):** store holds 2 human
+items (both 2026-05-07, open, no attachments), none since; corroborates Kam's own look.
+**RD-125 filed (Medium):** the retention sweep is a permanent no-op for feedback — the route
+file exports no getter, both sweep sites bind `() => []`, the RETENTION_SWEEP audit line
+records a false `before:0`; 365-day TTL first due ~May 2027. Portal unaffected. HISTORY
+0af9b96. Missing feedback #1: Kam — "skip".
+
 **s5 (2026-08-25 09:2x, 1.0):** Kam ruled RD-124 → ACR soft-delete ENABLED on
 nexusaidevacrfa39 (7-day recovery proved with an isolated probe; NOT retroactive —
 deletes before 2026-08-24T23:25:12Z stay gone; preview feature) and RD-123 → Single
 stays (recorded, no infra change). Both Done. Board 57. origin/main e590b35.
 
-**Open / next:**
+**Open / next (refreshed 2026-08-26):**
+- [ ] RD-125 retention-sweep no-op (Medium) — fix when commissioned; the two May feedback items (#2 Job History filters, #3 Anomalies filter) are NOT in Jira — Kam's call whether to ticket them.
 - [ ] RD-121 in Testing — promote once a customer-shaped workspace exercises
       the metadata path (demo blocks it by design under SYNTHETIC_DEMO_FEED).
 - [ ] RD-76/RD-116 browser eyeball on demo (Kam or my browser seat) — the one
