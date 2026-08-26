@@ -1400,3 +1400,6 @@ Done with it: briefed Datasec/Vision (QuickQuote repo) via brief_and_launch.sh �
 > in addition to the above, please look at the spacing in the orice tile.  see sceenshot, some of the text is hidden
 
 Done with it: ADDENDUM to the running Vision/QuickQuote session (item 9 — price tile layout: label column wrapping to three lines, values hidden/clipped, TOTAL clipped at "+ POA (").
+
+## 2026-08-26 ~15:1x AEST — Kam (terminal): "publish QuickQuote"
+Done with it: relayed to the Vision agent as context (terminal = my pane, not first-party for it); asked Kam to repeat it on the dashboard panel, which the agent reads at source.
