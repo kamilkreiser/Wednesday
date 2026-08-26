@@ -1356,3 +1356,8 @@ Done with: after the unison legs, a full additive rsync DevMASTER → KK_DEV_Loc
 > "Yes, ticket both of those in Jira."
 
 *(Done with it: NexusAI s7 micro-session briefed + launched via brief_and_launch.sh to file the two May feedback items (#2, #3) as RD tickets from the store's own text, mapping recorded in their HISTORY.)*
+
+## 2026-08-26 ~11:5x AEST — Kam (terminal), verbatim
+> "please review and update the secuura process /Users/kam_code/Downloads/dev-process-Aug26.md"
+
+*(Done with it: reviewed against the day's findings + the CONTRIBUTING wording on PR #733; v2 written to my scratchpad and delivered as a file; his Downloads copy left untouched (never-overwrite).)*
