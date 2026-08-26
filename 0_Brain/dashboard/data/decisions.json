@@ -639,5 +639,29 @@
   "status": "open",
   "ruled_choice": null,
   "ruled_ts": null
+ },
+ {
+  "id": "secuura-ks592-check-not-operation",
+  "client_project": "Secuura/Blockchain",
+  "title": "KS-592 follow-up: your 'whole operation tolerated' — tolerate the CHECK, not the OPERATION? (one word; hides two 500s otherwise)",
+  "bluf": "Your 10:45 ruling is recorded verbatim on KS-592 and stands for what it addressed (unknown query key + the offset null union). The agent's measurement, taken 8 minutes before, shows the operation's 24 failures are: 2 unknown-key rows (your rule reaches them), 14 'limit' rows (plain integer/min1/max200 violations, no union, no ruling needed — ordinary fixes), and TWO HTTP 500s on offset=-1 (an already-registered, still-unfiled parseInt||0 defect, KS-544 2026-08-04, one of six sites across four services). If 'whole operation tolerated' is implemented as a blanket per-operation exclusion in the harness, the sweep stops seeing those 500s. The register's own audit-log precedent already says a by-design entry must not suppress negative_data_rejection wholesale. Nothing implemented yet; the agent asked rather than narrowed.",
+  "default_action": "Nothing implemented until you say; the verbatim ruling stays on the ticket with the gap flagged beside it",
+  "options": [
+   {
+    "key": "check",
+    "label": "Tolerate the CHECK (unknown-query-param + null-offset) on this operation — 500s and limit violations stay visible",
+    "detail": "Register row scoped to the check; KS-592 keeps the limit rows; the 500s get filed under KS-593/544"
+   },
+   {
+    "key": "operation",
+    "label": "Keep 'whole operation' as ruled — blanket exclusion",
+    "detail": "Sweep stops reporting anything on GET /api/users/admin/list, including the 500s"
+   }
+  ],
+  "recommended": "check",
+  "ts": "2026-08-26T10:59:11.520742+10:00",
+  "status": "open",
+  "ruled_choice": null,
+  "ruled_ts": null
  }
 ]

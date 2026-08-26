@@ -28,6 +28,14 @@ updated: 2026-08-26
 - **Instrument rule, confirmed ×2 on 08-19: Linear `comments(last:N)` returns the
   OLDEST comments — always `first:50` + client-side sort.**
 
+**s67 (2026-08-26, 1.0 — two halves):** Kam ADOPTED the Stuart/Peter merge flow → recorded on KS-685 (Stuart's, Todo) + CONTRIBUTING/CLAUDE (PR #733); evidence blocks on our 7 PRs; KS-687/688 (KS-666 findings, F1 fixed live-on-develop → PR #732), KS-689 (admin/create, Peter's handover); three Kam rulings recorded — KS-611 .strict() BUILT at runtime + spec (PR #734), KS-686 tolerate-until-KS-627 (verbatim, cross-refs on KS-627/593), KS-592 whole-operation (verbatim, register row PR #735) with the two-500s gap flagged → **card `secuura-ks592-check-not-operation`**. **Zero approvals on all 16 of our PRs — review capacity, not CI, is the constraint; Peter moved to platform-s.** develop 29287565e.
+
+**Open / next (refreshed 2026-08-26 after s67):**
+- 🔴 **Kam:** KS-592 check-vs-operation (card, one word) · CI billing (ruled WAIT for the team's cost discussion) · name a reviewer for #730 · KS-635 pattern (expires 08-31) · 6-Sep credits · KS-570 authorization half · KS-670 close · HP ink.
+- **Peter:** approvals are the gate now — our 16 PRs carry evidence blocks; KS-686 guard lands on #731 while open; KS-611 fix is ours (PR #734, both declarations); KS-592's limit-rows are ordinary fixes, the offset=-1 500s belong to KS-593/KS-544.
+- **Next session:** confirm KS-592/KS-611 In Progress = automation flip (history endpoint), one line on KS-611 for Peter; watch for Peter's approvals → first merge under the new flow gets one explicit go from me; F2/F3 after #729.
+- **Stuart:** KS-685 write-up (adopted baseline posted); PS-669 P0 / PS-670 P1 his.
+
 **s66 (2026-08-25 travel drive, 1.0): KS-685 filed** — manual-merge process definition
 commissioned by Kam, assigned to Stuart (Todo/High). Its history entry lives on the travel
 drive only until s67 carries it. **Peter's Tuesday (08-25):** all three KS-666 findings
@@ -35,7 +43,7 @@ ACCEPTED; `POST /api/users/admin/create` handed over to us (KS-570); #730 has no
 KS-684 complete at 4.25.2 on its branch (not merged), item 7 → KS-686; questions for Kam on
 KS-592 (admin/list edge) and KS-611 (.strict()); he is moving to platform-s.
 
-**Open / next (refreshed 2026-08-26 — s67 LIVE on Peter's handovers):**
+**Open / next (as briefed 2026-08-26 — superseded above):**
 - 🔴 **Kam:** CI billing (only unblocker) · KS-592 admin/list ruling (card) · KS-686 501
   posture (card) · KS-611 .strict() yes/no (card, default B) · name a reviewer for PR #730 ·
   KS-635 pattern (expires 08-31) · 6-Sep credits · KS-570 authorization half · KS-670 close.
