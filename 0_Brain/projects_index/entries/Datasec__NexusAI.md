@@ -3,7 +3,7 @@ client: Datasec
 project: NexusAI
 path: /Volumes/DevMASTER/!CODING/Datasec/NexusAI
 status: active
-updated: 2026-08-26
+updated: 2026-08-27
 ---
 
 # Datasec / NexusAI
@@ -30,6 +30,18 @@ named + digest-chained before). ACR: Basic SKU, nothing prunes; **RD-124
 found** (soft-delete DISABLED while its policy reads 7 days). RD-122 Done on
 Wednesday's ruling; RD-123 filed for the residual. origin/main 458cdfb.
 
+**s9 (2026-08-27 06:10–06:44, 1.0):** Session-Start check repointed to the Container App `/api/health` (CLAUDE.md; the launcher never curled the VM — Wednesday's premise, corrected); **RD-128 / RD-125 / RD-129 → Testing, deployed as `nexusai:1.21.0-rd128-rd125-9cdd5ca` → revision `--rd128125`** (rollback 1.20.0-rd121-e151431 digest-verified first; --0000089 deprovisioned = Single mode observed). Retention sweep now logs `feedback before:2 removed:0` on demo (was a false 0 for the feature's life). Third unfiltered export copy fixed in the same PR; `scripts/jira-query.sh` refuses with SEARCH BLIND on a dead token. 🔴 **RD-130 filed: the hourly health sweeper still probes the dead VM (DEFAULT_URLS[0], HEALTH_SWEEP_URLS unset) → ~2,300 false P1s feeding the SLA + morning-digest reports since 05-22.** RD-131 (Fleet Health CSV omits Drum Status). RD-93: transition to Testing is named "In Review" (id 31) — table in JIRA.md. main b376055. Board 62.
+
+**Open / next (refreshed 2026-08-27):**
+- [ ] **RD-130** — stop the false-P1 sweeper (set HEALTH_SWEEP_URLS / retire the default) and decide what to do with ~2,300 audit entries — next commission (Kam aware).
+- [ ] RD-131 Fleet Health CSV Drum Status — design call, when commissioned.
+- [ ] RD-128/125/129 in Testing — the browser click path (Copy Only → Export) still behind RD-76.
+- [ ] RD-76/RD-116 browser eyeball on demo (Kam or my browser seat).
+- [ ] 18+ tickets in Testing awaiting review / promotion — only if commissioned.
+- [ ] PT-002 / PT-011 secret liveness — needs Datasec dev-tenant admin.
+
+**Completed (moved off the dashboard 2026-08-27, verified at source):** stale VM Session-Start check repointed (s9) · RD-125 · RD-128 · RD-129 (all Testing, deployed).
+
 **s8 (2026-08-26 17:1x, micro, 1.0):** Kam's ruling (sweep + report only) LIVE: `scripts/feedback-sweep.sh` read-only, wired into CLAUDE.md Session Start + launcher FIRST ACTIONS step 6 (both machine-local — outside the repo; HISTORY says so). First live output: 2 items / 0 unreferenced, controls both ways. **RD-129 filed (Medium): a dead Jira token reads as an EMPTY BOARD, not an error** — `jira issue list` exits 0 with "No result", REST returns 200 `[]`; a negative control alone cannot detect a blind search. Boot is guarded by the /myself probe; mid-session token death + JIRA.md recipes are not. RD-125 comment 36707 (does NOT fix RD-125). main fc3bf0d. Board 60. Next session first: REPOINT the stale `curl https://4.198.168.215` Session-Start check (VM wound down 05-22) at the Container Apps health endpoint (ruled).
 
 **s7 (2026-08-26, micro):** Kam's "ticket both feedback items" → agent HELD: both were delivered by
@@ -50,7 +62,7 @@ nexusaidevacrfa39 (7-day recovery proved with an isolated probe; NOT retroactive
 deletes before 2026-08-24T23:25:12Z stay gone; preview feature) and RD-123 → Single
 stays (recorded, no infra change). Both Done. Board 57. origin/main e590b35.
 
-**Open / next (refreshed 2026-08-26):**
+**Open / next (as of 2026-08-26 — superseded above):**
 - [ ] Repoint the stale Session-Start reachability check (dead VM → Container Apps health) — ruled 08-26.
 - [ ] RD-129 dead-token-reads-empty (Medium) — fix when commissioned (mid-session + JIRA.md recipes).
 - [ ] RD-128 CSV export ignores Copy/Fax filters (Medium) — one-line fix + audit the other nine export functions, when commissioned.
