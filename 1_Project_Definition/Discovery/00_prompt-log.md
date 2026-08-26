@@ -1316,3 +1316,23 @@ Done with: after the unison legs, a full additive rsync DevMASTER → KK_DEV_Loc
 > "for Secuura - please create a ticket, flag Stuart to define the process of work, test and commit with manual mege going forward.  For HPSM, the project manager from HP is meeting with financing committee tomorrow"
 
 *(Done with it: Secuura micro-session briefed via brief_and_launch.sh to create the KS ticket flagging Stuart to define the work→test→commit→manual-merge process [my board access is read-only by design]; NOTHING-MERGES hold explicitly unchanged until the process is defined. HPSM: financing-committee intel recorded on the entry card + daily note — ink signal expected after that meeting; queue still fires only on Kam's ink confirmation.)*
+
+## 2026-08-26 ~10:4x AEST — Kam (terminal), verbatim
+> "Please start with checking what has changed on the KK_dev drive as I did minor changes yesterday while out."
+
+*(Done with it: full modified-since-10:40-08-25 sweep of KK_DEV_Local vs DevMASTER; results in daily/2026-08-26.md.)*
+
+## 2026-08-26 ~10:4x AEST — Kam (terminal), verbatim — WhatsApp thread pasted, Secuura commit/merge flow
+> "Also, please have a look at the following message from Stuart and Peter regarding their Secura commit and merge flow.
+> [25/8/2026, 7:43:22 pm] Stuart: Hello so a suggested strategy to avoid GitHub ci/cd costing.
+> Stuart/Kam develop code/solution on a branch. When completed/happy commit/push/PR.
+> Peter reviews/tests pr. Ok/fixes discussed with PR issuer. And once happy … Peter merges to develop
+> Pull develop and then Manual deploy follows by pr issuer
+> Thoughts/comments
+> [25/8/2026, 8:13:53 pm] ~ Douglas Peter: Yeah, broadly fine with this. Couple of things though.
+> Stuart, Kam — I need you to test your own stuff before the PR goes up, and stick the results in the description. What you touched, what you actually ran, what you didn't get to, any migrations or config changes. Doesn't need to be an essay.
+> If that ends up with me instead I'm just testing all day and none of my own tickets move. I'll become the blocker, and the automation work I'm meant to be doing stops dead. Unless you fancy picking up my tickets and writing the tests, which I'd rather avoid — a dev testing their own work isn't great. Though I'll admit that argument's a bit weaker these days given the AI's writing most of the tests anyway. It's more that the ticket and the review shouldn't sit with the same person.
+> Other thing — happy to review and I'll do some sample testing on top. Auth and tenancy stuff, migrations, anything crossing service boundaries, I'll go through properly. Rest I'll spot check. But can the author merge rather than me? You'll know when it's ready because I'll have approved the PR first. If every merge waits on me actually doing it, develop stops every time I'm off, and you're in a better position to fix it if something goes bang straight after merging. Branch protection does the same job — needs an approval, needs the checks green, no pushing straight to develop.
+> [25/8/2026, 8:29:05 pm] Kam: Happy with that   Work this into our current flow and follow it going forward."
+
+*(Done with it: adopted as the Secuura merge flow — addendum to the live s67 brief: record on KS-685 as the ADOPTED process, fold into their contributing docs, add test-evidence blocks to our open PRs; the NOTHING-MERGES hold becomes "merge only after Peter's PR approval".)*
