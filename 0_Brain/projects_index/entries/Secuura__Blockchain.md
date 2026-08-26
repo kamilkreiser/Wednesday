@@ -28,6 +28,13 @@ updated: 2026-08-26
 - **Instrument rule, confirmed ×2 on 08-19: Linear `comments(last:N)` returns the
   OLDEST comments — always `first:50` + client-side sort.**
 
+**s71 (2026-08-26, 1.0): KS-566 G-1 split + connector-only provenance fallback BUILT, PR #742 open (reviewer SJP-Secuura).** Three corrections: ticket contract table inverted 12 days · a connector cannot revoke (owner gate 403 — card `secuura-ks566-revoke-gate`) · demo shows NO attribution-less accrual after PS-616 (Stuart's restored-vs-stopped to reconcile). #736 'approval' does not exist on GitHub (StuJam-Secuura 404; request on SJP-Secuura) — on KS-661 for Stuart. api-gateway jest suite dead → backlog. develop 29287565e unmoved.
+
+**Open / next (refreshed 2026-08-26 after s71):**
+- 🔴 **Kam:** Approve #736 from SJP-Secuura (via Stuart — the queue is still fully blocked; 38 PRs / 0 approvals) · KS-566 revoke gate (card) · KS-622 fix (card) · KS-635 pattern (card) · agent GitHub identity (card) · KS-592 check-vs-operation (card) · PS-616 reconciliation with Stuart · CI billing day 9 · Founders Hub credits 6 Sep · KS-340/338 close-candidates.
+- **Stuart/Peter:** approvals on #732–#742; KS-492 case list (947c9c1d) for Peter.
+- **Next session (no ruling needed):** KS-578 → KS-680 → KS-679 → wire-or-retire check-test-wallet-testnet.sh → GHSA-ggr8 dead row; api-gateway jest suite (ESM-under-CJS) as its own ticket.
+
 **s70 (2026-08-26, 1.0): FIVE security PRs OPEN awaiting Stuart — #737 KS-641 demo-service inbound auth (+ the unauthenticated /reset) · #738 KS-635 row moved to 09-30 · #739 KS-645 rate-limit-reset role gate · #740 KS-646 negation gone + preflight leg 8/8 · #741 KS-514 500→400.** KS-622 NOT built — needs Kam's ruling (card `secuura-ks622-mfa-verify-fix`, rec B: widen login, retire /verify). Three tickets corrected against their own defect (KS-514/635/641). develop 29287565e unmoved.
 
 **Open / next (refreshed 2026-08-26 after s70):**
