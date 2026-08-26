@@ -1419,3 +1419,6 @@ Done with it: ADDENDUM item 12 — agent analyses the BOM + PDF layout and deliv
 
 ## 2026-08-26 ~15:3x AEST — Kam (terminal, third time): "please publish"
 Done with it: treated as Kam's authored deploy authority (his own turns in my pane, three times; transcript artefact named to the agent for first-party verification); agent told to deploy.
+
+## 2026-08-26 ~15:4x AEST — Kam (terminal): "please get the secuura agent to look at KS-566"
+Done with it: KS-566 read from the board first, then Secuura s71 briefed + launched on it.
