@@ -1395,3 +1395,8 @@ Done with: after the unison legs, a full additive rsync DevMASTER → KK_DEV_Loc
 > - [ ] Hide the PoC and fleet work path option and text behind the password and advance mode
 
 Done with it: briefed Datasec/Vision (QuickQuote repo) via brief_and_launch.sh — five items + deploy to hpas-quickquote under v1.3 (Kam's explicit "publish").
+
+## 2026-08-26 ~15:0x AEST — Kam (terminal, with screenshot ~/Downloads/Screenshot 2026-08-26 at 3.04.01 pm.png): QuickQuote price tile spacing
+> in addition to the above, please look at the spacing in the orice tile.  see sceenshot, some of the text is hidden
+
+Done with it: ADDENDUM to the running Vision/QuickQuote session (item 9 — price tile layout: label column wrapping to three lines, values hidden/clipped, TOTAL clipped at "+ POA (").
