@@ -1386,3 +1386,12 @@ Done with: after the unison legs, a full additive rsync DevMASTER → KK_DEV_Loc
 > "Are there any other secure backlog tickets or items that can be addressed or solved without waiting on Peter or Stuart?"
 
 *(Done with it: board swept read-only (163; 134 Kam/unassigned not Blocked); Secuura s70 launched on the no-dependency security batch KS-641/645/622/578/646/514 (+680/679 if context); the rest triaged to Kam's desk on the panel: KS-486 tenancy ruling unlocks 642/643/644; KS-635 pattern; KS-577 decision.)*
+
+## 2026-08-26 ~14:5x AEST — Kam (terminal): QuickQuote change round + publish
+> please implement the following changes to the quick quote tool and publish - - [ ] Checkbox - Register deal Y/N
+> - [ ] Add this link under work path ready devices input box and text.  https://developers.hp.com/workpath/compatible-devices
+> - [ ] grey out POC option for no. of devices less than 10
+> - [ ] POC - text (below) "PoC runs for 30 days and is applicable for deployments over 10 devices. Contact us to request a PoC under 10 devices)"
+> - [ ] Hide the PoC and fleet work path option and text behind the password and advance mode
+
+Done with it: briefed Datasec/Vision (QuickQuote repo) via brief_and_launch.sh — five items + deploy to hpas-quickquote under v1.3 (Kam's explicit "publish").
