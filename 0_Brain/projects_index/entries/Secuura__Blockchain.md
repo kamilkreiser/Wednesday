@@ -28,6 +28,8 @@ updated: 2026-08-26
 - **Instrument rule, confirmed ×2 on 08-19: Linear `comments(last:N)` returns the
   OLDEST comments — always `first:50` + client-side sort.**
 
+**s68 (2026-08-26, micro, 1.0):** dev-process v2 (Kam-approved) in the repo at `Blockchain/Dev/docs/DEV-PROCESS.md` on PR #733 (5b9614a30) + KS-685 pointer comment; CONTRIBUTING pointer names the reviewer-proposal caveat. CI 344 dead runs; 16 human PRs / 0 approvals. develop 29287565e.
+
 **s67 (2026-08-26, 1.0 — two halves):** Kam ADOPTED the Stuart/Peter merge flow → recorded on KS-685 (Stuart's, Todo) + CONTRIBUTING/CLAUDE (PR #733); evidence blocks on our 7 PRs; KS-687/688 (KS-666 findings, F1 fixed live-on-develop → PR #732), KS-689 (admin/create, Peter's handover); three Kam rulings recorded — KS-611 .strict() BUILT at runtime + spec (PR #734), KS-686 tolerate-until-KS-627 (verbatim, cross-refs on KS-627/593), KS-592 whole-operation (verbatim, register row PR #735) with the two-500s gap flagged → **card `secuura-ks592-check-not-operation`**. **Zero approvals on all 16 of our PRs — review capacity, not CI, is the constraint; Peter moved to platform-s.** develop 29287565e.
 
 **Open / next (refreshed 2026-08-26 after s67):**
