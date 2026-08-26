@@ -1403,3 +1403,6 @@ Done with it: ADDENDUM to the running Vision/QuickQuote session (item 9 — pric
 
 ## 2026-08-26 ~15:1x AEST — Kam (terminal): "publish QuickQuote"
 Done with it: relayed to the Vision agent as context (terminal = my pane, not first-party for it); asked Kam to repeat it on the dashboard panel, which the agent reads at source.
+
+## 2026-08-26 ~15:1x AEST — Kam (terminal): "put the register deal next to customer name - No sub text needed"
+Done with it: ADDENDUM to the Vision/QuickQuote session — item 1 placement = next to the Customer name field; no note/helper text under it.
