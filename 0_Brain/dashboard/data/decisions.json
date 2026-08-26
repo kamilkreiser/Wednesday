@@ -721,5 +721,58 @@
   "status": "open",
   "ruled_choice": null,
   "ruled_ts": null
+ },
+ {
+  "id": "secuura-ks635-expiry-pattern",
+  "client_project": "Secuura/Blockchain",
+  "title": "KS-635: audit-baseline exception expiring 2026-08-31 — pattern ruling",
+  "bluf": "One audit-baseline row (GHSA-mwp4-54f8-5fhr, owner KS-559 Done+archived) expires 2026-08-31; from 09-01 the audit gate blocks every push touching Blockchain/Dev. Seven exceptions expire on four dates through 11-11 (measured by s61). s70 is opening a one-line PR moving this row to 09-30 so an approvable fix exists before the deadline; the PATTERN (how exceptions get re-reviewed/extended) is yours.",
+  "default_action": "extend: s70's PR goes up today; if unapproved by 08-31 I raise it again on the 30th",
+  "options": [
+   {
+    "key": "extend",
+    "label": "Extend the one row to 09-30 (PR by s70, needs a Stuart/Peter approval)",
+    "detail": "Buys a month; pattern still open"
+   },
+   {
+    "key": "pattern",
+    "label": "Rule the pattern now",
+    "detail": "e.g. quarterly re-review of every exception, agent-run, with a ticket per row — tell me the shape"
+   },
+   {
+    "key": "lapse",
+    "label": "Let it lapse",
+    "detail": "push wall from 09-01 on Blockchain/Dev until someone re-triages"
+   }
+  ],
+  "recommended": "extend",
+  "ts": "2026-08-26T14:11:46.664758+10:00",
+  "status": "open",
+  "ruled_choice": null,
+  "ruled_ts": null
+ },
+ {
+  "id": "nas-leg-crawl",
+  "client_project": "WED/Datasec",
+  "title": "NAS sync leg crawling — ~17 KB/s, ETA ~8 days",
+  "bluf": "The nodeletion NAS unison leg (started 10:58) is safe — 0 Deleting lines, deletion impossible by flag — but throughput fell from ~250 KB/s to ~17 KB/s; 977 MB of 12.2 GB moved. Cause not measured (NAS link vs share throttling vs contention with the live agent stack).",
+  "default_action": "leave: I re-measure at the 23:00 close and stop it then if still crawling, saying so",
+  "options": [
+   {
+    "key": "leave",
+    "label": "Leave it running",
+    "detail": "nothing lost either way; re-check at tonight's close"
+   },
+   {
+    "key": "stop",
+    "label": "Stop it now, re-run when the link is faster",
+    "detail": "unison resumes from its archive; nothing lost"
+   }
+  ],
+  "recommended": "leave",
+  "ts": "2026-08-26T14:11:46.710847+10:00",
+  "status": "open",
+  "ruled_choice": null,
+  "ruled_ts": null
  }
 ]
