@@ -30,6 +30,12 @@ named + digest-chained before). ACR: Basic SKU, nothing prunes; **RD-124
 found** (soft-delete DISABLED while its policy reads 7 days). RD-122 Done on
 Wednesday's ruling; RD-123 filed for the residual. origin/main 458cdfb.
 
+**s7 (2026-08-26, micro):** Kam's "ticket both feedback items" → agent HELD: both were delivered by
+Kam on 2026-05-08 (91dab1bc, deployed) → recorded as **RD-126 (Bug) / RD-127 (Story), both Done**
+for the trail; **RD-128 (Bug, Medium, To Do)** new: Export CSV → Job History ignores Copy/Fax
+filters (one of two sites updated in May); other nine export functions not audited. HISTORY
+823ff43. Board 59. Feedback→Jira has no mechanism either way → card for Kam.
+
 **s6 (2026-08-26, micro, read-only — Kam's feedback-portal question):** store holds 2 human
 items (both 2026-05-07, open, no attachments), none since; corroborates Kam's own look.
 **RD-125 filed (Medium):** the retention sweep is a permanent no-op for feedback — the route
@@ -43,7 +49,9 @@ deletes before 2026-08-24T23:25:12Z stay gone; preview feature) and RD-123 → S
 stays (recorded, no infra change). Both Done. Board 57. origin/main e590b35.
 
 **Open / next (refreshed 2026-08-26):**
-- [ ] RD-125 retention-sweep no-op (Medium) — fix when commissioned; the two May feedback items (#2 Job History filters, #3 Anomalies filter) are NOT in Jira — Kam's call whether to ticket them.
+- [ ] RD-128 CSV export ignores Copy/Fax filters (Medium) — one-line fix + audit the other nine export functions, when commissioned.
+- [ ] RD-125 retention-sweep no-op (Medium) — fix when commissioned.
+- [ ] Feedback→Jira mechanism — Kam's card (nexusai-feedback-loop-mechanism).
 - [ ] RD-121 in Testing — promote once a customer-shaped workspace exercises
       the metadata path (demo blocks it by design under SYNTHETIC_DEMO_FEED).
 - [ ] RD-76/RD-116 browser eyeball on demo (Kam or my browser seat) — the one

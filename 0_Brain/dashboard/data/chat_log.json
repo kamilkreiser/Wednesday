@@ -2098,5 +2098,10 @@
   "role": "wednesday",
   "ts": "2026-08-26T11:37:17.750608+10:00",
   "text": "Correction before the tickets go up — the premise I gave you was wrong. Both May feedback items were already delivered: by you, on 8 May, the morning after they came in (commit 91dab1bc 'address feedback items #2/#3', proven present in the running demo image). The Job History filters weren't broken in the filter code at all — the fix was in the CSP helper that passed the literal string 'this' to nine handlers; you also added Copy/Fax and the Anomalies severity filter then. The feedback store still says 'open' only because nothing writes back to it.\n\nSo the agent held rather than file two false defects, and I've ruled: file both anyway as delivered → Done, so the feedback → implementation trail exists on the board (your instruction, kept true), plus ONE genuinely new bug it found on the way — Export CSV → Job History ignores the Copy Only / Fax Only filters (the 8 May change added them to the on-screen table but not the CSV path), so a user filtering to Copy and exporting gets every print and scan job with no warning. Bug, Medium; not fixed this session."
+ },
+ {
+  "role": "wednesday",
+  "ts": "2026-08-26T11:42:10.803745+10:00",
+  "text": "NexusAI s7 done: RD-126 (Job History filters) and RD-127 (Anomalies severity filter) recorded as delivered → Done with your 8 May commit as the evidence; RD-128 filed open — the CSV export that ignores the Copy/Fax filters (Medium, one-line fix, but the other nine export functions should be checked for the same divergence when someone picks it up).\n\nOne design call for you (card nexusai-feedback-loop-mechanism): two sessions, two findings in opposite directions — the retention sweep can't see the feedback store, and the board couldn't see work the store had already provoked. Nothing connects the in-app feedback to Jira either way. Options: build the integration / a boot-time sweep-and-report / leave it (2 items in 4 months). Recommendation: the sweep. Default: nothing built."
  }
 ]

@@ -663,5 +663,34 @@
   "status": "open",
   "ruled_choice": null,
   "ruled_ts": null
+ },
+ {
+  "id": "nexusai-feedback-loop-mechanism",
+  "client_project": "Datasec/NexusAI",
+  "title": "Feedback → Jira has no mechanism: two findings in two sessions, opposite directions — design call",
+  "bluf": "s6: the retention sweep cannot see the feedback store (RD-125). s7: the board could not see work the store had already provoked — you fixed feedback #2/#3 on 8 May and nothing wrote back, so 111 days later they still read 'open' and nearly became two false tickets. Same root: nothing connects the in-app feedback store to Jira in either direction. Options: (a) commission a small integration — new feedback item → RD ticket (Bug/Story by type) with the RD key written back to the item, status synced on Done; (b) a lighter rule: the agent sweeps the feedback store at boot and reports new items (no integration); (c) leave it — feedback is rare (2 items in 4 months).",
+  "default_action": "Nothing built; the trail lives in RD-125/126/127/128 + HISTORY",
+  "options": [
+   {
+    "key": "integrate",
+    "label": "Commission the feedback→Jira integration (create + write-back + status sync)",
+    "detail": "NexusAI ticket, agent builds under v1.3, demo deploy with rollback"
+   },
+   {
+    "key": "sweep",
+    "label": "Boot-time sweep + report only (no integration)",
+    "detail": "Added to the NexusAI launcher/brief as a standing check"
+   },
+   {
+    "key": "leave",
+    "label": "Leave it — volume too low to justify",
+    "detail": "Recorded; RD-125/126/127/128 stand as the trail"
+   }
+  ],
+  "recommended": "sweep",
+  "ts": "2026-08-26T11:42:06.781721+10:00",
+  "status": "open",
+  "ruled_choice": null,
+  "ruled_ts": null
  }
 ]
