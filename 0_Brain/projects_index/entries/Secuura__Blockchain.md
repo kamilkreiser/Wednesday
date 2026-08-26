@@ -28,6 +28,13 @@ updated: 2026-08-26
 - **Instrument rule, confirmed ×2 on 08-19: Linear `comments(last:N)` returns the
   OLDEST comments — always `first:50` + client-side sort.**
 
+**s70 (2026-08-26, 1.0): FIVE security PRs OPEN awaiting Stuart — #737 KS-641 demo-service inbound auth (+ the unauthenticated /reset) · #738 KS-635 row moved to 09-30 · #739 KS-645 rate-limit-reset role gate · #740 KS-646 negation gone + preflight leg 8/8 · #741 KS-514 500→400.** KS-622 NOT built — needs Kam's ruling (card `secuura-ks622-mfa-verify-fix`, rec B: widen login, retire /verify). Three tickets corrected against their own defect (KS-514/635/641). develop 29287565e unmoved.
+
+**Open / next (refreshed 2026-08-26 after s70):**
+- 🔴 **Kam:** KS-622 fix ruling (card) · KS-635 pattern (card; 2 of 5 ip-address consumers already patched — exception broader than exposure) · agent GitHub identity (card; gates every merge) · KS-592 check-vs-operation (card) · close the stale "[Decision] Agent Mail send limit" extranet to-do · KS-486 tenancy (unlocks KS-642/643/644) · HP ink.
+- **Stuart/Peter:** approvals on #732–#741 (0 of 32 open PRs approved); first merge under the flow gets one explicit go from me; KS-661 deploy = REBUILD the demo gateway.
+- **Next session (no ruling needed), s70's ranked list:** KS-578 cold-cache cross-tenant revoke (RLS-aware test) → KS-680 → KS-679 → wire-or-retire `scripts/check-test-wallet-testnet.sh` (zero callers) → GHSA-ggr8 dead-weight baseline row. Unfiled finds to carry: `format: date-time` on VcIssueRequest · builder.ts:253 unguarded `new Date` · mcp-server ip-address minor bump · all-digit backup-code branch.
+
 **s69 (2026-08-26, 1.0): KS-661 certify→declare BUILT + proved, PR #736 open awaiting Stuart's approval** (review requested from SJP-Secuura). 🔴 **Kam cannot approve any of our PRs — GitHub self-approval bar (all authored by kksecura)** → card secuura-agent-github-identity. Next session: merge on approval → demo deploy under v1.3 (**REBUILD the gateway — the spec is BAKED, rsync does nothing**) → PS-612 ping on deploy; Kintsugi only on Stuart's word.
 
 **s68 (2026-08-26, micro, 1.0):** dev-process v2 (Kam-approved) in the repo at `Blockchain/Dev/docs/DEV-PROCESS.md` on PR #733 (5b9614a30) + KS-685 pointer comment; CONTRIBUTING pointer names the reviewer-proposal caveat. CI 344 dead runs; 16 human PRs / 0 approvals. develop 29287565e.

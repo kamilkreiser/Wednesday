@@ -774,5 +774,34 @@
   "status": "open",
   "ruled_choice": null,
   "ruled_ts": null
+ },
+ {
+  "id": "secuura-ks622-mfa-verify-fix",
+  "client_project": "Secuura/Blockchain",
+  "title": "KS-622: backup codes redeemable without factor 1 — which fix (published API change)",
+  "bluf": "POST /api/auth/mfa/verify redeems MFA backup codes with no proof of the password factor. s70 measured: NO frontend calls /verify, and login's own mfaCode regex can never accept a backup code (0 of 20,000 generated codes pass) — so today backup codes work ONLY for an unauthenticated caller and not at all through any real UI. Every viable fix changes a published API contract, so the agent stopped and asked.",
+  "default_action": "hold: nothing built until you rule; the two dead-code legs are already closed on the ticket",
+  "options": [
+   {
+    "key": "b",
+    "label": "Option B — widen login to accept backup codes, retire /verify",
+    "detail": "login already enforces both factors; deletes an unauthenticated surface instead of guarding it (published-endpoint removal)"
+   },
+   {
+    "key": "a",
+    "label": "Option A — guard /verify with a factor-1 session requirement",
+    "detail": "keeps the endpoint; the ticket's own 'not final' direction"
+   },
+   {
+    "key": "hold",
+    "label": "Hold — ask Stuart first",
+    "detail": "S-side may have a consumer we cannot see"
+   }
+  ],
+  "recommended": "b",
+  "ts": "2026-08-26T14:54:15.863295+10:00",
+  "status": "open",
+  "ruled_choice": null,
+  "ruled_ts": null
  }
 ]
