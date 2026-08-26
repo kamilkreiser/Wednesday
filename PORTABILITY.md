@@ -106,3 +106,15 @@ Keep this file updated whenever a new machine-local dependency appears.
     `caffeinate -dims -t <seconds>` alongside any fleet launch (same action, not
     afterwards). Recovery for a slept turn: re-verify the dead turn's writes, then
     mirror mail + resume tap (the 08-24 dead-turn rule).
+
+20. **Case-consistency of replica names BEFORE any sync leg (found 2026-08-26 — the
+    2026-08-25 NAS leg deleted six `!CODING/` folders from DevMASTER):** the NAS share's
+    real directory is `!CODING/datasec` while DevMASTER/KK_DEV have `Datasec`. macOS SMB
+    resolves both spellings to the same folder, unison compares case-sensitively, and the
+    profile runs `prefer = newer` with `confirmbigdel = false` — so the "reconciliation"
+    is a mass delete. Before "Sync All Drives" (or any single leg): diff the REAL names
+    (`python3 -c 'import os; print(sorted(os.listdir(r)))'` per replica root and per
+    `!CODING/`), and after every leg grep its log for `[BGN] Deleting` before trusting
+    `Sync finished`. A leg cut by a shutdown writes no summary — read the body. Learning:
+    `0_Brain/learnings/2026-08-26_a-sync-that-cannot-refuse-a-deletion.md`. The NAS leg
+    stays OFF until the case is fixed (Kam's card `nas-case-fold-datasec`).

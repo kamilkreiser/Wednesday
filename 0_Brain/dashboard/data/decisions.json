@@ -414,9 +414,9 @@
   ],
   "recommended": "fix-now",
   "ts": "2026-08-25T06:18:03.622295+10:00",
-  "status": "open",
-  "ruled_choice": null,
-  "ruled_ts": null
+  "status": "ruled",
+  "ruled_choice": "wait",
+  "ruled_ts": "2026-08-26T10:46:45.873208+10:00"
  },
  {
   "id": "nexusai-revision-mode",
@@ -520,9 +520,9 @@
   ],
   "recommended": "restore",
   "ts": "2026-08-26T10:06:39.625490+10:00",
-  "status": "open",
-  "ruled_choice": null,
-  "ruled_ts": null
+  "status": "ruled",
+  "ruled_choice": "restore",
+  "ruled_ts": "2026-08-26T10:46:45.827901+10:00"
  },
  {
   "id": "secuura-ks592-adminlist",
@@ -610,5 +610,34 @@
   "status": "ruled",
   "ruled_choice": "a",
   "ruled_ts": "2026-08-26T10:44:54.075913+10:00"
+ },
+ {
+  "id": "nas-case-fold-datasec",
+  "client_project": "Fleet/NAS (Development share)",
+  "title": "NAS sync leg is UNSAFE: the NAS has a lowercase '!CODING/datasec' tree — that is what deleted the six folders",
+  "bluf": "Restore done and verified (six folders back on DevMASTER, counts + hashes match the travel drive). Root cause found while re-mounting the NAS: the NAS's real directory is '!CODING/datasec' (lowercase; the share lists only that name), while DevMASTER/KK_DEV use 'Datasec'. macOS resolves both names to the same folder, but unison is case-sensitive: it sees 'Datasec/…' missing on the NAS and 'datasec/…' missing on DevMASTER, then reconciles by DELETING — 5,179 log lines under datasec/ and 5,316 under Datasec/ in yesterday's run, which is where Marketing_Collateral etc. went. The NAS still holds all six (with more files than DevMASTER — likely older versions + AppleDouble '._' files). The NAS leg WILL do it again until the case is fixed. KK_DEV leg is unaffected (both sides 'Datasec') — running it now.",
+  "default_action": "HOLD: no NAS leg runs; KK_DEV leg only",
+  "options": [
+   {
+    "key": "rename",
+    "label": "Rename the NAS folder to 'Datasec' (two-step rename via a temp name) and reset unison's NAS archive, then re-run the NAS leg",
+    "detail": "I do the rename on the NAS + clear the NAS-pair archive; first sync after that is a bidirectional merge with copyonconflict"
+   },
+   {
+    "key": "ignorecase",
+    "label": "Set 'ignorecase = true' in devnas.prf instead",
+    "detail": "Your profile file; makes unison fold case on all legs; no rename needed"
+   },
+   {
+    "key": "hold",
+    "label": "Hold the NAS leg; you look at the NAS yourself",
+    "detail": "NAS untouched; DevMASTER and KK_DEV stay in sync via the KK_DEV leg"
+   }
+  ],
+  "recommended": "rename",
+  "ts": "2026-08-26T10:48:58.820763+10:00",
+  "status": "open",
+  "ruled_choice": null,
+  "ruled_ts": null
  }
 ]
