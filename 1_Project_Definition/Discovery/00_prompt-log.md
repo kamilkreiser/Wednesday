@@ -1426,3 +1426,8 @@ Done with it: KS-566 read from the board first, then Secuura s71 briefed + launc
 ## 2026-08-26 ~16:0x AEST — Kam (terminal): QuickQuote currency bug
 > in the quick qupte tool - When the currency is changed, the application selection pane does not update based on the converted value.
 Done with it: ADDENDUM item 13 to the Vision/QuickQuote session — bug: app selection pane (per-app chips/prices) does not re-render on currency change; fix + test, own PR ahead of the feedback box.
+
+## 2026-08-26 ~17:1x AEST — Kam (terminal, with an image: HP "Authentication Suite — Productivity | Security | Convenience" logo): QuickQuote logo
+> Please add the following logo to the Quick Quote tool. On the top left corner, you can remove the HPARS Quick Quote heading and the sub line as a result. The logo should also be added to the printable quote and PDF.
+
+Done with it: logo file located/obtained → ADDENDUM to the running Vision/QuickQuote session (item 14: replace the top-left "HPAS Quick Quote" heading + subline with the logo; logo on the printable quote and the emailed PDF; same deploy hold).
