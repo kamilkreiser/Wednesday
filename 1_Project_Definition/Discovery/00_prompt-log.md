@@ -1361,3 +1361,8 @@ Done with: after the unison legs, a full additive rsync DevMASTER → KK_DEV_Loc
 > "please review and update the secuura process /Users/kam_code/Downloads/dev-process-Aug26.md"
 
 *(Done with it: reviewed against the day's findings + the CONTRIBUTING wording on PR #733; v2 written to my scratchpad and delivered as a file; his Downloads copy left untouched (never-overwrite).)*
+
+## 2026-08-26 ~12:0x AEST — Kam (terminal), verbatim
+> "Yes, put it in the repo and link it from KS-685"
+
+*(Done with it: v2 copied into 1_Project_Definition/Discovery/2026-08-26_secuura-dev-process-v2.md as the source the agent reads; Secuura s68 micro-session briefed + launched to add it on the #733 docs branch and link it from KS-685; nothing merges.)*
