@@ -1376,3 +1376,8 @@ Done with: after the unison legs, a full additive rsync DevMASTER → KK_DEV_Loc
 > "go ahead and merge"
 
 *(Done with it: read as advance authorisation of the KS-661 merge (his last topic); relayed to s69 as an addendum — my explicit-go step satisfied; Approve requested on the PR from Kam/Stuart to keep the flow's record; 15-min fallback merges on his quoted word; branch-protection refusal = stop and report.)*
+
+## 2026-08-26 ~12:5x AEST — Kam (terminal), verbatim
+> "I approved the PR"
+
+*(Done with it: KS-661 PR not yet open → addendum 2 to s69: identify which PR carries the approval via the reviews endpoint; merge if #733 (docs), else report and wait for sequencing.)*
