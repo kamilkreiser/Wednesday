@@ -2088,5 +2088,15 @@
   "role": "wednesday",
   "ts": "2026-08-26T11:23:15.681344+10:00",
   "text": "NexusAI feedback portal — measured, and it matches your look: the store holds exactly 2 items, both human, both from 7 May 2026 (#2 'Job History Tab' — filters not filtering, add Copy-only/Fax-only; #3 'Anomalies and Risks Tab' — add All/High/Medium/Low filter), both still open, no attachments, and nothing created since — zero feedback POSTs in the 30-day log window, with the control query returning 33 rows. Neither item is in Jira.\n\nTwo extras from the read:\n• A real defect, ahead of harm: the app's retention sweep can never see feedback (the route file doesn't export the getter, so the sweep binds an empty stub) and its audit log records feedback: before 0 — a compliance line that is false while two free-text records sit there. The 365-day TTL would first matter ~May 2027. Ticket being filed now (Medium); portal itself unaffected.\n• One question only you can answer: there was a feedback item #1 and it's gone — ids run 2 and 3, and the store was rewritten on 7 May at 23:53Z, ~16 hours after #3. Did you delete a test submission that evening? (If yes, nothing changes; if no, the finding gets sharper.)"
+ },
+ {
+  "role": "wednesday",
+  "ts": "2026-08-26T11:27:23.185622+10:00",
+  "text": "NexusAI s6 closed and scored 1.0: RD-125 filed (the retention-sweep defect, Medium, linked to the attachments ticket), history committed. Your #1 answer recorded as skip. Left for you only if you want it: the two May feedback items (Job History filters; Anomalies filter) are not in Jira — say the word and the next NexusAI session tickets them. NAS leg still running, zero deletions."
+ },
+ {
+  "role": "wednesday",
+  "ts": "2026-08-26T11:37:17.750608+10:00",
+  "text": "Correction before the tickets go up — the premise I gave you was wrong. Both May feedback items were already delivered: by you, on 8 May, the morning after they came in (commit 91dab1bc 'address feedback items #2/#3', proven present in the running demo image). The Job History filters weren't broken in the filter code at all — the fix was in the CSP helper that passed the literal string 'this' to nine handlers; you also added Copy/Fax and the Anomalies severity filter then. The feedback store still says 'open' only because nothing writes back to it.\n\nSo the agent held rather than file two false defects, and I've ruled: file both anyway as delivered → Done, so the feedback → implementation trail exists on the board (your instruction, kept true), plus ONE genuinely new bug it found on the way — Export CSV → Job History ignores the Copy Only / Fax Only filters (the 8 May change added them to the on-screen table but not the CSV path), so a user filtering to Copy and exporting gets every print and scan job with no warning. Bug, Medium; not fixed this session."
  }
 ]
