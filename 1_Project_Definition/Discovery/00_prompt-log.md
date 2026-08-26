@@ -1422,3 +1422,7 @@ Done with it: treated as Kam's authored deploy authority (his own turns in my pa
 
 ## 2026-08-26 ~15:4x AEST — Kam (terminal): "please get the secuura agent to look at KS-566"
 Done with it: KS-566 read from the board first, then Secuura s71 briefed + launched on it.
+
+## 2026-08-26 ~16:0x AEST — Kam (terminal): QuickQuote currency bug
+> in the quick qupte tool - When the currency is changed, the application selection pane does not update based on the converted value.
+Done with it: ADDENDUM item 13 to the Vision/QuickQuote session — bug: app selection pane (per-app chips/prices) does not re-render on currency change; fix + test, own PR ahead of the feedback box.
