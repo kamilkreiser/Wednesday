@@ -20,6 +20,25 @@ Linear: KS-601 Kintsugi (linked KS-584) + KS-602/603/604/605 + PS-556
 resolution comment ALL created 06:58Z; **cull NOT run** (KS 128 + PS 143 =
 271 active unchanged). Vision 08-11 wrapped 02:15Z (F2 closed, merged to main).
 
+**Refreshed 2026-08-26 ~10:2x (first Studio boot after the travel day; DevMASTER was 7
+commits behind origin at boot — fast-forwarded before any write).** 🔴 **DATA-LOSS FINDING:
+the 08-25 NAS sync leg (started 10:14:23, cut by the 10:41 shutdown) propagated deletions
+onto DevMASTER — `!CODING/Datasec/{Marketing_Collateral, RESEARCH, Security Review,
+Task_Dispatcher, Websites}` + `!CODING/MultiAgent Coordination` gone from the master;
+Paperclip intact (9988/9988). Copies intact on KK_DEV_Local and in ~/.unison/backup. ALL
+SYNC LEGS ON HOLD until Kam rules (card devmaster-nas-deletions).** Sweep (controls on every
+count): **Secuura 160 work queue / 57 unstarted+started** — 🔴 **Peter worked the board all
+Tuesday (36 KS+PS rows moved) and is moving to platform-s**: KS-666 findings ACCEPTED ("take
+them"), KS-570 admin/create HANDED OVER to us + PR #730 has no reviewer, KS-592 question for
+Kam (admin/list edge), KS-684 complete at 4.25.2 on its branch (not merged) with item 7 split
+to KS-686 (needs Kam's 501 ruling), KS-611 .strict() yes/no for Kam, KS-575/667 re-measured by
+him; Stuart triaged PS + filed PS-669 (P0)/PS-670 (P1); KS-685 unanswered by Stuart yet.
+**NexusAI 57 · ATTIO 16 · HPSM 26 Backlog · Vision 0 (control 64) — all zero movement.**
+🔴 **HP financing committee TODAY (Wed 08-26)** — ink signal expected after. **Launched under
+the standing grant: Secuura s67 (%2)** on Peter's handovers (+ carrying s66's history entry
+from the travel-drive file). Cards open: devmaster-nas-deletions · secuura-ci-billing ·
+secuura-ks592-adminlist · secuura-ks686-501-posture · secuura-ks611-strict.
+
 **Re-checked 2026-08-25 09:1x (respawn session after the 06:02 session went silent post-07:01):** all counts unchanged from 06:1x except NexusAI 58→59 (s4 filed RD-123/124, closed RD-122); every row moved since 06:00 is s64/s4's own; Peter/Stuart/Kam quiet; HPSM ink unconfirmed. **No launches** — leads are Kam-gated or human-waits. Cards open: secuura-ci-billing · secuura-ks662-scope · nexusai-revision-mode · nexusai-acr-softdelete.
 
 **Refreshed 2026-08-25 06:1x (Tuesday 06:00 wake — 🔴 HPSM SIGNATURE WINDOW OPEN

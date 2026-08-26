@@ -3,7 +3,7 @@ client: Secuura
 project: Blockchain
 path: /Volumes/DevMASTER/!CODING/Secuura/Blockchain
 status: active
-updated: 2026-08-25
+updated: 2026-08-26
 ---
 
 # Secuura / Blockchain (Platform K)
@@ -27,6 +27,22 @@ updated: 2026-08-25
   Merge order on return: #721 → #720 → #718, then #568 on Kam sign-off.
 - **Instrument rule, confirmed ×2 on 08-19: Linear `comments(last:N)` returns the
   OLDEST comments — always `first:50` + client-side sort.**
+
+**s66 (2026-08-25 travel drive, 1.0): KS-685 filed** — manual-merge process definition
+commissioned by Kam, assigned to Stuart (Todo/High). Its history entry lives on the travel
+drive only until s67 carries it. **Peter's Tuesday (08-25):** all three KS-666 findings
+ACCEPTED; `POST /api/users/admin/create` handed over to us (KS-570); #730 has no reviewer;
+KS-684 complete at 4.25.2 on its branch (not merged), item 7 → KS-686; questions for Kam on
+KS-592 (admin/list edge) and KS-611 (.strict()); he is moving to platform-s.
+
+**Open / next (refreshed 2026-08-26 — s67 LIVE on Peter's handovers):**
+- 🔴 **Kam:** CI billing (only unblocker) · KS-592 admin/list ruling (card) · KS-686 501
+  posture (card) · KS-611 .strict() yes/no (card, default B) · name a reviewer for PR #730 ·
+  KS-635 pattern (expires 08-31) · 6-Sep credits · KS-570 authorization half · KS-670 close.
+- **s67 (running):** file KS-666's accepted findings (F1+F2, F3) + F1 fix push-only · file
+  the admin/create ticket · KS-592 targeted re-probe as input · carry s66's history entry.
+- **Stuart:** KS-685 process definition (his plate, no chasing) · PS-669 P0 / PS-670 P1 his.
+- **Peter:** KS-684 merge waits on CI; F2/F3 land after #729 (Kam-held).
 
 **s64 (2026-08-25, 1.0): 🔴 CI FREEZE = GITHUB ORG BILLING** (payments failed / spending
 limit; 305 startup_failures since 08-17; Kam-only, carded) · KS-666 closed out with

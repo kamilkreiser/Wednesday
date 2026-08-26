@@ -494,5 +494,121 @@
   "status": "ruled",
   "ruled_choice": "property",
   "ruled_ts": "2026-08-25T09:18:05.749909+10:00"
+ },
+ {
+  "id": "devmaster-nas-deletions",
+  "client_project": "Fleet/DevMASTER drive",
+  "title": "Yesterday's NAS sync DELETED six folders from DevMASTER — restore, or was it deliberate?",
+  "bluf": "The 08-25 10:14 NAS leg (unison, prefer-newer) propagated deletions FROM the NAS ONTO the master drive: !CODING/Datasec/{Marketing_Collateral, RESEARCH, Security Review (796MB), Task_Dispatcher, Websites} + !CODING/MultiAgent Coordination. It was cut by the 10:41 shutdown mid-Paperclip (Paperclip intact, 9988/9988 files). Both KK_DEV_Local and ~/.unison/backup still hold all six. If the NAS lost them because YOU deleted them there, this is correct; if not, it is data loss on the master. NO sync leg runs until you rule — the next KK_DEV leg would delete the travel drive's copies too.",
+  "default_action": "HOLD: no sync leg runs, nothing restored or deleted; both copies intact",
+  "options": [
+   {
+    "key": "restore",
+    "label": "Restore the six onto DevMASTER from KK_DEV_Local (additive rsync), then re-sync",
+    "detail": "I copy them back (verify by file count + hash sample), then the NAS/KK_DEV legs run normally"
+   },
+   {
+    "key": "intended",
+    "label": "Deletion was deliberate — leave DevMASTER as is",
+    "detail": "Next syncs remove them from the travel drive and backup rotation too"
+   },
+   {
+    "key": "hold",
+    "label": "Hold — no syncs, no restore, I'll look myself",
+    "detail": "Both copies stay intact; nothing runs"
+   }
+  ],
+  "recommended": "restore",
+  "ts": "2026-08-26T10:06:39.625490+10:00",
+  "status": "open",
+  "ruled_choice": null,
+  "ruled_ts": null
+ },
+ {
+  "id": "secuura-ks592-adminlist",
+  "client_project": "Secuura/Blockchain",
+  "title": "KS-592: GET /api/users/admin/list — one violation or two? (Peter's question to you, 08-25)",
+  "bluf": "The edge s65 flagged-but-did-not-decide. Peter read the spec: offset is declared [integer, null] since 2026-07-29 (KS-486 #3) and the handler treats 'null' as 0 — so offset=null is conformant, not a violation. The only remaining half is the unknown-query-param, which your 2026-07-29 rule (KS-518, audit-log carve-out) tolerates if 'the class' meant platform-wide. If so the whole operation is tolerated and KS-592 drops from six to five. Peter is not blocked; he wants your call before anyone tries to make it green.",
+  "default_action": "Hold (Peter unblocked either way); s67 posts the re-probe measurement on KS-592 as input",
+  "options": [
+   {
+    "key": "tolerated",
+    "label": "Whole operation tolerated under the 2026-07-29 rule; the null union is intended",
+    "detail": "KS-592 goes six → five; recorded on the ticket"
+   },
+   {
+    "key": "split",
+    "label": "offset=null is a separate violation — narrow the spec to integer-only",
+    "detail": "Spec fix (whoever owns the KS-486 spec), then handler follows"
+   },
+   {
+    "key": "hold",
+    "label": "Hold for a targeted re-probe first",
+    "detail": "s67 measures which component Schemathesis actually flags; then you rule"
+   }
+  ],
+  "recommended": "tolerated",
+  "ts": "2026-08-26T10:06:39.670135+10:00",
+  "status": "open",
+  "ruled_choice": null,
+  "ruled_ts": null
+ },
+ {
+  "id": "secuura-ks686-501-posture",
+  "client_project": "Secuura/Blockchain",
+  "title": "KS-686: rule the by-design 501 on POST /api/wallets/verify (platform posture, blocks nothing)",
+  "bluf": "KS-684 (Schemathesis 4.25.2 bump) is COMPLETE on its branch, not merged. Its item 7 was split to KS-686 so the bump does not wait on you: the harness's not_a_server_error check flags the deliberate, documented 501 (fail-closed replacement for the stub that said verified:true for any input — KS-488-C/KS-627). Peter needs a platform ruling that the 501 is tolerated so a two-halves guard can carry your wording verbatim, with KS-627's landing as the expiry tripwire. KS-593's count is inflated by this op until then.",
+  "default_action": "Hold — KS-684 is not waiting on it",
+  "options": [
+   {
+    "key": "tolerate",
+    "label": "Tolerate the 501 until KS-627 lands (guard + tripwire, land it on the KS-684 branch)",
+    "detail": "Peter incorporates on KS-684 if still open; KS-686 closes as absorbed"
+   },
+   {
+    "key": "change",
+    "label": "Different posture (e.g. 404 until implemented)",
+    "detail": "Say which; platform-k code change on our side"
+   },
+   {
+    "key": "hold",
+    "label": "Hold",
+    "detail": "KS-684 merges without it; KS-686 stays open"
+   }
+  ],
+  "recommended": "tolerate",
+  "ts": "2026-08-26T10:06:39.712979+10:00",
+  "status": "open",
+  "ruled_choice": null,
+  "ruled_ts": null
+ },
+ {
+  "id": "secuura-ks611-strict",
+  "client_project": "Secuura/Blockchain",
+  "title": "KS-611: add .strict() to the timestamps batch item schema? (yes/no — Peter takes B otherwise)",
+  "bluf": "POST /api/timestamps/batch aborts the fuzzer's health check on most sweeps. Fix A = .strict() on our Zod item schema (timestamping.openapi.ts:76) — a LIVE contract change: unknown fields inside a hashes item start returning 400 on a public write endpoint (same class as the reverted #240/#248). Fix B = Peter raises the generation budget 50→100 in systemTest only; no contract touched. Peter: 'we will take B unless you want A' — and his 11:25Z follow-up says the generator was replaced in 4.25.0, so B's numbers must be re-measured before acting. Nothing is blocked.",
+  "default_action": "B stands (Peter's side) — no contract change without your word",
+  "options": [
+   {
+    "key": "b",
+    "label": "No .strict() — leave the contract; Peter takes B after re-measuring on 4.25.2",
+    "detail": "No platform change"
+   },
+   {
+    "key": "a",
+    "label": "Yes, add .strict() on its own merits (closed contract on a public write endpoint)",
+    "detail": "Our code change, ships under the merge hold; Peter skips B"
+   },
+   {
+    "key": "shape",
+    "label": "A different shape (e.g. documentId required)",
+    "detail": "Say which"
+   }
+  ],
+  "recommended": "b",
+  "ts": "2026-08-26T10:06:39.756117+10:00",
+  "status": "open",
+  "ruled_choice": null,
+  "ruled_ts": null
  }
 ]
