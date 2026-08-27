@@ -1491,3 +1491,13 @@ _Done with it:_ answered on the panel (built yes / uploaded no); the typed panel
 > Comment - So we run with the tests and add to the pr and then Peter checks our results with his red pen.  Yes, please make it a process rule and always run as a final check
 
 *Done with it:* RULED → (1) standing rule: the four platform suites (Schemathesis · Akto · Playwright · Performance/k6) run as the FINAL CHECK before handover, results in the PR's Test Evidence block, Peter reviews; written into DEV-PROCESS/CONTRIBUTING (#733) + KS-685 by Secuura s76; (2) the 19 in-flight PRs: one stacked-branch run of all four, results posted to every PR, reds bisected to their PR; nothing merges. Entry card + INDEX + fleet brief template carry the rule.
+
+## 2026-08-27 17:56 (terminal)
+> billing will not be fixed.  Please find and use a workaround (this new process) going forward
+
+*Done with it:* RULED — GitHub Actions stays off for Secuura by decision; the local four-suite final check IS the gate permanently (not "suspended until Actions returns"). Addendum to s76: docs wording made permanent, manual CI-gate equivalents map written into DEV-PROCESS (per CI job → local runner → pass criterion), KS-660 closed as decided, KS-441 noted moot, CI-dependent tickets (KS-634/637/638) re-scoped to local equivalents by comment. Desk item "CI billing" closed.
+
+## 2026-08-27 17:57 (terminal)
+> please run all tests on all tickets we processed
+
+*Done with it:* read as: the four suites over everything we processed — merged work (develop HEAD ca5b643e0, incl. KS-661/PS-612 chain, KS-587/586 etc.) AND the 19 open PRs. Addendum 2 to s76: baseline run on develop first (its own result, posted on KS-685), then the stacked run; reds attribute to develop vs the stack.
