@@ -1577,3 +1577,8 @@ Done with it: people/kam.md + identity/voice-protocol.md updated (de-duplicate s
 > Can you please look at Freshdesk technical documents? The company has a Freshdesk account. And I would like to host the quick quote tool behind or on the Freshdesk infrastructure. Can you look at whether this is possible?
 
 Done with it: research delegated (read-only, public Freshdesk docs) → BLUF report file in Discovery/research/; panel ack.
+
+## 2026-08-28 09:37 — Kam (dashboard chat, dictated; doubled)
+> The OTP sign-in would need to be removed. This is not a problem, and our Freshdesk already has people who would access this tool signed up. They have a login that they will use for Freshdesk.
+
+Done with it: constraint forwarded to the Freshdesk research agent (auth = Freshdesk's own login, OTP removed; audience = existing Freshdesk users — agents or portal contacts to be determined); panel ack.
