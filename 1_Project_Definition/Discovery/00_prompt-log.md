@@ -1465,3 +1465,8 @@ _Done with it:_ ruling recorded as ae; Vision launched on A+E then ADDENDUM: bui
 > Please publish once all the changes are made.
 
 _Done with it:_ answered on the panel (built yes / uploaded no); the typed panel "publish" = authority → Vision addendum: finish A+E (ae confirmed by his silence after being told), deploy the merge SHA, zero mail.
+
+## 2026-08-27 16:24 (terminal)
+> Please assign all PRs that Peter has to review to him on the secuura project
+
+*Done with it:* read as GitHub PR assignee + review request → PeterObeden on every open PR of ours awaiting his review (incl. the three with no request); briefed Secuura s74 via the gate; nothing merges; census after each PR touch (automation walks tickets).
