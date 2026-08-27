@@ -1551,3 +1551,9 @@ _Done with it:_ answered on the panel (built yes / uploaded no); the typed panel
 > will this resolve everything relating to KS-666
 
 *Done with it:* answered — #729 merged closes KS-666 itself; #732 closes KS-687; KS-688 (lock per worktree) and KS-689 (admin/create mounted without auth) have no PR yet → added to s77's tail as PR items (KS-689 first, security) if runway allows tonight, else the next session; Peter merges them on return.
+
+## 2026-08-27 19:46:14 + 19:46:37 (dashboard panel, typed)
+> fantastic.  thank you.  keep going
+> dont wait until tomorrow.  just keep pushing now or through the night
+
+*Done with it:* OVERNIGHT GRANT for tonight's Secuura queue — no "tomorrow" deferral: KS-689/688 tonight; the session relays (wrap → handover → successor) through the night until the queue is dry; Wednesday rotates herself under the 70% grant and keeps relaunching. Boundaries unchanged (nothing merges without an approval; no Actions; never delete; demo deploy only on an approved+merged fix under v1.3).
