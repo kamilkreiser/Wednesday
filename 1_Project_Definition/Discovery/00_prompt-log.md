@@ -1531,3 +1531,8 @@ _Done with it:_ answered on the panel (built yes / uploaded no); the typed panel
 > And associated
 
 *Done with it:* read as option (b) for #729 AND the associated PRs (#732) — our agent resolves the one-hunk conflict on Peter's #729, re-runs the four suites, merges #729 (Kam's approval on it) and #732 (Peter's approval, waiver) tonight. Folded into the s77 brief as item 2; launched at 19:17 (the 19:20 defaults were about to fire anyway). Reading stated to Kam; "leave #729 to Peter" reverses it.
+
+## 2026-08-27 19:40:01 (dashboard panel, typed)
+> Please action, merge, approve, and test all PRs that you can.  this Here's a message from Peter.  [27/8/2026, 7:17:34 pm] Kam: PR #729 can't merge because it conflicts with his other PR #731 (which you merged this afternoon)  What would you like me to do [27/8/2026, 7:28:58 pm] ~Douglas Peter: "Yes please  I will wait until 2pm today before merging my tickets, that will give you lots of time to merge more this evening"
+
+*Done with it:* Peter consents to us resolving #729 and holds his own merges until 14:00 tomorrow. Kam's "merge, approve, test all you can" → ADDENDUM to s77: merge every approved+clean PR (#732, #729 after resolve, #735); Peter's open clean PRs (#719, #722; #568 dirty) reviewed + four-suited + APPROVED from Kam's account on this typed word (provenance in the body) + merged; the unapproved 17 of ours get the stacked four-suite run + results posted (cannot merge — self-approval bar); KS-694 fix PR still in queue. Panel ack with the reading.
