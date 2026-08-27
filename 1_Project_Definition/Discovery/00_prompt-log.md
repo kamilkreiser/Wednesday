@@ -1587,3 +1587,8 @@ Done with it: constraint forwarded to the Freshdesk research agent (auth = Fresh
 > Please format the full report with resources into a well-structured PDF.
 
 Done with it: Freshdesk report rendered to PDF (Discovery/research/), delivered as a file on the panel.
+
+## 2026-08-28 09:51 — Kam (dashboard chat; doubled)
+> I will ask the person on the question, otherwise, thank you for the format. The PDF looks great. Keep this style going forward.
+
+Done with it: praise row; the render pipeline + CSS saved as 2_Project_Files/tools/md2pdf/ (house style for every report PDF from now on); Freshdesk login-type question is with Kam's contact — no chase.
