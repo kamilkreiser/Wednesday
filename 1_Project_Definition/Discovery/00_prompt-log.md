@@ -1516,3 +1516,8 @@ _Done with it:_ answered on the panel (built yes / uploaded no); the typed panel
 > tell me what you need from me when you need it
 
 *Done with it:* filed as an extension of learnings/2026-08-07_ask-for-what-you-need (asks are just-in-time: one specific ask at the moment it gates work, with the click named — not a standing desk list repeated in every reply).
+
+## 2026-08-27 18:19:47 (dashboard panel, typed)
+> please action on my behalf.  this is the approval
+
+*Done with it:* first-party typed turn on Kam's own surface → authority for the Secuura agent to submit the APPROVE review on #729 from the kksecura account, review body naming the instruction + timestamp. Relayed by ANSWER with the chat-log provenance for the agent to verify itself. #729 still cannot merge until Peter rebases (conflict) — stated.
