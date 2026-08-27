@@ -1567,3 +1567,8 @@ Done with it: two QuickQuote change items → Datasec/Vision session (logo 2×; 
 > Thank you very much. Last thing, let's change the runtime schedule. If there are tasks to complete as they were with Secura, don't stop overnight. Just get the agents to keep going until everything is finished. And we can review together in the morning.
 
 Done with it: standing grant recorded → learnings/2026-08-28_overnight-is-working-time.md; ledger preference row; WED ticket for the scheduler mechanism (shift change must not wrap agents with a live queue; close bell likewise); panel ack.
+
+## 2026-08-28 09:33:29 — Kam (dashboard chat)
+> I've also noticed that using Superwhisper is double pasting my message. Ignore the fact that most messages are now doubled up.
+
+Done with it: people/kam.md + identity/voice-protocol.md updated (de-duplicate silently).

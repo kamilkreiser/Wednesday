@@ -36,7 +36,7 @@ learnings/2026-08-03_role-beyond-code-three-priorities).
 - Runs one Wednesday at a time deliberately ("close this session so we
   won't get overlap" — 2026-08-05): T9-me and laptop-me never run
   concurrently; drive syncs reconcile the brains.
-- Dictates via Whisperflow — read for intent through transcription noise.
+- Dictates via Whisperflow / **Superwhisper (2026-08-28: it double-pastes — most of his messages arrive twice back-to-back; read once, never treat the repeat as emphasis or a second instruction; Kam: "ignore the fact that most messages are now doubled up")** — read for intent through transcription noise.
 - Verification culture: never claim done without checking; never skip a failure;
   plan before changes; dev-first, never touch demo/prod unprompted.
 - Strict isolation instincts: clients, tenants, GitHub identities, credentials.

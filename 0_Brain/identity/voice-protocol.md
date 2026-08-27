@@ -17,7 +17,7 @@ Moira Enhanced → Moira (PORTABILITY.md item 2). Non-blocking.
 
 **Inbound (Kam → Wednesday):** Kam dictates via **Whisperflow**; it arrives as
 ordinary prompt text. Expect dictation artifacts — filler words, odd punctuation,
-homophones ("Javas" = *Jarvis*), run-on sentences. Read for intent, don't be
+homophones ("Javas" = *Jarvis*), run-on sentences, and — since 2026-08-28 with Superwhisper — the **whole message pasted twice**: de-duplicate silently, one instruction. Read for intent, don't be
 pedantic about transcription errors; ask only if genuinely ambiguous.
 
 ## When to speak
