@@ -28,7 +28,7 @@ Stuart/PS (🎉 **PS-612 MERGED to S develop #623 a0385d452** — the `declare` 
 owed); zero Peter, 0 approvals on our PRs (41). **NexusAI 62 · ATTIO 16 (control 29) · HPSM 26 Backlog
 (control 41) · Vision 0 (control 64)** — zero Datasec rows in 3h; no HP ink. **Not launched at boot:**
 Secuura review-bound; NexusAI RD-130 offered with a launch default → **s10 launched 12:45, wrapped 13:08, 1.0: both halves live + observed; audit count corrected 2,300→683 (leave); RD-132/133/134 filed.** History
-08-26 entry backfilled. **16:25 Kam: "assign all PRs Peter has to review to him" → Secuura s74 (0.95): 19/19 PRs on Peter as reviewer+assignee, four walks reverted; 🔴 #731 self-merged by Peter unapproved (his conversation).** Cards open: 0.
+08-26 entry backfilled. **16:25 Kam: "assign all PRs Peter has to review to him" → Secuura s74 (0.95): 19/19 PRs on Peter as reviewer+assignee, four walks reverted; 🔴 #731 self-merged by Peter unapproved (his conversation).** **17:3x–17:5x: Peter STARTED (2/19 approved); Peter's four-suites question measured by s75 (1.0): 0/19 ran them — KS-441 (his hold) + dead CI; rec to Kam: one-off run on a stacked branch BEFORE merging.** Cards open: 0.
 
 **Refreshed 2026-08-27 06:1x (Thursday 06:00 wake — fresh session).** Floor quiet at boot; zero
 inbound overnight; Kam silent since his 17:11:38 08-26 ruling — **`quickquote-publish-v225` UNRULED
