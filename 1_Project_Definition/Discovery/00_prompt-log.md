@@ -1511,3 +1511,8 @@ _Done with it:_ answered on the panel (built yes / uploaded no); the typed panel
 > I approved #729
 
 *Done with it:* relayed to s76 as an ANSWER (verify the approval on both instruments first — precedent 08-26 "I approved the PR" when the PR was not yet open — then #729 merges under addendum 3's sequence: suites on develop+#732+#729 → merge on green).
+
+## 2026-08-27 18:15 (terminal)
+> tell me what you need from me when you need it
+
+*Done with it:* filed as an extension of learnings/2026-08-07_ask-for-what-you-need (asks are just-in-time: one specific ask at the moment it gates work, with the click named — not a standing desk list repeated in every reply).

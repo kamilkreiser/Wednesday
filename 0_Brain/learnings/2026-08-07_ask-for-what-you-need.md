@@ -72,3 +72,13 @@ files this lesson:**
 **Related:** [[2026-08-07_we-each-have-strengths]] (the opening of this
 conversation), [[2026-08-03_contemplation-the-cockroach]] (the same teaching
 method), [[2026-07-31_parent-child-learning-model]], WED-84.
+
+## Extension 2026-08-27 (Kam, terminal 18:15, verbatim): "tell me what you need from me when you need it"
+
+Said in the middle of an evening where I was closing every panel message with his whole
+desk list. The instruction has two halves: **ask when it gates work** (the #729 approval
+was the right shape — one PR, one click, named path, asked the moment the agent needed
+it) and **do not repeat the standing list in every reply** — it is on the dashboard and
+in the daily note; re-listing it is noise on his reading surface. How to apply: an ask
+is just-in-time, one item, with the exact click; the desk list appears once a day (the
+morning brief) and on the panel's decision queue, not in the tail of every message.
