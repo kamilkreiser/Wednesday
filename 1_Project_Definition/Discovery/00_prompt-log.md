@@ -1451,3 +1451,10 @@ _Done with it:_ Secuura board re-read (zero movement since 06:50); draft to Pete
 > On the click, quite tall. I don't think we need the decimal points. On the click, quite tall. I don't think we need the decimal points In the calculations and totals pane.
 
 _Read as:_ the quote is quite tall; drop decimals in the Calculations/Totals pane. _Done with it:_ Vision addendum item 15 → v2.26 on main (display-only, math unchanged, height measured); publish still held for his typed word.
+
+## 2026-08-27 11:22 — Kam (dashboard chat, verbatim)
+
+> Decision quickquote-height-lever: ae — A + E together (−188px)
+> With the fleet activities section on the chat cockpit, the chat view on the dashboard, can you please make it so that clicking the option actually selects what I would like to go off with? So if I click on A, A is recorded.
+
+_Done with it:_ ruling recorded as ae; Vision launched on A+E then ADDENDUM: build A first, hold E until his click is confirmed; chat-view option-click defect → investigated (WED).
