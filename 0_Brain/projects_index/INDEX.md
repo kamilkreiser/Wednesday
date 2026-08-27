@@ -20,7 +20,7 @@ Linear: KS-601 Kintsugi (linked KS-584) + KS-602/603/604/605 + PS-556
 resolution comment ALL created 06:58Z; **cull NOT run** (KS 128 + PS 143 =
 271 active unchanged). Vision 08-11 wrapped 02:15Z (F2 closed, merged to main).
 
-**Refreshed 2026-08-27 12:1x (successor after the 11:57 rotation).** Floor quiet at boot (me + shell);
+**Refreshed 2026-08-27 12:0x (successor after the 11:57 rotation).** Floor quiet at boot (me + shell);
 zero inbound since the predecessor's wrap; Kam's last panel word 11:32 ("Thank you"). Sweep (controls on
 every count; window from the 11:3x read): **Secuura KS 164 / 72 unstarted+started** — 9 rows moved, ALL
 Stuart/PS (🎉 **PS-612 MERGED to S develop #623 a0385d452** — the `declare` rename chain now spans K demo
