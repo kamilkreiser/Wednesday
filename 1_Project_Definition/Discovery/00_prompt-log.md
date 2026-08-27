@@ -1582,3 +1582,8 @@ Done with it: research delegated (read-only, public Freshdesk docs) → BLUF rep
 > The OTP sign-in would need to be removed. This is not a problem, and our Freshdesk already has people who would access this tool signed up. They have a login that they will use for Freshdesk.
 
 Done with it: constraint forwarded to the Freshdesk research agent (auth = Freshdesk's own login, OTP removed; audience = existing Freshdesk users — agents or portal contacts to be determined); panel ack.
+
+## 2026-08-28 09:46/09:49 — Kam (dashboard chat; sent twice)
+> Please format the full report with resources into a well-structured PDF.
+
+Done with it: Freshdesk report rendered to PDF (Discovery/research/), delivered as a file on the panel.
