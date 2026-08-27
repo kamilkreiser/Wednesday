@@ -1536,3 +1536,8 @@ _Done with it:_ answered on the panel (built yes / uploaded no); the typed panel
 > Please action, merge, approve, and test all PRs that you can.  this Here's a message from Peter.  [27/8/2026, 7:17:34 pm] Kam: PR #729 can't merge because it conflicts with his other PR #731 (which you merged this afternoon)  What would you like me to do [27/8/2026, 7:28:58 pm] ~Douglas Peter: "Yes please  I will wait until 2pm today before merging my tickets, that will give you lots of time to merge more this evening"
 
 *Done with it:* Peter consents to us resolving #729 and holds his own merges until 14:00 tomorrow. Kam's "merge, approve, test all you can" → ADDENDUM to s77: merge every approved+clean PR (#732, #729 after resolve, #735); Peter's open clean PRs (#719, #722; #568 dirty) reviewed + four-suited + APPROVED from Kam's account on this typed word (provenance in the body) + merged; the unapproved 17 of ours get the stacked four-suite run + results posted (cannot merge — self-approval bar); KS-694 fix PR still in queue. Panel ack with the reading.
+
+## 2026-08-27 19:42:29 (dashboard panel, typed)
+> dont hold any megers.  the 2pm was that he will wait for me until 2pm UK time.  so lets do everything we can in the next 2 houts
+
+*Done with it:* deadline = 14:00 UK = 23:00 AEST (~2 h). ADDENDUM to s77: MERGE FIRST — every approved+clean PR merges now (#732, #735, #729 after the resolve), the four suites run on develop AFTER as post-merge validation (Kam's override of suites-first tonight, waiver recorded on each PR); Peter's clean PRs reviewed+approved from Kam's account+merged; KS-694 fix PR; evidence onto our unapproved PRs so Peter can approve inside his window. Ask to Kam: tell Peter our PRs are ready for his approval before 2pm UK.
