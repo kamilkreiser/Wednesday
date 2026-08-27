@@ -20,6 +20,14 @@ Linear: KS-601 Kintsugi (linked KS-584) + KS-602/603/604/605 + PS-556
 resolution comment ALL created 06:58Z; **cull NOT run** (KS 128 + PS 143 =
 271 active unchanged). Vision 08-11 wrapped 02:15Z (F2 closed, merged to main).
 
+**Refreshed 2026-08-27 19:54 (successor after the 19:49 rotation — OVERNIGHT RELAY on Kam's 19:46 word).** Floor:
+me + shell + **Secuura s77 (%21) LIVE**: **#732 · #735 · #729 MERGED → develop cc65abad5** (my ls-remote; the three
+approved PRs landed inside Peter's 2pm-UK window), KS-666 Done, now building the KS-694 Urgent fix → four suites on
+develop-as-merged + evidence onto every open PR → KS-689/688 → wrap/relay. Sweep (window 09:17Z): **KS 166** —
+Stuart split PS-690 (org-owned documents) into seven phases PS-696..702 and filed **KS-695 (K-side S↔K erasure,
+assigned to Kam's account)** → morning sweep; Peter PS-667/682 In Review, no KS movement. WED 89 active, 0 lesson.
+Nothing else launched (evening; other boards unchanged).
+
 **Refreshed 2026-08-27 12:0x (successor after the 11:57 rotation).** Floor quiet at boot (me + shell);
 zero inbound since the predecessor's wrap; Kam's last panel word 11:32 ("Thank you"). Sweep (controls on
 every count; window from the 11:3x read): **Secuura KS 164 / 72 unstarted+started** — 9 rows moved, ALL
