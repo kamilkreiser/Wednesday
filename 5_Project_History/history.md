@@ -1,3 +1,13 @@
+## 2026-08-27 — Thursday overnight-relay successor 19:5x → 22:46 rotation (ctx ~62%, the grant; 🔴 relay still ON, last leg live)
+
+**Fleet:** the relay ran as a relay — five Secuura legs launched through the gated send→verify→launch path, four scored: s77 1.0 (#732/#735/#729 MERGED — first merges under the flow, #729 on Peter's branch with in-session consent; KS-694 Urgent fixed #747 + exposure measured live on demo; evidence 17/17; #719/#722 approved; KS-689/688 → #748/#749; KS-697 Urgent + KS-696 found) · s78 0.95 (KS-697 fixed #751; KS-698 found; the count-vs-set gate finding; early wrap) · s79 0.95 (Akto variance proved Akto's; KS-700/701 filed; KS-693 direction; extranet mark-seen) · s80 1.0 (KS-700 #752, KS-701 #753, s79's figure corrected, KS-702 filed). s81 live on KS-702 — the last agent-actionable item; night queue dry after it. develop cc65abad5. Day: twelve wraps (eight 1.0 · four 0.95).
+
+**Kam:** silent after the 19:46 grant; zero asks made (his 18:15 rule); one card opened (secuura-ks697-demo-probe, default HOLD). Morning desk in the daily-note handover.
+
+**Wednesday's own:** boot from the WHOLE ledger + scoreboard (50% ctx at boot+5 min — boot-cost line for consolidation); ledger: three fleet-insight rows + w=1 mine (a two-word answer read as a ruling) + a praise row; ghosts ~78–81 incl. rung 8 in Kam's voice; every score verified at source; every launch gate-first-time.
+
+**Records:** daily note (boot, checkpoint, five leg blocks, handover, retro); INDEX; Secuura card ×4; scoreboard ×4; ledger ×4; wrap mail (wrap_send.sh, verified). HEAD == origin at every step.
+
 ## 2026-08-27 — Thursday successor session 12:0x → 19:4x rotation (ctx 70%, the grant; 🔴 overnight Secuura relay ON)
 
 **Fleet:** FOUR wraps scored this session — NexusAI s10 1.0 (RD-130 false-P1 sweeper fixed on both surfaces, observed on a real hourly run; audit count corrected 2,300→683; RD-132/133/134 filed) · Secuura s74 0.95 (Kam: Peter as reviewer+assignee on all 19 open PRs, 19/19 read back, four walks reverted; #731 found self-merged by Peter unapproved) · s75 1.0 (Peter STARTED: #732/#735 approved; the four-suites question measured: 0/19 ran them — KS-441 hold + dead CI) · s76 0.95 (Kam's four-suite final-check RULE written as PR #746 + CI-gate map; Actions retired by decision; baseline 2/4 green → KS-694 URGENT GDPR authz bypass + KS-693; #729 approved from Kam's account on his typed panel word; branch protection measured never-ticked) · s77 LIVE on the evening queue (merge #732/#735/#729, Peter's #719/#722, KS-694 fix, evidence on every PR, KS-689/688) — relay through the night on Kam's 19:46 word. Day total: EIGHT wraps (six 1.0 · two 0.95).
