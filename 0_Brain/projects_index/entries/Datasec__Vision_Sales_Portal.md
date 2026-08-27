@@ -8,9 +8,17 @@ updated: 2026-08-27
 
 # Datasec / Vision Sales Portal
 
+**Session 4 (2026-08-27 11:22–11:53, QuickQuote, 1.0): 🎉 v2.27 LIVE** — `hpas-quickquote:v0.4.2-tool2.27-f62a347`, started 01:50:23Z on Kam's typed panel word (11:24:30 "publish once all the changes are made"). **The two-day Feedback-button defect on emailed quotes is CLEARED** (old image: fbBtn print rule 0; new: present — read by digest). Height lever A+E = **−156px** (1002→846; A/C overlap; POA estimate kept via estLine). Print gate rebuilt after being found green on a page with no equations (16/16). Rollback `v0.4.1-tool2.23` named first. Zero OTP, one mail.
+
+**Open / next (refreshed 2026-08-27 11:5x):**
+- **Kam:** rates whole-dollar too? (BACKLOG) · custom domain at go-live (ruled) · `gh auth login` datasecau on this seat (K2) · dependabot HIGH (tracked BACKLOG:209).
+- **Next session:** one live feedback re-verify once /healthz shows a lastSuccessAt · `.dockerignore` (BACKLOG) · AppServicePlatformLogs lag noted for any rollback decision.
+
+**Completed (moved off the dashboard 2026-08-27, verified live):** publish v2.25→v2.27 · item 15 · height lever · Feedback-button print fix.
+
 **Session 3 (2026-08-27 09:06–10:47, QuickQuote, scored 1.0): PUBLISH HELD, correctly** — Kam's "publish QuickQuote" was `promptSource: suggestion_accepted` (an accepted rendered suggestion, my own wording), not typed; all three authority surfaces (DKIM · card tap · typed turn) empty. **Item 15 built + merged: whole-dollar amounts in Lines/Totals, RATES keep 2 dp** (Kam may flip); introduced-and-caught unmarked-equation defect → general print gate (13/13). **Height: decimals = 0px change (1002/1032)**; levers measured A −127 (deletes item-12 arithmetic) · B −27 · C −18 · D −17 · E −61 → card `quickquote-height-lever` (rec E). **Deploy target now `1796f9b`** (code == v2.26; delta BACKLOG only). Zero mail spent. Zero-OTP post-deploy proof = AppServicePlatformLogs "Creating container with image" (instrument proved); version tile needs one OTP.
 
-**Open / next (refreshed 2026-08-27 10:5x):**
+**Open / next (as of 10:5x — superseded above):**
 - 🔴 **Kam:** type `publish` → deploy 1796f9b (v2.26; carries the live Feedback-button fix, day 2) · height lever card (rec E) · rates whole-dollar too? · custom domain at go-live (ruled) · `gh auth login` datasecau on this seat (K2) · 1 HIGH dependabot (tracked BACKLOG:209, chromium path not used).
 - **Next session:** deploy on his word → platform-log proof → one live feedback re-verify once /healthz shows a lastSuccessAt · `.dockerignore` (BACKLOG).
 
