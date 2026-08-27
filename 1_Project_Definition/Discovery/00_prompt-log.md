@@ -1541,3 +1541,8 @@ _Done with it:_ answered on the panel (built yes / uploaded no); the typed panel
 > dont hold any megers.  the 2pm was that he will wait for me until 2pm UK time.  so lets do everything we can in the next 2 houts
 
 *Done with it:* deadline = 14:00 UK = 23:00 AEST (~2 h). ADDENDUM to s77: MERGE FIRST — every approved+clean PR merges now (#732, #735, #729 after the resolve), the four suites run on develop AFTER as post-merge validation (Kam's override of suites-first tonight, waiver recorded on each PR); Peter's clean PRs reviewed+approved from Kam's account+merged; KS-694 fix PR; evidence onto our unapproved PRs so Peter can approve inside his window. Ask to Kam: tell Peter our PRs are ready for his approval before 2pm UK.
+
+## 2026-08-27 19:43:17 (dashboard panel, typed)
+> sorry.  I agree, they cant mege without him.  but do everything so he can merge when he gets back including testing
+
+*Done with it:* short addendum to s77: after the three merges, priority = the four-suite run on the stack of our 17 + results posted into every PR's evidence block (so Peter merges on return); KS-694 fix PR with evidence; no ask to Peter needed. Panel ack.
