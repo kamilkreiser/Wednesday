@@ -1475,3 +1475,14 @@ _Done with it:_ answered on the panel (built yes / uploaded no); the typed panel
 > Any new movement from Peter?
 
 *Done with it:* Linear read (no Peter comments since 16:00; KS-687 walked In Review by the GitHub integration 16:50 = a PR event on #732) → answered on the panel with the limit; Secuura s75 micro launched read-only to read Peter's GitHub activity on the 19 PRs + revert the walk.
+
+## 2026-08-27 17:39 (terminal — Kam relaying Peter)
+> message from Peter - Better talking about, but just to put your mind at ease…
+>
+> I noticed that the Schemathesis, Akto, Playwright, and Performance tests haven't been run, or  they have accidentally been missed in the PR.
+>
+> Thoughts?
+> •⁠  ⁠Merge all these PRs now, then run all the tests - this would be a one off
+> •⁠  ⁠In future, include the Schemathesis, Akto, Playwright, and Performance tests in the PR  this relates to a rule that I meessaged you about where before we hand over to Peter we need to run the tests.  Have these been performed?  and is this a process rule?
+
+*Done with it:* measured before answering — the adopted flow (DEV-PROCESS v2 / KS-685) makes the Test Evidence block the gate while CI is dead but does not name the four platform suites as mandatory; s75 addendum measures per-PR whether each evidence block records the four suites; answer + recommendation to Kam on the panel (run the four suites once on a stacked integration branch BEFORE merging, not after; make the four-suite line a rule going forward).
