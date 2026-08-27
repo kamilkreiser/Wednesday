@@ -1501,3 +1501,8 @@ _Done with it:_ answered on the panel (built yes / uploaded no); the typed panel
 > please run all tests on all tickets we processed
 
 *Done with it:* read as: the four suites over everything we processed — merged work (develop HEAD ca5b643e0, incl. KS-661/PS-612 chain, KS-587/586 etc.) AND the 19 open PRs. Addendum 2 to s76: baseline run on develop first (its own result, posted on KS-685), then the stacked run; reds attribute to develop vs the stack.
+
+## 2026-08-27 18:03 (terminal — Kam relaying Peter)
+> request from Peter - Can we get KS-666 and associated PRs merged, as it will help me.  please merge
+
+*Done with it:* Kam's "please merge" = merge authority for KS-666's PRs. ADDENDUM 3 to s76: identify the PRs attached to KS-666/687/688; #732 (Peter-approved 06:50Z) merges FIRST after the four suites pass on develop+#732 (the final-check rule, applied on day one); unapproved associated PRs cannot merge (self-approval bar) → facts on KS-666. Default stated to Kam: merge after the suites (~30–40 min post-rebuild); "merge now" overrides.
