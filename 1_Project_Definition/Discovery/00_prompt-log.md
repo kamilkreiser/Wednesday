@@ -1506,3 +1506,8 @@ _Done with it:_ answered on the panel (built yes / uploaded no); the typed panel
 > request from Peter - Can we get KS-666 and associated PRs merged, as it will help me.  please merge
 
 *Done with it:* Kam's "please merge" = merge authority for KS-666's PRs. ADDENDUM 3 to s76: identify the PRs attached to KS-666/687/688; #732 (Peter-approved 06:50Z) merges FIRST after the four suites pass on develop+#732 (the final-check rule, applied on day one); unapproved associated PRs cannot merge (self-approval bar) → facts on KS-666. Default stated to Kam: merge after the suites (~30–40 min post-rebuild); "merge now" overrides.
+
+## 2026-08-27 18:15 (terminal)
+> I approved #729
+
+*Done with it:* relayed to s76 as an ANSWER (verify the approval on both instruments first — precedent 08-26 "I approved the PR" when the PR was not yet open — then #729 merges under addendum 3's sequence: suites on develop+#732+#729 → merge on green).
