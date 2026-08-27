@@ -1486,3 +1486,8 @@ _Done with it:_ answered on the panel (built yes / uploaded no); the typed panel
 > •⁠  ⁠In future, include the Schemathesis, Akto, Playwright, and Performance tests in the PR  this relates to a rule that I meessaged you about where before we hand over to Peter we need to run the tests.  Have these been performed?  and is this a process rule?
 
 *Done with it:* measured before answering — the adopted flow (DEV-PROCESS v2 / KS-685) makes the Test Evidence block the gate while CI is dead but does not name the four platform suites as mandatory; s75 addendum measures per-PR whether each evidence block records the four suites; answer + recommendation to Kam on the panel (run the four suites once on a stacked integration branch BEFORE merging, not after; make the four-suite line a rule going forward).
+
+## 2026-08-27 17:52 (terminal)
+> Comment - So we run with the tests and add to the pr and then Peter checks our results with his red pen.  Yes, please make it a process rule and always run as a final check
+
+*Done with it:* RULED → (1) standing rule: the four platform suites (Schemathesis · Akto · Playwright · Performance/k6) run as the FINAL CHECK before handover, results in the PR's Test Evidence block, Peter reviews; written into DEV-PROCESS/CONTRIBUTING (#733) + KS-685 by Secuura s76; (2) the 19 in-flight PRs: one stacked-branch run of all four, results posted to every PR, reds bisected to their PR; nothing merges. Entry card + INDEX + fleet brief template carry the rule.
