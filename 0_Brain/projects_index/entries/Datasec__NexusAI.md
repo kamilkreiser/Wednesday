@@ -32,15 +32,17 @@ Wednesday's ruling; RD-123 filed for the residual. origin/main 458cdfb.
 
 **s9 (2026-08-27 06:10–06:44, 1.0):** Session-Start check repointed to the Container App `/api/health` (CLAUDE.md; the launcher never curled the VM — Wednesday's premise, corrected); **RD-128 / RD-125 / RD-129 → Testing, deployed as `nexusai:1.21.0-rd128-rd125-9cdd5ca` → revision `--rd128125`** (rollback 1.20.0-rd121-e151431 digest-verified first; --0000089 deprovisioned = Single mode observed). Retention sweep now logs `feedback before:2 removed:0` on demo (was a false 0 for the feature's life). Third unfiltered export copy fixed in the same PR; `scripts/jira-query.sh` refuses with SEARCH BLIND on a dead token. 🔴 **RD-130 filed: the hourly health sweeper still probes the dead VM (DEFAULT_URLS[0], HEALTH_SWEEP_URLS unset) → ~2,300 false P1s feeding the SLA + morning-digest reports since 05-22.** RD-131 (Fleet Health CSV omits Drum Status). RD-93: transition to Testing is named "In Review" (id 31) — table in JIRA.md. main b376055. Board 62.
 
-**Open / next (refreshed 2026-08-27):**
-- [ ] **RD-130** — stop the false-P1 sweeper (set HEALTH_SWEEP_URLS / retire the default) and decide what to do with ~2,300 audit entries — next commission (Kam aware).
-- [ ] RD-131 Fleet Health CSV Drum Status — design call, when commissioned.
-- [ ] RD-128/125/129 in Testing — the browser click path (Copy Only → Export) still behind RD-76.
+**s10 (2026-08-27 12:45–13:08, 1.0):** RD-130 both halves live — `HEALTH_SWEEP_URLS` set on demo (rev --0000090, same image, one URL by ruling, rollback = unset) and the 03:00Z run observed clean (p1 0 vs three P1s the hours before); `DEFAULT_URLS` loses the dead VM (red-first tests + a control against emptying the list), main 63ba114 / HISTORY fdce1ed, 279/279. 🔴 **Ticket corrected: 683 false-P1 audit entries EXIST (30-day retention pruned the rest), not ~2,300 — rec LEAVE, self-expiring; no Kam decision needed.** RD-131 proposal (shape 1; omission in two functions + a false-negative alert). **Filed: RD-132** (docs still name the dead VM as the live demo) · **RD-133** (readRecent line-cap used as a time window; SLA report fails optimistically) · **RD-134** (no scheduler tests; jest/ESM uuid trap, stub proven). Board 65.
+
+**Open / next (refreshed 2026-08-27 13:1x):**
+- [ ] RD-132 / RD-133 / RD-134 — next commission when Kam wants one (none launched by default; RD-133 is the one that mis-reports customer downtime).
+- [ ] RD-131 — design call on the ticket (proposal posted), when commissioned.
+- [ ] RD-128/125/129/130 in Testing — the browser click path still behind RD-76.
 - [ ] RD-76/RD-116 browser eyeball on demo (Kam or my browser seat).
 - [ ] 18+ tickets in Testing awaiting review / promotion — only if commissioned.
 - [ ] PT-002 / PT-011 secret liveness — needs Datasec dev-tenant admin.
 
-**Completed (moved off the dashboard 2026-08-27, verified at source):** stale VM Session-Start check repointed (s9) · RD-125 · RD-128 · RD-129 (all Testing, deployed).
+**Completed (moved off the dashboard 2026-08-27, verified at source):** RD-130 both halves (s10) · stale VM Session-Start check repointed (s9) · RD-125 · RD-128 · RD-129 (all Testing, deployed).
 
 **s8 (2026-08-26 17:1x, micro, 1.0):** Kam's ruling (sweep + report only) LIVE: `scripts/feedback-sweep.sh` read-only, wired into CLAUDE.md Session Start + launcher FIRST ACTIONS step 6 (both machine-local — outside the repo; HISTORY says so). First live output: 2 items / 0 unreferenced, controls both ways. **RD-129 filed (Medium): a dead Jira token reads as an EMPTY BOARD, not an error** — `jira issue list` exits 0 with "No result", REST returns 200 `[]`; a negative control alone cannot detect a blind search. Boot is guarded by the /myself probe; mid-session token death + JIRA.md recipes are not. RD-125 comment 36707 (does NOT fix RD-125). main fc3bf0d. Board 60. Next session first: REPOINT the stale `curl https://4.198.168.215` Session-Start check (VM wound down 05-22) at the Container Apps health endpoint (ruled).
 

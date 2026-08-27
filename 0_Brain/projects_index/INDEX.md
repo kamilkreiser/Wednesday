@@ -27,7 +27,7 @@ Stuart/PS (🎉 **PS-612 MERGED to S develop #623 a0385d452** — the `declare` 
 + S develop; PS-671 to UAT; PS-686/687/688 new); KS-661 → In Review 01:35Z (automation suspected, census
 owed); zero Peter, 0 approvals on our PRs (41). **NexusAI 62 · ATTIO 16 (control 29) · HPSM 26 Backlog
 (control 41) · Vision 0 (control 64)** — zero Datasec rows in 3h; no HP ink. **Not launched at boot:**
-Secuura review-bound; NexusAI RD-130 (false-P1 sweeper) offered to Kam with a launch default. History
+Secuura review-bound; NexusAI RD-130 offered with a launch default → **s10 launched 12:45, wrapped 13:08, 1.0: both halves live + observed; audit count corrected 2,300→683 (leave); RD-132/133/134 filed.** History
 08-26 entry backfilled. Cards open: 0.
 
 **Refreshed 2026-08-27 06:1x (Thursday 06:00 wake — fresh session).** Floor quiet at boot; zero
