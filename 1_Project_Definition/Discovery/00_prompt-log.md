@@ -1572,3 +1572,8 @@ Done with it: standing grant recorded → learnings/2026-08-28_overnight-is-work
 > I've also noticed that using Superwhisper is double pasting my message. Ignore the fact that most messages are now doubled up.
 
 Done with it: people/kam.md + identity/voice-protocol.md updated (de-duplicate silently).
+
+## 2026-08-28 09:36 — Kam (dashboard chat, dictated; doubled)
+> Can you please look at Freshdesk technical documents? The company has a Freshdesk account. And I would like to host the quick quote tool behind or on the Freshdesk infrastructure. Can you look at whether this is possible?
+
+Done with it: research delegated (read-only, public Freshdesk docs) → BLUF report file in Discovery/research/; panel ack.
