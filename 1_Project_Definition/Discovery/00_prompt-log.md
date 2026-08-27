@@ -1557,3 +1557,8 @@ _Done with it:_ answered on the panel (built yes / uploaded no); the typed panel
 > dont wait until tomorrow.  just keep pushing now or through the night
 
 *Done with it:* OVERNIGHT GRANT for tonight's Secuura queue — no "tomorrow" deferral: KS-689/688 tonight; the session relays (wrap → handover → successor) through the night until the queue is dry; Wednesday rotates herself under the 70% grant and keeps relaunching. Boundaries unchanged (nothing merges without an approval; no Actions; never delete; demo deploy only on an approved+merged fix under v1.3).
+
+## 2026-08-28 09:3x — Kam (terminal, dictated)
+> with the logo on the quick quote tool, please make this 2x the size.  Also, remove the decimal point and cents from the total pain on the right hand side as this takes up a lot of space and there will not be any fractions of a dollar
+
+Done with it: two QuickQuote change items → Datasec/Vision session (logo 2×; whole-dollar totals pane on the right — "pain" read as "pane"). Build now; deploy held for his publish word.
