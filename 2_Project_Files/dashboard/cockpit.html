@@ -210,13 +210,18 @@ const pointerDown = { convo: false, feed: false };
 function armGuards(el, key) {
   el.addEventListener("pointerdown", () => { pointerDown[key] = true; });
 }
+// flushPending is DEFERRED one task: pointerup fires BEFORE click, and a
+// synchronous re-render here replaced the button under the pointer, so the
+// click landed on whichever new node sat there after reflow (Kam, 2026-08-27
+// 11:22: "if I click on A, A is recorded" — his A click recorded the adjacent
+// option). setTimeout(0) lets the click dispatch against the DOM it started on.
 window.addEventListener("pointerup", () => {
   pointerDown.convo = pointerDown.feed = false;
-  flushPending();
+  setTimeout(flushPending, 0);
 });
 window.addEventListener("pointercancel", () => {
   pointerDown.convo = pointerDown.feed = false;
-  flushPending();
+  setTimeout(flushPending, 0);
 });
 function selectionIn(el) {
   const s = window.getSelection();
@@ -766,7 +771,8 @@ function decisionCard(dec) {
     const b = document.createElement("button");
     b.className = "decbtn" + (isRec ? " rec" : "");
     b.dataset.ruling = "1";     // lockBtns targets ruling buttons only
-    b.textContent = label;
+    b.dataset.key = opt.key;    // the key the click sends comes from the node itself
+    b.textContent = isRec ? label : `[${opt.key.toUpperCase()}] ${label}`;
     b.addEventListener("click", async e => {
       e.stopPropagation();
       // the click is a MESSAGE to Wednesday through the normal chat channel;
@@ -774,9 +780,10 @@ function decisionCard(dec) {
       // processes the message
       lockBtns(true);
       const noteTxt = noteEl.value.trim();
+      const key = b.dataset.key || opt.key;   // read from the clicked node, never a stale closure
       const text = noteTxt
-        ? `Decision ${dec.id}: ${opt.key} — ${opt.label} | note: ${noteTxt}`
-        : `Decision ${dec.id}: ${opt.key} — ${opt.label}`;
+        ? `Decision ${dec.id}: ${key} — ${opt.label} | note: ${noteTxt}`
+        : `Decision ${dec.id}: ${key} — ${opt.label}`;
       try {
         const r = await (await fetch("/api/chat", {
           method: "POST", headers: {"Content-Type": "application/json"},

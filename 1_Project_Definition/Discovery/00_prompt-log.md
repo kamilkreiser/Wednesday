@@ -1458,3 +1458,10 @@ _Read as:_ the quote is quite tall; drop decimals in the Calculations/Totals pan
 > With the fleet activities section on the chat cockpit, the chat view on the dashboard, can you please make it so that clicking the option actually selects what I would like to go off with? So if I click on A, A is recorded.
 
 _Done with it:_ ruling recorded as ae; Vision launched on A+E then ADDENDUM: build A first, hold E until his click is confirmed; chat-view option-click defect → investigated (WED).
+
+## 2026-08-27 11:25 — Kam (dashboard chat, verbatim)
+
+> For the quick quote tool, have all the updates been made and has the new version been uploaded to the site?
+> Please publish once all the changes are made.
+
+_Done with it:_ answered on the panel (built yes / uploaded no); the typed panel "publish" = authority → Vision addendum: finish A+E (ae confirmed by his silence after being told), deploy the merge SHA, zero mail.
