@@ -1546,3 +1546,8 @@ _Done with it:_ answered on the panel (built yes / uploaded no); the typed panel
 > sorry.  I agree, they cant mege without him.  but do everything so he can merge when he gets back including testing
 
 *Done with it:* short addendum to s77: after the three merges, priority = the four-suite run on the stack of our 17 + results posted into every PR's evidence block (so Peter merges on return); KS-694 fix PR with evidence; no ask to Peter needed. Panel ack.
+
+## 2026-08-27 19:44:51 (dashboard panel, typed)
+> will this resolve everything relating to KS-666
+
+*Done with it:* answered — #729 merged closes KS-666 itself; #732 closes KS-687; KS-688 (lock per worktree) and KS-689 (admin/create mounted without auth) have no PR yet → added to s77's tail as PR items (KS-689 first, security) if runway allows tonight, else the next session; Peter merges them on return.
