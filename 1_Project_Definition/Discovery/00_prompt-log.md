@@ -1562,3 +1562,8 @@ _Done with it:_ answered on the panel (built yes / uploaded no); the typed panel
 > with the logo on the quick quote tool, please make this 2x the size.  Also, remove the decimal point and cents from the total pain on the right hand side as this takes up a lot of space and there will not be any fractions of a dollar
 
 Done with it: two QuickQuote change items → Datasec/Vision session (logo 2×; whole-dollar totals pane on the right — "pain" read as "pane"). Build now; deploy held for his publish word.
+
+## 2026-08-28 09:33 — Kam (dashboard chat, dictated; doubled dictation kept once)
+> Thank you very much. Last thing, let's change the runtime schedule. If there are tasks to complete as they were with Secura, don't stop overnight. Just get the agents to keep going until everything is finished. And we can review together in the morning.
+
+Done with it: standing grant recorded → learnings/2026-08-28_overnight-is-working-time.md; ledger preference row; WED ticket for the scheduler mechanism (shift change must not wrap agents with a live queue; close bell likewise); panel ack.
