@@ -1592,3 +1592,8 @@ Done with it: Freshdesk report rendered to PDF (Discovery/research/), delivered 
 > I will ask the person on the question, otherwise, thank you for the format. The PDF looks great. Keep this style going forward.
 
 Done with it: praise row; the render pipeline + CSS saved as 2_Project_Files/tools/md2pdf/ (house style for every report PDF from now on); Freshdesk login-type question is with Kam's contact — no chase.
+
+## 2026-08-28 10:00:07 — Kam (dashboard chat, typed)
+> Once the new build of vision is finished, please upload it.
+
+Done with it: = publish authority for QuickQuote v2.28 (build finished at cf0ed4e) — typed prose on his own surface; relayed to the Vision agent as DEPLOY GO with the instruction to verify the row itself before deploying.
