@@ -1618,3 +1618,9 @@ Done with it: Vision s6 briefed (button label; the emailed spreadsheet becomes a
 > Opening app works better for me. Just use the Excel spreadsheet file. No CSV for now.
 
 Done with it: addendum to Vision s6 (XLSX replaces CSV, no CSV; sample file path for opening); preference reinforced — open deliverables, don't picture them.
+
+## 2026-08-28 10:39 — Kam (dashboard chat; typed, doubled)
+> The workbook looks fantastic. Please deploy.
+> Decision secuura-ks705-orphan-tx: a — Leave the orphan on chain, record it on KS-705 (default)
+
+Done with it: DEPLOY GO v2.29 relayed to Vision via gate (agent verifies the row; build-in-container first; no restart after container set); KS-705 card ruled (a) — recorded; s83 already holds the default (record only, no anchor_store write).
