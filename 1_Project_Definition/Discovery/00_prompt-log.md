@@ -1613,3 +1613,8 @@ Done with it: record corrected (the Vision-pane text was Superwhisper focus-past
 > With regards to Secura, have all the tests and the new process been applied?
 
 Done with it: Vision s6 briefed (button label; the emailed spreadsheet becomes a formatted XLSX with the logo — flagged that today it is a CSV); Secuura answered on the panel from verified state.
+
+## 2026-08-28 10:20 — Kam (dashboard chat; doubled)
+> Opening app works better for me. Just use the Excel spreadsheet file. No CSV for now.
+
+Done with it: addendum to Vision s6 (XLSX replaces CSV, no CSV; sample file path for opening); preference reinforced — open deliverables, don't picture them.
