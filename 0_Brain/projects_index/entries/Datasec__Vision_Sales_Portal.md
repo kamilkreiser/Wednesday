@@ -8,6 +8,14 @@ updated: 2026-08-28
 
 # Datasec / Vision Sales Portal
 
+**Session 6 (2026-08-28 10:18–10:54, QuickQuote, 1.0): 🎉 v2.29 LIVE** — `v0.4.4-tool2.29-982acfd` (digest 392d232f…, container 00:47:00Z, one boot, NO outage) on Kam's typed word 10:39:35 ("Please deploy"). Button → 'Email me this quote (PDF & XLS)' (strip.js:219); the emailed CSV is REPLACED by a formatted XLSX (exceljs 4.4.0 + uuid pin; logo, header, widths, frozen pane, whole amounts / 2-dp rates, POA as text) built from the PDF's own rows — parity by construction + 5 read-back tests. Rollback `v0.4.3-tool2.28-cf0ed4e`.
+
+**Open / next (refreshed 2026-08-28 10:56):**
+- **Kam:** currency symbol on Excel money cells? (as built: none; free addendum) · printed POA tail shows cents (one-arg fix) · dark-mode logo plate at 2× · print headroom 146 px floor · BACKLOG:514 printed rates · Freshdesk login type + plan tier · Dynamics 365 trial questions (report 2026-08-28) · `gh auth login` datasecau (K2) · dependabot HIGH (BACKLOG:206/209).
+- **Next session:** whichever Kam rules; `.dockerignore` now matters (exceljs +22 MB build context).
+
+**Completed (moved off the dashboard 2026-08-28, verified live):** v2.28 (logo 2×, whole-dollar pane) · v2.29 (PDF & XLS, Excel attachment).
+
 **Session 5 (2026-08-28 09:31–10:12, QuickQuote, 0.95): 🎉 v2.28 LIVE** — `hpas-quickquote:v0.4.3-tool2.28-cf0ed4e` (digest b3ddceab…, container 00:09:15Z) on Kam's typed panel word 10:00:07 ("please upload it"). Logo 2× (masthead 46→92 px; print logos doubled at the same page count, headroom −40/−32 px); on-screen right-hand pane whole-dollar except /device/day (Kam ruled (a) 09:36); custom-block display totals whole, inputs untouched. 🔴 Self-caused ~75 s outage (restart raced the platform pull) — disclosed, rule written. Rollback `v0.4.2-tool2.27-f62a347`.
 
 **Open / next (refreshed 2026-08-28 10:14):**
