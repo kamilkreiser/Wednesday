@@ -1634,3 +1634,8 @@ Done with it: research delegated (public docs; current flow read from my ATTIO/V
 > Can you please also comment on the following? Datasec employees have their own Datasec email, but with relation to sales of HP solutions that we have developed, we use an HP email which we do not control or will not get application approval. So the integration with the main email for HP solutions will not be possible. How will this impact the performance and features of Dynamics?
 
 Done with it: constraint forwarded to the Dynamics research agent as a required section (feature-by-feature impact + no-consent workarounds; like-for-like with Attio's ATTIO-8 limit).
+
+## 2026-08-28 10:53 — Kam (dashboard chat; doubled)
+> Create the output as a well-formatted PDF as well.
+
+Done with it: the Dynamics report renders through tools/md2pdf (house style) on delivery and is opened, not pictured.
