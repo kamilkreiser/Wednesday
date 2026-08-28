@@ -22,6 +22,8 @@ resolution comment ALL created 06:58Z; **cull NOT run** (KS 128 + PS 143 =
 
 **Refreshed 2026-08-28 21:37.** 🎉 Secuura s84 WRAPPED 1.0 — **Peter approved #746 + #753 → MERGED (first under the flow), develop 0077f28b7**; his #754/#752 reviews answered (two asks refuted on measurement); KS-707/708(Urgent, his)/709 filed. Floor QUIET. Day: SIX wraps (s82 1.0 · Vision s5 0.95 · Vision s6 1.0 · s83 1.0 · Vision s7 0.95 · s84 1.0). Kam's desk: forward the Peter line; v2.30 publish word; KS-703 widening; KS-708 reproduce.
 
+**Refreshed 2026-08-28 22:51 (night).** 🎉 Secuura s85 WRAPPED 0.95 — **SEVEN merges on Peter's approvals → develop 763343288; KS-694 Urgent LIVE on demo, edge-verified 200→403**; KS-711/#758 for the gates his docs commit re-reddened. Approved-and-open PRs 0; #756/#757/#758 with Peter. Day: SEVEN wraps (s82 1.0 · Vision s5 0.95 · s6 1.0 · s83 1.0 · Vision s7 0.95 · s84 1.0 · s85 0.95). Floor QUIET; Peter monitor armed; Kam asleep (turned in ~22:5x).
+
 **Refreshed 2026-08-28 12:33.** Vision s7 WRAPPED STAGED 0.95 (v2.30 at d258651, not deployed — no publish word by 12:30). **Floor QUIET.** Day: FIVE wraps (s82 1.0 · Vision s5 0.95 · Vision s6 1.0 · s83 1.0 · Vision s7 0.95). Nothing agent-actionable without a ruling/approval: Secuura 12 PRs on Peter; Vision deploy = Kam's word; NexusAI RD-132/133/134 commission-class.
 
 **Refreshed 2026-08-28 11:5x.** Secuura s83 WRAPPED 1.0 (KS-705 #756 · KS-703 #757, both scopes corrected by control; twelve PRs on Peter, 0 approvals; queue DRY; pane closed). Vision s7 holding v2.30 (d258651, tests-only on top of a77e050) for Kam's publish word. Day: FOUR wraps (s82 1.0 · Vision s5 0.95 · Vision s6 1.0 · s83 1.0). `cockpit.sh say` now verifies delivery (WED-134 for the other tap paths).
