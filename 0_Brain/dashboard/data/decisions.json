@@ -1064,5 +1064,164 @@
   "status": "ruled",
   "ruled_choice": "a",
   "ruled_ts": "2026-08-28T10:40:19.347673+10:00"
+ },
+ {
+  "id": "secuura-linear-cap",
+  "client_project": "Secuura/Blockchain",
+  "title": "Linear workspace REFUSES new issues (USAGE_LIMIT_EXCEEDED on activeIssueCount) — blocks Peter's filings and ours",
+  "bluf": "First refusal 15:35Z on KS-721; reads + comments still work; 710 issues incl. archived. Unfiled: KS-721 (social-auth), the ~157-op KS-712 remainder, the session-eviction finding. Archiving Done/Canceled/Duplicate issues is reversible (unarchive) and keeps them readable; upgrade is money.",
+  "default_action": "HOLD: nothing archived, nothing filed; unfiled findings stay parked as comments on KS-712/KS-708",
+  "options": [
+   {
+    "key": "archive",
+    "label": "Archive pass over completed/canceled/duplicate issues (s88 lists candidates read-only first, you confirm the set)",
+    "detail": ""
+   },
+   {
+    "key": "upgrade",
+    "label": "Upgrade the Secuura Linear plan (money — your signature)",
+    "detail": ""
+   },
+   {
+    "key": "hold",
+    "label": "Hold — nothing filed until you decide",
+    "detail": ""
+   }
+  ],
+  "recommended": "archive",
+  "ts": "2026-08-29T06:05:16.733295+10:00",
+  "status": "open",
+  "ruled_choice": null,
+  "ruled_ts": null
+ },
+ {
+  "id": "secuura-ks708-template",
+  "client_project": "Secuura/Blockchain",
+  "title": "KS-708: Peter's Urgent BOLA is a FALSE POSITIVE for the whole ADD_USER_ID class — how does the akto BOLA suite go green honestly?",
+  "bluf": "Reproduced at Peter's exact 2-of-3 on Akto 2.22.2, then disproved from the engine's captured pairs: the template injects the scan's OWN user id and asserts only percentage_match — a change-detector firing on four endpoints the scan itself grows. Option A (VOLATILE_PATH_RE) deletes coverage. Real findings beside it: KS-716 (super-admin surface 0/16 scanned), KS-570 confirmed real (#730 unmerged).",
+  "default_action": "Nothing suppressed (current state = honest red); Peter picks the template shape; your four-suite process call stands",
+  "options": [
+   {
+    "key": "b",
+    "label": "Scope tolerance to the three similarity templates only (Peter's shape, on KS-708)",
+    "detail": ""
+   },
+   {
+    "key": "c",
+    "label": "Honest red",
+    "detail": "leave the suite failing until the template is replaced"
+   },
+   {
+    "key": "a",
+    "label": "VOLATILE_PATH_RE exclusion (the trap — goes green by not looking)",
+    "detail": ""
+   }
+  ],
+  "recommended": "b",
+  "ts": "2026-08-29T06:05:16.782899+10:00",
+  "status": "open",
+  "ruled_choice": null,
+  "ruled_ts": null
+ },
+ {
+  "id": "secuura-ks713-mcp-prod",
+  "client_project": "Secuura/Blockchain",
+  "title": "KS-713: is mcp-server in scope / exposed in PRODUCTION? (Peter's question — only you know)",
+  "bluf": "Akto cannot reach mcp-server (container-network only: port 4023 unpublished, though a gateway route exists at proxy.ts:984). If it is exposed in production it needs publishing/routing for the scan (Dev change); if not, the Akto leg closes. The 8 MCP_SECURITY suites stay off either way (empty-list false-zero class).",
+  "default_action": "KS-713 stays BLOCKED on you; nothing routed",
+  "options": [
+   {
+    "key": "exposed",
+    "label": "Yes — exposed in production; route it for Akto (Dev change, Peter's shape)",
+    "detail": ""
+   },
+   {
+    "key": "internal",
+    "label": "No — internal only; close the Akto leg on KS-713",
+    "detail": ""
+   }
+  ],
+  "recommended": "internal",
+  "ts": "2026-08-29T06:05:16.829408+10:00",
+  "status": "open",
+  "ruled_choice": null,
+  "ruled_ts": null
+ },
+ {
+  "id": "secuura-ks714-apple",
+  "client_project": "Secuura/Blockchain",
+  "title": "KS-714: should Platform K configure Apple Sign-In to match S (PS-16/PS-564)?",
+  "bluf": "Peter: Apple is filtered from getEnabled() for want of credentials = working as designed. The only open question is product intent. Note the contradiction: KS-714 records enabled providers [google, linkedin, github] while s86 measured providers [] on the local stack (no social credentials in the container) — which record is right is a stack question, not a code one.",
+  "default_action": "No change; KS-714 stays open for your word",
+  "options": [
+   {
+    "key": "yes",
+    "label": "Yes — K configures Apple to match S (a credentials task, secrets rule applies)",
+    "detail": ""
+   },
+   {
+    "key": "no",
+    "label": "No — K stays as is; close KS-714 as working-as-designed",
+    "detail": ""
+   }
+  ],
+  "recommended": "no",
+  "ts": "2026-08-29T06:05:16.875610+10:00",
+  "status": "open",
+  "ruled_choice": null,
+  "ruled_ts": null
+ },
+ {
+  "id": "secuura-ks719-contract",
+  "client_project": "Secuura/Blockchain",
+  "title": "KS-719 (P2): two settings PUTs accept UNAUTHENTICATED writes — the fix changes a published contract",
+  "bluf": "PUT /api/privacy/settings and PUT /api/settings/notifications run authenticateToken(false) → userId 'default' → a shared Redis bucket anyone can write. Requiring auth is a contract change on two published routes; documenting them in the spec as-is would BLESS the behaviour (held out of #760 for that reason).",
+  "default_action": "HOLD: routes untouched, not spec-documented",
+  "options": [
+   {
+    "key": "require",
+    "label": "Require auth on both routes (401 unauthenticated) — contract change, PR on Peter",
+    "detail": ""
+   },
+   {
+    "key": "document",
+    "label": "Document as-is in the spec (blesses it)",
+    "detail": ""
+   },
+   {
+    "key": "hold",
+    "label": "Hold",
+    "detail": ""
+   }
+  ],
+  "recommended": "require",
+  "ts": "2026-08-29T06:05:16.923025+10:00",
+  "status": "open",
+  "ruled_choice": null,
+  "ruled_ts": null
+ },
+ {
+  "id": "vision-v230-publish",
+  "client_project": "Datasec/Vision_Sales_Portal",
+  "title": "QuickQuote v2.30 staged at d258651 — publish?",
+  "bluf": "Footer (org/partner-use/version line to the page bottom) + disclaimer aligned to the logo ink edge + phone logo cap; tests-only commit on top of a77e050. Live stays v2.29. Deploy = your typed word (signature class); no restart after container set; rollback v0.4.4-tool2.29-982acfd.",
+  "default_action": "HOLD on v2.29",
+  "options": [
+   {
+    "key": "publish",
+    "label": "Publish v2.30 (type the word on the panel)",
+    "detail": ""
+   },
+   {
+    "key": "hold",
+    "label": "Hold on v2.29",
+    "detail": ""
+   }
+  ],
+  "recommended": "publish",
+  "ts": "2026-08-29T06:05:16.968982+10:00",
+  "status": "open",
+  "ruled_choice": null,
+  "ruled_ts": null
  }
 ]
