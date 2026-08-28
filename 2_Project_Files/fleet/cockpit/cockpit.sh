@@ -231,10 +231,16 @@ case "${1:-}" in
     tries=1
     while :; do
       sleep 2
+      # A QUEUED message (agent mid-turn) is still rendered as "❯ <text>" above
+      # the "Press up to edit queued messages" footer — so check the queue
+      # marker BEFORE reading "text still visible" as "not submitted". Found
+      # live 2026-08-28 11:29: the first real busy tap was reported NOT
+      # DELIVERED while the pane showed it queued.
+      if pane_has_queue "$PANE"; then echo "delivered to '$2' (queued behind a running turn)"; exit 0; fi
       NOW_TXT="$(prompt_text "$PANE")"
       case "$NOW_TXT" in
         "$KEY"*) ;;                       # still at the prompt
-        *) if pane_has_queue "$PANE"; then echo "delivered to '$2' (queued behind a running turn)"; else echo "delivered to '$2' (prompt clear)"; fi; exit 0 ;;
+        *) echo "delivered to '$2' (prompt clear)"; exit 0 ;;
       esac
       if [ $tries -ge 2 ]; then
         echo "cockpit: NOT DELIVERED to '$2' after 2 Enters — text still at the prompt: $NOW_TXT" >&2
