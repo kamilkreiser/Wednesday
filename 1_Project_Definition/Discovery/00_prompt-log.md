@@ -1683,3 +1683,9 @@ Done with it: Dynamics → Kam's team decision (no action); QuickQuote masthead/
 > https://github.com/Secuura/Distributed_Secuura/pull/752
 
 *Action: addendum 3 to s85 — verify both instruments (approval on e2a59abd8), merge with the post-deploy batch.*
+
+## 2026-08-28 22:17 — Kam (terminal, two fragments, verbatim)
+> Peter is active. Keep monitoring the
+> Them as they come through
+
+*Read as one instruction: keep monitoring Peter's approvals/comments as they arrive tonight and act on them. Mechanism: a persistent board monitor (peter_watch.sh, 2-min Linear poll, fire + quiet paths proved) that wakes me on each Peter event; s85 is the live executor.*
