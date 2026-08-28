@@ -8,6 +8,14 @@ updated: 2026-08-28
 
 # Datasec / Vision Sales Portal
 
+**Session 7 (2026-08-28 11:01–12:31, QuickQuote, 0.95): v2.30 STAGED at `d258651`, NOT deployed** — hold to 12:30 with zero publish rows (35 polls of the chat log). Item 20: cog stays; org/partner-use/version line → page `<footer>` (viewport-bottom, tool page only); disclaimer aligned to the logo's MEASURED ink edge 156.9 (PNG carries 59 px white margin → `--logo-ink-inset`, re-measure if the asset changes); logo capped on phones without squashing (ratio-proved); +2 rendered-version gates tied to CONFIG (control fails on a stale version). 🔴 **Phone clip is the `.ticket` totals table (min-content 394 > 326 at 390 px) — NOT fixed: changes money layout; Kam's eye.** Live unchanged v2.29.
+
+**Open / next (refreshed 2026-08-28 12:33):**
+- **Kam:** type the publish word → deploy d258651 (v2.30: footer + alignment; no restart after container set; rollback v0.4.4-tool2.29-982acfd) · dark-mode plate at 2× (disclaimer now inside the plate edge) · phone totals-table clip (money layout — ruling) · printed POA tail cents · currency symbol on Excel cells · BACKLOG:514 printed rates · Freshdesk login type · Dynamics 365 (team) · `gh auth login` datasecau (K2) · dependabot HIGH.
+- **Next session:** deploy on his word, else whichever item he rules; `.dockerignore`.
+
+**Completed (moved off the dashboard 2026-08-28, verified at source):** v2.30 built + merged (staged).
+
 **Session 6 (2026-08-28 10:18–10:54, QuickQuote, 1.0): 🎉 v2.29 LIVE** — `v0.4.4-tool2.29-982acfd` (digest 392d232f…, container 00:47:00Z, one boot, NO outage) on Kam's typed word 10:39:35 ("Please deploy"). Button → 'Email me this quote (PDF & XLS)' (strip.js:219); the emailed CSV is REPLACED by a formatted XLSX (exceljs 4.4.0 + uuid pin; logo, header, widths, frozen pane, whole amounts / 2-dp rates, POA as text) built from the PDF's own rows — parity by construction + 5 read-back tests. Rollback `v0.4.3-tool2.28-cf0ed4e`.
 
 **Open / next (refreshed 2026-08-28 10:56):**
