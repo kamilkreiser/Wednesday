@@ -1661,3 +1661,12 @@ Done with it: Dynamics → Kam's team decision (no action); QuickQuote masthead/
 > Thank you. Please post back to Peter when finished and let me know
 
 *Read: replies to Peter go on the PRs + tickets (the channel he used; agent as author, in scope); a WhatsApp line for Kam to forward is drafted at wrap (external send stays his).*
+
+## 2026-08-28 21:52 — Kam (terminal, relaying Peter, verbatim)
+> PR Approved
+> https://github.com/Secuura/Distributed_Secuura/pull/747
+>
+> PR Approved:
+> https://github.com/Secuura/Distributed_Secuura/pull/748
+
+*Action: Secuura s85 — verify on both instruments, merge #747 (KS-694 Urgent) + #748 (KS-689), suites, KS-694 originate demo deploy under v1.3.*
