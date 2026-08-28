@@ -1670,3 +1670,10 @@ Done with it: Dynamics → Kam's team decision (no action); QuickQuote masthead/
 > https://github.com/Secuura/Distributed_Secuura/pull/748
 
 *Action: Secuura s85 — verify on both instruments, merge #747 (KS-694 Urgent) + #748 (KS-689), suites, KS-694 originate demo deploy under v1.3.*
+
+## 2026-08-28 22:10 — Kam (terminal, relaying Peter, verbatim)
+> Approved:
+> https://github.com/Secuura/Distributed_Secuura/pull/755
+> https://github.com/Secuura/Distributed_Secuura/pull/754
+
+*Action: addendum to s85 — verify both instruments, merge #755 + #754 after the KS-694 demo deploy.*
