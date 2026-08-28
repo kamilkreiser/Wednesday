@@ -1644,3 +1644,8 @@ Done with it: the Dynamics report renders through tools/md2pdf (house style) on 
 > Thank you for the PDF, I've had a brief look and it looks good. I will consider it in detail and circulate amongst the team for decision. With relation to the quick web tool one last layout change. Keep the settings cog at the top, but move the "Datasec HP Internal Partner Use Only" text to the very bottom of the page. Put the text which says "This tool is for initial" in between, and align the logo and text so that it looks like it's properly aligned.
 
 Done with it: Dynamics → Kam's team decision (no action); QuickQuote masthead/footer layout round → Vision s7 (build v2.30, deploy held).
+
+## 2026-08-28 20:49 — Kam (dashboard chat, dictated, tripled by Superwhisper; verbatim once)
+> Please have a look at the following message from Peter. These should also be reflected in GitHub.
+
+*Note (20:50): no message text arrived with the dictation. Identified from the Secuura board: Peter's two KS-702 comments 20:19/20:24 AEST — review concerns on PR #754 (three author questions + cosmetic) and the check-test-ids follow-on, also posted on the PR; he pushed 6222d2698 + 6101ce3b6 to our branch, no merge. Action: Secuura s84 launched to answer on the PR + KS-702 and land the changes.*
