@@ -3,7 +3,7 @@ client: Secuura
 project: Blockchain
 path: /Volumes/DevMASTER/!CODING/Secuura/Blockchain
 status: active
-updated: 2026-08-28
+updated: 2026-08-29
 ---
 
 # Secuura / Blockchain (Platform K)
@@ -40,6 +40,13 @@ updated: 2026-08-28
 - **Peter (from 23:00 AEST):** NINE PRs of ours with four-suite evidence — #746 (the rule) · #747 (KS-694 Urgent) · #748 · #749 · #750 · #751 (KS-697 Urgent) · #752 · #753 · #754 · KS-693 ruling (Option 2) · his #719/#722 approved.
 - **Kam (morning):** KS-703 ruling (extending the control-byte guard to query strings = a new rejection on published GET contracts) · KS-697 demo-probe card (HOLD) · KS-670 stale-overstating · KS-660 + 44 unassigned · s79 cleared the extranet unread flags · credits 6 Sep · F-02 16 sessions · KS-695 + Stuart's PS-690 seven-phase programme · agent GitHub identity · KS-621 sitting.
 - **Next agent-actionable (when commissioned, not tonight):** systemTest/performance quality chain audit (KS-702's sibling, never looked at) · repo-wide sweep for string query params reaching Postgres (6 routes measured, not the surface) · KS-704 fix · assertCaptureSucceeded beyond the PR tier.
+
+**s86 (2026-08-29 00:05–01:38, overnight, 0.95): 🔴 KS-708 (Peter's Urgent BOLA) = FALSE POSITIVE** — reproduced then disproved (Akto's ADD_USER_ID flags the scan's own audit-log writes; null attack 35.9%; same super_admin bearer baseline+replay; authz proven). **KS-712: 173 routed spec-absent ops, not 89** (34% named-export registrations invisible to the regex; found by reconciling against Peter's list). **PR #759** (KS-715, Akto capture ENOBUFS) + **PR #760** (KS-712 (b): 16 auth ops, spec 286→303, pure addition) on Peter. Filed: KS-715 · KS-716 (super-admin surface 0/16 scanned) · KS-719 (unauthenticated settings writes, 'default' bucket) · KS-720 (wallet link/unlink can never succeed — no authenticate()). Social-auth (Peter's two shapes): CONFIRMED in code, unreachable today (providers `[]` — contradicts KS-714's recorded set) → KS-721 body parked on KS-712 (comment 4eebfd05). 🔴 **Linear refusing new issues workspace-wide (USAGE_LIMIT_EXCEEDED / activeIssueCount, 710 incl. archived)** — nothing archived. KS-713: mcp-server unreachable by Akto (Peter), a gateway route DOES exist (proxy.ts:984). Trap: local auth image built from unmerged #757. develop 763343288 unmoved; board 181.
+
+**Open / next (refreshed 2026-08-29 01:40 after s86 — queue DRY):**
+- 🔴 **Kam (morning, LEADS): Linear ceiling — upgrade (money) or archiving pass (tracking decision); blocks Peter's filings too** · KS-708 Option B (scope tolerance to the 3 similarity templates) vs C (honest red) — A is the trap · KS-719 fix changes a published contract · KS-713: is mcp-server exposed in production? · KS-714: configure Apple on K to match S? + the enabled-set contradiction · KS-712 ~157-op remainder ticket sizing · --ignore-path convention · KS-703 widening · compose-hash deploy precondition · KS-662 ruling · credits 6 Sep · agent GitHub identity · KS-621 sitting.
+- **Peter:** #756 #757 #758 #759 #760 reviews (0 approvals); his own KS-710/717/718 in progress on the Akto harness.
+- **s87 first (after Kam's Linear decision):** file KS-721 (from KS-712 comment 4eebfd05) · file the ~157-op remainder · then KS-709 · KS-593 six offset sites · KS-704.
 
 **s85 (2026-08-28 21:52–22:48, 0.95): 🎉 SEVEN MERGES on Peter's approvals** — #747 KS-694 Urgent · #748 KS-689 · #751 KS-697 Urgent · #749 KS-688 (approved after Kam's last relay; provenance on KS-688) · #755 KS-706 · #754 KS-702 · #752 KS-700 → **develop 763343288**; each approval commit_id == head, each merge content-verified with a negative control. **KS-694 DEPLOYED to demo (originate image sha256:7d94210a…, rollback b8db1c1a… named first) and edge-verified: DSR pending / deletion-log / system-errors ×2 = 200 before → 403 after for ISSUER_ADMIN, super_admin 200, untouched routes unchanged, NODE_ENV=development throughout.** KS-697 rode the image (400 half verified on the edge; 404 half NOT probed — chain write). ⚠ `up -d originate` also recreated postgres/pgbouncer/redis (x-stack-labels anchor → config hashes) with an 18-s gateway 503, RestartCount 0. 🔴 Peter's docs-only a984448c8 re-reddened the akto + performance Prettier gates → **KS-711 / PR #758** (fourth systemTest Prettier red in a week — Peter's --ignore-path question needs a decision). Suites on both merge points: Schemathesis set 11 (+4 = KS-693 class, m365 image predates), Akto PASS, k6 5/5, Playwright green bar KS-707. Board 173; open PRs 37; **approved-and-open PRs 0**. Peter filed KS-710 (his).
 
