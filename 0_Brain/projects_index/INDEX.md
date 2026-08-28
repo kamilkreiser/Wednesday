@@ -38,6 +38,8 @@ resolution comment ALL created 06:58Z; **cull NOT run** (KS 128 + PS 143 =
 
 **Refreshed 2026-08-29 01:42.** Peter (15:37Z): ADD_USER_ID now flags `GET /api/sessions` 2/3 runs (not hand-derived) → **Secuura s87 LAUNCHED (%38)**: hand re-derive it + the leaderboard AUTH_BYPASS hit vs KS-570 + KS-709 if runway — comments only (Linear cap), nothing merges. Floor: me + shell + s87.
 
+**Refreshed 2026-08-29 01:50.** s87 plan confirmed: rebuild auth from develop e126a241b (its image carried unmerged #757 code) then hand re-derive /api/sessions. 🔴 **#761: Peter self-merged, 0 approvals** (measured) → Kam. develop e126a241b · main e44600ecc · 39 open PRs, #756–#760 unreviewed.
+
 **Refreshed 2026-08-28 21:37.** 🎉 Secuura s84 WRAPPED 1.0 — **Peter approved #746 + #753 → MERGED (first under the flow), develop 0077f28b7**; his #754/#752 reviews answered (two asks refuted on measurement); KS-707/708(Urgent, his)/709 filed. Floor QUIET. Day: SIX wraps (s82 1.0 · Vision s5 0.95 · Vision s6 1.0 · s83 1.0 · Vision s7 0.95 · s84 1.0). Kam's desk: forward the Peter line; v2.30 publish word; KS-703 widening; KS-708 reproduce.
 
 **Refreshed 2026-08-28 22:51 (night).** 🎉 Secuura s85 WRAPPED 0.95 — **SEVEN merges on Peter's approvals → develop 763343288; KS-694 Urgent LIVE on demo, edge-verified 200→403**; KS-711/#758 for the gates his docs commit re-reddened. Approved-and-open PRs 0; #756/#757/#758 with Peter. Day: SEVEN wraps (s82 1.0 · Vision s5 0.95 · s6 1.0 · s83 1.0 · Vision s7 0.95 · s84 1.0 · s85 0.95). Floor QUIET; Peter monitor armed; Kam asleep (turned in ~22:5x).
