@@ -28,6 +28,8 @@ resolution comment ALL created 06:58Z; **cull NOT run** (KS 128 + PS 143 =
 
 **Refreshed 2026-08-29 00:57.** Peter on KS-713 (14:55Z): mcp-server unreachable by Akto (container-network only); scope/production-exposure question → **Kam**; reassigned to us. s86 told: answer facts-only, KS-713 held, KS-709 if runway.
 
+**Refreshed 2026-08-29 01:20.** Peter (15:17Z) read the social-auth callback: `state` never verified + email-match without `emailVerified` — code-read, asks confirm/refute → queued to s86 after the (b) PR (measure locally, no fix; KS-486 stream if real).
+
 **Refreshed 2026-08-28 21:37.** 🎉 Secuura s84 WRAPPED 1.0 — **Peter approved #746 + #753 → MERGED (first under the flow), develop 0077f28b7**; his #754/#752 reviews answered (two asks refuted on measurement); KS-707/708(Urgent, his)/709 filed. Floor QUIET. Day: SIX wraps (s82 1.0 · Vision s5 0.95 · Vision s6 1.0 · s83 1.0 · Vision s7 0.95 · s84 1.0). Kam's desk: forward the Peter line; v2.30 publish word; KS-703 widening; KS-708 reproduce.
 
 **Refreshed 2026-08-28 22:51 (night).** 🎉 Secuura s85 WRAPPED 0.95 — **SEVEN merges on Peter's approvals → develop 763343288; KS-694 Urgent LIVE on demo, edge-verified 200→403**; KS-711/#758 for the gates his docs commit re-reddened. Approved-and-open PRs 0; #756/#757/#758 with Peter. Day: SEVEN wraps (s82 1.0 · Vision s5 0.95 · s6 1.0 · s83 1.0 · Vision s7 0.95 · s84 1.0 · s85 0.95). Floor QUIET; Peter monitor armed; Kam asleep (turned in ~22:5x).
