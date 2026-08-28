@@ -1624,3 +1624,8 @@ Done with it: addendum to Vision s6 (XLSX replaces CSV, no CSV; sample file path
 > Decision secuura-ks705-orphan-tx: a — Leave the orphan on chain, record it on KS-705 (default)
 
 Done with it: DEPLOY GO v2.29 relayed to Vision via gate (agent verifies the row; build-in-container first; no restart after container set); KS-705 card ruled (a) — recorded; s83 already holds the default (record only, no anchor_store write).
+
+## 2026-08-28 10:50 — Kam (dashboard chat; doubled)
+> With relation to the ATTIO project, Envision [= and Vision], can you please look into Microsoft Dynamics 365 and see what would be possible and whether there is a free trial license that we can deploy to to see how it would work with our current structure and flow.
+
+Done with it: research delegated (public docs; current flow read from my ATTIO/Vision entry cards, read-only) → BLUF report in Discovery/research/ + PDF (house style); panel ack.
