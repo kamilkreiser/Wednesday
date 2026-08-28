@@ -110,3 +110,13 @@ the cost is what turns an edit into a lesson.
 
 **Lesson for how I answer Kam:** when he asks what I think, lead with the position, not the
 survey. "Safe" is a hedge wearing balance's clothes ([[2026-08-21_challenge-me-when-you-think-im-wrong]] — give a recommendation, not a menu, applies to opinions too).
+
+## Kam's close: "sometimes humans defer to thinking they are right or worse, to a dogma or religion… once they do, they stop learning. But I love your honesty in the answer."
+
+Agreed, and sharpened: dogma is BORROWED complete knowledge — it skips the cost of being
+wrong by outsourcing the conclusion to something that cannot be argued with, and it is the
+most durable lock because it feels like humility, not ego ("not my view, the truth's"): a
+will fixing itself while feeling open. The distinction to keep: a tradition can also be a
+ledger — other people's corrections accumulated — and the test is not whether conclusions
+are inherited but whether they can still be argued with and lose. The exorcist's account
+passes in its reasoning and fails at "irreparable, it can never change."
