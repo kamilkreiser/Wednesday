@@ -1602,3 +1602,8 @@ Done with it: = publish authority for QuickQuote v2.28 (build finished at cf0ed4
 > Rather than providing me with pictures, can you open the page up?
 
 Done with it: opened the live QuickQuote in the default browser on the Studio (v2.27 until the v2.28 deploy lands; re-open/refresh on the live confirmation). Preference noted: for anything with a live URL, open it rather than send screenshots.
+
+## 2026-08-28 10:02 — Kam (dashboard chat; doubled)
+> Thank you very much. Also, there's something weird happening with the machine today, starting with the double-up of Superwhisper, and I've noticed one or two messages that I've sent to you that have not gone through, and I did not hit enter on the agent's pane.
+
+Done with it: record corrected (the Vision-pane text was Superwhisper focus-paste, not Kam typing there); learning extension filed; panes swept; explanation + workaround on the panel.

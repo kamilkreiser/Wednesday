@@ -31,3 +31,26 @@ it sits UNSENT at the prompt indefinitely (the agent never sees it).
 
 **Related:** [[../people/kam.md]] (updated same day),
 [[2026-08-03_go-slow-earn-autonomy]] (approval-class always attributable).
+
+
+## Extension 2026-08-28 — a DICTATION TOOL can put Kam's words in a pane he never looked at
+
+**The case.** At 10:00 Kam's panel message "Once the new build of vision is finished, please
+upload it." also appeared, doubled, as TYPED-UNSENT text at the Vision agent's prompt. I recorded
+it as "Kam typed the same line into the pane" and cleared it. At 10:02 he said: *"I did not hit
+enter on the agent's pane"* — and that messages to me "have not gone through". **Superwhisper
+pastes into whichever window has focus**: with the cockpit terminal in front, his dictation landed
+in the active pane instead of the chat box. So the detector's TYPED verdict was right about the
+CHANNEL (keystrokes) and wrong about INTENT (he never addressed that pane).
+
+**Rules added:**
+1. A TYPED-UNSENT line in an agent pane that matches (or nearly matches) a message Kam sent
+   elsewhere is a **focus-paste**, not an instruction to that pane — treat as delivered through
+   the real channel, clear it (one Ctrl-C if C-u will not take a wrapped line), record.
+2. A TYPED-UNSENT line that matches NOTHING he sent elsewhere may be a message to ME that
+   went astray — read it as such and answer it on the panel, then ask him to click the chat box
+   before dictating. Never act on it as an instruction to the agent.
+3. When Kam reports "messages not going through", sweep every pane's prompt first — that is
+   where they are.
+4. The costume list for prompt text is now three: machine ghost (dim) · Kam typing on purpose ·
+   Kam's dictation focus-pasted (typed, doubled, addressed elsewhere).
