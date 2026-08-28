@@ -1649,3 +1649,10 @@ Done with it: Dynamics → Kam's team decision (no action); QuickQuote masthead/
 > Please have a look at the following message from Peter. These should also be reflected in GitHub.
 
 *Note (20:50): no message text arrived with the dictation. Identified from the Secuura board: Peter's two KS-702 comments 20:19/20:24 AEST — review concerns on PR #754 (three author questions + cosmetic) and the check-test-ids follow-on, also posted on the PR; he pushed 6222d2698 + 6101ce3b6 to our branch, no merge. Action: Secuura s84 launched to answer on the PR + KS-702 and land the changes.*
+
+## 2026-08-28 21:18 — Kam (terminal, relaying Peter's WhatsApp, verbatim)
+> Message from Peter. @Kam
+> I have comments on
+> https://github.com/Secuura/Distributed_Secuura/pull/752
+
+*Action: addendum to Secuura s84 — read at source, answer as author after the #746/#753 merges.*
