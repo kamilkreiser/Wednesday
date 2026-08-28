@@ -1,3 +1,13 @@
+## 2026-08-29 — overnight successor 00:11 → ~02:07 rotation (ctx ~67%, the 70% grant; 🔴 Peter active all night; Kam asleep)
+
+**Fleet:** ONE wrap scored — Secuura s86 0.95 (Peter's Urgent KS-708 reproduced then DISPROVED as a false positive; KS-712 re-derived at 173 spec-absent ops not 89; PRs #759 (Akto ENOBUFS capture) + #760 (16 auth ops into the spec, pure addition) on Peter; KS-715/716/719/720 filed; Peter's two social-auth shapes CONFIRMED in code, unreachable today, KS-721 parked when Linear began refusing issues; nothing merged/archived). **s87 LIVE** on Peter's new `/api/sessions` ADD_USER_ID hit: auth rebuilt from develop e126a241b (three-way proof), KS-703 evidence comment posted, local Akto → 2.22.2 ruled. Peter overnight: KS-717/718 filed, #761 self-merged (0 approvals → Kam), KS-710/718/524 closed, fresh sweeps on KS-592/593, cross-refs on KS-712/714, the social-auth code-read, a public self-correction on KS-593.
+
+**Kam:** asleep — zero instructions; morning receipt on the panel after the score; his board leads with the Linear ceiling (money / tracking decision), #761, KS-708 Option B vs C, KS-719, KS-713/714 yes/no's.
+
+**Wednesday's own:** ledger w=42 (a counterpart's staleness claim adopted into a ruling — predecessor's) · w=43 (ruled on a state inferred from prose) · fleet insights ×6 · one `cd`-into-another-checkout self-catch (nothing written). Eleven gated sends, all verified at destination; s87 launched after three gate refusals fixed by content.
+
+**Records:** daily note (boot, every leg, checkpoint, handover, retro); INDEX ×10; Secuura card; scoreboard; ledger ×9; wrap mail. HEAD == origin at every step.
+
 ## 2026-08-28 — Friday successor session 11:1x → overnight (Kam turned in 22:31; 🔴 s85 live under the overnight grant, Peter monitor armed)
 
 **Fleet:** SIX wraps scored this session — Secuura s83 1.0 (KS-705 #756 submission-idempotency, KS-703 #757 both routes — both scopes corrected by control) · Vision s7 0.95 (v2.30 staged at d258651, not deployed — no publish word; ink edge 156.9 measured from pixels; the table-clip money-layout change refused unasked) · Secuura s84 1.0 (🎉 the deadlock broke: Peter approved #746 + #753 → FIRST MERGES under the flow, develop 0077f28b7; his #754/#752 reviews answered as author, two asks refuted on measurement; KS-707/708/709 filed) · plus the predecessor's s82 1.0, Vision s5 0.95, s6 1.0 earlier in the day. **s85 LIVE** on eight Peter approvals in one evening (#747 KS-694 Urgent · #748 · #751 KS-697 Urgent · #755 · #754 · #752) — verify both instruments, merge, suites, KS-694 originate-only demo deploy edge-verified, post-deploy batch. Peter's #752/#754 comments found on the board when Kam's dictation dropped the text.
