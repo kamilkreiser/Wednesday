@@ -1639,3 +1639,8 @@ Done with it: constraint forwarded to the Dynamics research agent as a required 
 > Create the output as a well-formatted PDF as well.
 
 Done with it: the Dynamics report renders through tools/md2pdf (house style) on delivery and is opened, not pictured.
+
+## 2026-08-28 10:59 — Kam (dashboard chat; doubled)
+> Thank you for the PDF, I've had a brief look and it looks good. I will consider it in detail and circulate amongst the team for decision. With relation to the quick web tool one last layout change. Keep the settings cog at the top, but move the "Datasec HP Internal Partner Use Only" text to the very bottom of the page. Put the text which says "This tool is for initial" in between, and align the logo and text so that it looks like it's properly aligned.
+
+Done with it: Dynamics → Kam's team decision (no action); QuickQuote masthead/footer layout round → Vision s7 (build v2.30, deploy held).
