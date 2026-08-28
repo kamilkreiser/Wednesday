@@ -228,8 +228,16 @@ for cfg in "$DRIVE_ROOT"/!CODING/*/*/2_Project_Files/.git/config; do
 done
 [ "$STALE_PTRS" = "0" ] && ok "travel pointers: no project repo points at a missing key path"
 
+# md2pdf house-style renderer deps (Kam 2026-08-28: "keep this style going forward"; PORTABILITY 21)
+if command -v pandoc >/dev/null && [ -x "/Applications/Google Chrome.app/Contents/MacOS/Google Chrome" ] && command -v pdftoppm >/dev/null; then
+  ok "md2pdf deps (pandoc + Google Chrome + pdftoppm)"
+else
+  warn "md2pdf deps missing" "pandoc/Google Chrome/pdftoppm — report PDFs will not render (brew install pandoc poppler; Chrome from google.com/chrome)"
+fi
+
 echo
 if [ "$HARD_FAIL" = "1" ]; then
+
   echo "PREFLIGHT: HARD FAILURES above — fix before relying on this machine."
   exit 1
 elif [ "$WARNS" -gt 0 ]; then

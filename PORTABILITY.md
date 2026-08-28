@@ -118,3 +118,9 @@ Keep this file updated whenever a new machine-local dependency appears.
     `Sync finished`. A leg cut by a shutdown writes no summary — read the body. Learning:
     `0_Brain/learnings/2026-08-26_a-sync-that-cannot-refuse-a-deletion.md`. The NAS leg
     stays OFF until the case is fixed (Kam's card `nas-case-fold-datasec`).
+21. **Report PDFs — md2pdf deps (added 2026-08-28):** `2_Project_Files/tools/md2pdf/md2pdf.sh`
+    renders every report in the house style Kam asked to keep ("The PDF looks great. Keep
+    this style going forward"). Machine-local: `pandoc` (brew), **Google Chrome** (headless
+    print-to-pdf), `pdftoppm` (brew `poppler`, for the eyeball raster). doctor.sh warns when
+    any is missing. Fallback if Chrome is absent: `soffice --headless --convert-to pdf` on
+    the pandoc HTML (uglier, still a PDF).
