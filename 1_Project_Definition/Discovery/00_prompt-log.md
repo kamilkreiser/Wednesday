@@ -1656,3 +1656,8 @@ Done with it: Dynamics → Kam's team decision (no action); QuickQuote masthead/
 > https://github.com/Secuura/Distributed_Secuura/pull/752
 
 *Action: addendum to Secuura s84 — read at source, answer as author after the #746/#753 merges.*
+
+## 2026-08-28 21:28 — Kam (terminal, verbatim)
+> Thank you. Please post back to Peter when finished and let me know
+
+*Read: replies to Peter go on the PRs + tickets (the channel he used; agent as author, in scope); a WhatsApp line for Kam to forward is drafted at wrap (external send stays his).*
