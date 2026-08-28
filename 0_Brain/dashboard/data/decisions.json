@@ -1040,5 +1040,29 @@
   "status": "ruled",
   "ruled_choice": "a",
   "ruled_ts": "2026-08-28T09:37:18.026675+10:00"
+ },
+ {
+  "id": "secuura-ks705-orphan-tx",
+  "client_project": "Secuura/Blockchain",
+  "title": "KS-705: one document produced TWO confirmed Cardano txs — the first (408e7208…, block 4,609,927) is on chain with no database row",
+  "bluf": "Your KS-697 probe reproduced the defect on chain (confirmed) AND surfaced a bigger one: anchoring is idempotent on the row, not the submission — a retry read the node's 'probably already included' as failure and minted a second fee-paying tx. The orphan tx carries the same payload for the same document; no row points at it. The CODE fix is agent-actionable (no ruling). The orphan is a provenance call: backfill the index to reference it, or leave it and record it on the ticket.",
+  "default_action": "Leave it and record it; the code fix proceeds either way.",
+  "options": [
+   {
+    "key": "a",
+    "label": "Leave the orphan on chain, record it on KS-705 (default)",
+    "detail": "No DB write; the ticket + the tx hash are the record."
+   },
+   {
+    "key": "b",
+    "label": "Backfill anchor_store to reference 408e7208…",
+    "detail": "One DB row on demo pointing at the first tx; agent writes it with a labelled note."
+   }
+  ],
+  "recommended": "a",
+  "ts": "2026-08-28T10:16:07.598895+10:00",
+  "status": "open",
+  "ruled_choice": null,
+  "ruled_ts": null
  }
 ]

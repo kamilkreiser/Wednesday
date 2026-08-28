@@ -3,7 +3,7 @@ client: Secuura
 project: Blockchain
 path: /Volumes/DevMASTER/!CODING/Secuura/Blockchain
 status: active
-updated: 2026-08-27
+updated: 2026-08-28
 ---
 
 # Secuura / Blockchain (Platform K)
@@ -40,6 +40,13 @@ updated: 2026-08-27
 - **Peter (from 23:00 AEST):** NINE PRs of ours with four-suite evidence — #746 (the rule) · #747 (KS-694 Urgent) · #748 · #749 · #750 · #751 (KS-697 Urgent) · #752 · #753 · #754 · KS-693 ruling (Option 2) · his #719/#722 approved.
 - **Kam (morning):** KS-703 ruling (extending the control-byte guard to query strings = a new rejection on published GET contracts) · KS-697 demo-probe card (HOLD) · KS-670 stale-overstating · KS-660 + 44 unassigned · s79 cleared the extranet unread flags · credits 6 Sep · F-02 16 sessions · KS-695 + Stuart's PS-690 seven-phase programme · agent GitHub identity · KS-621 sitting.
 - **Next agent-actionable (when commissioned, not tonight):** systemTest/performance quality chain audit (KS-702's sibling, never looked at) · repo-wide sweep for string query params reaching Postgres (6 routes measured, not the surface) · KS-704 fix · assertCaptureSucceeded beyond the PR tier.
+
+**s82 (2026-08-28 09:25–10:14, 1.0): KS-697 REPRODUCED ON CHAIN under Kam's (b) ruling** — one labelled probe document, transfer to an invented holder → 201 + a confirmed preview anchor; `to_holder_id` matches 0 users (control 1); #751 correct, unmerged. 🔴 **KS-705 (High) filed: anchoring is idempotent on the ROW, not the SUBMISSION — the retry path reads the node's 'already included' as failure and minted a SECOND fee-paying tx; the first (408e7208…, block 4,609,927) is on chain with no DB row** (card `secuura-ks705-orphan-tx`, default leave+record). Overnight merge identified: #722/KS-662 by Peter 15:37Z. **Ten PRs (#746–#755) on Peter, ZERO approvals** (both instruments, control fires). #747 unmerged → no KS-694 deploy (recorded on the ticket; demo NODE_ENV=development). KS-703 surface: 2 of 12 params, ONE route (`role`, `search`) — fixable at the route with KS-451 primitives, no ruling; platform-wide guard widening still needs one. **KS-706 (High) filed + fixed #755** (systemTest/performance quality gate red for everyone; 179 unreachable tests). KS-670 read-only at 23:54Z (chain calls succeeding five minutes before the daily reset — one more late-window probe recommended). Board 176. develop 123b05f1a.
+
+**Open / next (refreshed 2026-08-28 10:16 after s82):**
+- **Peter:** TEN PRs with four-suite evidence — #747 (KS-694 Urgent) · #751 (KS-697 Urgent) · #746 · #748 · #749 · #750 · #752 · #753 · #754 · #755 · KS-693 ruling.
+- **Kam:** card `secuura-ks705-orphan-tx` (default leave+record) · KS-703 platform-wide guard widening (ruling) · KS-670 (one more late-window probe, his card) · KS-660 + 44 unassigned · credits 6 Sep · agent GitHub identity · KS-621 sitting · F-02 17 sessions.
+- **Next leg (agent-actionable, no ruling):** KS-705 code fix (submission idempotency; failing test first; local only — NO chain write) · KS-703 route-level fix with KS-451 primitives (+ `search`) · then dry unless Peter approves something.
 
 **s80 (2026-08-27 21:51–22:36, 1.0): KS-700 FIXED — PR #752** (capture failure recorded as a fact, "CAPTURE FAILED — results unknown (not zero)", PR gate fails on it SEPARATELY from the security assertion; the "no captured request" placeholder was ours — `.message` now read from Mongo, exact-request curl on the card; a second defect (7 KB Mongo pipeline in the log) caught by the fix's own control). **KS-701 FIXED — PR #753** (config already imported the getters; option 1; quality green, unit 48/48). **KS-696 re-measured ×6 on the fixed harness: 2/1/0/2/0/0 with every capture healthy — s79's "2/0/2" corrected: its 0 was the failed capture; conclusion (Akto's own per-run auth setup) stands as a hypothesis.** 🔴 **KS-702 (High): the Akto gate is red on develop for everyone — format:check 8 files, lint 288 errors/16 files, knip 2; a && chain, so no author reaches the tests.** Flagged not filed: redis NOAUTH reads as 0 keys; k6 "100% failed" carries no status breakdown. Board 173, zero walks, 42 open PRs.
 
