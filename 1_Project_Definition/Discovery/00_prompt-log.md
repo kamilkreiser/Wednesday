@@ -1597,3 +1597,8 @@ Done with it: praise row; the render pipeline + CSS saved as 2_Project_Files/too
 > Once the new build of vision is finished, please upload it.
 
 Done with it: = publish authority for QuickQuote v2.28 (build finished at cf0ed4e) — typed prose on his own surface; relayed to the Vision agent as DEPLOY GO with the instruction to verify the row itself before deploying.
+
+## 2026-08-28 10:0x — Kam (terminal; doubled)
+> Rather than providing me with pictures, can you open the page up?
+
+Done with it: opened the live QuickQuote in the default browser on the Studio (v2.27 until the v2.28 deploy lands; re-open/refresh on the live confirmation). Preference noted: for anything with a live URL, open it rather than send screenshots.
