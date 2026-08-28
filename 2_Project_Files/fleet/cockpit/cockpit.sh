@@ -18,7 +18,12 @@
 #   cockpit.sh status             list panes: name, alive, last activity
 #   cockpit.sh say <name> <text>  type a line into a pane's prompt (the live
 #                                 "tap on the shoulder" — substantive
-#                                 instructions still go by mail for the record)
+#                                 instructions still go by mail for the record).
+#                                 VERIFIES delivery by reading the prompt back:
+#                                 exit 3 = prompt occupied by typed text (refused,
+#                                 nothing sent) · exit 2 = still at the prompt
+#                                 after two Enters (NOT delivered) · exit 0 only
+#                                 when the text left the prompt.
 #   cockpit.sh rotate <Client/Project> [--timeout-min N]
 #                                 working-rhythm §3 session rotation: tap the
 #                                 pane with the wrap instruction, wait for its
@@ -41,11 +46,36 @@ SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 # 2026-08-05).
 PROJECT_DIR="$(cd "$SCRIPT_DIR/../../.." && pwd)"
 CONF="$SCRIPT_DIR/cockpit.conf"
-SESSION="fleet"
+# COCKPIT_SESSION: test hook ONLY — points every subcommand at another tmux
+# session (a scratch one) so `say` can be exercised without touching a live
+# agent. One variable, applied to everything; default is the real fleet.
+SESSION="${COCKPIT_SESSION:-fleet}"
 TMUX_BIN="$(command -v tmux || echo /opt/homebrew/bin/tmux)"
 
 die() { echo "cockpit: $*" >&2; exit 1; }
 [ -x "$TMUX_BIN" ] || die "tmux not found (PORTABILITY: brew install tmux)"
+
+# Prompt readers (same extraction as pane_prompt_check.sh: strip SGR, take the
+# last ❯ line that is not Claude Code's own chrome, drop the U+00A0 after ❯).
+prompt_text() { # $1 = pane id → text at the input prompt ("" = clear)
+  local line cand text=""
+  while IFS= read -r line; do
+    [ -n "$line" ] || continue
+    cand="$(printf '%s' "$line" | LC_ALL=C sed 's/\x1b\[[0-9;]*m//g' \
+            | LC_ALL=C sed 's/^.*❯//' | LC_ALL=C sed 's/^\xc2\xa0*//' | LC_ALL=C sed 's/^ *//')"
+    case "$cand" in "Press up to edit queued messages"*|"Try "*|"for shortcuts"*) continue ;; esac
+    text="$cand"
+  done < <("$TMUX_BIN" capture-pane -t "$1" -p -e 2>/dev/null | LC_ALL=C grep -a '❯' || true)
+  printf '%s' "$text"
+}
+prompt_is_ghost() { # $1 = pane id → 0 if the last prompt line is dim (Claude's suggestion)
+  local raw
+  raw="$("$TMUX_BIN" capture-pane -t "$1" -p -e 2>/dev/null | LC_ALL=C grep -a '❯' | LC_ALL=C grep -av 'Press up to edit queued\|Try \|for shortcuts' | LC_ALL=C tail -1 || true)"
+  printf '%s' "$raw" | LC_ALL=C grep -q $'\x1b\\[2m'
+}
+pane_has_queue() { # $1 = pane id → 0 if Claude Code shows a queued message
+  "$TMUX_BIN" capture-pane -t "$1" -p 2>/dev/null | LC_ALL=C grep -aq 'Press up to edit queued messages'
+}
 
 pane_exists() { # by @cockpit_name
   "$TMUX_BIN" list-panes -t "$SESSION" -F '#{@cockpit_name}' 2>/dev/null | grep -qx "$1"
@@ -178,13 +208,42 @@ case "${1:-}" in
     done
     ;;
   say)
+    # DELIVERY IS VERIFIED, NOT ASSUMED (ledger w=4, 2026-08-28). This used to
+    # send text + Enter and print "sent" — send-keys rc=0 echoed as delivery, a
+    # check that cannot fail. Twice that morning the Enter was swallowed (Claude
+    # Code drops the first Enter after a Ctrl-C) and the pointer sat TYPED-UNSENT
+    # at the agent's prompt; Secuura s83 idled 41 minutes on a confirmed plan.
+    # Now: refuse an occupied prompt (someone's line is there — Kam typing, or an
+    # earlier undelivered tap) · send text · Enter · read the prompt back · if the
+    # text is still there, Enter ONCE more · still there → exit 2, loudly.
     [ $# -eq 3 ] || die "usage: cockpit.sh say <pane-name> <text>"
     "$TMUX_BIN" has-session -t "$SESSION" 2>/dev/null || die "no fleet session"
     PANE=$("$TMUX_BIN" list-panes -t "$SESSION:0" -F '#{@cockpit_name}|#{pane_id}' | awk -F'|' -v n="$2" '$1==n{print $2}')
     [ -n "$PANE" ] || die "no pane named '$2'"
+    PRE="$(prompt_text "$PANE")"
+    if [ -n "$PRE" ] && ! prompt_is_ghost "$PANE"; then
+      echo "cockpit: REFUSED — '$2' prompt is occupied by typed text (not sent): $PRE" >&2
+      exit 3
+    fi
     "$TMUX_BIN" send-keys -t "$PANE" -l "$3"
     "$TMUX_BIN" send-keys -t "$PANE" Enter
-    echo "sent to '$2'"
+    KEY="$(printf '%s' "$3" | cut -c1-30)"
+    tries=1
+    while :; do
+      sleep 2
+      NOW_TXT="$(prompt_text "$PANE")"
+      case "$NOW_TXT" in
+        "$KEY"*) ;;                       # still at the prompt
+        *) if pane_has_queue "$PANE"; then echo "delivered to '$2' (queued behind a running turn)"; else echo "delivered to '$2' (prompt clear)"; fi; exit 0 ;;
+      esac
+      if [ $tries -ge 2 ]; then
+        echo "cockpit: NOT DELIVERED to '$2' after 2 Enters — text still at the prompt: $NOW_TXT" >&2
+        exit 2
+      fi
+      tries=$((tries+1))
+      echo "cockpit: text still at '$2' prompt after Enter — re-sending Enter once (swallowed-Enter trap)" >&2
+      "$TMUX_BIN" send-keys -t "$PANE" Enter   # once, never a third
+    done
     ;;
   rotate)
     # Session rotation (working-rhythm §3, built 2026-08-10): tap → wrap mail
