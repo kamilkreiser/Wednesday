@@ -1607,3 +1607,9 @@ Done with it: opened the live QuickQuote in the default browser on the Studio (v
 > Thank you very much. Also, there's something weird happening with the machine today, starting with the double-up of Superwhisper, and I've noticed one or two messages that I've sent to you that have not gone through, and I did not hit enter on the agent's pane.
 
 Done with it: record corrected (the Vision-pane text was Superwhisper focus-paste, not Kam typing there); learning extension filed; panes swept; explanation + workaround on the panel.
+
+## 2026-08-28 10:17 — Kam (dashboard chat; doubled)
+> Thank you very much. That looks good, a couple of new tiny changes. The button that says "Email PDF" in the brackets, put PDF & XLS. Also please format the Excel spreadsheet with the logo and make it look nice.
+> With regards to Secura, have all the tests and the new process been applied?
+
+Done with it: Vision s6 briefed (button label; the emailed spreadsheet becomes a formatted XLSX with the logo — flagged that today it is a CSV); Secuura answered on the panel from verified state.
