@@ -1252,5 +1252,34 @@
   "status": "ruled",
   "ruled_choice": "hold",
   "ruled_ts": "2026-08-29T10:49:29.789643+10:00"
+ },
+ {
+  "id": "secuura-ks721-identity-commitment",
+  "client_project": "Secuura/Blockchain",
+  "title": "KS-721 (Stuart): anchor platform-s's opaque identityCommitment on chain — a trust shift, not a diff",
+  "bluf": "Stuart wants K's anchor schema to accept metadata.identityCommitment (an HMAC-SHA256 over the actor's identity snapshot, opaque, ≤128 chars) and carry it on-chain so verifiers get tamper-evidence for the identity shown beside a document. s89 measured: today K strips it (defence-in-depth, proved on the running container); the change is ~half a day, 3 source + 2 test files, mirroring occurredAt (KS-555); an exact-key-set test guards silent additions. What needs YOUR signature: today K can PROVE nothing identifying reaches the chain because it knows every anchored field's meaning; with a caller-opaque token K can only ASSERT it on S's word (a regex proves shape, not semantics). A keyed HMAC is pseudonymous, not anonymous — the key holder can confirm a guessed identity — so erasure depends on S DESTROYING key version vN, not rotating it, and K cannot verify that. The on-chain row is irreversible. Also: the provenance/verify response shape is not in the OpenAPI spec until KS-723 lands.",
+  "default_action": "HOLD: no schema change, nothing built; Stuart has the facts-and-sizing answer on KS-721 (comment f6414b85)",
+  "options": [
+   {
+    "key": "yes-with-shred",
+    "label": "Yes — accept + anchor it, conditional on an explicit S-side crypto-shred commitment (key version destroyed on erasure) recorded on KS-721 before K deploys",
+    "detail": ""
+   },
+   {
+    "key": "no",
+    "label": "No — K's on-chain minimisation stays strict; S keeps the commitment off-chain",
+    "detail": ""
+   },
+   {
+    "key": "defer",
+    "label": "Defer until KS-723 (spec remainder) lands so the response is contracted, not just returned",
+    "detail": ""
+   }
+  ],
+  "recommended": "yes-with-shred",
+  "ts": "2026-08-29T11:00:11.548960+10:00",
+  "status": "open",
+  "ruled_choice": null,
+  "ruled_ts": null
  }
 ]
