@@ -102,3 +102,19 @@ here it found a live defect in a persistence-loss recovery path.
 same day, mine), [[2026-08-07_a-check-that-cannot-fail]],
 [[2026-08-13_establish-authority-before-reconciling]],
 [[2026-08-11_coordinator-not-carrier]] (noticing and propagating is the job), [[_ledger]]
+
+## The third member (2026-08-27, Secuura s73; consolidated 2026-08-30): a DEFERRAL recorded only in code, pointing at a ticket
+
+**The case.** KS-586 fixed the role half of an authz gap and deferred the tenant half in a
+code comment — *"tracked on KS-586"*. KS-586 then closed. The comment kept pointing at a
+closed ticket, so the deferred half was tracked by nothing; Peter later handed the whole
+gap back as "no authz" (already fixed) and the live half surfaced only when the agent read
+the comment against the board: foreign-tenant ISSUER_ADMIN revoked another tenant's
+credential, 200 → KS-692 (High).
+
+**The rule:** *blocked by · excluded because · deferred to · tracked on* — a deferral that
+lives only in code (or a doc) is a claim that outlives every tracker it names. **When a
+brief closes or scopes a ticket that defers a half, require the deferred half to have its
+OWN open ticket before the parent closes**, and when I read a "tracked on X" in code, check
+X is open. Filing from the counterpart's description without this read would have
+duplicated a closed ticket and missed the live one.

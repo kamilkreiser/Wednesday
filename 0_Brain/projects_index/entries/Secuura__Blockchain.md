@@ -444,6 +444,8 @@ against a control).
 
 **Blockers:** none on me — the queue is available the moment a session runs it.
 
+**Standing traps for every Secuura brief:** `2_Project_Files/fleet/specs/secuura-brief-traps.md` (13 measured items, consolidated 2026-08-30 — paste the relevant ones into HOLDS/DEV-PROCESS).
+
 **Notes for Wednesday:** All holds observed and none tested — KS-486/642-645 no-code,
 `pre-merge-platform-suites.yml` not dispatched, #686 left red, extranet not marked seen
 (`EXTRANET_ME=kam`; clearing it resets Kam's own new-flags), demo untouched entirely. Worth

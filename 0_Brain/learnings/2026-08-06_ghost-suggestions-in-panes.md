@@ -165,6 +165,12 @@ waiting for.
    pack" — the exact Kam-held or explicitly-forbidden action. The generator
    does not know about holds; it knows about salience, and a hold makes an
    item salient.
+   **Extended 2026-08-30:** the same rung covers the exact KAM-HELD DECISION offered
+   at a WRAPPED pane — 08-29 ×2, "upgrade the Linear workspace, then file KS-721",
+   the one card on his desk that morning, rendered at s86's and s88's prompts after
+   their wraps. Routing a decision to Kam makes it salient; a wrapped pane then
+   proposes it. Not a new rung — rung 6 with the principal's queue as the source
+   of salience. Close the pane, never clear the line.
 7. **THE PRINCIPAL'S OWN FIRST-PERSON VOICE, WHILE THE PRINCIPAL IS GENUINELY
    PRESENT** (08-24, ~49th): s63 announced "Kam is in the pane, I will ask him
    for first-party confirmation" — and the prompt then carried a dim line

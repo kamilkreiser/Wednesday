@@ -38,7 +38,9 @@ if [ "$HOUR" -lt 22 ] || { [ "$HOUR" -eq 22 ] && [ "$MIN" -lt 30 ]; }; then
   exit 0
 fi
 
-DRYRUN="${WEDNESDAY_DRYRUN:-0}"
+# 2026-08-30 (WED-126): accept the bare DRYRUN=1 too — the 08-27 05:33 exercise set DRYRUN=1,
+# this script only read WEDNESDAY_DRYRUN, so a "dry run" SPOKE inside quiet hours.
+DRYRUN="${WEDNESDAY_DRYRUN:-${DRYRUN:-0}}"
 
 # ── Fleet inbox snapshot (best-effort; never blocks the close) ──
 MAIL_LINE="fleet inboxes: unreachable (key unset or API down)"
@@ -151,7 +153,14 @@ elif ! grep -qE '^## Session retro' "$NOTE"; then
 elif grep -qF -- '- Went well / do differently:' "$NOTE"; then
   WRAP_ISSUES="retro still on its template placeholder"
 fi
-GIT_DIRTY="$(cd "$PROJECT_DIR" && /usr/bin/git status --porcelain -- . ':(exclude)0_Brain/dashboard/data' 2>>"$LOG")"
+# 2026-08-30: standing never-delete residue (Kam 08-26: "do not delete any files") is listed in
+# scheduler/wrap_check_ignore.txt — one git pathspec per line — and excluded here, so the bell
+# stops flagging the same three items every night (an alarm that always fires is not a check).
+IGN_ARGS=()
+if [ -f "$SCRIPT_DIR/wrap_check_ignore.txt" ]; then
+  while IFS= read -r line; do case "$line" in ''|'#'*) ;; *) IGN_ARGS+=(":(exclude)$line") ;; esac; done < "$SCRIPT_DIR/wrap_check_ignore.txt"
+fi
+GIT_DIRTY="$(cd "$PROJECT_DIR" && /usr/bin/git status --porcelain -- . ':(exclude)0_Brain/dashboard/data' "${IGN_ARGS[@]}" 2>>"$LOG")"
 if [ -n "$GIT_DIRTY" ]; then
   N_DIRTY="$(printf '%s\n' "$GIT_DIRTY" | grep -c .)"
   WRAP_ISSUES="${WRAP_ISSUES:+$WRAP_ISSUES · }$N_DIRTY uncommitted/untracked file(s) outside dashboard churn"

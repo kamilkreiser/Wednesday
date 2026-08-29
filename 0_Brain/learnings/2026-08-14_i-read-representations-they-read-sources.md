@@ -249,3 +249,38 @@ never checked, because it justified the easy path.
 prove, ask **"have I measured that the other option is unprovable, or did I
 assume it because the assumption saves me a probe?"** Same family, fourth
 costume. Cited: s4's wrap 2026-08-24T20:32Z, scored 1.0 partly for saying it.
+
+## The brief-composition costumes, consolidated 2026-08-30 (w=37–46 in three days — ten instances)
+
+Ten rows in the family between 08-28 and 08-29, and they are four costumes of ONE act —
+**a sentence in a brief, a ruling or a card written from something other than the read it
+cites:**
+
+1. **A card's summary carried as a code/record fact** (w=37 "none walked" · w=38 item 15's
+   scope · w=39 BACKLOG:514's subject · w=33 a launcher mechanism). The brief cited the file
+   by line; the sentence was composed from my entry card.
+2. **A counterpart's number or claim adopted into an instruction** (w=41 "ink edge 138" ·
+   w=42 "16 commits stale" · w=43 a state described in prose that had already changed).
+   The claim arrived inside a careful plan mail and inherited my trust.
+3. **An instrument's LABEL stated as the event** (w=44 a monitor's "KS WALK" printed for a
+   Linear backlink). The tool's wording became my verb.
+4. **A RECOMMENDATION built on an unmeasured premise** (w=45 the archive pass; Kam ruled on
+   it). A rec steers a ruling the way a scope word grants authority — it is a measurement.
+
+**The rule, promoted to standing (w≥3 in the family many times over):** every claim about
+code, a record, a running state or a count that enters a brief, an ANSWER, a card or a
+report is **copied from a read taken in the same action as writing the sentence** — never
+composed from a card, a memory, a counterpart's mail or a tool's label. Where the read is
+someone else's, the sentence says so ("your 138", "s86 reports", "the monitor printed") and
+the instruction is conditional on it holding. A recommendation to Kam carries the
+measurement it rests on, or says "unmeasured — measure before ruling".
+
+**Enforcement state, honestly:** counts → `board_count.sh` (mechanism). Ticket facts in a
+QUEUE → the freshness gate (mechanism). Monitor labels → `board_watch_peter.sh` now prints
+the CLASSIFIED event with its actor from the history API (built 2026-08-30, exercised on
+the 08-29 window + a quiet window). Card-summary and counterpart-claim costumes → rule
+only; the catch remains the receiving agent at plan confirmation (every one of the ten was
+agent-caught, pre-cost). Timestamps in note headers and the prompt log → `tools/note_entry.sh`
++ `tools/prompt_log.sh` generate the stamp (built 2026-08-30 after w=46, the sixth composed
+clock, a nine-hour gap) — the rule "generate, never type" now has a writer that reads the
+clock for the two surfaces it kept failing on.

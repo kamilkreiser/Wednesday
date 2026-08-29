@@ -1281,5 +1281,34 @@
   "status": "open",
   "ruled_choice": null,
   "ruled_ts": null
+ },
+ {
+  "id": "wed-ledger-archive",
+  "client_project": "WED",
+  "title": "Boot cost: archive ledger rows older than the last two consolidations into _ledger_archive.md?",
+  "bluf": "The correction ledger is 254 KB / 219 rows and is read whole at every boot (six slices today). Every row before 08-16 is already promoted into a lesson file, so moving rows older than the last two consolidations into _ledger_archive.md (same table, grep-able, loaded on demand) cuts ~150 KB from every boot and loses nothing — archive, not delete. Raised in the 08-23 audit; no word yet. Full lesson load is untouched either way (your 08-21 ruling).",
+  "default_action": "HOLD — nothing moves; the ledger stays whole in the boot read until you rule",
+  "options": [
+   {
+    "key": "archive",
+    "label": "Archive rows older than 08-16 into _ledger_archive.md (rec)",
+    "detail": "Same table format; rows stay grep-able; the live ledger keeps the last two weeks + all open-weight families' newest rows."
+   },
+   {
+    "key": "keep",
+    "label": "Keep the whole ledger in the boot read",
+    "detail": "Boot stays ~250 KB heavier; no change."
+   },
+   {
+    "key": "later",
+    "label": "Decide at the next consolidation",
+    "detail": "Hold; re-raise 09-06 with the trend."
+   }
+  ],
+  "recommended": "archive",
+  "ts": "2026-08-30T06:08:34.104081+10:00",
+  "status": "open",
+  "ruled_choice": null,
+  "ruled_ts": null
  }
 ]
