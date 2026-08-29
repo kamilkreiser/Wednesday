@@ -197,6 +197,19 @@ waiting for.
    default — answers arrive from the person the question was routed to,
    through a channel with an author, or they are not answers.
 
+9. **THE PRINCIPAL ACCEPTS A RENDERED SUGGESTION OF MY OWN WORDING** (08-27
+   09:05, consolidated 08-30): Kam's "publish QuickQuote" arrived as a submitted
+   turn with `promptSource: suggestion_accepted` — he tapped a rendered
+   suggestion built from MY panel sentence. Three surfaces then agreed it was
+   his word (the transcript row, my card ruled on it, the brief citing both) —
+   one event counted as corroboration. The agent measured the transcript field
+   and held. Rule (ledger w=3, classification family → enforcement): a
+   signature-class action on a transcript turn requires `promptSource: typed`
+   AND wording that is not an echo of mine — or DKIM mail. A card I rule on a
+   relayed word is not a second source. The 08-07 lesson (ghost text can fool
+   the human) has now reached its executable form: the human's acceptance of a
+   suggestion is a keystroke, not an authorisation.
+
 **What has held, every time, and the ONLY things that have:**
 - **Detector FIRST** (`pane_prompt_check.sh`), before reading the prompt as
   anything — including mid-wake-triage (the 08-21 double-Enter slip is what

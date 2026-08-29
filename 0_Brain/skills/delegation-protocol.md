@@ -33,6 +33,10 @@ Every brief contains, explicitly:
 4. **Definition of done + verifier** — how the result is checked and scored
    0–1 (tests > build/typecheck > checklist > Kam). No verifier → brief not ready.
 5. **Round cap** — max 3 refinement rounds, then escalate.
+5a. **Standing lines** — paste from `2_Project_Files/fleet/specs/brief-standing-lines.md`
+   (authority · evidence wording · instrument traps; consolidated 2026-08-30) and, for
+   Secuura, `fleet/specs/secuura-brief-traps.md`. The gate cannot check these; the body
+   carries them.
 6. **Pre-answered questions** (WED-42) — before sending, ask: *what would this
    agent plausibly ask mid-session?* (env/tenant to verify against, merge vs
    PR, what's pre-approved, deploy or not, test scope). Answer those IN the
