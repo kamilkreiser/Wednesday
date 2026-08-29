@@ -157,8 +157,8 @@ fi
 # scheduler/wrap_check_ignore.txt — one git pathspec per line — and excluded here, so the bell
 # stops flagging the same three items every night (an alarm that always fires is not a check).
 IGN_ARGS=()
-if [ -f "$SCRIPT_DIR/wrap_check_ignore.txt" ]; then
-  while IFS= read -r line; do case "$line" in ''|'#'*) ;; *) IGN_ARGS+=(":(exclude)$line") ;; esac; done < "$SCRIPT_DIR/wrap_check_ignore.txt"
+if [ -f "$SELF_DIR/wrap_check_ignore.txt" ]; then
+  while IFS= read -r line; do case "$line" in ''|'#'*) ;; *) IGN_ARGS+=(":(exclude)$line") ;; esac; done < "$SELF_DIR/wrap_check_ignore.txt"
 fi
 GIT_DIRTY="$(cd "$PROJECT_DIR" && /usr/bin/git status --porcelain -- . ':(exclude)0_Brain/dashboard/data' "${IGN_ARGS[@]}" 2>>"$LOG")"
 if [ -n "$GIT_DIRTY" ]; then
