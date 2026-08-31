@@ -1,0 +1,41 @@
+{
+  "theme": "dark",
+  "statusLine": {
+    "type": "command",
+    "command": "sh /Volumes/KK_DEV_Local/WEDNESDAY/2_Project_Files/tools/statusline.sh '[Wednesday]'"
+  },
+  "hooks": {
+    "PreCompact": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "bash \"$CLAUDE_PROJECT_DIR/2_Project_Files/fleet/hooks/precompact_block.sh\""
+          }
+        ]
+      }
+    ],
+    "SessionStart": [
+      {
+        "matcher": "compact",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "bash \"$CLAUDE_PROJECT_DIR/2_Project_Files/fleet/hooks/session_start_compact.sh\""
+          }
+        ]
+      }
+    ]
+  },
+  "permissions": {
+    "defaultMode": "default",
+    "ask": [
+      "Edit(//Volumes/DevMASTER/!CODING/**)",
+      "Write(//Volumes/DevMASTER/!CODING/**)",
+      "Edit(//Volumes/DevMASTER/Notes (MASTER)/**)",
+      "Write(//Volumes/DevMASTER/Notes (MASTER)/**)",
+      "Bash(git push --force*)",
+      "Bash(git push -f*)"
+    ]
+  }
+}
