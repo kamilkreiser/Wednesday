@@ -3,7 +3,7 @@ client: Secuura
 project: Blockchain
 path: /Volumes/DevMASTER/!CODING/Secuura/Blockchain
 status: active
-updated: 2026-08-29
+updated: 2026-08-31
 ---
 
 # Secuura / Blockchain (Platform K)
@@ -35,6 +35,14 @@ updated: 2026-08-29
 **s75 (2026-08-27 17:38–17:50, micro read-only, 1.0):** 🎉 **Peter STARTED — 2 of 19 approved (#732, #735, 06:50Z LGTM)**, 17 outstanding. KS-687 walk reverted; **rule extended: a review SUBMISSION walks the attached ticket too** (expect one walk per approval — integration setting is the durable fix, Kam's). **Peter's four-suites question measured: 0 of 19 PRs ran Schemathesis/Akto/Playwright/k6** — Schemathesis+Akto pre-merge under Peter's OWN KS-441 do-not-dispatch (14 Aug), Playwright+k6 under dead CI; unblock needs BOTH billing (Kam) and the job cap (Peter). Rows against us: #686 ticked-as-run with N/A; only 4/19 carry the ack section; KS-685's "manual CI-gate equivalents" do not exist yet. All four suites runnable on a dev stack (~6.5 / ~7–8 / 30 s / unstated min). Local develop now ca5b643e0 (pulled).
 
 **s81 (2026-08-27 22:38–23:11, 1.0): KS-702 FIXED — PR #754** (`npm run quality` in systemTest/akto exits 0 end-to-end: format 8 files · lint 288→0 · knip 2→0 · unit 350/350 · audit 0; red-on-develop proved by md5; the ticket's 'one definition, imported' fix REFUSED — it would re-break the slotContainerNames regression guard; 36 process.env sites = 12 prod → `env()` + 23 test sites behind a scoped exception). 🔴 **KS-703 (High) filed: a NUL byte in a string query param on `GET /api/users/admin/list` returns 500 leaking `invalid byte sequence for encoding "UTF8": 0x00` — the KS-471/472 guard walks the BODY only; found as the 10th Schemathesis entry over a 9 floor (set-vs-count, second time).** KS-704 (Medium): k6 summary already carries http_server_error / http_rate_limited / http_503 per class; passes/fails read backwards for a Rate. Four suites on #754 (Akto PASS with a real thread dump; Playwright 12/12 + 45/45; k6 5/5 by status line; Schemathesis FAIL 10 as a SET). Board 175, one expected walk, 43 open PRs. **NIGHT QUEUE DRY.**
+
+**s91 (2026-08-31 12:00–12:29, midday, 1.0): KS-721 BUILT + PR #763 on Peter, on Kam's yes-with-shred ruling** — ruling comment 12ac7ce7 (attributed as his decision-surface act, relayed; ask to Stuart for the crypto-shred commitment ON the ticket) → build failing-test-first (Zod accept + whitelist + spec declaration + exact-key-set test at BOTH extremes; 6 files +180, branch head 27c66e24b off 0087e6912) → **PR #763** (Peter reviewer+assignee, comment c942d072) → four suites (Schemathesis SET 8, diff vs baseline: NEW none; the changed op generated and absent from the set; Akto pass with the honest note it cannot see the new field per KS-725; Playwright green; k6 run1 RED chased → run2 5/5, BOTH on the PR; unit 149/150 with threadTokenMint proved pre-existing by detached-worktree control). **NOTHING merged, NOTHING deployed — deploy gated on Stuart's shred commitment ON KS-721 (absent at wrap).** Off-queue: vault daily 08-29's 207 uncommitted lines (s89+s90 records) rescued 7a59745. VOCABULARY.md "not in the public spec" corrected (stale since 72987ffe6). 40 open PRs (review:none control 40), 0 approved. Board: only KS-721 moved.
+
+**Open / next (refreshed 2026-08-31 12:3x after s91 — queue DRY):**
+- **Stuart: record the crypto-shred commitment on KS-721** (K deploys nowhere until it lands) — he was active on the S-side identity stream this morning (PS-713/714/715 In Review).
+- **Peter: PR #763** + the standing six (#756–#760, #730) — zero reviews each.
+- 🔴 **Kam (carded 2026-08-31): KS-670 Blockfrost plan (demo anchoring works ~2h/day, money)** · **Founders Hub credit lapses Sep 6 — demo VM/ACR/KV/storage, no plan (re-raise Sep 4)** · KS-724+725 leg (rec go, default hold) · #761 self-merged · KS-703 widening · KS-621 sitting · agent GitHub identity.
+- **Next agent-actionable (when commissioned):** KS-724 fix · KS-725 · KS-709 · KS-593 offsets · KS-704 · KS-720 (unruled).
 
 **Open / next (refreshed 2026-08-27 23:13 after s81 — queue DRY):**
 - **Peter (from 23:00 AEST):** NINE PRs of ours with four-suite evidence — #746 (the rule) · #747 (KS-694 Urgent) · #748 · #749 · #750 · #751 (KS-697 Urgent) · #752 · #753 · #754 · KS-693 ruling (Option 2) · his #719/#722 approved.

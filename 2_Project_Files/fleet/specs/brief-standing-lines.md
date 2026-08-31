@@ -40,3 +40,7 @@ here and travel in the brief body.
   before the parent closes (KS-586 → KS-692).
 - **Never delete** — quarantine (dated folder / Archive/); briefs carry the rule.
 - **Positive controls WRITE on side-effecting systems** — label the artefact, keep it.
+- **End-of-session must verify the VAULT push, not only the project push** — two sessions'
+  records (207 lines) sat uncommitted in the vault silently until s91 found them blocking a
+  pull (2026-08-31, credited to s91). A wrap that commits the project and skips the vault
+  loses the session record with no signal.
