@@ -3,7 +3,7 @@ client: Secuura
 project: Blockchain
 path: /Volumes/DevMASTER/!CODING/Secuura/Blockchain
 status: active
-updated: 2026-08-31
+updated: 2026-09-01
 ---
 
 # Secuura / Blockchain (Platform K)
@@ -37,6 +37,14 @@ updated: 2026-08-31
 **s81 (2026-08-27 22:38–23:11, 1.0): KS-702 FIXED — PR #754** (`npm run quality` in systemTest/akto exits 0 end-to-end: format 8 files · lint 288→0 · knip 2→0 · unit 350/350 · audit 0; red-on-develop proved by md5; the ticket's 'one definition, imported' fix REFUSED — it would re-break the slotContainerNames regression guard; 36 process.env sites = 12 prod → `env()` + 23 test sites behind a scoped exception). 🔴 **KS-703 (High) filed: a NUL byte in a string query param on `GET /api/users/admin/list` returns 500 leaking `invalid byte sequence for encoding "UTF8": 0x00` — the KS-471/472 guard walks the BODY only; found as the 10th Schemathesis entry over a 9 floor (set-vs-count, second time).** KS-704 (Medium): k6 summary already carries http_server_error / http_rate_limited / http_503 per class; passes/fails read backwards for a Rate. Four suites on #754 (Akto PASS with a real thread dump; Playwright 12/12 + 45/45; k6 5/5 by status line; Schemathesis FAIL 10 as a SET). Board 175, one expected walk, 43 open PRs. **NIGHT QUEUE DRY.**
 
 **s92+s93 (2026-08-31 afternoon/evening, both 1.0): PETER'S FIRST APPROVALS AND THE BOARD'S FIRST MERGES UNDER THE FLOW.** s92: Peter's morning report actioned — KS-635 measured to the hour (fires 2026-09-01T00:00Z; a 2x2 clock-shift matrix names exactly GHSA-mwp4-54f8-5fhr), his two holds answered+extended, #720 un-conflicted, all 16 PRs evidenced, dependabot A–D triage. s93: Peter approved #763+#756 (both predating Kam's chase) → **#763 MERGED (develop 436f37bed)**; #756 HELD on measurement (hoisted fix absent from approved head + Peter's OR-branch satisfied by neither route while KS-726's scope para claims otherwise — both routes with him); his four #760 reqs answered (Akto re-import under a lifted hold, additive-proven, identityCommitment now scanned — KS-725 field-tested); **KS-726 built → PR #764** (onSigned hook, merge-order-free); KS-727 (errorHandler leak) + KS-728 (social/link HANG 10s/0 bytes) filed — Linear accepted both creations (cap-card data).
+
+**Open / next (refreshed 2026-09-01 07:2x after s94, 1.0 — s95 live as #738 sentinel):**
+- 🔴 **#738 / KS-635: only Peter's signature missing** — his ask DONE (KS-729 filed due 09-30, row re-pointed, pushed 8697e1527); gate flips 10:00 AEST; s95 polls both instruments and merges on approval under the pre-authorised framework; unapproved at 10:00 = report, pushes refuse (bounded), Kam holds the path.
+- **Merged today: #757 (0874b0ebe, KS-703) + #743 (a7d1a6427, KS-680)** — develop a7d1a6427 by my ls-remote; tickets rest In Review (merged ≠ deployed).
+- **On Peter:** #766 (KS-728 social/link hang) · #767 (KS-727 errorHandler leak, 13 services) · #756 re-approval at cfb66cdba (old approval stale=absent) · #764 fixes at 035f9b450 · #686 unblocked (his symlink suspicion confirmed).
+- **New tickets:** KS-729 (ip-address upgrade owner) · KS-730 (71 inline err.message sites, api-gateway worst) · KS-731 (Peter's cross-slot credential finding, homed off #765).
+- **s95 queue:** sentinel · #760 six items (false Playwright justification → correct the PR body) · 10-vs-11 reconcile.
+- **Gates unchanged:** KS-721 demo deploy on Stuart's crypto-shred commitment (absent) · KS-724/725 leg on Kam's go · v2.30 word (Vision) · Blockfrost + credit + dependabot cards with Kam.
 
 **Open / next (refreshed 2026-08-31 19:4x after s93):**
 - 🔴 **#738/KS-635: gate fires 10:00 AEST 09-01** — still 0 reviews; Kam's ask is with Peter; merge path survives the deadline, platform-code pushes do not.

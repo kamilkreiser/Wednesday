@@ -34,3 +34,8 @@ do not rely on the agent remembering them across sessions.
   every PR action and revert states on tickets you do not own.
 - **Positive controls WRITE on this system** (originate auto-anchors to preview testnet;
   a POST probe can mint keys) — label the artefact, never delete it.
+- **Read package.json's test script before running any suite** (s94): `npx vitest` at a
+  jest service prints "N suites failed, no tests" — reads exactly like a broken service.
+- **Rebuild `packages/shared` AT THE REF BEING MEASURED** (s94): a gitignored dist/
+  survives branch switches and manufactures phantom cross-branch failures.
+
