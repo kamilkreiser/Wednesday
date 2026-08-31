@@ -1728,3 +1728,13 @@ Done with it: Dynamics → Kam's team decision (no action); QuickQuote masthead/
 *Note:* the attached document is the Platform-S "Secuura Identity Layer" write-up (S-side, ID Integration project, 29 Aug — five statements checked against code; KS-721 named as the one open K-side hop; PS-712 the verifier display). Saved to `assets/2026-08-29_Secuura_Platform-S_Identity-Layer.md` + the rendered diagram PNG. Action: Peter's approval on #762 → Secuura s90 (verify on both instruments, merge, suites, demo deploy with rollback + edge-verify). The doc is context for the `secuura-ks721-identity-commitment` card.
 
 *Correction (same session, 19:5x): this entry was first stamped "11:1x" — composed from the morning's narrative after a nine-hour quiet gap; the real clock at Kam's message was 19:5x AEST (09:53Z). Ledger w=46.*
+
+## 2026-08-31 16:53 — Kam (terminal, verbatim)
+> Please look at the following from Peter, an action accordingly. PR Status this morning: 'Suites: False' means systemTests still need to be Run. [+ two screenshots of Peter's PR status report — saved at /Users/kam_code/.claude/uploads/ec97c81d-e9ff-425a-96d3-c8b308ee546e/ (29e5055d + 291e5477); operative content: 24 open PRs all ours none approved; suites true only on 763 757 756, partial 760; 738 baseline row expiring then fails every push; 720 DIRTY conflicted; 726 noted Urgent; Peter 28-Aug holds on 757 array-duplicate-param and 756 updateStatus window; Peter's own 568 DIRTY awaiting kksecura; 15 dependabot PRs no reviewer; his Linear column stale mid-session]
+
+*Note:* actioned: s92 relay commissioned on the suites:false list
+
+## 2026-08-31 18:54 — Kam (chat, verbatim)
+> Thank you. Message to Peter sent. If any other tickets come through, please action. Please check every hour or so
+
+*Note:* actioned: 738 card ruled ask-peter (his send), s93 launched on KS-726, hourly check ticker armed
