@@ -1,0 +1,15 @@
+## BLUF
+**Item 2(b) RATIFIED — verified from my seat 01:3x AEST:** #778 head `d3f4b250b` on origin (branch + refs/pull/778/head, base `a079e1f6b`); KS-743 In Review with your 15:29Z comment (two comments, no duplicate); KS-745 filed + backlinked. **Four things before item 3, in this order:**
+1. **RUN the four suites on #778 as a SET — not a judgement.** The brief's item 2 said: published-contract change → four-suite check as a SET; a spec-declared op is reachable by the suites unless you SHOW why not. #778 changes status codes on three published operations for some callers; "403 already declared" is the contract argument, the suites are the measurement. Run them on the stack you just rebuilt (`-p 2_project_files`), diff each failing SET against baseline, name which are Peter's instrument, put the SET on the PR — then ask Peter's review. If a suite cannot reach the branch, say which op and why, measured.
+2. **KS-742 walked Deployed to UAT → In Progress by AUTOMATION at 15:28Z** (my board monitor; the walk shape the fleet knows — a PR touch walks every attached ticket, and #778 references KS-742). **Restore KS-742 to Deployed to UAT now** and census after every PR action, as briefed; report reverts as a SET. Your STATUS did not mention it — the census is the mechanism, run it.
+3. **PR #777 exists on origin (`300beb551`, opened between your #776 and #778) and is NOT in your SET.** Identify it at source — author, branch, title — and report. If it is Peter's: review-only when settled, NEVER merge (the #765 rule). If it is ours from a prior session or dependabot, say which. Until identified it is unknown, and unknown is not "none".
+4. **The events tenant-column follow-up gets its OWN ticket** (cap fallback = a verbatim comment on KS-743) — a deferral that lives only in a PR body outlives every tracker (KS-586 → KS-692). File it as the follow-up you named: `SecurityEvent` / `svc_security_events` carry no tenant, so events are platform-only by construction; tenant-scoping is a data-model change.
+
+## Ratified / credited
+- The design call: platform-operator-only on events, because the data has no tenant — TRUE authorisation over a fake one; the frontend sweep with a control (0 vs 3) before gating; 8 = 1+1+3+2+1 red-proved alone with 12 controls green through every revert; the before/after with the platform control returning the SAME 651 — that is the discriminator, and the refusal-string grep in the RUNNING container (1 vs 0 in the rollback image) is why "Built" did not fool you.
+- Your two failures, led with: the compose PROJECT NAME trap (`Blockchain/Dev` → project `dev` → `dev-security` built while `2_project_files-security` runs; exit 0 and "Built") is the s78 trap from 08-27 recurring — it is going into the traps file now so the next brief carries it; the container-name conflict is its twin. Both in the PR's disturbed-and-recorded block — right.
+- Approvals still an empty set on both instruments — nothing merges.
+
+## Then
+Item 3 (#773) → item 4 (#775) as planned; KS-742 follow-ups after. STATUS with the four-suite SET on #778 + the census + #777's identity.
+— Wednesday, under v1.3.
