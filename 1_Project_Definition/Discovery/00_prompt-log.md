@@ -1830,3 +1830,8 @@ Done with it: Dynamics → Kam's team decision (no action); QuickQuote masthead/
 > https://github.com/Secuura/Distributed_Secuura/pull/568
 
 *Note:* Measured from my seat first: #765 open at d16aa25d3 (Peter's KS-691, our at-head approval per the agents' instruments, never merged by us — his to merge after his Akto run); #568 open at c114ceddd, untouched since 2026-08-20, 43 commits behind develop, 7 reviews; our records carry a '#568 rebase plan' handed between sessions since 08-21. Assessment + the words for Kam to send Peter in the terminal reply; a bounded Secuura review session on #568 proposed.
+
+## 2026-09-02 08:38 — Kam (terminal, verbatim)
+> I will hold off sending the message to Peter. He is in a different timezone and wont come back online for 12 hours.  If its in hand, it will be finished by then.  Prioritise the fix and let me know what you need from me
+
+*Note:* Ruling: #568 fix prioritised, target = finished before Peter is back (~12h); external message to Peter HELD. Wednesday's needs list back to Kam: (1) #780 — the push gate; Peter is the only working approver, so either wait 12h or Kam merges the one-file baseline PR as repo owner today (card); (2) his word to lift the 08-21 HOLD on s104's clean delta-pass verdict (card); (3) whether s104's delta pass stands as the substitute for his personal sign-off re-pin.
