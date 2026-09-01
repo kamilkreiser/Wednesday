@@ -1773,3 +1773,13 @@ Done with it: Dynamics → Kam's team decision (no action); QuickQuote masthead/
 > Also, please look at the following and the paper they cite- anything we can learn from this and adapt to you and the agent operation and flow https://youtu.be/QgH9sr7G13Q?si=d_6KugW_gmshtW_-
 
 *Note:* Research commissioned: subagent fetching video + cited paper; my adaptation analysis against the fleet follows; deliverable = house-style report + panel pointer
+
+## 2026-09-01 17:26 — Kam (dashboard chat, verbatim)
+> nexus AI - thank you for the changes.  please make the following 1) on settings, add an icon under sustainability.  this could be a tree icon or a water drop 2)Lets add a process where every change is reviewed by the testing agent first.  this should include visual changes and testing in the browser 3)implement the factors from Australian National greenhouse.... as initial stats.  make these as a deployment default as clients will be able to change but might not know these to start with.  So populate all fields and make the feature work 4) reference where the initial numbers came from.  5)On the Dashboard - make the tab fully functional.
+
+*Note:* NexusAI round 2 commission (chat ts 17:25:30): items 1/3/4/5 → NexusAI s12 brief; item 2 = a standing QA gate (testing agent reviews every change, visual + browser, before deploy) — wired on this round and written into the project CLAUDE.md by its agent.
+
+## 2026-09-01 17:52 — Kam (dashboard chat, verbatim)
+> with relation to - 3. New card: the NGA factors cover ELECTRICITY only. Water, wood and tree-equivalent per kg of paper are paper-LCA numbers NGA doesn't publish — options on the card (licence EPN v4.1 = money; a published supplier EPD = free, cited; or leave provisional). Default: provisional with the reason shown. The agent will not invent them.        Publish and incorporate all these factors
+
+*Note:* Kam's ruling on card nexusai-paper-factor-source (chat ts 17:51:18): read as option (b) published supplier EPD/LCA, populate all three paper slots with cited figures; mapping mine, stated in the addendum to s12. Same minute (17:50:31) he relayed Peter's approvals of #756 #764 #760 #738 #686 → s96 addendum, merge under the framework.
