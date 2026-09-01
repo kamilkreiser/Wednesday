@@ -1783,3 +1783,13 @@ Done with it: Dynamics → Kam's team decision (no action); QuickQuote masthead/
 > with relation to - 3. New card: the NGA factors cover ELECTRICITY only. Water, wood and tree-equivalent per kg of paper are paper-LCA numbers NGA doesn't publish — options on the card (licence EPN v4.1 = money; a published supplier EPD = free, cited; or leave provisional). Default: provisional with the reason shown. The agent will not invent them.        Publish and incorporate all these factors
 
 *Note:* Kam's ruling on card nexusai-paper-factor-source (chat ts 17:51:18): read as option (b) published supplier EPD/LCA, populate all three paper slots with cited figures; mapping mine, stated in the addendum to s12. Same minute (17:50:31) he relayed Peter's approvals of #756 #764 #760 #738 #686 → s96 addendum, merge under the framework.
+
+## 2026-09-01 17:56 — Kam (dashboard chat, verbatim)
+> please create a new process where an agent hands over to you confirming what was done, you hand over to the testing agent to double check the changes.  All changes made be checked visually and through code.  If browser related, then through a browser.  Once the testing agent check, you double check
+
+*Note:* Standing process change (chat ts 17:55:18): agent WRAP → Wednesday receipt → testing agent (visual + code; browser when browser-related) → Wednesday double-check → SCORE/deploy. Filed as learnings/2026-09-01_qa-gate-before-my-verification.md; delegation-protocol skill amended; WED ticket for the mechanism; first live run = NexusAI s12 READY FOR QA.
+
+## 2026-09-01 17:57 — Kam (dashboard chat, verbatim)
+> complettion.  you do not have to do the same test as the testing agent
+
+*Note:* Clarifies the 17:55:18 process ask (chat ts 17:55:45): Wednesday's double-check after the testing agent is a COMPLETION check — delivered vs commissioned — not a repeat of the QA agent's tests. Folded into learnings/2026-09-01_qa-gate-before-my-verification.md + the delegation-protocol skill.

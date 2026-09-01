@@ -24,6 +24,24 @@ because paths stay current while pasted copies go stale.
 complex work into specialised agents with a tight *purpose*, each fully
 briefed. See [[../learnings/2026-08-03_context-loading-split]].
 
+## The verification chain — three hops, not two (Kam, 2026-09-01 17:55)
+
+Every delegated change passes, in this order, before it is scored or shipped:
+1. **Agent → Wednesday:** the wrap/STATUS confirming what was done — sets not counts,
+   branch + SHA, surfaces changed, how it authenticates, what was NOT done.
+2. **Wednesday → testing agent:** a per-invocation brief from
+   `2_Project_Files/fleet/qa-agent/BRIEF_TEMPLATE.md` (charter beside it; R0 — one
+   client's content only). **Every change is checked visually AND through code; anything
+   browser-related is driven in a real browser.** Findings-only; the QA agent never fixes.
+   Where SSO blocks the demo, QA runs on a local run of the same commit and says so.
+3. **Wednesday's COMPLETION check:** delivered vs commissioned, item by item against the
+   brief and Kam's asks, plus the source facts only I hold — **not a repeat of the QA
+   tests** (Kam, 17:55:45). Then SCORE; then any deploy GO.
+
+A wrap is a QA trigger, not a score trigger. Briefs say "this round ends at READY FOR QA"
+and hold deploys until the QA pass + my GO. Mechanism: WED-137. Origin and evidence:
+[[../learnings/2026-09-01_qa-gate-before-my-verification]].
+
 ## The brief (before anything is delegated)
 
 Every brief contains, explicitly:
