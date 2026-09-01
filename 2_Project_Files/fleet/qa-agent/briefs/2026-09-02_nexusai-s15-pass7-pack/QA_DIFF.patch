@@ -1,0 +1,1387 @@
+diff --git a/__tests__/dark-mode-link-order.test.js b/__tests__/dark-mode-link-order.test.js
+new file mode 100644
+index 0000000..5630f77
+--- /dev/null
++++ b/__tests__/dark-mode-link-order.test.js
+@@ -0,0 +1,153 @@
++/**
++ * @jest-environment node
++ *
++ * RD-158 / RD-163 — the two properties that make "dark-mode.css is linked LAST"
++ * a safe change rather than a hopeful one.
++ *
++ * WHY THE MOVE EXISTS. Every shipped page used to link `dark-mode.css` BEFORE
++ * `inline-styles-extracted.css`. In a browser that did not matter: every
++ * selector in dark-mode.css carries `.dark-mode`, so it out-specifies the
++ * plain single-class rules in the generated sheet and wins regardless of
++ * order. In the jsdom harness it mattered enormously, because jsdom resolves
++ * competing declarations by SOURCE ORDER and ignores specificity entirely
++ * (RD-163, pinned in dom-harness.test.js). The harness therefore measured a
++ * cascade no engine actually runs, and reported 267 dark failures on
++ * first-run-setup where a correctly-ordered sheet reports 30.
++ *
++ * So the move buys ONE thing: the harness now resolves the same winner a
++ * browser does. It is not expected to change a single rendered pixel, and the
++ * two tests below are what make that claim checkable instead of asserted.
++ *
++ *   1. dark-mode.css contains NOTHING that is not scoped to `.dark-mode`.
++ *      If it did, moving it last would let it win over light-mode rules it
++ *      previously lost to, and the move would stop being inert.
++ *   2. No sheet other than dark-mode.css defines a `.dark-mode` rule.
++ *      If one did, the move could flip an equal-specificity conflict.
++ *
++ * Both are asserted against the real files AND against deliberately sabotaged
++ * copies, because a green invariant that has never been shown to go red is not
++ * evidence — it is the shape RD-110 and RD-99 exist to stop. The sabotage is
++ * applied to strings in memory; no file on disk is touched.
++ *
++ * The generated sheet is stamped "Auto-generated ... Do not edit by hand", so
++ * the ORDER is the only lever available: a counterpart appended to that file
++ * would be deleted by the next `refactor-inline-styles.js` run.
++ */
++
++const fs = require('fs');
++const path = require('path');
++
++const ROOT = path.join(__dirname, '..');
++const read = (p) => fs.readFileSync(path.join(ROOT, p), 'utf8');
++
++const DARK_SHEET = 'static/css/dark-mode.css';
++const OTHER_SHEETS = [
++    'static/css/inline-styles-extracted.css',
++    'static/css/feedback-widget.css',
++    'static/css/first-run-setup-styles.css',
++    'static/css/index-styles.css',
++    'static/css/settings-styles.css',
++];
++const PAGES = ['static/first-run-setup.html', 'static/index.html', 'static/settings.html'];
++
++/**
++ * Every selector in a stylesheet, with comments stripped first.
++ *
++ * Stripping comments is not tidiness, it is the correctness of the
++ * measurement. A rough `grep -oE '^[^@{}/][^{]*\{'` over this file reports two
++ * rule heads with no `.dark-mode` — and both are PROSE inside the block
++ * comment that explains the R5-2 !important finding, where the continuation
++ * lines begin with a space rather than a slash: "`.text-primary-emphasis {
++ * color: var(...) !important }`" and "`.v { color: #664d03 !important }`".
++ * They are examples being described, not rules being shipped. A selector
++ * counter that reads comments measures the comment.
++ */
++function selectorsIn(cssText) {
++    const withoutComments = cssText.replace(/\/\*[\s\S]*?\*\//g, '');
++    const out = [];
++    for (const head of withoutComments.match(/[^{}]+(?=\{)/g) || []) {
++        for (const sel of head.split(',')) {
++            const s = sel.trim();
++            if (s && !s.startsWith('@')) out.push(s);
++        }
++    }
++    return out;
++}
++
++const isDarkScoped = (sel) => /(^|\s|\.)dark-mode\b/.test(sel);
++const unscopedIn = (css) => selectorsIn(css).filter((s) => !isDarkScoped(s));
++const darkScopedIn = (css) => selectorsIn(css).filter(isDarkScoped);
++
++/** The local stylesheet hrefs a page links, in document order. CDN hrefs excluded. */
++function localSheetOrder(html) {
++    return (html.match(/<link\b[^>]*>/gi) || [])
++        .filter((tag) => /rel\s*=\s*["']stylesheet["']/i.test(tag))
++        .map((tag) => (tag.match(/href\s*=\s*["']([^"']+)["']/i) || [])[1])
++        .filter(Boolean)
++        .filter((href) => !/^https?:/i.test(href));
++}
++
++describe('RD-158 — invariant 1: dark-mode.css is entirely scoped to .dark-mode', () => {
++    test('the shipped stylesheet has zero unscoped selectors', () => {
++        expect(unscopedIn(read(DARK_SHEET))).toEqual([]);
++    });
++
++    test('POSITIVE CONTROL — it is not scoped by being empty; it has real rules', () => {
++        expect(darkScopedIn(read(DARK_SHEET)).length).toBeGreaterThan(150);
++    });
++
++    test('NEGATIVE CONTROL — one unscoped rule appended makes it RED', () => {
++        const sabotaged = read(DARK_SHEET) + '\n.rogue-unscoped { color: red; }\n';
++        expect(unscopedIn(sabotaged)).toContain('.rogue-unscoped');
++    });
++
++    test('the comment-stripping is what makes the count right, and it can be shown', () => {
++        // The exact shape that fools a line-based grep: a rule written as prose
++        // inside a block comment. It must NOT be counted as a shipped selector.
++        const css = '/*\n * example: `.text-primary-emphasis { color: red !important }`\n */\nbody.dark-mode .a { color: #fff; }';
++        expect(unscopedIn(css)).toEqual([]);
++        expect(darkScopedIn(css)).toEqual(['body.dark-mode .a']);
++    });
++});
++
++describe('RD-158 — invariant 2: no other sheet defines a .dark-mode rule', () => {
++    test.each(OTHER_SHEETS)('%s defines no .dark-mode selector', (sheet) => {
++        expect(darkScopedIn(read(sheet))).toEqual([]);
++    });
++
++    test('POSITIVE CONTROL — those sheets are non-empty, so the zero is measured', () => {
++        for (const sheet of OTHER_SHEETS) {
++            expect(selectorsIn(read(sheet)).length).toBeGreaterThan(0);
++        }
++    });
++
++    test('NEGATIVE CONTROL — one .dark-mode rule appended to a later sheet makes it RED', () => {
++        const sabotaged = read(OTHER_SHEETS[0]) + '\nbody.dark-mode .rogue { color: red; }\n';
++        expect(darkScopedIn(sabotaged)).toContain('body.dark-mode .rogue');
++    });
++});
++
++describe('RD-158 — the link order itself, pinned on every page that carries dark mode', () => {
++    test.each(PAGES)('%s links dark-mode.css after every other local sheet', (page) => {
++        const order = localSheetOrder(read(page));
++        expect(order.length).toBeGreaterThan(1);
++        expect(order[order.length - 1]).toMatch(/dark-mode\.css$/);
++        // and exactly once, so a duplicate link cannot satisfy this by accident
++        expect(order.filter((h) => /dark-mode\.css$/.test(h))).toHaveLength(1);
++    });
++
++    test('NEGATIVE CONTROL — the old order fails this assertion', () => {
++        const old = `<link rel="stylesheet" href="/css/index-styles.css">
++                     <link href="/css/dark-mode.css" rel="stylesheet">
++                     <link rel="stylesheet" href="/css/inline-styles-extracted.css">`;
++        const order = localSheetOrder(old);
++        expect(order[order.length - 1]).not.toMatch(/dark-mode\.css$/);
++    });
++
++    test('NEGATIVE CONTROL — a page that links dark-mode.css twice fails it', () => {
++        const dupe = `<link href="/css/dark-mode.css" rel="stylesheet">
++                      <link rel="stylesheet" href="/css/inline-styles-extracted.css">
++                      <link href="/css/dark-mode.css" rel="stylesheet">`;
++        expect(localSheetOrder(dupe).filter((h) => /dark-mode\.css$/.test(h))).toHaveLength(2);
++    });
++});
+diff --git a/__tests__/dom-harness.test.js b/__tests__/dom-harness.test.js
+index b579254..bcc01c5 100644
+--- a/__tests__/dom-harness.test.js
++++ b/__tests__/dom-harness.test.js
+@@ -145,7 +145,15 @@ describe('the limitation that shapes the CSS: jsdom drops var()', () => {
+ });
+ 
+ describe('the real stylesheets load and the cascade resolves', () => {
+-    test('the shipped dark-mode override beats the vendor rule, as it does in a browser', () => {
++    /**
++     * RD-163 caveat, added in s15: this passes because dark-mode.css is loaded
++     * SECOND here, not because jsdom weighs specificity — it does not weigh it
++     * at all (pinned in jsdom-cascade-limit.test.js). The assertion is still
++     * worth having: it proves the sheets load and that our override reaches the
++     * element. It is NOT evidence that a more specific dark rule beats a later
++     * light one, which is the claim the page order used to depend on.
++     */
++    test('the shipped dark-mode override beats the vendor rule, given this load order', () => {
+         document.head.innerHTML = '';
+         loadStylesheet('__tests__/helpers/vendor-surface.css');
+         // dark-mode.css, not index-styles.css: since R3-1 there is exactly ONE
+diff --git a/__tests__/first-run-dark-surfaces.test.js b/__tests__/first-run-dark-surfaces.test.js
+new file mode 100644
+index 0000000..bd678a3
+--- /dev/null
++++ b/__tests__/first-run-dark-surfaces.test.js
+@@ -0,0 +1,169 @@
++/**
++ * @jest-environment jsdom
++ *
++ * R6-2 / P6-01 + P6-02 (RD-158) — the wizard's dark surfaces.
++ *
++ * THE MECHANISM, measured before anything was written. `first-run-setup.html`
++ * paints most of its panels from `inline-styles-extracted.css`: 51 of the
++ * `.s-xxxxxxxx` classes it uses declare a background or a text colour, and
++ * every one of them is a LIGHT-mode value. Nothing in dark-mode.css targeted
++ * them, so under `body.dark-mode` the page kept white / #f8f9fa / #e7f3ff /
++ * #fff3cd panels and dropped the body's #e8e8e8 onto them. The two largest
++ * clusters were bare `<strong>` at 1.09:1 and bare `<li>` at 1.23:1 — text
++ * with no class of its own, failing because of the ground beneath it.
++ *
++ * That sheet is stamped "Auto-generated by scripts/refactor-inline-styles.js.
++ * Do not edit by hand", so the counterparts live in dark-mode.css and the
++ * pages now link dark-mode.css LAST (RD-158, pinned in
++ * dark-mode-link-order.test.js). In a browser that changes no winner — every
++ * dark-mode selector already out-specified these — it changes which winner
++ * THIS harness sees, because jsdom cascades by source order (RD-163).
++ *
++ * WHAT THIS FILE CAN AND CANNOT CLAIM. Bootstrap is not loaded (CDN, RD-145),
++ * jsdom does not inherit `color`, discards `var()`, and does not honour
++ * `!important`. So a pass here means "our own stylesheets no longer fail this
++ * node". Whether the page reads correctly in the cascade is the tester's, and
++ * pass 7 is where it gets answered. The counts below are the instrument's, not
++ * the product's — 267 before and 30 after are two numbers from the same
++ * imperfect engine, useful as a delta and worthless as a product metric.
++ *
++ * MEASURED PALETTE. Every pair was computed before it was written; the matrix
++ * is asserted below. The tightest pair in the whole set is muted #9090a0 on the
++ * warning tint #332a12 at 4.51:1 — it passes AA by 0.01, and it is the first
++ * thing worth re-measuring in a real engine.
++ */
++
++const { renderPage, visibleTextNodes, measureContrast, parseColor, contrastRatio, rgb } = require('./helpers/dom');
++
++const PAGE = 'static/first-run-setup.html';
++const AA = 4.5;
++
++/** Light ground -> the dark counterpart it is given, reusing dark-mode.css's palette. */
++const GROUNDS = {
++    'rgb(30, 30, 63)':   { name: 'panel  (was white)',    probes: ['s-28fc19e0af', 's-618110d49d', 's-f28d221b5b', 's-2223116996'] },
++    'rgb(37, 37, 80)':   { name: 'raised (was #f8f9fa)',  probes: ['s-774f573f07', 's-951df17cfc', 's-a2c5bf3107', 's-e25ed4010e'] },
++    'rgb(22, 38, 63)':   { name: 'info   (was #e7f3ff)',  probes: ['s-70cc9673d8', 's-3d740e084c', 's-2a1b5837e4', 's-cee39a41dd'] },
++    'rgb(51, 42, 18)':   { name: 'warning (was #fff3cd)', probes: ['s-9f110629b5', 's-ea0f8633e3'] },
++};
++
++/** Families this round deliberately does NOT touch, each with the reason. */
++const OUT_OF_SCOPE = [
++    { re: /\bbtn-hp\b|\bbtn-success-hp\b|\bds-step-number\b|\bstep-title\b|\bstep-desc\b|\bstep-number\b/,
++      why: 'brand chrome on the #0096d6 ground — RD-160, Kam\'s decision, measured not changed' },
++    { re: /\bbtn-outline-(primary|secondary)\b|\bbtn-lg\b|\bbtn-sm\b/,
++      why: 'Bootstrap-painted; jsdom never loaded Bootstrap (RD-145), so this engine cannot judge it' },
++];
++const isOutOfScope = (cls, tag) => tag === 'option' || OUT_OF_SCOPE.some((f) => f.re.test(cls));
++
++/**
++ * Sweep once per mode and reuse it. A full walk of this page costs ~35s, and
++ * four independent walks put two minutes on the suite for four readings of the
++ * same page. The cache is keyed on the mode and never crosses one, so no
++ * assertion below can be answered by the other mode's render.
++ */
++const sweepCache = new Map();
++const sweep = (dark) => {
++    if (!sweepCache.has(dark)) {
++        renderPage(PAGE, { dark });
++        sweepCache.set(dark, visibleTextNodes()
++            .map((el) => ({ el, tag: el.tagName.toLowerCase(),
++                            cls: typeof el.className === 'string' ? el.className : '',
++                            ...measureContrast(el) }))
++            .filter((m) => m.ratio < AA));
++    }
++    return sweepCache.get(dark);
++};
++
++describe('R6-2 — the measured palette, asserted before it is trusted', () => {
++    // Object rows, not arrays, so the test NAME carries the measurement. A
++    // printf title on an array row consumes the args in order and had been
++    // printing "#e8e8e8 on #e8e8e8" — a title that reads as evidence while
++    // naming the wrong colour is worse than no title.
++    const PAIRS = [
++        { fgName: 'body text #e8e8e8', fg: '#e8e8e8', bgName: 'panel #1e1e3f',   bg: '#1e1e3f', expected: 13.06 },
++        { fgName: 'body text #e8e8e8', fg: '#e8e8e8', bgName: 'raised #252550',  bg: '#252550', expected: 11.75 },
++        { fgName: 'body text #e8e8e8', fg: '#e8e8e8', bgName: 'info #16263f',    bg: '#16263f', expected: 12.39 },
++        { fgName: 'body text #e8e8e8', fg: '#e8e8e8', bgName: 'warning #332a12', bg: '#332a12', expected: 11.58 },
++        { fgName: 'form-hint #b8c5d6', fg: '#b8c5d6', bgName: 'raised #252550',  bg: '#252550', expected: 8.22 },
++        { fgName: 'code #ff9ecd',      fg: '#ff9ecd', bgName: 'warning #332a12', bg: '#332a12', expected: 7.45 },
++        { fgName: 'link #79b8ff',      fg: '#79b8ff', bgName: 'panel #1e1e3f',   bg: '#1e1e3f', expected: 7.70 },
++        { fgName: 'muted #9090a0',     fg: '#9090a0', bgName: 'panel #1e1e3f',   bg: '#1e1e3f', expected: 5.09 },
++        { fgName: 'muted #9090a0',     fg: '#9090a0', bgName: 'warning #332a12', bg: '#332a12', expected: 4.51 },
++    ];
++
++    test.each(PAIRS)('$fgName on $bgName clears AA (measured $expected:1)', ({ fg, bg, expected }) => {
++        const ratio = contrastRatio(parseColor(fg), parseColor(bg));
++        expect(ratio).toBeCloseTo(expected, 1);
++        expect(ratio).toBeGreaterThanOrEqual(AA);
++    });
++
++    test('the tightest pair is muted #9090a0 on the warning tint, and it passes by 0.01', () => {
++        const ratios = PAIRS.map(({ fg, bg }) => contrastRatio(parseColor(fg), parseColor(bg)));
++        const tightest = PAIRS[ratios.indexOf(Math.min(...ratios))];
++        expect(`${tightest.fgName} on ${tightest.bgName}`).toBe('muted #9090a0 on warning #332a12');
++        expect(Math.min(...ratios)).toBeCloseTo(4.51, 2);
++    });
++
++    test('NEGATIVE CONTROL — the matrix can fail; the pre-fix pair is below AA', () => {
++        // #e8e8e8 on white is what the page actually rendered before this round.
++        expect(contrastRatio(parseColor('#e8e8e8'), parseColor('#ffffff'))).toBeLessThan(AA);
++    });
++});
++
++describe('R6-2 — the extracted grounds actually compute dark on the rendered page', () => {
++    test.each(Object.entries(GROUNDS))('%s is applied where the page uses it', (expectedRgb, { probes }) => {
++        renderPage(PAGE, { dark: true });
++        const seen = probes
++            .map((cls) => document.querySelector('.' + cls))
++            .filter(Boolean)
++            .map((el) => rgb(parseColor(getComputedStyle(el).backgroundColor)));
++        // Vacuity guard: if none of the probes is on the page, this assertion
++        // proves nothing and must fail rather than pass silently.
++        expect(seen.length).toBeGreaterThan(0);
++        for (const got of seen) expect(got).toBe(expectedRgb);
++    });
++
++    test('CONTROL — in LIGHT mode those same grounds are still the light values', () => {
++        renderPage(PAGE, { dark: false });
++        const el = document.querySelector('.s-28fc19e0af');
++        expect(el).not.toBeNull();
++        expect(rgb(parseColor(getComputedStyle(el).backgroundColor))).toBe('rgb(255, 255, 255)');
++    });
++});
++
++describe('R6-2 — the rendered dark sweep', () => {
++    test('every remaining dark failure is in a family this round deliberately left alone', () => {
++        const unexplained = sweep(true).filter((f) => !isOutOfScope(f.cls, f.tag));
++        // Named individually so a regression says WHICH node, not just a count.
++        expect(unexplained.map((f) => `${f.ratio.toFixed(2)} <${f.tag}> ${f.cls || '(no class)'}`)).toEqual([]);
++    });
++
++    test('the sweep is not passing by measuring nothing', () => {
++        renderPage(PAGE, { dark: true });
++        expect(visibleTextNodes().length).toBeGreaterThan(900);
++    });
++
++    test('NEGATIVE CONTROL — the allowlist does not swallow an in-scope failure', () => {
++        // A bare <li> on a white ground is exactly the P6-02 shape this round
++        // fixed: no class, so no out-of-scope rule can match it.
++        expect(isOutOfScope('', 'li')).toBe(false);
++        expect(isOutOfScope('form-hint', 'p')).toBe(false);
++        expect(isOutOfScope('s-924053337a', 'span')).toBe(false);
++    });
++
++    test('brand chrome IS still failing, and is recorded rather than silently passed', () => {
++        // RD-160 is Kam's card. This asserts the round did NOT quietly change it,
++        // so "0 unexplained failures" above cannot be read as "the page is clean".
++        const chrome = sweep(true).filter((f) => /\bbtn-hp\b|\bds-step-number\b/.test(f.cls));
++        expect(chrome.length).toBeGreaterThan(0);
++    });
++});
++
++describe('R6-2 — light mode must not regress', () => {
++    test('the light sweep is unchanged at its pre-existing 169 failures', () => {
++        // 169 is the number s14 measured before this round and Wednesday ruled
++        // OFF-DELTA. Pinned exactly: one more means this round leaked a colour
++        // into light mode, one fewer means it silently changed a light surface.
++        expect(sweep(false)).toHaveLength(169);
++    });
++});
+diff --git a/__tests__/index-dark-surfaces.test.js b/__tests__/index-dark-surfaces.test.js
+new file mode 100644
+index 0000000..5f91555
+--- /dev/null
++++ b/__tests__/index-dark-surfaces.test.js
+@@ -0,0 +1,227 @@
++/**
++ * @jest-environment jsdom
++ *
++ * R6-3 / P6-03 (RD-159) — the dashboard's dark surfaces.
++ *
++ * THE HEADLINE FINDING, in the tester's words from pass 6: `div.controls`
++ * computes `background-color: rgb(255,255,255)` under `body.dark-mode` and
++ * `div.ai-assistant-section` computes `rgb(248,249,250)`, so the body's
++ * #e8e8e8 lands on both and ALL EIGHT filter labels render at 1.23:1 — Date
++ * Range, User Filter, Anomaly Filter, Department, Data Source, Region, Action
++ * Type, Printer. That is the dashboard's primary control surface. `grep` found
++ * no `.controls` rule in dark-mode.css at 1f41edc either, so it is pre-existing
++ * and surfaced only because pass 6 was the first sweep of the whole page.
++ *
++ * Fixed on the SURFACE, not on the labels — the same decision the P2-04/P2-05
++ * comment in dark-mode.css records. Darkening `.form-label` instead would fix
++ * dark mode, break light mode (where #e8e8e8-on-white is the bug and the label
++ * colour is correct), and have to be repeated for every control added later.
++ *
++ * TARGETED BY SEMANTIC CLASS wherever one exists, deliberately. The extracted
++ * `s-xxxxxxxx` names are hashes of their own declaration text, so editing an
++ * inline style renames the class and silently unlinks any counterpart keyed to
++ * it (RD-165). Seven nodes on this page carry no semantic class at all and are
++ * keyed by hash out of necessity; they are probed below so a rename fails the
++ * build instead of shipping a silent regression.
++ *
++ * WHAT THIS FILE CANNOT CLAIM. Bootstrap is absent (RD-145), jsdom does not
++ * inherit `color`, discards `var()`, ignores `!important`, and resolves the
++ * cascade by source order rather than specificity (RD-163). A pass means "our
++ * own stylesheets no longer fail this node". The counts are a delta, never a
++ * product metric — the tester's real-engine table is the number pass 7 judges.
++ */
++
++const { renderPage, visibleTextNodes, measureContrast, parseColor, contrastRatio, rgb } = require('./helpers/dom');
++
++const PAGE = 'static/index.html';
++const AA = 4.5;
++
++/**
++ * Families R6-3 does not touch, each with the reason it is out.
++ *
++ * `.table-title` WAS here until RD-147 landed inside this round; it now has a
++ * positive assertion of its own below instead. The allowlist shrinking is the
++ * visible half of that fix.
++ */
++const OUT_OF_SCOPE = [
++    { re: /\bbtn-outline-(primary|secondary)\b/, why: 'Bootstrap-painted; jsdom never loaded Bootstrap (RD-145)' },
++    { re: /\btab-button\b|\bfile-select-btn\b|\brefresh-btn\b|\bmodal-btn\b|\bbtn-sm\b/, why: 'brand chrome / UA button face — RD-160, measured not changed' },
++    { re: /\bloading-(title|subtitle|status|content)\b|\bskip-setup-hint\b/, why: 'the load overlay, white-on-white in BOTH modes — RD-166, mode-independent and off-delta' },
++];
++const isOutOfScope = (cls, tag) =>
++    tag === 'option' ||
++    // the overlay's opt-out checkbox label carries no class of its own
++    (tag === 'label' && cls === '') ||
++    OUT_OF_SCOPE.some((f) => f.re.test(cls));
++
++const sweepCache = new Map();
++const sweep = (dark) => {
++    if (!sweepCache.has(dark)) {
++        renderPage(PAGE, { dark });
++        sweepCache.set(dark, visibleTextNodes()
++            .map((el) => ({ el, tag: el.tagName.toLowerCase(),
++                            cls: typeof el.className === 'string' ? el.className : '',
++                            ...measureContrast(el) }))
++            .filter((m) => m.ratio < AA));
++    }
++    return sweepCache.get(dark);
++};
++
++describe('R6-3 — the measured palette', () => {
++    const PAIRS = [
++        { fgName: 'filter label #e8e8e8',  fg: '#e8e8e8', bgName: 'controls #1e1e3f',  bg: '#1e1e3f', expected: 13.06 },
++        { fgName: 'body #e8e8e8',          fg: '#e8e8e8', bgName: 'raised #252550',    bg: '#252550', expected: 11.75 },
++        { fgName: 'muted #9090a0',         fg: '#9090a0', bgName: 'raised #252550',    bg: '#252550', expected: 4.58 },
++        { fgName: 'sort chevron #a8a8bc',  fg: '#a8a8bc', bgName: 'table head #252550', bg: '#252550', expected: 6.16 },
++        { fgName: 'risk title #ff9c9c',    fg: '#ff9c9c', bgName: 'page #1a1a2e',      bg: '#1a1a2e', expected: 8.52 },
++    ];
++
++    test.each(PAIRS)('$fgName on $bgName clears AA (measured $expected:1)', ({ fg, bg, expected }) => {
++        const ratio = contrastRatio(parseColor(fg), parseColor(bg));
++        expect(ratio).toBeCloseTo(expected, 1);
++        expect(ratio).toBeGreaterThanOrEqual(AA);
++    });
++
++    test('NEGATIVE CONTROL — the values these replace are the ones that failed', () => {
++        // What the page actually rendered before this round, per the tester.
++        expect(contrastRatio(parseColor('#e8e8e8'), parseColor('#ffffff'))).toBeCloseTo(1.23, 1);
++        // and the chevron colour R6-3 replaced, on the head it sits on
++        expect(contrastRatio(parseColor('#6a6a7a'), parseColor('#252550'))).toBeLessThan(AA);
++        // the risk heading missed AA by 0.04 — a near-miss survives an eyeball
++        expect(contrastRatio(parseColor('#e74c3c'), parseColor('#1a1a2e'))).toBeLessThan(AA);
++    });
++});
++
++describe('R6-3 — the eight filter labels, which are the finding', () => {
++    test('every label inside div.controls clears AA in dark mode', () => {
++        renderPage(PAGE, { dark: true });
++        const controls = document.querySelector('.controls');
++        expect(controls).not.toBeNull();
++        const labels = Array.from(controls.querySelectorAll('label'));
++        // The tester counted eight. Fewer would mean the page changed shape and
++        // this assertion has stopped covering what it claims to cover.
++        expect(labels.length).toBeGreaterThanOrEqual(8);
++        // Asserted as a LIST of the failures, not one expectation per label, so
++        // a regression names which filter went unreadable and at what ratio
++        // rather than stopping at the first one.
++        const failing = labels
++            .map((el) => ({ label: el.textContent.trim(), ratio: +measureContrast(el).ratio.toFixed(2) }))
++            .filter((m) => m.ratio < AA);
++        expect(failing).toEqual([]);
++    });
++
++    test('the control surface itself is dark, which is where the fix lives', () => {
++        renderPage(PAGE, { dark: true });
++        expect(rgb(parseColor(getComputedStyle(document.querySelector('.controls')).backgroundColor)))
++            .toBe('rgb(30, 30, 63)');
++    });
++
++    test('CONTROL — in LIGHT mode the same surface is still white', () => {
++        renderPage(PAGE, { dark: false });
++        expect(rgb(parseColor(getComputedStyle(document.querySelector('.controls')).backgroundColor)))
++            .toBe('rgb(255, 255, 255)');
++    });
++});
++
++describe('R6-3 — the grounds compute dark on the rendered page', () => {
++    const GROUNDS = [
++        ['.controls',                 'rgb(30, 30, 63)'],
++        ['.data-table',               'rgb(30, 30, 63)'],
++        ['.file-drop-zone',           'rgb(30, 30, 63)'],
++        ['.import-section',           'rgb(37, 37, 80)'],
++        ['.info-card',                'rgb(37, 37, 80)'],
++        ['.ai-assistant-section',     'rgb(37, 37, 80)'],
++        ['.risk-conditions-summary',  'rgb(37, 37, 80)'],
++        ['th',                        'rgb(37, 37, 80)'],
++    ];
++
++    test.each(GROUNDS)('%s computes %s in dark mode', (selector, expected) => {
++        renderPage(PAGE, { dark: true });
++        const els = Array.from(document.querySelectorAll(selector));
++        expect(els.length).toBeGreaterThan(0);          // vacuity guard
++        for (const el of els) {
++            expect(rgb(parseColor(getComputedStyle(el).backgroundColor))).toBe(expected);
++        }
++    });
++
++    test('RD-165 guard — every hash-keyed class this round relies on is still on the page', () => {
++        // These seven carry no semantic class, so their dark rules are keyed to a
++        // content-derived hash. If refactor-inline-styles.js renames one, the
++        // rule silently stops matching — so this FAILS instead, loudly.
++        renderPage(PAGE, { dark: true });
++        const HASH_KEYED = [
++            's-2d7970a1c7',  // AI assistant strapline
++            's-2f0d1ca48f',  // "Try these example questions:"
++            's-7329ae9d7f',  // "Quick questions:"
++            's-c6a58f0546',  // the chat Expand/Collapse button
++            's-67a2eb68e3',
++            's-8951e9aa12',  // "Scan Analytics Summary"
++            's-f61b57bc2b',  // "AI Analysis Assistant"
++        ];
++        for (const cls of HASH_KEYED) {
++            expect({ cls, present: document.querySelectorAll('.' + cls).length > 0 })
++                .toEqual({ cls, present: true });
++        }
++    });
++});
++
++describe('R6-3 — the rendered dark sweep', () => {
++    test('every remaining dark failure is in a family this round left alone', () => {
++        const unexplained = sweep(true).filter((f) => !isOutOfScope(f.cls, f.tag));
++        expect(unexplained.map((f) => `${f.ratio.toFixed(2)} <${f.tag}> ${f.cls || '(no class)'}`)).toEqual([]);
++    });
++
++    test('the sweep is not passing by measuring nothing', () => {
++        renderPage(PAGE, { dark: true });
++        expect(visibleTextNodes().length).toBeGreaterThan(350);
++    });
++
++    test('NEGATIVE CONTROL — the allowlist does not swallow an in-scope failure', () => {
++        expect(isOutOfScope('form-label small', 'label')).toBe(false);
++        expect(isOutOfScope('sort-indicator', 'span')).toBe(false);
++        expect(isOutOfScope('', 'strong')).toBe(false);
++        expect(isOutOfScope('file-description', 'p')).toBe(false);
++    });
++
++    test('the out-of-scope families ARE still failing, so a clean list is not a clean page', () => {
++        const residue = sweep(true);
++        expect(residue.some((f) => /\bbtn-outline-/.test(f.cls))).toBe(true);      // RD-145
++        expect(residue.some((f) => /\bfile-select-btn\b/.test(f.cls))).toBe(true); // RD-160
++    });
++});
++
++describe('RD-147 — the sixteen table headings', () => {
++    test('every .table-title clears AA in dark mode', () => {
++        renderPage(PAGE, { dark: true });
++        const titles = Array.from(document.querySelectorAll('.table-title'));
++        // Fifteen are in the markup; the sixteenth is created by
++        // sustainability-ui.js and is not in the static page, so the count this
++        // harness can see is 15. If it drops, the assertion has stopped
++        // covering the headings it claims to.
++        expect(titles.length).toBeGreaterThanOrEqual(15);
++        const failing = titles
++            .map((el) => ({ heading: el.textContent.trim().slice(0, 40), ratio: +measureContrast(el).ratio.toFixed(2) }))
++            .filter((m) => m.ratio < AA);
++        expect(failing).toEqual([]);
++    });
++
++    test('CONTROL — the light-theme navy it replaces fails on both dark grounds', () => {
++        expect(contrastRatio(parseColor('#2c3e50'), parseColor('#1a1a2e'))).toBeLessThan(AA);
++        expect(contrastRatio(parseColor('#2c3e50'), parseColor('#1e1e3f'))).toBeLessThan(AA);
++    });
++
++    test('CONTROL — light mode keeps the navy', () => {
++        renderPage(PAGE, { dark: false });
++        expect(rgb(parseColor(getComputedStyle(document.querySelector('.table-title')).color)))
++            .toBe('rgb(44, 62, 80)');
++    });
++});
++
++describe('R6-3 — light mode must not regress', () => {
++    test('the light sweep is unchanged at its pre-existing 91 failures', () => {
++        // 91 is what s14 measured before this round and Wednesday ruled
++        // OFF-DELTA. One more means a colour leaked into light mode; one fewer
++        // means a light surface was changed without being asked for.
++        expect(sweep(false)).toHaveLength(91);
++    });
++});
+diff --git a/__tests__/jsdom-cascade-limit.test.js b/__tests__/jsdom-cascade-limit.test.js
+new file mode 100644
+index 0000000..7837c6d
+--- /dev/null
++++ b/__tests__/jsdom-cascade-limit.test.js
+@@ -0,0 +1,77 @@
++/**
++ * @jest-environment jsdom
++ *
++ * RD-163 — THIS HARNESS DOES NOT CASCADE LIKE A BROWSER.
++ *
++ * Found in s15 while R6-2 (RD-158) could not explain why
++ * `body.dark-mode .info-box` (specificity 0,2,0) was losing to
++ * `.s-3d740e084c` (0,1,0) in the rendered-page sweep.
++ *
++ * jsdom resolves competing declarations by SOURCE ORDER and ignores selector
++ * specificity. The probes below are constructed so the pair differs only in
++ * declaration order, which is the only way to show that ORDER — not
++ * specificity, and not the shorthand/longhand distinction — is what decides.
++ *
++ * Consequence, stated plainly: no contrast COUNT this harness produces is the
++ * product's. first-run-setup measured 267 dark failures with the sheets in the
++ * order the pages used to link them, and 30 with dark-mode.css linked last.
++ * Neither is a browser's number; the gap is the instrument. RD-158 moved the
++ * link so that the harness and a browser at least resolve the same WINNER.
++ * ENUMERATE here; DECIDE in the tester's real engine.
++ *
++ * WHY IT PROBES BY SWAPPING `document.head` rather than standing up its own
++ * jsdom: `require('jsdom')` fails under jest in this repo in BOTH environments —
++ * in the jsdom environment whatwg-url throws, and in the node environment jest
++ * cannot parse jsdom's ESM-only dependency chain. That is the same class of
++ * blocker as RD-134 (node-cron -> ESM-only uuid). Swapping the head in the
++ * environment jest already provides measures the same thing with no new
++ * dependency, and each case uses its own class names so nothing leaks between
++ * them.
++ *
++ * Note what this means for dom-harness.test.js's "the shipped dark-mode
++ * override beats the vendor rule, as it does in a browser": that test passes
++ * for the right reason only because it loads dark-mode.css second. It was never
++ * evidence about specificity, and this file exists so nobody reads it as such.
++ *
++ * If jsdom ever gains a real cascade, the three order-dependent assertions here
++ * FAIL — and that failure is the signal that this harness's numbers have become
++ * usable on their own.
++ */
++
++/** Compute background-color for `cls` under `css`, in a freshly-styled document. */
++function compute(css, cls) {
++    document.head.innerHTML = `<style>${css}</style>`;
++    document.body.className = 'dark-mode';
++    document.body.innerHTML = `<div class="${cls}" id="probe">t</div>`;
++    return getComputedStyle(document.getElementById('probe')).backgroundColor;
++}
++
++const MORE_SPECIFIC = 'body.dark-mode .ib{background-color:#16263f}';   // 0,2,0
++const LESS_LONGHAND = '.sx{background-color:#e7f3ff}';                   // 0,1,0
++const LESS_SHORTHAND = '.sx{background:#e7f3ff}';                        // 0,1,0
++
++describe('RD-163 — the cascade is resolved by source order, not specificity', () => {
++    test('CONTROL — each rule alone computes its own value, so the probe discriminates', () => {
++        expect(compute(MORE_SPECIFIC, 'ib')).toBe('rgb(22, 38, 63)');
++        expect(compute(LESS_LONGHAND, 'sx')).toBe('rgb(231, 243, 255)');
++    });
++
++    test('CONTROL — the head swap really does replace the previous rules', () => {
++        compute(LESS_LONGHAND, 'sx');
++        // .sx is no longer defined at all here, so the probe must fall back to
++        // the initial value rather than remember the previous test's sheet.
++        expect(compute(MORE_SPECIFIC, 'sx')).toBe('');
++    });
++
++    test('the LESS specific rule wins when declared last — a browser computes #16263f', () => {
++        expect(compute(`${MORE_SPECIFIC} ${LESS_LONGHAND}`, 'ib sx')).toBe('rgb(231, 243, 255)');
++    });
++
++    test('identical with the `background` shorthand, so it is not a shorthand-merge quirk', () => {
++        expect(compute(`${MORE_SPECIFIC} ${LESS_SHORTHAND}`, 'ib sx')).toBe('rgb(231, 243, 255)');
++    });
++
++    test('reverse the declaration order and the answer flips — order is the whole mechanism', () => {
++        expect(compute(`${LESS_SHORTHAND} ${MORE_SPECIFIC}`, 'ib sx')).toBe('rgb(22, 38, 63)');
++    });
++});
+diff --git a/__tests__/quick-question-chips.test.js b/__tests__/quick-question-chips.test.js
+new file mode 100644
+index 0000000..9461697
+--- /dev/null
++++ b/__tests__/quick-question-chips.test.js
+@@ -0,0 +1,126 @@
++/**
++ * @jest-environment jsdom
++ *
++ * R6-3 / P6-03 (RD-159) — the quick-question chips.
++ *
++ * The tester measured four of these at 2.25 / 2.46 / 2.53 / 3.69:1 in dark mode
++ * in a real browser. The rendered-page sweep never saw them, and could not: the
++ * chips are created by `index.js`, so they are absent from the static markup
++ * the sweep walks. This file is what covers them instead.
++ *
++ * WHY THE FIX HAD TO BE A REFACTOR, not a colour change. The chips were styled
++ * by `button.style.cssText = ...`. An inline style has specificity 1,0,0,0, so
++ * NO stylesheet rule can override it without `!important` — and `!important` is
++ * exactly the trap R5-2 fell into: jsdom does not honour it, so the suite could
++ * not have told anyone whether the override landed. Adding a dark rule would
++ * have been inert in the browser and green here, which is the worst of both.
++ *
++ * So the six colour objects in the JS became six variant NUMBERS, and the values
++ * moved to `.example-prompt-c1..c6` in index-styles.css with dark counterparts
++ * in dark-mode.css. The cascade now does the theming, no `!important` is
++ * involved, and six JS-injected inline styles are gone — which is independently
++ * what scripts/refactor-inline-styles.js exists to achieve for CSP_STRICT.
++ *
++ * THIS MEASUREMENT IS THIS INSTRUMENT'S TO MAKE, unlike the .btn-hp case in
++ * R6-1. These buttons carry only `example-prompt` classes; no Bootstrap rule
++ * paints them, so jsdom's absence of Bootstrap does not distort the result. The
++ * chip is built and measured on the real stylesheets, in both modes.
++ *
++ * Light must not regress, and here that is a precise claim: the six light values
++ * moved from JS to CSS and must be byte-identical to what they were.
++ */
++
++const fs = require('fs');
++const path = require('path');
++const { loadStylesheet, measureContrast, parseColor, contrastRatio, composite, rgb } = require('./helpers/dom');
++
++const AA = 4.5;
++const NON_TEXT = 3.0;
++const ROOT = path.join(__dirname, '..');
++const VARIANTS = [1, 2, 3, 4, 5, 6];
++
++/** The six light values as they stood in index.js before the refactor. */
++const LIGHT_BEFORE = {
++    1: { bg: 'rgba(52, 152, 219, 0.1)',  border: 'rgba(52, 152, 219, 0.3)',  text: 'rgb(41, 128, 185)' },
++    2: { bg: 'rgba(155, 89, 182, 0.1)',  border: 'rgba(155, 89, 182, 0.3)',  text: 'rgb(142, 68, 173)' },
++    3: { bg: 'rgba(230, 126, 34, 0.1)',  border: 'rgba(230, 126, 34, 0.3)',  text: 'rgb(230, 126, 34)' },
++    4: { bg: 'rgba(46, 204, 113, 0.1)',  border: 'rgba(46, 204, 113, 0.3)',  text: 'rgb(39, 174, 96)' },
++    5: { bg: 'rgba(52, 73, 94, 0.1)',    border: 'rgba(52, 73, 94, 0.3)',    text: 'rgb(52, 73, 94)' },
++    6: { bg: 'rgba(149, 165, 166, 0.1)', border: 'rgba(149, 165, 166, 0.3)', text: 'rgb(149, 165, 166)' },
++};
++
++/** Build one chip on the real stylesheets, inside the card it actually lives in. */
++function chip(variant, { dark }) {
++    document.head.innerHTML = '';
++    loadStylesheet('static/css/index-styles.css');
++    loadStylesheet('static/css/inline-styles-extracted.css');
++    loadStylesheet('static/css/dark-mode.css');       // linked last, as the pages do (RD-158)
++    document.body.className = dark ? 'dark-mode' : '';
++    document.body.innerHTML =
++        `<div class="ai-assistant-section">
++             <button class="example-prompt example-prompt-c${variant}">Show me unusual activity</button>
++         </div>`;
++    return document.querySelector('.example-prompt');
++}
++
++describe('RD-159 — the chips are no longer styled inline, which is what made them fixable', () => {
++    const js = fs.readFileSync(path.join(ROOT, 'static/js/index.js'), 'utf8');
++
++    test('no example-prompt button is given a cssText style any more', () => {
++        // The three call sites each used to write background/color/border inline.
++        const inlineChipStyles = js.match(/example-prompt[\s\S]{0,200}?style\.cssText/g) || [];
++        expect(inlineChipStyles).toEqual([]);
++    });
++
++    test('the chips get a variant CLASS instead, at all three call sites', () => {
++        expect((js.match(/example-prompt-c\$\{(?:color|item\.color)\}/g) || []).length).toBe(3);
++    });
++
++    test('POSITIVE CONTROL — the file still builds chips, so the zero above is not a delete', () => {
++        expect((js.match(/example-prompt/g) || []).length).toBeGreaterThanOrEqual(3);
++    });
++});
++
++describe('RD-159 — light mode keeps the exact values that moved out of the JS', () => {
++    test.each(VARIANTS)('variant %i is byte-identical to its pre-refactor value', (v) => {
++        const el = chip(v, { dark: false });
++        const cs = getComputedStyle(el);
++        expect({ bg: cs.backgroundColor, border: cs.borderColor, text: cs.color })
++            .toEqual({ bg: LIGHT_BEFORE[v].bg, border: LIGHT_BEFORE[v].border, text: LIGHT_BEFORE[v].text });
++    });
++});
++
++describe('RD-159 — dark mode: every chip clears AA on its own composited ground', () => {
++    test.each(VARIANTS)('variant %i clears 4.5:1 in dark mode', (v) => {
++        const el = chip(v, { dark: true });
++        const m = measureContrast(el);
++        // Reported as an object so a failure names the colours, not just a number.
++        expect({ variant: v, pass: m.ratio >= AA, ratio: +m.ratio.toFixed(2), fg: rgb(m.foreground), bg: rgb(m.background) })
++            .toEqual({ variant: v, pass: true, ratio: expect.any(Number), fg: expect.any(String), bg: expect.any(String) });
++    });
++
++    test('the chip borders clear the 3:1 non-text bar against the card', () => {
++        const card = parseColor('#252550');
++        const failing = VARIANTS.map((v) => {
++            const cs = getComputedStyle(chip(v, { dark: true }));
++            const border = composite(parseColor(cs.borderColor), card);
++            return { variant: v, ratio: +contrastRatio(border, card).toFixed(2) };
++        }).filter((m) => m.ratio < NON_TEXT);
++        expect(failing).toEqual([]);
++    });
++
++    test('NEGATIVE CONTROL — the values the tester measured would fail this', () => {
++        // #2980b9 on the dark card is what the inline style produced.
++        expect(contrastRatio(parseColor('#2980b9'), parseColor('#252550'))).toBeLessThan(AA);
++        expect(contrastRatio(parseColor('#8e44ad'), parseColor('#252550'))).toBeLessThan(AA);
++        expect(contrastRatio(parseColor('#34495e'), parseColor('#252550'))).toBeLessThan(AA);
++    });
++
++    test('CONTROL — dark and light actually differ, so the dark rules are being applied', () => {
++        for (const v of VARIANTS) {
++            const light = getComputedStyle(chip(v, { dark: false })).color;
++            const dark = getComputedStyle(chip(v, { dark: true })).color;
++            expect({ variant: v, differs: light !== dark }).toEqual({ variant: v, differs: true });
++        }
++    });
++});
+diff --git a/static/css/dark-mode.css b/static/css/dark-mode.css
+index cc79f9a..5e43411 100644
+--- a/static/css/dark-mode.css
++++ b/static/css/dark-mode.css
+@@ -622,3 +622,372 @@ body.dark-mode .diag-card-optional {
+     background-color: #332a12;
+     color: #e8e8e8;
+ }
++
++/* ===================================================================
++ * R6-2 (RD-158) — dark counterparts for the EXTRACTED inline surfaces.
++ * Generated from static/css/inline-styles-extracted.css restricted to the
++ * classes first-run-setup.html actually uses, then grouped by the light
++ * value each one paints. Every pair below was measured before it was
++ * written; the matrix is in the R6-2 test.
++ * =================================================================== */
++
++/* white -> the panel ground (9 classes) */
++body.dark-mode .s-10c9abdae5,
++body.dark-mode .s-2223116996,
++body.dark-mode .s-28fc19e0af,
++body.dark-mode .s-3fdcc08ed2,
++body.dark-mode .s-5fa8d63767,
++body.dark-mode .s-618110d49d,
++body.dark-mode .s-c44bd9441a,
++body.dark-mode .s-df3c1e3575,
++body.dark-mode .s-f28d221b5b {
++    background-color: #1e1e3f;
++    border-color: #3a3a5a;
++}
++
++/* #f8f9fa -> the raised ground (12 classes) */
++body.dark-mode .s-544d132add,
++body.dark-mode .s-76c492882b,
++body.dark-mode .s-774f573f07,
++body.dark-mode .s-85fe96fe4a,
++body.dark-mode .s-8c858e6bac,
++body.dark-mode .s-951df17cfc,
++body.dark-mode .s-a2c5bf3107,
++body.dark-mode .s-b2f8a558e1,
++body.dark-mode .s-d1e0022658,
++body.dark-mode .s-e25ed4010e,
++body.dark-mode .s-eaf7ecf45e,
++body.dark-mode .s-fec10731e2 {
++    background-color: #252550;
++    border-color: #3a3a5a;
++}
++
++/* #e7f3ff / #cce5ff -> the info tint (9 classes) */
++body.dark-mode .s-018de64052,
++body.dark-mode .s-2a1b5837e4,
++body.dark-mode .s-3d740e084c,
++body.dark-mode .s-4f8fd867a6,
++body.dark-mode .s-551e0d98fa,
++body.dark-mode .s-70cc9673d8,
++body.dark-mode .s-86f7ec0792,
++body.dark-mode .s-a61e744a67,
++body.dark-mode .s-cee39a41dd {
++    background-color: #16263f;
++    border-color: #5a86c4;
++}
++
++/* #fff3cd -> the warning tint (13 classes) */
++body.dark-mode .s-00e41ce0aa,
++body.dark-mode .s-167ce837ac,
++body.dark-mode .s-2469ce88f5,
++body.dark-mode .s-2e887f055f,
++body.dark-mode .s-495fa4df94,
++body.dark-mode .s-88a4ad9d5f,
++body.dark-mode .s-9f110629b5,
++body.dark-mode .s-b23823b0dc,
++body.dark-mode .s-b56fc9fe1d,
++body.dark-mode .s-cbb4b32dfc,
++body.dark-mode .s-d5903faa53,
++body.dark-mode .s-ea0f8633e3,
++body.dark-mode .s-f8a5e12dc9 {
++    background-color: #332a12;
++    border-color: #b08f2e;
++}
++
++/* #d4edda -> the success tint (5 classes) */
++body.dark-mode .s-36c14955fc,
++body.dark-mode .s-56603173ee,
++body.dark-mode .s-6d465f455c,
++body.dark-mode .s-ba04a9b0fe,
++body.dark-mode .s-e009e30c99 {
++    background-color: #14301f;
++    border-color: #4f9e6b;
++}
++
++/* #f8d7da -> the error tint (3 classes) */
++body.dark-mode .s-ba7577d3ce,
++body.dark-mode .s-d00fdc8386,
++body.dark-mode .s-ed1f414da5 {
++    background-color: #3a1a1e;
++    border-color: #b25a63;
++}
++
++/* light gradients (#f8f9fa -> #e7f3ff / #e9f5fb): the panel ground into the
++ * info tint, so the surface keeps its direction instead of going flat. */
++body.dark-mode .s-2e66ac65cb,
++body.dark-mode .s-8f31ad588f {
++    background: linear-gradient(135deg, #1e1e3f 0%, #16263f 100%);
++}
++
++/* Foregrounds: light-mode text colours declared by the extracted classes,
++ * which land on the dark grounds above and on the .step-card / .ds-step-content
++ * surfaces round 4 already darkened. */
++/* -> #e8e8e8 (16 classes) */
++body.dark-mode .s-2254201c80,
++body.dark-mode .s-25293a741d,
++body.dark-mode .s-2e35f92a8c,
++body.dark-mode .s-407ab7cd1b,
++body.dark-mode .s-44306c1f0f,
++body.dark-mode .s-44f8000211,
++body.dark-mode .s-75a2081330,
++body.dark-mode .s-7bae6ca59b,
++body.dark-mode .s-7f9f7090af,
++body.dark-mode .s-a74e4243ad,
++body.dark-mode .s-bb357ba3a0,
++body.dark-mode .s-c5e6643755,
++body.dark-mode .s-d831de0cb4,
++body.dark-mode .s-daff18f41a,
++body.dark-mode .s-eaf7ecf45e,
++body.dark-mode .s-fefb1eb62d {
++    color: #e8e8e8;
++}
++
++/* -> #9090a0 (13 classes) */
++body.dark-mode .s-06113e5486,
++body.dark-mode .s-1207e27b19,
++body.dark-mode .s-3919a34aa2,
++body.dark-mode .s-3ee72e9c96,
++body.dark-mode .s-667b33a50b,
++body.dark-mode .s-84354861fb,
++body.dark-mode .s-8afac496e6,
++body.dark-mode .s-8fc4a4a00e,
++body.dark-mode .s-9497e0026f,
++body.dark-mode .s-9806d32cf5,
++body.dark-mode .s-ce8e2861f6,
++body.dark-mode .s-f2dc88fcea,
++body.dark-mode .s-f8989f820d {
++    color: #9090a0;
++}
++
++/* -> #cfe4ff (9 classes) */
++body.dark-mode .s-018de64052,
++body.dark-mode .s-124a79c172,
++body.dark-mode .s-42ae60d998,
++body.dark-mode .s-551e0d98fa,
++body.dark-mode .s-57ac33f90e,
++body.dark-mode .s-68ecf3648c,
++body.dark-mode .s-6dcdfff98c,
++body.dark-mode .s-9b770dca12,
++body.dark-mode .s-a61e744a67 {
++    color: #cfe4ff;
++}
++
++/* -> #ffd977 (11 classes) */
++body.dark-mode .s-08721ceb3e,
++body.dark-mode .s-0b04f80275,
++body.dark-mode .s-6d87ca500b,
++body.dark-mode .s-8db25e4213,
++body.dark-mode .s-a85018122c,
++body.dark-mode .s-ba0225bbab,
++body.dark-mode .s-c1b978897d,
++body.dark-mode .s-cb74aa7812,
++body.dark-mode .s-d2d235e224,
++body.dark-mode .s-d8595c9571,
++body.dark-mode .s-ea0f8633e3 {
++    color: #ffd977;
++}
++
++/* -> #9ae6b4 (11 classes) */
++body.dark-mode .s-28c5e68d97,
++body.dark-mode .s-36c14955fc,
++body.dark-mode .s-41d14b597e,
++body.dark-mode .s-4b9f3f6f2d,
++body.dark-mode .s-5b7c1226e0,
++body.dark-mode .s-6d465f455c,
++body.dark-mode .s-6dbcde2ca6,
++body.dark-mode .s-c410312943,
++body.dark-mode .s-da17a4452d,
++body.dark-mode .s-e009e30c99,
++body.dark-mode .s-e554b5b2d3 {
++    color: #9ae6b4;
++}
++
++/* -> #ff9c9c (11 classes) */
++body.dark-mode .s-0eb7b96d97,
++body.dark-mode .s-178ec01df1,
++body.dark-mode .s-24ca4d5179,
++body.dark-mode .s-3385f7d43c,
++body.dark-mode .s-4b8726b2f5,
++body.dark-mode .s-58378bcd96,
++body.dark-mode .s-924053337a,
++body.dark-mode .s-c2b3d1291f,
++body.dark-mode .s-ca5435a13f,
++body.dark-mode .s-d58d64f212,
++body.dark-mode .s-e65a122cdb {
++    color: #ff9c9c;
++}
++
++/* -> #79b8ff (20 classes) */
++body.dark-mode .s-10c9abdae5,
++body.dark-mode .s-10db74638a,
++body.dark-mode .s-113d9e175d,
++body.dark-mode .s-1921a01e31,
++body.dark-mode .s-1d6eb444ee,
++body.dark-mode .s-2638400d89,
++body.dark-mode .s-5a22d81696,
++body.dark-mode .s-6870978b55,
++body.dark-mode .s-756b3cadd9,
++body.dark-mode .s-87d05332be,
++body.dark-mode .s-8b125eb633,
++body.dark-mode .s-8e2266ff1a,
++body.dark-mode .s-aacd093ba7,
++body.dark-mode .s-adb01149d2,
++body.dark-mode .s-b0109c41a2,
++body.dark-mode .s-ba4135d565,
++body.dark-mode .s-cca72e835b,
++body.dark-mode .s-ce6009c3ee,
++body.dark-mode .s-d813a72f88,
++body.dark-mode .s-f5a9d9ad88 {
++    color: #79b8ff;
++}
++
++
++/* ===================================================================
++ * R6-3 (RD-159) — index.html: the dashboard's own light surfaces.
++ *
++ * P6-03's mechanism is P6-02's, one page over: `div.controls` and
++ * `div.ai-assistant-section` are painted light by index-styles.css and by the
++ * extracted sheet, nothing darkened them, and the body's #e8e8e8 landed on
++ * white. The tester measured all EIGHT filter labels at 1.23:1 in a real
++ * browser — the dashboard's primary control surface. Fixed on the surface, not
++ * on the labels: darkening the text instead would fix dark mode and break
++ * light, and would have to be repeated for every control added later.
++ *
++ * Targeted by SEMANTIC class wherever one exists, not by the extracted
++ * `s-xxxxxxxx` hash. The hashes are content-derived: change an inline style in
++ * the HTML, re-run refactor-inline-styles.js, and the hash changes — taking any
++ * counterpart keyed to it silently out of the cascade. Two nodes here have no
++ * semantic class and are keyed by hash out of necessity; see RD-165.
++ *
++ * Every pair measured before it was written; the matrix is asserted in
++ * __tests__/index-dark-surfaces.test.js.
++ * =================================================================== */
++
++/* white -> the panel ground */
++body.dark-mode .controls,
++body.dark-mode .data-table,
++body.dark-mode .file-drop-zone {
++    background-color: #1e1e3f;
++    border-color: #3a3a5a;
++}
++
++/* #f8f9fa -> the raised ground */
++body.dark-mode .import-section,
++body.dark-mode .info-card,
++body.dark-mode .ai-assistant-section,
++body.dark-mode .risk-conditions-summary {
++    background-color: #252550;
++    border-color: #3a3a5a;
++}
++
++/* Headings on those grounds keep the neutral body colour rather than the
++ * light theme's navy #2c3e50, which is 1.55:1 on anything dark. */
++body.dark-mode .import-section h3 {
++    color: #e8e8e8;
++}
++
++/* Secondary copy: the light theme uses #7f8c8d / #6c757d here, both of which
++ * fail on the raised ground. #9090a0 is the muted colour the rest of dark mode
++ * already uses, so this stays one decision rather than six.
++ * None of the four hashes below carries a semantic class, so each is keyed by
++ * a content-derived name that a re-run of refactor-inline-styles.js can rename
++ * out from under it — the RD-165 fragility. They are, in order: the AI
++ * assistant's strapline, "Try these example questions:", "Quick questions:",
++ * and the chat Expand/Collapse button. All four are probed by the RD-165 guard
++ * in __tests__/index-dark-surfaces.test.js, so a rename fails the build rather
++ * than silently restoring the light colour. */
++body.dark-mode .file-description,
++body.dark-mode .s-2d7970a1c7,
++body.dark-mode .s-2f0d1ca48f,
++body.dark-mode .s-7329ae9d7f,
++body.dark-mode .s-c6a58f0546 {
++    color: #9090a0;
++}
++
++/* The sort chevrons sit on the darkened table head (#252550), where the round-3
++ * value #6a6a7a reads 2.71:1. They carry the sortability of the column, so they
++ * are held to the text bar rather than the 3:1 non-text one. */
++body.dark-mode .sort-indicator {
++    color: #a8a8bc;
++}
++
++/* #e74c3c on the page ground is 4.46:1 — under AA by 0.04, which is exactly the
++ * kind of near-miss that survives an eyeball and fails an audit. */
++body.dark-mode .risk-category-title {
++    color: #ff9c9c;
++}
++
++/* The dashboard's own tables are NOT Bootstrap `.table`s — index-styles.css
++ * paints a bare `th { background: #f8f9fa; color: #495057 }` (line 210) and
++ * every dark rule above it is scoped to `.table`, so those heads stayed light.
++ * This is what made the sort chevrons read 2.22:1 after R6-3's first pass
++ * raised them for the #252550 head they sit on elsewhere: the same glyph lives
++ * on two different grounds, and only one of them had been darkened. */
++body.dark-mode th {
++    background-color: #252550;
++    color: #e8e8e8;
++}
++
++body.dark-mode td,
++body.dark-mode th {
++    border-bottom-color: #3a3a5a;
++}
++
++/* Section headings that carry the light theme's navy #2c3e50 (1.31:1 on the
++ * raised ground). None of these three has a semantic class — they are pure
++ * extracted hashes, which is the RD-165 fragility, keyed here out of necessity:
++ * s-67a2eb68e3, s-8951e9aa12 ("Scan Analytics Summary"), s-f61b57bc2b
++ * ("AI Analysis Assistant"). */
++body.dark-mode .s-67a2eb68e3,
++body.dark-mode .s-8951e9aa12,
++body.dark-mode .s-f61b57bc2b {
++    color: #e8e8e8;
++}
++
++/* The chat panel is a 95%-opaque white sheet over the card; at 95% the card
++ * beneath it makes no difference, so it needs its own dark value. */
++body.dark-mode .chat-container {
++    background: rgba(30, 30, 63, 0.95);
++}
++
++/* RD-147 — the sixteen table headings.
++ *
++ * index-styles.css:191 gives `.table-title` the light theme's navy #2c3e50 and
++ * has no dark counterpart, so all sixteen headings across every dashboard tab
++ * read 1.55:1 on the page ground and 1.46:1 on a darkened card. One rule, one
++ * counterpart, all sixteen — not just the Sustainability instance that made it
++ * visible. Deferred by s13 as pre-existing; folded into R6-3 on Wednesday's
++ * ruling because pass 7 sweeps the whole rendered page and sixteen headings at
++ * 1.55 would fail it whatever ticket they belong to.
++ *
++ * SCOPE STOPS HERE, deliberately. `.table-title` is defined TWICE in the
++ * product — here for index, and again at chart-details-styles.css:34 for
++ * chart-details.html, which links no dark stylesheet at all and cannot be
++ * fixed by a rule in this file. That page and the ten others in the same
++ * position are RD-167, not RD-147. */
++body.dark-mode .table-title {
++    color: #e8e8e8;
++}
++
++/* The quick-question chips (RD-159 / P6-03).
++ *
++ * The tester measured four of these at 2.25 / 2.46 / 2.53 / 3.69 in a real
++ * browser. This harness never saw them: they are created by index.js, so they
++ * are absent from the static markup the sweep walks. They were also styled by
++ * `button.style.cssText`, an inline style at specificity 1,0,0,0 that no
++ * stylesheet rule can beat without `!important` — so the fix had to move the
++ * colours into classes before dark mode could reach them at all.
++ *
++ * Text measured on each chip's own composited ground over the card (#252550),
++ * not on the card itself, because a 14%-alpha tint shifts it:
++ *   blue 6.00 · purple 6.04 · orange 6.79 · green 7.08 · slate 7.79 · grey 6.99
++ * Borders are the chip's own text colour at 55% alpha, which clears the 3:1
++ * non-text bar on all six (3.15-3.76) — the same bar the tint variants above
++ * are held to.
++ */
++body.dark-mode .example-prompt-c1 { background: rgba(52, 152, 219, 0.14);  border-color: rgba(121, 192, 245, 0.55); color: #79c0f5; }
++body.dark-mode .example-prompt-c2 { background: rgba(155, 89, 182, 0.14);  border-color: rgba(208, 164, 232, 0.55); color: #d0a4e8; }
++body.dark-mode .example-prompt-c3 { background: rgba(230, 126, 34, 0.14);  border-color: rgba(245, 183, 127, 0.55); color: #f5b77f; }
++body.dark-mode .example-prompt-c4 { background: rgba(46, 204, 113, 0.14);  border-color: rgba(132, 224, 171, 0.55); color: #84e0ab; }
++body.dark-mode .example-prompt-c5 { background: rgba(52, 73, 94, 0.14);    border-color: rgba(184, 197, 214, 0.55); color: #b8c5d6; }
++body.dark-mode .example-prompt-c6 { background: rgba(149, 165, 166, 0.14); border-color: rgba(194, 205, 206, 0.55); color: #c2cdce; }
+diff --git a/static/css/index-styles.css b/static/css/index-styles.css
+index 5187e08..3646a2a 100644
+--- a/static/css/index-styles.css
++++ b/static/css/index-styles.css
+@@ -1264,3 +1264,35 @@
+     color: #555;
+     margin-bottom: 18px;
+ }
++/* Quick-question chips: the six colour variants, moved out of JS.
++ *
++ * These were set by `button.style.cssText = ...` in index.js at three call
++ * sites. An inline style has specificity 1,0,0,0, so no stylesheet rule could
++ * theme them without `!important` — and `!important` is precisely the trap R5-2
++ * fell into, because jsdom does not honour it and the suite could not tell you
++ * whether the override landed. Moving the colours into classes lets the cascade
++ * do the theming, needs no `!important`, and removes six JS-injected inline
++ * styles that CSP_STRICT would otherwise have to allow (the same reason
++ * scripts/refactor-inline-styles.js exists).
++ *
++ * Light values are the ones that were in the JS array, unchanged.
++ */
++.example-prompt {
++    border: 1px solid transparent;
++    border-radius: 20px;
++    padding: 6px 12px;
++    font-size: 0.85rem;
++    cursor: pointer;
++    transition: all 0.2s;
++}
++
++.example-prompt--lg {
++    padding: 8px 14px;
++}
++
++.example-prompt-c1 { background: rgba(52, 152, 219, 0.1);  border-color: rgba(52, 152, 219, 0.3);  color: #2980b9; }
++.example-prompt-c2 { background: rgba(155, 89, 182, 0.1);  border-color: rgba(155, 89, 182, 0.3);  color: #8e44ad; }
++.example-prompt-c3 { background: rgba(230, 126, 34, 0.1);  border-color: rgba(230, 126, 34, 0.3);  color: #e67e22; }
++.example-prompt-c4 { background: rgba(46, 204, 113, 0.1);  border-color: rgba(46, 204, 113, 0.3);  color: #27ae60; }
++.example-prompt-c5 { background: rgba(52, 73, 94, 0.1);    border-color: rgba(52, 73, 94, 0.3);    color: #34495e; }
++.example-prompt-c6 { background: rgba(149, 165, 166, 0.1); border-color: rgba(149, 165, 166, 0.3); color: #95a5a6; }
+diff --git a/static/first-run-setup.html b/static/first-run-setup.html
+index f177ef6..7adc371 100644
+--- a/static/first-run-setup.html
++++ b/static/first-run-setup.html
+@@ -12,7 +12,6 @@
+  <script src="js/csp-helpers.js"></script>
+     <script src="js/first-run-setup.js" data-csp-converted="true"></script>
+  <link rel="stylesheet" href="/css/first-run-setup-styles.css">
+-    <link href="/css/dark-mode.css" rel="stylesheet">
+     <!-- R4-3: the wiring half of "dark mode defined once". Must load from
+          <head>, before first paint, or the page flashes light. -->
+     <script src="js/dark-mode.js"></script>
+@@ -2297,6 +2296,13 @@ az webapp identity show \
+ 
+  <!-- Feedback Widget -->
+  <link href="css/feedback-widget.css" rel="stylesheet">
++    <!-- dark-mode.css is linked LAST, after every other local sheet, deliberately (RD-158 / RD-163).
++         Every selector in it is scoped to .dark-mode and no other sheet defines a .dark-mode rule,
++         so in a browser it already wins on specificity and this changes nothing a user sees. It is
++         last so the winner does not depend on out-specifying whatever is appended after it - and so
++         a source-order-only engine resolves the same winner a browser does. Pinned by
++         __tests__/dark-mode-link-order.test.js; do not move it back up. -->
++    <link href="/css/dark-mode.css" rel="stylesheet">
+  <script src="js/entra-provisioning-ui.js"></script>
+  <script src="js/entra-provisioning-mount.js"></script>
+  <script src="js/feedback-widget.js"></script>
+diff --git a/static/index.html b/static/index.html
+index 0699578..4bdeb90 100644
+--- a/static/index.html
++++ b/static/index.html
+@@ -19,7 +19,6 @@
+  <script src="js/job-type-filter.js"></script>
+     <script src="js/index.js" data-csp-converted="true"></script>
+  <link rel="stylesheet" href="/css/index-styles.css">
+-    <link href="/css/dark-mode.css" rel="stylesheet">
+     <!-- R4-3: the wiring half of "dark mode defined once". Must load from
+          <head>, before first paint, or the page flashes light. -->
+     <script src="js/dark-mode.js"></script>
+@@ -1049,6 +1048,13 @@
+ 
+  <!-- Feedback Widget -->
+  <link href="css/feedback-widget.css" rel="stylesheet">
++    <!-- dark-mode.css is linked LAST, after every other local sheet, deliberately (RD-158 / RD-163).
++         Every selector in it is scoped to .dark-mode and no other sheet defines a .dark-mode rule,
++         so in a browser it already wins on specificity and this changes nothing a user sees. It is
++         last so the winner does not depend on out-specifying whatever is appended after it - and so
++         a source-order-only engine resolves the same winner a browser does. Pinned by
++         __tests__/dark-mode-link-order.test.js; do not move it back up. -->
++    <link href="/css/dark-mode.css" rel="stylesheet">
+  <script src="js/sustainability-ui.js"></script>
+  <script src="js/sustainability-mount.js"></script>
+  <script src="js/feedback-widget.js"></script>
+diff --git a/static/js/index.js b/static/js/index.js
+index dfa528a..63516b1 100644
+--- a/static/js/index.js
++++ b/static/js/index.js
+@@ -2349,15 +2349,23 @@
+                 ];
+ 
+ 
+-                // Colors for the buttons
+-                const colors = [
+-                    { bg: 'rgba(52, 152, 219, 0.1)', border: 'rgba(52, 152, 219, 0.3)', text: '#2980b9' },
+-                    { bg: 'rgba(155, 89, 182, 0.1)', border: 'rgba(155, 89, 182, 0.3)', text: '#8e44ad' },
+-                    { bg: 'rgba(230, 126, 34, 0.1)', border: 'rgba(230, 126, 34, 0.3)', text: '#e67e22' },
+-                    { bg: 'rgba(46, 204, 113, 0.1)', border: 'rgba(46, 204, 113, 0.3)', text: '#27ae60' },
+-                    { bg: 'rgba(52, 73, 94, 0.1)', border: 'rgba(52, 73, 94, 0.3)', text: '#34495e' },
+-                    { bg: 'rgba(149, 165, 166, 0.1)', border: 'rgba(149, 165, 166, 0.3)', text: '#95a5a6' }
+-                ];
++                // Chip colour VARIANTS, not colour values (RD-159).
++                //
++                // These used to be six {bg, border, text} objects written onto
++                // each button with `style.cssText`. An inline style has
++                // specificity 1,0,0,0, so no stylesheet could theme them without
++                // `!important` - and `!important` is the trap R5-2 fell into,
++                // because jsdom does not honour it and the suite could not tell
++                // you whether the override landed. The tester measured four of
++                // these chips at 2.25-3.69:1 in dark mode.
++                //
++                // The values now live in index-styles.css as
++                // .example-prompt-c1..c6, with dark counterparts in
++                // dark-mode.css, so the cascade does the theming. This also
++                // removes six JS-injected inline styles, which is what
++                // scripts/refactor-inline-styles.js exists to eliminate for
++                // CSP_STRICT.
++                const colors = [1, 2, 3, 4, 5, 6];
+ 
+                 // Icons for the buttons
+                 const icons = ['🔍', '💰', '⚠️', '📊', '👥', '🔧'];
+@@ -2381,9 +2389,8 @@
+                     const isHidden = index >= maxInitial;
+ 
+                     const button = document.createElement('button');
+-                    button.className = 'example-prompt';
++                    button.className = `example-prompt example-prompt-c${color}`;
+                     button.onclick = () => runExamplePrompt(question);
+-                    button.style.cssText = `background: ${color.bg}; color: ${color.text}; border: 1px solid ${color.border}; border-radius: 20px; padding: 6px 12px; font-size: 0.85rem; cursor: pointer; transition: all 0.2s;`;
+                     if (isHidden) {
+                         button.style.display = 'none';
+                     }
+@@ -2428,9 +2435,8 @@
+                     const isTruncated = question.length > 30;
+ 
+                     const button = document.createElement('button');
+-                    button.className = 'example-prompt';
++                    button.className = `example-prompt example-prompt--lg example-prompt-c${color}`;
+                     button.onclick = () => runExamplePrompt(question);
+-                    button.style.cssText = `background: ${color.bg}; color: ${color.text}; border: 1px solid ${color.border}; border-radius: 20px; padding: 8px 14px; font-size: 0.85rem; cursor: pointer; transition: all 0.2s;`;
+                     button.innerHTML = `${icon} ${shortText}`;
+                     
+                     // Add tooltip if question is truncated
+@@ -2456,11 +2462,13 @@
+         }
+ 
+         function loadDefaultQuickQuestions() {
++            // `color` is a variant number matching .example-prompt-c1..c6; see the
++            // note on the `colors` array above for why these are no longer values.
+             const defaults = [
+-                { text: 'Show me unusual activity this week', icon: '🔍', color: { bg: 'rgba(52, 152, 219, 0.1)', border: 'rgba(52, 152, 219, 0.3)', text: '#2980b9' } },
+-                { text: 'Which users have high costs?', icon: '💰', color: { bg: 'rgba(155, 89, 182, 0.1)', border: 'rgba(155, 89, 182, 0.3)', text: '#8e44ad' } },
+-                { text: 'Are there any maintenance alerts?', icon: '⚠️', color: { bg: 'rgba(230, 126, 34, 0.1)', border: 'rgba(230, 126, 34, 0.3)', text: '#e67e22' } },
+-                { text: 'Show me key insights from the latest data', icon: '📊', color: { bg: 'rgba(46, 204, 113, 0.1)', border: 'rgba(46, 204, 113, 0.3)', text: '#27ae60' } }
++                { text: 'Show me unusual activity this week', icon: '🔍', color: 1 },
++                { text: 'Which users have high costs?', icon: '💰', color: 2 },
++                { text: 'Are there any maintenance alerts?', icon: '⚠️', color: 3 },
++                { text: 'Show me key insights from the latest data', icon: '📊', color: 4 }
+             ];
+ 
+             ['quickQuestionsContainer', 'expandedQuickQuestionsContainer'].forEach(containerId => {
+@@ -2477,9 +2485,9 @@
+                     const isTruncated = item.text.length > maxLength;
+ 
+                     const button = document.createElement('button');
+-                    button.className = 'example-prompt';
++                    const size = containerId === 'expandedQuickQuestionsContainer' ? ' example-prompt--lg' : '';
++                    button.className = `example-prompt${size} example-prompt-c${item.color}`;
+                     button.onclick = () => runExamplePrompt(item.text);
+-                    button.style.cssText = `background: ${item.color.bg}; color: ${item.color.text}; border: 1px solid ${item.color.border}; border-radius: 20px; padding: ${containerId === 'expandedQuickQuestionsContainer' ? '8px 14px' : '6px 12px'}; font-size: 0.85rem; cursor: pointer; transition: all 0.2s;`;
+                     button.innerHTML = `${item.icon} ${shortText}`;
+                     
+                     // Add tooltip if question is truncated
+diff --git a/static/settings.html b/static/settings.html
+index 74e2608..7c2dada 100644
+--- a/static/settings.html
++++ b/static/settings.html
+@@ -13,7 +13,6 @@
+  <script src="js/csp-helpers.js"></script>
+     <script src="js/settings.js" data-csp-converted="true"></script>
+  <link rel="stylesheet" href="/css/settings-styles.css">
+-    <link href="/css/dark-mode.css" rel="stylesheet">
+     <!-- R4-3: the wiring half of "dark mode defined once". Must load from
+          <head>, before first paint, or the page flashes light. -->
+     <script src="js/dark-mode.js"></script>
+@@ -811,6 +810,13 @@
+ 
+  <!-- Feedback Widget -->
+  <link href="css/feedback-widget.css" rel="stylesheet">
++    <!-- dark-mode.css is linked LAST, after every other local sheet, deliberately (RD-158 / RD-163).
++         Every selector in it is scoped to .dark-mode and no other sheet defines a .dark-mode rule,
++         so in a browser it already wins on specificity and this changes nothing a user sees. It is
++         last so the winner does not depend on out-specifying whatever is appended after it - and so
++         a source-order-only engine resolves the same winner a browser does. Pinned by
++         __tests__/dark-mode-link-order.test.js; do not move it back up. -->
++    <link href="/css/dark-mode.css" rel="stylesheet">
+  <script src="js/sustainability-ui.js"></script>
+  <script src="js/sustainability-mount.js"></script>
+  <script src="js/entra-provisioning-ui.js"></script>
