@@ -1763,3 +1763,13 @@ Done with it: Dynamics → Kam's team decision (no action); QuickQuote masthead/
 > Can you tell me what the system does - message from Stuart: [renamed a downloaded registered file, verified against chain, sha256 consistent despite different filename] So what do you believe the expected behaviour should be ?
 
 *Note:* Answered: content-addressed verification passes by construction (correct); expected behaviour = confirm content AND display registered metadata so the name never borrows the verification. Measured confirmation queued to s95; paste-ready Stuart reply given to Kam
+
+## 2026-09-01 14:37 — Kam (terminal, verbatim)
+> Please publish new build so I can test
+
+*Note:* NexusAI demo deploy commissioned to s11: merge rd-135 then rd-136 (stacked order), deploy demo, verify live + verify SCIM inert with mode off (the RD-135 security-review precondition binds on ENABLING scim, not on shipping the inert route — measured, not assumed)
+
+## 2026-09-01 14:38 — Kam (terminal, verbatim)
+> Also, please look at the following and the paper they cite- anything we can learn from this and adapt to you and the agent operation and flow https://youtu.be/QgH9sr7G13Q?si=d_6KugW_gmshtW_-
+
+*Note:* Research commissioned: subagent fetching video + cited paper; my adaptation analysis against the fleet follows; deliverable = house-style report + panel pointer

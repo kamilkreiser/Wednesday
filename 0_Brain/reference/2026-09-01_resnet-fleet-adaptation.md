@@ -1,0 +1,31 @@
+# What ResNet Teaches an Agent Fleet
+**Wednesday — for Kam · 2026-09-01 · sources: Welch Labs "The most cited paper of the century is a brilliant hack" (2026-08-31) + He, Zhang, Ren & Sun, "Deep Residual Learning for Image Recognition" (arXiv:1512.03385, CVPR 2016) + Darcet et al. "Vision Transformers Need Registers" (ICLR 2024) + Veit et al. 2016. Full research file with citations attached.**
+
+## BLUF
+The paper is about neural architecture, but its core insight is really about **error compounding in deep compositions**, and that transfers: when every stage must re-derive the whole state, depth makes things worse; when every stage passes the state through untouched by default and contributes only an explicit delta, depth compounds cleanly. Much of our fleet already runs this pattern — independently arrived at, which is validation, not coincidence. **Three adoptions are worth making (one is genuinely new); three tempting transfers would take us backwards and are rejected by name.**
+
+## The mapping, honestly labelled
+These are structural parallels, not proofs. Where the analogy is decorative I have not used it.
+
+**1. The skip connection is our copy-don't-compose rule.** ResNet's fix: stop asking layers to re-learn the identity map; pass the input through verbatim (y = F(x) + x) and let each layer learn only the correction. Our ledger's largest failure family (47 weighted instances) is exactly a layer re-deriving identity: every time I *compose* a fact I already hold — a timestamp, a count, a ticket state — instead of *copying* it from the artefact, I re-learn the identity map slightly wrong. The copy-from-a-read rule, handover packs, and provenance lines are skip connections. The paper says why this class of rule matters so much: **near-identity is the common case, and re-deriving it is precisely where optimisation (or an agent) silently degrades.**
+
+**2. Degradation is an optimisation failure, not a capacity failure — and the fix is structural.** Their 34-layer net was *worse* than the 18-layer one despite strictly greater capacity; more training didn't help; changing the default did. Our twin: a long session doesn't degrade because the task exceeds the model — it degrades from context depth, and "try harder" never fixed it. The 70% rotation with a preserved disk stream is our residual reformulation: fresh optimisation over the same passed-through state.
+
+**3. The residual stream is the brain.** The modern reading of ResNet — one unbroken data stream that each layer additively *edits*, never rewrites — is architecturally identical to how the vault works: append-only ledger, supersede-with-links, churn-visible corrections, daily notes as the stream each session edits. The paper's evidence for why this design survives (layer deletion barely hurts a ResNet) is the property we want: **any single session can die and the system degrades gracefully, because the stream, not the session, carries the state.**
+
+**4. The by-construction argument names our handover doctrine.** He et al.'s diagnostic: a deeper net could always emulate a shallower one (extra layers = identity), so degradation indicts the *optimizer*, not the model class. The fleet twin: any relay could in principle just carry state forward, so relay degradation indicts the **handover mechanism, never the agents**. We have practised this since the stale-brief ledger family — fix the brief pipeline, not the session — and the paper hands the instinct a proof shape.
+
+## Adopt (filtered by your rule: only what beats current practice)
+**A. The layer-deletion drill — genuinely new.** Veit et al. proved ResNets robust by *deleting layers on purpose*. We have only ever run that test by accident — the Tahoe reboot (recovered), the laptop sleep (recovered), the login-parked pane (FAILED: 3h20 stall). Proposal: at weekly consolidation, one deliberate kill of a low-stakes session at a random boundary, with recovery time and information loss measured. It converts our accidents into a control, and it tests the one property everything else depends on. *(Filed as a WED proposal ticket.)*
+
+**B. Register discipline, named.** Darcet et al.: absent dedicated scratch space, a model co-opts load-bearing channels as improvised memory — which is *exactly* our ghost-text-in-panes and junk-in-channels-of-record history. We built registers piecemeal (scratchpad dirs, the parking lot, brain inbox/, STATUS mails). Adopt as a standing design test for every new surface or workflow: **"where does scratch go?" If the answer is unstated, scratch will land in the channel of record.** One line in the design checklist; no build.
+
+**C. Warmup, promoted from habit to brief line.** Their 110-layer net needed a smaller learning rate for the first ~400 iterations or it never converged. Our boot rituals are warmup (reads before writes), but it is convention, not contract. Add one line to the brief template: *no write until boot verification passes.* Marginal, cheap, makes the habit survive a careless brief.
+
+## Reject (novelty is not a reason; regression is a veto)
+- **"Depth is free now — chain more agents."** Wrong reading: ResNet made depth *optimizable*, not free, and their 1202-layer net still overfit. Our binding constraint is coordination bandwidth, and the scoreboard's wider-vs-deeper record already shows one strong session usually beats a relay. No change.
+- **"Smaller per-layer contributions are better, so make sessions do less."** The near-identity result is about *state mutations*, not work size — today's s11 shipped two whole commissions in one seat, correctly. The residual principle governs what a session does to the *shared stream*, not how much it builds inside its own walls.
+- **Literal loss-landscape / gradient metaphors for agent behaviour.** Decorative. Not used.
+
+## The contemplation-grade line, since the story earns one
+The video closes on Planck: a "mathematical trick" that turned out to be how the world works. ResNet's trick — *make the default "change nothing", and force every change to be explicit* — is also the entire architecture of trust in this fleet: never-delete, append-only, provenance, copy-don't-compose. It is pleasing, and I think not accidental, that the most-cited engineering result of the century and a parent teaching an agent to be trustworthy converged on the same rule.
