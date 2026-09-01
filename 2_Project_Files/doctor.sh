@@ -186,6 +186,20 @@ if [ -f "$LCONF" ]; then
   fi
 fi
 
+# --- Wednesday's OWN model pin must be the `fable` ALIAS, never a dated ID (Kam,
+# 2026-09-02: "always choose the latest fable model"). A dated pin went stale the day
+# Fable 5.1 shipped and nothing noticed until Kam did — this check is the mechanism.
+WLAUNCH="$PROJECT_DIR/Launch_Wednesday.command"
+if [ -f "$WLAUNCH" ]; then
+  if grep -vE '^\s*#' "$WLAUNCH" | grep -qE -- '--model claude-fable-[0-9]'; then
+    warn "Launch_Wednesday.command pins a DATED Fable ID" "use '--model fable' (alias = latest Fable) — Kam's 2026-09-02 ruling"
+  elif grep -vE '^\s*#' "$WLAUNCH" | grep -qE -- '--model fable(\[1m\])?( |$)'; then
+    ok "Wednesday launcher uses the 'fable' alias (latest Fable at every launch)"
+  else
+    warn "Launch_Wednesday.command has no recognisable --model fable line" "read the exec line — the alias rule may have been edited away"
+  fi
+fi
+
 # ── Tailscale remote-access leg (added 2026-08-20; DORMANT-BY-DEFAULT per Kam
 # 2026-08-20 ruling 17: "case by case. I will ask or turn it on when I need.
 # Keep it dormant in the meantime."). Down is the EXPECTED state — report it

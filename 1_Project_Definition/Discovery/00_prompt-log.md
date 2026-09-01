@@ -1811,3 +1811,8 @@ Done with it: Dynamics → Kam's team decision (no action); QuickQuote masthead/
 > Some new tickets approved by Peter, please check through the secure agent and one and make sure that all the tickets that have been actioned are archived
 
 *Note:* routed to Secuura s98 item 0: approval sweep + merges under the framework; KS completed-type archive pass measured first, PS untouched
+
+## 2026-09-02 07:33 — Kam (terminal, verbatim)
+> please amend your script to use fable 5.1 rather than 5.  Is there a way for you to always choose the latest fable model?
+
+*Note:* Launch_Wednesday.command exec line changed from the dated pin claude-fable-5 to the 'fable' ALIAS (claude --help: alias = the latest model) so every launch tracks the newest Fable without an edit; doctor.sh gained a check that warns if a dated Fable ID ever returns to the launcher. Resolved model name recorded per boot from the pane statusline.

@@ -284,7 +284,15 @@ briefing on screen and wait quietly; do NOT start executing priorities without
 his confirm. Quiet-hours rule stands: nothing spoken before 06:00."
 fi
 
-# Pin Fable 5 (Kam's standing preference, 2026-07-29). Override with /model.
+# Model: the `fable` ALIAS, not a dated ID (Kam, 2026-09-02: "amend your script to
+# use fable 5.1 rather than 5 … is there a way to always choose the latest fable
+# model?"). `claude --help`: "--model <model> … an alias for the latest model (e.g.
+# 'fable')". A dated pin (`claude-fable-5`) went stale the day 5.1 shipped; the alias
+# tracks the newest Fable at every launch. Consequence to keep honest: the model can
+# change between seats without a code change — the boot block records the resolved
+# model name from the pane statusline. Override with /model. (Fable itself remains
+# Kam's standing preference since 2026-07-29; `fable[1m]` is the 1M-context variant
+# if he ever wants that as the default — not chosen here.)
 # Safety-classifier routing target (Kam, 2026-08-11). Claude Code reruns
 # security-flagged turns on a higher-assurance Opus model — content-triggered,
 # NOT an availability fallback, and unaffected by the --model pin below. Left
@@ -294,4 +302,4 @@ fi
 # documentation for this is third-party, so the binary is the source of truth.
 export ANTHROPIC_DEFAULT_OPUS_MODEL=claude-opus-5
 
-exec claude --dangerously-skip-permissions --model claude-fable-5 "$INITIAL_PROMPT"
+exec claude --dangerously-skip-permissions --model fable "$INITIAL_PROMPT"
