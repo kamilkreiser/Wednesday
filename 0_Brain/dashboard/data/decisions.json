@@ -1684,5 +1684,39 @@
   "status": "open",
   "ruled_choice": null,
   "ruled_ts": null
+ },
+ {
+  "id": "secuura-ks487-clean-stack-admin-bootstrap",
+  "client_project": "Secuura/Blockchain",
+  "title": "KS-487 follow-on (Peter, 21:36): a clean stack cannot bootstrap any admin — which shape re-opens B-3's hardening least?",
+  "bluf": "Peter reproduced it end to end: seed-demo-users needs ORG_ADMIN, registration always mints OWNER (KS-82 correctly refuses a client role), no migration seeds a user — so on a fresh checkout nobody can ever become admin. Breaks the systemTest Quick Start (run.py dies on a prompt while exiting 0), four pre-merge suites and CLAUDE.md's demo login. Not production-affecting, not urgent; cost him ~1h today. He offers four shapes and no rec because the trade belongs to whoever owns the hardening — that is you. Nothing is built until you rule; s98 files the separable run.py exit-0 defect regardless.",
+  "default_action": "HOLD — nothing built; s98 measures nothing further (Peter's repro stands), files the run.py exit-0 ticket, and drafts the design comment only after your ruling.",
+  "options": [
+   {
+    "key": "oneshot",
+    "label": "Option 3 — CLI/compose one-shot seeder against the DB, never over HTTP, gated by the two B-3 flags, non-prod only",
+    "detail": "Removes the seeding route from the attack surface entirely; the flags stay the explicit opt-in; no known account in the schema."
+   },
+   {
+    "key": "migration",
+    "label": "Option 1 — non-prod migration seeding one ORG_ADMIN",
+    "detail": "Smallest change, but puts a known account back in the schema — close to what B-3 removed."
+   },
+   {
+    "key": "flags",
+    "label": "Option 2 — when both flags are true, allow the route unauthenticated or via a first-run bootstrap token",
+    "detail": "The flags already carry the default-deny decision; widens an HTTP route on a flag."
+   },
+   {
+    "key": "document",
+    "label": "Option 4 — document a supported manual recipe, accept a human step on every clean stack",
+    "detail": "Zero code; the cost lands on every developer and CI slot from now on."
+   }
+  ],
+  "recommended": "oneshot",
+  "ts": "2026-09-01T21:39:31.053459+10:00",
+  "status": "open",
+  "ruled_choice": null,
+  "ruled_ts": null
  }
 ]
