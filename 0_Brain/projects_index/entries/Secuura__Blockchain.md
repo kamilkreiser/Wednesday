@@ -8,6 +8,8 @@ updated: 2026-09-02
 
 # Secuura / Blockchain (Platform K)
 
+**🔴 CORRECTION (2026-09-02 07:3x, churn-visible — every older "KS-291 = crypto-shred INFEASIBLE" line below is STALE):** KS-291's RESOLUTION is the opposite of its description — Kam implemented per-subject DEK envelope + true crypto-shred (PR #440), shipped to develop + demo, Done. Verified at develop from my seat: `migrations/034_pii_subject_keys.sql` + `036_deletion_log_crypto_shred.sql` + `packages/shared/src/crypto/subjectDek.ts` (header names KS-291 + the erasure guarantee) all PRESENT at `a079e1f6b`. **Crypto-shred IS available to K** — KS-695's design uses it (S-driven erasure can destroy the subject's DEK; stronger Art.17 position than field blanking). The stale constraint travelled s96→s103 briefs (ledger w=57); s103 caught it and designed against the true state.
+
 **Last sessions (2026-08-19, s47 + s48, both 1.0):**
 - **s48: 🎉 KINTSUGI IS UP** — `secuura02-kintsugi.southeastasia.cloudapp.azure.com`
   (20.198.226.148), D2ps_v6 **zone 1** (zone 3 sub-restricted), 128 GiB, USD
