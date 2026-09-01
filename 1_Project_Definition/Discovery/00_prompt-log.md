@@ -1793,3 +1793,8 @@ Done with it: Dynamics → Kam's team decision (no action); QuickQuote masthead/
 > complettion.  you do not have to do the same test as the testing agent
 
 *Note:* Clarifies the 17:55:18 process ask (chat ts 17:55:45): Wednesday's double-check after the testing agent is a COMPLETION check — delivered vs commissioned — not a repeat of the QA agent's tests. Folded into learnings/2026-09-01_qa-gate-before-my-verification.md + the delegation-protocol skill.
+
+## 2026-09-01 18:06 — Kam (terminal, verbatim)
+> For Secuura, a message from Peter.  Please look into it - [1/9/2026, 6:00:35 pm] ~ Douglas Peter: @Kam KS-691: declare the preflight's own dependencies, and stop a missing install reading as spec drift- #765. (Akto Isolation) https://github.com/Secuura/Distributed_Secuura/pull/765 Can you review this PR, and check it Thanks, Peter [1/9/2026, 6:01:35 pm] Kam: Of course. Will look now [1/9/2026, 6:04:14 pm] ~ Douglas Peter: Found an issue with the results - darn it, updating the ticket and PR now [1/9/2026, 6:04:44 pm] ~ Douglas Peter: I will re-test
+
+*Note:* Peter asks Kam to review + check PR #765 (KS-691); Kam accepted ('will look now') and delegated to me. Peter is updating the PR after finding an issue (18:04) → s96 ADDENDUM: review the UPDATED head when his push lands (code + execution), comments on the PR, approve as our account if it passes; Peter merges his own PR.
