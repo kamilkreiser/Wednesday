@@ -1758,3 +1758,8 @@ Done with it: Dynamics → Kam's team decision (no action); QuickQuote masthead/
 > please create a sustainability tab in settings to define costs.  then add a sustainability tab on dashboard /Users/kam_code/Downloads/Nexus_AI_Sustainability_Analytics_Developer_Requirements_v1.0.docx
 
 *Note:* NexusAI sustainability commission; doc read (17-section dev spec v1.0, 2026-09-01); queued behind the in-flight RD-135 build; agent to copy the doc into its own tree (Downloads is machine-local) + file tickets + propose the MVP slice
+
+## 2026-09-01 14:29 — Kam (terminal, verbatim)
+> Can you tell me what the system does - message from Stuart: [renamed a downloaded registered file, verified against chain, sha256 consistent despite different filename] So what do you believe the expected behaviour should be ?
+
+*Note:* Answered: content-addressed verification passes by construction (correct); expected behaviour = confirm content AND display registered metadata so the name never borrows the verification. Measured confirmation queued to s95; paste-ready Stuart reply given to Kam
