@@ -1619,5 +1619,34 @@
   "status": "open",
   "ruled_choice": null,
   "ruled_ts": null
+ },
+ {
+  "id": "secuura-ks739-lookup-role-scope",
+  "client_project": "Secuura/Blockchain",
+  "title": "KS-739: S's connector cannot call K's users/lookup (403 → surfaced as 502) — allow the role on K, or scope S's key?",
+  "bluf": "Corrects the PS-681 card (measured by s97, KS-739): an S-only share recipient already gets a typed 404 — that case is handled. Stuart's 502 is K's own 403 on GET /api/users/lookup: the connector role is not in ALLOWED_LOOKUP_ROLES and S's connector key does not carry users:read, and originate maps that 403 to 502 BAD_GATEWAY. The MAPPING defect (401/403 → typed 4xx, per the code's own KS-536 rule) is being fixed as a PR now under v1.3. Your half: how S is allowed to call the lookup.",
+  "default_action": "HOLD — mapping-fix PR proceeds (typed 403 with the missing scope named); no role/scope change until you rule; Stuart sees KS-739 via the PS-681 backlink",
+  "options": [
+   {
+    "key": "a",
+    "label": "K adds connector to ALLOWED_LOOKUP_ROLES",
+    "detail": "K design change — every connector key can resolve emails in its tenant; a PR after your word"
+   },
+   {
+    "key": "b",
+    "label": "S's connector key carries users",
+    "detail": "read scope:no K change; Stuart provisions the scope on S's key; K's lookup already honours it"
+   },
+   {
+    "key": "c",
+    "label": "Both",
+    "detail": "belt and braces; a is a widening you may not want"
+   }
+  ],
+  "recommended": "b",
+  "ts": "2026-09-01T20:15:25.441719+10:00",
+  "status": "open",
+  "ruled_choice": null,
+  "ruled_ts": null
  }
 ]
