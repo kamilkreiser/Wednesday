@@ -1753,3 +1753,8 @@ Done with it: Dynamics → Kam's team decision (no action); QuickQuote masthead/
 > implement both so admin can choose option and configure in first run.  follow tenant selection and setup model in log analytics - for rd135
 
 *Note:* RD-135 ruling: both routes admin-selectable; card ruled with verbatim (option set lacked 'both' — direct truthful write; decision_queue 'other'-pathway = consolidation candidate); build commissioned to s11
+
+## 2026-09-01 14:02 — Kam (terminal, verbatim)
+> please create a sustainability tab in settings to define costs.  then add a sustainability tab on dashboard /Users/kam_code/Downloads/Nexus_AI_Sustainability_Analytics_Developer_Requirements_v1.0.docx
+
+*Note:* NexusAI sustainability commission; doc read (17-section dev spec v1.0, 2026-09-01); queued behind the in-flight RD-135 build; agent to copy the doc into its own tree (Downloads is machine-local) + file tickets + propose the MVP slice
