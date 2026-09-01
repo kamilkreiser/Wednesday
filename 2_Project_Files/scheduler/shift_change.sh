@@ -45,7 +45,7 @@ DRYRUN="${WEDNESDAY_DRYRUN:-0}"
 TMUX_BIN="$(command -v tmux || echo /opt/homebrew/bin/tmux)"
 SESSION="fleet"
 
-WRAP_AGENT="[Wednesday, scheduled 05:30 shift change] Please wrap up and finish this session now: complete or safely checkpoint the current step, then run your end-of-session ritual (commit+push, history entry, wrap email to wednesday-agent@agentmail.to). Do not start new work. Fresh sessions launch after 06:00."
+WRAP_AGENT="[Wednesday, scheduled 05:30 shift change — CHECKPOINT, per the 2026-08-28 overnight-is-working-time grant] If your queue is LIVE: CONTINUE working — checkpoint at your own rhythm boundary; do NOT wrap on this tap. If your queue is DRY: run your end-of-session ritual now (commit+push, history entry, wrap email to wednesday-agent@agentmail.to). Signature classes still pause for Kam. The 06:00 wake verifies state either way."
 WRAP_WED="[Scheduled 05:30 shift change] Wrap the overnight session now: retro, handover email [Wednesday-overnight -> Wednesday-morning], commit+push. Do not start new work — the 06:00 wake begins fresh."
 
 TAPPED=0
@@ -79,7 +79,7 @@ if [ "$DRYRUN" != "1" ] && [ -f "$ENV_FILE" ]; then
     HTTP_CODE="$(curl -s -o /dev/null -w '%{http_code}' -m 15 \
       -X POST "https://api.agentmail.to/v0/inboxes/wednesday-agent@agentmail.to/messages/send" \
       -H "Authorization: Bearer $AGENTMAIL_API_KEY" -H "Content-Type: application/json" \
-      -d "{\"to\":[\"coagent@agentmail.to\"],\"subject\":\"[Wednesday -> all agents] Morning shift change $TODAY — wrap now\",\"text\":\"Scheduled 05:30 shift change (WED-16). All live sessions: wrap up and finish now — end-of-session ritual, wrap email to wednesday-agent@. Fresh sessions launch after 06:00. Panes tapped directly: $TAPPED. This mail is the record; the tap on your prompt is the trigger.\"}" 2>/dev/null)"
+      -d "{\"to\":[\"coagent@agentmail.to\"],\"subject\":\"[Wednesday -> all agents] Morning shift change $TODAY — checkpoint (continue if your queue is live)\",\"text\":\"Scheduled 05:30 shift change (WED-16), per the 2026-08-28 overnight-is-working-time grant: a session with a LIVE queue CONTINUES (checkpoint at its own boundary); only a session with a DRY queue wraps now (end-of-session ritual, wrap email to wednesday-agent@). Panes tapped directly: $TAPPED. This mail is the record; the tap on your prompt is the trigger.\"}" 2>/dev/null)"
     log "bus mail HTTP $HTTP_CODE"
   else
     log "bus mail skipped: AGENTMAIL_API_KEY unset"
