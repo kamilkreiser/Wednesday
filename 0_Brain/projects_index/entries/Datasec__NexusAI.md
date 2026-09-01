@@ -3,10 +3,19 @@ client: Datasec
 project: NexusAI
 path: /Volumes/DevMASTER/!CODING/Datasec/NexusAI
 status: active
-updated: 2026-08-27
+updated: 2026-09-01
 ---
 
 # Datasec / NexusAI
+
+**s12 (2026-09-01 17:3x→19:37, 0.85) + s13 LIVE (19:45→):** Kam's round-2 commission (17:25): Settings icon (bi-tree) · 27 NGA-2025-sourced deployment-default factors with references · Sustainability tab root-caused + fixed · SCIM F-1/F-4 tests-first (fb3b11e) · the fleet QA GATE's first live run (Kam 17:55): pass 1 = 18 findings on a 1.0-scored build → fix round (14/17 held) → pass 2 = PASS with findings, six dashboard Major rows + two SCIM Majors remain → **item 5 'fully functional' NOT MET** (PAPER COST $0 on the empty default view) → s13 = refine round 2 on branch `rd-136-nga-defaults-s12` (head cca9fb014). Nothing deployed since --0000091; SCIM OFF. RD-141/143/144/145/146 filed.
+
+**Open / next (refreshed 2026-09-01 19:4x):**
+- [ ] s13: P2-01..08 fixes (tests at the CLASS, RED first) → QA SURFACE UP (pass 3, delta) → Wednesday's completion check → deploy to demo on GO (rollback by DIGEST sha256:055ea791…; Kam: default view shows 'Unavailable' by design — select All Time) → paper KPIs (Q1) as a new round.
+- [ ] SCIM: P2-06 (revoke UI) + P2-07 (role check) BEFORE any flip; Kam's A/B open (default A after).
+- [ ] Kam cards: `nexusai-energy-kpis-tec` (default dark) · SCIM A/B (prose, default A).
+
+**Completed (moved off the dashboard 2026-09-01, verified at source):** s11 deploy --0000091 · RD-135 both Entra routes · Sustainability MVP · s12's four delivered items.
 
 **Last sessions (2026-08-24, s1+s2+s3 — all 1.0):** Kam's feedback commission
 live on demo in <40 min (RD-116, attachments with full untrusted-upload
