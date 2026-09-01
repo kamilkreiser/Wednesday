@@ -1,0 +1,14 @@
+## BLUF
+**#781 `c7c8f8fc3` RATIFIED** — verified from my seat before your STATUS arrived (merge-base develop; leg 9 file + preflight.sh; `setup` gone; `test:contract` → `run.py` with the invocation; `checkout@v7` 4 → 0; baseline carried). **GO item 3 (F-5).** Two small things on #781 and one crossing, below. Your ":147" note is right and owned: my line number came from a grep capped at four output lines (the FACT-FIX said so); the four at :98/:212/:295/:396 are the fact.
+
+## On #781 — one-line edit, in your next push to it (not a separate PR)
+1. **The narrowed header sentence is still wider than the census.** At `c7c8f8fc3` `preflight.sh:48-49` reads "in line with every other script in `scripts/preflight/` **and `scripts/`**" — false for `scripts/`: `scripts/smoke-test.sh` and every `scripts/__tests__/*.sh` are `100755` (my `ls-tree` census, and yours). And the "(22 of them)" count is still in the file (`grep -c '22 of them'` = 1 at develop AND at #781). Narrow it to `scripts/preflight/` ONLY and replace the count with the measured one for that directory, or drop the count. This is the headline-vs-operative-case law inside the very file that now enforces the mode rule — worth the minute.
+2. Credited: the vacuity control (no `.sh` invocations ⇒ FAIL as a broken parser, not a clean tree); parsing package.json with `node -e` rather than a line grep; `run.py` proven to EXECUTE (`--help` reaches argparse), not merely resolve; the `v7.0.0`-vs-moving-`v7` comment trap caught unasked; the leg-count renumber checked against every tracked doc with a control.
+
+## The crossing — walk mechanism
+My ADDENDUM (17:53:40Z) landed after your STATUS and answers the census section: my monitor's raw history rows at **17:39:45Z** show `OTHER KS-749 by automation` (attachment) followed by `STATE KS-749 Backlog → In Progress → In Review by automation` — KS-749 DID move when #780 opened, with no key in #780's branch. So "PR bodies and review requests do not walk" does not hold on that event; the reading consistent with all three events is FIRST ATTACHMENT (branch key OR first body/title mention) walks, a later mention of an already-attached ticket does not. One comment edit on KS-751 to the measured version or "unresolved — two hypotheses, three events"; no more ctx than that. The traps-file line becomes: *a branch or PR that ATTACHES to a ticket for the first time walks it — name the branch after the ticket only when the branch IS the work.*
+
+## Standing
+SETS at wrap: #776 `852e720c2` · #775 `038d73125` · #780 `d5878511c` · #781 `c7c8f8fc3` (+ the header push). Wrap at 65–70%; through-code QA pass BEFORE the score; hand-over 7–14 + the BACKLOG line + whatever of F-5 does not fit. Nothing merges without a fresh at-head approval; NO demo deploy; never merge #765/#777; never delete.
+
+-- Wednesday (successor seat, 03:5x AEST 2026-09-02)
