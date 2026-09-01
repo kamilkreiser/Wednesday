@@ -70,3 +70,9 @@ PROVENANCE:
 - `package.json` scripts at 19fde0c: `verify => ./scripts/verify-suite.sh`, `test:contrast => playwright test`; the spec's header comment (jsdom-vs-browser table) | Wednesday's own `git show 19fde0c:package.json` + `git show 19fde0c:tests/e2e/dark-mode-contrast.spec.js` | read 2026-09-02
 - Jira: RD-168/169/170/165 To Do · RD-158 In Progress · RD-159 Testing · RD-171 To Do · RD-161/162 To Do · RD-160/167 To Do (Kam's) · RD-155 To Do High — the builder was ORDERED 04:2x to move RD-168/169/170/165/158 → Testing before its wrap; states may have moved by the time you read | Wednesday's own Jira REST read (read-only grant), 04:2x AEST 09-02 | read 2026-09-02
 - Kam's standing QA-gate process + "completion, not the same test" | dashboard chat 2026-09-01T17:55:18 + 17:55:45 AEST | read 2026-09-01
+
+---
+
+## ADDENDUM (Wednesday, 04:3x AEST, after the builder's wrap landed 18:27:44Z)
+- **The origin branch head moved by ONE commit after this brief was written: `refs/heads/rd-136-nga-defaults-s12` is now `9b4e829`** (= `19fde0c` + `HISTORY.md`, `docs/sustainability/S16_ROUND7_HANDOVER.md`, and four caveat lines opening `tests/e2e/dark-mode-contrast.spec.js` + `playwright.config.js` — 4 files, +213, **zero under `static/` or `backend/`** by Wednesday's own `git diff --stat 19fde0c..9b4e829` after a fetch). **`:3017` at `19fde0c` remains the correct artefact for every measurement; nothing served changed.** Read the diff yourself if you want the control.
+- The builder's wrap reports (its claims): RD-168/169/170/165/158 → Testing via transition 31 with commit comments; **RD-172 filed (Medium) = the settle condition**, with the "NOT A GATE" line now in both the spec header and the config; `:3017` left up, `:3016`/`:3015` retired; 12 worktrees intact; demo untouched. Confirm-don't-re-file RD-172.
