@@ -1748,3 +1748,8 @@ Done with it: Dynamics → Kam's team decision (no action); QuickQuote masthead/
 > Please look into it. The feedback from our next supporter.Please look into it. The feedback from our nexus platform.
 
 *Note:* Read through dictation noise as: look into the NexusAI platform's user feedback. NexusAI s11 launched (feedback sweep, repo-first reconciliation per the 08-26 lesson); one-item clarifier offered on the panel
+
+## 2026-09-01 13:46 — Kam (dashboard chat, verbatim)
+> implement both so admin can choose option and configure in first run.  follow tenant selection and setup model in log analytics - for rd135
+
+*Note:* RD-135 ruling: both routes admin-selectable; card ruled with verbatim (option set lacked 'both' — direct truthful write; decision_queue 'other'-pathway = consolidation candidate); build commissioned to s11
