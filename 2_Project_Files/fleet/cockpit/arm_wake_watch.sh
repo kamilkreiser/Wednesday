@@ -122,7 +122,13 @@ RUNNER='
       # comments here, ever; one broke the arm path on the first fix attempt.
       *"new mail"*|*"idle at prompt"*|*"message from Kam"*) MSG="[wake_watch] $OUT — check the fleet inbox / pane now." ;;
       *"ctx at"*) MSG="[wake_watch] $OUT — apply rhythm §2 now; rotate at the task boundary via cockpit.sh rotate <Client/Project> (wednesday pane: own checkpoint ritual)." ;;
-      *) MSG="" ;;
+      # content-FROZEN added 2026-09-01 (WED-136, ledger w=5 enforcement-scoped-narrower):
+      # the FROZEN-BUSY leg (wake_watch.sh, 2026-08-23) fired 14 times on an idle
+      # Secuura pane with a permanent sentinel shell and every fire fell through
+      # this case un-tapped. Same defect as the 08-17 chat-leg row: leg widened,
+      # consumer not. Any new wake shape gets a line HERE the day it is added.
+      *"content FROZEN"*) MSG="[wake_watch] $OUT — turn likely ended with work or mail pending: check the inbox FIRST, then the transcript mtime, then the detector at the pane; tap or score as the state requires." ;;
+      *) echo "$(date "+%Y-%m-%d %H:%M:%S") WAKE UNMATCHED by tap case (add a pattern): $OUT"; MSG="" ;;
     esac
     if [ -n "$MSG" ]; then
         if '"$TMUX_BIN"' list-panes -t fleet:0 -F "#{@cockpit_name}|#{pane_id}" 2>/dev/null | grep -q "^wednesday|"; then
