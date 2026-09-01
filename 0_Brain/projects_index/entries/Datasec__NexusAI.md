@@ -3,12 +3,17 @@ client: Datasec
 project: NexusAI
 path: /Volumes/DevMASTER/!CODING/Datasec/NexusAI
 status: active
-updated: 2026-09-01
+updated: 2026-09-02
 ---
 
 # Datasec / NexusAI
 
 **s12 (2026-09-01 17:3x→19:37, 0.85) + s13 LIVE (19:45→):** Kam's round-2 commission (17:25): Settings icon (bi-tree) · 27 NGA-2025-sourced deployment-default factors with references · Sustainability tab root-caused + fixed · SCIM F-1/F-4 tests-first (fb3b11e) · the fleet QA GATE's first live run (Kam 17:55): pass 1 = 18 findings on a 1.0-scored build → fix round (14/17 held) → pass 2 = PASS with findings, six dashboard Major rows + two SCIM Majors remain → **item 5 'fully functional' NOT MET** (PAPER COST $0 on the empty default view) → s13 = refine round 2 on branch `rd-136-nga-defaults-s12` (head cca9fb014). Nothing deployed since --0000091; SCIM OFF. RD-141/143/144/145/146 filed.
+
+**Open / next (refreshed 2026-09-02 00:37 — 🎉 ca98a55 DEPLOYED to demo as --0000092; s14 WRAPPING on my word; s15 = round 6's second half):**
+- **Deployed (verified from my seat 00:2x):** rev `--0000092`, image `1.23.0-rd136-s12-ca98a55`, digest sha256:c589bccc…; rollback `--0000091` sha256:055ea791… (re-read live before the swap); range 1d0b9c6..ca98a55 (rounds 2–5), 837/837; (a)/(e) preconditions SUBSTITUTED behind the SSO wall (platform-log line + the presence-discriminating `/css/dark-mode.css`, sha-identical, 404 control) — accepted; doc corrected. RD-136/137/138 **Release Ready**. For Kam: default view shows 'Unavailable' tiles by design (pick All Time); `POST /api/settings/costs` now 400s on invalid values.
+- **Round 6 (s14 checkpoint 00:33):** R6-1 RD-157 DONE at `449af60` (the HTML's three typo classes fixed, not the CSS — 3 vs 11 uses, no sheet defined the typo; its flattering jsdom assertion deleted) · R6-4 RD-160 measured, NOTHING changed → **Kam card `nexusai-rd160-brand-chrome-contrast`** (rec #00719f on text-bearing chrome; default HOLD) · **R6-2 RD-158 + R6-3 RD-159 (High) → s15** from `docs/sustainability/S15_ROUND6_HANDOVER.md` at `3f180d6` (sweepPage ENUMERATES — 267/99/7 are over-counts, Bootstrap unpainted in jsdom; the real engine DECIDES — the tester's 87; settings clean) → QA SURFACE UP (pass 7, new port) → whole-page acceptance sweep → completion check → SCORE → any deploy = a fresh GO by digest. `:3015` stays up at ca98a55 as the live control until pass 7's surface stands. s14 SCORE at its wrap (rec 0.85–0.90: two rounds delivered in the engine; three own regressions across rounds 4–5, all gate-caught; exemplary disclosure; QA report ids pass 5 + pass 6).
+- **Residual tickets (To Do):** RD-157 In Progress · RD-158 Med · RD-159 High · RD-160/161/162 Low · **RD-155 High PRE-EXISTING** (numeric-only settings.json abandons DATA_DIR — Kam's priority call) · RD-148 + auth-enforced P2-07 re-verify before any SCIM flip (card `nexusai-scim-deploy-live-ab` default A) · `nexusai-energy-kpis-tec` default dark.
 
 **Open / next (refreshed 2026-09-01 23:26 — s14 round 5 briefed; NO deploy from 1f41edc):**
 - **s14 (live, holding→round 5):** pass 5 = PASS WITH FINDINGS; my completion check FAILS leg 3 (first-run-setup dark 41/67 lines fail AA) → round 5: R5-1 cost `pattern` does not compile in Chrome (escape the dash; test compiles with the `v` flag) · R5-2 six `.text-*-emphasis` rules need `!important` · R5-3 dark counterparts for first-run-setup's own surfaces (light untouched) · R5-4 real `JsonStorage` in the cache test · R5-5 → RD ticket (a cost cannot be un-set through the product) → QA SURFACE UP (pass 6, new port) → my completion check → SCORE s14 → deploy GO by digest. :3013 retired on this ruling; :3014 until pass 6's surface.
