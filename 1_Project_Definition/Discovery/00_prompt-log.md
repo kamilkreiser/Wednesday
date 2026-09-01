@@ -1743,3 +1743,8 @@ Done with it: Dynamics → Kam's team decision (no action); QuickQuote masthead/
 > messages from peter [WhatsApp thread relay, 31/8 19:01 → 1/9 00:22, incl. Peter↔Stuart platform-s exchange (#588 conflict→fixed→approved; Playwright-evidence-for-code-changes rule stated), Peter's approvals to Kam (#757 21:54, #743 22:10), and his 00:20 'Platform-K PR Status' screenshot: 24 open-comment rows 'all awaiting Kamil' + 'Let me know if I have missed any']
 
 *Note:* Relayed by Kam in-session; screenshot rows reconciled against s92–s95 state; remainder → next Secuura leg queue
+
+## 2026-09-01 13:33 — Kam (dashboard chat, verbatim)
+> Please look into it. The feedback from our next supporter.Please look into it. The feedback from our nexus platform.
+
+*Note:* Read through dictation noise as: look into the NexusAI platform's user feedback. NexusAI s11 launched (feedback sweep, repo-first reconciliation per the 08-26 lesson); one-item clarifier offered on the panel
