@@ -1821,3 +1821,12 @@ Done with it: Dynamics → Kam's team decision (no action); QuickQuote masthead/
 > I also noticed that the nexus page (in testing) is adopting blue backgrounds (this is secuura not Datasec).  Please make sure project style guides are adhered to an never mixed
 
 *Note:* Measured: NexusAI dark-mode.css at 6b78315 grounds = a navy/indigo family (#1a1a2e/#1e1e3f/#252550/#16213e), NO style guide/brand token file in the repo, eight QA passes measured contrast never brand. Learning filed (style-guides-never-mixed), ledger row, pass-9 ADDENDUM (brand conformance = Major class), fleet brief standing line, s17 item 0 = style guide from the project's own brand tokens + dark palette PROPOSED to Kam before it ships; deploy of rounds 6-8 HELD on the palette.
+
+## 2026-09-02 08:25 — Kam (terminal, verbatim)
+> can you please look at the following message from Peter - [1/9/2026, 1:26:44 am] ~Douglas Peter: Currently working on Akto isolation, I will finish it tomorrow, this is what I have so far.  You are welcome to add comments to the draft PR, but I won't be satisfied until I run Akto tests.
+> https://github.com/Secuura/Distributed_Secuura/pull/765
+> [1/9/2026, 10:46:16 pm] ~Douglas Peter: @Kam
+> Where are we with this one?
+> https://github.com/Secuura/Distributed_Secuura/pull/568
+
+*Note:* Measured from my seat first: #765 open at d16aa25d3 (Peter's KS-691, our at-head approval per the agents' instruments, never merged by us — his to merge after his Akto run); #568 open at c114ceddd, untouched since 2026-08-20, 43 commits behind develop, 7 reviews; our records carry a '#568 rebase plan' handed between sessions since 08-21. Assessment + the words for Kam to send Peter in the terminal reply; a bounded Secuura review session on #568 proposed.
