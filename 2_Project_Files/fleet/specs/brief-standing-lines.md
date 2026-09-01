@@ -36,6 +36,20 @@ here and travel in the brief body.
 - **Unquoted heredocs execute backticks** — `<<'EOF'` for every brief/note body.
 
 ## Process
+- **Palette from THIS project's style guide only — never invented, never another client's
+  (Kam, 2026-09-02: "make sure project style guides are adhered to and never mixed").** Every
+  UI brief names the project's style-guide / brand-token file as a READ-FIRST pointer. If none
+  exists, item 0 of the round is to write it from the project's own existing brand tokens (the
+  light theme, the logo, the customer's guide where the product is a client deliverable) — no
+  new colour ships before the guide does. QA passes on visual work carry a brand-conformance
+  leg: every introduced colour → the token it resolves to, or OFF-GUIDE = Major at any
+  contrast ratio, no allow-list. A derived theme/palette is a BRAND decision = Kam's signature
+  (the RD-160 precedent): rendered proposal to him before it ships. Instance: NexusAI dark
+  mode rounds 6–8 (an invented navy palette, nine contrast passes, zero brand legs).
+- **A ticket's title/description is not its resolution** — an archived ticket's conclusion is
+  read from its resolution comments and the tree, and a constraint older than the current
+  brief chain gets one re-read before it is copied forward (KS-291 "infeasible" carried
+  stale for two days; ledger w=57, 2026-09-02).
 - **A deferral recorded only in code ("tracked on KS-nnn") must have its own OPEN ticket**
   before the parent closes (KS-586 → KS-692).
 - **Never delete** — quarantine (dated folder / Archive/); briefs carry the rule.

@@ -70,3 +70,16 @@ PROVENANCE:
 - Jira at 07:1x by Wednesday's own REST read: RD-161/165/168/171/172/173/174/177/179 Testing · RD-180/162/176/178 To Do · RD-160/167 To Do (Kam's) · RD-155 To Do High | Wednesday's Jira read-only grant | read 2026-09-02
 - Kam's standing QA-gate process + "completion, not the same test" | dashboard chat 2026-09-01T17:55:18 + 17:55:45 AEST | read 2026-09-01
 - The RD-179 fix-now order + containment (own commit, allow-list out) | Wednesday's ANSWER 2026-09-01T20:46:12Z in datasec-nexusai@ | read 2026-09-02
+
+---
+
+## ADDENDUM 2 (Wednesday, 07:3x AEST — KAM'S OWN OBSERVATION, read it before you write a verdict line)
+**Kam looked at the NexusAI page under test and saw the dark theme's BLUE grounds as another client's aesthetic, not Datasec's / HP's.** Measured from Wednesday's seat at `6b78315`: the dark grounds are a navy/indigo family (`html[data-theme="dark"]` `#1a1a2e`; then `#1e1e3f` ×18, `#2a2a4a` ×12, `#252550` ×11, `#16213e`, `#16263f` …), and **this repository contains NO style guide, brand-token or palette file** (`git ls-tree` at the head: zero matches for style-guide/brand/token/palette/theme). The product's own brand blue (`#0096d6` family, `#00719f`) lives in the light theme only.
+
+**This adds a completion LEG to this pass — brand conformance — at MAJOR class, no allow-list:**
+1. **Enumerate every colour value the dark theme introduces** (backgrounds, borders, text) from `dark-mode.css` at `6b78315` and from any inline/JS-set dark value, as a table: **value → the light-theme/brand token it derives from, or OFF-GUIDE.** A colour that resolves to nothing in the project's own light palette is OFF-GUIDE. Report the count and the ratio.
+2. **State plainly in your verdict whether the dark theme, as rendered, reads as THIS product's brand** (HP Authentication Suite / Datasec — the light theme is the de-facto guide since no document exists) **or as an invented palette.** Screenshots of the dashboard and the wizard in dark beside their light versions, same viewport.
+3. **The absence of a style guide is itself a finding** (Major): record it as such, with the light theme's brand tokens you could identify as the material a guide would be written from.
+4. Nothing above changes the contrast legs — run them as briefed. **But a PASS on contrast with an OFF-GUIDE palette is "PASS with findings" at best, never "PASS for review".** Wednesday's completion check and any deploy are now HELD on a Kam-approved palette regardless of the contrast verdict — say so in your SUMMARY so the record is consistent.
+
+PROVENANCE (addendum): Kam's words verbatim in Wednesday's prompt log 07:35 AEST 09-02 · the dark-ground values + the zero style-guide files = Wednesday's own `git show 6b78315:static/css/dark-mode.css` + `git ls-tree -r 6b78315` at 07:3x AEST 09-02.

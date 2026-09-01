@@ -8,6 +8,8 @@ updated: 2026-09-02
 
 # Datasec / NexusAI
 
+**🔴 DEPLOY HOLD (Kam, 2026-09-02 07:3x — brand): the dark theme (rounds 6–8, head `6b78315`/`451dfba`) is an INVENTED navy/indigo palette (`#1a1a2e`/`#1e1e3f`/`#252550`/`#16213e` — measured from my seat) and the repo has NO style guide / brand-token file. Kam saw it as another client's aesthetic. Rounds 6–8 do NOT deploy on any pass-9 contrast verdict — deploy = a Kam-approved palette first. s17 item 0 = write `docs/STYLE_GUIDE.md` + a brand-token file from the product's existing HP tokens (`#0096d6` family in the light theme), derive the dark palette from it, PROPOSE to Kam as rendered screenshots both modes, then re-theme; a guard that every dark-mode colour resolves to a token. Pass 9 carries a brand-conformance leg (ADDENDUM 2). Lesson: learnings/2026-09-02_style-guides-never-mixed.**
+
 **s12 (2026-09-01 17:3x→19:37, 0.85) + s13 LIVE (19:45→):** Kam's round-2 commission (17:25): Settings icon (bi-tree) · 27 NGA-2025-sourced deployment-default factors with references · Sustainability tab root-caused + fixed · SCIM F-1/F-4 tests-first (fb3b11e) · the fleet QA GATE's first live run (Kam 17:55): pass 1 = 18 findings on a 1.0-scored build → fix round (14/17 held) → pass 2 = PASS with findings, six dashboard Major rows + two SCIM Majors remain → **item 5 'fully functional' NOT MET** (PAPER COST $0 on the empty default view) → s13 = refine round 2 on branch `rd-136-nga-defaults-s12` (head cca9fb014). Nothing deployed since --0000091; SCIM OFF. RD-141/143/144/145/146 filed.
 
 **Open / next (refreshed 2026-09-02 05:0x — PASS 8 read: s15 round 7 SCORED 0.85; leg 3 NOT MET → NO deploy; ROUND 8 = s16):**

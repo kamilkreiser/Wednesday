@@ -1816,3 +1816,8 @@ Done with it: Dynamics → Kam's team decision (no action); QuickQuote masthead/
 > please amend your script to use fable 5.1 rather than 5.  Is there a way for you to always choose the latest fable model?
 
 *Note:* Launch_Wednesday.command exec line changed from the dated pin claude-fable-5 to the 'fable' ALIAS (claude --help: alias = the latest model) so every launch tracks the newest Fable without an edit; doctor.sh gained a check that warns if a dated Fable ID ever returns to the launcher. Resolved model name recorded per boot from the pane statusline.
+
+## 2026-09-02 07:35 — Kam (terminal, verbatim)
+> I also noticed that the nexus page (in testing) is adopting blue backgrounds (this is secuura not Datasec).  Please make sure project style guides are adhered to an never mixed
+
+*Note:* Measured: NexusAI dark-mode.css at 6b78315 grounds = a navy/indigo family (#1a1a2e/#1e1e3f/#252550/#16213e), NO style guide/brand token file in the repo, eight QA passes measured contrast never brand. Learning filed (style-guides-never-mixed), ledger row, pass-9 ADDENDUM (brand conformance = Major class), fleet brief standing line, s17 item 0 = style guide from the project's own brand tokens + dark palette PROPOSED to Kam before it ships; deploy of rounds 6-8 HELD on the palette.
