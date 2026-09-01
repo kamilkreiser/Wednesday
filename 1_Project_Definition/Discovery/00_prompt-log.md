@@ -1835,3 +1835,13 @@ Done with it: Dynamics → Kam's team decision (no action); QuickQuote masthead/
 > I will hold off sending the message to Peter. He is in a different timezone and wont come back online for 12 hours.  If its in hand, it will be finished by then.  Prioritise the fix and let me know what you need from me
 
 *Note:* Ruling: #568 fix prioritised, target = finished before Peter is back (~12h); external message to Peter HELD. Wednesday's needs list back to Kam: (1) #780 — the push gate; Peter is the only working approver, so either wait 12h or Kam merges the one-file baseline PR as repo owner today (card); (2) his word to lift the 08-21 HOLD on s104's clean delta-pass verdict (card); (3) whether s104's delta pass stands as the substitute for his personal sign-off re-pin.
+
+## 2026-09-02 09:15 — Kam (terminal, verbatim)
+> merge #780 myself as owner — go ahead.
+
+*Note:* Kam's ruling on card secuura-780-owner-merge: OWNER-MERGE. Read as: the merge is authorised under his repo-owner authority; the Secuura agent executes it as the kksecura account (his), records the owner ruling on KS-751 + the PR; if Kam clicks it himself first the agent finds it merged and skips. Then: restore the KS-749/751 walk → baseline union + push 63f4b2c34 → push custody/568-rebase (branch only) → #568 still HOLD (separate card).
+
+## 2026-09-02 09:16 — Kam (terminal, verbatim)
+> also, For Nexus AI: "Is there any reason why the sustainability tab has all panes as unavailable?" The sustainability metrics and calculations should be applied historically to all jobs. And... We should be able to calculate the information accordingly.
+
+*Note:* Measured answer from pass 9 (09-02): the default Last-30-Days window holds zero jobs on the demo dataset (jobs 2026-01-30..2026-04-29) so every tile reads Unavailable until All Time is selected; energy/Scope-2 tiles dark by the provisional-factor stand (card nexusai-energy-kpis-tec). Kam's ruling read as: (1) the empty default is a DEFECT — compute historically over all stored jobs / default the window to the data's span; (2) energy KPIs COMPUTE from the sourced NGA factors, labelled provisional. Routed to s17 as an ADDENDUM; card ruled compute.
