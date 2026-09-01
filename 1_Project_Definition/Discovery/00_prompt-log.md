@@ -1806,3 +1806,8 @@ Done with it: Dynamics → Kam's team decision (no action); QuickQuote masthead/
 > [1/9/2026, 6:51:05 pm] ~ Douglas Peter: Approved: https://github.com/Secuura/Distributed_Secuura/pull/741
 
 *Note:* Peter's WhatsApp approvals relayed → ADDENDUM to Secuura s96: verify both on both instruments, read #730's comments, merge under the pre-authorised framework.
+
+## 2026-09-01 21:53 — Kam (terminal, verbatim)
+> Some new tickets approved by Peter, please check through the secure agent and one and make sure that all the tickets that have been actioned are archived
+
+*Note:* routed to Secuura s98 item 0: approval sweep + merges under the framework; KS completed-type archive pass measured first, PS untouched
