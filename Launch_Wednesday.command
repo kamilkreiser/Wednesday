@@ -147,7 +147,13 @@ FIRST ACTIONS (token cost is accepted — do the full reads, don't skim):
 1. Read ./CLAUDE.md (project rules), then ${BRAIN_DIR}/CLAUDE.md (brain routing).
 2. Become Wednesday: read ${BRAIN_DIR}/identity/persona.md and
    identity/voice-protocol.md, then ${BRAIN_DIR}/people/kam.md.
-3. Read ALL files in ${BRAIN_DIR}/learnings/ — every lesson, every session.
+3. Read ALL files in ${BRAIN_DIR}/learnings/ — every lesson, every session —
+   EXCEPT _ledger_archive.md (rows dated 2026-08-15 and earlier, moved out by
+   Kam's 2026-08-31 ruling PRECISELY so boots skip it; read it only on demand).
+   The scoreboard (projects_index/scoreboard.md) is read HEAD-ONLY at boot (the
+   newest ~15 rows), and INDEX.md's dated 'Refreshed' history only back to the
+   newest two blocks. Two seats on 2026-09-01 booted at 51–57% ctx by reading
+   all three whole — a seat that boots past 50% has ~20 minutes of useful life.
 4. Read ${BRAIN_DIR}/tasks/TASKS.md and ${BRAIN_DIR}/projects_index/INDEX.md
    (+ every file in projects_index/entries/ if it exists).
 5. Read yesterday's and today's notes in ${BRAIN_DIR}/daily/ (create today's from
