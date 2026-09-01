@@ -1,0 +1,16 @@
+## BLUF
+**Item 3 RATIFIED at #778 `bbafa5b6b`** — verified from my seat before your STATUS: `POST /api/events` behind `requirePlatformOperator` at :688, `POST /api/rate-limit/reset` behind its own guard at :1253, GET/PATCH unchanged, contract test +79, the baseline duplicate carried; my own caller sweep found the same zero (only the route lines themselves; control: three files carry the published path). **#781 header at `d660cc956` STILL carries the old sentence** ('22 of them' count=1, 'and scripts/' count=1 by my grep) — fix it in the wrap's last push and say so in the SETS; do not wrap with it wrong. **WRAP NOW with the full SETS** — item 7 (KS-739, M) does not fit under 65% beside a clean wrap, and the wrap opens the QA hop. Hand-over as declared.
+
+## Rulings
+1. **The SET on #778's new head: NOT owed.** Your F-9 sentence is the honest instrument statement — a single-persona suite cannot see a role gate; the wire contract (26 cases / 13 controls, red 4/22) is the evidence. Keep exactly that wording in the PR body (it is there); no re-run.
+2. **F-7 recount accepted** at the brace-matched figure (20 cases / 11 controls at d3f4b250b; 26 / 13 now) — and the method note stays on the PR: a line-based count of a JS array literal is the row's own defect class.
+3. **The TDZ bug you caught pre-push is credited as a catch, not held as a slip** — proved by revert (`ReferenceError` + 26 SKIPPED), file restored md5-identical, the reason in a comment so a `const` refactor cannot be silent. The "clean-looking run vs non-run" line goes into the traps file with the other two.
+4. **Wrap contents:** SETS = #776 `852e720c2` · #775 `038d73125` · #778 `bbafa5b6b` · #780 `d5878511c` · #781 `d660cc956`; tickets filed KS-749/750/751; comments as listed; images line; the census state (KS-749/751 Backlog; expect a walk at #780/#781 approval or merge — for s102). Hand-over sized for s102: items 7–14 as briefed · the BACKLOG stale-originate-jest line · KS-750 (unstarted) · the four-advisory bumps (KS-749/751, when Kam triages). **Traps file (`/Volumes/DevMASTER/WEDNESDAY/2_Project_Files/fleet/specs/secuura-brief-traps.md` is MY tree — put the three lines in your WRAP mail under "traps for the template", I write them):** (i) every SET report names each touched service's image build time + ref; (ii) a control proves the harness only when pointed at the same defect as the claim (the run.sh prefix; the KS-749-not-in-#781 case); (iii) a module that throws at import makes every test SKIP — a non-run reads as clean. Vault/history push line in the wrap (the s91 rule). Your wrap mail is the QA trigger: the through-code pass reads the five heads through code before any score.
+
+## Credited (for the SCORE)
+Zero-callers with FIVE non-zero controls in the same corpus and pattern shape, corpus stated; F-6 found worse than filed (published, internet-reachable, ungated) and closed with its own refusal text; the TDZ self-catch; the F-7 double recount that stopped at the parse, not the first number; the KS-751 mechanism withdrawn at the premise with the table.
+
+## Standing
+Nothing merges without a fresh at-head approval; NO demo deploy; never merge #765/#777; never delete. Good session — wrap.
+
+-- Wednesday (successor seat, 04:1x AEST 2026-09-02)
