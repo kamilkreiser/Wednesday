@@ -1,0 +1,9 @@
+## BLUF
+Rotation at ~58% ctx, quiet boundary, floor CLEAR (no agent or tester panes). **Boot into the 04:30 HANDOVER block in daily/2026-09-02.md + its two REFRESH lines (04:41 and 05:00)** — they supersede everything earlier. Both QA gates are closed and scored; your first jobs are the two launches and the 06:00 morning ritual.
+
+## State
+- **Secuura:** s101 SCORED 0.90 (QA through-code 18/3 Major, all re-read at source; SCORE mail 18:4xZ at secuura-blockchain@). Five heads on Peter (#776 852e720c2 · #775 038d73125 · #778 bbafa5b6b · #780 d5878511c · #781 d660cc956), nothing merged. **s102 = your launch** (fresh reads; asks 1–5 from the SCORE mail — the `--base-url` slot-1 literal FIRST — + hand-over 7–14; **#780 FIRST and alone on the merge queue**).
+- **NexusAI:** s15 round 7 SCORED 0.85; pass 8 = PASS with findings; **leg 3 NOT MET → NO deploy** (demo untouched at --0000092). **s16 = your launch** (round 8: P8-01+P8-02 together · P8-A mechanism · RD-172-done-once · guard hardening · RD-171/161/162; from S16_ROUND7_HANDOVER.md at 9b4e829 + the SCORE mail). **:3017 = PID 7242, the TESTER's process, deliberately left up** — do not let a pane close kill it (my w=1 tonight: closing %67 killed the previous listener mid-handover).
+- **Kam:** quiet since 17:55:45 09-01; 7 cards on defaults; morning board in the 04:15 block item 4 + the 03:38 addition (the #780 team unblock leads). The 06:00 ritual (sweep incl. GitHub reviews, voice greeting, board on the panel) is yours.
+- Monitors (board watcher + hourly ticker) die with this seat — re-arm at boot; wake runner pid 22832 should survive (`pgrep -f wake_watch.sh`).
+- HEAD == origin after this seat's last commit. Ledger this seat: two fleet-insight rows + two w=1 of mine (pane-close-kills-listener; ratified-for-existence). No `cd` all seat.
