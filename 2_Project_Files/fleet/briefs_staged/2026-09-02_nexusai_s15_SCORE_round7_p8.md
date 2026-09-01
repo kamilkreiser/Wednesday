@@ -1,0 +1,31 @@
+## BLUF
+**s15 round 7 SCORED 0.85. Completion check: legs 1+2 UNREGRESSED, leg 3 NOT MET → NO deploy from `19fde0c`/`9b4e829`; ROUND 8 on the delta = s16.** Pass 8 (report id `projects/nexusai/reports/2026-09-02-s15-sustainability-pass8`, PASS with findings) closed FOUR of the five ids at the root in a real engine — P7-01 1.07→12.39 (and `.warning` at 11.58), P7-03 1.35→7.27 with the state machine proven by a click, both P6-01 residues, P7-04's guard exact at 142/142 — and **the wizard is the first page in this campaign with zero dark failures outside RD-160's brand chrome (19 of 19 remaining lines are Kam's card)**. The deductions are two acts below. Every Major re-read at `19fde0c` from my seat and held.
+
+## Completion check (mine — delivered vs commissioned)
+1. Leg 1 (empty default view): PAPER COST unavailable-with-reason naming the real span — **UNREGRESSED** (measured verbatim).
+2. Leg 2 (period sentences): honest across all four windows — **UNREGRESSED**.
+3. Leg 3 (whole rendered page dark ≥4.5:1): **NOT MET** — `settings.html`'s eight other panels carry **P8-01** (Bootstrap `.bg-light`/white cards keep light grounds under `body.dark-mode` while `#e8e8e8` text lands on them: 1.14–1.23 across three panels; `dark-mode.css` has ZERO `.bg-*` counterparts — my grep) and **P8-02** (a round-7 REGRESSION: `body.dark-mode .btn-outline-secondary…{color:#b8c5d6}` lightened text that composites on those light grounds — same button 4.45 in light vs 1.66 in dark, the delta entirely the round-7 rule); plus **P8-A**: the P7-02 SYMPTOM survives the link fix — the link move was never the mechanism (`dark-mode.js:25` returns early with no `<body>`, defers to DOMContentLoaded which the pending sheet blocks, and the css has 0 `[data-theme]` selectors, so the signal available at first byte paints nothing). Contract line :8 ("no flash of light content") still false under a stalled sheet; normal case <81 ms (measured control).
+
+## The deductions (on acts)
+- **−0.05 — P8-02:** the round shipped a regression: a dark-foreground rule fully specified on the assumption the ground beneath is dark, on a page whose grounds the round never swept. It is the only line in the delta that moved backwards.
+- **−0.05 — P8-04:** the in-repo sweep shipped with three defects in the file built as the round's counter-move: `baseURL` defaults to `:3016` (retired — and the wrap disclosed catching exactly this, then shipped it at `19fde0c`), `enterDarkMode()` writes `localStorage['theme']` where the product reads `darkMode` (so the product's own path is never exercised), and it sweeps pages as-loaded only — it structurally cannot see P7-01, the finding it was written in answer to.
+
+## Credited (why 0.85 and not lower)
+- Four of five ids closed at the root, each with a positive control that moved (the 7.27 followed the click).
+- The wizard: 499 lines walked, 19 failures, all RD-160 — the first clean page of the campaign.
+- The WARNING on your own instrument ("none of those numbers is a finding") was exactly right, and the fencing verified 4/4 as claimed; RD-172 filed with a determinism acceptance criterion; the denominator drift chased into your own `<head>` comment and fixed in the harness.
+- Zero round-7 palette values reach light mode (10 values × 3 pages, tester-checked); light unregressed.
+- **Not deducted:** P8-A — you fixed exactly what P7-02 named and what I ordered; the deeper mechanism is new information, and it goes to s16, not against you. **P8-08 (the surface down at pass-8 start) is MINE:** I verified `:3017` 200 at 04:2x, then closed your pane at 04:29 — the listener almost certainly died with the pane's process tree. The tester restood it identically and disclosed. On my ledger, not yours.
+
+## ROUND 8 (s16 — briefed by the next coordinator seat from `S16_ROUND7_HANDOVER.md` at `9b4e829` + this mail; RD-172's settle work folds into item 3)
+1. **P8-01 + P8-02 TOGETHER:** `body.dark-mode` counterparts for `.bg-light`/`.bg-white`/`.bg-body` (+ the `.border` and the `-subtle`/`-emphasis` pairs) WITH `!important` (Bootstrap's own carries it — the R5-2 reasoning applied to backgrounds); P8-02 is then correct on the dark card. Guard = the tester's luminance sweep: no element's computed background lighter than the dark ground survives under `body.dark-mode`, failing by name.
+2. **P8-A:** paint the top-level grounds from `html[data-theme="dark"]` alongside `body.dark-mode` (or an inline `<style>` written from `<head>`), keep the link in `<head>`; regression test is a TIMING assertion (sheet delayed → at no sampled instant is the body light while `darkMode=true`), not a position one.
+3. **The sweep usable:** state-based settle (overlay gone + `document.fonts.ready` + styles stable across two rAFs), a navigation matrix (5 wizard sections · 9 tabs · 9 panels · selected filter states), `baseURL` to a live port or refuse when `/api/health` is dead, enter dark via `NexusDarkMode.apply(true)`, and the run-twice/same-sets assertion — this IS RD-172, done once.
+4. **Guard hardening (P8-05/P8-06):** variant scan covers `classList.add/toggle` + template literals; drift guard bidirectional; the memo cache keyed on a DOM revision (MutationObserver) or an exposed `invalidateColorCaches()` documented as mandatory after DOM mutation.
+5. **RD-171** (light `.result-box.warning`), then **RD-161/RD-162** as sized. **File as tickets:** P8-01 (High) · P8-02 (High, regression) · P8-07 (`consumable-text` 1.19 both modes — with the designer's text-shadow mitigation named) · the P8-04 fixes onto RD-172's ticket.
+- HOLDS unchanged: NO deploy without a fresh GO by digest after pass 9; SCIM OFF; RD-160 + RD-167 are Kam's cards; RD-155 its own round; never delete; `:3017` (now PID 7242, the tester's) stays up as the surface until s16 stands its own.
+
+## Record
+Scoreboard: s15 round 7 **0.85** · QA agent **1.0** (restood the dead surface with full disclosure; its own CSSOM null-instrument caught and replaced with a stronger A/B; six sabotages on a byte-identical copy; the navigation-matrix counter-move). Demo untouched at `--0000092` (verified: zero non-GET all session; `$HOME/data/settings.json` byte-identical).
+
+-- Wednesday (successor seat, 05:0x AEST 2026-09-02)
