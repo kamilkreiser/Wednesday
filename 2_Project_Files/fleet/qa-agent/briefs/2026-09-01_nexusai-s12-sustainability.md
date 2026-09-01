@@ -10,21 +10,22 @@
 
 ## 1. Target
 - **Client / Project:** Datasec / NexusAI (product: "NexusAI Print Analytics" dashboard — settings + reporting web app, Node/Express backend, vanilla JS front end with Bootstrap Icons).
-- **Running target:** `http://127.0.0.1:3011/` — a LOCAL run of commit `ef9859d` (branch `rd-136-nga-defaults-s12`) stood up by the project's own agent from a git worktree with a freshly seeded data directory. **Same commit as the branch under review, NOT the demo image.** Say exactly that in your report; never write that demo was tested.
+- **Running target:** `http://127.0.0.1:3011/` — a LOCAL run of commit `697c933` (branch `rd-136-nga-defaults-s12`; = ef9859d + one further commit that adds a unitBasis label to the three paper factors) stood up by the project's own agent from a git worktree with a freshly seeded data directory. **Same commit as the branch under review, NOT the demo image.** Say exactly that in your report; never write that demo was tested.
 - **Environment identity:** local, `NODE_ENV=development`, auth in OPEN mode by design (fresh data dir → `isAuthEnforced()` false; no shim). Confirmed by Wednesday from the agent's READY FOR QA + QA SURFACE UP mails.
 - **Production?:** NO. Nothing you touch reaches any deployed instance. The demo (a Container App) is SSO-only and is not your surface.
 - **Before trusting "localhost": fingerprint the browser** (`navigator.hardwareConcurrency`, `screen.width×height`) against this Mac (a Mac Studio M3 Ultra; compare with `sysctl -n hw.ncpu` in your shell). The Chrome extension can be attached to a different Mac; a refused loopback is the tell.
 
 ## 2. Spec / DoD being tested against
-- **Spec source (read-only):** the Sustainability Analytics dev spec v1.0 in the project tree — `@@WORKTREE@@/docs/sustainability/` (17 sections; §6.1 KPI definitions, §7.1 factor sourcing rule "never infer water/fibre from a carbon factor", §7.2 tree-equivalent display rule, §16 MVP scope, §17 "a metric must state its period").
+- **Spec source (read-only):** the Sustainability Analytics dev spec v1.0 in the project tree — `/Volumes/DevMASTER/!CODING/Datasec/NexusAI/qa-worktrees/697c933/docs/sustainability/` (17 sections; §6.1 KPI definitions, §7.1 factor sourcing rule "never infer water/fibre from a carbon factor", §7.2 tree-equivalent display rule, §16 MVP scope, §17 "a metric must state its period").
 - **What was changed in this round (the agent's claims — inputs to falsify, not evidence):**
   1. Settings → Sustainability nav entry AND section heading now show a TREE icon (`bi-tree`); previously the class `bi-leaf` rendered a blank (it does not exist in bootstrap-icons 1.10.0).
   2. Dashboard → Sustainability tab LOADS (previously "Could not load sustainability KPIs" on every deployment: the page called `/api/sustainability/kpis` with no period; the §17 guard refused; 500). Now: an unbounded request resolves its period against the data actually read; the tab FOLLOWS the dashboard's date controls (`#dateRange`, `#fromDate`, `#toDate`), reloads on change, and STATES its period on the tab.
   3. Factor registry (Settings → Sustainability): 27 sourced default factor records — NGA 2025 electricity Scope-2/Scope-3 by state/territory (Table 1) + three paper factors (water 665 L/kg; wood 3.51 m3/tonne paper; 24 tree-equivalents/tonne paper) — each with publication · table · row · version · effective-from · retrieved date · licence · link · alternatives considered. A **Reference column** was added. The "Not for reporting" banner is now CONDITIONAL: with nothing provisional it is replaced by a green summary of the three publications; the provisional machinery still exists and has a direct test.
   4. Settings → Costs: POST now returns a `deprecations` entry for `costPerSheetSimplex` (dormant setting retired; RD-140).
-  5. Every user-visible number on the tab carries its evidence class (Measured / Calculated / Unavailable) and "Where this number comes from" references.
-- **Code-review half (through code):** `@@WORKTREE@@/QA_DIFF.patch` (the full `git diff main...ef9859d`) and `@@WORKTREE@@/QA_CHANGES.md` (the agent's file-by-file claims + the tests covering each). Read the diff against each claim above; read the tests, don't only trust that they ran; note any claim with no test that could fail.
-- **Source tree (read-only, for root-causing):** `@@WORKTREE@@` (the worktree at ef9859d). Do not edit anything in it.
+  5. (commit 697c933) every paper factor record carries a `unitBasis` ("per tonne of finished paper (NOT per kilogram of wood)" on wood and tree-equivalents; "per kilogram of finished paper" on water) shown in the API, under the value in the registry table, and on the KPI tile reference line — check all three places; a per-tonne figure read as per-kilogram is wrong by 1000× and looks plausible.
+  6. Every user-visible number on the tab carries its evidence class (Measured / Calculated / Unavailable) and "Where this number comes from" references.
+- **Code-review half (through code):** `/Volumes/DevMASTER/!CODING/Datasec/NexusAI/qa-worktrees/697c933/QA_DIFF.patch` (the full `git diff main...697c933`) and `/Volumes/DevMASTER/!CODING/Datasec/NexusAI/qa-worktrees/697c933/QA_CHANGES.md` (the agent's file-by-file claims + the tests covering each). Read the diff against each claim above; read the tests, don't only trust that they ran; note any claim with no test that could fail.
+- **Source tree (read-only, for root-causing):** `/Volumes/DevMASTER/!CODING/Datasec/NexusAI/qa-worktrees/697c933` (the worktree at 697c933). Do not edit anything in it.
 
 ## 3. Scope
 - **Charter:** explore the Settings → Sustainability surfaces and the Dashboard → Sustainability tab as a demanding admin user who will put these numbers in front of a customer, looking for figures that are wrong, unlabelled, unsourced, or that change meaning when the date range changes; and review the diff for claims the tests cannot falsify.
@@ -58,7 +59,7 @@
 ---
 
 PROVENANCE:
-- Local run at 127.0.0.1:3011 = commit ef9859d in a worktree with a seeded data dir, open-mode auth by design, NOT the demo image | NexusAI agent mails READY FOR QA 2026-09-01T08:11:57Z + QA SURFACE UP (@@SURFACE_TS@@) in wednesday-agent@agentmail.to | read 2026-09-01
+- Local run at 127.0.0.1:3011 = commit ef9859d in a worktree with a seeded data dir, open-mode auth by design, NOT the demo image | NexusAI agent mails READY FOR QA 2026-09-01T08:11:57Z + QA SURFACE UP (2026-09-01T08:17:42Z) in wednesday-agent@agentmail.to | read 2026-09-01
 - The five change claims, the icon root cause (bi-leaf width 0 / bi-tree 16px), the tab root cause (missing period → §17 refusal → 500, demo logs 07:48:44Z) | READY FOR QA mail 2026-09-01T08:11:57Z + Kam's live screenshots 17:5x AEST | read 2026-09-01
 - Seeded span 2026-01-30 → 2026-04-29; DATA_DIR trap (RD-143) | READY FOR QA mail | read 2026-09-01
 - Spec location docs/sustainability in the project tree | ls of the NexusAI repo | read 2026-09-01
