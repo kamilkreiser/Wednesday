@@ -1845,3 +1845,8 @@ Done with it: Dynamics → Kam's team decision (no action); QuickQuote masthead/
 > also, For Nexus AI: "Is there any reason why the sustainability tab has all panes as unavailable?" The sustainability metrics and calculations should be applied historically to all jobs. And... We should be able to calculate the information accordingly.
 
 *Note:* Measured answer from pass 9 (09-02): the default Last-30-Days window holds zero jobs on the demo dataset (jobs 2026-01-30..2026-04-29) so every tile reads Unavailable until All Time is selected; energy/Scope-2 tiles dark by the provisional-factor stand (card nexusai-energy-kpis-tec). Kam's ruling read as: (1) the empty default is a DEFECT — compute historically over all stored jobs / default the window to the data's span; (2) energy KPIs COMPUTE from the sourced NGA factors, labelled provisional. Routed to s17 as an ADDENDUM; card ruled compute.
+
+## 2026-09-02 09:48 — Kam (terminal, verbatim)
+> lift the hold on 568 — merge it once the suites pass
+
+*Note:* Ruling on card secuura-568-custody-lift-hold → lift-on-evidence. Merge of #568 (as the rebased custody branch 8d7109411) authorised by Kam (repo owner + the ticket's assignee; Peter's 08-21 handover of merge authority stands) CONDITIONAL on the four platform suites PASSING on images rebuilt from the landing tree. Ordered to s105 as an ADDENDUM; no demo deploy ruled.
