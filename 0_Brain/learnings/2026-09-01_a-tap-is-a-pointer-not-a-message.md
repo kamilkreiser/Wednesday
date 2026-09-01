@@ -2,7 +2,7 @@
 date: 2026-09-01
 type: correction
 source: "w=2 (channel-of-record family, sender side): 2026-08-24 four resume taps to NexusAI s3 went pane-only during the 529 outage (agent flagged 'no mail for any of them'; status cell said 'practice adopted; watch for recurrence'); 2026-09-01 15:17 my first act as the rotation successor was a pane tap to Secuura s95 announcing the rotation with no mail behind it — its STATUS 05:18Z: 'NO such mail in my inbox… either your successor needs to mail me, or something is putting instructions in my pane.'"
-status: live
+status: live — ENFORCED 2026-09-02 (cockpit.sh say --mail)
 supersedes: ""
 ---
 
@@ -51,3 +51,17 @@ fleet rule I enforce on every agent says it must be treated exactly that way.
 sender-side twin of), [[2026-08-07_authorship-is-checkable-dkim]] (why mail and not pane),
 [[2026-08-26_mirror-reports-state-not-intent]] (zero-cost recurrences), [[2026-08-04_gitignore-artifacts-at-creation]]
 (a candidate is not a destination), [[_ledger]]
+
+## ENFORCED 2026-09-02 00:57 (w=3 — the order broke a third time, with the mail present)
+
+Third instance (ledger 2026-09-02): the ANSWER was sent through the gate and the tap fired on the
+send's exit code, seconds before a read-back CONFIRMED the mail at the destination (the delivery
+race; the predecessor had re-read first at 00:25). Rule 4's candidate is now the mechanism:
+
+- `cockpit.sh say <pane> <pointer> --mail '<subject substring>'` — reads the project's inbox
+  (routing conf) up to 4× over ~24 s and REFUSES the tap (rc=5) unless a message with that subject
+  is there. The read-back is in the path of the tap; it cannot be skipped or raced by hand.
+- A tap longer than 200 chars without `--mail` is refused (rc=4): content goes by mail, always.
+- Exercised before reliance: both refuse paths + the pass path on a scratch tmux session.
+- For my hands: every pointer tap that follows a mail carries `--mail`. The bare form remains for
+  taps with no mail behind them (a bell pointer, 'read your inbox').

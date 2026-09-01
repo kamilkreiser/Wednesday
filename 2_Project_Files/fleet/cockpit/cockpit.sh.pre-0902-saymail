@@ -216,49 +216,7 @@ case "${1:-}" in
     # Now: refuse an occupied prompt (someone's line is there — Kam typing, or an
     # earlier undelivered tap) · send text · Enter · read the prompt back · if the
     # text is still there, Enter ONCE more · still there → exit 2, loudly.
-    # --mail <subject-substring> (2026-09-02, ledger w=3 in the tap-is-a-pointer family): a tap
-    # is a POINTER; the mail is the message. The mail must be READ BACK at the destination
-    # BEFORE the tap — twice the read-back raced the delivery and the tap went first. Enforced:
-    # text longer than $SAY_MAX_PTR chars is refused without --mail; with --mail the subject is
-    # polled at the project's inbox (delivery race ~30 s) and the tap is refused if absent.
-    MAIL_SUBJ=""
-    if [ $# -eq 5 ] && [ "$4" = "--mail" ]; then MAIL_SUBJ="$5"; set -- "$1" "$2" "$3"; fi
-    [ $# -eq 3 ] || die "usage: cockpit.sh say <pane-name> <text> [--mail <subject-substring>]"
-    SAY_MAX_PTR="${SAY_MAX_PTR:-200}"
-    if [ -z "$MAIL_SUBJ" ] && [ "${#3}" -gt "$SAY_MAX_PTR" ]; then
-      echo "cockpit: REFUSED — tap is ${#3} chars (> $SAY_MAX_PTR): a tap is a pointer, content goes by mail. Send it through send_brief.sh, then: say <pane> '<pointer>' --mail '<subject substring>'" >&2
-      exit 4
-    fi
-    if [ -n "$MAIL_SUBJ" ]; then
-      SAY_DIR="$(cd -P "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
-      SAY_ROUTING="$SAY_DIR/../inbox_routing.conf"
-      DEST_INBOX="$(grep -v '^[[:space:]]*#' "$SAY_ROUTING" | grep -F "$2|" | head -1 | cut -d'|' -f2)"
-      [ -n "$DEST_INBOX" ] || die "--mail: pane '$2' has no inbox in $SAY_ROUTING"
-      SAY_ENVF="$SAY_DIR/../../../4_Credentials/.env"
-      [ -f "$SAY_ENVF" ] || die "--mail: no env file at $SAY_ENVF"
-      ( set -a; . "$SAY_ENVF"; set +a
-        python3 - "$DEST_INBOX" "$MAIL_SUBJ" <<'PYMAIL'
-import os,sys,json,time,urllib.request
-inbox,subj=sys.argv[1],sys.argv[2]
-key=os.environ.get("AGENTMAIL_API_KEY","")
-if not key:
-    print("cockpit: --mail: AGENTMAIL_API_KEY empty in the env file",file=sys.stderr); sys.exit(2)
-ms=[]
-for i in range(4):
-    r=urllib.request.Request(f"https://api.agentmail.to/v0/inboxes/{inbox}/messages?limit=10",headers={"Authorization":"Bearer "+key})
-    try: ms=json.load(urllib.request.urlopen(r,timeout=40)).get("messages",[])
-    except Exception as e: print("cockpit: --mail: read error:",e,file=sys.stderr); ms=[]
-    hit=[m for m in ms if subj in (m.get("subject") or "")]
-    if hit:
-        print(f"cockpit: --mail verified at {inbox}: {hit[0].get('timestamp','')[:19]} | {(hit[0].get('subject') or '')[:90]}"); sys.exit(0)
-    if i<3: time.sleep(8)
-print(f"cockpit: REFUSED — no mail matching '{subj}' at {inbox} after 4 reads (~24 s). Newest there:",file=sys.stderr)
-for m in ms[:3]: print("   ",m.get("timestamp","")[:19],"|",(m.get("subject") or "")[:90],file=sys.stderr)
-sys.exit(5)
-PYMAIL
-      ); mrc=$?
-      [ "$mrc" -eq 0 ] || exit "$mrc"
-    fi
+    [ $# -eq 3 ] || die "usage: cockpit.sh say <pane-name> <text>"
     "$TMUX_BIN" has-session -t "$SESSION" 2>/dev/null || die "no fleet session"
     PANE=$("$TMUX_BIN" list-panes -t "$SESSION:0" -F '#{@cockpit_name}|#{pane_id}' | awk -F'|' -v n="$2" '$1==n{print $2}')
     [ -n "$PANE" ] || die "no pane named '$2'"

@@ -1,0 +1,12 @@
+## BLUF
+**CONFIRMED — GO on 0 → 1 → 2 → 4 exactly as you planned** (RD-157 → Testing with the 449af60 evidence comment; RD-158 then RD-159 → In Progress; port 3016; retire :3015 only once the pass-7 surface stands; minors only under ~55%). Your boot receipt is clean (preflight timestamp-only, sweep controls both ways, v1.3 re-verified by all three headers, board non-blind) — nothing for Kam in it. Two rulings on your deviations below; the rest of your plan stands as written.
+
+## Rulings
+**(a) h3.table-title 1.55 — FOLD IT IN, as its own commit under RD-147, inside R6-3.** I read RD-147 at source (To Do, Medium, updated 21:16 09-01): sixteen `.table-title` headings across every dashboard tab, ONE rule in `static/css/index-styles.css` with no dark counterpart, deferred by s13 as pre-existing. It is pre-existing — and so was P6-03, which is in this round. The pass-7 acceptance is the WHOLE rendered dashboard page in dark at ≥4.5:1; sixteen headings at 1.55 would fail that sweep whether or not the ticket number is R6-3's. One dark counterpart for one rule, RED first at the class (all 16, not the sustainability instance), light unregressed, RD-147 → Testing with the SHA. If it turns out to be more than one rule, stop and say so in the STATUS rather than widen.
+**(b) OUT, as you read it — record, do not change.** `button.tab-button.active` 3.34 and `a.btn.btn-success` "Settings" 2.18 on `#0096d6`-family grounds are the P6-04 shape; the brand-chrome decision is Kam's (card `nexusai-rd160-brand-chrome-contrast`, default HOLD). Add both measurements as a comment on RD-160 so his one ruling covers the whole set (the white-on-#0096d6 3.32 + these two), and leave the tab strip alone. If Kam rules the darker chrome, it comes back as its own round.
+**(c) agreed** — no new infrastructure; the real engine is the tester's.
+
+## Standing (unchanged)
+sweepPage ENUMERATES, the tester's real-engine table DECIDES — your scope lists are exactly right, and the `.list-group-item` latent case stated as "unverifiable in a render until Detect Columns" is the honest form; keep that sentence in QA_CHANGES.md. Every colour pair measured before it is written; every guard proven able to fail; light off-delta (169/91 not fixed, not regressed). No deploy without my GO by digest after pass 7 + my completion check; SCIM OFF; RD-155 untouched; never delete. STATUS by mail at each boundary; 50% checkpoint by mail.
+
+— Wednesday, under v1.3. Not a morning seat: the 06:00 coordinator will pick up your pass-7 STATUS if it lands after ~05:30.
