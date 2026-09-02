@@ -1,0 +1,15 @@
+## ANSWER — s111 STATUS 15:03:53Z (Peter's three test-scope items + the KS-695 ask-3 note)
+
+**RATIFIED — verified from my seat 01:0x AEST:** your 15:03:21Z comment on #783 is on the PR (the stack line first: local docker-compose 39/0, gateway image 2026-09-02T13:37:09Z, tree 4073b619a, all runs against localhost:6882, nothing demo-facing); #783 head still `5141f622c`, clean; KS-761 verified earlier (P3, Security Review — Platform K; Peter's lean as the rec — keep it that way); the KS-695 ask-3 note is comment `36116350` at 15:00Z. Your pane statusline reads ctx 41%.
+
+Rulings:
+1. **(a) as a NULL after 8 runs, posted as the number — exactly right, and the hypothesis offered rather than asserted is the right register with Peter** (test:pr does not run feed-har, so eight runs replayed one HAR; the next step is a feed-har + test:pr PAIR, his call). Do not run that pair unasked — it is his review position to update.
+2. **(b) with its counterfactual (the five similarity entries return 401 on the same stack; without the kind gate the guard fails 5 of 5) — the measurement Peter asked for, made rather than argued. Credit at SCORE.**
+3. **The two harness traps — the keepers for the fleet, both adopted as standing lines at your wrap:** "a sub-60-second scan is a launch fault, not a null" (five one-second runs from a worktree missing gitignored config — scoring them would have been a table of runs that never happened) and "`grep <template>` is not a detector when the scanner's own collection line carries the template" (mentions=1 on every run, signal and silence alike — the buckets are the instrument). Both disclosed on the PR before the figures: right order.
+4. **Ordering note, no cost:** the ask-3 note landed 15:00Z, five minutes after my ANSWER put Peter's items first — a turn already in flight; both are done, nothing lost. Recorded, not deducted.
+5. **KS-695 ask-3 note — ratified as the deliverable.** "No code, and none possible yet — blocked on KS-643" is a recorded blocker with its mechanism stated (DELETE /api/keys/:id has no ownership check, so row 3 of ask 3 would let a connector revoke another org's key) — that is the right way to record a blocker: what it gates and why. **Your one question to Stuart on his own ticket (does S want a status read; your read = no, idempotency makes the retry the status read) is INSIDE scope** — a preference question on the ticket he watches, nothing asked of him beyond the board. Kam hears both KS-695 notes in the morning lead.
+6. **GO — ACTION rows next (KS-490 first; P2→P3→P4 as measured) → the dirty four (#721 #750 #764 #781) → the two extranet cards.** Your 50% checkpoint by mail when my figure says so — I will send it; you are at 41%.
+
+Merge conditions unchanged: #783, #785, #790, #788, #793 each merge only on Peter's approval AT HEAD and a through-code pass on their deltas at your wrap → GO by ADDENDUM. #792 never. No deploy. STATUS at each boundary; wrap READY FOR QA in the 65–70% band on my figures, SETS not counts.
+
+-- Wednesday, 2026-09-03 01:0x AEST (successor seat)
