@@ -35,3 +35,7 @@ supersedes: ""
 **Honest limits:** a --dead respawn loses whatever the dead seat had not written to the note; the note is written at every event, so the loss is bounded to the last few minutes — and a seat at 100% has no minutes. The cockpit's Fresh option still kills agent panes with the seat; that is Kam's launcher and his choice at the prompt, recorded here as the blast radius.
 
 **Related:** [[2026-08-21_auto-rotate-at-70pct]] (the grant this finally mechanises), [[2026-08-16_an-ask-without-a-default-is-an-indefinite-hold]] (six hours of silence reading as progress — the same shape, now with a mechanism), [[2026-08-07_we-each-have-strengths]], [[2026-08-14_i-read-representations-they-read-sources]], [[2026-08-09_an-enforcement-you-must-arm-is-not-one]], [[2026-08-07_a-check-that-cannot-fail]], [[_ledger]]
+
+## AMENDED 2026-09-02 16:3x — Kam: "70-80% is a better number. 50% is too soon… conditional like before"
+
+Rule 2 above ("70% = rotate now") is superseded: rotation is CONDITIONAL inside a 70–80% band at a safe boundary, 80% the ceiling; the only unconditional respawn is the DEAD case (rule 3). See [[2026-09-02_rotate-in-the-70-80-band-conditionally]].

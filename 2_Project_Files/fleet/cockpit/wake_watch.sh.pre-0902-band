@@ -174,24 +174,14 @@ except Exception: print('')" 2>/dev/null)
     pct=$("$TMUX_BIN" capture-pane -t "$pid" -p 2>/dev/null | grep -oE 'ctx:[0-9]+%' | tail -1 | tr -dc '0-9')
     [ -n "$pct" ] || continue
     gen=$(printf '%s_%s' "$pid" "$ppid" | tr -c 'A-Za-z0-9' '_')
-    if [ "$pct" -ge 80 ] 2>/dev/null; then
-      # 80% = the CEILING of the rotation band (Kam 2026-09-02 16:32: "70-80% is a
-      # better number. 50% is too soon... conditional like before"). ROTATE NOW =
-      # at the first boundary, start nothing. The wednesday pane rotates itself via
-      # wednesday_rotate.sh --self after its handover block is pushed; agent panes
-      # via cockpit.sh rotate. The only UNCONDITIONAL respawn is leg (d) DEAD.
-      if [ ! -f "$CTX_STATE/ctx_fired_${gen}_80" ] && [ ! -f "$STATE_DIR/ctx_wake" ]; then
-        touch "$CTX_STATE/ctx_fired_${gen}_80" "$CTX_STATE/ctx_fired_${gen}_70" "$CTX_STATE/ctx_fired_${gen}_65" "$CTX_STATE/ctx_fired_${gen}_50"
-        echo "WAKE: pane '$name' ctx at ${pct}% — ROTATE NOW (80% ceiling, Kam 09-02): finish the current step, write + push the handover block, then rotate (wednesday: fleet/cockpit/wednesday_rotate.sh --self, detached; agents: cockpit.sh rotate)" > "$STATE_DIR/ctx_wake"
-      fi
-    elif [ "$pct" -ge 70 ] 2>/dev/null; then
-      # 70% = the band is ENTERED (Kam 2026-08-21 grant, restored 2026-09-02 after the
-      # 16:1x seat hardened this into an interrupt and rotated too soon): rotate at
-      # the NEXT SAFE BOUNDARY — no agent QUESTION unanswered or imminent, no dangling
-      # Kam thread, HEAD == origin, agents untouched. Conditional by design.
+    if [ "$pct" -ge 70 ] 2>/dev/null; then
+      # 70% = ROTATE NOW (Kam 2026-08-21: rotate at 70%, unprompted, at a safe
+      # boundary). The wednesday pane rotates itself via wednesday_rotate.sh
+      # --self after its handover block is pushed; agent panes via cockpit.sh
+      # rotate. Added 2026-09-02 after a seat rode past 65% to the hard limit.
       if [ ! -f "$CTX_STATE/ctx_fired_${gen}_70" ] && [ ! -f "$STATE_DIR/ctx_wake" ]; then
         touch "$CTX_STATE/ctx_fired_${gen}_70" "$CTX_STATE/ctx_fired_${gen}_65" "$CTX_STATE/ctx_fired_${gen}_50"
-        echo "WAKE: pane '$name' ctx at ${pct}% — 70-80% BAND (Kam 09-02): rotate at the NEXT SAFE BOUNDARY, not now — answer any pending agent mail, close the thread with Kam, push the handover, then rotate (wednesday: wednesday_rotate.sh --self, detached; agents: cockpit.sh rotate); 80% is the ceiling" > "$STATE_DIR/ctx_wake"
+        echo "WAKE: pane '$name' ctx at ${pct}% — ROTATE NOW (70% rule): finish the current step, write + push the handover block, then rotate (wednesday: fleet/cockpit/wednesday_rotate.sh --self, detached; agents: cockpit.sh rotate)" > "$STATE_DIR/ctx_wake"
       fi
     elif [ "$pct" -ge 65 ] 2>/dev/null; then
       if [ ! -f "$CTX_STATE/ctx_fired_${gen}_65" ] && [ ! -f "$STATE_DIR/ctx_wake" ]; then
