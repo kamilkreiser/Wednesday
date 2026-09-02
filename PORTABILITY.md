@@ -8,7 +8,7 @@ through this list on a new machine.
 | # | Dependency | On a new Mac | Degrades to |
 |---|---|---|---|
 | 1 | Claude Code CLI + Kam's login | Install Claude Code, log in to the Max account | Nothing works without it |
-| 2 | "Matilda (Premium)" voice (Kam's pick, 2026-07-31) | System Settings → Accessibility → Spoken Content → System Voice → Manage Voices… → English (Australia) → download Matilda (Premium) | speak.sh falls back: Matilda Enhanced → Moira Enhanced → compact Moira (robotic) |
+| 2 | "Matilda (Premium)" voice (Kam's pick, 2026-07-31) | System Settings → Accessibility → Spoken Content → System Voice → Manage Voices… → English (Australia) → download Matilda (Premium). **macOS 26.6 (2026-09-02): the pane did not show the download option on the new laptop — try System Settings → Accessibility → Read & Speak → System Voice → Manage Voices, or skip; the fallback chain works** | speak.sh falls back: Matilda Enhanced → Moira Enhanced → compact Moira (robotic) |
 | 3 | Volume name/mount path | Drive must mount as `/Volumes/DevMASTER` (default since 2026-08-25; was `/Volumes/KK_T9_External_HDD`). If renamed, launcher still works (self-locating) but memory notes referencing the path go stale | — |
 | 4 | DevMASTER workspace | Optional read-only context; launcher reports "NOT mounted" and continues | Reduced cross-project awareness |
 | 5 | git + ssh | Xcode CLT (`xcode-select --install`). Deploy key lives ON the drive (`3_Access_Keys/github_deploy_rw`, gitignored) — no keychain dependency, portable by design | — |
