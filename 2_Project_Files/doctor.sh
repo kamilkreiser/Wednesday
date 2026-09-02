@@ -167,6 +167,22 @@ else
   ok "no agent panes live — wake_watch not required"
 fi
 
+# --- Boot digest current (WED-139, 2026-09-02): the seat boots on a digest GENERATED
+# from the lesson files. The launcher regenerates it in-path; this is the backstop —
+# a digest older than any lesson file, or missing a headline/rule line, means a seat
+# would boot on stale rules. --check exits 1 on either.
+BD="$PROJECT_DIR/2_Project_Files/tools/boot_digest.py"
+if [ -f "$BD" ]; then
+  BD_OUT="$(python3 "$BD" --check 2>&1)"; BD_RC=$?
+  if [ "$BD_RC" -eq 0 ]; then
+    ok "boot digest current ($(printf '%s' "$BD_OUT" | tail -1 | sed 's/^check: //'))"
+  else
+    warn "boot digest STALE or incomplete" "regenerate: python3 2_Project_Files/tools/boot_digest.py — $(printf '%s' "$BD_OUT" | head -1)"
+  fi
+else
+  warn "boot_digest.py missing" "the seat will read every lesson file (34% boot) — restore 2_Project_Files/tools/boot_digest.py"
+fi
+
 # --- Dead-coordinator rotation (2026-09-02): the 06:39 seat hit the hard context
 # limit at 09:49 and sat unreachable for six hours while the watcher tapped it 94
 # times. The fix has three parts and each must be present or the others are decor:

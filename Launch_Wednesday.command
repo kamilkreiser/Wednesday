@@ -40,6 +40,17 @@ cd "$PROJECT_DIR" || exit 1
 
 # ── Machine preflight (Kam, 2026-08-04: dependency check for the laptop case) ──
 # Non-blocking on warnings; hard failures pause so they're seen before launch.
+# --- Boot digest (WED-139, Kam 2026-09-02 20:47 "go with a boot as you recommend"):
+# regenerate 0_Brain/learnings/_boot_digest.md FROM the lesson files at every launch,
+# so the seat never boots on a stale digest (in-path enforcement; doctor.sh is the
+# backstop). Non-fatal: a generator failure falls back to the full lesson read.
+if python3 "$PROJECT_DIR/2_Project_Files/tools/boot_digest.py" >/tmp/wednesday_boot_digest.$$ 2>&1; then
+  tail -1 /tmp/wednesday_boot_digest.$$
+else
+  echo "⚠ boot_digest.py FAILED (rc=$?) — read the lesson files in full this boot:"; cat /tmp/wednesday_boot_digest.$$
+fi
+rm -f /tmp/wednesday_boot_digest.$$
+
 if [ -x "$PROJECT_DIR/2_Project_Files/doctor.sh" ]; then
   if ! "$PROJECT_DIR/2_Project_Files/doctor.sh" --quiet; then
     echo ""
@@ -147,10 +158,18 @@ FIRST ACTIONS (token cost is accepted — do the full reads, don't skim):
 1. Read ./CLAUDE.md (project rules), then ${BRAIN_DIR}/CLAUDE.md (brain routing).
 2. Become Wednesday: read ${BRAIN_DIR}/identity/persona.md and
    identity/voice-protocol.md, then ${BRAIN_DIR}/people/kam.md.
-3. Read ALL files in ${BRAIN_DIR}/learnings/ — every lesson, every session —
-   EXCEPT _ledger_archive.md (rows dated 2026-08-29 and earlier, moved out by
-   Kam's 2026-08-31 ruling + his 2026-09-02 "we need to prune a little" PRECISELY
-   so boots skip it; read it only on demand).
+3. Read ${BRAIN_DIR}/learnings/_boot_digest.md WHOLE — it was GENERATED at this
+   launch from every lesson file (headline = the retrieval handle, frontmatter,
+   the operative paragraph, the section index, and every rules section verbatim;
+   6 short files included whole) — then ${BRAIN_DIR}/learnings/_ledger.md WHOLE
+   (rows since 2026-08-30). Do NOT read the individual lesson files at boot: open
+   a lesson file the moment its rule FIRES, or when a diagnosis or a ledger row
+   needs its cases — the digest names the file beside every headline. This is
+   WED-139 (Kam 2026-09-02 20:47 "go with a boot as you recommend"): the full
+   lesson load cost 34% of the window by statusline; report your statusline
+   after the brain load in the boot note so the digest is measured, not assumed.
+   _ledger_archive.md (rows dated 2026-08-29 and earlier, Kam's 2026-08-31 ruling
+   + his 2026-09-02 "we need to prune a little") is read only on demand.
    The scoreboard (projects_index/scoreboard.md) is read HEAD-ONLY at boot (the
    newest ~15 rows), and INDEX.md's dated 'Refreshed' history only back to the
    newest two blocks. Two seats on 2026-09-01 booted at 51–57% ctx by reading

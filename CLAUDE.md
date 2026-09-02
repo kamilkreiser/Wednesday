@@ -124,6 +124,12 @@ functional understanding; Wednesday takes it seriously, records it, and applies 
    `2_Project_Files/doctor.sh` + a PORTABILITY.md item in the same wrap.
    (Same at-creation discipline as the gitignore rule — the wrap is the
    backstop, not the mechanism.)
+3b. **Boot digest (WED-139, Kam 2026-09-02):** if this session wrote or edited
+   any file in `0_Brain/learnings/`, run
+   `python3 2_Project_Files/tools/boot_digest.py` and commit the regenerated
+   `_boot_digest.md` with it (the launcher regenerates at boot too; doctor warns
+   on a stale one — the wrap keeps origin current for a seat that boots
+   elsewhere).
 4. Verify no secrets staged; commit + push if/when this folder becomes a git repo.
 5. Say good night. Briefly.
 

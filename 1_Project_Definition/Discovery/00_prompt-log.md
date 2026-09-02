@@ -2015,3 +2015,8 @@ Done with it: Dynamics → Kam's team decision (no action); QuickQuote masthead/
 > So 777, click ready to close.
 
 *Note:* read as: approve AND MERGE #777 on a passing review — flips the never-merge-Peter's-PRs hold, so ONE confirming question on the panel (Kam present); default after ~10 min = approve only, merge left to Peter
+
+## 2026-09-02 20:49 — Kam (dashboard chat (20:47, doubled), verbatim)
+> Let's go with a boot as you recommend it.
+
+*Note:* GO on WED-139: build the digest generator + check, switch the launcher's step 3 to digest-first, measure the boot at the next rotation; roll back on a lesson that stops firing
