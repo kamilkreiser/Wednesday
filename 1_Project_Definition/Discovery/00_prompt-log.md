@@ -2020,3 +2020,8 @@ Done with it: Dynamics → Kam's team decision (no action); QuickQuote masthead/
 > Let's go with a boot as you recommend it.
 
 *Note:* GO on WED-139: build the digest generator + check, switch the launcher's step 3 to digest-first, measure the boot at the next rotation; roll back on a lesson that stops firing
+
+## 2026-09-02 21:27 — Kam (dashboard chat (21:26, doubled), verbatim)
+> Please create a list and a message that I can send to Peter of all the tickets that are completed and fully tested by us that require his attention, and do the same for Stuart.
+
+*Note:* acked; lists built from live reads (GitHub reviews per open PR + Linear KS states/projects); two pasteable messages delivered whole; untested items excluded and named
