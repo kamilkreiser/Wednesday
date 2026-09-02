@@ -2420,5 +2420,34 @@
   "status": "open",
   "ruled_choice": null,
   "ruled_ts": null
+ },
+ {
+  "id": "secuura-ks764-key-revoke-org-scope",
+  "client_project": "Secuura/Blockchain",
+  "title": "KS-764: should ORG_ADMIN be organisation-bounded when revoking API keys? (today it is tenant-bounded — the same scope gap the erasure fix closed tonight)",
+  "bluf": "Tonight's #790 fix ruled, for erasure, that the tenant is a floor and the organisation is the gate. The code review found key revocation (decideKeyRevoke, keyRevokePolicy.ts:89) still compares TENANT only, so an ORG_ADMIN in one organisation can revoke another organisation's key inside the same tenant — destructive, and from the victim's side an outage. The code's own comment calls ORG_ADMIN tenant-scoped, so it may be intended. Fix-shape and the control pair are on KS-764; api_keys carrying organization_id is being verified. Nothing changes until you rule.",
+  "default_action": "HOLD — revocation semantics unchanged until you rule",
+  "options": [
+   {
+    "key": "org",
+    "label": "Org-bound it",
+    "detail": "ORG_ADMIN / ISSUER_ADMIN additionally require key.organizationId == user.organizationId; org-less key or caller refused (the #790 shape); platform roles bypass; tenant-wide roles keep the tenant compare"
+   },
+   {
+    "key": "keep",
+    "label": "Keep tenant scope",
+    "detail": "ORG_ADMIN stays tenant-wide by design; the ticket records the decision and closes"
+   },
+   {
+    "key": "peter",
+    "label": "Ask Peter first",
+    "detail": "agent posts both readings on KS-764 and waits for Peter's view before you rule"
+   }
+  ],
+  "recommended": "org",
+  "ts": "2026-09-03T02:31:05.721168+10:00",
+  "status": "open",
+  "ruled_choice": null,
+  "ruled_ts": null
  }
 ]
