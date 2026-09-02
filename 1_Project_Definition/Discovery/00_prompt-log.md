@@ -1860,3 +1860,13 @@ Done with it: Dynamics → Kam's team decision (no action); QuickQuote masthead/
 > I think you rotated too soon.  Go back to the previous structure.  70-80% is a better number.  50% is too soon.  also, this reboot should be conditional like before (naturally without the flaw.  With regards to Secuura  can you please create a PDF summary of all tickets for Platform K.  Ignore closed tickets.  Categorised based on 1)ready to action, no external input necessary.  In our hands 2) tickets requiring input 3)tickets closed requiring approval.  Within each category, mark whether they have gone through a full round of tests (especially Peters tests).  Make these tabular
 
 *Note:* Two items: (1) rotation ruling - 70-80% band, conditional at a safe boundary; 50% is a checkpoint only; the dead-seat respawn (the flaw) stays unconditional -> lesson 2026-09-02_rotate-in-the-70-80-band-conditionally + watcher legs reworded; (2) Platform K open-ticket summary PDF, three categories, tests column -> produced from read-only Linear reads via a subagent, rendered with md2pdf, delivered whole.
+
+## 2026-09-02 16:51 — Kam (terminal, verbatim)
+> Move the archived-but-open tickets into the tables too.  flag them as such
+
+*Note:* Platform K report v2: the 27 archived issues in non-closed states (10 Backlog/Todo/In Review/In Progress + 17 Deployed to UAT) added to the same three tables with an ARCHIVED flag; predicate + counts restated; re-rendered and re-delivered whole.
+
+## 2026-09-02 16:55 — Kam (terminal, verbatim)
+> send me the updated PDF when it's done.  email it to me
+
+*Note:* Deliver the revised Platform K PDF by email from wednesday-agent@ to kreiser.org@me.com with the file attached; attachment path exercised first against my own inbox.
