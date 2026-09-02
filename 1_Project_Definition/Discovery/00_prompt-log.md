@@ -1985,3 +1985,13 @@ Done with it: Dynamics → Kam's team decision (no action); QuickQuote masthead/
 > did I read that correctly?  its taking 43% context to load?
 
 *Note:* answered: 34% after the brain load / 43% after the whole boot (statusline); the live ledger (272 KB, rows since 08-16) is the heavy half; recommended a second archive pass at Sunday's consolidation, offered tonight on his word
+
+## 2026-09-02 20:43 — Kam (terminal (20:4x), verbatim)
+> we need to prune a little.  any MCP servers or unnecessary loads?
+
+*Note:* measured: MCP + skills + CLAUDE.md ≈ 1–2% of the window; the live ledger was 272 KB = the load → rows ≤08-29 (133 rows, 145 KB) moved verbatim into _ledger_archive.md the same minutes (live ledger now 127 KB); launcher boot line updated; playwright MCP = user-level duplicate of Claude-in-Chrome, his to remove
+
+## 2026-09-02 20:43 — Kam (dashboard chat (20:42, typed), verbatim)
+> Please review and approve 777.
+
+*Note:* PR #777 on Secuura → s108 by ADDENDUM: review at head now, APPROVE on a pass (Kam's typed word; approve ≠ merge; his never-merge hold on Peter's PRs stands), STATUS with review id + head
