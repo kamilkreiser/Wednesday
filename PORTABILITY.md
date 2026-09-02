@@ -166,3 +166,14 @@ above are the per-dependency detail; this is the run-sheet.
 10. **Verify:** `doctor.sh` (now also checks node/npm/gh/az/unison/docker), then
     `git -C WEDNESDAY pull --rebase` (the drive's repo lags origin by the Studio's last commits;
     stash the sync churn first — never drop it).
+
+## Machine-local: the repo pre-commit hook (added 2026-09-02 19:4x)
+
+`.git/hooks/pre-commit` (untracked by design) carries TWO refusals: the 2026-08-04 artifact
+classes (`__pycache__`/`.pyc`/`.pkl`/`logs/`/`state/`/`out*/`/`seat_scratch/`/`node_modules/`)
+and, since 2026-09-02 (ledger w=5, conflict markers reached origin twice in one day through a `;`
+chain), **any staged text file carrying a `<<<<<<< ` / `=======` / `>>>>>>> ` line**. After any
+fresh clone or a `.git` that did not travel, re-create it: copy the hook body from the Studio's
+`.git/hooks/pre-commit` (backup `.pre-0902-markers` beside it) or from the 2026-08-04 history
+entry (artifact half) + the 2026-09-02 daily note (marker half); `chmod +x`; exercise both
+refusals on a scratch repo before relying on it.
