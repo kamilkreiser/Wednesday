@@ -1915,3 +1915,8 @@ Done with it: Dynamics → Kam's team decision (no action); QuickQuote masthead/
 > Also, Peter has updated KS765.
 
 *Note:* 18:54 — read as PR #765 (KS-691; no KS-765 exists); s107 ordered to re-review at its new head, review-only; Kam asked to correct in one word if a different ticket was meant
+
+## 2026-09-02 18:58 — Kam (dashboard chat (doubled), verbatim)
+> Email me the PDF for now.
+
+*Note:* 18:58 — resent by email 08:58:42Z (first send 08:53Z); confirmed on the panel
