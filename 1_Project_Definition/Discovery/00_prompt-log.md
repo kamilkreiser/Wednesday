@@ -2005,3 +2005,13 @@ Done with it: Dynamics → Kam's team decision (no action); QuickQuote masthead/
 > It looks like the boot script is the main culprit. How can we learn from the boot? How can we take the learnings, bottle them up, make sure we don't lose anything, but cut down the actual context?
 
 *Note:* proposed on the panel: two-tier load — a GENERATED boot digest (headline + How-to-apply per lesson, ~1 KB each) with full files on demand; ledger at boot = rows since the last consolidation; insight rows to their own file; est. 466 KB → ~140 KB; default = build + measure tonight, boot switches only on his word (WED ticket filed)
+
+## 2026-09-02 20:47 — Kam (dashboard chat (20:45, doubled), verbatim)
+> As soon as 777 is ready, let me know and post NPRs so Peter can continue his work.
+
+*Note:* read as: when #777 is approved, tell Kam + post the review/evidence ON the PR so Peter continues ('NPRs' = dictation for 'on PRs'); reading stated on the panel for a one-word correction
+
+## 2026-09-02 20:47 — Kam (dashboard chat (20:46, doubled), verbatim)
+> So 777, click ready to close.
+
+*Note:* read as: approve AND MERGE #777 on a passing review — flips the never-merge-Peter's-PRs hold, so ONE confirming question on the panel (Kam present); default after ~10 min = approve only, merge left to Peter
