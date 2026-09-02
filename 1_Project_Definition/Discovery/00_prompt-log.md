@@ -1880,3 +1880,8 @@ Done with it: Dynamics → Kam's team decision (no action); QuickQuote masthead/
 > Not just secure tickets but scan all projects and see what's outstanding. And let's start today with a summary of what we can action and what we need to follow up.
 
 *Note:* All-projects sweep (NexusAI RD · HPSM · ATTIO · CypherKey · Vision · Lead_Bot; Platform K reused from the 06:51Z report) -> one report, per project the three categories + a fleet summary table of actionable vs follow-up + Kam-assigned share; delegated to a read-only subagent writing to disk with a DONE marker; then standing queues per project briefed to the agents.
+
+## 2026-09-02 17:40 — Kam (dashboard chat, verbatim)
+> Don't worry about non-secure projects today. We'll start with that tomorrow morning.
+
+*Note:* Non-Secuura projects deferred to the 06:00 morning session 09-03: the fleet sweep already running (read-only) is left to finish and its files become the morning seat's input - refreshed at the sweep, delivered with the morning board; no non-Secuura queue briefs or deliveries today.
