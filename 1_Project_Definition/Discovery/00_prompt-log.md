@@ -1925,3 +1925,13 @@ Done with it: Dynamics → Kam's team decision (no action); QuickQuote masthead/
 > So can you make this into an Excel spreadsheet so I can consult by column?
 
 *Note:* 18:59 — v3 workbook built from the report (238 rows, filter on every column, summary + legend sheet); openpyxl installed drive-local under tools/pylibs (tracked, as websocket is); emailed + device card 19:0x
+
+## 2026-09-02 19:31 — Kam (dashboard chat (19:28, doubled by Superwhisper — read once), verbatim)
+> A couple things from the Secura meeting. Let's create projects for things like connectors, commercialization-ready etc. And aggregate tickets into those projects. Once aggregated, let's archive the tickets that are not relevant for now so that we are not eating up too many linear spots with tickets that won't be actioned for a while. As an example with Stuart taking the lead on platform S and connectors. Anything in tickets relating to Outlook or any other connector can be created into a project or category of connectors. And as we're no longer creating connectors through platform K, these can be archived. The same would be for any item relating to commercialization readiness, like rotating keys, changing blockchain, etc. Please go through all the backlog and all tickets and projectize and archive the tickets. I'm told we can unarchive tickets, so don't close them just archive them.
+
+*Note:* Secuura Linear: projectise + archive pass → item 0 of the s108 brief (Secuura agent's hands; archive not close); policy + reading back to Kam on the panel
+
+## 2026-09-02 19:31 — Kam (dashboard chat (19:29, doubled — read once), verbatim)
+> The second thing that came out of the meeting is that it would help Peter if we aggregated PRs and things into projects. So if multiple items relate to the same stream, let's start creating projects and groups so that multiple tickets can aggregate into one project. That way, Peter can run a test on one stream rather than a dozen different streams that are no different but take time. Create this as a policy for Secuura ongoing because this is the new way we want to interact with Peter. My description is not clear, please let me know.
+
+*Note:* Secuura: stream policy for Peter (tickets grouped into Linear projects per stream; one test pass per stream) → policy drafted in 0_Brain, written into the Secuura repo by s108 as a docs PR; reading + one question back to Kam

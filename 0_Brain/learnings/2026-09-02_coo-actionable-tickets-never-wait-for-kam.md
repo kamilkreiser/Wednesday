@@ -20,3 +20,13 @@ supersedes: ""
 5. **Report the percentage he asked for at each refresh**: of the tickets assigned to Kam, the share that needs nobody outside Kam, me and the agent — and drive it to zero.
 
 **Related:** [[2026-08-12_morning-ticket-sweep-autostart]] (the grant this widens from "new" to "still open"), [[2026-08-28_overnight-is-working-time]] (the rhythm that makes a standing queue finish), [[2026-08-11_coordinator-not-carrier]] (the manager's job is the breadth the agents lack — here the breadth was the board itself), [[2026-08-07_a-promise-is-not-a-mechanism]] (the standing queue lives in the brief and the handover, not in an intention), [[../people/kam]], [[_ledger]]
+
+## REFINED the same evening — Kam, panel 19:31: "I was a little bit harsh on you earlier… some of them have been put to the back burner or just simply cannot be actioned yet. They remain there as tickets. Let's run through a catalogue after you've sorted things: should be actioned, escalated to me, or simply archived."
+
+The COO stance stands. What changes is the SORTING instrument: "no external input needed" is a predicate about WHO, not WHEN. A ticket can need nobody outside us and still be back-burner (deliberately parked) or not-yet-possible (its precondition has not arrived). Those are not failures of execution and they do not belong on a "should have been done" list — they belong in a **catalogue** with a three-way disposition per ticket, run through WITH Kam:
+
+1. **Action** — category 1 AND actionable now → the standing queue, unprompted, until empty (rule 1 above, unchanged).
+2. **Escalate** — needs Kam's ruling or a client human → his desk as a dated card with a default.
+3. **Archive for now** — back-burner or not-yet-possible → ARCHIVED (never closed; Linear unarchives), grouped first into a stream PROJECT so it can come back as a set.
+
+Paired with his 19:28/19:29 meeting notes (same prompt-log batch): Linear PROJECTS per stream (Connectors — Stuart leads Platform S + connectors, K no longer builds them; Commercialisation-readiness — key rotation, chain changes …), tickets aggregated into their stream, and the standing Peter rule: **one stream = one project = one test pass for Peter**, written into Secuura's process docs. The morning board's category-1 count is now "actionable now" (after the catalogue), and the percentage he asked for is measured on that set.
