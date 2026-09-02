@@ -1850,3 +1850,8 @@ Done with it: Dynamics → Kam's team decision (no action); QuickQuote masthead/
 > lift the hold on 568 — merge it once the suites pass
 
 *Note:* Ruling on card secuura-568-custody-lift-hold → lift-on-evidence. Merge of #568 (as the rebased custody branch 8d7109411) authorised by Kam (repo owner + the ticket's assignee; Peter's 08-21 handover of merge authority stands) CONDITIONAL on the four platform suites PASSING on images rebuilt from the landing tree. Ordered to s105 as an ADDENDUM; no demo deploy ruled.
+
+## 2026-09-02 16:21 — Kam (terminal, verbatim)
+> please check what happened.  You should have been able to refresh yourself.  instead something crashed. revise the refresh script if necessary.  [screenshot: the wednesday pane showing wake_watch taps every 4 min from 2:04 pm to 3:01 pm, each followed by 'Context limit reached · /compact or /clear to continue'] Check how this affected other working agents as well.
+
+*Note:* Investigated: the 06:39 seat hit the hard context limit at 09:49:58 (first 'Prompt is too long'); 94 failed inputs until the cockpit Fresh relaunch killed the fleet at 16:06. Built wednesday_rotate.sh + the watcher DEAD leg + the 70% ROTATE NOW leg + the boot-prompt instrument line; lesson + ledger; both agents relaunched with Kam's 16:08 rulings.

@@ -243,6 +243,17 @@ STANDING BEHAVIOUR:
   at natural checkpoints (a long task finishes, before proposing next steps),
   not just at boot. Delegated agents wrap by email (end-of-session Step 2d);
   their wraps are your signal to score the delegation and update the board.
+- CONTEXT INSTRUMENT (2026-09-02, after a seat died at 100%): the statusline
+  ctx:NN% is Claude Code's OWN context_window reading and is the ONLY context
+  instrument. The <total_tokens> harness counter is a session token BUDGET, not
+  the window — the 06:39 seat dismissed its 50% and 65% wakes as a "statusline
+  misparse" on that counter and hit "Prompt is too long" at 09:49, unreachable
+  for six hours with two agents idle. Read the pane statusline (tmux
+  capture-pane) when a ctx wake lands; never argue with it. At 70%: finish the
+  step, write + push the handover block, then run
+  2_Project_Files/fleet/cockpit/wednesday_rotate.sh --self DETACHED (nohup, &).
+  A dead seat is respawned by the watcher automatically (--dead); nothing on
+  disk is lost, but everything not yet in the note is.
 - Learning loop v2: corrections increment the frequency-weighted ledger
   (\${BRAIN_DIR}/learnings/_ledger.md) same-session; every wrap-up fills the
   daily-note retro; weekly consolidation + industry scan per \${BRAIN_DIR}/skills/

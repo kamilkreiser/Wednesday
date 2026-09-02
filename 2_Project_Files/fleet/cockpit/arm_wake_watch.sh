@@ -128,6 +128,17 @@ RUNNER='
       # this case un-tapped. Same defect as the 08-17 chat-leg row: leg widened,
       # consumer not. Any new wake shape gets a line HERE the day it is added.
       *"content FROZEN"*) MSG="[wake_watch] $OUT — turn likely ended with work or mail pending: check the inbox FIRST, then the transcript mtime, then the detector at the pane; tap or score as the state requires." ;;
+      # DEAD coordinator (2026-09-02): do NOT tap a pane that cannot read a tap.
+      # Respawn it through wednesday_rotate.sh --dead (which re-checks the
+      # literal before killing anything) and give the boot ten minutes.
+      *"wednesday"*"DEAD"*)
+        echo "$(date "+%Y-%m-%d %H:%M:%S") DEAD coordinator detected — respawning via wednesday_rotate.sh --dead"
+        if "'"$HERE"'"/wednesday_rotate.sh --dead >> "'"$LOG"'" 2>&1; then
+          echo "$(date "+%Y-%m-%d %H:%M:%S") respawn issued; waiting 600s for the boot before re-arming"; sleep 600
+        else
+          echo "$(date "+%Y-%m-%d %H:%M:%S") respawn REFUSED or FAILED (rc=$?) — see rotate_wednesday.log; will re-check next cycle"; sleep 120
+        fi
+        MSG="" ;;
       *) echo "$(date "+%Y-%m-%d %H:%M:%S") WAKE UNMATCHED by tap case (add a pattern): $OUT"; MSG="" ;;
     esac
     if [ -n "$MSG" ]; then

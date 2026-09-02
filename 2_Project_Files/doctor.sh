@@ -160,6 +160,21 @@ else
   ok "no agent panes live — wake_watch not required"
 fi
 
+# --- Dead-coordinator rotation (2026-09-02): the 06:39 seat hit the hard context
+# limit at 09:49 and sat unreachable for six hours while the watcher tapped it 94
+# times. The fix has three parts and each must be present or the others are decor:
+# the watcher leg that sees "Context limit reached", the runner case that respawns
+# instead of tapping, and the respawn script itself.
+RT="$PROJECT_DIR/2_Project_Files/fleet/cockpit/wednesday_rotate.sh"
+if [ -x "$RT" ] \
+   && grep -q "Context limit reached" "$PROJECT_DIR/2_Project_Files/fleet/cockpit/wake_watch.sh" \
+   && grep -q 'wednesday_rotate.sh --dead' "$PROJECT_DIR/2_Project_Files/fleet/cockpit/arm_wake_watch.sh" \
+   && grep -q 'ROTATE NOW' "$PROJECT_DIR/2_Project_Files/fleet/cockpit/wake_watch.sh"; then
+  ok "dead-coordinator rotation wired (watcher leg + runner case + wednesday_rotate.sh)"
+else
+  fail "dead-coordinator rotation NOT wired" "a seat at its context limit would sit dead until a human notices (2026-09-02); check wake_watch.sh / arm_wake_watch.sh / wednesday_rotate.sh"
+fi
+
 # --- Fleet model pins (Kam ruling 2026-08-12: all projects Opus 5; only Wednesday
 # stays on Fable 5 while the usage limit is tight). Launchers pin --model on the
 # exec line, which OVERRIDES the global default — a stale fable pin silently

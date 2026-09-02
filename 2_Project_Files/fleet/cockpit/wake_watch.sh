@@ -39,6 +39,14 @@ mkdir -p "$CTX_STATE"
 find "$CTX_STATE" -name 'ctx_fired_*' -mtime +3 -delete 2>/dev/null
 end=$((SECONDS + 14400))
 while [ $SECONDS -lt $end ]; do
+  # (d) DEAD COORDINATOR (2026-09-02): the wednesday pane shows Claude Code's
+  # hard stop "Context limit reached". Every other wake is pointless while this
+  # holds — the seat cannot read a tap. Fires every cycle it is seen (the runner
+  # respawns via wednesday_rotate.sh --dead; a respawn clears the pane).
+  wpane=$("$TMUX_BIN" list-panes -t "$FLEET" -F '#{pane_id}|#{@cockpit_name}' 2>/dev/null | awk -F'|' '$2=="wednesday"{print $1}' | head -1)
+  if [ -n "$wpane" ] && "$TMUX_BIN" capture-pane -t "$wpane" -p -S -60 2>/dev/null | grep -q 'Context limit reached'; then
+    echo "WAKE: pane 'wednesday' DEAD — Context limit reached; the coordinator cannot act — respawn required"; exit 0
+  fi
   # (a) mail tripwire
   # Latest INBOUND message only — own outbound copies (from wednesday-agent@)
   # must never fire the tripwire (false wake 2026-08-05 21:4x).
@@ -166,7 +174,16 @@ except Exception: print('')" 2>/dev/null)
     pct=$("$TMUX_BIN" capture-pane -t "$pid" -p 2>/dev/null | grep -oE 'ctx:[0-9]+%' | tail -1 | tr -dc '0-9')
     [ -n "$pct" ] || continue
     gen=$(printf '%s_%s' "$pid" "$ppid" | tr -c 'A-Za-z0-9' '_')
-    if [ "$pct" -ge 65 ] 2>/dev/null; then
+    if [ "$pct" -ge 70 ] 2>/dev/null; then
+      # 70% = ROTATE NOW (Kam 2026-08-21: rotate at 70%, unprompted, at a safe
+      # boundary). The wednesday pane rotates itself via wednesday_rotate.sh
+      # --self after its handover block is pushed; agent panes via cockpit.sh
+      # rotate. Added 2026-09-02 after a seat rode past 65% to the hard limit.
+      if [ ! -f "$CTX_STATE/ctx_fired_${gen}_70" ] && [ ! -f "$STATE_DIR/ctx_wake" ]; then
+        touch "$CTX_STATE/ctx_fired_${gen}_70" "$CTX_STATE/ctx_fired_${gen}_65" "$CTX_STATE/ctx_fired_${gen}_50"
+        echo "WAKE: pane '$name' ctx at ${pct}% — ROTATE NOW (70% rule): finish the current step, write + push the handover block, then rotate (wednesday: fleet/cockpit/wednesday_rotate.sh --self, detached; agents: cockpit.sh rotate)" > "$STATE_DIR/ctx_wake"
+      fi
+    elif [ "$pct" -ge 65 ] 2>/dev/null; then
       if [ ! -f "$CTX_STATE/ctx_fired_${gen}_65" ] && [ ! -f "$STATE_DIR/ctx_wake" ]; then
         touch "$CTX_STATE/ctx_fired_${gen}_65" "$CTX_STATE/ctx_fired_${gen}_50"
         echo "WAKE: pane '$name' ctx at ${pct}% — mechanical tails only, then handover (rhythm §2)" > "$STATE_DIR/ctx_wake"
