@@ -2333,5 +2333,34 @@
   "status": "open",
   "ruled_choice": null,
   "ruled_ts": null
+ },
+ {
+  "id": "secuura-erasure-scope-gate",
+  "client_project": "Secuura/Blockchain",
+  "title": "Which connector scope gates cascading erasure + crypto-shred on POST /api/gdpr/erasures? (Peter's #790 F5)",
+  "bluf": "Peter's review: the new erasure route has no scope gate while /api/anchoring requires anchors:write. s110 measured that connector JWTs DO carry scopes (sets like documents:write, anchors:write), so this is purely WHICH scope. s110 recommends a dedicated subjects:erase (or gdpr:write) rather than reusing documents:write — a cascading erasure with key destruction is not a document write — and did not implement it: widening or narrowing an authorisation check is not an agent's call (the KS-645/#739 lesson). Put to Peter on the PR; your word decides.",
+  "default_action": "HOLD — no gate change until you or Peter rule; the PR comment carries the question",
+  "options": [
+   {
+    "key": "A",
+    "label": "Dedicated scope subjects",
+    "detail": "erase (mint it for S's key at registration; refuse others 403):s110's and my recommendation; one more scope in the registry, S's key re-minted or extended"
+   },
+   {
+    "key": "B",
+    "label": "Reuse documents",
+    "detail": "write:No registry change; erasure rides a write scope S already holds"
+   },
+   {
+    "key": "C",
+    "label": "No gate — rely on the connector JWT alone",
+    "detail": "Status quo; Peter flagged it as a Minor"
+   }
+  ],
+  "recommended": "A",
+  "ts": "2026-09-02T23:21:47.245277+10:00",
+  "status": "open",
+  "ruled_choice": null,
+  "ruled_ts": null
  }
 ]
