@@ -1895,3 +1895,23 @@ Done with it: Dynamics → Kam's team decision (no action); QuickQuote masthead/
 > this is a new PC.  My laptop died and I had to firmware refresh.  Please check what software is needed, and whats installed.  Install everything missing, from obsidian to docker please
 
 *Note:* Machine bring-up on the replacement MacBook Pro from the KK_DEV_Local travel drive: inventory vs PORTABILITY.md + doctor.sh + CLAUDE-reference; GUI apps installed direct (Docker, iTerm2, Obsidian, VS Code); Homebrew by Kam (sudo); CLI tools via brew after.
+
+## 2026-09-02 18:55 — Kam (dashboard chat (Superwhisper, doubled), verbatim)
+> I have this secure meeting in 10 minutes. Can you reproduce the PDF? Also, the pdut column didn't make sense; make sure that is clear.
+
+*Note:* 18:50 — 'secure' = Secuura; the Platform K open-tickets PDF re-issued as v3 (live refresh, the two cryptic columns renamed + a legend); 'pdut' read as one of those columns
+
+## 2026-09-02 18:55 — Kam (dashboard chat (doubled), verbatim)
+> What's the percentage now?
+
+*Note:* 18:50 — re-measured live: 131 Kam-assigned open, 67 category-1 = 51% (was 54%); answered on the panel + in the v3 PDF
+
+## 2026-09-02 18:55 — Kam (dashboard chat (doubled), verbatim)
+> That's still a very high percentage. Can you please plough through these through the night? And for as long as it takes to make sure they're all actioned.
+
+*Note:* 18:53 — the standing-queue relay continues overnight until the category-1 list is empty (08-28 grant + the 17:34 COO instruction); relayed to s107 by ADDENDUM
+
+## 2026-09-02 18:55 — Kam (dashboard chat (doubled), verbatim)
+> Also, Peter has updated KS765.
+
+*Note:* 18:54 — read as PR #765 (KS-691; no KS-765 exists); s107 ordered to re-review at its new head, review-only; Kam asked to correct in one word if a different ticket was meant
