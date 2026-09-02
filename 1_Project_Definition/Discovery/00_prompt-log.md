@@ -1920,3 +1920,8 @@ Done with it: Dynamics → Kam's team decision (no action); QuickQuote masthead/
 > Email me the PDF for now.
 
 *Note:* 18:58 — resent by email 08:58:42Z (first send 08:53Z); confirmed on the panel
+
+## 2026-09-02 19:01 — Kam (dashboard chat (doubled), verbatim)
+> So can you make this into an Excel spreadsheet so I can consult by column?
+
+*Note:* 18:59 — v3 workbook built from the report (238 rows, filter on every column, summary + legend sheet); openpyxl installed drive-local under tools/pylibs (tracked, as websocket is); emailed + device card 19:0x
