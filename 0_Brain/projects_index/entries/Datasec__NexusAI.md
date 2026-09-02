@@ -3,7 +3,7 @@ client: Datasec
 project: NexusAI
 path: /Volumes/DevMASTER/!CODING/Datasec/NexusAI
 status: active
-updated: 2026-09-02
+updated: 2026-09-03
 ---
 
 # Datasec / NexusAI
@@ -11,6 +11,12 @@ updated: 2026-09-02
 **🔴 DEPLOY HOLD (Kam, 2026-09-02 07:3x — brand): the dark theme (rounds 6–8, head `6b78315`/`451dfba`) is an INVENTED navy/indigo palette (`#1a1a2e`/`#1e1e3f`/`#252550`/`#16213e` — measured from my seat) and the repo has NO style guide / brand-token file. Kam saw it as another client's aesthetic. Rounds 6–8 do NOT deploy on any pass-9 contrast verdict — deploy = a Kam-approved palette first. s17 item 0 = write `docs/STYLE_GUIDE.md` + a brand-token file from the product's existing HP tokens (`#0096d6` family in the light theme), derive the dark palette from it, PROPOSE to Kam as rendered screenshots both modes, then re-theme; a guard that every dark-mode colour resolves to a token. Pass 9 carries a brand-conformance leg (ADDENDUM 2). Lesson: learnings/2026-09-02_style-guides-never-mixed.**
 
 **s12 (2026-09-01 17:3x→19:37, 0.85) + s13 LIVE (19:45→):** Kam's round-2 commission (17:25): Settings icon (bi-tree) · 27 NGA-2025-sourced deployment-default factors with references · Sustainability tab root-caused + fixed · SCIM F-1/F-4 tests-first (fb3b11e) · the fleet QA GATE's first live run (Kam 17:55): pass 1 = 18 findings on a 1.0-scored build → fix round (14/17 held) → pass 2 = PASS with findings, six dashboard Major rows + two SCIM Majors remain → **item 5 'fully functional' NOT MET** (PAPER COST $0 on the empty default view) → s13 = refine round 2 on branch `rd-136-nga-defaults-s12` (head cca9fb014). Nothing deployed since --0000091; SCIM OFF. RD-141/143/144/145/146 filed.
+
+**Open / next (refreshed 2026-09-03 01:10 — S20 WRAPPED READY FOR QA at `79dc30a` (code head `e952f3b`, docs-only delta); PASS 12 RUNNING (pane %20) on `:3042`; NO deploy):**
+- **Pass 12 → my completion check → SCORE s20 (−0.05 candidate: the 00:47 turn-end stall) → S21 brief** (RD-203's 7 files / 18 sites · the RD-223 class sweep · whatever pass 12 finds). Deploy of the repaint needs pass 12 + completion + GO; the palette word is on record (20:14, card A).
+- **Landed this round:** RD-217 `5f3b0bf` (far stops → `#106ebe`) · RD-216 `badff5f` (dark selected step; the chip's lost circle = Kam's eye) · RD-195 `6339847` (allowance with a real-server control) · RD-223 `e76c734` (the midnight red, pinned) · RD-211 `4835d59` (Appearance preview, dark branch) · RD-218 `4e0ada2` (the `--*-rgb` reader, three holes) · RD-203 `e952f3b` (one file). Ticket-only: RD-180 (its own `#0d1b2a` FAILS; only `#000000` clears — needs-decision) · RD-162 (five dead blocks = one) · RD-61 (resolved by SUBSTITUTION; RD-118 confirmed in prod logs; no `az` write) · RD-148 sized.
+- **Surfaces:** `:3042` (e952f3b, DEFAULT limiter — the pass-12 subject, pid 28105) · `:3040` (raised, pid 26107) · controls `:3029` (2b014bc) + `:3024` (463f03d); `:3036 :3038 :3039` intermediate. Demo `--0000092` = `ca98a55` untouched.
+- **Kam's cards:** rd196 (B) · rd198 (B) · rd202 (HOLD) · brand-chrome-dark-token (leave) · primary-action-blue (leave) · costs-header-green-gradient (C, RD-215 ticketed) · NEW for the morning: the wizard chip circle (a dark token = brand) · RD-180's options A–D · RD-61 close-by-substitution + a real-ingest health-check ticket (rec).
 
 **Open / next (refreshed 2026-09-02 23:08 — PASS 11 = PASS with findings: P10-01 FIXED against the control; 3 Majors (P11-03 on the round's own repaint) → s19 SCORED 0.90, QA 1.0; NO deploy; S20 = round 12, brief staged):**
 - **S20 queue:** P11-03 far stops → `#106ebe` (ruled value, no new token) → P11-01 the Costs header PAIRING (the ruled gradient's stops never move) → P11-02 the dark active wizard step from existing tokens → RD-195 (three conditions) → RD-211 both branches → P11-05 → items 7–9 → RD-203 → pass-12 surface → wrap READY FOR QA → pass 12 → my completion check → deploy GO.
