@@ -2025,3 +2025,68 @@ Done with it: Dynamics → Kam's team decision (no action); QuickQuote masthead/
 > Please create a list and a message that I can send to Peter of all the tickets that are completed and fully tested by us that require his attention, and do the same for Stuart.
 
 *Note:* acked; lists built from live reads (GitHub reviews per open PR + Linear KS states/projects); two pasteable messages delivered whole; untested items excluded and named
+
+## 2026-09-03 09:51 — Kam (terminal, verbatim)
+> Docker is restarted, release the browser tests and launch Secuura
+
+*Note:* S22's e2e/hover released by ADDENDUM 09:46 on the machine measurement (VM gone, load 35); the daemon measured NOT running at 09:46/09:50; s114 launched on the docker-free queue; Kam tapped the docker-wedge card 'restart' at 09:49
+
+## 2026-09-03 09:52 — Kam (dashboard chat (card), verbatim)
+> Decision secuura-founders-hub-credit-expiry note: is this doubling due to the introduction of Katsugi? if so, this is fine.
+
+*Note:* read Katsugi = Kintsugi (KS-601, the new Platform K dev server); answered with a measurement via s114 item 0a
+
+## 2026-09-03 09:52 — Kam (dashboard chat (card), verbatim)
+> Decision secuura-ks764-key-revoke-org-scope: org — Org-bound it
+
+*Note:* ruled in the file; KS-764 → s114's queue as a build
+
+## 2026-09-03 09:54 — Kam (dashboard chat (card), verbatim)
+> Decision nexusai-home-data-mutated: restore — Restore from ~/data/backups
+
+*Note:* ruled in the file; the restore routed to the NexusAI agent (S22) by ADDENDUM under Kam's word — quarantine the current file, restore settings.json from the newest pre-01:46 backup, shas before/after
+
+## 2026-09-03 09:56 — Kam (dashboard chat, verbatim)
+> its now reopened
+
+*Note:* Docker Desktop — measured up at 09:53 (daemon 28.4.0 answering)
+
+## 2026-09-03 09:56 — Kam (dashboard chat (card), verbatim)
+> Decision secuura-ks762-db-password-rotation: rotate — Schedule the rotation
+
+*Note:* ruled; → s114 by ADDENDUM: plan + coordinate on the ticket, no secret rotated until Peter/Stuart acknowledge a date
+
+## 2026-09-03 09:56 — Kam (dashboard chat (card), verbatim)
+> Decision secuura-erasure-scope-gate: A — Dedicated scope subjects
+
+*Note:* ruled A (subjects:erase); → s114 by ADDENDUM as a build on the erasure route
+
+## 2026-09-03 09:56 — Kam (dashboard chat (card), verbatim)
+> Decision nexusai-costs-header-green-gradient: B — Solid #1e7e34 (the gradient's own dark stop), white text = 5.14 on the whole header
+
+*Note:* ruled B; → S22 by ADDENDUM (RD-215)
+
+## 2026-09-03 09:56 — Kam (dashboard chat (card), verbatim)
+> Decision nexusai-primary-action-blue: A — Repaint to the chrome pair (#00719f / white), both modes
+
+*Note:* ruled A; → S22 by ADDENDUM
+
+## 2026-09-03 09:57 — Kam (dashboard chat (card), verbatim)
+> Decision nexusai-brand-chrome-dark-token: leave — Keep #106ebe as the far stop, reason recorded on RD-214
+
+*Note:* ruled leave; S22 records it on RD-214
+
+## 2026-09-03 09:57 — Kam (dashboard chat (card), verbatim)
+> Decision nexusai-rd202-light-active-tab-indigo: A — Fold the tab into the brand family (#0096d6 ground + white)
+
+*Note:* ruled A → S22
+
+## 2026-09-03 09:57 — Kam (dashboard chat (card), verbatim)
+> Decision nexusai-rd196-dashboard-default-window: A — Move the CONTROL: on first load the whole dashboard opens on All Time (rec) — one window, your $0.00 tiles fixed too
+
+*Note:* ruled A → S22
+
+## 2026-09-03 09:59 — Kam (dashboard chat, verbatim)
+> Once the sustainability fix is in, please upload all changes so they are live.
+
+*Note:* (doubled by Superwhisper, read once) NexusAI DEPLOY authority on record: after RD-196 (the sustainability/dashboard window fix) lands → the branch deploys to the demo; sequenced behind pass 13b (the e2e set at the final head is a deploy precondition) + my completion check
