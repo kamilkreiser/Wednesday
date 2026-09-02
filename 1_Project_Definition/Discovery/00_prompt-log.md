@@ -1970,3 +1970,8 @@ Done with it: Dynamics → Kam's team decision (no action); QuickQuote masthead/
 > thank you.  1)a 2)this will require further discussion. 3)yes, approve 4)new credits applied to account.  we have 11 more months.  dont worry.  thanks
 
 *Note:* KS-695 ask 3 = (a) → s108 by mail · mailbox = further discussion (card ruled later, branch stays staged) · NexusAI palette APPROVED (A, neutral + gradient chrome) → s19 by mail; deploy still behind pass 11 + my GO · Founders Hub credit renewed, 11 months — stop raising it
+
+## 2026-09-02 20:19 — Kam (dashboard chat (20:18), verbatim)
+> As you go through the tickets tonight, please archive as many as you can.
+
+*Note:* archiving HOLD LIFTED for tonight → ADDENDUM to s108: archive the ARCHIVE-FOR-NOW rows as each stream is catalogued; archive never close; carve-outs (TND per 16:08, open PRs/in review, ACTION/ESCALATE rows, KS-695); every archived id listed for the morning catalogue
