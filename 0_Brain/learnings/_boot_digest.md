@@ -7,7 +7,7 @@ status: live
 
 # Boot digest — headline + rules of every lesson (open the file when it fires)
 
-Generated 2026-09-03 05:40 from 88 lesson files (339,709 B). Each block = the lesson's retrieval handle (H1), its frontmatter, the operative paragraph, its section index, and every RULES section verbatim. 6 files carry no rules-shaped section and are included whole. The CASES behind a rule live only in the file: open it the moment the rule fires, or when a diagnosis needs the evidence. `_ledger.md` is read whole beside this digest; `_ledger_archive.md` on demand.
+Generated 2026-09-03 06:57 from 89 lesson files (343,979 B). Each block = the lesson's retrieval handle (H1), its frontmatter, the operative paragraph, its section index, and every RULES section verbatim. 6 files carry no rules-shaped section and are included whole. The CASES behind a rule live only in the file: open it the moment the rule fires, or when a diagnosis needs the evidence. `_ledger.md` is read whole beside this digest; `_ledger_archive.md` on demand.
 
 ## The T9 SSD is the master — Wednesday must be fully portable
 `2026-07-31_fully-portable-drive.md` · principle · 2026-07-31 · status: superseded — the "T9 is the master" half by [[2026-08-25_one-drive-devmaster-is-master]] (2026-08-25); the portability principle itself still lives
@@ -2895,4 +2895,22 @@ sections (open the file for these): What happened (measured, not remembered) · 
 
 ## AMENDED 2026-09-02 16:3x — Kam: "70-80% is a better number. 50% is too soon… conditional like before"
 Rule 2 above ("70% = rotate now") is superseded: rotation is CONDITIONAL inside a 70–80% band at a safe boundary, 80% the ceiling; the only unconditional respawn is the DEAD case (rule 3). See [[2026-09-02_rotate-in-the-70-80-band-conditionally]].
+
+
+## A pane close is a SESSION kill — a listener with parent 1 still dies if it shares the pane's tty; check `ps -o sess,tty`, never `ppid`
+`2026-09-03_a-pane-close-is-a-session-kill.md` · correction · 2026-09-03 · status: live
+
+**The operative case, so the headline matches it:** I am about to close (kill) a builder's or tester's pane, and a surface the handover names as "left up" is served by a process whose parent is `launchd` (ppid 1). **That is not daemonisation.** A process reparented to 1 after its parent exited can still be a member of the pane's SESSION with the pane's controlling tty; when the pane dies, the tty hangs up and every process still attached to it gets SIGHUP. The check is `ps -o pid,ppid,sess,tty -p <pid>`: tty `??` (and session 0) = detached and survives; `ttysNNN` = it dies with the pane, whatever its ppid says.
+
+sections (open the file for these): The two cases · Why the w=1 rule did not fire (the diagnosis w=2 requires) · How to apply
+
+## How to apply
+
+1. **Before closing ANY pane, for EVERY listener the handover names as up:** `ps -o pid,ppid,sess,tty,command -p <pid> <parent>` — tty must read `??` on the listener AND on its immediate parent. A `ttys…` anywhere in that pair = it dies with the pane: do not close until the surface is re-stood detached, or its owner has said it may die.
+2. **`ppid 1` proves nothing about survival.** Say "detached" only after reading the tty.
+3. **After ANY pane close, curl every surface the handover names as up, in the same minutes** (the w=1 rule, kept) — a 000 there is my act, disclosed first on every surface that reads it (the QA brief, the note, the panel if Kam is reading).
+4. **Briefs to builders carry the launch rule:** a surface that must outlive the session is launched from a script FILE with `setsid`/`nohup`, stdin/stdout/stderr redirected, and its handover row states `sess`/`tty` as measured — "left up" without those two fields is a claim.
+5. **Enforcement candidate (w=3 would promote it):** a `pane_close.sh` that takes the pane id + the listener pids from the handover, refuses (rc 5) if any listener or its parent has a tty, and only then `kill-pane`s and re-curls — the check in the path, not in memory.
+
+**Family:** [[2026-08-26_never-delete-cleanup-means-quarantine]] (a close that destroys; the blast radius of a tidy act) · [[2026-08-07_a-check-that-cannot-fail]] (a parentage test asked a survival question) · [[2026-08-14_i-read-representations-they-read-sources]] ("ppid 1" read as "daemonised" — a representation of detachment) · [[2026-08-15_a-gui-open-is-a-write]] (my own action's side effect read as the world's state).
 
