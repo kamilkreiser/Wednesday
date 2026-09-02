@@ -160,9 +160,13 @@ above are the per-dependency detail; this is the run-sheet.
 8. **Kam's own credential bundle:** `Setup and System/Machine_Credentials/install_credentials.command`
    (his 2026-06-10 design; interactive passphrase prompts → he double-clicks it). Captured
    tokens age — expect `gh auth login` / `az login` afterwards.
-9. **Still GUI-only, per machine:** Matilda Premium voice (item 2), scheduler + its TCC grant
-   (items 12/15 — NOT installed on the laptop by default: the Studio runs the fleet and two
-   schedulers would boot two Wednesdays), calendar TCC (already granted on this machine).
+9. **Still GUI-only, per machine:** Matilda Premium voice (item 2); scheduler + its TCC grant
+   (items 12/15) — installed on the laptop 2026-09-02 on Kam's word: installer → first kickstart
+   exits 126 → Full Disk Access for `/bin/bash` (System Settings → Privacy & Security → Full Disk
+   Access → + → Cmd+Shift+G `/bin/bash`) → re-kickstart exits 0 and the on-drive log shows the
+   script ran. Known consequence: with the travel drive in the laptop at home at 06:00, the
+   laptop AND the Studio each boot a Wednesday; unmounted drive = the laptop's jobs no-op.
+   Calendar TCC was already granted on this machine.
 10. **Verify:** `doctor.sh` (now also checks node/npm/gh/az/unison/docker), then
     `git -C WEDNESDAY pull --rebase` (the drive's repo lags origin by the Studio's last commits;
     stash the sync churn first — never drop it).
