@@ -3,12 +3,19 @@ client: Secuura
 project: Blockchain
 path: /Volumes/DevMASTER/!CODING/Secuura/Blockchain
 status: active
-updated: 2026-09-02
+updated: 2026-09-03
 ---
 
 # Secuura / Blockchain (Platform K)
 
 **🔴 CORRECTION (2026-09-02 07:3x, churn-visible — every older "KS-291 = crypto-shred INFEASIBLE" line below is STALE):** KS-291's RESOLUTION is the opposite of its description — Kam implemented per-subject DEK envelope + true crypto-shred (PR #440), shipped to develop + demo, Done. Verified at develop from my seat: `migrations/034_pii_subject_keys.sql` + `036_deletion_log_crypto_shred.sql` + `packages/shared/src/crypto/subjectDek.ts` (header names KS-291 + the erasure guarantee) all PRESENT at `a079e1f6b`. **Crypto-shred IS available to K** — KS-695's design uses it (S-driven erasure can destroy the subject's DEK; stronger Art.17 position than field blanking). The stale constraint travelled s96→s103 briefs (ledger w=57); s103 caught it and designed against the true state.
+
+**Open / next (refreshed 2026-09-03 01:36 — s111 WRAPPED 15:33Z READY FOR QA; through-code pass RUNNING (pane %21); develop `541acae81`; SIX merges tonight):**
+- **Merge queue, all HELD on the through-code verdict + my GO:** #790 `5f5220e1a` · #788 `743ce456f` · #785 `878081e98` · #783 `5141f622c` — each **Peter-APPROVED AT HEAD** (15:26–15:29Z, minutes after the pushes) · #793 `55438c29c` (the #786 gate follow-up; no review yet) · #721 `c9a673565` / #750 `104e3c5e3` (rebased, no review) · #781 `6410e9ade` (merged develop in; approval stale at the old head — re-approval asked) · #764 `035f9b450` DIRTY ON PURPOSE (rebasing would revert KS-705's extraction) · #792 Peter's, never merged.
+- **s112 first id = KS-726 as a BUILD** in `anchorSubmission.ts` against KS-705's idempotency guards (not a rebase of #764); then the catalogue's remaining ACTION rows (KS-565/591/593 sized by s103, not re-opened).
+- **Filed tonight:** KS-760 (the GitHub integration walks tickets — FIVE walks, KS-229 ×3) · KS-761 (staleness detection for similarity FP entries, Peter's lean as the rec) · KS-762 (APP_DB_PASSWORD committed default ×51 — Kam's card). **Dispositioned:** KS-490 (register wrong in three directions) · KS-597 (0 of 95,127, backfill promoted) · KS-598 (live, both halves) · KS-577 (BOUNCE → Stuart) · KS-365 (In Review right) · KS-695 (ask-3 design note; Stuart @-mentioned on the contract change + one preference question).
+- **Kam's (morning lead):** KS-762 rotation card (default HOLD) · Peter's F5 scope-gate card (HOLD) · the SECURITY.md disclosure mailbox · Actions billing · KS-577 = Stuart's cutover-window decision · the KS-695 contract note Stuart was addressed on.
+- **Scores tonight:** s108 0.85 · s109 0.80 · s110 0.75 · s111 pending the pass.
 
 **Last sessions (2026-08-19, s47 + s48, both 1.0):**
 - **s48: 🎉 KINTSUGI IS UP** — `secuura02-kintsugi.southeastasia.cloudapp.azure.com`
