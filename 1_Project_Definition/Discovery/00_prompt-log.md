@@ -1965,3 +1965,8 @@ Done with it: Dynamics → Kam's team decision (no action); QuickQuote masthead/
 > Can you elaborate on each question using the bluff method? If you want to post in the fleet activity with the comments and recommendation.
 
 *Note:* the four open items re-posted in BLUF / Recommendation / Detail form on the panel (+ the fleet activity feed if it has a poster)
+
+## 2026-09-02 20:15 — Kam (dashboard chat (20:14, typed), verbatim)
+> thank you.  1)a 2)this will require further discussion. 3)yes, approve 4)new credits applied to account.  we have 11 more months.  dont worry.  thanks
+
+*Note:* KS-695 ask 3 = (a) → s108 by mail · mailbox = further discussion (card ruled later, branch stays staged) · NexusAI palette APPROVED (A, neutral + gradient chrome) → s19 by mail; deploy still behind pass 11 + my GO · Founders Hub credit renewed, 11 months — stop raising it
