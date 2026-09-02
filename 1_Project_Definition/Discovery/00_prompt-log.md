@@ -1940,3 +1940,18 @@ Done with it: Dynamics → Kam's team decision (no action); QuickQuote masthead/
 > ks-695 is a blocker for Stuart.  this does not look like its a problem.  please action and close
 
 *Note:* KS-695 (erasure design, Stuart's blocker) → read live; inserted FIRST in the s108 queue (ahead of item 0); close on evidence, not on the instruction alone — if the read disagrees with 'not a problem' I say so
+
+## 2026-09-02 19:54 — Kam (terminal (laptop), verbatim)
+> Can you configure TailScale specifically to connect to my other machines?
+
+*Note:* Laptop joined the tailnet; Studio connected by Kam; ssh + screen-sharing path proven
+
+## 2026-09-02 19:54 — Kam (terminal (laptop), verbatim)
+> install the scheduler on the laptop too
+
+*Note:* Installed after the two-Wednesdays flag; TCC granted; kickstart exit 0
+
+## 2026-09-02 19:54 — Kam (terminal (laptop), verbatim)
+> Fantastic. Thank you very much. Let's wrap up for now.
+
+*Note:* Wrap of the laptop seat
