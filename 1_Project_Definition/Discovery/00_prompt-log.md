@@ -1955,3 +1955,8 @@ Done with it: Dynamics → Kam's team decision (no action); QuickQuote masthead/
 > Fantastic. Thank you very much. Let's wrap up for now.
 
 *Note:* Wrap of the laptop seat
+
+## 2026-09-02 20:10 — Kam (dashboard chat (20:10, doubled), verbatim)
+> I'm gonna wrap up soon. Are there any questions or any tickets you want to run past me before I wrap up?
+
+*Note:* answered on the panel with the open items, each with its default so silence is safe
