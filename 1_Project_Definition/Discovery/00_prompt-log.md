@@ -1960,3 +1960,8 @@ Done with it: Dynamics → Kam's team decision (no action); QuickQuote masthead/
 > I'm gonna wrap up soon. Are there any questions or any tickets you want to run past me before I wrap up?
 
 *Note:* answered on the panel with the open items, each with its default so silence is safe
+
+## 2026-09-02 20:12 — Kam (dashboard chat (20:11, second doubled), verbatim)
+> Can you elaborate on each question using the bluff method? If you want to post in the fleet activity with the comments and recommendation.
+
+*Note:* the four open items re-posted in BLUF / Recommendation / Detail form on the panel (+ the fleet activity feed if it has a poster)
