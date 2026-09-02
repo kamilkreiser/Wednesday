@@ -1870,3 +1870,13 @@ Done with it: Dynamics → Kam's team decision (no action); QuickQuote masthead/
 > send me the updated PDF when it's done.  email it to me
 
 *Note:* Deliver the revised Platform K PDF by email from wednesday-agent@ to kreiser.org@me.com with the file attached; attachment path exercised first against my own inbox.
+
+## 2026-09-02 17:36 — Kam (dashboard chat, verbatim)
+> For Secura, there are a lot, and I mean a lot of tickets assigned to me. One: I would like you to be a lot more proactive with tickets and making sure agents execute these tickets even without me asking. Assume that you are the manager or the COO, ensuring that things move forward and things are actioned. Especially tickets that can be actioned by us without any external input. These should not appear on any list; they should have been done by now. So let's start and let's keep actually these until they're finished. Second, I'd like you to identify as a percentage how many of these tickets are assigned to me and can be actual without any external input other than, of course, me, you, or the agent.
+
+*Note:* Superwhisper doubled the message; recorded once. (1) standing instruction -> lesson 2026-09-02_coo-actionable-tickets-never-wait-for-kam + ledger row; the category-1 list (129) sent to Secuura s106 as the STANDING QUEUE after KS-740, relayed until empty. (2) percentage computed from the report's Kam-assigned rows and answered on the panel.
+
+## 2026-09-02 17:37 — Kam (dashboard chat, verbatim)
+> Not just secure tickets but scan all projects and see what's outstanding. And let's start today with a summary of what we can action and what we need to follow up.
+
+*Note:* All-projects sweep (NexusAI RD · HPSM · ATTIO · CypherKey · Vision · Lead_Bot; Platform K reused from the 06:51Z report) -> one report, per project the three categories + a fleet summary table of actionable vs follow-up + Kam-assigned share; delegated to a read-only subagent writing to disk with a DONE marker; then standing queues per project briefed to the agents.
