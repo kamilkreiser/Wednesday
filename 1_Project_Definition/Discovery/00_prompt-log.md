@@ -1935,3 +1935,8 @@ Done with it: Dynamics → Kam's team decision (no action); QuickQuote masthead/
 > The second thing that came out of the meeting is that it would help Peter if we aggregated PRs and things into projects. So if multiple items relate to the same stream, let's start creating projects and groups so that multiple tickets can aggregate into one project. That way, Peter can run a test on one stream rather than a dozen different streams that are no different but take time. Create this as a policy for Secuura ongoing because this is the new way we want to interact with Peter. My description is not clear, please let me know.
 
 *Note:* Secuura: stream policy for Peter (tickets grouped into Linear projects per stream; one test pass per stream) → policy drafted in 0_Brain, written into the Secuura repo by s108 as a docs PR; reading + one question back to Kam
+
+## 2026-09-02 19:46 — Kam (dashboard chat (19:46), verbatim)
+> ks-695 is a blocker for Stuart.  this does not look like its a problem.  please action and close
+
+*Note:* KS-695 (erasure design, Stuart's blocker) → read live; inserted FIRST in the s108 queue (ahead of item 0); close on evidence, not on the instruction alone — if the read disagrees with 'not a problem' I say so
