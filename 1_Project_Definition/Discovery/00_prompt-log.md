@@ -1975,3 +1975,8 @@ Done with it: Dynamics → Kam's team decision (no action); QuickQuote masthead/
 > As you go through the tickets tonight, please archive as many as you can.
 
 *Note:* archiving HOLD LIFTED for tonight → ADDENDUM to s108: archive the ARCHIVE-FOR-NOW rows as each stream is catalogued; archive never close; carve-outs (TND per 16:08, open PRs/in review, ACTION/ESCALATE rows, KS-695); every archived id listed for the morning catalogue
+
+## 2026-09-02 20:26 — Kam (dashboard chat (20:26, doubled), verbatim)
+> Please rotate and keep going.
+
+*Note:* Kam-prompted coordinator rotation at statusline 58%: handover refreshed, pushed, wednesday_rotate.sh --self; agents untouched
