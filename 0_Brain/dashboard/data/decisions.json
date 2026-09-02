@@ -2005,5 +2005,34 @@
   "status": "open",
   "ruled_choice": null,
   "ruled_ts": null
+ },
+ {
+  "id": "secuura-ks740-tsa-fanout-fix",
+  "client_project": "Secuura/Blockchain",
+  "title": "KS-740: the rfc3161 batch path has no timeout and no concurrency limit — fix it, cap it, or leave it?",
+  "bluf": "Measured (s106) and mechanism named (QA pass): a spec-legal 100-item batch is ~380 ms serial, but 12 concurrent batches breach the 10 s budget 10–12 of 12 times on the rfc3161 (qualified TSA) path — bare fetch with no signal + an unbounded Promise.all fan-out over the batch; 8 other services already use AbortSignal.timeout. Availability-class. Your 16:08 ruling was measure-only; this is the fix decision.",
+  "default_action": "HOLD (measure-only stands; nothing built) until you rule",
+  "options": [
+   {
+    "key": "A",
+    "label": "Bound the TSA path",
+    "detail": "per-request timeout + a concurrency limit on the fan-out, maxItems stays 100:one PR on Peter; contract unchanged; the SET proves it"
+   },
+   {
+    "key": "B",
+    "label": "Lower maxItems in the contract (Peter's first reading)",
+    "detail": "a published-API change; the measurement says it is not the defect"
+   },
+   {
+    "key": "C",
+    "label": "Leave as measured; note on the ticket",
+    "detail": "the breach stands for any 12-way concurrent caller"
+   }
+  ],
+  "recommended": "A",
+  "ts": "2026-09-02T18:38:53.202304+10:00",
+  "status": "open",
+  "ruled_choice": null,
+  "ruled_ts": null
  }
 ]
