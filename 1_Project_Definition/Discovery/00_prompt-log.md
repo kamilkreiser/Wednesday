@@ -1980,3 +1980,8 @@ Done with it: Dynamics → Kam's team decision (no action); QuickQuote masthead/
 > Please rotate and keep going.
 
 *Note:* Kam-prompted coordinator rotation at statusline 58%: handover refreshed, pushed, wednesday_rotate.sh --self; agents untouched
+
+## 2026-09-02 20:41 — Kam (terminal (20:4x), verbatim)
+> did I read that correctly?  its taking 43% context to load?
+
+*Note:* answered: 34% after the brain load / 43% after the whole boot (statusline); the live ledger (272 KB, rows since 08-16) is the heavy half; recommended a second archive pass at Sunday's consolidation, offered tonight on his word
