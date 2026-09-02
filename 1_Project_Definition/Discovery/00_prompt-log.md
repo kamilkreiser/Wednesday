@@ -1890,3 +1890,8 @@ Done with it: Dynamics → Kam's team decision (no action); QuickQuote masthead/
 > While that's running, please sync the external drive with DevMaster and rotate yourself.
 
 *Note:* Doubled by Superwhisper; recorded once. Sync = Kam's engine with the 08-26 two checks (case-consistent top-level names across replicas BEFORE; the log read for Deleting AFTER) and never-delete (dry run first); then wednesday_rotate.sh --self at the boundary.
+
+## 2026-09-02 18:12 — Kam (terminal (new laptop, travel drive), verbatim)
+> this is a new PC.  My laptop died and I had to firmware refresh.  Please check what software is needed, and whats installed.  Install everything missing, from obsidian to docker please
+
+*Note:* Machine bring-up on the replacement MacBook Pro from the KK_DEV_Local travel drive: inventory vs PORTABILITY.md + doctor.sh + CLAUDE-reference; GUI apps installed direct (Docker, iTerm2, Obsidian, VS Code); Homebrew by Kam (sudo); CLI tools via brew after.

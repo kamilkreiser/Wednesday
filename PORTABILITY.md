@@ -124,3 +124,45 @@ Keep this file updated whenever a new machine-local dependency appears.
     print-to-pdf), `pdftoppm` (brew `poppler`, for the eyeball raster). doctor.sh warns when
     any is missing. Fallback if Chrome is absent: `soffice --headless --convert-to pdf` on
     the pandoc HTML (uglier, still a PDF).
+
+## New-Mac bring-up, done end to end (2026-09-02 — Kam's laptop died; replacement MacBook Pro from the KK_DEV_Local travel drive)
+
+The order that worked, so the next dead machine costs an hour, not an evening. Items 1–21
+above are the per-dependency detail; this is the run-sheet.
+
+1. **Already there on a firmware-fresh Mac with Kam's Apple ID:** Xcode (so git/CLT), Chrome,
+   Brave, Claude.app + `~/.local/bin/claude`, Superwhisper, Office, `jq` (macOS 26 ships it).
+   Python is the system 3.9 — not enough for the venvs (item 9/11).
+2. **Homebrew needs Kam's password** — the only sudo step. `/bin/bash -c "$(curl -fsSL
+   https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"` in a Terminal window
+   he can type into (an agent's shell has no TTY for the prompt; opening the window for him via
+   `osascript … do script` worked). Then `eval "$(/opt/homebrew/bin/brew shellenv)"` in
+   `~/.zprofile`.
+3. **GUI apps that need NO password** (download + copy into /Applications, clear quarantine):
+   Docker Desktop (`desktop.docker.com/mac/main/arm64/Docker.dmg`), iTerm2
+   (`iterm2.com/downloads/stable/latest`), VS Code
+   (`update.code.visualstudio.com/latest/darwin-arm64/stable`), Obsidian (GitHub releases —
+   the `latest` release is the ANDROID apk; take the newest release whose asset ends in `.dmg`;
+   the DMG mounts with a space in its volume name).
+4. **Brew formulae, non-interactive:** `node gh azure-cli unison tmux pandoc poppler ffmpeg
+   python@3.14 uv git-crypt` — ~4 min. `python@3.14` is what BOTH on-drive venvs
+   (`tools/media/.venv`, `coordination/.venv`) point at via `/opt/homebrew/opt/python@3.14`;
+   once it exists they work unchanged (proven: faster_whisper + treequest import).
+5. **Tailscale is a pkg cask = sudo:** `brew install --cask tailscale-app` in Kam's Terminal.
+   First launch then needs TWO GUI approvals — the VPN configuration, then Log in to the
+   tailnet (`tail99c01e.ts.net`; the Studio is `mac-studio`). Until both, the CLI BLOCKS
+   (doctor's call is now bounded to 4 s).
+6. **Docker first launch:** `open -a Docker`, Kam accepts the terms + helper prompt; the
+   `/usr/local/bin/docker` symlink appears after that. Fallback added to `~/.zprofile`:
+   `PATH=$PATH:/Applications/Docker.app/Contents/Resources/bin` (compose v2 is bundled there).
+7. **`wednesday` command:** `/opt/homebrew/bin/wednesday` recreated (execs the launcher on
+   DevMASTER, else KK_DEV_Local, else fails politely).
+8. **Kam's own credential bundle:** `Setup and System/Machine_Credentials/install_credentials.command`
+   (his 2026-06-10 design; interactive passphrase prompts → he double-clicks it). Captured
+   tokens age — expect `gh auth login` / `az login` afterwards.
+9. **Still GUI-only, per machine:** Matilda Premium voice (item 2), scheduler + its TCC grant
+   (items 12/15 — NOT installed on the laptop by default: the Studio runs the fleet and two
+   schedulers would boot two Wednesdays), calendar TCC (already granted on this machine).
+10. **Verify:** `doctor.sh` (now also checks node/npm/gh/az/unison/docker), then
+    `git -C WEDNESDAY pull --rebase` (the drive's repo lags origin by the Studio's last commits;
+    stash the sync churn first — never drop it).

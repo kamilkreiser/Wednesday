@@ -91,13 +91,6 @@ fi
 # --- Statusline dependency (added 2026-08-05: tools/statusline.sh needs jq) ---
 command -v jq >/dev/null 2>&1 && ok "jq (statusline)" || warn "jq missing" "statusline degrades to bare label — brew install jq"
 
-# --- Machine dev toolset (added 2026-09-02, new-laptop bring-up): the workspace
-# CLAUDE.md requires az/docker/node/npm; the fleet uses gh + unison (sync engine).
-# Warn-level: Wednesday boots without them, the fleet/sync legs do not.
-for t in node npm gh az unison docker; do
-  command -v "$t" >/dev/null 2>&1 && ok "$t" || warn "$t missing" "brew install $( [ "$t" = az ] && echo azure-cli || { [ "$t" = docker ] && echo '--cask docker (then launch Docker.app once for the CLI symlink)' || echo "$t"; } )"
-done
-
 # WED-16 scheduler TCC health (added 2026-08-05; relocated same day — was
 # unreachable below the exit): launchd jobs must execute from this drive.
 # Exit code 126 on kickstart = TCC ungranted (PORTABILITY 15: Full Disk
@@ -231,12 +224,7 @@ fi
 #   $TS_BIN up && $TS_BIN serve --bg --http=80 --set-path=/ http://127.0.0.1:47787
 TS_BIN="/Applications/Tailscale.app/Contents/MacOS/Tailscale"
 if [ -x "$TS_BIN" ]; then
-  # Bounded call (2026-09-02, new laptop): before the user approves the VPN
-  # configuration the CLI BLOCKS forever waiting for the backend, and doctor
-  # hung with it. macOS has no `timeout`; background + kill after 4 s.
-  TS_TMP=$(mktemp); ( "$TS_BIN" status --json > "$TS_TMP" 2>/dev/null & TS_PID=$!; sleep 4; kill "$TS_PID" 2>/dev/null; wait "$TS_PID" 2>/dev/null )
-  TS_STATE=$(python3 -c 'import json,sys; print(json.load(open(sys.argv[1])).get("BackendState",""))' "$TS_TMP" 2>/dev/null); rm -f "$TS_TMP"
-  [ -z "$TS_STATE" ] && warn "tailscale backend not answering" "first run: approve the VPN configuration + log in via the menu-bar icon (PORTABILITY Tailscale section)"
+  TS_STATE=$("$TS_BIN" status --json 2>/dev/null | python3 -c 'import json,sys; print(json.load(sys.stdin).get("BackendState",""))' 2>/dev/null)
   if [ "$TS_STATE" = "Running" ]; then
     if "$TS_BIN" serve status 2>/dev/null | grep -q "proxy http://127.0.0.1:47787"; then
       ok "tailscale ACTIVE + dashboard served (Kam asked for it — make dormant again when he is done)"
