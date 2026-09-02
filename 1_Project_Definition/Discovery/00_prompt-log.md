@@ -1885,3 +1885,8 @@ Done with it: Dynamics → Kam's team decision (no action); QuickQuote masthead/
 > Don't worry about non-secure projects today. We'll start with that tomorrow morning.
 
 *Note:* Non-Secuura projects deferred to the 06:00 morning session 09-03: the fleet sweep already running (read-only) is left to finish and its files become the morning seat's input - refreshed at the sweep, delivered with the morning board; no non-Secuura queue briefs or deliveries today.
+
+## 2026-09-02 17:43 — Kam (dashboard chat, verbatim)
+> While that's running, please sync the external drive with DevMaster and rotate yourself.
+
+*Note:* Doubled by Superwhisper; recorded once. Sync = Kam's engine with the 08-26 two checks (case-consistent top-level names across replicas BEFORE; the log read for Deleting AFTER) and never-delete (dry run first); then wednesday_rotate.sh --self at the boundary.
