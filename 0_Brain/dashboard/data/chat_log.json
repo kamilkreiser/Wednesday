@@ -4518,5 +4518,25 @@
   "role": "wednesday",
   "ts": "2026-09-02T20:44:37.115460+10:00",
   "text": "PR #777 taken: it is Peter's small registry change (platform-s's Playwright report port 9323 added to the port-crossover gate, two files, no reviews yet). The instruction is in the Secuura session's inbox, verified: review at its next boundary with the gate run and a sabotage control, then an approving review at the head on a pass. Approve, not merge — his PR stays his to merge unless you say the word. You hear the review id when it lands."
+ },
+ {
+  "role": "kam",
+  "text": "It looks like the boot script is the main culprit. How can we learn from the boot? How can we take the learnings, bottle them, make sure we don't lose anything, but cut down the actual context?It looks like the boot script is the main culprit. How can we learn from the boot? How can we take the learnings, bottle them up, make sure we don't lose anything, but cut down the actual context?",
+  "ts": "2026-09-02T20:44:56.656488+10:00"
+ },
+ {
+  "role": "kam",
+  "text": "As soon as 777 is ready, let me know and post NPRs so Peter can continue his work.As soon as 777 is ready, let me know and post NPRs so Peter can continue his work.",
+  "ts": "2026-09-02T20:45:44.191301+10:00"
+ },
+ {
+  "role": "wednesday",
+  "ts": "2026-09-02T20:46:19.885114+10:00",
+  "text": "1. #777 and the launcher — no collision, measured: the launcher's boot line is edited on disk and on origin (line 151, commit 4ffbef0 at 20:43:41, syntax check clean), and the #777 relay went out a minute later (3edcd51 at 20:44:47). The two never touched. What you saw was the ORDER of my receipts: your #777 message landed while I was mid-way through the ledger move, and I finished that and answered the prune first, so #777's receipt came two minutes after your message. Your messages never interrupt work in progress; the miss was mine — no immediate acknowledgement. Fix, applied from now: when a message lands mid-task you get a one-line 'received — finishing X, then Y' at once, so the ordering is always visible and the work runs on underneath. Recorded in the ledger.\n\n2. The boot — you are right that it is the culprit, and the fix I actually believe in is a two-tier load, generated, not hand-written.\n\nBLUF: keep every lesson file exactly as it is (the source of truth, nothing lost), but boot from a DIGEST that a script generates from them: each lesson's headline (the retrieval handle) plus its 'How to apply' rules — about 1 KB per lesson instead of 4–28 KB. The full file is opened on demand the moment a lesson fires or a diagnosis needs its cases, the same way the archive works today. The ledger at boot becomes 'rows since the last consolidation' (the older rows auto-archive as a consolidation step, the 82 fleet-insight rows go to their own file). Rough size: 466 KB today → about 140 KB, so a boot near 10–12% instead of 34% — an estimate until measured.\n\nWhy it loses nothing: the digest is built by a script from the files, so every rule line is present by construction and a check can prove it; what leaves the boot is the case evidence, which matters at consolidation and re-diagnosis — both on-demand reads. It also makes your 13 Aug rule load-bearing: a lesson whose headline does not carry its operative case gets fixed, because the headline is now what fires.\n\nCost, honestly: a rule that lives only in a lesson's body and not in its 'How to apply' would be invisible at boot — the generator flags those so they get tidied at consolidation, and the short contemplation files stay whole.\n\nDefault unless you say otherwise: I build the generator and the digest TONIGHT and measure the real size — the boot itself does not switch until you say the word (one launcher line, reversible in one edit; pilot one seat, compare the retro over a day, roll back if a lesson stops firing)."
+ },
+ {
+  "role": "kam",
+  "text": "So 777, click ready to close.So 777, click ready to close.",
+  "ts": "2026-09-02T20:46:43.282068+10:00"
  }
 ]

@@ -1995,3 +1995,13 @@ Done with it: Dynamics → Kam's team decision (no action); QuickQuote masthead/
 > Please review and approve 777.
 
 *Note:* PR #777 on Secuura → s108 by ADDENDUM: review at head now, APPROVE on a pass (Kam's typed word; approve ≠ merge; his never-merge hold on Peter's PRs stands), STATUS with review id + head
+
+## 2026-09-02 20:46 — Kam (dashboard chat (20:44, doubled), verbatim)
+> It looks like my comment on 777 interacted with the process we were going through with updating the launcher script. Is this the case? And if so, we should make sure that it doesn't happen again so we can either run in parallel or do things sequentially without interrupting.
+
+*Note:* answered: no collision (launcher line on disk + origin at 4ffbef0 20:43:41; #777 relay 3edcd51 20:44:47); the visible effect was receipt ORDER — his #777 message waited ~2 min behind the archive move; fix = immediate one-line ack on arrival (08-05 rule 3), ledgered w=1
+
+## 2026-09-02 20:46 — Kam (dashboard chat (20:44, doubled), verbatim)
+> It looks like the boot script is the main culprit. How can we learn from the boot? How can we take the learnings, bottle them up, make sure we don't lose anything, but cut down the actual context?
+
+*Note:* proposed on the panel: two-tier load — a GENERATED boot digest (headline + How-to-apply per lesson, ~1 KB each) with full files on demand; ledger at boot = rows since the last consolidation; insight rows to their own file; est. 466 KB → ~140 KB; default = build + measure tonight, boot switches only on his word (WED ticket filed)
