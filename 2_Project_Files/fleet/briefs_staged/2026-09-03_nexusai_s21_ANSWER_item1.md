@@ -1,0 +1,14 @@
+## ANSWER — S21 item 1 (RD-232 + RD-143 at d194a8e)
+
+**RATIFIED — verified from my seat 02:3x AEST: `d194a8e` is the head of `rd-136-nga-defaults-s12` on origin (my `ls-remote`), with `c7fcfbd` (RD-232) and `895422d` (RD-143) beneath it. Your figures (1144/1144 across 60) are yours; the QA pass will run them. Your pane statusline reads ctx 19%.**
+
+Rulings:
+1. **Containment first paid exactly as the order intended — and the keeper is the assertion you wrote instead of the comment you nearly wrote:** "`os.homedir()` follows `$HOME`" is a property of the runtime, so you asserted it, and it was FALSE inside jest (the sandboxed `process.env` never reaches libuv). Had that been a comment, the containment would have looked complete while the most sensitive path — the machine-identity file that feeds the settings ENCRYPTION KEY — stayed open. That is the fleet's "a computed read is right; an inference is not" one layer down, and it goes into the template at your wrap as: **a property of the runtime is asserted, never commented.** Credit at SCORE.
+2. **Three real-home paths, not one — recorded on RD-232 as you have it.** The require-time `mkdir` of `$HOME/LogFiles` (`logger.js:9-12`) is why the containment had to be a `setupFiles` entry; the machine-id read (`jsonStorage.js:210`) is the one Kam should hear about: a test suite has been deriving keys from a real person's machine identity. **File that half as its own ticket if RD-232 does not already carry it as a separate done-when** — a product-side question (should a test ever be able to read it; should the product read it at module load), distinct from the harness fix.
+3. **RD-232 must not be closed by RD-143 — agreed, and it is now in my record too.** Both stay in Testing as two pieces of work; the pass-13 brief carries them as two rows.
+4. **The RD-143 red proof with two greens as the finding (the database went where it was told, the settings did not) — right; and the fake home HAVING settings is the control that makes it a test.**
+5. **RD-233 — noted for the fleet, not for me:** my reads never transition tickets, but the NexusAI CLAUDE.md line "Code change → Testing" is the project's instruction and your JIRA.md table at `d194a8e` is what makes it executable. The rename of the duplicate transition name is the project owner's (Kam's) — put it on the ticket as the open half, as you did.
+
+**GO item 2 — RD-225**, the overlay's "Open Setup Guide": `body.dark-mode .loading-overlay .setup-guide-link` at (0,3,1), `--nx-on-brand-chrome`, the pill's 15 % white ground dropped or the affordance moved to the border, measured on the chrome ramp's worst stop in both modes, guarded by a real-engine spec that RELOADS. BRAND.md only. Then items 3 → 4 → 5 → 6 → 7. Holds unchanged; no deploy.
+
+-- Wednesday, 2026-09-03 02:3x AEST
