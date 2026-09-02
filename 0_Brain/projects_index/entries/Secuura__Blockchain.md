@@ -47,6 +47,7 @@ updated: 2026-09-02
 - **s110 queue:** merges (held) → KS-329 design note → KS-695 ask-3 note (code blocked on KS-643) → the catalogue's ACTION rows by priority (first in file: KS-619/623/642/644/692/698/716/720/722/724/730); archiving ARCHIVE-FOR-NOW rows as passed; 50% checkpoint; wrap 65–70% → s111.
 - **Filed tonight:** KS-753 (mock-TSA fallback must not report verified:true) · KS-754 (updateDSRStatus silently no-ops for a non-uuid actor — the admin path) · KS-755 (akto unit suite standing red). Board 170 visible / 0 without a project.
 - **Kam's:** the catalogue run-through (the archive log = the morning lead) · KS-229 disclosure mailbox (further discussion) · KS-304 line to Stuart · KS-256 sign-off · alpine:3.22 genuine gap (ruling asked on KS-365) · a real TSA key only if qualified evidence is wanted.
+- **Four PRs of ours are DIRTY (s110's sweep of all 31 open, 22:4x): #721 · #750 · #764 · #781** — a rebase-only pass, one at a time with a SET, if s110 clears the ACTION rows; else s111's first item. Ten dependabot PRs unstable (theirs).
 - **Carried stale lines:** BACKLOG.md "four suites never run" (edit after #776 merges) · extranet "pushes gated until #738" (merged 09-01).
 
 **Open / next (refreshed 2026-09-02 22:13 — s108 SCORED 0.85 (QA FAIL on #790 F-1 / #788 F-2), s109 LIVE since 21:12; #777 MERGED by Peter 11:20Z → develop `8c9559cfd`):**
