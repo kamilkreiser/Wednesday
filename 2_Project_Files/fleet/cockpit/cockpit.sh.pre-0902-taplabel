@@ -223,12 +223,6 @@ case "${1:-}" in
     # polled at the project's inbox (delivery race ~30 s) and the tap is refused if absent.
     MAIL_SUBJ=""
     if [ $# -eq 5 ] && [ "$4" = "--mail" ]; then MAIL_SUBJ="$5"; set -- "$1" "$2" "$3"; fi
-    # SENDER LABEL (2026-09-02 17:3x, ledger fleet-incident row): a tap lands in the agent's
-    # transcript as a user-role typed turn, byte-indistinguishable from Kam typing into the
-    # pane. s106 read three of my taps as Kam's in-session word and wrote "re-confirmed" into
-    # a PR body. Every tap now opens with a label the fleet rule names: "[Wednesday tap]" =
-    # a pointer from the coordinator, never the principal's word.
-    case "$3" in "[Wednesday tap]"*) ;; *) set -- "$1" "$2" "[Wednesday tap] $3" ;; esac
     [ $# -eq 3 ] || die "usage: cockpit.sh say <pane-name> <text> [--mail <subject-substring>]"
     SAY_MAX_PTR="${SAY_MAX_PTR:-200}"
     if [ -z "$MAIL_SUBJ" ] && [ "${#3}" -gt "$SAY_MAX_PTR" ]; then
