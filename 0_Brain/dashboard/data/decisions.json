@@ -2391,5 +2391,34 @@
   "status": "open",
   "ruled_choice": null,
   "ruled_ts": null
+ },
+ {
+  "id": "nexusai-home-data-mutated",
+  "client_project": "Datasec/NexusAI",
+  "title": "Your Mac's ~/data (a local NexusAI data dir) was written to by the pass-12 tester — restore from its backups, or leave it?",
+  "bluf": "Pass 12 found P12-02: NexusAI honours DATA_DIR only when that directory already has settings, so a fresh DATA_DIR silently falls through to ~/data. The round's new rate-limit test spawns the real server at a fresh tmpdir, and running it wrote to /Users/kam_code/data/settings.json on this Mac (47,300 -> 52,731 bytes between 00:53 and 01:49). The tester disclosed it as not restorable by itself; a ~/data/backups folder exists. Nobody in the fleet touches ~/data (outside every project folder). The product fix is S21's first item.",
+  "default_action": "LEAVE — nobody touches ~/data until you rule",
+  "options": [
+   {
+    "key": "restore",
+    "label": "Restore from ~/data/backups",
+    "detail": "you pick the pre-00:53 backup and copy it back; the fleet stays out of the folder"
+   },
+   {
+    "key": "leave",
+    "label": "Leave it",
+    "detail": "if this local instance does not matter, nothing to do"
+   },
+   {
+    "key": "quarantine",
+    "label": "Have me snapshot it",
+    "detail": "I copy ~/data to a dated quarantine folder inside WEDNESDAY (read-only copy, no restore) so a later decision has the bytes"
+   }
+  ],
+  "recommended": "restore",
+  "ts": "2026-09-03T02:05:23.244574+10:00",
+  "status": "open",
+  "ruled_choice": null,
+  "ruled_ts": null
  }
 ]
