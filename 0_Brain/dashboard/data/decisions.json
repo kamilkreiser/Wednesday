@@ -3072,5 +3072,34 @@
   "status": "open",
   "ruled_choice": null,
   "ruled_ts": null
+ },
+ {
+  "id": "secuura-rotation-shell-inversion",
+  "client_project": "Secuura/Blockchain",
+  "title": "The rotation-day checker can print a full green over a stack running the OLD shared passwords — measured tonight, and the script itself hands operators the command that arms it",
+  "bluf": "The Secuura agent (s122) measured a real precedence inversion. `source` resolves the .env OVER the shell; Docker Compose resolves the SHELL over the .env. So in one shell, with one correctly-rotated .env, check-slot-credentials.sh prints 'POSTGRES_PASSWORD is per-clone', 'REDIS_PASSWORD is per-clone' and exits 0, while compose resolves BOTH datastore passwords to the shared literals from git history. Worse: when the .env is unreadable the script tells the operator to run `set -a; . '.env'` to diagnose it, and running that is exactly what exports the stale values into their shell. The operator most likely to type it is the one whose .env is malformed - i.e. mid-rotation. APP_DB_PASSWORD rotates 2026-09-05 09:00, about 29 hours out. Wednesday has ruled the technical path already: a new ticket for the inversion, the false 'it IS the consumer' claim corrected on #800 now, and the trap-arming suggestion removed from the script. What is NOT Wednesday's is whether Stuart and Peter hear anything different from what they have already been told.",
+  "default_action": "The standing extranet notice stands unchanged, no contact is made with Stuart or Peter, and the Secuura agent continues the fixes overnight. Kam rules in the morning with the finished work in front of him.",
+  "options": [
+   {
+    "key": "holdnotice",
+    "label": "Standing notice stands; no new comms tonight (Recommended)",
+    "detail": "The extranet notice already tells Stuart and Peter not to follow the printed remedy until #800 lands, so the instruction they are operating under is unchanged and still correct - this finding strengthens its reason rather than changing its content. Nobody rotates at 3am, and the fixes land overnight. Kam reviews in the morning with the fix in hand."
+   },
+   {
+    "key": "amend",
+    "label": "Amend the extranet notice now with the shell hazard",
+    "detail": "Adds one specific warning: do not run `set -a; . '.env'` in a shell you will then start the stack from. Buys precision at the cost of a second message about the same PR before the fix exists - and Kam is the only one who talks to them."
+   },
+   {
+    "key": "movedate",
+    "label": "Ask to move the 2026-09-05 09:00 rotation",
+    "detail": "Safest of all, and the most expensive in goodwill. Wednesday does not recommend it: the fixes are being written now and the current standing instruction already protects them."
+   }
+  ],
+  "recommended": "holdnotice",
+  "ts": "2026-09-04T03:33:53.982039+10:00",
+  "status": "open",
+  "ruled_choice": null,
+  "ruled_ts": null
  }
 ]
