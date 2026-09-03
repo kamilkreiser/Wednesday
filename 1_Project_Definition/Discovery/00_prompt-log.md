@@ -2158,3 +2158,8 @@ Done with it: Dynamics → Kam's team decision (no action); QuickQuote masthead/
 > Please email me the image for review. I'm referring to the hooded woman image.
 
 *Note:* 12:10 — opened the PNG in Preview on his desk + emailed a 1920×1080 review copy to kreiser.org@me.com from wednesday-agent@ (his own ask; not external comms).
+
+## 2026-09-03 12:14 — Kam (dashboard chat, verbatim)
+> Thank you. Deploy everything that's ready.
+
+*Note:* 12:13 — his reply to the deploy-scope card/panel question = option A (develop whole to demo/UAT, staged). Card ruled A; DEPLOY GO ADDENDUM to s115 at develop e02e15811 with the rollback re-tag first. NexusAI unchanged (gate → pass 13b-i → GO).
