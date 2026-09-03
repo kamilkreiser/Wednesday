@@ -7,7 +7,7 @@ status: live
 
 # Boot digest — headline + rules of every lesson (open the file when it fires)
 
-Generated 2026-09-04 00:55 from 91 lesson files (370,657 B). Each block = the lesson's retrieval handle (H1), its frontmatter, the operative paragraph, its section index, and every RULES section verbatim. 6 files carry no rules-shaped section and are included whole. The CASES behind a rule live only in the file: open it the moment the rule fires, or when a diagnosis needs the evidence. `_ledger.md` is read whole beside this digest; `_ledger_archive.md` on demand.
+Generated 2026-09-04 01:51 from 91 lesson files (374,430 B). Each block = the lesson's retrieval handle (H1), its frontmatter, the operative paragraph, its section index, and every RULES section verbatim. 6 files carry no rules-shaped section and are included whole. The CASES behind a rule live only in the file: open it the moment the rule fires, or when a diagnosis needs the evidence. `_ledger.md` is read whole beside this digest; `_ledger_archive.md` on demand.
 
 ## The T9 SSD is the master — Wednesday must be fully portable
 `2026-07-31_fully-portable-drive.md` · principle · 2026-07-31 · status: superseded — the "T9 is the master" half by [[2026-08-25_one-drive-devmaster-is-master]] (2026-08-25); the portability principle itself still lives
@@ -998,7 +998,7 @@ reported anything else — because it measured the wrong thing, errored and
 swallowed it, or asked a question whose answer was fixed in advance. It is worse
 than no check, because it converts an open question into a settled one.
 
-sections (open the file for these): The concrete remedy, added 2026-08-13 (Secuura/Blockchain s28) · A failure-only log going quiet is not recovery (2026-08-22, Secuura s61) · The third member: a check that MISREPORTS what it saw (2026-08-14, same agent) · A test that cannot CLEAN UP starts asserting against live data (2026-08-15, Secuura s35) · A positive control proves the suite it RAN IN, and nothing about its neighbour (2026-08-15, Secuura s35) · The inverse: a REPRODUCTION that cannot reproduce (2026-08-15, Datasec/NexusAI) · The refinement that makes the positive-control rule actually work (2026-08-16, Secuura s37) · An indicator that can MISS its own event (2026-08-24, Datasec/NexusAI) · The control needs its own control (2026-08-23, Datasec/NexusAI) · The condition we had not stated: on a side-effecting system, the positive control IS an action (2026-08-14, Secuura s34) · The mirror: an ABSENCE claim needs a positive control too (2026-08-14) · Three "cannot see" members from one micro-session (2026-08-25, Datasec/NexusAI s5) — and a derivation lesson from its neighbour · A test's NAME is not its coverage (2026-09-03, Secuura s119 — the member that let an AUTH BYPASS survive a suite that appears to test it)
+sections (open the file for these): The concrete remedy, added 2026-08-13 (Secuura/Blockchain s28) · A failure-only log going quiet is not recovery (2026-08-22, Secuura s61) · The third member: a check that MISREPORTS what it saw (2026-08-14, same agent) · A test that cannot CLEAN UP starts asserting against live data (2026-08-15, Secuura s35) · A positive control proves the suite it RAN IN, and nothing about its neighbour (2026-08-15, Secuura s35) · The inverse: a REPRODUCTION that cannot reproduce (2026-08-15, Datasec/NexusAI) · The refinement that makes the positive-control rule actually work (2026-08-16, Secuura s37) · An indicator that can MISS its own event (2026-08-24, Datasec/NexusAI) · The control needs its own control (2026-08-23, Datasec/NexusAI) · The condition we had not stated: on a side-effecting system, the positive control IS an action (2026-08-14, Secuura s34) · The mirror: an ABSENCE claim needs a positive control too (2026-08-14) · Three "cannot see" members from one micro-session (2026-08-25, Datasec/NexusAI s5) — and a derivation lesson from its neighbour · A test's NAME is not its coverage (2026-09-03, Secuura s119 — the member that let an AUTH BYPASS survive a suite that appears to test it) · Two views that LOOK independent can share ONE truncation (2026-09-04, Datasec/NexusAI S29 — the builder's own diagnosis of why it could not see a regression it shipped)
 
 **How to apply — one question, asked of the check rather than the result:**
 
@@ -1187,6 +1187,27 @@ happened — and the cycle is the evidence the loop works.
    everything. **Without those controls, "leg 1 returns non-200" would have reported a bypass that
    was never demonstrated.** A security claim proved by a negative-only harness is the
    negative-only suite rule pointed at the most expensive possible subject.
+
+**How to apply:**
+1. **When a verification confirms a change you just made, ask what the verification and the change
+   SHARE** — a parser, a regex, a selector-splitting helper, an assumption about the input's shape.
+   Shared upstream = one observation reported twice.
+2. **Read the raw artefact at least once, unmediated.** Both views here were greps. Neither was the
+   file. **A tool that extracts is a tool that can omit**, and the omission is invisible in its
+   output by construction.
+3. **Prefer a verifier with a different SHAPE, not just a different invocation** — render vs source,
+   a second party, the consumer itself. The strongest check in this whole round was the tester's
+   two-surface diff (declared ground now vs painted ground before), because its mechanism shared
+   nothing with the writer's.
+4. **A clean result from a method you cannot show is falsifiable is not evidence.** The same agent
+   noted its other sheet came out 16/16 **by luck of the regex it happened to use there, not by
+   judgement** — and said so, rather than banking it as proof of method. That sentence is what made
+   the rest of its report believable.
+5. **Same family, one level up:** the tester in the same round built an RD-286 probe, got a clean
+   green, and then proved its own probe *structurally could not fail* for that set — because the
+   ground-walk terminated on the element itself. **It replaced the check rather than reporting the
+   green.** A green from an instrument that cannot go red is the thing this file is about, and it is
+   worth as much attention when it comes from your own new tool as from someone else's old one.
 
 
 ## A promise is not a mechanism — unsupervised work needs a trigger, not an intention

@@ -481,3 +481,54 @@ so nobody does), here with a security consequence.
    everything. **Without those controls, "leg 1 returns non-200" would have reported a bypass that
    was never demonstrated.** A security claim proved by a negative-only harness is the
    negative-only suite rule pointed at the most expensive possible subject.
+
+
+## Two views that LOOK independent can share ONE truncation (2026-09-04, Datasec/NexusAI S29 — the builder's own diagnosis of why it could not see a regression it shipped)
+
+**Their formulation, adopted verbatim and better than the rule it sharpens:**
+
+> *"The script that added the grounds took each selector as `sel.split('\n')[-1]` — the LAST line
+> only — so a grouped selector was silently truncated to its final member. I then 'verified' with
+> `sed -n '/^\.nx-sus-rank th:last-child/,+7p'`, which starts AT that line and hides the
+> `td:last-child,` above it. **Two views of the file, truncated the same way, and I never read the
+> raw rule. I built the instrument that hid it and then trusted it.**"*
+
+**The case.** A CSS ground was written onto the *combined* selector
+`.nx-sus-rank td:last-child, .nx-sus-rank th:last-child`. The `td` half outranked the rule that gave
+it its real ground, so six table cells silently changed from `#ffffff` to `#f8f9fa` — a visible
+regression on a page the principal had ratified by eye. **Contrast never moved, so no contrast
+assertion could catch it.** The writer's script and the writer's verification both saw only the last
+line of the selector, so both agreed, and the agreement was worth nothing.
+
+**Why this is a distinct member.** The existing rule in this file says *suspicious agreement is as
+informative as disagreement — if a check and its control both return zero, the harness is the
+suspect, not the subject.* That is stated for a check and a control. **This is stronger and less
+obvious: a WRITER and a VERIFIER, built by the same person from the same assumption, are not two
+observations.** They feel independent because they are different tools run at different times, and
+they are not. Nothing in the second view could ever contradict the first, because the flaw is
+upstream of both.
+
+**How to apply:**
+1. **When a verification confirms a change you just made, ask what the verification and the change
+   SHARE** — a parser, a regex, a selector-splitting helper, an assumption about the input's shape.
+   Shared upstream = one observation reported twice.
+2. **Read the raw artefact at least once, unmediated.** Both views here were greps. Neither was the
+   file. **A tool that extracts is a tool that can omit**, and the omission is invisible in its
+   output by construction.
+3. **Prefer a verifier with a different SHAPE, not just a different invocation** — render vs source,
+   a second party, the consumer itself. The strongest check in this whole round was the tester's
+   two-surface diff (declared ground now vs painted ground before), because its mechanism shared
+   nothing with the writer's.
+4. **A clean result from a method you cannot show is falsifiable is not evidence.** The same agent
+   noted its other sheet came out 16/16 **by luck of the regex it happened to use there, not by
+   judgement** — and said so, rather than banking it as proof of method. That sentence is what made
+   the rest of its report believable.
+5. **Same family, one level up:** the tester in the same round built an RD-286 probe, got a clean
+   green, and then proved its own probe *structurally could not fail* for that set — because the
+   ground-walk terminated on the element itself. **It replaced the check rather than reporting the
+   green.** A green from an instrument that cannot go red is the thing this file is about, and it is
+   worth as much attention when it comes from your own new tool as from someone else's old one.
+
+**Related:** [[2026-08-14_i-read-representations-they-read-sources]] (a grep's output is a
+representation of a file) · [[2026-08-06_selector-discipline-in-ui-verification]] (suspect your own
+selector first — here the selector was suspect in both tools at once).
