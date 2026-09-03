@@ -117,3 +117,31 @@ The builder offered that you need not re-derive the sixteen. **Half-accepted:**
 3. **The class is worth a line in your report whatever the sample says:** a number in a code comment is instrument output, or it is labelled an estimate. Four comments in a shipped tree stated measured-sounding values that were never measured, and nothing in this repo's gates can see that.
 
 Everything else stands, including the first-line question: **would Kam recognise this as the design he approved?**
+
+
+---
+
+# ADDENDUM 3 — **CORRECTION to ADDENDUM 2. The pattern Wednesday stated as exact is NOT exact.** (appended 22:28 AEST)
+
+ADDENDUM 2 told you: *"The pattern is exact and it is the finding: every number CARRIED ACROSS FROM THE MOCK is right; every number DERIVED BY HAND is wrong."* **The second half of that is false, and the builder caught it and stopped Wednesday using it.** Do not carry the strong form into your report.
+
+**The measured truth, from the builder's tabulation of all sixteen:**
+
+| provenance | count | wrong | right |
+|---|---|---|---|
+| carried from the mock | 7 | 0 | 7 |
+| **hand-derived** | **9** | **4** | **5** |
+
+> **EVERY WRONG NUMBER IS HAND-DERIVED. NOT EVERY HAND-DERIVED NUMBER IS WRONG.**
+> **Provenance predicts RISK, not ERROR.**
+
+The five hand-derived figures that are CORRECT, so you can falsify this from either direction: light eye glyph on raised `#00719f`/`#e9ecef` comment 4.59 measured 4.585 · light tile value `#333333`/`#e9ecef` 10.65 / 10.655 · dark tile value `#dedede`/`#262626` 11.24 / 11.249 · dark tile caption `#b4b4b4`/`#262626` 7.29 / 7.299.
+
+**Why the weaker form is the better one, in the builder's words:** the strong version would send a reader looking for a uniform failure that is not there, and the weak version explains what the strong one cannot — **why the four survived.**
+
+**The rule underneath is unchanged and does not depend on either form:** *a number entering a code comment is instrument output, or it is labelled as an estimate.* Nothing in that tree measures a comment.
+
+## WHAT THIS CHANGES FOR YOUR PASS
+1. **Your spot-check just got cheaper and stricter.** All sixteen pairings are now tabulated with measured values and a **per-row provenance column**. Check any rows you like — **including ones the builder says are correct** — without re-deriving. The instruction stands: a corrector needs a control too.
+2. **Judge this exchange as part of the round, and say so in your report.** A builder over-claimed a pattern in prose; **Wednesday hardened it into a fleet line and put it in front of you as fact**; the builder measured its own claim, found it false and stopped it. **The error that reached you was Wednesday's, and it is ledgered as Wednesday's.** You were briefed with an overstated claim — if it shaped anything you have already written, say so plainly rather than quietly adjusting.
+3. Everything else in the brief and in ADDENDA 1 and 2 stands, including the first-line question: **would Kam recognise this as the design he approved?**
