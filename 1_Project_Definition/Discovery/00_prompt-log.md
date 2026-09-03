@@ -2148,3 +2148,13 @@ Done with it: Dynamics → Kam's team decision (no action); QuickQuote masthead/
 > How are the Nexus AI changes going? Let me know when the new version with the sustainability tab working is deployed.   With regards to Secura, that is fantastic. Please adopt this as the process going forward.
 
 *Note:* 11:59. NexusAI: answered with state + an INTERIM deploy track (gate + e2e + pass 13b-i at the current head → GO → deploy; the brand items in a second deploy). Secuura: the review streams APPROVED → s115 builds now; 'adopt as the process' = a standing preference → COO lesson extended + ledger.
+
+## 2026-09-03 12:12 — Kam (dashboard chat, verbatim)
+> Can you bring up the image for me to review?
+
+*Note:* 12:04 — missed for six minutes (landed between reads); the file had gone to the Claude side panel, which he was not looking at.
+
+## 2026-09-03 12:12 — Kam (dashboard chat, verbatim)
+> Please email me the image for review. I'm referring to the hooded woman image.
+
+*Note:* 12:10 — opened the PNG in Preview on his desk + emailed a 1920×1080 review copy to kreiser.org@me.com from wednesday-agent@ (his own ask; not external comms).

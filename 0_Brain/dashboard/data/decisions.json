@@ -2560,5 +2560,34 @@
   "ruled_choice": null,
   "ruled_ts": "2026-09-03T11:11:32.065801+10:00",
   "withdrawn_reason": "superseded by Kam's 11:02 decision to restart the Mac (his word on the panel) — the restart clears the wedged engine + VM"
+ },
+ {
+  "id": "secuura-demo-deploy-scope-2026-09-03",
+  "client_project": "Secuura/Blockchain",
+  "title": "Demo/UAT deploy: it is three weeks of develop, not 12 tickets — which scope?",
+  "bluf": "Your 11:44 word covered the 12 Tested-Not-Deployed tickets. The agent's readiness read: 7 of the 12 have a deployable surface (5 are test-harness only), and deploying them means rebuilding 24 of 25 services on demo — three weeks of develop, 18 API operations demo does not serve yet (MFA 8, social auth 5, wallet auth 4, and KS-695's two erasure paths Stuart is waiting on), one unapplied migration (044). The demo VM (2 vCPU, 3.8 GiB, 14 G free) cannot state which revision it runs and has NO rollback until we re-tag its images first. Nothing has been touched.",
+  "default_action": "HOLD — nothing rsynced, built or restarted on demo until you rule; the agent prepares the rollback re-tag list, the env-key mapping, the one-at-a-time build plan and the provenance fix so A can execute inside the hour.",
+  "options": [
+   {
+    "key": "A",
+    "label": "Deploy develop whole, STAGED",
+    "detail": "one service at a time with a health read between; rollback re-tag first; migration 044 verified by a schema read; Stuart gets KS-695's contract. Most honest to what 'Deployed to UAT' means."
+   },
+   {
+    "key": "B",
+    "label": "Narrow to the 7 tickets' 8 services",
+    "detail": "api-gateway, auth, originate, referral, security, timestamping, migrations, shared — leaves the rest of the estate 16 shared-package commits behind (version skew). Not recommended."
+   },
+   {
+    "key": "C",
+    "label": "Hold; fix provenance first",
+    "detail": "one build adding the image-revision label to every service, then deploy (A) tomorrow with a demo that can say what it runs."
+   }
+  ],
+  "recommended": "A",
+  "ts": "2026-09-03T12:12:21.036994+10:00",
+  "status": "open",
+  "ruled_choice": null,
+  "ruled_ts": null
  }
 ]
