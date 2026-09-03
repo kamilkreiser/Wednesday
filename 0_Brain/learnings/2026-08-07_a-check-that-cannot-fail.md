@@ -604,3 +604,52 @@ is meaningless, and the correct treatment is to leave it alone. **A guard that d
 (3) from (1) will push the deliberate-inheritance cases into the restatement bucket and produce
 exactly the defect it exists to prevent.** Any lint, migration or invariant of the form "every X must
 declare its own Y" needs that third category before it ships.
+
+
+## A red-proof proves a check CAN fail; only a GREEN BASELINE proves it can pass for the right reason (2026-09-04, Secuura s120 — a guard defeated by its own doc comment)
+
+**Their formulation, adopted verbatim:**
+
+> **"Run a new assertion against known-good code FIRST, and treat a red there as a defect in the
+> assertion until proven otherwise. A red-proof tells you a case can fail; only a green baseline
+> tells you it can pass for the right reason. I had the discipline for the subject all night and not
+> for the instrument."**
+
+**The case.** The agent wrote a guard asserting that every JWT payload type on a revoke path declares
+the fields the policy reads. Its first version sliced the interface body with `indexOf('}', start)`
+— **and failed on correct code.** The doc comment it had just written on the `tenantId` field quotes
+how auth signs the claim, `{ tenantId }` — so **the first `}` after the declaration sat inside a
+comment**, truncating the body before the field being looked for. **A parser defeated by the text it
+parses, and the text was its own.**
+
+**Why it was caught, which is the part to keep.** *"It was caught only because the case went red
+BEFORE any tamper. Had I written it and reached straight for the red-proof, I would have seen
+red-on-tamper, green-on-restore… except restore was also red, which is the only reason I looked."*
+**A red-proof run on a broken assertion still looks like a working red-proof.** It reddens on tamper
+— because it reddens on everything. The tamper/restore cycle only discriminates if the restored state
+is known green, and nothing in the red-proof ritual checks that.
+
+**The asymmetry, stated plainly:**
+
+| ritual | question answered | what it CANNOT catch |
+|---|---|---|
+| **red-proof** (tamper → expect red) | *can this check fail?* | a check that fails on **everything**, including correct code |
+| **green baseline** (run on known-good → expect green) | *can this check pass, and for the right reason?* | a check that passes on everything (the classic vacuous case) |
+
+**Both are needed and neither substitutes.** This fleet has been rigorous about the first all week and
+had not named the second.
+
+**How to apply:**
+1. **Order matters: green baseline FIRST, red-proof second.** Run any new assertion against
+   unmodified, known-good code before you tamper with anything. A red there is a defect in the
+   assertion until proven otherwise — not a discovery.
+2. **Suspect the assertion hardest when it reddens on the very code it was written for.** The
+   author's mental model is freshest and least questioned at exactly that moment.
+3. **This is the truncation family again** (see the census/writer/verifier section above) — a parser
+   that stops early on input that is legal but unanticipated. **Third instance in one night, in two
+   projects: a selector split on its last line, a `sed` range starting at the wrong line, and now a
+   brace search halted by a doc comment.** The common shape: **a cheap textual extractor standing in
+   for a parser, on input the author also wrote.**
+4. **A guard whose input includes prose you control is a guard whose input can move under you.**
+   Quoting code inside a comment is normal and good practice; a checker that reads structure by
+   scanning for delimiters cannot tell your prose from your code.
