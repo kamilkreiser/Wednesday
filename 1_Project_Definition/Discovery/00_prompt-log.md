@@ -2090,3 +2090,30 @@ Done with it: Dynamics → Kam's team decision (no action); QuickQuote masthead/
 > Once the sustainability fix is in, please upload all changes so they are live.
 
 *Note:* (doubled by Superwhisper, read once) NexusAI DEPLOY authority on record: after RD-196 (the sustainability/dashboard window fix) lands → the branch deploys to the demo; sequenced behind pass 13b (the e2e set at the final head is a deploy precondition) + my completion check
+
+## 2026-09-03 10:47 — Kam (dashboard chat, verbatim)
+> docker quit and restarted but still not coming up
+
+*Note:* 10:26 (doubled) — after his 10:27 card ruling restart on secuura-studio-docker-wedge-2; measured 10:41: Desktop + VM alive, daemon not answering, load 136
+
+## 2026-09-03 10:47 — Kam (dashboard chat (card taps), verbatim)
+> Decision secuura-founders-hub-credit-expiry: portal — Open the sponsorship portal and read the balance + end date; rule extend / top-up / lapse
+> Decision nexusai-rd198-border-token-naming: A — Rename to a neutral-step name (e.g. --nx-surface-3) and keep --nx-border as an alias
+> Decision secuura-studio-docker-wedge-2: restart — Restart Docker Desktop again (Quit + reopen); the agent then brings the stack up STAGED — infra, then services in batches of six with a health wait between
+
+*Note:* 10:27 (first two re-clicked 10:37 because the rotating seat had not ruled them in the file) — ruled in the file 10:4x by the successor seat; RD-198 A → S22 addendum; Docker → measured then routed to s114; portal → a browser read
+
+## 2026-09-03 10:47 — Kam (dashboard chat, verbatim)
+> The agents work in the background. On startup, this screen displays an image. Once I enter my password, the image disappears. It's an image of a woman with a hood on it with a black background. Are you able to find where that is?
+
+*Note:* 10:42 (doubled) — a find request; searched the project tree + macOS login-window sources
+
+## 2026-09-03 10:59 — Kam (dashboard chat, verbatim)
+> When you get a chance, can you please give me an update on how the ticket cleanup is going for Secure?
+
+*Note:* 10:50 (doubled; 'Secure' = Secuura) — answered on the panel 10:57 from a fresh board_count read (97 active / 81 backlog / 0 assigned to Kam / 0 without a project / 133 touched since Tue 19:30)
+
+## 2026-09-03 10:59 — Kam (dashboard chat, verbatim)
+> dont forget to agregate / categorise tickets for Peter to review.  He would prefer to review and test 3 big projects with sub issues than 30 issues
+
+*Note:* 10:53 (doubled) — a preference about Peter's review shape: routed to Secuura s114 as item 2b (propose ~3 review streams with sub-issues, one test pass per stream; propose before moving); lesson extension + ledger row
