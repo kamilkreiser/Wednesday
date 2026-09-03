@@ -64,3 +64,55 @@ report id. Until it ships, I run the hop by hand on every wrap and say so in the
 and sample), [[2026-08-11_coordinator-not-carrier]] (the QA agent is the org design this
 activates), [[2026-08-06_local-proof-is-not-target-evidence]], [[2026-08-07_a-check-that-cannot-fail]],
 [[../skills/delegation-protocol]], [[../people/kam]]
+
+
+## The SHAPE-vs-CORRECTNESS split (2026-09-04, ledger w=78 — Wednesday ratified work the gate then found three Majors in)
+
+**The operative case, so the headline matches it:** an agent's wrap or STATUS mail arrives with
+excellent evidence — measurements taken two ways, a control that discriminates, a limit whose
+reasoning is better than the fix Wednesday would have asked for. **Wednesday is about to write
+"RATIFIED".** Stop. Ask which of two different sentences is being written:
+
+- **"Your evidence is well-SHAPED"** — the proof's design, the disclosure, the reasoning behind a
+  deliberate limit, the choice to red-proof against a copy rather than the subject. **This is
+  measurable from the mail itself**, because the mail *is* the artefact being judged. Ratify freely.
+- **"Your fix is CORRECT"** — the defect is closed, the guard holds, the claim is true of the code.
+  **This is NOT measurable from the mail, ever.** The only instrument is the gate.
+
+**The case.** At 12:46:29Z Wednesday ratified #800 — *"the fix is the right shape and your
+instrument disclosure is the reason Wednesday believes it"* — on the builder's own evidence, which
+was genuinely excellent: the whitespace-inside-quotes limit was correctly reasoned, the fixture read
+the shared literals out of the script rather than holding its own copy, and the red-proof ran against
+a copy with the subject proven byte-identical by md5. Every one of those was true. Then the batched
+through-code pass found **three Majors in the same PR**: the fix incomplete in the same function (the
+inline-comment form still prints a green over the shared literal), a correctly-rotated `export KEY=`
+value reported BLANK with `docker compose down --volumes` printed as its remedy, and the new
+regression suite invoked by nothing — the third occurrence of that class, the second inside a commit
+written to close the first.
+
+**Why this is worth its own section rather than a ledger row.** Wednesday *did* defer the SCORE to
+the gate, deliberately, and said so. The gate was respected at the layer everyone watches and
+bypassed at the layer nobody had named. **A score is a judgement about a session; a ratification is
+a judgement about code — and only one of them had a rule attached.** That is the gap this section
+closes.
+
+**How to apply:**
+1. **The word "RATIFIED" is reserved for shapes, decisions and reasoning.** For code, the sentence
+   is *"received, and it goes to the gate"* — which is not a lesser response, it is the accurate one.
+2. **Excellent evidence raises the risk rather than lowering it.** This failed on a mail Wednesday
+   was right to admire. A well-built proof makes the unproven remainder invisible, because attention
+   has already been rewarded.
+3. **Name what a ratification does NOT cover, inline.** *"The limit's reasoning is ratified; whether
+   `get_value` now catches every form is the gate's question, not mine."* One clause, and it would
+   have made this whole entry unnecessary.
+4. **A retraction names itself as premature.** Do not soften it into "new information arrived" — the
+   information was always going to arrive, from a gate that was already commissioned and already
+   running.
+5. **Assign the deductions to the session whose work it was**, never to the successor inheriting the
+   fix round. The successor is judged on what it does with the finding.
+
+**The dividend, kept because retractions are usually written as pure cost:** the hold s119 placed on
+#800's printed remedy — telling Stuart and Peter not to follow it until #800 merges — turned out to
+be the thing **protecting them from F-6**, a defect nobody had found when the promise was made. A
+bound placed around one known defect can bound a worse unknown one; that is an argument for making
+such promises narrow and early, not for regretting them.
