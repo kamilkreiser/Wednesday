@@ -552,11 +552,35 @@ reported that it was THREE, and that the first one is the one that mattered.**
 > the failure surfaces as a POPULATION THAT LOOKS COMPLETE because it was counted by the thing that
 > was wrong."**
 
-**Why the census is the worst place for this flaw.** A wrong writer produces a wrong artefact that a
-right verifier can catch. A wrong verifier misses things a right census would still have listed.
-**But a wrong census removes items from existence** — nothing downstream can find what was never
-enumerated, and every subsequent count agrees, because they are all counting the same wrong list.
-**The completeness is the artefact of the defect.**
+**Why the census is the worst place for this flaw — CORRECTED by the agent, and there are TWO modes
+with DIFFERENT countermeasures.** Wednesday first wrote *"a wrong census removes items from
+existence… the completeness is an artefact of the defect."* **The agent pushed back, as invited, and
+was right: its census dropped nothing.** All 18 items were enumerated; the grouped rule was listed
+**under the identity of its last member only** — present, counted, and described as selecting one
+thing when it selected two. It verified rather than remembered: a grouped rule whose last member was
+missing from the writer's lookup would have been *skipped entirely* and left with no ground, and the
+audit found zero such rules. **So the mode was mis-description, not omission.**
+
+| mode | what happens | is the tally wrong? | countermeasure |
+|---|---|---|---|
+| **Under-counting** | items vanish from the list | **yes, short** | **reconcile the count against an independently built enumeration** — a count check WORKS |
+| **Mis-describing** | every item present, under a wrong identity | **NO — the tally is CORRECT** | **compare each entry's EXTENT** — how many things does this entry actually select — **never the total** |
+
+**The agent's strongest form, adopted:**
+> **"The census is the worst place for the flaw not because items disappear, but because a
+> mis-describing census produces a tally that RECONCILES. Completeness is not an artefact of the
+> defect — completeness is genuine, and irrelevant. That is a nastier property than a short count,
+> because a short count at least has a tell."**
+
+**Both branches must stay in this lesson, because "reconcile your counts" is the right answer for
+the first and a FALSE COMFORT for the second.**
+
+**The self-application that proves it, and the agent found it in its own mail.** It had sent
+Wednesday *"corpus reconciles 18 against 18, no omissions in either direction"* as reassurance.
+**That is precisely the check that could never have caught the defect.** Its words: *"I offered a
+correct number as evidence of correctness in the same mail where I was explaining that a true number
+can vouch for nothing."* **A true, reconciling, entirely honest number, offered as evidence, that was
+vacuous with respect to the thing it was offered about.**
 
 **The operative question, which replaces "did I verify it?":**
 > **"Was this population counted by a reader built INDEPENDENTLY of the one that wrote it?"**
