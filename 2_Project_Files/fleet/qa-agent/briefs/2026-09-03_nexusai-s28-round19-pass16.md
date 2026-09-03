@@ -56,3 +56,34 @@
 - **Time-box:** ~75 minutes. Rows 1, 2 and 3 FULL; rows 4, 5, 6 FULL-cheap. Stop when findings repeat.
 - **Findings sink:** `projects/nexusai/reports/2026-09-03-s28-round19-pass16/` under YOUR project tree, `SUMMARY.md` the entry point, screenshots in `evidence/`.
 - **Report to Wednesday by mail** (`wednesday-agent@agentmail.to`) when the SUMMARY is written. Lead with the VERDICT and with your answer to the first-line question — **would Kam recognise this as the design he approved?** — then the FAIL conditions and what each did, then findings by severity, then **NOT TESTED at the same weight**.
+
+
+---
+
+# ADDENDUM 1 — RD-283 is DISCLOSED, and it comes with a better question than the defect (appended 22:18 AEST)
+
+**The builder self-reported a contrast failure in its own rebuild, mid-pass, before you could find it.** It is disclosed so you do not spend a finding rediscovering it. **Do not re-file it.**
+
+## What it disclosed, measured through the repo's own `contrastRatio` helper in chromium
+| mode | pairing | ratio | verdict |
+|---|---|---|---|
+| **LIGHT** | `.nx-sus-rank th` `#6c757d` on `#f8f9fa` | **4.449** | **FAILS AA** (11px text, so the bar is 4.5) |
+| light, what the sheet assumed | `#6c757d` on `#ffffff` | 4.689 | passes |
+| DARK | `#8c8c8c` on `#262626` | **4.500** | passes **by exactly 0.000** |
+
+**Cause:** `sustainability.css` gives the rank header a colour and **no ground**, so `index-styles.css:211`'s bare element selector `th { background: #f8f9fa }` reaches `.nx-sus-rank th` because nothing of the builder's claims that ground. **Both colours are on-guide tokens — the defect is an UNOWNED GROUND, not an invented colour**, which is exactly why the brand gate could never have caught it.
+
+**Ruled by Wednesday: the fix is NOT applied during your pass.** Changing the artefact under a running tester is its own defect and would widen the head-versus-surface gap you are already asked to verify. `:3073` is exactly as handed to you.
+
+## THE QUESTION THAT IS WORTH YOUR TIME
+The builder also measured **why its own gates were green**, and this is the part to pull on:
+- the light sweep in `dark-mode-contrast.spec.js` navigates to `/index.html` and **never opens the Sustainability tab**, so every element of this rebuild is `display:none` and is **never measured at all**;
+- it asserts unexcused light failures against a **baseline of 60**, so a new light failure has **37 places to hide** (re-run at `LIGHT_BASELINE=0` against `:3073`: 23 unexcused).
+
+**So: what ELSE can that sweep not see?** A disclosed defect is worth more as a probe of the instrument than as a confirmation. Specifically —
+1. **Reproduce the blindness**, do not take it: show the sweep passing while a known-failing pairing sits behind the tab.
+2. **Enumerate what is behind the closed tab** — how much of this rebuild is invisible to the round's own contrast gate.
+3. **The dark 4.500 is a coincidence, not a margin.** Check whether anything else in the rebuild passes by a rounding-width margin, in either mode.
+4. Judge the builder's own retraction: it says *"contrast sweep 17/17 is TRUE and vouches for less than it sounds like."* **Is 17/17 an honest number for what it covers?** Say so either way — a number that is true and misleading is this campaign's most expensive recurring shape.
+
+Everything else in the brief stands, including the first-line question: **would Kam recognise this as the design he approved?**
