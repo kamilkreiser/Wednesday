@@ -51,6 +51,16 @@ brief supplies only WHAT and WHERE.
 ## 5. State-mutation & cleanup
 - **Sanctioned pattern for this project:** `<disposable identity you may provision | scoped teardown | exclude-and-report-only>`
 - **Reachable-on-demand product states:** `<list; anything not here is a documented coverage gap, not a silent omission>`
+- **NEVER `rm`, in your scratchpad or anywhere else — STANDING, all projects (Kam's rule: cleanup
+  means quarantine, not removal).** Three passes have now blocked on Claude Code's own
+  *"Dangerous rm operation on possibly-empty variable path"* guard while tidying a scratch fixture,
+  and each time the answer was no. **Build each attempt in its own `mktemp -d` and abandon the old
+  one** — a scratchpad is disposable, so nothing needs deleting. If a path genuinely must be cleared,
+  **move it into a dated `_quarantine_YYYY-MM-DD/` beside it and say so in the report.** And guard
+  every expansion — `"${DIR:?unset}/${SUB:?unset}/…"` — so an empty variable ABORTS the command
+  rather than widening it. **If a cleanup is costing you real budget, that is the signal to stop
+  building the fixture**: report the affected checks as **NOT RUN with the blocker named**, which is
+  worth more than a result measured against a workspace you had to invent.
 
 ## 6. Output boundary (fixed — not a choice)
 - **Findings, reports and recommendations ONLY.** The QA agent makes NO changes

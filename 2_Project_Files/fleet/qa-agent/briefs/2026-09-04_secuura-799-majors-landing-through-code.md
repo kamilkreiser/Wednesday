@@ -120,3 +120,42 @@ author, and was NOT verified against the repository from Wednesday's seat. **Ver
 object on your own seat and say so if any does not resolve.**
 
 SELF-CHECK: re-read end-to-end for contradictions | 2026-09-04 03:08
+
+---
+
+## ADDENDUM 1 — Wednesday DECLINED the `rm` at your prompt. Do not retry it.
+
+**What happened.** At ~03:3x your pane blocked on Claude Code's own guard:
+*"Dangerous rm operation on possibly-empty variable path: `"$SP/$p/node_modules"`"*.
+**Wednesday pressed Esc, not Yes.** You did nothing wrong in asking; the guard is right and the
+answer is no.
+
+**Why no, so you can apply the rule yourself next time.** Kam's standing instruction across this
+whole fleet is **never delete — cleanup means quarantine, not removal** (his words, twice in one
+message: *"Do not delete any files, especially files that we are working on. Better cleanup is
+worthwhile."*). And the specific shape here is the one that turns a tidy-up into an incident: **if
+`$p` is empty the path collapses to `$SP//node_modules`, and if `$SP` is also empty it collapses to
+an absolute path you did not intend.** A deletion is the one file operation that cannot be undone
+from inside the system.
+
+**Do this instead, in order of preference:**
+1. **Do not clean at all — build fresh.** Make each shim attempt in its own `mktemp -d` and abandon
+   the old one. Nothing needs removing, and the scratchpad is disposable by design.
+2. **If a path genuinely must be cleared, MOVE it aside** into a dated
+   `_quarantine_2026-09-04/` beside it and say in the report where it went.
+3. **Whatever you do, guard the expansions**: `"${SP:?SP unset}/${p:?p unset}/node_modules"` so an
+   empty variable aborts the command instead of widening it.
+
+**And the more useful point — check that you need this at all.** **Your brief is a STATIC,
+read-by-SHA pass.** Section 5 permits running a suite only *"from a copy by SHA in your own
+scratchpad"*; it does not ask you to reconstruct a workspace. **If the `node_modules` shim is costing
+this much, that is the signal to stop building it**: report the suites as **NOT RUN, with the reason
+and the blocker named**, and spend the budget on the three questions the brief actually ranks —
+**fixture reachability first** (does each of the 15 cases enter the branch its name claims), then the
+NOT-a-mock control's ability to fail, then whether a third revoke surface exists.
+
+**A NOT-RUN with a stated reason is worth more here than a suite run against a workspace you had to
+invent** — the counts in the builder's claim are re-derivable statically, and an invented workspace is
+a different system from the one under test.
+
+**Nothing else in the brief changes.** Zero writes to the Secuura tree, no real `.env`, findings only.
