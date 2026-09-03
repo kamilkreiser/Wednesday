@@ -2187,3 +2187,8 @@ Done with it: Dynamics → Kam's team decision (no action); QuickQuote masthead/
 > Once all the Nexus changes are made. Please deploy.
 
 *Note:* Deploy word for NexusAI (13:39): restates the 10:57/11:59/12:13 authorisation for the current build (149e358 — deploys after pass 13b + my completion check, by my GO naming SHA + revision + IMAGE_TAG, to the dev/demo container app nexusaidev-app, never prod) and covers the relayout round (S24) the same way: build → QA → completion → deploy. Each deploy still goes through the gate; the word names the environment by the workflow's next state.
+
+## 2026-09-03 16:21 — Kam (dashboard chat, verbatim)
+> Also, with notes and actions necessary, can you please use names rather than you, I, etc.  Sometimes it is difficult to tell who it refers to, Kam, Wed, Secuura agent, etc
+
+*Note:* Filed as learnings/2026-09-03_names-not-pronouns-in-notes-and-actions.md (preference, w=1); applied from the 16:2x panel ack onward.

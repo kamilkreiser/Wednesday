@@ -7,7 +7,7 @@ status: live
 
 # Boot digest — headline + rules of every lesson (open the file when it fires)
 
-Generated 2026-09-03 15:17 from 89 lesson files (347,476 B). Each block = the lesson's retrieval handle (H1), its frontmatter, the operative paragraph, its section index, and every RULES section verbatim. 6 files carry no rules-shaped section and are included whole. The CASES behind a rule live only in the file: open it the moment the rule fires, or when a diagnosis needs the evidence. `_ledger.md` is read whole beside this digest; `_ledger_archive.md` on demand.
+Generated 2026-09-03 16:21 from 90 lesson files (350,558 B). Each block = the lesson's retrieval handle (H1), its frontmatter, the operative paragraph, its section index, and every RULES section verbatim. 6 files carry no rules-shaped section and are included whole. The CASES behind a rule live only in the file: open it the moment the rule fires, or when a diagnosis needs the evidence. `_ledger.md` is read whole beside this digest; `_ledger_archive.md` on demand.
 
 ## The T9 SSD is the master — Wednesday must be fully portable
 `2026-07-31_fully-portable-drive.md` · principle · 2026-07-31 · status: superseded — the "T9 is the master" half by [[2026-08-25_one-drive-devmaster-is-master]] (2026-08-25); the portability principle itself still lives
@@ -2919,4 +2919,17 @@ sections (open the file for these): The two cases · Why the w=1 rule did not fi
 5. **Enforcement candidate (w=3 would promote it):** a `pane_close.sh` that takes the pane id + the listener pids from the handover, refuses (rc 5) if any listener or its parent has a tty, and only then `kill-pane`s and re-curls — the check in the path, not in memory.
 
 **Family:** [[2026-08-26_never-delete-cleanup-means-quarantine]] (a close that destroys; the blast radius of a tidy act) · [[2026-08-07_a-check-that-cannot-fail]] (a parentage test asked a survival question) · [[2026-08-14_i-read-representations-they-read-sources]] ("ppid 1" read as "daemonised" — a representation of detachment) · [[2026-08-15_a-gui-open-is-a-write]] (my own action's side effect read as the world's state).
+
+
+## Names, not pronouns, in notes and actions — "you", "I", "the agent" do not say who
+`2026-09-03_names-not-pronouns-in-notes-and-actions.md` · preference · 2026-09-03 · status: live
+
+**The operative case, so the headline matches it:** Wednesday is about to write a note line, a decision card, a panel message, a brief, a ticket comment relayed for a human, or an action list — anything Kam reads later or on a phone — and the sentence carries "you", "I", "we", "the agent", "its", "yours". **Stop. Name the actor: Kam, Wednesday, the Secuura agent (s116), the NexusAI agent (S25), the tester, Peter, Stuart.** Kam's words: it is difficult to tell who a pronoun refers to when the same paragraph holds Kam, Wednesday and two agents.
+
+**How to apply:**
+1. **Every actor is named on first mention in every paragraph** of a note line, card BLUF/option/default, panel message, brief section, handover block, ledger row and scoreboard note: "Kam ruled", "Wednesday verified", "the Secuura agent (s116) built", "the tester found", "Peter approved". Session ids stay beside the agent's name where they matter (s116, S25).
+2. **"You" is allowed only inside a mail addressed to ONE agent** (an ANSWER to s116 is read by s116 alone) — and even there, a sentence that mentions a third party names it. Panel messages to Kam may say "Kam" or address him directly, but any other actor in the sentence is named.
+3. **Cards especially:** the BLUF, every option and the default name who acts ("Kam notifies Peter and Stuart"; "the Secuura agent re-enables demo-service"; "Wednesday re-raises after the rotation").
+4. **Notes and handover blocks:** "Wednesday" for this seat's own acts, never "I"/"my" — a successor seat reads "my" as its own act. "Own statusline" → "Wednesday's statusline".
+5. **Test by its handle:** read the sentence as Kam on a phone with no context: can every "who" be answered without scrolling? If not, name it.
 
