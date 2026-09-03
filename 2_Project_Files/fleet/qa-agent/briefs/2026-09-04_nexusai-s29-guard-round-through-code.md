@@ -88,3 +88,28 @@ either does not.** Wednesday has NOT established the blast radius of running the
 scratchpad copy — **establish it before acting**, and if it would write into the tree, do not run it.
 
 SELF-CHECK: re-read end-to-end for contradictions | 2026-09-04 03:44
+
+---
+
+## ADDENDUM 1 — the head MOVED past your subject while you were booting. It is HISTORY.md only.
+
+**Do not read this as a finding, and do not re-point your pass.**
+
+**Your subject remains `5a7c6b5`.** S29 wrapped at **`11cdf5a`**, and by its own wrap statement
+**`11cdf5a` on top of `5a7c6b5` is `HISTORY.md` only** — no product, no CSS, no test.
+
+**Why you are being told rather than left to find it:** a pass that discovers its subject is no
+longer the branch head, mid-run, reasonably reports it — the fleet's own pass 14b filed exactly that
+as a Major (*"the branch head moved PAST the candidate mid-session — deploy BY SHA, never the
+branch"*), and it was right to. **Here the movement is known, declared and inert.** Reporting it as
+new would cost you a finding slot and cost the reader a false alarm.
+
+**But it is a claim, not a fact, until you check it — and checking it is cheap.** The honest form is
+`git diff --name-only 5a7c6b5 11cdf5a`. **If that returns anything other than `HISTORY.md`, that IS
+a finding and a significant one**, because Kam is being shown frames on the strength of the
+zero-rendered-pixel claim and because Wednesday relayed this sentence from the builder's wrap mail
+rather than deriving it. **Provenance: S29's Session wrap, `wednesday-agent@agentmail.to`,
+2026-09-03T17:46:06Z — NOT re-derived by Wednesday.**
+
+**Everything else in the brief stands unchanged**, including that `:3077` serves `7e5faa9` and is
+the source of Kam's frames and must not be restood.
