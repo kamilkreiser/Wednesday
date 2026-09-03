@@ -653,3 +653,42 @@ had not named the second.
 4. **A guard whose input includes prose you control is a guard whose input can move under you.**
    Quoting code inside a comment is normal and good practice; a checker that reads structure by
    scanning for delimiters cannot tell your prose from your code.
+
+
+### The AXIS a guard is blind on is not the axis it was designed for (2026-09-04, Datasec/NexusAI — a perfectly-implemented guard, green on a defect it could never see)
+
+**The three-population rule above says a "every X must declare its own Y" guard needs to distinguish
+restatement, new assertion and deliberate inheritance. That is necessary and it is not sufficient,
+because it is all about ONE AXIS.**
+
+**The case.** A CSS declaration gained an explicit background. It was **colour-correct** — declared
+value equalled would-paint value, in both modes, KIND 1 by the classification above. **And it still
+moved the render**: the harm was to the **ancestor's border geometry**, whose rounded corners squared
+off, not to the element that gained the ground. **A ground-invariance guard implemented perfectly is
+GREEN on it.** The builder's own words: *"it closes the colour half and not the geometry half. I had
+been treating it as closing the class."*
+
+**The general form:** a guard is defined over a property — colour, type, permission, schema — and
+**the change it governs can do harm through a property it does not measure.** The guard is not
+broken, not vacuous, and not badly implemented. **It is complete on its axis and silent off it**, and
+that silence reads exactly like a pass.
+
+**How to apply:**
+1. **When adopting a guard, write down the axis it measures and the axes it does not.** "This
+   asserts colour equivalence; it says nothing about geometry, layout, focus order or timing." That
+   sentence belongs in the ticket, not in someone's head — otherwise the guard's green is read as
+   coverage.
+2. **A guard that closes a class must be tested against a defect of the SAME CLASS ON A DIFFERENT
+   AXIS**, not only against the instance that motivated it. Here the motivating defect was a repaint;
+   the sibling was a corner radius, and only a pixel diff saw it.
+3. **Prefer the instrument with the WIDER aperture when ranking two guards.** The pixel diff catches
+   both halves; the property-guard catches one precisely. **Precision on one axis is not a substitute
+   for coverage across them**, and if only one is affordable the wider one wins.
+4. **The remedy is often to declare the inheritance rather than the value.** The fix here was to give
+   the ground back with `background: transparent` — following an existing idiom in the same sheet —
+   **so the next sweep reads the element as deliberately inherited rather than as missed.** That is
+   KIND 3 from the classification above, used as a repair rather than an exception.
+
+**Family:** the census/writer/verifier section above (one view rendered three times) is about a guard
+that cannot SEE; this is about a guard that sees perfectly, on the wrong axis. **Both produce a green
+that means nothing, and only the second one survives every review of the guard's own logic.**
