@@ -2589,5 +2589,34 @@
   "status": "ruled",
   "ruled_choice": "A",
   "ruled_ts": "2026-09-03T12:14:42.701129+10:00"
+ },
+ {
+  "id": "secuura-ps-signing-key-provision-2026-09-03",
+  "client_project": "Secuura/Platform S",
+  "title": "Provision the isolated signing-key secret before the next S prod deploy (Stuart's PS-607 guard will refuse to boot prod without it)",
+  "bluf": "Stuart built LiveConfigGuard for AppSpecific:SigningKeyEncryptionKey (branch feature/ps-607-liveconfigguard-signing-key @ 0c7cf22). Under DeployMode=live, prod refuses to boot until the key exists: mint it (AWS Secrets Manager for UAT/prod, Key Vault for dev-ps), add the template tokens + setenv render, THEN deploy. Not today's work; a prerequisite of the next S prod deploy. Who mints is the only question.",
+  "default_action": "LEAVE: no action; Wednesday re-raises this card when the next Platform S UAT/prod deploy is scheduled",
+  "options": [
+   {
+    "key": "leave",
+    "label": "Leave — Stuart drives; mint at the next S prod deploy prep",
+    "detail": "Nothing moves now; Wednesday re-raises when a UAT/prod deploy is next scheduled"
+   },
+   {
+    "key": "kam",
+    "label": "You mint the secrets now",
+    "detail": "Prod + secrets = your signature class; Stuart then adds the tokens + render"
+   },
+   {
+    "key": "stuart",
+    "label": "Ask Stuart to mint",
+    "detail": "If he holds the Secrets Manager / Key Vault rights — one line from you on PS-607"
+   }
+  ],
+  "recommended": "leave",
+  "ts": "2026-09-03T13:30:06.165285+10:00",
+  "status": "open",
+  "ruled_choice": null,
+  "ruled_ts": null
  }
 ]
