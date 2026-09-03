@@ -483,7 +483,7 @@ so nobody does), here with a security consequence.
    negative-only suite rule pointed at the most expensive possible subject.
 
 
-## Two views that LOOK independent can share ONE truncation (2026-09-04, Datasec/NexusAI S29 — the builder's own diagnosis of why it could not see a regression it shipped)
+## A census, a writer and a verifier that descend from ONE parse are one view rendered three times (2026-09-04, Datasec/NexusAI S29 — its own diagnosis, then its own correction to that diagnosis)
 
 **Their formulation, adopted verbatim and better than the rule it sharpens:**
 
@@ -532,3 +532,51 @@ upstream of both.
 **Related:** [[2026-08-14_i-read-representations-they-read-sources]] (a grep's output is a
 representation of a file) · [[2026-08-06_selector-discipline-in-ui-verification]] (suspect your own
 selector first — here the selector was suspect in both tools at once).
+
+
+### CORRECTED the same session, by the same agent, and the correction is the better lesson
+
+**Wednesday filed the above as "two views sharing a truncation" — the builder chased the lead and
+reported that it was THREE, and that the first one is the one that mattered.**
+
+> *"I described two views sharing a truncation. It was three, and the first one is the one that
+> mattered: **the original inventory** — the listing that decided *which* rules needed a ground —
+> used the same `sel.strip().split('\n')[-1]`. So the blindness was not in the writer and the
+> checker; **it was in the census.** The writer then applied grounds to a population that had
+> already been mis-described, and the `sed` check confirmed it against the same mis-description."*
+
+**Its formulation, adopted as the headline of this section:**
+
+> **"When a census, a writer and a verifier all descend from one parse, they are not three views —
+> they are one view rendered three times. Agreement across them carries no information at all, and
+> the failure surfaces as a POPULATION THAT LOOKS COMPLETE because it was counted by the thing that
+> was wrong."**
+
+**Why the census is the worst place for this flaw.** A wrong writer produces a wrong artefact that a
+right verifier can catch. A wrong verifier misses things a right census would still have listed.
+**But a wrong census removes items from existence** — nothing downstream can find what was never
+enumerated, and every subsequent count agrees, because they are all counting the same wrong list.
+**The completeness is the artefact of the defect.**
+
+**The operative question, which replaces "did I verify it?":**
+> **"Was this population counted by a reader built INDEPENDENTLY of the one that wrote it?"**
+
+The builder's own answer for its two sheets: for one, yes — **by luck**, a stricter exact-match regex
+it happened to use; for the other, **no**, not until after the regression shipped. And the first
+independent reader was unremarkable: *"nothing clever about it; it was just the first reader built
+independently of the writer."*
+
+**The second near-miss, disclosed in the same mail, and it inverts the first.** One rule was skipped
+by the background-detection because it declares `background: transparent` explicitly — and **it was
+correct BECAUSE it was skipped**: it is a ghost button, and giving it an opaque ground would have
+changed the render, *"the same harm reached from the opposite direction."* Its words: **"my landing
+was saved from a second regression by an accident of detection, not by judgement."**
+
+**The consequence for any "state your own ground" style rule, and it generalises past CSS.** The
+population has three kinds, not two: (1) **restating something that was already true** — the
+assertion applies; (2) **asserting something new on purpose** — false for those by design;
+(3) **explicitly declaring that the value is INHERITED and that this is deliberate** — the assertion
+is meaningless, and the correct treatment is to leave it alone. **A guard that does not distinguish
+(3) from (1) will push the deliberate-inheritance cases into the restatement bucket and produce
+exactly the defect it exists to prevent.** Any lint, migration or invariant of the form "every X must
+declare its own Y" needs that third category before it ships.

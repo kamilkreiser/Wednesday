@@ -101,3 +101,56 @@ PROVENANCE:
 - Kam's QA-gate order | /Volumes/DevMASTER/WEDNESDAY/0_Brain/learnings/2026-09-01_qa-gate-before-my-verification.md | read 2026-09-04
 
 SELF-CHECK: re-read end-to-end for contradictions | 2026-09-04 01:48
+
+---
+
+# ADDENDUM 1 (Wednesday, appended mid-pass) — the builder chased §7's lead itself, and the question is now BETTER
+
+**It was THREE views, not two, and the first one is the one that mattered: the CENSUS.**
+
+The builder reports (its 15:52:56Z mail, read by Wednesday in this action) that the **original
+inventory** — the listing that decided *which* rules needed a ground — used the same
+`sel.strip().split('\n')[-1]`. So the blindness was **not** in the writer and the checker; it was in
+the thing that defined the population. The writer then applied grounds to a population already
+mis-described, and the `sed` check confirmed it against the same mis-description.
+
+**Its formulation, which supersedes §7's:**
+> *"When a census, a writer and a verifier all descend from one parse, they are not three views —
+> they are one view rendered three times. Agreement across them carries no information at all, and
+> the failure surfaces as a population that looks complete because it was counted by the thing that
+> was wrong."*
+
+**So the enumeration question in §2 is upgraded.** Do not ask *"are the two grouped selectors the
+only two."* Ask: **"was this population counted by a reader built INDEPENDENTLY of the one that
+wrote it?"** The builder's own answer: for `dark-mode.css` yes, **by luck** (a stricter exact-match
+regex it happened to use); for `sustainability.css` **no**, not until after F1 — the comma-splitting
+audit it ran post-F1 is the first independent reader, *"nothing clever about it; it was just the
+first reader built independently of the writer."*
+
+**Its non-truncating re-audit, for you to falsify:** `sustainability.css` **26** colour-setting sus
+rules, **0** with no ground on the same selector; `dark-mode.css` **21**, **1** without. Corpus
+reconciles: 18 backgrounds applied against 18 rules found lacking one, no omissions either direction.
+
+# ADDENDUM 2 — a SECOND near-miss the builder disclosed, and it inverts F1
+The one dark rule without a ground is **`body.dark-mode .nx-sus-pop-close`**. Measured, not reasoned:
+light fg `#00719f`, own transparent, ancestor `#ffffff`, **painted `#ffffff`** (claims 5.437 — true);
+dark fg `#0096d6`, own transparent, ancestor `#1c1c1c`, **painted `#1c1c1c`** (claims 5.140 — true).
+
+**It is correct BECAUSE it was skipped.** `.nx-sus-pop-close` declares `background: transparent`
+explicitly, so the background-detection counted it as already having one and passed over it. **It is
+a ghost button — giving it an opaque ground would have changed the render, the same harm as F1
+reached from the opposite direction.** The builder's own words: *"my landing was saved from a second
+F1 by an accident of detection, not by judgement."*
+
+**This changes RD-286's scope and it is worth your verdict.** The population a ground-invariance
+guard covers has **three** kinds, not two:
+1. **restating a ground that was already painting** — the assertion applies;
+2. **painting a new surface on purpose** (19 on this tab) — false for them by design;
+3. **`background: transparent`** = *"the ground is inherited and that is deliberate"* — the
+   assertion is **meaningless**, and the correct treatment is to leave the ground alone.
+
+**A guard scoped to "every colour rule states its own ground" would push category 3 into category 1
+and produce exactly the defect it exists to prevent.** Wednesday's ask: **when you attack the
+25-item false-positive floor (§2), classify each of the 25 into these three kinds** rather than
+judging them legitimate-or-not as a flat list. That is the answer that decides whether the guard is
+shippable as a gate.
