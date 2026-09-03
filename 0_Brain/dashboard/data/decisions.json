@@ -3101,5 +3101,34 @@
   "status": "open",
   "ruled_choice": null,
   "ruled_ts": null
+ },
+ {
+  "id": "fleet-vault-note-attribution",
+  "client_project": "WED (fleet-wide, shared file)",
+  "title": "Concurrent agents keep sweeping each other's vault sections into wrongly-attributed commits — third instance, and the fix touches a file shared across clients",
+  "bluf": "When two project agents run at once they both append their own section to the SAME shared daily note, and whichever commits second does `git add daily/<date>.md` and sweeps in the other client's uncommitted text under a message naming only itself. The NexusAI agent did exactly that tonight to the Secuura seat's section, self-reported it, and correctly did NOT revert — the text was additive with zero deletions, so reverting would have destroyed it. It fixed the record with a pushed attribution commit instead. This is the THIRD occurrence, and the agent's diagnosis is the useful part: the reminder is not what fails. Its words - the check sits at commit time while the decision forms at boot, and by commit time the file feels like mine. Its proposed replacement is a mechanism rather than a memory: derive the attribution from the staged diff in the same command as the commit (git diff --cached on the note, take every added heading, and name each one in the message), which is correct whether or not anyone remembered anything hours earlier. It asked that this be passed to the fleet because it is not a NexusAI-specific trap. Wednesday agrees and cannot ship it: the end-of-session skill is shared across every client, so amending it is Kam's call and not a coordinator's unilateral edit.",
+  "default_action": "Nothing changes in the shared skill without Kam's word. Wednesday keeps recording each instance and the agents keep self-correcting additively. Wednesday will draft the exact wording so the decision is one word rather than a design session.",
+  "options": [
+   {
+    "key": "adopt",
+    "label": "Adopt the derive-from-staged-diff rule in the shared end-of-session skill (Recommended)",
+    "detail": "One added step in the shared wrap ritual. Turns a remembered check into a mechanism that runs in the same command as the commit. Wednesday drafts the wording for Kam to approve before it lands, since the file is shared across clients."
+   },
+   {
+    "key": "percommit",
+    "label": "Forbid agents committing the shared note at all; each writes its section and Wednesday commits",
+    "detail": "Removes the race entirely by giving the file one writer. Costs a round trip per wrap and makes Wednesday a bottleneck at exactly the moment several agents wrap together - which is when it already happened three times."
+   },
+   {
+    "key": "leave",
+    "label": "Leave it; keep correcting attribution after the fact",
+    "detail": "What happens today. It has worked in the sense that every instance was self-caught and corrected additively - but three occurrences is the frequency argument, and the next one may be caught by nobody."
+   }
+  ],
+  "recommended": "adopt",
+  "ts": "2026-09-04T04:36:46.250466+10:00",
+  "status": "open",
+  "ruled_choice": null,
+  "ruled_ts": null
  }
 ]
