@@ -15,7 +15,7 @@ updated: 2026-09-03
 - **Board by state 11:4x (real counts):** In Review 38 · Tested Not Deployed 12 · In Progress 11 · Blocked 3 · Todo 45 · Backlog 82; completed since Tue 19:30 = 10; Peter 20 active; no-project 1 (KS-769).
 - **s114 through-code pass:** launching on the local objects → completion → SCORE s114.
 - **Kam's:** the review-streams proposal as a document (promised 11:4x) · Founders Hub PORTAL read · KS-767 · KS-769 · Actions billing.
-- Scores: s113 0.70 · s114 pending.
+- Scores: s113 0.70 · **s114 0.75** (QA 1.0; findings A–I → s115's gate PR).
 
 **Open / next (refreshed 2026-09-03 11:20 — s114 WRAPPED 01:13:54Z: item 2 DONE (gate branch `e23e47006`, four commits), 3(a) `fa1c5e8f0`; BOTH BRANCHES LOCAL-ONLY (verified: objects present, absent on origin); stack never came up; Mac RESTART by Kam; develop `e02e15811`):**
 - **s115, in order (after the reboot, once the daemon answers):** push both branches (preflight standalone) → baseline the 5 newly-visible advisories (brace-expansion ×2, nanoid, js-yaml, body-parser 1.20.4) with measured reasons + fuses — the branch is RED knowingly until then → ONE PR F1/F2/F3/F4/F5/F9 to Peter, comment KS-763/768/769 → the stack STAGED (infra, then batches of six with a health wait; stop at the first that does not settle) → the regen leaf-first root LAST (**fuse 2026-09-06**) → 2b (Peter's ~3 review streams — PROPOSE, I ratify) → 4 · 4a KS-764 org · 4b scope gate A · 4c KS-762 rotation 09-05 09:00 → 5 → ACTION rows. Then a through-code pass on the four commits → SCORE s114.
