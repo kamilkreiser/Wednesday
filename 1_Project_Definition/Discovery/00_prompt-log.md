@@ -2138,3 +2138,8 @@ Done with it: Dynamics → Kam's team decision (no action); QuickQuote masthead/
 > Thank you for the summary. Anything that's been tested and needs deployment, please deploy.
 
 *Note:* 11:44 (dictated twice). Read as: the 12 Secuura Tested-Not-Deployed tickets → demo/UAT deploy of develop (v1.3 scope + his word); NOT production; routed to s115 by ADDENDUM (readiness STATUS → my GO → deploy → tickets to Deployed to UAT). NexusAI stays on his 09:57 word: deploy after pass 13b at the final head.
+
+## 2026-09-03 11:50 — Kam (dashboard chat, verbatim)
+> Also, did you find the image Let's display it at logon.
+
+*Note:* 11:47. Searched again post-reboot: no copy on this Mac (setting still bound to the deleted Desktop path; no iCloud Desktop, no TM, no snapshots). Asked him for one re-download from ChatGPT to the exact path; I verify + set on his word.
