@@ -437,3 +437,47 @@ happened — and the cycle is the evidence the loop works.
 3. **An index that lags the write.** Jira's JQL search index trails transitions by tens of seconds; a `statusCategory != Done` query returned a ticket already displaying Done, and the board count read 59 when the truth was 57. **The issue endpoint is authoritative; a board count taken straight after a transition is a stale rendering** ([[2026-08-14_i-read-representations-they-read-sources]]).
 
 **And from Secuura s65 the same morning, the derivation half:** s64's decision pack reached the RIGHT answer (six operations stay on KS-592) via a list that summed to 11 against a ticket naming ten. *"A correct conclusion is not evidence of a correct derivation"* — and a correct conclusion is precisely what lets a wrong derivation survive review. Re-derive from the source when the record will be cited; a matching bottom line is not a check of the arithmetic above it.
+
+
+## A test's NAME is not its coverage (2026-09-03, Secuura s119 — the member that let an AUTH BYPASS survive a suite that appears to test it)
+
+**Their formulation, adopted verbatim: *a test's NAME is not its coverage.***
+
+**The case.** KS-737: platform-admin login skipped MFA entirely when `mfaCode` was omitted —
+password alone returning a full SYSTEM_ADMIN session. The obvious question is how that survived a
+test suite. It survived one that *looks exactly like* the suite that would catch it.
+`ks622-mfa-failure-lockout.test.ts` contains a **passing** case named
+*"CONTROL — a missing MFA code is MFA_REQUIRED"*. It stubs `getPlatformAdmin` to return **null**,
+so every request in that file falls through to the **regular-user** branch. **The control that
+reads as covering the platform-admin branch never enters it.** It passed, it was named as a
+control, and it measured the wrong code path for its entire life.
+
+**Why this is a distinct member rather than another instance.** Every earlier member of this file
+is a check whose *instrument* was broken — it could not parse, could not see, could not receive
+input, ran before its setup, ran under the wrong runner. **This one's instrument works perfectly.
+What is wrong is the SUBJECT: the fixture routes the test away from the branch its name claims.**
+And the name is what everyone reads. A grep for "is this covered?" returns this file and stops,
+which is exactly how a bypass lives for months inside a green suite.
+
+**The structural half, which generalises further than the test.** The platform-admin branch exists
+because platform admins are not in `users`. **The MORE privileged path was the laxer one**, because
+it drifted from its sibling **with nothing comparing them**. Two code paths that must agree, and no
+assertion assigned to the agreement — the same shape as
+[[2026-08-13_establish-authority-before-reconciling]] rule 5 (nobody is assigned to read the pair,
+so nobody does), here with a security consequence.
+
+**How to apply:**
+1. **Never accept a test NAME as evidence of coverage — read what its fixture makes reachable.**
+   The question is not "is there a test for X?" but "does this test's setup enter X's branch?"
+   A stub that returns `null` for the discriminator routes every case in the file elsewhere.
+2. **A case named CONTROL earns the most suspicion, not the least.** It is the one nobody re-reads,
+   because its name asserts the property the reader came to check.
+3. **Where two branches must stay in agreement (privileged vs ordinary, admin vs user, service vs
+   shared), assert the AGREEMENT itself**, not each branch separately. A divergence no test is
+   assigned to notice is a defect with a countdown on it.
+4. **Corollary from the same session, on the proof rather than the subject:** s119's own red-proof
+   harness **failed both POSITIVE controls with 401 on its first run** — it had mocked
+   `../utils/password` when the module is `../services/password`, so the harness refused
+   everything. **Without those controls, "leg 1 returns non-200" would have reported a bypass that
+   was never demonstrated.** A security claim proved by a negative-only harness is the
+   negative-only suite rule pointed at the most expensive possible subject.

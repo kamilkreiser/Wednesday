@@ -7,7 +7,7 @@ status: live
 
 # Boot digest — headline + rules of every lesson (open the file when it fires)
 
-Generated 2026-09-03 22:51 from 91 lesson files (363,565 B). Each block = the lesson's retrieval handle (H1), its frontmatter, the operative paragraph, its section index, and every RULES section verbatim. 6 files carry no rules-shaped section and are included whole. The CASES behind a rule live only in the file: open it the moment the rule fires, or when a diagnosis needs the evidence. `_ledger.md` is read whole beside this digest; `_ledger_archive.md` on demand.
+Generated 2026-09-03 23:01 from 91 lesson files (366,820 B). Each block = the lesson's retrieval handle (H1), its frontmatter, the operative paragraph, its section index, and every RULES section verbatim. 6 files carry no rules-shaped section and are included whole. The CASES behind a rule live only in the file: open it the moment the rule fires, or when a diagnosis needs the evidence. `_ledger.md` is read whole beside this digest; `_ledger_archive.md` on demand.
 
 ## The T9 SSD is the master — Wednesday must be fully portable
 `2026-07-31_fully-portable-drive.md` · principle · 2026-07-31 · status: superseded — the "T9 is the master" half by [[2026-08-25_one-drive-devmaster-is-master]] (2026-08-25); the portability principle itself still lives
@@ -998,7 +998,7 @@ reported anything else — because it measured the wrong thing, errored and
 swallowed it, or asked a question whose answer was fixed in advance. It is worse
 than no check, because it converts an open question into a settled one.
 
-sections (open the file for these): The concrete remedy, added 2026-08-13 (Secuura/Blockchain s28) · A failure-only log going quiet is not recovery (2026-08-22, Secuura s61) · The third member: a check that MISREPORTS what it saw (2026-08-14, same agent) · A test that cannot CLEAN UP starts asserting against live data (2026-08-15, Secuura s35) · A positive control proves the suite it RAN IN, and nothing about its neighbour (2026-08-15, Secuura s35) · The inverse: a REPRODUCTION that cannot reproduce (2026-08-15, Datasec/NexusAI) · The refinement that makes the positive-control rule actually work (2026-08-16, Secuura s37) · An indicator that can MISS its own event (2026-08-24, Datasec/NexusAI) · The control needs its own control (2026-08-23, Datasec/NexusAI) · The condition we had not stated: on a side-effecting system, the positive control IS an action (2026-08-14, Secuura s34) · The mirror: an ABSENCE claim needs a positive control too (2026-08-14) · Three "cannot see" members from one micro-session (2026-08-25, Datasec/NexusAI s5) — and a derivation lesson from its neighbour
+sections (open the file for these): The concrete remedy, added 2026-08-13 (Secuura/Blockchain s28) · A failure-only log going quiet is not recovery (2026-08-22, Secuura s61) · The third member: a check that MISREPORTS what it saw (2026-08-14, same agent) · A test that cannot CLEAN UP starts asserting against live data (2026-08-15, Secuura s35) · A positive control proves the suite it RAN IN, and nothing about its neighbour (2026-08-15, Secuura s35) · The inverse: a REPRODUCTION that cannot reproduce (2026-08-15, Datasec/NexusAI) · The refinement that makes the positive-control rule actually work (2026-08-16, Secuura s37) · An indicator that can MISS its own event (2026-08-24, Datasec/NexusAI) · The control needs its own control (2026-08-23, Datasec/NexusAI) · The condition we had not stated: on a side-effecting system, the positive control IS an action (2026-08-14, Secuura s34) · The mirror: an ABSENCE claim needs a positive control too (2026-08-14) · Three "cannot see" members from one micro-session (2026-08-25, Datasec/NexusAI s5) — and a derivation lesson from its neighbour · A test's NAME is not its coverage (2026-09-03, Secuura s119 — the member that let an AUTH BYPASS survive a suite that appears to test it)
 
 **How to apply — one question, asked of the check rather than the result:**
 
@@ -1171,6 +1171,22 @@ must-succeed case cannot tell you which of those numbers you are looking at.
 unprompted, and the churn is left visible in the scoreboard rather than tidied away.
 A record that quietly returns to its original wording hides that a correction cycle
 happened — and the cycle is the evidence the loop works.
+
+**How to apply:**
+1. **Never accept a test NAME as evidence of coverage — read what its fixture makes reachable.**
+   The question is not "is there a test for X?" but "does this test's setup enter X's branch?"
+   A stub that returns `null` for the discriminator routes every case in the file elsewhere.
+2. **A case named CONTROL earns the most suspicion, not the least.** It is the one nobody re-reads,
+   because its name asserts the property the reader came to check.
+3. **Where two branches must stay in agreement (privileged vs ordinary, admin vs user, service vs
+   shared), assert the AGREEMENT itself**, not each branch separately. A divergence no test is
+   assigned to notice is a defect with a countdown on it.
+4. **Corollary from the same session, on the proof rather than the subject:** s119's own red-proof
+   harness **failed both POSITIVE controls with 401 on its first run** — it had mocked
+   `../utils/password` when the module is `../services/password`, so the harness refused
+   everything. **Without those controls, "leg 1 returns non-200" would have reported a bypass that
+   was never demonstrated.** A security claim proved by a negative-only harness is the
+   negative-only suite rule pointed at the most expensive possible subject.
 
 
 ## A promise is not a mechanism — unsupervised work needs a trigger, not an intention
