@@ -2182,3 +2182,8 @@ Done with it: Dynamics → Kam's team decision (no action); QuickQuote masthead/
 > That's fantastic. I agree with the approach. Please go ahead.
 
 *Note:* APPROVAL of the Sustainability relayout approach + sequencing as proposed (13:16 panel): S24 = the relayout round after the 149e358 deploy; mock for his eye → build → QA → deploy on my GO. Staged brief marked APPROVED.
+
+## 2026-09-03 13:40 — Kam (dashboard chat, verbatim)
+> Once all the Nexus changes are made. Please deploy.
+
+*Note:* Deploy word for NexusAI (13:39): restates the 10:57/11:59/12:13 authorisation for the current build (149e358 — deploys after pass 13b + my completion check, by my GO naming SHA + revision + IMAGE_TAG, to the dev/demo container app nexusaidev-app, never prod) and covers the relayout round (S24) the same way: build → QA → completion → deploy. Each deploy still goes through the gate; the word names the environment by the workflow's next state.
