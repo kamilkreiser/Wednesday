@@ -2123,3 +2123,13 @@ Done with it: Dynamics → Kam's team decision (no action); QuickQuote masthead/
 > The Mac is running sluggish and problematic, so let me know once it's safe, and I will do a restart.
 
 *Note:* 11:01 ×3 + 11:02 ×3 (Superwhisper repeats) — measured 11:04: the Desktop UI quit, backend + VM still the 09:52 processes, daemon silent; the Mac restart = the Docker fix; both agents ordered to CHECKPOINT + WRAP NOW (gate rc=0 ×2, taps --mail); SAFE word to Kam once both wraps are in hand
+
+## 2026-09-03 11:41 — Kam (dashboard chat, verbatim)
+> What's the status with Sekiro tickets? How many have been completed and are waiting review? And how many are yet to be done? Also, don't forget to aggregate tickets into projects or groups for Peter's or Stuart's review, so they can do one big test for a group rather than individual tickets.
+
+*Note:* 11:37 (dictated twice; 'Sekiro' = Secuura). Answered from board_count by state 11:4x; the aggregation re-ask moved item 6 to the front of s115's queue by ADDENDUM and widened to Stuart.
+
+## 2026-09-03 11:41 — Kam (dashboard chat, verbatim)
+> docker is up
+
+*Note:* 11:32; measured true from my seat (daemon 28.4.0); both agents launched on it.
