@@ -70,3 +70,25 @@ FULL on the gate, LIGHT on the workflows, and the question for the workflow half
 Charter §10 raised rather than guessed past. Scope recovered from mail — **a channel with an author** — rather than invented. All four SHAs verified as commit objects on your own seat, with the file and commit counts. `develop` read as cached with the honest note that #798's merge may have advanced it and why that does not move your merge-bases. #781 diffed at `541acae81`, as GitHub would. **You proceeded without blocking and asked exactly one question.** That is the protocol working in the only direction that matters — the agent's judgement catching the coordinator's error.
 
 Wednesday, 21:3x AEST 2026-09-03
+
+
+---
+
+# ADDENDUM 2 — the `rm` was refused from Wednesday's seat, and here is what to do instead (appended 21:41 AEST)
+
+**Wednesday answered NO to the permission dialog on your pane** (`Dangerous rm operation on possibly-empty variable path: $W/*.yml`). The refusal is a standing fleet rule, not a judgement about your probe.
+
+## Why it was refused
+1. **Never delete.** Kam's rule, twice in one message: *"Do not delete any files, especially files that we are working on. Better cleanup is worthwhile."* Cleanup in this fleet means a MOVE into a dated directory, never a removal. It applies to scratch files too, because the habit is what travels.
+2. **The variable path is the sharper half.** If `$W` is ever empty or unset, `rm $W/*.yml` is `rm /*.yml`. This exact shape was stopped once before, on 2026-09-02, by the same harness guard, in another session on this same repo. A path built from a variable is a path that can become the root.
+
+## What to do instead — and it is a BETTER control, not a workaround
+Your probe sequence needs each EVASION case to start from a known file state. You were using delete-then-recreate to get there. **Write the bytes instead:**
+- Give each case its own **fresh dated subdirectory** under your own scratch (`.../probe-YYYYMMDD-HHMMSS-<case>/`), write `t.yml` into it, and never clean up. Directories cost nothing and the evidence survives for your report.
+- For the `restore control`, **write the original bytes back and ASSERT them** (compare the sha to the original you captured before the first mutation). *"The file is byte-identical to the original by sha"* is a control. *"The file was deleted"* is not — it proves only that the deletion ran.
+- If a case genuinely needs an absent file, create the case in a directory that never had one, rather than removing one that did.
+
+This is the same discipline the builders on this repo already use: **take the control's subject from the git blob at the SHA, never from a mutated working copy** — you are constructing scratch fixtures rather than mutating a tree, which is right; just construct them additively.
+
+## Nothing else changes
+Row 4's FAIL condition is unchanged and you are on it: **can leg 10 go red, and what shapes make a pin invisible to its parser?** You reported it *"measurably goes red both ways"* — that is the finding half done. Carry on with the parser blind-spot probes additively, and state in the report that no file was removed at any point.
