@@ -2143,3 +2143,8 @@ Done with it: Dynamics → Kam's team decision (no action); QuickQuote masthead/
 > Also, did you find the image Let's display it at logon.
 
 *Note:* 11:47. Searched again post-reboot: no copy on this Mac (setting still bound to the deleted Desktop path; no iCloud Desktop, no TM, no snapshots). Asked him for one re-download from ChatGPT to the exact path; I verify + set on his word.
+
+## 2026-09-03 12:01 — Kam (dashboard chat, verbatim)
+> How are the Nexus AI changes going? Let me know when the new version with the sustainability tab working is deployed.   With regards to Secura, that is fantastic. Please adopt this as the process going forward.
+
+*Note:* 11:59. NexusAI: answered with state + an INTERIM deploy track (gate + e2e + pass 13b-i at the current head → GO → deploy; the brand items in a second deploy). Secuura: the review streams APPROVED → s115 builds now; 'adopt as the process' = a standing preference → COO lesson extended + ledger.
