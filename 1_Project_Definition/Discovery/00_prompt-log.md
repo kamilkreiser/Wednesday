@@ -2197,3 +2197,8 @@ Done with it: Dynamics → Kam's team decision (no action); QuickQuote masthead/
 > Please deploy the Nexus AI site so it's live on Nexus AI dev app dot light forest dash B, etc.
 
 *Note:* Deploy word for the NexusAI dev app (nexusaidev-app.politeforest-b008d469…); read as: deploy the current head now (the fixes so far), the relayout as a second deploy; routed through the 09-01 QA gate; the NexusAI agent cuts a candidate at its next boundary.
+
+## 2026-09-03 16:47 — Kam (dashboard chat, verbatim)
+> I'm gonna go have dinner now, but please keep working through the Sukura tickets and backlog.
+
+*Note:* Read: the 08-28 overnight grant restated for Secuura — s117 continues its standing queue (KS-731 proof → #795/#785 → KS-726 → ACTION rows → ask 3 after KS-764 lands); the NexusAI deploy proceeds under the tester's pass (no waiver).
