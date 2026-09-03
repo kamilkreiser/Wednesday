@@ -3154,5 +3154,33 @@
   "updated": "2026-09-04T08:38:32+10:00",
   "ruling": "adopt",
   "ruling_note": "SHIPPED 2026-09-04: Step 1b of the shared end-of-session skill now derives attribution from `git diff --cached`. Exercised both paths in the real vault before committing; test line removed and the daily note verified byte-identical. Vault commit b830104, pushed."
+ },
+ {
+  "id": "secuura-ks779-org-mapping-2026-09-04",
+  "client_project": "Secuura / Blockchain (Platform K)",
+  "status": "open",
+  "updated": "2026-09-04T09:48:17+10:00",
+  "title": "KS-779: which organisation for TWO accounts — not ten. Eight of the ten cannot be assigned at all, and fixing the two clears every real 403.",
+  "bluf": "The ticket says ten accounts need an organisation and forbids acting off the numbers alone. The Secuura agent (s123) went and looked, read-only, and the decision is far smaller than the ticket makes it sound. THREE facts the original measurement never surfaced. FIRST, all 20 organisations live in ONE tenant; eight of the ten org-less accounts sit in tenants that contain ZERO organisations, so for those eight the mapping is not undecided, it is NOT EXPRESSIBLE without first creating an organisation there. SECOND, those same eight tenants hold no org-owned API keys at all — the entire operational cost sits in the one tenant that holds exactly TWO of the ten. FIXING TWO ROWS CLEARS 20 OF THE 20 REAL 403s. THIRD, the 21st key is a QA fixture, not customer data — it names itself 'WEDNESDAY-QA-CONTROL KS-742 — not customer data — do not use' and its organisation id resolves to no organisation row at all, so no assignment could ever make it revokable. It is outside the ticket either way. ON WHETHER WE COULD JUST INFER IT: no. ZERO of ten is derivable, and the agent proved that rather than asserting it — six independent paths, each with a positive control showing the path COULD have carried the answer: organization_members is empty; 0 of 39 keys carry a user id; the second key table is empty; four of the ten appear in 203 audit rows and NONE carries an organisation id, while 6,647 of 407,201 rows in general DO (so the column is populated, just never for these users); email domain is UNAVAILABLE because it is encrypted at rest; rights_holders and signatories are both empty. 'Whose organisation' is genuinely ABSENT from the data, not merely unlooked-for. A TRAP WORTH KNOWING BEFORE YOU ANSWER: two organisation NAMES are duplicated across different ids — 'First One PTE Ltd' and 'Secuura Pte. Ltd' each exist twice, from 2026-07-31 and 2026-08-14, owning two active keys between them. So the answer has to name an ID, not a name, or it is ambiguous on its face. Eight of the twenty are obvious test artefacts and the agent has shortlisted the rest.",
+  "options": [
+   {
+    "key": "assign-two",
+    "label": "Assign the TWO accounts in the org-bearing tenant, record the other eight as intentionally org-less with the reason (Recommended)",
+    "detail": "Two rows change. Clears 20 of the 20 real 403s. Already satisfies the ticket's own Done-means, which explicitly permits 'explicitly recorded as intentionally org-less with a reason'. NEEDS ONE THING FROM KAM: the organisation ID for those two accounts - an ID, not a name, because two names are duplicated. The agent has the shortlist ready."
+   },
+   {
+    "key": "record-only",
+    "label": "Change nothing; record all ten as intentionally org-less (DEFAULT - carries if Kam never opens this)",
+    "detail": "No writes to real demo accounts. The 403 is secure-by-default and is accepted knowingly. Costs nothing and loses nothing except the 20 cleared 403s. This is the default precisely because the recommended option needs a choice only Kam can make."
+   },
+   {
+    "key": "create-orgs",
+    "label": "Create organisations in the four empty tenants and assign all ten",
+    "detail": "Largest option and IT BUYS NOTHING - those tenants hold no org-owned keys to revoke. The agent named it plainly as the shape the original ten-row framing invites, which is why it is on the card rather than quietly omitted."
+   }
+  ],
+  "recommended": "assign-two",
+  "default_action": "record-only - change nothing, record all ten with the reason. Chosen as the default because the recommended option requires an organisation ID that only Kam can supply, and because nothing here writes to real demo accounts without his word. The Secuura agent SKIPS PAST KS-779 and keeps working its queue rather than idling, so nothing waits on this.",
+  "provenance": "s123's read-only measurement, 2026-09-03T23:47:09Z, posted as a comment on KS-779 and assigned to Kam citing his 2026-09-02 standing instruction. default_transaction_read_only=on for every statement; nothing written. Six derivation paths each with a positive control. It also corrected the ticket's own text twice, checking WHICH half was wrong rather than assuming: '21 keys would 403' is accurate as a count but 20 is the operational figure, and 'the ten callers span five tenants' is correct but was written as a scale problem when it is the opposite - only one of those five contains an organisation."
  }
 ]
