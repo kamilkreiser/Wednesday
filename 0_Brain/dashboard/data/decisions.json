@@ -2618,5 +2618,29 @@
   "status": "ruled",
   "ruled_choice": "leave",
   "ruled_ts": "2026-09-03T13:36:41.919756+10:00"
+ },
+ {
+  "id": "secuura-demo-service-persona-switch-2026-09-03",
+  "client_project": "Secuura/Blockchain",
+  "title": "Demo persona-switching is OFF after today's demo deploy — keep it off until KS-641's fix ships, or turn it back on (re-opens an unauthenticated admin-token endpoint)",
+  "bluf": "The develop deploy to the demo VM finished 20 of 21 services; demo-service refuses to start because the new code requires an explicit DEMO_SERVICE_ENABLED=true opt-in that the VM never had. Side effect: KS-641 (High, In Review) — POST /demo-api/persona/switch mints a Platform Admin token with NO inbound auth on the publicly reachable demo — is now CLOSED. Turning persona switching back on re-opens it on old or new code. The rest of the deploy (the gateway with Stuart's erasure contract) is running now regardless.",
+  "default_action": "LEAVE OFF: no action; the agent re-enables demo-service as its own dated step once KS-641's fix is merged and deployed",
+  "options": [
+   {
+    "key": "leave",
+    "label": "Leave it OFF until KS-641's fix is merged + deployed (rec)",
+    "detail": "The demo loses persona switching for now; the security hole stays closed; the agent re-enables it as a dated step when KS-641 ships"
+   },
+   {
+    "key": "enable",
+    "label": "Turn it ON now (DEMO_SERVICE_ENABLED=true on the VM)",
+    "detail": "Persona switching back for demos; the unauthenticated admin-token endpoint is live again on the public demo until KS-641 ships — your accepted risk, dated"
+   }
+  ],
+  "recommended": "leave",
+  "ts": "2026-09-03T14:11:33.389940+10:00",
+  "status": "open",
+  "ruled_choice": null,
+  "ruled_ts": null
  }
 ]
