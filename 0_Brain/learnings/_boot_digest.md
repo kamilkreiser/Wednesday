@@ -7,7 +7,7 @@ status: live
 
 # Boot digest — headline + rules of every lesson (open the file when it fires)
 
-Generated 2026-09-03 22:33 from 91 lesson files (359,823 B). Each block = the lesson's retrieval handle (H1), its frontmatter, the operative paragraph, its section index, and every RULES section verbatim. 6 files carry no rules-shaped section and are included whole. The CASES behind a rule live only in the file: open it the moment the rule fires, or when a diagnosis needs the evidence. `_ledger.md` is read whole beside this digest; `_ledger_archive.md` on demand.
+Generated 2026-09-03 22:51 from 91 lesson files (363,565 B). Each block = the lesson's retrieval handle (H1), its frontmatter, the operative paragraph, its section index, and every RULES section verbatim. 6 files carry no rules-shaped section and are included whole. The CASES behind a rule live only in the file: open it the moment the rule fires, or when a diagnosis needs the evidence. `_ledger.md` is read whole beside this digest; `_ledger_archive.md` on demand.
 
 ## The T9 SSD is the master — Wednesday must be fully portable
 `2026-07-31_fully-portable-drive.md` · principle · 2026-07-31 · status: superseded — the "T9 is the master" half by [[2026-08-25_one-drive-devmaster-is-master]] (2026-08-25); the portability principle itself still lives
@@ -1885,7 +1885,7 @@ string, a capped query, or something I wrote earlier — **that is a representat
 thing, not the thing.** Go to the source. Every time. Especially when I am in the middle
 of requiring someone else to do exactly that.
 
-sections (open the file for these): The six, in one day · Why this is a distinct lesson and not six instances of old ones · Why the existing rules did not fire, which is the part to fix · How to apply · Will it persist? Yes — and the dangerous half is not the half that showed up today · Sharpened 2026-08-15: the variable is not WHOSE claim it is · Sharpened again 2026-08-16: the third switch is EXPECTATION, and it is the quietest · The clock-composition sub-class, consolidated 2026-08-23: GENERATE timestamps, never type them · The honest note on credit · The fourth switch (2026-08-25, Datasec/NexusAI s4): the option you can VERIFY WITHOUT EFFORT · The brief-composition costumes, consolidated 2026-08-30 (w=37–46 in three days — ten instances) · The 2026-09-03 evening sub-class: FOUR instances in one session, all in COORDINATION messages, all agent-caught (ledger w=73–76) · The rule promoted from this (enforceable in the sentence, not in a tool)
+sections (open the file for these): The six, in one day · Why this is a distinct lesson and not six instances of old ones · Why the existing rules did not fire, which is the part to fix · How to apply · Will it persist? Yes — and the dangerous half is not the half that showed up today · Sharpened 2026-08-15: the variable is not WHOSE claim it is · Sharpened again 2026-08-16: the third switch is EXPECTATION, and it is the quietest · The clock-composition sub-class, consolidated 2026-08-23: GENERATE timestamps, never type them · The honest note on credit · The fourth switch (2026-08-25, Datasec/NexusAI s4): the option you can VERIFY WITHOUT EFFORT · The brief-composition costumes, consolidated 2026-08-30 (w=37–46 in three days — ten instances) · The 2026-09-03 evening sub-class: FOUR instances in one session, all in COORDINATION messages, all agent-caught (ledger w=73–76) · The rule promoted from this (enforceable in the sentence, not in a tool) · The PERSON sub-class, added 2026-09-03 22:5x (ledger w=77) — and it is a lesson about how THIS FILE was written
 
 ## How to apply
 
@@ -1956,7 +1956,7 @@ clock for the two surfaces it kept failing on.
 
 ### The rule promoted from this (enforceable in the sentence, not in a tool)
 
-> **When a sentence to an agent states a fact about a file, a board, a review state or a context window, it NAMES THE INSTRUMENT that produced it — inline.**
+> **When a sentence to an agent states a fact whose truth-maker lies OUTSIDE the sentence, it NAMES THE INSTRUMENT that produced it — inline.** Files, boards, review states and context windows are the common cases; **people are the case with no instrument at all** (see the 09-03 person sub-class below), and there the only honest forms are *"unmeasured"* or a named observation with its boundary stated.
 > *"by the diffstat, unread"* · *"from the reviews endpoint at 21:52"* · *"captured from your pane in this action"* · *"your prose, not re-derived"*.
 
 This costs four words and it converts an assertion into a weighable claim. Each of the four above would have survived contact: an agent reading *"by the diffstat, unread"* sizes the work correctly instead of spending a turn correcting the coordinator.
@@ -1964,6 +1964,25 @@ This costs four words and it converts an assertion into a weighable claim. Each 
 **The corollary, learned the same evening:** *an instrument's own output is not the claim you build on it.* A stat is a representation of a diff. A summary line is a representation of a board. Prose is a representation of a measurement. **The gap between them is exactly where a confident sentence goes wrong**, and it widens with message volume — which is why this landed four times in the busiest three hours of the day and not once in the quiet ones.
 
 **What must NOT be concluded from it:** that the agents should trust Wednesday less. They already calibrate correctly — the QA agent's NOT-TESTED list that same evening said *"review states and approvals are from your mail — a channel with an author, not an oracle I verified."* **That sentence is the fleet working.** The fix belongs on the sender's side.
+
+**How to apply — three sentence shapes that are always available:**
+1. *"Unmeasured: I do not know whether Peter will reach these tonight."*
+2. *"Measured: Peter posted seven comments between 12:45Z and 12:46:21Z (board monitor, actor
+   from the history API). Not measured: the review state of the three PRs."*
+3. The operative instruction stated **independently of the prediction** — "do not chase them" was
+   right either way, and it survived the correction untouched. **When an instruction does not
+   depend on a claim, do not attach the claim to it.** Most predictions in briefs are decoration
+   on an instruction that stands without them, and decoration is where this family lives.
+
+**The dividend, recorded because corrections are usually written as pure cost.** Going back to
+read what Peter had actually written — rather than only retracting — surfaced that **four of his
+twelve failing pairs are MFA endpoints** (`/api/auth/mfa/setup/verify`,
+`/api/auth/mfa/backup-codes/regenerate`, `/api/users/me/mfa/disable`, `/api/users/me/mfa/verify`)
+and that s119 was minutes from opening **KS-737, the platform-admin MFA bypass**. Its red-proof
+was about to be built on a surface already failing conformance for an unrelated reason. **The
+correction was worth more than the error cost**, and it is the coordinator's job that produced it
+([[2026-08-11_coordinator-not-carrier]]) — the task-focused agent could not have seen the
+adjacency, and Wednesday only saw it by being forced back to the source.
 
 
 ## A cap is never neutral — it removes whatever the SORT put last, and the sort is usually ordered by what you care about

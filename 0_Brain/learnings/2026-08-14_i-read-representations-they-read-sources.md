@@ -303,7 +303,7 @@ clock for the two surfaces it kept failing on.
 
 ### The rule promoted from this (enforceable in the sentence, not in a tool)
 
-> **When a sentence to an agent states a fact about a file, a board, a review state or a context window, it NAMES THE INSTRUMENT that produced it — inline.**
+> **When a sentence to an agent states a fact whose truth-maker lies OUTSIDE the sentence, it NAMES THE INSTRUMENT that produced it — inline.** Files, boards, review states and context windows are the common cases; **people are the case with no instrument at all** (see the 09-03 person sub-class below), and there the only honest forms are *"unmeasured"* or a named observation with its boundary stated.
 > *"by the diffstat, unread"* · *"from the reviews endpoint at 21:52"* · *"captured from your pane in this action"* · *"your prose, not re-derived"*.
 
 This costs four words and it converts an assertion into a weighable claim. Each of the four above would have survived contact: an agent reading *"by the diffstat, unread"* sizes the work correctly instead of spending a turn correcting the coordinator.
@@ -311,3 +311,49 @@ This costs four words and it converts an assertion into a weighable claim. Each 
 **The corollary, learned the same evening:** *an instrument's own output is not the claim you build on it.* A stat is a representation of a diff. A summary line is a representation of a board. Prose is a representation of a measurement. **The gap between them is exactly where a confident sentence goes wrong**, and it widens with message volume — which is why this landed four times in the busiest three hours of the day and not once in the quiet ones.
 
 **What must NOT be concluded from it:** that the agents should trust Wednesday less. They already calibrate correctly — the QA agent's NOT-TESTED list that same evening said *"review states and approvals are from your mail — a channel with an author, not an oracle I verified."* **That sentence is the fleet working.** The fix belongs on the sender's side.
+
+
+## The PERSON sub-class, added 2026-09-03 22:5x (ledger w=77) — and it is a lesson about how THIS FILE was written
+
+**The case.** Wednesday's 12:46:29Z ACK to Secuura s119 said the three open PRs "are all waiting
+on Peter, **who will not review tonight**." Nothing was measured. It was already false when it
+was sent: between **12:45Z and 12:46:21Z** Peter posted seven comments and eleven relation edits
+across KS-591/592/593/508/565/712, linking them to KS-752 and KS-717, and recorded that his sweep
+`pre-merge-2026-09-03T12-18-51Z` had reached the operations #760 declared with 12 check::operation
+pairs failing on the auth surface. Wednesday's own board monitor surfaced it **one tool call after
+the send** — and the mail went out minutes after Wednesday had briefed a different agent about
+naming its instruments.
+
+**Why the promoted rule did not fire, which is the part worth keeping.** The rule as written
+above enumerated four things: *a file, a board, a review state, a context window*. Wednesday
+matched the **enumeration** and not the **principle**, and a person is not on the list. This is
+the same defect as [[2026-08-13_headline-must-match-the-operative-case]] pointed at a rule's
+body rather than its title: **an enumeration invites a reader to check membership, where a
+principle invites them to check the property.** Under load, membership is the cheaper test and
+it is the one that runs. So the rule text above is now stated as the property, with the
+enumeration demoted to examples.
+
+**Why people are the sharp end, not just another entry.** For every other item in that list an
+instrument exists and is one call away — a diffstat, a reviews endpoint, a `capture-pane`. **For
+a person's intentions, availability or future acts there is no instrument, ever.** That is
+exactly why the sentence must never take the declarative grammar of a measurement: there is no
+possible follow-up read that would have settled it. The honest forms are the only forms.
+
+**How to apply — three sentence shapes that are always available:**
+1. *"Unmeasured: I do not know whether Peter will reach these tonight."*
+2. *"Measured: Peter posted seven comments between 12:45Z and 12:46:21Z (board monitor, actor
+   from the history API). Not measured: the review state of the three PRs."*
+3. The operative instruction stated **independently of the prediction** — "do not chase them" was
+   right either way, and it survived the correction untouched. **When an instruction does not
+   depend on a claim, do not attach the claim to it.** Most predictions in briefs are decoration
+   on an instruction that stands without them, and decoration is where this family lives.
+
+**The dividend, recorded because corrections are usually written as pure cost.** Going back to
+read what Peter had actually written — rather than only retracting — surfaced that **four of his
+twelve failing pairs are MFA endpoints** (`/api/auth/mfa/setup/verify`,
+`/api/auth/mfa/backup-codes/regenerate`, `/api/users/me/mfa/disable`, `/api/users/me/mfa/verify`)
+and that s119 was minutes from opening **KS-737, the platform-admin MFA bypass**. Its red-proof
+was about to be built on a surface already failing conformance for an unrelated reason. **The
+correction was worth more than the error cost**, and it is the coordinator's job that produced it
+([[2026-08-11_coordinator-not-carrier]]) — the task-focused agent could not have seen the
+adjacency, and Wednesday only saw it by being forced back to the source.
