@@ -2117,3 +2117,9 @@ Done with it: Dynamics → Kam's team decision (no action); QuickQuote masthead/
 > dont forget to agregate / categorise tickets for Peter to review.  He would prefer to review and test 3 big projects with sub issues than 30 issues
 
 *Note:* 10:53 (doubled) — a preference about Peter's review shape: routed to Secuura s114 as item 2b (propose ~3 review streams with sub-issues, one test pass per stream; propose before moving); lesson extension + ledger row
+
+## 2026-09-03 11:11 — Kam (dashboard chat, verbatim)
+> docker uip
+> The Mac is running sluggish and problematic, so let me know once it's safe, and I will do a restart.
+
+*Note:* 11:01 ×3 + 11:02 ×3 (Superwhisper repeats) — measured 11:04: the Desktop UI quit, backend + VM still the 09:52 processes, daemon silent; the Mac restart = the Docker fix; both agents ordered to CHECKPOINT + WRAP NOW (gate rc=0 ×2, taps --mail); SAFE word to Kam once both wraps are in hand
