@@ -2192,3 +2192,8 @@ Done with it: Dynamics → Kam's team decision (no action); QuickQuote masthead/
 > Also, with notes and actions necessary, can you please use names rather than you, I, etc.  Sometimes it is difficult to tell who it refers to, Kam, Wed, Secuura agent, etc
 
 *Note:* Filed as learnings/2026-09-03_names-not-pronouns-in-notes-and-actions.md (preference, w=1); applied from the 16:2x panel ack onward.
+
+## 2026-09-03 16:46 — Kam (dashboard chat, verbatim)
+> Please deploy the Nexus AI site so it's live on Nexus AI dev app dot light forest dash B, etc.
+
+*Note:* Deploy word for the NexusAI dev app (nexusaidev-app.politeforest-b008d469…); read as: deploy the current head now (the fixes so far), the relayout as a second deploy; routed through the 09-01 QA gate; the NexusAI agent cuts a candidate at its next boundary.
