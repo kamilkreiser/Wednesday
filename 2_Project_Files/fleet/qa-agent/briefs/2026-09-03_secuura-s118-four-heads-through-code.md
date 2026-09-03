@@ -92,3 +92,31 @@ This is the same discipline the builders on this repo already use: **take the co
 
 ## Nothing else changes
 Row 4's FAIL condition is unchanged and you are on it: **can leg 10 go red, and what shapes make a pin invisible to its parser?** You reported it *"measurably goes red both ways"* — that is the finding half done. Carry on with the parser blind-spot probes additively, and state in the report that no file was removed at any point.
+
+
+---
+
+# ADDENDUM 3 — **#799's HEAD MOVED. Row 1's SHA in this brief is superseded.** (appended 21:44 AEST)
+
+**Read this before you write row 1's verdict.**
+
+The builder (s118) pushed to #799 after this brief was written and then wrapped. Verified from Wednesday's seat at 21:43 against the GitHub API:
+
+| PR | the SHA this brief named | the head NOW | status |
+|---|---|---|---|
+| **#799** | `52edde340` | **`124e98192`** | **CHANGED — row 1 must be re-pointed** |
+| #800 | `a9b9e18df` | `a9b9e18df` | unchanged, mergeable clean |
+| #795 | `22a0405ef` | `22a0405ef` | unchanged, mergeable clean |
+| #781 | `6410e9ade` | `6410e9ade` | unchanged, mergeable clean |
+
+develop is now **`e7cfe4b5f`** (#797 then #798 merged tonight), not `b0373773b`.
+
+## What to do
+1. **Re-point row 1 at `124e98192`** and review the KS-764 work at that SHA. If you have already read `52edde340`, `git diff 52edde340 124e98192` first and say what moved — a delta you have read is cheaper than a re-read, and it may be small.
+2. **Every verdict in your SUMMARY names the SHA it covers**, per PR. This is your own keeper from pass 14b: *"a green obtained against something other than what shipped"* — that finding was about a deploy, and this is the same class one layer over, in a review whose report gates four merges.
+3. If any other head moves under you before you finish, say so rather than silently re-reading: **a moving head is a finding about the process, not just an inconvenience.** Nothing else has moved as of 21:43.
+
+## Context you should have
+The builder wrapped at 21:42. Its own rotation work produced a finding that raises **#800** from a fix to an **unblocker**: the credential generator does not exist on develop, so anyone following the checker's printed remedy today gets a silent no-op and a stack quietly back on the shared password. **That does not change your job on row 2** — it raises what a clean verdict there is worth, so weigh row 2's FAIL condition accordingly.
+
+Kam's rulings from tonight are unchanged and remain on the do-not-re-flag list.
