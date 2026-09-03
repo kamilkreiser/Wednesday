@@ -2729,5 +2729,34 @@
   "status": "ruled",
   "ruled_choice": "you-ask",
   "ruled_ts": "2026-09-03T16:17:07.758200+10:00"
+ },
+ {
+  "id": "secuura-ks762-required-switch-2026-09-03",
+  "client_project": "Secuura/Blockchain",
+  "title": "KS-762: switch docker-compose's DB-password defaults to ':?required' (fail-loud) — overrides KS-165's in-file 'do NOT' and stops every local stack until each .env gains a line",
+  "bluf": "The agent measured before building: docker-compose.yml:121-132 carries a KS-165 instruction not to switch to ':?required' (it breaks the team's existing local stacks; a fresh volume bakes the DB password at first init). KS-762's done-when #1 is exactly that switch and never cites KS-165. Also measured: the default literal is a WORKING credential (AUTH OK, with a wrong-password control), it entered git history at 1305bbda9 so removal does not un-commit it, and there are 52 sites not 51. The non-breaking half (env.example line, the count, the red-proof) is being built now. Rotation on 2026-09-05 09:00 is the load-bearing half and is your deploy step either way.",
+  "default_action": "KEEP DEFAULTS: no switch; the non-breaking half lands; the switch is re-raised after the 09-05 rotation",
+  "options": [
+   {
+    "key": "keep-defaults",
+    "label": "Keep the defaults until the 09-05 rotation makes the literal dead; revisit the switch after (KS-165 stands)",
+    "detail": ""
+   },
+   {
+    "key": "switch-with-notify",
+    "label": "Switch to '",
+    "detail": "?required' now — you notify Peter and Stuart that their .env needs APP_DB_PASSWORD before their next 'docker compose up'"
+   },
+   {
+    "key": "hold",
+    "label": "Hold KS-762 entirely",
+    "detail": ""
+   }
+  ],
+  "recommended": "keep-defaults",
+  "ts": "2026-09-03T16:18:51.987863+10:00",
+  "status": "open",
+  "ruled_choice": null,
+  "ruled_ts": null
  }
 ]
