@@ -7,7 +7,7 @@ status: live
 
 # Boot digest — headline + rules of every lesson (open the file when it fires)
 
-Generated 2026-09-03 17:09 from 90 lesson files (350,558 B). Each block = the lesson's retrieval handle (H1), its frontmatter, the operative paragraph, its section index, and every RULES section verbatim. 6 files carry no rules-shaped section and are included whole. The CASES behind a rule live only in the file: open it the moment the rule fires, or when a diagnosis needs the evidence. `_ledger.md` is read whole beside this digest; `_ledger_archive.md` on demand.
+Generated 2026-09-03 21:14 from 91 lesson files (356,495 B). Each block = the lesson's retrieval handle (H1), its frontmatter, the operative paragraph, its section index, and every RULES section verbatim. 6 files carry no rules-shaped section and are included whole. The CASES behind a rule live only in the file: open it the moment the rule fires, or when a diagnosis needs the evidence. `_ledger.md` is read whole beside this digest; `_ledger_archive.md` on demand.
 
 ## The T9 SSD is the master — Wednesday must be fully portable
 `2026-07-31_fully-portable-drive.md` · principle · 2026-07-31 · status: superseded — the "T9 is the master" half by [[2026-08-25_one-drive-devmaster-is-master]] (2026-08-25); the portability principle itself still lives
@@ -2919,6 +2919,24 @@ sections (open the file for these): The two cases · Why the w=1 rule did not fi
 5. **Enforcement candidate (w=3 would promote it):** a `pane_close.sh` that takes the pane id + the listener pids from the handover, refuses (rc 5) if any listener or its parent has a tty, and only then `kill-pane`s and re-curls — the check in the path, not in memory.
 
 **Family:** [[2026-08-26_never-delete-cleanup-means-quarantine]] (a close that destroys; the blast radius of a tidy act) · [[2026-08-07_a-check-that-cannot-fail]] (a parentage test asked a survival question) · [[2026-08-14_i-read-representations-they-read-sources]] ("ppid 1" read as "daemonised" — a representation of detachment) · [[2026-08-15_a-gui-open-is-a-write]] (my own action's side effect read as the world's state).
+
+
+## A ratified mock is a spec with TWO halves — a brief that carries its figures and not its layout ships half the design, and only the principal will notice
+`2026-09-03_a-ratified-design-has-two-halves.md` · correction · 2026-09-03 · status: live
+
+**The operative case, so the headline matches it:** Kam has approved a MOCK — a rendered design document — and Wednesday is now writing the brief that turns it into code. **Ask which half of that mock the brief is carrying.** A mock states two things at once: WHAT the page says (the figures, the groups, the captions, what is deliberately absent) and WHAT THE PAGE IS (the columns, the chrome, the tiles, the chips, the popover, the type scale). The figures are easy to carry because they are prose. **The layout is a picture, and a picture does not survive into a brief unless someone measures it into words.**
+
+sections (open the file for these): The case · Why the existing lessons did not fire · How to apply
+
+## How to apply
+
+1. **When a mock is ratified, MEASURE IT INTO THE BRIEF in the same action.** Open the file, read its CSS, and write the layout down as numbered, checkable properties — the grid, the chrome, the tile shape, the chip, the popover, the table rules. "Build it like the mock" is not a brief; a reader who has the mock still needs to know which of its properties are load-bearing.
+2. **A design ratified once stays the spec for every later round.** Each subsequent brief carries a pointer to the mock BY REF (`git show <sha>:<path>`, ancestry verified) and one line naming which of its halves this round is closing.
+3. **The completion check gets a second question.** Not only *does the delivery match the brief?* but ***does the delivery match the artefact Kam approved?*** Those are different documents, and when they differ, the ratified one wins — because that is the thing the principal said yes to.
+4. **The QA brief gets the mock as an EXPECTED artefact**, so a pass can report "the page does not have the mock's shape" without being told to look for it. A tester given the figures will check the figures.
+5. **The screenshots close the loop.** Any round that changes what a page IS ends with rendered screenshots to Kam, both modes, before the deploy — his eye is the only instrument that has ever caught this class, twice now (the navy palette on 2026-09-02, this layout tonight).
+
+**The uncomfortable part, kept:** the agents did not fail here. Wednesday commissioned half a design twice, scored the second half 0.90, and would have deployed it to the dev app if Kam had not looked at the screen. **The system's own instruments were all green because they were all pointed at the same incomplete sentence.**
 
 
 ## Names, not pronouns, in notes and actions — "you", "I", "the agent" do not say who

@@ -213,10 +213,18 @@ if [ -f "$LCONF" ]; then
     # Comments excluded: Secuura's launcher keeps "Was `--model claude-fable-5`"
     # as a history note, which made this check warn on an already-fixed pin
     # (false alarm, 2026-08-13). Only a live (non-#) line counts.
-    if grep -vE '^\s*#' "$LPATH" 2>/dev/null | grep -qE -- '--model claude-fable-5'; then
+    if grep -vE '^\s*#' "$LPATH" 2>/dev/null | grep -qE -- '--model (claude-)?fable'; then
       STALE_PINS="$STALE_PINS $LNAME"
     fi
   done < "$LCONF"
+  # Wednesday's OWN launcher is not in launchers.conf, so it was never in this
+  # check's corpus — an alias pin (`--model fable`) sat there unseen until Kam's
+  # Fable credits ran out on 2026-09-03 and he had to switch the model by hand.
+  # A check whose corpus excludes the checker's own file is a check that cannot
+  # see (ledger, a-check-that-cannot-fail family).
+  if grep -vE '^\s*#' "$PROJECT_DIR/Launch_Wednesday.command" 2>/dev/null | grep -qE -- '--model (claude-)?fable'; then
+    STALE_PINS="$STALE_PINS WEDNESDAY(own)"
+  fi
   if [ -n "$STALE_PINS" ]; then
     warn "fable-5 pin still in launcher(s):$STALE_PINS" "next launch reverts to Fable — route the pin edit to that project's agent (or Kam)"
   else
@@ -224,17 +232,22 @@ if [ -f "$LCONF" ]; then
   fi
 fi
 
-# --- Wednesday's OWN model pin must be the `fable` ALIAS, never a dated ID (Kam,
-# 2026-09-02: "always choose the latest fable model"). A dated pin went stale the day
-# Fable 5.1 shipped and nothing noticed until Kam did — this check is the mechanism.
+# --- Wednesday's OWN model pin: the ALIAS, never a dated ID — and the alias is now
+# `opus` (Kam, 2026-09-03 21:0x: "fable credits ran out. next launch use opus").
+# This SUPERSEDES the 2026-09-02 ruling that pinned the `fable` alias; the alias
+# discipline itself is unchanged, because a dated pin went stale the day Fable 5.1
+# shipped and nothing noticed until Kam did. A `fable` pin here is now a REGRESSION:
+# it launches a seat against an exhausted credit pool.
 WLAUNCH="$PROJECT_DIR/Launch_Wednesday.command"
 if [ -f "$WLAUNCH" ]; then
-  if grep -vE '^\s*#' "$WLAUNCH" | grep -qE -- '--model claude-fable-[0-9]'; then
-    warn "Launch_Wednesday.command pins a DATED Fable ID" "use '--model fable' (alias = latest Fable) — Kam's 2026-09-02 ruling"
-  elif grep -vE '^\s*#' "$WLAUNCH" | grep -qE -- '--model fable(\[1m\])?( |$)'; then
-    ok "Wednesday launcher uses the 'fable' alias (latest Fable at every launch)"
+  if grep -vE '^\s*#' "$WLAUNCH" | grep -qE -- '--model (claude-)?fable'; then
+    warn "Launch_Wednesday.command pins Fable" "Kam's Fable credits are exhausted (2026-09-03) — use '--model opus'"
+  elif grep -vE '^\s*#' "$WLAUNCH" | grep -qE -- '--model claude-opus-[0-9]'; then
+    warn "Launch_Wednesday.command pins a DATED Opus ID" "use '--model opus' (alias = latest Opus) — Kam's alias ruling, 2026-09-02"
+  elif grep -vE '^\s*#' "$WLAUNCH" | grep -qE -- '--model opus(\[1m\])?( |$)'; then
+    ok "Wednesday launcher uses the 'opus' alias (latest Opus at every launch)"
   else
-    warn "Launch_Wednesday.command has no recognisable --model fable line" "read the exec line — the alias rule may have been edited away"
+    warn "Launch_Wednesday.command has no recognisable --model opus line" "read the exec line — the alias rule may have been edited away"
   fi
 fi
 

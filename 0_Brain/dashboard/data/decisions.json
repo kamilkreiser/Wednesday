@@ -2758,5 +2758,121 @@
   "status": "ruled",
   "ruled_choice": "keep-defaults",
   "ruled_ts": "2026-09-03T16:24:19.172076+10:00"
+ },
+ {
+  "id": "secuura-ks775-express-4to5-decision-2026-09-03",
+  "client_project": "Secuura/Blockchain",
+  "title": "KS-775: who owns the express 4 → 5 call before the qs fuse lapses on 2026-09-10",
+  "bluf": "Two qs advisories are baselined with a fuse of 2026-09-10; when it lapses the push gate re-fires and blocks every author. The named remedy (KS-409, the express 4 → 5 migration) was archived on 09-02 with nothing replacing it. The Secuura agent (s118) measured all 45 locks: 29 carry qs, 28 of those are pinned by tilde-capped express 4 / body-parser parents, so only a migration or a deliberate override reaches the fix. KS-775 now owns the decision; Peter asked for an owner before the fuse. The decision is Kam's / Peter's.",
+  "default_action": "extend — Wednesday orders the fuse moved to 2026-09-24 with the reason on the rows and KS-775 sizing the migration, unless Kam rules otherwise by 2026-09-08 09:00",
+  "options": [
+   {
+    "key": "migrate",
+    "label": "Commission the express 4 → 5 migration plan (Peter's fix shape; 15 services; sized under KS-775 first, built as its own stream)",
+    "detail": "the tilde-capped parents go away rather than being overridden; a real migration with its own plan and blast radius"
+   },
+   {
+    "key": "override",
+    "label": "A deliberate overrides on qs to 6.16.0 (fast; violates two declared parent ranges — a risk decision, recorded as such)",
+    "detail": "reaches the patched version now; Peter and Kam accept the range violation knowingly, dated"
+   },
+   {
+    "key": "extend",
+    "label": "Extend the fuse to 2026-09-24 with a stated reason on the baseline rows, while KS-775 sizes the migration (no code change; the gate keeps its teeth)",
+    "detail": "buys two weeks; the decision is deferred, not dropped"
+   }
+  ],
+  "recommended": "migrate",
+  "ts": "2026-09-03T18:01:01.192448+10:00",
+  "status": "ruled",
+  "ruled_choice": "migrate",
+  "ruled_ts": "2026-09-03T18:02:15.785318+10:00"
+ },
+ {
+  "id": "secuura-studio-slot1-shared-postgres-literal-2026-09-03",
+  "client_project": "Secuura/Blockchain",
+  "title": "The Studio's own local Secuura stack (slot 1) still runs on the shared Postgres literal — rotating it destroys the slot's local data",
+  "bluf": "While fixing KS-731 (per-clone Postgres/Redis passwords), the Secuura agent (s118) found this Mac's own .env carries the shared Postgres literal (Redis already per-clone). Peter's cross-slot exposure (#765) applies to this clone now. Rotating an existing clone needs docker compose down --volumes on the slot (Postgres bakes the password at first init), which wipes the slot's local dev data; Docker beyond up -d is Kam's, and the data loss is his call. Not the 09-05 APP_DB_PASSWORD rotation — a different credential. The new checker will WARN on every start until it is rotated.",
+  "default_action": "leave — the checker keeps warning; Wednesday re-raises at the next Secuura deploy session or when Peter asks about clone rotation",
+  "options": [
+   {
+    "key": "leave",
+    "label": "Leave it for now; the checker warns at every start; rotate when Kam picks a moment (nothing else depends on the local slot's data being kept)",
+    "detail": "no data loss today; the local exposure stays until then"
+   },
+   {
+    "key": "rotate-now",
+    "label": "Kam runs the rotation himself now (down --volumes on slot 1, then start-environment.sh regenerates per-clone passwords; the seeded demo data re-seeds)",
+    "detail": "a few minutes; wipes any local-only data on slot 1"
+   },
+   {
+    "key": "agent-rotates",
+    "label": "Authorise the Secuura agent to run down --volumes on slot 1 + the regeneration (a one-off Docker grant, scoped to slot 1 only)",
+    "detail": "hands-off for Kam; the agent states the volume list before and after"
+   }
+  ],
+  "recommended": "leave",
+  "ts": "2026-09-03T18:21:43.288100+10:00",
+  "status": "open",
+  "ruled_choice": null,
+  "ruled_ts": null
+ },
+ {
+  "id": "secuura-ks764-orgless-caller-403-2026-09-03",
+  "client_project": "Secuura/Blockchain",
+  "title": "KS-764: an org-bounded admin with NO organisation on their account will be refused key revocation (403) — keep the refusal, or allow same-tenant?",
+  "bluf": "The key-revoke fix (KS-764, local, unpushed) refuses a cross-organisation revoke and, as a side arm, refuses an ORG_ADMIN or ISSUER_ADMIN whose own account carries no organisation. The Secuura agent (s118) measured the local seed database: 10 of 156 users are in that state (ORG_ADMIN 4 of 4, ISSUER_ADMIN 6 of 8). Local seed, not production — the production population is unmeasured. Kam's 05:59 ruling covered org-less KEYS (allowed); this is org-less CALLERS. The review found it (F-764-03); the agent routed it up rather than deciding.",
+  "default_action": "refuse — the 403 stays and the PR body carries the population question; the demo population measured by the Secuura agent before KS-764's PR is requested for review",
+  "options": [
+   {
+    "key": "refuse",
+    "label": "Keep the 403 for org-less callers (secure by default); a data fix assigns those admins an organisation before they can revoke; measure the demo/prod population before the PR merges",
+    "detail": "no cross-org path opens; some admins lose revoke until their account carries an org"
+   },
+   {
+    "key": "allow",
+    "label": "Allow an org-less caller to revoke same-tenant keys (the tenant is the floor; today's behaviour for those users), refusing only a real cross-org mismatch — mirrors the org-less-KEY ruling",
+    "detail": "no admin loses revoke; an org-less admin can revoke any key in the tenant, as today"
+   },
+   {
+    "key": "hold",
+    "label": "Hold KS-764 until the demo population is measured, then decide",
+    "detail": "delays a security fix already built"
+   }
+  ],
+  "recommended": "refuse",
+  "ts": "2026-09-03T18:31:52.155510+10:00",
+  "status": "open",
+  "ruled_choice": null,
+  "ruled_ts": null
+ },
+ {
+  "id": "secuura-qs-fuse-extend-2026-09-03",
+  "client_project": "Secuura/Blockchain",
+  "title": "The two qs baseline rows expire 2026-09-10 and the express 4 to 5 migration cannot land by then — extend the fuse to 2026-09-24?",
+  "bluf": "The Secuura agent (s118) measured the express 4 to 5 migration at develop b0373773b and PR'd the plan as #798: 28 lockfiles touch express (not the 15 services KS-409's title claims), the breaking surface in Secuura's own code is TWO sites in total against a control of 316, and one of them (a write to req.query in packages/shared) is fixable on express 4 as Stage 0. The plan is 6 to 9 sessions with a Schemathesis pass per stage. The two qs baseline rows in the audit gate expire 2026-09-10, which this cannot meet; compressing it would push an upgrade through auth, security and api-gateway with no per-stage test pass. Kam ruled MIGRATE on 2026-09-03 at 18:01 — this is only the fuse date, not the direction.",
+  "default_action": "extend — the Secuura agent writes the new date with the measurement and Kam's ruling on the rows; nothing else changes",
+  "options": [
+   {
+    "key": "extend",
+    "label": "Extend both qs rows to 2026-09-24, reason written on the rows",
+    "detail": ""
+   },
+   {
+    "key": "hold",
+    "label": "Leave 2026-09-10 and let the gate block pushes when it lapses",
+    "detail": ""
+   },
+   {
+    "key": "compress",
+    "label": "Compress the migration to land by 2026-09-10",
+    "detail": ""
+   }
+  ],
+  "recommended": "extend",
+  "ts": "2026-09-03T21:10:13.231539+10:00",
+  "status": "open",
+  "ruled_choice": null,
+  "ruled_ts": null
  }
 ]
