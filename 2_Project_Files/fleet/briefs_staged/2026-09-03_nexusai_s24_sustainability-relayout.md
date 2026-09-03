@@ -1,6 +1,6 @@
-# STAGED — Datasec / NexusAI S24 — the Sustainability tab relayout (Kam's commission, 2026-09-03 13:1x AEST) — DRAFT, not sent
+# STAGED — Datasec / NexusAI S24 — the Sustainability tab relayout (Kam's commission 13:1x, APPROVED 13:18, 2026-09-03 AEST) — not yet sent (after the 149e358 deploy + S23's wrap)
 
-**Status:** commission section for the S24 brief. Sent only after the 149e358 deploy (Kam's 11:59 ask) and S23's wrap. The S24 brief proper adds the standing sections (protocol, provenance gate, holds, QA gate, CTX stop-line) from the S23 brief; this file is the WHAT.
+**Status:** APPROVED by Kam — panel 13:18:16 2026-09-03, verbatim: "That's fantastic. I agree with the approach. Please go ahead." (the approach + sequencing as mirrored 13:16). Commission section for the S24 brief. Sent only after the 149e358 deploy (Kam's 11:59 ask) and S23's wrap. The S24 brief proper adds the standing sections (protocol, provenance gate, holds, QA gate, CTX stop-line) from the S23 brief; this file is the WHAT.
 
 ## Kam's words (terminal, dictated, verbatim — the spec; read through dictation noise)
 > The Nexus and the Sustainability page. Let's change the layout a little bit.

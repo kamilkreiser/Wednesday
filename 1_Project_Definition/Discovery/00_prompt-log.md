@@ -2177,3 +2177,8 @@ Done with it: Dynamics → Kam's team decision (no action); QuickQuote masthead/
 > Paitilesns or stats that are unavailable, do not include.
 
 *Note:* Addendum to the Sustainability relayout: panels/tiles or stats that are unavailable are NOT shown (read through dictation noise: 'Paitilesns' = panels/tiles). Folded into the S24 commission: the three dark KPIs (ENERGY KWH / SCOPE 2 / SECURE RELEASE) are hidden, not displayed as unavailable.
+
+## 2026-09-03 13:18 — Kam (dashboard chat, verbatim)
+> That's fantastic. I agree with the approach. Please go ahead.
+
+*Note:* APPROVAL of the Sustainability relayout approach + sequencing as proposed (13:16 panel): S24 = the relayout round after the 149e358 deploy; mock for his eye → build → QA → deploy on my GO. Staged brief marked APPROVED.
