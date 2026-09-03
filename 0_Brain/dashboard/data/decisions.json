@@ -3014,5 +3014,34 @@
   "status": "open",
   "ruled_choice": null,
   "ruled_ts": null
+ },
+ {
+  "id": "secuura-appdb-rotation-vs-800-2026-09-04",
+  "client_project": "Secuura/Blockchain",
+  "title": "The APP_DB_PASSWORD rotation is scheduled for 2026-09-05 09:00 — and the checker that verifies it is still broken on develop",
+  "bluf": "The scheduled APP_DB_PASSWORD rotation lands 2026-09-05 09:00. The tool Stuart and Peter would use to confirm the rotation worked is check-slot-credentials.sh, and its fixes are sitting unmerged in PR #800. Measured tonight by the fleet QA pass and confirmed by the Secuura agent (s120): the shipped version prints a GREEN all-clear over the shared literal secuura_dev_password when the value carries an inline comment, and reports a CORRECTLY ROTATED value as BLANK when written as 'export KEY=' - then instructs the operator to run 'docker compose down --volumes', which destroys that slot's data. s120 has already told Stuart and Peter in an extranet notice not to follow the printed remedy until #800 lands, so nobody is currently exposed to it. #800's fixes are pushed at e26cfce2b and preflight-green, but the PR has ZERO reviews and Wednesday has NOT issued a merge GO because it also still needs a through-code QA pass over the fix. Wednesday cannot merge it without a reviewer, and chasing Peter for that review is external communication - Kam's signature class.",
+  "default_action": "holdnotice - the rotation proceeds, the standing extranet notice stands, and verification on the day falls to the Secuura agent rather than to Stuart and Peter. No nudge is sent and no date moves unless Kam says otherwise.",
+  "options": [
+   {
+    "key": "nudge",
+    "label": "Kam asks Peter to prioritise #800's review before the 09-05 rotation",
+    "detail": "One short message from Kam naming the date and the coupling. Highest chance #800 merges before the rotation, so the verification tool works when it is actually needed. Spends a little of Peter's goodwill on prioritisation."
+   },
+   {
+    "key": "holdnotice",
+    "label": "Leave it unmerged; rely on the standing notice (DEFAULT)",
+    "detail": "Stuart and Peter have already been told not to use the printed remedy. The rotation can proceed without the checker - it just cannot be self-verified by them, so verification falls to the Secuura agent and Wednesday on the day. Nothing is destroyed and nobody is misled."
+   },
+   {
+    "key": "defer",
+    "label": "Move the rotation date",
+    "detail": "Push the 09-05 rotation until after #800 merges. Cleanest technically, but it is a scheduled security action and Kam may have reasons the date is fixed."
+   }
+  ],
+  "recommended": "holdnotice",
+  "ts": "2026-09-04T02:21:02.700941+10:00",
+  "status": "open",
+  "ruled_choice": null,
+  "ruled_ts": null
  }
 ]
