@@ -7,7 +7,7 @@ status: live
 
 # Boot digest — headline + rules of every lesson (open the file when it fires)
 
-Generated 2026-09-04 02:39 from 91 lesson files (385,827 B). Each block = the lesson's retrieval handle (H1), its frontmatter, the operative paragraph, its section index, and every RULES section verbatim. 6 files carry no rules-shaped section and are included whole. The CASES behind a rule live only in the file: open it the moment the rule fires, or when a diagnosis needs the evidence. `_ledger.md` is read whole beside this digest; `_ledger_archive.md` on demand.
+Generated 2026-09-04 02:54 from 91 lesson files (388,868 B). Each block = the lesson's retrieval handle (H1), its frontmatter, the operative paragraph, its section index, and every RULES section verbatim. 6 files carry no rules-shaped section and are included whole. The CASES behind a rule live only in the file: open it the moment the rule fires, or when a diagnosis needs the evidence. `_ledger.md` is read whole beside this digest; `_ledger_archive.md` on demand.
 
 ## The T9 SSD is the master — Wednesday must be fully portable
 `2026-07-31_fully-portable-drive.md` · principle · 2026-07-31 · status: superseded — the "T9 is the master" half by [[2026-08-25_one-drive-devmaster-is-master]] (2026-08-25); the portability principle itself still lives
@@ -998,7 +998,7 @@ reported anything else — because it measured the wrong thing, errored and
 swallowed it, or asked a question whose answer was fixed in advance. It is worse
 than no check, because it converts an open question into a settled one.
 
-sections (open the file for these): The concrete remedy, added 2026-08-13 (Secuura/Blockchain s28) · A failure-only log going quiet is not recovery (2026-08-22, Secuura s61) · The third member: a check that MISREPORTS what it saw (2026-08-14, same agent) · A test that cannot CLEAN UP starts asserting against live data (2026-08-15, Secuura s35) · A positive control proves the suite it RAN IN, and nothing about its neighbour (2026-08-15, Secuura s35) · The inverse: a REPRODUCTION that cannot reproduce (2026-08-15, Datasec/NexusAI) · The refinement that makes the positive-control rule actually work (2026-08-16, Secuura s37) · An indicator that can MISS its own event (2026-08-24, Datasec/NexusAI) · The control needs its own control (2026-08-23, Datasec/NexusAI) · The condition we had not stated: on a side-effecting system, the positive control IS an action (2026-08-14, Secuura s34) · The mirror: an ABSENCE claim needs a positive control too (2026-08-14) · Three "cannot see" members from one micro-session (2026-08-25, Datasec/NexusAI s5) — and a derivation lesson from its neighbour · A test's NAME is not its coverage (2026-09-03, Secuura s119 — the member that let an AUTH BYPASS survive a suite that appears to test it) · A census, a writer and a verifier that descend from ONE parse are one view rendered three times (2026-09-04, Datasec/NexusAI S29 — its own diagnosis, then its own correction to that diagnosis) · CORRECTED the same session, by the same agent, and the correction is the better lesson · A red-proof proves a check CAN fail; only a GREEN BASELINE proves it can pass for the right reason (2026-09-04, Secuura s120 — a guard defeated by its own doc comment) · The AXIS a guard is blind on is not the axis it was designed for (2026-09-04, Datasec/NexusAI — a perfectly-implemented guard, green on a defect it could never see)
+sections (open the file for these): The concrete remedy, added 2026-08-13 (Secuura/Blockchain s28) · A failure-only log going quiet is not recovery (2026-08-22, Secuura s61) · The third member: a check that MISREPORTS what it saw (2026-08-14, same agent) · A test that cannot CLEAN UP starts asserting against live data (2026-08-15, Secuura s35) · A positive control proves the suite it RAN IN, and nothing about its neighbour (2026-08-15, Secuura s35) · The inverse: a REPRODUCTION that cannot reproduce (2026-08-15, Datasec/NexusAI) · The refinement that makes the positive-control rule actually work (2026-08-16, Secuura s37) · An indicator that can MISS its own event (2026-08-24, Datasec/NexusAI) · The control needs its own control (2026-08-23, Datasec/NexusAI) · The condition we had not stated: on a side-effecting system, the positive control IS an action (2026-08-14, Secuura s34) · The mirror: an ABSENCE claim needs a positive control too (2026-08-14) · Three "cannot see" members from one micro-session (2026-08-25, Datasec/NexusAI s5) — and a derivation lesson from its neighbour · A test's NAME is not its coverage (2026-09-03, Secuura s119 — the member that let an AUTH BYPASS survive a suite that appears to test it) · A census, a writer and a verifier that descend from ONE parse are one view rendered three times (2026-09-04, Datasec/NexusAI S29 — its own diagnosis, then its own correction to that diagnosis) · CORRECTED the same session, by the same agent, and the correction is the better lesson · A red-proof proves a check CAN fail; only a GREEN BASELINE proves it can pass for the right reason (2026-09-04, Secuura s120 — a guard defeated by its own doc comment) · The AXIS a guard is blind on is not the axis it was designed for (2026-09-04, Datasec/NexusAI — a perfectly-implemented guard, green on a defect it could never see) · THE OTHER END OF IT: a red-proof on a subject that did not COMPILE is not a red-proof (2026-09-04, Secuura s121 — the pair to the green-baseline rule above)
 
 **How to apply — one question, asked of the check rather than the result:**
 
@@ -1247,6 +1247,24 @@ reported that it was THREE, and that the first one is the one that mattered.**
 **Family:** the census/writer/verifier section above (one view rendered three times) is about a guard
 that cannot SEE; this is about a guard that sees perfectly, on the wrong axis. **Both produce a green
 that means nothing, and only the second one survives every review of the guard's own logic.**
+
+**How to apply — the ritual, corrected:**
+1. **Green baseline** — run the new assertion unmodified against known-good code. A red here is a
+   defect in the assertion.
+2. **Tamper, and read the COUNT** — the number of cases executed must be the same as the baseline's.
+   `1 failed / 0 tests` is not a red-proof; it is a build failure wearing one.
+3. **Confirm the SPECIFIC cases that reddened are the ones the tamper should hit.** In the same
+   session: hoisting a write above a guard failed **CASE 2 and CASE 4 on `not.toHaveBeenCalled()`
+   while their 403 status still PASSED** — the ordering assertion doing work an end-state assertion
+   sails straight through. A count of failures is weaker than a list of them.
+4. **Restore, and confirm green** — byte-identical, hash-proven.
+
+**The related mocking trap from the same landing, because it is the same shape one level up:** the
+obvious way to write that test file was to mock the shared package wholesale — **which would have
+replaced the SUBJECT with a stub and left a green suite testing nothing.** The agent's load-bearing
+control asserts **the decision function is NOT a mock**, and its auth stub sets the principal under
+**both** property names the real setter uses, *"because a stub setting one silently disables half the
+chain."* **A test's mocks are part of its subject; mock the neighbours, never the thing under test.**
 
 
 ## A promise is not a mechanism — unsupervised work needs a trigger, not an intention

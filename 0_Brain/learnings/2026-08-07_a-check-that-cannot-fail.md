@@ -692,3 +692,48 @@ that silence reads exactly like a pass.
 **Family:** the census/writer/verifier section above (one view rendered three times) is about a guard
 that cannot SEE; this is about a guard that sees perfectly, on the wrong axis. **Both produce a green
 that means nothing, and only the second one survives every review of the guard's own logic.**
+
+
+### THE OTHER END OF IT: a red-proof on a subject that did not COMPILE is not a red-proof (2026-09-04, Secuura s121 — the pair to the green-baseline rule above)
+
+**Their formulation, adopted:**
+
+> **"A red is only evidence when you know the cases RAN and the subject BUILT — check the test
+> COUNT, not the verdict."**
+
+**The case.** Tampering to red-proof a guard, the agent deleted a refusal block and left a variable
+unused. **TS6133.** The run reported **`1 failed / 0 tests`**. *"The headline says failure; the truth
+is zero cases executed. Had I read the summary line I would have logged a clean red-proof having
+proven nothing."* It discarded that tamper in the commit and on the PR rather than quietly re-running.
+
+**Why this completes the pair, and the pairing is the lesson.** Two hours earlier, on another
+project, an agent found that **an assertion that cannot PASS still reddens on tamper**, and named
+*green baseline before red-proof*. This is its mirror: **a subject that cannot RUN also reddens on
+tamper.**
+
+| failure | what is broken | what the summary line shows | the discriminator |
+|---|---|---|---|
+| **assertion cannot pass** | the check | red on tamper, red on restore | **run it on known-good code FIRST** — a green baseline |
+| **subject cannot build/run** | the thing under test | red on tamper, **0 tests executed** | **read the test COUNT, not the verdict** |
+
+**Both produce a red. Both look identical in the headline. Neither proves anything.** The
+tamper/restore ritual — which this fleet had treated as the gold standard all week — is blind to
+both, because it only ever asks *"did it go red?"*
+
+**How to apply — the ritual, corrected:**
+1. **Green baseline** — run the new assertion unmodified against known-good code. A red here is a
+   defect in the assertion.
+2. **Tamper, and read the COUNT** — the number of cases executed must be the same as the baseline's.
+   `1 failed / 0 tests` is not a red-proof; it is a build failure wearing one.
+3. **Confirm the SPECIFIC cases that reddened are the ones the tamper should hit.** In the same
+   session: hoisting a write above a guard failed **CASE 2 and CASE 4 on `not.toHaveBeenCalled()`
+   while their 403 status still PASSED** — the ordering assertion doing work an end-state assertion
+   sails straight through. A count of failures is weaker than a list of them.
+4. **Restore, and confirm green** — byte-identical, hash-proven.
+
+**The related mocking trap from the same landing, because it is the same shape one level up:** the
+obvious way to write that test file was to mock the shared package wholesale — **which would have
+replaced the SUBJECT with a stub and left a green suite testing nothing.** The agent's load-bearing
+control asserts **the decision function is NOT a mock**, and its auth stub sets the principal under
+**both** property names the real setter uses, *"because a stub setting one silently disables half the
+chain."* **A test's mocks are part of its subject; mock the neighbours, never the thing under test.**
