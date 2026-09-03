@@ -130,6 +130,17 @@ functional understanding; Wednesday takes it seriously, records it, and applies 
    `_boot_digest.md` with it (the launcher regenerates at boot too; doctor warns
    on a stale one — the wrap keeps origin current for a seat that boots
    elsewhere).
+3c. **Ledger archive (Kam-ruled 2026-09-04 08:32, card `wed-ledger-boot-cost`):**
+   move every `_ledger.md` row **older than ~3 days** into `_ledger_archive.md`,
+   verbatim, newest-first, under a dated `## Archived …` heading naming this rule.
+   **Assert conservation before writing: rows(ledger) + rows(archive) must be
+   identical before and after.** Nothing is edited and nothing is deleted — this
+   is a move, and the archive is read on demand. *Why: the ledger reached 322 KB,
+   LARGER than the boot digest it sits beside, two days after the previous prune;
+   rows run 2–3 KB of prose each, so it grows faster than any one-off tidy can
+   keep up with. First run 2026-09-04 moved 38 rows (08-31 + 09-01), 322 KB → 267 KB,
+   398 rows conserved.*
+
 4. Verify no secrets staged; commit + push if/when this folder becomes a git repo.
 5. Say good night. Briefly.
 
