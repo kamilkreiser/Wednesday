@@ -2671,5 +2671,63 @@
   "status": "ruled",
   "ruled_choice": "leave",
   "ruled_ts": "2026-09-03T16:01:18.329458+10:00"
+ },
+ {
+  "id": "secuura-ks764-org-arm-design-2026-09-03",
+  "client_project": "Secuura/Blockchain",
+  "title": "KS-764 (key revocation, organisation arm): which shape? — your call under KS-621 (organisation is a security boundary; design comes to you before code)",
+  "bluf": "The agent built the org arm and measured the ticket's filed shape first: REFUSING org-less keys prevents no cross-org attack (the hazard needs the key to belong to org B), would make 477 of 1,225 keys across 197 tenants platform-admin-only (39%), and turns KS-643's merged 'must not over-correct' test red. It built the alternative instead: refuse only a REAL cross-org mismatch (org-less key → tenant verdict; org-less caller vs an org'd key → 403, distinct reason). 11 cases, red-proofed, suite 118/118, committed LOCALLY at f3b926033 (unpushed — develop's gate is red for everyone until #797 merges). The agent's comment wrongly said you had ruled this; you have not — corrected at the source. KS-621 reserves this design for you.",
+  "default_action": "HOLD: the branch stays local and unpushed; nothing merges or deploys until you rule (KS-621 is your reservation, not a default I can take)",
+  "options": [
+   {
+    "key": "mismatch-only",
+    "label": "Refuse only a real cross-org mismatch (as built) — org-less keys keep the tenant verdict",
+    "detail": ""
+   },
+   {
+    "key": "refuse-orgless",
+    "label": "Refuse org-less keys too (the ticket's filed shape) — 39% of keys become platform-admin-only; KS-643's test must be rewritten",
+    "detail": ""
+   },
+   {
+    "key": "hold",
+    "label": "Hold KS-764 until KS-621 is ruled as a whole",
+    "detail": ""
+   }
+  ],
+  "recommended": "mismatch-only",
+  "ts": "2026-09-03T16:07:22.064296+10:00",
+  "status": "open",
+  "ruled_choice": null,
+  "ruled_ts": null
+ },
+ {
+  "id": "secuura-797-peter-priority-2026-09-03",
+  "client_project": "Secuura/Blockchain",
+  "title": "Ask Peter to prioritise #797 as the develop unblocker?",
+  "bluf": "develop's push gate is red for EVERY author (7 unbaselined advisories: 4 fast-uri + 2 qs + 1 mysql2). PR #797 (the lockfile regen + baseline carry, on Peter since 15:21) is the fix; until it merges nothing on the K queue can be pushed (KS-764, KS-695 ask 3, KS-762 all hit the wall). The agent keeps building locally meanwhile. Contacting Peter is external comms — yours.",
+  "default_action": "WAIT: nothing sent to Peter; the K agents keep committing locally and push in order when #797 lands",
+  "options": [
+   {
+    "key": "you-ask",
+    "label": "You ask Peter (a one-line note",
+    "detail": "#797 first, it unblocks every push)"
+   },
+   {
+    "key": "wednesday-drafts",
+    "label": "I draft the note for you to send",
+    "detail": ""
+   },
+   {
+    "key": "wait",
+    "label": "Wait — Peter reviews in bursts; nothing said",
+    "detail": ""
+   }
+  ],
+  "recommended": "you-ask",
+  "ts": "2026-09-03T16:07:22.116773+10:00",
+  "status": "open",
+  "ruled_choice": null,
+  "ruled_ts": null
  }
 ]
