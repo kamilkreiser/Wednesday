@@ -2163,3 +2163,17 @@ Done with it: Dynamics → Kam's team decision (no action); QuickQuote masthead/
 > Thank you. Deploy everything that's ready.
 
 *Note:* 12:13 — his reply to the deploy-scope card/panel question = option A (develop whole to demo/UAT, staged). Card ruled A; DEPLOY GO ADDENDUM to s115 at develop e02e15811 with the rollback re-tag first. NexusAI unchanged (gate → pass 13b-i → GO).
+
+## 2026-09-03 13:16 — Kam (terminal (dictated), verbatim)
+> The Nexus and the Sustainability page. Let's change the layout a little bit.
+> 
+> Create one tile with the different metrics and add a little eye next to it. When clicked, shows where the calculation and where the data comes from. So displayed, we'll only have the actual stats.
+> 
+> Then create a bigger pane which actually showcases the sustainability improvements. This will be calculated by printing double-sided versus single-sided, printing black and white versus color and anything else that you think would be useful?
+
+*Note:* NexusAI Sustainability tab relayout commission: one metrics tile + an eye (provenance on click); a larger improvements pane (duplex vs simplex, mono vs colour, + my recommendations). Routed to NexusAI S24 after the 149e358 deploy; my recommendation + default on the panel.
+
+## 2026-09-03 13:16 — Kam (terminal (dictated), verbatim)
+> Paitilesns or stats that are unavailable, do not include.
+
+*Note:* Addendum to the Sustainability relayout: panels/tiles or stats that are unavailable are NOT shown (read through dictation noise: 'Paitilesns' = panels/tiles). Folded into the S24 commission: the three dark KPIs (ENERGY KWH / SCOPE 2 / SECURE RELEASE) are hidden, not displayed as unavailable.
