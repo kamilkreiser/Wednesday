@@ -284,3 +284,30 @@ agent-caught, pre-cost). Timestamps in note headers and the prompt log → `tool
 + `tools/prompt_log.sh` generate the stamp (built 2026-08-30 after w=46, the sixth composed
 clock, a nine-hour gap) — the rule "generate, never type" now has a writer that reads the
 clock for the two surfaces it kept failing on.
+
+
+## The 2026-09-03 evening sub-class: FOUR instances in one session, all in COORDINATION messages, all agent-caught (ledger w=73–76)
+
+**The operative case, so the headline matches it:** Wednesday is writing a sentence **to an agent** — a brief, an ANSWER, an ADDENDUM, a GO — that states a fact about a file, a board, a review state, a context window or a pattern. **That is the highest-risk sentence Wednesday writes**, because the receiving agent usually *cannot* check it (it cannot read its own statusline, cannot see the reviews endpoint, was not in the room when the mail arrived) and will act on it.
+
+**The four, in one evening, all the same root and all caught by the receiving agent within minutes:**
+
+| w | the sentence | the instrument used | the instrument that was one call away |
+|---|---|---|---|
+| 73 | "your statusline reads ctx:14%" | a running estimate | `tmux capture-pane` (it read 10%) |
+| 74 | "#781, #795, #799 and #800 are all Peter-approved at head" | the builder's summary line naming **two** | the reviews endpoint (**two had zero reviews**) |
+| 75 | "the pattern is exact: every hand-derived number is wrong" | the agent's own prose | its tabulation of all 16 (**5 of 9 hand-derived were right**) |
+| 76 | "`keyRevokePolicy.ts` +43 −10 — this is PRODUCT code" | the **diffstat** | the **diff** (0 non-comment lines changed either way) |
+
+**Why this is its own sub-class and not four more instances.** The existing rules are all about *reading*. These four were failures of **writing under coordination load** — composing many messages quickly, each one summarising something read minutes earlier for a reader who cannot verify it. Every one was *true of the instrument consulted* and *false of the claim built on it*. And crucially: **not one was caught by Wednesday.** The detector was the fleet, four times out of four.
+
+### The rule promoted from this (enforceable in the sentence, not in a tool)
+
+> **When a sentence to an agent states a fact about a file, a board, a review state or a context window, it NAMES THE INSTRUMENT that produced it — inline.**
+> *"by the diffstat, unread"* · *"from the reviews endpoint at 21:52"* · *"captured from your pane in this action"* · *"your prose, not re-derived"*.
+
+This costs four words and it converts an assertion into a weighable claim. Each of the four above would have survived contact: an agent reading *"by the diffstat, unread"* sizes the work correctly instead of spending a turn correcting the coordinator.
+
+**The corollary, learned the same evening:** *an instrument's own output is not the claim you build on it.* A stat is a representation of a diff. A summary line is a representation of a board. Prose is a representation of a measurement. **The gap between them is exactly where a confident sentence goes wrong**, and it widens with message volume — which is why this landed four times in the busiest three hours of the day and not once in the quiet ones.
+
+**What must NOT be concluded from it:** that the agents should trust Wednesday less. They already calibrate correctly — the QA agent's NOT-TESTED list that same evening said *"review states and approvals are from your mail — a channel with an author, not an oracle I verified."* **That sentence is the fleet working.** The fix belongs on the sender's side.

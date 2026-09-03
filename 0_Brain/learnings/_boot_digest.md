@@ -7,7 +7,7 @@ status: live
 
 # Boot digest — headline + rules of every lesson (open the file when it fires)
 
-Generated 2026-09-03 21:14 from 91 lesson files (356,495 B). Each block = the lesson's retrieval handle (H1), its frontmatter, the operative paragraph, its section index, and every RULES section verbatim. 6 files carry no rules-shaped section and are included whole. The CASES behind a rule live only in the file: open it the moment the rule fires, or when a diagnosis needs the evidence. `_ledger.md` is read whole beside this digest; `_ledger_archive.md` on demand.
+Generated 2026-09-03 22:33 from 91 lesson files (359,823 B). Each block = the lesson's retrieval handle (H1), its frontmatter, the operative paragraph, its section index, and every RULES section verbatim. 6 files carry no rules-shaped section and are included whole. The CASES behind a rule live only in the file: open it the moment the rule fires, or when a diagnosis needs the evidence. `_ledger.md` is read whole beside this digest; `_ledger_archive.md` on demand.
 
 ## The T9 SSD is the master — Wednesday must be fully portable
 `2026-07-31_fully-portable-drive.md` · principle · 2026-07-31 · status: superseded — the "T9 is the master" half by [[2026-08-25_one-drive-devmaster-is-master]] (2026-08-25); the portability principle itself still lives
@@ -1885,7 +1885,7 @@ string, a capped query, or something I wrote earlier — **that is a representat
 thing, not the thing.** Go to the source. Every time. Especially when I am in the middle
 of requiring someone else to do exactly that.
 
-sections (open the file for these): The six, in one day · Why this is a distinct lesson and not six instances of old ones · Why the existing rules did not fire, which is the part to fix · How to apply · Will it persist? Yes — and the dangerous half is not the half that showed up today · Sharpened 2026-08-15: the variable is not WHOSE claim it is · Sharpened again 2026-08-16: the third switch is EXPECTATION, and it is the quietest · The clock-composition sub-class, consolidated 2026-08-23: GENERATE timestamps, never type them · The honest note on credit · The fourth switch (2026-08-25, Datasec/NexusAI s4): the option you can VERIFY WITHOUT EFFORT · The brief-composition costumes, consolidated 2026-08-30 (w=37–46 in three days — ten instances)
+sections (open the file for these): The six, in one day · Why this is a distinct lesson and not six instances of old ones · Why the existing rules did not fire, which is the part to fix · How to apply · Will it persist? Yes — and the dangerous half is not the half that showed up today · Sharpened 2026-08-15: the variable is not WHOSE claim it is · Sharpened again 2026-08-16: the third switch is EXPECTATION, and it is the quietest · The clock-composition sub-class, consolidated 2026-08-23: GENERATE timestamps, never type them · The honest note on credit · The fourth switch (2026-08-25, Datasec/NexusAI s4): the option you can VERIFY WITHOUT EFFORT · The brief-composition costumes, consolidated 2026-08-30 (w=37–46 in three days — ten instances) · The 2026-09-03 evening sub-class: FOUR instances in one session, all in COORDINATION messages, all agent-caught (ledger w=73–76) · The rule promoted from this (enforceable in the sentence, not in a tool)
 
 ## How to apply
 
@@ -1953,6 +1953,17 @@ agent-caught, pre-cost). Timestamps in note headers and the prompt log → `tool
 + `tools/prompt_log.sh` generate the stamp (built 2026-08-30 after w=46, the sixth composed
 clock, a nine-hour gap) — the rule "generate, never type" now has a writer that reads the
 clock for the two surfaces it kept failing on.
+
+### The rule promoted from this (enforceable in the sentence, not in a tool)
+
+> **When a sentence to an agent states a fact about a file, a board, a review state or a context window, it NAMES THE INSTRUMENT that produced it — inline.**
+> *"by the diffstat, unread"* · *"from the reviews endpoint at 21:52"* · *"captured from your pane in this action"* · *"your prose, not re-derived"*.
+
+This costs four words and it converts an assertion into a weighable claim. Each of the four above would have survived contact: an agent reading *"by the diffstat, unread"* sizes the work correctly instead of spending a turn correcting the coordinator.
+
+**The corollary, learned the same evening:** *an instrument's own output is not the claim you build on it.* A stat is a representation of a diff. A summary line is a representation of a board. Prose is a representation of a measurement. **The gap between them is exactly where a confident sentence goes wrong**, and it widens with message volume — which is why this landed four times in the busiest three hours of the day and not once in the quiet ones.
+
+**What must NOT be concluded from it:** that the agents should trust Wednesday less. They already calibrate correctly — the QA agent's NOT-TESTED list that same evening said *"review states and approvals are from your mail — a channel with an author, not an oracle I verified."* **That sentence is the fleet working.** The fix belongs on the sender's side.
 
 
 ## A cap is never neutral — it removes whatever the SORT put last, and the sort is usually ordered by what you care about
