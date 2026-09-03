@@ -2927,5 +2927,34 @@
   "status": "open",
   "ruled_choice": null,
   "ruled_ts": null
+ },
+ {
+  "id": "secuura-ks764-merge-order-2026-09-03",
+  "client_project": "Secuura/Blockchain",
+  "title": "On demo the KS-764 fix locks out EVERY org-bounded admin until the data fix runs — 10 of 10, not 10 of 156. Merge first, or run the data fix first?",
+  "bluf": "Kam's merge precondition is discharged and the number is ten times worse than the fixture suggested. Measured read-only on the demo VM by the Secuura agent (s119) with controls on both zeros: 10 of 30 demo accounts hold an org-bounded role (ORG_ADMIN or ISSUER_ADMIN, the exact set in the code), and organization_id is NULL for ALL of them — 10 of 10, not the 10 of 156 the local fixture implied. 21 of 21 org-owned keys would be refused. So when #799 merges, key revocation on demo closes for every admin in those roles until KS-779 (the data fix, filed, not performed) assigns organisations. Kam's ruling already sequences it that way — keep the 403, and a data fix comes before they can revoke — so this is not a contradiction, it is the same decision at ten times the measured cost. The figure of 477 of 1,225 sitting in the code counts KEYS from a fixture database that no longer exists and does not satisfy the precondition.",
+  "default_action": "merge-then-fix — Kam's own words were keep the 403 and let a data fix precede their ability to revoke; demo is not production and the refusal is the intended behaviour",
+  "options": [
+   {
+    "key": "merge-then-fix",
+    "label": "Merge #799 when Peter approves, secure by default, and run KS-779 promptly after",
+    "detail": ""
+   },
+   {
+    "key": "fix-first",
+    "label": "Run the KS-779 data fix first, then merge #799, so no revocation window closes",
+    "detail": ""
+   },
+   {
+    "key": "hold",
+    "label": "Hold #799 until Kam has looked at the demo accounts himself",
+    "detail": ""
+   }
+  ],
+  "recommended": "merge-then-fix",
+  "ts": "2026-09-03T22:22:19.331126+10:00",
+  "status": "open",
+  "ruled_choice": null,
+  "ruled_ts": null
  }
 ]

@@ -87,3 +87,33 @@ The builder also measured **why its own gates were green**, and this is the part
 4. Judge the builder's own retraction: it says *"contrast sweep 17/17 is TRUE and vouches for less than it sounds like."* **Is 17/17 an honest number for what it covers?** Say so either way — a number that is true and misleading is this campaign's most expensive recurring shape.
 
 Everything else in the brief stands, including the first-line question: **would Kam recognise this as the design he approved?**
+
+
+---
+
+# ADDENDUM 2 — sixteen contrast comments, four of them wrong, and how to check a corrector (appended 22:23 AEST)
+
+The builder self-reported a second time, and this one is about **numbers in comments**, not about the page.
+
+It re-measured **every ratio claim in both stylesheets** through the repo's own helper after catching one of its own figures wrong. **Four of sixteen are wrong; twelve are correct to 2dp:**
+
+| comment claims | actual | occurrences |
+|---|---|---|
+| light `--nx-text` on card 8.42 | **8.176** | ×4 |
+| light `--nx-text` on raised 7.10 | **6.895** | ×1 |
+| dark `--nx-text-muted` on card 5.65 | **5.068** | ×2 |
+| dark `--nx-brand-blue` on eye 4.47 | **4.564** | ×1 |
+
+**The pattern is exact and it is the finding: every number CARRIED ACROSS FROM THE MOCK is right; every number DERIVED BY HAND is wrong** (a dropped `/1.055` in the sRGB-to-linear step). The mock's figures came from an instrument; the hand-derived ones went into comments that read as measurements.
+
+**No legibility consequence** — 8.176, 6.895 and 5.068 all clear AA, and 4.564 clears both 4.5 and the 3:1 a control needs. Note that `4.47 → 4.564` is wrong in the *pessimistic* direction, which is the tell that this is not motivated error but simply unmeasured arithmetic.
+
+**Not corrected in-round, for the same reason RD-283 is not:** editing `static/css/*.css`, even comment-only, would falsify the builder's STATUS claim that every PRODUCT file is identical between `93cbdc4` and the branch head — **the claim you are verifying.** Both land in one restand.
+
+## WHAT WEDNESDAY ASKS OF YOU HERE — and it is deliberately not "skip it"
+The builder offered that you need not re-derive the sixteen. **Half-accepted:**
+1. **Spot-check a SAMPLE, not the set** — the four it corrected, **plus at least one it says is CORRECT.** Checking only the flagged ones verifies its list; checking an unflagged one verifies its **re-measurement**. **A corrector needs a control too**, which is this campaign's own standard pointed at the person applying it.
+2. If your sample disagrees with its table anywhere, that is a Major and it changes what the restand has to cover.
+3. **The class is worth a line in your report whatever the sample says:** a number in a code comment is instrument output, or it is labelled an estimate. Four comments in a shipped tree stated measured-sounding values that were never measured, and nothing in this repo's gates can see that.
+
+Everything else stands, including the first-line question: **would Kam recognise this as the design he approved?**
