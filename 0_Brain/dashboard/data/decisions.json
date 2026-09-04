@@ -3272,5 +3272,34 @@
   "status": "ruled",
   "ruled_choice": "approve-this-one",
   "ruled_ts": "2026-09-04T11:33:06.890845+10:00"
+ },
+ {
+  "id": "nexusai-rd296-sizing-2026-09-04",
+  "client_project": "Datasec / NexusAI",
+  "title": "The wiring you ruled is 1-2 days, not weeks — but it lights NO new tile, and the strongest metric in the spec is dark because HP's telemetry does not emit the events",
+  "bluf": "You ruled wire-to-logsources at 11:32. The investigation is back and the sizing is GOOD NEWS: 1-2 days plus QA, not weeks. All ten fields the sustainability service consumes are already emitted by all three Log Analytics parsers under identical names, the injection seam already exists, and the KPI maths is untouched. It is an adapter. TWO THINGS YOU SHOULD KNOW BEFORE THE BUILD STARTS, because they change what you are buying rather than whether it works. FIRST: wiring lights NO new tile. It is exactly the same six lit and the same three dark as the tab you looked at this morning. What changes is WHERE the lit ones get their rows - real customer data instead of a seeded CSV - which is the whole point of your ruling and is still worth doing, but it is not a coverage win and nobody should expect a fuller tab. SECOND, and this is the strategic one: SECURE_RELEASE_AVOIDED stays dark STRUCTURALLY, not for want of configuration. The agent read the live 59-column schema: nothing matching release, held, pending, submit or queue exists. jobStatus_s is an outcome enum - Succeeded, Failed, Canceled - not a submit-versus-release pair. Secure release avoided is the strongest metric in the whole sustainability spec, and it cannot be delivered from what HP's telemetry currently emits, by us or by anyone. That is a conversation with HP about their data, not an engineering task. ONE RISK THAT IS UNSIZEABLE FROM HERE AND STATED AS SUCH: evidence class depends on VALUES, not on fields existing. A tile reads MEASURED only when every job in the period reported its sheet count. The agent could not test this because the demo is not attached to a real workspace, and the precedent points the wrong way - the one real workspace this product has had does not emit toner columns for most devices. If a customer's ingest fills those columns sparsely, this stops being a wiring job and becomes a data-quality conversation with that customer. Wednesday has already ruled the demo question and it does not need you: the SQLite path stays reachable and the source is made explicit, so today's demo fix cannot be stranded by a routing change nobody aimed at it.",
+  "default_action": "build-it - if you say nothing, Wednesday commissions the 1-2 day build on the ruling you already made, with the demo protected as ruled, and the HP release-events question stays on your desk as an open item rather than being dropped. Nothing is blocked either way; the agent is on two small unrelated items in the meantime.",
+  "options": [
+   {
+    "key": "build-it",
+    "label": "Build it - 1 to 2 days, knowing it lights no new tile (Recommended)",
+    "detail": "Your ruling stands and the reasoning still holds: a real customer currently gets a permanently empty tab with no error, and this fixes that. The sizing is small because the groundwork is already there. You are buying correctness for real customers, not a richer demo."
+   },
+   {
+    "key": "build-and-raise-hp",
+    "label": "Build it, AND raise the release-events gap with HP",
+    "detail": "Same build, plus you open the conversation about whether HP's job telemetry can emit submission and release events. That is the only path to the spec's strongest metric, and it is a commercial ask rather than an engineering one - so it is yours, and it is worth knowing whether it is even possible before anyone promises that tile to a customer."
+   },
+   {
+    "key": "park-it",
+    "label": "Park the build for now",
+    "detail": "Nothing breaks today - the demo works and no customer is live on this tab. The cost of parking is that a GA blocker stays open on a feature that looks finished, which is the shape a customer finds rather than us. Choose this if something else is worth the two days more."
+   }
+  ],
+  "recommended": "build-and-raise-hp",
+  "ts": "2026-09-04T12:11:40.498137+10:00",
+  "status": "open",
+  "ruled_choice": null,
+  "ruled_ts": null
  }
 ]
