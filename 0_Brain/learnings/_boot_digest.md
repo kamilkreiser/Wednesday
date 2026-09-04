@@ -7,7 +7,7 @@ status: live
 
 # Boot digest — headline + rules of every lesson (open the file when it fires)
 
-Generated 2026-09-04 14:00 from 91 lesson files (406,344 B). Each block = the lesson's retrieval handle (H1), its frontmatter, the operative paragraph, its section index, and every RULES section verbatim. 6 files carry no rules-shaped section and are included whole. The CASES behind a rule live only in the file: open it the moment the rule fires, or when a diagnosis needs the evidence. `_ledger.md` is read whole beside this digest; `_ledger_archive.md` on demand.
+Generated 2026-09-04 14:17 from 91 lesson files (407,952 B). Each block = the lesson's retrieval handle (H1), its frontmatter, the operative paragraph, its section index, and every RULES section verbatim. 6 files carry no rules-shaped section and are included whole. The CASES behind a rule live only in the file: open it the moment the rule fires, or when a diagnosis needs the evidence. `_ledger.md` is read whole beside this digest; `_ledger_archive.md` on demand.
 
 ## The T9 SSD is the master — Wednesday must be fully portable
 `2026-07-31_fully-portable-drive.md` · principle · 2026-07-31 · status: superseded — the "T9 is the master" half by [[2026-08-25_one-drive-devmaster-is-master]] (2026-08-25); the portability principle itself still lives
@@ -2364,6 +2364,12 @@ sections (open the file for these): The case · The second layer, which is the p
 3. **When a fix lands under a different ticket's number, go and close the loop on the ticket it actually obsoletes** — name which ticket fixed it. That is the moment the record can still be corrected cheaply, and it is the moment nothing currently forces.
 4. **Prefer a stated absence to a confident count** in anything I write that others will read later: "the corpus at `<sha>` was N" dates the claim; a bare "N" does not.
 5. **A pattern across stale records needs its denominator before it becomes a sweep.** Counting the stale ones you happened to find is a numerator with no denominator — the same error in the instrument that is being used to study the error.
+
+6. 🔴 **THE REMEDY IS FORWARD-LOOKING, NOT A SWEEP — adopted fleet-wide 2026-09-04 from the agent that measured the rate: when a ticket is fixed under a DIFFERENT ticket's number, THE FIXING TICKET NAMES THE ONE IT OBSOLETES.** Its argument, and it is the right one: *"that kills the mechanism instead of chasing its output."* Sweeping the backlog measures the rot more precisely and changes nothing; one convention removes the moment the rot is created. **Prefer the convention to the audit every time the audit's output is a number rather than a fix.**
+
+7. **The rate, so nobody re-derives it or over-reacts to a run of instances:** measured 2026-09-04 on one board — **121 of 193 tickets carried a numeric claim; a seeded sample of 10 gave 2 stale of 7 assessable.** Real, and **a backlog-hygiene job rather than an emergency.** Three instances in one day felt like an epidemic and was not; **the felt rate and the measured rate differed by roughly 3×, in the direction that would have justified a large unasked sweep.**
+
+8. **A classifier whose predicate makes its own answer trivially true is a check that cannot fail, and definitions are where it hides.** The first pass here scored 6 of 7 by asking "does the summary still describe the tree?" — **but a ticket in *Testing* means its fix has landed, so its summary describing the pre-fix state is not staleness, it is what Testing MEANS.** Under that definition every Testing ticket is stale and the finding is empty. **Before trusting any classification rate, ask what fraction of the corpus the definition makes positive BY CONSTRUCTION.**
 
 
 ## A scope/reversibility CLASSIFICATION is a fact needing provenance — and it is the one that decides my own authority
