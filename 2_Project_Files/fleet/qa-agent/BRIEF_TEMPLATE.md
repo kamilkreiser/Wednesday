@@ -69,6 +69,42 @@ brief supplies only WHAT and WHERE.
   prose in its report; the project's own agent authors and commits everything.
   (Kam ruling 2026-08-11, absolute — supersedes the earlier opt-in.)
 
+## 6a. EVIDENCE CLASS ON EVERY FINDING THAT RECOMMENDS AN ACTION (mandatory)
+
+**Added 2026-09-04 after a QA recommendation of this fleet's own was overturned by a live
+probe, on a client platform, one commit before it shipped.**
+
+**The case, so this rule is not abstract.** A QA pass read an unpublished API operation
+STATICALLY and reported it *"the one most worth publishing."* The builder authored it,
+regenerated the spec, and the repo's own contract check went GREEN with every example
+resolving. It then probed the live endpoint before finalising: **the gateway 415s every
+content-type the operation accepts — octet-stream, pdf, text/plain, multipart, none —
+and only an empty body reaches the handler at all.** Publishing it would have replaced
+*"absent from the spec"* with *"the spec says POST octet-stream and the gateway refuses
+it"* — **a divergence CREATED by the ticket that exists to close divergences.** The QA
+report was right that the operation was the most valuable one, and **it could not have
+known it 415s, because a static read cannot.** Nothing in the report said which it was.
+
+**THE RULE: any finding that recommends an ACTION — publish this, wire this, delete this,
+prioritise this — carries its EVIDENCE CLASS inline, in these words:**
+
+- **`MEASURED AT RUNTIME`** — the behaviour was driven and observed. Name the probe.
+- **`PROBED`** — an adjacent call was made; say which, and what it does NOT cover.
+- **`READ ONLY`** — established from source, spec, config or docs, **not executed.**
+
+**A recommendation with no evidence class is incomplete and the receiving agent should ask
+for one rather than act on it.** *"Most worth publishing"* is an action recommendation; it
+rested on a read; the report presented it with the same confidence as its measurements.
+
+**Why this is a template rule and not advice:** the reader of a QA report is usually an
+agent under time pressure with the report's own confidence as its only calibration.
+**A finding that is right about VALUE and silent about FEASIBILITY reads as both.**
+
+**The corollary for green gates, from the same session:** a repo's own contract check
+passing is not evidence that a consumer can call the thing. **Green `check:openapi` was
+not enough; the live probe was the thing.** Where a recommendation depends on a runtime
+behaviour, say so even when — especially when — a static gate agrees with you.
+
 ## 7. Known-fragile / known-changed areas
 - **Known-fragile:** `<areas historically brittle — hunt the class here first>`
 - **Recent changes — do NOT flag as new:** `<list, so a known change is not reported as a regression>`
