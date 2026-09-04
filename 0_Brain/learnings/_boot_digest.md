@@ -7,7 +7,7 @@ status: live
 
 # Boot digest — headline + rules of every lesson (open the file when it fires)
 
-Generated 2026-09-04 11:35 from 91 lesson files (395,182 B). Each block = the lesson's retrieval handle (H1), its frontmatter, the operative paragraph, its section index, and every RULES section verbatim. 6 files carry no rules-shaped section and are included whole. The CASES behind a rule live only in the file: open it the moment the rule fires, or when a diagnosis needs the evidence. `_ledger.md` is read whole beside this digest; `_ledger_archive.md` on demand.
+Generated 2026-09-04 12:53 from 91 lesson files (398,671 B). Each block = the lesson's retrieval handle (H1), its frontmatter, the operative paragraph, its section index, and every RULES section verbatim. 6 files carry no rules-shaped section and are included whole. The CASES behind a rule live only in the file: open it the moment the rule fires, or when a diagnosis needs the evidence. `_ledger.md` is read whole beside this digest; `_ledger_archive.md` on demand.
 
 ## The T9 SSD is the master — Wednesday must be fully portable
 `2026-07-31_fully-portable-drive.md` · principle · 2026-07-31 · status: superseded — the "T9 is the master" half by [[2026-08-25_one-drive-devmaster-is-master]] (2026-08-25); the portability principle itself still lives
@@ -998,7 +998,7 @@ reported anything else — because it measured the wrong thing, errored and
 swallowed it, or asked a question whose answer was fixed in advance. It is worse
 than no check, because it converts an open question into a settled one.
 
-sections (open the file for these): The concrete remedy, added 2026-08-13 (Secuura/Blockchain s28) · A failure-only log going quiet is not recovery (2026-08-22, Secuura s61) · The third member: a check that MISREPORTS what it saw (2026-08-14, same agent) · A test that cannot CLEAN UP starts asserting against live data (2026-08-15, Secuura s35) · A positive control proves the suite it RAN IN, and nothing about its neighbour (2026-08-15, Secuura s35) · The inverse: a REPRODUCTION that cannot reproduce (2026-08-15, Datasec/NexusAI) · The refinement that makes the positive-control rule actually work (2026-08-16, Secuura s37) · An indicator that can MISS its own event (2026-08-24, Datasec/NexusAI) · The control needs its own control (2026-08-23, Datasec/NexusAI) · The condition we had not stated: on a side-effecting system, the positive control IS an action (2026-08-14, Secuura s34) · The mirror: an ABSENCE claim needs a positive control too (2026-08-14) · Three "cannot see" members from one micro-session (2026-08-25, Datasec/NexusAI s5) — and a derivation lesson from its neighbour · A test's NAME is not its coverage (2026-09-03, Secuura s119 — the member that let an AUTH BYPASS survive a suite that appears to test it) · A census, a writer and a verifier that descend from ONE parse are one view rendered three times (2026-09-04, Datasec/NexusAI S29 — its own diagnosis, then its own correction to that diagnosis) · CORRECTED the same session, by the same agent, and the correction is the better lesson · A red-proof proves a check CAN fail; only a GREEN BASELINE proves it can pass for the right reason (2026-09-04, Secuura s120 — a guard defeated by its own doc comment) · The AXIS a guard is blind on is not the axis it was designed for (2026-09-04, Datasec/NexusAI — a perfectly-implemented guard, green on a defect it could never see) · THE OTHER END OF IT: a red-proof on a subject that did not COMPILE is not a red-proof (2026-09-04, Secuura s121 — the pair to the green-baseline rule above) · A MULTI-CLAUSE guard red-proofed with a fixture that trips BOTH clauses has measured the pair and learned nothing about the parts (2026-09-04, Datasec/NexusAI S31 — the builder found its OWN guard was decoration) · THE SECOND HALF, added hours later by the TESTER that verified the fix (2026-09-04, QA re-gate on `aad37da`)
+sections (open the file for these): The concrete remedy, added 2026-08-13 (Secuura/Blockchain s28) · A failure-only log going quiet is not recovery (2026-08-22, Secuura s61) · The third member: a check that MISREPORTS what it saw (2026-08-14, same agent) · A test that cannot CLEAN UP starts asserting against live data (2026-08-15, Secuura s35) · A positive control proves the suite it RAN IN, and nothing about its neighbour (2026-08-15, Secuura s35) · The inverse: a REPRODUCTION that cannot reproduce (2026-08-15, Datasec/NexusAI) · The refinement that makes the positive-control rule actually work (2026-08-16, Secuura s37) · An indicator that can MISS its own event (2026-08-24, Datasec/NexusAI) · The control needs its own control (2026-08-23, Datasec/NexusAI) · The condition we had not stated: on a side-effecting system, the positive control IS an action (2026-08-14, Secuura s34) · The mirror: an ABSENCE claim needs a positive control too (2026-08-14) · Three "cannot see" members from one micro-session (2026-08-25, Datasec/NexusAI s5) — and a derivation lesson from its neighbour · A test's NAME is not its coverage (2026-09-03, Secuura s119 — the member that let an AUTH BYPASS survive a suite that appears to test it) · A census, a writer and a verifier that descend from ONE parse are one view rendered three times (2026-09-04, Datasec/NexusAI S29 — its own diagnosis, then its own correction to that diagnosis) · CORRECTED the same session, by the same agent, and the correction is the better lesson · A red-proof proves a check CAN fail; only a GREEN BASELINE proves it can pass for the right reason (2026-09-04, Secuura s120 — a guard defeated by its own doc comment) · The AXIS a guard is blind on is not the axis it was designed for (2026-09-04, Datasec/NexusAI — a perfectly-implemented guard, green on a defect it could never see) · THE OTHER END OF IT: a red-proof on a subject that did not COMPILE is not a red-proof (2026-09-04, Secuura s121 — the pair to the green-baseline rule above) · A MULTI-CLAUSE guard red-proofed with a fixture that trips BOTH clauses has measured the pair and learned nothing about the parts (2026-09-04, Datasec/NexusAI S31 — the builder found its OWN guard was decoration) · THE SECOND HALF, added hours later by the TESTER that verified the fix (2026-09-04, QA re-gate on `aad37da`) · AN ELIMINATION SET THAT IS EXHAUSTIVE WITHIN ONE CATEGORY AND SILENT ABOUT THE OTHERS (2026-09-04, Datasec/NexusAI S32 — it disproved its OWN filed finding)
 
 **How to apply — one question, asked of the check rather than the result:**
 
@@ -1317,6 +1317,37 @@ apply**, briefly producing a run readable as *"clause A disabled, both clauses s
 because **the offenders list showed BOTH messages where it should have shown one** — *"had I not read the
 message text I would have reported a false result on the most important test of the pass."* **Content over
 status, on the load-bearing measurement of a pass about guards that cannot fail.**
+
+**THE RULE, in the agent's own formulation:**
+
+> **"I eliminated every CLIENT-side cache and then concluded the only remaining CLIENT-side
+> explanation must be true. I never eliminated 'a different server answered.'"**
+> **An instrument does not have to lose its subject to lie — it only has to SWAP it.**
+
+**How to apply:**
+1. **Before an elimination set closes an argument, name the CATEGORY it ranged over.** "Every
+   client-side cache" is not "every explanation". **Write the category down; the moment it is
+   written, the missing sibling categories are usually obvious** — server, network, routing,
+   time, identity.
+2. **"The only remaining explanation" is only as strong as the enumeration behind it**, and a
+   complete-looking set is exactly what makes an inference feel like a measurement. **Every
+   elimination here was individually sound.**
+3. **Where one hostname can be served by more than one process — a rollout, a load balancer, a
+   worktree, two ports, a stale tab — "which server answered?" belongs in the set by default.**
+   This is the sibling of the 2026-08-05 browser lesson (which MACHINE'S localhost) one layer
+   out: there the wrong machine, here the wrong revision.
+4. **The absent thing is not automatically the fault.** The agent filed the missing
+   `Cache-Control` as the cause; heuristic freshness needs a `Last-Modified`, there is none,
+   freshness is zero — **so the absent header is the reason the page always revalidates, i.e.
+   the reason it WORKS.** Before calling an absence a defect, work out what its presence would
+   have changed.
+
+**THE OPERATIONAL RULE IT PRODUCED, now in the deploy recipe:** **verify AFTER the OLD revision
+has terminated, not after the new one starts logging.** A deploy is not live when the new
+revision starts; it is live when the old one stops. **Wednesday's own five-point deploy
+verification had this hole: "figures rendering on the tab", run inside the rollover window,
+would have shown empty on a good deploy — and the honest consequence is a rollback-by-digest
+and a reported failure that never happened. The check was not wrong; its CLOCK was.**
 
 
 ## A promise is not a mechanism — unsupervised work needs a trigger, not an intention

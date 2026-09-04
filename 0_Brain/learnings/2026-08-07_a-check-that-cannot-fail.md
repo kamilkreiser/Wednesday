@@ -825,3 +825,55 @@ apply**, briefly producing a run readable as *"clause A disabled, both clauses s
 because **the offenders list showed BOTH messages where it should have shown one** — *"had I not read the
 message text I would have reported a false result on the most important test of the pass."* **Content over
 status, on the load-bearing measurement of a pass about guards that cannot fail.**
+
+
+## AN ELIMINATION SET THAT IS EXHAUSTIVE WITHIN ONE CATEGORY AND SILENT ABOUT THE OTHERS (2026-09-04, Datasec/NexusAI S32 — it disproved its OWN filed finding)
+
+**The case.** After a deploy, a page rendered the empty state while the server was already
+returning correct data to it. The agent eliminated every client-side cache — service workers 0,
+`caches.keys()` empty, no local/session storage, `cache-control`/`expires`/`pragma` all null —
+and filed a browser heuristic-caching bug (RD-300), honestly labelled INFERRED rather than
+isolated.
+
+**Asked to isolate it, the agent disproved itself.** Three plain fetches showed
+`transferSize 300` against `encodedBodySize 15109` **with a moving `date` header on each** — a
+304 round trip every time, not a cache hit that skipped the network. Its control settled it:
+real etag → 304; **deliberately-wrong etag → 200 with the full body**. The etag is
+content-derived, so a changed body yields a changed validator yields a 200. **A plain reload
+does pick up changed content.**
+
+**The real cause was that a DIFFERENT SERVER ANSWERED.** Two revisions served one hostname for
+**66.1 seconds** during the rollover, and the old one ran an unseeded database — **empty by
+construction.** The "cache-busting" hard reload happened **76 seconds after that container had
+already been SIGTERMed.**
+
+**THE RULE, in the agent's own formulation:**
+
+> **"I eliminated every CLIENT-side cache and then concluded the only remaining CLIENT-side
+> explanation must be true. I never eliminated 'a different server answered.'"**
+> **An instrument does not have to lose its subject to lie — it only has to SWAP it.**
+
+**How to apply:**
+1. **Before an elimination set closes an argument, name the CATEGORY it ranged over.** "Every
+   client-side cache" is not "every explanation". **Write the category down; the moment it is
+   written, the missing sibling categories are usually obvious** — server, network, routing,
+   time, identity.
+2. **"The only remaining explanation" is only as strong as the enumeration behind it**, and a
+   complete-looking set is exactly what makes an inference feel like a measurement. **Every
+   elimination here was individually sound.**
+3. **Where one hostname can be served by more than one process — a rollout, a load balancer, a
+   worktree, two ports, a stale tab — "which server answered?" belongs in the set by default.**
+   This is the sibling of the 2026-08-05 browser lesson (which MACHINE'S localhost) one layer
+   out: there the wrong machine, here the wrong revision.
+4. **The absent thing is not automatically the fault.** The agent filed the missing
+   `Cache-Control` as the cause; heuristic freshness needs a `Last-Modified`, there is none,
+   freshness is zero — **so the absent header is the reason the page always revalidates, i.e.
+   the reason it WORKS.** Before calling an absence a defect, work out what its presence would
+   have changed.
+
+**THE OPERATIONAL RULE IT PRODUCED, now in the deploy recipe:** **verify AFTER the OLD revision
+has terminated, not after the new one starts logging.** A deploy is not live when the new
+revision starts; it is live when the old one stops. **Wednesday's own five-point deploy
+verification had this hole: "figures rendering on the tab", run inside the rollover window,
+would have shown empty on a good deploy — and the honest consequence is a rollback-by-digest
+and a reported failure that never happened. The check was not wrong; its CLOCK was.**
