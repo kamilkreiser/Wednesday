@@ -3214,5 +3214,34 @@
   "status": "ruled",
   "ruled_choice": "extend-one-deploy",
   "ruled_ts": "2026-09-04T11:00:00.810549+10:00"
+ },
+ {
+  "id": "nexusai-rd296-sustainability-has-no-data-path-2026-09-04",
+  "client_project": "Datasec / NexusAI",
+  "title": "The Sustainability tab cannot ever have data for a real customer — verified by Wednesday, not relayed. The date work is finished and it is not what is wrong with the tab",
+  "bluf": "Two agents reached this independently and Wednesday then MEASURED it rather than believing either, because this morning Wednesday put an agent's unverified figure in front of Kam and he ruled on it. The chain, all read at aad37da: kpis.js computes every Sustainability figure from printer_logs rows and nothing else - no Log Analytics require, no fallback. insertPrinterLog() has exactly two references in the whole repo: its own definition and ONE test. Every INSERT INTO printer_logs is a seeder or a script (seedDemoData.js, create_db.py, generate-demo-data.py). So NOTHING in production writes that table. A real Marketplace customer who configures their own workspace gets a permanently empty Sustainability tab, no error and no explanation - that is RD-296, already filed at Highest, and it is a GA blocker. Meanwhile every other tab reads the Azure Log Analytics path. THE DEPLOY IS UNAFFECTED and proceeds either way: seeding makes the demo show real figures, which is what Kam sees. This decides what NexusAI works NEXT, not whether we ship today.",
+  "default_action": "wire-to-logsources - if Kam says nothing, Wednesday commissions the round with an investigation as item 0 AFTER the current deploy lands, and brings the sizing back before any build begins. Nothing about this blocks or delays today's deploy.",
+  "options": [
+   {
+    "key": "wire-to-logsources",
+    "label": "Point Sustainability at the same log sources as every other tab (Recommended)",
+    "detail": "Commission RD-295/RD-296 as the next NexusAI round, with item 0 being a scoped investigation that establishes the real data path before any code is written - the shape that has worked all week. This is the fix that makes the feature real rather than demo-only, and it matches Kam's own 09:14 framing: logs in, metrics derived. Unknown size until item 0 reports, which is exactly why item 0 is an investigation."
+   },
+   {
+    "key": "demo-only-documented",
+    "label": "Accept Sustainability as demo-only for now, documented as a known GA gap",
+    "detail": "Ship the format work, keep the seeded demo, and record plainly that the tab is not customer-functional yet so nobody sells it as if it were. Cheapest, and honest - but it leaves a Highest-priority GA blocker open on a feature that appears finished, which is the exact shape that gets discovered by a customer rather than by us."
+   },
+   {
+    "key": "investigate-only",
+    "label": "Scoped investigation first, decide after",
+    "detail": "Commission only the investigation - what would a real customer's data path be, what would wiring it cost - and bring the answer back as a card before committing any build time. Slowest to a fix, but it is the option that spends the least before Kam knows the size."
+   }
+  ],
+  "recommended": "wire-to-logsources",
+  "ts": "2026-09-04T11:23:35.549730+10:00",
+  "status": "open",
+  "ruled_choice": null,
+  "ruled_ts": null
  }
 ]
