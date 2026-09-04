@@ -70,6 +70,25 @@ it is that **the accurate claims next to it stop being acted on.**
    not establish X"* to a confident row, because an unestablished row invites work and an
    overstated one poisons the well.
 
+## THE ROT HAS A MECHANISM, and the NexusAI agent (S32) named it better than I had (2026-09-04, after its THIRD stale ticket in one day)
+
+**The operative case:** I am reading, triaging or briefing from a ticket summary, register row, PR body, README line or CLAUDE.md sentence **that contains a number or an absolute state claim** — `241/10 vs 1403/83`, `SEED_DEMO_DATA is ABSENT`, `6 of 12`, `across 11 files`. **That claim has no maintainer.**
+
+**THE FORMULATION, adopted verbatim because it is better than mine:**
+
+> **A number in a summary has no owner after the fix — the code changes, the status changes, the number doesn't.**
+
+**The sharpening that comes with it, and it identifies WHICH records rot:** a ticket closed by its own fix gets reread at the moment of closing. **A ticket made obsolete by SOMEONE ELSE'S fix never does** — two of the three stale RD tickets found that day were fixed under a different ticket's number (RD-294 by RD-299, RD-155 by RD-143), which removes the one moment anybody would have reopened the original. **Cross-ticket fixes are where stale records are manufactured.**
+
+**The half worth as much as the insight: the agent REFUSED to promote it to a predicate.** Asked whether a pattern predicted which tickets had rotted, it answered *"I don't think three is enough, and I'd rather say so"*, named the denominator it had not measured (how many RD summaries carry a numeric claim at all, and what fraction of THOSE are stale), and cited its own earlier error as the reason — it had once called every hand-derived number wrong from four cases when the full set of sixteen showed five of nine were right. **A candidate mechanism offered with its denominator named as missing is worth more than a rule asserted from three cases, and this is the shape to reward.**
+
+**How to apply:**
+1. **Treat any count or absolute state claim in a summary as UNOWNED by default** — not wrong, unowned. Its truth was established once, by someone who has since moved on, and no process re-checks it.
+2. **Before building against a ticket, measure its premise, not just its status.** Three tickets in one day described defects that no longer existed; a triage starting from the summary would have begun work on each.
+3. **When a fix lands under a different ticket's number, go and close the loop on the ticket it actually obsoletes** — name which ticket fixed it. That is the moment the record can still be corrected cheaply, and it is the moment nothing currently forces.
+4. **Prefer a stated absence to a confident count** in anything I write that others will read later: "the corpus at `<sha>` was N" dates the claim; a bare "N" does not.
+5. **A pattern across stale records needs its denominator before it becomes a sweep.** Counting the stale ones you happened to find is a numerator with no denominator — the same error in the instrument that is being used to study the error.
+
 **Related:** [[2026-08-16_a-recorded-blocker-is-not-a-boundary]] (the row-level version, and its
 "recorded exclusion" extension), [[2026-08-13_headline-must-match-the-operative-case]] (a
 headline that misdescribes its own body is how this starts),

@@ -7,7 +7,7 @@ status: live
 
 # Boot digest — headline + rules of every lesson (open the file when it fires)
 
-Generated 2026-09-04 13:18 from 91 lesson files (398,671 B). Each block = the lesson's retrieval handle (H1), its frontmatter, the operative paragraph, its section index, and every RULES section verbatim. 6 files carry no rules-shaped section and are included whole. The CASES behind a rule live only in the file: open it the moment the rule fires, or when a diagnosis needs the evidence. `_ledger.md` is read whole beside this digest; `_ledger_archive.md` on demand.
+Generated 2026-09-04 13:42 from 91 lesson files (401,586 B). Each block = the lesson's retrieval handle (H1), its frontmatter, the operative paragraph, its section index, and every RULES section verbatim. 6 files carry no rules-shaped section and are included whole. The CASES behind a rule live only in the file: open it the moment the rule fires, or when a diagnosis needs the evidence. `_ledger.md` is read whole beside this digest; `_ledger_archive.md` on demand.
 
 ## The T9 SSD is the master — Wednesday must be fully portable
 `2026-07-31_fully-portable-drive.md` · principle · 2026-07-31 · status: superseded — the "T9 is the master" half by [[2026-08-25_one-drive-devmaster-is-master]] (2026-08-25); the portability principle itself still lives
@@ -2316,7 +2316,7 @@ row true?" It is "which direction is this row wrong in?" — because the answer 
 row, and getting one row's direction wrong costs nothing while getting another's costs
 everything.**
 
-sections (open the file for these): The case · The second layer, which is the part I had never considered · Why this is distinct from the lessons it sits beside · How to apply
+sections (open the file for these): The case · The second layer, which is the part I had never considered · Why this is distinct from the lessons it sits beside · How to apply · THE ROT HAS A MECHANISM, and the NexusAI agent (S32) named it better than I had (2026-09-04, after its THIRD stale ticket in one day)
 
 ## How to apply
 
@@ -2335,6 +2335,13 @@ sections (open the file for these): The case · The second layer, which is the p
 5. **Writing registers: a row that overstates costs more than a row omitted.** Prefer *"I could
    not establish X"* to a confident row, because an unestablished row invites work and an
    overstated one poisons the well.
+
+**How to apply:**
+1. **Treat any count or absolute state claim in a summary as UNOWNED by default** — not wrong, unowned. Its truth was established once, by someone who has since moved on, and no process re-checks it.
+2. **Before building against a ticket, measure its premise, not just its status.** Three tickets in one day described defects that no longer existed; a triage starting from the summary would have begun work on each.
+3. **When a fix lands under a different ticket's number, go and close the loop on the ticket it actually obsoletes** — name which ticket fixed it. That is the moment the record can still be corrected cheaply, and it is the moment nothing currently forces.
+4. **Prefer a stated absence to a confident count** in anything I write that others will read later: "the corpus at `<sha>` was N" dates the claim; a bare "N" does not.
+5. **A pattern across stale records needs its denominator before it becomes a sweep.** Counting the stale ones you happened to find is a numerator with no denominator — the same error in the instrument that is being used to study the error.
 
 
 ## A scope/reversibility CLASSIFICATION is a fact needing provenance — and it is the one that decides my own authority
