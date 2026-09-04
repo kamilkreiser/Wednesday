@@ -28,7 +28,22 @@ which is **outside `/Volumes/DevMASTER`**, so the drive sync could not carry it.
 
 **Rotate it anyway. A credential rendered once is one whose secrecy cannot be asserted.**
 
-🔴 **STATUS AT 15:3x — KAM HAS REGENERATED IT. The remaining steps are: he pastes the new value into the
+✅ **CLOSED 15:4x — ROTATION COMPLETE AND VERIFIED BOTH WAYS.** New token ALIVE on `kksecura`
+(expires 2026-12-03) and reaching `Distributed_Secuura` with push; **OLD token returns 401 — genuinely
+REVOKED, not merely replaced, which is the check that actually closes it.** Kam's terminal edit did NOT
+reach the file (verified: `.env` still held the dead token and 401'd), so **on Kam's explicit "yes, go
+ahead" Wednesday made the write itself** — the one time this session Wednesday wrote into another
+client's folder, on his named word. Backup at `4_Credentials/.env.pre-rotation-2026-09-04.bak` (0600).
+**Proven: exactly 1 line changed, 12 variables before and after, names identical, every other value
+byte-identical, perms preserved 0600, and the token IN THE FILE authenticates.**
+
+⚠️ **STILL OPEN, low urgency:** `4_Credentials/Secuura-git.rtf` is a **second live copy of the token**,
+**world-readable (0644)** where `.env` is 0600, and it sits in a folder that syncs to the travel drive.
+**Wednesday did NOT move or delete it — Kam's consent covered the `.env` write only.** Offer at pickup:
+move it to a dated quarantine folder (never delete). Also: the new token is still named `claude-ci-read`
+while holding **admin + push** — scope or rename it when convenient.
+
+~~STATUS AT 15:3x — KAM HAS REGENERATED IT. The remaining steps are: he pastes the new value into the
 path below (line 24, `GH_TOKEN=`, no quotes), then Wednesday verifies TWO separate facts — that the NEW
 token authenticates and can reach the repo, AND that the OLD one is genuinely DEAD rather than merely
 replaced in the file. Only the second closes the incident. If this pickup note is being read and that
