@@ -305,6 +305,27 @@ else
   warn "md2pdf deps missing" "pandoc/Google Chrome/pdftoppm — report PDFs will not render (brew install pandoc poppler; Chrome from google.com/chrome)"
 fi
 
+# --- Root-folder hygiene (Kam 2026-09-05 08:1x: "the images in the root folder do
+# not belong there … create a rule"). The project root holds the rules file, the
+# portability checklist and the launchers — nothing else. Screenshots go to
+# 0_Brain/reference/<date>_<topic>/, session artefacts to 5_Project_History/,
+# scratch to the session scratchpad. A backup of a root script may sit beside it
+# (the cockpit precedent: cockpit.sh.pre-0902-*). Anything else is a filing miss.
+ROOT_STRAYS=""
+for f in "$PROJECT_DIR"/* "$PROJECT_DIR"/.[!.]*; do
+  [ -f "$f" ] || continue
+  b=$(basename "$f")
+  case "$b" in
+    CLAUDE.md|PORTABILITY.md|.gitignore|.DS_Store|Launch_*.command|Launch_*.command.pre-*|Launch_*.command.bak*) ;;
+    *) ROOT_STRAYS="$ROOT_STRAYS $b" ;;
+  esac
+done
+if [ -z "$ROOT_STRAYS" ]; then
+  ok "root folder: only rules, portability and launchers"
+else
+  warn "root folder holds stray file(s):$ROOT_STRAYS" "file them (screenshots -> 0_Brain/reference/<date>_<topic>/; artefacts -> 5_Project_History/) — never delete"
+fi
+
 echo
 if [ "$HARD_FAIL" = "1" ]; then
 

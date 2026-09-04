@@ -2202,3 +2202,8 @@ Done with it: Dynamics → Kam's team decision (no action); QuickQuote masthead/
 > I'm gonna go have dinner now, but please keep working through the Sukura tickets and backlog.
 
 *Note:* Read: the 08-28 overnight grant restated for Secuura — s117 continues its standing queue (KS-731 proof → #795/#785 → KS-726 → ACTION rows → ask 3 after KS-764 lands); the NexusAI deploy proceeds under the tester's pass (no waiver).
+
+## 2026-09-05 08:1x — morning, panel (fleet reopen + root-folder rule)
+> good morning.  1)please look at your root folder.  please ensure (create a rule) to file things properly.  the images in the root folder do not belong there. 2)looks like credits are back.  Please look at the following message from peter.  there are a number of tickets with comments and for our review and completion /Users/kam_code/Desktop/Screenshot 2026-09-05 at 8.09.24 am.png 3)get the nexus agent to continue with the work, complete the sustainability change so everything for nexus is finished and complete 4)do any other tickets you can on secuura
+
+*Done with it:* (1) four root PNGs filed under `0_Brain/reference/`, rule added to CLAUDE.md folder map + a doctor.sh root-hygiene check (exercised both ways) + lesson `2026-09-05_root-folder-holds-only-rules-and-launchers.md`. (2) Peter's board view read: five PRs approved "author to merge" + two review comments needing our push. (3) NexusAI S33 launched 08:17 — RD-296 build first (Kam's build-it ruling), RD-245 round second, one QA gate. (4) Secuura s125 launched 08:17 — #807 merge first, four branches pushed, KS-731/PS merges, Peter's comments, KS-781. The 09-04 fleet-shut and grant suspension are lifted by this message.

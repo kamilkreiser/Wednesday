@@ -41,6 +41,7 @@ functional understanding; Wednesday takes it seriously, records it, and applies 
 | `3_Access_Keys/` | SSH/deploy keys. **Gitignored, never committed.** |
 | `4_Credentials/` | `.env`, per-project `az`/`gh` state. **Gitignored, never committed.** |
 | `5_Project_History/` | `history.md` (newest at TOP) + session artifacts. |
+| *(root)* | **Only** `CLAUDE.md`, `PORTABILITY.md`, `.gitignore` and the `Launch_*.command` launchers (a `.pre-*` backup may sit beside its launcher). **Nothing else lives in the root** (Kam, 2026-09-05): screenshots → `0_Brain/reference/<date>_<topic>/`, session artefacts → `5_Project_History/`, scratch → the session scratchpad. `doctor.sh` warns on any stray root file at every launch. |
 
 ## Rules (inherits the workspace seven hard rules, plus)
 
