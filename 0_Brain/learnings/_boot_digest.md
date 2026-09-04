@@ -7,7 +7,7 @@ status: live
 
 # Boot digest — headline + rules of every lesson (open the file when it fires)
 
-Generated 2026-09-05 08:18 from 94 lesson files (431,417 B). Each block = the lesson's retrieval handle (H1), its frontmatter, the operative paragraph, its section index, and every RULES section verbatim. 6 files carry no rules-shaped section and are included whole. The CASES behind a rule live only in the file: open it the moment the rule fires, or when a diagnosis needs the evidence. `_ledger.md` is read whole beside this digest; `_ledger_archive.md` on demand.
+Generated 2026-09-05 09:20 from 94 lesson files (433,377 B). Each block = the lesson's retrieval handle (H1), its frontmatter, the operative paragraph, its section index, and every RULES section verbatim. 6 files carry no rules-shaped section and are included whole. The CASES behind a rule live only in the file: open it the moment the rule fires, or when a diagnosis needs the evidence. `_ledger.md` is read whole beside this digest; `_ledger_archive.md` on demand.
 
 ## The T9 SSD is the master — Wednesday must be fully portable
 `2026-07-31_fully-portable-drive.md` · principle · 2026-07-31 · status: superseded — the "T9 is the master" half by [[2026-08-25_one-drive-devmaster-is-master]] (2026-08-25); the portability principle itself still lives
@@ -435,6 +435,8 @@ CLAUDE.md's tenant section" — but that file was one of the two artifacts
 being repaired *because its tenant section is stale*. Circular ground truth;
 the agent had nowhere authoritative to stand.
 
+sections (open the file for these): EXTENSION 2026-09-05 (w=2): validate the EXTENSION of what a brief commissions, not only the existence of what it points at
+
 **How to apply:**
 1. For every "verify X from Y" in a brief: open Y first (read-only) and
    confirm Y actually answers X correctly TODAY. If I can't check Y, say so
@@ -447,6 +449,16 @@ the agent had nowhere authoritative to stand.
    asserting unverified ones) obliges me to ensure the verification path I
    name instead is sound — otherwise I've swapped a checkable wrong fact for
    an unfalsifiable dead end, which is worse.
+
+## EXTENSION 2026-09-05 (w=2): validate the EXTENSION of what a brief commissions, not only the existence of what it points at
+**The case.** Two briefs on one morning, both caught by the receiving agent: the s125 brief queued two Platform S merges for a Platform K seat (the seat's scope — the client CLAUDE.md isolates Platform S), and it queued "fix the MFA bypass on `POST /api/oauth/authorize`" for KS-781, whose own BLUF names THREE token-issuing doors kept as one ticket. Both facts were validated the way this lesson and the send_brief gate demand — the ticket exists, it is open, its last comment is dated — and both were wrong about *how much* was being commissioned and *whose* it was to do.
+
+**The rule, extended:**
+1. **A QUEUE item on a ticket carries the ticket's SCOPE sentence** (its BLUF, quoted) in the provenance line — not only its state. If the brief commissions less than the ticket (one door of three, one leg of a migration), it says so as narrowing: "door 1 of 3 this round; doors 2–3 tracked as sub-issues before door 1 merges." A brief that is narrower than its ticket without saying so produces a ticket that closes on a fraction.
+2. **A QUEUE item carries the receiving seat's AUTHORITY over it** — read from the client's own CLAUDE.md (coupled pairs, isolated projects) before the item is written. "Author to merge" on a reviewer's board says who is expected to merge, not which seat may.
+3. **Enforcement candidate (w=3 would promote it):** send_brief refuses a queued ticket id whose provenance line lacks a `scope:` clause; and refuses a repo/PR reference outside the `<Client>/<Project>` the brief is addressed to unless the client CLAUDE.md declares the pair.
+
+**Family:** [[2026-08-13_headline-must-match-the-operative-case]] (a ticket's title said one route; its operative case said three) · [[2026-08-13_shared-bus-tag-filter-or-leak]] (client isolation is a property of the seat, not of the task's size).
 
 
 ## The Chrome extension's "isLocal" is a heuristic — fingerprint before trusting it
