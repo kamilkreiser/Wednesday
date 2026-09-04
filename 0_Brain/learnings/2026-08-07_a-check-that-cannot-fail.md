@@ -548,6 +548,28 @@ upstream of both.
 3. **A tamper that can throw needs its exception path considered**, especially where the subject has its own `try/catch` — a swallowed throw converts "the guard is gone" into "the function is gone" without any visible difference in the run.
 4. **State which cases the tamper SHOULD hit before running it**, then compare the set, not the number. This is the clause-isolation rule pointed at the subject rather than the guard.
 
+
+## A FIXTURE THAT CANNOT REACH THE PRODUCT'S PATH — the entry-point member (2026-09-04, Datasec/NexusAI RD-245; a BLOCKER found under a green suite the tester re-derived)
+
+**The operative case:** a test proves a fix works, and the fix does not work. **Ask what ENTRY POINT the fixture uses, and whether the product uses that one.**
+
+**The case.** RD-245 guarded a backup rotation by comparing the live file to the newest backup by hash and returning when identical. Five tests, green, inside `1504/1504 across 88`. **The tests modelled the mutation as raw `fs.writeFileSync`. The product mutates through `setSetting()`, which stamps a fresh `_updated_at` on every write and calls `backupFile()` before every write.** So on the product's path no two consecutive states are ever byte-identical — **the guard's condition is UNSATISFIABLE there** — and every write consumes a rotation slot anyway. Replaying the incident gave **byte-identical outcomes on the fixed and the unfixed tree.**
+
+**Why it is its own member.** The family already holds checks that cannot SEE, cannot PARSE, cannot RECEIVE INPUT, run before their own setup, or run in the wrong place. **This one executes perfectly, in the right place, against the right module — and enters the system by a door the product never uses.** Nothing about the assertion is wrong; the fixture simply never reaches the state machine where the defect lives.
+
+**And the author is the worst-placed person to notice**, which is the part worth keeping: the test was written by the agent that had just diagnosed the defect, and it says so — *"I had every reason to know which path the product used."* **Knowing the mechanism does not tell you which door your fixture opened.**
+
+**The sibling, from the fix round two hours later, and it is the same shape one level over:** the regression that fix introduced was in `resolveDataDir`'s SELECTION, and **a test of the PREDICATE would have passed throughout it, because the predicate did exactly what its table said.** The agent's own line: *"the test pins the SELECTION, not the predicate."* **Test the decision the product makes, not the helper that informs it.**
+
+**How to apply:**
+1. **Name the product's entry point before writing the fixture, and use it.** *"The product calls X; my test calls Y"* is a defect in the test, whatever the assertions say.
+2. **The governing check, and it is cheap: if the new test cannot be made to go RED on the current code BY THE PRODUCT'S OWN PATH, it is not a test of that defect.** A red obtained through a different door proves something about the module and nothing about the bug.
+3. **Suspect the fixture hardest when the author understood the defect best** — the mental model is freshest, and it is a model of the MECHANISM, not of the call graph.
+4. **Test the decision, not the helper.** Where a predicate feeds a selection, a branch, or a gate, assert the OUTCOME the product produces; a helper-level test passes through the whole regression.
+5. **A green suite that survives replacing the fix with nothing is the tell** — here the incident replayed identically on both trees, which is the strongest possible statement that the suite was not measuring the fix.
+
+**The naming corollary, from the same fix and worth as much:** the drift became possible because ONE predicate named `hasExistingSettings` answered two different questions — *is there anything here?* for a warning, and *is the user's config here?* for a selection. The agent **deleted the name rather than aliasing it**, because *"that name is what let one predicate drift across two questions."* **A name that answers two questions is how the next drift gets in, and an alias keeps the door open while looking tidy.**
+
 **Related:** [[2026-08-14_i-read-representations-they-read-sources]] (a grep's output is a
 representation of a file) · [[2026-08-06_selector-discipline-in-ui-verification]] (suspect your own
 selector first — here the selector was suspect in both tools at once).
