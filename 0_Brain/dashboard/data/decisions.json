@@ -3301,5 +3301,34 @@
   "status": "open",
   "ruled_choice": null,
   "ruled_ts": null
+ },
+ {
+  "id": "secuura-ks781-mfa-bypass-fix-order-2026-09-04",
+  "client_project": "Secuura / Blockchain (Platform K)",
+  "title": "MFA bypass CONFIRMED at runtime on the OAuth authorize endpoint — and a SECOND bug is the only thing currently stopping it. Fixing that second bug arms the first.",
+  "bluf": "The agent proved it with a control, on a throwaway account it created, with MFA enabled on that account alone. Same account, same password: POST /api/auth/login returns 403 MFA_REQUIRED and zero tokens. POST /api/oauth/authorize returns 302 with a valid authorization code. MFA, lockout and account status are all bypassed at the authorize step, and the stored code carries no PKCE gate either. That is KS-781, and it is now confirmed at runtime rather than inferred from a code read. THE PART THAT MATTERS MOST IS WHAT IT FOUND NEXT. The leaked code does not currently become a token - exchanging it returns 400 User not found. The agent predicted a clean token pair, was wrong, and chased the 400 instead of reporting the bypass and moving on. The cause is a separate bug, filed KS-790: the token leg calls a post-auth RLS-scoped lookup inside a pre-auth flow, so it fails for EVERY authorization_code grant. So a broken OAuth grant is the only thing standing between the bypass and a working token. FIXING KS-790 IN ISOLATION RE-OPENS THE BYPASS END TO END. A working token exchange with no MFA check on authorize is strictly worse than a broken one. The agent has said so on both tickets and marked KS-790 blocked-behind KS-781, but that is a comment on a board, and anyone triaging KS-790 as a routine broken-OAuth bug could fix it without reading it.",
+  "default_action": "report-only - if you say nothing, NOTHING IS FIXED and both tickets stay reported-not-fixed under your standing ruling. Wednesday will not authorise a change on a security path without your signature. But note that this default is only safe while KS-790 stays broken, which is why the warning to Peter and Stuart is needed regardless of which option you pick.",
+  "options": [
+   {
+    "key": "authorize-fix-now",
+    "label": "Authorise the KS-781 fix now, KS-790 explicitly blocked behind it (Recommended)",
+    "detail": "The agent fixes the authorize path first - MFA, lockout and status enforced before a code is issued, plus the missing PKCE gate - and KS-790 stays untouched until that lands. This closes the bypass while its accidental mitigation is still in place, which is the safest possible ordering. It is a fix on a security path, so it needs your signature under your own standing reported-not-fixed ruling."
+   },
+   {
+    "key": "report-only",
+    "label": "Keep both reported-not-fixed, warn the humans, fix later",
+    "detail": "Nothing changes in the code today. The bypass stays live but unexploitable-by-accident while KS-790 remains broken. The whole safety of this option rests on nobody fixing KS-790 in the meantime - which is exactly the thing a routine triage would do."
+   },
+   {
+    "key": "peter-decides",
+    "label": "Hand both to Peter with the ordering stated, and let him rule",
+    "detail": "It is his platform and his security review. Slower, and it puts the ordering decision with the person who owns the code. The risk is the same as report-only: the window between handover and his ruling is a window in which someone could fix KS-790."
+   }
+  ],
+  "recommended": "authorize-fix-now",
+  "ts": "2026-09-04T12:35:13.292997+10:00",
+  "status": "open",
+  "ruled_choice": null,
+  "ruled_ts": null
  }
 ]
