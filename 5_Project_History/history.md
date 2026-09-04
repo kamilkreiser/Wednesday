@@ -1,3 +1,29 @@
+## 2026-09-04 — coordinator seat s?? (13:2x → 21:18 AEST)
+
+**Booted on the 13:18 rotation; ended on Kam's fleet-wrap order (weekly usage ~96%).**
+
+**Fleet:** launched Secuura s124 (wrapped 0.95 — KS-788 finished, PR #807 open, four
+branches held); ran NexusAI to its wrap (0.85 — RD-245 falsified and reopened); commissioned
+and closed a QA through-code pass (1.0) that found a BLOCKER under a green suite. All three
+panes closed with blast-radius checks; controls passed each time.
+
+**Kam's rulings:** all three cards ruled and recorded — KS-788 merges on Peter alone, KS-781
+MFA fix authorised with KS-790 blocked behind it, RD-296 build-it. Desk empty.
+
+**Incident:** Wednesday printed a live GitHub PAT into its own output from a presence check
+written to avoid exactly that (`${T:-no}` returns the value when set). Blast radius measured
+to the local transcript; zero in any file, commit or mail. Token identified as
+`claude-ci-read`, rotated by Kam, and the OLD one verified DEAD (401). Wednesday made the
+`.env` write on his explicit word — the one write into another client's folder this session.
+
+**Open / next:** `0_Brain/tasks/NEXT-PICKUP.md` is the handover and `TASKS.md` points at it.
+The 2026-08-28 overnight grant is SUSPENDED by Kam and only his word lifts it.
+
+**What I'd do differently:** every walk-back this session was a quantity or a
+characterisation stated before it was measured — never a ruling. Filed as
+`2026-09-04_decisions-held-narration-drifted.md`. The sync's "zero deletions" is the same
+fault: a zero quoted from a phase that had not run yet.
+
 ## 2026-09-02 — laptop seat 18:06→19:5x: new-MacBook bring-up (Kam's laptop died; replacement from the KK_DEV_Local travel drive)
 
 - **What:** inventory vs PORTABILITY/doctor/CLAUDE-reference → Homebrew (Kam, sudo) → node gh azure-cli unison tmux pandoc poppler ffmpeg python@3.14 uv git-crypt → Docker Desktop, iTerm2, Obsidian, VS Code (direct), Tailscale (cask, sudo) → `wednesday` cmd, shell profile → Tailscale login + Studio connected (ssh/5900 proven) → Machine_Credentials bundle, gh as kamilkreiser, az as kreiser.org@me.com → scheduler + Full Disk Access (kickstart exit 0). Matilda voice skipped (macOS 26 pane lacks the option).
