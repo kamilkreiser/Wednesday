@@ -28,6 +28,18 @@ which is **outside `/Volumes/DevMASTER`**, so the drive sync could not carry it.
 
 **Rotate it anyway. A credential rendered once is one whose secrecy cannot be asserted.**
 
+🔴 **STATUS AT 15:3x — KAM HAS REGENERATED IT. The remaining steps are: he pastes the new value into the
+path below (line 24, `GH_TOKEN=`, no quotes), then Wednesday verifies TWO separate facts — that the NEW
+token authenticates and can reach the repo, AND that the OLD one is genuinely DEAD rather than merely
+replaced in the file. Only the second closes the incident. If this pickup note is being read and that
+second check has not been recorded, DO IT FIRST.**
+
+🔴 **AND THE SEVERITY IS HIGHER THAN THE NAME SUGGESTS: the token is called `claude-ci-read` and it holds
+`admin: true, push: true, pull: true` on `Distributed_Secuura`. It is not a read token — it can push code
+and administer the repository.** Wednesday initially under-described the exposure by reasoning from the
+name. **When it is reissued, scope it to what it is named for or rename it to what it holds — a
+credential's NAME is not its GRANT, and the wrong name invites exactly that mis-reasoning.**
+
 | | |
 |---|---|
 | **Which** | Fine-grained PAT on GitHub account **`kksecura`**, value ends `…7zOd` |
