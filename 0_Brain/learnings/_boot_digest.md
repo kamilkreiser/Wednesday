@@ -7,7 +7,7 @@ status: live
 
 # Boot digest — headline + rules of every lesson (open the file when it fires)
 
-Generated 2026-09-04 14:17 from 91 lesson files (407,952 B). Each block = the lesson's retrieval handle (H1), its frontmatter, the operative paragraph, its section index, and every RULES section verbatim. 6 files carry no rules-shaped section and are included whole. The CASES behind a rule live only in the file: open it the moment the rule fires, or when a diagnosis needs the evidence. `_ledger.md` is read whole beside this digest; `_ledger_archive.md` on demand.
+Generated 2026-09-04 14:20 from 91 lesson files (410,164 B). Each block = the lesson's retrieval handle (H1), its frontmatter, the operative paragraph, its section index, and every RULES section verbatim. 6 files carry no rules-shaped section and are included whole. The CASES behind a rule live only in the file: open it the moment the rule fires, or when a diagnosis needs the evidence. `_ledger.md` is read whole beside this digest; `_ledger_archive.md` on demand.
 
 ## The T9 SSD is the master — Wednesday must be fully portable
 `2026-07-31_fully-portable-drive.md` · principle · 2026-07-31 · status: superseded — the "T9 is the master" half by [[2026-08-25_one-drive-devmaster-is-master]] (2026-08-25); the portability principle itself still lives
@@ -3020,7 +3020,7 @@ race; the predecessor had re-read first at 00:25). Rule 4's candidate is now the
    three different instruments: the agent proves it built it; the QA agent proves it works
    for a user; I prove it is what was asked for.
 
-sections (open the file for these): The SHAPE-vs-CORRECTNESS split (2026-09-04, ledger w=78 — Wednesday ratified work the gate then found three Majors in)
+sections (open the file for these): SHARPENED 2026-09-04 (w=88): a claim about the PRODUCT is not a shape, however well it is argued · The SHAPE-vs-CORRECTNESS split (2026-09-04, ledger w=78 — Wednesday ratified work the gate then found three Majors in)
 
 **The rule (Kam's order, exactly):**
 1. **The agent hands over to me confirming what was done** — the wrap/STATUS mail: sets not
@@ -3073,6 +3073,15 @@ WED ticket filed the same session for: a cockpit launcher entry, a per-invocatio
 path that keeps R0 (client-neutral charter; one client's content only in the brief), a
 report path I read, and the scoring ritual amended so SCORE cannot be sent without a QA
 report id. Until it ships, I run the hop by hand on every wrap and say so in the SCORE.
+
+## SHARPENED 2026-09-04 (w=88): a claim about the PRODUCT is not a shape, however well it is argued
+**The 2026-09-04 split said Wednesday may ratify a SHAPE — a proof's design, a disclosure, a limit's reasoning — and never CORRECTNESS. Wednesday then broke it inside the paragraph that stated it.**
+
+**How to apply:**
+1. **Before writing any approving sentence about a builder's reasoning, ask whether its truth-maker is inside the mail or inside the codebase.** Inside the mail → ratifiable. Inside the codebase → it goes to the gate, and say so.
+2. **Well-argued reasoning about a mechanism is the highest-risk thing to endorse**, not the safest — it is the form in which a wrong model is most persuasive, and it arrives attached to good work.
+3. **Name what the ratification does NOT cover, inline** — *"the design of your proof is ratified; whether the third boot is the test is the gate's question, not Wednesday's."* One clause.
+4. **When the gate falsifies something Wednesday endorsed, that goes at the HEAD of the findings mail**, before the findings, not in a footnote — the builder needs to know which of its foundations was borrowed.
 
 **How to apply:**
 1. **The word "RATIFIED" is reserved for shapes, decisions and reasoning.** For code, the sentence

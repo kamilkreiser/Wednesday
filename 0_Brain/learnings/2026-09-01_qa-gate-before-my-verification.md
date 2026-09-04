@@ -60,6 +60,25 @@ path that keeps R0 (client-neutral charter; one client's content only in the bri
 report path I read, and the scoring ritual amended so SCORE cannot be sent without a QA
 report id. Until it ships, I run the hop by hand on every wrap and say so in the SCORE.
 
+
+## SHARPENED 2026-09-04 (w=88): a claim about the PRODUCT is not a shape, however well it is argued
+
+**The 2026-09-04 split said Wednesday may ratify a SHAPE — a proof's design, a disclosure, a limit's reasoning — and never CORRECTNESS. Wednesday then broke it inside the paragraph that stated it.**
+
+**The case.** Ratifying RD-245, Wednesday wrote *"NOT RATIFIED: correctness. That waits for the gate"* — and in the same mail praised the builder's **"the third boot is the test"** reasoning as *"the kind of thing that decides whether a regression test is worth having."* **That is a claim about what the product does on the third boot.** The QA pass falsified it: the reasoning holds only for a mutation that consumes no rotation slot, and the product's `setSetting()` consumes one. **The builder held an endorsement worth less than it read, on precisely the reasoning where the defect was hiding.**
+
+**THE DISCRIMINATOR, and it is one question:**
+
+> **Does this sentence describe the PROOF, or does it describe the CODE?**
+
+A proof's design, a disclosure, a stated limit, an admission of what was not measured — all properties of **the artefact the builder wrote**, and all ratifiable from a wrap mail. **A model of how the system behaves is not**, however careful the argument, **because that is exactly the thing the gate exists to test.**
+
+**How to apply:**
+1. **Before writing any approving sentence about a builder's reasoning, ask whether its truth-maker is inside the mail or inside the codebase.** Inside the mail → ratifiable. Inside the codebase → it goes to the gate, and say so.
+2. **Well-argued reasoning about a mechanism is the highest-risk thing to endorse**, not the safest — it is the form in which a wrong model is most persuasive, and it arrives attached to good work.
+3. **Name what the ratification does NOT cover, inline** — *"the design of your proof is ratified; whether the third boot is the test is the gate's question, not Wednesday's."* One clause.
+4. **When the gate falsifies something Wednesday endorsed, that goes at the HEAD of the findings mail**, before the findings, not in a footnote — the builder needs to know which of its foundations was borrowed.
+
 **Related:** [[2026-08-10_own-the-spec-not-just-the-escalation]] (testing is mine to demand
 and sample), [[2026-08-11_coordinator-not-carrier]] (the QA agent is the org design this
 activates), [[2026-08-06_local-proof-is-not-target-evidence]], [[2026-08-07_a-check-that-cannot-fail]],
