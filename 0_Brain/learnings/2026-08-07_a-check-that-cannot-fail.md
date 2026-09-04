@@ -570,6 +570,54 @@ upstream of both.
 
 **The naming corollary, from the same fix and worth as much:** the drift became possible because ONE predicate named `hasExistingSettings` answered two different questions — *is there anything here?* for a warning, and *is the user's config here?* for a selection. The agent **deleted the name rather than aliasing it**, because *"that name is what let one predicate drift across two questions."* **A name that answers two questions is how the next drift gets in, and an alias keeps the door open while looking tidy.**
 
+
+## A KEYWORD SEARCH OVER A CORPUS THAT CONTAINS THE SEARCH TERM AS VOCABULARY (2026-09-04 — three instances in one evening)
+
+**The operative case:** I am grepping a log, a diff or a tree for a word that names an EVENT —
+`conflict`, `failed`, `error`, `deleted`, `github_pat_` — **and the corpus is one where that word
+also appears as ordinary vocabulary.** The hits are real matches and none of them are the event.
+
+**The three, one night, all mine:**
+- **`grep -c 'github_pat_'` on a staged diff returned 1** — and the match was **my own ledger row
+  describing the token leak**, which quotes the prefix as documentation. **A secret scanner whose
+  pattern matches its own incident report will alarm on exactly the commits that discuss security,
+  which is the set most likely to be waved through.**
+- **`grep -ci conflict` on a unison log returned 3** — two were **filenames** containing
+  `(conflict_on_2026-09-02)`, old conflict-copies from a previous run being copied as ordinary
+  files. Unison's real marker, `<-?->`, appeared **zero** times.
+- **`grep -ci failed` returned 2** — one was a pytest cache file literally named `lastfailed`.
+
+**The general form, and it is the uncomfortable half: the MORE relevant a corpus is to your search
+term, the MORE likely it contains that term as vocabulary rather than as an event.** Sync logs
+discuss conflicts. Security commits discuss tokens. Test trees contain the word "failed" in
+filenames. **The correlation runs the wrong way — precision falls exactly where you most need it.**
+
+**How to apply:**
+1. **Search for the tool's OWN marker, not the English word.** Unison signals a conflict with
+   `<-?->`, not with "conflict". Find the machine's token before grepping for the human's.
+2. **Prove the search can find the real thing: plant it and search for it.** A `<-?->` written into
+   a scratch file, searched with the same command, is a one-line positive control — and it is what
+   turned "3 conflicts" into "zero conflicts, and here is why the 3 were not".
+3. **When a hit lands, READ IT before counting it.** A count is a claim about events; the lines are
+   the evidence. Every one of the three above dissolved on being read.
+4. **Scan for the SECRET, not the FORMAT** — the token body, never the vendor prefix, or the tool
+   fires on your own write-up of the incident.
+
+## `timeout N cmd | wc -l` PRINTS 0 WHEN THE COMMAND IS KILLED — and no `||` can catch it (2026-09-04, twice in one evening)
+
+`timeout 25 find <dir> -type f 2>/dev/null | wc -l` printed **`0`**, and I reported "zero files" for
+a directory holding **53 worktrees and 13 GB**. When `timeout` kills `find`, `wc -l` still counts the
+lines it received — none — **and exits 0, so a trailing `|| echo` can never fire.** The guard is
+unreachable by construction.
+
+**It happened TWICE the same night**, the second time while measuring the very thing the first had
+got wrong. Caught both times by an adjacent listing that contradicted the zero.
+
+**How to apply:** never let a bounded command's output be the sole evidence for a count — capture
+the rc on its own line (`timeout N find … > out; rc=$?`) and branch on `124` (timed out) before
+reading the file. And **a zero from a bounded command is a suspect until its rc is read**, which is
+this whole file's rule pointed at the shell.
+
 **Related:** [[2026-08-14_i-read-representations-they-read-sources]] (a grep's output is a
 representation of a file) · [[2026-08-06_selector-discipline-in-ui-verification]] (suspect your own
 selector first — here the selector was suspect in both tools at once).

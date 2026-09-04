@@ -7,7 +7,7 @@ status: live
 
 # Boot digest — headline + rules of every lesson (open the file when it fires)
 
-Generated 2026-09-04 14:35 from 91 lesson files (413,899 B). Each block = the lesson's retrieval handle (H1), its frontmatter, the operative paragraph, its section index, and every RULES section verbatim. 6 files carry no rules-shaped section and are included whole. The CASES behind a rule live only in the file: open it the moment the rule fires, or when a diagnosis needs the evidence. `_ledger.md` is read whole beside this digest; `_ledger_archive.md` on demand.
+Generated 2026-09-04 17:08 from 92 lesson files (422,910 B). Each block = the lesson's retrieval handle (H1), its frontmatter, the operative paragraph, its section index, and every RULES section verbatim. 6 files carry no rules-shaped section and are included whole. The CASES behind a rule live only in the file: open it the moment the rule fires, or when a diagnosis needs the evidence. `_ledger.md` is read whole beside this digest; `_ledger_archive.md` on demand.
 
 ## The T9 SSD is the master — Wednesday must be fully portable
 `2026-07-31_fully-portable-drive.md` · principle · 2026-07-31 · status: superseded — the "T9 is the master" half by [[2026-08-25_one-drive-devmaster-is-master]] (2026-08-25); the portability principle itself still lives
@@ -1014,7 +1014,7 @@ reported anything else — because it measured the wrong thing, errored and
 swallowed it, or asked a question whose answer was fixed in advance. It is worse
 than no check, because it converts an open question into a settled one.
 
-sections (open the file for these): The concrete remedy, added 2026-08-13 (Secuura/Blockchain s28) · A failure-only log going quiet is not recovery (2026-08-22, Secuura s61) · The third member: a check that MISREPORTS what it saw (2026-08-14, same agent) · A test that cannot CLEAN UP starts asserting against live data (2026-08-15, Secuura s35) · A positive control proves the suite it RAN IN, and nothing about its neighbour (2026-08-15, Secuura s35) · The inverse: a REPRODUCTION that cannot reproduce (2026-08-15, Datasec/NexusAI) · The refinement that makes the positive-control rule actually work (2026-08-16, Secuura s37) · An indicator that can MISS its own event (2026-08-24, Datasec/NexusAI) · The control needs its own control (2026-08-23, Datasec/NexusAI) · The condition we had not stated: on a side-effecting system, the positive control IS an action (2026-08-14, Secuura s34) · The mirror: an ABSENCE claim needs a positive control too (2026-08-14) · Three "cannot see" members from one micro-session (2026-08-25, Datasec/NexusAI s5) — and a derivation lesson from its neighbour · A test's NAME is not its coverage (2026-09-03, Secuura s119 — the member that let an AUTH BYPASS survive a suite that appears to test it) · A census, a writer and a verifier that descend from ONE parse are one view rendered three times (2026-09-04, Datasec/NexusAI S29 — its own diagnosis, then its own correction to that diagnosis) · THE ALL-FAIL RED-PROOF: a tamper that destroys the SUBJECT, so the failure set stops discriminating (2026-09-04, Datasec/NexusAI — self-caught and self-reported) · A FIXTURE THAT CANNOT REACH THE PRODUCT'S PATH — the entry-point member (2026-09-04, Datasec/NexusAI RD-245; a BLOCKER found under a green suite the tester re-derived) · CORRECTED the same session, by the same agent, and the correction is the better lesson · A red-proof proves a check CAN fail; only a GREEN BASELINE proves it can pass for the right reason (2026-09-04, Secuura s120 — a guard defeated by its own doc comment) · The AXIS a guard is blind on is not the axis it was designed for (2026-09-04, Datasec/NexusAI — a perfectly-implemented guard, green on a defect it could never see) · THE OTHER END OF IT: a red-proof on a subject that did not COMPILE is not a red-proof (2026-09-04, Secuura s121 — the pair to the green-baseline rule above) · A MULTI-CLAUSE guard red-proofed with a fixture that trips BOTH clauses has measured the pair and learned nothing about the parts (2026-09-04, Datasec/NexusAI S31 — the builder found its OWN guard was decoration) · THE SECOND HALF, added hours later by the TESTER that verified the fix (2026-09-04, QA re-gate on `aad37da`) · AN ELIMINATION SET THAT IS EXHAUSTIVE WITHIN ONE CATEGORY AND SILENT ABOUT THE OTHERS (2026-09-04, Datasec/NexusAI S32 — it disproved its OWN filed finding)
+sections (open the file for these): The concrete remedy, added 2026-08-13 (Secuura/Blockchain s28) · A failure-only log going quiet is not recovery (2026-08-22, Secuura s61) · The third member: a check that MISREPORTS what it saw (2026-08-14, same agent) · A test that cannot CLEAN UP starts asserting against live data (2026-08-15, Secuura s35) · A positive control proves the suite it RAN IN, and nothing about its neighbour (2026-08-15, Secuura s35) · The inverse: a REPRODUCTION that cannot reproduce (2026-08-15, Datasec/NexusAI) · The refinement that makes the positive-control rule actually work (2026-08-16, Secuura s37) · An indicator that can MISS its own event (2026-08-24, Datasec/NexusAI) · The control needs its own control (2026-08-23, Datasec/NexusAI) · The condition we had not stated: on a side-effecting system, the positive control IS an action (2026-08-14, Secuura s34) · The mirror: an ABSENCE claim needs a positive control too (2026-08-14) · Three "cannot see" members from one micro-session (2026-08-25, Datasec/NexusAI s5) — and a derivation lesson from its neighbour · A test's NAME is not its coverage (2026-09-03, Secuura s119 — the member that let an AUTH BYPASS survive a suite that appears to test it) · A census, a writer and a verifier that descend from ONE parse are one view rendered three times (2026-09-04, Datasec/NexusAI S29 — its own diagnosis, then its own correction to that diagnosis) · THE ALL-FAIL RED-PROOF: a tamper that destroys the SUBJECT, so the failure set stops discriminating (2026-09-04, Datasec/NexusAI — self-caught and self-reported) · A FIXTURE THAT CANNOT REACH THE PRODUCT'S PATH — the entry-point member (2026-09-04, Datasec/NexusAI RD-245; a BLOCKER found under a green suite the tester re-derived) · A KEYWORD SEARCH OVER A CORPUS THAT CONTAINS THE SEARCH TERM AS VOCABULARY (2026-09-04 — three instances in one evening) · `timeout N cmd | wc -l` PRINTS 0 WHEN THE COMMAND IS KILLED — and no `||` can catch it (2026-09-04, twice in one evening) · CORRECTED the same session, by the same agent, and the correction is the better lesson · A red-proof proves a check CAN fail; only a GREEN BASELINE proves it can pass for the right reason (2026-09-04, Secuura s120 — a guard defeated by its own doc comment) · The AXIS a guard is blind on is not the axis it was designed for (2026-09-04, Datasec/NexusAI — a perfectly-implemented guard, green on a defect it could never see) · THE OTHER END OF IT: a red-proof on a subject that did not COMPILE is not a red-proof (2026-09-04, Secuura s121 — the pair to the green-baseline rule above) · A MULTI-CLAUSE guard red-proofed with a fixture that trips BOTH clauses has measured the pair and learned nothing about the parts (2026-09-04, Datasec/NexusAI S31 — the builder found its OWN guard was decoration) · THE SECOND HALF, added hours later by the TESTER that verified the fix (2026-09-04, QA re-gate on `aad37da`) · AN ELIMINATION SET THAT IS EXHAUSTIVE WITHIN ONE CATEGORY AND SILENT ABOUT THE OTHERS (2026-09-04, Datasec/NexusAI S32 — it disproved its OWN filed finding)
 
 **How to apply — one question, asked of the check rather than the result:**
 
@@ -1239,6 +1239,22 @@ happened — and the cycle is the evidence the loop works.
 5. **A green suite that survives replacing the fix with nothing is the tell** — here the incident replayed identically on both trees, which is the strongest possible statement that the suite was not measuring the fix.
 
 **The naming corollary, from the same fix and worth as much:** the drift became possible because ONE predicate named `hasExistingSettings` answered two different questions — *is there anything here?* for a warning, and *is the user's config here?* for a selection. The agent **deleted the name rather than aliasing it**, because *"that name is what let one predicate drift across two questions."* **A name that answers two questions is how the next drift gets in, and an alias keeps the door open while looking tidy.**
+
+**How to apply:**
+1. **Search for the tool's OWN marker, not the English word.** Unison signals a conflict with
+   `<-?->`, not with "conflict". Find the machine's token before grepping for the human's.
+2. **Prove the search can find the real thing: plant it and search for it.** A `<-?->` written into
+   a scratch file, searched with the same command, is a one-line positive control — and it is what
+   turned "3 conflicts" into "zero conflicts, and here is why the 3 were not".
+3. **When a hit lands, READ IT before counting it.** A count is a claim about events; the lines are
+   the evidence. Every one of the three above dissolved on being read.
+4. **Scan for the SECRET, not the FORMAT** — the token body, never the vendor prefix, or the tool
+   fires on your own write-up of the incident.
+
+**How to apply:** never let a bounded command's output be the sole evidence for a count — capture
+the rc on its own line (`timeout N find … > out; rc=$?`) and branch on `124` (timed out) before
+reading the file. And **a zero from a bounded command is a suspect until its rc is read**, which is
+this whole file's rule pointed at the shell.
 
 ### CORRECTED the same session, by the same agent, and the correction is the better lesson
 **Wednesday filed the above as "two views sharing a truncation" — the builder chased the lead and
@@ -3233,4 +3249,34 @@ sections (open the file for these): The case · Why the existing lessons did not
 3. **Cards especially:** the BLUF, every option and the default name who acts ("Kam notifies Peter and Stuart"; "the Secuura agent re-enables demo-service"; "Wednesday re-raises after the rotation").
 4. **Notes and handover blocks:** "Wednesday" for this seat's own acts, never "I"/"my" — a successor seat reads "my" as its own act. "Own statusline" → "Wednesday's statusline".
 5. **Test by its handle:** read the sentence as Kam on a phone with no context: can every "who" be answered without scrolling? If not, name it.
+
+
+## When Kam says I have been sloppy, classify my errors before answering — mine were all NARRATION, and the rulings held
+`2026-09-04_decisions-held-narration-drifted.md` · correction · 2026-09-04 · status: live
+
+**The operative case:** Kam has noticed a drop in quality and is asking why. **Do not list the
+mistakes and do not reach for the context window. Classify them.** The answer he needs is
+*which kind* of thing degraded, because that tells him what he can still trust and what he
+cannot — and it tells me where to apply care.
+
+sections (open the file for these): The case · Why the distinction is worth more than the apology · How to apply · The sibling finding: a reversal costs trust unless the FIRST call showed its reasoning
+
+## How to apply
+
+1. **When Kam questions my quality, classify before answering.** Sort the errors into kinds —
+   rulings, measurements, descriptions, omissions — and report which kind moved. **A list is
+   not an answer; a pattern is.**
+2. **Never offer the context window as a cause unless the statusline supports it AND the error
+   shape fits.** Say the number, say what the shape does and does not look like, and say
+   plainly when I do not know.
+3. **THE RULE THIS PRODUCES, and it is the operative output: no quantity and no
+   characterisation reaches Kam unless the measurement is in the same breath.** If I cannot
+   measure it in that breath, the honest word is **"unmeasured"** — which is a real answer, and
+   I have been treating it as a failure.
+4. **Do not over-flagellate.** He asked for a diagnosis, not contrition. Naming what held is
+   part of an honest answer, not self-defence — and a report that only lists faults is as
+   miscalibrated as one that hides them.
+5. **Prefer his framing back to him.** He said "consistency or thought". Consistency is about
+   the rulings; thought is about the care in the sentence. **Answering in his own two
+   categories is more useful than substituting mine.**
 
