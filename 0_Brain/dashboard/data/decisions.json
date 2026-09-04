@@ -3412,5 +3412,63 @@
   "status": "open",
   "ruled_choice": null,
   "ruled_ts": null
+ },
+ {
+  "id": "nexusai-rd245-audit-log-leaves-settings",
+  "client_project": "Datasec/NexusAI",
+  "title": "RD-245 fix shape RULED by Wednesday (veto card): the AI audit log moves out of settings.json; retention stays 2",
+  "bluf": "The NexusAI agent read the real incident artefacts: the two surviving settings generations are 23 ms apart, both written by the AI misunderstanding log (server.js:169), which shares settings.json's two-slot backup rotation with every real setting. Wednesday ruled: give that log its own file with a non-silent migration, and make the identity guard ignore *_updated_at. Two generations stay; per-write backup of real settings stays. Inside Wednesday's reserved question; Kam holds veto.",
+  "default_action": "Proceed as ruled; the build is already authorised and lands in the batched RD-245 QA pass.",
+  "options": [
+   {
+    "key": "proceed",
+    "label": "Proceed as ruled",
+    "detail": "Audit log leaves settings.json with a logged migration; guard compares excluding *_updated_at; no retention or write-cost change for real settings."
+   },
+   {
+    "key": "keep-n",
+    "label": "Keep more than 2 generations instead",
+    "detail": "Changes retention depth (disk and write cost) for every deployment; does not address the churning writer."
+   },
+   {
+    "key": "stop",
+    "label": "Stop — Kam wants to think about persistence guarantees first",
+    "detail": "The agent halts the fix; F-3 (the test rewrite) continues."
+   }
+  ],
+  "recommended": "proceed",
+  "ts": "2026-09-05T08:57:38.657922+10:00",
+  "status": "open",
+  "ruled_choice": null,
+  "ruled_ts": null
+ },
+ {
+  "id": "nexusai-rd303-rd307-key-shaped-files-in-repo",
+  "client_project": "Datasec/NexusAI",
+  "title": "RD-303 + RD-307: two key-shaped things inside the NexusAI repo folder — untrack the six .azure files? move .machine-id?",
+  "bluf": "RD-303: 4_Credentials/.azure/ is TRACKED in the repo (6 files; Wednesday verified 0 suspicious matches with a firing control); untracking touches committed history. RD-307: a test run wrote data/.machine-id (the encryption key-derivation seed) into the repo folder — never committed, now gitignored, left in place because removing it could make already-encrypted data unreadable. Both need a human ruling; neither is urgent.",
+  "default_action": "Nothing moves; both tickets stay open with their ignore lines until Kam rules.",
+  "options": [
+   {
+    "key": "untrack-and-quarantine",
+    "label": "Untrack the six .azure files (git rm --cached, keep on disk) AND quarantine .machine-id after the agent proves nothing is keyed by it",
+    "detail": "Two commits on the dev branch; a history rewrite is NOT proposed."
+   },
+   {
+    "key": "untrack-only",
+    "label": "Untrack the six .azure files; leave .machine-id in place",
+    "detail": "Closes RD-303; RD-307 stays open with the ignore line as the control."
+   },
+   {
+    "key": "leave",
+    "label": "Leave both as they are",
+    "detail": "Ignore lines are the control on both; RD-303 and RD-307 closed as won't-fix with the reason."
+   }
+  ],
+  "recommended": "untrack-and-quarantine",
+  "ts": "2026-09-05T08:57:38.711786+10:00",
+  "status": "open",
+  "ruled_choice": null,
+  "ruled_ts": null
  }
 ]
