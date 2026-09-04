@@ -529,6 +529,25 @@ upstream of both.
    green.** A green from an instrument that cannot go red is the thing this file is about, and it is
    worth as much attention when it comes from your own new tool as from someone else's old one.
 
+
+## THE ALL-FAIL RED-PROOF: a tamper that destroys the SUBJECT, so the failure set stops discriminating (2026-09-04, Datasec/NexusAI — self-caught and self-reported)
+
+**The case.** Red-proofing RD-245's backup guard, the agent stripped the `const` bindings along with the guard. `backupFile` threw, its own `try/catch` swallowed the throw, and **all four tests failed — including the two that do not depend on the guard at all.** That is a tamper proving the tests detect a broken function, which is not the claim being made.
+
+**THE FORMULATION, adopted verbatim:**
+
+> **A red-proof where everything fails looks stronger than one where two things pass, and it is weaker.**
+
+**Why this is a distinct member.** The family already held *a tamper that did not tamper* (the perl clause-removal that silently failed to apply) and *a red-proof on a subject that did not compile* (`1 failed / 0 tests`). **This is the one where the tamper WORKS — it changes real behaviour — and destroys the subject on the way, so the failure SET carries no information.** Every prior member fails to move the instrument; this one moves it too far.
+
+**The corrected proof, and the shape to require:** removing only the guard gives **2 fail / 2 pass**, and the two that pass are exactly the genuine-change rotation and the harness control — **a failure set matching the mechanism, not a failure count.**
+
+**How to apply:**
+1. **Count the tests that SHOULD be unaffected before you tamper, and require them to pass after.** A red-proof with no survivors has not isolated anything.
+2. **The all-fail result is the seductive one** — it reads as the more emphatic finding in a status mail, which is precisely why nobody re-examines it. Treat a total red the way you treat a total green: as a suspect.
+3. **A tamper that can throw needs its exception path considered**, especially where the subject has its own `try/catch` — a swallowed throw converts "the guard is gone" into "the function is gone" without any visible difference in the run.
+4. **State which cases the tamper SHOULD hit before running it**, then compare the set, not the number. This is the clause-isolation rule pointed at the subject rather than the guard.
+
 **Related:** [[2026-08-14_i-read-representations-they-read-sources]] (a grep's output is a
 representation of a file) · [[2026-08-06_selector-discipline-in-ui-verification]] (suspect your own
 selector first — here the selector was suspect in both tools at once).

@@ -38,5 +38,26 @@ CI-shaped rule didn't fire when the costume changed to a scheduler log.
 3. Same discipline in reverse: absence of an artifact is not absence of the
    event (it may log elsewhere, or the writer may have died mid-way).
 
+
+## A PANE IS NOT A TURN, AND A TURN IS NOT THE COMMISSIONED TURN (2026-09-04 — correcting Wednesday's own launch-verification rule)
+
+**The operative case:** Wednesday has just launched an agent and is about to say it is working on X. **A non-zero `ctx` on that pane proves A turn ran. It does not prove the turn you commissioned ran.**
+
+**The case.** The QA agent was launched with `ultrathink` and its prompt as two positional arguments; Claude Code takes the first positional as the prompt, so the agent booted on the literal word `ultrathink`, fell back to its own project rules and sat asking for a URL and test credentials. **Its statusline read `ctx:4%` — completely truthful, and completely useless: the turn it measured was the agent asking a question nobody was going to answer.** Wednesday had already mailed another agent that the pass was running and pinned its branch on that basis.
+
+**The rule this corrects is Wednesday's own** (2026-09-04, the launch-receipt row): *"a receipt for a LAUNCHED agent is written from the agent's own first artefact — a report path, a boot mail, a non-zero ctx."* **The non-zero ctx does not belong in that list.** The escalation ladder of launch evidence, weakest to strongest:
+
+1. **The launcher's exit code** — proves a process started. Worthless. (This is the 2026-09-04 w=4 row.)
+2. **A pane exists** — proves tmux did its job.
+3. **`ctx:-`** — genuinely informative in ONE direction: no turn has run at all. That half holds.
+4. **A non-zero ctx** — a turn ran. **Says nothing about WHICH turn.** This is the rung that was wrongly trusted.
+5. **The pane's CONTENT showing the commission was received** — the agent naming the ticket, opening the brief, reading the SHA. **This is the first rung that discriminates.**
+6. **The agent's own outbound artefact** — a boot mail, a plan confirmation, a report path.
+
+**How to apply:**
+1. **Verify a launch at rung 5 or 6, never below.** Grep the pane for something only the commissioned agent would produce — the ticket id, the brief path, the SHA under test.
+2. **Put the discriminator in the LAUNCHER, not in the checking.** The wrapper now refuses to start unless the prompt begins with the thinking directive and names the brief path — both clauses red-proofed individually. A blind agent should be unlaunchable, not merely detectable.
+3. **The same asymmetry as everywhere else in this file:** absence of a turn is strong evidence; presence of a turn is weak evidence. `ctx:-` means something; `ctx:4%` means almost nothing.
+
 **Related:** [[_ledger]], [[2026-08-03_mental-model-not-source-of-truth]],
 [[2026-08-05_verify-the-chain-not-the-legs]]

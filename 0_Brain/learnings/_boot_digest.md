@@ -7,7 +7,7 @@ status: live
 
 # Boot digest — headline + rules of every lesson (open the file when it fires)
 
-Generated 2026-09-04 13:42 from 91 lesson files (401,586 B). Each block = the lesson's retrieval handle (H1), its frontmatter, the operative paragraph, its section index, and every RULES section verbatim. 6 files carry no rules-shaped section and are included whole. The CASES behind a rule live only in the file: open it the moment the rule fires, or when a diagnosis needs the evidence. `_ledger.md` is read whole beside this digest; `_ledger_archive.md` on demand.
+Generated 2026-09-04 14:00 from 91 lesson files (406,344 B). Each block = the lesson's retrieval handle (H1), its frontmatter, the operative paragraph, its section index, and every RULES section verbatim. 6 files carry no rules-shaped section and are included whole. The CASES behind a rule live only in the file: open it the moment the rule fires, or when a diagnosis needs the evidence. `_ledger.md` is read whole beside this digest; `_ledger_archive.md` on demand.
 
 ## The T9 SSD is the master — Wednesday must be fully portable
 `2026-07-31_fully-portable-drive.md` · principle · 2026-07-31 · status: superseded — the "T9 is the master" half by [[2026-08-25_one-drive-devmaster-is-master]] (2026-08-25); the portability principle itself still lives
@@ -617,6 +617,8 @@ behind a build:
 **The failure class (two occurrences, two days):** I attributed an EVENT to an
 ARTIFACT without confirming the event actually executed.
 
+sections (open the file for these): A PANE IS NOT A TURN, AND A TURN IS NOT THE COMMISSIONED TURN (2026-09-04 — correcting Wednesday's own launch-verification rule)
+
 **How to apply:**
 1. Before claiming "X ran / X fired / X failed because of Y" — open the
    artifact and find the line that proves the specific event, not the file
@@ -626,6 +628,20 @@ ARTIFACT without confirming the event actually executed.
 2. Reports to Kam carry the proving line, not the artifact's name.
 3. Same discipline in reverse: absence of an artifact is not absence of the
    event (it may log elsewhere, or the writer may have died mid-way).
+
+**The rule this corrects is Wednesday's own** (2026-09-04, the launch-receipt row): *"a receipt for a LAUNCHED agent is written from the agent's own first artefact — a report path, a boot mail, a non-zero ctx."* **The non-zero ctx does not belong in that list.** The escalation ladder of launch evidence, weakest to strongest:
+
+1. **The launcher's exit code** — proves a process started. Worthless. (This is the 2026-09-04 w=4 row.)
+2. **A pane exists** — proves tmux did its job.
+3. **`ctx:-`** — genuinely informative in ONE direction: no turn has run at all. That half holds.
+4. **A non-zero ctx** — a turn ran. **Says nothing about WHICH turn.** This is the rung that was wrongly trusted.
+5. **The pane's CONTENT showing the commission was received** — the agent naming the ticket, opening the brief, reading the SHA. **This is the first rung that discriminates.**
+6. **The agent's own outbound artefact** — a boot mail, a plan confirmation, a report path.
+
+**How to apply:**
+1. **Verify a launch at rung 5 or 6, never below.** Grep the pane for something only the commissioned agent would produce — the ticket id, the brief path, the SHA under test.
+2. **Put the discriminator in the LAUNCHER, not in the checking.** The wrapper now refuses to start unless the prompt begins with the thinking directive and names the brief path — both clauses red-proofed individually. A blind agent should be unlaunchable, not merely detectable.
+3. **The same asymmetry as everywhere else in this file:** absence of a turn is strong evidence; presence of a turn is weak evidence. `ctx:-` means something; `ctx:4%` means almost nothing.
 
 
 ## Every ask carries: Client/Project · problem · options · recommendation
@@ -998,7 +1014,7 @@ reported anything else — because it measured the wrong thing, errored and
 swallowed it, or asked a question whose answer was fixed in advance. It is worse
 than no check, because it converts an open question into a settled one.
 
-sections (open the file for these): The concrete remedy, added 2026-08-13 (Secuura/Blockchain s28) · A failure-only log going quiet is not recovery (2026-08-22, Secuura s61) · The third member: a check that MISREPORTS what it saw (2026-08-14, same agent) · A test that cannot CLEAN UP starts asserting against live data (2026-08-15, Secuura s35) · A positive control proves the suite it RAN IN, and nothing about its neighbour (2026-08-15, Secuura s35) · The inverse: a REPRODUCTION that cannot reproduce (2026-08-15, Datasec/NexusAI) · The refinement that makes the positive-control rule actually work (2026-08-16, Secuura s37) · An indicator that can MISS its own event (2026-08-24, Datasec/NexusAI) · The control needs its own control (2026-08-23, Datasec/NexusAI) · The condition we had not stated: on a side-effecting system, the positive control IS an action (2026-08-14, Secuura s34) · The mirror: an ABSENCE claim needs a positive control too (2026-08-14) · Three "cannot see" members from one micro-session (2026-08-25, Datasec/NexusAI s5) — and a derivation lesson from its neighbour · A test's NAME is not its coverage (2026-09-03, Secuura s119 — the member that let an AUTH BYPASS survive a suite that appears to test it) · A census, a writer and a verifier that descend from ONE parse are one view rendered three times (2026-09-04, Datasec/NexusAI S29 — its own diagnosis, then its own correction to that diagnosis) · CORRECTED the same session, by the same agent, and the correction is the better lesson · A red-proof proves a check CAN fail; only a GREEN BASELINE proves it can pass for the right reason (2026-09-04, Secuura s120 — a guard defeated by its own doc comment) · The AXIS a guard is blind on is not the axis it was designed for (2026-09-04, Datasec/NexusAI — a perfectly-implemented guard, green on a defect it could never see) · THE OTHER END OF IT: a red-proof on a subject that did not COMPILE is not a red-proof (2026-09-04, Secuura s121 — the pair to the green-baseline rule above) · A MULTI-CLAUSE guard red-proofed with a fixture that trips BOTH clauses has measured the pair and learned nothing about the parts (2026-09-04, Datasec/NexusAI S31 — the builder found its OWN guard was decoration) · THE SECOND HALF, added hours later by the TESTER that verified the fix (2026-09-04, QA re-gate on `aad37da`) · AN ELIMINATION SET THAT IS EXHAUSTIVE WITHIN ONE CATEGORY AND SILENT ABOUT THE OTHERS (2026-09-04, Datasec/NexusAI S32 — it disproved its OWN filed finding)
+sections (open the file for these): The concrete remedy, added 2026-08-13 (Secuura/Blockchain s28) · A failure-only log going quiet is not recovery (2026-08-22, Secuura s61) · The third member: a check that MISREPORTS what it saw (2026-08-14, same agent) · A test that cannot CLEAN UP starts asserting against live data (2026-08-15, Secuura s35) · A positive control proves the suite it RAN IN, and nothing about its neighbour (2026-08-15, Secuura s35) · The inverse: a REPRODUCTION that cannot reproduce (2026-08-15, Datasec/NexusAI) · The refinement that makes the positive-control rule actually work (2026-08-16, Secuura s37) · An indicator that can MISS its own event (2026-08-24, Datasec/NexusAI) · The control needs its own control (2026-08-23, Datasec/NexusAI) · The condition we had not stated: on a side-effecting system, the positive control IS an action (2026-08-14, Secuura s34) · The mirror: an ABSENCE claim needs a positive control too (2026-08-14) · Three "cannot see" members from one micro-session (2026-08-25, Datasec/NexusAI s5) — and a derivation lesson from its neighbour · A test's NAME is not its coverage (2026-09-03, Secuura s119 — the member that let an AUTH BYPASS survive a suite that appears to test it) · A census, a writer and a verifier that descend from ONE parse are one view rendered three times (2026-09-04, Datasec/NexusAI S29 — its own diagnosis, then its own correction to that diagnosis) · THE ALL-FAIL RED-PROOF: a tamper that destroys the SUBJECT, so the failure set stops discriminating (2026-09-04, Datasec/NexusAI — self-caught and self-reported) · CORRECTED the same session, by the same agent, and the correction is the better lesson · A red-proof proves a check CAN fail; only a GREEN BASELINE proves it can pass for the right reason (2026-09-04, Secuura s120 — a guard defeated by its own doc comment) · The AXIS a guard is blind on is not the axis it was designed for (2026-09-04, Datasec/NexusAI — a perfectly-implemented guard, green on a defect it could never see) · THE OTHER END OF IT: a red-proof on a subject that did not COMPILE is not a red-proof (2026-09-04, Secuura s121 — the pair to the green-baseline rule above) · A MULTI-CLAUSE guard red-proofed with a fixture that trips BOTH clauses has measured the pair and learned nothing about the parts (2026-09-04, Datasec/NexusAI S31 — the builder found its OWN guard was decoration) · THE SECOND HALF, added hours later by the TESTER that verified the fix (2026-09-04, QA re-gate on `aad37da`) · AN ELIMINATION SET THAT IS EXHAUSTIVE WITHIN ONE CATEGORY AND SILENT ABOUT THE OTHERS (2026-09-04, Datasec/NexusAI S32 — it disproved its OWN filed finding)
 
 **How to apply — one question, asked of the check rather than the result:**
 
@@ -1208,6 +1224,12 @@ happened — and the cycle is the evidence the loop works.
    ground-walk terminated on the element itself. **It replaced the check rather than reporting the
    green.** A green from an instrument that cannot go red is the thing this file is about, and it is
    worth as much attention when it comes from your own new tool as from someone else's old one.
+
+**How to apply:**
+1. **Count the tests that SHOULD be unaffected before you tamper, and require them to pass after.** A red-proof with no survivors has not isolated anything.
+2. **The all-fail result is the seductive one** — it reads as the more emphatic finding in a status mail, which is precisely why nobody re-examines it. Treat a total red the way you treat a total green: as a suspect.
+3. **A tamper that can throw needs its exception path considered**, especially where the subject has its own `try/catch` — a swallowed throw converts "the guard is gone" into "the function is gone" without any visible difference in the run.
+4. **State which cases the tamper SHOULD hit before running it**, then compare the set, not the number. This is the clause-isolation rule pointed at the subject rather than the guard.
 
 ### CORRECTED the same session, by the same agent, and the correction is the better lesson
 **Wednesday filed the above as "two views sharing a truncation" — the builder chased the lead and
