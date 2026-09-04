@@ -211,6 +211,12 @@ probe first.
   objects, the API for the rest. Never a fetch.**
 - **`gh` is NOT authenticated in the Secuura project's `GH_CONFIG_DIR`** — use the project's
   own `GH_TOKEN` against the API, and verify identity at point of use.
+- 🔴 **Wednesday's own pre-commit secret scan REPORTS BUT DOES NOT REFUSE** — it was written
+  `grep -c … || echo clean`, which prints a hit and lets the commit through. **And its
+  predicate (`github_pat_`) matches Wednesday's own incident write-up**, so it alarms on the
+  commits that discuss security. **Two fixes, both sized and unbuilt: gate on the result
+  (`if grep -q …; then exit 1; fi`), and scan for the secret BODY not the vendor prefix. The
+  durable home is the repo's existing pre-commit hook, which already blocks artefact classes.**
 - **The QA project still has no launcher entry, no inbox and no wrap hook.** Its one-off
   wrapper at `fleet/state/launch_qa_nexusai_rd245.sh` **does not travel** — `state/` is
   gitignored by design. **The durable fix — a real launcher in `launchers.conf` with the
