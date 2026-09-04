@@ -7,7 +7,7 @@ status: live
 
 # Boot digest — headline + rules of every lesson (open the file when it fires)
 
-Generated 2026-09-04 10:02 from 91 lesson files (388,868 B). Each block = the lesson's retrieval handle (H1), its frontmatter, the operative paragraph, its section index, and every RULES section verbatim. 6 files carry no rules-shaped section and are included whole. The CASES behind a rule live only in the file: open it the moment the rule fires, or when a diagnosis needs the evidence. `_ledger.md` is read whole beside this digest; `_ledger_archive.md` on demand.
+Generated 2026-09-04 11:18 from 91 lesson files (392,312 B). Each block = the lesson's retrieval handle (H1), its frontmatter, the operative paragraph, its section index, and every RULES section verbatim. 6 files carry no rules-shaped section and are included whole. The CASES behind a rule live only in the file: open it the moment the rule fires, or when a diagnosis needs the evidence. `_ledger.md` is read whole beside this digest; `_ledger_archive.md` on demand.
 
 ## The T9 SSD is the master — Wednesday must be fully portable
 `2026-07-31_fully-portable-drive.md` · principle · 2026-07-31 · status: superseded — the "T9 is the master" half by [[2026-08-25_one-drive-devmaster-is-master]] (2026-08-25); the portability principle itself still lives
@@ -998,7 +998,7 @@ reported anything else — because it measured the wrong thing, errored and
 swallowed it, or asked a question whose answer was fixed in advance. It is worse
 than no check, because it converts an open question into a settled one.
 
-sections (open the file for these): The concrete remedy, added 2026-08-13 (Secuura/Blockchain s28) · A failure-only log going quiet is not recovery (2026-08-22, Secuura s61) · The third member: a check that MISREPORTS what it saw (2026-08-14, same agent) · A test that cannot CLEAN UP starts asserting against live data (2026-08-15, Secuura s35) · A positive control proves the suite it RAN IN, and nothing about its neighbour (2026-08-15, Secuura s35) · The inverse: a REPRODUCTION that cannot reproduce (2026-08-15, Datasec/NexusAI) · The refinement that makes the positive-control rule actually work (2026-08-16, Secuura s37) · An indicator that can MISS its own event (2026-08-24, Datasec/NexusAI) · The control needs its own control (2026-08-23, Datasec/NexusAI) · The condition we had not stated: on a side-effecting system, the positive control IS an action (2026-08-14, Secuura s34) · The mirror: an ABSENCE claim needs a positive control too (2026-08-14) · Three "cannot see" members from one micro-session (2026-08-25, Datasec/NexusAI s5) — and a derivation lesson from its neighbour · A test's NAME is not its coverage (2026-09-03, Secuura s119 — the member that let an AUTH BYPASS survive a suite that appears to test it) · A census, a writer and a verifier that descend from ONE parse are one view rendered three times (2026-09-04, Datasec/NexusAI S29 — its own diagnosis, then its own correction to that diagnosis) · CORRECTED the same session, by the same agent, and the correction is the better lesson · A red-proof proves a check CAN fail; only a GREEN BASELINE proves it can pass for the right reason (2026-09-04, Secuura s120 — a guard defeated by its own doc comment) · The AXIS a guard is blind on is not the axis it was designed for (2026-09-04, Datasec/NexusAI — a perfectly-implemented guard, green on a defect it could never see) · THE OTHER END OF IT: a red-proof on a subject that did not COMPILE is not a red-proof (2026-09-04, Secuura s121 — the pair to the green-baseline rule above)
+sections (open the file for these): The concrete remedy, added 2026-08-13 (Secuura/Blockchain s28) · A failure-only log going quiet is not recovery (2026-08-22, Secuura s61) · The third member: a check that MISREPORTS what it saw (2026-08-14, same agent) · A test that cannot CLEAN UP starts asserting against live data (2026-08-15, Secuura s35) · A positive control proves the suite it RAN IN, and nothing about its neighbour (2026-08-15, Secuura s35) · The inverse: a REPRODUCTION that cannot reproduce (2026-08-15, Datasec/NexusAI) · The refinement that makes the positive-control rule actually work (2026-08-16, Secuura s37) · An indicator that can MISS its own event (2026-08-24, Datasec/NexusAI) · The control needs its own control (2026-08-23, Datasec/NexusAI) · The condition we had not stated: on a side-effecting system, the positive control IS an action (2026-08-14, Secuura s34) · The mirror: an ABSENCE claim needs a positive control too (2026-08-14) · Three "cannot see" members from one micro-session (2026-08-25, Datasec/NexusAI s5) — and a derivation lesson from its neighbour · A test's NAME is not its coverage (2026-09-03, Secuura s119 — the member that let an AUTH BYPASS survive a suite that appears to test it) · A census, a writer and a verifier that descend from ONE parse are one view rendered three times (2026-09-04, Datasec/NexusAI S29 — its own diagnosis, then its own correction to that diagnosis) · CORRECTED the same session, by the same agent, and the correction is the better lesson · A red-proof proves a check CAN fail; only a GREEN BASELINE proves it can pass for the right reason (2026-09-04, Secuura s120 — a guard defeated by its own doc comment) · The AXIS a guard is blind on is not the axis it was designed for (2026-09-04, Datasec/NexusAI — a perfectly-implemented guard, green on a defect it could never see) · THE OTHER END OF IT: a red-proof on a subject that did not COMPILE is not a red-proof (2026-09-04, Secuura s121 — the pair to the green-baseline rule above) · A MULTI-CLAUSE guard red-proofed with a fixture that trips BOTH clauses has measured the pair and learned nothing about the parts (2026-09-04, Datasec/NexusAI S31 — the builder found its OWN guard was decoration)
 
 **How to apply — one question, asked of the check rather than the result:**
 
@@ -1265,6 +1265,38 @@ replaced the SUBJECT with a stub and left a green suite testing nothing.** The a
 control asserts **the decision function is NOT a mock**, and its auth stub sets the principal under
 **both** property names the real setter uses, *"because a stub setting one silently disables half the
 chain."* **A test's mocks are part of its subject; mock the neighbours, never the thing under test.**
+
+**THE RULE, adopted verbatim from the builder:**
+
+> **A guard with two clauses, red-proofed with a fixture that trips BOTH, tells you the guard
+> fires. It does not tell you either clause works. Red-proof each clause against a fixture only
+> that clause can catch, or you have measured the pair and learned nothing about the parts.**
+
+**How to apply:**
+1. **Count the clauses in any guard before red-proofing it.** A guard with N independent
+   conditions needs N fixtures, each of which trips exactly one. A single fixture that trips all
+   of them proves only that the disjunction is non-empty.
+2. **Disable each clause in turn and confirm the others still catch their own case alone.** A
+   clause that cannot be shown to catch something by itself is decoration, and decoration in a
+   guard is worse than an absent guard because it is counted as coverage.
+3. **Suspect the CHEAP clause of carrying the expensive one.** Here a month-name string match was
+   silently doing the work a structural regex was credited with. The cheap heuristic is the one
+   that fires on everything, so it hides a structural clause that fires on nothing.
+4. **A regex that bounds a code body by indentation encodes a file's formatting as a
+   precondition.** `\n\s{0,4}\}` is a claim about every file the guard will ever run over. Prefer
+   naming the function; where a textual bound is unavoidable, red-proof it at the widest
+   indentation in the corpus (this is the 2026-09-04 sibling: *do not reuse the shape of the
+   defect that motivated the guard — enumerate the shapes its corpus actually contains*).
+5. **This is the truncation family again** — a cheap textual extractor standing in for a parser,
+   on input whose shape the author did not enumerate. Fourth instance in two days across two
+   projects: a selector split on its last line, a `sed` range starting at the wrong line, a brace
+   search halted by a doc comment, and now a body bound halted by indentation.
+
+**Family:** the CONTROL-side rules above (a control must ISOLATE the mechanism it is named for;
+a control that has never been made to fail is a claim) — **this is that rule pointed at a guard's
+INTERNAL STRUCTURE rather than at the guard as a whole.** Both prior formulations would have
+passed this guard: it fired, and it isolated the mechanism *it was named for*. Only clause-level
+tampering saw it.
 
 
 ## A promise is not a mechanism — unsupervised work needs a trigger, not an intention
