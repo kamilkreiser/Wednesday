@@ -3,12 +3,20 @@ client: Secuura
 project: Blockchain
 path: /Volumes/DevMASTER/!CODING/Secuura/Blockchain
 status: active
-updated: 2026-09-03
+updated: 2026-09-04
 ---
 
 # Secuura / Blockchain (Platform K)
 
 **🔴 CORRECTION (2026-09-02 07:3x, churn-visible — every older "KS-291 = crypto-shred INFEASIBLE" line below is STALE):** KS-291's RESOLUTION is the opposite of its description — Kam implemented per-subject DEK envelope + true crypto-shred (PR #440), shipped to develop + demo, Done. Verified at develop from my seat: `migrations/034_pii_subject_keys.sql` + `036_deletion_log_crypto_shred.sql` + `packages/shared/src/crypto/subjectDek.ts` (header names KS-291 + the erasure guarantee) all PRESENT at `a079e1f6b`. **Crypto-shred IS available to K** — KS-695's design uses it (S-driven erasure can destroy the subject's DEK; stronger Art.17 position than field blanking). The stale constraint travelled s96→s103 briefs (ledger w=57); s103 caught it and designed against the true state.
+
+**Open / next (refreshed 2026-09-04 13:26 — s123 WRAPPED 03:14:06Z and SCORED 0.93 (the strongest single session this fleet has produced); s124 LAUNCHED on pane %36 (pid moved 25468→68814, ctx:8% = a turn has run, back on **Opus 5** — yesterday's silent 4.8 drop did NOT carry across the seat)):**
+- **s124's queue, as ruled:** (1) the OWED leg-5 advisory re-run on #800 `c06860658` — npm's bulk endpoint was down when it was pushed with `--no-verify`, disclosed in the PR body; re-run when it answers, post the result, mark the disclosure resolved. (2) **KS-791** (Backlog/Medium, read live 03:23:25Z) — publish verify-file v1+v2 in the spec, coupled with the gateway 415 fix; the half s123 split out of KS-663 rather than leaving it half-done. (3) Then the standing Category-1 queue, swept by the agent itself.
+- 🔴 **TWO HARD HOLDS carried into the brief.** **KS-781/KS-790 are OFF LIMITS to every agent** — KS-781 is a CONFIRMED runtime MFA bypass on `POST /api/oauth/authorize` and KS-790 (a separate pre-auth `getUserById` bug) is the ONLY thing stopping the leaked code becoming a session; fixing KS-790 in isolation ARMS the bypass. **LEAVE the unpushed branches** `feature/ks-663-…` `df169eaf5` and `feature/ks-693-…` `88684fb25` — the 12:15 `--no-verify` ruling named #800/#806 only and does NOT extend; they have no reviewer and no deadline, so waiting costs nothing.
+- **Board, counted through `board_count.sh` (never a hand-picked `first:`): KS 108 active · KS 89 backlog · PS 29 active**, read 2026-09-04.
+- **KS-790 measured for the risk rather than assumed: still Backlog, High, UNASSIGNED, last touched 2026-09-04T02:32:43Z.** Nobody has picked it up, so the warning to Peter and Stuart still has time on it. That warning is Kam's to send — external comms — and is re-raised on his panel.
+- **KS-597/598 remain Category-2**, held pending Kam's plan-sheet approval; Wednesday holds that request deliberately behind the security item.
+- **#800 `c06860658` and #806 `745e9e0e0` are with Peter; nothing merges without him.** The PS-761 caveat (three concurrent stacks SIGKILL the app; `exit 137`, no log, no test fails, `docker inspect` describes the REPLACEMENT container) must travel with the re-request — it was observed during a PS-737 gate run, which is the gate Peter will run.
 
 **Open / next (refreshed 2026-09-03 23:07 — s119 WRAPPED 13:02:07Z; s120 launching on KS-726; the batched through-code QA pass RUNNING on pane %22):**
 - **develop `7dd304b7c`** (s119's own ls-remote, not the merge API's reply). **TWO MERGED tonight on Wednesday's GOs:** `96c970b18` (#781, the CI gate PR) then `7dd304b7c` (#795, Peter's lint PR) — each PUT guarded on the head SHA so a moved head would have been refused.
