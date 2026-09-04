@@ -3330,5 +3330,34 @@
   "status": "open",
   "ruled_choice": null,
   "ruled_ts": null
+ },
+ {
+  "id": "secuura-ks788-gate-fails-open-2026-09-04",
+  "client_project": "Secuura / Blockchain (Platform K)",
+  "title": "The dependency gate should fail OPEN on one leg when npm is unreachable — a security-posture change on a repo with no CI behind it",
+  "bluf": "Wednesday has AUTHORISED THE BUILD and is NOT authorising the merge. Today the advisory leg of the pre-push gate calls npm with no timeout; npm has been down all day, so the call never returns and NOBODY can push to that repo at all. That is why Wednesday had to authorise a --no-verify bypass this morning, and a --no-verify skips EVERY leg, not one. The fix adds a timeout so the leg reaches a SKIP path that is already written in the code. THE CATCH, which the agent did not name and Wednesday is naming: that SKIP path is authorised by CONTRIBUTING.md on the clause \"CI is the hard gate\" - and GitHub Actions is RETIRED on that project, so the backstop the authorisation assumes does not exist. So this is not \"letting the code reach its ratified path\". It is deliberately failing OPEN on one leg of a security gate, on a client platform, with no CI behind it, because failing CLOSED is producing worse bypasses. Build, red-proof and PR are Wednesday scope and are proceeding; the merge changes security posture and Peter reviews it. Nothing is blocked while this sits.",
+  "default_action": "if you say nothing: the build, the red-proof and the PR go ahead and the PR OPENS, but it does NOT merge - it waits for you. Nothing is blocked either way; the agent has other work, and the KS-792 lock fix pushes normally once the timeout is in its tree.",
+  "options": [
+   {
+    "key": "merge-when-peter-approves",
+    "label": "Let it merge on Peter review alone",
+    "detail": "Kam delegates the posture call to Peter as the reviewing engineer; Wednesday reports the outcome. Fastest, and Peter is the person who lives with both the gate and the outage."
+   },
+   {
+    "key": "kam-signs-too",
+    "label": "Kam signs it as well as Peter",
+    "detail": "Kam reads the PR body (which carries the no-CI framing and the outage measurements) and rules explicitly before merge. Slower by however long Kam takes; nothing else waits on it."
+   },
+   {
+    "key": "do-not-merge",
+    "label": "Build it but do not merge - keep failing closed",
+    "detail": "The repo stays unpushable during any npm outage, and the pressure toward --no-verify (which skips every leg) stays. The branch sits ready for whenever the posture question is settled."
+   }
+  ],
+  "recommended": "kam-signs-too",
+  "ts": "2026-09-04T14:11:48.061661+10:00",
+  "status": "open",
+  "ruled_choice": null,
+  "ruled_ts": null
  }
 ]
