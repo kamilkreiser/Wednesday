@@ -737,3 +737,51 @@ replaced the SUBJECT with a stub and left a green suite testing nothing.** The a
 control asserts **the decision function is NOT a mock**, and its auth stub sets the principal under
 **both** property names the real setter uses, *"because a stub setting one silently disables half the
 chain."* **A test's mocks are part of its subject; mock the neighbours, never the thing under test.**
+
+
+## A MULTI-CLAUSE guard red-proofed with a fixture that trips BOTH clauses has measured the pair and learned nothing about the parts (2026-09-04, Datasec/NexusAI S31 — the builder found its OWN guard was decoration)
+
+**The case.** S31 wrote a "no private copy of the shared formatter" guard with two clauses: a
+function-definition matcher and a month-name heuristic. Its function-definition clause ended the
+body at `\n\s{0,4}\}` — **so it only ever matched a function indented four spaces or less.**
+`sustainability-ui.js` is indented four. **`index.js` is indented eight.**
+
+> **A private `humanSpan` planted in `index.js` with no month-name table passed 10/10 GREEN.**
+> The month-name heuristic beside it was carrying the entire clause.
+
+**How it was found, which is the whole lesson:** it tampered with **each clause separately**. Its
+first tamper included a month table, the guard went red, and — its own words — *"had I stopped
+there I would have reported a working detector."* The second tamper, same defect with one
+heuristic removed, is what exposed it.
+
+**THE RULE, adopted verbatim from the builder:**
+
+> **A guard with two clauses, red-proofed with a fixture that trips BOTH, tells you the guard
+> fires. It does not tell you either clause works. Red-proof each clause against a fixture only
+> that clause can catch, or you have measured the pair and learned nothing about the parts.**
+
+**How to apply:**
+1. **Count the clauses in any guard before red-proofing it.** A guard with N independent
+   conditions needs N fixtures, each of which trips exactly one. A single fixture that trips all
+   of them proves only that the disjunction is non-empty.
+2. **Disable each clause in turn and confirm the others still catch their own case alone.** A
+   clause that cannot be shown to catch something by itself is decoration, and decoration in a
+   guard is worse than an absent guard because it is counted as coverage.
+3. **Suspect the CHEAP clause of carrying the expensive one.** Here a month-name string match was
+   silently doing the work a structural regex was credited with. The cheap heuristic is the one
+   that fires on everything, so it hides a structural clause that fires on nothing.
+4. **A regex that bounds a code body by indentation encodes a file's formatting as a
+   precondition.** `\n\s{0,4}\}` is a claim about every file the guard will ever run over. Prefer
+   naming the function; where a textual bound is unavoidable, red-proof it at the widest
+   indentation in the corpus (this is the 2026-09-04 sibling: *do not reuse the shape of the
+   defect that motivated the guard — enumerate the shapes its corpus actually contains*).
+5. **This is the truncation family again** — a cheap textual extractor standing in for a parser,
+   on input whose shape the author did not enumerate. Fourth instance in two days across two
+   projects: a selector split on its last line, a `sed` range starting at the wrong line, a brace
+   search halted by a doc comment, and now a body bound halted by indentation.
+
+**Family:** the CONTROL-side rules above (a control must ISOLATE the mechanism it is named for;
+a control that has never been made to fail is a claim) — **this is that rule pointed at a guard's
+INTERNAL STRUCTURE rather than at the guard as a whole.** Both prior formulations would have
+passed this guard: it fired, and it isolated the mechanism *it was named for*. Only clause-level
+tampering saw it.
