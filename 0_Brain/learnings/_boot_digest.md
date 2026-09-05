@@ -7,7 +7,7 @@ status: live
 
 # Boot digest — headline + rules of every lesson (open the file when it fires)
 
-Generated 2026-09-05 13:32 from 94 lesson files (434,363 B). Each block = the lesson's retrieval handle (H1), its frontmatter, the operative paragraph, its section index, and every RULES section verbatim. 6 files carry no rules-shaped section and are included whole. The CASES behind a rule live only in the file: open it the moment the rule fires, or when a diagnosis needs the evidence. `_ledger.md` is read whole beside this digest; `_ledger_archive.md` on demand.
+Generated 2026-09-05 14:01 from 95 lesson files (438,956 B). Each block = the lesson's retrieval handle (H1), its frontmatter, the operative paragraph, its section index, and every RULES section verbatim. 6 files carry no rules-shaped section and are included whole. The CASES behind a rule live only in the file: open it the moment the rule fires, or when a diagnosis needs the evidence. `_ledger.md` is read whole beside this digest; `_ledger_archive.md` on demand.
 
 ## The T9 SSD is the master — Wednesday must be fully portable
 `2026-07-31_fully-portable-drive.md` · principle · 2026-07-31 · status: superseded — the "T9 is the master" half by [[2026-08-25_one-drive-devmaster-is-master]] (2026-08-25); the portability principle itself still lives
@@ -3349,4 +3349,17 @@ sections (open the file for these): How to apply
 **Family:** [[2026-08-04_gitignore-artifacts-at-creation]] (fate at creation — now
 including *location*) · [[2026-08-26_never-delete-cleanup-means-quarantine]] ·
 [[2026-08-07_a-check-that-cannot-fail]] (the doctor check was fired before it was trusted).
+
+
+## Client-facing communication goes ON THE TICKET — the extranet is not a channel, and the only escalation path is a short WhatsApp that KAM sends
+`2026-09-05_tickets-are-the-channel-whatsapp-via-kam-is-the-escalation.md` · preference · 2026-09-05 · status: live
+
+**The operative case, so the headline matches it:** Wednesday or an agent has something Peter, Stuart or any client human needs to read — a status document, a warning, a question, a PR's state, a finding. **It goes as a BLUF comment on the ticket they will read (Linear for Secuura, Jira for Datasec). Never the extranet. Never a document "posted" or "sent" anywhere else.** If it is urgent enough that a ticket comment might sit unread, that is an ESCALATION: Wednesday tells Kam, with a copy-pasteable one-or-two-line WhatsApp text that points at the ticket, and Kam sends it. Nobody else messages the humans.
+
+**How to apply:**
+1. **Every deliverable for a client human is a ticket comment, BLUF-first** ([[2026-08-06_bluf-write-for-the-reader]]), posted by the project's own agent under its board authority. A document in a repo or on a branch (the #811 status document) is delivered by a comment that carries its content or its link ON THE TICKET the human reads — the review-stream parent for Peter, the S↔K stream for Stuart ([[2026-09-02_coo-actionable-tickets-never-wait-for-kam]]).
+2. **The extranet is INPUT ONLY.** Read replies there if they exist; never post there; never count an extranet reply as "the human has been told" in the other direction. A brief that says "post to the extranet" is wrong.
+3. **Escalation = Wednesday → Kam → WhatsApp.** When a ticket comment is not enough (a security hold, a merge the team must not do, a question blocking a rotation), Wednesday tells Kam on the panel with the WhatsApp text ready: one or two lines, the ticket id, nothing that is not already on the ticket (his 2026-08-19 rule: "by having the detail in that ticket, the message can actually be short"). Kam decides and sends; external comms stay his signature class ([[2026-08-07_protocol-v1.3-signed-delegation]]).
+4. **Wednesday does not nag him with escalation candidates.** Tell him when one exists, with the text; the default if he is silent is that the ticket comment stands on its own.
+5. **Briefs carry this as a standing line** in the HOLDS section for every client project: "Client-facing communication = ticket comments only; the extranet is not a channel; anything needing a push goes to Wednesday as an escalation candidate for Kam's WhatsApp."
 

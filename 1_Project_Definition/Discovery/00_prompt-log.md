@@ -2212,3 +2212,8 @@ Done with it: Dynamics → Kam's team decision (no action); QuickQuote masthead/
 > if the merge is necessary to continue that is fine.  the point is for us to keep code and responsibilities seperate
 
 *Done with it:* merge judged NOT necessary (Platform K's queue does not depend on it); s125 kept off Platform S; the two Peter-approved PS PRs carded for a Platform S responsibility. Principle recorded on the day's ledger row.
+
+## 2026-09-05 13:57 — Kam (dashboard chat, verbatim)
+> The team is not using the extranet much. I mentioned this yesterday. If anything needs to be escalated, please tell me and I'll send a WhatsApp message. Otherwise, everything has to be done through the tickets.
+
+*Note:* Re-ask of 2026-09-04 08:32; filed as lesson 2026-09-05_tickets-are-the-channel-whatsapp-via-kam-is-the-escalation (w=2); relayed to Secuura s127 by addendum; fleet brief template gains the standing HOLDS line.
