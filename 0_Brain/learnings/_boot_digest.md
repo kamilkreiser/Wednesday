@@ -7,7 +7,7 @@ status: live
 
 # Boot digest — headline + rules of every lesson (open the file when it fires)
 
-Generated 2026-09-05 16:19 from 96 lesson files (450,765 B). Each block = the lesson's retrieval handle (H1), its frontmatter, the operative paragraph, its section index, and every RULES section verbatim. 6 files carry no rules-shaped section and are included whole. The CASES behind a rule live only in the file: open it the moment the rule fires, or when a diagnosis needs the evidence. `_ledger.md` is read whole beside this digest; `_ledger_archive.md` on demand.
+Generated 2026-09-05 17:00 from 97 lesson files (457,783 B). Each block = the lesson's retrieval handle (H1), its frontmatter, the operative paragraph, its section index, and every RULES section verbatim. 6 files carry no rules-shaped section and are included whole. The CASES behind a rule live only in the file: open it the moment the rule fires, or when a diagnosis needs the evidence. `_ledger.md` is read whole beside this digest; `_ledger_archive.md` on demand.
 
 ## The T9 SSD is the master — Wednesday must be fully portable
 `2026-07-31_fully-portable-drive.md` · principle · 2026-07-31 · status: superseded — the "T9 is the master" half by [[2026-08-25_one-drive-devmaster-is-master]] (2026-08-25); the portability principle itself still lives
@@ -3385,6 +3385,25 @@ sections (open the file for these): How to apply
 **Family:** [[2026-08-04_gitignore-artifacts-at-creation]] (fate at creation — now
 including *location*) · [[2026-08-26_never-delete-cleanup-means-quarantine]] ·
 [[2026-08-07_a-check-that-cannot-fail]] (the doctor check was fired before it was trusted).
+
+
+## Learnings live in three tiers — Wednesday holds management and operations; project agents hold their project's cases; the fleet method is shared and client-neutral
+`2026-09-05_three-tier-learnings-wednesday-management-agents-project.md` · preference · 2026-09-05 · status: live
+
+**The operative case, so the headline matches it:** Wednesday is about to write, extend, or file a lesson — from a correction, a fleet insight, or an agent's keeper. **Ask which tier it belongs to before writing a word, and write it THERE:**
+- **W — Wednesday's own:** how Kam works and what he has ruled, the coordination method (briefs, gates, taps, pane closes, scores, rotation), the boundaries (the seven hard rules, R0, the signature classes), and Wednesday's own failure modes. Loaded whole at every Wednesday boot.
+- **M — fleet method, client-neutral:** the instrument disciplines every agent must carry (a control must be able to fail; a red-proof against the product's own path; a SHA is read or not used; an rc on its own line; never delete). Written WITHOUT any client's case in it. Reaches agents through the brief template's standing lines and the QA charter today; a shared home is Kam's call (a shared file).
+- **P-<Client>/<Project> — that project's cases:** the fast-uri fuse, the body-parser guard corpus, the jsonStorage rotation, the Sustainability tab's paint timing. Written into THAT project's own brain by ITS agent (Wednesday briefs the transfer; hard rule 1 — Wednesday never edits another project's files) and loaded by that agent at ITS boot. Wednesday keeps only the handle (one line + a pointer), never the case.
+
+**How to apply:**
+1. **Every new lesson and every ledger row carries `tier:` in its frontmatter / a `[W]`/`[M]`/`[P-<Client>/<Project>]` tag at creation** — a decision made when the sentence is written, not at consolidation (the gitignore-at-creation discipline pointed at location, again).
+2. **Fleet insights and praise for an AGENT's work go to the scoreboard row and the project's standing lines, not to Wednesday's ledger.** The ledger keeps Wednesday's own corrections, Kam's rulings, and Kam's praise.
+3. **A P-tier case is written as a TRANSFER ITEM** (the case, its provenance, the rule it produced) into the next brief to that project; the agent files it in its own brain and confirms by mail; Wednesday marks the section `transferred: <project> <date>` and the digest drops it to a handle.
+4. **The M tier is extracted from every P case as one client-free sentence** into the brief template's standing lines / the QA charter; a shared home in the workspace `CLAUDE.md` or `Notes (MASTER)/skills/` is proposed to Kam, never written unilaterally (a shared file across clients is his).
+5. **`boot_digest.py` emits by tier:** W whole; M rules-only; P handle-only (one line + pointer). The boot prompt names the tiers. Boot cost re-measured at every boot (the WED-139 line stays) and reported at every weekly consolidation.
+6. **Plan and phases:** `1_Project_Definition/Architecture/2026-09-05_learning-tiers-context-split-plan.md` — Phase 0 (measure + tag, Wednesday's folder only) at the weekend consolidation; Phase 1 the transfer briefs; Phase 2 the M-tier home (Kam's call); Phase 3 the at-creation rules above as the standing practice. Pilot → metrics → review with Kam before any of it is called done (the go-slow rule 4).
+
+**Family:** [[2026-08-03_context-loading-split]] (full for me, narrow for sub-agents — this file refines "full": full of MY tier) · [[2026-08-03_context-discipline-close-before-full]] · [[2026-08-11_coordinator-not-carrier]] (context is the scarce resource; an agent's window holds one task, Wednesday's holds the board) · [[2026-08-13_shared-bus-tag-filter-or-leak]] (R0 at the comms layer; this is R0 at the memory layer) · [[2026-09-02_rotate-in-the-70-80-band-conditionally]] (the rotation this reduces) · [[2026-08-03_go-slow-earn-autonomy]] (rule 4: pilot first) · [[2026-08-04_gitignore-artifacts-at-creation]] (fate at creation — now including TIER).
 
 
 ## Client-facing communication goes ON THE TICKET — the extranet is not a channel, and the only escalation path is a short WhatsApp that KAM sends

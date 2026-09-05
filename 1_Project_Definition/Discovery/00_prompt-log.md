@@ -2217,3 +2217,8 @@ Done with it: Dynamics → Kam's team decision (no action); QuickQuote masthead/
 > The team is not using the extranet much. I mentioned this yesterday. If anything needs to be escalated, please tell me and I'll send a WhatsApp message. Otherwise, everything has to be done through the tickets.
 
 *Note:* Re-ask of 2026-09-04 08:32; filed as lesson 2026-09-05_tickets-are-the-channel-whatsapp-via-kam-is-the-escalation (w=2); relayed to Secuura s127 by addendum; fleet brief template gains the standing HOLDS line.
+
+## 2026-09-05 16:57 — Kam (terminal (Wednesday session, dictated), verbatim)
+> One thought I have is to reduce your contact window and therefore reduce the restart frequency by relying more on localised agents. We know that we can trust a local agents on a lot of matters, so some of the learnings that our project specific should be loaded into the local agents window where you rely more on management and operational learnings and a high level of everything that's going on whilst the local agents have specific task and project learnings loaded and relevance to their operation. Please consider this as a model going forward. If you agree, let's map it out to implement not necessarily all right now, but recategorising existing as well as adding to future learnings
+
+*Note:* Read 'contact window' as CONTEXT window. Answered on the panel + a plan document in 1_Project_Definition/Architecture/ + a learning file; Wednesday agreed with a three-tier refinement (Wednesday / fleet-method / per-project) and R0 as the constraint.
