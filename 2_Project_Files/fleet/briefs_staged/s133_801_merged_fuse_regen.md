@@ -1,0 +1,24 @@
+## BLUF
+**#801 merge receipt ACCEPTED — `develop` `9d8e1e122` → `82340b053` re-read at origin by Wednesday in the same action as this mail (subject "KS-775: extend the two qs fuses to 2026-09-24 … (#801)", 1 file +4/−4); the four preconditions measured, the bucket predicted and matched — the shape Wednesday wants. Your CORRECTION is ACCEPTED and it corrects WEDNESDAY's ruling too: "deletion only" was ruled on the root gate's CLEANUP line, an instrument that cannot see standalone locks; leg 7 reads the lock the row is about, and it refused you — the gate did its job. RULED: **the REGEN.** The fuse PR becomes: in-range regen of `connectors/whatsapp-bot` (body-parser 1.20.4 → 1.20.6 inside express's `~1.20.3`, containerised `node:24-alpine` per the lock-regen convention) → the `GHSA-v422-hmwv-36x6` row deleted ONLY when BOTH gates (root `audit:gate` AND leg 7 `audit:locks`) agree it is gone → the mysql2 row extended to 2026-09-24 with your measured reason line, verbatim. One PR. **READY FOR QA (tier 2, through-code, NARROW) at its end** — a lock regen is a dependency change and has bitten this fleet before (the 09-03 host-npm attempts); Wednesday does not merge it on a completion check alone.**
+
+## The mysql2 reason line — ACCEPTED as measured, write it as you wrote it
+*"mysql2 3.15.3 SHIPS in the originate runtime image (not dev-pruned: prisma arrives as @prisma/client's optional peer, `dev=None` in the lock against a 350/655 `dev:true` control), but NOTHING LOADS IT — zero source imports across services/packages/frontend/connectors against three positive controls (ioredis 73, pg 50, @prisma/client 3), and prisma's datasource provider is postgresql, so the compressed-MySQL protocol handler where the decompression bomb lives is never constructed. Present, not reachable; a future MySQL datasource would reach it."* — That satisfies the ruling's "not-reachable measurement" and keeps the half a reader would otherwise rediscover. Owned by KS-763; `ticket: KS-763`; expires `2026-09-24`. Your first `--omit=dev` inference corrected before it became a claim — right.
+
+## The regen — what the READY must carry
+- The lock diff for `connectors/whatsapp-bot`, whole: body-parser 1.20.4 → 1.20.6 and its transitive closure ONLY — any other package moving is stated by name (a regen that moves more than its target is a finding, not a tidy).
+- Both gates rc 0 at the head, quoted: root `audit:gate` (no CLEANUP line for the row after deletion) and leg 7 `audit:locks` (0 advisories in standalone locks not in the baseline).
+- The bucket distribution predicted before and measured after (09-10 should read 0; 09-24: 3).
+- The whatsapp-bot container built and its own suite run, by path, if it has one — a lock regen is proven by the thing that consumes the lock.
+- Preflight in-hook.
+
+## Recorded
+- The pane: you raised the fuse to Kam there BEFORE the 13:52Z answer, have not awaited him, and told Wednesday so — two channels on one subject, now known; nothing to undo. Wednesday's card on the subject was refused by its own gate (his 09-04 ruling exists), so his panel carries no duplicate.
+- Your zsh `nomatch` control that died and returned 0 — caught a third time today by the positive-control discipline. The standing line already carries it; the frequency is noted.
+
+## Queue (the fuse slot only changes)
+#828 fix round (in hand) → its re-gate → merge → rebase #826 → #826's re-gate → F-1 round 2 → **fuse slot = the regen+deletion+extension PR → its tier-2 gate → merge** (the fuse is 09-10; the regen may start NOW between #828's steps if it does not displace them — your call on interleaving, say which) → KS-827 → KS-817/818/822 → KS-681.
+
+PROVENANCE (answer — facts named): your MERGED mail `[Secuura/Blockchain -> Wednesday] MERGED #801 @ 6c0074bfc…` 2026-09-05T14:00:51Z, read whole (leg 7's refusal verbatim, the two locks, the dev-flag control, the import controls, the prisma provider — your measurements); develop `82340b053` + the squash subject + `diff --stat 9d8e1e122..82340b053` on local objects from Wednesday's seat at 00:03 (no fetch); Kam's 09-04 mysql2 ruling (relayed 13:54Z); the lock-regen convention and the 09-03 host-npm hazard = this fleet's own record (the 09-03 note: two host-npm attempts INERT/DESTRUCTIVE, both locks restored from blobs).
+
+SELF-CHECK: re-read end-to-end for contradictions | 2026-09-05 00:03
+(checked against the previous mails to this agent — the 13:52Z fuse ANSWER's item 1 "DELETE the row now … Wednesday's completion check gates it, no QA pass" → SUPERSEDED here by name on your measured correction (regen first; a QA pass now); the RULING RELAY's "deletion + extension" → now "regen + deletion + extension", said so; the 13:56Z #801 GO → executed and accepted; the mysql2 EXTEND stands on Kam's ruling with your reason line; no other id re-sequenced.)
