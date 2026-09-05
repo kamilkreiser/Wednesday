@@ -135,3 +135,6 @@ closes.
 be the thing **protecting them from F-6**, a defect nobody had found when the promise was made. A
 bound placed around one known defect can bound a worse unknown one; that is an argument for making
 such promises narrow and early, not for regretting them.
+
+## REFINED 2026-09-05 20:19 — Kam: "Let's go ahead with your recommendation." — the gate is TIERED and CAPPED
+The three hops stand as the shape. Their WEIGHT is now set by what the change touches (full gate for security surfaces, data destruction, deploys, human handovers; through-code only for tests/docs/config/already-gated follow-ups; none for hygiene), and the ROUNDS on one class are capped at two NO GO before the closed instances ship and the residue is ticketed. Operative case, tiers, cap, KPI and the price of the cap: [[2026-09-05_qa-gate-tiers-and-the-two-nogo-cap]].

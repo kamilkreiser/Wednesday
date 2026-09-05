@@ -7,7 +7,7 @@ status: live
 
 # Boot digest — headline + rules of every lesson (open the file when it fires)
 
-Generated 2026-09-05 18:50 from 97 lesson files (457,783 B). Each block = the lesson's retrieval handle (H1), its frontmatter, the operative paragraph, its section index, and every RULES section verbatim. 6 files carry no rules-shaped section and are included whole. The CASES behind a rule live only in the file: open it the moment the rule fires, or when a diagnosis needs the evidence. `_ledger.md` is read whole beside this digest; `_ledger_archive.md` on demand.
+Generated 2026-09-05 20:20 from 98 lesson files (463,070 B). Each block = the lesson's retrieval handle (H1), its frontmatter, the operative paragraph, its section index, and every RULES section verbatim. 6 files carry no rules-shaped section and are included whole. The CASES behind a rule live only in the file: open it the moment the rule fires, or when a diagnosis needs the evidence. `_ledger.md` is read whole beside this digest; `_ledger_archive.md` on demand.
 
 ## The T9 SSD is the master — Wednesday must be fully portable
 `2026-07-31_fully-portable-drive.md` · principle · 2026-07-31 · status: superseded — the "T9 is the master" half by [[2026-08-25_one-drive-devmaster-is-master]] (2026-08-25); the portability principle itself still lives
@@ -3068,7 +3068,7 @@ race; the predecessor had re-read first at 00:25). Rule 4's candidate is now the
    three different instruments: the agent proves it built it; the QA agent proves it works
    for a user; I prove it is what was asked for.
 
-sections (open the file for these): SHARPENED 2026-09-04 (w=88): a claim about the PRODUCT is not a shape, however well it is argued · The SHAPE-vs-CORRECTNESS split (2026-09-04, ledger w=78 — Wednesday ratified work the gate then found three Majors in)
+sections (open the file for these): SHARPENED 2026-09-04 (w=88): a claim about the PRODUCT is not a shape, however well it is argued · The SHAPE-vs-CORRECTNESS split (2026-09-04, ledger w=78 — Wednesday ratified work the gate then found three Majors in) · REFINED 2026-09-05 20:19 — Kam: "Let's go ahead with your recommendation." — the gate is TIERED and CAPPED
 
 **The rule (Kam's order, exactly):**
 1. **The agent hands over to me confirming what was done** — the wrap/STATUS mail: sets not
@@ -3151,6 +3151,9 @@ report id. Until it ships, I run the hop by hand on every wrap and say so in the
 be the thing **protecting them from F-6**, a defect nobody had found when the promise was made. A
 bound placed around one known defect can bound a worse unknown one; that is an argument for making
 such promises narrow and early, not for regretting them.
+
+## REFINED 2026-09-05 20:19 — Kam: "Let's go ahead with your recommendation." — the gate is TIERED and CAPPED
+The three hops stand as the shape. Their WEIGHT is now set by what the change touches (full gate for security surfaces, data destruction, deploys, human handovers; through-code only for tests/docs/config/already-gated follow-ups; none for hygiene), and the ROUNDS on one class are capped at two NO GO before the closed instances ship and the residue is ticketed. Operative case, tiers, cap, KPI and the price of the cap: [[2026-09-05_qa-gate-tiers-and-the-two-nogo-cap]].
 
 
 ## I am the COO of the boards — a ticket that needs no external input is executed, never listed
@@ -3348,6 +3351,24 @@ sections (open the file for these): Why the rule did not fire (the w=2 diagnosis
 5. **Test by its handle:** if the artefact going to Peter or Stuart could be read as "here are N things", it is not ready; if it reads as "run this, and these M are done", it is.
 
 **Family:** [[2026-09-02_coo-actionable-tickets-never-wait-for-kam]] (the 09-03 extension this promotes) · [[2026-08-06_bluf-write-for-the-reader]] (the reviewer's attention is the scarce resource; structure is part of the deliverable) · [[2026-08-13_headline-must-match-the-operative-case]] (why it did not fire) · [[2026-09-05_tickets-are-the-channel-whatsapp-via-kam-is-the-escalation]] (the channel the blocks travel on).
+
+
+## The QA gate is TIERED by what the change touches, and CAPPED at two NO GO rounds on one class — full weight for security, data destruction, deploys and human handovers; through-code only for tests, docs, config and already-gated follow-ups; none for hygiene
+`2026-09-05_qa-gate-tiers-and-the-two-nogo-cap.md` · grant · 2026-09-05 · status: live — refines 2026-09-01_qa-gate-before-my-verification (the gate stays; its WEIGHT is now tiered and its ROUNDS are capped)
+
+**The operative case, so the headline matches it:** a builder's READY or wrap lands and Wednesday is about to commission a QA pass. **Ask two questions before writing the brief: (1) which TIER does this change fall in — what does it touch? (2) how many NO GO rounds has this CLASS already had?** The answer to (1) sets the pass's weight; the answer to (2), if it is two, means the residue is ticketed and the closed instances ship — no third round without Kam's word.
+
+sections (open the file for these): The tiers · The cap · The KPI (weekly consolidation) · How to apply
+
+**The grant (recorded per go-slow rule 5).** Kam's 2026-09-01 rule — every change goes agent → Wednesday → testing agent → Wednesday — stands as the SHAPE. On 2026-09-05 at 20:17 he asked whether the gate was yielding and whether everything should go through it; Wednesday answered with the scoreboard (56 passes in five days; today 9 passes with 5 NO GO; builders 0.85 mean with 13 introduced-defect rounds; one NexusAI class at its eighth gate; ~30 min per pass; the 7-day budget at 34%) and recommended tiers plus a cap rather than sparing use. He ruled at 20:19: *"Let's go ahead with your recommendation."*
+
+## How to apply
+1. Every QA brief's header names its TIER and the reason ("tier 1: auth door" / "tier 2: follow-up, mechanism gated at `2ddca095d`").
+2. Every fix-round mail names the ROUND COUNT for the class ("round 2 of 2 under the cap — the next NO GO ships the closed instances and tickets the rest").
+3. In flight on 09-05 at the grant: NexusAI re-gate (8) is the class's eighth round — the cap is forward-looking; a NO GO at (8) ships the closed instances and tickets the residue rather than opening round 9. s131's follow-up PR (S130-F1…F6) = tier 2. #817 (KS-800, the NUL-byte guard class) = tier 1 (a security guard's mount surface).
+4. Unchanged: Wednesday's completion check (delivered-vs-commissioned) on every round; the signature classes; a deploy needs Kam's word.
+
+**Family:** [[2026-09-01_qa-gate-before-my-verification]] (the rule this tiers — its three hops stand) · [[2026-08-03_go-slow-earn-autonomy]] (rule 5: a relaxation is recorded, never assumed) · [[2026-08-07_a-check-that-cannot-fail]] (what the gate catches) · [[2026-08-21_challenge-me-when-you-think-im-wrong]] (the recommendation went to him with its price, not as a courtesy answer) · [[2026-09-04_decisions-held-narration-drifted]] (the measurement in the same breath as the characterisation).
 
 
 ## The project root holds only rules and launchers — every file Wednesday writes has a folder, and the root is never it

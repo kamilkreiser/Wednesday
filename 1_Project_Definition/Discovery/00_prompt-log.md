@@ -2227,3 +2227,8 @@ Done with it: Dynamics → Kam's team decision (no action); QuickQuote masthead/
 > Is the QA agent yielding results? Do you think it's worthwhile having everything go through the QA agent, or should we use it sparingly?
 
 *Note:* Answered on the panel with scoreboard measurements (56 passes / 5 days; today 9, 5 NO GO; builders 0.85 mean, 13 introduced) and a TIERED recommendation + a two-NO-GO cap; long form 5_Project_History/2026-09-05_qa-gate-assessment.md; default = his 09-01 rule unchanged until he rules.
+
+## 2026-09-05 20:20 — Kam (dashboard chat, verbatim)
+> That's great to hear. Thank you. Let's go ahead with your recommendation.
+
+*Note:* RULING on the QA gate: tiers (full / through-code / none) + a two-NO-GO cap per class + first-time-pass KPI — recorded as a grant in learnings/2026-09-05_qa-gate-tiers-and-the-two-nogo-cap.md; applied from the next brief.
