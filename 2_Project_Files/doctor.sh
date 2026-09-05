@@ -222,8 +222,19 @@ if [ -f "$LCONF" ]; then
   # Fable credits ran out on 2026-09-03 and he had to switch the model by hand.
   # A check whose corpus excludes the checker's own file is a check that cannot
   # see (ledger, a-check-that-cannot-fail family).
-  if grep -vE '^\s*#' "$PROJECT_DIR/Launch_Wednesday.command" 2>/dev/null | grep -qE -- '--model (claude-)?fable'; then
-    STALE_PINS="$STALE_PINS WEDNESDAY(own)"
+  # AMENDED 2026-09-05 (Kam: "latest fable … unless credits are out, in which case
+  # latest opus"): Wednesday's launcher now pins `--model fable --fallback-model
+  # opus`. The hazard this check guards is "credits out → seat cannot start"; the
+  # fallback flag is the remedy, so a fable pin WITH the fallback is the wanted
+  # state and only a fable pin WITHOUT it warns. (A dated `claude-fable-N` pin
+  # still warns — the alias is what tracks the newest Fable.)
+  WEXEC=$(grep -vE '^\s*#' "$PROJECT_DIR/Launch_Wednesday.command" 2>/dev/null | grep -E -- '--model (claude-)?fable' || true)
+  if [ -n "$WEXEC" ]; then
+    if printf '%s\n' "$WEXEC" | grep -qE -- '--model claude-fable'; then
+      STALE_PINS="$STALE_PINS WEDNESDAY(own:dated-pin)"
+    elif ! printf '%s\n' "$WEXEC" | grep -qE -- '--fallback-model'; then
+      STALE_PINS="$STALE_PINS WEDNESDAY(own:fable-without-fallback)"
+    fi
   fi
   if [ -n "$STALE_PINS" ]; then
     warn "fable-5 pin still in launcher(s):$STALE_PINS" "next launch reverts to Fable — route the pin edit to that project's agent (or Kam)"
@@ -232,22 +243,30 @@ if [ -f "$LCONF" ]; then
   fi
 fi
 
-# --- Wednesday's OWN model pin: the ALIAS, never a dated ID — and the alias is now
-# `opus` (Kam, 2026-09-03 21:0x: "fable credits ran out. next launch use opus").
-# This SUPERSEDES the 2026-09-02 ruling that pinned the `fable` alias; the alias
-# discipline itself is unchanged, because a dated pin went stale the day Fable 5.1
-# shipped and nothing noticed until Kam did. A `fable` pin here is now a REGRESSION:
-# it launches a seat against an exhausted credit pool.
+# --- Wednesday's OWN model pin (Kam, 2026-09-05 13:1x, verbatim: "you should load in
+# latest fable model (now 5.1) unless credits are out in which case you should load
+# in latest opus model"). The wanted exec line is `--model fable --fallback-model
+# opus`: the `fable` ALIAS tracks the newest Fable (a dated pin went stale the day
+# 5.1 shipped, 2026-09-02), and `--fallback-model opus` is the CLI's own leg for an
+# unavailable primary — exercised 2026-09-05 with a bogus primary (FALLBACK-OK).
+# History this supersedes: 09-02 fable alias → 09-03/09-04 hand-pin `opus` when the
+# Fable credits ran out (a pin that silently kept every later seat on Opus after the
+# credits came back — the 09-05 13:09 seat booted on Opus with Fable reachable).
+# Honest limit, also written in the launcher: whether a CREDIT exhaustion trips the
+# fallback leg is unverified — it cannot be exercised without spending the credits.
 WLAUNCH="$PROJECT_DIR/Launch_Wednesday.command"
 if [ -f "$WLAUNCH" ]; then
-  if grep -vE '^\s*#' "$WLAUNCH" | grep -qE -- '--model (claude-)?fable'; then
-    warn "Launch_Wednesday.command pins Fable" "Kam's Fable credits are exhausted (2026-09-03) — use '--model opus'"
-  elif grep -vE '^\s*#' "$WLAUNCH" | grep -qE -- '--model claude-opus-[0-9]'; then
-    warn "Launch_Wednesday.command pins a DATED Opus ID" "use '--model opus' (alias = latest Opus) — Kam's alias ruling, 2026-09-02"
-  elif grep -vE '^\s*#' "$WLAUNCH" | grep -qE -- '--model opus(\[1m\])?( |$)'; then
-    ok "Wednesday launcher uses the 'opus' alias (latest Opus at every launch)"
+  WEXECLINE=$(grep -vE '^\s*#' "$WLAUNCH" | grep -E -- '^exec claude|--model ' | tail -1)
+  if printf '%s\n' "$WEXECLINE" | grep -qE -- '--model (claude-fable-[0-9]|claude-opus-[0-9])'; then
+    warn "Launch_Wednesday.command pins a DATED model ID" "use the aliases: '--model fable --fallback-model opus' (Kam 2026-09-05)"
+  elif printf '%s\n' "$WEXECLINE" | grep -qE -- '--model fable(\[1m\])? ' && printf '%s\n' "$WEXECLINE" | grep -qE -- '--fallback-model opus'; then
+    ok "Wednesday launcher: fable alias with opus fallback (Kam 2026-09-05)"
+  elif printf '%s\n' "$WEXECLINE" | grep -qE -- '--model fable'; then
+    warn "Launch_Wednesday.command pins Fable with NO fallback" "credits out = the seat cannot start; add '--fallback-model opus' (Kam 2026-09-05)"
+  elif printf '%s\n' "$WEXECLINE" | grep -qE -- '--model opus'; then
+    warn "Launch_Wednesday.command pins opus ONLY" "Kam 2026-09-05 wants fable as the default with opus as the fallback — an opus-only pin stays on Opus after Fable credits return"
   else
-    warn "Launch_Wednesday.command has no recognisable --model opus line" "read the exec line — the alias rule may have been edited away"
+    warn "Launch_Wednesday.command has no recognisable --model line" "read the exec line — the alias rule may have been edited away"
   fi
 fi
 

@@ -3558,5 +3558,35 @@
   "ruled_choice": "in-hand",
   "ruled_ts": "2026-09-05T10:52:19.895132+10:00",
   "ruling_note": "Kam, panel 2026-09-05 10:51:56, verbatim: \"no need to raise this again.  this is in hand\" — closed without an option; Wednesday will not re-raise."
+ },
+ {
+  "id": "secuura-ks781-consent-page-shipping-surface",
+  "client_project": "Secuura/Blockchain",
+  "title": "KS-781: is the built-in OAuth consent page something Secuura ships?",
+  "bluf": "PR #812 closes the KS-781 door-1 bypass. Along the way the Secuura agent (s126) relaxed the API gateway so the built-in OAuth consent page could post a normal HTML form. The third QA pass measured two things: the page STILL cannot submit (a CSRF check refuses it first, 403), and the relaxation opened a cross-site, preflight-free path to an endpoint that checks passwords and accrues lockouts. So the relaxation currently buys zero working functionality and costs a real attack surface. The question underneath it is whether that consent page is a surface Secuura ships to integrators, or a dev convenience. Wednesday has already ruled the safe default and s126 is working to it — Kam's ruling overrides.",
+  "default_action": "Wednesday proceeds on REVERT. s126 has the ruling as of 01:06Z and is working the uncontested findings first. Kam's ruling overrides any time before the fourth QA pass is commissioned.",
+  "options": [
+   {
+    "key": "revert",
+    "label": "Revert the relaxation (Wednesday's default, already in force)",
+    "detail": "Gateway returns to its pre-#812 behaviour. PR #812's actual fix - the status/MFA gate on door 1 - merges after a fourth QA pass. The consent page's inability to submit looks PRE-EXISTING (s126 is confirming) and becomes its own ticket. Nothing working is lost; the new cross-site path closes."
+   },
+   {
+    "key": "build",
+    "label": "The consent page ships - fix it properly",
+    "detail": "s126 makes the form carry a CSRF token (hidden field, or a same-origin fetch that can set the header) rather than exempting the route, plus Origin enforcement before the no-cookie bail-out. Own ticket, own QA pass. #812 still merges on the revert in the meantime."
+   },
+   {
+    "key": "exempt",
+    "label": "Exempt authorize from CSRF (cheapest, Wednesday recommends against)",
+    "detail": "Makes the form work today and removes the last control standing in front of the cross-site path the tester measured. #812 would become the first endpoint in that class that takes a password and accrues lockout."
+   }
+  ],
+  "recommended": "revert",
+  "ts": "2026-09-05T11:06:43.317823+10:00",
+  "status": "ruled",
+  "ruled_choice": "revert",
+  "ruled_ts": "2026-09-05T13:17:54.925528+10:00",
+  "ruling_note": "Kam clicked REVERT on the panel at 11:29:11 (no Wednesday seat existed to process it — the 11:06 seat had died) and again at 13:12:00; Wednesday processed the 13:12 click. Revert was already the default in force with s126 since 01:06Z."
  }
 ]
