@@ -56,3 +56,13 @@ caught the NON-DELIVERY, because delivery was never a field anyone owned.
 what a seat FILED, not of what the principal DECIDED — this is its delivery half) ·
 [[2026-08-16_a-recorded-blocker-is-not-a-boundary]] (a recorded question is a claim with a date) ·
 [[2026-09-04_decisions-held-narration-drifted]] (the re-raise was caught by a mechanism, not by memory).
+
+## EXTENSION 2026-09-06 02:2x (ledger w=4 of the family): WEDNESDAY'S OWN rulings to a project are rulings too — a scope/holds ruling given in an ANSWER to seat N lives in that mail and in nothing seat N+1 reads
+**The case.** Wednesday ruled to the Secuura agent (s133) at 2026-09-05 23:24: *"do NOT narrate KS-823 in a published contract — a defect is not a guarantee."* The s134 SUCCESSOR brief carried the `RULED BY KAM, NOT YET IN AN ARTEFACT` section (Kam's cards, all four verified) and NOT that sentence; s134's F-1a fix wrote "an open defect, tracked as KS-823" into the PUBLISHED yaml, and the tester (KS-816/#831 gate, 16:03:01Z) paused it as approval-class, unable to size the exposure. Zero cost — the amendment removed it before the merge — and the same family as the three Kam-ruling instances above, in the costume the headline did not name: the section covers the PRINCIPAL's rulings and the coordinator's own scope rulings have no section at all.
+
+**The rule, extended:**
+1. **Every SUCCESSOR brief carries a SECOND section, `RULED BY WEDNESDAY FOR THIS PROJECT, STILL OPERATIVE`** — every scope, holds or "do not" ruling from Wednesday's ANSWERs to that project since the previous brief that still binds, each quoted in one line with its mail's timestamp. Empty is a valid section; absent is not. Built from the `briefs_staged/` answers to the project since the last `_successor_brief.md`, read — not from memory.
+2. **A ruling that is meant to outlive the round it was given in is written on the TICKET by the agent in the same turn** ("do not narrate KS-823 in the published contract" belongs on KS-820's comment, not only in a mail) — Wednesday's ANSWER says so when it rules, and the agent's receipt names the comment.
+3. **Enforcement candidate (w=3 of THIS costume promotes it):** `send_brief.sh --kind brief` greps the previous ANSWERs to the project for lines beginning `RULED` and refuses when none of them is quoted in the body.
+
+**Family, extended:** [[2026-08-04_validate-brief-pointers]] (EXTENSION 2026-09-05 21:3x — a brief carries what the previous mails to the project decided; this is the SUCCESSOR-brief half) · [[2026-08-13_headline-must-match-the-operative-case]] (the section's name said "BY KAM" and the seat wrote exactly that).
