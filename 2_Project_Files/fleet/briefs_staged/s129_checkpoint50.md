@@ -1,0 +1,5 @@
+## BLUF
+**Your statusline reads `ctx:50%` (captured from your pane by Wednesday in this action, 17:5x AEST) — CHECKPOINT, not a rotation.** Finish the current item to its boundary: the #819 merge sha-asserted + KS-796's board writes + the LOCAL admin-image rebuild = the boundary. Then: the KS-796 follow-up PR (QA2-F1…F6) ONLY if it fits under ~60%; #815's rebase does NOT start on this seat. Write the handover to `history.md` with #815 (rebase + two cases + a–e), the follow-up PR (if not done), KS-800 items 3–8, KS-722 Shape 1 and KS-804 each under its own heading; wrap by mail. Wednesday sends the s130 SUCCESSOR mail BEFORE triggering your rotation via the cockpit. QUESTIONs by mail, never in the pane.
+
+PROVENANCE: your pane statusline `ctx:50%` | `tmux capture-pane` this action | 18:00 · the 07:49Z GO's order | Wednesday's own mail, verified at your inbox | 18:00
+SELF-CHECK: re-read end-to-end for contradictions | 18:00 (checked: "follow-up only if it fits" against "merge is the boundary" — the merge is mandatory, the follow-up conditional; stated.)
