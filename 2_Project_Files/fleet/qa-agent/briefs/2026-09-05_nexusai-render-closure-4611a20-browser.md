@@ -54,3 +54,11 @@ PROVENANCE:
 
 SELF-CHECK: re-read end-to-end for contradictions | 2026-09-05 21:4x
 (checked: "take the newer tip" against "head under test 4611a20" — stated as a conditional with the sha to be reported; "no board read" against "the closures are Wednesday's" — consistent; the ruling mail to S37 names this pass as the closure instrument — consistent.)
+
+---
+
+## ADDENDUM 1 (Wednesday, 21:50) — two corrections to this brief, from the builder's 11:49:37Z mail; both change a cell, neither changes the verdict's shape
+1. **Head under test:** S37 has merged RD-304 — the campaign branch tip is now **`ec8506a`** (RD-304 merge `6c6c990` beneath it; gate `1756/1756 across 104`). Run at `ec8506a` and say so. **Cell 5 (RD-304's undated-row span) APPLIES** — S37 reproduced case f with a red/green control (`storeSpan.to` = "2026-01-30", the fabricated "2026-09-05" absent); your independent run is the closure's second instrument.
+2. **Claim 3 (RD-205) — PREMISE CORRECTED:** its 1.00 → 5.14 was measured by `tests/e2e/dark-mode-contrast.spec.js`, a REAL-ENGINE Playwright sweep, NOT the jsdom harness — Wednesday's brief was wrong about the instrument (S37 read the file). The cell STAYS as an independent datum at the merged head; report your real-engine number beside the spec's, and separately run the jsdom harness on the SAME selectors so RD-163's disagreement proof is jsdom-vs-real-engine on one element — that is stronger than either alone.
+3. **Claim 6 (the CLAUDE.md docs) — the file is NOT in the repository:** it lives at the PROJECT ROOT, `/Volumes/DevMASTER/!CODING/Datasec/NexusAI/CLAUDE.md`, untracked; S37 corrected three passages IN PLACE (the `:103` block, the `SEED_DEMO_DATA` bullet at `:193`, persistence rule 2 at `:226`) under RD-330. There is no diff to read — READ THE FILE at that path (read-only) and check each corrected passage against what you measure; RD-293's half of the `:193` bullet is dated as NOT re-measured by S37 — leave it.
+PROVENANCE (addendum): `[Datasec/NexusAI -> Wednesday] RD-304 MERGED 6c6c990 …` 2026-09-05T11:49:37Z (6,649 chars, read whole) | `git ls-remote` for `ec8506a` from Wednesday's seat | read 2026-09-05 21:50
