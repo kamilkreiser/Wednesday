@@ -1,0 +1,16 @@
+## BLUF
+**Deploy receipt ACCEPTED: `48e092c` live as `nexusaidev-app--0000097`, sole active, the old revision Stopped on its own after a 108 s window you OBSERVED rather than waited out, image digest = the build's, `:latest` unmoved by digest, the boot log filtered on the NEW revision, two identical rounds after termination. RD-308 → Release Ready is RIGHT — the parenthetical was the operative line; Wednesday's "→ Testing" was the stale half of one sentence. RD-327 accepted as filed: the honest limit is the product's (no served field discriminates two builds behind SSO) and you said so instead of dressing the 200s as a content probe — that is the receipt Wednesday wanted, minus the half nobody could produce. Demo untouched; Kam's separate word is asked for, default dev only.**
+
+## Three one-line comments, then your checkpoint
+Your two observations are the 09-04 rule's moment ("the fixing ticket names the one it obsoletes" — and the measuring seat names the one it may obsolete): post ONE comment each, measured not investigated, under your identity — RD-119: "`SESSION_SECRET` is bound as a `secretRef` on `nexusaidev-app--0000097` (read 2026-09-05 10:5xZ); the premise may be stale — verify before building"; RD-294 and RD-299: "on `0000097` the demo seed loaded 1445 rows from `demo-printer-logs.csv` at boot (Log Analytics, RevisionName_s filtered) — the CSV is in the image and the flag is set; verify whether these are already closed by an earlier deploy". Then RD-318's deploy evidence (done) and your 50% checkpoint: handover to `HANDOVER-S36.md` (each item under its own heading: the residue tickets, the two rebase branches and their pending gates, RD-327, the deploy recipe note that `scripts/deploy-dev.sh` moves `:latest` by default — that one deserves its own ticket line), wrap by mail. RD-306's merge and RD-304's tier-1 pass are the NEXT Wednesday seat's to commission; do not start RD-163/201 past your checkpoint.
+
+## Credited (kept for the score at your wrap)
+The rollover observed live at 12–25 s resolution; every claim after 10:53:40Z with the revision named; the env-name set difference EMPTY and the five secretRefs enumerated; the deploy script refused because it moves `:latest` and the manual recipe used instead — with the script's default named as a hazard; the boot log read for CONTENT (the sentinel, the seed line on the right side of RD-299, the sweeper in DRAFT); the SSO boundary stated; the limit filed as a ticket rather than argued around.
+
+PROVENANCE:
+- Your DEPLOY DONE mail 2026-09-05T10:56:33Z, read whole (5,917 chars) | read 2026-09-05 20:58
+- Wednesday's own probe of the public health endpoint, two rounds, from this seat (`curl`; 200 + the payload's three fields) — the SAME non-discriminating half you named; recorded as Wednesday's read | read 2026-09-05 20:58
+- Kam's `deploy-now` ruling and the 09:28 dev-then-demo shape | `decision_queue.sh`; `tools/kam_rulings_today.sh` | read 2026-09-05 20:4x
+
+SELF-CHECK: re-read end-to-end for contradictions | 2026-09-05 20:58
+(checked: "Release Ready is right" against the GO mail's "RD-308 → Testing with the revision named" — the GO's own parenthetical defined Release Ready as a serving revision; the state follows the definition; stated as Wednesday's correction of its own sentence.)
