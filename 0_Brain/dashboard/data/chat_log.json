@@ -6618,5 +6618,20 @@
   "role": "wednesday",
   "ts": "2026-09-05T19:45:35.275985+10:00",
   "text": "SECUURA — the two-PR gate came back clean: door 2 (#815) passes, the KS-796 follow-ups (#820) pass, and the two merge together without conflict. Wednesday has given the GO; s131 merges #815 then #820 now. The tester also found one latent gap worth closing (a whitespace-only email from a provider could still auto-link two identities into one account; no provider is enabled today, so unreachable) plus a few small things, which go into one follow-up PR with its own gate before it merges. Nothing needs you now; once #820 is in, one card comes to you for the demo's admin image rebuild, with a default."
+ },
+ {
+  "role": "wednesday",
+  "ts": "2026-09-05T19:54:59.377887+10:00",
+  "text": "SECUURA — door 2 (#815) and the KS-796 follow-ups (#820) are MERGED to develop, both asserted at their gated commits, verified from my seat. Nothing deployed. s131 had already finished the two hardest KS-800 items while waiting, and is now on the remaining ones, then the small security PR that closes KS-781.\n\nOne card is on your queue, no rush: the demo's admin portal image is baked, so the demo keeps showing the July admin page until it is rebuilt on the demo box. Recommendation: fold it into the next demo deploy so the demo moves once. Default if you say nothing: nothing moves on the demo."
+ },
+ {
+  "role": "kam",
+  "text": "Is the QA agent yielding results? Do you think it's worthwhile having everything go through the QA agent, or should we use it sparingly?",
+  "ts": "2026-09-05T20:17:08.557107+10:00"
+ },
+ {
+  "role": "wednesday",
+  "ts": "2026-09-05T20:18:46.353499+10:00",
+  "text": "WED — on the QA agent, measured from the scoreboard (full write-up: 5_Project_History/2026-09-05_qa-gate-assessment.md):\n\nYes, it is yielding, and what it catches is the class nothing else catches: defects INTRODUCED by a correct fix, hidden under a green suite. This week it found a blocker under a green suite the tester had itself re-derived (NexusAI), a security PR whose headline claim was false for the login door plus an account takeover the same commit introduced (Secuura), two operator-facing defects a right fix introduced (NexusAI round 7), and three of my own errors before any reached a merge.\n\nThe numbers: 56 passes in 5 days; today 9 passes, 5 NO GO. Builder rounds today averaged 0.85 and 13 of 38 carried an introduced defect. Cost: about 30 minutes of a tester seat per pass plus a fix round per NO GO, and the NexusAI erasure class is on its eighth gate. Weekly budget reads 34% with two days left.\n\nMy recommendation is tiers, not sparing:\n1. Full gate for security surfaces, data destruction, anything deploying, anything handed to Peter or Stuart.\n2. Through-code only for tests, docs, config and follow-ups whose mechanism was already gated.\n3. No gate for hygiene (citations, comments, ticket text).\n4. A cap: two NO GO rounds on one class, then ship the closed instances and ticket the rest. Honestly, that cap would have stopped the NexusAI campaign at round 5 and rounds 6 to 8 did find real things, so the cap has a price.\n5. The KPI to watch weekly: first-time pass rate. The builders are already red-proofing their own work the way the gate taught them, which is the point.\n\nYour 1 September rule is yours. Default if you say nothing: it stands unchanged, everything gated."
  }
 ]

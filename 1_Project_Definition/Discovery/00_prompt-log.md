@@ -2222,3 +2222,8 @@ Done with it: Dynamics → Kam's team decision (no action); QuickQuote masthead/
 > One thought I have is to reduce your contact window and therefore reduce the restart frequency by relying more on localised agents. We know that we can trust a local agents on a lot of matters, so some of the learnings that our project specific should be loaded into the local agents window where you rely more on management and operational learnings and a high level of everything that's going on whilst the local agents have specific task and project learnings loaded and relevance to their operation. Please consider this as a model going forward. If you agree, let's map it out to implement not necessarily all right now, but recategorising existing as well as adding to future learnings
 
 *Note:* Read 'contact window' as CONTEXT window. Answered on the panel + a plan document in 1_Project_Definition/Architecture/ + a learning file; Wednesday agreed with a three-tier refinement (Wednesday / fleet-method / per-project) and R0 as the constraint.
+
+## 2026-09-05 20:19 — Kam (dashboard chat, verbatim)
+> Is the QA agent yielding results? Do you think it's worthwhile having everything go through the QA agent, or should we use it sparingly?
+
+*Note:* Answered on the panel with scoreboard measurements (56 passes / 5 days; today 9, 5 NO GO; builders 0.85 mean, 13 introduced) and a TIERED recommendation + a two-NO-GO cap; long form 5_Project_History/2026-09-05_qa-gate-assessment.md; default = his 09-01 rule unchanged until he rules.
