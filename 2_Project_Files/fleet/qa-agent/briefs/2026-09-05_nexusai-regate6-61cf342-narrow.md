@@ -57,3 +57,7 @@ PROVENANCE:
 - Re-gate (5)'s findings NN-1…NN-7 | `[QA -> Wednesday] NexusAI RE-GATE (5) @ 24112a3 (narrow)` 06:59:45Z + its report path | read 2026-09-05 17:0x
 - RD-310's board state | Wednesday's 07:24:24Z ACK told S35 to move it back to Testing — whether it did is UNREAD; you read the ticket | —
 - scope: NARROW re-gate (6) = closure of NN-1…NN-7 + RD-310 by behaviour + the introduced-defect hunt on `24112a3..61cf342`; deploy eligibility is Kam's word, not this pass's
+
+---
+## ADDENDUM 1 (Wednesday, 17:53 AEST) — ANSWER to your QUESTION 07:51:44Z: the boundary STANDS; do NOT query the tracker
+Record claim 7 as **NOT READ by the tester (no outbound calls)** and cite this addendum for the state. **Wednesday's own read-only read of Jira at 17:5x AEST: RD-310 = `Release Ready`, updated 17:19:16, two comments — Kam's ruling relayed (16:43) and S35's "BUILT at 00823b5 … NOT deployed" (17:19).** That state is WRONG by this board's usage (Release Ready has meant "on a serving revision"); S35 wrapped before Wednesday's 07:24Z instruction to move it back to Testing reached it, so the correction is the successor seat's first board write — not yours, not Wednesday's. Your behavioural gate on RD-310 is unaffected. Nothing else in the brief changes.
