@@ -23,7 +23,6 @@
 set -u
 DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 export DQ_FILE="${DQ_FILE:-$DIR/../../0_Brain/dashboard/data/decisions.json}"
-export DQ_CHAT="${DQ_CHAT:-$DIR/../../0_Brain/dashboard/data/chat_log.json}"
 # The python below is delivered on stdin (heredoc), so a `--json` payload
 # cannot also ride stdin — capture it into DQ_JSON first.
 DQ_JSON=""
@@ -104,34 +103,6 @@ def validate(d, existing_ids):
     dec["ruled_ts"] = None
     return dec
 
-STOPWORDS = {"about","after","again","before","between","could","should","would","their","there","these","those","which","while","wednesday","secuura","datasec","nexusai","blockchain","kam","agent","ticket","tickets","decision","recommended","default","nothing","moves","today","tomorrow","reported","expires","money","only"}
-
-def prior_rulings(d):
-    """Kam's panel messages whose text shares >=2 subject words with the card's id+title."""
-    import re
-    chat = os.environ.get("DQ_CHAT", "")
-    if not chat or not os.path.exists(chat):
-        return []
-    try:
-        c = json.load(open(chat))
-    except Exception as e:
-        die(f"chat log unreadable ({e}) — refusing to add a card without the prior-ruling check")
-    msgs = c if isinstance(c, list) else c.get("messages", c)
-    subject = f"{d.get('id','')} {d.get('title','')}".lower().replace("-", " ")
-    words = {w for w in re.findall(r"[a-z]{5,}", subject) if w not in STOPWORDS}
-    if not words:
-        return []
-    hits = []
-    for m in msgs:
-        if m.get("role") != "kam":
-            continue
-        text = str(m.get("text", ""))
-        low = text.lower()
-        shared = {w for w in words if w in low}
-        if len(shared) >= 2:
-            hits.append((str(m.get("ts", ""))[:16].replace("T", " "), " ".join(text.split())))
-    return hits
-
 def cmd_add(args):
     if args == ["--json"]:
         try:
@@ -153,35 +124,14 @@ def cmd_add(args):
                 d["options"].append({"key": parts[0], "label": parts[1],
                                      "detail": parts[2] if len(parts) > 2 else ""})
                 i += 2
-            elif a == "--override-prior-rulings":
-                d["_override_prior"] = True
-                i += 1
             elif a in flag_map:
                 if i + 1 >= len(args): die(f"{a} needs a value")
                 d[flag_map[a]] = args[i + 1]
                 i += 2
             else:
                 die(f"unknown flag: {a}")
-    # PRIOR-RULING GATE (2026-09-05 16:4x, ledger w=2 — the Founders Hub credit was carded a FOURTH
-    # time at 16:32 after Kam's 10:51 panel note "no need to raise this again. this is in hand";
-    # the seat had read the panel only for messages after its predecessor's last action). A card
-    # is Wednesday's artefact; the panel holds Kam's rulings. Before any card is written, every
-    # Kam message on the panel is searched for the card's subject words; a hit REFUSES the add and
-    # prints his words, unless --override-prior-rulings is passed (and then the override is stated
-    # in the receipt). In the path, not in memory.
-    override = bool(d.pop("_override_prior", False))
-    prior = prior_rulings(d)
-    if prior and not override:
-        print("decision_queue: REFUSED — Kam has already written on this subject on the panel "
-              f"({len(prior)} message(s)). Read them; if the card is still warranted, re-run with "
-              "--override-prior-rulings and say why in the BLUF:", file=sys.stderr)
-        for ts, text in prior:
-            print(f"  {ts} | {text[:220]}", file=sys.stderr)
-        sys.exit(3)
     data = load()
     dec = validate(d, {x.get("id") for x in data if isinstance(x, dict)})
-    if prior and override:
-        dec["prior_rulings_overridden"] = [ts for ts, _ in prior]
     data.append(dec)
     save(data)
     print(f"added: {dec['id']} ({dec['client_project']}) — {dec['title']} [rec: {dec['recommended']}]")

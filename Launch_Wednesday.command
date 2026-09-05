@@ -252,6 +252,13 @@ STANDING BEHAVIOUR:
   (0_Brain/dashboard/data/chat_log.json) — messages Kam types there are real
   input. If the launch state above says FAILED or the port was held, diagnose
   per no-skip before relying on the dashboard.
+  KAM'S RULINGS FIRST (2026-09-05, after the fourth raise of a subject he had
+  ruled in hand): run 2_Project_Files/tools/kam_rulings_today.sh right after the
+  brain load and at every checkpoint, and read EVERY line — his panel messages
+  for the day, verbatim. A handover note summarises; his words on a card or in
+  passing reach it as an episode, not a rule. No card, brief or ruling is written
+  before this read. decision_queue.sh add now REFUSES a card whose subject he has
+  already written on (--override-prior-rulings, with the reason in the BLUF).
   **STABLE CONVERSATION SURFACE (Kam, 2026-08-17 — learnings/2026-08-17_conversation-needs-a-stable-panel.md):**
   the chat tile is where Kam READS; the terminal buries conversation under
   fleet mechanics. MIRROR every substantive conversational reply to Kam via
