@@ -6643,5 +6643,20 @@
   "role": "wednesday",
   "ts": "2026-09-05T20:20:52.735038+10:00",
   "text": "Thank you. Recorded as a standing rule from now: full gate for security, data destruction, deploys and anything going to Peter or Stuart; through-code only for tests, docs, config and follow-ups already gated; none for hygiene; two NO GO rounds on one class and then the closed parts ship and the rest becomes a ticket; first-time pass rate reported at each weekly consolidation. Applied from the next brief. The NexusAI round running now is that class's eighth: whatever it returns, the closed parts ship and any residue becomes a ticket, no round nine."
+ },
+ {
+  "role": "kam",
+  "text": "What was your opinion on pushing some of the learnings down to the individual agents to clear up some of your context memory and also to do a categorization and summary of the existing learnings?",
+  "ts": "2026-09-05T20:25:59.789168+10:00"
+ },
+ {
+  "role": "kam",
+  "text": "The goal is to reduce the context used when loading.",
+  "ts": "2026-09-05T20:26:19.192764+10:00"
+ },
+ {
+  "role": "wednesday",
+  "ts": "2026-09-05T20:27:18.392587+10:00",
+  "text": "WED — my opinion is unchanged from this afternoon and it is yes, and the plan for it already exists (WED-145; 1_Project_Definition/Architecture/2026-09-05_learning-tiers-context-split-plan.md). The numbers, read from the files now:\n\n- Boot today: 27% of the window after the brain load (digest 254 KB + ledger 282 KB), 36% after all boot reads.\n- The ledger: 134 rows; 45 of them are fleet-insight and agent-credit rows that already live on the scoreboard. That is 97 KB, 34% of the ledger, and none of it is mine to carry at boot.\n- The lessons: 98 files, 463 KB. The project cases sit inside method lessons, not in separate files. One file alone (a-check-that-cannot-fail) is 71 KB, about 15% of the corpus, mostly NexusAI and Secuura cases the agents need at their boot and I do not.\n\nWhat reduces the load, in order of size and safety:\n1. Move the 45 insight rows out of the boot ledger into a fleet-insights file (conserved, nothing deleted). Roughly a third of the ledger.\n2. Tag every lesson with its tier and have the digest emit W whole, M rules-only, P as a one-line handle pointing at the file. The cases stay on disk, one pointer away.\n3. Transfer the P-tier cases to each project's own brain through their briefs, so their agents load them and I stop.\n\nEstimate, labelled as an estimate: boot from about 27% to somewhere near 17 to 19%. Measured only when step 1 and 2 run.\n\nWhat I would not do: merge or rewrite lessons to make them shorter. Your August ruling was reduction only with evidence it loses nothing, and that is still right; the digest-by-tier is the mechanism that gives the evidence.\n\nRecommendation: steps 1 and 2 tonight, by a Wednesday-assistant seat (my context is at 62% and this is a build, not a conversation), measured before and after, nothing deleted; you see the numbers in the morning brief. Step 3 goes into tomorrow's project briefs. Default if you say nothing: the weekend consolidation, as already planned. One word from you starts it tonight."
  }
 ]

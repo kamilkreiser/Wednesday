@@ -2232,3 +2232,13 @@ Done with it: Dynamics → Kam's team decision (no action); QuickQuote masthead/
 > That's great to hear. Thank you. Let's go ahead with your recommendation.
 
 *Note:* RULING on the QA gate: tiers (full / through-code / none) + a two-NO-GO cap per class + first-time-pass KPI — recorded as a grant in learnings/2026-09-05_qa-gate-tiers-and-the-two-nogo-cap.md; applied from the next brief.
+
+## 2026-09-05 20:27 — Kam (dashboard chat, verbatim)
+> What was your opinion on pushing some of the learnings down to the individual agents to clear up some of your context memory and also to do a categorization and summary of the existing learnings?
+
+*Note:* Answered on the panel with the measured sizes (boot 27%/36%; 45 insight rows = 34% of the ledger; a-check-that-cannot-fail 71 KB of 463 KB) and the WED-145 plan; rec = steps 1–2 tonight by an assistant seat, default weekend.
+
+## 2026-09-05 20:27 — Kam (dashboard chat, verbatim)
+> The goal is to reduce the context used when loading.
+
+*Note:* The goal restated; the estimate given (27% → ~17–19%, unmeasured until Phase 0 runs); no lesson merging (his 08-10 rule).
