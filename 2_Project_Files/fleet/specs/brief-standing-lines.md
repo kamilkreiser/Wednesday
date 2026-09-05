@@ -24,6 +24,9 @@ here and travel in the brief body.
 - **A zero needs a control that can fail independently** — and a control that AGREES with a
   null is the suspect (grep that never ran; NOAUTH; empty bearer; dead SSH leg).
 - **An absence claim carries the corpus it was measured against, verbatim.**
+- **A before/after pair is not evidence until the two artefacts are shown to DIFFER — hash them** (NexusAI S37, 2026-09-05: its first RD-332 pair was byte-identical between builds because the sentence sat below the fold; the captions looked right). And health-confirm each server BEFORE switching the tree — a `git checkout` racing module loading served one build as two.
+- **Name every suite by PATH and command, never by a phrase** — "the four platform suites" meant two different sets in this fleet's own QA reports on 2026-09-05 (Schemathesis/Akto/Playwright/k6 vs the four service suites); the tester had to resolve a builder's phrase Wednesday had relayed unread.
+- **Never echo ANY portion of a credential — not a prefix, not a "redacted" head, not its length beside its value.** A presence check is `[ -n "$K" ] && echo set || echo unset` — the value never enters a format string (Wednesday's own 2026-09-04 w=1 severity-high row: `${T:-no}` printed a live token; a QA pane on 2026-09-05 printed the first 12 characters of a key "(redacted)" — a prefix is a partial leak in a transcript that outlives the session).
 
 ## Instrument traps (all measured)
 - **Linear `updatedAt:{gt:"P1D"}` returns 0 with an agreeing 0 control** — ISO datetimes only.
