@@ -7,7 +7,7 @@ status: live
 
 # Boot digest BY TIER — W whole, M rules-only, every project case a handle
 
-Generated 2026-09-05 21:25 from 98 lesson files (465,798 B). M 24 · MIXED 5 · W 69. 28 project CASE sections inside MIXED files are reduced to one line each: the heading and the path to read it at. W blocks are exactly what the default digest carries; M blocks drop the section index and keep the rules; a P file is a single handle. The CASES behind every rule live only in the lesson files — open one the moment its rule fires.
+Generated 2026-09-05 21:30 from 98 lesson files (467,262 B). M 24 · MIXED 5 · W 69. 28 project CASE sections inside MIXED files are reduced to one line each: the heading and the path to read it at. W blocks are exactly what the default digest carries; M blocks drop the section index and keep the rules; a P file is a single handle. The CASES behind every rule live only in the lesson files — open one the moment its rule fires.
 
 ## The T9 SSD is the master — Wednesday must be fully portable
 `2026-07-31_fully-portable-drive.md` · principle · 2026-07-31 · status: superseded — the "T9 is the master" half by [[2026-08-25_one-drive-devmaster-is-master]] (2026-08-25); the portability principle itself still lives · tier: W
@@ -433,7 +433,7 @@ CLAUDE.md's tenant section" — but that file was one of the two artifacts
 being repaired *because its tenant section is stale*. Circular ground truth;
 the agent had nowhere authoritative to stand.
 
-sections (open the file for these): EXTENSION 2026-09-05 (w=2): validate the EXTENSION of what a brief commissions, not only the existence of what it points at
+sections (open the file for these): EXTENSION 2026-09-05 (w=2): validate the EXTENSION of what a brief commissions, not only the existence of what it points at · EXTENSION 2026-09-05 21:3x (w=2): a mail that changes an earlier instruction NAMES it and says SUPERSEDES — the self-check reads the PREVIOUS mail to the same agent, not only the mail in hand
 
 **How to apply:**
 1. For every "verify X from Y" in a brief: open Y first (read-only) and
@@ -457,6 +457,13 @@ sections (open the file for these): EXTENSION 2026-09-05 (w=2): validate the EXT
 3. **Enforcement candidate (w=3 would promote it):** send_brief refuses a queued ticket id whose provenance line lacks a `scope:` clause; and refuses a repo/PR reference outside the `<Client>/<Project>` the brief is addressed to unless the client CLAUDE.md declares the pair.
 
 **Family:** [[2026-08-13_headline-must-match-the-operative-case]] (a ticket's title said one route; its operative case said three) · [[2026-08-13_shared-bus-tag-filter-or-leak]] (client isolation is a property of the seat, not of the task's size).
+
+## EXTENSION 2026-09-05 21:3x (w=2): a mail that changes an earlier instruction NAMES it and says SUPERSEDES — the self-check reads the PREVIOUS mail to the same agent, not only the mail in hand
+**The case.** Wednesday's 11:18Z GO told s131 to rebase #822 after #821 and mail the head; the 11:22Z ANSWER, four minutes later, said #822 rebases after its tier-2 verdict lands. Neither mail named the other. s131 had already acted on the first, finished the push rather than stop mid-flight, and flagged the conflict — the 18:5x seat's w=1 (two brief items colliding) in a new costume: the two items were in two mails.
+**The rule, extended:**
+1. **Before sending anything to an agent that sequences, holds or releases a thing already sequenced (a PR, a ticket, a deploy), re-read the previous outbound to that agent for the same id.** If the new sentence changes it, the new mail says so by name: *"supersedes item 3 of the 11:18Z GO"*. A silent change is a contradiction the agent has to adjudicate mid-turn.
+2. The SELF-CHECK line's scope is now: Kam's rulings · the mail against itself · **the previous mail to this agent on every id this mail names.**
+3. **Enforcement candidate (w=3 promotes it):** `send_brief.sh` keeps the last outbound per project; when a new body carries a sequencing verb (rebase / merge / after / before / hold / release) on a PR or ticket id that the previous body also sequenced, it refuses unless the body contains `SUPERSEDES`.
 
 
 ## The Chrome extension's "isLocal" is a heuristic — fingerprint before trusting it

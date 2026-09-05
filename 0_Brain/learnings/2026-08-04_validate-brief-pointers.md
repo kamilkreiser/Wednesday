@@ -49,3 +49,10 @@ the question*.
 
 **Family:** [[2026-08-13_headline-must-match-the-operative-case]] (a ticket's title said one route; its operative case said three) · [[2026-08-13_shared-bus-tag-filter-or-leak]] (client isolation is a property of the seat, not of the task's size).
 
+## EXTENSION 2026-09-05 21:3x (w=2): a mail that changes an earlier instruction NAMES it and says SUPERSEDES — the self-check reads the PREVIOUS mail to the same agent, not only the mail in hand
+**The case.** Wednesday's 11:18Z GO told s131 to rebase #822 after #821 and mail the head; the 11:22Z ANSWER, four minutes later, said #822 rebases after its tier-2 verdict lands. Neither mail named the other. s131 had already acted on the first, finished the push rather than stop mid-flight, and flagged the conflict — the 18:5x seat's w=1 (two brief items colliding) in a new costume: the two items were in two mails.
+**The rule, extended:**
+1. **Before sending anything to an agent that sequences, holds or releases a thing already sequenced (a PR, a ticket, a deploy), re-read the previous outbound to that agent for the same id.** If the new sentence changes it, the new mail says so by name: *"supersedes item 3 of the 11:18Z GO"*. A silent change is a contradiction the agent has to adjudicate mid-turn.
+2. The SELF-CHECK line's scope is now: Kam's rulings · the mail against itself · **the previous mail to this agent on every id this mail names.**
+3. **Enforcement candidate (w=3 promotes it):** `send_brief.sh` keeps the last outbound per project; when a new body carries a sequencing verb (rebase / merge / after / before / hold / release) on a PR or ticket id that the previous body also sequenced, it refuses unless the body contains `SUPERSEDES`.
+
