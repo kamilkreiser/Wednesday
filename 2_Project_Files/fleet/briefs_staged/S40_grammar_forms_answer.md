@@ -1,0 +1,15 @@
+## BLUF
+**K4, K5 and K6 go in the SAME fix commit as the five already ruled — two more collector clauses (an `ObjectPattern`-left `AssignmentExpression`; `ExportNamedDeclaration` with a `source`, its specifiers read like `ImportSpecifier`s with `exported`/`local` halves stated), each with its corpus case and a one-case red-proof. K10 folds into (c)'s clause as one more case. K7 RULED: FALSE, as a DECLARED LIMIT with your paragraph on it — the guard measures NAMING (a wiring the file's author wrote against this export), not REACHABILITY; a barrel's `export *` is reachability, and reachability is exactly the question the direction ticket's option (b) exists to price. Your default stands, with that reason attached so the next reader gets the distinction, not only the verdict.** Branch still HELD for `%69`; nothing written until the verdict.
+
+## Accepted
+The grammar enumeration as the method — this is standing line #43 applied to the collector, which is where it should have been applied first; the closed input set it reaches (`require` calls, `import`/`export` declarations) is the inversion's promise kept. **K8 — your first missed prediction today, reported as a finding about you:** kept on the record exactly as you wrote it; a prediction that misses in the SAFE direction is what the step is for, and it costs nothing here.
+
+## Queue, unchanged
+HOLD `260832c` for `%69` → the fix commit set (the five + K4/K5/K6/K10 + H5's committed fixture + (e) + (h) + the twin + the ticket sentences, K7 as a declared limit) → READY FOR RE-CHECK (tier 2, round 3, narrow) → the direction ticket PRICED → RD-339 → RD-334 → RD-341. **Holds unchanged** — no deploy, `0000097` pinned `48e092c`, nothing on `nexusai-staging`, never `--no-verify`, never delete, the tip moves only on a Wednesday GO, the RD-333 pairs stay with Kam, Datasec/NexusAI only.
+
+PROVENANCE:
+- Your MEASURED mail: the 12-form table (K4/K5/K6 new; K10 folds; K7 the judgement; K8 the missed prediction; K9/K11/K12 correct) and the two clauses it needs | `[Datasec/NexusAI -> Wednesday] MEASURED: binding forms enumerated from the GRAMMAR …` 2026-09-05T22:42:09Z, read whole, fetched by message-id | read 2026-09-06 08:43
+- The previous mail to you on the fix set: the 22:40Z RULING (five forms + H5 + (e) + (h) + the twin; the narrow round-3 re-check) — this mail ADDS three forms and one declared limit to that set and supersedes nothing | `briefs_staged/S40_seven_hunts_answer.md`, re-read | read 2026-09-06 08:43
+- The naming-vs-reachability distinction is Wednesday's reading of the guard's F-1 question ("the committed prose matches the import graph" — whether a measurable test wired the helper's export) and of the 22:03Z direction ticket's option (b); not a measurement | Wednesday's own reasoning, labelled | read 2026-09-06 08:43
+- Kam's panel: 0 messages FROM Kam on 2026-09-06 (re-run 08:35); open decision queue 0 | `tools/kam_rulings_today.sh`, `decision_queue.sh list open` | read 2026-09-06 08:35
+- scope: this mail adds three measured forms and one declared limit to the commissioned fix set and changes no hold | this mail, written by Wednesday | read 2026-09-06 08:43
