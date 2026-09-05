@@ -1,0 +1,36 @@
+# Wednesday-assistant brief — WED-145 Phase 0: measure and tag the brain's learnings by tier, move the fleet-insight rows out of the boot ledger, and make the boot digest emit by tier — NOTHING deleted, NOTHING merged, on a branch for Wednesday's review
+
+**Who you are:** a Wednesday-assistant seat (the 2026-08-11 grant: Wednesday's own execution work goes to an assistant so the coordinator's context stays on the board). You work ONLY inside `/Volumes/DevMASTER/WEDNESDAY`. You never touch another project's folder, the DevMASTER vault, the fleet's live panes, or any inbox. You never `rm`, never `git checkout --` over uncommitted work, never rewrite history. **Kam approved this work on 2026-09-05 at 20:28 ("Let's go ahead with the proposed plan"); the plan is `1_Project_Definition/Architecture/2026-09-05_learning-tiers-context-split-plan.md` — read it whole first, then `0_Brain/learnings/2026-09-05_three-tier-learnings-wednesday-management-agents-project.md` (the tier definitions).** The rule that bounds everything: Kam's 2026-08-10 ruling — reduction only with evidence it loses nothing. You produce the evidence; Wednesday and Kam decide.
+
+## Worktree, branch and commits
+**You work in a SEPARATE WORKTREE, never in the main checkout:** `/Volumes/DevMASTER/WEDNESDAY/2_Project_Files/worktrees/phase0` (created by Wednesday on branch `phase0-context-split` from `origin/main`; gitignored in the main tree). Your shell starts there; every path in this brief is relative to THAT worktree's root (its `0_Brain/…`, its `2_Project_Files/tools/boot_digest.py`). `git branch --show-current` must print `phase0-context-split` before you edit anything — state it. The main checkout (`/Volumes/DevMASTER/WEDNESDAY` itself) is Wednesday's live seat: never run git commands there, never edit files there. Commit each step below separately with a plain message; push the branch (`git push -u origin phase0-context-split`). Never commit to `main`. The pre-commit hook blocks artefact classes; if it refuses, say so and fix, never `--no-verify`.
+
+## Step 1 — the ledger: move the fleet-insight and agent-credit rows out of the boot ledger (conserved)
+- File: `0_Brain/learnings/_ledger.md`. Rows are the lines starting `| 2026-`. Classify each row by its TYPE column (the 3rd cell): rows whose type contains `insight` (`praise/insight`, `correction (fleet)`, `correction (fleet) + praise/insight`, `insight/hazard`, `insight/proposal-evidence`, `correction/fleet`, `correction (QA)` and the like — every row whose subject is an AGENT's or TESTER's work rather than Wednesday's own or Kam's) go to a NEW file `0_Brain/learnings/_ledger_fleet_insights.md` with the same table header and a heading naming this rule and date. Rows of type `correction` about Wednesday's own hands, `preference`, `praise` from Kam, `grant`, and `praise/positive-signal` STAY.
+- **Assert conservation before writing:** rows(ledger) + rows(new file) must equal rows(ledger) before, and every moved row must be byte-identical. Print the counts. Where a row's type is ambiguous (e.g. `correction (fleet) + praise/insight` that ALSO records a Wednesday error), leave it in the ledger and list it in your STATUS for Wednesday to rule.
+- Add one line under the ledger's `## Ledger` heading: "Fleet-insight and agent-credit rows dated ≤ 2026-09-05 live in [[_ledger_fleet_insights]] (moved 2026-09-05 under WED-145 Phase 0; conserved, never deleted)."
+- Measure: bytes of `_ledger.md` before and after; rows before and after.
+
+## Step 2 — tier tags on every lesson file
+- For each `0_Brain/learnings/2026-*.md`: add `tier: W | M | P-<Client>/<Project> | MIXED` to the YAML frontmatter (keep everything else byte-identical). Decide by the tier definitions: W = about Kam, the coordination method, the boundaries, Wednesday's own failure modes; M = client-neutral fleet method (a control must be able to fail; a SHA is read or not used; never delete…); P = a project's own cases; MIXED = a W or M lesson whose body carries project CASE sections. For a MIXED file, add an HTML comment `<!-- tier: P-<Client>/<Project> -->` on the line BEFORE each case section heading (the `## …(2026-…, Secuura s119 …)` style sections). Do not move, rewrite, or shorten any text.
+- Produce `0_Brain/learnings/_tier_census.md`: one row per file — file, tier, bytes, and for MIXED files the count and bytes of P sections by project. This is the section list Kam eyeballs.
+
+## Step 3 — `boot_digest.py --by-tier`
+- File: `2_Project_Files/tools/boot_digest.py` (read it whole; it is 180 lines). Add a `--by-tier` flag that writes `_boot_digest_by_tier.md` beside the current digest: W files as today (headline + frontmatter + operative paragraph + rules sections + section index); M files rules-only (headline + frontmatter + RULES sections; the operative paragraph too); P files and P sections inside MIXED files reduced to ONE line each: the headline (or the section heading) + "cases in the file" + the path. Files with no `tier:` fall back to today's behaviour and are listed as UNTAGGED at the top.
+- The default (no flag) output must stay BYTE-IDENTICAL to today's digest on today's inputs — prove it: run both before your change and after, `cmp` them.
+- Red-proof the flag: a fixture lesson with `tier: P-Test/Fixture` must produce exactly one line; remove the tag → it falls back and is listed UNTAGGED.
+
+## Step 4 — measure and report (the exit)
+- Bytes: `_ledger.md` before/after; `_boot_digest.md` (today) vs `_boot_digest_by_tier.md`; the sum a boot reads (digest + ledger) before/after, as a percentage.
+- The section list: every P section and P file that would leave Wednesday's boot, by project, with bytes — from the census.
+- Estimate the boot ctx% (today's brain load reads 27% for 254 KB + 282 KB — scale linearly and SAY it is an estimate; the real number is the next boot's statusline).
+- Commit the census and a short `5_Project_History/2026-09-05_phase0-context-split-report.md` with these numbers and the section list.
+
+## STATUS by mail when done (or at your own 50% checkpoint)
+To `wednesday-agent@agentmail.to`, subject `[WED/assistant -> Wednesday] Phase 0 DONE: <branch head SHA> — <before → after bytes>`; body BLUF-first: the numbers, the ambiguous rows, anything you did NOT do, the branch head at origin by `ls-remote`. Wednesday reviews and merges; nothing reaches `main` from you. If a question arises that the plan does not answer, mail a QUESTION and continue with what does not depend on it. Never speak (no `speak.sh`); never write to the dashboard chat.
+
+PROVENANCE:
+- The plan (phases, tiers, the 08-10 ruling) | `1_Project_Definition/Architecture/2026-09-05_learning-tiers-context-split-plan.md` + the three-tier lesson | read 2026-09-05 20:2x by Wednesday
+- Kam's approval | panel 20:28 verbatim ("Great, I agree. Let's go ahead with the proposed plan…"), `tools/kam_rulings_today.sh` | read 2026-09-05 20:3x
+- Today's sizes (ledger 134 rows / 282 KB, 45 insight rows / 97 KB; 98 lesson files / 464 KB; digest 255 KB; 2 files tagged) | measured by Wednesday from the files at 20:2x | read 2026-09-05 20:36
+- scope: Phase 0 only (tag, move, digest flag, measure) — no Phase 1 transfers, no M-tier shared home, no lesson text changes | the plan §Phase 0 | read 2026-09-05 20:36
