@@ -65,3 +65,4 @@ here and travel in the brief body.
   records (207 lines) sat uncommitted in the vault silently until s91 found them blocking a
   pull (2026-08-31, credited to s91). A wrap that commits the project and skips the vault
   loses the session record with no signal.
+- **Never `--no-verify` on ANY commit or push, a merge commit included** — a hook that refuses is fixed at its root cause or its verdict is READ and mailed to Wednesday; a bypass compensated afterwards is still a bypass and counts against the round (added 2026-09-06 01:1x after S38 bypassed the gitleaks pre-commit hook on a merge commit, disclosed it, and compensated with the canary + an explicit scan — the Secuura briefs carried the line, the NexusAI brief did not).
