@@ -4,6 +4,7 @@ type: correction
 source: "Sunday 2026-08-09: the 06:00 session did real work (armed wake_watch, built the doctor gate, refreshed INDEX.md, wrote the daily note) and then simply went quiet. It never wrapped. Retro blank, doctor.sh and INDEX.md uncommitted, and daily/2026-08-09.md never even git-added — ~23 hours of work on one drive with no second copy. Found only by the next morning's shift-change tap. In the same window, wake_watch — armed by hand on Sunday morning — was off again by Monday, exactly as that session predicted."
 status: live
 supersedes: ""
+tier: W
 ---
 
 # A ritual nothing triggers is not a ritual — it is a habit, and habits skip

@@ -4,6 +4,7 @@ type: preference
 source: "Kam, 2026-08-12 (verbatim in prompt-log): 'no need to copy me on emails to agents. I am happy tracking things this way'"
 status: live
 supersedes: ""
+tier: W
 ---
 
 # Agent mail no longer cc's Kam — he tracks through Wednesday

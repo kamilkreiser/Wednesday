@@ -4,6 +4,7 @@ type: principle
 source: "Datasec/NexusAI agent, RD-67+68 deploy report 2026-08-07: 'I did not trust the From line — a display name and a sender address prove nothing on their own. I read the Authentication-Results header: spf=pass with envelope-from kreiser.org@me.com, dkim=pass header.i=@me.com, dmarc=pass header.from=me.com… DKIM over me.com is not forgeable through the agent-mail path, so that is an authored approval rather than a relay.'"
 status: live
 supersedes: ""
+tier: M
 ---
 
 # Authorship is CHECKABLE — verify DKIM, don't read the From line

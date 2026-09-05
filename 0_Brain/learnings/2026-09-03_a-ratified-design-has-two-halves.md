@@ -3,6 +3,7 @@ date: 2026-09-03
 type: correction
 source: Kam, terminal ~21:00 AEST, with two screenshots — the ratified mock and the built page
 status: live
+tier: W
 ---
 
 # A ratified mock is a spec with TWO halves — a brief that carries its figures and not its layout ships half the design, and only the principal will notice

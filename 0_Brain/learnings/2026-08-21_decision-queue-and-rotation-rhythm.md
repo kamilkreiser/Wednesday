@@ -4,6 +4,7 @@ type: preference
 source: "Kam, 2026-08-21 19:38 (dashboard chat, verbatim in prompt log): 'is the new structure of wrapping up at 50 to 70% working for you? And what else can we do to improve the working nature between you and me? ... I want to make sure that it's getting the best from both of us.'"
 status: live
 supersedes: ""
+tier: W
 ---
 
 # The working rhythm is a standing subject between us — and the decision queue is his preferred surface

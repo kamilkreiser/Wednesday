@@ -3,6 +3,7 @@ date: 2026-09-03
 type: correction
 source: own act at 06:5x (pane %23 closed; the :3052 QA surface died with it) — second instance of the 2026-09-02 04:29 row (ledger w=2)
 status: live
+tier: W
 ---
 
 # A pane close is a SESSION kill — a listener with parent 1 still dies if it shares the pane's tty; check `ps -o sess,tty`, never `ppid`

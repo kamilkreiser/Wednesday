@@ -4,6 +4,7 @@ type: preference
 source: "Kam, 2026-08-21 10:04 (dashboard chat): 'when requesting steps with me, can you create line breaks between each step so that it's just easier for me to see it visually? Repeat the steps for the faucet after.'"
 status: live
 supersedes: ""
+tier: W
 ---
 
 # Steps handed to Kam get line breaks — one step per visual block

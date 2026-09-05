@@ -4,6 +4,7 @@ type: lesson
 source: "Self-caught during WED-70 verification: Chrome refused ALL loopback (fresh test listener included) while curl succeeded; the extension's list_connected_browsers said isLocal:true for what fingerprinting proved was a DIFFERENT Mac (8 cores/1470×956 vs this laptop's 12/3024×1964)"
 status: live
 supersedes: ""
+tier: M
 ---
 
 # The Chrome extension's "isLocal" is a heuristic — fingerprint before trusting it

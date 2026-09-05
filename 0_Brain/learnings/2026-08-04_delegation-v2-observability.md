@@ -3,6 +3,7 @@ date: 2026-08-04
 type: correction
 source: "Kam, 2026-08-04 evening, after the full delegation day: 'this approach of managing other agents and flows / tasks is a little lacking. lets spend more time to get this right before we do more on delegation of work' + iTerm2 / Agent Teams / video / screenshot pointer"
 status: live
+tier: W
 ---
 
 # Delegation v2: observability is the missing half — get it right before delegating more

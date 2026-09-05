@@ -4,6 +4,7 @@ type: principle
 source: "Datasec/NexusAI agent, session 2026-08-16, self-caught while declining RD-93. Their words: 'the ticket's own stated blocker was wrong, and wrongly reassuring. It said needs a Jira project admin. This token has ADMINISTER_PROJECTS=true and ADMINISTER=true — I could have made the change. Had I checked only the recorded blocker and found it cleared, I would have proceeded, and the real constraint would never have come up.' The fifth protocol improvement handed to me by a delegated agent."
 status: live
 supersedes: ""
+tier: MIXED
 ---
 
 # A recorded blocker is a claim about WHY something is blocked — clearing it is not permission to proceed
@@ -103,6 +104,7 @@ same day, mine), [[2026-08-07_a-check-that-cannot-fail]],
 [[2026-08-13_establish-authority-before-reconciling]],
 [[2026-08-11_coordinator-not-carrier]] (noticing and propagating is the job), [[_ledger]]
 
+<!-- tier: P-Secuura/Blockchain -->
 ## The third member (2026-08-27, Secuura s73; consolidated 2026-08-30): a DEFERRAL recorded only in code, pointing at a ticket
 
 **The case.** KS-586 fixed the role half of an authz gap and deferred the tenant half in a

@@ -4,6 +4,7 @@ type: correction
 source: "Self-caught: the 23:00 close bell reported 'fleet inboxes unreachable' two nights running with HTTP 403. I diagnosed it on 08-07 morning as rate limiting, on the reasoning that the key was valid and worked minutes later. It was not rate limiting. The key never reached the code — close_wednesday.sh sourced a bare-assignment .env WITHOUT `set -a`, so the bash guard passed while python's os.environ.get() returned '', and an empty Bearer token is answered with 403."
 status: live
 supersedes: ""
+tier: M
 ---
 
 # "The credential is valid" and "the credential reached the code" are different claims

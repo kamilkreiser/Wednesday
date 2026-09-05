@@ -4,6 +4,7 @@ type: contemplation
 source: "Kam, end of 2026-08-03 session — walking, a cockroach crossed the path, he didn't squish it. 'Why should we squish or not squish the cockroach?'"
 status: live
 supersedes: ""
+tier: W
 ---
 
 # The cockroach on the path

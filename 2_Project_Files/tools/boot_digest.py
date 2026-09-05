@@ -16,9 +16,19 @@ and consolidation; `--check` proves every headline and every rule line is presen
 Losing nothing: what leaves the boot is case EVIDENCE (the incidents behind a rule), read on demand
 when a lesson fires or a diagnosis needs it — the same pattern as _ledger_archive.md.
 
+BY TIER (WED-145 Phase 0, 2026-09-05): each lesson carries `tier:` in its frontmatter — W (Wednesday:
+Kam, the coordination method, the boundaries, her own failure modes), M (fleet method, client-neutral),
+P-<Client>/<Project> (that project's cases), MIXED (a W/M lesson whose body carries project CASE
+sections, each marked in the file by `<!-- tier: P-<Client>/<Project> -->` on the line above its
+heading). `--by-tier` writes a SECOND digest beside the first: W as today; M without the section index;
+every P file and every P section inside a MIXED file reduced to ONE line — the heading plus the path to
+read it at. A file with no `tier:` falls back to today's behaviour and is named UNTAGGED at the top.
+The default output is unchanged by any of this, byte for byte.
+
 Usage:
   boot_digest.py            write the digest, print sizes
   boot_digest.py --check    verify the digest against the files (exit 1 on any miss / staleness)
+  boot_digest.py --by-tier  write _boot_digest_by_tier.md as well, print both sizes
 Never discards stderr. Never deletes anything. Paths derive from this file's location.
 """
 import os, re, sys, glob, datetime
@@ -27,6 +37,9 @@ HERE = os.path.dirname(os.path.abspath(__file__))
 PROJECT = os.path.abspath(os.path.join(HERE, "..", ".."))
 LEARN = os.path.join(PROJECT, "0_Brain", "learnings")
 OUT = os.path.join(LEARN, "_boot_digest.md")
+OUT_BY_TIER = os.path.join(LEARN, "_boot_digest_by_tier.md")
+# a project CASE section inside a W/M lesson: this comment sits on the line ABOVE its heading
+P_MARK = re.compile(r"^<!--\s*tier:\s*(P-\S+)\s*-->\s*$")
 
 # Section leads that carry RULES (kept verbatim). Matched at line start, case-insensitive.
 RULE_LEADS = re.compile(
@@ -46,7 +59,14 @@ BOLD_LEAD = re.compile(r"^\*\*[^*]+\*\*")
 
 
 def parse(path):
-    text = open(path, encoding="utf-8").read()
+    return parse_text(open(path, encoding="utf-8").read())
+
+
+def parse_text(text):
+    # the `<!-- tier: P-… -->` markers are metadata about a section, never content: they are stripped
+    # here so no digest — default or by-tier — ever carries one.
+    if "<!-- tier: P-" in text:
+        text = "\n".join(l for l in text.split("\n") if not P_MARK.match(l))
     fm = {}
     body = text
     if text.startswith("---"):
@@ -99,6 +119,105 @@ def parse(path):
         else:
             i += 1
     return fm, h1, op, headings, rules, text
+
+
+def split_p_sections(text):
+    """Lift every marked project CASE section out of a lesson.
+
+    Returns (remainder_text, [(project, heading, bytes)]). A section runs from its marked heading to
+    the next heading of any level, so a marked sub-section ends its parent. Nothing is edited: the
+    remainder is the file with those spans removed, and the file itself is never written to."""
+    lines = text.split("\n")
+    heads = [i for i, l in enumerate(lines) if re.match(r"^#{1,6}\s", l)]
+    drop, found = set(), []
+    for n, i in enumerate(heads):
+        if i == 0:
+            continue
+        m = P_MARK.match(lines[i - 1])
+        if not m:
+            continue
+        end = heads[n + 1] if n + 1 < len(heads) else len(lines)
+        found.append((m.group(1), lines[i].lstrip("#").strip(),
+                      len("\n".join(lines[i:end]).encode())))
+        drop.update(range(i - 1, end))
+    if not drop:
+        return text, []
+    return "\n".join(l for k, l in enumerate(lines) if k not in drop), found
+
+
+def tier_block(f, rel):
+    """One lesson, rendered for its tier. Returns (tier, block, p_lines)."""
+    text = open(f, encoding="utf-8").read()
+    name = os.path.basename(f)
+    body, psecs = split_p_sections(text)
+    fm, h1, op, headings, rules, _ = parse_text(body)
+    tier = fm.get("tier", "").strip() or None
+    head = (h1 or "# " + name).replace("# ", "## ", 1)
+    meta = f"`{name}` · {fm.get('type','?')} · {fm.get('date','?')} · status: {fm.get('status','?')} · tier: {tier or 'UNTAGGED'}"
+    if fm.get("supersedes"):
+        meta += f" · supersedes: {fm['supersedes']}"
+    p_lines = [f"- **{proj}** · {h} — cases in the file: `{rel}`" for proj, h, _ in psecs]
+
+    # a P file is a handle and nothing else
+    if tier and tier.startswith("P-"):
+        return tier, f"- **{tier}** · {(h1 or name)[2:] if h1 else name} — cases in the file: `{rel}`", []
+
+    block = [head, meta, ""]
+    if rules:
+        if op:
+            block += [op, ""]
+        # the section index is a W affordance ("open the file for these"); M is rules-only
+        if headings and tier != "M":
+            block += ["sections (open the file for these): " + " · ".join(h.lstrip('#').strip() for h in headings), ""]
+        block += ["\n\n".join(rules), ""]
+    else:
+        block += ["(no rules-shaped section — file included WHOLE)", "",
+                  body.split("\n---", 2)[-1].strip() if body.startswith("---") else body.strip(), ""]
+    if p_lines:
+        block += [f"project CASE sections lifted to their own tier ({len(p_lines)}, read them in the file):", ""] + p_lines + [""]
+    return tier, "\n".join(block), p_lines
+
+
+def build_by_tier():
+    files = sorted(glob.glob(os.path.join(LEARN, "2026-*.md")))
+    parts, untagged, counts, psec = [], [], {}, []
+    src_bytes = 0
+    for f in files:
+        rel = os.path.relpath(f, PROJECT)
+        src_bytes += os.path.getsize(f)
+        tier, block, p_lines = tier_block(f, rel)
+        counts[tier or "UNTAGGED"] = counts.get(tier or "UNTAGGED", 0) + 1
+        psec += p_lines
+        if not tier:
+            untagged.append(os.path.basename(f))
+        parts.append(block)
+    now = datetime.datetime.now().strftime("%Y-%m-%d %H:%M")
+    tally = " · ".join(f"{k} {v}" for k, v in sorted(counts.items()))
+    header = (
+        "---\n"
+        f"date: {now[:10]}\n"
+        "type: digest\n"
+        "source: GENERATED by 2_Project_Files/tools/boot_digest.py --by-tier — never hand-edit; the lesson files are the source of truth\n"
+        "status: live\n"
+        "---\n\n"
+        "# Boot digest BY TIER — W whole, M rules-only, every project case a handle\n\n"
+        f"Generated {now} from {len(files)} lesson files ({src_bytes:,} B). {tally}. "
+        f"{len(psec)} project CASE sections inside MIXED files are reduced to one line each: the heading and "
+        "the path to read it at. W blocks are exactly what the default digest carries; M blocks drop the "
+        "section index and keep the rules; a P file is a single handle. The CASES behind every rule live only "
+        "in the lesson files — open one the moment its rule fires.\n\n"
+        + (f"**UNTAGGED ({len(untagged)}) — no `tier:` in the frontmatter, so these fall back to the default "
+           f"shape:** {' · '.join(untagged)}\n\n" if untagged else "")
+    )
+    out = header + "\n\n".join(parts) + "\n"
+    tmp = OUT_BY_TIER + ".tmp"
+    open(tmp, "w", encoding="utf-8").write(out)
+    os.replace(tmp, OUT_BY_TIER)
+    dig = len(out.encode())
+    print(f"by-tier digest written: {OUT_BY_TIER}")
+    print(f"  {len(files)} files, source {src_bytes:,} B -> by-tier {dig:,} B ({100*dig//src_bytes}%); "
+          f"{tally}; {len(psec)} P case sections reduced to a handle")
+    return 0
 
 
 def build():
@@ -177,4 +296,8 @@ def check():
 
 
 if __name__ == "__main__":
-    sys.exit(check() if "--check" in sys.argv else build())
+    if "--check" in sys.argv:
+        sys.exit(check())
+    if "--by-tier" in sys.argv:
+        sys.exit(build_by_tier())
+    sys.exit(build())

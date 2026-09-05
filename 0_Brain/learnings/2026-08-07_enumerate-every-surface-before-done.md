@@ -4,6 +4,7 @@ type: correction
 source: "Kam, 2026-08-07: 'please double check and make sure everything is as expected' — the check found the WED-82 rollout incomplete. Four client area subpages still carried the legacy colours (49 marks) because they render through sub_ev_row()/area_tickets_html(), not the functions I had converted and verified."
 status: live
 supersedes: ""
+tier: M
 ---
 
 # Before calling a rollout done, enumerate every SURFACE that renders the data

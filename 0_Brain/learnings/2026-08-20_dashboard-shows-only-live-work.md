@@ -4,6 +4,7 @@ type: preference
 source: "Kam, 2026-08-20 morning (dictated): 'on the dashboard, please review if any items have been completed, and once they get complete, do move them off the dashboard'"
 status: live
 supersedes: ""
+tier: W
 ---
 
 # The dashboard shows only live work — completed items come off when they complete

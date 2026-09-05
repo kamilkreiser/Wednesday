@@ -4,6 +4,7 @@ type: correction
 source: "w=2 promotion: (1) 08-05/06 CI-reds mis-attribution (suites were outcome=skipped boot casualties, no test ran); (2) 08-06 boot report claimed 'shift change fired its first live 05:30 this morning' from the log FILE's existence — the log's content showed the real fire was SKIPPED (coalesced to 09:25, window guard) and the tap lines were a dry-run test"
 status: live
 supersedes: ""
+tier: M
 ---
 
 # Artifact presence is not execution — read the content, find what actually ran

@@ -4,6 +4,7 @@ type: principle
 source: "Secuura/Blockchain agent, session 28, diagnosing its own slip after I corrected it for CC'ing Kam on a plan confirmation. Their formulation: 'A rule whose first line contradicts its own operative case will be misapplied under load.' The memory already carried the correct carve-out; the headline still read 'CC Kam on every email' and the exception sat in the body."
 status: live
 supersedes: ""
+tier: MIXED
 ---
 
 # A rule whose headline contradicts its operative case will be misapplied — the first line IS the retrieval handle
@@ -60,6 +61,7 @@ differently-shaped than the situation the rule was supposed to govern.**
    BLUF rule and this one are the same discipline pointed at different readers:
    the reader who stops early must not be misled.
 
+<!-- tier: P-Secuura/Blockchain -->
 ## The tooling costume (2026-08-17, Secuura s43): a check whose MESSAGE rots while its measurement stays correct
 
 KS-78's launcher drift warning printed *"N commit(s) on main"* while its `git log` (no

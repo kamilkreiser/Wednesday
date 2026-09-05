@@ -3,6 +3,7 @@ date: 2026-08-05
 type: lesson
 source: "Self-caught during WED-56/57 drive syncs: KK_DEV_Local pass returned rc=0 'complete' while today's daily note was still absent from it"
 status: live
+tier: M
 ---
 
 # Multi-hop sync: verify content at the destination, not exit codes per leg

@@ -4,6 +4,7 @@ type: preference
 source: "Kam, 2026-09-01 17:55 (dashboard chat, verbatim in Discovery/00_prompt-log.md): 'please create a new process where an agent hands over to you confirming what was done, you hand over to the testing agent to double check the changes. All changes made be checked visually and through code. If browser related, then through a browser. Once the testing agent check, you double check' — minutes after his two live screenshots showed a Settings icon that never rendered and a dashboard tab whose KPIs fail to load, on a build that had been scored 1.0 on unit tests and a code read."
 status: live
 supersedes: "the two-hop verification in delegation-protocol (agent wrap → Wednesday verify → score) — now three hops"
+tier: W
 ---
 
 # Every change goes agent → me → testing agent → me before it is scored or shipped

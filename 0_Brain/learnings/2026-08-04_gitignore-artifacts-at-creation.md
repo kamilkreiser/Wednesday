@@ -4,6 +4,7 @@ type: correction
 source: "Self-caught at w=2: 08-03 Codex binary rejected the push; 08-04 code review found __pycache__/*.pyc + checkpoint *.pkl + run artifacts committed in 0642e0d"
 status: live
 supersedes: ""
+tier: W
 ---
 
 # Gitignore artifacts AT CREATION, not at wrap — and retro candidates need files

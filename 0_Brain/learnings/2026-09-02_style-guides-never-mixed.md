@@ -4,6 +4,7 @@ type: correction
 source: "Kam, 2026-09-02 07:3x (terminal, verbatim in Discovery/00_prompt-log.md): 'I also noticed that the nexus page (in testing) is adopting blue backgrounds (this is secuura not Datasec). Please make sure project style guides are adhered to an never mixed' — after eight QA passes and three scored rounds of NexusAI dark-mode work, none of which measured brand fidelity"
 status: live
 supersedes: ""
+tier: M
 ---
 
 # Project style guides are adhered to and NEVER mixed — a palette is client identity, and contrast is not conformance

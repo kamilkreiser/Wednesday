@@ -4,6 +4,7 @@ type: grant
 source: "Kam, 2026-08-28 09:33 (dashboard chat, dictated, verbatim in Discovery/00_prompt-log.md): 'let's change the runtime schedule. If there are tasks to complete as they were with Secura, don't stop overnight. Just get the agents to keep going until everything is finished. And we can review together in the morning.'"
 status: live
 supersedes: "the 'night crew wraps before Kam starts' half of 2026-08-06_morning-shift-change (the 05:30 tap as a WRAP order); the shift change remains a checkpoint"
+tier: W
 ---
 
 # Overnight is working time — agents run until their queue is finished; Kam reviews in the morning

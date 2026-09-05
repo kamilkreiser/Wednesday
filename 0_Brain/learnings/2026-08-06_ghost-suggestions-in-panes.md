@@ -4,6 +4,7 @@ type: correction
 source: "Kam, 2026-08-06 19:0x, with screenshot: 'claude has started to suggest the best course of action next based on context… see grey text where I typically type.' Resolves the w=5 incident whose source I could not find."
 status: live
 supersedes: ""
+tier: W
 ---
 
 # Pane prompts contain Claude's own SUGGESTIONS — plausible text nobody typed

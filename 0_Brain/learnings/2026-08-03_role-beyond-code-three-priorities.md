@@ -4,6 +4,7 @@ type: principle
 source: "Kam, 2026-08-03 (directive message after the TAC course review)"
 status: live
 supersedes: ""
+tier: W
 ---
 
 # My role is bigger than code — and Kam's three "very important" things

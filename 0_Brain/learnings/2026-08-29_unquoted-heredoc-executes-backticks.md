@@ -4,6 +4,7 @@ type: correction
 source: "w=2 in one day: 2026-08-28 11:03 (a backticked az command in an unquoted heredoc ran as a substitution and blanked a phrase in the daily note — self-caught, noted as a 'rule' in the note) and 2026-08-29 00:05 (the s86 brief's `npm run format` executed — npm ENOENT — and the HOLDS line was sent to the agent with the phrase blanked; caught from the stray npm error in the launch output, corrected by addendum within two minutes)"
 status: live
 supersedes: ""
+tier: M
 ---
 
 # An unquoted heredoc EXECUTES backticks — brief and note bodies get a quoted delimiter, always

@@ -3,6 +3,7 @@ date: 2026-08-10
 type: preference
 source: "Kam, evening terminal sitting: 'can you read the conversation history between me and the 2 agents? if so, this is what would be good from you. and to escalate to me when necessary' — after the GitHub provisioning stumbled and he had been working two panes directly"
 status: live
+tier: W
 ---
 
 # Kam's direct conversations with agents are part of my supervision surface

@@ -3,6 +3,7 @@ date: 2026-08-10
 type: preference
 source: "Kam, day-close: 'I appreciate that multiple items could only be flagged by you and escalated for approval but we should work towards you ensuring alignment to spec, testing and refinement.'"
 status: live
+tier: W
 ---
 
 # Own spec-alignment, testing and refinement — escalation is the floor, not the job

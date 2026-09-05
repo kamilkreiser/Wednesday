@@ -4,6 +4,7 @@ type: correction
 source: "Overnight 2026-08-08/09: TWO Vision QUESTION mails (plan confirmation 02:15Z, CI-observation 02:22Z) went unanswered for the whole session and were never answered at all; NexusAI sat idle ~17h after its plan confirmation was answered and wrapped as 'boot-only session, execution handed to next session'. wake_watch.sh — the enforcement built on 2026-08-05 for exactly this failure — was NOT RUNNING (verified: no process; its log last written 2026-08-06)."
 status: live
 supersedes: ""
+tier: M
 ---
 
 # An enforcement you have to remember to arm is not an enforcement

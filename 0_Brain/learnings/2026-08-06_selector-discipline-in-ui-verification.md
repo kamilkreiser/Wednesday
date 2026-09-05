@@ -4,6 +4,7 @@ type: correction
 source: "Consolidation w=2 promotion of two 08-05 retro lines (both 'recurrence watch', neither filed): (1) clicked the .vsave wrapper div instead of #view-save, briefly suspected a phantom save bug; (2) clicked a stale element reference and read an empty modal as a builder defect"
 status: live
 supersedes: ""
+tier: M
 ---
 
 # Verifier discipline: suspect my own selector before I suspect the build

@@ -3,6 +3,7 @@ date: 2026-09-05
 type: preference
 source: Kam, panel 2026-09-05 08:1x — "please look at your root folder. please ensure (create a rule) to file things properly. the images in the root folder do not belong there."
 status: live
+tier: W
 ---
 
 # The project root holds only rules and launchers — every file Wednesday writes has a folder, and the root is never it

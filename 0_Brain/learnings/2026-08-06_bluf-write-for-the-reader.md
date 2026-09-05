@@ -4,6 +4,7 @@ type: preference
 source: "Kam, 2026-08-06 evening: 'I also found out today that Peter reads every ticket. this takes a long time so if we can, lets adopt a structure which has BLUF (Bottom Line Up Front) the shortest logical summary at the top. then reccomendation, then detail. with the headings. for each agent when posting tickets or updates.' Plus: 'it is good to keep a human in the loop. we should make it as easy for them as possible.'"
 status: live
 supersedes: ""
+tier: W
 ---
 
 # BLUF — the human's reading time is the scarce resource

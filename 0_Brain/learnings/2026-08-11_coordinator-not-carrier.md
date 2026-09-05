@@ -4,6 +4,7 @@ type: preference
 source: "Kam, 2026-08-11 morning (verbatim in Discovery/00_prompt-log.md), building on the 08-10 context discussion and the own-the-spec close"
 status: live
 supersedes: ""
+tier: W
 ---
 
 # Coordinator, not carrier — my context is for thinking outside the agents' focus

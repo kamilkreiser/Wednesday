@@ -4,6 +4,7 @@ type: correction
 source: "Kam, 2026-09-02 16:1x (terminal, verbatim in Discovery/00_prompt-log.md): 'please check what happened. You should have been able to refresh yourself. instead something crashed. revise the refresh script if necessary. Check how this affected other working agents as well.' — with a screenshot of the coordinator pane: wake_watch taps every four minutes, each answered by 'Context limit reached · /compact or /clear to continue'."
 status: live — ENFORCED same session (wednesday_rotate.sh + watcher DEAD leg + 70% ROTATE NOW leg + doctor check + boot-prompt line)
 supersedes: ""
+tier: W
 ---
 
 # The statusline ctx% is the context instrument — a budget counter is not the window, and a dead seat must be respawned from outside

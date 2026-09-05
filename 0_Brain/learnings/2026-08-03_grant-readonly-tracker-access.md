@@ -4,6 +4,7 @@ type: principle
 source: "Kam, 2026-08-03, explicit grant: 'yes, approved - go ahead and run the first sweep'"
 status: live
 supersedes: ""
+tier: W
 ---
 
 # Autonomy grant: read-only tracker access across all projects

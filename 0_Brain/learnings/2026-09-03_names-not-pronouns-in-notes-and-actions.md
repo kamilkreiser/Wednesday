@@ -3,6 +3,7 @@ date: 2026-09-03
 type: preference
 source: Kam, dashboard panel 16:19:29 AEST 2026-09-03 (verbatim: "Also, with notes and actions necessary, can you please use names rather than you, I, etc. Sometimes it is difficult to tell who it refers to, Kam, Wed, Secuura agent, etc")
 status: live
+tier: W
 ---
 
 # Names, not pronouns, in notes and actions — "you", "I", "the agent" do not say who

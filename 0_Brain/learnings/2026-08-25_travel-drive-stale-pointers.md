@@ -4,6 +4,7 @@ type: correction
 source: "First travel-drive session (KK_DEV_Local on the laptop, DevMASTER unmounted). Kam: 'I can see from the secuura agent that github was dead... make notes so next sync avoids these issues please.' Found live: s66's git dead at boot; cockpit launch refused; two dashboard surfaces rotted."
 status: live
 supersedes: ""
+tier: W
 ---
 
 # A drive sync copies files, not pointers — enumerate the absolute paths before first launch on the other machine

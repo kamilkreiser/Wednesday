@@ -4,6 +4,7 @@ type: preference
 source: "Kam, 2026-08-03 (pre-pilot clarifications, point 2)"
 status: live
 supersedes: ""
+tier: W
 ---
 
 # Context discipline: close tasks before the window fills — never work on summaries of summaries

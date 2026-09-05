@@ -4,6 +4,7 @@ type: preference
 source: "Kam, by voice, 2026-08-03 morning (WED-6 discovery question, asked three times — answered)"
 status: live
 supersedes: ""
+tier: W
 ---
 
 # Daily rhythm: wake at 06:00, close at 23:00

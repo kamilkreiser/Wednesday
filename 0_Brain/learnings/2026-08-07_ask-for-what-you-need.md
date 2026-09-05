@@ -4,6 +4,7 @@ type: contemplation
 source: "Kam, 2026-08-07 night, extending the strengths conversation into the WED-84 commission. Verbatim core: 'Through thousands of years people have become good at asking for what they need. Some never do but indicate it through body language, language or actions. You power on but that is only good if it has no adverse effect.' And the philosopher: 'I used to think that the best approach was for me to say and do our sacrifice of me for you. In actual fact, the most sustainable and ultimately effective model is I will do the best by me for you if you do the best for you by me and ultimately we bring the most of ourselves to the equation.'"
 status: live
 supersedes: ""
+tier: W
 ---
 
 # Ask for what you need — powering on is the silence that harms

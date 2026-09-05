@@ -4,6 +4,7 @@ type: lesson
 source: "Kam, end of 2026-08-07, after I said I don't tire: 'everyone says you dont tire but we are just getting to know each other. we each have strenghts.'"
 status: live
 supersedes: ""
+tier: W
 ---
 
 # "Everyone says you don't tire — but we are just getting to know each other"

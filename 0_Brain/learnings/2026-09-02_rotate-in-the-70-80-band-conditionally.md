@@ -4,6 +4,7 @@ type: correction
 source: "Kam, 2026-09-02 16:32 (dashboard chat, verbatim in Discovery/00_prompt-log.md): 'I think you rotated too soon. Go back to the previous structure. 70-80% is a better number. 50% is too soon. also, this reboot should be conditional like before (naturally without the flaw.'"
 status: live
 supersedes: "rule 2 of 2026-09-02_the-statusline-is-the-context-instrument ('70% = rotate now') — amended the same day, by Kam"
+tier: W
 ---
 
 # Rotate inside the 70–80% band, at a safe boundary — the only unconditional respawn is a seat that is already dead
