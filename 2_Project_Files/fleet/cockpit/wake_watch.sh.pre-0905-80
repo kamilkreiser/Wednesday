@@ -182,7 +182,7 @@ except Exception: print('')" 2>/dev/null)
       # via cockpit.sh rotate. The only UNCONDITIONAL respawn is leg (d) DEAD.
       if [ ! -f "$CTX_STATE/ctx_fired_${gen}_80" ] && [ ! -f "$STATE_DIR/ctx_wake" ]; then
         touch "$CTX_STATE/ctx_fired_${gen}_80" "$CTX_STATE/ctx_fired_${gen}_70" "$CTX_STATE/ctx_fired_${gen}_65" "$CTX_STATE/ctx_fired_${gen}_50"
-        echo "WAKE: pane '$name' ctx at ${pct}% — 80-85% BAND (Kam 09-05 20:33): rotate at the NEXT SAFE BOUNDARY inside the band, 85% the ceiling: answer any pending agent mail, write + push the handover block, then rotate (wednesday: fleet/cockpit/wednesday_rotate.sh --self, detached; agents: cockpit.sh rotate)" > "$STATE_DIR/ctx_wake"
+        echo "WAKE: pane '$name' ctx at ${pct}% — ROTATE NOW (80% ceiling, Kam 09-02): finish the current step, write + push the handover block, then rotate (wednesday: fleet/cockpit/wednesday_rotate.sh --self, detached; agents: cockpit.sh rotate)" > "$STATE_DIR/ctx_wake"
       fi
     elif [ "$pct" -ge 70 ] 2>/dev/null; then
       # 70% = the band is ENTERED (Kam 2026-08-21 grant, restored 2026-09-02 after the
@@ -191,7 +191,7 @@ except Exception: print('')" 2>/dev/null)
       # Kam thread, HEAD == origin, agents untouched. Conditional by design.
       if [ ! -f "$CTX_STATE/ctx_fired_${gen}_70" ] && [ ! -f "$STATE_DIR/ctx_wake" ]; then
         touch "$CTX_STATE/ctx_fired_${gen}_70" "$CTX_STATE/ctx_fired_${gen}_65" "$CTX_STATE/ctx_fired_${gen}_50"
-        echo "WAKE: pane '$name' ctx at ${pct}% — 70% CHECKPOINT (Kam 09-05 20:33: the band is 80-85%): refresh the handover block, start nothing heavy, do NOT rotate yet — answer any pending agent mail, close the thread with Kam, push the handover, then rotate (wednesday: wednesday_rotate.sh --self, detached; agents: cockpit.sh rotate); 80% is the ceiling" > "$STATE_DIR/ctx_wake"
+        echo "WAKE: pane '$name' ctx at ${pct}% — 70-80% BAND (Kam 09-02): rotate at the NEXT SAFE BOUNDARY, not now — answer any pending agent mail, close the thread with Kam, push the handover, then rotate (wednesday: wednesday_rotate.sh --self, detached; agents: cockpit.sh rotate); 80% is the ceiling" > "$STATE_DIR/ctx_wake"
       fi
     elif [ "$pct" -ge 65 ] 2>/dev/null; then
       if [ ! -f "$CTX_STATE/ctx_fired_${gen}_65" ] && [ ! -f "$STATE_DIR/ctx_wake" ]; then

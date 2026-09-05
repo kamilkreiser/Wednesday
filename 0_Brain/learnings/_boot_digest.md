@@ -7,7 +7,7 @@ status: live
 
 # Boot digest — headline + rules of every lesson (open the file when it fires)
 
-Generated 2026-09-05 20:20 from 98 lesson files (463,070 B). Each block = the lesson's retrieval handle (H1), its frontmatter, the operative paragraph, its section index, and every RULES section verbatim. 6 files carry no rules-shaped section and are included whole. The CASES behind a rule live only in the file: open it the moment the rule fires, or when a diagnosis needs the evidence. `_ledger.md` is read whole beside this digest; `_ledger_archive.md` on demand.
+Generated 2026-09-05 20:34 from 98 lesson files (464,044 B). Each block = the lesson's retrieval handle (H1), its frontmatter, the operative paragraph, its section index, and every RULES section verbatim. 6 files carry no rules-shaped section and are included whole. The CASES behind a rule live only in the file: open it the moment the rule fires, or when a diagnosis needs the evidence. `_ledger.md` is read whole beside this digest; `_ledger_archive.md` on demand.
 
 ## The T9 SSD is the master — Wednesday must be fully portable
 `2026-07-31_fully-portable-drive.md` · principle · 2026-07-31 · status: superseded — the "T9 is the master" half by [[2026-08-25_one-drive-devmaster-is-master]] (2026-08-25); the portability principle itself still lives
@@ -3207,7 +3207,12 @@ The catalogue's OUTPUT has a shape, and the shape is set by the human who review
 - **80% = the ceiling** — the first boundary after it is the rotation; nothing new is started past it.
 - **Unconditional = the DEAD case only** — the literal "Context limit reached" respawned from outside by `wednesday_rotate.sh --dead`. That is "the flaw" Kam named: a seat that could not act. Its fix stays; nothing else is unconditional.
 
+sections (open the file for these): SUPERSEDED IN ITS NUMBERS 2026-09-05 20:28 + 20:33 — Kam: "move your restart threshold to 80%" then "should not be a hard number, so still use the band. Just use a band of 80 to 85%"
+
 **How to apply (built the same hour):** the watcher's 70% leg says "rotate at the next safe boundary (70–80% band)"; a new 80% leg says "ceiling — rotate at the first boundary"; `wednesday_rotate.sh --self` stays the mechanism (still refuses on a dirty tree or HEAD != origin); the 50% checkpoint ritual stands; the DEAD leg and runner respawn are untouched.
+
+## SUPERSEDED IN ITS NUMBERS 2026-09-05 20:28 + 20:33 — Kam: "move your restart threshold to 80%" then "should not be a hard number, so still use the band. Just use a band of 80 to 85%"
+The rotation BAND is now **80–85%**: rotate at the first SAFE BOUNDARY inside it, **85% the ceiling** (a hard number was refused at 20:33 — "still use the band") (the 08-21 grant's safety conditions unchanged — no open agent QUESTION, no dangling thread with Kam, everything durable and pushed, agents untouched). 70% is a checkpoint (refresh the handover block; start nothing heavy), not a band entry. The only unconditional respawn remains the DEAD case (`wednesday_rotate.sh --dead`). Context for the change: the boot digest (WED-139) and the coming context split (WED-145, Phase 0 running from 2026-09-05 night) make a seat's useful life longer; Kam moved the number to match. The watcher's 70/80 legs re-worded the same night (backup `wake_watch.sh.pre-0905-80` beside it).
 
 
 ## Project style guides are adhered to and NEVER mixed — a palette is client identity, and contrast is not conformance

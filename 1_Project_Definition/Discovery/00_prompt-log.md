@@ -2242,3 +2242,13 @@ Done with it: Dynamics → Kam's team decision (no action); QuickQuote masthead/
 > The goal is to reduce the context used when loading.
 
 *Note:* The goal restated; the estimate given (27% → ~17–19%, unmeasured until Phase 0 runs); no lesson merging (his 08-10 rule).
+
+## 2026-09-05 20:30 — Kam (dashboard chat, verbatim)
+> Great, I agree. Let's go ahead with the proposed plan and move your restart threshold to 80%.
+
+*Note:* RULING: (1) the context-split plan's steps 1–2 run tonight by a Wednesday-assistant seat (insight rows out of the boot ledger, conserved; tier tags + digest by tier; measured; nothing deleted), step 3 in tomorrow's project briefs; (2) Wednesday's rotation threshold moves from the 70–80 band to 80%.
+
+## 2026-09-05 20:33 — Kam (dashboard chat, verbatim)
+> The rotation threshold should not be a hard number, so still use the band. Just use a band of 80 to 85%. Thank you.
+
+*Note:* Refinement of the 20:28 ruling: the rotation is a BAND, 80–85%, rotate at the first safe boundary inside it, 85 the ceiling. Lesson section, watcher leg text and ledger row amended in the same minutes.
