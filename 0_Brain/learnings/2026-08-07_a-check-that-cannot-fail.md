@@ -966,3 +966,14 @@ revision starts; it is live when the old one stops. **Wednesday's own five-point
 verification had this hole: "figures rendering on the tab", run inside the rollover window,
 would have shown empty on a good deploy — and the honest consequence is a rollback-by-digest
 and a reported failure that never happened. The check was not wrong; its CLOCK was.**
+
+## A TEST HELPER THAT REIMPLEMENTS THE PRODUCT IS A MOCK THE MOMENT THE PRODUCT MOVES (2026-09-05, Secuura s128 — found by its own red-proof, not by reading)
+**The case.** KS-796 Q1's new 20-case suite asserted the status mapping through a `domainOf()` helper the builder wrote — a faithful copy of `mapDbStatus`. The builder then ran RP-A: revert the product's `|| 'ACTIVE'` fallback, the exact defect the ticket exists to close. **The suite stayed 20/20 green.** The helper had matched the product exactly at the moment it was written, so every assertion was checking the copy against itself. `mapDbStatus` is now exported and the test calls the product; RP-A then reddens.
+
+**The builder's formulation, adopted verbatim:** *"a test helper that duplicates the product's logic silently becomes a mock the moment the product changes, and a red-proof against the PRODUCT is the only thing that detects it. Tampering found this; reading would not."*
+
+**How to apply:**
+1. **Every helper in a new suite is inspected for a second copy of a product rule** — a mapping, a predicate, a normaliser, a format. If it exists, the test imports the product's function (export it if needed) and the helper goes.
+2. **The red-proof for a fix reverts the PRODUCT's defect, never a test-side stand-in.** A suite that stays green when the bug it was written for is restored is decoration, and the only instrument that shows it is the revert itself.
+3. **Same family as the 2026-09-04 "mock the neighbours, never the thing under test" rule and the 09-03 s116 case ("a test of the policy is not a test of the route")** — here the mock was not declared as one; it was a helper that looked like a convenience.
+4. **The sibling from the same PR, kept beside it:** inverting a credential gate took the suite from 391 passing to 391 passing. **A green suite across a security change of that shape is evidence of ABSENT coverage, not of safety** — the builder read it that way and wrote the 20 cases; the reflex to read it as "clean change" is the one to retire.
