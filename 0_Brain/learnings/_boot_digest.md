@@ -7,7 +7,7 @@ status: live
 
 # Boot digest — headline + rules of every lesson (open the file when it fires)
 
-Generated 2026-09-05 23:03 from 98 lesson files (466,296 B). Each block = the lesson's retrieval handle (H1), its frontmatter, the operative paragraph, its section index, and every RULES section verbatim. 6 files carry no rules-shaped section and are included whole. The CASES behind a rule live only in the file: open it the moment the rule fires, or when a diagnosis needs the evidence. `_ledger.md` is read whole beside this digest; `_ledger_archive.md` on demand.
+Generated 2026-09-05 23:58 from 99 lesson files (470,896 B). Each block = the lesson's retrieval handle (H1), its frontmatter, the operative paragraph, its section index, and every RULES section verbatim. 6 files carry no rules-shaped section and are included whole. The CASES behind a rule live only in the file: open it the moment the rule fires, or when a diagnosis needs the evidence. `_ledger.md` is read whole beside this digest; `_ledger_archive.md` on demand.
 
 ## The T9 SSD is the master — Wednesday must be fully portable
 `2026-07-31_fully-portable-drive.md` · principle · 2026-07-31 · status: superseded — the "T9 is the master" half by [[2026-08-25_one-drive-devmaster-is-master]] (2026-08-25); the portability principle itself still lives
@@ -3342,6 +3342,38 @@ sections (open the file for these): The case · Why the distinction is worth mor
 5. **Prefer his framing back to him.** He said "consistency or thought". Consistency is about
    the rulings; thought is about the care in the sentence. **Answering in his own two
    categories is more useful than substituting mine.**
+
+
+## A Kam ruling relayed to an agent is DELIVERED only when it sits in the artefact the next reader lands on — the row, the ticket, the PR — and every ruled-but-undelivered item rides in the successor brief under its own heading
+`2026-09-05_a-relayed-ruling-is-delivered-only-when-it-is-in-the-artefact.md` · correction · 2026-09-05 · status: live
+
+**The operative case, so the headline matches it:** Wednesday is writing a SUCCESSOR brief, or a
+morning sweep, or is about to card a question to Kam. **Before any of those: list the cards Kam has
+RULED for that project since the last brief and ask, per card, WHERE the ruling now lives.** If the
+answer is "on Kam's panel and in a mail to a seat that has since wrapped", it lives nowhere a
+reader lands, and the next agent will find the question open and ask it again.
+
+**How to apply:**
+1. **A ruled card is not closed until its RECEIPT names the artefact** the ruling was written into
+   (the row/ticket/PR/comment), read by Wednesday at origin or on the board. "Relayed to s123" is a
+   step, not the receipt.
+2. **Every SUCCESSOR brief carries a section `RULED BY KAM, NOT YET IN AN ARTEFACT`** — built from
+   `decision_queue.sh list ruled` for that project since the previous brief, each card with its
+   ruling verbatim and the artefact it must land in. Empty is a valid section; absent is not.
+3. **The morning sweep diffs the ruled cards against the artefacts**, per project, and re-queues any
+   ruling whose artefact does not carry it — before any brief is written (the sweep-before-brief rule).
+4. **Enforcement candidate (w=3 would promote it):** `decision_queue.sh` gains a `--delivered
+   <artefact>` mark on a ruled card and a `list ruled --undelivered` view; `send_brief.sh --kind brief`
+   to a project refuses when that view is non-empty for the project and the body lacks the section.
+5. **Test by its handle:** if the successor could read every artefact the project owns and still not
+   find the ruling, the ruling is not delivered.
+
+**Family:** [[2026-08-07_a-promise-is-not-a-mechanism]] (a relay is a promise about an artefact) ·
+[[2026-08-09_an-enforcement-you-must-arm-is-not-one]] (a filing duty that dies with its seat) ·
+[[2026-08-14_i-read-representations-they-read-sources]] (the 09-04 w=82 row: a queue is a record of
+what a seat FILED, not of what the principal DECIDED — this is its delivery half) ·
+[[2026-08-16_a-recorded-blocker-is-not-a-boundary]] (a recorded question is a claim with a date) ·
+[[2026-09-04_decisions-held-narration-drifted]] (the re-raise was caught by a mechanism, not by memory).
 
 
 ## Every handover to Peter or Stuart is a TEST BLOCK, as large as one pass can prove — never a list of PRs
