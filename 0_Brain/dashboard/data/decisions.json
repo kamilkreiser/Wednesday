@@ -3588,5 +3588,121 @@
   "ruled_choice": "revert",
   "ruled_ts": "2026-09-05T13:17:54.925528+10:00",
   "ruling_note": "Kam clicked REVERT on the panel at 11:29:11 (no Wednesday seat existed to process it — the 11:06 seat had died) and again at 13:12:00; Wednesday processed the 13:12 click. Revert was already the default in force with s126 since 01:06Z."
+ },
+ {
+  "id": "nexusai-rd310-which-of-three-files-are-customer-data",
+  "client_project": "Datasec / NexusAI",
+  "title": "RD-310: the export list and the purge list disagree on three files — which of them are customer data is your call",
+  "bluf": "The NexusAI agent (S34) measured, in-process, that two files are EXPORTED as customer data but never PURGED by right-to-erasure (`.machine-id`, `.persistence-sentinel.json`) and one is PURGED but never exported (`agentmail-cursors.json`). It filed RD-310 (Medium) and explicitly did not decide which of the three is customer data — that is a classification, i.e. what an erasure deletes and what a data export hands a customer, so it is Kam's. Wednesday has NOT read the three files; the descriptions below are S34's. RD-310 stays To Do until ruled; nothing depends on it today.",
+  "default_action": "Nothing moves. RD-310 stays To Do/Medium; S35 is told not to touch it. Wednesday re-raises only if a round needs the answer.",
+  "options": [
+   {
+    "key": "infra-not-customer",
+    "label": "`.machine-id` + `.persistence-sentinel.json` are infrastructure: REMOVE from export, keep out of purge; `agentmail-cursors.json` is derived from customer mail — keep in purge AND add to export (Recommended, by S34's descriptions — unmeasured by Wednesday)",
+    "detail": "`.machine-id` is the per-install encryption key seed (F-6/RD-309) — a key seed should not leave the box inside a customer data export; the sentinel is a boot marker. The cursors track positions in the customer's mailbox, so they are customer-derived. Result: both lists agree, and the export stops carrying a key seed."
+   },
+   {
+    "key": "all-customer",
+    "label": "All three are customer data: export AND purge every one",
+    "detail": "Simplest rule, both lists identical. Cost: the export ships the machine key seed and a boot marker; erasure deletes the install identity (the product re-mints it on next boot — S34 measured that re-minting path under F-6)."
+   },
+   {
+    "key": "leave",
+    "label": "Leave as is; RD-310 stays To Do",
+    "detail": "The disagreement stands; the N-1 lesson says list drift is how the next erasure hole arrives."
+   }
+  ],
+  "recommended": "infra-not-customer",
+  "ts": "2026-09-05T13:31:51.358423+10:00",
+  "status": "open",
+  "ruled_choice": null,
+  "ruled_ts": null
+ },
+ {
+  "id": "secuura-demo-service-crash-loop",
+  "client_project": "Secuura/Blockchain",
+  "title": "The demo's demo-service is crash-looping (2,856 restarts in 48 h) — deliberately off by the KS-641 fail-closed guard, but restart: unless-stopped keeps reviving it",
+  "bluf": "Secuura / Blockchain. The Secuura agent (s127) read the demo VM while verifying two ticket states and found secuura-demo-service restarting about once a minute since 2026-09-03 04:04Z (RestartCount 2856; FATAL: DEMO_SERVICE_ENABLED must be exactly true). The KS-641 guard is working as designed; the compose restart policy turns 'deliberately off' into 'unhealthy forever' — the only red container on the demo, and a 776 KB log so far. Host load 0.18, not a performance emergency. Any change touches the LIVE DEMO, so it is Kam's. The agent changed nothing.",
+  "default_action": "Nothing moves. The container keeps looping; the agent does not touch the demo. Wednesday re-raises only if the demo's health matters for a client demo.",
+  "options": [
+   {
+    "key": "stop",
+    "label": "docker stop it",
+    "detail": "The demo reports a stopped container instead of a permanently unhealthy one; persona switching stays off; one command, reversible."
+   },
+   {
+    "key": "enable",
+    "label": "Enable it properly",
+    "detail": "Set DEMO_SERVICE_ENABLED=true and DEMO_SERVICE_KEY, recreate the container — persona switching returns, now authenticated (the KS-641 shape). Needs the key chosen and stored."
+   },
+   {
+    "key": "leave",
+    "label": "Leave it",
+    "detail": "By-design red stays; every health glance must re-derive it."
+   }
+  ],
+  "recommended": "stop",
+  "ts": "2026-09-05T14:24:02.667970+10:00",
+  "status": "ruled",
+  "ruled_choice": "stop",
+  "ruled_ts": "2026-09-05T14:54:37.249692+10:00"
+ },
+ {
+  "id": "secuura-ks386-nothing-to-dispose",
+  "client_project": "Secuura/Blockchain",
+  "title": "KS-386 KYC images: the disposal decision on your desk has nothing to dispose — svc_kyc_images holds 0 rows on local AND demo",
+  "bluf": "Secuura / Blockchain. Your 2026-08-14 ruling on KS-386 kept the disposal of existing KYC image rows as your explicit signature and asked for the row count. The Secuura agent (s127) measured it today as superuser with row-level security confirmed off: 0 rows on local, 0 on demo (users table 25/30 as the non-zero control). So there is nothing to dispose. Two loose ends the agent flagged: the ticket's description still says 'encrypt under the subject DEK', which contradicts your stop-storing ruling; and the stop-storing write-path half (migration 045 makes the column nullable) is parked local on s127's branch, unfinished.",
+  "default_action": "Record-only: the zero-row measurement and the stale-description note go on KS-386 (board write within the agent's authority); the write-path half stays parked; the disposal question stays on your desk until you rule.",
+  "options": [
+   {
+    "key": "close",
+    "label": "Record it and finish stop-storing",
+    "detail": "The successor corrects KS-386's description to the stop-storing ruling, notes the zero-row measurement on the ticket, and finishes the write-path half as category-1 work under your 08-14 ruling; the disposal question closes as moot."
+   },
+   {
+    "key": "record-only",
+    "label": "Record the zero on the ticket, nothing else",
+    "detail": "The measurement goes on KS-386; the description and the write-path half wait for a later ruling."
+   },
+   {
+    "key": "leave",
+    "label": "Leave it",
+    "detail": "Nothing changes; the disposal question stays open on your desk."
+   }
+  ],
+  "recommended": "close",
+  "ts": "2026-09-05T14:45:10.943753+10:00",
+  "status": "ruled",
+  "ruled_choice": "close",
+  "ruled_ts": "2026-09-05T14:53:55.090795+10:00"
+ },
+ {
+  "id": "secuura-demo-stop-needs-kams-own-word",
+  "client_project": "Secuura/Blockchain",
+  "title": "demo-service stop: the agent refuses Wednesday's relay and wants your own word",
+  "bluf": "Kam ruled 'docker stop it' on the panel at 14:53. The Secuura agent (s128) holds: its boot brief (written by Wednesday's predecessor) says 'prod/demo pause for Kam — touch nothing on the demo' and the project CLAUDE.md binds prod/demo, so a relay from Wednesday is not enough for it; it agrees the stop is right on the merits (2,899 restarts, undo = docker start). Wednesday's v1.3 text says demo is Wednesday's to relay, but Wednesday will not argue it into scope. KS-641's archive waits behind the stop record.",
+  "default_action": "nothing moves; the loop continues; KS-641 stays unarchived until the stop lands",
+  "options": [
+   {
+    "key": "type-in-pane",
+    "label": "Kam types one line in the Secuura agent's pane (cockpit pane 'Secuura/Blockchain')",
+    "detail": "docker stop secuura-demo-service — the agent reads it on its merits and runs it in under a minute"
+   },
+   {
+    "key": "amend-brief",
+    "label": "Wednesday corrects the brief's text to v1.3's demo scope (dev/staging/test/demo deploys are Wednesday's to relay) and the agent acts on the relay",
+    "detail": ""
+   },
+   {
+    "key": "leave",
+    "label": "leave it looping (noise, not damage); KS-641 archived without the stop record",
+    "detail": ""
+   }
+  ],
+  "recommended": "type-in-pane",
+  "ts": "2026-09-05T15:18:02.807228+10:00",
+  "status": "open",
+  "ruled_choice": null,
+  "ruled_ts": null
  }
 ]
