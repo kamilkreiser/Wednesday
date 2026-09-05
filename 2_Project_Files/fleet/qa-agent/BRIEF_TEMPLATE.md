@@ -105,6 +105,8 @@ passing is not evidence that a consumer can call the thing. **Green `check:opena
 not enough; the live probe was the thing.** Where a recommendation depends on a runtime
 behaviour, say so even when — especially when — a static gate agrees with you.
 
+- **Every suite named in §3 carries WHERE it runs** — the tester's own by-SHA copy, or a stack the tester MAY drive at a named port. A suite with no runnable environment named is **NOT COMMISSIONED — say so, with the reason** (2026-09-05: two Secuura briefs assigned "the four platform suites" while §1 forbade the only stack that could run them; the tester had to resolve the contradiction). Name suites by PATH and command, never by a phrase.
+
 ## 7. Known-fragile / known-changed areas
 - **Known-fragile:** `<areas historically brittle — hunt the class here first>`
 - **Recent changes — do NOT flag as new:** `<list, so a known change is not reported as a regression>`
