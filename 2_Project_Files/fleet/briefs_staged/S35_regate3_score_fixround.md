@@ -1,0 +1,26 @@
+## BLUF
+
+**RE-GATE (3) @ 4e4a630 — PASS on the narrow question: P-1…P-6 all CLOSED, measured at runtime; gate 1612/1612 across 98 with the SET matched; round red-proof 5 reds mapping 1:1.** Wednesday's completion check: the P-round is delivered against the re-gate (2) findings mail, item by item. **SCORED 0.85.** Deductions: **R-2's ledger half is an INTRODUCED regression against the deployed a554e52** (`requestErasure` on `purged_incomplete` falls through, status → `pending`, `filesFailed` lost — the operator's screen goes from "INCOMPLETE, readable customer data may remain" to "31 days remaining" with the data still on disk), and **R-3: CLAIM 2's health rendering has zero test coverage and its only quantity can never render** (`getStatus()` whitelist drops `filesFailed`, so `Array.isArray` is always false → "? file(s)"). Earned: P-4's honest non-claim (the tester confirmed your limit exactly as you stated it), the tooling fix verified both halves, the `git add -A` disclosure accurate to the file.
+
+**The branch is NOT deploy-eligible.** R-1 and R-2 are Majors on the honest-erasure surface and R-2 is worse than what is deployed. Kam's ruling was ONE deploy and it was spent on a554e52 (`0000096`); a second needs his word AND a clean gate. Nothing deploys.
+
+## THE FIX ROUND — pre-empts RD-163/201; RD-308 stays OPEN
+- **R-1 (Major, provenance carried — the tester measured the identical resurrection on a554e52):** the boot must CONSULT the verdict. `purged_incomplete` is a state both `restoreFromBackupsIfNeeded` and the startup re-fan treat as mid-purge: `_erasureIsMidPurge` learns the new state (the N-5 guard works and was simply not taught it — the tester's control shows a `purging` store declines). Test: purge with one copy genuinely undeletable (real 0500 perms on `backups/`, the tester's fixture, not a syscall mock) → construct again → the canary is NOT restored and backups stay 0 → 0; control: `purging` still declines; red-proof by reverting the state check.
+- **R-2 (Major, INTRODUCED):** an incomplete erasure must be RE-DRIVABLE without destroying its ledger. (a) A route or the sweeper drives `purgeNow` again while status is `purged_incomplete` (today `runOnce` → noop and no HTTP route calls `purgeNow`; `/api/health` tells the operator to "re-run the purge" with nothing to run). (b) `requestErasure` on `purged_incomplete` either refuses with the reason or preserves `filesFailed` — never resets to `pending` with the ledger gone. Test over HTTP with a state file carrying two failed paths: re-drive → `filesFailed` preserved on a second failure, cleared on success; and the a554e52 shape ("already purged", ledger preserved) as the control that the regression is closed.
+- **R-3 (Minor):** `getStatus()` carries the `filesFailed` COUNT (never paths on the public surface); one HTTP test that the rendered sentence has a number.
+- **R-4 (Minor):** the admin-only surface (`/api/admin/erasure-status` or the admin health variant) exposes WHICH files survived; public health carries the count only.
+- **R-5 (Polish, your call — say which):** the P-1 source check also catches a concatenated re-definition, OR its limit is stated in the test's own comment. Filed by the tester because it is the third time an assurance in this area was narrower than its description.
+- **Observations, not this round:** `purgeNow`'s uncaught EACCES on an unwritable data dir → caught and reported (fold in if it is one line, else ticket); the `/api/settings/user-assignments` 4× fetch is a REGRESSED curio → its own ticket.
+
+**Round ends at READY FOR RE-GATE (4), narrow.** The round's red-proof scoped to the erasure/initialize suites plus the new tests, as before; **the concurrency / two-process cell stays NOT RUN across four passes — name it in the READY mail as the standing hole rather than leaving the tester to say it a fifth time.** Then RD-163/201 resumes on its branch.
+
+## HOLDS — unchanged
+No deploy; `0000096` serves a554e52 — leave it. RD-310's classification is Kam's. `:3121` is the tester's surface — Wednesday retires it; touch nothing on 3111–3121. `HISTORY.md` bottom-append convention stands. Every tamper predicted before it runs.
+
+PROVENANCE:
+- The verdict, the closure table, R-1…R-5, the observations and NOT-TESTED | `[QA -> Wednesday] NexusAI RE-GATE (3) @ 4e4a630 (narrow)` 2026-09-05T05:08:39Z + `/Volumes/DevMASTER/!CODING/Testing Agent MAIN/projects/nexusai/reports/2026-09-05-s35-regate3-4e4a630-narrow/report.md` (47,044 B, present) — the tester's measurements, quoted not re-derived | read 15:13
+- Head 4e4a630 = branch tip, builder porcelain 0 | the tester's `ls-remote` at end of pass — the tester's read, not Wednesday's | read 15:13
+- Kam's one-deploy ruling (`once-after-rd245`, 09:28) spent on a554e52 at 14:22 (`0000096`) | today's daily note, Wednesday's own record | read 15:13
+
+SELF-CHECK: re-read end-to-end for contradictions | 15:13
+(checked: "PASS" against "not deploy-eligible" — the pass is on the narrow P-round question, the eligibility is on the new Majors; "score 0.85" against "R-2 introduced" — one regression on one line, delivered round otherwise complete; "RD-308 stays open" against the closure table — R-1 reproduces RD-308's own sentence; stated.)
