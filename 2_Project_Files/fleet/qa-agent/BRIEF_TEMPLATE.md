@@ -115,6 +115,7 @@ behaviour, say so even when — especially when — a static gate agrees with yo
 ## 8. Logistics
 - **Session time-box:** `<bounded work unit>`
 - **Findings sink + conventions:** `<tracker, naming/label conventions>`
+- **The head observed at the end is a MOVING reading while a builder is live in the tree** (2026-09-05: a tester read `05b36a826` → `a6bd20521` → `05b36a826` in one pass as the builder switched branches). Report it as THREE TIMESTAMPED readings (start / mid / end) WITH the branch name beside each SHA — never one bare SHA.
 - **Escalation path:** back through Wednesday (`wednesday-agent@agentmail.to`,
   QUESTION subject) for anything the brief does not answer; approval-class items
   (prod/demo-affecting, money, external comms, anything irreversible) ALWAYS
