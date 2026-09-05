@@ -1,0 +1,28 @@
+## BLUF
+**GO — merge PR #817 at `0750499ef`, sha-asserted, NOW, independent of #821/#822.** KS-800 RE-GATE (tier 1, round 2 of 2) @ `0750499ef` = **PASS for merge** — 14 of pass 1's 16 findings CLOSED by pass 1's own probes with exact predicted sets, F-13 closed in scope, **F-14 RETRACTED by the tester (you were right; pass 1 was wrong — index.ts:862 is inside createVerificationRoutes)**, F-12 ticketed KS-813 by you. The tester built the connector image itself (clean 200 / NUL 400 / mount-removed 200 over its own socket), re-derived the corpus of 25 by its own AST walk, reproduced LEG F's 19 and 1. **NO GO on the sentence "the class is closed"** — and under Kam's 20:19 cap this ends the class's rounds: the closed instances SHIP, the residue is TICKETED, no round 3. Your deviation (`@secuura/shared` not in `package.json`; resolved by the builder stage + symlink) is ACCEPTED — the tester's image check is the evidence.
+
+**Merge order:** Wednesday measured `git diff --name-only` on local objects this action — #817 touches 11 files, NONE of them in #821 (7 files) or #822 (7 files); the ruled order #821 → #822 → #817 bound only overlapping verdicts. Merge #817 first; #821 and #822 stay HELD for their own verdicts (both testers still running).
+
+## After the merge (your board authority)
+1. KS-800 comment, BLUF-first: what closed (the 14 + F-13), what was retracted (F-14), what is ticketed; board state per the convention you applied to KS-795. Cite the report path below.
+2. **Residue tickets — file them, then continue KS-804:**
+   - **G-01 (High):** two live api-gateway routes parse a body no guard inspects — `shouldParseBody()` (index.ts:407) skips the global parser for proxyPaths prefixes, but `createVerificationRoutes` (mounted :861, before the proxy at :1040) parses with `mockBodyParser`; over a real socket `POST /api/documents/abc/verify` and `POST /api/certifications/abc/verify` with NUL → 200, handler reached, NUL in `req.body`; control `/api/workflows/abc/reject` → 400. `/api/certifications/:id/verify` carries NO auth handler. NOT introduced by #817 — the guard's PRECONDITION. Its own ticket, High, security.
+   - **G-02 (High):** a parser mounted by a helper in the SAME file, declared above the guard and called below it, is invisible to all eight legs (predicted 0, measured 107/107 GREEN; over a socket the NUL reaches the handler). The scanner recognises `mountBodyParsers(app)` by name and no other shape; the 24-service migration makes this real. Own ticket, scanner work, tier 1 when built.
+   - **G-03 + G-04 (one Medium):** LEG D still counts REFERENCES (a 7th route on the factory parser at index.ts:862 → 107/107 green); `sawSharedImport` suppresses the fallback for the whole FILE, so a guard imported from any non-`@secuura/shared` specifier reads as "mounts NO guard".
+   - **G-05/G-06/G-07/G-08 → lines on the KS-800 follow-up ticket:** PARSER_FACTORY_NAMES hand-maintained (8 = 8 today, no leg asserts it); the T10 bare-`?` case comes back over a RAW SOCKET (3 of 3 discriminate there); one sibling still binds `::` (ks727-errorhandler-class-guard.test.ts:277); **ENTRYPOINT_NAMES: the tester's word is YES, delete the array, keep the comment** — in the follow-up, NOT in #817: the gated SHA merges as gated.
+3. Then KS-804 as briefed. #821 and #822 HELD.
+
+## Score (KS-800 round, items 3–8 + the fix set on #817)
+**s131: 0.85** — 14/16 closed exact, the F-14 retraction earned by your own re-read, the connector guarded with build wiring, the corpus exact; deductions: the class claim "closed" falsified by G-02 (a specific hole the classifier cannot see, in the shape the migration takes), and G-03 (F-07 converted LEG F and left LEG D). QA pass: 1.0 (its own F-14 retraction in the open; its own miss stated — the originalUrl tamper 2 predicted / 3 measured; the failed first tamper re-anchored and only the second run tabled).
+
+## Holds
+Merge only #817 at `0750499ef` (sha-asserted — if the head has moved, STOP and mail); nothing on the demo (the demo-service stop and the admin-image rebuild are Kam's cards); handovers to Peter/Stuart are test blocks, never PR lists; client-facing text goes on tickets only.
+
+PROVENANCE:
+- The verdict, the closure table, G-01…G-08, the score inputs | mail `[QA -> Wednesday] KS-800 RE-GATE @ 0750499ef (PR #817)` 2026-09-05T11:05:16Z, BLUF + closure table read; full report at /Volumes/DevMASTER/!CODING/Testing Agent MAIN/projects/secuura/reports/2026-09-05-s131-ks800-regate-0750499ef/report.md (the QA project's tree, 47,277 B) | read 2026-09-05 21:11
+- #817 = 11 files, zero overlap with #821 (7) and #822 (7) | `git -C /Volumes/DevMASTER/!CODING/Secuura/Blockchain/2_Project_Files diff --name-only cd5262dc3 <head>` on LOCAL objects, no fetch, from Wednesday's seat | read 2026-09-05 21:11
+- The cap (two NO GO rounds on one class → ship the closed instances, ticket the residue) | Kam, panel 20:19 "Let's go ahead with your recommendation" — /Volumes/DevMASTER/WEDNESDAY/0_Brain/learnings/2026-09-05_qa-gate-tiers-and-the-two-nogo-cap.md | read 2026-09-05 21:11
+- Your deviation + KS-812/KS-813 filed | your READY mail 2026-09-05T10:26:01Z as recorded in Wednesday's note (the predecessor seat read it whole) — not re-read by this seat | read 2026-09-05 21:11
+
+SELF-CHECK: re-read end-to-end for contradictions | 2026-09-05 21:11
+(checked: "merge first" against the ruled order — the order was conditional on verdicts and Wednesday's overlap read shows none; stated with its instrument. "PASS for merge" against "NO GO on the class" — both the tester's own sentences, the cap resolves them; consistent. G-08 "delete" against "gated SHA merges as gated" — routed to the follow-up; consistent.)
