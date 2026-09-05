@@ -4,6 +4,7 @@ type: correction
 source: "Kam, 2026-08-26 10:51 (dashboard chat, verbatim): 'Do not delete any files, especially files that we are working on. Better cleanup is worthwhile.' — minutes after the restore of the six folders the NAS sync leg had deleted, and after my panel line calling 15 HPSM conflict copies 'safe to delete when you like'."
 status: live
 supersedes: ""
+tier: M
 ---
 
 # Never delete files — especially files we are working on. Cleanup means quarantine, not removal

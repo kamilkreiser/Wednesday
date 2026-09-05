@@ -4,6 +4,7 @@ type: correction
 source: "Self-caught via the HPSM agent's report: it noted 'the deck is frozen with PowerPoint holding it open right now (pid 6147)' as a constraint on ITS work. That process was mine, opened for Kam an hour earlier, and it had left a ~$ lock file inside the Datasec/HPSM project tree."
 status: live
 supersedes: ""
+tier: M
 ---
 
 # Opening a file in a GUI application is a WRITE into the folder that holds it

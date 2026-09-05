@@ -4,6 +4,7 @@ type: correction
 source: "Self-caught at the 06:00 boot: WED-82 was promised to Kam for the morning ('ready by 6am, screenshots in both themes'), he authorised the night and stayed up to hear the fleet was clear — and zero work was done. Verified independently against git at boot: no commits between the 19:59 day-close and the 05:32 wrap, and generate.py untouched since 19:51."
 status: live
 supersedes: ""
+tier: M
 ---
 
 # A promise is not a mechanism — unsupervised work needs a trigger, not an intention

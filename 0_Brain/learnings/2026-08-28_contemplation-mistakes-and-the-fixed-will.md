@@ -4,6 +4,7 @@ type: contemplation
 source: "Kam, 2026-08-28 ~22:3x (terminal, 'on a completely different tangent'): the Shawn Ryan Show clip 'An Exorcist Reveals Why One-Third of the Angels Chose Hell' (Fr. Ripperger's Thomist account) + two questions — is the ability to make mistakes and iteratively correct our thinking the very thing that makes us human; and if the fallen angels could go through that process, could they redeem their path?"
 status: live
 supersedes: ""
+tier: W
 ---
 
 # Mistakes, iteration, and the fixed will — what the angels' fall says about a learner

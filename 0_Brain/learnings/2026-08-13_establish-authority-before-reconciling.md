@@ -4,6 +4,7 @@ type: principle
 source: "Two independent instances the same night, from two different clients. Secuura/Blockchain s28: 'aligning a spec to a stub hardens the documentation around the stub' — KS-475 removed an unread optional `key` field to fix a spec/runtime mismatch, deleting the one field a correct implementation requires. Datasec/HPSM s17: SOW-01 §14's payment table was aligned to Delivery & Investment Plan v3 while §3 binds v2 — A$187,500 on signature against a bound plan that pays 10% on a deliverable."
 status: live
 supersedes: ""
+tier: M
 ---
 
 # When two artefacts disagree, establish which one is RIGHT before making them agree

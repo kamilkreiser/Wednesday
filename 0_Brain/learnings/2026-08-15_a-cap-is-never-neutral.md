@@ -4,6 +4,7 @@ type: correction
 source: "Three instances in one day, from three different people: my own maxResults=30 (2026-08-14, recurring in memory today), Peter's PR-698 register losing its eighth item beneath its own headline count of seven, and RD-97's `--reverse` under a `head -12` cap truncating exactly the highest-priority blockers."
 status: live
 supersedes: ""
+tier: M
 ---
 
 # A cap is never neutral — it removes whatever the SORT put last, and the sort is usually ordered by what you care about

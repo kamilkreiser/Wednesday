@@ -4,6 +4,7 @@ type: preference
 source: "Kam, dashboard panel 2026-09-05 13:55 (verbatim): 'The team is not using the extranet much. I mentioned this yesterday. If anything needs to be escalated, please tell me and I'll send a WhatsApp message. Otherwise, everything has to be done through the tickets.' — the re-ask of his 2026-09-04 08:32 note; the shape goes back to 2026-08-19 ('by having the detail in that ticket, the message can actually be short')"
 status: live
 supersedes: ""
+tier: W
 ---
 
 # Client-facing communication goes ON THE TICKET — the extranet is not a channel, and the only escalation path is a short WhatsApp that KAM sends

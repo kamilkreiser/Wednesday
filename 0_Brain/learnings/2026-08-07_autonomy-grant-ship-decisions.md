@@ -4,6 +4,7 @@ type: principle
 source: "Kam, 2026-08-07 ~09:5x, verbatim: 'happy for you to make these decisions yourself and only escalate to me if needed.' Said in the message correcting the ghost-text misattribution, i.e. immediately after seeing me decline to relay an approval I could not prove was his."
 status: live
 supersedes: ""
+tier: W
 ---
 
 # Autonomy grant: fleet ship/deploy decisions are mine, escalate by exception

@@ -4,6 +4,7 @@ type: principle
 source: "Formulated by the Datasec/Vision_Sales_Portal agent — 'A check that cannot fail is not a check' — after catching two of its own. Four independent occurrences across three agents and me in a single day."
 status: live
 supersedes: ""
+tier: MIXED
 ---
 
 # A check that cannot fail is not a check
@@ -64,6 +65,7 @@ have come out differently?"**
 while I was diagnosing my own instance of it. That is the second protocol
 improvement the fleet handed me today. My job is to notice and propagate them.
 
+<!-- tier: P-Secuura/Blockchain -->
 ## The concrete remedy, added 2026-08-13 (Secuura/Blockchain s28)
 
 The rule above asks *"what would make this check fail?"* — good, but it is a
@@ -101,6 +103,7 @@ distinguishes "the guard is discriminating" from "nothing is getting through".
   character broke a strict JSON parse, and a status query used a short SHA and
   returned "0 runs, 0 failures".
 
+<!-- tier: P-Secuura/Blockchain -->
 ### A failure-only log going quiet is not recovery (2026-08-22, Secuura s61)
 
 **The case.** Demo's Blockfrost quota errors ran 450–460/hr for days, stopped
@@ -124,6 +127,7 @@ signature was elsewhere (71 anchors × exactly 1 poll at the 6-hour revisit
 mark, against a proven-zero gap). **Attribute an effect to a cause only when
 the evidence carries the cause's own fingerprint, not merely its timing.**
 
+<!-- tier: P-Secuura/Blockchain -->
 ### The third member: a check that MISREPORTS what it saw (2026-08-14, same agent)
 
 One GitHub secondary rate limit on a GHCR pull, wearing three disguises at once:
@@ -153,6 +157,7 @@ it** (see [[2026-08-06_artifact-presence-is-not-execution]], which this is the
 message-layer twin of).
 
 
+<!-- tier: P-Secuura/Blockchain -->
 ### A test that cannot CLEAN UP starts asserting against live data (2026-08-15, Secuura s35)
 
 **The formulation is the agent's and it is the newest member of the family.** A cleanup
@@ -190,6 +195,7 @@ defined` **instead of the real assertion** — the wrong-runner member above, fa
 direction that looks like a worse bug than you have.
 
 
+<!-- tier: P-Secuura/Blockchain -->
 ### A positive control proves the suite it RAN IN, and nothing about its neighbour (2026-08-15, Secuura s35)
 
 **The condition that caught this was "run the positive control PER SITE", and I set it without
@@ -213,6 +219,7 @@ the corollary from 2026-08-14 that **the positive control must run in the SAME P
 real query** — this is that rule pointed at suites rather than at searches.
 
 
+<!-- tier: P-Datasec/NexusAI -->
 ### The inverse: a REPRODUCTION that cannot reproduce (2026-08-15, Datasec/NexusAI)
 
 **Every member above is a check that cannot report a failure. This one is a check that cannot
@@ -254,6 +261,7 @@ delete what you are studying.
 [[2026-08-06_exercise-mechanisms-before-arming]],
 [[2026-08-07_enumerate-every-surface-before-done]], [[_ledger]]
 
+<!-- tier: P-Secuura/Blockchain -->
 ### The refinement that makes the positive-control rule actually work (2026-08-16, Secuura s37)
 
 **The rule everywhere above is "pair a zero-result check with a control that must be non-zero."
@@ -281,6 +289,7 @@ published-ports regex and **rewrote the instrument rather than believing its zer
 3. **A zero that means "the command could not run" is indistinguishable from a zero that means
    "no such code"** — and quoting/globbing/shell differences are the commonest cause on macOS.
 
+<!-- tier: P-Datasec/NexusAI -->
 ### An indicator that can MISS its own event (2026-08-24, Datasec/NexusAI)
 
 **The case.** Building upload limits, the size cap genuinely cut the stream
@@ -303,6 +312,7 @@ listeners synchronously AND detect by measured state (size counted vs cap),
 plus an exact-boundary regression test. Belt from mechanism, braces from
 measurement.
 
+<!-- tier: P-Datasec/NexusAI -->
 ### The control needs its own control (2026-08-23, Datasec/NexusAI)
 
 **The case.** Proving a gitleaks allowlist fix, the agent injected a sabotage
@@ -354,6 +364,7 @@ still passed** (image validation), **9 of 16** (token encryption), **7 of 10**
 (billing idempotency). Every survivor was a rejection case. A suite without a
 must-succeed case cannot tell you which of those numbers you are looking at.
 
+<!-- tier: P-Secuura/Blockchain -->
 ### The condition we had not stated: on a side-effecting system, the positive control IS an action (2026-08-14, Secuura s34)
 
 The rule above says *always prove the search can find something before trusting that it
@@ -385,6 +396,7 @@ times for nothing**, which teaches you that controls are cheap — **and then th
 costs you is the half you added in order to be rigorous.** The discipline and the trap
 arrive together.
 
+<!-- tier: P-Secuura/Blockchain -->
 ### The mirror: an ABSENCE claim needs a positive control too (2026-08-14)
 
 The family above is about checks that cannot report a failure. This is its mirror —
@@ -430,6 +442,7 @@ unprompted, and the churn is left visible in the scoreboard rather than tidied a
 A record that quietly returns to its original wording hides that a correction cycle
 happened — and the cycle is the evidence the loop works.
 
+<!-- tier: P-Datasec/NexusAI -->
 ### Three "cannot see" members from one micro-session (2026-08-25, Datasec/NexusAI s5) — and a derivation lesson from its neighbour
 
 1. **A paginator whose unknown parameter is silently ignored.** The AgentMail list API accepts `page_token`; passing `last_key` errors nowhere and re-serves page 1 on every call. The loop reports a plausible scan count (550 "messages"), terminates, and says NOT FOUND with full confidence. Caught only by running three candidate parameter names against each other and noticing two returned byte-identical first pages. **Rule: a "not found" from a paginator nobody has proven can paginate is worth exactly nothing — prove the second page differs from the first before believing the scan.**
@@ -439,6 +452,7 @@ happened — and the cycle is the evidence the loop works.
 **And from Secuura s65 the same morning, the derivation half:** s64's decision pack reached the RIGHT answer (six operations stay on KS-592) via a list that summed to 11 against a ticket naming ten. *"A correct conclusion is not evidence of a correct derivation"* — and a correct conclusion is precisely what lets a wrong derivation survive review. Re-derive from the source when the record will be cited; a matching bottom line is not a check of the arithmetic above it.
 
 
+<!-- tier: P-Secuura/Blockchain -->
 ## A test's NAME is not its coverage (2026-09-03, Secuura s119 — the member that let an AUTH BYPASS survive a suite that appears to test it)
 
 **Their formulation, adopted verbatim: *a test's NAME is not its coverage.***
@@ -483,6 +497,7 @@ so nobody does), here with a security consequence.
    negative-only suite rule pointed at the most expensive possible subject.
 
 
+<!-- tier: P-Datasec/NexusAI -->
 ## A census, a writer and a verifier that descend from ONE parse are one view rendered three times (2026-09-04, Datasec/NexusAI S29 — its own diagnosis, then its own correction to that diagnosis)
 
 **Their formulation, adopted verbatim and better than the rule it sharpens:**
@@ -530,6 +545,7 @@ upstream of both.
    worth as much attention when it comes from your own new tool as from someone else's old one.
 
 
+<!-- tier: P-Datasec/NexusAI -->
 ## THE ALL-FAIL RED-PROOF: a tamper that destroys the SUBJECT, so the failure set stops discriminating (2026-09-04, Datasec/NexusAI — self-caught and self-reported)
 
 **The case.** Red-proofing RD-245's backup guard, the agent stripped the `const` bindings along with the guard. `backupFile` threw, its own `try/catch` swallowed the throw, and **all four tests failed — including the two that do not depend on the guard at all.** That is a tamper proving the tests detect a broken function, which is not the claim being made.
@@ -549,6 +565,7 @@ upstream of both.
 4. **State which cases the tamper SHOULD hit before running it**, then compare the set, not the number. This is the clause-isolation rule pointed at the subject rather than the guard.
 
 
+<!-- tier: P-Datasec/NexusAI -->
 ## A FIXTURE THAT CANNOT REACH THE PRODUCT'S PATH — the entry-point member (2026-09-04, Datasec/NexusAI RD-245; a BLOCKER found under a green suite the tester re-derived)
 
 **The operative case:** a test proves a fix works, and the fix does not work. **Ask what ENTRY POINT the fixture uses, and whether the product uses that one.**
@@ -623,6 +640,7 @@ representation of a file) · [[2026-08-06_selector-discipline-in-ui-verification
 selector first — here the selector was suspect in both tools at once).
 
 
+<!-- tier: P-Datasec/NexusAI -->
 ### CORRECTED the same session, by the same agent, and the correction is the better lesson
 
 **Wednesday filed the above as "two views sharing a truncation" — the builder chased the lead and
@@ -695,6 +713,7 @@ exactly the defect it exists to prevent.** Any lint, migration or invariant of t
 declare its own Y" needs that third category before it ships.
 
 
+<!-- tier: P-Secuura/Blockchain -->
 ## A red-proof proves a check CAN fail; only a GREEN BASELINE proves it can pass for the right reason (2026-09-04, Secuura s120 — a guard defeated by its own doc comment)
 
 **Their formulation, adopted verbatim:**
@@ -744,6 +763,7 @@ had not named the second.
    scanning for delimiters cannot tell your prose from your code.
 
 
+<!-- tier: P-Datasec/NexusAI -->
 ### The AXIS a guard is blind on is not the axis it was designed for (2026-09-04, Datasec/NexusAI — a perfectly-implemented guard, green on a defect it could never see)
 
 **The three-population rule above says a "every X must declare its own Y" guard needs to distinguish
@@ -783,6 +803,7 @@ that cannot SEE; this is about a guard that sees perfectly, on the wrong axis. *
 that means nothing, and only the second one survives every review of the guard's own logic.**
 
 
+<!-- tier: P-Secuura/Blockchain -->
 ### THE OTHER END OF IT: a red-proof on a subject that did not COMPILE is not a red-proof (2026-09-04, Secuura s121 — the pair to the green-baseline rule above)
 
 **Their formulation, adopted:**
@@ -828,6 +849,7 @@ control asserts **the decision function is NOT a mock**, and its auth stub sets 
 chain."* **A test's mocks are part of its subject; mock the neighbours, never the thing under test.**
 
 
+<!-- tier: P-Datasec/NexusAI -->
 ## A MULTI-CLAUSE guard red-proofed with a fixture that trips BOTH clauses has measured the pair and learned nothing about the parts (2026-09-04, Datasec/NexusAI S31 — the builder found its OWN guard was decoration)
 
 **The case.** S31 wrote a "no private copy of the shared formatter" guard with two clauses: a
@@ -875,6 +897,7 @@ INTERNAL STRUCTURE rather than at the guard as a whole.** Both prior formulation
 passed this guard: it fired, and it isolated the mechanism *it was named for*. Only clause-level
 tampering saw it.
 
+<!-- tier: P-Datasec/NexusAI -->
 ### THE SECOND HALF, added hours later by the TESTER that verified the fix (2026-09-04, QA re-gate on `aad37da`)
 
 The builder's rule above is good and **partial**. The tester proved the rewritten guard holds — deleting
@@ -916,6 +939,7 @@ message text I would have reported a false result on the most important test of 
 status, on the load-bearing measurement of a pass about guards that cannot fail.**
 
 
+<!-- tier: P-Datasec/NexusAI -->
 ## AN ELIMINATION SET THAT IS EXHAUSTIVE WITHIN ONE CATEGORY AND SILENT ABOUT THE OTHERS (2026-09-04, Datasec/NexusAI S32 — it disproved its OWN filed finding)
 
 **The case.** After a deploy, a page rendered the empty state while the server was already
@@ -967,6 +991,7 @@ verification had this hole: "figures rendering on the tab", run inside the rollo
 would have shown empty on a good deploy — and the honest consequence is a rollback-by-digest
 and a reported failure that never happened. The check was not wrong; its CLOCK was.**
 
+<!-- tier: P-Secuura/Blockchain -->
 ## A TEST HELPER THAT REIMPLEMENTS THE PRODUCT IS A MOCK THE MOMENT THE PRODUCT MOVES (2026-09-05, Secuura s128 — found by its own red-proof, not by reading)
 **The case.** KS-796 Q1's new 20-case suite asserted the status mapping through a `domainOf()` helper the builder wrote — a faithful copy of `mapDbStatus`. The builder then ran RP-A: revert the product's `|| 'ACTIVE'` fallback, the exact defect the ticket exists to close. **The suite stayed 20/20 green.** The helper had matched the product exactly at the moment it was written, so every assertion was checking the copy against itself. `mapDbStatus` is now exported and the test calls the product; RP-A then reddens.
 

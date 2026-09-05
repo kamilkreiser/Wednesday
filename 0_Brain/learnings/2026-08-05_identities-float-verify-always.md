@@ -4,6 +4,7 @@ type: principle
 source: "Kam, 2026-08-05 (responding to my gh-identity 'cleanup queue' flag): 'i will switch between accounts and jobs. this will happen. tell me if you need me to auth but 1)critical not to get the job / client wrong 2)to make things as portable as possible'"
 status: live
 supersedes: ""
+tier: W
 ---
 
 # Identities float by design — verify at point of use, never propose "cleanup"

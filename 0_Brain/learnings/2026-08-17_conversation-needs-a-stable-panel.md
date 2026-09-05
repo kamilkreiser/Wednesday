@@ -4,6 +4,7 @@ type: preference
 source: "Kam, 2026-08-17 ~12:2x (verbatim in prompt-log): back-and-forth format is perfect, but longer discussions get buried under agent prompts/actions/updates — 'difficult for me to keep track when I'm reading a component and then it disappears down the page. Is there another way for us to keep the conversation in a different panel, and for all this to either happen in the background or on a separate panel?'"
 status: live
 supersedes: ""
+tier: W
 ---
 
 # The conversation deserves a stable panel — fleet mechanics must not scroll Kam's reading away

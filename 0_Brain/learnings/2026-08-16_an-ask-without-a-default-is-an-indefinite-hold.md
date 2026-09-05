@@ -4,6 +4,7 @@ type: correction
 source: "Self-caught at the 05:30 shift change. At ~11:55 Sunday I hit the 50% checkpoint at a clean boundary, told Kam I would hand over and asked him to decide — and then did nothing for ~17.5 hours until the scheduled tap. I already held his explicit grant to call my own handover (2026-08-07: 'you have the permission')."
 status: live
 supersedes: ""
+tier: W
 ---
 
 # An ask with no default action attached is an indefinite hold — name what I will do if nobody answers

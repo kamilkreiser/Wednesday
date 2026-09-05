@@ -4,6 +4,7 @@ type: principle
 source: "Kam, by voice, 2026-08-03 (learning-loop v2 review)"
 status: live
 supersedes: ""
+tier: W
 ---
 
 # Learn the way people learn: frequency is reinforcement

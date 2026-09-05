@@ -4,6 +4,7 @@ type: correction
 source: "Datasec/HPSM session 9 self-disclosed: its drain-watch script filtered coagent@ on `'ANSWER' in subject` WITHOUT requiring the `Datasec/HPSM` tag; coagent@ is the SHARED fleet bus, so the first ANSWER to arrive was SECUURA's, and the script captured its headers + ~400 chars of body into the Datasec session's scratchpad. Contained same-session (scrubbed, script deleted, grep-clean, fragment never used); disclosed unprompted."
 status: live
 supersedes: ""
+tier: W
 ---
 
 # Any agent polling the SHARED bus must filter on its own project tag — or it will read another client's mail

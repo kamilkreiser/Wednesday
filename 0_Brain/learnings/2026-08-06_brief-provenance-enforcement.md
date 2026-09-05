@@ -4,6 +4,7 @@ type: correction
 source: "w=3 regression: WED-75 Lead_Bot brief asserted the API-key handoff was 'TO Vision' — the authoritative record (Vision's own 2026-07-03 history entry) says Vision GENERATED the key and Lead_Bot receives it, and the value still in Lead_Bot's .env is a gitleaks-found LEAKED key. Caught by the Lead_Bot agent's verify-first pass. Family: 08-04 Peter to-do type (w=1) + 08-04 Tokenomics circular pointer (w=2)"
 status: live
 supersedes: ""
+tier: W
 ---
 
 # Every brief fact carries provenance — enforced by a gate, not by intention

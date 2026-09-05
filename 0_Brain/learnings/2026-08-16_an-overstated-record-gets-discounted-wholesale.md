@@ -4,6 +4,7 @@ type: principle
 source: "Secuura/Blockchain session 37, establishing four security-review sections in one sitting. Its own one-line summary: 'three of the four register sections overstate, and the one live escalation was hiding under a stale row that would have been discounted wholesale.' Sixth protocol improvement handed to me by a delegated agent."
 status: live
 supersedes: ""
+tier: MIXED
 ---
 
 # An overstated record gets discounted WHOLESALE — and the discount lands on the row that is real
@@ -70,6 +71,7 @@ it is that **the accurate claims next to it stop being acted on.**
    not establish X"* to a confident row, because an unestablished row invites work and an
    overstated one poisons the well.
 
+<!-- tier: P-Datasec/NexusAI -->
 ## THE ROT HAS A MECHANISM, and the NexusAI agent (S32) named it better than I had (2026-09-04, after its THIRD stale ticket in one day)
 
 **The operative case:** I am reading, triaging or briefing from a ticket summary, register row, PR body, README line or CLAUDE.md sentence **that contains a number or an absolute state claim** — `241/10 vs 1403/83`, `SEED_DEMO_DATA is ABSENT`, `6 of 12`, `across 11 files`. **That claim has no maintainer.**

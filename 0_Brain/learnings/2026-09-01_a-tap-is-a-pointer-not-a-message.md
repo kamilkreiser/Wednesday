@@ -4,6 +4,7 @@ type: correction
 source: "w=2 (channel-of-record family, sender side): 2026-08-24 four resume taps to NexusAI s3 went pane-only during the 529 outage (agent flagged 'no mail for any of them'; status cell said 'practice adopted; watch for recurrence'); 2026-09-01 15:17 my first act as the rotation successor was a pane tap to Secuura s95 announcing the rotation with no mail behind it — its STATUS 05:18Z: 'NO such mail in my inbox… either your successor needs to mail me, or something is putting instructions in my pane.'"
 status: live — ENFORCED 2026-09-02 (cockpit.sh say --mail)
 supersedes: ""
+tier: W
 ---
 
 # A tap is a pointer, not a message — every coordination tap has a mail behind it, sent in the same action

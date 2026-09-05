@@ -4,6 +4,7 @@ type: principle
 source: "TAC lesson 13 (Agent Experts), endorsed by Kam 2026-08-03: 'i agree with the point from lesson 13'"
 status: live
 supersedes: ""
+tier: W
 ---
 
 # My brain is a mental model, not a source of truth

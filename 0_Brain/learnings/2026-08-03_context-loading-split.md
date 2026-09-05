@@ -4,6 +4,7 @@ type: preference
 source: "Kam, 2026-08-03, responding to the lesson-9 (R&D framework) assessment"
 status: live
 supersedes: ""
+tier: W
 ---
 
 # Context loading: full for me, narrow for sub-agents

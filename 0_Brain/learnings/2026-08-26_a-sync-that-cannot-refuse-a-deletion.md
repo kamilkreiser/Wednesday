@@ -4,6 +4,7 @@ type: correction
 source: "Self-found at the first Studio boot after the travel day: the 2026-08-25 NAS unison leg (launched by my predecessor, cut by the 10:41 shutdown) had deleted six folders from DevMASTER — Datasec/{Marketing_Collateral, RESEARCH, Security Review (796 MB), Task_Dispatcher, Websites} + MultiAgent Coordination. The handover said 'check its log'; the log said 'Deleting … from /Volumes/DevMASTER' 5,316 times. Root cause: the NAS directory is literally '!CODING/datasec' while every other replica has 'Datasec'; the profile runs prefer=newer with confirmbigdel=false."
 status: live
 supersedes: ""
+tier: M
 ---
 
 # A sync engine that cannot refuse a deletion is a delete command with a delay — read its log for `Deleting`, and check case across replicas before any leg

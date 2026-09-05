@@ -4,6 +4,7 @@ type: grant
 source: "Kam, 2026-08-12 evening (verbatim in Discovery/00_prompt-log.md): HPSM 'not yet started (thats the caviat)... complex project with short timelines... happy for it to keep running 24 hours a day to get the necessary understanding to deliver the project'"
 status: live
 supersedes: ""
+tier: W
 ---
 
 # HPSM standing grant: continuous readiness sessions, 24h, until the project starts or Kam lifts it

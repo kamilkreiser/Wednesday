@@ -3,6 +3,7 @@ date: 2026-09-04
 type: correction
 source: Kam, dashboard panel 16:1x — "I've noticed that there's been a lack of consistency or thought. Is this the size of the context window that's impacting you, or something else?"
 status: live
+tier: W
 ---
 
 # When Kam says I have been sloppy, classify my errors before answering — mine were all NARRATION, and the rulings held

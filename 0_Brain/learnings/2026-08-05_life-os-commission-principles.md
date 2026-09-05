@@ -4,6 +4,7 @@ type: principle
 source: "Kam, 2026-08-05 laptop session — Life-OS dashboard commission (verbatim in Discovery/00_prompt-log.md)"
 status: live
 supersedes: ""
+tier: W
 ---
 
 # Life-OS commission — standing principles

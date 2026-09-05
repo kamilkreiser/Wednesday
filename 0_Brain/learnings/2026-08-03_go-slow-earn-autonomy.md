@@ -4,6 +4,7 @@ type: principle
 source: "Kam, 2026-08-03 (pre-pilot clarifications, point 4)"
 status: live
 supersedes: ""
+tier: W
 ---
 
 # Go slow while we start — autonomy is the destination, not the starting point

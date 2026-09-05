@@ -3,6 +3,7 @@ date: 2026-08-19
 type: correction
 source: "Two independent hits in one day: my KS-256 read (comments(last:2/6) returned June/July comments, nearly missed Peter's 08-18 one) and s48's gate verification (comments(last:3) hid Stuart's 00:54/00:58Z comments — it was one step from reporting my gate claims unverifiable and blocking a correctly-authorised spend)."
 status: live
+tier: M
 ---
 
 # A pagination argument is a SELECTOR — `last:N` on Linear comments returns the OLDEST, and "newest" is an assumption you typed

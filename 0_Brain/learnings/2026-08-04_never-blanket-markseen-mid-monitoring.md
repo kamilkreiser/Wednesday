@@ -3,6 +3,7 @@ date: 2026-08-04
 type: correction
 source: "Self-caught: Vision's plan-confirmation QUESTION (05:57Z) swallowed by a manual mark-seen racing its arrival; surfaced only because their wrap mentioned the unanswered mail"
 status: live
+tier: M
 ---
 
 # Acknowledgments cover what you PROCESSED, never "everything as of now" — in any tool, not just mark-seen

@@ -4,6 +4,7 @@ type: principle
 source: "Kam, discovery session (prompt #2), point 1"
 status: superseded — the "T9 is the master" half by [[2026-08-25_one-drive-devmaster-is-master]] (2026-08-25); the portability principle itself still lives
 supersedes: ""
+tier: W
 ---
 
 # The T9 SSD is the master — Wednesday must be fully portable

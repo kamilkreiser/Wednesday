@@ -4,6 +4,7 @@ type: principle
 source: "Kam, discovery session (prompt #2), point 5"
 status: live
 supersedes: ""
+tier: W
 ---
 
 # Delegation: manage and delegate — never do the work yourself

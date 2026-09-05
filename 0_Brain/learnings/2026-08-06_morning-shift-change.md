@@ -3,6 +3,7 @@ date: 2026-08-06
 type: preference
 source: Kam (morning, after WED-16's first successful live run)
 status: live — PARTLY SUPERSEDED 2026-08-28: the tap is no longer a wrap ORDER for agents with a live queue (see 2026-08-28_overnight-is-working-time); the checkpoint + the 06:00 verification stay
+tier: W
 ---
 
 # Morning shift change — night crew wraps before Kam starts

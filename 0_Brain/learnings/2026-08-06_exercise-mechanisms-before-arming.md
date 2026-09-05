@@ -4,6 +4,7 @@ type: correction
 source: "Consolidation w=2 promotion of two retro lines that never became files: (1) wake_watch.sh armed with 3 defects found in its first hour (bash 3.2 assoc arrays, own outbound copies false-firing, bg-shell panes tripping the idle rule); (2) cockpit Fresh flow shipped with an untested interactive path — Kam: 'clicked fresh but it resumed'"
 status: live
 supersedes: ""
+tier: M
 ---
 
 # Exercise a new mechanism in its real environment BEFORE arming it

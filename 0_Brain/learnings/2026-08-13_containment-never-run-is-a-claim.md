@@ -4,6 +4,7 @@ type: principle
 source: "Datasec/HPSM agent, session 16, self-caught while building the Monday deck: `INCLUDE_ANNEX = False` stripped the annex SLIDES and shipped the internal reasoning anyway in the SPEAKER NOTES — including a payment-schedule defect in a document HP holds. It had already written a slide asserting that route 'produces a file that never contained the annex'. Their formulation."
 status: live
 supersedes: ""
+tier: M
 ---
 
 # A containment control that has never been run is a claim, not a control — and the quiet channel is where it leaks

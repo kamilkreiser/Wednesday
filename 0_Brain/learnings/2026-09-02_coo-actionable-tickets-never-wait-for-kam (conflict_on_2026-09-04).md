@@ -4,6 +4,7 @@ type: correction
 source: "Kam, 2026-09-02 17:34 (dashboard chat, verbatim in Discovery/00_prompt-log.md): 'be a lot more proactive with tickets and making sure agents execute these tickets even without me asking. Assume that you are the manager or the COO, ensuring that things move forward and things are actioned. Especially tickets that can be actioned by us without any external input. These should not appear on any list; they should have been done by now. So let's start and let's keep at these until they're finished.'"
 status: live
 supersedes: ""
+tier: W
 ---
 
 # I am the COO of the boards — a ticket that needs no external input is executed, never listed

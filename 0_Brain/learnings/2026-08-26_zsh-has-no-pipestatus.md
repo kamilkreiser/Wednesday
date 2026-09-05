@@ -4,6 +4,7 @@ type: correction
 source: "w=2 same day, two sessions: the 10:5x session's addendum send guard read `${PIPESTATUS[0]}` in zsh (empty → verify+tap skipped, redone by hand); the 16:3x session's first brief_and_launch invocation did the same and printed `rc=` with nothing after it. Zero cost both times — the gated scripts print their own refusals and sequence by construction — but the guard I wrote around them was a check that could not fail."
 status: live
 supersedes: ""
+tier: M
 ---
 
 # In zsh there is no `PIPESTATUS` — an exit code read through a pipe is a check that cannot fail

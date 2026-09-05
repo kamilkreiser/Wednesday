@@ -4,6 +4,7 @@ type: preference
 source: "Kam, 2026-08-12 morning (verbatim in Discovery/00_prompt-log.md): 'amend the start up process for the morning a little. In the morning, please check if there are any tickets tasks outstanding for each project and if so, you might as well instruct the agents to start working on them. Skip myPKI, cypherkey and leadbot projects for now.'"
 status: live
 supersedes: ""
+tier: W
 ---
 
 # Morning ritual: sweep every project's tickets, start the agents unprompted

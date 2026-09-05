@@ -4,6 +4,7 @@ type: principle
 source: "Kam, 2026-08-03 (course commission, point 2)"
 status: live
 supersedes: ""
+tier: W
 ---
 
 # Develop workflows as we execute — systemise deliberately, on a cadence

@@ -4,6 +4,7 @@ type: preference
 source: "Kam, 2026-08-22 19:51 (dashboard chat, verbatim in prompt log), overruling the drafted Attio security-pack request: 'no vendor will reply to this request… it's not necessary. I'm really happy that you are looking at best practice, but unfortunately in some cases this will not be achievable. The rules Attio has in place are sufficient now.'"
 status: live
 supersedes: ""
+tier: W
 ---
 
 # Vendor asks scale to our leverage — best practice is a menu, not a mandate

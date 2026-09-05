@@ -4,6 +4,7 @@ type: preference
 source: "Kam, 2026-08-25 ~10:2x (terminal, verbatim in Discovery/00_prompt-log.md): 'once done, i will unplug t9 as well and launch you from dev master so we use 1 drive for you and dev code'"
 status: live
 supersedes: "2026-07-31_fully-portable-drive (the T9-is-master half; portability itself still stands)"
+tier: W
 ---
 
 # One drive: DevMASTER is Wednesday's master, the T9 is a sync copy

@@ -3,6 +3,7 @@ date: 2026-09-05
 type: preference
 source: Kam, panel 15:04:21 AEST (verbatim below) — the THIRD time this rule was said (2026-09-03 10:53, 2026-09-03 11:37, today); ledger w=3 → promoted
 status: live
+tier: W
 ---
 
 # Every handover to Peter or Stuart is a TEST BLOCK, as large as one pass can prove — never a list of PRs

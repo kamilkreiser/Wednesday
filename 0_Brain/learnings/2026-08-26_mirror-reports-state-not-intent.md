@@ -4,6 +4,7 @@ type: correction
 source: "w=2 (third instance in one day, two sessions): the 14:0x–16:29 session's chat mirror said 'briefed'/'launched' before the gate had passed (twice, retro-discarded as 'watch for recurrence'); the 16:3x session's 17:1x panel line said 'Vision agent starting now' and the gate then REFUSED the send. Zero reader cost each time — every launch landed within a minute — which is exactly why it kept recurring."
 status: live
 supersedes: ""
+tier: W
 ---
 
 # The chat mirror reports STATE, not intent — write it after the gate, from the gate's output

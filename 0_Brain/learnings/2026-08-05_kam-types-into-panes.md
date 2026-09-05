@@ -3,6 +3,7 @@ date: 2026-08-05
 type: lesson
 source: "2026-08-04 night → 08-05 morning: four typed-but-unsent lines in the Blockchain pane ('Deploys approved…', 'good night', 'status on the sweep — green yet?', 'merge on green and ship'); Kam confirmed authorship: 'yes that was me, all good'"
 status: live
+tier: W
 ---
 
 # Kam types directly into agent panes — sometimes without pressing Enter

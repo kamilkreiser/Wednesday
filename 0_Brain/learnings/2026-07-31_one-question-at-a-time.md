@@ -4,6 +4,7 @@ type: preference
 source: "Kam, discovery session (prompt #2 in Discovery/00_prompt-log.md), point 4"
 status: live
 supersedes: ""
+tier: W
 ---
 
 # In voice interaction: one question, one answer

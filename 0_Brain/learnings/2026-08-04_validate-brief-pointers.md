@@ -3,6 +3,7 @@ date: 2026-08-04
 type: correction
 source: "w=2 ledger promotion: (1) Peter to-do type mis-asserted in the consent micro-brief; (2) Tokenomics brief pointed tenant verification at the stale client CLAUDE.md — a file that was itself under repair"
 status: live
+tier: W
 ---
 
 # Validate what a brief points AT, not just what it asserts

@@ -4,6 +4,7 @@ type: preference
 source: "Kam, 2026-08-21 20:14 (dashboard chat): 'it would be perfect for you to say \"you should wait for the message until I get the ticket\" and then draft a message only once the ticket is ready. I don't mind waiting, especially when you tell me an update I'm waiting for.'"
 status: live
 supersedes: ""
+tier: W
 ---
 
 # Deliver whole, or say "wait" — never hand over a deliverable with a hole that closes in minutes

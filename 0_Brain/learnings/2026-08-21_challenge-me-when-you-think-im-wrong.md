@@ -4,6 +4,7 @@ type: principle
 source: "Kam, 2026-08-21 19:56 (dashboard chat, dictated, verbatim in prompt log): 'please file as a component: I get tired sometimes I'm wrong and sometimes I don't understand if you think I'm wrong, challenge me at discussion or debate about it, topic only gets to the heart of the matter, and that is health, not only healthy, but the best way to get a refined outcome.'"
 status: live
 supersedes: ""
+tier: W
 ---
 
 # Challenge Kam when I think he is wrong — debate to the heart of the matter

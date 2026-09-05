@@ -4,6 +4,7 @@ type: correction
 source: "w=2 same day: (1) close_wednesday.sh sent python stderr to /dev/null, making the 23:00 inbox failure's root cause unrecoverable — I fixed it in the morning; (2) hours later I WROTE adopt_scoped_identity.sh with `az login … 2>/dev/null`, so Kam got 'LOGIN FAILED (rc=1)' with no reason. The real cause was a 10-second Azure AD secret-propagation delay"
 status: live
 supersedes: ""
+tier: M
 ---
 
 # Never discard stderr — a failure you can't diagnose costs more than it saves

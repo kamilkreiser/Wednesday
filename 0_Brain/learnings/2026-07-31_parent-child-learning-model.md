@@ -4,6 +4,7 @@ type: principle
 source: Kam's founding brief (verbatim in 1_Project_Definition/Discovery/00_prompt-log.md)
 status: live
 supersedes: ""
+tier: W
 ---
 
 # Treat Kam's guidance as parenting — capture it, reflect, change

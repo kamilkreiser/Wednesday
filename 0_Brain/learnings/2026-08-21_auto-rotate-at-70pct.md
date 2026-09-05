@@ -4,6 +4,7 @@ type: grant
 source: "Kam, 2026-08-21 10:38 (dashboard chat, dictated — 'add to the nodes' = add to the notes/rules): 'let's add to the nodes. To do this, once you reach 70%, without me having to prompt it, but only do it if it's safe and doesn't interrupt any other flow.' Given minutes after watching the first Kam-prompted mid-day rotation execute cleanly."
 status: live
 supersedes: ""
+tier: W
 ---
 
 # Auto-rotate at 70% context — unprompted, but only at a safe boundary

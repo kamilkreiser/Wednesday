@@ -4,6 +4,7 @@ type: correction
 source: "Six of my own errors in one day, every one caught by a delegated agent or by a gate I had built, none by noticing anything felt wrong. Collected at the point where the sixth arrived — the NexusAI agent correcting my line-169 diagnosis in the same wrap where it satisfied my condition about checks that cannot fail."
 status: live
 supersedes: ""
+tier: MIXED
 ---
 
 # I hold others to sources and myself to representations — and I cannot feel the difference
@@ -227,6 +228,7 @@ first-person case), [[2026-08-13_headline-must-match-the-operative-case]] (why t
 rules stayed silent), [[2026-08-06_artifact-presence-is-not-execution]],
 [[2026-08-07_a-check-that-cannot-fail]], [[2026-08-07_we-each-have-strengths]], [[_ledger]]
 
+<!-- tier: P-Datasec/NexusAI -->
 ## The fourth switch (2026-08-25, Datasec/NexusAI s4): the option you can VERIFY WITHOUT EFFORT
 
 **Its own disclosure, kept verbatim:** *"Before your answer arrived I had talked

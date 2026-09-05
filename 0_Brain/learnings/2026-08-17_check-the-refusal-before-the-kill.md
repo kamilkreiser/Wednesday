@@ -3,6 +3,7 @@ date: 2026-08-17
 type: correction
 source: "w=2: 2026-08-14 (path-gate refusal + chained kill-pane/launch left a fresh agent briefless) and 2026-08-17 (freshness-gate refusal, same chain, same result — s41 booted toward an inbox holding only a SCORE). Both self-caught within a minute; both cost only the send-fix race against the boot."
 status: live
+tier: M
 ---
 
 # Check the refusal before the kill — never chain a destructive step after a step that can refuse

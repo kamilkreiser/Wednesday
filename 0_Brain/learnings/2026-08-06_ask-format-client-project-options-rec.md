@@ -4,6 +4,7 @@ type: preference
 source: "Kam, 2026-08-06 fleet day: 'every time you ask for a) action, b) clarification c) question or anything else, that you Specify the Client and project, quick summary of the question or problem. options available and your reccomendation. I know its duplication but it will help me with multiple items'"
 status: live
 supersedes: ""
+tier: W
 ---
 
 # Every ask carries: Client/Project · problem · options · recommendation

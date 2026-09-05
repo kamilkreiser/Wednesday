@@ -4,6 +4,7 @@ type: correction
 source: "Caught by the Datasec/NexusAI agent within 15 minutes of my brief. I wrote 'RD-93 — duplicate transition id 51 on the RD board, landing on Declined. Board config, reversible.' Neither half is true: transition 51 lives in a workflow shared by 25 workflow schemes across a 35-project company Jira. I verified the 25 myself afterwards — the agent was exact."
 status: live
 supersedes: ""
+tier: W
 ---
 
 # A scope/reversibility CLASSIFICATION is a fact needing provenance — and it is the one that decides my own authority

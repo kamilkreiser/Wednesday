@@ -4,6 +4,7 @@ type: preference
 source: "Kam, 2026-08-05 session 2: evaluated Wednesday's recommendation and approved — 'lets implement the approach as per your reccomendation. then we can work on items while we interact on other items'"
 status: live
 supersedes: ""
+tier: W
 ---
 
 # WED work splits by size: converse left, delegate chunky builds

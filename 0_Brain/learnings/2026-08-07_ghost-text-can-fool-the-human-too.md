@@ -4,6 +4,7 @@ type: lesson
 source: "Live near-miss, 2026-08-07 ~09:5x. I quoted the ghost line `yes, deploy RD-67+68 to the demo` to Kam as a warning; he read my warning and sent the sentence back to me as his own with 'that's from me'. I refused to relay it because the wording was byte-identical to the ghost text. He then checked and corrected: 'it was not me. I missread the message. it was not me but I agree with the comment.'"
 status: live
 supersedes: ""
+tier: W
 ---
 
 # Ghost text can capture the HUMAN, not just the agent — and quoting it is how it spreads

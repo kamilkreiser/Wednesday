@@ -4,6 +4,7 @@ type: principle
 source: "Secuura/Blockchain agent, KS-563 ship 2026-08-06 — their finding, propagated fleet-wide by me. Their words: 'Local could not have found this… a green local proof is not evidence about an env whose mode differs by design.'"
 status: live
 supersedes: ""
+tier: M
 ---
 
 # A green local proof is not evidence about an environment that differs by design
