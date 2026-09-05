@@ -2252,3 +2252,13 @@ Done with it: Dynamics → Kam's team decision (no action); QuickQuote masthead/
 > The rotation threshold should not be a hard number, so still use the band. Just use a band of 80 to 85%. Thank you.
 
 *Note:* Refinement of the 20:28 ruling: the rotation is a BAND, 80–85%, rotate at the first safe boundary inside it, 85 the ceiling. Lesson section, watcher leg text and ledger row amended in the same minutes.
+
+## 2026-09-05 20:46 — Kam (dashboard chat, verbatim)
+> Please deploy Nexus.And I saw somewhere that the agent was having trouble connecting to GitHub. Can you just confirm that GitHub commits are happening as expected?
+
+*Note:* RULING on the NexusAI deploy card = deploy-now (dev app; demo on his word per the 09:28 shape); GitHub confirmed by fresh ls-remote on all three repos + the day's push receipts. This line reached Wednesday at 20:45 (his 20:44 'Did you get stuck?' — owned).
+
+## 2026-09-05 20:47 — Kam (dashboard chat, verbatim)
+> Did you get stuck?
+
+*Note:* Not stuck — the 20:34 line reached Wednesday at 20:45 (the panel push landed after the 20:37 commit; no panel read between 20:33 and 20:45 — owned). Answered with the deploy GO sent/verified and the GitHub measurement.
