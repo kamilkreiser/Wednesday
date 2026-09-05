@@ -20,7 +20,7 @@
 #   suspect, never a measurement.
 #
 # Usage:
-#   board_count.sh linear <api-key-env-var> '<graphql filter JSON>'
+#   board_count.sh linear <api-key-env-var> '<GraphQL filter OBJECT — unquoted keys, e.g. { team: { key: { eq: "WED" } } }>'  (NOT JSON: it is spliced raw into the query)
 #   board_count.sh jira   <site> <email> <token> '<jql>'
 #
 # Never prints or stores a key. stderr is never discarded (ledger 2026-08-06).
@@ -52,7 +52,7 @@ MSG
 
 case "${1:-}" in
   linear)
-    [ $# -eq 3 ] || die "usage: board_count.sh linear <KEY_ENV_VAR> '<filter JSON>'"
+    [ $# -eq 3 ] || die "usage: board_count.sh linear <KEY_ENV_VAR> '<GraphQL filter object, unquoted keys — NOT JSON>'"
     KEY="${!2:-}"; [ -n "$KEY" ] || die "env var $2 is empty — source the project's .env first"
     Q="{ issues(first:$PAGE, filter:$3) { nodes { identifier } pageInfo { hasNextPage } } }"
     BODY=$(python3 -c 'import json,sys; print(json.dumps({"query":sys.argv[1]}))' "$Q")
