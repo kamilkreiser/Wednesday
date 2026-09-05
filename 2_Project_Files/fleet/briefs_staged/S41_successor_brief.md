@@ -53,5 +53,5 @@ PROVENANCE:
 - RD-341 state (To Do, 0 comments, updated 2026-09-06T05:04) | Jira ticket RD-341 | read 2026-09-06
 - RD-204 state (To Do, last comment 2026-09-06T06:45 — 37178; open at High, its own commission) | Jira ticket RD-204 | read 2026-09-06
 
-SELF-CHECK: re-read end-to-end for contradictions | 2026-09-06 09:3x
+SELF-CHECK: re-read end-to-end for contradictions | 2026-09-06 09:39
 (checked: the merge head ruled ONCE (`9401f6f`, not `0eec7b8`) and the docs branch's merge condition stated once; the gate's SHA and the pane named; every head carries its read time and instrument; the thirteen cards carried with S40's claim labelled as S40's and Wednesday's verification named as Wednesday's; consistent with the 23:18Z ruling and the 23:19Z checkpoint (the successor takes the verdict); the RULED BY KAM section present and non-empty; no sequencing conflicts with the previous mails to S40 — S40 has wrapped.)
