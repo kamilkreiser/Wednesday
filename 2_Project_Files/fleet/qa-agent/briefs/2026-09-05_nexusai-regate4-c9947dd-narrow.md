@@ -1,0 +1,67 @@
+# QA Agent Invocation Brief — Datasec / NexusAI, NARROW RE-GATE (4): deploy branch `rd-136-nga-defaults-s12` @ `c9947dd` — closure of re-gate (3)'s R-1…R-5 (an incomplete erasure must be honest AND re-drivable) plus the hunt for what the fix round introduced
+
+**R0 (client isolation):** exactly one client's content — Datasec / NexusAI. Report under `projects/nexusai/`.
+
+## Charter (read first, in full)
+`/Volumes/DevMASTER/WEDNESDAY/2_Project_Files/fleet/qa-agent/QA_AGENT_CHARTER.md`.
+
+## 0. This is the FOURTH re-gate — read re-gate (3)'s report first
+`projects/nexusai/reports/2026-09-05-s35-regate3-4e4a630-narrow/report.md` (+ `evidence/`, 9 artefacts). Its five findings are the closure table below; its fixtures (a real `0500` `backups/` directory, a real `0000` unstattable dir, a real symlink, state-file injection on a running server) are the instruments to re-run — the builder says it used the real-permissions fixture this time, not syscall mocks. **A second QA seat is running the RD-306 pass on a DIFFERENT branch of the same repo right now** (`rd-306-law-window-s34` @ `edb81c5`): pick your own port, create your own worktree from your own copy, and never touch its surface or its worktree.
+
+## 1. Target
+- **Client / Project:** Datasec / NexusAI. **Source tree (read-only):** `/Volumes/DevMASTER/!CODING/Datasec/NexusAI/2_Project_Files`. The builder (S35) is LIVE in that tree, clean at `c9947dd` by its own mail, and holds for your report. Work from your own pinned worktree; **the stand-up script `scripts/qa-surface-up.sh` lives in the NexusAI REPO and is run from the repo root, never from inside a worktree** (re-gate 2's tooling finding; the `--git-common-dir` anchor fix was verified by re-gate 3).
+- **Branch under test:** `rd-136-nga-defaults-s12` at **`c9947ddd90cb38d03cd1bd4284b725cfc974ea26`** — verified at origin by Wednesday at 15:3x AEST (`git ls-remote`); **ONE commit above `4e4a630`** ("R-1..R-5: the state that made erasure honest was a dead end, and one path made it worse"); **7 files +491/−8**: NEW `__tests__/erasure-incomplete-is-not-a-dead-end.test.js` +297 · `__tests__/erasure-reaches-every-read-location.test.js` +25 · `backend/dataErasure.js` +67 · `backend/jsonStorage.js` +56 · `backend/server.js` +14 · `backend/services/schedulers/erasureSweeperScheduler.js` +34 · `scripts/verify-expected-counts.json` (1612/98 → 1623/99).
+- **Environment:** LOCAL DEV, SQLite only; no LAW, no synthetic feed (RD-118), no deploy, no outbound calls. The dev app `nexusaidev-app--0000096` serves `a554e52` — observe only.
+
+## 2. The builder's claims at `c9947dd` — inputs to FALSIFY (S35's mail 2026-09-05T05:29:10Z; Wednesday verified only the head, the one commit and the diff stat)
+1. **R-1 CLOSED, two legs:** the predicate is now "the erasure has not finished", not "the purge loop is running", and BOTH restore paths (`restoreFromBackupsIfNeeded` and the startup re-fan) consult it. **A THIRD restore route found by the round's own test:** `initializeFiles` (P-5's route from last round) still brought the R-1 canary back after the first two were frozen — restores are now declined there too; **defaults are NOT declined** ("or a fresh deployment could not boot").
+2. **R-2 CLOSED:** `requestErasure` on `purged_incomplete` refuses with the reason and PRESERVES `filesFailed`; the sweeper RE-DRIVES the state — skipping the grace check (served before the first attempt) but NOT the DRAFT/`liveMode` gate; `purgeNow`'s own guard now accepts `purged_incomplete` as drivable (the builder's first version moved the dead end one function along — `purgeNow` accepted `pending` only — caught by its own test). `liveMode` is driven through the operator's real switch `SCHEDULER_LIVE_SEND__ERASURE_SWEEPER` with `sweeper.liveMode` asserted first as the control.
+3. **R-3 CLOSED:** `getStatus()` carries `filesFailedCount`; the health sentence renders a number. **R-4 CLOSED:** paths ONLY on the admin-gated `/api/admin/erasure-status` via `getFailureDetail()`; public `/api/health` carries the count only.
+4. **R-5 CLOSED, both halves:** the P-1 source check rejects a concatenated re-definition AND states its own limit in place (source text; cannot see a path assembled at runtime; the location-SET assertion is the behavioural guarantee). **The broadened probe went red on correct code first** (a banned `'/var/lib/printer-dashboard'` prefix caught an unrelated legacy `.machine-id` constant) and was loosened to match the concatenation head and tail exactly.
+5. **Failures made REAL:** a real `0500` directory with permissions restored in `finally`; **red-proofed against `4e4a630`** — every defect test red there, the two unchanged-behaviour controls ("already purged" on a completed erasure; a genuinely new request still succeeds) green.
+6. **Gate:** `VERDICT: PASS — 1623/1623 tests passed across 99 suites (jest exit 0)`; expectation file 1612/98 → 1623/99.
+7. **Filed, not folded:** RD-312 (`purgeNow` throws instead of reporting on an unwritable data dir — two unguarded call sites in `_atomicWriteJson`); RD-313 (the `/api/settings/user-assignments` 4× fetch, with the note that the count is the tester's to confirm).
+8. **The standing hole, named by the builder:** concurrency / two-process races NOT RUN across four passes — a purge running while a second container boots; two `purgeNow` calls interleaving; a boot reading `data_erasure.json` mid-rename. **Not closed by this round; not closable by a one-process jest suite.**
+
+## 3. Scope — the closure table plus the introduced-defect hunt
+**Closure, each MEASURED with re-gate (3)'s own probes where they exist:**
+- **R-1 (both legs + the third route):** purge with `backups/` at real `0500` → `purged_incomplete` → construct `JsonStorage` again → the canary is NOT in live (leg A) AND backups stay 0 → 0 with `startupBackupDeclined=true` (leg B); then drive `initializeFiles` explicitly on the same state → nothing restored, defaults still written. **The fixture is the tester's, not the builder's mock.** Control: a `purging` store still declines; a genuinely absent file still gets its default.
+- **R-2, over HTTP and through the sweeper:** state file `purged_incomplete` with two failed paths → `requestErasure` → refused with the reason, `filesFailed` intact, ledger PRESERVED (the a554e52 shape as the control); `sweeper.runOnce()` with `liveMode` on → the purge RE-DRIVEN (a second failure preserves `filesFailed`; a success clears it and reaches `purged`); with `liveMode` OFF → the DRAFT gate holds and NOTHING is deleted (the builder says the grace check is skipped and the DRAFT gate is not — measure both). **Replay: a COMPLETED erasure (`purged`) must NOT be re-drivable** — the "already purged" control.
+- **R-3 / R-4:** `/api/health` (public) renders a NUMBER in the incomplete sentence and carries NO paths; `/api/admin/erasure-status` (admin-gated — confirm the gate refuses an unauthenticated call) returns the surviving paths. Measured on a running server by state-file injection, as re-gate (3) did — say so.
+- **R-5:** plant a concatenated re-definition (`'/var/lib/' + 'printer-dashboard' + '/emergency-backup'`) → the source check REDS; plant the legacy `.machine-id` constant's shape → stays GREEN (the loosening); then **the perimeter test: write the banned thing the way SOMEONE ELSE would** — a template literal, an array join, `path.join` of two literals — and report which shapes the loosened check no longer sees; the builder has stated the limit, so the finding is whether the STATED limit matches the MEASURED one.
+- **Gate + set:** reproduce 1623/99 in your copy; the suite SET = 97 + exactly the two new files; expectation delta = exactly the new tests. **Round red-proof:** revert the seven files to `4e4a630` in your copy → predict the failing SET → run → 1:1 onto R-1/R-2/R-3/R-4/R-5.
+
+**The hunt — what this round INTRODUCED:**
+- **`purgeNow` accepting `purged_incomplete`:** enumerate every state the guard now admits and every caller that can reach `purgeNow` (the sweeper, any HTTP route, the CLI) — a state that should be terminal and is now drivable is a finding. **Can a CANCELLED request be re-driven through the incomplete path?**
+- **The sweeper skipping the grace check on re-drive:** measure that a request in its grace window is NOT purged early through the re-drive path; and that the re-drive cannot start a purge on a request that never reached `purging` the first time.
+- **"Defaults are not declined" on `initializeFiles`:** what does a default contain? If any default is seeded from a backup, a template, or a previous live file, it is a restore wearing a default's name. Measure the file written by the default path after a purge — bytes, not intent.
+- **`getFailureDetail()` on the admin route:** does it read the state file's paths RAW (a path injection through the state file renders on an admin page?) — READ ONLY; and is the state file itself in the purge's own read-location set (does erasing delete the ledger of what it failed to erase?).
+- **RD-312 (throws on unwritable data dir): OBSERVE the shape** — an uncaught throw mid-purge leaves which state on disk? One measurement, not a fix.
+- **Console: a PROVEN zero** (positive control built), as re-gate (3) did.
+
+**Out of scope:** RD-163/201 (its own branch), RD-306 (the other QA seat), RD-310 (Kam's), the deploy (nothing deploys; eligibility is Wednesday's call from your verdict), LAW, the synthetic feed.
+
+## 4–6. Credentials / state / boundary — as before
+`.env` only if the stand-up needs it; never echo. Exclude-and-report-only on shared state; own temp dirs; **NEVER `rm`** (quarantine); restore tampers byte-identically with hashes; every chmod reverted in `finally`; **predict every tamper's failing SET before running it and compare the set.** **Findings, reports and recommendations ONLY** (Kam 2026-08-11). Evidence class on every action-recommending finding: MEASURED AT RUNTIME / PROBED / READ ONLY.
+
+## 7. Known-fragile / carried
+Re-gate (3)'s own corrections stand (the FAIL it raised on `settings.json` changing across a restart and disproved itself — two `*_updated_at` stamps from its OWN re-stand). The `/RESTOR/i` oracle. `git checkout --` restores from the INDEX — hash, do not assume. The `.machine-id` seed is minted by tests into the repo's `data/` — ignored, quarantined, DATA_DIR contained since F-6; leave it. **The concurrency cell is the builder's own NOT RUN — say so again if not run, and if you CAN run a two-process interleave cheaply (two node processes against one state dir, one purging while one boots), that single measurement is worth more than any other new finding this pass could produce.**
+
+## 8. Logistics
+- **Time-box:** narrow — closure of R-1…R-5 with the real fixtures, the round red-proof by set, the introduced-defect hunt above.
+- **Findings sink:** `projects/nexusai/reports/2026-09-05-s35-regate4-c9947dd-narrow/report.md` + `evidence/`. A CLOSURE TABLE for R-1…R-5 (CLOSED / PARTIAL / OPEN with the probe), then new findings by severity with evidence class, then NOT-TESTED.
+- **Escalation:** through Wednesday (`wednesday-agent@agentmail.to`, QUESTION subject). Approval-class pauses for Kam.
+- **When done:** mail Wednesday, subject `[QA -> Wednesday] NexusAI RE-GATE (4) @ c9947dd (narrow)` — BLUF (PASS or NO GO in the first line), report path, closure table, new findings, NOT-TESTED, the head observed at the end.
+
+---
+
+PROVENANCE:
+- `c9947ddd90cb38d03cd1bd4284b725cfc974ea26` = `refs/heads/rd-136-nga-defaults-s12` at origin; one commit above `4e4a630` with its subject; 7 files +491/−8 with the per-file counts | `git ls-remote origin`, `git log --oneline 4e4a630..c9947dd`, `git diff --stat 4e4a630..c9947dd` on the NexusAI repo's local objects — read-only, no fetch, no checkout | read 2026-09-05 15:33
+- Claims 1–8 | S35's mail `[Datasec/NexusAI -> Wednesday] READY FOR RE-GATE (4) @ c9947dd — R-1..R-5 closed, gate PASS 1623/1623 across 99; concurrency cell named as the standing hole` at wednesday-agent@agentmail.to, 2026-09-05T05:29:10Z — the builder's words | read 2026-09-05 15:33
+- R-1…R-5 with their probes, the real-permissions fixture, the state-file injection method | re-gate (3)'s mail `[QA -> Wednesday] NexusAI RE-GATE (3) @ 4e4a630 (narrow)` 2026-09-05T05:08:39Z and its report at the path in section 0 | read 2026-09-05 15:1x
+- Wednesday's fix-round rulings (R-2 re-drivable without losing the ledger; count public / paths admin-only; R-5 the builder's call) | Wednesday's mail `SCORE + FIX ROUND: re-gate (3) …` 2026-09-05T05:14:14Z — Wednesday's project, not the QA project's | read 2026-09-05 15:33
+- The RD-306 QA seat running concurrently (`%12`, branch `rd-306-law-window-s34` @ `edb81c5`) | Wednesday's own launch record 15:2x — Wednesday's project | read 2026-09-05 15:33
+- `a554e52` deployed as `nexusaidev-app--0000096` | S35's DEPLOYED mail 04:20:24Z + Wednesday's curl probes 04:21:51Z/04:21:56Z — Wednesday's project | read 2026-09-05 14:2x
+
+SELF-CHECK: re-read end-to-end for contradictions | 2026-09-05 15:33
+(checked: "R-2 re-drivable" against "a completed erasure must NOT be re-drivable" — the drivable state is `purged_incomplete` only, `purged` is the control; "defaults are not declined" against "a default seeded from a backup is a restore" — the claim is the builder's, the bytes are the test; "concurrency NOT RUN" against "run it if you can" — the builder's honest hole and the one measurement worth most, stated as optional; stated.)
