@@ -111,6 +111,7 @@ behaviour, say so even when — especially when — a static gate agrees with yo
 - **Known-fragile:** `<areas historically brittle — hunt the class here first>`
 - **Recent changes — do NOT flag as new:** `<list, so a known change is not reported as a regression>`
 - **Known open gaps / missing tools:** `<so they are carried as gaps, not re-discovered>`
+- **Known-fragile, standing (2026-09-06):** Linear's `commentCreate` on an ARCHIVED ticket answers `Entity not found: Issue` — a refusal indistinguishable from a wrong id. Before reading that error as "the ticket does not exist", run the control: the same call against a ticket known to be live must succeed, and `issue(id)` with `includeArchived: true` must return the archived one. A write that fails on an archived ticket is recorded as "archived, not written", never as "not found".
 
 ## 8. Logistics
 - **Session time-box:** `<bounded work unit>`
