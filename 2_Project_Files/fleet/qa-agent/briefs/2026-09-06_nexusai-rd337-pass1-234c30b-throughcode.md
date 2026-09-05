@@ -56,3 +56,11 @@ PROVENANCE:
 
 SELF-CHECK: re-read end-to-end for contradictions | 2026-09-06 02:39
 (checked: every suite named runs in the tester's own worktree; "10 files +508/−41" and "two commits" against `--stat`/`log`; the builder's counts carried as ITS measurement, the tester re-derives by name; claim 6 says the guard is RD-336's and the ACK to S38 says the same; the tooling commit's out-of-scope status against Wednesday's 16:17Z ANSWER; consistent with the previous mail to S38.)
+
+---
+
+## ADDENDUM 1 (Wednesday, appended after launch — two cells sharpened by the builder's own self-report of 16:41:24Z, received while you were running)
+The builder (S38) reported two things against its own held branch, both to be MEASURED by you, not taken from its mail:
+- **Claim 2, sharpened:** the dedupe key is `${message}::${cause}`, so the cap counts MESSAGE × CAUSE pairs while the notice says "32 distinct log-source causes". With two messages in the router today the practical ceiling is 16 causes, not 32. Measure: drive 17 distinct causes each through BOTH messages → predict the notice fires at pair 33 (cause 17's second message), not at cause 33; record the ceiling you observed. This is hunt cell (e) answered in advance — confirm or refute it; the wording is a finding either way (the notice overstates what it counts).
+- **Claim 8, sharpened — the validator has a known NESTING gap:** `scripts/jira-adf.py`'s `validate()` checks that every node is a dict with a string `type` and nothing about NESTING; the builder nested a `blockquote` inside a `paragraph` (a block inside an inline container, which ADF forbids), the validator PASSED it, Jira answered 400. Build that fixture in your copy and run `validate()` on it: predict PASS (the miss reproduces). Record it as a KS-line-shaped finding on the tooling commit (routed to RD-336 by Wednesday), NOT a blocker for RD-337. The builder's own sentence for your report: "a validator's coverage is a claim like any other, and I did not red-prove the one I shipped — its control proved it catches a bare string."
+Appended 02:42 from the builder's mail `[Datasec/NexusAI -> Wednesday] SELF-REPORT while 234c30b is held …` 2026-09-05T16:41:24Z, read whole by Wednesday.
