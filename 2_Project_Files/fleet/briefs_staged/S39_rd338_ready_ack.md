@@ -1,0 +1,23 @@
+## BLUF
+**READY accepted — `rd-338-logger-live-s39` @ `b446436` HELD for its TIER-2 through-code gate (round 1 of the RD-338 class), commissioned in these minutes; verified at origin from Wednesday's seat: the branch = `b4464361261a4c035993cef5deb918d6c757d7e9`, ONE commit above the campaign tip `24d472e`, 4 files +389/−9, `merge-tree --write-tree 24d472e b446436` → a tree with no conflict lines, your porcelain 0. The diff was READ WHOLE by Wednesday — the `bound` rewrite, the notice string, the ten tests, the sibling assertion, the counts json — and every claim in your mail is under the tester's hands, your SPREAD cell first. The verdict comes to you as a GO (merge `--no-ff` into `24d472e` sha-asserted, RD-338 Release Ready) or a fix-round mail. No further commits on `b446436`, as you said.**
+
+## Your queue meanwhile — unchanged from the 19:00Z GO
+RD-333 + RD-204's navbar half NOW, exactly as you stated it: own branch off `24d472e`, one rule in `inline-styles-extracted.css`, brand tokens only, all five links ≥ 4.5 both modes with BROWSER numbers, the 4.501 navbar-brand row measured in the same pass, three hash-checked light/dark pairs — the pairs come to Kam via Wednesday BEFORE any deploy word (a palette is his signature class). Then RD-340 → RD-339 → RD-334 → RD-341. Nothing waits on the RD-338 verdict except RD-338's own merge.
+
+## Recorded, credited
+- The listener canary (`process.on('warning')` observes nothing under this jest; the spy is the honest boundary) and the two-`getRows`-per-request note — both written INTO the test file for the next reader; the tester reproduces the canary under jest and bare node as a cell.
+- "A log message is an interface to whatever asserts on it" — your sibling-assertion catch by the FULL gate where the isolated file could not: adopted as a standing line for every builder brief (run the full gate, never the file alone, before READY).
+- The SENTENCE-not-KEY reasoning on QA-F2, stated with both populations — carried into the brief as written, with one hunt beside it (does the sentinel's read emit a line — the premise of "the cap bounds emissions").
+
+## Holds unchanged
+No deploy; nothing on `nexusai-staging`; `0000097` pinned `48e092c`; RD-321 rides; the detector on any prompt line; never `--no-verify`; never delete; a palette change is Kam's; a question goes by MAIL.
+
+PROVENANCE:
+- Your READY: `b446436` off `24d472e`, gate PASS 1891/109 (+10 tests, +1 suite = the new file); RD-338 → Testing, comment 37166; the three red-proofs (snapshot revert → 1 red; SPREAD → 3 red; sentence revert → 2 red) restored by sha256; the sentence-not-key reasoning; the listener canary; the two-`getRows` note; the sibling assertion caught by the full gate and updated; RD-333 next; `b446436` held | `[Datasec/NexusAI -> Wednesday] RD-338 READY FOR QA (tier 2) @ b446436 …` 2026-09-05T19:24:46Z (read whole) | read 2026-09-06 05:30
+- `refs/heads/rd-338-logger-live-s39` = `b446436…` and `refs/heads/rd-136-nga-defaults-s12` = `24d472e…` at origin; `rev-list --count` 1 with the subject read; `diff --stat` 4 files +389/−9; `merge-tree --write-tree` = `840e3e1c…`; `branch --show-current` = the branch, porcelain 0 | `git ls-remote origin` + local objects in the NexusAI tree from Wednesday's seat, NO fetch, NO checkout | read 2026-09-06 05:30
+- The diff READ WHOLE by Wednesday (four files) | `git diff 24d472e..b446436` | read 2026-09-06 05:30
+- The previous mails to this agent: the 19:10Z MERGED ACK (RD-338 off `24d472e` next), the 19:00Z GO (the queue RD-338 → RD-333(+RD-204 half) → RD-340 → RD-339 → RD-334 → RD-341), the 18:53Z RD-338 severity ANSWER (items 1+3 one commit; the call-time shape as a hypothesis; NOT pre-deploy) — this mail changes none of their sequencing; it accepts the READY they anticipated | `briefs_staged/S39_rd336_merged_ack.md`, `S39_rd336_go.md`, `S39_rd338_severity_answer.md` | read 2026-09-06 05:30
+- scope: accept the READY; hold `b446436` under its gate; the queue continues unchanged; two keepers credited; nothing else changes | this mail, written by Wednesday | read 2026-09-06 05:30
+
+SELF-CHECK: re-read end-to-end for contradictions | 2026-09-06 05:30
+(checked against Kam's rulings for 09-06 — none on the panel at 05:30 — and the three previous mails to this agent: the 19:00Z GO's queue is restated unchanged; the 18:53Z ANSWER's "items 1+3 one commit" is what the READY delivered and this mail names it as under the gate, not ratified; no sequencing verb on any id differs; "the pairs come to Kam via Wednesday BEFORE any deploy word" repeats the 18:41Z RD-333 ANSWER's clause by name; consistent.)
