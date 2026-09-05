@@ -7,7 +7,7 @@ status: live
 
 # Boot digest — headline + rules of every lesson (open the file when it fires)
 
-Generated 2026-09-05 15:18 from 96 lesson files (447,211 B). Each block = the lesson's retrieval handle (H1), its frontmatter, the operative paragraph, its section index, and every RULES section verbatim. 6 files carry no rules-shaped section and are included whole. The CASES behind a rule live only in the file: open it the moment the rule fires, or when a diagnosis needs the evidence. `_ledger.md` is read whole beside this digest; `_ledger_archive.md` on demand.
+Generated 2026-09-05 15:36 from 96 lesson files (448,717 B). Each block = the lesson's retrieval handle (H1), its frontmatter, the operative paragraph, its section index, and every RULES section verbatim. 6 files carry no rules-shaped section and are included whole. The CASES behind a rule live only in the file: open it the moment the rule fires, or when a diagnosis needs the evidence. `_ledger.md` is read whole beside this digest; `_ledger_archive.md` on demand.
 
 ## The T9 SSD is the master — Wednesday must be fully portable
 `2026-07-31_fully-portable-drive.md` · principle · 2026-07-31 · status: superseded — the "T9 is the master" half by [[2026-08-25_one-drive-devmaster-is-master]] (2026-08-25); the portability principle itself still lives
@@ -3242,7 +3242,7 @@ Rule 2 above ("70% = rotate now") is superseded: rotation is CONDITIONAL inside 
 
 **The operative case, so the headline matches it:** I am about to close (kill) a builder's or tester's pane, and a surface the handover names as "left up" is served by a process whose parent is `launchd` (ppid 1). **That is not daemonisation.** A process reparented to 1 after its parent exited can still be a member of the pane's SESSION with the pane's controlling tty; when the pane dies, the tty hangs up and every process still attached to it gets SIGHUP. The check is `ps -o pid,ppid,sess,tty -p <pid>`: tty `??` (and session 0) = detached and survives; `ttysNNN` = it dies with the pane, whatever its ppid says.
 
-sections (open the file for these): The two cases · Why the w=1 rule did not fire (the diagnosis w=2 requires) · How to apply · SHARPENED 2026-09-05 (w=2): the check has TWO halves, and a hand-run check drops one — so it is now a script
+sections (open the file for these): The two cases · Why the w=1 rule did not fire (the diagnosis w=2 requires) · How to apply · SHARPENED 2026-09-05 (w=2): the check has TWO halves, and a hand-run check drops one — so it is now a script · EXTENSION 2026-09-05 (w=1, filed from the 10:1x seat's retro candidate): a KILL LIST is built from the listener's port and working directory, never from a parent walk — and pid 1 is refused by name
 
 ## How to apply
 
@@ -3256,6 +3256,10 @@ sections (open the file for these): The two cases · Why the w=1 rule did not fi
 
 ## SHARPENED 2026-09-05 (w=2): the check has TWO halves, and a hand-run check drops one — so it is now a script
 **The case.** Closing S33's NexusAI pane: Wednesday ran `ps -o pid,ppid,sess,tty -p <listener>` on the 3111 surface, read tty `??`, and closed the pane. The listener's PARENT (a shell on the pane's tty) was never checked; the pane close hung up the tty; 3111 died with it (listeners 24→23, curl 000). The rule above says "on the listener AND on its immediate parent" — the second half was dropped under load, exactly the failure a two-part manual check invites.
+
+## EXTENSION 2026-09-05 (w=1, filed from the 10:1x seat's retro candidate): a KILL LIST is built from the listener's port and working directory, never from a parent walk — and pid 1 is refused by name
+**The case.** Retiring two QA surfaces, the 10:1x seat built its kill list from a `ppid` lookup; the node servers' parent was `launchd`, so the command issued `kill <pid> 1`. As a non-root user `kill 1` is EPERM, so nothing happened — but the list was wrong by construction, and on a root shell it would have signalled `launchd`. **The same afternoon the 15:0x seat's identity check REFUSED to kill the 3121 surface on the command line alone** (`node backend/server.js` names no worktree), and only killed it after `lsof -a -p <pid> -d cwd` showed the cwd was the tester's pinned worktree — the positive case of this rule.
+**The rule:** (1) a listener to stop is identified by its PORT (`lsof -nP -iTCP:<port> -sTCP:LISTEN -t`) and confirmed by its CWD (`lsof -a -p <pid> -d cwd`) or its command line — the pane's process tree is not the list; (2) every expansion in a kill command is guarded (`${PID:?}`), an empty list aborts, and **pid 1 is excluded explicitly** (`[ "$PID" != 1 ]`) — a parent walk that reaches `launchd` must stop, not signal; (3) after any stop, curl the port for 000 and re-count listeners — the control that the right process died and nothing else did. `pane_close.sh` already refuses the pane's own tty listeners; this is the rule for the STOP that precedes a close.
 
 
 ## A ratified mock is a spec with TWO halves — a brief that carries its figures and not its layout ships half the design, and only the principal will notice
