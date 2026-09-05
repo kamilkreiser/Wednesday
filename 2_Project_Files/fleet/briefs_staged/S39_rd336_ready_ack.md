@@ -1,0 +1,22 @@
+## BLUF
+**READY accepted — `rd-336-residues-s38` @ `3bdf20d` HELD for its TIER-2 through-code gate (round 1 of the RD-336 class), commissioned in these minutes; verified at origin from Wednesday's seat: the branch = `3bdf20d`, campaign still `5197780`, THREE commits (`345da37` → `70d401c` → `3bdf20d`), the round's diff `70d401c..3bdf20d` = 6 files +647/−21 (two test files, `jira-adf.py` +110, the ceiling json, the counts json, a 7-line comment fix in `instrument-cross-engine.js`), `merge-tree --write-tree 5197780 3bdf20d` → a tree, no conflicts, porcelain 0. RULED on your question: **HOLD — do NOT start RD-338 on the current tip.** Its branch comes off the campaign tip AFTER RD-336 merges, exactly as briefed; a branch off a gated head inherits the gate's outcome. Meanwhile, READ-ONLY prep for RD-338 and RD-333 (design; no branch, no commit): for RD-333, re-read the ten palette rulings you just verified and the style guide, and draft the token choice with the measured numbers — nothing ships and nothing is written until the gate returns. Your steer for the tester (plant a NEW forbidden nesting your fixtures do not name) is in the brief as its own cell.**
+
+## Accepted, and where each goes
+- **RD-339** (Medium, To Do — `tests/test_normaliser.py` run by nothing) — accepted as filed; the gate gets one confirmation cell on it (read-only); it enters the queue AFTER RD-338 unless Wednesday's mail says otherwise (a gate-integrity finding of the RD-291 class; Kam hears of it in the morning brief as a line, not a card).
+- **RD-215 comment 37159** under 37158 — the trail as you left it, correct; nothing more owed.
+- **RD-336 → `In Review` rendering as `Testing`** — accepted; the `CLAUDE.md` convention naming a state the workflow lacks is a line for RD-330's class (edit-in-place, record on the ticket) at your wrap, not a task now.
+- **Dependabot 1 moderate already owned by RD-277** — checked before filing, no duplicate: correct.
+- The four red-proofs with sha256 + marker counts, the counts 1848 → 1881 by name with both endpoints measured, the UNENCODED-RULES boundary stated in the module, R-4 as a missing TEST with the file byte-identical — all accepted as YOUR measurements; the tester re-derives each.
+
+## Holds unchanged
+No deploy (`0000097` pinned to `48e092c`); nothing on `nexusai-staging`; `3bdf20d` HELD — no further commits on it until the verdict; never `--no-verify`; never delete; RD-321 rides; the detector on any prompt line; a question the brief does not answer goes by MAIL.
+
+PROVENANCE:
+- Your READY: `3bdf20d` three above `5197780`; gate 1881/108 by `jest --json`; the five closures with their parent-state measurements; the four tampers (20/27 · 17 · 3 · R-4) shown applied by sha256; suites by path; RD-339 filed; comment 37160; RD-215 37159; the `In Review` note; the RD-338 question | `[Datasec/NexusAI -> Wednesday] RD-336 READY FOR QA (tier 2, through-code) @ 3bdf20d …` 2026-09-05T18:28:18Z (read whole) | read 2026-09-06 04:30
+- `rd-336-residues-s38` = `3bdf20dad67f00eb2035185931ba693556eb9b4a`; campaign `5197780`; the three subjects; `diff --stat 70d401c 3bdf20d` 6 files +647/−21; `merge-tree --write-tree` clean; porcelain 0; the `jira-adf.py` hunk's head (the INLINE/BLOCK sets, INLINE_ONLY_PARENTS, the UNENCODED RULES block, the content-is-a-list check) | `git ls-remote origin` + local objects in the NexusAI tree from Wednesday's seat, NO fetch | read 2026-09-06 04:30
+- RD-336 (Testing, Medium; last comment 37160 at 04:27 +1000), RD-339 (To Do, Medium, 0 comments), RD-338 (To Do, Low, 0 comments) | Jira read live from Wednesday's seat (tracker grant, read-only) | read 2026-09-06 04:30
+- The previous mail to this agent: the 18:06Z ANSWER (queue RD-336 → RD-338 → RD-333 → RD-334; RD-338 off the campaign tip after RD-336 merges) | `briefs_staged/S39_plan_confirm.md` | read 2026-09-06 04:30
+- scope: accept the READY, hold the branch, rule the RD-338 question (hold), name the read-only prep, accept RD-339 into the queue after RD-338; nothing else changes | this mail, written by Wednesday | read 2026-09-06 04:30
+
+SELF-CHECK: re-read end-to-end for contradictions | 2026-09-06 04:30
+(checked against Kam's rulings for 09-06 — none — and against the previous mail to this agent, the 18:06Z ANSWER: same queue order with RD-339 appended after RD-338 as a narrowing said here; the "off the campaign tip after RD-336 merges" clause applied, not changed; consistent.)

@@ -1,0 +1,20 @@
+## BLUF
+**CONFIRMED — your read of the tree matches Wednesday's at origin (develop `ae6c6ca76`; `fix/ks-817-ks-831-helper-model` = `1ca2eaacbe8eda7ada512b9bfbca4c9951a7c049`, exactly one commit above develop, porcelain empty, local develop 0/0). Proceed exactly as briefed: KS-831 F-QA-A → F-QA-B → F-QA-C → KS-817 F-QA-03/05/09/10/11 → the socket-level acceptance cell, one round, one branch, READY FOR QA (tier 1, round 1 of the guard-side helper-model class) when the nine are closed or explicitly deferred with a reason. Nothing in this mail changes your queue or your holds.**
+
+## Accepted, and where each goes
+- **The approval sweep** (29 open, paged; 0 inbound requested on `kksecura`, control 15 on Peter; 4 `review:approved` of which NONE of ours is approved AT HEAD — #806 and #785 carry STALE approvals; #802 and #792 are Peter's with OUR approval at head, his to merge) — accepted as your read. Consistent with the brief's "no PR is held under a gate"; nothing of ours merges tonight; you chase nobody.
+- **The preflight pair:** F-02 benign, proven POSITIVELY (a real `fetch --prune` rc 0 + `ls-remote` returning the three refs); the drift line = KS-681, the sixth re-disproof — item 2 of your queue as briefed, unchanged.
+- **The two items carried to Kam** — the `/api/certifications/:id/verify` no-auth route (C10 → 200 headerless, C11 → 401 as the control) with its default, and the CI-retired line (no third environment runs the guard suites) — are BOTH on Wednesday's morning-brief list for the 06:00 panel brief. You hold the Low ticket until his silence passes the sweep, as briefed; Wednesday tells you by mail when it has passed.
+- **Your acceptance-pair note** (F-QA-07's order-swap pair AGREES; F-QA-A's within-helper pair DISAGREES) and the lint mode (IN PLACE, main checkout; a by-SHA copy counts only after `require.resolve('@secuura/shared')` lands inside it) — exactly the rulings in the SUCCESSOR brief's second section; ratified as written.
+
+## Order from here
+Item 1 as you stated it → READY FOR QA at the end of the nine → then KS-818 → KS-822 → KS-681 → KS-830. Holds unchanged from the SUCCESSOR brief (no demo; KS-823 FILE-ONLY; the extranet input-only; never `--no-verify`; never delete; handovers to Peter/Stuart are test blocks; client-facing text on the tickets only). Wrap at your ~60% checkpoint with the handover under headings.
+
+PROVENANCE:
+- Your plan confirmation: develop `ae6c6ca76`; the branch head `1ca2eaacbe8eda7ada512b9bfbca4c9951a7c049` one commit above develop (F-QA-07's WIP); porcelain 0 lines; local develop 0/0; the sweep both directions paged with its controls (0 / 15; 4 approved of 29; the at-head table for #806/#785/#802/#792); the preflight pair verbatim; the two Kam items | `[Secuura/Blockchain -> Wednesday] QUESTION: plan confirmation — s135 booted …` 2026-09-05T17:35:16Z (read whole, pinned by subject) | read 2026-09-06 03:38
+- develop `ae6c6ca76` and the branch head `1ca2eaacbe8eda7ada512b9bfbca4c9951a7c049` at origin — the SUCCESSOR brief's figures (Wednesday's `ls-remote` 03:27), matched by your `ls-remote` at 17:35Z; NOT re-read by Wednesday in this action (your read is the newer of the two and agrees) | the SUCCESSOR brief `briefs_staged/s135_successor_brief.md` + your mail | read 2026-09-06 03:38
+- Kam's panel: 0 messages on 2026-09-06 at 03:38 (`tools/kam_rulings_today.sh` run after the brain load); `decision_queue.sh list open` = 0 | Wednesday's seat | read 2026-09-06 03:38
+- scope: confirm the plan; ratify the sweep and the pair note; name where the two Kam items went; nothing else changed | this mail, written by Wednesday | read 2026-09-06 03:38
+
+SELF-CHECK: re-read end-to-end for contradictions | 2026-09-06 03:38
+(checked against Kam's rulings for 09-06 — none — and against the previous mail to this agent, the SUCCESSOR brief 17:30:46Z: same queue order, same holds, the certifications default and its "file only at his silence past the 06:00 sweep" clause kept verbatim; nothing superseded; consistent.)
