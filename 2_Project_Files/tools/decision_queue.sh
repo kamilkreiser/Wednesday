@@ -22,6 +22,11 @@
 #   decision_queue.sh list ruled --undelivered [ID-PREFIX]
 #                                     # ruled cards with no delivered mark, optionally
 #                                     # only ids starting with e.g. nexusai- / secuura-
+#   decision_queue.sh show ID         # ONE card whole: every option with its KEY,
+#                                     # label and detail, the ruling (choice + note +
+#                                     # ts), delivered_artefact/ts. Copy a letter
+#                                     # FROM HERE, never from the question's wording
+#                                     # (2026-09-06 ledger w=107). Unknown id: exit 2.
 #
 # DELIVERED (2026-09-06, ledger w=3 promotion of learnings/2026-09-05_a-relayed-
 # ruling-is-delivered-only-when-it-is-in-the-artefact.md rule 4): a RULED card is
@@ -246,6 +251,33 @@ def cmd_delivered(args):
             return
     die(f"no decision with id {did!r}")
 
+def cmd_show(args):
+    # SHOW (2026-09-06, ledger w=107): a letter was glossed from the question's word
+    # order instead of the store. Print the card whole, key beside label.
+    if len(args) != 1 or not args[0].strip():
+        die("usage: show ID")
+    did = args[0].strip()
+    dec = next((d for d in load() if isinstance(d, dict) and d.get("id") == did), None)
+    if dec is None:
+        die(f"no decision with id {did!r}")
+    print(f"id:      {dec.get('id')}")
+    print(f"status:  {dec.get('status')}   ({dec.get('client_project', '?')})")
+    print(f"title:   {dec.get('title', '')}")
+    print(f"bluf:    {dec.get('bluf', '')}")
+    print(f"options (recommended: {dec.get('recommended')}):")
+    for o in dec.get("options", []):
+        if isinstance(o, dict):
+            print(f"  [{o.get('key')}] {o.get('label', '')}")
+            if str(o.get("detail") or "").strip():
+                print(f"        detail: {o['detail']}")
+    print(f"default: {dec.get('default_action', '')}")
+    print(f"ruling:  choice={dec.get('ruled_choice')!r}"
+          + (f"  ruling={dec['ruling']!r}" if dec.get("ruling") else "")
+          + f"  ruled_ts={dec.get('ruled_ts')}")
+    for k in ("ruling_note", "withdrawn_at", "withdrawn_reason", "delivered_artefact", "delivered_ts"):
+        if dec.get(k):
+            print(f"{k}: {dec[k]}")
+
 def cmd_list(args):
     which = args[0] if args else "all"
     if which not in ("open", "ruled", "all"):
@@ -286,10 +318,11 @@ def cmd_list(args):
     print(f"{shown} decision(s) [{tag}]")
 
 if len(sys.argv) < 2:
-    die("usage: decision_queue.sh add|rule|--delivered|list ...", 1)
+    die("usage: decision_queue.sh add|rule|--delivered|list|show ...", 1)
 cmd, rest = sys.argv[1], sys.argv[2:]
 if cmd == "add":   cmd_add(rest)
 elif cmd == "rule": cmd_rule(rest)
+elif cmd == "show": cmd_show(rest)
 elif cmd in ("--delivered", "delivered"): cmd_delivered(rest)
 elif cmd == "list": cmd_list(rest)
 else: die(f"unknown command: {cmd}", 1)

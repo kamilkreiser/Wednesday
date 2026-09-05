@@ -12,6 +12,8 @@
 # Usage:
 #   send_brief.sh --to "<Client>/<Project>" --subject "<topic>" --body-file <path>
 #   send_brief.sh --to ... --subject ... --body-file ... --kind answer   (ANSWER/ruling relay: provenance optional)
+#   send_brief.sh --to ... --subject-file <path> --body-file ...          (subject = FIRST LINE of <path>;
+#                                                                          alternative to --subject, never both)
 #
 # Exit codes: 0 sent · 1 refused (provenance missing/malformed) · 2 usage/env error
 set -u
@@ -23,19 +25,31 @@ INBOX="wednesday-agent@agentmail.to"
 BUS="coagent@agentmail.to"
 ROUTING="$SELF_DIR/inbox_routing.conf"
 
-TO=""; SUBJECT=""; BODY_FILE=""; KIND="brief"
+TO=""; SUBJECT=""; SUBJECT_FILE=""; BODY_FILE=""; KIND="brief"
 while [ $# -gt 0 ]; do
   case "$1" in
     --to) TO="${2:-}"; shift 2 ;;
     --subject) SUBJECT="${2:-}"; shift 2 ;;
+    --subject-file) SUBJECT_FILE="${2:-}"; shift 2 ;;
     --body-file) BODY_FILE="${2:-}"; shift 2 ;;
     --kind) KIND="${2:-}"; shift 2 ;;
     *) echo "unknown arg: $1" >&2; exit 2 ;;
   esac
 done
 
+# ── SUBJECT FROM FILE (2026-09-06, quoting family w=3) ──────────────────────
+# A subject with an apostrophe inside single quotes made zsh parse-error and
+# nothing sent. --subject-file reads the FIRST LINE of a file instead, so the
+# subject never rides the shell's quoting. Exactly one of the two forms; a
+# missing or blank file refuses rather than sending an empty subject.
+if [ -n "$SUBJECT_FILE" ]; then
+  [ -z "$SUBJECT" ] || { echo "usage: give --subject OR --subject-file, not both" >&2; exit 2; }
+  [ -f "$SUBJECT_FILE" ] || { echo "subject file not found: $SUBJECT_FILE" >&2; exit 2; }
+  SUBJECT="$(head -n 1 "$SUBJECT_FILE" | tr -d '\r\n' | sed 's/^[[:space:]]*//;s/[[:space:]]*$//')"
+  [ -n "$SUBJECT" ] || { echo "subject file is empty (first line blank): $SUBJECT_FILE" >&2; exit 2; }
+fi
 [ -n "$TO" ] && [ -n "$SUBJECT" ] && [ -n "$BODY_FILE" ] || {
-  echo "usage: send_brief.sh --to '<Client>/<Project>' --subject '<topic>' --body-file <path> [--kind brief|answer]" >&2; exit 2; }
+  echo "usage: send_brief.sh --to '<Client>/<Project>' (--subject '<topic>' | --subject-file <path>) --body-file <path> [--kind brief|answer]" >&2; exit 2; }
 [ -f "$BODY_FILE" ] || { echo "body file not found: $BODY_FILE" >&2; exit 2; }
 
 BODY="$(cat "$BODY_FILE")"
