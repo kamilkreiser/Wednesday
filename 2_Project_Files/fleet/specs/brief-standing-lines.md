@@ -22,6 +22,7 @@ here and travel in the brief body.
 - **Every count carries its predicate and its bound** (state set, window open at the
   counterpart's last write, limit) — "134 in backlog/unstarted/started since 10:32Z".
 - **A zero needs a control that can fail independently** — and a control that AGREES with a
+- **A control only discriminates if it can fail the SAME WAY the measurement can** (Secuura s133, 2026-09-05): a single-token control returned 7 beside a multi-word-phrase sweep that read 0 — the phrase LINE-WRAPS in the generated yaml and a single-line grep structurally cannot match it, while a single token never wraps. Sibling of "lint by-SHA copies outside the project returns 0 and cannot fail" (s132): the control must share the measurement's failure mode.
   null is the suspect (grep that never ran; NOAUTH; empty bearer; dead SSH leg).
 - **An absence claim carries the corpus it was measured against, verbatim.**
 - **A before/after pair is not evidence until the two artefacts are shown to DIFFER — hash them** (NexusAI S37, 2026-09-05: its first RD-332 pair was byte-identical between builds because the sentence sat below the fold; the captions looked right). And health-confirm each server BEFORE switching the tree — a `git checkout` racing module loading served one build as two.
