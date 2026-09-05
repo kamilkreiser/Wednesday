@@ -7,7 +7,7 @@ status: live
 
 # Boot digest — headline + rules of every lesson (open the file when it fires)
 
-Generated 2026-09-05 14:01 from 95 lesson files (438,956 B). Each block = the lesson's retrieval handle (H1), its frontmatter, the operative paragraph, its section index, and every RULES section verbatim. 6 files carry no rules-shaped section and are included whole. The CASES behind a rule live only in the file: open it the moment the rule fires, or when a diagnosis needs the evidence. `_ledger.md` is read whole beside this digest; `_ledger_archive.md` on demand.
+Generated 2026-09-05 15:09 from 96 lesson files (444,422 B). Each block = the lesson's retrieval handle (H1), its frontmatter, the operative paragraph, its section index, and every RULES section verbatim. 6 files carry no rules-shaped section and are included whole. The CASES behind a rule live only in the file: open it the moment the rule fires, or when a diagnosis needs the evidence. `_ledger.md` is read whole beside this digest; `_ledger_archive.md` on demand.
 
 ## The T9 SSD is the master — Wednesday must be fully portable
 `2026-07-31_fully-portable-drive.md` · principle · 2026-07-31 · status: superseded — the "T9 is the master" half by [[2026-08-25_one-drive-devmaster-is-master]] (2026-08-25); the portability principle itself still lives
@@ -3165,7 +3165,7 @@ The COO stance stands. What changes is the SORTING instrument: "no external inpu
 
 **The operative case, so the headline matches it:** a project board holds open tickets that our agents can action without input from a client human (Stuart, Peter, HP) or a ruling from Kam. **Those tickets are my queue to drive, unprompted, until they are gone.** The Platform K report of 2026-09-02 put 129 such tickets in front of Kam, dozens assigned to him personally, and his reaction was the correction: they should not have been on any list — they should have been done.
 
-sections (open the file for these): REFINED the same evening — Kam, panel 19:31: "I was a little bit harsh on you earlier… some of them have been put to the back burner or just simply cannot be actioned yet. They remain there as tickets. Let's run through a catalogue after you've sorted things: should be actioned, escalated to me, or simply archived." · Extension 2026-09-03 10:53 — Kam: "aggregate / categorise tickets for Peter to review. He would prefer to review and test 3 big projects with sub issues than 30 issues" · Extension 2026-09-03 11:59 — Kam: "With regards to Secura, that is fantastic. Please adopt this as the process going forward." — review streams ARE the process
+sections (open the file for these): REFINED the same evening — Kam, panel 19:31: "I was a little bit harsh on you earlier… some of them have been put to the back burner or just simply cannot be actioned yet. They remain there as tickets. Let's run through a catalogue after you've sorted things: should be actioned, escalated to me, or simply archived." · Extension 2026-09-03 10:53 — Kam: "aggregate / categorise tickets for Peter to review. He would prefer to review and test 3 big projects with sub issues than 30 issues" · Extension 2026-09-03 11:59 — Kam: "With regards to Secura, that is fantastic. Please adopt this as the process going forward." — review streams ARE the process · PROMOTED 2026-09-05 15:04 (w=3) — the 10:53 block rule now lives in its own file, and the catalogue gains an ARCHIVE disposition
 
 **How to apply:**
 1. **Every active project keeps a STANDING QUEUE** = its category-1 tickets (no external input needed), ordered by priority then identifier, worked session after session under the 08-28 overnight grant until empty; each wrap names the next id; the successor session continues from it. A new QA ask or Kam ruling is INSERTED at its priority, it does not replace the queue.
@@ -3312,6 +3312,27 @@ sections (open the file for these): The case · Why the distinction is worth mor
 5. **Prefer his framing back to him.** He said "consistency or thought". Consistency is about
    the rulings; thought is about the care in the sentence. **Answering in his own two
    categories is more useful than substituting mine.**
+
+
+## Every handover to Peter or Stuart is a TEST BLOCK, as large as one pass can prove — never a list of PRs
+`2026-09-05_handovers-to-peter-and-stuart-are-test-blocks.md` · preference · 2026-09-05 · status: live
+
+**The operative case, so the headline matches it:** Wednesday or a Secuura agent is about to put work in front of Peter or Stuart — a review request, a "what we need from you" message for Kam to send, a ticket comment listing PRs, a rundown pack section called "waiting on the team". **Stop. Group first.** The unit they receive is a BLOCK: the largest set of PRs and tickets that ONE test pass proves, named by its review-stream parent (KS-770/771/772 for Peter, the S↔K stream for Stuart), with the pass that proves it (from the repo's DEV-PROCESS, with its measured wall-clock where the s115 overlay has one) and the one thing the human has to DO. A PR that fits no block is stated as the exception, with the reason. A flat list of PRs is the thing Kam has now corrected three times.
+
+sections (open the file for these): Why the rule did not fire (the w=2 diagnosis, owed at w=3) · How to apply — promoted to enforcement (w≥3), not left as a rule
+
+## Why the rule did not fire (the w=2 diagnosis, owed at w=3)
+1. **The rule lived as an EXTENSION SECTION of another lesson** ([[2026-09-02_coo-actionable-tickets-never-wait-for-kam]], "Extension 2026-09-03 10:53"), under a headline about COO stance and ticket execution. The retrieval handle at boot is the headline; "I am writing a message about Peter's queue" matched nothing. This is [[2026-08-13_headline-must-match-the-operative-case]] exactly — the operative case was in the body of a file whose first line answers a different question.
+2. **The instrument Wednesday reached for was a PR list** (the 14:01 rundown pack §3 "Our PRs with Peter requested, no approval at head (15)"), and a pack section written as a list produces a message written as a list. The pack template had no block structure, so the rule had nothing in the path to hold it.
+
+## How to apply — promoted to enforcement (w≥3), not left as a rule
+1. **This file is the rule's own home** with its operative case in the first line; the COO lesson keeps its extension and points here.
+2. **Every Secuura brief carries the standing line** in HOLDS: *"Handovers to Peter/Stuart are test blocks (stream parent · PRs in the block · the one pass that proves it · what the human does), never a list of PRs; a PR that fits no block is stated as the exception."* Wednesday is the brief writer, so the line is in the path of every brief.
+3. **Any pack or panel line for Kam about "waiting on the team" is grouped by block before it is written**, with the PR count inside the block, never as the headline. The rundown pack's §3 shape is retired.
+4. **The receiving agent builds the blocks** (it has the overlay, the streams and the repo's passes); Wednesday ratifies the grouping and writes Kam's short text from it. Kam sends. Nobody else messages the humans ([[2026-09-05_tickets-are-the-channel-whatsapp-via-kam-is-the-escalation]]).
+5. **Test by its handle:** if the artefact going to Peter or Stuart could be read as "here are N things", it is not ready; if it reads as "run this, and these M are done", it is.
+
+**Family:** [[2026-09-02_coo-actionable-tickets-never-wait-for-kam]] (the 09-03 extension this promotes) · [[2026-08-06_bluf-write-for-the-reader]] (the reviewer's attention is the scarce resource; structure is part of the deliverable) · [[2026-08-13_headline-must-match-the-operative-case]] (why it did not fire) · [[2026-09-05_tickets-are-the-channel-whatsapp-via-kam-is-the-escalation]] (the channel the blocks travel on).
 
 
 ## The project root holds only rules and launchers — every file Wednesday writes has a folder, and the root is never it
