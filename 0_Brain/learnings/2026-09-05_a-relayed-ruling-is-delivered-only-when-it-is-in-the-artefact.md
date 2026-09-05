@@ -44,7 +44,7 @@ caught the NON-DELIVERY, because delivery was never a field anyone owned.
    ruling verbatim and the artefact it must land in. Empty is a valid section; absent is not.
 3. **The morning sweep diffs the ruled cards against the artefacts**, per project, and re-queues any
    ruling whose artefact does not carry it — before any brief is written (the sweep-before-brief rule).
-4. **Enforcement candidate (w=3 would promote it):** `decision_queue.sh` gains a `--delivered
+4. **BUILT 2026-09-06 02:3x (w=3 reached on 2026-09-06 00:5x — the F-14 ruling; built by a Wednesday-assistant agent, verified and exercised by Wednesday: refuse path rc 1 with 0 sent lines, pass path on a stubbed copy, fails closed on a broken queue):** `decision_queue.sh` gains a `--delivered
    <artefact>` mark on a ruled card and a `list ruled --undelivered` view; `send_brief.sh --kind brief`
    to a project refuses when that view is non-empty for the project and the body lacks the section.
 5. **Test by its handle:** if the successor could read every artefact the project owns and still not

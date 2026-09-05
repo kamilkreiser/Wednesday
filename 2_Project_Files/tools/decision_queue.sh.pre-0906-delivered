@@ -15,22 +15,7 @@
 #                                     # options[{key,label,detail?}],
 #                                     # recommended, default_action)
 #   decision_queue.sh rule ID CHOICE_KEY
-#   decision_queue.sh --delivered ID ARTEFACT   # mark a RULED card delivered: the
-#                                     # ruling now sits in ARTEFACT (ticket comment,
-#                                     # PR, row). Refuses unless the card is ruled.
 #   decision_queue.sh list [open|ruled|all]
-#   decision_queue.sh list ruled --undelivered [ID-PREFIX]
-#                                     # ruled cards with no delivered mark, optionally
-#                                     # only ids starting with e.g. nexusai- / secuura-
-#
-# DELIVERED (2026-09-06, ledger w=3 promotion of learnings/2026-09-05_a-relayed-
-# ruling-is-delivered-only-when-it-is-in-the-artefact.md rule 4): a RULED card is
-# not closed until the ruling sits in the artefact the next reader lands on. The
-# mysql2 EXTEND ruling of 09-04 was relayed, absorbed into a queue, pre-empted,
-# and re-raised as "unanswered" by s133 — nobody owned DELIVERY as a field. Now it
-# is one: `delivered_artefact` + `delivered_ts` on the card, and fleet/send_brief.sh
-# refuses a --kind brief while `list ruled --undelivered <prefix>` is non-empty for
-# that project and the body lacks the RULED BY KAM, NOT YET IN AN ARTEFACT section.
 #
 # Guarantees: the file stays valid JSON (atomic tmp+rename write); malformed
 # input or an unreadable existing file FAILS LOUDLY (exit 2) and never
@@ -221,42 +206,10 @@ def cmd_rule(args):
             return
     die(f"no decision with id {did!r}")
 
-def is_delivered(dec):
-    return bool(str(dec.get("delivered_artefact") or "").strip())
-
-def cmd_delivered(args):
-    # Marks a RULED card as delivered into ARTEFACT. The timestamp is generated
-    # here (now()), never typed. A card that is open/withdrawn/absent REFUSES —
-    # delivery is a property of a ruling, and there is none to deliver.
-    if len(args) != 2 or not args[0].strip() or not args[1].strip():
-        die("usage: --delivered ID ARTEFACT   (ARTEFACT = the ticket comment / PR / row the ruling now sits in)")
-    did, artefact = args[0].strip(), " ".join(args[1].split())
-    data = load()
-    for dec in data:
-        if isinstance(dec, dict) and dec.get("id") == did:
-            st = dec.get("status")
-            if st != "ruled":
-                die(f"{did} is not ruled (status={st!r}) — only a ruled card can be delivered")
-            if is_delivered(dec):
-                die(f"{did} is already delivered: {dec['delivered_artefact']} @ {dec.get('delivered_ts')}")
-            dec["delivered_artefact"] = artefact
-            dec["delivered_ts"] = now()
-            save(data)
-            print(f"delivered: {did} -> {artefact} @ {dec['delivered_ts'][:16]}")
-            return
-    die(f"no decision with id {did!r}")
-
 def cmd_list(args):
     which = args[0] if args else "all"
     if which not in ("open", "ruled", "all"):
-        die("usage: list [open|ruled|all] | list ruled --undelivered [ID-PREFIX]")
-    undelivered, prefix = False, ""
-    rest = args[1:]
-    if rest:
-        if which != "ruled" or rest[0] != "--undelivered" or len(rest) > 2:
-            die("usage: list [open|ruled|all] | list ruled --undelivered [ID-PREFIX]")
-        undelivered = True
-        prefix = rest[1] if len(rest) == 2 else ""
+        die("usage: list [open|ruled|all]")
     data = load()
     shown = 0
     for dec in data:
@@ -266,31 +219,20 @@ def cmd_list(args):
         st = dec.get("status", "?")
         if which != "all" and st != which:
             continue
-        if undelivered:
-            if is_delivered(dec):
-                continue
-            if prefix and not str(dec.get("id", "")).startswith(prefix):
-                continue
         shown += 1
         line = f"[{st:5}] {dec.get('id','?')}  {dec.get('client_project','?')} — {dec.get('title','?')}"
         if st == "ruled":
             line += f"  => {dec.get('ruled_choice')} @ {str(dec.get('ruled_ts') or '')[:16]}"
-            if is_delivered(dec):
-                line += f"  delivered: {dec['delivered_artefact']} @ {str(dec.get('delivered_ts') or '')[:16]}"
         else:
             line += f"  (rec: {dec.get('recommended','?')}; default: {dec.get('default_action','?')})"
         print(line)
-    tag = which
-    if undelivered:
-        tag += ", undelivered" + (f", prefix={prefix}" if prefix else "")
-    print(f"{shown} decision(s) [{tag}]")
+    print(f"{shown} decision(s) [{which}]")
 
 if len(sys.argv) < 2:
-    die("usage: decision_queue.sh add|rule|--delivered|list ...", 1)
+    die("usage: decision_queue.sh add|rule|list ...", 1)
 cmd, rest = sys.argv[1], sys.argv[2:]
 if cmd == "add":   cmd_add(rest)
 elif cmd == "rule": cmd_rule(rest)
-elif cmd in ("--delivered", "delivered"): cmd_delivered(rest)
 elif cmd == "list": cmd_list(rest)
 else: die(f"unknown command: {cmd}", 1)
 PYEOF

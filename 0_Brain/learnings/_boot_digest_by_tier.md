@@ -7,7 +7,7 @@ status: live
 
 # Boot digest BY TIER — W whole, M rules-only, every project case a handle
 
-Generated 2026-09-06 02:19 from 99 lesson files (474,151 B). M 24 · MIXED 5 · W 70. 28 project CASE sections inside MIXED files are reduced to one line each: the heading and the path to read it at. W blocks are exactly what the default digest carries; M blocks drop the section index and keep the rules; a P file is a single handle. The CASES behind every rule live only in the lesson files — open one the moment its rule fires.
+Generated 2026-09-06 02:25 from 99 lesson files (474,355 B). M 24 · MIXED 5 · W 70. 28 project CASE sections inside MIXED files are reduced to one line each: the heading and the path to read it at. W blocks are exactly what the default digest carries; M blocks drop the section index and keep the rules; a P file is a single handle. The CASES behind every rule live only in the lesson files — open one the moment its rule fires.
 
 ## The T9 SSD is the master — Wednesday must be fully portable
 `2026-07-31_fully-portable-drive.md` · principle · 2026-07-31 · status: superseded — the "T9 is the master" half by [[2026-08-25_one-drive-devmaster-is-master]] (2026-08-25); the portability principle itself still lives · tier: W
@@ -3025,7 +3025,7 @@ sections (open the file for these): EXTENSION 2026-09-06 02:2x (ledger w=4 of th
    ruling verbatim and the artefact it must land in. Empty is a valid section; absent is not.
 3. **The morning sweep diffs the ruled cards against the artefacts**, per project, and re-queues any
    ruling whose artefact does not carry it — before any brief is written (the sweep-before-brief rule).
-4. **Enforcement candidate (w=3 would promote it):** `decision_queue.sh` gains a `--delivered
+4. **BUILT 2026-09-06 02:3x (w=3 reached on 2026-09-06 00:5x — the F-14 ruling; built by a Wednesday-assistant agent, verified and exercised by Wednesday: refuse path rc 1 with 0 sent lines, pass path on a stubbed copy, fails closed on a broken queue):** `decision_queue.sh` gains a `--delivered
    <artefact>` mark on a ruled card and a `list ruled --undelivered` view; `send_brief.sh --kind brief`
    to a project refuses when that view is non-empty for the project and the body lacks the section.
 5. **Test by its handle:** if the successor could read every artefact the project owns and still not

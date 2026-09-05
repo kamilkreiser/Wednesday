@@ -308,64 +308,6 @@ THIS version of the brief, then re-date the line.
 MSG
     exit 1
   fi
-
-  # ── UNDELIVERED-RULING GATE (ledger w=3 promotion, 2026-09-06) ────────────
-  # learnings/2026-09-05_a-relayed-ruling-is-delivered-only-when-it-is-in-the-
-  # artefact.md rule 4. Kam ruled the mysql2 fuse EXTEND on 09-04 (07:08 and
-  # 08:33); it was relayed, absorbed into s123's queue, pre-empted, and never
-  # written into the row, KS-763 or #801. Ten successor briefs (s124..s133)
-  # carried nothing of it, and s133 reported it — correctly, from every artefact
-  # it could read — as an open question unanswered since 09-03. Nothing caught
-  # the non-delivery because delivery was never a field anyone owned. Now it is:
-  # decision_queue.sh --delivered ID ARTEFACT marks the card; this gate reads
-  # `list ruled --undelivered <prefix>` for the project and REFUSES a brief while
-  # that view is non-empty and the body lacks the section the learning mandates:
-  #     RULED BY KAM, NOT YET IN AN ARTEFACT
-  # (each card, the ruling verbatim, the artefact it must land in). Empty is a
-  # valid section; absent is not. NARROW per the w=8 lesson: --kind brief only;
-  # ANSWER mails untouched. FAILS CLOSED: if the queue tool errors, the brief
-  # refuses — an unreadable queue is not evidence of an empty one. Projects with
-  # no prefix mapping are not gated (say so here when adding one).
-  DQ_TOOL="$PROJECT_DIR/2_Project_Files/tools/decision_queue.sh"
-  case "$TO" in
-    Secuura/Blockchain)          DQ_PREFIX="secuura-" ;;
-    Datasec/NexusAI)             DQ_PREFIX="nexusai-" ;;
-    Datasec/Vision_Sales_Portal) DQ_PREFIX="vision-" ;;
-    Datasec/HPSM)                DQ_PREFIX="hpsm-" ;;
-    *)                           DQ_PREFIX="" ;;
-  esac
-  if [ -n "$DQ_PREFIX" ]; then
-    [ -f "$DQ_TOOL" ] || { echo "BRIEF REFUSED — decision queue tool missing at $DQ_TOOL (cannot check undelivered rulings)" >&2; exit 1; }
-    UNDELIVERED_OUT="$(bash "$DQ_TOOL" list ruled --undelivered "$DQ_PREFIX" 2>&1)"; DQ_RC=$?
-    if [ "$DQ_RC" -ne 0 ]; then
-      echo "BRIEF REFUSED — decision_queue.sh list ruled --undelivered $DQ_PREFIX failed (rc=$DQ_RC); refusing rather than assuming no undelivered rulings:" >&2
-      printf '%s\n' "$UNDELIVERED_OUT" | sed 's/^/  /' >&2
-      exit 1
-    fi
-    UNDELIVERED_IDS="$(printf '%s\n' "$UNDELIVERED_OUT" | awk '/^\[ruled\]/ {print $2}')"
-    if [ -n "$UNDELIVERED_IDS" ] && ! printf '%s\n' "$BODY" | grep -q '^RULED BY KAM, NOT YET IN AN ARTEFACT'; then
-      N_UNDELIVERED="$(printf '%s\n' "$UNDELIVERED_IDS" | grep -c .)"
-      cat >&2 <<MSG
-BRIEF REFUSED — $N_UNDELIVERED ruled card(s) for '$TO' (prefix $DQ_PREFIX) have NO delivered mark, and
-the body has no line beginning 'RULED BY KAM, NOT YET IN AN ARTEFACT'.
-$(printf '%s\n' "$UNDELIVERED_IDS" | sed 's/^/  /')
-
-A ruling Kam gave that sits only on his panel and in a mail to a seat that has
-since wrapped lives nowhere the next reader lands — the successor will find the
-question open and ask it again (mysql2 EXTEND, 09-04 -> re-raised 09-05). Do ONE of:
-  - for each card whose ruling now sits in a ticket comment / PR / row, record it:
-      2_Project_Files/tools/decision_queue.sh --delivered <card-id> "<artefact>"
-  - carry the rest in the brief under its own heading, each with the ruling
-    verbatim and the artefact it must land in:
-      RULED BY KAM, NOT YET IN AN ARTEFACT
-      - <card-id>: "<ruling verbatim>" -> must land in <ticket/PR/row>
-    (an empty section under that heading is valid; an absent one is not)
-
-Ledger w=3 (2026-09-06): a relayed ruling is delivered only when it is in the artefact.
-MSG
-      exit 1
-    fi
-  fi
 fi
 
 # ── DRY RUN ───────────────────────────────────────────────────────────────
