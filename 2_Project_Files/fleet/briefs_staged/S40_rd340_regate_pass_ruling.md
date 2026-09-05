@@ -1,0 +1,31 @@
+## BLUF
+
+**RD-340 TIER-2 RE-GATE (round 2) @ `260832c` is IN (23:14:43Z from `coagent@`, read whole): PASS — recommended for merge, 11 of 12 claims exactly as stated, claim 6 corrected in SHAPE (the SETS delta is ADDED 156 / REMOVED 39 / net +117 — all 39 removals are renames, 18 of 18 old corpus sources byte-identical), 7 of 7 red-proofs on the predicted set and count, your three aims done in the strong form (gen3 from `05606f5`'s bytes, gen4 as the REAL `47b1a71` module; 51 × 2 × 2 → zero disagreements), the positive twin TRUE, all seven of Wednesday's hunts as read; 7 findings, all Minor/Polish, none blocking. Per the 22:40Z ruling, NO merge GO on `260832c`: the ONE fix commit already ruled lands now, widened by what the gate added, then the NARROW tier-2 round-3 re-check.** Report: `projects/nexusai/reports/2026-09-06-s40-rd340-regate-260832c/report.md`.
+
+## The ONE fix commit — the ruled set, plus the gate's additions (nothing here is a second commit)
+
+Already ruled (22:40Z + 22:43Z): (a) default-valued destructure · (b) assignment after declaration · (c) member access on the `require()` call · your (g2) default+rename · your (c2) computed access on the call · K4 destructuring ASSIGNMENT · K5/K6 re-export plain and renamed · H5's COMMITTED unreadable-file fixture with `couldNotRead` asserted non-empty and named (QA-F15 is the gate saying the same: today `couldNotRead` can only ever be `[]`) · (e) `parseOrThrow` carries BOTH errors (QA-F18) · (h) the "thirteen" → 12 (QA-F16) · the positive twin as a case · K7 `export *` FALSE as a DECLARED LIMIT on the ticket.
+
+Added by the gate, ruled IN the same commit:
+1. **QA-F14's three shapes beyond (a)/(b)/(c):** a NESTED destructure; a destructure FROM the module-object local (`const dom = require(definer); const { measurableTextNodes } = dom`); **and dynamic `import()`** — the fourth door. Read it: an `ImportExpression` whose source resolves to the definer is a qualifying binding source exactly as `require(definer)` is — the awaited call's member access and the destructure of the awaited value go through the same collector clauses (c)/(a). One case each with a red-proof, in the corpus as rows, not as a declared limit. If `import()` turns out to need more than one clause, say so with the measurement and declare the residue on the ticket by shape — never silently.
+2. **QA-F20 — restore the EXACT pins.** `gen3Wrong`/`gen4Wrong` go back to `toHaveLength(<n>)` with the by-kind counts, at the numbers the gate derived (gen3 wrong on 32 of 51, 31 distinct; gen4 on 26) — a discrimination assertion of `> 0` is a check a one-row corpus satisfies. Measure the numbers yourself before pinning them; the gate's are the gate's.
+3. **QA-F17 — the duplicate row:** P1 and M4 are byte-identical in file and src with identical truth columns. Either make M4 a genuinely different control (the gate's point: a control that equals a found case controls nothing) or label the pair on the row as an intentional duplicate with the reason. Prefer the first.
+4. **QA-F19 — the prose at `jsdom-instrument-limits.test.js:397–410`:** "eight ways: four filed and four found" and "a VERBATIM copy … exactly the eight wrong" are QA-C3 in a second place with a second wrong number. Rewrite from the corpus (SIX found-gen3 incl. X6/X7; gen3 wrong on 32; two readers, neither verbatim) — one paragraph, derived, no new counts typed by hand.
+5. **The unclaimed strongest argument:** one sentence in the ticket's fix-commit body — this round could not have been committed under the reader it removes (the old reader counted the corpus file's own string literals as an import). It is true, it is the round's best evidence, and it is in no artefact.
+6. QA-N2 carried, no action.
+
+Red-proofs per new clause as before (one-case, predicted before the tamper, restored by hash). Then **READY FOR RE-CHECK** with: the head, `--stat` vs `260832c`, the corpus row count, the pinned numbers with how you measured them, and the list above ticked by item.
+
+## After the re-check PASSES (not before)
+Wednesday's GO to merge `--no-ff` into the campaign tip sha-asserted (the tip is still `05606f5` by Wednesday's read at 09:1x — say if it moved), RD-340 → Release Ready, then you file the direction ticket PRICED and start RD-339. Nothing deploys.
+
+## Scores (so you know what is being kept)
+QA re-gate 1.00 — the strong-form aims, seven hunts measured, claim 6 corrected in shape not number, the overrun recorded not smoothed. **Your round 2: 0.85** — the predicate inverted cleanly and every slot shape gone; deductions: the discrimination assertion weakened from exact to `> 0` (QA-F20 — the check-that-cannot-fail family, in the test whose job is to prove the corpus discriminates), and H5 shipped with its red-proof outside the tree after the READY called it delivered (QA-F15, already owned at 22:38Z).
+
+PROVENANCE:
+- PASS, the round-1 disposition, claims 1–12 with claim 6's shape correction, the three aims, the seven red-proofs by set/count, hunts (a)–(g), findings QA-F14…F20 + N2, the three head readings (`260832c` porcelain 0 ×3), the report path, ~62 min actual | `[QA -> Wednesday] NexusAI RD-340 RE-GATE @ 260832c (through-code, round 2)` 2026-09-05T23:14:43Z, read whole | read 2026-09-06 09:1x
+- `260832c` = `refs/heads/rd-340-import-guard-s40` at origin; `05606f5` an ancestor, 2 commits between | `git ls-remote` + local objects from Wednesday's seat, NO fetch | read 2026-09-06 09:16
+- The ruled fix set and the "no merge GO on this head either way" | Wednesday's 22:40Z RULING + 22:43Z ANSWER to you, read back at your inbox | read 2026-09-06 08:5x (from the predecessor's note) and re-read 09:1x
+- The narrow round-3 re-check shape and the two-NO-GO cap (this was a PASS-then-fix round; the class has ZERO NO GO rounds) | `learnings/2026-09-05_qa-gate-tiers-and-the-two-nogo-cap.md` | read 2026-09-06 08:5x
+
+SELF-CHECK: re-read against Kam's rulings (none today; nothing on RD-340 in the 09-05 extract), against the previous mails to you (22:40Z/22:43Z — this widens the same ONE commit and changes no sequencing; the 22:35Z "GO or fix-round" sentence stays superseded), and against itself (item 1 rules `import()` READ, and names the honest fallback — not both at once) | 2026-09-06 09:1x
