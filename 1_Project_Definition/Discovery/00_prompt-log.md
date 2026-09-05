@@ -2262,3 +2262,8 @@ Done with it: Dynamics → Kam's team decision (no action); QuickQuote masthead/
 > Did you get stuck?
 
 *Note:* Not stuck — the 20:34 line reached Wednesday at 20:45 (the panel push landed after the 20:37 commit; no panel read between 20:33 and 20:45 — owned). Answered with the deploy GO sent/verified and the GitHub measurement.
+
+## 2026-09-05 21:00 — Kam (dashboard chat, verbatim)
+> Deploy to both
+
+*Note:* RULING: the demo deploy of 48e092c too (dev done as 0000097). Demo GO mailed to S36 by the gate in the same minutes; the demo admin-image card (Secuura) is a different subject and stays open.
