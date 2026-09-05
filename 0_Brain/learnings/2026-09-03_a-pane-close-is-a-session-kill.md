@@ -27,3 +27,10 @@ The w=1 rule named the wrong discriminator. "Listeners its tree owns" is a PAREN
 5. **Enforcement candidate (w=3 would promote it):** a `pane_close.sh` that takes the pane id + the listener pids from the handover, refuses (rc 5) if any listener or its parent has a tty, and only then `kill-pane`s and re-curls — the check in the path, not in memory.
 
 **Family:** [[2026-08-26_never-delete-cleanup-means-quarantine]] (a close that destroys; the blast radius of a tidy act) · [[2026-08-07_a-check-that-cannot-fail]] (a parentage test asked a survival question) · [[2026-08-14_i-read-representations-they-read-sources]] ("ppid 1" read as "daemonised" — a representation of detachment) · [[2026-08-15_a-gui-open-is-a-write]] (my own action's side effect read as the world's state).
+
+## SHARPENED 2026-09-05 (w=2): the check has TWO halves, and a hand-run check drops one — so it is now a script
+
+**The case.** Closing S33's NexusAI pane: Wednesday ran `ps -o pid,ppid,sess,tty -p <listener>` on the 3111 surface, read tty `??`, and closed the pane. The listener's PARENT (a shell on the pane's tty) was never checked; the pane close hung up the tty; 3111 died with it (listeners 24→23, curl 000). The rule above says "on the listener AND on its immediate parent" — the second half was dropped under load, exactly the failure a two-part manual check invites.
+
+**The mechanism (rule 5, now built rather than a candidate):** `2_Project_Files/fleet/cockpit/pane_close.sh <pane> [port …]` — resolves every listener on the named ports (or every TCP listener whose tty matches the pane's), checks the listener AND its parent for a tty, **refuses (rc 5) if either has one**, otherwise `kill-pane` and re-curls every port. A pane is closed through it or not at all.
+

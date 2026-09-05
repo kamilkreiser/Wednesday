@@ -7,7 +7,7 @@ status: live
 
 # Boot digest — headline + rules of every lesson (open the file when it fires)
 
-Generated 2026-09-05 09:20 from 94 lesson files (433,377 B). Each block = the lesson's retrieval handle (H1), its frontmatter, the operative paragraph, its section index, and every RULES section verbatim. 6 files carry no rules-shaped section and are included whole. The CASES behind a rule live only in the file: open it the moment the rule fires, or when a diagnosis needs the evidence. `_ledger.md` is read whole beside this digest; `_ledger_archive.md` on demand.
+Generated 2026-09-05 10:29 from 94 lesson files (434,363 B). Each block = the lesson's retrieval handle (H1), its frontmatter, the operative paragraph, its section index, and every RULES section verbatim. 6 files carry no rules-shaped section and are included whole. The CASES behind a rule live only in the file: open it the moment the rule fires, or when a diagnosis needs the evidence. `_ledger.md` is read whole beside this digest; `_ledger_archive.md` on demand.
 
 ## The T9 SSD is the master — Wednesday must be fully portable
 `2026-07-31_fully-portable-drive.md` · principle · 2026-07-31 · status: superseded — the "T9 is the master" half by [[2026-08-25_one-drive-devmaster-is-master]] (2026-08-25); the portability principle itself still lives
@@ -3237,7 +3237,7 @@ Rule 2 above ("70% = rotate now") is superseded: rotation is CONDITIONAL inside 
 
 **The operative case, so the headline matches it:** I am about to close (kill) a builder's or tester's pane, and a surface the handover names as "left up" is served by a process whose parent is `launchd` (ppid 1). **That is not daemonisation.** A process reparented to 1 after its parent exited can still be a member of the pane's SESSION with the pane's controlling tty; when the pane dies, the tty hangs up and every process still attached to it gets SIGHUP. The check is `ps -o pid,ppid,sess,tty -p <pid>`: tty `??` (and session 0) = detached and survives; `ttysNNN` = it dies with the pane, whatever its ppid says.
 
-sections (open the file for these): The two cases · Why the w=1 rule did not fire (the diagnosis w=2 requires) · How to apply
+sections (open the file for these): The two cases · Why the w=1 rule did not fire (the diagnosis w=2 requires) · How to apply · SHARPENED 2026-09-05 (w=2): the check has TWO halves, and a hand-run check drops one — so it is now a script
 
 ## How to apply
 
@@ -3248,6 +3248,9 @@ sections (open the file for these): The two cases · Why the w=1 rule did not fi
 5. **Enforcement candidate (w=3 would promote it):** a `pane_close.sh` that takes the pane id + the listener pids from the handover, refuses (rc 5) if any listener or its parent has a tty, and only then `kill-pane`s and re-curls — the check in the path, not in memory.
 
 **Family:** [[2026-08-26_never-delete-cleanup-means-quarantine]] (a close that destroys; the blast radius of a tidy act) · [[2026-08-07_a-check-that-cannot-fail]] (a parentage test asked a survival question) · [[2026-08-14_i-read-representations-they-read-sources]] ("ppid 1" read as "daemonised" — a representation of detachment) · [[2026-08-15_a-gui-open-is-a-write]] (my own action's side effect read as the world's state).
+
+## SHARPENED 2026-09-05 (w=2): the check has TWO halves, and a hand-run check drops one — so it is now a script
+**The case.** Closing S33's NexusAI pane: Wednesday ran `ps -o pid,ppid,sess,tty -p <listener>` on the 3111 surface, read tty `??`, and closed the pane. The listener's PARENT (a shell on the pane's tty) was never checked; the pane close hung up the tty; 3111 died with it (listeners 24→23, curl 000). The rule above says "on the listener AND on its immediate parent" — the second half was dropped under load, exactly the failure a two-part manual check invites.
 
 
 ## A ratified mock is a spec with TWO halves — a brief that carries its figures and not its layout ships half the design, and only the principal will notice
