@@ -4547,5 +4547,73 @@
   "status": "open",
   "ruled_choice": null,
   "ruled_ts": null
+ },
+ {
+  "id": "attio-entra-consent-m365",
+  "client_project": "Datasec/ATTIO",
+  "title": "ATTIO-8: grant Entra admin consent so the follow-up signal answers the question you actually asked",
+  "bluf": "Prior-rulings check: you have ruled eight ATTIO cards (tier, attribute cap, security pack, prod DB, rate card, browser access, nfr stage, contact data). None covers this one. THE PROBLEM: your daily follow-up digest ran this morning and flagged 12 deals as not contacted - and the agent itself warns, at the top, that this is NOT the question you asked. Attio holds no correspondence data because M365 email/calendar sync has no Entra admin consent, so the signal can only report which RECORDS HAVE NOT BEEN EDITED. A deal you phoned yesterday still appears on the list. The agent flagged this honestly rather than letting the number stand, which is why it is worth acting on. Granting consent is a tenant admin action only you can take. WHAT I HAVE NOT ESTABLISHED: exactly which Graph scopes the connector asks for, and whether it reads mail bodies or only headers and calendar events - I have not read the connector, and that is a question you should have answered before you grant anything. I would rather tell you the ask is unmeasured than hand you a consent screen and a shrug.",
+  "default_action": "HOLD - no consent granted, nothing touched in the tenant. The digest keeps running with its honest warning attached.",
+  "options": [
+   {
+    "key": "scopes-first",
+    "label": "Have the agent report the exact scopes first, then decide (recommended)",
+    "detail": "A short read-only job: name every Graph permission the connector requests and whether it reads message bodies. You grant with the blast radius in front of you. Costs one round trip."
+   },
+   {
+    "key": "grant",
+    "label": "Grant the consent now",
+    "detail": "Turns the strongest signal on today. Costs granting mailbox/calendar scopes without having read what they cover."
+   },
+   {
+    "key": "never",
+    "label": "Leave it - accept the digest reports record edits only",
+    "detail": "No consent, no correspondence data. The not-contacted signal keeps its warning banner permanently and stays a weaker instrument."
+   }
+  ],
+  "recommended": "scopes-first",
+  "ts": "2026-09-07T07:02:20.461909+10:00",
+  "status": "open",
+  "ruled_choice": null,
+  "ruled_ts": null,
+  "prior_rulings_overridden": [
+   "2026-08-21 09:47",
+   "2026-08-21 09:56",
+   "2026-08-21 10:02",
+   "2026-08-21 13:02",
+   "2026-09-01 13:45"
+  ]
+ },
+ {
+  "id": "attio-renewal-date-vs-attr-cap",
+  "client_project": "Datasec/ATTIO",
+  "title": "Your attribute cap is blocking the renewal signal — lift it for one field, or accept no renewal tracking?",
+  "bluf": "Prior-rulings check: you ruled attio-attr-cap => HOLD AT CAP on 2026-08-22. This card exists because that ruling now has a consequence nobody knew about at the time, and the agent refused to work around it rather than quietly adding a 28th attribute. THE SITUATION: the renewals leg of your daily digest CANNOT RUN. There is no renewal-date attribute on Deal; the only renewal-adjacent field is a using_mps checkbox with no date. Adding a renewal date would be the 28th custom attribute, outside the cap you ruled, so the job creates nothing and reports nothing. It said so plainly rather than returning a zero - its words: a zero here is not a clean bill of health. FOR SCALE: 6 of 18 deals are marked as under an MPS contract, so the population this signal would cover is real - it is simply undated. This is a small decision but it is genuinely yours: it is your own ruling that is the blocker.",
+  "default_action": "HOLD - the cap stands, no attribute is created, and the renewals leg keeps reporting that it cannot run rather than reporting a zero.",
+  "options": [
+   {
+    "key": "one-field",
+    "label": "Lift the cap by exactly one, for a renewal date (recommended)",
+    "detail": "28 attributes instead of 27, for the single field that turns a dead signal into a live one. Narrow and reversible."
+   },
+   {
+    "key": "hold",
+    "label": "Keep the cap - accept no renewal tracking",
+    "detail": "Your 08-22 reasoning stands and renewals stay untracked in Attio. The digest keeps saying the signal cannot run, which is honest but permanent."
+   },
+   {
+    "key": "reuse",
+    "label": "Have the agent look for a way to do it without a new attribute first",
+    "detail": "It may be expressible on an existing field or outside Attio. Costs a round trip and may come back with nothing."
+   }
+  ],
+  "recommended": "one-field",
+  "ts": "2026-09-07T07:02:20.534086+10:00",
+  "status": "open",
+  "ruled_choice": null,
+  "ruled_ts": null,
+  "prior_rulings_overridden": [
+   "2026-08-24 06:57"
+  ]
  }
 ]
