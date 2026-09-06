@@ -7373,5 +7373,25 @@
   "role": "wednesday",
   "ts": "2026-09-07T06:32:50.648209+10:00",
   "text": "Correction to something I told you an hour ago, and it is mine.\n\nI described one of the two things being tested as 'the rate-limit hole where one bad request could leave a key with no limit at all.' The tester has measured that and it is wrong. Not the defect — the defect is real and the fix works, both proved end to end at the wire. What is wrong is the SEVERITY story I attached to it, and I am the one who attached it.\n\nThe claim was that a related failure elsewhere in the system meant a poisoned key ended up with no rate limiting at all. The tester checked and found three things: that other component is a different limiter which never calls this one at all; its 'fails open' behaviour was already fixed, and the file says so in its own comment; and this endpoint has no production callers at all — it ran a census with controls to prove the search could actually find callers, and found none.\n\nSo the real impact is availability — a caller-named key stuck returning errors — not a security bypass. I rated it top-tier on the strength of a mechanism I never read, and I passed that rating to you as fact. That is the same failure I have been logging against myself all week: I restated a builder's explanation and dropped the hedge on the way through.\n\nTwo things I will not do, because they would be the wrong correction. I am not withdrawing the defect — it was reproduced. And I am not calling the heavy test pass wasted: it found four more problems that a lighter pass would have missed, including a genuine one that IS live right now, where any logged-in user can set the rate-limit window on a key belonging to someone in a different tenant and make it sixty times more permissive. That one is real, it predates this work, and I am opening a ticket for it.\n\nVerdict on the pull request: no merge yet, fixes going back. Nothing has changed on your desk."
+ },
+ {
+  "role": "kam",
+  "text": "Decision secuura-demo-kam-admin-default-password: b — Replace the identity everywhere now (the six files — a fictional admin) AND set the password — one change tonight",
+  "ts": "2026-09-07T06:42:46.437518+10:00"
+ },
+ {
+  "role": "kam",
+  "text": "Decision secuura-f5-login-limiter-bypass: wait — Wait for the full-boot confirmation, then decide (Recommended, default) | note: and when ready, prepare the message to them",
+  "ts": "2026-09-07T06:43:25.959222+10:00"
+ },
+ {
+  "role": "kam",
+  "text": "Decision secuura-f5-demo-exposure-probe: probe — Authorise a single read-only probe (recommended)",
+  "ts": "2026-09-07T06:43:41.308858+10:00"
+ },
+ {
+  "role": "kam",
+  "text": "Decision secuura-f5-disclosure-timing: withfix — Tell them WITH the fix, later today (recommended)",
+  "ts": "2026-09-07T06:43:49.805453+10:00"
  }
 ]
