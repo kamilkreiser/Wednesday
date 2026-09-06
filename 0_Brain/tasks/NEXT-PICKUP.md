@@ -17,96 +17,85 @@ Opus-5 boot pin through 2026-09-13 (doctor WARNs after). "Keep pushing Secuura t
 **NexusAI is PAUSED** on Kam's 09-06 17:01 ruling — do not launch it. Nothing merges, deploys or
 reaches Peter/Stuart without Kam.
 
-## FLEET — one builder seat (s144, `%142`), launched 08:0x
-Everything else closed cleanly: the ATTIO seat wrapped and was scored 1.0; three QA gates reported and
-their panes are closed. **Load was 10.5 at 07:5x on Kam's complaint; it is back down.**
+## 🔴 THE LIVE THREAD — ATTIO MOVES OUT OF DATASEC (Kam, this morning)
+**His rulings, verbatim:** 09:12 card `attio-repo-home` => **move**, *"i will set up under kamilkkreiser
+but not in datasec"* · 09:18 *"use https://github.com/KamORG454/attic.git. please create deploy keys"* ·
+09:28 *"that clears it up but i would still like it to live outside datasec. please instruct everyone."*
 
-## PR STATE — all heads read together by `ls-remote` at 08:0x
+**New home `git@github.com:KamORG454/attic.git` — `attic`, NOT `attio`.** Checked, not assumed: attic
+= HTTP 200, attio = 404. He pasted an https URL; **deploy keys are SSH**, so the `git@` form or the key
+is never used. **Deploy keypair CREATED** at `!CODING/Datasec/ATTIO/3_Access_Keys/attic_deploy_rw`
+(600/644; that folder is gitignored, verified). **The public key is with Kam to paste** at
+github.com/KamORG454/attic → Deploy keys, **Allow write access ticked.** Nothing pushes until he has.
+**Instruction mail SENT to Datasec/Vision (23:2xZ)** — the only seat that touches Attio. **Old
+`datasecau/attio` is ARCHIVED NEVER DELETED, and that is Kam's hands (org op).**
+**NOT RULED: whether the local folder leaves `!CODING/Datasec/ATTIO`. Default: leave it, move the
+remote only. Do not invent this.**
+
+**How it started, and it is Wednesday's failure:** he approved the renewal-date change on its merits
+and only later saw the commits had gone to the **Datasec** org. *"Your role is to double-check and do
+so."* **Every artefact said WHAT would change; none said WHERE it would land.** Standing line now in
+`fleet/specs/brief-standing-lines.md`: **any card, brief or GO whose consequence is a commit NAMES the
+remote and branch in its BLUF** (deploys name the environment; tickets name the board).
+**Contamination scan at his challenge: ZERO Secuura refs in that push** (control: 48 `attio` hits).
+Workspace-wide: Attio in **83 Datasec files, 3 Secuura** — all three session history, one of them a
+Secuura agent recording it deliberately did NOT use an Attio finding. **Attio was never mixed with
+Secuura; Kam accepted that and wants it out of Datasec anyway.**
+
+## FLEET — one builder (s144, `%142`, standing down to wrap) + two QA panes reporting
+| pane | state |
+|---|---|
+| `%142` Secuura/Blockchain (s144) | told to STAND DOWN and wrap — both its PRs are Kam's now |
+| `%143` QA #884 r2 | **REPORTED: GO on the security question** |
+| `%144` QA #876 r2 | **REPORTED: GO on the arm, but a REGRESSION survives** |
+
+## PR STATE — heads read together at 09:0x
 ```
-develop 306d0db923183f3b62b053f0242549e37bdf362c   (unmoved all morning)
-#884  f3a037978  KS-858/F5  TIER-1 GATED -> GO on the security question, TWO MAJORS -> round 2 IN FLIGHT (P1)
-#876  8d3e5208a  KS-930     TIER-1 GATED -> NO GO on ONE arm -> round 2 queued behind #884
-#885  a98df6b11  KS-949     round 1 pushed, NOT re-gated (queued; shape ratified)
-#882  7e4603df   KS-698     round 1 READY, NEVER GATED — needs a gate, no fix pending
-#874  6f7885602 · #879 79f1fcb48 (stacked on #876) · #880 47b2b60f2 · #881 787771b97 · #883 bac58b93a — untouched today
+develop 306d0db923183f3b62b053f0242549e37bdf362c   UNMOVED ALL DAY — nothing merged
+#884  64e457943  KS-858/F5  r2 GATED -> GO on security. F5 closed on BOTH request forms.
+                            AWAITING KAM'S MERGE WORD — and it gates today's client disclosure.
+#876  3047bcb1d  KS-930     r2 GATED -> arm CLOSED (7/8 shapes base-blocked -> r1-exempt -> head-blocked)
+                            BUT `node-22` spelling still EXEMPT at head, BLOCKED at base = a REGRESSION.
+                            Two NO GOs = Kam's cap reached -> CARDED to him.
+#885  a98df6b11  KS-949     r1 pushed, NOT re-gated (queued)
+#882  7e4603df   KS-698     r1 READY, NEVER GATED — needs a gate, nothing pending on it
+#874 #879(stacked on #876) #880 #881 #883 — untouched today
 ```
 
-## THE TIME-SENSITIVE THING — Kam ruled a client disclosure for TODAY
-`secuura-f5-disclosure-timing` => **withfix**: Peter and Stuart are told today, **with the fix**.
-Draft written and HELD at `5_Project_History/2026-09-07_f5-disclosure-draft-for-kam.md`.
-**It waits on #884 round 2 being clean + Kam's merge word. Kam sends; nobody else.**
+## KAM'S DESK — 2 open
+1. `secuura-ks930-cap-vs-regression` — **his cap says ship; Wednesday says a regression is not a
+   known-gap.** Rec: ONE narrow round 3, regression only. **Wednesday deliberately did NOT apply the
+   cap silently** — this is the edge his rule does not cover.
+2. `attio-repo-home` => ruled **move** (above) — execution pending his key paste.
 
-**F5 itself is CLOSED and proven** — fresh HEAD gateway 16/16 on both `//` spellings, fresh BASE
-gateway 0/16 with all 8 firing canonically as the control. **F5 IS LIVE ON THE DEMO**, measured:
-canonical `100;w=900` vs `//` `2000;w=60` = **300x** on one route. **Bounded: ONE of eight mounts
-probed, GET only** — the limiter MISS is measured; whether the demo SERVES a POST through `//` is NOT.
+## WHAT WEDNESDAY OWES NEXT
+1. **#884: put the merge to Kam WITH the disclosure draft** (`5_Project_History/2026-09-07_f5-disclosure-draft-for-kam.md`)
+   — his `withfix` ruling ties them; F5 IS LIVE ON THE DEMO (300x, one route measured, GET only).
+2. **Gate #882 `7e4603df`** — READY and never gated.
+3. Re-gate #885. 4. Score s143, s144, s10 and five QA passes on the scoreboard.
+5. **A gate-level finding worth more than any ticket: no pull_request workflow in that repo runs ANY of
+   its 26 workspace suites** (from the #884 r2 verdict). Card it to Kam.
 
-**The two Majors blocking the merge** (both availability/conformance, NEITHER a security hole):
-F-QA-1 the fix mangles absolute-form targets so every endpoint 404s where there is no nginx
-(`index.ts` KS-245 names Dev/Demo Container Apps as exactly that); F-QA-2 nothing pins the mount or
-its ordering — deleting the `app.use` line leaves 277/277 green.
+## DRIVES — DONE, verified, Kam told
+T9 + KK_DEV_Local carry `WEDNESDAY` + `!CODING/Datasec`, one-way additive, `.git`/`qa-worktrees`
+excluded. **Final T9 verify: Datasec = 0 items differing.** The last resume moved 1,151,037 files /
+12.4 GB. Volume verified clean after an accidental mid-write unplug. **Kam's deletions on the travel
+drive were deliberate — "gone on purpose, don't restore." NO bidirectional sync on KK_DEV_Local.**
+His profile still has `confirmbigdel = false` — raised twice, his file, his call.
 
-## KAM'S DESK — EMPTY. All ten cards ruled today.
-Ruled + delivered: demo-admin-password=b · f5-login-limiter-bypass=wait · f5-demo-exposure-probe=probe ·
-f5-disclosure-timing=withfix · f5-demo-interim-mitigation=letitland · attio-renewal-date=one-field ·
-attio-entra-consent-m365=scopes-first · attio-entra-consent-decision=open-and-look (**HIS action — open
-the consent screen, look for "all mailboxes"**) · demo-admin-mfa=later · demo-admin-transcripts=redact.
-**Still undelivered (older, none urgent):** `launcher-turn-end-line` => approve (2026-08-24, **14 days**
-— Wednesday's half is to hand the exact wording to each project; owed to s144) · secuura-ci-billing ·
-secuura-agent-github-identity · secuura-dependabot-triage · secuura-ks229-disclosure-mailbox ·
-secuura-ps-759-760-merge-owner.
-
-## DRIVES — T9 IS A LIVE THREAD WITH KAM. Read this before touching any drive.
-**Kam's ask (07:39):** *"please sync the external drive. the secuura agent is maxing out this machine
-and I will do datasec work on another machine."* Then (07:5x) *"t9 plugged in. sync this drive first."*
-Then **(08:31) *"it was unplugged by mistake. its back in. please continue."***
-
-**Scope: `WEDNESDAY` + `!CODING/Datasec` ONLY, one-way DevMASTER → drive, ADDITIVE (no `--delete`).**
-Exclusions: `.git` (repos travel by git — tell him to `git pull` on the other machine),
-`qa-worktrees/` `deploy-worktrees/` `wt-rd*/` (**24 GB of NexusAI QA scratch, half the Datasec tree**,
-Wednesday's call, regenerable).
-
-**STANDING, from Kam: deletions on the travel drive were DELIBERATE — "gone on purpose, don't restore."
-NO bidirectional sync on KK_DEV_Local until he says otherwise.** His unison profile still has
-`confirmbigdel = false` with `batch`+`auto` on — the engine cannot refuse a mass deletion. Raised in
-August and again today; **his file, his call, not edited.**
-
-**Incident: the T9 was accidentally unplugged mid-write (~1.3 GB in flight).** On reattach,
-`diskutil verifyVolume` = **clean, exit 0** — nothing corrupted. Copy resumed; WEDNESDAY needed only
-28 files, so it was essentially complete. **Verify with `rsync -an --itemize-changes` and the SAME
-exclusions** — never a file count, never one project read as the whole tree (see errors 4 and 5).
-**Expect ~30 permanent differences in WEDNESDAY** — dashboard feeds, cockpit state, logs, the spoken
-log. All live telemetry Wednesday rewrites continuously; **zero work product. List them, never count
-them.** Datasec should verify at zero.
-
-## WEDNESDAY'S ERRORS TODAY — four, all owned in the artefacts
-1. **The #882 TIER-1 rating was Wednesday's and measurement broke it** (w=145) — KS-616 is a different
-   limiter, already remediated, endpoint has zero consumers. Withdrawn to scope.
-2. **"Re-price KS-946 to Blocker"** — no such field; already Urgent. A severity word relayed unchecked.
-3. **"Your address is gone from everywhere it is operative"** told to Kam (w=146) — true of the CODE,
-   false of the demo. An artefact property stated as a world property.
-4. **"The Datasec copy did not finish"** told to Kam (w=2, scope-mismatch) — the evidence was a count
-   over `.git` internals the copy deliberately excludes.
-5. **THEN THE RETRACTION WAS ALSO WRONG** — Wednesday told Kam the copy HAD finished, on a
-   `diff -rq` of **ATTIO alone**. ATTIO was complete; **fifteen other projects were not.** The resumed
-   copy moved **139,102 files / 1.3 GB**. **A sample stated of the population.** So: right conclusion,
-   invalid evidence; then wrong conclusion on better-but-too-narrow evidence; only the THIRD
-   measurement was sound. Both corrections were delivered to Kam leading with them.
-**Errors 1-3 are one axis (a claim about a running thing composed from an artefact); errors 4-5 are
-another (an instrument whose scope does not match the operation it measures). FIVE in one morning, and
-every single one was caught — three by agents, two by Wednesday. The catch rate is the system working;
-the rate itself is the thing to watch.**
-
-## WHAT WEDNESDAY OWES
-1. s144's #884 round 2 → then #876 round 2. **#884 is the critical path to Kam's disclosure.**
-2. **Gate #882 `7e4603df`** — READY and never gated, and nothing is pending on it.
-3. Re-gate #885 `a98df6b11` (queued for load).
-4. Hand the exact approved turn-end wording to s144 (Kam's 14-day-old approval, Wednesday's half).
-5. Score s143 and the three QA passes on the scoreboard.
+## WEDNESDAY'S ERRORS TODAY — SIX, all owned in the artefacts, all caught
+1. #882 TIER-1 rating built on an unread mechanism (w=145). 2. "Re-price KS-946 to Blocker" — no such
+field. 3. "Your address is gone from everywhere it is operative" — true of the code, false of the demo
+(w=146). 4. "The Datasec copy did not finish" — evidence was a `.git` count the copy excludes (w=2).
+5. **The retraction of 4 was ALSO wrong** — a `diff` of ATTIO alone, stated of the whole tree; the
+resume then moved 1.15M files. 6. **An approval given without naming its DESTINATION** (Kam-caught).
+**Families: 1-3 = a claim about a running thing composed from an artefact. 4-5 = an instrument whose
+scope does not match the operation. 6 = the field nobody wrote down at all.**
+**Three caught by agents, three by Kam or Wednesday. The catch rate is the system; the RATE is the
+thing to watch.**
 
 ## STANDING NOTES
-Env does NOT persist across Bash calls — `set -a; . .env` in the SAME command. **No `cd`** (hook
-refuses). **Tap ≤200 chars.** **Verify a sent mail's BODY by `preview` being non-null** — `text` is 0 in
-a LIST response for every message. **Use `<<'EOF'` for every brief** and inject live values in a second
-step. **An instrument must carry the SAME exclusions as the operation it measures.** Never delete —
-quarantine. New work = new branch; push nothing to a branch under gate.
+No `cd` (hook refuses). Tap ≤200 chars. **Verify a sent mail's BODY by `preview` being non-null.**
+**`<<'EOF'` for every brief**, inject live values second. **An instrument carries the SAME exclusions as
+the operation it measures.** **Name the destination in anything that causes a commit.** Never delete —
+quarantine. Push nothing to a branch under gate.

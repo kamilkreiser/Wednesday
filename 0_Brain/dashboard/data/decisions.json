@@ -4730,5 +4730,63 @@
    "2026-08-22 08:00",
    "2026-09-07 07:07"
   ]
+ },
+ {
+  "id": "attio-repo-home",
+  "client_project": "Datasec/ATTIO",
+  "title": "Attio lives in the Datasec GitHub org and you did not know. Leave it, or move it?",
+  "bluf": "Prior-rulings check: you ruled attio-renewal-date-vs-attr-cap => one-field at 07:07 and then said at 09:04 that you did not realise it would push to the Datasec repository. This card is that disposition, and the rule you set is already applied - see the last paragraph. THE FACTS, measured: the remote is git@github.com:datasecau/attio.git. It has been that since the project was scaffolded on 2026-08-21. There are 53 commits; 51 predate today and 2 are this mornings. Every other Datasec project uses the same org - NexusAI is datasecau/Reporting_Dashboard_Au, Vision is datasecau/vision_datasec-sales-portal, CypherKey is datasecau/OneTimePad. So Attio followed the house pattern from day one; nothing about todays push was novel. CONTAMINATION, checked at your challenge: zero Secuura references in anything pushed today, proven with a control (the same diff returns 48 hits for attio, so the search was live). One pre-existing hit disclosed rather than waved through: CLAUDE.md line 27 cites your Secuura coupled-pair as the worked example of a workspace rule. Written 2026-08-21, untouched today. ALREADY DONE, needing no ruling: from now on any card, brief or GO whose consequence is a commit names the remote and branch in its BLUF, and the same for deploys (environment) and tickets (board). That is in the fleet standing lines, not just in my memory.",
+  "default_action": "HOLD - nothing moves, nothing is stripped. The naming rule is already live either way, and no further pushes to that repo are queued.",
+  "options": [
+   {
+    "key": "leave",
+    "label": "Leave it where it is, now that you have seen it (recommended)",
+    "detail": "It is Datasecs CRM migration, it sits in Datasecs org like every other Datasec project, and no client content is mixed. The gap was that nobody showed you the destination - which is now fixed by the rule above rather than by moving 53 commits."
+   },
+   {
+    "key": "move",
+    "label": "Move it to its own repo or org",
+    "detail": "If Attio should not be under Datasec at all, I brief the move: new remote, history preserved, the old repo archived not deleted. Costs a migration and a day of pointer-chasing across launchers, CI and docs."
+   },
+   {
+    "key": "strip",
+    "label": "Leave it, but remove the Secuura mention from CLAUDE.md",
+    "detail": "The one pre-existing name. One line, one commit. Independent of the other two options - you can take this with either."
+   }
+  ],
+  "recommended": "leave",
+  "ts": "2026-09-07T09:06:42.318342+10:00",
+  "status": "ruled",
+  "ruled_choice": "move",
+  "ruled_ts": "2026-09-07T09:24:07.611548+10:00"
+ },
+ {
+  "id": "secuura-ks930-cap-vs-regression",
+  "client_project": "Secuura/Blockchain",
+  "title": "Your two-round cap is reached on #876, but the residue is a REGRESSION. Cap says ship; I say a regression is not shippable. Your call.",
+  "bluf": "Prior-rulings check: you ruled the QA gate TIERED and CAPPED on 2026-09-05 - two NO GO rounds on one class, then the closed instances ship and the residue is ticketed, no third round without your word. #876 has now had two NO GOs, so the cap is reached and this is the decision it hands you. WHAT IS CLOSED, measured as a transition rather than claimed: the arm round 1 refused is fixed - 7 of 8 rebuilt attack shapes go base-blocked, round-1-EXEMPT, head-blocked. Preflight leg 13 is green on the real 25-file tree. Every new cell is killable and each red-proof isolates. WHAT IS NOT: one line of Dockerfile - the #851 outage shape with the binary spelled node-22 instead of node - is still certified EXEMPT at the head, and was BLOCKED at base. That is a regression the PR introduces and round 2 did not close. Three claim-level defects also ship: a hand-written census wrong at every SHA in the series, a clause the author names as unable to fail and leaves in, and a CONTROL cell that cannot fail for the reason its name asserts. MY POSITION, and it is a disagreement with your own rule: the cap exists to stop infinite polishing, and it is right for that. But a REGRESSION is not a known-remaining-gap - it is a hole this PR opens in a guard that blocks every push, on the exact shape of the #851 outage. I do not think shipping it is what you meant when you wrote the cap, so I am not applying the cap silently.",
+  "default_action": "HOLD - nothing merges, no third round starts, and the seat stands down. #876 and #879 stay where they are until you rule.",
+  "options": [
+   {
+    "key": "one-more",
+    "label": "Authorise ONE narrow round 3, regression only (recommended)",
+    "detail": "Close the node-22 spelling and nothing else. The three claim-level defects become a ticket. Small, bounded, and it stops a guard shipping weaker than the base it replaces."
+   },
+   {
+    "key": "cap",
+    "label": "Apply the cap as written - merge what is closed, ticket the rest",
+    "detail": "Your rule, applied literally. Ships a guard that blocks less than develop does today on one spelling. Everything is ticketed and visible."
+   },
+   {
+    "key": "hold",
+    "label": "Hold #876 entirely until you have looked at it yourself",
+    "detail": "Nothing merges, nothing more is spent. #879 stays blocked behind it either way."
+   }
+  ],
+  "recommended": "one-more",
+  "ts": "2026-09-07T09:29:10.652956+10:00",
+  "status": "open",
+  "ruled_choice": null,
+  "ruled_ts": null
  }
 ]
