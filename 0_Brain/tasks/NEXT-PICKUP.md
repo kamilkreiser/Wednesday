@@ -56,12 +56,28 @@ the consent screen, look for "all mailboxes"**) · demo-admin-mfa=later · demo-
 secuura-agent-github-identity · secuura-dependabot-triage · secuura-ks229-disclosure-mailbox ·
 secuura-ps-759-760-merge-owner.
 
-## DRIVES — done, verified at the destination
-T9 and KK_DEV_Local both carry **WEDNESDAY + `!CODING/Datasec`**, one-way additive, `.git` excluded.
-Verified by content (`diff -rq --exclude=.git` on ATTIO = zero lines), not by exit code.
-**Kam deleted files on the travel drive deliberately — ruled "gone on purpose, don't restore".**
-**NO bidirectional sync on that drive until he says otherwise.** 24 GB of NexusAI `qa-worktrees` scratch
-excluded on Wednesday's call. His profile still has `confirmbigdel = false` — raised, his file, his call.
+## DRIVES — T9 IS A LIVE THREAD WITH KAM. Read this before touching any drive.
+**Kam's ask (07:39):** *"please sync the external drive. the secuura agent is maxing out this machine
+and I will do datasec work on another machine."* Then (07:5x) *"t9 plugged in. sync this drive first."*
+Then **(08:31) *"it was unplugged by mistake. its back in. please continue."***
+
+**Scope: `WEDNESDAY` + `!CODING/Datasec` ONLY, one-way DevMASTER → drive, ADDITIVE (no `--delete`).**
+Exclusions: `.git` (repos travel by git — tell him to `git pull` on the other machine),
+`qa-worktrees/` `deploy-worktrees/` `wt-rd*/` (**24 GB of NexusAI QA scratch, half the Datasec tree**,
+Wednesday's call, regenerable).
+
+**STANDING, from Kam: deletions on the travel drive were DELIBERATE — "gone on purpose, don't restore."
+NO bidirectional sync on KK_DEV_Local until he says otherwise.** His unison profile still has
+`confirmbigdel = false` with `batch`+`auto` on — the engine cannot refuse a mass deletion. Raised in
+August and again today; **his file, his call, not edited.**
+
+**Incident: the T9 was accidentally unplugged mid-write (~1.3 GB in flight).** On reattach,
+`diskutil verifyVolume` = **clean, exit 0** — nothing corrupted. Copy resumed; WEDNESDAY needed only
+28 files, so it was essentially complete. **Verify with `rsync -an --itemize-changes` and the SAME
+exclusions** — never a file count, never one project read as the whole tree (see errors 4 and 5).
+**Expect ~30 permanent differences in WEDNESDAY** — dashboard feeds, cockpit state, logs, the spoken
+log. All live telemetry Wednesday rewrites continuously; **zero work product. List them, never count
+them.** Datasec should verify at zero.
 
 ## WEDNESDAY'S ERRORS TODAY — four, all owned in the artefacts
 1. **The #882 TIER-1 rating was Wednesday's and measurement broke it** (w=145) — KS-616 is a different
@@ -69,9 +85,17 @@ excluded on Wednesday's call. His profile still has `confirmbigdel = false` — 
 2. **"Re-price KS-946 to Blocker"** — no such field; already Urgent. A severity word relayed unchecked.
 3. **"Your address is gone from everywhere it is operative"** told to Kam (w=146) — true of the CODE,
    false of the demo. An artefact property stated as a world property.
-4. **"The Datasec copy did not finish"** told to Kam (w=2, scope-mismatch) — the gap was `.git`
-   internals the copy deliberately excludes. **Second badly-scoped instrument of the morning.**
-**Three of the four are one axis: a claim about a running thing composed from an artefact.**
+4. **"The Datasec copy did not finish"** told to Kam (w=2, scope-mismatch) — the evidence was a count
+   over `.git` internals the copy deliberately excludes.
+5. **THEN THE RETRACTION WAS ALSO WRONG** — Wednesday told Kam the copy HAD finished, on a
+   `diff -rq` of **ATTIO alone**. ATTIO was complete; **fifteen other projects were not.** The resumed
+   copy moved **139,102 files / 1.3 GB**. **A sample stated of the population.** So: right conclusion,
+   invalid evidence; then wrong conclusion on better-but-too-narrow evidence; only the THIRD
+   measurement was sound. Both corrections were delivered to Kam leading with them.
+**Errors 1-3 are one axis (a claim about a running thing composed from an artefact); errors 4-5 are
+another (an instrument whose scope does not match the operation it measures). FIVE in one morning, and
+every single one was caught — three by agents, two by Wednesday. The catch rate is the system working;
+the rate itself is the thing to watch.**
 
 ## WHAT WEDNESDAY OWES
 1. s144's #884 round 2 → then #876 round 2. **#884 is the critical path to Kam's disclosure.**
