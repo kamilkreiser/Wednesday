@@ -54,6 +54,17 @@ fi
 
 BODY="$(cat "$BODY_FILE")"
 
+# ── PLACEHOLDER GATE (2026-09-06 12:4x, check-the-refusal w=3 → promoted) ──
+# A `sed` receipt-fill failed (a `/` in the receipt broke the delimiter) and the
+# send in the SAME call ran on the unfilled file: "@LAUNCH@" and "@NOW@" reached
+# an agent. A body that still carries an @UPPER@ token is refused HERE, where the
+# rule already lives — a fill is done in python `str.replace`, and its result is
+# read before the send. Mail addresses (lower-case) never match this pattern.
+if printf '%s' "$BODY" | grep -qE '@[A-Z][A-Z0-9_]*@'; then
+  echo "REFUSED: body still carries an unfilled placeholder: $(printf '%s' "$BODY" | grep -oE '@[A-Z][A-Z0-9_]*@' | sort -u | tr '\n' ' ')" >&2
+  exit 1
+fi
+
 # ── ROUTING (WED-104) ─────────────────────────────────────────────────────
 # Which inbox actually receives this. A project not listed in the routing file
 # is REFUSED — never silently defaulted to the shared bus, which is exactly the
