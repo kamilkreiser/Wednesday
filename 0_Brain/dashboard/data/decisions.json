@@ -4544,9 +4544,9 @@
   ],
   "recommended": "letitland",
   "ts": "2026-09-07T06:52:56.522550+10:00",
-  "status": "open",
-  "ruled_choice": null,
-  "ruled_ts": null
+  "status": "ruled",
+  "ruled_choice": "letitland",
+  "ruled_ts": "2026-09-07T07:08:42.491594+10:00"
  },
  {
   "id": "attio-entra-consent-m365",
@@ -4573,9 +4573,9 @@
   ],
   "recommended": "scopes-first",
   "ts": "2026-09-07T07:02:20.461909+10:00",
-  "status": "open",
-  "ruled_choice": null,
-  "ruled_ts": null,
+  "status": "ruled",
+  "ruled_choice": "scopes-first",
+  "ruled_ts": "2026-09-07T07:08:42.424507+10:00",
   "prior_rulings_overridden": [
    "2026-08-21 09:47",
    "2026-08-21 09:56",
@@ -4609,11 +4609,80 @@
   ],
   "recommended": "one-field",
   "ts": "2026-09-07T07:02:20.534086+10:00",
+  "status": "ruled",
+  "ruled_choice": "one-field",
+  "ruled_ts": "2026-09-07T07:08:42.356735+10:00",
+  "prior_rulings_overridden": [
+   "2026-08-24 06:57"
+  ]
+ },
+ {
+  "id": "secuura-demo-admin-transcripts",
+  "client_project": "Secuura/Blockchain",
+  "title": "Your name is still in 10 dated session transcripts — redact, or leave the record intact?",
+  "bluf": "Prior-rulings check: you ruled secuura-demo-kam-admin-default-password => b (\"replace the identity everywhere\") at 06:42. This card exists because the agent found one reading of \"everywhere\" it was not willing to take on its own, and it was right to stop. THE SITUATION: the card said six files. It is TWENTY - 4 executable, 6 operative docs, and 10 DATED SESSION TRANSCRIPTS (runs/2026-04-27_*, 2026-05-02_*, the RUN13/RUN14 feedback files). The 4 and the 6 are changed and the identity is now platform.admin@secuura-test.invalid everywhere it is OPERATIVE. The 10 transcripts are records of sessions that actually happened with your real address in them. The agent left them and said why: rewriting them would falsify a record rather than fix a defect. Wednesday agrees, and would not have thought of the distinction. Nothing is exposed by leaving them that is not already exposed - they are in-repo history either way.",
+  "default_action": "HOLD - the transcripts stay exactly as they are. The operative half of your ruling is already done and shipped to QA as PR #885.",
+  "options": [
+   {
+    "key": "redact",
+    "label": "Redact them WITH a dated note saying what was removed and why (recommended)",
+    "detail": "The agents own recommendation. An artefact that cannot be un-made gets relabelled, not rewritten. Your address goes; the record stays honest about having been edited."
+   },
+   {
+    "key": "leave",
+    "label": "Leave the transcripts as they are",
+    "detail": "They are dated records of real sessions. Operative use of the identity is already gone, which was the actual defect."
+   },
+   {
+    "key": "rewrite",
+    "label": "Substitute the fictional identity silently",
+    "detail": "Cleanest to read, and it makes the record say something that did not happen. Wednesday recommends against it."
+   }
+  ],
+  "recommended": "redact",
+  "ts": "2026-09-07T07:08:42.559502+10:00",
   "status": "open",
   "ruled_choice": null,
   "ruled_ts": null,
   "prior_rulings_overridden": [
-   "2026-08-24 06:57"
+   "2026-08-21 19:49",
+   "2026-08-28 10:39",
+   "2026-09-03 09:55",
+   "2026-09-04 10:08",
+   "2026-09-05 09:15"
+  ]
+ },
+ {
+  "id": "secuura-demo-admin-mfa",
+  "client_project": "Secuura/Blockchain",
+  "title": "MFA is off on the demo platform admin — turn it on with this change, or leave it?",
+  "bluf": "Prior-rulings check: you ruled secuura-demo-kam-admin-default-password => b at 06:42, which covered the identity and the password. MFA was noted on that card and you did not rule on it; the agent deliberately did NOT turn it on as a bonus, which is the right instinct - a security default nobody asked for is still an unreviewed change. THE SITUATION: the account that was kam@secuura.ai is now platform.admin@secuura-test.invalid and no longer has a published password at all (the seed now fails closed - unset env var means the account is simply not created). MFA remains off. WHAT I HAVE NOT MEASURED: whether anything in the demo flows or the test fixtures assumes that account can log in without a second factor. Turning MFA on could break a Playwright or Schemathesis fixture, and the agent has already flagged that the four platform suites were not run against this change.",
+  "default_action": "HOLD - MFA stays off, unchanged, and this is re-raised once the platform suites have run against PR #885.",
+  "options": [
+   {
+    "key": "later",
+    "label": "Leave MFA off for now, revisit after the suites run (recommended)",
+    "detail": "The identity and the password were the exposure and both are closed. MFA on a fictional test account with no password is a smaller question, and turning it on before the platform suites have run risks breaking fixtures nobody has checked."
+   },
+   {
+    "key": "now",
+    "label": "Turn MFA on as part of this change",
+    "detail": "Closes it in one visit. Costs an unreviewed change to demo login behaviour with the platform suites unrun."
+   },
+   {
+    "key": "never",
+    "label": "Deliberately leave MFA off on demo accounts and record that",
+    "detail": "Makes it a decision rather than an omission, so it stops coming back."
+   }
+  ],
+  "recommended": "later",
+  "ts": "2026-09-07T07:08:42.629759+10:00",
+  "status": "open",
+  "ruled_choice": null,
+  "ruled_ts": null,
+  "prior_rulings_overridden": [
+   "2026-08-21 09:47",
+   "2026-09-07 06:42"
   ]
  }
 ]
