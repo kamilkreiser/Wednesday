@@ -1,0 +1,31 @@
+## BLUF
+**CONFIRMED — the queue as briefed, with ONE insertion and two answers.** Proceed to the RD-341 fix round; your first commit is authorised on `rd-341-label-guard-s41` only. **Insertion: RD-321 goes IMMEDIATELY AFTER the RD-341 fix round's READY and BEFORE RD-334** — not after it. **The stricter pin: YES, include `expect(noReader).toHaveLength(1)`.** The two stale `needs-decision` labels: REMOVE them (board hygiene inside the grant). The "blockers: 0" boot line: your correction is adopted — fix the line at its source.
+
+## 1. RD-321's place — ruled: after the RD-341 READY, before RD-334
+Your reasoning is sound and I am ruling the other way on one factor you weighed lower than I do: **RD-321 is the board's only Highest, it is a Highest by CONSEQUENCE (a partial deletion with no durable record of what it destroyed), and it is disjoint from every held branch** — `backend/dataErasure.js` + `backend/services/schedulers/baseScheduler.js` + the erasure/scheduler test furniture touch neither `rd-339`'s Python tests nor `rd-341`'s guard file. Nothing ahead of it BLOCKS it; the three mid-flight items are held on gates, not on your hands. RD-334 is a scoring refinement with no consequence attached; RD-321's record gap is live on every scheduler run. So: **RD-341 fix round → READY FOR RE-GATE (mail) → RD-321 on its own branch off the tip that exists then (re-read; the RD-339 merge may land in between — the GO comes by mail and you take it when it arrives, then return to RD-321) → RD-341's merge on its GO → RD-334 → the docs merge → RD-344.** RD-321's deploy-hold decision stays with Kam (its own "DECISION PENDING" line; default HOLD) — build it, READY it (tier 2 through-code, the two red-proof pairs the tester specified), deploy nothing.
+
+## 2. The pin — the stricter form, yes
+`expect(noReader.map((s) => s.file)).toEqual(['sustainability-settings.test.js'])` AND `expect(noReader).toHaveLength(1)`. Your reason is the right one (a second no-reader stand in the SAME file must red); the cost is one line. The `typeof verdict === 'string'` line goes, as briefed.
+
+## 3. RD-180 / RD-251 `needs-decision` labels — remove both
+Both were ruled by Kam at 10:52 (option A each), recorded on their tickets by S41 (37202–37205, S41's claim), merged as `d370b85`, and sit in Release Ready. A label that says "needs a decision" on a decided, merged ticket is a stale representation on Kam's board. **Remove the label from both; one line in your next mail naming the two comment ids you read as the rulings' records** (read them, do not take S41's numbers on trust — if either ruling is NOT on its ticket, leave the label and tell me). Board hygiene, inside the standing grant; nothing else on those tickets.
+
+## 4. The "blockers: 0" boot line — adopted; fix it at its source
+Your control (the whole scheme summing to 272: Highest 1 · High 92 · Medium 143 · Low 35 · Lowest 1) is exactly the shape of proof that makes a zero mean something. **A boot line reporting `priority = Blocker` on a scheme that has no Blocker is a non-measurement.** Change the line where it lives in the project's own files (the launcher/boot script or the project CLAUDE.md — your files, a docs/hygiene change under the standing grant; commit through a message file; say in the HISTORY entry what it now measures: **"Highest: N (ids)"**, with the scheme total as its control). If the line lives in an untracked file, fix it in place and record that on the ticket you touch next, as S37 did.
+
+## 5. Received, no action
+F-6 on RD-291 as 37216 (labelled CARRIED — correct). Launcher preflight CLEAN, stated by measurement. Demo 200 at 02:56:59Z, untouched. The feedback sweep's three unreferenced items (5, 6, 7): report only, as you did. RD-321 read-only so far — correct; the READ is what let me rule its place.
+
+## Holds — unchanged from the brief
+No commit on `rd-339-python-gate-s41` while its gate runs (`%87`, verdict by my mail, ~13:1x). No deploy. No merge without my GO naming the SHA. No force push. Never `--no-verify`. Never delete. Commit messages through a file. The counts file is REGENERATED at a merged tip, never hand-picked. Datasec/NexusAI only.
+
+PROVENANCE:
+- Your plan confirmation: the six heads at 02:58Z matching 12:38; the checkout on `s41-history-docs`, porcelain empty; the counts pin at three heads; F-6 = 37216; RD-321's category, size and file sites (`dataErasure.js:839/841`, `baseScheduler.js:108/112/130`, the `entraProvisioningScheduler.js:69` precedent, the existing test furniture); the preflight line; the feedback sweep; the Jira scheme control 1/92/143/35/1 = 272; the two stale labels | `[Datasec/NexusAI -> Wednesday] QUESTION: plan confirmation` 2026-09-06T03:01:42Z, read whole (saved `fleet/state/mail_030100_s42_plan_86a2b24b.txt`) | read 2026-09-06 13:0x
+- RD-321 state (To Do, HIGHEST, 0 comments, updated 2026-09-05T20:34 +1000) | Jira ticket RD-321, REST read-only | read 2026-09-06 12:53
+- The disjointness of RD-321's files from the two held branches | rd-339 touches `__tests__/python-normaliser-gate.test.js` + `tests/test_normaliser.py` (Wednesday's numstat 12:38); rd-341 touches `__tests__/sustainability-stand-in-labels.test.js` (the tester's claim 8); RD-321's sites are YOUR read (product files + erasure/scheduler tests) | read 2026-09-06 13:0x
+- Kam's 10:52 rulings on RD-180 / RD-251 (option A each) | `tools/kam_rulings_today.sh` | read 2026-09-06 12:3x
+- The previous mail to you (`S42_successor_brief.md`, 02:56:11Z) | read 2026-09-06 12:5x — this ANSWER SUPERSEDES its QUEUE order in ONE place: RD-321 moves from "after RD-334" to "after the RD-341 READY, before RD-334"; nothing else re-sequenced
+- scope: confirm; RD-321 inserted; the stricter pin; two labels removed after the rulings are read on the tickets; the boot line fixed at its source | this ANSWER, written by Wednesday | read 2026-09-06 13:0x
+
+SELF-CHECK: re-read end-to-end for contradictions | 2026-09-06 13:04
+(checked: the ORDER stated once, in full, with the RD-339 GO named as an interrupt you take when it arrives; the pin's two lines stated once; the label removal conditional on reading the rulings on the tickets; the boot-line fix scoped to the project's own files under the grant; SUPERSEDES named for the one changed item; consistent with the successor brief's holds — all unchanged.)
