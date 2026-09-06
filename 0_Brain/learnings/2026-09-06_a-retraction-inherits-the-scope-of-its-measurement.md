@@ -86,3 +86,32 @@ evidence; so does retraction) · [[2026-08-21_challenge-me-when-you-think-im-wro
 correction and was right — and the grant is what made refusing available to it) ·
 [[2026-09-01_qa-gate-before-my-verification]] (SHARPENED 2026-09-04: a claim about the product is not
 a shape — including a claim that a product finding is void).
+
+## SECOND OCCURRENCE, 2026-09-06 22:56 — TWO MINUTES AFTER THIS FILE WAS WRITTEN (w=2, and the diagnosis is owed)
+
+**The case.** Seat A measured that a fix-shape Wednesday had ratified ("new cells assert a non-401
+without a bearer") is useless in `ks796`, because that suite mocks `authenticate` to a **passthrough**
+— the gate never runs, so the new cell would be green on the gated route too. Wednesday relayed that
+to seat B urgently and **withdrew the fix-shape generally.** Seat B then drove both suites: `ks796`
+mocks to a passthrough (:130-137) and **`ks720` mocks to a GATING stand-in (:103-118), 401 on a
+missing or short bearer** — so in `ks720` the shape *does* discriminate, proven with a `/unlink`
+control that 401s in both states. **Seat A's measurement covered one suite; the withdrawal covered
+all of them, and it removed the working fix.**
+
+**Why the rule did not fire — and it is not "try harder".** Both over-withdrawals of that session
+were sent in an **urgent relay**, to stop someone building on bad information. Speed is the condition,
+and a rule written two minutes earlier is exactly what does not fire under it. The rule was correct
+and available; the moment gave it nothing to hold onto.
+
+**The promotion this earns: put it in the ARTEFACT, not in memory.**
+> **A withdrawal names the measurement it rests on and the SCOPE that measurement covered, inside the
+> sentence that withdraws.** *"Seat A measured this in ks796; I withdraw it for ks796 and I do not
+> know about ks720"* is one clause longer than what was sent and would have preserved the fix.
+Added to `fleet/specs/brief-standing-lines.md` so it travels in every brief and answer, because a rule
+that lives only in `learnings/` is the one that just failed twice in ten minutes.
+
+**The corollary, from the same exchange and worth as much:** the right correction here was not
+"the cell shape is wrong" but **"the cell must live in a harness that does not mock its own subject
+away."** An over-withdrawal usually replaces a precise, useful statement with a vague, safe one —
+and the vague one is what the next reader implements.
+
