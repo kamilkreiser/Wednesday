@@ -1,38 +1,90 @@
 ---
 date: 2026-09-06
 type: pickup
-source: replaced wholesale by the 20:1x seat at its ROTATION (22:2x)
+source: replaced wholesale by the 22:1x seat at its 70% handover (23:40)
 status: live
 supersede: replace this file wholesale at the next pickup; do not append
 ---
 
-# NEXT PICKUP — BOTH Secuura seats WRAPPED (two successor briefs OWED), two gates running, two merges owed a seat; NexusAI PAUSED; Kam's queue = 1 card; Wednesday boots on OPUS for the week
+# NEXT PICKUP — both seats productive, FIVE PRs open, gate queue is the bottleneck; Kam's queue = 1 card, nothing waits on him
 
-**Kam tonight, verbatim, both executed:** (1) 20:19 *"change your boot script for the rest of the week to boot in opus 5 rather than fable. we are burning through credits a little too quickly"* — the launcher pins `--model opus`, fable line commented in place, backup `.pre-0906-opus`, **`doctor.sh` holds the date: ok until 2026-09-13, WARN after**, both branches exercised. (2) 20:19 *"keep pushing the secuura agent to polish the platform to a ready state"* — the sort key in every brief.
+**Kam, verbatim, both still operative:** (1) 20:19 *"change your boot script for the rest of the week
+to boot in opus 5 rather than fable. we are burning through credits a little too quickly"* — the
+launcher is pinned, `doctor.sh` WARNs after 2026-09-13. (2) 20:19 *"keep pushing the secuura agent to
+polish the platform to a ready state."* His last panel message was 19:31; **0 new from him since.**
 
-## 🔴 FIRST ACT: the launcher gate gates every relaunch
-**Seat B's KS-911/912 launcher change is LIVE ON DISK and its gate is RUNNING in `%127`.** Until that verdict: **no Secuura seat is relaunched** — or restore both `.pre-` copies first (`Launch_Claude.command.pre-ks911` `9609c845…`, `Launch_Claude.seats.test.sh.pre-ks912` `a5d5d9ef…`, both equal to KS-907's gated hashes) and say so in the brief. Shipped hashes verified live at 22:1x: `932a2cc3…` / `b93b2c83…`. **Both successor briefs wait on this.**
+## 🔴 FIRST ACT: the gate queue. Two panes free, four subjects waiting.
+No tester is running. Launch in this order (wrappers: copy `state/launch_qa_secuura_seatb_ks733.sh`,
+python `str.replace` NEVER `sed`, and red-proof rc 6 / rc 7 before arming — both branches, every time):
+1. **`a0ad0a084e7ecdd772d106740a283f738ccdadf7` (#876, KS-930) — TIER 1 re-gate.** F-5's keyword
+   upper-casing, the whole F-6 exemption AND Finding 2's new single-write cell are UNGATED. **Re-read
+   `ls-remote` before you brief it — this head moved TWICE while it sat in a queue** (`af954c691` →
+   `ff7704135` → `a0ad0a084`), and seat A mailed the correction unprompted both times.
+2. **`6f7885602` (#874, KS-926) — TIER 2, ROUND 2 OF 2 under Kam's cap.** Seat A asked to be told
+   findings as a CLASS rather than item by item; hold to that.
+3. **#875 (KS-936)** and **#878 (KS-942)**, seat B's, both tier 2.
+**Briefs live in `fleet/qa-agent/briefs/`; the last four are the pattern.**
 
-## The floor at 22:2x
-- **Secuura develop = `60d1ce97e235528f1f3815f90881a80984e340f0`** (seat B's #869 merge at its wrap). Tonight's chain, every link verified from objects: `b77b20bf6` → `34fc749df` → `e1d840d8e` → `a821bd0aa` → `a8aa723a0` → `ff5218867` → `60d1ce97e`. **SEVEN merges. The live validate-then-fetch SSRF gap is CLOSED.** The local `refs/heads/develop` is STALE — `origin/develop` via `ls-remote` is the only honest ref.
-- **NO BUILDERS RUNNING.** Seat A (s141) wrapped 22:07, scored 0.95. Seat B (s140d) wrapped 22:04, scored **1.0** — the best seat this fleet has run.
-- **`%127`** tester — the launcher, BY HASH (blocking). **`%128`** tester — **#870 (KS-921) tier-1 re-gate**.
-- **NexusAI PAUSED** on Kam's 17:01 word.
+## THE FLOOR
+- **Secuura develop `306d0db923183f3b62b053f0242549e37bdf362c`** — seat B's #877 merge LANDED, so
+  **TEN merges tonight**. Verify it from objects yourself; this seat read it from `ls-remote` at 23:40
+  and did not yet `cat-file` its parents. **Re-read `ls-remote` before trusting any SHA in this file.**
+- **seat A `%130` (s141b)** — KS-945 FILED and Finding 2's fifth cell already in `a0ad0a084` (suite
+  39 → 40); on its table next.
+- **seat B `%129` (s140e)** — merging #877, then **F5 P1**, then the bounded KS-486 sweep, then build.
+- **NexusAI PAUSED** on Kam's 17:01 word. **NO testers running.**
+- Panes closed this seat, listeners 24 → 24 every time: `%126 %119 %121 %127 %128 %131 %132 %133`.
 
-## Owed, in order
-1. **`%127`'s verdict** → then **both successor briefs** (s141b seat A, s140e seat B) via `brief_and_launch.sh`.
-2. **`%128`'s verdict** (#870 re-gate) → GO by SHA or a fix round.
-3. **#871 (KS-720) has a PASS and NO SEAT** — its GO goes into seat B's successor brief: merge `6845b1cd382e129845df7ae7affe547bef159e30` by SHA against develop re-read; KS-720 → TND.
-4. **FILE THE F-1 FINDING — it is a live security defect, not a PR nit.** From #871's verdict: the `undefined` skip is LIVE on three MFA call sites (`routes/mfa.ts` ~:282 and ~:204; `routes/users.ts` ~:1079 — search `mfaSecret: undefined`). **"MFA disabled" emits a PARTIAL update naming only `mfa_enabled` and `verification_level`, so the flag flips, the call reports success, and the TOTP seed and hashed backup codes SURVIVE in the row.** Measured at the wire with a `null` control. **The mechanism is NOT the one BACKLOG.md records**, which is what the PR's justification pointed at. P2 at least; seat B's successor.
-5. **Also from that verdict:** **F-2 — `POST /api/auth/wallet/authenticate` is pinned by NOTHING in 595 tests** (gating it leaves the suite fully green) while the file's own comment claims a cell pins all four public routes. **F-3 retracts the builder's premise, keeps its conclusion:** `null` cannot enter the encryption path for ANY column (`typeof null === 'object'`).
-6. **Queued gates after the two running:** #872 (KS-732 @ `235bb1ba3`), #873 (KS-931 @ `7d8a3f0e4`).
-7. **Carry into seat B's brief, from Wednesday's own omission:** the two KS-923 re-gate Minors, VERBATIM — **QA-923-1** the harness's subject guard uses `-f` forty lines from a comment saying existence is not readability, so a mode-000 subject prints a SUBJECT line with an **EMPTY hash**; **QA-923-2** CELL 12 counts a SKIP as a PASS, printing "12 passed, 0 failed" while eleven cells ran. Seat B refused to file them from a count and was right.
-8. **KS-936** (seat B's third-cell ticket, red-proof must red **at rc 0** against `313f96519`) and **KS-930** (F-3/F-6/F-7 from #870's first gate, its first item being that an nginx final stage has **no route to green at all**).
-9. **Kam's card** `secuura-demo-kam-admin-default-password` — open, default HOLD. If ruled: RULING RELAY to a seat + `--delivered`.
-10. **KS-926's campaign** opens with **FIVE mechanisms of one family** — nothing runs the guard (KS-926) · running with its positive half dead (KS-927) · the wiring unasserted so deleting the call site leaves every test green (KS-928) · a branch no cell can red (#870's `A_FAIL`) · a type gate excluding the files it is credited with checking (#868's F3).
+## 🔴 F5 IS THE HIGHEST-VALUE OPEN QUESTION IN THE FLEET
+From #877's tier-1 verdict. Four path spellings — `/api/users/me//mfa/disable`,
+`%6Dfa`, `mfa;x=1`, `mfa%2Fdisable` — **dodge EVERY path-scoped gateway limiter** (all seven at
+`index.ts:939-1016`, `/api/auth/mfa` included). The spec gate falls through by design
+(`:1047 if (!matched) return next();`), and **express's own prefix strip normalises the dodge away
+AFTER the limiter was skipped** — driven: 429 on the canonical spelling, **200** on `//mfa/disable`.
+**PRE-EXISTING, not #877's defect.** The tester refused to rate it and was right to:
+> *"If auth 404s them, F5 is a curio. If auth serves them, F5 is a Blocker on the whole limiter
+> layer, not just MFA."*
+**Ruled P1; its first act is the experiment** — local booted gateway + auth in seat B's own copy,
+never the demo box, four spellings driven, canonical as the control, severity set by the result.
+**And KS-733 must not close as if the 450x gap were fully shut.**
 
-## Tonight's ledger against Wednesday, one line each
-🔴 the pane close that killed #863's push (recovered by re-merge) · 🔴 **a ruling naming a proof path the schema refuses** — a backup code could never reach the handler, agent-caught pre-build (*a ruling is a pointer and Wednesday did not open it*) · 🟡 **an instruction to FILE two findings that carried only a count and a severity** — the agent refused to invent them and was right (*a count is not a finding*) · 🟡 a `%` escaped for printf's FORMAT inside an ARGUMENT, so a tap could not match its own subject · 🟡 three gate refusals on one brief, all pre-cost.
+## OWED, in order
+1. The four gates above.
+2. **#876 and #874 do not merge until their own heads are gated** — `af954c691` and `fe5225f31` both
+   passed, and both branches have moved past those SHAs.
+3. Seat B's F3+F4 ticket from #877 (the parity cell compares only `windowMs`/`max`; the gate is purely
+   relative). **#876's F1+F3 is already filed as KS-945** (P2, Backlog, related to KS-926) with the
+   fail-closed inversion as its design — five spellings re-measured by seat A with a blocking control:
+   `npm add`, `npm it`, `npm install-test`, bare `yarn`, `pnpm add` all rc 0 FALSE CLEAN; `pnpm i`
+   caught only by accident and `mynpm i` a FALSE BLOCK, both from the missing left word boundary.
+4. Kam's card `secuura-demo-kam-admin-default-password` — OPEN, default HOLD. Nothing on the demo
+   identity moves.
 
-## Standing operational notes
-A card add is ALWAYS its own tool call · a wrapped agent's pane is closed only when no tap is queued AND a capture shows no spinner · **never `fetch` / `merge-tree --write-tree` / `worktree add` in an agent's checkout** · the SELF-CHECK line is the canonical sentence + `| $(date)` with NOTHING between them · provenance entries carry three fields even when the middle is "not read", and a path outside Wednesday's tree is absolute or names its owner · **never escape inside an argument**; a `--mail` substring is copied from the subject file AFTER writing it · **a tamper does not count until its subject's hash is shown to have changed** · a merge is verified from objects with a real-object containment control BOTH ways in one batch · **an instruction to file a finding carries its text verbatim or names the mail and section** · QA wrappers red-proofed rc 6 / rc 7 before arming · `git grep -a` / `git diff -a`; `core.fileMode` false; `env bash` 3.2; `/bin/dash` present · the two daily notes are ~600 KB — read the newest seat block, the rotation block and this file, never whole.
+## 🔴 THE MISTAKE TO NOT REPEAT — a gate's subject is a SHA
+Twice tonight a builder pushed to a branch mid-gate and the verdict described a head the branch had
+moved past (#874, then #876 — the second on Wednesday's own instruction, given without naming the
+live gate). **Any instruction that could cause a push NAMES the gates running against that branch;
+new work goes on a new branch.** Now a standing line. And **re-read a verdict's own target line
+against `ls-remote` before merging on it** — that is what caught the second one.
+
+## TONIGHT'S LEDGER AGAINST WEDNESDAY, one line each
+🔴 a forward titled "the KS-720 verdict" that carried the LAUNCHER verdict (a message id reused, the
+true subject printed into the body by Wednesday's own script and never compared) · 🔴 **two
+OVER-WITHDRAWALS in ten minutes**, the second two minutes after filing the lesson for it — one nearly
+destroyed a live finding, one removed a working fix; diagnosis: both were urgent relays, so the rule
+went into the standing lines · 🟡 **three overstatements of a relayed claim**, the third dropping a
+builder's hedge into a QA brief as the thing to press · 🔴 the gated-subject miss above.
+**Every one was caught by an agent, and the agents were right every time.**
+
+## STANDING OPERATIONAL NOTES
+A card add is ALWAYS its own tool call (now gated: `card_id_gate.sh` in `send_brief.sh` +
+`chat_reply.sh`) · a wrapped pane closes only with no queued tap and no spinner · **never
+`fetch`/`merge-tree --write-tree`/`worktree add` in an agent's checkout** · SELF-CHECK is the
+canonical sentence + `| $(date)` with NOTHING between · **EMPTY OUTPUT IS NOT A RESULT — read the
+exit status; `bash -n` on a zero-byte file returns 0** · a relayed claim carries the counterpart's
+sentence VERBATIM INCLUDING ITS HEDGE · a red that proves nothing is as blind as a green that proves
+nothing · a hash proves the bytes, only a run proves the file still works · **`send_brief.sh`'s
+DQ_PREFIX now covers `Secuura/Blockchain-B`** (it did not, so seat-B briefs skipped the ruled-cards
+gate) · Linear: an issue fixed under an ALREADY-ARCHIVED ticket **can never be marked Duplicate** —
+close it Done with the fixer's id, SHA and PR in the comment TEXT, and say why · the two daily notes
+are ~700 KB: read the newest seat block, the rotation block and this file, never whole.
