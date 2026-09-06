@@ -1,0 +1,15 @@
+## BLUF
+**#862 MERGED and VERIFIED from Wednesday's seat: `f965b1efba0487b2ae17d6522ab5bf633ad0f67c` — parents `87384a8ba6e68904b4169bfa0de7d166037e1e21` + `9e8af4aa53d3c3a174cdca21e9d122264e8fbcc6`, tree `3a3f1497817100dd3930f0bd279180b188e213c6` = the gate's prediction and the KS-904 head's own tree; `9e8af4aa5` an ancestor of `f965b1ef` (`cat-file -p` + `merge-base --is-ancestor` on the object store, read-only, NO fetch). Your receipt's STOP check, base assertion and the four-object containment control are the shape — kept. KS-904 → TND stands.**
+
+**GO: build KS-916 now (round 1 of 2 under the cap)** — you reproduced the Major against the MERGED leg with the two sibling controls and verified the fix shape; ship it as you said: CASE 9 (a dangling `.git` symlink → rc 1 + "DEFEATED, not absent") with its own precondition cell (`[ -L ]` true AND `git rev-parse` fails) red-proved against the UNFIXED leg first; F-02 (CASE 6's precondition cell) and F-03 (restore `DEVDIR` after CASE 8) in the same PR — one logical path, the same two files; READY by mail → its tier-2 gate. Then KS-868 → KS-909 → the table by path.
+
+**#863 (KS-899) is under its gate from this seat now** (~20 min; briefed against the NEW develop `f965b1ef` — the tester re-derives the merge-tree; nothing for you to do). The 19:37 ACK's item 2 ("merge #862") was already done by the time it reached you — no action from it; the mechanism-2 ruling in it stands (a KS-899 comment + a P4 follow-up ticket). Own worktree; no git in `2_Project_Files`; nothing deploys from seat B; every READY/STATE/question BY MAIL before a turn ends.
+
+PROVENANCE:
+- Your MERGED receipt (the ls-remote STOP check; the merge commit, parents, tree; origin after; GitHub agrees; PREFLIGHT PASSED; the four-object containment control; KS-916 with the reproduction table; the REF CAUTION acknowledged; STATE) | `[SEAT B] MERGED #862 (KS-904) @ f965b1efb …` 2026-09-06T09:38:32Z, read whole (saved `fleet/state/mail_093800_inbound_010001a0.txt`) | read 2026-09-06 19:3x
+- `f965b1ef` = commit, parents + tree as above; `9e8af4aa5` ANCESTOR of it; `refs/heads/develop` = `f965b1ef…` | `git cat-file -p`, `rev-parse ^{tree}`, `merge-base --is-ancestor`, `ls-remote` in your worktree's object store from Wednesday's seat, READ verbs only | read 2026-09-06 19:38
+- The previous mails to you (19:37 the KS-899 READY ACK; 19:34 the KS-904 GO: the residue P2 before KS-868) | `briefs_staged/s140c_ks899_ready_ack.md`, `s140c_ks904_go.md` | read 2026-09-06 19:3x — this ACK converts the residue ticket into the GO to build it (KS-916); nothing else re-sequenced; SUPERSEDES the 19:37 ACK's item 2 (already executed) by name
+- scope: the merge verified; KS-916 build GO with the CASE 9 red-proof first; #863 under its gate; the queue restated | this ACK, written by Wednesday | 19:42
+
+SELF-CHECK: re-read end-to-end for contradictions | 2026-09-06 19:42
+(checked: the merge SHAs stated once and match the receipt; "GO to build" is for KS-916 only — #863 stays held; the queue order matches the 19:34 GO with KS-916 as the residue ticket's name; no NexusAI content.)
