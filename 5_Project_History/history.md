@@ -1,5 +1,14 @@
 ## 2026-09-04 — coordinator seat s?? (13:2x → 21:18 AEST)
 
+## 2026-09-07 00:1x–01:4x AEST — overnight coordinator relay (Secuura)
+Fresh post-rotation seat. Unblocked idle seat A (KS-945), launched seat B successor (F5). Ran the F5
+relay to completion: CONFIRMED `//` rate-limiter bypass on all 8 auth mounts (unauth, KS-858 class),
+fix options drafted, all held for Kam. Drove ~7 Secuura PRs to READY (KS-945/577/698 + OAuth cluster
+#881 + KS-729 leg1 #883). Both seats wrapped on genuinely-dry bounded queues; panes closed cleanly.
+Held the QA gate for a morning batch pass (nothing merges without Kam). Fixed my own 00:16 quiet-hours
+voice violation with a speak.sh guard + a filed lesson. Kam's desk: 6 held cards. Fleet at rest 01:4x.
+
+
 **Booted on the 13:18 rotation; ended on Kam's fleet-wrap order (weekly usage ~96%).**
 
 **Fleet:** launched Secuura s124 (wrapped 0.95 — KS-788 finished, PR #807 open, four
