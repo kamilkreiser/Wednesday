@@ -7,7 +7,7 @@ status: live
 
 # Boot digest — headline + rules of every lesson (open the file when it fires)
 
-Generated 2026-09-07 06:30 from 103 lesson files (498,908 B). Each block = the lesson's retrieval handle (H1), its frontmatter, the operative paragraph, its section index, and every RULES section verbatim. 6 files carry no rules-shaped section and are included whole. The CASES behind a rule live only in the file: open it the moment the rule fires, or when a diagnosis needs the evidence. `_ledger.md` is read whole beside this digest; `_ledger_archive.md` on demand.
+Generated 2026-09-07 09:41 from 104 lesson files (502,208 B). Each block = the lesson's retrieval handle (H1), its frontmatter, the operative paragraph, its section index, and every RULES section verbatim. 6 files carry no rules-shaped section and are included whole. The CASES behind a rule live only in the file: open it the moment the rule fires, or when a diagnosis needs the evidence. `_ledger.md` is read whole beside this digest; `_ledger_archive.md` on demand.
 
 ## The T9 SSD is the master — Wednesday must be fully portable
 `2026-07-31_fully-portable-drive.md` · principle · 2026-07-31 · status: superseded — the "T9 is the master" half by [[2026-08-25_one-drive-devmaster-is-master]] (2026-08-25); the portability principle itself still lives
@@ -3632,6 +3632,32 @@ place enforcement lives).
 5. **When it has already happened:** disclose it in the artefact the objects were written for (the brief's provenance line: "run by Wednesday IN THE BUILDER'S CHECKOUT — a write; re-derive it, do not trust it"), record the row, and tell the seat whose repo it is if anything could be observed (`FETCH_HEAD` moved; dangling objects — nothing an agent's workflow reads).
 
 **Family:** [[2026-07-31_manage-dont-do]] (rule 2: editing that project's files from Wednesday's hands is not allowed — `.git` is its files) · [[2026-08-15_a-gui-open-is-a-write]] (an action classified as reading that writes) · [[2026-08-13_headline-must-match-the-operative-case]] (a rule without a headline does not fire) · [[2026-08-09_an-enforcement-you-must-arm-is-not-one]] (the w=3 clause).
+
+
+## Kam re-granted merge authority I ALREADY HELD — and the lesson is that I spent a whole morning asking for it
+`2026-09-07_merge-authority-was-already-mine.md` · grant · 2026-09-07 · status: live
+
+**His words, verbatim (2026-09-07 09:40):** *"Give the go ahead to merge, and for this week, you can
+give the go ahead to merge as it becomes relevant so that I'm not slowing things down."*
+
+sections (open the file for these): The uncomfortable half, and it is the point of this file · How to apply
+
+## How to apply
+1. **Merge on my own word when the gate has passed and the change is inside work he commissioned.**
+   The QA gate is the condition, not his attention. Report the merge; do not request it.
+2. **Still his, and this week's grant does not touch them:** production · money · **external
+   communication to any human** · irreversible actions · **and any merge that itself makes an external
+   commitment.** KS-577 / #880 is the live example — merging it silently picks Option 1 for Platform S,
+   which is a Stuart-facing contractual choice. **A merge is mine; a merge that decides something with
+   a client is his.**
+3. **The disclosure/merge split, concretely:** merging the F5 fix is mine; telling Peter and Stuart
+   about it remains his signature class. Those two travel together and are not the same act.
+4. **"For this week" is a SCOPE WORD and it carries an expiry** ([[2026-09-06_a-scoped-override-carries-its-own-expiry]]):
+   read as through Sunday 2026-09-13, stated to him as my reading. After that the v1.3 standing grant
+   is what remains — which is the same authority, so nothing actually lapses. Say that rather than
+   letting a re-grant imply the original had expired.
+5. **At every future boot: before writing "awaiting Kam" anywhere, check the grant register.**
+   The register exists so this is a lookup, not a judgement.
 
 
 ## Establish the LOCAL clock and day-phase from `date` at boot — before any time-framed ritual (greeting, voice, morning-vs-overnight)
