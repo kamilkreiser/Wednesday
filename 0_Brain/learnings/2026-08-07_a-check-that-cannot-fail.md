@@ -1002,3 +1002,51 @@ and a reported failure that never happened. The check was not wrong; its CLOCK w
 2. **The red-proof for a fix reverts the PRODUCT's defect, never a test-side stand-in.** A suite that stays green when the bug it was written for is restored is decoration, and the only instrument that shows it is the revert itself.
 3. **Same family as the 2026-09-04 "mock the neighbours, never the thing under test" rule and the 09-03 s116 case ("a test of the policy is not a test of the route")** — here the mock was not declared as one; it was a helper that looked like a convenience.
 4. **The sibling from the same PR, kept beside it:** inverting a credential gate took the suite from 391 passing to 391 passing. **A green suite across a security change of that shape is evidence of ABSENT coverage, not of safety** — the builder read it that way and wrote the 20 cases; the reflex to read it as "clean change" is the one to retire.
+
+## THE DELIVERY MEMBER, and it is the sharpest one yet because the failing check IS this family's own enforcement (2026-09-07, W-tier, agent-caught in two minutes)
+
+**The case.** Wednesday's ANSWER to a live Secuura seat was delivered **subject-only — the body was
+empty**. Two checks passed on it: `send_brief.sh` reported `sent` on its own exit code, and
+`cockpit.sh say --mail` **verified the mail at the destination inbox** before tapping the pointer.
+That second check is the mechanism built for [[2026-09-01_a-tap-is-a-pointer-not-a-message]] — the
+enforcement that exists precisely so a tap never points at a message that is not there. It verifies
+by **SUBJECT**. A message with a subject and no content passes it.
+
+The cause was upstream and mundane: the stamping command was
+`open(p,'w').write(open(p).read().replace(...))`. Python evaluates `open(p,'w')` first, which
+truncates the file; the read then returns nothing. The same seat's larger brief eight minutes earlier
+used the safe order (read into a variable, then open for write) and arrived intact — **the shortcut
+was taken on the smaller message**, which is where shortcuts live.
+
+**The rule this adds:**
+1. **A delivery check must measure CONTENT, not existence.** "It is at the destination" and "it says
+   what I wrote" are different claims, and every mail/webhook/queue/file-copy verification tends to
+   answer the first while being read as the second. Ask of any delivery check: *what would this print
+   if the payload were empty?*
+2. **Measure the artefact you produced before you hand it to the tool that sends it.** `wc -c` on the
+   body file costs nothing. The failure was visible on disk for the whole interval.
+3. **Pick the discriminator by testing it against a known-bad instance.** Here `text` is 0 in a LIST
+   response for *every* message, good or bad, so it cannot discriminate; `preview` is null only for
+   the empty one. The agent found this with a **same-read control** — the messages either side in the
+   same listing carried previews. That control is the technique, not the field.
+4. **Enforcement in the path, not a rule about writing files.** `send_brief.sh` now refuses a body
+   under 40 non-space characters, with no `--force`, and names the truncate-before-read cause in the
+   refusal text. Four branches exercised before arming: empty, whitespace-only and 37-char all refuse;
+   a long body passes through to be refused by the *next* gate, proving no over-fire.
+
+**Residual, stated rather than quietly carried:** `cockpit.sh say --mail` still verifies by subject.
+Wiring the `preview` discriminator into it is the promotion if this recurs.
+
+**The agent's half, credited:** it proved the body was empty **at signing time** from the DKIM body
+hash — `bh=` matched simple-canonicalisation of an empty body and was discriminated against by both a
+relaxed-canonicalisation control and a non-empty control — which rules out both transit stripping and
+its own retrieval failing. Then it **did not block and did not invent the missing criterion**: it
+started the one measurement that was correct under every reading of the surviving subject line, and
+asked for exactly the sentence it lacked. A counterpart that can prove *which* side of the wire lost
+the data turns an ambiguous incident into a fixed one.
+
+**Family:** [[2026-09-01_a-tap-is-a-pointer-not-a-message]] (the enforcement that passed) ·
+[[2026-08-29_unquoted-heredoc-executes-backticks]] (the sibling: prose destroyed on its way through a
+tool, with `bash -n` clean) · [[2026-08-14_i-read-representations-they-read-sources]] (a "sent" exit
+code is a representation of a delivery).
+

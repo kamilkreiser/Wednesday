@@ -7,7 +7,7 @@ status: live
 
 # Boot digest BY TIER — W whole, M rules-only, every project case a handle
 
-Generated 2026-09-07 06:02 from 103 lesson files (496,220 B). M 24 · MIXED 5 · W 74. 28 project CASE sections inside MIXED files are reduced to one line each: the heading and the path to read it at. W blocks are exactly what the default digest carries; M blocks drop the section index and keep the rules; a P file is a single handle. The CASES behind every rule live only in the lesson files — open one the moment its rule fires.
+Generated 2026-09-07 06:30 from 103 lesson files (499,874 B). M 24 · MIXED 5 · W 74. 28 project CASE sections inside MIXED files are reduced to one line each: the heading and the path to read it at. W blocks are exactly what the default digest carries; M blocks drop the section index and keep the rules; a P file is a single handle. The CASES behind every rule live only in the lesson files — open one the moment its rule fires.
 
 ## The T9 SSD is the master — Wednesday must be fully portable
 `2026-07-31_fully-portable-drive.md` · principle · 2026-07-31 · status: superseded — the "T9 is the master" half by [[2026-08-25_one-drive-devmaster-is-master]] (2026-08-25); the portability principle itself still lives · tier: W
@@ -1034,7 +1034,7 @@ reported anything else — because it measured the wrong thing, errored and
 swallowed it, or asked a question whose answer was fixed in advance. It is worse
 than no check, because it converts an open question into a settled one.
 
-sections (open the file for these): A KEYWORD SEARCH OVER A CORPUS THAT CONTAINS THE SEARCH TERM AS VOCABULARY (2026-09-04 — three instances in one evening) · `timeout N cmd | wc -l` PRINTS 0 WHEN THE COMMAND IS KILLED — and no `||` can catch it (2026-09-04, twice in one evening)
+sections (open the file for these): A KEYWORD SEARCH OVER A CORPUS THAT CONTAINS THE SEARCH TERM AS VOCABULARY (2026-09-04 — three instances in one evening) · `timeout N cmd | wc -l` PRINTS 0 WHEN THE COMMAND IS KILLED — and no `||` can catch it (2026-09-04, twice in one evening) · THE DELIVERY MEMBER, and it is the sharpest one yet because the failing check IS this family's own enforcement (2026-09-07, W-tier, agent-caught in two minutes)
 
 **How to apply — one question, asked of the check rather than the result:**
 
@@ -1071,6 +1071,38 @@ sections (open the file for these): A KEYWORD SEARCH OVER A CORPUS THAT CONTAINS
 the rc on its own line (`timeout N find … > out; rc=$?`) and branch on `124` (timed out) before
 reading the file. And **a zero from a bounded command is a suspect until its rc is read**, which is
 this whole file's rule pointed at the shell.
+
+**The rule this adds:**
+1. **A delivery check must measure CONTENT, not existence.** "It is at the destination" and "it says
+   what I wrote" are different claims, and every mail/webhook/queue/file-copy verification tends to
+   answer the first while being read as the second. Ask of any delivery check: *what would this print
+   if the payload were empty?*
+2. **Measure the artefact you produced before you hand it to the tool that sends it.** `wc -c` on the
+   body file costs nothing. The failure was visible on disk for the whole interval.
+3. **Pick the discriminator by testing it against a known-bad instance.** Here `text` is 0 in a LIST
+   response for *every* message, good or bad, so it cannot discriminate; `preview` is null only for
+   the empty one. The agent found this with a **same-read control** — the messages either side in the
+   same listing carried previews. That control is the technique, not the field.
+4. **Enforcement in the path, not a rule about writing files.** `send_brief.sh` now refuses a body
+   under 40 non-space characters, with no `--force`, and names the truncate-before-read cause in the
+   refusal text. Four branches exercised before arming: empty, whitespace-only and 37-char all refuse;
+   a long body passes through to be refused by the *next* gate, proving no over-fire.
+
+**Residual, stated rather than quietly carried:** `cockpit.sh say --mail` still verifies by subject.
+Wiring the `preview` discriminator into it is the promotion if this recurs.
+
+**The agent's half, credited:** it proved the body was empty **at signing time** from the DKIM body
+hash — `bh=` matched simple-canonicalisation of an empty body and was discriminated against by both a
+relaxed-canonicalisation control and a non-empty control — which rules out both transit stripping and
+its own retrieval failing. Then it **did not block and did not invent the missing criterion**: it
+started the one measurement that was correct under every reading of the surviving subject line, and
+asked for exactly the sentence it lacked. A counterpart that can prove *which* side of the wire lost
+the data turns an ambiguous incident into a fixed one.
+
+**Family:** [[2026-09-01_a-tap-is-a-pointer-not-a-message]] (the enforcement that passed) ·
+[[2026-08-29_unquoted-heredoc-executes-backticks]] (the sibling: prose destroyed on its way through a
+tool, with `bash -n` clean) · [[2026-08-14_i-read-representations-they-read-sources]] (a "sent" exit
+code is a representation of a delivery).
 
 project CASE sections lifted to their own tier (24, read them in the file):
 
