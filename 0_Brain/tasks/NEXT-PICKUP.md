@@ -29,9 +29,11 @@ python `str.replace` NEVER `sed`, and red-proof rc 6 / rc 7 before arming — bo
 - **Secuura develop `306d0db923183f3b62b053f0242549e37bdf362c`** — seat B's #877 merge LANDED, so
   **TEN merges tonight**. Verify it from objects yourself; this seat read it from `ls-remote` at 23:40
   and did not yet `cat-file` its parents. **Re-read `ls-remote` before trusting any SHA in this file.**
-- **seat A `%130` (s141b)** — KS-945 FILED and Finding 2's fifth cell already in `a0ad0a084` (suite
-  39 → 40); on its table next.
-- **seat B `%129` (s140e)** — merging #877, then **F5 P1**, then the bounded KS-486 sweep, then build.
+- **seat A `%130` (s141b)** — still RUNNING (ctx ~45% at 23:50) on its table. Untouched by the rotation.
+- **seat B: WRAPPED at 23:57 and SCORED 1.0, pane closed (listeners 24 → 24). A SUCCESSOR BRIEF IS OWED.**
+  Its handover: `5_Project_History/HANDOVER-s140e.md`. Unstarted and startable cold: **the bounded
+  KS-486 sweep (11 tickets, NINE unexamined — 2 of 2 checked were stale, which is suggestive and not
+  evidence)**, **KS-946's remedy OPTIONS (a decision, not a build)**, and the **six inferred mounts**.
 - **NexusAI PAUSED** on Kam's 17:01 word. **NO testers running.**
 - Panes closed this seat, listeners 24 → 24 every time: `%126 %119 %121 %127 %128 %131 %132 %133`.
 
