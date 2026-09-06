@@ -54,6 +54,8 @@ deliveries are strong but unscored pending gate.
 ## KAM'S DESK — cards, all HOLD, none urgent
 1. `secuura-demo-kam-admin-default-password` — demo admin password. Demo identity frozen.
 2. `secuura-f5-login-limiter-bypass` — now RIPE (see F5 above): remedy + disclosure.
+3. **KS-577 (#880, READY) — Stuart cutover + grace-window Option (escalation candidate, not a block).** Seat A built it; condition 1 is Stuart's cutover agreement + which `API_KEY_ROTATION_GRACE_SECONDS` (Opt 1 instant [Kam's default ruling] / 2 bounded / 3 S-side ack, not built). Merging as-is defaults Platform S to Opt 1. External contract = Kam opens it with Stuart. Held behind the gate.
+4. **KS-762 — credential rotation date LAPSED 2026-09-05 (2 days), + the app-db-password switch decision.** Seat A correctly BLOCKED it (no PR): the switch is ruled HELD in-code (KS-165 + the guard header), all 3 conditions Kam's (switch / rotation / tell Stuart+Peter); atomic, cannot be incremental. Surface NOT unguarded today (guard passes reporting HELD). Lapsed rotation is the most actionable piece.
 
 ## KS-486 register — Kam disposition (from seat B's sweep, HELD)
 Register is NOT uniformly stale (contradicts the earlier "2 of 2 stale"): KS-619/621/623 accurate
