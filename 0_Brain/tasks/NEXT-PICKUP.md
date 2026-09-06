@@ -42,12 +42,16 @@ Workspace-wide: Attio in **83 Datasec files, 3 Secuura** — all three session h
 Secuura agent recording it deliberately did NOT use an Attio finding. **Attio was never mixed with
 Secuura; Kam accepted that and wants it out of Datasec anyway.**
 
-## FLEET — one builder (s144, `%142`, standing down to wrap) + two QA panes reporting
-| pane | state |
-|---|---|
-| `%142` Secuura/Blockchain (s144) | told to STAND DOWN and wrap — both its PRs are Kam's now |
-| `%143` QA #884 r2 | **REPORTED: GO on the security question** |
-| `%144` QA #876 r2 | **REPORTED: GO on the arm, but a REGRESSION survives** |
+## FLEET — ONE seat, just launched (s145, `%145`). Everything else closed cleanly.
+**Kam ruled `secuura-ks930-cap-vs-regression` => `one-more` at 09:38** — ONE narrow round 3 on #876,
+**regression only**, an explicit exception to his own two-NO-GO cap because the residue is a regression
+rather than a known gap. **s145 launched 09:4x on exactly that.**
+**ITS PLAN CONFIRMATION WILL LAND FOR YOU, NOT FOR THE SEAT THAT BRIEFED IT** — the rotation happened
+as it booted. That is expected; the brief tells it so. **Answer it.**
+The regression is **SIX version-suffixed spellings**, not one (`node-22`, `node22`, `node.22`,
+`node_22`, `nodejs-22`, `node-lts`) — s144 re-measured its own defect at wrap so Kam would rule on the
+true size. **The fix is one character class, already measured and deliberately unapplied, on KS-956.**
+F4/F5/F6 (the three claim-level defects) are **ticket-only, not this round** — Kam said regression only.
 
 ## PR STATE — heads read together at 09:0x
 ```
