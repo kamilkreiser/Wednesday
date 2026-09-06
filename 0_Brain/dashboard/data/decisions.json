@@ -4084,5 +4084,137 @@
   ],
   "delivered_artefact": "Linear KS-485 comment b0aafd1a-08d8-4d34-9952-75e5952878bd (Kam's 10:23 A + 10:24 note verbatim; the 18 restored from Linear history), per s138's receipt 2026-09-06T00:31:27Z",
   "delivered_ts": "2026-09-06T10:32:05.496736+10:00"
+ },
+ {
+  "id": "nexusai-rd104-gh-token-storage",
+  "client_project": "Datasec/NexusAI",
+  "title": "RD-104: gh keeps its token in the shared macOS keychain — accept and fix the launcher's wording, or move to per-project GH_TOKEN?",
+  "bluf": "Datasec / NexusAI (workspace hygiene). Hard rule 5 relies on GH_CONFIG_DIR for per-client GitHub identity; the launcher's comment claims a per-project TOKEN store. On macOS that half is false: gh keeps the credential in the shared keychain (keyed by service AND account, so identities coexist); GH_CONFIG_DIR isolates hosts.yml only. Exposure is LATENT — gh api refuses under the project config dir; only gh auth token under an empty project dir returns a live keychain token, and no caller does that today (S41's grep). Wednesday recommends A now, B when a script needs a raw token. Default: A with the launcher comment corrected.",
+  "default_action": "A — accept, and the launcher comment is corrected (a launcher is Kam's file; the wording change goes through him); never C without the gitignore check (RD-104 comment 37198).",
+  "options": [
+   {
+    "key": "A",
+    "label": "Accept the residual behaviour; correct the launcher's false wording (Recommended)",
+    "detail": "Near-zero cost; the risk stays theoretical while nothing calls gh auth token."
+   },
+   {
+    "key": "B",
+    "label": "Per-project GH_TOKEN sourced from each project's .env",
+    "detail": "A token per project to mint and rotate; 4_Credentials/ is already gitignored."
+   },
+   {
+    "key": "C",
+    "label": "File-based gh storage (--insecure-storage)",
+    "detail": "Writes the token to disk under 4_Credentials/.gh-config; gitignore must be confirmed first; 'insecure' is the flag's own word."
+   }
+  ],
+  "recommended": "A",
+  "ts": "2026-09-06T10:48:40.192593+10:00",
+  "status": "open",
+  "ruled_choice": null,
+  "ruled_ts": null
+ },
+ {
+  "id": "nexusai-rd180-badge-label-colour",
+  "client_project": "Datasec/NexusAI",
+  "title": "RD-180: the scan-destination badge label colour — only pure black clears AA on all twelve chip colours (brand)",
+  "bluf": "OVERRIDE of the prior-ruling gate, reason: the only match is Kam's 2026-08-05 question about pale tile colours in customise — a different surface and a question, not a ruling; nothing Kam has said covers this badge. Datasec / NexusAI. The dashboard's scan-destination badge text is 3.23:1 in both modes; the palette is twelve colours written inline so no dark-mode rule reaches it. The NexusAI agent (S41) measured every candidate label against all twelve chips: only #000000 clears 4.5 everywhere (worst 4.59); the ticket's own original recommendation #0d1b2a FAILS at 3.81 on the binding chip #8E54E9. A label colour is a brand call, so it is Kam's. Wednesday recommends A. Default if silent: leave unfixed, ticket open — B is not shipped on the description's word.",
+  "default_action": "Leave unfixed, ticket open; do not ship #0d1b2a on the description's recommendation (RD-180 comment 37197 carries the measurements).",
+  "options": [
+   {
+    "key": "A",
+    "label": "Label everything #000000 (Recommended)",
+    "detail": "The only measured pass on all twelve; a one-value change; pure black on coloured chips is a look, not a defect."
+   },
+   {
+    "key": "B",
+    "label": "Keep dark navy #0d1b2a",
+    "detail": "Reads better; an accepted AA failure on at least one chip (3.81)."
+   },
+   {
+    "key": "C",
+    "label": "Change the twelve destination colours",
+    "detail": "Largest cost — a palette change under BRAND.md §8, touches every chip."
+   },
+   {
+    "key": "D",
+    "label": "Treat the badge text as LARGE text (AA large = 3.0)",
+    "detail": "Today's 3.23 already clears; changes the type size, not the colour — a design call."
+   }
+  ],
+  "recommended": "A",
+  "ts": "2026-09-06T10:49:27.659755+10:00",
+  "status": "open",
+  "ruled_choice": null,
+  "ruled_ts": null,
+  "prior_rulings_overridden": [
+   "2026-08-05 15:36"
+  ]
+ },
+ {
+  "id": "nexusai-rd251-inactive-tab-brand",
+  "client_project": "Datasec/NexusAI",
+  "title": "RD-251: the dashboard's INACTIVE and HOVER tab states — extend the brand chrome pair, or leave them Fluent indigo? (brand)",
+  "bluf": "OVERRIDE of the prior-ruling gate, reason: the matches are Kam's RD-160/RD-214/RD-202 chrome rulings — RD-202 ruled the ACTIVE tab only (A — fold it into the brand family); the inactive and hover states of the same control were not in that ruling, and extending it by inference would be a builder making a second brand decision, which is exactly why this ticket exists. Datasec / NexusAI. Kam ruled the ACTIVE dashboard tab onto the brand chrome pair (RD-202). Its two siblings in the same rule block — .tab-button at rest and :hover — still paint Fluent indigo, so the strip is half brand, half indigo, and the indigo half fails AA in light (rest 3.48 on eight tabs, hover 3.10; dark is fine). Pre-existing values; the CONTEXT changed. Wednesday recommends A. Default: leave unfixed, ticket open.",
+  "default_action": "Leave unfixed, ticket open; RD-202's ruling is not extended by inference (RD-251 comment 37199).",
+  "options": [
+   {
+    "key": "A",
+    "label": "Move rest and hover onto the brand chrome pair (#00719f + white) (Recommended)",
+    "detail": "Smallest; one family in both modes; consistent with the active-tab ruling; no new colour."
+   },
+   {
+    "key": "B",
+    "label": "Move rest only, leave hover",
+    "detail": "Fixes the always-visible 3.48, leaves the 3.10 under the pointer; keeps two families."
+   },
+   {
+    "key": "C",
+    "label": "An inactive tab carries NO filled ground; restyle the control",
+    "detail": "Largest — a design change, not a recolour; answers the underlying question."
+   }
+  ],
+  "recommended": "A",
+  "ts": "2026-09-06T10:49:27.721884+10:00",
+  "status": "open",
+  "ruled_choice": null,
+  "ruled_ts": null,
+  "prior_rulings_overridden": [
+   "2026-09-02 16:08",
+   "2026-09-03 09:55",
+   "2026-09-03 09:56"
+  ]
+ },
+ {
+  "id": "nexusai-rd75-dkim-recipe-workspace",
+  "client_project": "Datasec/NexusAI",
+  "title": "RD-75: the DKIM/SPF/DMARC verification recipe is absent from the WORKSPACE CLAUDE.md — a few lines only a workspace-scoped session or Kam can write",
+  "bluf": "OVERRIDE of the prior-ruling gate, reason: the only match is Kam's 2026-08-21 musing about a Claude-to-Claude project — unrelated; nothing Kam has said covers the workspace recipe. Datasec / NexusAI (workspace file). The Kam-traceable authorisation mechanism exists and has been exercised (the v1.3 grant mail is a verified instance). Acceptance criterion 3 is unmet: the header-verification recipe is not in /Volumes/DevMASTER/CLAUDE.md (grep 0 with a positive control of 7), so every other project session re-derives it or reads the From line instead. The file is shared across clients, so the write is Kam's or a workspace session's, never a project's or Wednesday's. Wednesday recommends A and will draft the lines for pasting. Default: keep the ticket open and re-measure; never close it from the project.",
+  "default_action": "Ticket stays open, re-measured at the next sweep; not closed from the project (RD-75 comment 37200).",
+  "options": [
+   {
+    "key": "A",
+    "label": "Add the recipe to the workspace CLAUDE.md (Recommended)",
+    "detail": "Minutes, one file, closes the criterion; Wednesday drafts the lines for Kam to paste."
+   },
+   {
+    "key": "B",
+    "label": "Accept per-project recipes; close criterion 3 as won't-do",
+    "detail": "Every new project repeats the derivation; the failure mode is silent."
+   },
+   {
+    "key": "C",
+    "label": "Leave open indefinitely",
+    "detail": "Open on this criterion since 08-13, re-measured three times — the argument against C."
+   }
+  ],
+  "recommended": "A",
+  "ts": "2026-09-06T10:49:27.785125+10:00",
+  "status": "open",
+  "ruled_choice": null,
+  "ruled_ts": null,
+  "prior_rulings_overridden": [
+   "2026-08-21 19:49"
+  ]
  }
 ]
