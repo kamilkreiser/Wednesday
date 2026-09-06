@@ -354,18 +354,4 @@ fi
 # documentation for this is third-party, so the binary is the source of truth.
 export ANTHROPIC_DEFAULT_OPUS_MODEL=claude-opus-5
 
-# WEEK-SCOPED OVERRIDE (Kam, 2026-09-06 20:2x, verbatim into Wednesday's own
-# session: "please change your boot script for the rest of the week to boot in
-# opus 5 rather than fable. we are burning through credits a little too
-# quickly"). Every Wednesday seat boots on the `opus` ALIAS (newest Opus = Opus 5
-# today; ANTHROPIC_DEFAULT_OPUS_MODEL above pins the classifier target the same
-# way) until the week is out. "The week" is read as through Sunday 2026-09-13 —
-# the 7-day usage window renews ~2026-09-13 (statusline "renews:6d 15h" at
-# 20:14 on 09-06) — stated as an assumption to Kam; his one word moves it.
-# REVERT = restore the line below (fable primary, opus fallback — the 09-05
-# ruling, exercised then). doctor.sh WARNS from 2026-09-14 while this pin is
-# live, so the override cannot outlive its week silently (the 09-04 hand-pin did
-# exactly that; a promise is not a mechanism). Backup beside this file:
-# Launch_Wednesday.command.pre-0906-opus.
-# exec claude --dangerously-skip-permissions --model fable --fallback-model opus "$INITIAL_PROMPT"
-exec claude --dangerously-skip-permissions --model opus "$INITIAL_PROMPT"
+exec claude --dangerously-skip-permissions --model fable --fallback-model opus "$INITIAL_PROMPT"

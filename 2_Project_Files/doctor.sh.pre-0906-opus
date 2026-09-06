@@ -264,19 +264,7 @@ if [ -f "$WLAUNCH" ]; then
   elif printf '%s\n' "$WEXECLINE" | grep -qE -- '--model fable'; then
     warn "Launch_Wednesday.command pins Fable with NO fallback" "credits out = the seat cannot start; add '--fallback-model opus' (Kam 2026-09-05)"
   elif printf '%s\n' "$WEXECLINE" | grep -qE -- '--model opus'; then
-    # WEEK-SCOPED OVERRIDE (Kam, 2026-09-06 20:2x, verbatim: "please change your boot
-    # script for the rest of the week to boot in opus 5 rather than fable. we are
-    # burning through credits a little too quickly"). An opus-only pin is the WANTED
-    # state until the week is out; after that it is the 09-04 hazard again (a hand-pin
-    # that silently outlived its reason), so this leg EXPIRES itself rather than
-    # relying on anyone remembering. Kam's word moves the date; the revert is the
-    # commented fable line in Launch_Wednesday.command.
-    WED_OPUS_UNTIL="2026-09-13"
-    if [ "$(date +%Y-%m-%d)" \> "$WED_OPUS_UNTIL" ]; then
-      warn "Launch_Wednesday.command still pins opus ONLY after $WED_OPUS_UNTIL" "Kam's 2026-09-06 override was for one week — restore the commented '--model fable --fallback-model opus' line or ask him to extend it"
-    else
-      ok "Wednesday launcher: opus pin, Kam's week-scoped credit override (expires after $WED_OPUS_UNTIL)"
-    fi
+    warn "Launch_Wednesday.command pins opus ONLY" "Kam 2026-09-05 wants fable as the default with opus as the fallback — an opus-only pin stays on Opus after Fable credits return"
   else
     warn "Launch_Wednesday.command has no recognisable --model line" "read the exec line — the alias rule may have been edited away"
   fi

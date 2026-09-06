@@ -7,7 +7,7 @@ status: live
 
 # Boot digest — headline + rules of every lesson (open the file when it fires)
 
-Generated 2026-09-06 19:01 from 100 lesson files (480,421 B). Each block = the lesson's retrieval handle (H1), its frontmatter, the operative paragraph, its section index, and every RULES section verbatim. 6 files carry no rules-shaped section and are included whole. The CASES behind a rule live only in the file: open it the moment the rule fires, or when a diagnosis needs the evidence. `_ledger.md` is read whole beside this digest; `_ledger_archive.md` on demand.
+Generated 2026-09-06 20:29 from 101 lesson files (484,338 B). Each block = the lesson's retrieval handle (H1), its frontmatter, the operative paragraph, its section index, and every RULES section verbatim. 6 files carry no rules-shaped section and are included whole. The CASES behind a rule live only in the file: open it the moment the rule fires, or when a diagnosis needs the evidence. `_ledger.md` is read whole beside this digest; `_ledger_archive.md` on demand.
 
 ## The T9 SSD is the master — Wednesday must be fully portable
 `2026-07-31_fully-portable-drive.md` · principle · 2026-07-31 · status: superseded — the "T9 is the master" half by [[2026-08-25_one-drive-devmaster-is-master]] (2026-08-25); the portability principle itself still lives
@@ -3500,6 +3500,48 @@ including *location*) · [[2026-08-26_never-delete-cleanup-means-quarantine]] ·
 3. **Escalation = Wednesday → Kam → WhatsApp.** When a ticket comment is not enough (a security hold, a merge the team must not do, a question blocking a rotation), Wednesday tells Kam on the panel with the WhatsApp text ready: one or two lines, the ticket id, nothing that is not already on the ticket (his 2026-08-19 rule: "by having the detail in that ticket, the message can actually be short"). Kam decides and sends; external comms stay his signature class ([[2026-08-07_protocol-v1.3-signed-delegation]]).
 4. **Wednesday does not nag him with escalation candidates.** Tell him when one exists, with the text; the default if he is silent is that the ticket comment stands on its own.
 5. **Briefs carry this as a standing line** in the HOLDS section for every client project: "Client-facing communication = ticket comments only; the extranet is not a channel; anything needing a push goes to Wednesday as an escalation candidate for Kam's WhatsApp."
+
+
+## A time-scoped instruction gets a mechanism that EXPIRES it — an override with no end date is a permanent change nobody decided to make
+`2026-09-06_a-scoped-override-carries-its-own-expiry.md` · correction · 2026-09-06 · status: live
+
+**The operative case, so the headline matches it:** Kam gives an instruction with a
+window in it — *"for the rest of the week"*, *"until the credits come back"*,
+*"while X is running"*, *"just for today"*. **Wednesday is about to apply it.
+Before the edit lands, decide what ENDS it, and build that ending into a check
+that fires on its own.** A scoped instruction applied without an expiry becomes a
+standing one the moment the seat that heard it rotates.
+
+**How to apply:**
+1. **Read the scope word as part of the instruction, not as flavour.** "For the
+   week", "for now", "while we are tight" are operative clauses. Write the end
+   date down in the artefact itself, in Kam's own words, with the date derived
+   and STATED as an assumption ("read as through Sunday 2026-09-13 — the 7-day
+   usage window renews then; your word moves it").
+2. **The expiry is a CHECK, never a note.** A comment expires nothing; a diary
+   entry expires nothing; a successor brief expires nothing once the brief is
+   two rotations old. The check goes where the thing is read at every boot —
+   `doctor.sh` here — and it must WARN on the day after, unprompted.
+   ([[2026-08-09_an-enforcement-you-must-arm-is-not-one]]: a rule you have to
+   remember to un-apply is not a rule.)
+3. **Exercise both branches before arming** — the state that should pass and the
+   state that should warn, with the clock moved rather than waited for
+   ([[2026-08-06_exercise-mechanisms-before-arming]],
+   [[2026-08-07_a-check-that-cannot-fail]]).
+4. **Keep the revert one line away and say where it is** — the superseded line
+   commented in place, plus a dated `.pre-` backup beside the file
+   ([[2026-08-26_never-delete-cleanup-means-quarantine]]).
+5. **Tell Kam the assumption in the same breath as the receipt.** He set a window
+   in ordinary words; the date is my reading of it, and a reading he can correct
+   in three seconds beats a pin he discovers in a fortnight.
+
+**Family:** [[2026-08-09_an-enforcement-you-must-arm-is-not-one]] ·
+[[2026-08-07_a-promise-is-not-a-mechanism]] (an intention to revert is not a
+revert) · [[2026-08-16_a-recorded-blocker-is-not-a-boundary]] (a recorded
+condition is a claim with a date — this is its mirror: a recorded PERMISSION is a
+claim with an end) · [[2026-08-06_exercise-mechanisms-before-arming]] ·
+[[2026-09-05_root-folder-holds-only-rules-and-launchers]] (the doctor as the
+place enforcement lives).
 
 
 ## Another project's checkout is READ-ONLY for git too — `fetch`, `merge-tree --write-tree` and `worktree add` WRITE into its `.git`; predict a merge by naming the seat that runs it, never by running it there

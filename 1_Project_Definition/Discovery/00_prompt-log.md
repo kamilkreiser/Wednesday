@@ -2267,3 +2267,13 @@ Done with it: Dynamics → Kam's team decision (no action); QuickQuote masthead/
 > Deploy to both
 
 *Note:* RULING: the demo deploy of 48e092c too (dev done as 0000097). Demo GO mailed to S36 by the gate in the same minutes; the demo admin-image card (Secuura) is a different subject and stays open.
+
+## 2026-09-06 20:18 — Kam (wednesday-session (Kam, mid-turn during the 20:1x boot), verbatim)
+> please change your boot script for the rest of the week to boot in opus 5 rather than fable.  we are burning through credits a little too quickly
+
+*Note:* Launch_Wednesday.command exec line pinned to --model opus (backup .pre-0906-opus); doctor expiry warn from 2026-09-14; learning + ledger row; Kam told on the panel with the week-end assumption (Sun 2026-09-13)
+
+## 2026-09-06 20:19 — Kam (wednesday-session (Kam, mid-turn during the 20:1x boot), verbatim)
+> thank you.  keep pushing the secuura agent to polish the platform to a ready state.
+
+*Note:* standing direction folded into the s140d successor brief (seat B) and seat A's KS-914 ANSWER; ledger ruling row
