@@ -1,0 +1,24 @@
+## BLUF
+**#846 (KS-845 @ `1e3409b7a342d626d18e9d396744c7d324442ed2`) + #847 (KS-847 @ `20879417762fc735a02de73f656e8f4b18e9050b`) RECEIVED → under ONE tier-2 gate (launched 12:10:06 (pane %84 QA/Secuura-s138b-ks845-ks847, wrapper --check rc 0, red-proofs rc 6 / rc 7 read bare)), verdict per PR PLUS the merge order — because BOTH edit `ks431-oauth-app-update.test.ts` in adjacent hunks; whichever merges second gets re-checked at its rebased head (a NEW branch, never a force push). Both HELD. Queue complete — the next two acts while the gates run: (1) the PETER TEST BLOCK for your PRs, (2) KS-856.**
+
+## 1. The gate
+Brief `2_Project_Files/fleet/qa-agent/briefs/2026-09-06_secuura-seatb-ks845-846-ks847-847-tier2.md`; pane `QA/Secuura-s138b-ks845-ks847`; ~35 min; verdict mail `[QA -> Wednesday] Secuura SEAT B KS-845 + KS-847 PASS 1 @ 1e3409b7a + 208794177 (PRs #846 + #847, tier 2)`. It re-derives the fix-shape-alone regression, censuses the nine sites, runs the scan's red-proofs, and carries one hunt of Wednesday's on the new suite: `SRC_ROOT = new URL('..', import.meta.url).pathname` is not decoded — a checkout under a path with a space or a `%` cannot be walked (the suite would ERROR, not false-green; `fileURLToPath` is the shape if it measures). Nothing on either branch until the verdict. The six instruments that lied today are in the brief's known-fragile list — the fleet keeps them.
+
+## 2. Act now (1): the Peter test block — your PRs, grouped as ONE pass
+Kam's rule (2026-09-05, promoted): a handover to Peter is a TEST BLOCK, as large as one pass can prove — never a list of PRs. You have the overlay, the review streams and the repo's DEV-PROCESS passes; Wednesday ratifies, Kam sends. Build it: the harness block = **#842 (merged, KS-833) · #843 (KS-853) · #844 (KS-842) · #846 (KS-845) · #847 (KS-847)** — under the review-stream parent that owns harness/preflight work (read the stream parents; name the one), the ONE pass that proves the block (which suites, the preflight legs, from which environment — the worktree hook matters for KS-853), its measured wall-clock where the overlay has one, and the one thing Peter has to DO (approve the block). A PR that fits no block is stated as the exception with the reason (#845 is seat A's and is in a fix round — NOT in this block). Write it as a BLUF comment on the stream parent, then mail Wednesday the comment id and a TWO-LINE WhatsApp text for Kam that points at the ticket and nothing else. Nobody messages Peter but Kam.
+
+## 3. Act now (2): KS-856
+The non-fast-forward pre-push refusal (seat A's ticket, your partition), as ruled at 12:03: a scratch bare remote; a pushed branch rewritten locally → REFUSED with the rule in the message; `ALLOW_FORCE=1` passes; a fast-forward passes; a brand-new branch passes; the two near-misses of this session as its cases. A NEW branch off develop re-read (`e08472c6e…` at 12:0x; re-read at branch time). Then the next pick from your table, named with its by-path confirmation before cutting, as your brief requires.
+
+## 4. State
+develop `e08472c6ef44ccede29001a64fdba5f4b5a20c0b`. HELD under gates: #843 + #844 (`%82`, since 11:39), #846 + #847 (this one). Merged: #840, #842. Peter: five requested — the default stands (leave, never chase); the block above is how they reach him. Seat A's checkout untouched. No deploy, nothing on the demo, never `--no-verify`, never delete a branch. `[SEAT B]` in every subject.
+
+PROVENANCE:
+- `refs/pull/846/head` = `1e3409b7a…`, `refs/pull/847/head` = `208794177…`, both one commit on develop `e08472c6e…`; the ks431 overlap (both diffs read whole) | `git ls-remote origin` + `merge-base`/`diff -a` over the shared object store, NO fetch | read 2026-09-06 12:0x
+- Your READY (the fix-shape-alone regression; 12/3/9; 583/583 + 26/26; `grep -c` nothing → 2; 583 → 588; auth-only scope; the six instruments; five PRs with Peter) | `[SEAT B] READY: KS-845 PR #846 + KS-847 PR #847 …` 2026-09-06T01:57:16Z, read whole | read 2026-09-06 12:0x
+- The test-block rule | `learnings/2026-09-05_handovers-to-peter-and-stuart-are-test-blocks.md` (the receiving agent builds the blocks; Wednesday ratifies; Kam sends) — my project, not yours | boot digest
+- KS-856's shape | Wednesday's 11:42 ruling to seat A and the 12:03 ACK to you | 12:0x
+- The gate launch | `cockpit.sh add` receipt in Wednesday's own output | 12:10:06 (pane %84 QA/Secuura-s138b-ks845-ks847, wrapper --check rc 0, red-proofs rc 6 / rc 7 read bare)
+
+SELF-CHECK: re-read end-to-end | 2026-09-06 12:10
+(checked: the two acts are both inside seat B's partition and neither touches a branch under gate; the block excludes #845 with the reason; the launch line is from the receipt; the Peter default from 11:42 is unchanged; consistent with the 12:03 ACK's sequencing (KS-856 next); no NexusAI content.)
