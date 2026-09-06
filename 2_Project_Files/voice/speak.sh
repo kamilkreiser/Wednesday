@@ -44,6 +44,20 @@ if [ "${WEDNESDAY_MUTE:-0}" = "1" ]; then
   exit 0
 fi
 
+# Quiet hours (voice-protocol.md + daily-rhythm-6-to-23): NO speech 23:00–06:00
+# unless something is genuinely on fire. This was rule-only until 2026-09-07,
+# when a fresh 00:16 seat misread the clock as morning and spoke — the rule
+# lived nowhere in the path (an-enforcement-you-must-arm; a-promise-is-not-a-
+# mechanism). Now it is a guard. Override for a real emergency:
+# WEDNESDAY_SPEAK_URGENT=1. WEDNESDAY_TEST_HOUR forces the hour for exercising
+# both branches (close-ritual pattern, valid-is-not-delivered).
+HOUR="${WEDNESDAY_TEST_HOUR:-$(date +%H)}"
+HOUR=$((10#$HOUR))
+if [ "${WEDNESDAY_SPEAK_URGENT:-0}" != "1" ] && { [ "$HOUR" -ge 23 ] || [ "$HOUR" -lt 6 ]; }; then
+  echo "[quiet hours ${HOUR}:00 — NOT spoken; text stands. Set WEDNESDAY_SPEAK_URGENT=1 only if genuinely on fire] $MSG"
+  exit 0
+fi
+
 # Background so the calling session never blocks on audio.
 say -v "$VOICE" -r "$RATE" "$MSG" >/dev/null 2>&1 &
 echo "[spoken:$VOICE] $MSG"

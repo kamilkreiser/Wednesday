@@ -1,92 +1,67 @@
 ---
-date: 2026-09-06
+date: 2026-09-07
 type: pickup
-source: replaced wholesale by the 22:1x seat at its 70% handover (23:40)
+source: replaced wholesale by the 00:1x post-rotation seat
 status: live
 supersede: replace this file wholesale at the next pickup; do not append
 ---
 
-# NEXT PICKUP — both seats productive, FIVE PRs open, gate queue is the bottleneck; Kam's queue = 1 card, nothing waits on him
+# NEXT PICKUP — 00:2x, both Secuura seats working; gate queue HELD by choice; Kam asleep, 2 HOLD cards
 
-**Kam, verbatim, both still operative:** (1) 20:19 *"change your boot script for the rest of the week
-to boot in opus 5 rather than fable. we are burning through credits a little too quickly"* — the
-launcher is pinned, `doctor.sh` WARNs after 2026-09-13. (2) 20:19 *"keep pushing the secuura agent to
-polish the platform to a ready state."* His last panel message was 19:31; **0 new from him since.**
+**Time reality:** it is just-past-midnight AEST (fleet mail timestamps are UTC ≈ AEST−10 — do NOT
+misread them as afternoon). This is an overnight coordinator seat; Kam is asleep. **NO VOICE 23:00–06:00**
+(now enforced by `speak.sh`'s quiet-hours guard — override only with `WEDNESDAY_SPEAK_URGENT=1`).
 
-## 🔴 FIRST ACT: the gate queue. Two panes free, four subjects waiting.
-No tester is running. Launch in this order (wrappers: copy `state/launch_qa_secuura_seatb_ks733.sh`,
-python `str.replace` NEVER `sed`, and red-proof rc 6 / rc 7 before arming — both branches, every time):
-1. **`a0ad0a084e7ecdd772d106740a283f738ccdadf7` (#876, KS-930) — TIER 1 re-gate.** F-5's keyword
-   upper-casing, the whole F-6 exemption AND Finding 2's new single-write cell are UNGATED. **Re-read
-   `ls-remote` before you brief it — this head moved TWICE while it sat in a queue** (`af954c691` →
-   `ff7704135` → `a0ad0a084`), and seat A mailed the correction unprompted both times.
-2. **`6f7885602` (#874, KS-926) — TIER 2, ROUND 2 OF 2 under Kam's cap.** Seat A asked to be told
-   findings as a CLASS rather than item by item; hold to that.
-3. **#875 (KS-936)** and **#878 (KS-942)**, seat B's, both tier 2.
-**Briefs live in `fleet/qa-agent/briefs/`; the last four are the pattern.**
+**Kam, verbatim, still operative:** (1) 09-05 20:19 *"change your boot script for the rest of the week
+to boot in opus 5 rather than fable… burning through credits a little too quickly"* — launcher pinned,
+`doctor.sh` WARNs after 2026-09-13. (2) *"keep pushing the secuura agent to polish the platform to a
+ready state."* No new panel message from Kam since 09-06 19:31.
 
-## THE FLOOR
-- **Secuura develop `306d0db923183f3b62b053f0242549e37bdf362c`** — seat B's #877 merge LANDED, so
-  **TEN merges tonight**. Verify it from objects yourself; this seat read it from `ls-remote` at 23:40
-  and did not yet `cat-file` its parents. **Re-read `ls-remote` before trusting any SHA in this file.**
-- **seat A `%130` (s141b)** — still RUNNING (ctx ~45% at 23:50) on its table. Untouched by the rotation.
-- **seat B: WRAPPED at 23:57 and SCORED 1.0, pane closed (listeners 24 → 24). A SUCCESSOR BRIEF IS OWED.**
-  Its handover: `5_Project_History/HANDOVER-s140e.md`. Unstarted and startable cold: **the bounded
-  KS-486 sweep (11 tickets, NINE unexamined — 2 of 2 checked were stale, which is suggestive and not
-  evidence)**, **KS-946's remedy OPTIONS (a decision, not a build)**, and the **six inferred mounts**.
-- **NexusAI PAUSED** on Kam's 17:01 word. **NO testers running.**
-- Panes closed this seat, listeners 24 → 24 every time: `%126 %119 %121 %127 %128 %131 %132 %133`.
+## STATE — both seats live and working (verify from objects; don't trust these SHAs)
+- **Seat A (s141b, %130)** — RUNNING on **KS-945** (fail-closed install-verb guard, the 4th axis of
+  the defect class). GO given this session; ends at READY FOR QA. Its P2 table resumes after
+  (KS-487/485, KS-577, KS-762, KS-798/799/841 OAuth consent).
+- **Seat B (%134)** — fresh SUCCESSOR launched this session (booting at hand-off). Queue: **F5 coverage
+  completion (P1, LOCAL gateway only — never demo) → F5 fix OPTIONS (decision, not a fix) → KS-486
+  bounded sweep → KS-946 remedy options → six inferred mounts.** Brief:
+  `2_Project_Files/fleet/briefs_staged/seatb_successor_0907.md`.
+- **develop was `306d0db923183f3b62b053f0242549e37bdf362c`** (10 merges, 23:40 handover) — re-read
+  `ls-remote` before trusting it.
 
-## 🔴 F5 IS THE HIGHEST-VALUE OPEN QUESTION IN THE FLEET
-From #877's tier-1 verdict. Four path spellings — `/api/users/me//mfa/disable`,
-`%6Dfa`, `mfa;x=1`, `mfa%2Fdisable` — **dodge EVERY path-scoped gateway limiter** (all seven at
-`index.ts:939-1016`, `/api/auth/mfa` included). The spec gate falls through by design
-(`:1047 if (!matched) return next();`), and **express's own prefix strip normalises the dodge away
-AFTER the limiter was skipped** — driven: 429 on the canonical spelling, **200** on `//mfa/disable`.
-**PRE-EXISTING, not #877's defect.** The tester refused to rate it and was right to:
-> *"If auth 404s them, F5 is a curio. If auth serves them, F5 is a Blocker on the whole limiter
-> layer, not just MFA."*
-**Ruled P1; its first act is the experiment** — local booted gateway + auth in seat B's own copy,
-never the demo box, four spellings driven, canonical as the control, severity set by the result.
-**And KS-733 must not close as if the 450x gap were fully shut.**
+## 🟡 GATE QUEUE — HELD by choice this session (go-slow + credits); it is the next coordinator action
+No tester running. Held rather than firing 4 Opus-5 testers overnight while 2 builders already produce.
+Launch the tier-1 first when a builder READY lands or in the real morning:
+1. **`a0ad0a084…` (#876, KS-930) — TIER 1 re-gate.** F-5 keyword upper-casing + the F-6 exemption +
+   Finding 2's new single-write cell are UNGATED. **Head moved TWICE in a queue before
+   (`af954c691`→`ff7704135`→`a0ad0a084`) — re-read `ls-remote` before briefing.**
+2. **`6f7885602` (#874, KS-926) — TIER 2, ROUND 2 OF 2** under Kam's cap (findings as a CLASS).
+3. **#875 (KS-936)** and **#878 (KS-942)**, seat B's, tier 2.
+Briefs pattern: `2_Project_Files/fleet/qa-agent/briefs/` (last four). Wrappers: copy
+`state/launch_qa_*`, python `str.replace` not `sed`, red-proof rc 6/7 both branches before arming.
 
-## OWED, in order
-1. The four gates above.
-2. **#876 and #874 do not merge until their own heads are gated** — `af954c691` and `fe5225f31` both
-   passed, and both branches have moved past those SHAs.
-3. Seat B's F3+F4 ticket from #877 (the parity cell compares only `windowMs`/`max`; the gate is purely
-   relative). **#876's F1+F3 is already filed as KS-945** (P2, Backlog, related to KS-926) with the
-   fail-closed inversion as its design — five spellings re-measured by seat A with a blocking control:
-   `npm add`, `npm it`, `npm install-test`, bare `yarn`, `pnpm add` all rc 0 FALSE CLEAN; `pnpm i`
-   caught only by accident and `mynpm i` a FALSE BLOCK, both from the missing left word boundary.
-4. Kam's card `secuura-demo-kam-admin-default-password` — OPEN, default HOLD. Nothing on the demo
-   identity moves.
+## 🔴 F5 — highest-value open question; P1
+Double-slash `/api/auth//login` dodges the login limiter, confirmed on the REAL gateway (2 of 8
+routes; 6 unclaimed — seat B completes them LOCALLY). Pre-existing, dev branch, nothing deployed.
+KS-733 must NOT close as if the 450x gap were fully shut. **Whether a DEPLOYED system carries it is
+KAM's question — no probe of deployed/demo without his word.**
 
-## 🔴 THE MISTAKE TO NOT REPEAT — a gate's subject is a SHA
-Twice tonight a builder pushed to a branch mid-gate and the verdict described a head the branch had
-moved past (#874, then #876 — the second on Wednesday's own instruction, given without naming the
-live gate). **Any instruction that could cause a push NAMES the gates running against that branch;
-new work goes on a new branch.** Now a standing line. And **re-read a verdict's own target line
-against `ls-remote` before merging on it** — that is what caught the second one.
+## KAM'S DESK — 2 cards, both HOLD, neither urgent
+1. `secuura-demo-kam-admin-default-password` — demo admin password. Demo identity frozen.
+2. **F5 disclosure to Peter/Stuart** — tonight vs morning-with-fix-options. Recommend morning; fix
+   options not yet designed (seat B). External comms = Kam's signature class.
 
-## TONIGHT'S LEDGER AGAINST WEDNESDAY, one line each
-🔴 a forward titled "the KS-720 verdict" that carried the LAUNCHER verdict (a message id reused, the
-true subject printed into the body by Wednesday's own script and never compared) · 🔴 **two
-OVER-WITHDRAWALS in ten minutes**, the second two minutes after filing the lesson for it — one nearly
-destroyed a live finding, one removed a working fix; diagnosis: both were urgent relays, so the rule
-went into the standing lines · 🟡 **three overstatements of a relayed claim**, the third dropping a
-builder's hedge into a QA brief as the thing to press · 🔴 the gated-subject miss above.
-**Every one was caught by an agent, and the agents were right every time.**
+## 🟡 FIVE STALE RULED CARDS need Kam-disposition at the real morning sweep
+Carried in seat B's brief (delivery gate). Most are Kam-actions or "leave/wait", NOT seat-B build:
+`secuura-ci-billing` (wait), `secuura-agent-github-identity` (identity — Kam org action),
+`secuura-dependabot-triage` (close-and-rescope — Peter's repo), `secuura-ks229-disclosure-mailbox`
+(later — no action), `secuura-ps-759-760-merge-owner` (Kam merges 2 Platform-S PRs — NOT Platform K).
+Either mark `--delivered` with the artefact or re-rule each; they've sat 1–2 weeks.
 
-## STANDING OPERATIONAL NOTES
-A card add is ALWAYS its own tool call (now gated: `card_id_gate.sh` in `send_brief.sh` +
-`chat_reply.sh`) · a wrapped pane closes only with no queued tap and no spinner · **never
-`fetch`/`merge-tree --write-tree`/`worktree add` in an agent's checkout** · SELF-CHECK is the
-canonical sentence + `| $(date)` with NOTHING between · **EMPTY OUTPUT IS NOT A RESULT — read the
-exit status; `bash -n` on a zero-byte file returns 0** · a relayed claim carries the counterpart's
-sentence VERBATIM INCLUDING ITS HEDGE · a red that proves nothing is as blind as a green that proves
-nothing · a hash proves the bytes, only a run proves the file still works · **`send_brief.sh`'s
-DQ_PREFIX now covers `Secuura/Blockchain-B`** (it did not, so seat-B briefs skipped the ruled-cards
-gate) · Linear: an issue fixed under an ALREADY-ARCHIVED ticket **can never be marked Duplicate** —
-close it Done with the fixer's id, SHA and PR in the comment TEXT, and say why · the two daily notes
-are ~700 KB: read the newest seat block, the rotation block and this file, never whole.
+## THIS SESSION'S LEDGER (self-caught)
+🔴 QUIET-HOURS VOICE VIOLATION at 00:16 (misread clock as morning) — `speak.sh` guard shipped +
+exercised both branches; framing errors ("morning"/"overnight") corrected in chat + note + this file.
+
+## STANDING NOTES
+INDEX.md is STALE (last real refresh 2026-08-11) — refresh it in a quieter slot. Two daily notes are
+~700 KB — read the newest seat block + rotation block + this file, never whole. A tap is a pointer,
+mail behind it. Gate subject is a SHA. New work on a new branch. Never delete — quarantine.
