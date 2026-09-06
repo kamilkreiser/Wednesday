@@ -21,7 +21,8 @@ reaches Peter/Stuart without Kam.
 **F5 IS FIXED AND MERGED.** develop `306d0db92` → **`db94e9fc8`**, the first merge of the day. Tree oid
 predicted before the merge and matched; containment controls fired both ways; merge pinned with `sha=`.
 **Kam, 09:50: *"Fantastic and genuinely great find. Please keep going with the tickets and all secure
-work."*** With his 08:50: *"fixing things is slower than finding them. This is fine, we'll just persist
+work."*** **— and he corrected it himself at 09:50:58: *"Secure work refers to secuura."* So the
+directive is ALL SECUURA WORK, not security work generally. Do not narrow it to security tickets.** With his 08:50: *"fixing things is slower than finding them. This is fine, we'll just persist
 and plow through it."* **DO NOT slow the finding rate to make the backlog look better — he has ruled
 that twice.** Board: 190 created / 27 closed since 09-01, 283 open. That ratio is the gate working.
 

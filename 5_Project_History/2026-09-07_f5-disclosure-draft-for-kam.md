@@ -3,7 +3,12 @@
 ("Tell them WITH the fix, later today") and his note on `secuura-f5-login-limiter-bypass`
 ("and when ready, prepare the message to them").**
 
-## STATUS — this is a DRAFT and it is NOT sendable yet
+## STATUS — READY TO SEND. #884 merged to develop at `db94e9fc8` on 2026-09-07 09:4x.
+**Superseded the 'not sendable' block below: the fix is no longer under test, it is ON DEVELOP.**
+Merge verified from objects — predicted tree oid matched, containment controls fired both ways, and
+the merge was pinned with `sha=` so a mid-flight head move would have refused.
+
+### (historical, kept for the record)
 The fix exists: **PR #884 @ `f3a037978`**, built this morning, at READY. **It has not been gated
 and it has not merged.** The message below deliberately says "fix is up and under test" rather
 than "fixed", and that wording is only honest until the gate reports. **Two things must land
@@ -50,8 +55,8 @@ Kam asked for it prepared; it is prepared, and this note says plainly what it wa
 > the route we checked, the extra slash makes the demo about 300x more permissive. We only probed
 > the one route; the other seven look the same in the code but we haven't driven them there.
 >
-> The fix is PR #884: it normalises the path once at the gateway edge, above every guard, so it
-> closes the scope gates and the GDPR routes at the same time. It's under test now.
+> It's fixed — PR #884 is merged to develop. It normalises the path once at the gateway edge, above
+> every guard, so it closes the scope gates and the GDPR routes at the same time.
 >
 > Full detail, the reproduction and the eight affected routes are on **KS-946**. Nothing needs
 > doing from you before your normal review — I wanted you to have it before you test.
