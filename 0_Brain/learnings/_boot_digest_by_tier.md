@@ -7,7 +7,7 @@ status: live
 
 # Boot digest BY TIER — W whole, M rules-only, every project case a handle
 
-Generated 2026-09-06 22:11 from 101 lesson files (485,304 B). M 24 · MIXED 5 · W 72. 28 project CASE sections inside MIXED files are reduced to one line each: the heading and the path to read it at. W blocks are exactly what the default digest carries; M blocks drop the section index and keep the rules; a P file is a single handle. The CASES behind every rule live only in the lesson files — open one the moment its rule fires.
+Generated 2026-09-06 22:54 from 102 lesson files (491,247 B). M 24 · MIXED 5 · W 73. 28 project CASE sections inside MIXED files are reduced to one line each: the heading and the path to read it at. W blocks are exactly what the default digest carries; M blocks drop the section index and keep the rules; a P file is a single handle. The CASES behind every rule live only in the lesson files — open one the moment its rule fires.
 
 ## The T9 SSD is the master — Wednesday must be fully portable
 `2026-07-31_fully-portable-drive.md` · principle · 2026-07-31 · status: superseded — the "T9 is the master" half by [[2026-08-25_one-drive-devmaster-is-master]] (2026-08-25); the portability principle itself still lives · tier: W
@@ -3161,6 +3161,49 @@ including *location*) · [[2026-08-26_never-delete-cleanup-means-quarantine]] ·
 3. **Escalation = Wednesday → Kam → WhatsApp.** When a ticket comment is not enough (a security hold, a merge the team must not do, a question blocking a rotation), Wednesday tells Kam on the panel with the WhatsApp text ready: one or two lines, the ticket id, nothing that is not already on the ticket (his 2026-08-19 rule: "by having the detail in that ticket, the message can actually be short"). Kam decides and sends; external comms stay his signature class ([[2026-08-07_protocol-v1.3-signed-delegation]]).
 4. **Wednesday does not nag him with escalation candidates.** Tell him when one exists, with the text; the default if he is silent is that the ticket comment stands on its own.
 5. **Briefs carry this as a standing line** in the HOLDS section for every client project: "Client-facing communication = ticket comments only; the extranet is not a channel; anything needing a push goes to Wednesday as an escalation candidate for Kam's WhatsApp."
+
+
+## A retraction inherits the SCOPE of the measurement that produced it — withdrawing more than was refuted destroys a live finding, and the one it destroys is the one nobody is guarding
+`2026-09-06_a-retraction-inherits-the-scope-of-its-measurement.md` · correction · 2026-09-06 · status: live · tier: W
+
+**The operative case, so the headline matches it:** someone has just refuted something Wednesday
+said, and Wednesday is about to withdraw it. **Before the withdrawal goes out, ask exactly what the
+refuting MEASUREMENT covered — and withdraw only that.** A correction feels like the safe direction,
+so it gets none of the care an assertion gets. It is not the safe direction. An over-broad assertion
+is loud and gets challenged; an over-broad retraction is quiet, reads as humility, and takes a live
+finding with it.
+
+sections (open the file for these): The case · Why this is its own lesson and not another representations row · How to apply
+
+## How to apply
+
+1. **Before withdrawing anything, write down what the refuting measurement actually covered** — the
+   file, the lines, the command, the claim it tested. Withdraw exactly that. If the retraction
+   sentence is broader than that scope, it is wrong.
+2. **A bundle of claims retracts one at a time.** Claims that arrived in one paragraph did not
+   necessarily arrive from one source: check the PROVENANCE of each half separately. Here, one half
+   was Wednesday's inference and the other was a tester's measurement — different authors, different
+   evidence, and only one was refuted.
+3. **Never instruct a downstream reader to correct a document on a retraction's authority** — say
+   what was measured and let them check their own text against it. Seat A was told to change a
+   sentence; had the instruction been *"here is what was measured; check whether your row rests on
+   it"*, the same outcome would have arrived without the risk.
+4. **Treat a correction as the highest-risk act of the session, not the safest.** Twice on 2026-09-06
+   an act of repair produced a NEW error: a forward sent to fix an unreachable pointer carried the
+   wrong report, and this withdrawal over-reached. The representations lesson already says *"when
+   correcting someone, check my own instance of the same thing first"* — this extends it to
+   correcting **myself**: check the scope with the same care as the original claim.
+5. **The tell is a retraction that closes more questions than the measurement opened.** If withdrawing
+   makes several loose ends tidy at once, that is not relief, it is the signal to re-read.
+
+**Family:** [[2026-08-14_i-read-representations-they-read-sources]] (the assertion half; rule 3 and
+"the correction is the highest-risk moment") · [[2026-08-16_an-overstated-record-gets-discounted-wholesale]]
+(a row wrong in its headline is not therefore wrong in its body — this is the same asymmetry pointed
+at a withdrawal) · [[2026-08-13_establish-authority-before-reconciling]] (reconciliation destroys
+evidence; so does retraction) · [[2026-08-21_challenge-me-when-you-think-im-wrong]] (seat A refused a
+correction and was right — and the grant is what made refusing available to it) ·
+[[2026-09-01_qa-gate-before-my-verification]] (SHARPENED 2026-09-04: a claim about the product is not
+a shape — including a claim that a product finding is void).
 
 
 ## A time-scoped instruction gets a mechanism that EXPIRES it — an override with no end date is a permanent change nobody decided to make
