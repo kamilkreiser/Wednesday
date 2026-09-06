@@ -1,79 +1,70 @@
 ---
 date: 2026-09-07
 type: pickup
-source: replaced wholesale by the 00:1x post-rotation seat (updated ~00:5x)
+source: replaced wholesale ~01:2x by the overnight coordinator seat
 status: live
 supersede: replace this file wholesale at the next pickup; do not append
 ---
 
-# NEXT PICKUP — 00:5x, both seats productive, F5 CONFIRMED (ripe for Kam), gate queue HELD; Kam asleep
+# NEXT PICKUP — 01:2x, overnight wind-down: seat A WRAPPED, seat B finishing; SIX PRs await a MORNING gate pass
 
-**Time:** just past midnight AEST (mail timestamps are UTC ≈ AEST−10). Overnight coordinator seat.
-**NO VOICE 23:00–06:00** (now enforced by `speak.sh` quiet-hours guard; `WEDNESDAY_SPEAK_URGENT=1`
-overrides). Kam's standing words: "keep pushing the secuura agent to a ready state"; Opus-5 boot pin
-"for the rest of the week" (credits; doctor WARNs after 2026-09-13).
+**Time:** ~01:20 AEST (mail timestamps UTC ≈ AEST−10). Overnight coordinator seat. **NO VOICE
+23:00–06:00** (enforced by speak.sh). Kam asleep. Standing: "keep pushing secuura to a ready state" +
+Opus-5 boot pin (credits, doctor WARNs after 2026-09-13).
 
-## SEATS — both working (verify from objects; don't trust these SHAs)
-- **Seat A (s141b, %130)** — was ~55% ctx. Shipped **KS-945 (PR #879 @ `79f1fcb48`, stacked on
-  #876), READY FOR QA**; filed **KS-948** (its test names executed npm, broke the install — self-caught).
-  Now on **KS-577 → KS-762** (bounded only; review streams + OAuth cluster held off it). Will rotate
-  at its 80–85% band with a handover.
-- **Seat B (s142, %134)** — ~28% ctx, Opus 4.8. **F5 fully resolved** (items 1+2 + six mounts) and
-  **KS-486 swept**. Now on the **OAuth consent cluster: KS-798 → KS-799 → KS-841**, one at a time to
-  READY, rotate at its band if mid-cluster.
+## WHY THE FLEET IS WINDING DOWN (a decision, recorded for Kam)
+A very productive night: F5 fully resolved + 6 PRs at READY. **The advance to "ready state" now needs
+Kam (merges/disclosure) and careful GATE RUNS — not more building.** More building only piles PRs
+behind the held gate. So: seat A rests (not relaunched), seat B finishes its OAuth cluster, and the
+GATE PASS is the morning's first fleet job. This honours "keep pushing" (the push is blocked on Kam,
+not build capacity) and the credits flag. If Kam wants max overnight throughput instead, relaunch a
+seat A successor on KS-729/KS-664 (bounded dep bumps, per HANDOVER-s141b).
 
-## 🔴 F5 — CONFIRMED, and RIPE for Kam's morning ruling
-Seat B confirmed on a locally booted REAL gateway (never demo): **`//` (double/multi-slash) skips the
-path-scoped rate limiter on ALL 8 auth mounts and is normalised back to canonical in transit → handler
-reached UNAUTHENTICATED and UNLIMITED** (12×200, counter never increments; canonical spelling correctly
-429s). All 6 newly-driven mounts under public /api/auth. **KS-858 class.** The other 3 spellings
-(%XX, ;matrix, %2F) skip the limiter but express 4.22.2 404s them — **curios, not exploitable.**
-- **Two coupled decisions for Kam** (his existing card `secuura-f5-login-limiter-bypass` is the surface;
-  a new card was NOT added — the card gate flagged Kam's prior Peter/Stuart writes, and I respected it,
-  carrying this here + in the chat mirror):
-  1. **Remedy:** A edge-normalise //-only at the gateway (as KS-858), raise KS-858→P1 [seat B's lean,
-     my rec] · B fail-closed reject 400 · C per-predicate (NOT rec) · D fold into KS-858→P1.
-  2. **Disclosure:** tell Peter/Stuart now WITH the fix option, or keep waiting. **Rec: morning, with
-     the option.** External comms = Kam's signature class.
-- **HELD pending Kam:** the ready-to-post KS-946 evidence comment (seat B wrote it, HELD — posting vuln
-  detail to a board they may read is itself disclosure); KS-946 re-price to Blocker; **KS-733 must NOT
-  close as "MFA throttled"** (its remedy is //-bypassable — keep open-with-a-bound or gate behind the
-  KS-858 fix); KS-858→P1.
+## SEATS
+- **Seat A (s141b, %130) — WRAPPED at its band (~01:21), idle, NOT relaunched.** Handover is in the
+  AGENT'S OWN tree: `!CODING/Secuura/Blockchain/5_Project_History/HANDOVER-s141b.md` (read-only for
+  Wednesday) + the full wrap mail. Successor's bounded/free work: **KS-729, KS-664** (dep bumps); do
+  NOT start KS-739 (awaiting Kam); review streams + OAuth cluster need a full window.
+- **Seat B (s142, %134) — RUNNING.** Building **KS-799 Option 2** (JS submit, no CSRF exemption —
+  Wednesday's GO; Option 1 rejected as it re-opens the KS-781 revert surface). OAuth **KS-798+KS-841
+  already READY on #881.** When its queue dries, it wraps — do NOT relaunch overnight (wind-down).
 
-## 🟡 GATE QUEUE — HELD by choice, GROWING; batch it (fresh focused seat or the morning)
-No tester running (go-slow + credits; not launching a stacked tier-1 gate late at night). PRs wait
-harmlessly — nothing merges without a gate + Kam's GO. Run serially, tier-1 first:
-1. **#876 (KS-930) tier-1 re-gate** — head moved twice before; re-read `ls-remote` before briefing.
-2. **#879 (KS-945) — stacked on #876**; gate #876 first, then #879 rebased. Verify KS-948's fix is isolated.
-3. **#874 (KS-926) tier-2 R2** (Kam's cap; findings as a class).
-4. **#875 (KS-936)**, **#878 (KS-942)** tier-2.
-Wrappers: copy `state/launch_qa_*`, python `str.replace` not `sed`, red-proof rc 6/7 both branches.
-**Scoring is HELD until each gate runs** (09-01 rule: score after QA). Seat A's KS-945 + seat B's F5
-deliveries are strong but unscored pending gate.
+## 🔴 THE MORNING'S FIRST FLEET JOB — the GATE PASS (6 PRs, run serially, tier-1 first)
+No tester running (held all night by choice). Nothing merges without a gate + Kam's GO. Re-read
+`ls-remote` for every head (they move). Serial order:
+1. **#876 (KS-930) a0ad0a084 — TIER 1 re-gate** (base of the #879 stack; head moved twice before).
+2. **#879 (KS-945) 79f1fcb48 — STACKED on #876** (gate #876 first, then #879 rebased; verify KS-948 fix isolated).
+3. **#882 (KS-698) bd2b761a0** — the one-request rate-limit-key-poison bypass fix (fails OPEN, KS-616). Note seat A's 2 disclosures: a fake self-heal cell (now extracted to `usableRateLimitEntry()`, red-proof is the evidence) and fix-2 has NO cell (stated).
+4. **#880 (KS-577) 47b2b60f2** — merging picks Platform-S Option 1 by default (Stuart cutover = Kam).
+5. **#874 (KS-926) 6f7885602 — TIER 2 round 2 of 2** (Kam's cap; findings as a class).
+6. **#881 (KS-798+KS-841, +KS-799 when ready)** — OAuth consent cluster, tier 2.
+Wrappers: copy `state/launch_qa_*`, python str.replace not sed, red-proof rc 6/7 both branches.
+**Scoring is HELD until each gate runs** (09-01). Seat A + seat B deliveries strong but unscored.
 
-## KAM'S DESK — cards, all HOLD, none urgent
-1. `secuura-demo-kam-admin-default-password` — demo admin password. Demo identity frozen.
-2. `secuura-f5-login-limiter-bypass` — now RIPE (see F5 above): remedy + disclosure.
-3. **KS-577 (#880, READY) — Stuart cutover + grace-window Option (escalation candidate, not a block).** Seat A built it; condition 1 is Stuart's cutover agreement + which `API_KEY_ROTATION_GRACE_SECONDS` (Opt 1 instant [Kam's default ruling] / 2 bounded / 3 S-side ack, not built). Merging as-is defaults Platform S to Opt 1. External contract = Kam opens it with Stuart. Held behind the gate.
-4. **KS-762 — credential rotation date LAPSED 2026-09-05 (2 days), + the app-db-password switch decision.** Seat A correctly BLOCKED it (no PR): the switch is ruled HELD in-code (KS-165 + the guard header), all 3 conditions Kam's (switch / rotation / tell Stuart+Peter); atomic, cannot be incremental. Surface NOT unguarded today (guard passes reporting HELD). Lapsed rotation is the most actionable piece.
+## KAM'S DESK — 4 cards, all HOLD, none urgent, all for the real morning
+1. `secuura-demo-kam-admin-default-password` — demo admin password (demo identity frozen).
+2. `secuura-f5-login-limiter-bypass` — RIPE: **F5 CONFIRMED** (// unauth bypass, all 8 mounts, KS-858
+   class; curios otherwise). Remedy (A edge-normalise //-only [rec] / B fail-closed 400 / C per-pred /
+   D fold→KS-858 P1) + disclosure to Peter/Stuart (rec: morning, WITH the fix). KS-946 evidence
+   comment HELD; KS-946→Blocker, KS-733 must-not-close-as-throttled, KS-858→P1 all held.
+3. **KS-577 (#880)** — Stuart cutover + grace-window Option (external contract; merging defaults S to Opt 1).
+4. **KS-762** — credential rotation date LAPSED 2026-09-05 + the app-db-password switch (all 3 conditions Kam's; ruled HELD in-code).
 
-## KS-486 register — Kam disposition (from seat B's sweep, HELD)
-Register is NOT uniformly stale (contradicts the earlier "2 of 2 stale"): KS-619/621/623 accurate
-(valid low-pri hardening/trackers, KEEP); KS-652 premise moot (Actions retired → reframe as a
-manual-gate-coverage question); the other 3 are Peter-owned/parked/tracker.
+## 🟡 TO VERIFY IN THE MORNING (seat A self-disclosed, all self-caught/contained, nothing to origin)
+- **KS-869 ticket state**: seat A's `Refs KS-nnn` trailers auto-walked 7 tickets; KS-869 went TND→In
+  Progress→(a bad zsh restore loop)→Backlog→Python-fixed. **Confirm KS-869's final state is correct.**
+- **KS-948** (test names executed npm, pruned the workspace install) — seat A filed it; a real hygiene bug.
+- **zsh word-split — FIFTH instance this session** (Refs trailers / restore loops). Recurring fleet
+  hazard; belongs in the fleet method (M-tier) + the agent's own memory, not Wednesday's ledger.
 
-## 🟡 FIVE STALE RULED CARDS — Kam disposition at the real morning
-Carried in seat B's successor brief. `secuura-ci-billing` (wait), `secuura-agent-github-identity`
-(Kam org action), `secuura-dependabot-triage` (Peter's repo), `secuura-ks229-disclosure-mailbox`
-(later/no-action), `secuura-ps-759-760-merge-owner` (Kam merges 2 Platform-S PRs). Mark `--delivered`
-or re-rule; they've sat 1–2 weeks.
+## 🟡 FIVE STALE RULED CARDS — Kam disposition (in seat B's successor brief)
+`secuura-ci-billing` (wait) · `secuura-agent-github-identity` (Kam org action) · `secuura-dependabot-triage`
+(Peter's repo) · `secuura-ks229-disclosure-mailbox` (later) · `secuura-ps-759-760-merge-owner` (Kam merges 2 PS PRs).
 
 ## THIS SESSION'S LEDGER (self-caught)
-🔴 Quiet-hours voice violation at 00:16 (misread clock as morning) — `speak.sh` guard shipped +
-exercised; framing errors corrected.
+🔴 Quiet-hours voice violation at 00:16 (misread clock as morning) — speak.sh guard shipped+exercised.
 
 ## STANDING NOTES
-INDEX.md STALE (last real refresh 2026-08-11). Env does NOT persist across Bash calls — `set -a; . .env`
-in the SAME command for any raw curl. Wednesday's key gets 403 on project inboxes (isolation) — send
-success is the delivery signal; a tap ≤200 chars. Gate subject = SHA. New work = new branch. Never
-delete — quarantine.
+INDEX.md STALE (2026-08-11). Env does NOT persist across Bash calls — `set -a; . .env` in the SAME
+command for raw curl. Wednesday's key 403s on project inboxes (isolation) — send success = the signal.
+Tap ≤200 chars. Gate subject = SHA. New work = new branch. Never delete — quarantine.
