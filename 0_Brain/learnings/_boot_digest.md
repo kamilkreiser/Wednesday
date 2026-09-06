@@ -7,7 +7,7 @@ status: live
 
 # Boot digest — headline + rules of every lesson (open the file when it fires)
 
-Generated 2026-09-06 14:10 from 99 lesson files (476,567 B). Each block = the lesson's retrieval handle (H1), its frontmatter, the operative paragraph, its section index, and every RULES section verbatim. 6 files carry no rules-shaped section and are included whole. The CASES behind a rule live only in the file: open it the moment the rule fires, or when a diagnosis needs the evidence. `_ledger.md` is read whole beside this digest; `_ledger_archive.md` on demand.
+Generated 2026-09-06 15:43 from 100 lesson files (480,421 B). Each block = the lesson's retrieval handle (H1), its frontmatter, the operative paragraph, its section index, and every RULES section verbatim. 6 files carry no rules-shaped section and are included whole. The CASES behind a rule live only in the file: open it the moment the rule fires, or when a diagnosis needs the evidence. `_ledger.md` is read whole beside this digest; `_ledger_archive.md` on demand.
 
 ## The T9 SSD is the master — Wednesday must be fully portable
 `2026-07-31_fully-portable-drive.md` · principle · 2026-07-31 · status: superseded — the "T9 is the master" half by [[2026-08-25_one-drive-devmaster-is-master]] (2026-08-25); the portability principle itself still lives
@@ -3500,4 +3500,19 @@ including *location*) · [[2026-08-26_never-delete-cleanup-means-quarantine]] ·
 3. **Escalation = Wednesday → Kam → WhatsApp.** When a ticket comment is not enough (a security hold, a merge the team must not do, a question blocking a rotation), Wednesday tells Kam on the panel with the WhatsApp text ready: one or two lines, the ticket id, nothing that is not already on the ticket (his 2026-08-19 rule: "by having the detail in that ticket, the message can actually be short"). Kam decides and sends; external comms stay his signature class ([[2026-08-07_protocol-v1.3-signed-delegation]]).
 4. **Wednesday does not nag him with escalation candidates.** Tell him when one exists, with the text; the default if he is silent is that the ticket comment stands on its own.
 5. **Briefs carry this as a standing line** in the HOLDS section for every client project: "Client-facing communication = ticket comments only; the extranet is not a channel; anything needing a push goes to Wednesday as an escalation candidate for Kam's WhatsApp."
+
+
+## Another project's checkout is READ-ONLY for git too — `fetch`, `merge-tree --write-tree` and `worktree add` WRITE into its `.git`; predict a merge by naming the seat that runs it, never by running it there
+`2026-09-06_other-projects-repos-are-read-only-git-verbs-that-write.md` · correction · 2026-09-06 · status: live
+
+**The operative case, so the headline matches it:** Wednesday is about to run a `git` command with `-C <another project's checkout>` to verify a merge, predict a merge-tree oid, or bring a commit into view. **Ask: does this verb write to `.git`?** `diff`, `diff --numstat`, `merge-base`, `rev-list`, `show`, `cat-file`, `ls-tree`, `ls-remote`, `log`, `grep` — READ. `fetch`, `pull`, `push`, `merge-tree --write-tree`, `worktree add/prune`, `checkout`, `reset`, `stash`, `commit`, `tag`, `gc` — WRITE. A write into an agent's checkout from Wednesday's hands is hard rule 1 broken (stay in the project folder; manage, don't do), however harmless the objects are, and it happened twice in one day because the two verb classes look identical at the prompt and no headline named the line.
+
+**How to apply:**
+1. **Verify a merge from the agent's own receipt** (parents + tree oid + stat, DKIM-verified) plus `ls-remote` from Wednesday's seat. When origin holds a commit the local objects lack, the merge fact is the agent's to re-derive on request — or Wednesday clones by SHA into its OWN scratchpad (`git clone --shared` from the checkout is itself read-only on the source) and runs the write verbs there.
+2. **A merge-tree prediction in a brief names the instrument and the seat:** "predicted by the tester in its own copy" or "the builder's merge-tree in its worktree, quoted". Wednesday's own prediction, if ever needed, is made in Wednesday's clone.
+3. **Before any `git -C <path>` where `<path>` is outside `/Volumes/DevMASTER/WEDNESDAY`:** read the verb against the WRITE list above. If it is on it, stop.
+4. **Enforcement candidate (w=3 promotes it):** the pretooluse hook that refuses `cd` gains a clause refusing `git -C <path outside WEDNESDAY>` followed by a write verb, and `git fetch|pull|push|merge-tree --write-tree|worktree` with the tool's cwd outside WEDNESDAY.
+5. **When it has already happened:** disclose it in the artefact the objects were written for (the brief's provenance line: "run by Wednesday IN THE BUILDER'S CHECKOUT — a write; re-derive it, do not trust it"), record the row, and tell the seat whose repo it is if anything could be observed (`FETCH_HEAD` moved; dangling objects — nothing an agent's workflow reads).
+
+**Family:** [[2026-07-31_manage-dont-do]] (rule 2: editing that project's files from Wednesday's hands is not allowed — `.git` is its files) · [[2026-08-15_a-gui-open-is-a-write]] (an action classified as reading that writes) · [[2026-08-13_headline-must-match-the-operative-case]] (a rule without a headline does not fire) · [[2026-08-09_an-enforcement-you-must-arm-is-not-one]] (the w=3 clause).
 
