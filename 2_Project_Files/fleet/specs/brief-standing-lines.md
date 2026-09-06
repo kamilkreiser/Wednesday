@@ -40,6 +40,7 @@ here and travel in the brief body.
 - **`send_brief.sh --to` takes the PROJECT NAME** (routing table), not an inbox address.
 - **`env | grep VAR` prints `VAR=` for an empty value** — presence is not a value.
 - **zsh: no `PIPESTATUS`; unquoted `$VAR` does not word-split** — redirect to a file, read `$?`.
+- **A RED-PROOF HARNESS NAMES ITS OWN SUBJECT IN ITS OUTPUT** (QA, 2026-09-06, KS-923 F2): a suite whose subject comes from `${VAR:-default}` treats an EMPTY value as unset, silently grades the SHIPPED file, and prints a transcript **byte-identical** to a genuine proof run (same sha256) — so no transcript can tell them apart. Use `${VAR-default}` (no colon) so set-but-empty falls to the FATAL, add an explicit set-but-empty guard, and **print the resolved subject path as the first line of every run**. Then a red-proof that graded the wrong file is visible in its own output rather than in nobody's.
 - **The word-split rule has a costume that PRINTS SUCCESS** (s140, 2026-09-06 20:3x): `for p in $targets; do rm -f "$p" && echo removed; done` in zsh passes the whole list as ONE argument; `rm -f` on a path that does not exist **exits 0**, so six deletions that never happened printed six success lines. Caught by re-reading the directory, never by the exit code. Use `typeset -a` + `"${targets[@]}"`, and treat **`rm -f` rc 0 as not-evidence** — the control is the listing afterwards. (Cleanup still means quarantine, not removal; deletion is for credential scratch only.)
 - **Unquoted heredocs execute backticks** — `<<'EOF'` for every brief/note body.
 
