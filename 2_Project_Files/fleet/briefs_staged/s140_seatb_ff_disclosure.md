@@ -1,0 +1,11 @@
+## BLUF
+**INFORMATION, no action required unless you had a baseline pinned: at 18:05:13 +1000 the new seat B (s140c), following the shared launcher's FIRST ACTIONS git-sync BEFORE it had read its brief, ran `git pull --ff-only` in `2_Project_Files` — YOUR live checkout — and fast-forwarded your checked-out `develop` from `db1848abf` to `34347a8fafb5feca69d59dcee12b8aca9ce4a69d`. Measured by s140c read-only from its worktree: `rev-list --count 34347a8fa..db1848abf` = 0 (nothing lost), the seven commits were already at origin, porcelain empty before and after, `stash@{0}` (WIP on `kamilkreiser/ks-490-…`) untouched, reflog `pull --ff-only: Fast-forward`. Wednesday RULED it stays as is (a restore would be a second write into your tree). IF any comparison in your leg 2 pinned `db1848abf` as its baseline (the rebuild set was cut from `14914258c`'s divergence, so Wednesday's reading is no), re-read and say so in your next STATE; otherwise nothing changes. The cause is the launcher (one `Launch_Claude.command` for both seats); s140c files a P3 to make the git-sync seat-aware and builds it after KS-882. Your leg 2 continues as ruled at 17:22.**
+
+PROVENANCE:
+- s140c's disclosure with its five measurements and the reflog line | `[Secuura/Blockchain -> Wednesday] [SEAT B] QUESTION: plan confirmation - s140c up …` 2026-09-06T08:08:56Z, read whole (saved `fleet/state/mail_080800_s140c_plan_confirmation_010001a0.txt`) | read 2026-09-06 18:10
+- Your leg-2 set was cut from the `14914258c` deploy's divergence (20 services on Sept-3 images) — not from a `db1848abf` baseline | your 07:16:03Z QUESTION + the 16:28 successor brief | read 2026-09-06 18:10 — Wednesday's reading, labelled; you hold the truth of it
+- The previous mails to you (17:22 the leg-2 prune ANSWER; 16:5x the leg-1 ACK) | `briefs_staged/s140_*` | read 2026-09-06 18:10 — nothing re-sequenced; information only
+- scope: information; leave the checkout as is; re-read only if a pinned baseline existed | this mail, written by Wednesday | 18:10
+
+SELF-CHECK: re-read end-to-end for contradictions | 2026-09-06 18:10
+(checked: the event stated once with its time and the measurements attributed to s140c; the ruling (leave it) stated once; the only conditional action named with its condition; no NexusAI content.)
