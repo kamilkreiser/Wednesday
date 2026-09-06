@@ -7443,5 +7443,25 @@
   "role": "wednesday",
   "ts": "2026-09-07T07:34:38.716628+10:00",
   "text": "Your scopes answer is back, and it is worth the two minutes. Full document: 5_Project_History/2026-09-07_attio-m365-scopes-report.md. There is a card on your queue.\n\nYou asked whether it reads message bodies. Yes. Not headers, not metadata — full messages including attachments, and Attio stores them.\n\nThe thing you did not ask, which is the part I am glad we checked: it is not read-only. Three of the seven permissions are write or send. It can modify items in the mailbox, and it can SEND MAIL AS YOU — recipients see it from you, by two separate paths. Nobody reading the words 'email and calendar sync' would expect send-as. There is also a refresh token in there, which turns it from a session into standing access that keeps working with nobody watching until someone revokes it.\n\nThe reassuring half, with its limit attached rather than as comfort: the permissions look delegated rather than tenant-wide, on three independent signs — so a mailbox only reaches Attio when its owner connects it, and your admin consent removes the 'needs approval' prompt rather than handing over every mailbox in Datasec.\n\nBut the agent named the hole in its own reasoning instead of smoothing it: Microsoft grants what is registered on the APP, not only what is written in the link. If Attio also declares tenant-wide permissions, the same click grants those too, and this report would not know.\n\nWhich is why my recommendation is not grant and not refuse. It is: open the consent screen and read it. That screen is the authority, it labels tenant-wide permissions distinctly, and if any line says 'all mailboxes' the whole delegated reading is wrong and you stop. Ten seconds, and it beats the entire report.\n\nOne more thing it flagged and I agree with: nobody documents what Attio does with stored bodies after a mailbox is disconnected. That belongs in the security pack you already ruled to send.\n\nTwo things it refused to do, which I want on the record because they were both available. It holds no identity in your corporate tenant and did not go looking for one. And the Attio browser session was closed — signing in as you was available, and it did not."
+ },
+ {
+  "role": "kam",
+  "text": "Decision attio-entra-consent-decision: open-and-look — Open the consent screen and check for \"all mailboxes\" before deciding (recommended)",
+  "ts": "2026-09-07T07:37:50.893689+10:00"
+ },
+ {
+  "role": "kam",
+  "text": "Decision secuura-demo-admin-mfa: later — Leave MFA off for now, revisit after the suites run (recommended)",
+  "ts": "2026-09-07T07:37:56.334668+10:00"
+ },
+ {
+  "role": "kam",
+  "text": "Decision secuura-demo-admin-transcripts: redact — Redact them WITH a dated note saying what was removed and why (recommended)",
+  "ts": "2026-09-07T07:38:07.056665+10:00"
+ },
+ {
+  "role": "wednesday",
+  "ts": "2026-09-07T07:39:45.724009+10:00",
+  "text": "All three rulings recorded and moving. Two notes.\n\nThe transcripts one is yours to know about because it changed my instruction, not just the agent's work. I had told the agent to redact only three of the ten — the three the tester found were not really transcripts at all but live instructions telling a reader to configure a test harness with your address and the published password. You have ruled all ten, with a dated note. That is simpler and it is the agent's own recommendation, so I have superseded my narrowing by name rather than letting two instructions sit in its inbox contradicting each other.\n\nThe three still need more than redaction, though, and I have said so: an instruction telling someone to do a thing is still wrong once you remove the credential from it. Those get corrected as well as redacted.\n\nOne boundary I added that is mine, not yours: redacting a historical record is the one place today where 'never delete' bites hardest. The original bytes stay recoverable through git history, nothing leaves the tree, and if any of the ten turns out not to be tracked the agent stops and asks before touching it.\n\nOn the consent screen — that one is yours to do, not an agent's. When you open it, the single thing that matters is whether any line says 'all mailboxes' or 'without a signed-in user'. If it does, the whole delegated reading is wrong and you close it. If every line is the delegated kind, the report's table is what you are granting.\n\nMFA stays off and will come back to you after the platform suites run, which is what those suites are now for.\n\nWhere the fleet is: the guard that blocks every push is back under a full test pass — the agent inverted its logic rather than narrowing it for the fourth time, and it talked me out of my own recommendation on the way, correctly. Two more rounds queued behind it. The Attio agent has finished and is closed. Nothing merged, nothing deployed, nothing to Peter or Stuart."
  }
 ]
