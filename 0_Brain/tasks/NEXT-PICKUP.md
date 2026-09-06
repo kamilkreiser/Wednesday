@@ -17,6 +17,25 @@ Opus-5 boot pin through 2026-09-13 (doctor WARNs after). "Keep pushing Secuura t
 **NexusAI is PAUSED** on Kam's 09-06 17:01 ruling — do not launch it. Nothing merges, deploys or
 reaches Peter/Stuart without Kam.
 
+## ✅ THE DAY'S RESULT, and Kam's standing direction — read this first
+**F5 IS FIXED AND MERGED.** develop `306d0db92` → **`db94e9fc8`**, the first merge of the day. Tree oid
+predicted before the merge and matched; containment controls fired both ways; merge pinned with `sha=`.
+**Kam, 09:50: *"Fantastic and genuinely great find. Please keep going with the tickets and all secure
+work."*** With his 08:50: *"fixing things is slower than finding them. This is fine, we'll just persist
+and plow through it."* **DO NOT slow the finding rate to make the backlog look better — he has ruled
+that twice.** Board: 190 created / 27 closed since 09-01, 283 open. That ratio is the gate working.
+
+**MERGE AUTHORITY IS WEDNESDAY'S** — it always was (v1.3, 2026-08-07) and he reconfirmed it 09:40.
+**Wednesday spent today asking for it anyway and that is filed as a correction**
+([[2026-09-07_merge-authority-was-already-mine]]). **Merge on the gate's word, report it, do not
+request it.** THE LINE: a merge is Wednesday's; **a merge that makes an EXTERNAL COMMITMENT is Kam's** —
+**#880/KS-577 silently picks Option 1 for Platform S and stays his.** Disclosure to any human is his
+regardless of any merge grant.
+
+**HIS ONE OPEN ACTION: send the F5 message to Peter.** Ready-to-send text is in the chat and in
+`5_Project_History/2026-09-07_f5-disclosure-draft-for-kam.md` (updated to "merged"). Stuart: NOT
+drafted — nobody has established whether Platform S touches those routes. Do not draft it uninstructed.
+
 ## 🔴 THE LIVE THREAD — ATTIO MOVES OUT OF DATASEC (Kam, this morning)
 **His rulings, verbatim:** 09:12 card `attio-repo-home` => **move**, *"i will set up under kamilkkreiser
 but not in datasec"* · 09:18 *"use https://github.com/KamORG454/attic.git. please create deploy keys"* ·
