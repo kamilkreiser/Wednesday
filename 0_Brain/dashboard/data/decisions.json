@@ -4446,5 +4446,77 @@
    "2026-09-05 15:04",
    "2026-09-06 10:23"
   ]
+ },
+ {
+  "id": "secuura-f5-demo-exposure-probe",
+  "client_project": "Secuura/Blockchain",
+  "title": "Do we probe the DEMO to find out if F5 is live there?",
+  "bluf": "F5 was measured only on a locally booted gateway - deliberately, because touching the demo is approval-class. So the actual exposure on the box Peter and Stuart use is UNMEASURED. The code path is the same, so it is very likely affected, but Wednesday will not report a guess as a finding. A probe would be one unauthenticated GET-shaped request against one non-destructive route, run read-only, to establish whether the bypass is reachable there. It changes nothing on the box. It also changes the disclosure card: if the demo is clean, the urgency drops; if it is live, it rises.",
+  "default_action": "HOLD - the demo is not touched. Wednesday states the exposure as UNMEASURED in everything it writes, including any disclosure.",
+  "options": [
+   {
+    "key": "probe",
+    "label": "Authorise a single read-only probe (recommended)",
+    "detail": "One request, one non-destructive route, no writes, result reported to you before anything else happens."
+   },
+   {
+    "key": "noprobe",
+    "label": "Do not touch the demo - assume it is affected",
+    "detail": "Safe, and we disclose on the assumption. Costs us precision in what we tell Peter and Stuart."
+   },
+   {
+    "key": "later",
+    "label": "Decide after the fix is gated",
+    "detail": "Defers it; the fix lands either way."
+   }
+  ],
+  "recommended": "probe",
+  "ts": "2026-09-07T06:16:10.607547+10:00",
+  "status": "open",
+  "ruled_choice": null,
+  "ruled_ts": null
+ },
+ {
+  "id": "secuura-f5-disclosure-timing",
+  "client_project": "Secuura/Blockchain",
+  "title": "F5 is CONFIRMED — when do Peter and Stuart hear about it?",
+  "bluf": "Prior-rulings check: Kam has written seven times about Peter and Stuart (the 08-19 WhatsApp draft, the 09-02 completed-tickets message, the 09-03 status question, the 09-05 aggregate-into-blocks instruction, the 09-06 keep-the-seven-assigned ruling). None of them rules DISCLOSURE of an unfixed security defect, so this card stands; the 09-05 block instruction is folded into the options below. THE DECISION: the double-slash bypass is confirmed on a real booted gateway - /api/auth//register and the other seven limiter mounts skip rate limiting entirely and reach the handler, six of them unauthenticated. This supersedes the open card secuura-f5-login-limiter-bypass, written when it was only a reproduction. Two things have moved: Wednesday has RULED the fix (normalise // once at the gateway edge - the KS-858 class fix) and a Secuura seat is building it now, so the fix is hours away. UNMEASURED, and Wednesday will not guess: whether the DEMO Peter and Stuart use is affected. Same code path, so very likely - but nobody has probed it (that is your other card, secuura-f5-demo-exposure-probe). Telling them is external comms and stays yours.",
+  "default_action": "HOLD - nothing reaches Peter or Stuart. The fix is built and gated, and this card is re-raised with the PR in hand.",
+  "options": [
+   {
+    "key": "now",
+    "label": "Tell them NOW, before the fix",
+    "detail": "A short WhatsApp from you pointing at KS-946, so they stop relying on auth rate limits today. Gives them a hole they cannot act on, but no surprise later."
+   },
+   {
+    "key": "withfix",
+    "label": "Tell them WITH the fix, later today (recommended)",
+    "detail": "One message once the fix is READY and gated - the defect, the fix, the PR, and the one thing they do, written as a test block per your 09-05 instruction. Same day, one context switch instead of two."
+   },
+   {
+    "key": "onmerge",
+    "label": "Tell them when it MERGES",
+    "detail": "Cleanest for them, latest for you. Merging needs your word anyway."
+   },
+   {
+    "key": "hold",
+    "label": "Say nothing yet; re-raise when the fix is gated",
+    "detail": "The default if you say nothing."
+   }
+  ],
+  "recommended": "withfix",
+  "ts": "2026-09-07T06:16:41.005840+10:00",
+  "status": "open",
+  "ruled_choice": null,
+  "ruled_ts": null,
+  "prior_rulings_overridden": [
+   "2026-08-19 09:45",
+   "2026-08-21 20:06",
+   "2026-08-26 17:11",
+   "2026-09-02 21:26",
+   "2026-09-03 11:37",
+   "2026-09-05 15:04",
+   "2026-09-06 10:23"
+  ]
  }
 ]
