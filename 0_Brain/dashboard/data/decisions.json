@@ -4299,5 +4299,38 @@
   "ruled_ts": "2026-09-06T14:01:03.941498+10:00",
   "delivered_artefact": "PR #845 round-3 commit e1d9d93803780f50152ab2d7d31e6e30007d37af at origin (ls-remote 14:2x) + KS-861 comment b7fddc51-39d8-47ee-9cd7-af1f8c2ce3a1 (04:14:38Z); under its tier-1 gate %95 since 14:22",
   "delivered_ts": "2026-09-06T14:30:04.792177+10:00"
+ },
+ {
+  "id": "secuura-demo-vm-prune",
+  "client_project": "Secuura/Blockchain",
+  "title": "Demo VM disk: prune the Docker build cache and dangling images so the demo can be rebuilt under your 15:12 lift?",
+  "bluf": "OVERRIDE of the prior-ruling gate, reason: its two matches are the 08-21 Peter PR #729 message and your 09-03 09:49 ruling to prune the STUDIO's Docker Desktop cache — this card is the demo VM in Azure (secuura02-demo-vm), a different box, never ruled on. The VM has 13 GB free; deploying the merged develop means rebuilding the 24 service images that bake packages/shared, 19.2 GB today, and the never-delete rule stops the Secuura agent (seat A) from pruning anything. Measured read-only by seat A 15:2x: build cache 18.16 GB (14.85 GB reclaimable), 62 images 24.6 GB (9.25 GB reclaimable). A prune is a deletion on your box, so it is your word. Meanwhile seat A deploys only the four services whose behaviour the Tested-Not-Deployed tickets touch (migrations, api-gateway, auth, originate, ~6 GB) IF the packages/shared change measures additive for the other 20; the lift runs until the tickets and the backlog are through, so deploys will recur and the prune is asked for once.",
+  "default_action": "HOLD — nothing is pruned until your word; seat A deploys the four changed services now if the shared delta measures additive, the other 20 rebuild after the prune",
+  "options": [
+   {
+    "key": "a",
+    "label": "Prune both (build cache + dangling images) — recommended",
+    "detail": "docker builder prune + image prune of dangling only; running containers and their images untouched; ~24 GB back; the full 24-image rebuild then fits twice over"
+   },
+   {
+    "key": "b",
+    "label": "Prune the build cache only",
+    "detail": "~14.85 GB back; the full rebuild fits once, tightly"
+   },
+   {
+    "key": "c",
+    "label": "No prune",
+    "detail": "the deploy stays partial (4 of 24 services) until disk is freed another way"
+   }
+  ],
+  "recommended": "a",
+  "ts": "2026-09-06T15:37:05.334788+10:00",
+  "status": "ruled",
+  "ruled_choice": "a",
+  "ruled_ts": "2026-09-06T16:27:24.973891+10:00",
+  "prior_rulings_overridden": [
+   "2026-08-21 09:47",
+   "2026-09-03 09:49"
+  ]
  }
 ]
