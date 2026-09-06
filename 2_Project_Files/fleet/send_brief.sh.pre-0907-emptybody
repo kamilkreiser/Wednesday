@@ -54,44 +54,6 @@ fi
 
 BODY="$(cat "$BODY_FILE")"
 
-# EMPTY-BODY GATE (2026-09-07, ledger: a subject-only ANSWER reached seat s143).
-# `send_brief.sh` reported "sent" and `cockpit.sh say --mail` verified the mail at
-# the destination — BY SUBJECT. Both passed on a mail with NO BODY. The agent proved
-# it empty from the DKIM body hash and asked for a resend; it cost it a turn and
-# nearly cost it a GO/NO-GO criterion it needed before writing code.
-# Cause was upstream of this script: `open(p,'w').write(open(p).read()...)` truncates
-# the file before the read runs. That will happen again, so the refusal lives HERE,
-# in the path, rather than in a rule about how to write files.
-# A body that is empty, or has no non-whitespace content, or is shorter than a
-# plausible sentence, is refused. There is no --force: a body worth sending is
-# never 40 bytes.
-BODY_BYTES=$(printf '%s' "$BODY" | wc -c | tr -d ' ')
-BODY_VISIBLE=$(printf '%s' "$BODY" | tr -d '[:space:]' | wc -c | tr -d ' ')
-if [ "$BODY_VISIBLE" -lt 40 ]; then
-  cat >&2 <<EMSG
-BRIEF REFUSED — the body is empty or trivially short.
-
-  --body-file : $BODY_FILE
-  bytes read  : $BODY_BYTES
-  non-space   : $BODY_VISIBLE  (minimum 40)
-
-Nothing was sent. The commonest cause is a truncate-before-read while stamping the
-body: \`open(p,'w').write(open(p).read()...)\` opens for WRITE first, which empties
-the file, so the read returns nothing. Read into a variable FIRST, then write:
-
-  s = open(p).read().replace("@NOW@", now)
-  with open(p,'w') as f: f.write(s)
-
-Then check it: \`wc -c < <body-file>\` before sending.
-
-Ledger 2026-09-07: a subject-only ANSWER reached a live seat. send_brief said "sent"
-and the --mail read-back verified the SUBJECT at the destination; neither looked at
-the body. Verify a delivered body by its \`preview\` field being non-null, never by
-\`text\` in a LIST response (that is 0 for every message, including good ones).
-EMSG
-  exit 1
-fi
-
 # ── PLACEHOLDER GATE (2026-09-06 12:4x, check-the-refusal w=3 → promoted) ──
 # A `sed` receipt-fill failed (a `/` in the receipt broke the delimiter) and the
 # send in the SAME call ran on the unfilled file: "@LAUNCH@" and "@NOW@" reached
