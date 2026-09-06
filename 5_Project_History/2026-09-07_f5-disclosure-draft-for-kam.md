@@ -16,9 +16,22 @@ Kam asked for it prepared; it is prepared, and this note says plainly what it wa
 ## WHAT PETER AND STUART ARE ACTUALLY BEING TOLD
 - An extra slash in the URL (`/api/auth//login`) skipped the rate limiter entirely.
 - It affected **all eight protected auth mounts**, and **six of those need no login at all**.
-- Confirmed on a real running gateway, locally booted — **never on the demo**.
-- **Whether the demo is affected is still UNMEASURED.** Kam authorised one read-only probe at 06:43;
-  it has not run yet. **The message must not claim either way until it has.**
+- Confirmed on a real running gateway, locally booted.
+- **THE DEMO IS AFFECTED. Measured 2026-09-06T20:49:45Z, not inferred** — updated after this draft
+  was first written. The canonical address answers with the per-route limit (`100;w=900`); the
+  double-slash address answers with the GLOBAL limit (`2000;w=60`). **No path-scoped limiter on that
+  box has a 60-second window, so the path-scoped mount was unambiguously missed.** On that route the
+  demo is **300x more permissive** through the extra slash: 6.67/min becomes 2000/min.
+  Cost of establishing it: **two read-only GET requests, nothing written, no limiter exhausted, no
+  credential sent.** Both 404'd at the backend, so no handler did any work.
+- **The precise limits of that measurement, which the message must not round up:**
+  - **One route was probed** (`/api/auth/verify-email`). The other seven are **inference** from
+    identical mount shape plus the local 8/8 result — write them as inference.
+  - The probe used **GET**, so **the limiter miss is measured; whether the demo would SERVE a POST
+    through the slash is NOT.** Locally it does. On the demo it is unmeasured. **Understate it.**
+- Also established: `server: nginx` on both responses, so **neither Caddy nor the compose nginx
+  collapses the path on the way in** — the request reaches the gateway still spelled `//`. And the
+  demo runs a **non-prod `NODE_ENV`** (the limit reads 100 rather than the production 10).
 - The fix normalises the path once at the gateway edge, above every guard, so the same trick is
   closed for the scope gates and the GDPR routes too — not just the limiters.
 
@@ -32,6 +45,10 @@ Kam asked for it prepared; it is prepared, and this note says plainly what it wa
 > limiter completely. It affects all eight protected auth routes and six of them are
 > unauthenticated. Confirmed on a real running gateway, not the demo, and the demo was never
 > touched.
+>
+> It is live on the demo too — we measured it there this morning with two read-only requests. On
+> the route we checked, the extra slash makes the demo about 300x more permissive. We only probed
+> the one route; the other seven look the same in the code but we haven't driven them there.
 >
 > The fix is PR #884: it normalises the path once at the gateway edge, above every guard, so it
 > closes the scope gates and the GDPR routes at the same time. It's under test now.
@@ -81,6 +98,7 @@ his relationship and his call.
 - The fix's shape and that it closes the scope gates and the GDPR routes | the s143 seat's mail 2026-09-06T20:42:49Z (`//api/gdpr//erasures` 404 -> 401 measured) | read 2026-09-07
 - #884 head `f3a0379787123b45e4ffdb48d9d3db78e9661726` | `git ls-remote origin` from Wednesday's own seat | measured 2026-09-07 06:4x
 - Kam's rulings | `kam_rulings_today.sh`, cards `secuura-f5-disclosure-timing` => withfix and `secuura-f5-login-limiter-bypass` => wait + the "prepare the message" note | read 2026-09-07
-- Whether the DEMO is affected | **UNMEASURED** — the authorised probe has not run | not read
+- The demo IS affected, 300x on `/api/auth/verify-email` | the seat's probe mail 2026-09-06T20:51:16Z: two read-only GETs at 20:49:45Z reading `ratelimit-policy` headers, with every `rateLimit` mount in `index.ts` enumerated to show no path-scoped mount has a 60s window | measured 2026-09-07
+- The other seven mounts on the demo, and whether the demo SERVES a POST through `//` | **UNMEASURED** — one route, GET only; the rest is inference from mount shape | not read
 - Whether Platform S calls any of the eight mounts | **UNMEASURED** | not read
 - KS-946's current content and whether it already carries the reproduction | NOT read by Wednesday in this action | not read

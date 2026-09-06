@@ -4518,5 +4518,34 @@
    "2026-09-05 15:04",
    "2026-09-06 10:23"
   ]
+ },
+ {
+  "id": "secuura-f5-demo-interim-mitigation",
+  "client_project": "Secuura/Blockchain",
+  "title": "F5 is CONFIRMED LIVE on the demo — protect it in the interim, or let the fix land?",
+  "bluf": "Prior-rulings check: you ruled secuura-f5-demo-exposure-probe=probe and secuura-f5-disclosure-timing=withfix ninety minutes ago. Neither covers this, because neither of us knew the answer yet. THE MEASUREMENT: the probe ran (2 read-only GETs, nothing written, no limiter exhausted, no credential sent) and F5 IS LIVE on the demo. The canonical address answers with the per-route limit of 100 per 900 seconds; the double-slash address answers with the GLOBAL limit of 2000 per 60 seconds - so on that route the demo is 300x more permissive via the extra slash. No path-scoped limiter on that box has a 60-second window, so the miss is unambiguous. WHAT IS NOT MEASURED, and Wednesday will not round it up: only ONE of the eight routes was probed (the other seven are inference from identical mount shape plus the local result), and the probe used GET, so the LIMITER MISS is measured while whether the demo would actually SERVE a POST through the slash is not. THE DECISION: the real fix (PR #884) is built and in testing and could merge today on your word. An interim edge mitigation on the demo would be a change to a live box - your signature class - and carries its own risk on a box Peter and Stuart are using.",
+  "default_action": "HOLD - no change to the demo. The fix is gated and comes to you for the merge, and the message to Peter and Stuart states the demo exposure as measured on one route and inferred on the rest.",
+  "options": [
+   {
+    "key": "letitland",
+    "label": "No interim change - land the real fix today (recommended)",
+    "detail": "The fix is hours away and gated. A hasty edge rule on a live box is a second change to review, on the same surface, with less testing than the thing it is standing in for. The demo is non-prod and the exposure is a weakened rate limit, not a new door."
+   },
+   {
+    "key": "mitigate",
+    "label": "Put an interim edge rule on the demo now",
+    "detail": "Collapse repeated slashes at the demo edge until #884 merges. Closes it within the hour. Costs a live change to a running box and a second thing to unpick afterwards."
+   },
+   {
+    "key": "ask",
+    "label": "Have the agent measure the remaining seven routes first, then decide",
+    "detail": "One more narrow read-only probe pass. Buys precision for your message to Peter and Stuart; costs a little time and widens the probe authorisation you gave."
+   }
+  ],
+  "recommended": "letitland",
+  "ts": "2026-09-07T06:52:56.522550+10:00",
+  "status": "open",
+  "ruled_choice": null,
+  "ruled_ts": null
  }
 ]
