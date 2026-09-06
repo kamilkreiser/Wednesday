@@ -37,7 +37,7 @@ develop 306d0db923183f3b62b053f0242549e37bdf362c   (unmoved all morning)
 #879  79f1fcb48  KS-945   STACKED on #876, blocked behind it
 #880  47b2b60f2  KS-577   Stuart cutover — Kam's, not gated
 #881  787771b97  OAuth cluster — NOT GATED TODAY
-#882  bd2b761a0  KS-698   NO GO round 1 — queued behind #876
+#882  bd2b761a0  KS-698   NO GO round 1 — STARTED 07:47 (was UNTOUCHED for 75 min while both sides believed it queued)
 #883  bac58b93a  KS-729 leg 1 — NOT GATED TODAY
 #884  f3a037978  KS-858/F5 — GO ruled on the criterion; TIER-1 GATE RUNNING
 #885  9be9a8380  KS-949   demo admin — TIER-1 GATE RUNNING
