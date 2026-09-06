@@ -3,10 +3,246 @@ client: Secuura
 project: Blockchain
 path: /Volumes/DevMASTER/!CODING/Secuura/Blockchain
 status: active
-updated: 2026-09-04
+updated: 2026-09-06
 ---
 
 # Secuura / Blockchain (Platform K)
+
+## CATEGORY-1 LIST (generated 2026-09-06 10:16 by a Wednesday-assistant from a full paginated board read; both seats select from here)
+
+**Counts.** Instrument for totals: `2_Project_Files/fleet/board_count.sh linear` (cap 250, refuses a total equal to its cap). Predicate `{team:{key:{eq:"KS"}}, state:{type:{in:["backlog","unstarted","started"]}}}` → **TOTAL=208** (backlog-type 113 · unstarted-type 47 · started-type 48, each by its own board_count run). Full read: 3 pages of `first:100` + `after:` cursor until `hasNextPage=false` → 208 unique issues, matching the count. By state name: Backlog 113 · Todo 47 · Blocked 3 · In Review 25 · In Progress 20 (Tested Not Deployed is not in the predicate — 0 read).
+**Classification (over the 163 not in flight):** category 1 = **119** (seat A 59 · seat B 44 · ? unpartitioned 16) · category 2 = **31** (assignee rule 6 · `[Decision]` title 4 · newest-comment bounce 5 · ticket-text names a human's ruling 13 · Wednesday card hold 3) · category 3 = **13** · **in flight (In Review + In Progress, not selectable) = 45**. Newest comment = client-side max(createdAt) over `comments(first:50)` (max seen on one ticket: 42). Comment authors on the board: ours 324 · Peter 105 · Stuart 23. No ticket's newest comment by Peter/Stuart asked a question or reserved the work — every Peter/Stuart-newest ticket outside cat 2 carries a measurement or status note only (basis quoted per row where it mattered).
+
+**Seat rule:** A = product (`services/*/src/` outside `__tests__/`, `migrations/`, `packages/shared/src/` outside `__tests__/`, compose/config) · B = harness (`packages/shared/src/__tests__/`, `services/*/src/__tests__/`, `systemTest/`, `tests/`, `scripts/`) · ? = the ticket names no path in either tree. **Read the deciding-path note before starting — VERIFY FIRST / DUPLICATE / OVERLAP flags are load-bearing.**
+
+### Category 1 — ours to do now (sorted priority 1→4, then id)
+
+| id | pri | state | seat | deciding path | title | newest comment (date, author) |
+|---|---|---|---|---|---|---|
+| KS-61 | 2 | Todo | A | `docs/openapi/secuura-api.yaml` regenerated from `services/*/src/*.openapi.ts` (descriptions/operationId) | OpenAPI compliance: documentation gaps across the spec (descriptions, parameter docs, operationId) | 2026-06-03, Peter |
+| KS-188 | 2 | Todo | A | `services/*/src/*.openapi.ts` → spec `links`/`operationId` | Stateful testing: declare OpenAPI `links` + `operationId` so POST→GET→DELETE chains are exercised (currently 0 of 613 links covered) | 2026-08-05, Peter |
+| KS-485 | 2 | Todo | ? | unpartitioned — coordination hub / findings register, no file paths | Security review — plan, methodology & handover (Platform K) | 2026-09-05, ours |
+| KS-490 | 2 | Todo | A | register rows over `services/*/Dockerfile`, `docker-compose*.yml` | Review E — Deployment, containers & CI/CD supply chain | 2026-09-02, ours |
+| KS-491 | 2 | Todo | A | `docker/nginx-gateway/` (remaining row = strategic WAF gap; Caddyfile row FALSE per 2026-09-02) | Review F — Edge, WAF, DDoS & anti-automation | 2026-09-02, ours |
+| KS-525 | 2 | Backlog | B | `systemTest/playwright/` (8 of 310 ops covered) | Playwright: end-to-end flow coverage across all 310 published API operations | 2026-07-25, Peter |
+| KS-565 | 2 | Backlog | A | `services/*/src/` response schemas for POST /api/m365/connections/complete + POST /api/presentations/verify | Sweeps 2026-08-05: untracked failures across 10 ops — response-schema recurrence (KS-498 residual), 3 genuine 500s, non-envelope 5xx on by-design-503 ops, undocumented status | 2026-09-03, Peter |
+| KS-568 | 2 | Backlog | B | `systemTest/schemathesis/` S↔K connector identity regressions | systemTest (Schemathesis): S↔K connector identity regression coverage (KS-480 Option A) — tier separation, rotation read-back, provenance exclusion | 2026-08-07, Peter |
+| KS-588 | 2 | Backlog | B | `systemTest/schemathesis/` /api/status revoked-session regressions | systemTest (Schemathesis): /api/status authorization + revoked-session regression coverage (KS-570 class — vc-issuer status lists) | 2026-08-17, Peter |
+| KS-590 | 2 | Backlog | B | `systemTest/schemathesis/` verify-by-hash regressions — description says parked on KS-584; KS-584 is no longer open (unparked per Peter 2026-08-12) | systemTest (Schemathesis): verify-by-hash must not resolve to an arbitrary registration — anchored-ancestor + cross-tenant field disclosure (KS-584 class) | 2026-08-12, Peter |
+| KS-591 | 2 | Backlog | A | `services/*/src/` request Zod schemas (positive_data_acceptance, 64 ops) | positive_data_acceptance recurs at scale — 734 failures across 64 ops (KS-255 / KS-515 recurrence, full-2026-08-07 sweep) | 2026-09-03, Peter |
+| KS-593 | 2 | Backlog | A | `services/*/src/` raw-5xx handlers (8 ops) | not_a_server_error recurs — 17 raw 5xx across 8 ops (KS-431 / KS-449 / KS-497 recurrence, full-2026-08-07 sweep) | 2026-09-03, Peter |
+| KS-602 | 2 | Backlog | ? | unpartitioned — BM-1 certification model epic, no paths; needs splitting | BM-1: Certification model — certification = attestation + signing + optional watermarking; any modification → new version → mandatory re-certification | (none) |
+| KS-603 | 2 | Backlog | ? | unpartitioned — BM-2 verification workflow epic, no paths; needs splitting | BM-2: Verification is a configurable workflow via smart contracts — record the workflow path, not casual views | (none) |
+| KS-607 | 2 | Backlog | A | `services/anchoring/src/` — 3 anchors read `failed` with a real tx hash + confirmed_at | GET /api/anchors/{id} and verify report different statuses for the same anchor — 91 UAT anchors read "failed" while verify says confirmed | 2026-08-12, ours |
+| KS-618 | 2 | Backlog | A | `services/api-gateway/src/` trust-proxy + `docker/nginx-gateway/` (X-Forwarded-For) | Client IP is invisible platform-wide on demo: every IP-keyed control sees 172.18.0.1 — brute-force, lockout and CSRF binding are global, and KS-613's rate limit would be too | (none) |
+| KS-636 | 2 | Backlog | A | `services/*/Dockerfile` node:24-alpine base (CVE-2026-59873) — the watch workflow itself is retired CI | node:24-alpine carries a CRITICAL (CVE-2026-59873) — our own base-image watchdog flagged it on 2026-08-01 and the failure went unread | 2026-08-15, ours |
+| KS-642 | 2 | Backlog | A | `services/security/src/index.ts:888-905` — VERIFY FIRST: KS-748 says KS-742 already enforces tenancy on GET/POST /api/keys; may be closable | Security: GET /api/keys enumerates another tenant's API keys (BOLA) | (none) |
+| KS-644 | 2 | Backlog | A | `services/security/src/index.ts:703,728` — VERIFY FIRST: KS-746 says KS-743 gated /api/events platform-only; may be closable | Security: /api/events — ANY authenticated user reads every tenant's security events (no admin gate, no tenant filter) | 2026-08-16, ours |
+| KS-652 | 2 | Backlog | B | `scripts/preflight/` — re-scope from CI (retired) to the local gate; overlaps KS-826 | No CI job runs any services/* unit suite — 1219 tests across 23 services are ungated on every PR | 2026-08-17, ours |
+| KS-668 | 2 | Backlog | A | `docker-compose.yml` (`*123` seed default + 11 rotation vars not interpolated) | Compose seeds published *123 credentials by default, and the 11 rotation vars never reach the auth container from .env — every compose deploy (local, demo VM, Kintsugi) | (none) |
+| KS-676 | 2 | Backlog | B | `scripts/docker-build.sh`, `scripts/security/04-container-trivy.sh` (bash 3.2) | Two host scripts use bash 4 syntax and cannot run on macOS — docker-build.sh dies outright (twice), 04-container-trivy.sh reports a clean CVE scan having examined nothing | 2026-09-05, ours |
+| KS-678 | 2 | Backlog | A | `docs/openapi/secuura-api.yaml` 17 secuura.io URLs (guard-rule half is `scripts/` = B) | #568 publishes 17 URLs on secuura.io — an unresolving, seemingly unowned domain (KS-669 class; no guard rule covers URLs) | 2026-09-05, ours |
+| KS-683 | 2 | Todo | ? | unpartitioned — S-side fix confirmed working 2026-08-21; K remainder = verify + close | Anchor-status standoff: a consumer repolls anchors K reports as terminally failed — K's labelling is already honest (KS-587), so the fix is terminal-state handling, not a new K signal | 2026-08-21, ours |
+| KS-692 | 2 | Backlog | A | `services/vc-issuer/src/routes/status.ts` tenant ownership on revoke/unrevoke | Security: /api/status revoke/unrevoke has no tenant ownership check — an ISSUER_ADMIN in any tenant can revoke another tenant’s credential (KS-586’s deferred half, now untracked) | 2026-09-01, ours |
+| KS-696 | 2 | Todo | B | `systemTest/akto/` pr-scan determinism | Akto pr-scan is non-deterministic — three runs on near-identical code gave 1 HIGH / 1 HIGH (different endpoint) / 0 HIGH | 2026-08-27, ours |
+| KS-698 | 2 | Todo | A | `services/security/src/` rate-limit/check windowMs validation | Security: one request permanently poisons any rate-limit key — unbounded windowMs persists an invalid resetAt, and every later check 500s (limiter fails open) | (none) |
+| KS-707 | 2 | Backlog | B | `systemTest/playwright/.prettierignore` | Playwright quality:static is RED again — .prettierignore names the UNLABELLED artefact paths, so every slot/ticket-labelled run fails format:check | (none) |
+| KS-709 | 2 | Backlog | B | `systemTest/akto/` false-zero axis (not-applicable 969) | Akto reports a PASS for a test that executed NOTHING — 'clean 0 / not-applicable 969 ✓' is a second false-zero axis that richCaptureFailed does not catch | 2026-08-28, ours |
+| KS-716 | 2 | Todo | B | `systemTest/akto/config/secrets.yml` system_admin block | The whole super-admin surface is silently unscanned — no system_admin block means the HAR replay fallback never fires (0 of 16 endpoints, incl. KS-694's GDPR routes) | (none) |
+| KS-720 | 2 | Todo | A | `services/auth/src/routes/wallet.ts` authenticate() — OVERLAP: KS-796 (In Progress) edits the same file | POST /api/auth/wallet/link and DELETE /unlink can never succeed — wallet.ts never applies authenticate(), so req.user is always unset (and missing auth returns 400, not 401) | (none) |
+| KS-723 | 2 | Todo | A | `services/*/src/*.openapi.ts` ~157 undeclared ops | Declare the remaining ~157 routed-but-undocumented /api operations in the OpenAPI spec — the KS-712 remainder | (none) |
+| KS-724 | 2 | Todo | ? | unpartitioned — fix may be product (`services/auth` 10-session window) or harness (login once); decide | A scan that logs in more than ten times as one user revokes its own bearer — the 10-session window evicts the token it is scanning with | (none) |
+| KS-725 | 2 | Todo | B | `systemTest/akto/` test:pr spec re-import | test:pr never re-imports the OpenAPI spec, so Akto scans a collection that has drifted from it — a declared operation is not a scanned one | 2026-08-31, ours |
+| KS-729 | 2 | Todo | A | `services/mcp-server/package.json` express-rate-limit bump; root + `frontend/issuer` @meshsdk — baseline row expires 2026-09-30 | Upgrade ip-address off GHSA-mwp4-54f8-5fhr (high, SSRF) — express-rate-limit 8.4.1→8.5.1+ in mcp-server, @meshsdk/@cardano-sdk 9.0.5 line in root + frontend/issuer | 2026-09-01, ours |
+| KS-730 | 2 | Backlog | A | `services/api-gateway/src/` first, then 4 more files across 3 services (71 err.message sites) | Security: 71 inline handlers still return err.message verbatim off-production — KS-727's enumerated remainder (api-gateway leaks it TWICE, at the edge) | (none) |
+| KS-732 | 2 | Todo | A | `services/auth/src/` mfa/disable password verification (security) | Security: POST /api/auth/mfa/disable never verifies the password it requires — any bearer disables MFA | (none) |
+| KS-733 | 2 | Todo | A | `services/api-gateway/src/` rateLimit('mfa') on /api/users/me/mfa/* | /api/users/me/mfa/* is unthrottled — the same TOTP surface is 450x more attackable than /api/auth/mfa/* | (none) |
+| KS-734 | 2 | Todo | B | `tests/e2e/` not a workspace member; 20/82 fail | The e2e Playwright suite cannot run from a clean checkout — tests/e2e is not a workspace member and never gets installed; 20 of 82 fail once it does | 2026-09-02, ours |
+| KS-753 | 2 | Backlog | A | `services/*/src/` POST /api/timestamps + /batch mock-TSA fallback (extend KS-523) | Timestamping fail-closed: a mock TSA fallback must not report verified: true (extend KS-523 to the batch path) | (none) |
+| KS-754 | 2 | Backlog | A | `services/originate/src/services/gdprService.ts` updateDSRStatus processed_by cast | updateDSRStatus silently no-ops for any non-uuid actor — step 12 never marks a connector erasure completed | (none) |
+| KS-756 | 2 | Backlog | A | `services/auth/src/services/session.ts:143` opaque refresh token read path (Kam's KS-329 ruling (a)) | Wire up the opaque refresh token that createSession already mints — one write site, zero read sites (KS-329 ruling (a) prerequisite) | (none) |
+| KS-769 | 2 | Backlog | ? | unpartitioned — `mobile/secuura-app` is in neither seat's tree; fuse 2026-09-17 | mobile/secuura-app has 81 unscanned advisories (2 critical) — nothing has ever audited that tree | 2026-09-05, ours |
+| KS-785 | 2 | Backlog | B | `scripts/` credential checker (`source` vs compose env precedence) | Compose resolves the SHELL over .env while the checker resolves .env over the shell — a green credential check over a stack running the shared literal | (none) |
+| KS-786 | 2 | Backlog | B | `systemTest/` stack_env.test.sh + slot_target.test.sh | stack_env and slot_target read the values they unit-test out of the ambient environment — a slot-targeted shell makes both suites compare the shell's answer with itself | (none) |
+| KS-810 | 2 | Backlog | A | `services/auth/src/services/passwordLoginGate.ts:55` (z from zod) → `auth.openapi.ts` importable | auth.openapi.ts cannot be imported by any test — passwordLoginGate imports z from zod directly, so a module-scope throw there leaves the suite green | (none) |
+| KS-835 | 2 | Todo | A | `services/auth/src/` scopes.ts:34 short-circuit + oauth token minting (security) | Security: OAuth consent is decorative — the granted scope never reaches the token, and the gate short-circuits on a label OAuth tokens share with logins | 2026-09-05, ours |
+| KS-502 | 3 | Todo | B | `systemTest/schemathesis/` (+ `systemTest/integration` harness per Peter 2026-08-12) | systemTest (Schemathesis): skipped security regressions needing a proper harness/env (billing idempotency · seed-demo prod-gate · webhook-SSRF residual) | 2026-08-12, Peter |
+| KS-526 | 3 | Backlog | A | `services/anchoring/src/` PLATFORM_WALLET_MNEMONIC → Key Vault loader (vault secret creation itself is Kam's) | KMS: move platform wallet mnemonic to Key Vault (KS-326 follow-up) | (none) |
+| KS-528 | 3 | Backlog | ? | unpartitioned — `frontend/admin\|issuer\|verifier` react-router v7 | Frontends: react-router v6 → v7 migration (3 moderate client-runtime advisories — open redirect/XSS, constructor injection) | 2026-08-14, ours |
+| KS-530 | 3 | Backlog | A | `services/originate/package.json`, `services/mcp-server/package.json` @hono/node-server ^2.0.5 | @hono/node-server v1->v2 major bump (GHSA-frvp) - originate + mcp-server runtime | 2026-08-14, ours |
+| KS-533 | 3 | Todo | ? | unpartitioned — maintained register document (docs/), no build | S↔K security register: data-loss / unrecoverability scenarios + code-verified findings (extracted from KS-480 sign-off) | (none) |
+| KS-562 | 3 | Backlog | B | `services/anchoring/src/__tests__/threadTokenMint.test.ts` — did not reproduce 2026-08-14; likely close | anchoring threadTokenMint test fails only under root-visible npm install layout — nested @lucid-evolution/plutus duplicate-instance (pre-existing, layout-dependent; KS-559 A/B-cleared) | 2026-08-14, ours |
+| KS-571 | 3 | Backlog | B | `systemTest/schemathesis/` KS-539 R2/R4/R5/R6 coverage | systemTest (Schemathesis): KS-539 agent document-operation rules — onBehalfOf realignment (G-1) + R2/R4/R5/R6 regression coverage | 2026-08-12, Peter |
+| KS-572 | 3 | Backlog | B | `systemTest/schemathesis/` unhandledRejection posture pin | systemTest (Schemathesis): pin the KS-546 unhandledRejection posture — config drift + the mirrored KS-529 guard | (none) |
+| KS-579 | 3 | Todo | A | `services/api-gateway/src/routes/platform.ts:499-509` per-person platform-admin identities | Per-person platform-admin identities — the shared seeded admin cannot carry attribution or approval | (none) |
+| KS-580 | 3 | Todo | A | `services/api-gateway/src/routes/platform.ts:698-709` (external sink choice is an infra decision — flag before build) | Append-only recovery audit held outside the estate being recovered | (none) |
+| KS-581 | 3 | Todo | A | `services/api-gateway/src/routes/platform.ts:476` register-connector rate limit + alerting | register-connector: volume alerting, rate limit, and correlation of refused re-key attempts | (none) |
+| KS-595 | 3 | Backlog | B | `systemTest/schemathesis/tests/test_undeclared_method_safety.py:54-68` — measure whether the 3 defects are live | Three undeclared-verb catalogue skips cite CLOSED tickets (KS-406 / KS-421) — are the defects still live? | 2026-08-14, ours |
+| KS-604 | 3 | Backlog | ? | unpartitioned — BM-5 system-details document (agent drafts, Kam hands over) | BM-5: System-details document for Peter & Stuart — the technical system-info doc Kam owes them | (none) |
+| KS-605 | 3 | Backlog | ? | unpartitioned — terminology definitions document ('signing' still with Phil) | Terminology definitions for stakeholders + lawyers — certification / verification / signing / watermarking | (none) |
+| KS-606 | 3 | Backlog | B | `systemTest/schemathesis/scripts/run.py` + `scripts/runner/config.py` split (bootstrap contract first) | systemTest (Schemathesis): split scripts/run.py + scripts/runner/config.py — blocked on re-establishing the pre-venv bootstrap contract first | 2026-08-12, Peter |
+| KS-619 | 3 | Backlog | A | `services/api-gateway/src/middleware/auth.ts:387` unconditional tenant overwrite | Gateway tenant resolution falls through to the caller's x-tenant-id when a token has no tenantId claim — make it unconditional and fail closed | (none) |
+| KS-627 | 3 | Backlog | A | `services/wallet-connector/src/` CIP-8/COSE verification + request-contract change (large; Kam's KS-686 ruling names this as the guard's expiry trigger) | Implement real wallet signature verification (CIP-8/COSE + address binding) — needs the COSE key back in the request contract | 2026-08-26, ours |
+| KS-630 | 3 | Backlog | B | `scripts/preflight/preflight.sh` ← `scripts/security/status-page-xss-probe.mjs` | Wire the status-page XSS probe into preflight (or decide not to) — it runs today only by hand | (none) |
+| KS-650 | 3 | Backlog | B | `services/originate/src/__tests__/ks444-webhooks-create-description-guard.test.ts` (stale fixture) — DUPLICATES KS-803 + half of KS-826; work once | services/originate: POST /api/webhooks 500s on its two success-path tests — ks444 suite red on develop | 2026-09-01, ours |
+| KS-686 | 3 | Backlog | B | `systemTest/schemathesis/` integration_5xx_guard for the by-design 501 (Kam ruled tolerate 2026-08-26; check PR #731 state first) | not_a_server_error flags the by-design 501 on POST /api/wallets/verify — needs the integration_5xx_guard treatment (split from KS-684 item 7) | 2026-08-26, ours |
+| KS-699 | 3 | Backlog | A | `migrations/` — 0 of 29 FKs point at users across 52 columns (data-fix risk: plan before writing) | No table references `users`: 0 of the database's 29 foreign keys point at it, across 52 user-reference columns — KS-697 was this hole being exercised | 2026-09-02, ours |
+| KS-704 | 3 | Todo | B | `systemTest/performance/` k6 status-code breakdown | k6 gate reports a failure rate with no status-code breakdown - an author cannot tell a platform 4xx from a harness auth failure | (none) |
+| KS-736 | 3 | Todo | B | `services/api-gateway/src/__tests__/` KS-570 mount-auth check (`collectMounts` mock) — sized M | Gateway mount-auth check scores authenticateToken(false) as green — six /api mounts satisfy neither leg of its own assertion | 2026-09-01, ours |
+| KS-738 | 3 | Todo | B | `systemTest/schemathesis/scripts/run.py:124-131` execv loop | schemathesis run.py bootstrap can os.execv-loop forever on a symlinked venv — silent, 100% CPU, indistinguishable from a hang | (none) |
+| KS-741 | 3 | Todo | A | `services/originate/src/` middleware strip x-emitter-internal + comment | x-emitter-internal is unstripped on the /originate/ route — the marker's safety rests on an unstated convention, and the comment promises the wrong guarantee | (none) |
+| KS-745 | 3 | Backlog | A | `services/api-gateway/src/routes/audit-export.ts:138` → security has no /api/audit/logs | api-gateway audit export calls /api/audit/logs — a route the security service does not have, so the export 404s every time | (none) |
+| KS-746 | 3 | Backlog | A | `services/security/src/index.ts:95-107` + `migrations/` tenant on security events | Security events carry no tenant at all — KS-743 had to gate them platform-only, which is a workaround for the data model | (none) |
+| KS-747 | 3 | Backlog | A | `services/security/src/` GET /api/security/keys openapi parameters | Spec drift: GET /api/security/keys declares no parameters while the handler requires organizationId — the contract suite can never reach its 200 branch | (none) |
+| KS-752 | 3 | Backlog | B | `systemTest/schemathesis/scripts/run.py:533` baseline gate skipped on failure (comment carries 2 parked tickets, one a [Decision] — file when cap allows) | Schemathesis baseline gate is unreachable: run.py skips it whenever the sweep fails — i.e. on every run it exists to triage | 2026-09-02, ours |
+| KS-755 | 3 | Backlog | B | `systemTest/akto/tests/unit/core/runDir.test.ts` injected clock | akto unit suite has a standing red: runDir resolveRunId ignores the injected clock | (none) |
+| KS-758 | 3 | Backlog | A | `services/originate/src/routes/gdpr.ts` permanent-failure answers + dead-letter (S retries — contract-aware) | Connector erasure: three permanent failures present as retryable and nothing dead-letters; the unresolvable path records no deletion log (Peter F6/F9) | (none) |
+| KS-759 | 3 | Backlog | A | `packages/shared/src/` JwtPayload.tenantId + `services/originate/src/middleware/auth.ts:15` | tenantId is read through two `as unknown as` casts because it is not on JwtPayload (Peter F14) | (none) |
+| KS-761 | 3 | Backlog | B | `systemTest/schemathesis/` similarity-undiscriminating FP staleness | similarity-undiscriminating FP entries have no staleness detection — a tolerance can outlive its premise and keep hiding a real finding | (none) |
+| KS-765 | 3 | Backlog | ? | unpartitioned — the merge helper's location is not named (likely fleet tooling outside the repo) | Merge helper must refuse a non-read SHA and have no fallback that re-derives its own expectation — the #774 gate could not fail | (none) |
+| KS-766 | 3 | Backlog | B | `scripts/` base-image-watch.sh self-test (producer red-proof) | base-image-watch self-test cannot red the DB-age PRODUCER — the F-5 clamp can be re-introduced with the suite green | (none) |
+| KS-773 | 3 | Todo | B | `scripts/preflight/lockfile-cleanroom.sh:16-25` drop the mcp-server SKIP (Peter measured 6/6 OK) | lockfile-cleanroom skips services/mcp-server for a reason its lock refutes — leg 2/9 claims "all locks clean-room-installable" without trying it | 2026-09-03, ours |
+| KS-778 | 3 | Todo | B | `scripts/preflight/` leg-10 pin-label parser (quoted uses:, uppercase hex) | Preflight leg 10's pin-label parser is blind to a quoted `uses:` and an uppercase-hex SHA — it then prints an all-clear (QA F-781-01) | (none) |
+| KS-780 | 3 | Todo | A | `packages/shared/src/` normaliseOrgId + the two originate resolvers | Two implementations of organisation-id normalisation, in two layers — move normaliseOrgId into @secuura/shared (the reason for keeping it local expired with KS-764) | (none) |
+| KS-783 | 3 | Backlog | A | `services/auth/src/` platform-admin backup codes — DUPLICATES KS-809 (schema half); work as one | A platform admin who loses their TOTP device has no self-service recovery — TOTP-only branch, no backup codes | (none) |
+| KS-784 | 3 | Backlog | A | `services/*/src/` POST /api/teams/webhook-config handler (investigate: fails every pr sweep on develop) | POST /api/teams/webhook-config fails the Schemathesis pr sweep on every run — including develop — and is tracked by nothing | (none) |
+| KS-789 | 3 | Backlog | ? | unpartitioned — `CONTRIBUTING.md:383-385` prose ('CI is the hard gate' — there is no CI) | CONTRIBUTING.md justifies the hook's degradation and its --no-verify bypass with "CI is the hard gate" — there is no CI | (none) |
+| KS-794 | 3 | Backlog | A | `services/api-gateway/src/routes/verification.ts` + `verificationV2.ts` response schemas (fileSize, v1 fileHash vs hash) | verify-file returns `fileSize` on every 200 and neither response schema declares it | 2026-09-04, ours |
+| KS-803 | 3 | Backlog | B | `services/originate/src/__tests__/ks444-…test.ts` — DUPLICATE of KS-650 | originate: two ks444-webhooks-create-description-guard cases are red on develop — pre-existing, not #812's | (none) |
+| KS-805 | 3 | Backlog | A | `services/auth/src/routes/oauth.ts` deny Location + PATCH /api/oauth/apps .min(1) | POST /api/oauth/authorize deny emits `Location: undefined?error=…` for an app with zero registered redirect URIs; GET 500s on the same state; PATCH /api/oauth/apps lacks .min(1) | (none) |
+| KS-807 | 3 | Backlog | A | `packages/shared/src/` findNulBytePath/findControlBytePath on Buffer (ticket poses the design question; default = extend the guard) | The control-byte guard cannot see a raw body — findNulBytePath returns null for every Buffer, and the doc claims otherwise | (none) |
+| KS-808 | 3 | Backlog | B | `scripts/run-migrations.sh` exit code + applied= count (runtime-critical script; partition says B) | run-migrations.sh exits 0 even when a migration failed, and applied=N counts skips — the summary line cannot be trusted | (none) |
+| KS-809 | 3 | Backlog | A | `migrations/` platform_admins backup-code column + `services/auth/src/` — DUPLICATES KS-783 | A platform admin who loses their TOTP device cannot log in — platform_admins has no backup-code column at all | (none) |
+| KS-813 | 3 | Backlog | B | `scripts/preflight/preflight.sh:409` unconditional PREFLIGHT PASSED | "PREFLIGHT PASSED" is unconditional — step() only prints a banner, and skipped legs read as passes | (none) |
+| KS-824 | 3 | Backlog | A | `migrations/047` app_type case + `docker/init` unnamed constraint | OAuth app_type: a CASED row is neither normalised by 047 nor refused by its CHECK, and docker/init's unnamed constraint defeats 047's idempotence guard | (none) |
+| KS-825 | 3 | Backlog | B | `services/auth/src/__tests__/` non-deterministic green (21/40 files app.listen(0)) — overlaps KS-845 | Gate integrity: the auth suite's green is not deterministic — three head runs gave 534/0, 534/0, and 534 with 2 FAILED | (none) |
+| KS-826 | 3 | Backlog | B | `scripts/preflight/` gate the four service suites (+ the ks444 red = KS-650) | A red with no reader: originate's ks444 webhook-guard suite fails at both SHAs, and no gate ever runs the four service suites | (none) |
+| KS-828 | 3 | Backlog | B | `packages/shared/src/__tests__/` KS-800 corpus instrument LEG F (wrapped router) | KS-800 scanner: LEG F cannot see the control-byte guard LEAVE a wrapped router — both KS-815 wrappers can drop the guard and packages/shared stays 118/118 green | (none) |
+| KS-829 | 3 | Backlog | B | `scripts/audit/` baseline data model (scope validation, suppression match) | Audit gate baseline data model: an unvalidated `scope` lets a GREEN root gate advertise a row leg 7 still needs, and suppression matches by advisory id alone | (none) |
+| KS-836 | 3 | Backlog | A | `services/auth/src/auth.openapi.ts` request block for POST /api/oauth/token (changes Schemathesis generation — run the sweep) | Publish a `request:` block for POST /api/oauth/token — the endpoint's shape is asserted nowhere, and adding it moves what Schemathesis generates | 2026-09-05, ours |
+| KS-837 | 3 | Backlog | B | `scripts/` prose-drift phrase check + marker convention | Published prose drifts from the routes it describes and nothing detects it — the phrase check, the marker convention, and the ~306 unswept descriptions | 2026-09-05, ours |
+| KS-838 | 3 | Backlog | A | `services/auth/src/services/oauth.ts` authorize rules as data (+ per-rule test) | Make the authorize rules DATA the resolver iterates, so the GET/POST agreement guard is structural instead of textual | 2026-09-05, ours |
+| KS-839 | 3 | Backlog | A | `services/auth/src/services/oauth.ts:352` allowedScopes ['*'] bypass (security) | Security: an allowedScopes of ['*'] bypasses the invalid_scope refusal entirely — validateScopes returns the request unfiltered | (none) |
+| KS-842 | 3 | Backlog | B | `packages/shared/src/__tests__/` KS-832 scanner isConditionallyReached residues | KS-832 residues from the #836 gate: the conditional-reachability model leaves six lexical shapes open | (none) |
+| KS-843 | 3 | Backlog | A | `services/originate/src/routes/gdpr.ts` + register-connector scope mint — Kam ruled A 2026-09-03 (S's key must carry the scope: coordinate rollout with Stuart) | KS-695 F5: build the dedicated `subjects:erase` scope gate on POST /api/gdpr/erasures — Kam ruled it 2026-09-03 and it has never been built | (none) |
+| KS-844 | 3 | Backlog | A | `services/demo-service/src/` error handler (service is DOWN by ruling on demo; code fix only) | demo-service mounts no error handler — a raw 0x00 body returns express's default HTML with a stack trace and absolute paths | (none) |
+| KS-845 | 3 | Backlog | B | `services/auth/src/__tests__/` ×7 + `services/referral/src/__tests__/` ×2 app.listen(0) | Close the NINE bare `app.listen(0)` sites in auth and referral — the intermittent-red class measured twice on 2026-09-06 | (none) |
+| KS-623 | 4 | Backlog | A | `services/auth/src/middleware/authenticate.ts:24-27` fail-closed on unset NODE_ENV | Test-token env guard is asymmetric: the gateway fails closed on an unset NODE_ENV, the auth service fails open | (none) |
+| KS-648 | 4 | Backlog | ? | unpartitioned — `frontend/*` CSP directives | Frontend CSP quality: issuer alone carries 'unsafe-eval', and all three portals allow 'unsafe-inline' styles | (none) |
+| KS-744 | 4 | Backlog | A | `services/api-gateway/src/middleware/auth.ts:377` guard verificationLevel | Gateway 500s on every proxied route for a token lacking verificationLevel — auth.ts:377 sets the header unguarded | (none) |
+| KS-748 | 4 | Backlog | A | `migrations/` + `services/security/src/` svc_api_keys org/tenant coherence | svc_api_keys.organization_id is not a tenancy boundary and nothing keeps it coherent with tenant_id — an incoherent pair is storable | (none) |
+| KS-749 | 4 | Backlog | ? | unpartitioned — `frontend/admin` tailwind → postcss-selector-parser | postcss-selector-parser 6.1.2 carries GHSA-w9m9-85wc-3x92 — baselined to unblock the preflight; the override was inert | 2026-09-01, ours |
+| KS-793 | 4 | Backlog | ? | unpartitioned — `BACKLOG.md:7` stale line | BACKLOG.md:7 claims 2 of 27 auth test files fail at import — they do not on develop | (none) |
+| KS-811 | 4 | Backlog | B | `services/api-gateway/src/__tests__/` 403 code set vs spec | Nothing asserts #815's 403 code SET against what the route actually throws | (none) |
+| KS-812 | 4 | Backlog | ? | unpartitioned — `connectors/whatsapp-bot/src/index.ts:21` (connectors/ is in neither seat's tree) | connectors/whatsapp-bot prints the DEAD Container Apps API URL as its default target | (none) |
+| KS-840 | 4 | Backlog | A | `services/auth/src/routes/oauth.ts` OAuth error envelope + RFC 6749 redirect (contract change — say so in the PR) | The OAuth error code travels in error.message and the contract never says so; and authorize refusals answer JSON where RFC 6749 redirects | (none) |
+| KS-846 | 4 | Backlog | A | `packages/shared/package.json` main → dist (relates to KS-651 [Decision]) | `@secuura/shared` `main` points at an untracked, never-built `dist/index.js` — anything outside vitest's alias resolves to nothing | (none) |
+| KS-847 | 4 | Backlog | B | `services/auth/src/__tests__/ks431-oauth-app-update.test.ts:151` NUL fixture | A raw NUL byte in ks431's fixture makes the whole file invisible to plain `grep` | (none) |
+
+### Category 2 — needs a human (Peter / Stuart / Kam)
+
+| id | pri | state | assignee | rule | basis |
+|---|---|---|---|---|---|
+| KS-441 | 1 | Blocked | peter@obeden.com | assignee | assignee peter@obeden.com (Blocked); newest 2026-08-15 ours: 'not actioned, still yours' to Peter |
+| KS-608 | 1 | Blocked | kamil.kreiser@secuura.ai | ticket-text | description: 'DO NOT START — waiting on one answer from @kamil.kreiser'; no comments. NOTE: KS-607 comment 2026-08-12 21:14 answered it ('same lifecycle fact') — needs Kam/Wednesday to confirm the hold is lifted |
+| KS-239 | 2 | Backlog | stuart.jamieson@secuura.ai | assignee | assignee stuart.jamieson@secuura.ai + title `[Decision]` |
+| KS-304 | 2 | Backlog | kamil.kreiser@secuura.ai | newest-comment | 2026-09-02 09:38 ours: 'RULED — Kam's action, not ours: tell Stuart S goes first (your message)' |
+| KS-577 | 2 | Todo | kamil.kreiser@secuura.ai | newest-comment | 2026-09-02 15:11 ours: 'BOUNCE — this is Stuart's decision (cutover window), not K-side work' |
+| KS-597 | 2 | Todo | kamil.kreiser@secuura.ai | card-hold | Wednesday's standing hold (card 2026-09-04: 'KS-597/598 remain Category-2, held pending Kam's plan-sheet approval'); newest 2026-09-02 ours = re-measurement only |
+| KS-598 | 2 | Todo | kamil.kreiser@secuura.ai | card-hold | Wednesday's standing hold (card 2026-09-04, as KS-597); newest 2026-09-02 ours = confirmed live, no ask |
+| KS-624 | 2 | Backlog | kamil.kreiser@secuura.ai | ticket-text | description: 'The by-design-or-remediate ruling is Kam's'; newest 2026-08-13 ours = 'input to the decision, not a pre-emption' |
+| KS-655 | 2 | Backlog | kamil.kreiser@secuura.ai | newest-comment | 2026-09-02 16:59 ours: 'BOUNCE — the remaining actor is @kam' (Launch_Claude.command, 16 copies) |
+| KS-735 | 2 | Todo | kamil.kreiser@secuura.ai | newest-comment | 2026-09-02 16:59 ours: 'BOUNCE — the remaining actor is @PeterObeden' (flat-vs-nested contract call) |
+| KS-770 | 2 | Todo | kamil.kreiser@secuura.ai | ticket-text | the ticket IS Peter's review stream ('Review stream for Peter — one review, one test pass, 19 tickets') |
+| KS-772 | 2 | Todo | kamil.kreiser@secuura.ai | ticket-text | the ticket IS Stuart's review stream ('Review stream for Stuart'; pass runs from Platform S) |
+| KS-787 | 2 | Backlog | kamil.kreiser@secuura.ai | ticket-text | S↔K contract question raised from Stuart's PS-764..767 split — K's answer depends on what S emits (Stuart/Kam) |
+| KS-101 | 3 | Backlog | stuart.jamieson@secuura.ai | assignee | assignee stuart.jamieson@secuura.ai; newest 2026-06-03 Stuart: billing-model options (a question) |
+| KS-135 | 3 | Todo | stuart.jamieson@secuura.ai | assignee | assignee stuart.jamieson@secuura.ai (Platform S refactor) |
+| KS-139 | 3 | Backlog | stuart.jamieson@secuura.ai | assignee | assignee stuart.jamieson@secuura.ai (Platform S test suite) |
+| KS-263 | 3 | Backlog | kamil.kreiser@secuura.ai | newest-comment | 2026-08-14 01:38 ours: 'Waiting on: an org/repo admin enabling Code Security' (GitHub org setting — Kam) |
+| KS-305 | 3 | Backlog | kamil.kreiser@secuura.ai | ticket-text | customer DPA wording — a legal instrument outside the repo (agent may draft; Kam owns the DPA) |
+| KS-492 | 3 | Todo | peter@obeden.com | assignee | assignee peter@obeden.com (Review G owner) |
+| KS-582 | 3 | Todo | kamil.kreiser@secuura.ai | decision-title | title `[Decision]` approval shape for bulk re-key; newest 2026-09-02 Stuart re-filed PS-740 |
+| KS-621 | 3 | Backlog | kamil.kreiser@secuura.ai | ticket-text | description: tracking ticket, fix shape blank 'without committing to a security model that has not been decided' |
+| KS-625 | 3 | Backlog | kamil.kreiser@secuura.ai | ticket-text | description: 'The by-design-or-remediate ruling is Kam's' |
+| KS-629 | 3 | Backlog | kamil.kreiser@secuura.ai | ticket-text | description: 'Decide which half is right' — implement liveness processing or drop the field: product decision |
+| KS-651 | 3 | Backlog | kamil.kreiser@secuura.ai | decision-title | title `[Decision]` @secuura/shared symlink pattern |
+| KS-658 | 3 | Backlog | kamil.kreiser@secuura.ai | ticket-text | description: 'Changing what the demo is counts as demo-affecting config and is Kam's call' |
+| KS-760 | 3 | Backlog | kamil.kreiser@secuura.ai | ticket-text | GitHub↔Linear integration behaviour — workspace/integration admin setting, not repo work (Kam) |
+| KS-767 | 3 | Backlog | kamil.kreiser@secuura.ai | card-hold | card 2026-09-03 lists KS-767 under 'Kam's'; description: '17 baseline entries … each one is a decision nobody has made explicitly' |
+| KS-782 | 3 | Backlog | kamil.kreiser@secuura.ai | decision-title | title `[Decision]` OAuth two-step MFA consent |
+| KS-339 | 4 | Backlog | kamil.kreiser@secuura.ai | ticket-text | grants two humans extranet access: SWA passcodes (secrets) + briefing Phil/Steve — Kam |
+| KS-690 | 4 | Backlog | kamil.kreiser@secuura.ai | ticket-text | description: 'Assignee: @kamil.kreiser (decision), then whoever wires it' (wire or retire; ticket's own default = wire) |
+| KS-834 | 4 | Backlog | kamil.kreiser@secuura.ai | decision-title | title `[Decision]` — asks @kamil.kreiser public-or-gated |
+
+### Category 3 — parked / not yet possible
+
+| id | pri | state | blocker |
+|---|---|---|---|
+| KS-660 | 1 | Blocked | state Blocked; cause = GitHub Actions spend — Actions retired for the repo (Kam 2026-08-27), so the ticket is moot; closing it is a Kam call |
+| KS-329 | 2 | Backlog | blocked on KS-756 (opaque refresh token wiring) per newest 2026-09-02 ours: 'not a bounce … blocked on KS-756' |
+| KS-412 | 2 | Todo | branch-protection / required-check settings for GitHub Actions workflows — Actions retired 2026-08-27; org-admin action |
+| KS-576 | 2 | Todo | description: 'It must not ship before KS-577 (revoke-on-rotate)' — KS-577 is Stuart's cutover decision |
+| KS-638 | 2 | Backlog | extranet live runner is driven by GitHub Actions (`extranet-test-run.yml`) — Actions retired 2026-08-27 |
+| KS-739 | 2 | Todo | Kam ruled option (b) 2026-09-02: the change is on Platform S (S's connector key carries users:read); K keeps only the measurement half — close after S ships |
+| KS-768 | 2 | Backlog | delivered on PR #796 (`scripts/audit/lock-discovery.mjs`) — open with Peter; nothing left to build |
+| KS-841 | 2 | Todo | duplicate of in-flight KS-798 (client_id carries the redirect URI, In Progress) + KS-799 (CSRF, In Progress) — reconcile, do not start |
+| KS-418 | 3 | Todo | after full AWS migration (not done) AND the nightly workflow is GitHub Actions (retired) |
+| KS-583 | 3 | Todo | step 4 ('the old key is dead') needs KS-577 revoke-on-rotate — Stuart's cutover decision (cat 2) |
+| KS-679 | 3 | Todo | newest 2026-08-21 ours: 'HELD deliberately … gated on the KS-665 fixture-design agreement' (KS-665 In Progress, design awaiting Peter); shipping now 'would turn the build red' |
+| KS-757 | 3 | Backlog | description: 'all THREE of the fixes prescribed for it are blocked by something measurable' — needs a new fix-shape / ruling before any build |
+| KS-777 | 3 | Todo | retroactive tracker — 'All four are FIXED on #795 … exists so they are findable, not because work is outstanding'; closes with #795 |
+
+### In flight — not selectable (In Review / In Progress at read time)
+
+| id | pri | state | assignee | newest comment (date, author) |
+|---|---|---|---|---|
+| KS-256 | 2 | In Progress | kamil.kreiser@secuura.ai | 2026-09-02, ours |
+| KS-487 | 2 | In Progress | kamil.kreiser@secuura.ai | 2026-09-02, ours |
+| KS-575 | 2 | In Progress | kamil.kreiser@secuura.ai | 2026-08-25, Peter |
+| KS-601 | 2 | In Progress | kamil.kreiser@secuura.ai | 2026-08-21, ours |
+| KS-664 | 2 | In Progress | kamil.kreiser@secuura.ai | 2026-08-26, ours |
+| KS-665 | 2 | In Progress | kamil.kreiser@secuura.ai | 2026-08-21, ours |
+| KS-669 | 2 | In Progress | kamil.kreiser@secuura.ai | 2026-08-21, ours |
+| KS-687 | 2 | In Progress | kamil.kreiser@secuura.ai | 2026-08-27, ours |
+| KS-695 | 2 | In Progress | kamil.kreiser@secuura.ai | 2026-09-05, ours |
+| KS-762 | 2 | In Progress | kamil.kreiser@secuura.ai | 2026-09-05, ours |
+| KS-764 | 2 | In Progress | kamil.kreiser@secuura.ai | 2026-09-05, ours |
+| KS-771 | 2 | In Progress | kamil.kreiser@secuura.ai | 2026-09-05, ours |
+| KS-775 | 2 | In Progress | kamil.kreiser@secuura.ai | 2026-09-04, ours |
+| KS-796 | 2 | In Progress | kamil.kreiser@secuura.ai | 2026-09-05, ours |
+| KS-798 | 2 | In Progress | kamil.kreiser@secuura.ai | (none) |
+| KS-801 | 2 | In Progress | kamil.kreiser@secuura.ai | 2026-09-05, ours |
+| KS-806 | 2 | In Progress | kamil.kreiser@secuura.ai | (none) |
+| KS-573 | 3 | In Progress | kamil.kreiser@secuura.ai | 2026-09-05, ours |
+| KS-799 | 3 | In Progress | kamil.kreiser@secuura.ai | (none) |
+| KS-802 | 3 | In Progress | kamil.kreiser@secuura.ai | 2026-09-05, ours |
+| KS-229 | 2 | In Review | kamil.kreiser@secuura.ai | 2026-09-02, ours |
+| KS-365 | 2 | In Review | kamil.kreiser@secuura.ai | 2026-09-02, ours |
+| KS-386 | 2 | In Review | kamil.kreiser@secuura.ai | 2026-09-05, ours |
+| KS-566 | 2 | In Review | kamil.kreiser@secuura.ai | 2026-09-01, ours |
+| KS-643 | 2 | In Review | kamil.kreiser@secuura.ai | 2026-09-03, ours |
+| KS-661 | 2 | In Review | kamil.kreiser@secuura.ai | 2026-08-26, ours |
+| KS-663 | 2 | In Review | kamil.kreiser@secuura.ai | 2026-09-04, ours |
+| KS-671 | 2 | In Review | kamil.kreiser@secuura.ai | (none) |
+| KS-677 | 2 | In Review | kamil.kreiser@secuura.ai | 2026-09-01, ours |
+| KS-693 | 2 | In Review | kamil.kreiser@secuura.ai | 2026-09-04, ours |
+| KS-717 | 2 | In Review | peter@obeden.com | 2026-08-28, Peter |
+| KS-722 | 2 | In Review | kamil.kreiser@secuura.ai | 2026-09-05, ours |
+| KS-731 | 2 | In Review | kamil.kreiser@secuura.ai | 2026-09-05, ours |
+| KS-763 | 2 | In Review | kamil.kreiser@secuura.ai | 2026-09-03, ours |
+| KS-790 | 2 | In Review | kamil.kreiser@secuura.ai | 2026-09-05, ours |
+| KS-800 | 2 | In Review | kamil.kreiser@secuura.ai | 2026-09-05, ours |
+| KS-804 | 2 | In Review | kamil.kreiser@secuura.ai | 2026-09-05, ours |
+| KS-823 | 2 | In Review | kamil.kreiser@secuura.ai | (none) |
+| KS-645 | 3 | In Review | kamil.kreiser@secuura.ai | 2026-09-05, ours |
+| KS-657 | 3 | In Review | kamil.kreiser@secuura.ai | 2026-08-17, ours |
+| KS-682 | 3 | In Review | kamil.kreiser@secuura.ai | 2026-09-03, Peter |
+| KS-711 | 3 | In Review | kamil.kreiser@secuura.ai | (none) |
+| KS-726 | 3 | In Review | kamil.kreiser@secuura.ai | 2026-09-04, ours |
+| KS-791 | 3 | In Review | kamil.kreiser@secuura.ai | 2026-09-04, ours |
+| KS-818 | 3 | In Review | kamil.kreiser@secuura.ai | 2026-09-05, ours |
+
 
 **🔴 CORRECTION (2026-09-02 07:3x, churn-visible — every older "KS-291 = crypto-shred INFEASIBLE" line below is STALE):** KS-291's RESOLUTION is the opposite of its description — Kam implemented per-subject DEK envelope + true crypto-shred (PR #440), shipped to develop + demo, Done. Verified at develop from my seat: `migrations/034_pii_subject_keys.sql` + `036_deletion_log_crypto_shred.sql` + `packages/shared/src/crypto/subjectDek.ts` (header names KS-291 + the erasure guarantee) all PRESENT at `a079e1f6b`. **Crypto-shred IS available to K** — KS-695's design uses it (S-driven erasure can destroy the subject's DEK; stronger Art.17 position than field blanking). The stale constraint travelled s96→s103 briefs (ledger w=57); s103 caught it and designed against the true state.
 
