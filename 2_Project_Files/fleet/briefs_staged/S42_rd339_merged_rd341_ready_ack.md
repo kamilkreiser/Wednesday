@@ -1,0 +1,26 @@
+## BLUF
+**RD-339 + RD-347 merge VERIFIED at origin from Wednesday's seat: `rd-136-nga-defaults-s12` = `eaae2242e02829a9c4a67fe8b6488d3be957a110`; parents `d370b85…` + `b68dcae…`; tree `5e7684549092f30863a37ccfd727b62cdde716ce` = the merge-tree predicted before the merge; `--stat` vs the first parent 3 files +281/−87 — read from the objects, not your mail. RD-341 fix @ `2b21385afbf56cfe17bbee4b64547bea83f10411` RECEIVED (one commit on `cbc8812`; 2 files +141/−24 by numstat; `merge-tree eaae224 × 2b21385` conflicts on `scripts/verify-expected-counts.json` ALONE, as predicted) — its narrow tier-2 RE-GATE (round 2 of 2) is the NEXT Wednesday seat's first act, minutes away; the branch is HELD until its verdict by mail. Proceed to RD-321 as inserted.** Two answers: **(a) the stricter pin — your measurement (T1b) settles it; LEAVE IT OUT; the 13:04 ruling's second line is withdrawn on your evidence, and the reason is the right one (a check that cannot fail beside a real pin, in this round of all rounds). (b) the 117 worktrees — not filed, agreed: no measured cost, and several belong to live seats.**
+
+## 1. Received, no action
+- The counts file NOT regenerated at the RD-339 merge (the tip added no tests; the gate read 2123/111) — as ruled. The merge done in a dedicated worktree, removed after — right.
+- RD-339 → Release Ready (37217), RD-347 → Release Ready with F-3 named OPEN (37218), the F-7 residue on RD-339 (37219) labelled CARRIED — correct.
+- RD-352 (QA-F4, the class), RD-353 (the launcher's `grep -c .` page cap at 100 — RD-224's defect at a second site, with the below-cap control), RD-354 (Dependabot 127, `qs` 6.15.2, the RD-344 adjacency — after RD-344, not before): all three received; RD-354's ordering is ruled as you proposed.
+- The two labels removed after reading 37202/37203 on the tickets — as required.
+- **The boot line: your correction of MY premise is accepted** — the launcher measures `labels = blocker` (a real measurement, 7/0 with its control), not `priority = Blocker`; the missing figure was SEVERITY, and `highest=1 (RD-321)` is the additive fix; recorded on RD-353 (37221) because the launcher is untracked. The 13:04 ruling's item 4 is superseded by what you did.
+- The `test.each` title reorder (12 rows) disclosed on the record; the acceptance matrix re-run after — received.
+
+## 2. What the re-gate will measure (so nothing surprises you)
+The tester's five named reds (T1/T2 on the pin; T3/T4/T5 each on a fixture row) re-derived in its own clone against your tamper table (T0 22/22; T1a/T1b/T2/T3 ×5/T4 ×2/T5/T6 ×2); the counts pin 2119/110 by jest `--json` names; QA-F3's eligibility (T6) as a fourth pinned mechanism; the docblock's two declared limits; scope hygiene (2 files, `static/` 0); merge-tree naming the counts file as the ONLY conflict with `eaae224`. Round 2 of 2: a NO GO ships nothing on the branch and the residue is ticketed.
+
+## Holds — unchanged
+No commit on `rd-341-label-guard-s41` while its gate runs (from the moment the next seat launches it — treat it as held NOW). No deploy. No merge without a GO naming the SHA; the RD-341 merge regenerates the counts file at the merged tip. No force push. Never `--no-verify`. Never delete. Commit messages through a file. RD-321's deploy-hold decision stays with Kam.
+
+PROVENANCE:
+- `rd-136-nga-defaults-s12` = `eaae2242…`; `rd-341-label-guard-s41` = `2b21385a…`; `rd-339-python-gate-s41` = `b68dcae…` | `git ls-remote origin` from Wednesday's seat, NO fetch | read 2026-09-06 14:06:29
+- The merge fact (tree `5e76845…`, parents `d370b85` + `b68dcae`, 3 files +281/−87); the RD-341 fix's numstat (`__tests__/sustainability-stand-in-labels.test.js` +139/−22; the counts file 2/2) and `merge-tree --write-tree eaae224 2b21385` rc 1 on the counts file alone | `git cat-file -p` / `diff --stat` / `diff --numstat` / `merge-tree` over local objects in the builder's checkout, read-only | read 2026-09-06 14:06
+- Your READY + receipt (the tip re-read at 03:43:25Z; the VERDICT line 2123/2123 × 111; the tamper table T0–T6 with T1b the measurement; 2119/110; comments 37217–37221; RD-352/353/354; the labels; the boot line; the 117 worktrees) | `[Datasec/NexusAI -> Wednesday] READY FOR RE-GATE: RD-341 fix @ 2b21385 …` 2026-09-06T04:04:02Z, read whole (saved `fleet/state/mail_040400_s42_rd341_ready_dafe0ebf.txt`) | read 2026-09-06 14:0x
+- The previous mails to you (03:04:38Z confirmation — the stricter pin YES, the boot line item 4; 03:42:27Z GO) | `briefs_staged/S42_plan_confirm.md`, `S42_rd339_regate_pass_go.md` | read 2026-09-06 14:0x — this ACK SUPERSEDES the confirmation's item 2 second line (the stricter pin: withdrawn) and item 4 (the boot line: superseded by the additive severity figure); nothing else re-sequenced
+- scope: verify the merge; hold RD-341 for its re-gate (the next seat's first act); the two answers; proceed to RD-321 | this ACK, written by Wednesday | read 2026-09-06 14:0x
+
+SELF-CHECK: re-read end-to-end for contradictions | 2026-09-06 14:08
+(checked: the merge fact stated once from Wednesday's read; the RD-341 head once; the pin ruling reversed ONCE with SUPERSEDES named; the boot-line ruling superseded once; the re-gate assigned to the next seat explicitly so "held" has a start; consistent with the 03:04Z confirmation's order — RD-321 next.)
