@@ -4374,5 +4374,37 @@
   ],
   "delivered_artefact": "KS-660 comment 959e0dcc (disposition quoting Kam's 19:31 ruling) + archived; seat A's read-back receipt 2026-09-06T09:48Z",
   "delivered_ts": "2026-09-06T19:51:02.357877+10:00"
+ },
+ {
+  "id": "secuura-demo-kam-admin-default-password",
+  "client_project": "Secuura/Blockchain",
+  "title": "Your address kam@secuura.ai is a SYSTEM_ADMIN on the public demo, seeded with the published default password secuura123 (DEMO_SECUURA_PASSWORD unset, ALLOW_DEFAULT_SEED_PASSWORDS=true, MFA off) — set a real password tonight, replace the identity, or both?",
+  "bluf": "OVERRIDE of the prior-ruling gate, reason: its one match is your 2026-08-17 20:15 message about Purview and the HPSM analysis — unrelated. Measured read-only by the Secuura agent (seat A) at 19:58 on the demo box and in the tree: the live demo account a0000000-…-000060 / kam@secuura.ai / SYSTEM_ADMIN / tenant secuura-co is created by services/auth/src/repositories/userRepo.ts:1113 (seedPw('DEMO_SECUURA_PASSWORD','secuura123')) and inserted again by api-gateway/src/startup-migrations.ts:960; on secuura-auth DEMO_SECUURA_PASSWORD is UNSET and ALLOW_DEFAULT_SEED_PASSWORDS=true, so the password is the repository's published default; mfa_enabled=false; last login 2026-07-14. No login was attempted and none will be. CORRECTION: Wednesday told you at 19:5x that this account was separately provisioned and unaffected by KS-913 — that was the agent's inference (a unique argon2 hash proves nothing under a salted KDF; one seed list is not every seeder) relayed by Wednesday as a measurement; withdrawn at 20:0x. The address sits in 6 files (the gated seed list — fixed on a held branch; the two runtime seeders; the smoke script; a fixture; two docs). Yours on three counts: your personal identity, a live demo you and Stuart log in to, a credential change. KS-919 (the MFA-off ticket) is the same account and folds in here. Nothing has changed on the demo.",
+  "default_action": "HOLD (option c) until your word — a change to what you log in with on the demo is approval-class; the ONLY act tonight without your word is pushing the already-made, gated seed-list edit (adminConfig.ts) as its own PR — it touches no live login",
+  "options": [
+   {
+    "key": "a",
+    "label": "Set DEMO_SECUURA_PASSWORD on the demo stack TONIGHT (a new secret; the identity kept for now) — then the identity swap as KS-913's next round with Stuart told (Recommended)",
+    "detail": "the Secuura agent generates the secret on the box, sets it on secuura-auth (and the gateway if it reads it), restarts only those services, confirms the row's password changed by a login-free check; you read the secret from the box yourself over SSH (never mail, never the panel); Stuart's login changes only at the identity round, which you announce"
+   },
+   {
+    "key": "b",
+    "label": "Replace the identity everywhere now (the six files — a fictional admin) AND set the password — one change tonight",
+    "detail": "your and Stuart's demo login changes tonight; needs your WhatsApp to Stuart before it lands (external comms = yours); the agent builds it as one PR + the env change, gated, deployed under your 15:12 lift"
+   },
+   {
+    "key": "c",
+    "label": "HOLD — nothing changes tonight; the published default stays live on the public demo",
+    "detail": "the agent files the measurement on KS-913/KS-919 and moves on; you decide tomorrow"
+   }
+  ],
+  "recommended": "a",
+  "ts": "2026-09-06T20:01:21.154513+10:00",
+  "status": "open",
+  "ruled_choice": null,
+  "ruled_ts": null,
+  "prior_rulings_overridden": [
+   "2026-08-17 20:15"
+  ]
  }
 ]
