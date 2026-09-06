@@ -37,6 +37,17 @@ regardless of any merge grant.
 `5_Project_History/2026-09-07_f5-disclosure-draft-for-kam.md` (updated to "merged"). Stuart: NOT
 drafted — nobody has established whether Platform S touches those routes. Do not draft it uninstructed.
 
+## ⚠ NEGATIVE RESULT ON THE TURN-END FIX — record it, do not assume it is closed
+s144 replaced the launcher's turn-end line with **Kam's approved wording** at ~23:07Z and proved the
+prompt intact with a check that can fail. **s145 booted from that fixed launcher at 23:39Z and STALLED
+AT TURN END ANYWAY** (~09:5x, after sending its merge receipt and naming round 3 as next). Detector
+run: prompt empty, no ghost text, 0 inbound — a genuine stall, third of the day.
+**So the wording was NOT the whole cause.** Kam's approved line covers "either continue working
+in-turn", which is exactly this case, and it still did not fire. **Do not report the turn-end class as
+closed.** Next step is diagnosis, not another wording change: capture what the seat's final turn
+actually looked like before the stall, and check whether the line survives into the RUNNING prompt for
+a seat launched by the cockpit (as opposed to being present in the file s144 verified).
+
 ## 🔴 THE LIVE THREAD — ATTIO MOVES OUT OF DATASEC (Kam, this morning)
 **His rulings, verbatim:** 09:12 card `attio-repo-home` => **move**, *"i will set up under kamilkkreiser
 but not in datasec"* · 09:18 *"use https://github.com/KamORG454/attic.git. please create deploy keys"* ·
