@@ -33,7 +33,10 @@ request it.** THE LINE: a merge is Wednesday's; **a merge that makes an EXTERNAL
 **#880/KS-577 silently picks Option 1 for Platform S and stays his.** Disclosure to any human is his
 regardless of any merge grant.
 
-**HIS ONE OPEN ACTION: send the F5 message to Peter.** Ready-to-send text is in the chat and in
+**DONE — Kam sent the F5 message to Peter himself at ~09:53 AEST.** ✅ Card marked delivered.
+**PETER IS IN THE UK (Kam, 09:53)** — ~9-10h behind AEST, so no reply until late in the Australian day.
+**Never read his silence during our working day as a non-response; it is his night.** Filed as
+`0_Brain/people/peter.md`. The historical note below is superseded: Ready-to-send text is in the chat and in
 `5_Project_History/2026-09-07_f5-disclosure-draft-for-kam.md` (updated to "merged"). Stuart: NOT
 drafted — nobody has established whether Platform S touches those routes. Do not draft it uninstructed.
 
