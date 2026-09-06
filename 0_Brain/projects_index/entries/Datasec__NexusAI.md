@@ -3,10 +3,12 @@ client: Datasec
 project: NexusAI
 path: /Volumes/DevMASTER/!CODING/Datasec/NexusAI
 status: active
-updated: 2026-09-03
+updated: 2026-09-06
 ---
 
 # Datasec / NexusAI
+
+**⏸ PAUSED (Kam, panel 2026-09-06 17:01: "when the nexus agent finishes its round of ticket please retire the agent and we will pause nexus for a few days") — S42 wrapped 17:15 (scored 0.85), pane retired 17:2x, NO successor. Resume only on Kam's word, at `HANDOVER-S42.md` §2 in the NexusAI folder. State at the pause: campaign tip `rd-136-nga-defaults-s12` = `9546da5` (RD-339/347/341/321 merged, pin 2154/112); `rd-334-classify-and-name-s42` = `2952591` READY FOR QA — its tier-2 gate launched from Wednesday's seat 17:2x, the verdict to be recorded on RD-334 for the resuming seat (which merges on a GO with the counts regenerated at the merged tip); the deploy of `48e092c`/`0000097` is Kam's, default HOLD, untouched; RD-359 + RD-360 filed (S42's own residue); the winston-transport route un-driven across three gates; local :3001 DOWN (never started by S42). Refreshed 2026-09-06 17:2x by the 17:1x Wednesday seat.**
 
 **🔴 DEPLOY HOLD (Kam, 2026-09-02 07:3x — brand): the dark theme (rounds 6–8, head `6b78315`/`451dfba`) is an INVENTED navy/indigo palette (`#1a1a2e`/`#1e1e3f`/`#252550`/`#16213e` — measured from my seat) and the repo has NO style guide / brand-token file. Kam saw it as another client's aesthetic. Rounds 6–8 do NOT deploy on any pass-9 contrast verdict — deploy = a Kam-approved palette first. s17 item 0 = write `docs/STYLE_GUIDE.md` + a brand-token file from the product's existing HP tokens (`#0096d6` family in the light theme), derive the dark palette from it, PROPOSE to Kam as rendered screenshots both modes, then re-theme; a guard that every dark-mode colour resolves to a token. Pass 9 carries a brand-conformance leg (ADDENDUM 2). Lesson: learnings/2026-09-02_style-guides-never-mixed.**
 
