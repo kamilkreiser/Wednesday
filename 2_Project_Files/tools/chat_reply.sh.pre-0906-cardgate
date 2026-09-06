@@ -17,20 +17,6 @@ CHAT="$PROJECT_DIR/0_Brain/dashboard/data/chat_log.json"
 MSG="${1:-}"
 [ -n "$MSG" ] || { echo "chat_reply: empty message refused" >&2; exit 2; }
 [ -f "$CHAT" ] || { echo "chat_reply: no chat log at $CHAT" >&2; exit 1; }
-
-# ── CARD-ID GATE (2026-09-06 22:2x, mirror-reports-state w=7 → promoted) ──
-# The FIRST of the three instances landed here: the panel told Kam a card existed
-# that did not, because the line was written in the same batch as a refused add.
-# Kam's panel is his reading surface; a line there is a receipt, not a forecast.
-GATE="$PROJECT_DIR/2_Project_Files/fleet/card_id_gate.sh"
-if [ -f "$GATE" ]; then
-  _cg_tmp="$(mktemp)"; printf '%s' "$MSG" > "$_cg_tmp"
-  if ! bash "$GATE" "$_cg_tmp"; then
-    echo "  (gate: card_id_gate.sh — ledger w=7; nothing was mirrored to Kam's panel)" >&2
-    rm -f "$_cg_tmp"; exit 1
-  fi
-  rm -f "$_cg_tmp"
-fi
 CHAT_FILE="$CHAT" python3 - "$MSG" <<'PYEOF'
 import json, os, sys, datetime, tempfile
 path = os.environ["CHAT_FILE"]

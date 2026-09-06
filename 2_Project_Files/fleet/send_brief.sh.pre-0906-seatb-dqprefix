@@ -65,17 +65,6 @@ if printf '%s' "$BODY" | grep -qE '@[A-Z][A-Z0-9_]*@'; then
   exit 1
 fi
 
-# ── CARD-ID GATE (2026-09-06 22:2x, mirror-reports-state w=7 → promoted) ──
-# Three times in two days a sentence asserting a card existed shipped in the same
-# batch as the `decision_queue.sh add` that was refused. The rule ("the sentence
-# comes in the call AFTER `added:` is read") has failed as a rule; it is a gate now.
-# Detector measured against 750 staged briefs before arming: 70 hits in card-claim
-# lines, 66 resolve, 1 true catch, 2 false (Azure resource names, excluded by name).
-if ! bash "$SELF_DIR/card_id_gate.sh" "$BODY_FILE"; then
-  echo "  (gate: card_id_gate.sh — ledger w=7)" >&2
-  exit 1
-fi
-
 # ── ROUTING (WED-104) ─────────────────────────────────────────────────────
 # Which inbox actually receives this. A project not listed in the routing file
 # is REFUSED — never silently defaulted to the shared bus, which is exactly the
@@ -365,11 +354,6 @@ MSG
   DQ_TOOL="$PROJECT_DIR/2_Project_Files/tools/decision_queue.sh"
   case "$TO" in
     Secuura/Blockchain)          DQ_PREFIX="secuura-" ;;
-    # Seat B (added 2026-09-06 22:2x). It was in launchers.conf and inbox_routing.conf and
-    # NOT here, so every seat-B brief silently skipped the undelivered-rulings gate — the
-    # registry-gap class the 2026-09-06 10:1x ledger row already named, in the third registry
-    # that row itself lists. Same board, same cards, same prefix as seat A.
-    Secuura/Blockchain-B)        DQ_PREFIX="secuura-" ;;
     Datasec/NexusAI)             DQ_PREFIX="nexusai-" ;;
     Datasec/Vision_Sales_Portal) DQ_PREFIX="vision-" ;;
     Datasec/HPSM)                DQ_PREFIX="hpsm-" ;;

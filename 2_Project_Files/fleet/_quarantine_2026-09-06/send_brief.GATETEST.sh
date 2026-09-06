@@ -65,17 +65,6 @@ if printf '%s' "$BODY" | grep -qE '@[A-Z][A-Z0-9_]*@'; then
   exit 1
 fi
 
-# ── CARD-ID GATE (2026-09-06 22:2x, mirror-reports-state w=7 → promoted) ──
-# Three times in two days a sentence asserting a card existed shipped in the same
-# batch as the `decision_queue.sh add` that was refused. The rule ("the sentence
-# comes in the call AFTER `added:` is read") has failed as a rule; it is a gate now.
-# Detector measured against 750 staged briefs before arming: 70 hits in card-claim
-# lines, 66 resolve, 1 true catch, 2 false (Azure resource names, excluded by name).
-if ! bash "$SELF_DIR/card_id_gate.sh" "$BODY_FILE"; then
-  echo "  (gate: card_id_gate.sh — ledger w=7)" >&2
-  exit 1
-fi
-
 # ── ROUTING (WED-104) ─────────────────────────────────────────────────────
 # Which inbox actually receives this. A project not listed in the routing file
 # is REFUSED — never silently defaulted to the shared bus, which is exactly the
@@ -451,7 +440,7 @@ import json, os, urllib.request
 payload = {"to": os.environ["RCPTS"].split(","),
            "subject": os.environ["SUBJ"], "text": os.environ["BODY"]}
 req = urllib.request.Request(
-    f"https://api.agentmail.to/v0/inboxes/{os.environ['INBOXADDR']}/messages/send",
+    "http://127.0.0.1:1/STUBBED-NO-SEND",
     data=json.dumps(payload).encode(),
     headers={"Authorization": "Bearer " + os.environ["AGENTMAIL_API_KEY"], "Content-Type": "application/json"})
 try:
