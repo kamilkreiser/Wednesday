@@ -12,22 +12,24 @@ supersede: replace this file wholesale at the next pickup; do not append
 23:00–06:00** (enforced by speak.sh). Kam asleep. Standing: "keep pushing secuura to a ready state" +
 Opus-5 boot pin (credits, doctor WARNs after 2026-09-13).
 
-## WHY THE FLEET IS WINDING DOWN (a decision, recorded for Kam)
-A very productive night: F5 fully resolved + 6 PRs at READY. **The advance to "ready state" now needs
-Kam (merges/disclosure) and careful GATE RUNS — not more building.** More building only piles PRs
-behind the held gate. So: seat A rests (not relaunched), seat B finishes its OAuth cluster, and the
-GATE PASS is the morning's first fleet job. This honours "keep pushing" (the push is blocked on Kam,
-not build capacity) and the credits flag. If Kam wants max overnight throughput instead, relaunch a
-seat A successor on KS-729/KS-664 (bounded dep bumps, per HANDOVER-s141b).
+## POSTURE (a decision, recorded for Kam): ONE seat keeps pushing; the gate pass is the morning's job
+A very productive night: F5 fully resolved + the OAuth cluster + more, ~7 PRs at READY. Seat A wrapped
+at its band and its pane is closed (not relaunched — a fresh morning seat takes its leftover review
+streams). **Seat B KEEPS PUSHING** on bounded category-1 backlog per Kam's "keep pushing secuura"
+directive (credits handled by the model pin, not by idling) until it hits its band, then wraps.
+The MERGE/gate advance to "ready state" needs Kam + careful GATE RUNS = the morning's first fleet job;
+holding the gate overnight was deliberate (nothing merges without Kam anyway).
 
 ## SEATS
-- **Seat A (s141b, %130) — WRAPPED at its band (~01:21), idle, NOT relaunched.** Handover is in the
+- **Seat A (s141b, %130) — WRAPPED at its band (~01:21) and PANE CLOSED (~01:2x, pane_close.sh, listeners 24→24 = owned no surface), NOT relaunched.** Handover is in the
   AGENT'S OWN tree: `!CODING/Secuura/Blockchain/5_Project_History/HANDOVER-s141b.md` (read-only for
   Wednesday) + the full wrap mail. Successor's bounded/free work: **KS-729, KS-664** (dep bumps); do
   NOT start KS-739 (awaiting Kam); review streams + OAuth cluster need a full window.
-- **Seat B (s142, %134) — RUNNING.** Building **KS-799 Option 2** (JS submit, no CSRF exemption —
-  Wednesday's GO; Option 1 rejected as it re-opens the KS-781 revert surface). OAuth **KS-798+KS-841
-  already READY on #881.** When its queue dries, it wraps — do NOT relaunch overnight (wind-down).
+- **Seat B (s142, %134) — RUNNING, ~48% ctx.** OAuth consent cluster **COMPLETE** — KS-798, KS-841,
+  KS-799 (Option 2, no CSRF exemption) all READY on **#881**. Now on **KS-729** (ip-address GHSA →
+  express-rate-limit in mcp-server) then **KS-664** (deepmerge-ts → 8.0.1), bounded dep-security.
+  Wraps at its band; reassess relaunch then (remaining bounded work is thin — mostly review
+  streams/decision-blocked, which want a fresh morning seat).
 
 ## 🔴 THE MORNING'S FIRST FLEET JOB — the GATE PASS (6 PRs, run serially, tier-1 first)
 No tester running (held all night by choice). Nothing merges without a gate + Kam's GO. Re-read
