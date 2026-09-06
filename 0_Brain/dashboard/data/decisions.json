@@ -4684,5 +4684,47 @@
    "2026-08-21 09:47",
    "2026-09-07 06:42"
   ]
+ },
+ {
+  "id": "attio-entra-consent-decision",
+  "client_project": "Datasec/ATTIO",
+  "title": "The scopes report is in: it reads message bodies, and 3 of 7 permissions are write/send. Grant, or not?",
+  "bluf": "Prior-rulings check: you ruled attio-entra-consent-m365 => scopes-first at 07:07. This is that report coming back, and it is the decision you deferred. Full document: 5_Project_History/2026-09-07_attio-m365-scopes-report.md. THE ANSWER TO WHAT YOU ASKED: yes, something reads message BODIES - Mail.Read and Mail.ReadWrite cover the full message including attachments, and Attio stores bodies rather than headers alone. AND IT IS NOT READ-ONLY: three of the seven are write or send - Mail.ReadWrite modifies mailbox items, and Mail.Send plus SMTP.Send send mail AS the connected user, recipients seeing it from them. A reasonable person reading \"email and calendar sync\" would not expect send-as. Plus offline_access, which turns a session into standing access: Attio holds a refresh token and keeps working with nobody watching until someone revokes it. THE REASSURING HALF, with its limit: the permissions look DELEGATED not application-level, on three independent indications - so a mailbox reaches Attio only when its owner connects it, and admin consent removes the \"needs admin approval\" prompt rather than handing over every mailbox in Datasec. BUT the agent named the gap rather than smoothing it: Microsoft grants what is REGISTERED ON THE APP, not only what is in the URL, so if Attio also declares application-level permissions the same consent grants those too and this report would not know. THE TEN-SECOND CHECK THAT BEATS THE WHOLE REPORT: the consent screen itself is the authority. It labels application-level permissions distinctly - \"without a signed-in user\" or \"Read mail in all mailboxes\". If any line says ALL MAILBOXES, the delegated reading is wrong and you stop. Also unmeasured and worth knowing: Attios data retention after a mailbox is disconnected is undocumented in what was read - whether stored bodies are deleted. The agent says that is the one it would most want answered before consenting, and it belongs in the security pack you already ruled to send.",
+  "default_action": "HOLD - nothing granted, nothing requested, nothing opened. The follow-up digest keeps running with its honest warning attached.",
+  "options": [
+   {
+    "key": "open-and-look",
+    "label": "Open the consent screen and check for \"all mailboxes\" before deciding (recommended)",
+    "detail": "Ten seconds, and it converts the reports one real gap into a measurement. If every line is delegated you can grant there and then; if any says all mailboxes you close it and we think again."
+   },
+   {
+    "key": "grant",
+    "label": "Grant admin consent now",
+    "detail": "Turns the strongest follow-up signal on today. Costs granting body-read and send-as without the app-registration question settled."
+   },
+   {
+    "key": "retention-first",
+    "label": "Ask Attio about post-disconnect retention first",
+    "detail": "Folds into the security pack you already ruled to send. Slower; the not-contacted signal stays blind meanwhile."
+   },
+   {
+    "key": "never",
+    "label": "Do not connect mailboxes at all",
+    "detail": "The signal stays permanently what it is - records-not-edited, with its warning banner. No bodies leave the tenant."
+   }
+  ],
+  "recommended": "open-and-look",
+  "ts": "2026-09-07T07:34:15.516146+10:00",
+  "status": "open",
+  "ruled_choice": null,
+  "ruled_ts": null,
+  "prior_rulings_overridden": [
+   "2026-08-21 09:47",
+   "2026-08-21 09:56",
+   "2026-08-21 20:06",
+   "2026-08-21 20:41",
+   "2026-08-22 08:00",
+   "2026-09-07 07:07"
+  ]
  }
 ]
