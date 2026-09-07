@@ -1,0 +1,77 @@
+ultrathink
+
+You are the cross-project QA agent, working from
+/Volumes/KK_T9_External_HDD/!CODING/Testing Agent MAIN
+
+TIER 2 FULL GATE — Datasec/NexusAI, RD-377, branch rd-377-verdict-domain-s47 @ fabcc93, base e032c7d
+(rd-323-scheduler-failure-vocabulary-s45, a CLOSED lineage — do not re-gate it). NOT main (frozen at
+a9a8cb6, 250 behind). Nothing merged, nothing deployed. You may not merge. Round 1 of this ticket.
+
+*** THIS ROUND TOUCHES PRODUCT CODE — three schedulers — which is why it is a full pass and not
+through-code. It is scheduler BEHAVIOUR, not a rendered surface: RD-76 gates every authenticated page,
+so the artefacts are the suite and mutation arms driven against the real runOnce with local HTTP
+stubs. A local run at fabcc93 is correct; do NOT claim the demo was tested. ***
+
+YOUR BRIEF — read it first, in full, and follow it exactly:
+/Volumes/KK_T9_External_HDD/WEDNESDAY/2_Project_Files/fleet/qa-agent/briefs/2026-09-08_nexusai-rd377-tier2.md
+
+FIRST JOB — THE BUILDER FILED A FINDING AGAINST ITS OWN WORK, AND THE ARM IS YOUR SUBJECT, NOT THE FIX.
+Its words: "My bucketFor() docblock claims production is TOTAL. A mutation removing that fallback
+passed 33/33 — because every verdict today IS mapped, so the fallback is unreachable from the real
+classifier and the claim had nothing behind it." It closed this with a synthetic arm. This is the
+FOURTH appearance of one class in this codebase in 24 hours — a claim with no cell behind it, each
+time inside the work written to close the previous one. So:
+ (1) remove the bucketFor() fallback and confirm something now REDDENS — if it still passes, the arm
+     is decoration and the finding is NOT closed;
+ (2) confirm it reddens for the RIGHT reason — read the failure, do not just observe a red;
+ (3) ask what the arm CANNOT see. A synthetic arm proves the fallback works when driven synthetically;
+     it does not prove the fallback is REACHABLE FROM THE PRODUCT. Say plainly which of the two it
+     establishes, because the docblock's word is "production".
+
+SECOND — the derived domain must be DERIVED, not written down. __tests__/helpers/verdict-domain.js is
+new and claims an acorn-only static + driven domain. THIS EXACT CLAIM WAS FALSE ONE ROUND AGO on
+RD-323: the strings were derived, the probe INPUTS were hand-listed, and a real fifth verdict passed
+2175/2175 unnoticed while silently joining the escalation set. So do not READ the helper — TEST it:
+add a genuine fifth verdict to _classify and confirm something reddens WITHOUT the test being edited,
+asserting the tamper LANDED first (grep it AND drive the real classifier to see it emitted). Confirm
+the static and driven halves AGREE, and say what happens when they disagree. Check how it resolves
+acorn and whether it is declared.
+
+THIRD — the ADDITIVE constraint is a ruling, not a preference. A new unknownStatus count ALONGSIDE
+p1Incidents / healthP1s, never folded in, because RD-323-D-2 was a metric's meaning changing under an
+unchanged key. Confirm p1Incidents and healthP1s mean exactly what they meant at e032c7d (drive both
+readers over a mixed sweep, per-field, old head vs new). And confirm the new fields REACH THE WIRE:
+getHealthSnapshot() -> server.js:17174 -> /api/admin/health. A count in the object but not in the
+response is the same defect this ticket exists to close.
+
+FOURTH — P2-unknown-status END TO END, all four legs, with DEGRADED and OK controls in the same run:
+bucket incremented · ok:false audit row written · tick NOT failed · P1 alert email NOT sent. The
+finding was that all four were silent, so a fix landing only the bucket is half done. And the negative
+that gives the positives meaning: a P1-unreachable target must STILL escalate and STILL mail.
+
+FIFTH — the builder's arms table says eight mutations and THREE CAUGHT NOTHING on the first pass. Read
+what it did about each. An arm that caught nothing is either a real gap it then closed, or an arm
+pointed at the wrong thing. Both are fine; conflating them is not. Report which each was.
+
+RE-DERIVE rather than accept: PASS 2196/2196 across 114 suites at exit 0; verify-expected-counts.json
+2175/113 -> 2196/114 by NAME-DIFFING cells, never a total; and the claim that NOTHING reads the bucket
+sum (spot-check over a frame you NAME — that claim is what turned a possible regression into a
+caution). Confirm fabcc93 and its base with your OWN ls-remote.
+
+EVIDENCE: positive control opening AND closing; every mutation asserted PRESENT before its result is
+read and restored after; matched pairs so exactly one variable moves; READ EVERY RED AND SAY WHY IT IS
+RED — AND READ WHY A GREEN IS GREEN (a mutation script with a syntax error printed a full green on this
+fleet last night; the builder's own first grep here returned empty because zsh globbed --include=*.js);
+NAME THE FRAME in any completeness claim; FOUND / TESTED / HOW with controls named under HOW; state
+what you did NOT test.
+
+Stop any server you start and prove the port reads 000. No az, no registry, no demo, no staging. Work
+in your own clone or worktree.
+
+VERDICT: GO / GO-with-findings / NO GO with severities, AND the terminating classification — is what
+you found (a) nothing, (b) RECORD-LEVEL ONLY, or (c) WRONG IN THE CODE (a behaviour the product gets
+wrong, or a cell that cannot fail)? Only (c) earns another round; (a) and (b) end the ticket and get
+ticketed. Say which, plainly.
+
+Report to Wednesday. Write the report under projects/nexusai/reports/2026-09-08-rd377-tier2/ and NAME
+THAT PATH IN YOUR MAIL.
