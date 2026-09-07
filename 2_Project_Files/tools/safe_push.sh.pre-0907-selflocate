@@ -32,14 +32,7 @@
 # (learnings/2026-08-26_zsh-has-no-pipestatus).
 set -u
 
-# W is SELF-LOCATED, never a hardcoded volume (Kam 2026-08-25: DevMASTER is the
-# master, the T9 is a sync copy; learnings/2026-08-25_travel-drive-stale-pointers:
-# a sync copies the stale pointer along with the valid thing it points at).
-# Superseded 2026-09-07 22:3x, kept one line away per the revert rule:
-#   W=/Volumes/KK_T9_External_HDD/WEDNESDAY   <- dead on the Studio; that volume
-#   is not mounted there, so every run of this tool exited 2 or worse.
-SELF_DIR="$(cd -P "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
-W="$(cd -P "$SELF_DIR/../.." && pwd)"
+W=/Volumes/KK_T9_External_HDD/WEDNESDAY
 D=0_Brain/dashboard/data
 MSG="${1:?usage: safe_push.sh \"<commit message>\" [path ...]}"; shift || true
 
