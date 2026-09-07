@@ -28,7 +28,19 @@ naming its own brief (never a non-zero ctx) — and **both have since REPORTED**
 **The general rule this earns, and it is already a lesson:** a handover records a mechanism by its
 **PATH**. Every launch wrapper below is named by path for exactly that reason.
 
-## FLEET — EMPTY. Every agent wrapped or reported; every pane closed. Panes: Wednesday + the monitor.
+## FLEET — 1 live: the RD-329 gate (`%6`). Everything else wrapped or reported, panes closed.
+- **`%6` — QA gate, RD-329 public `/api/health` allow-list, TIER 2 through-code, round 1 of 2.**
+  Branch `rd-329-health-payload-allowlist-s43` @ `2e78c76e573c5836037d80d99479cf5129dfba6d`.
+  Launch: `2_Project_Files/fleet/state/launch_qa_nexusai_rd329.sh` · Brief:
+  `2_Project_Files/fleet/qa-agent/briefs/2026-09-07_nexusai-rd329-health-allowlist-tier2.md`.
+  Launched 18:33, verified at rung 5. **Tier 2 deliberately: no product code changed** — 129 lines of
+  test pinning behaviour correct since 2026-04-25, and the builder said plainly that **no red-proof is
+  available** (the suite passes at the base by construction). **The one question it was given: is this
+  an ALLOW-LIST in behaviour or only in name** — with the RD-362 "spelling check wearing the costume of
+  a semantic guarantee" precedent handed to it as the thing to assume. Its deliverable is the list of
+  which tampers the guard catches and which it does not.
+- **Gate queue after it: RD-148 @ `aea410c` only.**
+
 All three gates returned and the builder wrapped. Closes went through
 `2_Project_Files/fleet/cockpit/pane_close.sh`; **listeners 13 → 13 on every one**, and the ports the
 handovers named (3001/3111/3121) were already 000 beforehand — nothing died with a pane.
