@@ -17,9 +17,7 @@
 #   --dead   the seat is DEAD: refuse unless the wednesday pane's capture shows
 #            the literal "Context limit reached" (never kill a live seat on a
 #            guess). Called by the wake runner's DEAD case. rc 3 = refused.
-#   --self   the seat rotates ITSELF inside the 80-90% band (Kam 2026-09-07 10:49;
-#            supersedes 80-85 of 09-05 and 70-80 of 09-02). 70% is a CHECKPOINT
-#            ONLY - refresh the handover, start nothing heavy, do NOT rotate. Refuse
+#   --self   the seat rotates ITSELF at 70% (Kam's 2026-08-21 rule): refuse
 #            unless the WEDNESDAY repo HEAD equals origin/main (everything
 #            durable is pushed — rhythm §3 item 3). rc 4 = refused. Run it
 #            DETACHED from the seat (nohup … &): the respawn kills the caller.
@@ -68,7 +66,7 @@ else
       log "REFUSED (--self): working tree has uncommitted changes outside the dashboard data churn — commit + push the handover first:"; printf '%s\n' "$DIRTY" | head -10 >> "$LOG"; exit 4
     fi
   fi
-  REASON="planned rotation inside Kam's 80-90% context band"
+  REASON="planned rotation at the 70% context tripwire"
 fi
 
 STAMP=$(date '+%H:%M')
