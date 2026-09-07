@@ -115,3 +115,43 @@ that lives only in `learnings/` is the one that just failed twice in ten minutes
 away."** An over-withdrawal usually replaces a precise, useful statement with a vague, safe one —
 and the vague one is what the next reader implements.
 
+
+## THIRD OCCURRENCE, 2026-09-07 12:3x — THE OTHER AXIS: a retraction correct in its SCOPE and applied in TOO FEW PLACES (w=3, and the diagnosis is owed and given)
+
+**The operative case this section adds, because the file's headline does not carry it:** Wednesday
+has just withdrawn a claim, and the withdrawal is correctly bounded. **Before moving on: WHERE ELSE
+DOES THAT CLAIM LIVE?** A belief that reached one paragraph has usually reached three, and the
+handover is the one document where a stale belief is inherited as fact by someone who was not in the
+room.
+
+**The case.** The 11:2x seat told Kam its rulings were reaching "a second panel" its instrument could
+not read. It then measured — one shared `chat_log.json`, monotonic, nothing overwritten — and
+retracted the mechanism while correctly keeping the observation. **Textbook, by this file's own rule.**
+It then wrote a handover whose blind-spot SECTION still said *"`kam_rulings_today.sh` reads ONE panel;
+Kam ruled five times on the other one"*, with a pointer line at the top of the file repeating it. In
+the *same file* it had correctly struck through its other wrong claim (the watcher "not running").
+
+**So the correction discipline fired — on the instance it was thinking about, and nowhere else.**
+The successor found the refuted mechanism leading a section of its own cold-start handover, and had
+to re-measure from source (1,589 messages; `"between 80 and 90"`, `"rotation window"`, `"unpause"`,
+`"Marketplace"` — one hit each, **zero authored by Kam**) before it could tell which version was true.
+
+**The w=3 diagnosis.** The first two occurrences were about withdrawing too MUCH, so the rule this
+file promoted was about *sizing* a retraction. **Sizing is one axis; distribution is the other, and
+nothing was pointed at it.** A retraction is a fact-change, and every fact-change has the same
+delivery problem as a ruling — [[2026-09-05_a-relayed-ruling-is-delivered-only-when-it-is-in-the-artefact]]
+already says a ruling is delivered only when it sits in the artefact the next reader lands on.
+**A retraction is delivered on exactly the same terms and this file never said so.**
+
+**The rule, added to How to apply as 6:**
+
+6. **A retraction is not finished when the sentence is corrected — it is finished when the CLAIM is
+   gone from every artefact carrying it.** Grep for the **claim**, not for the sentence: the wording
+   will differ, the belief will not. The three that always need checking are **the handover, the
+   daily note, and any brief already staged**. **The closing check is ABSENCE**
+   ([[2026-08-07_enumerate-every-surface-before-done]]) — "I fixed the line I was looking at" is a
+   presence check and always passes.
+
+**Enforcement state, honestly:** rule only. The candidate at w=4 is a wrap-step that greps the
+handover and the day's note for the day's retracted claims by keyword — which requires the ledger row
+to name the retracted claim in a machine-findable form, and it does not today.

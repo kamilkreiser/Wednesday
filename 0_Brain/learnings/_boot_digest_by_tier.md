@@ -7,7 +7,7 @@ status: live
 
 # Boot digest BY TIER — W whole, M rules-only, every project case a handle
 
-Generated 2026-09-07 12:31 from 107 lesson files (519,622 B). M 24 · MIXED 5 · W 78. 28 project CASE sections inside MIXED files are reduced to one line each: the heading and the path to read it at. W blocks are exactly what the default digest carries; M blocks drop the section index and keep the rules; a P file is a single handle. The CASES behind every rule live only in the lesson files — open one the moment its rule fires.
+Generated 2026-09-07 12:53 from 108 lesson files (531,499 B). M 24 · MIXED 5 · W 79. 28 project CASE sections inside MIXED files are reduced to one line each: the heading and the path to read it at. W blocks are exactly what the default digest carries; M blocks drop the section index and keep the rules; a P file is a single handle. The CASES behind every rule live only in the lesson files — open one the moment its rule fires.
 
 ## The T9 SSD is the master — Wednesday must be fully portable
 `2026-07-31_fully-portable-drive.md` · principle · 2026-07-31 · status: superseded — the "T9 is the master" half by [[2026-08-25_one-drive-devmaster-is-master]] (2026-08-25); the portability principle itself still lives · tier: W
@@ -1454,6 +1454,12 @@ never noticed, because nothing told me and I never looked.
 4. **Checkpoint discipline is mine even when a watcher exists** — the watcher is
    the backstop, not the plan. Finishing any long task is a checkpoint: check
    the inbox before starting the next thing, not when I happen to think of it.
+
+## EXTENSION 2026-09-07 — the strongest evidence yet, and it is that a guard caught the COORDINATOR, not the builder
+**The case.** Wednesday's `split` brief told the Secuura seat to revert a file to its state **on
+develop** and prove byte-identity. **Base still carried Kam's real address AND his real name** — the
+redaction had happened in round 1 of that same PR — so *"restore it to develop"* meant *"undo the
+redaction"*. **The instruction written to make things safer would have re-published his identity.**
 
 
 ## A ritual nothing triggers is not a ritual — it is a habit, and habits skip
@@ -3216,7 +3222,7 @@ so it gets none of the care an assertion gets. It is not the safe direction. An 
 is loud and gets challenged; an over-broad retraction is quiet, reads as humility, and takes a live
 finding with it.
 
-sections (open the file for these): The case · Why this is its own lesson and not another representations row · How to apply · SECOND OCCURRENCE, 2026-09-06 22:56 — TWO MINUTES AFTER THIS FILE WAS WRITTEN (w=2, and the diagnosis is owed)
+sections (open the file for these): The case · Why this is its own lesson and not another representations row · How to apply · SECOND OCCURRENCE, 2026-09-06 22:56 — TWO MINUTES AFTER THIS FILE WAS WRITTEN (w=2, and the diagnosis is owed) · THIRD OCCURRENCE, 2026-09-07 12:3x — THE OTHER AXIS: a retraction correct in its SCOPE and applied in TOO FEW PLACES (w=3, and the diagnosis is owed and given)
 
 ## How to apply
 
@@ -3247,6 +3253,19 @@ evidence; so does retraction) · [[2026-08-21_challenge-me-when-you-think-im-wro
 correction and was right — and the grant is what made refusing available to it) ·
 [[2026-09-01_qa-gate-before-my-verification]] (SHARPENED 2026-09-04: a claim about the product is not
 a shape — including a claim that a product finding is void).
+
+**The rule, added to How to apply as 6:**
+
+6. **A retraction is not finished when the sentence is corrected — it is finished when the CLAIM is
+   gone from every artefact carrying it.** Grep for the **claim**, not for the sentence: the wording
+   will differ, the belief will not. The three that always need checking are **the handover, the
+   daily note, and any brief already staged**. **The closing check is ABSENCE**
+   ([[2026-08-07_enumerate-every-surface-before-done]]) — "I fixed the line I was looking at" is a
+   presence check and always passes.
+
+**Enforcement state, honestly:** rule only. The candidate at w=4 is a wrap-step that greps the
+handover and the day's note for the day's retracted claims by keyword — which requires the ledger row
+to name the retracted claim in a machine-findable form, and it does not today.
 
 
 ## A time-scoped instruction gets a mechanism that EXPIRES it — an override with no end date is a permanent change nobody decided to make
@@ -3304,6 +3323,40 @@ place enforcement lives).
 5. **When it has already happened:** disclose it in the artefact the objects were written for (the brief's provenance line: "run by Wednesday IN THE BUILDER'S CHECKOUT — a write; re-derive it, do not trust it"), record the row, and tell the seat whose repo it is if anything could be observed (`FETCH_HEAD` moved; dangling objects — nothing an agent's workflow reads).
 
 **Family:** [[2026-07-31_manage-dont-do]] (rule 2: editing that project's files from Wednesday's hands is not allowed — `.git` is its files) · [[2026-08-15_a-gui-open-is-a-write]] (an action classified as reading that writes) · [[2026-08-13_headline-must-match-the-operative-case]] (a rule without a headline does not fire) · [[2026-08-09_an-enforcement-you-must-arm-is-not-one]] (the w=3 clause).
+
+
+## A handover records a mechanism by its PATH, never by the id of the thing it produced — and tooling that lives in a gitignored directory is invisible to every search a successor knows how to run
+`2026-09-07_a-mechanism-is-recorded-by-its-path-not-its-runtime-id.md` · correction · 2026-09-07 · status: live · tier: W
+
+**The operative case, so the headline matches it:** Wednesday is writing a handover, a note or a
+brief and is about to name something it used — a QA gate, a watcher, a probe, a launch. **The
+sentence is about to say `%135`, or a pid, or a port, or "the wrapper".** Stop. **Write the PATH of
+the file that produced it.** A pane id is dead the moment the pane is; a pid is dead sooner. The
+successor inherits a name for a thing it cannot reach, and the cost is not confusion — it is that the
+successor's next best option is to *invent* the mechanism, which is how a guard gets bypassed by the
+person it was built to protect.
+
+sections (open the file for these): The case · The real cause, and the commit is what found it · Why this is its own lesson and not another handover-quality row · How to apply · Residual, stated rather than carried quietly
+
+## How to apply
+
+1. **Any mechanism a seat invokes goes into the handover as its PATH.** Not a pane id, not a pid, not
+   a port, not a prose noun ("the wrapper"). `fleet/state/launch_qa_<topic>.sh --check` is a handover
+   line; `%135` is not. Runtime identifiers may appear *beside* the path, never instead of it.
+2. **Before writing a tool anywhere, ask whether the directory is tracked** — and whether it is
+   tracked *for the right reason*. `git check-ignore -v <path>` answers it in one command. This is
+   [[2026-08-04_gitignore-artifacts-at-creation]] pointed the other way: that lesson stops artefacts
+   being committed; this one stops **tooling being hidden**.
+3. **State drawers hold state.** Baselines, hashes, seen-markers, scratch — ignored, correctly.
+   Executables that a future seat must find are tooling and belong in a tracked path. **The fix when
+   they are in the wrong place is a MOVE, not a gitignore change** ([[2026-08-26_never-delete-cleanup-means-quarantine]]),
+   and it is not done while something is live on the mechanism.
+4. **When a mechanism cannot be found, do not compose one.** The honest options are: keep reading the
+   source, or say plainly that it is unrecorded. **A launch command that looks right is exactly what a
+   generator produces best** ([[2026-08-06_ghost-suggestions-in-panes]]) — and here the invented one
+   would have been *functional*, which is worse than one that fails.
+5. **Test by its handle:** could a seat that booted on another machine, from a fresh clone, run this
+   mechanism from what the handover says? If not, the handover names a ghost.
 
 
 ## Deploy authority for the week — and "fix the issues with the visible data"

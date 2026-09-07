@@ -76,3 +76,37 @@ were owed answers and did the right thing without them.
 [[2026-08-04_never-blanket-markseen-mid-monitoring]] (the 08-04 swallowed
 question — same family, different cause), [[2026-08-07_a-check-that-cannot-fail]],
 [[_ledger]]
+
+## EXTENSION 2026-09-07 — the strongest evidence yet, and it is that a guard caught the COORDINATOR, not the builder
+
+**The case.** Wednesday's `split` brief told the Secuura seat to revert a file to its state **on
+develop** and prove byte-identity. **Base still carried Kam's real address AND his real name** — the
+redaction had happened in round 1 of that same PR — so *"restore it to develop"* meant *"undo the
+redaction"*. **The instruction written to make things safer would have re-published his identity.**
+
+**What caught it was a drift guard the BUILDER had written four hours earlier, in that same round**,
+which enumerates seed sites **from the tree** rather than from a hand-written list. It fired on
+Wednesday's instruction and told the seat the address was back in that file. The seat had already
+caught, re-targeted and pushed **before Wednesday's own STOP arrived** — the messages crossed, and
+the fix was the guard's and the seat's, not the warning's.
+
+**The agent's formulation, adopted verbatim because it is better than the file's own:** *"Guards in
+the path beat rules in briefs. Rules live in whoever remembers them. That guard did not need anyone
+to remember anything."*
+
+**The two things this adds to the file:**
+
+1. **A guard's blast radius exceeds its author's intent, and that is the point.** It was written to
+   stop a builder's drift and it caught a coordinator's instruction — **the one class of error no
+   review layer above it was going to catch, because the coordinator IS the review layer.** A
+   hand-written list would have contained the two files someone remembered, one of which was the file
+   Wednesday's instruction changed. **Enumerate from the source; never list from memory.**
+2. **The discoverability corollary, learned the same day:** an enforcement nobody can find is an
+   enforcement that gets routed around in good faith. See
+   [[2026-09-07_a-mechanism-is-recorded-by-its-path-not-its-runtime-id]] — a QA launch guard sat in a
+   gitignored directory and was ~25 minutes from being bypassed by the coordinator who was trying to
+   honour it. **Arm it, check it is armed, and make sure the next person can find it.**
+
+**Also from the same day, the seat's own second keeper:** *"three wrong-path zeroes, each caught only
+because the control returned zero too. A zero from a wrong path is the check-that-cannot-fail wearing
+a shell's clothes."* ([[2026-08-07_a-check-that-cannot-fail]].)
