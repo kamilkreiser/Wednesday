@@ -402,6 +402,40 @@ else
   warn "root folder holds stray file(s):$ROOT_STRAYS" "file them (screenshots -> 0_Brain/reference/<date>_<topic>/; artefacts -> 5_Project_History/) — never delete"
 fi
 
+# --- Ledger archive has a TRIGGER (Kam ruling 2026-09-08 07:07, card
+# `wed-ledger-archive-has-no-trigger` => `trigger`: "Add the doctor.sh trigger,
+# leave your cadence alone"). CLAUDE.md rule 3c says move `_ledger.md` rows older
+# than ~3 days into `_ledger_archive.md`. It was written as a SESSION-END step —
+# and a seat that ROTATES never runs the session-end ritual, so with 3-5 rotations
+# a day it fired approximately never. Measured 2026-09-08: `_ledger.md` had reached
+# 398,606 B / 206 rows, LARGER than the boot digest beside it, while rule 3c was
+# perfectly correct and simply unexecuted. His cadence is untouched; this only
+# makes it fire.
+# The sibling per-seat ledgers are covered too: they grow by the same mechanism and
+# leaving a known sibling out is the frame error this project keeps catching.
+LEDGER_CUTOFF=$(date -v-3d +%Y-%m-%d 2>/dev/null || date -d '3 days ago' +%Y-%m-%d 2>/dev/null)
+LEDGER_STALE=""
+if [ -n "$LEDGER_CUTOFF" ]; then
+  for LF in "$PROJECT_DIR"/0_Brain/learnings/_ledger.md \
+            "$PROJECT_DIR"/0_Brain/learnings/_ledger_laptop_datasec.md; do
+    [ -f "$LF" ] || continue
+    # Row dates are the first cell of a table row: `| YYYY-MM-DD | ...`
+    OLD=$(grep -oE '^\| 2[0-9]{3}-[0-9]{2}-[0-9]{2} \|' "$LF" 2>/dev/null \
+          | tr -d '| ' | awk -v c="$LEDGER_CUTOFF" '$0 < c' | wc -l | tr -d ' ')
+    if [ "${OLD:-0}" -gt 0 ]; then
+      SZ=$(( $(wc -c < "$LF" | tr -d ' ') / 1024 ))
+      LEDGER_STALE="$LEDGER_STALE $(basename "$LF"):${OLD}rows/${SZ}KB"
+    fi
+  done
+fi
+if [ -z "$LEDGER_CUTOFF" ]; then
+  warn "ledger archive: could not compute a 3-day cutoff" "neither \`date -v-3d\` nor \`date -d\` worked — rule 3c is UNCHECKED on this machine, not satisfied"
+elif [ -z "$LEDGER_STALE" ]; then
+  ok "ledger archive: no rows older than $LEDGER_CUTOFF"
+else
+  warn "ledger rows past rule 3c's cadence:$LEDGER_STALE" "move them to _ledger_archive.md VERBATIM, newest-first, and ASSERT CONSERVATION (rows before == rows after). Never edit, never delete — 3c is a move."
+fi
+
 echo
 if [ "$HARD_FAIL" = "1" ]; then
 
