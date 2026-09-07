@@ -48,6 +48,30 @@ GITCHK=$(printf '%s' "$CMD" | python3 -c '
 import re, sys
 cmd = sys.stdin.read()
 OWN = "/Volumes/DevMASTER/WEDNESDAY"
+
+# STRIP HEREDOC BODIES BEFORE MATCHING (added at build time, third false positive of this
+# class in this file). A brief, a daily note or a lesson written through `cat > f <<EOF` is
+# PROSE, and prose about git is not a git invocation — but every line of it starts at a
+# newline, which is a command position, so the anchoring alone could not tell them apart.
+# It fired on this seat own note describing the hook. Bodies are removed, delimiters kept,
+# so a real command before or after a heredoc is still seen.
+def strip_heredocs(t):
+    out, i = [], 0
+    lines = t.split("\n")
+    while i < len(lines):
+        line = lines[i]
+        out.append(line)
+        m = re.search(r"<<-?\s*([\x27\x22]?)([A-Za-z_][A-Za-z0-9_]*)\1", line)
+        i += 1
+        if not m:
+            continue
+        delim = m.group(2)
+        while i < len(lines) and lines[i].strip() != delim:
+            i += 1                      # drop the body
+        if i < len(lines):
+            out.append(lines[i]); i += 1
+    return "\n".join(out)
+cmd = strip_heredocs(cmd)
 WRITE = ("fetch","pull","push","worktree","checkout","reset","stash","commit","tag","gc",
          "clean","am","apply","cherry-pick","rebase","revert","prune","repack","update-ref",
          "symbolic-ref","switch","restore","mv","init","submodule")

@@ -4943,5 +4943,41 @@
   ],
   "delivered_artefact": "mail to Secuura/Blockchain 2026-09-07T00:43Z, subject 'MERGE GO: #882 ...' — item 5 of its sequence, plus a RULED BY KAM section naming the PR workflow job and the ticket it lands in",
   "delivered_ts": "2026-09-07T10:43:32.339093+10:00"
+ },
+ {
+  "id": "secuura-ks949-round2-and-the-second-admin",
+  "client_project": "Secuura/Blockchain",
+  "title": "#885 NO GO — your address survives on an already-seeded box, AND the gate found a SECOND published-default super-admin that is worse",
+  "bluf": "PRIOR-RULING CHECK: your 06:42 ruling (replace the identity everywhere AND set the password, one change tonight), your 07:37 later on MFA and your 07:38 redact ruling were all read. This card does not revisit any of them — it reports that the work executing them is not finished and asks a new question. THE VERDICT: #885 round 1 is a NO GO. That is the SECOND NO GO on this class, so your two-NO-GO cap is reached and a round 2 needs your word. WHAT IS MEASURED, against a real Postgres 16 with fail-closed RLS and the product's own SQL extracted verbatim and sha256-pinned: the AUTH database IS remediated correctly — the builder's design holds there. The MAIN database is NOT. On an already-seeded box the twelve-row seed INSERT dies on the primary key (the statement says ON CONFLICT (email) but the real collision is on id), Postgres aborts the whole batch, and the error is swallowed as a debug-level 'User seed skipped'. Your address stays live on that row and the other eleven rows never re-sync either. WHAT IS NOT MEASURED, and I will not imply it: whether the LIVE demo box is in that already-seeded state. Nobody has looked. Your one-probe authorisation from this morning was spent and I did not renew it myself. THE BIGGER FIND, and it is out of KS-949's scope: there is a SECOND super-admin — a platform_admins row whose bcrypt hash is committed with its PLAINTEXT in a comment on the line above. The tester verified the pair rather than assuming (bcrypt.compare -> true, with a negative control). It matters more than the row this ticket fixes: the login path checks platform_admins FIRST, hardcodes role SYSTEM_ADMIN and status ACTIVE so it never consults a row status, and the Azure deploy script re-asserts that published password ON EVERY RUN, including on an already-seeded box. Also: the drift guard covers 2 of the 4 executable seed sites (a planted tamper in the fourth passed 7/7), three files still publish a password beside the identity, and the PR flips a seed-password flag from default-DENY to default-ALLOW.",
+  "default_action": "If Kam is silent: NOTHING is merged, NOTHING is deployed and the demo is NOT contacted. #885 stays open and unmerged, the second super-admin is filed as a ticket so it cannot be lost, and Wednesday re-raises at the next checkpoint. Silence leaves the exposure exactly as it is today — which is why this one is worth a word.",
+  "options": [
+   {
+    "key": "round2-plus-probe",
+    "label": "Authorise round 2 AND a single read-only probe of the demo (recommended)",
+    "detail": "The agent fixes the main-DB path with the same remediate-then-skip the auth path already got, closes the three publishing files, widens the drift guard to enumerate seed sites from the tree, and reverts the default-ALLOW flag. Separately, ONE read-only look at the demo to establish whether it is actually in the already-seeded state — because right now we are guessing about your exposure, and the fix's urgency depends on the answer. No writes to the demo under any circumstance."
+   },
+   {
+    "key": "round2-only",
+    "label": "Authorise round 2, no probe",
+    "detail": "Fix it and re-gate, and treat the demo as already-seeded on the precautionary assumption. Avoids touching the demo at all. Leaves your actual exposure unmeasured."
+   },
+   {
+    "key": "ship-and-ticket",
+    "label": "Apply your cap as written — ship what is closed, ticket the rest",
+    "detail": "The auth-DB half is genuinely fixed and would land. The main-DB half, the second super-admin and the guard gap become tickets. Consistent with your own rule, and it means your address stays live on any already-seeded box until a later round."
+   },
+   {
+    "key": "escalate-second-admin",
+    "label": "Round 2, and treat the SECOND super-admin as its own P1 ahead of it",
+    "detail": "The platform_admins credential is published in plaintext, re-asserted on every deploy, checked before the users path, with status hardcoded ACTIVE. Arguably a worse exposure than the one KS-949 was opened for. This option puts it first."
+   }
+  ],
+  "recommended": "round2-plus-probe",
+  "ts": "2026-09-07T11:00:11.784114+10:00",
+  "status": "ruled",
+  "ruled_choice": "round2-plus-probe",
+  "ruled_ts": "2026-09-07T11:03:11.054048+10:00",
+  "delivered_artefact": "mail to Secuura/Blockchain 2026-09-07T01:0xZ, subject 'KAM RULED round2-plus-probe: #885 round 2 ...' — carries the ruling verbatim, the probe bounds, and lands in this round's PR plus the probe report",
+  "delivered_ts": "2026-09-07T11:03:11.126844+10:00"
  }
 ]
