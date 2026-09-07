@@ -35,7 +35,18 @@ tonight (S45's plan confirmation, its RD-361 READY, its RD-148 READY, the RD-361
   inside KS-969's own test suite**, which is why this is his and not Wednesday's.
 - **`secuura-ks968-rotation-three-worlds`** (rec `separate`, **default STOP**) — two booleans separate
   a real login-breaking rotation from two innocent states.
-## 🟢 IN FLIGHT — #897 MERGE GO GIVEN 22:22. Expect its merge receipt.
+## ✅ DONE — #897 IS MERGED. `develop` = `400517aaf`. Nothing is in flight.
+**The DEPLOY BLOCKER is closed on the trunk.** Tree predicted before the merge by two agreeing
+methods and re-derived after; parents `6a7a7824e` + `48c4d8053`; **negative control proved to
+discriminate BOTH ways** (#892's three files absent from develop, a control file present, the same
+files present on #892). **KS-978 → Tested Not Deployed** — not Done, because it is a *deploy* blocker
+and **nothing has shipped**. It carries the receipt and the scenario-H limit verbatim.
+**`develop` moved THREE times this seat** and had not moved at all before it:
+`6c60cc09b → 2ff0eb850` (#889) `→ 6a7a7824e` (#893/#894) `→ 400517aaf` (#897). **All develop-only.**
+**The one thing not to let go quiet — the seat's own ask:** KS-811's derived code-set comparison.
+*"Without it, the next contract author is in the same position the last one was."*
+
+## (superseded) the GO that produced the above
 **#897 @ `48c4d8053` — amended, completion check PASSED, MERGE GO given on Wednesday's word** under
 Kam's week grant (inside commissioned work, reversible, doc-only, no external commitment).
 **Expect a merge receipt naming the SHA develop lands on, parents from the objects, and a NEGATIVE
@@ -109,7 +120,7 @@ listeners 26→26 each). It is **DORMANT BY DESIGN, told to stand down on #892 e
    **F2-A and F1-C are NOT in this round. THERE IS NO ROUND 5** — a NO GO comes back to Kam.
 
 ## STATE — every SHA is an agent's read, NOT re-derived at this seat
-    origin/develop   6a7a7824e  ← MOVED TONIGHT. #889 (2ff0eb850) then #893 (6a7a7824e), both
+    origin/develop   400517aaf  ← MOVED 3× TONIGHT (#889, #893, #897). Earlier: #889 (2ff0eb850) then #893 (6a7a7824e), both
                                  merged on Wednesday's word, both with a NEGATIVE control proving
                                  #892's frozen work did not leak in. NOTHING DEPLOYED.
     demo VM          632f16dfe  (untouched all day)
