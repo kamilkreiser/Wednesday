@@ -343,31 +343,13 @@ fi
 # routed to the projects' own launchers/agents — Wednesday never edits their repos.
 DRIVE_ROOT="${PROJECT_DIR%/WEDNESDAY}"
 STALE_PTRS=0
-# 2026-09-07: the sweep used to cover ONLY !CODING project repos. The SHARED VAULT was
-# never swept — and it is the one repo EVERY agent on the drive pushes to at wrap, so a
-# stale pointer there fails every project at once rather than one. Found when the NexusAI
-# agent hit exactly that mid-wrap on the T9 (its pointer still named /Volumes/DevMASTER)
-# and had to diagnose it itself. Wednesday's own repo is swept for the same reason.
-# Read-only either way: warnings are ROUTED, never worked around — Wednesday does not
-# edit another project's .git (hard rule 1).
-for cfg in "$DRIVE_ROOT"/!CODING/*/*/2_Project_Files/.git/config \
-           "$DRIVE_ROOT"/Notes\ \(MASTER\)/.git/config \
-           "$PROJECT_DIR"/.git/config; do
+for cfg in "$DRIVE_ROOT"/!CODING/*/*/2_Project_Files/.git/config; do
   [ -f "$cfg" ] || continue
   SSHCMD=$(git config -f "$cfg" core.sshCommand 2>/dev/null) || continue
   [ -n "$SSHCMD" ] || continue
-  # Extract the -i argument. QUOTED FORM FIRST: a key path may contain spaces (the vault's
-  # does — ".../Setup and System/keys/..."), and the unquoted character class below stops
-  # at the first space, which would truncate the path and warn on a healthy repo. Latent
-  # until a spaced path entered the sweep; adding the vault is what makes it reachable.
-  KEYPATH=$(printf '%s' "$SSHCMD" | sed -n 's/.*-i "\([^"]*\)".*/\1/p')
-  [ -n "$KEYPATH" ] || KEYPATH=$(printf '%s' "$SSHCMD" | sed -n 's/.*-i \([^ ]*\).*/\1/p')
+  KEYPATH=$(printf '%s' "$SSHCMD" | sed -n 's/.*-i "\{0,1\}\([^" ]*\)"\{0,1\}.*/\1/p')
   if [ -n "$KEYPATH" ] && [ ! -f "$KEYPATH" ]; then
-    case "$cfg" in
-      "$PROJECT_DIR"/.git/config)          PROJ="WEDNESDAY (this repo)" ;;
-      "$DRIVE_ROOT"/Notes\ \(MASTER\)/*)   PROJ="Notes (MASTER) — THE SHARED VAULT: every agent's wrap pushes here" ;;
-      *) PROJ=$(printf '%s' "$cfg" | sed "s|$DRIVE_ROOT/!CODING/||; s|/2_Project_Files/.git/config||") ;;
-    esac
+    PROJ=$(printf '%s' "$cfg" | sed "s|$DRIVE_ROOT/!CODING/||; s|/2_Project_Files/.git/config||")
     warn "stale ssh pointer: $PROJ" "core.sshCommand -> $KEYPATH (missing here) — heals at that project's next launch, or its agent repoints"
     STALE_PTRS=$((STALE_PTRS+1))
   fi
