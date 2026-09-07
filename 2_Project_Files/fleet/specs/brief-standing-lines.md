@@ -118,3 +118,47 @@ here and travel in the brief body.
   - a **selection rule handed to an agent** → the **ownership predicate** ("unassigned, or on Kam's account; never Peter's or Stuart's"), because a rule that filters on *difficulty* while omitting *ownership* will find the borderline item on its own;
   - a **message to a human** → who sends it (Kam) and on which channel.
   **Test by its handle:** read only what the artefact says will change. If a reader could not answer *"and whose is it?"*, the field is missing. [W]
+
+## TICKET CREATION — the unit of a ticket is the TEST PASS (Kam, 2026-09-07 13:23, verbatim)
+
+> *"if a single test is required, we should be creating one ticket with multiple items inside it
+> rather than multiple tickets. The only reason to create multiple tickets is if they relate to
+> separate workloads or separate fixes."*
+
+**The predicate, stated so it can be applied without judgement:** **if ONE test pass proves the
+whole thing, it is ONE ticket** — its items as a checklist or sub-issues inside it. **Split only on
+a separate WORKLOAD or a separate FIX**, never because findings arrived separately, were found by
+different passes, or sit in different files.
+
+**This SHARPENS his 2026-09-06 09:42 aggregation ruling** (*"rather than creating three or five
+separate tickets, create one larger ticket… within a logical path"*) by naming what "a logical path"
+actually is: **the test pass**. It is the same criterion he already set for the REVIEW side
+(handovers to Peter and Stuart are TEST BLOCKS, cut by what one pass proves), so **creation and
+review now use one predicate** — which is why a stream built this way needs no re-grouping later.
+
+**Standing line for every brief that may create tickets:**
+> *"Ticket creation aggregates on the TEST PASS: if one test proves it, it is one ticket with its
+> items inside. Separate tickets only for separate workloads or separate fixes — never because the
+> findings arrived separately."*
+
+**The check before filing N tickets:** *could one pass prove all N?* If yes, it is one ticket and you
+are about to make the reviewer read N times. If no, name the distinct workload or fix per ticket in
+its first line.
+
+## FILING A FINDING — a control proving "not mine" does not prove "not filed" (2026-09-07)
+
+**Found by a board catalogue pass:** one guard failure filed **four times across 31 hours**. Every
+session ran a control and correctly proved the red pre-dated its own work. **None searched the board
+first.** Five findings, fourteen tickets, on one board.
+
+**Standing line for every brief:**
+> *"Before filing any finding, search the board for it BY SYMBOL, FILE PATH OR ERROR STRING — never
+> by your own phrasing, which is what differs between sessions describing one failure. State the
+> search in the ticket ('searched `<symbol>`, 0 open hits'). A control proving a red is PRE-EXISTING
+> is half the check; the other half is that it is UNFILED. If it is already filed, add your evidence
+> to that ticket rather than opening a second one — two independent proofs of one red are stronger
+> than two tickets."*
+
+**Why it belongs in the path and not in an agent's memory:** a duplicate is only visible from OUTSIDE
+the session that files it. Inside one session the loop is flawless — red → control → not mine → file.
+Nothing in that loop can surface the other three.

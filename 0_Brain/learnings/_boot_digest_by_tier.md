@@ -7,7 +7,7 @@ status: live
 
 # Boot digest BY TIER — W whole, M rules-only, every project case a handle
 
-Generated 2026-09-07 12:53 from 108 lesson files (531,499 B). M 24 · MIXED 5 · W 79. 28 project CASE sections inside MIXED files are reduced to one line each: the heading and the path to read it at. W blocks are exactly what the default digest carries; M blocks drop the section index and keep the rules; a P file is a single handle. The CASES behind every rule live only in the lesson files — open one the moment its rule fires.
+Generated 2026-09-07 13:27 from 109 lesson files (536,249 B). M 25 · MIXED 5 · W 79. 28 project CASE sections inside MIXED files are reduced to one line each: the heading and the path to read it at. W blocks are exactly what the default digest carries; M blocks drop the section index and keep the rules; a P file is a single handle. The CASES behind every rule live only in the lesson files — open one the moment its rule fires.
 
 ## The T9 SSD is the master — Wednesday must be fully portable
 `2026-07-31_fully-portable-drive.md` · principle · 2026-07-31 · status: superseded — the "T9 is the master" half by [[2026-08-25_one-drive-devmaster-is-master]] (2026-08-25); the portability principle itself still lives · tier: W
@@ -3323,6 +3323,35 @@ place enforcement lives).
 5. **When it has already happened:** disclose it in the artefact the objects were written for (the brief's provenance line: "run by Wednesday IN THE BUILDER'S CHECKOUT — a write; re-derive it, do not trust it"), record the row, and tell the seat whose repo it is if anything could be observed (`FETCH_HEAD` moved; dangling objects — nothing an agent's workflow reads).
 
 **Family:** [[2026-07-31_manage-dont-do]] (rule 2: editing that project's files from Wednesday's hands is not allowed — `.git` is its files) · [[2026-08-15_a-gui-open-is-a-write]] (an action classified as reading that writes) · [[2026-08-13_headline-must-match-the-operative-case]] (a rule without a headline does not fire) · [[2026-08-09_an-enforcement-you-must-arm-is-not-one]] (the w=3 clause).
+
+
+## A control proving "this failure is not mine" answers the wrong question — the next one is "then who already filed it?"
+`2026-09-07_a-control-proving-it-is-not-yours-does-not-say-who-filed-it.md` · correction · 2026-09-07 · status: live · tier: M
+
+**The operative case, so the headline matches it:** an agent hits a failing check, a red suite, a
+broken guard, a lint error it did not cause. **It does the right thing: it runs a control and
+establishes the failure is PRE-EXISTING, not its own doing.** It then files a ticket. **Stop there.
+The control answered "is this mine?" and the question that actually decides what to do next is
+"has someone already filed this?"** Those are different questions, and only the first one has a
+control.
+
+## How to apply
+
+1. **Before filing ANY finding, search the board for it.** Search by the SYMBOL, the file path, or
+   the error string — **never by your own phrasing of the problem**, which is exactly the thing that
+   differs between four sessions describing one failure. Say in the ticket what you searched and
+   found nothing: *"searched `<symbol>` and `<path>`, 0 open hits."* That line is cheap and it makes
+   the absence checkable.
+2. **A control that proves "not mine" is HALF the check.** Pair it, always: *"pre-existing (control:
+   red at base) AND unfiled (search: 0 hits)."* A finding reported with only the first half is
+   incomplete, and a coordinator receiving one should ask for the second.
+3. **If it IS already filed, add your evidence to the existing ticket and say so** — the second
+   session's control is worth more than the second session's ticket, because two independent proofs
+   of the same red is genuinely stronger evidence than one.
+4. **When several sessions work one repo in a window, the risk is highest** — a relay, an overnight
+   run, parallel seats. The same red is in front of all of them.
+5. **For whoever writes the brief:** this belongs in the standing lines, not in an agent's memory.
+   An agent cannot see the other three sessions; only the path can.
 
 
 ## A handover records a mechanism by its PATH, never by the id of the thing it produced — and tooling that lives in a gitignored directory is invisible to every search a successor knows how to run
