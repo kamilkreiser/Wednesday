@@ -7,7 +7,7 @@ status: live
 supersede: replace wholesale at the next pickup; do not append
 ---
 
-# NEXT PICKUP — Datasec laptop seat, ~16:15 AEST Monday 2026-09-07
+# NEXT PICKUP — Datasec laptop seat, ~16:40 AEST Monday 2026-09-07
 
 **TWO WEDNESDAYS LIVE.** Studio owns **Secuura**; this seat owns **Datasec**. One repo, one dashboard,
 one chat panel, **ONE USAGE LIMIT**. Do not write the shared files (`NEXT-PICKUP.md`, daily note,
@@ -25,19 +25,34 @@ one chat panel, **ONE USAGE LIMIT**. Do not write the shared files (`NEXT-PICKUP
    coincides with a real authorisation is more corrosive than one that doesn't, because it gets
    reinforced rather than corrected.** The test is never "is this correct" but "does this have an author".
 
-## FLEET — 2 agents
-- **`Datasec/NexusAI` `%2`** (ctx ~34%). Executing the sweep ruling (A/B/C/D merges, E held, F
-  conditional), then back to RD-361. **Do not close that pane** — a queued tap starts a new turn.
-- **RD-361 tier-1 QA gate** — running. Its verdict is the next thing that moves RD-361.
+## FLEET — 4 live (3 delta agents + NexusAI); RE-GATE QUEUED at the ceiling
+**DELTA BATCH 1 running, 3 concurrent** (launched ~16:30, expect 15–25 min each):
+MailFlow+CypherSharePoint+UniversalPrint · License-Services+LicenseServer · infra_hpam+HPK.
+**BATCH 2 queued (4):** CypherOneDrive + Teams (gate INTACT — the control group for F-13) ·
+CommonValueLibraryCypher (shared lib) · Cyphercard-Enrolment-App (writes the identity anchor).
 
-## RD-361 (SEC-01, the Critical) — BUILT, AT THE GATE
-Branch `rd-361-fail-closed-unknown-s43` @ `e4d9147`, `npm run verify` 2165/2165, `rd-334` untouched.
-**It found FIVE fail-open sites, not one** — incl. two admin-only query endpoints where UNKNOWN
-skipped the admin-role check; neither was in the review or the ticket. It **self-caught two faulty
-test cells**, incl. a tamper control that passed *vacuously* at the unfixed head.
-**Open deviation for the gate, not for Wednesday:** review asked 401, it returns **503
-`AUTH_STATE_UNKNOWN`**. Wednesday ratified the REASONING; the claim "the security property is
-identical" is a product claim and went to the gate.
+**`Datasec/NexusAI` `%2`** — working its 3-item no-gate queue (RD-242 closure condition, RD-362/363,
+the 102 category-1 tickets). **Do not close that pane.**
+
+**⚠️ THE RE-GATE ON RD-361 IS QUEUED, NOT DONE — START IT AS SOON AS A DELTA AGENT FINISHES.**
+Round 2 is built at `1149d1c` (`npm run verify` 2174/2174). It is **round 2 of 2 under Kam's cap** —
+a NO GO ships what is closed and tickets the residue; no round 3 without his word.
+The re-gate must press on: F-1 driven at the wire incl. the **wiped-volume case the agent itself
+named as still open**; **F-2 mutation-proven at all SIX sites individually** (round 1's suite stayed
+11/11 green with three sites reverted, so a green suite is NOT evidence); the sixth site actually
+routed through `authGateDecision`; `serverCode()` widened past `server.js`; `Retry-After` + audit event.
+
+## RD-361 HISTORY — NO GO round 1, round 2 built
+Round 1 was NO GO: the fix closed **1 of 4** failure modes and **the Azure Files case named in its own
+rationale survived**. Also mutation-proven: 3 of 5 sites had no regression protection; a **sixth site**
+existed (`entraProvisioning.js:107`, fails closed). 503-over-401 **endorsed**, but the builder's
+reasoning was inverted (503 is what HTTP machinery retries).
+Round 2 closed F-1 using two pre-existing unused signals (`dataDirFallbackActive`,
+`persistenceSentinelPreexisting`), re-derived the gate's table on its own round-1 worktree, and
+**named what it does NOT close**: a persistent volume wiped between deploys is byte-identical to a
+genuine first deploy, and denying there would brick every legitimate first deployment. Routed to
+RD-363/platform layer. **Wednesday ACKNOWLEDGED and CREDITED round 2 but did NOT ratify it** — the
+design reasoning lives in the mail and is ratifiable; the product claim goes to the gate.
 
 ## SECURITY REVIEW — STEP 1 COMPLETE, step 2 awaiting Kam
 **219 findings: 31 June (27 unremediated, ZERO fixed) + 188 new. NOW 16 new Criticals, not 15.**
@@ -57,8 +72,11 @@ irreversibly null-writes credentials on **every** row older than 7 days; `saas-r
 anonymous caller trigger **outbound customer email**. **No compensating control at any layer**
 (proven three ways). dev ≡ staging on all three Entra secrets; **production separate on all nine**.
 
-**STEP 2 (delta on the 19 June components): 8 of 19 done. AWAITING KAM'S STEER** — recommendation is
-to DROP the remaining 11 to a named gap; it is the lowest-value work and where the budget went.
+**STEP 2 (delta on the 19 June components): 8 done, 11 COMMISSIONED.** Wednesday recommended dropping
+them; **Kam overruled — "yes, queue the eleven three at a time."** He was right and the register says
+so: the gap sits exactly in the class scanners cannot see, which is where every Critical came from.
+Register §7.1 rewritten from "named gap accepted" to "commissioned, in flight" — **do not let the
+in-flight state harden into a claim of completeness.**
 
 ## WEDNESDAY'S OWN ERRORS TODAY — 4, all corrected in the open
 1. Consolidation ruled backwards ("keep earliest"); the agent had the better rule (keep **the ticket
@@ -76,12 +94,11 @@ verification pass**) · `11_Assurance_Pack_Index` (rows 1–19 flagged as unders
 `scan-artifacts-2026-09/` (argv recorded per tool) · `_Working/2026-09-07_{METHOD_IMPROVEMENTS,RERUN_DISCOVERY,VISION_PARKED}.md`
 
 ## OPEN FOR KAM
-1. **Delta-review steer** (above).
-2. **RD-18** — the Australian Privacy Act package. The real Marketplace exposure; on hold, untouched.
-3. Re-issue June deliverables 00/03/04/09/10 against 219, or let 12+13 stand as authoritative?
-4. Live GitHub/Azure/Entra pass still open; tenant conflict `fc05dcdd` vs `0c57ab37` unresolved
+1. **RD-18** — the Australian Privacy Act package. The real Marketplace exposure; on hold, untouched.
+2. Re-issue June deliverables 00/03/04/09/10 against 219, or let 12+13 stand as authoritative?
+3. Live GitHub/Azure/Entra pass still open; tenant conflict `fc05dcdd` vs `0c57ab37` unresolved
    before any `az`.
-5. **Vision PARKED** by his 10:44 ruling (`_Working/2026-09-07_VISION_PARKED.md`).
+4. **Vision PARKED** by his 10:44 ruling (`_Working/2026-09-07_VISION_PARKED.md`).
 
 ## FIXED TODAY (mechanisms, not intentions)
 - **`pretooluse_no_cd.sh` root is now self-locating** (`cb646a4a`) — it was hardcoded to DevMASTER and
