@@ -292,8 +292,8 @@ fi
 #           changes, but flag these when relevant or when making changes."
 #                                                              -> PRODUCTION changes
 # The third is the largest boundary he has moved (never-touch-prod is a hard rule with
-# its own skill). Wednesday reads it NARROWLY: Secuura only, pending his answer on
-# whether it extends to other clients. A credential live systems authenticate with is a
+# its own skill). SCOPE CONFIRMED BY KAM 12:10:40 — "Only secure" = SECUURA ONLY.
+# Datasec production is NOT covered and the laptop seat has no such grant. A credential live systems authenticate with is a
 # ROTATION and still comes to him; external comms are untouched.
 # Both are read as THROUGH SUNDAY 2026-09-13, stated to him as a reading he can move.
 # WHY THIS IS A CHECK AND NOT A NOTE (2026-09-06_a-scoped-override-carries-its-own-expiry):
@@ -306,7 +306,7 @@ WED_WEEK_GRANTS_UNTIL="2026-09-13"
 if [ "$(date +%Y-%m-%d)" \> "$WED_WEEK_GRANTS_UNTIL" ]; then
   warn "Kam's week-scoped MERGE + DEPLOY + PRODUCTION grants lapsed after $WED_WEEK_GRANTS_UNTIL" "2026-09-07 09:40, 11:09 and 12:07 were 'for the rest of the week' — fall back to protocol v1.3 scope, or ask him to extend. Do not carry the extra latitude forward silently."
 else
-  ok "Kam's week-scoped merge + deploy + PRODUCTION grants (2026-09-07) live until $WED_WEEK_GRANTS_UNTIL (production read NARROWLY: Secuura only)"
+  ok "Kam's week-scoped merge + deploy + PRODUCTION grants (2026-09-07) live until $WED_WEEK_GRANTS_UNTIL (production: SECUURA ONLY, confirmed by Kam 12:10)"
 fi
 
 # ── Tailscale remote-access leg (added 2026-08-20; DORMANT-BY-DEFAULT per Kam

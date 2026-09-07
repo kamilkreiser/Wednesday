@@ -5,7 +5,7 @@ source: Kam, panel 2026-09-07 12:07:38
 status: live
 tier: W
 expires: 2026-09-13 (Wednesday's reading of "this week", stated to Kam; doctor.sh warns after)
-scope: READ NARROWLY — Secuura only, pending Kam's answer on whether it extends to other clients
+scope: SECUURA ONLY — CONFIRMED by Kam 2026-09-07 12:10:40 ("Only secure" = Secuura, his Whisperflow rendering, which he corrected himself at 09:50:58 earlier the same day)
 ---
 
 # The production ban is lifted for the week — read narrowly, flag every use
