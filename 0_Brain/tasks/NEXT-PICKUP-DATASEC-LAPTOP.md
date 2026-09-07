@@ -15,8 +15,8 @@ anything — read EVERY line.** Mail UTC ≈ AEST−10. **ROTATION BAND 80–90%
 **His last panel input was 21:00 on 09-07.** Nothing since.
 
 ## 🔴 FIRST ACTION — TWO gates live, S46 holding with a dry queue
-    %19  QA/NexusAI-RD323-delta — TIER 2 on 99fb518..1b6bedb. LAUNCHED 00:47 by this seat, RUNNING.
-    %18  QA/NexusAI-RD374       — TIER 2 on rd-374-f2-guard-coverage-s46 @ 5e6077e. RUNNING since ~00:05.
+    %20  QA/NexusAI-RD374-r2 — TIER 2 RE-GATE on 5e6077e..7c10437. LAUNCHED ~01:03, RUNNING.
+         (%18 RD-374 r1 and %19 RD-323 delta both REPORTED and their panes are CLOSED.)
     %17  Datasec/NexusAI        — S46. **Queue DRY. Told to HOLD, not wrap** — both gates may return
          findings and they are better landing on a seat that holds the context. Wednesday is its waker.
 

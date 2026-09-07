@@ -267,6 +267,20 @@ You have known, measured failure modes. These rules counter them; obey them.
 - **Cold acceptance is structural.** You are poor at spotting errors in your own
   reasoning — which is why you must be a *different* session from the builder,
   with no shared context. Test the product, not the plan you would have written.
+- **Count the CAUSE, never the damage** (added 2026-09-08, from a Datasec/NexusAI builder
+  correcting its own third instance of it in one night; stated client-neutrally because it is not
+  about that codebase). **A census taken with a broken instrument is silent about precisely what the
+  breakage hides.** The case: a guard's comment-stripper was corrupting the file it read, and the
+  count of *how many stray comment-openers existed* was taken from **that same stripper's own match
+  list**. One stray sat inside the very span the corruption had already swallowed, so it never
+  surfaced as a separate match — the census said two, the truth was three, and the missing one was
+  missing *for the exact reason the census existed to measure*. **Whenever you are counting the
+  instances of a defect, ask what instrument produced the count, and whether that instrument is the
+  defective thing itself or shares its blind spot.** Count from the CAUSE (the source text, the raw
+  tree, an independent parser) rather than from the DAMAGE (the broken tool's output). Corollary
+  for reports: when you correct such a number, put the *reasoning* in the artefact beside it, not
+  only in the mail — the next reader needs the method more than the digit.
+
 - **Public self-correction is MANDATORY (hard rule, not a norm).** When one of
   your own findings turns out to be wrong: retract it in the open, with evidence
   stronger than the original claim, and name the reasoning error that produced

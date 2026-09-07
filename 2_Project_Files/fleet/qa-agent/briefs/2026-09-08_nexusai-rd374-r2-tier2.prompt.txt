@@ -1,0 +1,73 @@
+ultrathink
+
+You are the cross-project QA agent, working from
+/Volumes/KK_T9_External_HDD/!CODING/Testing Agent MAIN
+
+TIER 2 RE-GATE — Datasec/NexusAI, RD-374 ROUND 2, branch rd-374-f2-guard-coverage-s46 @ 7c10437.
+SUBJECT IS THE DELTA ONLY: 5e6077e..7c10437 — ONE commit, ONE file
+(__tests__/auth-gate-fail-closed.test.js, 186+/43-), NO product code. 5e6077e already has a
+GO-with-findings from tonight's round-1 gate; do not re-gate it. NOT main (frozen). Nothing merged,
+nothing deployed. You may not merge. Round 2 of this class and round 1 was GO-with-findings, not a
+NO GO, so the two-NO-GO cap is not engaged.
+
+YOUR BRIEF — read it first, in full, and follow it exactly:
+/Volumes/KK_T9_External_HDD/WEDNESDAY/2_Project_Files/fleet/qa-agent/briefs/2026-09-08_nexusai-rd374-r2-tier2.md
+
+YOUR FIRST JOB, AND THE BUILDER ASKED FOR IT AGAINST ITSELF. It did NOT implement the G-1a remedy
+Wednesday specified, said so unprompted, and named why its own evidence cannot settle the difference:
+"my negative control passes under both and cannot tell them apart on its own. The gate should confirm
+which one is actually in the file."
+
+Wednesday specified a NAME HEURISTIC (treat any computed key matching /^AUTH_ENFORCED/ as the key).
+The builder says it implemented a BINDING RESOLUTION (resolve against a proven binding; the module's
+exports derived BY VALUE from the real module, plus a local const, plus one re-alias hop). These fail
+in OPPOSITE directions. Read the implementation, then BUILD THE TWO ARMS THAT DISCRIMINATE, because
+neither exists yet:
+ (1) a binding NAMED like the constant but holding something else - const AUTH_ENFORCED_MODE =
+     'somethingElse' as the computed key. A heuristic flags it (false positive); a resolution does not.
+ (2) a binding holding the key under an unrelated name - const zzz = 'authEnforced' as the computed
+     key. A heuristic misses it; a resolution catches it.
+Report which behaviour the file actually exhibits. IF IT IS THE HEURISTIC, that is a NO GO on G-1a -
+not because a heuristic is useless, but because the record would then say something the code does not do.
+
+ALSO ON G-1a: the builder claims the export set is derived BY VALUE from the real module so it "picks
+up a second export without being edited". Verify that is what the CODE does, not what the comment
+says - then prove it: add a second export holding the same value and confirm the detector picks it up
+WITHOUT the test being edited. Restore after. A hard-coded set means the sentence is wider than the
+code, which is the exact defect this branch exists to fix.
+
+Q-2 (local const of the literal) and Q-3 (renamed destructure) are now RED. Establish they are caught
+by the resolution MECHANISM and not incidentally: mutate the resolution path specifically and confirm
+Q-2 and Q-3 go green while T-MB2 (literal-key control) stays RED.
+
+G-1b: the builder fixed the DETECTOR not the sentence, and proved R-2 in backend/jsonStorage.js
+deliberately - the file with no object-literal second net. Confirm the proof site, that an alias of
+readFileSync stays green, and that the docblock now matches what the detector does.
+
+G-2a/G-2d: the trap was DECOUPLED rather than ordered. Spans now derive from the old regex's own match
+ranges, "used when present and ASSERTED OVER NOTHING WHEN ABSENT, with a synthetic arm that always runs
+so the cell cannot go vacuous." Interrogate that sentence - it is a vacuity path by construction. Prove
+the synthetic arm ALWAYS runs including when the spans are empty, and that the cell can still FAIL in
+that state. Reproduce both numbers: after cleaning all three stray prose comments, OLD 5e6077e = 1
+failed/36 passed and NEW = 37/37; reverting codeOnly to the regex on NEW = 2 failed.
+
+G-2b: confirm the corrected counts are IN the file (three strays; FOUR call sites for the named
+stripComments, not three; five for serverCode()) and that the reasoning - "a census taken with the
+broken instrument is silent about precisely what the breakage hides; count the CAUSE, never the
+damage" - is in the docblock, not only in its mail.
+
+RE-DERIVE rather than accept: PASS 2191/2191 across 113 suites, jest exit 0; cell count unchanged at
+37 (which is why verify-expected-counts.json is untouched) - by NAME-DIFFING cells, never a total; and
+that no product code is in the diff. Confirm with your OWN ls-remote that rd-322-root-guard-vacuity-s45
+is still 432617a and rd-361-round4-s45 still 731aa6e.
+
+EVIDENCE: positive control opening AND closing; every mutation asserted PRESENT before its result is
+read and restored after; matched pairs so exactly one variable moves; READ EVERY RED AND SAY WHY IT IS
+RED; NAME THE FRAME in any completeness claim; FOUND / TESTED / HOW with controls named under HOW;
+state what you did NOT test.
+
+Stop any server you start and prove the port reads 000. No az, no registry, no demo, no staging. Work
+in your own clone or worktree - the project checkout is not yours to write to.
+
+Report to Wednesday. Write the report under projects/nexusai/reports/2026-09-08-rd374-r2-tier2/ and
+NAME THAT PATH IN YOUR MAIL.
