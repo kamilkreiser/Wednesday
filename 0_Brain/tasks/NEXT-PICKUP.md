@@ -12,32 +12,43 @@ supersede: replace this file wholesale at the next pickup; do not append
 **Run `2_Project_Files/tools/kam_rulings_today.sh` before writing anything — read EVERY line.**
 Mail UTC ≈ AEST−10. **ROTATION BAND 80–90% (Kam 10:49); 70% is a CHECKPOINT ONLY.**
 
-## 🔴 FIRST ACTION — nothing has a pending trigger; two gates report to you
-**Both live gates mail their verdicts to WEDNESDAY, not to the seat.** When one lands, rule it, then
-tap s148. **s148 must not poll them.**
+## 🔴 FIRST ACTION — three cards are on Kam's desk and ONE of them gates a Blocker
+**Nothing runs until he rules `secuura-892-cap-spent-blocker-open`.** #892 took its SECOND NO GO, so
+**the cap is spent** — and F1, the Blocker, is still open. **Do NOT merge #892 under the cap:** the cap
+says closed instances ship and the residue is ticketed, **but #892 IS the instance**, so merging it
+ships the exact defect KS-969 exists to remove with a ticket attached. Recommendation on the card is
+one narrow round 3 (both fixes are one-liners, per the gate). **Default HOLD.**
 
-## KAM'S DESK — ALL SECUURA CARDS RULED. Nothing of mine is open.
-He ruled six today. **The two that became work are `bind` and `strong-control` (19:00), both now in
-s148's brief.** `#891` remains **his own click** — link given, not ours:
-`https://github.com/Secuura/Distributed_Secuura/pull/891`.
-**Still open and NOT MINE:** `vault-ssh-pointer-heal` (Fleet/workspace — the LAPTOP seat's card; it
-edits the shared workspace `CLAUDE.md`, which is outside this seat's writable scope; Kam has ruled it
-three times, so his panel is re-presenting it) and two `nexusai-*` cards (the laptop's).
-**Do not act on any of those three.**
+## KAM'S DESK — three open, all default-safe, all mine
+1. **`secuura-892-cap-spent-blocker-open`** (rec `round3-narrow`, default HOLD) — above.
+2. **`secuura-ks968-hash-population-count`** (rec `count-populated`, default STOP) — **the KS-968
+   control returned C=0, the pre-registered "instrument NOT validated" arm, so NOTHING was concluded.**
+   Two explanations survive and **one is not about KS-968 at all**: either that address has no row, or
+   **the rows were hashed under a rotated key — which breaks email login on that box, because login
+   resolves users by that hash.** One integer separates them. **On silence, record KS-968 as
+   UNMEASURED and the key-rotation possibility as UNINVESTIGATED — do not let either read as clear.**
+3. **`secuura-org-trust-boundary-within-tenant`** — **ALREADY RULED `bind`**; the change is pushed.
+**NOT MINE and not to be adopted:** `vault-ssh-pointer-heal` (Fleet/workspace — the LAPTOP's card, and
+it edits the shared workspace `CLAUDE.md`, outside this seat's writable scope) and any `nexusai-*`.
 
 ## STATE — every SHA is an agent's `ls-remote`, NOT re-derived here (no Secuura identity on this seat)
-    origin/develop   6c60cc09b   (#888 and #890 both merged today; NEITHER deployed)
+    origin/develop   6c60cc09b   (#888 and #890 merged today; NEITHER deployed)
     demo VM          632f16dfe   (untouched all day)
-    #892  42e778203  round 2 GATE LIVE — NO GO 1 of 2 already spent, a NO GO here SPENDS THE CAP
-    #893  ab1053141  queued for ONE tier-1 gate on #894's head (contains #893)
-    #894  e02d0fecc  stacked on #893 so #893's gated head cannot move; not re-targeted at develop yet
-    #889  9898ae724  Kam ruled BIND — the change is s148's work, then a TIER 1 gate, then merge
-    #891  3c07157a2  KAM'S OWN CLICK
-**KS-973** = the #892 residue (F4, F5 + the F6–F9 minors). **KS-970** complete. **KS-969** items 1–3
-done, item 4 still blocked on #892 landing. **KS-968 status: UNMEASURED, not clear** — the probe
-returned zeros from an instrument nobody had shown could return non-zero; **Kam authorised the strong
-control at 19:00 and s148 runs it, pre-registered and hashed first.** The earlier pre-registration is
-durable at `5_Project_History/KS-968-probe-preregistration-2026-09-07.txt`.
+    #889  42d8cf5f5  Kam's BIND is PUSHED — needs a TIER 1 gate, then merge. NOT gated yet.
+    #892  42e778203  NO GO x2, CAP SPENT, F1 Blocker + F2 open — carded, do not merge
+    #893  ab1053141  contained inside #894
+    #894  e02d0fecc  ONE tier-1 gate LIVE over the stack (gating #894 gates #893)
+    #891  3c07157a2  KAM'S OWN CLICK — https://github.com/Secuura/Distributed_Secuura/pull/891
+**Live panes:** `Secuura/Blockchain` (s148, on KS-973) · `QA/KS-970-894` (the stack gate).
+**Both gates report to WEDNESDAY, not to the seat.** **#889's tier-1 gate is OWED and not yet
+launched** — launch it when a pane frees; it is the last thing standing between Kam's `bind` ruling
+and a merge.
+
+## WHAT THE #892 GATE FOUND THAT MUST NOT BE LOST
+**F1: withholding a manifest is a NON-WRITE, not a REMOVAL** — a stale drifted manifest already on
+disk survives the fix and the suites still read it. **There is a live instance on the builder's own
+worktree.** **F2: `run.py quality` is EXEMPT from the pre-step and runs 389 live-API cells.**
+**F3 (new): the cell pinning "a refusal is not a warning" CANNOT FAIL.**
 
 ## WHAT WEDNESDAY GOT WRONG TODAY — all agent- or gate-caught, none reaching a cost
 - **The #890 fix instruction was wrong THREE ways** (base64url renames the `-` sentinel rather than
