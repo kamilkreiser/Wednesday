@@ -19,33 +19,7 @@ set -u
 SELF_DIR="$(cd -P "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 PROJECT_DIR="$(cd -P "$SELF_DIR/../.." && pwd)"
 CHAT="$PROJECT_DIR/0_Brain/dashboard/data/chat_log.json"
-# ── PER-SEAT PROJECT DEFAULT (2026-09-08, s150) ──────────────────────────────
-# Kam ruled on 2026-09-07 11:12 that the chat panel gets a per-project display
-# filter, and chat.html has carried a complete, correct one since — chips per
-# project, persisted per browser, his own messages always shown.
-# MEASURED 2026-09-08 08:4x, which is why this block exists: of 1725 entries the
-# `project` field read WED 64 / Datasec 6 / absent 1655, and `projOf()` maps an
-# absent field to "WED" too. So BOTH seats' replies landed in ONE bucket and the
-# filter had nothing to separate. The mechanism was never broken; nothing fed it.
-# `--project` is wired correctly (line ~44 passes it through) — no seat passed it.
-#
-# THE MAPPING BELOW IS KAM'S SPLIT AND HE CALLED IT TEMPORARY, verbatim
-# (panel, 2026-09-08 07:09): "for now, secuura on this machine and datasec on
-# laptop". It is ONE line to change and it is deliberately the only place the
-# machine->client assumption lives. If he re-splits, edit SEAT_PROJECT and nothing
-# else. An unknown host falls back to "WED", never to a guess.
-# Precedence: --project  >  $CHAT_PROJECT already in the environment  >  this
-# per-seat default  >  "WED".
-seat_project_default() {
-  case "$(hostname -s 2>/dev/null || hostname 2>/dev/null)" in
-    Kamils-MBP*)        echo "Datasec" ;;   # laptop  = Datasec  (his 07:09 split)
-    Kamils-Mac-Studio*) echo "Secuura" ;;   # Studio  = Secuura  (his 07:09 split)
-    *)                  echo "" ;;          # unknown host: no guess
-  esac
-}
-PROJECT="${CHAT_PROJECT:-}"
-[ -n "$PROJECT" ] || PROJECT="$(seat_project_default)"
-[ -n "$PROJECT" ] || PROJECT="WED"
+PROJECT="WED"
 if [ "${1:-}" = "--project" ]; then
   [ -n "${2:-}" ] || { echo "chat_reply: --project needs a value (Datasec|Secuura|WED)" >&2; exit 2; }
   PROJECT="$2"; shift 2
