@@ -28,29 +28,51 @@ naming its own brief (never a non-zero ctx) — and **both have since REPORTED**
 **The general rule this earns, and it is already a lesson:** a handover records a mechanism by its
 **PATH**. Every launch wrapper below is named by path for exactly that reason.
 
-## FLEET — 1 live. The builder has WRAPPED and all three finished panes are CLOSED.
-- **`%5` — QA gate, RD-362 (SEC-04 + SEC-03), TIER 1, round 1 of 2.** Branch
-  `rd-362-pentest-report-exposure-s43` @ `920e067dc32f21cfb11e23701ee10ac210bee4d0`.
-  Launch: `2_Project_Files/fleet/state/launch_qa_nexusai_rd362.sh` · Brief:
-  `2_Project_Files/fleet/qa-agent/briefs/2026-09-07_nexusai-rd362-sec04-sec03-tier1.md`.
-  **Writing its report as of 18:15.** Early signal from its pane: **the redaction is INCOMPLETE** — a
-  7-char hash still resolves to the removal commit and, combined with line 194, the recipe
-  reconstitutes. Expect findings, not a clean GO.
-- **`%2` (builder, s43) — WRAPPED 18:05 and CLOSED.** Ritual complete: HISTORY entry on
-  `s43-history-docs` @ `cb8601c`, vault pushed @ `8c38a88`, `.env` never staged across six branches,
-  13 of its own errors named in `HANDOVER-S43.md`.
-- **`%3` `%4` (the returned gates) — CLOSED.** Reports mailed and read; both scored 1.0.
-- **Closes were done through `2_Project_Files/fleet/cockpit/pane_close.sh`**, listeners **13 → 13**
-  on every one, and ports 3001/3111/3121 already 000 beforehand — nothing died with a pane.
+## FLEET — EMPTY. Every agent wrapped or reported; every pane closed. Panes: Wednesday + the monitor.
+All three gates returned and the builder wrapped. Closes went through
+`2_Project_Files/fleet/cockpit/pane_close.sh`; **listeners 13 → 13 on every one**, and the ports the
+handovers named (3001/3111/3121) were already 000 beforehand — nothing died with a pane.
+**Ghost text appeared at THREE prompts today**, each proposing the salient next action (`good night`
+at the wrapped builder; the RD-361 follow-up ticket at its gate; `Wait for Wednesday's reply` at the
+RD-362 gate). Detector called all three `SUGGESTION`; a fourth pane returned `prompt empty`, so it
+discriminates. **Run `pane_prompt_check.sh` before reading ANY prompt line.**
 
-## ⚠️ GHOST TEXT APPEARED AT TWO PROMPTS IN ONE MINUTE — both caught, both created by Wednesday
-A `idle at prompt ~3 min — likely waiting on Wednesday` wake fired on the builder, which was idle
-because it had **wrapped**. At its prompt: **`good night`** (ladder rung 2, the wrap phrase at a
-wrapped pane). At the RD-361 gate's prompt: **the exact follow-up ticket under discussion** (rung 6,
-the coordinator's own queue as the salience source). `pane_prompt_check.sh` called both
-`SUGGESTION — ignore`; a third pane returned `prompt empty`, so the detector discriminates.
-**Telling a seat to wrap is what makes "good night" the generator's next sentence.** Run the detector
-BEFORE reading any prompt line, and **close a wrapped pane rather than clearing its line.**
+## 🔴 RD-362 VERDICT — GO-with-findings, AND THE TICKET MUST NOT CLOSE AS "CONTAINMENT ACHIEVED"
+3 Major, 3 Minor, 2 advisory, **no Blocker**. The change is a strict improvement; the gate's own words:
+*"blocking it would leave the markdown report shipping in the customer image, which is worse than any
+finding below."* **But the exposure is materially wider than the ticket claims:**
+1. **SEC-03 redacted 1 of 5 carriers.** Four unredacted full copies remain tracked — the `.docx` and
+   `.pdf` under `docs/`, and **a SECOND COPY under a different name in `Final Documents/Working
+   Documents/`, inside the build context** and matched by no ignore pattern (no `COPY` reaches it, so
+   not in the image). All four carry both pointers SEC-03 just redacted.
+2. **🔴 `docs/runbooks/git-history-scrub.md` SHIPS INSIDE THE CUSTOMER IMAGE and carries the recovery
+   pointer in pasteable `<commit>:<path>` form.** Dereferenced to a live blob (type and size only,
+   never content); the introducing commit resolves, is an ancestor of head, its tree holds 2 entries
+   under the key directory and its parent holds 0. **SEC-04 excludes the report and ships the map.**
+   Pre-existing, not a regression — **but squarely inside SEC-04's own threat model** ("anyone who can
+   pull or inspect an image layer").
+3. **F4 MAJOR — the redaction's own claim is falsified inside the file it edited.** A short-form hash
+   survives ~8 lines above the redaction and the key directory is named ~12 lines below it; the hash
+   is live and IS the removal commit. Removal commit + directory name = the same recipe, shorter. The
+   test's pattern only matches 40-hex preceded by `git show`, so it cannot see it. **Same class as the
+   `:553` miss the builder found, one turn later.**
+4. **F6 MINOR** — `SESSION_NOTES_*.md` is root-anchored, so four `docs/SESSION_NOTES_*.md` still ship;
+   one carries 10 GUID-shaped strings. **F5 MINOR** — partial PEM material remains (~40%, public
+   portion, NOT the private scalar; the gate explicitly declines to call it key recovery).
+5. **The runtime-read control cell is a spelling check.** `expect(lines).not.toContain('*.md')` —
+   exact string identity against four literals, computing no exclusion. Fires on literal `*.md`,
+   **silent on `**/*.md`, `*.[Mm][Dd]`, `*.m?` and `PRIVACY.*`**, all of which break the two live
+   routes. Found by tampering five ways with each tamper asserted to have landed.
+
+**Merge: HELD, same reason as RD-363 — the target is a frozen `main` and RD-367 is unruled.** A merge
+would not close the exposure anyway; only a rebuild/republish does, and that is Kam's.
+
+**🔴 THE NEXT SEAT'S FIRST JOB — Wednesday CANNOT do it: tracker access is READ-ONLY.**
+File these as tickets on the RD board (aggregated per Kam's 13:23 rule — the carrier story is ONE
+logical path), searching by SYMBOL/PATH first and saying so, with both controls:
+`git-history-scrub.md` shipping the map · the four unredacted carriers · F4's short-form hash ·
+F6's SESSION_NOTES · and the control cell's upgrade from string-identity to a computed exclusion.
+**And RD-362 itself must be re-scoped so it cannot close as containment achieved.**
 
 ## GATE QUEUE AFTER RD-362 — 2 left, both Wednesday's to fire, neither needs the builder
 1. **RD-329 @ `2e78c76`** — the public `/api/health` allow-list guard. **No red-proof exists and the
