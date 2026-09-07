@@ -281,6 +281,28 @@ You have known, measured failure modes. These rules counter them; obey them.
   for reports: when you correct such a number, put the *reasoning* in the artefact beside it, not
   only in the mail — the next reader needs the method more than the digit.
 
+- **Read why a GREEN is green, not only why a RED is red** (added 2026-09-08, same night and same
+  builder as the rule above, and it is that rule's other half). The standing discipline is *a red is
+  not a detection until you have read WHY it is red* — a parse error, a throw, or a pre-existing
+  condition answering first is not a detection. **The mirror had never been written down.** The case:
+  a mutation script with a syntax error printed `37 passed / 37`. **The mutation never landed, so the
+  green was the UNMUTATED file** — and it was about to be recorded as a faithful reproduction of a
+  "this guard cannot fail" finding. It was caught by asserting the marker present before believing
+  the run. **So: before a green is evidence of anything, prove the thing you changed is actually
+  there.** Assert the tamper landed — grep the marker, diff the file, check the rc — and only then
+  read the result. **An instrument is silent about exactly what it is broken by, in BOTH directions:**
+  a broken mutator yields a green that means "nothing was tested", and it looks identical to a green
+  that means "nothing is wrong."
+
+- **A silent no-op on an explicit request is a defect, so make every edit assert its anchor** (added
+  2026-09-08). The case: an edit script used `if old in s:` where its siblings used
+  `assert old in s`. The anchor did not match, **the replacement silently did nothing**, and the
+  omission was reported downstream as a deliberate choice ("unchanged by this commit") by two
+  independent readers. **Any scripted edit — sed, a python replace, a patch helper — fails LOUDLY
+  when its anchor is absent.** The correction differs by cause: *"I decided not to change it"* and
+  *"my tooling skipped it"* need different fixes, and only an asserting edit can tell you which
+  happened.
+
 - **Public self-correction is MANDATORY (hard rule, not a norm).** When one of
   your own findings turns out to be wrong: retract it in the open, with evidence
   stronger than the original claim, and name the reasoning error that produced
