@@ -14,29 +14,49 @@ anything — read EVERY line.** Mail UTC ≈ AEST−10. **ROTATION BAND 80–90%
 **Quiet hours are OVER — voice is allowed.** Kam's last panel input was 21:00 on 09-07; he has the
 morning board on his panel.
 
-## 🔴 FIRST ACTION — MERGES ARE LANDING ON MAIN RIGHT NOW. Read this before touching anything.
-    %22  Datasec/NexusAI      — S47. MERGING, resumed at merge 3 of 7 on Wednesday's 07:32 GO.
-    %24  QA/NexusAI-RD376     — full tier-2 gate, still running (~60 min).
-    %25  Datasec/SecurityReview — BOTH JOBS DONE. Owes one answer (the Agent Mail 403), then wraps.
-    %0   wednesday            — this seat.
+## 🔴 FIRST ACTION — merges are landing; S47 has its GO and is NOT blocked
+    %22  Datasec/NexusAI      — S47. Merging. Has Wednesday's 07:41 GO on the merge-4 conflict.
+    %24  QA/NexusAI-RD376     — REPORTED (GO, classification (b)). Pane can be closed after a detector run.
+    %25  Datasec/SecurityReview — both jobs done; owes one answer (Agent Mail 403), then wraps.
+    %0   wednesday            — rotated at 82%.
 
-🔴 **`main` HAS MOVED for the first time since 2026-09-01.** Verified by Wednesday's own `ls-remote`:
-    a9a8cb6   frozen since 09-01        (before)
-    8c4c22d   MERGE 1 — rd-323 @ e032c7d   +250 commits, 255 files   PUSHED
-    1803bcd   MERGE 2 — rd-377 @ fabcc93   +1 commit, 7 files        PUSHED  <- origin/main NOW
-**Merge 3 (rd-381) exists LOCALLY as `0dd9cc0` and is NOT pushed** — discardable, nothing published.
-**Authority: Kam, panel 07:10 verbatim** — *"deploy and merge everything that has been tested and done
-and is ready for deployment"* — plus his standing `mergeup` card (gate-passed only, one at a time,
-reporting each). **Wednesday does not merge; S47 executes.**
+🔴 **`main` HAS MOVED — 3 of 7-8 merged and pushed**, first movement since 2026-09-01:
+    a9a8cb6 (frozen) -> 8c4c22d rd-323 -> 1803bcd rd-377 -> 0dd9cc0 rd-381
+All three confirmed under the two-sided predictor; side A = the branch's own diff, side B = what main
+already carried, plus an absent-branch control.
 
-🔴 **THE DEPLOY HALF IS UNCONFIRMED.** He asked for deploy AND merge. `deploy.yml` appears to be
-`workflow_dispatch:` only now, so **a push to main may NOT have deployed anything.** S47 has been
-asked to report **what the two pushes ACTUALLY fired** — workflows, targets, whether anything
-deployed. **Do not report "deployed" to Kam until that fact is in hand.** If nothing fired, the deploy
-half of his instruction is NOT satisfied and it goes back to him.
-🔴 **gitleaks now sees six days of commits for the first time** and RD-367 says a credential sits in
-`terraform.tfstate.backup`. **Expect it to fire. That is the scanner working.** Report only — **no
-history rewrite, no force push, no deletion** (all Kam's signature class).
+🔴 **THE DEPLOY HALF OF KAM'S 07:10 DID NOT HAPPEN AND CANNOT FROM HERE — MEASURED, NOT INFERRED.**
+Container App `nexusaidev-app` still on revision 0000097 (2026-09-05); ACR newest tag unchanged.
+**Cause: `deploy-demo.yml:51` gates every job on `vars.CI_DEPLOY_ENABLED == 'true'`, and the
+workflow's own header says it stays unset deliberately until secrets + environment exist.** So a
+merge CANNOT deploy. **This INVERTS Wednesday's earlier hold** — the fear was a merge deploying
+unseen; the truth is it cannot deploy at all.
+**THREE THINGS ARE KAM'S and they are the whole deploy half:** set `CI_DEPLOY_ENABLED=true`; add
+secrets `AZURE_CLIENT_ID` / `AZURE_TENANT_ID` / `AZURE_SUBSCRIPTION_ID`; create the `demo` environment.
+**Sent to his panel 07:4x.** **Do NOT report any merge as a deploy.**
+
+## MERGE QUEUE — corrected twice by S47, both times measured, both times right
+    DONE  1 rd-323 e032c7d · 2 rd-377 fabcc93 · 3 rd-381 b93d3b5
+    4. rd-361  731aa6e  CONFLICT on scripts/verify-expected-counts.json — GO given 07:41
+    5. rd-374  10ddb0a  CONTAINS rd-361 (that is why rd-361 goes first; Wednesday's order was wrong)
+    6. rd-376  36191eb  NOW ELIGIBLE — gate returned (b), ticket ended. Based on 10ddb0a.
+    7. rd-322  432617a  the only unqualified GO
+    8. rd-148  690bed9
+🔴 **The conflict resolution is BY MEASUREMENT** (the file's own `_why` prescribes
+`npm run verify -- --update-counts`), **with a guard Wednesday added: a measured count BELOW 2196
+must STOP the seat.** `--update-counts` makes the file agree with the tree; it does not check the
+tree is right, so it would silently bless a merge that lost tests.
+🔴 **When rd-376 merges, the absent-branch negative control becomes VACUOUS** — S47 has been told to
+name a replacement. Check it did.
+
+## 🟢 gitleaks CLEAN — and Wednesday's brief was WRONG about a credential
+Wednesday's merge brief said, as fact, that a credential sits in `terraform.tfstate.backup` (taken
+from the ruled RD-367 card, **relayed without opening the repo**). **S47 measured: not present on any
+ref; gitleaks 0 findings at raw exit 0**, scanned the way CI does. **Retracted to S47, scoped to the
+presence claim only** — the main-only-scanning fact that justified the expectation still stands.
+**The card `nexusai-rd367-frozen-trunk` is stale on this point and should be corrected.**
+**S47's keeper, worth carrying:** *"an expectation that a red is coming is exactly the condition under
+which a false red gets believed."* Wednesday created that condition; the seat checked anyway.
 
 ## ✅ SECURITY REVIEW — COMMISSION COMPLETE (Kam approved option (a) at ~07:1x)
 `%25` did both jobs and its Bearer sweep found a real one.
