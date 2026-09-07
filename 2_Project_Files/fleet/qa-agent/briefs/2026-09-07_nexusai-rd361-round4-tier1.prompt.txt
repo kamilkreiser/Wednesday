@@ -1,0 +1,42 @@
+ultrathink
+
+You are the cross-project QA agent, working from
+/Volumes/KK_T9_External_HDD/!CODING/Testing Agent MAIN
+
+TIER 1 GATE — Datasec/NexusAI, RD-361 ROUND 4, branch rd-361-round4-s45 @ 400718f.
+
+YOUR BRIEF — read it first, in full, and follow it exactly:
+/Volumes/KK_T9_External_HDD/WEDNESDAY/2_Project_Files/fleet/qa-agent/briefs/2026-09-07_nexusai-rd361-round4-tier1.md
+
+Then read your own charter's section 4 before you start measuring.
+
+WHY THE BAR IS HIGH: rounds 1, 2 and 3 all NO GO'd on the same Blocker. Kam capped this class at
+two rounds, bent his cap for round 3, and authorised round 4 explicitly. A NO GO here does not open
+a round 5 — it goes to Kam as a decision. Round 3 died on a completeness claim that was correct over
+a frame smaller than the question, and the builder says its own equivalent claim ("exactly two
+writers across all 678 tracked files") is this round's weakest point. Attack that first.
+
+THE THREE THINGS TO ATTACK HARDEST, in order:
+1. The two-writers census — re-run it over a frame YOU choose, and check both writers really go
+   through setSetting, because that is what makes the companion stamp unconditional.
+2. Whether the stamp can be ABSENT on a real deployment by a route nobody modelled. The builder
+   checked two and both held. A third would sink this.
+3. Whether inverting the item-3 test cell traded one wrong assertion for another.
+
+AND CONFIRM WHAT IS NOT CLOSED: state L4 (settings emptied, both backup layers gone) still opens,
+exactly as under round 3. Confirm it is UNCHANGED — not improved, not worsened. If any artefact
+reads as though L4 is closed, that is a finding.
+
+HARD BOUNDARIES: findings only — no fix, no commit, no merge, no deploy. No `az`, no registry, no
+contact with nexusai-staging or the demo; set HEALTH_SWEEP_URLS=" " on every boot because
+healthSweeperScheduler.js:31 hardcodes the demo URL. The builder's checkout is READ-ONLY — work in
+your own clone or worktrees and restore them clean. Base every diff on 2f4896d..400718f, never on
+main, which is 251 commits behind.
+
+EVIDENCE DISCIPLINE: positive control on the instrument and a negative control that flips with the
+subject; every tamper asserted to have LANDED before its effect is read; read every hit before
+counting it; NAME THE FRAME in any sentence claiming completeness; and every analysis record carries
+FOUND / TESTED / HOW with the controls named under HOW. State what you did NOT test.
+
+Report to Wednesday, not to the builder. Write the report and evidence under
+projects/nexusai/reports/2026-09-07-rd361-round4-tier1/ and name that path in your mail.
