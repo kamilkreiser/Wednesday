@@ -5058,5 +5058,42 @@
   ],
   "delivered_artefact": "mail to Secuura/Blockchain 2026-09-07T01:44:37Z subject 'KAM RULED x2 ...' — rotation commissioned as its own round after #885 merges, measurement half authorised now; lands in the rotation ticket and its PR",
   "delivered_ts": "2026-09-07T11:45:33.216192+10:00"
+ },
+ {
+  "id": "secuura-ks949-round3-cap-and-the-cutoff",
+  "client_project": "Secuura/Blockchain",
+  "title": "#885 NO GO — your cap is spent. And nothing currently removes your address: the auth remediation is switched off on prod-like environments by a date cutoff.",
+  "bluf": "PRIOR-RULING CHECK: your 06:42, 07:37, 07:38, 11:01, 11:09 and 11:43 rulings on this ticket were read; none is revisited. This is the cap decision you said would come. VERDICT: NO GO on 6dbe63cae. That spends round 2 of 2. NOT OFFERED AS AN OPTION, deliberately: shipping this head. It would write twelve plaintext addresses into an encrypted column on the first boot after a deploy, and eleven of those twelve are the documented public demo personas your own credential sheet publishes and that the auth smoke test drives - not a back-office table. THE HONEST FRAMING, which the agent asked for in its own words: round 3 exists because round 2's fix was wrong about what it writes, not because the gate keeps finding new ground. AND WEDNESDAY'S SHARE, with the receipt: the agent's F1 report told Wednesday at character offset 1134 that the column is AES-GCM ciphertext and the real unique index is a different column, and Wednesday answered 'F1 RATIFIED, keep going' without asking what the statement would write once it started working. Two failures over one sentence - the builder in the writing, Wednesday in the reviewing, which is the layer that exists to catch the first. THE NEW FACT THAT CHANGES YOUR PICTURE, and it is why this card is not simply 'may I have another round': NOTHING CURRENTLY REMOVES YOUR ADDRESS, and round 3 alone may not either. The auth service's remediation - the thing we established is the only path that would rewrite your row - is disabled on prod-like environments by a PII plaintext cutoff dated 2026-06-01 that is set nowhere in the repo, so the source default applies. Decryption throws, the lookup catches and returns null, the remediation reads that as 'no pre-existing row to remediate' and skips. Measured with four cells including two controls that isolate the cutoff rather than the row shape. The builder's own suite cannot see it: its mock forces the encryption check off and runs a development environment. ALSO MEASURED AND NEW: your old address remains the LIVE LOGIN KEY for a system-admin row; and the Azure deploy applies a THIRD schema file, not either of the two we had been arguing about.",
+  "default_action": "If Kam is silent: NOTHING merges, NOTHING deploys, the demo is untouched, and #885 stays open at 6dbe63cae. The four closed fixes sit unshipped and the exposure - whatever it turns out to be - stays exactly as it is today. Silence is safe here but it is not free: it holds the second-super-admin fix off develop too.",
+  "options": [
+   {
+    "key": "split",
+    "label": "Revert F1 only, ship F2-F5 now, give F1 its own round (recommended)",
+    "detail": "This is your cap applied exactly as you wrote it - the closed instances ship, the residue is ticketed. F2, F3, F4 and F5 are gated and genuinely closed, including the second published super-admin, and they should not be held hostage. Reverting F1 returns the seed statement to throwing on every boot, which is the state that has existed for months and is SAFE - the bug was what protected the column. F1 then comes back as its own small PR with its own gate."
+   },
+   {
+    "key": "round3",
+    "label": "Authorise a third round on the same PR",
+    "detail": "Everything lands together and the fix is known and small - the migration stops writing identity columns, which Wednesday has already ratified in shape and the gate agrees is one change. Costs one more gate and holds four good fixes while it runs."
+   },
+   {
+    "key": "round3-plus-cutoff",
+    "label": "Round 3, and treat the PII cutoff as its own P1 alongside it",
+    "detail": "Same as above, plus the thing that actually decides whether your address ever comes off: the auth remediation being switched off on prod-like environments. Widest, slowest, and the only option that ends with a measured answer about your own data."
+   },
+   {
+    "key": "close-and-restart",
+    "label": "Close #885 and re-open the whole thing as a fresh ticket",
+    "detail": "Cleanest ledger, loses the four working fixes and the round history. Honest only if you want the whole approach rethought."
+   }
+  ],
+  "recommended": "split",
+  "ts": "2026-09-07T12:06:04.198148+10:00",
+  "status": "open",
+  "ruled_choice": null,
+  "ruled_ts": null,
+  "prior_rulings_overridden": [
+   "2026-08-21 19:49"
+  ]
  }
 ]

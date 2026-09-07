@@ -47,10 +47,10 @@ panel, or the tool reads both and says which it read. **Not yet ruled.**
   handover"* — which at 65 with a 90 ceiling would idle a seat for 25 points — to *"keep the handover
   current, do NOT wind down."* Exercised on nine values (95/90→CEILING, 85/80→BAND, 75/70→CHECKPOINT,
   66→light, 55→checkpoint, 40→none). Backup `.pre-0907-band8090`.
-  **The RUNNING watcher (pid 2403) has the script inlined in memory as a `bash -c` loop, so it is
-  still on the OLD thresholds.** It takes effect at the next watcher restart. **Wednesday did not
-  restart a live watcher mid-session for a wording fix** (its mail baseline is the risk). **So expect
-  old-band wakes until then, and do not trust a 65% wake's wording.**
+  **IT IS LIVE.** Wednesday first wrote that the running watcher held the old code and **that was
+  wrong** — the next 70% wake arrived quoting the new wording (the phrase occurs 2x in the live file
+  and 0x in the backup). Pid 2403 is the RUNNER; it invokes `wake_watch.sh` fresh each tick. **Trust
+  the wake wording: if it cites 'Kam 09-07 10:49' it is the corrected file.**
 
 The launcher said **70%** until this seat fixed it — it was **two rulings stale** and is why seats
 kept rotating early. Fixed in `Launch_Wednesday.command`, verified by extracting `INITIAL_PROMPT` and
