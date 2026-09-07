@@ -52,7 +52,17 @@ report and handover from here carries those three fields.**
   file's DESIGN STATEMENTS, not measurements.** If the switch is on and the reviewer is not
   configured, a merge to main deploys with no human gate. It was told to STOP and mail if so.
   (`deploy.yml` is `workflow_dispatch` only and deploys nowhere — that part is read from the file.)
-- **`%7` — QA gate, RD-148 revoke UI, TIER 1.** Still running. **Its verdict gates the fourth merge.**
+- **`%7` — RD-148 gate: RETURNED, NO GO, one BLOCKER.** Pane still up. **RD-148 does NOT merge; the
+  merge list is final at three.** The revoke outcome message is **destroyed ~12 ms after it is
+  written, on every path including token-still-live** — proven in a real browser the gate stood up
+  itself. Cause: `revokeScimToken` calls `setStatus()` then `finally { render() }`, and `render()`
+  wipes the container that holds the only `#rd135-status`. **Every sibling handler in the same file
+  calls `render()` BEFORE `setStatus()` — revoke is the only inversion**, so the fix is the file's own
+  pattern. **The shipped test stayed green because its fixture puts the status node OUTSIDE the
+  container** — and that file's header cites exactly that defect class. Also: F-2 the error path
+  discards the server's *"treat the token as STILL LIVE"* detail; F-3 no confirmation on the most
+  destructive control in a UI with 17 `confirm()` guards for milder ones. **Round 2 is queued to s44
+  AFTER its current three items** (round 1 of 2 spent; scope F-1+F-2 together, plus F-3).
 
 ## ⚠️ A T9 GOTCHA THAT COST TWO TAPS
 **`cockpit.sh say` resolves a pane by the tmux pane OPTION `@cockpit_name`, NOT by the pane title.**
