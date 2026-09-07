@@ -1,0 +1,77 @@
+ultrathink
+
+You are the cross-project QA agent, working from
+/Volumes/KK_T9_External_HDD/!CODING/Testing Agent MAIN
+
+TIER 2 RE-GATE — Datasec/NexusAI, RD-323 DELTA ROUND 2, branch
+rd-323-scheduler-failure-vocabulary-s45 @ e032c7d.
+SUBJECT IS THE DELTA ONLY: 1b6bedb..e032c7d — ONE commit, FOUR files, 176+/6-. 1b6bedb already has a
+GO-with-findings from tonight's round-1 delta gate; do not re-gate it. NOT main (frozen). Nothing
+merged, nothing deployed. You may not merge. Round 2 of this class and round 1 was GO-with-findings,
+not a NO GO, so the two-NO-GO cap is not engaged.
+
+*** THIS ROUND CHANGES PRODUCT CODE and the previous one did not
+(backend/services/schedulers/healthSweeperScheduler.js +32). The builder flagged that unprompted. It
+is why this is a gate and not a through-code skim. ***
+
+YOUR BRIEF — read it first, in full, and follow it exactly:
+/Volumes/KK_T9_External_HDD/WEDNESDAY/2_Project_Files/fleet/qa-agent/briefs/2026-09-08_nexusai-rd323-r2-tier2.md
+
+FIRST JOB — the builder handed you a mutation table and asked you to check IT rather than the greens:
+  M3  degraded no longer alerts            1 failed   ONLY D-1
+  M4  escalates() = "the unreachable set"  1 failed   ONLY D-4
+  M5  carve-out removed entirely           3 failed   F-1, D-1, D-4
+M4 is the one that matters: under it F-1 and its CONTROL stay GREEN, which demonstrates the round-1
+D-4 finding by measurement rather than argument. Reproduce all three and confirm the signatures are
+DISTINCT. The claim is not "three mutations go red" - it is that each reddens a different NAMED set,
+which is what makes the cells independent rather than three views of one assertion. IF ANY TWO
+SIGNATURES COLLAPSE TO THE SAME SET, the independence claim fails and that is the finding.
+
+SECOND — the PRODUCT change. The inline filter is now a named static
+HealthSweeperScheduler.escalates(verdict). Wednesday has ALREADY RULED the extraction KEPT, so your
+job is not whether to keep it - it is whether it is CORRECT:
+ (1) drive the real class over EVERY verdict _classify can emit and compare old-vs-new decision per
+     verdict; a refactor that quietly widens or narrows the escalation set is the whole risk;
+ (2) the vocabulary is claimed to be enumerated BY DRIVING _classify, never hand-listed. Verify that
+     is what the CODE does, not the comment - add a new verdict to _classify and confirm the assertion
+     picks it up WITHOUT the test being edited, then restore. A hard-coded list is the same defect this
+     round exists to close;
+ (3) escalates is now PUBLIC API on the class - enumerate its callers over a frame you name.
+
+THIRD — the D-1 cell asserts liveMode / emailService / alertEmail as PRECONDITIONS before the claim.
+Confirm the preconditions actually gate it: make one false and confirm the cell FAILS rather than
+silently passing. Confirm the clean-sweep negative arm exists - "it sends" is satisfied by a scheduler
+that mails every tick. The builder raised an env-leak risk against itself (the D-1 cell swaps
+process.env; health-sweep-urls.test.js reads the same vars; jest shares a worker) and tested it 26/26.
+RE-RUN THAT PAIRING IN THE OPPOSITE ORDER TOO - a restore bug is order-sensitive and one ordering hides it.
+
+FOURTH — D-2: escalated published ALONGSIDE p1, not instead (renaming breaks /api/admin/health and the
+persisted rows); confirm the doc matches the code and the wire carries both. D-3: the distinction
+"a vacuous cell that is WRONG is cover; a vacuous cell that is RIGHT is redundancy" is in the test - confirm.
+
+RE-DERIVE rather than accept: PASS 2175/2175 across 113 suites (2173 + 2 cells), jest exit 0;
+verify-expected-counts.json 2173 -> 2175 by NAME-DIFFING cells, never a total. Confirm with your OWN
+ls-remote that rd-374 is 7c10437, rd-361-round4 731aa6e, rd-148-round2 690bed9, rd-322 432617a.
+
+*** THE TERMINATING CONDITION — state it in your verdict. This is the THIRD gate in one night on this
+lineage. Each round has produced strictly new findings with zero duplication, which is why it has
+continued; Kam's standing criterion is that working-vs-looping "can only be decided by the outcome".
+So the rule is set BEFORE your verdict, not after:
+  - a clean GO ends the lineage;
+  - a GO-with-findings whose findings are RECORD-LEVEL ONLY (docs, wording, a docblock line) ALSO ends
+    it - those get TICKETED, not fixed in a round 3;
+  - only a finding wrong in the CODE (a behaviour the product gets wrong, or a cell that cannot fail)
+    earns another round.
+SAY PLAINLY WHICH OF THE THREE YOU ARE RETURNING. That classification is the most useful thing you can
+give Wednesday tonight - more useful than the findings themselves. ***
+
+EVIDENCE: positive control opening AND closing; every mutation asserted PRESENT before its result is
+read and restored after; matched pairs so exactly one variable moves; READ EVERY RED AND SAY WHY IT IS
+RED; NAME THE FRAME in any completeness claim; FOUND / TESTED / HOW with controls named under HOW;
+state what you did NOT test.
+
+Stop any server you start and prove the port reads 000 - these cells bind loopback sockets. No az, no
+registry, no demo, no staging. Work in your own clone or worktree.
+
+Report to Wednesday. Write the report under projects/nexusai/reports/2026-09-08-rd323-r2-tier2/ and
+NAME THAT PATH IN YOUR MAIL.
