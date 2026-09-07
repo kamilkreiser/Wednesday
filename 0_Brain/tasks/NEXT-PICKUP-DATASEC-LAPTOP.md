@@ -28,33 +28,48 @@ naming its own brief (never a non-zero ctx) — and **both have since REPORTED**
 **The general rule this earns, and it is already a lesson:** a handover records a mechanism by its
 **PATH**. Every launch wrapper below is named by path for exactly that reason.
 
-## FLEET — 2 live, and THE GATE QUEUE IS NOW EMPTY. Every Datasec branch is gated or has been.
-- **`%6` — RD-329 public `/api/health` allow-list, TIER 2 through-code, round 1 of 2.**
-  `rd-329-health-payload-allowlist-s43` @ `2e78c76e573c5836037d80d99479cf5129dfba6d`.
-  Launch: `2_Project_Files/fleet/state/launch_qa_nexusai_rd329.sh` · Brief:
-  `.../briefs/2026-09-07_nexusai-rd329-health-allowlist-tier2.md`. Launched 18:33, rung-5 verified.
-  **Early signal from its pane: tamper matrix 3 RED / 11 GREEN — the guard catches 3 of 14 variants**,
-  i.e. it is narrow, which is precisely the question it was sent with. It is now checking whether the
-  counts gate is actually enforced in `verify-suite.sh` (is the gate a gate?) — its own initiative.
+## FLEET — 1 live (`%7` RD-148). RD-329 RETURNED. Gate queue empty.
 - **`%7` — RD-148 (P2-06) SCIM revoke UI, TIER 1, round 1 of 2.**
   `rd-148-scim-revoke-ui-s43` @ `aea410cc0432638b6a8698ae659197599915c2c2`.
   Launch: `2_Project_Files/fleet/state/launch_qa_nexusai_rd148.sh` · Brief:
   `.../briefs/2026-09-07_nexusai-rd148-revoke-ui-tier1.md`. Launched 18:46, rung-5 verified.
-  **🔴 WEDNESDAY RAISED THIS FROM TIER 2 (queue tail) TO TIER 1.** It is not a display tweak: it adds
-  a **REVOKE control — a destructive action on a security surface, in front of a human**, with +103
-  lines of new product JS. Its three questions: does the request name the row the admin is LOOKING at
-  (bound at render vs re-read at click — construct the divergence by re-sorting between render and
-  click); does the UI report success from an HTTP 200 or from something proving the revocation; and is
-  the **SERVER route** guarded, since a hidden button is not a control. **Sibling caution handed to it,
-  as a reason not to assume rather than a claim about this route:** the Reporting Dashboard
-  verification upgraded RD-10 to High partly because `POST/PUT /api/data-sources` carry no role guard.
-  **An honest constraint was stated in its brief rather than hidden:** there is no drivable browser
-  surface — the builder wrapped, `localhost:3001` has no listener (verified), deployed hosts are out of
-  scope. It was told to stand the app up locally from that commit if cheap and SAY it is a local run of
-  the same commit, or else say plainly it could not and name what the code/DOM pass cannot prove.
+  **Wednesday raised it from tier 2:** +103 lines of new product JS adding a **REVOKE control** — a
+  destructive action on a security surface in front of a human. Questions: does the request name the
+  row the admin is LOOKING at; does the UI report success from an HTTP 200 or from the revocation; is
+  the **SERVER route** guarded. Its brief states honestly that **no drivable browser surface exists**
+  (builder wrapped, `localhost:3001` no listener, deployed hosts out of scope) and tells it to say so
+  and name what a code/DOM pass cannot prove, rather than imply coverage.
+- **`%6` RD-329 — RETURNED, pane still up for inspection.** Verdict below.
 
-**GATE QUEUE: EMPTY.** RD-361 (held on Kam), RD-363, RD-362, RD-329, RD-148 have all been gated.
-Nothing further to fire without a new branch or a Kam ruling.
+## ✅ RD-329 VERDICT — GO-with-findings. The guard is REAL but NARROW: 6 tamper classes caught, 10 MISSED.
+**It applied Wednesday's standing line exactly** — *a guard that is real but narrow is
+GO-with-findings, not NO GO*. Both controls held (untampered GREEN, comment-only edit GREEN, positive
+tampers RED), so its greens are vouchable. **Every miss was proved on the wire from a booted server,
+each `node --check` clean** — not inferred from reading.
+
+**Three MAJORs, and the second is the one that generalises:**
+- **F-1 — the allow-list holds TWO SPELLINGS, not the property it is named for.** Seven syntaxes add a
+  key while it stays green: quoted key, `...full` spread (**+16 fields incl. `persistence.dataDir`,
+  an absolute path**), bracket notation, `Object.assign`, re-nesting under an ALLOWED key, an alias
+  variable, and **two keys on one physical line** (the regex is line-anchored).
+- **🔴 F-2 — the "belt-and-braces" deny-list is NOT a second layer: it shares the allow-list's parser.**
+  Measured on tamper E — `nodeVersion` is ON the deny-list, went out on the wire, **both cells green.**
+  *"Two layers that fail together are one layer"*, and the commit message presents them as independent.
+- **F-3 — the GUID-scrub cell is a spelling check**: it asserts three character sequences exist in the
+  file. Scrub commented out with its spelling left in place → a raw GUID rides out on `degradedReason`.
+
+**🔴 THE MOST ACTIONABLE LINE IN THE VERDICT:** the builder called source-reading *"the strongest
+instrument available without booting the app"* — **true as worded, but this repo ALREADY boots the
+app** (`__tests__/erasure-health-branches.test.js:97-143` spawns the real `server.js` on a reserved
+port). Rebuilt on that existing pattern, the same allow-list **caught 7 of the 10 misses.** **The fix
+is not a better regex; it is the harness two files away.**
+
+**Honest limits it named, of BOTH instruments:** an allowed KEY with a sensitive VALUE
+(`version: full.persistence.dataDir`) defeats any key-based allow-list, source or behavioural; and the
+commented-scrub case is the RD-362 pattern exactly.
+
+**Credited:** its CONTROL asserts the tamper LANDED before asserting the effect — the check RD-362's
+control lacked — and the PRECONDITION cell is a real guard against the null-block failure mode.
 
 ## 🔴 RD-362 VERDICT — GO-with-findings, AND THE TICKET MUST NOT CLOSE AS "CONTAINMENT ACHIEVED"
 3 Major, 3 Minor, 2 advisory, **no Blocker**. The change is a strict improvement; the gate's own words:
