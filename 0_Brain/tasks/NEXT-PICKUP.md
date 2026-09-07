@@ -7,7 +7,7 @@ status: live
 supersede: replace this file wholesale at the next pickup; do not append
 ---
 
-# NEXT PICKUP — ~16:10 AEST Sunday. THE DEPLOY IS LIVE. One seat merging #888.
+# NEXT PICKUP — ~16:20 AEST Sunday. DEPLOY LIVE **AND #888 MERGED**. One seat, two PRs awaiting gates.
 
 **Run `2_Project_Files/tools/kam_rulings_today.sh` before writing anything — read EVERY line.**
 Mail UTC ≈ AEST−10. **ROTATION BAND 80–90% (Kam 10:49); 70% is a CHECKPOINT ONLY.**
@@ -31,20 +31,32 @@ absent from the VM `.env`; proven not running before — `.env` mtime 09-03, gua
 service mints REAL Platform Admin tokens with NO caller credential.** Refusing to start is it failing
 CLOSED, which is correct. **Enabling it is a security opt-in and Kam's alone.** Nothing is exposed.
 
-## 🔴 FIRST ACTION — the merge receipt
-**s146 (`%152`) is merging #888 at `9710cc1fde36109f3ad6fc34d792801d4357fab9` exactly, no amendment.**
-Its waker fired ~16:04 (build done) and it is working. **Read the receipt, verify parents + tree oid,
-then it files the F3-RESIDUE ticket as its first board action.**
+## ✅ #888 IS MERGED — `632f16dfe` → **`9e9a88709fb80517463d18d67a8ada02bc2e6ca6`**
+Tree oid predicted BEFORE and matched · parents re-derived FROM THE OBJECT not the API · containment
+both ways **with a control** (#890 `74c0b3bbf` absent, so the check discriminates) · F1 re-confirmed
+on develop (`.env.example:133` empty). **NOT DEPLOYED — the demo still runs `632f16dfe`.**
+**KS-966 moved back to `In Progress`** (the merge auto-transitioned it to `In Review`, which would
+have read as done while items 3+4 are open).
 
-**THE F3-RESIDUE TICKET DOES NOT EXIST YET** — Wednesday referred to it as though it did and the seat
-correctly refused to invent an id. **The unique-index measurement is parked on KS-966** with a note
-saying it moves when filed. **Filing it is the next board action.**
-Content: with BOTH rows present the id-row UPDATE throws **23505** on `users_email_lookup_hash_uniq`,
-the `catch` at `userRepo.ts:1506` swallows it, **so the whole F3 fix never runs** — pre-existing,
-equally open on develop, proved by isolation + a cross-SHA control. **And a GREEN CELL asserts it is
-handled**, passing only because the vitest `db` double cannot enforce a unique index. That cell is
-item 1 of the ticket. **Fix-shapes:** email-row-first ordering · id rewrite conditional on
-`!emailRowIsDistinct` · or one transaction. **The regression test must run against a REAL Postgres.**
+## 🔴 FIRST ACTION — gates on the two open PRs
+**#890 (KS-952, `74c0b3bbf`)** and **#891 (KS-418 docs, `3c07157a2`)** are open and awaiting gates.
+**#889 (KS-597, `af640e809`)** also open. Tier them by what they touch.
+
+**KS-968 IS FILED, MAJOR** (the residue ticket — it did not exist until 16:1x).
+Content: `if (byId)` at **`:1363`** rewrites the `…0020` row's `email_lookup_hash`; a distinct row
+holding that hash makes it a **23505**; the catch logs and `continue`s **without rethrowing**; and
+`if (emailRowIsDistinct)` sits at **`:1388`, AFTER the throwing statement** — so the F3 arm never runs
+when both rows exist. Pre-existing, equally open on develop. **Item 1 is the misleading GREEN CELL**
+(passes only because the vitest `db` double cannot enforce a unique index). **Item 3: do NOT probe the
+demo — likelihood UNKNOWN and that probe is Kam's to authorise.** **The regression test must drive a
+REAL Postgres.** **The swallowing catch is part of the defect** — same class as KS-962's `debug`-level
+seed failure, two instances in one afternoon.
+
+**⚠ A CORRECTION THAT WAS QUOTED ONWARD:** s146's original 23505 reasoning (that the collision came
+from rewriting the address onto the row found BY it) is **WRONG** and reached three artefacts. It is
+corrected **by comment, not by edit**, on KS-966, #888 and KS-968. **Do not re-inherit the old
+version.** Its own formulation, now filed M-tier: *"I had a real measurement and attached it to the
+wrong statement, which is a costlier error than not measuring at all, because it looks like evidence."*
 
 ## S146's QUEUE AFTER THE MERGE
 KS-952 (#890 open) · the KS-418 docs (#891 open, branch deliberately WITHOUT the ticket id so it does
