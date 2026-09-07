@@ -12,40 +12,32 @@ supersede: replace this file wholesale at the next pickup; do not append
 **Run `2_Project_Files/tools/kam_rulings_today.sh` before writing anything — read EVERY line.**
 Mail UTC ≈ AEST−10. **ROTATION BAND 80–90% (Kam 10:49); 70% is a CHECKPOINT ONLY.**
 
-## 🔴 FIRST ACTION — s148 is executing two Kam authorisations; the ONE thing to watch is an INCIDENT trigger
-**Kam authorised at 19:56: `round3-narrow` on #892, and `count-populated` on KS-968.** s148 was told
-to run **the count FIRST**, because **a NON-ZERO is an incident, not a KS-968 finding**: rows carrying
-hashes the running key cannot match means a **key rotation without a re-hash, and login resolves users
-by that hash — those users cannot be found by email.** **If its mail reports non-zero: STOP the fleet
-on that thread, do not let it investigate on its own word (the grant was for ONE count), and card Kam
-immediately.** Zero means benign and KS-968 becomes *not applicable, measured.*
+## 🔴 FIRST ACTION — s148 is on ROUND 3 (#892). Nothing else is running. Two things sit with Kam.
+**All four gates have reported and all four panes are closed.** s148 is the only live agent.
+**Do not start anything on the demo box** — the id-keyed decider is Kam's, **default STOP**.
 
-## THE ONE READING TO RE-STATE IF KAM QUERIES IT
-`round3-narrow`'s option label says **"F1 and F2 only, both one-liners."** **F1 is not a one-liner.**
-That label was the gate's assessment and Wednesday's when the card was written; **s148's own
-measurement corrected it BEFORE Kam ruled** (panel 19:4x, ruling 19:56). **F1 must QUARANTINE a stale
-manifest, not merely skip the write** — *a non-write is not a removal* — or the interlock with item 3
-stays live: a `presuite-test-…` manifest left standing by a refused run, **consumers pointed at
-accounts a test suite created for itself.** Wednesday relayed round 3 on the corrected shape **and
-told Kam that is its reading**, so he can narrow it in a sentence.
+## KAM'S DESK
+- **`secuura-ks968-id-keyed-decider`** (rec `id-count`, **default STOP**) — `P=30` came back non-zero,
+  **but that is NECESSARY, not SUFFICIENT** for the rotation story, and Wednesday's brief wrongly said
+  otherwise. **One id-keyed count decides it, and it touches no hash so it is independent of the key.**
+  **1 → rotation → incident (email login broken for those rows). 0 → benign, KS-968 moot.**
+  **On silence: record CONSISTENT-WITH BUT UNESTABLISHED. Do not let it read either way.**
+- `vault-ssh-pointer-heal` — **the LAPTOP's, not ours.** Do not adopt.
 
-## KAM'S DESK — ONE card open, and it is NOT MINE
-`vault-ssh-pointer-heal` (Fleet/workspace) is the **LAPTOP seat's**; it edits the shared workspace
-`CLAUDE.md`, outside this seat's writable scope. **He has ruled it three times, so his panel is
-re-presenting it. Do not adopt it.** **All eight Secuura cards are ruled, delivered and executing.**
-
-## STATE — every SHA is an agent's `ls-remote`, NOT re-derived here (no Secuura identity on this seat)
+## STATE — every SHA is an agent's `ls-remote`, NOT re-derived here
     origin/develop   6c60cc09b   (#888, #890 merged today; NEITHER deployed)
     demo VM          632f16dfe   (untouched all day)
-    #889  42d8cf5f5  Kam's BIND — TIER 1 GATE LIVE (pane QA/889-bind). Verdict comes to WEDNESDAY.
-    #893  0281b0faa  #894 IS MERGED INTO IT (tree matched, parents re-derived). base=develop.
-                     ** #893 -> develop is HELD until #889's gate reports — THAT merge moves the trunk **
-    #894  ---        merged into #893's branch; nothing further
-    #892  42e778203  ROUND 3 AUTHORISED (F1 quarantine + F2 command-set). No round 4 without Kam.
+    #892  42e778203  ROUND 3 IN PROGRESS — F1 as a QUARANTINE (not a skip), F2 as a COMMAND SET.
+                     Cap already spent: NO ROUND 4 WITHOUT KAM.
+    #889  42d8cf5f5  Kam's BIND is CORRECT and gate-proved — but F1 MERGE-BLOCKS: the PR's own
+                     integration suite is RED and its passing cells are VACUOUS. Needs a round 2.
+    #893  0281b0faa  #894 merged into it. ** #893 -> develop HELD ** — it was waiting on #889, and
+                     #889's answer is "not yet". THAT merge is the one that moves the trunk.
     #891  3c07157a2  KAM'S OWN CLICK — https://github.com/Secuura/Distributed_Secuura/pull/891
-**Owed after the above:** the **F-1 ticket** from the #894 gate — `/api/rate-limit/check` publishes
-`maxLength: 256` and still enforces code units, **on the route with NO role gate**; MAJOR, leads a
-ticket with F-2…F-5. **It is the sibling Wednesday's ratification missed.**
+**Owed tickets:** the **F-1** from the #894 gate (`/api/rate-limit/check` publishes `maxLength: 256`
+and still enforces code units, **on the route with NO role gate** — MAJOR, leads F-2…F-5); and the
+gate's **F3 tooling finding**: `run-migrations.sh` reports `applied=N failed=0` **for migrations it
+SKIPPED** — which is why three agents today insisted on confirming a migration BY NAME.
 
 ## WHAT WEDNESDAY GOT WRONG TODAY — all agent- or gate-caught, none reaching a cost
 - **The #890 fix instruction was wrong THREE ways** (base64url renames the `-` sentinel rather than
