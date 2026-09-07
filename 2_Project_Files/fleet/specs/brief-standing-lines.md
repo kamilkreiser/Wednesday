@@ -371,3 +371,48 @@ constrained and one of the two paths is never exercised at all.
 exist**, not only about whether the guard fires. **Cells that always red together are one cell
 wearing two names**, and a suite that claims to cover two paths while reddening as one is a coverage
 claim that has already falsified itself in front of you.
+
+---
+
+## A LOCAL `git clone --shared` GIVES YOU THE SOURCE'S *LOCAL* BRANCHES AS ITS REMOTE-TRACKING REFS
+*(QA agent, Secuura #892 round 4, 2026-09-07 — caught before it corrupted a single control.)*
+
+**The trap.** Cloning a checkout on the same filesystem copies the SOURCE's **local** branches into
+the clone's `refs/remotes/origin/*`. So `origin/develop` **in the clone** was the builder's **stale
+local `develop` (`ff5218867`)** — not the real remote head (`6a7a7824e`). **Every base, every
+merge-base, every two-dot diff and every "did this change" control taken against that ref would have
+been silently wrong**, and each one would have looked perfectly reasonable.
+
+**The rule for any gate that clones:**
+1. **Never trust `origin/*` inside a `--shared` or local clone.** Fetch the true remote refs into a
+   separate namespace (`refs/true/*`) and **use SHAs everywhere after that.**
+2. **Assert the ref you resolved equals the SHA the brief names**, before any comparison is run.
+   The brief carries the head and the trunk precisely so this is checkable.
+3. This is the census-over-a-wrong-frame family pointed at git: **the instrument answered correctly
+   about a frame nobody meant to ask about.**
+
+## PROVE THE DISCRIMINATOR BEFORE YOU BELIEVE ANY TAMPER COUNT
+*(same pass — two controls that are the reason its table means anything.)*
+
+Before accepting any red-proof, the gate built **two controls of its own**:
+- **A deliberate SYNTAX ERROR** in the file under tamper → **1 cell executed, no trailer line, a raw
+  uncaught exception.** This proves the executed-cell metric **can tell a build break from a real
+  assertion failure** — a build break looks *nothing* like a genuine red.
+- **An inert COMMENT** inserted in the same file → **10 passed, 0 failed.** This proves the tamper
+  *mechanism itself* is not what causes the reds.
+
+**The rule:** a red-proof's count is evidence only if you have first shown the counting instrument
+**discriminates**. Run a known-bad and a known-inert through it before believing any of the real
+cells. **Every tamper restored from a pristine copy and the end SHA asserted against the head.**
+
+## A FIX THAT REINTRODUCES THE CLASS IT REMOVES IS NOT A FIX WITH A TICKET ATTACHED
+*(the round-4 outcome, and the second time this exact principle has decided a #892 call.)*
+
+Round 4 genuinely closed KS-969's blocker — **and its own new test suite now silently quarantines a
+developer's live manifest while reporting `24 passed, 0 failed`.** The tester's words:
+*"it is SILENT, and it REINTRODUCES KS-969's OWN FAILURE CLASS FROM INSIDE KS-969's OWN TEST SUITE."*
+
+**The rule:** when a round's fix introduces a defect **of the same class the ticket exists to
+remove**, that is not residue to ticket — it is the ticket, unfinished. **Shipping it with a
+follow-up attached is the cap being used to launder something**, which is the objection Kam upheld on
+this same PR at round 2. Say so and route the call; do not merge it on a coordinator's own word.

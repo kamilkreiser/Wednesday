@@ -5745,5 +5745,34 @@
    "CARD secuura-admin-credential-rotation-183-files",
    "CARD vault-ssh-pointer-heal"
   ]
+ },
+ {
+  "id": "secuura-892-round4-passed-but-introduced-two-majors",
+  "client_project": "Secuura/Blockchain",
+  "title": "Round 4 CLOSED the blocker — and introduced a Major that reintroduces KS-969's own failure class inside KS-969's own test suite",
+  "bluf": "PRIOR-RULING CHECK: Kam authorised round 4 at 20:55 and said there is no round 5. This card is NOT a re-raise and NOT a NO GO — ROUND 4 SUCCEEDED. The BLOCKER IS CLOSED, and the binding condition he paid for is MET: the gate pre-registered its fail condition, neutered the call site, and got 1 of 10 failing, the RIGHT cell, reddening by EXECUTING rather than by failing to build. It proved that distinction with two controls of its own — a deliberate syntax error (1 cell executed, no trailer line: a build break looks NOTHING like a real red) and an inert comment (10 passed: the tamper mechanism is not itself causing reds). All three of the builder's red-proofs reproduce exactly. WHY THIS IS ON KAM'S DESK ANYWAY: the fix INTRODUCED two new Majors, and one of them is the reason to ask rather than merge. F-2: `pre_suite.test.sh` now SILENTLY QUARANTINES A DEVELOPER'S LIVE MANIFEST and reports 24 passed, 0 failed. The sibling file added in THE SAME COMMIT does stash and restore that directory, with the comment 'the real generated/ is this repo's, not ours'. This one does not. THE TESTER'S OWN WORDS, and they are why Wednesday will not merge on its own authority: 'F-2 is the one I would do first: it is SILENT, and it REINTRODUCES KS-969's OWN FAILURE CLASS FROM INSIDE KS-969's OWN TEST SUITE.' That is exactly the objection Wednesday raised at round 2 and Kam upheld — merging #892 would ship the defect KS-969 exists to remove. F-1, the other Major: the new call site sits in a catch block outside any try, so runPreSuite now THROWS — its own docstring says 'Never throws: classifying the failure IS this function's job'. Two concurrent runs in one checkout crash 9 of 12, against a parent-commit control of 0 of 12, and the repo documents that slots run in parallel. It is Major and not Blocker because it is LOUD — no false green, no wrong assertion; it makes the instrument stop rather than lie, which is the right side of the ceiling round 2 set. F-3 is Minor: the strict arm quarantines and does not say so. NOTHING DEGRADES WHILE THIS WAITS. #892 is unmerged and develop is exactly as it has been all day at 6a7a7824e. Nothing is deployed.",
+  "default_action": "HOLD — #892 stays unmerged, F-1/F-2/F-3 are ticketed, no further rounds start. Nothing degrades: develop is at 6a7a7824e exactly as it has been all day and nothing is deployed. The closed blocker simply waits.",
+  "options": [
+   {
+    "key": "round5",
+    "label": "ONE more narrow round — F-1 and F-2 only, F-2 first (Recommended)",
+    "detail": "Both are small, both were introduced by round 4, and F-2 has a pattern to copy sitting in a file added in the same commit. Wednesday recommends this because merging a fix that reintroduces the class it removes is the exact thing you upheld Wednesday's objection about at round 2. It is a fifth round on this PR, which is why it is your word and not Wednesday's."
+   },
+   {
+    "key": "merge-and-ticket",
+    "label": "Merge #892 now, ticket F-1 and F-2 as immediate follow-ups",
+    "detail": "Defensible: the blocker IS closed, neither Major restores it and neither produces a false green, and the tester itself frames them as follow-up rather than a fourth refusal. The cost is that develop then carries a test suite that silently moves a developer's manifest while reporting all-green — until the follow-up lands."
+   },
+   {
+    "key": "hold",
+    "label": "Hold #892 unmerged and ticket all three, no further rounds",
+    "detail": "The most conservative. Nothing degrades — develop is unchanged. The cost is that KS-969's fix, which round 4 genuinely achieved, sits unmerged indefinitely and the work is spent."
+   }
+  ],
+  "recommended": "round5",
+  "ts": "2026-09-07T21:36:52.421984+10:00",
+  "status": "open",
+  "ruled_choice": null,
+  "ruled_ts": null
  }
 ]

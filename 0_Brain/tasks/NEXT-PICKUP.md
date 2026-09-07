@@ -2,21 +2,26 @@
 date: 2026-09-07
 type: pickup
 scope: SECUURA + Wednesday's own work. Datasec belongs to the LAPTOP seat — do not touch its threads.
-source: replaced WHOLESALE at 21:0x by the 20:12 seat; state block kept current at 21:2x
+source: replaced WHOLESALE at 21:0x by the 20:12 seat; state block kept current at 21:39 (70% checkpoint)
 status: live
 supersede: replace this file wholesale at the next pickup; do not append
 ---
 
-# NEXT PICKUP — 21:0x AEST Monday. KAM'S DESK IS CLEAR. One agent working a 3-item queue. Nothing deployed.
+# NEXT PICKUP — 21:39 AEST Monday. ONE CARD ON KAM'S DESK. #892 FROZEN pending it. Nothing deployed.
 
 **Run `2_Project_Files/tools/kam_rulings_today.sh` before writing anything — read EVERY line.**
 Mail UTC ≈ AEST−10. **ROTATION BAND 80–90% (Kam 10:49); 70% is a CHECKPOINT ONLY.**
 
-## 🔴 FIRST ACTION — read `%162`, then the inbox. Nothing is owed to Kam.
-**`%162` Secuura/Blockchain is the ONLY agent pane.** Both gate panes were closed after reporting
-(listeners 26→26 each, logged). **A tap is QUEUED behind its running turn** (the 20:58 `KAM RULED
-BOTH` pointer) — it fires when the merge turn ends. **Do NOT close `%162`**: a queued tap is a future
-turn ([[2026-09-03_a-pane-close-is-a-session-kill]]).
+## 🔴 FIRST ACTION — read Kam's panel, then `%162`, then the inbox.
+**TWO THINGS ARE HIS AND BOTH HAVE SAFE DEFAULTS:**
+- **`secuura-892-round4-passed-but-introduced-two-majors`** (rec `round5`, **default HOLD**) — round 4
+  CLOSED the blocker and introduced two Majors; **F-2 reintroduces KS-969's own failure class from
+  inside KS-969's own test suite**, which is why this is his and not Wednesday's.
+- **`secuura-ks968-rotation-three-worlds`** (rec `separate`, **default STOP**) — two booleans separate
+  a real login-breaking rotation from two innocent states.
+**`%162` Secuura/Blockchain is the ONLY agent pane** (all three gate panes closed after reporting,
+listeners 26→26 each). It is **DORMANT BY DESIGN, told to stand down on #892 entirely**, and
+**Wednesday is its wake path**. Its prompt is clear — no queued tap.
 
 ## ITS QUEUE, in the order Wednesday set and Kam's rulings bound
 1. **Merges: #889 `48ad0354e` → develop, then #893 `0281b0faa` → develop.** GO given on Wednesday's
@@ -29,7 +34,11 @@ turn ([[2026-09-03_a-pane-close-is-a-session-kill]]).
    **1 → a rotation happened → INCIDENT** (login resolves by `email_lookup_hash`; those rows cannot
    sign in by address). **0 → benign, KS-968 moot on that box.** **A THIRD QUERY IS OUTSIDE HIS
    WORDS** — an ambiguous result is a finding to report, never a licence to widen.
-3. **#892 ROUND 4 — PUSHED `1e31c80b9`, UNDER GATE at `%168`** (Kam ruled `round4` at 20:55).
+3. **#892 ROUND 4 — GATED, GO-with-findings, BLOCKER CLOSED — and FROZEN pending Kam.**
+   The binding condition he paid for was **MET**: 1 of 10 failing, the right cell by name, reddening
+   by **executing**. The gate proved that with **its own two controls** (a planted syntax error → 1
+   cell, no trailer; an inert comment → 10 passed). **But the fix introduced F-1 and F-2, both
+   MAJOR.** **DO NOT START A FIFTH ROUND — it is carded.** Old scope line, superseded:
    **The binding condition is MET and proved**: with the drift-arm call removed the new call-site cell
    reds, 1 of 10, and it is the right cell. The gate is told to verify the **identity** of the failing
    cell and the **EXECUTED-cell count** under each tamper — a cell that reds by failing to build
