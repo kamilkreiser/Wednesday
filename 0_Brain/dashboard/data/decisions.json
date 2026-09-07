@@ -5546,5 +5546,39 @@
    "CARD secuura-ks788-gate-fails-open-2026-09-04",
    "CARD nexusai-rd361-blocker-vs-nogo-cap"
   ]
+ },
+ {
+  "id": "secuura-ks968-id-keyed-decider",
+  "client_project": "Secuura/Blockchain",
+  "title": "P=30 came back non-zero — but WEDNESDAY'S escalation rule was a logic error and the agent caught it. ONE id-keyed count actually decides it",
+  "bluf": "PRIOR-RULING CHECK: you authorised the population count at 19:56 and it RAN, exactly as scoped. P=30, non-zero. This is not a re-raise, it is the result plus a correction. WEDNESDAY'S BRIEF SAID: 'NON-ZERO means a key rotation without a re-hash, and it is an INCIDENT.' THAT WAS WRONG AS LOGIC. P>0 is NECESSARY but not SUFFICIENT: it refutes 'there is nothing for a rotated key to have orphaned', but it does not establish that a rotation happened. The 30 rows could belong to other users while the demo seed simply never created issuer@secuura.com - for instance with ENABLE_DEMO_SEED off - in which case the key is fine and there is no incident at all. THE AGENT REGISTERED THAT DISTINCTION IN ITS PRE-REGISTRATION BEFORE RUNNING, precisely so that seeing 30 could not talk it into the stronger reading, and it refused to report an incident it had not established. It also labelled its own hunch as a hunch: 30 rows is in the range of the seeded accounts, which LEANS toward the seed having run, and it said plainly that is inference and not evidence. WHAT ACTUALLY DECIDES IT, and it is elegant: SELECT count(*) FROM users WHERE id = 'a0000000-0000-4000-8000-000000000030'. ID-KEYED, so it touches no hash and is INDEPENDENT OF THE KEY - which is exactly why it can separate the two worlds that the hash-based queries cannot. ONE means the seed created that row and its hash does not match the running key, so a rotation happened and it IS an incident. ZERO means the seed never created it: benign, and KS-968 is moot on that box. One integer, no row data, no address, no write, same guards as the last two runs. It has NOT been run. WHY IT MATTERS TONIGHT IF ONE: login resolves users BY email_lookup_hash, so rows written under a superseded key cannot be found by email and those accounts cannot sign in by address. Silent and user-facing, on the demo.",
+  "default_action": "STOP — nothing further runs on that box. KS-968 is recorded as UNMEASURED and the rotation hypothesis as CONSISTENT-WITH BUT UNESTABLISHED, in the handover, so it is visible rather than forgotten.",
+  "options": [
+   {
+    "key": "id-count",
+    "label": "Authorise the id-keyed count - it is the one that decides (Recommended)",
+    "detail": "One integer, and unlike everything before it, independent of the key that is in question. Settles the whole thread either way: incident, or benign and closed. Pre-registered and hashed first, as all three previous runs were."
+   },
+   {
+    "key": "stop-here",
+    "label": "Stop - record it as CONSISTENT-WITH a rotation but unestablished",
+    "detail": "Honest and defensible: three counts have narrowed it and the fourth would close it, but nothing is degrading while it is unknown. The cost is that if a rotation did happen, users who cannot sign in by email stay undiscovered."
+   },
+   {
+    "key": "escalate-now",
+    "label": "Treat it as an incident now and investigate properly",
+    "detail": "Wednesday does NOT recommend this. It is precisely what the agent refused to do on this evidence, and it would mean acting on a necessary-but-not-sufficient condition - the same error Wednesday made in the brief."
+   }
+  ],
+  "recommended": "id-count",
+  "ts": "2026-09-07T20:02:05.071636+10:00",
+  "status": "open",
+  "ruled_choice": null,
+  "ruled_ts": null,
+  "prior_rulings_overridden": [
+   "CARD secuura-ks968-demo-hash-probe",
+   "CARD secuura-ks968-probe-control-query",
+   "CARD secuura-ks968-hash-population-count"
+  ]
  }
 ]
