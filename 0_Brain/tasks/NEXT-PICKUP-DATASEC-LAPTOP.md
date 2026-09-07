@@ -147,6 +147,13 @@ nothing by path. Carded; shared file, so it is Kam's.
 2. 🔴 **BOTH Wednesdays send as `wednesday-agent@agentmail.to`** — an inbox listing **CANNOT** tell this
    seat's outbound from the Studio's by the From address. s150's own tagging called a Studio mail
    `OUT(mine)`. **Tag by SUBJECT (`-> Datasec/*` is this seat, `-> Secuura/*` is the Studio).**
+   🔴 **AND THAT PREFIX RULE IS NOT ENOUGH — s150's own heuristic failed on its first hard case at
+   09:28.** A gate verdict arrives as **`[QA -> Wednesday] Secuura KS-969 / #892 round 5 — GO WITH
+   FINDINGS`**: the arrow prefix carries **no client at all**, so a prefix-only tagger leaves it
+   unclassified — and a DATASEC gate verdict looks identical at the prefix. **Classify on the subject's
+   CONTENT, not only its arrow:** the client, ticket key or PR number named in the line (`Secuura`,
+   `KS-`/`PS-` = the Studio's; `Datasec`, `RD-`, `VSP-` = this seat's). **The arrow says who is
+   speaking; only the body of the subject says whose work it is.**
 3. 🔴 **`git -C $VARIABLE <writeverb>` is REFUSED — write paths LITERALLY.** Hit a THIRD time by s150 at
    08:09 with this very trap in this very file. The environment trains the reflex (the no-`cd` hook
    forces absolute paths, so a variable is the ergonomic way to write them) and a warning cannot beat a
