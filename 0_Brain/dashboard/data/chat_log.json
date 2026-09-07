@@ -8353,6 +8353,20 @@
   "text": "An update to the 892 card before you rule it, because the case just got stronger and the fix got less simple.\n\nI told you both remaining fixes were one-liners. That was the gate's assessment and I passed it on. The agent has since measured the live instance rather than recalling it, and found the two defects interlock.\n\nOn that worktree there are two manifests. The published one was written at 07:57. The rejected one is 53 minutes newer. So the most recent provisioning run was refused, and the file every consumer actually reads is still the old one. The code's own comment promises that on refusal every consumer falls back to its seeded accounts because the file simply is not there — but the file was there. A non-write is not a removal, and that comment is an assumption about the filesystem rather than something the code establishes.\n\nHere is the part I did not have when I wrote your card. The surviving manifest's seed name is the shape that the test script itself writes. So one defect puts throwaway test identities into the real manifest, and the other declines to overwrite them and leaves them standing. The consumers on that worktree are pointed at accounts a test suite created for itself.\n\nThat means fixing the blocker alone leaves the pairing live. The recommendation is unchanged — one narrow round three — but it should fold both, and it is a quarantine of the stale file rather than a one-line skip. So my card understated it and you should have the corrected version before you decide.\n\nOne more thing worth carrying beyond this ticket: that directory is gitignored, which is why it persists silently across runs. A clean git status is not evidence the manifest is clean."
  },
  {
+  "role": "wednesday",
+  "seat": "Kamils-MBP.localdomain",
+  "project": "WED",
+  "ts": "2026-09-07T19:50:41.240200+10:00",
+  "text": "[LAPTOP / Datasec] Before I hand over: the round three fix does not close the bricking bug, and the agent proved that against its own work.\n\nYou authorised that extra round on the understanding it would close it. It does not, and I would rather you heard that from me tonight than found it in a ticket tomorrow.\n\nThe fix rested on one thing: a flag that was believed to be written in exactly one place, right after the auth setting. It is also written in three other places in the setup wizard - when a connection test succeeds, when validation passes, and when someone ticks don't show this again - all before auth is ever enforced. So an admin who runs the connection test and then gets interrupted is still bricked, by the same deadlock. What the round actually fixes is the narrower case where they got nowhere at all.\n\nThe agent found this itself, measured it, and told me before the tester reported. It also diagnosed its own mistake precisely: it searched for the flag in the backend and stopped at the language boundary, and the other writers were in the frontend the whole time.\n\nThat has given us the third failure pattern of the week and it is the one that beats our existing defences. A search that is completely correct over a smaller area than the question. Both our usual controls pass, and the number really is read from the source - the source is just narrower than the claim. Two of the six examples I logged are mine, including a check I fixed for you earlier this evening that was correct across every project folder and blind to the one shared repository that had actually broken. The fix is four words: say what you searched, not just what you found.\n\nWhat survives is real and I have recorded it as surviving - the second, smaller fix in that round is genuinely closed, and proved by contrast rather than by assertion.\n\nI am rotating now at eighty-one percent, at a clean boundary. The tester is still running and will report to the next seat, which will bring you one card with both measurements rather than two half-informed ones. Your GitHub card is still the only thing waiting on you, and nothing degrades overnight."
+ },
+ {
+  "role": "wednesday",
+  "seat": "Kamils-MBP.localdomain",
+  "project": "WED",
+  "ts": "2026-09-07T19:51:10.154197+10:00",
+  "text": "Coordinator seat rotated automatically at 19:51 — planned rotation inside Kam's 80-90% context band. A fresh seat is booting now (about ten minutes); agents are untouched and their mail waits for it."
+ },
+ {
   "role": "kam",
   "text": "Decision secuura-892-cap-spent-blocker-open: round3-narrow — Authorise ONE narrow round 3 - F1 and F2 only, both one-liners (Recommended)",
   "ts": "2026-09-07T19:56:41.488497+10:00"
@@ -8361,5 +8375,17 @@
   "role": "kam",
   "text": "Decision secuura-ks968-hash-population-count: count-populated — Authorise the one count - rows where email_lookup_hash IS NOT NULL (Recommended)",
   "ts": "2026-09-07T19:56:45.460411+10:00"
+ },
+ {
+  "role": "kam",
+  "text": "Decision rd104-gh-identity-acceptance-false-premise: youcheck — You check the two settings pages yourself - two clicks, links below (recommended) | note: please give me the step by step in the conversation paine",
+  "ts": "2026-09-07T19:58:06.640653+10:00"
+ },
+ {
+  "role": "wednesday",
+  "seat": "Kamils-MBP.localdomain",
+  "project": "Datasec",
+  "ts": "2026-09-07T19:59:38.522084+10:00",
+  "text": "[LAPTOP / Datasec] Two pages, step by step. Both are GitHub settings on the Reporting Dashboard repo, and you are the only party who can see either one — the project's own GitHub identity cannot reach the datasecau org at all, which is exactly why this is on your desk.\n\nFIRST — check the account. Look at the avatar top-right on GitHub. It has to be an account with access to the datasecau org. If it is sitting on a personal account, switch before you start or both pages will 404 for you the same way they do for the agent.\n\nSTEP 1 — Environments.\n\nhttps://github.com/datasecau/Reporting_Dashboard_Au/settings/environments\n\nLook for an environment called demo, and click into it. Tell me whether \"Required reviewers\" is turned on, and if it is, who is listed.\n\nSTEP 2 — Variables.\n\nhttps://github.com/datasecau/Reporting_Dashboard_Au/settings/variables/actions\n\nLook down the list for CI_DEPLOY_ENABLED. Tell me whether it is there at all, and if it is, what value it holds.\n\nThat is the whole job. Two answers and the three merges go tonight.\n\nWhat the answers decide, so you are not answering blind: if the switch is ON and demo has NO required reviewer, then a merge to main deploys straight to the demo with nobody in the loop — and I would hold the merges and fix that first. Every other combination and I merge on your existing authority.\n\nBoth links are built from the repo's actual git remote, not from memory — I checked it before writing them."
  }
 ]
