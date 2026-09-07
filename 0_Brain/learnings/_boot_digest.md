@@ -7,7 +7,7 @@ status: live
 
 # Boot digest — headline + rules of every lesson (open the file when it fires)
 
-Generated 2026-09-08 07:43 from 118 lesson files (580,473 B). Each block = the lesson's retrieval handle (H1), its frontmatter, the operative paragraph, its section index, and every RULES section verbatim. 6 files carry no rules-shaped section and are included whole. The CASES behind a rule live only in the file: open it the moment the rule fires, or when a diagnosis needs the evidence. `_ledger.md` is read whole beside this digest; `_ledger_archive.md` on demand.
+Generated 2026-09-08 08:46 from 119 lesson files (586,711 B). Each block = the lesson's retrieval handle (H1), its frontmatter, the operative paragraph, its section index, and every RULES section verbatim. 6 files carry no rules-shaped section and are included whole. The CASES behind a rule live only in the file: open it the moment the rule fires, or when a diagnosis needs the evidence. `_ledger.md` is read whole beside this digest; `_ledger_archive.md` on demand.
 
 ## The T9 SSD is the master — Wednesday must be fully portable
 `2026-07-31_fully-portable-drive.md` · principle · 2026-07-31 · status: superseded — the "T9 is the master" half by [[2026-08-25_one-drive-devmaster-is-master]] (2026-08-25); the portability principle itself still lives
@@ -4194,6 +4194,40 @@ source is the system clock) · [[2026-08-14_i-read-representations-they-read-sou
 (a mail timestamp is a representation of an instant, in another zone) ·
 [[2026-08-09_an-enforcement-you-must-arm-is-not-one]] (the voice rule was lesson-only until
 the `speak.sh` guard) · [[2026-08-03_daily-rhythm-6-to-23]] · voice-protocol.md.
+
+
+## When a check returns NOTHING, the instrument is the first suspect — a false absence reads exactly like a true one, and only the instrument can tell you which you have
+`2026-09-08_a-false-absence-is-usually-my-own-instrument.md` · correction · 2026-09-08 · status: live
+
+**The operative case, so the headline matches it:** a check just came back **empty** — zero rows,
+no matches, a missing line, an all-FAIL matrix, a blank field. **Before that absence enters a
+sentence, ask what the instrument would have printed if the thing WERE there, and prove it can
+print that.** A false absence and a true absence are byte-identical on screen. **The world cannot
+tell you which one you are holding; only a control can.**
+
+sections (open the file for these): The three, in one session, all within ninety minutes · Why this is its own lesson and not three ledger rows · How to apply · The uncomfortable half, kept
+
+## How to apply
+
+1. **Every zero, empty, no-match or all-fail gets a control that would have produced a non-zero,
+   run in the same action.** Plant the thing and search for it; run a case known to pass; grep a
+   token you know is present. **One extra command, every time, before the absence is spoken.**
+2. **When EVERY case fails identically — the negative control included — stop testing the subject
+   and test the instrument.** Six identical failures is not six failures; it is one broken tool.
+   This is the mirror of the all-pass red-proof rule and it deserves the same standing.
+3. **Read stderr before believing stdout's silence** ([[2026-08-06_never-discard-stderr]]). All three
+   instances above were diagnosable in one line of stderr or one un-truncated read; instance 1's
+   answer was sitting in a stream the first harness discarded.
+4. **Name the frame of the read, not only of the query** — `head -N`, `| tail`, a single-line grep,
+   a `limit:`, a glob. **A truncation is a frame** ([[2026-09-07_a-census-complete-over-a-frame-that-is-not]]),
+   and a truncated read is a census over the wrong world exactly as a narrow query is.
+5. **Prefer a token that cannot wrap, or match multiline.** For any prose assertion in a wrapped
+   file, grep a distinctive single word or `tr '\n' ' '` first. Long phrases are the worst possible
+   search key in hand-wrapped markdown, which is what this whole brain is written in.
+6. **Suspect the instrument hardest when the absence is CONVENIENT** — "nothing to do here",
+   "already clean", "not started, so I get to build it". Instance 3 would have handed s150 a
+   flattering finding about someone else's mechanism; instance 2 would have sent it to redo work it
+   had already done correctly.
 
 
 ## A ghost suggestion is dangerous in proportion to how little the receiving agent has ALREADY WRITTEN DOWN — the detector catches the line, a recorded decision makes it inert

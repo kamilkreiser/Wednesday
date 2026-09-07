@@ -203,3 +203,36 @@ no replies, and do NOT adopt it.**
 renews in 4d 19h). **Do not write `NEXT-PICKUP.md`, the daily note or `_ledger.md`** — the Studio's;
 this seat's ledger is **`_ledger_laptop_datasec.md`**. Panel messages open `[LAPTOP / Datasec]`.
 **Live panes: `%0` wednesday (s150) · `%22` Datasec/NexusAI (S47, holding, queue dry, ~50% ctx).**
+
+## 08:5x — DOCTOR RUN CLEAN, and one check that cries wolf (s150)
+`doctor.sh` run in full at 08:44. **The rule-3c ledger check Kam approved at 07:07 IS live and
+passing** — `✓ ledger archive: no rows older than 2026-09-05`. **s150 first reported it MISSING; that
+was `head -40` truncating the output at line 40 when the check prints at 41.** A cap read as an
+absence — see the new lesson below.
+**Also confirmed by doctor, and it settles a line s150 had hedged:** `Kam's week-scoped merge + deploy
++ PRODUCTION grants live until 2026-09-13 (production: SECUURA ONLY, confirmed by Kam 12:10)`.
+**So the Secuura-only narrowing is HIS, not the predecessor's reading.** Datasec production stays
+ungranted; s150's earlier "treat as ungranted until he says otherwise" was right but over-hedged.
+
+🟡 **A CHECK THAT CRIES WOLF, noted not fixed:** the exec-bit warning lists 10 paths. **Measured: only
+5 of ~120 `fleet/state/launch_qa_*.sh` lack the bit, and all 5 are SPENT one-shot launchers that will
+never run again.** The rest of the list is a quarantine copy, a `TESTCOPY`, two
+`(conflict_on_2026-09-04)` files and an Obsidian plugin inside a worktree — **none of which should
+ever be flagged.** The real risk the 2026-08-06 lesson names (a live script failing at `nohup`
+because a sync dropped its mode) does not apply to any of them. **Left alone deliberately:** it is a
+scoping decision on a shared check, mid-session, on a judgement call — and `chmod`-ing spent scripts
+would only hide the noise. **Candidate: scope the check to tooling that can still be invoked, and
+exclude `_quarantine_*`, `*TESTCOPY*`, `*(conflict_on_*)*` and `worktrees/`.** A preflight that flags
+10 items where 0 matter is the overstated-record lesson pointed at a boot check.
+
+## 🔴 NEW LESSON FILED — read it, it is about this seat's own checking
+`0_Brain/learnings/2026-09-08_a-false-absence-is-usually-my-own-instrument.md` (W tier).
+**THREE instrument failures in ninety minutes, all producing a FALSE ABSENCE, all self-caught:** a
+harness whose bash syntax error made all six branches read FAIL while the code was correct (the tell:
+**the negative control failed too**, which is impossible if the subject is merely wrong) · a `grep`
+returning 0 on text that was present because the phrase **LINE-WRAPS** — a trap documented in the very
+file being edited · `doctor.sh | head -40` hiding a passing check at line 41.
+**The through-line: this seat's WORK held all morning and its INSTRUMENTS kept failing, and every
+near-miss was in the CHECKING rather than the doing.** Both digests regenerated (119 files); doctor
+confirms current.
+
