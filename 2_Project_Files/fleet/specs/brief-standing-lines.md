@@ -292,3 +292,40 @@ pattern, **count its occurrences and classify each one** — a `grep`-shaped fix
 blast radius, and a finding that names two instances has said nothing about the others. **Pin the
 sites that must NOT change with a regression cell**, so the boundary is a property of the suite
 rather than of whoever writes the fix.
+
+---
+
+## AT WRAP, STAGE THE VAULT BY PATH — `git add -A` there stages ANOTHER CLIENT'S FILES
+*(found by the Datasec/NexusAI seat S45, 2026-09-07 21:13, and routed to a coordinator because it
+crosses clients. Recorded here — the one place Wednesday controls that reaches every seat — rather
+than by editing the shared skill file, which is Kam's.)*
+
+**FOUND:** the shared vault at `Notes (MASTER)` currently holds **~85 untracked files, four of them
+one client's content sitting in another client's session's working tree** (`Secuura/Extranet.md`,
+`Secuura/Technical Meeting - Stuart/`, two Secuura platform-k files).
+
+**TESTED:** the end-of-session ritual's vault step is `git add -A`
+(`skills/Current/end-of-session.md:50`). **Run literally from a Datasec seat it stages and commits
+Secuura content — workspace hard rule 2, breached automatically by the documented ritual**, and hard
+rule 2 is Kam's stated *"very important #1"*: it would be *"embarrassing or worse if Datasec had
+Secuura's name in it."*
+
+**CONTROL, and it is the reassuring half:** it has **not** fired. The previous seat's wrap commit
+touched exactly one file, so **the trap is live in the WRITTEN ritual and absent from the PRACTICE** —
+which is precisely the state in which it goes unnoticed until one seat follows the instructions.
+
+**THE STANDING LINE, for every project seat's wrap:**
+1. **Never `git add -A` in the vault. Stage your own files BY PATH** — your daily-note edit, your own
+   client folder's notes, nothing else.
+2. **Before staging, run `git -C "<vault>" status --porcelain` and read it.** If it lists a path
+   under another client's folder, **that is not yours to stage, commit, stash, clean or move** —
+   report it and leave it exactly where it is.
+3. **A vault that cannot pull is not yours to fix by clearing the tree.** `cannot pull with rebase:
+   You have unstaged changes` is a report, not an instruction to `add -A` or `checkout --`.
+4. **The fix to the shared skill file is KAM'S** — it is a file shared across clients, so no seat and
+   no coordinator edits it unilaterally. This line is the interim guard, in the path of every brief.
+
+**The general shape, and it is the one to carry past this instance: a ritual written for a
+single-tenant world becomes a cross-tenant breach the moment the workspace holds more than one
+client, and the ritual will not notice.** A wildcard stage, a wildcard clean, a wildcard sync and a
+wildcard grep all have this property.
