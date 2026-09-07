@@ -45,8 +45,10 @@ mkdir -p "$SC" || { echo "cannot create scratch $SC" >&2; exit 2; }
 # (learnings/2026-09-07_a-mechanism-is-recorded-by-its-path-not-its-runtime-id).
 SP_UNION_CHAT="$W/2_Project_Files/tools/union_chat_log.py"
 SP_UNION_DEC="$W/2_Project_Files/tools/union_decisions.py"
+SP_UNION_SB="$W/2_Project_Files/tools/union_scoreboard.py"
 [ -s "$SP_UNION_CHAT" ] || { echo "missing union helper: $SP_UNION_CHAT" >&2; exit 2; }
 [ -s "$SP_UNION_DEC" ]  || { echo "missing union helper: $SP_UNION_DEC" >&2; exit 2; }
+[ -s "$SP_UNION_SB" ]   || { echo "missing union helper: $SP_UNION_SB" >&2; exit 2; }
 
 FEEDS="agentmail brain_state datasec_calendar linear_personal linear_wed news
        parkinglot personal_calendar secuura_error tickets"
@@ -100,6 +102,16 @@ for round in 1 2 3 4 5 6 7 8; do
         git -C "$W" show ":3:$f" > "$SC/d_theirs.json" 2>/dev/null
         python3 "$SP_UNION_DEC" "$SC/d_ours.json" "$SC/d_theirs.json" \
                 "$SC/decisions.backup.json" "$W/$f" || exit 21
+        git -C "$W" add "$f" ;;
+      0_Brain/projects_index/scoreboard.md)
+        # An append-at-top table BOTH Wednesday seats write. Union on whole rows,
+        # upstream order preserved, our unique rows inserted after the separator.
+        # Added 2026-09-07 after this script correctly REFUSED it (rc 22) rather
+        # than guessing: 557 and 556 rows unioned to 559, five unique rows across
+        # the two sides. Taking either side would have dropped the other's scores.
+        git -C "$W" show ":2:$f" > "$SC/sb_ours.md"   2>/dev/null
+        git -C "$W" show ":3:$f" > "$SC/sb_theirs.md" 2>/dev/null
+        python3 "$SP_UNION_SB" "$SC/sb_ours.md" "$SC/sb_theirs.md" "$W/$f" || exit 23
         git -C "$W" add "$f" ;;
       0_Brain/learnings/_boot_digest*.md)
         # derived from the lesson files; settle it, then regenerate from source below
