@@ -95,6 +95,14 @@ Duplicate**) → the KS-418 doc fix → KS-966 items 3+4 (**item 4 opens with th
   (`decision_queue.sh`, backup `.pre-0907-cardid`); three of the four Founders Hub cards would now be
   refused at creation.
 
+## ⚠ LEDGER SIZE — measured, not actioned
+**`_ledger.md` is 332 KB, LARGER than the 276 KB by-tier boot digest** — the exact condition of Kam's
+card `wed-ledger-boot-cost`, **still unruled**. It grew ~65 KB this afternoon (17 rows from the 12:3x
+seat). **CLAUDE.md 3c archives rows older than ~3 days; the 09-05 rows are 2 days old and were
+DELIBERATELY NOT moved** — the rule is a cadence, not a lever to hit a size target. **Do not re-card
+it** (Kam is heads-down and the card exists); the measurement is now line 5 of the consolidation KPI,
+where it will be acted on beside the board's 30% number.
+
 ## STANDING
 No `cd` (hook). Taps ≤200 chars, **every tap has a verified mail behind it**. `<<'EOF'` for every
 brief; **`-F -` with a quoted heredoc for commit messages** (an unescaped `"` in `-m` broke one today).

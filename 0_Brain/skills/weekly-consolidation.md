@@ -66,3 +66,20 @@ lines, with the measurement in the same breath as the characterisation:**
 **Report all four to Kam even when they look good**, and never as a verdict — the ruling on what
 they mean is his. **Baseline set 2026-09-07: 293 open · 88 instrument-subject (69 ours / 4 product /
 7 both / 8 unclassified) · 79 actionable · 5 findings across 14 tickets · 7 legacy.**
+
+5. **WEDNESDAY'S OWN VOLUME — the same question turned inward, and it is not optional.** The 09-07
+   board pass found 30% of a client board was about our own instruments. **Ask it of this brain too:**
+   ledger bytes added this week · rows added per seat · and how many of those rows a later seat
+   actually RETRIEVED. **Measured 2026-09-07: `_ledger.md` reached 332 KB — LARGER than the 276 KB
+   by-tier boot digest it sits beside — having grown ~65 KB in one afternoon, 17 rows from a single
+   seat.** A ledger row is *supposed* to be about Wednesday's own corrections; that is what the
+   ledger is. **The volume is still a signal, and it is the same signal Kam declined to rule on for
+   the board: working hard, or talking to itself.** The discriminator is the same one — **did a row
+   ever fire?** A row no boot has retrieved and no diagnosis has cited is decoration, however true.
+   **Report it beside the board number, not separately** — one instrument turned on both.
+
+**Standing note on the archive rule (CLAUDE.md 3c):** rows older than ~3 days move to
+`_ledger_archive.md`, verbatim, conservation asserted. **Do not stretch "~3 days" to reach a size
+target** — the rule is a cadence, not a lever, and 2026-09-07 declined to move the 09-05 rows for
+exactly that reason. **If the cadence cannot hold the size, that is the finding to take to Kam**
+(card `wed-ledger-boot-cost`, still unruled as of 2026-09-07), not a reason to bend the rule.
