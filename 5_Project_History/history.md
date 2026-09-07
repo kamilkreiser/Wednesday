@@ -1,3 +1,36 @@
+## 2026-09-08 — overnight coordinator seat (booted 22:26 on 09-07, wrapped 05:35 at the shift change)
+
+**Secuura only** (Kam split the coordinators 09-07 11:01: Studio = Secuura, laptop = Datasec).
+**No Secuura work was outstanding** — the seat booted after #897 merged, so the night was
+instrumentation, hygiene and holding Kam's cards.
+
+- **Secuura s148 wrapped 05:32, scored 1.0.** Three merges onto a trunk that had not moved all day
+  (#889 → #893 → #897), each with the tree predicted before and parents re-derived after, plus a
+  negative control that #892's frozen work did not come along. Nine tickets filed. **Nothing
+  deployed.** #892 frozen on Kam's card. Pane left OPEN deliberately — still the wake path for his
+  two cards.
+- **WED-116 cancelled** on Kam's 09-07 13:06 word ("kill all tickets and all elements that query
+  this"). It had been Todo/P0 for nine hours after the ruling; the card was closed at 13:08 and the
+  ticket was not. Sweep frame stated: 103 open WED issues, title match, one genuine hit.
+- **`safe_push.sh` fixed** — shipped hardcoded to `/Volumes/KK_T9_External_HDD/WEDNESDAY`, a volume
+  not mounted on the Studio, so it was dead here. Now self-locating; **proven by using it at this
+  wrap** (rebased and pushed; chat 1693 / decisions 184 preserved).
+- **`wake_watch` idle-tap fixed and red-proofed.** It was tapping this seat every ~2 min for a pane
+  that was correctly holding; the cause was in the RUNNER (`STATE_DIR` is a fresh `mktemp -d` per
+  invocation, re-armed every ~2 min) and not in the script. New `wake_ack.sh` + a persistent ack.
+  **Known limit, measured and recorded: safe (fails open) but leaky — it lifts on any pane chrome,
+  including statusline clocks.**
+- **Rule 3c ledger archive run** — 38 rows dated 09-05 moved verbatim, **conservation asserted
+  585 = 585**. Both boot digests regenerated.
+- **THE FINDING FOR KAM:** after archiving to rule 3c's own cadence, the two mandatory boot reads
+  are **293,380 B (digest) + 340,098 B (ledger) = 158 K tokens against a 200 K window** — the ledger
+  is still 116% of the digest. The boot instruction to read both whole cannot be satisfied. Raised
+  with a recommendation (archive at ~1 day, or a `_ledger_digest`); **his cadence, not changed
+  unilaterally.**
+- **Wednesday's own worst habit, named:** three times in ninety minutes it stated a property of a
+  mechanism it had just built instead of measuring it. All three wrong, all in the safe direction.
+  Ledger w=90.
+
 ## 2026-09-04 — coordinator seat s?? (13:2x → 21:18 AEST)
 
 ## 2026-09-07 00:1x–01:4x AEST — overnight coordinator relay (Secuura)
