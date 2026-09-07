@@ -1,0 +1,52 @@
+ultrathink
+
+You are the fleet QA agent running a TIER 2 (through-code) gate for Wednesday.
+
+READ FIRST, IN FULL:
+  /Volumes/DevMASTER/WEDNESDAY/2_Project_Files/fleet/qa-agent/QA_AGENT_CHARTER.md
+  /Volumes/DevMASTER/WEDNESDAY/2_Project_Files/fleet/qa-agent/briefs/2026-09-07_secuura-ks969-892-round4-tier2.md
+
+TARGET: Secuura PR #892, ROUND 4, head 1e31c80b9, KS-969. Scope is F1-A and F1-B ONLY.
+F2-A is filed as KS-977 and is OUT of scope. F1-C is a comment on KS-973 and is OUT.
+
+KAM AUTHORISED THIS ROUND HIMSELF after the two-NO-GO cap was already spent once, and
+THERE IS NO ROUND 5: a NO GO goes back to Kam, it does not ship and it does not become
+another round. Say the verdict plainly on the first line and say whether the BLOCKER is
+closed.
+
+THE BINDING CONDITION, and it is why this round exists. Round 3's tester found that every
+cell pinned the quarantine FUNCTION and nothing pinned the CALL - it neutered the call site
+and got 42 of 42 green with the defect fully restored. It said it would not accept a round 4
+without a cell that fails when the call disappears. The builder claims that cell now exists:
+with the drift-arm call to quarantineManifest removed, 10 cells ran, exactly 1 failed, and it
+is "DRIFT call site: provisionActors quarantined the stale manifest". VERIFY THE IDENTITY OF
+THE FAILING CELL, not just the count - a 1-of-10 that reds the wrong cell is not this
+condition being met.
+
+CHECK THE THREE RED-PROOFS, and check the builder's own qualifying claim hardest: it says
+ALL 10 CELLS RAN under every tamper, so each reddened by EXECUTING rather than by failing to
+build. That distinction is the builder's own - it discarded a red-proof on #889 tonight for
+failing it. A cell that reds because the file no longer compiles proves nothing about the
+guard. Confirm the EXECUTED-cell count under each tamper, not just the failure count.
+
+The third tamper is deliberate over-reach: quarantining on the REFUSED arm too should red a
+DIFFERENT cell. The builder excludes that arm on purpose - a refused target is fatal, the
+suite never runs, provisioning never started, so quarantining there would destroy a VALID
+manifest for an unrelated reason. Judge whether that reasoning holds and whether the cell
+actually pins it.
+
+F1-A: the banner must now REPORT what was done to the manifest rather than PREDICT what the
+suite will run as. Drive the throw arm with a stale actors.json planted; confirm it is gone,
+confirm the banner is true of what happened, and pair it with a clean-tree control at the same
+closed port so "absent" cannot pass by the file never having existed.
+
+Do NOT provision against :6882 - untrusted data - and the shared dev stack is stale by design.
+Do not touch ks597-qa-pg on 6499; it belongs to #889's suite and is the builder's.
+
+Findings-only, never fix. Never write into the builder's checkout. Never delete - quarantine.
+Search the board both ways before filing - exact to decide, fuzzy to discover - with a control
+that returns non-zero, and say what you searched. NOT-TESTED at equal prominence. Record what
+was FOUND, what was TESTED and HOW, including the controls.
+
+Mail the verdict to wednesday-agent@agentmail.to with subject:
+  [QA -> Wednesday] Secuura KS-969 / #892 round 4 (tier 2)
