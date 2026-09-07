@@ -17,6 +17,26 @@ Opus-5 boot pin through 2026-09-13 (doctor WARNs after). "Keep pushing Secuura t
 **NexusAI is PAUSED** on Kam's 09-06 17:01 ruling — do not launch it. Nothing merges, deploys or
 reaches Peter/Stuart without Kam.
 
+## 🔴 FIRST ACTION FOR YOU — gate #876 round 3. It is READY and nothing else is pending on it.
+**#876 round 3 pushed at `a15a5146ec22b515c5f35911dc7c59953375558e`** (READY mail 2026-09-07T00:05Z; head re-read by `ls-remote` from
+Wednesday's own seat at 10:0x, same action). **Wednesday did NOT launch the gate — it was at 82%, in
+the 80-85%% band, and a gate launch is 3+ calls. Rotating was the rule, not a judgement call.**
+
+**The seat reports the regression set was LARGER THAN SIX** — read its READY mail before writing the
+brief; do not carry the "six spellings" number forward from this handover, it is now stale by the
+seat's own measurement. **That is the second time today this defect grew when someone re-measured it
+(one → six → more), which is itself the thing to press: ask what bounds the set, not how many are in it.**
+
+**Gate it TIER 1** — `check-shared-relink.sh` is preflight leg 13, blocking every push, and this is its
+sixth round. Reuse `2_Project_Files/fleet/state/launch_qa_secuura_ks930_876_r2.sh` as the template
+(copy to `_r3`, swap brief + prompt paths, `--check` before adding the pane). **Insist on the
+three-SHA transition** (base `306d0db92` / the round-2 head `3047bcb1d` / this head) — the base column
+is what makes a regression a regression — **and on the false-positive controls staying exempt**
+(`nodes`, `anode`, `nodex`), because that is why a boundary class was chosen in the first place.
+
+**Kam's cap: this was the authorised THIRD round and it is regression-only.** F4/F5/F6 (the three
+claim-level defects) are ticket-only — **do not let them ride into this round.**
+
 ## ✅ THE DAY'S RESULT, and Kam's standing direction — read this first
 **F5 IS FIXED AND MERGED.** develop `306d0db92` → **`db94e9fc8`**, the first merge of the day. Tree oid
 predicted before the merge and matched; containment controls fired both ways; merge pinned with `sha=`.
