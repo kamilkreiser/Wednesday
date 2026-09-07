@@ -38,6 +38,20 @@ arrived only because the laptop seat pushed a file and this seat read the commit
 panel, or the tool reads both and says which it read. **Not yet ruled.**
 
 ## ✅ ROTATION BAND IS 80–90% (Kam 10:49). 70% is a CHECKPOINT ONLY.
+**⚠ TWO mechanisms carried the old number and only one of them is RUNNING the fix.**
+- `Launch_Wednesday.command` — **FIXED** (it had said 70% through TWO band rulings). Backup
+  `.pre-0907-band8090`; verified by extracting `INITIAL_PROMPT` and asserting its length + tail.
+- `fleet/cockpit/wake_watch.sh` — **FIXED ON DISK, NOT RUNNING.** A new **90% CEILING** leg was added
+  (there was none: the old top leg was 80, fired once, so a seat running to 95% got no further wake),
+  80/70 re-worded to the 80–90 band, and the 65 leg demoted from *"mechanical tails only, then
+  handover"* — which at 65 with a 90 ceiling would idle a seat for 25 points — to *"keep the handover
+  current, do NOT wind down."* Exercised on nine values (95/90→CEILING, 85/80→BAND, 75/70→CHECKPOINT,
+  66→light, 55→checkpoint, 40→none). Backup `.pre-0907-band8090`.
+  **The RUNNING watcher (pid 2403) has the script inlined in memory as a `bash -c` loop, so it is
+  still on the OLD thresholds.** It takes effect at the next watcher restart. **Wednesday did not
+  restart a live watcher mid-session for a wording fix** (its mail baseline is the risk). **So expect
+  old-band wakes until then, and do not trust a 65% wake's wording.**
+
 The launcher said **70%** until this seat fixed it — it was **two rulings stale** and is why seats
 kept rotating early. Fixed in `Launch_Wednesday.command`, verified by extracting `INITIAL_PROMPT` and
 asserting its length (11,150) and tail. Backup `.pre-0907-band8090`.
