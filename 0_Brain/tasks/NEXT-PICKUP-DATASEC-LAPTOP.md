@@ -236,3 +236,30 @@ file being edited · `doctor.sh | head -40` hiding a passing check at line 41.
 near-miss was in the CHECKING rather than the doing.** Both digests regenerated (119 files); doctor
 confirms current.
 
+## 08:5x — 50% CHECKPOINT (rhythm §2, NOT a rotation — the band is 80–90%)
+**Default declared: hold.** Nothing is in flight, nothing is owed, no heavy work started past this
+point. S47 holds on `%22` (acked, quiet); Kam has three cards; the deploy settings are his.
+
+### NEW CARD `fleet-cross-seat-mail-wakes-keep-or-filter` (WED, rec `leave`, default = nothing changes)
+**The predecessor promised this card to the morning board yesterday and it was never filed.** Filed now.
+**Measured by s150 in one action: of 12 inbound since boot, SEVEN were Secuura** — the Studio's, which
+this seat must not act on. The Studio measured the mirror image (six Datasec wakes in twenty minutes,
+three inside 33 seconds). **Each coordinator spends about one wake in two on the other's traffic.**
+**The predecessor's note says explicitly: "this is the judgement a successor should RE-MAKE rather
+than inherit."** s150 re-made it and **it holds, with evidence the predecessor did not have:** at 07:53
+a Secuura deploy was in flight and the Studio had been silent in git for 41 minutes; **what proved it
+alive at 08:11 was Secuura mail in the shared inbox.** A filter would have blinded this seat at the
+exact moment it was asking whether the other coordinator had died. **Keep reading by SUBJECT, treat
+the other client's traffic as a one-line noop, do NOT build a filter on a seat's own judgement.**
+
+### 🟡 UNVERIFIED, and it is Kam's money so it is worth someone checking
+Kam's 11:01 split ruling (2026-09-07, verbatim) gives two reasons — *"this machine is running a little
+bit slow"* and *"I have an additional Claude Max account for Datasec that I will use to split the
+credits across the two projects."* **The predecessor's handover recorded "ONE USAGE LIMIT" across both
+Wednesdays.** If that is right, **the credit split he set the second account up for is not in effect.**
+🔴 **s150 has NOT established this and cannot from here:** this seat and S47 both read `7d:37%`, which
+is expected for two panes on ONE machine and says nothing about the Studio's account. **The predecessor's
+"one usage limit" line is a REPRESENTATION, not a measurement s150 reproduced.** Do not report it to Kam
+as fact. **The check is a single statusline read on the STUDIO machine** — a percentage differing from
+the laptop's proves two accounts; an identical one is suggestive and not conclusive.
+
