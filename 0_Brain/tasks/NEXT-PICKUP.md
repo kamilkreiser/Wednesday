@@ -103,6 +103,17 @@ DELIBERATELY NOT moved** — the rule is a cadence, not a lever to hit a size ta
 it** (Kam is heads-down and the card exists); the measurement is now line 5 of the consolidation KPI,
 where it will be acted on beside the board's 30% number.
 
+## ⏱ THE ETA IS THE DISCRIMINATOR — tap at 16:15 if there is no receipt
+**The waker fires on COMPLETION, not progress** (DONE · STOPPED_LOW_DISK · process-death). **A HUNG
+build — stuck, not dead, not finished — matches none of the three and would leave everyone asleep.**
+That gap is real and is accepted deliberately rather than fixed: polling on suspicion costs a seat's
+turn every time and the seat is at 53%.
+
+**So the ETA is the instrument. Build ETA ~16:05 AEST (11/31 at 04:41Z, ~4.4 min/service).**
+**IF 16:15 PASSES WITH NO RECEIPT: tap `%152` for a one-call build count.** A count that has not moved
+since 04:41Z means hung, and that is a stop-and-diagnose, not a wait. **The repeated frozen-pane
+alerts are the clock** — use them, do not just dismiss them.
+
 ## ⚠ THE FROZEN-BUSY WATCHER WILL CRY WOLF UNTIL ~16:05
 `%152` is **dormant BY DESIGN** — Wednesday told it to wait cheaply and it built a correct three-class
 waker (DONE · STOPPED_LOW_DISK · process-death). **`wake_watch.sh:146-150` has no per-episode
