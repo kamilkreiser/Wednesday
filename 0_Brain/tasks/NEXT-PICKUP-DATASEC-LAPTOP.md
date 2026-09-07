@@ -2,467 +2,140 @@
 date: 2026-09-07
 type: pickup
 scope: DATASEC ONLY — laptop seat. Secuura belongs to the Studio seat; do not touch it.
-source: replaced WHOLESALE at ~21:15 by the 19:51 seat
+source: replaced WHOLESALE at ~23:55 by the 19:51 seat
 status: live
 supersede: replace this file wholesale at the next pickup; do not append
 ---
 
-# NEXT PICKUP — Datasec laptop seat, ~21:15 AEST Monday 2026-09-07. TWO SEATS LIVE. KAM IS ASLEEP.
+# NEXT PICKUP — Datasec laptop seat, ~23:55 Monday 2026-09-07. KAM IS ASLEEP. NOTHING NEEDS HIM TONIGHT.
 
-**Run `/Volumes/KK_T9_External_HDD/WEDNESDAY/2_Project_Files/tools/kam_rulings_today.sh` before
-writing anything — read EVERY line.** Mail UTC ≈ AEST−10. **ROTATION BAND 80–90%; 70% is a
-CHECKPOINT ONLY.**
+**Run `/Volumes/KK_T9_External_HDD/WEDNESDAY/2_Project_Files/tools/kam_rulings_today.sh` before writing
+anything — read EVERY line.** Mail UTC ≈ AEST−10. **ROTATION BAND 80–90%; 70% is a checkpoint only.**
+**QUIET HOURS 23:00–06:00: no voice.** Chat mirror only, and only if something genuinely needs saying.
 
-## 🔴 KAM'S LAST INSTRUCTION, 2026-09-07 ~21:00, verbatim
-> *"keep working on security review and I will review in the morning when I wake"*
+## 🔴 FIRST ACTION — read the fleet, then answer whatever landed
+    %17  Datasec/NexusAI  — S46, briefed and building. Plan CONFIRMED. Working G-2 → G-1 → G-3 → G-5 → G-4.
+    %15  QA/NexusAI-RD322-323 — tier-2, TWO subjects, launched 23:0x. HAS NOT REPORTED YET.
+**Both report to Wednesday, not to each other.** S45 handed over at 23:03 and its pane is closed
+(`HANDOVER-S45.md` at the NexusAI **project root**, outside the repo — its **§0** is the best thing in
+it and sits above the branch table deliberately).
 
-He is asleep. **Nothing tonight is worth waking him.** Both live seats were launched under this
-instruction plus his 21:00 ruling. Everything else holds.
+## 🔴 KAM'S DESK — FOUR open cards, all default-safe. The two clicks are the only thing that matters.
+His last input was **21:00** (`deadlock`, actioned and delivered). **Nothing since.**
 
-## FLEET — 2 live, both verified at rung 5 (pane CONTENT, never a non-zero ctx)
-- **`%10` — `Datasec/SecurityReview`.** Five Step-2 delta reviews.
-  Mechanism, BY PATH: `/Volumes/KK_T9_External_HDD/WEDNESDAY/2_Project_Files/fleet/launch_secreview_delta_batch2.sh`
-  (`--check` runs every guard without launching). Brief and prompt beside each other in
-  `2_Project_Files/fleet/briefs_staged/2026-09-07_secreview-delta-batch2{.md,.prompt.txt}`.
-  **Its report lands at a FILE, not in mail** — this project has no inbox and `send_brief.sh`
-  refuses it by design:
-  `/Volumes/KK_T9_External_HDD/!CODING/Datasec/Security Review/_Working/delta-review-2026-09/_BATCH2_REPORT.md`
-- **`%11` — `Datasec/NexusAI`.** RD-361 **ROUND 4**, on Kam's 21:00 `deadlock` ruling.
-  Launched via the project's own `Launch_Claude.command`; brief delivered by MAIL and read back
-  non-null in BOTH `datasec-nexusai@` and `coagent@` before the launch.
-  Brief: `2_Project_Files/fleet/briefs_staged/2026-09-07_nexusai-rd361-round4.md`
-
-## 🔴 KAM'S TWO RULINGS TONIGHT — one is DONE, one is WAITING ON HIM
-| Card | Ruling | State |
-|---|---|---|
-| `rd104-gh-identity-acceptance-false-premise` | **`youcheck`** @ 19:58 | **WAITING ON KAM.** Step-by-step delivered to his panel with both links on their own lines. **His two answers unblock three gate-passed merges. Nothing else does.** |
-| `nexusai-rd361-round3-blocker-survives` | **`deadlock`** @ 21:00 | Executed — round 4 briefed and launched. **Delivery still OWED:** the seat writes the ruling onto RD-361 as a comment in its first turn and reports the comment id; then `decision_queue.sh --delivered nexusai-rd361-round3-blocker-survives "<comment id>"`. |
-
-**The two answers Kam owes, so you can act the moment he gives them:**
+**THE TWO CLICKS, and they gate more than they look like they do:**
 1. `https://github.com/datasecau/Reporting_Dashboard_Au/settings/environments` — is there a
    **required reviewer** on the `demo` environment?
 2. `https://github.com/datasecau/Reporting_Dashboard_Au/settings/variables/actions` — does
    **`CI_DEPLOY_ENABLED`** exist, and what is its value?
-**If the switch is ON and `demo` has NO required reviewer, HOLD the merges** — a merge to `main`
-then deploys to the demo with no human gate. Any other combination and the merges go on his
-existing week-scoped authority. Repo confirmed from the git remote, not composed.
+**If the switch is ON and `demo` has NO required reviewer → HOLD the merges** (a merge to `main` then
+deploys to the demo with nobody in the loop). Any other combination → the merges go on his existing
+week-scoped authority. Repo confirmed from the git remote, not composed.
+**The chain, measured link by link:** NexusAI releases through `main` → `main` frozen since 09-01 and
+**251** behind → he ruled `mergeup` at 18:58 → blocked → **46 tickets in Release Ready** (counted via
+`board_count.sh`, which certified it a real total, not a cap). Those are the *"tested but not
+deployed"* items he pointed at on 13:40.
 
-**🔴 THOSE TWO CLICKS ARE WORTH MORE THAN THREE MERGES, and the chain is measured link by link:**
-NexusAI releases through `main` (RD-367) · `main` is frozen since 09-01 and **250** commits behind
-(the gate's measurement, not the stale 248) · Kam ruled **`mergeup`** on it at 18:58 · the mergeup
-is what is blocked · behind it sits a **Release Ready column of 46**, counted through
-`2_Project_Files/fleet/board_count.sh` which certified *"limit was 250, so this is a real count and
-not a cap"*. Those 46 are the *"tested but not deployed"* items Kam pointed at on 09-07 13:40.
-**Do not quote a NexusAI board number from a hand-written query — `board_count.sh jira` takes the
-site with NO scheme (`${JIRA_SITE#https://}`), and it correctly REFUSED to total
-`statusCategory != Done` because more pages exist.**
+**Cards (2 Wednesday's, 2 the Studio's):** `vault-add-a-stages-another-clients-files` ·
+`hpsm-credential-bearing-prd-outside-every-snapshot` · plus two Secuura ones that are **not yours**.
 
-**RD-321 — CLOSED, no action.** S45 flagged it as Highest-priority and unmentioned in any artefact,
-which is the shape that goes missing. Wednesday read it: **Release Ready, assigned to Kam, updated
-2026-09-06** — finished and sitting in the column above, nothing missing. Good raise, boring answer.
-(`JIRA_SITE` in the NexusAI `.env` carries **no scheme**; a bare `curl` to it returns HTTP 301 and an
-empty body, which reads exactly like an auth failure. Prefix `https://`.)
-
-## 🔴 RD-361 ROUND 3 WAS A NO GO — and round 4 must not repeat its shape
-Round 3's fix relaxes the gate only while `firstRunComplete` is absent. **That flag is also written
-by three FRONTEND sites during ordinary setup** (`static/js/first-run-setup.js:2796` connection test,
-`:3069` validation, `:3494` the "don't show again" checkbox), all before auth is enforced, and the
-wizard's tab order puts Log Analytics **before** User Access. **So the bricking path is the intended
-journey.** Round 3 also opened **F-2 (Major)**: a deployment that HAD auth enforced serves **open
-mode across all 175 routes** if `settings.json` is emptied with backups gone.
-**Genuinely closed, and recorded as closed:** F-B / M10, proved by contrast (mutation reds exactly
-cell D; restore 23/23). Single-write-site premise verified across **all 678 tracked files**.
-**Report:** `/Volumes/KK_T9_External_HDD/!CODING/Testing Agent MAIN/projects/nexusai/reports/2026-09-07-rd361-round3-tier1/report.md`
-
-## 🔴 FIRST ACTION FOR THE NEXT SEAT — S46 is briefed and building; ONE gate still live
-**Live panes:** `%17 Datasec/NexusAI` (**S46**, briefed on G-1…G-5) · `%15 QA/NexusAI-RD322-323`
-(47 min in, not yet reported). **The moved-heads gate reported and its pane is closed.**
-
-**✅ BOTH MOVED HEADS: GO WITH FINDINGS.** `690bed9` is the cleaner of the two and would ship without
-reservation; `731aa6e` ships **only with G-1 and G-2 ticketed** and the gate's sentence on the record:
+## FOUR BRANCHES — none merged, and TWO have GOs on commits that are no longer their heads
+    rd-361-round4-s45   GO@f93730c   HEAD 731aa6e   GO-with-findings @731aa6e too (moved-heads gate)
+    rd-148-round2-s45   GO@ea4d229   HEAD 690bed9   GO-with-findings @690bed9 — the cleaner of the two
+    rd-322-root-guard-vacuity-s45            @ 432617a   -> %15 gating now
+    rd-323-scheduler-failure-vocabulary-s45  @ 99fb518   -> %15 gating now
+**`690bed9` would ship without reservation. `731aa6e` ships only with G-1 and G-2 ticketed** and this
+sentence on the record (the gate's, Wednesday endorsed):
 > *No future round may cite the WIRING cells as a completeness claim over `server.js` until
 > `stripComments()` is gone.*
 
-**S46's brief:** `2_Project_Files/fleet/briefs_staged/2026-09-07_nexusai-s46-g-findings.md`
-**Gate report:** `/Volumes/KK_T9_External_HDD/!CODING/Testing Agent MAIN/projects/nexusai/reports/2026-09-07-moved-heads-tier2/report.md`
+## S46'S QUEUE — G-1…G-5, one logical path: the F-2 guard's COVERAGE and its RECORD
+Brief: `2_Project_Files/fleet/briefs_staged/2026-09-07_nexusai-s46-g-findings.md`
+Gate report (**805 lines — read it, not a summary**):
+`/Volumes/KK_T9_External_HDD/!CODING/Testing Agent MAIN/projects/nexusai/reports/2026-09-07-moved-heads-tier2/report.md`
 
-**G-1 (Major)** the AST census **misses what the regex caught** — a `writeFileSync` with a template
-literal, with a string literal, and a spread carrying the key, all additive, all in frame, all
-bypassing the stamp. **T-A8b passes the whole file 33/33; its matched pair T-MB2 (object literal) is
-RED. The only variable is SERIALISATION.**
-**G-2 (Major) — and the defect is in the RECORD, not the code.** The retained `stripComments()` is
-still load-bearing and its stated reason is **false twice**: a URL *can* hide what those cells count,
-**and the live damage needs no URL at all** — two prose comments contain `/*` (`server.js:638`,
-`:1097`), each opening a bogus block. **31,845 non-comment characters deleted across 116 ranges;
-lines 638–713 and 1097–2062 gone, ~1,040 lines.** Byte-identical payload, three placements: outside
-the hole **RED**, inside **GREEN**, URL-on-line **GREEN**. **`THE BUG` is a `not.toMatch`, so deleting
-text makes it PASS — it fails OPEN.**
-**🔴 DO NOT OVERSTATE IT, and the gate did not:** no current deciding site is in a deleted span (all
-nine at line 2349+), the WIRING patterns count identically raw and stripped today, the cells are
-byte-unchanged. **No live defect. NOT a regression.** What is wrong is that the commit records the
-question as considered and settled on a reason that does not hold.
-**G-3** `acorn-walk` is declared **nowhere** in `package.json` — the guard rests on a transitive dev
-dep of `acorn-globals`. **G-4** the `__tests__` cell CAN fail (D-1 red) but its title claims a
-property of the image while its assertion checks a spelling (D-2 `COPY . .` and D-3 `ADD` both green);
-**its green is luck — the cell never reads `.dockerignore`.** **G-5** the "256 computed assignments"
-reproduces **exactly**, over a frame **121 files wider** than the guard the sentence qualifies
-(239 guard-frame / 256 all-tracked / 145 backend) — sound limit, wrong frame, **in a docblock whose
-whole purpose is that round 3 died of that.**
+- **G-2 (Major), FIRST — the defect is in the RECORD, not the code.** `stripComments()` was kept for
+  the WIRING cells on the reasoning a URL can't hide what they count. **False twice: a URL can, and
+  the live damage needs no URL at all** — two prose comments contain `/*` (`server.js:638`, `:1097`),
+  each opening a bogus block. **31,845 non-comment chars deleted across 116 ranges; lines 638–713 and
+  1097–2062 gone (~1,040 lines).** Byte-identical payload, three placements: outside **RED**, inside
+  **GREEN**, URL-on-line **GREEN**. `THE BUG` is a `not.toMatch`, so deleting text makes it **PASS —
+  it fails OPEN.** **🔴 DO NOT OVERSTATE:** no deciding site is in a deleted span (all nine at 2349+),
+  WIRING patterns count identically today, cells byte-unchanged — **no live defect, not a regression.**
+- **G-1 (Major)** the AST census **misses what the regex caught**: `writeFileSync` with a template
+  literal, with a string literal, and a spread carrying the key. **T-A8b passes the whole file 33/33;
+  its pair T-MB2 (object literal) is RED — the only variable is SERIALISATION.**
+- **G-3** `acorn-walk` declared **nowhere** in `package.json` — the guard rests on a transitive dev dep
+  of `acorn-globals`. **G-5** "256 computed assignments" reproduces exactly but over a frame **121
+  files wider** than the guard it qualifies (239 / 256 / 145) — sound limit, wrong frame, in a docblock
+  whose whole purpose is that round 3 died of that. **G-4** the `__tests__` cell CAN fail but its title
+  claims a property of the image while its assertion checks a spelling; **its green is luck — it never
+  reads `.dockerignore`.**
 
-## (superseded) FIRST ACTION — two gates live and NexusAI had no builder
-**Live panes:** `%16 QA/NexusAI-MovedHeads` · `%15 QA/NexusAI-RD322-323`. **Both report to Wednesday.**
-**S45 handed over at 23:03 and its pane is CLOSED** (`HANDOVER-S45.md` at the NexusAI project root,
-outside the repo). **Relaunch a NexusAI builder only when a verdict needs action** — a fresh seat on a
-verdict beats a 56% seat idling, and there is no category-1 work it was mid-way through.
+**S46 reordered the queue by DEPENDENCY rather than severity (G-2 first) and it was right** — doing
+G-2 first stops G-1's work landing on a stripper that deletes 1,040 lines. Wednesday took the
+correction.
 
-**FOUR BRANCHES, none merged, and Kam's two GitHub answers gate all three merges:**
-
-    rd-361-round4-s45   GO@f93730c   HEAD 731aa6e   AST census rewrite   -> %16 gating now
-    rd-148-round2-s45   GO@ea4d229   HEAD 690bed9   N-4 cell fix         -> %16 gating now
-    rd-322-root-guard-vacuity-s45      @ 432617a                          -> %15 gating now
-    rd-323-scheduler-failure-vocabulary-s45 @ 99fb518                     -> %15 gating now
-
-**Gate mechanisms BY PATH:** `2_Project_Files/fleet/launch_qa_nexusai_moved_heads.sh` ·
-`2_Project_Files/fleet/launch_qa_nexusai_rd322_rd323.sh` (each `--check` runs every guard without
-launching; both verify **BOTH** their heads on origin — the first draft of the two-subject wrapper
-checked only one, a guard covering half its subject).
-
-## ⚠️ GHOST TEXT SIX TIMES TONIGHT — and `good night` TWICE AT THE SAME PANE
-NexusAI's pane carried **`good night`** at boot (seat s44, wrapped) **and again at 23:2x** (seat s45,
-wrapped). Also: Security Review — *"check the Bearer scheme defect in SharePoint, MailFlow and
-UniversalPrint"* (three components already reviewed, outside the brief); the round-4 gate — *"Send Kam
-a one-paragraph summary of the verdict"* (an action aimed at the principal); the F-2 gate — *"file a
-fix-backlog entry for F-B in the NexusAI repo"*; the RD-148 gate — *"file the N-1 ticket details for
-Wednesday"*.
-**All six at WRAPPED panes. Detector FIRST, every time, then CLOSE the pane rather than clear the
-line.** A cleared prompt can be re-populated; a closed pane cannot. All six closed cleanly.
-
-## ✅ F-B/F-A/F-D/F-E ALL DONE @ `731aa6e` — and S45 applied the moved-head rule to ITSELF
-The census now **parses**: acorn + acorn-walk over an AST, write positions found structurally
-(`setSetting` call · `AssignmentExpression` onto a member named `authEnforced`, **every operator**, so
-`??=`/`||=` are covered where `=(?!=)` was not · a `Property` keyed `authEnforced` inside a
-`writeFile` argument). **Red-proofed with the matched pair, and it re-ran the OLD regex against M-G2
-to get `bulkWrites = 0` — F-B demonstrated rather than described.**
-**Frame widened** from `backend/**` to everything tracked except `__tests__` (**148** shipping files),
-closing three bypasses the F-2 gate found outside the old frame. **The `__tests__` exclusion is
-ASSERTED, not assumed** — a cell reads the Dockerfile and requires no `COPY` line mentions it.
-**KNOWN LIMIT, measured not guessed:** the guard covers **syntactic** write positions; a dynamic
-`settings[k] = v` needs dataflow, and there are **256 computed assignments in the tree**, so asserting
-zero is not available. **`stripComments()` is still in the file for the WIRING cells** on the reasoning
-that a URL cannot hide what those count — **the moved-heads gate is ruling on that.**
-**Unprompted, in the same mail, S45 applied the GO-names-a-head rule to its own push** — `731aa6e`
-moved the F-2 GO's head exactly as `690bed9` moved RD-148's — and tabled both rather than leaving them
-to be found. **Process note taken too:** it built in a worktree (`/tmp/wt-f2`), checkout never moved.
-
-## 🔴 A GO NAMES A HEAD — the RD-148 GO is on `ea4d229` and the head is now `690bed9`
-The tier-1 GO, Wednesday's relay and the scoreboard row all name **`ea4d229`**. **N-4's fix is
-`690bed9`, which has never been gated.** Wednesday commissioned the N-4 fix in the same breath as
-recording the GO and did not think about what that did to the SHA; **neither Wednesday nor the seat
-said so.** Nothing is at risk — the merge is blocked on Kam regardless — but **`ea4d229` is what
-carries a verdict and `690bed9` is what would merge.**
-**QUEUED: a tier-2 pass on `690bed9`** (one test cell; it can ride with another pass).
-**The rule, and it is Wednesday's to carry into the standing lines:** *a GO names a head; the moment
-the head moves, the GO stops describing what would ship.*
-
-## ✅ S45 CHECKPOINT — filing complete, handover refreshed, and a count SELF-CORRECTED
-**RD-372** (N-1 filed as the **CLASS**, High) · **RD-373** (N-3 + N-5 aggregated, Low) · **RD-371
-comment 37274** (N-2's evidence onto the existing ticket — its own search found RD-371's F-5 already
-covered it) · **`690bed9`** N-4 fixed, PASS 2176/2176. Tree clean. Four branches at gates, none merged.
-**Board 287, not the 289 it had written** — it re-measured through the guarded reader and corrected
-itself unprompted, with the diagnosis that matters: *"I did this one in my head while writing prose,
-which is exactly where I should not have."* Every other count it sent came from the guarded reader.
-**Wednesday made the same class of error twice tonight** (a widened census frame that was still wrong;
-a capped Jira page sliced so it "found" three comments older than the one it wanted). **The fix is
-identical in all three: the number is read in the same action as the sentence carrying it.**
-
-## ✅ F-2 CENSUS CELL — **GO WITH FINDINGS @ `f93730c`** (tier-2 re-gate, 22:51). **F-B MUST BE FIXED.**
-The cell **can** fail against the real `server.js` — M-A and M-B reproduced on disk. F-2 is answered.
-
-**🔴 F-B (Major), and it is NOT acceptable as a stated limit:** the cell's `stripComments()` runs
-`line.replace(/\/\/.*$/,'')` — **and `https://` contains `//`.** It corrupts parsing in **18 of the 80
-files, `server.js` and `jsonStorage.js` among them.** The census reads damaged text, so **a writer
-sharing its line with a URL is deleted before it is counted** (M-G2 — byte-identical hazard to the
-M-B2 the cell catches, **green, in frame**). **acorn is already a dependency.** The gate's closing
-line is why it matters: *"fix F-B before the next round rests on this census the way round 4 rested on
-the comment."*
-
-**F-A (Major)** — docblock claims *"all 678 tracked files, every extension"*; the cell guards **80
-`backend/**.js` = 11.8%.** **But the claim is TRUE today** (re-measured across all 678: exactly two
-write sites) — **sound claim, undersized guard.** The docblock must stop claiming 678, and the frame
-must at minimum cover **what ships** (M-E2 one directory up and M-H `.mjs` are shipped paths).
-**F-C** textual counters miss a computed key, a key-in-variable bulk write, and `??=`.
-**F-D (Minor)** the control's title claims *"EACH WAY a writer could bypass"* — a completeness claim
-over three shapes when eight more exist; **rename it an instrument-liveness proof, which is what it
-is.** **F-E (Polish)** M-B never reaches `bulkWrites`.
-
-**The control question answered properly:** NOT the RD-329 pathology — under M-B2 the census went red
-while the control **passed**. **But they are always BLIND together: 0 of 6 blind spots, by
-construction**, because the control drives the same `censusOf()` over the same regexes.
-
-**Correction to the builder's red-proof, in both directions:** M-B reddens on `setSettingWrites` 2→1,
-so jest stops and **`bulkWrites` — the counter M-B exists to exercise — is never evaluated.** The
-red-proof would read identically if that counter were dead. The gate isolated M-B2 (additive) and
-proved it live.
-
-**COMMISSIONED to S45 as its LAST item before handover, F-B FIRST if context is short:** acorn instead
-of regex stripping, **red-proofed with the matched pair (M-B2 stays RED, M-G2 turns RED)** · docblock
-and guard made to agree · control cell renamed · an additive bulk-write cell so `bulkWrites` is
-exercised.
-
-**Process note filed as a habit, not a finding:** S45's checkout **moved during the live gate**
-(`f93730c` → `ea4d229`). No harm — the gate resolved every SHA by object and never wrote to the tree —
-but **when a gate is live on your work, use a separate worktree for the next branch.**
-
-## ✅ RD-148 ROUND 2 — **GO WITH FINDINGS @ `ea4d229`, all three closed** (gate 22:41)
-F-1 (Blocker), F-2, F-3 genuinely closed, each verified on a real DOM with a negative control that
-flips. **None of the residue is a regression** — every finding proved byte-identical between
-`aea410c` and `ea4d229`, per-function. **The cap is spent and did not need a third round.**
-Report: `/Volumes/KK_T9_External_HDD/!CODING/Testing Agent MAIN/projects/nexusai/reports/2026-09-07-rd148-round2-tier1/report.md`
-**MERGE HELD — Kam's two GitHub answers gate it, not the verdict.**
-
-**The gate out-built the builder's own argument.** It re-ran A/B/C and added **B2**: round-1 product
-code byte-identical, round-1 cells, **only the fixture line changed** — three revoke cells red, seven
-render/date cells GREEN. **B1 moves 140 lines so "the fixture did it" stays an inference; B2 moves one
-statement and the untouched cells are the control.** Technique worth reusing: when you argue *only X
-changed*, build the arm that changes only X.
-
-**N-1 (Major) — the CLASS is still live**: the same defect shape survives in `load()` in the same
-file; a failed provisioning load is silent, misrepresents tenant state, and a later unguarded Save
-switches SCIM provisioning **off**. Instance fixed, class not. **N-4 — the round's own new STRUCTURE
-cell does not guard the risk it appears to guard**: a check that cannot fail, inside the suite built
-to stop exactly that. N-2/N-3/N-5 minor. **Commissioned:** N-1 its own ticket (class, not instance);
-N-2/3/4/5 aggregated as one per Kam's rule; N-4's cell fixed so it can fail.
-
-**🔴 THE GATE'S VERDICT MAIL ARRIVED WITH A ZERO-BYTE BODY.** Subject carried "GO with findings"; the
-findings did not travel. **Measured, not assumed:** the `preview` discriminator with a **same-read
-control** — null on that message, 200 chars on all four neighbours in one listing.
-**Nothing was lost ONLY because the brief specified a report path on disk.**
-**The gap is in the path, and it is Wednesday's to close:** `send_brief.sh` refuses a body under 40
-non-space characters, **but the QA agent does not send through it**, so a tier-1 verdict can evaporate
-into a subject line. Until that is fixed: **every gate brief keeps the report-path requirement, and a
-verdict is read from the report, never from the mail alone.** *(The mail was also tagged
-`[Datasec/NexusAI ->]` rather than `[QA ->]`; routing is by subject.)*
-
-**✅ AND THE FIX FROM THE ROUND-4 GATE WORKED, MEASURABLY.** The round-4 brief lacked *"stop any server
-you start and prove the port reads 000"*; its gate left a listener that died with its pane. **That line
-was added to the RD-148 brief, and at its close both ports already read 000 and listeners held 13 → 13.**
-One brief to the next, same night. **Put the line in every QA brief.**
-
-## ✅ ROUND-4 FOLLOW-UP DONE @ `f93730c` — and F-2's cell is at a TIER-2 RE-GATE
-All four commissioned items complete, **PASS 2185/2185**. Boundary corrected in **all three**
-artefacts (docblock · a superseding commit note, history NOT rewritten · **RD-361 comment 37271 as a
-NEW comment superseding 37266**). PREV2 and PREVGEN added to RD-368 (comment 37272) **kept distinct**
-— PREV2 charged to round 4, PREVGEN pre-existing and unattributed. F-2's census cell built to the
-gate's design and red-proofed **on disk against the real `server.js`** (M-A a third writer → RED;
-M-B `server.js:3349` → bulk `writeFile` → RED).
-**Re-gate mechanism, BY PATH:** `2_Project_Files/fleet/launch_qa_nexusai_rd361_f2.sh`
-(tier 2 = through-code only; wrong-SHA path red-proofed at rc 9 before launch).
-**The one question it must answer:** the cell's frame is `backend/**.js`, which is **narrower than
-"everywhere the key can be written"** — and round 3 died because a `backend/` sweep could not see
-`static/`. **A narrower-than-the-guarantee frame is a finding even though the cell passes.**
-It must also rule on the builder's own disclosure that its **control reddens under both mutations** —
-sound, or one instrument wearing two names?
-
-**S45 also closed RD-322** (root-guard vacuity; chose RED over `test.skip(asRoot)` and **measured the
-thing the choice depends on** — `build.yml` is `runs-on: ubuntu-latest` with no `container:`, so CI is
-not root; call accepted) and **parked RD-323 cleanly in a labelled stash**, now resumed.
-**RD-130 flagged as possibly stale and correctly NOT touched** — at the campaign tip `DEFAULT_URLS` is
-the Container Apps demo URL, not the dead VM, but its frame is the SOURCE at that SHA, not a deployed
-revision. Category 2; Wednesday carries it; the tenant question gates that pass anyway.
-
-## 🔴 THE STUDIO SEAT FIXED A REAL BUG IN WEDNESDAY'S OWN TOOL — `safe_push.sh`
-Wednesday shipped `safe_push.sh` with **`W=/Volumes/KK_T9_External_HDD/WEDNESDAY` hardcoded**. That
-volume is **not mounted on the Studio**, so every run of it there would have exited. She made `W`
-self-locating from `BASH_SOURCE` (commit `812008ec`) and kept the dead line one away with the reason,
-per the revert rule. **Verified from this seat: it resolves to the same path, so the fix is correct on
-both machines.** This is Wednesday violating the portability rule it holds the whole fleet to
-([[2026-08-25_travel-drive-stale-pointers]]) inside a tool built to travel — **the second time tonight
-a Wednesday seat caught the other's error.** Any new tool gets a self-located root, never a volume.
-
-## ✅ RD-361 ROUND 4 — **GO WITH FINDINGS, THE BLOCKER IS CLOSED** (gate reported 22:21)
-`rd-361-round4-s45` @ `400718f`. 2 Major, 2 Minor, 1 Polish — **neither Major blocks.** The Blocker
-closes on BOTH forms of the wizard's ordinary path, the `/api/auth/enforce` deadlock closes with it,
-**no regression** on F/C2b/E/L1/RST, and **round 4 also closed a hole round 3 had** (state C3: key
-stripped, stamp left — r3 SERVED, r4 DENIES). **L4 CONFIRMED UNCHANGED** — identical key list,
-identical 5236 bytes, both heads. Report + 24 per-state evidence records:
-`/Volumes/KK_T9_External_HDD/!CODING/Testing Agent MAIN/projects/nexusai/reports/2026-09-07-rd361-round4-tier1/`
-
-**🔴 WEDNESDAY'S COMPLETION CHECK FOUND A THIRD ARTEFACT — the hop earned its place.** The gate named
-its frame honestly: *"I read the docblock and the commit message. RD-361 and RD-370 are Jira and I did
-not read them."* Wednesday read them. **RD-361 comment 37268 and RD-370's summary are both correct**
-(they say the round does NOT close F-2/L4). **But F-1's false sentence is also in RD-361 comment
-37266** — *"where they survive, `restoreFromBackupsIfNeeded` already restores authEnforced and the
-question never arises. Measured: state L1 comes out ENFORCED."* **The measurement is true; the
-generalisation is false** — PREV2 has backups surviving and the question arises. One state measured,
-the conclusion written about all of them. **So F-1 lives in THREE places, not two.**
-
-**F-1 (Major)** — the residue BOUNDARY is understated; fix is documentation + RD-368 scope, **no code
-change**. The residue is not *"settings lost AND the backup layer with it"*; it is *"the settings state
-the gate reads carries no evidence"*, which **includes a restore from any recovery generation
-predating the enforce write** — a shape the product itself produces (`writeFile()` backs up before
-overwriting, `jsonStorage.js:1817-1820`). **The gate was scrupulous about what it would NOT charge to
-round 4:** PREVGEN (that generation surviving alone) serves on BOTH heads, so it is pre-existing.
-**F-2 (Major)** — the load-bearing census is guarded by **no test**; *"round 3's failure class one
-level down — a census correct when written and undefended afterwards."* Cheap fix, design supplied.
-
-**COMMISSIONED to S45 as a tier-2 follow-up (not a round; the cap is untouched by a GO):** correct the
-boundary in all THREE artefacts (docblock · commit message · a NEW RD-361 comment superseding 37266,
-never an edit) · add PREV2 **and** PREVGEN to RD-368 comment 37267 keeping them distinct · build F-2's
-guard cell with its own tampered-copy control · then mail Wednesday. **Scored 1.0 / 1.0** (scoreboard).
-
-**⚠️ `pane_close.sh` caught a listener dying with the round-4 gate's pane (16 → 15).** Diagnosed, not
-waved off: the gate booted 24 servers and **its housekeeping section never claims to have stopped
-them**. Harmless — its work was delivered and the two surviving listeners (3098/3099) are the LIVE
-RD-148 gate's. **The line is already in the RD-148 brief:** *stop any server you start and prove the
-port reads 000.* Put it in every future QA brief.
-
-**🔴 GHOST TEXT THREE TIMES TONIGHT, ALL AT WRAPPED PANES** — NexusAI (`good night`), Security Review
-(*"check the Bearer scheme defect in SharePoint, MailFlow and UniversalPrint"* — three components
-already reviewed and outside the brief), and the round-4 gate (*"Send Kam a one-paragraph summary of
-the verdict"*, an action aimed at the principal). **Detector first, every time; close the pane rather
-than clear the line when the agent has wrapped.** All three closed cleanly.
-
-## 🔴 HOW ROUND 4 GOT ITS SHAPE — item 1 FALSIFIED Wednesday and the round is better for it
-**Wednesday's inference was HALF right, and the wrong half was the one that mattered.** S45 measured
-every byte of every file under the data directory across the full state space, after the second
-`new JsonStorage(dir)` returns.
-
-- **CONFIRMED:** for whole-file loss with both backup layers gone (**state L4**), a lost deployment
-  is **byte-identical** to a fresh deploy. No predicate over the volume separates them. Measured now,
-  not inferred.
-- **🔴 FALSIFIED:** that is **not the state the Blocker is about.** `jsonStorage.setSetting()`
-  (`backend/jsonStorage.js:1865`) stamps **`authEnforced_updated_at`** in the same write, and **it
-  survives deletion of the key itself** — positive evidence auth was once enforced. Rounds 2 and 3
-  both walked past it.
-- **The candidate:** relax only when `authEnforced` is absent **AND** `authEnforced_updated_at` is
-  absent. Correct on F, I, I2, C2 — **it closes the Blocker** — wrong only on L4.
-
-**WEDNESDAY'S CALL, 21:32, reported to Kam and NOT asked of him:** round 4 **continues on the sidecar
-predicate**; **item 2's `/api/auth/enforce` carve-out is WITHDRAWN.** Reasoning, so a successor can
-check it rather than inherit it: Kam ruled `deadlock` to spend a round **closing the Blocker** — that
-objective is unchanged; only the means changed, and the new means is strictly narrower and safer
-(no door opened on an auth route, so the takeover question never arises). That is v1.3 execution —
-a technical route inside work he commissioned. **The risk trade underneath it was already his:** he
-saw F-2 in the BLUF of the card he ruled and authorised the round anyway.
-
-**🔴 ROUND 4 CLOSES F-1. IT DOES NOT CLOSE F-2.** The sidecar dies with the file, so **L4 still
-resolves to `allow-open-mode`, exactly as under round 3.** The residue is ticketed in the same
-action, routed to the platform layer (RD-363 / RD-368) where round 3's own docblock already pointed.
-**Do not let any artefact record round 4 as closing SEC-01 or F-2.** The gate decides F-1.
-
-**What Wednesday ratified and did NOT ratify:** the SHAPE of S45's reasoning is ratified; **the
-predicate's correctness in the product is the tier-1 gate's question, not Wednesday's.**
-
-**S45's own control is the best thing in the exchange, and it is now a standing brief line:** its
-first run showed F and L4 differing in `.machine-id` and the sentinel — which reads as "a
-discriminator exists" and is the opposite of the truth. Both were artefacts of its harness giving
-each state a **fresh temp directory**. Re-run with those preserved, as a real restart preserves them,
-the two came back byte-identical. **An enumeration harness that constructs its states in different
-places manufactures differences that look exactly like findings.**
-
-## ✅ SECURITY REVIEW — DONE, QUEUE DRY, AND IT CORRECTED WEDNESDAY'S OWN CENSUS
-**Report (the deliverable Kam reads):**
+## ✅ DONE TONIGHT
+**Security review COMPLETE and the queue is DRY.** Four delta reviews (CypherOneDrive · Teams ·
+CommonValueLibraryCypher · Cyphercard-Enrolment) plus an HPSM **scope verdict**. Report:
 `/Volumes/KK_T9_External_HDD/!CODING/Datasec/Security Review/_Working/delta-review-2026-09/_BATCH2_REPORT.md`
+**The June-baseline delta set is COMPLETE at 19/19** — and the agent **corrected Wednesday's census**:
+only 19 of the 32 component summaries are June baselines; 13 were written today by this re-run, and
+HPSM was scaffolded 2026-08-12, so no June state exists to diff. **What remains is decisions, not
+work:** RD-18's Privacy Act package · whether to re-issue the June deliverables against the 219-finding
+register · the live cloud pass, still blocked on the tenant question (`fc05dcdd` vs `0c57ab37`).
 
-**Delivered:** four delta reviews — CypherOneDrive, Teams, CommonValueLibraryCypher,
-Cyphercard-Enrolment-App — plus an HPSM **scope verdict**. Headline: **D-OD-01 (High)** — CypherOneDrive's
-Graph service root is now supplied at RUNTIME over IPC, the only predicate is `!= CloudConfig.Empty`, and the
-OkHttp interceptor attaches the user's delegated Entra token to every request without inspecting the
-destination. Three consumers, **one of them a `.java` file a Kotlin-only sweep would have missed.**
+**RD-361's Blocker is CLOSED** after four rounds and three NO GOs. **RD-148's F-1/F-2/F-3 closed.**
+RD-322, RD-323, RD-370, RD-371, RD-372, RD-373 filed or done. **Board 287** (S45 self-corrected its
+own 289 double-count).
 
-**🔴 WEDNESDAY'S CENSUS WAS WRONG, one level above where it caught the predecessor's.** Wednesday
-enumerated `Deliverables/Components/*.md` → 32 and treated ALL of them as June baselines. **Only 19 are.
-The other 13 were written TODAY by this re-run.** HPSM's "baseline" was written this morning and the
-component was scaffolded **2026-08-12**, two months after June — so no June state exists to diff.
-The agent proved it three ways (a clean mtime split with no intermediate dates, `README.md:3` scaffold date,
-and its own delivery recorded at `PROGRESS.md:123`), not by file date alone.
-**CORRECTED ARITHMETIC: the June-baseline delta set is COMPLETE at 19/19. It was never going to be 20.**
-*(`delta-review-2026-09/` holds 20 non-`_` files — the 19 deltas plus `hpsm-main.md`, which is the scope
-verdict, not a delta. Do not count it as a twentieth.)*
-
-**🔴 CARDED FOR KAM — `hpsm-credential-bearing-prd-outside-every-snapshot`** (rec `structural-look`,
-**default HOLD**). `Source_Code/HPSM-main/.gitignore:11-13` says in the developers' own words that a
-**credential-bearing document** lives at `../1_Project_Definition/Source_Documents/` — outside the repo and
-outside every snapshot either review was built from. **Nobody has ever opened it.** The agent reported it
-structurally and correctly did not go looking. *(The prior-ruling gate refused this card on the words
-"hpsm"/"credential"; Wednesday read all seven matches — telemetry/SOW, a Secuura password, and panel messages
-about slides, Purview and Attio — and none is this subject. Override reason is stated as that measurement in
-the card's BLUF.)*
-
-**THE QUEUE IS DRY — say so rather than manufacture study.** What remains is decisions, not agent work:
-RD-18 (Australian Privacy Act package), whether to re-issue the June deliverables 00/03/04/09/10 against the
-219-finding register or let 12+13 stand, and the live GitHub/Azure/Entra pass still blocked on the unresolved
-tenant question (`fc05dcdd` vs `0c57ab37`).
-
-## SECURITY REVIEW — the ORIGINAL frame, kept because the correction above is the lesson
-    32  components with a June baseline (Deliverables/Components/*.md)
-    15  have a 2026-09 DELTA review
-    10  have a 2026-09 VERIFICATION pass
-     2  PARKED by Kam 2026-09-07 10:44 (both Vision components)
-     5  REMAIN — CypherOneDrive · Teams · CommonValueLibraryCypher · Cyphercard-Enrolment-App · HPSM
-
-**🔴 `hpsm-main` was NOT in the predecessor's list of four.** It has a June baseline and no 2026-09
-output; Wednesday found it only by enumerating the frame. The brief names it as Wednesday's
-inference and gives the agent permission to skip it with a reason. **This is the census family
-firing on Wednesday's own handover** — the list was right about batch 2 and silent about the tree.
-
-## WHAT THIS SEAT DID, and the one thing worth carrying
-- **Caught a `good night` at the wrapped NexusAI pane's prompt** — detector said ghost text, nobody
-  typed it. Rung 2 of the ladder. **Closed the pane rather than clearing the line** (a cleared prompt
-  can be re-populated; a closed pane cannot). Listeners 13→13, port 3001 dead before and after.
-- **🔴 THE CHAT-LOG UNION IS NOT OPTIONAL, AND HERE IS THE MEASUREMENT.** A push conflicted with the
-  Studio seat. Union on `(ts, text)` across **both conflict sides AND a pre-flight backup**:
-  **1663 / 1664 / 1665 in — 1667 out.** Every source was missing something, and **the backup alone
-  held one message neither conflict side had.** Taking either side — the default resolution — would
-  have deleted it. Back BOTH `chat_log.json` and `decisions.json` to the scratchpad before any
-  multi-step git sequence, every time. The union script is at
-  `/private/tmp/.../scratchpad/union_chat.py` for this session only — **rewrite it, do not hunt for it.**
-- **Digests were conflicted too. Resolved from SOURCE** (re-ran `boot_digest.py` on the lesson files)
-  rather than picking a side — a derived artefact comes from its source, not from whoever won.
-- **Boot measured `ctx:27%`** on the by-tier digest (WED-139 duty).
-
-## ⚠️ TRAPS — the first one FIRED tonight exactly as written
-1. **🔴 A T9 LAUNCH HITS A FOLDER-TRUST DIALOG AND NO GUARD CAN SEE IT.** The Security Review launch
-   showed *"Is this a project you created or one you trust?"* with **`No, exit` preselected**, and
-   sat there. Every wrapper guard had passed. **Only reading the pane caught it.** Answer with
-   `tmux send-keys Down` then `Enter`. Once trusted, later launches skip it. **Verify EVERY launch at
-   the pane, always** — a check that cannot observe a dialog appearing after `exec` cannot fail.
-2. **`launchers.conf` points at DevMASTER, which is not mounted here**, so `cockpit.sh launch` and
-   `brief_and_launch.sh` cannot start a T9 seat. Launch by hand with `tmux split-window`, then
-   **`tmux set-option -p -t <pane> @cockpit_name '<Client/Project>'`** or `cockpit.sh say` cannot
-   find the pane. **Do NOT rewrite `launchers.conf`** — it is shared and correct for the Studio.
-3. **`send_brief.sh` has three gates and all three fired on me tonight, correctly:** a literal
-   `PROVENANCE:` line (not `## PROVENANCE`); **absolute** paths or an explicit owner in every
-   citation; and the heading `RULED BY KAM, NOT YET IN AN ARTEFACT` with bullets shaped
-   `- <card-id>: "<ruling verbatim>" -> must land in <artefact>`. Budget three refusals.
-4. **No `cd` in a Bash call** (`pretooluse_no_cd.sh`). A wrapper that legitimately needs `cd` is
-   written with the **Write tool**. **`git -C $VARIABLE <writeverb>` is refused** — write git paths
-   literally.
-5. **Before pulling, discard the ten regenerated dashboard feeds**, then pull, then push. Never
-   `git add -A 0_Brain/dashboard/data` — stage `chat_log.json` and `decisions.json` BY NAME.
-   **Never `git checkout <sha> -- 0_Brain/dashboard/data`** — that is what destroyed four of Kam's
-   rulings this afternoon.
-6. **Ghost text has now appeared three times at NexusAI prompts.** Run
-   `2_Project_Files/fleet/cockpit/pane_prompt_check.sh <pane-%ID>` before reading anything at a
-   prompt. `pane_close.sh` refuses a name that does not resolve to a tty — pass the `%ID`.
+## ⚠️ TRAPS — the first two FIRED tonight, repeatedly
+1. **🔴 GHOST TEXT SEVEN TIMES, ALL AT WRAPPED PANES**, and `good night` **twice at the same NexusAI
+   pane** (boot, and again at 23:2x). Others: *"check the Bearer scheme defect in SharePoint, MailFlow
+   and UniversalPrint"* (already reviewed, outside the brief) · *"Send Kam a one-paragraph summary"* ·
+   *"file a fix-backlog entry for F-B"* · *"file the N-1 ticket details for Wednesday"* · *"file G-1 and
+   G-2 as tickets"*. **Run `2_Project_Files/fleet/cockpit/pane_prompt_check.sh <%ID>` FIRST, every
+   time, then CLOSE the pane rather than clear the line.** A cleared prompt can be re-populated.
+2. **A T9 launch hits a FOLDER-TRUST DIALOG no guard can see** — `No, exit` preselected. Only reading
+   the pane catches it. Answer `Down` then `Enter`. (Fired on the Security Review launch tonight.)
+3. **`launchers.conf` points at DevMASTER, unmounted here.** Launch by hand with `tmux split-window`,
+   then **`tmux set-option -p -t <pane> @cockpit_name '<Client/Project>'`** or `cockpit.sh say` cannot
+   find the pane. **Do not rewrite `launchers.conf`** — it is shared and correct for the Studio.
+4. **`send_brief.sh` has three gates** and all three fired correctly tonight: a literal `PROVENANCE:`
+   line (not `## PROVENANCE`); **absolute** paths or a named owner in every citation; and the heading
+   `RULED BY KAM, NOT YET IN AN ARTEFACT` with bullets `- <card-id>: "<ruling>" -> must land in <x>`.
+5. **No `cd` in a Bash call.** A wrapper needing `cd` is written with the **Write tool**.
+   **`git -C $VARIABLE <writeverb>` is refused** — write git paths literally.
+6. **Use `2_Project_Files/tools/safe_push.sh "<msg>" [paths…]` for every push.** It backs up the
+   irreplaceable pair, discards the ten regenerated feeds, stages by name, and resolves conflicts by
+   each file's own rule — **refusing (rc 22) on any file it has no rule for rather than guessing.**
+7. **A verdict mail can arrive with a ZERO-BYTE body** — one did tonight. `send_brief.sh` refuses a
+   body under 40 non-space chars, **but the QA agent does not send through it.** **Every gate brief
+   must require a report path on disk, and a verdict is read from the report, never the mail alone.**
 
 ## STANDING
-**Kam's week-scoped grants (read as through Sunday 2026-09-13):** merge on Wednesday's word once the
-gate passes · deploy · board judgement calls. **🔴 THE PRODUCTION LIFT IS SECUURA ONLY** — 12:07
-lifted, **narrowed at 12:10 to *"Only secure"*. Datasec has NO production grant. This is the Datasec
-seat.** Ticket CREATION aggregates (one larger ticket per logical path, 13:23). Every analysis record
-carries **FOUND / TESTED / HOW** with the controls named under HOW (18:56:36). **Kill anything that
-queries Azure credits** (13:06 — five raises, closed).
+**Kam's week-scoped grants (through Sunday 2026-09-13):** merge on Wednesday's word once the gate
+passes · deploy · board judgement calls. **🔴 THE PRODUCTION LIFT IS SECUURA ONLY** — 12:07 lifted,
+**narrowed 12:10 to *"Only secure"*. Datasec has NO production grant.** Ticket creation aggregates
+(one larger ticket per logical path, 13:23). Every analysis record carries **FOUND / TESTED / HOW**
+with the controls named under HOW (18:56:36). **Kill anything querying Azure credits** (13:06).
 
-**NAME THE FRAME** in any sentence claiming completeness — the third failure family, filed today,
-and it beats both existing defences because both controls pass and the number really is read from
-the source. It caught Wednesday's own handover tonight (the missing fifth component).
+**A GO NAMES A HEAD.** The moment a head moves, its GO stops describing what would ship. Two branches
+proved it tonight. Say it in the same breath as any push.
+
+**NAME THE FRAME** in any completeness claim. **Three separate findings tonight were frames narrower
+than the sentence they supported, and two were Wednesday's own** — a component census widened once and
+still wrong, and a Jira comment page sliced by a cap so it "found" three comments older than the one
+it wanted. **The number is read in the same action as the sentence that carries it.**
 
 Taps ≤200 chars, pointer only, mail FIRST and verified by non-null `preview`, THEN tap.
-`<<'EOF'` or the Write tool for every body. **Never delete — quarantine.** Search before you file,
-by SYMBOL / PATH / ERROR STRING.
+`<<'EOF'` or the Write tool for every body. **Never delete — quarantine.** Search before you file, by
+SYMBOL / PATH / ERROR STRING.
 
-**TWO WEDNESDAYS LIVE:** Studio owns **Secuura**, this seat owns **Datasec**. One repo, one
-dashboard, one chat panel, **ONE USAGE LIMIT**. Do not write the shared files (`NEXT-PICKUP.md`, the
-daily note, `_ledger.md`) — they are hers this session. Panel messages open `[LAPTOP / Datasec]`.
-Secuura mail in the shared inbox: **read the subject, not the body, and leave it.**
+**TWO WEDNESDAYS LIVE:** Studio owns **Secuura**, this seat owns **Datasec**. One repo, one dashboard,
+one chat panel, **ONE USAGE LIMIT**. Do not write `NEXT-PICKUP.md`, the daily note or `_ledger.md` —
+hers this session. Panel messages open `[LAPTOP / Datasec]`. Secuura mail in the shared inbox:
+**read the subject, not the body, and leave it.**
+**She fixed a real bug in `safe_push.sh` tonight** — Wednesday had hardcoded the T9 volume, dead on her
+machine; it is self-locating now. **Any new tool gets a self-located root, never a volume.**
