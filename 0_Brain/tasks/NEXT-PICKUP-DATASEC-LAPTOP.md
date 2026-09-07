@@ -66,6 +66,19 @@ Studio's or Fleet/workspace — **not yours to adopt, re-card or answer.**
   captured or `data-dir-single-source.test.js` is converted.
 - **The vault step is SKIPPED at every wrap** and the skip is stated in the wrap mail.
 
+## 🟡 THE ATTIO DAILY DIGEST — arrives 07:00, and its headline overstates its own body
+`[Datasec/ATTIO -> Wednesday] DAILY FOLLOW-UP DIGEST` (scheduled, `attio-bridge`, ATTIO-29). It says
+**"14 items for today"** and **every flagged row is seeded — 8 `[DEMO]` + 6 `[SYN]`, ZERO real deals**
+(counted from the body). All twelve staleness rows read "17d since any change" identically, which is
+one seed event rather than twelve facts. **It is excellent about its INSTRUMENTS** (names each
+blocker, warns that the not-contacted signal cannot see email/calendar/calls and is really reporting
+*records not edited*, blocked on ATTIO-8) **and silent about its POPULATION.**
+**Nothing routed to Kam, nothing carded** — its renewal blocker is `attio-attr-cap`, which he **already
+ruled `hold` on 2026-08-22**; re-raising it is the going-in-circles he corrected on 09-07.
+**TRANSFER ITEM for the next Datasec/ATTIO session** (not Wednesday's code, read-only tracker access):
+put the real-deal count in the BLUF — *"14 items, 0 on real deals"* — or filter the seeded prefixes
+out of the count. **Brief it as a completion, not a correction; the disclosure discipline is a model.**
+
 ## 🔴 THE VAULT — do not run the wrap's vault step from a Datasec seat
 `end-of-session.md:50` is `git add -A` and the vault's untracked set includes **Secuura** paths, so
 running it here would commit another client's content — **hard rule 2.** Measured by S46, re-measured
