@@ -30,8 +30,8 @@ file is the Datasec-scoped handover. Pull before every write.
   ledger — those are the Studio seat's files this session. It must be filed at the next consolidation.**
 
 ## STATE — the security review re-run is DONE (first full pass)
-All 8 reviewers reported. **220 findings stand across the estate: 31 June (27 unremediated, ZERO
-fixed) + 189 new.** 15 new Criticals. Deliverables written, `.md` + branded `.docx` both current:
+All 8 reviewers reported. **219 findings stand across the estate: 31 June (27 unremediated, ZERO
+fixed) + 188 new.** 15 new Criticals. Deliverables written, `.md` + branded `.docx` both current:
 - `Deliverables/12_Rerun_Delta_2026-09` — the delta report (343 lines)
 - `Deliverables/13_Consolidated_Findings_Register_2026-09` — the consolidated register
 - `Deliverables/Components/` — 13 new component summaries
@@ -52,7 +52,7 @@ and drive toward Marketplace submission readiness.
 1. **Answer NexusAI's plan confirmation**, then its ticket-grouping proposal.
 2. **`11_Assurance_Pack_Index.md` does not know documents 12 and 13 exist** — add them.
 3. The **June deliverables 00/03/04/09/10** are now materially out of date (the register says 31; it
-   is 220). Decide with Kam whether to re-issue or to let 12+13 stand as the current position.
+   is 219). Decide with Kam whether to re-issue or to let 12+13 stand as the current position.
 4. **Two live checks named by reviewers**, both needing Kam's word: whether the OneTimePad demo
    exposes `/setup` unauthenticated, and whether Entra genuinely pins the EAM `sub`.
 5. **The deferred live GitHub/Azure/Entra config pass** is still open from June, and the tenant
