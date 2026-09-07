@@ -350,15 +350,6 @@ class Handler(SimpleHTTPRequestHandler):
                     return self._json(404, {"error": "no message with that ts"})
                 if msg.get("role") != "wednesday":
                     return self._json(400, {"error": "wednesday-role messages only"})
-                # ── SEAT SCOPE (2026-09-07): two Wednesday seats share one chat_log via
-                # git. Autoplay voices only messages THIS machine's seat wrote; a message
-                # from another seat (or with no seat field) is a 200 no-op under auto.
-                # Manual ▶ (no auto flag) still plays anything, on purpose.
-                if data.get("auto"):
-                    import socket as _sock
-                    if msg.get("seat") != _sock.gethostname():
-                        return self._json(200, {"ok": True, "skipped": "other-seat",
-                                                "seat": msg.get("seat"), "here": _sock.gethostname()})
                 text = ear_text(msg.get("text") or "")
                 if not text:
                     return self._json(400, {"error": "message empty once prepared for the ear"})

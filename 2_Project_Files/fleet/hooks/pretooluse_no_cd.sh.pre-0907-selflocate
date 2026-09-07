@@ -44,18 +44,10 @@ fi
 # The tool's cwd is pinned to WEDNESDAY by the `cd` refusal above, so the `-C` form is the only
 # realistic vector. Residual, stated rather than implied: a bare `git <writeverb>` would not be
 # caught if the cwd were ever outside WEDNESDAY — which the cd clause is what prevents.
-# SELF-LOCATING ROOT (2026-09-07, T9 seat): OWN was hardcoded to /Volumes/DevMASTER/WEDNESDAY,
-# so on the travel drive this hook read Wednesday's OWN repo as another project's and refused
-# every commit — the travel-drive stale-pointer class (2026-08-25) inside the guard itself.
-# The hook lives at <ROOT>/2_Project_Files/fleet/hooks/, so ROOT is four levels up from here.
-# Both volumes now work; the DevMASTER literal remains the fallback if resolution ever fails.
-HOOK_OWN_ROOT="$(cd -P "$(dirname "${BASH_SOURCE[0]}")/../../.." 2>/dev/null && pwd)"
-export HOOK_OWN_ROOT
-
 GITCHK=$(printf '%s' "$CMD" | python3 -c '
-import os, re, sys
+import re, sys
 cmd = sys.stdin.read()
-OWN = os.environ.get("HOOK_OWN_ROOT") or "/Volumes/DevMASTER/WEDNESDAY"
+OWN = "/Volumes/DevMASTER/WEDNESDAY"
 
 # STRIP HEREDOC BODIES BEFORE MATCHING (added at build time, third false positive of this
 # class in this file). A brief, a daily note or a lesson written through `cat > f <<EOF` is
@@ -116,7 +108,7 @@ if [ -n "$GITCHK" ]; then
   V="${GITCHK%%|*}"; P="${GITCHK#*|}"
   cat >&2 <<MSG
 REFUSED by pretooluse_no_cd.sh: \`git -C $P $V\` is a WRITE verb pointed OUTSIDE
-$HOOK_OWN_ROOT. Another project's \`.git\` is its files — hard rule 1, manage don't do
+/Volumes/DevMASTER/WEDNESDAY. Another project's \`.git\` is its files — hard rule 1, manage don't do
 (ledger w=2, 2026-09-07; lesson 2026-09-06_other-projects-repos-are-read-only-git-verbs-that-write).
 
 READ verbs are fine there: ls-remote · log · show · diff · cat-file · ls-tree · rev-parse ·
