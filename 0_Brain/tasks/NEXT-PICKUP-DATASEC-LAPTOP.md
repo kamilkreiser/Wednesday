@@ -13,12 +13,15 @@ supersede: replace this file wholesale at the next pickup; do not append
 anything — read EVERY line.** Mail UTC ≈ AEST−10. **ROTATION BAND 80–90%; 70% is a checkpoint only.**
 **QUIET HOURS 23:00–06:00: no voice.** **His last panel input was 21:00 on 09-07.** Nothing since.
 
-## 🔴 FIRST ACTION — there is nothing in flight. Verify that, then decide what the morning needs.
-    %17  Datasec/NexusAI — S46. Filing four tickets, then WRAPPING (permission given explicitly).
-                            At 50% ctx with a bounded task — it should NOT rotate; wrap is the boundary.
-    All gate panes CLOSED: %18, %19, %20, %21. Each `listeners 13 → 13` on close.
-**If S46 has wrapped: the Datasec queue is genuinely empty and everything left is Kam's or filed.**
-Do not invent work. Do not launch a builder to fill the silence.
+## 🔴 FIRST ACTION — NOTHING IS IN FLIGHT. The Datasec fleet is empty and that is the correct state.
+    S46 WRAPPED at 16:03Z / 02:03 AEST. Both lineages closed, SEVEN tickets filed, nothing merged.
+    ALL panes closed: %17 (builder), %18, %19, %20, %21 (gates). Each `listeners 13 → 13` on close.
+    Only Wednesday's own pane %0 remains.
+**Everything left is Kam's or filed. Do not invent work. Do not launch a builder to fill the silence.**
+Verify with `tmux list-panes -t fleet` before believing this line.
+**Tickets filed tonight:** RD-376 · RD-377 (R2-1 folded in, caveat as its FIRST line, guard half in the
+summary so it is findable) · RD-378 · RD-379 · RD-380 · RD-381. **S46's handover `HANDOVER-S46.md` §5f
+carries BOTH retractions — its own and Wednesday's — with the scope recorded exactly as scoped.**
 
 ## ✅ WHAT THIS SEAT DID — both NexusAI lineages closed, nothing merged, nothing deployed
     rd-374-f2-guard-coverage-s46   10ddb0a   ACCEPTED. Completion check PASSED on all five. Closed.
