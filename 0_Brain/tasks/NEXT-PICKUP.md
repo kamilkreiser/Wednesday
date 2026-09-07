@@ -103,6 +103,15 @@ DELIBERATELY NOT moved** — the rule is a cadence, not a lever to hit a size ta
 it** (Kam is heads-down and the card exists); the measurement is now line 5 of the consolidation KPI,
 where it will be acted on beside the board's 30% number.
 
+## ⚠ THE FROZEN-BUSY WATCHER WILL CRY WOLF UNTIL ~16:05
+`%152` is **dormant BY DESIGN** — Wednesday told it to wait cheaply and it built a correct three-class
+waker (DONE · STOPPED_LOW_DISK · process-death). **`wake_watch.sh:146-150` has no per-episode
+suppression: once `fcnt >= 6` it re-fires on every qualifying tick.** So expect repeated frozen-busy
+alerts on that pane until the build finishes. **Triage them with ONE combined command** (inbound-only
+inbox + `pane_prompt_check.sh` + shell count), not three. **Do NOT re-arm the watcher while the deploy
+depends on it** — fix shape recorded for the next quiet point: reset `fcnt` on fire, or a `fired_$key`
+marker cleared when the hash changes.
+
 ## STANDING
 No `cd` (hook). Taps ≤200 chars, **every tap has a verified mail behind it**. `<<'EOF'` for every
 brief; **`-F -` with a quoted heredoc for commit messages** (an unescaped `"` in `-m` broke one today).
