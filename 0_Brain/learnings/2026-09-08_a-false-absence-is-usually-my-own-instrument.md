@@ -71,6 +71,27 @@ DUPLICATED or WASTED work, not merely an inaccurate sentence.**
    flattering finding about someone else's mechanism; instance 2 would have sent it to redo work it
    had already done correctly.
 
+## Instance 4, added the same session — and it landed INSIDE the correction
+
+Fifteen minutes after this file was written, s150 red-proofed a `wake_ack` guard and got a **hash
+mismatch** — the shape that reads as *"the guard is installed and inert"*. The guard was fine.
+**s150's check piped a capture straight into `shasum` while the tool uses `printf '%s' "$t" | shasum`,
+so a trailing newline entered one digest and not the other.** Both tool files
+(`wake_ack.sh:37-39`, `wake_watch.sh:98-99`) are byte-identical; recomputed the tool's way it matched
+exactly, with a negative control on another pane that differed.
+
+**The sharp part: the 2026-09-07 ledger row describes the predecessor building this EXACT defect into
+the tool** (`tr -d '\n'` vs `printf '%s'`, *"the two hashes could never have matched"*). It was read
+at this seat's boot. **The tool was fixed; the CHECKING of the tool re-introduced the same bug.**
+
+**The rule this adds, and it is narrower than "be careful":**
+7. **Never RE-IMPLEMENT a tool's method in order to verify that tool.** Read the tool's own lines and
+   run those, or make the tool print what it computed. **A hand-rolled equivalent of a hash, a query,
+   a filter or a count is a SECOND IMPLEMENTATION, and two implementations of one idea disagree by
+   default** — so a mismatch tells you nothing about the subject until both sides are proven to
+   compute the same thing. This is the absence-shaped twin of "a control must be able to fail the
+   same way the measurement can".
+
 ## The uncomfortable half, kept
 
 **This seat's WORK held all morning and its INSTRUMENTS kept failing.** The merges were verified

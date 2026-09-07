@@ -7,7 +7,7 @@ status: live
 
 # Boot digest BY TIER — W whole, M rules-only, every project case a handle
 
-Generated 2026-09-08 08:46 from 119 lesson files (587,677 B). M 27 · MIXED 5 · W 87. 28 project CASE sections inside MIXED files are reduced to one line each: the heading and the path to read it at. W blocks are exactly what the default digest carries; M blocks drop the section index and keep the rules; a P file is a single handle. The CASES behind every rule live only in the lesson files — open one the moment its rule fires.
+Generated 2026-09-08 08:49 from 119 lesson files (589,197 B). M 27 · MIXED 5 · W 87. 28 project CASE sections inside MIXED files are reduced to one line each: the heading and the path to read it at. W blocks are exactly what the default digest carries; M blocks drop the section index and keep the rules; a P file is a single handle. The CASES behind every rule live only in the lesson files — open one the moment its rule fires.
 
 ## The T9 SSD is the master — Wednesday must be fully portable
 `2026-07-31_fully-portable-drive.md` · principle · 2026-07-31 · status: superseded — the "T9 is the master" half by [[2026-08-25_one-drive-devmaster-is-master]] (2026-08-25); the portability principle itself still lives · tier: W
@@ -3862,7 +3862,7 @@ sentence, ask what the instrument would have printed if the thing WERE there, an
 print that.** A false absence and a true absence are byte-identical on screen. **The world cannot
 tell you which one you are holding; only a control can.**
 
-sections (open the file for these): The three, in one session, all within ninety minutes · Why this is its own lesson and not three ledger rows · How to apply · The uncomfortable half, kept
+sections (open the file for these): The three, in one session, all within ninety minutes · Why this is its own lesson and not three ledger rows · How to apply · Instance 4, added the same session — and it landed INSIDE the correction · The uncomfortable half, kept
 
 ## How to apply
 
@@ -3885,6 +3885,14 @@ sections (open the file for these): The three, in one session, all within ninety
    "already clean", "not started, so I get to build it". Instance 3 would have handed s150 a
    flattering finding about someone else's mechanism; instance 2 would have sent it to redo work it
    had already done correctly.
+
+**The rule this adds, and it is narrower than "be careful":**
+7. **Never RE-IMPLEMENT a tool's method in order to verify that tool.** Read the tool's own lines and
+   run those, or make the tool print what it computed. **A hand-rolled equivalent of a hash, a query,
+   a filter or a count is a SECOND IMPLEMENTATION, and two implementations of one idea disagree by
+   default** — so a mismatch tells you nothing about the subject until both sides are proven to
+   compute the same thing. This is the absence-shaped twin of "a control must be able to fail the
+   same way the measurement can".
 
 
 ## A ghost suggestion is dangerous in proportion to how little the receiving agent has ALREADY WRITTEN DOWN — the detector catches the line, a recorded decision makes it inert
