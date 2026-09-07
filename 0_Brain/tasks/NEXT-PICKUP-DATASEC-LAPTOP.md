@@ -112,7 +112,41 @@ each state a **fresh temp directory**. Re-run with those preserved, as a real re
 the two came back byte-identical. **An enumeration harness that constructs its states in different
 places manufactures differences that look exactly like findings.**
 
-## SECURITY REVIEW — the frame, because the previous handover's list was complete over a smaller one
+## ✅ SECURITY REVIEW — DONE, QUEUE DRY, AND IT CORRECTED WEDNESDAY'S OWN CENSUS
+**Report (the deliverable Kam reads):**
+`/Volumes/KK_T9_External_HDD/!CODING/Datasec/Security Review/_Working/delta-review-2026-09/_BATCH2_REPORT.md`
+
+**Delivered:** four delta reviews — CypherOneDrive, Teams, CommonValueLibraryCypher,
+Cyphercard-Enrolment-App — plus an HPSM **scope verdict**. Headline: **D-OD-01 (High)** — CypherOneDrive's
+Graph service root is now supplied at RUNTIME over IPC, the only predicate is `!= CloudConfig.Empty`, and the
+OkHttp interceptor attaches the user's delegated Entra token to every request without inspecting the
+destination. Three consumers, **one of them a `.java` file a Kotlin-only sweep would have missed.**
+
+**🔴 WEDNESDAY'S CENSUS WAS WRONG, one level above where it caught the predecessor's.** Wednesday
+enumerated `Deliverables/Components/*.md` → 32 and treated ALL of them as June baselines. **Only 19 are.
+The other 13 were written TODAY by this re-run.** HPSM's "baseline" was written this morning and the
+component was scaffolded **2026-08-12**, two months after June — so no June state exists to diff.
+The agent proved it three ways (a clean mtime split with no intermediate dates, `README.md:3` scaffold date,
+and its own delivery recorded at `PROGRESS.md:123`), not by file date alone.
+**CORRECTED ARITHMETIC: the June-baseline delta set is COMPLETE at 19/19. It was never going to be 20.**
+*(`delta-review-2026-09/` holds 20 non-`_` files — the 19 deltas plus `hpsm-main.md`, which is the scope
+verdict, not a delta. Do not count it as a twentieth.)*
+
+**🔴 CARDED FOR KAM — `hpsm-credential-bearing-prd-outside-every-snapshot`** (rec `structural-look`,
+**default HOLD**). `Source_Code/HPSM-main/.gitignore:11-13` says in the developers' own words that a
+**credential-bearing document** lives at `../1_Project_Definition/Source_Documents/` — outside the repo and
+outside every snapshot either review was built from. **Nobody has ever opened it.** The agent reported it
+structurally and correctly did not go looking. *(The prior-ruling gate refused this card on the words
+"hpsm"/"credential"; Wednesday read all seven matches — telemetry/SOW, a Secuura password, and panel messages
+about slides, Purview and Attio — and none is this subject. Override reason is stated as that measurement in
+the card's BLUF.)*
+
+**THE QUEUE IS DRY — say so rather than manufacture study.** What remains is decisions, not agent work:
+RD-18 (Australian Privacy Act package), whether to re-issue the June deliverables 00/03/04/09/10 against the
+219-finding register or let 12+13 stand, and the live GitHub/Azure/Entra pass still blocked on the unresolved
+tenant question (`fc05dcdd` vs `0c57ab37`).
+
+## SECURITY REVIEW — the ORIGINAL frame, kept because the correction above is the lesson
     32  components with a June baseline (Deliverables/Components/*.md)
     15  have a 2026-09 DELTA review
     10  have a 2026-09 VERIFICATION pass

@@ -5774,5 +5774,43 @@
   "status": "open",
   "ruled_choice": null,
   "ruled_ts": null
+ },
+ {
+  "id": "hpsm-credential-bearing-prd-outside-every-snapshot",
+  "client_project": "Datasec/HPSM",
+  "title": "HPSM's own .gitignore says a CREDENTIAL-BEARING document lives outside the repo — outside every review snapshot, and nobody has ever looked at it. It is the only security content that component has ever yielded.",
+  "bluf": "**OVERRIDE, with the reason stated as a measurement rather than a feeling.** The prior-ruling gate matched on the words *hpsm* and *credential* and named two ruled cards plus five panel messages. **Wednesday read all seven and none is this subject:** `hpsm-41-telemetry-cr` is the telemetry core versus SOW §4.2; `secuura-admin-credential-rotation-183-files` is a Secuura admin password in a different client's repo; the panel messages are about slide scoring, Purview, sustainability metrics living outside the log, and Attio living outside Datasec. **No prior ruling touches a credential-bearing document outside the HPSM repository.**\n\n**FOUND.** `Source_Code/HPSM-main/.gitignore:11-13` states, **in the developers' own words**, that a **credential-bearing PRD document** lives at `../1_Project_Definition/Source_Documents/` — outside that repository and therefore outside every snapshot the June and September security reviews were built from. **Its contents, whether any credentials in it are still live, and its storage / sharing / backup footprint are all unknown and unreviewed.**\n\n**TESTED.** The HPSM component itself was examined and is empty of security content: the tree is exactly two files (`README.md`, `.gitignore`); no `.git`, no `.github`, no other dotfiles; zero Keycloak references; and HPSM appears **nowhere** in `03_Findings_Register.md`. **The agent did NOT go outside `Source_Code/` to look for the document** — correctly, since that is outside its brief — and reported it structurally only, naming no path contents and no values.\n\n**HOW.** `find` returned 3 paths including the directory, with a **positive control** — the identical `find` shape against `Source_Code/Teams-main` returns 17 entries, so the instrument finds files when files exist. The Keycloak zero was a true `grep` exit 1, controlled by `grep -rnci \"hp\" README.md` → 3. The register absence was `grep -c` exit 1, controlled by `grep -n -i \"cyphercard\"` → 9 lines on the same file.\n\n**NOT tested, and this is the whole point of the card:** the document itself. Nobody on either review has opened it, and it is the one place HPSM's security content could actually be.\n\n**Why this is on your desk rather than actioned.** A document a developer labelled as credential-bearing is not something Wednesday opens on its own judgement, even read-only — and it sits inside the HPSM *project* folder, not inside the Security Review's `Source_Code/`, so looking at it is a step outside the engagement's own boundary. **Nothing about it is urgent tonight and nothing degrades while it waits:** it has been in that state since HPSM was scaffolded on 2026-08-12, and the default below leaves it exactly where it is.\n\n**Context you may already hold and Wednesday does not:** you may simply know what is in it, in which case this closes in one sentence and no one needs to open anything.",
+  "default_action": "HOLD, and holding is safe. Nobody opens the document, nothing is copied, and the finding is recorded in the batch report and in this seat's handover so it is visible rather than forgotten. It has been in this state since HPSM was scaffolded on 2026-08-12; one more night changes nothing. Silence costs only that the exposure stays unsized.",
+  "options": [
+   {
+    "key": "structural-look",
+    "label": "Authorise a STRUCTURAL-only look — existence, filenames, credential CLASS and count, never a value (recommended)",
+    "detail": "Sizes the exposure without reading secrets. Reports exactly what the engagement's own rules already require of every finding: file, line, variable name, value LENGTH and credential class — never the value and never a prefix of it. It answers the three questions that actually matter: does the document exist where the .gitignore says, does it carry credential-shaped material, and are those credentials for systems that are still live. Whoever does it works read-only and copies nothing."
+   },
+   {
+    "key": "you-answer",
+    "label": "You answer it from what you already know",
+    "detail": "Cheapest path if you know the document and what it holds. If the credentials in it are dead, or it never really carried any, this closes with one sentence from you and nobody opens anything. If you are not sure, that uncertainty is itself the answer and the structural look becomes the right move."
+   },
+   {
+    "key": "record-only",
+    "label": "Record it as a known unknown and leave it",
+    "detail": "Defensible — HPSM is a scaffold with two files and no code, so nothing is shipping from it. But the exposure is not in the code, it is in a document, and 'no code' is exactly why nobody has looked. Wednesday recommends against leaving it silent, because a credential-bearing artefact that no review has ever reached is the shape that surfaces later from somewhere else."
+   }
+  ],
+  "recommended": "structural-look",
+  "ts": "2026-09-07T21:57:37.477531+10:00",
+  "status": "open",
+  "ruled_choice": null,
+  "ruled_ts": null,
+  "prior_rulings_overridden": [
+   "2026-08-17 20:10",
+   "2026-08-17 20:15",
+   "2026-08-17 20:23",
+   "2026-09-04 09:14",
+   "2026-09-07 09:28",
+   "CARD hpsm-41-telemetry-cr",
+   "CARD secuura-admin-credential-rotation-183-files"
+  ]
  }
 ]
