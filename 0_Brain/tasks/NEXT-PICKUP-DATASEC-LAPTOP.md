@@ -74,6 +74,27 @@ mode across all 175 routes** if `settings.json` is emptied with backups gone.
 cell D; restore 23/23). Single-write-site premise verified across **all 678 tracked files**.
 **Report:** `/Volumes/KK_T9_External_HDD/!CODING/Testing Agent MAIN/projects/nexusai/reports/2026-09-07-rd361-round3-tier1/report.md`
 
+## 🔴 A GO NAMES A HEAD — the RD-148 GO is on `ea4d229` and the head is now `690bed9`
+The tier-1 GO, Wednesday's relay and the scoreboard row all name **`ea4d229`**. **N-4's fix is
+`690bed9`, which has never been gated.** Wednesday commissioned the N-4 fix in the same breath as
+recording the GO and did not think about what that did to the SHA; **neither Wednesday nor the seat
+said so.** Nothing is at risk — the merge is blocked on Kam regardless — but **`ea4d229` is what
+carries a verdict and `690bed9` is what would merge.**
+**QUEUED: a tier-2 pass on `690bed9`** (one test cell; it can ride with another pass).
+**The rule, and it is Wednesday's to carry into the standing lines:** *a GO names a head; the moment
+the head moves, the GO stops describing what would ship.*
+
+## ✅ S45 CHECKPOINT — filing complete, handover refreshed, and a count SELF-CORRECTED
+**RD-372** (N-1 filed as the **CLASS**, High) · **RD-373** (N-3 + N-5 aggregated, Low) · **RD-371
+comment 37274** (N-2's evidence onto the existing ticket — its own search found RD-371's F-5 already
+covered it) · **`690bed9`** N-4 fixed, PASS 2176/2176. Tree clean. Four branches at gates, none merged.
+**Board 287, not the 289 it had written** — it re-measured through the guarded reader and corrected
+itself unprompted, with the diagnosis that matters: *"I did this one in my head while writing prose,
+which is exactly where I should not have."* Every other count it sent came from the guarded reader.
+**Wednesday made the same class of error twice tonight** (a widened census frame that was still wrong;
+a capped Jira page sliced so it "found" three comments older than the one it wanted). **The fix is
+identical in all three: the number is read in the same action as the sentence carrying it.**
+
 ## ✅ F-2 CENSUS CELL — **GO WITH FINDINGS @ `f93730c`** (tier-2 re-gate, 22:51). **F-B MUST BE FIXED.**
 The cell **can** fail against the real `server.js` — M-A and M-B reproduced on disk. F-2 is answered.
 
