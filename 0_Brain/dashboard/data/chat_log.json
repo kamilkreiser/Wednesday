@@ -8351,5 +8351,15 @@
   "project": "WED",
   "ts": "2026-09-07T19:42:34.964459+10:00",
   "text": "An update to the 892 card before you rule it, because the case just got stronger and the fix got less simple.\n\nI told you both remaining fixes were one-liners. That was the gate's assessment and I passed it on. The agent has since measured the live instance rather than recalling it, and found the two defects interlock.\n\nOn that worktree there are two manifests. The published one was written at 07:57. The rejected one is 53 minutes newer. So the most recent provisioning run was refused, and the file every consumer actually reads is still the old one. The code's own comment promises that on refusal every consumer falls back to its seeded accounts because the file simply is not there — but the file was there. A non-write is not a removal, and that comment is an assumption about the filesystem rather than something the code establishes.\n\nHere is the part I did not have when I wrote your card. The surviving manifest's seed name is the shape that the test script itself writes. So one defect puts throwaway test identities into the real manifest, and the other declines to overwrite them and leaves them standing. The consumers on that worktree are pointed at accounts a test suite created for itself.\n\nThat means fixing the blocker alone leaves the pairing live. The recommendation is unchanged — one narrow round three — but it should fold both, and it is a quarantine of the stale file rather than a one-line skip. So my card understated it and you should have the corrected version before you decide.\n\nOne more thing worth carrying beyond this ticket: that directory is gitignored, which is why it persists silently across runs. A clean git status is not evidence the manifest is clean."
+ },
+ {
+  "role": "kam",
+  "text": "Decision secuura-892-cap-spent-blocker-open: round3-narrow — Authorise ONE narrow round 3 - F1 and F2 only, both one-liners (Recommended)",
+  "ts": "2026-09-07T19:56:41.488497+10:00"
+ },
+ {
+  "role": "kam",
+  "text": "Decision secuura-ks968-hash-population-count: count-populated — Authorise the one count - rows where email_lookup_hash IS NOT NULL (Recommended)",
+  "ts": "2026-09-07T19:56:45.460411+10:00"
  }
 ]
