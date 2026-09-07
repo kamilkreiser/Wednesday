@@ -7,7 +7,29 @@ status: live
 supersede: replace wholesale at the next pickup; do not append
 ---
 
-# NEXT PICKUP — Datasec laptop seat, ~16:40 AEST Monday 2026-09-07
+# NEXT PICKUP — Datasec laptop seat, ~17:0x AEST Monday 2026-09-07 (rotated at 80%)
+
+## 🔴 READ THESE FOUR FIRST — they change conclusions already given to Kam
+1. **THE CI SECRET GATE MAY BE DECORATIVE.** All 25 `gitleaks.yml` workflows pin
+   `actions/checkout@v7` — a major that does not exist. Wednesday verified: v4×35, **v7×25**, v2×8,
+   v3×3, v5×1, **no v6**; all 25 v7 files are gitleaks workflows, zero non-gitleaks use v7. A workflow
+   whose checkout cannot resolve **fails before the scanner runs**. Corroborated: `terraform.tfstate.backup`
+   still carries F-16 credentials in a repo whose gitleaks nominally runs on every push. **SUSPECTED,
+   high confidence — one look at Actions run history settles it; now the top item of the live pass.**
+   This RETRACTS the one improvement credited all day.
+2. **KEYCLOAK IS WIRED AND LOAD-BEARING** in all four production regions (5-step chain proven; positive
+   control: pdf-api modules DO carry `count = 0`, so disabled is detectable). **Not documentation debt —
+   a live legacy dependency.** `04_Keycloak_Retirement_Attestation` is now CONTRADICTED, not merely
+   unevidenced.
+3. **A LICENSING DECISION CAN BE FORGED WITHOUT THE ROOT KEY** — new Critical. The `valid:true` token is
+   signed by a per-tenant key that travels inside every licence file, JWE-wrapped to a committed key, and
+   binds nothing (no iss/aud/exp/tenant; cert has no extensions). **F-11's root rotation does NOT fix it.**
+4. **TWO REMEDIATIONS MUST NOT BE RUN AS WRITTEN:** (a) rotating the root CA **wipes the licence table** —
+   `TenantLicenseService.cs:50-54` deletes on validation failure, on the default page render; fix that
+   first. (b) Deleting the committed `.key` files does NOT remove the root key — `LicenseGenerator.exe`
+   is committed and CONTAINS it; no text scanner sees it.
+
+# (previous header) Datasec laptop seat
 
 **TWO WEDNESDAYS LIVE.** Studio owns **Secuura**; this seat owns **Datasec**. One repo, one dashboard,
 one chat panel, **ONE USAGE LIMIT**. Do not write the shared files (`NEXT-PICKUP.md`, daily note,
@@ -25,36 +47,16 @@ one chat panel, **ONE USAGE LIMIT**. Do not write the shared files (`NEXT-PICKUP
    coincides with a real authorisation is more corrosive than one that doesn't, because it gets
    reinforced rather than corrected.** The test is never "is this correct" but "does this have an author".
 
-## FLEET — 4 live (3 delta agents + NexusAI); RE-GATE QUEUED at the ceiling
-**DELTA BATCH 1 running, 3 concurrent** (launched ~16:30, expect 15–25 min each):
-MailFlow+CypherSharePoint+UniversalPrint · License-Services+LicenseServer · infra_hpam+HPK.
-**BATCH 2 queued (4):** CypherOneDrive + Teams (gate INTACT — the control group for F-13) ·
-CommonValueLibraryCypher (shared lib) · Cyphercard-Enrolment-App (writes the identity anchor).
-
-**`Datasec/NexusAI` `%2`** — working its 3-item no-gate queue (RD-242 closure condition, RD-362/363,
-the 102 category-1 tickets). **Do not close that pane.**
-
-**⚠️ TWO GATES ARE QUEUED, NOT DONE — START THEM AS DELTA AGENTS FREE SLOTS. This is the single
-most important thing on this list.**
-
-**GATE 2 (after RD-361): SEC-07 / RD-363 @ `b0dec96`, branch `rd-363-keyvault-purge-protection-s43`,
-TIER 2.** `softDeleteRetentionInDays 7→90`, `enablePurgeProtection absent→true`. This is the item
-trivy MISSED and a reviewer caught. Press on: the assertion must be on the TEMPLATE, not a deployment
-(purge protection is irreversible once set, so it cannot be tested by rollback in a real
-subscription); that the `DOCUMENTED NON-ASSERTION` cell actually fails when someone adds `Deny`; and
-that 90 is intended rather than a default.
-**The agent deliberately did NOT add `networkAcls defaultAction: Deny` — correctly.** The Container
-App resolves secrets via `keyVaultUrl` with the UAI at deploy time and on every revision
-(`mainTemplate.json:548`, `:559`), so a vault firewall without a private endpoint bricks every
-customer deployment. It pinned that reason in a named test cell. **Do not "fix" it.**
-
-**GATE 1 (first): RD-361 round 2.**
-Round 2 is built at `1149d1c` (`npm run verify` 2174/2174). It is **round 2 of 2 under Kam's cap** —
-a NO GO ships what is closed and tickets the residue; no round 3 without his word.
-The re-gate must press on: F-1 driven at the wire incl. the **wiped-volume case the agent itself
-named as still open**; **F-2 mutation-proven at all SIX sites individually** (round 1's suite stayed
-11/11 green with three sites reverted, so a green suite is NOT evidence); the sixth site actually
-routed through `authGateDecision`; `serverCode()` widened past `server.js`; `Retry-After` + audit event.
+## FLEET — 2 live
+- **RD-361 round-2 TIER-1 RE-GATE running** (launched 17:0x). **Round 2 of 2 under Kam's cap** — a NO GO
+  ships what is closed and tickets the residue; no round 3 without his word.
+- **`Datasec/NexusAI` `%2`** at ~52% ctx, ran its own checkpoint, `HANDOVER-S43.md` written. Working
+  **RD-362 then RD-329** (Wednesday RULED the reorder: the round's Marketplace objective outranks
+  priority-then-identifier). **Do not close that pane.**
+- **DELTA BATCH 1 COMPLETE — all 7 components reported.** BATCH 2 STILL TO LAUNCH (4): CypherOneDrive +
+  Teams (gate INTACT — the control group for F-13) · CommonValueLibraryCypher · Cyphercard-Enrolment-App.
+- **SEC-07 / RD-363 @ `b0dec96` STILL QUEUED for a tier-2 gate.** Do not "fix" its deliberate omission of
+  `networkAcls Deny` — it would brick every customer deployment; the reason is pinned in a test cell.
 
 ## RD-361 HISTORY — NO GO round 1, round 2 built
 Round 1 was NO GO: the fix closed **1 of 4** failure modes and **the Azure Files case named in its own
