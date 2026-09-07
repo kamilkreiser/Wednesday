@@ -14,17 +14,51 @@ anything — read EVERY line.** Mail UTC ≈ AEST−10. **ROTATION BAND 80–90%
 **Quiet hours are OVER — voice is allowed.** Kam's last panel input was 21:00 on 09-07; he has the
 morning board on his panel.
 
-## 🔴 FIRST ACTION — one gate live, and KAM HAS AN UNANSWERED RECOMMENDATION FROM THIS SEAT
-    %24  QA/NexusAI-RD376  — FULL tier-2 gate on rd-376-stripper-reconcile-s47 @ 36191eb. 30+ min in.
-    %22  Datasec/NexusAI   — S47. HOLDING correctly and said so; prompt clean; ctx 40%.
-    %0   wednesday         — this seat.
-    (%18 %19 %20 %21 %23 all closed; each `listeners 13 -> 13`.)
-    %25  Datasec/SecurityReview — LAUNCHED 07:2x on KAM'S OWN WORD ("go ahead with option a").
-         Brief: 2_Project_Files/fleet/briefs_staged/2026-09-08_secreview-file-and-sweep.md (ab16fba5).
-         Booted clean, no trust dialog, on Fable 5 (that project's launcher). Pointer tapped.
-✅ **KAM RULED option (a) at ~07:1x — it is DONE, not pending.** Do not re-ask him.
-`tmux list-panes -t fleet` before believing this line. **When %24 reports: read the verdict from the
-REPORT ON DISK** (`projects/nexusai/reports/2026-09-08-rd376-tier2/`), never the mail alone.
+## 🔴 FIRST ACTION — MERGES ARE LANDING ON MAIN RIGHT NOW. Read this before touching anything.
+    %22  Datasec/NexusAI      — S47. MERGING, resumed at merge 3 of 7 on Wednesday's 07:32 GO.
+    %24  QA/NexusAI-RD376     — full tier-2 gate, still running (~60 min).
+    %25  Datasec/SecurityReview — file the 22 findings + finish the Bearer sweep. Kam-approved.
+    %0   wednesday            — this seat.
+
+🔴 **`main` HAS MOVED for the first time since 2026-09-01.** Verified by Wednesday's own `ls-remote`:
+    a9a8cb6   frozen since 09-01        (before)
+    8c4c22d   MERGE 1 — rd-323 @ e032c7d   +250 commits, 255 files   PUSHED
+    1803bcd   MERGE 2 — rd-377 @ fabcc93   +1 commit, 7 files        PUSHED  <- origin/main NOW
+**Merge 3 (rd-381) exists LOCALLY as `0dd9cc0` and is NOT pushed** — discardable, nothing published.
+**Authority: Kam, panel 07:10 verbatim** — *"deploy and merge everything that has been tested and done
+and is ready for deployment"* — plus his standing `mergeup` card (gate-passed only, one at a time,
+reporting each). **Wednesday does not merge; S47 executes.**
+
+🔴 **THE DEPLOY HALF IS UNCONFIRMED.** He asked for deploy AND merge. `deploy.yml` appears to be
+`workflow_dispatch:` only now, so **a push to main may NOT have deployed anything.** S47 has been
+asked to report **what the two pushes ACTUALLY fired** — workflows, targets, whether anything
+deployed. **Do not report "deployed" to Kam until that fact is in hand.** If nothing fired, the deploy
+half of his instruction is NOT satisfied and it goes back to him.
+🔴 **gitleaks now sees six days of commits for the first time** and RD-367 says a credential sits in
+`terraform.tfstate.backup`. **Expect it to fire. That is the scanner working.** Report only — **no
+history rewrite, no force push, no deletion** (all Kam's signature class).
+
+## MERGE ORDER — S47's, MEASURED, and it CORRECTED Wednesday's
+Wednesday's brief said "rd-374 before anything that depends on it". **Wrong, and verified wrong from
+this seat:** `merge-base --is-ancestor 731aa6e 10ddb0a` is TRUE — **rd-361 is an ANCESTOR of rd-374**,
+so rd-374 first would silently subsume rd-361 and one of Kam's "one at a time" merges would never get
+its own receipt. Remaining order:
+    3. rd-381  b93d3b5   (merged locally as 0dd9cc0, unpushed)
+    4. rd-361  731aa6e
+    5. rd-374  10ddb0a   CONTAINS rd-361
+    6. rd-322  432617a   the only unqualified GO
+    7. rd-148  690bed9
+**EXCLUDED: `rd-376 @ 36191eb` — its gate is still running.** If it returns GO, **give a separate GO;
+do not let S47 infer one.**
+
+## THE PREDICTOR — replaced mid-run, and merges 1 and 2 were NOT unchecked
+S47's tree-equality predictor assumed the branch strictly CONTAINS main. **True for merges 1 and 2
+(chains); false from merge 3 on, because `rd-377` and `rd-381` are SIBLINGS on `rd-323`**
+(`merge-base(fabcc93,b93d3b5) = e032c7d`, verified here). It stopped rather than pushing — the stop
+condition working. **Replacement, approved:** delta-from-main == the branch's own commit diff, AND
+delta-from-branch == what main already carried, AND `rd-376` not an ancestor. Correct for siblings and
+chains alike. **Merges 1 and 2 are being re-checked as CONFIRMATION, not repair** — tree equality is
+valid for a strict superset and it passed honestly. Word it that way.
 
 ## THE TERMINATING RULE — it governs the RD-377 verdict when it lands
 - **clean GO** -> ticket closes;
