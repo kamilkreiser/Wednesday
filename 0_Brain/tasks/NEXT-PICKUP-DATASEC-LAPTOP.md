@@ -13,10 +13,49 @@ supersede: replace this file wholesale at the next pickup; do not append
 anything — read EVERY line.** Mail UTC ≈ AEST−10. **ROTATION BAND 80–90%; 70% is a checkpoint only.**
 **QUIET HOURS 23:00–06:00: no voice.** Chat mirror only, and only if something genuinely needs saying.
 
-## 🔴 FIRST ACTION — read the fleet, then answer whatever landed
-    %17  Datasec/NexusAI  — S46, briefed and building. Plan CONFIRMED.
-         Queue: G-2 → G-1 → RD-323-F-1 → G-3 → G-5 → G-4  (+ RD-322-F-1/F-2 as one-liners in that file)
-**ALL GATES HAVE REPORTED. No gate is running.** S46 is the only live agent.
+## 🔴 FIRST ACTION — one gate live, S46 holding with a DRY queue
+    %18  QA/NexusAI-RD374 — tier 2 on rd-374-f2-guard-coverage-s46 @ 5e6077e. RUNNING, not yet reported.
+    %17  Datasec/NexusAI  — S46. **Queue DRY. Told to HOLD, not wrap** — the RD-374 gate may return
+         findings and they are better landing on a seat that holds the context.
+**When RD-374 reports: findings → S46; clean GO → tell S46 it may wrap.**
+
+**🔴 ONE DELTA IS OWED A GATE:** `rd-323-scheduler-failure-vocabulary-s45` moved **`99fb518` →
+`1b6bedb`** (RD-323-F-1 landed WITH the change, on Wednesday's instruction, so the staleness is
+Wednesday's to carry). **The GO-with-findings was on `99fb518`.** Queue a tier-2 pass on
+`99fb518..1b6bedb`. **PASS 2173/2173** claimed; RD-323 evidence comment 37276.
+
+**HEAD TABLE — three unmoved, and S46 said so explicitly rather than leaving it to be checked:**
+
+    rd-374-f2-guard-coverage-s46             5e6077e   AT THE TIER-2 GATE NOW
+    rd-323-scheduler-failure-vocabulary-s45  1b6bedb   GO was 99fb518 -> DELTA OWED A GATE
+    rd-361-round4-s45                        731aa6e   GO-with-findings stands
+    rd-148-round2-s45                        690bed9   GO-with-findings stands  (cleanest of the set)
+    rd-322-root-guard-vacuity-s45            432617a   GO stands — merge-ready
+
+## 🟢 A KEEPER FROM S46 — adopt it in every QA and builder brief
+Told to *"rewrite the assertion against a shape `runOnce` actually emits"*, it did something stronger:
+**it stopped writing a shape at all.** The certifying cell now drives the **real** `runOnce` against a
+**real** local target and feeds whatever comes out into the **real** `_failed`. Its words:
+> *"A hand-written shape cannot notice it is impossible; a driven one cannot be written for a state the
+> product cannot reach."*
+**Wednesday's instruction would have fixed the instance and left the next hand-written fixture free to
+assert another unreachable state. This removes the category.** Same move as red-proofing against the
+real `server.js` instead of an in-cell copy. **Standing line from now on.**
+
+## 🔴 AND THE OTHER KEEPER — a red is not a detection until you have read WHY it is red
+S46 got **two of its own red-proofs wrong** and self-caught both — **not the fixes, the EVIDENCE for
+the fixes.** (1) payloads spliced at arbitrary line numbers landed mid-expression, the parser threw,
+the cell reddened: **a parse error dressed as a detection**, including the arm proving the `https://`
+case. (2) an hour later its Dockerfile arms failed on a **pre-existing** reason because `shipsTests()`
+returns the first reason it finds. Both redone — at acorn-derived statement positions, and against a
+minimal base. **Its framing:** *S45's §0 says the artefact you are fixing is the one you stop checking;
+mine was the artefact I was PROVING WITH.* **The RD-374 gate has been pointed at those corrections
+first, at S46's own request.**
+
+**AND THE FINDING UNDER THE FINDING:** `stripComments()` existed **TWICE** — the named helper (3 call
+sites) **and an unnamed inline copy of the identical regexes inside `serverCode()`** (5 more).
+**A grep for the helper's name finds half of it.** Total damage re-measured: **33,106 characters over
+1,073 lines.** The frame family again, one level down.
 
 **✅ RD-322 @ `432617a` → GO** (merge-ready as it stands). **✅ RD-323 @ `99fb518` → GO-with-findings**
 (1 Major, 2 Minor, 2 Polish). Report:
