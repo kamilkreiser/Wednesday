@@ -36,7 +36,7 @@ FLEET="${WAKE_WATCH_TMUX_SESSION:-fleet}:0"
 CTX_STATE="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)/state"
 mkdir -p "$CTX_STATE"
 # markers older than 3 days belong to dead pane generations — prune quietly
-find "$CTX_STATE" \( -name 'ctx_fired_*' -o -name 'idle_ack_*' \) -mtime +3 -delete 2>/dev/null
+find "$CTX_STATE" -name 'ctx_fired_*' -mtime +3 -delete 2>/dev/null
 end=$((SECONDS + 14400))
 while [ $SECONDS -lt $end ]; do
   # (d) DEAD COORDINATOR (2026-09-02): the wednesday pane shows Claude Code's
@@ -156,21 +156,7 @@ except Exception: print('')" 2>/dev/null)
       fcnt=0
     fi
     printf '%s' "$h" > "$hf"; printf '%s' "$cnt" > "$cf"; printf '%s' "$fcnt" > "$ff"
-    # IDLE-ACK (2026-09-07): an idle pane that Wednesday has ALREADY adjudicated
-    # must not re-fire forever. STATE_DIR is a fresh mktemp -d per invocation and
-    # the runner re-arms every ~2 min, so cnt restarts from zero every cycle — a
-    # pane parked at an empty prompt (dormant BY DESIGN, holding for Kam, with
-    # Wednesday as its wake path) fires again every ~2 min, all night. Measured
-    # 2026-09-07 22:35-22:39 on %162 in wake_watch_runner.log.
-    # The ack is keyed to the pane's CONTENT HASH and lives in CTX_STATE, which
-    # survives re-arm (an ack in STATE_DIR would be erased every cycle — a
-    # suppression that cannot suppress). Any new output changes $h and lifts the
-    # ack by itself, so this can never silence a pane that has something to say;
-    # it silences only a repeat of a state already judged. Mail and ctx wakes are
-    # separate legs and are untouched.
-    ackf="$CTX_STATE/idle_ack_$key"
-    ack=$(cat "$ackf" 2>/dev/null || echo none)
-    if [ "$cnt" -ge "$STABLE_N" ] && [ "$ack" != "$h" ]; then
+    if [ "$cnt" -ge "$STABLE_N" ]; then
       echo "WAKE: pane '$name' ($pid) idle at prompt ~$((STABLE_N * INTERVAL / 60)) min — likely waiting on Wednesday" > "$STATE_DIR/fired"
     fi
   done
