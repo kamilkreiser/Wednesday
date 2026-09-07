@@ -327,8 +327,22 @@ seat **ctx 11% -> 23%**. **The digest is not the problem; line 198 is.** s150 re
 Secuura interims at 07:42 and 07:53 (subject-only from here; no body fetched, no reply sent). A
 coordinator that has just launched an agent and is watching it is not expected to commit. **Threshold
 for raising it to Kam, set in advance so it is not a judgement made under pressure: no Studio write by
-~08:30** (>70 min, several more s149 interims elapsed). **s150 has no instrument on that machine and
-must not adopt Secuura work** — the only available act is telling Kam.
+~08:30.** **s150 has no instrument on that machine and must not adopt Secuura work** — the only
+available act is telling Kam.
+
+**CORRECTED 08:09 — the 07:17 figure above was measured over TOO NARROW A FRAME.** It queried only
+`NEXT-PICKUP.md` and the daily note. Widened to all four of the Studio's files (adding `_ledger.md`
+and `scoreboard.md`), its last write is **`c6ac9aea` at 07:28**. **State the FILE SET in any silence
+claim** — "no write to its pickup, note, ledger or scoreboard since 07:28" is checkable; "last write
+07:17" is not. Ledger w=93.
+
+**08:07 — THE SECUURA DEPLOY COMPLETED** (`[Secuura/Blockchain -> Wednesday] DEPLOY COMPLETE —
+400517aaf LIVE on the demo, verified`; subject only, no body fetched, no reply). **The threshold is
+NOT moved on this, deliberately — it was set in advance precisely so a new event would not move it.**
+But its MEANING has sharpened: 08:30 is no longer "silence alone", it is **silence THROUGH a completion
+event its coordinator must score.** 41 minutes with a deploy in flight is a coordinator watching;
+silence past a completed deploy is a different fact. **If 08:30 passes with no Studio write, tell Kam —
+and tell him only. Scoring the Secuura deploy is not s150's to take.**
 
 ## 08:06 — S47's 50% CHECKPOINT, ruled CONTINUE (s150)
 **Ruling mailed + pointer tapped** (`CHECKPOINT RULING: CONTINUE through 6-7-8`, verified at
