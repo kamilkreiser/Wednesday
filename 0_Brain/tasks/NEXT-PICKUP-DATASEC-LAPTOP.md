@@ -74,6 +74,41 @@ mode across all 175 routes** if `settings.json` is emptied with backups gone.
 cell D; restore 23/23). Single-write-site premise verified across **all 678 tracked files**.
 **Report:** `/Volumes/KK_T9_External_HDD/!CODING/Testing Agent MAIN/projects/nexusai/reports/2026-09-07-rd361-round3-tier1/report.md`
 
+## ✅ RD-148 ROUND 2 — **GO WITH FINDINGS @ `ea4d229`, all three closed** (gate 22:41)
+F-1 (Blocker), F-2, F-3 genuinely closed, each verified on a real DOM with a negative control that
+flips. **None of the residue is a regression** — every finding proved byte-identical between
+`aea410c` and `ea4d229`, per-function. **The cap is spent and did not need a third round.**
+Report: `/Volumes/KK_T9_External_HDD/!CODING/Testing Agent MAIN/projects/nexusai/reports/2026-09-07-rd148-round2-tier1/report.md`
+**MERGE HELD — Kam's two GitHub answers gate it, not the verdict.**
+
+**The gate out-built the builder's own argument.** It re-ran A/B/C and added **B2**: round-1 product
+code byte-identical, round-1 cells, **only the fixture line changed** — three revoke cells red, seven
+render/date cells GREEN. **B1 moves 140 lines so "the fixture did it" stays an inference; B2 moves one
+statement and the untouched cells are the control.** Technique worth reusing: when you argue *only X
+changed*, build the arm that changes only X.
+
+**N-1 (Major) — the CLASS is still live**: the same defect shape survives in `load()` in the same
+file; a failed provisioning load is silent, misrepresents tenant state, and a later unguarded Save
+switches SCIM provisioning **off**. Instance fixed, class not. **N-4 — the round's own new STRUCTURE
+cell does not guard the risk it appears to guard**: a check that cannot fail, inside the suite built
+to stop exactly that. N-2/N-3/N-5 minor. **Commissioned:** N-1 its own ticket (class, not instance);
+N-2/3/4/5 aggregated as one per Kam's rule; N-4's cell fixed so it can fail.
+
+**🔴 THE GATE'S VERDICT MAIL ARRIVED WITH A ZERO-BYTE BODY.** Subject carried "GO with findings"; the
+findings did not travel. **Measured, not assumed:** the `preview` discriminator with a **same-read
+control** — null on that message, 200 chars on all four neighbours in one listing.
+**Nothing was lost ONLY because the brief specified a report path on disk.**
+**The gap is in the path, and it is Wednesday's to close:** `send_brief.sh` refuses a body under 40
+non-space characters, **but the QA agent does not send through it**, so a tier-1 verdict can evaporate
+into a subject line. Until that is fixed: **every gate brief keeps the report-path requirement, and a
+verdict is read from the report, never from the mail alone.** *(The mail was also tagged
+`[Datasec/NexusAI ->]` rather than `[QA ->]`; routing is by subject.)*
+
+**✅ AND THE FIX FROM THE ROUND-4 GATE WORKED, MEASURABLY.** The round-4 brief lacked *"stop any server
+you start and prove the port reads 000"*; its gate left a listener that died with its pane. **That line
+was added to the RD-148 brief, and at its close both ports already read 000 and listeners held 13 → 13.**
+One brief to the next, same night. **Put the line in every QA brief.**
+
 ## ✅ ROUND-4 FOLLOW-UP DONE @ `f93730c` — and F-2's cell is at a TIER-2 RE-GATE
 All four commissioned items complete, **PASS 2185/2185**. Boundary corrected in **all three**
 artefacts (docblock · a superseding commit note, history NOT rewritten · **RD-361 comment 37271 as a
