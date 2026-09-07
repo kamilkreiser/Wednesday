@@ -7,7 +7,7 @@ status: live
 
 # Boot digest — headline + rules of every lesson (open the file when it fires)
 
-Generated 2026-09-07 17:54 from 112 lesson files (551,598 B). Each block = the lesson's retrieval handle (H1), its frontmatter, the operative paragraph, its section index, and every RULES section verbatim. 6 files carry no rules-shaped section and are included whole. The CASES behind a rule live only in the file: open it the moment the rule fires, or when a diagnosis needs the evidence. `_ledger.md` is read whole beside this digest; `_ledger_archive.md` on demand.
+Generated 2026-09-07 18:40 from 113 lesson files (555,281 B). Each block = the lesson's retrieval handle (H1), its frontmatter, the operative paragraph, its section index, and every RULES section verbatim. 6 files carry no rules-shaped section and are included whole. The CASES behind a rule live only in the file: open it the moment the rule fires, or when a diagnosis needs the evidence. `_ledger.md` is read whole beside this digest; `_ledger_archive.md` on demand.
 
 ## The T9 SSD is the master — Wednesday must be fully portable
 `2026-07-31_fully-portable-drive.md` · principle · 2026-07-31 · status: superseded — the "T9 is the master" half by [[2026-08-25_one-drive-devmaster-is-master]] (2026-08-25); the portability principle itself still lives
@@ -3897,6 +3897,34 @@ check the register before asking) · [[2026-08-07_protocol-v1.3-signed-delegatio
 sits on) · [[2026-08-03_go-slow-earn-autonomy]] (rule 5: every grant recorded, so the boundary is
 written down and never vibes) · [[2026-09-06_a-scoped-override-carries-its-own-expiry]] (the expiry
 mechanism) · [[2026-08-16_an-ask-without-a-default-is-an-indefinite-hold]] (rule 3).
+
+
+## When an action is KAM'S to click, hand him the LINK — not the instruction to go and find it
+`2026-09-07_hand-kam-the-link-not-the-instruction.md` · preference · 2026-09-07 · status: live
+
+**His words, verbatim (2026-09-07 18:04:35):**
+> *"Remind me to merge it by providing the link to GitHub to merge."*
+
+sections (open the file for these): Why this is a preference and not a nicety · How to apply
+
+## How to apply
+
+1. **Any item routed to Kam for an action HE performs carries the direct URL, on its own line**, in
+   the card's default-action AND in the panel message that raises it. Not "merge #891" — the link.
+2. **The link goes where the action is**, not in a detail section: in the card's recommended option
+   and its default-action text, because those are the two lines he reads when ruling.
+3. **Build the URL from a fact already measured, never composed from memory** — the PR number from
+   the gate verdict or the API read, the repo from the remote. A wrong link is worse than none,
+   because it spends his click and returns him nothing
+   ([[2026-08-14_i-read-representations-they-read-sources]]).
+4. **Reminders repeat the link.** A follow-up that says "still waiting on #891" without the URL makes
+   him do the lookup a second time. Every mention of a pending Kam action carries it.
+5. **Generalises past merges:** a consent screen, a billing page, a Partner Center submission, an
+   approval in a portal — anything where his hands are the mechanism gets the exact destination, and
+   where a click needs a specific identity, name which one
+   ([[2026-08-05_identities-float-verify-always]]).
+6. **Applies to what Wednesday asks agents to hand up too** — a brief that tells an agent "escalate to
+   Kam" must require the link in the escalation, or the gap simply moves one seat along.
 
 
 ## Kam re-granted merge authority I ALREADY HELD — and the lesson is that I spent a whole morning asking for it
