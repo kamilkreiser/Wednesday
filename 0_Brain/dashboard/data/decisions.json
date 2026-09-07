@@ -5662,5 +5662,45 @@
    "CARD secuura-ks968-hash-population-count",
    "CARD secuura-ks968-id-keyed-decider"
   ]
+ },
+ {
+  "id": "nexusai-rd361-round3-blocker-survives",
+  "client_project": "Datasec/NexusAI",
+  "title": "Round 3 did NOT close the SEC-01 Blocker — the builder and the gate proved it independently, and the round also opened a new Major. Your bent cap is spent and the next move is a design call, not another narrow fix.",
+  "bluf": "**OVERRIDE:** Kam ruled `round3` at 18:58 on the stated premise that it would close the Blocker. **This card is that round's RESULT, not a re-raise of it.**\n\n**ROUND 3 IS A NO GO.** Two independent instruments reached it, and they agree.\n\n**FOUND.** The fix rests on `firstRunComplete` being written only beside `authEnforced`. It is also written by the FRONTEND wizard at three sites that have nothing to do with authentication — when the Log Analytics connection test succeeds, when data validation passes, and when the admin ticks 'don't show this guide again'. The wizard's own tab order puts Log Analytics Access BEFORE User Access, so **the bricking path is the intended journey, not an edge case.** Ticking the checkbox alone is sufficient. Any restart in that gap — scale-to-zero, a revision recycle, an image update, going home for the night — and every route 503s, `/first-run-setup` redirects to `/login`, and `POST /api/auth/enforce`, the one route that could write the missing key, is itself refused. Only exit is hand-editing settings.json on the customer's volume.\n\n**AND ROUND 3 OPENED SOMETHING NEW (F-2, Major).** A deployment that HAD auth enforced, whose settings.json is emptied with the backup layer also gone, now serves **open mode across all 175 routes** where round 2 denied. That is SEC-01's own direction of failure, reintroduced by the fix for SEC-01.\n\n**WHAT GENUINELY CLOSED, recorded as closing:** F-B / M10 is real — mutating the sole producer fails exactly cell D and restore returns 23/23, proved by contrast rather than assertion. The single-write-site premise was verified across all 678 tracked files. 2177/2177, 113 suites, 0 skips, reproduced independently.\n\n**TESTED.** A 2x2 matrix on a real server — real `npm start`, real DATA_DIR, boot then interrupt then boot on the same directory — across both heads and both variants. The deadlock was driven with a VALID CSRF token. F-2 was measured as a before/after table on the same two heads. NOT tested: behaviour on Azure Files or Container Apps (local disk is not a network mount), and whether a real incident removes the backups while sparing the sentinel — the gate names that as F-2's weakest link itself.\n\n**HOW.** Positive control on the instrument (`/api/health` 200 on every boot of both heads, so a 503 elsewhere is a gate decision and not a dead server). Negative control that flips with the subject (`/api/__qa_impossible__` returns 404 when the gate is open, 503 when closed). Positive control on the module (the function throws 'is not a function' on the before-head, proving the before column is really before-head code). Every tamper asserted to have LANDED before its effect was read; a 403-CSRF run was discarded rather than reported. The gate found and fixed two of its own harness bugs before recording any claim, and over-read F-2 initially and narrowed it. Report and evidence: `!CODING/Testing Agent MAIN/projects/nexusai/reports/2026-09-07-rd361-round3-tier1/`\n\n**WEDNESDAY'S READING, marked as inference and NOT measured by the gate:** rounds 2 and 3 both tried to *discriminate* 'never set up' from 'set up then lost'. The gate has now shown those two states are **byte-identical** by the time the check runs, because JsonStorage's constructor normalises a missing or corrupt settings.json to `{}` before the gate ever reads it. If that holds, **no discriminator built on settings.json content can work**, and a round 4 aimed at a better discriminator is spending your cap on something structurally unavailable. The deadlock itself looks like the more tractable target. This is Wednesday's reasoning, not a measurement — it needs a round to test it before anyone builds on it.\n\n**Nothing is merged, nothing is deployed, nothing degrades overnight.**",
+  "default_action": "HOLD. Nothing merges, nothing deploys, and RD-361 stays open. Wednesday files F-1 through F-5 as ONE ticket on the RD board per the 13:23 aggregation rule so nothing is lost, and records that round 3's own test cell asserts the surviving Blocker as intended — that comment is the thing most likely to mislead the next reader. Silence costs only time.",
+  "options": [
+   {
+    "key": "deadlock",
+    "label": "Round 4, but aimed at the DEADLOCK instead of the discriminator (recommended)",
+    "detail": "Commission one narrow round whose FIRST item is to test Wednesday's inference above, and only then build. If the two states really are byte-identical after initializeFiles(), the fix is to make the deployment recoverable rather than correctly classified: let POST /api/auth/enforce and the first-run wizard through the AUTH_STATE_UNKNOWN gate while everything else keeps denying. An interrupted first run then finishes instead of bricking, and nothing has to guess which state it is in. It also drops F-2, because no relaxation of the gate is needed. Cost: it is a new mechanism, so it is a full tier-1 gate, not a re-gate. It is NOT a one-liner and should not be sold to you as one."
+   },
+   {
+    "key": "revert-keep-tests",
+    "label": "Revert the discriminator, keep the test improvement, and park SEC-01",
+    "detail": "The M10 / cell-D fix is genuinely good and independent of the broken part. Take it, revert authEnforcement.js to round 2's behaviour, and leave SEC-01 open. Round 2 bricks a fresh deployment on an interrupted first run, but it has NO open-mode path — so this is the safer of the two failure directions while the design question waits for you. Choose this if you would rather spend nothing more on it tonight."
+   },
+   {
+    "key": "shipnarrow",
+    "label": "Merge round 3 as it stands",
+    "detail": "NOT recommended, and on the record only so the option exists. It ships a fix that does not close its Blocker, adds a new open-mode path (F-2), and whose own new test cell ASSERTS the surviving brick as correct behaviour — so the next reader finds the defect codified as intent. This is the cap being used to launder something rather than the cap working."
+   }
+  ],
+  "recommended": "deadlock",
+  "ts": "2026-09-07T21:00:22.220283+10:00",
+  "status": "ruled",
+  "ruled_choice": "deadlock",
+  "ruled_ts": "2026-09-07T21:01:47.958851+10:00",
+  "prior_rulings_overridden": [
+   "2026-08-21 19:49",
+   "2026-08-29 07:59",
+   "2026-09-02 19:46",
+   "2026-09-07 18:58",
+   "2026-09-07 19:56",
+   "CARD secuura-ks843-half2-round3",
+   "CARD secuura-ks949-round3-cap-and-the-cutoff",
+   "CARD nexusai-rd361-blocker-vs-nogo-cap",
+   "CARD secuura-892-cap-spent-blocker-open"
+  ]
  }
 ]
