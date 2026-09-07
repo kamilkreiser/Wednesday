@@ -2,15 +2,31 @@
 date: 2026-09-07
 type: pickup
 scope: SECUURA + Wednesday's own work. Datasec belongs to the LAPTOP seat — do not touch its threads.
-source: replaced WHOLESALE at 21:0x by the 20:12 seat; state block kept current at 22:23
+source: replaced WHOLESALE at 21:0x by the 20:12 seat; replaced at 22:25 for the rotation
 status: live
 supersede: replace this file wholesale at the next pickup; do not append
 ---
 
-# NEXT PICKUP — 22:10 AEST Monday. TWO CARDS ON KAM'S DESK. #897 UNDER GATE. #892 FROZEN. Nothing deployed.
+# NEXT PICKUP — 22:25 AEST Monday. FOUR cards on Kam's desk, only TWO of them this seat's. #892 FROZEN. Nothing deployed.
 
 **Run `2_Project_Files/tools/kam_rulings_today.sh` before writing anything — read EVERY line.**
 Mail UTC ≈ AEST−10. **ROTATION BAND 80–90% (Kam 10:49); 70% is a CHECKPOINT ONLY.**
+
+## 🔴 KAM'S DESK — FOUR open cards, and only TWO are this seat's
+**THIS SEAT'S — act on these:**
+- **`secuura-892-round4-passed-but-introduced-two-majors`** (rec `round5`, **default HOLD**)
+- **`secuura-ks968-rotation-three-worlds`** (rec `separate`, **default STOP**)
+
+**THE LAPTOP SEAT'S — do NOT adopt, re-card, or answer:**
+- `vault-add-a-stages-another-clients-files` (Fleet/workspace) — **the vault `git add -A` finding
+  this seat deliberately did NOT card at 21:16 because the laptop held the thread. It DID card it.
+  That non-action was correct and is now confirmed twice.**
+- `hpsm-credential-bearing-prd-outside-every-snapshot` (Datasec/HPSM)
+
+**Datasec mail on the shared inbox: read by SUBJECT ONLY, do not fetch the body.** Four arrived
+tonight (S45's plan confirmation, its RD-361 READY, its RD-148 READY, the RD-361 gate verdict at
+12:21). **This seat answered none, correctly** — that coordinator is alive and gating its own agents.
+**Three body-fetches were paid for before the filter was applied; that is the avoidable cost.**
 
 ## 🔴 FIRST ACTION — read Kam's panel, then `%162`, then the inbox.
 **TWO THINGS ARE HIS AND BOTH HAVE SAFE DEFAULTS:**
