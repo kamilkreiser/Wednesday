@@ -288,6 +288,13 @@ fi
 #           slowing things down"                                    -> MERGE authority
 #   11:09  "Go ahead with the deploy, and you've got permission to deploy for the rest
 #           of the week."                                           -> DEPLOY authority
+#   12:07  "Lift the production ban. This week we are allowed to make production
+#           changes, but flag these when relevant or when making changes."
+#                                                              -> PRODUCTION changes
+# The third is the largest boundary he has moved (never-touch-prod is a hard rule with
+# its own skill). Wednesday reads it NARROWLY: Secuura only, pending his answer on
+# whether it extends to other clients. A credential live systems authenticate with is a
+# ROTATION and still comes to him; external comms are untouched.
 # Both are read as THROUGH SUNDAY 2026-09-13, stated to him as a reading he can move.
 # WHY THIS IS A CHECK AND NOT A NOTE (2026-09-06_a-scoped-override-carries-its-own-expiry):
 # a scoped instruction applied without an expiry becomes a standing one the moment the
@@ -297,9 +304,9 @@ fi
 # deploys; what lapses is the extra latitude, not the baseline. Kam's word moves it.
 WED_WEEK_GRANTS_UNTIL="2026-09-13"
 if [ "$(date +%Y-%m-%d)" \> "$WED_WEEK_GRANTS_UNTIL" ]; then
-  warn "Kam's week-scoped MERGE + DEPLOY grants lapsed after $WED_WEEK_GRANTS_UNTIL" "2026-09-07 09:40 and 11:09 were 'for the rest of the week' — fall back to protocol v1.3 scope, or ask him to extend. Do not carry the extra latitude forward silently."
+  warn "Kam's week-scoped MERGE + DEPLOY + PRODUCTION grants lapsed after $WED_WEEK_GRANTS_UNTIL" "2026-09-07 09:40, 11:09 and 12:07 were 'for the rest of the week' — fall back to protocol v1.3 scope, or ask him to extend. Do not carry the extra latitude forward silently."
 else
-  ok "Kam's week-scoped merge + deploy grants (2026-09-07) live until $WED_WEEK_GRANTS_UNTIL"
+  ok "Kam's week-scoped merge + deploy + PRODUCTION grants (2026-09-07) live until $WED_WEEK_GRANTS_UNTIL (production read NARROWLY: Secuura only)"
 fi
 
 # ── Tailscale remote-access leg (added 2026-08-20; DORMANT-BY-DEFAULT per Kam

@@ -7,7 +7,7 @@ status: live
 
 # Boot digest — headline + rules of every lesson (open the file when it fires)
 
-Generated 2026-09-07 12:07 from 106 lesson files (514,351 B). Each block = the lesson's retrieval handle (H1), its frontmatter, the operative paragraph, its section index, and every RULES section verbatim. 6 files carry no rules-shaped section and are included whole. The CASES behind a rule live only in the file: open it the moment the rule fires, or when a diagnosis needs the evidence. `_ledger.md` is read whole beside this digest; `_ledger_archive.md` on demand.
+Generated 2026-09-07 12:09 from 107 lesson files (518,580 B). Each block = the lesson's retrieval handle (H1), its frontmatter, the operative paragraph, its section index, and every RULES section verbatim. 6 files carry no rules-shaped section and are included whole. The CASES behind a rule live only in the file: open it the moment the rule fires, or when a diagnosis needs the evidence. `_ledger.md` is read whole beside this digest; `_ledger_archive.md` on demand.
 
 ## The T9 SSD is the master — Wednesday must be fully portable
 `2026-07-31_fully-portable-drive.md` · principle · 2026-07-31 · status: superseded — the "T9 is the master" half by [[2026-08-25_one-drive-devmaster-is-master]] (2026-08-25); the portability principle itself still lives
@@ -3744,6 +3744,33 @@ commissions — a selection rule commissions a whole class of choices) ·
 [[2026-08-03_role-beyond-code-three-priorities]] (his very-important #1: no cross-client leak — case
 1 is that fear firing) · [[2026-09-02_coo-actionable-tickets-never-wait-for-kam]] (the 2026-09-06
 assignment correction this violated).
+
+
+## The production ban is lifted for the week — read narrowly, flag every use
+`2026-09-07_production-ban-lifted-for-the-week.md` · grant · 2026-09-07 · status: live
+
+**His words, verbatim:** *"Lift the production ban. This week we are allowed to make production
+changes, but flag these when relevant or when making changes. Make the change directly."*
+
+sections (open the file for these): The three things Wednesday did with it, in order · What remains OUTSIDE the grant, because he did not name it · How to apply
+
+## How to apply
+1. **Flag every production change** — his condition, taken as a standing obligation rather than a
+   courtesy: named to Kam **before** where there is time, **immediately after** where there is not,
+   with what changed and where. **It goes into every agent's standing HOLDS**, not just Wednesday's
+   memory ([[2026-08-09_an-enforcement-you-must-arm-is-not-one]]).
+2. **Name the destination** — a production change states the environment and subscription in its BLUF,
+   exactly as a commit states its remote and branch
+   ([[2026-09-07_name-the-field-that-says-whose-it-is]]).
+3. **The grant removes the pause, not the receipt** ([[2026-08-07_autonomy-grant-ship-decisions]]).
+4. **Never argue an action into scope.** If it needs a clever reading of "production changes", it is
+   outside it — and this grant in particular will be read by successors who were not in the room.
+
+**Family:** [[2026-08-07_protocol-v1.3-signed-delegation]] (production was his signature class; this
+suspends that one line for a week) · [[2026-09-07_merge-authority-was-already-mine]] and
+[[2026-09-07_deploy-grant-and-fix-the-visible-data]] (the day's other two week-scoped grants — check
+the register before asking for any of the three) · [[2026-09-06_a-scoped-override-carries-its-own-expiry]] ·
+[[2026-08-03_go-slow-earn-autonomy]] (rule 5) · [[2026-08-21_challenge-me-when-you-think-im-wrong]].
 
 
 ## Establish the LOCAL clock and day-phase from `date` at boot — before any time-framed ritual (greeting, voice, morning-vs-overnight)
