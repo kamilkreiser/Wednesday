@@ -103,6 +103,18 @@ DELIBERATELY NOT moved** — the rule is a cadence, not a lever to hit a size ta
 it** (Kam is heads-down and the card exists); the measurement is now line 5 of the consolidation KPI,
 where it will be acted on beside the board's 30% number.
 
+## 📨 A DATASEC/NEXUSAI REPORT LANDED AND IS **NOT THIS SEAT'S** — do not answer it
+**05:09:46Z, `[Datasec/NexusAI -> Wednesday] RD-361/362/363/364 FILED · cat-1 = 102 of 285 ·
+Marketplace blockers named`.** Subject read; **body deliberately NOT read and NOT acted on.**
+**Kam partitioned the machines at 11:01: Secuura here, Datasec on the LAPTOP.** That agent was
+unpaused and briefed by the LAPTOP seat, not this one — answering it would mean ruling on a thread
+whose brief this seat has never seen. **Leave it.**
+
+**The one live risk:** Kam said at 11:25 he would resume the laptop *"at 3 when the rate limit
+resumes"*. It is past that. **If the laptop seat is NOT up, this report sits unanswered** — and
+Marketplace blockers matter, since Kam ruled the Marketplace objective at 10:48. **Flagged to him as
+one line with a default: if he is silent, it stays for the laptop seat and this note is the record.**
+
 ## ⏱ THE ETA IS THE DISCRIMINATOR — tap at 16:15 if there is no receipt
 **The waker fires on COMPLETION, not progress** (DONE · STOPPED_LOW_DISK · process-death). **A HUNG
 build — stuck, not dead, not finished — matches none of the three and would leave everyone asleep.**
