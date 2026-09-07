@@ -74,6 +74,44 @@ mode across all 175 routes** if `settings.json` is emptied with backups gone.
 cell D; restore 23/23). Single-write-site premise verified across **all 678 tracked files**.
 **Report:** `/Volumes/KK_T9_External_HDD/!CODING/Testing Agent MAIN/projects/nexusai/reports/2026-09-07-rd361-round3-tier1/report.md`
 
+## ✅ F-2 CENSUS CELL — **GO WITH FINDINGS @ `f93730c`** (tier-2 re-gate, 22:51). **F-B MUST BE FIXED.**
+The cell **can** fail against the real `server.js` — M-A and M-B reproduced on disk. F-2 is answered.
+
+**🔴 F-B (Major), and it is NOT acceptable as a stated limit:** the cell's `stripComments()` runs
+`line.replace(/\/\/.*$/,'')` — **and `https://` contains `//`.** It corrupts parsing in **18 of the 80
+files, `server.js` and `jsonStorage.js` among them.** The census reads damaged text, so **a writer
+sharing its line with a URL is deleted before it is counted** (M-G2 — byte-identical hazard to the
+M-B2 the cell catches, **green, in frame**). **acorn is already a dependency.** The gate's closing
+line is why it matters: *"fix F-B before the next round rests on this census the way round 4 rested on
+the comment."*
+
+**F-A (Major)** — docblock claims *"all 678 tracked files, every extension"*; the cell guards **80
+`backend/**.js` = 11.8%.** **But the claim is TRUE today** (re-measured across all 678: exactly two
+write sites) — **sound claim, undersized guard.** The docblock must stop claiming 678, and the frame
+must at minimum cover **what ships** (M-E2 one directory up and M-H `.mjs` are shipped paths).
+**F-C** textual counters miss a computed key, a key-in-variable bulk write, and `??=`.
+**F-D (Minor)** the control's title claims *"EACH WAY a writer could bypass"* — a completeness claim
+over three shapes when eight more exist; **rename it an instrument-liveness proof, which is what it
+is.** **F-E (Polish)** M-B never reaches `bulkWrites`.
+
+**The control question answered properly:** NOT the RD-329 pathology — under M-B2 the census went red
+while the control **passed**. **But they are always BLIND together: 0 of 6 blind spots, by
+construction**, because the control drives the same `censusOf()` over the same regexes.
+
+**Correction to the builder's red-proof, in both directions:** M-B reddens on `setSettingWrites` 2→1,
+so jest stops and **`bulkWrites` — the counter M-B exists to exercise — is never evaluated.** The
+red-proof would read identically if that counter were dead. The gate isolated M-B2 (additive) and
+proved it live.
+
+**COMMISSIONED to S45 as its LAST item before handover, F-B FIRST if context is short:** acorn instead
+of regex stripping, **red-proofed with the matched pair (M-B2 stays RED, M-G2 turns RED)** · docblock
+and guard made to agree · control cell renamed · an additive bulk-write cell so `bulkWrites` is
+exercised.
+
+**Process note filed as a habit, not a finding:** S45's checkout **moved during the live gate**
+(`f93730c` → `ea4d229`). No harm — the gate resolved every SHA by object and never wrote to the tree —
+but **when a gate is live on your work, use a separate worktree for the next branch.**
+
 ## ✅ RD-148 ROUND 2 — **GO WITH FINDINGS @ `ea4d229`, all three closed** (gate 22:41)
 F-1 (Blocker), F-2, F-3 genuinely closed, each verified on a real DOM with a negative control that
 flips. **None of the residue is a regression** — every finding proved byte-identical between
