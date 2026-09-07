@@ -4855,9 +4855,9 @@
   ],
   "recommended": "grant",
   "ts": "2026-09-07T10:28:36.822382+10:00",
-  "status": "open",
-  "ruled_choice": null,
-  "ruled_ts": null,
+  "status": "ruled",
+  "ruled_choice": "grant",
+  "ruled_ts": "2026-09-07T11:06:24.283306+10:00",
   "prior_rulings_overridden": [
    "2026-08-17 20:05",
    "2026-08-21 09:56",
@@ -4865,7 +4865,9 @@
    "2026-08-26 10:51",
    "2026-08-29 08:00",
    "2026-09-05 16:40"
-  ]
+  ],
+  "delivered_artefact": "EXECUTED 2026-09-07 10:5x: CLAUDE-reference.md:83 az command commented out + live Founders Hub values added; New-Project Launch_Claude.command:197 repointed to Founders Hub with a dead-tenant warning (bash -n clean); Machine_Credentials/azure/azureProfile.json quarantined by rename. /Volumes/DevMASTER/CLAUDE.md:29 warning deliberately KEPT. Backups .pre-0907-deadtenant beside both files.",
+  "delivered_ts": "2026-09-07T11:06:24.353059+10:00"
  },
  {
   "id": "secuura-ks597-backfill-95k",
@@ -4979,5 +4981,39 @@
   "ruled_ts": "2026-09-07T11:03:11.054048+10:00",
   "delivered_artefact": "mail to Secuura/Blockchain 2026-09-07T01:0xZ, subject 'KAM RULED round2-plus-probe: #885 round 2 ...' — carries the ruling verbatim, the probe bounds, and lands in this round's PR plus the probe report",
   "delivered_ts": "2026-09-07T11:03:11.126844+10:00"
+ },
+ {
+  "id": "secuura-demo-row-060-remediation",
+  "client_project": "Secuura/Blockchain",
+  "title": "MEASURED: the live demo IS in the exposed state — and fixing the seeder does NOT rewrite the row that is already there",
+  "bluf": "PRIOR-RULING CHECK: your 06:42 (replace the identity everywhere AND set the password), 07:37 (MFA later), 07:38 (redact the transcripts) and 11:01 (round 2 plus one probe) were all read. This card does not revisit any of them; it reports the probe you authorised and asks the question it exposed. THE PROBE RESULT: outcome A, the pre-registered exposed case. The agent wrote three outcomes to a file and sha256-hashed them BEFORE running anything, used one read-only SELECT per database over SSH, and NEVER SELECTED THE ADDRESS — the query returns a boolean by construction, so your address is not in its mail or in any log it produced. MEASURED: the seed row exists on the live demo, is 'active', and its email is NOT the redacted placeholder. Control: 30 users total, so the query could see rows. Also measured: only 6 of the 12 fixed seed ids are on the box, consistent with the whole batch aborting. STATED AS INFERENCE, NOT MEASUREMENT, because the agent separated them and I am keeping that separation: that the row therefore still holds your old address follows from the abort mechanism plus this ticket's history — the boolean only proves 'not the placeholder'. THE QUESTION THIS EXPOSES, and it is the reason for the card: fixing the seeder stops this recurring, but it does NOT rewrite the row that is already sitting there. That needs a deploy, and deploys are yours. So round 2 alone leaves the demo exactly as it is today.",
+  "default_action": "If Kam is silent: the agent continues round 2 (the code fix) and NOTHING touches the demo — no second probe, no write, no deploy. The exposure stays as it is today and Wednesday re-raises when round 2 is READY, which is the next natural decision point anyway.",
+  "options": [
+   {
+    "key": "domain-probe-then-decide",
+    "label": "One more read-only probe to close the inference gap, then decide the deploy (recommended)",
+    "detail": "The agent compares ONLY the domain against the fictional secuura-test.invalid — one statement, still never selecting the address. A non-fictional domain settles it beyond inference. It refused to run this on its own because your bound said one probe, which was correct. Then we decide the deploy knowing exactly what is there."
+   },
+   {
+    "key": "deploy-after-round2",
+    "label": "Skip the second probe, deploy the fix once round 2 passes its gate",
+    "detail": "Treat the inference as good enough — it is well supported — and let the corrected seeder rewrite the row on the next deploy. Fastest route to your address being gone. Needs your deploy word, which is what this option is."
+   },
+   {
+    "key": "targeted-remediation-now",
+    "label": "Remediate that one row now, ahead of round 2",
+    "detail": "A single targeted UPDATE on the demo to suspend and re-identify the row, before the code fix lands. Shortest exposure window, and it is a WRITE to a live box, which is the thing every rule here exists to prevent. I would want your explicit word and a second pair of eyes on the statement."
+   },
+   {
+    "key": "leave-until-fixed",
+    "label": "Change nothing on the demo until round 2 is merged and deployed normally",
+    "detail": "No extra probe, no targeted write. Accepts that your address stays on the demo for as long as that takes."
+   }
+  ],
+  "recommended": "domain-probe-then-decide",
+  "ts": "2026-09-07T11:07:41.184126+10:00",
+  "status": "open",
+  "ruled_choice": null,
+  "ruled_ts": null
  }
 ]
