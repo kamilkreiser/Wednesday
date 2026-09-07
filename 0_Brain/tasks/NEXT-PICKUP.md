@@ -2,7 +2,7 @@
 date: 2026-09-07
 type: pickup
 scope: SECUURA + Wednesday's own work. Datasec belongs to the LAPTOP seat — do not touch its threads.
-source: replaced WHOLESALE at 21:0x by the 20:12 seat; state block kept current at 22:10
+source: replaced WHOLESALE at 21:0x by the 20:12 seat; state block kept current at 22:16
 status: live
 supersede: replace this file wholesale at the next pickup; do not append
 ---
@@ -19,7 +19,25 @@ Mail UTC ≈ AEST−10. **ROTATION BAND 80–90% (Kam 10:49); 70% is a CHECKPOIN
   inside KS-969's own test suite**, which is why this is his and not Wednesday's.
 - **`secuura-ks968-rotation-three-worlds`** (rec `separate`, **default STOP**) — two booleans separate
   a real login-breaking rotation from two innocent states.
-## 🟢 IN FLIGHT RIGHT NOW — `%169` QA-897, and its verdict is the next event
+## 🟢 IN FLIGHT — #897 AMENDING. The gate REPORTED and `%169` is closed.
+**VERDICT: GO with findings. KS-978 / F-B is GENUINELY CLOSED.** **Wednesday ruled AMEND BEFORE
+MERGE** and mailed it 22:14 — **not a round** (no cap on #897; that is #892's), doc-only, reversible,
+Wednesday's call. **One edit closes both findings:**
+- **F-1 MAJOR** — `POST /api/documents` answers 403 for **NINE** conditions; the rewrite publishes
+  **TWO**. The gate's sentence is the ruling: *"the replaced text named no condition precisely… but
+  it did not tell an integrator the list was CLOSED. The new sentence does."* **Vague-and-OPEN →
+  specific-and-CLOSED.** Fix: keep the two, **re-open the list**, name the other codes, phrase it so
+  it does not claim to be exhaustive.
+- **F-2 MINOR** — *"belongs to a different Organisation"* is narrower than the predicate
+  (`claimedOrgId !== callerOrgId`): a uuid belonging to NO org is refused identically. Fix the field
+  description, the 403 description **and the runtime message**.
+- **NO THIRD TICKET** — the regression test folds into **KS-811** (the gate's own call).
+- **ON THE AMENDED DIFF: Wednesday does the completion check, then MERGES.** Do not re-raise it.
+- **Stated limit to carry onto KS-978's closing comment:** scenario H proved the new cells are
+  **presence regexes — they catch a DROP, not an INVERSION** (inverted meaning, all tokens kept → 7
+  passed). That is KS-837's line 1, correctly not filed against the PR.
+
+## (superseded) the gate that produced the above
 **PR #897 @ `718008cef`** (off develop `6a7a7824e`) **closes KS-978 / F-B — the DEPLOY BLOCKER on
 already-merged code.** Prose + generated spec only; **the 403 is untouched.** Gate `%169` was 17 min
 in and **mid-way through writing `VERDICT: GO with findings — TIER 2 STANDS (no behaviour change)`**
