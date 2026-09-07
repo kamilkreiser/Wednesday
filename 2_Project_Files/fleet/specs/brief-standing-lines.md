@@ -162,3 +162,24 @@ first.** Five findings, fourteen tickets, on one board.
 **Why it belongs in the path and not in an agent's memory:** a duplicate is only visible from OUTSIDE
 the session that files it. Inside one session the loop is flawless — red → control → not mine → file.
 Nothing in that loop can surface the other three.
+
+## BRANCH NAMING — the rule has TWO directions (2026-09-07, both learned in one day)
+
+**Direction 1 (morning, from a real mislabel):** *name a branch from a ticket that EXISTS, never from
+a guessed position in the sequence.* A seat guessed the next id, named the branch, and #888 now
+carries `ks-964` while meaning `ks-966` — corrected in the PR title and body, history NOT rewritten.
+
+**Direction 2 (afternoon, and it is the one nobody would think of):** **sometimes the ticket id must
+be LEFT OUT of the branch name on purpose.** A seat fixing the KS-418 documentation defect named its
+branch `docs/nightly-schedule-true-reason` **specifically because `ks-418` in the branch name would
+have transitioned PETER'S ticket** through Linear's GitHub integration — the same integration that
+silently moved KS-964 to `In Progress` that morning.
+
+**The rule, stated once so both directions follow from it:**
+> **A branch name is an INSTRUCTION TO THE BOARD, not a label.** Linear's integration reads it and
+> moves the ticket. So: name it from a ticket that exists AND that you are entitled to move. **If the
+> ticket belongs to a client human — Peter, Stuart — keep its id OUT of the branch entirely and put
+> the reference in the PR body instead**, where it links without transitioning.
+
+**Test by its handle:** *"if this branch name moves a ticket, is that ticket mine to move?"* If no,
+the id does not go in the name.
