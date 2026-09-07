@@ -7748,5 +7748,15 @@
   "role": "kam",
   "text": "Decision secuura-workspace-suites-never-run-on-a-pr: wire-nonblocking — Wire the workspace suites into the PR workflow, NON-blocking first (recommended)",
   "ts": "2026-09-07T10:41:39.422035+10:00"
+ },
+ {
+  "role": "wednesday",
+  "ts": "2026-09-07T10:44:33.752651+10:00",
+  "text": "Second merge of the day is going in. The rate limiter fix passed clean — no majors, and the tester proved the important one two separate ways rather than once.\n\nYour CI ruling is recorded and queued behind the merges.\n\nThe thing worth your attention is something the tester found that nobody asked it to look at. There is a ticket on the Secuura board, KS-645, that says a reset endpoint has no role check. That is false, and it was already false before this PR — the role check landed weeks ago and the tester drove it at the wire to confirm: a tenant admin gets a flat 403 at both versions. Nothing anywhere in the codebase even references that ticket number.\n\nBut it did not stop at 'the ticket is wrong'. It went looking for what was real underneath, and found it: a system admin in one tenant can clear another tenant's rate limit bucket. Drove it end to end — tenant B exhausts its bucket, tenant A resets it, tenant B is free again.\n\nThen it did the thing I would not have expected of a findings-only tester. It worked out that the obvious fix — bind the rate limit key to whoever is calling — would BREAK the reset endpoint, because clearing another tenant's bucket is plausibly exactly what a platform operator reset is for. So it is one mechanism but it needs two different rules. That is a design conclusion, from an agent whose charter says it never fixes anything, and it saves us a wasted round.\n\nI have folded the two tickets into one on that basis with the asymmetry written into it.\n\nOne ruling of mine you might disagree with: the tester left a one-line comment defect and asked whether to patch it before merging. I said no. The head was gated at a specific commit, and if we amend after the gate then what merges is not what was measured. It becomes a follow-up.\n\nThird gate is still running on the demo admin identity work — that is the one about your address and the published password. I will bring you that one whatever it says."
+ },
+ {
+  "role": "kam",
+  "text": "Great find. This is another proof point that the process is working well. Please continue.",
+  "ts": "2026-09-07T10:46:09.662721+10:00"
  }
 ]
