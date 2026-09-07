@@ -6082,5 +6082,42 @@
    "CARD secuura-ks635-expiry-pattern",
    "CARD secuura-founders-hub-credit-expiry"
   ]
+ },
+ {
+  "id": "secuura-ks968-my-decision-table-was-void",
+  "client_project": "Secuura/Blockchain",
+  "title": "KS-968: the decision table you ruled on contained a boolean that CANNOT FAIL — it would have called a possible incident 'benign'. Still unmeasured.",
+  "bluf": "OVERRIDE REASON, and it is a correction of my own prior card rather than a re-raise of yours. You ruled 'separate' on secuura-ks968-rotation-three-worlds at 07:09:37 and the one authorised statement RAN: is_superuser=on, hash_null=f, addr_unchanged=f. MY TABLE SAID THAT MEANS WORLD (b), BENIGN. IT DOES NOT, AND THE SECOND BOOLEAN IS THE REASON. users.email is AES-GCM CIPHERTEXT — the seat established this from the repo BEFORE touching the box (docker/init/01-schema.sql:18-21; userRepo.ts:534 encrypts the column; :433-444 resolves logins via email_lookup_hash and NEVER by the email column). So 'email = issuer@secuura.com' compares a plaintext literal to ciphertext and returns FALSE whether the address changed or not. THE BOOLEAN CANNOT FAIL. My table would therefore have selected 'benign' using an instrument incapable of contradicting it — a check that cannot fail, written by me, put in front of you as a decision aid, and ruled on. The seat did not take that route and registered why BEFORE running: its pre-registration (SHA-256 c83a6dd9, verified unchanged after) recorded the disappointing outcome as its EXPECTATION, which is what makes this a measurement instead of a rationalisation. THIRD OCCURRENCE OF THIS COLUMN PRODUCING FALSE EVIDENCE across two seats; s145 filed and retracted the same defect. WHERE KS-968 ACTUALLY STANDS: world (c) is EXCLUDED. World (a), a key rotation with no re-hash — the INCIDENT, where affected accounts cannot sign in by email address on the demo — and world (b), benign, remain UNSEPARATED. It is UNMEASURED, not clear. NOTHING further has been run: the seat named the third query it did not run rather than widening scope, and I am not authorising one.",
+  "default_action": "HOLD — nothing further runs on the demo box. KS-968 is recorded as UNMEASURED with worlds (a) and (b) both live, in the handover, so it stays visible rather than being quietly filed as benign. NOTHING IS DEGRADING FURTHER WHILE THIS WAITS: if it is a rotation it has been one since the rotation happened, and the affected accounts are already in that state — a day changes nothing material. THE ONE THING I WILL NOT DO IS LET IT BE RECORDED AS BENIGN on the reading my own void boolean produced.",
+  "options": [
+   {
+    "key": "hashcmp",
+    "label": "Authorise ONE read-only comparison",
+    "detail": "the row's email_lookup_hash against lookupHash('issuer@secuura.com') under the CURRENT key (Recommended). STATED LIMIT, because I failed to state one last time: this is ONE-DIRECTIONAL. A MATCH is decisive for benign — the stored hash is current and resolves that address, so there was no un-re-hashed rotation. A MISMATCH leaves (a) and (b) still ambiguous and closes nothing."
+   },
+   {
+    "key": "record",
+    "label": "Record KS-968 UNMEASURED with both worlds live, and stop — an honest state, no further reads on that box",
+    "detail": ""
+   },
+   {
+    "key": "login",
+    "label": "Settle it functionally instead — attempt a real sign-in by address for that account on the demo, which tests the actual user-facing symptom rather than the data",
+    "detail": ""
+   }
+  ],
+  "recommended": "hashcmp",
+  "ts": "2026-09-08T09:16:34.089237+10:00",
+  "status": "open",
+  "ruled_choice": null,
+  "ruled_ts": null,
+  "prior_rulings_overridden": [
+   "2026-09-06 09:42",
+   "CARD secuura-ks968-demo-hash-probe",
+   "CARD secuura-ks968-probe-control-query",
+   "CARD secuura-ks968-hash-population-count",
+   "CARD secuura-ks968-id-keyed-decider",
+   "CARD secuura-ks968-rotation-three-worlds"
+  ]
  }
 ]
