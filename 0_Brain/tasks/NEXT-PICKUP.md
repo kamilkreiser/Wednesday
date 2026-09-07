@@ -1,81 +1,70 @@
 ---
 date: 2026-09-08
 type: pickup
-scope: SECUURA ONLY on this machine — Kam, panel 07:08:23: "only secuura projects on this machine until further notice". Datasec is the LAPTOP's.
-source: replaced WHOLESALE at 07:17 by the 22:26 seat at its 50% checkpoint
+scope: SECUURA ONLY on this machine — Kam, panel 07:08:23: "only secuura projects on this machine until further notice". Datasec is the LAPTOP's; read its mail by SUBJECT only.
+source: replaced WHOLESALE at 09:05 by the 22:26 seat at its 65% checkpoint
 status: live
 supersede: replace this file wholesale at the next pickup; do not append
 ---
 
-# NEXT PICKUP — 07:17 AEST Tuesday. KAM'S DESK IS CLEAR. s149 is running the deploy sweep.
+# NEXT PICKUP — 09:05 Tuesday. DEPLOY DONE. Peter's queue closed out bar one. ONE card on Kam's desk.
 
-**Run `2_Project_Files/tools/kam_rulings_today.sh` before writing anything.** It warns when its copy
-is stale — SETTLE that by pulling and re-running before concluding he is quiet.
-Mail UTC ≈ AEST−10. **ROTATION BAND 80–90%; 70% is a CHECKPOINT ONLY.**
+**Run `2_Project_Files/tools/kam_rulings_today.sh` first — and SETTLE its stale warning by pulling
+and re-running before concluding he is quiet.** Mail UTC ≈ AEST−10. **ROTATION BAND 80–90%.**
 
-## 🔴 IN FLIGHT — s149 on pane `%170`, launched 07:15, briefed and tapped
-**Brief (durable path, not a scratchpad):**
-`2_Project_Files/fleet/briefs_staged/2026-09-08_secuura-s149-deploy-sweep-round5-ks968.md`
-Mail verified at `secuura-blockchain@agentmail.to` 2026-09-08T21:15:08Z before the tap.
-
-**Its queue, in Kam's order:**
-1. **THE DEPLOY SWEEP — Kam 07:10:32, verbatim:** *"I'm going to drop off the kit if we please deploy
-   and merge everything that has been tested and done and is ready for deployment."* (dictation:
-   "the kit" = his kids). **24 issues sit in `Tested Not Deployed` across KS+PS** (board_count.sh,
-   limit 250, a real count). **NOTHING has ever been deployed:** demo box `632f16dfe`, develop
-   `400517aaf`. **Step 1a is ENUMERATE AND STOP — Wednesday GOes the SET before any merge or deploy.**
-   The GO is conditional on the seat writing down the BLAST RADIUS, which is UNMEASURED — Wednesday
-   holds no Secuura identity and refused to guess it.
-2. **#892 round 5 — F-2 FIRST** (Kam 07:08:30: *"ONE more narrow round — F-1 and F-2 only, F-2
-   first"*). F-3 is NOT in this round. #892 is frozen at `1e31c80b9` and is NOT in the merge set.
-3. **KS-968 — EXACTLY ONE two-boolean statement** (Kam 07:09:37 `separate`), decision table in the
-   brief. A third query is outside his words.
-
-## ✅ KAM'S DESK IS CLEAR — he ruled six things between 07:07 and 07:10
-- `secuura-ci-dead-19-days-blocks-your-own-ruling` → **`fix`**: **Kam is fixing GitHub billing
-  himself.** Link given: `https://github.com/organizations/Secuura/settings/billing` (org measured
-  from the remote; the page itself unverified — Wednesday holds no Secuura identity).
-  **When he says billing is live, commission KS-961** — his `wire-nonblocking` ruling becomes
-  executable only then. **Until then CI is DEAD** (2,000 runs, 100% `startup_failure` since
-  2026-08-20, the seat's measurement).
-- `secuura-892-round4…` → **`round5`** · `secuura-ks968-rotation-three-worlds` → **`separate`** — both
-  now in s149's queue above.
-- `wed-ledger-archive-has-no-trigger` → **`trigger`**: ✅ **BUILT AND LIVE — by the LAPTOP seat**
-  (`8d906698`, three branches exercised; a missing `date` binary reports UNCHECKED rather than OK,
-  which is the check-that-cannot-fail guard). Verified firing on this machine 2026-09-08 08:3x:
-  `✓ ledger archive: no rows older than 2026-09-05`. **The Studio seat nearly rebuilt it and caught
-  itself by looking first — check what already occupies the slot before building.**
-  The laptop's diagnosis is the one to carry: **rule 3c is a SESSION-END step and seats that ROTATE
-  never run it, so it fires almost never.** Row rate is only the second cause.
-- `vault-add-a-stages-another-clients-files` → **`grant-both`** + note: *"allow the option through
-  this chat to seperate or merge datasec and secuura. for now, secuura on this machine and datasec
-  on laptop"*. **TWO items and NEITHER is started:** (a) the vault skill-file write + a reconcile
-  session — **the card is the LAPTOP'S; do not both act on the shared vault, that is the race the
-  card is about**; (b) a chat-panel option to separate/merge Datasec and Secuura views (WED work).
-- `hpsm-credential-bearing-prd-outside-every-snapshot` → note only: **"only secuura projects on this
-  machine until further notice."** HPSM stays untouched.
+## 🔴 KAM'S DESK — ONE card, default HOLD, nothing expiring before 2026-09-10
+**`secuura-793-security-expiry-two-triages-disagree`** (rec `earlier`, **default HOLD**).
+Three accepted-vulnerability exceptions read `expires 2026-09-10` on #793 and `2026-09-24` on
+develop; on a fourth advisory develop is the correct one. **Neither side is simply newer.** Wednesday
+did NOT rule it: taking develop's dates EXTENDS three live risk acceptances by 14 days, and that
+authority would ORIGINATE with Wednesday — the one v1.3 line it may not cross.
+**The card carries a third option, `pattern`, and it is the one that stops this recurring:** Kam was
+offered a pattern ruling on 2026-08-26 (`secuura-ks635-expiry-pattern`), took `extend` on ONE row,
+and that card's own text says *"pattern still open"*. **This is that deferral arriving as a merge conflict.**
 
 ## STATE
-    origin/develop   400517aaf   NOTHING DEPLOYED
-    demo VM          632f16dfe   19 days of merged change never shipped
-    #892             1e31c80b9   FROZEN — round 5 authorised, not built
+    origin/develop   4f337be83   format gates GREEN, proved ON THE TRUNK (not on a branch)
+    demo VM          400517aaf   LIVE — deployed 2026-09-08 21:43→22:07Z, verified at the destination
+                                 The develop→demo delta is FORMATTING-ONLY: nothing to redeploy for.
+                                 It rides with the next real deploy. Stated, not left as drift.
+    #892             1e31c80b9   round 5 IN FLIGHT (F-2 first, then F-1; F-3 excluded; NO round 6)
+    #793             7e8721107   DIRTY, UNTOUCHED, frozen on Kam's card. Do NOT let a later task
+                                 quietly resolve it. Wednesday declined even the mechanical half:
+                                 the file is written ONCE or nobody will trust it.
     #891             KAM'S OWN CLICK — https://github.com/Secuura/Distributed_Secuura/pull/891
-    ks597-qa-pg      UP, docker-owned (127.0.0.1:6499). Survived the %162 close — verified tty ?? on
-                     the listener AND its parent, listeners 26 -> 26.
+    rollback         632f16dfe   (not free: 3-image rebuild; does NOT undo a DB change)
 
-## WHAT THIS SEAT DID OVERNIGHT (full detail in 5_Project_History/history.md, 2026-09-08 entry)
-s148 wrapped 05:32, scored 1.0 · WED-116 cancelled on Kam's word · `safe_push.sh` un-hardcoded from
-the dead T9 path · `wake_watch` idle-tap fixed + red-proofed (**known limit: safe but LEAKY — the ack
-lifts on any pane chrome including statusline clocks; re-ack, do not chase**) · rule 3c archive run
-(conservation asserted 585 = 585).
+## 🔴 s149 ON PANE `%170` — at 50%, told to CONTINUE not rotate, budget statement owed
+Working **#892 round 5**, then the **KS-968 single two-boolean statement**. Nothing else is queued.
+Brief: `2_Project_Files/fleet/briefs_staged/2026-09-08_secuura-peter-queue.md` (+ the s149 brief
+beside it). **It has corrected Wednesday THREE times today and been right every time** — treat its
+pushbacks as measurements, not friction.
 
-## THE HABIT TO CARRY — it is Wednesday's, not an agent's
-**Three times in ninety minutes this seat described a property of a mechanism it had just built
-instead of measuring it.** All three wrong, all in the safe direction. Ledger w=90.
-**And the wrap itself nearly went unsaved:** `safe_push` printed `HEAD == origin` while the entire
-wrap sat uncommitted, because it stages only paths passed as ARGUMENTS. **Verify every wrap by
-`git show HEAD:<path>`; a non-zero dirty count is a FAILED wrap whatever any tool printed.** w=91.
+## PETER'S 14 — CLOSED OUT except the card and three unapprovables
+DONE: #750 closed · #758 closed carrying its three-tree measurement · #720 rebased clean
+(`fcc611d29`, preflight passed 50 legs, no `--no-verify`) · #721 done (`62108c579`) · #895's two
+findings on KS-682 · #901 opened AND MERGED (the live trunk red) · KS-987/988/989/990/991 filed.
+**#793** — Kam's card. **PS #783** — a Platform S PR, NOT in this repo; **still needs routing.**
+🔴 **#896 / #899 / #900 REMAIN UNAPPROVED and that is deliberate.** ~18,600 lines of harness code.
+The seat refused to approve what it had not reviewed to approval depth and **Wednesday upheld it**.
+**Do not let a later seat quietly stamp them.** They carry factual verification records saying
+explicitly that they are not approvals. **#900's base is #899's branch, not develop** — merging it
+as-is reports success while moving nothing on the trunk; that warning is on the PR.
 
-## STILL OWED, inherited
-**KS-811's derived code-set comparison** — *"without it, the next contract author is in the same
-position the last one was."*
+## WHAT WEDNESDAY GOT WRONG TODAY — all caught by measurement, none reached a cost
+1. **"NOTHING has been deployed at all"** — false; s146 shipped on 09-07 and it is in the project's
+   own history. Job was 8x smaller than briefed. **An absence claim needs a positive control.** w=92.
+2. **"Refresh #758's evidence block, ~10 min"** — the refreshed block could not be made true; the PR
+   turns neither gate green and its own fix does not survive its merge.
+3. **"`audit-baseline.json` is GENERATED, regenerate it"** — there is no writer. Hand-maintained.
+   **Wednesday instructed a command that does not exist.**
+4. **The queue never recorded Kam's rulings**, so the panel re-served six cards and he answered five
+   twice. Fixed by transcription; **nothing bridges chat_log → decisions.json.** w=93.
+5. **Nearly rebuilt the doctor ledger trigger** the laptop had already shipped (`8d906698`).
+**The pattern: measure your own claim before stating it. Four of the five are that.**
+
+## WED ITEMS STILL OWED
+- **Chat panel option to separate/merge Datasec and Secuura views** (Kam's 07:09 note). Not started.
+- **Route PS #783** to Platform S.
+- **The vault reconciliation is the LAPTOP'S card** — do not both write the shared vault.
+- `board_count.sh` excludes ARCHIVED by default; "24" was the visible part of a 29-row state.
