@@ -74,7 +74,42 @@ mode across all 175 routes** if `settings.json` is emptied with backups gone.
 cell D; restore 23/23). Single-write-site premise verified across **all 678 tracked files**.
 **Report:** `/Volumes/KK_T9_External_HDD/!CODING/Testing Agent MAIN/projects/nexusai/reports/2026-09-07-rd361-round3-tier1/report.md`
 
-## 🔴 FIRST ACTION FOR THE NEXT SEAT — two gates are live and NexusAI has NO builder
+## 🔴 FIRST ACTION FOR THE NEXT SEAT — S46 is briefed and building; ONE gate still live
+**Live panes:** `%17 Datasec/NexusAI` (**S46**, briefed on G-1…G-5) · `%15 QA/NexusAI-RD322-323`
+(47 min in, not yet reported). **The moved-heads gate reported and its pane is closed.**
+
+**✅ BOTH MOVED HEADS: GO WITH FINDINGS.** `690bed9` is the cleaner of the two and would ship without
+reservation; `731aa6e` ships **only with G-1 and G-2 ticketed** and the gate's sentence on the record:
+> *No future round may cite the WIRING cells as a completeness claim over `server.js` until
+> `stripComments()` is gone.*
+
+**S46's brief:** `2_Project_Files/fleet/briefs_staged/2026-09-07_nexusai-s46-g-findings.md`
+**Gate report:** `/Volumes/KK_T9_External_HDD/!CODING/Testing Agent MAIN/projects/nexusai/reports/2026-09-07-moved-heads-tier2/report.md`
+
+**G-1 (Major)** the AST census **misses what the regex caught** — a `writeFileSync` with a template
+literal, with a string literal, and a spread carrying the key, all additive, all in frame, all
+bypassing the stamp. **T-A8b passes the whole file 33/33; its matched pair T-MB2 (object literal) is
+RED. The only variable is SERIALISATION.**
+**G-2 (Major) — and the defect is in the RECORD, not the code.** The retained `stripComments()` is
+still load-bearing and its stated reason is **false twice**: a URL *can* hide what those cells count,
+**and the live damage needs no URL at all** — two prose comments contain `/*` (`server.js:638`,
+`:1097`), each opening a bogus block. **31,845 non-comment characters deleted across 116 ranges;
+lines 638–713 and 1097–2062 gone, ~1,040 lines.** Byte-identical payload, three placements: outside
+the hole **RED**, inside **GREEN**, URL-on-line **GREEN**. **`THE BUG` is a `not.toMatch`, so deleting
+text makes it PASS — it fails OPEN.**
+**🔴 DO NOT OVERSTATE IT, and the gate did not:** no current deciding site is in a deleted span (all
+nine at line 2349+), the WIRING patterns count identically raw and stripped today, the cells are
+byte-unchanged. **No live defect. NOT a regression.** What is wrong is that the commit records the
+question as considered and settled on a reason that does not hold.
+**G-3** `acorn-walk` is declared **nowhere** in `package.json` — the guard rests on a transitive dev
+dep of `acorn-globals`. **G-4** the `__tests__` cell CAN fail (D-1 red) but its title claims a
+property of the image while its assertion checks a spelling (D-2 `COPY . .` and D-3 `ADD` both green);
+**its green is luck — the cell never reads `.dockerignore`.** **G-5** the "256 computed assignments"
+reproduces **exactly**, over a frame **121 files wider** than the guard the sentence qualifies
+(239 guard-frame / 256 all-tracked / 145 backend) — sound limit, wrong frame, **in a docblock whose
+whole purpose is that round 3 died of that.**
+
+## (superseded) FIRST ACTION — two gates live and NexusAI had no builder
 **Live panes:** `%16 QA/NexusAI-MovedHeads` · `%15 QA/NexusAI-RD322-323`. **Both report to Wednesday.**
 **S45 handed over at 23:03 and its pane is CLOSED** (`HANDOVER-S45.md` at the NexusAI project root,
 outside the repo). **Relaunch a NexusAI builder only when a verdict needs action** — a fresh seat on a
