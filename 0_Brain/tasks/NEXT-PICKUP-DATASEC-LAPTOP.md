@@ -74,7 +74,50 @@ mode across all 175 routes** if `settings.json` is emptied with backups gone.
 cell D; restore 23/23). Single-write-site premise verified across **all 678 tracked files**.
 **Report:** `/Volumes/KK_T9_External_HDD/!CODING/Testing Agent MAIN/projects/nexusai/reports/2026-09-07-rd361-round3-tier1/report.md`
 
-## 🔴 ROUND 4 CHANGED SHAPE AT 21:32 — item 1 FALSIFIED Wednesday and the round is better for it
+## ✅ RD-361 ROUND 4 — **GO WITH FINDINGS, THE BLOCKER IS CLOSED** (gate reported 22:21)
+`rd-361-round4-s45` @ `400718f`. 2 Major, 2 Minor, 1 Polish — **neither Major blocks.** The Blocker
+closes on BOTH forms of the wizard's ordinary path, the `/api/auth/enforce` deadlock closes with it,
+**no regression** on F/C2b/E/L1/RST, and **round 4 also closed a hole round 3 had** (state C3: key
+stripped, stamp left — r3 SERVED, r4 DENIES). **L4 CONFIRMED UNCHANGED** — identical key list,
+identical 5236 bytes, both heads. Report + 24 per-state evidence records:
+`/Volumes/KK_T9_External_HDD/!CODING/Testing Agent MAIN/projects/nexusai/reports/2026-09-07-rd361-round4-tier1/`
+
+**🔴 WEDNESDAY'S COMPLETION CHECK FOUND A THIRD ARTEFACT — the hop earned its place.** The gate named
+its frame honestly: *"I read the docblock and the commit message. RD-361 and RD-370 are Jira and I did
+not read them."* Wednesday read them. **RD-361 comment 37268 and RD-370's summary are both correct**
+(they say the round does NOT close F-2/L4). **But F-1's false sentence is also in RD-361 comment
+37266** — *"where they survive, `restoreFromBackupsIfNeeded` already restores authEnforced and the
+question never arises. Measured: state L1 comes out ENFORCED."* **The measurement is true; the
+generalisation is false** — PREV2 has backups surviving and the question arises. One state measured,
+the conclusion written about all of them. **So F-1 lives in THREE places, not two.**
+
+**F-1 (Major)** — the residue BOUNDARY is understated; fix is documentation + RD-368 scope, **no code
+change**. The residue is not *"settings lost AND the backup layer with it"*; it is *"the settings state
+the gate reads carries no evidence"*, which **includes a restore from any recovery generation
+predating the enforce write** — a shape the product itself produces (`writeFile()` backs up before
+overwriting, `jsonStorage.js:1817-1820`). **The gate was scrupulous about what it would NOT charge to
+round 4:** PREVGEN (that generation surviving alone) serves on BOTH heads, so it is pre-existing.
+**F-2 (Major)** — the load-bearing census is guarded by **no test**; *"round 3's failure class one
+level down — a census correct when written and undefended afterwards."* Cheap fix, design supplied.
+
+**COMMISSIONED to S45 as a tier-2 follow-up (not a round; the cap is untouched by a GO):** correct the
+boundary in all THREE artefacts (docblock · commit message · a NEW RD-361 comment superseding 37266,
+never an edit) · add PREV2 **and** PREVGEN to RD-368 comment 37267 keeping them distinct · build F-2's
+guard cell with its own tampered-copy control · then mail Wednesday. **Scored 1.0 / 1.0** (scoreboard).
+
+**⚠️ `pane_close.sh` caught a listener dying with the round-4 gate's pane (16 → 15).** Diagnosed, not
+waved off: the gate booted 24 servers and **its housekeeping section never claims to have stopped
+them**. Harmless — its work was delivered and the two surviving listeners (3098/3099) are the LIVE
+RD-148 gate's. **The line is already in the RD-148 brief:** *stop any server you start and prove the
+port reads 000.* Put it in every future QA brief.
+
+**🔴 GHOST TEXT THREE TIMES TONIGHT, ALL AT WRAPPED PANES** — NexusAI (`good night`), Security Review
+(*"check the Bearer scheme defect in SharePoint, MailFlow and UniversalPrint"* — three components
+already reviewed and outside the brief), and the round-4 gate (*"Send Kam a one-paragraph summary of
+the verdict"*, an action aimed at the principal). **Detector first, every time; close the pane rather
+than clear the line when the agent has wrapped.** All three closed cleanly.
+
+## 🔴 HOW ROUND 4 GOT ITS SHAPE — item 1 FALSIFIED Wednesday and the round is better for it
 **Wednesday's inference was HALF right, and the wrong half was the one that mattered.** S45 measured
 every byte of every file under the data directory across the full state space, after the second
 `new JsonStorage(dir)` returns.
