@@ -2,12 +2,12 @@
 date: 2026-09-07
 type: pickup
 scope: SECUURA + Wednesday's own work. Datasec belongs to the LAPTOP seat — do not touch its threads.
-source: replaced WHOLESALE at 21:0x by the 20:12 seat; state block kept current at 21:39 (70% checkpoint)
+source: replaced WHOLESALE at 21:0x by the 20:12 seat; state block kept current at 22:10
 status: live
 supersede: replace this file wholesale at the next pickup; do not append
 ---
 
-# NEXT PICKUP — 21:39 AEST Monday. ONE CARD ON KAM'S DESK. #892 FROZEN pending it. Nothing deployed.
+# NEXT PICKUP — 22:10 AEST Monday. TWO CARDS ON KAM'S DESK. #897 UNDER GATE. #892 FROZEN. Nothing deployed.
 
 **Run `2_Project_Files/tools/kam_rulings_today.sh` before writing anything — read EVERY line.**
 Mail UTC ≈ AEST−10. **ROTATION BAND 80–90% (Kam 10:49); 70% is a CHECKPOINT ONLY.**
@@ -19,7 +19,18 @@ Mail UTC ≈ AEST−10. **ROTATION BAND 80–90% (Kam 10:49); 70% is a CHECKPOIN
   inside KS-969's own test suite**, which is why this is his and not Wednesday's.
 - **`secuura-ks968-rotation-three-worlds`** (rec `separate`, **default STOP**) — two booleans separate
   a real login-breaking rotation from two innocent states.
-**`%162` Secuura/Blockchain is the ONLY agent pane** (all three gate panes closed after reporting,
+## 🟢 IN FLIGHT RIGHT NOW — `%169` QA-897, and its verdict is the next event
+**PR #897 @ `718008cef`** (off develop `6a7a7824e`) **closes KS-978 / F-B — the DEPLOY BLOCKER on
+already-merged code.** Prose + generated spec only; **the 403 is untouched.** Gate `%169` was 17 min
+in and **mid-way through writing `VERDICT: GO with findings — TIER 2 STANDS (no behaviour change)`**
+when this block was written — **read the inbox, the verdict may already be there.**
+- Brief: `2_Project_Files/fleet/qa-agent/briefs/2026-09-07_secuura-ks978-897-tier2.md`
+- Launcher: `2_Project_Files/fleet/qa-agent/launchers/launch_qa_secuura_897.sh` (all 8 branches
+  exercised before arming). **Close the pane after it reports** (`pane_close.sh %169`).
+- **On a GO: the merge is WEDNESDAY'S** under Kam's week grant — #897 is inside commissioned work,
+  reversible, and makes no external commitment. **Score it, then merge, then say so.**
+
+**`%162` Secuura/Blockchain is the ONLY builder pane** (all three gate panes closed after reporting,
 listeners 26→26 each). It is **DORMANT BY DESIGN, told to stand down on #892 entirely**, and
 **Wednesday is its wake path**. Its prompt is clear — no queued tap.
 
@@ -58,12 +69,16 @@ listeners 26→26 each). It is **DORMANT BY DESIGN, told to stand down on #892 e
                                  merged on Wednesday's word, both with a NEGATIVE control proving
                                  #892's frozen work did not leak in. NOTHING DEPLOYED.
     demo VM          632f16dfe  (untouched all day)
-    #892  1e31c80b9  ROUND 4, UNDER GATE at %168. NO ROUND 5 — a NO GO goes back to Kam.
+    #892  1e31c80b9  ROUND 4 GATED (GO-with-findings, BLOCKER CLOSED) — FROZEN pending Kam's card.
+    #897  718008cef  KS-978 / F-B, the DEPLOY BLOCKER. UNDER GATE at %169. Merge is Wednesday's on a GO.
+  🔴 SCOPING FACT, measured by the seat: F-1/F-2/F-3 are NOT live on develop — those suites exist
+     ONLY on the frozen #892 branch (`git ls-tree`). F-2's hazard reaches that branch, not the
+     trunk — and MERGING #892 is what would put it there. Strengthens the card, does not soften it.
     #891  3c07157a2  ** KAM'S OWN CLICK ** https://github.com/Secuura/Distributed_Secuura/pull/891
 **Filed tonight:** KS-974/975/976 (#894's findings) · KS-977 (#892 F2-A) · **KS-978 (#889 F-B — the
 DEPLOY BLOCKER, and it is that ticket's FIRST LINE)** · KS-979 (F-A) · KS-980 (F-C); plus comments on
 KS-808 and KS-973. **F-A and F-C were SPLIT, not grouped** — F-C carries a decision, F-A does not.
-**Nothing is owed on the board.**
+**KS-981 (F-1+F-3) · KS-982 (F-2) filed** — the seat split them from Wednesday's two-ticket proposal and gave its reasoning ON the tickets. **Nine tickets filed tonight. Nothing is owed on the board.**
 **`ks597-qa-pg` is UP** (`docker ps`, 127.0.0.1:6499→5432) — the seat's disposable Postgres, its
 teardown command in `HANDOVER-s148.md`. **It is the seat's to tear down, not Wednesday's.**
 
