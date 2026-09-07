@@ -44,7 +44,11 @@ holding `admin@secuura.com`), the id-row UPDATE throws **23505** on `users_email
 the `catch` at `userRepo.ts:1506` swallows it and `continue`s — **so the entire F3 fix NEVER RUNS.**
 Proved by ISOLATION (neuter only the id guard → the email arm works perfectly) and a CROSS-SHA control
 (round-1's file reproduces it). **AND A GREEN CELL ASSERTS IT IS HANDLED** — it passes only because
-the vitest `db` double returns `{rows:[]}` and cannot enforce a unique index. **Ticket + the
+the vitest `db` double returns `{rows:[]}` and cannot enforce a unique index. **⚠ THE F3-RESIDUE TICKET DOES NOT EXIST YET — Wednesday referred to it in three mails as though it
+did, and s146 correctly REFUSED to invent an identifier** (citing this morning's KS-964 branch
+mislabel). **The newest issue on the board is KS-967.** The unique-index measurement is parked on
+**KS-966** with an explicit note that it moves to the residue ticket when filed. **FILING IT IS THE
+NEXT BOARD ACTION** — after the deploy receipt, by s146 or its successor. **Ticket + the
 misleading cell = a follow-up, NOT an amendment to #888.** Fix-shapes: email-row-first ordering, or
 make the id rewrite conditional on `!emailRowIsDistinct`, or one transaction. **The regression test
 must run against a REAL Postgres — a mock cannot express this defect.**
