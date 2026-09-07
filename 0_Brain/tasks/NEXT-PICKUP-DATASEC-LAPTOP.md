@@ -14,9 +14,29 @@ anything — read EVERY line.** Mail UTC ≈ AEST−10. **ROTATION BAND 80–90%
 **QUIET HOURS 23:00–06:00: no voice.** Chat mirror only, and only if something genuinely needs saying.
 
 ## 🔴 FIRST ACTION — read the fleet, then answer whatever landed
-    %17  Datasec/NexusAI  — S46, briefed and building. Plan CONFIRMED. Working G-2 → G-1 → G-3 → G-5 → G-4.
-    %15  QA/NexusAI-RD322-323 — tier-2, TWO subjects, launched 23:0x. HAS NOT REPORTED YET.
-**Both report to Wednesday, not to each other.** S45 handed over at 23:03 and its pane is closed
+    %17  Datasec/NexusAI  — S46, briefed and building. Plan CONFIRMED.
+         Queue: G-2 → G-1 → RD-323-F-1 → G-3 → G-5 → G-4  (+ RD-322-F-1/F-2 as one-liners in that file)
+**ALL GATES HAVE REPORTED. No gate is running.** S46 is the only live agent.
+
+**✅ RD-322 @ `432617a` → GO** (merge-ready as it stands). **✅ RD-323 @ `99fb518` → GO-with-findings**
+(1 Major, 2 Minor, 2 Polish). Report:
+`/Volumes/KK_T9_External_HDD/!CODING/Testing Agent MAIN/projects/nexusai/reports/2026-09-07-rd322-rd323-tier2/report.md`
+
+**🔴 RD-323-F-1 (Major) — the THIRD check-that-cannot-fail tonight, inside the change built to stop
+that family.** `healthSweeper.runOnce` sets `p1 = p1s.length` filtering `verdict.startsWith('P1')`,
+**which includes `'P1-degraded'` — so `p1 >= degraded`, always** — and the override fails the tick on
+it, **four lines below its own comment promising `degraded` is deliberately NOT failure.** Measured on
+the shipped class with a real stub. **And the cell certifying the carve-out asserts
+`f({degraded:1, p1:0}) === false` — a shape `runOnce` cannot produce.** Land the fix **WITH** the
+change, not behind it: a few lines in one method plus one rewritten assertion.
+
+**RD-322's judgement call is RATIFIED** — the gate verified both grounds itself across the **whole
+`.github` tree** (5 workflows, 6 `runs-on` all `ubuntu-latest`, zero `container:`, zero matrix legs,
+zero self-hosted, Dockerfile user `node`, no git hooks). **No workflow runs as root; RED-over-skip
+stands.** It also added an arm the ticket lacked (delete the record so `blocked` goes true for the
+WRONG reason — the cell still reddens): **narrow, not vacuous.**
+
+S45 handed over at 23:03 and its pane is closed
 (`HANDOVER-S45.md` at the NexusAI **project root**, outside the repo — its **§0** is the best thing in
 it and sits above the branch table deliberately).
 
