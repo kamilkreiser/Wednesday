@@ -17,7 +17,7 @@ morning board on his panel.
 ## 🔴 FIRST ACTION — MERGES ARE LANDING ON MAIN RIGHT NOW. Read this before touching anything.
     %22  Datasec/NexusAI      — S47. MERGING, resumed at merge 3 of 7 on Wednesday's 07:32 GO.
     %24  QA/NexusAI-RD376     — full tier-2 gate, still running (~60 min).
-    %25  Datasec/SecurityReview — file the 22 findings + finish the Bearer sweep. Kam-approved.
+    %25  Datasec/SecurityReview — BOTH JOBS DONE. Owes one answer (the Agent Mail 403), then wraps.
     %0   wednesday            — this seat.
 
 🔴 **`main` HAS MOVED for the first time since 2026-09-01.** Verified by Wednesday's own `ls-remote`:
@@ -37,6 +37,29 @@ half of his instruction is NOT satisfied and it goes back to him.
 🔴 **gitleaks now sees six days of commits for the first time** and RD-367 says a credential sits in
 `terraform.tfstate.backup`. **Expect it to fire. That is the scanner working.** Report only — **no
 history rewrite, no force push, no deletion** (all Kam's signature class).
+
+## ✅ SECURITY REVIEW — COMMISSION COMPLETE (Kam approved option (a) at ~07:1x)
+`%25` did both jobs and its Bearer sweep found a real one.
+- **Job 1 done, and done the hard way:** the 22 are filed in the Consolidated Findings Register **and
+  the register's unframed "VERIFICATION IS COMPLETE" claim was amended** so filing unverified rows did
+  not make a true document false. It also fixed a stale §7.1 and an unswept Bearer flag nobody sent it at.
+- **Job 2 done, and it is NOT a clean bill:** `GotenbergCloudRenderingRequestJob.kt:250-253` sends
+  **the raw Microsoft credential to a server-designated `contentLocation` URL**, with the escalation
+  condition named (pdf-api influence -> well above Low). Sweep record:
+  `_Working/delta-review-2026-09/bearer-sweep-2026-09-08.md`. **Wednesday has NOT opened that file** —
+  relayed from its report.
+- **So the register now holds 23 pending rows, not 22.**
+- **Told: do NOT verify the 23** (out of scope, Kam has not approved it) — **a ghost at its prompt
+  proposed exactly that**, the fourth time in twelve hours a suggestion has proposed the freshly-ruled-
+  against option. It held. **One question owed back: the shape of an "Agent Mail 403" it reported.**
+  Then it wraps. Vault step skipped, per the standing ruling.
+- 🔴 **NEW CARD `secrev-verify-23-and-batch1-filing`** (rec `package`, default = nothing runs). Two
+  things it surfaced and correctly did NOT self-authorise: the 23 are unverified against a register
+  whose standard is independent re-derivation, **and batch-1's findings (D-MF-01..06, D-SP-01..05,
+  D-UP-01..06, D-HAM-...) are STILL NARRATIVE-ONLY in §2.2** — prose, not rows — so the estate count is
+  understated by ~20 more. The prior-ruling gate refused this card on the bare word "verify" (matching
+  a Secuura MFA ticket and an ISO-date card); **both opened and read, both false positives, override
+  reason stated in the BLUF.**
 
 ## MERGE ORDER — S47's, MEASURED, and it CORRECTED Wednesday's
 Wednesday's brief said "rd-374 before anything that depends on it". **Wrong, and verified wrong from
@@ -123,7 +146,10 @@ heading count and the severity split re-derived with the report's own greps and 
 **WHAT IS NOT DONE, and this was the answer to his question:**
 1. **Static only, by design** — nothing built, executed, flashed or networked; no device, card, tenant
    or `az`. There is no dynamic testing in this at all.
-2. 🔴 **NONE of the 22 findings is on a board** ("read-only on Jira — no ticket created"). Four Highs,
+2. ✅ **RESOLVED 07:3x — the findings are now FILED** (23 rows, incl. the Bearer sweep's) in the
+   Consolidated Findings Register, marked pending verification, with the register's completeness claim
+   amended. The paragraph below is the ORIGINAL finding, kept as the record of why it mattered:
+   ~~NONE of the 22 findings is on a board~~ ("read-only on Jira — no ticket created"). Four Highs,
    including a security predicate switched off with `if (true) return false;` in a shared library six
    apps link, live in markdown and nowhere a tracker shows them.
 3. 🔴 **An unfinished sweep:** the missing-`Bearer`-scheme defect found in TWO siblings is likely in
