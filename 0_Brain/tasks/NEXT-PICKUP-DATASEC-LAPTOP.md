@@ -74,6 +74,37 @@ mode across all 175 routes** if `settings.json` is emptied with backups gone.
 cell D; restore 23/23). Single-write-site premise verified across **all 678 tracked files**.
 **Report:** `/Volumes/KK_T9_External_HDD/!CODING/Testing Agent MAIN/projects/nexusai/reports/2026-09-07-rd361-round3-tier1/report.md`
 
+## ✅ ROUND-4 FOLLOW-UP DONE @ `f93730c` — and F-2's cell is at a TIER-2 RE-GATE
+All four commissioned items complete, **PASS 2185/2185**. Boundary corrected in **all three**
+artefacts (docblock · a superseding commit note, history NOT rewritten · **RD-361 comment 37271 as a
+NEW comment superseding 37266**). PREV2 and PREVGEN added to RD-368 (comment 37272) **kept distinct**
+— PREV2 charged to round 4, PREVGEN pre-existing and unattributed. F-2's census cell built to the
+gate's design and red-proofed **on disk against the real `server.js`** (M-A a third writer → RED;
+M-B `server.js:3349` → bulk `writeFile` → RED).
+**Re-gate mechanism, BY PATH:** `2_Project_Files/fleet/launch_qa_nexusai_rd361_f2.sh`
+(tier 2 = through-code only; wrong-SHA path red-proofed at rc 9 before launch).
+**The one question it must answer:** the cell's frame is `backend/**.js`, which is **narrower than
+"everywhere the key can be written"** — and round 3 died because a `backend/` sweep could not see
+`static/`. **A narrower-than-the-guarantee frame is a finding even though the cell passes.**
+It must also rule on the builder's own disclosure that its **control reddens under both mutations** —
+sound, or one instrument wearing two names?
+
+**S45 also closed RD-322** (root-guard vacuity; chose RED over `test.skip(asRoot)` and **measured the
+thing the choice depends on** — `build.yml` is `runs-on: ubuntu-latest` with no `container:`, so CI is
+not root; call accepted) and **parked RD-323 cleanly in a labelled stash**, now resumed.
+**RD-130 flagged as possibly stale and correctly NOT touched** — at the campaign tip `DEFAULT_URLS` is
+the Container Apps demo URL, not the dead VM, but its frame is the SOURCE at that SHA, not a deployed
+revision. Category 2; Wednesday carries it; the tenant question gates that pass anyway.
+
+## 🔴 THE STUDIO SEAT FIXED A REAL BUG IN WEDNESDAY'S OWN TOOL — `safe_push.sh`
+Wednesday shipped `safe_push.sh` with **`W=/Volumes/KK_T9_External_HDD/WEDNESDAY` hardcoded**. That
+volume is **not mounted on the Studio**, so every run of it there would have exited. She made `W`
+self-locating from `BASH_SOURCE` (commit `812008ec`) and kept the dead line one away with the reason,
+per the revert rule. **Verified from this seat: it resolves to the same path, so the fix is correct on
+both machines.** This is Wednesday violating the portability rule it holds the whole fleet to
+([[2026-08-25_travel-drive-stale-pointers]]) inside a tool built to travel — **the second time tonight
+a Wednesday seat caught the other's error.** Any new tool gets a self-located root, never a volume.
+
 ## ✅ RD-361 ROUND 4 — **GO WITH FINDINGS, THE BLOCKER IS CLOSED** (gate reported 22:21)
 `rd-361-round4-s45` @ `400718f`. 2 Major, 2 Minor, 1 Polish — **neither Major blocks.** The Blocker
 closes on BOTH forms of the wizard's ordinary path, the `/api/auth/enforce` deadlock closes with it,
