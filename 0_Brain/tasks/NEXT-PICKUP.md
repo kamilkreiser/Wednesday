@@ -34,7 +34,7 @@ turn ([[2026-09-03_a-pane-close-is-a-session-kill]]).
    reds, 1 of 10, and it is the right cell. The gate is told to verify the **identity** of the failing
    cell and the **EXECUTED-cell count** under each tamper — a cell that reds by failing to build
    proves nothing. **KS-977 filed (F2-A); F1-C is a comment on KS-973.**
-4. **#889's THREE TICKETS — F-A, F-B, F-C — COMMISSIONED 11:24Z, NOT YET CONFIRMED FILED.**
+4. **#889's THREE TICKETS — DONE.** KS-978/979/980 filed 11:27Z and verified against merged develop.
    **Measured on the board: they were NEVER filed** (newest was KS-977 @ 11:10). **F-B carries a
    DEPLOY-BLOCKER line that must sit ON the ticket** — #889 is merged and that ruling otherwise lives
    only in a mail. **CHECK THE BOARD, do not assume.** KS-811 to be read first — the gate calls F-B
@@ -45,15 +45,16 @@ turn ([[2026-09-03_a-pane-close-is-a-session-kill]]).
    **F2-A and F1-C are NOT in this round. THERE IS NO ROUND 5** — a NO GO comes back to Kam.
 
 ## STATE — every SHA is an agent's read, NOT re-derived at this seat
-    origin/develop   6c60cc09b  → moves tonight when #889 and #893 land
-    demo VM          632f16dfe  (untouched all day; nothing deployed)
-    #889  48ad0354e  GO-with-findings, F1 CLOSED. MERGING.
-    #893  0281b0faa  released behind #889 — the trunk-moving merge.
-    #892  34a48abc6  NO GO. ROUND 4 authorised, narrow.
+    origin/develop   6a7a7824e  ← MOVED TONIGHT. #889 (2ff0eb850) then #893 (6a7a7824e), both
+                                 merged on Wednesday's word, both with a NEGATIVE control proving
+                                 #892's frozen work did not leak in. NOTHING DEPLOYED.
+    demo VM          632f16dfe  (untouched all day)
+    #892  1e31c80b9  ROUND 4, UNDER GATE at %168. NO ROUND 5 — a NO GO goes back to Kam.
     #891  3c07157a2  ** KAM'S OWN CLICK ** https://github.com/Secuura/Distributed_Secuura/pull/891
-**Filed:** KS-974 (F-1+F-5) · KS-975 (F-2+F-4) · KS-976 (F-3); KS-808 already covered the
-`run-migrations.sh` finding. **Owed:** tickets for #889's F-A/F-B/F-C and #892's F1-A/F1-B/F2-A;
-F1-C is an UPDATE to KS-973 item 3.
+**Filed tonight:** KS-974/975/976 (#894's findings) · KS-977 (#892 F2-A) · **KS-978 (#889 F-B — the
+DEPLOY BLOCKER, and it is that ticket's FIRST LINE)** · KS-979 (F-A) · KS-980 (F-C); plus comments on
+KS-808 and KS-973. **F-A and F-C were SPLIT, not grouped** — F-C carries a decision, F-A does not.
+**Nothing is owed on the board.**
 **`ks597-qa-pg` is UP** (`docker ps`, 127.0.0.1:6499→5432) — the seat's disposable Postgres, its
 teardown command in `HANDOVER-s148.md`. **It is the seat's to tear down, not Wednesday's.**
 

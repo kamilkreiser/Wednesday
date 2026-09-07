@@ -329,3 +329,45 @@ which is precisely the state in which it goes unnoticed until one seat follows t
 single-tenant world becomes a cross-tenant breach the moment the workspace holds more than one
 client, and the ritual will not notice.** A wildcard stage, a wildcard clean, a wildcard sync and a
 wildcard grep all have this property.
+
+---
+
+## SAYING IT IS NOT FILING IT — search the board before asserting a thing is TRACKED
+*(Secuura/Blockchain seat, 2026-09-07 21:27, in its own words; and Wednesday's own miss from the
+other side, the same evening.)*
+
+> *"I reported F-B as 'a deploy blocker on merged code' in three separate mails tonight and never
+> once checked whether it existed as a ticket. **I treated saying it as filing it.**"*
+
+**Wednesday's half, same class, opposite direction:** three tickets were COMMISSIONED at 10:54Z,
+displaced four times by Wednesday's own inserts, and then referred to as though commissioning were
+filing — while one of them carried a **DEPLOY BLOCKER on already-merged code**, which therefore lived
+in a mail and a handover and **in nothing a person about to deploy would land on.**
+
+**The rule, and it binds coordinators and builders identically:**
+1. **Before any sentence claiming a finding is tracked, ticketed, owned, deploy-blocked or "already
+   filed" — search the board and quote what the search returned.** *"searched `<symbol>` and
+   `<path>`, 0 open hits"* is one line and it makes the claim checkable.
+2. **Commissioning is not filing.** A coordinator that asks for a ticket re-reads its STATE before
+   writing it anywhere as done — and an insert that displaces a commissioned item **names what it
+   displaces and when it returns**.
+3. **A ruling only exists where its next reader lands.** A deploy blocker belongs on the ticket, **as
+   its first line, above the BLUF** — not as a severity field, not in a comment thread, not in the
+   mail that ruled it.
+4. **The instrument is the same one that catches duplicates** (see the search section above), so
+   there is no new tooling to learn: exact searches to decide, the fuzzy one to discover, a control
+   that returns non-zero.
+
+## A TAMPER'S FAILURE SET SIZES THE MECHANISMS, not just the guard
+*(same seat, same mail — it noticed hours later that it already held the evidence.)*
+
+In #889's round-2 tamper the `platform_bypass` and `bypassrls` cells **reddened identically**. The
+suite's header claims those are **two distinct paths**. **Two genuinely distinct mechanisms do not
+have to fail together** — and the cause turned out to be that `writerOn()` opens the *same*
+connection for both branches, so the `platform_bypass` GUC sits on a connection RLS never
+constrained and one of the two paths is never exercised at all.
+
+**The rule:** when you run a tamper, **read the failure SET as evidence about how many mechanisms
+exist**, not only about whether the guard fires. **Cells that always red together are one cell
+wearing two names**, and a suite that claims to cover two paths while reddening as one is a coverage
+claim that has already falsified itself in front of you.
