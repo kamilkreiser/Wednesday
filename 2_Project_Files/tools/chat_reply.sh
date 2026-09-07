@@ -53,18 +53,51 @@ _raw = open(path).read()
 try:
     log = json.loads(_raw)
 except json.JSONDecodeError:
+    # CORRECTED 2026-09-07 17:5x, MEASURED not reasoned. The previous repair stripped the
+    # marker LINES and then salvaged objects with a per-object regex. That silently LOSES
+    # entries whenever a conflict boundary falls INSIDE an object rather than between two:
+    # the shared prefix ("role") stays outside the markers, so the two sides' remaining
+    # fields end up in ONE brace-run and only one entry survives it. Run against the real
+    # 17:2x conflict it returned 1624 entries where both sides hold 1630 — it dropped SIX,
+    # including the two NEWEST messages (the Studio seat's 17:20 and the laptop's 17:23) —
+    # and printed "REPAIRED". A repair that reports success while losing the most recent
+    # messages is worse than one that refuses.
+    # So: rebuild each SIDE as a whole document, parse both, union. The regex salvage is
+    # kept as the last resort for a file too damaged for that, and now SAYS it is lossy.
     import re as _re
-    _clean = '\n'.join(l for l in _raw.split('\n')
-                        if not l.startswith(('<<<<<<<', '=======', '>>>>>>>')))
+    def _side(_text, _keep):                      # _keep: 'ours' | 'theirs'
+        _out, _state = [], 0
+        for _l in _text.split('\n'):
+            if _l.startswith('<<<<<<<'): _state = 1; continue
+            if _l.startswith('=======') and _state == 1: _state = 2; continue
+            if _l.startswith('>>>>>>>') and _state == 2: _state = 0; continue
+            if _state == 0 or (_state == 1 and _keep == 'ours') or (_state == 2 and _keep == 'theirs'):
+                _out.append(_l)
+        return '\n'.join(_out)
+    _entries, _how = [], None
+    try:
+        _ours = json.loads(_side(_raw, 'ours'))
+        _theirs = json.loads(_side(_raw, 'theirs'))
+        _entries = ([e for e in _ours if isinstance(e, dict)] +
+                    [e for e in _theirs if isinstance(e, dict)])
+        _how = 'both sides parsed as documents'
+    except json.JSONDecodeError:
+        _clean = '\n'.join(l for l in _raw.split('\n')
+                            if not l.startswith(('<<<<<<<', '=======', '>>>>>>>')))
+        for _m in _re.finditer(r'\{[^{}]*"ts"\s*:\s*"[^"]+"[^{}]*\}', _clean, _re.S):
+            try: _entries.append(json.loads(_m.group(0)))
+            except Exception: continue
+        _how = 'REGEX SALVAGE — LOSSY, a side would not parse; entries may be missing'
+    # dedupe on (ts, role, text-prefix): ts+role alone collides when two seats write in the
+    # same second, and dropping a real message costs more than keeping a near-duplicate.
     _seen, log = set(), []
-    for _m in _re.finditer(r'\{[^{}]*"ts"\s*:\s*"[^"]+"[^{}]*\}', _clean, _re.S):
-        try: _e = json.loads(_m.group(0))
-        except Exception: continue
-        _k = (_e.get('ts'), _e.get('role'))
+    for _e in _entries:
+        _k = (_e.get('ts'), _e.get('role'), (_e.get('text') or '')[:120])
         if _k in _seen: continue
         _seen.add(_k); log.append(_e)
     log.sort(key=lambda e: str(e.get('ts', '')))
-    sys.stderr.write('chat_reply: REPAIRED a conflict-marked log -> %d entries\n' % len(log))
+    sys.stderr.write('chat_reply: REPAIRED a conflict-marked log via %s -> %d entries\n'
+                     % (_how, len(log)))
 log.append({
     "role": "wednesday",
     "seat": __import__("socket").gethostname(),  # 2026-09-07: which machine wrote this (autoplay scope)
