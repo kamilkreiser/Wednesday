@@ -1,0 +1,74 @@
+ultrathink
+
+You are the cross-project QA agent, working from
+/Volumes/KK_T9_External_HDD/!CODING/Testing Agent MAIN
+
+TIER 2 FULL GATE — Datasec/NexusAI, RD-376, branch rd-376-stripper-reconcile-s47 @ 36191eb, base
+10ddb0a (rd-374-f2-guard-coverage-s46, a CLOSED lineage — do not re-gate it). ONE commit, TEN files,
+199+/46-. NOT main (frozen a9a8cb6, 250 behind). Nothing merged, nothing deployed. You may not merge.
+
+YOUR BRIEF — read it first, in full, and follow it exactly:
+/Volumes/KK_T9_External_HDD/WEDNESDAY/2_Project_Files/fleet/qa-agent/briefs/2026-09-08_nexusai-rd376-tier2.md
+
+*** WHY THIS IS A FULL PASS THOUGH IT TOUCHES NO PRODUCT CODE. Wednesday measured it: tests and
+helpers only. Under the standing tiering that reads as through-code, and Wednesday overrode it on
+blast radius. This change does not ADD tests - it REPLACES THE READER THAT TEN CALL SITES USE TO SEE
+THE CODE THEY GUARD, one of them auth-gate-fail-closed.test.js. If the shared helper is subtly wrong,
+ten guards go quietly blind at once - which is exactly the defect this ticket exists to close, since
+the old two-regex stripper made a guard fail OPEN by deleting the text it was searching. ***
+
+FIRST JOB — BEHAVIOURAL IDENTITY PER CALL SITE, NOT IN AGGREGATE. A reconciliation's whole risk is one
+call site quietly changing behaviour while the suite stays green. For each of the ten call sites,
+establish the shared helper returns what that site's previous implementation returned, or that the
+difference is intended AND stated in the commit. THE THREE PRIOR IMPLEMENTATIONS WERE NOT IDENTICAL TO
+EACH OTHER - that is why this ticket exists - so "they now share one helper" necessarily changed at
+least two of them. WHICH TWO, AND HOW? That question is the gate. A/B on real inputs from the repo,
+not synthetic strings. Where behaviour changed, say whether the NEW behaviour is correct - do not
+assume the parsed version wins on every axis just because it is parsed.
+
+SECOND — reproduce the X-2 flip yourself, deriving the spans from the guard's OWN regex at this commit
+rather than inheriting the numbers:
+    BASELINE no payload          10/10 GREEN  -> 10/10 GREEN
+    X-1  L2090 OUTSIDE the spans  1f CAUGHT   ->  1f CAUGHT
+    X-2  L1107 INSIDE 1097-2062  10/10 MISSED ->  1f CAUGHT
+Baseline and X-1 must NOT move - that is what makes X-2's flip one variable.
+
+THIRD — THE FRAME, and the builder has already moved it twice. The ticket said nine guards. It reports
+an ELEVENTH instance the list does not name, and that import-graph-reader.test.js must NOT be
+converted because its legacyStrip is a deliberate historical stand-in. Both are frame corrections and
+both need checking: verify the eleventh exists and say whether it is in this commit, ticketed, or
+neither; verify the exclusion is right by reading what that guard asserts (AN EXCLUSION IS A CLAIM
+TOO); then run your OWN census over a frame you NAME, BY SHAPE not by name - the two regexes, not the
+word stripComments. The last gate on this class found the shape hiding under a different name inside
+another function, and a name-grep found half of it.
+
+FOURTH — the builder's own caught error. Its first commit message said both prior implementations "now
+delegate to" the shared helper. THEY DID NOT - it had converted the seven downstream guards and left
+the two originals untouched, which is requirement 1 of the ticket. It caught it before push and
+amended. VERIFY THE AMEND DID THE RECONCILIATION AND NOT JUST THE SENTENCE: stripCommentsParsed() and
+codeOnly() must both actually delegate now. This is the fifth appearance of "a claim with nothing
+behind it" in this codebase in 24 hours, and this one was in the commit message closing that class -
+so read the code, not the message.
+
+FIFTH — spot-check at least two rows of the per-guard red-proof table independently. Note
+local-date-single-definition shows a 1f BASELINE which the builder attributes to its own planted
+harness being counted by that guard (it asserts over every harness in __tests__/). Confirm that
+explanation - a baseline red waved past invalidates the row, and it says it chased this one.
+
+RE-DERIVE: PASS 2191/2191 across 113 suites at exit 0 - and NOTE THE SUITE COUNT IS UNCHANGED, a
+199-line change adding no cells. Confirm that is a refactor and not lost coverage by NAME-DIFFING
+cells at both heads, never a total. Confirm codeOnly() exists on 10ddb0a and nowhere else (the
+builder's stated reason for the base). Confirm 36191eb and its base with your OWN ls-remote.
+
+EVIDENCE: positive control opening AND closing; every mutation asserted PRESENT before its result is
+read and restored after; matched pairs so exactly one variable moves; READ EVERY RED AND SAY WHY IT IS
+RED, AND READ WHY A GREEN IS GREEN; NAME THE FRAME; FOUND / TESTED / HOW with controls named under
+HOW; state what you did NOT test. Stop any server you start and prove the port reads 000. No az, no
+registry, no demo, no staging. Work in your own clone or worktree.
+
+VERDICT: GO / GO-with-findings / NO GO with severities, AND the terminating classification - (a)
+nothing, (b) RECORD-LEVEL ONLY, or (c) WRONG IN THE CODE (a behaviour the product gets wrong, or a
+cell that cannot fail). Only (c) earns another round. Say which, plainly.
+
+Report to Wednesday. Write the report under projects/nexusai/reports/2026-09-08-rd376-tier2/ and NAME
+THAT PATH IN YOUR MAIL.
