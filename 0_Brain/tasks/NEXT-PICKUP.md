@@ -104,6 +104,12 @@ it** (Kam is heads-down and the card exists); the measurement is now line 5 of t
 where it will be acted on beside the board's 30% number.
 
 ## 📨 A DATASEC/NEXUSAI REPORT LANDED AND IS **NOT THIS SEAT'S** — do not answer it
+**RESOLVED 15:1x: the laptop seat IS ALIVE** — it pushed `cb646a4a` at 15:08 (*"hook: self-locating
+project root — it was bricking the T9 seat"*). A rejected push told Wednesday that, better than the
+question did. **So the report has an owner. Leave it.** **And PULL BEFORE EVERY WRITE — that is twice
+today origin moved under this seat.** Do NOT `git stash push` before `pull --rebase`: the rebase
+autostashes by itself and doing both produced a 12-file conflicted pop (resolved, quarantined at
+`5_Project_History/_quarantine_2026-09-07_rebase-conflicts/`, all stashes kept).
 **05:09:46Z, `[Datasec/NexusAI -> Wednesday] RD-361/362/363/364 FILED · cat-1 = 102 of 285 ·
 Marketplace blockers named`.** Subject read; **body deliberately NOT read and NOT acted on.**
 **Kam partitioned the machines at 11:01: Secuura here, Datasec on the LAPTOP.** That agent was
