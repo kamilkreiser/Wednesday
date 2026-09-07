@@ -15,14 +15,18 @@ anything — read EVERY line.** Mail UTC ≈ AEST−10. **ROTATION BAND 80–90%
 morning board on his panel.
 
 ## 🔴 FIRST ACTION — merges are landing; S47 has its GO and is NOT blocked
-    %22  Datasec/NexusAI      — S47. Merging. Has Wednesday's 07:41 GO on the merge-4 conflict.
-    %24  QA/NexusAI-RD376     — REPORTED (GO, classification (b)). Pane can be closed after a detector run.
-    %25  Datasec/SecurityReview — both jobs done; owes one answer (Agent Mail 403), then wraps.
-    %0   wednesday            — rotated at 82%.
+    %22  Datasec/NexusAI      — S47. Merging, on merge 5 of 8. ctx 48% at 07:52.
+    %24  CLOSED 07:48 by s150 (detector: prompt empty; listeners 13 -> 13).
+    %25  CLOSED 07:48 by s150 (detector: prompt empty; listeners 13 -> 13). Its 403 answer
+         landed in `_Working/2026-09-08_FILE_AND_SWEEP_REPORT.md` before it wrapped — nothing owed.
+    %0   wednesday            — s150, booted 07:44, rotated in at 82%. ONLY TWO PANES LIVE.
 
-🔴 **`main` HAS MOVED — 3 of 7-8 merged and pushed**, first movement since 2026-09-01:
-    a9a8cb6 (frozen) -> 8c4c22d rd-323 -> 1803bcd rd-377 -> 0dd9cc0 rd-381
-All three confirmed under the two-sided predictor; side A = the branch's own diff, side B = what main
+🔴 **`main` HAS MOVED — 4 of 8 merged and pushed**, first movement since 2026-09-01:
+    a9a8cb6 (frozen) -> 8c4c22d rd-323 -> 1803bcd rd-377 -> 0dd9cc0 rd-381 -> 97be896 rd-361
+**`0dd9cc0` and `97be896` re-read by s150 with its own `ls-remote` at 07:48 and 07:52** — not
+relayed. **Merge 4's decrease guard HELD: 2229 tests / 115 suites, above the 2196 floor.** S47
+also caught its OWN verification loop printing a conclusion on mangled paths, and re-derived it.
+All FOUR confirmed under the two-sided predictor; side A = the branch's own diff, side B = what main
 already carried, plus an absent-branch control.
 
 🔴 **THE DEPLOY HALF OF KAM'S 07:10 DID NOT HAPPEN AND CANNOT FROM HERE — MEASURED, NOT INFERRED.**
@@ -36,8 +40,7 @@ secrets `AZURE_CLIENT_ID` / `AZURE_TENANT_ID` / `AZURE_SUBSCRIPTION_ID`; create 
 **Sent to his panel 07:4x.** **Do NOT report any merge as a deploy.**
 
 ## MERGE QUEUE — corrected twice by S47, both times measured, both times right
-    DONE  1 rd-323 e032c7d · 2 rd-377 fabcc93 · 3 rd-381 b93d3b5
-    4. rd-361  731aa6e  CONFLICT on scripts/verify-expected-counts.json — GO given 07:41
+    DONE  1 rd-323 e032c7d · 2 rd-377 fabcc93 · 3 rd-381 b93d3b5 · 4 rd-361 731aa6e (main 97be896)
     5. rd-374  10ddb0a  CONTAINS rd-361 (that is why rd-361 goes first; Wednesday's order was wrong)
     6. rd-376  36191eb  NOW ELIGIBLE — gate returned (b), ticket ended. Based on 10ddb0a.
     7. rd-322  432617a  the only unqualified GO
@@ -85,12 +88,13 @@ which a false red gets believed."* Wednesday created that condition; the seat ch
 Wednesday's brief said "rd-374 before anything that depends on it". **Wrong, and verified wrong from
 this seat:** `merge-base --is-ancestor 731aa6e 10ddb0a` is TRUE — **rd-361 is an ANCESTOR of rd-374**,
 so rd-374 first would silently subsume rd-361 and one of Kam's "one at a time" merges would never get
-its own receipt. Remaining order:
-    3. rd-381  b93d3b5   (merged locally as 0dd9cc0, unpushed)
-    4. rd-361  731aa6e
-    5. rd-374  10ddb0a   CONTAINS rd-361
-    6. rd-322  432617a   the only unqualified GO
-    7. rd-148  690bed9
+its own receipt. **The REASON above still binds; its numbers do NOT — they were written when rd-381
+was unpushed and rd-361 unmerged. Both are now in `main`. The live queue is the one at the top of this
+file, and rd-361 has had its own receipt (`97be896`).** Remaining, and it agrees with that queue:
+    5. rd-374  10ddb0a   CONTAINS rd-361 (already merged, so this one now adds only its own delta)
+    6. rd-376  36191eb   based on 10ddb0a
+    7. rd-322  432617a   the only unqualified GO
+    8. rd-148  690bed9
 ~~EXCLUDED: `rd-376 @ 36191eb` — its gate is still running.~~ **SUPERSEDED 07:4x — the gate returned
 GO, classification (b) RECORD-LEVEL ONLY, so the ticket ENDED and rd-376 is now IN the queue at
 position 6.** The separate GO was given in the 07:41 mail.
@@ -121,7 +125,8 @@ which is what makes it a rule rather than an excuse.
     rd-361-round4-s45                        731aa6e   GO-with-findings stands
     rd-148-round2-s45                        690bed9   GO-with-findings stands; the checkout sits here
     rd-322-root-guard-vacuity-s45            432617a   GO stands — FROZEN, only unqualified GO
-    main                                     1803bcd   MOVING TODAY — a9a8cb6 -> 8c4c22d -> 1803bcd
+    main                                     97be896   MOVING — a9a8cb6 -> 8c4c22d -> 1803bcd -> 0dd9cc0 -> 97be896
+                                                       (s150's own `ls-remote`, 07:52; re-read it, do not trust this line)
 🔴 **rd-377 is STACKED on rd-323** — `e032c7d` must merge before `fabcc93`. **Two merges, two blast
 radii; say which one you mean.** **The merges are AUTHORISED and running** — Kam, panel 07:10.
 
@@ -282,3 +287,41 @@ and that wrap is ITS to handle, subject-only from here). This seat owns **Datase
 dashboard, one chat panel, **ONE USAGE LIMIT** (7d:34%, renews in 4d 21h). **Do not write
 `NEXT-PICKUP.md`, the daily note or `_ledger.md`** — the Studio seat's. Panel messages open
 `[LAPTOP / Datasec]`.
+
+## s150's ADDITIONS (2026-09-08 07:56 AEST) — read these with the block above, which s150 corrected in place
+
+**OPEN QUESTION TO S47, mailed 07:49, NO TAP, answer due at its wrap:** is the eight-branch set the
+COMPLETE set of tested, gate-passed, mergeable work — or a subset? Subject
+`[Wednesday -> Datasec/NexusAI] QUESTION at your wrap: is the eight-branch set the COMPLETE ready set?`,
+verified at `datasec-nexusai@agentmail.to` with a non-null preview. **Why it exists: Kam's 07:10 asked
+for EVERYTHING ready, and the only evidence the eight IS everything is S47's own derivation. Wednesday
+holds no instrument — `board_count.sh` cannot count this board (WED-146) and the Release Ready 46 is
+Wednesday's own uninstrumented count.** Twelve hours ago a set was called 24 when the gap was 3.
+
+**VISION SALES PORTAL SWEPT — nothing to start, and the zero has a control.** VSP open = **0**;
+positive control: unfiltered `project = VSP` = **64**, `statusCategory = Done` = **64**, so the
+predicate discriminates and 0 + 64 reconciles. Site `team-1634009483756.atlassian.net` (**prefix
+`https://` — the NexusAI `JIRA_SITE` scheme trap applies to Vision's `.env` too**). Under the morning
+autostart grant this is a receipt, not a request: **no Vision agent launched, because there is nothing
+for one to do.**
+
+**NEW CARD `wed-boot-names-one-ledger-there-are-two` (WED, rec `scope`, default = nothing changes).**
+`doctor.sh:419-420` — the check Kam's 07:07 `trigger` ruling shipped — sweeps **both** `_ledger.md`
+and `_ledger_laptop_datasec.md` by name. **`Launch_Wednesday.command:198` still says read `_ledger.md`
+WHOLE and names the laptop's nowhere.** The two mechanisms disagree and the boot prompt is the obeyed
+one. **The prior-ruling gate REFUSED the first attempt and the refusal is what produced the sharper
+finding** — his three prior rulings were about SIZE and CADENCE, this is about WHICH FILE IS READ, and
+his own ruling's artefact is the proof they are different subjects. Ledger row filed, w=3.
+
+**BOOT COST, measured so the next seat does not have to guess:** by-tier digest read WHOLE moved this
+seat **ctx 11% -> 23%**. **The digest is not the problem; line 198 is.** s150 read
+`_ledger_laptop_datasec.md` (its own, 37 rows) as row-headlines and `_ledger.md` (the Studio's,
+345,743 B) as row-headlines only, and says so rather than carrying it silently.
+
+**THE STUDIO SEAT — measured, not chased.** Its last write to any file of its own is `2878f1e7` at
+**07:17**; `origin/main` == local at 07:54, so that is not a fetch gap. **Its agent s149 IS alive** —
+Secuura interims at 07:42 and 07:53 (subject-only from here; no body fetched, no reply sent). A
+coordinator that has just launched an agent and is watching it is not expected to commit. **Threshold
+for raising it to Kam, set in advance so it is not a judgement made under pressure: no Studio write by
+~08:30** (>70 min, several more s149 interims elapsed). **s150 has no instrument on that machine and
+must not adopt Secuura work** — the only available act is telling Kam.
