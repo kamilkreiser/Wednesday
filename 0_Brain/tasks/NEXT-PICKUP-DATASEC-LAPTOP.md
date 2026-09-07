@@ -91,8 +91,9 @@ its own receipt. Remaining order:
     5. rd-374  10ddb0a   CONTAINS rd-361
     6. rd-322  432617a   the only unqualified GO
     7. rd-148  690bed9
-**EXCLUDED: `rd-376 @ 36191eb` — its gate is still running.** If it returns GO, **give a separate GO;
-do not let S47 infer one.**
+~~EXCLUDED: `rd-376 @ 36191eb` — its gate is still running.~~ **SUPERSEDED 07:4x — the gate returned
+GO, classification (b) RECORD-LEVEL ONLY, so the ticket ENDED and rd-376 is now IN the queue at
+position 6.** The separate GO was given in the 07:41 mail.
 
 ## THE PREDICTOR — replaced mid-run, and merges 1 and 2 were NOT unchecked
 S47's tree-equality predictor assumed the branch strictly CONTAINS main. **True for merges 1 and 2
