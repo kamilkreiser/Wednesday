@@ -40,8 +40,11 @@ Mail verified at `secuura-blockchain@agentmail.to` 2026-09-08T21:15:08Z before t
   2026-08-20, the seat's measurement).
 - `secuura-892-round4…` → **`round5`** · `secuura-ks968-rotation-three-worlds` → **`separate`** — both
   now in s149's queue above.
-- `wed-ledger-archive-has-no-trigger` → **`trigger`**: add a `doctor.sh` check that warns when
-  `_ledger.md` holds rows older than the ~3-day cadence. **NOT YET BUILT — this is the top WED item.**
+- `wed-ledger-archive-has-no-trigger` → **`trigger`**: ✅ **BUILT AND LIVE — by the LAPTOP seat**
+  (`8d906698`, three branches exercised; a missing `date` binary reports UNCHECKED rather than OK,
+  which is the check-that-cannot-fail guard). Verified firing on this machine 2026-09-08 08:3x:
+  `✓ ledger archive: no rows older than 2026-09-05`. **The Studio seat nearly rebuilt it and caught
+  itself by looking first — check what already occupies the slot before building.**
   The laptop's diagnosis is the one to carry: **rule 3c is a SESSION-END step and seats that ROTATE
   never run it, so it fires almost never.** Row rate is only the second cause.
 - `vault-add-a-stages-another-clients-files` → **`grant-both`** + note: *"allow the option through
