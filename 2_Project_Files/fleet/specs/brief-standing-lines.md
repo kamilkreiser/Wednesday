@@ -416,3 +416,42 @@ developer's live manifest while reporting `24 passed, 0 failed`.** The tester's 
 remove**, that is not residue to ticket — it is the ticket, unfinished. **Shipping it with a
 follow-up attached is the cap being used to launder something**, which is the objection Kam upheld on
 this same PR at round 2. Say so and route the call; do not merge it on a coordinator's own word.
+
+---
+
+## A GREEN CELL THAT DRIFTED OFF ITS SUBJECT IS A CHECK THAT CANNOT FAIL
+*(Secuura/Blockchain seat, 2026-09-07 22:20 — self-caught by re-reading, twice in one evening.)*
+
+Amending a published description, the seat added an `onBehalfOf` clause. **The existing cell's
+`/different Organisation/i` then started matching THAT clause instead of the `organizationUuid` one.
+It stayed green throughout and had stopped pinning what its name said it pinned.**
+
+**The suite could not have caught this**, because nothing went red. It was caught by **re-reading the
+assertion against the new text**. Its own words: *"that is the second time tonight a change of mine
+made a green cell stop testing what it claimed. It is a quieter failure than a red one."*
+
+**The rule:** when you edit the TEXT or the SHAPE a cell asserts against, **re-read every regex that
+could match the new content** — a pattern written to be specific becomes generic the moment a
+neighbouring clause contains its words. **Tighten the pattern to something only the subject can
+satisfy** (here `/different Organisation/i` → `/DIFFERS FROM/`), and **add a cell for whatever the
+edit itself introduced.** A green suite over a drifted assertion is indistinguishable from a green
+suite over a working one, which is the definition of a check that cannot fail.
+
+**Corollary for coordinators:** a re-gate cannot find this either. **Only the author, re-reading, can
+— so ask for it explicitly whenever an amendment changes the text a suite greps.**
+
+## A CONTRACT AUTHOR WHO READS ONLY THE SERVICE THAT OWNS THE ROUTE CANNOT SEE THE GATEWAY'S REFUSALS
+*(same mail — the structural reason a defect recurs, which is worth more than the defect.)*
+
+`DOC_TYPE_DISABLED`, `INSUFFICIENT_VERIFICATION_LEVEL`, `MFA_REQUIRED` and
+`AUTH_PROVIDER_NOT_ALLOWED` return **zero** hits inside `services/originate` — they live in
+`api-gateway/src/services/enforcement.ts`, and the gateway's own handler is mounted **before** the
+proxy route, runs its gates, then pipes the downstream status back. **Both services' refusals surface
+on one published operation, and grepping the owning service finds only half of them.**
+
+**The rule:** before documenting or reasoning about an operation's failure modes, **establish which
+handlers can answer it** — mount order and proxy layers included — **and search all of them.** A
+census scoped to the service that "owns" the route is a census over the wrong frame, and it will look
+complete. **The durable fix is a DERIVED comparison** (enumerate the `error.code` set every handler
+can emit, assert each is published) rather than a hand-written list, because the hand-written list is
+exactly what keeps going thin.

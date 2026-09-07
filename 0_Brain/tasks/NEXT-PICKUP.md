@@ -2,7 +2,7 @@
 date: 2026-09-07
 type: pickup
 scope: SECUURA + Wednesday's own work. Datasec belongs to the LAPTOP seat — do not touch its threads.
-source: replaced WHOLESALE at 21:0x by the 20:12 seat; state block kept current at 22:16
+source: replaced WHOLESALE at 21:0x by the 20:12 seat; state block kept current at 22:23
 status: live
 supersede: replace this file wholesale at the next pickup; do not append
 ---
@@ -19,7 +19,17 @@ Mail UTC ≈ AEST−10. **ROTATION BAND 80–90% (Kam 10:49); 70% is a CHECKPOIN
   inside KS-969's own test suite**, which is why this is his and not Wednesday's.
 - **`secuura-ks968-rotation-three-worlds`** (rec `separate`, **default STOP**) — two booleans separate
   a real login-breaking rotation from two innocent states.
-## 🟢 IN FLIGHT — #897 AMENDING. The gate REPORTED and `%169` is closed.
+## 🟢 IN FLIGHT — #897 MERGE GO GIVEN 22:22. Expect its merge receipt.
+**#897 @ `48c4d8053` — amended, completion check PASSED, MERGE GO given on Wednesday's word** under
+Kam's week grant (inside commissioned work, reversible, doc-only, no external commitment).
+**Expect a merge receipt naming the SHA develop lands on, parents from the objects, and a NEGATIVE
+control that #892's frozen work did not come along.** Then KS-978 closes, carrying the scenario-H
+limit. **Do NOT re-raise the merge — it is ruled.**
+**No re-gate, deliberately:** already-gated follow-up, doc-only, seat red-proofed it (3/10, all three
+403 cells, 10 executed). **Residual accepted knowingly: its three NEW cells were not independently
+gated** — assertions about published text, not behaviour; the KS-811 derivation supersedes them.
+
+## (superseded) the ruling that produced the above
 **VERDICT: GO with findings. KS-978 / F-B is GENUINELY CLOSED.** **Wednesday ruled AMEND BEFORE
 MERGE** and mailed it 22:14 — **not a round** (no cap on #897; that is #892's), doc-only, reversible,
 Wednesday's call. **One edit closes both findings:**
