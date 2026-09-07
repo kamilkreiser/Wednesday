@@ -1,0 +1,55 @@
+ultrathink
+
+You are the cross-project QA agent, working from
+/Volumes/KK_T9_External_HDD/!CODING/Testing Agent MAIN
+
+TIER 1 RE-GATE — Datasec/NexusAI, RD-148 ROUND 2, branch rd-148-round2-s45 @ ea4d229.
+
+YOUR BRIEF — read it first, in full, and follow it exactly:
+/Volumes/KK_T9_External_HDD/WEDNESDAY/2_Project_Files/fleet/qa-agent/briefs/2026-09-07_nexusai-rd148-round2-tier1.md
+
+Then read your charter's section 4 before measuring anything.
+
+THIS IS ROUND 2 OF 2. The cap is spent — a NO GO does not open a round 3. It means the closed
+instances ship and the residue is ticketed, or it goes to Kam. So if you NO GO, say plainly what
+should ship anyway and what should be ticketed.
+
+THE DEFECT WAS A REAL-DOM TIMING BUG, so jsdom is not the artefact. Drive a real browser against a
+local server at this commit. The failure path is the one that matters: the server returns 500 with
+scimTokenConfigured true, so the token is still live while the admin is being told so. Force it with
+chmod 444 on the DATA_DIR settings.json, assert the tamper LANDED before reading any result, and
+revert it after.
+
+ATTACK HARDEST, in this order:
+1. THE FIXTURE. Round 1 was 10/10 green over a broken product because its fixture put the status
+   nodes as SIBLINGS of the container, so they survived the re-render that destroys the real one.
+   Re-run contrast B yourself - round-1 code with the NEW fixture must FAIL. That is the whole
+   argument, and only the fixture changes between A and B. Then confirm against the real page that
+   there is exactly ONE #rd135-status and it is INSIDE the container. A fixture the builder chose is
+   still a fixture it chose.
+2. Whether there is a path where `outcome` stays null and the admin gets a silent panel again.
+3. Whether F-3's confirm() is adequate HERE - it is the most destructive control in a UI carrying 17
+   confirm() guards for milder things, and the builder deliberately matched the house idiom rather
+   than inventing a guarded variant. Rule on that choice.
+
+MEASURE THE RENDERED ARTEFACT, not DOM text - box geometry and colour. A node whose text is right and
+whose box is 0x0 is the same defect in a different costume.
+
+ON SCREENSHOTS: the builder's are gitignored and do not travel - take your own. It QUARANTINED two of
+its own because they were byte-identical viewport shots of a panel that sits below the fold inside a
+display:none section, so neither showed the message it was named for. Read its WHY.md. Hash any
+screenshot you take and confirm the panel is visible before citing it. The panel is hidden until you
+click the a[data-section="provisioning"] nav link on settings.html.
+
+HARD BOUNDARIES: findings only - no fix, no commit, no merge, no deploy. HEALTH_SWEEP_URLS=" " on
+every boot; no `az`, no registry, no contact with nexusai-staging or the demo. The builder's checkout
+is READ-ONLY. Base diffs on aea410c..ea4d229, never on main. Stop any server you start and prove the
+port reads 000.
+
+EVIDENCE: positive control on the instrument, negative control that flips with the subject, every
+tamper asserted LANDED before its effect is read, read every hit before counting it, NAME THE FRAME
+in any completeness claim, and FOUND / TESTED / HOW with the controls named under HOW. State what you
+did NOT test.
+
+Report to Wednesday, not to the builder. Write the report and evidence under
+projects/nexusai/reports/2026-09-07-rd148-round2-tier1/ and name that path in your mail.
