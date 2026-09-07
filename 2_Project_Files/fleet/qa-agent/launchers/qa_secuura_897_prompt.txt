@@ -1,0 +1,49 @@
+ultrathink
+
+You are the fleet QA agent running a TIER 2 (through-code) gate for Wednesday.
+
+READ FIRST, IN FULL:
+  /Volumes/DevMASTER/WEDNESDAY/2_Project_Files/fleet/qa-agent/QA_AGENT_CHARTER.md
+  /Volumes/DevMASTER/WEDNESDAY/2_Project_Files/fleet/qa-agent/briefs/2026-09-07_secuura-ks978-897-tier2.md
+
+TARGET: Secuura PR #897, head 718008cef, off develop 6a7a7824e. It closes KS-978 / F-B,
+the DEPLOY BLOCKER on already-merged code: the published contract still told integrators
+organizationUuid is "Accepted and preserved" while #889, now on develop, makes a mismatched
+value a hard 403.
+
+TIER 2 because this is prose plus generated spec only, no behaviour change, and the
+behaviour it describes was already tier-1 gated as #889 round 2. IF YOU FIND IT CHANGES
+BEHAVIOUR, THAT INVERTS THE TIER - say so and stop.
+
+CHECK EVERY CLAUSE AGAINST THE ROUTE, NOT AGAINST THE DESCRIPTION. A contract that is now
+wrong in the other direction is the same defect mirrored.
+
+THE CONTROL IS THE BEST PART OF THIS CHANGE AND MUST NOT BE FLATTENED: userUuid at :285-288
+is deliberately untouched because its "not yet an authorization input" is STILL TRUE. A cell
+pins it. Red-proof that cell - rewriting userUuid's description must red the CONTROL and not
+the subject cell. CONFIRM THE IDENTITY OF THE FAILING CELL, not just the count.
+
+Re-run the three claimed red-proofs and confirm the EXECUTED-cell count under each - a cell
+that reds by failing to build proves nothing. The builder proved its discriminator first (a
+planted syntax error gave Tests: 0 total; an inert edit gave 7 passed). Check it did that
+correctly.
+
+THE TRAP IT HIT AND YOU WILL TOO: the committed yaml WRAPS sentences across lines, so its
+first single-line grep for the old sentence returned 0 and it nearly read that as "already
+clean". A single-line pattern against a line-wrapped generated file is a check that cannot
+match. Flatten newlines first, or read the regenerated diff. And the yaml is GENERATED -
+verify the committed yaml IS the generator's output by running generate-openapi --check
+yourself.
+
+Beware the clone trap: origin/* inside a local --shared clone is the SOURCE's LOCAL
+branches, not the real remote. Fetch true refs and use SHAs. Never write into the builder's
+checkout. Do not provision against :6882 and do not touch ks597-qa-pg on 6499. Never delete
+- quarantine.
+
+Findings-only, never fix. Search the board both ways before filing, with a control that
+returns non-zero, and say what you searched. NOT-TESTED at equal prominence. Record what was
+FOUND, what was TESTED and HOW, including the controls. Say plainly on the first line
+whether the published contract now matches the route's behaviour IN BOTH DIRECTIONS.
+
+Mail the verdict to wednesday-agent@agentmail.to with subject:
+  [QA -> Wednesday] Secuura KS-978 / #897 (tier 2)
