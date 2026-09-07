@@ -56,66 +56,53 @@ The launcher said **70%** until this seat fixed it — it was **two rulings stal
 kept rotating early. Fixed in `Launch_Wednesday.command`, verified by extracting `INITIAL_PROMPT` and
 asserting its length (11,150) and tail. Backup `.pre-0907-band8090`.
 
-## 🔴 FIRST ACTION FOR YOU — read Kam's ruling on `secuura-ks949-round3-cap-and-the-cutoff`. Nothing moves until he rules.
-**#885 round 2 came back NO GO on `6dbe63cae` at 12:02. That SPENDS Kam's two-round cap.** The card
-is on his desk with four options; **recommendation = `split`** (revert F1 only, ship F2–F5, F1 gets
-its own round) because that is his own cap applied as written and the four are genuinely closed.
-**Default if he is silent: nothing merges, nothing deploys, #885 stays at `6dbe63cae`.**
+## 🔴 FIRST ACTION FOR YOU — read s145's merge receipt + rotation measurement, then decide if it hands over
+**#885 IS MERGED.** develop `61df129e9` → **`632f16dfe62f4c498a73ca09a39cadaf6eeab764`** (12:24).
+**FOUR MERGES TODAY**; develop had not moved at all before this morning.
+**Wednesday verified all FIVE of today's merges are ancestors of `632f16dfe`** — #885's branch was cut
+before today's merges, so it was a genuine three-way and nothing was silently reverted.
 
-### 🔴 THE FACT THAT CHANGES EVERYTHING — nothing currently removes Kam's address
-**The auth remediation — established as the ONLY path that would rewrite his row — is DISABLED on
-prod-like environments.** `decryptEmail` throws on a non-ciphertext value once
-`plaintextStillAcceptable()` is false, which it is whenever `NODE_ENV` is production/staging/demo
-**and** the date is past `PII_PLAINTEXT_CUTOFF` (**2026-06-01, set NOWHERE in the repo — the source
-default applies**). `getUserById` catches and returns **null**, so the remediation reads it as *"no
-pre-existing row to remediate"* and skips. **All three deployment values are prod-like**
-(`services.bicep:564` defaults to `staging`; `env.demo.json:8` says `production`).
-**Four cells, two of them controls isolating the cutoff rather than the row shape.** The builder's own
-suite **cannot see it**: its mock forces `isEncryptedPii: () => false` (test line 40) and runs
-`NODE_ENV=development` (line 88). **So round 3 alone may not remediate anything either.**
+**s145 is at ~70% and was sending its merge receipt AND the rotation measurement together when this
+seat rotated. READ THAT MAIL FIRST.** Early figures visible on its pane (its measurement, not
+Wednesday's): **93 executable / 87 documentary** occurrences of the retired credential, and
+**104 flat spec files in `Blockchain/Dev/tests/` that are in NO playwright config's `testDir` and
+referenced by no runner** (it ran a control). **That reshapes the rotation job and it is the seat's
+finding — do not restate it as Wednesday's.**
 
-### Why shipping this head was NOT offered to Kam as an option
-It would write **twelve plaintext addresses into an encrypted column** on the first boot after a
-deploy — and **eleven of the twelve are the documented public demo personas** the credential sheet
-publishes and `scripts/auth-matrix-smoke.sh` drives. **Not a back-office table.**
-**Also measured: Kam's old address remains the LIVE LOGIN KEY for a SYSTEM_ADMIN row** —
-`auth_find_user_by_email_hash(<old hash>)` still returns it. The accurate description of the fix's
-damage is **FINDABLE, THEN UNREADABLE**, not "unfindable" — the gate corrected Wednesday and the
-builder on that, in both directions.
+### 🔴 THE DEPLOY — do NOT let it look like Kam's problem is solved
+**After the revert, NOTHING IN #885 REMEDIATES KAM'S ROW.** The fix that would have is the one that was
+taken out. **A deploy today ships four real improvements and does nothing about his address.**
+Kam has been told exactly that. **He has an active deploy grant and a production grant (Secuura only,
+this week) — so a deploy of F2–F5 is available and is Wednesday's to make — but it must be flagged as
+what it is.** Do not deploy silently and do not let a receipt imply remediation.
 
-### A THIRD schema source, for KS-960
-**The Azure deploy applies `deployment/azure/migrate/init.sql`** (`run.sh:26`, `run-platform.sh:25`) —
-not `docker/init`, not `migrations/001`. It declares `email VARCHAR(255) UNIQUE` with **no
-`email_lookup_hash`**; `migrations/030_auth_user_columns.sql:36-44` then converges it onto the
-docker/init shape. **F1's 42P10 diagnosis survives that**, measured by the gate in its own container.
+### WHAT KS-962 AND KS-963 CARRY (filed, do not re-derive)
+- **KS-962** — F1's own round. **The ratified shape: the migration REMOVES its INSERT** and keeps the
+  PK conflict target only to re-sync `tenant_id`/`tenant_slug` on existing rows. It also carries
+  **what NOT to do** — why repointing the conflict target is worse than the bug. **The new cell must
+  drive BOTH seeders against ONE database in BOTH orders, on the `docker/init` shape, and must NOT
+  stub `isEncryptedPii`.**
+- **KS-963 (P1)** — the PII cutoff, **with BOTH readings**: the gate's mechanism proof (4 cells, 2
+  controls) AND the two conditions that bound it. **`NODE_ENV=development` on the demo VM was
+  measured** (pre-registered, hashed before the read) — **so condition B fails and the cutoff cannot
+  fire there.** The sharp edge that survives regardless: **`getUserById` collapses "the encryption
+  migration is incomplete" and "no such user" into one answer**, which is what makes the failure silent.
 
-### The shape already ratified, for whenever Kam authorises the fix
-**Option (b): the migration REMOVES its INSERT** and keeps the PK conflict target used **only** to
-re-sync `tenant_id`/`tenant_slug` on rows that already exist. Rationale that decided it: **auth
-already creates all twelve identically**, and on a stack where the migration has thrown every boot
-since encryption landed **all twelve exist, ciphertext, hashes set** — *"we are not proposing to
-remove a load-bearing statement, we are proposing to delete one that has never borne load."*
-**The new regression cell must drive BOTH seeders against ONE real database in BOTH orders, on the
-docker/init shape, and must NOT stub `isEncryptedPii`** — that stub is what blinded the builder's suite.
+### ⚠ THE RECONCILIATION — carry it, do not re-open it
+The gate's `services.bicep:564` (staging) and `env.demo.json:8` (production) are **real** — they belong
+to the **RETIRED Container Apps estate**, not the running VM. **The gate and the seat were measuring
+different environments. Neither was wrong.** Anyone re-reading those two mails will think they conflict.
 
-## 🔴 F3 — THE BIGGER FIND, and Kam chose NOT to prioritise it (round2 over escalate). File it as a P1.
-A **second** published-default super-admin: a `platform_admins` row whose **bcrypt hash is committed
-with its PLAINTEXT in a comment on the line above** (verified by `bcrypt.compare` **with a negative
-control**). Worse than the row KS-949 fixes because: `routes/auth.ts:344-346` checks that table
-**FIRST**; `:381-383` hardcodes `role: SYSTEM_ADMIN` / `status: ACTIVE` so **row status is never
-consulted**; and `deployment/azure/migrate/run-platform.sh:124` **re-asserts the published password
-on EVERY run**, including on an already-seeded box. **Do not reproduce the plaintext or the hash in
-any artefact.**
-
-## PR / MERGE STATE — verified at origin
+## PR / MERGE STATE — verified at origin 12:2x
 ```
-develop 61df129e9c580e3b4622d9b5de11f2abd765b8f6   THREE MERGES TODAY; it had not moved before today
-  306d0db92 -> db94e9fc8 (#884 KS-858/F5) -> 603b0a017 (#882 KS-698) -> 8aefd2b06 (#876 r3) -> 61df129e9 (#886)
-#885  a98df6b11  KS-949  NO GO -> round 2 IN FLIGHT (Kam authorised) + the probe
+develop 632f16dfe62f4c498a73ca09a39cadaf6eeab764   FOUR MERGES TODAY, all five verified as ancestors
+  306d0db92 -> db94e9fc8 (#884 F5) -> 603b0a017 (#882) -> 8aefd2b06 (#876 r3) -> 61df129e9 (#886)
+            -> 632f16dfe (#885, the split: F2-F5 shipped, F1 reverted to round-1 state)
+#887  bb0502c80  KS-961 workspace-suites advisory lane — OPEN, needs a gate when Kam wants it
+KS-597 af640e809 pushed, NO PR yet — ask s145 if one is wanted
 #874 #879 #880 #881 #883 — untouched today
 ```
-**#880/KS-577 STAYS KAM'S** — merging it silently picks Option 1 for Platform S, a client-facing
-commitment. A merge is Wednesday's; a merge that decides something with a client is his.
+**#880/KS-577 STAYS KAM'S** — merging it silently picks Option 1 for Platform S.
 
 ## s145's QUEUE after #885 round 2 (it was DISPLACED and returns)
 1. **KS-645 correction + fold into KS-952.** KS-645's headline is **false and was false at base** —
