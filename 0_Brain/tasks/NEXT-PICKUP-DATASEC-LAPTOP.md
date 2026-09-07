@@ -41,11 +41,45 @@ artefact under it is `5_Project_History/2026-09-07_datasec-analysis-record.md`. 
 report and handover from here carries those three fields.**
 
 ## FLEET — 2 live
-- **`%8` — `Datasec/NexusAI` s44.** **Item 1 DELIVERED: RD-361 round 3 @ `2f4896d`, at its gate.**
-  Item 2 (merges) HELD on the card below. Items 3 (findings tickets) and 4 (RD-148 round 2) queued.
-- **`%9` — QA gate, RD-361 ROUND 3, TIER 1.** Branch `rd-361-round3-s44` @ `2f4896d`, cut from
-  `1149d1c`. Launch: `2_Project_Files/fleet/state/launch_qa_nexusai_rd361_r3.sh` · Brief:
-  `.../briefs/2026-09-07_nexusai-rd361-round3-tier1.md`. Launched 19:29, rung-5 verified.
+- **`%8` — `Datasec/NexusAI` s44, ~21% ctx, TOLD TO HOLD and write its handover.** Items 1 and 3 are
+  DONE. Item 2 is blocked on Kam's card. **Item 4 (RD-148 round 2) is deliberately NOT started** — it
+  is at a clean boundary and I would rather a successor got a clean handover than a half-done round.
+- **`%9` — QA gate, RD-361 ROUND 3, TIER 1.** Running. Fixed its own harness and is re-running the
+  **before-state control** — the right rigour: if the repro does not FAIL at `1149d1c`, the instrument
+  is wrong rather than the world.
+
+## ✅ ITEM 3 DONE — three artefacts, and the agent corrected Wednesday in BOTH directions
+**RD-369** filed (the whole carrier story as ONE ticket per Kam's aggregation rule; `Relates` to
+RD-362, RD-55, RD-329) · **RD-362 re-scoped** so it cannot read as containment achieved (comment
+37262) · **RD-329 updated** rather than duplicated (comment 37263). Board 282 → 283. Tree clean,
+nothing merged, no branch moved.
+
+**🔴 CORRECTION UP — and it is WEDNESDAY'S error.** The brief said the short hash survives *"~8 lines
+above the redaction"* and the key directory is named *"~12 below"*. **Those were the RD-362 gate's
+APPROXIMATIONS, relayed with the tilde dropped and no instrument named.** Measured: **line 182 short
+hash, line 183 redaction marker, line 194 the key directory — ONE line and ELEVEN.** The pointer and
+the path sit either side of the redaction, which makes it worse, not milder. **A tilde is part of a
+claim: carry the hedge verbatim or re-measure.**
+
+**CORRECTION DOWN — and the handling is the model.** `Final Documents/` is in the ACR upload context
+but **NOT in a customer-pullable layer** (0 matching COPY lines against 27 total). The agent wrote
+that Wednesday's phrase *"inside the build context"* was *"exactly right"* and that it did not want to
+overturn something Wednesday had not said — **it corrected the READING without manufacturing an
+error.** Also widened: **11 GUIDs across TWO shipping files**, not 10 in one.
+
+**🔴 THE BEST FINDING, and it is internal to the artefact:** `.dockerignore:72` is `SESSION_NOTES_*.md`
+**root-anchored**, so four `docs/SESSION_NOTES_*.md` ship — **and lines 8–9 of the SAME FILE carry both
+`node_modules` AND `**/node_modules`.** The correct idiom is two lines above the defect, so the file
+itself proves the pattern was known. **And the guard asserts `expect(lines).toContain('SESSION_NOTES_*.md')`
+— that the pattern is WRITTEN, never that anything is EXCLUDED.** Adopted as a standing QA line:
+***a string in a file is not a behaviour*** — assert the EFFECT or say the cell proves text only.
+Same shape on F4: the cell matches 40-hex and the file holds **0 of those and 22 short-form hashes** —
+*"green, with nothing left to catch."*
+
+**What it did NOT do, and it is the right list:** no image built or layer inspected (every shipping
+claim is Dockerfile COPY + `.dockerignore`); the `.docx`/`.pdf` carriers inferred, not opened; the
+RD-329 7-of-10 figure marked `[relayed: the gate's]` rather than restated as its own. **Building the
+image would settle two of them outright — that is the next seat's cheapest high-value move.**
 
 ## ROUND 3 — what the builder did, and the part worth keeping
 `rd-361-round3-s44` @ `2f4896d`, **cut from `1149d1c` not the campaign tip** (verified after pushing,
