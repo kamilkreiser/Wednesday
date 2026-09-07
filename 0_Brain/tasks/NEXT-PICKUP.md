@@ -2,90 +2,99 @@
 date: 2026-09-07
 type: pickup
 scope: SECUURA + Wednesday's own work. Datasec belongs to the LAPTOP seat — do not touch its threads.
-source: replaced WHOLESALE at 20:40 by the 20:12 seat, at its 50% checkpoint
+source: replaced WHOLESALE at 21:0x by the 20:12 seat
 status: live
 supersede: replace this file wholesale at the next pickup; do not append
 ---
 
-# NEXT PICKUP — 20:40 AEST Monday. TWO GATES IN FLIGHT. ONE CARD ON KAM'S DESK. Nothing merged, nothing deployed.
+# NEXT PICKUP — 21:0x AEST Monday. KAM'S DESK IS CLEAR. One agent working a 3-item queue. Nothing deployed.
 
 **Run `2_Project_Files/tools/kam_rulings_today.sh` before writing anything — read EVERY line.**
 Mail UTC ≈ AEST−10. **ROTATION BAND 80–90% (Kam 10:49); 70% is a CHECKPOINT ONLY.**
 
-## 🔴 FIRST ACTION — read the two gate panes, then the inbox. Nothing else is owed to anyone.
-**`%166` QA-889-r2 (tier 1) and `%167` QA-892-r3 (tier 2) are both LIVE and progressing.**
-**`%162` Secuura/Blockchain is DORMANT BY DESIGN at 47%** — it named its wake as the two verdicts,
-Wednesday told it in writing to stay on them, and **WEDNESDAY IS ITS WAKE PATH.** Its idle is correct;
-do not read the watcher's repeating idle alert as a stall (see STANDING, below).
+## 🔴 FIRST ACTION — read `%162`, then the inbox. Nothing is owed to Kam.
+**`%162` Secuura/Blockchain is the ONLY agent pane.** Both gate panes were closed after reporting
+(listeners 26→26 each, logged). **A tap is QUEUED behind its running turn** (the 20:58 `KAM RULED
+BOTH` pointer) — it fires when the merge turn ends. **Do NOT close `%162`**: a queued tap is a future
+turn ([[2026-09-03_a-pane-close-is-a-session-kill]]).
 
-## KAM'S DESK — one card, and one click
-- **`secuura-ks968-id-keyed-decider`** (rec `id-count`, **default STOP**). P=30 is NECESSARY, not
-  SUFFICIENT, for the rotation story. One id-keyed count decides it and **touches no hash, so it is
-  independent of the key in question.** 1 → rotation → incident (email login broken for those rows).
-  0 → benign, KS-968 moot. **On silence: CONSISTENT-WITH BUT UNESTABLISHED. Nothing further runs on
-  that box.**
-- **PR #891 is KAM'S OWN CLICK** — GitHub refuses the agent's token on a `.github/workflows` file.
-  **https://github.com/Secuura/Distributed_Secuura/pull/891** — every reminder carries the link.
+## ITS QUEUE, in the order Wednesday set and Kam's rulings bound
+1. **Merges: #889 `48ad0354e` → develop, then #893 `0281b0faa` → develop.** GO given on Wednesday's
+   word under Kam's week-scoped merge grant — **execution of his own `bind` ruling**, since
+   `hold-for-finding1` held #889 until HE ruled the trust-boundary question, he ruled it at 19:00,
+   and the gate proved F1 closed by a 2×2 tamper matrix rather than a green run.
+2. **KS-968 — Kam ruled `id-count` at 20:56.** EXACTLY ONE query, nothing else:
+   `SELECT count(*) FROM users WHERE id = 'a0000000-0000-4000-8000-000000000030';`
+   **ID-keyed, so it touches no hash and is INDEPENDENT of the key in question.**
+   **1 → a rotation happened → INCIDENT** (login resolves by `email_lookup_hash`; those rows cannot
+   sign in by address). **0 → benign, KS-968 moot on that box.** **A THIRD QUERY IS OUTSIDE HIS
+   WORDS** — an ambiguous result is a finding to report, never a licence to widen.
+3. **#892 ROUND 4 — Kam ruled `round4` at 20:55.** F1-A (quarantine on EVERY non-publishing outcome,
+   not just drift) + the DEGRADED banner must stop naming what the suite will run as + **THE
+   CALL-SITE CELL, which is not optional** + the throw-arm regression cell with a clean-tree control.
+   **F2-A and F1-C are NOT in this round. THERE IS NO ROUND 5** — a NO GO comes back to Kam.
 
 ## STATE — every SHA is an agent's read, NOT re-derived at this seat
-    origin/develop   6c60cc09b   (#888, #890 merged today; NEITHER deployed)
-    demo VM          632f16dfe   (untouched all day)
-    #892  34a48abc6  ROUND 3, UNDER GATE at %167. Kam authorised this round himself
-                     (round3-narrow, F1+F2 ONLY). ** NO ROUND 4 WITHOUT KAM ** — a NO GO here
-                     goes back to him, it does NOT ship under the two-NO-GO cap.
-    #889  48ad0354e  ROUND 2, UNDER GATE at %166. Round 1 was NO GO on F1.
-    #893  0281b0faa  ** #893 -> develop still HOLDS ** behind #889. That merge moves the trunk.
-    #891  3c07157a2  Kam's click (link above).
-**Filed this evening by s148:** KS-974 (F-1+F-5) · KS-975 (F-2+F-4) · KS-976 (F-3).
-**KS-808 already covered the `run-migrations.sh` finding** — evidence added there, hold reason
-written ON the ticket. **No owed tickets remain.**
+    origin/develop   6c60cc09b  → moves tonight when #889 and #893 land
+    demo VM          632f16dfe  (untouched all day; nothing deployed)
+    #889  48ad0354e  GO-with-findings, F1 CLOSED. MERGING.
+    #893  0281b0faa  released behind #889 — the trunk-moving merge.
+    #892  34a48abc6  NO GO. ROUND 4 authorised, narrow.
+    #891  3c07157a2  ** KAM'S OWN CLICK ** https://github.com/Secuura/Distributed_Secuura/pull/891
+**Filed:** KS-974 (F-1+F-5) · KS-975 (F-2+F-4) · KS-976 (F-3); KS-808 already covered the
+`run-migrations.sh` finding. **Owed:** tickets for #889's F-A/F-B/F-C and #892's F1-A/F1-B/F2-A;
+F1-C is an UPDATE to KS-973 item 3.
+**`ks597-qa-pg` is UP** (`docker ps`, 127.0.0.1:6499→5432) — the seat's disposable Postgres, its
+teardown command in `HANDOVER-s148.md`. **It is the seat's to tear down, not Wednesday's.**
 
-## WHAT THE GATES MUST COME BACK WITH — do not accept a green run for either
-- **#889:** the proof is **the TAMPER, not the green integration suite** — a green suite is exactly
-  what the BROKEN state produced (three cells were vacuous; only the positive control caught it).
-  Delete the `AND tenant_id` predicate from BOTH organizations subqueries → the two cross-tenant
-  cells must go RED. **Plus a green baseline**: a red-proof shows a check CAN fail; only a baseline
-  shows it passes for the right reason.
-- **#892:** F1 is a POSTCONDITION claim — *"a non-write is not a removal"*. A stale drifted manifest
-  outlives a non-write. **`generated/` is gitignored, so a clean `git status` is NOT evidence.**
+## 🔴 F-B ON #889 IS A DEPLOY BLOCKER — Wednesday's ruling, on the record
+`originate.openapi.ts:289-293` still tells integrators `organizationUuid` is *"Accepted and
+preserved"*; #889 makes a mismatched value a hard **403**, reproduced at the wire. **Not
+merge-blocking** (contract/doc, no runtime misbehaviour, a merge publishes nothing). **Deploy-blocking:
+fixed before anything carrying it reaches a surface an S integrator reads.** Severity was the
+tester's; the priority is Wednesday's.
 
-## WHAT WEDNESDAY GOT WRONG THIS SEAT — both agent-caught, neither reached a cost
-- **A SEVERITY WORD WITH NOTHING BEHIND IT:** called F-2 *"an unpinned arm rather than a live
-  defect"*. **It changed a live 200 → 403 on `/check`, the route with NO role gate.** Unpinned is
-  true; not-a-live-defect is false, and only that half decides how hard a thing gets pushed.
-  Classification-is-the-field, **w=11**, hours after the same family was gate-refused.
-- **A TOOL PATH COMPOSED FROM ITS NAME:** reached for `fleet/pane_prompt_check.sh`, got "No such
-  file", and was one sentence from telling Kam the ghost-text detector was missing. **It lives at
-  `fleet/cockpit/pane_prompt_check.sh`.** Prove an absence with `find`/`grep` + a positive control —
-  a failed `bash <path>` is `ls`'s costume.
+## WHAT WEDNESDAY GOT WRONG THIS SEAT — all caught, none reached a cost
+- **A SEVERITY WORD WITH NOTHING BEHIND IT:** called #894's F-2 *"an unpinned arm rather than a live
+  defect"*. It changed a live **200 → 403 on `/check`, the route with NO role gate.**
+  Classification-is-the-field, **w=11**. Agent-caught in five minutes.
+- **A TOOL PATH COMPOSED FROM ITS NAME:** `fleet/pane_prompt_check.sh` → "No such file"; it lives at
+  **`fleet/cockpit/pane_prompt_check.sh`**. Was one sentence from telling Kam the ghost-text detector
+  was missing. **Prove an absence with `find`/`grep` + a positive control.**
+- **A WRONG MECHANISM WRITTEN INTO TWO LEDGER ROWS** — see STANDING below. Retracted and corrected.
+- **A CONTROL THAT COULD NOT DISCRIMINATE:** curled port **6499 to prove the seat's Postgres survived
+  a pane close** — 6499 is **Postgres, and curl speaks HTTP**, so `000` was guaranteed either way.
+  `docker ps` + a TCP connect settled it (container UP). **A check that cannot fail, in Wednesday's
+  own hands, minutes after crediting a tester for catching one.**
 
-## STANDING — and two that are NEW this seat
+## STANDING — and the correction that matters most
 No `cd` (hook; it also refuses `git -C $VAR` — use literal paths). Taps ≤200 chars with a verified
-mail behind them (`--mail`). `<<'EOF'` for briefs; **`-F -` for commits, never `-m`**. Never delete —
-quarantine. **Search before you file, by SYMBOL/PATH/ERROR STRING — and run the FUZZY search too:
-the noise is what found KS-808** (`fleet/specs/brief-standing-lines.md`).
+mail behind them (`--mail`), **and re-read the destination until the mail is VISIBLE — the send's
+rc 0 raced the listing tonight.** `<<'EOF'` for briefs; **`-F -` for commits, never `-m`**. Never
+delete — quarantine. **Search before filing BOTH ways: exact (symbol/path/error string) to decide,
+FUZZY to discover — the noise is what found KS-808.**
+**`decision_queue.sh add --json` SKIPS the flag loop**, so `--override-prior-rulings` is unreachable
+there; the JSON-path equivalent is the key **`"_override_prior": true`** inside the object.
 **`0_Brain/dashboard/data/` holds TWO irreplaceable files** — `chat_log.json` and `decisions.json`.
 **Never `git add -A` it and never `git checkout <sha> --` it.** Discard the ten regenerated feeds by
-name BEFORE pulling, then stage only those two. Copy both to the scratchpad first.
+name BEFORE pulling, then stage only those two.
 
-**🟡 NEW — THE WATCHER'S IDLE LEG HAS NO FIRE-ONCE, and it is firing on a correctly-dormant seat.**
-`wake_watch.sh:151-160` increments `cnt` and fires on EVERY subsequent sample — **the same defect as
-the frozen leg (w=2). The diagnosis is that it is in NEITHER leg but in the shared pattern**: both
-count consecutive qualifying samples and fire on `>=`, and neither resets. **MEASURED AND SAFE: leg
-(a), new mail, runs FIRST and `exit 0`s before the pane leg (`:60-61`) — a repeating idle wake CANNOT
-mask a verdict.** **NOT FIXED, deliberately: two gates are live on this watcher.** Fix shape, one
-line for both legs: reset the counter on fire, or a `fired_$key` marker cleared when the hash changes.
-**CHEAP TRIAGE, one call:** inbox since baseline · `grep` both gate panes for their commissioned
-nouns · detector on the idle pane.
+**🟡 THE WATCHER'S IDLE LEG — MECHANISM CORRECTED 20:4x; DO NOT BUILD FROM THE OLD ONE.**
+`STATE_DIR` is a **PER-INVOCATION `mktemp -d`** (`:30`), so the counters do NOT persist. The script
+loops internally (`sleep` at `:217`) and **every fire path is `exit 0`, which kills the invocation and
+DESTROYS that state.** The runner restarts it and `STABLE_N` samples later the same condition is
+re-derived. **So the defect is not "no reset" — THE RESET AND THE FIRE ARE THE SAME EVENT, so a fire
+can never suppress its own repeat.** **A `fired_$key` marker in `$STATE_DIR` would be wiped by the
+exit that wrote it — that fix shape is VOID.** Correct shape: a **persistent** marker under
+`$CTX_STATE` (`cockpit/state/`) keyed by pane AND capture hash, cleared when the hash changes, as the
+ctx legs already do with `ctx_fired_${gen}_NN`. **MEASURED SAFE: leg (a), new mail, runs FIRST and
+`exit 0`s before the pane leg (`:60-61`) — a repeating idle wake CANNOT mask a verdict.**
 
-**🟡 NEW — QA LAUNCHERS ARE MOVING OUT OF THE GITIGNORED DRAWER.** `fleet/state/` is gitignored and
-holds **128 wrappers + 128 prompt files** — invisible to every git search a successor can run, which
-is how a seat nearly rebuilt a launch command by hand and bypassed its own guards. **New wrappers now
-go to the TRACKED `fleet/qa-agent/launchers/`** (the two live ones are there). **The bulk move of the
-128 is QUEUED — a `mv`, never a gitignore change, and never while gates are live.**
+**🟡 QA LAUNCHERS.** `fleet/state/` is gitignored and holds **128 wrappers + 128 prompt files**,
+invisible to every git search. **New wrappers go to the TRACKED `fleet/qa-agent/launchers/`.** The
+bulk move of the 128 is **QUEUED** — a `mv`, never a gitignore change, never while gates are live.
 
 ## GIT
 **PULL BEFORE EVERY WRITE** — the laptop seat is live on this vault. Discard the ten regenerated
 dashboard feeds by name, stage `chat_log.json` + `decisions.json` + your real changes, then
 `-c rebase.autoStash=true pull --rebase && push`. **Keep every autostash; drop nothing.**
-HEAD at this checkpoint: `0b3c4e66`, clean, == origin/main.
