@@ -8657,6 +8657,13 @@
  },
  {
   "role": "wednesday",
+  "seat": "Kamils-Mac-Studio.local",
+  "project": "WED",
+  "ts": "2026-09-08T07:40:39.373987+10:00",
+  "text": "DEPLOY IS GOING. Flagging it as it starts, as you asked, not afterwards.\n\nBoth risks are closed, and neither was closed by assuming.\n\nTHE ADMIN LOGIN RISK IS DEAD. The seat read the demo box: ADMIN_USER_PASSWORD is indeed unset — but it does not matter, because the seeder never runs there at all. A different variable gates it and returns before any account row is touched. It proved this from the auth container's OWN LOG, not from reading config: the skip message appears once, the two 'seeder ran' messages appear zero times, against seven thousand log lines with controls both ways. It also threw away its first attempt because its positive control was wrong, and told me so rather than burying it.\n\nTHE PLATFORM S RISK IS CLOSED, and I closed that one myself rather than sending it back. S's repo is in my read-only scope. Five spellings of the organisation field: zero hits, with a control proving the search reaches the tree. Then the decisive read — the exact C# type S posts to that endpoint carries five fields and only five, none of them the org field, with explicit serialisation attributes so there is nothing dynamic hiding one. S cannot trip the new 403. One honest limit, which I have put in the deploy record: that checkout is not a git repo, so I cannot prove how current it is.\n\nWHAT SHIPS: nineteen commits, three tickets. Rollback is the SHA the demo is on now. The seat verifies at the destination — a real login, the three changed surfaces — not an exit code, and it stops and tells me if anything at all surprises it rather than retrying.\n\nTWO SMALLER THINGS. The seat found my ticket count was wrong: twenty-four was the VISIBLE part of that state, not the state — five more are archived and a default Linear query cannot see them. That is a blind spot in my own counting tool and it is mine to fix, not the agent's. And I ruled to LEAVE those five archived rather than move them: they are already live, and unarchiving to fix a cosmetic state uses a write path that has demonstrably broken this board before.\n\nYou will get the completion flag with the new SHA the moment it lands."
+ },
+ {
+  "role": "wednesday",
   "seat": "Kamils-MBP.localdomain",
   "project": "WED",
   "ts": "2026-09-08T07:41:58.249496+10:00",
@@ -8682,5 +8689,37 @@
   "project": "WED",
   "ts": "2026-09-08T08:07:41.112003+10:00",
   "text": "[LAPTOP / Datasec] Five of the eight are in. main has gone a9a8cb6 to 4216f07 this morning — rd-323, rd-377, rd-381, rd-361, rd-374, each with its own receipt and each measured by Wednesday's own read rather than taken from the agent's word.\n\nThree left: rd-376, rd-322, rd-148.\n\nThe NexusAI agent hit its halfway context mark, so Wednesday ruled it CONTINUE rather than hand over — it has three merges left and it already paid for the machinery the first five needed. The one condition Wednesday set is that it never starts a merge it cannot also finish and verify: a half-merged trunk under a dead seat would be worse than stopping cleanly at six.\n\nThe test-count guard has held on every merge so far. Nothing has deployed and nothing can until the three GitHub settings are yours to set."
+ },
+ {
+  "role": "kam",
+  "text": "Decision secuura-ci-dead-19-days-blocks-your-own-ruling: fix — Kam fixes the billing / spending limit himself — the only unblock, and it releases KS-961 plus every future PR gate",
+  "ts": "2026-09-08T08:08:03.714230+10:00"
+ },
+ {
+  "role": "kam",
+  "text": "Decision wed-ledger-archive-has-no-trigger: trigger — Add the doctor.sh trigger, leave your cadence alone (Recommended)",
+  "ts": "2026-09-08T08:08:12.925938+10:00"
+ },
+ {
+  "role": "kam",
+  "text": "Decision secuura-892-round4-passed-but-introduced-two-majors: round5 — ONE more narrow round — F-1 and F-2 only, F-2 first (Recommended)",
+  "ts": "2026-09-08T08:08:39.686771+10:00"
+ },
+ {
+  "role": "kam",
+  "text": "Decision vault-add-a-stages-another-clients-files: grant-both — Grant Wednesday the write for that one skill file, and a session to reconcile the vault (recommended) | note: yes.  and allow the option through this chat to seperate or merge datasec and secuura.  for now, secuura on this machine and datasec on laptop.  PS - I already ansered these above",
+  "ts": "2026-09-08T08:09:23.327679+10:00"
+ },
+ {
+  "role": "wednesday",
+  "seat": "Kamils-Mac-Studio.local",
+  "project": "WED",
+  "ts": "2026-09-08T08:09:28.438664+10:00",
+  "text": "DEPLOY IS DONE AND VERIFIED. 400517aaf is live on the demo. Nineteen commits, thirty files, started 21:43 finished 22:07 UTC, nothing failed and nothing was retried. Rollback is unchanged at 632f16dfe.\n\nIt verified at the destination rather than by exit code, and every reading carries a control: each of the three user-visible changes measured zero-before and one-after against a baseline taken while the OLD containers were still running, with an unrelated string held constant to prove the instrument did not move. Portals, admin, verify and health all 200. A real login works and issues a token. Anchoring is untouched and still real on preview. The env file's checksum is byte-identical before and after — that is the control for the July incident. No schema change, as predicted.\n\nThe judgement I want you to see: it did NOT prove the new 403 by calling the endpoint, because if the guard had failed to ship that call would have anchored a real testnet transaction that cannot be un-made. It read the artefact instead, which discriminates just as well and creates nothing.\n\nTWO THINGS IT REPORTED RATHER THAN BURIED. It caused a side effect — bringing the stack up restarted the demo-service that session 146 had deliberately stopped — and it stopped it again and restored the exact prior state. That service fails closed and never served; it was in a crash loop for about ninety seconds. And it found something worth a ticket, KS-987: rsync breaks a file-level bind mount by inode, so the container kept serving a stale API spec while every signal an operator checks — exit code, the file on disk, container health, a 200 response — looked correct. Rebuilding does nothing, so the obvious fix feels right and is not.\n\nNOW PETER. I have transcribed both screenshots into a durable file rather than leaving them in chat, and cross-checked them against the seat's own independent measurement from an hour ago — the two agree on every PR that appears in both, which is my control on the transcription.\n\nFourteen items, and they are not one kind of work. Five are Peter's own clean PRs waiting on our review. Three are conflicted and cannot merge as they stand. Two need a re-run. One has an approval sitting at a stale head. And FOUR are not code at all — they are questions of yours that have gone unanswered since the 31st of August: the close-it ask on 750, the framing point on 721, the 2.22.2 pin disagreement on 758, and whether routing to main is the real fix on 768.\n\nI am briefing the seat now to verify all fourteen against GitHub, action everything that is ours, and hand me the four that need a ruling. I will answer what is technical and inside what you have already commissioned, and bring you only what genuinely needs you. You will have that list well before end of day."
+ },
+ {
+  "role": "kam",
+  "text": "Decision secuura-ks968-rotation-three-worlds: separate — Authorise the one two-boolean statement — it settles which of the three worlds this is (Recommended)",
+  "ts": "2026-09-08T08:09:30.618831+10:00"
  }
 ]
