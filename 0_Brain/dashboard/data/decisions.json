@@ -5701,6 +5701,49 @@
    "CARD secuura-ks949-round3-cap-and-the-cutoff",
    "CARD nexusai-rd361-blocker-vs-nogo-cap",
    "CARD secuura-892-cap-spent-blocker-open"
+  ],
+  "delivered_artefact": "Jira RD-361 comment 37265 (2026-09-07T21:12:17+1000, author Kamil Kreiser, 4561 chars) — S45 posted it in its first turn and verified by readback; quotes the deadlock ruling verbatim",
+  "delivered_ts": "2026-09-07T21:15:41.062818+10:00"
+ },
+ {
+  "id": "vault-add-a-stages-another-clients-files",
+  "client_project": "Fleet/workspace (shared file — your call, not Wednesday's)",
+  "title": "Your 09-04 vault fix shipped and works — it fixed WHO the commit names, not WHAT it stages. `git add -A` is still there, and the vault on this drive is holding four Secuura files a Datasec seat would sweep up.",
+  "bluf": "**OVERRIDE, and here is the reason, because the gate was right to stop me.** The prior-ruling gate refused this card against `fleet-vault-note-attribution`, which you ruled `adopt` on 2026-09-04 and Wednesday shipped the same day (vault commit `b830104`). **That ruling is not this subject, and I only know that because I went and read origin's own copy of the file rather than assuming.** Your fix added attribution derived from the staged diff — it decides *who the commit names*. **It left the staging verb untouched.** This card is the half it did not reach.\n\n**FOUND — two things, one logical path.**\n\n**(1) The staging verb still sweeps everything.** `origin/main:skills/Current/end-of-session.md` line 50 is still `git add -A`, run inside `$VAULT_DIR`. The vault on this drive currently holds **83 untracked files, four of them Secuura's** — `Secuura/Extranet.md`, `Secuura/Technical Meeting - Stuart/`, and two `platform-k-*` files. **A Datasec seat following the documented ritual literally tonight would commit another client's content.** Hard rule 2, fired by the ritual that exists to close a session safely.\n\n**(2) This drive's vault cannot receive your fix anyway.** It is **1 ahead / 450 behind** `origin/main` and **cannot pull at all** — `git pull --rebase` refuses with *\"You have unstaged changes\"*. `b830104` **is** an ancestor of `origin/main` and is **NOT** an ancestor of this copy's HEAD. So every agent that boots from this drive and reads the wrap ritual is reading a version that lacks even the attribution fix you already paid for.\n\n**TESTED.** Both halves first-hand, and the reassuring half deliberately widened. **HOW:** `git -C \"<vault>\" status --porcelain` → 83 `??`, 2 `D`, 2 `M`, and `grep -ci secuura` over that list → exactly 4. `git show origin/main:<skill>` → `add -A` at lines 23 and 50, with your fix present at line 56 as `git diff --cached -- \"$NOTE\" | grep '^+## '` — which is what proves the two changes are different changes. `git rev-list --left-right --count HEAD...origin/main` → `1 450`. `git merge-base --is-ancestor b830104 HEAD` → false; against `origin/main` → true.\n\n**THE CONTROL, and it is the reason nothing is urgent.** The NexusAI seat (S45) found this, did not touch the vault, and correctly refused to file it on the RD board because it spans three clients. Its own control checked **one** commit and concluded practice was selective. **Wednesday widened that frame to the last 20 vault commits: every one touches 1–5 files and not one mixes clients.** The Secuura-tagged commits came from Secuura sessions. **So the trap is live in the WRITTEN ritual and has never once fired in PRACTICE. Nothing has leaked and there is nothing to clean up.**\n\n**NOT tested:** commits older than the newest 20, and what the 450 commits this copy is missing contain.\n\n**One reassuring aside:** the vault's `core.sshCommand` is **healthy** on this drive and resolves to a key that exists, so the 2026-09-07 rename breakage in the workspace rules is not present here. Nothing was repaired and nothing needed to be.\n\n**Why both halves are yours:** (1) edits a file shared across Datasec, Secuura and Side Projects — hard rule 1 says that is amended on your word, never by one client's seat. (2) cannot be reconciled from a Datasec seat at all, because the only ways to unblock the pull are to commit, stash or discard 83 files **four of which are Secuura's** — a Datasec session doing any of those is the very leak this card is about.",
+  "default_action": "HOLD, and holding is genuinely safe tonight. No agent has run `add -A` on the vault in the last 20 commits; this seat's handover now carries the prohibition explicitly; and the NexusAI seat has already stated unprompted that it will stage its own daily-note edit by path at wrap and will not run `add -A` there. Nothing leaks overnight, nothing needs cleaning up, and the four Secuura files stay exactly where they are. Silence costs only the trap staying written down.",
+  "options": [
+   {
+    "key": "grant-both",
+    "label": "Grant Wednesday the write for that one skill file, and a session to reconcile the vault (recommended)",
+    "detail": "Same narrow shape as the three-path grant you gave at 10:50 today. Wednesday changes line 50 from `git add -A` to staging the session's own paths by name, leaves the old line commented in place with a dated backup beside it, exercises both branches before arming, and reports. For the 450-behind vault: Wednesday quarantines the 83 untracked files into a dated folder rather than committing or discarding any of them — the four Secuura files included, untouched and preserved — then pulls, and reports what the 450 commits brought. Nothing is deleted at any point."
+   },
+   {
+    "key": "skill-only",
+    "label": "Fix the skill file yourself; leave the drive's vault reconciliation for later",
+    "detail": "Strictest reading of hard rule 1 — the shared file never takes an agent's write. The change is one line: in `skills/Current/end-of-session.md` line 50, stage the session's own paths instead of `git add -A`. Line 23 does the same for the project repo and is safe, because a project repo only ever holds its own client. This leaves finding (2) open, so agents on this drive keep reading a 450-commit-stale ritual."
+   },
+   {
+    "key": "leave-and-carry",
+    "label": "Change nothing; Wednesday carries the prohibition in every brief and handover",
+    "detail": "Defensible on the evidence — 20 commits and it has never fired. But it leaves a documented instruction that produces a cross-client commit the moment an agent follows it literally, and 'a rule you have to remember NOT to follow' is the exact shape that has cost this fleet before. Wednesday recommends against it, on the record."
+   }
+  ],
+  "recommended": "grant-both",
+  "ts": "2026-09-07T21:17:59.384642+10:00",
+  "status": "open",
+  "ruled_choice": null,
+  "ruled_ts": null,
+  "prior_rulings_overridden": [
+   "2026-08-21 19:49",
+   "2026-09-07 07:39",
+   "2026-09-07 18:54",
+   "2026-09-07 18:58",
+   "2026-09-07 19:00",
+   "CARD fleet-vault-note-attribution",
+   "CARD nexusai-rd303-rd307-key-shaped-files-in-repo",
+   "CARD nexusai-rd310-which-of-three-files-are-customer-data",
+   "CARD secuura-admin-credential-rotation-183-files",
+   "CARD vault-ssh-pointer-heal"
   ]
  }
 ]
