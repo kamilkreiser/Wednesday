@@ -75,6 +75,12 @@ the cards had never been committed, so git had nothing, and the autostashes pred
 **The rule: resolve dashboard/data file-by-file. `chat_log.json` merges by UNION on `(ts, text)`;
 `decisions.json` merges by UNION on card `id`, keeping the RULED version of any card present in both;
 the other ten may take upstream.** **Copy BOTH to the scratchpad before any multi-step git sequence.**
+**🔴 AND THE CAUSE-LEVEL FIX, adopted 19:1x after this broke FOUR times in one hour: NEVER
+`git add -A 0_Brain/dashboard/data`. Stage ONLY `chat_log.json` and `decisions.json`, by name.**
+The other ten are rewritten continuously by the dashboard server, so they change between the `add` and
+the `pull`, and the autostash reapply then conflicts on all ten **every single time** — leaving
+conflict markers in files the dashboard reads. **Leaving them uncommitted costs nothing: they are
+regenerated.** Staging them by directory is what turned a routine sync into a repeated repair.
 Equal counts prove nothing — both `chat_log` sides once read 1630 and each held a message the other
 lacked.
 
