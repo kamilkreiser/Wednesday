@@ -8189,10 +8189,56 @@
   "text": "[LAPTOP / Datasec] One decision on your desk, and it is a good problem to have.\n\nBoth gates came back. The Key Vault one is a go. The auth-gate one is a no-go, and the reason is worth two minutes.\n\nThe change fixes all four ways the auth gate could fail open. The tester verified every one of them, on both versions, against real directories rather than mocks. It is good work. But it introduces one new hole the builder's own table does not name, and the tester measured it on a live server rather than reasoning about it: if a customer deploys NexusAI and the container restarts before they finish the setup wizard, the deployment is permanently bricked. Every route refuses, including the one route that could unstick it. The only way out is hand-editing a file on their volume. On the platform we ship to, a restart in that window is ordinary - scale to zero, a revision recycle, an image update, or a customer who deploys and comes back tomorrow.\n\nNothing leaks. It fails closed, which is the safe direction. It is availability, on the first-run path of a product we are trying to sell on the Marketplace.\n\nHere is why it needs you rather than me. This was round two, and your rule says two no-gos and we stop, ticket the rest, no third round without your word. That rule assumed the leftovers would be leftovers. This leftover bricks a customer. I will not merge it either way - that part is mine and the gate did not pass. The only question that is yours is whether the cap bends for something like this.\n\nIt is card number one on your panel. My recommendation is one narrow third round, just the blocker and one line of test plumbing, both of which the tester has already specified exactly. If you say nothing, nothing happens and nothing is lost - I file the findings as tickets tonight and it waits.\n\nAlso, and I would rather you heard it from me: I had to withdraw something I told you earlier today. The claim that our secret scanner was broken because it pins a version of an action that does not exist - that version does exist. I checked it two ways and the agent found a third: it has run a hundred and four times on that pin. What survives is the real problem, which is that the scanner only runs on a branch nobody has merged into for six days."
  },
  {
+  "role": "kam",
+  "text": "Decision secuura-force-push-own-branch-standing: narrow-allow — Allow it on an agent's OWN unshared branch, under exactly those checks (Recommended)",
+  "ts": "2026-09-07T18:03:38.979732+10:00"
+ },
+ {
+  "role": "kam",
+  "text": "Decision secuura-889-issuer-org-caller-asserted: hold-for-finding1 — Hold #889 until you rule the trust-boundary question (Recommended)",
+  "ts": "2026-09-07T18:03:50.025995+10:00"
+ },
+ {
+  "role": "kam",
+  "text": "Decision secuura-891-workflow-scope-merge: kam-merges — You merge #891 yourself - one click (Recommended)",
+  "ts": "2026-09-07T18:04:11.149688+10:00"
+ },
+ {
+  "role": "kam",
+  "text": "Decision secuura-ks968-demo-hash-probe: probe — Authorise the two read-only COUNTs (Recommended)",
+  "ts": "2026-09-07T18:04:22.591589+10:00"
+ },
+ {
+  "role": "kam",
+  "text": "Remind me to merge it by providing the link to GitHub to merge.",
+  "ts": "2026-09-07T18:04:35.884410+10:00"
+ },
+ {
+  "role": "wednesday",
+  "seat": "Kamils-Mac-Studio.local",
+  "project": "WED",
+  "ts": "2026-09-07T18:05:04.828995+10:00",
+  "text": "All four ruled — thank you. Here is the 891 link.\n\nhttps://github.com/Secuura/Distributed_Secuura/pull/891\n\nThat is the docs one. Four files, thirty-five lines added, sixteen removed. Nothing executable changes — the workflow file it touches is comment-only, and the agent proved that by parsing the file rather than eyeballing the diff: the triggers are still exactly workflow_dispatch and the schedule block is still commented out. GitHub refuses our agent's token on any workflow file, which is why it needs your click rather than ours.\n\nThe repo path is read from the project's own git remote just now, not composed from memory.\n\nOn the other three: the force-push rule is going into the agent's standing holds as you set it, with its own two checks as the precondition. 889 stays held and I will put the trust-boundary question to you properly as its own card, because holding it does not answer it. And the 968 probe is authorised — I am sending the agent the exact two counts it scoped, with no row data and no address returned.\n\n890 is merging now. Its gate came back clean and the 889 re-gate reported, which was the only thing it was waiting on."
+ },
+ {
   "role": "wednesday",
   "seat": "Kamils-MBP.localdomain",
   "project": "WED",
   "ts": "2026-09-07T18:09:44.176953+10:00",
   "text": "[LAPTOP / Datasec] Third card on your desk, and it is a small fix with a wide blast radius.\n\nThe NexusAI agent wrapped and hit something on its way out: it could not push to the shared vault at all. The vault's stored key path still names the old drive, from the rename. The key is fine and sitting at the right place - only the pointer is stale. It repaired it by hand, correctly declined to own the fix because it is not a NexusAI problem, and handed it to me.\n\nTwo things make it worth your attention rather than mine. Every project's own launcher repairs its own copy of that pointer at launch; the vault has no launcher, so nothing repairs it. And nothing was detecting it either - our drive-pointer check swept every project repo and skipped the one repo every agent on the drive writes to at the end of every session. So any session that wrapped since the rename either hit this or quietly skipped its vault write.\n\nI have fixed the detection half - the check now covers the vault, and I ran it both ways to be sure it warns on a genuinely broken pointer and stays silent on a healthy one rather than just being quiet. The healing half is a line in a shared file and a launcher change, and both of those are yours. Card recommends doing both. Default is hold: it is now impossible for this to be silent again, so nothing breaks while you decide.\n\nSeparately, and I would rather flag it than let you find it: our own decision-card gate refused that card three times before I filed it, matching on the words workspace and vault against cards about a dead tenant, test suites, and commit attribution. None of them related. That is the same instrument that missed a real repeat this afternoon, so it is now wrong in both directions and I have logged it as a regression rather than an annoyance. Every one of the three was filed with the override reason written on the card, so you can see exactly what I overrode and why."
+ },
+ {
+  "role": "wednesday",
+  "seat": "Kamils-Mac-Studio.local",
+  "project": "WED",
+  "ts": "2026-09-07T18:10:20.020493+10:00",
+  "text": "One card back on your desk, and it is the question your hold was waiting for.\n\nYou held 889 until you rule the trust-boundary question. That question is now on the panel properly framed, because holding it does not answer it and I did not want it to quietly age.\n\nThe short version. When a document is registered, the organisation credited as issuing it is taken from the request body and written, with no check that the caller belongs to it. Across tenants that is correctly refused. Within a tenant, any authenticated caller can credit any sibling organisation. And fifteen lines above in the same file, the same handler does exactly that check for a different field and returns a 403 when it does not match. So the code already answers the question, and answers it the other way.\n\nIt is yours rather than mine because 889 is what puts that value on the public verification page. On a product whose whole proposition is that a document is genuinely from someone, publishing an issuer nobody verified is a claim about the product.\n\nMy recommendation is to bind it, matching the check already sitting above it. The one thing I cannot tell you is whether a real integrator legitimately issues on behalf of a sibling organisation — if one does, binding breaks them, and that is the only fact that would change my recommendation. There is a third option to measure that first if it is what is stopping you. Default is nothing moves.\n\nSeparately: the 889 re-gate found the agent's test fix had closed only half the hole, and it has already closed the other half — all four tampers now red where two were blind. And 890 is merging."
+ },
+ {
+  "role": "wednesday",
+  "seat": "Kamils-Mac-Studio.local",
+  "project": "WED",
+  "ts": "2026-09-07T18:15:18.988791+10:00",
+  "text": "890 is merged, and there is one small thing on your desk that I think you will want to say yes to.\n\nThe merge first. Develop moved to 6c60cc09b at the head the gate passed, unamended. The agent predicted the resulting tree before merging and re-derived it from the object afterwards, and proved the content landed with a negative control — the new 403 is published, a status that should not be there is absent, and a file from one of its own unmerged branches is correctly missing. So the check discriminates rather than agreeing with everything. The demo is untouched.\n\nNow the thing worth your attention. Your 968 probe ran exactly as you authorised it — two counts, no data, no address, outcomes written down and hashed before the run. It came back zero and zero, which is the tidy answer meaning the defect does not fire on the demo.\n\nThe agent refuses to believe it, and it is right. A zero from a hash comparison is indistinguishable from a hash computed with the wrong key. If those rows were written under a key that has since rotated, every comparison returns zero and the probe reports no problem for a reason that has nothing to do with the problem. It is a zero from an instrument nobody has shown can return anything else. Its own words were that it would not be the one to ship a result because the answer happened to be convenient.\n\nSo it stopped and asked instead. One more count would settle it — the same shape, one integer, no data — counting rows matching a different seeded address we know exists. A non-zero there proves its key and its method are right, which is what makes the original zero mean anything.\n\nI have carded it rather than approving it myself, because your authorisation said those two counts and nothing else, and I am not going to argue a third one into scope on my own reading. Default is stop, and on silence I record 968's demo status as unmeasured rather than clear."
  }
 ]
