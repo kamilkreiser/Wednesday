@@ -12,38 +12,32 @@ supersede: replace this file wholesale at the next pickup; do not append
 **Run `2_Project_Files/tools/kam_rulings_today.sh` before writing anything — read EVERY line.**
 Mail UTC ≈ AEST−10. **ROTATION BAND 80–90% (Kam 10:49); 70% is a CHECKPOINT ONLY.**
 
-## 🔴 FIRST ACTION — the one thing with a pending trigger
-**#890 has a MERGE GO from Wednesday, held ONLY on sequencing.** It waits for the **#889 re-gate**
-(pane `QA/KS-597-889-r2`) to report. **The moment that verdict lands: tap s147 to merge #890 at
-`4096bdd1a` — the gated head, unamended.** The seat was told the wake is a tap and to mail-and-ask if
-nothing comes within the hour, so **an unanswered hour is a broken promise, not a quiet queue.**
+## 🔴 FIRST ACTION — nothing has a pending trigger; two gates report to you
+**Both live gates mail their verdicts to WEDNESDAY, not to the seat.** When one lands, rule it, then
+tap s148. **s148 must not poll them.**
 
-## KAM'S DESK — three open cards, ALL default-safe, none blocking
-1. **`secuura-889-issuer-org-caller-asserted`** (rec `hold-for-finding1`, default HOLD) — the issuing
-   organisation on #889 is **caller-asserted and never bound to the actor**, and #889 is the first
-   change that puts it on the **public verification surface**. Whether an org is a trust boundary
-   inside a tenant is the open question **KS-621** holds. **A merge here decides a product question,
-   so it is Kam's.** ⚠ **The head has MOVED since the card was written** (`af640e809` → `fc4480188`,
-   test-only; `documentRepo.ts` byte-identical). The card's question is head-independent; the re-gate
-   exists so his ruling is immediately actionable. **`decision_queue.sh` has no edit verb — he was
-   told on the panel.**
-2. **`secuura-891-workflow-scope-merge`** (rec `kam-merges`, default LEAVE OPEN) — GitHub refuses the
-   PAT on a `.github/workflows/` file. **Widening the token is deliberately NOT an option and a
-   successor must not re-propose it.** Matches his own 2026-09-05 `kam-merges` ruling.
-3. **`secuura-ks968-demo-hash-probe`** (rec `probe`, default HOLD) — two read-only `SELECT count(*)`s
-   would settle whether KS-968 fires on the demo. **s146 refused to run it and was right; do not run
-   it on silence.**
+## KAM'S DESK — ALL SECUURA CARDS RULED. Nothing of mine is open.
+He ruled six today. **The two that became work are `bind` and `strong-control` (19:00), both now in
+s148's brief.** `#891` remains **his own click** — link given, not ours:
+`https://github.com/Secuura/Distributed_Secuura/pull/891`.
+**Still open and NOT MINE:** `vault-ssh-pointer-heal` (Fleet/workspace — the LAPTOP seat's card; it
+edits the shared workspace `CLAUDE.md`, which is outside this seat's writable scope; Kam has ruled it
+three times, so his panel is re-presenting it) and two `nexusai-*` cards (the laptop's).
+**Do not act on any of those three.**
 
-## STATE — every SHA is an agent's `ls-remote`, NOT re-derived by Wednesday (no Secuura identity here)
-    origin/develop   9e9a88709   (#888 merged 16:1x; NOT deployed)
-    demo VM          632f16dfe   (unchanged all afternoon)
-    #890  4096bdd1a  round 2 GATED GO-with-findings — MERGE GO given, awaiting the sequencing tap
-    #889  fc4480188  Finding 2 closed; re-gate LIVE; merge HELD on Kam's card 1
-    #891  3c07157a2  MERGE GO given, BLOCKED on PAT workflow scope, Kam's card 2
-**KS-970 filed** (six items, one path — the scope encoder and its published contract; F-3 leads: a
-whitespace-only `tenantId` on `/reset` silently retargets the caller's own bucket **and answers 200**).
-**KS-969 filed** (systemTest actor/credential story, four items; **item 1 is the unlock** and is s147's
-current work). **KS-968** = the seed's 23505 swallow. **KS-967** filed earlier.
+## STATE — every SHA is an agent's `ls-remote`, NOT re-derived here (no Secuura identity on this seat)
+    origin/develop   6c60cc09b   (#888 and #890 both merged today; NEITHER deployed)
+    demo VM          632f16dfe   (untouched all day)
+    #892  42e778203  round 2 GATE LIVE — NO GO 1 of 2 already spent, a NO GO here SPENDS THE CAP
+    #893  ab1053141  queued for ONE tier-1 gate on #894's head (contains #893)
+    #894  e02d0fecc  stacked on #893 so #893's gated head cannot move; not re-targeted at develop yet
+    #889  9898ae724  Kam ruled BIND — the change is s148's work, then a TIER 1 gate, then merge
+    #891  3c07157a2  KAM'S OWN CLICK
+**KS-973** = the #892 residue (F4, F5 + the F6–F9 minors). **KS-970** complete. **KS-969** items 1–3
+done, item 4 still blocked on #892 landing. **KS-968 status: UNMEASURED, not clear** — the probe
+returned zeros from an instrument nobody had shown could return non-zero; **Kam authorised the strong
+control at 19:00 and s148 runs it, pre-registered and hashed first.** The earlier pre-registration is
+durable at `5_Project_History/KS-968-probe-preregistration-2026-09-07.txt`.
 
 ## WHAT WEDNESDAY GOT WRONG TODAY — all agent- or gate-caught, none reaching a cost
 - **The #890 fix instruction was wrong THREE ways** (base64url renames the `-` sentinel rather than
