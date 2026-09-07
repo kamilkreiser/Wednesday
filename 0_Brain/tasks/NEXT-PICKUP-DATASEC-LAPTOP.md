@@ -14,12 +14,17 @@ anything — read EVERY line.** Mail UTC ≈ AEST−10. **ROTATION BAND 80–90%
 **Quiet hours are OVER — voice is allowed.** Kam's last panel input was 21:00 on 09-07; he has the
 morning board on his panel.
 
-## 🔴 FIRST ACTION — verify these two, then read Kam's panel
-    %23  QA/NexusAI-RD377  — FULL tier-2 gate on rd-377-verdict-domain-s47 @ fabcc93. Launched 06:17.
-    %22  Datasec/NexusAI   — S47. On RD-376 (unblocked 06:19 after holding unnecessarily).
+## 🔴 FIRST ACTION — one gate live, and KAM HAS AN UNANSWERED RECOMMENDATION FROM THIS SEAT
+    %24  QA/NexusAI-RD376  — FULL tier-2 gate on rd-376-stripper-reconcile-s47 @ 36191eb. 30+ min in.
+    %22  Datasec/NexusAI   — S47. HOLDING correctly and said so; prompt clean; ctx 40%.
     %0   wednesday         — this seat.
-`tmux list-panes -t fleet` before believing this line. **When %23 reports: read the verdict from the
-REPORT ON DISK** (`projects/nexusai/reports/2026-09-08-rd377-tier2/`), never the mail alone.
+    (%18 %19 %20 %21 %23 all closed; each `listeners 13 -> 13`.)
+🔴 **AWAITING KAM: at ~07:0x he asked "how did you go with the security review — are all elements,
+tests, verifications completed?" Wednesday answered with a verified status and a RECOMMENDATION he
+has not yet ruled on.** See the SECURITY REVIEW section below — **do not re-ask him, and do not start
+it without his word.**
+`tmux list-panes -t fleet` before believing this line. **When %24 reports: read the verdict from the
+REPORT ON DISK** (`projects/nexusai/reports/2026-09-08-rd376-tier2/`), never the mail alone.
 
 ## THE TERMINATING RULE — it governs the RD-377 verdict when it lands
 - **clean GO** -> ticket closes;
@@ -30,7 +35,9 @@ REPORT ON DISK** (`projects/nexusai/reports/2026-09-08-rd377-tier2/`), never the
 which is what makes it a rule rather than an excuse.
 
 ## LIVE HEADS — `ls-remote` by this seat overnight + S47's own re-derivation; Wednesday ran no fetch
-    rd-377-verdict-domain-s47                fabcc93   AT THE FULL TIER-2 GATE (%23). Base e032c7d.
+    rd-376-stripper-reconcile-s47            36191eb   AT THE FULL TIER-2 GATE (%24). Base 10ddb0a.
+    rd-377-verdict-domain-s47                fabcc93   GATE: GO, classification (a) NOTHING. CLOSED.
+    rd-381-effective-boundary-s47            b93d3b5   accepted on Wednesday's completion check. CLOSED.
     rd-323-scheduler-failure-vocabulary-s45  e032c7d   lineage CLOSED, findings ticketed
     rd-374-f2-guard-coverage-s46             10ddb0a   lineage CLOSED, completion check passed
     rd-361-round4-s45                        731aa6e   GO-with-findings stands
@@ -50,7 +57,7 @@ Step-by-step went to his panel **19:59:38 on 09-07** — **do not re-send it.**
 Studio's or Fleet/workspace — **not yours to adopt, re-card or answer.**
 
 ## RULINGS THIS SEAT MADE — a successor must not re-litigate these
-- **RD-377 is a FULL tier-2 gate** (product code in three schedulers), base `e032c7d`.
+- **RD-377 was ruled a FULL tier-2 gate** (product code in three schedulers), base `e032c7d` — **that gate has since returned GO and RD-377 is CLOSED.** The ruling is recorded because the REASON still binds: product code moves a round off through-code.
 - **The two reader widenings land INSIDE RD-377, additively** — a new `unknownStatus` count alongside
   `p1Incidents`/`healthP1s`, **never folded in** (RD-323-D-2: a metric's meaning must not change under
   an unchanged key; RD-130: never inflate an incident count with non-incidents).
@@ -65,6 +72,31 @@ Studio's or Fleet/workspace — **not yours to adopt, re-card or answer.**
 - **The three stray `/*` comments in `server.js` stay untouched** until the X-1/X-2 reproducer is
   captured or `data-dir-single-source.test.js` is converted.
 - **The vault step is SKIPPED at every wrap** and the skip is stated in the wrap mail.
+
+## 🔴 SECURITY REVIEW — Kam asked, Wednesday answered, and a RECOMMENDATION IS PENDING HIS WORD
+**Report:** `/Volumes/KK_T9_External_HDD/!CODING/Datasec/Security Review/_Working/delta-review-2026-09/_BATCH2_REPORT.md`
+**VERIFIED BY THIS SEAT, not relayed:** 19/19 June-baseline delta set complete plus an HPSM scope
+verdict (20 files, reconciles); **22 findings, 4 High · 4 Medium · 7 Low · 7 Informational** — both the
+heading count and the severity split re-derived with the report's own greps and they match exactly.
+**WHAT IS NOT DONE, and this was the answer to his question:**
+1. **Static only, by design** — nothing built, executed, flashed or networked; no device, card, tenant
+   or `az`. There is no dynamic testing in this at all.
+2. 🔴 **NONE of the 22 findings is on a board** ("read-only on Jira — no ticket created"). Four Highs,
+   including a security predicate switched off with `if (true) return false;` in a shared library six
+   apps link, live in markdown and nowhere a tracker shows them.
+3. 🔴 **An unfinished sweep:** the missing-`Bearer`-scheme defect found in TWO siblings is likely in
+   CypherSharePoint / MailFlow / UniversalPrint — **not checked.** Work, not a decision.
+4. **Two open questions GATE a severity:** the CVL print-source storage location (D-CVL-02 is Medium
+   **on an assumption**; if external it is a High) and MailFlow's `error.codeLink` origin.
+5. **The live cloud pass has not run** — blocked on the tenant question `fc05dcdd` vs `0c57ab37`,
+   which the workspace CLAUDE.md marks UNRESOLVED. **Do not assert which.**
+6. **Two decisions are his:** RD-18's Privacy Act package; whether to re-issue the June deliverables
+   against the 219-finding register.
+**THE PENDING RECOMMENDATION (option a):** launch a Security Review session to file the 22 findings and
+finish the Bearer sweep — neither needs anyone outside us, neither touches his pending decisions.
+🔴 **Security Review is NOT in the morning-autostart grant** (that covers Secuura/Blockchain,
+NexusAI, Vision), so this is a new delegation and **waits for his word.** Note the project has **no
+fleet inbox** — `send_brief.sh` will refuse it; brief a launched session directly.
 
 ## 🟡 THE ATTIO DAILY DIGEST — arrives 07:00, and its headline overstates its own body
 `[Datasec/ATTIO -> Wednesday] DAILY FOLLOW-UP DIGEST` (scheduled, `attio-bridge`, ATTIO-29). It says
