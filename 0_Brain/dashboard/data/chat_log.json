@@ -8661,5 +8661,19 @@
   "project": "WED",
   "ts": "2026-09-08T07:41:58.249496+10:00",
   "text": "[LAPTOP / Datasec] The merge half of your 07:10 is happening. THE DEPLOY HALF DID NOT, AND CANNOT WITHOUT YOU - and now I know exactly why.\n\nThree branches are merged and pushed. Main has moved for the first time since 1 September - it had 250 commits of finished work stacked behind it and that backlog is now clearing.\n\nBut nothing deployed, and I am not guessing that - the agent measured it on Azure rather than reading a workflow and inferring. The container app still runs the same revision from 5 September and the registry's newest image is the same one. Three pushes to main, no build, no deploy.\n\nThe cause is a master switch. The deploy workflow is wrapped in a condition on a repository variable called CI_DEPLOY_ENABLED, and the workflow's own header says it stays unset deliberately until the secrets and environment exist, so every job skips cleanly rather than failing. So merging cannot deploy. It is not broken - it is switched off on purpose, and nobody turned it on.\n\nThis also answers one of the two clicks I have been asking you about, and it inverts what I thought. I was holding those merges because I feared a merge would deploy to the demo with nobody watching. The opposite is true: a merge cannot deploy at all. My caution was pointed at a risk that did not exist.\n\nTHREE THINGS ARE YOURS, and they are the whole deploy half:\n\nSet the repository variable CI_DEPLOY_ENABLED to true.\n\nAdd the three Azure secrets the workflow needs - client id, tenant id, subscription id.\n\nCreate the demo environment, with a required reviewer if you want a human in the loop.\n\nI cannot do any of them. My identity is not in the datasecau org at all - I measured that too - and these need admin on the repo. Until they exist, every merge we land is correct and invisible.\n\nNothing is broken and nothing is waiting on me. Merging continues."
+ },
+ {
+  "role": "wednesday",
+  "seat": "Kamils-MBP.localdomain",
+  "project": "WED",
+  "ts": "2026-09-08T07:43:17.649410+10:00",
+  "text": "Coordinator seat rotated automatically at 07:43 — planned rotation inside Kam's 80-90% context band. A fresh seat is booting now (about ten minutes); agents are untouched and their mail waits for it."
+ },
+ {
+  "role": "wednesday",
+  "seat": "Kamils-MBP.localdomain",
+  "project": "WED",
+  "ts": "2026-09-08T07:48:32.639358+10:00",
+  "text": "[LAPTOP / Datasec] Fresh seat up at 07:47. Nothing needs Kam right now — this is a status, not an ask.\n\nMERGES, measured by Wednesday's own ls-remote just now, not relayed: origin/main = 0dd9cc0. Three landed (rd-323, rd-377, rd-381) — main's first movement since 1 September. The NexusAI agent (S47) is folding merge 4 (rd-361) right now; its measured test figure came back 2229 passing across 115 suites, above the 2196 floor Wednesday set as a stop condition, so no decrease. Four merges remain after it: rd-374, rd-376, rd-322, rd-148.\n\nDEPLOY: unchanged from what Wednesday sent at 07:41 — it cannot fire without the three GitHub settings, and those are Kam's hands. Not re-sending the steps; they are on the panel.\n\nHOUSEKEEPING: the RD-376 gate and the Security Review both finished and their panes are closed (listeners 13 to 13, nothing died with them). The Security Review filed its 23 findings into register 13, now 242, with the completeness claim amended — the card asking whether to verify those 23 is still on Kam's desk with a default of nothing runs."
  }
 ]
