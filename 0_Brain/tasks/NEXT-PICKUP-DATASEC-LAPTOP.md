@@ -28,20 +28,29 @@ naming its own brief (never a non-zero ctx) — and **both have since REPORTED**
 **The general rule this earns, and it is already a lesson:** a handover records a mechanism by its
 **PATH**. Every launch wrapper below is named by path for exactly that reason.
 
-## FLEET — 1 live: the RD-362 gate. The builder has been told to WRAP.
+## FLEET — 1 live. The builder has WRAPPED and all three finished panes are CLOSED.
 - **`%5` — QA gate, RD-362 (SEC-04 + SEC-03), TIER 1, round 1 of 2.** Branch
   `rd-362-pentest-report-exposure-s43` @ `920e067dc32f21cfb11e23701ee10ac210bee4d0`.
-  Launch: `2_Project_Files/fleet/state/launch_qa_nexusai_rd362.sh` (`--check` for guards).
-  Brief: `2_Project_Files/fleet/qa-agent/briefs/2026-09-07_nexusai-rd362-sec04-sec03-tier1.md`.
-  Launched and verified at rung 5. **Its report is the next thing to land.**
-- **`Datasec/NexusAI` `%2`** — the builder (s43), ~68% ctx, **queue empty and it said so rather than
-  manufacturing work.** `HANDOVER-S43.md` is current (eight branch heads first-hand, the Blocker in
-  full, eleven of its own errors, ten traps). **Told to WRAP** at 07:59:57Z — not to tidy up, but
-  because an alive-but-dormant pane re-fires the frozen-busy watcher for ~75 minutes of false alerts.
-  Expect its wrap mail. Relaunch it when Kam rules on either card.
-- **`%3` `%4`** — the two returned gates, idle since 17:42 / 17:40. Panes up for inspection only.
-  Before closing either: `pane_close.sh` discipline (tty on the listener AND its parent), then
-  re-curl anything named as up.
+  Launch: `2_Project_Files/fleet/state/launch_qa_nexusai_rd362.sh` · Brief:
+  `2_Project_Files/fleet/qa-agent/briefs/2026-09-07_nexusai-rd362-sec04-sec03-tier1.md`.
+  **Writing its report as of 18:15.** Early signal from its pane: **the redaction is INCOMPLETE** — a
+  7-char hash still resolves to the removal commit and, combined with line 194, the recipe
+  reconstitutes. Expect findings, not a clean GO.
+- **`%2` (builder, s43) — WRAPPED 18:05 and CLOSED.** Ritual complete: HISTORY entry on
+  `s43-history-docs` @ `cb8601c`, vault pushed @ `8c38a88`, `.env` never staged across six branches,
+  13 of its own errors named in `HANDOVER-S43.md`.
+- **`%3` `%4` (the returned gates) — CLOSED.** Reports mailed and read; both scored 1.0.
+- **Closes were done through `2_Project_Files/fleet/cockpit/pane_close.sh`**, listeners **13 → 13**
+  on every one, and ports 3001/3111/3121 already 000 beforehand — nothing died with a pane.
+
+## ⚠️ GHOST TEXT APPEARED AT TWO PROMPTS IN ONE MINUTE — both caught, both created by Wednesday
+A `idle at prompt ~3 min — likely waiting on Wednesday` wake fired on the builder, which was idle
+because it had **wrapped**. At its prompt: **`good night`** (ladder rung 2, the wrap phrase at a
+wrapped pane). At the RD-361 gate's prompt: **the exact follow-up ticket under discussion** (rung 6,
+the coordinator's own queue as the salience source). `pane_prompt_check.sh` called both
+`SUGGESTION — ignore`; a third pane returned `prompt empty`, so the detector discriminates.
+**Telling a seat to wrap is what makes "good night" the generator's next sentence.** Run the detector
+BEFORE reading any prompt line, and **close a wrapped pane rather than clearing its line.**
 
 ## GATE QUEUE AFTER RD-362 — 2 left, both Wednesday's to fire, neither needs the builder
 1. **RD-329 @ `2e78c76`** — the public `/api/health` allow-list guard. **No red-proof exists and the
