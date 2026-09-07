@@ -74,6 +74,51 @@ mode across all 175 routes** if `settings.json` is emptied with backups gone.
 cell D; restore 23/23). Single-write-site premise verified across **all 678 tracked files**.
 **Report:** `/Volumes/KK_T9_External_HDD/!CODING/Testing Agent MAIN/projects/nexusai/reports/2026-09-07-rd361-round3-tier1/report.md`
 
+## 🔴 FIRST ACTION FOR THE NEXT SEAT — two gates are live and NexusAI has NO builder
+**Live panes:** `%16 QA/NexusAI-MovedHeads` · `%15 QA/NexusAI-RD322-323`. **Both report to Wednesday.**
+**S45 handed over at 23:03 and its pane is CLOSED** (`HANDOVER-S45.md` at the NexusAI project root,
+outside the repo). **Relaunch a NexusAI builder only when a verdict needs action** — a fresh seat on a
+verdict beats a 56% seat idling, and there is no category-1 work it was mid-way through.
+
+**FOUR BRANCHES, none merged, and Kam's two GitHub answers gate all three merges:**
+
+    rd-361-round4-s45   GO@f93730c   HEAD 731aa6e   AST census rewrite   -> %16 gating now
+    rd-148-round2-s45   GO@ea4d229   HEAD 690bed9   N-4 cell fix         -> %16 gating now
+    rd-322-root-guard-vacuity-s45      @ 432617a                          -> %15 gating now
+    rd-323-scheduler-failure-vocabulary-s45 @ 99fb518                     -> %15 gating now
+
+**Gate mechanisms BY PATH:** `2_Project_Files/fleet/launch_qa_nexusai_moved_heads.sh` ·
+`2_Project_Files/fleet/launch_qa_nexusai_rd322_rd323.sh` (each `--check` runs every guard without
+launching; both verify **BOTH** their heads on origin — the first draft of the two-subject wrapper
+checked only one, a guard covering half its subject).
+
+## ⚠️ GHOST TEXT SIX TIMES TONIGHT — and `good night` TWICE AT THE SAME PANE
+NexusAI's pane carried **`good night`** at boot (seat s44, wrapped) **and again at 23:2x** (seat s45,
+wrapped). Also: Security Review — *"check the Bearer scheme defect in SharePoint, MailFlow and
+UniversalPrint"* (three components already reviewed, outside the brief); the round-4 gate — *"Send Kam
+a one-paragraph summary of the verdict"* (an action aimed at the principal); the F-2 gate — *"file a
+fix-backlog entry for F-B in the NexusAI repo"*; the RD-148 gate — *"file the N-1 ticket details for
+Wednesday"*.
+**All six at WRAPPED panes. Detector FIRST, every time, then CLOSE the pane rather than clear the
+line.** A cleared prompt can be re-populated; a closed pane cannot. All six closed cleanly.
+
+## ✅ F-B/F-A/F-D/F-E ALL DONE @ `731aa6e` — and S45 applied the moved-head rule to ITSELF
+The census now **parses**: acorn + acorn-walk over an AST, write positions found structurally
+(`setSetting` call · `AssignmentExpression` onto a member named `authEnforced`, **every operator**, so
+`??=`/`||=` are covered where `=(?!=)` was not · a `Property` keyed `authEnforced` inside a
+`writeFile` argument). **Red-proofed with the matched pair, and it re-ran the OLD regex against M-G2
+to get `bulkWrites = 0` — F-B demonstrated rather than described.**
+**Frame widened** from `backend/**` to everything tracked except `__tests__` (**148** shipping files),
+closing three bypasses the F-2 gate found outside the old frame. **The `__tests__` exclusion is
+ASSERTED, not assumed** — a cell reads the Dockerfile and requires no `COPY` line mentions it.
+**KNOWN LIMIT, measured not guessed:** the guard covers **syntactic** write positions; a dynamic
+`settings[k] = v` needs dataflow, and there are **256 computed assignments in the tree**, so asserting
+zero is not available. **`stripComments()` is still in the file for the WIRING cells** on the reasoning
+that a URL cannot hide what those count — **the moved-heads gate is ruling on that.**
+**Unprompted, in the same mail, S45 applied the GO-names-a-head rule to its own push** — `731aa6e`
+moved the F-2 GO's head exactly as `690bed9` moved RD-148's — and tabled both rather than leaving them
+to be found. **Process note taken too:** it built in a worktree (`/tmp/wt-f2`), checkout never moved.
+
 ## 🔴 A GO NAMES A HEAD — the RD-148 GO is on `ea4d229` and the head is now `690bed9`
 The tier-1 GO, Wednesday's relay and the scoreboard row all name **`ea4d229`**. **N-4's fix is
 `690bed9`, which has never been gated.** Wednesday commissioned the N-4 fix in the same breath as
