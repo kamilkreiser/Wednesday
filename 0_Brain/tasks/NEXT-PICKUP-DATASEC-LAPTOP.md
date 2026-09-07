@@ -74,12 +74,43 @@ mode across all 175 routes** if `settings.json` is emptied with backups gone.
 cell D; restore 23/23). Single-write-site premise verified across **all 678 tracked files**.
 **Report:** `/Volumes/KK_T9_External_HDD/!CODING/Testing Agent MAIN/projects/nexusai/reports/2026-09-07-rd361-round3-tier1/report.md`
 
-**Round 4's item 1 is a MEASUREMENT THAT MAY KILL THE ROUND**, and that outcome is a success:
-Wednesday's inference — that `initializeFiles()` normalises a lost `settings.json` to `{}` before the
-gate reads it, so "never set up" and "set up then lost" are byte-identical and **no** content
-discriminator can work — **is an inference, not a measurement.** The seat is told to try to break it
-and to STOP and mail Wednesday if a real discriminator exists. **Do not let round 4's output be
-recorded as closing SEC-01 unless the gate says so.**
+## 🔴 ROUND 4 CHANGED SHAPE AT 21:32 — item 1 FALSIFIED Wednesday and the round is better for it
+**Wednesday's inference was HALF right, and the wrong half was the one that mattered.** S45 measured
+every byte of every file under the data directory across the full state space, after the second
+`new JsonStorage(dir)` returns.
+
+- **CONFIRMED:** for whole-file loss with both backup layers gone (**state L4**), a lost deployment
+  is **byte-identical** to a fresh deploy. No predicate over the volume separates them. Measured now,
+  not inferred.
+- **🔴 FALSIFIED:** that is **not the state the Blocker is about.** `jsonStorage.setSetting()`
+  (`backend/jsonStorage.js:1865`) stamps **`authEnforced_updated_at`** in the same write, and **it
+  survives deletion of the key itself** — positive evidence auth was once enforced. Rounds 2 and 3
+  both walked past it.
+- **The candidate:** relax only when `authEnforced` is absent **AND** `authEnforced_updated_at` is
+  absent. Correct on F, I, I2, C2 — **it closes the Blocker** — wrong only on L4.
+
+**WEDNESDAY'S CALL, 21:32, reported to Kam and NOT asked of him:** round 4 **continues on the sidecar
+predicate**; **item 2's `/api/auth/enforce` carve-out is WITHDRAWN.** Reasoning, so a successor can
+check it rather than inherit it: Kam ruled `deadlock` to spend a round **closing the Blocker** — that
+objective is unchanged; only the means changed, and the new means is strictly narrower and safer
+(no door opened on an auth route, so the takeover question never arises). That is v1.3 execution —
+a technical route inside work he commissioned. **The risk trade underneath it was already his:** he
+saw F-2 in the BLUF of the card he ruled and authorised the round anyway.
+
+**🔴 ROUND 4 CLOSES F-1. IT DOES NOT CLOSE F-2.** The sidecar dies with the file, so **L4 still
+resolves to `allow-open-mode`, exactly as under round 3.** The residue is ticketed in the same
+action, routed to the platform layer (RD-363 / RD-368) where round 3's own docblock already pointed.
+**Do not let any artefact record round 4 as closing SEC-01 or F-2.** The gate decides F-1.
+
+**What Wednesday ratified and did NOT ratify:** the SHAPE of S45's reasoning is ratified; **the
+predicate's correctness in the product is the tier-1 gate's question, not Wednesday's.**
+
+**S45's own control is the best thing in the exchange, and it is now a standing brief line:** its
+first run showed F and L4 differing in `.machine-id` and the sentinel — which reads as "a
+discriminator exists" and is the opposite of the truth. Both were artefacts of its harness giving
+each state a **fresh temp directory**. Re-run with those preserved, as a real restart preserves them,
+the two came back byte-identical. **An enumeration harness that constructs its states in different
+places manufactures differences that look exactly like findings.**
 
 ## SECURITY REVIEW — the frame, because the previous handover's list was complete over a smaller one
     32  components with a June baseline (Deliverables/Components/*.md)
