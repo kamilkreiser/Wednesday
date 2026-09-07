@@ -93,6 +93,32 @@ The gate's `services.bicep:564` (staging) and `env.demo.json:8` (production) are
 to the **RETIRED Container Apps estate**, not the running VM. **The gate and the seat were measuring
 different environments. Neither was wrong.** Anyone re-reading those two mails will think they conflict.
 
+## 🔴 s145 IS EXECUTING THE ROTATION — shape RATIFIED, order 1,2,4,3, then tickets
+Kam ruled `rotate-properly` (11:43:32). **s145's measurement made the job much smaller than the card
+he ruled on, and he has been told: of 183 occurrences the real surface is ~32**, because
+**43 sit in `Blockchain/Dev/tests/` spec files that NOTHING RUNS** (in no playwright config's
+`testDir`, referenced by no runner, with a working control). Split: **93 executable / 87 documentary**;
+the 93 splits again into **8 env-var-with-published-fallback · 12 comments · 73 hardcoded**.
+
+**AND THERE IS NO NEW SHARED SECRET TO DISTRIBUTE.** The machinery exists
+(`systemTest/playwright/config/environment.ts:185` reads `getGeneratedActor(ADMIN_ACTOR_KEY)?.password`;
+`provision-actors.ts` provisions per run). **The published default is the fallback that makes it moot.**
+So the rotation collapses into a deletion — no second rotation waiting later.
+
+**Ruled order:** (1) the 8 fallbacks — delete the default, keep the var, fail closed **[FIRST: it holds
+the live defect `userRepo.ts:1071`]** · (2) the 5 CI sites — remove the literal (Actions is retired,
+they cannot break a run that does not happen) · (3) the 4 startup/scripts + 3 harnesses — env var, no
+fallback · (4) the 12 systemTest sites — route through the generated-actor path **[LAST of the code:
+it is a routing change, the only real regression risk; prove the actor path resolves BEFORE removing
+the fallback]** · (5) the 43 dead specs → **own ticket, quarantine not delete** · (6) the 87
+documentary → own pass, after.
+
+**⚠ FLAG TO KAM WHEN IT LANDS:** after step 1, **an unset var seeds NO admin rather than a known one**
+— a behaviour change on anything relying on the default, and it goes to him under the production grant.
+
+**s145 was at ~70% and told to do 1 and 2, push, then judge honestly whether 3 and 4 fit — and to wrap
+with a handover rather than push anything half-done.** Check which it chose before assuming.
+
 ## PR / MERGE STATE — verified at origin 12:2x
 ```
 develop 632f16dfe62f4c498a73ca09a39cadaf6eeab764   FOUR MERGES TODAY, all five verified as ancestors
