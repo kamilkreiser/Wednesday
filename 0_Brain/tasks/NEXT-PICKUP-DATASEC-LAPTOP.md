@@ -1,360 +1,182 @@
 ---
 date: 2026-09-08
 type: pickup
-scope: DATASEC ONLY — laptop seat. Secuura belongs to the Studio seat; do not touch it.
-source: replaced WHOLESALE at 06:2x by the 00:21 seat, at the 65% checkpoint
+scope: DATASEC ONLY — laptop seat. Secuura belongs to the Studio seat; do not touch it, do not adopt its cards.
+source: replaced WHOLESALE at 08:2x by s150, at the all-eight-merged boundary
 status: live
 supersede: replace this file wholesale at the next pickup; do not append
 ---
 
-# NEXT PICKUP — Datasec laptop seat, 06:2x Tuesday 2026-09-08. KAM IS AWAKE (greeted by voice 06:13). TWO THINGS ARE LIVE.
+# NEXT PICKUP — Datasec laptop seat, 08:2x Tuesday 2026-09-08. KAM'S MERGE HALF IS DONE. HIS DEPLOY HALF IS STILL HIS.
 
 **Run `/Volumes/KK_T9_External_HDD/WEDNESDAY/2_Project_Files/tools/kam_rulings_today.sh` before writing
 anything — read EVERY line.** Mail UTC ≈ AEST−10. **ROTATION BAND 80–90%; 70% is a checkpoint only.**
-**Quiet hours are OVER — voice is allowed.** Kam's last panel input was 21:00 on 09-07; he has the
-morning board on his panel.
+Kam left at 07:10 to drop the kids off. Voice is allowed.
 
-## 🔴 FIRST ACTION — merges are landing; S47 has its GO and is NOT blocked
-    %22  Datasec/NexusAI      — S47. Merging, on merge 5 of 8. ctx 48% at 07:52.
-    %24  CLOSED 07:48 by s150 (detector: prompt empty; listeners 13 -> 13).
-    %25  CLOSED 07:48 by s150 (detector: prompt empty; listeners 13 -> 13). Its 403 answer
-         landed in `_Working/2026-09-08_FILE_AND_SWEEP_REPORT.md` before it wrapped — nothing owed.
-    %0   wednesday            — s150, booted 07:44, rotated in at 82%. ONLY TWO PANES LIVE.
+## 🟢 ALL EIGHT MERGED — `main` = `e94973d`, unfrozen after 7 days
+    a9a8cb6  frozen since 2026-09-01
+    8c4c22d  1 rd-323 e032c7d      1803bcd  2 rd-377 fabcc93      0dd9cc0  3 rd-381 b93d3b5
+    97be896  4 rd-361 731aa6e      ecd214a  5 rd-374 10ddb0a      36d5e6f  6 rd-376 36191eb
+    4216f07  7 rd-322 432617a      e94973d  8 rd-148 690bed9
+274 commits. Final suite **2255/2255 across 116 suites** — **S47's figure, S47's run, not re-derived.**
 
-🔴 **`main` IS MOVING — 5 of 8 merged and pushed at 08:0x**, first movement since 2026-09-01:
-    a9a8cb6 (frozen) -> 8c4c22d rd-323 -> 1803bcd rd-377 -> 0dd9cc0 rd-381 -> 97be896 rd-361 -> 4216f07 rd-374
-🔴 **EVERY SHA AND COUNT IN THIS FILE IS A SNAPSHOT OF A MOVING TRUNK. `main` moved four times
-between 07:34 and 08:06 and this line went stale twice while being written. DO NOT TRUST IT — run
-`git -C "/Volumes/KK_T9_External_HDD/!CODING/Datasec/NexusAI/2_Project_Files" ls-remote origin main`
-(a READ verb, safe from Wednesday's seat) and believe that instead.** The durable facts here are the
-QUEUE ORDER and the GUARDS, not the head.
-**`0dd9cc0` and `97be896` re-read by s150 with its own `ls-remote` at 07:48 and 07:52** — not
-relayed. **Merge 4's decrease guard HELD: 2229 tests / 115 suites, above the 2196 floor.** S47
-also caught its OWN verification loop printing a conclusion on mangled paths, and re-derived it.
-All FOUR confirmed under the two-sided predictor; side A = the branch's own diff, side B = what main
-already carried, plus an absent-branch control.
+**VERIFIED INDEPENDENTLY BY s150, and this is the method to reuse:** `git clone --shared --no-checkout`
+of the builder's checkout into s150's OWN scratchpad (read-only on the source; source HEAD and a clean
+`status` re-read afterwards), then `merge-base --is-ancestor` for each of the eight against
+`origin/main` — **8/8 IN main**, with a **negative control that discriminated**
+(`rd-306-law-window-s34 edb81c5` correctly NOT in main). The branch mapping above is from
+`git log --merges`, **not from queue order.** S47's account and s150's measurement agree exactly.
 
-🔴 **THE DEPLOY HALF OF KAM'S 07:10 DID NOT HAPPEN AND CANNOT FROM HERE — MEASURED, NOT INFERRED.**
-Container App `nexusaidev-app` still on revision 0000097 (2026-09-05); ACR newest tag unchanged.
-**Cause: `deploy-demo.yml:51` gates every job on `vars.CI_DEPLOY_ENABLED == 'true'`, and the
-workflow's own header says it stays unset deliberately until secrets + environment exist.** So a
-merge CANNOT deploy. **This INVERTS Wednesday's earlier hold** — the fear was a merge deploying
-unseen; the truth is it cannot deploy at all.
-**THREE THINGS ARE KAM'S and they are the whole deploy half:** set `CI_DEPLOY_ENABLED=true`; add
-secrets `AZURE_CLIENT_ID` / `AZURE_TENANT_ID` / `AZURE_SUBSCRIPTION_ID`; create the `demo` environment.
-**Sent to his panel 07:4x.** **Do NOT report any merge as a deploy.**
+## 🔴 THE DEPLOY HALF — STILL KAM'S, STILL UNSATISFIED, AND NO MERGE CHANGED IT
+`deploy-demo.yml:51` gates every job on `vars.CI_DEPLOY_ENABLED == 'true'`, unset by design until
+secrets + environment exist. **So a merge CANNOT deploy.** Container App `nexusaidev-app` still on
+revision `0000097` (2026-09-05); newest ACR tag still the 09-05 image. **NEVER REPORT A MERGE AS A DEPLOY.**
+**Three things are his and they are the whole deploy half:** set `CI_DEPLOY_ENABLED=true` · add secrets
+`AZURE_CLIENT_ID` / `AZURE_TENANT_ID` / `AZURE_SUBSCRIPTION_ID` · create the `demo` environment.
+**Sent to his panel 07:41 and again in the 08:1x completion message. DO NOT RE-SEND — he has it twice.**
+s150 MEASURED that it cannot do these itself: `kamilDatasec` is in orgs `token-one` and `warpkey`, NOT
+`datasecau`; the deploy key reaches git, the API identity does not, and repo settings need admin anyway.
 
-## MERGE QUEUE — corrected twice by S47, both times measured, both times right
-    DONE  1 rd-323 · 2 rd-377 · 3 rd-381 · 4 rd-361 (main 97be896) · 5 rd-374 (main 4216f07)
-    6. rd-376  36191eb  NOW ELIGIBLE — gate returned (b), ticket ended. Based on 10ddb0a.
-    7. rd-322  432617a  the only unqualified GO
-    8. rd-148  690bed9
-🔴 **The conflict resolution is BY MEASUREMENT** (the file's own `_why` prescribes
-`npm run verify -- --update-counts`), **with a guard Wednesday added: a measured count BELOW 2196
-must STOP the seat.** `--update-counts` makes the file agree with the tree; it does not check the
-tree is right, so it would silently bless a merge that lost tests.
-🔴 **When rd-376 merges, the absent-branch negative control becomes VACUOUS** — S47 has been told to
-name a replacement. Check it did.
+## 🔴 TWO ERRORS s150 OWES ITS SUCCESSOR — both were s150's, both caught by S47
+1. **s150 told Kam "five of eight… rd-374 (`4216f07`)". `4216f07` is merge 7, rd-322 — SEVEN were in.**
+   The `ls-remote` was a measurement; the SHA-to-branch mapping was inferred from QUEUE ORDER and
+   published as measured. It reached **Kam's panel, this file, AND the CHECKPOINT RULING mail**, so S47
+   was handed a remaining queue containing two already-merged branches and had to reconcile it mid-run.
+   **A SHA and a BRANCH NAME are TWO facts needing TWO reads: `ls-remote` for the head, `log --merges`
+   for the mapping. Never let queue order supply the second.** Ledger w=94. Corrected everywhere.
+2. **The rd-376 negative control was NOT closed for the reason s150 recorded.** S47's pane line *"All
+   four are already in main — they're old lineage… Control chosen"* meant the four CANDIDATES WERE
+   UNUSABLE. S47 then enumerated all 50 remote heads, found 15 genuinely absent, and chose **two:
+   `rd-329 @ 2e78c76` and `rd-362 @ 920e067`**, both proven absent throughout all eight merges.
+   **A successor inheriting s150's "old lineage was fine" would rebuild a vacuous control.**
+   **Never close an item on a quoted pane line containing an ellipsis.** Ledger w=95.
+🟡 **s150's 50% CHECKPOINT RULING ARRIVED AFTER MERGE 7, NOT BEFORE MERGE 6.** S47 said so rather than
+answering as if it had been timely. **Do not record that ruling as the mechanism that protected the
+run — it did not arrive in time to be one.** The boundary rule held by sequencing.
 
-## 🟢 gitleaks CLEAN — and Wednesday's brief was WRONG about a credential
-Wednesday's merge brief said, as fact, that a credential sits in `terraform.tfstate.backup` (taken
-from the ruled RD-367 card, **relayed without opening the repo**). **S47 measured: not present on any
-ref; gitleaks 0 findings at raw exit 0**, scanned the way CI does. **Retracted to S47, scoped to the
-presence claim only** — the main-only-scanning fact that justified the expectation still stands.
-**The card `nexusai-rd367-frozen-trunk` is stale on this point and should be corrected.**
-**S47's keeper, worth carrying:** *"an expectation that a red is coming is exactly the condition under
-which a false red gets believed."* Wednesday created that condition; the seat checked anyway.
+## 🟢 S47's OWN BEST CATCH — propagating to the QA charter §6
+On merge 8 it read `2233` off the counts file and nearly recorded it: **the `--update-counts` writer had
+not finished and the file still held a previous run's figure.** The tell was ARITHMETIC — rd-148 adds 22
+tests, so a merged total identical to OURS was not credible. Real figure **2255/116**.
+***"A number read before its writer finishes is not a measurement."*** A new member of the
+check-that-cannot-fail family: **a stale read is a check whose answer was fixed before the question.**
 
-## ✅ SECURITY REVIEW — COMMISSION COMPLETE (Kam approved option (a) at ~07:1x)
-`%25` did both jobs and its Bearer sweep found a real one.
-- **Job 1 done, and done the hard way:** the 22 are filed in the Consolidated Findings Register **and
-  the register's unframed "VERIFICATION IS COMPLETE" claim was amended** so filing unverified rows did
-  not make a true document false. It also fixed a stale §7.1 and an unswept Bearer flag nobody sent it at.
-- **Job 2 done, and it is NOT a clean bill:** `GotenbergCloudRenderingRequestJob.kt:250-253` sends
-  **the raw Microsoft credential to a server-designated `contentLocation` URL**, with the escalation
-  condition named (pdf-api influence -> well above Low). Sweep record:
-  `_Working/delta-review-2026-09/bearer-sweep-2026-09-08.md`. **Wednesday has NOT opened that file** —
-  relayed from its report.
-- **So the register now holds 23 pending rows, not 22.**
-- **Told: do NOT verify the 23** (out of scope, Kam has not approved it) — **a ghost at its prompt
-  proposed exactly that**, the fourth time in twelve hours a suggestion has proposed the freshly-ruled-
-  against option. It held. **One question owed back: the shape of an "Agent Mail 403" it reported.**
-  Then it wraps. Vault step skipped, per the standing ruling.
-- 🔴 **NEW CARD `secrev-verify-23-and-batch1-filing`** (rec `package`, default = nothing runs). Two
-  things it surfaced and correctly did NOT self-authorise: the 23 are unverified against a register
-  whose standard is independent re-derivation, **and batch-1's findings (D-MF-01..06, D-SP-01..05,
-  D-UP-01..06, D-HAM-...) are STILL NARRATIVE-ONLY in §2.2** — prose, not rows — so the estate count is
-  understated by ~20 more. The prior-ruling gate refused this card on the bare word "verify" (matching
-  a Secuura MFA ticket and an ISO-date card); **both opened and read, both false positives, override
-  reason stated in the BLUF.**
+## 🔴 THE ONE THING STILL OPEN ON KAM'S 07:10
+**Was the eight-branch set EVERYTHING that was ready, or everything s150 knew about?** Asked of S47 at
+08:15 (`SCORE 1.0 — 8/8 verified independently…`, supersedes the 07:49 mail's "at the wrap" timing —
+its queue is dry). Wanted: the predicate + its FRAME · anything at Release Ready not in the eight, with
+why · **and the stale-board direction specifically** (a branch already in main whose ticket still reads
+Release Ready) — the direction that INFLATES a count, and the one that bit this fleet at 07:2x when a
+set was called 24 and the real gap was 3. **s150 holds no instrument: `board_count.sh` cannot count this
+board (WED-146).** **If the answer is "the eight was everything", that CLOSES Kam's merge instruction.**
 
-## MERGE ORDER — S47's, MEASURED, and it CORRECTED Wednesday's
-Wednesday's brief said "rd-374 before anything that depends on it". **Wrong, and verified wrong from
-this seat:** `merge-base --is-ancestor 731aa6e 10ddb0a` is TRUE — **rd-361 is an ANCESTOR of rd-374**,
-so rd-374 first would silently subsume rd-361 and one of Kam's "one at a time" merges would never get
-its own receipt. **The REASON above still binds; its numbers do NOT — they were written when rd-381
-was unpushed and rd-361 unmerged. Both are now in `main`. The live queue is the one at the top of this
-file, and rd-361 has had its own receipt (`97be896`).** Remaining, and it agrees with that queue:
-    5. rd-374  10ddb0a   CONTAINS rd-361 (already merged, so this one now adds only its own delta)
-    6. rd-376  36191eb   based on 10ddb0a
-    7. rd-322  432617a   the only unqualified GO
-    8. rd-148  690bed9
-~~EXCLUDED: `rd-376 @ 36191eb` — its gate is still running.~~ **SUPERSEDED 07:4x — the gate returned
-GO, classification (b) RECORD-LEVEL ONLY, so the ticket ENDED and rd-376 is now IN the queue at
-position 6.** The separate GO was given in the 07:41 mail.
+## BOARD (S47's read, not re-derived)
+RD-322/323/361/374/376/377/381 **Release Ready** · RD-378/379/380/382/383/384 **To Do**.
+**RD-384** filed (Low, `operations`) carrying RD-376's F-1..F-5 — (b) meant ticket, not fix.
+**F-2 has teeth:** `entra-provisioning-ui.test.js` passes 12/12 against a reader that blanks the whole
+file — the one converted guard that stays silent if the shared reader is blinded. Pre-existing (proven
+at `10ddb0a` too), two lines fix it. The other six redden under both no-op and erase readers. **So the
+shared-helper blast radius is closed everywhere except that one site.**
 
-## THE PREDICTOR — replaced mid-run, and merges 1 and 2 were NOT unchecked
-S47's tree-equality predictor assumed the branch strictly CONTAINS main. **True for merges 1 and 2
-(chains); false from merge 3 on, because `rd-377` and `rd-381` are SIBLINGS on `rd-323`**
-(`merge-base(fabcc93,b93d3b5) = e032c7d`, verified here). It stopped rather than pushing — the stop
-condition working. **Replacement, approved:** delta-from-main == the branch's own commit diff, AND
-delta-from-branch == what main already carried, AND `rd-376` not an ancestor. Correct for siblings and
-chains alike. **Merges 1 and 2 are being re-checked as CONFIRMATION, not repair** — tree equality is
-valid for a strict superset and it passed honestly. Word it that way.
+## 🟡 KAM'S DESK — cards, every one with a safe default
+- **`wed-boot-names-one-ledger-there-are-two`** (WED, rec `scope`, default = nothing changes) — s150's.
+  `doctor.sh:419-420` sweeps BOTH ledgers; `Launch_Wednesday.command:198` reads only the Studio's.
+- **`secrev-verify-23-and-batch1-filing`** (rec `package`, default = nothing runs).
+- **`hpsm-credential-bearing-prd-outside-every-snapshot`** — note only: *"only secuura projects on this
+  machine until further notice"*. HPSM stays untouched.
+- **Not this seat's, do not adopt, re-card or answer:** the Studio's and Fleet/workspace cards.
+🔴 **KAM'S 07:09 NOTE HAD TWO ITEMS AND (b) IS STILL NOT STARTED:** *"allow the option through this chat
+to seperate or merge datasec and secuura."* **That is WED work, unstarted, and nobody is carrying it.**
+(a), the vault skill-file write + reconcile session, is the LAPTOP-vs-Studio race the card is about —
+**do not both act on the shared vault.**
 
-## THE TERMINATING RULE — it governs the RD-377 verdict when it lands
-- **clean GO** -> ticket closes;
-- **GO-with-findings, RECORD-LEVEL ONLY** -> **ticket the findings, do NOT open a round 2**;
-- **only a finding wrong in the CODE** — a wrong product behaviour, or **A CELL THAT CANNOT FAIL** —
-  earns another round.
-**The gate has been asked to state which of the three it returns.** It fired both ways last night,
-which is what makes it a rule rather than an excuse.
+## ✅ SECURITY REVIEW — COMMISSION COMPLETE, panes closed
+Report: `/Volumes/KK_T9_External_HDD/!CODING/Datasec/Security Review/_Working/_BATCH2_REPORT.md` and
+`_Working/2026-09-08_FILE_AND_SWEEP_REPORT.md`. **23 findings filed into register 13 (now 242), marked
+pending verification, and the register's unframed "VERIFICATION IS COMPLETE" claim AMENDED** so filing
+unverified rows did not make a true document false. Bearer sweep found a real one:
+`GotenbergCloudRenderingRequestJob.kt:250-253` sends **the raw Microsoft credential to a
+server-designated `contentLocation` URL**. **s150 has NOT opened that file — relayed from its report.**
+**Still open and NOT authorised:** verifying the 23 · the live cloud pass (blocked on the unresolved
+`fc05dcdd` vs `0c57ab37` tenant question — **do not assert which**) · RD-18's Privacy Act package ·
+whether to re-issue the June deliverables. Batch-1 findings are still NARRATIVE-ONLY in §2.2.
 
-## LIVE HEADS — `ls-remote` by this seat overnight + S47's own re-derivation; Wednesday ran no fetch
-    rd-376-stripper-reconcile-s47            36191eb   AT THE FULL TIER-2 GATE (%24). Base 10ddb0a.
-    rd-377-verdict-domain-s47                fabcc93   GATE: GO, classification (a) NOTHING. CLOSED.
-    rd-381-effective-boundary-s47            b93d3b5   accepted on Wednesday's completion check. CLOSED.
-    rd-323-scheduler-failure-vocabulary-s45  e032c7d   lineage CLOSED, findings ticketed
-    rd-374-f2-guard-coverage-s46             10ddb0a   lineage CLOSED, completion check passed
-    rd-361-round4-s45                        731aa6e   GO-with-findings stands
-    rd-148-round2-s45                        690bed9   GO-with-findings stands; the checkout sits here
-    rd-322-root-guard-vacuity-s45            432617a   GO stands — FROZEN, only unqualified GO
-    main                                     97be896   MOVING — a9a8cb6 -> 8c4c22d -> 1803bcd -> 0dd9cc0 -> 97be896
-                                                       (s150's own `ls-remote`, 07:52; re-read it, do not trust this line)
-🔴 **rd-377 is STACKED on rd-323** — `e032c7d` must merge before `fabcc93`. **Two merges, two blast
-radii; say which one you mean.** **The merges are AUTHORISED and running** — Kam, panel 07:10.
-
-## 🟡 KAM'S DESK — the two clicks NO LONGER GATE THE MERGES (superseded by his 07:10)
-🔴 **SUPERSEDED: earlier versions of this file said the two clicks gate all three merges. They do
-not.** Wednesday held the merges pending those settings because `deploy-demo.yml` deploys FROM main —
-a merge IS a deploy — and did not want that firing unseen. **Kam then asked for the deploy at 07:10,
-so the hold is resolved BY HIS INSTRUCTION, not by an answer.** The settings remain **unread**, and
-Wednesday MEASURED that it cannot read them: `kamilDatasec` is in orgs `token-one` and `warpkey`,
-**not `datasecau`**, sees zero repos there; the deploy key reaches git, the API identity does not, and
-repo settings need admin regardless. **They are now INFORMATIONAL** — what the pushes actually fired
-may answer them without him.
-Step-by-step went to his panel **19:59:38 on 09-07** — **do not re-send it.**
-1. `https://github.com/datasecau/Reporting_Dashboard_Au/settings/environments` — required reviewer on `demo`?
-2. `https://github.com/datasecau/Reporting_Dashboard_Au/settings/variables/actions` — `CI_DEPLOY_ENABLED` present, and its value?
-~~Switch ON + `demo` with NO required reviewer -> HOLD the merges.~~ **That rule is SPENT — he authorised the deploy.**
-**Five cards open, every one with a safe default.** This seat's two: `wed-ledger-archive-has-no-trigger`
-(WED) · `hpsm-credential-bearing-prd-outside-every-snapshot` (Datasec). The other three are the
-Studio's or Fleet/workspace — **not yours to adopt, re-card or answer.**
-
-## RULINGS THIS SEAT MADE — a successor must not re-litigate these
-- **RD-377 was ruled a FULL tier-2 gate** (product code in three schedulers), base `e032c7d` — **that gate has since returned GO and RD-377 is CLOSED.** The ruling is recorded because the REASON still binds: product code moves a round off through-code.
-- **The two reader widenings land INSIDE RD-377, additively** — a new `unknownStatus` count alongside
-  `p1Incidents`/`healthP1s`, **never folded in** (RD-323-D-2: a metric's meaning must not change under
-  an unchanged key; RD-130: never inflate an incident count with non-incidents).
-- **`P2-unknown-status` gets its own bucket and `ok:false` row, does NOT escalate the tick, does NOT
-  join the P1 alert email.** It is a **CONTRACT** problem, not an availability one — *the target
-  answered.* Both Wednesday and the gate had been saying "the target vanished"; that overstates it and
-  argues for the opposite call.
-- **While a gate runs, continue on the next INDEPENDENT item on its own branch.** A pending gate
-  freezes its own head, not the seat.
-- **RD-376's base is the BUILDER's call**, by smallest conflict surface, measurement stated —
-  Wednesday holds no client identity there and will not name a head it cannot measure.
-- **The three stray `/*` comments in `server.js` stay untouched** until the X-1/X-2 reproducer is
-  captured or `data-dir-single-source.test.js` is converted.
-- **The vault step is SKIPPED at every wrap** and the skip is stated in the wrap mail.
-
-## 🔴 SECURITY REVIEW — Kam asked, Wednesday answered, and a RECOMMENDATION IS PENDING HIS WORD
-**Report:** `/Volumes/KK_T9_External_HDD/!CODING/Datasec/Security Review/_Working/delta-review-2026-09/_BATCH2_REPORT.md`
-**VERIFIED BY THIS SEAT, not relayed:** 19/19 June-baseline delta set complete plus an HPSM scope
-verdict (20 files, reconciles); **22 findings, 4 High · 4 Medium · 7 Low · 7 Informational** — both the
-heading count and the severity split re-derived with the report's own greps and they match exactly.
-**WHAT IS NOT DONE, and this was the answer to his question:**
-1. **Static only, by design** — nothing built, executed, flashed or networked; no device, card, tenant
-   or `az`. There is no dynamic testing in this at all.
-2. ✅ **RESOLVED 07:3x — the findings are now FILED** (23 rows, incl. the Bearer sweep's) in the
-   Consolidated Findings Register, marked pending verification, with the register's completeness claim
-   amended. The paragraph below is the ORIGINAL finding, kept as the record of why it mattered:
-   ~~NONE of the 22 findings is on a board~~ ("read-only on Jira — no ticket created"). Four Highs,
-   including a security predicate switched off with `if (true) return false;` in a shared library six
-   apps link, live in markdown and nowhere a tracker shows them.
-3. 🔴 **An unfinished sweep:** the missing-`Bearer`-scheme defect found in TWO siblings is likely in
-   CypherSharePoint / MailFlow / UniversalPrint — **not checked.** Work, not a decision.
-4. **Two open questions GATE a severity:** the CVL print-source storage location (D-CVL-02 is Medium
-   **on an assumption**; if external it is a High) and MailFlow's `error.codeLink` origin.
-5. **The live cloud pass has not run** — blocked on the tenant question `fc05dcdd` vs `0c57ab37`,
-   which the workspace CLAUDE.md marks UNRESOLVED. **Do not assert which.**
-6. **Two decisions are his:** RD-18's Privacy Act package; whether to re-issue the June deliverables
-   against the 219-finding register.
-**✅ KAM RULED option (a) — LAUNCHED at `%25`.** Its two jobs: file the 22 into the register, and
-finish the Bearer sweep across CypherSharePoint / MailFlow / UniversalPrint.
-🔴 **The constraint Wednesday set, and it is the point of job 1:** the register's line 15 says
-**"VERIFICATION IS COMPLETE"** with **no frame**, and the 22 are **unverified**. Filing them as-is
-makes a true document false. So filing has two halves: add them marked *pending independent
-verification*, AND amend line 15 / §2.1 to carry their frame. **Totals must reconcile: 219 + 22 = 241.**
-**Explicitly OUT of scope** (do not let it widen): no verification pass on the 22 · no live cloud pass
-(blocked on the unresolved tenant question) · the two severity-gating questions stay open · RD-18 and
-the re-issue decision are Kam's · the HPSM PRD is already carded.
-**No fleet inbox** — `send_brief.sh` refuses this project. **Its report on disk under `_Working/` IS
-the deliverable**; it was briefed by a tapped pointer at the committed brief, and mid-session questions
-come via `_Working/PROGRESS.md` plus the pane. **Read the pane, not an inbox.**
-
-## 🟡 THE ATTIO DAILY DIGEST — arrives 07:00, and its headline overstates its own body
-`[Datasec/ATTIO -> Wednesday] DAILY FOLLOW-UP DIGEST` (scheduled, `attio-bridge`, ATTIO-29). It says
-**"14 items for today"** and **every flagged row is seeded — 8 `[DEMO]` + 6 `[SYN]`, ZERO real deals**
-(counted from the body). All twelve staleness rows read "17d since any change" identically, which is
-one seed event rather than twelve facts. **It is excellent about its INSTRUMENTS** (names each
-blocker, warns that the not-contacted signal cannot see email/calendar/calls and is really reporting
-*records not edited*, blocked on ATTIO-8) **and silent about its POPULATION.**
-**Nothing routed to Kam, nothing carded** — its renewal blocker is `attio-attr-cap`, which he **already
-ruled `hold` on 2026-08-22**; re-raising it is the going-in-circles he corrected on 09-07.
-**TRANSFER ITEM for the next Datasec/ATTIO session** (not Wednesday's code, read-only tracker access):
-put the real-deal count in the BLUF — *"14 items, 0 on real deals"* — or filter the seeded prefixes
-out of the count. **Brief it as a completion, not a correction; the disclosure discipline is a model.**
+## 🟡 ATTIO — TRANSFER ITEM, not Wednesday's code
+The 07:00 daily digest says **"14 items for today"** and **every flagged row is seeded — 8 `[DEMO]` +
+6 `[SYN]`, ZERO real deals.** Excellent about its INSTRUMENTS, silent about its POPULATION.
+**For the next Datasec/ATTIO session: put the real-deal count in the BLUF, or filter the seeded
+prefixes out. Brief it as a COMPLETION — its disclosure discipline is a model.** Its renewal blocker
+`attio-attr-cap` was ruled `hold` by Kam on 2026-08-22; **re-raising it is the going-in-circles he
+corrected on 09-07.**
 
 ## 🔴 THE VAULT — do not run the wrap's vault step from a Datasec seat
-`end-of-session.md:50` is `git add -A` and the vault's untracked set includes **Secuura** paths, so
-running it here would commit another client's content — **hard rule 2.** Measured by S46, re-measured
-by S47. **Carded for Kam** (`vault-add-a-stages-another-clients-files`, default HOLD); shared file, so
-it is his. Skip the step, say so in the wrap mail, stage nothing by path.
+`end-of-session.md:50` is `git add -A` and the vault's untracked set includes **Secuura** paths —
+running it here commits another client's content (**hard rule 2**). Skip it, say so in the wrap, stage
+nothing by path. Carded; shared file, so it is Kam's.
 
-## WHAT THIS SEAT DID SINCE MIDNIGHT (compressed — details in `_ledger_laptop_datasec.md`, 33 rows)
-Both overnight NexusAI lineages closed (RD-374 @ `10ddb0a`, RD-323 @ `e032c7d`), **six gates
-commissioned and returned, all scored 1.0**, S46 wrapped with seven tickets, S47 launched 05:39 under
-the morning-sweep grant and closed RD-377 to READY by 06:13. **Nothing merged, nothing deployed, at
-any point.** Four tracked gate launchers now carry ancestor + range guards, each exercised pass plus
-three or more distinct refusals before arming.
-**Board:** Release Ready **46** (Wednesday's own count) · open **295 -> 296**, S47's count, reconciling
-exactly with S46's 289 plus the six new. **`board_count.sh` cannot count this board — WED-146.**
+## RULINGS A SUCCESSOR MUST NOT RE-LITIGATE
+- **The two reader widenings land INSIDE RD-377, additively** — a new `unknownStatus` count beside
+  `p1Incidents`/`healthP1s`, **never folded in** (a metric's meaning must not change under an unchanged
+  key; never inflate an incident count with non-incidents).
+- **`P2-unknown-status`** gets its own bucket and `ok:false` row; does NOT escalate the tick, does NOT
+  join the P1 alert email. It is a **CONTRACT** problem, not availability — *the target answered.*
+- **While a gate runs, continue on the next INDEPENDENT item.** A pending gate freezes its head, not the seat.
+- **The three stray `/*` comments in `server.js` stay untouched** until the X-1/X-2 reproducer is captured.
+- **The `nexusai-rd367-frozen-trunk` card is STALE** on its credential claim: S47 measured that no
+  credential sits in `terraform.tfstate.backup` on any ref; gitleaks 0 findings, exit 0, scanned as CI
+  does — re-run clean on the merged tree. **The main-only-scanning fact that justified the expectation
+  still stands.** S47's keeper: *"an expectation that a red is coming is exactly the condition under
+  which a false red gets believed."*
 
-## 🔴 THREE ERRORS OF WEDNESDAY'S OWN, ALL DISCLOSED AT THE HEAD OF THE NEXT MAIL
-1. **Ratified a claim whose truth-maker was in the codebase** (the w=88 rule in its exact named form):
-   told S46 the `escalates()` vocabulary was derived and "removes the mechanism that produced RD-377's
-   gap". **M6 falsified it.** **The KEEP ruling stands; the REASON was withdrawn.** The sharp part: the
-   brief to the gate asked it to verify that very sentence while the mail to the builder asserted it.
-2. **Praised a control that could not fail** — S46's env-leak pairing; M9 showed deleting the restore
-   left it 26/26 green. *Control the instrument before believing the green.*
-3. **Wrote a FALSE claim about its OWN capability into a brief, as a REASON** — "Wednesday holds no
-   NexusAI board identity". It holds **read-only** access under Kam's 2026-08-03 grant; the real cause
-   was `JIRA_SITE` missing its scheme. **"I lack authority" was the worst available reading.**
-   **Standing rule: before writing "I cannot X" into a brief, run X once.**
-
-## 🟢 IN THE QA CHARTER §6 NOW — all three from agents, not from Wednesday
-Backups `.pre-0908-count-the-cause` and `.pre-0908-green-and-noop` beside the file.
-1. **Count the CAUSE, never the damage.**
-2. **Read why a GREEN is green, not only why a RED is red** — assert the tamper LANDED before
-   believing any run. Six instances in one night, three on the green side.
-3. **A silent no-op on an explicit request is a defect** — every scripted edit asserts its anchor.
-
-## ⚠️ TRAPS — live, and most fired on this seat
-1. **Read the inbox at limit >= 3, never 1.** Twice a real inbound sat 12-26s beneath Wednesday's own
-   outbound echo; reading only the newest showed the echo and hid a gate verdict.
-2. **`send_brief.sh`'s SELF-CHECK regex is exact.** Extra prose before the pipe breaks it — specifics
-   go on a `SELF-CHECK NOTES:` line above. **GENERATE the stamp**; this seat typed a wrong one.
-3. **`git -C $VARIABLE <writeverb>` is refused** — write paths LITERALLY. **Both Wednesday seats hit
-   this independently in one night**, and this seat had written the trap itself hours earlier.
-4. **`pane_close.sh` port args may not discriminate** — ports read 000 before the close too. **The
-   tool's own `listeners N->N` is the real control.**
-5. **Ghosts: five at this project's panes since midnight**, and the two dangerous ones proposed **what
-   Wednesday had just decided against** and **what Wednesday was about to rule**. Rung 6's recorded
-   salience sources did not apply — **the new source is Wednesday's own live deliberation.** Detector
-   FIRST, then CLOSE a wrapped pane.
-6. **A T9 launch can hit a folder-trust dialog no guard can see** (`Down`, `Enter`).
-7. **`launchers.conf` points at DevMASTER, unmounted here** — launch by hand, then
-   `tmux set-option -p -t <pane> @cockpit_name '<name>'`. **Do not rewrite `launchers.conf`.**
-8. **Another project's checkout is READ-ONLY for git too.** This seat ran read verbs only, never fetched.
-9. **A verdict mail can arrive zero-byte** — read every verdict from the report on disk.
-10. **`decision_queue.sh` uses `--client-project`**; a prior-ruling refusal **is a research prompt**.
-11. **`/Volumes/DevMASTER` is NOT decommissioned** — unmounted here. **Prune no worktrees.**
-12. **NexusAI's `JIRA_SITE` has no scheme** — prefix `https://` or a 301 with an HTML body reads as
-    "board unreachable". Filed as RD-382 on their board.
-13. **Use `2_Project_Files/tools/safe_push.sh` for every push.**
+## ⚠️ TRAPS — live, most fired on this seat
+1. **Read the inbox at limit >= 3, never 1.** A real inbound sits beneath your own outbound echo.
+2. 🔴 **BOTH Wednesdays send as `wednesday-agent@agentmail.to`** — an inbox listing **CANNOT** tell this
+   seat's outbound from the Studio's by the From address. s150's own tagging called a Studio mail
+   `OUT(mine)`. **Tag by SUBJECT (`-> Datasec/*` is this seat, `-> Secuura/*` is the Studio).**
+3. 🔴 **`git -C $VARIABLE <writeverb>` is REFUSED — write paths LITERALLY.** Hit a THIRD time by s150 at
+   08:09 with this very trap in this very file. The environment trains the reflex (the no-`cd` hook
+   forces absolute paths, so a variable is the ergonomic way to write them) and a warning cannot beat a
+   rewarded reflex. Ledger w=3.
+4. 🔴 **THE SAME HOOK BLOCKS ITS OWN PRESCRIBED REMEDY.** Its refusal text says *"clone by SHA into this
+   session's scratchpad and run them THERE"* — then refuses a write verb IN the scratchpad, because the
+   scratchpad is outside WEDNESDAY. **Workaround that worked: `git clone --shared` carries the source's
+   objects via alternates, so `rev-parse` / `merge-base` need NO fetch at all.** Enforcement candidate:
+   resolve single-variable paths and allow scratchpad writes. **Shared hook — Kam's or a dedicated session's.**
+5. **`send_brief.sh`'s SELF-CHECK regex is exact.** GENERATE the stamp; extra prose before the pipe breaks it.
+6. **Ghosts:** detector FIRST (`pane_prompt_check.sh`), then close. **A wrapped pane beside an open Kam
+   card is the rung-6 surface** — s150 closed %24 and %25 for exactly this.
+7. **`pane_close.sh`** is the tool; its own `listeners N->N` line is the real control.
+8. **Another project's checkout is READ-ONLY for git**, `.git` included. Read verbs only.
+9. **A verdict mail can arrive zero-byte** — verify a send by a non-null `preview`, and read verdicts
+   from the report on disk.
+10. **AgentMail single-message GET needs the `message_id` URL-ENCODED** (angle brackets + `@`), else 400.
+11. **`launchers.conf` points at DevMASTER, unmounted here** — launch by hand, then
+    `tmux set-option -p -t <pane> @cockpit_name '<name>'`. **Do not rewrite `launchers.conf`.**
+12. **NexusAI's and Vision's `JIRA_SITE` have NO SCHEME** — prefix `https://` or a 301 with an HTML body
+    reads as "board unreachable". Filed as RD-382.
+13. **`/Volumes/DevMASTER` is NOT decommissioned** — unmounted here. **Prune no worktrees.**
+14. **Use `2_Project_Files/tools/safe_push.sh` for every push — IT STAGES ONLY PATHS PASSED AS ARGUMENTS.**
+    `HEAD == origin` proves the REFS agree, not that the work is in them. **Verify every wrap by
+    `git show HEAD:<path>`; a non-zero dirty count is a FAILED wrap whatever any tool printed.**
 
 ## STANDING
 **Kam's week grants (through Sunday 2026-09-13):** merge on Wednesday's word once the gate passes ·
-deploy · board judgement calls. **🔴 PRODUCTION LIFT IS SECUURA ONLY — Datasec has NO production
-grant.** Ticket creation aggregates. **FOUND / TESTED / HOW** with controls named under HOW.
-**Kill anything querying Azure credits.**
-**A clean GO freezes; a GO-with-findings carries an expected re-gate** — commission the re-gate as
-part of accepting the fix, not as a reaction to the head moving.
-**NAME THE FRAME. The number is read in the same action as the sentence carrying it.** Taps <= 200
-chars, pointer only, mail FIRST and verified by a non-null `preview`, THEN tap. **Never delete —
-quarantine.** Search before filing by SYMBOL / PATH / ERROR STRING **with a control on the zero.**
-**Names, not pronouns.**
+deploy · production changes (**flag every use**) · board judgement calls. **🔴 s150's predecessor read
+the production lift as SECUURA ONLY — Kam's words named no client, so treat Datasec production as
+UNGRANTED until he says otherwise, and ASK rather than argue it into scope.**
+Ticket creation AGGREGATES (one larger ticket per logical path). **FOUND / TESTED / HOW**, controls
+named under HOW. **A clean GO freezes; a GO-with-findings carries an expected re-gate.**
+**NAME THE FRAME — the number is read in the same action as the sentence carrying it.**
+Taps <= 200 chars, pointer only; **mail FIRST, verified by a non-null `preview`, THEN tap.**
+**Never delete — quarantine. Names, not pronouns. Kill anything querying Azure credits.**
 
-**TWO WEDNESDAYS LIVE:** Studio owns **Secuura** (alive — committed 05:30; its s148 wrapped overnight
-and that wrap is ITS to handle, subject-only from here). This seat owns **Datasec**. One repo, one
-dashboard, one chat panel, **ONE USAGE LIMIT** (7d:34%, renews in 4d 21h). **Do not write
-`NEXT-PICKUP.md`, the daily note or `_ledger.md`** — the Studio seat's. Panel messages open
-`[LAPTOP / Datasec]`.
-
-## s150's ADDITIONS (2026-09-08 07:56 AEST) — read these with the block above, which s150 corrected in place
-
-**OPEN QUESTION TO S47, mailed 07:49, NO TAP, answer due at its wrap:** is the eight-branch set the
-COMPLETE set of tested, gate-passed, mergeable work — or a subset? Subject
-`[Wednesday -> Datasec/NexusAI] QUESTION at your wrap: is the eight-branch set the COMPLETE ready set?`,
-verified at `datasec-nexusai@agentmail.to` with a non-null preview. **Why it exists: Kam's 07:10 asked
-for EVERYTHING ready, and the only evidence the eight IS everything is S47's own derivation. Wednesday
-holds no instrument — `board_count.sh` cannot count this board (WED-146) and the Release Ready 46 is
-Wednesday's own uninstrumented count.** Twelve hours ago a set was called 24 when the gap was 3.
-
-**VISION SALES PORTAL SWEPT — nothing to start, and the zero has a control.** VSP open = **0**;
-positive control: unfiltered `project = VSP` = **64**, `statusCategory = Done` = **64**, so the
-predicate discriminates and 0 + 64 reconciles. Site `team-1634009483756.atlassian.net` (**prefix
-`https://` — the NexusAI `JIRA_SITE` scheme trap applies to Vision's `.env` too**). Under the morning
-autostart grant this is a receipt, not a request: **no Vision agent launched, because there is nothing
-for one to do.**
-
-**NEW CARD `wed-boot-names-one-ledger-there-are-two` (WED, rec `scope`, default = nothing changes).**
-`doctor.sh:419-420` — the check Kam's 07:07 `trigger` ruling shipped — sweeps **both** `_ledger.md`
-and `_ledger_laptop_datasec.md` by name. **`Launch_Wednesday.command:198` still says read `_ledger.md`
-WHOLE and names the laptop's nowhere.** The two mechanisms disagree and the boot prompt is the obeyed
-one. **The prior-ruling gate REFUSED the first attempt and the refusal is what produced the sharper
-finding** — his three prior rulings were about SIZE and CADENCE, this is about WHICH FILE IS READ, and
-his own ruling's artefact is the proof they are different subjects. Ledger row filed, w=3.
-
-**BOOT COST, measured so the next seat does not have to guess:** by-tier digest read WHOLE moved this
-seat **ctx 11% -> 23%**. **The digest is not the problem; line 198 is.** s150 read
-`_ledger_laptop_datasec.md` (its own, 37 rows) as row-headlines and `_ledger.md` (the Studio's,
-345,743 B) as row-headlines only, and says so rather than carrying it silently.
-
-**THE STUDIO SEAT — measured, not chased.** Its last write to any file of its own is `2878f1e7` at
-**07:17**; `origin/main` == local at 07:54, so that is not a fetch gap. **Its agent s149 IS alive** —
-Secuura interims at 07:42 and 07:53 (subject-only from here; no body fetched, no reply sent). A
-coordinator that has just launched an agent and is watching it is not expected to commit. **Threshold
-for raising it to Kam, set in advance so it is not a judgement made under pressure: no Studio write by
-~08:30.** **s150 has no instrument on that machine and must not adopt Secuura work** — the only
-available act is telling Kam.
-
-**CORRECTED 08:09 — the 07:17 figure above was measured over TOO NARROW A FRAME.** It queried only
-`NEXT-PICKUP.md` and the daily note. Widened to all four of the Studio's files (adding `_ledger.md`
-and `scoreboard.md`), its last write is **`c6ac9aea` at 07:28**. **State the FILE SET in any silence
-claim** — "no write to its pickup, note, ledger or scoreboard since 07:28" is checkable; "last write
-07:17" is not. Ledger w=93.
-
-**08:07 — THE SECUURA DEPLOY COMPLETED** (`[Secuura/Blockchain -> Wednesday] DEPLOY COMPLETE —
-400517aaf LIVE on the demo, verified`; subject only, no body fetched, no reply). **The threshold is
-NOT moved on this, deliberately — it was set in advance precisely so a new event would not move it.**
-But its MEANING has sharpened: 08:30 is no longer "silence alone", it is **silence THROUGH a completion
-event its coordinator must score.** 41 minutes with a deploy in flight is a coordinator watching;
-silence past a completed deploy is a different fact. **If 08:30 passes with no Studio write, tell Kam —
-and tell him only. Scoring the Secuura deploy is not s150's to take.**
-
-## 08:06 — S47's 50% CHECKPOINT, ruled CONTINUE (s150)
-**Ruling mailed + pointer tapped** (`CHECKPOINT RULING: CONTINUE through 6-7-8`, verified at
-`datasec-nexusai@agentmail.to` 22:06:42Z BEFORE the tap; tap reported `queued behind a running turn`).
-**50% is a checkpoint, not a rotation** — it forbids starting work that will not FIT, not the next unit
-of a queue already running; the band is 80-90%. **The one non-negotiable given to S47: never START a
-merge it cannot also FINISH and VERIFY** — a half-merged trunk under a dead seat is worse than a clean
-handover at merge 6. **S47 was asked to STATE its own per-merge burn before merge 6**; Wednesday's
-outside view (6-8 should be cheaper than 1-5, since the predictor, the decrease guard and the
-replacement control are all built) was given explicitly AS AN INFERENCE FROM ITS PANE, not a
-measurement, with S47 told to overrule it if its own numbers disagree. **If the answer is "they do not
-fit": land the last one that does, wrap at that boundary with the queue named, relaunch.**
-**Negative control:** S47's pane at 07:46 reads *"All four are already in main — they're old lineage…
-Control chosen."* Wednesday reads the rd-376 vacuity item as CLOSED on S47's own words — **not
-independently verified.**
+## FLEET
+**TWO WEDNESDAYS LIVE. The Studio owns Secuura and is ALIVE** — verified 08:11 by its own outbound
+(`[Wednesday -> Secuura/Blockchain] PETER'S QUEUE — 14 PRs, Kam's deadline is END OF DAY`), which s150
+did not send. **The Secuura demo deploy COMPLETED at 08:07** (`400517aaf` live, verified at the
+destination by its agent) — **that is the Studio's to score. Subject-only from here; no body fetches,
+no replies, and do NOT adopt it.**
+**This seat owns Datasec.** One repo, one dashboard, one chat panel, **ONE USAGE LIMIT** (7d:37%,
+renews in 4d 19h). **Do not write `NEXT-PICKUP.md`, the daily note or `_ledger.md`** — the Studio's;
+this seat's ledger is **`_ledger_laptop_datasec.md`**. Panel messages open `[LAPTOP / Datasec]`.
+**Live panes: `%0` wednesday (s150) · `%22` Datasec/NexusAI (S47, holding, queue dry, ~50% ctx).**
