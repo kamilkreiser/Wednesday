@@ -70,10 +70,19 @@ drives it tests an old build. **Every gate brief now says: build your own from t
 path, or state what a stack built on <date> cannot prove.** **The local seeded stack on :6882 also
 took unparameterised writes** from a QA pass (disclosed) — **treat its DATA as untrusted until
 re-seeded.**
-**NEW — `chat_log.json` is written by BOTH Wednesday seats.** A rebase conflict there is NOT routine
-churn: **merge by UNION on `(ts, text)`, never pick a side.** Equal message counts prove nothing —
-today both sides read 1630 and each held one message the other lacked. **A VCS default there silently
-deletes one of Kam's panel messages.**
+**🔴 NEW AND LEARNED THE HARD WAY — `0_Brain/dashboard/data/` HOLDS TWO IRREPLACEABLE FILES, NOT ZERO.**
+`chat_log.json` (Kam's conversation) **and `decisions.json` (the decision queue's durable state — his
+RULINGS).** Everything else in that directory is a regenerated feed. **NEVER
+`git checkout <sha> -- 0_Brain/dashboard/data` as a blanket conflict resolution.** Wednesday did that
+twice on 2026-09-07 and **destroyed four of Kam's rulings and three whole cards** — he re-ruled them
+fifty minutes later because the panel showed them open again. Nothing was ACTED on wrongly (the
+operational effects were already mailed to the agent) but the RECORD was gone and unrecoverable:
+the cards had never been committed, so git had nothing, and the autostashes predated them.
+**The rule: resolve dashboard/data file-by-file. `chat_log.json` merges by UNION on `(ts, text)`;
+`decisions.json` merges by UNION on card `id`, keeping the RULED version of any card present in both;
+the other ten may take upstream.** **Copy BOTH to the scratchpad before any multi-step git sequence.**
+Equal counts prove nothing — both `chat_log` sides once read 1630 and each held a message the other
+lacked.
 
 ## GIT
 **PULL BEFORE EVERY WRITE** — the laptop seat is live on this vault. Use ONE chain:

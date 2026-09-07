@@ -5123,9 +5123,9 @@
   ],
   "recommended": "probe",
   "ts": "2026-09-07T16:34:49.904915+10:00",
-  "status": "open",
-  "ruled_choice": null,
-  "ruled_ts": null,
+  "status": "ruled",
+  "ruled_choice": "probe",
+  "ruled_ts": "2026-09-07T18:56:50.671698+10:00",
   "prior_rulings_overridden": [
    "2026-09-02 17:34",
    "2026-09-07 11:43",
@@ -5169,9 +5169,9 @@
   ],
   "recommended": "kam-merges",
   "ts": "2026-09-07T16:40:00.154365+10:00",
-  "status": "open",
-  "ruled_choice": null,
-  "ruled_ts": null,
+  "status": "ruled",
+  "ruled_choice": "kam-merges",
+  "ruled_ts": "2026-09-07T18:56:50.598940+10:00",
   "prior_rulings_overridden": [
    "2026-08-17 20:01",
    "2026-08-21 13:58",
@@ -5227,9 +5227,9 @@
   ],
   "recommended": "hold-for-finding1",
   "ts": "2026-09-07T16:56:16.517647+10:00",
-  "status": "open",
-  "ruled_choice": null,
-  "ruled_ts": null,
+  "status": "ruled",
+  "ruled_choice": "hold-for-finding1",
+  "ruled_ts": "2026-09-07T18:56:50.528040+10:00",
   "prior_rulings_overridden": [
    "2026-09-03 21:20",
    "CARD secuura-ks764-orgless-caller-403-2026-09-03"
@@ -5325,6 +5325,114 @@
    "2026-09-04 07:07",
    "2026-09-04 08:31",
    "CARD fleet-vault-note-attribution"
+  ]
+ },
+ {
+  "id": "secuura-force-push-own-branch-standing",
+  "client_project": "Secuura/Blockchain",
+  "title": "RE-CREATED after Wednesday destroyed the record: force-push on an agent's OWN unshared branch — you ruled narrow-allow at 18:03:38",
+  "bluf": "THIS CARD IS RE-CREATED, NOT ORIGINAL. Wednesday destroyed the first one by resolving a git conflict across the whole 0_Brain/dashboard/data directory, which contains decisions.json. Your ruling of 18:03:38 - narrow-allow - is being re-applied from your own chat message, which survived because chat_log.json was unioned rather than overwritten. THE OPERATIONAL EFFECT NEVER LAPSED: the ruling was mailed to the Secuura agent at 08:06Z and is in its standing holds; nothing was done wrongly, only the record was lost. THE SUBSTANCE, unchanged: the agent needed to amend a commit on its own feature branch after catching its own mistake. The repo's pre-push gate REFUSED and named two risks - an open PR's head, and a gate running against the SHA being replaced. It did not override; it answered both with controls. gh pr list --head returned empty, checked against a control query on another branch that correctly returns #890, so the query discriminates. The only Actions run on that SHA was startup_failure, completed, ZERO jobs - the dead-CI signature, not a live gate. Only then the documented override, which logs. Your v1.3 grant names force pushes among the classes you reserved, which is why it was a card.",
+  "default_action": "narrow-allow stands as ruled 18:03:38 and is already in the agent's standing holds; this card exists to restore the RECORD, not to re-open the question.",
+  "options": [
+   {
+    "key": "narrow-allow",
+    "label": "Allow it on an agent's OWN unshared branch, under exactly those checks (your 18",
+    "detail": "03:38 ruling):The agent's two controls are the standing precondition: no PR on the branch, proven with a discriminating control query; and no live gate on the SHA, proven from the run's conclusion and job count. Anything shared - develop, main, a branch with an open PR - stays yours."
+   },
+   {
+    "key": "always-ask",
+    "label": "Keep every force push yours, no exceptions",
+    "detail": "Costs a round-trip whenever a seat catches its own mistake before review, which is the behaviour we want cheap."
+   }
+  ],
+  "recommended": "narrow-allow",
+  "ts": "2026-09-07T18:56:50.753365+10:00",
+  "status": "ruled",
+  "ruled_choice": "narrow-allow",
+  "ruled_ts": "2026-09-07T18:56:50.823928+10:00",
+  "prior_rulings_overridden": [
+   "2026-08-31 11:57",
+   "2026-08-31 18:49",
+   "2026-09-07 18:03",
+   "CARD secuura-806-force-push-2026-09-04"
+  ]
+ },
+ {
+  "id": "secuura-org-trust-boundary-within-tenant",
+  "client_project": "Secuura/Blockchain",
+  "title": "RE-CREATED (Wednesday destroyed the record, not the question): inside one tenant, is an ORGANISATION a trust boundary? It is what your #889 hold is waiting on",
+  "bluf": "RE-CREATED, NOT ORIGINAL — Wednesday destroyed the first card by resolving a git conflict across the whole dashboard/data directory, which holds decisions.json. Nothing was ACTED on wrongly: #889 has been held unmerged throughout. PRIOR-RULING CHECK: you ruled secuura-889-issuer-org-caller-asserted 'hold-for-finding1' at 18:03:50, whose own option text was 'Hold #889 until you rule the trust-boundary question'. THIS IS THAT QUESTION, still unanswered. THE FACT, measured by the gate against a real Postgres: when a document is registered, the issuing organisation is taken from the REQUEST BODY, lowercased, and written - with NO check that the caller belongs to it. Across tenants it is correctly refused. Within a tenant, any authenticated caller can attribute a document to any sibling organisation. THE PRODUCT ALREADY ANSWERS THIS FIFTEEN LINES ABOVE, and the other way: the same handler resolves onBehalfOf against the key's own organisation and returns 403 on a mismatch (documents.ts:559). The file contradicts itself, and req.user.organizationId is in the same scope, used ten lines later. WHY IT IS YOURS: #889 is the first change that puts this value on the PUBLIC VERIFICATION DISPLAY. On a product whose proposition is 'this document is genuinely from X', publishing an issuer nobody verified is a claim about the product. KS-621 holds the same question. WHAT WEDNESDAY DOES NOT KNOW: whether any real integrator legitimately issues on behalf of a sibling organisation. If one does, option A breaks them - the only fact that would change the recommendation.",
+  "default_action": "NOTHING MOVES. #889 stays held and unmerged, KS-621 stays open. Silence costs nothing today.",
+  "options": [
+   {
+    "key": "bind",
+    "label": "Bind the issuer to the actor - 403 on a mismatch, exactly as onBehalfOf already does (Recommended)",
+    "detail": "Makes the file self-consistent with the check fifteen lines above it, and makes the public display mean what a reader assumes. A genuine delegation need goes through the onBehalfOf mechanism that already exists for it, not an unchecked field."
+   },
+   {
+    "key": "disclose",
+    "label": "Leave it caller-asserted and change the public surface so it does not imply verification",
+    "detail": "Breaks no integrator. But the verification page then carries a value we know nobody checked, and someone must write the wording that says so."
+   },
+   {
+    "key": "measure-first",
+    "label": "Neither yet - enumerate who actually sends that field before ruling",
+    "detail": "One read-only pass. Answers the thing Wednesday cannot: whether anyone legitimately names a sibling org today."
+   }
+  ],
+  "recommended": "bind",
+  "ts": "2026-09-07T18:57:19.445309+10:00",
+  "status": "open",
+  "ruled_choice": null,
+  "ruled_ts": null,
+  "prior_rulings_overridden": [
+   "2026-08-31 11:57",
+   "2026-08-31 18:49",
+   "2026-09-04 09:51",
+   "2026-09-07 18:03",
+   "2026-09-07 18:54",
+   "CARD workspace-dead-secuura-tenant-cleanup"
+  ]
+ },
+ {
+  "id": "secuura-ks968-probe-control-query",
+  "client_project": "Secuura/Blockchain",
+  "title": "RE-CREATED (record destroyed, nothing run): your KS-968 probe returned zero and the agent refuses to believe it — ONE more count would make your authorisation mean something",
+  "bluf": "RE-CREATED, NOT ORIGINAL — Wednesday destroyed the first card in a git conflict resolution. NOTHING WAS RUN: the agent was told default STOP and has run nothing further on that box. PRIOR-RULING CHECK: you authorised the probe at 18:04:22. This is not a re-raise - the probe RAN as scoped and returned A=0, B=0, which lands in the pre-registered case meaning 'the defect does not fire on the demo'. THE AGENT WILL NOT DRAW THAT CONCLUSION AND IT IS RIGHT: a zero from a HASH-EQUALITY check is indistinguishable from a hash computed with the WRONG KEY. If the demo rows were written under a since-rotated key, every comparison returns zero and the probe reports 'no collision' for a reason unrelated to collisions. Its words: 'I am not going to be the one who ships it because the answer happened to be convenient.' WHAT IT DID RIGHT: five outcomes pre-registered and SHA-256'd BEFORE the run; exactly two SELECT count(*); no row data, no address; the HMAC key and computed hash read on the box and NEVER printed, only their lengths. AND THE PRE-REGISTRATION IS NOW DURABLE - it lived in a session scratchpad, so its hash was unverifiable by anyone else; the agent copied it to 5_Project_History/KS-968-probe-preregistration-2026-09-07.txt and verified the copy hashes the same. WHY A CARD: your ruling said 'exactly the two counts it scoped, and nothing else'. A third is outside those words and Wednesday will not argue it into scope. WITHOUT the control, the probe you authorised produces an uninterpretable result and KS-968's demo status stays UNMEASURED rather than clear.",
+  "default_action": "STOP — no third query. KS-968's demo status is recorded UNMEASURED, not clear. The agent has been told to run nothing further on silence and has not.",
+  "options": [
+   {
+    "key": "strong-control",
+    "label": "Authorise ONE more count - the strong control (Recommended)",
+    "detail": "Count of rows whose email_lookup_hash equals the hash of a DIFFERENT seeded address already known to exist on the demo. A NON-ZERO proves the key and derivation are right, which is what makes the original A=0 mean what it says. Same shape: one integer, no row data, no address, no write. Outcomes pre-registered and hashed first, as before."
+   },
+   {
+    "key": "weak-control",
+    "label": "Authorise the weaker one",
+    "detail": "count where email_lookup_hash IS NOT NULL - proves the column is populated, but not that the agent's key is right, so the zero stays partly uninterpretable."
+   },
+   {
+    "key": "stop",
+    "label": "No further queries - record KS-968's demo status as UNMEASURED",
+    "detail": "The fix ships on its merits; we never learn whether the defect was live there. Default, and an honest outcome rather than a failure."
+   }
+  ],
+  "recommended": "strong-control",
+  "ts": "2026-09-07T18:57:19.526921+10:00",
+  "status": "open",
+  "ruled_choice": null,
+  "ruled_ts": null,
+  "prior_rulings_overridden": [
+   "2026-08-21 19:49",
+   "2026-08-21 20:06",
+   "2026-08-31 11:57",
+   "2026-08-31 18:49",
+   "2026-09-04 09:51",
+   "2026-09-07 18:04",
+   "2026-09-07 18:55",
+   "CARD secuura-ks697-demo-probe",
+   "CARD secuura-f5-demo-exposure-probe",
+   "CARD secuura-ks968-demo-hash-probe"
   ]
  }
 ]
