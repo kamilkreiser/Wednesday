@@ -282,6 +282,26 @@ if [ -f "$WLAUNCH" ]; then
   fi
 fi
 
+# ── WEEK-SCOPED AUTONOMY GRANTS — they expire themselves (added 2026-09-07) ──────
+# Kam gave TWO week-scoped grants on 2026-09-07, in his own words, hours apart:
+#   09:40  "you can give the go ahead to merge as it becomes relevant so that I'm not
+#           slowing things down"                                    -> MERGE authority
+#   11:09  "Go ahead with the deploy, and you've got permission to deploy for the rest
+#           of the week."                                           -> DEPLOY authority
+# Both are read as THROUGH SUNDAY 2026-09-13, stated to him as a reading he can move.
+# WHY THIS IS A CHECK AND NOT A NOTE (2026-09-06_a-scoped-override-carries-its-own-expiry):
+# a scoped instruction applied without an expiry becomes a standing one the moment the
+# seat that heard it rotates — and this pair grants MERGE and DEPLOY, which is exactly
+# the category where a silently-permanent grant is worst. After the date the honest
+# state is the v1.3 standing grant, which already covers merges and dev/staging/demo
+# deploys; what lapses is the extra latitude, not the baseline. Kam's word moves it.
+WED_WEEK_GRANTS_UNTIL="2026-09-13"
+if [ "$(date +%Y-%m-%d)" \> "$WED_WEEK_GRANTS_UNTIL" ]; then
+  warn "Kam's week-scoped MERGE + DEPLOY grants lapsed after $WED_WEEK_GRANTS_UNTIL" "2026-09-07 09:40 and 11:09 were 'for the rest of the week' — fall back to protocol v1.3 scope, or ask him to extend. Do not carry the extra latitude forward silently."
+else
+  ok "Kam's week-scoped merge + deploy grants (2026-09-07) live until $WED_WEEK_GRANTS_UNTIL"
+fi
+
 # ── Tailscale remote-access leg (added 2026-08-20; DORMANT-BY-DEFAULT per Kam
 # 2026-08-20 ruling 17: "case by case. I will ask or turn it on when I need.
 # Keep it dormant in the meantime."). Down is the EXPECTED state — report it
