@@ -183,3 +183,27 @@ silently moved KS-964 to `In Progress` that morning.
 
 **Test by its handle:** *"if this branch name moves a ticket, is that ticket mine to move?"* If no,
 the id does not go in the name.
+
+## CLEANUP DURING A DEPLOY — a just-built artefact reads as UNUSED until the thing that uses it restarts (2026-09-07)
+
+**Found by a seat mid-deploy, unprompted, and it is the reason a disk-space guard must never delete:**
+
+> *"Do not prune images to make room — the freshly built ones read as unused until `up -d` recreates
+> the containers, so a prune deletes this deploy's own output."*
+
+**The general shape:** cleanup tooling decides liveness from REFERENCES, and **a deploy is precisely
+the window in which the references have not caught up yet.** A freshly built image, a new layer, a
+staged artefact, an unadopted volume — all of them look like garbage to a reaper until the consumer
+is restarted to point at them. **So the moment you most need space is the moment automated cleanup is
+most likely to destroy the thing you just made.**
+
+**Standing lines for any brief involving a build, a deploy or a disk constraint:**
+> *"NEVER free space on a live box on your own judgement — a stalled deploy is recoverable, a box you
+> cleaned up is not. A disk guard STOPS the build and escalates; it does not delete. And specifically:
+> do NOT prune images or build cache during a deploy — the artefacts you just built read as unused
+> until the consumer restarts, so the prune eats your own output."*
+
+**Also standing, from the same handover:** **`docker compose up -d --remove-orphans` is a destructive
+flag on any host running profile-gated services** — containers outside the active profile read as
+orphans and are removed. Name the forbidden flag in the brief; do not rely on it not occurring to
+anyone.
