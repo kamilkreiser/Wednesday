@@ -40,6 +40,48 @@ what was tested, and how."* Filed as [[2026-09-07_analysis-records-what-tested-a
 artefact under it is `5_Project_History/2026-09-07_datasec-analysis-record.md`. **Every ticket comment,
 report and handover from here carries those three fields.**
 
+## 🔴🔴 SUCCESSOR: YOUR FIRST ACTION — ROUND 3 DOES NOT CLOSE THE BLOCKER. Kam gets ONE card when the gate reports.
+**Do not let round 3 be recorded as closing SEC-01's Blocker.** The builder falsified its own fix,
+first-hand, before the gate's verdict — and the gate was independently heading the same way.
+
+**The measurement.** Round 3 rests on `authEnforced` present ⇒ `firstRunComplete` present, because
+`firstRunComplete` was written only at `server.js:3350`. **It is ALSO written by three FRONTEND callers
+during ordinary setup**, all BEFORE `/api/auth/enforce` (`:3955`/`:4053`):
+
+    static/js/first-run-setup.js:2796   Log Analytics connection test succeeds -> {completed:true}
+    static/js/first-run-setup.js:3069   data validation passes                 -> {completed:true}
+    static/js/first-run-setup.js:3494   "don't show again" checkbox            -> {completed:dontShow}
+
+`:3069`'s own comment says it is *"so the loading button disappears"* — **a security-relevant flag
+written for a UI side-effect.** So an admin who runs the connection test and is then interrupted has
+`firstRunComplete: true` and no `authEnforced`; round 3 reads that as loss and denies. **Still bricked,
+same deadlock.** Round 3 closes only the narrow slice where settings are still `{}`.
+
+**WHAT SURVIVES, and record it as surviving:** **F-B is genuinely closed** — cell D drives a real
+unwritable directory and **M10 goes RED on the new cell while the round-2 cell stays GREEN; the
+contrast is the evidence.** The negative control now constructs **twice**. The correction is on RD-361
+as comment **37264**, written to SUPERSEDE rather than edit the earlier "Blocker closed" text.
+
+**YOUR FIRST ACTION:** the tier-1 gate (`%9`) is still running and will report independently.
+**Wait for it, then send Kam ONE card carrying both instruments — not two half-informed ones.** He
+bent his own two-round cap for this round on the premise that it would close the Blocker; **that
+premise is gone, so the next step is HIS, not another round.** Give him the options with a default,
+and per his 18:04 preference **put any link he must click on its own line.**
+
+## 🔴 THE THIRD FAILURE FAMILY, named by the agent — now a lesson, and two of its instances are OURS
+[[2026-09-07_a-census-complete-over-a-frame-that-is-not]] (M tier, filed tonight, digests regenerated
+— 115 files). ***"The instrument answers about the frame, and the answer gets written down as if it
+were about the world."*** Six instances in one day across four repos: `firstRunComplete`'s writers
+(correct over `backend/`) · `gh auth status` (correct over `hosts.yml`, blind to the keychain) ·
+`assignedKeys()` (correct over its two regexes) · the `.dockerignore` cells (correct that a string is
+present) · **`doctor.sh`'s travel sweep — Wednesday's own, correct over `!CODING/*/*/` and blind to
+the shared vault that actually broke** · **and Wednesday's *"~8 lines above"*, correct over the gate's
+PROSE and wrong about the file.**
+**It defeats the other two families' defences:** the positive control fires, the negative control
+passes, the number IS read from the source — the source is just smaller than the question.
+**Defence, and it costs four words: NAME THE FRAME IN THE SENTENCE** — *"three writers IN `backend/`"*
+— because a stated frame is one somebody can widen.
+
 ## FLEET — 2 live
 - **`%8` — `Datasec/NexusAI` s44, ~21% ctx, TOLD TO HOLD and write its handover.** Items 1 and 3 are
   DONE. Item 2 is blocked on Kam's card. **Item 4 (RD-148 round 2) is deliberately NOT started** — it

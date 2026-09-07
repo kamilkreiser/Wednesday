@@ -7,7 +7,7 @@ status: live
 
 # Boot digest BY TIER — W whole, M rules-only, every project case a handle
 
-Generated 2026-09-07 18:40 from 113 lesson files (556,247 B). M 25 · MIXED 5 · W 83. 28 project CASE sections inside MIXED files are reduced to one line each: the heading and the path to read it at. W blocks are exactly what the default digest carries; M blocks drop the section index and keep the rules; a P file is a single handle. The CASES behind every rule live only in the lesson files — open one the moment its rule fires.
+Generated 2026-09-07 19:49 from 115 lesson files (565,480 B). M 26 · MIXED 5 · W 84. 28 project CASE sections inside MIXED files are reduced to one line each: the heading and the path to read it at. W blocks are exactly what the default digest carries; M blocks drop the section index and keep the rules; a P file is a single handle. The CASES behind every rule live only in the lesson files — open one the moment its rule fires.
 
 ## The T9 SSD is the master — Wednesday must be fully portable
 `2026-07-31_fully-portable-drive.md` · principle · 2026-07-31 · status: superseded — the "T9 is the master" half by [[2026-08-25_one-drive-devmaster-is-master]] (2026-08-25); the portability principle itself still lives · tier: W
@@ -3349,6 +3349,38 @@ place enforcement lives).
 **Family:** [[2026-07-31_manage-dont-do]] (rule 2: editing that project's files from Wednesday's hands is not allowed — `.git` is its files) · [[2026-08-15_a-gui-open-is-a-write]] (an action classified as reading that writes) · [[2026-08-13_headline-must-match-the-operative-case]] (a rule without a headline does not fire) · [[2026-08-09_an-enforcement-you-must-arm-is-not-one]] (the w=3 clause).
 
 
+## A census that looks complete over a frame that is not — the instrument answers about the FRAME, and the answer gets written down as if it were about the WORLD
+`2026-09-07_a-census-complete-over-a-frame-that-is-not.md` · correction · 2026-09-07 · status: live · tier: M
+
+**The operative case, so the headline matches it:** you are about to write down *"there are three
+writers"*, *"the accounts are X"*, *"every occurrence is handled"*, *"no stale pointer remains"* —
+**any statement of the form "here is the complete set."** Stop and ask: **complete over what?** Every
+one of the instances below was a **correct** answer to the question the instrument was actually asked,
+and every one was recorded as an answer to a larger question nobody noticed had been narrowed.
+
+## How to apply
+
+1. **Name the frame in the sentence, every time.** *"Three writers **in `backend/`**"*, *"no stale
+   pointer **in `!CODING/*/*/`**"*, *"the account **per `hosts.yml`**"*. **A stated frame is one
+   somebody can widen; an unstated one is invisible to the reader and to you.** This is the whole
+   defence and it costs four words.
+2. **For any "complete set" claim, ask what would live OUTSIDE the frame** — another language, another
+   directory, a non-tracked path, a different file type, a caller in a template, a value rather than a
+   key. **Then look there once.** The `firstRunComplete` case cost one `git grep` over `static/`.
+3. **Language and directory boundaries are the commonest frames** and the least visible: a backend
+   grep will not see the frontend caller; an `*.js` glob will not see `.ts`; a `2_Project_Files/`
+   sweep will not see the sibling repo.
+4. **When a census underpins a DECISION, the frame is load-bearing and belongs in the provenance
+   line**, not just in the prose — the RD-361 fix rested entirely on a three-writer census, and the
+   census was right.
+5. **Suspect a census hardest when it is convenient** — three writers, one function, one caller is a
+   tidy story, and tidiness is what stops the next question being asked
+   ([[2026-08-16_classification-is-the-field-that-grants-authority]]).
+6. **It nests with the other two families:** *a check that cannot fail* (the result was never in
+   doubt), *a claim whose instrument is unnamed* (the evidence was never fetched), and this one — **the
+   evidence was fetched, from a smaller world than the claim.**
+
+
 ## A classification list is a REPRESENTATION of the items, not the items — converting one into an instruction without reading them is the representations failure at the list layer
 `2026-09-07_a-classification-list-is-a-representation-not-an-instruction.md` · correction · 2026-09-07 · status: live · tier: W
 
@@ -3526,6 +3558,37 @@ to keep checking is not a trigger) · [[2026-08-09_an-enforcement-you-must-arm-i
 silence from an agent is a question, never an answer) · [[2026-08-03_context-discipline-close-before-full]]
 (the window advice that was right and incomplete) ·
 [[2026-08-14_i-read-representations-they-read-sources]] ("the next signal from me" read as a wake).
+
+
+## Where there is analysis, the record carries THREE fields — what was found, what was TESTED, and HOW
+`2026-09-07_analysis-records-what-tested-and-how.md` · preference · 2026-09-07 · status: live · tier: W
+
+**His words, verbatim (2026-09-07 18:56:36):**
+> *"Fantastic. Keep with the work, and there is analysis, make notes of what was found, what was
+> tested, and how."*
+
+sections (open the file for these): Why he asked for it, and why it is not bookkeeping · How to apply
+
+## How to apply
+
+1. **Every analysis record carries the three fields explicitly** — not implied, not woven into prose:
+   **FOUND** (the claim), **TESTED** (the scope: what was and was not exercised), **HOW** (the
+   instrument, the command, the controls).
+2. **"HOW" includes the controls.** A positive control proving the instrument fires, and — since the
+   09-07 RD-368 precedent — a **negative control** so a zero is one the reader can vouch for. A method
+   without its controls is a story about what someone did.
+3. **State what was NOT tested, in the same breath.** The QA charter already requires it; this makes
+   it a property of every analysis record, not only gate reports. *"Unit-proven; the click path could
+   not be exercised"* is a complete record. A bare green tick is not.
+4. **Where the analysis produced an artefact, name its PATH** — the report directory, the matrix
+   files, the evidence folder ([[2026-09-07_a-mechanism-is-recorded-by-its-path-not-its-runtime-id]]).
+   A finding whose evidence cannot be reached is a finding on trust.
+5. **Record the instrument errors too.** Both gates today reported their own bad probes (a 403 that
+   was CSRF; a tamper matrix that never ran). **Those belong in the record** — they are what tells the
+   next reader which greens to re-check.
+6. **This binds Wednesday's OWN analysis, not only the agents'.** Handovers, ledger rows and panel
+   summaries that carry a finding carry its method, or say plainly that the method was someone else's
+   and name whose ([[2026-08-14_i-read-representations-they-read-sources]]).
 
 
 ## Deploy authority for the week — and "fix the issues with the visible data"
