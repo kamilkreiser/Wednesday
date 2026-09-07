@@ -34,8 +34,22 @@ and that card's own text says *"pattern still open"*. **This is that deferral ar
     #891             KAM'S OWN CLICK — https://github.com/Secuura/Distributed_Secuura/pull/891
     rollback         632f16dfe   (not free: 3-image rebuild; does NOT undo a DB change)
 
-## 🔴 s149 ON PANE `%170` — at 50%, told to CONTINUE not rotate, budget statement owed
-Working **#892 round 5**, then the **KS-968 single two-boolean statement**. Nothing else is queued.
+## 🔴 KS-968 IS UNMEASURED — do NOT let it be filed as benign
+The one statement Kam authorised RAN (`is_superuser=on | hash_null=f | addr_unchanged=f`).
+**Wednesday's decision table called that reading BENIGN and the table was WRONG:**
+`addr_unchanged` compared a plaintext literal to an **AES-GCM ciphertext column** — it returns false
+either way, so the benign row was selectable by a check that cannot fail. **World (c) is excluded;
+the INCIDENT world (a) and the benign world (b) remain UNSEPARATED.**
+**Card `secuura-ks968-my-decision-table-was-void` is on Kam's desk**, recommending ONE read-only
+hash comparison and **stating its limit: one-directional — a match is decisive for benign, a
+mismatch closes nothing.** Default HOLD.
+**PROJECT TRAP, third occurrence across two seats (s145 filed and retracted the same):
+ANY probe of `users.email` by literal comparison is VOID BY CONSTRUCTION.**
+
+## 🔴 s149 ON PANE `%170` — queue DRY, holding
+**Round 5 BUILT and PUSHED (`d2aa11fd1`), both fixes red-proofed, now AT A TIER-2 GATE** launched
+09:1x via `2_Project_Files/fleet/qa-agent/launchers/launch_qa_secuura_892_round5.sh` (seven guards,
+each exercised to its own rc). **KS-968 run and reported. The queue is dry and the seat is holding.**
 Brief: `2_Project_Files/fleet/briefs_staged/2026-09-08_secuura-peter-queue.md` (+ the s149 brief
 beside it). **It has corrected Wednesday THREE times today and been right every time** — treat its
 pushbacks as measurements, not friction.
