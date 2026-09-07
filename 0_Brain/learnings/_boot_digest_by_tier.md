@@ -7,7 +7,7 @@ status: live
 
 # Boot digest BY TIER — W whole, M rules-only, every project case a handle
 
-Generated 2026-09-07 14:04 from 111 lesson files (548,927 B). M 25 · MIXED 5 · W 81. 28 project CASE sections inside MIXED files are reduced to one line each: the heading and the path to read it at. W blocks are exactly what the default digest carries; M blocks drop the section index and keep the rules; a P file is a single handle. The CASES behind every rule live only in the lesson files — open one the moment its rule fires.
+Generated 2026-09-07 14:40 from 112 lesson files (552,564 B). M 25 · MIXED 5 · W 82. 28 project CASE sections inside MIXED files are reduced to one line each: the heading and the path to read it at. W blocks are exactly what the default digest carries; M blocks drop the section index and keep the rules; a P file is a single handle. The CASES behind every rule live only in the lesson files — open one the moment its rule fires.
 
 ## The T9 SSD is the master — Wednesday must be fully portable
 `2026-07-31_fully-portable-drive.md` · principle · 2026-07-31 · status: superseded — the "T9 is the master" half by [[2026-08-25_one-drive-devmaster-is-master]] (2026-08-25); the portability principle itself still lives · tier: W
@@ -3488,6 +3488,44 @@ blast radius turned out to be non-zero and pointed at Peter) · [[2026-09-02_coo
 (two structures disagreed; the question was which is authoritative, and he had answered it) ·
 [[2026-08-04_validate-brief-pointers]] (EXTENSION: validate the EXTENSION of what a brief commissions) ·
 [[2026-08-03_go-slow-earn-autonomy]] (rule 4: pilot first — and this is why).
+
+
+## An instruction to WAIT must name what will WAKE — "wait cheaply" with no wake mechanism is an instruction to go dormant
+`2026-09-07_an-instruction-to-wait-must-name-what-wakes.md` · correction · 2026-09-07 · status: live · tier: W
+
+**The operative case, so the headline matches it:** Wednesday is about to tell a seat to wait on
+something outside its session — a remote build, a CI run, a counterparty's reply, a long job on
+another box. **Before sending it: name the thing that will PROMPT the seat when the wait ends.**
+A turn that ends stops polling. **If nothing produces an event in that session, "wait cheaply" means
+"stop existing until someone taps you."**
+
+sections (open the file for these): The case · How to apply
+
+## How to apply
+
+1. **Every wait instruction names its wake.** The forms that actually work: a **background job that
+   EXITS on completion** (the harness re-invokes on exit — this is the real one), a scheduled tick, a
+   counterparty's mail, or **an explicit "I will tap you" from Wednesday with a stated interval.**
+   *"Check back periodically"* is not a mechanism; it is a hope about a turn that has already ended.
+2. **"Poll sparsely" and "have a wake" are different instructions and both are needed.** Sparse
+   polling protects the window; the wake protects the work. **Sending only the first is what happened
+   here**, and it converts a window problem into a liveness problem.
+3. **Ask the seat to state its wake path back**, in the same mail. *"Say what you expect will wake
+   you"* is four words and it is what surfaced this — the seat found its own gap the moment it was
+   asked to describe it.
+4. **Treat a frozen-busy pane during a long external wait as a REAL alert, not as your own
+   instruction being obeyed.** Wednesday's first instinct here was *"that is exactly what I asked
+   for"* — plausible, comforting, and wrong. **The detector and the mtime settle it; the assumption
+   does not.**
+5. **The watcher is the backstop, not the plan** ([[2026-08-09_an-enforcement-you-must-arm-is-not-one]]).
+   It caught this in six minutes and that is the system working — **but a design that relies on the
+   backstop firing has no wake path, it has a rescue path.**
+
+**Family:** [[2026-08-07_a-promise-is-not-a-mechanism]] (the parent, pointed at waiting — an intention
+to keep checking is not a trigger) · [[2026-08-09_an-enforcement-you-must-arm-is-not-one]] (rule 3:
+silence from an agent is a question, never an answer) · [[2026-08-03_context-discipline-close-before-full]]
+(the window advice that was right and incomplete) ·
+[[2026-08-14_i-read-representations-they-read-sources]] ("the next signal from me" read as a wake).
 
 
 ## Deploy authority for the week — and "fix the issues with the visible data"
