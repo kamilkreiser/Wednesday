@@ -5477,5 +5477,39 @@
    "CARD secuura-ks721-identity-commitment",
    "CARD nexusai-rd104-gh-token-storage"
   ]
+ },
+ {
+  "id": "secuura-ks968-hash-population-count",
+  "client_project": "Secuura/Blockchain",
+  "title": "The control came back ZERO — and one of the two explanations is a LOGIN-BREAKING incident, not a KS-968 question. One more integer separates them",
+  "bluf": "PRIOR-RULING CHECK: you authorised the probe at 18:04 and the strong control at 19:00. Both RAN, exactly as scoped, and this is not a re-raise - it is the result. THE CONTROL RETURNED C=0, which is the pre-registered 'instrument NOT validated' arm, so the agent drew NO conclusion. It hashed a HARDCODED seeded address (issuer@secuura.com) rather than the obvious demo@ or admin@, for a measurable reason: those two are env-overridable and only a hardcoded one can separate 'wrong key' from 'this box was configured with different addresses'. It also refuted its own escape hatch at source - auth does NOT read the key from Key Vault, it reads process.env directly and THROWS if unset, so it hashed with exactly the operative key. WHY THE STAKES CHANGED, and this is the reason for the card: the two surviving explanations are (a) those rows were written under a DIFFERENT KEY - a rotation with no re-hash - or (b) issuer@secuura.com simply has no row on that box. If (a) is true it is ITS OWN INCIDENT and a bigger one than KS-968, because LOGIN RESOLVES USERS BY THAT HASH: rows hashed under a retired key cannot be found by email. That would be a live functional defect on the demo, not a theoretical one. THE SEPARATOR IS ONE INTEGER: a count of rows where email_lookup_hash IS NOT NULL. Zero means the column is simply unpopulated - (b), benign, KS-968 moot there. Non-zero means rows carry hashes the running key cannot match - (a), and we escalate. NOTE: this is the WEAKER control you declined at 19:00 in favour of the strong one. The strong one was the right first choice and it is precisely because it came back zero that the weak one is now the discriminator. AND WHAT THE AGENT REFUSED TO REPORT: three attempts returned empty stdout, empty stderr, exit 0 - indistinguishable by eye from a clean zero - because 'docker compose exec -T' attached stdin and drank the rest of the script. Its own pre-registered rule, 'empty output is NOT C=0, ever', is the only reason three non-runs stayed out of the record.",
+  "default_action": "STOP — no further query. KS-968's demo status is recorded UNMEASURED and the possible key-rotation condition is recorded as UNINVESTIGATED, in the handover, so it is visible rather than forgotten.",
+  "options": [
+   {
+    "key": "count-populated",
+    "label": "Authorise the one count - rows where email_lookup_hash IS NOT NULL (Recommended)",
+    "detail": "One integer. No row data, no address, no write. It separates a benign 'no such row' from a key rotation that breaks email login on the demo - and the second is something you would want to know tonight rather than discover from a user. Pre-registered and hashed first, as both previous runs were."
+   },
+   {
+    "key": "stop-unmeasured",
+    "label": "Stop - record KS-968's demo status as UNMEASURED, permanently",
+    "detail": "Three queries have produced no conclusion and this is the fourth ask. A defensible place to stop: the KS-968 fix ships on its merits regardless. The cost is that if explanation (a) is true, a login-breaking condition on the demo stays undiscovered until someone hits it."
+   },
+   {
+    "key": "widen",
+    "label": "Authorise the agent to investigate the key-rotation hypothesis properly",
+    "detail": "Larger than one integer and correspondingly larger in blast radius. Only worth it if you already suspect a rotation happened; otherwise the single count tells us whether to bother."
+   }
+  ],
+  "recommended": "count-populated",
+  "ts": "2026-09-07T19:28:54.961906+10:00",
+  "status": "open",
+  "ruled_choice": null,
+  "ruled_ts": null,
+  "prior_rulings_overridden": [
+   "2026-09-07 19:00",
+   "CARD secuura-ks968-demo-hash-probe",
+   "CARD secuura-ks968-probe-control-query"
+  ]
  }
 ]
