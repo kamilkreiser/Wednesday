@@ -32,6 +32,20 @@ Wednesday's to carry). **The GO-with-findings was on `99fb518`.** Queue a tier-2
     rd-148-round2-s45                        690bed9   GO-with-findings stands  (cleanest of the set)
     rd-322-root-guard-vacuity-s45            432617a   GO stands — merge-ready
 
+## 🟢 FILED AS A LESSON TONIGHT (118 now) — S46's, and it is the best ghost-text insight yet
+`0_Brain/learnings/2026-09-08_a-ghost-suggestion-is-dangerous-in-proportion-to-what-is-unwritten.md`
+> *"A ghost suggestion is dangerous in proportion to how little the receiving agent has already
+> written down. This one hit a decision that was already reasoned and recorded, so it bounced. The
+> ones that will get through are the ones proposing work in an area where I have not yet committed to
+> anything in writing."*
+**The detector protects the COORDINATOR, who reads panes. It does nothing for the agent, which never
+sees the line as a line — it sees it as its own next thought. A written, reasoned decision is the
+agent-side immune response, and it needs no noticing.** S46 never saw the RD-375 suggestion: it
+bounced because **RD-375's own ticket description already carried the reason it was filed rather than
+pushed.** Operative consequences: **send REASONING not prohibitions** · **brief the OPEN questions
+hardest, because that is where a plausible line meets no resistance** · **make agents record decisions
+in the artefact, not only in a mail.**
+
 ## 🟢 A KEEPER FROM S46 — adopt it in every QA and builder brief
 Told to *"rewrite the assertion against a shape `runOnce` actually emits"*, it did something stronger:
 **it stopped writing a shape at all.** The certifying cell now drives the **real** `runOnce` against a
