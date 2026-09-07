@@ -28,26 +28,33 @@ naming its own brief (never a non-zero ctx) — and **both have since REPORTED**
 **The general rule this earns, and it is already a lesson:** a handover records a mechanism by its
 **PATH**. Every launch wrapper below is named by path for exactly that reason.
 
-## FLEET — 1 live: the RD-329 gate (`%6`). Everything else wrapped or reported, panes closed.
-- **`%6` — QA gate, RD-329 public `/api/health` allow-list, TIER 2 through-code, round 1 of 2.**
-  Branch `rd-329-health-payload-allowlist-s43` @ `2e78c76e573c5836037d80d99479cf5129dfba6d`.
+## FLEET — 2 live, and THE GATE QUEUE IS NOW EMPTY. Every Datasec branch is gated or has been.
+- **`%6` — RD-329 public `/api/health` allow-list, TIER 2 through-code, round 1 of 2.**
+  `rd-329-health-payload-allowlist-s43` @ `2e78c76e573c5836037d80d99479cf5129dfba6d`.
   Launch: `2_Project_Files/fleet/state/launch_qa_nexusai_rd329.sh` · Brief:
-  `2_Project_Files/fleet/qa-agent/briefs/2026-09-07_nexusai-rd329-health-allowlist-tier2.md`.
-  Launched 18:33, verified at rung 5. **Tier 2 deliberately: no product code changed** — 129 lines of
-  test pinning behaviour correct since 2026-04-25, and the builder said plainly that **no red-proof is
-  available** (the suite passes at the base by construction). **The one question it was given: is this
-  an ALLOW-LIST in behaviour or only in name** — with the RD-362 "spelling check wearing the costume of
-  a semantic guarantee" precedent handed to it as the thing to assume. Its deliverable is the list of
-  which tampers the guard catches and which it does not.
-- **Gate queue after it: RD-148 @ `aea410c` only.**
+  `.../briefs/2026-09-07_nexusai-rd329-health-allowlist-tier2.md`. Launched 18:33, rung-5 verified.
+  **Early signal from its pane: tamper matrix 3 RED / 11 GREEN — the guard catches 3 of 14 variants**,
+  i.e. it is narrow, which is precisely the question it was sent with. It is now checking whether the
+  counts gate is actually enforced in `verify-suite.sh` (is the gate a gate?) — its own initiative.
+- **`%7` — RD-148 (P2-06) SCIM revoke UI, TIER 1, round 1 of 2.**
+  `rd-148-scim-revoke-ui-s43` @ `aea410cc0432638b6a8698ae659197599915c2c2`.
+  Launch: `2_Project_Files/fleet/state/launch_qa_nexusai_rd148.sh` · Brief:
+  `.../briefs/2026-09-07_nexusai-rd148-revoke-ui-tier1.md`. Launched 18:46, rung-5 verified.
+  **🔴 WEDNESDAY RAISED THIS FROM TIER 2 (queue tail) TO TIER 1.** It is not a display tweak: it adds
+  a **REVOKE control — a destructive action on a security surface, in front of a human**, with +103
+  lines of new product JS. Its three questions: does the request name the row the admin is LOOKING at
+  (bound at render vs re-read at click — construct the divergence by re-sorting between render and
+  click); does the UI report success from an HTTP 200 or from something proving the revocation; and is
+  the **SERVER route** guarded, since a hidden button is not a control. **Sibling caution handed to it,
+  as a reason not to assume rather than a claim about this route:** the Reporting Dashboard
+  verification upgraded RD-10 to High partly because `POST/PUT /api/data-sources` carry no role guard.
+  **An honest constraint was stated in its brief rather than hidden:** there is no drivable browser
+  surface — the builder wrapped, `localhost:3001` has no listener (verified), deployed hosts are out of
+  scope. It was told to stand the app up locally from that commit if cheap and SAY it is a local run of
+  the same commit, or else say plainly it could not and name what the code/DOM pass cannot prove.
 
-All three gates returned and the builder wrapped. Closes went through
-`2_Project_Files/fleet/cockpit/pane_close.sh`; **listeners 13 → 13 on every one**, and the ports the
-handovers named (3001/3111/3121) were already 000 beforehand — nothing died with a pane.
-**Ghost text appeared at THREE prompts today**, each proposing the salient next action (`good night`
-at the wrapped builder; the RD-361 follow-up ticket at its gate; `Wait for Wednesday's reply` at the
-RD-362 gate). Detector called all three `SUGGESTION`; a fourth pane returned `prompt empty`, so it
-discriminates. **Run `pane_prompt_check.sh` before reading ANY prompt line.**
+**GATE QUEUE: EMPTY.** RD-361 (held on Kam), RD-363, RD-362, RD-329, RD-148 have all been gated.
+Nothing further to fire without a new branch or a Kam ruling.
 
 ## 🔴 RD-362 VERDICT — GO-with-findings, AND THE TICKET MUST NOT CLOSE AS "CONTAINMENT ACHIEVED"
 3 Major, 3 Minor, 2 advisory, **no Blocker**. The change is a strict improvement; the gate's own words:
