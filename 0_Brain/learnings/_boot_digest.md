@@ -7,7 +7,7 @@ status: live
 
 # Boot digest — headline + rules of every lesson (open the file when it fires)
 
-Generated 2026-09-07 13:51 from 110 lesson files (542,640 B). Each block = the lesson's retrieval handle (H1), its frontmatter, the operative paragraph, its section index, and every RULES section verbatim. 6 files carry no rules-shaped section and are included whole. The CASES behind a rule live only in the file: open it the moment the rule fires, or when a diagnosis needs the evidence. `_ledger.md` is read whole beside this digest; `_ledger_archive.md` on demand.
+Generated 2026-09-07 14:04 from 111 lesson files (547,961 B). Each block = the lesson's retrieval handle (H1), its frontmatter, the operative paragraph, its section index, and every RULES section verbatim. 6 files carry no rules-shaped section and are included whole. The CASES behind a rule live only in the file: open it the moment the rule fires, or when a diagnosis needs the evidence. `_ledger.md` is read whole beside this digest; `_ledger_archive.md` on demand.
 
 ## The T9 SSD is the master — Wednesday must be fully portable
 `2026-07-31_fully-portable-drive.md` · principle · 2026-07-31 · status: superseded — the "T9 is the master" half by [[2026-08-25_one-drive-devmaster-is-master]] (2026-08-25); the portability principle itself still lives
@@ -3686,6 +3686,44 @@ place enforcement lives).
 5. **When it has already happened:** disclose it in the artefact the objects were written for (the brief's provenance line: "run by Wednesday IN THE BUILDER'S CHECKOUT — a write; re-derive it, do not trust it"), record the row, and tell the seat whose repo it is if anything could be observed (`FETCH_HEAD` moved; dangling objects — nothing an agent's workflow reads).
 
 **Family:** [[2026-07-31_manage-dont-do]] (rule 2: editing that project's files from Wednesday's hands is not allowed — `.git` is its files) · [[2026-08-15_a-gui-open-is-a-write]] (an action classified as reading that writes) · [[2026-08-13_headline-must-match-the-operative-case]] (a rule without a headline does not fire) · [[2026-08-09_an-enforcement-you-must-arm-is-not-one]] (the w=3 clause).
+
+
+## A classification list is a REPRESENTATION of the items, not the items — converting one into an instruction without reading them is the representations failure at the list layer
+`2026-09-07_a-classification-list-is-a-representation-not-an-instruction.md` · correction · 2026-09-07 · status: live
+
+**The operative case, so the headline matches it:** an agent has swept, censused or catalogued
+something and handed Wednesday a LIST with dispositions attached — *archive these · these are legacy ·
+these are duplicates · these are safe to close*. **Wednesday is about to convert that list into an
+instruction for another agent to act on.** Stop. **The classification is a claim about each item, made
+from its title and metadata by someone under time pressure, and it has not been checked against the
+item.** Either read them, or write a verify-each-one guard into the brief **and expect a material
+failure rate** — because the rate is not small.
+
+sections (open the file for these): The case, measured · Why this is its own lesson · How to apply
+
+## How to apply
+
+1. **Ask what the list was BUILT for.** A catalogue built to orient is not a work order. If its
+   purpose changes when you forward it, **say so in the brief** and re-scope the confidence with it.
+2. **Never send a classification list as an instruction without the verify-each-one guard**, and write
+   it as *expecting* failures rather than as a formality: *"this list is one pass old and title-level;
+   I expect some of it to be wrong — hold anything that does not match and tell me which."*
+3. **Every HOLD gets its reason written ON the item, not just in the reply.** The seat's own line, and
+   it is the anti-loop mechanism: *"so the next sweep does not re-propose it."* Otherwise the next
+   catalogue re-derives the same wrong disposition from the same title.
+4. **When an item is right for the wrong reason, fix the reason** — do not let a correct action carry
+   a false cause into the record. That is a record defect that outlives the action.
+5. **Suspect the classes that LOOK safest.** Every one of the seven was in the *"nobody will ever do
+   this"* or *"already dead"* bucket — the two buckets nobody expects to contain live work, which is
+   precisely why nobody looks.
+
+**Family:** [[2026-08-14_i-read-representations-they-read-sources]] (the parent — a list is a
+representation of the items) · [[2026-08-16_classification-is-the-field-that-grants-authority]] (a
+disposition is a scope word needing provenance) ·
+[[2026-08-16_an-overstated-record-gets-discounted-wholesale]] (check every row in BOTH directions) ·
+[[2026-09-07_a-control-proving-it-is-not-yours-does-not-say-who-filed-it]] (the sibling found by the
+same seat: an instrument that cannot see the evidence returns a clean zero) ·
+[[2026-09-07_a-rule-for-creation-is-not-a-mandate-to-retrofit]] (the same brief's other defect).
 
 
 ## A control proving "this failure is not mine" answers the wrong question — the next one is "then who already filed it?"
