@@ -242,3 +242,53 @@ condition that requires a JUDGEMENT, it prints the instruction alongside the ale
 `GUARD_STOPPED` branch prints *"mail Wednesday, do not clean up the box"* — *"I did not want that
 decision resting on my memory at the moment it fires."* **The moment an alert fires is the worst
 moment to be recalling policy.**
+
+---
+
+## SEARCHING THE BOARD BEFORE YOU FILE — run BOTH search kinds, and the noisy one earns its keep
+*(Secuura/Blockchain seat, 2026-09-07 20:29, in its own terms; sharpens the M-tier rule filed the
+same morning in `2026-09-07_a-control-proving-it-is-not-yours-does-not-say-who-filed-it`.)*
+
+That morning's rule said: **search by SYMBOL, PATH or ERROR STRING — never by your own phrasing of
+the problem**, because the phrasing is exactly what differs between four sessions describing one
+failure. **True, and it implied the fuzzy multi-word search is the weak one to avoid. It is the weak
+one to RUN ANYWAY.**
+
+Measured on Linear's `searchIssues`: **symbol searches DISCRIMINATE** (`scopeField` and
+`boundedByCodePoints` → 0; `rateLimitScope` / `explicitScope` / `principalScope` / `maxLength` →
+KS-970 only, with a `KS-970` control returning non-zero to prove the search itself works). **Phrase
+searches return noise** — `"Caller has no tenant"` and `run-migrations.sh` each returned ~20 loosely
+related hits.
+
+**And the noise is what caught the duplicate.** **KS-808** — already open, in Backlog, carrying the
+defect **verbatim in its own title** — was found through the noisy `run-migrations.sh` result, not
+through any exact search.
+
+**The rule:**
+1. **Run the exact searches to DECIDE (symbol, path, error string) and the fuzzy one to DISCOVER.**
+   They have different failure modes; an exact search cannot find a ticket that named the thing
+   differently, which is the whole reason duplicates exist.
+2. **Run a control that returns non-zero**, so a clean zero is one you can vouch for.
+3. **State in the ticket what you searched and what each search returned** — that line is cheap and
+   it makes the absence checkable.
+4. **A match your "0 open hits" did not predict gets OPENED, not waved past.** The same seat checked
+   a `checkRateLimitSchema` hit on KS-645 that looked like a match and established it was a closed
+   Duplicate about a different route.
+5. **If it IS already filed, add your evidence to that ticket and write the reason ON it** — never a
+   second ticket, and never the reason only in a reply, or the next sweep re-derives the same wrong
+   disposition from the same title.
+
+## A FIX SPECIFIED BY A STRING IS SCOPED BY THAT STRING — count the sites before you name the fix
+*(same seat, same mail, and it is an implementation hazard the gate did not name.)*
+
+The finding said a refusal message *"names the wrong thing"* at two sites. **The string
+`"Caller has no tenant"` occurs at FOUR**, and **two of them are CORRECT**: `index.ts:665` and `:716`
+guard `if (!isPlatformRole(...) && !callerTenantId)` — they test the tenant claim **directly**, so
+the message is literally true there. Only `:1267` and `:1377` sit behind `if (scope === null)`, which
+is null for three different reasons.
+
+**The rule:** before accepting or writing a fix described by a STRING, a message, a symbol or a
+pattern, **count its occurrences and classify each one** — a `grep`-shaped fix has a `grep`-shaped
+blast radius, and a finding that names two instances has said nothing about the others. **Pin the
+sites that must NOT change with a regression cell**, so the boundary is a property of the suite
+rather than of whoever writes the fix.
