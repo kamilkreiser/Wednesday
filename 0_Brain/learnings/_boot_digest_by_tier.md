@@ -7,7 +7,7 @@ status: live
 
 # Boot digest BY TIER — W whole, M rules-only, every project case a handle
 
-Generated 2026-09-07 19:51 from 115 lesson files (565,480 B). M 26 · MIXED 5 · W 84. 28 project CASE sections inside MIXED files are reduced to one line each: the heading and the path to read it at. W blocks are exactly what the default digest carries; M blocks drop the section index and keep the rules; a P file is a single handle. The CASES behind every rule live only in the lesson files — open one the moment its rule fires.
+Generated 2026-09-07 20:01 from 116 lesson files (569,983 B). M 26 · MIXED 5 · W 85. 28 project CASE sections inside MIXED files are reduced to one line each: the heading and the path to read it at. W blocks are exactly what the default digest carries; M blocks drop the section index and keep the rules; a P file is a single handle. The CASES behind every rule live only in the lesson files — open one the moment its rule fires.
 
 ## The T9 SSD is the master — Wednesday must be fully portable
 `2026-07-31_fully-portable-drive.md` · principle · 2026-07-31 · status: superseded — the "T9 is the master" half by [[2026-08-25_one-drive-devmaster-is-master]] (2026-08-25); the portability principle itself still lives · tier: W
@@ -3619,6 +3619,40 @@ check the register before asking) · [[2026-08-07_protocol-v1.3-signed-delegatio
 sits on) · [[2026-08-03_go-slow-earn-autonomy]] (rule 5: every grant recorded, so the boundary is
 written down and never vibes) · [[2026-09-06_a-scoped-override-carries-its-own-expiry]] (the expiry
 mechanism) · [[2026-08-16_an-ask-without-a-default-is-an-indefinite-hold]] (rule 3).
+
+
+## Git topology is a MEASUREMENT — a base, a head, an ancestor, or what a merge MOVES is read in the same action as the sentence that claims it, exactly like a count
+`2026-09-07_git-topology-is-a-measurement-not-a-model.md` · correction · 2026-09-07 · status: live · tier: W
+
+**The operative case, so the headline matches it:** Wednesday is about to write a sentence containing
+*"the base is X"*, *"this is fifteen lines above Y"*, *"merging this moves develop"*, *"the head is
+Z"* — into a brief, a card, a gate's instructions, or a tap. **Stop. That is a claim about the
+repository's shape, and Wednesday holds no client identity, so it is ALWAYS second-hand.** Read it, or
+attribute it to the agent who read it and say so.
+
+sections (open the file for these): The three, in one afternoon, all caught by someone who opened the thing · Why the existing rules did not fire — the diagnosis a w=3 owes · How to apply
+
+## How to apply
+
+1. **Any sentence naming a base, head, ancestor, merge-base, line number or file location is read in
+   the same action as writing it** — or it carries its instrument inline: *"the builder's `ls-remote`,
+   not re-derived here"*, *"from the PR files API"*, *"the gate's citation, unverified by Wednesday"*.
+   **Wednesday holds no client identity, so its topology claims are ALWAYS relayed. Say so.**
+2. **A line reference from someone else's report is a claim, not a citation.** Open the file before it
+   enters a card, a ruling's context, or a brief. **Three artefacts inherited instance 2 because it
+   was never opened once.**
+3. **Never say "merge" over a stack without naming which merge.** A two-PR stack has two merges with
+   different blast radii, and only one may move the trunk.
+4. **When an agent asks which one you meant, that is the correct handling of your ambiguity** — do not
+   apologise for the question, answer it unambiguously and record that the instruction was unclear.
+5. **Enforcement candidate (w=4 promotes it):** `send_brief.sh` refuses a body containing a bare
+   `<file>:<line>` or a 7–40 hex SHA that is not accompanied by an instrument clause on the same line.
+
+**Family:** [[2026-08-14_i-read-representations-they-read-sources]] (the parent — this is that lesson
+pointed at topology, which its numeric enforcements never covered) ·
+[[2026-08-16_classification-is-the-field-that-grants-authority]] (a scope word needs provenance; so
+does a SHA) · [[2026-09-06_other-projects-repos-are-read-only-git-verbs-that-write]] (the sibling: git
+verbs, not git facts) · [[2026-08-04_validate-brief-pointers]] (validate what a brief points AT).
 
 
 ## When an action is KAM'S to click, hand him the LINK — not the instruction to go and find it
