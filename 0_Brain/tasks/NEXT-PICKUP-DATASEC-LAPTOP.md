@@ -19,10 +19,10 @@ morning board on his panel.
     %22  Datasec/NexusAI   — S47. HOLDING correctly and said so; prompt clean; ctx 40%.
     %0   wednesday         — this seat.
     (%18 %19 %20 %21 %23 all closed; each `listeners 13 -> 13`.)
-🔴 **AWAITING KAM: at ~07:0x he asked "how did you go with the security review — are all elements,
-tests, verifications completed?" Wednesday answered with a verified status and a RECOMMENDATION he
-has not yet ruled on.** See the SECURITY REVIEW section below — **do not re-ask him, and do not start
-it without his word.**
+    %25  Datasec/SecurityReview — LAUNCHED 07:2x on KAM'S OWN WORD ("go ahead with option a").
+         Brief: 2_Project_Files/fleet/briefs_staged/2026-09-08_secreview-file-and-sweep.md (ab16fba5).
+         Booted clean, no trust dialog, on Fable 5 (that project's launcher). Pointer tapped.
+✅ **KAM RULED option (a) at ~07:1x — it is DONE, not pending.** Do not re-ask him.
 `tmux list-panes -t fleet` before believing this line. **When %24 reports: read the verdict from the
 REPORT ON DISK** (`projects/nexusai/reports/2026-09-08-rd376-tier2/`), never the mail alone.
 
@@ -92,11 +92,18 @@ heading count and the severity split re-derived with the report's own greps and 
    which the workspace CLAUDE.md marks UNRESOLVED. **Do not assert which.**
 6. **Two decisions are his:** RD-18's Privacy Act package; whether to re-issue the June deliverables
    against the 219-finding register.
-**THE PENDING RECOMMENDATION (option a):** launch a Security Review session to file the 22 findings and
-finish the Bearer sweep — neither needs anyone outside us, neither touches his pending decisions.
-🔴 **Security Review is NOT in the morning-autostart grant** (that covers Secuura/Blockchain,
-NexusAI, Vision), so this is a new delegation and **waits for his word.** Note the project has **no
-fleet inbox** — `send_brief.sh` will refuse it; brief a launched session directly.
+**✅ KAM RULED option (a) — LAUNCHED at `%25`.** Its two jobs: file the 22 into the register, and
+finish the Bearer sweep across CypherSharePoint / MailFlow / UniversalPrint.
+🔴 **The constraint Wednesday set, and it is the point of job 1:** the register's line 15 says
+**"VERIFICATION IS COMPLETE"** with **no frame**, and the 22 are **unverified**. Filing them as-is
+makes a true document false. So filing has two halves: add them marked *pending independent
+verification*, AND amend line 15 / §2.1 to carry their frame. **Totals must reconcile: 219 + 22 = 241.**
+**Explicitly OUT of scope** (do not let it widen): no verification pass on the 22 · no live cloud pass
+(blocked on the unresolved tenant question) · the two severity-gating questions stay open · RD-18 and
+the re-issue decision are Kam's · the HPSM PRD is already carded.
+**No fleet inbox** — `send_brief.sh` refuses this project. **Its report on disk under `_Working/` IS
+the deliverable**; it was briefed by a tapped pointer at the committed brief, and mid-session questions
+come via `_Working/PROGRESS.md` plus the pane. **Read the pane, not an inbox.**
 
 ## 🟡 THE ATTIO DAILY DIGEST — arrives 07:00, and its headline overstates its own body
 `[Datasec/ATTIO -> Wednesday] DAILY FOLLOW-UP DIGEST` (scheduled, `attio-bridge`, ATTIO-29). It says
