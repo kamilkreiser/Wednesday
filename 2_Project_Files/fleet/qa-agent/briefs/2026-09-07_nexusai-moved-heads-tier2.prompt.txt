@@ -1,0 +1,48 @@
+ultrathink
+
+You are the cross-project QA agent, working from
+/Volumes/KK_T9_External_HDD/!CODING/Testing Agent MAIN
+
+TIER 2 GATE — Datasec/NexusAI, TWO MOVED HEADS, two independent subjects, two verdicts:
+  rd-361-round4-s45  @ 731aa6e   (GO was at f93730c — base f93730c..731aa6e)
+  rd-148-round2-s45  @ 690bed9   (GO was at ea4d229 — base ea4d229..690bed9)
+
+WHY THIS EXISTS: a GO names a head. Both branches carry verdicts taken on commits that are no longer
+their heads, so what would merge has never been gated. Neither gates the other.
+
+YOUR BRIEF — read it first, in full, and follow it exactly:
+/Volumes/KK_T9_External_HDD/WEDNESDAY/2_Project_Files/fleet/qa-agent/briefs/2026-09-07_nexusai-moved-heads-tier2.md
+
+SUBJECT 1 (731aa6e): the census guard was rewritten from regex to acorn + acorn-walk, because the old
+stripComments() ran line.replace(/\/\/.*$/,'') and https:// contains // — it corrupted 18 of 80 files
+and deleted any writer sharing a line with a URL before counting it.
+THE QUESTION: does the AST guard see what the regex could not, AND does it now MISS anything the regex
+caught? Re-run the matched pair: M-B2 (additive bulk write, no URL) must be RED, and M-G2 (same write,
+URL earlier on the line) must NOW be RED where it was GREEN. Then hunt what an AST misses that a regex
+caught — a write through a helper, a re-exported setSetting, an aliased binding, a spread carrying the
+key, a computed literal ['authEnforced'].
+Also: the frame widened to everything tracked except __tests__, and that exclusion is ASSERTED by a
+cell reading the Dockerfile. VERIFY THAT CELL CAN FAIL - make a COPY line mention __tests__ and
+confirm it reddens. And re-derive the builder's "256 computed assignments" over a frame you name.
+And rule on this: stripComments() is STILL in that file for the WIRING cells, on the reasoning that a
+URL cannot hide what those cells count. If it can, the broken helper is still load-bearing.
+
+SUBJECT 2 (690bed9): the fix for "the new STRUCTURE cell does not guard the risk it appears to guard"
+- a check that could not fail, inside the suite built to stop exactly that. Can it fail NOW, and does
+it fail for the risk it NAMES? Tamper what it claims to guard (expect red), then make an unrelated
+change (expect green). A cell whose title and assertion disagree is the defect.
+
+EVIDENCE: positive control opening AND closing; every mutation asserted PRESENT before its result is
+read and restored after; MATCHED PAIRS so exactly one variable moves; read every hit before counting
+it; NAME THE FRAME in any completeness claim; FOUND / TESTED / HOW with controls named under HOW;
+state what you did NOT test. Re-derive both suite counts by NAME-DIFFING cells, never by trusting a
+total.
+
+Stop any server you start and prove the port reads 000. No az, no registry, no demo, no staging. The
+builder has HANDED OVER, so nothing should move under you; still work in your own clone or worktree.
+Do NOT prune the ~120 stale git worktree entries you will see - some are this project's own.
+
+A SEPARATE VERDICT PER SUBJECT, and say plainly which of the two, if either, you would ship.
+
+Report to Wednesday. Write the report under
+projects/nexusai/reports/2026-09-07-moved-heads-tier2/ and NAME THAT PATH IN YOUR MAIL.
