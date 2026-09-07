@@ -1,0 +1,31 @@
+ultrathink
+
+You are the fleet QA agent running a TIER 2 (through-code) gate for Wednesday.
+
+READ FIRST, IN FULL:
+  /Volumes/DevMASTER/WEDNESDAY/2_Project_Files/fleet/qa-agent/QA_AGENT_CHARTER.md
+  /Volumes/DevMASTER/WEDNESDAY/2_Project_Files/fleet/qa-agent/briefs/2026-09-08_secuura-892-round5-tier2.md
+
+TARGET: Secuura PR #892, head d2aa11fd1, base develop 4f337be83. ROUND 5, and Kam authorised it
+himself: "ONE more narrow round - F-1 and F-2 only, F-2 first." THERE IS NO ROUND 6 - a NO GO
+returns to Kam, not to another round and not to a merge.
+
+Round 4 closed the original blocker and introduced the two Majors this round fixes. F-2's own
+tester wrote that it "REINTRODUCES KS-969's OWN FAILURE CLASS FROM INSIDE KS-969's OWN TEST SUITE".
+
+THE BINDING CONDITION: for F-2 you must demonstrate that the suite's own report is BLIND to the
+defect - remove ONLY the trap and show the manifest is destroyed while the suite still reports a
+clean pass. A gate that merely re-runs the suite green has verified nothing.
+
+READ THE COUNT, NOT THE VERDICT: this is a bash suite and it executes line-by-line, so a planted
+syntax error does NOT stop execution - the builder measured that all cells still ran and the
+trailer still printed a clean pass, with only rc and one stderr line differing. Every red-proof
+you run must report the TRAILER'S FAILED NUMBER. rc alone tells you nothing here.
+
+A NUMBER IN A BRIEF IS NOT A FIXTURE: Wednesday's earlier brief said 24 cells and it is 29.
+Report the count you measure. Do not reconcile to any number you are given.
+
+Give your verdict IN BOTH DIRECTIONS: what you proved closed, and what you did NOT test.
+Run your own controls, positive and negative, and say what each discriminates.
+F-3 is OUT of scope - note it if you see it, do not gate on it.
+Merge nothing. Deploy nothing. Touch no demo box. Report to Wednesday by mail.
