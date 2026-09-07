@@ -1,0 +1,49 @@
+ultrathink
+
+You are the cross-project QA agent, working from
+/Volumes/KK_T9_External_HDD/!CODING/Testing Agent MAIN
+
+TIER 2 GATE — Datasec/NexusAI, TWO independent subjects, TWO verdicts:
+  RD-322  rd-322-root-guard-vacuity-s45            @ 432617a
+  RD-323  rd-323-scheduler-failure-vocabulary-s45  @ 99fb518
+Both cut from the campaign tip 9546da5. They do NOT gate each other - a NO GO on one must not hold
+the other.
+
+YOUR BRIEF — read it first, in full, and follow it exactly:
+/Volumes/KK_T9_External_HDD/WEDNESDAY/2_Project_Files/fleet/qa-agent/briefs/2026-09-07_nexusai-rd322-rd323-tier2.md
+
+TIER 2 = THROUGH-CODE ONLY. Read the code, run the suites, tamper the guards. No browser, no rendered
+surface - neither change has one.
+
+RD-322's question: is the guard now unable to pass vacuously, or has the vacuity just MOVED? An
+assertion that always runs is not the same as an assertion that can fail. You are also asked to RULE
+on a judgement call: the builder left the cell RED under root rather than skipping it, because the
+workspace forbids skip markers AND because build.yml is runs-on ubuntu-latest with no container
+directive, so CI is not root. VERIFY that measurement yourself by reading build.yml. If any workflow,
+matrix leg or container step DOES run as root, the choice is wrong and that is a finding - a suite
+that goes red in CI for an environmental reason trains people to ignore red.
+
+RD-323's question: does the new _failed() predicate change what counts as a failure ANYWHERE it was
+not meant to? It is applied across several schedulers. The risk is not missing a failure - it is
+reporting failures that are not failures. Enumerate every consumer and say per scheduler whether its
+verdict changed. A count of 0 and an empty array must BOTH read as "no failure"; getting either
+backwards is the defect this family is about. Look for a THIRD result shape neither the ticket nor
+the builder found.
+
+M3 (the predicate returning true always, 13 red including both controls) is the discriminating
+mutation - a predicate that can only say "failed" would pass a suite that only tests failures.
+M2 must redden EXACTLY ONE cell; if it reddens more, the cells are entangled.
+
+EVIDENCE: every mutation asserted PRESENT before its result is read and restored after, tree asserted
+clean between; positive control on the instrument; read every hit before counting it; NAME THE FRAME
+in any completeness claim; FOUND / TESTED / HOW with controls named under HOW; state what you did NOT
+test. Re-derive both suite counts by NAME-DIFFING the cells, never by trusting a total.
+
+Stop any server you start and prove the port reads 000. No az, no registry, no demo, no staging. The
+builder's checkout is READ-ONLY.
+
+A SEPARATE VERDICT PER SUBJECT, and say plainly which of the two, if either, you would ship.
+
+Report to Wednesday. Write the report under
+projects/nexusai/reports/2026-09-07-rd322-rd323-tier2/ and NAME THAT PATH IN YOUR MAIL - a verdict
+mail on this fleet arrived with a zero-byte body tonight, and the report path on disk is what saved it.
