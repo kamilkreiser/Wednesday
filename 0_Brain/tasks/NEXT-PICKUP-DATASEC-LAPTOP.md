@@ -55,7 +55,14 @@ one chat panel, **ONE USAGE LIMIT**. Do not write the shared files (`NEXT-PICKUP
   priority-then-identifier). **Do not close that pane.**
 - **DELTA BATCH 1 COMPLETE — all 7 components reported.** BATCH 2 STILL TO LAUNCH (4): CypherOneDrive +
   Teams (gate INTACT — the control group for F-13) · CommonValueLibraryCypher · Cyphercard-Enrolment-App.
-- **SEC-07 / RD-363 @ `b0dec96` STILL QUEUED for a tier-2 gate.** Do not "fix" its deliberate omission of
+- **GATE QUEUE, IN ORDER: (1) RD-361 r2 tier-1 RUNNING → (2) SEC-07/RD-363 @ `b0dec96` tier 2 →
+  (3) RD-148 @ `aea410c` (`rd-148-scim-revoke-ui-s43`, 2164/2164).** Fire 2 and 3 as slots free.
+- **RD-50 was MISCLASSIFIED as category 1 by the agent and is category 2** — its execution lives in the
+  Feedback System and Lead Bot folders, which a NexusAI seat cannot write to (hard rule 1). The agent
+  caught it, audited all 97 for the class, and owes the corrected count — **the cat-1 number Kam is
+  held to is not final until that lands.** General rule for the handover: *a ticket's category is a
+  claim read from its scope note, not inferred from its board state.*
+- **SEC-07 / RD-363 @ `b0dec96` QUEUED for a tier-2 gate.** Do not "fix" its deliberate omission of
   `networkAcls Deny` — it would brick every customer deployment; the reason is pinned in a test cell.
 
 ## RD-361 HISTORY — NO GO round 1, round 2 built
