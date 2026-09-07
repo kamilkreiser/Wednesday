@@ -77,15 +77,23 @@ which is what makes it a rule rather than an excuse.
     rd-361-round4-s45                        731aa6e   GO-with-findings stands
     rd-148-round2-s45                        690bed9   GO-with-findings stands; the checkout sits here
     rd-322-root-guard-vacuity-s45            432617a   GO stands — FROZEN, only unqualified GO
-    main                                     a9a8cb6   frozen, RD-367, 250 behind
+    main                                     1803bcd   MOVING TODAY — a9a8cb6 -> 8c4c22d -> 1803bcd
 🔴 **rd-377 is STACKED on rd-323** — `e032c7d` must merge before `fabcc93`. **Two merges, two blast
-radii; say which one you mean.** Nothing merges until Kam's two clicks.
+radii; say which one you mean.** **The merges are AUTHORISED and running** — Kam, panel 07:10.
 
-## 🔴 KAM'S DESK — the two clicks, unchanged, and they gate all three merges
+## 🟡 KAM'S DESK — the two clicks NO LONGER GATE THE MERGES (superseded by his 07:10)
+🔴 **SUPERSEDED: earlier versions of this file said the two clicks gate all three merges. They do
+not.** Wednesday held the merges pending those settings because `deploy-demo.yml` deploys FROM main —
+a merge IS a deploy — and did not want that firing unseen. **Kam then asked for the deploy at 07:10,
+so the hold is resolved BY HIS INSTRUCTION, not by an answer.** The settings remain **unread**, and
+Wednesday MEASURED that it cannot read them: `kamilDatasec` is in orgs `token-one` and `warpkey`,
+**not `datasecau`**, sees zero repos there; the deploy key reaches git, the API identity does not, and
+repo settings need admin regardless. **They are now INFORMATIONAL** — what the pushes actually fired
+may answer them without him.
 Step-by-step went to his panel **19:59:38 on 09-07** — **do not re-send it.**
 1. `https://github.com/datasecau/Reporting_Dashboard_Au/settings/environments` — required reviewer on `demo`?
 2. `https://github.com/datasecau/Reporting_Dashboard_Au/settings/variables/actions` — `CI_DEPLOY_ENABLED` present, and its value?
-**Switch ON + `demo` with NO required reviewer -> HOLD the merges.** Otherwise they go on his week grant.
+~~Switch ON + `demo` with NO required reviewer -> HOLD the merges.~~ **That rule is SPENT — he authorised the deploy.**
 **Five cards open, every one with a safe default.** This seat's two: `wed-ledger-archive-has-no-trigger`
 (WED) · `hpsm-credential-bearing-prd-outside-every-snapshot` (Datasec). The other three are the
 Studio's or Fleet/workspace — **not yours to adopt, re-card or answer.**
