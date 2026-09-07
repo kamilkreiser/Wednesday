@@ -21,8 +21,13 @@ morning board on his panel.
          landed in `_Working/2026-09-08_FILE_AND_SWEEP_REPORT.md` before it wrapped — nothing owed.
     %0   wednesday            — s150, booted 07:44, rotated in at 82%. ONLY TWO PANES LIVE.
 
-🔴 **`main` HAS MOVED — 4 of 8 merged and pushed**, first movement since 2026-09-01:
-    a9a8cb6 (frozen) -> 8c4c22d rd-323 -> 1803bcd rd-377 -> 0dd9cc0 rd-381 -> 97be896 rd-361
+🔴 **`main` IS MOVING — 5 of 8 merged and pushed at 08:0x**, first movement since 2026-09-01:
+    a9a8cb6 (frozen) -> 8c4c22d rd-323 -> 1803bcd rd-377 -> 0dd9cc0 rd-381 -> 97be896 rd-361 -> 4216f07 rd-374
+🔴 **EVERY SHA AND COUNT IN THIS FILE IS A SNAPSHOT OF A MOVING TRUNK. `main` moved four times
+between 07:34 and 08:06 and this line went stale twice while being written. DO NOT TRUST IT — run
+`git -C "/Volumes/KK_T9_External_HDD/!CODING/Datasec/NexusAI/2_Project_Files" ls-remote origin main`
+(a READ verb, safe from Wednesday's seat) and believe that instead.** The durable facts here are the
+QUEUE ORDER and the GUARDS, not the head.
 **`0dd9cc0` and `97be896` re-read by s150 with its own `ls-remote` at 07:48 and 07:52** — not
 relayed. **Merge 4's decrease guard HELD: 2229 tests / 115 suites, above the 2196 floor.** S47
 also caught its OWN verification loop printing a conclusion on mangled paths, and re-derived it.
@@ -40,8 +45,7 @@ secrets `AZURE_CLIENT_ID` / `AZURE_TENANT_ID` / `AZURE_SUBSCRIPTION_ID`; create 
 **Sent to his panel 07:4x.** **Do NOT report any merge as a deploy.**
 
 ## MERGE QUEUE — corrected twice by S47, both times measured, both times right
-    DONE  1 rd-323 e032c7d · 2 rd-377 fabcc93 · 3 rd-381 b93d3b5 · 4 rd-361 731aa6e (main 97be896)
-    5. rd-374  10ddb0a  CONTAINS rd-361 (that is why rd-361 goes first; Wednesday's order was wrong)
+    DONE  1 rd-323 · 2 rd-377 · 3 rd-381 · 4 rd-361 (main 97be896) · 5 rd-374 (main 4216f07)
     6. rd-376  36191eb  NOW ELIGIBLE — gate returned (b), ticket ended. Based on 10ddb0a.
     7. rd-322  432617a  the only unqualified GO
     8. rd-148  690bed9
@@ -325,3 +329,18 @@ coordinator that has just launched an agent and is watching it is not expected t
 for raising it to Kam, set in advance so it is not a judgement made under pressure: no Studio write by
 ~08:30** (>70 min, several more s149 interims elapsed). **s150 has no instrument on that machine and
 must not adopt Secuura work** — the only available act is telling Kam.
+
+## 08:06 — S47's 50% CHECKPOINT, ruled CONTINUE (s150)
+**Ruling mailed + pointer tapped** (`CHECKPOINT RULING: CONTINUE through 6-7-8`, verified at
+`datasec-nexusai@agentmail.to` 22:06:42Z BEFORE the tap; tap reported `queued behind a running turn`).
+**50% is a checkpoint, not a rotation** — it forbids starting work that will not FIT, not the next unit
+of a queue already running; the band is 80-90%. **The one non-negotiable given to S47: never START a
+merge it cannot also FINISH and VERIFY** — a half-merged trunk under a dead seat is worse than a clean
+handover at merge 6. **S47 was asked to STATE its own per-merge burn before merge 6**; Wednesday's
+outside view (6-8 should be cheaper than 1-5, since the predictor, the decrease guard and the
+replacement control are all built) was given explicitly AS AN INFERENCE FROM ITS PANE, not a
+measurement, with S47 told to overrule it if its own numbers disagree. **If the answer is "they do not
+fit": land the last one that does, wrap at that boundary with the queue named, relaunch.**
+**Negative control:** S47's pane at 07:46 reads *"All four are already in main — they're old lineage…
+Control chosen."* Wednesday reads the rd-376 vacuity item as CLOSED on S47's own words — **not
+independently verified.**
