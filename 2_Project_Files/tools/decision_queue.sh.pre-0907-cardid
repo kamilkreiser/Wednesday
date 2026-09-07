@@ -124,7 +124,7 @@ def validate(d, existing_ids):
     dec["ruled_ts"] = None
     return dec
 
-STOPWORDS = {"about","after","again","before","between","could","should","would","their","there","these","those","which","while","wednesday","secuura","datasec","nexusai","blockchain","kam","agent","ticket","tickets","decision","recommended","default","nothing","moves","today","tomorrow","reported","expires","money","only","check","again","round","review","update","looked","looking","state","again"}
+STOPWORDS = {"about","after","again","before","between","could","should","would","their","there","these","those","which","while","wednesday","secuura","datasec","nexusai","blockchain","kam","agent","ticket","tickets","decision","recommended","default","nothing","moves","today","tomorrow","reported","expires","money","only"}
 
 def prior_rulings(d):
     """Kam's panel messages whose text shares >=2 subject words with the card's id+title."""
@@ -150,47 +150,6 @@ def prior_rulings(d):
         shared = {w for w in words if w in low}
         if len(shared) >= 2:
             hits.append((str(m.get("ts", ""))[:16].replace("T", " "), " ".join(text.split())))
-
-    # ---- LEG 2: CARD-ID LINEAGE (2026-09-07, ledger w=3 — the FIFTH raise of the Azure/Founders
-    # Hub credit subject). Leg 1 above matches Kam's PROSE against the card's words. It is blind
-    # exactly where it matters most: a client name is a STOPWORD (it is in every card), and when
-    # Kam closes a subject he uses PRONOUNS — "no need to raise this again", "the hub is fine" —
-    # not the subject's nouns. His two closing messages on 09-05 shared exactly ONE scoring word
-    # ("credit") with the 09-07 card, and leg 1 needs two, so it could not see either of them.
-    # But his ruling messages carry the CARD ID in a structured form: "Decision <card-id>: ...".
-    # So match the NEW card's id tokens against the ids of cards he has ALREADY ruled, scoring a
-    # token only when it is RARE across the card store (a distinctive subject word, not "secuura").
-    # A rare shared token is one hit. In the path, not in memory.
-    try:
-        new_toks = {t for t in re.split(r"[^a-z0-9]+", str(d.get("id", "")).lower())
-                    if len(t) >= 4 and t not in STOPWORDS}
-        if new_toks:
-            store = load()
-            ruled = [x for x in store if isinstance(x, dict)
-                     and (x.get("status") == "ruled" or x.get("ruled_choice"))
-                     and x.get("id") != d.get("id")]
-            freq = {}
-            for x in store:
-                if not isinstance(x, dict):
-                    continue
-                for t in set(re.split(r"[^a-z0-9]+", str(x.get("id", "")).lower())):
-                    freq[t] = freq.get(t, 0) + 1
-            # RARITY CEILING, corrected 2026-09-07 during its own red-proof: a flat "<=3 cards"
-            # ceiling made a token STOP being a subject word once the subject had been carded a
-            # few times — so the gate went blind exactly on the subjects raised most often, which
-            # is the same flaw it exists to fix. Cell 4 (founders/hub, carded 4x) proved it.
-            # Ceiling is now proportional and generous: exclude only a genuinely ubiquitous token.
-            RARE = max(5, len(store) // 10)
-            for x in ruled:
-                x_toks = {t for t in re.split(r"[^a-z0-9]+", str(x.get("id", "")).lower())
-                          if len(t) >= 4 and t not in STOPWORDS}
-                shared_rare = {t for t in (new_toks & x_toks) if freq.get(t, 99) <= RARE}
-                if shared_rare:
-                    hits.append((f"CARD {x.get('id')}",
-                                 f"ALREADY RULED '{x.get('ruled_choice')}' — {x.get('title','')} "
-                                 f"[shared subject word(s): {', '.join(sorted(shared_rare))}]"))
-    except Exception as e:
-        die(f"card-id lineage check failed ({e}) — refusing to add a card without it")
     return hits
 
 def cmd_add(args):
