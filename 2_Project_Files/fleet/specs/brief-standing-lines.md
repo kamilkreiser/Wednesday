@@ -207,3 +207,38 @@ most likely to destroy the thing you just made.**
 flag on any host running profile-gated services** — containers outside the active profile read as
 orphans and are removed. Name the forbidden flag in the brief; do not rely on it not occurring to
 anyone.
+
+## WAKERS AND WATCHERS — two rules an agent found in its own monitor, 2026-09-07
+
+**RULE 1 — a waker must be able to observe the FAILURE it exists for.**
+A seat built a waker that exited on the build's `=== DONE` marker. **Its disk guard stops the build
+with `pkill`, which never writes that marker** — so **the one event it most needed to hear about
+would have left it asleep indefinitely.** Its own words:
+
+> *"A watcher that cannot observe the failure it exists for is a check that cannot fail, wearing a
+> monitor's clothes."*
+
+**The corrected shape, and it is the general one — wake on THREE classes, not one:**
+1. the **success** marker;
+2. the **explicit failure** marker (the guard's own stop file);
+3. **the watched process DISAPPEARING without either** — *"because the first two are both things that
+   WRITE something; a process that dies writes nothing."*
+
+**Test by its handle:** *if the thing I am afraid of happens, does this waker fire?* If the only
+answer is "it would write a marker", ask what happens when it cannot.
+
+**RULE 2 — a backgrounded task that backgrounds again is ORPHANED, and it reports success.**
+The seat's first fix wrapped the harness's background mode around a command that itself ended in `&`.
+**The outer shell exited immediately, the harness marked the task COMPLETE, and the loop kept polling
+with nothing left to wake.** *"It reported 'started' and was inert."*
+
+**It caught this by DURATION: the task completed in under a minute, which is not what a 90-minute
+watcher does.** **Standing check: after starting any long-lived background task, verify it is still
+running at a time when it should be** — a task that finishes far too fast has not finished, it has
+detached from you. Never `&` inside a tracked background task; let the loop be the foreground of it.
+
+**RULE 3, from the same seat and worth as much as the other two:** **when a waker fires on a
+condition that requires a JUDGEMENT, it prints the instruction alongside the alert.** Its
+`GUARD_STOPPED` branch prints *"mail Wednesday, do not clean up the box"* — *"I did not want that
+decision resting on my memory at the moment it fires."* **The moment an alert fires is the worst
+moment to be recalling policy.**
