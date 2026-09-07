@@ -233,24 +233,66 @@ path; (3) `npm-audit.yml` (`branches: ['**']`) is the only workflow that runs on
    render; fix that first. (b) Deleting the committed `.key` files does NOT remove the root key —
    `LicenseGenerator.exe` is committed and CONTAINS it; no text scanner sees it.
 
-## SECURITY REVIEW — step 1 complete, step 2 in flight
+## ✅ SECURITY REVIEW STEP 1 — ALL TEN FILES NOW READ BY THE COORDINATOR. Zero refuted.
 **219 findings: 31 June (27 unremediated, ZERO fixed) + 188 new. 16 new Criticals.**
-**STEP 1 (verify): all 10 files written; Wednesday has READ 4** — HP-AuthSuite (12 conf/1 upgraded),
-Cryptix (28 conf/1 down, all 4 Criticals stand), HPSA (16 conf/2 down), infra-admin-portal
-(6 conf/1 down/1 upgraded/1 unverif/+6 new). **62 re-derived, ZERO refuted.**
-**UNREAD — the cheapest high-value task available, do it when a gate slot frees:** OneTimePad ·
-myPKI · SecurePDF · pdf-api · OXPd1 · Reporting Dashboard, all in `_Working/verification-2026-09/`.
-**INFRA-03 (High 7.5 → ~9.3):** the admin portal's committed encryption key is **AES-ECB** (no IV, no
-auth, deterministic, raw-UTF-8 key, no KDF) over **customer tenants' Entra app-registration
-credentials**. Unauthenticated webhooks are worse than the seed said: `onboarding-cleanup`
-irreversibly null-writes credentials on every row older than 7 days; `saas-refresh` lets an anonymous
-caller trigger outbound customer email. No compensating control at any layer (proven three ways).
-dev ≡ staging on all three Entra secrets; production separate on all nine.
+
+**Wednesday read the six outstanding files at 18:2x** (SecurePDF · pdf-api · myPKI · OneTimePad ·
+OXPd1 · Reporting Dashboard). Exact tallies **from those six**:
+
+    CONFIRMED 87 · REFUTED 0 · DOWNGRADED 8 · UPGRADED 3 · UNVERIFIABLE 1 · NOT VERIFIED 0
+
+The predecessor reported **62 re-derived / 0 refuted** across the earlier four (HP-AuthSuite, Cryptix,
+HPSA, infra-admin-portal), which is where the handover's **149 re-derived, 0 refuted** comes from.
+**Across ten components, not one finding was refuted.** That is the strongest thing that can be said
+about a register, and it is the opposite of the risk that a single overstated row gets the whole
+thing discounted.
+
+**The verifiers moved severity in BOTH directions, which is what makes the zero credible:**
+- **UP:** `OTP-06` M→H (no binding between connector and challenge) · `OTP-10` M→H (the "specific
+  topology" is the shipped one) · **`RD-10` M→H — and this one ships:** the Managed-AI
+  `createUiDefinition.json` passes no Log Analytics parameters, so `hasPrinterData` is false on
+  **every Marketplace deploy** and `ALLOWED_WORKSPACE_IDS` is never set, while `POST/PUT
+  /api/data-sources` carry **no role guard** — a viewer can steer the app's own managed identity at
+  any workspace it can read.
+- **DOWN:** `OTP-31` H→L (the portal's gate is a server-issued bearer, not ASP.NET middleware;
+  PR:N/C:H/I:H/S:C do not survive) · `OTP-28` H→M · `OTP-32` H→M (finder's item (d) simply wrong —
+  the portal is `minReplicas: 1`) · `OXPD-02` H→L (**estate-wide escalation refuted**: the only
+  caller has zero callers) · `OXPD-04` H→M · `OXPD-10` M→Info · `RD-12` L→Info · `MYPKI-01` C→H
+  (the live path DOES have a KDF; the finder's own control grep was mis-run — 7 hits, not 0).
+
+## 🔴 TWO NEW HIGH-VALUE FINDINGS RAISED BY THE VERIFIERS — neither is in the seed
+1. **`V-OXPD-A` (High 7.3) — unauthenticated device-code minting, a phishing primitive.** Any host on
+   the LAN can POST a SOAP `hidReportEvent` to `:8092` (no auth). The handler keys the event by the
+   caller's socket address and starts an Entra **device-code flow using the organisation's own tenant,
+   client id and client secret**. `GET /session-state` from the same host returns the `userCode` and
+   the QR. **If any user completes that code — and the prompt shows the organisation's own app name —
+   their access AND refresh token land in the ATTACKER's session**, and `/onedrive-api` then acts as
+   them. Even with no victim, anyone on the LAN can mint device codes against the tenant at will.
+2. **`V-01` (Reporting Dashboard, Low but it compounds tonight's RD-362 work) — the pen-test report
+   quotes three FORMER signing secrets** (`JWT_SECRET`, `SESSION_SECRET`, `COORDINATOR_SECRET`
+   fallbacks) in cleartext, **in a file that ships in the image**, and **`.gitleaksignore:71-73` are
+   WORKING-TREE fingerprints suppressing exactly those three lines** while the file's own header at
+   `:3` claims "the working tree scans clean". `:61-63` admits it. Deploy path is now `${VAR:?…}` so
+   the fallbacks are gone from it — but any instance that ever ran on the defaults signed cookies with
+   a now-public secret until rotated.
+
+**🔴 THE CROSS-LINK THAT MATTERS, and only the coordinator could see it:** tonight's RD-362 gate found
+the report is **1 of 5 carriers** for the SSH recovery pointer. This verification pass independently
+found the **same report** also carries three signing secrets **with gitleaks fingerprints hiding them**.
+And `RD-03` notes the report publishes **TWO** `git show` hashes where the finder listed one.
+**So RD-362's scope is narrower than the artefact's exposure three separate ways.** RD-362 must be
+re-scoped, and RD-55 (rotate + scrub) is the ticket the whole carrier story converges on.
+
+**Also corroborated independently:** `RD-07` CONFIRMED — `mainTemplate.json:375-388` has no
+`networkAcls`, no `enablePurgeProtection`, `softDeleteRetentionInDays: 7`. **That is precisely what
+RD-363 fixes**, so tonight's tier-1 gate and this verification pass reached the same place from
+opposite directions.
+
 **STEP 2 (delta on the 19 June components): 8 done, 11 COMMISSIONED.** Wednesday recommended dropping
-them; **Kam overruled — "yes, queue the eleven three at a time."** He was right. **BATCH 2 STILL TO
-LAUNCH (4):** CypherOneDrive + Teams (gate INTACT — the control group for F-13) ·
-CommonValueLibraryCypher · Cyphercard-Enrolment-App. **Do not let the in-flight state harden into a
-claim of completeness** — register §7.1 says "commissioned, in flight".
+them; **Kam overruled — "yes, queue the eleven three at a time."** He was right and the register says
+so. **BATCH 2 STILL TO LAUNCH (4):** CypherOneDrive + Teams (gate INTACT — the control group for
+F-13) · CommonValueLibraryCypher · Cyphercard-Enrolment-App. **Do not let the in-flight state harden
+into a claim of completeness.**
 
 ## DELIVERABLES — current, `.md` + branded `.docx`
 `12_Rerun_Delta_2026-09` · `13_Consolidated_Findings_Register_2026-09` (carries §2.1, the
