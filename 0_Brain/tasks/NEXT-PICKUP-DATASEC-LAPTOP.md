@@ -40,29 +40,52 @@ what was tested, and how."* Filed as [[2026-09-07_analysis-records-what-tested-a
 artefact under it is `5_Project_History/2026-09-07_datasec-analysis-record.md`. **Every ticket comment,
 report and handover from here carries those three fields.**
 
-## FLEET — 2 live
-- **`%8` — `Datasec/NexusAI` s44**, booted 19:03, brief mailed + verified + pointer tapped. Its three
-  items: **RD-361 round 3** (Blocker + F-B's one line, nothing wider), **the RD-367 merges**
-  (gate-passed only: `b0dec96`, `920e067`, `2e78c76` — NOT `aea410c` while its gate runs, NOT
-  `1149d1c` which is NO GO), and **filing the RD-362/RD-329 findings** (Wednesday's tracker is
-  read-only, so it cannot).
-  🔴 **A PRECONDITION IT MUST SETTLE BEFORE THE FIRST MERGE, which Wednesday could not:**
-  `deploy-demo.yml` *says* push-to-main only builds in ACR and that the deploy job needs a required
-  reviewer on the `demo` environment, with `CI_DEPLOY_ENABLED` as a master switch — **those are the
-  file's DESIGN STATEMENTS, not measurements.** If the switch is on and the reviewer is not
-  configured, a merge to main deploys with no human gate. It was told to STOP and mail if so.
-  (`deploy.yml` is `workflow_dispatch` only and deploys nowhere — that part is read from the file.)
-- **`%7` — RD-148 gate: RETURNED, NO GO, one BLOCKER.** Pane still up. **RD-148 does NOT merge; the
-  merge list is final at three.** The revoke outcome message is **destroyed ~12 ms after it is
-  written, on every path including token-still-live** — proven in a real browser the gate stood up
-  itself. Cause: `revokeScimToken` calls `setStatus()` then `finally { render() }`, and `render()`
-  wipes the container that holds the only `#rd135-status`. **Every sibling handler in the same file
-  calls `render()` BEFORE `setStatus()` — revoke is the only inversion**, so the fix is the file's own
-  pattern. **The shipped test stayed green because its fixture puts the status node OUTSIDE the
-  container** — and that file's header cites exactly that defect class. Also: F-2 the error path
-  discards the server's *"treat the token as STILL LIVE"* detail; F-3 no confirmation on the most
-  destructive control in a UI with 17 `confirm()` guards for milder ones. **Round 2 is queued to s44
-  AFTER its current three items** (round 1 of 2 spent; scope F-1+F-2 together, plus F-3).
+## FLEET — 1 live (`%8` s44). RD-148 gate returned and its pane is closed-out.
+- **`%8` — `Datasec/NexusAI` s44.** Item 1 (RD-361 round 3) IN PROGRESS — it needs git, not the API,
+  so it is unaffected by the block below. **Item 2 (the merges) is HELD by the seat, correctly.**
+  Items 3 (findings tickets) and 4 (RD-148 round 2) queued behind.
+
+## 🔴🔴 THE MERGES ARE BLOCKED, AND A KAM RULING HAS BEEN FALSIFIED — card `rd104-gh-identity-acceptance-false-premise`
+**s44 could not establish the deploy precondition and stopped rather than guessing. It was right, and
+the trap was in WEDNESDAY'S brief.** I wrote *"if the switch is on and no reviewer, STOP; if the
+switch is unset, proceed"* — **two branches over an instrument that cannot tell "unset" from "cannot
+see".** The seat's `gh` 404s on the repo itself, so **a 404 on `CI_DEPLOY_ENABLED` is byte-identical
+to not-set.** Had it skipped a positive control it would have followed the brief and merged, and if
+the switch is on with no reviewer that is an **ungated deploy to the demo**.
+**RULE NOW IN EVERY BRIEF:** *a precondition stated as a decision rule MUST name its BLIND outcome and
+make it the SAFE one* — not "if X then stop else proceed" but **"if you cannot MEASURE X, that is the
+stop"** — and any instrument answering a question about a system it may not reach carries a
+**positive control on the instrument itself**. Its formulation, adopted verbatim: **"404 on
+`CI_DEPLOY_ENABLED` means BLIND, not UNSET."** Its own sharpest line: *"a negative control alone would
+have passed straight through this; it took the positive one to see the blindness."*
+
+**THE CAUSE — the identity check itself lies.** `gh auth status` → `kamilDatasec`, active.
+`gh api user` → `kamilkreiser`. **Raw `curl` with the same token, bypassing gh entirely →
+`kamilkreiser`.** That account cannot see `datasecau`, so every repo read 404s. Keychain metadata
+(never `-w`) plus `hosts.yml` mtime say a ~2026-09-02 `gh auth login` consolidated the keychain to one
+entry, and **`gh auth status` keeps printing the stale `hosts.yml` LABEL.**
+**So "verify identity at point of use" is NOT sufficient when the verifier is the tool itself** —
+corroborate with an instrument outside it, as s44 did with `curl`.
+
+**KAM'S RD-104 RULING (2026-09-06, option A — accept the residual) RESTS ON TWO NOW-FALSE CLAIMS:**
+(1) *"gh api refuses under the project config dir"* — **it answers**, as the wrong identity, and a
+session has now done so; (2) the residual was scoped to *"hosts.yml ABSENT"* — **it is present.**
+**A ruling whose premise has been falsified is a question again.** Carded with both GitHub settings
+URLs so he can answer in two clicks — he is currently the only party who can see either page.
+**Default HOLD: the three merges stay unmerged, round 3 continues, nothing degrades overnight.**
+
+## ✅ RD-148 VERDICT — NO GO, one BLOCKER. Does NOT merge; the list is final at three.
+The revoke outcome message is **destroyed ~12 ms after it is written, on every path including
+token-still-live** — proven in a real browser the gate stood up itself (port 3099, fresh `DATA_DIR`,
+MutationObserver timeline; server returned 500 and `scimTokenConfigured=true` on the same click).
+Cause: `revokeScimToken` calls `setStatus()` then `finally { render() }`; `render()` wipes the
+container holding the only `#rd135-status`. **Every sibling handler calls `render()` BEFORE
+`setStatus()` — revoke is the only inversion**, so the fix is the file's own pattern.
+**The shipped test stayed green because its fixture puts the status node OUTSIDE the container** — and
+that file's header cites exactly that defect class. F-2: the error path discards the server's *"treat
+the token as STILL LIVE"* detail. F-3: no confirmation on the most destructive control in a UI with
+**17 `confirm()` guards for milder things.** **Round 2 queued to s44 after its current items** (round
+1 of 2 spent; scope F-1+F-2 together, plus F-3).
 
 ## ⚠️ A T9 GOTCHA THAT COST TWO TAPS
 **`cockpit.sh say` resolves a pane by the tmux pane OPTION `@cockpit_name`, NOT by the pane title.**

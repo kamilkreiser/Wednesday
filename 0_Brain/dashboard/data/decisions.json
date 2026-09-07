@@ -5440,5 +5440,42 @@
    "CARD secuura-f5-demo-exposure-probe",
    "CARD secuura-ks968-demo-hash-probe"
   ]
+ },
+ {
+  "id": "rd104-gh-identity-acceptance-false-premise",
+  "client_project": "Datasec/NexusAI",
+  "title": "Your 2026-09-06 acceptance of the gh-identity residual rests on two claims that are now measurably false — and it is blocking three merges you authorised tonight",
+  "bluf": "**OVERRIDE:** the prior-ruling gate matched generic tokens; this is a NEW MEASUREMENT that falsifies the premise of an existing ruling, not a re-raise of it.\n\n**You ruled RD-104 on 2026-09-06 as option A — accept the residual gh-identity behaviour.** The NexusAI agent measured it tonight and **both written claims that acceptance rests on are false:**\n1. *\"gh api refuses under the project config dir, so no session has silently called the API as the wrong identity.\"* **It does not refuse. It answers — as `kamilkreiser`.** A session has now done exactly that: this one, read-only, this evening.\n2. The residual was scoped to *\"when a project's hosts.yml is ABSENT.\"* **Here `hosts.yml` is present** and names `kamilDatasec`, an account that no longer has a keychain credential.\n\n**What it measured:** `gh auth status` → `kamilDatasec`, active. `gh api user` → `kamilkreiser`. **Raw `curl` with the same token, bypassing gh entirely → `kamilkreiser`.** That account cannot see `datasecau` at all, so every repo read returns 404.\n\n**Why it blocks tonight:** your `mergeup` ruling is live and three gate-passed branches are ready. Before the first merge the agent had to establish whether a push to `main` can reach the demo without a human gate. **It cannot see either fact — and a 404 on the variable is byte-identical to 'not set'.** It caught this only because it ran a POSITIVE control (the repo itself → 404) and stopped. **My own brief is at fault too: I gave it two outcomes and the real world had a third.**\n\n**Nothing is degraded and nothing is urgent.** Round 3 on the Blocker continues — it needs git, not the API. This is only about the three merges.",
+  "default_action": "HOLD. The three merges stay unmerged. Round 3 on the Blocker continues - it needs git, not the GitHub API, so it is unaffected. Nothing else is blocked and nothing degrades overnight.",
+  "options": [
+   {
+    "key": "youcheck",
+    "label": "You check the two settings pages yourself - two clicks, links below (recommended)",
+    "detail": "Two pages, two clicks, and it unblocks the merges tonight:\n  ENVIRONMENTS (is there a required reviewer on `demo`?)\n  https://github.com/datasecau/Reporting_Dashboard_Au/settings/environments\n  VARIABLES (is CI_DEPLOY_ENABLED set, and to what?)\n  https://github.com/datasecau/Reporting_Dashboard_Au/settings/variables/actions\nTell me the two answers and the agent merges. You are the only party who can currently see either page — the project's gh identity cannot reach the org at all."
+   },
+   {
+    "key": "relogin",
+    "label": "You re-run gh auth login for this project as the datasecau-capable account, then the agent measures it",
+    "detail": "Fixes the cause rather than this instance, and every future NexusAI session gets a working GitHub API. Costs you a terminal login. The agent then measures both facts itself and merges without another round-trip."
+   },
+   {
+    "key": "mergeblind",
+    "label": "Merge the three without establishing the deploy gate",
+    "detail": "NOT recommended and stated only so the option is on the record. If the switch is on and no reviewer is configured, a merge to main deploys to the demo with no human gate — the precise thing the precondition exists to prevent. Nothing about tonight needs this risk."
+   }
+  ],
+  "recommended": "youcheck",
+  "ts": "2026-09-07T19:11:13.034223+10:00",
+  "status": "open",
+  "ruled_choice": null,
+  "ruled_ts": null,
+  "prior_rulings_overridden": [
+   "2026-08-21 20:06",
+   "2026-09-06 10:52",
+   "2026-09-07 06:42",
+   "CARD secuura-agent-github-identity",
+   "CARD secuura-ks721-identity-commitment",
+   "CARD nexusai-rd104-gh-token-storage"
+  ]
  }
 ]
