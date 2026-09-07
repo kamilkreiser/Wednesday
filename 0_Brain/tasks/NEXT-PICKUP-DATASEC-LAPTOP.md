@@ -28,18 +28,41 @@ naming its own brief (never a non-zero ctx) — and **both have since REPORTED**
 **The general rule this earns, and it is already a lesson:** a handover records a mechanism by its
 **PATH**. Every launch wrapper below is named by path for exactly that reason.
 
-## FLEET — 1 live (`%7` RD-148). RD-329 RETURNED. Gate queue empty.
-- **`%7` — RD-148 (P2-06) SCIM revoke UI, TIER 1, round 1 of 2.**
-  `rd-148-scim-revoke-ui-s43` @ `aea410cc0432638b6a8698ae659197599915c2c2`.
-  Launch: `2_Project_Files/fleet/state/launch_qa_nexusai_rd148.sh` · Brief:
-  `.../briefs/2026-09-07_nexusai-rd148-revoke-ui-tier1.md`. Launched 18:46, rung-5 verified.
-  **Wednesday raised it from tier 2:** +103 lines of new product JS adding a **REVOKE control** — a
-  destructive action on a security surface in front of a human. Questions: does the request name the
-  row the admin is LOOKING at; does the UI report success from an HTTP 200 or from the revocation; is
-  the **SERVER route** guarded. Its brief states honestly that **no drivable browser surface exists**
-  (builder wrapped, `localhost:3001` no listener, deployed hosts out of scope) and tells it to say so
-  and name what a code/DOM pass cannot prove, rather than imply coverage.
-- **`%6` RD-329 — RETURNED, pane still up for inspection.** Verdict below.
+## 🔴 KAM RULED ALL THREE CARDS AT 18:58 — all delivered, none outstanding
+| Card | Ruling | Delivered into |
+|---|---|---|
+| `nexusai-rd361-blocker-vs-nogo-cap` | **`round3`** — one narrow round 3, the Blocker + its guard only | the s44 brief, item 1 |
+| `nexusai-rd367-frozen-trunk` | **`mergeup`** — land finished branches on `main`, **gate-passed only** | the s44 brief, item 2 |
+| `vault-ssh-pointer-heal` | **`clauseandlauncher`** — CLAUDE.md line AND a launcher fix | `Launch_Wednesday.command` + workspace `CLAUDE.md` rule 5 + `doctor.sh` |
+
+**And a STANDING instruction, Kam 18:56:36:** *"where there is analysis, make notes of what was found,
+what was tested, and how."* Filed as [[2026-09-07_analysis-records-what-tested-and-how]]; the first
+artefact under it is `5_Project_History/2026-09-07_datasec-analysis-record.md`. **Every ticket comment,
+report and handover from here carries those three fields.**
+
+## FLEET — 2 live
+- **`%8` — `Datasec/NexusAI` s44**, booted 19:03, brief mailed + verified + pointer tapped. Its three
+  items: **RD-361 round 3** (Blocker + F-B's one line, nothing wider), **the RD-367 merges**
+  (gate-passed only: `b0dec96`, `920e067`, `2e78c76` — NOT `aea410c` while its gate runs, NOT
+  `1149d1c` which is NO GO), and **filing the RD-362/RD-329 findings** (Wednesday's tracker is
+  read-only, so it cannot).
+  🔴 **A PRECONDITION IT MUST SETTLE BEFORE THE FIRST MERGE, which Wednesday could not:**
+  `deploy-demo.yml` *says* push-to-main only builds in ACR and that the deploy job needs a required
+  reviewer on the `demo` environment, with `CI_DEPLOY_ENABLED` as a master switch — **those are the
+  file's DESIGN STATEMENTS, not measurements.** If the switch is on and the reviewer is not
+  configured, a merge to main deploys with no human gate. It was told to STOP and mail if so.
+  (`deploy.yml` is `workflow_dispatch` only and deploys nowhere — that part is read from the file.)
+- **`%7` — QA gate, RD-148 revoke UI, TIER 1.** Still running. **Its verdict gates the fourth merge.**
+
+## ⚠️ A T9 GOTCHA THAT COST TWO TAPS
+**`cockpit.sh say` resolves a pane by the tmux pane OPTION `@cockpit_name`, NOT by the pane title.**
+A pane launched by hand (as the T9 seat must — `launchers.conf` line 9 points at
+`/Volumes/DevMASTER/...`, which is not mounted here) has no such option, and the tap fails with
+*"no pane named ..."* even though the title matches. **Fix after any manual launch:**
+`tmux set-option -p -t <pane> @cockpit_name '<Client/Project>'`.
+**Do NOT rewrite `launchers.conf` to T9 paths** — it is shared, and the Studio seat runs from
+DevMASTER where those paths are correct. Same machine-dependent-absolute-path class as the travel
+pointers; a per-machine conf is the real fix and it is not tonight's job.
 
 ## ✅ RD-329 VERDICT — GO-with-findings. The guard is REAL but NARROW: 6 tamper classes caught, 10 MISSED.
 **It applied Wednesday's standing line exactly** — *a guard that is real but narrow is

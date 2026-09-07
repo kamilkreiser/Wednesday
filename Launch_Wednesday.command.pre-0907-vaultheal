@@ -28,39 +28,6 @@ else
   DEVMASTER_STATE="NOT mounted"
 fi
 
-# ── VAULT SSH POINTER HEAL (Kam ruling 2026-09-07 18:58, card `vault-ssh-pointer-heal`
-# => `clauseandlauncher`) ────────────────────────────────────────────────────────────
-# Every project launcher rewrites its OWN repo's core.sshCommand at each launch, so a
-# drive rename self-heals there. THE SHARED VAULT HAS NO LAUNCHER, so its pointer froze
-# at the old volume name and stayed broken. On 2026-09-07 a NexusAI agent hit it mid-wrap
-# ("Permission denied (publickey)", which reads as "repository does not exist") and had to
-# diagnose and repair it by hand; any session that ran the wrap ritual since the rename
-# either hit it or silently skipped its vault push. The vault is the ONE repo every agent
-# on the drive writes to, so a stale pointer there fails every project at once.
-#
-# This heals it on THIS drive, for every agent, at every Wednesday launch. It is
-# deliberately narrow: it only rewrites when the configured key path does NOT exist and a
-# key IS present at the drive-local path — so a correct pointer is never touched, and a
-# genuinely missing key is left alone to be reported rather than papered over.
-DRIVE_ROOT="$(cd -P "$PROJECT_DIR/.." && pwd)"
-VAULT_LOCAL="$DRIVE_ROOT/Notes (MASTER)"
-VAULT_KEY="$DRIVE_ROOT/Setup and System/keys/claude_obsidian_brain_deploy"
-if [ -d "$VAULT_LOCAL/.git" ]; then
-  VAULT_SSH="$(git -C "$VAULT_LOCAL" config --get core.sshCommand 2>/dev/null || true)"
-  # quoted form first: the key path contains spaces ("Setup and System")
-  VAULT_KEYPATH="$(printf '%s' "$VAULT_SSH" | sed -n 's/.*-i "\([^"]*\)".*/\1/p')"
-  [ -n "$VAULT_KEYPATH" ] || VAULT_KEYPATH="$(printf '%s' "$VAULT_SSH" | sed -n 's/.*-i \([^ ]*\).*/\1/p')"
-  if [ -n "$VAULT_KEYPATH" ] && [ ! -f "$VAULT_KEYPATH" ]; then
-    if [ -f "$VAULT_KEY" ]; then
-      git -C "$VAULT_LOCAL" config core.sshCommand \
-        "ssh -i \"$VAULT_KEY\" -o IdentitiesOnly=yes -o StrictHostKeyChecking=accept-new"
-      echo "  [vault] HEALED core.sshCommand: was -> $VAULT_KEYPATH (missing); now -> $VAULT_KEY"
-    else
-      echo "  [vault] WARNING: core.sshCommand points at $VAULT_KEYPATH (missing) and no key at $VAULT_KEY — vault pushes WILL fail; repair by hand." >&2
-    fi
-  fi
-fi
-
 # ── Sanity checks ──
 if [ ! -f "$PROJECT_DIR/CLAUDE.md" ] || [ ! -d "$BRAIN_DIR" ]; then
   echo "ERROR: expected CLAUDE.md and 0_Brain/ in $PROJECT_DIR"
