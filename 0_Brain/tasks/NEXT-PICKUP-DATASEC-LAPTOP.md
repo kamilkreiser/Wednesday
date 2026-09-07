@@ -34,7 +34,21 @@ CommonValueLibraryCypher (shared lib) · Cyphercard-Enrolment-App (writes the id
 **`Datasec/NexusAI` `%2`** — working its 3-item no-gate queue (RD-242 closure condition, RD-362/363,
 the 102 category-1 tickets). **Do not close that pane.**
 
-**⚠️ THE RE-GATE ON RD-361 IS QUEUED, NOT DONE — START IT AS SOON AS A DELTA AGENT FINISHES.**
+**⚠️ TWO GATES ARE QUEUED, NOT DONE — START THEM AS DELTA AGENTS FREE SLOTS. This is the single
+most important thing on this list.**
+
+**GATE 2 (after RD-361): SEC-07 / RD-363 @ `b0dec96`, branch `rd-363-keyvault-purge-protection-s43`,
+TIER 2.** `softDeleteRetentionInDays 7→90`, `enablePurgeProtection absent→true`. This is the item
+trivy MISSED and a reviewer caught. Press on: the assertion must be on the TEMPLATE, not a deployment
+(purge protection is irreversible once set, so it cannot be tested by rollback in a real
+subscription); that the `DOCUMENTED NON-ASSERTION` cell actually fails when someone adds `Deny`; and
+that 90 is intended rather than a default.
+**The agent deliberately did NOT add `networkAcls defaultAction: Deny` — correctly.** The Container
+App resolves secrets via `keyVaultUrl` with the UAI at deploy time and on every revision
+(`mainTemplate.json:548`, `:559`), so a vault firewall without a private endpoint bricks every
+customer deployment. It pinned that reason in a named test cell. **Do not "fix" it.**
+
+**GATE 1 (first): RD-361 round 2.**
 Round 2 is built at `1149d1c` (`npm run verify` 2174/2174). It is **round 2 of 2 under Kam's cap** —
 a NO GO ships what is closed and tickets the residue; no round 3 without his word.
 The re-gate must press on: F-1 driven at the wire incl. the **wiped-volume case the agent itself
