@@ -5812,5 +5812,49 @@
    "CARD hpsm-41-telemetry-cr",
    "CARD secuura-admin-credential-rotation-183-files"
   ]
+ },
+ {
+  "id": "wed-ledger-archive-has-no-trigger",
+  "client_project": "WED",
+  "title": "The ledger archive has no trigger — your 3c cadence is fine, but nothing fires it",
+  "bluf": "WHY THIS IS NOT YOUR 09-04 RULING AGAIN — I read what that fix actually shipped before re-raising it. Your 09-04 card wed-ledger-boot-cost set a CADENCE (~3 days) and a PLACE (CLAUDE.md rule 3c, under 'Session end'). It is complete over the cadence and silent about what FIRES it. This card is about the silence, not the cadence. MEASURED THIS BOOT, not recalled: _ledger.md is 398,606 B / 206 rows; the by-tier boot digest is 293,380 B. The ledger is the LARGER of the two again, and it grew about 20 KB in the 18 hours since the last seat raised this. The 09-07 seat blamed the row rate. That is the second cause. The first, measured three ways: grep over wednesday_rotate.sh for ledger/archive/wrap returns NOTHING; doctor.sh has NO ledger check (its three 'ledger' hits are comments citing rows, not the file); the launcher's only mention is the line telling each seat to read it WHOLE. So 3c is a SESSION-END step, and a seat that ROTATES never runs the session-end ritual. Seats now rotate three to five times a day and genuinely wrap almost never — so 3c fires approximately never, and it has nothing to do with how fast rows arrive. Rows dated 2026-09-05 (38 rows, 58,508 B) are archive-eligible under 3c exactly as you wrote it, right now. I did NOT move them: writing _ledger.md from this laptop seat while the Studio seat holds it is the shared-file race that nearly deleted four of your rulings on 09-07. A correct rule the only awake seat cannot execute is the finding.",
+  "default_action": "DEFAULT IF YOU SAY NOTHING: nothing moves. Seats keep reading the digest whole and the ledger as row headlines only, and keep disclosing that in the boot report — which is what the last two boots did. Nothing degrades while this waits; the only cost is the repetition.",
+  "options": [
+   {
+    "key": "trigger",
+    "label": "Add the doctor.sh trigger, leave your cadence alone (Recommended)",
+    "detail": "doctor.sh warns at every boot when _ledger.md holds rows older than your ~3-day cadence, naming the row count and the size. The archive stops depending on a ritual that no longer runs. Your cadence is untouched — this only makes it fire. Exercised both ways before arming."
+   },
+   {
+    "key": "triggerandcadence",
+    "label": "Add the trigger AND shorten the cadence to ~1 day",
+    "detail": "Same doctor check, plus the window moves from ~3 days to ~1. Costs nothing at boot (the archive is read on demand) and holds the file near 130 KB instead of 400. This one DOES change your cadence, which is why it is separate."
+   },
+   {
+    "key": "digest",
+    "label": "Generate a _ledger_digest on the boot_digest.py pattern",
+    "detail": "Give the ledger the WED-139 treatment: a generated headline digest read at boot, full rows on demand. More build than the other two, and it does not stop the file growing."
+   },
+   {
+    "key": "leave",
+    "label": "Leave it — seats keep reading headlines only and disclosing it",
+    "detail": "Zero work. Every boot from here makes the same judgement under load and discloses the same deviation, and the file keeps growing."
+   }
+  ],
+  "recommended": "trigger",
+  "ts": "2026-09-08T00:33:06.159159+10:00",
+  "status": "open",
+  "ruled_choice": null,
+  "ruled_ts": null,
+  "prior_rulings_overridden": [
+   "2026-08-31 11:57",
+   "2026-08-31 18:49",
+   "2026-09-04 07:07",
+   "2026-09-04 08:32",
+   "CARD wed-ledger-archive",
+   "CARD secuura-archive-tested-not-deployed",
+   "CARD wed-ledger-boot-cost",
+   "CARD secuura-archive-uat-tickets-vs-peters-test-list"
+  ]
  }
 ]

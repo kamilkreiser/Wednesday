@@ -1,0 +1,73 @@
+ultrathink
+
+You are the cross-project QA agent, working from
+/Volumes/KK_T9_External_HDD/!CODING/Testing Agent MAIN
+
+TIER 2 GATE — Datasec/NexusAI, RD-323 DELTA, branch rd-323-scheduler-failure-vocabulary-s45 @ 1b6bedb.
+YOUR SUBJECT IS THE DELTA ONLY: 99fb518..1b6bedb. One commit, three files, 108 insertions.
+Everything at or below 99fb518 already has a GO-with-findings from the 2026-09-07 gate - do not
+re-gate it. NOT main (frozen, ~251 behind). Nothing merged, nothing deployed. You may not merge.
+
+YOUR BRIEF — read it first, in full, and follow it exactly:
+/Volumes/KK_T9_External_HDD/WEDNESDAY/2_Project_Files/fleet/qa-agent/briefs/2026-09-08_nexusai-rd323-delta-tier2.md
+
+WHY THIS GATE EXISTS: RD-323's GO-with-findings was taken on 99fb518. The fix for that gate's own
+Major (RD-323-F-1) was landed WITH the change on Wednesday's instruction, so the head moved and NO
+VERDICT NOW DESCRIBES WHAT WOULD SHIP. That staleness is Wednesday's, not the builder's - it did what
+it was told and flagged the consequence itself. Round 1 of this class; the two-NO-GO cap is not near.
+
+THE MECHANISM: p1 was p1s.length, and p1s filters verdict.startsWith('P1'), which INCLUDES
+'P1-degraded' - so p1 >= degraded always, and _failed() failed the tick on a target that merely
+answered DEGRADED, four lines below its own comment promising the opposite. The fix is
+const escalated = p1s.filter(r => r.verdict !== 'P1-degraded').
+
+THE THREE THINGS THAT DECIDE THIS GATE:
+
+1. THE FRAME, and it is the highest-value check. The commit claims p1 "is read in exactly two places
+(this _failed and the suite), so the change is contained; checked rather than assumed." That is a
+completeness claim with NO FRAME ON IT, and everything rests on it. Re-derive it yourself and NAME THE
+FRAME you derived it over. result.p1, a destructured p1, and the object's p1 key travel under
+different spellings - a grep for one finds a fraction. Look at getHealthSnapshot, the alert-email
+path, any API or dashboard surface rendering a sweep result, persisted audit or metrics rows, and the
+FRONTEND. A reader outside backend/ is the exact shape this fleet has been caught by three times this
+week.
+
+2. THE CARVE-OUT IS A STRING EQUALITY. It excludes exactly one literal, 'P1-degraded'. Enumerate every
+P1-* verdict runOnce can actually produce - read the class, do not infer it from the tests - and
+confirm every one that SHOULD escalate still does, and that 'P1-degraded' is spelled identically at the
+producing site and the filtering site. A one-string carve-out is correct only over an enumerated
+vocabulary, and the builder did not enumerate it.
+
+3. A DOCBLOCK PROMISE THAT MAY HAVE NO CELL BEHIND IT. The docblock and the commit both say a degraded
+target "still gets its own ok:false p1-detected audit row AND STILL TRIGGERS THE ALERT EMAIL - only the
+tick verdict changes." The new cell asserts the audit row. Wednesday read the test and could not find
+an assertion for the alert email. Establish whether one exists. DO NOT TAKE WEDNESDAY'S READING AS THE
+FINDING - re-read it and report what you find, including that Wednesday was wrong if Wednesday was
+wrong.
+
+WHAT IS GOOD HERE, so you calibrate rather than hunt: told to "rewrite the assertion against a shape
+runOnce actually emits", the builder did the stronger thing and stopped writing a shape at all - the
+certifying cell DRIVES the real runOnce against a real local stub and feeds whatever comes out into
+the real _failed. Its words: "a hand-written shape cannot notice it is impossible; a driven one cannot
+be written for a state the product cannot reach." It also added a negative control - an unreachable
+target, same instrument, opposite answer - because the carve-out must NARROW the verdict, not remove
+it. Verify both cells genuinely drive the product, and mutate the fix to prove the control reddens for
+the intended reason.
+
+ALSO: an arm was DELETED from the old cell (the {degraded:1, p1:0} literal). Confirm the builder's
+stated reason against the code AT 99fb518 rather than accepting it, and confirm the new driven cell
+covers what the deleted arm protected. Counts 2171 -> 2173: re-derive by name-diffing cells, never by
+trusting the total, and confirm the arithmetic matches what the diff does.
+
+EVIDENCE: positive control opening AND closing; every mutation asserted PRESENT before its result is
+read and restored after; matched pairs so exactly one variable moves; READ EVERY RED AND SAY WHY IT IS
+RED - a parse error, a throw, or a pre-existing condition answering first is not a detection; NAME THE
+FRAME in any completeness claim; FOUND / TESTED / HOW with controls named under HOW; state what you did
+NOT test. Counts by name-diffing cells, never a total.
+
+Stop any server you start and prove the port reads 000 - this change starts two. No az, no registry,
+no demo, no staging. Work in your own clone or worktree.
+
+Report to Wednesday. Write the report under projects/nexusai/reports/2026-09-08-rd323-delta-tier2/ and
+NAME THAT PATH IN YOUR MAIL - a verdict mail on this fleet arrived with a zero-byte body last night,
+and the report on disk is what saved it.
