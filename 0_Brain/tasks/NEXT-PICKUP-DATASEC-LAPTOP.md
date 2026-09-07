@@ -150,7 +150,23 @@ RD-322, RD-323, RD-370, RD-371, RD-372, RD-373 filed or done. **Board 287** (S45
 own 289 double-count).
 
 ## ⚠️ TRAPS — the first two FIRED tonight, repeatedly
-1. **🔴 GHOST TEXT SEVEN TIMES, ALL AT WRAPPED PANES**, and `good night` **twice at the same NexusAI
+0. **🔴🔴 `C-u` DOES NOT CLEAR A RENDERED SUGGESTION — measured tonight.** A ghost line is DISPLAY
+   text, not typed input, so `send-keys C-u` leaves it exactly where it was (the detector still read it
+   afterwards). **What displaces it is real input: the pointer tap.** Order that works: mail → verify
+   at destination → **tap** → re-run the detector to confirm `prompt empty`. **This is the concrete
+   reason the standing rule says CLOSE a wrapped pane rather than clear it — on a wrapped pane there is
+   no tap to send, so closing is the only thing that removes the line.**
+0b. **🔴 THE NINTH GHOST WAS THE DANGEROUS ONE, because it was RIGHT-LOOKING.** At S46's prompt:
+   *"land RD-375 on RD-322 before merge."* **RD-375 is REAL** (S46 filed it for the RD-322 polish),
+   the findings are real, and landing polish before a merge is ordinarily sound. **It is wrong here for
+   one reason visible only from the coordinator's seat: `rd-322 @ 432617a` is the ONLY head in the set
+   with an unqualified GO, and moving it would cost that verdict for two Polish fixes that block
+   nothing.** The other eight proposed work that was merely out of scope; this one proposed work that
+   was in scope, sensible, and would have quietly spent the only thing ready to ship.
+   **RULE, mailed to S46 and standing: a branch carrying a GO is FROZEN until it merges or Wednesday
+   says otherwise. Polish and follow-ups go on a NEW branch cut from the GO'd head. The verdict is the
+   asset; the branch is just where it lives.**
+1. **🔴 GHOST TEXT NINE TIMES**, eight at wrapped panes, and `good night` **twice at the same NexusAI
    pane** (boot, and again at 23:2x). Others: *"check the Bearer scheme defect in SharePoint, MailFlow
    and UniversalPrint"* (already reviewed, outside the brief) · *"Send Kam a one-paragraph summary"* ·
    *"file a fix-backlog entry for F-B"* · *"file the N-1 ticket details for Wednesday"* · *"file G-1 and
