@@ -54,6 +54,15 @@ header a:hover { color:var(--text-primary); }
 .ackline.done, .ackline.seen { color:var(--series-3); }
 .ackline.actioning, .ackline.action_requested { color:var(--series-2); }
 #empty { color:var(--text-muted); font-size:13px; padding:24px 0; }
+/* project filter (Kam, 2026-09-07): which projects' Wednesday replies THIS browser shows */
+header #projfilter { display:flex; align-items:center; gap:6px; flex-wrap:wrap;
+  padding-top:0; padding-bottom:8px; font-size:11.5px; color:var(--text-muted); }
+.pftog { background:var(--surface-2); border:1px solid var(--line); border-radius:999px;
+  color:var(--text-muted); font:inherit; font-size:11px; padding:1px 9px; cursor:pointer; opacity:.7; }
+.pftog:hover { color:var(--text-primary); }
+.pftog.on { color:var(--series-3); border-color:var(--series-3); opacity:1; }
+.msg .seat { font-size:10.5px; color:var(--text-muted); margin-left:6px;
+  border:1px solid var(--line); border-radius:4px; padding:0 4px; }
 footer { flex:none; border-top:1px solid var(--line); background:var(--surface-1); }
 footer .col { display:flex; gap:8px; padding-top:10px; padding-bottom:
   calc(12px + env(safe-area-inset-bottom, 0px)); }
@@ -69,7 +78,8 @@ footer .col { display:flex; gap:8px; padding-top:10px; padding-bottom:
  <a href="/">&larr; dashboard</a>
  <button id="autoplay" title="speak newly-arriving Wednesday replies aloud">&#128266; auto-play replies</button>
  <button id="stopvoice" title="stop the voice that is speaking now (autoplay stays on)">&#9209; stop</button>
- <span id="live">&#9675; connecting&hellip;</span></div></header>
+ <span id="live">&#9675; connecting&hellip;</span></div>
+ <div class="col" id="projfilter"></div></header>
 <div id="log"><div class="col" id="msgs"><p id="empty">no messages yet</p></div></div>
 <footer><div class="col">
  <input id="text" type="text" maxlength="2000" placeholder="message Wednesday&hellip;" autocomplete="off">
@@ -104,14 +114,50 @@ function mdLite(s) {
 function nearBottom() {
   return log.scrollHeight - log.scrollTop - log.clientHeight < 80;
 }
+// ── project filter (Kam, 2026-09-07 11:12): each browser picks which projects'
+// Wednesday replies it DISPLAYS and AUTO-SPEAKS. Kam's own messages always show.
+// "WED" is the only default-on toggle. State is localStorage — per machine, which
+// is exactly the laptop-vs-Studio split Kam asked for; the server holds nothing.
+// Entries with no project field (all history before today) read as "WED".
+const PF_KEY = "wed_chat_projects";
+const pfEl = document.getElementById("projfilter");
+let pfSel = {};
+try { pfSel = JSON.parse(localStorage.getItem(PF_KEY) || "{}") || {}; } catch (e) { pfSel = {}; }
+let lastMsgs = [];
+function projOf(m) { return m.project || "WED"; }
+function projOn(name) { return name in pfSel ? !!pfSel[name] : name === "WED"; }
+function visible(m) { return m.role === "kam" || projOn(projOf(m)); }
+function seatShort(s) { return String(s || "").split(".")[0]; }
+function renderFilter(msgs) {
+  const names = new Set(["WED"]);
+  for (const m of msgs) if (m.role !== "kam") names.add(projOf(m));
+  const sorted = [...names].sort((a, b) => a === "WED" ? -1 : b === "WED" ? 1 : a.localeCompare(b));
+  pfEl.innerHTML = "";
+  pfEl.append("show replies from: ");
+  for (const n of sorted) {
+    const b = document.createElement("button"); b.type = "button";
+    b.className = "pftog" + (projOn(n) ? " on" : ""); b.textContent = n;
+    b.title = (projOn(n) ? "hide" : "show") + " Wednesday's " + n + " replies on this browser (not spoken while hidden)";
+    b.addEventListener("click", () => {
+      pfSel[n] = !projOn(n);
+      try { localStorage.setItem(PF_KEY, JSON.stringify(pfSel)); } catch (e) {}
+      render(lastMsgs);
+    });
+    pfEl.appendChild(b);
+  }
+}
 function render(msgs) {
   const stick = nearBottom() || lastSig === null;
+  lastMsgs = msgs;
+  renderFilter(msgs);
+  const shown = msgs.filter(visible);
   msgsEl.innerHTML = "";
-  if (!msgs.length) {
-    const p = document.createElement("p"); p.id = "empty"; p.textContent = "no messages yet";
+  if (!shown.length) {
+    const p = document.createElement("p"); p.id = "empty";
+    p.textContent = msgs.length ? "no messages for the selected projects" : "no messages yet";
     msgsEl.appendChild(p);
   }
-  for (const m of msgs) {
+  for (const m of shown) {
     const role = m.role === "kam" ? "kam" : "wednesday";
     const div = document.createElement("div"); div.className = "msg " + role;
     const meta = document.createElement("div"); meta.className = "meta";
@@ -123,6 +169,13 @@ function render(msgs) {
       pb.textContent = "▶"; pb.title = "speak this message aloud";
       pb.addEventListener("click", () => speak(m.ts, pb));
       meta.appendChild(pb);
+    }
+    if (role === "wednesday" && (m.seat || m.project)) {
+      // seat indicator (Kam, 2026-09-07): which machine wrote it, and for which project
+      const se = document.createElement("span"); se.className = "seat";
+      se.textContent = [seatShort(m.seat), m.project].filter(Boolean).join(" · ");
+      se.title = "written by seat " + (m.seat || "unknown") + " · project " + projOf(m);
+      meta.appendChild(se);
     }
     const body = document.createElement("div"); body.className = "body";
     if (role === "wednesday") body.innerHTML = mdLite(m.text || "");
@@ -191,7 +244,9 @@ async function poll(force) {
       // several at once would overlap-kill each other — speak only the latest
       // auto:true → the server dedups per-message, so a second open window
       // never restarts the same speech (Kam's two-window double-fire, 08-21)
-      if (autoplayOn && latestNew) speak(latestNew.ts, null, true);
+      // filter gate (2026-09-07): a reply hidden by the project filter is never
+      // auto-spoken here. The server's seat gate stays as the second net.
+      if (autoplayOn && latestNew && visible(latestNew)) speak(latestNew.ts, null, true);
     }
     const sig = JSON.stringify(msgs);
     if (!force && sig === lastSig) return;

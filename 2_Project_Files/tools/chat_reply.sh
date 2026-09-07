@@ -7,13 +7,23 @@
 # to Kam are mirrored here (short form, pointers to documents for anything
 # long). Fleet mechanics NEVER go through this script.
 #
-# Usage: chat_reply.sh "message text"
-# Appends {role: "wednesday", ts, text} to 0_Brain/dashboard/data/chat_log.json
-# atomically (write temp + mv). Never discards stderr. Refuses empty input.
+# Usage: chat_reply.sh [--project <Datasec|Secuura|WED>] "message text"
+# Appends {role: "wednesday", seat, project, ts, text} to
+# 0_Brain/dashboard/data/chat_log.json atomically (write temp + mv). Never
+# discards stderr. Refuses empty input.
+#
+# --project (Kam, 2026-09-07 11:12): tags the entry so each dashboard can choose
+# which project's replies it displays / auto-speaks (per-browser filter, WED on
+# by default). Omitted → "WED"; entries with no field at all read as "WED".
 set -u
 SELF_DIR="$(cd -P "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 PROJECT_DIR="$(cd -P "$SELF_DIR/../.." && pwd)"
 CHAT="$PROJECT_DIR/0_Brain/dashboard/data/chat_log.json"
+PROJECT="WED"
+if [ "${1:-}" = "--project" ]; then
+  [ -n "${2:-}" ] || { echo "chat_reply: --project needs a value (Datasec|Secuura|WED)" >&2; exit 2; }
+  PROJECT="$2"; shift 2
+fi
 MSG="${1:-}"
 [ -n "$MSG" ] || { echo "chat_reply: empty message refused" >&2; exit 2; }
 [ -f "$CHAT" ] || { echo "chat_reply: no chat log at $CHAT" >&2; exit 1; }
@@ -31,7 +41,7 @@ if [ -f "$GATE" ]; then
   fi
   rm -f "$_cg_tmp"
 fi
-CHAT_FILE="$CHAT" python3 - "$MSG" <<'PYEOF'
+CHAT_FILE="$CHAT" CHAT_PROJECT="$PROJECT" python3 - "$MSG" <<'PYEOF'
 import json, os, sys, datetime, tempfile
 path = os.environ["CHAT_FILE"]
 msg = sys.argv[1]
@@ -39,6 +49,8 @@ with open(path) as f:
     log = json.load(f)
 log.append({
     "role": "wednesday",
+    "seat": __import__("socket").gethostname(),  # 2026-09-07: which machine wrote this (autoplay scope)
+    "project": os.environ.get("CHAT_PROJECT") or "WED",  # 2026-09-07: per-dashboard display filter
     "ts": datetime.datetime.now(datetime.timezone.utc).astimezone().isoformat(),
     "text": msg,
 })
