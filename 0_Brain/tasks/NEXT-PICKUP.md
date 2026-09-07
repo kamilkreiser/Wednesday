@@ -2,7 +2,7 @@
 date: 2026-09-07
 type: pickup
 scope: SECUURA + Wednesday's own work. Datasec belongs to the LAPTOP seat — do not touch its threads.
-source: replaced WHOLESALE at 21:0x by the 20:12 seat
+source: replaced WHOLESALE at 21:0x by the 20:12 seat; state block kept current at 21:2x
 status: live
 supersede: replace this file wholesale at the next pickup; do not append
 ---
@@ -29,7 +29,17 @@ turn ([[2026-09-03_a-pane-close-is-a-session-kill]]).
    **1 → a rotation happened → INCIDENT** (login resolves by `email_lookup_hash`; those rows cannot
    sign in by address). **0 → benign, KS-968 moot on that box.** **A THIRD QUERY IS OUTSIDE HIS
    WORDS** — an ambiguous result is a finding to report, never a licence to widen.
-3. **#892 ROUND 4 — Kam ruled `round4` at 20:55.** F1-A (quarantine on EVERY non-publishing outcome,
+3. **#892 ROUND 4 — PUSHED `1e31c80b9`, UNDER GATE at `%168`** (Kam ruled `round4` at 20:55).
+   **The binding condition is MET and proved**: with the drift-arm call removed the new call-site cell
+   reds, 1 of 10, and it is the right cell. The gate is told to verify the **identity** of the failing
+   cell and the **EXECUTED-cell count** under each tamper — a cell that reds by failing to build
+   proves nothing. **KS-977 filed (F2-A); F1-C is a comment on KS-973.**
+4. **#889's THREE TICKETS — F-A, F-B, F-C — COMMISSIONED 11:24Z, NOT YET CONFIRMED FILED.**
+   **Measured on the board: they were NEVER filed** (newest was KS-977 @ 11:10). **F-B carries a
+   DEPLOY-BLOCKER line that must sit ON the ticket** — #889 is merged and that ruling otherwise lives
+   only in a mail. **CHECK THE BOARD, do not assume.** KS-811 to be read first — the gate calls F-B
+   its gap class.
+   **The original scope line, for reference —** F1-A (quarantine on EVERY non-publishing outcome,
    not just drift) + the DEGRADED banner must stop naming what the suite will run as + **THE
    CALL-SITE CELL, which is not optional** + the throw-arm regression cell with a clean-tree control.
    **F2-A and F1-C are NOT in this round. THERE IS NO ROUND 5** — a NO GO comes back to Kam.
