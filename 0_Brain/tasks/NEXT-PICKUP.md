@@ -92,6 +92,12 @@ The other ten are rewritten continuously by the dashboard server, so they change
 the `pull`, and the autostash reapply then conflicts on all ten **every single time** — leaving
 conflict markers in files the dashboard reads. **Leaving them uncommitted costs nothing: they are
 regenerated.** Staging them by directory is what turned a routine sync into a repeated repair.
+**AND THAT IS ONLY HALF THE FIX — learned 19:47.** Not staging them does not help, because
+`rebase.autoStash` captures the whole dirty working tree and its REAPPLY conflicts on the same ten.
+**So discard their local churn BEFORE pulling:**
+`git -C <wed> checkout -- 0_Brain/dashboard/data/{agentmail,brain_state,datasec_calendar,linear_personal,linear_wed,news,parkinglot,personal_calendar,secuura_error,tickets}.json`
+**then** pull. They are regenerated within seconds, so discarding costs nothing and the autostash
+then has nothing to fight over. **Never discard `chat_log.json` or `decisions.json` this way.**
 Equal counts prove nothing — both `chat_log` sides once read 1630 and each held a message the other
 lacked.
 
