@@ -7,7 +7,7 @@ status: live
 supersede: replace wholesale at the next pickup; do not append
 ---
 
-# NEXT PICKUP — Datasec laptop seat, 17:4x AEST Monday 2026-09-07
+# NEXT PICKUP — Datasec laptop seat, 18:0x AEST Monday 2026-09-07
 
 ## 🔴 THE CORRECTION THIS SEAT MADE TO THE HANDOVER IT INHERITED
 The 17:0x version said **"RD-361 round-2 TIER-1 RE-GATE running (launched 17:0x)"** and set a
@@ -22,30 +22,62 @@ that an absence was not confused with a blind instrument:
 Two readings survive and this seat cannot discriminate between them from disk: an in-process gate
 that died with its author's rotation (leaving no pane, wrapper or brief), or a recorded intention.
 **The operative fact is the same and it is the only one asserted anywhere: no gate had run and no
-gate output existed.** Both gates are genuinely running now (below), each verified by its pane
-naming its own brief — **rung 5, never a non-zero ctx.**
+gate output existed.** Both gates were then launched for real, each verified at rung 5 by its pane
+naming its own brief (never a non-zero ctx) — and **both have since REPORTED**; verdicts below.
 
 **The general rule this earns, and it is already a lesson:** a handover records a mechanism by its
 **PATH**. Every launch wrapper below is named by path for exactly that reason.
 
-## FLEET — 3 live, AT THE CAP (max 3 concurrent; the SESSION rate is what broke at 11:17, not the weekly budget)
-- **`Datasec/NexusAI` `%2`** — the builder. Working **RD-329** (unauthenticated `/api/health` on
-  `nexusai-staging` serving workspace IDs and component status). No gate needed. **Do not close it.**
-- **`%3` — QA gate, RD-361 round 2, TIER 1, round 2 of 2 under Kam's cap.**
-  Branch `rd-361-fail-closed-unknown-s43` @ `1149d1c332b6ebaac68393ba0afdeb8c65ebdd29`.
-  Launch: `2_Project_Files/fleet/state/launch_qa_nexusai_rd361_r2.sh` (`--check` for guards).
-  Brief: `2_Project_Files/fleet/qa-agent/briefs/2026-09-07_nexusai-rd361-r2-tier1.md`.
-- **`%4` — QA gate, RD-363 / SEC-07, TIER 1 (UPGRADED from 2), round 1 of 2.**
-  Branch `rd-363-keyvault-purge-protection-s43` @ `b0dec96fc1f498b309cee692b6441ed9e9b0b043`.
-  Launch: `2_Project_Files/fleet/state/launch_qa_nexusai_rd363_sec07.sh`.
-  Brief: `2_Project_Files/fleet/qa-agent/briefs/2026-09-07_nexusai-rd363-sec07-tier1.md`.
+## FLEET — 1 live (both gates RETURNED and their panes are closed-out; cap is 3)
+- **`Datasec/NexusAI` `%2`** — the builder, ~65% ctx (watcher checkpoint fired; it has room, it is NOT
+  rotating). Shipped **RD-329 @ `2e78c76`**. Next: file the platform-residue ticket (below). **Do not
+  close that pane.**
+- **`%3` / `%4`** — the two QA gates, both REPORTED. Panes left up for inspection; before closing
+  either, run `2_Project_Files/fleet/cockpit/pane_close.sh` discipline (tty on the listener AND its
+  parent), and re-curl anything the handover names as up.
 
-**GATE QUEUE AFTER THESE TWO, in order:**
-1. **RD-362 @ `920e067`** (`rd-362-pentest-report-exposure-s43`) — **MOVED UP ahead of RD-148 by this
-   seat.** It closes a live exposure: the pen-test report carrying the SSH-key recovery commit and
-   blob path shipped inside the customer image twice over. **Exposure outranks queue age.** The
-   builder was told and invited to disagree.
-2. **RD-148 @ `aea410c`** (`rd-148-scim-revoke-ui-s43`, 2164/2164).
+## 🔴 BOTH GATE VERDICTS — the first one is a decision on Kam's desk
+- **RD-361 round 2 @ `1149d1c`, tier 1 → NO GO.** One **Blocker**, two Majors.
+  **F-A (Blocker):** the sentinel is written on boot 1; `authEnforced` only when the admin finishes
+  setup; **any restart in that window permanently bricks a fresh deployment.** Measured at the wire:
+  503 on every route *including* `POST /api/auth/enforce`, the one route that could write the key.
+  Only exit is hand-editing `settings.json` on the customer's volume. Control: an empty volume serves
+  200. Fail-closed, so **not** a leak — an availability blocker on a Marketplace offer's first-run path.
+  **F-B (Major):** flipping the sole producer of `dataDirFallbackActive` (`jsonStorage.js:847`) leaves
+  `auth-gate-fail-closed.test.js` **20/20 green** — the case-D fix is unguarded. One-line remedy.
+  **F-C (Major): RESOLVED by Wednesday from the board — see below.**
+  🔴 **ROUND 3 IS KAM'S** (round 2 of 2 under his 2026-09-05 cap). Carded as
+  `nexusai-rd361-blocker-vs-nogo-cap`, recommendation `round3` (Blocker + F-B only), **default HOLD**.
+  **Do not start the fix. Wednesday will not merge it — the gate did not pass.**
+- **RD-363 / SEC-07 @ `b0dec96`, tier 1 → GO-with-findings**, with a **HARD BLOCK on publishing any
+  offer version** until its F-2 (redeploy-over-an-existing-vault; purge protection landing
+  irreversibly on existing customers' vaults) is resolved. Publishing an offer is Kam's class anyway.
+  **Wednesday is HOLDING the merge too, and not because of the change:** the target is `main`, which
+  RD-367 says is frozen 247 commits behind, so merging one branch into it is the first move of the
+  unruled branching decision. **RD-363 is not in question — where it lands is.**
+
+## F-C RESOLVED — the code comment AND Wednesday's brief pointed at the wrong ticket
+`authEnforcement.js:112` says the durable fix is *"SEC-01 remediation 3, tracked on RD-363."*
+Wednesday queried Jira read-only (standing grant), with a control:
+
+    RD-363 = SEC-07/08/11 — Marketplace deployment TEMPLATE hardening   [Testing, blocker/horizon-1/security]
+    RD-361 = SEC-01/05/06/09/10/15 — the auth gate fails open            [Testing]
+
+**SEC-01 belongs to RD-361 itself.** Residue search: `text ~ authConfigs` → 2 hits (those two tickets),
+`text ~ SEC-01` → 3, **control** `text ~ "Key Vault"` → 15 — all under the 20 limit, so untruncated.
+**The platform-layer residue has NO ticket of its own.** Commissioned to the builder as ONE ticket
+(Kam's 13:23 aggregation rule) stating what was searched, plus a repoint of the code comment.
+**Wednesday's own RD-361 brief §6 carried the same wrong pointer, taken from the builder's mail
+without checking it** — owned in the mail, ledgered.
+
+## GATE QUEUE — 2 remaining, fire as slots free
+1. **RD-362 @ `920e067`** — carry the builder's own framing into the brief: **the redaction removes the
+   recipe; the blobs stay reachable in git history until RD-55 lands.** The gate must not credit more
+   closure than shipped.
+2. **RD-329 @ `2e78c76`** — the allow-list guard. Note: **no red-proof exists and the builder said so**;
+   the code has been correct since 2026-04-25, so it passes at the base by construction. Its
+   discriminator is the control cell.
+3. **RD-148 @ `aea410c`**.
 
 ## ⚠️ TRAPS — the first is NEW and will cost you 20 minutes if you do not know it
 1. **🔴 A T9 QA LAUNCH HITS A FOLDER-TRUST DIALOG AND NO GUARD CAN SEE IT.** Every wrapper written
@@ -70,20 +102,32 @@ naming its own brief — **rung 5, never a non-zero ctx.**
    wrapper, so this seat did not move them mid-flight — **but the move to a tracked path is owed**
    and should not be done while a gate is live on the mechanism.
 
-## 🔴 AN OPEN QUESTION PUT TO THE BUILDER, AND IT MAY MATTER MORE THAN ANY GATE
-Measured read-only in the builder's checkout:
+## ✅ ANSWERED — `main` IS the integration branch, and the 247 commits are the FINDING (RD-367)
+This was raised as an open question at 17:2x and the builder settled it in three minutes.
 
-    origin/main                            a9a8cb6e3fc62b8c08e1f3aadecb08519f1f6ddc
-    rd-361-fail-closed-unknown-s43         249 commits AHEAD of main
-    rd-363-keyvault-purge-protection-s43   248 commits AHEAD of main
+    origin/main                            a9a8cb6e…  frozen 2026-09-01
+    rd-361 / rd-363                        249 / 248 commits AHEAD of main
     RD-363's OWN change (vs its parent)    3 files, +118 / -5
     RD-363 diffed against main             254 files, +59,000 / -1,034
 
-**What is NexusAI's actual integration branch?** If it is `main`, `main` is 248 commits behind the
-work and the word "base" in every gate brief is close to meaningless. **Neither running gate depends
-on the answer** — both are scoped to the right baseline (`e4d9147` → `1149d1c` for RD-361; the parent
-`9546da5` for RD-363), and both were told explicitly **not** to diff against `main`.
-NexusAI's mainline is **`main`, NOT `develop`** — do not carry the Secuura convention across.
+**`main` is the trunk by every mechanical definition** — 0 behind / 247 ahead, a strict ancestor,
+and its history is merge commits (RD-135, RD-136/137/138, RD-121, RD-116). It simply has not been
+fed since 1 September. **Filed as RD-367 (High, needs-decision): it needs a branching-model ruling,
+not a code change.** There is **no documented branching model anywhere** in the repo (searched
+JIRA.md, HISTORY.md, README.md, DEPLOYMENT_GUIDE.md, docs/runbooks/).
+
+**Three consequences, separate failures:** (1) `gitleaks.yml` is `main`-only, so **six days of
+commits are unscanned** — now the SOLE live explanation for the F-16 credential surviving;
+(2) `deploy-demo.yml` deploys from `main`, so nothing built since 09-01 is deployable by the normal
+path; (3) `npm-audit.yml` (`branches: ['**']`) is the only workflow that runs on the campaign branch.
+
+**Standing line for every NexusAI gate brief, adopted verbatim from the builder:**
+> Base every NexusAI gate on `parent..head` of the branch under test, never on `main`. main is the
+> integration branch but is currently ~247 commits behind the work; diffing against it reads other
+> people's merged work as the change under test.
+
+**NexusAI's mainline is `main`, NOT `develop`** — do not carry the Secuura convention across.
+**RD-367 is also why Wednesday is holding the RD-363 merge** (see the verdicts above).
 
 ## CLOSED SINCE THE LAST PICKUP
 - **The cat-1 count is settled: 96, not 97.** Category-2 is 18 → 19. **Only RD-50 moves** — its own
@@ -95,14 +139,35 @@ NexusAI's mainline is **`main`, NOT `develop`** — do not carry the Secuura con
   rotation halves stay open (rotation needs the dev-tenant admin: category 2).
 
 ## 🔴 STILL STANDING — four conclusions given to Kam that CHANGED, carried forward verbatim
-1. **THE CI SECRET GATE MAY BE DECORATIVE.** All 25 `gitleaks.yml` workflows pin
-   `actions/checkout@v7` — a major that does not exist. Verified spread: v4×35, **v7×25**, v2×8,
-   v3×3, v5×1, no v6; all 25 v7 files are gitleaks workflows. A workflow whose checkout cannot
-   resolve **fails before the scanner runs.** Corroborated: `terraform.tfstate.backup` still carries
-   F-16 credentials in a repo whose gitleaks nominally runs on every push. **SUSPECTED, high
-   confidence — one look at Actions run history settles it.** This RETRACTS the one improvement
-   credited all day. (The RD-363 brief asks its gate to establish cheaply whether NexusAI's own
-   counts gate actually executes — same class, different repo.)
+1. **✅ RETRACTED 17:4x — `actions/checkout@v7` EXISTS. The "decorative gate" diagnosis is DEAD.
+   Do NOT act on it and do NOT let it come back.**
+   The 17:0x version of this file said v7 was "a major that does not exist", so the workflow "fails
+   before the scanner runs." **False.** Measured twice independently: the RD-363 QA gate via the
+   GitHub API (`releases/latest` → **`v7.0.1`, published 2026-07-20**, GA June 2026), and **Wednesday
+   again in this session** — same endpoint, plus `repos/actions/checkout/tags` showing majors
+   **v1–v7** with `v4` as the control. **Wednesday also re-derived NexusAI's own pins: 4 × v4 and
+   1 × v7 — and the v7 pin IS `gitleaks.yml`, the MOST CURRENT major in the repo.** Third
+   corroboration from inside the fleet: Secuura's gate PR #781 deliberately pins four
+   `checkout@v7` at v7.0.0.
+   **🔴 THE ACTIVE RISK IS NOW THE OPPOSITE ONE** — the gate's words: *"the stated diagnosis, if
+   acted on, means DOWNGRADING A WORKING WORKFLOW."* If a ticket appears telling anyone to move
+   `gitleaks.yml` off `@v7`, it is wrong: put the measurement on it and close it.
+
+   **What SURVIVES — narrower than the retraction is wide. Do not over-withdraw:**
+   - **The estate-wide pin census stands** (v4×35, **v7×25**, v2×8, v3×3, v5×1, no v6): a count of
+     files, unaffected. **"No v6" was always about which majors the repos PIN, never about which
+     majors exist** — not retracted.
+   - **RD-367 stands entirely and is now the SOLE live explanation:** gitleaks is `main`-only and
+     `main` has been frozen since 2026-09-01, so **six days of commits are genuinely unscanned.**
+     Independent of the version claim — it got MORE important, not less.
+   - **`terraform.tfstate.backup` still carrying F-16 credentials** — observation stands, one of its
+     two explanations gone; it now rests on RD-367.
+   - **A third member of the class, from the SecurePDF verification pass:** that repo's
+     `gitleaks.yml:5` triggers on `master` while myPKI's uses `main`, so a copy-paste between repos
+     silently stops scanning pushes. **The scanner is fine; the TRIGGER is what fails, every time.**
+   - **Scope boundary, carried honestly:** the gate verified this for NexusAI and for the action
+     itself. **It did not examine the sibling repo**, so nothing here says what is failing there.
+     Still open, and it belongs to whoever holds that repo.
 2. **KEYCLOAK IS WIRED AND LOAD-BEARING** in all four production regions (5-step chain proven;
    positive control: pdf-api modules DO carry `count = 0`, so disabled is detectable). Not
    documentation debt — a live legacy dependency. `04_Keycloak_Retirement_Attestation` is

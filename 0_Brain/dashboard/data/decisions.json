@@ -5234,5 +5234,34 @@
    "2026-09-03 21:20",
    "CARD secuura-ks764-orgless-caller-403-2026-09-03"
   ]
+ },
+ {
+  "id": "nexusai-rd361-blocker-vs-nogo-cap",
+  "client_project": "Datasec/NexusAI",
+  "title": "RD-361 hit its SECOND NO GO — but the finding is a Blocker that bricks a customer's first deploy. Your cap says stop; the defect says do not ship. One word from you.",
+  "bluf": "OVERRIDE NOTE: the prior-ruling gate refused this card's first form on a prose match against your 2026-08-17 slide comments, your 2026-08-21 deploy-key ask and your 2026-09-01 settings-icon note. None of those rules on the QA cap or on RD-361; the match is a false positive and the card is filed on that basis.\n\nThe tier-1 gate returned NO GO on RD-361 round 2 — round 2 of 2 under your 2026-09-05 cap, which says a second NO GO ships what is closed and tickets the residue, no round 3 without your word. That rule assumed the residue would be leftovers. It is not.\n\nThe gate measured, AT THE WIRE on a real server, that an interrupted first run PERMANENTLY BRICKS a fresh NexusAI deployment. The boot sentinel is written on boot 1; the setting proving auth was configured is only written when the admin finishes setup; any restart in between reads as data loss and denies every route — INCLUDING the one route that could write that setting. The only exit is hand-editing a file on the customer's volume. On Container Apps the trigger is ordinary: scale-to-zero, a revision recycle, an image update, or a customer who deploys and comes back tomorrow. Direction is fail-closed, so this is NOT a data leak — it is an availability blocker on the first-run path of a Marketplace offer.\n\nRound 2 genuinely closed all four original failure modes and the gate verified every one on both heads against real directories. This is not a bad change; it is a good change with one new hole. Wednesday will not merge it either way — merging is mine and the gate did not pass. The only question that is yours is whether the cap bends for a Blocker. Both fixes are small and precisely specified by the gate.",
+  "default_action": "HOLD. No merge, no round 3. Wednesday files the Blocker and the unguarded-fix findings as tickets tonight so nothing is lost, and RD-361 waits for your word. Silence changes nothing and costs only time.",
+  "options": [
+   {
+    "key": "round3",
+    "label": "Authorise ONE narrow round 3 — the Blocker plus its guard only (recommended)",
+    "detail": "The gate specified both fixes exactly: keep the setup path reachable while the sentinel exists and auth is unconfigured; and drive the real directory fallback in the case-D cell instead of hand-setting the flag (removing that fix today leaves the suite 20/20 green, so nothing would notice). Nothing else in scope. The alternative leaves the original fail-open auth bug — 175 routes served unauthenticated — unfixed on main, which is the bug RD-361 exists to close."
+   },
+   {
+    "key": "shipandticket",
+    "label": "Hold to the cap — merge nothing, ticket the Blocker, stop",
+    "detail": "Follows your rule literally. Cost: RD-361 does not land, so the 175-route fail-open gap stays open on main too, and the branch sits until you revisit."
+   },
+   {
+    "key": "capchange",
+    "label": "Change the cap generally — a Blocker never counts toward the two rounds",
+    "detail": "A standing rule instead of a one-off, so this stops coming back to you. Bigger than tonight needs, but it is the durable answer if this recurs."
+   }
+  ],
+  "recommended": "round3",
+  "ts": "2026-09-07T17:45:45.166027+10:00",
+  "status": "open",
+  "ruled_choice": null,
+  "ruled_ts": null
  }
 ]
