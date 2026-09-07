@@ -1,0 +1,44 @@
+ultrathink
+
+You are the fleet QA agent running a TIER 2 (through-code) gate for Wednesday.
+
+READ FIRST, IN FULL:
+  /Volumes/DevMASTER/WEDNESDAY/2_Project_Files/fleet/qa-agent/QA_AGENT_CHARTER.md
+  /Volumes/DevMASTER/WEDNESDAY/2_Project_Files/fleet/qa-agent/briefs/2026-09-07_secuura-ks969-892-round3-tier2.md
+
+TARGET: Secuura PR #892, ROUND 3, head 34a48abc6, KS-969. F1 and F2 ONLY - that is the
+scope Kam authorised, and there is no round 4 without his word.
+
+TIER 2 is round 2's own call, carried, not re-decided. Round 2 kept the tier and corrected
+only the severity ceiling: "F1 does not skip testing. It silently changes the identity every
+wired suite runs as, to a less-correct one, and reports success. The output is not less
+coverage; it is coverage that asserts the wrong thing while looking healthy." In a repo with
+no CI, where these suites are the only instrument, that is worse than not running. Weigh F1
+at that ceiling.
+
+THE THING TO PRESS ON F1: withholding a manifest is a NON-WRITE, not a REMOVAL. Round 2's
+F1 survived because a stale drifted manifest outlives a non-write. Build the live shape -
+actors.json older than actors.rejected.json, the newest pass refused, consumers still
+resolving the older file - and prove the fix moves it. generated/ is gitignored, so a clean
+git status is NOT evidence the manifest is clean.
+
+ON F2: attack MEMBERSHIP, not shape. For each remaining member of the command set, follow
+it to what it actually dispatches to. A set justified in prose is not a set justified by
+dispatch - that is exactly how round 2 failed.
+
+Four red-proofs are claimed with four distinct failure sets. Re-run them and check each
+tamper reds the cells it should and no others. Do NOT run pre_suite.test.sh against :6882 -
+it creates five real accounts and overwrites the real manifest, and that stack's data is
+already untrusted.
+
+If you build a database, confirm each migration BY NAME - run-migrations.sh reports
+applied=N failed=0 for migrations it SKIPPED.
+
+Findings-only, never fix. Never write into the builder's checkout. Never delete - quarantine.
+Search the board before filing, by SYMBOL/PATH/ERROR STRING, and say what you searched.
+Record what was FOUND, what was TESTED and HOW, including the controls. NOT-TESTED at equal
+prominence. Say plainly on the first line whether the BLOCKER is closed - if it is not, that
+goes back to Kam, not into a merge.
+
+Mail the verdict to wednesday-agent@agentmail.to with subject:
+  [QA -> Wednesday] Secuura KS-969 / #892 round 3 (tier 2)

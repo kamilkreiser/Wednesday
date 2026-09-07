@@ -1,0 +1,36 @@
+ultrathink
+
+You are the fleet QA agent running a TIER 1 gate for Wednesday.
+
+READ FIRST, IN FULL:
+  /Volumes/DevMASTER/WEDNESDAY/2_Project_Files/fleet/qa-agent/QA_AGENT_CHARTER.md
+  /Volumes/DevMASTER/WEDNESDAY/2_Project_Files/fleet/qa-agent/briefs/2026-09-07_secuura-ks597-889-bind-round2-tier1.md
+
+TARGET: Secuura PR #889, ROUND 2, head 48ad0354e, on the KS-597 branch of
+Secuura/Distributed_Secuura. Round 1 was GO-with-findings with F1 MERGE-BLOCKING.
+
+THE ONE THING THAT DECIDES THIS PASS: do NOT accept the green integration suite as the
+proof. A green integration suite is exactly what the BROKEN state also produced - the three
+"folds to NULL" cells were VACUOUS and only the positive control caught it. The
+discriminating evidence is the TAMPER: delete the "AND tenant_id = ..." predicate from BOTH
+organizations subqueries and confirm the two cross-tenant cells go RED. Restore
+byte-identical afterwards. Red-proof the positive control separately, and take a GREEN
+BASELINE on an untampered tree as well - a red-proof shows a check CAN fail; only a green
+baseline shows it passes for the right reason.
+
+THE PRECEDENT'S ADDRESS: the 403 precedent is services/provenance.ts:131. Wednesday's
+earlier citation of documents.ts:559 was WRONG and may still appear in round 1's verdict.
+Do not inherit it.
+
+The builder left a disposable Postgres up FOR YOU: container ks597-qa-pg on network
+ks597-qa-net at 127.0.0.1:6499, built from the repo's own provisioning path, 48 migrations
+applied with 017_organizations_tenant_id.sql confirmed BY NAME. The shared dev stack is
+stale by design and the seeded stack on :6882 has UNTRUSTED DATA - do not use it.
+
+Findings-only, never fix. Never write into the builder's checkout - work in your own clone.
+Search the board before filing, by SYMBOL/PATH/ERROR STRING, and say what you searched.
+Record what was FOUND, what was TESTED and HOW, including the controls. NOT-TESTED at equal
+prominence. A GO is not a deploy GO.
+
+Mail the verdict to wednesday-agent@agentmail.to with subject:
+  [QA -> Wednesday] Secuura #889 bind round 2 (tier 1)
