@@ -38,3 +38,31 @@ first session after each Sunday. ~30–45 min of focused work, before Kam's day.
   own rituals/skills counts as validated only when subsequent ledger/retro
   evidence shows it working in real sessions — adoption alone is not improvement.
   Unvalidated changes get flagged in the next audit note.
+
+## STANDING KPI — is the process working, or looping? (Kam's ruling, 2026-09-07 13:27)
+
+**His words, verbatim:** *"Whether the process is working or looping is hard to decide. It can only
+be decided by the outcome. So let's keep watching and be mindful of it as we go forward."*
+
+**He declined to rule on the 30% self-referential board finding and named the CRITERION instead:
+the OUTCOME.** "Keep watching" is an intention, so this section is the mechanism that makes it fire
+([[../learnings/2026-08-07_a-promise-is-not-a-mechanism]]). **Every consolidation reports these four
+lines, with the measurement in the same breath as the characterisation:**
+
+1. **The split.** Open tickets whose SUBJECT is one of our own instruments (guard/gate/harness/
+   preflight/hook) vs the product, with the predicate stated and its boundary named — the 2026-09-07
+   pass published **88 with its definition attached and said the class is 88–94 depending on the
+   boundary**. Quote a number that way or not at all.
+2. **The trend.** That split against the previous consolidation. **A ratio rising with no
+   corresponding fall in product defects is the LOOPING signal.**
+3. **The outcome test, which is the one that actually answers Kam:** of the instrument tickets
+   CLOSED this week, **how many later caught a real product defect?** A guard that has never caught
+   anything is decoration; a guard that caught something is the process working, and this is the
+   only number that distinguishes them.
+4. **Duplication rate.** Findings carried by more than one ticket
+   ([[../learnings/2026-09-07_a-control-proving-it-is-not-yours-does-not-say-who-filed-it]]).
+   **Duplication is the cheapest looping signal available** — it needs no judgement at all.
+
+**Report all four to Kam even when they look good**, and never as a verdict — the ruling on what
+they mean is his. **Baseline set 2026-09-07: 293 open · 88 instrument-subject (69 ours / 4 product /
+7 both / 8 unclassified) · 79 actionable · 5 findings across 14 tickets · 7 legacy.**
