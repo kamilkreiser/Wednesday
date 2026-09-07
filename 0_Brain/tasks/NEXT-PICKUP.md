@@ -11,7 +11,8 @@ supersede: replace this file wholesale at the next pickup; do not append
 
 **Mail timestamps are UTC ≈ AEST−10.** Voice allowed (06:00–23:00). Kam is awake and ruling fast —
 he has ruled **six cards** since 10:22. **Run `kam_rulings_today.sh` before writing anything — AND
-SEE THE BLIND SPOT BELOW, because it only reads one of his two panels now.**
+SEE THE BLIND SPOT BELOW: it reads the shared panel correctly, but five of his rulings today never
+reached that panel at all, by a channel that is still UNMEASURED.**
 
 ## 🔴 THE THING THAT CHANGED TODAY: THERE ARE TWO WEDNESDAYS, BY KAM'S DESIGN
 **Kam, 11:01 verbatim:** *"The agent on the laptop is working on data sec items. I will re-sync the
@@ -29,13 +30,23 @@ projects."*
 - You will see `[Wednesday -> Datasec/…]` mail in the shared inbox **that this seat did not send.**
   That is the laptop. It is not yours.
 
-### ⚠ THE BLIND SPOT — raise it again if Kam has not ruled
-`kam_rulings_today.sh` reads **ONE panel**. Kam ruled **five times on the other one** today (10:15
-review scope · 10:44 Vision parked + pre-production · 10:46 NexusAI unpaused · 10:48 the Marketplace
-objective · **10:49 the rotation band → 80–90%**) and **none reached this seat's instrument.** They
-arrived only because the laptop seat pushed a file and this seat read the commit. **The boot rule
-"read his rulings before writing anything" now silently covers half his words.** Put to him as: one
-panel, or the tool reads both and says which it read. **Not yet ruled.**
+### ⚠ THE BLIND SPOT — the OBSERVATION stands; the MECHANISM in the 12:30 wording was REFUTED
+**Corrected by the 12:4x seat, measured not argued.** The 12:30 wording said `kam_rulings_today.sh`
+"reads ONE panel" and Kam "ruled five times on the other one". **There is no other panel.** There is
+ONE shared `chat_log.json` (1,589 messages at 12:4x, monotonic, both seats append, nothing
+overwritten) — and the phrases from all five rulings appear in it **zero times in Kam's voice**
+(`"between 80 and 90"`, `"rotation window"`, `"unpause"`, `"Marketplace"`: one hit each, every one
+authored by Wednesday, not by Kam).
+
+**What IS true, and it is the part to act on:** Kam ruled five times today (10:15 review scope ·
+10:44 Vision parked + pre-production · 10:46 NexusAI unpaused · 10:48 the Marketplace objective ·
+**10:49 the rotation band → 80–90%**) and **none of those words reached the shared record at all.**
+They arrived only because the laptop seat pushed a file and the Studio seat read the commit.
+**So the boot rule "read his rulings before writing anything" silently covers only the words he
+types into the panel.** The channel the other five travelled on is **UNMEASURED** — pane-typing is
+the known habit ([[2026-08-05_kam-types-into-panes]]) and has NOT been established. **Do not hand
+Kam a remedy built on the two-panel story: the two explanations imply different fixes.** Raise it as
+the observation plus the unmeasured channel. **Not yet ruled.**
 
 ## ✅ ROTATION BAND IS 80–90% (Kam 10:49). 70% is a CHECKPOINT ONLY.
 **⚠ TWO mechanisms carried the old number and only one of them is RUNNING the fix.**
