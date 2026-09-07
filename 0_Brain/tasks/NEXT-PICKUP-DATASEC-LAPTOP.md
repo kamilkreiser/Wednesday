@@ -47,6 +47,22 @@ instruction plus his 21:00 ruling. Everything else holds.
 then deploys to the demo with no human gate. Any other combination and the merges go on his
 existing week-scoped authority. Repo confirmed from the git remote, not composed.
 
+**🔴 THOSE TWO CLICKS ARE WORTH MORE THAN THREE MERGES, and the chain is measured link by link:**
+NexusAI releases through `main` (RD-367) · `main` is frozen since 09-01 and **250** commits behind
+(the gate's measurement, not the stale 248) · Kam ruled **`mergeup`** on it at 18:58 · the mergeup
+is what is blocked · behind it sits a **Release Ready column of 46**, counted through
+`2_Project_Files/fleet/board_count.sh` which certified *"limit was 250, so this is a real count and
+not a cap"*. Those 46 are the *"tested but not deployed"* items Kam pointed at on 09-07 13:40.
+**Do not quote a NexusAI board number from a hand-written query — `board_count.sh jira` takes the
+site with NO scheme (`${JIRA_SITE#https://}`), and it correctly REFUSED to total
+`statusCategory != Done` because more pages exist.**
+
+**RD-321 — CLOSED, no action.** S45 flagged it as Highest-priority and unmentioned in any artefact,
+which is the shape that goes missing. Wednesday read it: **Release Ready, assigned to Kam, updated
+2026-09-06** — finished and sitting in the column above, nothing missing. Good raise, boring answer.
+(`JIRA_SITE` in the NexusAI `.env` carries **no scheme**; a bare `curl` to it returns HTTP 301 and an
+empty body, which reads exactly like an auth failure. Prefix `https://`.)
+
 ## 🔴 RD-361 ROUND 3 WAS A NO GO — and round 4 must not repeat its shape
 Round 3's fix relaxes the gate only while `firstRunComplete` is absent. **That flag is also written
 by three FRONTEND sites during ordinary setup** (`static/js/first-run-setup.js:2796` connection test,
