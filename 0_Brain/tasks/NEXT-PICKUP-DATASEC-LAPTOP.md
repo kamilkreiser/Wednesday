@@ -13,7 +13,18 @@ supersede: replace this file wholesale at the next pickup; do not append
 anything — read EVERY line.** Mail UTC ≈ AEST−10. **ROTATION BAND 80–90%; 70% is a checkpoint only.**
 **QUIET HOURS 23:00–06:00: no voice.** **His last panel input was 21:00 on 09-07.** Nothing since.
 
-## 🔴 FIRST ACTION — NOTHING IS IN FLIGHT. The Datasec fleet is empty and that is the correct state.
+## 🔴 FIRST ACTION — S47 IS LIVE (launched 05:39 under the morning-sweep grant). Check it, then Kam's desk.
+    %22  Datasec/NexusAI — S47, successor to S46. Booted clean, no trust dialog.
+         Brief: `2_Project_Files/fleet/briefs_staged/2026-09-08_nexusai-s47.md` (sent + verified 19:37Z).
+         Queue: RD-377 first (only live product defect), then RD-376, RD-378, RD-379/380/381.
+    **Morning sweep done for Datasec.** Secuura was NOT swept — the Studio seat owns it and is ALIVE
+    (commit `810a614e` at 05:30). Its s148 wrap is in the shared inbox: SUBJECT ONLY, left for it.
+    **Board, measured 05:35 with `board_count.sh`:** Release Ready **46** · created in 12h **14**.
+    🔴 **Total open is UNMEASURED** — the counter refuses (`MORE PAGES EXIST`) even at page 2000, which
+    is likely Jira's own server-side cap rather than a huge board. **Do not quote a total; S45's "287"
+    is that seat's count, relayed.**
+
+## (superseded 05:39) NOTHING IS IN FLIGHT — true between 02:06 and the morning sweep
     S46 WRAPPED at 16:03Z / 02:03 AEST. Both lineages closed, SEVEN tickets filed, nothing merged.
     ALL panes closed: %17 (builder), %18, %19, %20, %21 (gates). Each `listeners 13 → 13` on close.
     Only Wednesday's own pane %0 remains.
