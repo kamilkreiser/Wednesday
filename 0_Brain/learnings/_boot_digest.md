@@ -7,7 +7,7 @@ status: live
 
 # Boot digest — headline + rules of every lesson (open the file when it fires)
 
-Generated 2026-09-07 21:12 from 116 lesson files (569,017 B). Each block = the lesson's retrieval handle (H1), its frontmatter, the operative paragraph, its section index, and every RULES section verbatim. 6 files carry no rules-shaped section and are included whole. The CASES behind a rule live only in the file: open it the moment the rule fires, or when a diagnosis needs the evidence. `_ledger.md` is read whole beside this digest; `_ledger_archive.md` on demand.
+Generated 2026-09-07 21:29 from 117 lesson files (574,402 B). Each block = the lesson's retrieval handle (H1), its frontmatter, the operative paragraph, its section index, and every RULES section verbatim. 6 files carry no rules-shaped section and are included whole. The CASES behind a rule live only in the file: open it the moment the rule fires, or when a diagnosis needs the evidence. `_ledger.md` is read whole beside this digest; `_ledger_archive.md` on demand.
 
 ## The T9 SSD is the master — Wednesday must be fully portable
 `2026-07-31_fully-portable-drive.md` · principle · 2026-07-31 · status: superseded — the "T9 is the master" half by [[2026-08-25_one-drive-devmaster-is-master]] (2026-08-25); the portability principle itself still lives
@@ -3823,6 +3823,47 @@ sections (open the file for these): The case · The real cause, and the commit i
    would have been *functional*, which is worse than one that fails.
 5. **Test by its handle:** could a seat that booted on another machine, from a fresh clone, run this
    mechanism from what the handover says? If not, the handover names a ghost.
+
+
+## A gate saying "Kam already ruled this" is telling you to go read the SHIPPED DIFF — what a fix CHANGED is not what its card was ABOUT
+`2026-09-07_a-prior-ruling-gate-refusal-is-a-research-prompt.md` · correction · 2026-09-07 · status: live
+
+**The operative case, so the headline matches it:** Wednesday is filing a card and
+`decision_queue.sh add` REFUSES it, naming a card Kam has already ruled on the same subject
+words. **There are two lazy exits and both are wrong.** Re-running with
+`--override-prior-rulings` because the finding *feels* different is the expensive one; dropping
+the card because he *seems* to have ruled it is the quiet one, and it is worse, because nobody
+ever learns the finding existed. **The correct move is a measurement: open the artefact the
+prior ruling was shipped into, and read what the fix actually CHANGED.**
+
+sections (open the file for these): The case · Why the existing lessons did not fire · How to apply
+
+## How to apply
+
+1. **On any prior-ruling refusal, open the artefact before deciding anything.** `git show
+   <ref>:<path>` on the file the ruling shipped into, and read the lines the new finding is
+   about. Cheap, decisive, and it is the only thing that discriminates.
+2. **Read the ruling's SCOPE, not its subject.** "He ruled on the vault staging step" and "he
+   ruled on attribution within the vault staging step" are different facts that share every
+   keyword. **The gate matches on words; only the diff matches on scope.**
+3. **A `ruling_note` is a representation of a diff, including one Wednesday wrote.** Own
+   authorship makes it feel like memory. It is a claim with a date on it.
+4. **State the override's reason as the MEASUREMENT, in the BLUF.** Not "this is different" but
+   *"his fix added attribution at line 56 and left `add -A` at line 50 — I read origin's copy."*
+   That sentence is what lets Kam check the override in one read instead of trusting it.
+5. **The refusal is a dividend, not a cost.** It bought a sharper finding and a second one
+   nobody was looking for. **Treat a gate that stops you as a question it is asking**, and
+   answer the question rather than routing around it
+   ([[2026-08-09_an-enforcement-you-must-arm-is-not-one]] — in-path enforcement works, and this
+   is what "working" looks like from the inside).
+
+**Family:** [[2026-08-14_i-read-representations-they-read-sources]] (the parent — a ruling note
+is a representation) · [[2026-09-05_a-relayed-ruling-is-delivered-only-when-it-is-in-the-artefact]]
+(delivered ≠ sufficient) · [[2026-08-16_a-recorded-blocker-is-not-a-boundary]] (clearing the
+stated blocker is the start of the check) · [[2026-09-07_a-rule-for-creation-is-not-a-mandate-to-retrofit]]
+(read the verb in his rule — this is: read the diff of his fix) ·
+[[2026-09-07_a-census-complete-over-a-frame-that-is-not]] (the ruling was complete over
+attribution and silent about staging — the same shape, in a card).
 
 
 ## A rule Kam gives for CREATION is not a mandate to retrofit what already exists — and before reshaping anything, find what already occupies the slot
