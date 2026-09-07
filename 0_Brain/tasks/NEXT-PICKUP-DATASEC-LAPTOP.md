@@ -85,10 +85,24 @@ shared-helper blast radius is closed everywhere except that one site.**
 - **`hpsm-credential-bearing-prd-outside-every-snapshot`** — note only: *"only secuura projects on this
   machine until further notice"*. HPSM stays untouched.
 - **Not this seat's, do not adopt, re-card or answer:** the Studio's and Fleet/workspace cards.
-🔴 **KAM'S 07:09 NOTE HAD TWO ITEMS AND (b) IS STILL NOT STARTED:** *"allow the option through this chat
-to seperate or merge datasec and secuura."* **That is WED work, unstarted, and nobody is carrying it.**
+🟢 **KAM'S 07:09 ITEM (b) IS DONE — and the line that used to sit here said "STILL NOT STARTED", which
+was FALSE.** s150 inherited that from the Studio's pickup, repeated it in this file, and told Kam so on
+the panel, all without opening `chat.html`. **The filter had existed since 2026-09-07 11:12** — chips per
+project, persisted per browser, Kam's own messages always shown. **The mechanism was never broken;
+nothing FED it:** of 1725 chat entries `project` read WED 64 / Datasec 6 / ABSENT 1655, and `projOf()`
+maps absent to "WED" too, so both seats landed in ONE bucket. `--project` was wired correctly the whole
+time; no seat passed it. **Fixed at the WRITER:** `chat_reply.sh` now defaults per seat (laptop ->
+`Datasec`, Studio -> `Secuura`), precedence `--project` > `$CHAT_PROJECT` > per-seat > `WED`, unknown
+host falls back to `WED` and never guesses. Six branches exercised incl. a negative control, then
+**proven on the ARTEFACT** — the panel message reporting it wrote `project: Datasec`.
+🔴 **The mapping is KAM'S TEMPORARY SPLIT** (his 07:09 words) and lives in exactly ONE line —
+`seat_project_default()` in `chat_reply.sh`. **If he re-splits, edit that and nothing else.**
+🔴 **THE RULE THIS EARNED, ledger w=97:** *"not started" inherited from another seat's note is a
+CLAIM WITH A DATE.* The check is one grep of the surface it would live on. **Never carry an
+unstarted-item claim into a handover, a panel message, or a build without opening the artefact —
+especially when the item is small enough to build, because that is exactly when nobody looks first.**
 (a), the vault skill-file write + reconcile session, is the LAPTOP-vs-Studio race the card is about —
-**do not both act on the shared vault.**
+**do not both act on the shared vault. Still open.**
 
 ## ✅ SECURITY REVIEW — COMMISSION COMPLETE, panes closed
 Report: `/Volumes/KK_T9_External_HDD/!CODING/Datasec/Security Review/_Working/_BATCH2_REPORT.md` and
