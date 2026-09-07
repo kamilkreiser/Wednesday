@@ -7,7 +7,7 @@ status: live
 
 # Boot digest BY TIER — W whole, M rules-only, every project case a handle
 
-Generated 2026-09-07 13:27 from 109 lesson files (536,249 B). M 25 · MIXED 5 · W 79. 28 project CASE sections inside MIXED files are reduced to one line each: the heading and the path to read it at. W blocks are exactly what the default digest carries; M blocks drop the section index and keep the rules; a P file is a single handle. The CASES behind every rule live only in the lesson files — open one the moment its rule fires.
+Generated 2026-09-07 13:38 from 109 lesson files (538,919 B). M 25 · MIXED 5 · W 79. 28 project CASE sections inside MIXED files are reduced to one line each: the heading and the path to read it at. W blocks are exactly what the default digest carries; M blocks drop the section index and keep the rules; a P file is a single handle. The CASES behind every rule live only in the lesson files — open one the moment its rule fires.
 
 ## The T9 SSD is the master — Wednesday must be fully portable
 `2026-07-31_fully-portable-drive.md` · principle · 2026-07-31 · status: superseded — the "T9 is the master" half by [[2026-08-25_one-drive-devmaster-is-master]] (2026-08-25); the portability principle itself still lives · tier: W
@@ -1759,6 +1759,8 @@ narrowed it to human-facing mail only. The carve-out was accurate, complete, and
 sat in the body. The headline still said the old thing. Under load, the headline
 is what fired.
 
+sections (open the file for these): EXTENSION 2026-09-07 — POSITION IN A DOCUMENT IS PART OF THE CLAIM (agent keeper, adopted verbatim)
+
 **How to apply — to my own learnings, memories, briefs and specs:**
 1. **Write the headline last, from the operative case**, not from the incident
    that produced the rule. The question is not "what happened?" but "what will I
@@ -1776,6 +1778,28 @@ is what fired.
    is what caused the w=3 provenance regression on 08-06), and spec BLUFs. The
    BLUF rule and this one are the same discipline pointed at different readers:
    the reader who stops early must not be misled.
+
+## EXTENSION 2026-09-07 — POSITION IN A DOCUMENT IS PART OF THE CLAIM (agent keeper, adopted verbatim)
+**The formulation, from the Secuura board-catalogue seat diagnosing its own error:**
+
+**How to apply:**
+1. **When you answer a question someone asked, that answer IS the action slot.** Put your most
+   carefully qualified sentence there, not your most quotable one. If the honest answer is *"three of
+   these five, and I have not read the other two closely"*, that belongs in the answer, not in a
+   caveat further down.
+2. **Before sending, find every sentence in the document that bears on the same fact and read them
+   against each other.** `self_check_view.sh` does this mechanically for ids and numbers; the same
+   question asked by hand catches the prose cases.
+3. **When a document says two things, the reader who acted on the actionable one was reading
+   correctly.** Do not correct them; correct the document.
+4. **Fix the ARTEFACT, not just the mail** — the seat rewrote the page Kam reads rather than leaving
+   the error there and the correction in an inbox
+   ([[2026-09-06_a-retraction-inherits-the-scope-of-its-measurement]], its 09-07 w=3 extension).
+
+**Family:** [[2026-08-06_bluf-write-for-the-reader]] (the reader who stops early must not be misled —
+this is its sibling: the reader who ACTS must not be misled) ·
+[[2026-09-06_a-retraction-inherits-the-scope-of-its-measurement]] ·
+[[2026-08-16_an-overstated-record-gets-discounted-wholesale]].
 
 project CASE sections lifted to their own tier (1, read them in the file):
 

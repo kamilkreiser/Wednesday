@@ -89,3 +89,43 @@ first costume), [[2026-08-06_artifact-presence-is-not-execution]],
 [[2026-08-12_no-cc-kam-on-agent-mail]] (the rule in question),
 [[2026-08-11_coordinator-not-carrier]] (noticing and propagating is the job),
 [[_ledger]]
+
+## EXTENSION 2026-09-07 — POSITION IN A DOCUMENT IS PART OF THE CLAIM (agent keeper, adopted verbatim)
+
+**The formulation, from the Secuura board-catalogue seat diagnosing its own error:**
+
+> *"I wrote the over-grouped sentence in the place where it would be ACTED ON, and the accurate
+> sentence in the place where it would be read as colour. Position in a document is part of the
+> claim."*
+
+**The case.** Its checkpoint mail contained BOTH *"Yes — five findings carried by 14 tickets,
+collapsing them frees 9"* (under the question Wednesday had asked, in the answer slot) and *"three
+separate holes in the one re-link guard"* (elsewhere, in prose). **Wednesday acted on the first and
+authorised collapsing six real findings into two.** The seat then read all six tickets, refused two
+of the collapses, and was right.
+
+**Why this is not just the headline rule again.** That rule is about the FIRST line versus the body.
+This is about **which slot a reader ACTS from** — the answer under a question, the row in a table, the
+number in a BLUF, the item in a queue. **A document has action slots and colour slots, and a reader
+under load reads the action slot and skims the rest.** An accurate sentence in a colour slot does not
+correct an over-stated one in an action slot; **it just makes the document internally contradictory in
+a way only a careful re-reader will find.**
+
+**How to apply:**
+1. **When you answer a question someone asked, that answer IS the action slot.** Put your most
+   carefully qualified sentence there, not your most quotable one. If the honest answer is *"three of
+   these five, and I have not read the other two closely"*, that belongs in the answer, not in a
+   caveat further down.
+2. **Before sending, find every sentence in the document that bears on the same fact and read them
+   against each other.** `self_check_view.sh` does this mechanically for ids and numbers; the same
+   question asked by hand catches the prose cases.
+3. **When a document says two things, the reader who acted on the actionable one was reading
+   correctly.** Do not correct them; correct the document.
+4. **Fix the ARTEFACT, not just the mail** — the seat rewrote the page Kam reads rather than leaving
+   the error there and the correction in an inbox
+   ([[2026-09-06_a-retraction-inherits-the-scope-of-its-measurement]], its 09-07 w=3 extension).
+
+**Family:** [[2026-08-06_bluf-write-for-the-reader]] (the reader who stops early must not be misled —
+this is its sibling: the reader who ACTS must not be misled) ·
+[[2026-09-06_a-retraction-inherits-the-scope-of-its-measurement]] ·
+[[2026-08-16_an-overstated-record-gets-discounted-wholesale]].
