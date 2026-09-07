@@ -5511,5 +5511,40 @@
    "CARD secuura-ks968-demo-hash-probe",
    "CARD secuura-ks968-probe-control-query"
   ]
+ },
+ {
+  "id": "secuura-892-cap-spent-blocker-open",
+  "client_project": "Secuura/Blockchain",
+  "title": "#892's cap is SPENT on a second NO GO, and the BLOCKER is still open — but both remaining fixes are one-liners. Same shape as the RD-361 call you granted tonight",
+  "bluf": "PRIOR-RULING CHECK: you granted a narrow round 3 on Datasec/NexusAI RD-361 earlier tonight for this exact shape - a cap spent while the leftover was a Blocker rather than a leftover. This is the Secuura instance of the same question and it is carded rather than assumed, because your rule is that no round 3 happens without you. WHAT HAPPENED: #892 came back NO GO twice. Round 1's Blocker was that a green PROVISIONED wrote a manifest with all five actors collapsed to OWNER, which then outranked the correctly-roled seeded accounts - every wired suite silently running as the wrong identity and reporting success. Round 2: F3 is CLOSED, F2's mechanism is genuinely better and all four arms fire and block - but TWO findings remain and one is still the Blocker. FINDING 1, still open: withholding a manifest is a NON-WRITE, not a REMOVAL. If a stale drifted manifest is already on disk, not writing a new one leaves the old one in place and the suites read it - so the original defect survives the fix. There is a live instance of exactly that on the builder's own worktree right now. FINDING 2, still open: 'run.py quality' is EXEMPT from the pre-step and runs 389 live-API cells - so the question the whole PR turns on, is there a path that reaches a stack without the pre-step, still answers YES. THE GATE'S OWN ASSESSMENT, and it is why this is worth asking: 'Both open findings are one-line fixes; neither needs a redesign.' WHY WEDNESDAY WILL NOT JUST SHIP IT: the cap says closed instances ship and the residue is ticketed. But #892 IS the instance, and merging it with F1 open ships the very defect KS-969 exists to remove, one level up. That is not shipping what closed; that is shipping the broken thing with a ticket attached. Nothing degrades while you decide: #892 is not merged, nothing is deployed, and the suites are no worse than they were this morning.",
+  "default_action": "HOLD. #892 stays unmerged and Wednesday files F1, F2 and the minors as one ticket tonight so nothing is lost. Silence costs only time.",
+  "options": [
+   {
+    "key": "round3-narrow",
+    "label": "Authorise ONE narrow round 3 - F1 and F2 only, both one-liners (Recommended)",
+    "detail": "Closes the Blocker and the bypass rather than ticketing them. The gate has specified both fixes precisely and says neither needs a redesign. Bounded: no new scope, and it goes straight back to the same tester who wrote both findings."
+   },
+   {
+    "key": "ship-and-ticket",
+    "label": "Hold the cap - merge what is closed and ticket F1 and F2",
+    "detail": "Consistent with the rule as written, and the rule exists for a reason. The cost is that the wired suites can still run as the wrong identity from a stale manifest, and one entry point still reaches a stack unguarded, with a ticket saying so."
+   },
+   {
+    "key": "park",
+    "label": "Neither - leave #892 unmerged until someone has time to do it properly",
+    "detail": "Nothing ships, nothing is ticketed as accepted debt. Honest, and the slowest."
+   }
+  ],
+  "recommended": "round3-narrow",
+  "ts": "2026-09-07T19:32:39.172081+10:00",
+  "status": "open",
+  "ruled_choice": null,
+  "ruled_ts": null,
+  "prior_rulings_overridden": [
+   "2026-08-17 19:53",
+   "2026-08-21 20:06",
+   "CARD secuura-ks788-gate-fails-open-2026-09-04",
+   "CARD nexusai-rd361-blocker-vs-nogo-cap"
+  ]
  }
 ]
