@@ -35,9 +35,12 @@ carries BOTH retractions — its own and Wednesday's — with the scope recorded
 with ancestor + range guards (`launch_qa_nexusai_rd323_delta.sh`, `..._rd374_r2.sh`, `..._rd323_r2.sh`),
 each exercised pass + ≥3 distinct refusals before arming.
 
-**Board residue, all filed, none of it tonight's work:** RD-376 (stripper across nine guards) ·
-RD-377 (`P2-unknown-status`, **R2-1 folded in with its caveat leading**) · RD-378 (three alias shapes)
-· R2-2/R2-3/R2-4.
+**Board residue, all filed, none of it work for tonight — SIX tickets:** RD-376 (stripper across nine
+guards) · RD-377 (`P2-unknown-status`, **R2-1 folded in, caveat as its FIRST line**) · RD-378 (three
+alias shapes) · **RD-379** (jest isolates `process.env` per file; do NOT re-add a paired-suite run as
+evidence — the instrument is a canary) · **RD-380** (`String()` kept as null-safety, applied once) ·
+**RD-381** (tie the doc boundary to the release; the better discriminator is the presence of the
+`escalated` key per row, which needs no clock).
 
 ## 🔴 THE TERMINATING RULE — it is the reason tonight ended instead of continuing. Keep it.
 Three gate rounds per lineage is where this was heading. The rule, set BEFORE each verdict:
