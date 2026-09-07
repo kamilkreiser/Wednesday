@@ -4866,5 +4866,39 @@
    "2026-08-29 08:00",
    "2026-09-05 16:40"
   ]
+ },
+ {
+  "id": "secuura-ks597-backfill-95k",
+  "client_project": "Secuura/Blockchain",
+  "title": "KS-597's backfill is 95,127 rows, not the 100 its title says — a data migration, and it needs your word",
+  "bluf": "The Secuura agent (s145) is building KS-597's forward fix now: populate documents.issuer_organization_id at registration. That half is Wednesday's to authorise and is under way. THE HALF THAT IS YOURS: the ticket also asks for a backfill of existing rows. Its title says '0 of 100'. The agent re-measured on the live tree and it is 0 of 95,127 — a 950x difference, which makes the backfill a different piece of work from the one the title describes. A 95k-row data migration is close enough to irreversible that Wednesday will not authorise it. WEDNESDAY'S SEQUENCING RULING, already given to the agent and not in question here: the backfill happens AFTER the forward fix is merged and proven, never before — every registration between a backfill and the fix creates another unpopulated row, so doing it first means running it twice and never being sure it took. So this card is not urgent; it is the next step after the fix lands. WHAT IS NOT ASKED: nothing runs today, nothing is written to any database on any option, and the forward fix proceeds regardless of how this is ruled.",
+  "default_action": "If Kam is silent: NOTHING runs. The agent builds and ships the forward fix only, the backfill stays a ticket, and Wednesday re-raises once after the fix merges — which is the earliest point the question is even answerable.",
+  "options": [
+   {
+    "key": "afterfix",
+    "label": "Authorise the backfill as its own round AFTER the fix merges (recommended)",
+    "detail": "The agent writes it as a reversible, resumable migration with a dry-run that reports the row count it would touch, a control that proves the query can see rows, and a post-run assertion that populated equals total. It goes through a tier-1 gate like any other change, and Wednesday reports the dry-run numbers to Kam before the real run. Nothing runs until the forward fix is on develop."
+   },
+   {
+    "key": "dryrunonly",
+    "label": "Authorise only the DRY RUN for now, and rule again on the real run",
+    "detail": "Same migration, but it stops after reporting what it would change. Cheapest way to turn 95,127 into a measured number on the real tree rather than the agent's local one. Adds one round trip."
+   },
+   {
+    "key": "ticketonly",
+    "label": "File it as a ticket and do not schedule it",
+    "detail": "The forward fix stops new unpopulated rows; the 95k existing rows stay empty until someone decides they matter. Honest, and it leaves a known-empty column in the product."
+   },
+   {
+    "key": "kamruns",
+    "label": "Kam runs it himself when the fix is live",
+    "detail": "Keeps a 95k-row migration entirely in Kam's hands. Slowest, and the agent has the measurement and the tooling."
+   }
+  ],
+  "recommended": "afterfix",
+  "ts": "2026-09-07T10:32:29.198865+10:00",
+  "status": "ruled",
+  "ruled_choice": "afterfix",
+  "ruled_ts": "2026-09-07T10:35:33.445209+10:00"
  }
 ]
