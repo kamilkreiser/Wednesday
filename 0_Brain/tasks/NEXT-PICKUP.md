@@ -56,27 +56,47 @@ The launcher said **70%** until this seat fixed it — it was **two rulings stal
 kept rotating early. Fixed in `Launch_Wednesday.command`, verified by extracting `INITIAL_PROMPT` and
 asserting its length (11,150) and tail. Backup `.pre-0907-band8090`.
 
-## 🔴 FIRST ACTION FOR YOU — #885 round 2 is IN FLIGHT with s145. Do not re-brief it; check it landed.
-**Kam ruled `round2-plus-probe` at 11:01:35.** The brief went out 01:02:58Z (subject starts
-`KAM RULED round2-plus-probe`) and the tap was **queued behind a running turn** — s145 was mid-KS-597
-at the checkpoint. **VERIFY IT ACTUALLY STARTED #885 rather than trusting the queue** (this morning a
-"next" item sat unstarted for ~75 minutes while both parties believed otherwise).
+## 🔴 FIRST ACTION FOR YOU — read Kam's ruling on `secuura-ks949-round3-cap-and-the-cutoff`. Nothing moves until he rules.
+**#885 round 2 came back NO GO on `6dbe63cae` at 12:02. That SPENDS Kam's two-round cap.** The card
+is on his desk with four options; **recommendation = `split`** (revert F1 only, ship F2–F5, F1 gets
+its own round) because that is his own cap applied as written and the four are genuinely closed.
+**Default if he is silent: nothing merges, nothing deploys, #885 stays at `6dbe63cae`.**
 
-**F1 is a BLOCKER:** `startup-migrations.ts:958-982` says `ON CONFLICT (email)` while the real
-collision on a seeded box is the **PRIMARY KEY `id`** — Postgres aborts **all twelve rows** and the
-error is swallowed as a **debug-level "User seed skipped"**. Kam's real address stays live.
-**AUTH DB is genuinely fixed** (proved against real Postgres under fail-closed RLS). Also in scope:
-F2 (three files still publish a password beside the identity), F4 (the drift guard covers 2 of 4
-executable seed sites — a planted tamper passed 7/7), F5 (revert `ALLOW_DEFAULT_SEED_PASSWORDS`
-default-ALLOW back to DENY). **F3 is FILE-ONLY, not fix** — see below.
-**This is round 2 of 2 under Kam's cap. A third needs his word.**
+### 🔴 THE FACT THAT CHANGES EVERYTHING — nothing currently removes Kam's address
+**The auth remediation — established as the ONLY path that would rewrite his row — is DISABLED on
+prod-like environments.** `decryptEmail` throws on a non-ciphertext value once
+`plaintextStillAcceptable()` is false, which it is whenever `NODE_ENV` is production/staging/demo
+**and** the date is past `PII_PLAINTEXT_CUTOFF` (**2026-06-01, set NOWHERE in the repo — the source
+default applies**). `getUserById` catches and returns **null**, so the remediation reads it as *"no
+pre-existing row to remediate"* and skips. **All three deployment values are prod-like**
+(`services.bicep:564` defaults to `staging`; `env.demo.json:8` says `production`).
+**Four cells, two of them controls isolating the cutoff rather than the row shape.** The builder's own
+suite **cannot see it**: its mock forces `isEncryptedPii: () => false` (test line 40) and runs
+`NODE_ENV=development` (line 88). **So round 3 alone may not remediate anything either.**
 
-### THE PROBE — one, read-only, hard bounds
-Kam authorised **ONE read-only probe** of the demo to establish whether it is actually in the
-already-seeded state. **Bounds given: state the success/failure condition IN WRITING BEFORE running
-it; if no read-only probe can discriminate, SAY SO AND STOP rather than reaching for something that
-changes state; never use or transmit the real address or any credential.** **His exposure is
-UNMEASURED and has been told to him as unmeasured — do not let that harden into a fact either way.**
+### Why shipping this head was NOT offered to Kam as an option
+It would write **twelve plaintext addresses into an encrypted column** on the first boot after a
+deploy — and **eleven of the twelve are the documented public demo personas** the credential sheet
+publishes and `scripts/auth-matrix-smoke.sh` drives. **Not a back-office table.**
+**Also measured: Kam's old address remains the LIVE LOGIN KEY for a SYSTEM_ADMIN row** —
+`auth_find_user_by_email_hash(<old hash>)` still returns it. The accurate description of the fix's
+damage is **FINDABLE, THEN UNREADABLE**, not "unfindable" — the gate corrected Wednesday and the
+builder on that, in both directions.
+
+### A THIRD schema source, for KS-960
+**The Azure deploy applies `deployment/azure/migrate/init.sql`** (`run.sh:26`, `run-platform.sh:25`) —
+not `docker/init`, not `migrations/001`. It declares `email VARCHAR(255) UNIQUE` with **no
+`email_lookup_hash`**; `migrations/030_auth_user_columns.sql:36-44` then converges it onto the
+docker/init shape. **F1's 42P10 diagnosis survives that**, measured by the gate in its own container.
+
+### The shape already ratified, for whenever Kam authorises the fix
+**Option (b): the migration REMOVES its INSERT** and keeps the PK conflict target used **only** to
+re-sync `tenant_id`/`tenant_slug` on rows that already exist. Rationale that decided it: **auth
+already creates all twelve identically**, and on a stack where the migration has thrown every boot
+since encryption landed **all twelve exist, ciphertext, hashes set** — *"we are not proposing to
+remove a load-bearing statement, we are proposing to delete one that has never borne load."*
+**The new regression cell must drive BOTH seeders against ONE real database in BOTH orders, on the
+docker/init shape, and must NOT stub `isEncryptedPii`** — that stub is what blinded the builder's suite.
 
 ## 🔴 F3 — THE BIGGER FIND, and Kam chose NOT to prioritise it (round2 over escalate). File it as a P1.
 A **second** published-default super-admin: a `platform_admins` row whose **bcrypt hash is committed
