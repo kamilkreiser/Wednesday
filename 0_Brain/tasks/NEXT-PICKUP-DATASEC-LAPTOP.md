@@ -143,8 +143,17 @@ nothing by path. Carded; shared file, so it is Kam's.
    objects via alternates, so `rev-parse` / `merge-base` need NO fetch at all.** Enforcement candidate:
    resolve single-variable paths and allow scratchpad writes. **Shared hook — Kam's or a dedicated session's.**
 5. **`send_brief.sh`'s SELF-CHECK regex is exact.** GENERATE the stamp; extra prose before the pipe breaks it.
-6. **Ghosts:** detector FIRST (`pane_prompt_check.sh`), then close. **A wrapped pane beside an open Kam
-   card is the rung-6 surface** — s150 closed %24 and %25 for exactly this.
+6. **Ghosts:** detector FIRST (`pane_prompt_check.sh`), always. **TWO at `%22` in twenty minutes, both
+   inert, both ~3 min after a decision was routed upward.** Rung 6 (merge the three) bounced because
+   S47 had WRITTEN its refusal first. Rung 2 (a wrap phrase at a HOLDING pane — a new costume; the
+   documented rung 2 is at a WRAPPED pane) found the gap, because **nothing S47 had written
+   contradicted wrapping.** 🔴 **So a brief states the decisions the agent is NOT making** — S47 is now
+   told in writing: wrap only on a MAIL from Wednesday or the rotation band, never on a prompt line and
+   never on its own read that the queue is dry. **A dry queue is a reason to HOLD, not to END.**
+   🔴 **`C-u` does NOT clear a rendered suggestion** — there is no input buffer; only new output or a
+   tap displaces it (`cockpit.sh say` reported `prompt clear` both times). **Do not read a failed `C-u`
+   as a failed clear.** A wrapped pane beside an open Kam card is still the rung-6 surface — s150
+   closed `%24` and `%25` for exactly that.
 7. **`pane_close.sh`** is the tool; its own `listeners N->N` line is the real control.
 8. **Another project's checkout is READ-ONLY for git**, `.git` included. Read verbs only.
 9. **A verdict mail can arrive zero-byte** — verify a send by a non-null `preview`, and read verdicts
