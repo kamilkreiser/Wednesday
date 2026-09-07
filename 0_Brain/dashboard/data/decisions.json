@@ -5263,5 +5263,34 @@
   "status": "open",
   "ruled_choice": null,
   "ruled_ts": null
+ },
+ {
+  "id": "nexusai-rd367-frozen-trunk",
+  "client_project": "Datasec/NexusAI",
+  "title": "NexusAI's trunk has not moved since 1 September — 247 commits of finished work are stacked behind it, and the secret scanner only runs there",
+  "bluf": "**RD-367, filed by the NexusAI agent.** `main` is the integration branch by every mechanical test — but it has not been fed since **2026-09-01**, and **247 commits of finished work sit ahead of it**. The agent measured it; Wednesday re-derived the counts independently.\n\n**Three consequences, and they are separate failures:**\n1. **`gitleaks.yml` runs on `main` only** — so **six days of commits have never been secret-scanned.** (This is now the SOLE explanation for a credential still sitting in `terraform.tfstate.backup`; the other candidate — a broken action version — was retracted today, verified three ways.)\n2. **`deploy-demo.yml` deploys from `main`** — so nothing built since 01-09 is deployable by the normal path.\n3. **Only `npm-audit.yml` runs on the working branch.**\n\n**Why it is on your desk rather than mine:** picking a branching model is a decision about how the project works, not a merge. And it is now **load-bearing** — four branches are at or awaiting gates, all landing on a frozen trunk, so **gate-passed work accumulates unmerged at the rate we produce it.** It is also why Wednesday is holding the RD-363 merge: merging one branch into a 247-behind trunk is the first move of this decision, not a neutral act.\n\n**There is no documented branching model anywhere in the repo** — searched JIRA.md, HISTORY.md, README.md, DEPLOYMENT_GUIDE.md and docs/runbooks/. That absence is the root cause.\n\n**The agent's own framing, and it is right:** this and the RD-361 round-3 card are the same shape — *the queue cannot move without a ruling*, and neither looks urgent from outside. One has a Blocker behind it; this one has four branches.",
+  "default_action": "HOLD - nothing merges to main, work continues on the campaign branch, and the queue keeps growing. No harm today; it compounds.",
+  "options": [
+   {
+    "key": "mergeup",
+    "label": "Authorise Wednesday to land the finished branches onto main, gate-passed only (recommended)",
+    "detail": "Wednesday merges only branches whose gate has PASSED, one at a time, reporting each. Closes the scanning gap fastest — once work is on main, gitleaks sees it. Does not settle the branching model, but stops the bleed while you decide. RD-363 would land under this; RD-361 would not, because its gate did not pass."
+   },
+   {
+    "key": "kamdecides",
+    "label": "You set the branching model first, then we land against it",
+    "detail": "Cleanest long-term: you name the model (trunk-based, release branches, whatever), it goes into the repo as a document, and every future gate brief cites it. Cost: the queue stays frozen until you do, and it is growing."
+   },
+   {
+    "key": "leave",
+    "label": "Leave it - keep working on the campaign branch and merge later in one go",
+    "detail": "Lowest effort now, highest cost later: one enormous merge, and the secret scanner stays blind on everything until it happens. Stated so the option is on the record, not because Wednesday recommends it."
+   }
+  ],
+  "recommended": "mergeup",
+  "ts": "2026-09-07T17:59:02.887435+10:00",
+  "status": "open",
+  "ruled_choice": null,
+  "ruled_ts": null
  }
 ]

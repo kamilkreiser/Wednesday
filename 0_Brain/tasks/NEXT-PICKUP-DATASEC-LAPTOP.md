@@ -7,7 +7,7 @@ status: live
 supersede: replace wholesale at the next pickup; do not append
 ---
 
-# NEXT PICKUP — Datasec laptop seat, 18:0x AEST Monday 2026-09-07
+# NEXT PICKUP — Datasec laptop seat, 18:0x AEST Monday 2026-09-07 (refreshed at the 50% checkpoint)
 
 ## 🔴 THE CORRECTION THIS SEAT MADE TO THE HANDOVER IT INHERITED
 The 17:0x version said **"RD-361 round-2 TIER-1 RE-GATE running (launched 17:0x)"** and set a
@@ -28,13 +28,35 @@ naming its own brief (never a non-zero ctx) — and **both have since REPORTED**
 **The general rule this earns, and it is already a lesson:** a handover records a mechanism by its
 **PATH**. Every launch wrapper below is named by path for exactly that reason.
 
-## FLEET — 1 live (both gates RETURNED and their panes are closed-out; cap is 3)
-- **`Datasec/NexusAI` `%2`** — the builder, ~65% ctx (watcher checkpoint fired; it has room, it is NOT
-  rotating). Shipped **RD-329 @ `2e78c76`**. Next: file the platform-residue ticket (below). **Do not
-  close that pane.**
-- **`%3` / `%4`** — the two QA gates, both REPORTED. Panes left up for inspection; before closing
-  either, run `2_Project_Files/fleet/cockpit/pane_close.sh` discipline (tty on the listener AND its
-  parent), and re-curl anything the handover names as up.
+## FLEET — 1 live: the RD-362 gate. The builder has been told to WRAP.
+- **`%5` — QA gate, RD-362 (SEC-04 + SEC-03), TIER 1, round 1 of 2.** Branch
+  `rd-362-pentest-report-exposure-s43` @ `920e067dc32f21cfb11e23701ee10ac210bee4d0`.
+  Launch: `2_Project_Files/fleet/state/launch_qa_nexusai_rd362.sh` (`--check` for guards).
+  Brief: `2_Project_Files/fleet/qa-agent/briefs/2026-09-07_nexusai-rd362-sec04-sec03-tier1.md`.
+  Launched and verified at rung 5. **Its report is the next thing to land.**
+- **`Datasec/NexusAI` `%2`** — the builder (s43), ~68% ctx, **queue empty and it said so rather than
+  manufacturing work.** `HANDOVER-S43.md` is current (eight branch heads first-hand, the Blocker in
+  full, eleven of its own errors, ten traps). **Told to WRAP** at 07:59:57Z — not to tidy up, but
+  because an alive-but-dormant pane re-fires the frozen-busy watcher for ~75 minutes of false alerts.
+  Expect its wrap mail. Relaunch it when Kam rules on either card.
+- **`%3` `%4`** — the two returned gates, idle since 17:42 / 17:40. Panes up for inspection only.
+  Before closing either: `pane_close.sh` discipline (tty on the listener AND its parent), then
+  re-curl anything named as up.
+
+## GATE QUEUE AFTER RD-362 — 2 left, both Wednesday's to fire, neither needs the builder
+1. **RD-329 @ `2e78c76`** — the public `/api/health` allow-list guard. **No red-proof exists and the
+   builder said so**: the code has been correct since 2026-04-25, so it passes at the base by
+   construction. Its discriminator is the control cell. **And the real finding is not code —
+   `nexusai-staging` is serving a build older than the fix**, so remediation is infrastructure
+   (redeploy/stop), category 2, not available to a code-scoped session.
+2. **RD-148 @ `aea410c`** (`rd-148-scim-revoke-ui-s43`, 2164/2164).
+
+## 🔴 TWO CARDS ON KAM'S DESK — nothing moves on either until he rules
+- **`nexusai-rd361-blocker-vs-nogo-cap`** — rec `round3`, **default HOLD**. The Blocker below.
+- **`nexusai-rd367-frozen-trunk`** — rec `mergeup`, **default HOLD**. `main` frozen since 2026-09-01
+  with 247 commits ahead of it; gitleaks runs on `main` only, so six days are unscanned; the demo
+  deploys from `main`. **The builder's framing, adopted: this and the round-3 card are the same shape
+  — the queue cannot move without a ruling, and neither looks urgent from outside.**
 
 ## 🔴 BOTH GATE VERDICTS — the first one is a decision on Kam's desk
 - **RD-361 round 2 @ `1149d1c`, tier 1 → NO GO.** One **Blocker**, two Majors.
