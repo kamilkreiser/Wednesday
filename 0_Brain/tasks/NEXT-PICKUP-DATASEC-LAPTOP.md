@@ -40,10 +40,28 @@ what was tested, and how."* Filed as [[2026-09-07_analysis-records-what-tested-a
 artefact under it is `5_Project_History/2026-09-07_datasec-analysis-record.md`. **Every ticket comment,
 report and handover from here carries those three fields.**
 
-## FLEET — 1 live (`%8` s44). RD-148 gate returned and its pane is closed-out.
-- **`%8` — `Datasec/NexusAI` s44.** Item 1 (RD-361 round 3) IN PROGRESS — it needs git, not the API,
-  so it is unaffected by the block below. **Item 2 (the merges) is HELD by the seat, correctly.**
-  Items 3 (findings tickets) and 4 (RD-148 round 2) queued behind.
+## FLEET — 2 live
+- **`%8` — `Datasec/NexusAI` s44.** **Item 1 DELIVERED: RD-361 round 3 @ `2f4896d`, at its gate.**
+  Item 2 (merges) HELD on the card below. Items 3 (findings tickets) and 4 (RD-148 round 2) queued.
+- **`%9` — QA gate, RD-361 ROUND 3, TIER 1.** Branch `rd-361-round3-s44` @ `2f4896d`, cut from
+  `1149d1c`. Launch: `2_Project_Files/fleet/state/launch_qa_nexusai_rd361_r3.sh` · Brief:
+  `.../briefs/2026-09-07_nexusai-rd361-round3-tier1.md`. Launched 19:29, rung-5 verified.
+
+## ROUND 3 — what the builder did, and the part worth keeping
+`rd-361-round3-s44` @ `2f4896d`, **cut from `1149d1c` not the campaign tip** (verified after pushing,
+with an explicit refspec so it could not land on the tip). 3 files, **2177/2177 across 113 suites**.
+**The discriminator:** `authEnforced` is written at exactly one site (`server.js:3349`) and the next
+statement (`:3350`) writes `firstRunComplete: true`; the disable path writes both. So
+**`authEnforced` present ⇒ `firstRunComplete` present**, and the contrapositive is the fix — relaxing
+**only on positive evidence** (a readable, plain-object settings file with no `firstRunComplete`).
+**🔴 THE PART WORTH KEEPING — it rejected its own first fix after reading the route:** *"no authorized
+users means auth was never enforced"* is FALSE, because `POST /api/auth/enforce` validates the four
+Entra settings and **not** the user list, so `authEnforced: true` is reachable with zero users. Its
+own words: it had written that fix in its head before reading the route, and **it would have been
+wrong in the product's favour and green in the suite — the exact shape of a check that cannot fail.**
+**It also pre-empted a false control for the gate:** `/api/health` returns 200 on BOTH heads, so it
+cannot discriminate — and it said so rather than letting a tester find it. And it **refused to
+manufacture screenshots** for a change that touched no screen.
 
 ## 🔴🔴 THE MERGES ARE BLOCKED, AND A KAM RULING HAS BEEN FALSIFIED — card `rd104-gh-identity-acceptance-false-premise`
 **s44 could not establish the deploy precondition and stopped rather than guessing. It was right, and
