@@ -4900,5 +4900,44 @@
   "status": "ruled",
   "ruled_choice": "afterfix",
   "ruled_ts": "2026-09-07T10:35:33.445209+10:00"
+ },
+ {
+  "id": "secuura-workspace-suites-never-run-on-a-pr",
+  "client_project": "Secuura/Blockchain",
+  "title": "The repo's own aggregate test command runs on NO pull request — its only triggers are a manual click and the deploy",
+  "bluf": "PRIOR-RULING CHECK: the queue flagged two of Kam's messages — 2026-08-21 19:49 (the Claude-to-Claude project) and 2026-09-01 09:47 (a plan change on his workspace quota). Wednesday read both; neither is about CI, workflows or test gating. Overridden on that basis. THE CARD, MEASURED BY WEDNESDAY AT develop db94e9fc8 rather than inherited: 'npm run test --workspaces' appears in exactly two of the repo's 17 workflows. In ci.yml line 51, whose ONLY trigger is workflow_dispatch — a human clicking Run workflow; no push trigger, no pull_request trigger. And in deploy-demo.yml line 140, which runs at DEPLOY, after merge. So the first time the aggregate workspace suite meets merged code is when we deploy it. CORRECTION TO WHAT WEDNESDAY WAS TOLD, because the version handed up was too strong and Wednesday nearly repeated it: pull requests are NOT unchecked. pr-platform-suites.yml runs on pull_request and executes test:migrations, test:unit, ci:e2e and quality:static; pre-merge-platform-suites.yml and security-scan.yml also fire. What is missing is the aggregate workspace lane specifically, not all testing. Two measured details that make it worse than it reads: the command carries --if-present, so a workspace with no test script is skipped silently and even a green manual run does not tell you how many suites executed; and pr-platform-suites.yml line 70 carries a comment stating in its own words that the gate which actually operates is the manual one. NOTHING IS BROKEN TODAY and nothing needs doing this hour — this is about where the safety net sits.",
+  "default_action": "If Kam is silent: Wednesday changes NO workflow. It files ONE ticket on the Secuura board recording the measurement above so the finding cannot be lost, and re-raises after the current PR queue clears. No CI behaviour changes without Kam's word, because a blocking check lands on Peter's and Stuart's work as well as ours.",
+  "options": [
+   {
+    "key": "wire-nonblocking",
+    "label": "Wire the workspace suites into the PR workflow, NON-blocking first (recommended)",
+    "detail": "Add the aggregate lane to pull_request as an advisory job. We learn what it catches and how long it takes on real PRs without stopping anyone's work, then make it blocking as a second step if it proves quiet and fast. Pilot-then-adopt, and it cannot surprise Peter or Stuart."
+   },
+   {
+    "key": "wire-blocking",
+    "label": "Wire it in and make it blocking immediately",
+    "detail": "Strongest guarantee. The honest risk is that it starts failing PRs on pre-existing breakage nobody has looked at, including Peter's and Stuart's, and we do not currently know how many workspaces even have a test script because --if-present hides it."
+   },
+   {
+    "key": "measure-first",
+    "label": "Run it once manually and report what it says, before deciding",
+    "detail": "One workflow_dispatch click. Wednesday reports how many workspaces ran, how many were skipped by --if-present, what failed and how long it took. Turns the question into a measurement; decides nothing; costs one run."
+   },
+   {
+    "key": "leave",
+    "label": "Leave it as a manual and deploy-time gate",
+    "detail": "Accept that the aggregate suite is a deploy-time discovery. The PR platform suites still run, so this is not a bare board."
+   }
+  ],
+  "recommended": "wire-nonblocking",
+  "ts": "2026-09-07T10:39:16.945116+10:00",
+  "status": "open",
+  "ruled_choice": null,
+  "ruled_ts": null,
+  "prior_rulings_overridden": [
+   "2026-08-21 10:04",
+   "2026-08-21 19:49",
+   "2026-09-01 09:47"
+  ]
  }
 ]
