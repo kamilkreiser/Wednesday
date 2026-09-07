@@ -5201,5 +5201,38 @@
    "CARD secuura-ks764-merge-order-2026-09-03",
    "CARD secuura-ps-759-760-merge-owner"
   ]
+ },
+ {
+  "id": "secuura-889-issuer-org-caller-asserted",
+  "client_project": "Secuura/Blockchain",
+  "title": "#889 passed its gate, but it puts a CALLER-ASSERTED organisation onto the public verification display. Merging it silently answers an open product question — so it is yours, not mine",
+  "bluf": "PRIOR-RULING CHECK: your 09:40 merge grant, 11:09 deploy grant and 10:34 ruling on the KS-597 backfill ('afterfix - authorise the backfill as its own round AFTER the fix merges') were all read. This card revisits none of them. Your merge grant is exactly why this card exists: it made merges mine, and your own 09-07 boundary says a merge that DECIDES SOMETHING WITH A CLIENT stays yours. This is one. THE GATE'S VERDICT: GO-with-findings on #889 @ af640e809. The mandated real-Postgres leg was run properly - a container built by the product's own docker/init plus 48 migrations, validated against the running dev DB, driving the REAL saveDocument as the non-superuser secuura_app role with RLS forced, every value read back out of the row by a separate connection. Ten registrations, nine rows, one correctly refused. The statement executes, the value is right, cross-tenant attribution folds to NULL, and the NULL path was proved three ways rather than accepted. THE FINDING THAT IS YOURS (MAJOR): the issuing organisation is taken straight from the request body, lowercased and written, with NO check that the caller belongs to it - while req.user.organizationId sits in the same scope and is used ten lines later. Fifteen lines ABOVE the new code, the same handler resolves onBehalfOf against the key's own organisation and 403s a different one. So the file is internally inconsistent. WITHIN a tenant, a caller can attribute a document to another organisation in that tenant. ACROSS tenants it is correctly refused. WHY IT IS YOURS AND NOT MINE: #889 is the first change that makes that answer visible ON THE PUBLIC VERIFICATION SURFACE, and whether an organisation is a trust boundary inside a tenant is the open product question KS-621 is already holding. On a document-verification product, publishing an unverified claim about who issued a document is a product decision, not an engineering one. The tester's own words: 'Finding 1 needs Kam, not this gate.' ALSO IN FLIGHT, not blocking this: Finding 2 (the new test is blind to the tenancy predicate it was written to protect - Wednesday has commissioned the fix, it is builder work), and Finding 5, MAJOR and out of scope - this change ARMS A PREVIOUSLY-INERT CASCADE DELETE of documents, which must reach whoever owns KS-764/PS-690 BEFORE the backfill round you authorised at 10:34 lands. Wednesday is holding the merge meanwhile; nothing is lost by waiting.",
+  "default_action": "HOLD — #889 is not merged. Wednesday commissions the Finding 2 test fix and files Findings 3-5. Nothing else waits on this.",
+  "options": [
+   {
+    "key": "hold-for-finding1",
+    "label": "Hold #889 until you rule the trust-boundary question (Recommended)",
+    "detail": "Nothing degrades while it waits - the defect it fixes is attribution, and today nothing is attributed at all (populated rows: 0). Ruling it also unblocks KS-621, which has been holding the same question. Wednesday commissions the Finding 2 test fix meanwhile so the PR is better when it does go."
+   },
+   {
+    "key": "merge-now-track",
+    "label": "Merge now, track Finding 1 as its own ticket",
+    "detail": "Ships the attribution the ticket asked for. Accepts that a caller-asserted organisation appears on the public verification display until Finding 1 is fixed. Defensible if you judge that within-tenant misattribution is not a real threat for these customers - which is genuinely your call and not the gate's."
+   },
+   {
+    "key": "fix-in-pr",
+    "label": "Bind the organisation to the actor inside #889 before it merges",
+    "detail": "One more round on this PR: resolve organizationUuid against req.user.organizationId exactly as onBehalfOf already does fifteen lines above, and 403 a mismatch. Technically small and makes the file self-consistent - but it decides the trust-boundary question by implementation rather than by your ruling, which is the thing to avoid."
+   }
+  ],
+  "recommended": "hold-for-finding1",
+  "ts": "2026-09-07T16:56:16.517647+10:00",
+  "status": "open",
+  "ruled_choice": null,
+  "ruled_ts": null,
+  "prior_rulings_overridden": [
+   "2026-09-03 21:20",
+   "CARD secuura-ks764-orgless-caller-403-2026-09-03"
+  ]
  }
 ]
