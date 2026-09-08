@@ -212,7 +212,7 @@ if [ -f "$BD" ]; then
   if [ "$BD_RC" -eq 0 ]; then
     ok "boot digest current ($(printf '%s' "$BD_OUT" | tail -1 | sed 's/^check: //'))"
   else
-    warn "boot digest STALE or incomplete" "regenerate: python3 2_Project_Files/tools/boot_digest.py — $(printf '%s' "$BD_OUT" | head -1)"
+    warn "boot digest STALE or incomplete" "regenerate BOTH: python3 2_Project_Files/tools/boot_digest.py --by-tier && python3 2_Project_Files/tools/boot_digest.py — $(printf '%s' "$BD_OUT" | head -1)"
   fi
 else
   warn "boot_digest.py missing" "the seat will read every lesson file (34% boot) — restore 2_Project_Files/tools/boot_digest.py"

@@ -126,11 +126,16 @@ functional understanding; Wednesday takes it seriously, records it, and applies 
    (Same at-creation discipline as the gitignore rule — the wrap is the
    backstop, not the mechanism.)
 3b. **Boot digest (WED-139, Kam 2026-09-02):** if this session wrote or edited
-   any file in `0_Brain/learnings/`, run
-   `python3 2_Project_Files/tools/boot_digest.py` and commit the regenerated
-   `_boot_digest.md` with it (the launcher regenerates at boot too; doctor warns
-   on a stale one — the wrap keeps origin current for a seat that boots
-   elsewhere).
+   any file in `0_Brain/learnings/`, regenerate **BOTH** digests and commit them:
+   `python3 2_Project_Files/tools/boot_digest.py --by-tier` **and**
+   `python3 2_Project_Files/tools/boot_digest.py`. **The `--by-tier` one is not
+   optional — `_boot_digest_by_tier.md` is the file the boot prompt tells every
+   seat to read, and the bare command does not touch it** (corrected 2026-09-08:
+   this line named only the bare command for six days, and `--check` was blind to
+   the by-tier file, so a wrap could leave the read-at-boot digest stale while
+   doctor printed "boot digest current"). The launcher regenerates both at boot;
+   doctor's `--check` now covers both — the wrap keeps origin current for a seat
+   that boots elsewhere.
 3c. **Ledger archive (Kam-ruled 2026-09-04 08:32, card `wed-ledger-boot-cost`):**
    move every `_ledger.md` row **older than ~3 days** into `_ledger_archive.md`,
    verbatim, newest-first, under a dated `## Archived …` heading naming this rule.

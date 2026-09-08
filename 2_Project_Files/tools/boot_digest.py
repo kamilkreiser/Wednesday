@@ -291,8 +291,39 @@ def check():
                     break
     if stale:
         print(f"CHECK FAIL: digest older than {len(stale)} lesson file(s): {' '.join(stale)} — regenerate", file=sys.stderr)
-    print(f"check: {len(files)} files, {misses} misses, {len(stale)} stale")
-    return 1 if (misses or stale) else 0
+
+    # --- THE BY-TIER DIGEST IS CHECKED TOO (2026-09-08, ledger: a check aimed at the
+    # wrong file). Until now check() validated ONLY _boot_digest.md — and the boot
+    # prompt tells every seat to read _boot_digest_by_tier.md. So doctor could print
+    # "boot digest current" while the file the seat actually reads was stale or absent.
+    # The launcher regenerates both in-path and ANTICIPATES the --by-tier leg failing
+    # (it prints a warning and falls back), which is exactly the case where this
+    # backstop was blind. Scope, stated honestly: EXISTENCE and STALENESS only. The
+    # per-tier content assertions (W whole, M rules-only, P handle) differ by tier and
+    # a content check would have to reimplement the tiering — which is a second
+    # implementation of the thing being verified, and two implementations of one idea
+    # disagree by default. Staleness is the property that actually failed here.
+    bt_problems = []
+    if not os.path.exists(OUT_BY_TIER):
+        bt_problems.append("missing")
+    else:
+        btmtime = os.path.getmtime(OUT_BY_TIER)
+        bt_stale = [os.path.basename(f) for f in files if os.path.getmtime(f) > btmtime]
+        if bt_stale:
+            # Cap the list: the red-proof for this branch printed all 127 filenames,
+            # which is a warning nobody reads. The COUNT is the finding; three names
+            # are enough to recognise it. (doctor.sh prints only head -1 of stderr,
+            # so an unbounded list is also a line it would truncate arbitrarily.)
+            shown = " ".join(bt_stale[:3]) + (f" +{len(bt_stale)-3} more" if len(bt_stale) > 3 else "")
+            bt_problems.append(f"older than {len(bt_stale)} lesson file(s): {shown}")
+    if bt_problems:
+        print("CHECK FAIL: by-tier digest " + "; ".join(bt_problems)
+              + " — regenerate: python3 2_Project_Files/tools/boot_digest.py --by-tier",
+              file=sys.stderr)
+
+    print(f"check: {len(files)} files, {misses} misses, {len(stale)} stale, "
+          f"by-tier {'OK' if not bt_problems else 'FAIL'}")
+    return 1 if (misses or stale or bt_problems) else 0
 
 
 if __name__ == "__main__":
