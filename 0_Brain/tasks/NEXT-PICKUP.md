@@ -257,9 +257,20 @@ have nodded at.** Report + evidence (md5 ledger):
 - **Builder `%5`** — merging #910, filing three tickets, then the preAuth widen. **KS-1004 (#912
   @ `ae8751f38`) is BUILT and waits for its own gate.** Its ticket description AND title now carry
   the two-direction lockout; KS-1017 widened and retitled. KS-1018, KS-1019 filed.
-- **Gate `%6`** — verdict delivered; the pane can be closed at the next tidy point **via
-  `pane_close.sh`, never `kill-pane`** (listener + parent tty both checked).
-- **Gate queue:** #912 tier 1 (needs `:6882`, so it goes next), preAuth tier 2 (does not).
+- **Gate `%6` CLOSED 07:2x via `pane_close.sh`** (never `kill-pane`). Its verdict was delivered
+  and relayed; pane reported *done 7:11 am*, prompt empty, **zero writes to the target**.
+  **Listeners unchanged and `:6882` + `:47787` both still 200 after the close.** ⚠ Two listener
+  counts disagreed on the TOTAL (the tool said 28→28, a separate `lsof` said 27→27) — **left
+  unreconciled: they agree on the INVARIANT, which is the property the check is for, and a delta
+  between two instruments is a fact about the instruments.**
+- 🔴 **GATE QUEUE — THE NEXT ACTION FOR A SEAT WITH A FULL WINDOW, and it is NOT started:**
+  **#912 (KS-1004) tier 1** — it needs `:6882`, which is now FREE. **preAuth tier 1** (raised from
+  tier 2 on blast radius — see below), does not need the stack, so the two can run together.
+  **NOTHING IS BLOCKED BY THIS: the builder is not waiting on either verdict.** Deliberately left
+  unstarted rather than written thin at 74% — a rushed gate brief is what produces a wasted pass.
+  **The pattern is one wrapper per gate, TRACKED, copy
+  `2_Project_Files/fleet/qa-agent/launchers/launch_qa_secuura_ks1013_910.sh`** (its five guards and
+  their exit codes are the shape to keep) and its brief beside it in `qa-agent/briefs/`.
 - **develop `e559f7bb`**; #910 branch `d90f9ad8d` untouched through the whole pass.
 
 ## 🟡 OPEN
