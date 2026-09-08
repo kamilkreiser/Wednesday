@@ -1,3 +1,66 @@
+## 2026-09-08 14:34–15:5x — s153, Studio Secuura seat (rotation successor to s152). PETER WAS WAITING ON NOBODY, FIVE TIMES OVER.
+
+Booted at 14:34 into Kam's standing 14:28 priority — *"prioritize the two images and messages from
+Peter so that he can move on once he comes back on board later today."* Discharged by 15:3x.
+
+**The finding is worth more than the clearance.** Fourteen PRs across his two screenshots — which are
+two DIFFERENT lists, not one — and exactly ONE needed Kam. Five were work already done or an action
+already his, with nobody writing it where he would see it: **#793** executed that morning, **#721**
+(his own preferred landing implemented on 1 and 7 Sep — an eight-day wait on nobody), **#768 item 3**
+already ticketed, **#785** a stale approval that was HIS re-review while displayed under "Waiting on
+Kamil", and **KS-566** done, deployed and mutually closed with Stuart while our board said In Review.
+**Two of the nine had ZERO Peter comments at all** — the "hold" strings were the PR's own title and a
+Linear bot quoting the defect the PR fixes; we were reading our own text back and calling it his
+objection. s150's formulation, adopted: *"Peter's board is not wrong; it is uninformed, and we are
+the ones who did not inform it."* Its closing measurement put a number on it: **20 of 39 In Review
+tickets have no open PR.**
+
+**Four merges.** `develop` `e69fa0dc5` → `27b0ee294` (#907) → `9806be0ac` (#793) → `5c6777658`
+(#895), and `main` → `54b2a5c26` (#908, Kam's `route-to-main` ruling). #895 merged on his explicit
+instruction with **zero approving reviews — read from the endpoint and stated on the ticket in the
+repo's own language**, because that was his exception to make rather than a step anyone skipped.
+**KS-682 is NOT proven until #896's four-slot sweep runs**, and that is said everywhere the stream
+appears. KS-997/999/1000/988 filed.
+
+**Three builds, each exercised before arming, and exercising them earned its keep every time.**
+(1) **The launcher now pulls before any boot read.** It never had — invisible while one seat on one
+drive made every commit, because that seat is current by definition. The two-machine split broke it:
+`.git` is deliberately excluded from every drive sync, so Tuesday's tree sat ten commits behind and a
+session does all its reading at BOOT. No `--autostash` and no output suppression, both because they
+put conflict markers on `main` twice this morning. (2) **The panel autoplay reads the whole message**
+(Kam 15:23). (3) **Nightly NAS sync at 03:30 with a deletion alarm**, plus `confirmbigdel = true` in
+Kam's own profile on his authorisation — and the honest split stated to him: that line prevents the
+catastrophic whole-replica case, the alarm detects the gradual one. **Exercising the wrapper found
+two defects reading it would not have** — `grep -c || echo 0` printing the count AND the fallback,
+and two same-second runs sharing a log so the second counted the sum of both.
+
+**Kam changed how I write to him TWICE, eleven minutes apart, and the second was caused by the
+first.** At 15:23 he had the panel's first-paragraph truncation removed so the voice reads
+everything; at 15:34 he asked for the ask to come FIRST, spelled out as literal steps. **Removing the
+cap made length cost him real seconds and my very next messages were the longest of the day** — a
+second-order effect of my own change that he felt and I did not. Both filed. The truncation was
+itself my inference from an instruction about WHICH DEVICE speaks, used to justify a decision about
+HOW MUCH is spoken, with his quote in the code comment as though it were provenance.
+
+**Eight of my own errors, all cheap, all in the ledger (211 rows).** The two that reached him: I told
+him nobody had executed his #793 rulings — having read the queue's "undelivered" view as a fact about
+the world when it records what a seat MARKED (s150's sharper version: *two independent records said
+done, one column said undelivered, and the column won*) — and I called a drive sync "additive, so
+nothing is at risk" before checking that additive rules out deletions, not overwrites. **That pair is
+a w=2 with its diagnosis filed:** the existing scope-word rule lists words for classifying WORK, and
+both of these were claims about a TOOL'S GUARANTEE, so the handle missed.
+
+**s150 scored 1.0** — it caught me twice inside six minutes and was right both times, and it came
+from **reordering my brief to measure first** rather than following its sequence. On #908 it measured
+the obvious mechanism before rejecting it (retargeting would have carried 849 commits to `main` for a
+one-file config edit), applied the change as INTENT rather than a cherry-pick because `main`'s file
+differed, and refused the claim Kam actually asked about — *"the config is on main"* and *"the bumps
+have stopped"* are different claims, and only an absence next week proves the second.
+
+Wrapped on Kam's 15:49 instruction — *"tell me when it's ready to shut down. Let everyone finish
+their tasks"* — with the T9 proven ready by a **contents** check (163,153 Datasec files, zero would
+transfer, positive control run) rather than the file counts I had first offered him.
+
 ## 2026-09-08 12:0x–12:3x — s152, Datasec laptop seat (rotation successor to s150). KAM'S TWO INSTRUCTIONS, BOTH ANSWERED BY MEASUREMENT.
 
 Booted at 12:06 straight into two direct instructions from Kam, which displaced the rest of the boot:
