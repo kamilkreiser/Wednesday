@@ -7,7 +7,7 @@ status: live
 
 # Boot digest — headline + rules of every lesson (open the file when it fires)
 
-Generated 2026-09-08 14:34 from 122 lesson files (602,994 B). Each block = the lesson's retrieval handle (H1), its frontmatter, the operative paragraph, its section index, and every RULES section verbatim. 6 files carry no rules-shaped section and are included whole. The CASES behind a rule live only in the file: open it the moment the rule fires, or when a diagnosis needs the evidence. `_ledger.md` is read whole beside this digest; `_ledger_archive.md` on demand.
+Generated 2026-09-08 15:25 from 123 lesson files (606,023 B). Each block = the lesson's retrieval handle (H1), its frontmatter, the operative paragraph, its section index, and every RULES section verbatim. 6 files carry no rules-shaped section and are included whole. The CASES behind a rule live only in the file: open it the moment the rule fires, or when a diagnosis needs the evidence. `_ledger.md` is read whole beside this digest; `_ledger_archive.md` on demand.
 
 ## The T9 SSD is the master — Wednesday must be fully portable
 `2026-07-31_fully-portable-drive.md` · principle · 2026-07-31 · status: superseded — the "T9 is the master" half by [[2026-08-25_one-drive-devmaster-is-master]] (2026-08-25); the portability principle itself still lives
@@ -4365,4 +4365,39 @@ wrong-question half) · [[2026-09-08_a-false-absence-is-usually-my-own-instrumen
 instrument was never shown to fire) · [[2026-09-07_a-census-complete-over-a-frame-that-is-not]]
 (right answer, wrong frame) · [[2026-08-09_an-enforcement-you-must-arm-is-not-one]] ·
 [[2026-09-01_a-tap-is-a-pointer-not-a-message]] (instance 2 lives there as the w=6 row).
+
+
+## The panel autoplay reads the WHOLE message — and the intro-only version was Wednesday's inference, not Kam's instruction
+`2026-09-08_the-panel-reads-the-whole-message.md` · preference · 2026-09-08 · status: live
+
+**The operative case, so the headline matches it:** Wednesday is writing a panel reply, or
+changing how the panel speaks. **The autoplay reads the message end to end.** Do not
+front-load on the assumption that only the opening is heard, and never re-introduce a
+truncation without his word.
+
+sections (open the file for these): What happened, and the part worth keeping · How to apply
+
+## How to apply
+
+1. **When an instruction has an obvious adjacent decision, that adjacent decision is still
+   YOURS and must be labelled as yours** — in the code comment, in the receipt, in the
+   message to him. *"You said only the browser speaks; I have also capped what it reads,
+   which you did not ask for — say if that is wrong"* costs one clause and would have
+   surfaced this immediately.
+2. **Never let a verbatim quote sit beside a decision it does not authorise.** A quotation
+   next to a choice reads as provenance for that choice. This is the sibling of
+   [[2026-08-16_classification-is-the-field-that-grants-authority]]: a citation, like a
+   scope word, is a claim about authority.
+3. **Panel replies are heard end to end, so length costs him seconds** — the fix is a
+   shorter message, never a truncated reading. BLUF stays first because it is heard first,
+   not because it is all that is heard.
+4. **A preference about HIS experience is his to set, always.** Wednesday may raise the
+   cost ("this will be two minutes of audio") and recommend — it may not decide it quietly
+   and ship it.
+
+**Family:** [[2026-09-07_a-rule-for-creation-is-not-a-mandate-to-retrofit]] (read what the
+rule actually scopes) · [[2026-08-14_i-read-representations-they-read-sources]] (an
+inference presented with a citation) · [[2026-08-20_dashboard-shows-only-live-work]] (his
+reading surface is his) · [[2026-08-17_conversation-needs-a-stable-panel]] (the panel is
+where he reads — and now where he listens).
 

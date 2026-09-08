@@ -165,19 +165,22 @@ _auto_spoken = set()
 
 def ear_text(text):
     """Written-for-the-eye → written-for-the-ear (voice protocol)."""
-    t = re.sub(r"\*\*", "", str(text))
+    # THE WHOLE MESSAGE IS SPOKEN (Kam, 2026-09-08 15:23, verbatim: "please amend the
+    # voicce over. auto voice over should read the entire message, not just the intro").
+    # This SUPERSEDES the 14:24 first-paragraph rule below it, which was Wednesday's
+    # reading of "only the browser speaks" and not his instruction. He listens while
+    # doing other things, so the intro-only version made him read the rest anyway —
+    # which is the opposite of what a voice channel is for. No paragraph split and no
+    # character cap: if a message is too long to hear, the fix is a shorter message.
+    t = str(text)
     t = re.sub(r"https?://\S+", "link", t)
-    # THE FIRST PARAGRAPH IS THE SPOKEN MESSAGE (Kam, 2026-09-08 14:24: "change it so
-    # that only the browser speaks"). With speak.sh silenced, the browser became the ONLY
-    # voice — and reading 1200 characters of a written reply aloud is not a voice channel,
-    # it is a recital. The voice protocol has always said 1-3 sentences for the ear and the
-    # detail on the page; Wednesday's replies already open with a BLUF, so the BLUF simply
-    # becomes what is spoken. A short single-paragraph message is unchanged.
-    para = re.split(r"\n\s*\n", t.strip(), maxsplit=1)[0]
-    t = re.sub(r"\s+", " ", para).strip()
-    if len(t) > 700:
-        t = t[:700].rstrip() + " ... the rest is on the page"
-    return t
+    t = re.sub(r"\*\*|__|`", "", t)            # bold/code marks are not words
+    t = re.sub(r"(?m)^\s{0,3}#{1,6}\s*", "", t)  # heading hashes
+    t = re.sub(r"(?m)^\s*[-*•]\s+", "", t)     # bullet markers
+    t = re.sub(r"[·|]", " ", t)                # separators that read as noise
+    t = re.sub(r"[ \t]+", " ", t)
+    t = re.sub(r"\n{3,}", "\n\n", t)           # keep paragraph pauses, drop the rest
+    return t.strip()
 
 class Handler(SimpleHTTPRequestHandler):
     def __init__(self, *a, **kw):
