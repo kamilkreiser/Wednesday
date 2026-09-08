@@ -21,35 +21,31 @@ declared default (finished the guard) and then started Secuura anyway, because o
 **it was never blocked on him**: his 07:10 instruction plus the week-scoped merge and deploy
 grants already authorised it, and the COO rule says such a ticket is executed, not listed.
 
-**🔴 YOUR LIVE DUTY — ONE agent is running and it reports to you, not to Kam.**
+**🔴 YOUR LIVE DUTY — two agents running, both report to you, and ONE THING IS OWED TO KAM.**
 
-`%171` = **Secuura s150** (NOT s153 — its own history is the authority for its seat number).
-At 14:0x it holds a GO to **merge #906**, then file ONE ticket for F1–F4, then act on three
-Kam rulings, then return to the **P2 In Review queue** (29 tickets, category-1).
-**Watch for its MERGED receipt and score it.** The QA pane `%172` is CLOSED — its verdict is
-delivered and its work is done.
+| pane | what | state at 14:3x |
+|---|---|---|
+| `%171` | **Secuura s150** | working the **P2 In Review queue** (KS-365 in progress). #906 MERGED, KS-998 filed, all three Kam rulings landed, #907 built |
+| `%173` | **QA gate, KS-963 / PR #907 @ `561de81ca`, TIER 1** | running; verdict → `wednesday-agent@`. **Do the completion check, then the merge GO is yours** under Kam's week grant |
 
-**KAM RULED THREE CARDS AT 14:00 and all three are relayed with their artefacts named:**
-- `secuura-ks963-getuserbyid-swallows` → **rethrow** — KS-963 is ACTIONABLE now; its own
-  "do not fix yet" line is superseded by his word.
-- `secuura-platform-s-count-was-wrong-when-you-ruled` → **all18** — **the Platform S hold is
-  LIFTED**; the remaining three get archived.
-- `secuura-61-archived-while-still-open` → **three** — unarchive KS-174, KS-796, KS-802 only.
+**🔴 OWED TO KAM, TIME-BOXED: he asked (14:28) for "the two images and messages from Peter"
+to be prioritised BEFORE PETER IS BACK LATER TODAY.** Only ONE arrived — the PR screenshot
+dropped 14:19, already analysed. **The second and Peter's messages DO NOT EXIST anywhere**: the
+chat could not carry an image until 14:13 today, because that is when the upload path was built.
+**Wednesday has asked him to re-drop them. WATCH FOR THEM** — check
+`0_Brain/dashboard/uploads/` and Kam's chat entries for `attachments`. When they land, read them
+(they are images; the Read tool renders them) and prioritise Peter's items same-session.
 
-**#906 verdict: GO-WITH-FINDINGS** (gate scored 1.0). Wednesday's completion check passed all
-six requirements and the merge GO is given under Kam's week-scoped grant. **F1 (gate fails OPEN
-when a gated package's deps are absent) and F2 (gate reads the WORKING TREE, not the pushed
-commits) are MAJOR and neither is a regression** — they go into one ticket, same logical path.
-Relaunch that gate by its PATH if ever needed:
-`2_Project_Files/fleet/qa-agent/launchers/launch_qa_secuura_ks989_906.sh [--check]`
+**PR STATE, measured by s150 and already corrected to Kam — do not re-derive:**
+`#895` +187/−196 (a mechanical kebab-case rename, reviewable in a sitting) — **DIRTY** ·
+`#896` +5,297 — **DIRTY** · `#899` +8,827 — clean · `#900` +4,485 — clean but **based on #899's
+branch**, so merging it alone moves nothing. The extranet's "CLEAN" was GitHub's *uncomputed*
+`mergeable_state` rendered as clean. **The hold on #896/#899/#900 STANDS**: 18,609 added lines,
+"not reviewable to approval depth" — recorded verbatim in `5_Project_History/HANDOVER-s149.md:23-24`
+and `history.md:98`. **PS #783 is unreadable — the PAT 404s on the whole `Secuura/platform-s` repo.**
 
-**LAUNCHER CHANGE (Kam, 14:05):** it no longer opens the dashboard in a browser — the server
-still starts, he refreshes his own saved tab. `WED_OPEN_DASH=1` restores it for a machine with
-no saved tab yet (Tuesday's). Exercised both ways with a stub `open`; boot prompt byte-identical.
-
-**🔴 INSTANCE 6 IS LIVE ON THE TRUNK until #906 merges:** `systemTest/akto` `format:check` RED
-on `develop 986c592d5`, arriving via merge `512480ef1` (#892) — the PREVIOUS seat's own merge,
-~4 hours before it was found (the gate corrected "three hours" to four).
+**ON KAM'S DESK:** `secuura-ks963-widen-to-preauth` (getUserByIdPreAuth has the identical
+swallow; rec: include; default: #907 ships as ruled).
 
 ## WHAT WAS BUILT TODAY — do not re-derive any of it
 | Thing | Where | Commit |
@@ -96,11 +92,16 @@ agent.
    write the text to a file and pass `"$(cat file)"`.
 4. **Screenshots from the browser tool are a CROP of a 3491px viewport.** Do not read
    geometry from them — `getBoundingClientRect` + `elementFromPoint` is the instrument.
-5. **`cockpit.sh say --mail` NOW REFUSES a cited mail older than 15 minutes** (fixed 14:0x
+5. **VOICE: only the BROWSER speaks now** (Kam 14:24). `speak.sh` is silent unless
+   `WEDNESDAY_SPEAK_LOCAL=1`; the panel's autoplay is exempt via `SPEAK_FROM_SERVER=1` — **it
+   runs through speak.sh, so silencing that script silences the panel too.** `ear_text` speaks
+   the FIRST PARAGRAPH only, so write a BLUF: it is what Kam hears. **With the page closed there
+   is NO voice at all.**
+6. **`cockpit.sh say --mail` NOW REFUSES a cited mail older than 15 minutes** (fixed 14:0x
    after it went green on a tap carrying content no mail held — sixth instance of that
    family, agent-caught). Send the mail, read it back at the destination, THEN tap a bare
    pointer. `SAY_ALLOW_OLD_MAIL=1` exists for a genuine continuation and must be said aloud.
-6. **`setsid` does not exist on macOS.** `nohup … </dev/null >log 2>&1 &`, then verify
+7. **`setsid` does not exist on macOS.** `nohup … </dev/null >log 2>&1 &`, then verify
    `tty` is `??`.
 
 ## SECUURA STATE (from s149's handover, 10:56 — nothing has moved since)
@@ -121,7 +122,7 @@ CONSTRUCTION (AES-GCM). Resolve via `email_lookup_hash`; decisive on a MATCH onl
 `decision_queue` refused it while `chat_log` was corrupt this morning; re-file it.
 
 ## FLEET
-**s150 Secuura/Blockchain LIVE in `%171`** (launched 13:14). QA gate ran 13:45→14:00 and its pane is CLOSED. The Datasec/laptop seat WRAPPED
+**s150 Secuura/Blockchain LIVE in `%171`** · **QA gate on #907 LIVE in `%173`**. The #906 gate ran 13:45→14:00, scored 1.0, pane closed. The Datasec/laptop seat WRAPPED
 at 12:21; NexusAI S47 wrapped at 12:15 (`main` = `cd2b543`). No Tuesday seat exists yet —
 she is provisioned on the T9 and waits on Kam's Claude login.
 Kam was answering within minutes until ~12:53 and has been quiet since.
