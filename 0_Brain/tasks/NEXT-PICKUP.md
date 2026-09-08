@@ -197,6 +197,65 @@ the WED board (24 open, `hasNextPage: false`, 0 labelled `lesson`).
   s153 deliberately so it is not silently dropped. Not actionable.
 - **The archive-cascade card** — closed, no card filed, all 7 inside the 61 Kam ruled `three` on.
 
+---
+
+# ⏱ HANDOVER BLOCK — refreshed by s155 at its 50% CHECKPOINT (band is 80-90; this is NOT a rotation)
+
+**s155 booted 06:01 on a planned rotation.** Seat number DERIVED from `5_Project_History/history.md`
+(newest entry s154). Brain read WHOLE — by-tier digest 328,915 B / 4,389 lines AND `_ledger.md`
+489 KB / 243 rows, all three days, **no subset taken**; the laptop/Datasec ledger as row headlines
+only. **Statusline `ctx:41%` after the complete brain load plus the whole operational sweep**, which
+is where the corrected boot lesson predicts. That default is confirmed executable at this corpus size.
+
+## 🟢 SECUURA s154 IS RUNNING — launched 06:10, verified at RUNG 5, do not re-brief it
+Pane **`%5`**, at 13% and mid-boot ritual at the checkpoint. **Rung 5 verified by pane CONTENT, not
+by a non-zero ctx:** it named the brief unprompted — *"A fresh brief from Wednesday landed at launch
+time. Reading it in full and DKIM-verifying before I act on it."* Brief sent through
+`brief_and_launch.sh`, **verified at `secuura-blockchain@agentmail.to` 20:10:15Z** before the launch
+branch was reachable. **Its next mail is a plan confirmation. Answer it promptly — the reply goes
+BEFORE the capture** (the previous seat's own w=2, twice).
+
+**It will flag the F-02 SSH preflight warning — it already has, in its pane.** That is a KNOWN FALSE
+ALARM (push proven twice; repo-local `core.sshCommand` is what git uses) and **it does not go to Kam**;
+the same instruction was once given to him wrongly and is a ledger row. Answer it to the seat.
+
+**Its commission:** item 0 is **KS-1013** (P2, Backlog, was UNASSIGNED) — `PATCH /api/users/admin/{id}`
+answers 500 for a malformed id. **It is a FIX, so the round ENDS AT READY FOR QA** — full gate chain,
+no merge and no deploy on the seat's word. After item 0 it builds its own standing queue and proposes
+it; Wednesday gave the rule, not the answer, deliberately.
+
+🔴 **THE FRAMING A SUCCESSOR MUST NOT GET BACKWARDS, repeated because it is load-bearing:**
+`561de81ca` (Kam's KS-963 `rethrow`) is **CONTEXT, NOT CAUSE. KS-963 did not create a defect; it
+removed the swallow that was hiding one.** The route never validated the id format, so the old 404 was
+itself a wrong answer. **THE RULING IS NOT TO BE REVERTED.**
+
+## 🟢 THE MORNING SWEEP, MEASURED
+15 KS issues moved since s153's 13:38Z wrap, newest 14:56Z — **15 of a requested 40, so NOT truncated**.
+**Nothing from Peter or Stuart.** Four P0s are open and **all four are Peter's** (KS-1002, KS-971,
+KS-985, KS-984) — under Kam's 2026-09-06 10:24 ruling they stay his. WED board **103 open** across
+backlog+unstarted+started (predicate stated; the handover's "24" was a narrower one), **0 labelled
+`lesson`**, **WED-48 still the only overdue item** (CypherKey Twilio rotation, due 09-04, 5 days).
+
+## 🟢 BUILT THIS SEAT — `fleet/specs/BRIEF_SKELETON.md`, and it caught itself
+The remedy named at 09-07 and 09-08 for the `##`-prefix gate class and never built. **Built and
+red-proofed at four cells: filled skeleton rc 0 all gates passed nothing sent; `## ` on the RULED
+literal, SELF-CHECK stamp removed, and `## ` on PROVENANCE each refused for its OWN reason.**
+It was **refused by the gate on its own first run** because its comment spelled out the scope words —
+a document about a hazard carrying the hazard. Fixed by pointing at `send_brief.sh:59` instead of
+duplicating the list. **The gate enforces THREE literals, not four**; the ledger row said four and is
+corrected in place from a READ of the gate.
+
+## 🟡 STILL OPEN AT THE CHECKPOINT
+- **The NAS sync (PID 84978) is still running** — 2 h 35 m at 06:10, still in unison's scan phase.
+  `Deleting` = 0 and `<-?->` = 0, both TRUE zeros against a firing control (98,345 `CODING` paths).
+  **Check it with `tr '\r' '\n'` FIRST — the log is 9 lines and 12 MB.** If `Deleting` is ever
+  non-zero: STOP and card it for Kam.
+- **The quiet-hours-versus-panel-autoplay question is UNRESOLVED and stays that way until it is
+  settled in daylight** with `WEDNESDAY_TEST_HOUR`. It is a factual question for the board, not a lesson.
+- **Kam has said nothing today** (`kam_rulings_today.sh`: 0 messages, local copy confirmed current).
+  The morning brief is on his panel. Four cards on his queue, three of them TUESDAY's; the only
+  Secuura one is `secuura-ks963-widen-to-preauth`, and every card has a safe default.
+
 ## STANDING (unchanged)
 Nothing deployed; demo `400517aaf` is INHERITED and is not asserted by anyone. **#880 is KAM'S** and
 carries the KS-843 cutover precondition. 18,609-line hold on #896/#899/#900, #899 before #900. Actions
