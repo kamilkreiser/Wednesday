@@ -992,3 +992,35 @@ satisfies the criteria, and the discriminator is reading what the PR CLOSES, nev
 to the change* — the other two are the KS-843/KS-577 precondition and the eight
 work-done-board-not-saying-so instances. Those are about a change nobody linked; this is about a
 person whose own change nobody linked to their own instruction.
+
+---
+
+## A PIPED long-running command buffers to EOF — and a wedged process then looks exactly like a quiet one
+*Added 2026-09-08 22:3x, from the Secuura seat (s153) stating its rebuild method. Credited; adopted verbatim.*
+
+> *"a piped long build buffers to EOF, and a wedged daemon then looks exactly like a quiet one."*
+
+**The operative case:** you are about to run something long — an image build, a migration, a full suite,
+a sync — and you pipe it (`| tee`, `| grep`, `| tail`) or redirect it somewhere you will read later.
+**Its output now arrives in blocks, or not at all until it finishes.** So the two states you most need
+to tell apart — *working slowly* and *hung* — produce the SAME observation: nothing new on screen.
+
+**This is the false-absence family in a shape none of its earlier members covered.** The others are
+about a ZERO (a count, a grep, an empty result). This one is about **SILENCE**, and silence has no
+value to run a control against.
+
+**How to apply:**
+1. **Run long operations UNPIPED with `--progress=plain`** (or the tool's equivalent line-buffered
+   mode). Readability is worth less than the ability to distinguish alive from wedged.
+2. **Separate `build` from `up`.** `up -d --build` merges two operations with different failure modes
+   into one observation.
+3. **Serial, not parallel, when you need to know WHICH unit is stuck.** Parallel output interleaved
+   through a pipe is the worst case of both problems at once.
+4. **If you must capture, capture AND display** — `stdbuf -oL … | tee` at minimum, and say in the
+   report that the capture was line-buffered, because the next reader will ask.
+5. **The sibling rule, same seat, same mail:** never read `$?` for schemathesis or k6 — the printed
+   `OVERALL:` / `Status:` line is the verdict, and both exit 0 while printing failure.
+
+**Family:** [[2026-09-08_a-false-absence-is-usually-my-own-instrument]] (the ZERO half; this is the
+SILENCE half) · [[2026-08-06_never-discard-stderr]] · [[2026-08-26_zsh-has-no-pipestatus]] (the other
+way a pipe destroys the information you needed).
