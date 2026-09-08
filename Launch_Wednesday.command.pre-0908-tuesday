@@ -19,37 +19,6 @@ PROJECT_DIR="$(cd -P "$(dirname "$SOURCE")" && pwd)"
 BRAIN_DIR="$PROJECT_DIR/0_Brain"
 export PROJECT_DIR BRAIN_DIR
 
-# ── WHICH AGENT IS THIS SEAT (Kam, 2026-09-08 11:56: the Datasec agent is TUESDAY)
-# The LAUNCHER FILE decides: Launch_Tuesday.command exports WED_AGENT=tuesday and
-# execs this script. The hostname map below is only the DEFAULT, kept so the
-# laptop's existing behaviour is byte-identical to before this change. It is
-# deliberately not the authority — once the headless Datasec Mac exists its
-# hostname is unknown, and a seat that guesses its own client is the failure this
-# whole two-agent split is built to prevent.
-AGENT="${WED_AGENT:-}"
-if [ -z "$AGENT" ]; then
-  case "$(hostname -s 2>/dev/null || hostname 2>/dev/null)" in
-    Kamils-MBP*) AGENT="tuesday" ;;
-    *)           AGENT="wednesday" ;;
-  esac
-fi
-case "$AGENT" in
-  wednesday) AGENT_NAME="Wednesday"; AGENT_UPPER="WEDNESDAY" ;;
-  tuesday)   AGENT_NAME="Tuesday";   AGENT_UPPER="TUESDAY"   ;;
-  *) echo "Launch: WED_AGENT must be wednesday or tuesday, got '$AGENT'" >&2; exit 2 ;;
-esac
-export WED_AGENT="$AGENT"          # chat_reply.sh reads this to pick its stream
-
-# Tuesday gets her OWN Claude auth namespace (TESTED 2026-09-08: an empty
-# CLAUDE_CONFIG_DIR answers "Not logged in · Please run /login" and builds its own
-# .claude.json/projects/sessions). Wednesday is deliberately left on the global
-# config: pointing her at a fresh one would log Kam's own seat out at its next
-# launch, and that is his move to make, not this script's.
-if [ "$AGENT" = "tuesday" ]; then
-  export CLAUDE_CONFIG_DIR="${CLAUDE_CONFIG_DIR:-$PROJECT_DIR/4_Credentials/.claude}"
-  mkdir -p "$CLAUDE_CONFIG_DIR"
-fi
-
 # DevMASTER workspace (read-only context) — may or may not be mounted.
 DEVMASTER="/Volumes/DevMASTER"
 DEVMASTER_VAULT="$DEVMASTER/Notes (MASTER)"
@@ -150,7 +119,7 @@ STATUSLINE_LOCAL="$PROJECT_DIR/2_Project_Files/tools/statusline.sh"
 if [ -f "$STATUSLINE_SHARED" ] && ! cmp -s "$STATUSLINE_SHARED" "$STATUSLINE_LOCAL" 2>/dev/null; then
   cp "$STATUSLINE_SHARED" "$STATUSLINE_LOCAL" && chmod +x "$STATUSLINE_LOCAL"
 fi
-LABEL="[$AGENT_NAME]"
+LABEL="[Wednesday]"
 python3 - "$LABEL" "$STATUSLINE_SHARED" "$STATUSLINE_LOCAL" <<'PYEOF'
 import json, os, sys, shlex
 label, shared, local = sys.argv[1], sys.argv[2], sys.argv[3]
@@ -185,15 +154,7 @@ export WEDNESDAY_DASHBOARD_PORT="$DASH_PORT"
 DASH_URL="http://127.0.0.1:${DASH_PORT}"
 DASH_LOG_DIR="$PROJECT_DIR/2_Project_Files/dashboard/logs"
 mkdir -p "$DASH_LOG_DIR"
-# ONE WEBSITE, served from the Studio (Kam, 2026-09-08 11:41: "can both agents read
-# the same pane so that I'm interacting with one website rather than two"). Tuesday
-# does NOT stand up a second dashboard: two servers would be two sites, and on the
-# headless box nobody is looking at the second one. She writes her stream; Kam's
-# panel renders it through the TUESDAY toggle. Override with WED_DASHBOARD=1 if a
-# Tuesday seat ever genuinely needs its own (a lone laptop with no Studio).
-if [ "$AGENT" = "tuesday" ] && [ "${WED_DASHBOARD:-0}" != "1" ]; then
-  DASH_STATE="not started — one panel, served from the Wednesday seat"
-elif curl -s -m 2 "$DASH_URL/api/health" 2>/dev/null | grep -q wednesday-dashboard; then
+if curl -s -m 2 "$DASH_URL/api/health" 2>/dev/null | grep -q wednesday-dashboard; then
   DASH_STATE="already running"
 else
   nohup "$PROJECT_DIR/2_Project_Files/dashboard/serve.sh" \
@@ -207,7 +168,7 @@ else
     fi
   done
 fi
-[ "$AGENT" = "tuesday" ] && [ "${WED_DASHBOARD:-0}" != "1" ] || open "$DASH_URL" 2>/dev/null || true
+open "$DASH_URL" 2>/dev/null || true
 
 # ── Initial prompt ──
 # ── PER-SEAT LEDGER SCOPE (Kam ruled `scope` on card `wed-boot-names-one-ledger-there-are-two`,
@@ -222,40 +183,14 @@ fi
 # unknown host falls back to `_ledger.md`, which is the pre-ruling behaviour — never a guess.
 SEAT_HOST="$(hostname -s 2>/dev/null || hostname 2>/dev/null)"
 case "$SEAT_HOST" in
-  # Keyed on the AGENT now, not the host — a seat's corrections belong to the
-  # agent, and Tuesday will move machines. The Datasec file keeps its historical
-  # name (_ledger_laptop_datasec.md) on purpose: renaming it would orphan 86K of
-  # that seat's own corrections and every link pointing at it.
-  *) case "$AGENT" in
-       tuesday) SEAT_LEDGER="_ledger_laptop_datasec.md"; OTHER_LEDGER="_ledger.md" ;;
-       *)       SEAT_LEDGER="_ledger.md";                OTHER_LEDGER="_ledger_laptop_datasec.md" ;;
-     esac ;;
+  Kamils-MBP*)        SEAT_LEDGER="_ledger_laptop_datasec.md"; OTHER_LEDGER="_ledger.md" ;;
+  Kamils-Mac-Studio*) SEAT_LEDGER="_ledger.md";                OTHER_LEDGER="_ledger_laptop_datasec.md" ;;
+  *)                  SEAT_LEDGER="_ledger.md";                OTHER_LEDGER="_ledger_laptop_datasec.md" ;;
 esac
-
-# ── CLIENT SCOPE, per agent (Kam, 2026-09-08 11:50 + 11:56) ────────────────────
-# Wednesday: Secuura and everything general. Tuesday: every Datasec project,
-# "as defined by living inside the Datasec folder" — his own words, and the
-# reason the boundary is a PATH test rather than a judgement call.
-if [ "$AGENT" = "tuesday" ]; then
-  AGENT_SCOPE="YOUR CLIENT SCOPE: every DATASEC project — anything under
-'/Volumes/DevMASTER/!CODING/Datasec/'. Secuura and general work belong to WEDNESDAY on
-the Studio; you do not brief, launch, or answer for them. You are her sister seat, not a
-different person: same persona, same voice, same W and M lessons, your own ledger, daily
-notes, pickup, claims file and inbox. Cross-seat mail to her carries COORDINATION ONLY —
-never Datasec code, findings, tickets or credentials. If a message needs client material
-to make sense, it is not cross-seat mail."
-else
-  AGENT_SCOPE="YOUR CLIENT SCOPE: SECUURA and all general/generic work. Every DATASEC
-project belongs to TUESDAY (Kam ruled the name 2026-09-08 11:56); read Datasec mail by
-SUBJECT only, and never brief or answer for a Datasec project. Cross-seat mail to her
-carries COORDINATION ONLY — never Secuura code, findings, tickets or credentials."
-fi
 
 INITIAL_PROMPT="ultrathink
 
-You are ${AGENT_UPPER}, launched at '${PROJECT_DIR}'. DevMASTER workspace is ${DEVMASTER_STATE}.
-
-${AGENT_SCOPE}
+You are WEDNESDAY, launched at '${PROJECT_DIR}'. DevMASTER workspace is ${DEVMASTER_STATE}.
 
 SCOPE RULES:
 1. All writes stay under ${PROJECT_DIR}. Your brain (${BRAIN_DIR}) is yours — full
@@ -408,7 +343,7 @@ STANDING BEHAVIOUR:
   A dead seat is respawned by the watcher automatically (--dead); nothing on
   disk is lost, but everything not yet in the note is.
 - Learning loop v2: corrections increment the frequency-weighted ledger
-  (\${BRAIN_DIR}/learnings/${SEAT_LEDGER}) same-session; every wrap-up fills the
+  (\${BRAIN_DIR}/learnings/_ledger.md) same-session; every wrap-up fills the
   daily-note retro; weekly consolidation + industry scan per \${BRAIN_DIR}/skills/
   (run in the first session after Sunday until the WED-16 scheduler exists).
 - Wrap-up phrases ('good night', 'let's wrap', 'save to memory') trigger the
@@ -417,7 +352,7 @@ STANDING BEHAVIOUR:
 clear
 cat <<EOF
 ==========================================
- Launching ${AGENT_UPPER}
+ Launching WEDNESDAY
  Dir:       ${PROJECT_DIR}
  Brain:     ${BRAIN_DIR}
  DevMASTER: ${DEVMASTER_STATE}
