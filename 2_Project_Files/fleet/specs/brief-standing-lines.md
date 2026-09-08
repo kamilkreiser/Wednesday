@@ -548,7 +548,7 @@ creation, which is the only moment anyone is looking.**
 
 ---
 
-## A tool's exit reports the CALL, never the OUTCOME — for anything that changes state elsewhere, read the destination (2026-09-08, THREE instances in one session)
+## A tool's exit reports the CALL, never the OUTCOME — for anything that changes state elsewhere, read the destination (2026-09-08; TWO instances, and the third was RETRACTED — see the correction at the foot)
 
 **Three greens that could not fail, all on 2026-09-08, all caught by reading the destination instead
 of the status:**
@@ -557,11 +557,14 @@ of the status:**
    backtick inside a `python -c`, so the receipt published with all its SHAs blank — the claim intact,
    the evidence gone. Caught by **fetching the comment back**. The seat's rule: *"a mutation returning
    success is not proof of what it stored."*
-2. **A push reported exit 0 and never happened.** A trailing `&` inside a call that was already
-   backgrounded: the outer call returned 0 immediately, the inner job was orphaned and killed at leg 2
-   of 14, and the script's own `PUSH_EXIT` line was never written. Caught by **comparing the remote
-   head to local HEAD**. The seat's rule: *"never conclude a push landed from an exit status; read the
-   remote ref."*
+2. ~~**A push reported exit 0 and never happened.**~~ **RETRACTED 2026-09-08 19:2x by the seat that
+   reported it — this was NOT an instance of this family.** The push had not failed; it was **in
+   flight**. A 14-leg preflight takes ~4 minutes and **the ref only moves at the very end**, so a
+   15-line output file and an unmoved remote ref are exactly what a healthy push looks like three
+   minutes in. The `&`-inside-a-backgrounded-call orphaned nothing. **The seat's own words: *"I
+   invented a mechanism to explain an outcome I had misread."*** Its rule *"never conclude a push
+   landed from an exit status"* still stands — but see the correction at the foot for the half that
+   actually matters here.
 3. **`safe_push.sh` printed `HEAD == origin` on a wrap that staged nothing** (2026-09-08 05:35). The
    refs genuinely agreed; the work was never in them. Caught by the `clean: 11` count printed beside it.
 
@@ -575,16 +578,32 @@ staging area. **Wherever those two questions differ, only the destination can an
    by the call's exit, never by re-reading your own outbound, and never by selecting "the newest" or
    "the longest" from a list. (Taking the longest of 19 comments read someone else's and would have
    "fixed" one that was already correct — a failure that leaves no trace of having been wrong.)
-2. **A push is verified against the remote ref**, not `$?` and not the tool's success line.
+2. **A push is verified against the remote ref**, not `$?` and not the tool's success line —
+   **and an UNMOVED ref is not a failure.** See rule 4.
 3. **A commit is verified by `git show HEAD:<path>` on each artefact**, not by `HEAD == origin`.
    Two refs agreeing says nothing about whether the work is in them.
-4. **Never nest backgrounding.** A trailing `&` inside an already-backgrounded call orphans the inner
-   job and returns 0 instantly. If a long job must run detached, have it write a completion marker and
-   verify THAT — an exit code from the wrapper is a statement about the wrapper.
+4. **DISTINGUISH "in flight" FROM "failed" — and the discriminator is the PROCESS, never its
+   artefacts.** For any operation that takes minutes and commits its effect at the END (a push behind
+   a long preflight, a build, a deploy), **an unmoved ref, a short log and a silent output file are
+   what SUCCESS looks like in the middle.** Before concluding a long job died: **is the process still
+   running, and is its output file still growing?** Neither costs anything and neither was checked in
+   the 2026-09-08 case. **Then: never start a second instance without answering that question** — the
+   real cost there was TWO concurrent 14-leg preflights against one tree, benign only by luck, and the
+   second failed solely because the first had already succeeded (*"cannot lock ref … is at X but
+   expected Y"*). **A long job must write a completion marker and be verified on THAT**, so the
+   question has a cheap answer.
 5. **Any prose passed through a shell is verified by reading it back at the destination.** Backticks,
    `$(...)` and unescaped quotes are eaten silently, and what remains still reads correctly — which is
    why nobody notices.
 
-**The tell they share: every one of these produced a green on the FIRST attempt at something that had
-failed.** A clean result from an operation you have not yet seen succeed is the moment to look at the
-destination, not the moment to move on.
+**The tell the two real instances share: each produced a green on the FIRST attempt at something that
+had failed.** A clean result from an operation you have not yet seen succeed is the moment to look at
+the destination, not the moment to move on.
+
+**CORRECTION 2026-09-08 19:2x — and it is the more valuable half of this section.** The retracted
+instance 2 failed in the OPPOSITE direction to everything above: not a green trusted too readily, but
+**a healthy operation declared dead because its destination had not changed yet.** Both errors are
+read at the same place — the destination — which is precisely why rule 4 exists: **the destination
+tells you WHAT HAS HAPPENED, and only the process tells you WHETHER ANYTHING IS STILL HAPPENING.**
+A rule that says "read the destination" and stops there produces this failure, and it produced it
+within ten minutes of being written down.
