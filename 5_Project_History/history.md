@@ -1,3 +1,84 @@
+## 2026-09-08 21:52 – 2026-09-09 05:30 — s154, Studio coordinator. TWO SECUURA SEATS AT 1.00, A REBUILD-AND-DELTA THAT CORRECTED THREE ARTEFACTS, AND SEVEN INSTRUMENT FAILURES OF WHICH SIX WERE MINE.
+
+*(Seat number DERIVED, not assumed: this file's newest entry is s153, so the next is s154. Noted for
+whoever reads down — the 18:01 seat on 09-08 called itself **s151** again in the daily note, reusing a
+number after Kam's planned shutdown. That is an anomaly in the daily note, not in this file.)*
+
+**Booted 21:52 into a rotation, and a wake landed mid-boot.** The Secuura seat had reported and its
+turn had ended. The previous session's own w=2 says *the reply goes before the capture*, so it was
+answered before a word of the brain-load was written down. That rule fired three more times in the
+night.
+
+**Boot measured per WED-139:** by-tier digest 326,506 B / 4,321 lines read WHOLE (statusline 8% → 21%,
+so 13 points for 326 KB — the window is far larger than the 200K a lesson had wrongly assumed that
+morning); ledger 486,051 B / 240 rows, today's 72 whole and the two older days as headlines; full boot
+at 36%. **The subset was stated to Kam rather than quietly taken.**
+
+**Secuura s152 and s153, both scored 1.00.** In Review **29 → 20**; one merge (#768, a regression closed
+BEFORE it fired); three PRs returned to Peter; **10 tickets filed**; the session-long verification gap
+CLOSED (legs 3/4/8 ran and passed with probe counts); a full **rebuild-and-delta** at `5ffaaf396`,
+32/32 services, zero build failures. **Zero merges to main, zero deploys, demo untouched and never
+asserted by anyone.**
+
+**THE DELTA CORRECTED THREE ARTEFACTS.** `rotate-secret` is STOCHASTIC — and the decisive evidence
+needed no rebuild at all: three runs of IDENTICAL code returned **12 → 11 → 12** failing. So *"eleven
+attributable, one unattributed"* was wrong in s152's mail, in my brief and in the pickup; the true
+shape is **eleven owned plus a stochastic slot**. The pickup was the only one of the three still
+editable and it now carries the correction.
+
+**ONE REAL INTRODUCED FAILURE, and its framing is the deliverable.** `PATCH /api/users/admin/{id}` →
+500, filed as **KS-1013**. Attributed to `561de81ca` — **Kam's own KS-963 `rethrow` ruling** — and the
+ticket opens with the protection: *KS-963 did not create a defect; it removed the swallow that was
+hiding one.* The route never validated the id format, so the old `404` was itself a wrong answer.
+**The ruling is not to be reverted**, and a reader meeting that SHA in a blame output must see that
+sentence first.
+
+**SIX THINGS WENT INTO THE BRAIN, FIVE FOUND BY THE SEATS:** a reviewer's instruction has a DATE (with
+its exception — a PREFERENCE does not expire when state moves) · a piped long build buffers to EOF so
+a wedge looks identical to a quiet one, **and the three-probe test that tells them apart** · a DERIVED
+identifier cannot be found by searching for what you think it is called, and the search returns a
+different family that DOES carry the name · **a mutation's return value carries no information about
+its content — only a readback does** (an unquoted heredoc made Linear return `success: true` on a
+comment that named nothing, on a security ticket) · ask the resolver, do not regex the format · report
+COVERAGE before the failure count.
+
+**FOUR ERRORS WERE MINE, all in the ledger with their diagnoses.** A brief CONDITION written to protect
+Kam's dashboard that required an absence but not its control · `boot_digest.py --check` blind to the
+by-tier digest every seat actually reads (fixed, red-proofed 4 cells, `CLAUDE.md` rule 3b corrected) ·
+a seat mis-numbered to Kam from a scratch filename (w=2 the same day; **the number leaked out of a
+temp filename into a sentence**) · and a 32-service build commissioned with **no wake named**, on a
+lesson read WHOLE at that boot — because its handle says *WAIT* and I was writing *BUILD*.
+
+**THE RETRO'S REAL FINDING, counted rather than felt: SEVEN instrument failures in one session and SIX
+were my own hand-composed checks.** The condition is VOLUME — many small verifications, each cheap
+enough to justify a hand-rolled grep instead of the tool's own interface — and they fail
+INDEPENDENTLY, so no single audit catches them and nothing feels risky. Filed as rules 19–21, with the
+exception that stops it becoming paralysis: **a control is owed the moment an absence enters a sentence
+someone else will rely on. The trigger is the CLAIM, not the command.**
+
+**A CARD FILED AND THEN DROPPED, which was the right outcome.** Measuring whether the rebuild had disk
+room found 212 GB reclaimable against 135 GiB free. The prior-ruling gate refused the card; opening the
+artefacts showed Kam was offered an agent-prune on 2026-09-03 and **chose to handle the Studio himself
+at the desk.** Card dropped, not overridden; he got one line as information with no ask.
+
+**NO SUCCESSOR WAS LAUNCHED AT 23:40, AND THAT IS A DECISION.** At 23:35 I told the seat that KS-1013
+needs the QA gate and neither of us should start that chain at that hour; ten minutes later, with the
+grant permitting a relaunch, I held to it rather than contradicting myself. The 2026-08-28 grant's own
+morning-review clause is what this defers to.
+
+**OVERNIGHT WAS QUIET AND THAT IS MEASURED.** Kam silent since 15:59 — settled by pulling after the
+rulings script warned its copy was stale, **because an empty tail and a stale copy are different
+facts.** Both stacks survived (38 containers, gateway 200, dashboard 200). **The 03:30 NAS sync is
+still running at 05:30 with no deletions proposed** — and the FIRST check was wrong: `grep -c
+'Deleting'` returned 0 across **9 lines of a 12 MB file**, because unison writes progress with carriage
+returns. Re-run on `tr '\r' '\n'` → 188,021 real records, true zero, firing control. **That zero would
+have entered the handover as fact.**
+
+**Left for the morning:** KS-1013 as item 0 with its framing · both stacks UP on purpose · the NAS sync
+mid-flight with its check documented · **WED-48 five days overdue** · and one thing held back
+deliberately: **Kam's own ruling exposed a latent defect, which is good news that landed after 23:00
+and is his to hear this morning.**
+
 ## 2026-09-08 14:34–15:5x — s153, Studio Secuura seat (rotation successor to s152). PETER WAS WAITING ON NOBODY, FIVE TIMES OVER.
 
 Booted at 14:34 into Kam's standing 14:28 priority — *"prioritize the two images and messages from
