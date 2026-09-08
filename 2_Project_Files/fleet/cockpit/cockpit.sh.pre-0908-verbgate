@@ -235,27 +235,6 @@ case "${1:-}" in
       echo "cockpit: REFUSED — tap is ${#3} chars (> $SAY_MAX_PTR): a tap is a pointer, content goes by mail. Send it through send_brief.sh, then: say <pane> '<pointer>' --mail '<subject substring>'" >&2
       exit 4
     fi
-    # INSTRUCTION-VERB CLAUSE (ledger w=5, 2026-09-08). The length cap above was
-    # armed at w=3 and a SHORT content-bearing tap walks straight through it —
-    # twice now. 2026-09-06 (w=4): a resume instruction under the cap. 2026-09-08
-    # (w=5): "ARCHIVE PILOT ACCEPTED — proceed" reached %170 with no mail behind
-    # it; s149 went looking for the mail, polled three times, found nothing and
-    # HELD 47 tickets for ~20 minutes. It was right to: from the agent's seat a
-    # tap with no mail is indistinguishable from the generator's ghost text, and
-    # that is the rule Wednesday enforces on every agent.
-    #
-    # So: a tap with NO --mail may not carry a word that AUTHORISES work. This
-    # cannot touch a real pointer — pointer verbs (read, check, see, your inbox)
-    # are deliberately absent from the list, and the clause is skipped entirely
-    # whenever --mail is present, which every genuine pointer has.
-    if [ -z "$MAIL_SUBJ" ] && printf '%s' "$3" | grep -qiE '(^|[^a-z])(proceed|continue|accepted|approved|authoris(e|ed)|authoriz(e|ed)|go ahead|start|begin|merge|deploy|archive|push|resume|do it|carry on)([^a-z]|$)'; then
-      echo "cockpit: REFUSED — this tap authorises work and has no mail behind it." >&2
-      echo "  A tap is a POINTER; the thing an agent may act on is a mail it can verify." >&2
-      echo "  Send it through send_brief.sh, verify it at the destination, then:" >&2
-      echo "    cockpit.sh say <pane> '<bare pointer>' --mail '<subject substring>'" >&2
-      echo "  (ledger w=5 — a tap like this cost a seat 20 minutes and 47 held tickets on 2026-09-08.)" >&2
-      exit 6
-    fi
     if [ -n "$MAIL_SUBJ" ]; then
       SAY_DIR="$(cd -P "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
       SAY_ROUTING="$SAY_DIR/../inbox_routing.conf"
