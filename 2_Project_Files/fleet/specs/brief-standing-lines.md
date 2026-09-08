@@ -698,7 +698,7 @@ from a flag that ran**, and CLI parsers routinely accept options their code path
 
 ---
 
-## Correcting something false we told a client human — four rules, and the fourth is the one everybody misses (2026-09-08)
+## Correcting something false we told a client human — FIVE rules, and rule 5 was missing from the first version of this very section (2026-09-08)
 
 **EVIDENCE BASIS:** one instance, **but the correction itself was checked mechanically against the
 four rules and one of them fired** — the seat's first draft carried an ask it had not noticed writing.
@@ -711,7 +711,7 @@ his own obligations.** Why that direction is the expensive one: *"a person who i
 something is theirs when it is not stops reading the queue as evidence — and then the true items stop
 landing too."*
 
-### The four rules
+### The five rules
 
 1. **LEAD with the correction.** A correction that arrives beneath our own progress report is not a
    correction; **it is a footnote to good news.** If the fix and the correction are in one comment, the
@@ -726,9 +726,23 @@ landing too."*
    *"Re-review whenever suits"*, a request hiding in a comment whose whole purpose was to stop making
    requests. **The workflow action requests the review; the comment is a record.**
 
+5. **THE CORRECTION MUST BE REACHABLE FROM THE ERROR, not only from the correction.** Added
+   2026-09-08 19:4x after the seat found this missing from rules 1–4 **and it is the one that
+   mattered**: the four rules above produced a correct correction in a NEW comment, and **the false
+   comment itself stood unedited.** Anyone landing on it, or reading the thread top-down, met the
+   false statement with no forward pointer. *Correcting it from a later comment only helps a reader
+   who reaches the later comment.*
+   **So: edit the erroneous artefact to carry a banner linking FORWARD to the correction, and preserve
+   its original body verbatim below** — a record edited without saying so cannot be dated by the next
+   reader. **The pair must be navigable in BOTH directions**, exactly as a dependency written at only
+   one end is discoverable only by whoever is already at that end. Verify the preservation by
+   **substring match on a fetch-back**, not by eye.
+
 **Also: do not characterise the delay.** No *"sorry for the five days"*, no *"this has been waiting on
 us since"*. State the dates and let them speak — a characterisation invites a reply and the point is
 that nothing is being asked.
 
-**Check these mechanically before posting, not by eye.** All four were checked on the 2026-09-08
-correction and rule 4 fired on a draft its author had read twice.
+**Check these mechanically before posting, not by eye.** All four of the original rules were checked
+on the 2026-09-08 correction and **rule 4 fired on a draft its author had read twice** — then the seat
+found that **rule 5 did not exist**, from a throwaway sentence in the instruction rather than from the
+rules themselves. **A checklist is complete only over the failures someone has already met.**
