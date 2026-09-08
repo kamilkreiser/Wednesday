@@ -23,6 +23,18 @@
 #   fleet_ack.sh answered "<subj substring>" "<label>"   ack every match
 #   fleet_ack.sh unack    "<subj substring>"   remove the ack (re-flag it)
 # Exit: 0 ok · 2 usage · 3 no match (refuses rather than silently acking nothing)
+#
+# TWO HONEST LIMITS, measured 2026-09-08 rather than discovered later:
+#  1. The feed is a ROLLING WINDOW (12 messages when this was written). An ack
+#     keyed to a message that has scrolled out still sits in ack_state.json and
+#     does nothing. Harmless, but the keys accumulate; prune at consolidation.
+#     It also means `answered` must be run BEFORE the message ages out, and that
+#     a needle can refuse (rc 3) simply because the collector has not run yet.
+#  2. The `attn` flag this clears fires ONLY on the literal word QUESTION in the
+#     subject (collect.py). So it MISSES things that plainly need attention —
+#     s149's "issueArchive CASCADES to sub-issues", a live incident, is attn=False.
+#     Clearing the flag is now possible; making it fire on the right things is a
+#     separate question about Kam's reading surface and is HIS, not this tool's.
 set -u
 SELF_DIR="$(cd -P "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 PROJECT_DIR="$(cd -P "$SELF_DIR/../.." && pwd)"
