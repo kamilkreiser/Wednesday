@@ -6218,9 +6218,9 @@
   ],
   "recommended": "all18",
   "ts": "2026-09-08T10:46:21.048050+10:00",
-  "status": "open",
-  "ruled_choice": null,
-  "ruled_ts": null,
+  "status": "ruled",
+  "ruled_choice": "all18",
+  "ruled_ts": "2026-09-08T14:01:02.172367+10:00",
   "prior_rulings_overridden": [
    "2026-08-21 10:26",
    "2026-08-21 10:28",
@@ -6372,13 +6372,47 @@
   ],
   "recommended": "three",
   "ts": "2026-09-08T13:44:05.993797+10:00",
-  "status": "open",
-  "ruled_choice": null,
-  "ruled_ts": null,
+  "status": "ruled",
+  "ruled_choice": "three",
+  "ruled_ts": "2026-09-08T14:00:50.525103+10:00",
   "prior_rulings_overridden": [
    "CARD secuura-ks788-gate-fails-open-2026-09-04",
    "CARD secuura-892-cap-spent-blocker-open",
    "CARD secuura-892-round3-nogo-blocker-still-open"
   ]
+ },
+ {
+  "id": "secuura-ks963-getuserbyid-swallows",
+  "client_project": "Secuura/Blockchain",
+  "title": "KS-963: the fix it asks for ALREADY SHIPPED ten lines away, after a real incident — so this is applying a pattern, not making a design decision",
+  "bluf": "THE FINDING THAT CHANGES YOUR DECISION IS s150's, not the ticket's. KS-963 says getUserById catches a decryption/policy error and returns null, so the auth remediation reads it as 'no such row' and skips SILENTLY. What the ticket does NOT say: its SIBLING function getUserByEmail, ten lines away, already RETHROWS — and its catch carries the reason verbatim: 'KS-253: a DB failure is NOT user-not-found. Swallowing it here made the login route answer 401 Invalid email or password to users with valid credentials during pool starvation (42/266 in the KS-217 storm).' So the design argument was already accepted and shipped after a real incident. This is applying an existing pattern to the function that was missed — which removes most of the cost from your decision. || s150 RE-VERIFIED EVERY PREMISE and all hold, including the zero-config finding WITH a control (POSTGRES_PASSWORD returns 10 hits from the same search in the same file, so the zero came from a search that works). PII_PLAINTEXT_CUTOFF defaults to 2026-06-01, already past, and is set nowhere. || NOT ARMED ON THE DEMO TODAY: it needs a prod-like NODE_ENV and a plaintext row; the demo reads NODE_ENV=development and every measured row is ciphertext. It is a trap for any prod-like environment and for anyone who makes a row plaintext — which the reverted seed fix would have done. || READ-NOT-RUN, AND FLAGGED AS SUCH BY THE SEAT ITSELF: s150 reads the code as suggesting the byEmail arm would RETHROW on such a row, so end-to-end the remediation might fail LOUDLY rather than skip silently — inverting the ticket's headline severity. That is a code read, not a measurement, and it is NOT on this card as a fact. The original chain was proven by a QA gate that built a database and drove four cells with two isolating controls; this deserves the same instrument, and the home for it is ks949-platform-admin-seed-identity.test.ts, which already builds that scenario. || THE THREE OPTIONS BELOW ARE WEDNESDAY'S, built from s150's findings — the ticket itself ends at 'Do not fix yet' and names none. || Nothing is built, nothing merged. The seat bounced this rather than touching it, correctly: writing the measuring cell is the first half of fixing, and the ticket says do not.",
+  "default_action": "DEFAULT IF KAM IS SILENT: nothing is built and KS-963 stays in Backlog, unassigned to a round. Silence costs only that a known silent-failure path stays open in any environment that ever goes prod-like — it is not armed on the demo today, so nothing degrades while you decide.",
+  "options": [
+   {
+    "key": "rethrow",
+    "label": "Apply the KS-253 pattern to getUserById — rethrow instead of swallowing. The design question is already settled by the sibling; this is the missed function (Recommended)",
+    "detail": ""
+   },
+   {
+    "key": "measure",
+    "label": "Write the measuring cell FIRST in ks949-platform-admin-seed-identity.test.ts to settle loud-vs-silent, then decide. Cheap, and it turns s150's read into a measurement",
+    "detail": ""
+   },
+   {
+    "key": "both",
+    "label": "Measure and fix in one round — the cell proves the current behaviour, the fix changes it, and the same cell proves the change",
+    "detail": ""
+   },
+   {
+    "key": "leave",
+    "label": "Leave it. Not armed on the demo today, and it is out of #885's scope",
+    "detail": ""
+   }
+  ],
+  "recommended": "rethrow",
+  "ts": "2026-09-08T14:00:08.879481+10:00",
+  "status": "ruled",
+  "ruled_choice": "rethrow",
+  "ruled_ts": "2026-09-08T14:00:56.317541+10:00"
  }
 ]
