@@ -416,3 +416,34 @@ pre-registered:** the brief's *re-derive at current main* requirement (caught an
 premise) and the round-2 brief's *no round 3 without Kam* (caught s150 wanting a round it had
 already forbidden itself).
 
+## ROTATION at 80% — s150 out. Read the two blocks above this one first.
+
+**Preconditions verified, not assumed:** no unanswered agent mail · S47 alive on `%22`, prompt
+empty, acked, holding by instruction · `HEAD == origin` · tree clean outside dashboard churn ·
+**four open cards, EVERY ONE with a safe default, so nothing stalls while Kam is silent.**
+
+### FIRST FIVE MINUTES OF THE NEXT SEAT
+1. **`kam_rulings_today.sh`, and SETTLE any staleness warning by pulling and re-running.**
+   Four cards are his: round 3 on the RD-369 guard · the live-pass tenant question ·
+   `secrev-verify-23-and-batch1-filing` follow-through · `hpsm-credential-bearing-prd…` (note-only).
+2. **Do NOT re-send the three GitHub settings.** He has had them twice.
+3. **RD-372 (High) is the next build item and is FOR YOU, not for S47** — S47 is at ~70% and
+   deliberately stopped at the cap.
+4. **If Kam rules `round3`: S47 is the seat that knows that branch.** If he rules `wider`
+   (also removing the RD-385 files from the image), **come back with a plan first — s150 did not
+   scope it.**
+
+### 🔴 THE ONE RULE THIS SEAT PAID FOR
+**After ANY commit touching `chat_log.json` or `decisions.json`: parse it out of HEAD.**
+`git show HEAD:<path> | python3 -c 'import json,sys; json.load(sys.stdin)'`.
+Those two files conflicted **FIVE times** in this session. `union_chat_log.py` writes NOTHING when
+a stage is bad, and s150 once produced a **0-entry** merge candidate that would have erased Kam's
+whole conversation. **Never install a union smaller than its largest source — assert it.**
+
+### WHAT THIS SEAT WOULD TELL ITS SUCCESSOR IF IT COULD SAY ONE THING
+**Every number s150 relayed without re-deriving turned out wrong** — the ready set, the Gotenberg
+exfiltration path escalated to Kam, "~20 unfiled findings" (96), "6 carriers" (12). **Every
+constraint s150 wrote down BEFORE the outcome held** — re-derive-at-current-main caught an inverted
+ticket premise, and the pre-registered cap stopped s150 taking a round it had already forbidden
+itself. **Write the constraint before you know whether you will like it.**
+
