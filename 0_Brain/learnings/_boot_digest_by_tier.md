@@ -7,7 +7,7 @@ status: live
 
 # Boot digest BY TIER — W whole, M rules-only, every project case a handle
 
-Generated 2026-09-08 15:36 from 124 lesson files (611,511 B). M 28 · MIXED 5 · W 91. 28 project CASE sections inside MIXED files are reduced to one line each: the heading and the path to read it at. W blocks are exactly what the default digest carries; M blocks drop the section index and keep the rules; a P file is a single handle. The CASES behind every rule live only in the lesson files — open one the moment its rule fires.
+Generated 2026-09-08 15:40 from 125 lesson files (616,048 B). M 28 · MIXED 5 · W 92. 28 project CASE sections inside MIXED files are reduced to one line each: the heading and the path to read it at. W blocks are exactly what the default digest carries; M blocks drop the section index and keep the rules; a P file is a single handle. The CASES behind every rule live only in the lesson files — open one the moment its rule fires.
 
 ## The T9 SSD is the master — Wednesday must be fully portable
 `2026-07-31_fully-portable-drive.md` · principle · 2026-07-31 · status: superseded — the "T9 is the master" half by [[2026-08-25_one-drive-devmaster-is-master]] (2026-08-25); the portability principle itself still lives · tier: W
@@ -3926,6 +3926,42 @@ has not, the line is the most reasoned-looking thing in the frame.
 5. **Keep the detector.** It is what protects the coordinator, and it caught all nine tonight. This
    does not replace it; it explains why eight bounced harmlessly and names the shape of the one that
    would not have.
+
+
+## A safety claim names the property it actually checked — "nothing is at risk" is a characterisation, and the guard's real scope is always narrower than its reputation
+`2026-09-08_a-safety-claim-names-the-property-it-checked.md` · correction · 2026-09-08 · status: live · tier: W
+
+**The operative case, so the headline matches it:** Wednesday is about to tell Kam that something
+is safe — *"it cannot delete anything"*, *"this prevents that failure"*, *"nothing is at risk"*.
+**Stop and name the PROPERTY that was checked, not the reassurance it produces.** The gap between
+the two is where every instance of this lives, and it always runs in the same direction: the claim
+is wider than the check.
+
+sections (open the file for these): The two, one hour apart, both to Kam · The diagnosis w=2 owes: why the existing rules did not fire · How to apply
+
+## How to apply
+
+1. **Say what the check covers, in the same sentence as the reassurance.** *"No `--delete`, so it
+   cannot remove anything — it CAN overwrite a newer file with an older one, which I have not checked
+   yet"*. Longer by a clause and it would have prevented both.
+2. **Read the guard's documentation before selling it.** One `unison -doc` call, before the ask, not
+   after the receipt. A guard's reputation is not its specification.
+3. **State the residual explicitly whenever a control is proposed** — what it does NOT cover, named,
+   so the person approving it knows what they are still exposed to. Prevention here, detection there.
+4. **Suspect the claim hardest when it argues for the safe option.** This is the mirror of
+   [[2026-08-14_i-read-representations-they-read-sources]] rule 4: the correction is the
+   highest-risk moment. So is the safety recommendation.
+5. **Widen the scope-word list to cover TOOL GUARANTEES, not just work classification:** additive ·
+   read-only · cannot delete · prevents · idempotent · non-destructive · dry-run · sandboxed.
+   Each is a measurement and each needs the property named.
+
+**Family:** [[2026-08-16_classification-is-the-field-that-grants-authority]] (the parent — this
+widens it from a change's blast radius to a tool's guarantee) ·
+[[2026-08-07_a-check-that-cannot-fail]] (ask what would make it fail) ·
+[[2026-09-04_decisions-held-narration-drifted]] (no characterisation without its measurement in the
+same breath) · [[2026-08-26_never-delete-cleanup-means-quarantine]] (deletion is the famous hazard,
+which is exactly why "no deletions" reads as "safe") ·
+[[2026-08-05_verify-the-chain-not-the-legs]].
 
 
 ## When I need Kam to do something, the ASK goes first and it is spelled out as steps — "I need you to do X. The rationale is Y. My recommendation was… Other options include…"
