@@ -1352,3 +1352,42 @@ as suspicious as when it fails — this is its red-side twin) ·
 test the instrument — here the count, not the uniformity, is the signal) ·
 [[2026-08-16_an-overstated-record-gets-discounted-wholesale]] (a row wrong in its headline is not
 therefore wrong in its body — the ticket understated its own defect).
+
+---
+
+## A TIER KEYED ON THE SHAPE OF A CHANGE IS BLIND TO WHAT THE CHANGE REACHES — ask both, and "it only gets better" is a claim that needs the gate
+*(2026-09-09, Secuura/Blockchain s154 raised it; Wednesday's rule was the one that was wrong. M-tier.)*
+
+**The case.** A two-line change, the identical pattern to one already gated and merged, on a sibling
+function — shape-checked byte-for-byte. Wednesday's tier rule keyed on that: *same pattern → tier 2.*
+
+**The seat enumerated the callers anyway and found four, two of which CONSUME A SINGLE-USE TOKEN on
+an infrastructure error.** Its framing, adopted verbatim: ***"the DIFF is two lines; the BLAST RADIUS
+is four call sites — those are different measurements and the second is not implied by the first."***
+
+**And the sentence that would have justified tier 2 was the seat's own honest read:** *"every caller
+moves from wrong to correct and none from correct to wrong."* **That is a claim about the runtime of
+four call sites.** Its truth-maker is in the codebase, not in the mail — so it is the one thing that
+must go to the gate rather than be ratified. **It nearly passed unexamined because it arrived in the
+TIER field, which reads as process rather than as a finding.**
+
+**The rules:**
+1. **A TIER IS A CLASSIFICATION, so it needs provenance like any measurement.** We already hold that
+   for *reversible · local · contained* in a brief. **A tier is the same field with a different name**,
+   and it decides how hard anyone looks — which makes it the highest-leverage unchecked word available.
+2. **Ask BOTH questions, always, and write both answers down:** *what does the diff look like?* and
+   *what does it touch?* A tier from the first alone is an assumption wearing a process label.
+3. **Any sentence of the form "it only gets better", "strictly an improvement", "no caller can be
+   worse off" is a CONSEQUENCE claim about code you have not driven.** It may well be true. **It is
+   exactly what the gate exists to establish**, so it raises the tier rather than lowering it.
+4. **Enumerate the callers before writing, even on a change whose shape you have already proved.** A
+   small diff on an already-verified pattern is precisely where nobody enumerates — and it is where
+   this was found.
+5. **When the shape rule and the reach rule disagree, REACH WINS**, and say which one you overruled.
+   A tier raised with its reason is checkable; a tier lowered by a default is not.
+
+**Family:** [[2026-08-16_classification-is-the-field-that-grants-authority]] (the parent — this points
+it at the TIER field, which it never named) · [[2026-09-01_qa-gate-before-my-verification]] (SHARPENED
+09-04: a claim about the PRODUCT is not a shape) · [[2026-09-05_qa-gate-tiers-and-the-two-nogo-cap]] ·
+[[2026-08-13_headline-must-match-the-operative-case]] (two rules of one author disagreeing four hours
+apart, on the same seat).
