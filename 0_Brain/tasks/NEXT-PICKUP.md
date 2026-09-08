@@ -52,9 +52,15 @@ overstated; the true figure is unknown and must not be guessed.** That bounding 
 missing PR). Needs platform-s scope on the token. **Kam's.**
 
 ## 🔴 OWED, NOT DONE — inherited and still not discharged
-1. **`secuura-ten-cascade-collateral-restore-or-leave`** — still unfiled, third seat running.
-   **Deliberately not filed from second-hand numbers** (a count in a card title with no provenance is
-   a ledger row Kam has already ruled on). s150 has the board: ask it to measure, then card it.
+1. ~~**`secuura-ten-cascade-collateral-restore-or-leave`**~~ — **CLOSED 2026-09-08 18:2x, NO CARD
+   FILED.** s151 measured it: **7 open tickets, all `Backlog`, four separate archive events, and 7 at
+   every window from 2s to 1h** (the total swings 28→93; the open subset does not). **Kam had already
+   ruled the class** at 14:00 — `secuura-61-archived-while-still-open` => `three`, unarchive only the
+   In Progress — so all seven stay archived and there is nothing to put to him. The three-seat refusal
+   to file it from an unprovenanced "ten" is what preserved that outcome. **Residual, commissioned:**
+   KS-774 and KS-633 are SECURITY-REVIEW children reading as defects, which his work-state reasoning
+   did not consider — cross-reference comments on the live parents KS-489/KS-488 make them findable
+   without unarchiving anything, and the seat is confirming all seven fall inside the 61 he ruled on.
 2. **The QA agent has no inbox** — `fleet/inbox_routing.conf` has no QA row, so no brief, answer or
    wrap can reach it by mail. File a WED ticket.
 3. **Nothing bridges Kam's chat rulings into `decisions.json`.** Four of his rulings today needed
