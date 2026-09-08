@@ -2,119 +2,92 @@
 date: 2026-09-08
 type: pickup
 scope: SECUURA + all general/generic work. Datasec is TUESDAY's (Kam ruled the name 11:56). Read Datasec mail by SUBJECT only.
-source: replaced WHOLESALE at 12:0x by s151
+source: replaced WHOLESALE at 13:0x by s152
 status: live
 supersede: replace this file wholesale at the next pickup; do not append
 ---
 
-# NEXT PICKUP — 12:1x Tuesday. **YOUR FIRST JOB IS NAMED BY KAM. Do not go looking for work.**
+# NEXT PICKUP — 13:0x Tuesday. Kam's commission is largely BUILT; two things are open.
 
 ## 🟢 KAM'S STANDING INSTRUCTION FOR THIS SEAT (verbatim, 2026-09-08 ~12:1x)
 > *"Okay, rotate, and after you've rotated, keep working on this new Wednesday, Tuesday, and chat structure."*
 
-**That is a GO to continue building, not a request for another plan.** He commissioned the
-architecture at 11:50, ruled the name TUESDAY at 11:56, and told this seat to carry on.
+**s152 did that.** Phases 0, 1, Tuesday's home, her launcher, her inbox and her brief are
+built, pushed and proven. **`main` = `9c33d004`.**
 
-### What "keep working" means concretely, in priority order
-1. **Phase 0 — one writer per file.** `chat_main`/`chat_wednesday` + `chat_tuesday` (+ Kam's own
-   stream), merged at render. **This is the prerequisite for the toggle AND the fix for a defect
-   that has cost THREE chat_log union-merges in one morning** (two corruptions + one live rebase
-   conflict). Adding Tuesday makes it three writers on one file.
-2. **Phase 1 — the WEDNESDAY | TUESDAY toggle**, top right, filtering chat + fleet activity +
-   board tiles on the `agent` field. A loud, unmissable indicator of the live view — the cost of
-   Kam typing a Datasec instruction while looking at the Wednesday view is a cross-client message.
-3. **Tuesday's home on the drive.** Kam: *"Copy your folder on the drive, labeling it Tuesday."*
-   **RECOMMENDATION ALREADY GIVEN TO HIM AND NOT CONTRADICTED — proceed on it: CLONE, not copy.**
-   A copy forks the brain; a clone of the same repo keeps it one thing that syncs, which is the
-   design he ruled. **EXCLUDE the build artefacts** — of `2_Project_Files`'s 1.3 GB, the worktrees,
-   venvs and `node_modules` must NOT be duplicated. She needs the tooling, not the scaffolding.
-   Give her `4_Credentials/` of her own.
-4. **Phase 2 — the path guard**: Tuesday refuses writes outside `!CODING/Datasec/`; Wednesday
-   refuses writes inside it. In `pretooluse_no_cd.sh`, exercised BOTH directions before arming.
-5. **Phase 3** — the headless bring-up section in PORTABILITY.md (mostly executing the existing
-   2026-09-02 run-sheet) + a doctor check for the untracked pre-commit hook.
+## 🔴 THE QUESTION ON KAM'S DESK RIGHT NOW (asked 13:0x, unanswered when this was written)
+**"Which do you want next: the rest of the path guard, or Secuura?"**
+- **If he says path guard** → §"WHAT IS NOT BUILT" below, item 1.
+- **If he says Secuura** → §SECUURA STATE. His 07:10 instruction (*"deploy and merge
+  everything that has been tested and done and is ready for deployment"*) and his 10:14
+  (*"archive any tickets that have been closed or deployed"*) have had NO seat on them
+  since s149 wrapped at 10:56.
+- **If he is silent** → default: finish the path guard. It is inside the commission he
+  named, it is the last structural piece, and Secuura is a bigger swing that deserves his
+  word first.
 
-### 🔴 THE ONE THING ALREADY SOLVED — do not re-derive it
-**`CLAUDE_CONFIG_DIR` gives a genuinely separate Claude auth namespace. TESTED, not assumed:**
-`CLAUDE_CONFIG_DIR=<scratch> claude -p …` returned **`Not logged in · Please run /login`** and built
-its own `.claude.json`/`projects`/`sessions`. Credentials are in the **Keychain** under
-`Claude Code-credentials-<hash of the config dir>`. **So each launcher exports its own on-drive
-`CLAUDE_CONFIG_DIR`** — same pattern as `AZURE_CONFIG_DIR`/`GH_CONFIG_DIR`, and it covers two
-machines, one machine, and the travel drive with one mechanism.
-**Caveat: the Keychain entry is MACHINE-LOCAL. The config dir travels; the secret does not — Kam
-logs in once per machine per agent.** That is a PORTABILITY.md item and is not yet written.
+## WHAT WAS BUILT TODAY — do not re-derive any of it
+| Thing | Where | Commit |
+|---|---|---|
+| **Phase 0** — one writer per chat file. `chat_log.json` is DERIVED + gitignored; writers append to `chat_wednesday/tuesday/kam.json`; `chat_legacy.json` (1778) frozen | `2_Project_Files/tools/chat_streams.py` | `a02f5528` |
+| **Phase 1** — the `WEDNESDAY \| TUESDAY` toggle, both surfaces, filtering chat + fleet + tally + chips on `agent` | `dashboard/cockpit.html`, `chat.html` | `8105f925` |
+| **Tuesday's clone + ONE parameterised launcher** (`WED_AGENT` decides; `Launch_Tuesday.command` is 20 lines) | root launchers | `0666f7b5` |
+| **`tuesday-agent@agentmail.to`** + inbox keyed on the AGENT, never the hostname | `fleet/inbox_digest.sh` | `29063f0c` |
+| **Guard scratchpad exemption + launcher own-repo ssh pointer heal** | `hooks/pretooluse_no_cd.sh`, launcher | `acc7440e` |
+| **Tuesday on the T9 (2.1 GB) + her first-boot brief** | `/Volumes/KK_T9_External_HDD/TUESDAY`, `0_Brain/tasks/FIRST-BOOT-TUESDAY.md` | `9c33d004` |
 
-Fleet quiet. No agents running. Kam is at the panel and answering in minutes.
+**MEASURED and settled — do not re-derive:** Tailscale mesh has served this dashboard
+since 2026-08-20 (NOT new work) · the new-Mac run-sheet exists and was exercised
+2026-09-02 · **`CLAUDE_CONFIG_DIR` gives a genuinely separate Claude auth namespace,
+TESTED**, and the keychain entry is MACHINE-LOCAL so Kam logs in once per machine per
+agent.
 
+## 🔴 WHAT IS NOT BUILT — stated so no successor assumes it
+1. **The path guard is HALF built.** `pretooluse_no_cd.sh` refuses git WRITE verbs pointed
+   outside this tree (8-case matrix, proven). It does **NOT** refuse general shell writes
+   (`rm`/`mv`/`cp`/`tee`/`>`/`sed -i`) into another client's folder or the sister tree, and
+   **nothing anywhere stops a read**. On the travel drive both clients are mounted for both
+   agents, so that is the mode where discipline is ALL there is.
+2. **PORTABILITY.md has no "Headless second agent — bring-up" section**, and there is no
+   doctor check for the untracked `.git/hooks/pre-commit` (a clone does not carry it — a
+   fresh Tuesday clone will happily push conflict markers).
+3. **Tuesday's MSGraph credentials** — deliberately withheld, on Kam's desk.
+4. **`/Volumes/DevMASTER/TUESDAY`** (the staging clone) is still at `8105f925` and lacks
+   `Launch_Tuesday.command`. **The T9 copy is the real one and is current.** The guard
+   refuses this seat a `git -C` write there, correctly; it is Kam's one command or simply
+   irrelevant now that the T9 is the deployment target.
 
+## 🔴 THINGS THAT BIT s152 — read before repeating them
+1. **The hook block in `pretooluse_no_cd.sh` is inside a SINGLE-QUOTED shell string.** An
+   apostrophe in a comment there BRICKS THE HOOK and blocks every Bash call including the
+   restore. Recover with the **Edit tool**, not `cp`. (Second occurrence in two days; the
+   warning now sits in the file.)
+2. **The guard fails CLOSED on `$VAR` paths** — `git -C $S/x init` is refused even when
+   `$S` is the scratchpad. Write literals.
+3. **The guard also refuses a command QUOTED inside a message.** To send Kam a command,
+   write the text to a file and pass `"$(cat file)"`.
+4. **Screenshots from the browser tool are a CROP of a 3491px viewport.** Do not read
+   geometry from them — `getBoundingClientRect` + `elementFromPoint` is the instrument.
+5. **`setsid` does not exist on macOS.** `nohup … </dev/null >log 2>&1 &`, then verify
+   `tty` is `??`.
 
-## 🔴 FIRST, IN THIS ORDER
-1. `2_Project_Files/tools/kam_rulings_today.sh` — settle its stale warning by PULLING and re-running.
-2. `2_Project_Files/tools/sync_kam_rulings.sh --dry-run` then `--apply`. His panel rulings still do
-   not write themselves into `decisions.json`.
-3. `0_Brain/fleet/claims/` — read the other seat's file; write only `claims_studio.md`.
-4. **NEW today — before ANY write to `0_Brain/dashboard/data/`:**
-   `. 2_Project_Files/tools/_store_guard.sh; guard_data_dir <the data dir>`.
-   **Both irreplaceable files were corrupted today** (`decisions.json` by the laptop, `chat_log.json`
-   by THIS seat) and neither errored. **Never pipe a pull's output to /dev/null.**
-
-## THE LIVE COMMISSION — Kam's two-agent fleet
-Two documents, **nothing built**:
-`1_Project_Definition/Architecture/2026-09-08_two-machine-fleet-and-one-shared-panel.md`
-`1_Project_Definition/Architecture/2026-09-08_two-agent-fleet-implementation-plan.md`
-
-**RULED by Kam:** the Datasec agent is **TUESDAY** (11:56). One brain, two ledgers, two inboxes,
-one panel with a WEDNESDAY | TUESDAY toggle. Wednesday's contrary recommendation was withdrawn.
-
-**MEASURED and settled — do not re-derive:**
-- **Tailscale mesh access has been serving this dashboard since 2026-08-20.** It is NOT new work.
-  (Wednesday told Kam it was "an evening's work"; corrected, ledger row filed.)
-- **The new-Mac run-sheet exists and was exercised end to end 2026-09-02** (PORTABILITY.md).
-- 🔴 **`CLAUDE_CONFIG_DIR` gives a genuinely SEPARATE auth namespace — TESTED, not assumed.**
-  `CLAUDE_CONFIG_DIR=<scratch> claude -p …` returned **`Not logged in · Please run /login`** and
-  built its own `.claude.json`/`projects`/`sessions`. Credentials live in the **Keychain** under
-  `Claude Code-credentials-<hash of the config dir>`. **That is the answer to Kam's travel
-  question:** each launcher exports its own on-drive `CLAUDE_CONFIG_DIR`, same pattern as
-  `AZURE_CONFIG_DIR`/`GH_CONFIG_DIR`. **Caveat: the keychain entry is machine-local, so the config
-  dir travels and the secret does not — Kam logs in once per machine per agent.**
-
-## OPEN WITH KAM — all have safe defaults, nothing blocks
-- **Card `secuura-platform-s-count-was-wrong-when-you-ruled`** — 18 PS tickets, default HOLD.
-- **Card `secuura-ten-cascade-collateral-restore-or-leave`** — NOT YET FILED (`decision_queue`
-  refused while `chat_log` was corrupt; **re-file it**). 10 tickets, 3 In Progress, default: none.
-- **Tuesday's folder shape** — Kam said "copy your folder, label it Tuesday". **ASKED, not done:**
-  a *copy* forks the brain; a **CLONE** of the same repo keeps it one thing that syncs. Also 1.3 GB
-  of `2_Project_Files` is worktrees/venvs/node_modules that must NOT be duplicated. One word from him.
-- Plan decisions still open: mesh vs hosted (default mesh, already running) · shared W/M brain
-  (default shared) · path guard on the travel drive (default: refuse).
-
-## DONE TODAY BY THIS SEAT
-s149 unblocked, scored 1.0, wrapped, pane closed · Kam's 4 rulings recorded · `decisions.json` and
-`chat_log.json` both repaired with conservation asserted · `store_guard` + `guard_data_dir` built
-and red-proofed in BOTH shells · `fleet_ack.sh` + the mail-tile ack (Kam's 10:19) · attention flag
-now fires on the red marker (Kam's 10:59) · `wed_claim.sh` un-hardcoded from the dead T9 path ·
-`cockpit.sh say` refuses an authorising tap with no mail (ledger w=5) · INDEX.md head corrected ·
-KS-996 measured read-only · **brain+settings backup at
-`5_Project_History/backups/wednesday-brain-and-settings_<stamp>.tar.gz` (660 MB, 12,207 entries,
-content-verified, secrets excluded).**
-
-## SECUURA STATE (s149 closed; its handover is the source)
+## SECUURA STATE (from s149's handover, 10:56 — nothing has moved since)
     origin/develop 986c592d5 · demo 400517aaf · unarchived 370
     #903 #904 #905 #793 open, unmerged · #896/#899/#900 UNAPPROVED deliberately
-    KS-968 In Progress (moved by another hand) · the schema trap is at c38040bd1, NOT on develop
-    Next highest-value: KS-989 (P1) — and "wire format:check, never quality" travels with it
-    HELD: PS-Done 18 (Kam) · Tested-Not-Deployed (Kam's `hold`)
+    KS-968 In Progress · the schema trap is at c38040bd1, NOT on develop
+    Next highest-value: KS-989 (P1) — "wire format:check, never quality" travels with it
+    HELD: PS-Done 18 (Kam's card) · Tested-Not-Deployed (Kam's `hold`)
+🔴 **PROJECT TRAP:** any probe of `users.email` by literal comparison is VOID BY
+CONSTRUCTION (AES-GCM). Resolve via `email_lookup_hash`; decisive on a MATCH only.
 
-## 🔴 PROJECT TRAP — third occurrence across two seats
-**Any probe of `users.email` by literal comparison is VOID BY CONSTRUCTION** — AES-GCM ciphertext.
-Resolve via `email_lookup_hash`; a hash comparison is decisive on a MATCH only.
+## OPEN CARDS ON KAM'S DESK (all with safe defaults; nothing blocks)
+`secuura-platform-s-count-was-wrong-when-you-ruled` (18 PS tickets, default HOLD) ·
+`hpsm-credential-bearing-prd-outside-every-snapshot` (Tuesday's) ·
+`secrev-live-pass-blocked-on-tenant` (Tuesday's) ·
+`nexusai-rd369-round3-or-ship-at-the-cap` (Tuesday's) ·
+**NOT FILED and still owed:** `secuura-ten-cascade-collateral-restore-or-leave` — the
+`decision_queue` refused it while `chat_log` was corrupt this morning; re-file it.
 
-## WHAT s151 GOT WRONG — all filed, none reached a cost
-1. Red-proofed an anti-junk-tap guard by sending junk taps to the LIVE agent.
-2. A count entered a card TITLE with no provenance and Kam ruled on it.
-3. **Corrupted `chat_log.json` via the mechanism it had itself named 40 minutes earlier**, in the
-   one writer it had not guarded — third instance today of "fixed the one you remember".
-4. **Priced a recommendation at "an evening's work" for something running 19 days** — and the
-   error argued silently for the RISKIER option.
-5. Four instrument false-absences (an `awk` range, stdout-vs-artefact, a zsh word-split in its own
-   guard, `timeout` on macOS). All self-caught by controls.
+## FLEET
+No agents running. The Datasec/laptop seat WRAPPED at 12:21; NexusAI S47 wrapped at 12:15
+(`main` = `cd2b543`). Kam is at the panel and answering within minutes.

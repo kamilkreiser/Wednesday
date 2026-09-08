@@ -21,6 +21,14 @@ machine until further notice"*). Datasec belongs to the laptop seat.
 | 2026-09-08 11:41 | Two-agent fleet architecture (Wednesday + TUESDAY) — Kam's commission | WED | ACTIVE — plan written, name ruled, CLAUDE_CONFIG_DIR solved; successor builds Phase 0+1 |
 | 2026-09-08 12:03 | Brain + settings backup, 660 MB, content-verified, secrets excluded | WED | DONE — 5_Project_History/backups/, gitignored at creation |
 | 2026-09-08 12:1x | SEAT ROTATED on Kam's word at 70% — successor inherits this file and the commission | WED | handover |
+| 2026-09-08 12:22 | chat_log.json + BOTH boot digests were UU from the 12:14 rotation stash pop | WED | DONE — unioned 1774+1773→1776 both sides subset; digests regenerated; 51c41a21 |
+| 2026-09-08 12:2x | **Phase 0 — one writer per chat file; chat_log.json now DERIVED + gitignored** | WED | DONE — a02f5528; orphan guard red-proofed both ways; Kam confirmed the panel 12:28 |
+| 2026-09-08 12:4x | **Phase 1 — the WEDNESDAY \| TUESDAY toggle on /cockpit and /chat** | WED | DONE — 8105f925; measured in Chrome both directions, 0 console errors |
+| 2026-09-08 12:45 | **Tuesday's home + one parameterised launcher** (clone at DevMASTER/TUESDAY) | WED | DONE — 0666f7b5; stub-exec dry-run for BOTH agents; Wednesday's prompt +1 paragraph, nothing else |
+| 2026-09-08 12:50 | **tuesday-agent@agentmail.to created** (Kam's word 12:50) + inbox keyed on WED_AGENT | WED | DONE — 29063f0c; verified by LISTING (7→8); proven on the live API both directions |
+| 2026-09-08 12:5x | Path-guard scratchpad exemption + launcher own-repo ssh pointer heal | WED | DONE — acc7440e; 8-case matrix + 3-state heal proof. Bricked the hook mid-edit (apostrophes), 4 min, recovered |
+| 2026-09-08 13:00 | **Tuesday provisioned on the T9 + FIRST-BOOT-TUESDAY.md** (Kam's 12:53) | WED | DONE — 9c33d004; 2.1 GB, HEAD verified AT the destination, creds 0600 |
+| 2026-09-08 13:0x | Phase 2 second half — general shell-write path guard (not just git verbs) | WED | **NOT STARTED** — the honest gap; git-verb half is armed and proven |
 | 2026-09-08 10:56 | s149 WRAPPED and its pane CLOSED (%170) — handover 143 lines, everything pushed | Secuura/Blockchain | DONE — Wednesday is the wake path; successor launches on Kam's PS ruling |
 | 2026-09-08 10:58 | decisions.json REPAIR — Kam's rulings file had git conflict markers committed into it | WED / shared | DONE — 195 cards, 0 rulings lost, pushed. Came in via the LAPTOP's ce6a24be; laptop must pull |
 | 2026-09-08 11:00 | Attention flag now fires on the red marker, not just 'QUESTION' (Kam 10:59) | WED | DONE — exercised on the real feed, 2 of 12 flagged correctly |
