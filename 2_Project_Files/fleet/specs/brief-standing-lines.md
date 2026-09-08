@@ -499,3 +499,49 @@ census scoped to the service that "owns" the route is a census over the wrong fr
 complete. **The durable fix is a DERIVED comparison** (enumerate the `error.code` set every handler
 can emit, assert each is published) rather than a hand-written list, because the hand-written list is
 exactly what keeps going thin.
+
+---
+
+## The artefact that TRAVELS is not the artefact anyone RE-READS — write the durable surface at the moment the travelling one is created (2026-09-08, Secuura s151; EIGHT instances in two days)
+
+**The measured pattern.** Across 2026-09-07/08, eight tickets were found sitting in `In Review` while
+the work was already done: **#793 · #721 (eight days on nobody) · #768 item 3 · #785 · KS-566 · the
+In Review column itself · KS-677 · KS-823.** The seat that found the last two named the shape better
+than the coordinator had:
+
+> *"The common shape is not forgetfulness. In every one of the eight, the fact WAS recorded — in a
+> merged PR body, in an ACK, in a code comment, in a provenance line. **What failed is that the
+> artefact which TRAVELS is not the artefact anyone RE-READS.** A merged PR body is written once and
+> read once. A ticket is read every time someone opens the column."*
+
+**KS-677 is the sharpest instance and the one no existing rule covered:** the ticket was parked on
+**#568**, which was **CLOSED WITHOUT MERGING**. Its work shipped six days earlier under **#782**
+(*"rebased onto develop, supersedes #568"*). So the ticket waited on a dead PR while the thing it
+wanted was already on the trunk and in the demo. **Nothing was careless; no surface said otherwise.**
+
+### The standing lines
+
+1. **When a PR merges, the ticket it closes gets a comment naming the merge SHA and what shipped.**
+   Not "done" — the SHA and the change, so the next reader can check rather than trust.
+2. **When a PR SUPERSEDES another, the SUPERSEDED PR's ticket gets that comment too, naming the new
+   PR.** *This is the case nobody covers and it is KS-677's exact shape.* A ticket parked on a closed
+   PR is invisible to everyone: the PR is closed so nobody revisits it, and the ticket looks
+   correctly blocked.
+3. **When a fix ships WITHOUT its own PR** (folded into a sibling, pushed as part of a larger guard),
+   the ticket gets the comment anyway, naming the PR that carried it. A ticket whose fix has no PR of
+   its own has no automatic link to anything.
+4. **Before moving a ticket into any column, name the event that takes it OUT.** If no such event can
+   occur for that class of work — a repo-side build gate has no deploy step; being on develop IS its
+   deployment — **that is the wrong column.** A ticket parked where its exit condition cannot occur
+   sits there permanently and nobody can tell whether it is deliberate. (This is
+   `2026-09-08_a-ruling-can-be-voided-by-removing-its-precondition` pointed at a board instead of a
+   ruling: an unreachable trigger fails silently, because nothing errors.)
+5. **Containment answers "is the code there", never "is it in force."** A merge commit contained in
+   the demo's SHA proves the lineage, not that the change runs there. For a service, containment is
+   evidence of deployment; **for a hook, a gate, a lint rule or a CI step, it is not** — and the
+   ticket says which instrument was used.
+
+**Why it is a step and not a virtue:** the cost is one comment per merge. Rules 1–3 would have caught
+KS-677, KS-566 and #721 at the moment they shipped rather than six days, six days and eight days
+later. **The defence is not more care when reading the board — it is one write at the moment of
+creation, which is the only moment anyone is looking.**
