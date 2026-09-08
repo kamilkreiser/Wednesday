@@ -545,3 +545,46 @@ wanted was already on the trunk and in the demo. **Nothing was careless; no surf
 KS-677, KS-566 and #721 at the moment they shipped rather than six days, six days and eight days
 later. **The defence is not more care when reading the board — it is one write at the moment of
 creation, which is the only moment anyone is looking.**
+
+---
+
+## A tool's exit reports the CALL, never the OUTCOME — for anything that changes state elsewhere, read the destination (2026-09-08, THREE instances in one session)
+
+**Three greens that could not fail, all on 2026-09-08, all caught by reading the destination instead
+of the status:**
+
+1. **A comment API returned `success: true` on a body that stored nothing.** A shell ate every
+   backtick inside a `python -c`, so the receipt published with all its SHAs blank — the claim intact,
+   the evidence gone. Caught by **fetching the comment back**. The seat's rule: *"a mutation returning
+   success is not proof of what it stored."*
+2. **A push reported exit 0 and never happened.** A trailing `&` inside a call that was already
+   backgrounded: the outer call returned 0 immediately, the inner job was orphaned and killed at leg 2
+   of 14, and the script's own `PUSH_EXIT` line was never written. Caught by **comparing the remote
+   head to local HEAD**. The seat's rule: *"never conclude a push landed from an exit status; read the
+   remote ref."*
+3. **`safe_push.sh` printed `HEAD == origin` on a wrap that staged nothing** (2026-09-08 05:35). The
+   refs genuinely agreed; the work was never in them. Caught by the `clean: 11` count printed beside it.
+
+**The general form:** an exit status answers *did my invocation return* — it cannot answer *did the
+world change*, because the world in question is on the other side of a network call, a shell, or a
+staging area. **Wherever those two questions differ, only the destination can answer.**
+
+### The standing lines
+
+1. **A write is verified by reading the written thing back**, by its **id** where one exists — never
+   by the call's exit, never by re-reading your own outbound, and never by selecting "the newest" or
+   "the longest" from a list. (Taking the longest of 19 comments read someone else's and would have
+   "fixed" one that was already correct — a failure that leaves no trace of having been wrong.)
+2. **A push is verified against the remote ref**, not `$?` and not the tool's success line.
+3. **A commit is verified by `git show HEAD:<path>` on each artefact**, not by `HEAD == origin`.
+   Two refs agreeing says nothing about whether the work is in them.
+4. **Never nest backgrounding.** A trailing `&` inside an already-backgrounded call orphans the inner
+   job and returns 0 instantly. If a long job must run detached, have it write a completion marker and
+   verify THAT — an exit code from the wrapper is a statement about the wrapper.
+5. **Any prose passed through a shell is verified by reading it back at the destination.** Backticks,
+   `$(...)` and unescaped quotes are eaten silently, and what remains still reads correctly — which is
+   why nobody notices.
+
+**The tell they share: every one of these produced a green on the FIRST attempt at something that had
+failed.** A clean result from an operation you have not yet seen succeed is the moment to look at the
+destination, not the moment to move on.
