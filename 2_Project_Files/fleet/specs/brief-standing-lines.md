@@ -1265,3 +1265,47 @@ WAS RIGHT. That is the expensive direction, because a gate overruled once gets r
 [[2026-08-06_local-proof-is-not-target-evidence]] (an environment that differs by design is blind
 exactly there) · [[2026-09-08_a-false-absence-is-usually-my-own-instrument]] ·
 [[2026-08-07_a-check-that-cannot-fail]].
+
+---
+
+## THE CORRECTION TO AN OVER-BROAD CLAIM OVERSHOOTS INTO AN OVER-NARROW ONE — state the BOUND, not the direction
+*(2026-09-09, Secuura/Blockchain s154, self-caught while fixing a sentence Wednesday had just made it fix.
+M-tier. It is the half the retraction-scope rule does not cover.)*
+
+**The case, and it took three passes to get one sentence right.** A doc said *"`docker restart
+secuura-auth` re-seeds"* — too wide, no object at all. The seat corrected it to *"re-seeds the
+PASSWORD only"* — **past correct, and now too narrow**: the seeder restores seven fields, so a reader
+would have believed `role` and `status` survive a restart. They do not. The third pass named the
+bound: *"re-seeds seven fields (password / role / verificationLevel / status / emailVerified /
+tenant) — NOT profile fields."*
+
+**Why the existing rule does not catch it.** [[2026-09-06_a-retraction-inherits-the-scope-of-its-measurement]]
+is written entirely about withdrawing TOO MUCH — an over-broad retraction taking a live finding with
+it. **It says nothing about the correction that sails past the truth and lands on the other side.**
+
+**And the direction is the dangerous one.** An over-narrow correction reads as CAUTION. It gets no
+challenge, from anyone, because under-claiming looks like rigour — the same asymmetry as an
+over-cautious HOLD, which is quiet and can ride in every successor brief indefinitely. An
+over-broad claim is loud and gets corrected within the hour.
+
+**The rules:**
+1. **State the BOUND, never the direction.** Not *"narrower than I said"*, not *"only the password"* —
+   **"these seven, and nothing else."** A direction is relative to a sentence that was already wrong,
+   so it inherits that sentence's frame. A bound is checkable on its own.
+2. **Read the mechanism before writing the corrected sentence, not before writing the first one.**
+   Both wrong versions were composed from a model of the code; the right one came from
+   `userRepo.ts:1475` and cites it, so the next reader can CHECK rather than trust.
+3. **Ask of any correction: could this new sentence be wrong in the OPPOSITE direction?** That
+   question is never asked, because a correction feels like the safe act — and it is the highest-risk
+   act of a session ([[2026-08-14_i-read-representations-they-read-sources]] rule 4).
+4. **An ENUMERATION is a promise of completeness that a summary never makes.** *"Credentials (not
+   profile fields)"* cannot be incomplete; *"password, role, status, tenant"* can, and was. **If you
+   list, the list is a claim — count it against the source. If you cannot, summarise instead.**
+5. **A control on both sides, in the same read.** Here: all seven names present AND a field NOT in the
+   set (`displayName`) absent — because a passing check and a broken grep are byte-identical without it.
+
+**Family:** [[2026-09-06_a-retraction-inherits-the-scope-of-its-measurement]] (the half this completes) ·
+[[2026-09-07_a-census-complete-over-a-frame-that-is-not]] (an enumeration is a census, and rule 4 is
+that lesson pointed at prose) · [[2026-09-08_a-safety-claim-names-the-property-it-checked]] (name the
+property, not the reassurance) · [[2026-08-16_an-overstated-record-gets-discounted-wholesale]] (check
+every row in BOTH directions — this is that, pointed at your own correction).
