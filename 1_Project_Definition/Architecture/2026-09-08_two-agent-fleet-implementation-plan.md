@@ -164,12 +164,77 @@ work and loses the specificity that makes the lessons fire.
 
 ---
 
+## 6a. REFINED by Kam, 11:52 — names for ADDRESSABILITY, and the collaboration question
+
+**His words:** *"by having the other agent named something like Datasec Wednesday or Tuesday, it
+might be helpful for you and that agent to be able to communicate to each other. I think you
+should still use the same email address and potentially even the same repository, but you'll be
+able to share and collaborate on certain tasks."* (Read through dictation: "Datasex" = Datasec.)
+
+**He is right about the need, and it exposes the real tension in this design:
+he wants a STRONG GATE and he wants COLLABORATION. Those pull opposite ways.
+They are reconcilable, but only if the boundary is drawn in the right place.**
+
+### The boundary that resolves it
+**The WEDNESDAY repo is the SHARED COORDINATION LAYER. `!CODING/<client>/` is the ISOLATED WORK
+LAYER. The gate belongs at `!CODING/`, not between the two Wednesdays.**
+
+That maps exactly onto Kam's own definition — *Datasec projects as defined by living inside the
+Datasec folder* — and it makes the answer to each of his three sub-questions fall out:
+
+| He asked | Answer | Why |
+|---|---|---|
+| **Same repository?** | **YES — and it already is.** | It is how the claims files, the ledgers, the brain and the tooling sync today. It is the shared layer *by design*. The corruption risk is fixed by Phase 0 (one writer per file), **not** by splitting repos — splitting them would break the shared brain and fix nothing. |
+| **Same email address?** | **NO — and this one has already bitten us.** | 2026-08-13: an agent polling the shared `coagent@` bus filtered on message CLASS and not on RECIPIENT, and a **Datasec session captured a Secuura message's headers and first 400 characters**. That is Kam's severity-max class, and it happened by accident, automatically. One inbox for two coordinators rebuilds that exposure. |
+| **Distinct name?** | **YES for addressing. The identity question is separate.** | See below. |
+
+### Mail: how they collaborate without the shared-bus failure
+**Two inboxes, plus deliberate cross-seat mail.** Each seat has its own; when one needs the other,
+it sends an addressed mail — exactly as this seat did at 11:07 today warning the laptop that
+`decisions.json` was corrupt. **That worked, it left a record, and it carried no client content.**
+
+The rule that keeps it safe: **cross-seat mail carries COORDINATION, never client material** —
+"pull before you write to the store", "I have claimed the dashboard work", "your card survived the
+repair". If a message needs Secuura's code or Datasec's findings in it to make sense, it is not
+cross-seat mail; it is a leak with a stamp on it.
+
+### What they may collaborate ON — the scoped list, so it is checkable
+**Shared (the WEDNESDAY repo, the coordination layer):**
+- WED work: the dashboard, the tooling, the guards, the launchers.
+- Fleet METHOD — the W and M tier lessons. One Wednesday learns once.
+- Kam's own general/generic work, scheduling, and anything not inside a client folder.
+- Fleet state: claims, who is on what, seat health.
+
+**Never shared (the work layer):**
+- Either client's code, tickets, findings, credentials, or board.
+- Each other's P-tier cases.
+
+### On the name itself
+**Two different things are being decided at once, and they should be decided separately:**
+
+1. **Name as ADDRESS** — needed, and cheap. `Wednesday (Datasec)` or a distinct name both work;
+   the inbox routing and the `seat` field already carry it.
+2. **Name as IDENTITY** — *"Tuesday"* implies a different person, with her own relationship with
+   Kam and, eventually, her own judgement. `Wednesday (Datasec)` implies one person at two desks.
+
+**Wednesday's recommendation, and the reason is not sentiment:** **one persona, two seats.** The
+lessons, the voice, the corrections and five weeks of calibration are a single body of learning,
+and the whole value of the learning loop is that it compounds in one place. Two names invite two
+brains, and two brains means a correction Kam gives once has to be given twice.
+
+**But this is genuinely Kam's call and it is a relationship decision, not a technical one.** If he
+wants a distinct character on the Datasec desk, it is buildable — the cost is stated above, and it
+is paid in duplicated teaching rather than in engineering.
+
 ## 7. The four decisions, all with safe defaults
 
 1. **Mesh or hosted?** — **Mesh, and it already exists.** Default: use what is running.
 2. **Shared W/M brain, or fully separate brains?** — Default: **shared W/M**, P stays with the
    project. The cost is named above.
-3. **Naming** — Default: **one persona, two seat labels.**
+3. **Naming** — Default: **one persona, two seat labels** (§6a). Sub-decisions, now separable:
+   **same repo = YES** (it already is, and it is the shared layer); **same inbox = NO** (the
+   2026-08-13 cross-client capture happened on exactly that shape); **distinct name = yes for
+   addressing, and the identity half is Kam's call.**
 4. **Does the path guard REFUSE, or WARN, on the travel drive?** — Default: **refuse**, same as
    on two machines. A gate that softens when supervision is lowest is the wrong way round.
 
