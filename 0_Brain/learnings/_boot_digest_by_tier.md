@@ -7,7 +7,7 @@ status: live
 
 # Boot digest BY TIER — W whole, M rules-only, every project case a handle
 
-Generated 2026-09-08 19:30 from 127 lesson files (638,438 B). M 29 · MIXED 5 · W 93. 28 project CASE sections inside MIXED files are reduced to one line each: the heading and the path to read it at. W blocks are exactly what the default digest carries; M blocks drop the section index and keep the rules; a P file is a single handle. The CASES behind every rule live only in the lesson files — open one the moment its rule fires.
+Generated 2026-09-08 20:00 from 127 lesson files (640,245 B). M 29 · MIXED 5 · W 93. 28 project CASE sections inside MIXED files are reduced to one line each: the heading and the path to read it at. W blocks are exactly what the default digest carries; M blocks drop the section index and keep the rules; a P file is a single handle. The CASES behind every rule live only in the lesson files — open one the moment its rule fires.
 
 ## The T9 SSD is the master — Wednesday must be fully portable
 `2026-07-31_fully-portable-drive.md` · principle · 2026-07-31 · status: superseded — the "T9 is the master" half by [[2026-08-25_one-drive-devmaster-is-master]] (2026-08-25); the portability principle itself still lives · tier: W
@@ -3920,7 +3920,7 @@ sentence, ask what the instrument would have printed if the thing WERE there, an
 print that.** A false absence and a true absence are byte-identical on screen. **The world cannot
 tell you which one you are holding; only a control can.**
 
-sections (open the file for these): The three, in one session, all within ninety minutes · Why this is its own lesson and not three ledger rows · How to apply · Instance 4, added the same session — and it landed INSIDE the correction · The uncomfortable half, kept
+sections (open the file for these): The three, in one session, all within ninety minutes · Why this is its own lesson and not three ledger rows · How to apply · Instance 4, added the same session — and it landed INSIDE the correction · The uncomfortable half, kept · EXTENSION 2026-09-08 19:5x — a FAILED COMMAND and a true zero are indistinguishable in a count, and a SEMANTIC control is what catches it
 
 ## How to apply
 
@@ -3951,6 +3951,26 @@ sections (open the file for these): The three, in one session, all within ninety
    default** — so a mismatch tells you nothing about the subject until both sides are proven to
    compute the same thing. This is the absence-shaped twin of "a control must be able to fail the
    same way the measurement can".
+
+## EXTENSION 2026-09-08 19:5x — a FAILED COMMAND and a true zero are indistinguishable in a count, and a SEMANTIC control is what catches it
+**The case (Secuura s151).** Counting where a chain-call recorder is invoked, the seat fetched a
+**TRUNCATED branch name**, so `git show` failed and every count came back `0/0/0`. That reads exactly
+like *the recorder is nowhere* — which was the opposite of the truth and would have refuted the PR's
+own subject.
+
+**The rule this adds to rule 1:**
+
+8. **Ask whether the answer is POSSIBLE before asking whether it is right.** A technical control proves
+   the instrument can fire; a **semantic** control asks whether this result could be true given what
+   you already know about the subject. **The second is cheaper and it catches a class the first
+   misses** — a broken command passes every technical control pointed at its output, because there is
+   no output to test.
+9. **Prefer an input shape that cannot fail over a check for the failure.** The fix was re-fetching by
+   `refs/pull/<n>/head`, **which cannot be truncated** — removing the failure mode beats detecting it
+   ([[2026-08-09_an-enforcement-you-must-arm-is-not-one]] applied to inputs).
+10. **A zero from a command whose invocation you did not verify is not a measurement of anything.**
+    This is rule 3 (read stderr) with its most common concrete cause named: **the identifier was
+    malformed, so the command never addressed the thing.**
 
 
 ## A ghost suggestion is dangerous in proportion to how little the receiving agent has ALREADY WRITTEN DOWN — the detector catches the line, a recorded decision makes it inert

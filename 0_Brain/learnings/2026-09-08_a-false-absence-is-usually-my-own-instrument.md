@@ -109,3 +109,30 @@ it gets less care than the work it is checking.**
 this generalises it past UI) · [[2026-09-07_a-census-complete-over-a-frame-that-is-not]] (a
 truncation is a frame) · [[2026-09-04_decisions-held-narration-drifted]] (classify the errors; a
 pattern is an answer, a list is not).
+
+
+## EXTENSION 2026-09-08 19:5x — a FAILED COMMAND and a true zero are indistinguishable in a count, and a SEMANTIC control is what catches it
+
+**The case (Secuura s151).** Counting where a chain-call recorder is invoked, the seat fetched a
+**TRUNCATED branch name**, so `git show` failed and every count came back `0/0/0`. That reads exactly
+like *the recorder is nowhere* — which was the opposite of the truth and would have refuted the PR's
+own subject.
+
+**What caught it was not a technical control.** A positive control proves the *instrument* can fire; it
+says nothing when the instrument never ran. **What caught it was SEMANTIC: a zero in `provider.ts`
+contradicted the PR's whole subject.** The seat knew the recorder had to be there, so the zero was
+impossible before it was investigated.
+
+**The rule this adds to rule 1:**
+
+8. **Ask whether the answer is POSSIBLE before asking whether it is right.** A technical control proves
+   the instrument can fire; a **semantic** control asks whether this result could be true given what
+   you already know about the subject. **The second is cheaper and it catches a class the first
+   misses** — a broken command passes every technical control pointed at its output, because there is
+   no output to test.
+9. **Prefer an input shape that cannot fail over a check for the failure.** The fix was re-fetching by
+   `refs/pull/<n>/head`, **which cannot be truncated** — removing the failure mode beats detecting it
+   ([[2026-08-09_an-enforcement-you-must-arm-is-not-one]] applied to inputs).
+10. **A zero from a command whose invocation you did not verify is not a measurement of anything.**
+    This is rule 3 (read stderr) with its most common concrete cause named: **the identifier was
+    malformed, so the command never addressed the thing.**
