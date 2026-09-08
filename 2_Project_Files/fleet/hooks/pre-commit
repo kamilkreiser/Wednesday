@@ -1,0 +1,34 @@
+#!/bin/bash
+# TRACKED MASTER COPY of the repo's pre-commit hook. INSTALL IT WITH:
+#     cp 2_Project_Files/fleet/hooks/pre-commit .git/hooks/pre-commit && chmod +x .git/hooks/pre-commit
+#
+# WHY THIS FILE EXISTS (2026-09-08). The hook is untracked BY NECESSITY — git will not
+# version .git/hooks — so it does not travel with a clone. Until today its body existed
+# only inside a 2026-08-04 commit MESSAGE, and doctor.sh warned "re-create per
+# learnings/2026-08-04_...", which asks a stranded seat to reconstruct a guard from a
+# month-old commit. That is a mechanism recorded by its story instead of its path
+# (learnings/2026-09-07_a-mechanism-is-recorded-by-its-path-not-its-runtime-id), and the
+# proof it matters is live: the DevMASTER/TUESDAY clone made this morning has NO hook, so
+# it would happily push conflict markers — which is exactly what it exists to stop, and
+# what happened twice on 2026-09-08.
+#
+# Keep this file and .git/hooks/pre-commit identical; doctor.sh compares them.
+# w=3 ledger enforcement (2026-08-04): block artifact classes from commits.
+BAD=$(git diff --cached --name-only --diff-filter=AM | grep -E '(__pycache__|\.pyc$|\.pkl$|/logs/|/state/|/out(_[a-z]+)?/|seat_scratch/|node_modules/)' || true)
+if [ -n "$BAD" ]; then
+  echo "COMMIT BLOCKED — artifact paths staged (gitignore them at creation):"
+  echo "$BAD"
+  exit 1
+fi
+
+# Conflict markers (added 2026-09-02 19:4x, ledger w=5 check-the-refusal family: a note with
+# markers reached origin twice in one day through a ';' chain after a failed autostash pop).
+# In-path: a commit cannot carry a staged text file with a marker line. Exercised before arming.
+MARK=$(git diff --cached --name-only --diff-filter=AM | grep -Ev '\.(json|png|jpg|pdf|xlsx|gif)$' | while read -r f; do
+  git show ":$f" 2>/dev/null | grep -nE '^(<<<<<<< |=======$|>>>>>>> )' | head -3 | sed "s|^|$f:|"
+done)
+if [ -n "$MARK" ]; then
+  echo "pre-commit: REFUSED — conflict markers in staged content:" >&2
+  echo "$MARK" >&2
+  exit 1
+fi

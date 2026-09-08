@@ -72,7 +72,25 @@ else warn "scheduler jobs not loaded" "run 2_Project_Files/scheduler/install.sh 
 [ -d "/Volumes/DevMASTER" ] && ok "DevMASTER mounted" || warn "DevMASTER not mounted" "cross-project context read-only unavailable — fine on the laptop"
 
 # --- Repo hooks (ledger w=3 enforcement travels per-clone) ---
-[ -x "$PROJECT_DIR/.git/hooks/pre-commit" ] && ok "pre-commit artifact gate" || warn "pre-commit hook missing" "re-create per learnings/2026-08-04_gitignore-artifacts-at-creation (fresh clone?)"
+# A TRACKED master copy now lives beside the other hooks, so a stranded seat installs it
+# with one command instead of reconstructing it from a 2026-08-04 commit message. The
+# check also compares the two: an installed hook that has DRIFTED from the master is worse
+# than a missing one, because it looks armed. Proof the gap is real — the clone made on
+# 2026-09-08 had no hook at all, and its whole job is refusing the conflict markers that
+# reached origin twice that same morning.
+PCM="$PROJECT_DIR/2_Project_Files/fleet/hooks/pre-commit"
+PCI="$PROJECT_DIR/.git/hooks/pre-commit"
+if [ ! -x "$PCI" ]; then
+  if [ -f "$PCM" ]; then
+    warn "pre-commit hook NOT installed" "one command: cp 2_Project_Files/fleet/hooks/pre-commit .git/hooks/pre-commit && chmod +x .git/hooks/pre-commit"
+  else
+    fail "pre-commit hook missing AND no tracked master" "the artifact/marker gate is gone entirely — restore 2_Project_Files/fleet/hooks/pre-commit"
+  fi
+elif [ -f "$PCM" ] && ! diff -q "$PCM" "$PCI" >/dev/null 2>&1; then
+  warn "pre-commit hook has DRIFTED from the tracked master" "diff 2_Project_Files/fleet/hooks/pre-commit .git/hooks/pre-commit — an armed-looking hook may not be"
+else
+  ok "pre-commit artifact + marker gate" "installed and matching the tracked master"
+fi
 
 # --- Calendar probe (added 2026-08-05: dashboard EventKit feed; PORTABILITY 18) ---
 # On an ungranted machine the macOS calendar prompt appears HERE at launch —

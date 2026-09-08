@@ -177,7 +177,61 @@ above are the per-dependency detail; this is the run-sheet.
 classes (`__pycache__`/`.pyc`/`.pkl`/`logs/`/`state/`/`out*/`/`seat_scratch/`/`node_modules/`)
 and, since 2026-09-02 (ledger w=5, conflict markers reached origin twice in one day through a `;`
 chain), **any staged text file carrying a `<<<<<<< ` / `=======` / `>>>>>>> ` line**. After any
-fresh clone or a `.git` that did not travel, re-create it: copy the hook body from the Studio's
-`.git/hooks/pre-commit` (backup `.pre-0902-markers` beside it) or from the 2026-08-04 history
-entry (artifact half) + the 2026-09-02 daily note (marker half); `chmod +x`; exercise both
-refusals on a scratch repo before relying on it.
+fresh clone or a `.git` that did not travel, re-create it.
+
+**SUPERSEDED 2026-09-08 — there is now a TRACKED master copy, so this is one command:**
+
+    cp 2_Project_Files/fleet/hooks/pre-commit .git/hooks/pre-commit && chmod +x .git/hooks/pre-commit
+
+The old instruction ("copy the body from the Studio, or from the 2026-08-04 history entry plus
+the 2026-09-02 daily note") asked a stranded seat to reconstruct a guard from a month-old commit
+message — a mechanism recorded by its story rather than its path. `doctor.sh` now warns when the
+hook is missing AND when it has DRIFTED from the tracked master, because an armed-looking hook
+that no longer matches is worse than an absent one. Exercised in all four states 2026-09-08.
+
+---
+
+## Headless second agent (TUESDAY) — bring-up (added 2026-09-08, Kam's two-machine commission)
+
+**Read `0_Brain/tasks/FIRST-BOOT-TUESDAY.md` first — it is what SHE reads. This is what KAM does.**
+
+The machine is a Time Machine restore of the Studio, so items 1–9 of the run-sheet above are
+already satisfied. **What a restore does NOT carry, and each one is a real gap:**
+
+1. **The drive.** Tuesday's tree is `/Volumes/KK_T9_External_HDD/TUESDAY` (2.1 GB, provisioned
+   2026-09-08). It is a working copy of the SAME repo — not a fork — so it pulls and pushes to
+   `kamilkreiser/Wednesday` like any other clone.
+2. **Her Claude account — the only true blocker, and only Kam can do it.** The keychain entry is
+   machine-local; the config dir travels, the secret does not.
+
+       CLAUDE_CONFIG_DIR=/Volumes/KK_T9_External_HDD/TUESDAY/4_Credentials/.claude claude
+
+   then `/login` with the **Datasec** Claude account. Once per machine per agent. Tested
+   2026-09-08: an empty config dir answers *"Not logged in · Please run /login"* and builds its
+   own `.claude.json`/`projects`/`sessions`, so the namespaces are genuinely separate.
+3. **Launch her with `Launch_Tuesday.command`** in that folder — never `Launch_Wednesday.command`,
+   which would boot her as Wednesday, reading Wednesday's ledger and Wednesday's inbox. (The
+   hostname map is only a fallback; the launcher FILE is what decides.)
+4. **Her credentials are deliberately narrow.** She holds the shared fleet keys only (Linear WED
+   workspace, AgentMail). **She does NOT hold `MSGRAPH_*`** for the Datasec mailbox/calendar —
+   arguably hers, but moving a client's credentials into a seat is Kam's call and it is still open.
+   She does not hold the other client's calendar feed and never should.
+5. **Her inbox is `tuesday-agent@agentmail.to`** (created 2026-09-08). `inbox_digest.sh` and her
+   boot prompt are keyed on the agent, so she never polls Wednesday's.
+6. **The `.git/hooks/pre-commit` gap applies to her** — see the section above; one command.
+7. **Verify the ssh pointer heals.** Her `.git/config` inherited a key path under `/Volumes/DevMASTER`.
+   With DevMASTER unmounted (the normal state on her machine) the launcher rewrites it to her own
+   tree's key at boot and prints `[repo] HEALED core.sshCommand`. If DevMASTER happens to be
+   mounted the pointer resolves and the heal correctly does nothing.
+8. **Headless specifics, all GUI, all Kam's:** auto-login ON (Tailscale's GUI variant starts at
+   LOGIN, not boot — without auto-login the machine is unreachable after a reboot) · sleep OFF ·
+   Screen Sharing ON so a monitor is optional · Tailscale's two approvals and tailnet login ·
+   Matilda Premium voice · Calendar TCC if she is to read one · Docker's first-launch prompts.
+9. **She does NOT serve a dashboard.** Kam asked for one website; it is served from the Studio and
+   her stream renders there under the TUESDAY toggle. `WED_DASHBOARD=1` overrides that if a lone
+   Tuesday machine ever genuinely needs its own.
+10. **The travel case, which is the weak one.** Both agents from one drive on one machine: the
+    physical separation disappears and only `pathguard.py` remains — and it gates WRITES, never
+    reads. Test it deliberately before relying on it: run both seats from the single drive and
+    verify the toggle still separates them, the guard still refuses, and neither corrupts the
+    other's chat stream.
