@@ -1024,3 +1024,45 @@ value to run a control against.
 **Family:** [[2026-09-08_a-false-absence-is-usually-my-own-instrument]] (the ZERO half; this is the
 SILENCE half) · [[2026-08-06_never-discard-stderr]] · [[2026-08-26_zsh-has-no-pipestatus]] (the other
 way a pipe destroys the information you needed).
+
+---
+
+## An identifier DERIVED and never written down cannot be found by searching for what you think it is called — and the search returns a DIFFERENT family that does carry the name
+*Added 2026-09-08 22:3x, from the Secuura seat (s153) correcting its own flag before the coordinator acted on it. Credited.*
+
+**The operative case:** you need the identifier for something — an image tag namespace, a compose
+project, a container prefix, a generated table name, a build artefact path — and you find it by
+**searching for the name of the project it belongs to.** Stop. **If the identifier is DERIVED (from a
+directory name, a slug, a hash, a config default), the project's name may appear nowhere in it — and
+your search will return something else that does carry the name.**
+
+**The case, measured.** The seat grepped `docker images | grep -i secuura`, found 32
+`secuura_slot3-*` images and reported them to Wednesday as the stack's tags. **They were not.** The
+running stack's images are `2_project_files-*` — **compose derives the project namespace from the
+DIRECTORY NAME, and it is written nowhere.** The `secuura_slot3-*` family belonged to a *different*
+project's stack, with **zero containers in any state**. Its own sentence:
+
+> *"the namespace is derived by compose from the DIRECTORY NAME — it is written nowhere, which is
+> exactly why grepping for a project name found the wrong family."*
+
+**Why this is worse than an empty result:** a zero prompts suspicion (that is the false-absence
+family). **A confident wrong family looks like an answer**, and it had already been written into a
+flag to the coordinator before the enumeration caught it.
+
+**How to apply:**
+1. **Ask the TOOL what it calls the thing, never the name you would have given it.** `docker compose
+   ls`, `docker inspect`, `terraform state list`, the ORM's generated name — the tool holds the
+   derived identifier; your model of it does not.
+2. **Go from the RUNNING thing back to its identifier, not from the name forward.** "What is this
+   container's image?" is answerable; "what are the project's images called?" invites a guess.
+3. **A match on a name you supplied is weak evidence; a match on something you did NOT supply is
+   strong.** Here, "it contains the word secuura" was supplied by the searcher; "34 containers
+   reference it" was not.
+4. **Derived-identifier sources worth naming in advance:** compose project names (directory), k8s
+   namespaces, docker volume prefixes, git worktree paths, temp dirs, slugified titles, and anything
+   with a `-1`/`_slot3` suffix that a tool appended.
+
+**Family:** [[2026-09-08_a-false-absence-is-usually-my-own-instrument]] (its inverse — a false
+PRESENCE, which gets a fraction of the suspicion a zero does) ·
+[[2026-08-14_i-read-representations-they-read-sources]] (a name is a representation of an identity) ·
+[[2026-09-07_a-mechanism-is-recorded-by-its-path-not-its-runtime-id]].
