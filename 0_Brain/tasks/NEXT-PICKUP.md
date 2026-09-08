@@ -38,9 +38,31 @@ The set, quoted as s152 wrote it (Wednesday has expanded no shorthand):
     POST /api/oauth/apps/{id}/rotate-secret · POST /api/onedrive/files/{id}/sync
     POST /api/teams/webhook-config · POST /api/wallets/verify
 
-Eight map to KS-693/KS-784 by string match; three more are m365-family; **`rotate-secret` is the one
-nobody can attribute, and s152 REFUSED to call it new without a baseline. That refusal stands until the
-delta settles it.**
+> 🔴 **CORRECTED 22:5x by s153's delta — this framing was WRONG AT EVERY HOP and the correction
+> lands here because this file is the only one of the three that can still be edited.** s152's mail and
+> Wednesday's brief both say *"eleven attributable, one unattributed"*. **The true shape is ELEVEN OWNED
+> PLUS A STOCHASTIC SLOT — there is no twelfth defect to attribute.**
+>
+> **Settled on the OLD code, without the rebuild**, which is the stronger claim: three runs of identical
+> code (s152's 12:12Z artefact + s153's two before-runs) returned **12 → 11 → 12 failing**, with
+> `rotate-secret` PRESENT / ABSENT / PRESENT. Nothing changed and the answer moved twice.
+> **Independent confirmation:** the second stochastic member, `POST /api/gdpr/consent`, is one KS-784
+> had already named as a past occupant of that same slot — so the slot is the mechanism, not a story
+> fitted to two runs. **NOTHING about `rotate-secret` is to be filed.**
+
+**THE DELTA, both directions (s153, BUILT_SHA `5ffaaf396…`, 32/32 built, 0 failures):**
+- **FIXED (2)** — failed in every before-run, none after: `GET /api/gdpr/erasures/{externalRef}` and
+  `POST /api/gdpr/erasures`. **Their fix was already in the code; only the stale image hid it** — the
+  eleventh instance of work-done-and-the-board-not-saying-so, caught in-session for once.
+- **INTRODUCED (1)** — `PATCH /api/users/admin/{id}` returns **500**. Isolated to two necessary
+  conditions with clean controls (valid UUID → 404; empty body → 400) and the trace names `22P02` at
+  `tenant-guc.js:178`. **Attributed to `561de81ca` — KAM'S OWN KS-963 `rethrow` ruling — and the
+  framing is load-bearing: KS-963 did NOT create a defect, it removed the swallow that was hiding one.
+  The route never validated the id format, so the old 404 was itself a wrong answer. THE RULING IS NOT
+  TO BE REVERTED.** Filed as its own P2 on the missing validation, related to KS-963 as context.
+- **UNCHANGED (9)** — 7 m365/onedrive (KS-693), `teams/webhook-config` (KS-784), `wallets/verify` (KS-686).
+- **Legs identical both sides** (3: 321/321 · 4: 341/341 · 8: 307/341), and run-validity 0 of 316
+  operations errored on all four runs — which is what makes every "unchanged" mean anything.
 
 ## 🟢 THE STACK IS UP AND STAYS UP — tear-down is nobody's tonight
 33/33 services, migrations `applied=45 failed=0`, gateway `localhost:6882` → 200. Exactly ONE consumer
