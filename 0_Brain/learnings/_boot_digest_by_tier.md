@@ -7,7 +7,7 @@ status: live
 
 # Boot digest BY TIER — W whole, M rules-only, every project case a handle
 
-Generated 2026-09-09 08:08 from 127 lesson files (657,605 B). M 29 · MIXED 5 · W 93. 28 project CASE sections inside MIXED files are reduced to one line each: the heading and the path to read it at. W blocks are exactly what the default digest carries; M blocks drop the section index and keep the rules; a P file is a single handle. The CASES behind every rule live only in the lesson files — open one the moment its rule fires.
+Generated 2026-09-09 08:14 from 128 lesson files (662,514 B). M 29 · MIXED 5 · W 94. 28 project CASE sections inside MIXED files are reduced to one line each: the heading and the path to read it at. W blocks are exactly what the default digest carries; M blocks drop the section index and keep the rules; a P file is a single handle. The CASES behind every rule live only in the lesson files — open one the moment its rule fires.
 
 ## The T9 SSD is the master — Wednesday must be fully portable
 `2026-07-31_fully-portable-drive.md` · principle · 2026-07-31 · status: superseded — the "T9 is the master" half by [[2026-08-25_one-drive-devmaster-is-master]] (2026-08-25); the portability principle itself still lives · tier: W
@@ -4410,4 +4410,38 @@ rule actually scopes) · [[2026-08-14_i-read-representations-they-read-sources]]
 inference presented with a citation) · [[2026-08-20_dashboard-shows-only-live-work]] (his
 reading surface is his) · [[2026-08-17_conversation-needs-a-stable-panel]] (the panel is
 where he reads — and now where he listens).
+
+
+## A BOUNDED authority to accept newly-published advisories — four clauses, and the exception is the clause that matters
+`2026-09-09_advisory-baseline-standing-authority.md` · grant · 2026-09-09 · status: live · tier: W
+
+**The operative case, so the headline matches it:** a newly-published security advisory has appeared
+against a pin this fleet already holds, the pre-push gate now refuses **every author's** push, and
+Wednesday is deciding whether to clear it. **Check the four clauses AND the exception below. If all
+five hold, clear it and flag it. If any one does not, it stops for Kam — and "it is probably fine" is
+not a clause.**
+
+sections (open the file for these): What the grant covers · THE EXCEPTION, and it is written first because it is the one that will be met · What it does NOT cover · Why he granted it, in one line the successor needs · How to apply
+
+## How to apply
+
+1. **Check the five, in writing, in the mail that clears it.** A grant applied silently is
+   indistinguishable from a grant exceeded.
+2. **Name the measurement's OWNER.** Wednesday holds no client identity, so clause 2 is always
+   someone else's read — say whose ([[2026-08-14_i-read-representations-they-read-sources]]).
+3. **Flag it to Kam with what was accepted and until when**, in the same action, not at the wrap.
+4. **This grant has no stated expiry** — he attached no window, unlike the three week-scoped grants of
+   2026-09-07. That is stated rather than assumed; it does **not** get a `doctor.sh` expiry check, and
+   if he meant one he can say so ([[2026-09-06_a-scoped-override-carries-its-own-expiry]]).
+5. **A rule is most dangerous just after adoption** ([[2026-09-08_a-new-rule-is-most-dangerous-just-after-adoption]]).
+   Its exception is written above rather than waited for. **The first time a case argues its way past
+   a clause, that is the clause working — stop and card it.**
+
+**Family:** [[2026-08-07_protocol-v1.3-signed-delegation]] (the baseline this narrows one line of) ·
+[[2026-08-03_go-slow-earn-autonomy]] (rule 5: every grant recorded, so the boundary is written down
+and never vibes) · [[2026-08-16_classification-is-the-field-that-grants-authority]] (severity and
+"does not reach runtime" are the fields that decide authority here, so each needs its provenance) ·
+[[2026-09-07_production-ban-lifted-for-the-week]] (a grant read narrowly, every use flagged) ·
+[[2026-08-09_an-enforcement-you-must-arm-is-not-one]] (the gate reshape is the mechanism; this grant
+is the interim rule).
 
