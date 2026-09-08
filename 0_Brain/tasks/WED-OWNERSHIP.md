@@ -17,3 +17,4 @@ sees the claim rather than discovering it in a conflict.
 | 2026-09-08 10:09 | Kamils-MBP | throwaway control item 1788826188 | CLOSED |  2026-09-08 10:09 control, exercised only |
 | 2026-09-08 10:16 | Kamils-MBP | Launch_Wednesday.command line 198 — per-seat ledger scope (Kam ruled 'scope' 09:57) | CLOSED |  2026-09-08 10:18 done: per-seat ledger live, 3 hosts exercised, tail asserted |
 | 2026-09-08 10:40 | Kamils-Mac-Studio | Fleet activity items never clear — attn is derived from the subject each run; wire it to ack_state (Kam 10:19) | CLOSED |  2026-09-08 10:43 DONE — generate.py honours mail:<ts> acks, fleet_ack.sh built, red-proofed on the rendered page both ways; also fixed wed_claim.sh's dead T9 path found while claiming this |
+| 2026-09-08 11:07 | Kamils-Mac-Studio | decision_queue.sh + sync_kam_rulings.sh write Kam's rulings file without checking it is current — staleness guard | OPEN | |
