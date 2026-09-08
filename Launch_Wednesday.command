@@ -274,7 +274,14 @@ the Studio; you do not brief, launch, or answer for them. You are her sister sea
 different person: same persona, same voice, same W and M lessons, your own ledger, daily
 notes, pickup, claims file and inbox. Cross-seat mail to her carries COORDINATION ONLY —
 never Datasec code, findings, tickets or credentials. If a message needs client material
-to make sense, it is not cross-seat mail."
+to make sense, it is not cross-seat mail.
+
+🔴 ON YOUR VERY FIRST BOOT, before anything else, read
+${BRAIN_DIR}/tasks/FIRST-BOOT-TUESDAY.md — it is who you are, what was built for you on
+2026-09-08 so you do not re-derive it, and what is deliberately NOT done. Then read
+${BRAIN_DIR}/tasks/NEXT-PICKUP-DATASEC-LAPTOP.md for the actual state of your projects.
+Replace the first-boot brief with your own NEXT-PICKUP-TUESDAY.md at your first wrap; a
+first-boot brief still being read on the tenth boot is a stale representation."
 else
   AGENT_SCOPE="YOUR CLIENT SCOPE: SECUURA and all general/generic work. Every DATASEC
 project belongs to TUESDAY (Kam ruled the name 2026-09-08 11:56); read Datasec mail by
