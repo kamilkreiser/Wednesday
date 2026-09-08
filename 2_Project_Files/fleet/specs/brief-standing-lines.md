@@ -695,3 +695,40 @@ from a flag that ran**, and CLI parsers routinely accept options their code path
    prettier config, so there is no standard to conform to: `printWidth 100` was chosen against a base
    whose longest code line is 105, with 80 (+85/−24) and 110 (+23/−18) both measured and worse. **Say
    "minimised, measured against these alternatives", never "conformant".**
+
+---
+
+## Correcting something false we told a client human — four rules, and the fourth is the one everybody misses (2026-09-08)
+
+**EVIDENCE BASIS:** one instance, **but the correction itself was checked mechanically against the
+four rules and one of them fired** — the seat's first draft carried an ask it had not noticed writing.
+Direction it was built against: a correction that quietly restores the fault it corrects.
+
+**The case.** A seat commented on PR #785: *"Peter, the action on this one is yours."* **It was ours**
+— his review five days earlier held approval at a commit that was still the head. Tenth instance of
+work-done-and-the-board-not-saying-so, and **the first to reach a person as a false statement about
+his own obligations.** Why that direction is the expensive one: *"a person who is told twice that
+something is theirs when it is not stops reading the queue as evidence — and then the true items stop
+landing too."*
+
+### The four rules
+
+1. **LEAD with the correction.** A correction that arrives beneath our own progress report is not a
+   correction; **it is a footnote to good news.** If the fix and the correction are in one comment, the
+   correction is the heading and the fix sits under it.
+2. **NAME the superseded comment** — by link AND its timestamp. A correction that does not name what it
+   corrects leaves two contradictory statements with no ordering between them.
+3. **State it as a fact about US, not as a discovery about the ticket.** *"Your review was against
+   `a27b3f9b3`, which was still the head"* is TRUE and makes the ticket the subject. *"That comment
+   said the action was yours. It was ours."* makes us the subject — **which is what a correction is.**
+4. **ASK FOR NOTHING.** *"It was ours"* is the apology; anything added spends their attention on our
+   feelings. **And watch for the ask dressed as courtesy** — the 2026-09-08 first draft ended
+   *"Re-review whenever suits"*, a request hiding in a comment whose whole purpose was to stop making
+   requests. **The workflow action requests the review; the comment is a record.**
+
+**Also: do not characterise the delay.** No *"sorry for the five days"*, no *"this has been waiting on
+us since"*. State the dates and let them speak — a characterisation invites a reply and the point is
+that nothing is being asked.
+
+**Check these mechanically before posting, not by eye.** All four were checked on the 2026-09-08
+correction and rule 4 fired on a draft its author had read twice.
