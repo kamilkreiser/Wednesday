@@ -7,7 +7,7 @@ status: live
 
 # Boot digest BY TIER — W whole, M rules-only, every project case a handle
 
-Generated 2026-09-08 18:55 from 126 lesson files (633,114 B). M 29 · MIXED 5 · W 92. 28 project CASE sections inside MIXED files are reduced to one line each: the heading and the path to read it at. W blocks are exactly what the default digest carries; M blocks drop the section index and keep the rules; a P file is a single handle. The CASES behind every rule live only in the lesson files — open one the moment its rule fires.
+Generated 2026-09-08 19:30 from 127 lesson files (638,438 B). M 29 · MIXED 5 · W 93. 28 project CASE sections inside MIXED files are reduced to one line each: the heading and the path to read it at. W blocks are exactly what the default digest carries; M blocks drop the section index and keep the rules; a P file is a single handle. The CASES behind every rule live only in the lesson files — open one the moment its rule fires.
 
 ## The T9 SSD is the master — Wednesday must be fully portable
 `2026-07-31_fully-portable-drive.md` · principle · 2026-07-31 · status: superseded — the "T9 is the master" half by [[2026-08-25_one-drive-devmaster-is-master]] (2026-08-25); the portability principle itself still lives · tier: W
@@ -3980,6 +3980,43 @@ has not, the line is the most reasoned-looking thing in the frame.
 5. **Keep the detector.** It is what protects the coordinator, and it caught all nine tonight. This
    does not replace it; it explains why eight bounced harmlessly and names the shape of the one that
    would not have.
+
+
+## A new rule is at its most dangerous immediately AFTER it is adopted — one worked example, a persuaded author, and nobody has met its exception yet
+`2026-09-08_a-new-rule-is-most-dangerous-just-after-adoption.md` · principle · 2026-09-08 · status: live · tier: W
+
+**The operative case, so the headline matches it:** you have just written a rule from something that
+happened today, and you are about to put it somewhere that binds — the brief path, a standing line,
+a launcher, `CLAUDE.md`. **Stop. Ask what its exception looks like, and whether anyone has met one.**
+A rule is never more confident, never better argued, and never less tested than in the hour it is
+adopted.
+
+sections (open the file for these): The case, measured, and it took ten minutes · The seat's formulation, adopted verbatim · Why this is its own lesson and not go-slow rule 4 restated · How to apply
+
+## How to apply
+
+1. **Before a rule enters a binding path, write its EXCEPTION** — the case where following it gives
+   the wrong answer. If you cannot construct one, you do not yet understand the rule's scope; say so
+   in the line itself rather than omitting it.
+2. **A mechanism reported by one party, once, is a HYPOTHESIS.** It may go in a ledger row the same
+   day. **It does not enter the brief path until something verifies it or it recurs.** (Wednesday's
+   own [[2026-08-03_frequency-weighted-reinforcement]]: w=1 is *could be noise*.)
+3. **Every standing line carries its evidence basis** — how many instances, verified by what, or the
+   honest `SINGLE UNVERIFIED INSTANCE — pilot only`. **A path that accepts a well-told line is a path
+   with no gate**, and prose quality is not evidence.
+4. **State the direction a rule was built against.** *"Built from a green trusted too readily; says
+   nothing about a slow operation mid-flight"* is one clause, and it is the clause that would have
+   prevented this.
+5. **Treat the first exception as a dividend, not an embarrassment.** Ours arrived in ten minutes and
+   cost nothing because the seat retracted unprompted. **The rules to fear are the ones whose
+   exception arrives in three months, to someone who was not there.**
+
+**Family:** [[2026-08-03_go-slow-earn-autonomy]] (rule 4 — this is its mechanism) ·
+[[2026-09-01_qa-gate-before-my-verification]] (SHARPENED 09-04: a mechanism claim goes to the gate,
+not to ratification — the rule broken here) · [[2026-08-09_an-enforcement-you-must-arm-is-not-one]]
+(the brief path IS enforcement, so writing to it is arming something) ·
+[[2026-08-14_i-read-representations-they-read-sources]] (the SHARPENING: a compression propagates with
+perfect fidelity — so does a well-told wrong rule) · [[2026-08-07_a-check-that-cannot-fail]].
 
 
 ## A decision stays on the page while the world moves under it — the dangerous change is not the one that contradicts a ruling, it is the one that removes the precondition the ruling's TRIGGER depends on

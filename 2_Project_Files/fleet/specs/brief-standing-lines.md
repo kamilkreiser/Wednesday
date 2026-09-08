@@ -546,6 +546,31 @@ KS-677, KS-566 and #721 at the moment they shipped rather than six days, six day
 later. **The defence is not more care when reading the board — it is one write at the moment of
 creation, which is the only moment anyone is looking.**
 
+
+---
+
+## ⚠ CONVENTION FOR THIS FILE — every section carries its EVIDENCE BASIS (added 2026-09-08 after a false rule reached this path in ten minutes)
+
+**This file IS enforcement.** A line written here is carried by every brief the fleet sends, so adding
+to it is arming something ([[2026-08-09_an-enforcement-you-must-arm-is-not-one]]).
+
+**On 2026-09-08 a standing rule was added from a single seat's self-reported mechanism and was FALSE**
+— retracted by that seat fourteen minutes later. **Nothing in this path required it to be true; it
+only required it to be well-told.** Prose quality is not evidence.
+
+**So every section added from here carries, in its heading or first line:**
+
+- **how many instances** it rests on, and **whose** they are;
+- **what verified the mechanism** — a control, a red-proof, a second party — or the honest
+  **`SINGLE UNVERIFIED INSTANCE — pilot only, do not enforce`**;
+- **the failure DIRECTION it was built against**, because a rule built against one direction actively
+  recommends the opposite mistake (see the correction under the exit-vs-outcome section — that rule
+  produced its own opposite failure within ten minutes of being written).
+
+**A mechanism reported once, by one party, is a hypothesis.** It belongs in a ledger row that day; it
+enters this file when something verifies it or it recurs. See
+`0_Brain/learnings/2026-09-08_a-new-rule-is-most-dangerous-just-after-adoption.md`.
+
 ---
 
 ## A tool's exit reports the CALL, never the OUTCOME — for anything that changes state elsewhere, read the destination (2026-09-08; TWO instances, and the third was RETRACTED — see the correction at the foot)
