@@ -7,7 +7,7 @@ status: live
 
 # Boot digest — headline + rules of every lesson (open the file when it fires)
 
-Generated 2026-09-09 06:15 from 127 lesson files (653,538 B). Each block = the lesson's retrieval handle (H1), its frontmatter, the operative paragraph, its section index, and every RULES section verbatim. 6 files carry no rules-shaped section and are included whole. The CASES behind a rule live only in the file: open it the moment the rule fires, or when a diagnosis needs the evidence. `_ledger.md` is read whole beside this digest; `_ledger_archive.md` on demand.
+Generated 2026-09-09 06:59 from 127 lesson files (656,639 B). Each block = the lesson's retrieval handle (H1), its frontmatter, the operative paragraph, its section index, and every RULES section verbatim. 6 files carry no rules-shaped section and are included whole. The CASES behind a rule live only in the file: open it the moment the rule fires, or when a diagnosis needs the evidence. `_ledger.md` is read whole beside this digest; `_ledger_archive.md` on demand.
 
 ## The T9 SSD is the master — Wednesday must be fully portable
 `2026-07-31_fully-portable-drive.md` · principle · 2026-07-31 · status: superseded — the "T9 is the master" half by [[2026-08-25_one-drive-devmaster-is-master]] (2026-08-25); the portability principle itself still lives
@@ -4296,7 +4296,7 @@ sentence, ask what the instrument would have printed if the thing WERE there, an
 print that.** A false absence and a true absence are byte-identical on screen. **The world cannot
 tell you which one you are holding; only a control can.**
 
-sections (open the file for these): The three, in one session, all within ninety minutes · Why this is its own lesson and not three ledger rows · How to apply · Instance 4, added the same session — and it landed INSIDE the correction · The uncomfortable half, kept · EXTENSION 2026-09-08 19:5x — a FAILED COMMAND and a true zero are indistinguishable in a count, and a SEMANTIC control is what catches it · SHARPENED 2026-09-08 22:2x by the Secuura seat (s152) — A CONTROL DRAWN FROM THE SAME FAMILY AS THE THING YOU ARE MISSING AGREES WITH THE WRONG ANSWER · COSTUME 2026-09-08 22:4x — A REFUSED QUERY RENDERING AS AN EMPTY ONE (Secuura s153, self-caught by its control) · COSTUME 2026-09-08 23:2x — PARSING A FORMAT WITH REGEX WHEN ITS OWN RESOLVER IS ONE COMMAND AWAY (Secuura s153; the THIRD false zero it caught in one session) · THE RATE, observed at the 2026-09-09 overnight wrap — SEVEN instrument failures in one session, and SIX were Wednesday's own hand-composed checks
+sections (open the file for these): The three, in one session, all within ninety minutes · Why this is its own lesson and not three ledger rows · How to apply · Instance 4, added the same session — and it landed INSIDE the correction · The uncomfortable half, kept · EXTENSION 2026-09-08 19:5x — a FAILED COMMAND and a true zero are indistinguishable in a count, and a SEMANTIC control is what catches it · SHARPENED 2026-09-08 22:2x by the Secuura seat (s152) — A CONTROL DRAWN FROM THE SAME FAMILY AS THE THING YOU ARE MISSING AGREES WITH THE WRONG ANSWER · COSTUME 2026-09-08 22:4x — A REFUSED QUERY RENDERING AS AN EMPTY ONE (Secuura s153, self-caught by its control) · COSTUME 2026-09-08 23:2x — PARSING A FORMAT WITH REGEX WHEN ITS OWN RESOLVER IS ONE COMMAND AWAY (Secuura s153; the THIRD false zero it caught in one session) · THE RATE, observed at the 2026-09-09 overnight wrap — SEVEN instrument failures in one session, and SIX were Wednesday's own hand-composed checks · SHARPENED 2026-09-09 by the Secuura seat (s154) — A CONTROL THAT FIRES CAN STILL BE THE WRONG INSTRUMENT
 
 ## How to apply
 
@@ -4415,6 +4415,30 @@ requiring the control).
 **Family:** rules 16-18 above (ask the resolver, not the text) — this is the same rule pointed at the
 person rather than the format · [[2026-08-07_a-check-that-cannot-fail]] ·
 [[2026-08-14_i-read-representations-they-read-sources]].
+
+## SHARPENED 2026-09-09 by the Secuura seat (s154) — A CONTROL THAT FIRES CAN STILL BE THE WRONG INSTRUMENT
+**The operative case, so the headline of this section matches it:** you have a zero, you ran a control,
+**and the control came back NON-ZERO.** Rule 1 is satisfied. **Stop anyway and ask a second question:
+does the instrument answer the question you are asking, or a neighbouring one?**
+
+**The rules this adds:**
+
+22. **A firing control proves the instrument RUNS. It does not prove the instrument ANSWERS.** Ask both:
+    *could this have returned non-zero?* and *would a non-zero here actually mean what I need it to mean?*
+    The second question is the one nothing in this file asked before.
+23. **When a zero would change a decision, go to the SOURCE the artefact is DERIVED FROM.** The generated
+    yaml is downstream of the authored schema; the authored schema is what the generator reads and what
+    the product enforces. **This is rule 16 (ask the resolver, not the text) pointed one hop further
+    back: ask the AUTHOR, not the artefact.**
+24. **The tell is a control whose hits you have not READ.** Eighteen was accepted as a number. Reading
+    even one of the eighteen would have shown it was an example rather than an enum member — which is
+    rule 3 of [[2026-08-07_a-check-that-cannot-fail]] ("when a hit lands, READ IT before counting it")
+    firing on the CONTROL rather than on the subject, where nobody points it.
+
+**Family:** rules 11-12 above (independence — necessary and, as this shows, not sufficient) · rule 16
+(ask the resolver) · [[2026-08-14_i-read-representations-they-read-sources]] (a generated file is a
+representation of an authored one) · [[2026-09-07_a-census-complete-over-a-frame-that-is-not]] (the
+grep was complete over the yaml and silent about the schema).
 
 
 ## A ghost suggestion is dangerous in proportion to how little the receiving agent has ALREADY WRITTEN DOWN — the detector catches the line, a recorded decision makes it inert

@@ -199,62 +199,66 @@ the WED board (24 open, `hasNextPage: false`, 0 labelled `lesson`).
 
 ---
 
-# ⏱ HANDOVER BLOCK — refreshed by s155 at its 50% CHECKPOINT (band is 80-90; this is NOT a rotation)
+# ⏱ HANDOVER BLOCK — refreshed by s155 at its 65% LIGHT checkpoint (band is 80-90; NOT a rotation)
 
-**s155 booted 06:01 on a planned rotation.** Seat number DERIVED from `5_Project_History/history.md`
-(newest entry s154). Brain read WHOLE — by-tier digest 328,915 B / 4,389 lines AND `_ledger.md`
-489 KB / 243 rows, all three days, **no subset taken**; the laptop/Datasec ledger as row headlines
-only. **Statusline `ctx:41%` after the complete brain load plus the whole operational sweep**, which
-is where the corrected boot lesson predicts. That default is confirmed executable at this corpus size.
+**s155 booted 06:01 on a planned rotation.** Seat DERIVED from `history.md` (newest s154). Brain read
+WHOLE — by-tier digest 4,389 lines AND `_ledger.md` all 243 rows, no subset. **`ctx:41%` after the
+complete load plus the operational sweep**, exactly where the corrected boot lesson predicts.
 
-## 🟢 SECUURA s154 IS RUNNING — launched 06:10, verified at RUNG 5, do not re-brief it
-Pane **`%5`**, at 13% and mid-boot ritual at the checkpoint. **Rung 5 verified by pane CONTENT, not
-by a non-zero ctx:** it named the brief unprompted — *"A fresh brief from Wednesday landed at launch
-time. Reading it in full and DKIM-verifying before I act on it."* Brief sent through
-`brief_and_launch.sh`, **verified at `secuura-blockchain@agentmail.to` 20:10:15Z** before the launch
-branch was reachable. **Its next mail is a plan confirmation. Answer it promptly — the reply goes
-BEFORE the capture** (the previous seat's own w=2, twice).
+## 🟢 THE FLOOR — two agents live, and what each is doing
+- **Secuura builder s154, pane `%5`.** Verified at RUNG 5 at launch (named the brief unprompted).
+  Working KS-1004 on a new branch off the NEW develop. **Its wake path is Wednesday. The reply goes
+  BEFORE the capture** — that rule fired seven times this session and never cost a turn.
+- **Tier-1 QA gate, pane `%6`** (`QA-ks1013-910`), on **#910 @ `d90f9ad8d`**. Verified at rung 5.
+  **Its verdict is the next thing owed to the builder.**
+- Launcher: `2_Project_Files/fleet/qa-agent/launchers/launch_qa_secuura_ks1013_910.sh` — TRACKED,
+  red-proofed at 5 cells (`--check` 0 · wrong SHA 6 · no directive 8 · no brief path 9 · tier
+  disagreement 7). **Recorded by PATH so a successor never has to invent a launch command.**
 
-**It will flag the F-02 SSH preflight warning — it already has, in its pane.** That is a KNOWN FALSE
-ALARM (push proven twice; repo-local `core.sshCommand` is what git uses) and **it does not go to Kam**;
-the same instruction was once given to him wrongly and is a ledger row. Answer it to the seat.
+## 🔴 HOLDS IN FORCE — and the wording matters more than the list
+**While a gate is driving a surface, do NOT generate traffic against that surface** — no probes, no
+logins, no suite runs, no restarts, no rebuilds, no pushes to the gated branch. **This is the CORRECTED
+wording; my first version enumerated only restart/rebuild/push and the seat inferred the intent
+correctly, which is a ledger row (w=1) and my error, not its.** If the surface is needed, sequence it.
 
-**Its commission:** item 0 is **KS-1013** (P2, Backlog, was UNASSIGNED) — `PATCH /api/users/admin/{id}`
-answers 500 for a malformed id. **It is a FIX, so the round ENDS AT READY FOR QA** — full gate chain,
-no merge and no deploy on the seat's word. After item 0 it builds its own standing queue and proposes
-it; Wednesday gave the rule, not the answer, deliberately.
+`BOOTSTRAP_ADMIN_PASSWORD` not set · `getUserByIdPreAuth` NOT widened while
+`secuura-ks963-widen-to-preauth` is open and unruled · KS-754's schema-widening option comes to
+Wednesday with its consumer enumeration BEFORE anything is written · KS-1004 needs NO spec change
+(confirmed from the AUTHORED schema, not the generated yaml).
 
-🔴 **THE FRAMING A SUCCESSOR MUST NOT GET BACKWARDS, repeated because it is load-bearing:**
-`561de81ca` (Kam's KS-963 `rethrow`) is **CONTEXT, NOT CAUSE. KS-963 did not create a defect; it
-removed the swallow that was hiding one.** The route never validated the id format, so the old 404 was
-itself a wrong answer. **THE RULING IS NOT TO BE REVERTED.**
+## 🟢 SHIPPED THIS SESSION — do not re-derive any of it
+- **#911 MERGED** at `e559f7bb` (was `5ffaaf396`), authorised by Wednesday after reading the file AT
+  the SHA with both controls; merged with `--match-head-commit` so a different tree was structurally
+  unmergeable. **develop = `e559f7bbace5281668637755410273ff58068c15`.**
+- **KS-1013 → In Review**, PR #910 under gate. **KS-1017** (fixture realism) and **KS-1018** (empty
+  catch answering from an in-memory map) filed.
+- **`fleet/specs/BRIEF_SKELETON.md`** — the `##`-prefix remedy named twice and never built. Built,
+  and it was REFUSED by the gate on its own first run for spelling out the scope words.
+- **FOUR standing lines from s154**, all in `fleet/specs/brief-standing-lines.md`: `includeArchived`
+  under-reports disposition queries by half · a sentence true only in its paragraph carries its own
+  object · a config-resolving tool run on a COPY is a false clean · **a correction to an over-broad
+  claim overshoots into an over-narrow one — state the BOUND, not the direction.**
+- **Rules 22-24 added to `2026-09-08_a-false-absence-is-usually-my-own-instrument`**: a firing control
+  proves the instrument RUNS, not that it ANSWERS. **Both digests regenerated, `--check` rc 0.**
 
-## 🟢 THE MORNING SWEEP, MEASURED
-15 KS issues moved since s153's 13:38Z wrap, newest 14:56Z — **15 of a requested 40, so NOT truncated**.
-**Nothing from Peter or Stuart.** Four P0s are open and **all four are Peter's** (KS-1002, KS-971,
-KS-985, KS-984) — under Kam's 2026-09-06 10:24 ruling they stay his. WED board **103 open** across
-backlog+unstarted+started (predicate stated; the handover's "24" was a narrower one), **0 labelled
-`lesson`**, **WED-48 still the only overdue item** (CypherKey Twilio rotation, due 09-04, 5 days).
+## 🔴 WITH KAM — one NEW item, and it is his own ruling never executed
+**`secuura-agent-github-identity`, ruled `identity` 2026-08-26 17:12, undelivered fourteen days.**
+Every agent PR is authored by `kksecura` = HIS account; **GitHub disables Approve on your own PR and
+drops the click silently**, so the one available approver cannot approve, and every merge lands with no
+review recorded. **Evidence is the merge receipt naming `kksecura`, NOT the card's unmarked state.**
+His part is two clicks: invite the account to the org, grant Write on the repo. **Put to him on the
+panel action-first at 06:5x. Not carded — he already ruled it; re-carding would be a fifth-raise.**
 
-## 🟢 BUILT THIS SEAT — `fleet/specs/BRIEF_SKELETON.md`, and it caught itself
-The remedy named at 09-07 and 09-08 for the `##`-prefix gate class and never built. **Built and
-red-proofed at four cells: filled skeleton rc 0 all gates passed nothing sent; `## ` on the RULED
-literal, SELF-CHECK stamp removed, and `## ` on PROVENANCE each refused for its OWN reason.**
-It was **refused by the gate on its own first run** because its comment spelled out the scope words —
-a document about a hazard carrying the hazard. Fixed by pointing at `send_brief.sh:59` instead of
-duplicating the list. **The gate enforces THREE literals, not four**; the ledger row said four and is
-corrected in place from a READ of the gate.
+Also open, all with safe defaults: `secuura-ks963-widen-to-preauth` (Wednesday's) and three that are
+**TUESDAY's** (`hpsm-…prd-outside-every-snapshot` · `secrev-live-pass-blocked-on-tenant` ·
+`nexusai-rd369-round3-or-ship-at-the-cap`). **WED-48 is 5 days overdue** (CypherKey Twilio rotation).
 
-## 🟡 STILL OPEN AT THE CHECKPOINT
-- **The NAS sync (PID 84978) is still running** — 2 h 35 m at 06:10, still in unison's scan phase.
-  `Deleting` = 0 and `<-?->` = 0, both TRUE zeros against a firing control (98,345 `CODING` paths).
-  **Check it with `tr '\r' '\n'` FIRST — the log is 9 lines and 12 MB.** If `Deleting` is ever
-  non-zero: STOP and card it for Kam.
-- **The quiet-hours-versus-panel-autoplay question is UNRESOLVED and stays that way until it is
-  settled in daylight** with `WEDNESDAY_TEST_HOUR`. It is a factual question for the board, not a lesson.
-- **Kam has said nothing today** (`kam_rulings_today.sh`: 0 messages, local copy confirmed current).
-  The morning brief is on his panel. Four cards on his queue, three of them TUESDAY's; the only
-  Secuura one is `secuura-ks963-widen-to-preauth`, and every card has a safe default.
+## 🟡 STILL OPEN
+- **The NAS sync (PID 84978)** was still scanning at 06:1x, `Deleting` 0 and `<-?->` 0 against a firing
+  control. **Check with `tr '\r' '\n'` FIRST — 9 lines, 12 MB.** Non-zero `Deleting` → STOP and card it.
+- **Quiet-hours vs panel autoplay** — unresolved by design; settle in daylight with `WEDNESDAY_TEST_HOUR`.
+- **Wednesday's own errors this seat: two.** The `##`-prefix gate miss (w=4, fixed by building the
+  skeleton) and the verb-enumerated hold (w=1). Both in `_ledger.md`, both zero-cost.
 
 ## STANDING (unchanged)
 Nothing deployed; demo `400517aaf` is INHERITED and is not asserted by anyone. **#880 is KAM'S** and

@@ -265,3 +265,44 @@ handover on the strength of a grep that could not see 99.99% of the file.
 **Family:** rules 16-18 above (ask the resolver, not the text) — this is the same rule pointed at the
 person rather than the format · [[2026-08-07_a-check-that-cannot-fail]] ·
 [[2026-08-14_i-read-representations-they-read-sources]].
+
+## SHARPENED 2026-09-09 by the Secuura seat (s154) — A CONTROL THAT FIRES CAN STILL BE THE WRONG INSTRUMENT
+
+**The operative case, so the headline of this section matches it:** you have a zero, you ran a control,
+**and the control came back NON-ZERO.** Rule 1 is satisfied. **Stop anyway and ask a second question:
+does the instrument answer the question you are asking, or a neighbouring one?**
+
+**The case.** Establishing whether a fix needed a contract change, the seat grepped the GENERATED
+OpenAPI yaml for the status value it would write: `anchor_failed` = **0**, against a control of
+`anchored` = **18**. A firing control beside a zero — which reads as *"the status is not declared, so
+publishing it needs a spec change"*, and would have sent an unnecessary question to the coordinator.
+
+**It was the wrong instrument, and the control could not reveal that.** Those 18 hits are EXAMPLES and
+PROPERTY NAMES, not an enum. The field is published as `blockchain: z.unknown().nullable()`
+(`originate.openapi.ts:601`) — **so there is no enum at all.** A zero from that grep cannot distinguish
+*"not in the enum"* from *"there is no enum"*, and the non-zero control sits in the same undiscriminating
+space: `anchored` appears for reasons that have nothing to do with being permitted.
+
+**Why rules 11 and 12 do not catch it.** Those require a control that can fail INDEPENDENTLY of the
+suspected failure. This control was independent, it fired, and it was still uninformative — **because
+independence is a property of the CONTROL, and this defect is a property of the INSTRUMENT.** A
+perfectly independent control on the wrong instrument confirms the wrong instrument.
+
+**The rules this adds:**
+
+22. **A firing control proves the instrument RUNS. It does not prove the instrument ANSWERS.** Ask both:
+    *could this have returned non-zero?* and *would a non-zero here actually mean what I need it to mean?*
+    The second question is the one nothing in this file asked before.
+23. **When a zero would change a decision, go to the SOURCE the artefact is DERIVED FROM.** The generated
+    yaml is downstream of the authored schema; the authored schema is what the generator reads and what
+    the product enforces. **This is rule 16 (ask the resolver, not the text) pointed one hop further
+    back: ask the AUTHOR, not the artefact.**
+24. **The tell is a control whose hits you have not READ.** Eighteen was accepted as a number. Reading
+    even one of the eighteen would have shown it was an example rather than an enum member — which is
+    rule 3 of [[2026-08-07_a-check-that-cannot-fail]] ("when a hit lands, READ IT before counting it")
+    firing on the CONTROL rather than on the subject, where nobody points it.
+
+**Family:** rules 11-12 above (independence — necessary and, as this shows, not sufficient) · rule 16
+(ask the resolver) · [[2026-08-14_i-read-representations-they-read-sources]] (a generated file is a
+representation of an authored one) · [[2026-09-07_a-census-complete-over-a-frame-that-is-not]] (the
+grep was complete over the yaml and silent about the schema).
