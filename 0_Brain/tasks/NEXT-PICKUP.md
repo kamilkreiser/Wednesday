@@ -25,7 +25,7 @@ grants already authorised it, and the COO rule says such a ticket is executed, n
 
 | pane | what | state at 14:3x |
 |---|---|---|
-| `%171` | **Secuura s150** | working the **P2 In Review queue** (KS-365 in progress). #906 MERGED, KS-998 filed, all three Kam rulings landed, #907 built |
+| `%171` | **Secuura s150** | **P2 queue: 2 of 29 done, next is KS-566.** #906 MERGED, KS-998 filed, all three Kam rulings landed, #907 built. It has a STATED DEFAULT — it keeps going down the queue unless you pull something forward, so it is NOT waiting on you |
 | `%173` | **QA gate, KS-963 / PR #907 @ `561de81ca`, TIER 1** | running; verdict → `wednesday-agent@`. **Do the completion check, then the merge GO is yours** under Kam's week grant |
 
 **🔴 OWED TO KAM, TIME-BOXED: he asked (14:28) for "the two images and messages from Peter"
@@ -43,6 +43,8 @@ branch**, so merging it alone moves nothing. The extranet's "CLEAN" was GitHub's
 `mergeable_state` rendered as clean. **The hold on #896/#899/#900 STANDS**: 18,609 added lines,
 "not reviewable to approval depth" — recorded verbatim in `5_Project_History/HANDOVER-s149.md:23-24`
 and `history.md:98`. **PS #783 is unreadable — the PAT 404s on the whole `Secuura/platform-s` repo.**
+
+**KS-365 (its 14:32 status): HOLD, not close.** Digest unchanged from the one the ticket records, so no upstream rebuild; `gosu`'s vendored Go stdlib still carries CVE-2025-68121, unpatchable by us, local-dev surface only. **It deliberately did NOT run `base-image-watch.sh`** — that script's false-clear fix sits on #793, open and unmerged, and using an unfixed gate to answer the one question it is known to answer wrongly is not a check. It ran trivy directly instead. KS-365 waits on an upstream rebuild AND on #793 merging; neither is ours.
 
 **ON KAM'S DESK:** `secuura-ks963-widen-to-preauth` (getUserByIdPreAuth has the identical
 swallow; rec: include; default: #907 ships as ruled).
