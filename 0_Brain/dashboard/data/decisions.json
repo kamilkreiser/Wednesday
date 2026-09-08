@@ -6669,5 +6669,43 @@
    "CARD attio-prod-db",
    "CARD secuura-ks713-mcp-prod"
   ]
+ },
+ {
+  "id": "secuura-four-advisories-in-shipped-code",
+  "client_project": "Secuura/Blockchain",
+  "title": "Blocked again — but this wave is DIFFERENT: four advisories in code we actually ship, one HIGH, and one of them sits in ten production services including auth",
+  "bluf": "OVERRIDE REASON, AND IT IS A CORRECTION TO WEDNESDAY'S OWN FRAMING FROM AN HOUR AGO. The repo is push-blocked again, 26 minutes after it cleared. Wednesday's first instinct was to call this more churn and it is WRONG. THIS MORNING'S EIGHT WERE TEST TOOLING — vitest, hono, colord, baseline-browser-mapping — measured to reach nothing shipped, and blocking every author on those is the gate turning a third party's publishing schedule into an outage. THESE FOUR ARE IN CODE WE SHIP. Measured by the Secuura seat across 42 manifests, 42 of 42 actually opened, with TWO controls that discriminate: express 27 production / 0 dev, and vitest 0 production / 25 dev. On that instrument: MORGAN is a production dependency in TEN services — api-gateway, auth, security, anchoring, demo-service, guardian, m365-integration, prism, queue, timestamping — and NODEMAILER in three, one of those advisories rated HIGH. So the gate is not misfiring; it is doing the job it exists for, and this is the first time today it has. AND THE SHORTCUT IS ALREADY CLOSED, stated so nobody reaches for it: the grace-window reshape you ruled at 08:12 would NOT unblock this. Its design constraint is warn only for moderate-or-below measured not to reach a shipped tree, and hard-fail immediately for anything shipping or HIGH. All four are production-reaching and one is HIGH, so under the correct reshape they still block. Building it to get moving today would either not help or mean weakening it, and weakening a gate while it is correctly stopping us is the worst version of that. THE ONE FACT STILL MISSING, and it is being measured now: morgan's advisory is log forging via unescaped Unicode line separators, which is only exploitable if our log sink is line-delimited. Nobody has checked. It is a bounded read of our own code, authorised, and it decides whether morgan is real for us or theoretical — the same shape as the nodemailer question this morning, which turned out theoretical and made your last ruling defensible. WHAT THE SEAT DID: added nothing, no --no-verify, and it REFUSED to merge #913 as-is and file its known defect as a follow-up, on the grounds that it would be reversing Wednesday's instruction to get around a blocker. It also caught its own measuring harness returning express=0 — impossible — because git ls-files run from a subdirectory silently opened no manifests at all. Its words: a broken harness that reads all-zeros looks exactly like good news. STATE: KS-963's fix is built and green at 1372dc095, unpushed. #914 is open and would clear only 7 of the 11, so merging it does not unblock anyone.",
+  "default_action": "NOTHING HAPPENS AND NOBODY CAN PUSH — us, Peter or Stuart. KS-963's fix sits built and green at 1372dc095, unpushed, and #913's merge waits behind it. Nothing expires, nothing degrades and no work is lost. Wednesday will NOT baseline a production-reaching or HIGH advisory on your behalf — that is your own grant's clauses working exactly as you wrote them, twice in one morning now, rather than Wednesday being cautious.",
+  "options": [
+   {
+    "key": "measure-then-rule",
+    "label": "Wait for the morgan measurement — minutes away — then rule all four together (Recommended)",
+    "detail": "The check is running now: is our log sink line-delimited? If it is not, morgan is theoretical for us and this becomes a much smaller decision. If it is, morgan is a real log-forging exposure in the three services whose logs an incident would be reconstructed from — auth, api-gateway and security — and you would want to know that before accepting it. Costs the team perhaps thirty more minutes of not pushing. Wednesday brings you the answer and a recommendation the moment it lands."
+   },
+   {
+    "key": "baseline-four",
+    "label": "Baseline all four now with the shared expiry — unblock immediately",
+    "detail": "Everyone pushes within minutes and the 2026-09-24 review carries twelve rows instead of eight. Cost, and it is the real one: you would be accepting four advisories in shipped code, one of them HIGH, on severity alone and before the morgan question is answered. Wednesday will do it on your word and will not do it without."
+   },
+   {
+    "key": "bump",
+    "label": "Bump these pins instead of accepting them",
+    "detail": "nodemailer is declared at ^9.0.3, so a caret bump may need no manifest change at all — it is the cheapest genuine fix available and it removes rather than accepts. morgan is pinned 1.11.0 across ten services, which is a larger change with more blast radius. Confirming fixed versions exist needs an external registry lookup, which this project's rules say not to do unless you authorise it. Say yes and it is one action."
+   },
+   {
+    "key": "split",
+    "label": "Bump what is cheap, baseline what is not, in one pass",
+    "detail": "Bump nodemailer via its caret; baseline morgan short with a dated expiry pending the log-sink answer. Unblocks today, accepts the least, and leaves the one genuine question open on a ticket rather than buried in a baseline entry."
+   }
+  ],
+  "recommended": "measure-then-rule",
+  "ts": "2026-09-09T08:56:07.162326+10:00",
+  "status": "open",
+  "ruled_choice": null,
+  "ruled_ts": null,
+  "prior_rulings_overridden": [
+   "2026-08-19 09:45",
+   "CARD secuura-793-the-four-rows-you-authorised-are-already-expired"
+  ]
  }
 ]

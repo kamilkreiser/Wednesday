@@ -18,7 +18,19 @@ supersede: replace this file wholesale at the next pickup; do not append
 > **STILL TRUE AND STILL THE POINT: this was a GATE problem, not a backlog.** The churn finding stands, KS-1025 is filed, and the reshape is ruled but unbuilt.
 > **The next block will arrive the same way and from nobody's change.**
 
-## 🟢 A SUCCESSOR IS BRIEFED AND BOOTING — s155 on `%8`, launched 08:38
+## 🔴 BLOCKED AGAIN — and this wave is SIGNAL, not the churn. Read this before re-applying yesterday's diagnosis.
+
+**The repo was unblocked at 08:31 and re-blocked at 08:49.** 11 advisories: **7 are #914's wave sitting unmerged**, **4 are genuinely NEW and ALL fail Kam's clauses.**
+
+⚠ **DO NOT read this as more churn — Wednesday nearly did.** This morning's eight were TEST TOOLING reaching nothing shipped. **These four are in code we SHIP:** `morgan` production in **TEN services** (api-gateway, auth, security + 7), `nodemailer` in three, `GHSA-2x7j` **HIGH**. Measured by s155 over 42 manifests, 42 opened, controls `express` 27prod/0dev and `vitest` 0prod/25dev. **The gate is doing its job for the first time today.**
+
+⚠ **THE RESHAPE WOULD NOT UNBLOCK THIS — do not reach for it.** KS-1025's design hard-fails immediately for anything shipping or HIGH. All four are exactly that. **Building it to get moving means weakening it while it is correctly stopping us.**
+
+**ON KAM'S QUEUE:** `secuura-four-advisories-in-shipped-code` (rec: `measure-then-rule`). **IN FLIGHT:** s155 is measuring whether our log sink is line-delimited — that decides if the morgan log-forging advisory is real for us or theoretical. **Same shape as the `resolveContent()` question that made Kam's last ruling defensible.**
+
+**#914 clears only 7 of 11 — merging it unblocks NOBODY, and it has no gate brief yet (Wednesday writes those).**
+
+## 🟢 THE SEAT — s155 on `%8`, verified at RUNG 5 by pane content
 
 **s154 WRAPPED and is SCORED 1.0** (handover v3 in the inbox at `2026-09-08T22:34:31Z`, history entry written, vault pushed; its pane `%5` closed clean, listeners 28 → 28, both HTTP surfaces 200 either side).
 
