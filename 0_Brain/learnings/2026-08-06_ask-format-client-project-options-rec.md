@@ -9,6 +9,13 @@ tier: W
 
 # Every ask carries: Client/Project · problem · options · recommendation
 
+**⚠ REORDERED 2026-09-08 15:34 by Kam — the FIELDS below are unchanged, the ORDER is not.**
+When the ask requires HIS HANDS, the ACTION comes first, spelled out as literal steps:
+*"I need you to do X. The rationale is Y. My recommendation was… Other options include…"*
+This file's order puts the ask fourth. See [[2026-09-08_ask-format-action-first]] for the
+operative case and why his LISTENING time made it urgent. Everything below still holds for
+asks that are questions rather than instructions.
+
 **The rule:** every time I ask Kam for anything — an action, a clarification, a
 question, a ruling, a confirmation, *anything* — the ask opens with:
 

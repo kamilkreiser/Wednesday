@@ -7,7 +7,7 @@ status: live
 
 # Boot digest BY TIER — W whole, M rules-only, every project case a handle
 
-Generated 2026-09-08 15:35 from 123 lesson files (606,989 B). M 28 · MIXED 5 · W 90. 28 project CASE sections inside MIXED files are reduced to one line each: the heading and the path to read it at. W blocks are exactly what the default digest carries; M blocks drop the section index and keep the rules; a P file is a single handle. The CASES behind every rule live only in the lesson files — open one the moment its rule fires.
+Generated 2026-09-08 15:36 from 124 lesson files (611,511 B). M 28 · MIXED 5 · W 91. 28 project CASE sections inside MIXED files are reduced to one line each: the heading and the path to read it at. W blocks are exactly what the default digest carries; M blocks drop the section index and keep the rules; a P file is a single handle. The CASES behind every rule live only in the lesson files — open one the moment its rule fires.
 
 ## The T9 SSD is the master — Wednesday must be fully portable
 `2026-07-31_fully-portable-drive.md` · principle · 2026-07-31 · status: superseded — the "T9 is the master" half by [[2026-08-25_one-drive-devmaster-is-master]] (2026-08-25); the portability principle itself still lives · tier: W
@@ -662,8 +662,12 @@ ARTIFACT without confirming the event actually executed.
 ## Every ask carries: Client/Project · problem · options · recommendation
 `2026-08-06_ask-format-client-project-options-rec.md` · preference · 2026-08-06 · status: live · tier: W
 
-**The rule:** every time I ask Kam for anything — an action, a clarification, a
-question, a ruling, a confirmation, *anything* — the ask opens with:
+**⚠ REORDERED 2026-09-08 15:34 by Kam — the FIELDS below are unchanged, the ORDER is not.**
+When the ask requires HIS HANDS, the ACTION comes first, spelled out as literal steps:
+*"I need you to do X. The rationale is Y. My recommendation was… Other options include…"*
+This file's order puts the ask fourth. See [[2026-09-08_ask-format-action-first]] for the
+operative case and why his LISTENING time made it urgent. Everything below still holds for
+asks that are questions rather than instructions.
 
 **The rule:** every time I ask Kam for anything — an action, a clarification, a
 question, a ruling, a confirmation, *anything* — the ask opens with:
@@ -3922,6 +3926,39 @@ has not, the line is the most reasoned-looking thing in the frame.
 5. **Keep the detector.** It is what protects the coordinator, and it caught all nine tonight. This
    does not replace it; it explains why eight bounced harmlessly and names the shape of the one that
    would not have.
+
+
+## When I need Kam to do something, the ASK goes first and it is spelled out as steps — "I need you to do X. The rationale is Y. My recommendation was… Other options include…"
+`2026-09-08_ask-format-action-first.md` · preference · 2026-09-08 · status: live · tier: W
+
+**The operative case, so the headline matches it:** Wednesday is writing anything to Kam that
+requires **his hands** — a command, a click, a ruling, a change to a file only he owns.
+**The first thing on the page is the action, stated as an instruction, with the exact steps.**
+Not the problem, not the context, not what was found. He can always read down for the why; he
+cannot act on a why.
+
+sections (open the file for these): The shape, in his own order · Why this is a real correction and not a formatting nicety · How to apply
+
+## How to apply
+
+1. **Action first, always, when his hands are required.** If the message needs nothing from him,
+   say *"no action needed"* in the first line instead — the same discipline pointed the other way.
+2. **"Spell out exactly the steps" means literal and pasteable** — the whole command on its own
+   line, the direct URL, the exact setting and its file
+   ([[2026-09-07_hand-kam-the-link-not-the-instruction]] is this rule's sibling: never make him
+   go and find the thing).
+3. **Consolidate his open asks rather than dripping them.** Three numbered blocks in one message
+   beat three messages, because each message is now read aloud in full.
+4. **Keep the recommendation labelled as mine and the alternatives honest**, including the
+   do-nothing and its real cost ([[2026-08-16_an-ask-without-a-default-is-an-indefinite-hold]]).
+5. **Length is now a cost with a unit.** Before adding a paragraph, ask whether he would want it
+   read to him. Detail he might want goes in a file with a pointer, not into the message.
+
+**Family:** [[2026-08-06_ask-format-client-project-options-rec]] (the fields; this reorders them) ·
+[[2026-08-06_bluf-write-for-the-reader]] (the parent principle he named) ·
+[[2026-09-08_the-panel-reads-the-whole-message]] (why length changed price today) ·
+[[2026-08-21_steps-get-line-breaks]] (one step per visual block — already correct, now load-bearing) ·
+[[2026-09-07_hand-kam-the-link-not-the-instruction]].
 
 
 ## Any WED work is CLAIMED before it is started — client work is split by machine, and Wednesday's own project is the half with no owner
