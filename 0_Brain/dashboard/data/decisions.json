@@ -6700,12 +6700,50 @@
   ],
   "recommended": "measure-then-rule",
   "ts": "2026-09-09T08:56:07.162326+10:00",
+  "status": "ruled",
+  "ruled_choice": "measure-then-rule",
+  "ruled_ts": "2026-09-09T09:41:52.701965+10:00",
+  "prior_rulings_overridden": [
+   "2026-08-19 09:45",
+   "CARD secuura-793-the-four-rows-you-authorised-are-already-expired"
+  ],
+  "delivered_artefact": "card secuura-four-advisories-ruled-after-measurement — his measure-then-rule ruling is discharged BY that card, which carries all four measurements together as the option asked; the measurement itself completed 09:07 and is recorded in 0_Brain/daily/2026-09-09.md",
+  "delivered_ts": "2026-09-09T09:41:55.257985+10:00"
+ },
+ {
+  "id": "secuura-four-advisories-ruled-after-measurement",
+  "client_project": "Secuura/Blockchain",
+  "title": "All four measured as you asked — none reachable in our code today, and my recommendation is to BUMP rather than accept them",
+  "bluf": "ACTION: tap an option below, and if you tap bump, say yes to one registry lookup so I can confirm fixed versions exist. Nobody can push to Secuura until this lands - not us, not Peter, not Stuart. WHAT YOU ASKED FOR, DELIVERED: you ruled measure-then-rule; here are all four together. GHSA-2x7j (HIGH, nodemailer) is UNREACHABLE - the quadratic blow-up needs a crafted address LIST, and every attacker-reachable path validates to a SINGLE address first (z.string().email() at auth.ts:145, isEmail() at certifications.ts:991); the one fallback that looked unguarded, notificationClient.ts:99, is guarded BY ITS CALLER, which the seat chased specifically because it looked like the hole. GHSA-wmmp and GHSA-cc9r are MOOT - the recipient allow-list they bypass, EMAIL_RECIPIENT_ALLOWLIST, is NOT configured; empty in both services, live secuura-auth reports len=0 against three known-set controls (NODE_ENV 11, DATABASE_URL 80, JWT_PUBLIC_KEY 600), so there is nothing in force to bypass. GHSA-jxfw (morgan) is THEORETICAL on three independent grounds, any one sufficient - the strongest is that Node decodes HTTP headers as latin1, so a U+2028 in a User-Agent arrives as mojibake and the vector cannot deliver the character at all. AND A CORRECTION TO MY OWN EARLIER SENTENCE TO YOU: I told you morgan sits in ten production services including auth, the gateway and security. DECLARED in ten, IMPORTED in three - queue, guardian and demo-service. The three I named to make it sound worst are exactly the three that never call it. That embellishment was mine, not the seat's; its number was a declaration count and it said so. THE THREE CAVEATS, CARRIED AS CAVEATS RATHER THAN SMOOTHED AWAY, and the first is the seat's own sentence and the reason for my recommendation: unreachable because of a property we happen to hold, not because the vulnerable code is absent. We SHIP all four packages. The two allow-list ones flip the moment ANY deployment sets EMAIL_RECIPIENT_ALLOWLIST - a CONFIG change, not a code change, and nobody setting it would think they were touching security. Second: this is bounded to LOCAL config; the demo VM's environment was NOT read, so if the demo has the allow-list on, those two stop being moot for it. Third: whether a single PATHOLOGICAL address could also be slow is UNMEASURED - the reported vector is closed, that residual is not. And morgan is theoretical UNDER THE SINK WE HAVE TODAY, never 'not a bug': Python's splitlines() DOES split on U+2028 (measured, 2 parts vs control 1) and JSON.stringify does NOT escape it, so the day those logs reach a Python-based processor it becomes real with no change to our code. FINALLY, THE THING I WOULD RATHER TELL YOU THAN ROUTE AROUND: your 08:12 grant STILL does not cover these. Its clause 2 tests whether a package reaches a shipped image, and all four do. What was measured is that the vulnerable PATH is not exercised - a better fact, and a DIFFERENT one. So it stays your ruling, and your clause is slightly blunter than the question turned out to be.",
+  "default_action": "NOTHING HAPPENS AND NOBODY CAN PUSH - us, Peter or Stuart. KS-963's fix stays built and green at 1372dc095, unpushed; #913's merge waits behind it; #914 is open but clears only 7 of the 11, so merging it unblocks nobody. Nothing expires, nothing degrades and no work is lost - the seat wrapped clean at 09:11 with a complete handover. The only cost of silence is that the whole team stays unable to push, and that I will not baseline a production-reaching or HIGH advisory on your behalf - which is your own grant's clauses working exactly as you wrote them, three times in one morning now, rather than me being cautious.",
+  "options": [
+   {
+    "key": "bump",
+    "label": "Bump the pins instead of accepting them - removes the vulnerable code rather than recording a decision to live with it (Recommended)",
+    "detail": "This is my recommendation because all three caveats above are arguments against baselining specifically: every one of them is a way our 'unreachable' could stop being true without anyone touching security. Bumping makes all three moot. nodemailer is declared at caret 9.0.3, so a caret bump may need no manifest change at all - the cheapest genuine fix available. morgan is pinned 1.11.0 across ten manifests, which is a larger change but a mechanical one, and only three of those ten actually import it. Confirming fixed versions exist needs one external registry lookup, which this project's rules say not to do without your word - that is the single extra thing I am asking for. If a bump turns out to cascade, I baseline that one with a dated expiry and tell you which, rather than coming back to you."
+   },
+   {
+    "key": "baseline-four",
+    "label": "Baseline all four now with the shared expiry - everyone pushes within minutes",
+    "detail": "The fastest unblock and a defensible one: all four are measured unreachable today, with controls, by a seat that twice caught its own instruments returning false zeros. Cost: the 2026-09-24 re-triage carries twelve rows instead of eight, you accept four advisories in code we ship on the strength of properties we happen to hold, and the two allow-list ones silently become live if any deployment ever sets that variable. I will do this on your word and it is not a bad answer - it is simply the one that keeps the risk rather than removing it."
+   },
+   {
+    "key": "split",
+    "label": "Bump what is cheap, baseline what is not, in one pass",
+    "detail": "Bump nodemailer via its caret - that closes the HIGH one and both allow-list ones, which is three of the four and all the caveats that worry me. Baseline morgan short with a dated expiry, since it is the widest change and the weakest risk (the vector cannot deliver its character at all). Unblocks today, accepts the least, and leaves one ticketed question rather than four buried in baseline entries. This is the pragmatic middle and I would be content with it."
+   }
+  ],
+  "recommended": "bump",
+  "ts": "2026-09-09T09:41:23.415964+10:00",
   "status": "open",
   "ruled_choice": null,
   "ruled_ts": null,
   "prior_rulings_overridden": [
-   "2026-08-19 09:45",
-   "CARD secuura-793-the-four-rows-you-authorised-are-already-expired"
+   "2026-09-04 07:08",
+   "2026-09-04 08:33",
+   "2026-09-09 09:39",
+   "CARD secuura-793-the-four-rows-you-authorised-are-already-expired",
+   "CARD secuura-platform-s-count-was-wrong-when-you-ruled"
   ]
  }
 ]
