@@ -976,6 +976,12 @@ the tree. Only an instruction whose **REASON rests on a state** expires with tha
 Getting this backwards means overriding a human's stated preference on the strength of a commit,
 which is the far more expensive direction.
 
+**The concrete case the exception exists for, in the receiving seat's own words (2026-09-08 22:0x,
+adopted verbatim and credited):** *"my rule as written would license a seat to reason 'Peter said
+don't sweep this, but things have moved' and close a ticket on a preference. Naming the state is the
+test, and it is checkable rather than a judgement call."* **A rule with its case attached fires where
+an abstract one does not** — that is why this paragraph is here rather than in a ledger row.
+
 ### What this rule was built AGAINST, and what it is silent about
 
 **Built against:** work that WAS done, by the very person whose note is holding it. **Silent about:**
