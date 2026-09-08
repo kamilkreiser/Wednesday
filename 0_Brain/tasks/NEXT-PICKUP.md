@@ -7,27 +7,31 @@ status: live
 supersede: replace this file wholesale at the next pickup; do not append
 ---
 
-# NEXT PICKUP — 09:05 Tuesday. DEPLOY DONE. Peter's queue closed out bar one. ONE card on Kam's desk.
+# NEXT PICKUP — 10:00 Tuesday. KAM'S DESK IS CLEAR. #892 MERGED. Seat working four items.
 
 **Run `2_Project_Files/tools/kam_rulings_today.sh` first — and SETTLE its stale warning by pulling
 and re-running before concluding he is quiet.** Mail UTC ≈ AEST−10. **ROTATION BAND 80–90%.**
 
-## 🔴 KAM'S DESK — ONE card, default HOLD, nothing expiring before 2026-09-10
-**`secuura-793-security-expiry-two-triages-disagree`** (rec `earlier`, **default HOLD**).
-Three accepted-vulnerability exceptions read `expires 2026-09-10` on #793 and `2026-09-24` on
-develop; on a fourth advisory develop is the correct one. **Neither side is simply newer.** Wednesday
-did NOT rule it: taking develop's dates EXTENDS three live risk acceptances by 14 days, and that
-authority would ORIGINATE with Wednesday — the one v1.3 line it may not cross.
-**The card carries a third option, `pattern`, and it is the one that stops this recurring:** Kam was
-offered a pattern ruling on 2026-08-26 (`secuura-ks635-expiry-pattern`), took `extend` on ONE row,
-and that card's own text says *"pattern still open"*. **This is that deferral arriving as a merge conflict.**
+## ✅ KAM'S DESK IS CLEAR — he ruled both cards at 09:57, both Wednesday's recommendations
+- **`secuura-793-security-expiry-two-triages-disagree` → `earlier`**: take the EARLIER expiry
+  (2026-09-10) for the three, plus develop's corrected `q8mj` row and #793's 4 new advisories.
+  **Relayed with the exact file contents specified and a parse-based verification (35 keys, the 4
+  named, and a CONTROL that another advisory still reads 09-24 — proving three rows moved, not the
+  field globally). If the count is not 35 the seat stops.**
+- **`secuura-ks968-my-decision-table-was-void` → `hashcmp`**: ONE read-only comparison of the stored
+  `email_lookup_hash` against `lookupHash('issuer@secuura.com')` under the CURRENT key.
+  **THE LIMIT IS PART OF THE RESULT: match → decisive for BENIGN; mismatch → CLOSES NOTHING and must
+  NOT be reported as evidence of an incident.** Values never printed. No third query either way.
+**Both rulings were written into `decisions.json` BY HAND — the panel still does not do it (w=93).**
 
 ## STATE
-    origin/develop   4f337be83   format gates GREEN, proved ON THE TRUNK (not on a branch)
+    origin/develop   512480ef1   #892 MERGED (round 5 closed it, 4 negative controls at zero)
     demo VM          400517aaf   LIVE — deployed 2026-09-08 21:43→22:07Z, verified at the destination
                                  The develop→demo delta is FORMATTING-ONLY: nothing to redeploy for.
                                  It rides with the next real deploy. Stated, not left as drift.
-    #892             1e31c80b9   round 5 IN FLIGHT (F-2 first, then F-1; F-3 excluded; NO round 6)
+    #892             MERGED at 512480ef1 — five rounds, two NO GOs, closed 2026-09-08 09:34
+    #902             e04814afe   tsconfig for systemTest/fixtures, 0 errors, MERGE AUTHORISED, unmerged
+    #720/#721        clean, pushed, unmerged
     #793             7e8721107   DIRTY, UNTOUCHED, frozen on Kam's card. Do NOT let a later task
                                  quietly resolve it. Wednesday declined even the mechanical half:
                                  the file is written ONCE or nobody will trust it.
@@ -76,6 +80,17 @@ as-is reports success while moving nothing on the trunk; that warning is on the 
    twice. Fixed by transcription; **nothing bridges chat_log → decisions.json.** w=93.
 5. **Nearly rebuilt the doctor ledger trigger** the laptop had already shipped (`8d906698`).
 **The pattern: measure your own claim before stating it. Four of the five are that.**
+
+## 🔴 THE SEAT'S QUEUE (pane %170, ~65%) — in this order
+1. **#793** per Kam's `earlier` ruling · 2. **KS-968** the one comparison · 3. **KS-991** (raised to
+P2: THREE instances in one session, every gap opened by a merge this seat itself performed — a
+defect whose trigger is "you did the right thing") · 4. **KS-992**.
+**KS-994 filed (P2)** — `withGeneratedActors()` has NEVER overlaid the generated actors: it iterates
+the wrapper, so the k6 harness silently runs on `secrets.yml` credentials while reporting success.
+**KS-969's own class, in a file #892 touched.** Fix-shape on the ticket, NOT applied — it is a
+behaviour change and needs its own gated round. **Do not let it be fixed under a gate-green ticket.**
+**KS-990 re-scoped** and must not be closed by making the error go away. **KS-993 done** — but #902
+makes the directory CHECKABLE, not CHECKED: nothing runs the tsconfig yet.
 
 ## WED ITEMS STILL OWED
 - **Chat panel option to separate/merge Datasec and Secuura views** (Kam's 07:09 note). Not started.
