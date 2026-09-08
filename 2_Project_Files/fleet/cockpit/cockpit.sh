@@ -277,7 +277,34 @@ for i in range(4):
     except Exception as e: print("cockpit: --mail: read error:",e,file=sys.stderr); ms=[]
     hit=[m for m in ms if subj in (m.get("subject") or "")]
     if hit:
-        print(f"cockpit: --mail verified at {inbox}: {hit[0].get('timestamp','')[:19]} | {(hit[0].get('subject') or '')[:90]}"); sys.exit(0)
+        # FRESHNESS (added 2026-09-08, the SIXTH instance of the tap-is-a-pointer family —
+        # and the first where the GATE PASSED while the rule was broken). The w=5 enforcement
+        # verified that a mail with this subject EXISTS. It cannot fail for a tap citing any
+        # real prior mail, which is very close to a check that cannot fail. Wednesday tapped
+        # s150 with brand-new content (a pane id, a launch time, a card) while citing an
+        # ANSWER sent 33 minutes earlier; the gate went green and the agent caught it.
+        # The rule was always "a mail sent in the SAME action", so age is the property to
+        # test. An older mail is legitimate ONLY when every claim in the tap is already
+        # inside it — which is exactly the test that failed here.
+        ts=(hit[0].get("timestamp") or "")[:19]
+        age=None
+        try:
+            import datetime as _dt
+            t=_dt.datetime.strptime(ts,"%Y-%m-%dT%H:%M:%S").replace(tzinfo=_dt.timezone.utc)
+            age=(_dt.datetime.now(_dt.timezone.utc)-t).total_seconds()
+        except Exception:
+            pass
+        maxage=int(os.environ.get("SAY_MAIL_MAX_AGE","900"))
+        if age is not None and age > maxage and os.environ.get("SAY_ALLOW_OLD_MAIL") != "1":
+            print(f"cockpit: REFUSED — the mail you cited is {int(age//60)} min old (limit {maxage//60} min).",file=sys.stderr)
+            print(f"    {ts} | {(hit[0].get('subject') or '')[:90]}",file=sys.stderr)
+            print("  A tap points at a mail sent in the SAME action. Citing an older one is legitimate",file=sys.stderr)
+            print("  ONLY if EVERY claim in your tap is already inside that mail — pane ids, launch",file=sys.stderr)
+            print("  times, verdicts and card names almost never are. Send the mail, read it back at",file=sys.stderr)
+            print("  the destination, then tap a bare pointer at it.",file=sys.stderr)
+            print("  If the older mail genuinely carries every claim: SAY_ALLOW_OLD_MAIL=1, and say so.",file=sys.stderr)
+            sys.exit(6)
+        print(f"cockpit: --mail verified at {inbox}: {ts} | {(hit[0].get('subject') or '')[:90]}"); sys.exit(0)
     if i<3: time.sleep(8)
 print(f"cockpit: REFUSED — no mail matching '{subj}' at {inbox} after 4 reads (~24 s). Newest there:",file=sys.stderr)
 for m in ms[:3]: print("   ",m.get("timestamp","")[:19],"|",(m.get("subject") or "")[:90],file=sys.stderr)
