@@ -270,3 +270,49 @@ is expected for two panes on ONE machine and says nothing about the Studio's acc
 as fact. **The check is a single statusline read on the STUDIO machine** — a percentage differing from
 the laptop's proves two accounts; an identical one is suggestive and not conclusive.
 
+## 10:4x — 65% CHECKPOINT. THREE PANES LIVE. Kam is at the panel and ruling.
+**Default: continue.** Band is 80-90; this is a checkpoint, not a rotation.
+
+    %22  Datasec/NexusAI      S47, holding. 8/8 merged, 4 tickets closed on Kam's word,
+                              RD-369 re-cut + READY, gate launched. RD-372 is NEXT, not now.
+    %26  Datasec/SecurityReview  fix §7.1 -> verify the 23 -> file batch-1 -> continue.
+    %27  QA/NexusAI-RD369     TIER 1 gate on `rd-369-recut-s47` @ `117931e`.
+    %0   wednesday            s150.
+
+### KAM RULED SIX THINGS THIS MORNING — all recorded, mine executed
+`close-superseded` (done, 4 tickets, verified on the board with RD-384 as a control) ·
+`package` (already running on %26) · `leave` (cross-seat wakes — nothing to build) ·
+`scope` (**BUILT: the launcher now sends each seat to its OWN ledger**; 3 hosts exercised,
+prompt tail asserted intact; backup `.pre-0908-seatledger`). Two Secuura rulings left alone.
+🔴 **AND TWO STANDING INSTRUCTIONS FROM HIM:** *"fix the register section"* (running on %26 —
+**given to that session rather than done by hand, because the `.docx` is what ships and only
+that session can regenerate it**) and *"from now on, any work on wednesday, take ownership so
+both agents dont work on the same things"* → **`2_Project_Files/tools/wed_claim.sh`, live and
+red-proofed** (dup rc 3, free rc 0). **CLAIM BEFORE STARTING ANY WED WORK.**
+
+### 🔴 RD-369 — the day's second going-backwards branch, and the biggest catch
+The ticket's premise was **INVERTED at main**: it reads as residue after SEC-03/SEC-04, but
+**neither is landed at main** — the whole fix sat on `rd-362 @ 920e067` at Testing. So it was
+the FULL exposure, wider than filed: no guard at all at main, the `.md` report neither redacted
+nor excluded (582 lines, **7 gitleaks fingerprints pinned inside it**), all five session-notes
+files shipping. **Wednesday had told Kam it was partly fixed and corrected him inside three
+minutes, scoped to exactly what was refuted.**
+🔴 **Merging `920e067` as it stood would have DELETED two test helpers and ~700 lines of
+`scheduler-failure-vocabulary.test.js` — reverting RD-376 and RD-377.** RD-304 was the same
+shape twelve hours earlier. **Both caught by diffing CONTENT, not by trusting a branch name.**
+**Ruled: re-cut, never re-author.** S47 did it; **Wednesday verified in its own clone: delete-set
+EMPTY, the three files present, 700 lines both sides, exactly five files added.**
+**Wednesday's ruling on the open judgement call: KEEP the directory-level `docs/runbooks/`
+exclusion** — over-exclusion is visible and reversible, under-exclusion is silent and is this
+ticket; and it fixes the class, not the instance. **It rests on S47's unverified claim that no
+runbook is referenced at runtime — the gate is checking that, and a runtime reference makes it a
+BLOCKER.**
+**Still open and must not vanish: F3** (redaction defeated by its own context — hash one line
+above the marker, key directory eleven below, 22 short-form hashes remain) **and F6** (never
+re-measured).
+
+### THE RULE THIS EARNED (ledger w=100)
+**A ticket's findings carry the REF they were measured at. A ticket measured on a BRANCH describes
+the branch, not the product** — re-derive at the current head before any fix. That single line in
+the RD-369 brief is the only reason this surfaced in five minutes instead of after a merge.
+
