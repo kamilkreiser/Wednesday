@@ -21,3 +21,4 @@ sees the claim rather than discovering it in a conflict.
 | 2026-09-08 11:26 | Kamils-Mac-Studio | INDEX.md head block is 4 weeks stale and misleads every cold seat at boot — rewrite the head, not a full sweep | CLOSED |  2026-09-08 11:26 DONE — head corrected + scope reason stated, additive only, WED-7 still unbuilt |
 | 2026-09-08 11:27 | Kamils-Mac-Studio | KS-996 measurement (read-only): are the 95 archived non-terminal Secuura tickets cascade collateral? parent archivedAt to the millisecond | OPEN | |
 | 2026-09-08 12:23 | Kamils-Mac-Studio | Phase 0 + Phase 1 — chat streams (one writer per file, chat_log.json becomes DERIVED) and the WEDNESDAY|TUESDAY toggle. Kam's 12:1x commission. | OPEN | |
+| 2026-09-08 13:14 | Kamils-Mac-Studio | Secuura s153 launched on the standing queue (KS-989 first) — supervision, gate, scoring | OPEN | |
