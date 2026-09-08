@@ -199,84 +199,60 @@ the WED board (24 open, `hasNextPage: false`, 0 labelled `lesson`).
 
 ---
 
-# ⏱ HANDOVER BLOCK — refreshed by s155 at its 70% CHECKPOINT (band 80-90; NOT a rotation)
+# ⏱ HANDOVER BLOCK — s155 at 78%, ROTATING at the next safe boundary (band 80-90, Kam 09-07)
 
-## 🔴 KAM IS AWAKE — four messages, one RULING, one PARK with an ambiguous referent
-`kam_rulings_today.sh`, read as a sequence:
-- **07:08 RULED `secuura-ks963-widen-to-preauth` => `include`** — widen the KS-963 rethrow to
-  `getUserByIdPreAuth`. **Recorded in the store 07:10:31 and verified by reading the card back.**
-  **THE HOLD ON `getUserByIdPreAuth` IS LIFTED** — every earlier line in this file saying otherwise
-  is superseded by this.
-- **07:09 ×2** — asked what the alternative was (answered from the card verbatim), and *"why do we
-  need a new account? Can we simply use deploy keys?"* Answered: **deploy keys cannot do it** — a
-  deploy key is git transport with no web identity, and a PR is created through the API with a
-  USER token, which is what makes the PR his. **He is right that a person-shaped account may be
-  wrong; a GitHub App is the cleaner shape.** Stated as READ-ONLY general knowledge, **NOT measured
-  against his org** — plan, seat cost and whether apps are permitted are all unchecked, and a seat
-  cost is money, which is his.
-- **07:13 *"Let's park it for now and come back to it tomorrow."*** ⚠ **REFERENT AMBIGUOUS.**
-  Read as the GITHUB IDENTITY thread (nothing in flight, parking costs nothing). **Explicitly NOT
-  read as parking the 07:08 widen ruling, which IS in flight** — said so to him in those terms with
-  a one-line veto path. **If a successor finds the widen stopped, that is why.**
+**Boot measured: digest 4,389 lines + `_ledger.md` all 243 rows, both WHOLE, `ctx:41%` after the
+full load and sweep.** Seat DERIVED from `history.md` (newest was s154, so this is s155).
 
-## 🔴 #907 IS ALREADY MERGED — his ruling's vehicle moved, his decision did not
-`561de81ca` is an ancestor of develop (measured: `merge-base --is-ancestor`, object resolves,
-`ls-remote` 1,193 refs as the live control). **So the widen lands as a NEW PR off today's develop,
-not as a change to #907.** Told to him and to the seat. **Default tier for it: TIER 2 through-code
-(identical pattern to an already-gated merged change, and it does not need `:6882` so it can run
-beside the other gates). It becomes TIER 1 if the seat's shape check shows `getUserByIdPreAuth`
-differs** — because the tier rests on "same pattern", and the seat proved KS-963's first premise
-false (a promise returned from a `try` is not caught by its `catch`).
-
-## 🟢 #910 GATED — GO-WITH-FINDINGS, MERGE GO ISSUED
-**Eight findings, none a defect in the change.** The gate **concurred with** the 400-vs-404
-judgement rather than merely permitting it, and **recommends AGAINST reverting `561de81ca`.**
-**The tier-1 call was vindicated: both MAJORs live in the contract half a through-code pass would
-have nodded at.** Report + evidence (md5 ledger):
-`/Volumes/DevMASTER/!CODING/Testing Agent MAIN/projects/secuura-blockchain/reports/2026-09-09-ks1013-pr910-tier1/`
-
-- **F-1 MAJOR, DEPLOY PATH, not this PR:** the gateway serves the head spec **from MEMORY over a
-  DEAD MOUNT** — host file byte-identical to base, `stat` reports head size, **every read syscall
-  returns ENOENT**. Right contract by accident of boot timing. READ-ONLY consequences: fsWatch on a
-  dead inode can never fire again; **a restart would publish the BASE spec while auth enforces
-  400.** **MERGING REMOVES THIS — holding would prolong it.** File against KS-987/KS-659.
-- **F-5 MAJOR, PRE-EXISTING, out of scope, FILE FIRST:** `GET /api/presentations/{id}`
-  (`vc-issuer/routes/presentations.ts:110-133`) falls back to `LIKE '%<id>%' LIMIT 1` with **no
-  ownership or tenant check** — `/api/presentations/0` returns **200 with a real stored
-  presentation**. **PROVED.** ⚠ **Cross-holder disclosure NOT proved** — all 39 rows have
-  `holder_id NULL`; the exposure is **INFERRED from the missing check, not measured.** Keep those
-  two apart. **Demo reachability UNMEASURED and NOT to be probed without Kam** — raised to him as
-  the only decision in it.
-- F-4 class (~15 siblings answer 404 for a malformed id) + F-2 + F-3 → **ONE ticket**, one logical
-  path. Good news inside it: 17 sibling GETs swept, **no 500s**, so KS-1013 was genuinely narrow.
-- F-6 → note on KS-969 (**a COLD START would have no usable admin**; evidence for the
-  `BOOTSTRAP_ADMIN_PASSWORD` design answer). F-7 → note on KS-949, **reported not reconciled**.
-  F-8 → check KS-993 first, do not duplicate.
+## 🔴 THE ONE THING THAT NEEDS A SEAT: the #912 gate, and it CANNOT run yet
+**#912 (KS-1004 @ `ae8751f38`) is the last ungated PR and its tier-1 pass needs `:6882` — which the
+#913 gate currently owns.** So it waits for that verdict; **writing its brief now would be
+premature and its SHA may move.** **Deliberately not written, not an omission.**
+**Pattern to copy, BY PATH:** `fleet/qa-agent/launchers/launch_qa_secuura_ks963_913.sh` + its brief
+in `qa-agent/briefs/`. Five guards, exit codes 6/7/8/9, red-proof both launchers the same way.
 
 ## 🟢 THE FLOOR
-- **Builder `%5`** — merging #910, filing three tickets, then the preAuth widen. **KS-1004 (#912
-  @ `ae8751f38`) is BUILT and waits for its own gate.** Its ticket description AND title now carry
-  the two-direction lockout; KS-1017 widened and retitled. KS-1018, KS-1019 filed.
-- **Gate `%6` CLOSED 07:2x via `pane_close.sh`** (never `kill-pane`). Its verdict was delivered
-  and relayed; pane reported *done 7:11 am*, prompt empty, **zero writes to the target**.
-  **Listeners unchanged and `:6882` + `:47787` both still 200 after the close.** ⚠ Two listener
-  counts disagreed on the TOTAL (the tool said 28→28, a separate `lsof` said 27→27) — **left
-  unreconciled: they agree on the INVARIANT, which is the property the check is for, and a delta
-  between two instruments is a fact about the instruments.**
-- 🔴 **GATE QUEUE — THE NEXT ACTION FOR A SEAT WITH A FULL WINDOW, and it is NOT started:**
-  **#912 (KS-1004) tier 1** — it needs `:6882`, which is now FREE. **preAuth tier 1** (raised from
-  tier 2 on blast radius — see below), does not need the stack, so the two can run together.
-  **NOTHING IS BLOCKED BY THIS: the builder is not waiting on either verdict.** Deliberately left
-  unstarted rather than written thin at 74% — a rushed gate brief is what produces a wasted pass.
-  **The pattern is one wrapper per gate, TRACKED, copy
-  `2_Project_Files/fleet/qa-agent/launchers/launch_qa_secuura_ks1013_910.sh`** (its five guards and
-  their exit codes are the shape to keep) and its brief beside it in `qa-agent/briefs/`.
-- **develop `e559f7bb`**; #910 branch `d90f9ad8d` untouched through the whole pass.
+- **Secuura builder `%5`** — **wrapped at 21:33, then UN-wrapped by my SUPERSEDES** (its wrap and
+  my Option A ruling crossed by 14 seconds). **It is building KS-754 Option A**, then re-wraps with
+  an amended handover. **Score the session WHOLE after that re-wrap, not before.**
+- **QA gate `%7` (`QA-ks963-913`)** — tier 1 on #913 `fdd8af79d`, **verified at rung 5 by content**.
+  🔴 **It has already found that the repo's own comment names FIVE callers of `getUserByIdPreAuth`
+  where the builder enumerated FOUR** (`ks468-authenticate-tenant-guc.test.ts:139`, the fifth being
+  `userRepo.ts`). **That is Q3 and it is why the tier moved. Wait for the verdict; do not act on it
+  mid-pass.**
+- **`:6882` is HELD by the gate.** Nobody drives it — no probes, logins, suite runs, restarts.
+
+## 🟢 SHIPPED TODAY — do not re-derive
+**Two merges, both authorised by Wednesday after reading the artefact at the SHA:** #911 docs
+(`e559f7bb`, after my read caught two errors in it) and **#910 KS-1013 (`f9296f9e`, tier-1 gated
+GO-WITH-FINDINGS)**. **develop = `f9296f9eadb26c52d47116457de99fcfc44ce4dd`.**
+**Six tickets: KS-1017** (fixture class, scoped to the ESTATE with the sweep as its closing
+condition) · **KS-1018 · KS-1019 · KS-1020** (presentations exposure — PROVED / cross-holder
+INFERRED, **bound intact, demo reachability UNMEASURED and NOT to be probed without Kam**) ·
+**KS-1021** (dead bind mount) · **KS-1022** (id-format seam).
+**Built by Wednesday:** `fleet/specs/BRIEF_SKELETON.md` (red-proofed 4 cells) and **SIX standing
+lines adopted from s154**, all in `brief-standing-lines.md`.
+
+## 🔴 KAM — one ruling delivered, one thread PARKED BY HIM
+- **07:08 ruled `secuura-ks963-widen-to-preauth` => `include`.** Recorded 07:10:31, **marked
+  DELIVERED against KS-963 comment `a33f68f8`**. Its vehicle changed (#907 was already merged) and
+  he was told.
+- **07:13 *"Let's park it for now and come back to it tomorrow."*** ⚠ Read as the **GitHub identity
+  thread** (deploy keys / an App / whether his org allows one). **Explicitly NOT read as parking
+  the widen**, and he was told so with a one-line veto path. **Bring it back TOMORROW, not today.**
+- **Still open on his queue:** three that are **TUESDAY's**, and she has never booted.
+  **WED-48 is 5 days overdue** (CypherKey Twilio rotation).
+
+## 🟡 WEDNESDAY'S OWN ERRORS TODAY — four, all in `_ledger.md`, all zero-cost
+`##`-prefix gate literal (w=4 — **fixed by building the skeleton**) · a verb-enumerated HOLD that
+was under-inclusive (w=1, agent inferred the intent correctly) · **a TIER rule keyed on the SHAPE
+of a change, four hours after ruling that the test is what a change REACHES** (w=1, agent-caught
+before it built) · eight false zeros from `$G="git -C …"` **because zsh does not word-split a
+command in a variable** (caught by my own negative control).
 
 ## 🟡 OPEN
-NAS sync PID 84978 (check with `tr '\r' '\n'` — 9 lines, 12 MB) · quiet-hours vs panel autoplay ·
-**Wednesday's own errors: two** (`##`-prefix w=4, verb-enumerated hold w=1), both in `_ledger.md`,
-both zero-cost · **five standing lines adopted from s154 today**, all in `brief-standing-lines.md`.
+NAS sync PID 84978 — **check with `tr '\r' '\n'` FIRST (9 lines, 12 MB)**; non-zero `Deleting`
+→ STOP and card it · quiet-hours vs panel autoplay, settle in daylight with `WEDNESDAY_TEST_HOUR`.
 
 ## STANDING (unchanged)
 Nothing deployed; demo `400517aaf` is INHERITED and is not asserted by anyone. **#880 is KAM'S** and
