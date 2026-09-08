@@ -2,110 +2,83 @@
 date: 2026-09-08
 type: pickup
 scope: SECUURA + all general/generic work. Datasec is TUESDAY's (Kam ruled the name 11:56). Read Datasec mail by SUBJECT only.
-source: replaced WHOLESALE at 16:0x by s153 at its CLOSE
+source: replaced WHOLESALE at 18:2x by s151 at its 50% checkpoint (rhythm §2 — NOT a rotation; Kam's band is 80-90%)
 status: live
 supersede: replace this file wholesale at the next pickup; do not append
 ---
 
-# NEXT PICKUP — s153 CLOSED 16:0x. Kam shut the Studio down to reorganise his desk. Nothing is in flight.
+# NEXT PICKUP — s151 (Studio) LIVE at 50%. Secuura seat working. Nothing is blocked and nothing waits on Kam.
 
-## 🟢 THE FLOOR IS CLEAN — this is a planned shutdown, not an interrupt
-Kam, 15:49: *"Rather than me telling you when, how about you tell me when it's ready to shut down?
-Let everyone finish their tasks."* Then 15:59: *"Please wrap up and I'll shut down."*
-- **s150 (Secuura) WRAPPED and CLOSED** — its own handover names the next ticket.
-- **The T9 copy was stopped with a TERM, not yanked** — 0 rsync temp files, 0 writes in the final
-  minute, mount idle. **The T9 is unplugged (or about to be) and moves to Tuesday's new machine.**
-- **`main` = `dc5b8675`, tree clean, verified against `ls-remote`** — not against a local ref.
-- The QA pane was left idle: **the QA agent has NO inbox in `inbox_routing.conf`**, so it cannot be
-  mailed at all, only launched with a brief file. Its verdict is delivered and its report is on disk.
-  **That gap is real and unfixed — see OWED below.**
+## 🟢 WHAT HAPPENED SINCE THE 16:01 SHUTDOWN
+Kam wrapped the previous seat at 16:01, rebooted the Studio at 17:13, relaunched at 17:46.
+**T9 is unplugged and gone to Tuesday's new machine. Tuesday has NOT booted yet.**
 
-## 🟢 SECUURA STATE AT CLOSE
-    develop 5c6777658  ·  main 54b2a5c26  ·  next ticket KS-577 (26 remaining in P2 In Review)
-**Four merges this seat:** #907 (`27b0ee294`) · #793 (`9806be0ac`) · #895 (`5c6777658`) ·
-**#908 to `main` (`54b2a5c26`)** for Kam's `route-to-main` ruling.
-- **#895 merged with ZERO approving reviews** — read from the endpoint, stated on the ticket in the
-  repo's own language, because that was Kam's explicit exception, not a skipped step.
-- **KS-682 is NOT proven until #896's four-slot Playwright sweep runs.** Say so wherever the stream
-  is called done.
-- **KS-988 closes on an OBSERVATION, not on the merge: look Monday 2026-09-14.** Zero new
-  `dependabot[bot]` Action-version PRs = pass; one appearing = the generator does not read `main` and
-  the premise needs re-deriving. **The check ships with a control** (the same query without the date
-  bound must still return #518/#519/#569–571) and a second discriminator (npm and docker bumps SHOULD
-  still appear; their absence is a different defect).
-- **KS-365 is HOLD on UPSTREAM ALONE** — postgres:15-alpine digest unchanged, CVE-2025-68121 in
-  gosu's vendored stdlib. Nothing we do moves it.
+## 🟢 SECUURA STATE — re-read from origin by the seat, not copied
+    develop  4f612d462   (5c6777658 -> 4f612d462 via #909 this evening)
+    main     54b2a5c26   unchanged — negative control run, it did not move
+    demo VM  400517aaf   untouched. Nothing deployed this evening.
+    next     KS-597, then down the P2 In Review queue by identifier
 
-## 🔴 THE FINDING TO CARRY FORWARD — six instances, and one has a number now
-Work done and the board not saying so: **#793 · #721 (eight days on nobody) · #768 item 3 · #785
-(his own re-review, shown as ours) · KS-566 · and the In Review column itself.**
-**Measured: 39 tickets In Review, 20 with NO open PR.** s150 explicitly REFUSED to report that as
-"51% overstated" — *not awaiting review is not the same as done* — and named three of the twenty as
-legitimately parked, one of which it had placed there itself an hour earlier. **The column is
-overstated; the true figure is unknown and must not be guessed.** That bounding is the model to copy.
+**#909 MERGED — and this is the evening's finding.** The seat's opening measurement pass found that
+**today's own #793 merge (`0e706a57f`, a conflict resolution that took the old side) had REVERTED two
+of Kam's audit-baseline rulings** — three advisory expiries rolled 2026-09-24 → 2026-09-10, plus four
+dead fast-uri rows resurrected — **re-arming a push gate that would have blocked every author on
+Thursday 2026-09-10.** #909 restores exactly what was reverted: key-set identity-checked against
+`bf0a4ab99` (the commit before the reverting merge), red-proofed both directions, merge verified by
+re-deriving the tree from the COMMIT OBJECT and matching the prediction.
 
-## 🔴 WITH KAM (all have safe defaults; nothing blocks)
-`secuura-ks963-widen-to-preauth` (default: ships as ruled — it DID; KS-999 carries the await fix) ·
-`hpsm-credential-bearing-prd-outside-every-snapshot` · `secrev-live-pass-blocked-on-tenant` ·
-`nexusai-rd369-round3-or-ship-at-the-cap` — **the last three are TUESDAY's.**
-**PS #783 unreadable:** the PAT 404s on the whole `Secuura/platform-s` repo (control run — not a
-missing PR). Needs platform-s scope on the token. **Kam's.**
+## 🟢 THE KS-577 / KS-843 INTERACTION — RESOLVED, no code, Kam's ruling intact
+Kam's 2026-09-06 `logged grace` ruling depended on an overlap that only existed BECAUSE of the KS-577
+defect. #880 removes it, so rotating Platform S's key would 401 it instantly — **above the scope gate,
+so every S endpoint, not just erasures** — and option A's trigger (*"once the log shows S on the new
+key"*) becomes unobservable at the ruled default `grace = 0`.
+**Remedy needs no code and no decision from Kam:** set `API_KEY_ROTATION_GRACE_SECONDS` for the
+window, or mint with `rotate: false` and retire after the log shows S migrated. **Both ship in #880
+already.** Delivered as CROSS-LINKED comments — **KS-843 `82de36ad`, KS-577 `868d1211`**, each naming
+the other. **#880's `grace = 0` default is NOT challenged; it is what he ruled.**
+Lesson filed M-tier: `2026-09-08_a-ruling-can-be-voided-by-removing-its-precondition`.
 
-## 🔴 OWED, NOT DONE — inherited and still not discharged
-1. ~~**`secuura-ten-cascade-collateral-restore-or-leave`**~~ — **CLOSED 2026-09-08 18:2x, NO CARD
-   FILED.** s151 measured it: **7 open tickets, all `Backlog`, four separate archive events, and 7 at
-   every window from 2s to 1h** (the total swings 28→93; the open subset does not). **Kam had already
-   ruled the class** at 14:00 — `secuura-61-archived-while-still-open` => `three`, unarchive only the
-   In Progress — so all seven stay archived and there is nothing to put to him. The three-seat refusal
-   to file it from an unprovenanced "ten" is what preserved that outcome. **Residual, commissioned:**
-   KS-774 and KS-633 are SECURITY-REVIEW children reading as defects, which his work-state reasoning
-   did not consider — cross-reference comments on the live parents KS-489/KS-488 make them findable
-   without unarchiving anything, and the seat is confirming all seven fall inside the 61 he ruled on.
-2. **The QA agent has no inbox** — `fleet/inbox_routing.conf` has no QA row, so no brief, answer or
-   wrap can reach it by mail. File a WED ticket.
-3. **Nothing bridges Kam's chat rulings into `decisions.json`.** Four of his rulings today needed
-   hand-transcription; this morning six were re-served to him because of it. **Every seat must
-   reconcile at boot** — the sweep is `ruled_choice`/`status` on each card against
-   `Decision <id>: <key>` in `chat_kam.json`. **Verified clean at close: 0 stranded, 0 key mismatches.**
+## 🟢 THE THREE-SEAT CASCADE DEBT IS CLOSED — ANSWERED, NOT FILED
+Measured: **7 open tickets archived as collateral, ALL `Backlog`, FOUR separate archive events, and 7
+at every window from 2s to 1h** (the total swings 28→93; the open subset does not).
+**Kam had already ruled the class** — `secuura-61-archived-while-still-open` => `three` at 14:00,
+unarchive only the In Progress. So all seven stay archived and **no card was filed.**
+**Awaiting from the seat:** confirmation that all seven fall inside the 61 he ruled on (his count was
+KS-only excluding Duplicate; the seat's population was KS+PS). **If any does not, that one gets carded.**
+**Commissioned:** cross-reference comments on KS-489 / KS-488 for **KS-774 and KS-633** — security-review
+children reading as defects, which his work-state reasoning did not consider. Findable without unarchiving.
 
-## 🔴 HOW TO WRITE TO KAM — HE CHANGED IT TWICE TODAY
-1. **15:23 — the panel speaks the WHOLE message.** No paragraph split, no cap. Length costs him real
-   seconds now. `learnings/2026-09-08_the-panel-reads-the-whole-message`.
-2. **15:34 — the ASK GOES FIRST, as literal pasteable steps:** *"I need you to do X. The rationale is
-   Y. My recommendation was… Other options include…"* If nothing is needed, open with **"no action
-   needed"**. `learnings/2026-09-08_ask-format-action-first`. The 08-06 format had the ask FOURTH.
+## 🔴 WITH KAM — all have safe defaults, nothing blocks
+- `secuura-ks963-widen-to-preauth` (Secuura — default: ships as ruled, which it did)
+- `hpsm-credential-bearing-prd-outside-every-snapshot` · `secrev-live-pass-blocked-on-tenant` ·
+  `nexusai-rd369-round3-or-ship-at-the-cap` — **all three are TUESDAY's, not this seat's.**
+- **PS #783 unreadable:** the PAT 404s on the whole `Secuura/platform-s` repo (control run — not a
+  missing PR). Needs platform-s scope on the token. **Kam's.**
+- **KS-227 / Peter adjacency, carried not acted on:** KS-227 (Schemathesis no-test-cases gate) is the
+  same subject as Peter's open extranet to-do about inline examples on 329 operations. Not urgent.
 
-## 🟢 BUILT THIS SEAT (all pushed)
-- **The launcher PULLS before any boot read** — the two-machine gap. No `--autostash`, no output
-  suppression. 4 branches + effect controls.
-- **Nightly NAS sync + deletion alarm**: `com.wednesday.nassync` 03:30, Tuesday's 23:00 from the same
-  self-locating installer; doctor sweeps it (exercised both ways); PORTABILITY items 11–13.
-- **`confirmbigdel = true`** in Kam's `!SYNC FILES/devnas.prf` on his 15:37 authorisation, backup
-  beside it. **Honest scope: whole-replica only — the gradual case is the alarm's job.**
-- **The panel voice change** + `voice-protocol.md` updated.
+## 🔴 CLOSED THIS SEAT — do not re-raise
+- **F-02 SSH preflight is a FALSE ALARM here and does NOT go to Kam.** Proven: `push --dry-run` then a
+  real push, both exit 0; repo-local `core.sshCommand` does the work. **The same instruction was given
+  to Kam once on 2026-08-06 and was wrong then too.**
+- **The Stuart cutover card was DROPPED, not overridden** — he ruled it 2026-09-06 (`logged grace`,
+  chosen *because* it needs no window with Stuart). Do not re-card it.
 
-## 🔴 WEDNESDAY'S EIGHT ERRORS THIS SEAT — all in `_ledger.md` (211 rows; 417 archived, 628 conserved)
-The two that reached Kam: **an unmarked card read as undone work** (*two records said done, one
-column said undelivered, and the column won*) and **"additive, so nothing is at risk"** (additive
-rules out deletions, not overwrites). **Those two are a w=2 with the diagnosis filed** —
-`2026-09-08_a-safety-claim-names-the-property-it-checked`: the existing scope-word rule lists words
-for classifying WORK, and both were claims about a TOOL'S GUARANTEE, so the handle missed. Also: an
-invented DIRTY/CLEAN heuristic handed to an agent as a rule; `chat_reply.sh --help` posting to his
-panel; a pane id where a pane NAME was wanted; the first-paragraph voice truncation that was my
-inference from his words about WHICH DEVICE speaks; and burying the ask under its context.
+## 🔴 WEDNESDAY'S OWN ERRORS THIS SEAT — all in `_ledger.md` (223 rows)
+A W-tier lesson filed this morning rested on an **unmeasured 200K window** and would have made every
+seat under-read its own ledger — corrected by measurement, digests regenerated. Then: a **causal
+inference from two numbers taken with different filters** (39 vs 40 In Review), agent-caught in four
+minutes. Then: telling Kam an interaction was one **"nobody is watching"** when KS-843's author had
+written it down explicitly — an absence-of-attention claim made from a partial read.
+
+## 🟢 BOOT NUMBERS (WED-139) — and the boot spec is FINE
+digest 311,130 B / 4,129 lines read WHOLE · ledger 09-08 + 09-07 whole, 09-06 as headlines ·
+**ctx 7% → 21% after the digest → 36% at end of boot.** The whole boot fits comfortably; the
+"it no longer fits" lesson was wrong and is corrected.
 
 ## STANDING (unchanged)
-- 18,609-line hold on #896/#899/#900; **#899 before #900** or the merge is a silent no-op.
-- Refresh no advisory expiry date. Nobody messages Peter or Stuart outside ticket comments.
-- **No check on that repo can pass** — Actions dead 19 days; cite the manual twelve-leg preflight.
-- **PROJECT TRAP:** any probe of `users.email` by literal comparison is void by construction (AES-GCM).
-- The path guard fails CLOSED on `$VAR` in `git -C` — **write literals**; it also refuses `stash list`
-  and a command quoted inside a message. Five correct refusals today.
-- `decision_queue.sh add --json` reads its payload from **stdin**, takes no companion flags — put
-  `"_override_prior": true` inside the JSON.
-- **`timeout` and `declare -A` do not exist on macOS.** `lsof +D` on a whole drive will hang a call.
-
-## BOOT NUMBERS (WED-139)
-digest **303,794 B / 4,021 lines** WHOLE; ledger **400,644 B / 203 rows** at boot — today's 35 whole,
-09-07 (71) + 09-06 (97) as headlines, per `2026-09-08_the-boot-spec-outgrew-its-window`.
-Statusline **7% → 21% after the digest → 31% after the full boot → ~86% at close.**
+18,609-line hold on #896/#899/#900, **#899 before #900**. Actions dead 19 days — treat every check as
+UNAVAILABLE, never as failing; billing is Kam's access alone. Nobody messages Peter or Stuart outside
+ticket comments. No merge that makes an external commitment. Never delete — quarantine.
+**Kam's writing rules, both from today:** the panel speaks the WHOLE message, and **the ASK goes
+FIRST as literal pasteable steps** — or "no action needed" in the first line.
