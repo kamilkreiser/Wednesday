@@ -632,3 +632,66 @@ read at the same place — the destination — which is precisely why rule 4 exi
 tells you WHAT HAS HAPPENED, and only the process tells you WHETHER ANYTHING IS STILL HAPPENING.**
 A rule that says "read the destination" and stops there produces this failure, and it produced it
 within ten minutes of being written down.
+
+---
+
+## A review badge is not an approval AT HEAD — and the search index lies in the OPPOSITE direction to the reviews endpoint (2026-09-08)
+
+**EVIDENCE BASIS, per this file's convention:** one seat (Secuura s151, 2026-09-08), **measured on
+live PRs with a cross-check control** — it verified its own "10 of 12 have zero reviews" against BOTH
+the search index and `/pulls/{n}/reviews` and found they agreed, then found #785 where they do not.
+**Verified, not inferred.** Failure direction it was built against: **both**, which is the point.
+
+**The pair, and having both is what makes either usable:**
+
+- **`/pulls/{n}/reviews` can be BLIND** to a shadow-flagged reviewer's approval — it under-reports.
+  (Already in this brain; kept here so the pair sits together.)
+- **`review:approved` in the SEARCH INDEX is an "ever approved" filter, not "approved at head"** — it
+  **over**-reports. #785 carried two `APPROVED` reviews by Peter at **superseded commits**, while his
+  review at the current head was `COMMENTED`, deliberately holding approval.
+
+**So a PR can present as APPROVED on every summary surface while its reviewer has explicitly declined
+to sign the current head.** And it can present as unreviewed while an approval exists. **The badge is
+a representation in both directions.**
+
+### The standing lines
+
+1. **The only test that settles approval is `commit_id == head.sha`** on the review itself. Never the
+   badge, never the search filter, never `mergeable_state`.
+2. **A `COMMENTED` review at head OUTRANKS an `APPROVED` review at a superseded commit.** The later
+   act is the reviewer's current position; an older approval is a statement about code that no longer
+   exists.
+3. **State approval staleness with its REASON on the ticket, not just "needs a rebase."** *"This shows
+   'X approved' and it is NOT ready — the approval was voided by a later push (`commit_id !=
+   head.sha`) and does not cover a single line of the current head."* The rebase is the visible half;
+   **the void approval is the half that misleads.**
+4. **Before telling any client human that an action is theirs, run test 1.** On 2026-09-08 a seat
+   posted *"Peter, the action on this one is yours"* on #785 — his review of five days earlier held
+   approval at a commit that was still the head, and **the action was ours.** That is the tenth
+   instance of work-done-and-the-board-not-saying-so, and the first to reach a client human as a false
+   statement about his own obligations.
+5. **Correcting such a comment: lead with it, name the superseded comment by its timestamp, state it
+   as a fact about US, ask for nothing, and do not characterise the delay.** A correction that does
+   not name what it corrects leaves two contradictory statements and no ordering between them.
+
+---
+
+## A flag accepted without warning is not a flag that ran (2026-09-08)
+
+**EVIDENCE BASIS:** one seat, **red-proofed with a positive control** — `prettier --single-quote` on
+the CLI was accepted silently and had **no effect**; the control `const a = "hello"` stayed
+double-quoted, and the **API honoured `{ singleQuote: true }` on the same input**, which discriminates
+the tool from the invocation. **Verified, not inferred.** Direction: a silent no-op read as success.
+
+**Why it belongs here:** it would have let the seat "revert" nothing and report success — with every
+downstream number honest and the conclusion false. **A flag accepted and ignored is indistinguishable
+from a flag that ran**, and CLI parsers routinely accept options their code path never consults.
+
+1. **Any flag whose effect you have not seen is unproven.** Prove it with a positive control on an
+   input whose transformation you can see, in the same invocation shape you are about to trust.
+2. **Prefer the API/config form over the CLI flag** where both exist — the config is read by the code
+   path; the flag is read by the parser.
+3. **State a formatting result as a MINIMISATION where no config exists.** `Blockchain/Dev` has no
+   prettier config, so there is no standard to conform to: `printWidth 100` was chosen against a base
+   whose longest code line is 105, with 80 (+85/−24) and 110 (+23/−18) both measured and worse. **Say
+   "minimised, measured against these alternatives", never "conformant".**
