@@ -7,7 +7,7 @@ status: live
 
 # Boot digest — headline + rules of every lesson (open the file when it fires)
 
-Generated 2026-09-08 08:49 from 119 lesson files (588,231 B). Each block = the lesson's retrieval handle (H1), its frontmatter, the operative paragraph, its section index, and every RULES section verbatim. 6 files carry no rules-shaped section and are included whole. The CASES behind a rule live only in the file: open it the moment the rule fires, or when a diagnosis needs the evidence. `_ledger.md` is read whole beside this digest; `_ledger_archive.md` on demand.
+Generated 2026-09-08 10:10 from 120 lesson files (592,875 B). Each block = the lesson's retrieval handle (H1), its frontmatter, the operative paragraph, its section index, and every RULES section verbatim. 6 files carry no rules-shaped section and are included whole. The CASES behind a rule live only in the file: open it the moment the rule fires, or when a diagnosis needs the evidence. `_ledger.md` is read whole beside this digest; `_ledger_archive.md` on demand.
 
 ## The T9 SSD is the master — Wednesday must be fully portable
 `2026-07-31_fully-portable-drive.md` · principle · 2026-07-31 · status: superseded — the "T9 is the master" half by [[2026-08-25_one-drive-devmaster-is-master]] (2026-08-25); the portability principle itself still lives
@@ -4267,4 +4267,31 @@ sections (open the file for these): The case (2026-09-08 00:1x, Datasec/NexusAI)
 5. **Keep the detector.** It is what protects the coordinator, and it caught all nine tonight. This
    does not replace it; it explains why eight bounced harmlessly and names the shape of the one that
    would not have.
+
+
+## Any WED work is CLAIMED before it is started — client work is split by machine, and Wednesday's own project is the half with no owner
+`2026-09-08_take-ownership-of-wed-work.md` · preference · 2026-09-08 · status: live
+
+**His words, verbatim (2026-09-08, panel):**
+> *"from now on, any work on wednesday, take ownership so both agents dont work on the same things"*
+
+sections (open the file for these): Why he asked, and the instance that earned it · How to apply · Honest limits, stated rather than discovered later
+
+## How to apply
+
+1. **Claim before starting, not after deciding.** `2_Project_Files/tools/wed_claim.sh claim "<item>"`.
+   It pulls first, refuses (rc 3) when an OPEN claim already matches, and **pushes immediately** — the
+   push is the publication, and it is what makes the claim visible rather than discoverable-in-a-conflict.
+2. **`check` before proposing WED work to Kam**, not just before building it. Proposing a thing the
+   other seat is already doing costs his attention, which is the scarce resource this exists to protect.
+3. **Release when done**, with a note. An OPEN claim on finished work is an overstated record and will
+   get the whole ledger discounted ([[2026-08-16_an-overstated-record-gets-discounted-wholesale]]).
+4. **`--force` exists and its use is stated in the item text.** Two genuinely distinct pieces of work
+   can touch one file; a gate that cannot be overridden gets routed around instead of used
+   ([[2026-09-07_a-prior-ruling-gate-refusal-is-a-research-prompt]] — a refusal is a question, answer it).
+5. **"Not started" inherited from the other seat is a CLAIM WITH A DATE, not a fact** — check the
+   ledger AND open the artefact before acting on it. That is the failure above, and the claim ledger
+   does not replace the check; it only makes the duplication visible earlier.
+6. **Scope: WED work.** Client work stays split by his 11:01 ruling. If that split changes, this file
+   does not — the ledger covers whatever has no owner.
 
