@@ -44,8 +44,21 @@ CMD="${1:-}"; [ -n "$CMD" ] || usage
 # The ledger is worthless if it is not current, so every command pulls first.
 # --autostash because the dashboard writes constantly; never a write verb elsewhere.
 sync_in() {
-  git -C "$PROJECT_DIR" pull --rebase --autostash >/dev/null 2>&1 || {
-    echo "wed_claim: WARNING — pull failed; this view may be stale and a claim may race" >&2; }
+  # 2026-09-08: this line used to end `>/dev/null 2>&1`. On 2026-09-08 ~11:2x it
+  # conflicted on chat_log.json against the other seat, left GIT CONFLICT MARKERS
+  # in it, and the commit that followed PUSHED them — because the failure was
+  # sent to /dev/null and nothing looked afterwards. A conflict you cannot see is
+  # a conflict you commit. stderr is kept, and the two irreplaceable files are
+  # checked AFTER the pull, every time.
+  local out rc
+  out="$(git -C "$PROJECT_DIR" pull --rebase --autostash 2>&1)"; rc=$?
+  if [ $rc -ne 0 ]; then
+    echo "wed_claim: WARNING — pull failed; this view may be stale and a claim may race" >&2
+    printf '%s\n' "$out" | tail -5 >&2
+  fi
+  . "$(cd -P "$(dirname "${BASH_SOURCE[0]}")" && pwd)/_store_guard.sh"
+  guard_data_dir "$PROJECT_DIR/0_Brain/dashboard/data" || {
+    echo "wed_claim: REFUSING to continue — repair the file above first." >&2; exit 8; }
 }
 
 ensure() {

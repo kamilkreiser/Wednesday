@@ -53,3 +53,45 @@ store_guard() {
   fi
   return 0
 }
+
+# ── THE SECOND IRREPLACEABLE FILE, added 2026-09-08 the same hour ────────────
+# `chat_log.json` was corrupted by the SAME mechanism ~40 minutes after
+# decisions.json, and that time it was WEDNESDAY'S OWN commit: `wed_claim.sh`
+# ran `pull --rebase --autostash >/dev/null 2>&1`, conflicted on chat_log
+# against the other seat, left markers, and pushed them.
+#
+# The morning's guard covered decision_queue.sh and sync_kam_rulings.sh and NOT
+# wed_claim.sh — the third writer, the one this seat uses constantly. That is
+# the same "fixed the one you remember, left the others lying" shape as
+# safe_push.sh / wed_claim.sh earlier the same day, THIRD instance.
+#
+# So this check is about the DIRECTORY, not one file, and any tool that pulls
+# with --autostash calls it AFTER the pull.
+# NOT a space-separated string, and the reason is a real defect this file had for
+# ten minutes: **the Bash tool here runs zsh, and zsh does NOT word-split an
+# unquoted $VAR.** `for f in $IRREPLACEABLE_FILES` therefore looked for ONE file
+# literally named "chat_log.json decisions.json", found nothing, and returned 0 —
+# a guard for conflict markers that could not detect a conflict marker, silently,
+# in exactly one of the two shells this project uses. Caught by a red-proof that
+# returned 0 where it had to return 8, and diagnosed with `bash -x` rather than by
+# re-reading. Same family as "zsh has no PIPESTATUS" (2026-08-26).
+# The loop below names both files explicitly, so it is correct in bash AND zsh.
+
+# guard_data_dir <path to 0_Brain/dashboard/data> — rc 8 if either irreplaceable
+# file carries conflict markers. Everything else in that directory is a
+# regenerated feed and may be clobbered freely; these two cannot.
+guard_data_dir() {
+  local dir="${1:?guard_data_dir: needs the data dir}" bad=0 f
+  for f in chat_log.json decisions.json; do
+    [ -f "$dir/$f" ] || continue
+    if grep -qE '^(<<<<<<< |=======$|>>>>>>> )' "$dir/$f" 2>/dev/null; then
+      echo "store_guard: 🔴 CONFLICT MARKERS IN $f — an IRREPLACEABLE file." >&2
+      grep -nE '^(<<<<<<< |=======$|>>>>>>> )' "$dir/$f" | head -4 >&2
+      bad=1
+    fi
+  done
+  [ "$bad" = 0 ] && return 0
+  echo "  Resolve BY HAND and by UNION — chat_log on (ts,text), decisions on card id" >&2
+  echo "  keeping the RULED version. Do NOT commit, do NOT push, do NOT re-pull." >&2
+  return 8
+}
