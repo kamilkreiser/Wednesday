@@ -945,6 +945,37 @@ permanent.
    contradicted its earlier verification. **Keep both, and read them against each other**; no single
    check would have found this.
 
+### THE PAIR COMPLETED, 2026-09-08 (Secuura s153) — a SUCCESS that committed the wrong thing
+
+The row above is *an error that had committed*. **This is its mirror: a success that committed
+CORRUPT CONTENT, and the API could not have told anyone.**
+
+**The case.** An **unquoted** heredoc (`<<PY` instead of `<<'PY'`) let the shell execute every
+backtick-quoted markdown span in a Linear comment before it was sent. **Linear returned
+`success: true`.** What it stored read *"the Akto PR-tier scan flags &nbsp; as &nbsp; / , HIGH"* — **the
+endpoint name, the code block and the SHA all replaced by empty command output.** A comment naming
+nothing, on a **security ticket**. The success flag was true, the comment id was real, and the length
+was plausible. Caught **only** by reading it back and searching for strings the sender knew it had sent.
+
+**The two together, in the seat's own framing, adopted verbatim:**
+
+> *the 504 was an ERROR that had committed; this is a SUCCESS that committed the wrong thing. Together:
+> only a readback tells you what is there.*
+
+**The rule, stated so it covers both directions:**
+
+6. **A mutation's RETURN VALUE carries no information about its CONTENT.** `success: true`, a 200, a
+   returned id and a plausible length are all claims about the CALL. **Verify a write by reading the
+   stored artefact back and searching it for a token you know you sent** — not for "is it there", but
+   for the specific strings whose absence would matter.
+7. **The token to search for is one the SHELL could have eaten** — a backtick span, a `$(…)`, a SHA, an
+   endpoint path. Those are exactly the load-bearing ones, and exactly the ones that vanish silently.
+8. **`<<'EOF'` on every heredoc carrying prose.** This is the same defect as
+   [[2026-08-29_unquoted-heredoc-executes-backticks]] and it has now reached a **client-facing
+   artefact twice in one evening**, on two different seats.
+9. **Correct in place with an update, then verify byte-identical, then assert exactly ONE comment and
+   not two** — the repair has the same failure mode as the original write.
+
 ---
 
 ## A reviewer's instruction has a DATE, and so does the state it rests on

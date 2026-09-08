@@ -7,7 +7,7 @@ status: live
 
 # Boot digest — headline + rules of every lesson (open the file when it fires)
 
-Generated 2026-09-08 22:55 from 127 lesson files (648,718 B). Each block = the lesson's retrieval handle (H1), its frontmatter, the operative paragraph, its section index, and every RULES section verbatim. 6 files carry no rules-shaped section and are included whole. The CASES behind a rule live only in the file: open it the moment the rule fires, or when a diagnosis needs the evidence. `_ledger.md` is read whole beside this digest; `_ledger_archive.md` on demand.
+Generated 2026-09-08 23:30 from 127 lesson files (650,683 B). Each block = the lesson's retrieval handle (H1), its frontmatter, the operative paragraph, its section index, and every RULES section verbatim. 6 files carry no rules-shaped section and are included whole. The CASES behind a rule live only in the file: open it the moment the rule fires, or when a diagnosis needs the evidence. `_ledger.md` is read whole beside this digest; `_ledger_archive.md` on demand.
 
 ## The T9 SSD is the master — Wednesday must be fully portable
 `2026-07-31_fully-portable-drive.md` · principle · 2026-07-31 · status: superseded — the "T9 is the master" half by [[2026-08-25_one-drive-devmaster-is-master]] (2026-08-25); the portability principle itself still lives
@@ -4296,7 +4296,7 @@ sentence, ask what the instrument would have printed if the thing WERE there, an
 print that.** A false absence and a true absence are byte-identical on screen. **The world cannot
 tell you which one you are holding; only a control can.**
 
-sections (open the file for these): The three, in one session, all within ninety minutes · Why this is its own lesson and not three ledger rows · How to apply · Instance 4, added the same session — and it landed INSIDE the correction · The uncomfortable half, kept · EXTENSION 2026-09-08 19:5x — a FAILED COMMAND and a true zero are indistinguishable in a count, and a SEMANTIC control is what catches it · SHARPENED 2026-09-08 22:2x by the Secuura seat (s152) — A CONTROL DRAWN FROM THE SAME FAMILY AS THE THING YOU ARE MISSING AGREES WITH THE WRONG ANSWER · COSTUME 2026-09-08 22:4x — A REFUSED QUERY RENDERING AS AN EMPTY ONE (Secuura s153, self-caught by its control)
+sections (open the file for these): The three, in one session, all within ninety minutes · Why this is its own lesson and not three ledger rows · How to apply · Instance 4, added the same session — and it landed INSIDE the correction · The uncomfortable half, kept · EXTENSION 2026-09-08 19:5x — a FAILED COMMAND and a true zero are indistinguishable in a count, and a SEMANTIC control is what catches it · SHARPENED 2026-09-08 22:2x by the Secuura seat (s152) — A CONTROL DRAWN FROM THE SAME FAMILY AS THE THING YOU ARE MISSING AGREES WITH THE WRONG ANSWER · COSTUME 2026-09-08 22:4x — A REFUSED QUERY RENDERING AS AN EMPTY ONE (Secuura s153, self-caught by its control) · COSTUME 2026-09-08 23:2x — PARSING A FORMAT WITH REGEX WHEN ITS OWN RESOLVER IS ONE COMMAND AWAY (Secuura s153; the THIRD false zero it caught in one session)
 
 ## How to apply
 
@@ -4385,6 +4385,18 @@ requiring the control).
     evidence was neither scan nor control: **`POST /api/auth/login` returned 200**, which settles "is
     this account locked out?" without reasoning about key patterns at all. **Ask what you actually want
     to know, of the system that would know it.**
+
+**The rules this adds:**
+
+16. **Ask the resolver, not the text.** `docker compose config` · `git config --get` · `jq` · `yq` ·
+    `terraform output` · the language's own loader. **The tool that CONSUMES the format is the only
+    parser guaranteed to agree with the consumer.** This is rule 7 (never re-implement a tool's method)
+    pointed at parsing rather than at verification.
+17. **Quote styles, comments, anchors, multi-line scalars and variable defaults are the five things a
+    hand-rolled parser gets wrong**, and every one of them is legal in the file. A zero from a
+    hand-rolled parser says nothing about the file.
+18. **A count of the SECTION HEADER is the cheapest control for a parser returning zero** — `grep -c
+    'ports:'` costs nothing and instantly separates *"there are none"* from *"I cannot see them"*.
 
 
 ## A ghost suggestion is dangerous in proportion to how little the receiving agent has ALREADY WRITTEN DOWN — the detector catches the line, a recorded decision makes it inert

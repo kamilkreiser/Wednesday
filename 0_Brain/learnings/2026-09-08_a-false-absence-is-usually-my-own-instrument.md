@@ -198,3 +198,30 @@ keys, `lockout:*` = 0 — **a true zero this time.**
     evidence was neither scan nor control: **`POST /api/auth/login` returned 200**, which settles "is
     this account locked out?" without reasoning about key patterns at all. **Ask what you actually want
     to know, of the system that would know it.**
+
+## COSTUME 2026-09-08 23:2x — PARSING A FORMAT WITH REGEX WHEN ITS OWN RESOLVER IS ONE COMMAND AWAY (Secuura s153; the THIRD false zero it caught in one session)
+
+**The operative case:** you are about to extract something from a structured file — ports from a
+compose file, a key from YAML/JSON/TOML, a value from an ini — **with `grep`, `awk` or `sed`.** Stop.
+**If the file has a tool that RESOLVES it, ask the tool.** Your regex is a second implementation of
+that tool's parser, and it will disagree with it on exactly the cases the format allows and you did
+not think of.
+
+**The case, measured.** TWO successive port enumerators returned **zero** on Akto's compose file.
+Causes, both legal YAML: the ports are **single-quoted** (`'${VAR:-default}:container'`) so one regex's
+quote handling missed them, and **the line after `ports:` is a COMMENT**, so the awk reset its
+in-section flag before reading a single entry. Control: `grep -c 'ports:'` = **4**, so the file plainly
+had ports. **The fix was not a better regex — it was `docker compose config`, which is the thing that
+will actually interpret the file.**
+
+**The rules this adds:**
+
+16. **Ask the resolver, not the text.** `docker compose config` · `git config --get` · `jq` · `yq` ·
+    `terraform output` · the language's own loader. **The tool that CONSUMES the format is the only
+    parser guaranteed to agree with the consumer.** This is rule 7 (never re-implement a tool's method)
+    pointed at parsing rather than at verification.
+17. **Quote styles, comments, anchors, multi-line scalars and variable defaults are the five things a
+    hand-rolled parser gets wrong**, and every one of them is legal in the file. A zero from a
+    hand-rolled parser says nothing about the file.
+18. **A count of the SECTION HEADER is the cheapest control for a parser returning zero** — `grep -c
+    'ports:'` costs nothing and instantly separates *"there are none"* from *"I cannot see them"*.
