@@ -18,7 +18,24 @@ supersede: replace this file wholesale at the next pickup; do not append
 > **STILL TRUE AND STILL THE POINT: this was a GATE problem, not a backlog.** The churn finding stands, KS-1025 is filed, and the reshape is ruled but unbuilt.
 > **The next block will arrive the same way and from nobody's change.**
 
-## 🔴 BLOCKED AGAIN — and this wave is SIGNAL, not the churn. Read this before re-applying yesterday's diagnosis.
+## 🔴 START HERE — the repo is BLOCKED and ONE Kam ruling clears everything. All four are measured.
+
+**Card `secuura-four-advisories-in-shipped-code` is OPEN on his panel with a COMPLETE picture and a recommendation.** Until he rules, **nobody — us, Peter, Stuart — can push.** Nothing expires, nothing degrades, nothing is lost.
+
+**ALL FOUR MEASURED, none reachable in our code today:** `GHSA-2x7j` (HIGH) **UNREACHABLE** — the blow-up needs a crafted address LIST and every attacker-reachable path validates to ONE address first; the one fallback that looked unguarded is guarded by its caller. `GHSA-wmmp` + `GHSA-cc9r` **MOOT** — the recipient allow-list exists and is NOT configured (live `secuura-auth` `len=0` against three known-set controls), so nothing is in force to bypass. `GHSA-jxfw` (morgan) **THEORETICAL** on three independent grounds, strongest being that Node decodes headers as latin1 so the vector cannot deliver the character. `GHSA-8m3c` measured this morning.
+
+⚠ **THREE CAVEATS THAT MUST TRAVEL WITH ANY "IT IS FINE" SENTENCE:**
+> **(1)** All four are unreachable **because of a property we happen to hold, not because the vulnerable code is absent — we SHIP all four packages.** The two allow-list ones **flip the moment any deployment sets `EMAIL_RECIPIENT_ALLOWLIST`, which is a CONFIG change, not a code change.**
+> **(2)** Bounded to LOCAL config — **the demo VM's environment was NOT read.** If the demo has the allow-list on, those two stop being moot for it. **Worth checking before anyone calls this closed.**
+> **(3)** Whether a single PATHOLOGICAL address is also slow is **UNMEASURED**. The reported vector is closed; that residual is not.
+
+🔴 **AND THE THING A SUCCESSOR MUST NOT UNDO: KAM'S GRANT DOES NOT COVER THESE FOUR, even measured.** Clause 2 tests whether a package **reaches a shipped image** — all four do. **The measurement is that the vulnerable PATH is not exercised, which is a better fact and a DIFFERENT one.** Wednesday told him his clause is blunter than the question rather than stretching it to fit. **Do not baseline these under the grant.**
+
+## 🟡 THE EARLIER WAVE — different in kind, and the distinction is load-bearing
+
+This morning's eight were TEST TOOLING reaching nothing shipped; **that** was the gate turning a publishing schedule into an outage, and KS-1025 answers it. **These four are in shipped code. The gate is doing its job.** ⚠ **KS-1025's reshape would NOT clear them** — it hard-fails immediately for anything shipping or HIGH. **Do not reach for it to get moving; that means weakening it while it is correctly stopping us.**
+
+## 🟢 THE SEAT — s155 on `%8`, HOLDING, wake is a tap from Wednesday
 
 **The repo was unblocked at 08:31 and re-blocked at 08:49.** 11 advisories: **7 are #914's wave sitting unmerged**, **4 are genuinely NEW and ALL fail Kam's clauses.**
 
@@ -30,7 +47,7 @@ supersede: replace this file wholesale at the next pickup; do not append
 
 **#914 clears only 7 of 11 — merging it unblocks NOBODY, and it has no gate brief yet (Wednesday writes those).**
 
-## 🟢 THE SEAT — s155 on `%8`, verified at RUNG 5 by pane content
+## 🟢 SEAT DETAIL
 
 **s154 WRAPPED and is SCORED 1.0** (handover v3 in the inbox at `2026-09-08T22:34:31Z`, history entry written, vault pushed; its pane `%5` closed clean, listeners 28 → 28, both HTTP surfaces 200 either side).
 
