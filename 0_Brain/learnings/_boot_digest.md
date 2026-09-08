@@ -7,7 +7,7 @@ status: live
 
 # Boot digest — headline + rules of every lesson (open the file when it fires)
 
-Generated 2026-09-08 18:38 from 126 lesson files (628,602 B). Each block = the lesson's retrieval handle (H1), its frontmatter, the operative paragraph, its section index, and every RULES section verbatim. 6 files carry no rules-shaped section and are included whole. The CASES behind a rule live only in the file: open it the moment the rule fires, or when a diagnosis needs the evidence. `_ledger.md` is read whole beside this digest; `_ledger_archive.md` on demand.
+Generated 2026-09-08 18:55 from 126 lesson files (632,148 B). Each block = the lesson's retrieval handle (H1), its frontmatter, the operative paragraph, its section index, and every RULES section verbatim. 6 files carry no rules-shaped section and are included whole. The CASES behind a rule live only in the file: open it the moment the rule fires, or when a diagnosis needs the evidence. `_ledger.md` is read whole beside this digest; `_ledger_archive.md` on demand.
 
 ## The T9 SSD is the master — Wednesday must be fully portable
 `2026-07-31_fully-portable-drive.md` · principle · 2026-07-31 · status: superseded — the "T9 is the master" half by [[2026-08-25_one-drive-devmaster-is-master]] (2026-08-25); the portability principle itself still lives
@@ -2205,7 +2205,7 @@ string, a capped query, or something I wrote earlier — **that is a representat
 thing, not the thing.** Go to the source. Every time. Especially when I am in the middle
 of requiring someone else to do exactly that.
 
-sections (open the file for these): The six, in one day · Why this is a distinct lesson and not six instances of old ones · Why the existing rules did not fire, which is the part to fix · How to apply · Will it persist? Yes — and the dangerous half is not the half that showed up today · Sharpened 2026-08-15: the variable is not WHOSE claim it is · Sharpened again 2026-08-16: the third switch is EXPECTATION, and it is the quietest · The clock-composition sub-class, consolidated 2026-08-23: GENERATE timestamps, never type them · The honest note on credit · The fourth switch (2026-08-25, Datasec/NexusAI s4): the option you can VERIFY WITHOUT EFFORT · The brief-composition costumes, consolidated 2026-08-30 (w=37–46 in three days — ten instances) · The 2026-09-03 evening sub-class: FOUR instances in one session, all in COORDINATION messages, all agent-caught (ledger w=73–76) · The rule promoted from this (enforceable in the sentence, not in a tool) · The PERSON sub-class, added 2026-09-03 22:5x (ledger w=77) — and it is a lesson about how THIS FILE was written
+sections (open the file for these): The six, in one day · Why this is a distinct lesson and not six instances of old ones · Why the existing rules did not fire, which is the part to fix · How to apply · Will it persist? Yes — and the dangerous half is not the half that showed up today · Sharpened 2026-08-15: the variable is not WHOSE claim it is · Sharpened again 2026-08-16: the third switch is EXPECTATION, and it is the quietest · The clock-composition sub-class, consolidated 2026-08-23: GENERATE timestamps, never type them · The honest note on credit · The fourth switch (2026-08-25, Datasec/NexusAI s4): the option you can VERIFY WITHOUT EFFORT · The brief-composition costumes, consolidated 2026-08-30 (w=37–46 in three days — ten instances) · The 2026-09-03 evening sub-class: FOUR instances in one session, all in COORDINATION messages, all agent-caught (ledger w=73–76) · The rule promoted from this (enforceable in the sentence, not in a tool) · The PERSON sub-class, added 2026-09-03 22:5x (ledger w=77) — and it is a lesson about how THIS FILE was written · SHARPENED 2026-09-08 by the Secuura seat (s151) — a COMPRESSION is a single-point failure, and the only catchable hop is the one that compresses
 
 ## How to apply
 
@@ -2303,6 +2303,37 @@ was about to be built on a surface already failing conformance for an unrelated 
 correction was worth more than the error cost**, and it is the coordinator's job that produced it
 ([[2026-08-11_coordinator-not-carrier]]) — the task-focused agent could not have seen the
 adjacency, and Wednesday only saw it by being forced back to the source.
+
+## SHARPENED 2026-09-08 by the Secuura seat (s151) — a COMPRESSION is a single-point failure, and the only catchable hop is the one that compresses
+**The case.** A builder wrote *"Filed only, per your Q2 ruling — **not in this session's queue**"*.
+Wednesday's ACK two minutes later said *"KS-823 (High, file-only)"*. **The scope word was dropped
+once.** It then travelled: ACK → a source comment → #831's PR body (*"an open defect, High,
+**file-only by ruling**"*) → the ticket's linkage → Wednesday's own disposition four hours later,
+which searched **201 of Kam's cards** for a ruling that was its own. A scheduling note about one
+session's capacity had become a standing decision about an unauthenticated token grant, and it held
+for three days.
+
+**How to apply — narrowed to the one moment that can act:**
+
+1. **The ACKNOWLEDGEMENT is the hop that compresses.** Summarising someone's sentence back to them is
+   where a scoped claim loses its scope, because the acknowledgement is short by design and the scope
+   word looks like detail. **When acknowledging a scoped statement, quote the scope or quote nothing.**
+2. **Scope words on an AUTHORITY claim are load-bearing in a way that hedges on a technical claim are
+   not.** *"Filed only"* and *"filed only this session"* are different rulings — the first grants a
+   standing disposition the speaker never made. **Same for: for now · this round · until X · pending Y.**
+3. **Test by the phrase's future:** if this sentence is quoted six times without its neighbours, does
+   it still say what the author meant? If not, it must not leave your hands in that form.
+4. **Suspect any phrase of the shape "by ruling", "as agreed", "per your decision" that you cannot
+   trace to a card or a dated message.** Those phrases exist to stop the next reader asking — which
+   makes a manufactured one uniquely expensive. **Searching the principal's decision store BEFORE
+   writing such a phrase into anything is one command.**
+5. **Downstream, the only available defence is cheap and worth it:** when a phrase grants authority,
+   ask once where it came from. Four readers passed this one; the fifth asked and it dissolved.
+
+**Family:** the RESTATEMENT-DROPS-THE-HEDGE rows (w=144, 2026-09-06) — this is their authority-claim
+form · [[2026-08-16_classification-is-the-field-that-grants-authority]] (*"by ruling"* IS that field,
+and here Wednesday manufactured it) · [[2026-09-05_a-relayed-ruling-is-delivered-only-when-it-is-in-the-artefact]]
+(its exact inverse — a ruling that was never made, delivered everywhere).
 
 
 ## A cap is never neutral — it removes whatever the SORT put last, and the sort is usually ordered by what you care about

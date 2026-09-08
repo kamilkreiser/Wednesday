@@ -359,3 +359,50 @@ was about to be built on a surface already failing conformance for an unrelated 
 correction was worth more than the error cost**, and it is the coordinator's job that produced it
 ([[2026-08-11_coordinator-not-carrier]]) — the task-focused agent could not have seen the
 adjacency, and Wednesday only saw it by being forced back to the source.
+
+
+## SHARPENED 2026-09-08 by the Secuura seat (s151) — a COMPRESSION is a single-point failure, and the only catchable hop is the one that compresses
+
+**The case.** A builder wrote *"Filed only, per your Q2 ruling — **not in this session's queue**"*.
+Wednesday's ACK two minutes later said *"KS-823 (High, file-only)"*. **The scope word was dropped
+once.** It then travelled: ACK → a source comment → #831's PR body (*"an open defect, High,
+**file-only by ruling**"*) → the ticket's linkage → Wednesday's own disposition four hours later,
+which searched **201 of Kam's cards** for a ruling that was its own. A scheduling note about one
+session's capacity had become a standing decision about an unauthenticated token grant, and it held
+for three days.
+
+**The seat's formulation, adopted verbatim because it is better than the rule it corrects:**
+
+> *"Each hop was a faithful copy of the hop before it — nobody was careless. The drop happened ONCE,
+> and then propagated with perfect fidelity, which is exactly why it survived three days and four
+> readers. **The defence is not more care at the later hops; it is that the hop which compresses is
+> the only one that can be caught.**"*
+
+**Why this changes the rule rather than restating it.** *"A relayed claim carries the counterpart's
+sentence verbatim including its hedge"* is written as advice to every relayer — so it asks four
+people to be careful and gets nothing from three of them, because **the three downstream readers were
+copying accurately.** There is no observation any of them could have made: the qualifier was already
+gone, and a compressed sentence does not look compressed. **Only the compressing hop holds both
+versions at once.**
+
+**How to apply — narrowed to the one moment that can act:**
+
+1. **The ACKNOWLEDGEMENT is the hop that compresses.** Summarising someone's sentence back to them is
+   where a scoped claim loses its scope, because the acknowledgement is short by design and the scope
+   word looks like detail. **When acknowledging a scoped statement, quote the scope or quote nothing.**
+2. **Scope words on an AUTHORITY claim are load-bearing in a way that hedges on a technical claim are
+   not.** *"Filed only"* and *"filed only this session"* are different rulings — the first grants a
+   standing disposition the speaker never made. **Same for: for now · this round · until X · pending Y.**
+3. **Test by the phrase's future:** if this sentence is quoted six times without its neighbours, does
+   it still say what the author meant? If not, it must not leave your hands in that form.
+4. **Suspect any phrase of the shape "by ruling", "as agreed", "per your decision" that you cannot
+   trace to a card or a dated message.** Those phrases exist to stop the next reader asking — which
+   makes a manufactured one uniquely expensive. **Searching the principal's decision store BEFORE
+   writing such a phrase into anything is one command.**
+5. **Downstream, the only available defence is cheap and worth it:** when a phrase grants authority,
+   ask once where it came from. Four readers passed this one; the fifth asked and it dissolved.
+
+**Family:** the RESTATEMENT-DROPS-THE-HEDGE rows (w=144, 2026-09-06) — this is their authority-claim
+form · [[2026-08-16_classification-is-the-field-that-grants-authority]] (*"by ruling"* IS that field,
+and here Wednesday manufactured it) · [[2026-09-05_a-relayed-ruling-is-delivered-only-when-it-is-in-the-artefact]]
+(its exact inverse — a ruling that was never made, delivered everywhere).
