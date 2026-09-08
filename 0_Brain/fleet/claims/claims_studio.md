@@ -28,7 +28,12 @@ machine until further notice"*). Datasec belongs to the laptop seat.
 | 2026-09-08 12:50 | **tuesday-agent@agentmail.to created** (Kam's word 12:50) + inbox keyed on WED_AGENT | WED | DONE — 29063f0c; verified by LISTING (7→8); proven on the live API both directions |
 | 2026-09-08 12:5x | Path-guard scratchpad exemption + launcher own-repo ssh pointer heal | WED | DONE — acc7440e; 8-case matrix + 3-state heal proof. Bricked the hook mid-edit (apostrophes), 4 min, recovered |
 | 2026-09-08 13:00 | **Tuesday provisioned on the T9 + FIRST-BOOT-TUESDAY.md** (Kam's 12:53) | WED | DONE — 9c33d004; 2.1 GB, HEAD verified AT the destination, creds 0600 |
-| 2026-09-08 13:0x | Phase 2 second half — general shell-write path guard (not just git verbs) | WED | **NOT STARTED** — the honest gap; git-verb half is armed and proven |
+| 2026-09-08 13:0x | Phase 2 second half — general shell-write path guard | WED | DONE — 361a68c0; pathguard.py, 17-case matrix through the full hook, both agent directions |
+| 2026-09-08 13:1x | Pre-commit hook tracked master + PORTABILITY headless section | WED | DONE — 77961ca5; doctor detects missing AND drifted, 4 states exercised |
+| 2026-09-08 13:14 | **Secuura s150 launched** on the standing queue (KS-989 first) | Secuura/Blockchain %171 | ACTIVE — 4 gate refusals on the brief, all correct; boot receipt caught 2 of Wednesday's |
+| 2026-09-08 13:20 | ANSWER to s150 — seat is s150 not s153, KS-971 struck (Peter's), KS-963 added | Secuura/Blockchain | DONE — verified at destination, pointer tapped |
+| 2026-09-08 13:4x | **QA gate on KS-989 / PR #906 @ 9f9a2a788, tier 2** | Secuura, pane %172 | ACTIVE — launcher tracked in qa-agent/launchers/, head-on-origin guard red-proofed (rc 6) |
+| 2026-09-08 13:5x | Card `secuura-61-archived-while-still-open` filed on s150's measurement | Secuura/Blockchain | DONE — 61 not 10, and NOT a cascade; prior-ruling gate overridden with the reason read, not assumed |
 | 2026-09-08 10:56 | s149 WRAPPED and its pane CLOSED (%170) — handover 143 lines, everything pushed | Secuura/Blockchain | DONE — Wednesday is the wake path; successor launches on Kam's PS ruling |
 | 2026-09-08 10:58 | decisions.json REPAIR — Kam's rulings file had git conflict markers committed into it | WED / shared | DONE — 195 cards, 0 rulings lost, pushed. Came in via the LAPTOP's ce6a24be; laptop must pull |
 | 2026-09-08 11:00 | Attention flag now fires on the red marker, not just 'QUESTION' (Kam 10:59) | WED | DONE — exercised on the real feed, 2 of 12 flagged correctly |

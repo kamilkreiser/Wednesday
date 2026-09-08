@@ -1,0 +1,46 @@
+ultrathink
+
+You are the cross-project QA agent, working from
+/Volumes/DevMASTER/!CODING/Testing Agent MAIN
+
+TIER 2 GATE (through-code) — Secuura/Blockchain, KS-989, PR #906,
+branch feature/ks-989-a-systemtest-docs-edit-can-red-a-package-quality-gate-that @ 9f9a2a788,
+base develop @ 986c592d5. Round 1 of this class; the cap is two NO GO rounds.
+Nothing is merged, nothing is deployed. YOU MAY NOT MERGE, PUSH, OR DEPLOY.
+
+*** THIS ROUND TOUCHES NO PRODUCT CODE — a git hook, a shell script, two shell test suites and
+one blank line in a test helper — which is why it is through-code and not a full pass. There is
+no rendered surface here, so do NOT drive a browser and do NOT claim one was driven. If you find
+the change touching a service, a frontend, the OpenAPI spec, a migration or an auth surface, STOP
+and report it: the tier is wrong and that is itself a finding. ***
+
+YOUR BRIEF — read it first, in full, and follow it exactly:
+/Volumes/DevMASTER/WEDNESDAY/2_Project_Files/fleet/qa-agent/briefs/2026-09-08_secuura-ks989-906-tier2.md
+
+THE REPO UNDER TEST (read it; do not write to it):
+/Volumes/DevMASTER/!CODING/Secuura/Blockchain/2_Project_Files
+
+FIRST JOB — THE LOAD-BEARING CLAIM IS ABOUT THE TRUNK, NOT ABOUT THE PATCH.
+The builder says it found the defect ALREADY LIVE on develop while writing the fix:
+systemTest/akto `format:check` RED at 986c592d5, arriving via merge 512480ef1 (PR #892), with a
+control at 4f337be83 where the offending file is absent but package.json is present. Reproduce
+that independently — the red, AND the control that proves the probe fires. If the trunk was not
+red, the entire justification for shipping the gate and the fix together collapses, and that is a
+NO GO however good the code is.
+
+SECOND — RE-RUN THE RED-PROOF YOURSELF. It claims 28/0 passing, 18/10 when tampered back to a
+pipe, the tampered file still parsing under `bash -n`, and a byte-identical restore with md5
+899987755dde6bfba0ce889084bda1da on both sides. Verify the hash on both sides. A red-proof
+reported by its own author is the most valuable thing in the delivery to reproduce and the
+easiest to get accidentally wrong.
+
+TWO THINGS IT SAYS IT DID NOT RUN, and you confirm they are still not run and say whether the
+gaps are acceptable: the four platform suites, and the deps-missing path against a real
+uninstalled package rather than a fixture.
+
+A GREEN THAT PROVES NOTHING IS A FINDING. A new test suite that passes is not evidence; a suite
+demonstrated to FAIL when the guarded thing is broken is. State what you did NOT test as loudly
+as what you did, and give every finding a control that proves your command could have failed.
+
+VERDICT to wednesday-agent@agentmail.to, subject exactly:
+[QA -> Wednesday] VERDICT: Secuura KS-989 / #906 @ 9f9a2a788
