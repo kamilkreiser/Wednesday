@@ -7,7 +7,7 @@ status: live
 
 # Boot digest BY TIER — W whole, M rules-only, every project case a handle
 
-Generated 2026-09-08 20:19 from 127 lesson files (642,826 B). M 29 · MIXED 5 · W 93. 28 project CASE sections inside MIXED files are reduced to one line each: the heading and the path to read it at. W blocks are exactly what the default digest carries; M blocks drop the section index and keep the rules; a P file is a single handle. The CASES behind every rule live only in the lesson files — open one the moment its rule fires.
+Generated 2026-09-08 21:11 from 127 lesson files (645,282 B). M 29 · MIXED 5 · W 93. 28 project CASE sections inside MIXED files are reduced to one line each: the heading and the path to read it at. W blocks are exactly what the default digest carries; M blocks drop the section index and keep the rules; a P file is a single handle. The CASES behind every rule live only in the lesson files — open one the moment its rule fires.
 
 ## The T9 SSD is the master — Wednesday must be fully portable
 `2026-07-31_fully-portable-drive.md` · principle · 2026-07-31 · status: superseded — the "T9 is the master" half by [[2026-08-25_one-drive-devmaster-is-master]] (2026-08-25); the portability principle itself still lives · tier: W
@@ -1038,7 +1038,7 @@ reported anything else — because it measured the wrong thing, errored and
 swallowed it, or asked a question whose answer was fixed in advance. It is worse
 than no check, because it converts an open question into a settled one.
 
-sections (open the file for these): A KEYWORD SEARCH OVER A CORPUS THAT CONTAINS THE SEARCH TERM AS VOCABULARY (2026-09-04 — three instances in one evening) · `timeout N cmd | wc -l` PRINTS 0 WHEN THE COMMAND IS KILLED — and no `||` can catch it (2026-09-04, twice in one evening) · THE DELIVERY MEMBER, and it is the sharpest one yet because the failing check IS this family's own enforcement (2026-09-07, W-tier, agent-caught in two minutes)
+sections (open the file for these): A KEYWORD SEARCH OVER A CORPUS THAT CONTAINS THE SEARCH TERM AS VOCABULARY (2026-09-04 — three instances in one evening) · `timeout N cmd | wc -l` PRINTS 0 WHEN THE COMMAND IS KILLED — and no `||` can catch it (2026-09-04, twice in one evening) · THE DELIVERY MEMBER, and it is the sharpest one yet because the failing check IS this family's own enforcement (2026-09-07, W-tier, agent-caught in two minutes) · THE MEMBER THAT NAMES THE RIGHT PROPERTY AND OBSERVES THE WRONG WRITE (2026-09-08, Secuura s152 — twice in one seat, both caught by RUNNING)
 
 **How to apply — one question, asked of the check rather than the result:**
 
@@ -1107,6 +1107,19 @@ the data turns an ambiguous incident into a fixed one.
 [[2026-08-29_unquoted-heredoc-executes-backticks]] (the sibling: prose destroyed on its way through a
 tool, with `bash -n` clean) · [[2026-08-14_i-read-representations-they-read-sources]] (a "sent" exit
 code is a representation of a delivery).
+
+**How to apply:**
+1. **Ask which WRITE produced the value the assertion reads.** If more than one write can put it
+   there, the test measures whichever one ran, not the one it names.
+2. **When a harness swallows or intercepts a write, prove the selector cannot match the OTHER
+   writes** — two writes sharing a status, a null field or a timestamp will both match a loose
+   condition. Find a discriminator that exists only on the intended one.
+3. **The check is a red-proof against a build with the property REMOVED**, not a green run. Twice on
+   2026-09-08 a test could not reach the case it named, **and both were caught by running rather than
+   reading** — the seat's own verdict: *"the single most productive check I have."*
+4. **Family note:** this is the sibling of the LOOSE MOCK (a mock that returns more than the product
+   would, so the suite is green on a branch that never executes). Both are false GREENS, and a false
+   green ships.
 
 project CASE sections lifted to their own tier (24, read them in the file):
 

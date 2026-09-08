@@ -1050,3 +1050,37 @@ the data turns an ambiguous incident into a fixed one.
 tool, with `bash -n` clean) · [[2026-08-14_i-read-representations-they-read-sources]] (a "sent" exit
 code is a representation of a delivery).
 
+
+
+## THE MEMBER THAT NAMES THE RIGHT PROPERTY AND OBSERVES THE WRONG WRITE (2026-09-08, Secuura s152 — twice in one seat, both caught by RUNNING)
+
+**The operative case:** a test asserts the property you care about, under a heading that names it, and
+**passes for a reason that has nothing to do with the code under test** — because the value it reads
+was put there by a DIFFERENT write that succeeds regardless.
+
+**The case.** The existing guard-5 test asserts `h.row.transactionHash === TX_A` under the header
+*"names the tx"*. **That value was written by the WRITE-AHEAD write, which succeeds in that harness.**
+So the assertion passes **whether or not guard 5 carries the hash** — the thing the test exists to
+prove. **Peter found the defect by reading something a GREEN TEST WAS ACTIVELY REASSURING US ABOUT.**
+
+**And the seat's own harness had the identical disease on its first run:** both writes carry status
+`'submitting'`, and once the write-ahead is swallowed both also see a null row hash, **so its selector
+matched BOTH and swallowed the very write under test.** `errorMessage` is the discriminator now.
+
+**Why this member is worse than a tautological check.** A check that cannot fail usually looks thin.
+**This one looks like exactly the right test** — correct property, correct name, meaningful value —
+and is indistinguishable from coverage **at every level except execution.** Reading it will not find
+it; only running it against a build where the property is absent will.
+
+**How to apply:**
+1. **Ask which WRITE produced the value the assertion reads.** If more than one write can put it
+   there, the test measures whichever one ran, not the one it names.
+2. **When a harness swallows or intercepts a write, prove the selector cannot match the OTHER
+   writes** — two writes sharing a status, a null field or a timestamp will both match a loose
+   condition. Find a discriminator that exists only on the intended one.
+3. **The check is a red-proof against a build with the property REMOVED**, not a green run. Twice on
+   2026-09-08 a test could not reach the case it named, **and both were caught by running rather than
+   reading** — the seat's own verdict: *"the single most productive check I have."*
+4. **Family note:** this is the sibling of the LOOSE MOCK (a mock that returns more than the product
+   would, so the suite is green on a branch that never executes). Both are false GREENS, and a false
+   green ships.
