@@ -15,3 +15,4 @@ sees the claim rather than discovering it in a conflict.
 | 2026-09-08 10:08 | Kamils-MBP | wed_claim.sh itself — the ownership mechanism Kam asked for 2026-09-08 | OPEN | |
 | 2026-09-08 10:09 | Kamils-MBP | wed_claim.sh docs pass (distinct work) | CLOSED |  2026-09-08 10:09 exercised, not real work |
 | 2026-09-08 10:09 | Kamils-MBP | throwaway control item 1788826188 | CLOSED |  2026-09-08 10:09 control, exercised only |
+| 2026-09-08 10:16 | Kamils-MBP | Launch_Wednesday.command line 198 — per-seat ledger scope (Kam ruled 'scope' 09:57) | OPEN | |
