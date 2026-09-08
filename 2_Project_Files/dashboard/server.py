@@ -275,6 +275,39 @@ class Handler(SimpleHTTPRequestHandler):
             return
         return super().do_GET()
 
+    def _kam_append(self, text, ts, view=None):
+        """PHASE 0 (Kam's 2026-09-08 11:50 commission): the panel writes ONLY
+        chat_kam.json and then regenerates the DERIVED chat_log.json. Three
+        endpoints used to append straight to the shared log; two Wednesday seats
+        did the same through git, and that file was corrupted three times on
+        2026-09-08. One writer per file makes it impossible rather than unlikely.
+
+        `view` is the toggle Kam was looking at when he typed, stored so his side
+        of the conversation is addressed to a view rather than broadcast to both.
+        Absent (pre-toggle clients) it stays "both" — never a guess at which
+        client he meant."""
+        kpath = ROOT / "0_Brain" / "dashboard" / "data" / "chat_kam.json"
+        try:
+            log = json.loads(kpath.read_text()) if kpath.exists() else []
+        except Exception:
+            # A stream that will not parse must NOT be overwritten — that would
+            # delete Kam's messages to fix a formatting problem.
+            raise
+        if not isinstance(log, list):
+            raise ValueError("chat_kam.json is not a list")
+        entry = {"role": "kam", "text": text, "ts": ts}
+        if view in ("wednesday", "tuesday", "both"):
+            entry["view"] = view
+        log.append(entry)
+        kpath.write_text(json.dumps(log, indent=1, ensure_ascii=False))
+        # rc is checked: a failed rebuild leaves the panel one message stale and
+        # that must surface as a 500, not as a silent success.
+        r = subprocess.run(["python3", str(ROOT / "2_Project_Files" / "tools" / "chat_streams.py")],
+                           timeout=60)
+        if r.returncode != 0:
+            raise RuntimeError("chat_streams.py rebuild failed rc=%d" % r.returncode)
+        return entry
+
     def _json(self, code, payload):
         body = json.dumps(payload).encode()
         self.send_response(code)
@@ -305,11 +338,8 @@ class Handler(SimpleHTTPRequestHandler):
                 text = (data.get("text") or "").strip()[:2000]
                 if not text:
                     return self._json(400, {"error": "empty message"})
-                cpath = ROOT / "0_Brain" / "dashboard" / "data" / "chat_log.json"
-                log = json.loads(cpath.read_text()) if cpath.exists() else []
                 now = datetime.datetime.now().astimezone().isoformat()
-                log.append({"role": "kam", "text": text, "ts": now})
-                cpath.write_text(json.dumps(log, indent=1, ensure_ascii=False))
+                self._kam_append(text, now, (data.get("view") or "").strip() or None)
                 subprocess.run(["python3", str(HERE / "generate.py")], timeout=60)
                 # PUSH delivery (Kam, 2026-08-17): tap the wednesday pane so chat
                 # stops being a 60s-poll waiting game. Detached, best-effort —
@@ -524,12 +554,8 @@ class Handler(SimpleHTTPRequestHandler):
                     ack = {}
                 ack[key] = {"state": "action_requested", "ts": now, "label": label or key}
                 apath.write_text(json.dumps(ack, indent=1, ensure_ascii=False))
-                cpath = ROOT / "0_Brain" / "dashboard" / "data" / "chat_log.json"
-                log = json.loads(cpath.read_text()) if cpath.exists() else []
-                if not isinstance(log, list):
-                    log = []
-                log.append({"role": "kam", "text": f"ACTION NOW: {label or key}", "ts": now})
-                cpath.write_text(json.dumps(log, indent=1, ensure_ascii=False))
+                self._kam_append(f"ACTION NOW: {label or key}", now,
+                                 (data.get("view") or "").strip() or None)
                 subprocess.run(["python3", str(HERE / "generate.py")], timeout=60)
                 return self._json(200, {"ok": True, "key": key})
             if self.path == "/api/archive":
@@ -620,14 +646,10 @@ class Handler(SimpleHTTPRequestHandler):
                 if not p:
                     return self._json(400, {"error": "unknown parking-lot file"})
                 _fm, title, _one = park_parse(p)
-                cpath = ROOT / "0_Brain" / "dashboard" / "data" / "chat_log.json"
-                log = json.loads(cpath.read_text()) if cpath.exists() else []
-                if not isinstance(log, list):
-                    log = []
-                log.append({"role": "kam",
-                            "text": f"Discuss parking-lot item: {title} — 0_Brain/parkinglot/{p.name}",
-                            "ts": datetime.datetime.now().astimezone().isoformat()})
-                cpath.write_text(json.dumps(log, indent=1, ensure_ascii=False))
+                self._kam_append(
+                    f"Discuss parking-lot item: {title} — 0_Brain/parkinglot/{p.name}",
+                    datetime.datetime.now().astimezone().isoformat(),
+                    (data.get("view") or "").strip() or None)
                 subprocess.run(["python3", str(HERE / "generate.py")], timeout=60)
                 return self._json(200, {"ok": True})
             if self.path == "/api/flag":

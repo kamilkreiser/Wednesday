@@ -197,6 +197,29 @@ else
   warn "boot_digest.py missing" "the seat will read every lesson file (34% boot) — restore 2_Project_Files/tools/boot_digest.py"
 fi
 
+# --- Chat streams (Phase 0, Kam's 2026-09-08 11:50 two-agent commission) ---------
+# chat_log.json is DERIVED from chat_legacy.json + one stream per writer, and it is
+# gitignored: a generated file that two seats both regenerate is what corrupted Kam's
+# reading surface three times on 2026-09-08. So a fresh clone HAS NO chat_log.json
+# until something builds it, and every reader of it — kam_rulings_today.sh,
+# wake_watch.sh, attention/ingest.py, generate.py — would report an empty day.
+# This does not warn about staleness, it REBUILDS: the file is derived, so the fix
+# and the check are the same command, and a boot is exactly when it must be right.
+CS="$PROJECT_DIR/2_Project_Files/tools/chat_streams.py"
+if [ -f "$CS" ]; then
+  # --harvest, not a bare run: a writer that bypassed the streams (an old server
+  # still up across a cutover — measured 2026-09-08) leaves an entry only the
+  # derived file holds, and a bare rebuild DELETES it. --harvest routes it back by
+  # its own fields and still fails (rc 4) on anything it cannot attribute.
+  if CS_OUT="$(python3 "$CS" --harvest 2>&1)"; then
+    ok "chat streams merged" "$(printf '%s' "$CS_OUT" | tail -1 | sed 's/^chat_streams: //')"
+  else
+    fail "chat_log.json NOT rebuilt from the streams" "$(printf '%s' "$CS_OUT" | head -2 | tr '\n' ' ')"
+  fi
+else
+  fail "chat_streams.py missing" "chat_log.json is derived and gitignored — without this tool Kam's panel is empty on a fresh clone"
+fi
+
 # --- Dead-coordinator rotation (2026-09-02): the 06:39 seat hit the hard context
 # limit at 09:49 and sat unreachable for six hours while the watcher tapped it 94
 # times. The fix has three parts and each must be present or the others are decor:

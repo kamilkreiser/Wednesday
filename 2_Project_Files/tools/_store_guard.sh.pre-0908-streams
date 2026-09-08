@@ -82,13 +82,7 @@ store_guard() {
 # regenerated feed and may be clobbered freely; these two cannot.
 guard_data_dir() {
   local dir="${1:?guard_data_dir: needs the data dir}" bad=0 f
-  # PHASE 0 (2026-09-08): the irreplaceable set grew. chat_log.json is now a
-  # DERIVED file rebuilt by tools/chat_streams.py — it is still checked, because
-  # markers there mean a writer bypassed the streams — but the RECORD lives in
-  # the frozen legacy file and the three single-writer streams, and those are
-  # what a repair must never lose.
-  for f in chat_log.json chat_legacy.json chat_wednesday.json chat_tuesday.json \
-           chat_kam.json decisions.json; do
+  for f in chat_log.json decisions.json; do
     [ -f "$dir/$f" ] || continue
     if grep -qE '^(<<<<<<< |=======$|>>>>>>> )' "$dir/$f" 2>/dev/null; then
       echo "store_guard: 🔴 CONFLICT MARKERS IN $f — an IRREPLACEABLE file." >&2

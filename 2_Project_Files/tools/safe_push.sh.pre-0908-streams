@@ -60,15 +60,8 @@ SP_UNION_SB="$W/2_Project_Files/tools/union_scoreboard.py"
 FEEDS="agentmail brain_state datasec_calendar linear_personal linear_wed news
        parkinglot personal_calendar secuura_error tickets"
 
-# PHASE 0 (2026-09-08, Kam's two-agent commission): the chat is no longer one
-# shared mutable file. `chat_log.json` is DERIVED and untracked; the record lives
-# in the frozen legacy file plus one stream per writer. Single-writer files do
-# not conflict — that is the whole point — but they are still irreplaceable, so
-# they are backed up and staged by name exactly as chat_log.json used to be.
-CHATFILES="chat_legacy chat_wednesday chat_tuesday chat_kam"
-
-# 1. Back up the irreplaceable files BEFORE any git verb touches the tree.
-for f in $CHATFILES decisions; do
+# 1. Back up the two irreplaceable files BEFORE any git verb touches the tree.
+for f in chat_log decisions; do
   [ -f "$W/$D/$f.json" ] && cp "$W/$D/$f.json" "$SC/$f.backup.json"
 done
 
@@ -79,10 +72,8 @@ for f in $FEEDS; do
   [ -f "$W/$D/$f.json" ] && git -C "$W" checkout -- "$D/$f.json" 2>/dev/null
 done
 
-# 3. Stage them by NAME, plus whatever the caller asked for. chat_log.json is
-#    deliberately absent: it is derived and gitignored, so staging it would
-#    re-create the shared-file conflict this phase removed.
-for f in $CHATFILES decisions; do
+# 3. Stage the two by NAME, plus whatever the caller asked for.
+for f in chat_log decisions; do
   [ -f "$W/$D/$f.json" ] && git -C "$W" add "$D/$f.json"
 done
 for p in "$@"; do git -C "$W" add "$p" || exit 2; done
@@ -108,22 +99,10 @@ for round in 1 2 3 4 5 6 7 8; do
     [ -n "$f" ] || continue
     case "$f" in
       "$D/chat_log.json")
-        # Should be unreachable after Phase 0 (the file is gitignored). If a
-        # clone predating the cutover still tracks it, the answer is not a merge:
-        # it is DERIVED, so settle the index and rebuild it from the streams
-        # below. Nothing is decided by picking a side of a generated file.
-        git -C "$W" checkout --theirs "$f" 2>/dev/null || git -C "$W" checkout --ours "$f"
-        git -C "$W" add "$f" ;;
-      "$D"/chat_legacy.json|"$D"/chat_wednesday.json|"$D"/chat_tuesday.json|"$D"/chat_kam.json)
-        # One writer per stream, so this is not expected — but a stream is
-        # irreplaceable and the rule must exist BEFORE it is needed. Union on
-        # (ts, text), exactly as the shared log used to be resolved.
-        _b="$SC/$(basename "$f" .json).backup.json"
         git -C "$W" show ":2:$f" > "$SC/c_ours.json"   2>/dev/null
         git -C "$W" show ":3:$f" > "$SC/c_theirs.json" 2>/dev/null
-        [ -s "$_b" ] || printf '[]' > "$_b"   # union_chat_log.py json.loads it
         python3 "$SP_UNION_CHAT" "$SC/c_ours.json" "$SC/c_theirs.json" \
-                "$_b" "$W/$f" || exit 20
+                "$SC/chat_log.backup.json" "$W/$f" || exit 20
         git -C "$W" add "$f" ;;
       "$D/decisions.json")
         git -C "$W" show ":2:$f" > "$SC/d_ours.json"   2>/dev/null
@@ -161,15 +140,6 @@ if ! git -C "$W" diff --quiet -- 0_Brain/learnings/_boot_digest.md \
   git -C "$W" add 0_Brain/learnings/_boot_digest.md 0_Brain/learnings/_boot_digest_by_tier.md 2>/dev/null
   git -C "$W" diff --cached --quiet || \
     git -C "$W" commit -m "digests regenerated from the lesson files after a conflict" >/dev/null
-fi
-
-# 5b. The chat log is derived too (Phase 0). After a pull that may have brought
-#     the OTHER agent's stream in, rebuild Kam's reading surface from every
-#     stream — otherwise his panel shows this seat's half of the conversation.
-#     Untracked, so it is never staged; a failure is REPORTED, never swallowed.
-if [ -x "$W/2_Project_Files/tools/chat_streams.py" ] || [ -f "$W/2_Project_Files/tools/chat_streams.py" ]; then
-  python3 "$W/2_Project_Files/tools/chat_streams.py" >/dev/null || \
-    echo "safe_push: WARNING — chat_log.json was NOT rebuilt; Kam's panel may be missing a seat" >&2
 fi
 
 git -C "$W" push 2>&1 | tail -2
