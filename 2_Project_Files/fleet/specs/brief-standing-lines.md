@@ -1152,3 +1152,38 @@ statement is that the system was not exercised at all.**
 **Family:** [[2026-08-15_a-cap-is-never-neutral]] (a count carries its predicate) ·
 [[2026-08-07_a-check-that-cannot-fail]] (a suite that cannot execute cannot fail for the right reason) ·
 [[2026-08-06_bluf-write-for-the-reader]] (the reader who stops at the first number must not be misled).
+
+---
+
+## A BOARD READ WITHOUT `includeArchived` UNDER-REPORTS SILENTLY — and the frame is invisible in the result
+*(2026-09-09, found by the Secuura/Blockchain seat s154 in its own boot sweep and credited to it. M-tier —
+client-neutral, it is about the instrument, not about any board's content.)*
+
+**The measurement.** Counting tickets closed in the last 24 hours on one Linear board: **41 with
+`includeArchived: true`, 18 without.** The 23-row gap is the archive. **A sweep without that flag
+under-reported by more than half**, and it did so with no marker of any kind in the result — the
+narrower answer is a perfectly well-formed number.
+
+**Why this earns a standing line rather than a note.** Archiving is how this fleet DISPOSES of tickets
+(Kam's ruling: *once anything is completed / actioned / merged it should be archived*), so the archive
+is where the completed work goes. **A "what did we close?" query that cannot see the archive is asking
+about the one population the answer is least likely to be in.** And it is the reverse of the usual
+failure: nothing is broken, no error is raised, the instrument answers exactly the question it was
+asked — a smaller question than the one being decided.
+
+**The rules:**
+1. **Any board query whose subject is DISPOSITION — closed, completed, archived, "what moved", a
+   burn-down, a catalogue — passes `includeArchived: true`, or states in the sentence that it did not.**
+2. **State the flag alongside the count**, the way an order is stated alongside a cap: *"41 closed in
+   24 h, `includeArchived: true`"*. A reader can widen a stated frame and cannot see an unstated one.
+3. **When two board counts disagree, check this flag before theorising** — it is the cheapest
+   explanation for a gap of this shape and it costs one re-run to eliminate.
+4. **It generalises past Linear:** Jira's `resolution`, a git query without `--all`, a container list
+   without `-a`, a log query inside its retention window. **Ask what state the tool hides BY DEFAULT,
+   because a default is a frame somebody else chose.**
+
+**Family:** [[2026-09-07_a-census-complete-over-a-frame-that-is-not]] (the parent — the instrument
+answers about the FRAME and the answer is recorded as being about the WORLD) ·
+[[2026-08-15_a-cap-is-never-neutral]] (a count carries its predicate; a default filter IS a predicate) ·
+[[2026-09-08_a-false-absence-is-usually-my-own-instrument]] (rule 14: on any filtered source, ask first
+what you were allowed to see).
