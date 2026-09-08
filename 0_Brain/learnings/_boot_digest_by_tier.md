@@ -7,7 +7,7 @@ status: live
 
 # Boot digest BY TIER — W whole, M rules-only, every project case a handle
 
-Generated 2026-09-08 14:06 from 121 lesson files (598,926 B). M 27 · MIXED 5 · W 89. 28 project CASE sections inside MIXED files are reduced to one line each: the heading and the path to read it at. W blocks are exactly what the default digest carries; M blocks drop the section index and keep the rules; a P file is a single handle. The CASES behind every rule live only in the lesson files — open one the moment its rule fires.
+Generated 2026-09-08 14:07 from 122 lesson files (603,960 B). M 28 · MIXED 5 · W 89. 28 project CASE sections inside MIXED files are reduced to one line each: the heading and the path to read it at. W blocks are exactly what the default digest carries; M blocks drop the section index and keep the rules; a P file is a single handle. The CASES behind every rule live only in the lesson files — open one the moment its rule fires.
 
 ## The T9 SSD is the master — Wednesday must be fully portable
 `2026-07-31_fully-portable-drive.md` · principle · 2026-07-31 · status: superseded — the "T9 is the master" half by [[2026-08-25_one-drive-devmaster-is-master]] (2026-08-25); the portability principle itself still lives · tier: W
@@ -3982,4 +3982,40 @@ sections (open the file for these): The measurement, 2026-09-08 · What s152 did
    move P-tier cases out to their projects (Phase 1 of the tier plan, never executed);
    or accept that the ledger is read as headlines by design and change the boot prompt to
    say so. **Proposing which is a consolidation item, not a boot-time decision.**
+
+
+## "The check ran, and it was not checking the thing" — a green from a check aimed at the wrong property is worse than no check, because it comes with a receipt
+`2026-09-08_the-check-ran-and-was-not-checking-the-thing.md` · correction · 2026-09-08 · status: live · tier: M
+
+**The operative case, so the headline matches it:** a gate, a test, a control or a guard has just
+returned GREEN, and you are about to treat that green as evidence. **Ask one question before you
+do: what property did it actually test, and is that the property the claim needs?** A check that
+is ABSENT announces itself the moment anyone looks. A check that runs and measures the wrong
+thing is silent, confident, and hands you a receipt for a claim nobody verified.
+
+## How to apply
+
+1. **Say the property out loud before accepting a green.** Not *"the gate passed"* but *"the gate
+   proved the cited mail EXISTS"* — and then ask whether existence is what the claim rests on. The
+   sentence is usually enough; the gap is obvious once it is spoken.
+2. **Build the check against the FAILURE you are trying to prevent, not against the artefact in
+   front of you.** The tap gate was built from *"a tap had no mail"* and so tested for a mail. The
+   failure was *"a tap carried claims nothing supported"*, which is about correspondence — and
+   the closest cheap proxy is FRESHNESS, since the rule was always "a mail sent in the same
+   action". That is what it tests now.
+3. **A green on the first attempt at a recurring failure is a prompt to re-read the check**, not a
+   reason to relax. Recurrence means the last fix aimed somewhere; ask where.
+4. **When a control returns the answer you wanted, plant a violation.** The 2026-09-08 QA gate on
+   #906 is the template: its control SHA came back green, so it planted a formatting violation at
+   that same SHA to prove the instrument fires, restored byte-identical, and only then called the
+   zero real. **A zero from an instrument that could not fire is not a zero.**
+5. **In code, the two questions to keep apart are "is there a result?" and "did the operation
+   succeed?"** Collapsing a failure into an empty result is this lesson in a `catch` block, and it
+   is the single most common form.
+
+**Family:** [[2026-08-07_a-check-that-cannot-fail]] (the tautology half — this is the
+wrong-question half) · [[2026-09-08_a-false-absence-is-usually-my-own-instrument]] (a zero whose
+instrument was never shown to fire) · [[2026-09-07_a-census-complete-over-a-frame-that-is-not]]
+(right answer, wrong frame) · [[2026-08-09_an-enforcement-you-must-arm-is-not-one]] ·
+[[2026-09-01_a-tap-is-a-pointer-not-a-message]] (instance 2 lives there as the w=6 row).
 

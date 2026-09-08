@@ -43,6 +43,10 @@ commits) are MAJOR and neither is a regression** — they go into one ticket, sa
 Relaunch that gate by its PATH if ever needed:
 `2_Project_Files/fleet/qa-agent/launchers/launch_qa_secuura_ks989_906.sh [--check]`
 
+**LAUNCHER CHANGE (Kam, 14:05):** it no longer opens the dashboard in a browser — the server
+still starts, he refreshes his own saved tab. `WED_OPEN_DASH=1` restores it for a machine with
+no saved tab yet (Tuesday's). Exercised both ways with a stub `open`; boot prompt byte-identical.
+
 **🔴 INSTANCE 6 IS LIVE ON THE TRUNK until #906 merges:** `systemTest/akto` `format:check` RED
 on `develop 986c592d5`, arriving via merge `512480ef1` (#892) — the PREVIOUS seat's own merge,
 ~4 hours before it was found (the gate corrected "three hours" to four).
