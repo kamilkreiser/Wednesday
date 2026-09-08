@@ -45,13 +45,6 @@ while [ $# -gt 0 ]; do
     *) echo "usage: sync_kam_rulings.sh [--dry-run|--apply] [--since YYYY-MM-DD]" >&2; exit 2 ;;
   esac
 done
-# STORE GUARD (2026-09-08) — only on the writing path. A dry run must stay usable
-# on a stale or broken store: it is how a seat DIAGNOSES one.
-if [ "$MODE" = "apply" ]; then
-  SKG_DIR="$(cd -P "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
-  . "$SKG_DIR/_store_guard.sh"
-  store_guard "$SKG_DIR/../../0_Brain/dashboard/data/decisions.json" || exit $?
-fi
 [ -s "$CHAT" ] || { echo "sync_kam_rulings: no chat log at $CHAT" >&2; exit 3; }
 [ -x "$DQ" ] || [ -s "$DQ" ] || { echo "sync_kam_rulings: no decision_queue.sh at $DQ" >&2; exit 3; }
 

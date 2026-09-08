@@ -44,14 +44,6 @@ set -u
 DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 export DQ_FILE="${DQ_FILE:-$DIR/../../0_Brain/dashboard/data/decisions.json}"
 export DQ_CHAT="${DQ_CHAT:-$DIR/../../0_Brain/dashboard/data/chat_log.json}"
-# STORE GUARD (2026-09-08) — refuse a write when origin is ahead on this file, or
-# when it carries conflict markers. WRITE commands only: `list`/`show` must stay
-# readable on a stale store, because a guard that blocks reading gets routed around.
-. "$DIR/_store_guard.sh"
-case "${1:-}" in
-  add|rule|--delivered)
-    store_guard "$DQ_FILE" || exit $? ;;
-esac
 # The python below is delivered on stdin (heredoc), so a `--json` payload
 # cannot also ride stdin — capture it into DQ_JSON first.
 DQ_JSON=""
