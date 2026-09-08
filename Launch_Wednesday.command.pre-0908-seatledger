@@ -171,23 +171,6 @@ fi
 open "$DASH_URL" 2>/dev/null || true
 
 # ── Initial prompt ──
-# ── PER-SEAT LEDGER SCOPE (Kam ruled `scope` on card `wed-boot-names-one-ledger-there-are-two`,
-# panel 2026-09-08 09:57) ───────────────────────────────────────────────────────────────────
-# Since his 2026-09-07 11:01 split there are TWO coordinator ledgers, and this prompt named
-# only one. Measured at the 2026-09-08 laptop boot: `_ledger.md` 345,743 B (the Studio/Secuura
-# seat's) vs `_ledger_laptop_datasec.md` 81,167 B / 36 rows (the laptop's own). A laptop seat
-# obeying the old line read ~86K tokens of ANOTHER CLIENT'S corrections and never opened its
-# own. `doctor.sh` already swept both by name (lines ~419-420) — the two mechanisms disagreed
-# and the boot prompt was the one being obeyed.
-# THE MAPPING IS HIS SPLIT AND HE CALLED IT TEMPORARY. It lives here, in one place. An
-# unknown host falls back to `_ledger.md`, which is the pre-ruling behaviour — never a guess.
-SEAT_HOST="$(hostname -s 2>/dev/null || hostname 2>/dev/null)"
-case "$SEAT_HOST" in
-  Kamils-MBP*)        SEAT_LEDGER="_ledger_laptop_datasec.md"; OTHER_LEDGER="_ledger.md" ;;
-  Kamils-Mac-Studio*) SEAT_LEDGER="_ledger.md";                OTHER_LEDGER="_ledger_laptop_datasec.md" ;;
-  *)                  SEAT_LEDGER="_ledger.md";                OTHER_LEDGER="_ledger_laptop_datasec.md" ;;
-esac
-
 INITIAL_PROMPT="ultrathink
 
 You are WEDNESDAY, launched at '${PROJECT_DIR}'. DevMASTER workspace is ${DEVMASTER_STATE}.
@@ -212,12 +195,8 @@ FIRST ACTIONS (token cost is accepted — do the full reads, don't skim):
 3. Read ${BRAIN_DIR}/learnings/_boot_digest_by_tier.md WHOLE (WED-145 Phase 0, Kam 2026-09-05 20:28: the by-tier digest — W whole, M rules-only, P cases as one-line handles; if it is missing, read _boot_digest.md instead) — it was GENERATED at this
    launch from every lesson file (headline = the retrieval handle, frontmatter,
    the operative paragraph, the section index, and every rules section verbatim;
-   6 short files included whole) — then YOUR OWN SEAT'S LEDGER,
-   ${BRAIN_DIR}/learnings/${SEAT_LEDGER}, WHOLE. (Kam ruled \"scope\" on 2026-09-08 09:57:
-   each seat reads the ledger for ITS OWN scope. There are TWO since his 09-07 split —
-   this seat's is ${SEAT_LEDGER}; the other coordinator's is ${OTHER_LEDGER}, which you read
-   as ROW HEADLINES ONLY for cross-seat awareness, never whole. Reading the other seat's
-   ledger whole is ~86K tokens of another client's corrections.) Do NOT read the individual lesson files at boot: open
+   6 short files included whole) — then ${BRAIN_DIR}/learnings/_ledger.md WHOLE
+   (rows since 2026-08-30). Do NOT read the individual lesson files at boot: open
    a lesson file the moment its rule FIRES, or when a diagnosis or a ledger row
    needs its cases — the digest names the file beside every headline. This is
    WED-139 (Kam 2026-09-02 20:47 \"go with a boot as you recommend\"): the full
