@@ -15,12 +15,41 @@ absent, commission quoted back). **At ~49% and running well.** Do not re-brief i
 
 **Its work since:** KS-671 `720a6968b` · KS-726 `97e2161fa` · KS-732 `1fb2cc6b2` — **all three pushed,
 PREFLIGHT PASSED, In Review, back with Peter.** **#768 MERGED** (`develop 067554d65 → 5ffaaf396`).
+**Then a P2 disposition pass: In Review 29 → 22, P2 17 → 15**, seven moved, two left for a human.
+**Its mechanical verdict flagged 15 — SIX were tickets s151 had read one at a time and deliberately
+KEPT** (two open security classes, and one whose own comment says *"THIS TICKET IS NOT DONE"*).
+**It checked the overlap against s151's handover BEFORE acting.** A bulk move would have undone a
+hand-made decision from four hours earlier and looked like tidying.
+**Peter had written "do not sweep this" on KS-717 and KS-729 in terms; both honoured.**
+⚠ **OPEN QUESTION IT RAISED:** #802 merged AFTER Peter's KS-717 note and **nobody has checked it
+against his three acceptance criteria.**
+⚠ **KS-964 IS IN A LOOP:** the branch `feature/ks-964-…` carries the identifier by mistake and keeps
+walking the ticket out of Backlog — **twice now.** The cause is recorded on the ticket rather than
+undone again. **Renaming/deleting that branch is someone's call, not ours.**
+**LEFT ALONE DELIBERATELY:** KS-365 (a CVE tracker with no natural exit event) and **KS-946 (behind an
+F5 disclosure hold that is KAM'S).**
 **Five tickets filed:** KS-1004 · **KS-1005 (High — change-password 404s for every user, BLOCKED on
 #872)** · KS-1006 · KS-1007 (#768) · KS-1008 (#773).
 **0 merges to main · 0 deploys · demo untouched at `400517aaf` · 0 messages to humans outside PR replies.**
 
 **⚠ HONEST GAP IT VOLUNTEERED:** legs 3/4/8 skipped on every push (no local stack) and **four platform
 suites NOT RUN all session. Unrun is not passed** — say so wherever the session is summarised.
+
+## 🔴 THE BEST FINDING OF THE NIGHT — a 504 that COMMITTED, and the verification that lied
+Shipped in full to `2_Project_Files/fleet/specs/brief-standing-lines.md`. **It completes the family the
+whole session was assembling** — the earlier members are greens that lie; **these are a RED that lies
+and a VERIFICATION that lies:**
+1. **A mutation returning an ERROR is not proof it did not happen.** The 504 had COMMITTED and then
+   timed out. **Worse than the green direction, because a failure invites a RETRY — and a retry is a
+   second write.**
+2. **A read-after-write can be stale enough to make a verification LIE.** *"Not applied"* needs the
+   same suspicion as *"applied"*.
+3. **An idempotency guard must key on the WHOLE operation** — comment + state change is two writes,
+   the failure landed between them, **so one half became the evidence for both.**
+**What it avoided: a comment reading "Moved In Review → In Progress" on a ticket still In Review — a
+published, permanent comment that lies about the board.** Caught only because the skip message
+contradicted its own earlier verification; repaired, then all seven re-read 7/7 with exactly one
+comment each and zero duplicates.
 
 ## 🟢 A REGRESSION CLOSED BEFORE IT FIRED — #768's inversion
 `main` had dropped `github-actions` via #908 today; **`develop` still carried it, so the next release
