@@ -18,7 +18,13 @@ supersede: replace this file wholesale at the next pickup; do not append
 > **STILL TRUE AND STILL THE POINT: this was a GATE problem, not a backlog.** The churn finding stands, KS-1025 is filed, and the reshape is ruled but unbuilt.
 > **The next block will arrive the same way and from nobody's change.**
 
-## 🟢 START HERE — the queue for a FRESH seat, now that things can land
+## 🟢 A SUCCESSOR IS BRIEFED AND BOOTING — s155 on `%8`, launched 08:38
+
+**s154 WRAPPED and is SCORED 1.0** (handover v3 in the inbox at `2026-09-08T22:34:31Z`, history entry written, vault pushed; its pane `%5` closed clean, listeners 28 → 28, both HTTP surfaces 200 either side).
+
+⚠ **THE LAUNCH IS NOT YET VERIFIED AT RUNG 5, and this line says so rather than claiming it.** `brief_and_launch.sh` reported `pane added (%8)` — a REAL add this time, not the skip-then-claim-success path — and the pane read `ctx:-` at 08:39, which means **no turn has run yet.** That is the one direction `ctx` is trustworthy in. **The next seat to look must grep `%8` for the commission (a ticket id, the brief path) before treating it as working.** If `%8` is dead or blind, re-brief from `scratchpad/s155b.md`.
+
+## 🟢 THE QUEUE THE SUCCESSOR HOLDS — do not duplicate it
 
 **PR #914 (KS-754) is OPEN and needs a tier-1 gate.** Then, in order and all needing a FULL window:
 
