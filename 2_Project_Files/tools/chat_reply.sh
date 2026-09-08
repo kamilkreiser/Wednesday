@@ -76,15 +76,6 @@ if [ "${1:-}" = "--project" ]; then
   [ -n "${2:-}" ] || { echo "chat_reply: --project needs a value (Datasec|Secuura|WED)" >&2; exit 2; }
   PROJECT="$2"; shift 2
 fi
-# ── --spoken (Kam, 2026-09-08 14:21: "I'm hearing a double-up of your voice over") ──
-# TWO independent speech paths existed: speak.sh from the terminal, and the panel autoplaying
-# every new Wednesday message through /api/speak. Both fired for the same event with DIFFERENT
-# text — the short spoken summary and the long written reply — so Kam heard two voices in a row.
-# Neither was wrong on its own; nobody had ever run them together with autoplay on.
-# A mirrored reply marked `spoken` is one Wednesday has ALREADY said aloud, and autoplay skips
-# it. The voice protocol wins on purpose: 1-3 sentences for the ear, the detail on the page.
-SPOKEN=0
-if [ "${1:-}" = "--spoken" ]; then SPOKEN=1; shift; fi
 MSG="${1:-}"
 [ -n "$MSG" ] || { echo "chat_reply: empty message refused" >&2; exit 2; }
 # A stream that does not exist yet is created empty — a fresh clone, or the first
@@ -105,7 +96,7 @@ if [ -f "$GATE" ]; then
   fi
   rm -f "$_cg_tmp"
 fi
-CHAT_FILE="$CHAT" CHAT_PROJECT="$PROJECT" CHAT_SPOKEN="$SPOKEN" python3 - "$MSG" <<'PYEOF'
+CHAT_FILE="$CHAT" CHAT_PROJECT="$PROJECT" python3 - "$MSG" <<'PYEOF'
 import json, os, sys, datetime, tempfile
 path = os.environ["CHAT_FILE"]
 msg = sys.argv[1]
@@ -164,7 +155,6 @@ except json.JSONDecodeError:
                      % (_how, len(log)))
 log.append({
     "role": "wednesday",
-    **({"spoken": True} if os.environ.get("CHAT_SPOKEN") == "1" else {}),
     "seat": __import__("socket").gethostname(),  # 2026-09-07: which machine wrote this (autoplay scope)
     "project": os.environ.get("CHAT_PROJECT") or "WED",  # 2026-09-07: per-dashboard display filter
     "ts": datetime.datetime.now(datetime.timezone.utc).astimezone().isoformat(),

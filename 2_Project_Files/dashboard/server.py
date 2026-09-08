@@ -167,9 +167,16 @@ def ear_text(text):
     """Written-for-the-eye → written-for-the-ear (voice protocol)."""
     t = re.sub(r"\*\*", "", str(text))
     t = re.sub(r"https?://\S+", "link", t)
-    t = re.sub(r"\s+", " ", t).strip()
-    if len(t) > 1200:
-        t = t[:1200].rstrip() + " ... more in the window"
+    # THE FIRST PARAGRAPH IS THE SPOKEN MESSAGE (Kam, 2026-09-08 14:24: "change it so
+    # that only the browser speaks"). With speak.sh silenced, the browser became the ONLY
+    # voice — and reading 1200 characters of a written reply aloud is not a voice channel,
+    # it is a recital. The voice protocol has always said 1-3 sentences for the ear and the
+    # detail on the page; Wednesday's replies already open with a BLUF, so the BLUF simply
+    # becomes what is spoken. A short single-paragraph message is unchanged.
+    para = re.split(r"\n\s*\n", t.strip(), maxsplit=1)[0]
+    t = re.sub(r"\s+", " ", para).strip()
+    if len(t) > 700:
+        t = t[:700].rstrip() + " ... the rest is on the page"
     return t
 
 class Handler(SimpleHTTPRequestHandler):
@@ -481,9 +488,16 @@ class Handler(SimpleHTTPRequestHandler):
                                    stdout=subprocess.DEVNULL, timeout=10)
                 try:
                     # list-form argv, shell=False; stderr inherited → server log
+                    # SPEAK_FROM_SERVER=1 (2026-09-08): speak.sh is silent by default
+                    # now that Kam chose the browser as the only voice — but the
+                    # BROWSER'S voice comes through this very script, so the panel's
+                    # own path must be exempt or the change silences everything.
+                    # Caught before shipping; it would have looked like the feature
+                    # working right up until nothing ever spoke again.
                     proc = subprocess.Popen([str(SPEAK_SH), text],
                                             stdout=subprocess.DEVNULL,
-                                            start_new_session=True)
+                                            start_new_session=True,
+                                            env={**os.environ, "SPEAK_FROM_SERVER": "1"})
                 except OSError as e:
                     import sys as _sys
                     print(f"speak: failed to launch {SPEAK_SH}: {e}", file=_sys.stderr, flush=True)

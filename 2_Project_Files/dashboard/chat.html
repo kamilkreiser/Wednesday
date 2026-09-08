@@ -358,8 +358,7 @@ async function poll(force) {
       // never restarts the same speech (Kam's two-window double-fire, 08-21)
       // filter gate (2026-09-07): a reply hidden by the project filter is never
       // auto-spoken here. The server's seat gate stays as the second net.
-      // skip what Wednesday already said aloud from the terminal (Kam, 2026-09-08 14:21)
-      if (autoplayOn && latestNew && !latestNew.spoken && visible(latestNew)) speak(latestNew.ts, null, true);
+      if (autoplayOn && latestNew && visible(latestNew)) speak(latestNew.ts, null, true);
     }
     const sig = JSON.stringify(msgs);
     if (!force && sig === lastSig) return;

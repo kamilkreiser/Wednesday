@@ -44,29 +44,6 @@ if [ "${WEDNESDAY_MUTE:-0}" = "1" ]; then
   exit 0
 fi
 
-# ── BROWSER IS THE ONLY VOICE (Kam, 2026-09-08 14:24, verbatim: "Can you change it
-# so that only the browser speaks?") ─────────────────────────────────────────────
-# Two speech paths existed and he heard both at once: this script through the Mac's
-# own `say`, and the panel autoplaying each new reply through /api/speak. He chose
-# the browser. So the machine-side path is SILENT by default — the line is still
-# written to .spoken.log above, so the record of what Wednesday would have said
-# survives and nothing that reads that log breaks.
-#
-# WHAT STILL SPEAKS: the panel, reading the FIRST PARAGRAPH of each mirrored reply
-# (server.py ear_text) — which is the BLUF, i.e. the 1-3 sentences the voice
-# protocol always asked for. So the protocol is unchanged; only the speaker moved.
-#
-# HONEST CONSEQUENCE, stated rather than discovered: with the browser closed, or on
-# a headless machine, THERE IS NO VOICE AT ALL. Anything that must reach Kam when he
-# is not looking at the page has to be a notification, not speech. Overrides, for a
-# machine with no panel or a genuine emergency:
-#   WEDNESDAY_SPEAK_LOCAL=1  — speak from this machine anyway
-#   /api/speak is unaffected; the panel calls it directly and never comes through here.
-if [ "${WEDNESDAY_SPEAK_LOCAL:-0}" != "1" ] && [ "${SPEAK_FROM_SERVER:-0}" != "1" ]; then
-  echo "[browser speaks, not this machine — Kam 2026-09-08 14:24; logged, not spoken] $MSG"
-  exit 0
-fi
-
 # Quiet hours (voice-protocol.md + daily-rhythm-6-to-23): NO speech 23:00–06:00
 # unless something is genuinely on fire. This was rule-only until 2026-09-07,
 # when a fresh 00:16 seat misread the clock as morning and spoke — the rule
