@@ -7,7 +7,7 @@ status: live
 
 # Boot digest — headline + rules of every lesson (open the file when it fires)
 
-Generated 2026-09-08 20:00 from 127 lesson files (639,279 B). Each block = the lesson's retrieval handle (H1), its frontmatter, the operative paragraph, its section index, and every RULES section verbatim. 6 files carry no rules-shaped section and are included whole. The CASES behind a rule live only in the file: open it the moment the rule fires, or when a diagnosis needs the evidence. `_ledger.md` is read whole beside this digest; `_ledger_archive.md` on demand.
+Generated 2026-09-08 20:19 from 127 lesson files (641,860 B). Each block = the lesson's retrieval handle (H1), its frontmatter, the operative paragraph, its section index, and every RULES section verbatim. 6 files carry no rules-shaped section and are included whole. The CASES behind a rule live only in the file: open it the moment the rule fires, or when a diagnosis needs the evidence. `_ledger.md` is read whole beside this digest; `_ledger_archive.md` on demand.
 
 ## The T9 SSD is the master — Wednesday must be fully portable
 `2026-07-31_fully-portable-drive.md` · principle · 2026-07-31 · status: superseded — the "T9 is the master" half by [[2026-08-25_one-drive-devmaster-is-master]] (2026-08-25); the portability principle itself still lives
@@ -2565,11 +2565,31 @@ send, a validated write, anything with a non-zero exit path) followed by a step 
 DESTRUCTIVE or irreversible-in-the-moment (kill-pane, launch, deploy, delete). **Split them.
 The destructive step runs only after the refusable step's success is verified.**
 
+sections (open the file for these): EXTENSION 2026-09-08 — a VERIFIER is a step that must be gated too, and it fails as a FALSE ALARM
+
 **How to apply:**
 1. Gated send → verify at the destination → THEN kill/launch. Three actions, not one.
 2. The same split applies to any refuse-capable step: preflight → check rc → destructive.
 3. If the chain has already fired and the refusable step failed: fix and re-send FIRST
    (the booting agent reads mail at boot end — the brief usually wins the race), and say so.
+
+## EXTENSION 2026-09-08 — a VERIFIER is a step that must be gated too, and it fails as a FALSE ALARM
+**The operative case, added because a verifier feels safe by definition and so nobody sequences it:**
+you have just run an action that can fail, and a verification block runs next **unconditionally**.
+**If the action did not happen, the verifier reports on the PREVIOUS state — and its output looks like
+a finding.**
+
+**How to apply:**
+1. **Gate the verifier on the action's own success**, by rc or by a completion marker — `[ $rc -eq 0 ]
+   && verify`. An unconditional verifier is a check with no subject.
+2. **A verifier's first assertion is that its SUBJECT EXISTS** — the ref moved, the file was written,
+   the id came back. Assert the subject before asserting anything about it.
+3. **On a surprising verifier result, check whether the ACTION happened before investigating the
+   RESULT.** The seat did this correctly: `state: open, merged: false` on the PR — the destination,
+   not the alarm.
+4. **Shell/interpreter argument shapes are a live source of this** — `python3 -c "…" VAR=x` passes
+   `VAR=x` as `sys.argv[1]`, not as an environment variable. The command succeeds, does nothing you
+   intended, and the next step proceeds.
 
 
 ## The conversation deserves a stable panel — fleet mechanics must not scroll Kam's reading away

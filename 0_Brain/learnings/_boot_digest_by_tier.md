@@ -7,7 +7,7 @@ status: live
 
 # Boot digest BY TIER — W whole, M rules-only, every project case a handle
 
-Generated 2026-09-08 20:00 from 127 lesson files (640,245 B). M 29 · MIXED 5 · W 93. 28 project CASE sections inside MIXED files are reduced to one line each: the heading and the path to read it at. W blocks are exactly what the default digest carries; M blocks drop the section index and keep the rules; a P file is a single handle. The CASES behind every rule live only in the lesson files — open one the moment its rule fires.
+Generated 2026-09-08 20:19 from 127 lesson files (642,826 B). M 29 · MIXED 5 · W 93. 28 project CASE sections inside MIXED files are reduced to one line each: the heading and the path to read it at. W blocks are exactly what the default digest carries; M blocks drop the section index and keep the rules; a P file is a single handle. The CASES behind every rule live only in the lesson files — open one the moment its rule fires.
 
 ## The T9 SSD is the master — Wednesday must be fully portable
 `2026-07-31_fully-portable-drive.md` · principle · 2026-07-31 · status: superseded — the "T9 is the master" half by [[2026-08-25_one-drive-devmaster-is-master]] (2026-08-25); the portability principle itself still lives · tier: W
@@ -2235,6 +2235,24 @@ The destructive step runs only after the refusable step's success is verified.**
 2. The same split applies to any refuse-capable step: preflight → check rc → destructive.
 3. If the chain has already fired and the refusable step failed: fix and re-send FIRST
    (the booting agent reads mail at boot end — the brief usually wins the race), and say so.
+
+## EXTENSION 2026-09-08 — a VERIFIER is a step that must be gated too, and it fails as a FALSE ALARM
+**The operative case, added because a verifier feels safe by definition and so nobody sequences it:**
+you have just run an action that can fail, and a verification block runs next **unconditionally**.
+**If the action did not happen, the verifier reports on the PREVIOUS state — and its output looks like
+a finding.**
+
+**How to apply:**
+1. **Gate the verifier on the action's own success**, by rc or by a completion marker — `[ $rc -eq 0 ]
+   && verify`. An unconditional verifier is a check with no subject.
+2. **A verifier's first assertion is that its SUBJECT EXISTS** — the ref moved, the file was written,
+   the id came back. Assert the subject before asserting anything about it.
+3. **On a surprising verifier result, check whether the ACTION happened before investigating the
+   RESULT.** The seat did this correctly: `state: open, merged: false` on the PR — the destination,
+   not the alarm.
+4. **Shell/interpreter argument shapes are a live source of this** — `python3 -c "…" VAR=x` passes
+   `VAR=x` as `sys.argv[1]`, not as an environment variable. The command succeeds, does nothing you
+   intended, and the next step proceeds.
 
 
 ## The conversation deserves a stable panel — fleet mechanics must not scroll Kam's reading away
