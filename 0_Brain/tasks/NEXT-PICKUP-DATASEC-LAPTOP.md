@@ -316,3 +316,60 @@ re-measured).
 the branch, not the product** — re-derive at the current head before any fix. That single line in
 the RD-369 brief is the only reason this surfaced in five minutes instead of after a merge.
 
+## 10:5x — 70% CHECKPOINT. Not a rotation (band 80-90). Default: continue, bounded work only.
+
+### 🟢 SECURITY REVIEW COMPLETE — all four items. Deliverable:
+`!CODING/Datasec/Security Review/_Working/2026-09-08_FIX_VERIFY_REPORT.md`
+(+ `_Working/verification-2026-09/_BATCH2_VERIFICATION_2026-09-08.md`,
+`_Working/2026-09-08_ITEM4_COVERAGE_GAPS.md`, `_Working/build-doc13.sh`)
+- **§7.1 FIXED in BOTH `.md` and `.docx`**, verified by reading the rendered result; deletion audit:
+  **seven heading lines changed, not one body line removed.**
+- **All 23 re-derived at source: 0 refuted outright · 2 down-scored · 1 aggravator refuted · 1 claim
+  partly refuted · 3 strengthened. NOTHING moved up.** All three severity-gating questions CLOSED,
+  all downward. **A pass that only ever confirms is a check that cannot fail — this one moved.**
+- 🔴 **THE UNFILED GAP WAS 96 FINDINGS, NOT ~20** — across **15 components, not 7**, including
+  **THREE Criticals never counted**. All 96 filed. **Estate 242 -> 339.**
+
+### 🔴 THREE CORRECTIONS TO WEDNESDAY, TWO OF WHICH REACHED KAM AS FACT
+1. **"roughly twenty" was a 4.8x undercount** (96), and the gap was NOT confined to batch 1 — the
+   eight components §7.1 calls **"Done" have 34 unfiled findings**. *Done* meant REVIEWED, not FILED.
+2. 🔴 **THE GOTENBERG EXFILTRATION PATH DOES NOT EXIST.** Wednesday escalated to Kam that D-MF-07's
+   credential goes to a **service-designated** `contentLocation` and would need a rescore well above
+   Low. **That was a FIELD MIX-UP in the register, already answered 2026-09-07 in this project's own
+   `mailflow-main.md:325-327`.** No exfiltration path, no pdf-api question, no rescore, no live pass
+   needed for it. **Wednesday relayed the register's wording without opening the file that settled it
+   — and it reached Kam as a security escalation.**
+3. **SecurePDF's `spdf_encode` is IN THE TREE** under a different name, not "not in the tree" as §7
+   said — it cost the engagement a component's worth of coverage.
+**Where Wednesday was right, per the agent: the §7.1 diagnosis, re-frame-don't-delete, REGENERATE THE
+`.docx` (the `.md` alone would have been the same defect in a worse place), and the standing warning
+that a verification pass which only confirms cannot fail.**
+
+### 🔴 NEW CARD `secrev-live-pass-blocked-on-tenant` (rec `name-tenant`, default = nothing runs)
+**The live pass has stopped being a coverage gap and is now costing PUBLISHED SEVERITIES** — Critical
+13's rescore hangs on it and the evidence points DOWN. Blocked on the workspace CLAUDE.md's
+**UNRESOLVED** Datasec tenant mapping (`fc05dcdd` vs `0c57ab37`), which says *do not assert which*.
+**Wednesday held three agents off `az` today on that line and will keep doing so.** Only Kam settles it.
+The gate refused this card on four priors; **all four opened**, and the closest (`secrev-verify-23…`,
+ruled `package`) is the PROOF it is new — that ruling explicitly listed the live pass as OUT of scope.
+
+### PANES
+    %22  Datasec/NexusAI      S47, holding, ~65%. RD-369 re-cut READY @ `117931e`, gate running.
+                              🔴 **RD-372 (High) is NEXT and should go to a SUCCESSOR, not to S47** —
+                              it is at 65% and the gate may return findings it must fix. Bounded work only.
+    %26  Datasec/SecurityReview  COMPLETE, holding. **A ghost sat at its prompt — `verify the 96 filed
+                              rows` — detector-classified SUGGESTION, NOT actioned.** Rung 6 again:
+                              it proposed the plausible next step seconds after the agent named that number.
+    %27  QA/NexusAI-RD369     TIER 1 gate on `117931e`, running.
+    %0   wednesday            s150 at 69%.
+
+### 🔴 A DEFECT OF WEDNESDAY'S OWN THAT THE STUDIO SEAT FIXED (ledger w=101)
+`wed_claim.sh` — the tool built FOR Kam's ownership rule — was **hardcoded to
+`/Volumes/KK_T9_External_HDD/WEDNESDAY`**. On the Studio seat every write went to a nonexistent path
+**and it still printed `claimed … and published`.** A check that cannot fail, in the one tool whose
+job is making two seats agree. **Same defect fixed in `safe_push.sh` the day before.** The Studio made
+it self-locating; s150 verified the fix on its own seat (resolver correct, `list` works, dup still
+refuses rc 3). **THE RULE: a tool whose PURPOSE is cross-seat is exercised with its path resolution
+FORCED to the OTHER seat's root before it is armed** — s150 did exactly that for `chat_reply.sh`'s
+seat mapping an hour earlier and not for this one.
+
