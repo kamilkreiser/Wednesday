@@ -373,3 +373,46 @@ refuses rc 3). **THE RULE: a tool whose PURPOSE is cross-seat is exercised with 
 FORCED to the OTHER seat's root before it is armed** — s150 did exactly that for `chat_reply.sh`'s
 seat mapping an hour earlier and not for this one.
 
+## 11:5x — ROTATION-READY. Nothing in flight. `main` = `edf1ab7`.
+
+### STATE, all verified by s150 on the live board / `ls-remote`, not relayed
+    main            edf1ab7   8 authorised merges + RD-369 fix + RD-369 round 2
+    RD-369          Release Ready (High) — fix merged and PROVEN in a real built image
+    RD-385          To Do (High) — tenant correspondence + staging roster SHIP to customers
+    RD-386          To Do (High) — the round-2 residue (R2-A window, R2-B certifying cell)
+    RD-372          To Do (High) — NOT started, routed to a SUCCESSOR, never to S47
+    control         RD-372 still To Do => the closes were surgical, not a sweep
+
+    %22  Datasec/NexusAI  S47 at ~70%, STOPPED at the cap, holding, acked. Its register stands.
+    %0   wednesday        s150 at ~78%.
+
+### 🔴 THREE THINGS ON KAM'S DESK, all with safe defaults
+1. **`nexusai-rd369-round3-or-ship-at-the-cap`** (rec `round3`) — **the exposure is CLOSED and
+   proven; this is only the GUARD.** It survives on a **one-line margin**: a purely cosmetic reflow
+   flips 3 of 4 real RD-385 files from carrier to CLEAN, and the certifying cell asserts only `>0`
+   so killing either detection path leaves it green. **Third option (NOT scoped by s150): also
+   REMOVE the RD-385 files from the image — the only option that stops the identifiers shipping.**
+2. **`secrev-live-pass-blocked-on-tenant`** (rec `name-tenant`) — a published Critical cannot be
+   rescored while the tenant mapping is UNRESOLVED. **s150 held three agents off `az` on that line.**
+3. **The three GitHub settings** — still the only unclosed part of his 07:10. Sent twice; do NOT re-send.
+
+### 🔴 THE RULE THIS SEAT EARNED THE HARD WAY (ledger w=103) — OBEY IT
+**After ANY commit touching `chat_log.json` or `decisions.json`, PARSE THE FILE OUT OF HEAD:**
+`git show HEAD:<path> | python3 -c 'import json,sys; json.load(sys.stdin)'`.
+**NOT `HEAD == origin`, NOT the tool's exit line, NOT another file's presence.** s150 pushed a
+corrupt `chat_log` **40 minutes after the Studio warned it in writing**, because the union step
+CRASHED and wrote nothing while four unrelated checks stayed green. **Those two files conflicted
+FOUR times in one session.** The repair needed brace-matching intact objects out of a NESTED
+conflict — a two-sided split gave two unparseable halves, and one candidate merge was **0 entries**,
+which would have erased Kam's whole conversation. **Never install a union smaller than its sources.**
+
+### THE DAY'S PATTERN, stated so a successor inherits the diagnosis and not just the rows
+**Three different agents corrected s150 and every one was right:** the eight merges were not the
+whole ready set · the Gotenberg exfiltration path s150 escalated to Kam **did not exist** (a field
+mix-up already answered in the project's own notes) · "~20 unfiled findings" was **96** · "6
+carriers" was **not reproducible**. **One root cause: relaying numbers and characterisations that
+were never re-derived.** Ledger w=94/96/100 and the w=103 row. **The two things that HELD were both
+pre-registered:** the brief's *re-derive at current main* requirement (caught an inverted ticket
+premise) and the round-2 brief's *no round 3 without Kam* (caught s150 wanting a round it had
+already forbidden itself).
+
