@@ -12,7 +12,12 @@ machine until further notice"*). Datasec belongs to the laptop seat.
 | 2026-09-08 07:10 | Peter's 14-PR queue | Secuura | DONE — 11 closed/actioned, 3 unapproved, 1 routed |
 | 2026-09-08 09:34 | #892 five-round thread | Secuura #892 | DONE — merged at 512480ef1 |
 | 2026-09-08 00:07 | KS-968 rotation question | Secuura KS-968 | DONE — BENIGN, incident excluded |
-| 2026-09-08 10:30 | SEAT ROTATED at 80% — successor inherits this file | WED | handover |
+| 2026-09-08 10:30 | SEAT ROTATED at 80% — s151 inherited this file | WED | handover |
+| 2026-09-08 10:36 | s149 unblocked: ANSWER + ADDENDUM (Kam's `archive` + `add-dead` rulings relayed) | Secuura/Blockchain %170 | DONE — both verified at destination, pointer tapped |
+| 2026-09-08 10:35 | Kam's two 10:35 rulings transcribed into the decision queue | WED / Secuura | DONE — sync_kam_rulings --apply, store read back |
+| 2026-09-08 10:40 | Fleet activity items could never clear (Kam 10:19) — mail-tile ack + fleet_ack.sh | WED | DONE — red-proofed on the rendered page, pushed |
+| 2026-09-08 10:44 | wed_claim.sh was writing to the DEAD T9 path — ownership tool was inert on this seat | WED | DONE — self-locating, 4 branches exercised, pushed |
+| 2026-09-08 10:45 | Secuura archive pass — 47 tickets, s149 executing on Kam's word | Secuura KS + PS boards | ACTIVE — s149's hands, Wednesday verifies the receipt |
 
 ## NOT MINE — the laptop seat's, and this seat has not touched them
 Datasec/NexusAI (RD-*) · Datasec/HPSM · Datasec/ATTIO · the vault `add -A` card
