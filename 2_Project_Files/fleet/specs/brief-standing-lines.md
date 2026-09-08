@@ -1121,3 +1121,34 @@ flag to the coordinator before the enumeration caught it.
 PRESENCE, which gets a fraction of the suspicion a zero does) ·
 [[2026-08-14_i-read-representations-they-read-sources]] (a name is a representation of an identity) ·
 [[2026-09-07_a-mechanism-is-recorded-by-its-path-not-its-runtime-id]].
+
+---
+
+## Report COVERAGE before the failure count — a suite with a dependency edge makes "1 failed" read as 92% green when nothing ran at all
+*Added 2026-09-08 23:3x, from the Secuura seat (s153) re-measuring KS-969's blast radius. Credited.*
+
+**The operative case:** you are about to report a suite result as a count of failures — *"1 failed"*,
+*"3 red"*, *"2 of 40 broken"*. **Ask how many tests ACTUALLY EXECUTED.** Where a setup step, fixture or
+auth dependency failed, the rest did not pass — **they did not run**, and most reporters print those
+two states so close together that a reader merges them.
+
+**The case, measured.** Playwright reported **`1 failed, 11 did not run`**. `auth-setup` is a
+dependency, so its failure suppressed the whole `api` project. **The failure count is 1; the coverage
+is 0 of 12.** *"One test failed out of twelve"* reads as a 92%-green suite with one problem. **The true
+statement is that the system was not exercised at all.**
+
+**How to apply:**
+1. **Lead with coverage: "0 of 12 exercised — 1 failed, 11 did not run."** The order is the whole rule;
+   both numbers are true and only one order is honest.
+2. **`skipped`, `did not run`, `pending`, `blocked` and `not applicable` are NOT passes**, and a total
+   that omits them is a total over a frame nobody stated
+   ([[2026-09-07_a-census-complete-over-a-frame-that-is-not]]).
+3. **Any suite with `dependsOn`, a global setup, a fixture chain or an auth step can produce this** —
+   and it produces it precisely when the setup breaks, which is when you most need the number to be
+   right.
+4. **The same discipline on a green:** *"1973 clean of 8828"* needs its other buckets named, exactly as
+   the Akto verdict named `not-applicable 5646` and `not-on-stack 662` rather than reporting a rate.
+
+**Family:** [[2026-08-15_a-cap-is-never-neutral]] (a count carries its predicate) ·
+[[2026-08-07_a-check-that-cannot-fail]] (a suite that cannot execute cannot fail for the right reason) ·
+[[2026-08-06_bluf-write-for-the-reader]] (the reader who stops at the first number must not be misled).

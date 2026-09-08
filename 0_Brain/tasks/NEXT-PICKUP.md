@@ -63,6 +63,31 @@ The set, quoted as s152 wrote it (Wednesday has expanded no shorthand):
 - **UNCHANGED (9)** — 7 m365/onedrive (KS-693), `teams/webhook-config` (KS-784), `wallets/verify` (KS-686).
 - **Legs identical both sides** (3: 321/321 · 4: 341/341 · 8: 307/341), and run-validity 0 of 316
   operations errored on all four runs — which is what makes every "unchanged" mean anything.
+- ⚠ **EVERY SUITE RUN TONIGHT RAN IN THE DEGRADED STATE**, schemathesis included — the actor
+  manifest was REJECTED in all four runs. **This does not weaken the delta** (both sides identical in
+  that respect, run-validity clean) **but it is a SHARED CONDITION, and a shared condition is what a
+  one-sided reading misses.** Disclosed by s153 unprompted, against its own results.
+
+## 🔴 RULED BY WEDNESDAY, STILL OPERATIVE — do NOT set `BOOTSTRAP_ADMIN_PASSWORD`
+The likely one-line unblock for KS-969 is supplying it. **It is not to be supplied.** Setting a
+credential in order to make a suite pass is the anti-pattern, and this one sits on the **KS-949 /
+KS-964 / KS-966 rotation surface — the rotation whose entire purpose was retiring a published default.
+A value that unblocks a test is exactly how a retired default comes back.** s153 declined to try it on
+its own judgement and Wednesday ruled it explicitly so no successor reads the restraint as an oversight.
+**The open question — what SHOULD supply it in a local test stack now the default is retired — is a
+design answer, not a value, and it belongs on KS-969.**
+
+## 🔴 KS-969 REPRODUCES, AND ITS TITLE IS FALSE
+Re-run against the rebuilt images: **identical to s152 in every number** (static 4 errors, unit 48/48,
+e2e 1 failed + 11 DID NOT RUN). It has NOT quietly fixed itself. **But its premise has moved:** the
+title says *"provisioning is never invoked"* and **provisioning IS invoked — six times tonight — and
+correctly REFUSES** to publish a manifest whose actors drifted from their requested roles.
+**Steps 1-3 are the guard WORKING.** The defect is step 5: the refusal promises *"suites keep their
+seeded accounts"*, every other consumer honours that, and **Playwright's admin path falls back to `''`
+instead**, so a DEGRADED run becomes a FAILED one. The `?? ''` is deliberate and its intent is right
+(KS-966 site 8) — **do not let the correction read as someone's mistake.**
+**State the blast radius in this order: coverage 0 of 12, of which 1 failed and 11 did not run** —
+*"1 failed"* out of twelve reads as 92% green and the true figure is nothing at all.
 
 ## 🟢 THE STACK IS UP AND STAYS UP — tear-down is nobody's tonight
 33/33 services, migrations `applied=45 failed=0`, gateway `localhost:6882` → 200. Exactly ONE consumer
