@@ -6306,5 +6306,38 @@
    "CARD secuura-892-round3-nogo-blocker-still-open",
    "CARD nexusai-rd361-round3-blocker-survives"
   ]
+ },
+ {
+  "id": "wed-schedulers-dead-since-0907",
+  "client_project": "WED/Wednesday",
+  "title": "Wednesday's 05:30 / 06:00 / 23:00 rituals have been dead since 2026-09-07 — re-arm now, or after the machine move?",
+  "bluf": "WHY THIS OVERRIDES THE PRIOR-RULING GATE: it matched on the word 'dead' against two SECUURA cards — the dead Secuura tenant cleanup and Secuura's dead CI billing. Both were opened and read; neither touches Wednesday's own launchd jobs. Different subject entirely. MEASURED, not inferred: com.wednesday.shiftchange (05:30), .wake (06:00) and .close (23:00) have failed EVERY fire since 2026-09-07 with exit 127. The plists were generated 2026-09-02 and hardcode /Volumes/KK_DEV_Local/WEDNESDAY/..., a volume that does not exist here. The .err logs date it exactly: last success wake 09-07 06:00, then 09-07 23:00, 09-08 05:30 and 09-08 06:00 all 'No such file or directory'. doctor.sh printed a GREEN TICK for all three — its own comment said 'launchd jobs must execute from this drive' and it never checked that; 127 fell through to the catch-all. THE CHECK IS ALREADY FIXED AND RED-PROOFED (3 warnings where 3 ticks were, plus a positive control proving a good path still goes green). What is NOT done is re-arming the jobs. install_scheduler.command self-locates, so it is one command from this drive. I deliberately did not run it: these jobs SPAWN SESSIONS, and re-arming three of them unsupervised on the eve of a machine migration is your call, not a wrap's. The plists live in ~/Library/LaunchAgents and do not travel to the new machine either way, so this is a bring-up step there regardless.",
+  "default_action": "Nothing happens: the jobs stay dead, doctor now WARNS at every launch instead of ticking them green, and the fix is one command whenever you want it.",
+  "options": [
+   {
+    "key": "after",
+    "label": "Leave them dead; run install_scheduler.command on the NEW machine as a bring-up step (Recommended)",
+    "detail": "Nothing spawns during the migration. They have been dead two days already so one more costs nothing, and the installer must be run on the new machine in any case."
+   },
+   {
+    "key": "now",
+    "label": "Re-arm on this laptop now, one command",
+    "detail": "Restores the 05:30 shift change, 06:00 wake and 23:00 close here tonight. Risk: a session spawns at 05:30 tomorrow on a machine that may be mid-migration."
+   },
+   {
+    "key": "both",
+    "label": "Re-arm here now AND put the installer in the new-machine run-sheet",
+    "detail": "Belt and braces. Same 05:30 spawn risk as 'now'."
+   }
+  ],
+  "recommended": "after",
+  "ts": "2026-09-08T12:20:31.512938+10:00",
+  "status": "open",
+  "ruled_choice": null,
+  "ruled_ts": null,
+  "prior_rulings_overridden": [
+   "CARD workspace-dead-secuura-tenant-cleanup",
+   "CARD secuura-ci-dead-19-days-blocks-your-own-ruling"
+  ]
  }
 ]

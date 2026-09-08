@@ -1,3 +1,74 @@
+## 2026-09-08 12:0x–12:3x — s152, Datasec laptop seat (rotation successor to s150). KAM'S TWO INSTRUCTIONS, BOTH ANSWERED BY MEASUREMENT.
+
+Booted at 12:06 straight into two direct instructions from Kam, which displaced the rest of the boot:
+*"under no circumstances can you make any changes to any of the code during the security review — if
+changes have been made, flag these to me immediately"*, then *"wrap up all projects as I'm going to
+deploy this agent on a new machine."*
+
+### 1. THE SECURITY-REVIEW ANSWER: no reviewed code was changed, and the discriminator is what makes it worth anything
+Nothing under `Security Review/Source_Code` was touched today; newest file anywhere in it is
+**2026-09-04 20:13**. *"Nothing today"* on its own is weak, so the load-bearing measurement is this:
+the three trees added since 01 Sep (HPAuthenticationManager 02 Sep, CypherKey 03 Sep,
+HP-AuthSuite-Manager 04 Sep) each carry **exactly ONE distinct timestamp across 299 / 412 / 312
+files**. That is a snapshot being dropped in. An agent editing files leaves scattered times.
+Everything the review session wrote is deliverable — register 13 (`.md` + `.docx`) with four `.pre-`
+backups, five `_Working/` reports, one statusline setting.
+
+**Reported to Kam WITH the two things that make it not a clean "no":**
+- **NexusAI moved 21 commits today** (`a9a8cb6` → `cd2b543`). That was his 07:10 authorisation, not
+  the review — and NexusAI is **explicitly out of the review's scope** by its own brief and is not in
+  `Source_Code` at all. Named to him anyway rather than answered away.
+- **HPSM (31) and myPKI (32) have uncommitted files, all PRE-DATING today** — HPSM's are August
+  conflict copies, myPKI's newest is 16 July. Neither has a commit today.
+- 🔴 **The honest weakness, volunteered:** none of the 34 trees is a git repo, so **mtime is the only
+  evidence available and there are no hashes to compare.** Strong, not proof. Recommended hashing the
+  trees now and keeping the manifest, plus a read-only bit. **NOT DONE — another project's folder is
+  Kam's boundary, not this seat's to cross.**
+
+### 2. 🔴 THE FINDING OF THE SESSION — THREE OF WEDNESDAY'S OWN RITUALS DEAD, BEHIND A GREEN TICK
+`com.wednesday.shiftchange` (05:30), `.wake` (06:00) and `.close` (23:00) have failed **every fire
+since 2026-09-07** with exit 127. The plists were generated 2026-09-02 and hardcode
+`/Volumes/KK_DEV_Local/WEDNESDAY/…`; that volume does not exist here. `.err` logs date it exactly —
+last success `wake` 09-07 06:00, then three consecutive failures.
+**`doctor.sh` printed `✓ scheduler … loaded (last exit 127)` for each.** Its own comment said
+*"launchd jobs must execute from this drive"* and it never checked that: it special-cased 126/78 for
+TCC and let 127 fall through to the catch-all `ok`. **Loaded conflated with runnable, for six days.**
+**Check fixed and BOTH branches exercised** — doctor now stats the plist's script path, names the
+stale path and the one-command remedy; red-proofed live (3 warnings where 3 ticks were), positive
+control confirms a present path with exit 0 still goes green and with exit 127 warns on the code
+rather than the path. **The jobs are deliberately NOT re-armed:** `install_scheduler.command`
+self-locates and would fix them in one command, but re-arming three session-spawning jobs
+unsupervised on the eve of a machine migration is Kam's call, not a wrap's.
+
+### 3. 🔴 A FAILURE OF THIS SEAT'S OWN BOOT, DISCLOSED RATHER THAN BURIED
+**s152 never loaded the brain.** The mandatory `_boot_digest_by_tier.md` read was issued as two `sed`
+calls through Bash; **both exceeded the tool's inline limit and were persisted to FILES**
+(`Output too large … saved to:`) **and the seat carried on as though the load had happened.** It ran
+the whole session on the handover, `kam_rulings_today.sh` and the two CLAUDE.md files — good sources,
+and not the lessons. **Measured afterwards, not assumed:** a `Read` of the same file at offset 3600
+returns content into context, so the file is fine and the PATH was the fault. Ledger w=104.
+**The rule: read the digest with `Read` in offset/limit chunks and assert the last line landed — a
+"saved to file" notice is a FAILED read.** Every other check this session worked; the one step with
+no check on it is the one that silently did not happen.
+
+### 4. THE WRAP — one agent, wrapped and closed, its figures re-derived not relayed
+S47 (Datasec/NexusAI) was mailed a wrap instruction (verified at the destination by a non-null
+preview before the pointer tap), ran its ritual, and **its own best act was a correction of mine:**
+it followed the PROJECT's history rule (`2_Project_Files/HISTORY.md`, newest at bottom) over the
+generic one in my brief, and said so. `main` = **`cd2b543`**, verified independently against
+`ls-remote` — not taken from its mail. Pane closed, `listeners 13 → 13`.
+🔴 **Its migration finding, re-derived here before being passed on: `HISTORY.md` at `main` runs
+S32…S39 then jumps to S47. S40–S46 is a seven-session hole** — four branches (`s40/s41/s43/s46-history-docs`)
+are in the remote and **none is an ancestor of main.** Not lost; not in a fresh clone either.
+
+### What a new machine will not get (the reason Kam asked)
+`.git/hooks/pre-commit` (untracked by design — the guard that refuses conflict markers, i.e. the
+exact thing that corrupted two files this morning) · `core.hooksPath` / `core.fileMode` /
+`core.sshCommand` (per-clone config) · `~/Library/LaunchAgents/com.wednesday.*` (machine-local, and
+currently wrong) · `4_Credentials/` + `3_Access_Keys/` · 12 root `HANDOVER-*.md` in NexusAI · the
+Matilda voice download. **The vault step was skipped, correctly** — `end-of-session.md:50` is
+`git add -A` and the vault's untracked set carries Secuura paths; from a Datasec seat that is hard rule 2.
+
 ## 2026-09-08 — overnight coordinator seat (booted 22:26 on 09-07, wrapped 05:35 at the shift change)
 
 **Secuura only** (Kam split the coordinators 09-07 11:01: Studio = Secuura, laptop = Datasec).

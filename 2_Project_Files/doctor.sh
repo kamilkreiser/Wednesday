@@ -102,13 +102,27 @@ done
 # unreachable below the exit): launchd jobs must execute from this drive.
 # Exit code 126 on kickstart = TCC ungranted (PORTABILITY 15: Full Disk
 # Access for /bin/bash, GUI-only, per machine).
+# 2026-09-08 (s152): this check said "must execute from this drive" and never
+# checked it. All three jobs had failed EVERY fire since 2026-09-07 with exit
+# 127 — the plists were generated on 2026-09-02 hardcoding /Volumes/KK_DEV_Local
+# and the drive is now mounted elsewhere — and this loop printed a green tick for
+# each, because 127 fell through to the catch-all. Loaded is not runnable: the
+# plist's script path is now READ and stat'd, and 127 is named rather than
+# decorated. install_scheduler.command self-locates, so re-running it from the
+# current drive is the whole fix.
 for job in com.wednesday.shiftchange com.wednesday.wake com.wednesday.close; do
   if launchctl print "gui/$(id -u)/$job" >/dev/null 2>&1; then
     lec=$(launchctl print "gui/$(id -u)/$job" 2>/dev/null | awk '/last exit code/{print $NF}')
-    case "$lec" in
-      126|78:*|78) warn "scheduler $job last exit $lec" "TCC/stdio blocked (PORTABILITY 15)";;
-      *) ok "scheduler $job loaded (last exit ${lec:-never})";;
-    esac
+    prog=$(launchctl list "$job" 2>/dev/null | awk -F'"' '/scheduler\/.*\.sh/{print $2; exit}')
+    if [ -n "$prog" ] && [ ! -f "$prog" ]; then
+      warn "scheduler $job points off-drive" "$prog missing — re-run scheduler/install_scheduler.command from this drive"
+    else
+      case "$lec" in
+        126|78:*|78) warn "scheduler $job last exit $lec" "TCC/stdio blocked (PORTABILITY 15)";;
+        127) warn "scheduler $job last exit 127" "its script was not found at fire time — re-run scheduler/install_scheduler.command";;
+        *) ok "scheduler $job loaded (last exit ${lec:-never})";;
+      esac
+    fi
   else
     warn "scheduler $job not loaded" "run scheduler/install_scheduler.command"
   fi
