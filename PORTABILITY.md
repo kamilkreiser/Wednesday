@@ -235,3 +235,25 @@ already satisfied. **What a restore does NOT carry, and each one is a real gap:*
     reads. Test it deliberately before relying on it: run both seats from the single drive and
     verify the toggle still separates them, the guard still refuses, and neither corrupts the
     other's chat stream.
+
+## Nightly NAS sync (added 2026-09-08, s153 — Kam's 14:57 commission)
+
+11. **The launchd job is MACHINE-LOCAL and does not travel.** `com.wednesday.nassync` fires
+    `2_Project_Files/scheduler/nas_sync.sh` at **03:30** on the Studio; Tuesday's machine gets
+    `com.tuesday.nassync` at **23:00**. Both are installed by the same self-locating
+    `scheduler/install_scheduler.command`, which picks the hour from `WED_AGENT` and puts the agent
+    in the label so two machines cannot collide in `launchctl`. **On any new machine, or after any
+    drive move, re-run that installer** — the plists point at absolute on-drive paths and a stale
+    one fires a script that is not there. `doctor.sh` sweeps the job for this seat's agent and warns
+    if it is not loaded (exercised both ways 2026-09-08).
+12. **`confirmbigdel = true` lives in Kam's file, not this repo** —
+    `/Volumes/DevMASTER/!SYNC FILES/devnas.prf`, changed on his explicit authorisation 2026-09-08
+    15:37, backup beside it as `.pre-confirmbigdel-2026-09-08`. **It is not carried by this repo and
+    it is not carried by the drive sync** (`!SYNC FILES` syncs, but a fresh workspace built any
+    other way will not have it). **Check it on any new workspace:** with `batch = true` it ABORTS the
+    run on a whole-replica delete, which is the whole point of an unattended job. Its honest scope:
+    whole-replica only — the gradual case is `nas_sync.sh`'s deletion alarm.
+13. **The alarm's recovery path is per-machine.** Deleted files land in `~/.unison/backup` on
+    whichever Mac ran the leg (`backup = Name *`, `maxbackups = 5`, `backuploc = central`) — **not on
+    the drives**. So a deletion propagated from Tuesday's machine is recoverable only there. Worth
+    knowing before assuming the T9 holds a copy.
