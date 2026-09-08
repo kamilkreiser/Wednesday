@@ -12,7 +12,7 @@ supersede: replace this file wholesale at the next pickup; do not append
 ## 🟢 SECUURA STATE — re-read from origin before trusting ANY of it; Peter is live tonight
     origin/develop   811a82253    (5c6777658 -> 4f612d462 via #909, -> 811a82253 via Peter's #802)
     origin/main      54b2a5c26    demo VM 400517aaf — NOTHING deployed this session
-    P2 In Review     20           (was 27 at boot)
+    P2 In Review     19           (was 27 at boot)
     branches pushed  #806 d38284a1c (clean) · #785 3611f60c4 (preflight passed)
 
 **⚠ PETER MERGED #802 MID-SESSION AT 08:45Z.** Standing: re-read `develop` from origin immediately
@@ -41,6 +41,16 @@ with the correction and links back; **`5579579360` (the false comment) now carri
 with its original body preserved verbatim. **Do not let either be tidied away.**
 
 ## 🔴 OPEN / NEXT
+0. **#728 / KS-671 IS THE SUCCESSOR'S FIRST WORK — five items across a service, deliberately NOT
+   started.** Peter reviewed it at `0c5914cad`, still the head, on 2026-08-31 — **eight days awaiting
+   US**; KS-671 moved to In Progress. **His finding indicts the TICKET'S OWN PREMISE and that
+   correction is now at the head of KS-671's DESCRIPTION, not in a comment:** *"every anchoring chain
+   call already funnels through `provider.ts`"* is FALSE — the verify scan and
+   `cardano/threadTokenMint.ts:256` both escape it, so **the fix as designed would not have caught
+   KS-670**, and `/health` would have read `connected (Blockfrost)` for six days. Re-verified at the
+   PR head with a control (recorder ×12 in `provider.ts`, ×0 in both escapes, 7-hit control proving
+   the grep fires). **Correct the premise first, then re-derive the five items from it** — do not
+   inherit five tasks that all assume the disproved sentence.
 1. **The remaining P2 In Review queue**, dispositions first, by identifier.
 2. **#806 and #785 both await Peter's review.** His approval on #806 is VOID (`commit_id != head.sha`)
    and that is stated on KS-731 as a warning block, not a table row.
