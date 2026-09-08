@@ -175,12 +175,45 @@ main { flex:1; display:flex; min-height:0; width:100%; }
   .panel { flex:1 1 50%; min-height:0; }
   #convo-panel { border-right:none; border-bottom:1px solid var(--line); }
 }
+/* ══ AGENT TOGGLE (Phase 1, Kam's 2026-09-08 11:50 commission) ═══════════════
+   Kam asked for "a toggle in the top right hand side between main agent and
+   datasec agent". It is deliberately LOUD: the cost of him typing a Datasec
+   instruction while looking at the Wednesday view is a cross-client message,
+   which is his own severity-max class. So the live view is stated three ways —
+   the pressed button, a full-width colour band, and the header's own tint —
+   never a subtle chip you can be wrong about at a glance. */
+#agentbar { flex:none; height:4px; background:var(--series-1); }
+body.view-tuesday #agentbar { background:#e08a2b; }
+/* NOT margin-left:auto — #live already carries one, and a second auto margin
+   splits the right-hand group across the free space instead of keeping it
+   together. It rides beside #live, so the pair anchors right at any width.
+   (Measured 2026-09-08 in Chrome: toggle at x 3289-3473 of a 3491px viewport,
+   inside the header, correct both before and after this change. An earlier
+   reading here said it was pushed off-screen — that was a screenshot crop being
+   read as the viewport, not a defect in the page.) */
+#agenttoggle { margin-left:10px; display:flex; gap:0; align-items:center;
+               border:1px solid var(--line); border-radius:7px; overflow:hidden; }
+#agenttoggle button { background:var(--surface-2); color:var(--text-muted);
+               border:none; padding:5px 11px; font-size:11.5px; font-weight:700;
+               letter-spacing:.05em; cursor:pointer; }
+#agenttoggle button + button { border-left:1px solid var(--line); }
+#agenttoggle button:hover { color:var(--text-primary); }
+#agenttoggle button.on { color:#fff; background:var(--series-1); }
+#agenttoggle button#ag-tuesday.on { background:#e08a2b; color:#241300; }
+body.view-tuesday header { background:rgba(224,138,43,.10); }
+body.view-tuesday header h1::after { content:" · TUESDAY (Datasec)"; color:#e08a2b;
+               font-size:12px; font-weight:700; letter-spacing:.04em; }
 </style></head><body>
+<div id="agentbar" aria-hidden="true"></div>
 <header><h1>Cockpit</h1>
  <a href="/">&larr; dashboard</a> <a href="/chat">chat view</a>
  <button id="autoplay" title="speak newly-arriving Wednesday replies aloud">&#128266; auto-play replies</button>
  <button id="stopvoice" title="stop the voice that is speaking now (autoplay stays on)">&#9209; stop</button>
- <span id="live">&#9675; connecting&hellip;</span></header>
+ <span id="live">&#9675; connecting&hellip;</span>
+ <span id="agenttoggle" role="group" aria-label="which agent's view is live">
+  <button id="ag-wednesday" type="button" title="Wednesday — Secuura and all general work">WEDNESDAY</button>
+  <button id="ag-tuesday" type="button" title="Tuesday — all Datasec projects">TUESDAY</button>
+ </span></header>
 <main>
  <section class="panel" id="convo-panel" aria-label="Conversation with Wednesday">
   <h2>Conversation — Kam &amp; Wednesday</h2>
@@ -235,11 +268,68 @@ function flushPending() {
 
 /* ══ LEFT: conversation (data pattern from chat.html) ══════════════════════ */
 const log = document.getElementById("log");
+/* ══ WHICH AGENT'S VIEW IS LIVE (Phase 1) ═══════════════════════════════════
+   Wednesday = Secuura + all general work. Tuesday = every Datasec project
+   (Kam's definition: "as defined by living inside the Datasec folder").
+   Persisted per browser, default WEDNESDAY. NOTHING IS DELETED BY FILTERING —
+   the other agent's stream is one click away, and messages addressed to both
+   (Kam's own, pre-toggle) show in either view rather than being hidden. */
+const AGENT_KEY = "wed_active_agent";
+let activeAgent = "wednesday";
+try {
+  const a = localStorage.getItem(AGENT_KEY);
+  if (a === "wednesday" || a === "tuesday") activeAgent = a;
+} catch (e) {}
+
+/* Which agent a FLEET event belongs to. Derived from the project the mail was
+   tagged with — never from the seat that happened to relay it. An unknown
+   project belongs to Wednesday, who holds everything that is not Datasec. */
+function agentOfProject(p) {
+  return /datasec/i.test(String(p || "")) ? "tuesday" : "wednesday";
+}
+function agentOfMsg(m) {
+  const a = m && m.agent;
+  if (a === "wednesday" || a === "tuesday" || a === "both") return a;
+  return "both";                      // unstamped: show it rather than hide it
+}
+function msgInView(m) {
+  const a = agentOfMsg(m);
+  return a === "both" || a === activeAgent;
+}
+function applyAgentView() {
+  document.body.classList.toggle("view-tuesday", activeAgent === "tuesday");
+  const w = document.getElementById("ag-wednesday");
+  const t = document.getElementById("ag-tuesday");
+  if (w) { w.classList.toggle("on", activeAgent === "wednesday");
+           w.setAttribute("aria-pressed", activeAgent === "wednesday"); }
+  if (t) { t.classList.toggle("on", activeAgent === "tuesday");
+           t.setAttribute("aria-pressed", activeAgent === "tuesday"); }
+  const box = document.getElementById("text");
+  if (box) box.placeholder = activeAgent === "tuesday"
+      ? "message Tuesday (Datasec)…" : "message Wednesday…";
+}
+function setAgent(a) {
+  if (a !== "wednesday" && a !== "tuesday") return;
+  activeAgent = a;
+  try { localStorage.setItem(AGENT_KEY, a); } catch (e) {}
+  applyAgentView();
+  // Redraw both panels from what is already in hand — a toggle must never wait
+  // for the next poll, or Kam sees the OTHER agent's view for up to five seconds
+  // while believing he is looking at this one.
+  if (Array.isArray(lastRaw)) render(lastRaw);
+  if (Array.isArray(lastEventsRaw)) renderFeed();
+}
+
+document.getElementById("ag-wednesday").addEventListener("click", () => setAgent("wednesday"));
+document.getElementById("ag-tuesday").addEventListener("click", () => setAgent("tuesday"));
+applyAgentView();        // paint the live view before the first poll returns
+
 const msgsEl = document.getElementById("msgs");
 const live = document.getElementById("live");
 const textEl = document.getElementById("text");
 let lastSig = null;
 let pendingMsgs = null;
+let lastRaw = null;      // the unfiltered poll result, so a toggle redraws instantly
 armGuards(log, "convo");
 
 function convoBusy() {
@@ -271,6 +361,10 @@ function nearBottom() {
 function render(msgs) {
   if (convoBusy()) { pendingMsgs = msgs; return; }
   pendingMsgs = null;
+  // Phase 1: show only the live view's half of the conversation. Kam's own
+  // pre-toggle messages are marked "both" and appear either way — a filter that
+  // hid his own words would be worse than no filter.
+  msgs = (msgs || []).filter(msgInView);
   const stick = nearBottom() || lastRendered === null;
   const keepTop = log.scrollTop;                 // reading position, if not at tail
   msgsEl.innerHTML = "";
@@ -366,6 +460,7 @@ async function poll(force) {
     const sig = JSON.stringify(msgs);
     if (!force && sig === lastSig && !pendingMsgs) return;
     lastSig = sig;
+    lastRaw = msgs;        // unfiltered — the view filter is applied in render()
     render(msgs);          // defers itself if Kam is mid-read/mid-draft
   } catch (e) {
     live.textContent = "○ reconnecting…"; live.classList.remove("on");
@@ -379,7 +474,7 @@ async function doSend() {
   try {
     const r = await (await fetch("/api/chat", {
       method: "POST", headers: {"Content-Type": "application/json"},
-      body: JSON.stringify({text: t})})).json();
+      body: JSON.stringify({text: t, view: activeAgent})})).json();
     if (r.ok) { textEl.value = ""; await poll(true); log.scrollTop = log.scrollHeight; }
   } finally { sendBtn.disabled = false; textEl.focus(); }
 }
@@ -512,6 +607,9 @@ function renderTally(events) {
   const today = aestDay(Date.now());
   const per = {};
   for (const ev of events) {
+    // view-scoped: the tally names PROJECTS, so an unscoped one prints the other
+    // client's project name across the top of this client's screen
+    if (agentOfProject(ev.project) !== activeAgent) continue;
     if (aestDay(ev.t) !== today) continue;
     if (ev.type !== "wrap" && ev.type !== "score") continue;
     per[ev.project] = per[ev.project] || {wrap: 0, score: 0};
@@ -553,9 +651,15 @@ function renderFilters(events, decisions) {
     });
     filtersEl.appendChild(b);
   }
+  // Only the LIVE view's projects get a chip. Offering "Secuura/Blockchain" on
+  // the Tuesday view is a control that can only ever return nothing, and a chip
+  // naming another client on this client's screen is the wrong thing to render
+  // at all (no cross-client leak, hard rule 2).
   const projects = [...new Set(events.map(e => e.project)
-                    .concat(decisions.map(d => d.project)))].sort();
-  for (const p of projects.concat(filters.projects.filter(x => !projects.includes(x)))) {
+                    .concat(decisions.map(d => d.project)))]
+                   .filter(p => agentOfProject(p) === activeAgent).sort();
+  for (const p of projects.concat(filters.projects.filter(
+        x => !projects.includes(x) && agentOfProject(x) === activeAgent))) {
     const b = document.createElement("button");
     b.className = "fchip" + (filters.projects.includes(p) ? " on" : "");
     b.textContent = p;
@@ -752,7 +856,7 @@ function decisionCard(dec) {
     try {
       const r = await (await fetch("/api/chat", {
         method: "POST", headers: {"Content-Type": "application/json"},
-        body: JSON.stringify({text: `Decision ${dec.id} note: ${t}`})})).json();
+        body: JSON.stringify({text: `Decision ${dec.id} note: ${t}`, view: activeAgent})})).json();
       if (r.ok) {
         noteEl.value = ""; decDrafts.delete(dec.id);
         if (!sentNotes.has(dec.id)) {
@@ -787,7 +891,7 @@ function decisionCard(dec) {
       try {
         const r = await (await fetch("/api/chat", {
           method: "POST", headers: {"Content-Type": "application/json"},
-          body: JSON.stringify({text})})).json();
+          body: JSON.stringify({text, view: activeAgent})})).json();
         if (r.ok) {
           sentDecisions.add(dec.id);
           decDrafts.delete(dec.id);          // draft consumed by the ruling message
@@ -851,7 +955,11 @@ function renderFeed(opts) {
   renderTally(events);
   renderFilters(events, dp.open.concat(dp.ruledToday));
   const typeOk = t => !filters.types.length || filters.types.includes(t);
-  const projOk = p => !filters.projects.length || filters.projects.includes(p);
+  // Phase 1: the agent view gates BEFORE the per-project chips, so Datasec fleet
+  // activity never appears on the Wednesday view and vice versa — Kam's explicit
+  // requirement, and the reason the toggle exists rather than another chip.
+  const projOk = p => agentOfProject(p) === activeAgent &&
+                      (!filters.projects.length || filters.projects.includes(p));
   // NEEDS YOU = open decisions + unanswered questions (promoted out of updates)
   const needDecs = dp.open.filter(d => typeOk("decision") && projOk(d.project));
   const needQs = events.filter(ev => ev.type === "question" && ev.open &&

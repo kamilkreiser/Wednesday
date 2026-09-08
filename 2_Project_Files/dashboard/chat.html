@@ -73,12 +73,36 @@ footer .col { display:flex; gap:8px; padding-top:10px; padding-bottom:
   border-radius:8px; font:inherit; font-size:14px; padding:8px 16px; cursor:pointer; }
 #send:hover { color:var(--text-primary); }
 #send:disabled { opacity:.5; cursor:default; }
+/* ══ AGENT TOGGLE (Phase 1) ═══════════════════════════════════════════════
+   The same control as /cockpit, sharing its localStorage key so the two
+   surfaces can never disagree about which agent Kam is talking to. Without it
+   this page would show Tuesday's Datasec conversation on the Wednesday view and
+   quietly undo the isolation the cockpit's toggle provides. */
+#agentbar { height:4px; background:var(--series-1); }
+body.view-tuesday #agentbar { background:#e08a2b; }
+#agenttoggle { margin-left:10px; display:inline-flex; align-items:center;
+               border:1px solid var(--line); border-radius:7px; overflow:hidden;
+               vertical-align:middle; }
+#agenttoggle button { background:var(--surface-2); color:var(--text-muted);
+               border:none; padding:4px 10px; font:inherit; font-size:11px;
+               font-weight:700; letter-spacing:.05em; cursor:pointer; }
+#agenttoggle button + button { border-left:1px solid var(--line); }
+#agenttoggle button.on { color:#fff; background:var(--series-1); }
+#agenttoggle button#ag-tuesday.on { background:#e08a2b; color:#241300; }
+body.view-tuesday header { background:rgba(224,138,43,.10); }
+body.view-tuesday header h1::after { content:" \00b7 TUESDAY (Datasec)"; color:#e08a2b;
+               font-size:12px; font-weight:700; letter-spacing:.04em; }
 </style></head><body>
+<div id="agentbar" aria-hidden="true"></div>
 <header><div class="col"><h1>Chat with Wednesday</h1>
  <a href="/">&larr; dashboard</a>
  <button id="autoplay" title="speak newly-arriving Wednesday replies aloud">&#128266; auto-play replies</button>
  <button id="stopvoice" title="stop the voice that is speaking now (autoplay stays on)">&#9209; stop</button>
- <span id="live">&#9675; connecting&hellip;</span></div>
+ <span id="live">&#9675; connecting&hellip;</span>
+ <span id="agenttoggle" role="group" aria-label="which agent's view is live">
+  <button id="ag-wednesday" type="button" title="Wednesday — Secuura and all general work">WEDNESDAY</button>
+  <button id="ag-tuesday" type="button" title="Tuesday — all Datasec projects">TUESDAY</button>
+ </span></div>
  <div class="col" id="projfilter"></div></header>
 <div id="log"><div class="col" id="msgs"><p id="empty">no messages yet</p></div></div>
 <footer><div class="col">
@@ -119,18 +143,63 @@ function nearBottom() {
 // "WED" is the only default-on toggle. State is localStorage — per machine, which
 // is exactly the laptop-vs-Studio split Kam asked for; the server holds nothing.
 // Entries with no project field (all history before today) read as "WED".
+/* Which agent's view is live. SAME localStorage key as /cockpit, on purpose:
+   two surfaces disagreeing about who Kam is addressing is the cross-client
+   message this whole phase exists to prevent. */
+const AGENT_KEY = "wed_active_agent";
+let activeAgent = "wednesday";
+try {
+  const a = localStorage.getItem(AGENT_KEY);
+  if (a === "wednesday" || a === "tuesday") activeAgent = a;
+} catch (e) {}
+function agentOfProject(p) { return /datasec/i.test(String(p || "")) ? "tuesday" : "wednesday"; }
+function agentOfMsg(m) {
+  const a = m && m.agent;
+  if (a === "wednesday" || a === "tuesday" || a === "both") return a;
+  return "both";                      // unstamped: show rather than hide
+}
+function inView(m) { const a = agentOfMsg(m); return a === "both" || a === activeAgent; }
+function applyAgentView() {
+  document.body.classList.toggle("view-tuesday", activeAgent === "tuesday");
+  const w = document.getElementById("ag-wednesday"), t = document.getElementById("ag-tuesday");
+  if (w) { w.classList.toggle("on", activeAgent === "wednesday"); w.setAttribute("aria-pressed", activeAgent === "wednesday"); }
+  if (t) { t.classList.toggle("on", activeAgent === "tuesday"); t.setAttribute("aria-pressed", activeAgent === "tuesday"); }
+  const box = document.getElementById("text");
+  if (box) box.placeholder = activeAgent === "tuesday" ? "message Tuesday (Datasec)\u2026" : "message Wednesday\u2026";
+}
+function setAgent(a) {
+  if (a !== "wednesday" && a !== "tuesday") return;
+  activeAgent = a;
+  try { localStorage.setItem(AGENT_KEY, a); } catch (e) {}
+  applyAgentView();
+  render(lastMsgs || []);
+}
+document.getElementById("ag-wednesday").addEventListener("click", () => setAgent("wednesday"));
+document.getElementById("ag-tuesday").addEventListener("click", () => setAgent("tuesday"));
+applyAgentView();
+
 const PF_KEY = "wed_chat_projects";
 const pfEl = document.getElementById("projfilter");
 let pfSel = {};
 try { pfSel = JSON.parse(localStorage.getItem(PF_KEY) || "{}") || {}; } catch (e) { pfSel = {}; }
 let lastMsgs = [];
 function projOf(m) { return m.project || "WED"; }
-function projOn(name) { return name in pfSel ? !!pfSel[name] : name === "WED"; }
-function visible(m) { return m.role === "kam" || projOn(projOf(m)); }
+// Kam's 2026-09-07 rule — "WED is the only default-on toggle" — was written when
+// there was one view. Carried into the TUESDAY view unchanged it defaults every
+// Datasec project to OFF and the page renders empty, which reads as a broken
+// toggle rather than a filter. So the default is per view: WED-only on the
+// Wednesday side (his tuning, untouched), everything on for Tuesday, where he has
+// tuned nothing yet. An explicit choice always wins over both.
+function projOn(name) {
+  if (name in pfSel) return !!pfSel[name];
+  return activeAgent === "tuesday" ? true : name === "WED";
+}
+function visible(m) { return inView(m) && (m.role === "kam" || projOn(projOf(m))); }
 function seatShort(s) { return String(s || "").split(".")[0]; }
 function renderFilter(msgs) {
   const names = new Set(["WED"]);
-  for (const m of msgs) if (m.role !== "kam") names.add(projOf(m));
+  for (const m of msgs) if (m.role !== "kam" && inView(m)) names.add(projOf(m));
+  for (const n of [...names]) if (agentOfProject(n) !== activeAgent) names.delete(n);
   const sorted = [...names].sort((a, b) => a === "WED" ? -1 : b === "WED" ? 1 : a.localeCompare(b));
   pfEl.innerHTML = "";
   pfEl.append("show replies from: ");
@@ -265,7 +334,7 @@ async function doSend() {
   try {
     const r = await (await fetch("/api/chat", {
       method: "POST", headers: {"Content-Type": "application/json"},
-      body: JSON.stringify({text: t})})).json();
+      body: JSON.stringify({text: t, view: activeAgent})})).json();
     if (r.ok) { textEl.value = ""; await poll(true); log.scrollTop = log.scrollHeight; }
   } finally { sendBtn.disabled = false; textEl.focus(); }
 }
