@@ -66,3 +66,44 @@ what a seat FILED, not of what the principal DECIDED — this is its delivery ha
 3. **Enforcement candidate (w=3 of THIS costume promotes it):** `send_brief.sh --kind brief` greps the previous ANSWERs to the project for lines beginning `RULED` and refuses when none of them is quoted in the body.
 
 **Family, extended:** [[2026-08-04_validate-brief-pointers]] (EXTENSION 2026-09-05 21:3x — a brief carries what the previous mails to the project decided; this is the SUCCESSOR-brief half) · [[2026-08-13_headline-must-match-the-operative-case]] (the section's name said "BY KAM" and the seat wrote exactly that).
+
+
+## EXTENSION 2026-09-08 18:3x (w=2 THE SAME DAY, opposite direction — and the diagnosis this owes)
+
+**Twice on 2026-09-08 Wednesday read the queue's DELIVERY MARK as a fact about the world, in opposite
+directions, twelve hours apart.**
+
+- **Morning:** `decision_queue.sh list ruled --undelivered` showed Kam's two #793 rulings unmarked, and
+  Wednesday told him *"nobody executed either."* s149 had executed them both. The rule written then:
+  **an UNMARKED card means UNKNOWN, never UNDONE.**
+- **Evening:** the same view showed `secuura-889-issuer-org-caller-asserted => hold-for-finding1`
+  unmarked, and Wednesday copied it into a brief's HOLDS as **still binding**. **#889 had merged the
+  previous morning** — Kam answered Finding 1 with `bind`, it shipped at `42d8cf5f5`, and the commit
+  is on develop and contained in the demo SHA. The hold's condition was **MET, not bypassed.** The
+  seat caught it and asked for the mark.
+
+**Why the morning's rule did not fire in the evening — and it is a retrieval failure, not a care
+failure.** That rule was written as *"before any sentence claiming a ruling was NOT EXECUTED, open the
+artefact."* Wednesday was not claiming non-execution. It was writing a **HOLD** — which does not read
+as a claim about execution at all, it reads as caution. **The handle covered one sentence-shape and
+the recurrence wore another**
+([[2026-08-13_headline-must-match-the-operative-case]] on an enforcement line, again).
+
+**The rule, restated so it covers both directions and the costume in between:**
+
+> **A card's mark is a record of what a SEAT WROTE DOWN. It is never a fact about the world.**
+> Before any sentence that treats a card's state as reality — *undone · still binding · still open ·
+> still held · already done · closed* — **open the artefact the card names.** Both directions cost
+> the same to check and both have now been wrong once.
+
+**And the asymmetry worth naming, because it decides which is more dangerous:** an unmarked card read
+as UNDONE produces a false sentence to Kam, which is loud and gets corrected. An unmarked card read as
+**STILL BINDING** produces a HOLD — and a hold is quiet, looks like diligence, and can sit in every
+successor brief indefinitely without anyone testing it. **The over-cautious direction is the one that
+does not announce itself.**
+
+**Enforcement candidate (w=3 promotes it):** the `RULED BY KAM, NOT YET IN AN ARTEFACT` section that
+`send_brief.sh` requires already forces Kam's words onto the same page as Wednesday's — that is what
+caught the contradicting-hold error earlier the same day. Extend it: a card carried into a brief's
+**HOLDS** must name the artefact checked and the date it was read, or be listed under the undelivered
+heading as UNKNOWN rather than asserted as binding.

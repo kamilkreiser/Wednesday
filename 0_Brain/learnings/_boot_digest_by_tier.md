@@ -7,7 +7,7 @@ status: live
 
 # Boot digest BY TIER — W whole, M rules-only, every project case a handle
 
-Generated 2026-09-08 18:18 from 126 lesson files (626,767 B). M 29 · MIXED 5 · W 92. 28 project CASE sections inside MIXED files are reduced to one line each: the heading and the path to read it at. W blocks are exactly what the default digest carries; M blocks drop the section index and keep the rules; a P file is a single handle. The CASES behind every rule live only in the lesson files — open one the moment its rule fires.
+Generated 2026-09-08 18:38 from 126 lesson files (629,568 B). M 29 · MIXED 5 · W 92. 28 project CASE sections inside MIXED files are reduced to one line each: the heading and the path to read it at. W blocks are exactly what the default digest carries; M blocks drop the section index and keep the rules; a P file is a single handle. The CASES behind every rule live only in the lesson files — open one the moment its rule fires.
 
 ## The T9 SSD is the master — Wednesday must be fully portable
 `2026-07-31_fully-portable-drive.md` · principle · 2026-07-31 · status: superseded — the "T9 is the master" half by [[2026-08-25_one-drive-devmaster-is-master]] (2026-08-25); the portability principle itself still lives · tier: W
@@ -3097,7 +3097,7 @@ RULED for that project since the last brief and ask, per card, WHERE the ruling 
 answer is "on Kam's panel and in a mail to a seat that has since wrapped", it lives nowhere a
 reader lands, and the next agent will find the question open and ask it again.
 
-sections (open the file for these): EXTENSION 2026-09-06 02:2x (ledger w=4 of the family): WEDNESDAY'S OWN rulings to a project are rulings too — a scope/holds ruling given in an ANSWER to seat N lives in that mail and in nothing seat N+1 reads
+sections (open the file for these): EXTENSION 2026-09-06 02:2x (ledger w=4 of the family): WEDNESDAY'S OWN rulings to a project are rulings too — a scope/holds ruling given in an ANSWER to seat N lives in that mail and in nothing seat N+1 reads · EXTENSION 2026-09-08 18:3x (w=2 THE SAME DAY, opposite direction — and the diagnosis this owes)
 
 **How to apply:**
 1. **A ruled card is not closed until its RECEIPT names the artefact** the ruling was written into
@@ -3130,6 +3130,29 @@ what a seat FILED, not of what the principal DECIDED — this is its delivery ha
 3. **Enforcement candidate (w=3 of THIS costume promotes it):** `send_brief.sh --kind brief` greps the previous ANSWERs to the project for lines beginning `RULED` and refuses when none of them is quoted in the body.
 
 **Family, extended:** [[2026-08-04_validate-brief-pointers]] (EXTENSION 2026-09-05 21:3x — a brief carries what the previous mails to the project decided; this is the SUCCESSOR-brief half) · [[2026-08-13_headline-must-match-the-operative-case]] (the section's name said "BY KAM" and the seat wrote exactly that).
+
+## EXTENSION 2026-09-08 18:3x (w=2 THE SAME DAY, opposite direction — and the diagnosis this owes)
+**Twice on 2026-09-08 Wednesday read the queue's DELIVERY MARK as a fact about the world, in opposite
+directions, twelve hours apart.**
+
+**The rule, restated so it covers both directions and the costume in between:**
+
+> **A card's mark is a record of what a SEAT WROTE DOWN. It is never a fact about the world.**
+> Before any sentence that treats a card's state as reality — *undone · still binding · still open ·
+> still held · already done · closed* — **open the artefact the card names.** Both directions cost
+> the same to check and both have now been wrong once.
+
+**And the asymmetry worth naming, because it decides which is more dangerous:** an unmarked card read
+as UNDONE produces a false sentence to Kam, which is loud and gets corrected. An unmarked card read as
+**STILL BINDING** produces a HOLD — and a hold is quiet, looks like diligence, and can sit in every
+successor brief indefinitely without anyone testing it. **The over-cautious direction is the one that
+does not announce itself.**
+
+**Enforcement candidate (w=3 promotes it):** the `RULED BY KAM, NOT YET IN AN ARTEFACT` section that
+`send_brief.sh` requires already forces Kam's words onto the same page as Wednesday's — that is what
+caught the contradicting-hold error earlier the same day. Extend it: a card carried into a brief's
+**HOLDS** must name the artefact checked and the date it was read, or be listed under the undelivered
+heading as UNKNOWN rather than asserted as binding.
 
 
 ## Every handover to Peter or Stuart is a TEST BLOCK, as large as one pass can prove — never a list of PRs
