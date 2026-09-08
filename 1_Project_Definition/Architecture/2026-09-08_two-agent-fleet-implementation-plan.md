@@ -226,15 +226,70 @@ brains, and two brains means a correction Kam gives once has to be given twice.
 wants a distinct character on the Datasec desk, it is buildable — the cost is stated above, and it
 is paid in duplicated teaching rather than in engineering.
 
+## 6b. 🟢 RULED by Kam, 11:56 — the Datasec agent is **TUESDAY**
+
+**His words:** *"What about calling the Dardasek agent Tuesday?"* (dictation: Datasec.)
+
+**RULED: the Datasec seat is TUESDAY. Wednesday keeps the Studio.**
+Wednesday's §6a recommendation (one persona, two seat labels) is **WITHDRAWN — it did not survive
+the challenge, and the reason it failed is worth keeping.**
+
+### Why the recommendation was wrong
+Wednesday's argument was *"two names invite two brains, and two brains means teaching everything
+twice."* **That does not hold.** A name does not fork a brain; the brain ARCHITECTURE does, and
+that is a design choice under Wednesday's control. **Wednesday conflated the name with the
+identity — the exact conflation it had told Kam he was making one message earlier.**
+
+### The benefit Wednesday under-weighted, and today is the evidence for it
+**A name that cannot be confused is a SAFETY property, not a cosmetic one.**
+Today's own failures were all misaddressing: an instruction typed into the wrong pane; a tap with
+no mail behind it; one seat within one command of acting on another seat's authority; a coordinator
+mail that had to be titled "CROSS-SEAT" in capitals to be unmistakable.
+
+*"Tuesday writing to Wednesday"* is unambiguous in the words themselves.
+*"Wednesday (Datasec) writing to Wednesday (Main)"* is precisely the string a tired seat misreads.
+**The clarity is bought at the moment of misaddressing, which is when it is worth the most.**
+
+Second benefit, and it is Kam's rather than the fleet's: **while toggling views he never has to
+work out which Wednesday he is addressing.** His own stated constraint is that he finds it hard to
+hold several things at once ([[2026-07-31_one-question-at-a-time]]); two names delete that question.
+
+### The condition — what MUST stay shared for the name to be safe
+**Tuesday is Wednesday's sister, not a second character built from scratch.** She inherits the five
+weeks rather than starting at zero:
+
+    SHARED    identity/persona.md · identity/voice-protocol.md · people/kam.md
+              learnings/ W-tier and M-tier · the boot digest · the skills/rituals
+              the WEDNESDAY repo (the coordination layer)
+    HERS      _ledger_*.md · daily notes · NEXT-PICKUP · claims file · her inbox
+              her Claude account · her machine · her client folder
+
+**That split is exactly what Kam already ruled on 2026-09-08 09:57 ("each seat reads the ledger for
+its own scope"). The name does not create the split; it makes the existing one legible.**
+
+### 🔴 The risk, written down rather than discovered later
+**A distinct name tends to ACCRETE a distinct identity, and two identities can drift in judgement.**
+Not automatic, and observable: **the tell is Tuesday and Wednesday ruling differently on the same
+CLASS of question.** If that appears, the response is a shared consolidation rather than two
+separate ones — not a rename. Worth watching; not worth refusing the name for.
+
+### What changes concretely
+- Inboxes: `wednesday-agent@` (Studio) · **`tuesday-agent@` (new, Datasec)** — two inboxes was
+  already the §6a recommendation; the name makes the routing self-describing.
+- Chat/fleet entries: the `agent` field carries **`wednesday` | `tuesday`** rather than main/datasec.
+- The toggle in §3 is labelled **WEDNESDAY | TUESDAY**.
+- The Datasec machine's launcher greets as Tuesday and loads the same persona.
+
 ## 7. The four decisions, all with safe defaults
 
 1. **Mesh or hosted?** — **Mesh, and it already exists.** Default: use what is running.
 2. **Shared W/M brain, or fully separate brains?** — Default: **shared W/M**, P stays with the
    project. The cost is named above.
-3. **Naming** — Default: **one persona, two seat labels** (§6a). Sub-decisions, now separable:
-   **same repo = YES** (it already is, and it is the shared layer); **same inbox = NO** (the
-   2026-08-13 cross-client capture happened on exactly that shape); **distinct name = yes for
-   addressing, and the identity half is Kam's call.**
+3. **Naming** — ✅ **RULED by Kam 11:56: the Datasec agent is TUESDAY** (§6b). Wednesday's
+   contrary recommendation is withdrawn — it rested on a conflation of name and brain.
+   Settled with it: **same repo = YES** (it is the shared coordination layer);
+   **same inbox = NO** (the 2026-08-13 cross-client capture is exactly that shape);
+   **shared persona, voice and W/M lessons; separate ledger, dailies, pickup, claims, inbox.**
 4. **Does the path guard REFUSE, or WARN, on the travel drive?** — Default: **refuse**, same as
    on two machines. A gate that softens when supervision is lowest is the wrong way round.
 
