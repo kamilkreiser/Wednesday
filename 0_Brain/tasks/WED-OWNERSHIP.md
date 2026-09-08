@@ -13,3 +13,4 @@ sees the claim rather than discovering it in a conflict.
 | Claimed (local) | Seat | Item | State | Released / note |
 |---|---|---|---|---|
 | 2026-09-08 10:08 | Kamils-MBP | wed_claim.sh itself — the ownership mechanism Kam asked for 2026-09-08 | OPEN | |
+| 2026-09-08 10:09 | Kamils-MBP | wed_claim.sh docs pass (distinct work) | OPEN | |
