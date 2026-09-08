@@ -21,29 +21,31 @@ declared default (finished the guard) and then started Secuura anyway, because o
 **it was never blocked on him**: his 07:10 instruction plus the week-scoped merge and deploy
 grants already authorised it, and the COO rule says such a ticket is executed, not listed.
 
-**🔴 YOUR LIVE DUTY — two agents are running and BOTH report to you, not to Kam:**
+**🔴 YOUR LIVE DUTY — ONE agent is running and it reports to you, not to Kam.**
 
-| pane | what | state at 14:0x |
-|---|---|---|
-| `%171` | **Secuura s150** (NOT s153 — its own history is the authority for its seat number) | working **KS-963**; KS-989 built as PR #906, KS-858 found ALREADY DONE, KS-946 re-priced P1→P3 |
-| `%172` | **QA gate, KS-989 / PR #906 @ `9f9a2a788`, TIER 2** | running; verdict comes to `wednesday-agent@`, subject `[QA -> Wednesday] VERDICT: Secuura KS-989 / #906 @ 9f9a2a788` |
+`%171` = **Secuura s150** (NOT s153 — its own history is the authority for its seat number).
+At 14:0x it holds a GO to **merge #906**, then file ONE ticket for F1–F4, then act on three
+Kam rulings, then return to the **P2 In Review queue** (29 tickets, category-1).
+**Watch for its MERGED receipt and score it.** The QA pane `%172` is CLOSED — its verdict is
+delivered and its work is done.
 
-**When the verdict lands:** it is a QA report, not a score trigger. Do Wednesday's COMPLETION
-check (delivered-vs-commissioned, item by item against the brief) — **not** a re-run of the
-gate's tests — then score, then the merge GO is Wednesday's under the week-scoped grant.
-Round 1 of 2 under the cap.
-**Relaunch that gate with its PATH, never a reconstructed command:**
+**KAM RULED THREE CARDS AT 14:00 and all three are relayed with their artefacts named:**
+- `secuura-ks963-getuserbyid-swallows` → **rethrow** — KS-963 is ACTIONABLE now; its own
+  "do not fix yet" line is superseded by his word.
+- `secuura-platform-s-count-was-wrong-when-you-ruled` → **all18** — **the Platform S hold is
+  LIFTED**; the remaining three get archived.
+- `secuura-61-archived-while-still-open` → **three** — unarchive KS-174, KS-796, KS-802 only.
+
+**#906 verdict: GO-WITH-FINDINGS** (gate scored 1.0). Wednesday's completion check passed all
+six requirements and the merge GO is given under Kam's week-scoped grant. **F1 (gate fails OPEN
+when a gated package's deps are absent) and F2 (gate reads the WORKING TREE, not the pushed
+commits) are MAJOR and neither is a regression** — they go into one ticket, same logical path.
+Relaunch that gate by its PATH if ever needed:
 `2_Project_Files/fleet/qa-agent/launchers/launch_qa_secuura_ks989_906.sh [--check]`
 
-**s150's open corrections to carry:** KS-858 → move to `Deployed to UAT` (already merged in
-#884, on develop and on demo); its ticket text names a non-bypass as a bypass (`sig-json`
-fails CLOSED) and says 2/6 instances where the population is 1. KS-946 → re-price to P3 with
-the partition table on the ticket.
-
-**🔴 INSTANCE 6 IS LIVE ON THE TRUNK:** `systemTest/akto` `format:check` is RED on
-`develop 986c592d5`, arriving via merge `512480ef1` (#892) — merged by the PREVIOUS seat
-three hours before it was found. PR #906 ships the gate AND that fix together, deliberately:
-a gate added over a red trunk blocks every author on day one and gets bypassed.
+**🔴 INSTANCE 6 IS LIVE ON THE TRUNK until #906 merges:** `systemTest/akto` `format:check` RED
+on `develop 986c592d5`, arriving via merge `512480ef1` (#892) — the PREVIOUS seat's own merge,
+~4 hours before it was found (the gate corrected "three hours" to four).
 
 ## WHAT WAS BUILT TODAY — do not re-derive any of it
 | Thing | Where | Commit |
@@ -115,7 +117,7 @@ CONSTRUCTION (AES-GCM). Resolve via `email_lookup_hash`; decisive on a MATCH onl
 `decision_queue` refused it while `chat_log` was corrupt this morning; re-file it.
 
 ## FLEET
-**s150 Secuura/Blockchain LIVE in `%171`** (launched 13:14) · **QA gate LIVE in `%172`**. The Datasec/laptop seat WRAPPED
+**s150 Secuura/Blockchain LIVE in `%171`** (launched 13:14). QA gate ran 13:45→14:00 and its pane is CLOSED. The Datasec/laptop seat WRAPPED
 at 12:21; NexusAI S47 wrapped at 12:15 (`main` = `cd2b543`). No Tuesday seat exists yet —
 she is provisioned on the T9 and waits on Kam's Claude login.
 Kam was answering within minutes until ~12:53 and has been quiet since.
