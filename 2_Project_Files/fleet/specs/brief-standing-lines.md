@@ -814,3 +814,43 @@ query, whatever column list the SQL asked for.**
    original advice would have made the route unsatisfiable for wallet accounts, whose password column
    is null by construction; he retracted it himself. **Record the retraction on the ticket** — an
    unretracted recommendation outlives the reviewer's attention.
+
+---
+
+## Two silent no-ops that produce a FALSE ZERO and a FALSE IGNORE — the command runs, exits 0, and is wrong (2026-09-08, Secuura s152)
+
+**EVIDENCE BASIS:** one seat, **both red-proofed with discriminating controls in the same action**.
+Direction built against: a false zero / a false "ignored". **Not yet tested against:** other `grep`
+implementations, or `.gitignore` patterns beyond the trailing-slash form.
+
+### 1. `git grep -E` does NOT support `\b`, and matches NOTHING rather than erroring
+
+An escape audit for raw-client calls outside `provider.ts` returned **zero — the exact opposite of the
+truth, on the question the ticket turned on.**
+
+    git grep -E '\bpattern'   ->  0 hits     <- SILENT no-op, exit 0
+    git grep -E 'pattern'     ->  3 hits     <- control
+    git grep -P '\bpattern'   ->  3 hits     <- control (PCRE does support \b)
+    git grep -F 'literal'     ->  1 hit      <- control
+
+**This is distinct from the zsh `nomatch` case already in this brain: there the command FAILS. Here it
+RUNS AND EXITS 0.** There is no error, no warning, and a zero that looks like a measurement.
+
+1. **Never use `\b` with `-E`. Use `-P`** (PCRE), or anchor on characters you can see.
+2. **Any zero from a regex you have not exercised gets a control with the anchor REMOVED.** If
+   removing an anchor changes 0 into N, the anchor was the finding, not the world.
+3. **This belongs to the false-absence family** — and it is the member where the instrument reports
+   success, so `rc` cannot save you.
+
+### 2. A SYMLINKED `node_modules` escapes a `node_modules/` gitignore rule
+
+**A trailing slash matches DIRECTORIES ONLY.** A symlink at that path is not a directory, so git lists
+it as **untracked** — and **`git add -A` would have committed a symlink pointing into another
+worktree.** Discriminating control: **a real directory at the same path IS ignored.**
+
+1. **After creating any symlink inside a repo, run `git status --short` and look for it** — do not
+   assume an existing ignore rule covers it.
+2. **`git check-ignore -v <path>` answers it in one command** and prints the rule that matched, or
+   nothing at all.
+3. **Never `git add -A` in a tree containing symlinks you did not place.** This is the
+   gitignore-at-creation rule pointed at a file TYPE rather than a location.
