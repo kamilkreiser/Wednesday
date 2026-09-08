@@ -243,8 +243,22 @@ built from nothing:
    mounted the pointer resolves and the heal correctly does nothing.
 8. **Headless specifics, all GUI, all Kam's:** auto-login ON (Tailscale's GUI variant starts at
    LOGIN, not boot — without auto-login the machine is unreachable after a reboot) · sleep OFF ·
-   Screen Sharing ON so a monitor is optional · Tailscale's two approvals and tailnet login ·
+   Screen Sharing ON so a monitor is optional · ~~Tailscale's two approvals and tailnet login~~ ·
    Matilda Premium voice · Calendar TCC if she is to read one · Docker's first-launch prompts.
+
+   🔴 **TAILSCALE RULED OUT 2026-09-09 by Kam, verbatim: *"no tailscale needed on this machine
+   for now."*** So `doctor.sh`'s `⚠ Tailscale.app missing` on `Kamils-Mac-mini` is an EXPECTED
+   state, not an open gap — **do not re-raise it, and do not install it on this machine without
+   his word.** `doctor.sh` is a shared file both seats run and Tailscale IS wanted on the Studio,
+   so the check was deliberately left alone rather than suppressed.
+
+   **What his ruling costs, stated so he can correct it in seconds rather than discover it:**
+   Tailscale was the remote-access path for this box. Without it the mini is reachable only on
+   the local network (Screen Sharing / SSH over LAN), so **if it is ever run genuinely headless
+   and away from Kam, there is no way in.** That is the condition that reopens this — not a date.
+   *"For now"* is his scope word and it carries no expiry he set
+   ([[0_Brain/learnings/2026-09-06_a-scoped-override-carries-its-own-expiry]]); the trigger to ask
+   again is **"this machine needs to be reached from outside the LAN"**, and nothing else.
 9. **She does NOT serve a dashboard.** Kam asked for one website; it is served from the Studio and
    her stream renders there under the TUESDAY toggle. `WED_DASHBOARD=1` overrides that if a lone
    Tuesday machine ever genuinely needs its own.
