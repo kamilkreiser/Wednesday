@@ -17,7 +17,10 @@ machine until further notice"*). Datasec belongs to the laptop seat.
 | 2026-09-08 10:35 | Kam's two 10:35 rulings transcribed into the decision queue | WED / Secuura | DONE — sync_kam_rulings --apply, store read back |
 | 2026-09-08 10:40 | Fleet activity items could never clear (Kam 10:19) — mail-tile ack + fleet_ack.sh | WED | DONE — red-proofed on the rendered page, pushed |
 | 2026-09-08 10:44 | wed_claim.sh was writing to the DEAD T9 path — ownership tool was inert on this seat | WED | DONE — self-locating, 4 branches exercised, pushed |
-| 2026-09-08 10:45 | Secuura archive pass — 47 tickets, s149 executing on Kam's word | Secuura KS + PS boards | ACTIVE — s149's hands, Wednesday verifies the receipt |
+| 2026-09-08 10:45 | Secuura archive pass — 33 archived + 2 cascade-restored | Secuura KS board | DONE — s149 scored 1.0; PS-18 HELD on Kam's card |
+| 2026-09-08 10:56 | s149 WRAPPED and its pane CLOSED (%170) — handover 143 lines, everything pushed | Secuura/Blockchain | DONE — Wednesday is the wake path; successor launches on Kam's PS ruling |
+| 2026-09-08 10:58 | decisions.json REPAIR — Kam's rulings file had git conflict markers committed into it | WED / shared | DONE — 195 cards, 0 rulings lost, pushed. Came in via the LAPTOP's ce6a24be; laptop must pull |
+| 2026-09-08 11:00 | Attention flag now fires on the red marker, not just 'QUESTION' (Kam 10:59) | WED | DONE — exercised on the real feed, 2 of 12 flagged correctly |
 
 ## NOT MINE — the laptop seat's, and this seat has not touched them
 Datasec/NexusAI (RD-*) · Datasec/HPSM · Datasec/ATTIO · the vault `add -A` card
