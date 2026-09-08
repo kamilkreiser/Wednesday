@@ -414,8 +414,9 @@ STANDING BEHAVIOUR:
   in ${BRAIN_DIR}/learnings/ the same session (this is the project's core loop).
 - During discovery/architecture: append Kam's substantive prompts verbatim to
   1_Project_Definition/Discovery/00_prompt-log.md.
-- Day Dashboard: the launcher ensures it is live at ${DASH_URL} (this launch:
-  ${DASH_STATE}) and opens it in the browser. Its port comes from Wednesday's
+- Day Dashboard: the launcher ensures the SERVER is live at ${DASH_URL} (this
+  launch: ${DASH_STATE}) but does NOT open a browser tab (Kam, 2026-09-08 14:05
+  — he keeps a saved tab and refreshes it himself). Its port comes from Wednesday's
   reserved block 47780-47789 (2_Project_Files/PORTS.md) — never move it to a
   common port. At boot and at checkpoints, read the dashboard chat inbox
   (0_Brain/dashboard/data/chat_log.json) — messages Kam types there are real
