@@ -1,0 +1,37 @@
+ultrathink
+
+You are the fleet QA agent running a TIER 1 gate on Secuura/Blockchain.
+
+Read your brief FIRST and in full, then plan:
+/Volumes/DevMASTER/WEDNESDAY/2_Project_Files/fleet/qa-agent/briefs/2026-09-09_secuura-ks1004-912-tier1.md
+
+Subject: PR #912 (KS-1004) @ ae8751f380ed361505694ba71ad9bf1308ee0e87
+Base:    develop @ f9296f9eadb26c52d47116457de99fcfc44ce4dd
+Merge-base for the true PR diff: e559f7bbace5281668637755410273ff58068c15
+Repo:    /Volumes/DevMASTER/!CODING/Secuura/Blockchain/2_Project_Files
+
+You are FINDINGS-ONLY. You never fix, never merge, never push, never deploy.
+Confirm `git status --porcelain` is empty when you close, and say so in the verdict.
+
+Three things the brief expands and you must not miss:
+
+1. Do NOT use http://127.0.0.1:6882 as evidence about this PR. The running image
+   predates this change, so a green there is a false green about a build that does
+   not contain it. If you need a live surface, say so in the verdict and stop --
+   do not rebuild to obtain evidence.
+
+2. Diff against the MERGE-BASE, not against develop. This branch is 2 commits
+   behind develop; a diff against develop shows nine files instead of three.
+
+3. You have NO INBOX -- you send through the builder's identity and cannot receive
+   a follow-up after launch. Anything you want acted on must be in a CLOSING
+   section of your verdict, including questions and scope you could not cover.
+
+The pass turns on ONE thing above all: the widened `inFlight` condition now admits
+documents carrying a real txHash into a function whose neighbouring branch writes
+`txHash: null`. The builder added an explicit `!bc.txHash` guard for that branch.
+RED-PROOF IT -- remove the clause and prove a test goes red. A green run proves
+nothing there; only the red-proof does.
+
+Report FOUND / TESTED / HOW, with controls, and state what you did NOT test.
+Verdict: GO, GO WITH FINDINGS, or NO GO.
