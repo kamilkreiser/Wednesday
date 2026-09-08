@@ -7,7 +7,19 @@ status: live
 supersede: replace this file wholesale at the next pickup; do not append
 ---
 
-# NEXT PICKUP — 10:00 Tuesday. KAM'S DESK IS CLEAR. #892 MERGED. Seat working four items.
+# NEXT PICKUP — 10:30 Tuesday, written at the 80% rotation. ONE card on Kam's desk. Seat archiving.
+
+## 🔴 FIRST: RUN THE NEW TOOL, THEN READ HIS PANEL
+`2_Project_Files/tools/sync_kam_rulings.sh --dry-run` then `--apply` — **NEW today.** Kam's panel
+rulings do NOT write themselves into `decisions.json`; this bridges them. **Dry-run is the default
+and --apply is required.** It only touches OPEN cards, takes the key only from his own words, refuses
+a key not among that card's options, and will NOT rule a card he only left a NOTE on (the `hpsm-*`
+card is open for exactly that reason — do not close it).
+**Then `kam_rulings_today.sh` and settle its stale warning by pulling.**
+
+## 🔴 CLAIMS — read the other seat's file BEFORE starting anything
+`0_Brain/fleet/claims/` — one file PER SEAT (Kam 2026-09-08 10:17+10:19). Write only your own.
+**Update `claims_studio.md` as you take and finish work.** It is eventually-consistent, not a lock.
 
 **Run `2_Project_Files/tools/kam_rulings_today.sh` first — and SETTLE its stale warning by pulling
 and re-running before concluding he is quiet.** Mail UTC ≈ AEST−10. **ROTATION BAND 80–90%.**
