@@ -1309,3 +1309,46 @@ over-broad claim is loud and gets corrected within the hour.
 that lesson pointed at prose) · [[2026-09-08_a-safety-claim-names-the-property-it-checked]] (name the
 property, not the reassurance) · [[2026-08-16_an-overstated-record-gets-discounted-wholesale]] (check
 every row in BOTH directions — this is that, pointed at your own correction).
+
+---
+
+## BEFORE A RED-PROOF, WRITE DOWN WHICH CELLS YOU EXPECT TO REDDEN AND HOW MANY — a red you did not aim at is a FINDING, not noise
+*(2026-09-09, Secuura/Blockchain s154. M-tier. It is a mechanical tripwire that costs one line and it
+found a defect the ticket had understated.)*
+
+**The seat's own words, and they are the reason this is a rule rather than an anecdote:** *"I nearly
+counted it as expected red and moved on. The only reason I did not is that the number 4 did not match
+the three cells I had aimed at."*
+
+**Why the count is the tripwire and not the colour.** On a multi-guard change, "about four reds" looks
+right at a glance — which is exactly the moment nothing checks. A red-proof is judged on whether it
+reddened, and a red that was not aimed at is indistinguishable from one that was **unless the aim was
+written down first.** Afterwards it is unfalsifiable: every red can be rationalised into the set.
+
+**What the unaimed red turned out to be.** It was a cell the seat had labelled `CONTROL: a confirmed
+anchor still heals FORWARD, never to failed`. **A true control must not redden under the tamper**, so
+either the fix was wrong or the label was. **The label was** — under the old predicate a hashed
+document failed BOTH arms, so the early-return fired and it reconciled in NEITHER direction. **The
+ticket claimed one direction; the defect had two**, and the widened claim came out of reading an
+unexpected red rather than out of reading the code.
+
+**The rules:**
+1. **Write the aim before the tamper: which cells, and how many.** Then compare the count first and the
+   colours second. **A mismatch in the count is the finding; the colours are the detail.**
+2. **An unexpected red is investigated, never absorbed.** "Expected-ish" is the tell. If it can be
+   explained after the fact, it can be explained wrongly after the fact.
+3. **A CONTROL that reddens means your fix is wrong or your label is.** Both are worth knowing and only
+   one is bad news. **Find out which before touching either.**
+4. **Relabel in the cell, with the reasoning, rather than deleting or quietly re-scoping.** A control
+   that quietly is not one is worse than a missing control, because **the next reader counts it as
+   coverage.** The seat relabelled its cell `REPRO 2` and wrote why, in the cell.
+5. **The same arithmetic on the pass side:** if a tamper reddens FEWER cells than you aimed at, the
+   missing ones could not reach the property — which is the test-that-cannot-fail family arriving from
+   the other direction.
+
+**Family:** [[2026-08-07_a-check-that-cannot-fail]] (rule 5: when a check surprises you by passing, be
+as suspicious as when it fails — this is its red-side twin) ·
+[[2026-09-08_a-false-absence-is-usually-my-own-instrument]] (rule 2: when every case fails identically,
+test the instrument — here the count, not the uniformity, is the signal) ·
+[[2026-08-16_an-overstated-record-gets-discounted-wholesale]] (a row wrong in its headline is not
+therefore wrong in its body — the ticket understated its own defect).
