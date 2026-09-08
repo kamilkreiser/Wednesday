@@ -40,6 +40,23 @@ At 05:08 a seat told Peter on #785 *"the action on this one is yours."* **It was
 with the correction and links back; **`5579579360` (the false comment) now carries a forward banner**
 with its original body preserved verbatim. **Do not let either be tidied away.**
 
+## 🟠 SEAT ROTATION EXECUTED 20:2x — AND ITS VERIFICATION IS PENDING, NOT DONE
+**s151 wrapped at a clean boundary at 71%** (its set closed 8/8; it did not grind to the 80 ceiling).
+Scored **1.00** on the scoreboard. Pane `%2` closed with the listener guard (**listeners 19 → 19** as
+the control), successor launched in **`%3`**.
+
+**⚠ THE SUCCESSOR IS VERIFIED ONLY AT RUNG 4** — a turn ran, correct project and model, `ctx 9%`,
+mid-brain-load. **It has NOT yet named the commission, so rung 5 is NOT met and must not be claimed.**
+**Whoever reads this next: confirm rung 5 or 6 before treating it as briefed** — grep its pane for
+`KS-671`, `#728` or `premise`, or wait for its boot/plan mail, which is rung 6.
+**Its brief is `[Wednesday -> Secuura/Blockchain] SUCCESSOR to s151`, verified at the destination
+inbox 2026-09-08T10:24:41Z.** If the seat never confirms, re-tap a pointer at that subject.
+
+**Sequencing note that caught me out and is worth inheriting:** `brief_and_launch.sh` **skips the
+launch when the pane already exists** — so the successor brief landed in an inbox the WRAPPING seat
+was still polling. The pane had to be closed and relaunched separately. **Send the successor brief
+AFTER the pane is recycled, or expect the outgoing seat to be the one holding it.**
+
 ## 🟠 THE ROTATION PLAN — decided at 20:1x, and it exists nowhere else if this seat dies
 **Wednesday and the Secuura seat were BOTH at 70% and drifting to the band together.** If both turn
 over at once, the seat's handover is perfect and there is no live coordinator reading it.
