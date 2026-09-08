@@ -109,19 +109,6 @@ for m in pat.finditer(cmd):
     # name WEDNESDAY. Fail CLOSED on the unknown, since the whole class is about other trees.
     if path.startswith(OWN):
         continue
-    # SESSION SCRATCHPAD EXEMPTION (2026-09-08). This hook own refusal message ends by
-    # saying: clone by SHA into this session scratchpad and run them THERE. It then refused
-    # exactly that — a `git -C <scratchpad>/healtest init` building a fixture to red-proof a
-    # launcher fix. A gate that blocks its OWN documented workaround is a gate people route
-    # around, which is the failure it exists to prevent (the same lesson this file already
-    # learned at 02:3x on 09-02 from a false positive). A temp path is nobody checkout: no
-    # client repo lives under /tmp, so the rule has nothing to protect there.
-    # NOTE TO WHOEVER EDITS THIS BLOCK NEXT: it lives inside a SINGLE-QUOTED shell string.
-    # An apostrophe here ends that string and BRICKS THE HOOK, which blocks every Bash call
-    # in the session including the one that would repair it. That happened while writing
-    # this very comment. Keep this block apostrophe-free.
-    if path.startswith("/tmp/") or path.startswith("/private/tmp/") or path.startswith("/var/folders/"):
-        continue
     print("%s|%s" % (verb, path))
     break
 ' 2>/dev/null)

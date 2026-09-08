@@ -92,6 +92,37 @@ if [ -d "$VAULT_LOCAL/.git" ]; then
   fi
 fi
 
+# ── OWN-REPO SSH POINTER HEAL (2026-09-08, found while provisioning Tuesday) ─────────
+# The comment above says "every project launcher rewrites its OWN repo's core.sshCommand
+# at each launch". THIS launcher did not — it healed the vault and left itself alone, and
+# nobody noticed because on the Studio the pointer has always been correct.
+#
+# It stops being harmless the moment the tree is CLONED or COPIED: Tuesday's tree on the
+# T9 inherited `-i /Volumes/DevMASTER/WEDNESDAY/3_Access_Keys/github_deploy_rw`, a path
+# that will not exist on her machine. Git reports that as "Permission denied (publickey)",
+# which reads as "repository does not exist" — the exact 2026-09-07 diagnosis a NexusAI
+# agent lost time to, and the 2026-08-25 travel-drive stale-pointer class pointed at
+# Wednesday's own repo instead of someone else's.
+#
+# Same narrow shape as the vault heal: rewrite ONLY when the configured key path is
+# missing AND a key exists in this tree. A correct pointer is never touched; a genuinely
+# absent key is reported, never papered over.
+OWN_KEY="$PROJECT_DIR/3_Access_Keys/github_deploy_rw"
+if [ -d "$PROJECT_DIR/.git" ]; then
+  OWN_SSH="$(git -C "$PROJECT_DIR" config --get core.sshCommand 2>/dev/null || true)"
+  OWN_KEYPATH="$(printf '%s' "$OWN_SSH" | sed -n 's/.*-i "\([^"]*\)".*/\1/p')"
+  [ -n "$OWN_KEYPATH" ] || OWN_KEYPATH="$(printf '%s' "$OWN_SSH" | sed -n 's/.*-i \([^ ]*\).*/\1/p')"
+  if [ -n "$OWN_KEYPATH" ] && [ ! -f "$OWN_KEYPATH" ]; then
+    if [ -f "$OWN_KEY" ]; then
+      git -C "$PROJECT_DIR" config core.sshCommand \
+        "ssh -i \"$OWN_KEY\" -o IdentitiesOnly=yes -o StrictHostKeyChecking=accept-new"
+      echo "  [repo] HEALED core.sshCommand: was -> $OWN_KEYPATH (missing); now -> $OWN_KEY"
+    else
+      echo "  [repo] WARNING: core.sshCommand points at $OWN_KEYPATH (missing) and no key at $OWN_KEY — pushes WILL fail; Kam must place the deploy key." >&2
+    fi
+  fi
+fi
+
 # ── Sanity checks ──
 if [ ! -f "$PROJECT_DIR/CLAUDE.md" ] || [ ! -d "$BRAIN_DIR" ]; then
   echo "ERROR: expected CLAUDE.md and 0_Brain/ in $PROJECT_DIR"
