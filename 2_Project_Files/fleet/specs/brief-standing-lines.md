@@ -571,6 +571,15 @@ only required it to be well-told.** Prose quality is not evidence.
 enters this file when something verifies it or it recurs. See
 `0_Brain/learnings/2026-09-08_a-new-rule-is-most-dangerous-just-after-adoption.md`.
 
+**AND STATE WHAT THE SECTION DOES NOT YET COVER.** Added 20:0x on evidence: **three sections written
+on 2026-09-08 met an exception within the hour** — the exit-vs-outcome rule (its opposite direction,
+in ten minutes), the client-correction checklist (a missing rule 5, in one hour), and the review-badge
+pair (a THIRD failure direction, in forty minutes). **That is not carelessness; it is what a rule with
+one worked example is.** So every section carries a line naming the directions or cases it has NOT
+been tested against — *"built from a green trusted too readily; says nothing about a slow operation
+mid-flight"*. **A stated gap is one the next reader can fill; an unstated one they will discover the
+hard way, in the field, believing the rule was complete.**
+
 ---
 
 ## A tool's exit reports the CALL, never the OUTCOME — for anything that changes state elsewhere, read the destination (2026-09-08; TWO instances, and the third was RETRACTED — see the correction at the foot)
@@ -652,7 +661,23 @@ is wrong for one of them.** A discriminator that separates two cases a summary s
 is doing real work — that is a stronger basis than either case alone. **Verified, not inferred.**
 Failure direction: **both**, which is the point.
 
-**The pair, and having both is what makes either usable:**
+**THREE directions, completed 2026-09-08 20:0x — and the third was found while Peter was reviewing
+in real time, with our board reading "awaiting review" on work he had already returned:**
+
+    /pulls/{n}/reviews      can be BLIND to a shadow-flagged approval      -> under-reports
+    review:approved (index) is EVER-approved, not approved-AT-HEAD         -> over-reports
+    a PLAIN PR COMMENT      appears in NEITHER of the above                -> invisible
+
+**Some reviewers review two ways.** Peter posts formal reviews on some PRs (#728, #785, #799) and
+**plain PR comments on others (#872, #881)** — and a plain comment is in neither surface. **So NO
+SINGLE SURFACE answers "has this been reviewed?".**
+
+**The sweep method, which is the operative output:** read **`/issues/{n}/comments` AS WELL AS
+`/pulls/{n}/reviews`**, then settle at-head with `commit_id == head.sha`. A sweep that reads only the
+formal endpoint and the index is **correct when measured and incomplete in method** — which is exactly
+how a true figure ("13 awaiting Peter's review") becomes a false brief.
+
+**The original pair, kept because having all three is what makes any of them usable:**
 
 - **`/pulls/{n}/reviews` can be BLIND** to a shadow-flagged reviewer's approval — it under-reports.
   (Already in this brain; kept here so the pair sits together.)
@@ -756,3 +781,36 @@ that nothing is being asked.
 on the 2026-09-08 correction and **rule 4 fired on a draft its author had read twice** — then the seat
 found that **rule 5 did not exist**, from a throwaway sentence in the instruction rather than from the
 rules themselves. **A checklist is complete only over the failures someone has already met.**
+
+
+---
+
+## A mock LOOSER than the product gives a false GREEN that ships — the more dangerous mirror of a mock stricter than the product (2026-09-08)
+
+**EVIDENCE BASIS:** one seat, **measured against the product with a discriminating control** — the
+defect reproduces in the product and the suite is green; the control is that the same idiom works
+elsewhere (`getUserByEmail` uses `SELECT *`, which is why `passwordLoginGate` functions), **so the
+defect is this call and not the pattern.** Direction: a false green. Verified, not inferred.
+
+**The case (KS-732).** `USER_COLS` omits the password column — its own comment says *"All user columns
+EXCEPT password_hash"* — `getUserById` selects exactly that list, and the handler uses that call. **So
+the password guard is false for every account and `verifyPassword` is never reached.** The branch does
+not execute. **The suite passes because the `../db` mock returns the whole row for any `FROM users`
+query, whatever column list the SQL asked for.**
+
+**This board already carries "a mock STRICTER than the product". This is its mirror and it is worse:**
+
+> **A strict mock gives a false RED, and a false red gets investigated. A loose mock gives a false
+> GREEN, and a false green ships.**
+
+1. **When a test passes on a path you have not seen execute, suspect the mock's SHAPE, not just its
+   return values.** A mock that ignores the query's column list, filter, limit or ordering is a mock
+   answering a different question than the product asks.
+2. **The discriminator is whether the mock can REFUSE what the product would refuse.** If every query
+   shape gets the same row back, the mock cannot fail in the direction the defect lives.
+3. **Prove the branch executes before trusting the assertion about it** — a log line, a spy, a
+   deliberate throw. A green on a branch that never ran is a check that cannot fail.
+4. **A reviewer who withdraws his own filed recommendation on measurement is doing the job.** Peter's
+   original advice would have made the route unsatisfiable for wallet accounts, whose password column
+   is null by construction; he retracted it himself. **Record the retraction on the ticket** — an
+   unretracted recommendation outlives the reviewer's attention.
