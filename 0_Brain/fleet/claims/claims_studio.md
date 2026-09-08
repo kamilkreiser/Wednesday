@@ -5,6 +5,9 @@ machine until further notice"*). Datasec belongs to the laptop seat.
 
 | Since | What | Where | State |
 |---|---|---|---|
+| 2026-09-08 18:03 | Secuura seat (%2) — briefs, rulings, gates, merges on the P2 In Review queue from KS-577 | Secuura/Blockchain, pane %2 | ACTIVE |
+| 2026-09-08 18:03 | Correcting the 09-08 boot-spec lesson (its 200K-window premise falsified by measurement) | WED / 0_Brain/learnings | CLOSED 18:0x — corrected, digests regenerated, pushed 09de0120 |
+| — | **EVERY ROW BELOW THIS LINE PREDATES KAM'S 16:01 SHUTDOWN and is HISTORY, not state.** The panes named in them are gone; the Studio rebooted at 17:13. Kept, never deleted. | — | HISTORICAL |
 | 2026-09-08 07:15 | Secuura seat s149 — briefs, rulings, gates, merges | Secuura/Blockchain, pane %170 | ACTIVE |
 | 2026-09-08 10:14 | Archive pass: 52 tickets in terminal states (Kam 10:14) | Secuura KS+PS boards | ACTIVE — pilot of 5 CLEAN, rest authorised |
 | 2026-09-08 09:57 | #793 audit-baseline resolution | Secuura #793 | HELD — on Kam's card (4 expired rows) |
