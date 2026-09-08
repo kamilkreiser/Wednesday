@@ -45,7 +45,10 @@ with its original body preserved verbatim. **Do not let either be tidied away.**
 Scored **1.00** on the scoreboard. Pane `%2` closed with the listener guard (**listeners 19 → 19** as
 the control), successor launched in **`%3`**.
 
-**⚠ THE SUCCESSOR IS VERIFIED ONLY AT RUNG 4** — a turn ran, correct project and model, `ctx 9%`,
+**✅ SUCCESSOR VERIFIED AT RUNG 6 (20:32): s152 sent a boot mail, DKIM-verified the brief
+(spf/dkim/dmarc pass with EIGHT failing-value controls absent in the same read), quoted the commission
+back, and re-read the floor from origin in its own action.** Two measured corrections at boot, both
+accepted — see below. ~~THE SUCCESSOR IS VERIFIED ONLY AT RUNG 4~~ — a turn ran, correct project and model, `ctx 9%`,
 mid-brain-load. **It has NOT yet named the commission, so rung 5 is NOT met and must not be claimed.**
 **Whoever reads this next: confirm rung 5 or 6 before treating it as briefed** — grep its pane for
 `KS-671`, `#728` or `premise`, or wait for its boot/plan mail, which is rung 6.
@@ -69,8 +72,24 @@ RUNG 5 (the pane quoting the commission, never a non-zero ctx) → THEN Wednesda
 `#728 / KS-671` is item 0 regardless.**
 
 ## 🔴 THE REAL "BALL WITH US" SET — supersedes every earlier count including the 13 in the s151 brief
-**8 of 32 open non-dependabot PRs have been returned by Peter AT or AFTER the current head:**
-**#728 · #768 · #773 · #805 · #872 · #880 · #881 · #883.** Measured across BOTH surfaces.
+**~~8~~ SEVEN of 32 open non-dependabot PRs are with us** — **#728 · #768 · #773 · #805 · #872 ·
+#880 · #881** (#883 merged). **CORRECTED at 20:32 by s152: #785 is NOT with us.** Its head is
+`3611f60c4` with THREE reviews and **ZERO at head** — **s151's own final push voided every review on
+it**, including Peter's 2026-09-03 approval at `a27b3f9b3`. **So #785 is genuinely with Peter.**
+*The irony to carry: s151 spent the evening establishing that a push voids an approval — it wrote the
+#806 warning block for exactly this — and then did it to itself on its last act, unnoticed. Watch for
+that at a wrap, when attention is on the handover rather than the work.*
+
+**⚠ A HANDOVER IS NOT THE AUTHORITY FOR STATE.** Wednesday's successor brief said it was; s152 proved
+otherwise with `merge-base --is-ancestor` **both directions** (HANDOVER-s151's `811a82253` is an
+ANCESTOR of `067554d65`, not divergent — Peter merged #792 at 10:17Z after it was written).
+**The corrected rule: a handover is the authority for what that SEAT DID and DECIDED; `origin` is the
+authority for STATE, always. A handover's state block is a measurement with a timestamp.**
+**Peter merged TWICE tonight without warning — re-read origin before any merge.**
+
+**UNVERIFIED, and stated as such:** *"#773 and #768 live on no board"* is s151's claim, passed on by
+Wednesday, and **s152 refused to inherit it as measured** — its own control shows Linear's
+`searchIssues` too fuzzy to discriminate. Settle by PR attachment, or file both tickets anyway.
 **#883 MERGED at 20:1x** — `develop 811a82253 → baa99128d`. Tier 2, settled by the seat reading the
 diff against a discriminator rather than asking: one file, `package-lock.json`, +31/−7, ZERO code
 files; `ip-address` 10.1.0 → 10.7.0 via `express-rate-limit` 8.7.0; **the vulnerable code REMOVED, not
