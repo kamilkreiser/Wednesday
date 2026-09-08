@@ -133,6 +133,40 @@ fi
 
 cd "$PROJECT_DIR" || exit 1
 
+# ── PULL THIS TREE BEFORE ANY BOOT READ (2026-09-08, s153) ────────────────────────────
+# NOTE TO WHOEVER EDITS THIS BLOCK: never add `>/dev/null` and never add `--autostash`.
+# Both were tried elsewhere in this repo on 2026-09-08 and both are why conflict markers
+# reached `main`: an autostash conflict you cannot see is a conflict you commit.
+#
+# WHY IT EXISTS. The launcher never pulled. That was invisible while one seat on one
+# drive made every commit — it is current by definition. The two-machine split breaks
+# that: `.git` is deliberately excluded from every drive sync (KS-99 — file-syncing a
+# repo corrupts it), so a second seat's tree only ever moves forward when someone pulls,
+# and NOTHING pulled. Tuesday's T9 tree was found ten commits behind at 15:1x, and a
+# session does all its reading at BOOT — it would have read a stale handover, stale
+# lessons and a stale copy of its own instructions, then worked confidently from all three.
+# It runs BEFORE the boot digest below, because the digest is generated FROM the lesson
+# files a pull may have just changed.
+#
+# It never blocks a launch: offline, detached, dirty or conflicted all WARN and continue.
+if command -v git >/dev/null 2>&1 && [ -d "$PROJECT_DIR/.git" ]; then
+  if [ -n "$(git -C "$PROJECT_DIR" status --porcelain 2>/dev/null)" ]; then
+    # A dirty tree is normal here (the dashboard writes its data files constantly).
+    # We do NOT autostash — that is the mechanism that corrupted two files today.
+    echo "ℹ tree has local changes — skipping the boot pull (no autostash, by design)."
+    echo "  If this seat is behind, commit or stash first, then: git -C \"$PROJECT_DIR\" pull --rebase"
+  else
+    echo "→ pulling $PROJECT_DIR before the boot reads…"
+    if git -C "$PROJECT_DIR" pull --rebase 2>&1; then
+      echo "✓ boot pull ok — HEAD $(git -C "$PROJECT_DIR" rev-parse --short HEAD)"
+    else
+      echo "⚠ BOOT PULL FAILED (rc=$?). This seat may be reading a STALE brain."
+      echo "  Output is above — read it. If it is a conflict, resolve it BEFORE trusting"
+      echo "  the handover, the ledger or the digest. Continuing so the launch is not blocked."
+    fi
+  fi
+fi
+
 # ── Machine preflight (Kam, 2026-08-04: dependency check for the laptop case) ──
 # Non-blocking on warnings; hard failures pause so they're seen before launch.
 # --- Boot digest (WED-139, Kam 2026-09-02 20:47 "go with a boot as you recommend"):
