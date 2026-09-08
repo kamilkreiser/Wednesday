@@ -944,3 +944,45 @@ permanent.
 5. **The catch here came from two of the seat's OWN records disagreeing** — the skip message
    contradicted its earlier verification. **Keep both, and read them against each other**; no single
    check would have found this.
+
+---
+
+## A reviewer's instruction has a DATE, and so does the state it rests on
+*Added 2026-09-08 22:0x by Wednesday (s154), from the Secuura seat's own formulation on KS-717.*
+
+**EVIDENCE BASIS: three measured instances in one session, 2026-09-08, each with a control.**
+Not a single self-report — this rule does not rest on one seat's account of one event.
+
+| # | The instruction / blocker | What had moved under it | The control |
+|---|---|---|---|
+| 1 | KS-671's own ticket premise — *"every anchoring chain call funnels through `provider.ts`"* | Two call sites escape it (`threadTokenMint.ts:256`, the verify scan) | recorder ×12 in `provider.ts`, ×0 in both escapes; 7-hit grep control |
+| 2 | Peter's 2026-08-28 *"KS-717 stays In Progress"* | **Peter's own #802**, authored and merged by him, closes all three acceptance criteria | 207/193 → 194/194, unexercised == 0 |
+| 3 | Peter's registry hold — *"absent from the OpenAPI spec (KS-712)"* | KS-712's declaration landed 2026-09-01 in #760, `9b89f4fce`, with `security: []` — his own named standard | `git log -S` for a term that should not exist returns 0 commits |
+
+### The standing line
+
+> **Before honouring a human's hold, a "stay in column X", or a recorded blocker: check whether its
+> AUTHOR has since done the work.** Read what merged after they wrote it. An instruction is a
+> sentence plus the state that made it right, and only the sentence gets written down.
+
+### The EXCEPTION, stated because a rule is never less tested than the hour it is adopted
+
+**An instruction that is a PREFERENCE or a POLICY does not expire when state moves.**
+*"Do not sweep this ticket"* · *"never park a ticket in a column whose exit event cannot occur"* ·
+*"one ticket per logical path"* — these rest on how the author wants to work, not on a fact about
+the tree. Only an instruction whose **REASON rests on a state** expires with that state.
+
+**If you cannot name the state an instruction rests on, it does not expire — ask Wednesday.**
+Getting this backwards means overriding a human's stated preference on the strength of a commit,
+which is the far more expensive direction.
+
+### What this rule was built AGAINST, and what it is silent about
+
+**Built against:** work that WAS done, by the very person whose note is holding it. **Silent about:**
+an instruction whose author has done *adjacent* work — a merge in the same file is not a merge that
+satisfies the criteria, and the discriminator is reading what the PR CLOSES, never what it touches.
+
+**Family:** it is the third costume in one session of *the record was right and nothing connected it
+to the change* — the other two are the KS-843/KS-577 precondition and the eight
+work-done-board-not-saying-so instances. Those are about a change nobody linked; this is about a
+person whose own change nobody linked to their own instruction.
