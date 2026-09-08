@@ -24,19 +24,7 @@ fi
 # Conflict markers (added 2026-09-02 19:4x, ledger w=5 check-the-refusal family: a note with
 # markers reached origin twice in one day through a ';' chain after a failed autostash pop).
 # In-path: a commit cannot carry a staged text file with a marker line. Exercised before arming.
-# 🔴 `json` REMOVED FROM THE EXCLUSION LIST 2026-09-09 (Tuesday, after doing the exact thing
-# this guard exists to stop). The list read `\.(json|png|jpg|pdf|xlsx|gif)$` — so the scan
-# skipped `decisions.json` and `chat_log.json`, **the only two files in this repo that have
-# ever carried conflict markers into origin**, six times by this date. The guard excluded the
-# file class it was written for. Measured, not argued: commit beb32de7 on 2026-09-09 pushed a
-# `decisions.json` with `<<<<<<< Updated upstream` at line 6630 straight past this hook, and
-# an unparseable decisions.json makes `decision_queue.sh` and `send_brief.sh` refuse for BOTH
-# seats — i.e. it blocks the fleet and puts Kam's rulings at risk.
-# WHY THE FALSE-POSITIVE FEAR DOES NOT APPLY: a JSON string value can never contain a literal
-# newline (json.dump escapes it as \n), so no line INSIDE a well-formed JSON file can begin
-# with `<<<<<<< `, `=======` or `>>>>>>> ` unless it is a real conflict marker. The binary
-# types stay excluded. Both branches exercised before arming — see the 2026-09-09 daily note.
-MARK=$(git diff --cached --name-only --diff-filter=AM | grep -Ev '\.(png|jpg|jpeg|pdf|xlsx|gif|zip|dmg)$' | while read -r f; do
+MARK=$(git diff --cached --name-only --diff-filter=AM | grep -Ev '\.(json|png|jpg|pdf|xlsx|gif)$' | while read -r f; do
   git show ":$f" 2>/dev/null | grep -nE '^(<<<<<<< |=======$|>>>>>>> )' | head -3 | sed "s|^|$f:|"
 done)
 if [ -n "$MARK" ]; then
