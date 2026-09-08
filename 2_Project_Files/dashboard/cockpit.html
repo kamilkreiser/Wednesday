@@ -498,7 +498,9 @@ async function poll(force) {
       }
       // several at once would overlap-kill each other — speak only the latest
       // auto:true → the server dedups per-message across every open window
-      if (autoplayOn && latestNew) speak(latestNew.ts, null, true);
+      // skip what Wednesday already said aloud from the terminal — otherwise Kam hears the
+      // short spoken summary AND the long written reply, back to back (his 14:21 report)
+      if (autoplayOn && latestNew && !latestNew.spoken) speak(latestNew.ts, null, true);
     }
     const sig = JSON.stringify(msgs);
     if (!force && sig === lastSig && !pendingMsgs) return;

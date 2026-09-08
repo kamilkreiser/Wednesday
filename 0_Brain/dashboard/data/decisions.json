@@ -6414,5 +6414,40 @@
   "status": "ruled",
   "ruled_choice": "rethrow",
   "ruled_ts": "2026-09-08T14:00:56.317541+10:00"
+ },
+ {
+  "id": "secuura-ks963-widen-to-preauth",
+  "client_project": "Secuura/Blockchain",
+  "title": "getUserByIdPreAuth has the IDENTICAL swallow, and your ruling named only getUserById — two lines, but widening a security change past its ruling is not ours",
+  "bluf": "WHY THIS OVERRODE THE PRIOR-RULING GATE, stated as the discriminator: the gate matched your 14:00 ruling on the shared word 'ks963'. That ruling reads, verbatim, 'Apply the KS-253 pattern to getUserById' and it shipped into PR #907, which changes getUserById ONLY. This card is about getUserByIdPreAuth — a DIFFERENT function the builder found afterwards and deliberately did not touch. Same ticket, different scope; the gate matches on words and only the scope discriminates. || You ruled 'rethrow' on getUserById at 14:00 and it is built as #907. While building it the seat found getUserByIdPreAuth carries the SAME swallow, and STOPPED: widening a security change past the ruling that authorised it is not the agent's call, nor Wednesday's, on the rule that a permissive sentence is not a grant for something it did not name. It is flagged at the function and on the ticket, unchanged. || FOR INCLUDING IT: your own reasoning already covers it — you said the design question is settled by the sibling and 'this is the missed function'. getUserByIdPreAuth is also a missed function of the same pattern, and leaving it means the class is half-closed on a path whose name says PRE-AUTH. || AGAINST: it is a second security surface in a round gated for one, and the gate on #907 is briefed against the change you actually authorised. || A FINDING THAT MAY CHANGE HOW YOU READ ALL OF THIS: the seat proved KS-963's FIRST PREMISE IS FALSE. The ticket said getUserById catches a decrypt error and returns null. It does not and never did — fromRow is async and was returned WITHOUT await from inside the try, and a promise returned from a try block is not caught by its catch. A decrypt failure has always propagated. The fix is still the right change and still your ruling, but it closes the query() failure path rather than the decrypt path the ticket describes. It found that because a cell it wrote PASSED, then passed IDENTICALLY when it tampered the source back to the swallow — a vacuous cell it caught in its own work before sending it to me as the measurement I commissioned. Nothing is built on the preAuth function; #907 is at the gate.",
+  "default_action": "DEFAULT IF KAM IS SILENT: #907 ships as ruled, covering getUserById only, and getUserByIdPreAuth keeps its swallow with the finding recorded at the function and on KS-963. Nothing degrades — that is today's behaviour — but the class stays half-closed on a path named PRE-AUTH.",
+  "options": [
+   {
+    "key": "include",
+    "label": "Widen #907 to getUserByIdPreAuth now — two lines, same pattern, same round, gate re-briefed to cover both (Recommended)",
+    "detail": ""
+   },
+   {
+    "key": "separate",
+    "label": "Leave #907 as ruled and file getUserByIdPreAuth as its own ticket — keeps the gated change identical to the authorised one",
+    "detail": ""
+   },
+   {
+    "key": "leave",
+    "label": "Leave it entirely — getUserByIdPreAuth keeps the swallow",
+    "detail": ""
+   }
+  ],
+  "recommended": "include",
+  "ts": "2026-09-08T14:19:55.408433+10:00",
+  "status": "open",
+  "ruled_choice": null,
+  "ruled_ts": null,
+  "prior_rulings_overridden": [
+   "2026-08-17 20:10",
+   "2026-08-17 20:15",
+   "2026-09-08 14:00",
+   "CARD secuura-ks963-getuserbyid-swallows"
+  ]
  }
 ]

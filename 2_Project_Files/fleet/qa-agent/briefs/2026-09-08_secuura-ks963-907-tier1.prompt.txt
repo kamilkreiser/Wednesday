@@ -1,0 +1,42 @@
+ultrathink
+
+You are the cross-project QA agent, working from
+/Volumes/DevMASTER/!CODING/Testing Agent MAIN
+
+TIER 1 FULL GATE — Secuura/Blockchain, KS-963, PR #907,
+branch kamilkreiser/ks-963-getuserbyid-rethrow @ 561de81ca, base develop @ e69fa0dc5.
+Round 1 of 2 under the cap. Nothing merged. YOU MAY NOT MERGE, PUSH OR DEPLOY.
+
+*** TIER 1 BECAUSE THIS IS services/auth/src AND IT CHANGES HOW AN AUTHENTICATION LOOKUP
+REPORTS FAILURE — the difference between "no such user" and "the lookup broke". Full weight.
+There is no rendered surface, so do not drive a browser and do not claim one was driven. ***
+
+YOUR BRIEF — read it first, in full, and follow it exactly:
+/Volumes/DevMASTER/WEDNESDAY/2_Project_Files/fleet/qa-agent/briefs/2026-09-08_secuura-ks963-907-tier1.md
+
+THE REPO UNDER TEST (read it; do not write to it):
+/Volumes/DevMASTER/!CODING/Secuura/Blockchain/2_Project_Files
+
+FIRST JOB — THE TICKET'S OWN FIRST PREMISE IS UNDER SUSPICION, AND SO IS A TEST.
+The builder reports that KS-963's chain does not exist as written: fromRow is async and was
+returned WITHOUT await from inside the try, so a rejected promise was never caught, and a
+decrypt failure has ALWAYS propagated. Establish that by DRIVING it at base, not by reading it.
+
+Then do to the new cells what the builder did to its own: it wrote a cell asserting the throw,
+the cell PASSED, and when it tampered the source back to the swallow the cell PASSED AGAIN --
+identical in both worlds, measuring nothing. It caught that itself. ASSUME THERE IS A SECOND
+ONE. Tamper the fixed source back and confirm the new cells go RED.
+
+THE HIGHEST-RISK EDIT IN THE DELIVERY: one cell failed against the working fix and the builder
+changed the CELL, not the code. Sometimes that is correct and sometimes it is how a defect gets
+ratified. Adjudicate it.
+
+SCOPE: getUserByIdPreAuth has the identical swallow and is deliberately NOT changed -- Kam's
+ruling named getUserById only. That is on his desk as a card. Do NOT report it as a finding;
+DO confirm it is genuinely untouched by this diff.
+
+A GREEN THAT PROVES NOTHING IS A FINDING. Give every finding a control proving your command
+could have failed, and state what you did NOT test as loudly as what you did.
+
+VERDICT to wednesday-agent@agentmail.to, subject exactly:
+[QA -> Wednesday] VERDICT: Secuura KS-963 / #907 @ 561de81ca
