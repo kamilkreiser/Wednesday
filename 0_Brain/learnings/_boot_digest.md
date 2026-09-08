@@ -7,7 +7,7 @@ status: live
 
 # Boot digest — headline + rules of every lesson (open the file when it fires)
 
-Generated 2026-09-08 22:18 from 127 lesson files (644,316 B). Each block = the lesson's retrieval handle (H1), its frontmatter, the operative paragraph, its section index, and every RULES section verbatim. 6 files carry no rules-shaped section and are included whole. The CASES behind a rule live only in the file: open it the moment the rule fires, or when a diagnosis needs the evidence. `_ledger.md` is read whole beside this digest; `_ledger_archive.md` on demand.
+Generated 2026-09-08 22:23 from 127 lesson files (646,649 B). Each block = the lesson's retrieval handle (H1), its frontmatter, the operative paragraph, its section index, and every RULES section verbatim. 6 files carry no rules-shaped section and are included whole. The CASES behind a rule live only in the file: open it the moment the rule fires, or when a diagnosis needs the evidence. `_ledger.md` is read whole beside this digest; `_ledger_archive.md` on demand.
 
 ## The T9 SSD is the master — Wednesday must be fully portable
 `2026-07-31_fully-portable-drive.md` · principle · 2026-07-31 · status: superseded — the "T9 is the master" half by [[2026-08-25_one-drive-devmaster-is-master]] (2026-08-25); the portability principle itself still lives
@@ -4296,7 +4296,7 @@ sentence, ask what the instrument would have printed if the thing WERE there, an
 print that.** A false absence and a true absence are byte-identical on screen. **The world cannot
 tell you which one you are holding; only a control can.**
 
-sections (open the file for these): The three, in one session, all within ninety minutes · Why this is its own lesson and not three ledger rows · How to apply · Instance 4, added the same session — and it landed INSIDE the correction · The uncomfortable half, kept · EXTENSION 2026-09-08 19:5x — a FAILED COMMAND and a true zero are indistinguishable in a count, and a SEMANTIC control is what catches it
+sections (open the file for these): The three, in one session, all within ninety minutes · Why this is its own lesson and not three ledger rows · How to apply · Instance 4, added the same session — and it landed INSIDE the correction · The uncomfortable half, kept · EXTENSION 2026-09-08 19:5x — a FAILED COMMAND and a true zero are indistinguishable in a count, and a SEMANTIC control is what catches it · SHARPENED 2026-09-08 22:2x by the Secuura seat (s152) — A CONTROL DRAWN FROM THE SAME FAMILY AS THE THING YOU ARE MISSING AGREES WITH THE WRONG ANSWER
 
 ## How to apply
 
@@ -4347,6 +4347,29 @@ own subject.
 10. **A zero from a command whose invocation you did not verify is not a measurement of anything.**
     This is rule 3 (read stderr) with its most common concrete cause named: **the identifier was
     malformed, so the command never addressed the thing.**
+
+## SHARPENED 2026-09-08 22:2x by the Secuura seat (s152) — A CONTROL DRAWN FROM THE SAME FAMILY AS THE THING YOU ARE MISSING AGREES WITH THE WRONG ANSWER
+**The operative case:** you have a zero, and rule 1 says run a control. **Before you run it, ask what
+the control has in common with the case you may be missing.** A control that shares the failing
+property is not a control — it is a second sample of the same blind spot, and it will come back
+confirming the zero.
+
+**The rule this adds to rule 1:**
+
+11. **A control must be able to fail INDEPENDENTLY of the failure it is testing for.** State what the
+    control does NOT share with the suspect case — a different file, a different syntax, a different
+    code path, a different writer. *"I planted the token and found it"* is only a control if the
+    planted token could be found by a broken instrument's blind spot too.
+12. **The cheapest way to get independence is to pick the control from something you did not write and
+    did not choose** — an existing value in another file beats a fixture you author, because a fixture
+    inherits your model of the problem, which is the thing under suspicion.
+
+**Family:** this is the all-pass red-proof rule (rule 2) pointed at the control rather than the
+subject — *when every case fails identically, including the control, stop testing the subject* is what
+you get when the control is NOT independent, and this rule is how you avoid arriving there. Also
+[[2026-08-07_a-check-that-cannot-fail]] and the same day's ledger row on a brief CONDITION being an
+instrument (the condition that produced this case was Wednesday's, and it required the absence without
+requiring the control).
 
 
 ## A ghost suggestion is dangerous in proportion to how little the receiving agent has ALREADY WRITTEN DOWN — the detector catches the line, a recorded decision makes it inert

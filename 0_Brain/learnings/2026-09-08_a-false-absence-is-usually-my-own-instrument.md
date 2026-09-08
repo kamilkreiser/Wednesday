@@ -136,3 +136,36 @@ impossible before it was investigated.
 10. **A zero from a command whose invocation you did not verify is not a measurement of anything.**
     This is rule 3 (read stderr) with its most common concrete cause named: **the identifier was
     malformed, so the command never addressed the thing.**
+
+## SHARPENED 2026-09-08 22:2x by the Secuura seat (s152) — A CONTROL DRAWN FROM THE SAME FAMILY AS THE THING YOU ARE MISSING AGREES WITH THE WRONG ANSWER
+
+**The operative case:** you have a zero, and rule 1 says run a control. **Before you run it, ask what
+the control has in common with the case you may be missing.** A control that shares the failing
+property is not a control — it is a second sample of the same blind spot, and it will come back
+confirming the zero.
+
+**The case, measured.** Wednesday's local-stack GO carried a condition protecting Kam's dashboard:
+enumerate the ports the stack binds, confirm none fall in 47780–47789. The seat's first enumerator
+printed `total host ports: 0` — the compose file writes ports as `${VAR:-default}:container` and the
+regex demanded a leading digit. **The control that caught it asserted that 6882 and 8881 must appear —
+and those ports live in a DIFFERENT FILE, in a DIFFERENT SYNTAX.** The seat's own words:
+
+> *"had I picked a control from the same `${VAR:-default}` family, it would have returned zero too and
+> agreed with the wrong answer."*
+
+**The rule this adds to rule 1:**
+
+11. **A control must be able to fail INDEPENDENTLY of the failure it is testing for.** State what the
+    control does NOT share with the suspect case — a different file, a different syntax, a different
+    code path, a different writer. *"I planted the token and found it"* is only a control if the
+    planted token could be found by a broken instrument's blind spot too.
+12. **The cheapest way to get independence is to pick the control from something you did not write and
+    did not choose** — an existing value in another file beats a fixture you author, because a fixture
+    inherits your model of the problem, which is the thing under suspicion.
+
+**Family:** this is the all-pass red-proof rule (rule 2) pointed at the control rather than the
+subject — *when every case fails identically, including the control, stop testing the subject* is what
+you get when the control is NOT independent, and this rule is how you avoid arriving there. Also
+[[2026-08-07_a-check-that-cannot-fail]] and the same day's ledger row on a brief CONDITION being an
+instrument (the condition that produced this case was Wednesday's, and it required the absence without
+requiring the control).
