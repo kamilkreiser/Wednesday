@@ -22,3 +22,4 @@ sees the claim rather than discovering it in a conflict.
 | 2026-09-08 11:27 | Kamils-Mac-Studio | KS-996 measurement (read-only): are the 95 archived non-terminal Secuura tickets cascade collateral? parent archivedAt to the millisecond | OPEN | |
 | 2026-09-08 12:23 | Kamils-Mac-Studio | Phase 0 + Phase 1 — chat streams (one writer per file, chat_log.json becomes DERIVED) and the WEDNESDAY|TUESDAY toggle. Kam's 12:1x commission. | OPEN | |
 | 2026-09-08 13:14 | Kamils-Mac-Studio | Secuura s153 launched on the standing queue (KS-989 first) — supervision, gate, scoring | OPEN | |
+| 2026-09-08 14:58 | Kamils-Mac-Studio | Drive sync topology: DevMASTER->T9 full sync now, plus nightly NAS sync schedules for both agents (Tuesday 23:00, Wednesday 03:00-04:00) — Kam 14:57 | OPEN | |
