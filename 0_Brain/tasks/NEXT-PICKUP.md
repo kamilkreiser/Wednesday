@@ -40,6 +40,20 @@ At 05:08 a seat told Peter on #785 *"the action on this one is yours."* **It was
 with the correction and links back; **`5579579360` (the false comment) now carries a forward banner**
 with its original body preserved verbatim. **Do not let either be tidied away.**
 
+## 🔴 THE REAL "BALL WITH US" SET — supersedes every earlier count including the 13 in the s151 brief
+**8 of 32 open non-dependabot PRs have been returned by Peter AT or AFTER the current head:**
+**#728 · #768 · #773 · #805 · #872 · #880 · #881 · #883.** Measured across BOTH surfaces.
+**#883 is APPROVED at head `bac58b93a`, clean** (KS-729 leg 1, an SSRF removal) — **conditional merge
+GO given: TIER 2 and merge if it is a dependency removal/replacement; STOP and escalate if it adds or
+rewrites request/URL-handling code of ours.**
+**PETER REVIEWED FOUR PRs IN FIFTEEN MINUTES around 09:50–10:02Z and may still be going.**
+
+## 🔴 A FALSE CLAIM ABOUT A HUMAN IS IN HANDOVER-s150.md — do not inherit it
+It states *"Peter has NEVER commented on #773 or #728."* **Both halves are false** — formal
+`COMMENTED` reviews at `0c5914c` (2026-08-31) and `1377590` (2026-09-02), **each still the head**.
+Corrected in this brain's daily note by appending; the Secuura seat records it in the project's own
+`history.md` beside s150's handover, never by editing that seat's record silently.
+
 ## 🔴 OPEN / NEXT
 0. **#728 / KS-671 IS THE SUCCESSOR'S FIRST WORK — five items across a service, deliberately NOT
    started.** Peter reviewed it at `0c5914cad`, still the head, on 2026-08-31 — **eight days awaiting
