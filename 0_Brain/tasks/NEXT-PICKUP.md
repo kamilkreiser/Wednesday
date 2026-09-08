@@ -7,7 +7,24 @@ status: live
 supersede: replace this file wholesale at the next pickup; do not append
 ---
 
-# NEXT PICKUP — s154 (Studio) LIVE at 50%. Secuura s153 REBUILDING. Nothing blocked, nothing waiting on Kam.
+# NEXT PICKUP — s154 (Studio) LIVE. Secuura s153 WRAPPED CLEAN at 23:38. NO SEAT RUNNING. Nothing blocked, nothing waiting on Kam.
+
+## 🟢 START HERE IN THE MORNING — KS-1013 is item 0, and NO successor was launched deliberately
+**KS-1013 (P2) is the one genuinely actionable item.** It is a FIX, so it needs the full QA gate chain
+(builder → Wednesday → testing agent → Wednesday), and **Wednesday ruled at 23:35 that neither it nor
+the seat should start that chain at that hour** — then held to that ruling ten minutes later rather
+than launching a successor anyway. **That is a decision, not an omission.** The 2026-08-28 overnight
+grant covers running on; its own morning-review clause is what this defers to.
+
+**The load-bearing framing, repeated here because it is what a fresh seat must not get backwards:**
+`561de81ca` (Kam's KS-963 `rethrow`) is **CONTEXT, NOT CAUSE**. **KS-963 did not create a defect; it
+removed the swallow that was hiding one.** The route never validated the id format, so the old `404`
+was itself a wrong answer. **The ruling is NOT to be reverted.** Fix shape: a 400 format check before
+the lookup (KS-536 4xx rule).
+
+**Both stacks were left UP on purpose** — the platform stack (33 containers, gateway 200) and Akto
+(5 containers), so the next seat can re-run without a bring-up. Tear-down is `stop`, never `down`,
+never `-v`, and it is nobody's tonight. `47787` verified still bound and untouched at wrap.
 
 ## 🟢 s153 IS MID-BUILD — do not re-brief it, do not tap it, wait for its delta mail
 Booted 22:31, **verified at RUNG 6** (boot mail; brief DKIM-verified with all eight failing-value
