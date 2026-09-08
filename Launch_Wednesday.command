@@ -251,6 +251,11 @@ SUBJECT only, and never brief or answer for a Datasec project. Cross-seat mail t
 carries COORDINATION ONLY — never Secuura code, findings, tickets or credentials."
 fi
 
+case "$AGENT" in
+  tuesday) SELF_INBOX="tuesday-agent@agentmail.to" ;;
+  *)       SELF_INBOX="wednesday-agent@agentmail.to" ;;
+esac
+
 INITIAL_PROMPT="ultrathink
 
 You are ${AGENT_UPPER}, launched at '${PROJECT_DIR}'. DevMASTER workspace is ${DEVMASTER_STATE}.
@@ -321,10 +326,10 @@ FIRST ACTIONS (token cost is accepted — do the full reads, don't skim):
    truncation, and the two agents caught it before I did.
 8. Agent Mail check (email is the FLEET'S inter-agent channel, Kam 2026-08-03):
    if AGENTMAIL_API_KEY is set in 4_Credentials/.env, list recent messages for
-   BOTH wednesday-agent@agentmail.to (Wednesday's own inbox, live 2026-08-04;
-   wednesday@ was taken platform-wide) AND the shared coagent@agentmail.to
+   BOTH ${SELF_INBOX} (this seat's OWN inbox — never the other agent's; the
+   2026-08-13 cross-client capture is exactly that shape) AND the shared coagent@agentmail.to
    (legacy fleet bus — keep checking until every project's wrap flow targets
-   wednesday-agent@) — GET https://api.agentmail.to/v0/inboxes/<inbox>/messages, 'Authorization:
+   the seat's own inbox) — GET https://api.agentmail.to/v0/inboxes/<inbox>/messages, 'Authorization:
    Bearer <key>'. ROUTE on subject: '[<Client>/<Project> -> Wednesday] Session
    wrap ...' = a project agent reporting in — read it, update INDEX.md +
    scoreboard, close any loop your own '[Wednesday -> ...]' email opened.
@@ -441,7 +446,7 @@ not by Kam. He may not be at the desk yet. After the boot ritual: (1) do the
 morning consolidation/contemplation pass BEFORE he surfaces (light: route mail,
 refresh index, review yesterday's retro + any ledger movement); (1b) VERIFY the
 05:30 shift change (scheduler/logs/shift_change_<today>.log): every pane it
-tapped should have a wrap email in wednesday-agent@ — report any session that
+tapped should have a wrap email in ${SELF_INBOX} — report any session that
 did not wrap so Kam knows before he relaunches; (2) prepare the
 day's briefing and speak the greeting as usual — if he doesn't answer, leave the
 briefing on screen and wait quietly; do NOT start executing priorities without

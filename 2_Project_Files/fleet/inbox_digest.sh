@@ -34,7 +34,15 @@ if [ -z "${AGENTMAIL_API_KEY:-}" ]; then
   echo "ERROR: AGENTMAIL_API_KEY not set (4_Credentials/.env)" >&2; exit 1
 fi
 
-INBOXES=("wednesday-agent@agentmail.to" "coagent@agentmail.to")
+# The seat's OWN inbox, plus the legacy shared bus. Keyed on WED_AGENT (exported by
+# the launcher), NOT on the hostname — Tuesday will move machines, and a seat that
+# polls the other agent's inbox is the 2026-08-13 cross-client capture in a new
+# costume. An unknown value falls back to Wednesday's rather than guessing.
+case "${WED_AGENT:-wednesday}" in
+  tuesday) SELF_INBOX="tuesday-agent@agentmail.to" ;;
+  *)       SELF_INBOX="wednesday-agent@agentmail.to" ;;
+esac
+INBOXES=("$SELF_INBOX" "coagent@agentmail.to")
 
 if [ "${1:-}" = "full" ]; then
   [ $# -eq 3 ] || { echo "usage: $0 full <inbox> <message_id>" >&2; exit 1; }
