@@ -211,6 +211,35 @@ premature and its SHA may move.** **Deliberately not written, not an omission.**
 **Pattern to copy, BY PATH:** `fleet/qa-agent/launchers/launch_qa_secuura_ks963_913.sh` + its brief
 in `qa-agent/briefs/`. Five guards, exit codes 6/7/8/9, red-proof both launchers the same way.
 
+## 🔴 KS-754 IS RULED AND BUILDABLE — the final shape, after my first conditions collided
+**Option A (widen `processed_by` to text) is RULED.** The precondition that would have made it
+Kam's is measured away: **Platform S does NOT consume the field** (0 hits, controls `erasure` 26 /
+`externalRef` 8, negative 0; tracked checkout, excl. `node_modules`/`.git`; cannot see a dynamic
+reference or a rename at a boundary).
+
+⚠ **My FIRST set of conditions could not be satisfied and the seat caught it before writing.**
+Postgres refuses to widen a column under `REFERENCES users(id)` on a `uuid` PK, and
+`migrations/001` is HISTORICAL so editing it changes no live database. **THE FINAL SHAPE, ruled:**
+
+1. **New `048_widen_processed_by_to_text.sql`** — `DROP CONSTRAINT IF EXISTS` then `ALTER COLUMN
+   … TYPE text`. **`IF EXISTS` is REQUIRED, not stylistic** — two provisioning paths reach that
+   table, and once the azure init stops creating the FK a bare DROP fails on the migration path.
+   **That requirement is Wednesday's REASONING, not a measurement — the seat must prove it BOTH
+   ways (048 twice on one DB; once on a DB built from the edited azure init) before READY.**
+2. **`docker/init/01-schema.sql`** — widen the type. No FK, nothing else changes.
+3. **`deployment/azure/migrate/init.sql`** — widen the type AND drop its `REFERENCES users(id)`.
+4. **`migrations/001_initial-schema.sql` — NOT TOUCHED, deliberately.** An applied migration is a
+   historical record; editing it makes a fresh replay differ from the history every existing
+   database ran. A fresh install is still correct: 001 creates uuid, 048 widens it.
+5. **Ticket the FK asymmetry, UNRECONCILED**, with the seat's line: after this the three files
+   agree **for two different reasons** — one never had the FK, two lost it to the widening.
+   **Convergence that looks like agreement and is not.**
+
+**The semantic loss goes in the PR body BEFORE the change, not after:** nothing then guarantees
+`processed_by` names a real user. **That is correct rather than regrettable** — the FK said "must
+be a user" while the published contract said "any non-empty string", and those have contradicted
+each other since the field shipped. Dropping it makes the schema coherent for the first time.
+
 ## 🟢 THE FLOOR
 - **Secuura builder `%5`** — **wrapped at 21:33, then UN-wrapped by my SUPERSEDES** (its wrap and
   my Option A ruling crossed by 14 seconds). **It is building KS-754 Option A**, then re-wraps with
