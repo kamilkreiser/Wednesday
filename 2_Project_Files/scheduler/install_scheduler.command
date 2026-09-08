@@ -55,9 +55,21 @@ install_job "com.wednesday.shiftchange" "shift_change.sh" 5 30
 install_job "com.wednesday.wake"  "wake_wednesday.sh"  6  0
 install_job "com.wednesday.close" "close_wednesday.sh" 23 0
 
+# ── Nightly NAS sync (Kam, 2026-09-08 14:57) ──────────────────────────────────────────
+# "create a schedule for both agents to sync to the NAS drive at night. Get Tuesday to
+# sync at 11pm, and I think you should sync at 3 or 4am. The exact timing is up to you
+# so that both drives are current."
+# 03:30 for Wednesday: inside the window he gave, and clear of the 05:30 shift change so
+# a long leg cannot still be running when the fleet's morning starts.
+# The LABEL carries the agent so the two machines cannot collide in launchctl, and
+# $SELF_DIR is self-locating so Tuesday's copy installs pointing at her own drive.
+NAS_AGENT="${WED_AGENT:-wednesday}"
+if [ "$NAS_AGENT" = "tuesday" ]; then NAS_HOUR=23; NAS_MIN=0; else NAS_HOUR=3; NAS_MIN=30; fi
+install_job "com.${NAS_AGENT}.nassync" "nas_sync.sh" "$NAS_HOUR" "$NAS_MIN"
+
 echo ""
 echo "── verification ──"
-for label in com.wednesday.shiftchange com.wednesday.wake com.wednesday.close; do
+for label in com.wednesday.shiftchange com.wednesday.wake com.wednesday.close "com.${NAS_AGENT}.nassync"; do
   if launchctl print "gui/$(id -u)/$label" >/dev/null 2>&1; then
     echo "OK: $label loaded"
   else

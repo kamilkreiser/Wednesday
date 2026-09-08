@@ -128,7 +128,10 @@ done
 # plist's script path is now READ and stat'd, and 127 is named rather than
 # decorated. install_scheduler.command self-locates, so re-running it from the
 # current drive is the whole fix.
-for job in com.wednesday.shiftchange com.wednesday.wake com.wednesday.close; do
+# The nightly NAS sync (Kam 2026-09-08 14:57) joins the sweep. The LABEL carries the
+# agent — com.wednesday.nassync on this seat, com.tuesday.nassync on hers — so the two
+# machines cannot collide, and so this check follows whichever seat is booting.
+for job in com.wednesday.shiftchange com.wednesday.wake com.wednesday.close "com.${WED_AGENT:-wednesday}.nassync"; do
   if launchctl print "gui/$(id -u)/$job" >/dev/null 2>&1; then
     lec=$(launchctl print "gui/$(id -u)/$job" 2>/dev/null | awk '/last exit code/{print $NF}')
     prog=$(launchctl list "$job" 2>/dev/null | awk -F'"' '/scheduler\/.*\.sh/{print $2; exit}')

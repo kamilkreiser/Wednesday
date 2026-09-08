@@ -40,7 +40,10 @@ ENGINE="$WORKSPACE/!SYNC FILES/devnas-sync.sh"
 LOGDIR="$PROJECT_DIR/2_Project_Files/scheduler/logs"
 STATEDIR="$PROJECT_DIR/2_Project_Files/scheduler/state"
 mkdir -p "$LOGDIR" "$STATEDIR"
-STAMP="$(date '+%Y-%m-%d_%H%M%S')"
+# PID in the stamp: two runs inside the same SECOND otherwise share a log, and the
+# deletion count then reads the SUM of both runs. Found by exercising this script,
+# not by reading it — cases 2 and 3 of the fixture collided exactly that way.
+STAMP="$(date '+%Y-%m-%d_%H%M%S')_$$"
 LOG="$LOGDIR/nas_sync_${AGENT}_${STAMP}.log"
 REPORT="$STATEDIR/nas_sync_last_${AGENT}.txt"
 ALERT_AT="${NAS_SYNC_DELETE_ALERT:-50}"
@@ -66,8 +69,11 @@ say "engine exit rc=$RC"
 # ── THE DELETION ALARM ────────────────────────────────────────────────────────────────
 # `Deleting` is unison's own token — the one the 2026-08-26 recovery was found by. We
 # search for the MACHINE's word, not the human's ("deleted", "removed" appear in prose).
-DELETES=$(grep -c '^Deleting ' "$LOG" 2>/dev/null || echo 0)
-CONFLICTS=$(grep -c 'conflict' "$LOG" 2>/dev/null || echo 0)
+# NOT `grep -c ... || echo 0`: grep EXITS 1 on zero matches, so that form prints the
+# count AND the fallback — "0\n0" — and every downstream field is then malformed.
+# Exercising it is what showed this; reading it did not.
+DELETES=$(grep -c '^Deleting ' "$LOG" 2>/dev/null); DELETES=${DELETES:-0}
+CONFLICTS=$(grep -c 'conflict' "$LOG" 2>/dev/null); CONFLICTS=${CONFLICTS:-0}
 say "deletions propagated: $DELETES (alarm at $ALERT_AT) | conflict mentions: $CONFLICTS"
 
 SUMMARY="$STAMP | agent=$AGENT | rc=$RC | deletions=$DELETES | conflicts=$CONFLICTS | log=$LOG"
