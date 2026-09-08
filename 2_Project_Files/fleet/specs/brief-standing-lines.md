@@ -854,3 +854,46 @@ worktree.** Discriminating control: **a real directory at the same path IS ignor
    nothing at all.
 3. **Never `git add -A` in a tree containing symlinks you did not place.** This is the
    gitignore-at-creation rule pointed at a file TYPE rather than a location.
+
+---
+
+## A published assertion outliving the behaviour it described — and the API contract is the copy that matters most (2026-09-08, Secuura s152)
+
+**EVIDENCE BASIS:** one seat, **two instances found in one PR by REGENERATING the spec rather than
+reading it**, both absent from the human reviewer's own review. Direction built against: a fix that
+ships while its published description still asserts the defect. **Not yet tested against:** contracts
+other than OpenAPI/Zod, or repos where the spec is generated in CI rather than by hand.
+
+**The reframing, which is worth more than the instances:**
+
+> **This class is not "a stale code comment". It is "a PUBLISHED ASSERTION outliving the behaviour it
+> described" — and the API contract is the copy that matters most.**
+
+**A stale comment misleads whoever opens the file. A stale published contract misleads every
+integrator who never opens it and has no way to know.**
+
+**The case.** Fixing an MFA-disable auth defect, the spec's 401 description still read *"NOT returned
+for a wrong password: the password is never checked."* **That was TRUE before the PR — it described
+the exact defect the PR removes.** Shipping the fix without the spec would have left the published
+contract **asserting the vulnerability as intended behaviour**.
+
+**And the mechanism behind the second instance is the general one:** `MfaDisableRequest` was a
+**separate Zod object** from the handler's `disableSchema` — **two declarations of one contract** — so
+relaxing the handler left the published component still requiring `password`. **They had already
+drifted before anyone looked**, because only the handler's copy is exercised by tests.
+
+### The standing lines
+
+1. **Any change to a behaviour that a contract describes changes the contract in the same PR.** Search
+   the spec for the behaviour's *description*, not only its schema — prose fields (`description`,
+   `summary`, error-response text) are where the assertion lives and nothing type-checks them.
+2. **Wherever a schema is declared TWICE, assume it has already drifted.** One copy is exercised by
+   tests and the other is published. Prefer deriving the published one from the exercised one; where
+   you cannot, add a test that asserts they agree.
+3. **Regenerate the spec and diff it — do not read it.** Both instances here were found by
+   regeneration and neither was in a careful human review. **A generated artefact is checked by
+   generating it** ([[2026-08-07_a-check-that-cannot-fail]]: prefer the artefact over the intent).
+4. **A test that proves a guard's fixture still PROJECTS is a guard on the guard.** The same seat added
+   a cell asserting its stub genuinely honours the column list, **so the load-bearing cell cannot go
+   vacuous if a future seat loosens the stub.** Without it the loose-mock failure returns silently and
+   the suite goes green on nothing.
