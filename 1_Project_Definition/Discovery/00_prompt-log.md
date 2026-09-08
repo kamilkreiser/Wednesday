@@ -2277,3 +2277,8 @@ Done with it: Dynamics → Kam's team decision (no action); QuickQuote masthead/
 > thank you.  keep pushing the secuura agent to polish the platform to a ready state.
 
 *Note:* standing direction folded into the s140d successor brief (seat B) and seat A's KS-914 ANSWER; ledger ruling row
+
+## 2026-09-08 11:42 — Kam (dashboard chat, verbatim)
+> I am thinking of setting up two machines so that they can work together. Very similar to what's happening with the laptop, except I will use a different Mac to become a headless machine operating the other Wednesday agent. Essentially, what I would like to do is have this version of Wednesday sitting on the studio operate. The Secura project and all general or generic work, and have another version of Wednesday logged into the Datasec Claude account. Operate all Datasec projects.  To this end, I have a couple of questions, and I would like to refine the instructions so that once they're refined, we can go and implement. My first question is, what is the reason not to publish this website, especially the conversation fleet activity, in a password or passcode protected version in Azure? Second question is, can both agents read the same pane so that I'm interacting with one website rather than two individual websites? Depending on this, I will have some changes to the ladder of this dashboard.
+
+*Note:* Two-machine fleet architecture + two design questions (publish the dashboard to Azure behind a passcode; one shared pane for both agents). Answered with a measurement of what the dashboard actually contains; architecture note written; one decision carded back to him.
