@@ -9,8 +9,35 @@ supersede: replace this file wholesale at the next pickup; do not append
 
 # NEXT PICKUP — s151 (Studio) LIVE. Secuura seat working. Nothing blocked, nothing waiting on Kam.
 
+## 🟢 s152 IS LIVE AND PRODUCTIVE — queue was dry, now on the remaining P2 In Review
+**Booted 20:32, verified at RUNG 6** (boot mail, brief DKIM-verified with eight failing-value controls
+absent, commission quoted back). **At ~49% and running well.** Do not re-brief it; ack and steer.
+
+**Its work since:** KS-671 `720a6968b` · KS-726 `97e2161fa` · KS-732 `1fb2cc6b2` — **all three pushed,
+PREFLIGHT PASSED, In Review, back with Peter.** **#768 MERGED** (`develop 067554d65 → 5ffaaf396`).
+**Five tickets filed:** KS-1004 · **KS-1005 (High — change-password 404s for every user, BLOCKED on
+#872)** · KS-1006 · KS-1007 (#768) · KS-1008 (#773).
+**0 merges to main · 0 deploys · demo untouched at `400517aaf` · 0 messages to humans outside PR replies.**
+
+**⚠ HONEST GAP IT VOLUNTEERED:** legs 3/4/8 skipped on every push (no local stack) and **four platform
+suites NOT RUN all session. Unrun is not passed** — say so wherever the session is summarised.
+
+## 🟢 A REGRESSION CLOSED BEFORE IT FIRED — #768's inversion
+`main` had dropped `github-actions` via #908 today; **`develop` still carried it, so the next release
+merge would have silently reverted Kam's own ruled fix.** Same shape as this morning's #909 repair —
+**except visible in advance.** Fixed on Wednesday's GO (config-only, reversible, the develop-side
+completion of his `route-to-main` ruling). Verified: predicted tree read BEFORE, re-derived from the
+COMMIT OBJECT after, `main` unmoved as control, exactly one file. **develop and main now declare the
+same ecosystems.**
+
+## 🔴 FOR KAM, AS INFORMATION NOT AN ASK
+**Peter's #768 read — *"let it ride the next release"* — was correct on 2026-09-01 and is now wrong**,
+because #908 merged to main today. **Telling him that is INITIATING contact with a client human, which
+is Kam's signature class, not Wednesday's.** It is recorded on KS-1007. **s152 correctly did not post**
+— every PR comment this session was a REPLY to a review Peter opened. **If Kam wants it said, he says it.**
+
 ## 🟢 SECUURA STATE — re-read from origin before trusting ANY of it; Peter is live tonight
-    origin/develop   811a82253    (5c6777658 -> 4f612d462 via #909, -> 811a82253 via Peter's #802)
+    origin/develop   5ffaaf396    (5c6777658 -> 4f612d462 #909 -> 811a82253 Peter's #802 -> 067554d65 Peter's #792 -> 5ffaaf396 #768)
     origin/main      54b2a5c26    demo VM 400517aaf — NOTHING deployed this session
     P2 In Review     19           (was 27 at boot)
     branches pushed  #806 d38284a1c (clean) · #785 3611f60c4 (preflight passed)
