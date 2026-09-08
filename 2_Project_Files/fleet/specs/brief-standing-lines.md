@@ -637,10 +637,20 @@ within ten minutes of being written down.
 
 ## A review badge is not an approval AT HEAD — and the search index lies in the OPPOSITE direction to the reviews endpoint (2026-09-08)
 
-**EVIDENCE BASIS, per this file's convention:** one seat (Secuura s151, 2026-09-08), **measured on
-live PRs with a cross-check control** — it verified its own "10 of 12 have zero reviews" against BOTH
-the search index and `/pulls/{n}/reviews` and found they agreed, then found #785 where they do not.
-**Verified, not inferred.** Failure direction it was built against: **both**, which is the point.
+**EVIDENCE BASIS, per this file's convention — UPGRADED 2026-09-08 19:5x from one instance to a
+DISCRIMINATING CONTRAST PAIR:** one seat (Secuura s151), measured on live PRs with a cross-check
+control (its "10 of 12 have zero reviews" verified against BOTH the search index and
+`/pulls/{n}/reviews`, agreeing, before finding #785 where they do not). **Then the pair that settles
+it: #728 and #799 both read *"1 review, 0 approvals"* in the same sweep, both ours, both open, both
+`clean` — and they are OPPOSITE.**
+
+    #728  Peter COMMENTED at 0c5914cad  ==  head            -> awaiting US, eight days
+    #799  Peter COMMENTED at 04e9ef23d  !=  head b36757f7a  -> awaiting HIM, four commits answered
+
+**Review count, `mergeable_state` and the column all return the SAME answer for both, and that answer
+is wrong for one of them.** A discriminator that separates two cases a summary surface calls identical
+is doing real work — that is a stronger basis than either case alone. **Verified, not inferred.**
+Failure direction: **both**, which is the point.
 
 **The pair, and having both is what makes either usable:**
 
