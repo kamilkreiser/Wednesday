@@ -64,21 +64,8 @@ command -v tmux >/dev/null && ok "tmux $(tmux -V | awk '{print $2}')" || warn "t
 command -v brew >/dev/null && ok "homebrew" || warn "homebrew missing" "needed to install tmux/iTerm2 — https://brew.sh"
 
 # --- Scheduler (PORTABILITY item 12, machine-local launchd) ---
-# AGENT-AWARE 2026-09-09 (Kam ruled `parameterise` 08:21): this grepped a hardcoded
-# com.wednesday.wake, so on Tuesday's machine it reported "not loaded" for a job that
-# SHOULD NOT exist there, and would have reported "loaded" for one that must not.
-_DOC_AGENT="${WED_AGENT:-wednesday}"
-# INSTRUMENT CHANGED 2026-09-09, and the reason is measured rather than assumed. This check
-# used `launchctl list | grep -q <label>`. On 2026-09-09 that pipeline returned FALSE inside
-# doctor while `launchctl print gui/$(id -u)/<label>` — the call the per-job sweep below uses,
-# forty lines further down, in the SAME RUN — returned true for all four jobs. Two checks in
-# one run disagreed about the same fact. The same `list|grep` line run standalone matched, so
-# the fault is contextual and not worth more of anyone's evening: the fix is to stop using the
-# instrument that disagrees with its neighbour and use the one that is already proven here.
-# (Rule: when two instruments disagree, re-measure and keep the one whose answer is checkable —
-# never the one whose answer creates work you were expecting to do.)
-if launchctl print "gui/$(id -u)/com.${_DOC_AGENT}.wake" >/dev/null 2>&1; then ok "scheduler launchd jobs loaded (agent: $_DOC_AGENT)"
-else warn "scheduler jobs not loaded (agent: $_DOC_AGENT)" "run 2_Project_Files/scheduler/install_scheduler.command on this machine (PORTABILITY 12)"; fi
+if launchctl list 2>/dev/null | grep -q com.wednesday.wake; then ok "scheduler launchd jobs loaded"
+else warn "scheduler jobs not loaded" "run 2_Project_Files/scheduler/install.sh on this machine (PORTABILITY 12)"; fi
 
 # --- Optional seats / mounts ---
 [ -x "$PROJECT_DIR/2_Project_Files/tools/codex-cli/node_modules/.bin/codex" ] || [ -d "$PROJECT_DIR/2_Project_Files/tools/codex-cli" ] && ok "codex CLI (drive-local)" || warn "codex CLI dir missing" "gpt seat unavailable (PORTABILITY 7-9)"
@@ -144,8 +131,7 @@ done
 # The nightly NAS sync (Kam 2026-09-08 14:57) joins the sweep. The LABEL carries the
 # agent — com.wednesday.nassync on this seat, com.tuesday.nassync on hers — so the two
 # machines cannot collide, and so this check follows whichever seat is booting.
-# AGENT-AWARE 2026-09-09: all four labels now follow the booting seat, not just nassync.
-for job in "com.${_DOC_AGENT}.shiftchange" "com.${_DOC_AGENT}.wake" "com.${_DOC_AGENT}.close" "com.${_DOC_AGENT}.nassync"; do
+for job in com.wednesday.shiftchange com.wednesday.wake com.wednesday.close "com.${WED_AGENT:-wednesday}.nassync"; do
   if launchctl print "gui/$(id -u)/$job" >/dev/null 2>&1; then
     lec=$(launchctl print "gui/$(id -u)/$job" 2>/dev/null | awk '/last exit code/{print $NF}')
     prog=$(launchctl list "$job" 2>/dev/null | awk -F'"' '/scheduler\/.*\.sh/{print $2; exit}')

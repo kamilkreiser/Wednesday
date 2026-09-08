@@ -92,18 +92,7 @@ def local_date(ts):
 import random
 ATTEMPTS = 4
 BACKOFF = (7, 21, 55)          # seconds, before attempts 2, 3, 4
-# AGENT-AWARE (2026-09-09). This tuple was hardcoded to wednesday-agent@. Once the
-# installer became agent-aware, a `com.tuesday.close` firing here would have read
-# WEDNESDAY'S inbox from Tuesday's machine — the 2026-08-13 cross-client shape, which is
-# Kam's severity-max class. The seat's OWN inbox is derived from WED_AGENT, which the
-# plist now carries; the shared coagent@ bus is read by both and stays.
-_agent = os.environ.get("WED_AGENT", "wednesday")
-if _agent not in ("wednesday", "tuesday"):
-    print(f"close: WED_AGENT={_agent!r} is not a known agent — reading only the shared bus", flush=True)
-    _inboxes = ("coagent@agentmail.to",)
-else:
-    _inboxes = (f"{_agent}-agent@agentmail.to", "coagent@agentmail.to")
-for idx, inbox in enumerate(_inboxes):
+for idx, inbox in enumerate(("wednesday-agent@agentmail.to", "coagent@agentmail.to")):
     if idx:
         time.sleep(3)          # stagger: don't fire both inboxes in the same instant
     for attempt in range(ATTEMPTS):

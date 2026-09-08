@@ -20,37 +20,6 @@ SELF_DIR="$(cd -P "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 AGENTS_DIR="$HOME/Library/LaunchAgents"
 mkdir -p "$AGENTS_DIR"
 
-# ── AGENT-AWARE (2026-09-09, Kam ruled `parameterise` on the card
-# `wed-scheduler-installer-arms-wednesday-jobs-on-any-machine` at 08:21) ──────────────
-# WHAT WAS WRONG: this file used to arm com.wednesday.shiftchange/.wake/.close
-# UNCONDITIONALLY and read WED_AGENT only for the NAS job. Tuesday's first boot measured
-# the consequence: on her Mac mini, `com.wednesday.wake` would have run
-# `Launch_Wednesday.command` OUT OF /Volumes/KK_T9_External_HDD/TUESDAY at 06:00 daily —
-# a seat reading Wednesday's ledger and Wednesday's inbox from Tuesday's tree. The
-# two-agent case had been thought about for the NAS job and not carried across.
-#
-# THE LABEL IS NOT ENOUGH. launchd hands a job a minimal environment, so WED_AGENT is
-# NOT inherited at fire time — a correctly-labelled com.tuesday.wake would still have
-# defaulted to Wednesday inside the script. So every plist now CARRIES WED_AGENT in
-# EnvironmentVariables, and the scripts derive their launcher and inbox from it.
-AGENT="${WED_AGENT:-wednesday}"
-case "$AGENT" in
-  wednesday|tuesday) ;;
-  *) echo "install_scheduler: REFUSING — WED_AGENT='$AGENT' is not a known agent." >&2
-     echo "  Set WED_AGENT=wednesday or WED_AGENT=tuesday. Guessing here arms a job that" >&2
-     echo "  boots the wrong seat, which is the failure this parameterisation exists to stop." >&2
-     exit 2 ;;
-esac
-AGENT_TITLE="$(printf '%s' "${AGENT:0:1}" | tr '[:lower:]' '[:upper:]')${AGENT:1}"
-LAUNCHER="$(cd -P "$SELF_DIR/../.." && pwd)/Launch_${AGENT_TITLE}.command"
-if [ ! -f "$LAUNCHER" ]; then
-  echo "install_scheduler: REFUSING — no launcher at $LAUNCHER" >&2
-  echo "  WED_AGENT=$AGENT but this tree has no Launch_${AGENT_TITLE}.command. Arming jobs" >&2
-  echo "  that cannot find their launcher is how three rituals died silently on 2026-09-07." >&2
-  exit 3
-fi
-echo "agent: $AGENT  ·  launcher: $LAUNCHER"
-
 install_job() {
   local label="$1" script="$2" hour="$3" minute="$4"
   local plist="$AGENTS_DIR/$label.plist"
@@ -71,12 +40,8 @@ install_job() {
     <key>Minute</key><integer>$minute</integer>
   </dict>
   <key>RunAtLoad</key><false/>
-  <key>EnvironmentVariables</key>
-  <dict>
-    <key>WED_AGENT</key><string>$AGENT</string>
-  </dict>
-  <key>StandardOutPath</key><string>$HOME/Library/Logs/${AGENT}_${label##*.}.out</string>
-  <key>StandardErrorPath</key><string>$HOME/Library/Logs/${AGENT}_${label##*.}.err</string>
+  <key>StandardOutPath</key><string>$HOME/Library/Logs/wednesday_${label##*.}.out</string>
+  <key>StandardErrorPath</key><string>$HOME/Library/Logs/wednesday_${label##*.}.err</string>
 </dict>
 </plist>
 PLIST
@@ -86,9 +51,9 @@ PLIST
 }
 
 mkdir -p "$SELF_DIR/logs" "$SELF_DIR/state"
-install_job "com.$AGENT.shiftchange" "shift_change.sh" 5 30
-install_job "com.$AGENT.wake"  "wake_wednesday.sh"  6  0
-install_job "com.$AGENT.close" "close_wednesday.sh" 23 0
+install_job "com.wednesday.shiftchange" "shift_change.sh" 5 30
+install_job "com.wednesday.wake"  "wake_wednesday.sh"  6  0
+install_job "com.wednesday.close" "close_wednesday.sh" 23 0
 
 # ── Nightly NAS sync (Kam, 2026-09-08 14:57) ──────────────────────────────────────────
 # "create a schedule for both agents to sync to the NAS drive at night. Get Tuesday to
@@ -98,12 +63,13 @@ install_job "com.$AGENT.close" "close_wednesday.sh" 23 0
 # a long leg cannot still be running when the fleet's morning starts.
 # The LABEL carries the agent so the two machines cannot collide in launchctl, and
 # $SELF_DIR is self-locating so Tuesday's copy installs pointing at her own drive.
-if [ "$AGENT" = "tuesday" ]; then NAS_HOUR=23; NAS_MIN=0; else NAS_HOUR=3; NAS_MIN=30; fi
-install_job "com.$AGENT.nassync" "nas_sync.sh" "$NAS_HOUR" "$NAS_MIN"
+NAS_AGENT="${WED_AGENT:-wednesday}"
+if [ "$NAS_AGENT" = "tuesday" ]; then NAS_HOUR=23; NAS_MIN=0; else NAS_HOUR=3; NAS_MIN=30; fi
+install_job "com.${NAS_AGENT}.nassync" "nas_sync.sh" "$NAS_HOUR" "$NAS_MIN"
 
 echo ""
 echo "── verification ──"
-for label in "com.$AGENT.shiftchange" "com.$AGENT.wake" "com.$AGENT.close" "com.$AGENT.nassync"; do
+for label in com.wednesday.shiftchange com.wednesday.wake com.wednesday.close "com.${NAS_AGENT}.nassync"; do
   if launchctl print "gui/$(id -u)/$label" >/dev/null 2>&1; then
     echo "OK: $label loaded"
   else

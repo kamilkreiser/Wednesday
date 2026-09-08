@@ -35,18 +35,8 @@ if [ "$HOUR" -ge 12 ]; then
   log "skip: past noon — coalesced fire too late for a morning briefing"
   exit 0
 fi
-# AGENT-AWARE (2026-09-09, Kam's `parameterise` ruling). The plist installed by
-# install_scheduler.command carries WED_AGENT in EnvironmentVariables, because launchd
-# does NOT inherit it. Default stays `wednesday` so an old plist behaves exactly as before.
-WAKE_AGENT="${WED_AGENT:-wednesday}"
-case "$WAKE_AGENT" in
-  wednesday|tuesday) ;;
-  *) log "ERROR: WED_AGENT='$WAKE_AGENT' is not a known agent — refusing to guess a launcher"; exit 1 ;;
-esac
-WAKE_AGENT_TITLE="$(printf '%s' "${WAKE_AGENT:0:1}" | tr '[:lower:]' '[:upper:]')${WAKE_AGENT:1}"
-AGENT_LAUNCHER="$PROJECT_DIR/Launch_${WAKE_AGENT_TITLE}.command"
-if [ ! -f "$AGENT_LAUNCHER" ]; then
-  log "ERROR: launcher not found at $AGENT_LAUNCHER (agent=$WAKE_AGENT) — drive renamed?"
+if [ ! -f "$PROJECT_DIR/Launch_Wednesday.command" ]; then
+  log "ERROR: launcher not found at $PROJECT_DIR — drive renamed?"
   exit 1
 fi
 
@@ -101,7 +91,7 @@ if [ -n "${WAKE_TMUX_SESSION:-}" ] && [ -z "${WAKE_LAUNCH_CMD:-}" ]; then
   log "REFUSED: WAKE_TMUX_SESSION set without WAKE_LAUNCH_CMD — test mode may not default to the real launcher"
   exit 2
 fi
-LAUNCH_CMD="${WAKE_LAUNCH_CMD:-bash \"$AGENT_LAUNCHER\"}"
+LAUNCH_CMD="${WAKE_LAUNCH_CMD:-bash \"$PROJECT_DIR/Launch_Wednesday.command\"}"
 COCKPIT="$PROJECT_DIR/2_Project_Files/fleet/cockpit/cockpit.sh"
 
 # All -t targets use tmux exact-match syntax (=name): without it tmux
