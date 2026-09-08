@@ -195,8 +195,26 @@ that no longer matches is worse than an absent one. Exercised in all four states
 
 **Read `0_Brain/tasks/FIRST-BOOT-TUESDAY.md` first — it is what SHE reads. This is what KAM does.**
 
-The machine is a Time Machine restore of the Studio, so items 1–9 of the run-sheet above are
-already satisfied. **What a restore does NOT carry, and each one is a real gap:**
+🔴 **CORRECTED 2026-09-09 08:0x by Tuesday's first boot, by measurement.** This section used to
+open *"the machine is a Time Machine restore of the Studio, so items 1–9 of the run-sheet above
+are already satisfied."* **On the machine that actually arrived — `Kamils-Mac-mini`, macOS 27.0,
+arm64 — that is false in every part.** Kam's own words at 07:5x: *"this is a new machine freshly
+installed."* Measured in the same action as this sentence: **no Homebrew** (`/opt/homebrew` absent),
+**no node, npm, gh, az, tmux, unison, docker, pandoc, poppler**, python is the system **3.9.6** (the
+venvs need `python@3.14`), and **`/Applications` held only `Claude.app`, `Safari.app` and
+`Utilities`** — no Chrome, no Office, no Superwhisper. Xcode CLT and Apple git 2.54.0 WERE present,
+and `jq` ships with the OS; those two lines of item 1 survive.
+
+**So the rule is: do not assume the restore happened.** A bring-up section whose first sentence
+asserts a provenance ("this machine is a restore of X") is asserting a fact about hardware nobody
+has measured — and it silently excuses the next reader from running items 1–9. **Run `doctor.sh`
+FIRST and let it tell you which of items 1–9 are actually satisfied on the machine in front of you;
+it checks node/npm/gh/az/unison/docker/tmux/homebrew by name.** On 2026-09-09 it printed 19
+warnings on a machine this file called ready.
+
+**The full run-sheet above (items 1–10) therefore APPLIES on a fresh install.** What follows is
+what is Tuesday-specific ON TOP of it — the gaps that exist whether the machine was restored or
+built from nothing:
 
 1. **The drive.** Tuesday's tree is `/Volumes/KK_T9_External_HDD/TUESDAY` (2.1 GB, provisioned
    2026-09-08). It is a working copy of the SAME repo — not a fork — so it pulls and pushes to
