@@ -21,12 +21,29 @@ declared default (finished the guard) and then started Secuura anyway, because o
 **it was never blocked on him**: his 07:10 instruction plus the week-scoped merge and deploy
 grants already authorised it, and the COO rule says such a ticket is executed, not listed.
 
-**🔴 YOUR LIVE DUTY: s153 is running in pane `%171` (launched 13:14, Secuura/Blockchain).**
-Its plan confirmation comes to `wednesday-agent@agentmail.to` — **answer it; do not send it
-to Kam** (it is inside a brief he already authorised). Then supervise it: QA gate before any
-score, Wednesday's completion check, merge on Wednesday's GO. Its brief is
-`2_Project_Files/fleet/briefs_staged/s153_secuura_standing_queue.md` — read it before
-answering anything, it carries the holds and Kam's six undelivered rulings verbatim.
+**🔴 YOUR LIVE DUTY — two agents are running and BOTH report to you, not to Kam:**
+
+| pane | what | state at 14:0x |
+|---|---|---|
+| `%171` | **Secuura s150** (NOT s153 — its own history is the authority for its seat number) | working **KS-963**; KS-989 built as PR #906, KS-858 found ALREADY DONE, KS-946 re-priced P1→P3 |
+| `%172` | **QA gate, KS-989 / PR #906 @ `9f9a2a788`, TIER 2** | running; verdict comes to `wednesday-agent@`, subject `[QA -> Wednesday] VERDICT: Secuura KS-989 / #906 @ 9f9a2a788` |
+
+**When the verdict lands:** it is a QA report, not a score trigger. Do Wednesday's COMPLETION
+check (delivered-vs-commissioned, item by item against the brief) — **not** a re-run of the
+gate's tests — then score, then the merge GO is Wednesday's under the week-scoped grant.
+Round 1 of 2 under the cap.
+**Relaunch that gate with its PATH, never a reconstructed command:**
+`2_Project_Files/fleet/qa-agent/launchers/launch_qa_secuura_ks989_906.sh [--check]`
+
+**s150's open corrections to carry:** KS-858 → move to `Deployed to UAT` (already merged in
+#884, on develop and on demo); its ticket text names a non-bypass as a bypass (`sig-json`
+fails CLOSED) and says 2/6 instances where the population is 1. KS-946 → re-price to P3 with
+the partition table on the ticket.
+
+**🔴 INSTANCE 6 IS LIVE ON THE TRUNK:** `systemTest/akto` `format:check` is RED on
+`develop 986c592d5`, arriving via merge `512480ef1` (#892) — merged by the PREVIOUS seat
+three hours before it was found. PR #906 ships the gate AND that fix together, deliberately:
+a gate added over a red trunk blocks every author on day one and gets bypassed.
 
 ## WHAT WAS BUILT TODAY — do not re-derive any of it
 | Thing | Where | Commit |
@@ -73,7 +90,11 @@ agent.
    write the text to a file and pass `"$(cat file)"`.
 4. **Screenshots from the browser tool are a CROP of a 3491px viewport.** Do not read
    geometry from them — `getBoundingClientRect` + `elementFromPoint` is the instrument.
-5. **`setsid` does not exist on macOS.** `nohup … </dev/null >log 2>&1 &`, then verify
+5. **`cockpit.sh say --mail` NOW REFUSES a cited mail older than 15 minutes** (fixed 14:0x
+   after it went green on a tap carrying content no mail held — sixth instance of that
+   family, agent-caught). Send the mail, read it back at the destination, THEN tap a bare
+   pointer. `SAY_ALLOW_OLD_MAIL=1` exists for a genuine continuation and must be said aloud.
+6. **`setsid` does not exist on macOS.** `nohup … </dev/null >log 2>&1 &`, then verify
    `tty` is `??`.
 
 ## SECUURA STATE (from s149's handover, 10:56 — nothing has moved since)
@@ -94,7 +115,7 @@ CONSTRUCTION (AES-GCM). Resolve via `email_lookup_hash`; decisive on a MATCH onl
 `decision_queue` refused it while `chat_log` was corrupt this morning; re-file it.
 
 ## FLEET
-**s153 Secuura/Blockchain LIVE in `%171`** (launched 13:14). The Datasec/laptop seat WRAPPED
+**s150 Secuura/Blockchain LIVE in `%171`** (launched 13:14) · **QA gate LIVE in `%172`**. The Datasec/laptop seat WRAPPED
 at 12:21; NexusAI S47 wrapped at 12:15 (`main` = `cd2b543`). No Tuesday seat exists yet —
 she is provisioned on the T9 and waits on Kam's Claude login.
 Kam was answering within minutes until ~12:53 and has been quiet since.
