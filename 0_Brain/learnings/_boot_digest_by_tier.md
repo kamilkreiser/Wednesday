@@ -7,7 +7,7 @@ status: live
 
 # Boot digest BY TIER — W whole, M rules-only, every project case a handle
 
-Generated 2026-09-08 15:40 from 125 lesson files (616,048 B). M 28 · MIXED 5 · W 92. 28 project CASE sections inside MIXED files are reduced to one line each: the heading and the path to read it at. W blocks are exactly what the default digest carries; M blocks drop the section index and keep the rules; a P file is a single handle. The CASES behind every rule live only in the lesson files — open one the moment its rule fires.
+Generated 2026-09-08 17:59 from 125 lesson files (621,285 B). M 28 · MIXED 5 · W 92. 28 project CASE sections inside MIXED files are reduced to one line each: the heading and the path to read it at. W blocks are exactly what the default digest carries; M blocks drop the section index and keep the rules; a P file is a single handle. The CASES behind every rule live only in the lesson files — open one the moment its rule fires.
 
 ## The T9 SSD is the master — Wednesday must be fully portable
 `2026-07-31_fully-portable-drive.md` · principle · 2026-07-31 · status: superseded — the "T9 is the master" half by [[2026-08-25_one-drive-devmaster-is-master]] (2026-08-25); the portability principle itself still lives · tier: W
@@ -4024,17 +4024,16 @@ sections (open the file for these): Why he asked, and the instance that earned i
    does not — the ledger covers whatever has no owner.
 
 
-## The boot instruction asks for more than the window holds — read a defensible SUBSET and say which, never obey and die
+## Measure the WINDOW, not just the files, before trimming your own boot — this file's own premise was wrong, and a wrong denominator makes a seat under-read its own corrections
 `2026-09-08_the-boot-spec-outgrew-its-window.md` · correction · 2026-09-08 · status: live · tier: W
 
-**The operative case, so the headline matches it:** a seat boots, the prompt says *read the
-by-tier digest WHOLE, then your ledger WHOLE* — **and the two files together do not fit the
-context window.** The seat is one command from spending its whole life on its own memory.
-**Measure both files BEFORE reading either, decide a subset you can defend, read that, and
-report the numbers in the boot note.** Obeying a spec that has outgrown its instrument is
-not diligence; it is a seat that boots at 90% and is useless by its first task.
+> ⚠ **CORRECTED 2026-09-08 17:5x by the next seat, by measurement. The half that was wrong is the
+> ARITHMETIC; the half that was right is the METHOD.** See the CORRECTION section at the foot of this
+> file before applying rule 2. **The digest and the ledger DO fit — comfortably.** Rules 1, 3 and 4
+> (measure first · report the numbers · never silently under-read) stand and are good. **Rule 2's
+> specific subset is withdrawn as a DEFAULT**; it remains a reasonable choice, not a required one.
 
-sections (open the file for these): The measurement, 2026-09-08 · What s152 did instead, and why it is defensible · Why this is w=2 and the diagnosis is owed · How to apply · The uncomfortable part, kept
+sections (open the file for these): The measurement, 2026-09-08 · What s152 did instead, and why it is defensible · Why this is w=2 and the diagnosis is owed · How to apply · The uncomfortable part, kept · 🔴 CORRECTION 2026-09-08 17:5x — the premise was never measured, and it is wrong · Why the error is worth a section rather than a quiet edit · What is WITHDRAWN and what STANDS (scope stated per [[2026-09-06_a-retraction-inherits-the-scope-of-its-measurement]]) · The rule this replaces rule 2 with
 
 ## How to apply
 
@@ -4055,6 +4054,18 @@ sections (open the file for these): The measurement, 2026-09-08 · What s152 did
    move P-tier cases out to their projects (Phase 1 of the tier plan, never executed);
    or accept that the ledger is read as headlines by design and change the boot prompt to
    say so. **Proposing which is a consolidation item, not a boot-time decision.**
+
+### The rule this replaces rule 2 with
+1. **Measure the files AND establish the window in the same action.** `ls -la` on the digest and the
+   seat's ledger, then read `ctx:NN%` off the statusline before and after the first big read. **Two
+   statusline reads give you the exchange rate; one gives you nothing.**
+2. **Default to reading both WHOLE** — that is the boot spec, and on the measured window it lands a
+   seat around 40%, which is inside working range and well under the 80–90 rotation band.
+3. **Trim only against a measured ceiling, and say what you dropped and why** — the ledger's oldest
+   day as row headlines is the first thing to go, and it is a real option on a heavier day.
+4. **Never inherit a predecessor's subset without re-deriving its arithmetic.** A filed lesson is a
+   claim with a date on it ([[2026-08-16_a-recorded-blocker-is-not-a-boundary]]), and this one was
+   two seats old and wrong on its second reader.
 
 
 ## "The check ran, and it was not checking the thing" — a green from a check aimed at the wrong property is worse than no check, because it comes with a receipt

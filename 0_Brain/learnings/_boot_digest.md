@@ -7,7 +7,7 @@ status: live
 
 # Boot digest — headline + rules of every lesson (open the file when it fires)
 
-Generated 2026-09-08 15:36 from 124 lesson files (610,545 B). Each block = the lesson's retrieval handle (H1), its frontmatter, the operative paragraph, its section index, and every RULES section verbatim. 6 files carry no rules-shaped section and are included whole. The CASES behind a rule live only in the file: open it the moment the rule fires, or when a diagnosis needs the evidence. `_ledger.md` is read whole beside this digest; `_ledger_archive.md` on demand.
+Generated 2026-09-08 17:59 from 125 lesson files (620,319 B). Each block = the lesson's retrieval handle (H1), its frontmatter, the operative paragraph, its section index, and every RULES section verbatim. 6 files carry no rules-shaped section and are included whole. The CASES behind a rule live only in the file: open it the moment the rule fires, or when a diagnosis needs the evidence. `_ledger.md` is read whole beside this digest; `_ledger_archive.md` on demand.
 
 ## The T9 SSD is the master — Wednesday must be fully portable
 `2026-07-31_fully-portable-drive.md` · principle · 2026-07-31 · status: superseded — the "T9 is the master" half by [[2026-08-25_one-drive-devmaster-is-master]] (2026-08-25); the portability principle itself still lives
@@ -4273,6 +4273,42 @@ sections (open the file for these): The case (2026-09-08 00:1x, Datasec/NexusAI)
    would not have.
 
 
+## A safety claim names the property it actually checked — "nothing is at risk" is a characterisation, and the guard's real scope is always narrower than its reputation
+`2026-09-08_a-safety-claim-names-the-property-it-checked.md` · correction · 2026-09-08 · status: live
+
+**The operative case, so the headline matches it:** Wednesday is about to tell Kam that something
+is safe — *"it cannot delete anything"*, *"this prevents that failure"*, *"nothing is at risk"*.
+**Stop and name the PROPERTY that was checked, not the reassurance it produces.** The gap between
+the two is where every instance of this lives, and it always runs in the same direction: the claim
+is wider than the check.
+
+sections (open the file for these): The two, one hour apart, both to Kam · The diagnosis w=2 owes: why the existing rules did not fire · How to apply
+
+## How to apply
+
+1. **Say what the check covers, in the same sentence as the reassurance.** *"No `--delete`, so it
+   cannot remove anything — it CAN overwrite a newer file with an older one, which I have not checked
+   yet"*. Longer by a clause and it would have prevented both.
+2. **Read the guard's documentation before selling it.** One `unison -doc` call, before the ask, not
+   after the receipt. A guard's reputation is not its specification.
+3. **State the residual explicitly whenever a control is proposed** — what it does NOT cover, named,
+   so the person approving it knows what they are still exposed to. Prevention here, detection there.
+4. **Suspect the claim hardest when it argues for the safe option.** This is the mirror of
+   [[2026-08-14_i-read-representations-they-read-sources]] rule 4: the correction is the
+   highest-risk moment. So is the safety recommendation.
+5. **Widen the scope-word list to cover TOOL GUARANTEES, not just work classification:** additive ·
+   read-only · cannot delete · prevents · idempotent · non-destructive · dry-run · sandboxed.
+   Each is a measurement and each needs the property named.
+
+**Family:** [[2026-08-16_classification-is-the-field-that-grants-authority]] (the parent — this
+widens it from a change's blast radius to a tool's guarantee) ·
+[[2026-08-07_a-check-that-cannot-fail]] (ask what would make it fail) ·
+[[2026-09-04_decisions-held-narration-drifted]] (no characterisation without its measurement in the
+same breath) · [[2026-08-26_never-delete-cleanup-means-quarantine]] (deletion is the famous hazard,
+which is exactly why "no deletions" reads as "safe") ·
+[[2026-08-05_verify-the-chain-not-the-legs]].
+
+
 ## When I need Kam to do something, the ASK goes first and it is spelled out as steps — "I need you to do X. The rationale is Y. My recommendation was… Other options include…"
 `2026-09-08_ask-format-action-first.md` · preference · 2026-09-08 · status: live
 
@@ -4333,17 +4369,16 @@ sections (open the file for these): Why he asked, and the instance that earned i
    does not — the ledger covers whatever has no owner.
 
 
-## The boot instruction asks for more than the window holds — read a defensible SUBSET and say which, never obey and die
+## Measure the WINDOW, not just the files, before trimming your own boot — this file's own premise was wrong, and a wrong denominator makes a seat under-read its own corrections
 `2026-09-08_the-boot-spec-outgrew-its-window.md` · correction · 2026-09-08 · status: live
 
-**The operative case, so the headline matches it:** a seat boots, the prompt says *read the
-by-tier digest WHOLE, then your ledger WHOLE* — **and the two files together do not fit the
-context window.** The seat is one command from spending its whole life on its own memory.
-**Measure both files BEFORE reading either, decide a subset you can defend, read that, and
-report the numbers in the boot note.** Obeying a spec that has outgrown its instrument is
-not diligence; it is a seat that boots at 90% and is useless by its first task.
+> ⚠ **CORRECTED 2026-09-08 17:5x by the next seat, by measurement. The half that was wrong is the
+> ARITHMETIC; the half that was right is the METHOD.** See the CORRECTION section at the foot of this
+> file before applying rule 2. **The digest and the ledger DO fit — comfortably.** Rules 1, 3 and 4
+> (measure first · report the numbers · never silently under-read) stand and are good. **Rule 2's
+> specific subset is withdrawn as a DEFAULT**; it remains a reasonable choice, not a required one.
 
-sections (open the file for these): The measurement, 2026-09-08 · What s152 did instead, and why it is defensible · Why this is w=2 and the diagnosis is owed · How to apply · The uncomfortable part, kept
+sections (open the file for these): The measurement, 2026-09-08 · What s152 did instead, and why it is defensible · Why this is w=2 and the diagnosis is owed · How to apply · The uncomfortable part, kept · 🔴 CORRECTION 2026-09-08 17:5x — the premise was never measured, and it is wrong · Why the error is worth a section rather than a quiet edit · What is WITHDRAWN and what STANDS (scope stated per [[2026-09-06_a-retraction-inherits-the-scope-of-its-measurement]]) · The rule this replaces rule 2 with
 
 ## How to apply
 
@@ -4364,6 +4399,18 @@ sections (open the file for these): The measurement, 2026-09-08 · What s152 did
    move P-tier cases out to their projects (Phase 1 of the tier plan, never executed);
    or accept that the ledger is read as headlines by design and change the boot prompt to
    say so. **Proposing which is a consolidation item, not a boot-time decision.**
+
+### The rule this replaces rule 2 with
+1. **Measure the files AND establish the window in the same action.** `ls -la` on the digest and the
+   seat's ledger, then read `ctx:NN%` off the statusline before and after the first big read. **Two
+   statusline reads give you the exchange rate; one gives you nothing.**
+2. **Default to reading both WHOLE** — that is the boot spec, and on the measured window it lands a
+   seat around 40%, which is inside working range and well under the 80–90 rotation band.
+3. **Trim only against a measured ceiling, and say what you dropped and why** — the ledger's oldest
+   day as row headlines is the first thing to go, and it is a real option on a heavier day.
+4. **Never inherit a predecessor's subset without re-deriving its arithmetic.** A filed lesson is a
+   claim with a date on it ([[2026-08-16_a-recorded-blocker-is-not-a-boundary]]), and this one was
+   two seats old and wrong on its second reader.
 
 
 ## "The check ran, and it was not checking the thing" — a green from a check aimed at the wrong property is worse than no check, because it comes with a receipt
