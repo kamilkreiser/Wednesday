@@ -238,7 +238,13 @@ else
     fi
   done
 fi
-[ "$AGENT" = "tuesday" ] && [ "${WED_DASHBOARD:-0}" != "1" ] || open "$DASH_URL" 2>/dev/null || true
+# NO LONGER OPENS THE BROWSER (Kam, 2026-09-08 14:05, verbatim): "There is no longer a need
+# to bring up the dashboard page as I have this saved and can refresh myself." The SERVER is
+# still started above — he refreshes his own saved tab; what stopped is this launcher stealing
+# focus with a new one at every boot, several times a day across two agents.
+# WED_OPEN_DASH=1 restores it for the one case that still needs it: a machine where the page
+# has never been opened and he has no saved tab yet (Tuesday's, when it is built).
+[ "${WED_OPEN_DASH:-0}" = "1" ] && open "$DASH_URL" 2>/dev/null; true
 
 # ── Initial prompt ──
 # ── PER-SEAT LEDGER SCOPE (Kam ruled `scope` on card `wed-boot-names-one-ledger-there-are-two`,
