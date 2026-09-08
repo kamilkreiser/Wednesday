@@ -203,6 +203,27 @@ body.view-tuesday #agentbar { background:#e08a2b; }
 body.view-tuesday header { background:rgba(224,138,43,.10); }
 body.view-tuesday header h1::after { content:" · TUESDAY (Datasec)"; color:#e08a2b;
                font-size:12px; font-weight:700; letter-spacing:.04em; }
+
+/* ══ DRAG-AND-DROP ATTACHMENTS (Kam, 2026-09-08 14:10) ═══════════════════════
+   The drop target is the whole conversation column, not a small button: Kam is
+   dragging from Finder or another window and should not have to aim. */
+.dropping { outline:2px dashed var(--series-1); outline-offset:-6px;
+            background:color-mix(in srgb, var(--series-1) 7%, transparent); }
+#pending { display:flex; flex-wrap:wrap; gap:6px; padding:0 18px 6px; }
+#pending:empty { display:none; }
+#pending .pf { display:flex; align-items:center; gap:6px; font-size:11.5px;
+            background:var(--surface-2); border:1px solid var(--line);
+            border-radius:6px; padding:2px 6px 2px 4px; color:var(--text-secondary); }
+#pending .pf img { height:22px; width:22px; object-fit:cover; border-radius:3px; }
+#pending .pf button { background:none; border:none; color:var(--text-muted);
+            cursor:pointer; font-size:13px; line-height:1; padding:0 2px; }
+#pending .pf button:hover { color:var(--series-2); }
+.msg .atts { display:flex; flex-wrap:wrap; gap:8px; margin-top:6px; }
+.msg .atts a { font-size:12px; color:var(--series-1); text-decoration:none;
+            border:1px solid var(--line); border-radius:6px; padding:2px 8px;
+            background:var(--surface-2); }
+.msg .atts img { max-width:min(320px,100%); max-height:260px; border-radius:8px;
+            border:1px solid var(--line); display:block; }
 </style></head><body>
 <div id="agentbar" aria-hidden="true"></div>
 <header><h1>Cockpit</h1>
@@ -218,6 +239,7 @@ body.view-tuesday header h1::after { content:" · TUESDAY (Datasec)"; color:#e08
  <section class="panel" id="convo-panel" aria-label="Conversation with Wednesday">
   <h2>Conversation — Kam &amp; Wednesday</h2>
   <div class="scroll" id="log"><div id="msgs"><p class="empty" id="convo-empty">no messages yet</p></div></div>
+  <div id="pending"></div>
   <div id="convo-foot">
    <input id="text" type="text" maxlength="2000" placeholder="message Wednesday&hellip;" autocomplete="off">
    <button id="send">send</button></div>
@@ -388,6 +410,27 @@ function render(msgs) {
     const body = document.createElement("div"); body.className = "body";
     if (role === "wednesday") body.innerHTML = mdLite(m.text || "");
     else body.textContent = m.text || "";
+    if (m.attachments && m.attachments.length) {
+      const box = document.createElement("div"); box.className = "atts";
+      for (const a of m.attachments) {
+        if ((a.type || "").startsWith("image/")) {
+          const im = document.createElement("img");
+          // NOT loading="lazy": the chat re-renders these elements on every poll,
+          // so a lazy image can be destroyed and recreated before it ever completes.
+          // Measured 2026-09-08: complete=false, naturalWidth=0, rendered 2x2, while
+          // fetch() of the same URL returned 200 image/png and the file decoded fine
+          // outside the browser. A handful of small images buy nothing from lazy.
+          im.src = a.url; im.alt = a.name || "attachment";
+          const lk = document.createElement("a"); lk.href = a.url; lk.target = "_blank";
+          lk.appendChild(im); box.appendChild(lk);
+        } else {
+          const lk = document.createElement("a");
+          lk.href = a.url; lk.target = "_blank"; lk.textContent = "📎 " + (a.name || "file");
+          box.appendChild(lk);
+        }
+      }
+      body.appendChild(box);
+    }
     div.append(meta, body);
     if (role === "kam" && m.ack && m.ack.state) {
       // rendered from Wednesday-written state, never faked (WED-73 honesty rule)
@@ -466,15 +509,79 @@ async function poll(force) {
     live.textContent = "○ reconnecting…"; live.classList.remove("on");
   }
 }
+
+/* ══ DRAG-AND-DROP ATTACHMENTS (Kam, 2026-09-08 14:10) ══════════════════════
+   Drop or PASTE files anywhere in the conversation column. They upload first,
+   appear as removable chips, and go with the next message. A drop with no typed
+   text is still a message — the FILE is the message — so send is not disabled.
+   Every file gets an absolute path in the chat entry, because the other reader
+   of this log is an agent with file tools, not only a browser. */
+let pendingFiles = [];
+const pendingEl = document.getElementById("pending");
+function renderPending() {
+  pendingEl.innerHTML = "";
+  pendingFiles.forEach((f, i) => {
+    const c = document.createElement("span"); c.className = "pf";
+    if ((f.type || "").startsWith("image/")) {
+      const im = document.createElement("img"); im.src = f.url; im.alt = ""; c.appendChild(im);
+    }
+    const n = document.createElement("span");
+    n.textContent = f.name + " (" + Math.max(1, Math.round(f.bytes / 1024)) + " KB)";
+    const x = document.createElement("button");
+    x.textContent = "✕"; x.title = "remove before sending";
+    x.addEventListener("click", () => { pendingFiles.splice(i, 1); renderPending(); });
+    c.append(n, x); pendingEl.appendChild(c);
+  });
+}
+function b64(file) {
+  return new Promise((res, rej) => {
+    const r = new FileReader();
+    r.onload = () => res(String(r.result).split(",")[1] || "");
+    r.onerror = () => rej(r.error);
+    r.readAsDataURL(file);
+  });
+}
+async function uploadFiles(files) {
+  for (const file of files) {
+    try {
+      const r = await (await fetch("/api/upload", {
+        method: "POST", headers: {"Content-Type": "application/json"},
+        body: JSON.stringify({name: file.name, type: file.type, data_b64: await b64(file)})
+      })).json();
+      // A failed upload must be VISIBLE. Silently dropping a file Kam dragged in
+      // is the worst outcome here: he would believe it was sent.
+      if (r && r.ok) pendingFiles.push(r);
+      else alert("Upload failed for " + file.name + ": " + ((r && r.error) || "unknown"));
+    } catch (e) { alert("Upload failed for " + file.name + ": " + e); }
+  }
+  renderPending();
+}
+(function wireDrop(zone) {
+  let depth = 0;
+  zone.addEventListener("dragenter", e => { e.preventDefault(); if (++depth === 1) zone.classList.add("dropping"); });
+  zone.addEventListener("dragover", e => { e.preventDefault(); });
+  zone.addEventListener("dragleave", e => { if (--depth <= 0) { depth = 0; zone.classList.remove("dropping"); } });
+  zone.addEventListener("drop", async e => {
+    e.preventDefault(); depth = 0; zone.classList.remove("dropping");
+    const fs = [...(e.dataTransfer && e.dataTransfer.files ? e.dataTransfer.files : [])];
+    if (fs.length) await uploadFiles(fs);
+  });
+})(document.getElementById("convo-panel"));
+document.getElementById("text").addEventListener("paste", async e => {
+  const fs = [...(e.clipboardData && e.clipboardData.files ? e.clipboardData.files : [])];
+  if (fs.length) { e.preventDefault(); await uploadFiles(fs); }   // a pasted screenshot
+});
+function takePending() { const a = pendingFiles; pendingFiles = []; renderPending(); return a; }
+
 const sendBtn = document.getElementById("send");
 async function doSend() {
   const t = textEl.value.trim();
-  if (!t) return;
+  if (!t && !pendingFiles.length) return;      // a drop alone is a valid message
   sendBtn.disabled = true;
   try {
     const r = await (await fetch("/api/chat", {
       method: "POST", headers: {"Content-Type": "application/json"},
-      body: JSON.stringify({text: t, view: activeAgent})})).json();
+      body: JSON.stringify({text: t, view: activeAgent, attachments: takePending()})})).json();
     if (r.ok) { textEl.value = ""; await poll(true); log.scrollTop = log.scrollHeight; }
   } finally { sendBtn.disabled = false; textEl.focus(); }
 }

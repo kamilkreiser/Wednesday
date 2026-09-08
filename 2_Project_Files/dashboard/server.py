@@ -27,7 +27,7 @@ workspace (never any client board). Endpoints:
 After any write: linear collector + generator re-run so the page reflects it.
 NOTE before any remote exposure (Phase 4/Tailscale): add auth to this API.
 """
-import datetime, json, os, pathlib, re, subprocess, urllib.request
+import datetime, json, os, pathlib, re, subprocess, urllib.parse, urllib.request
 from http.server import ThreadingHTTPServer, SimpleHTTPRequestHandler
 
 # Dedicated Wednesday port — block 47780-47789, registry in ../PORTS.md
@@ -235,6 +235,24 @@ class Handler(SimpleHTTPRequestHandler):
             if not isinstance(raw, list):
                 raw, err = [], err or "decisions.json is not a list"
             return self._json(200, {"decisions": raw, "error": err})
+        if self.path.startswith("/uploads/"):
+            # Serve back what Kam dropped, so the chat can show the image inline.
+            # The name is re-sanitised HERE rather than trusted from the URL: the
+            # write path sanitises, but a read path that trusts its input is a
+            # directory traversal, and the two are independent surfaces.
+            want = self._safe_upload_name(urllib.parse.unquote(self.path[len("/uploads/"):]))
+            f = ROOT / "0_Brain" / "dashboard" / "uploads" / want
+            if not f.is_file():
+                return self._json(404, {"error": "no such upload"})
+            import mimetypes as _mt
+            ctype = _mt.guess_type(str(f))[0] or "application/octet-stream"
+            body = f.read_bytes()
+            self.send_response(200)
+            self.send_header("Content-Type", ctype)
+            self.send_header("Content-Length", str(len(body)))
+            self.end_headers()
+            self.wfile.write(body)
+            return
         if self.path == "/cockpit":
             # WED-113 two-panel view (Kam, 2026-08-21): conversation + fleet
             # activity feed. ADDITIVE — same theme/template pattern as /chat,
@@ -275,7 +293,33 @@ class Handler(SimpleHTTPRequestHandler):
             return
         return super().do_GET()
 
-    def _kam_append(self, text, ts, view=None):
+    # ── DRAG-AND-DROP ATTACHMENTS (Kam, 2026-09-08 14:10: "the ability to drag and
+    # drop files and images into the chat") ──────────────────────────────────────
+    # Files land in 0_Brain/dashboard/uploads/, GITIGNORED AT CREATION — Kam drops
+    # screenshots and PDFs, and those are his working material, not repo content.
+    # They are also how he hands Wednesday something to LOOK at, so the chat entry
+    # carries the absolute path: Wednesday reads it from disk with its own tools.
+    #
+    # base64 JSON rather than multipart, deliberately: multipart needs a parser,
+    # and a parser is a thing that can be subtly wrong on exactly the file that
+    # matters. This has no parsing step at all.
+    UPLOAD_MAX = 25 * 1024 * 1024
+
+    @staticmethod
+    def _safe_upload_name(name):
+        """A filename from a browser is untrusted input. Keep a readable name, but
+        allow nothing that could escape the directory or hide an extension."""
+        import re as _re
+        base = os.path.basename(str(name or "file"))[-120:]
+        base = _re.sub(r"[^A-Za-z0-9._-]", "_", base).lstrip(".")
+        return base or "file"
+
+    def _uploads_dir(self):
+        d = ROOT / "0_Brain" / "dashboard" / "uploads"
+        d.mkdir(parents=True, exist_ok=True)
+        return d
+
+    def _kam_append(self, text, ts, view=None, attachments=None):
         """PHASE 0 (Kam's 2026-09-08 11:50 commission): the panel writes ONLY
         chat_kam.json and then regenerates the DERIVED chat_log.json. Three
         endpoints used to append straight to the shared log; two Wednesday seats
@@ -298,6 +342,11 @@ class Handler(SimpleHTTPRequestHandler):
         entry = {"role": "kam", "text": text, "ts": ts}
         if view in ("wednesday", "tuesday", "both"):
             entry["view"] = view
+        if attachments:
+            # Each carries its ABSOLUTE path, because the reader is an agent with
+            # file tools, not only a browser. `url` is for the page; `path` is for
+            # Wednesday.
+            entry["attachments"] = attachments
         log.append(entry)
         kpath.write_text(json.dumps(log, indent=1, ensure_ascii=False))
         # rc is checked: a failed rebuild leaves the panel one message stale and
@@ -334,12 +383,45 @@ class Handler(SimpleHTTPRequestHandler):
                 ident = r["data"]["issueCreate"]["issue"]["identifier"]
                 refresh_site()
                 return self._json(200, {"ok": True, "created": ident})
+            if self.path == "/api/upload":
+                # {name, type, data_b64} -> saved file + the two ways to reach it.
+                import base64 as _b64
+                name = self._safe_upload_name(data.get("name"))
+                b64 = data.get("data_b64") or ""
+                if not b64:
+                    return self._json(400, {"error": "no data"})
+                try:
+                    raw = _b64.b64decode(b64, validate=True)
+                except Exception as e:
+                    return self._json(400, {"error": "bad base64: %s" % e})
+                if len(raw) > self.UPLOAD_MAX:
+                    return self._json(413, {"error": "file is %.1f MB; the cap is %d MB"
+                                            % (len(raw) / 1048576.0, self.UPLOAD_MAX // 1048576)})
+                stamp = datetime.datetime.now().strftime("%Y-%m-%d_%H%M%S")
+                d = self._uploads_dir()
+                dest = d / ("%s_%s" % (stamp, name))
+                n = 1
+                while dest.exists():           # never overwrite a file Kam dropped earlier
+                    dest = d / ("%s_%d_%s" % (stamp, n, name)); n += 1
+                dest.write_bytes(raw)
+                return self._json(200, {"ok": True, "name": name,
+                                        "url": "/uploads/" + dest.name,
+                                        "path": str(dest),
+                                        "type": (data.get("type") or "")[:100],
+                                        "bytes": len(raw)})
             if self.path == "/api/chat":
                 text = (data.get("text") or "").strip()[:2000]
-                if not text:
+                atts = data.get("attachments")
+                atts = atts if isinstance(atts, list) else []
+                # A drop with no typed message is still a message — the FILE is the
+                # message. Refusing it would make Kam type a word to send a screenshot.
+                if not text and not atts:
                     return self._json(400, {"error": "empty message"})
+                if not text:
+                    text = "(attached: %s)" % ", ".join(
+                        str(a.get("name"))[:80] for a in atts if isinstance(a, dict))
                 now = datetime.datetime.now().astimezone().isoformat()
-                self._kam_append(text, now, (data.get("view") or "").strip() or None)
+                self._kam_append(text, now, (data.get("view") or "").strip() or None, atts)
                 subprocess.run(["python3", str(HERE / "generate.py")], timeout=60)
                 # PUSH delivery (Kam, 2026-08-17): tap the wednesday pane so chat
                 # stops being a 60s-poll waiting game. Detached, best-effort —
