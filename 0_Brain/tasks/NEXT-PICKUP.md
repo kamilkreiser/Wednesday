@@ -40,12 +40,27 @@ At 05:08 a seat told Peter on #785 *"the action on this one is yours."* **It was
 with the correction and links back; **`5579579360` (the false comment) now carries a forward banner**
 with its original body preserved verbatim. **Do not let either be tidied away.**
 
+## 🟠 THE ROTATION PLAN — decided at 20:1x, and it exists nowhere else if this seat dies
+**Wednesday and the Secuura seat were BOTH at 70% and drifting to the band together.** If both turn
+over at once, the seat's handover is perfect and there is no live coordinator reading it.
+**So the seat was instructed to WRAP AT 80, not 90** — spending its runway on continuity deliberately.
+
+**The sequence, in order:** seat wraps at 80 → Wednesday scores it → Wednesday briefs the successor
+via `brief_and_launch.sh` (gates: PROVENANCE, SELF-CHECK, RULED BY KAM, card ids) → verify the boot at
+RUNG 5 (the pane quoting the commission, never a non-zero ctx) → THEN Wednesday rotates inside 80–90.
+**If this seat is gone before that: the seat's own handover is the authority for Secuura state, and
+`#728 / KS-671` is item 0 regardless.**
+
 ## 🔴 THE REAL "BALL WITH US" SET — supersedes every earlier count including the 13 in the s151 brief
 **8 of 32 open non-dependabot PRs have been returned by Peter AT or AFTER the current head:**
 **#728 · #768 · #773 · #805 · #872 · #880 · #881 · #883.** Measured across BOTH surfaces.
-**#883 is APPROVED at head `bac58b93a`, clean** (KS-729 leg 1, an SSRF removal) — **conditional merge
-GO given: TIER 2 and merge if it is a dependency removal/replacement; STOP and escalate if it adds or
-rewrites request/URL-handling code of ours.**
+**#883 MERGED at 20:1x** — `develop 811a82253 → baa99128d`. Tier 2, settled by the seat reading the
+diff against a discriminator rather than asking: one file, `package-lock.json`, +31/−7, ZERO code
+files; `ip-address` 10.1.0 → 10.7.0 via `express-rate-limit` 8.7.0; **the vulnerable code REMOVED, not
+reimplemented.** Tree predicted then re-derived from the object, `main` unmoved as control.
+**Follow-on DEFERRED DELIBERATELY:** GHSA-mwp4-54f8-5fhr's baseline row (KS-729, expires 2026-09-30) is
+now dead weight and `audit:gate` will list it under CLEANUP — not touched tonight because that file is
+the one #909 repaired, and the row blocks nothing.
 **PETER REVIEWED FOUR PRs IN FIFTEEN MINUTES around 09:50–10:02Z and may still be going.**
 
 ## 🔴 A FALSE CLAIM ABOUT A HUMAN IS IN HANDOVER-s150.md — do not inherit it
