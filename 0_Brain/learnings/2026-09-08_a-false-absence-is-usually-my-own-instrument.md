@@ -225,3 +225,43 @@ will actually interpret the file.**
     hand-rolled parser says nothing about the file.
 18. **A count of the SECTION HEADER is the cheapest control for a parser returning zero** — `grep -c
     'ports:'` costs nothing and instantly separates *"there are none"* from *"I cannot see them"*.
+
+## THE RATE, observed at the 2026-09-09 overnight wrap — SEVEN instrument failures in one session, and SIX were Wednesday's own hand-composed checks
+
+**The operative case:** you are running MANY small verifications in quick succession — a wrap, a boot,
+a sweep, a session of coordinating a seat. **Each one is cheap, so each one gets a hand-composed
+`grep`/`awk`/flag rather than the tool's own interface. That is the condition under which this whole
+family fires**, and it fires at a rate nobody notices because each instance is individually trivial.
+
+**The count, measured across one session (2026-09-08 21:52 → 2026-09-09 05:30):**
+
+| # | The instrument | What it returned | Caught by |
+|---|---|---|---|
+| 1 | a brief CONDITION with no control (ports) | false zero | the agent's own control |
+| 2 | `boot_digest.py --check` | green on a stale by-tier digest | reading the check's source |
+| 3 | `redis-cli --scan` under NOAUTH | false zero | a `DBSIZE` control |
+| 4 | two compose port enumerators | false zero ×2 | `grep -c 'ports:'` = 4 |
+| 5 | `grep 'by-tier one is not'` on CLAUDE.md | false zero (backticks) | a positive control |
+| 6 | `grep 'speechSynthesis'` on the wrong tree | false zero WITH a false control | rule 2 (all-fail ⇒ test the instrument) |
+| 7 | `grep -c 'Deleting'` on a 9-line / 12 MB unison log | a zero that could not have been non-zero | splitting on `\r` → 188,021 real records |
+
+**Six of the seven were Wednesday's**, and #7 nearly put *"the overnight sync deleted nothing"* into a
+handover on the strength of a grep that could not see 99.99% of the file.
+
+**The rules this adds:**
+
+19. **The more verifications you run in a sitting, the more each one must use the tool's own
+    interface** — because hand-composed instruments fail INDEPENDENTLY of each other, so there is no
+    single audit that catches them and no feeling of risk to warn you. **Volume is the risk factor, and
+    it feels like the opposite of one.**
+20. **Before grepping a file you did not write, ask what its RECORD SEPARATOR is.** Progress output
+    (`\r`), wrapped prose, JSON on one line and minified anything all defeat line-oriented tools —
+    and `wc -l` returning a small number beside a large `ls -la` is the tell. **Compare the line count
+    to the byte count; a 12 MB file with 9 lines is not a file you can grep by line.**
+21. **The exception, so this does not become paralysis:** a control is not owed to a read whose answer
+    you do not ACT on. It is owed the moment an absence enters a sentence someone else will rely on.
+    **The trigger is the claim, not the command.**
+
+**Family:** rules 16-18 above (ask the resolver, not the text) — this is the same rule pointed at the
+person rather than the format · [[2026-08-07_a-check-that-cannot-fail]] ·
+[[2026-08-14_i-read-representations-they-read-sources]].

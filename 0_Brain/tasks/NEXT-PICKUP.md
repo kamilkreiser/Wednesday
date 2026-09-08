@@ -7,7 +7,42 @@ status: live
 supersede: replace this file wholesale at the next pickup; do not append
 ---
 
-# NEXT PICKUP — s154 (Studio) LIVE. Secuura s153 WRAPPED CLEAN at 23:38. NO SEAT RUNNING. Nothing blocked, nothing waiting on Kam.
+# NEXT PICKUP — 2026-09-09 05:3x. Secuura s153 WRAPPED CLEAN 23:38. NO SEAT RUNNING (by decision). Nothing blocked, nothing waiting on Kam.
+
+## 🟢 OVERNIGHT WAS QUIET, AND THAT IS MEASURED
+No mail 13:38Z → 05:30 except the scheduler's own shift-change bus mail. **Kam silent since 15:59
+yesterday** — settled by `pull --rebase --autostash` (*Already up to date*) after the rulings script
+fired its stale-copy warning, **because an empty tail can mean "he said nothing" OR "this copy has not
+caught up".** Both stacks survived: **38 containers · gateway 6882 → 200 · dashboard 47787 → 200.**
+Watcher re-armed 03:42 `agents=0`, matching the real pane count. 23:00 close bell and 05:30 shift
+change both fired on their own schedules.
+
+## 🟡 THE 03:30 NAS SYNC IS STILL RUNNING — check it before assuming it finished
+PID **84978**, started 03:30, still in unison's *"Looking for changes"* scan at 05:30 (two hours; the
+crawl Kam ruled `leave` on 2026-08-26). **No deletions proposed: `Deleting` = 0 and `<-?->` = 0, both
+TRUE zeros with a firing control.**
+
+**HOW TO CHECK IT — do NOT grep the log by line.** It is **9 lines and 12 MB**: unison writes progress
+with carriage returns, so a line-oriented grep sees ~0.01% of it and returns a zero that could not have
+been anything else.
+
+    tr '\r' '\n' < 2_Project_Files/scheduler/logs/nas_sync_wednesday_2026-09-09_033000_84978.log > /tmp/nas.txt
+    grep -c 'Deleting' /tmp/nas.txt      # must be 0
+    grep -c '<-?->'    /tmp/nas.txt      # must be 0
+    grep -c 'CODING'   /tmp/nas.txt      # the CONTROL — must be large, or the split failed
+
+**If `Deleting` is ever non-zero: STOP and card it for Kam.** The 2026-08-26 incident lost six folders
+from DevMASTER to exactly this leg.
+
+## 🟡 OPEN QUESTION, unresolved deliberately — do quiet hours gate the panel's autoplay?
+`speak.sh` enforces 23:00-06:00, **but only after the browser-speaks gate**, and its own comment says
+*"`/api/speak` is unaffected; the panel calls it directly and never comes through here"* — while
+`server.py:503` DOES invoke it with `SPEAK_FROM_SERVER=1`, which WOULD reach the quiet-hours check.
+**Those two readings give opposite answers.** Wednesday could not locate the panel's client-side speech
+path (no `chat.html` under the served `site/`; the first greps returned zero WITH their controls also
+zero, which per rule 2 indicts the instrument). **NOT probed, because at 23:14 the failure mode of the
+test is waking Kam's house.** `WEDNESDAY_TEST_HOUR` exercises both branches safely — **settle it in
+daylight.** Meanwhile no panel message was sent after 23:00, which is correct under either reading.
 
 ## 🟢 START HERE IN THE MORNING — KS-1013 is item 0, and NO successor was launched deliberately
 **KS-1013 (P2) is the one genuinely actionable item.** It is a FIX, so it needs the full QA gate chain
