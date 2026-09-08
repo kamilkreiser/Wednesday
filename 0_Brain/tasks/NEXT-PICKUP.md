@@ -15,16 +15,18 @@ supersede: replace this file wholesale at the next pickup; do not append
 **s152 did that.** Phases 0, 1, Tuesday's home, her launcher, her inbox and her brief are
 built, pushed and proven. **`main` = `9c33d004`.**
 
-## 🔴 THE QUESTION ON KAM'S DESK RIGHT NOW (asked 13:0x, unanswered when this was written)
-**"Which do you want next: the rest of the path guard, or Secuura?"**
-- **If he says path guard** → §"WHAT IS NOT BUILT" below, item 1.
-- **If he says Secuura** → §SECUURA STATE. His 07:10 instruction (*"deploy and merge
-  everything that has been tested and done and is ready for deployment"*) and his 10:14
-  (*"archive any tickets that have been closed or deployed"*) have had NO seat on them
-  since s149 wrapped at 10:56.
-- **If he is silent** → default: finish the path guard. It is inside the commission he
-  named, it is the last structural piece, and Secuura is a bigger swing that deserves his
-  word first.
+## 🟢 BOTH ANSWERED THEMSELVES — the path guard is BUILT and SECUURA IS RUNNING
+The question put to Kam at 13:0x ("path guard or Secuura?") went unanswered; s152 did the
+declared default (finished the guard) and then started Secuura anyway, because on re-reading
+**it was never blocked on him**: his 07:10 instruction plus the week-scoped merge and deploy
+grants already authorised it, and the COO rule says such a ticket is executed, not listed.
+
+**🔴 YOUR LIVE DUTY: s153 is running in pane `%171` (launched 13:14, Secuura/Blockchain).**
+Its plan confirmation comes to `wednesday-agent@agentmail.to` — **answer it; do not send it
+to Kam** (it is inside a brief he already authorised). Then supervise it: QA gate before any
+score, Wednesday's completion check, merge on Wednesday's GO. Its brief is
+`2_Project_Files/fleet/briefs_staged/s153_secuura_standing_queue.md` — read it before
+answering anything, it carries the holds and Kam's six undelivered rulings verbatim.
 
 ## WHAT WAS BUILT TODAY — do not re-derive any of it
 | Thing | Where | Commit |
@@ -43,14 +45,17 @@ TESTED**, and the keychain entry is MACHINE-LOCAL so Kam logs in once per machin
 agent.
 
 ## 🔴 WHAT IS NOT BUILT — stated so no successor assumes it
-1. **The path guard is HALF built.** `pretooluse_no_cd.sh` refuses git WRITE verbs pointed
-   outside this tree (8-case matrix, proven). It does **NOT** refuse general shell writes
-   (`rm`/`mv`/`cp`/`tee`/`>`/`sed -i`) into another client's folder or the sister tree, and
-   **nothing anywhere stops a read**. On the travel drive both clients are mounted for both
-   agents, so that is the mode where discipline is ALL there is.
-2. **PORTABILITY.md has no "Headless second agent — bring-up" section**, and there is no
-   doctor check for the untracked `.git/hooks/pre-commit` (a clone does not carry it — a
-   fresh Tuesday clone will happily push conflict markers).
+1. **The path guard is now BOTH halves and armed** (`hooks/pathguard.py`, 17-case matrix
+   through the full hook, both agent directions, doctor check exercised in three states
+   including present-but-INERT). **What it still does NOT do: gate READS.** Nothing stops a
+   `cat`. On the travel drive both clients are mounted for both agents, so that is the mode
+   where discipline is ALL there is — the strongest mode is two machines.
+   Override for deliberate provisioning: `WED_ALLOW_CROSS_TREE=1`, and every use is stated.
+2. **DONE:** PORTABILITY.md has a "Headless second agent (TUESDAY) — bring-up" section, and
+   the pre-commit hook now has a TRACKED master at `2_Project_Files/fleet/hooks/pre-commit`
+   with a doctor check that also detects DRIFT. (The earlier claim here that no doctor check
+   existed was wrong — one existed since 2026-09-02; the real gap was that the hook's BODY
+   lived only in a commit message.)
 3. **Tuesday's MSGraph credentials** — deliberately withheld, on Kam's desk.
 4. **`/Volumes/DevMASTER/TUESDAY`** (the staging clone) is still at `8105f925` and lacks
    `Launch_Tuesday.command`. **The T9 copy is the real one and is current.** The guard
@@ -89,5 +94,7 @@ CONSTRUCTION (AES-GCM). Resolve via `email_lookup_hash`; decisive on a MATCH onl
 `decision_queue` refused it while `chat_log` was corrupt this morning; re-file it.
 
 ## FLEET
-No agents running. The Datasec/laptop seat WRAPPED at 12:21; NexusAI S47 wrapped at 12:15
-(`main` = `cd2b543`). Kam is at the panel and answering within minutes.
+**s153 Secuura/Blockchain LIVE in `%171`** (launched 13:14). The Datasec/laptop seat WRAPPED
+at 12:21; NexusAI S47 wrapped at 12:15 (`main` = `cd2b543`). No Tuesday seat exists yet —
+she is provisioned on the T9 and waits on Kam's Claude login.
+Kam was answering within minutes until ~12:53 and has been quiet since.
