@@ -1021,9 +1021,33 @@ value to run a control against.
 5. **The sibling rule, same seat, same mail:** never read `$?` for schemathesis or k6 — the printed
    `OVERALL:` / `Status:` line is the verdict, and both exit 0 while printing failure.
 
-**Family:** [[2026-09-08_a-false-absence-is-usually-my-own-instrument]] (the ZERO half; this is the
-SILENCE half) · [[2026-08-06_never-discard-stderr]] · [[2026-08-26_zsh-has-no-pipestatus]] (the other
-way a pipe destroys the information you needed).
+### AND THE TEST FOR IT, added 40 minutes later by the same seat — because the line above names the problem and does not give the discriminator
+
+> *"a slow network step and a wedged daemon look identical for the first two minutes; the difference is
+> whether anything downstream is still alive, and that is a cheaper question than a restart."*
+
+**The case.** A service sat on `RUN apk add --no-cache jq` for THREE MINUTES with zero log growth. The
+seat did not restart anything. It asked three questions instead: **is the daemon answering** (33
+containers listed) · **can the host reach what the step is waiting on** (the alpine CDN, 200 in 4.4 s) ·
+**is the VM burning CPU or idle** (6%, not 0). All three said alive, so it waited. It resumed on its own.
+
+**How to apply:**
+1. **A stalled log is a QUESTION, not a verdict.** Before any restart, kill or re-run, probe whether
+   anything downstream is still alive. Seconds, versus losing the work in flight.
+2. **Probe the thing the step is WAITING ON, not just the process** — the registry, the CDN, the
+   database, the API. A healthy process blocked on a dead dependency looks exactly like a hung one.
+3. **`0%` CPU and `6%` CPU are different findings.** Idle-at-zero is consistent with wedged; a few
+   percent is consistent with waiting on I/O.
+4. **The asymmetry that justifies the probe:** a restart destroys in-flight work and is not undoable;
+   a probe costs seconds and is free. **The cheap question goes first, always.**
+5. **The cost this avoids is a HUMAN'S:** Kam had to rule `restart` on a wedged Studio daemon twice on
+   2026-09-03. A seat that can discriminate spends seconds instead of his attention.
+
+**Family:** [[2026-09-08_a-false-absence-is-usually-my-own-instrument]] (the ZERO half; the SILENCE half
+is above, and this is its discriminator) · [[2026-08-06_never-discard-stderr]] ·
+[[2026-08-26_zsh-has-no-pipestatus]] (the other way a pipe destroys the information you needed) ·
+[[2026-08-17_check-the-refusal-before-the-kill]] (a restart is the destructive step; the probe is the
+refusable one that must precede it).
 
 ---
 

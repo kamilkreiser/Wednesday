@@ -7,7 +7,7 @@ status: live
 
 # Boot digest BY TIER — W whole, M rules-only, every project case a handle
 
-Generated 2026-09-08 22:23 from 127 lesson files (647,615 B). M 29 · MIXED 5 · W 93. 28 project CASE sections inside MIXED files are reduced to one line each: the heading and the path to read it at. W blocks are exactly what the default digest carries; M blocks drop the section index and keep the rules; a P file is a single handle. The CASES behind every rule live only in the lesson files — open one the moment its rule fires.
+Generated 2026-09-08 22:46 from 127 lesson files (649,684 B). M 29 · MIXED 5 · W 93. 28 project CASE sections inside MIXED files are reduced to one line each: the heading and the path to read it at. W blocks are exactly what the default digest carries; M blocks drop the section index and keep the rules; a P file is a single handle. The CASES behind every rule live only in the lesson files — open one the moment its rule fires.
 
 ## The T9 SSD is the master — Wednesday must be fully portable
 `2026-07-31_fully-portable-drive.md` · principle · 2026-07-31 · status: superseded — the "T9 is the master" half by [[2026-08-25_one-drive-devmaster-is-master]] (2026-08-25); the portability principle itself still lives · tier: W
@@ -3951,7 +3951,7 @@ sentence, ask what the instrument would have printed if the thing WERE there, an
 print that.** A false absence and a true absence are byte-identical on screen. **The world cannot
 tell you which one you are holding; only a control can.**
 
-sections (open the file for these): The three, in one session, all within ninety minutes · Why this is its own lesson and not three ledger rows · How to apply · Instance 4, added the same session — and it landed INSIDE the correction · The uncomfortable half, kept · EXTENSION 2026-09-08 19:5x — a FAILED COMMAND and a true zero are indistinguishable in a count, and a SEMANTIC control is what catches it · SHARPENED 2026-09-08 22:2x by the Secuura seat (s152) — A CONTROL DRAWN FROM THE SAME FAMILY AS THE THING YOU ARE MISSING AGREES WITH THE WRONG ANSWER
+sections (open the file for these): The three, in one session, all within ninety minutes · Why this is its own lesson and not three ledger rows · How to apply · Instance 4, added the same session — and it landed INSIDE the correction · The uncomfortable half, kept · EXTENSION 2026-09-08 19:5x — a FAILED COMMAND and a true zero are indistinguishable in a count, and a SEMANTIC control is what catches it · SHARPENED 2026-09-08 22:2x by the Secuura seat (s152) — A CONTROL DRAWN FROM THE SAME FAMILY AS THE THING YOU ARE MISSING AGREES WITH THE WRONG ANSWER · COSTUME 2026-09-08 22:4x — A REFUSED QUERY RENDERING AS AN EMPTY ONE (Secuura s153, self-caught by its control)
 
 ## How to apply
 
@@ -4025,6 +4025,21 @@ you get when the control is NOT independent, and this rule is how you avoid arri
 [[2026-08-07_a-check-that-cannot-fail]] and the same day's ledger row on a brief CONDITION being an
 instrument (the condition that produced this case was Wednesday's, and it required the absence without
 requiring the control).
+
+**The rules this adds:**
+
+13. **Pick a control that answers a DIFFERENT TYPE than the thing you are testing.** A count-returning
+    control beside a count-returning query shares the failure mode; a control that must return a NUMBER
+    exposes a string error immediately. **Type mismatch is a cheap form of the independence rule
+    (rule 11).**
+14. **On any authenticated service, the first question about a zero is "was I allowed to ask?"** —
+    databases, redis, cloud APIs, ticket boards, registries. `NOAUTH` · `403` · `permission denied` ·
+    an empty page from an expired session are all this shape, and none of them look like errors in a
+    count.
+15. **A DIRECT observation of the thing you care about beats two layers of proxy.** Here the decisive
+    evidence was neither scan nor control: **`POST /api/auth/login` returned 200**, which settles "is
+    this account locked out?" without reasoning about key patterns at all. **Ask what you actually want
+    to know, of the system that would know it.**
 
 
 ## A ghost suggestion is dangerous in proportion to how little the receiving agent has ALREADY WRITTEN DOWN — the detector catches the line, a recorded decision makes it inert

@@ -169,3 +169,32 @@ you get when the control is NOT independent, and this rule is how you avoid arri
 [[2026-08-07_a-check-that-cannot-fail]] and the same day's ledger row on a brief CONDITION being an
 instrument (the condition that produced this case was Wednesday's, and it required the absence without
 requiring the control).
+
+## COSTUME 2026-09-08 22:4x — A REFUSED QUERY RENDERING AS AN EMPTY ONE (Secuura s153, self-caught by its control)
+
+**The operative case:** a query against an authenticated service comes back with **zero rows**, and the
+refusal is on a DIFFERENT LINE from the count. **An unauthorised query and a genuinely empty result are
+byte-identical in the count**, and this is nastier than a bad pattern because **the instrument was
+correct — it was merely not allowed to answer.**
+
+**The case, measured.** `redis-cli --scan --pattern 'lockout:*'` returned 0 keys. It was not a zero:
+redis required AUTH, and the scan printed `NOAUTH Authentication required` on a separate line while the
+count came back clean. **The control that caught it was `DBSIZE` — chosen because it answers a NUMBER
+on success**, so `NOAUTH` could not be mistaken for a legitimate value. Authenticated properly (password
+read from the container's own `Config.Cmd`, never hardcoded): `DBSIZE` 253, `*` returns real session
+keys, `lockout:*` = 0 — **a true zero this time.**
+
+**The rules this adds:**
+
+13. **Pick a control that answers a DIFFERENT TYPE than the thing you are testing.** A count-returning
+    control beside a count-returning query shares the failure mode; a control that must return a NUMBER
+    exposes a string error immediately. **Type mismatch is a cheap form of the independence rule
+    (rule 11).**
+14. **On any authenticated service, the first question about a zero is "was I allowed to ask?"** —
+    databases, redis, cloud APIs, ticket boards, registries. `NOAUTH` · `403` · `permission denied` ·
+    an empty page from an expired session are all this shape, and none of them look like errors in a
+    count.
+15. **A DIRECT observation of the thing you care about beats two layers of proxy.** Here the decisive
+    evidence was neither scan nor control: **`POST /api/auth/login` returned 200**, which settles "is
+    this account locked out?" without reasoning about key patterns at all. **Ask what you actually want
+    to know, of the system that would know it.**
