@@ -298,24 +298,9 @@ def agentmail_feed():
         r = json.load(urllib.request.urlopen(req, timeout=30))
         for m in r.get("messages", []):
             subj = m.get("subject") or "(no subject)"
-            # ATTENTION HEURISTIC (Kam, panel 2026-09-08 10:59 "go with that", on
-            # Wednesday's recommendation). It used to be `"QUESTION" in subject`
-            # ALONE, which flagged the wrong things in both directions: a routine
-            # mail with the word in its title lit up, while s149's
-            # "issueArchive CASCADES to sub-issues" — a live incident that had
-            # silently archived two In Progress tickets — read as UNFLAGGED.
-            # The fleet already leads incidents with a red marker in the BLUF, so
-            # flag on the MARKER as well, in the subject or the preview.
-            # ADDITIVE: QUESTION still flags, because a question still needs an answer.
-            # HONEST LIMIT: `preview` is ~200 chars (the BLUF line), so a marker
-            # further down a long body is not seen. Flagging the BLUF is the point —
-            # an incident that does not lead with it has a different problem.
-            _preview = (m.get("preview") or "")
             msgs.append({"inbox": inbox.split("@")[0], "from": (m.get("from") or "?"),
                          "subject": subj, "ts": m.get("timestamp", ""),
-                         "attn": ("QUESTION" in subj.upper()
-                                  or "\U0001f534" in subj
-                                  or "\U0001f534" in _preview),
+                         "attn": "QUESTION" in subj.upper(),
                          # WED-113 round 2 (additive): the API's own preview
                          # snippet (~200 chars, BLUF line) for the cockpit's
                          # expand-row view — no extra requests, no body fetch.
