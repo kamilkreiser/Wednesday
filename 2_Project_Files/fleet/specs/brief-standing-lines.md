@@ -897,3 +897,50 @@ drifted before anyone looked**, because only the handler's copy is exercised by 
    a cell asserting its stub genuinely honours the column list, **so the load-bearing cell cannot go
    vacuous if a future seat loosens the stub.** Without it the loose-mock failure returns silently and
    the suite goes green on nothing.
+
+
+---
+
+## THE ERROR THAT LIES: a mutation returning an ERROR is not proof it did not happen — and the read that checks it can be STALE (2026-09-08, Secuura s152)
+
+**EVIDENCE BASIS:** one seat, **caught in flight by holding two of its own records against each other**;
+the wrong artefact was written and then repaired, and all seven subjects re-read to 7/7 with exactly
+one comment each and zero duplicates. Direction built against: **a failure that lies, and a
+verification of ABSENCE that lies.** **Not yet tested against:** APIs other than Linear's, or
+write-then-read windows longer than one retry.
+
+**This completes the family the rest of this file has been building.** The earlier members are all
+about a GREEN that lies:
+
+    success: true     on a body that stored nothing            -> a green that lies
+    exit 0            on a push that had not landed             -> a green that lies
+    unmoved ref       on a push still in flight                 -> a red that lies (in-flight vs failed)
+    HTTP 504          on a mutation that COMMITTED              -> a red that lies (NEW)
+    read-after-write  returning "not applied" when it WAS       -> a VERIFICATION that lies (NEW)
+
+**The case.** A comment POST died on HTTP 504. The seat verified before retrying and read **zero** of
+its comments on all seven subjects — *"nothing applied"*. **The 504 had COMMITTED the comment and then
+timed out, and the read had not caught up.** On the retry, an idempotency guard keyed on *"has my
+comment posted?"* **skipped that subject as already done — leaving a comment saying "Moved In Review →
+In Progress" on a ticket still sitting In Review. A comment that lies about the board**, published and
+permanent.
+
+### The standing lines
+
+1. **A mutation that returns an ERROR is not proof it did not happen.** Timeouts, 5xx and dropped
+   connections can land after committing. **And this direction is worse than the green one, because a
+   failure invites a RETRY — and a retry is a second write.**
+2. **"NOT applied" needs the same suspicion as "applied".** A read-after-write can be stale; a
+   confirmation of ABSENCE is a measurement like any other and gets a control. **Prefer a read that
+   is causally after the write** (a strongly-consistent endpoint, a re-fetch by id, or a short wait
+   with a second read that must AGREE with the first).
+3. **An idempotency guard keys on the WHOLE operation, never on a proxy for it.** *A comment plus a
+   state change is TWO writes; a failure can land between them, and then one half becomes the
+   evidence for both.* Key on the intended END STATE — "is this ticket In Progress AND does it carry
+   exactly one comment of mine?" — not on either half.
+4. **After any retry of a partially-failed batch, re-read EVERY subject and assert the end state AND
+   the absence of duplicates.** 7/7 at the intended state with exactly one comment each is the shape
+   of a complete repair; "the retry succeeded" is not.
+5. **The catch here came from two of the seat's OWN records disagreeing** — the skip message
+   contradicted its earlier verification. **Keep both, and read them against each other**; no single
+   check would have found this.
