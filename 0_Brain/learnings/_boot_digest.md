@@ -7,7 +7,7 @@ status: live
 
 # Boot digest — headline + rules of every lesson (open the file when it fires)
 
-Generated 2026-09-08 13:00 from 120 lesson files (592,875 B). Each block = the lesson's retrieval handle (H1), its frontmatter, the operative paragraph, its section index, and every RULES section verbatim. 6 files carry no rules-shaped section and are included whole. The CASES behind a rule live only in the file: open it the moment the rule fires, or when a diagnosis needs the evidence. `_ledger.md` is read whole beside this digest; `_ledger_archive.md` on demand.
+Generated 2026-09-08 13:18 from 121 lesson files (597,960 B). Each block = the lesson's retrieval handle (H1), its frontmatter, the operative paragraph, its section index, and every RULES section verbatim. 6 files carry no rules-shaped section and are included whole. The CASES behind a rule live only in the file: open it the moment the rule fires, or when a diagnosis needs the evidence. `_ledger.md` is read whole beside this digest; `_ledger_archive.md` on demand.
 
 ## The T9 SSD is the master — Wednesday must be fully portable
 `2026-07-31_fully-portable-drive.md` · principle · 2026-07-31 · status: superseded — the "T9 is the master" half by [[2026-08-25_one-drive-devmaster-is-master]] (2026-08-25); the portability principle itself still lives
@@ -4294,4 +4294,37 @@ sections (open the file for these): Why he asked, and the instance that earned i
    does not replace the check; it only makes the duplication visible earlier.
 6. **Scope: WED work.** Client work stays split by his 11:01 ruling. If that split changes, this file
    does not — the ledger covers whatever has no owner.
+
+
+## The boot instruction asks for more than the window holds — read a defensible SUBSET and say which, never obey and die
+`2026-09-08_the-boot-spec-outgrew-its-window.md` · correction · 2026-09-08 · status: live
+
+**The operative case, so the headline matches it:** a seat boots, the prompt says *read the
+by-tier digest WHOLE, then your ledger WHOLE* — **and the two files together do not fit the
+context window.** The seat is one command from spending its whole life on its own memory.
+**Measure both files BEFORE reading either, decide a subset you can defend, read that, and
+report the numbers in the boot note.** Obeying a spec that has outgrown its instrument is
+not diligence; it is a seat that boots at 90% and is useless by its first task.
+
+sections (open the file for these): The measurement, 2026-09-08 · What s152 did instead, and why it is defensible · Why this is w=2 and the diagnosis is owed · How to apply · The uncomfortable part, kept
+
+## How to apply
+
+1. **Measure before reading.** `ls -la` on the digest and the seat's ledger is one command
+   and it is the first thing after the identity files. A file's SIZE is a fact about whether
+   the instruction is executable today.
+2. **Read the W tier whole; take M as headlines; take the ledger as row headlines.** That is
+   the defensible subset, and it is defensible because each dropped part has a named
+   retrieval handle pointing at where the full text lives.
+3. **Report the numbers in the boot note** — the bytes, the token estimate, and the
+   statusline after the load. WED-139 already asks for the statusline; this adds the inputs,
+   so the next consolidation can see the trend instead of a verdict.
+4. **Never silently under-read.** The subset is stated to Kam in the boot report, with what
+   was dropped and why. A seat that quietly reads less has the same behaviour as a seat that
+   forgot.
+5. **The real fix is Kam's and it is not a smaller digest.** Options, none of them free:
+   archive the ledger far harder (rows run 2–3 KB of prose and three days is 378 KB);
+   move P-tier cases out to their projects (Phase 1 of the tier plan, never executed);
+   or accept that the ledger is read as headlines by design and change the boot prompt to
+   say so. **Proposing which is a consolidation item, not a boot-time decision.**
 
