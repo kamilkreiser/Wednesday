@@ -141,4 +141,41 @@ MSG
   exit 2
 fi
 
+# ── FILE-WRITE HALF OF THE TWO-AGENT GATE (Phase 2, Kam's 2026-09-08 11:50 commission:
+# "there's got to be a strong gate between agents acting between the two") ──────────────
+# The clause above covers git verbs. This covers ordinary shell writes into another
+# client's folder or the sister agent's tree. The logic lives in pathguard.py BESIDE this
+# file, deliberately: this script carries its checks inside a single-quoted string, and an
+# apostrophe there ends the string and blocks every Bash call in the session — twice in two
+# days. Code that gets edited under pressure does not belong in that string.
+# Exercised BOTH directions before arming (2026-09-08): as Wednesday and as Tuesday, 20
+# cases — refuses writes into the other tree and into any !CODING project, allows reads
+# anywhere and writes to its own tree, ignores commands quoted inside heredoc prose, and
+# the SAME command flips verdict with the seat. Honest limit, stated in pathguard.py:
+# nothing here stops a read.
+PATHGUARD="$(dirname "${BASH_SOURCE[0]}")/pathguard.py"
+if [ -f "$PATHGUARD" ]; then
+  PGCHK=$(printf '%s' "$CMD" | python3 "$PATHGUARD" 2>/dev/null)
+  if [ -n "$PGCHK" ]; then
+    PGC="${PGCHK%%|*}"; PGP="${PGCHK#*|}"
+    cat >&2 <<MSG
+REFUSED by pathguard.py: \`$PGC\` WRITES to
+  $PGP
+which belongs to another client or to the other agent's tree. This seat's root is
+$HOOK_OWN_ROOT.
+
+Hard rule 1 (stay in the project folder) and rule 2 (no cross-client contamination).
+Coordinators manage; the project's own agent executes. One writer per tree is the design,
+not a precaution — it is why the claims files have never once conflicted.
+
+READS are fine and are NOT gated: cat, grep, ls, git log/show/diff.
+To change another project: brief its agent. To change the sister tree: it is hers.
+If this is a deliberate provisioning run that Kam asked for, re-issue it with
+WED_ALLOW_CROSS_TREE=1 and say so in the session note — an override used silently is an
+override that stops being one.
+MSG
+    exit 2
+  fi
+fi
+
 exit 0

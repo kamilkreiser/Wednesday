@@ -197,6 +197,27 @@ else
   warn "boot_digest.py missing" "the seat will read every lesson file (34% boot) — restore 2_Project_Files/tools/boot_digest.py"
 fi
 
+# --- Two-agent path guard armed (Phase 2, Kam 2026-09-08: "a strong gate between
+# agents acting between the two"). A guard that can go MISSING is not a guard — the
+# file could be lost to a bad merge, a clone, or a tidy-up, and nothing else would say
+# so. This does not just check the file exists: it FIRES it on a known-bad command and
+# on a known-good one, so a pathguard that is present but inert fails the check too
+# (a-check-that-cannot-fail, 2026-08-07). Both probes are strings here, never run.
+PG="$PROJECT_DIR/2_Project_Files/fleet/hooks/pathguard.py"
+if [ -f "$PG" ]; then
+  PG_BAD="$(printf 'cp a /Volumes/DevMASTER/TUESDAY/b' | HOOK_OWN_ROOT="$PROJECT_DIR" python3 "$PG" 2>/dev/null)"
+  PG_GOOD="$(printf 'cp a %s/b' "$PROJECT_DIR" | HOOK_OWN_ROOT="$PROJECT_DIR" python3 "$PG" 2>/dev/null)"
+  if [ -n "$PG_BAD" ] && [ -z "$PG_GOOD" ]; then
+    ok "two-agent path guard armed" "refuses the sister tree, passes its own"
+  elif [ -z "$PG_BAD" ]; then
+    fail "path guard is INERT" "it did not refuse a write to the other agent's tree — the gate is decoration"
+  else
+    fail "path guard refuses its OWN tree" "it would block every write this seat makes — check HOOK_OWN_ROOT resolution"
+  fi
+else
+  fail "pathguard.py missing" "the file-write half of the two-agent gate is gone; only git verbs are guarded"
+fi
+
 # --- Chat streams (Phase 0, Kam's 2026-09-08 11:50 two-agent commission) ---------
 # chat_log.json is DERIVED from chat_legacy.json + one stream per writer, and it is
 # gitignored: a generated file that two seats both regenerate is what corrupted Kam's
