@@ -7,17 +7,26 @@ status: live
 supersede: replace this file wholesale at the next pickup; do not append
 ---
 
-# NEXT PICKUP — 2026-09-09 08:2x. THE SECUURA REPO CANNOT ACCEPT A PUSH FROM ANYONE, and it is on Kam's card. One seat live at ~70%, its handover written.
+# NEXT PICKUP — 2026-09-09 08:3x. THE BLOCK IS CLEARED, KS-754 IS LANDED AS PR #914, AND THE REPO CAN PUSH AGAIN.
 
-## 🔴 START HERE — everything hangs on one Kam ruling
+> 🟢 **SUPERSEDES THE 08:2x HEAD OF THIS FILE, which said nobody could push. That was true when written and is now false.**
+> **Kam WIDENED the authority at 08:23:52** (verbatim: *"The approval was for you to go ahead with any change necessary to Secura to make it work."*),
+> overriding his own grant's clauses 1 and 2 for this case. **All five advisories baselined, preflight green, branch pushed, PR #914 open.**
+> **Verified independently by Wednesday** — `ls-remote | grep ks-754` = 1 with `refs/heads/develop` = 1 as the control — **not taken from the pane.**
+> **No `--no-verify` at any point; the seat refused it three times.** Elapsed 21:43Z → ~22:31Z: about fifty minutes, three Kam rulings, eight advisories.
+>
+> **STILL TRUE AND STILL THE POINT: this was a GATE problem, not a backlog.** The churn finding stands, KS-1025 is filed, and the reshape is ruled but unbuilt.
+> **The next block will arrive the same way and from nobody's change.**
 
-**Card `secuura-advisories-high-and-prod-reaching` is OPEN on his panel.** Until he rules, **nobody — us, Peter, Stuart — can push to the Secuura repo.** Nothing expires, nothing degrades, no work is lost.
+## 🟢 START HERE — the queue for a FRESH seat, now that things can land
 
-**Three commits sit LOCAL on `feature/ks-754-widen-processed-by-to-text`, absent from origin (`ls-remote`, read not inferred):**
+**PR #914 (KS-754) is OPEN and needs a tier-1 gate.** Then, in order and all needing a FULL window:
 
-    66c845069   KS-1024   colord + scope: standalone-locks
-    64e2eddb6   KS-1024   the two Kam ruled at 07:58
-    9ceb61c5e   KS-754    the widening + the gdpr.ts:361 rethrow
+1. **#913 (KS-963) — merge GO IS ALREADY GIVEN.** Fix **F-1 in the same commit**: `userRepo.ts:409-430` and the test header both say FOUR callers and assert *"all four read null as 'no such user'"* — **false twice** (there are FIVE, and the fifth reads null as NO TENANT CONTEXT).
+2. **F-3 fix round — round 2 of 2 under Kam's cap.** Two of three structural cells cannot fail on the defect they exist to detect; the declared control at `:114` was MEASURED not to discriminate. **No product impact; the loss is regression value.**
+3. **#912 (`ae8751f38`) and #914 need gate briefs.** Wednesday writes those, not the seat.
+
+⚠ **CARD `secuura-advisories-high-and-prod-reaching` IS OPEN AND MOOT — do NOT rule it.** Kam's widening covered its subject but he gave a SENTENCE, not an option key, and `decision_queue.sh` has no withdraw verb. **Ruling it would write a choice into his record that he never made.** He has been told it is moot and may ignore it. **Candidate: a `supersede ID REASON` verb.**
 
 ## 🔴 THE SHAPE OF THE DAY, and a successor must not get this backwards
 
