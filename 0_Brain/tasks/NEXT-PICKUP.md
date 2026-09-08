@@ -7,7 +7,46 @@ status: live
 supersede: replace this file wholesale at the next pickup; do not append
 ---
 
-# NEXT PICKUP — 12:0x Tuesday. Fleet quiet. Kam is mid-commission on the two-agent fleet.
+# NEXT PICKUP — 12:1x Tuesday. **YOUR FIRST JOB IS NAMED BY KAM. Do not go looking for work.**
+
+## 🟢 KAM'S STANDING INSTRUCTION FOR THIS SEAT (verbatim, 2026-09-08 ~12:1x)
+> *"Okay, rotate, and after you've rotated, keep working on this new Wednesday, Tuesday, and chat structure."*
+
+**That is a GO to continue building, not a request for another plan.** He commissioned the
+architecture at 11:50, ruled the name TUESDAY at 11:56, and told this seat to carry on.
+
+### What "keep working" means concretely, in priority order
+1. **Phase 0 — one writer per file.** `chat_main`/`chat_wednesday` + `chat_tuesday` (+ Kam's own
+   stream), merged at render. **This is the prerequisite for the toggle AND the fix for a defect
+   that has cost THREE chat_log union-merges in one morning** (two corruptions + one live rebase
+   conflict). Adding Tuesday makes it three writers on one file.
+2. **Phase 1 — the WEDNESDAY | TUESDAY toggle**, top right, filtering chat + fleet activity +
+   board tiles on the `agent` field. A loud, unmissable indicator of the live view — the cost of
+   Kam typing a Datasec instruction while looking at the Wednesday view is a cross-client message.
+3. **Tuesday's home on the drive.** Kam: *"Copy your folder on the drive, labeling it Tuesday."*
+   **RECOMMENDATION ALREADY GIVEN TO HIM AND NOT CONTRADICTED — proceed on it: CLONE, not copy.**
+   A copy forks the brain; a clone of the same repo keeps it one thing that syncs, which is the
+   design he ruled. **EXCLUDE the build artefacts** — of `2_Project_Files`'s 1.3 GB, the worktrees,
+   venvs and `node_modules` must NOT be duplicated. She needs the tooling, not the scaffolding.
+   Give her `4_Credentials/` of her own.
+4. **Phase 2 — the path guard**: Tuesday refuses writes outside `!CODING/Datasec/`; Wednesday
+   refuses writes inside it. In `pretooluse_no_cd.sh`, exercised BOTH directions before arming.
+5. **Phase 3** — the headless bring-up section in PORTABILITY.md (mostly executing the existing
+   2026-09-02 run-sheet) + a doctor check for the untracked pre-commit hook.
+
+### 🔴 THE ONE THING ALREADY SOLVED — do not re-derive it
+**`CLAUDE_CONFIG_DIR` gives a genuinely separate Claude auth namespace. TESTED, not assumed:**
+`CLAUDE_CONFIG_DIR=<scratch> claude -p …` returned **`Not logged in · Please run /login`** and built
+its own `.claude.json`/`projects`/`sessions`. Credentials are in the **Keychain** under
+`Claude Code-credentials-<hash of the config dir>`. **So each launcher exports its own on-drive
+`CLAUDE_CONFIG_DIR`** — same pattern as `AZURE_CONFIG_DIR`/`GH_CONFIG_DIR`, and it covers two
+machines, one machine, and the travel drive with one mechanism.
+**Caveat: the Keychain entry is MACHINE-LOCAL. The config dir travels; the secret does not — Kam
+logs in once per machine per agent.** That is a PORTABILITY.md item and is not yet written.
+
+Fleet quiet. No agents running. Kam is at the panel and answering in minutes.
+
+
 
 ## 🔴 FIRST, IN THIS ORDER
 1. `2_Project_Files/tools/kam_rulings_today.sh` — settle its stale warning by PULLING and re-running.

@@ -18,6 +18,9 @@ machine until further notice"*). Datasec belongs to the laptop seat.
 | 2026-09-08 10:40 | Fleet activity items could never clear (Kam 10:19) — mail-tile ack + fleet_ack.sh | WED | DONE — red-proofed on the rendered page, pushed |
 | 2026-09-08 10:44 | wed_claim.sh was writing to the DEAD T9 path — ownership tool was inert on this seat | WED | DONE — self-locating, 4 branches exercised, pushed |
 | 2026-09-08 10:45 | Secuura archive pass — 33 archived + 2 cascade-restored | Secuura KS board | DONE — s149 scored 1.0; PS-18 HELD on Kam's card |
+| 2026-09-08 11:41 | Two-agent fleet architecture (Wednesday + TUESDAY) — Kam's commission | WED | ACTIVE — plan written, name ruled, CLAUDE_CONFIG_DIR solved; successor builds Phase 0+1 |
+| 2026-09-08 12:03 | Brain + settings backup, 660 MB, content-verified, secrets excluded | WED | DONE — 5_Project_History/backups/, gitignored at creation |
+| 2026-09-08 12:1x | SEAT ROTATED on Kam's word at 70% — successor inherits this file and the commission | WED | handover |
 | 2026-09-08 10:56 | s149 WRAPPED and its pane CLOSED (%170) — handover 143 lines, everything pushed | Secuura/Blockchain | DONE — Wednesday is the wake path; successor launches on Kam's PS ruling |
 | 2026-09-08 10:58 | decisions.json REPAIR — Kam's rulings file had git conflict markers committed into it | WED / shared | DONE — 195 cards, 0 rulings lost, pushed. Came in via the LAPTOP's ce6a24be; laptop must pull |
 | 2026-09-08 11:00 | Attention flag now fires on the red marker, not just 'QUESTION' (Kam 10:59) | WED | DONE — exercised on the real feed, 2 of 12 flagged correctly |
