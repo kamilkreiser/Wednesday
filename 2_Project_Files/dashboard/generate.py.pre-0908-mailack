@@ -781,33 +781,18 @@ def tile_email():
     rows = ""
     for m in agentmail["data"]["messages"]:
         ts = m["ts"][5:16].replace("T", " ")
-        # ANSWERED-CLEARING (Kam, panel 2026-09-08 10:19: "clear fleet activity
-        # items once answered"). `attn` is recomputed by the collector every run
-        # as `"QUESTION" in subject`, so it is a pure function of the subject and
-        # could NEVER clear — a mail stayed flagged forever no matter how well it
-        # was answered. The flag now honours an ack written by Wednesday's own
-        # session, keyed `mail:<ts>`. The `mail:` prefix is deliberate: the chat
-        # sidebar joins ack_state on a BARE ts, so a prefixed key cannot be picked
-        # up there by construction. HONESTY RULE (WED-73) holds — only Wednesday's
-        # session writes "answered"; the row itself is never removed, so the record
-        # of the question survives and only the call-to-action clears.
-        _a = ACK.get("mail:" + m["ts"])
-        _answered = isinstance(_a, dict) and _a.get("state") in ("answered", "done")
-        _needs = bool(m["attn"]) and not _answered
-        attn = '<span class="attn">&#9873;</span>' if _needs else ""
+        attn = '<span class="attn">&#9873;</span>' if m["attn"] else ""
         inboxes = "+".join(m.get("inboxes", [m.get("inbox", "?")]))
         fields = [("Subject", m["subject"]), ("From", m["from"]), ("Inboxes", inboxes),
                   ("Received", m["ts"][:16].replace("T", " "))]
-        if _needs: fields.append(("Attention", "QUESTION — check whether an ANSWER went out"))
-        if _answered:
-            fields.append(("Answered", f"{_a.get('label') or 'answered'} — {(_a.get('ts') or '')[:16].replace('T', ' ')}"))
+        if m["attn"]: fields.append(("Attention", "QUESTION — check whether an ANSWER went out"))
         # same column order as calendars/family (dot · category · time · text) so
         # tiles stacked in a column line up — Kam round 10 item (b)
         # round 13: the sending project's colour on the rail, so a glance down the
         # column says WHICH project is talking. Wednesday's own broadcasts stay
         # neutral — the same rule as her board.
         ek = entity_from_subject(m["subject"])
-        rows += (f'<li class="evrow{" needsack" if _needs else ""}"'
+        rows += (f'<li class="evrow{" needsack" if m["attn"] else ""}"'
                  f'{project_rail(ek) if ek else ""} data-detail="{detail_attr(fields)}">'
                  f'<span class="dot flagslot">{attn}</span>'
                  f'<span class="src">{html.escape(inboxes[:16])}</span><span class="time">{ts}</span>'
