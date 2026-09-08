@@ -1187,3 +1187,81 @@ answers about the FRAME and the answer is recorded as being about the WORLD) ·
 [[2026-08-15_a-cap-is-never-neutral]] (a count carries its predicate; a default filter IS a predicate) ·
 [[2026-09-08_a-false-absence-is-usually-my-own-instrument]] (rule 14: on any filtered source, ask first
 what you were allowed to see).
+
+---
+
+## A SENTENCE THAT IS TRUE ONLY BECAUSE OF THE PARAGRAPH AROUND IT WILL BE READ ALONE — so it carries its own object
+*(2026-09-09, found by the Secuura/Blockchain seat s154 while answering a question about a note it had
+been misled by, and the finding is better than the fix. M-tier — client-neutral.)*
+
+**The case, measured.** A seat needed to undo a write it had made to a seeded row. Five separate places
+in its project said some version of *"`docker restart secuura-auth` re-seeds"* — one of them the
+repo's own `MEMORY.md`, auto-loaded into every agent that touches the project. It restarted, read the
+row back, and **nothing had changed**: the seed is insert-if-absent, so a restart restores the
+PASSWORD and not the row's other fields.
+
+**The finding underneath, and it is why this is a standing line rather than five typo fixes: every one
+of the five sites was CORRECT IN CONTEXT.** All five sat in a passage about personas being unable to
+log in. **Not one was a wrong sentence.** Only the WORDING generalised — and the wording is the part
+that gets carried away from its context and relied on somewhere else.
+
+**Why the existing lines do not cover it.** The families already written — a dropped hedge, a dropped
+scope word, an acknowledgement that compresses — are all about a restatement LOSING something.
+**Here nothing was lost and nothing was compressed.** Five writers each wrote a true sentence, in
+place, carefully. The sentence was true because of the paragraph, and the paragraph did not travel.
+The reader who lifted it was not careless.
+
+**The rules:**
+1. **A sentence carries its own object.** Not *"re-seeds"* but *"re-seeds the password"*. Not
+   *"resets the environment"* but *"resets the environment's containers, not its volumes"*. The extra
+   two words are the whole defence.
+2. **Test by quotation:** *could this sentence be quoted, on its own, into a different task without
+   becoming false?* If not, it is not finished — however correct the surrounding passage is.
+3. **Weight the fix by WHERE it lives.** A `MEMORY.md`, a `CLAUDE.md`, a README's quick-start or any
+   auto-loaded file is read at boot by every future session, out of context by construction. Those
+   sites earn the object first.
+4. **Cite the mechanism beside the corrected sentence** (`userRepo.ts:1470-1487` here) so the next
+   reader can CHECK rather than trust — which is what stops the corrected wording generalising in
+   its turn.
+5. **Do NOT sweep the correct ones for tidiness.** The seat left one site alone because its *"it"* was
+   already bound to the password, and said why: **rewriting a correct sentence to match a fix is how
+   a diff stops being readable.** Fix what was refuted and nothing else — the retraction-scope rule,
+   pointed at an edit.
+
+**Family:** [[2026-08-13_headline-must-match-the-operative-case]] (its sibling: there the HEADLINE
+answered a different question from the body; here the BODY is right and the sentence cannot stand
+alone) · [[2026-09-06_a-retraction-inherits-the-scope-of-its-measurement]] (rule 5) ·
+[[2026-08-14_i-read-representations-they-read-sources]] (the SHARPENED 2026-09-08 compression section —
+this is the case that section does NOT cover).
+
+---
+
+## A CONFIG-RESOLVING TOOL RUN ON A COPY IS A FALSE CLEAN — the control must sit where the measurement sits
+*(2026-09-09, Secuura/Blockchain s154, self-caught before a push. M-tier.)*
+
+**The case.** A docs edit reddened a package's `prettier --check`. The seat's first control copied both
+the old and new files to `/tmp` and checked them there. **Both passed** — which would have said the
+gate was wrong about the change. **Prettier resolves its configuration by walking up from the FILE'S
+LOCATION**, so a copy outside the package is checked under different rules entirely. Re-run in place,
+develop's copy passed and the new one failed: the seat's own fault, confirmed by a control that could
+actually discriminate.
+
+**The direction is what makes it worth a line:** the false clean pointed at ARGUING WITH A GATE THAT
+WAS RIGHT. That is the expensive direction, because a gate overruled once gets routed around after.
+
+**The rules:**
+1. **Any tool that resolves configuration by walking up the tree is answering a DIFFERENT question
+   when you run it on a copy** — prettier, eslint, tsc/`tsconfig`, black, ruff, editorconfig, and git
+   itself. **Run it in place, or the clean is about the copy.**
+2. **A control must be able to fail the same way the measurement can.** A control in a different
+   config scope structurally cannot, so it is not a control — it is a second sample of a different
+   world ([[2026-09-08_a-false-absence-is-usually-my-own-instrument]] rule 11, independence).
+3. **When a gate reddens and your control says it should not, suspect the control first** — this is
+   the selector-discipline rule pointed at tooling: your own instrument before the world.
+4. **If a file genuinely must be checked outside its package, copy the config resolution too and say
+   you did** — otherwise report the check as NOT RUN with the blocker named.
+
+**Family:** [[2026-08-06_selector-discipline-in-ui-verification]] (suspect your own instrument first) ·
+[[2026-08-06_local-proof-is-not-target-evidence]] (an environment that differs by design is blind
+exactly there) · [[2026-09-08_a-false-absence-is-usually-my-own-instrument]] ·
+[[2026-08-07_a-check-that-cannot-fail]].
