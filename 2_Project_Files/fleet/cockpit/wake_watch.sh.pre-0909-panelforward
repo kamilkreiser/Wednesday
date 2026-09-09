@@ -82,13 +82,7 @@ while [ $SECONDS -lt $end ]; do
     -H "Authorization: Bearer ${AGENTMAIL_API_KEY:-}" \
     | python3 -c "
 import json,sys,os
-_inb=os.environ.get('SEAT_INBOX','')
-# A PANEL message from Kam is delivered INTO this seat's own inbox and therefore
-# carries this seat's address in 'from' — so the own-outbound filter suppressed it.
-# That is exactly why Kam's 17:03 message was delivered and never woke Tuesday.
-# Kam's messages are never 'own outbound', whatever the From line says.
-ms=[m for m in json.load(sys.stdin).get('messages',[])
-    if str(m.get('subject','')).startswith('[Kam ->') or _inb not in str(m.get('from',''))]
+ms=[m for m in json.load(sys.stdin).get('messages',[]) if os.environ.get('SEAT_INBOX','') not in str(m.get('from',''))]
 print(ms[0].get('timestamp','')[:16] if ms else '')" 2>/dev/null)
   if [ -n "$ts" ] && [[ "$ts" > "$BASELINE" ]]; then
     echo "WAKE: new mail at $ts (baseline $BASELINE)"; exit 0
