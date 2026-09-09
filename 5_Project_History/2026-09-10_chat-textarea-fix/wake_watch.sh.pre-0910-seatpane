@@ -37,48 +37,15 @@ CTX_STATE="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)/state"
 mkdir -p "$CTX_STATE"
 # markers older than 3 days belong to dead pane generations — prune quietly
 find "$CTX_STATE" \( -name 'ctx_fired_*' -o -name 'idle_ack_*' \) -mtime +3 -delete 2>/dev/null
-# ── SEAT RESOLUTION (hoisted above the loop 2026-09-10, Kam's ruling
-# "parameterise — make it agent-aware, Wednesday's behaviour byte-identical",
-# card wed-wakewatch-hardcodes-wednesday-inbox-and-pane).
-# The INBOX half was fixed 2026-09-09 but the resolution sat INSIDE the loop,
-# BELOW the DEAD-coordinator check — so the one check that runs first could not
-# see it and stayed hardcoded to the literal pane name "wednesday". On Tuesday's
-# seat that meant: no DEAD detection for her at all (she has no pane by that
-# name), and her OWN coordinator pane was not in the skip list, so the idle
-# tripwire treated her as an agent and woke her about herself.
-# Resolved ONCE here; every use below reads $SEAT. Wednesday's tree resolves to
-# "wednesday", so every comparison is the same string it was before.
-_root="$(cd -P "$(dirname "${BASH_SOURCE[0]}")/../../.." && pwd)"
-case "$(basename "$_root")" in
-  TUESDAY)   _tree_seat=tuesday   ;;
-  WEDNESDAY) _tree_seat=wednesday ;;
-  *)         _tree_seat=wednesday ;;
-esac
-# WED_AGENT if set, else the TREE'S OWN NAME. The tree is the discriminator
-# because the runner does NOT inherit WED_AGENT (measured 2026-09-09) and
-# because the two trees are clones of one repo — the checkout path is the only
-# thing that differs between them.
-SEAT="${WED_AGENT:-$_tree_seat}"
-_routing="$(cd -P "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)/inbox_routing.conf"
-case "$SEAT" in
-  tuesday)   SEAT_INBOX=$(awk -F'|' '$1=="Tuesday"{print $2}'   "$_routing" 2>/dev/null)
-             KAM_TAG="[Kam -> Tuesday]"   ;;
-  wednesday) SEAT_INBOX=$(awk -F'|' '$1=="Wednesday"{print $2}' "$_routing" 2>/dev/null)
-             KAM_TAG="[Kam -> Wednesday]" ;;
-  *)         SEAT_INBOX=""
-             KAM_TAG="[Kam -> Wednesday]" ;;
-esac
-[ -n "$SEAT_INBOX" ] || SEAT_INBOX="wednesday-agent@agentmail.to"
-
 end=$((SECONDS + 14400))
 while [ $SECONDS -lt $end ]; do
   # (d) DEAD COORDINATOR (2026-09-02): the wednesday pane shows Claude Code's
   # hard stop "Context limit reached". Every other wake is pointless while this
   # holds — the seat cannot read a tap. Fires every cycle it is seen (the runner
   # respawns via wednesday_rotate.sh --dead; a respawn clears the pane).
-  wpane=$("$TMUX_BIN" list-panes -t "$FLEET" -F '#{pane_id}|#{@cockpit_name}' 2>/dev/null | awk -F'|' -v seat="$SEAT" '$2==seat{print $1}' | head -1)
+  wpane=$("$TMUX_BIN" list-panes -t "$FLEET" -F '#{pane_id}|#{@cockpit_name}' 2>/dev/null | awk -F'|' '$2=="wednesday"{print $1}' | head -1)
   if [ -n "$wpane" ] && "$TMUX_BIN" capture-pane -t "$wpane" -p -S -60 2>/dev/null | grep -q 'Context limit reached'; then
-    echo "WAKE: pane '$SEAT' DEAD — Context limit reached; the coordinator cannot act — respawn required"; exit 0
+    echo "WAKE: pane 'wednesday' DEAD — Context limit reached; the coordinator cannot act — respawn required"; exit 0
   fi
   # (a) mail tripwire
   # SEAT-AWARE INBOX (Tuesday, 2026-09-09, on Kam's explicit instruction "fix things so
@@ -94,12 +61,29 @@ while [ $SECONDS -lt $end ]; do
   # watcher process carries no WED_AGENT), so keying on the variable alone would
   # silently keep polling the default inbox — the exact defect this fixes.
   # Unrecognised tree falls back to wednesday, so nothing changes for the Studio.
-  # (seat, SEAT_INBOX and KAM_TAG are resolved ONCE above the loop — 2026-09-10)
+  _root="$(cd -P "$(dirname "${BASH_SOURCE[0]}")/../../.." && pwd)"
+  case "$(basename "$_root")" in
+    TUESDAY)   _tree_seat=tuesday   ;;
+    WEDNESDAY) _tree_seat=wednesday ;;
+    *)         _tree_seat=wednesday ;;
+  esac
+  _seat="${WED_AGENT:-$_tree_seat}"
+  _routing="$(cd -P "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)/inbox_routing.conf"
+  case "$_seat" in
+    tuesday)   SEAT_INBOX=$(awk -F'|' '$1=="Tuesday"{print $2}'   "$_routing" 2>/dev/null) ;;
+    wednesday) SEAT_INBOX=$(awk -F'|' '$1=="Wednesday"{print $2}' "$_routing" 2>/dev/null) ;;
+    *)         SEAT_INBOX="" ;;
+  esac
+  [ -n "$SEAT_INBOX" ] || SEAT_INBOX="wednesday-agent@agentmail.to"
   # The Kam-panel tag must name THIS seat as the ADDRESSEE, not merely be a Kam
   # message. Wednesday relays "[Kam -> Tuesday]" copies to Tuesday, so those sit in
   # HER sent folder with that prefix; a class-only match would wake her about her own
   # relay. Filter on class AND recipient (the 2026-08-13 shared-bus rule).
-  # (KAM_TAG resolved above the loop — 2026-09-10)
+  case "$_seat" in
+    tuesday)   KAM_TAG="[Kam -> Tuesday]"   ;;
+    wednesday) KAM_TAG="[Kam -> Wednesday]" ;;
+    *)         KAM_TAG="[Kam -> Wednesday]" ;;
+  esac
   # Latest INBOUND message only — own outbound copies (from wednesday-agent@)
   # must never fire the tripwire (false wake 2026-08-05 21:4x).
   ts=$(set -a; . "$ENVF" 2>/dev/null; set +a; export SEAT_INBOX KAM_TAG; curl -s -m 10 \
@@ -151,9 +135,7 @@ except Exception: print('')" 2>/dev/null)
   # (b) pane idle-at-prompt tripwire
   "$TMUX_BIN" list-panes -t "$FLEET" -F '#{pane_id}|#{@cockpit_name}' 2>/dev/null | \
   while IFS='|' read -r pid name; do
-    # Skip THIS seat's own coordinator pane (was the literal "wednesday", which
-    # left Tuesday waking herself about her own prompt) and the monitor.
-    case "$name" in "$SEAT"|fleet-monitor|'') continue;; esac
+    case "$name" in wednesday|fleet-monitor|'') continue;; esac
     key=$(printf '%s' "$pid" | tr -c 'A-Za-z0-9' '_')
     tail=$("$TMUX_BIN" capture-pane -t "$pid" -p 2>/dev/null | grep -v '^$' | tail -20)
     h=$(printf '%s' "$tail" | shasum | cut -c1-12)

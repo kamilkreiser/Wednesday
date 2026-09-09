@@ -1,0 +1,127 @@
+---
+name: extranet
+description: On session start (alongside git + Linear) check the Secuura team task portal — surface the operator's tasks + new documents, and hand to-dos/replies between collaborators (kam/stuart/peter).
+---
+
+# Skill: Extranet (team task portal)
+
+The Secuura team portal (`secuura-extranet`) is where the collaborators — **kam, stuart, peter** — track shared tasks and post documents for day-to-day alignment. **Linear holds the deep technical detail; the extranet holds the concise, who-needs-what view.** On session start, check it alongside git + Linear, and use it to hand work and replies between collaborators.
+
+## Config (per machine; never commit)
+
+Read from env (set in the project's `4_Credentials/.env`, gitignored):
+- `EXTRANET_URL` — portal base URL.
+- `EXTRANET_AGENT_KEY` — agent API key, sent as header `x-agent-key`.
+- `EXTRANET_ME` — the operator's handle: `kam` | `stuart` | `peter`.
+
+If these aren't already in the environment, load them from the project's gitignored creds file when present: `set -a && . 4_Credentials/.env && set +a`. If `EXTRANET_URL` or `EXTRANET_AGENT_KEY` is still unset, **skip the extranet steps** (mention once, don't block the session). All API calls send `x-agent-key: $EXTRANET_AGENT_KEY` + `Content-Type: application/json`, and pass the actor handle (`$EXTRANET_ME`) in the body where noted.
+
+## On session start (in addition to git + Linear)
+
+1. `GET $EXTRANET_URL/api/summary?person=$EXTRANET_ME`.
+2. Fold into the initiation summary, **concise** (the whole point is to avoid trawling Linear). Use `counts` for a one-line header, e.g. *"Extranet: 2 tasks need you · 1 reply · 1 new doc"*, then:
+   - **Tasks for me** (`myOpenTasks`) — one line each: `[status] title — from @creator` + any links. Lead with these.
+   - **Replies to me** (`repliesOnMyTasks`) — `@author on "task title": <reply>` (+ link to the task's references).
+   - **New documents** (`newDocuments`) — `title — @postedBy` (hyperlink the title) + note.
+   - **Test runner** — glance at the latest run/report per platform (see *Review the test runner* below); surface any **failed run** or **CRITICAL/HIGH** finding, and flag untracked ones for the issues register.
+3. After presenting, `POST $EXTRANET_URL/api/seen {"person":"$EXTRANET_ME"}` so "new" resets next session.
+4. If the portal is unreachable, say so in one line and continue — **never block the session**.
+
+## Hand a to-do to a collaborator
+
+Whenever you **log or update a Linear issue**, or **create / modify / review** a piece of work, and it needs input or action from another collaborator, post a to-do for that person **at the same time** — the to-do should come up as soon as the issue is logged, not later:
+
+`POST $EXTRANET_URL/api/agent/tasks`
+```json
+{ "title": "[Marker] <very short summary — what it is about>",
+  "body": "<clear suggestion of what to do, 1–2 lines, the way you'd say it in chat>",
+  "assignee": "<kam|stuart|peter>", "createdBy": "$EXTRANET_ME",
+  "links": [{"title":"KS-123","url":"https://linear.app/secuura/issue/KS-123"}],
+  "section": "Inbox" }
+```
+
+### Task structure (required — the board is one row per task, read at a glance)
+
+A to-do should read like the instruction you'd give a person in chat when you want them to act: **a very short summary, then a clear suggestion of what to do.** Split across the two fields:
+
+1. **`title` = `[Marker]` + a very short summary** — a few words naming *what it is about*, scannable in a single board row (the Task cell). **Not** the whole instruction; keep it short. The `[Marker]` prefix names the area: **`[Testing]`**, **`[Roadmap]`**, **`[Platform K]`**, **`[Platform S]`**, **`[Dev]`** (CI / deploy / infra), **`[Security]`**, **`[Docs]`**, **`[Decision]`** (needs a product/design call). Add a new marker only if none fit; keep it one or two words.
+2. **`body` = a clear suggestion of what to do** — 1–2 lines, phrased as the action the way you'd say it in chat, with the done-state obvious. This is the part the assignee acts on.
+
+- ✅ title `[Dev] Git Flow branching doc — PR #117` · body `Skim CONTRIBUTING.md → Branching Model and approve #117, or flag changes. develop is cut — branch feature/* off it now.`
+- ❌ title `[Dev] Review PR #117 (Git Flow branching doc) and approve, or note changes against the new model and confirm develop is the base` — the whole instruction crammed into the title; won't read in a row.
+
+Rules:
+- **One ask per to-do.** Title = the short summary; body = the single clear suggested action + its done-state.
+- **Always include `links`** to the relevant Linear ticket(s) and/or document(s) so they can open the detail — never make them hunt. The board shows the ticket as a chip in the **Link** column (alongside Reply / Delete).
+- Don't repost a to-do that already exists for the same ask (check the board / `GET /api/tasks?assignee=` if unsure).
+- To update status / assignee / title / body later — **or to bring an older task up to this structure** — `PATCH $EXTRANET_URL/api/tasks/{id}`.
+
+## Keep the to-do list current (and short)
+
+The board is the team's at-a-glance "who-needs-what" — keep it **short and current**, never an append-only log.
+
+**Whenever you complete a piece of work or close a Linear ticket:** if a next step needs action from kam, stuart, or peter, **create or amend a to-do for that person in the same move** — don't leave the follow-up implicit. Each person should see, at a glance, the few things actually waiting on them (e.g. a roadmap to review, a document set to confirm, a test run to kick off).
+
+- **Amend, don't pile up.** If a to-do for the same ask already exists, `PATCH` it (status / assignee / title / body / links) rather than posting a second. Dedupe first (`GET /api/tasks?assignee=`).
+- **Close what's done.** When a task's ask is satisfied, set it `done` (or archive) so the list shows only open work.
+- **One ask per item** — `[Marker]` + short summary in the title, the clear suggested action in the body (see *Task structure* above). If you can't state the single action and its done-state, it isn't ready to post.
+- **A handful per person, not a backlog.** Linear holds the deep/long tail; the extranet holds the short actionable view. If a list is growing long, consolidate or archive stale items instead of adding more.
+
+## Reply
+
+A short reply to a task is a comment, attributed to you and surfaced to the task's **creator** (and assignee) on their next session.
+
+`POST $EXTRANET_URL/api/tasks/{taskId}/comments  {"author":"$EXTRANET_ME","body":"<short reply>"}`
+
+If the user types a short reply to one of the surfaced tasks, post it as a comment against that task — the person who created it / asked for feedback will see it in their `repliesOnMyTasks`.
+
+## Post a document
+
+When there's a doc/link the team should know about:
+`POST $EXTRANET_URL/api/documents  {"title","url","note"?,"audience"?,"postedBy":"$EXTRANET_ME"}`
+(`audience` = `all` or a specific handle.)
+
+### RULE — file AND post every new/updated document (Kam, 2026-06-23)
+
+Whenever you **create or materially update a document** — anything a person reads: a guide, runbook, reference, credentials/portal doc, access doc, test report, decision record, plan, onboarding/setup doc — do **both**:
+
+1. **File it** in its proper home — commit it to the repo / save it to the right project or vault location. Never leave it only in a chat, a PR description, or scratch.
+2. **Post it to the extranet** via `POST /api/documents` with the link (GitHub blob URL for repo docs) + a one-line note, so the team actually sees it. Pick `audience`: `all` for team-wide, or a specific handle when it's for one person.
+
+**Especially documents relevant to human agents (kam / stuart / peter)** — credentials & portals, access/runbooks, test reports, decisions, onboarding — these **must** be surfaced on the extranet, not just committed somewhere they'd be missed. If in doubt whether a doc is human-relevant, post it.
+
+Keep the feed clean (per this skill): one short sentence + the link; **amend/replace** an existing document entry rather than stacking near-duplicates (a refreshed doc replaces its prior post); skip purely internal dev churn — "document" means something a person reads, not every file you touch (code comments, lockfiles, trivial tweaks don't count). When a document update also ships in a push/deploy, fold the extranet post into the batched session-wrap update (see the project's local-first-workflow) rather than posting twice.
+
+## Review the test runner → issues register
+
+The Testing tab runs live suites (Schemathesis + e2e-v2) against dev/demo and stores each run's dashboard. Treat it as a feed into the Linear issues register (KS-138).
+
+1. For each platform (`platform-k`, then `platform-s`):
+   - `GET $EXTRANET_URL/api/tests/<platform>/runs` — latest run status (`passed`/`failed`/`error`/`running`).
+   - `GET $EXTRANET_URL/api/tests/<platform>/latest` — the latest dashboard `html`; scan it for **CRITICAL / HIGH** findings and new regressions (the dashboard marks severity + "status vs <date>").
+2. **Surface** concisely: any failed run, plus any CRITICAL/HIGH or newly-regressed finding.
+3. **File to the register:** for each finding that is a real platform defect and **not already tracked** in Linear (search Secuura-PK first to dedupe), propose — or, under the autonomous backlog flow, create — a **KS issue**: one per finding, titled with the symptom, body = env + finding + evidence, linked to the run/report. Skip **harness/test-content artifacts** (e.g. CSRF / CORS test-harness quirks the real portals don't hit) and anything already tracked.
+4. **Pause** for product/design calls — don't auto-file ambiguous findings; flag those to Kam.
+
+## API reference (all accept the agent key)
+
+| Call | Body / query |
+|---|---|
+| `GET /api/summary?person=<handle>` | → `{myOpenTasks, repliesOnMyTasks, newDocuments, counts, lastSeenAt}` |
+| `POST /api/seen` | `{person}` |
+| `POST /api/agent/tasks` | `{title, body, assignee?, createdBy, links?, section?, status?}` |
+| `PATCH /api/tasks/{id}` | `{status?, assignee?, links?, title?, body?}` |
+| `GET /api/tasks` | `?assignee=<handle>` / `?sectionId=` |
+| `POST /api/tasks/{id}/comments` | `{author, body}` (reply) · `GET` to list |
+| `GET /api/documents` · `POST /api/documents` | `{title, url, note?, audience?, postedBy}` |
+| `GET /api/tests/<platform>/runs` | recent live runs + status |
+| `GET /api/tests/<platform>/latest` | latest run dashboard `{version, html}` |
+| `POST /api/tests/<platform>/run` | `{env: dev or demo, suite?}` — trigger a live run |
+
+## Guardrails
+
+- Never commit `EXTRANET_AGENT_KEY`, and never write the per-person **access codes** (the humans' browser login) anywhere — they're separate from the agent key and identify a person.
+- Internal Secuura tool: keep task bodies to internal-tracker level; link to Linear for depth rather than pasting client-confidential detail.
+- Humans log in at `$EXTRANET_URL` with their own per-person code (the code = their identity); this skill (agent key) is for AI posting/reading only.
+
+> To make the session-start check automatic, the project launcher's session-start prompt can call this skill. Until then, perform step "On session start" whenever this skill is loaded.

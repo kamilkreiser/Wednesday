@@ -1,0 +1,506 @@
+<!doctype html><html data-theme="__THEME__" lang="en"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Wednesday — Chat</title>
+<style>
+:root { color-scheme: dark;
+  --surface-1:#1a1a19; --surface-2:#232322; --line:#33332f;
+  --text-primary:#ffffff; --text-secondary:#c3c2b7; --text-muted:#8a897f;
+  --series-1:#3987e5; --series-2:#d95926; --series-3:#199e70; }
+:root[data-theme="light"] { color-scheme: light;
+  --surface-1:#f7f7f4; --surface-2:#ffffff; --line:#dcdcd4;
+  --text-primary:#1b1b19; --text-secondary:#4a4a44; --text-muted:#78776e;
+  --series-1:#1f63b8; --series-2:#b8431a; --series-3:#127956; }
+* { box-sizing:border-box; margin:0; }
+html, body { height:100%; }
+body { background:var(--surface-1); color:var(--text-primary);
+  font:15px/1.55 -apple-system, "SF Pro Text", Helvetica, Arial, sans-serif;
+  display:flex; flex-direction:column; }
+.col { width:100%; max-width:46em; margin:0 auto; padding:0 18px; }
+header { border-bottom:1px solid var(--line); background:var(--surface-1);
+  flex:none; }
+header .col { display:flex; align-items:baseline; gap:12px; padding-top:12px; padding-bottom:10px; }
+header h1 { font-size:17px; font-weight:650; }
+header a { color:var(--text-muted); font-size:12.5px; text-decoration:none; }
+header a:hover { color:var(--text-primary); }
+#live { margin-left:auto; font-size:12px; color:var(--text-muted); }
+#live.on { color:var(--series-3); }
+#autoplay, #stopvoice { background:var(--surface-2); border:1px solid var(--line); border-radius:7px;
+  color:var(--text-muted); font:inherit; font-size:12px; padding:3px 10px; cursor:pointer; }
+#autoplay:hover, #stopvoice:hover { color:var(--text-primary); }
+#autoplay.on { color:var(--series-3); border-color:var(--series-3); }
+#stopvoice:disabled { opacity:.5; cursor:default; }
+.playbtn { background:none; border:none; color:var(--text-muted); cursor:pointer;
+  font-size:11px; padding:0 2px; margin-left:4px; line-height:1; vertical-align:baseline; }
+.playbtn:hover { color:var(--text-primary); }
+.playbtn:disabled { opacity:.4; cursor:default; }
+#log { flex:1; overflow-y:auto; scrollbar-width:thin; }
+#log .col { padding-top:16px; padding-bottom:16px; }
+.msg { margin:0 0 14px; max-width:88%; }
+.msg .meta { font-size:11.5px; color:var(--text-muted); margin:0 2px 2px; }
+.msg .who { font-weight:600; }
+.msg.wednesday .who { color:var(--series-3); }
+.msg.kam .who { color:var(--series-1); }
+.msg .body { background:var(--surface-2); border:1px solid var(--line);
+  border-radius:10px; padding:8px 12px; white-space:pre-wrap; word-break:break-word;
+  color:var(--text-primary); }
+.msg.kam { margin-left:auto; }
+.msg.kam .meta { text-align:right; }
+.msg.kam .body { border-color:color-mix(in srgb, var(--series-1) 35%, var(--line));
+  border-radius:10px 10px 2px 10px; }
+.msg.wednesday .body { border-radius:10px 10px 10px 2px; }
+.msg .body a { color:var(--series-1); word-break:break-all; }
+.msg .body strong { font-weight:650; }
+.ackline { font-size:11.5px; color:var(--text-muted); margin:3px 2px 0; text-align:right; }
+.ackline.done, .ackline.seen { color:var(--series-3); }
+.ackline.actioning, .ackline.action_requested { color:var(--series-2); }
+#empty { color:var(--text-muted); font-size:13px; padding:24px 0; }
+#agenttoggle .use{font-weight:400;opacity:.75;font-size:.9em;letter-spacing:0}
+#agenttoggle .use.stale{opacity:.45;font-style:italic}
+/* project filter (Kam, 2026-09-07): which projects' Wednesday replies THIS browser shows */
+header #projfilter { display:flex; align-items:center; gap:6px; flex-wrap:wrap;
+  padding-top:0; padding-bottom:8px; font-size:11.5px; color:var(--text-muted); }
+.pftog { background:var(--surface-2); border:1px solid var(--line); border-radius:999px;
+  color:var(--text-muted); font:inherit; font-size:11px; padding:1px 9px; cursor:pointer; opacity:.7; }
+.pftog:hover { color:var(--text-primary); }
+.pftog.on { color:var(--series-3); border-color:var(--series-3); opacity:1; }
+.msg .seat { font-size:10.5px; color:var(--text-muted); margin-left:6px;
+  border:1px solid var(--line); border-radius:4px; padding:0 4px; }
+footer { flex:none; border-top:1px solid var(--line); background:var(--surface-1); }
+footer .col { display:flex; gap:8px; padding-top:10px; padding-bottom:
+  calc(12px + env(safe-area-inset-bottom, 0px)); }
+#text { flex:1; background:var(--surface-2); border:1px solid var(--line);
+  border-radius:8px; color:var(--text-primary); font:inherit; padding:8px 12px; }
+#text:focus { outline:none; border-color:var(--series-1); }
+#send { background:var(--surface-2); color:var(--text-secondary); border:1px solid var(--line);
+  border-radius:8px; font:inherit; font-size:14px; padding:8px 16px; cursor:pointer; }
+#send:hover { color:var(--text-primary); }
+#send:disabled { opacity:.5; cursor:default; }
+/* ══ AGENT TOGGLE (Phase 1) ═══════════════════════════════════════════════
+   The same control as /cockpit, sharing its localStorage key so the two
+   surfaces can never disagree about which agent Kam is talking to. Without it
+   this page would show Tuesday's Datasec conversation on the Wednesday view and
+   quietly undo the isolation the cockpit's toggle provides. */
+#agentbar { height:4px; background:var(--series-1); }
+body.view-tuesday #agentbar { background:#e08a2b; }
+#agenttoggle { margin-left:10px; display:inline-flex; align-items:center;
+               border:1px solid var(--line); border-radius:7px; overflow:hidden;
+               vertical-align:middle; }
+#agenttoggle button { background:var(--surface-2); color:var(--text-muted);
+               border:none; padding:4px 10px; font:inherit; font-size:11px;
+               font-weight:700; letter-spacing:.05em; cursor:pointer; }
+#agenttoggle button + button { border-left:1px solid var(--line); }
+#agenttoggle button.on { color:#fff; background:var(--series-1); }
+#agenttoggle button#ag-tuesday.on { background:#e08a2b; color:#241300; }
+body.view-tuesday header { background:rgba(224,138,43,.10); }
+body.view-tuesday header h1::after { content:" \00b7 TUESDAY (Datasec)"; color:#e08a2b;
+               font-size:12px; font-weight:700; letter-spacing:.04em; }
+
+/* ══ DRAG-AND-DROP ATTACHMENTS (Kam, 2026-09-08 14:10) ═══════════════════════
+   The drop target is the whole conversation column, not a small button: Kam is
+   dragging from Finder or another window and should not have to aim. */
+.dropping { outline:2px dashed var(--series-1); outline-offset:-6px;
+            background:color-mix(in srgb, var(--series-1) 7%, transparent); }
+#pending { display:flex; flex-wrap:wrap; gap:6px; padding:0 18px 6px; }
+#pending:empty { display:none; }
+#pending .pf { display:flex; align-items:center; gap:6px; font-size:11.5px;
+            background:var(--surface-2); border:1px solid var(--line);
+            border-radius:6px; padding:2px 6px 2px 4px; color:var(--text-secondary); }
+#pending .pf img { height:22px; width:22px; object-fit:cover; border-radius:3px; }
+#pending .pf button { background:none; border:none; color:var(--text-muted);
+            cursor:pointer; font-size:13px; line-height:1; padding:0 2px; }
+#pending .pf button:hover { color:var(--series-2); }
+.msg .atts { display:flex; flex-wrap:wrap; gap:8px; margin-top:6px; }
+.msg .atts a { font-size:12px; color:var(--series-1); text-decoration:none;
+            border:1px solid var(--line); border-radius:6px; padding:2px 8px;
+            background:var(--surface-2); }
+.msg .atts img { max-width:min(320px,100%); max-height:260px; border-radius:8px;
+            border:1px solid var(--line); display:block; }
+</style></head><body>
+<div id="agentbar" aria-hidden="true"></div>
+<header><div class="col"><h1>Chat with Wednesday</h1>
+ <a href="/">&larr; dashboard</a>
+ <button id="autoplay" title="speak newly-arriving Wednesday replies aloud">&#128266; auto-play replies</button>
+ <button id="stopvoice" title="stop the voice that is speaking now (autoplay stays on)">&#9209; stop</button>
+ <span id="live">&#9675; connecting&hellip;</span>
+ <span id="agenttoggle" role="group" aria-label="which agent's view is live">
+  <button id="ag-wednesday" type="button" title="Wednesday — Secuura and all general work">WEDNESDAY<span class="use" id="use-wednesday"></span></button>
+  <button id="ag-tuesday" type="button" title="Tuesday — all Datasec projects">TUESDAY<span class="use" id="use-tuesday"></span></button>
+ </span></div>
+ <div class="col" id="projfilter"></div></header>
+<div id="log"><div class="col" id="msgs"><p id="empty">no messages yet</p></div></div>
+  <div id="pending"></div>
+<footer><div class="col">
+ <input id="text" type="text" maxlength="2000" placeholder="message Wednesday&hellip;" autocomplete="off">
+ <button id="send">send</button></div></footer>
+<script>
+"use strict";
+const log = document.getElementById("log");
+const msgsEl = document.getElementById("msgs");
+const live = document.getElementById("live");
+let lastSig = null;
+
+function esc(s) {
+  return String(s).replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;")
+                  .replace(/"/g, "&quot;").replace(/'/g, "&#39;");
+}
+// Wednesday messages only: escape FIRST, then minimal transforms (bold, links).
+// Line breaks are preserved by white-space:pre-wrap — no <br> injection needed.
+function mdLite(s) {
+  let h = esc(s);
+  // linkify FIRST (on escaped text — quotes/angles are already entities, so a
+  // URL cannot break out of the href attribute), then bold. That order keeps
+  // ** markers out of hrefs; <strong> may legally wrap an <a>.
+  h = h.replace(/https?:\/\/[^\s*]+/g, u => {
+    const m = u.match(/[.,)\]!?;:]+$/);
+    const trail = m ? m[0] : "";
+    if (trail) u = u.slice(0, -trail.length);
+    return '<a href="' + u + '" target="_blank" rel="noopener noreferrer">' + u + "</a>" + trail;
+  });
+  h = h.replace(/\*\*([^*\n][^*]*?)\*\*/g, "<strong>$1</strong>");
+  return h;
+}
+function nearBottom() {
+  return log.scrollHeight - log.scrollTop - log.clientHeight < 80;
+}
+// ── project filter (Kam, 2026-09-07 11:12): each browser picks which projects'
+// Wednesday replies it DISPLAYS and AUTO-SPEAKS. Kam's own messages always show.
+// "WED" is the only default-on toggle. State is localStorage — per machine, which
+// is exactly the laptop-vs-Studio split Kam asked for; the server holds nothing.
+// Entries with no project field (all history before today) read as "WED".
+/* Which agent's view is live. SAME localStorage key as /cockpit, on purpose:
+   two surfaces disagreeing about who Kam is addressing is the cross-client
+   message this whole phase exists to prevent. */
+const AGENT_KEY = "wed_active_agent";
+let activeAgent = "wednesday";
+try {
+  const a = localStorage.getItem(AGENT_KEY);
+  if (a === "wednesday" || a === "tuesday") activeAgent = a;
+} catch (e) {}
+function agentOfProject(p) { return /datasec/i.test(String(p || "")) ? "tuesday" : "wednesday"; }
+function agentOfMsg(m) {
+  const a = m && m.agent;
+  if (a === "wednesday" || a === "tuesday" || a === "both") return a;
+  return "both";                      // unstamped: show rather than hide
+}
+function inView(m) { const a = agentOfMsg(m); return a === "both" || a === activeAgent; }
+function applyAgentView() {
+  document.body.classList.toggle("view-tuesday", activeAgent === "tuesday");
+  const w = document.getElementById("ag-wednesday"), t = document.getElementById("ag-tuesday");
+  if (w) { w.classList.toggle("on", activeAgent === "wednesday"); w.setAttribute("aria-pressed", activeAgent === "wednesday"); }
+  if (t) { t.classList.toggle("on", activeAgent === "tuesday"); t.setAttribute("aria-pressed", activeAgent === "tuesday"); }
+  const box = document.getElementById("text");
+  if (box) box.placeholder = activeAgent === "tuesday" ? "message Tuesday (Datasec)\u2026" : "message Wednesday\u2026";
+}
+// ── weekly plan usage on the agent chips (Kam, 2026-09-09 12:32) ─────────
+// "add to the Wednesday toggle so it shows weeks usage % so its
+//  'Wednesday - xx%' and same for Tuesday".
+//
+// Each seat's statusline.sh publishes ONLY its own usage_<agent>.json — the
+// figure reaches that script on stdin from Claude Code and exists nowhere
+// else, so no seat can report another's.
+//
+// HONESTY (WED-73: rendered from written state, never faked). A seat that is
+// not running stops updating its file, so a percentage can only ever be as
+// fresh as its seat. Three states, and the difference is visible rather than
+// smoothed away:
+//   live   (< 15 min)  -> "— 76%"        the seat is running and this is now
+//   stale  (>= 15 min) -> "— 76% (2h)"   last known, with its age, dimmed
+//   none               -> ""             nothing written; claim nothing
+// A stale figure is shown WITH ITS AGE rather than hidden, because "Tuesday
+// was at 76% two hours ago" is useful and "Tuesday is at 76%" would be a lie.
+const USE_STALE_S = 900;
+function ageLabel(sec) {
+  if (sec == null) return "";
+  if (sec < 3600) return Math.max(1, Math.round(sec / 60)) + "m";
+  if (sec < 86400) return Math.round(sec / 3600) + "h";
+  return Math.round(sec / 86400) + "d";
+}
+function renderUsage(data) {
+  ["wednesday", "tuesday"].forEach(function (a) {
+    const el = document.getElementById("use-" + a);
+    if (!el) return;
+    const d = data && data[a];
+    if (!d || typeof d.pct !== "number") {   // nothing written — say nothing
+      el.textContent = ""; el.className = "use"; el.title = "no usage published by this seat";
+      return;
+    }
+    const age = d.age_seconds;
+    const stale = (age == null) || (age >= USE_STALE_S);
+    el.textContent = " \u2014 " + d.pct + "%" + (stale ? " (" + (ageLabel(age) || "?") + ")" : "");
+    el.className = stale ? "use stale" : "use";
+    el.title = stale
+      ? "last published " + (ageLabel(age) || "unknown") + " ago — this seat may not be running"
+      : "weekly plan usage, published by the " + a + " seat" +
+        (d.resets_in ? " · renews in " + d.resets_in : "");
+  });
+}
+async function pollUsage() {
+  try {
+    const r = await fetch("/api/usage");
+    if (r.ok) renderUsage(await r.json());
+  } catch (e) { /* leave the last render alone rather than blanking on a blip */ }
+}
+pollUsage();
+setInterval(pollUsage, 60000);
+
+function setAgent(a) {
+  if (a !== "wednesday" && a !== "tuesday") return;
+  activeAgent = a;
+  try { localStorage.setItem(AGENT_KEY, a); } catch (e) {}
+  applyAgentView();
+  render(lastMsgs || []);
+}
+document.getElementById("ag-wednesday").addEventListener("click", () => setAgent("wednesday"));
+document.getElementById("ag-tuesday").addEventListener("click", () => setAgent("tuesday"));
+applyAgentView();
+
+const PF_KEY = "wed_chat_projects";
+const pfEl = document.getElementById("projfilter");
+let pfSel = {};
+try { pfSel = JSON.parse(localStorage.getItem(PF_KEY) || "{}") || {}; } catch (e) { pfSel = {}; }
+let lastMsgs = [];
+function projOf(m) { return m.project || "WED"; }
+// Kam's 2026-09-07 rule — "WED is the only default-on toggle" — was written when
+// there was one view. Carried into the TUESDAY view unchanged it defaults every
+// Datasec project to OFF and the page renders empty, which reads as a broken
+// toggle rather than a filter. So the default is per view: WED-only on the
+// Wednesday side (his tuning, untouched), everything on for Tuesday, where he has
+// tuned nothing yet. An explicit choice always wins over both.
+function projOn(name) {
+  if (name in pfSel) return !!pfSel[name];
+  return activeAgent === "tuesday" ? true : name === "WED";
+}
+function visible(m) { return inView(m) && (m.role === "kam" || projOn(projOf(m))); }
+function seatShort(s) { return String(s || "").split(".")[0]; }
+function renderFilter(msgs) {
+  const names = new Set(["WED"]);
+  for (const m of msgs) if (m.role !== "kam" && inView(m)) names.add(projOf(m));
+  for (const n of [...names]) if (agentOfProject(n) !== activeAgent) names.delete(n);
+  const sorted = [...names].sort((a, b) => a === "WED" ? -1 : b === "WED" ? 1 : a.localeCompare(b));
+  pfEl.innerHTML = "";
+  pfEl.append("show replies from: ");
+  for (const n of sorted) {
+    const b = document.createElement("button"); b.type = "button";
+    b.className = "pftog" + (projOn(n) ? " on" : ""); b.textContent = n;
+    b.title = (projOn(n) ? "hide" : "show") + " Wednesday's " + n + " replies on this browser (not spoken while hidden)";
+    b.addEventListener("click", () => {
+      pfSel[n] = !projOn(n);
+      try { localStorage.setItem(PF_KEY, JSON.stringify(pfSel)); } catch (e) {}
+      render(lastMsgs);
+    });
+    pfEl.appendChild(b);
+  }
+}
+function render(msgs) {
+  const stick = nearBottom() || lastSig === null;
+  lastMsgs = msgs;
+  renderFilter(msgs);
+  const shown = msgs.filter(visible);
+  msgsEl.innerHTML = "";
+  if (!shown.length) {
+    const p = document.createElement("p"); p.id = "empty";
+    p.textContent = msgs.length ? "no messages for the selected projects" : "no messages yet";
+    msgsEl.appendChild(p);
+  }
+  for (const m of shown) {
+    const role = m.role === "kam" ? "kam" : "wednesday";
+    const div = document.createElement("div"); div.className = "msg " + role;
+    const meta = document.createElement("div"); meta.className = "meta";
+    const who = document.createElement("span"); who.className = "who";
+    who.textContent = role === "kam" ? "Kam" : "Wednesday";
+    meta.append(who, "  " + (m.ts || "").slice(11, 16));
+    if (role === "wednesday" && m.ts) {
+      const pb = document.createElement("button"); pb.className = "playbtn";
+      pb.textContent = "▶"; pb.title = "speak this message aloud";
+      pb.addEventListener("click", () => speak(m.ts, pb));
+      meta.appendChild(pb);
+    }
+    if (role === "wednesday" && (m.seat || m.project)) {
+      // seat indicator (Kam, 2026-09-07): which machine wrote it, and for which project
+      const se = document.createElement("span"); se.className = "seat";
+      se.textContent = [seatShort(m.seat), m.project].filter(Boolean).join(" · ");
+      se.title = "written by seat " + (m.seat || "unknown") + " · project " + projOf(m);
+      meta.appendChild(se);
+    }
+    const body = document.createElement("div"); body.className = "body";
+    if (role === "wednesday") body.innerHTML = mdLite(m.text || "");
+    else body.textContent = m.text || "";
+    if (m.attachments && m.attachments.length) {
+      const box = document.createElement("div"); box.className = "atts";
+      for (const a of m.attachments) {
+        if ((a.type || "").startsWith("image/")) {
+          const im = document.createElement("img");
+          // NOT loading="lazy": the chat re-renders these elements on every poll,
+          // so a lazy image can be destroyed and recreated before it ever completes.
+          // Measured 2026-09-08: complete=false, naturalWidth=0, rendered 2x2, while
+          // fetch() of the same URL returned 200 image/png and the file decoded fine
+          // outside the browser. A handful of small images buy nothing from lazy.
+          im.src = a.url; im.alt = a.name || "attachment";
+          const lk = document.createElement("a"); lk.href = a.url; lk.target = "_blank";
+          lk.appendChild(im); box.appendChild(lk);
+        } else {
+          const lk = document.createElement("a");
+          lk.href = a.url; lk.target = "_blank"; lk.textContent = "📎 " + (a.name || "file");
+          box.appendChild(lk);
+        }
+      }
+      body.appendChild(box);
+    }
+    div.append(meta, body);
+    if (role === "kam" && m.ack && m.ack.state) {
+      // rendered from Wednesday-written state, never faked (WED-73 honesty rule)
+      const al = document.createElement("div"); al.className = "ackline " + m.ack.state;
+      const at = (m.ack.ts || "").slice(11, 16);
+      al.textContent = m.ack.state === "seen" ? "✓ seen by Wed" + (at ? " " + at : "")
+        : m.ack.state === "actioning" ? "● actioning"
+        : m.ack.state === "done" ? "✓ done" + (at ? " " + at : "")
+        : "⚡ action requested";
+      div.appendChild(al);
+    }
+    msgsEl.appendChild(div);
+  }
+  // Only follow the tail when the reader is already AT the tail — never yank
+  // the scroll position out from under someone reading history.
+  if (stick) log.scrollTop = log.scrollHeight;
+}
+// ── speak-aloud: server-side lookup by ts, real Wednesday voice ──
+async function speak(ts, btn, auto) {
+  if (btn) btn.disabled = true;
+  try { await fetch("/api/speak", {
+    method: "POST", headers: {"Content-Type": "application/json"},
+    body: JSON.stringify(auto ? {ts, auto: true} : {ts})});
+  } finally { if (btn) setTimeout(() => { btn.disabled = false; }, 800); }
+}
+// stop button (Kam, 2026-08-19): kill the CURRENT utterance server-side.
+// Autoplay stays as it was — this stops one voice, not the feature.
+const svBtn = document.getElementById("stopvoice");
+svBtn.addEventListener("click", async () => {
+  svBtn.disabled = true;
+  try { await fetch("/api/speak/stop", {
+    method: "POST", headers: {"Content-Type": "application/json"}, body: "{}"});
+  } finally { setTimeout(() => { svBtn.disabled = false; }, 400); }
+});
+// autoplay: default OFF, persisted; only wednesday messages ARRIVING after
+// page load are spoken — never the back-history.
+const AP_KEY = "wed_chat_autoplay";
+const apBtn = document.getElementById("autoplay");
+let autoplayOn = localStorage.getItem(AP_KEY) === "1";
+apBtn.classList.toggle("on", autoplayOn);
+apBtn.addEventListener("click", () => {
+  autoplayOn = !autoplayOn;
+  localStorage.setItem(AP_KEY, autoplayOn ? "1" : "0");
+  apBtn.classList.toggle("on", autoplayOn);
+});
+let knownTs = null;   // null until the first successful poll seeds the history
+async function poll(force) {
+  try {
+    const d = await (await fetch("/api/chatlog")).json();
+    const msgs = d.messages || [];
+    live.textContent = "● live"; live.classList.add("on");
+    if (knownTs === null) {
+      knownTs = new Set(msgs.map(m => m.ts));   // back-history: never auto-spoken
+    } else {
+      let latestNew = null;
+      for (const m of msgs) {
+        if (m.ts && !knownTs.has(m.ts)) {
+          knownTs.add(m.ts);
+          if (m.role === "wednesday") latestNew = m;
+        }
+      }
+      // several at once would overlap-kill each other — speak only the latest
+      // auto:true → the server dedups per-message, so a second open window
+      // never restarts the same speech (Kam's two-window double-fire, 08-21)
+      // filter gate (2026-09-07): a reply hidden by the project filter is never
+      // auto-spoken here. The server's seat gate stays as the second net.
+      if (autoplayOn && latestNew && visible(latestNew)) speak(latestNew.ts, null, true);
+    }
+    const sig = JSON.stringify(msgs);
+    if (!force && sig === lastSig) return;
+    render(msgs);
+    lastSig = sig;
+  } catch (e) {
+    live.textContent = "○ reconnecting…"; live.classList.remove("on");
+  }
+}
+
+/* ══ DRAG-AND-DROP ATTACHMENTS (Kam, 2026-09-08 14:10) ══════════════════════
+   Drop or PASTE files anywhere in the conversation column. They upload first,
+   appear as removable chips, and go with the next message. A drop with no typed
+   text is still a message — the FILE is the message — so send is not disabled.
+   Every file gets an absolute path in the chat entry, because the other reader
+   of this log is an agent with file tools, not only a browser. */
+let pendingFiles = [];
+const pendingEl = document.getElementById("pending");
+function renderPending() {
+  pendingEl.innerHTML = "";
+  pendingFiles.forEach((f, i) => {
+    const c = document.createElement("span"); c.className = "pf";
+    if ((f.type || "").startsWith("image/")) {
+      const im = document.createElement("img"); im.src = f.url; im.alt = ""; c.appendChild(im);
+    }
+    const n = document.createElement("span");
+    n.textContent = f.name + " (" + Math.max(1, Math.round(f.bytes / 1024)) + " KB)";
+    const x = document.createElement("button");
+    x.textContent = "✕"; x.title = "remove before sending";
+    x.addEventListener("click", () => { pendingFiles.splice(i, 1); renderPending(); });
+    c.append(n, x); pendingEl.appendChild(c);
+  });
+}
+function b64(file) {
+  return new Promise((res, rej) => {
+    const r = new FileReader();
+    r.onload = () => res(String(r.result).split(",")[1] || "");
+    r.onerror = () => rej(r.error);
+    r.readAsDataURL(file);
+  });
+}
+async function uploadFiles(files) {
+  for (const file of files) {
+    try {
+      const r = await (await fetch("/api/upload", {
+        method: "POST", headers: {"Content-Type": "application/json"},
+        body: JSON.stringify({name: file.name, type: file.type, data_b64: await b64(file)})
+      })).json();
+      // A failed upload must be VISIBLE. Silently dropping a file Kam dragged in
+      // is the worst outcome here: he would believe it was sent.
+      if (r && r.ok) pendingFiles.push(r);
+      else alert("Upload failed for " + file.name + ": " + ((r && r.error) || "unknown"));
+    } catch (e) { alert("Upload failed for " + file.name + ": " + e); }
+  }
+  renderPending();
+}
+(function wireDrop(zone) {
+  let depth = 0;
+  zone.addEventListener("dragenter", e => { e.preventDefault(); if (++depth === 1) zone.classList.add("dropping"); });
+  zone.addEventListener("dragover", e => { e.preventDefault(); });
+  zone.addEventListener("dragleave", e => { if (--depth <= 0) { depth = 0; zone.classList.remove("dropping"); } });
+  zone.addEventListener("drop", async e => {
+    e.preventDefault(); depth = 0; zone.classList.remove("dropping");
+    const fs = [...(e.dataTransfer && e.dataTransfer.files ? e.dataTransfer.files : [])];
+    if (fs.length) await uploadFiles(fs);
+  });
+})(document.getElementById("log"));
+document.getElementById("text").addEventListener("paste", async e => {
+  const fs = [...(e.clipboardData && e.clipboardData.files ? e.clipboardData.files : [])];
+  if (fs.length) { e.preventDefault(); await uploadFiles(fs); }   // a pasted screenshot
+});
+function takePending() { const a = pendingFiles; pendingFiles = []; renderPending(); return a; }
+
+const sendBtn = document.getElementById("send");
+const textEl = document.getElementById("text");
+async function doSend() {
+  const t = textEl.value.trim();
+  if (!t && !pendingFiles.length) return;      // a drop alone is a valid message
+  sendBtn.disabled = true;
+  try {
+    const r = await (await fetch("/api/chat", {
+      method: "POST", headers: {"Content-Type": "application/json"},
+      body: JSON.stringify({text: t, view: activeAgent})})).json();
+    if (r.ok) { textEl.value = ""; await poll(true); log.scrollTop = log.scrollHeight; }
+  } finally { sendBtn.disabled = false; textEl.focus(); }
+}
+sendBtn.addEventListener("click", doSend);
+textEl.addEventListener("keydown", e => { if (e.key === "Enter") doSend(); });
+poll(true);
+setInterval(poll, 3000);
+</script></body></html>
