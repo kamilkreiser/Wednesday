@@ -7,7 +7,7 @@ status: live
 
 # Boot digest — headline + rules of every lesson (open the file when it fires)
 
-Generated 2026-09-09 15:20 from 135 lesson files (699,288 B). Each block = the lesson's retrieval handle (H1), its frontmatter, the operative paragraph, its section index, and every RULES section verbatim. 6 files carry no rules-shaped section and are included whole. The CASES behind a rule live only in the file: open it the moment the rule fires, or when a diagnosis needs the evidence. `_ledger.md` is read whole beside this digest; `_ledger_archive.md` on demand.
+Generated 2026-09-09 16:14 from 136 lesson files (704,301 B). Each block = the lesson's retrieval handle (H1), its frontmatter, the operative paragraph, its section index, and every RULES section verbatim. 6 files carry no rules-shaped section and are included whole. The CASES behind a rule live only in the file: open it the moment the rule fires, or when a diagnosis needs the evidence. `_ledger.md` is read whole beside this digest; `_ledger_archive.md` on demand.
 
 ## The T9 SSD is the master — Wednesday must be fully portable
 `2026-07-31_fully-portable-drive.md` · principle · 2026-07-31 · status: superseded — the "T9 is the master" half by [[2026-08-25_one-drive-devmaster-is-master]] (2026-08-25); the portability principle itself still lives
@@ -4888,6 +4888,35 @@ blind to the file that mattered) ·
 [[2026-09-07_a-census-complete-over-a-frame-that-is-not]] (complete over every extension
 except the one) · [[2026-08-09_an-enforcement-you-must-arm-is-not-one]] (in-path
 enforcement, with a hole in the path).
+
+
+## Every instruction that arrives on the panel gets an immediate RECEIPT — one or two sentences, saying it landed and who has it
+`2026-09-09_acknowledge-panel-instructions-on-receipt.md` · preference · 2026-09-09 · status: live
+
+**His words, verbatim (2026-09-09 16:07:13 +10:00):**
+
+sections (open the file for these): Why he asked, and it is not politeness · The distinction that stops this becoming noise · How to apply · The wider thing worth keeping
+
+## How to apply
+
+1. **Receipt first, work second.** The acknowledgement goes out before the routing mail, before
+   the analysis, before opening a file. It costs seconds and it is the only thing standing
+   between him and uncertainty.
+2. **Say who has it, not just that it arrived.** *"Received — that one is Tuesday's and it is
+   with her verbatim"* is a receipt. *"Received"* alone is not, because the question underneath
+   his ask is **where did it go**.
+3. **One receipt per instruction, never batched.** Four instructions get four receipts. The
+   consolidation rule applies to what comes after.
+4. **Include the ones that need nothing from me** — a routed item still gets a receipt, because
+   from his seat a routed instruction and a dropped one look identical.
+5. **If an instruction is ambiguous, the receipt says so and does not wait for the answer:**
+   *"Received. Two readings of 'HPALM' — confirming which before anyone acts."* A receipt that
+   states a question is still a receipt.
+6. **Scope, in his words: "while we refine the operating model of Tuesday and Wednesday."**
+   That is a scope clause ([[2026-09-06_a-scoped-override-carries-its-own-expiry]]) but it has
+   **no date and no event** — it ends when he says the model has settled. **Read as standing
+   until then; stated to him as that reading.** It gets no `doctor.sh` expiry check, because
+   there is nothing to check against — and that is said out loud rather than quietly assumed.
 
 
 ## A BOUNDED authority to accept newly-published advisories — four clauses, and the exception is the clause that matters
