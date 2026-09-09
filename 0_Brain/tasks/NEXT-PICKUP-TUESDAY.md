@@ -262,6 +262,14 @@ shared brief plus per-seat supplements, read the supplement AGAINST the shared h
 
 ## STANDING
 
+🔴 **EVERY WRAP: `git add 0_Brain/dashboard/data/usage_tuesday.json`.** Kam asked (2026-09-09 12:32) for
+the usage % on the TUESDAY dashboard chip. This seat's statusline runs
+`2_Project_Files/tools/statusline_publish.sh '[Tuesday]' tuesday`, which writes that file into THIS tree.
+**This tree is on a different machine and `.git` does not travel by drive sync, so the file reaches Kam's
+dashboard ONLY because this repo carries it.** s2 nearly discarded it during a pre-rotation tidy as
+"generated data" and it survived only by being untracked — **it is generated AND it must be committed.**
+
+
 **Scope (Kam, verbatim):** *"you will work on ONLY datasec projects unless otherwise instructed."*
 Datasec lives at `/Volumes/KK_T9_External_HDD/!CODING/Datasec/`. **Cross-seat mail is COORDINATION
 ONLY.** Kam's week grants run through **Sunday 2026-09-13**; **DATASEC PRODUCTION IS UNGRANTED.**
