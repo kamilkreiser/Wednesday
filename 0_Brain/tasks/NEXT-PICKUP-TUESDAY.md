@@ -13,7 +13,33 @@ supersede: replace this file WHOLESALE at the next pickup; never append. It repl
 warning below, because that tool cannot see everything Kam says. **Mail timestamps are UTC ≈ AEST−10.**
 **Rotation band 80–90%; 50% and 70% are checkpoints only.**
 
-## ✅ BOTH SEATS DELIVERED AND CLOSED — nothing is running. Floor is Wednesday `%0` + monitor `%1`.
+## 🔴 KAM'S STANDING INSTRUCTION RIGHT NOW (17:2x, verbatim): *"Wait until everything finishes. Review
+things carefully so that it's done properly, and then email me the finished product."*
+**So: NO piecemeal emails. One email, after round 2 lands and is reviewed.**
+
+## 🟢 RUNNING: `%14` Datasec/SecReview-Round2 — Kam's five structural changes to 13A/13B
+Title page with revision history · clickable TOC on page 2 · every section on a new page · MyEmpire as the
+body reference · **every finding restructured BLUF-first** (issue + suggested fix, then what was tested, how,
+and how to resolve). Brief `2026-09-09_secreview-round2-structure.md`, launcher
+`launch_secreview_round2_structure.sh` (red-proofed rc 0/14/9 — **my FIRST red-proof of it proved nothing:
+all three cells returned rc 7 because the scratch fixture lacked the June register and died at an earlier
+guard. The all-identical tell caught it**).
+🔴 **NAMED AS THE LIKELY FAILURE: a pandoc `.docx` TOC is a FIELD and can render blank on Kam's screen while
+being perfect in source.** Third render-vs-source trap on this document today.
+
+## ✅ JUNE SCRUB DONE AND VERIFIED INDEPENDENTLY BY TUESDAY
+`Deliverables/03_Findings_Register.{md,docx}`, quarantine `.pre-scrub-2026-09-09_*`, report
+`_Working/2026-09-09_JUNE_SCRUB_REPORT.md`. **The disclosure was WORSE than Tuesday's brief said: ten distinct
+secret values at 19 lines across FIVE findings (F-07, F-11, F-12, F-15, F-16), not eight across two.** The
+brief's own hedge — *re-derive, do not trust this count* — is what caught it, the second time today that hedge
+has paid. It also corrected the class list in BOTH directions.
+**TUESDAY'S OWN CHECK on the shipped `.docx`: 6 real `key=<literal>` disclosures in the CONTROL, 1 in the
+shipped file — and that 1 is a FALSE POSITIVE: it sits inside the REMEDIATION advice as a code example showing
+how to read the password from an environment variable. Read, not counted.** 35 redaction markers present, no
+length statement, and nothing weakened: 31 CVSS vectors, 45 severity lines and 686 file:line citations are
+IDENTICAL between control and shipped.
+
+## (earlier) BOTH ROUND-1 SEATS DELIVERED AND CLOSED. Floor is Wednesday `%0` + monitor `%1`.
 
 **REFORMAT DELIVERED AND EMAILED TO KAM 16:4x**, verified at the destination by recipient, sender, non-null
 preview and both attachment byte-sizes:
