@@ -35,61 +35,18 @@ DAY="${1:-$(date +%Y-%m-%d)}"
 # STALE_MIN overrides the threshold; 0 disables the warning.
 STALE_MIN="${KAM_RULINGS_STALE_MIN:-25}"
 
-SEAT="${WED_AGENT:-}"
-
-python3 - "$LOG" "$DAY" "$STALE_MIN" "$SEAT" <<'PY'
+python3 - "$LOG" "$DAY" "$STALE_MIN" <<'PY'
 import json, sys, os, datetime
-log, day, stale_min, seat = sys.argv[1], sys.argv[2], int(sys.argv[3]), sys.argv[4]
+log, day, stale_min = sys.argv[1], sys.argv[2], int(sys.argv[3])
 d = json.load(open(log))
 msgs = d if isinstance(d, list) else d.get("messages", d)
 kam = [m for m in msgs if m.get("role") == "kam" and str(m.get("ts", "")).startswith(day)]
-
-# ── SEAT FILTER (Tuesday's design, 2026-09-09, adopted whole) ────────────────
-# Kam's panel records which TAB he typed into, in each message's `view` field.
-# It has always been correct and NOTHING has ever read it — so both seats read
-# one undifferentiated stream and each had to guess which of his words were
-# theirs. **This seat guessed wrong on a load-bearing one: his 13:05 "will be
-# going through the review as soon as its ready" is tagged `tuesday`, and this
-# seat read it as an answer about SECUURA and rebuilt its afternoon around it.**
-# The tag was on disk the whole time.
-#
-# Her two design constraints, both kept because both are the difference between
-# a filter and a new blind spot:
-#   1. PRINT THE FILTER AND THE SUPPRESSED COUNT. A seat reading 11 of 47 must
-#      say so, or the next staleness incident is invisible in a NEW way. The
-#      frame is stated ([[2026-09-07_a-census-complete-over-a-frame-that-is-not]]).
-#   2. FAIL OPEN, NEVER CLOSED. A message with NO `view` — everything before
-#      2026-09-08 12:42, and any the panel could not tag — is shown to BOTH
-#      seats. **Silently dropping an untagged instruction from Kam is worse than
-#      the problem this fixes.** Same for a view this code does not recognise.
-# An unset WED_AGENT shows everything and says so: no seat, no filter, no guess.
-def mine(m):
-    v = str(m.get("view") or "").strip().lower()
-    if not seat:            return True      # no seat -> no filtering at all
-    if v in ("", "both"):   return True      # untagged / broadcast -> fail open
-    if v not in ("wednesday", "tuesday"): return True   # unknown tag -> fail open
-    return v == seat
-
-shown = [m for m in kam if mine(m)]
-hidden = len(kam) - len(shown)
-
-if not seat:
-    frame = "ALL views — WED_AGENT is unset, so nothing is filtered"
-else:
-    frame = f"view={seat}, plus untagged and broadcast"
-print(f"# Kam's panel messages on {day} — VERBATIM, oldest first. "
-      f"Showing {len(shown)} of {len(kam)} ({frame}). Read every one before any card, brief or ruling.")
-if hidden:
-    print(f"# {hidden} message(s) addressed to the OTHER seat's tab are NOT shown. "
-          f"They are that seat's to act on — but if one looks like yours, read it: "
-          f"the tab records where he TYPED, and he has typed in the wrong one.")
-for m in shown:
+print(f"# Kam's panel messages on {day} — VERBATIM, oldest first ({len(kam)} messages). Read every one before any card, brief or ruling.")
+for m in kam:
     ts = str(m.get("ts", ""))[11:16]
-    v = str(m.get("view") or "").strip().lower()
-    tag = "" if v == seat else f" [{v or 'untagged'}]"
     text = " ".join(str(m.get("text", "")).split())
-    print(f"{ts}{tag} | {text}")
-print(f"# end — {len(shown)} shown, {hidden} withheld")
+    print(f"{ts} | {text}")
+print(f"# end — {len(kam)} messages")
 
 # Freshness line: ALWAYS printed, so a stale read can never look like a quiet one.
 newest = max((str(m.get("ts", "")) for m in msgs if m.get("ts")), default="")
