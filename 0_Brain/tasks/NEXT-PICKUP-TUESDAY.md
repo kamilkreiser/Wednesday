@@ -21,7 +21,7 @@ Kam, panel 2026-09-09: *"yes, run multiple agents on the security review."*
 
 | Pane | Seat | Partition | Rows |
 |---|---|---|---|
-| `%3` | `Datasec/SecRev-A` | HPAuthenticationManager · infra_hpam | 19 |
+| ~~`%3`~~ | ~~`SecRev-A`~~ **CLOSED 11:5x — partition COMPLETE 19/19, verdict on disk** | HPAuthenticationManager · infra_hpam | 19 ✅ |
 | `%4` | `Datasec/SecRev-B` | License-Services · LicenseServer | 25 |
 | `%5` | `Datasec/SecRev-C` | HPK_Deployment_Utility · UniversalPrint · MailFlow · CypherSharePoint · QuickAccessLibrary | 28 |
 | `%6` | `Datasec/SecRev-D` | Task-Dispatcher · hpam-marketplace · datasec-administration-portal · WorkPathApplications · cc-api · hpam-api · SPDF-D1 | 25 |
@@ -33,7 +33,11 @@ seat A predates it and runs `launch_secreview_round2.sh` plus an in-flight amend
 
 🔴 **THE RULE THAT KEEPS THIS SAFE: NO SEAT EDITS THE REGISTER.** Four seats, one
 `13_Consolidated_Findings_Register_2026-09.md`. Each writes
-`_Working/verification-2026-09/round2-<a|b|c|d>.md`. **Seat A consolidates all FIVE in ONE action at
+`_Working/verification-2026-09/round2-<a|b|c|d>.md`. 🔴 **SEAT A IS CLOSED — THE CONSOLIDATOR IS A FRESH SEAT, NOT A.** Launch one when all five verdicts
+are in; it reads the five files cold. A was closed because a rung-6 ghost (`go ahead and consolidate`)
+appeared at its finished prompt, and because a consolidator with no stake in any partition is better
+than one adjudicating its own five proposed band-moves. **A's verdict file is self-sufficient.**
+The consolidator applies all FIVE in ONE action at
 the end, on Tuesday's word — do not let it start early, a partial consolidation is the worst outcome.**
 The clause is a launch guard (rc 12), not a request. **`_Working/PROGRESS.md` is shared too — leave it.**
 
@@ -54,6 +58,20 @@ that is wrong, June says Medium; take it from the pickup, not from round 1's tab
 there were FOUR seats and their report headers say so. **There are five verdict files, not four.** When
 you give seat A the consolidation word, say **five** and name them:
 `round2-a.md · round2-b.md · round2-c.md · round2-d.md · round2-june.md`.
+
+## 🟡 VERDICTS IN SO FAR — proposed, NOTHING APPLIED, register untouched at 11:20:34
+
+- **`round2-a.md` (43 KB, COMPLETE 19/19).** Five bands move, four up one down: **`D-01` High→Critical 9.2 ·
+  `I-D1` High→Critical 9.1 · `I-D2` High→Critical 9.9** · `I-D8` Low→Medium · `D-07` Low→Informational.
+  **Estate 23 → 26 Criticals on this partition alone**, total conserved at 339 (Tuesday re-added it).
+  🔴 **And the mechanical band-crosser table was WRONG about A's partition 4 times out of 5** — `I-D4`,
+  `I-D5`, `I-D10`, `I-D11` do not move. **That is the vindication of not adopting the computed column.**
+- **`round2-d.md` (20 KB).** 24 of its 25 rows carry a **band with no score and no vector at all**.
+  Tuesday sized it estate-wide rather than taking the partition as the estate: **22 tabulated rows carry a
+  band with nothing checkable underneath, 2 of them High, 0 Critical affected**; 20 more are Info, which
+  legitimately has no CVSS. **The vectors exist in the delta files and were dropped in assembly** — a
+  register defect, mechanically fixable, no judgement needed.
+- **Still to report: B, C, J.**
 
 ## 🔴 WHAT IS ACTUALLY ON KAM'S DESK (this seat's items only)
 
