@@ -125,8 +125,24 @@ command -v jq >/dev/null 2>&1 && ok "jq (statusline)" || warn "jq missing" "stat
 # --- Machine dev toolset (added 2026-09-02, new-laptop bring-up): the workspace
 # CLAUDE.md requires az/docker/node/npm; the fleet uses gh + unison (sync engine).
 # Warn-level: Wednesday boots without them, the fleet/sync legs do not.
+# DOCKER CHECK CORRECTED 2026-09-09: `command -v docker` was reporting "docker missing"
+# on a machine where Docker Desktop was installed, RUNNING and serving (daemon 29.7.2,
+# socket at ~/.docker/run/docker.sock). Docker Desktop no longer creates the
+# /usr/local/bin symlink unless the optional admin prompt is accepted, and its CLI lives
+# inside the app bundle — which is on PATH only for LOGIN shells (~/.zprofile). doctor runs
+# in a non-login shell, so it measured PATH and called it Docker. Ask the thing itself.
+DOCKER_BUNDLED="/Applications/Docker.app/Contents/Resources/bin/docker"
 for t in node npm gh az unison docker; do
-  command -v "$t" >/dev/null 2>&1 && ok "$t" || warn "$t missing" "brew install $( [ "$t" = az ] && echo azure-cli || { [ "$t" = docker ] && echo '--cask docker (then launch Docker.app once for the CLI symlink)' || echo "$t"; } )"
+  if [ "$t" = docker ]; then
+    DBIN="$(command -v docker 2>/dev/null || { [ -x "$DOCKER_BUNDLED" ] && echo "$DOCKER_BUNDLED"; })"
+    if [ -n "$DBIN" ]; then
+      if "$DBIN" info --format '{{.ServerVersion}}' >/dev/null 2>&1; then ok "docker ($("$DBIN" --version 2>/dev/null | awk '{print $3}' | tr -d ,), daemon up)"
+      else warn "docker CLI present, daemon not responding" "open -a Docker and accept its prompts"; fi
+      [ -x /usr/local/bin/docker ] || ok "docker CLI is bundle-only (no /usr/local/bin symlink) — ~/.zprofile puts it on PATH for login shells"
+    else warn "docker missing" "brew install --cask docker (then launch Docker.app once)"; fi
+    continue
+  fi
+  command -v "$t" >/dev/null 2>&1 && ok "$t" || warn "$t missing" "brew install $( [ "$t" = az ] && echo azure-cli || echo "$t" )"
 done
 
 # WED-16 scheduler TCC health (added 2026-08-05; relocated same day — was
