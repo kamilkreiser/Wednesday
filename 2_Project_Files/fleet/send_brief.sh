@@ -21,9 +21,44 @@ set -u
 SELF_DIR="$(cd -P "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 PROJECT_DIR="$(cd -P "$SELF_DIR/../.." && pwd)"
 ENV_FILE="$PROJECT_DIR/4_Credentials/.env"
-INBOX="wednesday-agent@agentmail.to"
 BUS="coagent@agentmail.to"
 ROUTING="$SELF_DIR/inbox_routing.conf"
+
+# ── THE SENDING INBOX IS THIS SEAT'S OWN, LOOKED UP — NEVER HARDCODED ────────
+# Until 2026-09-09 this line read INBOX="wednesday-agent@agentmail.to". Tuesday
+# measured the consequence: every mail HER seat sent through this script went out
+# of WEDNESDAY's inbox, so every reply came back to the wrong coordinator and her
+# own inbox-scoped key had no reason to work. Written when there was one
+# coordinator; wrong from the hour of the 2026-09-08 split.
+#
+# The seat comes from WED_AGENT, which the launcher exports, and there is NO
+# hostname fallback and no default. Kam's own words in Launch_Tuesday.command:
+# "a seat that guesses its own client is precisely the failure the two-agent split
+# exists to prevent" — and a hostname map is invalidated silently by a machine
+# move, which is what happened this week (2026-09-09_the-seat-resolver-is-the-
+# layer-above-every-agent-aware-fix).
+#
+# The address is LOOKED UP in inbox_routing.conf rather than composed. That is
+# the ledger's own finding from this morning, when a recipient was composed from
+# its shape instead: had it been looked up, the lookup would have FAILED and the
+# failure would have been the finding. So an unregistered seat REFUSES here.
+case "${WED_AGENT:-}" in
+  wednesday) SEAT_KEY="Wednesday" ;;
+  tuesday)   SEAT_KEY="Tuesday"   ;;
+  "") echo "send_brief: WED_AGENT is not set, so this seat cannot say which coordinator it is." >&2
+      echo "  A guess here sends a client's mail out of the other coordinator's inbox." >&2
+      echo "  Fix: launch through Launch_Wednesday.command or Launch_Tuesday.command," >&2
+      echo "  or export WED_AGENT=wednesday|tuesday in this shell. REFUSING." >&2
+      exit 2 ;;
+  *)  echo "send_brief: WED_AGENT='${WED_AGENT}' is neither wednesday nor tuesday. REFUSING." >&2
+      exit 2 ;;
+esac
+INBOX="$(awk -F'|' -v k="$SEAT_KEY" '$1==k {print $2; exit}' "$ROUTING" 2>/dev/null)"
+if [ -z "$INBOX" ]; then
+  echo "send_brief: seat '$SEAT_KEY' has no entry in $ROUTING, so its own inbox is unknown." >&2
+  echo "  Add a '$SEAT_KEY|<inbox>|yes' line there. REFUSING rather than sending as another seat." >&2
+  exit 2
+fi
 
 TO=""; SUBJECT=""; SUBJECT_FILE=""; BODY_FILE=""; KIND="brief"
 while [ $# -gt 0 ]; do
@@ -483,6 +518,17 @@ set -a; . "$ENV_FILE" 2>/dev/null; set +a
 # write "Kam is CC'd" (or any closing-mechanism claim) into a brief — there
 # is no cc to point at. Re-add only on a recorded Kam instruction.
 
+# ⚠ THE SUBJECT PREFIX IS DELIBERATELY STILL "Wednesday", INCLUDING FROM TUESDAY'S
+# SEAT — this is a known half-fix, not an oversight. The prefix is the fleet's
+# ROUTING KEY: every project agent's boot instruction tells it to match
+# "[Wednesday -> <Client>/<Project>]". Flipping it to the sending seat's name is
+# two characters here and makes every one of Tuesday's briefs invisible to the
+# Datasec agents until THEIR boot prompts accept the new tag — and those are her
+# projects, not this seat's, so the sequencing is hers.
+# The harm that mattered is fixed above: the mail now leaves the sending seat's OWN
+# inbox, so replies reach the coordinator who asked. What remains is attribution.
+# Raised to Kam and to Tuesday 2026-09-09 as a sequenced change: her agents accept
+# the tag first, the prefix flips second.
 FULL_SUBJECT="[Wednesday -> $TO] $SUBJECT"
 CODE="$(BODY="$BODY" SUBJ="$FULL_SUBJECT" RCPTS="$RECIPIENTS" INBOXADDR="$INBOX" python3 - <<'PYEOF'
 import json, os, urllib.request
