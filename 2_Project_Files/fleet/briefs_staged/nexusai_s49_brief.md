@@ -2,7 +2,7 @@
 
 ## BLUF
 
-**Three of Kam's rulings on this project have never reached an artefact, and two of them are your first two queue items.** Everything below is inside work he has already ruled or inside the marketplace readiness set S48 measured. **Nothing here is a deploy.**
+**Three of Kam's rulings on this project were undelivered when this brief was started. ONE of them is your first queue item; one turned out to be already done; one is Kam's own to close.** Everything below is inside work he has already ruled or inside the marketplace readiness set S48 measured. **Nothing here is a deploy.**
 
 **Boot from a CLEAN WORKTREE at `origin/main`, not from `2_Project_Files/`.** That tree is a stale snapshot — S48 measured 33 tracked files on disk not matching `cd2b543`, the diff being a reversion of `+248 / −1230`. The card `nexusai-main-tree-is-a-stale-snapshot` is OPEN with Kam's default standing: *the stale tree stays, the agent works from its own worktree, the mechanism stays unexplained.* **Do not "fix" that tree. Do not commit from it.**
 
@@ -25,7 +25,7 @@ Built from `decision_queue.sh list ruled --undelivered` for this project, read a
 
 ## RULED BY WEDNESDAY FOR THIS PROJECT, STILL OPERATIVE
 
-- **The QA gate precedes every score and every merge** (Kam, 2026-09-01; tiered 2026-09-05). Item 1 and item 3 touch security surfaces → **tier 1**. Item 4 is a docs/config correction → **through-code only**.
+- **The QA gate precedes every score and every merge** (Kam, 2026-09-01; tiered 2026-09-05). Items 1 and 2 touch security surfaces → **tier 1**. Item 3 is a docs correction → **through-code only**.
 - **A GO names a HEAD.** If you push after a gate verdict, that verdict is stale and the re-gate is part of accepting the fix, not a surprise afterwards.
 - **Client-facing communication is ticket comments only.** Nobody messages a human outside the team.
 - **Cleanup means quarantine, never deletion.**
@@ -37,8 +37,8 @@ Built from `decision_queue.sh list ruled --undelivered` for this project, read a
 ### 1. RD-369 round 3 — the guard, narrow (Kam-authorised above)
 PROVENANCE:
 - RD-369 state (**`Release Ready`**, 1 comment, last comment **2026-09-08T10:24**, updated 2026-09-08T11:53) | Jira ticket RD-369 | read 2026-09-10
-- **No comment on it since Kam's 2026-09-09T12:09 ruling — so no seat has acted on round 3. It is genuinely outstanding.**
-- Branches at origin: `rd-369-round2-s47` @ `c96837df931af020bd700b53fd3719f47f27cb22`, `rd-369-recut-s47` @ `117931ef4a5b8da635d4c4d2207227136c483138` (`ls-remote`, read 2026-09-10). **No round-3 branch exists yet.**
+- RD-369 has no comment after Kam's 2026-09-09T12:09 ruling, so no seat has acted on round 3 | Jira ticket RD-369 comments endpoint | read 2026-09-10
+- Only `rd-369-round2-s47` @ c96837df931af020bd700b53fd3719f47f27cb22 and `rd-369-recut-s47` @ 117931ef4a5b8da635d4c4d2207227136c483138 exist at origin; there is no round-3 branch | git ls-remote origin | read 2026-09-10
 **Ticket scope, quoted:** the exposure itself is CLOSED and proven against a real built image (288 derived vs 288 admitted, all four carrier paths 404 from a running container). **This round is about the GUARD that prevents recurrence, and nothing else.**
 The gate's finding: the builder found a distance window that made the instrument answer clean, **removed it from one code path and left it on the other, while the docblock says there is no window.** Proven consequence: a **purely cosmetic reflow** — one line broken after its colon, every value preserved — flips **three of four** true RD-385 files from carrier to CLEAN. And the certifying cell asserts only *greater than zero* over 284 files, so mutation-killing either detection path leaves it GREEN.
 **Do:** remove the window from **both** paths; make the certifying cell **able to fail** (red-proof it by mutation, with a green baseline either side).
@@ -84,7 +84,7 @@ The branch `origin/rd-363-keyvault-purge-protection-s43` at **`b0dec96fc1f498b30
 - The three rulings: **`decision_queue.sh show <id>`, quoted from the card, at brief time.**
 - 🔴 **Wednesday holds no GitHub identity for `datasecau` and no Docker daemon reading. Every claim about the org's settings or about image CONTENTS in this brief is second-hand or absent, and is labelled as such above.**
 
-## SELF-CHECK: GENERATED 2026-09-10 09:16:45 AEST
+## SELF-CHECK: re-read end-to-end for contradictions | 2026-09-10 09:25
 
 - Read against Kam's rulings for today: **`kam_rulings_today.sh` returned 0 messages for 2026-09-10** — and Wednesday has separately measured that his 08:58 message never entered the store the tool reads, so **that zero is a known-weak instrument, not a clean absence.** No ruling of his from today is in this brief because none is visible; if he ruled on NexusAI today it is not here.
 - Read against the previous outbound to this project: **the S48 commission (analysis only, no changes).** This brief SUPERSEDES nothing in it — S48 was read-only by design and this is the first brief that commissions changes from its findings.
