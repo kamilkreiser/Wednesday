@@ -7,7 +7,7 @@ status: live
 
 # Boot digest — headline + rules of every lesson (open the file when it fires)
 
-Generated 2026-09-09 10:58 from 131 lesson files (677,743 B). Each block = the lesson's retrieval handle (H1), its frontmatter, the operative paragraph, its section index, and every RULES section verbatim. 6 files carry no rules-shaped section and are included whole. The CASES behind a rule live only in the file: open it the moment the rule fires, or when a diagnosis needs the evidence. `_ledger.md` is read whole beside this digest; `_ledger_archive.md` on demand.
+Generated 2026-09-09 11:14 from 132 lesson files (682,243 B). Each block = the lesson's retrieval handle (H1), its frontmatter, the operative paragraph, its section index, and every RULES section verbatim. 6 files carry no rules-shaped section and are included whole. The CASES behind a rule live only in the file: open it the moment the rule fires, or when a diagnosis needs the evidence. `_ledger.md` is read whole beside this digest; `_ledger_archive.md` on demand.
 
 ## The T9 SSD is the master — Wednesday must be fully portable
 `2026-07-31_fully-portable-drive.md` · principle · 2026-07-31 · status: superseded — the "T9 is the master" half by [[2026-08-25_one-drive-devmaster-is-master]] (2026-08-25); the portability principle itself still lives
@@ -4844,6 +4844,45 @@ and never vibes) · [[2026-08-16_classification-is-the-field-that-grants-authori
 [[2026-09-07_production-ban-lifted-for-the-week]] (a grant read narrowly, every use flagged) ·
 [[2026-08-09_an-enforcement-you-must-arm-is-not-one]] (the gate reshape is the mechanism; this grant
 is the interim rule).
+
+
+## Multiple agents on one project, in parallel, to close tickets — partitioned by DIRECTORY, and the shared inbox is the part that bites
+`2026-09-09_parallel-seats-on-one-project-grant.md` · grant · 2026-09-09 · status: live
+
+**His words, verbatim:**
+> *"Keep working through the secure tickets if you need to run multiple agents so we can close as many of them off as possible."*
+
+sections (open the file for these): The operative case · What it does NOT relax · How to apply · ⚠ THE PART THAT BIT ON THE FIRST RUN: TWO SEATS SHARE ONE INBOX · Related
+
+## How to apply
+
+1. **Partition by DIRECTORY, not by ticket.** The queue is split so that no two seats can
+   touch the same files — and the boundary is stated in BOTH briefs, from each seat's side
+   ("yours: X; NOT yours, the other seat is in it right now: Y"). A partition by *topic*
+   looks disjoint and is not; a partition by *path* is checkable.
+2. **Name the foreseeable breach rather than hoping.** On 2026-09-09 the systemTest seat's
+   ticket needed a tsconfig, and a tsconfig placed high enough reaches a root file the other
+   seat could touch. The brief said so explicitly with a STOP, instead of trusting the
+   boundary to hold.
+3. **Each seat gets its own git worktree.** No two seats share a checkout, and
+   `2_Project_Files` itself stays read-only to both — verified clean before and after the
+   worktree add, and stated in the report.
+4. **Derive each seat number from THAT PROJECT'S OWN `5_Project_History/history.md`**, never
+   from Wednesday's counter and never from a scratch filename
+   ([[2026-09-07_a-mechanism-is-recorded-by-its-path-not-its-runtime-id]]).
+5. **Conflicts are the PARTITION's failure, not the seats'.** They are reported and
+   re-partitioned, never merged through.
+
+**How to handle it until per-seat inboxes exist:**
+- **Every brief in a parallel run states, near the top, that two seats share the inbox and
+  that a brief naming another seat is not theirs.** On the first run this warning was
+  written into the SECOND brief and never backported to the first — see the ledger row; the
+  seat without the warning is the one that had to work it out.
+- **Tap each seat with a pointer naming ITS OWN subject**, verified with
+  `cockpit.sh say <pane> '<pointer>' --mail '<subject substring>'`, which reads the mail
+  back at the destination before it types anything.
+- The structural fix is a per-seat inbox. **Not built:** it is shared tooling and the first
+  parallel run is not the moment to arm it ([[2026-09-08_a-new-rule-is-most-dangerous-just-after-adoption]]).
 
 
 ## Quarantine by RENAME is not a removal on any additively-synced tree — the replica keeps both names, and the next restore ships the thing you quarantined
