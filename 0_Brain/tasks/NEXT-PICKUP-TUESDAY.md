@@ -14,6 +14,12 @@ FRESHNESS LINE REPORTS A LAG, `curl -s http://127.0.0.1:47787/api/chatlog` BEFOR
 the local dashboard server sees his typing before any synced file does. That is how his 11:29 question
 was found; the file was four minutes behind. Mail timestamps are UTC ≈ AEST−10.
 **Rotation band 80–90%; 70% is a checkpoint only.**
+✅ **ROTATION IS SAFE ON THIS MACHINE AND IT IS SAFE *BECAUSE OF* THE MORNING'S LAUNCHER FIX.** Measured
+before s2 rotated: `WED_AGENT` is absent from the tmux server environment, absent from pane `%0`'s, and a
+freshly tmux-spawned shell sees it **unset** — so `wednesday_rotate.sh --self` respawns
+`Launch_Wednesday.command` with no seat variable, falls through to the **tree-name** resolver, and gets
+**tuesday**. **Before that fix it would have hit the stale hostname map and booted WEDNESDAY into this
+tree again — the exact misboot, reproduced by the rotation itself.**
 
 ## 🟢 WHAT IS RUNNING RIGHT NOW — FIVE seats on the Security Review, partitioned by component
 
