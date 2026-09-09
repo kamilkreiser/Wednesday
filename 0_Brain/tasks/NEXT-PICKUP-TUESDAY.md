@@ -13,7 +13,36 @@ supersede: replace this file WHOLESALE at the next pickup; never append. It repl
 warning below, because that tool cannot see everything Kam says. **Mail timestamps are UTC ≈ AEST−10.**
 **Rotation band 80–90%; 50% and 70% are checkpoints only.**
 
-## 🟢 WHAT IS RUNNING — two seats, both verified at rung 5, both report to `tuesday-agent@`
+## ✅ BOTH SEATS DELIVERED AND CLOSED — nothing is running. Floor is Wednesday `%0` + monitor `%1`.
+
+**REFORMAT DELIVERED AND EMAILED TO KAM 16:4x**, verified at the destination by recipient, sender, non-null
+preview and both attachment byte-sizes:
+`Deliverables/13A_HPAM_Consolidated_Findings_Register_2026-09.{md,docx}` (210 findings, the HP Authentication
+Suite — *"the other team"*) and `13B_Datasec_Products_...` (132, the projects we run). **Together 28 C · 76 H ·
+126 M · 73 L · 39 I = 342**, matched band by band. Report: `_Working/2026-09-09_REFORMAT_REPORT.md`.
+Builders: `_Working/build-doc13A.sh` / `build-doc13B.sh`. Quarantine `.pre-reformat-2026-09-09_13_*`.
+**Document 13 itself is UNTOUCHED and is superseded by 13A+13B for delivery.**
+
+🔴 **TUESDAY VERIFIED THE ARTEFACTS INDEPENDENTLY, NOT THE SEAT'S WORD** — 0 emoji and 20/15 real tables read
+out of `word/document.xml`, **with the pre-reformat file as the CONTROL at 462 emoji, proving the scan fires.**
+Attachments swept for secrets and every hit READ: 3 in 13A, all prose naming a config key, no values.
+
+**RULED BY TUESDAY on the seat's two raised items, both ratified, no rework owed:** (1) it REDACTED a secret's
+character length from a Critical (`"length deliberately not reproduced"`) — **correct; a length is a disclosure
+and the hold names it. This is the only cell text that changed and it changed toward less disclosure.**
+(2) it RETAINED a PUBLIC key fingerprint as load-bearing evidence — **correct; public by construction, and
+removing it would weaken a finding, which a presentation pass must not do. The document already labels it
+'public key', so it is self-documenting against a later scrubber.**
+
+🔴 **NEXT, AND IT IS THE ONLY OPEN DATASEC WORK: scrub the JUNE register** (`03_Findings_Register.{md,docx}`).
+Held until now ONLY because the reformat seat was using June as one of its two format models. **That reason is
+gone.** Kam told, default stated.
+
+**NexusAI marketplace analysis DELIVERED** — `NexusAI/MARKETPLACE-READINESS-2026-09-09.md`. One decision is
+Kam's (the project is preparing an Azure Application *and* a SaaS offer at once), plus a privacy-URL defect,
+RD-363's Key Vault hardening never landed on `main`, and RD-385 shipping internal docs in the image.
+
+## (superseded) WHAT WAS RUNNING
 
 | Pane | Seat | Commission | State |
 |---|---|---|---|
