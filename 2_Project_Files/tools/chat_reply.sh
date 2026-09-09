@@ -78,6 +78,25 @@ if [ "${1:-}" = "--project" ]; then
 fi
 MSG="${1:-}"
 [ -n "$MSG" ] || { echo "chat_reply: empty message refused" >&2; exit 2; }
+# ── A FLAG IS NOT A MESSAGE (2026-09-09, ledger — it cost three messages to Kam) ──
+# `--project` is the ONLY flag this script has. Wednesday invoked it three times as
+# `chat_reply.sh --file <path>`, so the literal string `--file` was mirrored to Kam's
+# reading surface as the message and 2.3 KB of content — including a security finding
+# and a merge hold — was never sent. The script printed its ordinary success line and
+# its entry COUNT incremented each time, so nothing looked wrong from the caller's
+# side. KAM noticed, not Wednesday: "multiple entries from you saying file".
+# A message that begins with `--` is overwhelmingly a mis-invocation, and the cost of
+# refusing a genuine one (re-send with a leading space) is nothing next to the cost of
+# silently mirroring a flag name to the principal.
+case "$MSG" in
+  --*) echo "chat_reply: REFUSED — the message begins with '--', which is almost certainly" >&2
+       echo "  a flag this script does not have. The ONLY flag is --project <Datasec|Secuura|WED>;" >&2
+       echo "  the message itself is POSITIONAL. There is no --file: pass the body as" >&2
+       echo "  \"\$(cat <path>)\" instead, which also survives punctuation in the prose." >&2
+       echo "  (2026-09-09: three messages to Kam were lost exactly this way.)" >&2
+       echo "  If you genuinely meant to send text starting with '--', prefix it with a space." >&2
+       exit 2 ;;
+esac
 # A stream that does not exist yet is created empty — a fresh clone, or the first
 # thing this seat has ever said. That is not an error; a MISSING stream is only a
 # problem if something then writes the derived file instead, which nothing does.

@@ -1,0 +1,46 @@
+ultrathink
+
+You are the fleet QA agent running a TIER 1 gate on Secuura/Blockchain.
+
+Read your brief FIRST and in full, then plan:
+/Volumes/DevMASTER/WEDNESDAY/2_Project_Files/fleet/qa-agent/briefs/2026-09-09_secuura-ks754-914-tier1.md
+
+Subject: PR #914 (KS-754 + three KS-1024 baseline commits) @ 311dc1ae474f5a1d37f30147d810a2c7583efa6b
+Base:    develop @ f9296f9eadb26c52d47116457de99fcfc44ce4dd (also the merge-base -- verify)
+Repo:    /Volumes/DevMASTER/!CODING/Secuura/Blockchain/2_Project_Files
+
+You are FINDINGS-ONLY. Never fix, never merge, never push, never deploy.
+Confirm `git status --porcelain` is empty when you close, and say so.
+
+This gate is on the critical path: every author in this repo, including Peter and
+Stuart, is blocked from pushing until #914 -> #915 -> develop lands. That is a
+reason to be thorough, not quick. If it needs a NO GO, give it one.
+
+The pass turns on ONE question above all:
+
+  `updateDSRStatus` used to swallow a database error as `false`. It now RETHROWS.
+  Its call at gdprService.ts:859 is step 12 of a GDPR Article 17 erasure and
+  previously IGNORED that return. So an erasure that used to complete -- failing
+  only to record its status -- may now ABORT AFTER THE DELETIONS HAVE HAPPENED.
+  Establish what actually happens to a part-completed erasure. DRIVE IT; do not
+  reason about it. A record that under-states a completed erasure is a compliance
+  problem in the opposite direction from the one being fixed.
+
+Second: the change DROPS a foreign key from data_subject_requests.processed_by to
+users(id). Enumerate who relied on it. This is the same shape as the finding that
+made #912 a NO GO -- a consumer silently depending on an invariant the change
+removes.
+
+You MAY run suites and stand your own containers in your own scratchpad. Do NOT
+use http://127.0.0.1:6882 as evidence -- the running image predates this work. Do
+not rebuild or restart the shared stack; ask instead.
+
+Report FOUND / TESTED / HOW, with controls, and state what you did NOT test.
+Verdict: GO, GO WITH FINDINGS, or NO GO.
+
+MAIL YOUR VERDICT to wednesday-agent@agentmail.to when the pass is complete, using
+the project's send_brief.sh. Your pane holds ~19 lines of alternate screen with no
+scrollback, so a verdict that stays in the pane is one pane-close from being lost --
+the previous gate's report survived only because it was dug out of a session
+transcript. Subject:
+[QA -> Wednesday] VERDICT: Secuura KS-754 / #914 @ 311dc1ae4 -- <GO|GO WITH FINDINGS|NO GO>
