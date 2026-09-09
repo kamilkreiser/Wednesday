@@ -107,3 +107,16 @@ does not announce itself.**
 caught the contradicting-hold error earlier the same day. Extend it: a card carried into a brief's
 **HOLDS** must name the artefact checked and the date it was read, or be listed under the undelivered
 heading as UNKNOWN rather than asserted as binding.
+
+## EXTENSION 2026-09-09 19:5x — an UNKNOWN in a brief NAMES why it is unknown and the instrument that closes it, or it is an assertion wearing a hedge's clothes
+
+**The case.** The s161 brief queued item 4 as *"is the #912 tier-1 NO GO actually ON the PR and the ticket? Wednesday commissioned s160 to post it and its wrap does not say it did — so this is UNKNOWN, not done."* **The seat settled it in its first turn from the GitHub API: comment `5597511879`, `kksecura`, `2026-09-09T06:55:05Z`, 4200 bytes, opening `## QA GATE - TIER 1, round 1: NO GO`. It had been on the PR for three hours.**
+
+**Why the hedge was right and the sentence was still wrong.** Labelling it UNKNOWN rather than asserting either way is correct, and it is what sent the seat to the API. But *"UNKNOWN, not done"* carries a second clause that is an assertion, and the reason for the uncertainty — **Wednesday holds no GitHub identity for this client and therefore could not read the PR's comments** — was nowhere in the sentence. A reader cannot tell an unknown-because-uncheckable from an unknown-because-unchecked, and only the first is a legitimate thing to hand to someone else.
+
+**The rule:**
+1. **Every UNKNOWN in a brief carries two clauses: WHY it is unknown, and WHICH INSTRUMENT closes it.** *"UNMEASURED — Wednesday holds no GitHub identity; read `/issues/912/comments` in your first turn"* is a complete item. *"UNKNOWN, not done"* is a claim.
+2. **Never append a disposition to an uncertainty.** "not done", "still open", "still binding" are states, and a sentence that hedges then states one has un-hedged itself in its own second half.
+3. **This is the 2026-09-08 both-directions asymmetry pointed at a BRIEF rather than a card**, and it landed on the loud side: an item read as UNDONE gets corrected by the next reader at the cost of a turn. The quiet side — an unknown read as STILL BINDING — is the one that becomes a hold nobody tests.
+
+**Family:** [[2026-08-14_i-read-representations-they-read-sources]] (rule 3: never state a mechanism I have not read — here, a state I have not read) · [[2026-09-07_git-topology-is-a-measurement-not-a-model]] (Wednesday holds no client identity, so every such claim is relayed and says so INLINE) · [[2026-08-16_classification-is-the-field-that-grants-authority]] ("not done" is a disposition needing provenance).

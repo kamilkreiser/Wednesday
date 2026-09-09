@@ -7,7 +7,7 @@ status: live
 
 # Boot digest BY TIER — W whole, M rules-only, every project case a handle
 
-Generated 2026-09-09 19:38 from 137 lesson files (708,692 B). M 32 · MIXED 5 · W 100. 28 project CASE sections inside MIXED files are reduced to one line each: the heading and the path to read it at. W blocks are exactly what the default digest carries; M blocks drop the section index and keep the rules; a P file is a single handle. The CASES behind every rule live only in the lesson files — open one the moment its rule fires.
+Generated 2026-09-09 20:01 from 137 lesson files (711,058 B). M 32 · MIXED 5 · W 100. 28 project CASE sections inside MIXED files are reduced to one line each: the heading and the path to read it at. W blocks are exactly what the default digest carries; M blocks drop the section index and keep the rules; a P file is a single handle. The CASES behind every rule live only in the lesson files — open one the moment its rule fires.
 
 ## The T9 SSD is the master — Wednesday must be fully portable
 `2026-07-31_fully-portable-drive.md` · principle · 2026-07-31 · status: superseded — the "T9 is the master" half by [[2026-08-25_one-drive-devmaster-is-master]] (2026-08-25); the portability principle itself still lives · tier: W
@@ -3159,7 +3159,7 @@ RULED for that project since the last brief and ask, per card, WHERE the ruling 
 answer is "on Kam's panel and in a mail to a seat that has since wrapped", it lives nowhere a
 reader lands, and the next agent will find the question open and ask it again.
 
-sections (open the file for these): EXTENSION 2026-09-06 02:2x (ledger w=4 of the family): WEDNESDAY'S OWN rulings to a project are rulings too — a scope/holds ruling given in an ANSWER to seat N lives in that mail and in nothing seat N+1 reads · EXTENSION 2026-09-08 18:3x (w=2 THE SAME DAY, opposite direction — and the diagnosis this owes)
+sections (open the file for these): EXTENSION 2026-09-06 02:2x (ledger w=4 of the family): WEDNESDAY'S OWN rulings to a project are rulings too — a scope/holds ruling given in an ANSWER to seat N lives in that mail and in nothing seat N+1 reads · EXTENSION 2026-09-08 18:3x (w=2 THE SAME DAY, opposite direction — and the diagnosis this owes) · EXTENSION 2026-09-09 19:5x — an UNKNOWN in a brief NAMES why it is unknown and the instrument that closes it, or it is an assertion wearing a hedge's clothes
 
 **How to apply:**
 1. **A ruled card is not closed until its RECEIPT names the artefact** the ruling was written into
@@ -3215,6 +3215,16 @@ does not announce itself.**
 caught the contradicting-hold error earlier the same day. Extend it: a card carried into a brief's
 **HOLDS** must name the artefact checked and the date it was read, or be listed under the undelivered
 heading as UNKNOWN rather than asserted as binding.
+
+## EXTENSION 2026-09-09 19:5x — an UNKNOWN in a brief NAMES why it is unknown and the instrument that closes it, or it is an assertion wearing a hedge's clothes
+**The case.** The s161 brief queued item 4 as *"is the #912 tier-1 NO GO actually ON the PR and the ticket? Wednesday commissioned s160 to post it and its wrap does not say it did — so this is UNKNOWN, not done."* **The seat settled it in its first turn from the GitHub API: comment `5597511879`, `kksecura`, `2026-09-09T06:55:05Z`, 4200 bytes, opening `## QA GATE - TIER 1, round 1: NO GO`. It had been on the PR for three hours.**
+
+**The rule:**
+1. **Every UNKNOWN in a brief carries two clauses: WHY it is unknown, and WHICH INSTRUMENT closes it.** *"UNMEASURED — Wednesday holds no GitHub identity; read `/issues/912/comments` in your first turn"* is a complete item. *"UNKNOWN, not done"* is a claim.
+2. **Never append a disposition to an uncertainty.** "not done", "still open", "still binding" are states, and a sentence that hedges then states one has un-hedged itself in its own second half.
+3. **This is the 2026-09-08 both-directions asymmetry pointed at a BRIEF rather than a card**, and it landed on the loud side: an item read as UNDONE gets corrected by the next reader at the cost of a turn. The quiet side — an unknown read as STILL BINDING — is the one that becomes a hold nobody tests.
+
+**Family:** [[2026-08-14_i-read-representations-they-read-sources]] (rule 3: never state a mechanism I have not read — here, a state I have not read) · [[2026-09-07_git-topology-is-a-measurement-not-a-model]] (Wednesday holds no client identity, so every such claim is relayed and says so INLINE) · [[2026-08-16_classification-is-the-field-that-grants-authority]] ("not done" is a disposition needing provenance).
 
 
 ## Every handover to Peter or Stuart is a TEST BLOCK, as large as one pass can prove — never a list of PRs
