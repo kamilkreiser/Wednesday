@@ -112,6 +112,36 @@ dir="$PROJECT_DIR/0_Brain/dashboard/data"
 [ -d "$dir" ] || { _fail "data dir absent at $dir"; exit 0; }
 
 f="$dir/usage_${agent}.json"
+
+# WRITE ONLY WHEN IT SAYS SOMETHING NEW — the percentage changed, or the file has
+# aged past the heartbeat. The statusline renders many times a minute; rewriting a
+# fresh timestamp each time makes this a permanently-dirty tracked file, which is
+# what made the first rebase of this very change fail. The heartbeat is well inside
+# the page's 15-minute staleness threshold, so a running seat never falsely reads as
+# stale, and a stopped seat's file ages exactly as it should.
+HEARTBEAT_S=300
+if [ -f "$f" ] && command -v python3 >/dev/null 2>&1; then
+  skip=$(python3 - "$f" "$pct_fmt" "$HEARTBEAT_S" <<'PY' 2>>"$LOG"
+import json, sys, datetime
+path, pct, hb = sys.argv[1], sys.argv[2], int(sys.argv[3])
+try:
+    d = json.load(open(path))
+    if str(d.get("pct")) != str(pct):
+        print("no")                      # the number moved — publish it
+    else:
+        # timezone-aware on purpose: utcnow() is deprecated and warns on 3.12+,
+        # and every such warning would land in this script's log on every render.
+        ts = datetime.datetime.strptime(d["ts"], "%Y-%m-%dT%H:%M:%SZ").replace(
+            tzinfo=datetime.timezone.utc)
+        age = (datetime.datetime.now(datetime.timezone.utc) - ts).total_seconds()
+        print("yes" if 0 <= age < hb else "no")
+except Exception:
+    print("no")                          # unreadable or malformed — rewrite it
+PY
+)
+  [ "$skip" = "yes" ] && exit 0
+fi
+
 if printf '{"agent":"%s","pct":%s,"resets_in":"%s","ts":"%s"}\n' \
      "$agent" "$pct_fmt" "$countdown" "$(date -u +%Y-%m-%dT%H:%M:%SZ)" > "$f.tmp" 2>>"$LOG"; then
   mv -f "$f.tmp" "$f" 2>>"$LOG" || { _fail "mv into $f failed"; rm -f "$f.tmp" 2>/dev/null; }

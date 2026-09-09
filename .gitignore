@@ -92,8 +92,10 @@ _quarantine_*/
 # statusline_publish.sh diagnostics (per-seat, machine-local)
 2_Project_Files/logs/
 
-# Per-seat live usage published by statusline_publish.sh. Rewritten on EVERY
-# statusline render, so tracking it means a dirty tree at all times and a conflict
-# between seats on every pull. It is live machine-local state, not a durable
-# artefact - the dashboard reads it from disk beside it.
-0_Brain/dashboard/data/usage_*.json
+# usage_*.json IS tracked, deliberately. It was ignored for eleven minutes on the
+# reasoning that it is live machine-local state - which was wrong about the one thing
+# that matters: Tuesday's seat is on another machine and THIS REPO IS THE TRANSPORT
+# between the two seats (her commit landed here by git while that line was being
+# written). Ignoring it would have guaranteed her chip stayed empty forever. The churn
+# that motivated ignoring it is fixed at the writer instead: statusline_publish.sh now
+# writes only when the number moves or the file ages past its heartbeat.
