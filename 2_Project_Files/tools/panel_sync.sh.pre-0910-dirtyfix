@@ -32,21 +32,8 @@ cycle(){
   if [ -d .git/rebase-merge ] || [ -d .git/rebase-apply ] || [ -f .git/MERGE_HEAD ]; then
     say "SKIP rebase/merge in progress"; return 0
   fi
-  # MEASURED 2026-09-10: a bare dirty-tree skip fired 782 times in 790 cycles and
-  # the page went 13 hours stale. The dashboard collector rewrites
-  # 0_Brain/dashboard/data/*.json continuously, so this tree is ALWAYS dirty and a
-  # guard that always trips is a mechanism that never runs.
-  # Generated dashboard data is this seat's own output and the repo is the only
-  # transport for it, so COMMIT it rather than stashing or skipping. Anything dirty
-  # OUTSIDE that directory is real work in progress: skip, never stash.
-  OTHER=$(git status --porcelain 2>/dev/null | grep -v ' 0_Brain/dashboard/data/' | grep -v '^?? 0_Brain/dashboard/data/')
-  if [ -n "$OTHER" ]; then
-    say "SKIP dirty outside dashboard/data ($(printf '%s' "$OTHER" | wc -l | tr -d ' ') paths); no autostash by design"; return 0
-  fi
-  if [ -n "$(git status --porcelain -- 0_Brain/dashboard/data 2>/dev/null)" ]; then
-    git add -A 0_Brain/dashboard/data >/dev/null 2>&1
-    git commit -q -m "dashboard: generated data (panel_sync)" >/dev/null 2>&1 \
-      && say "committed generated dashboard data" || say "WARN commit of dashboard data failed"
+  if [ -n "$(git status --porcelain 2>/dev/null)" ]; then
+    say "SKIP dirty tree (no autostash by design; retrying next cycle)"; return 0
   fi
   if ! out=$(git pull --rebase 2>&1); then
     say "PULL FAILED: $(printf '%s' "$out" | tr '\n' ' ' | cut -c1-200)"; return 1
@@ -54,7 +41,6 @@ cycle(){
   if ! sout=$(python3 "$ROOT/2_Project_Files/tools/chat_streams.py" 2>&1); then
     say "REGEN FAILED: $(printf '%s' "$sout" | tr '\n' ' ' | cut -c1-200)"; return 1
   fi
-  git push origin main >/dev/null 2>&1 || say "WARN push failed"
   say "ok $(printf '%s' "$sout" | tr '\n' ' ' | cut -c1-120)"
   return 0
 }
