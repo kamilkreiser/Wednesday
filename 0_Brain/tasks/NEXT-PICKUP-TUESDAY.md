@@ -156,6 +156,18 @@ share the blind spot.
    12:15). `fc05dcdd` is a strong candidate the workspace file forbids asserting. **A strong candidate
    is not a measurement.**
 
+## 🔴🔴 THE PANEL: WRITE, THEN READ IT BACK OFF THE SERVER. ALWAYS.
+
+**Kam read a FROZEN page for six hours today while this seat reported success.** The server on this machine was
+started 2026-09-08 17:51 from `/Volumes/KK_T9_External_HDD/WEDNESDAY/2_Project_Files/dashboard/server.py` — the
+**abandoned WEDNESDAY tree** — and resolves its data dir relative to itself. At 11:29 this seat became TUESDAY,
+writes moved to `TUESDAY/0_Brain/dashboard/data/`, and the page kept serving `WEDNESDAY/`. Nothing errored.
+**FIXED:** stale server stopped (identified by PORT, confirmed by CWD), `2_Project_Files/dashboard/serve.sh`
+started from THIS tree. 1,829 rows -> 2,025; 0 rows from this seat -> 40.
+🔴 **AFTER EVERY `chat_reply.sh`: `curl -s http://127.0.0.1:47787/api/chatlog` and ASSERT your message is the
+newest row.** The `chat_streams: ... N entries` line is a receipt for the WRITE, never for the DISPLAY.
+**Check the server's CWD at boot** — if it is not this tree, every panel message you send is invisible.
+
 ## STANDING
 
 🔴 **EVERY WRAP: `git add 0_Brain/dashboard/data/usage_tuesday.json`** — generated AND must be
