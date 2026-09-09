@@ -218,6 +218,43 @@ class Handler(SimpleHTTPRequestHandler):
                     m["ack"] = a
                 out.append(m)
             return self._json(200, {"messages": out})
+        if self.path == "/api/usage":
+            # Per-seat weekly plan usage for the agent toggle chips
+            # (Kam, 2026-09-09 12:32: "add to the Wednesday toggle so it shows
+            # weeks usage % so it's 'Wednesday - xx%' and same for Tuesday").
+            #
+            # Each seat's statusline.sh writes ONLY its own usage_<agent>.json —
+            # the number arrives on that script's stdin from Claude Code and
+            # exists nowhere else, so no seat can report another's. One writer
+            # per file, the shape that ended the chat_log conflicts on 09-08.
+            #
+            # STALENESS IS RETURNED, NOT HIDDEN. A seat that is not running
+            # stops updating its file, and a three-hour-old percentage rendered
+            # as current is exactly the "faked state" WED-73 forbids. The age is
+            # served and the page decides; the server asserts nothing.
+            out = {}
+            for agent in ("wednesday", "tuesday"):
+                p = ROOT / "0_Brain" / "dashboard" / "data" / f"usage_{agent}.json"
+                if not p.exists():
+                    out[agent] = None
+                    continue
+                try:
+                    d = json.loads(p.read_text())
+                except Exception:
+                    out[agent] = None
+                    continue
+                age = None
+                ts = d.get("ts")
+                if ts:
+                    try:
+                        t = datetime.datetime.strptime(ts, "%Y-%m-%dT%H:%M:%SZ").replace(
+                            tzinfo=datetime.timezone.utc)
+                        age = int((datetime.datetime.now(datetime.timezone.utc) - t).total_seconds())
+                    except Exception:
+                        age = None
+                d["age_seconds"] = age
+                out[agent] = d
+            return self._json(200, out)
         if self.path == "/api/agentmail":
             # Cockpit fleet-feed source (WED-113): the collector's agentmail
             # snapshot — SUBJECTS only (bodies are never collected, never served).

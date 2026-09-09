@@ -101,6 +101,49 @@ if [ -n "$week_pct" ]; then
   else
     week_str="7d:${week_pct_fmt}%"
   fi
+
+  # ── PUBLISH THIS SEAT'S OWN WEEKLY USAGE (Kam, 2026-09-09 12:32) ──────────
+  # "add to the Wednesday toggle so it shows weeks usage % so it's
+  #  'Wednesday - xx%' and same for Tuesday".
+  #
+  # The number is per-SEAT and only the seat can know it: Claude Code hands it
+  # to THIS script on stdin and nowhere else. So each seat writes its own file
+  # and neither ever writes the other's — the same one-writer-per-file shape
+  # that ended the chat_log conflicts on 2026-09-08.
+  #
+  # The timestamp is written so the reader can tell a live figure from a stale
+  # one. A seat that is not running publishes nothing, and the page must show
+  # that as unknown rather than as a last-known number (WED-73: rendered from
+  # written state, never faked).
+  #
+  # Cheap by construction: one small file, atomic tmp+mv, no network, and it
+  # only runs when Claude Code actually supplied a percentage.
+  _wa="${WED_AGENT:-}"
+  if [ -z "$_wa" ]; then
+    case "$(hostname -s 2>/dev/null || hostname 2>/dev/null)" in
+      Kamils-MBP*)        _wa="tuesday"   ;;
+      Kamils-Mac-Studio*) _wa="wednesday" ;;
+      *)                  _wa=""          ;;   # unknown host: publish nothing
+    esac
+  fi
+  case "$_wa" in
+    wednesday|tuesday)
+      # SELF-LOCATING, not a stored absolute: this script lives at
+      # <WEDNESDAY>/2_Project_Files/tools/statusline.sh, so the data dir is two
+      # levels up. A hardcoded /Volumes/... path is the exact thing
+      # learnings/2026-08-25_travel-drive-stale-pointers warns about — it wakes
+      # up wrong on the other machine, and Tuesday's seat is on another machine.
+      _sd=$(CDPATH= cd -- "$(dirname -- "$0")" 2>/dev/null && pwd -P) || _sd=""
+      _ud=""
+      [ -n "$_sd" ] && _ud="$_sd/../../0_Brain/dashboard/data"
+      if [ -d "$_ud" ]; then
+        _uf="$_ud/usage_${_wa}.json"
+        printf '{"agent":"%s","pct":%s,"resets_in":"%s","ts":"%s"}\n' \
+          "$_wa" "$week_pct_fmt" "${countdown:-}" "$(date -u +%Y-%m-%dT%H:%M:%SZ)" \
+          > "$_uf.tmp" 2>/dev/null && mv -f "$_uf.tmp" "$_uf" 2>/dev/null || rm -f "$_uf.tmp" 2>/dev/null
+      fi
+      ;;
+  esac
 fi
 
 # Azure account — cached to keep the status line fast

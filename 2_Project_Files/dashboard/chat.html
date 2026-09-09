@@ -54,6 +54,8 @@ header a:hover { color:var(--text-primary); }
 .ackline.done, .ackline.seen { color:var(--series-3); }
 .ackline.actioning, .ackline.action_requested { color:var(--series-2); }
 #empty { color:var(--text-muted); font-size:13px; padding:24px 0; }
+#agenttoggle .use{font-weight:400;opacity:.75;font-size:.9em;letter-spacing:0}
+#agenttoggle .use.stale{opacity:.45;font-style:italic}
 /* project filter (Kam, 2026-09-07): which projects' Wednesday replies THIS browser shows */
 header #projfilter { display:flex; align-items:center; gap:6px; flex-wrap:wrap;
   padding-top:0; padding-bottom:8px; font-size:11.5px; color:var(--text-muted); }
@@ -121,8 +123,8 @@ body.view-tuesday header h1::after { content:" \00b7 TUESDAY (Datasec)"; color:#
  <button id="stopvoice" title="stop the voice that is speaking now (autoplay stays on)">&#9209; stop</button>
  <span id="live">&#9675; connecting&hellip;</span>
  <span id="agenttoggle" role="group" aria-label="which agent's view is live">
-  <button id="ag-wednesday" type="button" title="Wednesday — Secuura and all general work">WEDNESDAY</button>
-  <button id="ag-tuesday" type="button" title="Tuesday — all Datasec projects">TUESDAY</button>
+  <button id="ag-wednesday" type="button" title="Wednesday — Secuura and all general work">WEDNESDAY<span class="use" id="use-wednesday"></span></button>
+  <button id="ag-tuesday" type="button" title="Tuesday — all Datasec projects">TUESDAY<span class="use" id="use-tuesday"></span></button>
  </span></div>
  <div class="col" id="projfilter"></div></header>
 <div id="log"><div class="col" id="msgs"><p id="empty">no messages yet</p></div></div>
@@ -189,6 +191,58 @@ function applyAgentView() {
   const box = document.getElementById("text");
   if (box) box.placeholder = activeAgent === "tuesday" ? "message Tuesday (Datasec)\u2026" : "message Wednesday\u2026";
 }
+// ── weekly plan usage on the agent chips (Kam, 2026-09-09 12:32) ─────────
+// "add to the Wednesday toggle so it shows weeks usage % so its
+//  'Wednesday - xx%' and same for Tuesday".
+//
+// Each seat's statusline.sh publishes ONLY its own usage_<agent>.json — the
+// figure reaches that script on stdin from Claude Code and exists nowhere
+// else, so no seat can report another's.
+//
+// HONESTY (WED-73: rendered from written state, never faked). A seat that is
+// not running stops updating its file, so a percentage can only ever be as
+// fresh as its seat. Three states, and the difference is visible rather than
+// smoothed away:
+//   live   (< 15 min)  -> "— 76%"        the seat is running and this is now
+//   stale  (>= 15 min) -> "— 76% (2h)"   last known, with its age, dimmed
+//   none               -> ""             nothing written; claim nothing
+// A stale figure is shown WITH ITS AGE rather than hidden, because "Tuesday
+// was at 76% two hours ago" is useful and "Tuesday is at 76%" would be a lie.
+const USE_STALE_S = 900;
+function ageLabel(sec) {
+  if (sec == null) return "";
+  if (sec < 3600) return Math.max(1, Math.round(sec / 60)) + "m";
+  if (sec < 86400) return Math.round(sec / 3600) + "h";
+  return Math.round(sec / 86400) + "d";
+}
+function renderUsage(data) {
+  ["wednesday", "tuesday"].forEach(function (a) {
+    const el = document.getElementById("use-" + a);
+    if (!el) return;
+    const d = data && data[a];
+    if (!d || typeof d.pct !== "number") {   // nothing written — say nothing
+      el.textContent = ""; el.className = "use"; el.title = "no usage published by this seat";
+      return;
+    }
+    const age = d.age_seconds;
+    const stale = (age == null) || (age >= USE_STALE_S);
+    el.textContent = " \u2014 " + d.pct + "%" + (stale ? " (" + (ageLabel(age) || "?") + ")" : "");
+    el.className = stale ? "use stale" : "use";
+    el.title = stale
+      ? "last published " + (ageLabel(age) || "unknown") + " ago — this seat may not be running"
+      : "weekly plan usage, published by the " + a + " seat" +
+        (d.resets_in ? " · renews in " + d.resets_in : "");
+  });
+}
+async function pollUsage() {
+  try {
+    const r = await fetch("/api/usage");
+    if (r.ok) renderUsage(await r.json());
+  } catch (e) { /* leave the last render alone rather than blanking on a blip */ }
+}
+pollUsage();
+setInterval(pollUsage, 60000);
+
 function setAgent(a) {
   if (a !== "wednesday" && a !== "tuesday") return;
   activeAgent = a;
