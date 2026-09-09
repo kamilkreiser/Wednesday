@@ -1,111 +1,55 @@
 ---
 date: 2026-09-10
 type: pickup
-scope: DATASEC ONLY — Tuesday, on Kamils-Mac-mini. Secuura and general work are Wednesday's, on the Studio.
-source: written at Tuesday s3's rotation, 2026-09-10 ~09:0x AEST, ctx 81%
+scope: DATASEC ONLY — Tuesday, on Kamils-Mac-mini. Secuura and general are Wednesday's, on the Studio.
+source: written at s4's 50% checkpoint, 2026-09-10 ~09:40 AEST, ctx 49%
 status: live
-supersede: replace WHOLESALE at the next pickup; never append. It replaced the s3-midsession pickup.
+supersede: replace WHOLESALE at the next pickup; never append. It replaced the s3 pickup.
 ---
 
-# NEXT PICKUP — Tuesday, after s3. NOTHING IS RUNNING. Kam owes TWO CLICKS and then you run the NAS sync.
+# NEXT PICKUP — Tuesday, s4. NexusAI IS RUNNING. Kam owes two clicks. Nothing is on fire.
 
-**`2_Project_Files/tools/kam_rulings_today.sh` before writing anything** — and note it CANNOT see messages
-Kam types into a terminal pane (s3 finding). **Rotation band 80–90; 70% is a checkpoint only.**
+**`2_Project_Files/tools/kam_rulings_today.sh` before writing anything.** Rotation band **80–90**; 70% is a checkpoint only.
 
-## 🔴 THE TWO THINGS KAM OWES, AND WHAT YOU DO THE MOMENT HE SAYS DONE
+## 🔴 WITH KAM — two items, and only the first blocks me
 
-He was given both, action-first, with the exact strings. **He has not confirmed either yet.**
+1. **THE NAS, unchanged since 09:00.** Finder ⌘K → `smb://KAMILADMIN@192.168.20.221/Development`, password, **tick "Remember this password in my keychain"** · then **System Settings → Privacy & Security → Full Disk Access → add Terminal.** Both required, they fail in that order, and #2 is what killed the 23:00 run (exit 126, TCC). ✅ **PROMISED HIM: the moment he says done, run `/Volumes/KK_T9_External_HDD/!SYNC FILES/devnas-sync.sh` BY HAND, watch it, confirm before tonight.** First run is long; >50-file deletion alarm; deletions recoverable from `~/.unison/backup`. **He said at 08:58 he will enter the password when asked — so ASK, do not wait.**
+2. **RD-104, open since 09-07** — he ruled `youcheck` and the two answers never came. `github.com/datasecau/Reporting_Dashboard_Au/settings/environments` and `.../settings/variables/actions`. **Not blocking: nothing in S49's queue deploys.**
 
-1. **Finder ⌘K → `smb://KAMILADMIN@192.168.20.221/Development`**, password, and **tick "Remember this
-   password in my keychain"**. The nightly job reads the keychain and cannot prompt at 23:00.
-2. **System Settings → Privacy & Security → Full Disk Access → add Terminal.**
+## 🟢 NexusAI S49 — LIVE in pane `%16`, and it is good
 
-🔴 **BOTH ARE REQUIRED AND THEY FAIL IN THAT ORDER.** #2 lets a scheduled job read the T9 at all; #1 lets it
-reach the NAS. **Last night it died on #2 before reaching #1.**
-✅ **YOU PROMISED HIM: once both are done, run the sync BY HAND, watch it, and confirm it works before
-tonight rather than finding out tomorrow.** Engine: `/Volumes/KK_T9_External_HDD/!SYNC FILES/devnas-sync.sh`
-(present, executable, profile beside it, unison installed, NAS pings). First run is long; it carries a
->50-file deletion alarm and deletions are recoverable from `~/.unison/backup`.
+Briefed + answered + addendum'd, all three verified at `datasec-nexusai@`. Working in its **own worktree** `/Volumes/KK_T9_External_HDD/!CODING/Datasec/NexusAI/wt-s49` @ `cd2b543`, 0 status entries. **Queue, all Kam-authorised or S48-measured:**
+1. **RD-369 round 3** (Kam ruled `round3` 09-09 12:09) — guard only: remove the distance window from BOTH paths, make the certifying cell able to fail. 🔴 **He was offered `wider` (round 3 PLUS removing the RD-385 files) and DECLINED. Detection only — do not let a successor widen it.** Cap: **no round 4 without Kam.**
+2. **RD-363** — forward-merge `b0dec96f` (Key Vault purge protection). 🔴 **The TICKET is SEC-07/08/11, three legs; the branch closes ONE. It must NOT close on one leg.** Tier-1 gate, merge on my GO.
+3. **`PRIVACY.md:21`** — remove the HP URL, invent no replacement (the domain is Kam's). It found **no RD ticket mentions `hpauthsuite`** — it is filing one.
 
-## 🔴 MEASURED LAST NIGHT: THE NAS BACKUP DID NOT RUN
+**Its mail now comes to `tuesday-agent@`** (addendum sent + verified). **Inbound from us still reads `[Wednesday -> …]` — a hardcoded literal in `send_brief.sh`; trust the `from` header.**
 
-`com.tuesday.nassync` fired 23:00, **runs=1, last exit code 126**, stderr: *"Operation not permitted"* on
-`2_Project_Files/scheduler/nas_sync.sh`. **macOS blocks LaunchAgents from reading the external volume on
-this machine.** The script is `rwxr-xr-x` and runs fine by hand — it is TCC, not file permissions.
-**My own `com.tuesday.panelsync` plist proved it independently (also 126) and is QUARANTINED at
-`~/Library/LaunchAgents/_quarantine_com.tuesday.panelsync.plist.disabled`, copy in
-`0_Brain/reference/2026-09-09_launchd-external-volume/`. Re-arm it the moment Kam grants #2.**
-⚠ Wednesday's related trap, avoided: **a plist with out/err paths under `/Volumes` is refused wholesale with
-EX_CONFIG 78 and never runs.** Keep log paths in `~/Library/Logs/`.
+## ⚠ TRAPS — s3's still hold. These are s4's.
 
-## 🟢 KAM'S PAGE — the thing to check FIRST at every boot
+1. 🔴 **NEVER `git pull --rebase --autostash` in this tree.** One did, this session, and cascaded into FOUR rounds of conflict surgery, the last landing on `chat_tuesday.json` — the file holding my replies to Kam. **Commit first, then `git pull --rebase --no-autostash`.** Repair shape that worked: union both sides on `(ts, sha256(text)[:12])` with assertions made BEFORE writing.
+2. 🔴 **Stop putting `0_Brain/dashboard/data/` in your own commits.** The `panel_sync` loop owns it and commits every 60s; every commit of mine that touched it was a race I chose to enter. **Four collector-file conflicts came from exactly that.** Let the loop push it.
+3. **`panel_sync.log` says `(0 paths)` when ONE path is dirty** — `printf '%s' | wc -l` counts newlines. **Do not go hunting a guard that fires on an empty set; I nearly mailed that as a cause.** Reported to Wednesday; her fix, her file.
+4. **`cockpit.sh launch` is still dead here** (registry pins DevMASTER; the travel fallback keys on the tree name `WEDNESDAY`). **Use `cockpit.sh add "<name>" 'bash "<real T9 path>"'` — same `add_pane`.** Worked cleanly for `%16`.
+5. **Empty prompt ≠ turn ended.** The spinner and the transcript mtime are the liveness discriminators. Detector (`pane_prompt_check.sh`) FIRST, always.
+6. **`board_count.sh` cannot page a Jira board** — it refuses (correctly) with "MORE PAGES EXIST". Page it yourself via `/rest/api/3/search/jql` with `nextPageToken` until `isLast`. **Datasec Jira: 543 open, RD = 296, all assigned to Kam.**
 
-1. 🔴 **The panel server must run from THIS tree.** On 2026-09-09 it was serving the **abandoned
-   `/Volumes/KK_T9_External_HDD/WEDNESDAY/`** tree, frozen at 11:29, and **Kam read a dead page for six
-   hours while this seat reported success.** Check: `lsof -a -p $(lsof -nP -iTCP:47787 -sTCP:LISTEN -t) -d cwd`
-   must show `TUESDAY/2_Project_Files/dashboard`. Start with `2_Project_Files/dashboard/serve.sh`.
-2. 🔴 **AFTER EVERY `chat_reply.sh`: `curl -s http://127.0.0.1:47787/api/chatlog` and assert your message is
-   the newest row.** The `chat_streams: … N entries` line is a receipt for the WRITE, never the DISPLAY.
-3. **`panel_sync.sh loop` keeps his page current every 60s** — pull, regen, push. **Running detached
-   (`tty ??`) so it survives rotation; VERIFY it at boot** (`pgrep -f "panel_sync.sh loop"`) and restart with
-   `nohup bash 2_Project_Files/tools/panel_sync.sh loop &` if absent. Log:
-   `2_Project_Files/tools/logs/panel_sync.log`.
-   ⚠ **It skipped 782 of 790 cycles overnight** because a bare dirty-tree guard always trips — the dashboard
-   collector rewrites its own data every minute. **Fixed: it commits `0_Brain/dashboard/data/` churn and only
-   skips on dirt OUTSIDE it. Never stashes.** A guard that always fires is a mechanism that never runs.
-4. **Kam reads the STUDIO page** (his ruling: one page governing both agents). Your replies reach him via
-   push → her pull. Symmetric 60s timer agreed with her; hers is `2_Project_Files/tools/chat_sync.sh`.
+## 🔵 OPEN, NOT MINE TO FIX
 
-## ✅ DELIVERED AND CLOSED — nothing outstanding on any of it
-
-- **Both registers emailed to Kam 2026-09-10 08:00Z and verified at the destination** (recipient, sender,
-  non-null preview, both byte sizes): `13A_HPAM_…` (210) and `13B_Datasec_Products_…` (132) = **342**.
-  Title page + revision history, clickable TOC, page breaks per section, MyEmpire shape, **every finding
-  BLUF-first**. **Nine checks each against the pre-round-2 files as controls; 18/18 pass.**
-  🔴 **The TOC was EMPTY in the 16:37 copies** — a pandoc field with no cached result, blank outside Word.
-  Fixed; 36/36 and 32/32 anchors resolve against 0 before.
-- **June register scrubbed and re-issued**, independently verified: 6 real `key=<literal>` disclosures in the
-  control, **1 in the shipped file and that one is a FALSE POSITIVE** (a remediation code example). Nothing
-  weakened — 31 vectors, 45 severity lines, 686 citations identical either side. **The disclosure was WORSE
-  than my brief said: 10 values, 19 lines, FIVE findings.** The brief's own *re-derive, don't trust my count*
-  hedge caught it, for the second time that day.
-- **NexusAI marketplace readiness delivered** — `NexusAI/MARKETPLACE-READINESS-2026-09-09.md`. **One decision
-  is Kam's: the project is preparing an Azure Application AND a SaaS offer at once.** Plus a privacy-URL
-  defect (the published URL is HP's policy), RD-363's Key Vault hardening never landed on `main`, and RD-385
-  shipping internal docs in the image. **Card `nexusai-main-tree-is-a-stale-snapshot` open, rec `investigate`.**
-
-## ⚠ TRAPS — s2's still hold; these are s3's
-
-1. **`wake_watch.sh` is FIXED three ways** (all mine, all pushed): polls the seat's own inbox; never suppresses
-   a Kam panel message as "own outbound"; and **matches the ADDRESSEE (`[Kam -> Tuesday]`) not the class** —
-   Wednesday caught that last one, because SHE relays `[Kam -> Tuesday]` copies and a class-only filter woke
-   her about her own sending. **That was my own 2026-08-13 shared-bus rule, broken by me.**
-2. **Kam's messages carry a `view` field naming the tab** — `tuesday` or `wednesday` — and it is CORRECT.
-   **Nothing filters on it yet.** Recommended to Wednesday. Until then read every message and sort by `view`.
-3. **The panel delivers Kam's messages into your OWN inbox from your OWN address**, labels `['sent']`.
-4. **Three ghosts at agent prompts in one session**, each offering the exact held action (`yes, restore it` ·
-   `file the five recommended tickets` · `Send the revised registers to Kam`). **Detector first, every time.**
-5. **`send_brief.sh` REFUSES a project absent from `inbox_routing.conf`** — Datasec/Security Review is not in
-   it; that project launches by wrapper + prompt file, never by mail.
-6. **`cockpit.sh launch` is dead here** (registry pins `/Volumes/DevMASTER`; travel fallback keyed on the tree
-   name `WEDNESDAY`). **Use `cockpit.sh add "<name>" 'bash "<real T9 path>"'` — same `add_pane`, identical pane.**
-7. **Brief gates are strict and were all RIGHT:** `PROVENANCE:` needs its colon · `SELF-CHECK:` needs a
-   GENERATED timestamp · a missing `RULED BY KAM` section hid three real undelivered NexusAI rulings.
+- **Card `fleet-comms-names-one-coordinator`** on Kam's queue (default HOLD): the workspace `CLAUDE.md` still tells every project to wrap to `wednesday-agent@`. **Measured: zero routing tags in the Datasec launchers — the instruction comes only from his file.** Until he rules, tell each Datasec seat by hand, in its brief.
+- **`panel_sync` outbound gating** — Wednesday is building it (her first `ff-only` proposal was retracted by her own measurement: `--ff-only` refuses on divergence, which is our normal state). **I owe her a red-proof on the Tuesday half when the diff lands.** Do not build it here.
+- **Card `nexusai-main-tree-is-a-stale-snapshot`** still open. `2_Project_Files/` is 33 files / +248 −1230 off `cd2b543`, mtimes older than the commits above them, mechanism unexplained. **S49 re-derived it exactly. Leave it.**
 
 ## STANDING
 
 🔴 **EVERY WRAP: `git add 0_Brain/dashboard/data/usage_tuesday.json`.**
 **Scope (Kam):** *"you will work on ONLY datasec projects unless otherwise instructed."*
-**Confirm EVERY chat-board instruction as received and being acted on, before the work** (his standing rule).
-**Cross-seat mail is COORDINATION ONLY. FOUND / TESTED / HOW. Names, not pronouns. Never delete — quarantine.**
+**Confirm EVERY chat-board instruction as received, before the work.** **Cross-seat mail is COORDINATION ONLY.** **Names, not pronouns. Never delete — quarantine.**
 🔴 **DO NOT run the wrap's vault step** (`end-of-session.md:50` is `git add -A`; the vault holds Secuura paths).
+**After every `chat_reply.sh`: curl `/api/chatlog` and assert your message is the newest row.**
+⚠ **Rule 3c is OVERDUE on `_ledger_laptop_datasec.md`** — 218 KB, rows back to 09-07. Archive 09-07-and-older to `_ledger_archive.md` **as a MOVE, asserting row conservation both sides.**
 
-## WHAT s3 WOULD SAY IF IT COULD SAY ONE THING
+## WHAT s4 WOULD SAY IF IT COULD SAY ONE THING
 
-**Five mechanisms failed today and every one of them kept answering while it was broken** — a page server on
-the wrong tree, a watcher on the wrong mailbox, a filter eating the principal's own messages, a scheduled job
-refused by the OS, and a guard of mine that tripped 782 times out of 790. **None errored. All five looked
-healthy from the outside, and four of the five I had to be TOLD about — by Kam or by Wednesday.**
-The one I caught myself, I caught by asking what a message actually looks like in an inbox rather than
-reasoning about where it should have gone. **A thing that fails loudly gets fixed. A thing that keeps
-answering gets trusted, and it is trusted for exactly as long as nobody measures it.**
+**Three mechanisms caught me today and every one of them was right: the brief gate refused work finished two days earlier, its self-check found two contradictions my own renumbering had made, and the prior-ruling gate made me read a ruling's scope instead of its subject.** **I caught none of the three myself.**
+**And the thing I did worst was a CORRECTION: I retracted a true finding two minutes after the counterpart confirmed it, because a later pull had the rows and I read the effect of her fix as evidence about the cause.** Then I agreed to a mechanism one `rev-list` would have killed. **Both are the same shape — I generate causes faster than I measure them, and the correction is where nobody re-checks me.** **The cheapest falsifying measurement, named out loud before agreeing, is the whole fix.**
