@@ -6772,5 +6772,33 @@
   "prior_rulings_overridden": [
    "2026-09-08 12:50"
   ]
+ },
+ {
+  "id": "secreview-estate-wide-scoring-pass-including-june",
+  "client_project": "Datasec/Security Review",
+  "title": "48 of 86 scored rows disagree with their own CVSS vector — three of them in the June baseline you signed off",
+  "bluf": "OVERRIDE REASON, as the measurement: the gate matched two of Kam's messages and BOTH ARE SECUURA — 2026-09-06 09:42 on Platform K ticket assignment and aggregation, and 2026-09-08 09:57 ruling secuura-793's advisory expiry. Neither rules on Datasec CVSS scoring or on the June security-review baseline; the match is on generic security/triage vocabulary across a client boundary. Different client, different artefact, subject untouched by either. MEASURED by the verification agent: of 86 rows carrying both a score and a vector, 48 disagree with themselves and 16 cross a band boundary. Three would move High to Critical and THREE OF THOSE ARE JUNE ROWS (F-07, F-10, F-22) from the baseline signed off months ago; the current register's D-01 inherited June F-07's error honestly, by copying its vector and its wrong number. THE AGENT'S OWN STRONGEST RECOMMENDATION IS DO NOT ADOPT THE COMPUTED NUMBERS, and it is right: H-D1 is the single row whose vector was re-derived from source today, and the VECTOR ITSELF was wrong — it implied Critical 9.6, and correcting one metric from source gave High 8.6, moving the row DOWN. I-D2 looks like the same risk inverted, its vector claiming network reach for credentials sitting in Terraform state. Computing from recorded vectors swaps an unverified number for a differently unverified one. The method is: re-derive each vector at source, THEN compute. ALREADY RUNNING AND NOT YOURS TO RULE: round 2 over this register's 90 unverified rows on that corrected method, inside the two-round cap. WHY THIS CARD EXISTS: extending it into the JUNE BASELINE re-opens a signed-off deliverable, which is a scope change and your signature class — and it is the half that could raise the estate Critical count rather than lower it. No live environment needed; not blocked on the tenant question.",
+  "default_action": "HOLD on June. Round 2 over the current register's 90 rows proceeds either way on the corrected method — nothing waits on this ruling except the June half.",
+  "options": [
+   {
+    "key": "extend",
+    "label": "Extend the scoring pass into the June baseline too",
+    "detail": "One method, one estate, one consistent set of numbers. Cost: it re-opens a signed-off deliverable, and if F-07, F-10 and F-22 hold at Critical the estate Critical count goes UP, which is a conversation with whoever received the June report. Tuesday recommends it — the errors are real, they are already inherited into the current register through D-01, and us finding them is strictly better than a customer finding them."
+   },
+   {
+    "key": "current-only",
+    "label": "Score only the current register; leave June alone",
+    "detail": "Cheaper, touches nothing signed off. Cost: the register keeps inheriting June's arithmetic through rows like D-01, the two documents disagree on method, and the June rows stay wrong in a deliverable somebody may still be relying on."
+   }
+  ],
+  "recommended": "extend",
+  "ts": "2026-09-09T11:24:09.689681+10:00",
+  "status": "open",
+  "ruled_choice": null,
+  "ruled_ts": null,
+  "prior_rulings_overridden": [
+   "2026-09-06 09:42",
+   "2026-09-08 09:57"
+  ]
  }
 ]
