@@ -38,6 +38,77 @@ if [ -z "$UTC_MIN" ]; then
   echo "chat_push: unparseable ts '$TS' — tapping without watermark" >&2
 fi
 
+# ── DELIVER TO TUESDAY WHEN THE MESSAGE WAS ADDRESSED TO HER ────────────────
+# Kam, 2026-09-09 16:08: "I'm sending instructions to Tuesday using the Tuesday
+# tab, and it looks like it's coming to you but not necessarily to Tuesday."
+#
+# MEASURED, and he was right: all five of his 15:37-16:07 messages carried
+# view='tuesday' in chat_kam.json. The panel STORES the tab; this script IGNORED
+# it and tapped Wednesday's pane unconditionally. Written 2026-08-17 when there
+# was one agent; the 09-08 split made it wrong with nothing failing.
+#
+# THE DEEPER HALF: Tuesday runs on ANOTHER MACHINE, so her pane is not in this
+# tmux at all — a tap could never have reached her however well it was routed.
+# EMAIL is the only cross-machine channel this fleet has, and it is the one both
+# seats have used all day. So a tuesday-addressed message is MAILED to her inbox.
+#
+# WHAT DELIBERATELY DOES NOT CHANGE:
+#  · Wednesday is still tapped for EVERY message, including Tuesday's. That is
+#    not noise — Kam's conversations with agents are the coordinator's
+#    supervision surface (2026-08-10), and it keeps the relay-by-hand that has
+#    been the only working path today as a BACKSTOP behind the new direct one.
+#  · The watermark still advances only on a delivered Wednesday tap. Unchanged.
+#  · A missing view, 'wednesday' or 'both' behaves exactly as before.
+# Best-effort and non-blocking by construction: this runs detached from the HTTP
+# response, every call is time-bounded, and a mail failure is LOGGED, never
+# raised — a delivery problem must not cost Kam his tap.
+VIEW="$(printf '%s' "${2:-}" | tr '[:upper:]' '[:lower:]')"
+PUSHLOG="$PROJECT_DIR/2_Project_Files/logs/chat_push.log"
+mkdir -p "$(dirname "$PUSHLOG")" 2>/dev/null || PUSHLOG=/dev/null
+case "$VIEW" in
+  tuesday|both)
+    ENVF="$PROJECT_DIR/4_Credentials/.env"
+    KEY="$(sed -n 's/^[[:space:]]*AGENTMAIL_API_KEY[[:space:]]*=[[:space:]]*//p' "$ENVF" 2>/dev/null | tr -d '"'"'"' \r' | head -1)"
+    if [ -z "$KEY" ]; then
+      printf '%s tuesday-push: AGENTMAIL_API_KEY not readable at %s — NOT delivered\n' \
+        "$(date -u +%Y-%m-%dT%H:%M:%SZ)" "$ENVF" >> "$PUSHLOG" 2>/dev/null
+    else
+      RCPT="$(awk -F'|' '$1=="Tuesday"{print $2; exit}' "$PROJECT_DIR/2_Project_Files/fleet/inbox_routing.conf" 2>/dev/null)"
+      if [ -z "$RCPT" ]; then
+        printf '%s tuesday-push: no Tuesday row in inbox_routing.conf — NOT delivered\n' \
+          "$(date -u +%Y-%m-%dT%H:%M:%SZ)" >> "$PUSHLOG" 2>/dev/null
+      else
+        BODY="$(TS="$TS" PD="$PROJECT_DIR" python3 - <<'PYEOF' 2>>"$PUSHLOG"
+import json, os
+ts = os.environ["TS"]
+p = os.path.join(os.environ["PD"], "0_Brain/dashboard/data/chat_kam.json")
+try:
+    entries = json.load(open(p))
+except Exception:
+    entries = []
+hit = next((e for e in reversed(entries) if e.get("ts") == ts), None)
+text = (hit or {}).get("text", "")
+print(json.dumps(
+    "Kam addressed this to you on the Tuesday tab of the dashboard panel at "
+    + ts + ". Delivered by the panel itself, not relayed by Wednesday.\n\n"
+    "HIS WORDS, VERBATIM:\n\n" + text +
+    "\n\n(If this is empty, the panel could not read the message back — open "
+    "0_Brain/dashboard/data/chat_kam.json at that timestamp.)"))
+PYEOF
+)"
+        [ -n "$BODY" ] || BODY='"(panel could not compose the body — read chat_kam.json)"'
+        CODE="$(curl -s -o /dev/null -w '%{http_code}' --max-time 20 -X POST \
+          "https://api.agentmail.to/v0/inboxes/${RCPT}/messages/send" \
+          -H "Authorization: Bearer $KEY" -H "Content-Type: application/json" \
+          -d "{\"to\":[\"${RCPT}\"],\"subject\":\"[Kam -> Tuesday] panel message ${TS}\",\"text\":${BODY}}" \
+          2>>"$PUSHLOG")"
+        printf '%s tuesday-push: %s -> HTTP %s\n' \
+          "$(date -u +%Y-%m-%dT%H:%M:%SZ)" "$RCPT" "${CODE:-none}" >> "$PUSHLOG" 2>/dev/null
+      fi
+    fi
+    ;;
+esac
+
 if "$SELF_DIR/tap_wednesday.sh" "[chat-push] New chat message from Kam at $TS — read the dashboard chat now."; then
   if [ -n "$UTC_MIN" ]; then
     mkdir -p "$STATE_DIR"

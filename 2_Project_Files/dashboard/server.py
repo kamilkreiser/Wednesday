@@ -481,8 +481,13 @@ class Handler(SimpleHTTPRequestHandler):
                 # once is enough"). Failed/log-only pushes leave the watermark
                 # untouched — the backstop still covers them.
                 try:
+                    # The VIEW is passed through (2026-09-09). It was stored and
+                    # never delivered on: Kam's Tuesday-tab messages all tapped
+                    # Wednesday. chat_push.sh mails Tuesday when it is hers, and
+                    # still taps Wednesday either way as the supervision backstop.
                     subprocess.Popen(
-                        [str(ROOT / "2_Project_Files" / "tools" / "chat_push.sh"), now],
+                        [str(ROOT / "2_Project_Files" / "tools" / "chat_push.sh"), now,
+                         (data.get("view") or "").strip()],
                         stdout=subprocess.DEVNULL, start_new_session=True)
                 except OSError as e:
                     import sys as _sys
