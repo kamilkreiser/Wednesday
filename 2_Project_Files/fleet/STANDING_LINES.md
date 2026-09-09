@@ -180,3 +180,32 @@ about the wrong repository state entirely.
 5. **This is a FALSE MEASUREMENT, not a false absence** — the command ran, succeeded, and answered a
    different question than the one asked. It belongs beside the census rules: *complete over what?*
    Here: *changed relative to what?*
+
+---
+
+## A TAMPER'S RESTORE NEEDS A UNIQUE ANCHOR — "the line I just changed" is not automatically one
+
+**Why this exists.** On 2026-09-09 a Secuura seat red-proofed a guard by reverting `auth.ts:826` to
+`await userRepo.updateUser(user.id, { passwordHash: newHash });`. **That exact string already exists
+verbatim at `auth.ts:539`** — the opportunistic login rehash. Its restore asserted `count == 1`, the
+assertion **failed**, and it restored by line number with the content checked first, verifying 539
+untouched.
+
+**What a silent wrong-occurrence restore would have done:** left the tamper in a DIFFERENT function,
+in a file the seat believed it had restored, **and passed every test in the run** — because the tests
+were pointed at the line it meant to tamper, not the one it actually left broken.
+
+**The rules:**
+
+1. **Before tampering, prove your anchor is unique** — `grep -c` the exact string in the file. If the
+   count is not 1, tamper by line number with the surrounding content asserted, or pick a longer
+   anchor that is unique.
+2. **Assert the restore, do not perform it.** `count == 1` on the way back, plus a **sha256 of the
+   whole file compared to the pre-tamper hash**. A restore you did not verify is a claim.
+3. **`git checkout` is not the answer here** — it reverts more than your tamper if anything else in
+   the tree moved, which is why this fleet restores by content and hash instead.
+4. **The failure is silent by construction:** the tests you then run are aimed at the line you MEANT
+   to change, so a tamper left in a sibling function produces a green run and a corrupted file. **The
+   uniqueness check is the only thing between you and that.**
+5. **Generalises past tampers** to any scripted edit-then-revert: sed on a config, a stubbed
+   credential, a temporarily disabled guard, a patched fixture.
