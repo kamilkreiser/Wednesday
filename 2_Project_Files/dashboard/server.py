@@ -457,7 +457,10 @@ class Handler(SimpleHTTPRequestHandler):
                                         "type": (data.get("type") or "")[:100],
                                         "bytes": len(raw)})
             if self.path == "/api/chat":
-                text = (data.get("text") or "").strip()[:2000]
+                # 2026-09-10: was [:2000]. Kam pasted a PR-triage document for review and it arrived
+                # cut mid-table; the input box capped it first and this line cut it again.
+                # Still bounded — a runaway paste must not be able to blow up the store.
+                text = (data.get("text") or "").strip()[:100000]
                 atts = data.get("attachments")
                 atts = atts if isinstance(atts, list) else []
                 # A drop with no typed message is still a message — the FILE is the

@@ -66,10 +66,15 @@ header #projfilter { display:flex; align-items:center; gap:6px; flex-wrap:wrap;
 .msg .seat { font-size:10.5px; color:var(--text-muted); margin-left:6px;
   border:1px solid var(--line); border-radius:4px; padding:0 4px; }
 footer { flex:none; border-top:1px solid var(--line); background:var(--surface-1); }
-footer .col { display:flex; gap:8px; padding-top:10px; padding-bottom:
+footer .col { display:flex; gap:8px; align-items:flex-end; padding-top:10px; padding-bottom:
   calc(12px + env(safe-area-inset-bottom, 0px)); }
 #text { flex:1; background:var(--surface-2); border:1px solid var(--line);
-  border-radius:8px; color:var(--text-primary); font:inherit; padding:8px 12px; }
+  border-radius:8px; color:var(--text-primary); font:inherit; padding:8px 12px;
+  /* 2026-09-10: was <input type=text> — it FLATTENED every newline (measured: 0 of
+     Kam's 105 messages contained one) and capped at 2000 chars, so a pasted document
+     arrived as a truncated single line. Textarea, auto-growing, capped at 40vh. */
+  resize:vertical; min-height:38px; max-height:40vh; line-height:1.45;
+  overflow-y:auto; white-space:pre-wrap; }
 #text:focus { outline:none; border-color:var(--series-1); }
 #send { background:var(--surface-2); color:var(--text-secondary); border:1px solid var(--line);
   border-radius:8px; font:inherit; font-size:14px; padding:8px 16px; cursor:pointer; }
@@ -130,7 +135,7 @@ body.view-tuesday header h1::after { content:" \00b7 TUESDAY (Datasec)"; color:#
 <div id="log"><div class="col" id="msgs"><p id="empty">no messages yet</p></div></div>
   <div id="pending"></div>
 <footer><div class="col">
- <input id="text" type="text" maxlength="2000" placeholder="message Wednesday&hellip;" autocomplete="off">
+ <textarea id="text" rows="1" maxlength="100000" placeholder="message Wednesday&hellip;" autocomplete="off"></textarea>
  <button id="send">send</button></div></footer>
 <script>
 "use strict";
@@ -496,11 +501,19 @@ async function doSend() {
     const r = await (await fetch("/api/chat", {
       method: "POST", headers: {"Content-Type": "application/json"},
       body: JSON.stringify({text: t, view: activeAgent})})).json();
-    if (r.ok) { textEl.value = ""; await poll(true); log.scrollTop = log.scrollHeight; }
+    if (r.ok) { textEl.value = ""; textEl.style.height = "auto"; await poll(true); log.scrollTop = log.scrollHeight; }
   } finally { sendBtn.disabled = false; textEl.focus(); }
 }
 sendBtn.addEventListener("click", doSend);
-textEl.addEventListener("keydown", e => { if (e.key === "Enter") doSend(); });
+textEl.addEventListener("keydown", e => {
+  // Enter still SENDS — that is the habit and it is not being changed.
+  // Shift+Enter is the new escape hatch for a deliberate newline.
+  if (e.key === "Enter" && !e.shiftKey) { e.preventDefault(); doSend(); }
+});
+function autogrow() { textEl.style.height = "auto";
+  textEl.style.height = Math.min(textEl.scrollHeight, window.innerHeight * 0.4) + "px"; }
+textEl.addEventListener("input", autogrow);
+textEl.addEventListener("paste", () => setTimeout(autogrow, 0));
 poll(true);
 setInterval(poll, 3000);
 </script></body></html>
