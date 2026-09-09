@@ -80,6 +80,18 @@ head -1 "$PROMPT_FILE" | grep -q 'ultrathink' || {
 grep -qF "$BRIEF" "$PROMPT_FILE" || {
   echo "REFUSING: prompt does not name the brief path — the agent would boot blind" >&2; exit 9; }
 
+# ADDED 2026-09-09 AFTER THIS GATE'S OWN FIRST RUN LOST ITS VERDICT TO A PANE.
+# The QA agent is WRITE-ONLY in the comms fabric: it has no inbox, and its pane is an
+# alternate screen holding ~19 lines with NO scrollback. This launcher's first run
+# produced a 13 KB tier-1 verdict with a BLOCKER in it, and the prompt never told the
+# agent where to SEND it — so the only copy was recoverable solely from the agent's
+# session transcript. A gate that cannot report is a gate that did not run.
+# (The working ks963_913 prompt carried this line and this one had simply omitted it.)
+grep -qi 'MAIL YOUR VERDICT' "$PROMPT_FILE" || {
+  echo "REFUSING: prompt does not tell the agent to MAIL its verdict — its pane has no" >&2
+  echo "scrollback and it has no inbox, so an unmailed verdict is lost at the pane close" >&2
+  exit 12; }
+
 if [ "${1:-}" = "--check" ]; then
   echo "all guards pass:"
   echo "  head $HEAD_SHA present at $BRANCH on origin"
@@ -87,6 +99,7 @@ if [ "${1:-}" = "--check" ]; then
   echo "  brief, prompt, QA project and repo all present"
   echo "  brief and prompt agree on TIER 1"
   echo "  prompt opens with the thinking directive and names the brief by path"
+  echo "  prompt tells the agent to MAIL its verdict — it has no inbox and no scrollback"
   exit 0
 fi
 
