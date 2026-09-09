@@ -1,0 +1,573 @@
+#!/bin/bash
+# send_brief.sh — the ONLY path by which Wednesday sends a brief to a project agent.
+#
+# WHY THIS EXISTS (enforcement, not advice): ledger w=3, 2026-08-06.
+# Three times now a load-bearing fact reached a brief without being read from
+# the authoritative source — Peter's to-do type (08-04), the Tokenomics tenant
+# pointer (08-04), and the Lead_Bot handoff DIRECTION (08-06, which was
+# backwards; the receiving project caught it). The rule "validate every fact"
+# was already written down twice and still did not fire. So it stops being a
+# rule and becomes a gate: a brief without per-fact provenance does not send.
+#
+# Usage:
+#   send_brief.sh --to "<Client>/<Project>" --subject "<topic>" --body-file <path>
+#   send_brief.sh --to ... --subject ... --body-file ... --kind answer   (ANSWER/ruling relay: provenance optional)
+#   send_brief.sh --to ... --subject-file <path> --body-file ...          (subject = FIRST LINE of <path>;
+#                                                                          alternative to --subject, never both)
+#
+# Exit codes: 0 sent · 1 refused (provenance missing/malformed) · 2 usage/env error
+set -u
+
+SELF_DIR="$(cd -P "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+PROJECT_DIR="$(cd -P "$SELF_DIR/../.." && pwd)"
+ENV_FILE="$PROJECT_DIR/4_Credentials/.env"
+BUS="coagent@agentmail.to"
+ROUTING="$SELF_DIR/inbox_routing.conf"
+
+# ── THE SENDING INBOX IS THIS SEAT'S OWN, LOOKED UP — NEVER HARDCODED ────────
+# Until 2026-09-09 this line read INBOX="wednesday-agent@agentmail.to". Tuesday
+# measured the consequence: every mail HER seat sent through this script went out
+# of WEDNESDAY's inbox, so every reply came back to the wrong coordinator and her
+# own inbox-scoped key had no reason to work. Written when there was one
+# coordinator; wrong from the hour of the 2026-09-08 split.
+#
+# The seat comes from WED_AGENT, which the launcher exports, and there is NO
+# hostname fallback and no default. Kam's own words in Launch_Tuesday.command:
+# "a seat that guesses its own client is precisely the failure the two-agent split
+# exists to prevent" — and a hostname map is invalidated silently by a machine
+# move, which is what happened this week (2026-09-09_the-seat-resolver-is-the-
+# layer-above-every-agent-aware-fix).
+#
+# The address is LOOKED UP in inbox_routing.conf rather than composed. That is
+# the ledger's own finding from this morning, when a recipient was composed from
+# its shape instead: had it been looked up, the lookup would have FAILED and the
+# failure would have been the finding. So an unregistered seat REFUSES here.
+case "${WED_AGENT:-}" in
+  wednesday) SEAT_KEY="Wednesday" ;;
+  tuesday)   SEAT_KEY="Tuesday"   ;;
+  "") echo "send_brief: WED_AGENT is not set, so this seat cannot say which coordinator it is." >&2
+      echo "  A guess here sends a client's mail out of the other coordinator's inbox." >&2
+      echo "  Fix: launch through Launch_Wednesday.command or Launch_Tuesday.command," >&2
+      echo "  or export WED_AGENT=wednesday|tuesday in this shell. REFUSING." >&2
+      exit 2 ;;
+  *)  echo "send_brief: WED_AGENT='${WED_AGENT}' is neither wednesday nor tuesday. REFUSING." >&2
+      exit 2 ;;
+esac
+INBOX="$(awk -F'|' -v k="$SEAT_KEY" '$1==k {print $2; exit}' "$ROUTING" 2>/dev/null)"
+if [ -z "$INBOX" ]; then
+  echo "send_brief: seat '$SEAT_KEY' has no entry in $ROUTING, so its own inbox is unknown." >&2
+  echo "  Add a '$SEAT_KEY|<inbox>|yes' line there. REFUSING rather than sending as another seat." >&2
+  exit 2
+fi
+
+TO=""; SUBJECT=""; SUBJECT_FILE=""; BODY_FILE=""; KIND="brief"
+while [ $# -gt 0 ]; do
+  case "$1" in
+    --to) TO="${2:-}"; shift 2 ;;
+    --subject) SUBJECT="${2:-}"; shift 2 ;;
+    --subject-file) SUBJECT_FILE="${2:-}"; shift 2 ;;
+    --body-file) BODY_FILE="${2:-}"; shift 2 ;;
+    --kind) KIND="${2:-}"; shift 2 ;;
+    *) echo "unknown arg: $1" >&2; exit 2 ;;
+  esac
+done
+
+# ── SUBJECT FROM FILE (2026-09-06, quoting family w=3) ──────────────────────
+# A subject with an apostrophe inside single quotes made zsh parse-error and
+# nothing sent. --subject-file reads the FIRST LINE of a file instead, so the
+# subject never rides the shell's quoting. Exactly one of the two forms; a
+# missing or blank file refuses rather than sending an empty subject.
+if [ -n "$SUBJECT_FILE" ]; then
+  [ -z "$SUBJECT" ] || { echo "usage: give --subject OR --subject-file, not both" >&2; exit 2; }
+  [ -f "$SUBJECT_FILE" ] || { echo "subject file not found: $SUBJECT_FILE" >&2; exit 2; }
+  SUBJECT="$(head -n 1 "$SUBJECT_FILE" | tr -d '\r\n' | sed 's/^[[:space:]]*//;s/[[:space:]]*$//')"
+  [ -n "$SUBJECT" ] || { echo "subject file is empty (first line blank): $SUBJECT_FILE" >&2; exit 2; }
+fi
+[ -n "$TO" ] && [ -n "$SUBJECT" ] && [ -n "$BODY_FILE" ] || {
+  echo "usage: send_brief.sh --to '<Client>/<Project>' (--subject '<topic>' | --subject-file <path>) --body-file <path> [--kind brief|answer]" >&2; exit 2; }
+[ -f "$BODY_FILE" ] || { echo "body file not found: $BODY_FILE" >&2; exit 2; }
+
+BODY="$(cat "$BODY_FILE")"
+
+# ── THE GATE VIEW OF THE BODY (ledger w=5, 2026-09-09) ───────────────────────
+# Every section gate below anchors on a BARE line — `^PROVENANCE:`,
+# `^RULED BY KAM, …`, `^SELF-CHECK:`. A markdown heading (`## PROVENANCE:`) is
+# the natural way to write those in a document and it does NOT match, so the
+# brief is refused for a formatting reason while carrying the section perfectly.
+# That has now happened FIVE times, twice inside one brief today, by a seat that
+# had read the w=4 row for it during its own boot ninety minutes earlier. A rule
+# that fails on its fifth reading is not a rule; the ledger says promote it.
+#
+# THE FIX IS A VIEW, NOT AN EDIT. `$BODY_G` is what the GATES read; `$BODY` is
+# what is SENT, byte-identical to what the author wrote, so agents still receive
+# the readable heading. Both the presence checks and the line-by-line parsers use
+# BODY_G, so they cannot disagree about where a section starts — a check that
+# finds a section its parser cannot read would be a check that cannot fail, which
+# is the family this whole file exists to serve.
+#
+# ONLY the four anchors that REQUIRE a bare line are normalised. `^## *QUEUE`
+# deliberately expects the hashes and is left alone — stripping it would break a
+# working gate while fixing a broken one.
+BODY_G="$(printf '%s' "$BODY" | sed -E 's/^#{1,6}[[:space:]]*(PROVENANCE:|SELF-CHECK:|RULED BY KAM, NOT YET IN AN ARTEFACT|RULED BY WEDNESDAY FOR THIS PROJECT, STILL OPERATIVE)/\1/')"
+
+# EMPTY-BODY GATE (2026-09-07, ledger: a subject-only ANSWER reached seat s143).
+# `send_brief.sh` reported "sent" and `cockpit.sh say --mail` verified the mail at
+# the destination — BY SUBJECT. Both passed on a mail with NO BODY. The agent proved
+# it empty from the DKIM body hash and asked for a resend; it cost it a turn and
+# nearly cost it a GO/NO-GO criterion it needed before writing code.
+# Cause was upstream of this script: `open(p,'w').write(open(p).read()...)` truncates
+# the file before the read runs. That will happen again, so the refusal lives HERE,
+# in the path, rather than in a rule about how to write files.
+# A body that is empty, or has no non-whitespace content, or is shorter than a
+# plausible sentence, is refused. There is no --force: a body worth sending is
+# never 40 bytes.
+BODY_BYTES=$(printf '%s' "$BODY" | wc -c | tr -d ' ')
+BODY_VISIBLE=$(printf '%s' "$BODY" | tr -d '[:space:]' | wc -c | tr -d ' ')
+if [ "$BODY_VISIBLE" -lt 40 ]; then
+  cat >&2 <<EMSG
+BRIEF REFUSED — the body is empty or trivially short.
+
+  --body-file : $BODY_FILE
+  bytes read  : $BODY_BYTES
+  non-space   : $BODY_VISIBLE  (minimum 40)
+
+Nothing was sent. The commonest cause is a truncate-before-read while stamping the
+body: \`open(p,'w').write(open(p).read()...)\` opens for WRITE first, which empties
+the file, so the read returns nothing. Read into a variable FIRST, then write:
+
+  s = open(p).read().replace("@NOW@", now)
+  with open(p,'w') as f: f.write(s)
+
+Then check it: \`wc -c < <body-file>\` before sending.
+
+Ledger 2026-09-07: a subject-only ANSWER reached a live seat. send_brief said "sent"
+and the --mail read-back verified the SUBJECT at the destination; neither looked at
+the body. Verify a delivered body by its \`preview\` field being non-null, never by
+\`text\` in a LIST response (that is 0 for every message, including good ones).
+EMSG
+  exit 1
+fi
+
+# ── PLACEHOLDER GATE (2026-09-06 12:4x, check-the-refusal w=3 → promoted) ──
+# A `sed` receipt-fill failed (a `/` in the receipt broke the delimiter) and the
+# send in the SAME call ran on the unfilled file: "@LAUNCH@" and "@NOW@" reached
+# an agent. A body that still carries an @UPPER@ token is refused HERE, where the
+# rule already lives — a fill is done in python `str.replace`, and its result is
+# read before the send. Mail addresses (lower-case) never match this pattern.
+if printf '%s' "$BODY" | grep -qE '@[A-Z][A-Z0-9_]*@'; then
+  echo "REFUSED: body still carries an unfilled placeholder: $(printf '%s' "$BODY" | grep -oE '@[A-Z][A-Z0-9_]*@' | sort -u | tr '\n' ' ')" >&2
+  exit 1
+fi
+
+# ── CARD-ID GATE (2026-09-06 22:2x, mirror-reports-state w=7 → promoted) ──
+# Three times in two days a sentence asserting a card existed shipped in the same
+# batch as the `decision_queue.sh add` that was refused. The rule ("the sentence
+# comes in the call AFTER `added:` is read") has failed as a rule; it is a gate now.
+# Detector measured against 750 staged briefs before arming: 70 hits in card-claim
+# lines, 66 resolve, 1 true catch, 2 false (Azure resource names, excluded by name).
+if ! bash "$SELF_DIR/card_id_gate.sh" "$BODY_FILE"; then
+  echo "  (gate: card_id_gate.sh — ledger w=7)" >&2
+  exit 1
+fi
+
+# ── ROUTING (WED-104) ─────────────────────────────────────────────────────
+# Which inbox actually receives this. A project not listed in the routing file
+# is REFUSED — never silently defaulted to the shared bus, which is exactly the
+# channel the per-project migration exists to stop using.
+[ -f "$ROUTING" ] || { echo "no routing file at $ROUTING" >&2; exit 2; }
+ROUTE_LINE="$(grep -v '^[[:space:]]*#' "$ROUTING" | grep -F "$TO|" | head -1)"
+[ -n "$ROUTE_LINE" ] || {
+  echo "BRIEF REFUSED — '$TO' is not in $ROUTING." >&2
+  echo "Add '<Client>/<Project>|<inbox>|<yes|no>' there (and create the inbox) before briefing it." >&2
+  exit 1; }
+PROJ_INBOX="$(printf '%s' "$ROUTE_LINE" | cut -d'|' -f2)"
+MIGRATED="$(printf '%s' "$ROUTE_LINE" | cut -d'|' -f3)"
+case "$MIGRATED" in
+  yes) RECIPIENTS="$PROJ_INBOX" ;;
+  no)  RECIPIENTS="$PROJ_INBOX,$BUS" ;;
+  *)   echo "BRIEF REFUSED — routing entry for '$TO' has a bad migrated flag: '$MIGRATED' (want yes|no)" >&2; exit 1 ;;
+esac
+
+# ── THE GATE ──────────────────────────────────────────────────────────────
+# A brief must carry a PROVENANCE block. Each entry states a fact, WHERE it was
+# read (a path, URL, ticket id, or command), and WHEN it was read. The check is
+# structural on purpose — it cannot know whether I actually opened the file, but
+# it makes "I didn't check" a deliberate act of writing a false line rather than
+# an omission I never noticed. That is the same shape as the pre-commit hook.
+if [ "$KIND" = "brief" ]; then
+  if ! printf '%s' "$BODY" | grep -q '^PROVENANCE:'; then
+    cat >&2 <<'MSG'
+BRIEF REFUSED — no PROVENANCE block.
+
+Every load-bearing fact in a brief must name where it was read and when. Add:
+
+PROVENANCE:
+- <fact> | <source path / URL / ticket / command> | read YYYY-MM-DD
+- ...
+
+Ledger w=3 (2026-08-06): the Lead_Bot brief asserted the handoff direction from
+a ticket title instead of the project's own history entry — and it was backwards.
+MSG
+    exit 1
+  fi
+  # Each provenance line needs a source AND a read-date; two pipes minimum.
+  BAD=0
+  while IFS= read -r line; do
+    case "$line" in
+      "- "*)
+        pipes="$(printf '%s' "$line" | tr -cd '|' | wc -c | tr -d ' ')"
+        if [ "$pipes" -lt 2 ] || ! printf '%s' "$line" | grep -qE 'read [0-9]{4}-[0-9]{2}-[0-9]{2}'; then
+          echo "BRIEF REFUSED — malformed provenance line (need '<fact> | <source> | read YYYY-MM-DD'):" >&2
+          echo "  $line" >&2
+          BAD=1
+        fi ;;
+      "") break ;;
+    esac
+  done <<EOF
+$(printf '%s' "$BODY" | sed -n '/^PROVENANCE:/,$p' | tail -n +2)
+EOF
+  [ "$BAD" -eq 0 ] || exit 1
+
+  # ── PATH-OWNERSHIP CHECK (ledger w=8, 2026-08-14) ────────────────────────
+  # A PROVENANCE source that is a RELATIVE path resolves in whoever's tree the
+  # reader is standing in. Three times now I have cited a path that exists only
+  # in MY project to an agent who cannot open it — an unverifiable pointer
+  # wearing a citation's clothes. The gate cannot know whose tree a path belongs
+  # to, but it CAN insist the writer says. The third occurrence came one session
+  # after I adopted the rule by hand, which is the definition of a rule that
+  # needs a mechanism.
+  #
+  # Accepted: an absolute path (/...), a URL, a bare filename with no directory,
+  # or a relative path whose line names an owner ("my project", "your project",
+  # "not yours", "your own", "this project", or an explicit <Client>/<Project>).
+  BADPATH=0
+  while IFS= read -r line; do
+    case "$line" in
+      "- "*) ;;
+      *) continue ;;
+    esac
+    src="$(printf '%s' "$line" | awk -F'|' '{print $2}')"
+    # a relative path = contains a slash, does not start with / or a scheme.
+    # FALSE POSITIVE fixed 2026-08-14, one hour after this gate shipped: a source
+    # that is a COMMAND rather than a file (`git ls-remote origin refs/heads/develop`,
+    # `GET /v0/inboxes/...`) contains slashes and was being refused. A gate that
+    # blocks legitimate sends is worse than no gate, because the next session routes
+    # around it. Commands are marked by backticks or an HTTP verb; skip those.
+    case "$src" in
+      *" /"*|*"http://"*|*"https://"*) continue ;;
+      *'`'*) continue ;;
+      *GET\ *|*POST\ *|*PUT\ *|*DELETE\ *) continue ;;
+    esac
+    printf '%s' "$src" | grep -q '/' || continue
+    # NOTE: two greps on purpose. The phrase markers are case-insensitive; the
+    # <Client>/<Project> pattern must be case-SENSITIVE. A single `grep -qiE`
+    # made `[A-Z]` match lowercase, so every ordinary path like
+    # `2_Project_Files/fleet/...` satisfied the Client/Project alternative and
+    # the gate passed everything — caught by exercising the refuse path, which
+    # is the only reason this comment exists rather than a silent hole.
+    if ! printf '%s' "$line" | grep -qiE 'my project|your project|not yours|your own|this project' \
+       && ! printf '%s' "$line" | grep -qE '[A-Z][A-Za-z_]+/[A-Z][A-Za-z_]+'; then
+      echo "BRIEF REFUSED — PROVENANCE cites a RELATIVE path without saying whose tree it is in:" >&2
+      echo "  $line" >&2
+      BADPATH=1
+    fi
+  done <<EOF
+$(printf '%s' "$BODY" | sed -n '/^PROVENANCE:/,$p' | tail -n +2)
+EOF
+  if [ "$BADPATH" -ne 0 ]; then
+    cat >&2 <<'MSG'
+
+Fix by doing ONE of:
+  - make it absolute:      /Volumes/DevMASTER/WEDNESDAY/0_Brain/...
+  - name the owner:        ... | 0_Brain/learnings/x.md - my project, not yours | read YYYY-MM-DD
+  - point at THEIR tree:   ... | your own 5_Project_History/history.md | read YYYY-MM-DD
+
+Ledger w=8 (validate-brief-pointers family): a relative path resolves in whoever's
+tree the reader is standing in. Twice the receiving agent had to tell me the file
+did not exist in their project.
+MSG
+    exit 1
+  fi
+
+  # ── SCOPE-CLAIM CHECK (ledger w=9, 2026-08-16) ───────────────────────────
+  # The provenance gate refuses a brief whose FACTS lack a source. It cannot see
+  # a CHARACTERISATION appended to a properly-sourced fact — and that is the one
+  # that matters, because "reversible" is the exact word separating what v1.3
+  # lets me authorise from what needs Kam's signature.
+  #
+  # 2026-08-16: my brief queued RD-93 as "duplicate transition id 51 on the RD
+  # board. Board config, reversible." The predecessor's wrap said no such thing;
+  # I appended the scope judgement, and the PROVENANCE line cited the wrap, so
+  # the whole sentence travelled looking sourced. Reality: that transition lives
+  # in a workflow shared by 25 of the site's 57 schemes — editing it changes
+  # other teams' boards. I did not merely misinform the agent; I manufactured my
+  # own permission to delegate it. Caught by the agent in 15 minutes.
+  #
+  # Deliberately NARROW, per the w=8 false-positive lesson (a gate that blocks
+  # legitimate sends is worse than no gate): it fires only on words that assert
+  # LOW risk, only on --kind brief, and is satisfied by ONE provenance line
+  # mentioning scope / blast radius / consumers / reversib. Cheap to satisfy
+  # honestly, impossible to satisfy by accident.
+  # TRIGGER LIST, narrowed 2026-08-16 by running it against the three real briefs
+  # sent that morning. `demo[- ]only` fired on two of them and both were FALSE
+  # POSITIVES: in my briefs "demo-only" is a RESTRICTION I am imposing ("the
+  # Kintsugi lift is demo-only"), not a low-risk claim about the work. It is
+  # dropped. The list keeps only words that assert the work is SAFE or SMALL.
+  # (The third brief fired correctly — on the real "Board config, reversible"
+  # defect this gate exists for, which is the evidence it works.)
+  SCOPE_HIT="$(printf '%s' "$BODY" | grep -oiE '\breversible\b|board config|low[- ]risk|blast radius|contained change|local change' | head -1)"
+  if [ -n "$SCOPE_HIT" ]; then
+    if ! printf '%s' "$BODY" | sed -n '/^PROVENANCE:/,$p' | tail -n +2 \
+         | grep -qiE 'scope|blast radius|consumers|reversib|who else|shared by'; then
+      cat >&2 <<MSG
+BRIEF REFUSED — it makes a SCOPE claim ("$SCOPE_HIT") with nothing in PROVENANCE
+establishing the blast radius.
+
+A scope word is not framing. It is the field that decides whether the work is
+inside my delegated authority — so it needs a source like any other fact:
+
+PROVENANCE:
+- reversible: only <X> consumes this | <the command that enumerated the consumers> | read YYYY-MM-DD
+
+If you have NOT established it, say so in the brief instead:
+  "I have not established the blast radius — establish it before acting."
+
+Ledger w=9 (2026-08-16): "board config, reversible" on a workflow shared by 25
+schemes across a 35-project Jira. The fact was sourced; the classification was
+not, and it rode through on the fact's citation.
+MSG
+      exit 1
+    fi
+  fi
+
+  # ── QUEUED-TICKET FRESHNESS CHECK (w=7 in the stale-brief family, 2026-08-17) ──
+  # Twice now a brief has queued work that was ALREADY DONE, because the queue
+  # was built from a frozen record (a history entry, a carry-forward block, a
+  # predecessor's wrap) instead of the newest record OF THAT WORK — the ticket.
+  # 2026-08-13: briefed HPSM to redo work my own SCORE mail had verified done.
+  # 2026-08-17: queued KS-490 E-2/E-3 as work; s38 had dispositioned both in a
+  # ticket comment 19 hours before my brief. The agent re-verified instead of
+  # redoing, both times — the catch cost them a read; the gate makes it mine.
+  #
+  # NARROW, per the w=8 false-positive lesson: fires only on a "## QUEUE"
+  # section (my brief template's work list), and only requires that each ticket
+  # ID queued there appears in SOME provenance line — i.e. I opened the ticket,
+  # or at least had to write a false line saying I did. Holds, context and
+  # ANSWER mails are untouched.
+  if printf '%s' "$BODY" | grep -qiE '^## *QUEUE'; then
+    QUEUE_IDS="$(printf '%s' "$BODY" | sed -n '/^## *[Qq][Uu][Ee][Uu][Ee]/,/^## /p' \
+                 | grep -oE '\b(KS|PS|RD|WED|HPSM|CPKEY|VSP|WIL)-[0-9]+\b' | sort -u)"
+    PROV_BLOCK="$(printf '%s' "$BODY" | sed -n '/^PROVENANCE:/,$p')"
+    MISSING=""
+    for id in $QUEUE_IDS; do
+      printf '%s' "$PROV_BLOCK" | grep -q "$id" || MISSING="$MISSING $id"
+    done
+    if [ -n "$MISSING" ]; then
+      cat >&2 <<MSG
+BRIEF REFUSED — the QUEUE section names ticket(s) with no provenance line:
+ $MISSING
+
+A queued ticket is a claim that the work is still open. The newest record of
+that work is the TICKET, not a wrap, a history entry or a carry-forward block.
+Open each one and add:
+
+PROVENANCE:
+- <ticket> state (open, last comment <when>) | Linear/Jira ticket <id> | read YYYY-MM-DD
+
+Stale-brief family w=7 (2026-08-13 HPSM redo-brief; 2026-08-17 KS-490 E-2/E-3
+queued 19 hours after the ticket said done).
+MSG
+      exit 1
+    fi
+  fi
+
+  # ── SELF-CONSISTENCY ATTESTATION (three-strike promotion, 2026-08-18) ─────
+  # Three times a brief of mine has CONTRADICTED ITSELF while every per-line
+  # gate passed, because per-line gates cannot see a document arguing with
+  # itself:
+  #   2026-08-13 (w=5): "the A$187,500 already invoiced" in a brief whose own
+  #     constraints section said "SOW unsigned" — the disproof travelled in the
+  #     same document.
+  #   2026-08-14 (w=8): the ownership rule applied to two provenance lines and
+  #     not the third, inside one mail.
+  #   2026-08-17 (w=2 family): QUEUE said Purview appears "exactly once" while
+  #     the same brief's PROVENANCE line said "2 hits". Caught by the agent.
+  # A self-contradiction is a READING defect, not a line defect, so the
+  # mechanism is the provenance gate's: convert "never noticed I hadn't done
+  # the read" into "I would have to write a false line". The brief must carry a
+  # fresh, TODAY-dated attestation that the end-to-end contradiction read was
+  # done:
+  #     SELF-CHECK: re-read end-to-end for contradictions | YYYY-MM-DD HH:MM
+  # The date must be today — a copy-pasted line from yesterday's brief refuses,
+  # which is what makes the attestation a fresh act rather than a template
+  # fossil. HONEST LIMIT (same as the provenance gate's, stated there too): it
+  # cannot know whether the read actually happened. It makes skipping it a
+  # deliberate falsehood instead of an omission — that shift is the mechanism.
+  # Helper: fleet/self_check_view.sh <body-file> prints the claim-bearing lines
+  # (numbers, ticket IDs, absolutes) grouped, so the re-read is targeted.
+  # NARROW per the w=8 false-positive lesson: --kind brief only; ANSWER mails
+  # and holds are untouched.
+  # LOCAL date only. The first draft also accepted the UTC date — and because
+  # AEST is UTC+10, every morning before 10:00 the UTC date is still YESTERDAY,
+  # so a stale attestation carried from last night would have passed. Caught by
+  # exercising the refuse path before arming (the stale test did not refuse).
+  TODAY_LOCAL="$(date +%Y-%m-%d)"
+  SC_LINE="$(printf '%s' "$BODY" | grep -E '^SELF-CHECK: *re-read end-to-end for contradictions \| [0-9]{4}-[0-9]{2}-[0-9]{2} [0-9]{2}:[0-9]{2}' | tail -1)"
+  if [ -z "$SC_LINE" ]; then
+    cat >&2 <<MSG
+BRIEF REFUSED — no SELF-CHECK attestation.
+
+Per-line gates cannot see a document contradicting itself (three instances:
+2026-08-13 "already invoiced" vs its own constraints; the w=8 mixed block;
+2026-08-17 "exactly once" vs "2 hits"). Re-read the WHOLE brief asking one
+question — does any sentence contradict another? — then attest it, freshly:
+
+SELF-CHECK: re-read end-to-end for contradictions | $TODAY_LOCAL $(date +%H:%M)
+
+Targeted view of the claim-bearing lines:
+  2_Project_Files/fleet/self_check_view.sh <body-file>
+MSG
+    exit 1
+  fi
+  SC_DATE="$(printf '%s' "$SC_LINE" | grep -oE '[0-9]{4}-[0-9]{2}-[0-9]{2}')"
+  if [ "$SC_DATE" != "$TODAY_LOCAL" ]; then
+    cat >&2 <<MSG
+BRIEF REFUSED — SELF-CHECK attestation is STALE ($SC_DATE, today is $TODAY_LOCAL).
+A carried-forward attestation is a template fossil, not a read. Do the read on
+THIS version of the brief, then re-date the line.
+MSG
+    exit 1
+  fi
+
+  # ── UNDELIVERED-RULING GATE (ledger w=3 promotion, 2026-09-06) ────────────
+  # learnings/2026-09-05_a-relayed-ruling-is-delivered-only-when-it-is-in-the-
+  # artefact.md rule 4. Kam ruled the mysql2 fuse EXTEND on 09-04 (07:08 and
+  # 08:33); it was relayed, absorbed into s123's queue, pre-empted, and never
+  # written into the row, KS-763 or #801. Ten successor briefs (s124..s133)
+  # carried nothing of it, and s133 reported it — correctly, from every artefact
+  # it could read — as an open question unanswered since 09-03. Nothing caught
+  # the non-delivery because delivery was never a field anyone owned. Now it is:
+  # decision_queue.sh --delivered ID ARTEFACT marks the card; this gate reads
+  # `list ruled --undelivered <prefix>` for the project and REFUSES a brief while
+  # that view is non-empty and the body lacks the section the learning mandates:
+  #     RULED BY KAM, NOT YET IN AN ARTEFACT
+  # (each card, the ruling verbatim, the artefact it must land in). Empty is a
+  # valid section; absent is not. NARROW per the w=8 lesson: --kind brief only;
+  # ANSWER mails untouched. FAILS CLOSED: if the queue tool errors, the brief
+  # refuses — an unreadable queue is not evidence of an empty one. Projects with
+  # no prefix mapping are not gated (say so here when adding one).
+  DQ_TOOL="$PROJECT_DIR/2_Project_Files/tools/decision_queue.sh"
+  case "$TO" in
+    Secuura/Blockchain)          DQ_PREFIX="secuura-" ;;
+    # Seat B (added 2026-09-06 22:2x). It was in launchers.conf and inbox_routing.conf and
+    # NOT here, so every seat-B brief silently skipped the undelivered-rulings gate — the
+    # registry-gap class the 2026-09-06 10:1x ledger row already named, in the third registry
+    # that row itself lists. Same board, same cards, same prefix as seat A.
+    Secuura/Blockchain-B)        DQ_PREFIX="secuura-" ;;
+    Datasec/NexusAI)             DQ_PREFIX="nexusai-" ;;
+    Datasec/Vision_Sales_Portal) DQ_PREFIX="vision-" ;;
+    Datasec/HPSM)                DQ_PREFIX="hpsm-" ;;
+    *)                           DQ_PREFIX="" ;;
+  esac
+  if [ -n "$DQ_PREFIX" ]; then
+    [ -f "$DQ_TOOL" ] || { echo "BRIEF REFUSED — decision queue tool missing at $DQ_TOOL (cannot check undelivered rulings)" >&2; exit 1; }
+    UNDELIVERED_OUT="$(bash "$DQ_TOOL" list ruled --undelivered "$DQ_PREFIX" 2>&1)"; DQ_RC=$?
+    if [ "$DQ_RC" -ne 0 ]; then
+      echo "BRIEF REFUSED — decision_queue.sh list ruled --undelivered $DQ_PREFIX failed (rc=$DQ_RC); refusing rather than assuming no undelivered rulings:" >&2
+      printf '%s\n' "$UNDELIVERED_OUT" | sed 's/^/  /' >&2
+      exit 1
+    fi
+    UNDELIVERED_IDS="$(printf '%s\n' "$UNDELIVERED_OUT" | awk '/^\[ruled\]/ {print $2}')"
+    if [ -n "$UNDELIVERED_IDS" ] && ! printf '%s\n' "$BODY" | grep -q '^RULED BY KAM, NOT YET IN AN ARTEFACT'; then
+      N_UNDELIVERED="$(printf '%s\n' "$UNDELIVERED_IDS" | grep -c .)"
+      cat >&2 <<MSG
+BRIEF REFUSED — $N_UNDELIVERED ruled card(s) for '$TO' (prefix $DQ_PREFIX) have NO delivered mark, and
+the body has no line beginning 'RULED BY KAM, NOT YET IN AN ARTEFACT'.
+$(printf '%s\n' "$UNDELIVERED_IDS" | sed 's/^/  /')
+
+A ruling Kam gave that sits only on his panel and in a mail to a seat that has
+since wrapped lives nowhere the next reader lands — the successor will find the
+question open and ask it again (mysql2 EXTEND, 09-04 -> re-raised 09-05). Do ONE of:
+  - for each card whose ruling now sits in a ticket comment / PR / row, record it:
+      2_Project_Files/tools/decision_queue.sh --delivered <card-id> "<artefact>"
+  - carry the rest in the brief under its own heading, each with the ruling
+    verbatim and the artefact it must land in:
+      RULED BY KAM, NOT YET IN AN ARTEFACT
+      - <card-id>: "<ruling verbatim>" -> must land in <ticket/PR/row>
+    (an empty section under that heading is valid; an absent one is not)
+
+Ledger w=3 (2026-09-06): a relayed ruling is delivered only when it is in the artefact.
+MSG
+      exit 1
+    fi
+  fi
+fi
+
+# ── DRY RUN ───────────────────────────────────────────────────────────────
+# Stops here, after every gate and before any network call. Added 2026-08-16 so
+# the PASS branch of each gate can be exercised without sending mail to a live
+# agent's inbox — on 2026-08-14 a junk "gate test" mail reached a working agent
+# and cost a disavowal. A gate whose pass path can only be tested by really
+# sending is a gate that gets tested in production, once, on someone else.
+if [ "${SEND_BRIEF_DRY_RUN:-}" = "1" ]; then
+  echo "DRY RUN — all gates PASSED, nothing sent."
+  echo "  to:         $TO"
+  echo "  recipients: $RECIPIENTS"
+  echo "  subject:    [Wednesday -> $TO] $SUBJECT"
+  exit 0
+fi
+
+# ── Send ──────────────────────────────────────────────────────────────────
+[ -f "$ENV_FILE" ] || { echo "no .env at $ENV_FILE" >&2; exit 2; }
+# shellcheck disable=SC1090
+set -a; . "$ENV_FILE" 2>/dev/null; set +a
+[ -n "${AGENTMAIL_API_KEY:-}" ] || { echo "AGENTMAIL_API_KEY unset" >&2; exit 2; }
+
+# Kam is CC'd on every brief. This is NOT cosmetic: my briefs routinely tell an
+# agent "Kam is CC'd — one line from him closes it", and that sentence names the
+# ONLY path by which an approval-class action becomes Kam-traceable under v1.2.
+# Until 2026-08-07 this script sent no cc at all, so that path never existed and
+# every such sentence I wrote was false. Found by the Datasec/NexusAI agent, who
+# checked the cc field through the API and held a built, verified deploy rather
+# than accept a relay whose named closing mechanism was broken. Same family as
+# validate-brief-pointers: I pointed an agent at a verification path without
+# opening it myself.
+# CC REMOVED 2026-08-12 on Kam's explicit instruction ("no need to copy me on
+# emails to agents. I am happy tracking things this way"). Under v1.3 the
+# signed delegation grant is the authority mechanism, so the cc had become
+# informational only. Consequence of the history above still binds: NEVER
+# write "Kam is CC'd" (or any closing-mechanism claim) into a brief — there
+# is no cc to point at. Re-add only on a recorded Kam instruction.
+
+# ⚠ THE SUBJECT PREFIX IS DELIBERATELY STILL "Wednesday", INCLUDING FROM TUESDAY'S
+# SEAT — this is a known half-fix, not an oversight. The prefix is the fleet's
+# ROUTING KEY: every project agent's boot instruction tells it to match
+# "[Wednesday -> <Client>/<Project>]". Flipping it to the sending seat's name is
+# two characters here and makes every one of Tuesday's briefs invisible to the
+# Datasec agents until THEIR boot prompts accept the new tag — and those are her
+# projects, not this seat's, so the sequencing is hers.
+# The harm that mattered is fixed above: the mail now leaves the sending seat's OWN
+# inbox, so replies reach the coordinator who asked. What remains is attribution.
+# Raised to Kam and to Tuesday 2026-09-09 as a sequenced change: her agents accept
+# the tag first, the prefix flips second.
+FULL_SUBJECT="[Wednesday -> $TO] $SUBJECT"
+CODE="$(BODY="$BODY" SUBJ="$FULL_SUBJECT" RCPTS="$RECIPIENTS" INBOXADDR="$INBOX" python3 - <<'PYEOF'
+import json, os, urllib.request
+payload = {"to": os.environ["RCPTS"].split(","),
+           "subject": os.environ["SUBJ"], "text": os.environ["BODY"]}
+req = urllib.request.Request(
+    f"https://api.agentmail.to/v0/inboxes/{os.environ['INBOXADDR']}/messages/send",
+    data=json.dumps(payload).encode(),
+    headers={"Authorization": "Bearer " + os.environ["AGENTMAIL_API_KEY"], "Content-Type": "application/json"})
+try:
+    print(urllib.request.urlopen(req, timeout=20).status)
+except Exception as e:
+    print(f"ERR {e}")
+PYEOF
+)"
+if [ "$CODE" = "200" ]; then
+  echo "sent: $FULL_SUBJECT"
+  echo "  -> $RECIPIENTS"
+else
+  echo "SEND FAILED ($CODE)" >&2; exit 2
+fi
