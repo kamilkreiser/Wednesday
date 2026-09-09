@@ -47,7 +47,7 @@ Briefed + answered + addendum'd, all three verified at `datasec-nexusai@`. Worki
 **Confirm EVERY chat-board instruction as received, before the work.** **Cross-seat mail is COORDINATION ONLY.** **Names, not pronouns. Never delete — quarantine.**
 🔴 **DO NOT run the wrap's vault step** (`end-of-session.md:50` is `git add -A`; the vault holds Secuura paths).
 **After every `chat_reply.sh`: curl `/api/chatlog` and assert your message is the newest row.**
-⚠ **Rule 3c is OVERDUE on `_ledger_laptop_datasec.md`** — 218 KB, rows back to 09-07. Archive 09-07-and-older to `_ledger_archive.md` **as a MOVE, asserting row conservation both sides.**
+✅ **Rule 3c RUN 2026-09-10 09:4x** — 27 rows dated 09-07 moved to **`_ledger_laptop_datasec_archive.md`** (a PER-SEAT archive, not the shared `_ledger_archive.md`: writing Tuesday's rows into a file the Studio seat is live on is the race the seat split exists to avoid — raise the merge at consolidation). **Ledger 218 KB → 169 KB, 87 rows conserved as 60 + 27, asserted both directions from disk, no row in both.** Next archive: rows dated 09-08 and older, once they age past ~3 days.
 
 ## WHAT s4 WOULD SAY IF IT COULD SAY ONE THING
 
