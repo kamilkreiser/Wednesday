@@ -109,3 +109,43 @@ diagnosing from*.
   `kksecura` is our PAT, so Approve returns **HTTP 422**. Mechanical; no ruling reaches it.
   **Meet it and STOP.** The durable fix is Kam's ruled agent GitHub identity (card
   `secuura-agent-github-identity`, ruled 2026-08-26, not yet executed).
+
+---
+
+## A VERDICT LINE IS A CLAIM ABOUT WHAT RAN — print the ratio, never "all"
+
+**Why this exists.** On 2026-09-09 a Secuura seat, sweeping for guards that skip a member and still
+exit 0, found the class one level above the guards: **`PREFLIGHT PASSED.` printed identically whether
+13 legs ran or 10.** Proven by control on one tree at one commit, changing only the gateway URL —
+gateway up: 0 skipped, `PREFLIGHT PASSED.`, exit 0; gateway closed: **3 legs SKIPPED**, `PREFLIGHT
+PASSED.`, exit 0. The two runs are indistinguishable from their verdict line, and the three legs that
+vanish include the two closest to a security assertion. **That line is what gets quoted into PR Test
+Evidence blocks that a client human reads.**
+
+**The class is not "guards with skip lists". It is A VERDICT COMPOSED SEPARATELY FROM THE WORK** —
+and it reproduces anywhere a summary is written by different code than the thing it summarises: test
+runners, deploy scripts, migration gates, audit passes, health checks, batch jobs, a wrap mail.
+
+**The rules:**
+
+1. **A pass line carries a RATIO, never a quantifier.** `13/13 legs ran` beats `all legs passed`;
+   `23 / 23 services` beats `all services`. **A quantifier is a claim about a denominator the reader
+   cannot see.**
+2. **A skip is not a pass.** Zero failures and ten of thirteen legs is not the same event as zero
+   failures and thirteen of thirteen. If a run could not execute part of itself, its verdict says
+   INCOMPLETE and its exit code is non-zero — or, where a skip is genuinely legitimate, the count is
+   printed and the reader decides.
+3. **Ask of any summariser: what would this print if half the work never ran?** If the answer is "the
+   same thing", the verdict is decoration and every claim resting on it is unfalsifiable from its own
+   output.
+4. **Prove it with a control, in both directions.** Force the skip condition and show the verdict
+   changes; run it clean and show it still passes. A guard that can only fail is as useless as one
+   that can only pass.
+5. **When you discover your own already-shipped evidence rests on such a line, strengthen the shipped
+   instance immediately** — re-read the leg-by-leg output and post the provenance on the artefact —
+   rather than only fixing the future. The 2026-09-09 seat did exactly this on PR #924.
+
+**Precedent to copy rather than reinvent** (both already in the Secuura corpus, which is why the fix
+shape was settled rather than open): `run-shell-suites.sh` refuses the vacuous pass in terms — *"'all
+0 are reached' is not a pass: there is nothing being gated"* — and `check-production-guard.sh` prints
+`23 / 23 services`.
