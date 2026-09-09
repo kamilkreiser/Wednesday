@@ -62,31 +62,11 @@ STREAMS="$PROJECT_DIR/2_Project_Files/tools/chat_streams.py"
 # else. An unknown host falls back to "WED", never to a guess.
 # Precedence: --project  >  $CHAT_PROJECT already in the environment  >  this
 # per-seat default  >  "WED".
-# ── KEYED ON THE SEAT, NOT THE HOSTNAME (Tuesday, 2026-09-09 — measured) ─────
-# This used to key on hostname: Kamils-MBP* -> Datasec, Kamils-Mac-Studio* -> Secuura.
-# **Tuesday moved to Kamils-Mac-mini on 2026-09-09, which matches NEITHER**, so it fell
-# through to "" and then to "WED" — silently. Her boot report to Kam that afternoon was
-# written with project=WED, so a message meant for his Datasec view landed in his WED
-# bucket. Blast radius exactly one message; she read all ten of her WED-tagged entries
-# before touching any, and retagged only her own in her single-writer stream.
-#
-# The seat is ALREADY resolved above, from WED_AGENT, and that resolver REFUSES rather
-# than guessing when it cannot tell. Keying the project off it removes the second,
-# weaker resolver entirely — byte-identical behaviour for the Wednesday seat, and no
-# silent WED fallback for anyone else. Tuesday's recommendation, adopted whole.
-#
-# ⚠ AND THE REASON THIS WAS MISSED IS WORTH MORE THAN THE FIX: the morning's sweep
-# grepped for the literal `wednesday` and this defect contains no agent name at all —
-# it is a hostname map. **A grep for the seat name is structurally blind to it. The
-# predicate that finds this class is HOSTNAME KEYS, not agent names.**
-#
-# Precedence is unchanged: --project > $CHAT_PROJECT > this per-seat default > "WED".
-# If Kam re-splits the clients, this case is still the one line to edit.
 seat_project_default() {
-  case "$AGENT" in
-    tuesday)   echo "Datasec" ;;   # his 2026-09-08 split: Datasec is Tuesday's
-    wednesday) echo "Secuura" ;;   # Secuura + all general work is Wednesday's
-    *)         echo "" ;;          # unreachable: the resolver above already refused
+  case "$(hostname -s 2>/dev/null || hostname 2>/dev/null)" in
+    Kamils-MBP*)        echo "Datasec" ;;   # laptop  = Datasec  (his 07:09 split)
+    Kamils-Mac-Studio*) echo "Secuura" ;;   # Studio  = Secuura  (his 07:09 split)
+    *)                  echo "" ;;          # unknown host: no guess
   esac
 }
 PROJECT="${CHAT_PROJECT:-}"
