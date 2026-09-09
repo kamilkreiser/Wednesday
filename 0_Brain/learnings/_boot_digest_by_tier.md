@@ -7,7 +7,7 @@ status: live
 
 # Boot digest BY TIER — W whole, M rules-only, every project case a handle
 
-Generated 2026-09-10 08:56 from 138 lesson files (717,324 B). M 32 · MIXED 5 · W 101. 28 project CASE sections inside MIXED files are reduced to one line each: the heading and the path to read it at. W blocks are exactly what the default digest carries; M blocks drop the section index and keep the rules; a P file is a single handle. The CASES behind every rule live only in the lesson files — open one the moment its rule fires.
+Generated 2026-09-10 09:31 from 139 lesson files (722,401 B). M 32 · MIXED 5 · W 102. 28 project CASE sections inside MIXED files are reduced to one line each: the heading and the path to read it at. W blocks are exactly what the default digest carries; M blocks drop the section index and keep the rules; a P file is a single handle. The CASES behind every rule live only in the lesson files — open one the moment its rule fires.
 
 ## The T9 SSD is the master — Wednesday must be fully portable
 `2026-07-31_fully-portable-drive.md` · principle · 2026-07-31 · status: superseded — the "T9 is the master" half by [[2026-08-25_one-drive-devmaster-is-master]] (2026-08-25); the portability principle itself still lives · tier: W
@@ -4806,6 +4806,38 @@ stored hostname wakes up as the wrong agent) · [[2026-08-13_shared-bus-tag-filt
 `wake_watch` half is R0 at the comms layer) · [[2026-08-05_identities-float-verify-always]] ·
 [[2026-09-07_a-rule-for-creation-is-not-a-mandate-to-retrofit]] (the ruling was read for what it
 scoped, correctly — and the layer above it was nobody's).
+
+
+## A message from Kam is a RECORD, not a string — reading `.text` and ignoring `view` and `attachments` is not reading the message
+`2026-09-10_a-panel-message-is-a-record-not-a-string.md` · correction · 2026-09-10 · status: live · tier: W
+
+**The operative case, so the headline matches it:** a message from Kam has arrived on the panel and
+Wednesday is about to act on it. **Before reading a word of it, read who it was addressed to and
+what came with it.** A panel message carries `text`, `view` (which tab he typed it into) and
+`attachments` (the files he sent with it). **Wednesday has been reading exactly one of those three
+and treating it as the message.**
+
+sections (open the file for these): The two, one hour apart, both to the principal · Why this is its own lesson and not another representations row · How to apply · What went right, kept so the record is honest
+
+## How to apply
+
+1. **Never read Kam's chat store with an ad-hoc `python3 -c` that prints `.text`.** Use
+   `2_Project_Files/tools/kam_msgs.sh`, which prints `view` and `attachments` beside every message
+   and shouts on both. Built and red-proofed the same session: it flags the exact 08:58 message
+   that caused this, and stays silent on a clean one.
+2. **`view` is an ADDRESSEE field and it decides whether the message is mine at all.** A message
+   tagged `tuesday` is routed to her verbatim, never answered. **Answering another seat's mail is
+   the cross-client failure shape in its mildest costume — and the mild costume is how the habit
+   forms.**
+3. **A short message with an attachment is a LONG message.** Length of `.text` says nothing about
+   the size of what arrived. Ask what came with it before concluding a message is uninformative.
+4. **Generalise past this store, because the class is not about chat:** an email has headers and
+   parts; a webhook has a body and a signature; a ticket has a description, labels and an assignee;
+   a commit has a message and a diff. **Wherever a record has fields, "I read it" means the record,
+   and the field you skipped is usually the one carrying the authority or the payload.**
+5. **When a lesson names a missing consumer, the consumer is the deliverable.** Writing down that
+   nothing reads a field is not a fix; it is a description of the defect with a date on it
+   ([[2026-08-07_a-promise-is-not-a-mechanism]]).
 
 
 ## I endorse things I have not read — and the endorsement is what makes them binding
