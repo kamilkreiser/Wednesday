@@ -27,11 +27,27 @@ PROJECT_DIR="$(cd -P "$SELF_DIR/../.." && pwd)"
 # The AGENT is what names the stream, and it is derived from the seat, never
 # typed. An unknown host is REFUSED rather than defaulted: writing another
 # agent's stream is exactly the failure this phase exists to make impossible.
+# ── THE TREE DECIDES; THERE IS NO HOSTNAME GUESS LEFT (2026-09-09) ───────────
+# This was a hostname map, and by today BOTH arms were wrong: Tuesday moved to
+# Kamils-Mac-mini, so `Kamils-MBP* -> tuesday` names a machine she is not on.
+#
+# Tuesday's argument for REMOVING the stale arm rather than repointing it, adopted
+# because it is this file's own logic rather than tidiness: the fallback can only
+# fire when WED_AGENT is unset AND the tree has not resolved it — which is exactly
+# the case where there is NO evidence about which seat this is. Mapping an
+# unrecognised tree on a known-stale host to a named seat is a guess, and Kam's own
+# words in Launch_Tuesday.command are that a seat guessing its own client is the
+# failure the two-agent split exists to prevent. Deleting the arm converts that
+# guess into the refusal already chosen everywhere else in this script.
+#
+# The travel case argues the same way rather than against it: if he ever runs the
+# TUESDAY tree on the laptop, the TREE check resolves it correctly and the hostname
+# arm was never needed.
 seat_agent_default() {
-  case "$(hostname -s 2>/dev/null || hostname 2>/dev/null)" in
-    Kamils-MBP*)        echo "tuesday"   ;;  # laptop / headless Datasec seat
-    Kamils-Mac-Studio*) echo "wednesday" ;;  # Studio  = Wednesday
-    *)                  echo ""          ;;  # unknown host: no guess
+  case "$(basename "$PROJECT_DIR")" in
+    TUESDAY|Tuesday|tuesday)       echo "tuesday"   ;;
+    WEDNESDAY|Wednesday|wednesday) echo "wednesday" ;;
+    *)                             echo ""          ;;  # no evidence: no guess
   esac
 }
 AGENT="${WED_AGENT:-}"
