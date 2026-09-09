@@ -79,8 +79,15 @@ share the blind spot.
 
 ## 🔴 WHAT IS ACTUALLY ON KAM'S DESK (this seat's items only)
 
-0. 🔴 **`secreview-june-register-discloses-credentials` — ruled `all-three`, and ONE PART IS STILL
-   UNANSWERED: where has that document already been sent.** Tuesday checked whether his 13:05
+0. 🟡 **`secreview-june-register-discloses-credentials` — ruled `all-three`, and the DISTRIBUTION LEG IS NOW
+   ANSWERED. Kam, 2026-09-09 ~16:3x, verbatim: *"no, nothing has been sent to anyone outside"*.**
+   **So the exposure is CONTAINED to people who already hold repository access: nothing to recall, nobody to
+   notify, no disclosure conversation. The scrub is routine work, not an incident.**
+   🔴 **DO NOT LET THAT READ WIDER THAN IT IS: the eight secrets remain COMMITTED IN SOURCE, which is the
+   original finding underneath this, so ROTATION IS STILL OWED and is NOT this seat's — Datasec production
+   is ungranted and rotating live credentials is Kam's either way.** **SEQUENCING RULED BY TUESDAY: the
+   scrub runs AFTER the reformat lands, because the reformat seat is using the June register as one of its
+   two format models and editing it underneath would change the model mid-pass. Kam told, default stated.** Tuesday checked whether his 13:05
    *"nothing sent yet"* answered it — **it did not; that was about the Secuura review.** Do not close it.
    **Re-derived at source this session and it holds: eight value-bearing lines, F-16 six and F-12 two**
    (2 Entra client secrets, 1 platform API key, App Configuration read+write master keys in a committed
