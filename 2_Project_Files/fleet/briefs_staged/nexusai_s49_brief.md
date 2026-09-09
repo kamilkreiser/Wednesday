@@ -16,8 +16,9 @@ Built from `decision_queue.sh list ruled --undelivered` for this project, read a
 → **Lands in:** the RD-369 guard code and its test, plus a comment on RD-369 naming this as the authorised round 3.
 🔴 **He was offered `wider` — round 3 PLUS removing the RD-385 files from the image — and he did NOT take it.** So **removing those files is OUT OF SCOPE for this session.** Detecting them is in scope; deleting them is not. If you think that is wrong, say so and stop — do not act on the reading.
 
-**2. `nexusai-three-lineages-in-scope-or-parked` → `close-superseded`, ruled 2026-09-08T10:07:29+10:00.** *"The NexusAI agent closes RD-163/201, RD-304 and RD-306 with the evidence quoted on each ticket — the byte-identical file, main's `:562` comment naming RD-304, and the `:626` NO-OP correction. Board reflects reality, the next sweep stops re-proposing them, and nothing is merged."*
-→ **Lands in:** three Jira tickets, each closed with its evidence in a comment. **Nothing is merged for these — merging them was measured HARMFUL and withdrawn.**
+**2. `nexusai-three-lineages-in-scope-or-parked` → `close-superseded`, ruled 2026-09-08T10:07:29+10:00 — ✅ ALREADY DELIVERED, and this is stated because Wednesday nearly commissioned it again.**
+**PROVENANCE:** RD-163, RD-201, RD-304, RD-306 — all four read **`[Done]`** live over the Jira REST API from Wednesday's seat, **2026-09-10 09:2x**, resolved **2026-09-08T10:08-10:09**, one minute after the ruling. **The board write happened two days ago; only the CARD was never marked.** Wednesday marked it delivered at 09:23 today.
+🔴 **Wednesday had this in the queue as work for you.** The `send_brief` freshness gate refused the brief and made Wednesday read the tickets. **Do not close them again. Nothing is owed here.**
 
 **3. `rd104-gh-identity-acceptance-false-premise` → `youcheck`, ruled 2026-09-07T19:58:59+10:00.** Kam took the option to read two GitHub settings pages himself (`environments`, and `variables/actions` for `CI_DEPLOY_ENABLED`) because the project's `gh` identity cannot reach the `datasecau` org at all.
 → **UNMEASURED BY WEDNESDAY: whether he has answered.** Wednesday holds no GitHub identity for this org and cannot check. **The instrument that closes it is Kam.** Until those two answers exist, **the deploy question stays open — which costs you nothing this session, because nothing here deploys.**
@@ -34,23 +35,26 @@ Built from `decision_queue.sh list ruled --undelivered` for this project, read a
 ## QUEUE — in this order. Each item carries its ticket's own scope sentence.
 
 ### 1. RD-369 round 3 — the guard, narrow (Kam-authorised above)
+PROVENANCE:
+- RD-369 state (**`Release Ready`**, 1 comment, last comment **2026-09-08T10:24**, updated 2026-09-08T11:53) | Jira ticket RD-369 | read 2026-09-10
+- **No comment on it since Kam's 2026-09-09T12:09 ruling — so no seat has acted on round 3. It is genuinely outstanding.**
+- Branches at origin: `rd-369-round2-s47` @ `c96837df931af020bd700b53fd3719f47f27cb22`, `rd-369-recut-s47` @ `117931ef4a5b8da635d4c4d2207227136c483138` (`ls-remote`, read 2026-09-10). **No round-3 branch exists yet.**
 **Ticket scope, quoted:** the exposure itself is CLOSED and proven against a real built image (288 derived vs 288 admitted, all four carrier paths 404 from a running container). **This round is about the GUARD that prevents recurrence, and nothing else.**
 The gate's finding: the builder found a distance window that made the instrument answer clean, **removed it from one code path and left it on the other, while the docblock says there is no window.** Proven consequence: a **purely cosmetic reflow** — one line broken after its colon, every value preserved — flips **three of four** true RD-385 files from carrier to CLEAN. And the certifying cell asserts only *greater than zero* over 284 files, so mutation-killing either detection path leaves it GREEN.
 **Do:** remove the window from **both** paths; make the certifying cell **able to fail** (red-proof it by mutation, with a green baseline either side).
 **This is the last round either way** — Kam's cap. No round 4 without him.
 
-### 2. Close RD-163/201, RD-304 and RD-306 as superseded (Kam-authorised above)
-**Re-derive before writing.** The measurement was taken against `origin/main = e94973d`; **main is now `cd2b543`**. The three claims to re-check per-file: RD-306's product file byte-identical to main · RD-304 superseded by main's own comment at `backend/routes/sustainability.js:562` naming the ticket · RD-163/201 carrying an `Object.freeze` on a Set that main's `dom.js:626` comment calls a NO-OP.
-**If any no longer reproduces, do NOT close that one — report it back.** A ticket closed on a measurement that has moved is the overstated row that gets a whole board discounted.
-
-### 3. RD-363 — merge the Key Vault purge-protection branch
+### 2. RD-363 — merge the Key Vault purge-protection branch
+PROVENANCE:
+- RD-363 state (**`Testing`**, High, labels `blocker, horizon-1, security`, updated **2026-09-07T17:50**) | Jira ticket RD-363 | read 2026-09-10
+- Branch `rd-363-keyvault-purge-protection-s43` @ `b0dec96fc1f498b309cee692b6441ed9e9b0b043` | `git ls-remote`, read 2026-09-10
 🔴 **THE TICKET IS WIDER THAN THIS MERGE AND THIS IS A NARROWING, stated so the ticket does not close on a fraction.**
 **Ticket scope, quoted verbatim:** *"SEC-07/08/11 — Marketplace deployment template hardening: Key Vault has no purge protection while holding the DEK wrapping key, storage has no network ACL and uses shared-key access, and the image is built with `npm install` rather than `npm ci`."* **Three legs.** [Testing], High, labels `blocker, horizon-1, security`.
 The branch `origin/rd-363-keyvault-purge-protection-s43` at **`b0dec96fc1f498b309cee692b6441ed9e9b0b043`** (confirmed at origin by `ls-remote` from Wednesday's seat, 1 commit, template + one new test) closes **the Key Vault leg only.**
 **Why it matters:** `main`'s `azure-marketplace/combined/mainTemplate.json:386-387` today has `enableSoftDelete: true`, `softDeleteRetentionInDays: 7` and **no `enablePurgeProtection`** — so the zip built from `main` ships a Key Vault holding the RSA key that wraps the customer's DEK, **destroyable permanently by any Contributor after 7 days, with no backup.**
 **Do:** forward-merge (the branch is based on an older main — **not** a fast-forward), tier-1 gate, then merge on Wednesday's GO. **Then say explicitly which of the three legs remain open and either sub-issue them or leave RD-363 open — do not close it on one leg.**
 
-### 4. `PRIVACY.md:21` — stop declaring another company's privacy policy
+### 3. `PRIVACY.md:21` — stop declaring another company's privacy policy
 **Measured by S48 at `cd2b543`:** the published privacy URL in the repo is `https://help.hpauthsuite.com/support/solutions/articles/47001217571-hp-privacy-statement` — **HP's privacy statement, for a different product** — while four lines above, the same document names **Datasec Solutions Pty Ltd** as the data controller. `privacy.datasec.com.au/nexusai` is **NXDOMAIN**; `datasec.com.au/privacy` is **404**.
 **Do:** remove the HP URL. **Do NOT invent a replacement URL** — standing up the domain and the page is Kam's, and a listing field pointing at a host that does not resolve is not an improvement on one that resolves wrongly. **Leave it explicitly marked as pending with a ticket reference, and say in your wrap what the replacement needs.**
 
@@ -86,3 +90,4 @@ The branch `origin/rd-363-keyvault-purge-protection-s43` at **`b0dec96fc1f498b30
 - Read against the previous outbound to this project: **the S48 commission (analysis only, no changes).** This brief SUPERSEDES nothing in it — S48 was read-only by design and this is the first brief that commissions changes from its findings.
 - Every ticket id in the QUEUE was read live in the same action as writing this brief.
 - **Narrowings stated:** RD-363 (one leg of three) · RD-369 (guard only, not the exposure, not the file removal).
+- 🔴 **A queue item was REMOVED after the gate refused this brief.** The first draft commissioned closing RD-163/201/RD-304/RD-306. **They have been `Done` since 2026-09-08.** Wednesday had read the RULING and not the TICKETS. The gate caught it; recording it here so you can see what the brief nearly cost you.
