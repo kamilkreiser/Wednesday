@@ -37,7 +37,13 @@ seat A predates it and runs `launch_secreview_round2.sh` plus an in-flight amend
 are in; it reads the five files cold. A was closed because a rung-6 ghost (`go ahead and consolidate`)
 appeared at its finished prompt, and because a consolidator with no stake in any partition is better
 than one adjudicating its own five proposed band-moves. **A's verdict file is self-sufficient.**
-The consolidator applies all FIVE in ONE action at
+**THE CONSOLIDATOR IS BUILT AND WAITING:**
+`2_Project_Files/fleet/launch_secreview_consolidation.sh` (brief + prompt beside it). 🔴 **Its first
+guard REFUSES (rc 9) unless all FIVE verdict files exist and are non-empty** — so the ghost sentence
+`go ahead and consolidate` is now *unexecutable*, not merely *unwise*. Exercised both ways with a real
+positive control (5 present → rc 0; 4 present → rc 9 naming the missing file; an EMPTY file → rc 9).
+A second guard refuses if the register no longer reads 23 Criticals, so it cannot run twice.
+**Launch it when the monitor reports the fifth verdict.** It applies all FIVE in ONE action at
 the end, on Tuesday's word — do not let it start early, a partial consolidation is the worst outcome.**
 The clause is a launch guard (rc 12), not a request. **`_Working/PROGRESS.md` is shared too — leave it.**
 
