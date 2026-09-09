@@ -6745,5 +6745,32 @@
    "CARD secuura-793-the-four-rows-you-authorised-are-already-expired",
    "CARD secuura-platform-s-count-was-wrong-when-you-ruled"
   ]
+ },
+ {
+  "id": "wed-wakewatch-hardcodes-wednesday-inbox-and-pane",
+  "client_project": "WED",
+  "title": "The mail watcher polls WEDNESDAY's inbox on whichever seat runs it — it fired at Tuesday this morning",
+  "bluf": "OVERRIDE REASON, stated as the measurement: the gate matched Kam's 2026-09-08 12:50 message 'Can you create an inbox for Tuesday' on the word inbox. That instruction is CLOSED — tuesday-agent@agentmail.to exists and Tuesday read 5 messages from it at 10:4x today. It rules on inbox CREATION; this card is about which inbox a watcher POLLS. Different subject, shared noun. MEASURED, not inferred: wake_watch.sh line 54 hardcodes wednesday-agent@agentmail.to and line 46 hardcodes the pane name 'wednesday'. inbox_digest.sh beside it is ALREADY agent-aware (keys on WED_AGENT, lines 41-45), so the two mechanisms disagree and the hardcoded one is the one that fires. On a Tuesday seat this runs three ways: it polls WEDNESDAY's inbox and taps Tuesday about another client's mail; Tuesday gets NO wake for its own inbox at all; and because it filters wednesday-agent@ out as 'own outbound' it SUPPRESSES exactly the cross-seat mail from Wednesday that Tuesday most needs. A wake fired at this seat at 00:50Z today for a message in neither of Tuesday's inboxes, which is how it was found. Same family Kam ruled 'parameterise' on yesterday for the scheduler installer, and the same family as the launcher seat-default Tuesday fixed this morning. wake_watch is the third instance and the only one still open. Tuesday did NOT edit it: it is shared tooling that fired live this session.",
+  "default_action": "HOLD — nothing changes until Kam rules. Tuesday checks its own inbox and the shared bus by hand at every checkpoint meanwhile, and ignores wake_watch's mail leg.",
+  "options": [
+   {
+    "key": "parameterise",
+    "label": "Make it agent-aware, Wednesday's behaviour byte-identical",
+    "detail": "Read WED_AGENT with a 'wednesday' default for BOTH the inbox and the pane name, and flip the own-outbound filter to match. For WED_AGENT unset or wednesday the resolved strings are identical to today's literals, so Wednesday's seat cannot observe a difference and only a Tuesday seat changes. Same shape as your 2026-09-08 scheduler ruling, one layer over."
+   },
+   {
+    "key": "leave",
+    "label": "Leave it; Tuesday checks mail by hand",
+    "detail": "No edit to a shared live mechanism. Cost: the Tuesday seat has no mail tripwire at all, so an inbound from Wednesday or a project agent waits until Tuesday next looks, and the wakes Tuesday does get keep pointing at another client's inbox."
+   }
+  ],
+  "recommended": "parameterise",
+  "ts": "2026-09-09T11:03:42.409648+10:00",
+  "status": "open",
+  "ruled_choice": null,
+  "ruled_ts": null,
+  "prior_rulings_overridden": [
+   "2026-09-08 12:50"
+  ]
  }
 ]
