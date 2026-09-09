@@ -7,7 +7,7 @@ status: live
 supersede: replace this file WHOLESALE at the next pickup; never append. It replaced the s1 pickup.
 ---
 
-# NEXT PICKUP — Tuesday, after s2. FOUR AGENTS ARE RUNNING. Do not launch a fifth without reading this.
+# NEXT PICKUP — Tuesday, after s2. FIVE AGENTS ARE RUNNING. Do not launch a sixth without reading this.
 
 **Run `2_Project_Files/tools/kam_rulings_today.sh` before writing anything.** 🔴 **AND WHEN ITS
 FRESHNESS LINE REPORTS A LAG, `curl -s http://127.0.0.1:47787/api/chatlog` BEFORE ANSWERING KAM** —
@@ -15,7 +15,7 @@ the local dashboard server sees his typing before any synced file does. That is 
 was found; the file was four minutes behind. Mail timestamps are UTC ≈ AEST−10.
 **Rotation band 80–90%; 70% is a checkpoint only.**
 
-## 🟢 WHAT IS RUNNING RIGHT NOW — four seats on the Security Review, partitioned by component
+## 🟢 WHAT IS RUNNING RIGHT NOW — FIVE seats on the Security Review, partitioned by component
 
 Kam, panel 2026-09-09: *"yes, run multiple agents on the security review."*
 
@@ -25,6 +25,7 @@ Kam, panel 2026-09-09: *"yes, run multiple agents on the security review."*
 | `%4` | `Datasec/SecRev-B` | License-Services · LicenseServer | 25 |
 | `%5` | `Datasec/SecRev-C` | HPK_Deployment_Utility · UniversalPrint · MailFlow · CypherSharePoint · QuickAccessLibrary | 28 |
 | `%6` | `Datasec/SecRev-D` | Task-Dispatcher · hpam-marketplace · datasec-administration-portal · WorkPathApplications · cc-api · hpam-api · SPDF-D1 | 25 |
+| `%7` | `Datasec/SecRev-J` | **the JUNE baseline** — `Deliverables/03_Findings_Register.md`, F-01…F-31 | 31 |
 
 **Shared method:** `2_Project_Files/fleet/briefs_staged/2026-09-09_secreview-round2-parallel-method.md`.
 **Launcher:** `2_Project_Files/fleet/launch_secreview_round2_seat.sh <b|c|d>` (one script, parameterised;
@@ -32,13 +33,27 @@ seat A predates it and runs `launch_secreview_round2.sh` plus an in-flight amend
 
 🔴 **THE RULE THAT KEEPS THIS SAFE: NO SEAT EDITS THE REGISTER.** Four seats, one
 `13_Consolidated_Findings_Register_2026-09.md`. Each writes
-`_Working/verification-2026-09/round2-<a|b|c|d>.md`. **Seat A consolidates all four in ONE action at
+`_Working/verification-2026-09/round2-<a|b|c|d>.md`. **Seat A consolidates all FIVE in ONE action at
 the end, on Tuesday's word — do not let it start early, a partial consolidation is the worst outcome.**
 The clause is a launch guard (rc 12), not a request. **`_Working/PROGRESS.md` is shared too — leave it.**
 
 **The method, and it is the agent's own recommendation adopted:** re-derive each CVSS vector FROM
 SOURCE, then compute. **Never adopt round 1's computed column.** `H-D1` is why — its recorded vector
 implied Critical 9.6 and re-deriving one metric from source gave High 8.6, moving the row DOWN.
+
+🔴 **KAM RULED `extend` ON JUNE, 2026-09-09 11:40, verbatim: *"extend the scoring pass into the June
+baseline"*.** Recorded in the queue. Seat J is that ruling. **June is a SIGNED-OFF deliverable, so it is
+the high-stakes partition and the only one likely to move severities UP.** Measured by Tuesday with four
+reference-vector controls: `F-07` filed High 8.7 → its own vector computes **9.2 Critical**; `F-10` filed
+High 8.2 → **9.4 Critical**; `F-22` filed **Medium** 7.7 → **9.0 Critical**, and 7.7 is itself a
+High-band number under a Medium band, so it is wrong twice. **Round 1 recorded `F-22` as filed High —
+that is wrong, June says Medium; take it from the pickup, not from round 1's table.** Round 1's
+*computed* figures were all three exactly right.
+
+⚠️ **SEAT-COUNT STALENESS, and it matters only at consolidation:** B, C and D were launched believing
+there were FOUR seats and their report headers say so. **There are five verdict files, not four.** When
+you give seat A the consolidation word, say **five** and name them:
+`round2-a.md · round2-b.md · round2-c.md · round2-d.md · round2-june.md`.
 
 ## 🔴 WHAT IS ACTUALLY ON KAM'S DESK (this seat's items only)
 

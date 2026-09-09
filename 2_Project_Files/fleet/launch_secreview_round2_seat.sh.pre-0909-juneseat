@@ -9,18 +9,14 @@
 #
 # SELF-LOCATING (portability rule 3, and the 2026-09-09 seat-resolver lesson).
 #
-# Usage: launch_secreview_round2_seat.sh <b|c|d|j> [--check]
+# Usage: launch_secreview_round2_seat.sh <b|c|d> [--check]
 # Exit: 0 launched (or guards pass under --check) · 2..12 a guard refused.
 set -u
 
 SEAT="${1:-}"
-# 'j' added 2026-09-09 on Kam's ruling `extend` — the June baseline is a FIFTH seat rather
-# than an amendment to the four already in flight: June is a separate document, so a
-# dedicated seat contends with nobody, and amending four running seats would be four
-# chances to get a SUPERSEDES wrong.
 case "$SEAT" in
-  b|c|d|j) ;;
-  *) echo "usage: launch_secreview_round2_seat.sh <b|c|d|j> [--check]" >&2; exit 2 ;;
+  b|c|d) ;;
+  *) echo "usage: launch_secreview_round2_seat.sh <b|c|d> [--check]" >&2; exit 2 ;;
 esac
 
 SELF="${BASH_SOURCE[0]}"
