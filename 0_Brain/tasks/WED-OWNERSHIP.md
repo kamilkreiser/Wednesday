@@ -30,3 +30,4 @@ sees the claim rather than discovering it in a conflict.
 | 2026-09-09 11:08 | Kamils-Mac-Studio | pre-push marker/artifact hook — covers rebase/amend/cherry-pick/merge, the paths pre-commit skips (Tuesday's design, 2026-09-09; she offered and I took it, her priority is the Datasec security review) | OPEN | |
 | 2026-09-09 12:32 | Kamils-Mac-Studio | chat page: show weekly usage % on the Wednesday/Tuesday toggle chips (Kam 12:32) | CLOSED |  2026-09-09 12:36 done |
 | 2026-09-09 12:57 | Kamils-Mac-Studio | send_brief + fleet tooling seat parameterisation (the hardcoded-Wednesday family) | CLOSED |  2026-09-09 13:01 send_brief sending-inbox DONE and pushed; subject prefix held pending Tuesday's agents; wake_watch held pending Kam's card |
+| 2026-09-09 21:14 | Kamils-Mac-Studio | decision_queue.sh amend verb + card freshness marker — the stale-card family hit 4x on 2026-09-09 (3 cards + 1 draft), 2 with measured cost; design settled in the 09-09 ledger rows | OPEN | |
