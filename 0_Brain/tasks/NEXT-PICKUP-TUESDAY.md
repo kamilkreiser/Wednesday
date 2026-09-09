@@ -132,6 +132,26 @@ both splits and the referred `ADM-D5` band move. **An application seat is still 
 
 ## 🔴 WHAT IS ACTUALLY ON KAM'S DESK (this seat's items only)
 
+0a. 🟡 **TENANT QUESTION — HALF ANSWERED 2026-09-09 12:12–12:15, relayed by Wednesday. The gap is now
+   PRECISE and small.** Kam's words, verbatim across three messages: *"It's the datasec.com.au tenant,
+   and the tenant that Nexus used to be deployed against."* · *"there are three tenants: Global Variables
+   is the sales demo tenant, datasec.com.au is the corporate tenant, there's also a development tenant
+   for Datasec"* · and decisively: ***"The Crys of the Rogue tenant is my development tenant, and there's
+   also another development tenant used by other developers, and this was the tenant that Nexus was
+   deployed against."***
+   **SETTLED: there are TWO development tenants.** Kreiser-org (`d500ebad-…`) is **his**; a **second dev
+   tenant used by other developers** is where NexusAI was deployed, and **that is the live pass's target**.
+   🔴 **STILL MISSING: that tenant's ID.** He named it by DESCRIPTION only.
+   ⚠️ **`fc05dcdd-…` IS A STRONG CANDIDATE AND MUST NOT BE ASSERTED.** The workspace CLAUDE.md still
+   records it as dev-**or**-sales-demo with *"the mapping is UNRESOLVED — do not assert which until
+   checked"*. Seat J's June work found `F-16`'s evidence pins HPAM's config to `fc05dcdd`, which is
+   evidence it is a real Datasec dev environment — **not** proof it is the developers' one rather than the
+   sales-demo one. **Ask him for the id, or measure it. A strong candidate is not a measurement.**
+   **Also owed when the floor is quiet:** the workspace CLAUDE.md lists five environments and does not
+   distinguish HIS dev tenant from THE DEVELOPERS' one, so it is now behind what he has said. Shared file
+   across clients — **Kam's to amend, neither seat's.**
+
+
 0. 🔴🔴 **`secreview-june-register-discloses-credentials` — rec `all-three`, default HOLD. THE MOST
    URGENT ITEM ON THIS DESK AND IT IS NOT A SCORING ISSUE.** The June register — **signed off, customer
    facing, rendered to `.docx` for circulation** — prints **8 lines of secret values verbatim** in `F-16`
