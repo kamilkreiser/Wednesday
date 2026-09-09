@@ -47,6 +47,32 @@ does not apply.
 
 ---
 
+## INSTRUMENTS — bound the OUTPUT, never the STREAM you are diagnosing from
+
+**Why this is here.** On 2026-09-09 one seat lost three commands to this family in a single
+session and named it better than the coordinator had. **Every one made a null result look like
+a real one**, and each was the pipe or a missing binary rather than the subject:
+
+1. `timeout 90 git fetch | tail` — **macOS has no `timeout`.** git never ran; the pipeline
+   still exited 0. **First command of the session.**
+2. A push through `| tail -50` — hid legs 1–3, so the real cause (`DEPS MISSING` on a worktree
+   that had never had `npm ci`) looked unattributable.
+3. `pgrep -qf 'npm test -w services/security'` — **matched the seat's own wrapper's command
+   line**, so a test that had never started read as running.
+
+**The rule:** redirect to a file and read the file — `cmd > out 2>&1; rc=$?` — then **the exit
+code and the head both survive**. Bound the *output you display*, never the *stream you are
+diagnosing from*.
+
+**And the three specifics, because each is a repeat offender:**
+- **`timeout` does not exist on macOS.** Neither does `realpath` on older ones. Assume the
+  oldest shell on the drive's targets: bash 3.2, no `declare -A`.
+- **A `pgrep -f` pattern matches YOUR OWN command line**, including the wrapper that ran it.
+  Exclude your own pid, or match on something only the target emits.
+- **In zsh there is no `PIPESTATUS`** — it is `$pipestatus[1]`, and the Bash tool here is zsh.
+  `${PIPESTATUS[0]}` expands to empty, so the guard around a refusable step reads nothing and
+  looks fine.
+
 ## HOLDS that go in every brief
 
 - **Signature classes pause for Kam, always:** production · money · external communication
