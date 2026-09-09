@@ -149,3 +149,34 @@ runners, deploy scripts, migration gates, audit passes, health checks, batch job
 shape was settled rather than open): `run-shell-suites.sh` refuses the vacuous pass in terms — *"'all
 0 are reached' is not a pass: there is nothing being gated"* — and `check-production-guard.sh` prints
 `23 / 23 services`.
+
+---
+
+## "WHAT DID MY BRANCH CHANGE" IS A THREE-DOT QUESTION — `other..HEAD` on a branch you are BEHIND shows their commits as yours
+
+**Why this exists.** On 2026-09-09 a Secuura seat asked whether its branch touched a lockfile. It ran
+`git diff --name-only origin/develop..HEAD`, got **12 lockfiles**, and was one step from reporting the
+mainline as broken repo-wide. The branch was **9 commits behind develop** and had touched **two files,
+neither a dependency file** — `git diff --name-only $(git merge-base origin/develop HEAD)..HEAD`.
+
+**The mechanism:** a two-dot diff `A..B` compares the two ENDPOINTS. If B is behind A, everything A
+gained since the fork shows up as though B changed it — **in the direction that makes your own branch
+look guilty of someone else's commits.** So the natural next sentence is an alarm, and the alarm is
+about the wrong repository state entirely.
+
+**The rules:**
+
+1. **To ask what YOUR branch changed, diff from the MERGE BASE** — `git diff $(git merge-base X HEAD)..HEAD`,
+   or `git diff X...HEAD` (three dots, which does it for you). **Never `X..HEAD`.**
+2. **The same trap sits in `log`**: `git log X..HEAD` is correct for "my commits" and
+   `git log X...HEAD` is not — the two commands want opposite dot counts, which is exactly why this
+   is worth writing down rather than remembering.
+3. **If a "what did I change" answer surprises you by its SIZE, check how far BEHIND you are before
+   you check what you touched.** `git rev-list --left-right --count X...HEAD` costs nothing and tells
+   you whether the number is about your work or about the gap.
+4. **A gate refusing your push is a claim about YOUR TREE, not about the repository.** Before
+   reporting a repo-wide blocker, establish whether the failure follows the branch or the trunk — the
+   cheapest test is whether merging the trunk in makes it go away.
+5. **This is a FALSE MEASUREMENT, not a false absence** — the command ran, succeeded, and answered a
+   different question than the one asked. It belongs beside the census rules: *complete over what?*
+   Here: *changed relative to what?*
