@@ -58,7 +58,7 @@ export DQ_CHAT="${DQ_CHAT:-$DIR/../../0_Brain/dashboard/data/chat_log.json}"
 # readable on a stale store, because a guard that blocks reading gets routed around.
 . "$DIR/_store_guard.sh"
 case "${1:-}" in
-  add|rule|--delivered|amend)
+  add|rule|--delivered)
     store_guard "$DQ_FILE" || exit $? ;;
 esac
 # The python below is delivered on stdin (heredoc), so a `--json` payload
@@ -284,95 +284,6 @@ def cmd_rule(args):
             return
     die(f"no decision with id {did!r}")
 
-def cmd_amend(args):
-    # AMEND an OPEN card in place. Built 2026-09-09 after the stale-card family
-    # reached four instances in one day (three cards + one draft), two with a
-    # measured cost: at 09:39 Kam ruled `measure-then-rule` on a card whose
-    # measurement had completed 32 minutes earlier, and at 18:06 a card offered
-    # him a three-option choice that a sweep had superseded two minutes later.
-    #
-    # A filed card is a SNAPSHOT presented as a live question, and the longer it
-    # waits the more certain it is to be wrong -- because waiting is exactly when
-    # the world moves. `supersede` would not have helped either instance: both
-    # cards were LIVE and STALE, not moot.
-    #
-    # DISCIPLINE, and each clause is load-bearing:
-    #   - RULED cards REFUSE. A ruling is a record of what the principal decided
-    #     against what he was shown; editing that retroactively rewrites his
-    #     reasoning. Withdraw and re-file instead.
-    #   - NOTHING IS DESTROYED. Every prior value is kept in `amendments`
-    #     (2026-08-26: cleanup means quarantine, never removal), so the card
-    #     still shows what he would have ruled on before the amendment.
-    #   - THE REASON IS MANDATORY. An amendment with no reason is indis-
-    #     tinguishable from a card that was always worded that way.
-    #   - TIMESTAMPS ARE GENERATED HERE, never typed (ledger w>=3, 2026-08-16).
-    did = args[0].strip() if args else ""
-    if not did or did.startswith("--"):
-        die("usage: amend ID --reason TEXT [--bluf TEXT] [--default-action TEXT] "
-            "[--option-detail KEY TEXT]   (at least one field; --reason always required)")
-    rest, fields, reason = args[1:], {}, None
-    i = 0
-    while i < len(rest):
-        a = rest[i]
-        if a == "--reason":
-            if i+1 >= len(rest): die("--reason needs a value")
-            reason = " ".join(rest[i+1].split()); i += 2
-        elif a in ("--bluf", "--default-action"):
-            if i+1 >= len(rest): die(f"{a} needs a value")
-            fields[a.lstrip("-").replace("-", "_")] = rest[i+1]; i += 2
-        elif a == "--option-detail":
-            if i+2 >= len(rest): die("--option-detail needs KEY and TEXT")
-            fields.setdefault("_options", {})[rest[i+1]] = rest[i+2]; i += 3
-        else:
-            die(f"unknown flag {a!r} for amend")
-    if not reason:
-        die("amend REQUIRES --reason: an amendment with no reason is indistinguishable "
-            "from a card that was always worded that way")
-    if not fields:
-        die("amend changes nothing: give at least one of --bluf, --default-action, --option-detail")
-
-    data = load()
-    for dec in data:
-        if not (isinstance(dec, dict) and dec.get("id") == did):
-            continue
-        st = dec.get("status")
-        if st == "ruled":
-            die(f"{did} is RULED ({dec.get('ruled_choice')} @ {dec.get('ruled_ts')}) -- a ruling records "
-                f"what Kam decided against what he was SHOWN, so amending it rewrites his reasoning. "
-                f"File a new card instead.")
-        if st not in (None, "open"):
-            die(f"{did} has status {st!r}; amend only applies to an OPEN card")
-
-        before, changed = {}, []
-        opts = fields.pop("_options", {})
-        for key, val in fields.items():
-            before[key] = dec.get(key)
-            dec[key] = val
-            changed.append(key)
-        for okey, detail in opts.items():
-            found = False
-            for o in dec.get("options", []):
-                if isinstance(o, dict) and o.get("key") == okey:
-                    before[f"option:{okey}"] = o.get("detail")
-                    o["detail"] = detail
-                    changed.append(f"option:{okey}")
-                    found = True
-                    break
-            if not found:
-                keys = ", ".join(sorted(str(o.get("key")) for o in dec.get("options", []) if isinstance(o, dict)))
-                die(f"{did} has no option {okey!r} (options: {keys}) -- nothing written")
-
-        dec.setdefault("amendments", []).append({
-            "ts": now(), "reason": reason, "changed": changed, "before": before,
-        })
-        dec["amended_ts"] = now()
-        save(data)
-        print(f"amended: {did} -- {', '.join(changed)}")
-        print(f"  reason: {reason}")
-        print(f"  prior values kept in amendments[{len(dec['amendments'])-1}]; nothing destroyed")
-        return
-    die(f"no decision with id {did!r}")
-
 def is_delivered(dec):
     return bool(str(dec.get("delivered_artefact") or "").strip())
 
@@ -465,13 +376,12 @@ def cmd_list(args):
     print(f"{shown} decision(s) [{tag}]")
 
 if len(sys.argv) < 2:
-    die("usage: decision_queue.sh add|rule|amend|--delivered|list|show ...", 1)
+    die("usage: decision_queue.sh add|rule|--delivered|list|show ...", 1)
 cmd, rest = sys.argv[1], sys.argv[2:]
 if cmd == "add":   cmd_add(rest)
 elif cmd == "rule": cmd_rule(rest)
 elif cmd == "show": cmd_show(rest)
 elif cmd in ("--delivered", "delivered"): cmd_delivered(rest)
-elif cmd == "amend": cmd_amend(rest)
 elif cmd == "list": cmd_list(rest)
 else: die(f"unknown command: {cmd}", 1)
 PYEOF
