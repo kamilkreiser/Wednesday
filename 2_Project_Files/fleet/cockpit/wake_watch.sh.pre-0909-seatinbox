@@ -48,41 +48,14 @@ while [ $SECONDS -lt $end ]; do
     echo "WAKE: pane 'wednesday' DEAD — Context limit reached; the coordinator cannot act — respawn required"; exit 0
   fi
   # (a) mail tripwire
-  # SEAT-AWARE INBOX (Tuesday, 2026-09-09, on Kam's explicit instruction "fix things so
-  # that next time I post it, you receive it"). Previously hardcoded to wednesday-agent@,
-  # so on the Tuesday seat this polled the OTHER coordinator's mailbox: it woke Tuesday
-  # about Wednesday's mail, gave no wake for Tuesday's own, and suppressed Tuesday's
-  # outbound to Wednesday as "own". MEASURED COST: a message from Kam delivered straight
-  # to tuesday-agent@ at 17:03:44 sat unread until he asked at 17:08.
-  # Resolved from inbox_routing.conf by seat, exactly as send_brief.sh does.
-  # DEFAULT IS wednesday, so behaviour on the Studio seat is byte-identical to before.
-  # Seat resolution: WED_AGENT if set, else the TREE'S OWN NAME. The tree is used
-  # because the runner does NOT inherit WED_AGENT (measured 2026-09-09: the live
-  # watcher process carries no WED_AGENT), so keying on the variable alone would
-  # silently keep polling the default inbox — the exact defect this fixes.
-  # Unrecognised tree falls back to wednesday, so nothing changes for the Studio.
-  _root="$(cd -P "$(dirname "${BASH_SOURCE[0]}")/../../.." && pwd)"
-  case "$(basename "$_root")" in
-    TUESDAY)   _tree_seat=tuesday   ;;
-    WEDNESDAY) _tree_seat=wednesday ;;
-    *)         _tree_seat=wednesday ;;
-  esac
-  _seat="${WED_AGENT:-$_tree_seat}"
-  _routing="$(cd -P "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)/inbox_routing.conf"
-  case "$_seat" in
-    tuesday)   SEAT_INBOX=$(awk -F'|' '$1=="Tuesday"{print $2}'   "$_routing" 2>/dev/null) ;;
-    wednesday) SEAT_INBOX=$(awk -F'|' '$1=="Wednesday"{print $2}' "$_routing" 2>/dev/null) ;;
-    *)         SEAT_INBOX="" ;;
-  esac
-  [ -n "$SEAT_INBOX" ] || SEAT_INBOX="wednesday-agent@agentmail.to"
   # Latest INBOUND message only — own outbound copies (from wednesday-agent@)
   # must never fire the tripwire (false wake 2026-08-05 21:4x).
-  ts=$(set -a; . "$ENVF" 2>/dev/null; set +a; export SEAT_INBOX; curl -s -m 10 \
-    "https://api.agentmail.to/v0/inboxes/$SEAT_INBOX/messages?limit=10" \
+  ts=$(set -a; . "$ENVF" 2>/dev/null; set +a; curl -s -m 10 \
+    "https://api.agentmail.to/v0/inboxes/wednesday-agent@agentmail.to/messages?limit=10" \
     -H "Authorization: Bearer ${AGENTMAIL_API_KEY:-}" \
     | python3 -c "
-import json,sys,os
-ms=[m for m in json.load(sys.stdin).get('messages',[]) if os.environ.get('SEAT_INBOX','') not in str(m.get('from',''))]
+import json,sys
+ms=[m for m in json.load(sys.stdin).get('messages',[]) if 'wednesday-agent@' not in str(m.get('from',''))]
 print(ms[0].get('timestamp','')[:16] if ms else '')" 2>/dev/null)
   if [ -n "$ts" ] && [[ "$ts" > "$BASELINE" ]]; then
     echo "WAKE: new mail at $ts (baseline $BASELINE)"; exit 0
