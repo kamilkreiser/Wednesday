@@ -75,18 +75,9 @@ while [ $SECONDS -lt $end ]; do
     *)         SEAT_INBOX="" ;;
   esac
   [ -n "$SEAT_INBOX" ] || SEAT_INBOX="wednesday-agent@agentmail.to"
-  # The Kam-panel tag must name THIS seat as the ADDRESSEE, not merely be a Kam
-  # message. Wednesday relays "[Kam -> Tuesday]" copies to Tuesday, so those sit in
-  # HER sent folder with that prefix; a class-only match would wake her about her own
-  # relay. Filter on class AND recipient (the 2026-08-13 shared-bus rule).
-  case "$_seat" in
-    tuesday)   KAM_TAG="[Kam -> Tuesday]"   ;;
-    wednesday) KAM_TAG="[Kam -> Wednesday]" ;;
-    *)         KAM_TAG="[Kam -> Wednesday]" ;;
-  esac
   # Latest INBOUND message only — own outbound copies (from wednesday-agent@)
   # must never fire the tripwire (false wake 2026-08-05 21:4x).
-  ts=$(set -a; . "$ENVF" 2>/dev/null; set +a; export SEAT_INBOX KAM_TAG; curl -s -m 10 \
+  ts=$(set -a; . "$ENVF" 2>/dev/null; set +a; export SEAT_INBOX; curl -s -m 10 \
     "https://api.agentmail.to/v0/inboxes/$SEAT_INBOX/messages?limit=10" \
     -H "Authorization: Bearer ${AGENTMAIL_API_KEY:-}" \
     | python3 -c "
@@ -97,7 +88,7 @@ _inb=os.environ.get('SEAT_INBOX','')
 # That is exactly why Kam's 17:03 message was delivered and never woke Tuesday.
 # Kam's messages are never 'own outbound', whatever the From line says.
 ms=[m for m in json.load(sys.stdin).get('messages',[])
-    if str(m.get('subject','')).startswith(os.environ.get('KAM_TAG','')) or _inb not in str(m.get('from',''))]
+    if str(m.get('subject','')).startswith('[Kam ->') or _inb not in str(m.get('from',''))]
 print(ms[0].get('timestamp','')[:16] if ms else '')" 2>/dev/null)
   if [ -n "$ts" ] && [[ "$ts" > "$BASELINE" ]]; then
     echo "WAKE: new mail at $ts (baseline $BASELINE)"; exit 0
