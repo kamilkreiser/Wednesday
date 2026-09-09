@@ -89,6 +89,27 @@ fi
 
 BODY="$(cat "$BODY_FILE")"
 
+# ── THE GATE VIEW OF THE BODY (ledger w=5, 2026-09-09) ───────────────────────
+# Every section gate below anchors on a BARE line — `^PROVENANCE:`,
+# `^RULED BY KAM, …`, `^SELF-CHECK:`. A markdown heading (`## PROVENANCE:`) is
+# the natural way to write those in a document and it does NOT match, so the
+# brief is refused for a formatting reason while carrying the section perfectly.
+# That has now happened FIVE times, twice inside one brief today, by a seat that
+# had read the w=4 row for it during its own boot ninety minutes earlier. A rule
+# that fails on its fifth reading is not a rule; the ledger says promote it.
+#
+# THE FIX IS A VIEW, NOT AN EDIT. `$BODY_G` is what the GATES read; `$BODY` is
+# what is SENT, byte-identical to what the author wrote, so agents still receive
+# the readable heading. Both the presence checks and the line-by-line parsers use
+# BODY_G, so they cannot disagree about where a section starts — a check that
+# finds a section its parser cannot read would be a check that cannot fail, which
+# is the family this whole file exists to serve.
+#
+# ONLY the four anchors that REQUIRE a bare line are normalised. `^## *QUEUE`
+# deliberately expects the hashes and is left alone — stripping it would break a
+# working gate while fixing a broken one.
+BODY_G="$(printf '%s' "$BODY" | sed -E 's/^#{1,6}[[:space:]]*(PROVENANCE:|SELF-CHECK:|RULED BY KAM, NOT YET IN AN ARTEFACT|RULED BY WEDNESDAY FOR THIS PROJECT, STILL OPERATIVE)/\1/')"
+
 # EMPTY-BODY GATE (2026-09-07, ledger: a subject-only ANSWER reached seat s143).
 # `send_brief.sh` reported "sent" and `cockpit.sh say --mail` verified the mail at
 # the destination — BY SUBJECT. Both passed on a mail with NO BODY. The agent proved
@@ -174,7 +195,7 @@ esac
 # it makes "I didn't check" a deliberate act of writing a false line rather than
 # an omission I never noticed. That is the same shape as the pre-commit hook.
 if [ "$KIND" = "brief" ]; then
-  if ! printf '%s' "$BODY" | grep -q '^PROVENANCE:'; then
+  if ! printf '%s' "$BODY_G" | grep -q '^PROVENANCE:'; then
     cat >&2 <<'MSG'
 BRIEF REFUSED — no PROVENANCE block.
 
@@ -203,7 +224,7 @@ MSG
       "") break ;;
     esac
   done <<EOF
-$(printf '%s' "$BODY" | sed -n '/^PROVENANCE:/,$p' | tail -n +2)
+$(printf '%s' "$BODY_G" | sed -n '/^PROVENANCE:/,$p' | tail -n +2)
 EOF
   [ "$BAD" -eq 0 ] || exit 1
 
@@ -251,7 +272,7 @@ EOF
       BADPATH=1
     fi
   done <<EOF
-$(printf '%s' "$BODY" | sed -n '/^PROVENANCE:/,$p' | tail -n +2)
+$(printf '%s' "$BODY_G" | sed -n '/^PROVENANCE:/,$p' | tail -n +2)
 EOF
   if [ "$BADPATH" -ne 0 ]; then
     cat >&2 <<'MSG'
@@ -296,7 +317,7 @@ MSG
   # defect this gate exists for, which is the evidence it works.)
   SCOPE_HIT="$(printf '%s' "$BODY" | grep -oiE '\breversible\b|board config|low[- ]risk|blast radius|contained change|local change' | head -1)"
   if [ -n "$SCOPE_HIT" ]; then
-    if ! printf '%s' "$BODY" | sed -n '/^PROVENANCE:/,$p' | tail -n +2 \
+    if ! printf '%s' "$BODY_G" | sed -n '/^PROVENANCE:/,$p' | tail -n +2 \
          | grep -qiE 'scope|blast radius|consumers|reversib|who else|shared by'; then
       cat >&2 <<MSG
 BRIEF REFUSED — it makes a SCOPE claim ("$SCOPE_HIT") with nothing in PROVENANCE
@@ -336,7 +357,7 @@ MSG
   if printf '%s' "$BODY" | grep -qiE '^## *QUEUE'; then
     QUEUE_IDS="$(printf '%s' "$BODY" | sed -n '/^## *[Qq][Uu][Ee][Uu][Ee]/,/^## /p' \
                  | grep -oE '\b(KS|PS|RD|WED|HPSM|CPKEY|VSP|WIL)-[0-9]+\b' | sort -u)"
-    PROV_BLOCK="$(printf '%s' "$BODY" | sed -n '/^PROVENANCE:/,$p')"
+    PROV_BLOCK="$(printf '%s' "$BODY_G" | sed -n '/^PROVENANCE:/,$p')"
     MISSING=""
     for id in $QUEUE_IDS; do
       printf '%s' "$PROV_BLOCK" | grep -q "$id" || MISSING="$MISSING $id"
@@ -391,7 +412,7 @@ MSG
   # so a stale attestation carried from last night would have passed. Caught by
   # exercising the refuse path before arming (the stale test did not refuse).
   TODAY_LOCAL="$(date +%Y-%m-%d)"
-  SC_LINE="$(printf '%s' "$BODY" | grep -E '^SELF-CHECK: *re-read end-to-end for contradictions \| [0-9]{4}-[0-9]{2}-[0-9]{2} [0-9]{2}:[0-9]{2}' | tail -1)"
+  SC_LINE="$(printf '%s' "$BODY_G" | grep -E '^SELF-CHECK: *re-read end-to-end for contradictions \| [0-9]{4}-[0-9]{2}-[0-9]{2} [0-9]{2}:[0-9]{2}' | tail -1)"
   if [ -z "$SC_LINE" ]; then
     cat >&2 <<MSG
 BRIEF REFUSED — no SELF-CHECK attestation.
@@ -457,7 +478,7 @@ MSG
       exit 1
     fi
     UNDELIVERED_IDS="$(printf '%s\n' "$UNDELIVERED_OUT" | awk '/^\[ruled\]/ {print $2}')"
-    if [ -n "$UNDELIVERED_IDS" ] && ! printf '%s\n' "$BODY" | grep -q '^RULED BY KAM, NOT YET IN AN ARTEFACT'; then
+    if [ -n "$UNDELIVERED_IDS" ] && ! printf '%s\n' "$BODY_G" | grep -q '^RULED BY KAM, NOT YET IN AN ARTEFACT'; then
       N_UNDELIVERED="$(printf '%s\n' "$UNDELIVERED_IDS" | grep -c .)"
       cat >&2 <<MSG
 BRIEF REFUSED — $N_UNDELIVERED ruled card(s) for '$TO' (prefix $DQ_PREFIX) have NO delivered mark, and
