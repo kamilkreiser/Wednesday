@@ -186,6 +186,19 @@ shared brief plus per-seat supplements, read the supplement AGAINST the shared h
 
 ## ⚠️ TRAPS — s1's still hold; these are s2's additions
 
+0. 🟢 **`send_brief.sh` IS FIXED** (Wednesday, 2026-09-09): the SENDING inbox is looked up from
+   `inbox_routing.conf` by `WED_AGENT`, no default, no hostname fallback, refuses rc 2 if unset.
+   **Proven end-to-end from this seat** — with `WED_AGENT=tuesday` it arrives `from: Tuesday Datasec
+   seat <tuesday-agent@>`. **The s2 restriction on using it for Datasec is LIFTED.**
+   ⚠️ **The SUBJECT PREFIX still reads `[Wednesday -> …]` on purpose — it is the fleet's ROUTING KEY**
+   and every Datasec agent's boot prompt matches it. **Flipping it makes your briefs INVISIBLE to your
+   own agents.** Order, and it is Kam's to authorise: agents accept BOTH tags → prefix flips → old tag
+   retired. **Until then it is a cosmetic defect, not a routing fault.**
+   🔴 **s2-ONLY HAZARD, gone for you:** s2's shell carried `WED_AGENT=wednesday` from the misboot, which
+   silently defeated that fix and nearly had s2 report her correct code as broken. **A correctly-booted
+   seat does not have this** — which is why it would be invisible to anyone reading the code later.
+
+
 1. 🔴 **`send_brief.sh` SENDS FROM `wednesday-agent@` ON EVERY SEAT** (line 24, hardcoded; line 486
    hardcodes the subject prefix too). **Do NOT use it for anything Datasec.** Mail Wednesday by direct
    POST to `/v0/inboxes/tuesday-agent@agentmail.to/messages/send`, and **verify at her end by the
