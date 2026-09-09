@@ -53,6 +53,39 @@ case "${WED_AGENT:-}" in
   *)  echo "send_brief: WED_AGENT='${WED_AGENT}' is neither wednesday nor tuesday. REFUSING." >&2
       exit 2 ;;
 esac
+# ── THE TREE MUST AGREE WITH THE ENVIRONMENT (Tuesday's control, 2026-09-09) ──
+# The check above refuses an UNSET or UNKNOWN seat. It cannot see a STALE BUT VALID
+# one — and that is the case that actually happened, within the hour: Tuesday's shell
+# still carried WED_AGENT=wednesday from a misboot, so her first test mail went out of
+# Wednesday's inbox again. The code did the right thing with the wrong input, and
+# nothing failed. She caught it with a control, not with an error.
+#
+# So cross-check the env against the TREE, using the launcher's own discriminator —
+# the checkout's folder name. It is the right key because it is LOCAL: the two trees
+# are clones of one repo, so every tracked file is identical in both and only the path
+# differs (Launch_Wednesday.command's resolver, and the lesson it came from).
+#
+# REFUSE ONLY ON A DISAGREEMENT between two things that both KNOW. An unrecognised tree
+# — a worktree, a fresh clone, a scratch copy — cannot discriminate, so it stays silent
+# rather than refusing work it has no evidence against. Over-refusing here would push
+# people to set the variable to whatever makes the tool quiet, which is worse than the
+# hole it closes.
+case "$(basename "$PROJECT_DIR")" in
+  TUESDAY|Tuesday|tuesday)       TREE_SEAT="tuesday"   ;;
+  WEDNESDAY|Wednesday|wednesday) TREE_SEAT="wednesday" ;;
+  *)                             TREE_SEAT=""          ;;
+esac
+if [ -n "$TREE_SEAT" ] && [ "$TREE_SEAT" != "$WED_AGENT" ]; then
+  echo "send_brief: THE TREE AND THE ENVIRONMENT DISAGREE ABOUT WHICH SEAT THIS IS." >&2
+  echo "  tree says : $TREE_SEAT   (from $(basename "$PROJECT_DIR")/)" >&2
+  echo "  WED_AGENT : $WED_AGENT" >&2
+  echo "  Sending now would put this seat's mail in the OTHER coordinator's inbox, and" >&2
+  echo "  nothing downstream would report it. The commonest cause is a stale WED_AGENT" >&2
+  echo "  inherited from a misboot — check with 'echo \$WED_AGENT' and re-export it," >&2
+  echo "  or prefix this command. REFUSING." >&2
+  exit 2
+fi
+
 INBOX="$(awk -F'|' -v k="$SEAT_KEY" '$1==k {print $2; exit}' "$ROUTING" 2>/dev/null)"
 if [ -z "$INBOX" ]; then
   echo "send_brief: seat '$SEAT_KEY' has no entry in $ROUTING, so its own inbox is unknown." >&2
