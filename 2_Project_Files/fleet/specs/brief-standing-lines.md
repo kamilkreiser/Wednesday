@@ -1391,3 +1391,41 @@ it at the TIER field, which it never named) · [[2026-09-01_qa-gate-before-my-ve
 09-04: a claim about the PRODUCT is not a shape) · [[2026-09-05_qa-gate-tiers-and-the-two-nogo-cap]] ·
 [[2026-08-13_headline-must-match-the-operative-case]] (two rules of one author disagreeing four hours
 apart, on the same seat).
+
+---
+
+## STANDING LINE (2026-09-09) — BEFORE ANY MERGE, CHECK THE PR'S BASE IS NOT ALREADY IN develop
+
+**The line, for every brief that could result in a merge:**
+
+> **Before merging any PR, confirm its BASE branch is not already fully contained in the target.**
+> `GET /repos/<o>/<r>/compare/develop...<base-branch>` — **`status: behind` or `ahead_by: 0` means
+> the base has already been merged away from, and merging the PR lands the work on a dead branch.**
+> Every other instrument will say success.
+
+**Why, measured rather than argued.** On 2026-09-09 Kam merged #914 into develop and then #915
+sixteen seconds later. **#915's base was still `feature/ks-754-…`, so it merged into #914's branch —
+a branch that had just been merged away from.** The bump never reached develop and the repo stayed
+push-blocked for every author. **Both PRs read `merged: true`, both had real merge commits, both had
+correct `merged_at`.** The seat's formulation, adopted fleet-wide:
+
+> ***"a PR merged into a branch that had already been merged away from, which reads as success on
+> every instrument except ancestry."***
+
+**Wednesday caused it** by telling Kam #915 would retarget itself once #914 merged. GitHub retargets
+when the base branch is **DELETED**; the branch still existed. **The true caveat — *"check its base
+says develop before you click"* — was in the same message, subordinated to the wrong headline.**
+
+**And it is not one PR.** Swept the same day across 42 open PRs: **3 not based on `develop`, and 2 of
+those 3 armed** — #916 (`ahead_by: 0`, `behind: 2`) and **#879 (`ahead_by: 0`, `behind: 95` — armed
+for a long time and unnoticed)**. #900 is a genuine live stack (`ahead_by: 4`) and is fine.
+**Control: the KS-926 branch, real unmerged work, reads `ahead_by: 1`** — so the check discriminates.
+
+**Two corollaries:**
+1. **`mergeable_state: clean` says nothing about this** — that field means no required check is
+   failing, and this repo's own `CLAUDE.md` already warns it is not "tested". It is also not "aimed
+   at the right branch".
+2. **The read that settles it is the ARTEFACT, not the PR metadata.** Twice on 2026-09-09 the
+   decisive instrument was a seat reading the dependency PINS out of `develop`'s lockfiles — first
+   proving the bump had NOT landed while two PRs claimed merged, then proving it had. **Ancestry and
+   gates can both be checked; the artefact is what cuts through when they disagree.**
