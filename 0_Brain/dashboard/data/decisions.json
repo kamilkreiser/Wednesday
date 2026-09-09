@@ -6881,5 +6881,38 @@
    "2026-09-04 15:32",
    "CARD secreview-estate-wide-scoring-pass-including-june"
   ]
+ },
+ {
+  "id": "nexusai-main-tree-is-a-stale-snapshot",
+  "client_project": "Datasec/NexusAI",
+  "title": "NexusAI's main working tree silently reverts seven tickets' work — restore it, or keep it as the only evidence of an unexplained write",
+  "bluf": "OVERRIDE REASON, STATED AS WHAT WAS READ. The gate matched two ruled cards on the bare tokens 'main' and 'snapshot'. Both were opened. One is hpsm-credential-bearing-prd-outside-every-snapshot, ruled structural-look, about an HPSM document living outside the repository. The other is secuura-768-dependabot-routing-to-main, ruled route-to-main, and it is SECUURA, another client. Neither rules on a NexusAI working tree, on git state, or on a restore. Same words, different projects, different subject. NOW THE CARD. MEASURED BY THE NEXUSAI SEAT, NOT INFERRED. 2_Project_Files is on main at cd2b543 and level with origin, but 33 tracked files on disk do not match that commit and the difference is a REVERSION of plus 248 minus 1230 lines, stripping work from RD-361, RD-374, RD-376, RD-322, RD-148, RD-362 and RD-369, including 332 lines of backend/services/authEnforcement.js. NOTHING IS AT RISK AND THAT IS ESTABLISHED: every on-disk file hashes to a blob already reachable in the repo, checked against all 2276 blobs from every ref, and the one untracked file likewise. A fresh worktree at cd2b543 renders byte-correct, so the volume is healthy now and this is a past event rather than an ongoing fault. THE MECHANISM IS NOT ESTABLISHED. The mtimes are 3 to 6 September, OLDER than the commits they lack, so these bytes were written days ago and never overwritten. That points at a restore-type write rather than a git operation, and the drive was renamed from DevMASTER to KK_T9_External_HDD at some point, with over a hundred stale worktree registrations still naming the old path. The agent could not close it and did not guess. NOTHING IS BLOCKED EITHER WAY: it snapshotted the tree, built its own worktree at cd2b543, and every measurement in its marketplace report comes from there. TUESDAY HELD THE RESTORE RATHER THAN TAKING IT, and the reason is evidence rather than authority: the restore is reversible and sits inside the delegated scope, but those 33 files are the only surviving artefact of whatever wrote them, and reconciling a mismatch destroys the evidence that a question was ever open.",
+  "default_action": "Nothing moves. The stale tree stays, the NexusAI agent keeps working from its own worktree at cd2b543, and the mechanism stays unexplained.",
+  "options": [
+   {
+    "key": "investigate",
+    "label": "Keep the tree as-is until the mechanism is explained, then restore",
+    "detail": "Recommended. Nothing is blocked and the evidence is irreplaceable; a restore can happen any time, the evidence cannot come back."
+   },
+   {
+    "key": "restore",
+    "label": "Restore now and accept losing the evidence",
+    "detail": "Tidies the tree today. The unexplained write stays unexplained and may recur on another project."
+   },
+   {
+    "key": "both",
+    "label": "Copy the 33 files to a dated evidence folder, then restore",
+    "detail": "Keeps both. Costs one copy step and leaves a folder somebody must later read."
+   }
+  ],
+  "recommended": "investigate",
+  "ts": "2026-09-09T16:01:11.163892+10:00",
+  "status": "open",
+  "ruled_choice": null,
+  "ruled_ts": null,
+  "prior_rulings_overridden": [
+   "CARD hpsm-credential-bearing-prd-outside-every-snapshot",
+   "CARD secuura-768-dependabot-routing-to-main"
+  ]
  }
 ]
