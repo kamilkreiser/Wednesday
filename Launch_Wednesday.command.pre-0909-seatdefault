@@ -28,34 +28,9 @@ export PROJECT_DIR BRAIN_DIR
 # whole two-agent split is built to prevent.
 AGENT="${WED_AGENT:-}"
 if [ -z "$AGENT" ]; then
-  # THE TREE DECIDES, NOT THE HOSTNAME (Tuesday s2, 2026-09-09 — measured, after this
-  # default misbooted a seat). The old map was `Kamils-MBP* -> tuesday, everything else
-  # -> wednesday`. Tuesday moved to Kamils-Mac-mini on 2026-09-09, so that map became
-  # wrong in BOTH directions on the same day: the mini fell through to `wednesday`, and
-  # the MBP still claimed tuesday. Running this launcher directly on the mini therefore
-  # handed a Wednesday identity, Wednesday's Secuura scope and Wednesday's ledger to a
-  # seat sitting in Tuesday's tree.
-  # The folder name is the right discriminator because it is LOCAL: the two trees are
-  # clones of one repo, so any tracked file is identical in both, and only the checkout
-  # path differs. Hostname stays as a second fallback for the laptop; an unrecognised
-  # tree on an unrecognised host REFUSES rather than guessing — Kam's own words in
-  # Launch_Tuesday.command: "a seat that guesses its own client is precisely the failure
-  # the two-agent split exists to prevent."
-  case "$(basename "$PROJECT_DIR")" in
-    TUESDAY|Tuesday|tuesday)       AGENT="tuesday" ;;
-    WEDNESDAY|Wednesday|wednesday) AGENT="wednesday" ;;
-    *)
-      case "$(hostname -s 2>/dev/null || hostname 2>/dev/null)" in
-        Kamils-MBP*) AGENT="tuesday" ;;
-        *)
-          echo "Launch: CANNOT DETERMINE WHICH SEAT THIS IS — refusing rather than guessing." >&2
-          echo "  tree: $PROJECT_DIR" >&2
-          echo "  host: $(hostname -s 2>/dev/null || hostname 2>/dev/null)" >&2
-          echo "  Fix, either one:" >&2
-          echo "    - launch the Datasec seat with ./Launch_Tuesday.command, or" >&2
-          echo "    - export WED_AGENT=wednesday (or tuesday) and re-run this script." >&2
-          exit 2 ;;
-      esac ;;
+  case "$(hostname -s 2>/dev/null || hostname 2>/dev/null)" in
+    Kamils-MBP*) AGENT="tuesday" ;;
+    *)           AGENT="wednesday" ;;
   esac
 fi
 case "$AGENT" in

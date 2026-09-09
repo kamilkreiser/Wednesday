@@ -7,7 +7,7 @@ status: live
 
 # Boot digest — headline + rules of every lesson (open the file when it fires)
 
-Generated 2026-09-09 10:26 from 130 lesson files (671,575 B). Each block = the lesson's retrieval handle (H1), its frontmatter, the operative paragraph, its section index, and every RULES section verbatim. 6 files carry no rules-shaped section and are included whole. The CASES behind a rule live only in the file: open it the moment the rule fires, or when a diagnosis needs the evidence. `_ledger.md` is read whole beside this digest; `_ledger_archive.md` on demand.
+Generated 2026-09-09 10:58 from 131 lesson files (677,743 B). Each block = the lesson's retrieval handle (H1), its frontmatter, the operative paragraph, its section index, and every RULES section verbatim. 6 files carry no rules-shaped section and are included whole. The CASES behind a rule live only in the file: open it the moment the rule fires, or when a diagnosis needs the evidence. `_ledger.md` is read whole beside this digest; `_ledger_archive.md` on demand.
 
 ## The T9 SSD is the master — Wednesday must be fully portable
 `2026-07-31_fully-portable-drive.md` · principle · 2026-07-31 · status: superseded — the "T9 is the master" half by [[2026-08-25_one-drive-devmaster-is-master]] (2026-08-25); the portability principle itself still lives
@@ -4896,4 +4896,46 @@ too much, here it deletes too little) · [[2026-08-25_travel-drive-stale-pointer
 copies files, not intentions) · [[2026-08-05_identities-float-verify-always]] ·
 [[2026-09-08_a-ruling-can-be-voided-by-removing-its-precondition]] (a ruling executed and
 then undone by a mechanism nobody connected to it).
+
+
+## Parameterising the JOBS does not help if the thing that decides WHICH SEAT is still guessing — fix the resolver, then sweep every sibling that hardcodes the answer
+`2026-09-09_the-seat-resolver-is-the-layer-above-every-agent-aware-fix.md` · correction · 2026-09-09 · status: live
+
+**The operative case, so the headline matches it:** a mechanism has just been made
+agent-aware — an installer, a plist, a digest, a ledger line. **Before calling the class
+closed, ask what decides `WED_AGENT` in the first place, and then grep every sibling file
+for the literal `wednesday`.** A parameterised job that receives the wrong seat name is
+exactly as wrong as a hardcoded one, and it is harder to see, because the file you fixed
+looks correct when you read it.
+
+sections (open the file for these): The case, measured · Why the 09-08 fix did not prevent this (the diagnosis w=2 owes) · How to apply
+
+## How to apply
+
+1. **When a mechanism is made agent-, tenant-, client- or environment-aware, fix the RESOLVER in
+   the same action** — the code that decides which value the parameter takes. A parameter with a
+   guessed argument is not parameterised, it is indirected.
+2. **Then grep the siblings for the literal you just replaced.** `grep -rn 'wednesday' 2_Project_Files/`
+   is one command and it is what surfaced `wake_watch.sh`. A class is closed when the sweep is
+   empty, not when the reported instance is fixed.
+3. **Prefer a discriminator that is LOCAL to the thing being identified.** The two trees are clones
+   of one repo, so every tracked file is identical in both and cannot discriminate; the checkout
+   path is the only thing that differs, which is why the folder name is the right key and the
+   hostname is not. Ask: *what property is true of this seat and could not be true of the other?*
+4. **A guess-by-default must become a REFUSAL.** Kam's own words in `Launch_Tuesday.command`:
+   *"a seat that guesses its own client is precisely the failure the two-agent split exists to
+   prevent."* The fixed resolver reads the tree, falls back to the hostname, and then **exits 2 with
+   the two one-line fixes named** rather than picking a seat.
+5. **A machine move invalidates every hostname map on the drive, silently and on the same day.**
+   When a seat changes machines, that is the trigger to sweep for hostname keys — they are the
+   travel-pointer defect pointed at identity instead of at paths.
+
+**Family:** [[2026-09-08_a-ruling-can-be-voided-by-removing-its-precondition]] (the machine move
+removed the map's precondition) · [[2026-09-07_a-census-complete-over-a-frame-that-is-not]] (the
+09-08 sweep was complete over JOBS and silent about the RESOLVER) ·
+[[2026-08-25_travel-drive-stale-pointers]] (a stored absolute wakes up on the wrong volume; a
+stored hostname wakes up as the wrong agent) · [[2026-08-13_shared-bus-tag-filter-or-leak]] (the
+`wake_watch` half is R0 at the comms layer) · [[2026-08-05_identities-float-verify-always]] ·
+[[2026-09-07_a-rule-for-creation-is-not-a-mandate-to-retrofit]] (the ruling was read for what it
+scoped, correctly — and the layer above it was nobody's).
 
