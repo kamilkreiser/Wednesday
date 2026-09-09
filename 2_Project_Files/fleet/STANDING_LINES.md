@@ -209,3 +209,5 @@ were pointed at the line it meant to tamper, not the one it actually left broken
    uniqueness check is the only thing between you and that.**
 5. **Generalises past tampers** to any scripted edit-then-revert: sed on a config, a stubbed
    credential, a temporarily disabled guard, a patched fixture.
+
+- **An exit status read through a pipe is the pipe's, not the command's — and this is about PIPES, not about pushes.** (Secuura seat s164, 2026-09-10, in its own words: *"The requirement is not about pushes; it is about pipes."*) Wednesday had written this standing line as *"push unpiped and paste the exit line"* because every recorded instance had been a `git push`; the seat then made it on a lockfile regen loop minutes after quoting the rule back, and `exit=0` was `tail`'s. **Redirect to a file and read `$?` on its own line** (`cmd > out 2>&1; rc=$?`), then read the file. In zsh `${PIPESTATUS[0]}` is empty — the equivalent is `$pipestatus[1]` — so branching on a piped status is a check that cannot fail. **A rule written from the instances it was found in is complete over those instances and silent about the class.**
