@@ -100,6 +100,36 @@ you give seat A the consolidation word, say **five** and name them:
   ghosts, both inert). **The CONSOLIDATION seat is running on `%8`** — a fresh seat that produced none of
   the verdicts, so it can weigh all five without defending any.
 
+## ✅ ROUND 2 IS CLOSED — consolidation applied 2026-09-09 12:2x, all panes closed
+
+**Register: `27 C · 78 H · 119 M · 75 L · 40 I = 339`** (both estate rows agree; verified from inside
+the `.docx` by column, by row, and against the contributing rows). **All 97 pending rows re-derived at
+source. 14 bands moved — 9 up, 5 down. Nothing refuted into non-existence, nothing added, total held.**
+Report: `_Working/2026-09-09_CONSOLIDATION_REPORT.md`. Quarantine `.pre-consolidation-2026-09-09_*`
+both formats, hash-matched at the moment taken.
+
+🔴 **TWO QUALIFIERS THAT MUST TRAVEL WITH THE NUMBER — a summary without them gets corrected in front
+of the customer.** (1) **27 Critical ROWS are 26 distinct DEFECTS** — License-Services `NEW-1` and
+LicenseServer `NEW-1` are the reviewer's own declared mirror, one licensing decision in two products.
+(2) **Two of the 27 turn on ONE unsettled metric:** `D-01` and June `F-07` were re-derived by two seats
+forbidden to read each other's rows and landed on the **identical vector**, Critical only on `UI:N`; on
+`UI:R` both are **8.5 High**. **That call is worth TWO Criticals, not one.**
+
+🔴 **THE `.docx` HAD BEEN SHIPPING BROKEN AND THE `.md` WAS ALWAYS RIGHT.** Three tables never rendered
+as tables — including the **entire 62-row §2.3.3 table containing both `NEW-1` Criticals** — because GFM
+needs a blank line before a table header and pandoc read them as one run-on paragraph of pipes. **Every
+review of the Markdown missed it because the Markdown was correct; the rendered file is what the
+customer got.** Fixed and verified by extracting 96/96 rows out of `word/document.xml`. Also: a raw `|`
+inside a cell truncates its row even in backticks — needs `\|` — 10 rows carried one, 2 predating this
+round. **THE LESSON: verify the ARTEFACT THAT SHIPS, not the source it was built from.**
+
+**SIX HELD CHANGES — RULED BY TUESDAY 12:3x, NOT YET APPLIED (§2.3.7 open item 1):** accept both
+withdrawals (`D-MF-01`, whose premise a verifier refuted outright; `DELTA-HP-01/-02`, whose own delta
+author wrote *"not as a new finding"*) **as MARKED withdrawals that keep the row and its refutation
+visible — never deletions**; **file the new UniversalPrint row** (three auth WebViews, no origin gate,
+JS enabled, one receiving the printer admin password — not filing a real gap is the worse error); take
+both splits and the referred `ADM-D5` band move. **An application seat is still owed for these.**
+
 ## 🔴 WHAT IS ACTUALLY ON KAM'S DESK (this seat's items only)
 
 0. 🔴🔴 **`secreview-june-register-discloses-credentials` — rec `all-three`, default HOLD. THE MOST
