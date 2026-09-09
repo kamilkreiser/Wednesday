@@ -7,7 +7,7 @@ status: live
 
 # Boot digest BY TIER — W whole, M rules-only, every project case a handle
 
-Generated 2026-09-09 16:14 from 136 lesson files (705,267 B). M 32 · MIXED 5 · W 99. 28 project CASE sections inside MIXED files are reduced to one line each: the heading and the path to read it at. W blocks are exactly what the default digest carries; M blocks drop the section index and keep the rules; a P file is a single handle. The CASES behind every rule live only in the lesson files — open one the moment its rule fires.
+Generated 2026-09-09 16:22 from 137 lesson files (708,692 B). M 32 · MIXED 5 · W 100. 28 project CASE sections inside MIXED files are reduced to one line each: the heading and the path to read it at. W blocks are exactly what the default digest carries; M blocks drop the section index and keep the rules; a P file is a single handle. The CASES behind every rule live only in the lesson files — open one the moment its rule fires.
 
 ## The T9 SSD is the master — Wednesday must be fully portable
 `2026-07-31_fully-portable-drive.md` · principle · 2026-07-31 · status: superseded — the "T9 is the master" half by [[2026-08-25_one-drive-devmaster-is-master]] (2026-08-25); the portability principle itself still lives · tier: W
@@ -4596,6 +4596,38 @@ and never vibes) · [[2026-08-16_classification-is-the-field-that-grants-authori
 [[2026-09-07_production-ban-lifted-for-the-week]] (a grant read narrowly, every use flagged) ·
 [[2026-08-09_an-enforcement-you-must-arm-is-not-one]] (the gate reshape is the mechanism; this grant
 is the interim rule).
+
+
+## Confirm every chat-board instruction as received and being acted on — silence is indistinguishable from a broken channel
+`2026-09-09_confirm-receipt-on-the-chat-board.md` · preference · 2026-09-09 · status: live · tier: W
+
+**The operative case, so the headline matches it:** an instruction from Kam has arrived
+through the dashboard chat board. **Before doing the work, post an acknowledgement back to
+the board naming what was received and saying it is being acted on.** The acknowledgement is
+not a courtesy and it is not the same as reporting the result later — it is the only signal
+Kam has that the channel itself is alive.
+
+**How to apply:**
+
+1. **Acknowledge on the BOARD, not in the terminal**, and name the instruction back to him in
+   his own terms so he can see it arrived intact rather than merely that something arrived.
+2. **Acknowledge before the work, not after it.** A confirmation that waits for the result
+   defeats the purpose, because the interval he cannot observe is exactly the one he asked
+   about.
+3. **Say that it is being acted on and by whom** — a seat, a brief, a running pass. "Received"
+   alone leaves him wondering whether it was understood.
+4. **It is scoped and he said so** — *"while we refine the operating model"*. It may be relaxed
+   once routing is trustworthy, and that is his call, not an assumption to make quietly
+   ([[2026-09-06_a-scoped-override-carries-its-own-expiry]]).
+
+**The mechanical half, measured the same day and the reason the rule exists.** Each of Kam's
+chat messages carries a `view` field recording which tab he typed it into, and **that field is
+correct** — 47 messages on 2026-09-09, 36 tagged `wednesday`, 11 tagged `tuesday`. **Nothing
+reads it.** Both coordinator seats load the same undifferentiated store, so a Tuesday-addressed
+message reached Tuesday only because Wednesday noticed it and relayed it by mail. Delivery
+depended on one agent watching for another's post. **The routing data existed and was right;
+the consumer was missing** — and confirming receipt is what makes that class of failure visible
+to Kam instead of silent.
 
 
 ## "Am I allowed to?" and "does this project allow it?" are two different checks, and I have only ever run the first
