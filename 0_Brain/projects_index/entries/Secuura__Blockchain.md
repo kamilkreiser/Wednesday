@@ -8,6 +8,19 @@ updated: 2026-09-09
 
 # Secuura / Blockchain (Platform K)
 
+> 🔴 **DO NOT OVERWRITE THIS FILE. It is 933 lines, not a 30-line index card.**
+> The shared end-of-session skill (`Notes (MASTER)/skills/Current/end-of-session.md`, step 2c)
+> says *"write/overwrite"* and *"keep it under ~30 lines — it's an index card"*. **That is true
+> of every other entry here and FALSE of this one.** Below the session blocks is a **curated
+> CATEGORY-1 ticket list, 208 table rows**, generated 2026-09-06 by a Wednesday-assistant and
+> not reproducible from a wrap. **Overwriting destroys it.**
+>
+> **INSERT a dated `## Last session` block directly under this warning; never replace the file.**
+> s159 did exactly that on 2026-09-09 (905 → 933 lines, all 208 rows intact) and flagged the
+> divergence. **The skill is Kam's file and cannot be edited from a project session — it is on
+> his queue to reconcile.** Until it is, this warning is the only thing standing between the
+> list and the next agent that follows the skill literally.
+
 ## Last session — 2026-09-09 (s159, review-readiness seat)
 
 **Made the review ready.** 43 open PRs grouped into four test blocks (KS-771 · KS-770 · KS-485 ·
