@@ -100,6 +100,39 @@ you give seat A the consolidation word, say **five** and name them:
   ghosts, both inert). **The CONSOLIDATION seat is running on `%8`** — a fresh seat that produced none of
   the verdicts, so it can weigh all five without defending any.
 
+## ✅✅ THE DOCUMENT IS FINISHED AND WITH KAM — 2026-09-09 13:12
+
+**FINAL: `28 C · 76 H · 126 M · 73 L · 39 I = 342`.** Balances **by row** (188+31+22+1+62+37+1) and
+**by column**, added three separate times, no cell adjusted to make it balance. The finalise pass applied
+Tuesday's six rulings (+3 net), settled the `UI` call at source for `D-01` and `F-07` **together**, and
+applied seat J's verdict to the June register so the two documents agree again.
+
+🔴 **THE PREDECESSOR'S COSTING WAS WRONG:** `2026-09-09_CONSOLIDATION_REPORT.md` says accepting all six
+*"most likely lands the estate at 337"* and repeats it in its recommendations. **It is 342.** Do not quote
+337 from that file.
+
+⛔ **Five rows are PRINTED AND NOT COUNTED, and nothing was deleted:** three marked withdrawals
+(`D-MF-01`, `DELTA-HP-01`, `DELTA-HP-02`) and two retained split parents. Each keeps its evidence, its
+measurement and a pointer to what replaced it.
+⚠️ **28 Critical ROWS are 27 distinct DEFECTS** — the two `NEW-1`s are the reviewer's own declared mirror.
+
+**EMAILED TO KAM 13:12** — `kamil.kreiser@datasec.com.au` (**his instruction; the corporate address for
+client material**), from `tuesday-agent@` **by direct POST**, with the `.docx` (172,925 B) and
+`2026-09-09_FINALISE_REPORT.md` (36,157 B). Verified at the destination: recipient, sender and both
+attachments. **Tuesday swept the attachment personally before sending and READ every hit** — the
+`password=` flag was a finding describing an ABSENT parameter, the "base64 blobs" were file paths a `/`
+in the character class matched; positive control fired on the file that genuinely discloses.
+**Kam, 13:2x: *"Thank you. I got the document and will come back to you once I've reviewed it."*** —
+**so the next inbound from him is his review. Nothing is owed to him until then.**
+
+🔴 **HIS QUESTION, ANSWERED HONESTLY AND THE ANSWER MUST NOT DRIFT:** *"does this mean all reviews have
+been completed, verified and documented?"* → **NO.** The scoring round is complete; the review is not.
+**Five gaps, and the load-bearing one is that NOTHING IS A LIVE PASS** — every reachability statement in
+both documents is static, so "verified" means *against the source*, not against a running system. Also:
+**23 of the 342 rows still carry no CVSS vector** (§2.3's 22 + §2.3.2's 1, never in a partition); seven
+items blocked on artefacts we do not hold (**none needing a tenant**); the myPKI Critical has needed a
+second reader since **2026-08-08**; and the estate-wide gitleaks claim is understated and unmeasured.
+
 ## ✅ ROUND 2 IS CLOSED — consolidation applied 2026-09-09 12:2x, all panes closed
 
 **Register: `27 C · 78 H · 119 M · 75 L · 40 I = 339`** (both estate rows agree; verified from inside
