@@ -241,9 +241,20 @@ if [ -f "$STATUSLINE_SHARED" ] && ! cmp -s "$STATUSLINE_SHARED" "$STATUSLINE_LOC
   cp "$STATUSLINE_SHARED" "$STATUSLINE_LOCAL" && chmod +x "$STATUSLINE_LOCAL"
 fi
 LABEL="[$AGENT_NAME]"
-python3 - "$LABEL" "$STATUSLINE_SHARED" "$STATUSLINE_LOCAL" <<'PYEOF'
+# The statusline is run through statusline_publish.sh, which prints the shared
+# statusline UNCHANGED and then publishes this seat's weekly usage % for the
+# dashboard's agent chips (Kam, 2026-09-09 12:32). It has to be a wrapper: the two
+# candidates below are a shared file outside this folder and a copy this launcher
+# overwrites from it at every boot, so an edit to either is either out of scope or
+# erased within minutes — which is exactly what happened to the first attempt at
+# 12:35, undone by the 12:37 launch. The seat name is passed as an ARGUMENT rather
+# than left to $WED_AGENT alone, so identity does not depend on an environment this
+# subprocess does not control.
+STATUSLINE_WRAPPER="$PROJECT_DIR/2_Project_Files/tools/statusline_publish.sh"
+[ -f "$STATUSLINE_WRAPPER" ] && chmod +x "$STATUSLINE_WRAPPER" 2>/dev/null
+python3 - "$LABEL" "$STATUSLINE_WRAPPER" "$STATUSLINE_SHARED" "$STATUSLINE_LOCAL" "$AGENT" <<'PYEOF'
 import json, os, sys, shlex
-label, shared, local = sys.argv[1], sys.argv[2], sys.argv[3]
+label, wrapper, shared, local, agent = sys.argv[1], sys.argv[2], sys.argv[3], sys.argv[4], sys.argv[5]
 path = ".claude/settings.local.json"
 data = {}
 if os.path.exists(path):
@@ -254,11 +265,18 @@ if os.path.exists(path):
             data = {}
     except Exception:
         data = {}
-script = next((s for s in (shared, local) if os.path.exists(s)), None)
-if script:
-    cmd = f"sh {shlex.quote(script)} {shlex.quote(label)}"
+# The wrapper first — it falls back to the shared statusline internally and to the
+# drive-local copy after that, so preferring it costs nothing on a machine where the
+# shared helper is missing. The two bare candidates remain as the fallback for a tree
+# where the wrapper itself is absent.
+if os.path.exists(wrapper):
+    cmd = f"sh {shlex.quote(wrapper)} {shlex.quote(label)} {shlex.quote(agent)}"
 else:
-    cmd = f"echo {shlex.quote(label)}"
+    script = next((s for s in (shared, local) if os.path.exists(s)), None)
+    if script:
+        cmd = f"sh {shlex.quote(script)} {shlex.quote(label)}"
+    else:
+        cmd = f"echo {shlex.quote(label)}"
 data["statusLine"] = {"type": "command", "command": cmd}
 with open(path, "w") as f:
     json.dump(data, f, indent=2)
