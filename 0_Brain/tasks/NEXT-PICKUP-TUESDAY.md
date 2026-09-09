@@ -77,9 +77,36 @@ you give seat A the consolidation word, say **five** and name them:
   band with nothing checkable underneath, 2 of them High, 0 Critical affected**; 20 more are Info, which
   legitimately has no CVSS. **The vectors exist in the delta files and were dropped in assembly** — a
   register defect, mechanically fixable, no judgement needed.
-- **Still to report: B, C, J.**
+- **`round2-b.md` (57 KB).** Both surviving Criticals HOLD, and seat B **executed the attack's first
+  cryptographic step** rather than inferring it — the committed API key unwraps a real committed licence's
+  encryption key; the root CA key as negative control fails. **It also stopped a downgrade:** round 1 would
+  have published `NEW-1` at 9.3 base; B agrees `A:H` leaves the base but found round 1 never examined `C`,
+  which is `C:H` (every tenant and device private key ever issued, offline, from committed material) —
+  **base 10.0 on its own.** Four bands move; **net estate effect on C and H is ZERO.**
+- **`round2-june.md` (22 KB).** **Three June rows move, net +1 Critical:** `F-02` Critical→High (down),
+  `F-07` and `F-10` High→Critical (up). **`F-22` explicitly NOT moved** — its vector computes Critical 9.0
+  against a filed Medium, but it is one of only two rows with **no scoring note at all**, so there is no
+  recorded intent to check against. Named, not moved. **And the mechanism is diagnosed, refuting round 1's
+  inference:** 18 of 31 numbers disagree with their own vector, but **26 of 31 are reproducible by changing
+  exactly ONE metric** — the signature of *a vector edited after the score was computed and never
+  recomputed*, not of scores estimated to fit a band. **Different defect, different remediation.**
+- **Still to report: C only.**
 
 ## 🔴 WHAT IS ACTUALLY ON KAM'S DESK (this seat's items only)
+
+0. 🔴🔴 **`secreview-june-register-discloses-credentials` — rec `all-three`, default HOLD. THE MOST
+   URGENT ITEM ON THIS DESK AND IT IS NOT A SCORING ISSUE.** The June register — **signed off, customer
+   facing, rendered to `.docx` for circulation** — prints **8 lines of secret values verbatim** in `F-16`
+   (6) and `F-12` (2): 2 Entra client secrets · 1 platform API key · 1 App Configuration connection-string
+   secret · 1 PFX password · 4 service/admin password literals. **Class and count only — never quote a
+   value, a prefix or a length from that document, including into a ticket.** The finding that reported
+   committed secrets **reproduced them into a document with wider distribution than the repository**, so
+   rotating the repo secrets and scrubbing history both leave the report untouched. **NOT established:
+   whether any is still live** — that needs a live pass, barred by the holds. It is a DISCLOSURE, not a
+   confirmed compromise. **The one thing only Kam can answer: where has that document already been sent.**
+   Also: `F-16`'s evidence pins HPAM config to tenant `fc05dcdd` — direct evidence on the question he
+   reserved to himself; no conclusion drawn.
+
 
 1. **`secreview-estate-wide-scoring-pass-including-june`** — rec `extend`, default HOLD. **48 of 86
    scored rows disagree with their own vector**; three of the band-crossers are in the **June baseline

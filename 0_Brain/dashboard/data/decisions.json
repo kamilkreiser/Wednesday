@@ -6848,5 +6848,38 @@
    "CARD secuura-ps-759-760-merge-owner",
    "CARD secuura-891-workflow-scope-merge"
   ]
+ },
+ {
+  "id": "secreview-june-register-discloses-credentials",
+  "client_project": "Datasec/Security Review",
+  "title": "The June findings register PRINTS 8 lines of live credential values — a signed-off, customer-facing document is itself a secrets channel",
+  "bluf": "OVERRIDE REASON, as the measurement: the gate matched two things and neither rules on this subject. (1) Kam's 2026-09-04 message about creating a Secuura .rtf credentials file — different client, different artefact, matched on the word credentials. (2) THIS MORNING'S OWN 'extend' CARD, sharing only the words june and secreview — and that ruling is the CAUSE of this finding, not a ruling on it: he ruled extend, the June seat ran, and this is what it found. A ruling that commissioned a pass cannot also be a ruling on what the pass discovered. MEASURED by the June seat, reported structurally only — class and count, no value, no prefix, no length. Deliverables/03_Findings_Register.md, signed off and rendered to .docx for circulation, prints EIGHT distinct lines of secret values verbatim inside the evidence blocks of F-16 (6 lines) and F-12 (2): 2 Entra client secrets, 1 platform API key, 1 Azure App Configuration connection-string secret, 1 PFX private-key password, 4 service/administrative password literals. THE SHAPE IS THE POINT: the finding whose purpose was to report that secrets were committed to a repository reproduced those secrets into a document with WIDER and LESS CONTROLLED distribution than the repository. Every copy of the deliverable is a copy of the credentials, so the assumed remediation is incomplete by construction — rotating the committed secrets does not address the report, and scrubbing history does not either. NOT ESTABLISHED, and it changes urgency not action: nobody has verified any credential is still live; that needs a live pass, barred by the holds and entangled with the tenant question. This is a DISCLOSURE, not a confirmed compromise. The handling stands regardless, because a distributed document cannot be un-distributed. SEPARATELY: F-16's evidence pins HPAM config to tenant fc05dcdd, the id Kam's standing notes record as UNRESOLVED — direct evidence on a question he reserved to himself, no conclusion drawn.",
+  "default_action": "HOLD — nothing rotated, re-issued or communicated on Tuesday's authority. Rotation touches live credentials and any word to a recipient is external comms; both are Kam's signature classes. Recorded here and in _Working/verification-2026-09/round2-june.md section 7 so it cannot evaporate. Silence costs only that the exposure stays unsized.",
+  "options": [
+   {
+    "key": "all-three",
+    "label": "Rotate, re-issue, and establish distribution",
+    "detail": "Treat every credential cited in F-16/F-12 as disclosed and rotate independently of any repository remediation; re-issue the register with values replaced by structural references (file, line, credential class — the convention every verification report uses, which loses no evidential value); and establish where the .md and .docx have already gone. Tuesday recommends this, starting with distribution, because until that is known nobody can size the exposure."
+   },
+   {
+    "key": "distribution-first",
+    "label": "Establish distribution only, decide the rest after",
+    "detail": "Find out where the document went, then rule on rotation once the blast radius is known. Cheaper if circulation was internal-only. Cost: if it reached a customer or an auditor, every hour of delay is an hour those values sit in someone else's inbox."
+   },
+   {
+    "key": "reissue-only",
+    "label": "Re-issue the register, do not rotate",
+    "detail": "Fixes the document going forward. Cost: assumes the already-distributed copies are harmless, which is the one assumption nobody can currently support."
+   }
+  ],
+  "recommended": "all-three",
+  "ts": "2026-09-09T12:01:10.750263+10:00",
+  "status": "open",
+  "ruled_choice": null,
+  "ruled_ts": null,
+  "prior_rulings_overridden": [
+   "2026-09-04 15:32",
+   "CARD secreview-estate-wide-scoring-pass-including-june"
+  ]
  }
 ]
