@@ -14,6 +14,15 @@
 #                                     # id, client_project, title, bluf,
 #                                     # options[{key,label,detail?}],
 #                                     # recommended, default_action)
+#                                     # NOTE: the JSON goes on STDIN and NOTHING may
+#                                     # follow --json (`add --json < card.json`).
+#                                     # And --override-prior-rulings DOES NOT WORK on
+#                                     # this path: --json breaks out of the flag loop,
+#                                     # so the JSON-path equivalent is the KEY
+#                                     # "_override_prior": "<the measurement that
+#                                     # justifies it>" INSIDE the object.
+#                                     # (Owed since 2026-09-07, named three times,
+#                                     # written 2026-09-09 at the third instance.)
 #   decision_queue.sh rule ID CHOICE_KEY
 #   decision_queue.sh --delivered ID ARTEFACT   # mark a RULED card delivered: the
 #                                     # ruling now sits in ARTEFACT (ticket comment,

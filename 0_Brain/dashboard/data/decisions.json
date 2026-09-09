@@ -6914,5 +6914,42 @@
    "CARD hpsm-credential-bearing-prd-outside-every-snapshot",
    "CARD secuura-768-dependabot-routing-to-main"
   ]
+ },
+ {
+  "id": "secuura-originate-unauthenticated-cross-tenant-billing",
+  "client_project": "Secuura/Blockchain",
+  "title": "Unauthenticated cross-tenant billing read via the /originate/ nginx bypass — measured locally; demo and production UNMEASURED",
+  "bluf": "MEASURED BY THE SECUURA SEAT ON THE LOCAL STACK, with controls in both directions: GET /originate/api/metering/usage returns tenant billing data with NO credential, when two client-supplied headers (x-user-role: connector, x-tenant-id) are sent. CTL-1 (no headers) 401. CASE 200, count 120, 420 ADA, $168. CTL-2 (same headers THROUGH the api-gateway) 401 — so the gateway's trust-header strip works and /originate/ skips it. The tenant is CALLER-CHOSEN: three different x-tenant-id values all returned 200 with the id echoed. The route's own comment states the premise this breaks — that originate is internal-only ingress, so a connector identity can only have been set by the gateway from a validated key. The logic is correct given its premise; the premise is the defect. VERIFIED BY WEDNESDAY, read-only: the location /originate/ block exists in ALL THREE configs — nginx-demo.conf:441, nginx.conf:208, nginx-production.conf:369 (positive control 8 /api/ locations, negative control 0). THAT IS A REASON TO CHECK, NOT A FINDING: nobody has probed demo or production, and the seat refused to, correctly — an outward action on a live environment is Kam's class and Wednesday did not widen it. Filed as KS-1041 Urgent. Nothing fixed. KS-741 is HELD behind this because it shares the root cause and fixing it alone would leave the larger hole open while reading as closed.",
+  "default_action": "HOLD — nothing is probed, nothing is fixed, KS-741 stays held, and the seat continues on unrelated tickets. Nobody outside Kam, Wednesday and the seat is told anything: disclosure to Peter or Stuart is Kam's signature class and is NOT part of any option here.",
+  "options": [
+   {
+    "key": "probe-then-rule",
+    "label": "Authorise a read-only probe of demo (and production) first, then rule the fix",
+    "detail": "One GET to /originate/api/metering/usage on each, by the seat, on Kam's word. Read-only, no writes, no data retained beyond the status code and whether a body came back. This answers the only question that decides urgency: is a live environment exposed, or is this a local-stack finding about a shape that happens to exist in the configs. Wednesday recommends this because every other option is being chosen in the dark."
+   },
+   {
+    "key": "fix-both-shapes",
+    "label": "Rule the fix now without probing: stop routing /originate/ through nginx AND have the gateway stamp what it vouches for",
+    "detail": "Makes the route's premise true rather than assumed, and stops a bare header being an identity. Larger change, needs the QA gate at tier 1, and carries the outage risk the seat named — the gateway legitimately sets those headers and originate consumes them in three places; a blanket strip broke x-tenant-override silently for two weeks once already."
+   },
+   {
+    "key": "hold",
+    "label": "Hold everything until Kam has read it himself",
+    "detail": "Nothing moves. The exposure, if it is real on a live environment, persists. Chosen only if Kam wants to look at the code before anyone acts."
+   }
+  ],
+  "recommended": "probe-then-rule",
+  "ts": "2026-09-09T18:09:43.133399+10:00",
+  "status": "open",
+  "ruled_choice": null,
+  "ruled_ts": null,
+  "prior_rulings_overridden": [
+   "2026-09-05 16:40",
+   "CARD secuura-ci-billing",
+   "CARD workspace-dead-secuura-tenant-cleanup",
+   "CARD secuura-org-trust-boundary-within-tenant",
+   "CARD fleet-cross-seat-mail-wakes-keep-or-filter",
+   "CARD secrev-live-pass-blocked-on-tenant"
+  ]
  }
 ]
