@@ -7,7 +7,7 @@ status: live
 
 # Boot digest — headline + rules of every lesson (open the file when it fires)
 
-Generated 2026-09-09 12:37 from 133 lesson files (687,638 B). Each block = the lesson's retrieval handle (H1), its frontmatter, the operative paragraph, its section index, and every RULES section verbatim. 6 files carry no rules-shaped section and are included whole. The CASES behind a rule live only in the file: open it the moment the rule fires, or when a diagnosis needs the evidence. `_ledger.md` is read whole beside this digest; `_ledger_archive.md` on demand.
+Generated 2026-09-09 13:03 from 134 lesson files (694,170 B). Each block = the lesson's retrieval handle (H1), its frontmatter, the operative paragraph, its section index, and every RULES section verbatim. 6 files carry no rules-shaped section and are included whole. The CASES behind a rule live only in the file: open it the moment the rule fires, or when a diagnosis needs the evidence. `_ledger.md` is read whole beside this digest; `_ledger_archive.md` on demand.
 
 ## The T9 SSD is the master — Wednesday must be fully portable
 `2026-07-31_fully-portable-drive.md` · principle · 2026-07-31 · status: superseded — the "T9 is the master" half by [[2026-08-25_one-drive-devmaster-is-master]] (2026-08-25); the portability principle itself still lives
@@ -4761,6 +4761,42 @@ rule actually scopes) · [[2026-08-14_i-read-representations-they-read-sources]]
 inference presented with a citation) · [[2026-08-20_dashboard-shows-only-live-work]] (his
 reading surface is his) · [[2026-08-17_conversation-needs-a-stable-panel]] (the panel is
 where he reads — and now where he listens).
+
+
+## A fix written into a file that something else GENERATES lives until the next boot — before editing any file, ask what WRITES it
+`2026-09-09_a-fix-in-a-generated-file-lives-until-the-next-boot.md` · correction · 2026-09-09 · status: live
+
+**The operative case, so the headline matches it:** you are about to edit a file to make a
+change stick — a config, a statusline, a settings key, a launcher-managed copy, a generated
+digest. **Before the edit, ask one question: what else writes this file, and when?** If a
+launcher, a generator, an installer or a sync leg rewrites it, the change is not a fix. It
+is a fix with a fuse, and the fuse is the next boot — **which is usually the person's next
+interaction, so the report of success and the disappearance of the feature arrive in that
+order.**
+
+sections (open the file for these): The case, measured · Why the existing lessons did not fire · How to apply · What went right, kept so the record is honest
+
+## How to apply
+
+1. **Before editing any file to make behaviour stick, grep the launcher and the generators
+   for its name.** `grep -rn '<basename>' Launch_*.command 2_Project_Files/` is one command.
+   A hit in a `cp`, a `>`, a template render or a `json.dump` means the file is an OUTPUT,
+   and editing an output is editing a cache.
+2. **When a file is generated, the fix goes in the GENERATOR or in a seam the generator does
+   not own.** A wrapper beside it, a new file the launcher points at, a template input —
+   never the artefact. Where the generator is out of scope (a shared file across clients),
+   the wrapper IS the answer, not an argument for editing it anyway.
+3. **Verify a "sticky" change by making the thing that overwrites it RUN.** A boot-surviving
+   change is not proven by the feature working now; it is proven by the feature working
+   **after the launcher, the generator or the sync has run once more.** That is the red-proof
+   for this family and it costs one launch.
+4. **A frozen value is this failure's fingerprint.** Not an error, not a blank — a number,
+   a timestamp or a status that is present and never moves. When a live figure stops
+   advancing, suspect that its WRITER is dead before suspecting the reader.
+5. **The surface half, restated because it recurred:** before reporting any UI change done,
+   `grep -l` the identifying markup across every page in the tree. Two renderers of one
+   toggle is the standard hiding place, and "the page I looked at works" is a presence check
+   that always passes.
 
 
 ## Read a guard's EXCLUSION list before trusting the guard — the file class it skips is usually the one it was written for
