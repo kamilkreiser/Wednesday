@@ -1,3 +1,90 @@
+## 2026-09-09 07:36 – 10:3x — TUESDAY s1, FIRST BOOT on Kamils-Mac-mini. A MACHINE BUILT FROM NOTHING, TWO GUARDS THAT WERE BLIND TO THEIR OWN SUBJECT, AND ONE CORRUPT PUSH THAT WAS MINE.
+
+**The first session of the Tuesday seat.** Read `FIRST-BOOT-TUESDAY.md`, then the by-tier digest
+**WHOLE — 4,413 lines in seven `Read` chunks with the last line asserted.** That mattered: the
+predecessor seat (s152) issued the same read through Bash, both chunks spilled to files, and it read
+the *"saved to file"* receipt as a completed read and ran an entire session without the lessons. It did
+not recur. Own ledger (`_ledger_laptop_datasec.md`, 78 rows) read whole; Wednesday's `_ledger.md` not
+read — another client's corrections.
+
+**KAM'S COMMISSION, mid-boot: sweep every tool this seat needs and install them, plus Superwhisper.**
+
+🔴 **The machine was NOT what `PORTABILITY.md` said it was.** That file opened its Tuesday section
+*"the machine is a Time Machine restore of the Studio, so items 1–9 are already satisfied."* Measured:
+**no Homebrew, no node/npm/gh/az/tmux/unison/docker/pandoc/poppler**, python 3.9.6, and `/Applications`
+holding only Claude, Safari and Utilities. `doctor.sh` printed **19 warnings on a machine that file
+called ready.** Corrected in place with a replacement rule: **run `doctor.sh` FIRST and let it say
+which run-sheet items are satisfied** — a sentence asserting a machine's provenance silently
+discharges the next reader from checking it.
+
+**Built, with Kam's hands needed exactly once** (the Homebrew installer — an agent shell has no TTY for
+a sudo prompt). Six GUI apps installed without a password because `/Applications` is admin-writable —
+**Superwhisper 2.18.3, iTerm2, VS Code, Chrome, Docker Desktop, Obsidian — every one
+`spctl`-verified as notarized BEFORE the copy, never after.** Superwhisper's real URL came from the
+Homebrew cask API, not from scraping its JS download page. Eleven brew formulae after that, **each
+verified by RUNNING it rather than by brew's exit code**. `~/.zprofile` did not exist and the Homebrew
+installer does not create it — written and proven by sourcing a fresh login shell. **19 → 3 warnings**,
+all three expected (Matilda absent, DevMASTER unmounted, Tailscale ruled out by Kam).
+
+🔴 **THE SCHEDULER WOULD HAVE BOOTED WEDNESDAY OUT OF TUESDAY'S TREE AT 06:00 DAILY — caught by
+reading the installer before running it.** Kam's standing `after` ruling authorised re-arming on the
+new machine; it did not authorise arming the wrong seat's rituals. `install_scheduler.command` armed
+three `com.wednesday.*` jobs unconditionally and read `WED_AGENT` only for the NAS job, while
+`wake_wednesday.sh` self-locates and names `Launch_Wednesday.command`. Armed **only**
+`com.tuesday.nassync`, quarantined the three Wednesday plists, **carded it** — and Kam ruled
+`parameterise` at 08:21. Built it: all four jobs agent-aware, **and the plists now CARRY `WED_AGENT`,
+because launchd does not inherit the environment and a correct label with a defaulting script still
+boots the wrong seat.** Two extensions beyond the ruling, both stated as extensions: the wake script's
+launcher, and `close_wednesday.sh`, which hardcoded `wednesday-agent@agentmail.to` — a
+`com.tuesday.close` would have read **Wednesday's inbox**, the cross-client class. **Both agent
+directions exercised in a sandbox** (fake `HOME`, stubbed `launchctl`) with a control proving nothing
+leaked onto the real machine, before anything was armed.
+
+🔴 **AND THE FAILURE, which is mine: I pushed a `decisions.json` carrying conflict markers to
+`origin/main` — Kam's rulings store.** Benign cause (both seats recorded the same ruling 29 seconds
+apart, so the sides differed in `ruled_ts` alone — asserted mechanically before anything was written,
+Wednesday's timestamp kept, 205 cards conserved, parsed before writing and re-read from disk after).
+**The reason it got through is the better finding: the pre-commit hook's marker scan EXCLUDED `.json`
+— so it skipped `decisions.json` and `chat_log.json`, the only two files in this repo that have ever
+carried markers into origin, six times by today. The guard excluded the file class it was written
+for.** Fixed and red-proofed both ways, including a positive control (a clean JSON whose string value
+contains `=======` still passes, because `json.dump` escapes newlines). **The rule this earns: parse
+the shared stores out of HEAD BEFORE the push, not after — a check that runs after turns a prevented
+incident into a disclosed one.**
+
+🔴 **The credentials restore put a DEAD TENANT back on a fresh Datasec machine, and the mechanism is
+two safety policies colliding.** `install_credentials.command` left `~/.azure` naming exactly one
+subscription — `Secuura Subscription`, tenant `4012a4e8…`, `isDefault: true`, decommissioned
+2026-06-25 — and global `gh` as `kksecura`. Both inert (no valid token). **Cause, measured:** Kam's
+2026-09-07 quarantine was a **rename**; the drive sync is **additive/no-delete**; a rename is a delete
+plus a create, so the replica kept BOTH names and the installer copied the live one. **Quarantine and
+no-delete-sync are each correct alone; nobody owned their interaction.** Reported, **not acted on** —
+`~/.azure` is Kam's global state and the bundle sits outside this seat's folder. **The seat itself was
+never exposed:** `AZURE_CONFIG_DIR`/`GH_CONFIG_DIR` point project-local, 0 subscriptions, not logged
+in — the launcher pattern earning its keep.
+
+**Also settled, so it is not re-derived:** **Jira works.** The seat already held read-only board access
+under Kam's 2026-08-03 grant; the thing that had twice looked like missing authority is that
+`JIRA_SITE` carries no scheme, so a bare request returns 301 HTML. Prefixed with `https://` it
+authenticates. RD board: **Release Ready 51 · In Progress 6** (real counts); open total and To Do
+**UNMEASURED** because `board_count.sh` correctly refuses to print a cap as a total (WED-146). A
+question raised to Kam was withdrawn by measurement rather than answered by him.
+
+**Kam ruled 4 things this session:** `parameterise` on the scheduler card · no Tailscale on this
+machine *"for now"* (recorded with its reopening CONDITION, since he set no date) · Moira as the voice
+(then installed Moira Enhanced) · and the scope split, verbatim: *"you will work on ONLY datasec
+projects unless otherwise instructed."*
+
+**Ledger: 6 rows (w=107→111 plus a praise/method row). Two lesson files filed (both M tier):**
+`quarantine-by-rename-is-not-removal-on-an-additive-sync` and
+`a-guard-whose-exclusion-list-contains-its-own-subject`. Digests regenerated — **130 files, M 29→31.**
+`FIRST-BOOT-TUESDAY.md` retired to `_superseded_2026-09-09/` and replaced by `NEXT-PICKUP-TUESDAY.md`,
+as its own closing line required. **The vault step was deliberately skipped** — `end-of-session.md:50`
+is `git add -A` and the vault's untracked set includes Secuura paths (hard rule 2).
+
+**What this seat would say if it could say one thing:** every real finding came from reading a
+mechanism before running it, and the one failure came from checking after instead of before.
+
 ## 2026-09-08 21:52 – 2026-09-09 05:30 — s154, Studio coordinator. TWO SECUURA SEATS AT 1.00, A REBUILD-AND-DELTA THAT CORRECTED THREE ARTEFACTS, AND SEVEN INSTRUMENT FAILURES OF WHICH SIX WERE MINE.
 
 *(Seat number DERIVED, not assumed: this file's newest entry is s153, so the next is s154. Noted for

@@ -7,7 +7,7 @@ status: live
 
 # Boot digest BY TIER — W whole, M rules-only, every project case a handle
 
-Generated 2026-09-09 09:09 from 128 lesson files (662,514 B). M 29 · MIXED 5 · W 94. 28 project CASE sections inside MIXED files are reduced to one line each: the heading and the path to read it at. W blocks are exactly what the default digest carries; M blocks drop the section index and keep the rules; a P file is a single handle. The CASES behind every rule live only in the lesson files — open one the moment its rule fires.
+Generated 2026-09-09 10:26 from 130 lesson files (672,541 B). M 31 · MIXED 5 · W 94. 28 project CASE sections inside MIXED files are reduced to one line each: the heading and the path to read it at. W blocks are exactly what the default digest carries; M blocks drop the section index and keep the rules; a P file is a single handle. The CASES behind every rule live only in the lesson files — open one the moment its rule fires.
 
 ## The T9 SSD is the master — Wednesday must be fully portable
 `2026-07-31_fully-portable-drive.md` · principle · 2026-07-31 · status: superseded — the "T9 is the master" half by [[2026-08-25_one-drive-devmaster-is-master]] (2026-08-25); the portability principle itself still lives · tier: W
@@ -4412,6 +4412,53 @@ reading surface is his) · [[2026-08-17_conversation-needs-a-stable-panel]] (the
 where he reads — and now where he listens).
 
 
+## Read a guard's EXCLUSION list before trusting the guard — the file class it skips is usually the one it was written for
+`2026-09-09_a-guard-whose-exclusion-list-contains-its-own-subject.md` · correction · 2026-09-09 · status: live · tier: M
+
+**The operative case, so the headline matches it:** you are relying on a guard — a
+pre-commit hook, a linter, a scanner, a CI gate, a backup job — and you are about to treat
+its silence as evidence. **Before you do, read its exclusion list out loud and ask: is the
+thing I am worried about ON it?** An exclusion list is a claim that a class of file cannot
+contain the defect, and it is the one part of a guard nobody ever tests.
+
+## How to apply
+
+1. **When you write or adopt a guard, name its subject and then read its exclusions
+   against that subject.** *"This stops conflict markers. Which files have actually had
+   conflict markers?"* If any are excluded, the guard is decoration for the case that
+   matters. One question, asked once, at the moment of writing.
+2. **An exclusion is a CLAIM needing evidence, exactly like a scope word**
+   ([[2026-08-16_classification-is-the-field-that-grants-authority]]). *"JSON cannot
+   contain conflict markers"* is checkable and false. Write down why each exclusion is
+   safe, or drop it.
+3. **Test the exclusion, not just the detection.** A red-proof that plants the defect in
+   an INCLUDED file proves nothing about the excluded ones. The proof that matters here
+   was planting markers in a `.json` and watching it be refused.
+4. **Prefer excluding by what a tool CANNOT read (true binaries) over what you assume is
+   safe.** `png|jpg|jpeg|pdf|xlsx|gif|zip|dmg` is a claim about encoding; `json` was a
+   claim about content, and content claims are where this lives.
+5. **Where the fear is false positives, test the fear instead of honouring it.** The
+   worry here was legitimate JSON containing `=======`. A positive control settled it in
+   one command: `json.dump` escapes newlines, so **no line inside well-formed JSON can
+   begin with a marker unless it is one** — and a clean JSON whose string *value* contains
+   `=======` passes. The fear was real, the risk was not, and only running it separated
+   them ([[2026-09-08_a-false-absence-is-usually-my-own-instrument]] rule 11 — a control
+   must be able to fail independently).
+6. **A guard that lives in an untracked, machine-local path is not fixed when you fix it.**
+   `.git/hooks/pre-commit` does not travel; pulling the tracked master does NOT install it.
+   Every seat copies it into its own `.git/hooks/`, and **the fix is not delivered until
+   each one has** ([[2026-09-05_a-relayed-ruling-is-delivered-only-when-it-is-in-the-artefact]]
+   pointed at a mechanism instead of a ruling).
+
+**Family:** [[2026-08-07_a-check-that-cannot-fail]] (rule 1 — *what would make this check
+fail?* For a JSON file, nothing could) ·
+[[2026-09-08_the-check-ran-and-was-not-checking-the-thing]] (it ran on every commit and was
+blind to the file that mattered) ·
+[[2026-09-07_a-census-complete-over-a-frame-that-is-not]] (complete over every extension
+except the one) · [[2026-08-09_an-enforcement-you-must-arm-is-not-one]] (in-path
+enforcement, with a hole in the path).
+
+
 ## A BOUNDED authority to accept newly-published advisories — four clauses, and the exception is the clause that matters
 `2026-09-09_advisory-baseline-standing-authority.md` · grant · 2026-09-09 · status: live · tier: W
 
@@ -4444,4 +4491,54 @@ and never vibes) · [[2026-08-16_classification-is-the-field-that-grants-authori
 [[2026-09-07_production-ban-lifted-for-the-week]] (a grant read narrowly, every use flagged) ·
 [[2026-08-09_an-enforcement-you-must-arm-is-not-one]] (the gate reshape is the mechanism; this grant
 is the interim rule).
+
+
+## Quarantine by RENAME is not a removal on any additively-synced tree — the replica keeps both names, and the next restore ships the thing you quarantined
+`2026-09-09_quarantine-by-rename-is-not-removal-on-an-additive-sync.md` · correction · 2026-09-09 · status: live · tier: M
+
+**The operative case, so the headline matches it:** you are about to neutralise a
+dangerous file — a stale credential profile, a dead tenant, a superseded config, a
+conflict copy — and the move is **quarantine, never delete**
+([[2026-08-26_never-delete-cleanup-means-quarantine]]). **You are about to do it by
+renaming the file in place.** Stop and ask one question: **does this tree get synced to
+any replica by an engine that does not propagate deletions?** If yes, the rename does not
+remove anything anywhere else. It **adds a second file**, and the original survives on
+every replica.
+
+## How to apply
+
+1. **Quarantine by MOVING the file into a directory the sync engine already ignores**
+   (`Archive/`, `_quarantine_YYYY-MM-DD/`), not by renaming it in place. A move out of the
+   synced set is a removal everywhere; a rename inside it is an addition everywhere.
+2. **Verify a quarantine AT EVERY REPLICA, not at the one you performed it on.** The
+   check is one `ls` per replica for the ORIGINAL name — its absence is the property that
+   matters, and its presence is invisible from the machine where you did the work. This is
+   [[2026-08-05_verify-the-chain-not-the-legs]] pointed at a removal instead of a copy.
+3. **Fix the SOURCE, not the machine in front of you.** A bundle, template or image that
+   still ships the bad artefact will reproduce it on the next restore. Repairing only the
+   current machine converts a systemic fault into a recurring one.
+4. **State severity by what is REACHABLE, not by what is named.** Here the profile was
+   inert — no token, `az account show` refused — so the exposure was directional (the next
+   `az login` in a non-launcher shell defaults to a dead tenant; the next restore repeats
+   it), not active. Saying that precisely is what lets the owner size it
+   ([[2026-09-04_decisions-held-narration-drifted]]).
+5. **The generalisation past syncs:** the same shape appears wherever a "removal" is
+   implemented as a rename or a status flag inside a set that gets copied wholesale —
+   archived tickets copied by an export, disabled accounts in a replicated directory,
+   `.disabled` config files in a container image. **Ask what COPIES this set, and whether
+   it copies intentions or only bytes.**
+
+**What held, and it is why this cost nothing today:** the per-project
+`AZURE_CONFIG_DIR` / `GH_CONFIG_DIR` isolation meant the coordinator seat read a
+project-local profile with zero subscriptions and was structurally unable to touch the
+restored one ([[2026-08-05_identities-float-verify-always]] rule 3 — prefer
+structurally-isolated state over global state). The global fallback was wrong; the seat
+never read it.
+
+**Family:** [[2026-08-26_never-delete-cleanup-means-quarantine]] ·
+[[2026-08-26_a-sync-that-cannot-refuse-a-deletion]] (its sibling — there the sync deleted
+too much, here it deletes too little) · [[2026-08-25_travel-drive-stale-pointers]] (a sync
+copies files, not intentions) · [[2026-08-05_identities-float-verify-always]] ·
+[[2026-09-08_a-ruling-can-be-voided-by-removing-its-precondition]] (a ruling executed and
+then undone by a mechanism nobody connected to it).
 

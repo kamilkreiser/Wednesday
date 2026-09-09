@@ -191,6 +191,72 @@ that no longer matches is worse than an absent one. Exercised in all four states
 
 ---
 
+## Kamils-Mac-mini — Tuesday's machine, brought up 2026-09-09 (what is machine-local HERE)
+
+**This is the record of an actual bring-up, so the next one is a checklist and not an investigation.**
+Fresh macOS 27.0 install, arm64. `doctor.sh` went **19 warnings -> 3**. Kam's hands were needed
+exactly ONCE.
+
+**The only step that needed his password:** the Homebrew installer. An agent shell has no TTY for a
+sudo prompt, so this is his by construction, not by policy:
+`/bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"`
+
+**`~/.zprofile` DID NOT EXIST and the Homebrew installer does not create it.** It prints the
+instruction and leaves it. Without it `brew` and everything it installs vanish from PATH at the next
+shell. Written 2026-09-09 with `eval "$(/opt/homebrew/bin/brew shellenv)"` plus the Docker bundle-path
+fallback, and **verified by sourcing a fresh login shell** rather than by reading it back.
+
+**Installed by Homebrew (all verified by RUNNING them, not by brew's exit code):** `node` 26.8.1 ·
+`npm` 11.19.0 · `gh` 2.100.0 · `az` 2.90.0 · `unison` · `tmux` · `pandoc` 3.11 · `poppler` ·
+`ffmpeg` 9.0.1 · `uv` 0.12.10 · `git-crypt` 0.8.0 · `python@3.14` (3.14.7 — what both on-drive venvs
+point at).
+
+**GUI apps installed WITHOUT a password — `/Applications` is admin-writable, so an agent can do these:**
+Superwhisper 2.18.3 · iTerm2 3.7.0 · VS Code · Google Chrome · Docker Desktop · Obsidian 1.13.7.
+**Every one had `spctl -a -vv -t exec` run against it BEFORE the copy** — all returned
+`accepted / Notarized Developer ID`. Verify before installing, never after.
+**Superwhisper's download URL is not in its web page** (JS app). Get it from the Homebrew cask API
+instead — `https://formulae.brew.sh/api/cask/superwhisper.json` gives the exact build URL and the
+target app name. Ask the resolver, not the text.
+
+**Voice:** Matilda is NOT available on this machine and the System Voice picker shows a short list.
+The fuller list is **System Settings -> Accessibility -> Spoken Content -> (i) beside System Voice ->
+Manage Voices**. Kam chose **Moira**, then installed **Moira (Enhanced)** (en_IE) on 2026-09-09;
+`speak.sh`'s fallback chain selects it automatically. Doctor's `Matilda Premium not downloaded`
+warning is therefore EXPECTED on this machine.
+
+**Scheduler:** `install_scheduler.command` is agent-aware from 2026-09-09 (Kam ruled `parameterise`).
+Run it with `WED_AGENT=tuesday`; it refuses an unknown agent and refuses if the matching
+`Launch_<Agent>.command` is absent. It arms `com.tuesday.shiftchange/.wake/.close/.nassync` and
+**writes `WED_AGENT` into each plist**, because launchd does NOT inherit the environment and a correct
+label with a defaulting script still boots the wrong seat.
+**Known collision, unresolved and Kam's:** `com.tuesday.close` and `com.tuesday.nassync` both fire at
+**23:00** — his "sync at 11pm" predates Tuesday having a close ritual at all. 23:30 for the sync is
+the recommendation; his time was left alone.
+
+**Docker:** the first launch prompts are Kam's. Docker Desktop **no longer creates
+`/usr/local/bin/docker`** unless the optional admin prompt is accepted; the CLI lives in the app
+bundle and reaches PATH only through `~/.zprofile`. `doctor.sh` was corrected 2026-09-09 to ask
+Docker itself (daemon probe) rather than to test PATH.
+
+🔴 **THE TRAP THIS MACHINE TAUGHT — read before running `install_credentials.command` anywhere.**
+The bundle restores CONFIG, never tokens (Keychain does not sync), and it was captured **2026-06-10**,
+so `gh` and `az` come back UNAUTHENTICATED — expected, not broken. Worse: **the June bundle predates
+the 2026-06-25 Secuura decommission, so it restored the DEAD tenant `4012a4e8…` as the default
+subscription in `~/.azure`, and `kksecura` as the global `gh` account — onto a Datasec-only machine.**
+Both were inert (no valid token). The seat was unaffected because the launcher scopes
+`AZURE_CONFIG_DIR` / `GH_CONFIG_DIR` to `4_Credentials/`, which is that pattern earning its keep.
+**Cause and durable fix:** [[0_Brain/learnings/2026-09-09_quarantine-by-rename-is-not-removal-on-an-additive-sync]]
+— quarantine by MOVING into an ignored directory, and fix the BUNDLE, not the machine, or the next
+restore repeats it.
+
+**Deliberately NOT on this machine:** Tailscale (Kam, 2026-09-09: *"no tailscale needed on this
+machine for now"*) — so the mini is LAN-reachable only. Office, Brave, and the Matilda voice are also
+absent; none is needed by the fleet.
+
+**Still GUI-only and still Kam's, unchanged from the run-sheet:** the scheduler's Full Disk Access
+grant for `/bin/bash`, Calendar TCC, auto-login and sleep settings for headless use.
+
 ## Headless second agent (TUESDAY) — bring-up (added 2026-09-08, Kam's two-machine commission)
 
 **Read `0_Brain/tasks/FIRST-BOOT-TUESDAY.md` first — it is what SHE reads. This is what KAM does.**
