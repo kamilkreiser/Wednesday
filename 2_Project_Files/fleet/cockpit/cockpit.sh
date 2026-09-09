@@ -179,9 +179,27 @@ case "${1:-}" in
     [ -n "$LPATH" ] || die "'$2' not in launchers.conf — register it (validated path) or use 'add'"
     if [ ! -f "$LPATH" ]; then
       # Travel-drive fallback (2026-08-25): the registry pins DevMASTER paths;
-      # when Wednesday runs from another drive carrying the same tree (the
+      # when a seat runs from another drive carrying the same tree (the
       # KK_DEV_Local travel copy), retry with THIS drive's root swapped in.
-      DRIVE_ROOT="${SCRIPT_DIR%/WEDNESDAY/*}"
+      #
+      # ── FIXED 2026-09-09, found by Tuesday — TENTH instance of the
+      # hardcoded-seat family, and the first found INSIDE a mechanism built to
+      # fix that family's sibling. This line used to read
+      # `DRIVE_ROOT="${SCRIPT_DIR%/WEDNESDAY/*}"`. **Her tree is named TUESDAY,
+      # so the pattern never matched**, the expansion returned SCRIPT_DIR
+      # UNCHANGED, and ALT became `.../fleet/cockpit/!CODING/...` — a path that
+      # cannot exist — so every `cockpit.sh launch` died with "registry stale"
+      # from her seat, for every project. **The guard written to survive a
+      # travel drive was itself keyed on the literal WEDNESDAY.**
+      #
+      # Derive the drive root from the VOLUME instead, which is what the
+      # fallback was always actually about. Her three exercised shapes, and she
+      # proved it NEUTRAL before proposing it: DevMASTER/WEDNESDAY ->
+      # /Volumes/DevMASTER (byte-identical to the old line) · KK_DEV_Local/
+      # WEDNESDAY -> /Volumes/KK_DEV_Local (byte-identical) · KK_T9/TUESDAY ->
+      # /Volumes/KK_T9_External_HDD, where the old line returned nonsense.
+      # **It only ADDS the failing case; nothing that works today changes.**
+      DRIVE_ROOT="$(printf '%s' "$SCRIPT_DIR" | awk -F/ '{print "/"$2"/"$3}')"
       ALT="$DRIVE_ROOT${LPATH#/Volumes/DevMASTER}"
       if [ "$ALT" != "$LPATH" ] && [ -f "$ALT" ]; then
         echo "launcher volume not mounted — using this drive's copy: $ALT" >&2
