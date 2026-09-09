@@ -7,7 +7,7 @@ status: live
 
 # Boot digest — headline + rules of every lesson (open the file when it fires)
 
-Generated 2026-09-09 13:34 from 134 lesson files (694,170 B). Each block = the lesson's retrieval handle (H1), its frontmatter, the operative paragraph, its section index, and every RULES section verbatim. 6 files carry no rules-shaped section and are included whole. The CASES behind a rule live only in the file: open it the moment the rule fires, or when a diagnosis needs the evidence. `_ledger.md` is read whole beside this digest; `_ledger_archive.md` on demand.
+Generated 2026-09-09 15:20 from 135 lesson files (699,288 B). Each block = the lesson's retrieval handle (H1), its frontmatter, the operative paragraph, its section index, and every RULES section verbatim. 6 files carry no rules-shaped section and are included whole. The CASES behind a rule live only in the file: open it the moment the rule fires, or when a diagnosis needs the evidence. `_ledger.md` is read whole beside this digest; `_ledger_archive.md` on demand.
 
 ## The T9 SSD is the master — Wednesday must be fully portable
 `2026-07-31_fully-portable-drive.md` · principle · 2026-07-31 · status: superseded — the "T9 is the master" half by [[2026-08-25_one-drive-devmaster-is-master]] (2026-08-25); the portability principle itself still lives
@@ -4797,6 +4797,48 @@ sections (open the file for these): The case, measured · Why the existing lesso
    `grep -l` the identifying markup across every page in the tree. Two renderers of one
    toggle is the standard hiding place, and "the page I looked at works" is a presence check
    that always passes.
+
+
+## A guard's refusal set is built from MISSING and MALFORMED — and the failure that actually happens is WELL-FORMED AND OUT OF DATE
+`2026-09-09_a-guard-refuses-malformed-input-and-the-real-failure-is-stale-input.md` · correction · 2026-09-09 · status: live
+
+**The operative case, so the headline matches it:** you are writing or reviewing a guard that
+validates an input before something irreversible — an identity, a target, a tenant, a branch,
+an environment name, a recipient. **Look at what it refuses.** Almost every such guard refuses
+**absent** and **unrecognised**, because those are the shapes that come to mind when you ask
+*"how could this input be bad?"*
+
+sections (open the file for these): The case, measured · Why this is its own lesson · How to apply
+
+## How to apply
+
+1. **For every guard, write down what it refuses — then ask what a STALE-BUT-VALID input
+   looks like for that field.** If the answer is "there isn't one", say why. If there is one,
+   the guard is incomplete as written.
+2. **Refuse on a DISAGREEMENT between two independent sources, not just on a bad value.** The
+   fix here cross-checks `WED_AGENT` against the checkout's folder name, because the two are
+   independent: one is environment, the other is where the code physically lives.
+3. **Pick the second source so it cannot go stale the same way as the first.** An environment
+   variable and another environment variable are one source. An env var and the filesystem are
+   two. A config file and the service it configures are two.
+4. **Refuse only where both sources KNOW.** An unrecognised tree, a missing config, a fresh
+   clone — those cannot discriminate, and a guard that refuses there teaches people to set the
+   value to whatever makes the tool quiet, which is worse than the hole it closes.
+5. **The class is widest where a value is INHERITED rather than supplied:** an exported shell
+   variable, a cached credential, a session token, a default in a config the caller did not
+   write, a `--profile` from last week. **Inheritance is how a value becomes stale without
+   anyone touching it.**
+6. **Test it with a discriminating pair, never with a single case.** Run the same operation
+   with the suspect value and with the value forced, and compare the *destination*. A single
+   run cannot tell "it worked" from "it worked, elsewhere".
+
+**Family:** [[2026-09-08_a-false-absence-is-usually-my-own-instrument]] (rule 11: a control
+must be able to fail independently — this is that rule applied to the guard's *input* instead
+of its output) · [[2026-08-07_a-check-that-cannot-fail]] ·
+[[2026-09-09_the-seat-resolver-is-the-layer-above-every-agent-aware-fix]] ·
+[[2026-08-25_travel-drive-stale-pointers]] · [[2026-08-05_identities-float-verify-always]]
+(identities float by design — this is the guard-shaped half of that principle) ·
+[[2026-09-08_the-check-ran-and-was-not-checking-the-thing]].
 
 
 ## Read a guard's EXCLUSION list before trusting the guard — the file class it skips is usually the one it was written for
