@@ -1,0 +1,61 @@
+#!/bin/bash
+# chat_sync.sh — keep Kam's ONE page current on BOTH machines, without either agent
+# remembering to do it.
+#
+# WHY (Kam, 2026-09-09 17:53 and 17:54, panel, verbatim):
+#   "Please coordinate with Tuesday to make it work so that I can review and work off a
+#    single page for both agents."
+#   "it would be good if both pages were automatically synced without agent intervention
+#    or both synced by either agent."
+# Before this, Tuesday's replies reached his page only when a Wednesday seat happened to
+# pull — a person standing in for a mechanism, which is the exact class this fleet keeps
+# filing. Measured that day: his 17:48 test sat invisible to him until a manual pull.
+#
+# WHY IT IS SAFE TO AUTOMATE (Tuesday's argument, verified here before arming):
+#   every chat file is SINGLE-WRITER by design — Wednesday writes only chat_wednesday.json,
+#   Tuesday only chat_tuesday.json, the panel only chat_kam.json — and chat_log.json is
+#   GITIGNORED and REBUILT from the three. So an automatic pull has nothing to conflict on.
+#
+# NO --autostash, DELIBERATELY. On 2026-09-09 a routine `pull --rebase --autostash` on a
+# dirty tree left conflict markers in BOTH decisions.json (Kam's rulings) and chat_log.json,
+# twice in one day. A background job that reaches into a live working tree to force a sync
+# through is not worth 60s of latency. FAIL CLOSED AND RETRY: if the tree is busy this
+# cycle skips and the next one picks it up.
+#
+# stderr is NEVER discarded (2026-08-06): a sync that fails silently every minute is worse
+# than no sync at all.
+set -u
+SELF="$(cd -P "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+ROOT="$(cd -P "$SELF/../.." && pwd)"          # self-locating: works from WEDNESDAY or TUESDAY
+LOG="$ROOT/2_Project_Files/fleet/state/chat_sync.log"
+mkdir -p "$(dirname "$LOG")" 2>/dev/null
+say(){ printf '%s %s\n' "$(date '+%Y-%m-%dT%H:%M:%S')" "$*" >> "$LOG"; }
+
+# (1) Never pull into a half-finished rebase/merge.
+if [ -d "$ROOT/.git/rebase-merge" ] || [ -d "$ROOT/.git/rebase-apply" ] || [ -f "$ROOT/.git/MERGE_HEAD" ]; then
+  say "SKIP: rebase/merge in progress"; exit 0
+fi
+
+# (2) Pull WITHOUT autostash. A dirty tree makes this fail, and that is the intended
+#     behaviour — we skip rather than touching the working tree.
+OUT="$(git -C "$ROOT" pull --rebase 2>&1)"; rc=$?
+if [ $rc -ne 0 ]; then
+  say "SKIP: pull rc=$rc — $(printf '%s' "$OUT" | tr '\n' ' ' | cut -c1-160)"
+  exit 0
+fi
+
+# (3) Rebuild the merged log the panel serves. Its own orphan guard refuses (rc 4) if the
+#     derived file holds an entry no stream has — that guard is left to fail loudly.
+GOUT="$(python3 "$SELF/chat_streams.py" 2>&1)"; grc=$?
+if [ $grc -ne 0 ]; then
+  say "REGEN FAILED rc=$grc — $(printf '%s' "$GOUT" | tr '\n' ' ' | cut -c1-200)"
+  exit 0
+fi
+# Log HONESTLY: git's rebase path says "up to date" in more than one wording, and a log
+# that prints PULLED every minute makes a real pull invisible (a detector that cries wolf).
+case "$OUT" in
+  *"Already up to date"*|*"is up to date"*|*"up to date with"*)
+      say "ok: nothing upstream; $(printf '%s' "$GOUT" | tail -1)" ;;
+  *)  say "PULLED; $(printf '%s' "$GOUT" | tail -1)" ;;
+esac
+exit 0

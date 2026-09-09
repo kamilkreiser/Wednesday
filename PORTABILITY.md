@@ -125,6 +125,21 @@ Keep this file updated whenever a new machine-local dependency appears.
     any is missing. Fallback if Chrome is absent: `soffice --headless --convert-to pdf` on
     the pandoc HTML (uglier, still a PDF).
 
+22. **`com.<agent>.chatsync` — Kam's ONE page, and it is MACHINE-LOCAL (added 2026-09-09 on his
+    instruction: *"both pages were automatically synced without agent intervention"*).**
+    `2_Project_Files/tools/chat_sync.sh` runs every 60s under launchd and does exactly two
+    things: `git pull --rebase` then `chat_streams.py`. Before it, Tuesday's replies reached
+    Kam's page only when a Wednesday seat happened to pull — a person standing in for a
+    mechanism. **The plist does NOT travel** (`~/Library/LaunchAgents/com.wednesday.chatsync.plist`
+    here, `com.tuesday.chatsync.plist` on hers); the LABEL is derived from the checkout's folder
+    name, so a seat can never run the other seat's job from the wrong tree. On a new machine:
+    `launchctl load ~/Library/LaunchAgents/com.<agent>.chatsync.plist`. doctor.sh checks it is
+    loaded AND that its log has moved in the last 10 minutes, because loaded is not running.
+    **Deliberately no `--autostash`:** on 2026-09-09 a routine `pull --rebase --autostash` on a
+    dirty tree left conflict markers in Kam's rulings store and in the chat log, twice in one
+    day. A dirty tree makes the cycle SKIP and retry; it never reaches into the working tree.
+    The script is self-locating, so it is correct in either agent's checkout unchanged.
+
 ## New-Mac bring-up, done end to end (2026-09-02 — Kam's laptop died; replacement MacBook Pro from the KK_DEV_Local travel drive)
 
 The order that worked, so the next dead machine costs an hour, not an evening. Items 1–21

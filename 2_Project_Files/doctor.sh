@@ -80,6 +80,25 @@ _DOC_AGENT="${WED_AGENT:-wednesday}"
 if launchctl print "gui/$(id -u)/com.${_DOC_AGENT}.wake" >/dev/null 2>&1; then ok "scheduler launchd jobs loaded (agent: $_DOC_AGENT)"
 else warn "scheduler jobs not loaded (agent: $_DOC_AGENT)" "run 2_Project_Files/scheduler/install_scheduler.command on this machine (PORTABILITY 12)"; fi
 
+# --- chat_sync: Kam's ONE page, kept current on BOTH machines (Kam, 2026-09-09 17:53/17:54) ---
+# Before this job, Tuesday's replies reached his page only when a Wednesday seat happened to
+# pull — a person standing in for a mechanism. Agent-derived label so a seat can never run the
+# other seat's job from the wrong tree. `launchctl print` deliberately, NOT `list | grep`:
+# the grep form gives a false negative here (2026-09-09, and the comment above says why).
+if launchctl print "gui/$(id -u)/com.${_DOC_AGENT}.chatsync" >/dev/null 2>&1; then
+  # LOADED IS NOT RUNNING, and a fresh log is NOT proof either: a seat running the script by
+  # hand keeps the log fresh while launchd fails every cycle. That exact check passed while the
+  # job was dead with EX_CONFIG on 2026-09-09. Key on launchd's OWN exit code, which nothing a
+  # seat does by hand can move.
+  _cs_rc=$(launchctl print "gui/$(id -u)/com.${_DOC_AGENT}.chatsync" 2>/dev/null | awk -F'= ' '/last exit code/{print $2}')
+  case "${_cs_rc:-unknown}" in
+    0|"(never exited)") ok "chat_sync loaded, last launchd exit clean (agent: $_DOC_AGENT)" ;;
+    *) warn "chat_sync loaded but launchd's last exit was: ${_cs_rc}" "78/EX_CONFIG means the plist points its out/err at /Volumes — they must live in ~/Library/Logs (PORTABILITY 22). Kam's page will not show the other agent." ;;
+  esac
+else
+  warn "chat_sync not loaded (agent: $_DOC_AGENT)" "launchctl load ~/Library/LaunchAgents/com.${_DOC_AGENT}.chatsync.plist (PORTABILITY 22) — without it Kam's page will not show the other agent"
+fi
+
 # --- Optional seats / mounts ---
 [ -x "$PROJECT_DIR/2_Project_Files/tools/codex-cli/node_modules/.bin/codex" ] || [ -d "$PROJECT_DIR/2_Project_Files/tools/codex-cli" ] && ok "codex CLI (drive-local)" || warn "codex CLI dir missing" "gpt seat unavailable (PORTABILITY 7-9)"
 [ -d "/Volumes/DevMASTER" ] && ok "DevMASTER mounted" || warn "DevMASTER not mounted" "cross-project context read-only unavailable — fine on the laptop"
