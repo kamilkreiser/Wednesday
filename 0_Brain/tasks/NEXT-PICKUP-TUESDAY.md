@@ -22,10 +22,10 @@ Kam, panel 2026-09-09: *"yes, run multiple agents on the security review."*
 | Pane | Seat | Partition | Rows |
 |---|---|---|---|
 | ~~`%3`~~ | ~~`SecRev-A`~~ **CLOSED 11:5x — partition COMPLETE 19/19, verdict on disk** | HPAuthenticationManager · infra_hpam | 19 ✅ |
-| `%4` | `Datasec/SecRev-B` | License-Services · LicenseServer | 25 |
-| `%5` | `Datasec/SecRev-C` | HPK_Deployment_Utility · UniversalPrint · MailFlow · CypherSharePoint · QuickAccessLibrary | 28 |
-| `%6` | `Datasec/SecRev-D` | Task-Dispatcher · hpam-marketplace · datasec-administration-portal · WorkPathApplications · cc-api · hpam-api · SPDF-D1 | 25 |
-| `%7` | `Datasec/SecRev-J` | **the JUNE baseline** — `Deliverables/03_Findings_Register.md`, F-01…F-31 | 31 |
+| ~~`%4`~~ CLOSED ✅ | `SecRev-B` | License-Services · LicenseServer | 25 |
+| ~~`%5`~~ CLOSED ✅ | `SecRev-C` | HPK_Deployment_Utility · UniversalPrint · MailFlow · CypherSharePoint · QuickAccessLibrary | 28 |
+| ~~`%6`~~ CLOSED ✅ | `SecRev-D` | Task-Dispatcher · hpam-marketplace · datasec-administration-portal · WorkPathApplications · cc-api · hpam-api · SPDF-D1 | 25 |
+| ~~`%7`~~ CLOSED ✅ | `SecRev-J` | **the JUNE baseline** — `Deliverables/03_Findings_Register.md`, F-01…F-31 | 31 |
 
 **Shared method:** `2_Project_Files/fleet/briefs_staged/2026-09-09_secreview-round2-parallel-method.md`.
 **Launcher:** `2_Project_Files/fleet/launch_secreview_round2_seat.sh <b|c|d>` (one script, parameterised;
@@ -43,7 +43,7 @@ guard REFUSES (rc 9) unless all FIVE verdict files exist and are non-empty** —
 `go ahead and consolidate` is now *unexecutable*, not merely *unwise*. Exercised both ways with a real
 positive control (5 present → rc 0; 4 present → rc 9 naming the missing file; an EMPTY file → rc 9).
 A second guard refuses if the register no longer reads 23 Criticals, so it cannot run twice.
-**Launch it when the monitor reports the fifth verdict.** It applies all FIVE in ONE action at
+**LAUNCHED 12:03 on `%8`; its guard passed with all five present and the register still at 23 Criticals.** It applies all FIVE in ONE action at
 the end, on Tuesday's word — do not let it start early, a partial consolidation is the worst outcome.**
 The clause is a launch guard (rc 12), not a request. **`_Working/PROGRESS.md` is shared too — leave it.**
 
@@ -90,7 +90,15 @@ you give seat A the consolidation word, say **five** and name them:
   inference:** 18 of 31 numbers disagree with their own vector, but **26 of 31 are reproducible by changing
   exactly ONE metric** — the signature of *a vector edited after the score was computed and never
   recomputed*, not of scores estimated to fit a band. **Different defect, different remediation.**
-- **Still to report: C only.**
+- **`round2-c.md` (56 KB).** 🔴 **The ONLY seat that REMOVES findings rather than re-scoring them** —
+  `D-MF-01` REFUTED OUTRIGHT, and `D-UP-01`/`D-UP-02` describe a file that is **dead code**. **That moves
+  the estate TOTAL, which no other seat does**, so the consolidator is instructed NOT to apply them on its
+  own authority. Also `H-D2` High 7.8 → **Low 3.3** (two bands). **Best instrument discipline of the five:**
+  21 published reference vectors PLUS a nine-pair differential control, each pair changing one metric and
+  each required to move the score — proving *sensitivity*, not just arithmetic.
+- **ALL FIVE VERDICTS ARE IN.** The four seat panes are closed (detector run on each first; two carried
+  ghosts, both inert). **The CONSOLIDATION seat is running on `%8`** — a fresh seat that produced none of
+  the verdicts, so it can weigh all five without defending any.
 
 ## 🔴 WHAT IS ACTUALLY ON KAM'S DESK (this seat's items only)
 
@@ -118,6 +126,13 @@ you give seat A the consolidation word, say **five** and name them:
 3. **The tenant question (`fc05dcdd` vs `0c57ab37`)** — his alone, on the older card
    `secrev-live-pass-blocked-on-tenant`. Blocks every live-environment item and is costing published
    severities. Not blocking round 2.
+
+
+⚠️ **A BRIEF DEFECT OF TUESDAY'S, OWNED:** the shared method brief told every seat *"JUNE IS OUT OF
+SCOPE"* while seat J's supplement made June its entire partition. Contradictory. **Seat J caught it,
+resolved it up front and said so** rather than silently picking one. Second time in the session an agent
+reconciled two of Tuesday's instructions — the other was the s150-era queue collision. **If you write a
+shared brief plus per-seat supplements, read the supplement AGAINST the shared holds before sending.**
 
 ## ⚠️ TRAPS — s1's still hold; these are s2's additions
 
