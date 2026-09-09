@@ -7,7 +7,7 @@ status: live
 
 # Boot digest BY TIER — W whole, M rules-only, every project case a handle
 
-Generated 2026-09-09 11:31 from 132 lesson files (683,209 B). M 31 · MIXED 5 · W 96. 28 project CASE sections inside MIXED files are reduced to one line each: the heading and the path to read it at. W blocks are exactly what the default digest carries; M blocks drop the section index and keep the rules; a P file is a single handle. The CASES behind every rule live only in the lesson files — open one the moment its rule fires.
+Generated 2026-09-09 11:40 from 133 lesson files (688,604 B). M 31 · MIXED 5 · W 97. 28 project CASE sections inside MIXED files are reduced to one line each: the heading and the path to read it at. W blocks are exactly what the default digest carries; M blocks drop the section index and keep the rules; a P file is a single handle. The CASES behind every rule live only in the lesson files — open one the moment its rule fires.
 
 ## The T9 SSD is the master — Wednesday must be fully portable
 `2026-07-31_fully-portable-drive.md` · principle · 2026-07-31 · status: superseded — the "T9 is the master" half by [[2026-08-25_one-drive-devmaster-is-master]] (2026-08-25); the portability principle itself still lives · tier: W
@@ -4491,6 +4491,43 @@ and never vibes) · [[2026-08-16_classification-is-the-field-that-grants-authori
 [[2026-09-07_production-ban-lifted-for-the-week]] (a grant read narrowly, every use flagged) ·
 [[2026-08-09_an-enforcement-you-must-arm-is-not-one]] (the gate reshape is the mechanism; this grant
 is the interim rule).
+
+
+## "Am I allowed to?" and "does this project allow it?" are two different checks, and I have only ever run the first
+`2026-09-09_my-authority-and-the-targets-rules-are-two-checks.md` · correction · 2026-09-09 · status: live · tier: W
+
+**The operative case, so the headline matches it:** Wednesday is about to rule an action
+**inside a client project** — a merge, a branch policy, a file move, a process change.
+**Before ruling it, open THAT PROJECT'S OWN `CLAUDE.md` and read what it says about the
+action.** Wednesday's authority answers whether *Wednesday* may direct the thing. It says
+nothing about whether the project permits the thing **at all**, by anyone.
+
+sections (open the file for these): The case · Why the existing lessons did not fire · How to apply · The uncomfortable part, kept · Related
+
+## How to apply
+
+1. **Before ruling any action inside a client project, open that project's `CLAUDE.md`
+   and grep it for the verb** — merge, push, deploy, delete, branch, release.
+   `grep -niE 'merge|approval|push|deploy' <project>/CLAUDE.md` is one command and it is
+   the one that was not run.
+2. **Two independent checks, both required, neither sufficient:** *my authority permits me
+   to direct this* **AND** *the project permits this to be done at all*. **They fail
+   independently** — here the first passed cleanly and the second forbade it outright.
+3. **A grant from the principal about MY authority does not silently amend a convention
+   the same principal adopted for a project.** Reading it that way is arguing an action
+   into scope ([[2026-08-07_protocol-v1.3-signed-delegation]] — *"if it needs a clever
+   reading of the grant, it is outside it"*), and it makes me **the sole author of the
+   authority**, which v1.3 excludes by name.
+4. **A rule that nothing technical enforces binds harder, not softer.** Line 246 says so
+   explicitly and names the PR that was self-merged because nothing stopped it. **Where a
+   convention survives only because people decline to do the easy thing, doing the easy
+   thing destroys it** — and the coordinator doing it destroys it fastest, because every
+   agent takes the precedent.
+5. **When two of the principal's own rulings are in tension, that tension is HIS to
+   resolve, and it goes to him as a card with the tension named** — not resolved by
+   picking the one that unblocks the work. **The one that unblocks the work is exactly the
+   one to distrust** ([[2026-08-16_classification-is-the-field-that-grants-authority]]
+   rule 4).
 
 
 ## Multiple agents on one project, in parallel, to close tickets — partitioned by DIRECTORY, and the shared inbox is the part that bites
