@@ -7,7 +7,7 @@ status: live
 
 # Boot digest BY TIER — W whole, M rules-only, every project case a handle
 
-Generated 2026-09-10 13:59 from 145 lesson files (745,257 B). M 32 · MIXED 5 · W 108. 28 project CASE sections inside MIXED files are reduced to one line each: the heading and the path to read it at. W blocks are exactly what the default digest carries; M blocks drop the section index and keep the rules; a P file is a single handle. The CASES behind every rule live only in the lesson files — open one the moment its rule fires.
+Generated 2026-09-10 15:27 from 146 lesson files (747,653 B). M 32 · MIXED 5 · W 109. 28 project CASE sections inside MIXED files are reduced to one line each: the heading and the path to read it at. W blocks are exactly what the default digest carries; M blocks drop the section index and keep the rules; a P file is a single handle. The CASES behind every rule live only in the lesson files — open one the moment its rule fires.
 
 ## The T9 SSD is the master — Wednesday must be fully portable
 `2026-07-31_fully-portable-drive.md` · principle · 2026-07-31 · status: superseded — the "T9 is the master" half by [[2026-08-25_one-drive-devmaster-is-master]] (2026-08-25); the portability principle itself still lives · tier: W
@@ -4964,6 +4964,50 @@ principal.
 **Family:** [[2026-07-31_manage-dont-do]] · [[2026-08-13_shared-bus-tag-filter-or-leak]] ·
 [[2026-09-10_a-panel-message-is-a-record-not-a-string]] (the tab is data about where he
 typed, not about who owns the work).
+
+
+## Deploy freely to kintsugi AND demo until end of Sunday 14 Sep — and "everything possible" means what has MERGED
+`2026-09-10_deploy-both-boxes-grant-expires-sunday.md` · preference · 2026-09-10 · status: live · tier: W
+
+(no rules-shaped section — file included WHOLE)
+
+# Deploy freely to kintsugi AND demo until end of Sunday 14 Sep — and "everything possible" means what has MERGED
+
+**His words, verbatim (email, 2026-09-10 15:24):**
+> *"Ruling given. Please deploy everything possible to kintsugi. Also deploy everything possible to
+> demo. This rule stands until the end of the week."*
+
+**This lifts the demo-affecting pause for the week.** All day until this email, demo was his
+signature class and every demo action stopped for him.
+
+## The three precisions that keep this from being read too wide
+
+1. **"Everything possible" = what has MERGED to develop.** It does **not** authorise merging the
+   66 open unapproved PRs, bypassing a gate, or `--no-verify`. Those are not *possible* — they are
+   blocked on a review nobody can give, which is the agent-identity problem and is untouched by
+   this grant.
+2. **Kintsugi first, then demo.** His 13:22 ruling the same day made kintsugi the dev box things
+   land on first. **A four-hour-old rule is not silently reversed by a later one that does not
+   mention it.**
+3. **It EXPIRES.** Recorded in [[../tasks/EXPIRING-GRANTS]] with a date, because a time-scoped
+   instruction with no expiry mechanism becomes a permanent change nobody decided to make.
+   ⚠ *"End of the week"* read as **end of Sunday 14 September**, flagged to him as an assumption.
+
+## What it does NOT change
+
+**Production is untouched and does not exist** — measured 2026-09-10: the hostname does not
+resolve and its config is deployed nowhere. **This grant is about two dev/demo boxes and nothing
+else.**
+
+The safety practices stay, because they are how a deploy is done rather than permission to do one:
+**Phase 0 re-tag before building** (neither box has any rollback — 31/31 bare `:latest`, zero
+dangling), **build everything before swapping anything**, **migrations in the middle** (046/047 add
+CHECK constraints old code demonstrably violates), and **re-verify KS-535's wallet AFTER a redeploy,
+not before**, because the risk is a redeploy overwriting it.
+
+**Family:** [[2026-09-10_kintsugi-first-then-demo-behind-gates]] ·
+[[2026-08-29_a-time-scoped-instruction-needs-a-mechanism-that-expires-it]] ·
+[[2026-09-05_never-update-prod-and-demo-is-kams-class]] (suspended for this week only, by this file).
 
 
 ## I endorse things I have not read — and the endorsement is what makes them binding
