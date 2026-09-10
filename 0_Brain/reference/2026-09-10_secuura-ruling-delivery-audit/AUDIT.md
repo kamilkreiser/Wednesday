@@ -116,3 +116,52 @@ is one bounded read.
 4. **Two rows are unmeasurable from this seat** — Platform S is invisible to the
    identity I hold. That is a gap in what I can audit, and it should be stated
    every time rather than quietly skipped.
+
+---
+
+## 5. SECOND PASS — measured after the first draft (2026-09-10 10:55)
+
+**KS-968 cluster: ALL FIVE WERE DELIVERED.** The measurements Kam authorised were
+run *and* recorded; only the cards were never marked. KS-968 carries six
+substantive comments, and two of them **cite Kam's authorisation by time in their
+own text** (`panel 09:57, "Authorise ONE read-only comparison"`). The final
+verdict is on the ticket: *"CLOSED — BENIGN. World (a), the incident, is
+EXCLUDED."* All five now marked delivered, the two exact attributions distinguished
+in the record from the three that rest on timing and content.
+
+**Undelivered count: 31 → 19.**
+
+### ⚠ The one that got worse on inspection, not better
+
+`secuura-demo-kam-admin-default-password` (ruled `b` 2026-09-07: *"Replace the
+identity everywhere now — the six files — AND set the password"*).
+
+**Do NOT mark this delivered. It is partially done at best, and it is Kam's own
+identity on a public demo.**
+
+- **PR #885 merged** 2026-09-07 — *"KS-949: the demo platform admin gets a
+  fictional identity and loses it"*. So the code change shipped.
+- **But KS-949 is still `In Progress`**, P2. Its own description names **two live
+  sites** (`services/auth/.../userRepo.ts` and
+  `services/api-gateway/src/startup-migrations.ts`) and records that the sibling
+  ticket **KS-913 is `Tested Not Deployed`** — this project's explicit state for a
+  fix that exists in code and has not reached a box.
+- **I have NOT measured whether the fix is deployed to the demo VM.** Merged is not
+  deployed, and this repo has a whole state for the difference. **Until someone
+  reads that box, we cannot say Kam's name and a published password are off it.**
+- **Residue tickets are open and neither is scheduled:** **KS-986** (Backlog, P3) —
+  `USER_TESTING/CREDENTIALS-AND-PORTALS.md` still advertises
+  `admin@secuura.com` / `admin123` at lines **68** and **177**; **KS-951**
+  (Backlog, P2) — the CI default-password gate exempts **16 published passwords by
+  design** and **4 of 5 planted canaries walked past it**.
+
+**Recommended next action:** one read-only check on the demo VM answering a single
+question — *does the seeded platform admin row still carry `kam@secuura.ai`?* That
+is one query, and it converts this from an argument into a fact.
+
+### Others refined
+
+| Card | Revised state |
+|---|---|
+| `secuura-f5-demo-interim-mitigation` (`letitland`) | **KS-946 is `In Review`**, not merged — *"Four path spellings dodge EVERY path-scoped gateway limiter — a CLASS"*. The real fix exists and is awaiting review, so the ruling is in flight rather than delivered. |
+| `secuura-dependabot-triage` (`close-and-rescope`) | **Rescope CONFIRMED done** — `.github/dependabot.yml` on develop declares only `npm` and `docker`; `github-actions` is gone. The "close the 5" half stays unconfirmed. |
