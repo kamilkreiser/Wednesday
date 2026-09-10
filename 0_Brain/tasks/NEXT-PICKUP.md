@@ -17,7 +17,7 @@ supersede: replace this file wholesale at the next pickup; do not append
 2. **Draft reply to Peter on #933** — `5_Project_History/2026-09-11_peter-reviews/DRAFT-reply-to-peter-933.md`: ONE blocker (#933's guard refuses the CI Akto job's topology → scan skipped; after merge, for every PR). Verified by Wednesday at step level. **#933 cannot be approved until fixed.** Notes carry the two triage corrections (#813 withdrawn-but-counted-approved; #900 open).
 3. **#896 draft** (last night) still unsent — `5_Project_History/2026-09-10_peter-protocol/DRAFT-reply-to-peter-896.md`.
 4. **Tell Peter #951 is NO GO** so he skips it (his triage ranks it #2) — suggested 08:0x.
-5. **Kam's own vault skill `Notes (MASTER)/skills/Current/extranet.md` still carries "RULE — file AND post every new/updated document (Kam, 2026-06-23)" and "Hand a to-do to a collaborator"** — it contradicts his 2026-09-05 tickets-only ruling and re-arms every seat that loads it (found by s176). **His file, read-only to us: put it in front of him as a one-line ask, not a card.** Not yet raised.
+5. **Kam's own vault skill `Notes (MASTER)/skills/Current/extranet.md` still carries "RULE — file AND post every new/updated document (Kam, 2026-06-23)" and "Hand a to-do to a collaborator"** — it contradicts his 2026-09-05 tickets-only ruling and re-arms every seat that loads it (found by s176). **His file, read-only to us.** **Raised on the panel ~09:0x as a one-line ask, offering to draft replacement text — no answer yet.**
 6. Unchanged: `raise-to-1` on the ruleset · the agent GitHub identity invite · four extranet decisions (**never `POST /api/seen`**).
 
 ## 🟢 FLOOR — ~08:4x
