@@ -36,28 +36,6 @@ PROJECT_DIR="$(cd -P "$HERE/../.." && pwd)"
 WORKSPACE="$(cd -P "$PROJECT_DIR/.." && pwd)"
 AGENT="${WED_AGENT:-wednesday}"
 
-# >>> ruled-ignores — KAM'S RULINGS ON WHAT THIS LEG SYNCS
-# 2026-09-10 20:27 `stop-partition-rerun` + 20:28 `nas-shared-folders-owner = wednesday`:
-#   this leg does NOT walk Datasec or the TUESDAY tree — Tuesday's leg owns those.
-# 2026-09-11 07:23 `narrow-hard`: "Cut node_modules, worktrees and regenerable bulk from
-#   the synced set, then re-run".
-# WHY IT LIVES HERE: until 2026-09-11 the partition existed ONLY in the environment of a
-# hand-launched re-run. The 03:30 launchd job passes NO environment, so the nightly leg
-# would have run WITHOUT the partition Kam ruled. A ruling that lives in one shell is not
-# in force.
-# SCOPED to agent=wednesday: another agent running this wrapper must never inherit a set
-# that excludes its own tree. An explicitly exported DEVNAS_IGNORE_NAMES still wins.
-# The engine takes BASENAMES only (`-ignore "Name X"`, any depth), so every name below is
-# one that is regenerable wherever it appears. `.azure/telemetry` was on the card as
-# "similar bulk" and is NOT here: as a basename, `Name telemetry` would match every folder
-# of that name. `dist`/`build`/`coverage` are NOT here either: those names hold real
-# source in some trees.
-if [ "$AGENT" = "wednesday" ] && [ -z "${DEVNAS_IGNORE_NAMES:-}" ]; then
-  DEVNAS_IGNORE_NAMES="Datasec TUESDAY node_modules worktrees .venv __pycache__ .next .turbo .pytest_cache"
-fi
-export DEVNAS_IGNORE_NAMES="${DEVNAS_IGNORE_NAMES:-}"
-# <<< ruled-ignores
-
 ENGINE="$WORKSPACE/!SYNC FILES/devnas-sync.sh"
 LOGDIR="$PROJECT_DIR/2_Project_Files/scheduler/logs"
 STATEDIR="$PROJECT_DIR/2_Project_Files/scheduler/state"
