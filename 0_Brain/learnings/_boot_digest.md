@@ -7,7 +7,7 @@ status: live
 
 # Boot digest — headline + rules of every lesson (open the file when it fires)
 
-Generated 2026-09-10 09:57 from 139 lesson files (721,435 B). Each block = the lesson's retrieval handle (H1), its frontmatter, the operative paragraph, its section index, and every RULES section verbatim. 6 files carry no rules-shaped section and are included whole. The CASES behind a rule live only in the file: open it the moment the rule fires, or when a diagnosis needs the evidence. `_ledger.md` is read whole beside this digest; `_ledger_archive.md` on demand.
+Generated 2026-09-10 11:00 from 140 lesson files (725,774 B). Each block = the lesson's retrieval handle (H1), its frontmatter, the operative paragraph, its section index, and every RULES section verbatim. 6 files carry no rules-shaped section and are included whole. The CASES behind a rule live only in the file: open it the moment the rule fires, or when a diagnosis needs the evidence. `_ledger.md` is read whole beside this digest; `_ledger_archive.md` on demand.
 
 ## The T9 SSD is the master — Wednesday must be fully portable
 `2026-07-31_fully-portable-drive.md` · principle · 2026-07-31 · status: superseded — the "T9 is the master" half by [[2026-08-25_one-drive-devmaster-is-master]] (2026-08-25); the portability principle itself still lives
@@ -5242,4 +5242,42 @@ a brief points AT — here, the helper a fix-shape names) ·
 [[2026-09-05_a-relayed-ruling-is-delivered-only-when-it-is-in-the-artefact]] (rule 5 — a retraction
 must reach the artefact that carries the instruction) ·
 [[2026-08-21_challenge-me-when-you-think-im-wrong]] (the grant that made all three catches available).
+
+
+## A step I hand Kam is a CLAIM about what he will SEE — measure the surface at the moment of writing, never from the card that motivated it
+`2026-09-10_steps-to-kam-are-a-claim-about-his-screen.md` · preference · 2026-09-10 · status: live
+
+**His words, verbatim (2026-09-10 10:32):**
+> *"Please try to be clearer with your recommendations. For example, go to page X, click on Y,
+> rationale below.    Going to the link you provided, require status check to passwords already
+> unticked."*
+
+sections (open the file for these): Why the existing rules did not catch it · The rule · How to apply · The wider costume
+
+## The rule
+
+**Before writing any step that puts Kam in front of a UI, read the live state of that exact
+surface, and write the step from the reading.** The card, the ticket, the earlier finding and my
+own previous message are all representations. The page is the source.
+
+This is [[2026-08-03_mental-model-not-source-of-truth]] pointed at the one artefact where being
+wrong is most expensive — because Kam does not get an error message, he gets a screen that does not
+match his instructions, and he has to work out which of us is confused.
+
+## How to apply
+
+1. **Measure the surface, then write the step.** For a GitHub setting that is one API read of the
+   ruleset or branch protection; for a ticket, one read of its state; for a PR, one read of its
+   reviews and mergeability. One call, immediately before writing.
+2. **State the current value in the step**, so the instruction is falsifiable on sight:
+   *"Required approving reviews currently reads 0 — set it to 1."* If he sees a different number,
+   he knows instantly that I am stale, instead of guessing.
+3. **If the thing is already done, say so and drop the step.** "Already done, nothing needed here"
+   is a complete and useful answer, and it is the answer he had to supply himself this time.
+4. **Order the steps by what the page does, not by what the card argued.** Page, click, then the
+   rationale underneath — his own stated shape.
+5. **This applies to sequencing too.** Two of his rulings today interacted: raising required
+   approvals to 1 would have walled in the very PR his other ruling said to merge. **A step is also
+   a claim about what the OTHER steps leave possible** — read the whole set before handing over any
+   of it.
 
