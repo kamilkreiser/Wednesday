@@ -8209,5 +8209,54 @@
   "prior_rulings_overridden": [
    "2026-08-26 17:11"
   ]
+ },
+ {
+  "id": "secuura-ks597-bind-compares-two-id-spaces-now-deployed",
+  "client_project": "Secuura/Blockchain",
+  "title": "Stuart's KS-597 question is now live: your bind likely refuses every Platform S document on kintsugi AND demo — which ID should it compare?",
+  "bluf": "OVERRIDE REASON, STATED FIRST: the prior-rulings gate will match your 2026-09-07 `bind` ruling (secuura-org-trust-boundary-within-tenant). That ruling decided WHETHER a claimed organisation is bound to the caller. This card asks only WHICH IDENTIFIER the bind compares - and Stuart says in terms \"I am not questioning the bind\". It is a different question, and it is addressed to you by name. THE QUESTION (Stuart, KS-597, 2026-09-10 06:14Z, unanswered 14 hours): when Platform S registers a document it sends organizationUuid = S`s own Organisation GUID (its externalRef, per PS-570 / KS-596: one shared identity space). But the connector key`s caller org is K`s own organizations.id. Your bind compares the two raw, before any resolution - so they never match, and every S originate is refused with 403. STUART MEASURED IT (local stack): 144 refusals in 45 minutes across two orgs with fresh keys; 11 of 14 @k-live specs red. WHY IT IS URGENT NOW AND WAS NOT YESTERDAY: at 06:14Z Stuart wrote nothing deployed was affected because kintsugi predated commit 48c4d8053, and warned \"the next Kintsugi or demo-pk rebuild from a develop carrying 48c4d8053 turns this into a real anchoring outage on dev-ps\". OUR SEAT REBUILT BOTH BOXES ON 0f8fb33c3 LATER THAT SAME DAY. MEASURED BY WEDNESDAY THIS MORNING: 48c4d8053 is an ancestor of 0f8fb33c3 (GitHub compare ahead_by 67, behind_by 0; control commit correctly reads not-ancestor), and the API spec served LIVE by both kintsugi.secuura.net and demo-pk.secuura.net carries the exact wording 48c4d8053 introduced and its parent lacks. EVIDENCE CLASS, said plainly: that both boxes run the bind is PROBED from the served spec; that S documents are actually being refused there right now is INFERRED - we have no Platform S traffic to observe, and Stuart`s logs would show it in a minute. NOBODY HAS TOLD STUART his warning came true. THE TWO ANSWERS (Stuart`s framing): A - S sends K`s organizations.id. No K change; Stuart already built it as platform-s#810, measured working (128 originates, 0 refusals). Cost: organizationUuid becomes the only K identifier in a payload that is otherwise S`s, re-opening the translation problem KS-596 closed; issuer_organization_id ends up recording the document OWNER rather than the ISSUER exactly where they differ; and S`s externalRef disappears from the metadata record. B - K resolves the claim through organizations.metadata->>externalRef (which register-connector already does at platform.ts:598) and compares the RESOLVED organisation to the caller. No S change, identity space stays consistent, the issuer column means what its name says. Cost: a change to the predicate you shipped, built and tier-1 gated by our seat, then deployed to both boxes. Stuart`s own follow-up argues for B. DEPLOYS ARE HELD MEANWHILE: I have held s172`s Phase 3 deploy so it cannot rebuild anything further on top of this until you rule.",
+  "default_action": "DEFAULT IF YOU DO NOT ANSWER: nothing is built or reverted. S documents stay refused on kintsugi and demo-pk (inferred, not observed); Stuart is not told his warning came true; s172`s deploy phase stays held. I will not message Stuart without you — telling a client his environment broke on our deploy is your conversation.",
+  "options": [
+   {
+    "key": "b-resolve-externalref",
+    "label": "B — K resolves S`s externalRef, then compares (Recommended)",
+    "detail": "Our seat builds it on the bind predicate, tier-1 gate, deploy kintsugi then demo under your grant. S changes nothing; Stuart reverts platform-s#810. Keeps the one identity space PS-570/KS-596 chose and keeps issuer_organization_id honest. Until it deploys, S documents stay refused on both boxes unless Stuart chooses to run #810 as a stopgap — that is his call, and the draft to him will offer it."
+   },
+   {
+    "key": "a-s-sends-k-id",
+    "label": "A — Platform S sends K`s organizations.id",
+    "detail": "Fastest: #810 already exists and works, no K change, nothing for us to build. You accept the three costs Stuart named — a K id inside an S-space payload, the issuer column recording the owner, and S`s externalRef lost from metadata."
+   },
+   {
+    "key": "b-with-stopgap",
+    "label": "B, and ask Stuart to merge #810 now as a stopgap, reverting once B is live",
+    "detail": "Restores S anchoring today while B is built properly. Costs Stuart two deploys (merge, later revert) and a period where the column records owners. Choose this if dev-ps anchoring being down is costing his team now."
+   }
+  ],
+  "recommended": "b-resolve-externalref",
+  "ts": "2026-09-11T07:33:29.902443+10:00",
+  "status": "open",
+  "ruled_choice": null,
+  "ruled_ts": null,
+  "prior_rulings_overridden": [
+   "2026-08-21 10:02",
+   "2026-08-21 20:06",
+   "2026-08-21 20:08",
+   "2026-08-21 20:10",
+   "2026-08-24 11:27",
+   "2026-09-02 19:28",
+   "2026-09-05 15:04",
+   "2026-09-06 09:42",
+   "2026-09-09 15:51",
+   "2026-09-09 17:03",
+   "2026-09-09 18:20",
+   "2026-09-09 19:47",
+   "2026-09-10 09:01",
+   "2026-09-10 09:08",
+   "2026-09-10 09:08",
+   "2026-09-10 17:10",
+   "CARD secuura-archive-tested-not-deployed",
+   "CARD secuura-ks597-backfill-95k"
+  ]
  }
 ]

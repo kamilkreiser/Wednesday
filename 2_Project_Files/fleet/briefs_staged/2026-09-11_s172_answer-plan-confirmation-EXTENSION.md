@@ -20,6 +20,10 @@
 
 **You are filing, not fixing.** `systemTest/` is Peter's authority.
 
+## 🔴 PHASE 3 IS HELD — do not start the deploy, even with a CHECKPOINT, until Wednesday lifts this by name
+
+**Why, measured by Wednesday (2026-09-11 ~07:4x AEST):** Stuart's KS-597 comments (2026-09-10T06:14Z and 07:43Z) show Kam's `bind` compares S's Organisation GUID against K's `organizations.id` — two identifier spaces — so **every Platform S originate is refused**. He wrote that nothing deployed was affected *then*, because Kintsugi predated commit `48c4d8053`, and that *"the next Kintsugi or demo-pk rebuild from a develop carrying 48c4d8053 turns this into a real anchoring outage on dev-ps."* **`48c4d8053` IS an ancestor of `0f8fb33c3`** (GitHub compare: ahead_by 67, behind_by 0; control `7bcb66128` vs `0f8fb33c3` reads `behind`), and both boxes were rebuilt on `0f8fb33c3` on 09-10. **Whether S traffic is actually being refused on either box right now is Wednesday's to establish and Kam's to rule (A vs B), not yours.** Your deploy would at minimum extend it. **Phases 1, 2 and 4 are unaffected — carry on.**
+
 ## F-02 — your launcher's SSH warning is NOT a push blocker. Measured by Wednesday.
 
 The repo-local `core.sshCommand` in `2_Project_Files/.git/config` points at `3_Access_Keys/github_deploy_rw`, **which is present**, and `git ls-remote origin` authenticated with it at ~21:4x UTC. **What is missing is only the keychain migration the launcher prefers** — and the remedy it prints names `~/.ssh/secuura_blockchain_deploy_rw`, **which does not exist on this machine**, so that line could not work as written. Record it in your wrap as a launcher finding.
@@ -27,6 +31,8 @@ The repo-local `core.sshCommand` in `2_Project_Files/.git/config` points at `3_A
 ⚠ **Limit, stated at the same size:** `ls-remote` proves the key AUTHENTICATES, not that it can WRITE. **Your first push is the real test.** If it is refused: stop, mail Wednesday with the verbatim error, and **do not** set `SECUURA_ALLOW_ONDISK_KEY`, seed the keychain, or touch any other key.
 
 PROVENANCE:
+- KS-597 S-originate refusal, A vs B question, outage warning | Linear KS-597 comments by stuart.jamieson@secuura.ai 2026-09-10T06:14Z and 07:43Z via https://api.linear.app/graphql | read 2026-09-11
+- 48c4d8053 is an ancestor of 0f8fb33c3 and 7bcb66128; control discriminates | https://api.github.com/repos/Secuura/Distributed_Secuura/compare/48c4d8053...0f8fb33c3 | read 2026-09-11
 - the two orphan defects, line numbers, the control | /Volumes/DevMASTER/WEDNESDAY/0_Brain/tasks/NEXT-PICKUP.md section "FILE THESE FIRST" | read 2026-09-11
 - s171 correctly did not file them under §2c | /Volumes/DevMASTER/!CODING/Secuura/Blockchain/5_Project_History/history.md s171 entry | read 2026-09-11
 - core.sshCommand names 3_Access_Keys/github_deploy_rw; that file present; ~/.ssh/secuura_blockchain_deploy_rw absent; ssh-agent has no identities | /Volumes/DevMASTER/!CODING/Secuura/Blockchain/2_Project_Files/.git/config and a file-existence test, Wednesday's seat | read 2026-09-11
