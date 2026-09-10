@@ -10,12 +10,19 @@ Peter — thanks for this, it's genuinely useful and we're adopting it as our pr
 Two things we measured today that touch your document directly, and one question.
 
 **1. GitHub Actions is running again.** Your §3.7 has it retired with no CI to read. It came back
-some time on 9 September and nobody on our side recorded it either — we only caught it today. It
-matters because its security gates currently fail on essentially every PR, so you'll see red checks
-that aren't telling you anything about the change under review. Six of the seven PRs currently
-waiting on you read `mergeable_state: unstable`, which is what a live-but-failing checks run
-produces. We haven't touched a workflow or re-run a job — we're measuring first — but you should
-know the checks you see are not yet trustworthy either way.
+some time on 9 September and nobody on our side recorded it either — we only caught it today. You'll
+see red checks, and the cause varies rather than being uniform noise. On three PRs we measured, `pr`,
+`PR Security Gates (KS-168)` and `Security Scanning` all failed. On your **#896 the picture is
+different — `PR Security Gates (KS-168)` PASSES**, and the two reds are a real `Run Playwright API
+tests` failure inside the Playwright suite that PR rewrites, and a `Dependency Audit` failure in the
+gates' own validator. So we are not going to tell you the reds are noise: at least one on #896 looks
+like it is about the change. We haven't touched a workflow or re-run a job — we're measuring first.
+
+One more thing about `mergeable_state`, because here it is worse than uninformative. PR #925 reads
+`clean`, and only because its three check runs all `startup_failure`d during the billing-dead period
+— a run that never starts reports no conclusion at all. So on this repo today `clean` can mean
+*nothing has ever checked this*, while `unstable` means *something checked it and complained*.
+Triaging by the green tick picks the least-verified PR first.
 
 **2. The approval gate isn't armed.** Your protocol treats the reviewer's approval as the gate. On
 the `require-pr-gates` ruleset for `develop`, required approving reviews is currently **0**, and

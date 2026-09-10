@@ -108,7 +108,7 @@ another developer as policy.**
 **§3.7 states: *"GitHub Actions is RETIRED for this repo, so there is no CI to read."* That is no
 longer true.** Card `secuura-actions-alive-but-security-gates-red`, Kam ruled `measure-then-decide`
 at 11:00 on 2026-09-10: Actions came back ~11 hours earlier and **its security gates now fail on
-essentially every PR.** Consequences his protocol has no rule for yet:
+many PRs — but NOT all.** ⚠ **"essentially every PR" was an OVERSTATEMENT this file carried until 21:2x.** Measured on **#896: `PR Security Gates (KS-168)` PASSES**; its two reds are a real `Run Playwright API tests` failure (inside the Playwright suite that PR rewrites) and a `Dependency Audit` failure in the gates' own validator. **The failing SET varies per PR — do not generalise from the three s170 measured.** Consequences his protocol has no rule for yet:
 - There **is** CI signal again, and it is red.
 - `mergeable_state` reads **`unstable`** on six of seven open PRs — which is what a live-but-failing
   checks run produces. (Measured by s170, 2026-09-10 ~20:2x. Cause not yet confirmed.)
