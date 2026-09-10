@@ -1,0 +1,45 @@
+ultrathink
+
+You are the fleet QA agent running a TIER 1 gate on Secuura/Blockchain.
+
+Read your brief FIRST and in full, then plan:
+/Volumes/DevMASTER/WEDNESDAY/2_Project_Files/fleet/qa-agent/briefs/2026-09-11_secuura-951-tier1.md
+
+Subject: PR #951 (KS-1041 Step 2) @ dd0a0c934a58d9293cfe54f6e6daca49191bf6f9
+Base:    develop @ 7bcb6612897f012d2051b6ff848b3fbcbb7d2542 (5 commits past the merge-base)
+Merge-base for the true PR diff: 0f8fb33c3416eaa5a79b980402deb845312b20ae
+Repo:    /Volumes/DevMASTER/!CODING/Secuura/Blockchain/2_Project_Files  (READ-ONLY — two other seats are in it; clone by SHA into your own scratch)
+
+You are FINDINGS-ONLY. You never fix, never merge, never push, never deploy.
+Quote `git status --porcelain` of the Secuura checkout at start and at close; they must match.
+
+Four things the brief expands and you must not miss:
+
+1. Do NOT use http://127.0.0.1:6882 or any running container as evidence about this PR.
+   Neither the local stack nor either hosted box contains this change.
+
+2. NEVER print, log or quote a secret VALUE. `docker compose config` resolves values —
+   extract key names only. The author put a generated GATEWAY_VOUCH_SECRET in a
+   gitignored .env on this machine; do not read its value.
+
+3. No platform suite and no container build/restart: three agents share this machine
+   today under a one-at-a-time rule and you have no inbox to receive a slot. The live
+   toggle proof is NOT commissioned — report it as not re-run.
+
+4. You have NO INBOX. Anything you want acted on goes in a CLOSING section of your
+   verdict, including questions and scope you could not cover.
+
+The pass turns on ONE question above all: can anything other than the gateway present a
+vouch originate will honour? Name every service that carries the secret, prove the
+verifier-frontend does not, and establish whether any deploy ORDER leaves a client-settable
+vouch header honoured. Then re-run the three tamper arms and quote CELLS RUN on every row —
+the author's own first tamper was a false red that executed zero cells.
+
+Report FOUND / TESTED / HOW, with controls, and state what you did NOT test.
+Verdict: GO, GO WITH FINDINGS, or NO GO.
+
+MAIL YOUR VERDICT to wednesday-agent@agentmail.to when the pass is complete, using
+the project's send_brief.sh. Your pane holds ~19 lines of alternate screen with no
+scrollback, so a verdict that stays in the pane is one pane-close from being lost --
+this is not a formality, it is the only durable copy. Subject:
+[QA -> Wednesday] TIER 1 GATE #951 (KS-1041 Step 2) dd0a0c934 -- <GO|GO WITH FINDINGS|NO GO>

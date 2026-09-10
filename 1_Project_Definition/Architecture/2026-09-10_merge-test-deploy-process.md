@@ -99,6 +99,54 @@ errors and a report that still read PASSED.*
 
 ---
 
+## Stage 3a — PETER'S TRIAGE: how his queue is ordered, and the three queues it hands US (adopted 2026-09-11)
+
+**Source:** `0_Brain/reference/2026-09-11_peter-pr-triage/pr-triage-2026-09-10.md` — Peter's own
+triage of every open PR, measured from the GitHub API at 2026-09-10 16:09 UTC. **Kam, 2026-09-11:
+*"new document from Peter for triage. please incorporate this into our workflow."***
+
+**Read it the way [[2026-09-10_a-reviewers-protocol-is-our-acceptance-criteria]] says to read any
+reviewer's process: from HIS chair.** "Your actions" in it are PETER's; "Kamil's court" is OURS.
+
+### His priority tiers — we use them to order OUR work too
+
+| Tier | A PR is in it when its diff touches | Why it outranks the next |
+|---|---|---|
+| **A — published contract** | `Blockchain/Dev/docs/openapi/secuura-api.yaml` | Schemathesis reads it, Akto imports it, it ships to `/api/docs` |
+| **B — runtime** | `services/`, `packages/`, `frontend/` outside `__tests__` | reaches users |
+| **C — gate & evidence integrity** | `.github/`, `scripts/`, docker / compose | decides whether every future PR's evidence is believable |
+| **D — test-only / docs** | everything else | no live surface |
+
+Oldest first within a tier. Overrides: a **stale approval** rises to the top of its tier; a PR others
+**hang off** rises above them; a **blocked** PR sinks below its blocker.
+
+### His court rules — whose move it is
+
+- **HIS last word, no reply and no push since → OUR court.** (His rule, from his chair: *"Your last word with no reply and no push since → their court."*) *A `develop` merge with no comment is not a reply.*
+- `CHANGES_REQUESTED` → **our** court until addressed (and since 2026-09-09 23:23Z GitHub blocks the merge).
+- **We push past his review → back to HIM; any approval is void.**
+- Never reviewed by him → **his** action.
+
+### The three queues his triage hands us
+
+1. **Approved at head, unmerged → WE MERGE.** The author merges on approval. On 09-10 this was 15
+   approved and 1 merged. **This is the cheapest throughput in the whole pipeline and it sat idle.**
+2. **"Kamil's court" — his last word, no reply → WE ANSWER**, in code or on the ticket, in tier order.
+3. **His own PRs waiting on Kamil → WE REVIEW** (Kamil is platform-k authority), s171's #896 shape;
+   **the approval is Kam's click** until the agent GitHub identity exists.
+
+### ⚠ Two traps his triage itself fell into — check these before acting on ANY row of it
+
+- **A withdrawn approval is invisible to review STATE.** #813: `APPROVED` at 14:52Z, then a `COMMENTED`
+  review at 14:56Z withdrawing it in words. GitHub's last-state and Peter's own tool both still read
+  "approved". **Before any merge, read every review AND comment dated after the approval.**
+- **A stacked PR can be reported merged when it is not.** His triage says #900 merged; at 21:0x UTC it
+  was OPEN, based on #899's branch. **Re-measure state before relying on a triage row.**
+
+**Both corrections go to Peter via Kam, framed as gifts, never agent-to-client.**
+
+---
+
 ## Stage 4 — MERGE
 
 | | |
@@ -111,6 +159,7 @@ errors and a report that still read PASSED.*
 - `required_approving_review_count` = **0**
 - `required_status_checks` = **absent** from the `require-pr-gates` ruleset
 - `blocked` = **0** across the open PRs; the develop freeze lifted this morning
+- ⚠ **Superseded in part (Peter's triage, 2026-09-10 16:09 UTC):** the ruleset was edited 2026-09-09 23:23Z — a `CHANGES_REQUESTED` review now BLOCKS (#881, #887 read `BLOCKED`). Required approvals is still 0, so a zero-approval PR still reads `CLEAN`.
 
 **There is no technical brake. The condition above is held by convention alone.** Kam ruled
 `raise-to-1` at 10:32 and it is **unapplied** (the ruleset's own `updated_at` is 09:23, before the
