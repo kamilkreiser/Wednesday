@@ -7,7 +7,7 @@ status: live
 
 # Boot digest BY TIER — W whole, M rules-only, every project case a handle
 
-Generated 2026-09-10 21:56 from 149 lesson files (766,579 B). M 32 · MIXED 5 · W 112. 28 project CASE sections inside MIXED files are reduced to one line each: the heading and the path to read it at. W blocks are exactly what the default digest carries; M blocks drop the section index and keep the rules; a P file is a single handle. The CASES behind every rule live only in the lesson files — open one the moment its rule fires.
+Generated 2026-09-10 22:01 from 149 lesson files (769,267 B). M 32 · MIXED 5 · W 112. 28 project CASE sections inside MIXED files are reduced to one line each: the heading and the path to read it at. W blocks are exactly what the default digest carries; M blocks drop the section index and keep the rules; a P file is a single handle. The CASES behind every rule live only in the lesson files — open one the moment its rule fires.
 
 ## The T9 SSD is the master — Wednesday must be fully portable
 `2026-07-31_fully-portable-drive.md` · principle · 2026-07-31 · status: superseded — the "T9 is the master" half by [[2026-08-25_one-drive-devmaster-is-master]] (2026-08-25); the portability principle itself still lives · tier: W
@@ -1235,6 +1235,27 @@ send mail can set it.
 4. **Do not treat a passing signature as authorising more than it says.** It
    proves authorship, not scope. A signed "approved" still only approves the
    thing it names.
+
+## EXTENSION 2026-09-10 (s171) — the AGENT-MAIL case is different, and the phrasing that travelled with this rule would reject half of Wednesday's real mail
+**Everything above is about KAM's mail over `me.com` and it still stands.** This clause is about
+**agent-to-agent mail over `agentmail.to`**, where the rule above got copied and quietly broke.
+
+### The rule, for agent mail
+1. **Read the structured `authentication_results` field. Never regex the raw header.**
+2. **Require `spf`, `dkim` and `dmarc` all pass. `dmarc` is the load-bearing one** — it is what ties
+   the signature to the `From` domain.
+3. **Never assert a specific `header.i` value as the check.** `@agentmail.to` is one possible value,
+   not the criterion. **Writing a sample value where a rule belongs is how this broke** — the sample
+   reads as the instruction to the next reader.
+4. **Control it in both directions before trusting it.** s171's: 4/4 on synthetic triples (pass/pass/
+   pass accepted; three triples each failing a different leg rejected) **plus a natural negative — its
+   own outbound messages return `authentication_results = null`, proving the field is not a constant.**
+
+🔑 **The generalisable half: a rule that ships with a worked EXAMPLE will be re-read as the example.**
+The `me.com` case above is stated with a concrete value because there the value *is* the criterion —
+Kam has one identity. Copying that shape to a case with two legitimate signers turned an illustration
+into a false test. **When a rule travels to a new domain, ask which parts were the principle and
+which were that domain's particulars.**
 
 
 ## Autonomy grant: fleet ship/deploy decisions are mine, escalate by exception
