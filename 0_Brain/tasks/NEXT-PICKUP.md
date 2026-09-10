@@ -2,7 +2,7 @@
 date: 2026-09-11
 type: pickup
 scope: SECUURA + all general/generic work. Datasec is TUESDAY's — read her mail by SUBJECT only, never brief or answer for a Datasec project.
-source: replaced WHOLESALE at the 65% checkpoint (~08:4x AEST); s174 checkpoint line added at the 70% checkpoint by the seat that booted 06:03. The 08:0x version is overtaken: s172 and s173 wrapped (both 1.00), s175 and s176 launched, #933 reviewed.
+source: replaced WHOLESALE at the 65% checkpoint (~08:4x AEST); s174 checkpoint line added at the 70% checkpoint; round-2 gate row added ~09:0x by the seat that booted 06:03. The 08:0x version is overtaken: s172 and s173 wrapped (both 1.00), s175 and s176 launched, #933 reviewed.
 status: live
 supersede: replace this file wholesale at the next pickup; do not append
 ---
@@ -26,6 +26,7 @@ supersede: replace this file wholesale at the next pickup; do not append
 | `%7` | **s174** Secuura/Blockchain-C | #951 ROUND 2 (last under the cap): F1 mint only to originate + F2 wiring tests + F6; F3+F4 one ticket. **At its 50% checkpoint (08:4x) it was told by mail: F1 → F2 → F6 → push → READY FOR QA strictly first; both tickets to its handover if short** | **READY FOR QA → commission the round-2 tier-1 gate** (template `fleet/qa-agent/launchers/launch_qa_secuura_ks1041_951.sh`; name round 1's report path and the NEW head) |
 | `%8` | **s175** Secuura/Blockchain-B | REVIEW #952 (KS-1016) — ONE review, handover for #899→#900, wrap | its REVIEW mail → **verify any blocker at source → draft reply for Kam**; its wrap → launch the #899/#900 seat from `HANDOVER-s175.md` |
 | `%9` | **s176** Secuura/Blockchain | MERGE LANE 2: fix the extranet error at the root (project CLAUDE.md step 3 → tickets only; notice on Peter's and Stuart's stream tickets) · merge develop into #879 + #813, re-run bites, push · Peter's "Kamil's court" Phase 4 · launcher ticket | its plan confirmation; pushes verified at GitHub; wrap → score |
+| `%10` | **QA** Testing Agent MAIN | **#951 ROUND-2 TIER-1 GATE @ `02a22f4bb` — LAST round under the cap.** Also MEASURES s174's READ ONLY flag (gateway `verification.ts` POST /api/documents + workflow-approve forward identity to originate with NO vouch) as a separate `PROVISIONING SAFETY` line | **its verdict mail** (subject `[QA -> Wednesday] TIER 1 GATE #951 ROUND 2…` — arrives FROM Wednesday; filter on the subject tag) → verify at source → score s174 → tell Kam. Launcher: `fleet/qa-agent/launchers/launch_qa_secuura_ks1041_951_round2.sh`. **s174 told: do NOT push to #951 while it runs.** |
 | `%1` | monitor | — | — |
 
 **develop = `2d864ae9220c57ddcd8dc77af1b80fbd8001d530`** (12 squash merges this morning, verified independently).
