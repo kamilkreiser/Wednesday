@@ -7,7 +7,7 @@ status: live
 
 # Boot digest BY TIER — W whole, M rules-only, every project case a handle
 
-Generated 2026-09-10 16:46 from 148 lesson files (752,045 B). M 32 · MIXED 5 · W 111. 28 project CASE sections inside MIXED files are reduced to one line each: the heading and the path to read it at. W blocks are exactly what the default digest carries; M blocks drop the section index and keep the rules; a P file is a single handle. The CASES behind every rule live only in the lesson files — open one the moment its rule fires.
+Generated 2026-09-10 16:48 from 148 lesson files (753,793 B). M 32 · MIXED 5 · W 111. 28 project CASE sections inside MIXED files are reduced to one line each: the heading and the path to read it at. W blocks are exactly what the default digest carries; M blocks drop the section index and keep the rules; a P file is a single handle. The CASES behind every rule live only in the lesson files — open one the moment its rule fires.
 
 ## The T9 SSD is the master — Wednesday must be fully portable
 `2026-07-31_fully-portable-drive.md` · principle · 2026-07-31 · status: superseded — the "T9 is the master" half by [[2026-08-25_one-drive-devmaster-is-master]] (2026-08-25); the portability principle itself still lives · tier: W
@@ -4126,7 +4126,7 @@ a launcher, `CLAUDE.md`. **Stop. Ask what its exception looks like, and whether 
 A rule is never more confident, never better argued, and never less tested than in the hour it is
 adopted.
 
-sections (open the file for these): The case, measured, and it took ten minutes · The seat's formulation, adopted verbatim · Why this is its own lesson and not go-slow rule 4 restated · How to apply
+sections (open the file for these): The case, measured, and it took ten minutes · The seat's formulation, adopted verbatim · Why this is its own lesson and not go-slow rule 4 restated · How to apply · EXTENSION 2026-09-10 — the FILE-level twin: a just-REPAIRED file is least defended, and repairing it is what makes you fast enough to break it
 
 ## How to apply
 
@@ -4152,6 +4152,17 @@ not to ratification — the rule broken here) · [[2026-08-09_an-enforcement-you
 (the brief path IS enforcement, so writing to it is arming something) ·
 [[2026-08-14_i-read-representations-they-read-sources]] (the SHARPENING: a compression propagates with
 perfect fidelity — so does a well-told wrong rule) · [[2026-08-07_a-check-that-cannot-fail]].
+
+## EXTENSION 2026-09-10 — the FILE-level twin: a just-REPAIRED file is least defended, and repairing it is what makes you fast enough to break it
+**Tuesday's formulation, adopted (she named the twin; I had written only the instance):** *"Same
+clock, different object: a rule is least tested in the hour it is adopted; a file is least defended
+in the hours after it is repaired, because the repair consumes the attention that would have noticed
+the next change."*
+
+**How to apply:** before changing a file that was repaired in the last day, **read what the repair
+CHANGED, not what the file now says** — the constraint the fix introduced is invisible in the final
+text, and a delivered card is evidence the guard has stopped looking. Standing line for every builder
+brief: `2_Project_Files/fleet/STANDING_LINES.md`.
 
 
 ## A decision stays on the page while the world moves under it — the dangerous change is not the one that contradicts a ruling, it is the one that removes the precondition the ruling's TRIGGER depends on

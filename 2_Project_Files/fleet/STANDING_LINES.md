@@ -213,3 +213,31 @@ were pointed at the line it meant to tamper, not the one it actually left broken
 - **An exit status read through a pipe is the pipe's, not the command's — and this is about PIPES, not about pushes.** (Secuura seat s164, 2026-09-10, in its own words: *"The requirement is not about pushes; it is about pipes."*) Wednesday had written this standing line as *"push unpiped and paste the exit line"* because every recorded instance had been a `git push`; the seat then made it on a lockfile regen loop minutes after quoting the rule back, and `exit=0` was `tail`'s. **Redirect to a file and read `$?` on its own line** (`cmd > out 2>&1; rc=$?`), then read the file. In zsh `${PIPESTATUS[0]}` is empty — the equivalent is `$pipestatus[1]` — so branching on a piped status is a check that cannot fail. **A rule written from the instances it was found in is complete over those instances and silent about the class.**
 
 - **The half the pipes line was still missing, added 2026-09-10 after it bit the seat that improved it:** `${PIPESTATUS[0]}` is **bash**. The Claude Code Bash tool runs **zsh**, where it expands to the EMPTY STRING — so `rc=${PIPESTATUS[0]}` assigns nothing, `[ "" = 0 ]` is false, and the guard reads as a silent failure that is indistinguishable from a real one. zsh's equivalent is `$pipestatus[1]` (lower-case, 1-indexed). **The shape that needs neither, and the one to write by default: `cmd > out 2>&1; rc=$?` — then read the file.** The rc is real and the output survives. (Wednesday's own ledger held this trap twice and it was not in the brief; a rule you improve is not a rule you have finished.)
+
+---
+
+## TOUCHING A FILE THAT WAS REPAIRED IN THE LAST DAY
+
+**Why this exists.** On 2026-09-10 two agent-blind defects in `wake_watch.sh` were fixed in the
+morning under Kam's `parameterise` ruling (`a66e3793`, card marked **delivered**). **Four hours later
+Wednesday proposed a change to that same file carrying a third hardcoded, seat-specific path** — a
+re-introduction of the family that had just been closed, into a file everyone now believed was clean,
+past a card that had already been told the job was done. It was caught by the OTHER coordinator, not
+by the author, and not by any gate.
+
+**The rule, for any agent about to change a recently-repaired file:**
+
+1. **Ask when this file was last fixed, and what the fix CHANGED** — `git log -p` the repair, not
+   just a read of the current text. **The constraint a fix introduces is invisible in the final
+   file**; the diff is the only place it is stated.
+2. **A card marked "delivered" is the guard standing down, not the guard confirming your change is
+   safe.** It says an earlier defect was closed. It says nothing about yours.
+3. **Being the person who repaired it is not protection.** It is what makes you fast and confident
+   enough to break it — which is the actual mechanism of this failure, observed on its author.
+4. **If the repair had a family** (agent-blindness, hardcoded paths, unquoted variables), **grep the
+   file for that family before adding anything**, including in the code you are about to write.
+
+**Same clock as [[../../0_Brain/learnings/2026-09-08_a-new-rule-is-most-dangerous-just-after-adoption]],
+different object:** a rule is least tested in the hour it is adopted; a file is least defended in the
+hours after it is repaired, because the repair consumes the attention that would have noticed the
+next change. Framing named by the Datasec coordinator, 2026-09-10.
