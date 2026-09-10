@@ -30,10 +30,6 @@ header a { color:var(--text-muted); font-size:12.5px; text-decoration:none; }
 header a:hover { color:var(--text-primary); }
 #live { margin-left:auto; font-size:12px; color:var(--text-muted); }
 #live.on { color:var(--series-3); }
-#projfilter { padding:6px 14px 2px; font-size:11px; color:var(--text-dim); }
-.pftog { background:var(--surface-2); border:1px solid var(--line); border-radius:6px;
-         color:var(--text-dim); font-size:11px; padding:2px 7px; margin:0 4px 4px 0; cursor:pointer; }
-.pftog.on { color:var(--series-3); border-color:var(--series-3); }
 #autoplay, #stopvoice { background:var(--surface-2); border:1px solid var(--line); border-radius:7px;
   color:var(--text-muted); font:inherit; font-size:12px; padding:3px 10px; cursor:pointer; }
 #autoplay:hover, #stopvoice:hover { color:var(--text-primary); }
@@ -243,8 +239,7 @@ body.view-tuesday header h1::after { content:" · TUESDAY (Datasec)"; color:#e08
  </span></header>
 <main>
  <section class="panel" id="convo-panel" aria-label="Conversation with Wednesday">
-  <h2 id="convo-h">Conversation — Kam &amp; Wednesday</h2>
-  <div id="projfilter"></div>
+  <h2>Conversation — Kam &amp; Wednesday</h2>
   <div class="scroll" id="log"><div id="msgs"><p class="empty" id="convo-empty">no messages yet</p></div></div>
   <div id="pending"></div>
   <div id="convo-foot">
@@ -321,39 +316,6 @@ function agentOfMsg(m) {
   if (a === "wednesday" || a === "tuesday" || a === "both") return a;
   return "both";                      // unstamped: show it rather than hide it
 }
-// ── show-replies-from filter (Kam, 2026-09-10: "This is the view I work on
-// most often. does not have the show replies") ─────────────────────────────
-// Ported from chat.html with ONE deliberate difference: the default here is
-// EVERY project ON. chat.html defaults to WED-only on Wednesday's view, and
-// copying that would silently hide the Secuura replies this view shows today.
-// A control that appears for the first time must not remove anything.
-const PF_KEY = "wed_cockpit_projfilter";
-let pfSel = {};
-try { pfSel = JSON.parse(localStorage.getItem(PF_KEY) || "{}") || {}; } catch (e) { pfSel = {}; }
-function projOf(m) { return (m && typeof m.project === "string" && m.project.trim()) ? m.project.trim() : "WED"; }
-function projOn(name) { return (name in pfSel) ? !!pfSel[name] : true; }
-function renderProjFilter(msgs) {
-  const el = document.getElementById("projfilter");
-  if (!el) return;
-  const names = new Set();
-  for (const m of msgs || []) if (m.role !== "kam" && msgInView(m)) names.add(projOf(m));
-  if (names.size <= 1) { el.innerHTML = ""; return; }   // no choice to offer
-  const sorted = [...names].sort((a, b) => a === "WED" ? -1 : b === "WED" ? 1 : a.localeCompare(b));
-  el.innerHTML = "";
-  el.append("show replies from: ");
-  for (const n of sorted) {
-    const b = document.createElement("button"); b.type = "button";
-    b.className = "pftog" + (projOn(n) ? " on" : ""); b.textContent = n;
-    b.title = (projOn(n) ? "hide" : "show") + " " + n + " replies on this browser";
-    b.addEventListener("click", () => {
-      pfSel[n] = !projOn(n);
-      try { localStorage.setItem(PF_KEY, JSON.stringify(pfSel)); } catch (e) {}
-      if (lastRenderedMsgs) render(lastRenderedMsgs);
-    });
-    el.appendChild(b);
-  }
-}
-function msgVisible(m) { return msgInView(m) && (m.role === "kam" || projOn(projOf(m))); }
 function msgInView(m) {
   const a = agentOfMsg(m);
   return a === "both" || a === activeAgent;
@@ -369,9 +331,6 @@ function applyAgentView() {
   const box = document.getElementById("text");
   if (box) box.placeholder = activeAgent === "tuesday"
       ? "message Tuesday (Datasec)…" : "message Wednesday…";
-  const h = document.getElementById("convo-h");
-  if (h) h.textContent = activeAgent === "tuesday"
-      ? "Conversation — Kam & Tuesday" : "Conversation — Kam & Wednesday";
 }
 function setAgent(a) {
   if (a !== "wednesday" && a !== "tuesday") return;
@@ -465,18 +424,13 @@ function mdLite(s) {
 function nearBottom() {
   return log.scrollHeight - log.scrollTop - log.clientHeight < 80;
 }
-let lastRenderedMsgs = null;
 function render(msgs) {
   if (convoBusy()) { pendingMsgs = msgs; return; }
   pendingMsgs = null;
   // Phase 1: show only the live view's half of the conversation. Kam's own
   // pre-toggle messages are marked "both" and appear either way — a filter that
   // hid his own words would be worse than no filter.
-  lastRenderedMsgs = msgs || [];
-  renderProjFilter(msgs);
-  // Kam's own words are never hidden by a project filter (his messages carry no
-  // project); only replies are filtered.
-  msgs = (msgs || []).filter(msgVisible);
+  msgs = (msgs || []).filter(msgInView);
   const stick = nearBottom() || lastRendered === null;
   const keepTop = log.scrollTop;                 // reading position, if not at tail
   msgsEl.innerHTML = "";
@@ -489,12 +443,7 @@ function render(msgs) {
     const div = document.createElement("div"); div.className = "msg " + role;
     const meta = document.createElement("div"); meta.className = "meta";
     const who = document.createElement("span"); who.className = "who";
-    // The name comes from the MESSAGE, never from a constant. Kam's 2026-09-10
-    // screenshot showed Tuesday's replies rendered under the name "Wednesday"
-    // on Tuesday's own view — a label that is wrong about who is speaking is
-    // worse than no label, because it reads as authoritative.
-    who.textContent = role === "kam" ? "Kam"
-                    : (agentOfMsg(m) === "tuesday" ? "Tuesday" : "Wednesday");
+    who.textContent = role === "kam" ? "Kam" : "Wednesday";
     meta.append(who, "  " + (m.ts || "").slice(11, 16));
     if (role === "wednesday" && m.ts) {
       const pb = document.createElement("button"); pb.className = "playbtn";
