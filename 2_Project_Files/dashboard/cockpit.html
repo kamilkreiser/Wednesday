@@ -30,6 +30,11 @@ header a { color:var(--text-muted); font-size:12.5px; text-decoration:none; }
 header a:hover { color:var(--text-primary); }
 #live { margin-left:auto; font-size:12px; color:var(--text-muted); }
 #live.on { color:var(--series-3); }
+#heldbar { display:block; width:calc(100% - 28px); margin:6px 14px; padding:6px 10px;
+           background:color-mix(in srgb, var(--series-3) 16%, transparent);
+           border:1px solid var(--series-3); border-radius:7px; color:var(--series-3);
+           font-size:11.5px; text-align:left; cursor:pointer; }
+#heldbar:hover { background:color-mix(in srgb, var(--series-3) 26%, transparent); }
 #projfilter { padding:6px 14px 2px; font-size:11px; color:var(--text-dim); }
 .pftog { background:var(--surface-2); border:1px solid var(--line); border-radius:6px;
          color:var(--text-dim); font-size:11px; padding:2px 7px; margin:0 4px 4px 0; cursor:pointer; }
@@ -439,6 +444,45 @@ let pendingMsgs = null;
 let lastRaw = null;      // the unfiltered poll result, so a toggle redraws instantly
 armGuards(log, "convo");
 
+// ── held-messages indicator ────────────────────────────────────────────────
+// A queue Kam can see and dismiss with one click, rather than a silent freeze.
+let heldCount = 0;
+function heldEl() {
+  let el = document.getElementById("heldbar");
+  if (!el) {
+    el = document.createElement("button");
+    el.id = "heldbar"; el.type = "button"; el.hidden = true;
+    el.title = "the conversation is paused while you are typing — click to show what arrived";
+    el.addEventListener("click", () => {
+      // Explicit: draw what is held WITHOUT stealing his draft or his focus.
+      if (pendingMsgs) { const m = pendingMsgs; pendingMsgs = null; hideHeld(); forceRender(m); }
+    });
+    // Insert relative to the messages list's OWN parent. #msgs is not a direct
+    // child of #convo-panel, and panel.insertBefore(el, panel.querySelector("#msgs"))
+    // throws NotFoundError — which crashed render() the instant a draft existed.
+    // Caught by driving the busy path in a browser; reading the diff would not
+    // have shown it, because the bug is in the DOM's shape, not in the code.
+    // Anchor to #log, which IS a direct child of #convo-panel. #msgs lives INSIDE
+    // #log (the scroll container), so a banner placed there would scroll away with
+    // the messages — useless for a "click to show" affordance that must stay put.
+    const logEl = document.getElementById("log");
+    if (logEl && logEl.parentNode) logEl.parentNode.insertBefore(el, logEl);
+    else {
+      const panel = document.getElementById("convo-panel");
+      if (panel) panel.appendChild(el); else return null;
+    }
+  }
+  return el;
+}
+function showHeld(msgs) {
+  const el = heldEl();
+  if (!el) return;                                            // no DOM to hang it on
+  if (lastRendered === null) { el.hidden = true; return; }    // nothing drawn yet
+  el.hidden = false;
+  el.textContent = "paused while you type — click to show the latest";
+}
+function hideHeld() { const el = document.getElementById("heldbar"); if (el) el.hidden = true; }
+
 function convoBusy() {
   // a non-empty draft means Kam is composing — don't repaint under him;
   // an empty focused input still updates live (send-echo depends on it)
@@ -466,9 +510,27 @@ function nearBottom() {
   return log.scrollHeight - log.scrollTop - log.clientHeight < 80;
 }
 let lastRenderedMsgs = null;
+let forcingRender = false;
+function forceRender(msgs) { forcingRender = true; try { render(msgs); } finally { forcingRender = false; } }
 function render(msgs) {
-  if (convoBusy()) { pendingMsgs = msgs; return; }
+  if (convoBusy() && !forcingRender) {
+    // HELD, NOT DROPPED — and Kam must be able to SEE that it is held.
+    // Found by the Datasec coordinator from Kam's own 11:57 screenshot, 2026-09-10:
+    // the conversation ended at "Kam 17:03" (yesterday) while FLEET ACTIVITY beside
+    // it rendered today's 10:22 / 09:50 / 09:35. One side frozen, one side live —
+    // and HIS OWN messages from today were missing too, which is what rules out any
+    // theory about one agent's messages in particular.
+    // He dictates with Superwhisper, so a part-finished line sitting in the box is
+    // his NORMAL working state, not an edge case. The not-repainting-under-him
+    // intent is right and is kept; what was wrong is that a suppressed panel is
+    // indistinguishable from an agent that has gone silent. He chased that three
+    // times this morning.
+    pendingMsgs = msgs;
+    showHeld(msgs);
+    return;
+  }
   pendingMsgs = null;
+  hideHeld();
   // Phase 1: show only the live view's half of the conversation. Kam's own
   // pre-toggle messages are marked "both" and appear either way — a filter that
   // hid his own words would be worse than no filter.
