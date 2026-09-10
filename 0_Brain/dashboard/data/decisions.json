@@ -8260,5 +8260,73 @@
    "CARD secuura-archive-tested-not-deployed",
    "CARD secuura-ks597-backfill-95k"
   ]
+ },
+ {
+  "id": "hpsm-composer-remediate-high-reach",
+  "client_project": "Datasec/HPSM",
+  "title": "HPSM Composer: does 'always remediate High' also switch on the 18 High items that are high-impact, with an approval?",
+  "bluf": "OVERRIDE, with the reason as a measurement: the gate matched your ruled card hpsm-composer-remediation-sow-vs-spec ('spec'). That card decided WHICH rule governs. The spec's own rule contains a carve-out, remediation ON if High and not high-impact, MANUAL APPROVAL if high-impact, and how far \"always remediate High\" reaches over that carve-out was not among its options. The other matches are other subjects. THE QUESTION: your ruling stands: the spec governs, always remediate High. The HPSM build seat measured that the 24 High items include 18 marked high-impact, so as the rule is written \"always remediate High\" switches on only 6. RECOMMENDATION, the seat's option (a): every remediable High item defaults ON, and a high-impact High item is still ON but additionally needs the spec's \"High-impact remediation enabled\" approval before release. LOGIC: the spec governs both halves, so nothing it requires is dropped and nothing is downgraded to Manual Approval; items that cannot be remediated stay off. It blocks nothing until the rules engine package.",
+  "default_action": "The rule stays unamended and nothing is built on it until the rules engine package is commissioned.",
+  "options": [
+   {
+    "key": "on-with-approval",
+    "label": "Yes - every remediable High item ON, high-impact ones also need the release approval",
+    "detail": ""
+   },
+   {
+    "key": "carve-out",
+    "label": "No - only the 6 High items that are not high-impact",
+    "detail": ""
+   }
+  ],
+  "recommended": "on-with-approval",
+  "ts": "2026-09-11T08:15:09.141216+10:00",
+  "status": "open",
+  "ruled_choice": null,
+  "ruled_ts": null,
+  "prior_rulings_overridden": [
+   "2026-08-28 10:52",
+   "2026-09-08 11:50",
+   "2026-09-10 09:01",
+   "2026-09-10 09:08",
+   "2026-09-10 09:08",
+   "2026-09-10 20:15",
+   "CARD hpsm-41-telemetry-cr",
+   "CARD hpsm-credential-bearing-prd-outside-every-snapshot",
+   "CARD secuura-advisories-high-and-prod-reaching",
+   "CARD hpsm-phase1-missing-source-workbook",
+   "CARD hpsm-phase1-imagepng-out-of-scope",
+   "CARD hpsm-composer-repo-and-jira-home",
+   "CARD hpsm-composer-silent-columns-severity",
+   "CARD hpsm-composer-remediation-sow-vs-spec",
+   "CARD hpsm-composer-remaining-16-questions"
+  ]
+ },
+ {
+  "id": "nexusai-client-secret-in-container-log",
+  "client_project": "Datasec/NexusAI",
+  "title": "NexusAI: fix the client secret printed in the container log before building the Marketplace zip?",
+  "bluf": "OVERRIDE, with the reason as a measurement: the gate matched one card, secuura-ks1041-demo-container-recreate, on the word container. That is a Secuura demo box, a different client and a different subject. THE FINDING: the overnight test gate on the NexusAI remediation branch (ed8b208) says GO for today's build, with no blocker. Its one Major is NOT from this branch: when a customer saves a data source in the setup wizard, the container log prints the full service-principal client secret in plain text (backend/server.js line 15961). It is in main too, and in a Marketplace deployment that log lands in the customer's own log system. RECOMMENDATION: fix it before the zip is built. It is one logging line, and a NexusAI seat can change it, re-run the suite and re-check the log this morning. LOGIC: a published container that writes customer secrets to its log is the kind of finding a Marketplace reviewer or a customer's security team reports, and it is far cheaper to fix before submission than after.",
+  "default_action": "The NexusAI seat fixes the logging line and re-verifies before the zip is built.",
+  "options": [
+   {
+    "key": "fix-first",
+    "label": "Fix it before the zip is built",
+    "detail": ""
+   },
+   {
+    "key": "ship-and-ticket",
+    "label": "Build as-is and ticket it",
+    "detail": ""
+   }
+  ],
+  "recommended": "fix-first",
+  "ts": "2026-09-11T08:15:11.863702+10:00",
+  "status": "open",
+  "ruled_choice": null,
+  "ruled_ts": null,
+  "prior_rulings_overridden": [
+   "CARD secuura-ks1041-demo-container-recreate"
+  ]
  }
 ]
