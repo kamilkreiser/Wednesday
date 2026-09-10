@@ -81,3 +81,27 @@ not to ratification — the rule broken here) · [[2026-08-09_an-enforcement-you
 (the brief path IS enforcement, so writing to it is arming something) ·
 [[2026-08-14_i-read-representations-they-read-sources]] (the SHARPENING: a compression propagates with
 perfect fidelity — so does a well-told wrong rule) · [[2026-08-07_a-check-that-cannot-fail]].
+
+## EXTENSION 2026-09-10 — the FILE-level twin: a just-REPAIRED file is least defended, and repairing it is what makes you fast enough to break it
+
+**Tuesday's formulation, adopted (she named the twin; I had written only the instance):** *"Same
+clock, different object: a rule is least tested in the hour it is adopted; a file is least defended
+in the hours after it is repaired, because the repair consumes the attention that would have noticed
+the next change."*
+
+**The case, and it is mine.** `wake_watch.sh` had two agent-blind defects — a hardcoded inbox and a
+hardcoded pane name — remediated the same morning under Kam's `parameterise` ruling (`a66e3793`,
+card marked **delivered**). **Four hours later I proposed a fix for that same file whose gate read
+`~/.claude/projects/…` — a third hardcoded, seat-specific location.** It would have re-introduced the
+closed family into the file that had just been cleaned, past a card whose whole purpose was to catch
+exactly that and which had already been told the job was done.
+
+**The compounding part, which is the reason this is not just "be careful":** I was the author of the
+fix, in a file I had read, hours earlier. **Being the person who repaired it is not protection — it
+is what makes you confident enough to change it quickly.** The card being marked delivered is not
+protection either; it is the mechanism standing down.
+
+**How to apply:** before changing a file that was repaired in the last day, **read what the repair
+CHANGED, not what the file now says** — the constraint the fix introduced is invisible in the final
+text, and a delivered card is evidence the guard has stopped looking. Standing line for every builder
+brief: `2_Project_Files/fleet/STANDING_LINES.md`.
