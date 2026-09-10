@@ -7,7 +7,7 @@ status: live
 
 # Boot digest BY TIER — W whole, M rules-only, every project case a handle
 
-Generated 2026-09-10 20:20 from 148 lesson files (762,401 B). M 32 · MIXED 5 · W 111. 28 project CASE sections inside MIXED files are reduced to one line each: the heading and the path to read it at. W blocks are exactly what the default digest carries; M blocks drop the section index and keep the rules; a P file is a single handle. The CASES behind every rule live only in the lesson files — open one the moment its rule fires.
+Generated 2026-09-10 20:33 from 149 lesson files (766,579 B). M 32 · MIXED 5 · W 112. 28 project CASE sections inside MIXED files are reduced to one line each: the heading and the path to read it at. W blocks are exactly what the default digest carries; M blocks drop the section index and keep the rules; a P file is a single handle. The CASES behind every rule live only in the lesson files — open one the moment its rule fires.
 
 ## The T9 SSD is the master — Wednesday must be fully portable
 `2026-07-31_fully-portable-drive.md` · principle · 2026-07-31 · status: superseded — the "T9 is the master" half by [[2026-08-25_one-drive-devmaster-is-master]] (2026-08-25); the portability principle itself still lives · tier: W
@@ -4884,6 +4884,41 @@ sections (open the file for these): The shape · The rule · How this was found,
    so*. **In both cases the guard kept its intent and lost its open-endedness.**
 4. **When a guard fires repeatedly, that is a finding about the guard, not noise.** Repetition is
    the signal that its condition has become normal.
+
+
+## A reviewer's protocol is not a checklist we run — it is the acceptance criteria for everything we hand them, and reading it as a to-do list is the failure
+`2026-09-10_a-reviewers-protocol-is-our-acceptance-criteria.md` · principle · 2026-09-10 · status: live · tier: W
+
+**The lesson:** Kam adopted Peter's 624-line PR verification protocol as our process. The obvious
+reading is *"here are the steps; run them."* **That reading is wrong and it is expensive.** The
+document is written from the REVIEWER's chair — his machine, his checkouts, his slot, his
+authorisations. Almost none of its steps are ours to execute. What binds us is the **author side it
+assumes**: the state a PR must already be in before his protocol can be run against it at all.
+
+sections (open the file for these): The general rule · How to apply · Related
+
+## How to apply
+
+1. **Before adopting any external process, split it in two:** what THEY do, and what must be TRUE
+   when they start. Write the second half down as acceptance criteria. Hand only that half to the
+   agents.
+2. **Never inherit their authorisations.** A pre-authorisation inside someone's protocol is scoped to
+   their run of it. Peter's §2c/§2d let *him* create tickets and post one PR comment during *his*
+   verification. Adopting the protocol does not transfer that to us. **Check the scope sentence —
+   his is explicit: *"Creating and commenting on tickets is pre-authorised ONLY for failures produced
+   by a test run during this verification."***
+3. **Do not quote their machine-local rules back at anyone.** His §4 says it in terms, and it applies
+   to us: their environment specifics are not policy for other developers.
+4. **Read the whole thing before acting on any of it.** 624 lines, and the operative constraint for
+   us (§10's "would it BITE?" — revert, confirm RED, restore, confirm GREEN) sits two-thirds of the
+   way down, after nine sections of their-side procedure. **A skim would have found the procedure and
+   missed the contract.**
+5. **Check their stated premises against what you have measured.** A protocol is a representation of
+   the world at the time it was written. Peter's says *"GitHub Actions is RETIRED, so there is no CI
+   to read"*; we measured the same day that Actions is back and its security gates fail on
+   essentially every PR. **Correcting a premise is a gift to the author; silently working around it
+   is how two teams end up with different models of the same repo.** The correction goes to the
+   human via Kam — never agent-to-client.
 
 
 ## A single-FILE bind mount binds the INODE, not the path — replacing the file on the host does not reach the container, and every signal still says success
