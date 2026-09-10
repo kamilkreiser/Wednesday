@@ -7802,5 +7802,103 @@
   ],
   "delivered_artefact": "AgentMail tuesday-agent@ -> datasec-hpsm@ 2026-09-10T09:07:17Z, subject 'ANSWER: Kam ruled flags 2 and 3 — DERIVE defaults from the E8 SOW (SUPERSEDES my flag-2 instruction), image.png EXCLUDED' — read back at destination (from/to/preview). Body: 2_Project_Files/fleet/briefs_staged/2026-09-10_hpsm-rulings-derive-exclude.answer.md. Architecture file+section to follow in the agent's receipt or wrap.",
   "delivered_ts": "2026-09-10T19:12:59.889705+10:00"
+ },
+ {
+  "id": "nexusai-authorized-users-md-remove",
+  "client_project": "Datasec/NexusAI",
+  "title": "NexusAI: remove docs/Authorized_Users.md before tomorrow's container build?",
+  "bluf": "OVERRIDE, with the reason as a measurement: the gate matched one message, Kam's 2026-08-21 note about Peter's Secuura PR #729. Tuesday read it; it has nothing to do with this file. THE FINDING: Kam, your recollection was half right, measured by the NexusAI seat (S52, REPORT-S52 section 1). RIGHT: the passwords in docs/Authorized_Users.md open nothing. No code, no user store and no image path reads them, and the staging host they belonged to no longer resolves. WRONG: finishing first-run setup does NOT hand over to Entra. Ticking the wizard's \"Don't show this setup guide\" box leaves the dashboard and its APIs open with no login, indefinitely, until someone runs User Access, Validate, Enforce. Nothing was removed, because the brief said remove only if both halves held. The file still ships inside every image built from the branch. RECOMMENDATION: remove it before tomorrow's build, with a quarantine copy first and both copies removed in one commit. LOGIC: it opens nothing, so removing it costs nothing at runtime, and a Marketplace container should not carry old passwords and people's addresses. One catch: the unmerged RD-369 round 3 test pins this file, so whichever branch merges second must update that pinned list.",
+  "default_action": "Nothing is removed. The file stays on the branch and ships in any build made from it.",
+  "options": [
+   {
+    "key": "remove",
+    "label": "Remove it - quarantine copy, both copies removed in one commit, RD-369 pinned list reconciled",
+    "detail": ""
+   },
+   {
+    "key": "keep",
+    "label": "Keep it for now - it ships in tomorrow's build",
+    "detail": ""
+   },
+   {
+    "key": "later",
+    "label": "Decide after the build",
+    "detail": ""
+   }
+  ],
+  "recommended": "remove",
+  "ts": "2026-09-10T19:28:17.334995+10:00",
+  "status": "open",
+  "ruled_choice": null,
+  "ruled_ts": null,
+  "prior_rulings_overridden": [
+   "2026-08-21 09:47"
+  ]
+ },
+ {
+  "id": "nexusai-marketplace-screenshot-reshoot",
+  "client_project": "Datasec/NexusAI",
+  "title": "NexusAI: re-shoot the Marketplace listing screenshots on synthetic data?",
+  "bluf": "OVERRIDE, with the reason as a measurement: the gate matched Kam's 2026-09-09 15:37 message commissioning the Marketplace review. That message asked for the review and ruled nothing about screenshots; the re-shoot recommendation below is the answer the remediation brief asked for. THE FINDING: the NexusAI seat (S52, REPORT-S52 section 3) recommends a NEW series, not a touch-up. The eight Marketplace listing images are only four distinct pictures. Three captions promise things the images do not show: toner and drum levels, cost trends, and the Log Analytics setup. The Sustainability tab and today's nine-tab navigation appear nowhere, and every data shot shows real people, which is why they are blurred. RECOMMENDATION: about six new shots, one per caption, at 1280 by 720, taken on the synthetic demo feed so there are no names and no blurs, with the caption table updated to match. LOGIC: blurred screenshots of the wrong screens sell the product worse than clean current ones, and synthetic data removes the privacy problem instead of hiding it. Nothing has been shot.",
+  "default_action": "Nothing is shot. The blurred images stay as the listing set.",
+  "options": [
+   {
+    "key": "reshoot",
+    "label": "Yes - a new series of about six, on synthetic data",
+    "detail": ""
+   },
+   {
+    "key": "keep",
+    "label": "Keep the blurred set for now",
+    "detail": ""
+   },
+   {
+    "key": "later",
+    "label": "After the container build",
+    "detail": ""
+   }
+  ],
+  "recommended": "reshoot",
+  "ts": "2026-09-10T19:28:20.035106+10:00",
+  "status": "open",
+  "ruled_choice": null,
+  "ruled_ts": null,
+  "prior_rulings_overridden": [
+   "2026-09-09 15:37"
+  ]
+ },
+ {
+  "id": "nas-shared-folders-owner",
+  "client_project": "Fleet/NAS sync",
+  "title": "NAS sync: which seat's nightly leg owns the shared folders?",
+  "bluf": "OVERRIDE, with the reason as a measurement: the gate matched three ruled Secuura cards on the words shared and owner (the #780 owner merge, the Studio's shared Postgres, the PS #759/760 merge owner). Tuesday read all three; none concerns the NAS sync. THE QUESTION: your 17:16 check. Design: 1_Project_Definition/Architecture/2026-09-10_nas-two-seat-sync-check.md. Its core is that each seat's nightly leg stops touching the other seat's folders: Tuesday's leg skips Secuura and Wednesday's tree, and Wednesday's leg skips Datasec and Tuesday's tree. Tested in scratch: a skipped folder is not synced in either direction, and a control proves the test can see a real deletion. OPEN is everything that is neither Datasec nor Secuura: the vault, Setup and System, Family, Daily Life and the general projects. RECOMMENDATION: Wednesday's leg owns them, and Tuesday's leg syncs only Datasec and Tuesday's own tree. LOGIC: general work is Wednesday's by your 9 September split, and one owner per folder is the whole point of the check. The catch: the sync engine cannot skip folders with spaces in their names, so a Tuesday leg that syncs ONLY its own folders needs a small change to your engine file. Tuesday's 23:00 leg is held until this is settled.",
+  "default_action": "Tuesday's 23:00 leg stays held. Wednesday's 03:30 leg is unchanged. Nothing new is built.",
+  "options": [
+   {
+    "key": "wednesday",
+    "label": "Wednesday's leg owns them - Tuesday's leg syncs only Datasec and its own tree",
+    "detail": ""
+   },
+   {
+    "key": "both",
+    "label": "Both legs keep syncing the shared folders",
+    "detail": ""
+   },
+   {
+    "key": "tuesday",
+    "label": "Tuesday's leg owns them",
+    "detail": ""
+   }
+  ],
+  "recommended": "wednesday",
+  "ts": "2026-09-10T19:28:22.683706+10:00",
+  "status": "open",
+  "ruled_choice": null,
+  "ruled_ts": null,
+  "prior_rulings_overridden": [
+   "CARD secuura-780-owner-merge",
+   "CARD secuura-studio-slot1-shared-postgres-literal-2026-09-03",
+   "CARD secuura-ps-759-760-merge-owner"
+  ]
  }
 ]
