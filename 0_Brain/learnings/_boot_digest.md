@@ -7,7 +7,7 @@ status: live
 
 # Boot digest — headline + rules of every lesson (open the file when it fires)
 
-Generated 2026-09-10 12:18 from 143 lesson files (736,478 B). Each block = the lesson's retrieval handle (H1), its frontmatter, the operative paragraph, its section index, and every RULES section verbatim. 6 files carry no rules-shaped section and are included whole. The CASES behind a rule live only in the file: open it the moment the rule fires, or when a diagnosis needs the evidence. `_ledger.md` is read whole beside this digest; `_ledger_archive.md` on demand.
+Generated 2026-09-10 12:28 from 144 lesson files (740,662 B). Each block = the lesson's retrieval handle (H1), its frontmatter, the operative paragraph, its section index, and every RULES section verbatim. 6 files carry no rules-shaped section and are included whole. The CASES behind a rule live only in the file: open it the moment the rule fires, or when a diagnosis needs the evidence. `_ledger.md` is read whole beside this digest; `_ledger_archive.md` on demand.
 
 ## The T9 SSD is the master — Wednesday must be fully portable
 `2026-07-31_fully-portable-drive.md` · principle · 2026-07-31 · status: superseded — the "T9 is the master" half by [[2026-08-25_one-drive-devmaster-is-master]] (2026-08-25); the portability principle itself still lives
@@ -5219,6 +5219,30 @@ sections (open the file for these): The two, one hour apart, both to the princip
 5. **When a lesson names a missing consumer, the consumer is the deliverable.** Writing down that
    nothing reads a field is not a fix; it is a description of the defect with a date on it
    ([[2026-08-07_a-promise-is-not-a-mechanism]]).
+
+
+## A guard that is correct in isolation and open-ended in practice — and whose refusal is logged where nobody reads it — is indistinguishable from working
+`2026-09-10_a-refusal-nobody-reads-is-indistinguishable-from-working.md` · principle · 2026-09-10 · status: live
+
+**Her sentence, adopted as written:**
+> *"A refusal that no one is looking at is indistinguishable from working."*
+
+sections (open the file for these): The shape · The rule · How this was found, which is part of the lesson
+
+## The rule
+
+1. **For every guard, ask what its condition looks like when it is TRUE for a long time.** Not
+   "is this the right condition" — that part is usually fine — but *"what does this do when it
+   stops being an exception?"* A guard that is correct per-cycle can be catastrophic per-hour.
+2. **A refusal must end somewhere a human or a successor actually lands** — a visible banner, a
+   panel row, an escalation after N consecutive refusals. **A log line is not a channel.** If the
+   only record is a file nobody opens, treat the guard as silent.
+3. **Prefer a guard that DEGRADES over one that BLOCKS.** The dirty-tree fix does not refuse the
+   whole cycle any more; it does the part that is safe (advance the other seat's stream) and skips
+   only the part that is not (the rebase). The freeze fix still suppresses the repaint but *says
+   so*. **In both cases the guard kept its intent and lost its open-endedness.**
+4. **When a guard fires repeatedly, that is a finding about the guard, not noise.** Repetition is
+   the signal that its condition has become normal.
 
 
 ## A single-FILE bind mount binds the INODE, not the path — replacing the file on the host does not reach the container, and every signal still says success
