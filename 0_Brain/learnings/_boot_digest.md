@@ -7,7 +7,7 @@ status: live
 
 # Boot digest — headline + rules of every lesson (open the file when it fires)
 
-Generated 2026-09-10 13:23 from 144 lesson files (740,662 B). Each block = the lesson's retrieval handle (H1), its frontmatter, the operative paragraph, its section index, and every RULES section verbatim. 6 files carry no rules-shaped section and are included whole. The CASES behind a rule live only in the file: open it the moment the rule fires, or when a diagnosis needs the evidence. `_ledger.md` is read whole beside this digest; `_ledger_archive.md` on demand.
+Generated 2026-09-10 13:25 from 145 lesson files (744,291 B). Each block = the lesson's retrieval handle (H1), its frontmatter, the operative paragraph, its section index, and every RULES section verbatim. 6 files carry no rules-shaped section and are included whole. The CASES behind a rule live only in the file: open it the moment the rule fires, or when a diagnosis needs the evidence. `_ledger.md` is read whole beside this digest; `_ledger_archive.md` on demand.
 
 ## The T9 SSD is the master — Wednesday must be fully portable
 `2026-07-31_fully-portable-drive.md` · principle · 2026-07-31 · status: superseded — the "T9 is the master" half by [[2026-08-25_one-drive-devmaster-is-master]] (2026-08-25); the portability principle itself still lives
@@ -5368,6 +5368,40 @@ a brief points AT — here, the helper a fix-shape names) ·
 [[2026-09-05_a-relayed-ruling-is-delivered-only-when-it-is-in-the-artefact]] (rule 5 — a retraction
 must reach the artefact that carries the instruction) ·
 [[2026-08-21_challenge-me-when-you-think-im-wrong]] (the grant that made all three catches available).
+
+
+## Secuura deploys go to KINTSUGI FIRST — demo is promoted to behind gates, and the board's "Deployed to UAT" label describes the OLD arrangement
+`2026-09-10_kintsugi-first-then-demo-behind-gates.md` · preference · 2026-09-10 · status: live
+
+**His words, verbatim (email, 2026-09-10 13:22):**
+> *"The demo box is labeled badly (a legacy thing)*
+> *Kintsugi is our dev box so things should always be deployed there first.*
+> *This is approval to bring kintsugi up to date and deploy everything so its current. In the
+> future deploy to kintsugi first*
+> *And we will set up gates once everything is tested and working to deploy to demo."*
+
+sections (open the file for these): The two environments, so nobody re-derives them · Why this surfaced, and the part worth keeping · How to apply
+
+## How to apply
+
+1. **Kintsugi first, always, for anything with a deployable surface.** Demo is a promote, not a
+   default, and it waits for the gates Kam is going to define.
+2. **Do not trust the board's environment labels.** `Deployed to UAT` predates this ruling and
+   describes demo. Until the board is re-labelled, read the state as "on demo" and say so.
+3. ⚠ **KS-535 IS ABSOLUTE AND IT HAS ALREADY COST A SESSION: kintsugi must never share demo's
+   `PLATFORM_WALLET_MNEMONIC`.** Two deployments on one wallet select the same UTxOs and race;
+   the loser fails with `All inputs are spent`. It has happened at scale — 295 local and 2 demo
+   anchors. **Any kintsugi deploy brief carries this by name.**
+4. **Measure the box before deploying to it.** Kintsugi was down 53 hours (2026-09-07 → 09-09) and
+   nobody should assume its state from memory.
+5. **The project's own rule is that any deploy notifies Stuart and Peter** (extranet to-do +
+   Linear comment). That still stands — but on 2026-09-10 Wednesday held the notice for Kam's word
+   rather than sending it on the agent's initiative, because the day had already turned on who was
+   told what.
+
+**Family:** [[2026-09-10_steps-to-kam-are-a-claim-about-his-screen]] (a label is a claim about a
+system, and this one had gone stale) · [[2026-08-03_mental-model-not-source-of-truth]] ·
+[[2026-09-05_never-update-prod-and-demo-is-kams-class]].
 
 
 ## A step I hand Kam is a CLAIM about what he will SEE — measure the surface at the moment of writing, never from the card that motivated it
