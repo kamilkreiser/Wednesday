@@ -11,6 +11,11 @@ supersede: replace this file wholesale at the next pickup; do not append
 
 > Narrative: `0_Brain/daily/2026-09-11.md`. **Measure before acting on any line here.**
 
+## 🔴 HOLD — SECUURA PREFLIGHT LEG 14 (ruled by Wednesday 2026-09-11 09:3x, ANSWER to s176 verified at destination)
+
+**Property protected: Secuura/Blockchain's SHARED `.git` (config + refs).** No seat pushes (runs the pre-push hook) or runs preflight leg 14 **from a linked worktree** on any tree containing `ec2d8c4ca` (it IS on develop `2d864ae92`, measured) until a `GIT_*` strip at the leg-14 invoker is on develop. **Why:** #879's push at 23:12Z ran leg 14's in-hook shell suites, which wrote fixture state into the shared `.git` (`core.bare=true`, fixture identity `t`, `origin/develop` deleted, `develop` moved, `feature/y`/`feature/w` created) and then refused the push. s176 restored it; Wednesday re-verified read-only (config file, worktree HEAD, `ls-remote`: nothing reached GitHub). **A normal-clone push is UNMEASURED.** **Every Secuura brief carries this in HOLDS.** The only exception is the FIX's own push, with snapshot-before / diff-after of `.git/config` + `for-each-ref`.
+**Owed:** s176 files the Urgent ticket + posts scoped warnings on KS-485/KS-772 + hands over the fix spec, then wraps → **Wednesday launches the fix seat** (tier-1 QA gate before merge) → **Kam gets a one-line WhatsApp for Peter/Stuart once the ticket number exists.** `feature/y` `d709d01b2` / `feature/w` `41612bf0a` are LEFT (no delete).
+
 ## 🔴 WITH KAM
 
 1. **`secuura-ks597-bind-compares-two-id-spaces-now-deployed`** (card, rec B) — Kam's `bind` compares Platform S's externalRef against K's `organizations.id` raw → every S originate 403s (Stuart, local). **Both kintsugi and demo-pk serve the post-`48c4d8053` spec (PROBED).** S refusals there = INFERRED. **Stuart NOT told — Kam's conversation. ALL DEPLOYS HELD until he rules.**
@@ -39,7 +44,7 @@ supersede: replace this file wholesale at the next pickup; do not append
 
 ## 🟠 NAS
 
-Re-running under launchd since 07:27 with 9 ruled ignores in `scheduler/nas_sync.sh`. **DO NOT EDIT `nas_sync.sh` WHILE IT RUNS.** Owed at completion: `Deleting` count + completion to Kam and Tuesday.
+**FINISHED 09:04:49 (1h37m), first completed pass of the leg:** `1029 transferred, 0 skipped, 42 failed` (Wednesday's live folders). **248 deletions, all on the NAS replica, all 248 paths absent on DevMASTER** (existence test with both controls). **Kam + Tuesday told 09:3x (both verified).** 🔴 **The deletion alarm was BLIND** (`^Deleting ` on a CR-separated log that writes `[BGN] Deleting` → printed 0; "163 conflicts" were filenames) — **fixed in `scheduler/nas_sync.sh` by Wednesday 09:4x; red-proof + commit in the same session.** Tonight's 03:30 leg is the first real run of the fixed counter — **read its summary line for a per-root breakdown; UNKNOWN means normalisation failed, not zero.** Tuesday's leg has never run on the mini (TCC exit 126 — her card for Kam).
 
 ## 🟡 OWED BY WEDNESDAY — mechanisms from today's ledger (none built)
 

@@ -94,11 +94,30 @@ say "engine exit rc=$RC"
 # NOT `grep -c ... || echo 0`: grep EXITS 1 on zero matches, so that form prints the
 # count AND the fallback — "0\n0" — and every downstream field is then malformed.
 # Exercising it is what showed this; reading it did not.
-DELETES=$(grep -c '^Deleting ' "$LOG" 2>/dev/null); DELETES=${DELETES:-0}
-CONFLICTS=$(grep -c 'conflict' "$LOG" 2>/dev/null); CONFLICTS=${CONFLICTS:-0}
-say "deletions propagated: $DELETES (alarm at $ALERT_AT) | conflict mentions: $CONFLICTS"
+#
+# ── 2026-09-11 (Wednesday): THE COUNT HERE WAS BLIND UNTIL TODAY, AND THIS IS WHY ─────────
+# These lines read `grep -c '^Deleting ' "$LOG"` and `grep -c 'conflict' "$LOG"`. The 07:27
+# narrow-hard run propagated 248 deletions and they printed 0 and 163.
+#   1. This unison writes `[BGN] Deleting <path> from <root>` (plus `[END] Deleting <path>`),
+#      not a bare `Deleting`.
+#   2. Its log is CARRIAGE-RETURN separated (progress repaints), so a `^` anchor on the RAW
+#      file matched nothing: raw 0 against 248 once `\r` becomes `\n`.
+#   3. 158 of the 163 'conflict' lines were FILE NAMES containing `conflict_on`; unison's own
+#      conflict marker `<-?->` appeared 0 times.
+# None of the three earlier logs held a single deletion, so this alarm had never been measured
+# against one. A failed normalisation reports UNKNOWN — never a zero it did not measure.
+NORM="$(mktemp -t nas_sync_norm)" || NORM=""
+if [ -n "$NORM" ] && tr '\r' '\n' < "$LOG" > "$NORM"; then
+  DELETES=$(grep -cE '^(\[BGN\] )?Deleting ' "$NORM"); DELETES=${DELETES:-0}
+  DEL_BY_ROOT=$(grep -E '^(\[BGN\] )?Deleting ' "$NORM" | sed -nE 's/^.* from (.+)$/\1/p' | sort | uniq -c | awk '{n=$1; $1=""; printf "%s%s from%s", s, n, $0; s="; "}')
+  CONFLICTS=$(grep -cF -- '<-?->' "$NORM"); CONFLICTS=${CONFLICTS:-0}
+else
+  say "🔴 could not normalise $LOG — deletion and conflict counts are UNKNOWN, not zero"
+  DELETES=UNKNOWN; DEL_BY_ROOT=""; CONFLICTS=UNKNOWN
+fi
+say "deletions propagated: $DELETES (alarm at $ALERT_AT)${DEL_BY_ROOT:+ — $DEL_BY_ROOT} | conflicts (<-?->): $CONFLICTS"
 
-SUMMARY="$STAMP | agent=$AGENT | rc=$RC | deletions=$DELETES | conflicts=$CONFLICTS | log=$LOG"
+SUMMARY="$STAMP | agent=$AGENT | rc=$RC | deletions=$DELETES${DEL_BY_ROOT:+ ($DEL_BY_ROOT)} | conflicts=$CONFLICTS | log=$LOG"
 printf '%s\n' "$SUMMARY" > "$REPORT"
 
 if [ "$DELETES" -ge "$ALERT_AT" ] 2>/dev/null; then
@@ -114,7 +133,7 @@ if [ "$DELETES" -ge "$ALERT_AT" ] 2>/dev/null; then
     echo "ON THIS MACHINE (backup = Name *, maxbackups = 5). They are NOT on the drives."
     echo
     echo "The deleted paths, from unison's own output:"
-    grep '^Deleting ' "$LOG" | head -200
+    grep -E '^(\[BGN\] )?Deleting ' "$NORM" | head -200
   } > "$ALERT"
   say "🔴 ALARM WRITTEN: $ALERT"
   if [ -x "$PROJECT_DIR/2_Project_Files/tools/chat_reply.sh" ]; then
