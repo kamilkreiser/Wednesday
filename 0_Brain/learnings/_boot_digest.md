@@ -7,7 +7,7 @@ status: live
 
 # Boot digest — headline + rules of every lesson (open the file when it fires)
 
-Generated 2026-09-10 17:12 from 148 lesson files (752,827 B). Each block = the lesson's retrieval handle (H1), its frontmatter, the operative paragraph, its section index, and every RULES section verbatim. 7 files carry no rules-shaped section and are included whole. The CASES behind a rule live only in the file: open it the moment the rule fires, or when a diagnosis needs the evidence. `_ledger.md` is read whole beside this digest; `_ledger_archive.md` on demand.
+Generated 2026-09-10 18:07 from 148 lesson files (756,358 B). Each block = the lesson's retrieval handle (H1), its frontmatter, the operative paragraph, its section index, and every RULES section verbatim. 7 files carry no rules-shaped section and are included whole. The CASES behind a rule live only in the file: open it the moment the rule fires, or when a diagnosis needs the evidence. `_ledger.md` is read whole beside this digest; `_ledger_archive.md` on demand.
 
 ## The T9 SSD is the master — Wednesday must be fully portable
 `2026-07-31_fully-portable-drive.md` · principle · 2026-07-31 · status: superseded — the "T9 is the master" half by [[2026-08-25_one-drive-devmaster-is-master]] (2026-08-25); the portability principle itself still lives
@@ -5303,7 +5303,7 @@ Related: [[2026-09-09_quarantine-by-rename-is-not-removal-on-an-additive-sync]] 
 [[2026-09-02_coo-actionable-tickets-never-wait-for-kam]]
 
 
-## A weekday NAME and a calendar DATE are two claims — an expiry written from one and dated from the other extends itself in the direction nobody checks
+## A weekday NAME and a calendar DATE are two claims — ANY pair, not just an expiry. Derive one from the other or you will write a date that is not the day you mean
 `2026-09-10_a-weekday-and-a-date-are-two-claims.md` · correction · 2026-09-10 · status: live
 
 **The lesson:** Kam's grant was *"until the end of the week."* The previous seat read that as
@@ -5312,7 +5312,7 @@ wrote the artefacts as **"END OF SUNDAY 2026-09-14"**. 14 September 2026 is a **
 weekday was right, the date was wrong, and because both appeared in the same phrase the sentence
 *looked* self-checking. Nobody re-derived one from the other.
 
-sections (open the file for these): How to apply
+sections (open the file for these): How to apply · RECURRENCE THE SAME DAY (w=2), FOUR HOURS AFTER THIS FILE WAS WRITTEN — and the diagnosis is the headline, not the discipline
 
 ## How to apply
 
@@ -5546,10 +5546,9 @@ match his instructions, and he has to work out which of us is confused.
 ## When a measurement surprises you, the instrument is probably correct and POINTED AT THE WRONG THING — suspect the selector before the subject
 `2026-09-10_surprising-measurements-are-selector-errors.md` · correction · 2026-09-10 · status: live
 
-**The lesson:** Three surprising measurements in one afternoon, all three a **selector** error, none
-of them a broken tool:
+**The lesson:** **FIVE** surprising measurements in one afternoon, across **three different agents**, every one a **selector** error and **not one of them a broken tool.** The first three:
 
-sections (open the file for these): How to apply
+sections (open the file for these): How to apply · EXTENSION, same day — FOUR instances across THREE agents, and a fourth kind of selector
 
 ## How to apply
 
@@ -5572,4 +5571,8 @@ Related: [[2026-08-15_a-cap-is-never-neutral]] ·
 [[2026-09-08_a-false-absence-is-usually-my-own-instrument]] ·
 [[2026-08-14_i-read-representations-they-read-sources]] ·
 [[2026-09-10_a-sync-conflict-copy-is-an-input-to-every-glob]]
+
+## EXTENSION, same day — FOUR instances across THREE agents, and a fourth kind of selector
+A fourth landed within the hour, from the Secuura seat, and it makes the family cross-fleet rather
+than mine:
 

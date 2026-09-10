@@ -8,8 +8,7 @@ tier: W
 
 # When a measurement surprises you, the instrument is probably correct and POINTED AT THE WRONG THING — suspect the selector before the subject
 
-**The lesson:** Three surprising measurements in one afternoon, all three a **selector** error, none
-of them a broken tool:
+**The lesson:** **FIVE** surprising measurements in one afternoon, across **three different agents**, every one a **selector** error and **not one of them a broken tool.** The first three:
 
 1. **Column index.** Parsing the ledger by `line.split('|')[3]` reported **2% of rows carry a
    weight**. Row prose contains `|`, so field counts run **6 to 17** — I was reading a different
@@ -51,3 +50,31 @@ Related: [[2026-08-15_a-cap-is-never-neutral]] ·
 [[2026-09-08_a-false-absence-is-usually-my-own-instrument]] ·
 [[2026-08-14_i-read-representations-they-read-sources]] ·
 [[2026-09-10_a-sync-conflict-copy-is-an-input-to-every-glob]]
+
+## EXTENSION, same day — FOUR instances across THREE agents, and a fourth kind of selector
+
+A fourth landed within the hour, from the Secuura seat, and it makes the family cross-fleet rather
+than mine:
+
+4. **A regex over-matching a nested path.** Deriving demo's rebuild set, `services/[a-z0-9-]+`
+   matched `services/originate/src/services/**gdpr**Service.ts` and **invented a service called
+   `gdpr`** — 13 services instead of 12. Fixed by **intersecting against compose's own service
+   list**, and the seat then asserted the residual set ("in changed paths but not a compose service")
+   was **empty**, which is the control that makes the intersection trustworthy.
+
+**So: a column index, a glob, a `$HOME`, and a regex — four selectors, three agents, one afternoon,
+zero broken tools.** The instrument worked every time.
+
+**And a FIFTH shape the same hour, which is a selector in TIME rather than in space** — worth naming
+because it does not look like this family at first: the seat measured demo's free disk **immediately
+after** a build (11,097 MB), computed a 14 GB shortfall, and was one message from a correct-looking
+"STOP, it will not fit". Settled free space minutes later was **13,751 MB — higher than before the
+build started.** It had measured the transient peak, not the durable cost. **WHEN you sample is a
+selector too**, and a measurement taken at the wrong moment is as wrong as one taken over the wrong
+set.
+
+**The seat's response is the one to copy:** it did not re-do the projection. It made the loop
+**self-limiting** — check free space before each service, refuse below a 4,000 MB floor, exit and
+write a stop-file, **never prune**. *"That way 'will it fit' is answered by the run rather than by my
+arithmetic, and the failure mode is a clean halt rather than an exhausted disk."* **Where a
+prediction keeps being wrong, replace the prediction with a mechanism that cannot overrun.**

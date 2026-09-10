@@ -7,7 +7,7 @@ status: live
 
 # Family-weight index — what a recurrence is measured against
 
-Generated from **823 ledger rows** (806 = 97% cite a lesson file) across `_ledger.md` + `_ledger_archive.md`. **137 families.**
+Generated from **824 ledger rows** (807 = 97% cite a lesson file) across `_ledger.md` + `_ledger_archive.md`. **137 families.**
 
 **`rows` is the hard count** — how many ledger rows cite this lesson; that is the number to quote when assigning a weight. **`max_w` is soft** — the largest `w=N` in any row citing it, and a row citing several lessons attributes its weight to each, so it can overstate. **Sorted by `rows`, not `max_w`** — five families share a max_w of 144 for that reason. Use `max_w` only to ask *"is this family high?"*, then `grep` the archive for the prose.
 
@@ -60,6 +60,7 @@ Generated from **823 ledger rows** (806 = 97% cite a lesson file) across `_ledge
 | [[2026-09-06_other-projects-repos-are-read-only-git-verbs-that-write]] | 10 | 6 | 3 | 2026-09-10 |
 | [[2026-09-08_the-check-ran-and-was-not-checking-the-thing]] | 10 | 10 | 1 | 2026-09-10 |
 | [[2026-08-05_verify-the-chain-not-the-legs]] | 9 | 2 | 2 | 2026-09-10 |
+| [[2026-09-08_a-new-rule-is-most-dangerous-just-after-adoption]] | 9 | 9 | 2 | 2026-09-10 |
 | [[2026-08-04_never-blanket-markseen-mid-monitoring]] | 8 | 3 | 119 | 2026-09-10 |
 | [[2026-08-03_go-slow-earn-autonomy]] | 8 | 1 | 88 | 2026-09-08 |
 | [[2026-09-02_rotate-in-the-70-80-band-conditionally]] | 8 | 0 | 82 | 2026-09-07 |
@@ -70,7 +71,6 @@ Generated from **823 ledger rows** (806 = 97% cite a lesson file) across `_ledge
 | [[2026-09-09_the-seat-resolver-is-the-layer-above-every-agent-aware-fix]] | 8 | 8 | 5 | 2026-09-09 |
 | [[2026-08-06_selector-discipline-in-ui-verification]] | 8 | 2 | 3 | 2026-09-10 |
 | [[2026-08-15_a-gui-open-is-a-write]] | 8 | 1 | 3 | 2026-09-08 |
-| [[2026-09-08_a-new-rule-is-most-dangerous-just-after-adoption]] | 8 | 8 | 2 | 2026-09-10 |
 | [[2026-08-06_ask-format-client-project-options-rec]] | 8 | 2 | — | 2026-09-10 |
 | [[2026-08-03_frequency-weighted-reinforcement]] | 7 | 1 | 89 | 2026-09-08 |
 | [[2026-09-05_qa-gate-tiers-and-the-two-nogo-cap]] | 7 | 3 | 88 | 2026-09-10 |
@@ -112,6 +112,7 @@ Generated from **823 ledger rows** (806 = 97% cite a lesson file) across `_ledge
 | [[2026-09-03_a-ratified-design-has-two-halves]] | 2 | 0 | 12 | 2026-09-04 |
 | [[2026-08-19_a-pagination-default-is-a-selector]] | 2 | 0 | 2 | 2026-09-04 |
 | [[2026-09-02_launcher-quote-truncation]] ⚠ NO FILE | 2 | 2 | 2 | 2026-09-08 |
+| [[2026-09-10_a-weekday-and-a-date-are-two-claims]] | 2 | 2 | 2 | 2026-09-10 |
 | [[2026-08-03_daily-rhythm-6-to-23]] | 2 | 0 | 1 | 2026-09-07 |
 | [[2026-08-05_wed-work-threshold-delegation]] | 2 | 0 | 1 | 2026-09-02 |
 | [[2026-09-07_read-the-clock-at-boot]] | 2 | 2 | 1 | 2026-09-10 |
@@ -136,7 +137,6 @@ Generated from **823 ledger rows** (806 = 97% cite a lesson file) across `_ledge
 | [[2026-09-10_a-detector-keyed-on-remedy-text-matches-the-hint]] | 1 | 1 | 1 | 2026-09-10 |
 | [[2026-09-10_a-single-file-bind-mount-binds-the-inode]] | 1 | 1 | 1 | 2026-09-10 |
 | [[2026-09-10_a-sync-conflict-copy-is-an-input-to-every-glob]] | 1 | 1 | 1 | 2026-09-10 |
-| [[2026-09-10_a-weekday-and-a-date-are-two-claims]] | 1 | 1 | 1 | 2026-09-10 |
 | [[2026-09-10_surprising-measurements-are-selector-errors]] | 1 | 1 | 1 | 2026-09-10 |
 | [[../identity/persona]] ⚠ NO FILE | 1 | 0 | — | 2026-08-28 |
 | [[2026-08-03_contemplation-the-cockroach]] | 1 | 0 | — | 2026-08-03 |
