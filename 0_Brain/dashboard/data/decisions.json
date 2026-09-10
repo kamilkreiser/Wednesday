@@ -8162,5 +8162,37 @@
   "status": "open",
   "ruled_choice": null,
   "ruled_ts": null
+ },
+ {
+  "id": "wed-nas-narrow-hard-followon",
+  "client_project": "WED/Fleet",
+  "title": "Your NAS partition worked 180x and then hit ONE directory — cut node_modules/worktrees, or accept no NAS backup?",
+  "bluf": "OVERRIDE REASON, STATED FIRST: the prior-rulings gate matched the WORD backup, not this subject. Its single hit is your 2026-08-26 ruling on secuura-ks622-mfa-verify-fix - MFA BACKUP CODES on the Secuura login path, which has nothing to do with the NAS. You have never ruled on narrowing the synced SET; you ruled on whether to STOP AND RE-RUN the leg, which is a different question and is the ruling this card follows on from. THIS IS THE FOLLOW-ON YOUR OWN RULING EARNED, NOT AN OVERRIDE OF IT. You ruled stop-partition-rerun at 20:27 last night with narrow-hard sitting beside it as its own option, and you chose otherwise. The re-run has now produced the number that was missing when you chose. YOUR PARTITION IS WORTH ~180x ON ORDINARY FILES: 14,003 files copied last night against 315 on the unpartitioned run; 17,864 of 19,966 items done (89%) in 9h against 395 of 20,621 in 40h. That is unambiguous and it is your ruling paying off. THEN IT HIT A WALL THAT IS NEITHER CAUSE WE FRAMED - not the item count, not the link. The log names it: [BGN] Copying !CODING/Secuura/Blockchain/worktrees. 2,102 items remain holding ~52 GiB - the last 10.5% of items is 89% of the bytes - inside a tree carrying 51+ worktrees each with its own node_modules. Rate collapsed to 2.0 KiB/s. ETA 327 days. THE COST OF LEAVING IT: it holds the /tmp lock, so every scheduled leg on this machine skips while it runs. This morning`s 03:30 did exactly that and reported correctly (rc=0, deletions=0, conflicts=0) - the abort-and-report semantic is already implemented and already firing. So the slot is occupied for 327 days and you have had no completed NAS backup since the job was armed on 2026-09-08. WHAT IS NOT WRONG, as precisely as what is: the Deleting count is 0 across BOTH runs. Nothing has been destroyed, no permission failure, stderr clean. DevMASTER and the T9 sync are unaffected - this is your third copy, not your only one. ONE NUMBER I AM FLAGGING RATHER THAN EXPLAINING: the denominator MOVED between runs, 44.13 GiB -> 58.82 GiB. I have not established why, and a total that changes between runs is not one either of us should build on. It does not change the shape of this decision but you should know it is unexplained. WHY THIS IS YOURS AND NOT MINE: cutting node_modules and worktrees changes WHAT YOU ARE PROTECTED AGAINST, not how fast a job runs. That is a decision about the backup, not a performance tweak, and I will not take it on my own.",
+  "default_action": "DEFAULT IF YOU DO NOT ANSWER: nothing changes. The run continues at 2.0 KiB/s, every scheduled leg keeps skipping, and there is still no completed NAS backup. I will not narrow the set on my own — it changes what you are protected against.",
+  "options": [
+   {
+    "key": "narrow-hard",
+    "label": "Cut node_modules, worktrees and regenerable bulk from the synced set, then re-run",
+    "detail": "Almost certainly completes tonight. What you lose: worktrees and node_modules are not in the backup — both are regenerable (worktrees from the repo, node_modules from a lockfile), so the loss is rebuild TIME after a disaster, not data. What you gain: an actual completed NAS backup, and the nightly slot back. Recommended because you currently have no third copy at all and the evidence now names one directory as the whole cost."
+   },
+   {
+    "key": "let-it-finish",
+    "label": "Leave it running to completion",
+    "detail": "It is 89% through by items and copying steadily; nothing is at risk. But 327 days is not a backup schedule, and the nightly slot stays occupied that whole time. Defensible only if you consider the NAS optional while DevMASTER + T9 cover you — a real position, but take it knowingly."
+   },
+   {
+    "key": "stop-and-measure",
+    "label": "Stop it and measure why worktrees specifically collapses to 2 KiB/s before changing the set",
+    "detail": "Slower to a working backup, but aims the fix at a measured cause. Choose this if you would rather not change what the backup CONTAINS on the strength of one run. I have not established whether the collapse is many-small-files, SMB round-trips, or something else."
+   }
+  ],
+  "recommended": "narrow-hard",
+  "ts": "2026-09-11T06:10:01.198230+10:00",
+  "status": "open",
+  "ruled_choice": null,
+  "ruled_ts": null,
+  "prior_rulings_overridden": [
+   "2026-08-26 17:11"
+  ]
  }
 ]
