@@ -30,6 +30,11 @@ header a { color:var(--text-muted); font-size:12.5px; text-decoration:none; }
 header a:hover { color:var(--text-primary); }
 #live { margin-left:auto; font-size:12px; color:var(--text-muted); }
 #live.on { color:var(--series-3); }
+#feedheld { display:block; width:calc(100% - 28px); margin:6px 14px; padding:6px 10px;
+           background:color-mix(in srgb, var(--series-3) 16%, transparent);
+           border:1px solid var(--series-3); border-radius:7px; color:var(--series-3);
+           font-size:11.5px; text-align:left; cursor:pointer; }
+#feedheld:hover { background:color-mix(in srgb, var(--series-3) 26%, transparent); }
 #heldbar { display:block; width:calc(100% - 28px); margin:6px 14px; padding:6px 10px;
            background:color-mix(in srgb, var(--series-3) 16%, transparent);
            border:1px solid var(--series-3); border-radius:7px; color:var(--series-3);
@@ -766,6 +771,31 @@ const sentNotes = new Set();           // decision ids that sent a note-only mes
 const decDrafts = new Map();           // dec.id -> free-text draft; survives poll re-renders (round 4)
 armGuards(feedScroll, "feed");
 
+// ── held indicator for the decision/activity panel ────────────────────────
+// Same grammar as the conversation's heldbar, deliberately: two panels that
+// freeze for the same reason should say so the same way.
+let forcingFeed = false;
+function forceRenderFeed() { forcingFeed = true; try { renderFeed(); } finally { forcingFeed = false; } }
+function feedHeldEl() {
+  let el = document.getElementById("feedheld");
+  if (!el) {
+    el = document.createElement("button");
+    el.id = "feedheld"; el.type = "button"; el.hidden = true;
+    el.title = "this panel is paused while you are typing a note — click to show what arrived";
+    el.textContent = "paused while you type — click to show the latest";
+    el.addEventListener("click", () => { hideFeedHeld(); forceRenderFeed(); });
+    // Anchor to the scroll container's PARENT, not inside it: a banner placed in
+    // the scroller scrolls away, which is useless for a click-to-show. This is
+    // the NotFoundError/placement lesson from the conversation banner, applied
+    // rather than re-learned.
+    if (feedScroll && feedScroll.parentNode) feedScroll.parentNode.insertBefore(el, feedScroll);
+    else return null;
+  }
+  return el;
+}
+function showFeedHeld() { const el = feedHeldEl(); if (el) el.hidden = false; }
+function hideFeedHeld() { const el = document.getElementById("feedheld"); if (el) el.hidden = true; }
+
 function feedBusy() {
   // a non-empty decision-note draft under focus = Kam is composing — defer the
   // repaint (same rule as convoBusy); decDrafts still restores the text if a
@@ -1212,8 +1242,20 @@ function ruledRow(dec) {
   return row;
 }
 function renderFeed(opts) {
-  if (feedBusy()) { pendingRender = true; return; }
+  if (feedBusy() && !forcingFeed) {
+    // HELD, NOT DROPPED — the decision panel's half of the same defect the
+    // conversation had, found one panel over on 2026-09-10. While Kam has a note
+    // draft focused in a decision card, this panel stopped repainting ENTIRELY —
+    // including NEW DECISION CARDS arriving. He had six cards here this morning
+    // and types notes into them, so a card landing while he composes was
+    // invisible, and a suppressed panel is indistinguishable from nothing
+    // happening. The suppression is kept; the silence is not.
+    pendingRender = true;
+    showFeedHeld();
+    return;
+  }
   pendingRender = false;
+  hideFeedHeld();
   const {events, skipped} = parseAll(lastEventsRaw || []);
   const dp = parseDecisions(lastDecisionsRaw || []);
   renderTally(events);
