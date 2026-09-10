@@ -7440,5 +7440,58 @@
   ],
   "delivered_artefact": "Brief [Wednesday -> Secuura/Blockchain] 'QUEUED ITEM 3 ... read the failing Actions runs and report WHY, change nothing', sent 2026-09-10 and verified at secuura-blockchain@agentmail.to; the seat's report will be the second artefact and goes on the ticket it files.",
   "delivered_ts": "2026-09-10T11:01:18.033672+10:00"
+ },
+ {
+  "id": "secuura-ks1041-step1-demo-verify-now",
+  "client_project": "Secuura/Blockchain",
+  "title": "KS-1041 Step 1 is built, green and in PR #938 — but your own verification says 'closed on the demo box', and touching demo is your class, not mine",
+  "bluf": "OVERRIDE REASON, STATED AS A MEASUREMENT: the gate will match your 10:32 `both-sequenced` ruling. That ruling chose the FIX SHAPE. It did not authorise a DEPLOY, and its own card's default action reads 'Nothing is changed on demo'. So the deploy is genuinely unruled — and your ruling's own verification criterion cannot be met without it. WHERE STEP 1 ACTUALLY IS: the proxy to originate:4000 is gone from all three nginx configs. Proven by RUNNING it, not reading it — the seat stood both configs up in nginx:alpine with a stub aliased as every upstream, and the same probe returns 200 on develop and 404 on the change, with two controls (the sibling /analytics/ route and the SPA catch-all) that could have moved and did not. `nginx -t` exit 0 on all three, production included once a throwaway cert is mounted. #934 merged, the advisory wall is down (leg 7 exit 1 -> exit 0, re-measured on the merged tree), PREFLIGHT PASSED with 13 of 13 legs COUNTED rather than trusting the banner. PR #938 is open, base develop, head fd3ab4245. WHAT IS LEFT IS ONLY YOUR HALF: 'the credential-free GET must return 404 on the demo host, plus a positive reachability control in the same run.' Until that runs, the exposure you ruled to close FIRST is still reachable on demo, and Step 2 cannot begin because you sequenced it behind Step 1's verification. THE ACTION, PRECISELY: nginx-demo.conf is BIND-MOUNTED on the demo host. It is an rsync of one file plus an nginx reload. No build, no image, no migration, no restart of any service, reversible in seconds by rsyncing the old file back. HONEST LIMITS: Wednesday has not read the demo host itself and takes the bind-mount claim from the seat, which has. And this is still a change to the box prospects and the team reach, which is why it is on your desk rather than done.",
+  "default_action": "HOLD. #938 sits unmerged, demo keeps the open route, and the unauthenticated billing read stays reachable on the box prospects reach — the exact thing you ruled at 10:32 to close FIRST. Step 2 stays blocked behind it. Nothing else degrades, and nothing is at risk from waiting except the exposure itself, which is already live and has been since before this morning.",
+  "options": [
+   {
+    "key": "verify-now",
+    "label": "Authorise the demo config push + reload now, then verify (Recommended)",
+    "detail": "One file rsynced, one nginx reload, then the credential-free GET plus its positive control. Closes the exposure today, which is what your own sequencing was for. Reversible in seconds. The seat recommends it and so do I."
+   },
+   {
+    "key": "after-merge",
+    "label": "Merge #938 first, then deploy to demo",
+    "detail": "More orthodox — the change is reviewed before it touches a live box. Cost: #938 needs an approval, the agent cannot give one, so this waits on YOUR click, and the exposure stays open until you make it."
+   },
+   {
+    "key": "verify-readonly-first",
+    "label": "Re-probe demo read-only first to confirm it is still open, then decide",
+    "detail": "Cheapest and changes nothing. Buys certainty that the exposure is still live before spending a deploy. Costs one more round trip while the hole stays open."
+   },
+   {
+    "key": "hold",
+    "label": "Hold until you have looked at #938 yourself",
+    "detail": "The exposure persists on demo while you do. It is demo, not production, and nothing customer-facing is reachable — so this is defensible, not reckless."
+   }
+  ],
+  "recommended": "verify-now",
+  "ts": "2026-09-10T11:05:28.560597+10:00",
+  "status": "open",
+  "ruled_choice": null,
+  "ruled_ts": null,
+  "prior_rulings_overridden": [
+   "CARD secuura-ks622-mfa-verify-fix",
+   "CARD secuura-ks697-demo-probe",
+   "CARD secuura-demo-deploy-scope-2026-09-03",
+   "CARD secuura-demo-service-persona-switch-2026-09-03",
+   "CARD secuura-demo-service-crash-loop",
+   "CARD secuura-demo-stop-needs-kams-own-word",
+   "CARD secuura-demo-admin-image-rebuild-2026-09-05",
+   "CARD secuura-demo-vm-prune",
+   "CARD secuura-demo-kam-admin-default-password",
+   "CARD secuura-f5-demo-exposure-probe",
+   "CARD secuura-f5-demo-interim-mitigation",
+   "CARD secuura-demo-admin-transcripts",
+   "CARD secuura-demo-admin-mfa",
+   "CARD secuura-demo-row-060-remediation",
+   "CARD secuura-ks968-demo-hash-probe",
+   "CARD secrev-verify-23-and-batch1-filing",
+   "CARD secuura-ks1041-fix-shape-demo-exposed"
+  ]
  }
 ]
