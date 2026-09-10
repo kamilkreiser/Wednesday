@@ -1,4 +1,8 @@
 #!/bin/bash
+# launchd starts this with a minimal PATH, so `gh` was rc=127 on 2026-09-10 and
+# section 2 (ready-to-merge) went blind. The script reported the failure rather than
+# treating it as zero — correct — but a check that cannot run is not a check.
+export PATH="/opt/homebrew/bin:/usr/local/bin:$PATH"
 # daily_sweep.sh — Kam's 15:00 Sydney sweep (panel, 2026-09-10 11:41):
 #   "create a new schedule to archive items that have been deployed, merged, or
 #    completed at the end of the day, and add to this schedule to archive,

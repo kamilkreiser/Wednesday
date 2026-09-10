@@ -7,7 +7,7 @@ status: live
 
 # Boot digest BY TIER — W whole, M rules-only, every project case a handle
 
-Generated 2026-09-10 15:27 from 146 lesson files (747,653 B). M 32 · MIXED 5 · W 109. 28 project CASE sections inside MIXED files are reduced to one line each: the heading and the path to read it at. W blocks are exactly what the default digest carries; M blocks drop the section index and keep the rules; a P file is a single handle. The CASES behind every rule live only in the lesson files — open one the moment its rule fires.
+Generated 2026-09-10 15:43 from 147 lesson files (750,746 B). M 32 · MIXED 5 · W 110. 28 project CASE sections inside MIXED files are reduced to one line each: the heading and the path to read it at. W blocks are exactly what the default digest carries; M blocks drop the section index and keep the rules; a P file is a single handle. The CASES behind every rule live only in the lesson files — open one the moment its rule fires.
 
 ## The T9 SSD is the master — Wednesday must be fully portable
 `2026-07-31_fully-portable-drive.md` · principle · 2026-07-31 · status: superseded — the "T9 is the master" half by [[2026-08-25_one-drive-devmaster-is-master]] (2026-08-25); the portability principle itself still lives · tier: W
@@ -4921,6 +4921,38 @@ sections (open the file for these): Why this is a lesson and not a docker footno
 [[2026-08-03_mental-model-not-source-of-truth]] · [[2026-09-06_green-local-proof-is-not-evidence-about-a-different-environment]].
 
 
+## A weekday NAME and a calendar DATE are two claims — an expiry written from one and dated from the other extends itself in the direction nobody checks
+`2026-09-10_a-weekday-and-a-date-are-two-claims.md` · correction · 2026-09-10 · status: live · tier: W
+
+**The lesson:** Kam's grant was *"until the end of the week."* The previous seat read that as
+"end of Sunday", told him so in chat as **"end of Sunday the thirteenth"** — correct — and then
+wrote the artefacts as **"END OF SUNDAY 2026-09-14"**. 14 September 2026 is a **Monday**. The
+weekday was right, the date was wrong, and because both appeared in the same phrase the sentence
+*looked* self-checking. Nobody re-derived one from the other.
+
+sections (open the file for these): How to apply
+
+## How to apply
+
+1. **Never write a weekday and a date in the same claim without deriving one from the other.**
+   `date -j -f "%Y-%m-%d" "<date>" "+%A"` costs nothing and answers it. If they disagree, the
+   *weekday* is usually what Kam actually meant — it is what he said aloud.
+2. **On any expiry, prefer the derived date and record the derivation**, not the one that "looks
+   like the weekend".
+3. **When an expiry is wrong, check which direction.** Permissive errors on a signature class
+   (deploy, prod, money, external comms) are corrected immediately and reported; restrictive ones
+   can wait for Kam.
+4. **A wrong fact in a HEADLINE is already everywhere.** Fix the source file, then regenerate BOTH
+   digests and grep every artefact for the old value — the correction note will still match, so
+   read the hits rather than counting them.
+5. This is the operative half of [[2026-09-07_read-the-clock-at-boot]]: reading the clock tells you
+   *today*; it does not check the arithmetic on a date someone else wrote down.
+
+Related: [[2026-09-10_deploy-both-boxes-grant-expires-sunday]] ·
+[[2026-09-06_a-scoped-override-carries-its-own-expiry]] ·
+[[2026-09-07_read-the-clock-at-boot]]
+
+
 ## Coordinate with Tuesday BEFORE taking a task — two coordinators on shared tooling will both fix the same thing unless one of them claims it first
 `2026-09-10_claim-a-task-with-tuesday-before-starting-it.md` · preference · 2026-09-10 · status: live · tier: W
 
@@ -4966,12 +4998,12 @@ principal.
 typed, not about who owns the work).
 
 
-## Deploy freely to kintsugi AND demo until end of Sunday 14 Sep — and "everything possible" means what has MERGED
+## Deploy freely to kintsugi AND demo until end of Sunday 13 Sep — and "everything possible" means what has MERGED
 `2026-09-10_deploy-both-boxes-grant-expires-sunday.md` · preference · 2026-09-10 · status: live · tier: W
 
 (no rules-shaped section — file included WHOLE)
 
-# Deploy freely to kintsugi AND demo until end of Sunday 14 Sep — and "everything possible" means what has MERGED
+# Deploy freely to kintsugi AND demo until end of Sunday 13 Sep — and "everything possible" means what has MERGED
 
 **His words, verbatim (email, 2026-09-10 15:24):**
 > *"Ruling given. Please deploy everything possible to kintsugi. Also deploy everything possible to
@@ -4991,7 +5023,7 @@ signature class and every demo action stopped for him.
    mention it.**
 3. **It EXPIRES.** Recorded in [[../tasks/EXPIRING-GRANTS]] with a date, because a time-scoped
    instruction with no expiry mechanism becomes a permanent change nobody decided to make.
-   ⚠ *"End of the week"* read as **end of Sunday 14 September**, flagged to him as an assumption.
+   ⚠ *"End of the week"* read as **end of Sunday 13 September**, flagged to him as an assumption. **CORRECTED 2026-09-10 15:4x: this file said "Sunday 14 Sep" in its headline, its `expires:` field and its body. 14 Sep 2026 is a MONDAY; Sunday is the 13th — which is the date he was actually told in chat. A weekday NAME and a date are two separate claims and they were never checked against each other, so the grant read one day longer than anyone gave it.**
 
 ## What it does NOT change
 

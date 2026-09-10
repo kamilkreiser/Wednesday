@@ -6,11 +6,11 @@ permanent change nobody decided to make. Every seat reads this at boot; an entry
 
 | grant | given | EXPIRES | scope, exactly |
 |---|---|---|---|
-| **Deploy freely to kintsugi AND demo** | Kam, email 2026-09-10 15:24 — *"Please deploy everything possible to kintsugi. Also deploy everything possible to demo. This rule stands until the end of the week."* | **END OF SUNDAY 2026-09-14 AEST** | Deploy MERGED work to both boxes. **"Everything possible" = what has merged to develop** — it does NOT authorise merging the 66 unapproved PRs, bypassing a gate, or `--no-verify`. Kintsugi first (his 13:22 rule). Production is untouched and does not exist. |
+| **Deploy freely to kintsugi AND demo** | Kam, email 2026-09-10 15:24 — *"Please deploy everything possible to kintsugi. Also deploy everything possible to demo. This rule stands until the end of the week."* | **END OF SUNDAY 2026-09-13 AEST** | Deploy MERGED work to both boxes. **"Everything possible" = what has merged to develop** — it does NOT authorise merging the 66 unapproved PRs, bypassing a gate, or `--no-verify`. Kintsugi first (his 13:22 rule). Production is untouched and does not exist. |
 
 ⚠ **ASSUMPTION ON THE DATE, FLAGGED TO KAM 2026-09-10 15:2x AND NOT YET CORRECTED:** "end of the
-week" read as **end of Sunday 14 September**. If he meant Friday 12th, this grant died earlier than
-this file says. **Ask before relying on it on the 13th or 14th.**
+week" read as **end of Sunday 13 September** (Sunday IS the 13th; 2026-09-14 is a Monday — this file said "Sunday 14 Sep" until 15:4x on 09-10, granting a day nobody gave). If he meant Friday 11th or 12th, this grant died earlier than
+this file says. **Ask before relying on it on the 12th or 13th.**
 
 ## When a grant expires
 
