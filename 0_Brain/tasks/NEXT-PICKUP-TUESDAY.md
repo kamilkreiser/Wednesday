@@ -58,6 +58,8 @@ mirrored to the panel).
 7. **Agent stdout is now gitignored** (`briefs_staged/*.out`) and the two previously-TRACKED plain `.out` files are untracked (`1a7c5aed`, copies quarantined). **A `.gitignore` rule cannot exclude what git already tracks** — check `git ls-files`, not just the rule.
 8. **`board_count.sh` cannot page Jira.** For counts use `POST /rest/api/3/search/approximate-count` — and **a nonexistent project key also returns `{"count":0}`**, so discriminate with `GET /rest/api/3/project/<KEY>` (404 = absent) before believing a zero.
 
+9. 🔴 **BEFORE CHANGING A RECENTLY-REPAIRED FILE, `git log -p` THE REPAIR — do not read the file as it stands.** **The constraint a fix introduces is invisible in the final text; the diff is the only place it is stated** (Wednesday's formulation, 2026-09-10). Reading `wake_watch.sh` today would not tell you that seat-specific hardcoded paths are exactly what was removed from it this morning (`a66e3793`) — and she had read it, then proposed a `~/.claude/...` path that would have re-introduced the family. **A remediated file is at its most fragile in the hours AFTER the fix**, because the repair consumes the attention that would have caught the next change, and **being the person who repaired it is not protection — it is what makes you confident enough to change it quickly.** This is the FILE-level twin of [[2026-09-08_a-new-rule-is-most-dangerous-just-after-adoption]]: same clock, different object.
+
 ## STANDING
 
 🔴 **Kam reads the STUDIO pane. Verify at ORIGIN, every time.**
