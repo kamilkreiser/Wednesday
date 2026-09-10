@@ -7,7 +7,7 @@ status: live
 
 # Family-weight index — what a recurrence is measured against
 
-Generated from **821 ledger rows** (804 = 97% cite a lesson file) across `_ledger.md` + `_ledger_archive.md`. **135 families.**
+Generated from **822 ledger rows** (805 = 97% cite a lesson file) across `_ledger.md` + `_ledger_archive.md`. **136 families.**
 
 **`rows` is the hard count** — how many ledger rows cite this lesson; that is the number to quote when assigning a weight. **`max_w` is soft** — the largest `w=N` in any row citing it, and a row citing several lessons attributes its weight to each, so it can overstate. **Sorted by `rows`, not `max_w`** — five families share a max_w of 144 for that reason. Use `max_w` only to ask *"is this family high?"*, then `grep` the archive for the prose.
 
@@ -136,6 +136,7 @@ Generated from **821 ledger rows** (804 = 97% cite a lesson file) across `_ledge
 | [[2026-09-10_a-single-file-bind-mount-binds-the-inode]] | 1 | 1 | 1 | 2026-09-10 |
 | [[2026-09-10_a-sync-conflict-copy-is-an-input-to-every-glob]] | 1 | 1 | 1 | 2026-09-10 |
 | [[2026-09-10_a-weekday-and-a-date-are-two-claims]] | 1 | 1 | 1 | 2026-09-10 |
+| [[2026-09-10_surprising-measurements-are-selector-errors]] | 1 | 1 | 1 | 2026-09-10 |
 | [[../identity/persona]] ⚠ NO FILE | 1 | 0 | — | 2026-08-28 |
 | [[2026-08-03_contemplation-the-cockroach]] | 1 | 0 | — | 2026-08-03 |
 | [[2026-08-12_morning-ticket-sweep-autostart]] | 1 | 0 | — | 2026-09-02 |

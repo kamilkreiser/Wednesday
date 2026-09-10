@@ -7,7 +7,7 @@ status: live
 
 # Boot digest BY TIER — W whole, M rules-only, every project case a handle
 
-Generated 2026-09-10 15:56 from 147 lesson files (748,762 B). M 32 · MIXED 5 · W 110. 28 project CASE sections inside MIXED files are reduced to one line each: the heading and the path to read it at. W blocks are exactly what the default digest carries; M blocks drop the section index and keep the rules; a P file is a single handle. The CASES behind every rule live only in the lesson files — open one the moment its rule fires.
+Generated 2026-09-10 16:46 from 148 lesson files (752,045 B). M 32 · MIXED 5 · W 111. 28 project CASE sections inside MIXED files are reduced to one line each: the heading and the path to read it at. W blocks are exactly what the default digest carries; M blocks drop the section index and keep the rules; a P file is a single handle. The CASES behind every rule live only in the lesson files — open one the moment its rule fires.
 
 ## The T9 SSD is the master — Wednesday must be fully portable
 `2026-07-31_fully-portable-drive.md` · principle · 2026-07-31 · status: superseded — the "T9 is the master" half by [[2026-08-25_one-drive-devmaster-is-master]] (2026-08-25); the portability principle itself still lives · tier: W
@@ -5173,4 +5173,35 @@ match his instructions, and he has to work out which of us is confused.
    approvals to 1 would have walled in the very PR his other ruling said to merge. **A step is also
    a claim about what the OTHER steps leave possible** — read the whole set before handing over any
    of it.
+
+
+## When a measurement surprises you, the instrument is probably correct and POINTED AT THE WRONG THING — suspect the selector before the subject
+`2026-09-10_surprising-measurements-are-selector-errors.md` · correction · 2026-09-10 · status: live · tier: W
+
+**The lesson:** Three surprising measurements in one afternoon, all three a **selector** error, none
+of them a broken tool:
+
+sections (open the file for these): How to apply
+
+## How to apply
+
+1. **On any surprising measurement, ask "is this pointed at what I think it is?" BEFORE "is this
+   right?"** Print the selector's output — the filename, the field, the row count, the resolved path
+   — not just its result.
+2. **A `head -1`, a `[N]` index, a glob and a `$HOME` are all selectors.** So is a `first:`/`limit:`
+   ([[2026-08-15_a-cap-is-never-neutral]]) and a `last:N` on comments
+   ([[2026-09-07_a-pagination-argument-is-a-selector]]). Same family, and it is large.
+3. **Two cheap discriminators, and both beat re-reading the code:** a **positive control** (something
+   you KNOW must match — I used a row I had written that hour) or a **second independent
+   measurement** (Tuesday re-measured against a live session). Reach for one of these on reflex.
+4. **A selector that encodes a location is seat-specific.** `$HOME`, a hardcoded pane name, an inbox
+   address — verify on a seat that is not your own, or derive it, never assume it.
+5. **Corollary for reviewing others:** when an agent hands me a surprising figure, the useful question
+   is not "how did you compute it" but **"what did you compute it over, and how do you know that was
+   the whole set?"**
+
+Related: [[2026-08-15_a-cap-is-never-neutral]] ·
+[[2026-09-08_a-false-absence-is-usually-my-own-instrument]] ·
+[[2026-08-14_i-read-representations-they-read-sources]] ·
+[[2026-09-10_a-sync-conflict-copy-is-an-input-to-every-glob]]
 
