@@ -7,7 +7,7 @@ status: live
 
 # Boot digest BY TIER — W whole, M rules-only, every project case a handle
 
-Generated 2026-09-10 18:11 from 148 lesson files (760,182 B). M 32 · MIXED 5 · W 111. 28 project CASE sections inside MIXED files are reduced to one line each: the heading and the path to read it at. W blocks are exactly what the default digest carries; M blocks drop the section index and keep the rules; a P file is a single handle. The CASES behind every rule live only in the lesson files — open one the moment its rule fires.
+Generated 2026-09-10 18:56 from 148 lesson files (762,401 B). M 32 · MIXED 5 · W 111. 28 project CASE sections inside MIXED files are reduced to one line each: the heading and the path to read it at. W blocks are exactly what the default digest carries; M blocks drop the section index and keep the rules; a P file is a single handle. The CASES behind every rule live only in the lesson files — open one the moment its rule fires.
 
 ## The T9 SSD is the master — Wednesday must be fully portable
 `2026-07-31_fully-portable-drive.md` · principle · 2026-07-31 · status: superseded — the "T9 is the master" half by [[2026-08-25_one-drive-devmaster-is-master]] (2026-08-25); the portability principle itself still lives · tier: W
@@ -5194,9 +5194,9 @@ match his instructions, and he has to work out which of us is confused.
 ## When a measurement surprises you, the instrument is probably correct and POINTED AT THE WRONG THING — suspect the selector before the subject
 `2026-09-10_surprising-measurements-are-selector-errors.md` · correction · 2026-09-10 · status: live · tier: W
 
-**The lesson:** **FIVE** surprising measurements in one afternoon, across **three different agents**, every one a **selector** error and **not one of them a broken tool.** The first three:
+**The lesson:** **SIX** selector errors in one afternoon, across **three different agents**, every one a **selector** error and **not one of them a broken tool** — and **the sixth would have produced a GREEN result rather than a surprising one** (see the last section, which changes the trigger). The first three:
 
-sections (open the file for these): How to apply · EXTENSION, same day — FOUR instances across THREE agents, and a fourth kind of selector
+sections (open the file for these): How to apply · EXTENSION, same day — FOUR instances across THREE agents, and a fourth kind of selector · THE HIGHEST-CONSEQUENCE INSTANCE, same day — a selector error whose failure mode is a GREEN RESULT
 
 ## How to apply
 
