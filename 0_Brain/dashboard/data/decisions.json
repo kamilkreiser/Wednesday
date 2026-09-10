@@ -7616,5 +7616,43 @@
    "CARD secuura-ks1041-fix-shape-demo-exposed",
    "CARD secuura-ks1041-step1-demo-verify-now"
   ]
+ },
+ {
+  "id": "secuura-originate-internal-ingress-widened",
+  "client_project": "Secuura/Blockchain",
+  "title": "The demo hole is shut from OUTSIDE and open from INSIDE — 34 containers can forge connector identity to originate and get a 200. Step 2 is bigger than the card you ruled, and it needs a fresh seat",
+  "bluf": "OVERRIDE REASON, STATED AS THE MEASUREMENT. The gate will match `secuura-ks1041-fix-shape-demo-exposed` (ruled `both-sequenced` today at 10:32). That ruling stands and Step 1 is DELIVERED AND VERIFIED. This card exists because measuring Step 2's premise DISPROVED it: the card told you Step 2 would 'make the route's premise true instead of assumed', and the premise is already true at the gateway and false somewhere nobody had looked. WHAT IS MEASURED, with controls in both directions: probing from `secuura-verifier-frontend`, a container with no business reaching originate — direct to `originate:4000` with NO headers returns 401, and with a forged `x-user-role: connector` + `x-tenant-id` returns **200**. Through `api-gateway:8080` the SAME forged request returns 401. Both no-header cells are 401, so the difference is the headers and not the path; both gateway cells are 401, so the gateway's strip is doing exactly what its code says. Reachability was confirmed by probe rather than inferred: `originate:4000/health` 200, positive control `api-gateway:8080/health` 200 proving the tool works, discriminating control `zzz-no-such-service` no response proving a 200 means something. THE BOUNDARY, AS PRECISE AS THE FINDING — this is NOT externally reachable: `originate:4000` is not published to the host (control: `nginx-gateway` IS, at `0.0.0.0:6882->80/tcp`). It sits on one flat network, `dev_secuura-network`, `Internal: false`, with **34 containers**, every one of which can address it directly. So: shut from the internet, open to any peer container on the demo box. WHAT THIS BREAKS. The seat's own scope proposal, which it retracted within twenty minutes of writing it: it had said 'the header is not the vulnerability; the ungated path to it was' and told me explicitly NOT to touch `extractTenantContext`. That reasoning holds only for gateway traffic. On the direct path the same header is attacker-controlled, and `extractTenantContext` (`index.ts:230`) reads it UNCONDITIONALLY, before any auth. So the fix cannot be a per-route patch on the metering shim — the shim is one consumer of a trust that is unverified at the door. THE CORRECT SHAPE: originate establishes that a request came from the gateway before honouring ANY trust header — one early middleware. Bigger than the one-file change proposed, far smaller than the seven services that read these headers. KEPT SEPARATE, DELIBERATELY: the metering 200 is MEASURED. That the same door is open wider — including a cross-tenant read — is REASONED. Confirming it needs a valid JWT and a probe nobody has run, and the seat refused to run it without a fresh commission. NOTHING IS BUILT, no Step 2 branch exists, and the seat wrapped rather than start an auth-path change on a thin margin.",
+  "default_action": "HOLD. Step 1's fix stands and the route stays shut from outside. The internal bypass remains: any of 34 containers on the demo box can read tenant billing data without a credential. Nothing customer-facing is exposed — production does not exist, measured earlier today — and nothing degrades while this waits. The cost of silence is that a hardening fix sits undone on a box the team and prospects reach.",
+  "options": [
+   {
+    "key": "fresh-seat-now",
+    "label": "Launch a fresh Secuura seat now to build the gateway-provenance middleware (Recommended)",
+    "detail": "One early middleware in originate, behind the tier-1 QA gate, red-proofed both arms: a forged connector header must be REFUSED and a genuine gateway-vouched call must still SUCCEED. Recommended because the finding is fresh, the handover is complete, and a hardening fix with a measured shape is the cheapest it will ever be to build. Cost: a full seat against a 7-day allowance already at 93%."
+   },
+   {
+    "key": "after-renewal",
+    "label": "Hold it until the usage allowance renews (~3 days)",
+    "detail": "Spends nothing now. The internal bypass persists for three days on a box that is not externally reachable. Defensible precisely because the boundary is measured rather than hoped — but it is three days of a known open door."
+   },
+   {
+    "key": "measure-jwt-first",
+    "label": "Commission only the cross-tenant JWT probe first, then decide",
+    "detail": "Cheapest next step. Settles whether the reasoned half — a cross-tenant read — is real, which decides how urgent the middleware is. Costs a small seat rather than a full one. Choose this if you want the severity pinned before spending on the fix."
+   },
+   {
+    "key": "network-first",
+    "label": "Segment the network instead of changing code",
+    "detail": "Stop 34 containers sharing one flat network with a service that trusts headers. Arguably the more correct fix and it is infrastructure rather than code. Larger blast radius on a live demo, and nobody has scoped it — I am naming it as an option, not recommending it."
+   }
+  ],
+  "recommended": "fresh-seat-now",
+  "ts": "2026-09-10T12:26:52.251585+10:00",
+  "status": "open",
+  "ruled_choice": null,
+  "ruled_ts": null,
+  "prior_rulings_overridden": [
+   "2026-08-21 09:56",
+   "CARD secuura-originate-unauthenticated-cross-tenant-billing"
+  ]
  }
 ]
