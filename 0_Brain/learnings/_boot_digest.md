@@ -7,7 +7,7 @@ status: live
 
 # Boot digest — headline + rules of every lesson (open the file when it fires)
 
-Generated 2026-09-10 15:27 from 146 lesson files (746,687 B). Each block = the lesson's retrieval handle (H1), its frontmatter, the operative paragraph, its section index, and every RULES section verbatim. 7 files carry no rules-shaped section and are included whole. The CASES behind a rule live only in the file: open it the moment the rule fires, or when a diagnosis needs the evidence. `_ledger.md` is read whole beside this digest; `_ledger_archive.md` on demand.
+Generated 2026-09-10 16:46 from 148 lesson files (751,079 B). Each block = the lesson's retrieval handle (H1), its frontmatter, the operative paragraph, its section index, and every RULES section verbatim. 7 files carry no rules-shaped section and are included whole. The CASES behind a rule live only in the file: open it the moment the rule fires, or when a diagnosis needs the evidence. `_ledger.md` is read whole beside this digest; `_ledger_archive.md` on demand.
 
 ## The T9 SSD is the master — Wednesday must be fully portable
 `2026-07-31_fully-portable-drive.md` · principle · 2026-07-31 · status: superseded — the "T9 is the master" half by [[2026-08-25_one-drive-devmaster-is-master]] (2026-08-25); the portability principle itself still lives
@@ -3294,29 +3294,11 @@ The three hops stand as the shape. Their WEIGHT is now set by what the change to
 
 
 ## I am the COO of the boards — a ticket that needs no external input is executed, never listed
-`2026-09-02_coo-actionable-tickets-never-wait-for-kam (conflict_on_2026-09-04).md` · correction · 2026-09-02 · status: live
-
-**The operative case, so the headline matches it:** a project board holds open tickets that our agents can action without input from a client human (Stuart, Peter, HP) or a ruling from Kam. **Those tickets are my queue to drive, unprompted, until they are gone.** The Platform K report of 2026-09-02 put 129 such tickets in front of Kam, dozens assigned to him personally, and his reaction was the correction: they should not have been on any list — they should have been done.
-
-sections (open the file for these): REFINED the same evening — Kam, panel 19:31: "I was a little bit harsh on you earlier… some of them have been put to the back burner or just simply cannot be actioned yet. They remain there as tickets. Let's run through a catalogue after you've sorted things: should be actioned, escalated to me, or simply archived."
-
-**How to apply:**
-1. **Every active project keeps a STANDING QUEUE** = its category-1 tickets (no external input needed), ordered by priority then identifier, worked session after session under the 08-28 overnight grant until empty; each wrap names the next id; the successor session continues from it. A new QA ask or Kam ruling is INSERTED at its priority, it does not replace the queue.
-2. **Kam-assigned tickets are ours to execute** — reassign on start, cite this instruction in the first comment. A ticket that turns out to need external input is bounced back to me with the reason and moves to category 2; it is not deferred silently.
-3. **The categorisation is refreshed at every morning sweep** (the report's three-way split), and the morning board to Kam leads with the count of category-1 tickets still open and the number closed since yesterday — the metric he is holding me to.
-4. **Signature classes unchanged**: production, money, external comms, irreversible actions still pause; deploys still need a ruling; the QA gate still precedes every score. Proactive means the queue moves, not that the boundaries move.
-5. **Report the percentage he asked for at each refresh**: of the tickets assigned to Kam, the share that needs nobody outside Kam, me and the agent — and drive it to zero.
-
-## REFINED the same evening — Kam, panel 19:31: "I was a little bit harsh on you earlier… some of them have been put to the back burner or just simply cannot be actioned yet. They remain there as tickets. Let's run through a catalogue after you've sorted things: should be actioned, escalated to me, or simply archived."
-The COO stance stands. What changes is the SORTING instrument: "no external input needed" is a predicate about WHO, not WHEN. A ticket can need nobody outside us and still be back-burner (deliberately parked) or not-yet-possible (its precondition has not arrived). Those are not failures of execution and they do not belong on a "should have been done" list — they belong in a **catalogue** with a three-way disposition per ticket, run through WITH Kam:
-
-
-## I am the COO of the boards — a ticket that needs no external input is executed, never listed
 `2026-09-02_coo-actionable-tickets-never-wait-for-kam.md` · correction · 2026-09-02 · status: live
 
 **The operative case, so the headline matches it:** a project board holds open tickets that our agents can action without input from a client human (Stuart, Peter, HP) or a ruling from Kam. **Those tickets are my queue to drive, unprompted, until they are gone.** The Platform K report of 2026-09-02 put 129 such tickets in front of Kam, dozens assigned to him personally, and his reaction was the correction: they should not have been on any list — they should have been done.
 
-sections (open the file for these): REFINED the same evening — Kam, panel 19:31: "I was a little bit harsh on you earlier… some of them have been put to the back burner or just simply cannot be actioned yet. They remain there as tickets. Let's run through a catalogue after you've sorted things: should be actioned, escalated to me, or simply archived." · Extension 2026-09-03 10:53 — Kam: "aggregate / categorise tickets for Peter to review. He would prefer to review and test 3 big projects with sub issues than 30 issues" · Extension 2026-09-03 11:59 — Kam: "With regards to Secura, that is fantastic. Please adopt this as the process going forward." — review streams ARE the process · PROMOTED 2026-09-05 15:04 (w=3) — the 10:53 block rule now lives in its own file, and the catalogue gains an ARCHIVE disposition · Extension 2026-09-06 09:42 — Kam, panel (verbatim): "Because Platform K is ours, every item must be assigned to us. Second, when creating tickets, ask the agent to categorize tickets. So rather than creating three or five separate tickets, create one larger ticket. I know this is not ideal for workflows, so make sure that it's done within a logical path."
+sections (open the file for these): REFINED the same evening — Kam, panel 19:31: "I was a little bit harsh on you earlier… some of them have been put to the back burner or just simply cannot be actioned yet. They remain there as tickets. Let's run through a catalogue after you've sorted things: should be actioned, escalated to me, or simply archived." · Extension 2026-09-03 10:53 — Kam: "aggregate / categorise tickets for Peter to review. He would prefer to review and test 3 big projects with sub issues than 30 issues" · Extension 2026-09-03 11:59 — Kam: "With regards to Secura, that is fantastic. Please adopt this as the process going forward." — review streams ARE the process · PROMOTED 2026-09-05 15:04 (w=3) — the 10:53 block rule now lives in its own file, and the catalogue gains an ARCHIVE disposition · Extension 2026-09-06 09:42 — assignment rule STANDS; the ticket-AGGREGATION half was WITHDRAWN BY KAM THREE MINUTES LATER and is NOT a rule. Kam, panel (verbatim): "Because Platform K is ours, every item must be assigned to us. Second, when creating tickets, ask the agent to categorize tickets. So rather than creating three or five separate tickets, create one larger ticket. I know this is not ideal for workflows, so make sure that it's done within a logical path."
 
 **How to apply:**
 1. **Every active project keeps a STANDING QUEUE** = its category-1 tickets (no external input needed), ordered by priority then identifier, worked session after session under the 08-28 overnight grant until empty; each wrap names the next id; the successor session continues from it. A new QA ask or Kam ruling is INSERTED at its priority, it does not replace the queue.
@@ -3334,7 +3316,7 @@ The catalogue's OUTPUT has a shape, and the shape is set by the human who review
 ## Extension 2026-09-03 11:59 — Kam: "With regards to Secura, that is fantastic. Please adopt this as the process going forward." — review streams ARE the process
 **The case.** The Secuura agent (s115) answered the 10:53 + 11:37 asks with four review streams covering all 97 active tickets (three for Peter, one for Stuart), each one Linear parent with sub-issues and ONE test pass built from the repo's own DEV-PROCESS with measured wall-clocks, cut by *what one test pass proves* rather than by topic, built as an overlay so the fine-grained catalogue survives. Kam approved it within three minutes of seeing the one-page document and named it the process.
 
-## Extension 2026-09-06 09:42 — Kam, panel (verbatim): "Because Platform K is ours, every item must be assigned to us. Second, when creating tickets, ask the agent to categorize tickets. So rather than creating three or five separate tickets, create one larger ticket. I know this is not ideal for workflows, so make sure that it's done within a logical path."
+## Extension 2026-09-06 09:42 — assignment rule STANDS; the ticket-AGGREGATION half was WITHDRAWN BY KAM THREE MINUTES LATER and is NOT a rule. Kam, panel (verbatim): "Because Platform K is ours, every item must be assigned to us. Second, when creating tickets, ask the agent to categorize tickets. So rather than creating three or five separate tickets, create one larger ticket. I know this is not ideal for workflows, so make sure that it's done within a logical path."
 **Two board rules for Platform K, from Kam's own words, recorded 09:44 the same session:**
 1. **Every NEW or UNASSIGNED Platform K ticket is assigned to OUR account** (the agent's board identity) — **CORRECTED by Kam 2026-09-06 10:24 (verbatim, on the ruled card `secuura-reassignment-exceptions`): *"once something is assigned to someone it belongs to them. the ruling was only to new or unassigned items."*** So: the unassigned (95 on 09-06) and every new filing go to us; Kam's own account IS the board account; **a ticket already on Peter or Stuart stays theirs** — it is moved only on Kam's word per ticket, never by a Wednesday predicate. (The 09:44 wording here originally read "never left on Kam, Peter or Stuart" and drove s138 to move 18 of the humans' tickets; reverted on his ruling — ledger 2026-09-06, classification-is-the-field w=2.) Rule 2 above (Kam-assigned tickets are ours) stands as written — his account is ours.
 2. **Ticket CREATION aggregates:** one larger ticket per logical path, its items as a checklist or sub-issues inside it — never three or five separate tickets for one line of work. "Within a logical path" is the limit: two unrelated defects do not share a ticket because they arrived together. This is the creation-side twin of [[2026-09-05_handovers-to-peter-and-stuart-are-test-blocks]] (the review-side rule), and it also bears on the Linear cap. The standing line goes into every Secuura brief's HOLDS.
@@ -5278,6 +5260,70 @@ sections (open the file for these): Why this is a lesson and not a docker footno
 [[2026-08-03_mental-model-not-source-of-truth]] · [[2026-09-06_green-local-proof-is-not-evidence-about-a-different-environment]].
 
 
+## An additive sync does not just fail to DELETE — it CREATES files, and every glob in the system treats them as input
+`2026-09-10_a-sync-conflict-copy-is-an-input-to-every-glob.md` · correction · 2026-09-10 · status: live
+
+**The lesson:** Unison resolves a conflict by keeping both sides and renaming one
+`<name> (conflict_on_<date>).<ext>`. That new file **sits in the same folder, with the same
+extension, and matches the same glob as the real one.** `boot_digest.py` globbed
+`learnings/2026-*.md` — and `2026-09-02_coo-actionable-tickets-never-wait-for-kam
+(conflict_on_2026-09-04).md` matched it.
+
+sections (open the file for these): How to apply
+
+## How to apply
+
+1. **Every glob over a synced folder gets an exclusion for `(conflict_on_`.** Treat a bare
+   `glob("2026-*.md")` on any brain folder as a defect on sight.
+2. **When a rule is withdrawn, superseded or narrowed, amend the HEADING**, not just the body —
+   in the same edit. Whatever the digest carries is what a cold seat will act on.
+3. **Never delete the conflict copies** ([[2026-08-31_never-delete-files]]) and do not rename them
+   either ([[2026-09-09_quarantine-by-rename-is-not-removal-on-an-additive-sync]] — the replica
+   keeps both names). **Exclude them from readers; leave them on disk.**
+4. **Diff a conflict copy before assuming it is junk.** This one was a strict subset, so nothing had
+   diverged — but that was measured, not hoped, and the answer decides whether it is noise or a lost
+   edit.
+5. This is the twin of the quarantine lesson: that one says a sync **cannot remove**; this one says a
+   sync **adds**, and additions arrive already matching your selectors.
+
+Related: [[2026-09-09_quarantine-by-rename-is-not-removal-on-an-additive-sync]] ·
+[[2026-08-13_headline-must-match-the-operative-case]] ·
+[[2026-09-09_a-guard-whose-exclusion-list-contains-its-own-subject]] ·
+[[2026-09-02_coo-actionable-tickets-never-wait-for-kam]]
+
+
+## A weekday NAME and a calendar DATE are two claims — an expiry written from one and dated from the other extends itself in the direction nobody checks
+`2026-09-10_a-weekday-and-a-date-are-two-claims.md` · correction · 2026-09-10 · status: live
+
+**The lesson:** Kam's grant was *"until the end of the week."* The previous seat read that as
+"end of Sunday", told him so in chat as **"end of Sunday the thirteenth"** — correct — and then
+wrote the artefacts as **"END OF SUNDAY 2026-09-14"**. 14 September 2026 is a **Monday**. The
+weekday was right, the date was wrong, and because both appeared in the same phrase the sentence
+*looked* self-checking. Nobody re-derived one from the other.
+
+sections (open the file for these): How to apply
+
+## How to apply
+
+1. **Never write a weekday and a date in the same claim without deriving one from the other.**
+   `date -j -f "%Y-%m-%d" "<date>" "+%A"` costs nothing and answers it. If they disagree, the
+   *weekday* is usually what Kam actually meant — it is what he said aloud.
+2. **On any expiry, prefer the derived date and record the derivation**, not the one that "looks
+   like the weekend".
+3. **When an expiry is wrong, check which direction.** Permissive errors on a signature class
+   (deploy, prod, money, external comms) are corrected immediately and reported; restrictive ones
+   can wait for Kam.
+4. **A wrong fact in a HEADLINE is already everywhere.** Fix the source file, then regenerate BOTH
+   digests and grep every artefact for the old value — the correction note will still match, so
+   read the hits rather than counting them.
+5. This is the operative half of [[2026-09-07_read-the-clock-at-boot]]: reading the clock tells you
+   *today*; it does not check the arithmetic on a date someone else wrote down.
+
+Related: [[2026-09-10_deploy-both-boxes-grant-expires-sunday]] ·
+[[2026-09-06_a-scoped-override-carries-its-own-expiry]] ·
+[[2026-09-07_read-the-clock-at-boot]]
+
+
 ## Coordinate with Tuesday BEFORE taking a task — two coordinators on shared tooling will both fix the same thing unless one of them claims it first
 `2026-09-10_claim-a-task-with-tuesday-before-starting-it.md` · preference · 2026-09-10 · status: live
 
@@ -5323,12 +5369,12 @@ principal.
 typed, not about who owns the work).
 
 
-## Deploy freely to kintsugi AND demo until end of Sunday 14 Sep — and "everything possible" means what has MERGED
+## Deploy freely to kintsugi AND demo until end of Sunday 13 Sep — and "everything possible" means what has MERGED
 `2026-09-10_deploy-both-boxes-grant-expires-sunday.md` · preference · 2026-09-10 · status: live
 
 (no rules-shaped section — file included WHOLE)
 
-# Deploy freely to kintsugi AND demo until end of Sunday 14 Sep — and "everything possible" means what has MERGED
+# Deploy freely to kintsugi AND demo until end of Sunday 13 Sep — and "everything possible" means what has MERGED
 
 **His words, verbatim (email, 2026-09-10 15:24):**
 > *"Ruling given. Please deploy everything possible to kintsugi. Also deploy everything possible to
@@ -5348,7 +5394,7 @@ signature class and every demo action stopped for him.
    mention it.**
 3. **It EXPIRES.** Recorded in [[../tasks/EXPIRING-GRANTS]] with a date, because a time-scoped
    instruction with no expiry mechanism becomes a permanent change nobody decided to make.
-   ⚠ *"End of the week"* read as **end of Sunday 14 September**, flagged to him as an assumption.
+   ⚠ *"End of the week"* read as **end of Sunday 13 September**, flagged to him as an assumption. **CORRECTED 2026-09-10 15:4x: this file said "Sunday 14 Sep" in its headline, its `expires:` field and its body. 14 Sep 2026 is a MONDAY; Sunday is the 13th — which is the date he was actually told in chat. A weekday NAME and a date are two separate claims and they were never checked against each other, so the grant read one day longer than anyone gave it.**
 
 ## What it does NOT change
 
@@ -5484,4 +5530,35 @@ match his instructions, and he has to work out which of us is confused.
    approvals to 1 would have walled in the very PR his other ruling said to merge. **A step is also
    a claim about what the OTHER steps leave possible** — read the whole set before handing over any
    of it.
+
+
+## When a measurement surprises you, the instrument is probably correct and POINTED AT THE WRONG THING — suspect the selector before the subject
+`2026-09-10_surprising-measurements-are-selector-errors.md` · correction · 2026-09-10 · status: live
+
+**The lesson:** Three surprising measurements in one afternoon, all three a **selector** error, none
+of them a broken tool:
+
+sections (open the file for these): How to apply
+
+## How to apply
+
+1. **On any surprising measurement, ask "is this pointed at what I think it is?" BEFORE "is this
+   right?"** Print the selector's output — the filename, the field, the row count, the resolved path
+   — not just its result.
+2. **A `head -1`, a `[N]` index, a glob and a `$HOME` are all selectors.** So is a `first:`/`limit:`
+   ([[2026-08-15_a-cap-is-never-neutral]]) and a `last:N` on comments
+   ([[2026-09-07_a-pagination-argument-is-a-selector]]). Same family, and it is large.
+3. **Two cheap discriminators, and both beat re-reading the code:** a **positive control** (something
+   you KNOW must match — I used a row I had written that hour) or a **second independent
+   measurement** (Tuesday re-measured against a live session). Reach for one of these on reflex.
+4. **A selector that encodes a location is seat-specific.** `$HOME`, a hardcoded pane name, an inbox
+   address — verify on a seat that is not your own, or derive it, never assume it.
+5. **Corollary for reviewing others:** when an agent hands me a surprising figure, the useful question
+   is not "how did you compute it" but **"what did you compute it over, and how do you know that was
+   the whole set?"**
+
+Related: [[2026-08-15_a-cap-is-never-neutral]] ·
+[[2026-09-08_a-false-absence-is-usually-my-own-instrument]] ·
+[[2026-08-14_i-read-representations-they-read-sources]] ·
+[[2026-09-10_a-sync-conflict-copy-is-an-input-to-every-glob]]
 

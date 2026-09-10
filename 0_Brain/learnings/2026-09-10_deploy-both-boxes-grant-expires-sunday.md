@@ -3,11 +3,11 @@ date: 2026-09-10
 type: preference
 source: Kam, email 2026-09-10 15:24
 status: live
-expires: 2026-09-14
+expires: 2026-09-13
 tier: W
 ---
 
-# Deploy freely to kintsugi AND demo until end of Sunday 14 Sep — and "everything possible" means what has MERGED
+# Deploy freely to kintsugi AND demo until end of Sunday 13 Sep — and "everything possible" means what has MERGED
 
 **His words, verbatim (email, 2026-09-10 15:24):**
 > *"Ruling given. Please deploy everything possible to kintsugi. Also deploy everything possible to
@@ -27,7 +27,7 @@ signature class and every demo action stopped for him.
    mention it.**
 3. **It EXPIRES.** Recorded in [[../tasks/EXPIRING-GRANTS]] with a date, because a time-scoped
    instruction with no expiry mechanism becomes a permanent change nobody decided to make.
-   ⚠ *"End of the week"* read as **end of Sunday 14 September**, flagged to him as an assumption.
+   ⚠ *"End of the week"* read as **end of Sunday 13 September**, flagged to him as an assumption. **CORRECTED 2026-09-10 15:4x: this file said "Sunday 14 Sep" in its headline, its `expires:` field and its body. 14 Sep 2026 is a MONDAY; Sunday is the 13th — which is the date he was actually told in chat. A weekday NAME and a date are two separate claims and they were never checked against each other, so the grant read one day longer than anyone gave it.**
 
 ## What it does NOT change
 
