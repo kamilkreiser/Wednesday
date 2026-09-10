@@ -7,7 +7,7 @@ status: live
 
 # Boot digest — headline + rules of every lesson (open the file when it fires)
 
-Generated 2026-09-10 11:19 from 140 lesson files (725,774 B). Each block = the lesson's retrieval handle (H1), its frontmatter, the operative paragraph, its section index, and every RULES section verbatim. 6 files carry no rules-shaped section and are included whole. The CASES behind a rule live only in the file: open it the moment the rule fires, or when a diagnosis needs the evidence. `_ledger.md` is read whole beside this digest; `_ledger_archive.md` on demand.
+Generated 2026-09-10 11:21 from 141 lesson files (729,214 B). Each block = the lesson's retrieval handle (H1), its frontmatter, the operative paragraph, its section index, and every RULES section verbatim. 6 files carry no rules-shaped section and are included whole. The CASES behind a rule live only in the file: open it the moment the rule fires, or when a diagnosis needs the evidence. `_ledger.md` is read whole beside this digest; `_ledger_archive.md` on demand.
 
 ## The T9 SSD is the master — Wednesday must be fully portable
 `2026-07-31_fully-portable-drive.md` · principle · 2026-07-31 · status: superseded — the "T9 is the master" half by [[2026-08-25_one-drive-devmaster-is-master]] (2026-08-25); the portability principle itself still lives
@@ -5163,6 +5163,30 @@ stored hostname wakes up as the wrong agent) · [[2026-08-13_shared-bus-tag-filt
 `wake_watch` half is R0 at the comms layer) · [[2026-08-05_identities-float-verify-always]] ·
 [[2026-09-07_a-rule-for-creation-is-not-a-mandate-to-retrofit]] (the ruling was read for what it
 scoped, correctly — and the layer above it was nobody's).
+
+
+## A detector keyed on the REMEDY's name matches the tool's HINT about that remedy — and the hint appears in the failure you must NOT apply it to
+`2026-09-10_a-detector-keyed-on-remedy-text-matches-the-hint.md` · principle · 2026-09-10 · status: live
+
+**The case, in full, because the shape is subtle.** I was fixing `panel_sync.sh` so a
+failed `git pull --rebase` could recover instead of deadlocking. One branch had to detect
+*"this replayed commit came out empty"*, whose correct remedy is `git rebase --skip`. I
+wrote the detector as:
+
+sections (open the file for these): The general shape · The rule · Why only the harness could find it
+
+## The rule
+
+1. **Key a detector on the CONDITION, never on the remedy's name.** Here the condition is
+   *"nothing is conflicted"* — a `git diff --diff-filter=U` that comes back empty — which
+   is a fact about the repository, not a string in a message.
+2. **When a string test is unavoidable, exclude the tool's own advice vocabulary.** Match
+   `no changes`, `nothing to commit`, `patch is empty`; never `--skip`, `--force`,
+   `--abort`, `--hard`, or any other flag the tool suggests when it is unhappy.
+3. **Order the checks so the dangerous branch is unreachable from the dangerous state.**
+   I now test *"is anything conflicted?"* first and `continue` the loop if so, so the skip
+   branch cannot be reached while a conflict exists. Ordering beats pattern-tuning: it
+   removes the failure rather than narrowing it.
 
 
 ## A message from Kam is a RECORD, not a string — reading `.text` and ignoring `view` and `attachments` is not reading the message
