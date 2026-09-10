@@ -7,7 +7,7 @@ status: live
 supersede: replace this file wholesale at the next pickup; do not append
 ---
 
-# NEXT PICKUP — 2026-09-11 ~08:4x. THREE SECUURA SEATS RUNNING. KAM AWAKE; SAID "Great job." AT 08:06.
+# NEXT PICKUP — 2026-09-11 ~09:1x (seat rotating at ~80%). ONE SECUURA SEAT (s176) + THE #951 ROUND-2 GATE RUNNING. KAM AWAKE; SAID "Great job." AT 08:06.
 
 > Narrative: `0_Brain/daily/2026-09-11.md`. **Measure before acting on any line here.**
 
