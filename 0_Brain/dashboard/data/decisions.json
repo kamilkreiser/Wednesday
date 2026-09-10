@@ -7140,5 +7140,92 @@
    }
   ],
   "amended_ts": "2026-09-10T09:52:18.160147+10:00"
+ },
+ {
+  "id": "secuura-ks1041-fix-shape-demo-exposed",
+  "client_project": "Secuura/Blockchain",
+  "title": "The demo box IS exposed — a credential-free read returns real billing data. Which fix shape? (you ruled the PROBE; this is the FIX you kept)",
+  "bluf": "OVERRIDE REASON, STATED AS THE MEASUREMENT. The gate will match secuura-originate-unauthenticated-cross-tenant-billing, which you ruled 'probe-then-rule' at 09:18 today. THAT RULING IS DISCHARGED: the probe ran and its result is below. Your own chosen option says 'then rule the fix' — this card IS that second half, and no ruling of yours covers the fix shape. THE RESULT, measured by the Secuura seat (s166), not by Wednesday, which holds no Secuura identity. On the live demo host secuura02-demo: a GET to /originate/api/metering/usage with two ordinary headers and NO credential returns HTTP 200 and real billing-shaped data (tenant id, date range, per-event-type counts, ADA and USD totals, populated). The SAME URL with no headers returns 401 — that control is what makes the 200 mean the header bypass rather than a route that answers everyone. SCOPE HELD EXACTLY: one request, one control, one tenant id (the route's own default), no enumeration, read-only, and NO VALUES retained anywhere — shape only. PRODUCTION IS NOT EXPOSED, AND THAT IS MEASURED RATHER THAN ASSUMED: the production hostname does not resolve, `az vm list` under the Founders Hub subscription shows only the demo VM and the kintsugi dev VM (plus two deallocated Platform-S boxes), and nginx-production.conf is mounted only by a compose file deployed nowhere. A positive reachability control on demo (HTTP 200, 0.22s) proves the instrument works. SO: nothing customer-facing is exposed today; the demo box, which the team and prospects reach, is. KS-741 is HELD behind this because it shares the root cause — ruling one shape while the other is unruled picks the architecture by accident.",
+  "default_action": "HOLD. Nothing is changed on demo, the exposure stays reachable, KS-741 stays held, and the seat continues on unrelated tickets. Nobody outside Kam, Wednesday and the seat is told anything — disclosure to Peter or Stuart is Kam's signature class and is NOT part of any option here.",
+  "options": [
+   {
+    "key": "both-sequenced",
+    "label": "Both, in order: drop the /originate/ nginx route FIRST, then fix the header trust behind the QA gate",
+    "detail": "Wednesday's recommendation. The route drop closes the exposure today with the smallest blast radius; the header fix then makes the route's own premise true instead of assumed. Sequenced rather than done together because the gateway LEGITIMATELY sets those headers and originate reads them in three places — a blanket strip broke x-tenant-override silently for two weeks once before. HONEST LIMIT ON THIS RECOMMENDATION: Wednesday has NOT read the code. The sequencing is a judgement about risk, not a claim about what either change does. The seat has read it."
+   },
+   {
+    "key": "route-only",
+    "label": "Drop the /originate/ route from nginx and stop there",
+    "detail": "Closes the exposure today, smallest change, no gateway risk. Leaves the underlying premise — that a bare header is an identity — untouched, so the next route mounted the same way reopens it."
+   },
+   {
+    "key": "headers-only",
+    "label": "Fix the header trust in originate's middleware and leave the route mounted",
+    "detail": "Fixes the real defect rather than the symptom, and covers routes nobody has thought of yet. Larger change, needs a tier-1 QA pass, and carries the outage risk named above."
+   },
+   {
+    "key": "hold",
+    "label": "Hold until you have read the code yourself",
+    "detail": "The exposure persists on demo while you do. It is demo, not production, and nothing customer-facing is reachable — so this is a defensible choice, not a reckless one."
+   }
+  ],
+  "recommended": "both-sequenced",
+  "ts": "2026-09-10T10:02:16.835611+10:00",
+  "status": "open",
+  "ruled_choice": null,
+  "ruled_ts": null,
+  "prior_rulings_overridden": [
+   "2026-09-10 09:00",
+   "2026-09-10 09:17",
+   "CARD secuura-ks697-demo-probe",
+   "CARD secuura-ks695-ask3-shape-stuart",
+   "CARD secuura-ks695-ask3-shape-ab",
+   "CARD secuura-demo-deploy-scope-2026-09-03",
+   "CARD secuura-demo-service-persona-switch-2026-09-03",
+   "CARD secuura-demo-service-crash-loop",
+   "CARD secuura-demo-stop-needs-kams-own-word",
+   "CARD secuura-demo-admin-image-rebuild-2026-09-05",
+   "CARD secuura-demo-vm-prune",
+   "CARD secuura-demo-kam-admin-default-password",
+   "CARD secuura-f5-demo-exposure-probe",
+   "CARD secuura-f5-demo-interim-mitigation",
+   "CARD secuura-demo-admin-transcripts",
+   "CARD secuura-demo-admin-mfa",
+   "CARD secuura-demo-row-060-remediation",
+   "CARD secuura-ks968-demo-hash-probe"
+  ]
+ },
+ {
+  "id": "secuura-required-approvals-zero-after-the-untick",
+  "client_project": "Secuura/Blockchain",
+  "title": "Unticking the status checks removed the LAST technical brake — 44 PRs are one click from develop with zero approvals required. Raise it to 1, or leave it?",
+  "bluf": "OVERRIDE REASON, STATED AS THE MEASUREMENT. The gate will match secuura-develop-merge-frozen-branch-protection, ruled 'look' at 09:17 today. That ruling asked you to READ the page and you did — it is discharged, marked delivered, and the freeze is gone. THIS IS A DIFFERENT QUESTION THAT ONLY EXISTS BECAUSE OF WHAT YOU FOUND THERE, and no ruling of yours covers it. WEDNESDAY'S ERROR FIRST, because it is why this card exists: when Wednesday asked you to untick 'Require status checks to pass', it told you that you were giving up nothing you currently had. THAT WAS WRONG. The ruleset carries required_approving_review_count: 0. So the unsatisfiable status-check rule was, accidentally, the ONLY thing making 'no approval, no merge' true in machinery. Unticking it removed that. MEASURED by the Secuura seat after your change: develop-based PRs went from 55 of 56 blocked / 0 clean to 44 clean / 13 unstable / 2 blocked / 1 dirty of 60, with a discrimination control (the field returned four distinct values in one sweep) and the ruleset read directly — required_status_checks is gone and updated_at reads 09:23:41, matching your click to the minute. The two still blocked are Peter's own change requests, which is the system working. SO THE POSITION TODAY: 44 pull requests are one click from develop and nothing technical requires anyone's approval. Your own Platform K CLAUDE.md already says 'no approval, no merge' is a rule the team KEEPS rather than one GitHub enforces — that sentence is now true in a way it was not this morning. NOBODY IS MERGING. Wednesday has held the fleet and the seat reported rather than acted.",
+  "default_action": "Nothing changes. Required approvals stay at 0, the convention keeps doing the work, and nobody merges without Wednesday's GO and a QA pass — which are Wednesday's own gates, not GitHub's. Wednesday will re-raise this ONCE if anything merges without a review at head, and not otherwise.",
+  "options": [
+   {
+    "key": "raise-to-1",
+    "label": "Raise required approving reviews from 0 to 1 on the require-pr-gates ruleset",
+    "detail": "Wednesday's recommendation, and it is a WEAK one — stated as weak rather than dressed up. It restores in machinery the rule your team already keeps, and it is one field on the page you were on this morning. The reason it is weak: it changes how Peter and Stuart work and Wednesday has not asked them. It may also block the four PRs the seats have ready, which currently carry zero reviews at head. If you take it, the same page: https://github.com/Secuura/Distributed_Secuura/settings/rules/18499832"
+   },
+   {
+    "key": "leave-at-0",
+    "label": "Leave it at 0 — the convention holds it, as it has all along",
+    "detail": "Nothing changes and nothing is blocked. It relies on everyone continuing to decline the easy thing, which is what your CLAUDE.md already documents and what a self-merge already broke once (#731)."
+   },
+   {
+    "key": "ask-peter",
+    "label": "Ask Peter and Stuart first, then rule",
+    "detail": "It is their workflow. External comms are your signature class, so this option means Wednesday drafts the message and you send it. Slowest, and the exposure it guards against is not urgent."
+   }
+  ],
+  "recommended": "raise-to-1",
+  "ts": "2026-09-10T10:02:45.704690+10:00",
+  "status": "open",
+  "ruled_choice": null,
+  "ruled_ts": null,
+  "prior_rulings_overridden": [
+   "2026-08-21 13:58",
+   "CARD secuura-ks762-required-switch-2026-09-03"
+  ]
  }
 ]
