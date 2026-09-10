@@ -6,7 +6,7 @@ status: live
 tier: W
 ---
 
-# A weekday NAME and a calendar DATE are two claims — an expiry written from one and dated from the other extends itself in the direction nobody checks
+# A weekday NAME and a calendar DATE are two claims — ANY pair, not just an expiry. Derive one from the other or you will write a date that is not the day you mean
 
 **The lesson:** Kam's grant was *"until the end of the week."* The previous seat read that as
 "end of Sunday", told him so in chat as **"end of Sunday the thirteenth"** — correct — and then
@@ -43,3 +43,25 @@ error there is not one wrong file — it is the wrong fact delivered at every bo
 Related: [[2026-09-10_deploy-both-boxes-grant-expires-sunday]] ·
 [[2026-09-06_a-scoped-override-carries-its-own-expiry]] ·
 [[2026-09-07_read-the-clock-at-boot]]
+
+## RECURRENCE THE SAME DAY (w=2), FOUR HOURS AFTER THIS FILE WAS WRITTEN — and the diagnosis is the headline, not the discipline
+
+**What happened:** filing WED-147 on Kam's instruction to park a discussion *"until Monday"*, I wrote
+**due `2026-09-15` and "Monday 2026-09-15"** into the ticket. **15 Sep 2026 is a TUESDAY. Monday is
+the 14th.** Same defect as this morning's grant, same direction (later than meant), **four hours
+after writing this lesson.**
+
+**WHY IT DID NOT FIRE — and it is a retrieval failure, not a care failure.** The original headline
+and every line of "How to apply" were written about **an EXPIRY on a GRANT**. I was writing a **DUE
+DATE on a TICKET**. The situation did not match the handle, so the rule never came up — exactly the
+w=2 diagnosis this brain requires: *wrong file? too abstract? bad retrieval handle?* **Bad handle.**
+
+**The fix is in the rule's SCOPE, not in trying harder:** the trigger is **any weekday word beside
+any date**, in a ticket, a note, a mail, a commit message, a chat line — not just in an expiry. The
+headline now says so.
+
+**And the tell to watch for: I "knew" Monday was the 15th because Sunday-the-13th was in my head from
+the morning's correction, and 13 + 2 felt like Monday.** Deriving from a nearby date I had just
+handled is the same error as deriving from a nearby field — **a date I corrected an hour ago is not
+a calendar.** Run `date -j -f "%Y-%m-%d" "<date>" "+%A"` every time; it costs nothing and it is the
+only thing that has ever caught this.

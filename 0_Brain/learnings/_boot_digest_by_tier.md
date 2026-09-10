@@ -7,7 +7,7 @@ status: live
 
 # Boot digest BY TIER — W whole, M rules-only, every project case a handle
 
-Generated 2026-09-10 17:12 from 148 lesson files (753,793 B). M 32 · MIXED 5 · W 111. 28 project CASE sections inside MIXED files are reduced to one line each: the heading and the path to read it at. W blocks are exactly what the default digest carries; M blocks drop the section index and keep the rules; a P file is a single handle. The CASES behind every rule live only in the lesson files — open one the moment its rule fires.
+Generated 2026-09-10 18:11 from 148 lesson files (760,182 B). M 32 · MIXED 5 · W 111. 28 project CASE sections inside MIXED files are reduced to one line each: the heading and the path to read it at. W blocks are exactly what the default digest carries; M blocks drop the section index and keep the rules; a P file is a single handle. The CASES behind every rule live only in the lesson files — open one the moment its rule fires.
 
 ## The T9 SSD is the master — Wednesday must be fully portable
 `2026-07-31_fully-portable-drive.md` · principle · 2026-07-31 · status: superseded — the "T9 is the master" half by [[2026-08-25_one-drive-devmaster-is-master]] (2026-08-25); the portability principle itself still lives · tier: W
@@ -1477,6 +1477,11 @@ never noticed, because nothing told me and I never looked.
 develop** and prove byte-identity. **Base still carried Kam's real address AND his real name** — the
 redaction had happened in round 1 of that same PR — so *"restore it to develop"* meant *"undo the
 redaction"*. **The instruction written to make things safer would have re-published his identity.**
+
+## EXTENSION 2026-09-10 — the sibling clause: an enforcement you must CHOOSE TO CALL is not one either. **An optional mechanism is a rule with a script attached.**
+**This file has said "an enforcement you must ARM is not one" since 2026-08-09 and it is the
+brain's largest family (149 ledger rows). Today it failed in its own blind spot: the tool was
+built, armed, executable, documented — and simply not called.**
 
 
 ## A ritual nothing triggers is not a ritual — it is a habit, and habits skip
@@ -4946,7 +4951,7 @@ Related: [[2026-09-09_quarantine-by-rename-is-not-removal-on-an-additive-sync]] 
 [[2026-09-02_coo-actionable-tickets-never-wait-for-kam]]
 
 
-## A weekday NAME and a calendar DATE are two claims — an expiry written from one and dated from the other extends itself in the direction nobody checks
+## A weekday NAME and a calendar DATE are two claims — ANY pair, not just an expiry. Derive one from the other or you will write a date that is not the day you mean
 `2026-09-10_a-weekday-and-a-date-are-two-claims.md` · correction · 2026-09-10 · status: live · tier: W
 
 **The lesson:** Kam's grant was *"until the end of the week."* The previous seat read that as
@@ -4955,7 +4960,7 @@ wrote the artefacts as **"END OF SUNDAY 2026-09-14"**. 14 September 2026 is a **
 weekday was right, the date was wrong, and because both appeared in the same phrase the sentence
 *looked* self-checking. Nobody re-derived one from the other.
 
-sections (open the file for these): How to apply
+sections (open the file for these): How to apply · RECURRENCE THE SAME DAY (w=2), FOUR HOURS AFTER THIS FILE WAS WRITTEN — and the diagnosis is the headline, not the discipline
 
 ## How to apply
 
@@ -5189,10 +5194,9 @@ match his instructions, and he has to work out which of us is confused.
 ## When a measurement surprises you, the instrument is probably correct and POINTED AT THE WRONG THING — suspect the selector before the subject
 `2026-09-10_surprising-measurements-are-selector-errors.md` · correction · 2026-09-10 · status: live · tier: W
 
-**The lesson:** Three surprising measurements in one afternoon, all three a **selector** error, none
-of them a broken tool:
+**The lesson:** **FIVE** surprising measurements in one afternoon, across **three different agents**, every one a **selector** error and **not one of them a broken tool.** The first three:
 
-sections (open the file for these): How to apply
+sections (open the file for these): How to apply · EXTENSION, same day — FOUR instances across THREE agents, and a fourth kind of selector
 
 ## How to apply
 
@@ -5215,4 +5219,8 @@ Related: [[2026-08-15_a-cap-is-never-neutral]] ·
 [[2026-09-08_a-false-absence-is-usually-my-own-instrument]] ·
 [[2026-08-14_i-read-representations-they-read-sources]] ·
 [[2026-09-10_a-sync-conflict-copy-is-an-input-to-every-glob]]
+
+## EXTENSION, same day — FOUR instances across THREE agents, and a fourth kind of selector
+A fourth landed within the hour, from the Secuura seat, and it makes the family cross-fleet rather
+than mine:
 
