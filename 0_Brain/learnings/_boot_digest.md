@@ -7,7 +7,7 @@ status: live
 
 # Boot digest — headline + rules of every lesson (open the file when it fires)
 
-Generated 2026-09-10 18:11 from 148 lesson files (759,216 B). Each block = the lesson's retrieval handle (H1), its frontmatter, the operative paragraph, its section index, and every RULES section verbatim. 7 files carry no rules-shaped section and are included whole. The CASES behind a rule live only in the file: open it the moment the rule fires, or when a diagnosis needs the evidence. `_ledger.md` is read whole beside this digest; `_ledger_archive.md` on demand.
+Generated 2026-09-10 18:56 from 148 lesson files (761,435 B). Each block = the lesson's retrieval handle (H1), its frontmatter, the operative paragraph, its section index, and every RULES section verbatim. 7 files carry no rules-shaped section and are included whole. The CASES behind a rule live only in the file: open it the moment the rule fires, or when a diagnosis needs the evidence. `_ledger.md` is read whole beside this digest; `_ledger_archive.md` on demand.
 
 ## The T9 SSD is the master — Wednesday must be fully portable
 `2026-07-31_fully-portable-drive.md` · principle · 2026-07-31 · status: superseded — the "T9 is the master" half by [[2026-08-25_one-drive-devmaster-is-master]] (2026-08-25); the portability principle itself still lives
@@ -5551,9 +5551,9 @@ match his instructions, and he has to work out which of us is confused.
 ## When a measurement surprises you, the instrument is probably correct and POINTED AT THE WRONG THING — suspect the selector before the subject
 `2026-09-10_surprising-measurements-are-selector-errors.md` · correction · 2026-09-10 · status: live
 
-**The lesson:** **FIVE** surprising measurements in one afternoon, across **three different agents**, every one a **selector** error and **not one of them a broken tool.** The first three:
+**The lesson:** **SIX** selector errors in one afternoon, across **three different agents**, every one a **selector** error and **not one of them a broken tool** — and **the sixth would have produced a GREEN result rather than a surprising one** (see the last section, which changes the trigger). The first three:
 
-sections (open the file for these): How to apply · EXTENSION, same day — FOUR instances across THREE agents, and a fourth kind of selector
+sections (open the file for these): How to apply · EXTENSION, same day — FOUR instances across THREE agents, and a fourth kind of selector · THE HIGHEST-CONSEQUENCE INSTANCE, same day — a selector error whose failure mode is a GREEN RESULT
 
 ## How to apply
 

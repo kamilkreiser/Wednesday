@@ -8,7 +8,7 @@ tier: W
 
 # When a measurement surprises you, the instrument is probably correct and POINTED AT THE WRONG THING — suspect the selector before the subject
 
-**The lesson:** **FIVE** surprising measurements in one afternoon, across **three different agents**, every one a **selector** error and **not one of them a broken tool.** The first three:
+**The lesson:** **SIX** selector errors in one afternoon, across **three different agents**, every one a **selector** error and **not one of them a broken tool** — and **the sixth would have produced a GREEN result rather than a surprising one** (see the last section, which changes the trigger). The first three:
 
 1. **Column index.** Parsing the ledger by `line.split('|')[3]` reported **2% of rows carry a
    weight**. Row prose contains `|`, so field counts run **6 to 17** — I was reading a different
@@ -78,3 +78,37 @@ set.
 write a stop-file, **never prune**. *"That way 'will it fit' is answered by the run rather than by my
 arithmetic, and the failure mode is a clean halt rather than an exhausted disk."* **Where a
 prediction keeps being wrong, replace the prediction with a mechanism that cannot overrun.**
+
+## THE HIGHEST-CONSEQUENCE INSTANCE, same day — a selector error whose failure mode is a GREEN RESULT
+
+**Sixth instance, and the first where the wrong selector would have produced a satisfied receipt
+rather than a wrong number.** Deriving demo's rebuild set, the Secuura seat mapped changed paths to
+`services/<name>/`. **The migrations image's content comes from `migrations/`, not `services/`, so
+the migrations image was never in the rebuild list.**
+
+Demo's `dev-migrations:latest` was three days old and carried 044–047 **but not 048** — the one
+migration pending on that box.
+
+> **Had Phase 3 run, the migration runner would have printed `applied=N failed=0` having never seen
+> 048.** Green log, satisfied operator, and the single schema change the deploy existed to make
+> would simply not have happened — **with a receipt saying it had.**
+
+**Caught only because the seat verified the image's CONTENTS before running the step that consumes
+it** — with a control (8 files match `^04`, proving the probe can see the directory at all, so a
+zero for 048 is a real zero). It then named **its own derivation** as the cause rather than the
+environment.
+
+**What this adds to the rule:** the earlier five instances announced themselves as *surprising
+numbers*. **This one would not have surprised anybody.** A selector that omits an item does not
+produce a strange answer — it produces a **smaller world in which everything is consistent**, and
+every check run inside that world passes.
+
+**So the trigger cannot only be "when a measurement surprises you."** It is also:
+
+> **Before any step that CONSUMES a derived set, verify the set contains the thing the step exists
+> to act on.** Not "did the derivation run" — *"is the item I care about actually in it?"* One
+> named item, checked by hand, with a control proving the probe can see the population.
+
+This is where this family meets [[2026-08-07_a-check-that-cannot-fail]]: a check aimed at a set that
+never contained the subject is a check that cannot fail, and it is the same defect wearing the
+costume of a completed step.
