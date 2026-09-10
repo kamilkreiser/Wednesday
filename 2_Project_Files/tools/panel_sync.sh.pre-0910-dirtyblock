@@ -39,50 +39,6 @@ say(){ printf '%s %s\n' "$(date '+%Y-%m-%dT%H:%M:%S%z')" "$*" >> "$LOG"; }
 # path (its `0_Brain/learnings/_boot_digest*.md)` case) — the defect was that the
 # unattended path never learned them.
 DERIVED_RE='^(0_Brain/learnings/_boot_digest(_by_tier)?\.md|0_Brain/dashboard/data/.*\.json)$'
-# ── ADVANCE THE OTHER SEAT'S STREAM WITHOUT A REBASE ───────────────────────
-# Each seat is the SOLE writer of its own chat stream, so origin is authoritative
-# for the other one. Bringing it forward needs no rebase and touches nothing of
-# mine — which is why it is safe to do while my tree is dirty.
-#
-# TWO REFUSALS, both deliberate:
-#   * never touch MY OWN stream (that is the one file this seat writes)
-#   * never move a stream BACKWARDS — take origin's copy only when it is strictly
-#     ahead. A stream that shrank is a symptom, not something to propagate.
-advance_other_streams(){
-  local mine other f before after
-  case "${WED_AGENT:-wednesday}" in
-    tuesday) mine="chat_tuesday.json";   other="chat_wednesday.json" ;;
-    *)       mine="chat_wednesday.json"; other="chat_tuesday.json" ;;
-  esac
-  git fetch -q origin 2>/dev/null || { say "  advance: fetch failed, nothing taken"; return 0; }
-  f="0_Brain/dashboard/data/$other"
-  before=$(python3 -c "
-import json,sys
-try:
-    d=json.load(open('$ROOT/$f'))
-    print(len(d if isinstance(d,list) else d.get('messages',[])))
-except Exception: print(-1)
-" 2>/dev/null)
-  after=$(git show "origin/main:$f" 2>/dev/null | python3 -c "
-import json,sys
-try:
-    d=json.load(sys.stdin)
-    print(len(d if isinstance(d,list) else d.get('messages',[])))
-except Exception: print(-1)
-" 2>/dev/null)
-  case "$before$after" in *-1*) say "  advance: could not read both copies of $other; nothing taken"; return 0 ;; esac
-  if [ "$after" -le "$before" ]; then
-    say "  advance: origin $other ($after) is not ahead of local ($before); nothing taken"
-    return 0
-  fi
-  git checkout "origin/main" -- "$f" 2>/dev/null || { say "  advance: checkout of $other FAILED"; return 0; }
-  if python3 "$ROOT/2_Project_Files/tools/chat_streams.py" >/dev/null 2>&1; then
-    say "  advance: $other $before -> $after rows from origin, rendered log rebuilt (my own $mine untouched)"
-  else
-    say "  advance: $other taken ($before -> $after) but chat_streams.py FAILED — the rendered log may be stale"
-  fi
-}
-
 resolve_derived_or_abort(){
   git rev-parse --verify -q HEAD >/dev/null 2>&1 || { say "RECOVER: no HEAD, refusing"; return 1; }
   if [ ! -d .git/rebase-merge ] && [ ! -d .git/rebase-apply ] && [ ! -f .git/MERGE_HEAD ]; then
@@ -164,20 +120,7 @@ cycle(){
   # OUTSIDE that directory is real work in progress: skip, never stash.
   OTHER=$(git status --porcelain 2>/dev/null | grep -v ' 0_Brain/dashboard/data/' | grep -v '^?? 0_Brain/dashboard/data/')
   if [ -n "$OTHER" ]; then
-    # `wc -l` on a string with no trailing newline undercounts by one and printed
-    # "(0 paths)" while a path was plainly blocking — a log line that contradicts
-    # itself is worse than no log line.
-    N_OTHER=$(printf '%s\n' "$OTHER" | grep -c .)
-    say "SKIP rebase: dirty outside dashboard/data ($N_OTHER path(s)); no autostash by design"
-    # MEASURED 2026-09-10 12:11, found by the Datasec coordinator pushing back after I
-    # closed her question: ONE uncommitted file of mine — an audit document I had been
-    # editing since ~11:30 — blocked this sync for 42 MINUTES, and TEN of her messages
-    # never reached Kam's panel. The guard's intent is right (never pull into a
-    # half-finished tree) and its consequence was never costed: an ACTIVELY WORKING
-    # coordinator blocks the sync indefinitely, and actively working is the NORMAL state.
-    # So Kam's reading surface stops waiting on either of us finishing a piece of work.
-    advance_other_streams
-    return 0
+    say "SKIP dirty outside dashboard/data ($(printf '%s' "$OTHER" | wc -l | tr -d ' ') paths); no autostash by design"; return 0
   fi
   if [ -n "$(git status --porcelain -- 0_Brain/dashboard/data 2>/dev/null)" ]; then
     git add -A 0_Brain/dashboard/data >/dev/null 2>&1
