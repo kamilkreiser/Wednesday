@@ -7,7 +7,7 @@ status: live
 
 # Boot digest — headline + rules of every lesson (open the file when it fires)
 
-Generated 2026-09-10 22:11 from 149 lesson files (768,301 B). Each block = the lesson's retrieval handle (H1), its frontmatter, the operative paragraph, its section index, and every RULES section verbatim. 7 files carry no rules-shaped section and are included whole. The CASES behind a rule live only in the file: open it the moment the rule fires, or when a diagnosis needs the evidence. `_ledger.md` is read whole beside this digest; `_ledger_archive.md` on demand.
+Generated 2026-09-10 22:21 from 150 lesson files (773,029 B). Each block = the lesson's retrieval handle (H1), its frontmatter, the operative paragraph, its section index, and every RULES section verbatim. 7 files carry no rules-shaped section and are included whole. The CASES behind a rule live only in the file: open it the moment the rule fires, or when a diagnosis needs the evidence. `_ledger.md` is read whole beside this digest; `_ledger_archive.md` on demand.
 
 ## The T9 SSD is the master — Wednesday must be fully portable
 `2026-07-31_fully-portable-drive.md` · principle · 2026-07-31 · status: superseded — the "T9 is the master" half by [[2026-08-25_one-drive-devmaster-is-master]] (2026-08-25); the portability principle itself still lives
@@ -5364,6 +5364,35 @@ Related: [[2026-09-09_quarantine-by-rename-is-not-removal-on-an-additive-sync]] 
 [[2026-08-13_headline-must-match-the-operative-case]] ·
 [[2026-09-09_a-guard-whose-exclusion-list-contains-its-own-subject]] ·
 [[2026-09-02_coo-actionable-tickets-never-wait-for-kam]]
+
+
+## When a question has two candidate answers, ask whether the instrument can produce a THIRD — and the third is almost always "the measurement did not happen"
+`2026-09-10_a-two-answer-question-hides-a-third-state.md` · principle · 2026-09-10 · status: live
+
+**s171's formulation, adopted because it is better than mine:**
+
+sections (open the file for these): Six instances, one session (2026-09-10) · How to apply · Related
+
+## How to apply
+
+1. **Before running a two-way check, name the third state out loud.** *"What would this return if the
+   measurement simply did not happen?"* If that is indistinguishable from one of your two answers,
+   **the check is not yet a check.**
+2. **A control is the only thing that separates them.** Not a better query — a control. Positive
+   (something that MUST be found) and, where you can, discriminating (something that must NOT be).
+   **Run it before you want the answer**, because a control written after you have a result is
+   written to agree with it.
+3. **Ask the question at the altitude where the third state is visible.** Job-level hid a skipped
+   step. Line-count hid a file with no newlines. **If the altitude cannot express "did not happen",
+   go one level down.**
+4. **Enumerate rather than verify a list.** The fourth lockfile was found by `git ls-tree` for *all*
+   locks, not by checking the three the ticket named. **A list you were handed is a frame; the
+   universe is not obliged to fit it.**
+5. **Hardest and most valuable: this applies to questions you WRITE, not just ones you answer.** The
+   Playwright instance began as *my* instruction — *"establish whether it fails because of this
+   change, or was already failing on develop"* — written as though those were exhaustive. **A brief
+   that offers two options teaches the reader there are two.** Where the answer might be a third
+   thing, say so: *"or tell me it is neither."*
 
 
 ## A weekday NAME and a calendar DATE are two claims — ANY pair, not just an expiry. Derive one from the other or you will write a date that is not the day you mean

@@ -25,9 +25,44 @@ supersede: replace this file wholesale at the next pickup; do not append
 
 **Waiting on him, drafted not sent:** `5_Project_History/2026-09-10_peter-protocol/DRAFT-reply-to-peter.md`.
 
+## 🔴 FILE THESE FIRST — two real defects that belong to NO ticket
+
+Both found during the #896 review. **s171 correctly did not file them** — Peter's §2c pre-authorises
+ticket creation only for failures produced by a test run, and these came from reading. **Filing them
+is a decision, and it is the morning seat's first small job after the #951 gate.**
+
+1. **The KS-969 / KS-966 composition seam.** KS-969's `DEGRADED` message promises *"the suite keeps
+   its correctly-roled SEEDED accounts"*. Since **KS-966 site 8** that promise is **false for the
+   admin persona**, whose seeded password fallback is now `''`. Chain: no bootstrap admin → all
+   actors land OWNER → manifest not published → `getTestAdminPassword()` returns `''` → login
+   **HTTP 400** inside a fixture, three steps downstream. ⚠ **The pre-suite exits 0 on DEGRADED, so
+   nothing stops the run.** Two individually-correct tickets composing into a guaranteed failure that
+   surfaces nowhere near its cause. **Neither ticket owns the seam. Link both.**
+2. **The env-drift guard cannot see the directory that is breaking CI.** `env-example.test.ts:24,40`
+   scans `PACKAGE_ROOT/config` **only**. `BOOTSTRAP_ADMIN_PASSWORD` is read from
+   `fixtures/provision-actors.ts:155` — outside the scan — documented in no template and absent from
+   `Blockchain/Dev/docs/ENVIRONMENT-VARIABLES.md` (control: `API_BASE_URL`/`DATABASE_URL` return 2
+   hits there, so the instrument fires). **The one variable currently red-lining CI is the one the
+   drift guard structurally cannot see.** Widening the scan to `fixtures/` is small.
+
+## 🟡 FOUR DECISIONS OPEN ON KAM'S EXTRANET BOARD — open at s171's boot AND at its wrap
+
+**KS-721 · KS-662 · KYC image disposal · GitHub Actions billing.** Untouched by any seat tonight;
+flagged so they do not go a third day unseen. ⚠ **Do NOT `POST /api/seen` on that board** — Kam ruled
+2026-09-10 that agents must not clear his unread flags (`EXTRANET_ME=kam`).
+
 ## 🟠 THE MORNING FOLLOW-ON HE HAS NOT SEEN YET
 
 **The NAS partition is necessary and NOT sufficient.** Kam ruled `stop-partition-rerun` at 20:27 and it was executed (both ignores verified active: `!coding/datasec` = 0 against a **16,516** positive control). But the scan is still walking `node_modules` inside Secuura worktrees. **The 2026-09-04 note measured that exact cost: 28 SECONDS with `node_modules` ignored, against 2h23m without.** The profile does not ignore it. **`narrow-hard` was on his card as its own option and he chose otherwise — cutting what a BACKUP contains is his call, so this is a follow-on question, not an override.**
+
+## 🟢 #896 — REVIEWED, NO BLOCKERS. It needs a human's approval and nothing else from us.
+
+Both reds attribute away from it. **Zero suites required** — the other three are green on its exact
+head, and Playwright is determined to fail at auth setup with 0 of 11 tests executing while
+`BOOTSTRAP_ADMIN_PASSWORD` is unset. **Reply to Peter DRAFTED for Kam at
+`5_Project_History/2026-09-10_peter-protocol/DRAFT-reply-to-peter-896.md`.** ⚠ **It still has ZERO
+reviews** — the approval is Kam's click, and Peter's Schemathesis pre-merge box is unticked while its
+CI job is green (an untidy box, not a gap).
 
 ## 🔴 PR #951 — BUILT TONIGHT, AND IT IS **NOT** APPROVAL-READY. IT NEEDS AN INDEPENDENT GATE.
 
