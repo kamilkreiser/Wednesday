@@ -33,6 +33,13 @@ Never discards stderr. Never deletes anything. Paths derive from this file's loc
 """
 import os, re, sys, glob, datetime
 
+# The glob excludes Unison sync-conflict copies. `2026-*.md` MATCHED
+# "2026-09-02_coo-actionable-tickets-never-wait-for-kam (conflict_on_2026-09-04).md",
+# so BOTH digests served a stale duplicate of that lesson at every boot — a copy
+# predating six extensions, including Kam's 2026-09-06 09:45 WITHDRAWAL of the
+# ticket-aggregation rule. A seat could have applied a rule he had taken back.
+# The conflict files are NOT deleted (never delete; quarantine only) — just not read.
+
 HERE = os.path.dirname(os.path.abspath(__file__))
 PROJECT = os.path.abspath(os.path.join(HERE, "..", ".."))
 LEARN = os.path.join(PROJECT, "0_Brain", "learnings")
@@ -179,7 +186,8 @@ def tier_block(f, rel):
 
 
 def build_by_tier():
-    files = sorted(glob.glob(os.path.join(LEARN, "2026-*.md")))
+    files = sorted(f for f in glob.glob(os.path.join(LEARN, "2026-*.md"))
+                   if "(conflict_on_" not in os.path.basename(f))
     parts, untagged, counts, psec = [], [], {}, []
     src_bytes = 0
     for f in files:
@@ -221,7 +229,8 @@ def build_by_tier():
 
 
 def build():
-    files = sorted(glob.glob(os.path.join(LEARN, "2026-*.md")))
+    files = sorted(f for f in glob.glob(os.path.join(LEARN, "2026-*.md"))
+                   if "(conflict_on_" not in os.path.basename(f))
     parts = []
     stats = {"files": 0, "whole": 0, "src_bytes": 0, "whole_names": []}
     for f in files:
@@ -273,7 +282,8 @@ def check():
         print("CHECK FAIL: no digest at", OUT, file=sys.stderr); return 1
     digest = open(OUT, encoding="utf-8").read()
     dmtime = os.path.getmtime(OUT)
-    files = sorted(glob.glob(os.path.join(LEARN, "2026-*.md")))
+    files = sorted(f for f in glob.glob(os.path.join(LEARN, "2026-*.md"))
+                   if "(conflict_on_" not in os.path.basename(f))
     misses = 0; stale = []
     for f in files:
         fm, h1, op, headings, rules, text = parse(f)
