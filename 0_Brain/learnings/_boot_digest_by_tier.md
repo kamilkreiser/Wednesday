@@ -7,7 +7,7 @@ status: live
 
 # Boot digest BY TIER — W whole, M rules-only, every project case a handle
 
-Generated 2026-09-10 11:55 from 142 lesson files (734,151 B). M 32 · MIXED 5 · W 105. 28 project CASE sections inside MIXED files are reduced to one line each: the heading and the path to read it at. W blocks are exactly what the default digest carries; M blocks drop the section index and keep the rules; a P file is a single handle. The CASES behind every rule live only in the lesson files — open one the moment its rule fires.
+Generated 2026-09-10 12:11 from 143 lesson files (737,444 B). M 32 · MIXED 5 · W 106. 28 project CASE sections inside MIXED files are reduced to one line each: the heading and the path to read it at. W blocks are exactly what the default digest carries; M blocks drop the section index and keep the rules; a P file is a single handle. The CASES behind every rule live only in the lesson files — open one the moment its rule fires.
 
 ## The T9 SSD is the master — Wednesday must be fully portable
 `2026-07-31_fully-portable-drive.md` · principle · 2026-07-31 · status: superseded — the "T9 is the master" half by [[2026-08-25_one-drive-devmaster-is-master]] (2026-08-25); the portability principle itself still lives · tier: W
@@ -4895,6 +4895,51 @@ sections (open the file for these): Why this is a lesson and not a docker footno
 [[2026-08-11_a-check-that-cannot-fail-is-not-a-check]] ·
 [[2026-09-10_a-detector-keyed-on-remedy-text-matches-the-hint]] ·
 [[2026-08-03_mental-model-not-source-of-truth]] · [[2026-09-06_green-local-proof-is-not-evidence-about-a-different-environment]].
+
+
+## Coordinate with Tuesday BEFORE taking a task — two coordinators on shared tooling will both fix the same thing unless one of them claims it first
+`2026-09-10_claim-a-task-with-tuesday-before-starting-it.md` · preference · 2026-09-10 · status: live · tier: W
+
+**His words, verbatim (2026-09-10 12:06:32):**
+> *"When you take a task, always make sure you coordinate with Tuesday so we don't have
+> overlap between multiple agents working on the same thing."*
+
+sections (open the file for these): The case it comes out of · The rule · How to apply
+
+## The rule
+
+**Before starting anything that is not unambiguously mine alone, say so — and check whether
+she is already on it.** A one-line mail costs seconds; two agents rebuilding the same
+mechanism costs a morning, and worse, produces two confident contradictory answers to the
+principal.
+
+**"Not unambiguously mine alone" is broader than it sounds.** It includes:
+
+- **Shared tooling**, even when the file lives in my tree — `cockpit.html`, `chat.html`,
+  `panel_sync.sh`, the chat streams, the scheduler. She runs the same scripts on another
+  machine.
+- **Anything Kam raised in the OTHER seat's tab.** He types where he happens to be; that
+  says nothing about whose work it is. The tab is where he stood, not who owns it.
+- **Anything either of us has already given him an answer about.** A second answer from the
+  other coordinator is worse than no answer — he cannot tell which to act on.
+
+## How to apply
+
+1. **Claim it in one line before starting**, not after finishing. *"Taking the cockpit reply
+   filter — yours if you have already started."* The claim is cheap; the collision is not.
+2. **When she hands something over explicitly, that IS the coordination** — she wrote *"your
+   files, your call"* on the boot digests, and acting on it immediately was right. Do not
+   re-ask what has already been handed over.
+3. **When a problem surfaces in her tab but the code is mine, say both halves**: I am taking
+   the code, she keeps the conversation. Silence on either half is how two people answer the
+   same question.
+4. **If we have both already answered, correct it jointly and name who found what.** I told
+   Kam it was not the panel and it was; naming Tuesday as the one who found it is not
+   politeness, it is the record being accurate about where the answer came from.
+
+**Family:** [[2026-07-31_manage-dont-do]] · [[2026-08-13_shared-bus-tag-filter-or-leak]] ·
+[[2026-09-10_a-panel-message-is-a-record-not-a-string]] (the tab is data about where he
+typed, not about who owns the work).
 
 
 ## I endorse things I have not read — and the endorsement is what makes them binding
