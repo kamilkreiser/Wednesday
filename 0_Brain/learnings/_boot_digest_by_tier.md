@@ -7,7 +7,7 @@ status: live
 
 # Boot digest BY TIER — W whole, M rules-only, every project case a handle
 
-Generated 2026-09-10 18:07 from 148 lesson files (757,324 B). M 32 · MIXED 5 · W 111. 28 project CASE sections inside MIXED files are reduced to one line each: the heading and the path to read it at. W blocks are exactly what the default digest carries; M blocks drop the section index and keep the rules; a P file is a single handle. The CASES behind every rule live only in the lesson files — open one the moment its rule fires.
+Generated 2026-09-10 18:11 from 148 lesson files (760,182 B). M 32 · MIXED 5 · W 111. 28 project CASE sections inside MIXED files are reduced to one line each: the heading and the path to read it at. W blocks are exactly what the default digest carries; M blocks drop the section index and keep the rules; a P file is a single handle. The CASES behind every rule live only in the lesson files — open one the moment its rule fires.
 
 ## The T9 SSD is the master — Wednesday must be fully portable
 `2026-07-31_fully-portable-drive.md` · principle · 2026-07-31 · status: superseded — the "T9 is the master" half by [[2026-08-25_one-drive-devmaster-is-master]] (2026-08-25); the portability principle itself still lives · tier: W
@@ -1477,6 +1477,11 @@ never noticed, because nothing told me and I never looked.
 develop** and prove byte-identity. **Base still carried Kam's real address AND his real name** — the
 redaction had happened in round 1 of that same PR — so *"restore it to develop"* meant *"undo the
 redaction"*. **The instruction written to make things safer would have re-published his identity.**
+
+## EXTENSION 2026-09-10 — the sibling clause: an enforcement you must CHOOSE TO CALL is not one either. **An optional mechanism is a rule with a script attached.**
+**This file has said "an enforcement you must ARM is not one" since 2026-08-09 and it is the
+brain's largest family (149 ledger rows). Today it failed in its own blind spot: the tool was
+built, armed, executable, documented — and simply not called.**
 
 
 ## A ritual nothing triggers is not a ritual — it is a habit, and habits skip

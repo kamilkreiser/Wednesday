@@ -110,3 +110,45 @@ to remember anything."*
 **Also from the same day, the seat's own second keeper:** *"three wrong-path zeroes, each caught only
 because the control returned zero too. A zero from a wrong path is the check-that-cannot-fail wearing
 a shell's clothes."* ([[2026-08-07_a-check-that-cannot-fail]].)
+
+## EXTENSION 2026-09-10 — the sibling clause: an enforcement you must CHOOSE TO CALL is not one either. **An optional mechanism is a rule with a script attached.**
+
+**This file has said "an enforcement you must ARM is not one" since 2026-08-09 and it is the
+brain's largest family (149 ledger rows). Today it failed in its own blind spot: the tool was
+built, armed, executable, documented — and simply not called.**
+
+**The case, and the timing is what makes it evidence.** At 09:00 a Kam panel message carrying
+`view="tuesday"` was read as this seat's. **At 09:33 `2_Project_Files/tools/kam_msgs.sh` was BUILT
+to prevent exactly that**, reading `view` and filtering by seat; its own header records the 09:00
+failure as its reason. **At 17:00–18:02 it was bypassed** for an ad-hoc `json.load(...)` one-liner
+filtering on `role` alone. Result: **4 of Kam's 12 `view="tuesday"` messages that day read as this
+seat's**, two needlessly forwarded to the other coordinator, and **Kam told that his TABS were at
+fault — a false claim, which then went into WED-147.** He had addressed all 58 correctly.
+
+**Why the existing rule did not cover it:** "arm it" was satisfied. The tool existed and ran. The
+gap is that **invoking it remained a decision**, and a decision under time pressure loses to a
+reflex — the same way "never `cd`" lost to a reflex five times before it became a hook.
+
+## The discriminator, measured on one day
+
+On 2026-09-10 this seat was stopped **ten times** by enforcement, and **every single one was
+IN-PATH and unavoidable**: the `cd` PreToolUse hook (3), `send_brief.sh`'s provenance/scope gates
+(4), `decision_queue.sh`'s prior-rulings gate (3). **Zero of those required remembering anything.**
+The one mechanism that had to be *chosen* — `kam_msgs.sh` — was the one that failed, on the day it
+was built.
+
+> **Ask of any new mechanism: can I complete the action WITHOUT it?**
+> If yes, it is a rule. Rules lose to reflexes. Move it into the path — a hook, a gate, a refusal —
+> or accept that it will work only while attention is cheap.
+
+**Fixed the same hour, in the path:** `hooks/pretooluse_seat_scoped_chat.sh` REFUSES any Bash call
+touching `chat_log.json` / `chat_kam.json` that never mentions `view`, and names the tool to use.
+Red-proofed on six arms before arming — **and the first version's allow-test was itself a selector
+bug** (`['\"]view['\"]` missed `d.get(\"view\")`, because the escaped quotes put a backslash
+between the quote and the word), **caught by exercising it rather than reading it**. The allow test
+is now deliberately generous: **a gate with false positives gets routed around**, which is how this
+family began.
+
+Related: [[2026-09-10_surprising-measurements-are-selector-errors]] ·
+[[2026-09-10_a-panel-message-is-a-record-not-a-string]] ·
+[[2026-08-06_exercise-mechanisms-before-arming]]

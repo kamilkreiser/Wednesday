@@ -7,7 +7,7 @@ status: live
 
 # Boot digest — headline + rules of every lesson (open the file when it fires)
 
-Generated 2026-09-10 18:07 from 148 lesson files (756,358 B). Each block = the lesson's retrieval handle (H1), its frontmatter, the operative paragraph, its section index, and every RULES section verbatim. 7 files carry no rules-shaped section and are included whole. The CASES behind a rule live only in the file: open it the moment the rule fires, or when a diagnosis needs the evidence. `_ledger.md` is read whole beside this digest; `_ledger_archive.md` on demand.
+Generated 2026-09-10 18:11 from 148 lesson files (759,216 B). Each block = the lesson's retrieval handle (H1), its frontmatter, the operative paragraph, its section index, and every RULES section verbatim. 7 files carry no rules-shaped section and are included whole. The CASES behind a rule live only in the file: open it the moment the rule fires, or when a diagnosis needs the evidence. `_ledger.md` is read whole beside this digest; `_ledger_archive.md` on demand.
 
 ## The T9 SSD is the master — Wednesday must be fully portable
 `2026-07-31_fully-portable-drive.md` · principle · 2026-07-31 · status: superseded — the "T9 is the master" half by [[2026-08-25_one-drive-devmaster-is-master]] (2026-08-25); the portability principle itself still lives
@@ -1785,7 +1785,7 @@ one that mattered: *nobody could observe the CI runs*, and only I or Kam could
 unblock it. NexusAI, meanwhile, did nothing at all for seventeen hours and I
 never noticed, because nothing told me and I never looked.
 
-sections (open the file for these): EXTENSION 2026-09-07 — the strongest evidence yet, and it is that a guard caught the COORDINATOR, not the builder
+sections (open the file for these): EXTENSION 2026-09-07 — the strongest evidence yet, and it is that a guard caught the COORDINATOR, not the builder · EXTENSION 2026-09-10 — the sibling clause: an enforcement you must CHOOSE TO CALL is not one either. **An optional mechanism is a rule with a script attached.** · The discriminator, measured on one day
 
 **How to apply:**
 1. **A safeguard that runs beside the work must have something that arms it and
@@ -1806,6 +1806,11 @@ sections (open the file for these): EXTENSION 2026-09-07 — the strongest evide
 develop** and prove byte-identity. **Base still carried Kam's real address AND his real name** — the
 redaction had happened in round 1 of that same PR — so *"restore it to develop"* meant *"undo the
 redaction"*. **The instruction written to make things safer would have re-published his identity.**
+
+## EXTENSION 2026-09-10 — the sibling clause: an enforcement you must CHOOSE TO CALL is not one either. **An optional mechanism is a rule with a script attached.**
+**This file has said "an enforcement you must ARM is not one" since 2026-08-09 and it is the
+brain's largest family (149 ledger rows). Today it failed in its own blind spot: the tool was
+built, armed, executable, documented — and simply not called.**
 
 
 ## A ritual nothing triggers is not a ritual — it is a habit, and habits skip

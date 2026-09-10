@@ -7,7 +7,7 @@ status: live
 
 # Family-weight index — what a recurrence is measured against
 
-Generated from **824 ledger rows** (807 = 97% cite a lesson file) across `_ledger.md` + `_ledger_archive.md`. **137 families.**
+Generated from **825 ledger rows** (808 = 97% cite a lesson file) across `_ledger.md` + `_ledger_archive.md`. **137 families.**
 
 **`rows` is the hard count** — how many ledger rows cite this lesson; that is the number to quote when assigning a weight. **`max_w` is soft** — the largest `w=N` in any row citing it, and a row citing several lessons attributes its weight to each, so it can overstate. **Sorted by `rows`, not `max_w`** — five families share a max_w of 144 for that reason. Use `max_w` only to ask *"is this family high?"*, then `grep` the archive for the prose.
 
@@ -15,7 +15,7 @@ Generated from **824 ledger rows** (807 = 97% cite a lesson file) across `_ledge
 |---|---|---|---|---|
 | [[2026-08-14_i-read-representations-they-read-sources]] | 329 | 85 | 144 | 2026-09-10 |
 | [[2026-08-07_a-check-that-cannot-fail]] | 229 | 60 | 107 | 2026-09-10 |
-| [[2026-08-09_an-enforcement-you-must-arm-is-not-one]] | 149 | 57 | 124 | 2026-09-10 |
+| [[2026-08-09_an-enforcement-you-must-arm-is-not-one]] | 150 | 58 | 124 | 2026-09-10 |
 | [[2026-08-04_validate-brief-pointers]] | 72 | 13 | 135 | 2026-09-10 |
 | [[2026-08-13_headline-must-match-the-operative-case]] | 66 | 29 | 144 | 2026-09-10 |
 | [[2026-08-16_classification-is-the-field-that-grants-authority]] | 66 | 29 | 144 | 2026-09-10 |
@@ -112,6 +112,7 @@ Generated from **824 ledger rows** (807 = 97% cite a lesson file) across `_ledge
 | [[2026-09-03_a-ratified-design-has-two-halves]] | 2 | 0 | 12 | 2026-09-04 |
 | [[2026-08-19_a-pagination-default-is-a-selector]] | 2 | 0 | 2 | 2026-09-04 |
 | [[2026-09-02_launcher-quote-truncation]] ⚠ NO FILE | 2 | 2 | 2 | 2026-09-08 |
+| [[2026-09-10_a-panel-message-is-a-record-not-a-string]] | 2 | 2 | 2 | 2026-09-10 |
 | [[2026-09-10_a-weekday-and-a-date-are-two-claims]] | 2 | 2 | 2 | 2026-09-10 |
 | [[2026-08-03_daily-rhythm-6-to-23]] | 2 | 0 | 1 | 2026-09-07 |
 | [[2026-08-05_wed-work-threshold-delegation]] | 2 | 0 | 1 | 2026-09-02 |
@@ -149,7 +150,6 @@ Generated from **824 ledger rows** (807 = 97% cite a lesson file) across `_ledge
 | [[2026-09-09_a-hold-names-the-property-it-protects]] ⚠ NO FILE | 1 | 1 | — | 2026-09-09 |
 | [[2026-09-09_acknowledge-panel-instructions-on-receipt]] | 1 | 1 | — | 2026-09-10 |
 | [[2026-09-09_parallel-seats-on-one-project-grant]] | 1 | 1 | — | 2026-09-09 |
-| [[2026-09-10_a-panel-message-is-a-record-not-a-string]] | 1 | 1 | — | 2026-09-10 |
 
 ## ⚠ 7 cited names with no lesson file on disk
 
