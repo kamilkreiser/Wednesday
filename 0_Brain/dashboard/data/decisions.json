@@ -7471,9 +7471,9 @@
   ],
   "recommended": "verify-now",
   "ts": "2026-09-10T11:05:28.560597+10:00",
-  "status": "open",
-  "ruled_choice": null,
-  "ruled_ts": null,
+  "status": "ruled",
+  "ruled_choice": "verify-now",
+  "ruled_ts": "2026-09-10T11:30:04.354436+10:00",
   "prior_rulings_overridden": [
    "CARD secuura-ks622-mfa-verify-fix",
    "CARD secuura-ks697-demo-probe",
@@ -7493,5 +7493,76 @@
    "CARD secrev-verify-23-and-batch1-filing",
    "CARD secuura-ks1041-fix-shape-demo-exposed"
   ]
+ },
+ {
+  "id": "secuura-two-untriaged-advisories-and-two-allowlists",
+  "client_project": "Secuura/Blockchain",
+  "title": "Your measure-first ruling paid off — it is all config, EXCEPT two genuinely untriaged advisories, and the repo runs TWO competing allow-lists for the same question",
+  "bluf": "YOUR RULING IS DISCHARGED AND IT WAS THE RIGHT CALL — and what it found is bigger than the gate question. You ruled `measure-then-decide` at 10:58; the seat measured, filed KS-1075, changed nothing, then CORRECTED ITS OWN REPORT when the four in-flight suites concluded. THE FINDING THAT MATTERS MOST, AND IT IS NOT ABOUT GATES: `Playwright suite` has been FAILING on every PR since 2026-09-07 at step 6, a static quality gate (tsc/ESLint/Prettier) that runs BEFORE any browser test — so ZERO Playwright tests have executed on any PR for three days, while the job's name said 'Playwright suite' and its red implied tests had run and failed. The cause is four ESLint jsdoc errors in systemTest/playwright/global-setup.ts (missing @param, @throws, @example, and a missing JSDoc comment), a file touched by NEITHER PR (0 hits against controls of 4 and 3 files actually touched), last changed at 42e778203 on 2026-09-07 in 'KS-969 round 2'. Byte-identical failures on both branches. Prettier passes; it is the jsdoc rules alone. THAT IS THREE DAYS OF AN E2E SUITE NOBODY HAS BEEN RUNNING, and it is a testing-coverage problem wearing a CI-gate costume. THE GATE PICTURE, now fully measured on #938: TWO of the seven required contexts are RED, not one — Code Security Gates FAILURE and Playwright suite FAILURE; Standalone locks, build/push images, Schemathesis, Performance k6 and Akto all success. THREE distinct config causes, none of them a finding in any diff, all proven with a real discriminator (both gates failing identically on #938, one nginx location block, and #939, type declarations in one service). (i) tsx unresolvable on the runner, so 1 of 18 shell suites cannot run. (ii) The audit-contract step exits 1 with ZERO OUTPUT — written for non-`-e` semantics, run under bash `-e`, so the assignment aborts the step and every message its author wrote is unreachable; that gate cannot say why it failed, by construction. (iii) The Playwright static gate above. WEDNESDAY HAS AUTHORISED (i) and (ii), `-e` first, through-code QA tier: restoring a control's ability to REPORT is not a change to what it ENFORCES. STILL DO NOT RE-TICK 'Require status checks to pass' — two of the seven are red for reasons unrelated to anyone's code, so re-ticking blocks every PR within minutes. WHAT IS YOURS. (a) `@prisma/config` and `prisma` are in NEITHER allow-list — genuinely untriaged, and exactly the two CI reports carrying '(no source id)'. The seat separated them out because its own discriminator does not cover them. Your 2026-09-08 card records that relaxing a risk acceptance is an authority that would ORIGINATE with Wednesday and is the v1.3 line it may not cross; a NEW acceptance is that. (b) The repo runs TWO parallel allow-lists for the same question: CI reads Blockchain/Dev/.security/exceptions.yml, which is EMPTY (`exceptions: []`), while the local preflight reads scripts/audit/audit-baseline.json, which is populated and passes on the identical tree; 6 of the 8 flagged packages are already triaged in the local one. Which file is the trunk's real answer is a policy choice, not plumbing. AND A THIRD THING THAT SURVIVES EVERY FIX: the required context name 'Code Security Gates' is emitted by TWO workflows — PR Security Gates (KS-168), failure, and Security Scanning, skipped — so which run satisfies a required check becomes a race, and a SKIPPED producer can satisfy or block it. Nobody had named it before. HONEST LIMIT, the seat's own: it matched the seven DESCRIPTIONS against live job names because the rule holding the exact context strings no longer exists after your untick, so exact-string equality is unverifiable and is not claimed. CORRECTION TO WEDNESDAY'S OWN NUMBERS, made before you act: I told you 45 startup_failures ending ~21:00Z. It is 127, ending 16:15:26Z, and 124 of 127 rather than all — I read one page of the API and reported it as the population. The shape held, a bounded historical come-back window and not a live defect; the size did not.",
+  "default_action": "HOLD on the two advisories and the allow-list question. The two config fixes Wednesday authorised proceed regardless. Cost of silence: `@prisma/config` and `prisma` stay untriaged and unwatched, CI keeps answering the audit question from an EMPTY list while local answers it from a populated one, and the duplicate context name stays a live race on a check you may want to re-require. Nothing degrades today and nothing is customer-facing.",
+  "options": [
+   {
+    "key": "one-list-triage-two",
+    "label": "Make the local triage record the single source, and triage the two properly (Recommended)",
+    "detail": "Point CI's npm-audit gate at `scripts/audit/audit-baseline.json` so one file answers the question, and give @prisma/config and prisma a real triage — reachability measured — rather than baselining them alongside the six that already are. Fixes the split-brain and refuses to launder two unknowns through a bulk import."
+   },
+   {
+    "key": "populate-ci-list",
+    "label": "Populate the CI file instead, leaving two lists in sync by hand",
+    "detail": "Smaller change to CI. Cost: two files must be kept in step forever, and the next divergence is silent — the same shape that produced this."
+   },
+   {
+    "key": "triage-only",
+    "label": "Triage the two advisories now; leave the two-list question for later",
+    "detail": "Closes the genuinely untriaged half today. The split-brain stays and will produce another disagreement."
+   },
+   {
+    "key": "hold",
+    "label": "Hold all of it until you have read KS-1075 yourself",
+    "detail": "Defensible — it is dev CI, nothing customer-facing, and the report is detailed. The two advisories stay unwatched while you do."
+   }
+  ],
+  "recommended": "one-list-triage-two",
+  "ts": "2026-09-10T11:28:44.733454+10:00",
+  "status": "ruled",
+  "ruled_choice": "one-list-triage-two",
+  "ruled_ts": "2026-09-10T11:30:01.785015+10:00",
+  "prior_rulings_overridden": [
+   "2026-08-17 20:01",
+   "2026-08-17 20:10",
+   "2026-08-17 20:15",
+   "2026-08-17 20:23",
+   "2026-08-21 20:06",
+   "2026-08-21 21:07",
+   "2026-08-29 08:00",
+   "2026-09-01 13:45",
+   "2026-09-02 16:08",
+   "2026-09-06 10:24",
+   "2026-09-08 11:41",
+   "2026-09-08 14:00",
+   "2026-09-09 08:21",
+   "2026-09-09 09:39",
+   "2026-09-09 10:29",
+   "2026-09-09 10:30",
+   "2026-09-10 09:01",
+   "2026-09-10 09:08",
+   "2026-09-10 09:08",
+   "CARD secuura-advisories-high-and-prod-reaching",
+   "CARD secuura-four-advisories-in-shipped-code",
+   "CARD secuura-four-advisories-ruled-after-measurement"
+  ],
+  "amendments": [
+   {
+    "ts": "2026-09-10T11:29:35.315538+10:00",
+    "reason": "The seat's own correction landed 4 minutes after I filed this, before Kam ruled: the four in-flight suites concluded and there are THREE causes not two, and TWO of the seven required contexts are red not one. The card's BLUF said 'Code Security Gates is one of the seven and it is RED' — true but now materially understated. A new and larger finding also arrived: Playwright has run ZERO tests on any PR since 2026-09-07.",
+    "changed": [
+     "bluf"
+    ],
+    "before": {
+     "bluf": "YOUR RULING IS DISCHARGED AND IT WAS THE RIGHT CALL. You ruled `measure-then-decide` at 10:58; the seat measured and filed KS-1075, changing nothing. HEADLINE: both failing gates fail for CONFIG reasons, not findings, and they are TWO causes not one — proven with a real discriminator, both gates failing identically on two unrelated diffs (#938, one nginx location block; #939, type declarations in one service). DO NOT RE-TICK 'Require status checks to pass' YET: `Code Security Gates` is one of the seven required contexts and it is RED right now for a reason unrelated to anyone's code, so re-ticking blocks every PR within minutes — the hole the team climbed out of yesterday. WHAT IS ALREADY IN HAND, no decision needed from you: (1) a test driver `tsx` is unresolvable on the runner, so 1 of 18 shell suites cannot run; (2) the audit-contract step exits 1 with ZERO OUTPUT because it is written for non-`-e` semantics and the workflow runs it under bash `-e`, so the assignment itself aborts the step and every message its author wrote is unreachable — that gate cannot say why it failed, by construction. Wednesday has AUTHORISED both, `-e` first, through-code QA tier: restoring a control's ability to REPORT is not a change to what it ENFORCES. WHAT IS YOURS, AND IT IS TWO THINGS. (a) `@prisma/config` and `prisma` are in NEITHER allow-list — genuinely untriaged, and they are exactly the two CI reports carrying '(no source id)'. The seat separated them out rather than folding them into the config story because its own discriminator does not cover them. Your 2026-09-08 card records, in your own artefact, that relaxing a risk acceptance is an authority that would ORIGINATE with Wednesday and is the v1.3 line it may not cross — a NEW acceptance is that. (b) The repo runs TWO parallel allow-lists for the same question: CI reads `Blockchain/Dev/.security/exceptions.yml`, which is EMPTY (`exceptions: []`), while the local preflight reads `scripts/audit/audit-baseline.json`, which is populated and passes on the identical tree. 6 of the 8 flagged packages are already triaged in the local one. Which file is the trunk's real answer is a policy choice about security posture, not plumbing. AND A THIRD THING THAT SURVIVES EVERY FIX ABOVE: the required context name `Code Security Gates` is emitted by TWO workflows — `PR Security Gates (KS-168)` (failure) and `Security Scanning` (skipped). For a required check that is a race: which run satisfies it depends on ordering, and a SKIPPED producer can satisfy or block the gate. Nobody had named it before. HONEST LIMIT, the seat's own and it is the right kind: it matched the seven DESCRIPTIONS against live job names because the rule holding the exact context strings NO LONGER EXISTS after your untick, so exact-string equality is unverifiable and is not claimed. CORRECTION TO WEDNESDAY'S OWN EARLIER CARD, made before you act on it: I told you 45 startup_failures ending ~21:00Z. It is 127, ending 16:15:26Z, and 124 of 127 rather than all. I read one page of the API and reported it as the population. The shape held — a bounded historical come-back window, not a live defect — the size did not."
+    }
+   }
+  ],
+  "amended_ts": "2026-09-10T11:29:35.315551+10:00"
  }
 ]
