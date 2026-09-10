@@ -1,4 +1,25 @@
-## 2026-09-09 19:41 – 2026-09-10 05:30 — WEDNESDAY, Studio coordinator, ONE SEAT ALL NIGHT (no rotation, 76% at the shift change). FOUR SECUURA SEATS AND TWO GATES ALL AT 1.00, TWO LATENT FINDINGS WORTH MORE THAN THE THROUGHPUT, AND FIVE ERRORS OF MINE OF WHICH THREE WERE ONE ACT.
+## 2026-09-10 19:39 → 2026-09-11 05:30 — evening + overnight (Secuura; Peter's protocol adopted)
+
+**Seats run:** s170 (KS-1041 Step 2, scored 1.00) · s171 (#896 review, scored 1.00). Both wrapped, panes closed.
+
+**Shipped:**
+- **PR #951** — the gateway-provenance middleware Kam ruled `fresh-seat-now` for at 17:11. Three arms revert-checked to byte-identical sha256 with cell counts, plus a live toggle (set → 401, unset → 200). **Not approval-ready: the builder cannot be its own gate.**
+- **#936 gated GO WITH FINDINGS** → two PRs now approval-ready where the night started with one.
+- **KS-1067 closed** — four systemTest locks at `smol-toml` 1.8.0 (the ticket's own title says three; the fourth was missing from the artefact, not just from our count). Advisory patched at 1.7.1, so fixed with margin.
+- **#896 reviewed, no blockers, zero suites required.** Both reds attribute away from Peter — and his branch is the only one in the repo whose static gate passes, so it is the only thing that has ever reached the Playwright tests.
+- **Peter's 624-line verification protocol adopted** as our process, read whole. Filed as a lesson + reference; **the five-stage merge/test/deploy process map written** (`1_Project_Definition/Architecture/2026-09-10_merge-test-deploy-process.md`) — his document covers one link of three, and stage 5 (deploy) is written down here for the first time.
+- **NAS:** Kam ruled `stop-partition-rerun`; executed and measured. Tuesday's partition is worth **~180×** on ordinary files (14,003 copied vs 315), then hits one directory holding 89% of the bytes.
+
+**Findings that outlived the tasks:** the KS-969/KS-966 composition seam (a DEGRADED promise falsified by a later empty-password fallback, pre-suite exits 0 so nothing stops the run) · the env-drift guard scanning `config/` while the one variable red-lining CI is read from `fixtures/` · **`mergeable_state` is INVERTED on this repo** (`clean` can mean nothing ever checked it) · **`develop` has no technical merge brake at all** — required approvals 0, status checks absent, nothing blocked.
+
+**Tickets:** WED-150 (launcher jams panel_sync every session), WED-151 (wake_watch cannot tell wrapped from blocked), KS-1080, KS-1081.
+
+**My own errors:** four wrong or overstated claims to Kam, each corrected leading with it; three were caught by an agent or the other coordinator rather than by me. One — *"security gates fail on essentially every PR"* — was one send from reaching a client.
+
+**Lessons:** `a-reviewers-protocol-is-our-acceptance-criteria` · `a-two-answer-question-hides-a-third-state` (the day's unifying shape: six instrument failures where the third state was *"the measurement did not happen"*) · a DKIM extension clause that would otherwise have had seats rejecting half my real mail.
+
+**Ledger:** 263 → 188 live rows, 75 archived under rule 3c, conservation asserted 848 = 848.
+
 
 **Booted 19:41 into a live incident's aftermath** — `kintsugi` had just come back up — and closed at the 05:30 shift change without rotating. **Brain load measured per WED-139: by-tier digest 349 KB whole 7%→23%, own ledger 512 KB whole →26%, boot complete at ctx 34%.** The 2026-09-08 arithmetic correction holds: both fit, ~22 KB of markdown per 1% of window.
 
@@ -19,6 +40,8 @@
 **WRAP:** rule-3c archive ran — **71 rows dated 2026-09-07 moved verbatim, conservation asserted 776 = 776**, ledger 623 KB → 457 KB, now 191 rows. Both digests regenerated, `--check` clean. **Secrets check vouched with a control that actually fires**: 0 tracked `.env`, 0 tracked files under `4_Credentials/` or `3_Access_Keys/`, and a planted `.env` proven caught by `.gitignore:5`. HEAD == origin. **Handover mailed and verified at the destination by content probe, not by the send's exit code.**
 
 **LEFT FOR THE MORNING:** KS-1055 first — **deliberately not launched at 74%**, because it is the one item where a wrong start is expensive and it wants a full coordinator window. **Five things wait on Kam**, who has not spoken since 19:47; the GitHub identity ask now blocks **nine** PRs.
+
+## 2026-09-09 19:41 – 2026-09-10 05:30 — WEDNESDAY, Studio coordinator, ONE SEAT ALL NIGHT (no rotation, 76% at the shift change). FOUR SECUURA SEATS AND TWO GATES ALL AT 1.00, TWO LATENT FINDINGS WORTH MORE THAN THE THROUGHPUT, AND FIVE ERRORS OF MINE OF WHICH THREE WERE ONE ACT.
 
 ## 2026-09-09 07:36 – 10:3x — TUESDAY s1, FIRST BOOT on Kamils-Mac-mini. A MACHINE BUILT FROM NOTHING, TWO GUARDS THAT WERE BLIND TO THEIR OWN SUBJECT, AND ONE CORRUPT PUSH THAT WAS MINE.
 
