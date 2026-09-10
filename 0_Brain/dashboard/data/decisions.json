@@ -7654,5 +7654,53 @@
    "2026-08-21 09:56",
    "CARD secuura-originate-unauthenticated-cross-tenant-billing"
   ]
+ },
+ {
+  "id": "secuura-kintsugi-whole-estate-rebuild",
+  "client_project": "Secuura/Blockchain",
+  "title": "Kintsugi is 322 commits behind and has never been touched since it was built — 'bring it current' is a 1.5-2h whole-estate rebuild, not a catch-up. Your call on WHEN, not whether",
+  "bluf": "OVERRIDE REASON: the gate will match your 13:22 email ruling, which is DISCHARGED in scope and not being re-litigated. You said 'bring kintsugi up to date and deploy everything so its current', and that is exactly what the measurement says is required. What has changed is the COST, and only the cost — you authorised it, and I did, believing it was a catch-up. WHAT WAS MEASURED, and the seat stopped rather than start it: kintsugi has NOT BEEN TOUCHED SINCE IT WAS BUILT — source rsynced 2026-08-19 12:52Z, images built 2026-08-19 22:51 to 2026-08-20 00:18Z, nothing since. It is **322 commits behind develop**, 162 of them touching a deployable surface, **23 backend services changed — but the real number is 31, because `packages/shared` changed and every service depends on it, so every image invalidates.** Both frontends changed too. **5 migrations behind** (its highest is 043; develop has 049). SIZING FROM EVIDENCE, NOT A GUESS: the original cold build of this exact box took **1h27m for 31 images**, read from the images' own CreatedAt timestamps. There is a 29 GB warm cache now, but a `packages/shared` edit is precisely the change that misses on almost every layer — and the one-service-at-a-time health-read cadence adds to it. THE GOOD NEWS, AND IT IS THE TRAP THAT MATTERED: **KS-535 is CLEAR.** Kintsugi has its own wallet AND its own Blockfrost credentials — it is not sharing demo's mnemonic, so the failure that cost 295 local and 2 demo anchors cannot bite here. Box healthy: up 17h57m since the 09-09 recovery, load 0.42, 33 containers with 31 running and the 2 exited being a one-shot migration runner and demo-overlay, both exit 0. **Zero unhealthy.** ONE OPEN QUESTION THE SEAT DID NOT WIDEN TO ANSWER: `guardian` and `queue` do not exist on kintsugi at all — absent, not stopped, behind a `phase2` profile — and both are in the changed list. Whether kintsugi is meant to run them, and whether demo does, is unresolved. AND IT CANNOT SAY WHAT REVISION IT IS ON: there is no `.git` on the box, by design (rsync deploy). That is the same defect demo had, and it means 'is it current?' is unanswerable from the box itself until something stamps it. HONEST CORRECTION TO THE SEAT'S OWN FRAMING, because I checked rather than relaying it: it flagged the 93% allowance as the blocker. A build is mostly WALL CLOCK, not model tokens — roughly 31 command-and-read cycles. The real cost is 1.5-2 hours of an agent supervising an unattended rebuild on a box Stuart uses, not a catastrophic token spend. I would rather give you the accurate constraint than the alarming one.",
+  "default_action": "HOLD. Kintsugi stays three weeks stale, which is the state it has been in since 2026-08-19, so nothing degrades by waiting. Your kintsugi-first rule still applies to everything NEW from here — this card is only about the backlog catch-up. Cost of silence: the box you have just made the primary dev target is the one box nobody can deploy onto until this runs, and Stuart is using it.",
+  "options": [
+   {
+    "key": "run-now",
+    "label": "Run it now, one service at a time with health reads (Recommended)",
+    "detail": "About 1.5-2 hours, supervised. Migrations first, then the 31 images. It is exactly what you authorised; the only new information is that it is long. Recommended because kintsugi is now the primary dev target and everything else queues behind it being current."
+   },
+   {
+    "key": "overnight",
+    "label": "Run it overnight, unattended, on your standing overnight-is-working-time rule",
+    "detail": "Costs no daytime attention and finishes before tomorrow. Risk: an unattended whole-estate rebuild on a box Stuart uses, with nobody watching if it stalls halfway — and a half-rebuilt estate is worse than a stale one."
+   },
+   {
+    "key": "migrations-only",
+    "label": "Apply the 5 migrations now, defer the image rebuild",
+    "detail": "Fast and small. Cost, stated plainly: it puts the DATABASE ahead of the CODE, which is the wrong order and can break a running stack. I am naming it because it looks attractive and I do not recommend it."
+   },
+   {
+    "key": "after-renewal",
+    "label": "Wait for the usage allowance to renew (~3 days)",
+    "detail": "Spends nothing. Kintsugi stays stale for three more days while being the box you have just designated as the one everything deploys to first."
+   }
+  ],
+  "recommended": "run-now",
+  "ts": "2026-09-10T13:34:18.722374+10:00",
+  "status": "open",
+  "ruled_choice": null,
+  "ruled_ts": null,
+  "prior_rulings_overridden": [
+   "2026-08-21 09:47",
+   "2026-08-21 19:49",
+   "2026-08-24 11:27",
+   "2026-08-28 09:36",
+   "2026-08-28 10:50",
+   "2026-09-05 16:45",
+   "2026-09-08 11:50",
+   "2026-09-10 09:01",
+   "2026-09-10 09:08",
+   "2026-09-10 09:08",
+   "CARD secuura-demo-admin-image-rebuild-2026-09-05",
+   "CARD secreview-estate-wide-scoring-pass-including-june"
+  ]
  }
 ]
