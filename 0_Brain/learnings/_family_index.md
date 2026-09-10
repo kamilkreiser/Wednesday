@@ -7,13 +7,13 @@ status: live
 
 # Family-weight index — what a recurrence is measured against
 
-Generated from **820 ledger rows** (803 = 97% cite a lesson file) across `_ledger.md` + `_ledger_archive.md`. **135 families.**
+Generated from **821 ledger rows** (804 = 97% cite a lesson file) across `_ledger.md` + `_ledger_archive.md`. **135 families.**
 
 **`rows` is the hard count** — how many ledger rows cite this lesson; that is the number to quote when assigning a weight. **`max_w` is soft** — the largest `w=N` in any row citing it, and a row citing several lessons attributes its weight to each, so it can overstate. **Sorted by `rows`, not `max_w`** — five families share a max_w of 144 for that reason. Use `max_w` only to ask *"is this family high?"*, then `grep` the archive for the prose.
 
 | family (lesson file) | rows | resident | max_w | last |
 |---|---|---|---|---|
-| [[2026-08-14_i-read-representations-they-read-sources]] | 328 | 84 | 144 | 2026-09-10 |
+| [[2026-08-14_i-read-representations-they-read-sources]] | 329 | 85 | 144 | 2026-09-10 |
 | [[2026-08-07_a-check-that-cannot-fail]] | 229 | 60 | 107 | 2026-09-10 |
 | [[2026-08-09_an-enforcement-you-must-arm-is-not-one]] | 149 | 57 | 124 | 2026-09-10 |
 | [[2026-08-04_validate-brief-pointers]] | 72 | 13 | 135 | 2026-09-10 |
