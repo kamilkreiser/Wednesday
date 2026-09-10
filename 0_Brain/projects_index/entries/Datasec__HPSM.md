@@ -1,12 +1,19 @@
 ---
 client: Datasec
 project: HPSM
-path: /Volumes/DevMASTER/!CODING/Datasec/HPSM
+path: /Volumes/KK_T9_External_HDD/!CODING/Datasec/HPSM
 status: active
-updated: 2026-08-25
+updated: 2026-09-10
 ---
 
 # Datasec / HPSM
+
+**Session 33 (2026-09-10) - Policy Composer WP0+WP1+WP2 built locally, CI green 12/12:** in
+`HPSM/6_Policy_Composer/` (its own repo, 4 commits, no remote). WP1 content draft `47ea3e7c` (0 errors,
+1,653 provisional); WP2 30 DB tests (forced RLS, T01-T18, A-28), mutation-tested. RED: the stack still
+connects as the Postgres superuser and runs no migrations, so RLS is not in force in the stack (WP4).
+Waiting on Tuesday: names + Jira PCOMP, Q-20 reach, Kam's GitHub steps. T9 vault 476 behind with other
+sessions' uncommitted edits - untouched. Older blocks below are HP SOW-01 state (sessions 5-31).
 
 **Last session (2026-08-13, session 9 — architecture worked through for Monday):**
 Programme un-paused on Kam's commission, worked, and re-paused on an honest
