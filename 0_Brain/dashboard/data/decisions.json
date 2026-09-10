@@ -7619,7 +7619,9 @@
    "CARD secuura-ks968-demo-hash-probe",
    "CARD secuura-ks1041-fix-shape-demo-exposed",
    "CARD secuura-ks1041-step1-demo-verify-now"
-  ]
+  ],
+  "delivered_artefact": "KS-1041 closed behaviourally on demo after the container recreate: /originate/health 200 -> 404, the \"path\" field 1 -> 0, and host/container inode 1311680 -> 1310894 == 1310894 — the check that catches a config right on disk that never reached the container. Verified by s169, recorded in 0_Brain/daily/2026-09-10.md at 17:39.",
+  "delivered_ts": "2026-09-10T19:53:55.346318+10:00"
  },
  {
   "id": "secuura-originate-internal-ingress-widened",
@@ -7651,13 +7653,15 @@
   ],
   "recommended": "fresh-seat-now",
   "ts": "2026-09-10T12:26:52.251585+10:00",
-  "status": "open",
-  "ruled_choice": null,
-  "ruled_ts": null,
+  "status": "ruled",
+  "ruled_choice": "fresh-seat-now",
+  "ruled_ts": "2026-09-10T19:54:07.809522+10:00",
   "prior_rulings_overridden": [
    "2026-08-21 09:56",
    "CARD secuura-originate-unauthenticated-cross-tenant-billing"
-  ]
+  ],
+  "delivered_artefact": "Brief [Wednesday -> Secuura/Blockchain] 'KS-1041 Step 2: gateway-provenance middleware (Kam ruled fresh-seat-now 17:11)', verified at secuura-blockchain@agentmail.to 2026-09-10T09:51:24Z. The ruling is ITEM 1 and rides again verbatim under the brief's RULED BY KAM, NOT YET IN AN ARTEFACT heading, where the seat is instructed to post it to KS-1041 as its FIRST act, before building.",
+  "delivered_ts": "2026-09-10T19:54:17.179054+10:00"
  },
  {
   "id": "secuura-kintsugi-whole-estate-rebuild",
@@ -8075,6 +8079,46 @@
    "CARD hpsm-credential-bearing-prd-outside-every-snapshot",
    "CARD hpsm-phase1-missing-source-workbook",
    "CARD hpsm-phase1-imagepng-out-of-scope"
+  ]
+ },
+ {
+  "id": "wed-nas-nightly-leg-has-never-completed",
+  "client_project": "WED",
+  "title": "Your nightly NAS backup has never completed once — the first run started 40 hours ago and is 14% done, ETA 22 days",
+  "bluf": "OVERRIDE REASON, STATED FIRST: the prior-rulings gate matched the WORD 'never', not this subject - the four hits are Stuart's anchor message, the Linear archive cap, and the workspace-suites-on-a-PR card, none of them about the NAS. Kam has never ruled on the nightly sync leg. MEASURED TONIGHT, NOT INFERRED. `com.wednesday.nassync` is PID 84978, started Wed 9 Sep 03:30:00, elapsed 01-16:14:10 at the time of reading. Its own last progress line: 14% - 395 of 20,621 items - 6.57 GiB of 44.13 GiB - 15.7 KiB/s - ETA 22d 04:40:00. `scheduler/logs/` holds EXACTLY ONE nas_sync log ever (`nas_sync_wednesday_2026-09-09_033000_84978.log`, still being appended to now) and there is no completed run of any date - so the leg armed on 2026-09-08 has never finished a single pass. The 2026-09-10 03:30 slot never fired, because launchd will not start a second instance while one is live: the run is eating its own successors. WHAT IS NOT WRONG, stated as precisely as what is: stderr is 0 bytes - no error, no permission failure, NOT TCC-blocked. The log has 315 `[BGN] Copying` lines and ZERO `Deleting` lines, so nothing has been destroyed and the deletion alarm has had nothing to fire on. Target is the SMB mount //KAMILADMIN@192.168.20.221/Development, 83 GiB present against DevMASTER's 192 GiB. It is throughput, not correctness. WHY IT IS SLOW IS NOT MEASURED and I am not guessing at it in a card you have to rule on - 15.7 KiB/s over SMB to a local NAS is two to three orders of magnitude below what that link should do, and the cause could be the link, the share, unison's scan on 20,621 items, or the set being far larger than it needs to be. The set is part of it: the trees my leg was walking when I looked are `!CODING/Datasec/ATTIO` and `!CODING/Datasec/NexusAI` - the OTHER coordinator's client work - including paths under `4_Credentials/.azure/telemetry/`. TUESDAY ALREADY HAS THIS. Her two-seat sync design is committed and she adopted my numbers within three minutes: the NAS-side lock is now ABORT-AND-REPORT rather than wait, because on 40-hour legs a waiting leg never runs. She also corrected me: a unison `Name` ignore matches a basename at any depth, so `Name Datasec` does cover those trees - the partition she designed would remove them from my leg. Nothing is armed and nothing has been changed. SEPARATELY AND NOT PART OF THIS CARD: whether `4_Credentials/` and `3_Access_Keys/` belong on the NAS at all is yours, and it is in HER design's decision list - I am not duplicating it here. I HAVE NOT KILLED THE PROCESS. A 40-hour in-flight copy is not something to interrupt on a hunch about partial files at the destination, and the answer changes depending on which option you pick.",
+  "default_action": "Nothing is killed and nothing is changed. The 40-hour run continues, the nightly slots stay blocked behind it, and there is no completed NAS backup until roughly 2 October if the current rate holds. No data is at risk from this: zero deletions so far, and DevMASTER plus the T9 sync are unaffected.",
+  "options": [
+   {
+    "key": "stop-partition-rerun",
+    "label": "Stop it, apply Tuesday's partition, re-run tonight and measure the result (Recommended)",
+    "detail": "Kill 84978, then re-run my leg with the ignore partition her design already specifies so it stops walking her client trees, and let it run overnight. You get a real answer by morning: either it completes, which tells us the SET was the problem, or it is still crawling, which tells us the LINK is - and that is a different fix. Recommended because you currently have no backup at all and have not had one since the job was armed, and because the cheapest discriminator between the two causes is one honest run. Unison is restartable and keeps `backup = Name *` with `maxbackups = 5`, so a kill mid-copy costs a partial file at the destination, not data on the source."
+   },
+   {
+    "key": "measure-first",
+    "label": "Stop it, measure the link before changing anything",
+    "detail": "Kill it, then time a single large file to the same share to separate link throughput from unison's scan cost, and bring you the number before touching the ignore set. Slower to a working backup, but it means the fix is aimed at the measured cause rather than the plausible one. Choose this if you would rather not change the synced SET on a guess - the set change is the part that alters what is protected."
+   },
+   {
+    "key": "let-it-run",
+    "label": "Leave it running",
+    "detail": "Spends nothing and risks nothing. It finishes in roughly 22 days if the rate holds, and it blocks every nightly slot until it does. Defensible only if you consider the NAS a nice-to-have while DevMASTER and the T9 sync covers you - which is a real position, but you should be taking it knowingly rather than by default."
+   },
+   {
+    "key": "narrow-hard",
+    "label": "Stop it and cut the synced set down hard before re-running",
+    "detail": "Beyond Tuesday's client-tree partition: also exclude node_modules, worktrees, .azure telemetry and similar regenerable bulk. Almost certainly makes the leg finish. I am naming it rather than recommending it because cutting what a BACKUP contains is a decision about what you are protected against, and that is yours - not a performance tweak I should take on my own."
+   }
+  ],
+  "recommended": "stop-partition-rerun",
+  "ts": "2026-09-10T19:53:43.747268+10:00",
+  "status": "open",
+  "ruled_choice": null,
+  "ruled_ts": null,
+  "prior_rulings_overridden": [
+   "2026-08-21 20:06",
+   "2026-08-29 08:00",
+   "2026-09-07 10:41",
+   "CARD secuura-workspace-suites-never-run-on-a-pr"
   ]
  }
 ]
