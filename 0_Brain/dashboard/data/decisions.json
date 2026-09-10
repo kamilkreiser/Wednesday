@@ -7321,5 +7321,47 @@
    "CARD secuura-ci-dead-19-days-blocks-your-own-ruling",
    "CARD secuura-merge-914-without-reviewer-approval"
   ]
+ },
+ {
+  "id": "wed-boot-read-exceeds-the-context-window",
+  "client_project": "WED",
+  "title": "My boot instruction is now physically impossible — the two files it says to read WHOLE are 229K tokens, larger than the window they go into",
+  "bluf": "MEASURED THIS BOOT, not estimated. The launcher tells every seat to read _boot_digest_by_tier.md WHOLE and then its own _ledger.md WHOLE. Today those are 371,090 B and 545,829 B = ~229K tokens for two files, against a context window of roughly 200K. The instruction cannot be followed; a seat that tries dies before it does any work. I did NOT follow it: I read the digest's 231 headlines as a retrieval map (~6K tokens), opened the three lesson files whose rules actually fired, and grepped the ledger instead of reading it. I booted at ctx:14% and had Kam's four outstanding items handled inside twenty minutes. THE CAUSE IS GROWTH RATE, NOT UNTIDINESS: the ledger holds 222 rows over three days — 75 on 09-08, 112 on 09-09, 35 so far today — at ~2.4 KB of prose each. That is ~270 KB/day. CLAUDE.md rule 3c archives rows older than ~3 days, which by construction leaves three days resident, so the ledger's floor IS three days of growth and no prune can get under it. The archive is already 957,635 B. The by-tier digest compresses 726 KB of lessons to 371 KB — 51%, where its whole purpose was to be the cheap read. HONEST LIMIT: I have not measured which of the three days' rows a seat actually USES, so I cannot tell you what a shorter window would cost in missed corrections. That is the one thing that decides between the options below, and it is a measurement I can run.",
+  "default_action": "NOTHING CHANGES and every seat keeps silently improvising its own boot, as I just did. That is the real cost of waiting: the instruction says one thing, every seat does something different and undocumented, and the corrections a seat misses are invisible — nobody can tell which lessons stopped firing or when.",
+  "options": [
+   {
+    "key": "measure-first",
+    "label": "Let me measure which ledger rows actually fire before changing anything (Recommended)",
+    "detail": "One pass over the last three days' rows classifying each as fired / could-have-fired / inert, then a proposal with a number attached. Costs one session's work and gives every later option a denominator. I recommend it because every other option here picks a cutoff in the dark, and my own brain has a lesson about exactly that."
+   },
+   {
+    "key": "ledger-one-day",
+    "label": "Cut the resident ledger to ONE day, archive the rest",
+    "detail": "~136K tokens down to ~45K immediately. Cheap and reversible — nothing is deleted, the archive already holds 957 KB and is read on demand. Risk: a correction from two days ago stops firing at boot, and we will not know which."
+   },
+   {
+    "key": "digest-headlines",
+    "label": "Make the by-tier digest a HEADLINE INDEX plus rules only",
+    "detail": "What I actually did this morning, promoted from improvisation to the instruction: 231 headlines with their file paths as the retrieval map, and the lesson file opened the moment its rule fires. ~6K tokens instead of 92K. Risk: a rule that never quite fires is a rule that never gets read."
+   },
+   {
+    "key": "both",
+    "label": "Do both trims now and measure afterwards",
+    "detail": "Fastest path to a boot that fits, and it accepts that we will not know what we lost. Defensible if you want seats working today more than you want the number."
+   }
+  ],
+  "recommended": "measure-first",
+  "ts": "2026-09-10T10:45:13.359955+10:00",
+  "status": "open",
+  "ruled_choice": null,
+  "ruled_ts": null,
+  "prior_rulings_overridden": [
+   "2026-09-03 09:56",
+   "2026-09-08 15:36",
+   "CARD nexusai-rd196-dashboard-default-window",
+   "CARD nexusai-rd260-window-persistence-2026-09-03",
+   "CARD wed-ledger-boot-cost",
+   "CARD wed-boot-names-one-ledger-there-are-two"
+  ]
  }
 ]
