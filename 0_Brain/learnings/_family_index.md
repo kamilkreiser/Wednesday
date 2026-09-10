@@ -7,7 +7,7 @@ status: live
 
 # Family-weight index — what a recurrence is measured against
 
-Generated from **822 ledger rows** (805 = 97% cite a lesson file) across `_ledger.md` + `_ledger_archive.md`. **136 families.**
+Generated from **823 ledger rows** (806 = 97% cite a lesson file) across `_ledger.md` + `_ledger_archive.md`. **137 families.**
 
 **`rows` is the hard count** — how many ledger rows cite this lesson; that is the number to quote when assigning a weight. **`max_w` is soft** — the largest `w=N` in any row citing it, and a row citing several lessons attributes its weight to each, so it can overstate. **Sorted by `rows`, not `max_w`** — five families share a max_w of 144 for that reason. Use `max_w` only to ask *"is this family high?"*, then `grep` the archive for the prose.
 
@@ -131,6 +131,7 @@ Generated from **822 ledger rows** (805 = 97% cite a lesson file) across `_ledge
 | [[2026-09-06_a-cap-is-never-neutral]] ⚠ NO FILE | 1 | 1 | 17 | 2026-09-10 |
 | [[2026-09-10_steps-to-kam-are-a-claim-about-his-screen]] | 1 | 1 | 13 | 2026-09-10 |
 | [[2026-08-26_a-sync-that-cannot-refuse-a-deletion]] | 1 | 0 | 1 | 2026-08-26 |
+| [[2026-09-08_a-decision-stays-on-the-page-while-the-world-moves]] ⚠ NO FILE | 1 | 1 | 1 | 2026-09-10 |
 | [[2026-09-09]] ⚠ NO FILE | 1 | 1 | 1 | 2026-09-09 |
 | [[2026-09-10_a-detector-keyed-on-remedy-text-matches-the-hint]] | 1 | 1 | 1 | 2026-09-10 |
 | [[2026-09-10_a-single-file-bind-mount-binds-the-inode]] | 1 | 1 | 1 | 2026-09-10 |
@@ -150,7 +151,7 @@ Generated from **822 ledger rows** (805 = 97% cite a lesson file) across `_ledge
 | [[2026-09-09_parallel-seats-on-one-project-grant]] | 1 | 1 | — | 2026-09-09 |
 | [[2026-09-10_a-panel-message-is-a-record-not-a-string]] | 1 | 1 | — | 2026-09-10 |
 
-## ⚠ 6 cited names with no lesson file on disk
+## ⚠ 7 cited names with no lesson file on disk
 
 A row points at a rule that cannot be opened — a rename, an alias, or a lesson never written.
 
@@ -158,6 +159,7 @@ A row points at a rule that cannot be opened — a rename, an alias, or a lesson
 - `2026-08-30 consolidation` — 1 row(s), last 2026-09-06
 - `2026-09-02_launcher-quote-truncation` — 2 row(s), last 2026-09-08
 - `2026-09-06_a-cap-is-never-neutral` — 1 row(s), last 2026-09-10
+- `2026-09-08_a-decision-stays-on-the-page-while-the-world-moves` — 1 row(s), last 2026-09-10
 - `2026-09-09` — 1 row(s), last 2026-09-09
 - `2026-09-09_a-hold-names-the-property-it-protects` — 1 row(s), last 2026-09-09
 

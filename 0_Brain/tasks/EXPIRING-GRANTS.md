@@ -12,6 +12,8 @@ permanent change nobody decided to make. Every seat reads this at boot; an entry
 week" read as **end of Sunday 13 September** (Sunday IS the 13th; 2026-09-14 is a Monday — this file said "Sunday 14 Sep" until 15:4x on 09-10, granting a day nobody gave). If he meant Friday 11th or 12th, this grant died earlier than
 this file says. **Ask before relying on it on the 12th or 13th.**
 
+| **Both boxes end the week at PARITY** | Kam, panel 2026-09-10 17:10 — *"make sure that everything that we do this week is replicated and fixed on both servers."* | **END OF SUNDAY 2026-09-13 AEST** (same week as the deploy grant above) | Anything deployed/fixed on kintsugi this week lands on demo too, and vice versa. **This is a PARITY duty, not a new permission** — it does not widen what may be deployed ("everything possible" still = what has MERGED). If something lands on one box and cannot land on the other, that is a REPORT to Wednesday, never a silent asymmetry. |
+
 ## When a grant expires
 
 1. **Stop.** The permission is gone; the previous rule returns — for demo that is *"demo-affecting
