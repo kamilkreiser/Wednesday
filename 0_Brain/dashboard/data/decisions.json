@@ -7375,5 +7375,54 @@
    "CARD wed-ledger-boot-cost",
    "CARD wed-boot-names-one-ledger-there-are-two"
   ]
+ },
+ {
+  "id": "secuura-actions-alive-but-security-gates-red",
+  "client_project": "Secuura/Blockchain",
+  "title": "GitHub Actions came back ~11 hours ago and NOBODY RECORDED IT — and now that it runs, its security gates fail on essentially every PR",
+  "bluf": "MEASURED THIS MORNING against the live Actions API, not inferred from a ticket. THE GOOD HALF: Actions is ALIVE. It has been running since at least 2026-09-09 13:56Z — a run fired on your #934 merge at 00:47:56Z today. That DISCHARGES two cards still sitting in the queue as live problems: `secuura-ci-billing` (ruled `wait` 2026-08-26, 'GitHub Actions dead 8 days') and `secuura-ci-dead-19-days-blocks-your-own-ruling` (ruled `fix` 2026-09-08, 'billing is your access only'). Whatever you did on billing worked and nothing in our records says so. THE BAD HALF, AND IT IS WHY THIS IS A CARD: over the last 100 runs — a window of only 11 hours, 2026-09-09 13:56Z to 2026-09-10 00:47Z — the tally is 45 startup_failure, 25 failure, 22 success, 6 skipped, 1 cancelled, 1 in progress. The 45 startup_failures all carry an EMPTY workflow name and all fall on 2026-09-09 across push, pull_request and pull_request_target on at least four feature branches; they stop after ~21:00Z, so that burst looks like the come-back window rather than a live defect. WHAT IS LIVE IS THE REST: on every recent run I read, `PR Security Gates (KS-168)` FAILS and `Security Scanning` FAILS, including on the #934 merge to develop itself. `PR — Lockfiles` and `pr-premerge-ack` pass. WHY THIS LANDS ON YOUR DESK TODAY SPECIFICALLY: you unticked 'Require status checks to pass' at 09:23 because the seven contexts could never report while Actions was retired. They can report now — and they would report RED. So the brake you removed for a good reason is now removed for a reason that no longer holds, on a repo where your `raise-to-1` approval requirement is about to be the only gate left. HONEST LIMITS: I have not opened a single failing run's logs and I do not know whether these gates are failing on real findings, on the moving-advisory set you already ruled on twice, or on a config defect. I have not established whether the seven required contexts map onto the workflows I can see. Both are the seat's to measure, not mine to guess.",
+  "default_action": "NOTHING HAPPENS. The status-check requirement stays off, the security gates keep going red where nobody looks, and the two CI cards stay in the queue describing a dead Actions that is not dead. Nothing degrades today — but the next person to argue about whether our gates mean anything will be arguing from a record that is 11 hours out of date.",
+  "options": [
+   {
+    "key": "measure-then-decide",
+    "label": "Have the seat read the failing runs and report WHY, before any gate change (Recommended)",
+    "detail": "One bounded pass: open the newest failing `PR Security Gates (KS-168)` and `Security Scanning` runs, say whether the failures are real findings, the known moving-advisory set, or config — and map the seven required contexts onto actual workflows. Then you decide about re-ticking. I recommend this because re-ticking a check that fails for a config reason re-freezes the repo, and that is the exact hole you just climbed out of."
+   },
+   {
+    "key": "reinstate-now",
+    "label": "Re-tick 'Require status checks to pass' now that Actions works",
+    "detail": "Restores the technical brake immediately. Risk, stated plainly: if the gates are red for a config reason, this re-freezes every push and PR within minutes, and it took most of yesterday to get out of that."
+   },
+   {
+    "key": "approval-only",
+    "label": "Leave status checks off; rely on the approval requirement alone",
+    "detail": "What your two rulings today already produce. Simple and unblocked. Cost: the only gate on the trunk is a human clicking Approve, and while the agent has no GitHub identity that human is always you."
+   },
+   {
+    "key": "note-only",
+    "label": "Just correct the record; no gate decision today",
+    "detail": "I mark the two CI cards discharged and log that Actions is back. Cheapest, and defensible if you would rather look at the gates yourself later."
+   }
+  ],
+  "recommended": "measure-then-decide",
+  "ts": "2026-09-10T10:53:06.227830+10:00",
+  "status": "open",
+  "ruled_choice": null,
+  "ruled_ts": null,
+  "prior_rulings_overridden": [
+   "2026-08-17 20:10",
+   "2026-08-17 20:15",
+   "2026-08-17 20:23",
+   "2026-08-21 19:49",
+   "2026-08-21 20:06",
+   "2026-09-01 09:17",
+   "2026-09-09 17:03",
+   "2026-09-10 09:01",
+   "2026-09-10 09:08",
+   "2026-09-10 09:08",
+   "CARD attio-security-pack",
+   "CARD secuura-ks660-actions-ci-disposition",
+   "CARD secuura-793-security-expiry-two-triages-disagree"
+  ]
  }
 ]
