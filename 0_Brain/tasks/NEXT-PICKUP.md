@@ -1,103 +1,99 @@
 ---
-date: 2026-09-09
+date: 2026-09-10
 type: pickup
 scope: SECUURA + all general/generic work. Datasec is TUESDAY's — read her mail by SUBJECT only, never brief or answer for a Datasec project.
-source: replaced WHOLESALE at 12:5x by the seat that booted 12:37, because the previous version said the repo was BLOCKED and it has been clear since 12:01
+source: replaced WHOLESALE at 19:5x by the seat that booted 19:39, because the previous version was written 2026-09-09 12:5x and most of it had been overtaken
 status: live
 supersede: replace this file wholesale at the next pickup; do not append
 ---
 
-# NEXT PICKUP — 2026-09-09 12:5x. SECUURA IS CLEAR. THE BLOCKER NOW IS APPROVAL, NOT PUSH.
+# NEXT PICKUP — 2026-09-10 19:5x. A SEAT IS RUNNING. KAM WANTS TICKETS CLOSED TONIGHT.
 
-> 🔴 **THE VERSION THIS REPLACES WAS DANGEROUSLY STALE.** It was written at 08:3x and its
-> first heading read *"the repo is BLOCKED and ONE Kam ruling clears everything"*. That was
-> true when written and became false at 12:01. It was still the file a successor is told to
-> read FIRST. Replaced wholesale rather than appended, per this file's own rule.
-> **The full, current state is the 12:17 handover block in `0_Brain/daily/2026-09-09.md`** —
-> this file carries only what is still OPEN and whose it is.
+> 🔴 **THE VERSION THIS REPLACES WAS 31 HOURS STALE** and TASKS.md still points at this file as
+> "the live board". Its headline ask (the GitHub identity invite) is real but no longer the top
+> item; its "FLOOR: empty of agents" was false; its READY/NONE-MERGED list has been overtaken by
+> the merges and the whole-estate deploy of 09-10. **Replaced wholesale, per this file's own rule.**
+> The full narrative state is `0_Brain/daily/2026-09-10.md`.
 
-## 🔴 THE ONE ASK ON KAM, AND IT IS TWO WEEKS OLD
+## 🟢 WHAT IS RUNNING RIGHT NOW
 
-**Invite an agent account to the Secuura GitHub org with write on `Distributed_Secuura`.**
+**Secuura/Blockchain seat on pane `%2`**, launched 19:51, brief verified at
+`secuura-blockchain@agentmail.to` 2026-09-10T09:51:24Z, boot observed in the pane (not taken from
+the launcher's receipt). Its queue:
+1. **KS-1041 Step 2** — the gateway-provenance middleware in `originate`. **Kam ruled
+   `fresh-seat-now` on the panel at 17:11**; the tap sat uncaught on its card for 2h33m because no
+   seat was awake, and `reconcile_rulings.py --apply` landed it at 19:44. Tier-1 gate, both arms
+   red-proofed (forged header REFUSED **and** genuine gateway call still SUCCEEDS).
+2. **Then close tickets**, order its own — Kam, panel 19:46 verbatim: *"Keep working on the secure
+   tickets. Close off as many as you can tonight."*
 
-He **already ruled this** — card `secuura-agent-github-identity`, choice `identity`,
-ruled **2026-08-26T17:12**. It was never executed, and it cost real time today: at 11:45
-the seat attempted the approvals Kam authorised at 11:39 and GitHub returned **HTTP 422,
-"Review Can not approve your own pull request", on BOTH PRs** — `kksecura` opened them and
-`kksecura` is our PAT. Kam hand-merged #914 and #915 instead.
+**A checkpoint is owed to me after item 1 and before item 2.** Do not let it run past that unreported.
 
-**Four PRs are ready and every one of them meets the same wall.** Raised to him at 12:5x.
-**Do not work around it** — no `--admin`, no force. It is his one action.
+**FLOOR:** Wednesday `%0` · Secuura `%2` · `%1` monitor.
 
-## 🟢 STATE — verify before acting on any of it
+## 🔴 THE ONE THAT OUTLIVES TONIGHT
 
-**Secuura `develop b6884888d`, CLEAR.** Every author can push, measured 12:01 on three
-agreeing instruments (ancestry with a discriminating control · both audit legs
-EXIT=1 → EXIT=0 with 0 unbaselined and the count falling 41 → 36, exactly the five the
-bump removes · the pins read out of develop's own lockfiles). Residual, stated so it does
-not return as a false re-block: a fresh worktree still meets leg 1 `DEPS MISSING` — that
-is an environment condition, not the repo.
+**NO DEPLOY without migration 048 applied FIRST.** `run-migrations.sh` exits 0 when migrations
+fail, so compose's `service_completed_successfully` gate does not catch it. Demo's image was three
+days stale with 044–047 and **not** 048 — caught on 09-10 only because the seat checked image
+CONTENTS before the step that consumes them. Both boxes now carry it.
 
-**READY, NONE MERGED:** **#916** (KS-993 + KS-1026, head `584b12ba1eed`, retargeted to
-develop today) · **`ed954f09e`** (KS-926 — ⚠ **NO PR EXISTS FOR IT AT ALL**; real work,
-14/14 preflight, and nothing tracking it for review) · **#887** (KS-961, Peter holding on
-one named line; unblocked for free now that develop's advisories are gone) · **#879**
-(KS-945, retargeted today). **#912 STAYS HELD** — NO GO; its api-gateway `confidence` fix
-must land with or before it.
+## 🟡 WITH KAM, HIS HANDS — and none of it blocks tonight's seat
 
-**FLOOR:** empty of agents at 12:5x. Wednesday `%0` · `%1` monitor.
+- **Raise required approving reviews 0 → 1** on the `require-pr-gates` ruleset. Ruled `raise-to-1`
+  at 10:32, **not executed** — my PAT is 403 on ruleset writes. Right now nothing technical stops
+  an unapproved merge.
+- **The agent GitHub identity invite** — ruled **2026-08-26T17:12**, still unexecuted. Every agent
+  approval hits HTTP 422 "cannot approve your own pull request" because `kksecura` authors and
+  `kksecura` is our PAT.
+- **`wed-nas-nightly-leg-has-never-completed`** — filed 19:53, rec `stop-partition-rerun`. See below.
+- **`nas-shared-folders-owner`** — open, rec `wednesday`.
+- **Whether `4_Credentials/` and `3_Access_Keys/` belong on the NAS at all** — in TUESDAY's sync
+  design decision list, deliberately **not** duplicated onto a card of mine.
 
-## 🔴 THE ONE THAT OUTLIVES TODAY
+## 🔴 NO NAS BACKUP EXISTS, AND HAS NOT SINCE THE JOB WAS ARMED
 
-**NO DEPLOY without migration 048 applied FIRST.** On KS-1031 and in #914's PR body.
-`run-migrations.sh` **exits 0 when migrations fail**, so compose's own
-`service_completed_successfully` gate does not catch it. If it is missed, every connector
-erasure anonymises, shreds the DEK and then aborts deterministically, and the connector's
-unbounded retry never succeeds. **Kam's production ban is lifted this week, which is
-exactly why this must not go quiet.**
+Measured 19:4x. `com.wednesday.nassync` PID 84978, started **Wed 9 Sep 03:30**, elapsed 40h+,
+**14% · 395/20,621 items · 6.57 GiB of 44.13 GiB · 15.7 KiB/s · ETA 22 days**. `scheduler/logs/`
+holds **exactly one** nas_sync log ever and **no completed run of any date**; the 09-10 03:30 slot
+never fired because launchd will not start a second instance. **stderr is 0 bytes — not
+TCC-blocked, not failing, just crawling.** 315 Copying lines, **zero Deleting** — nothing destroyed.
+**The process has NOT been killed**; which way to go depends on Kam's ruling on the card.
+Tuesday has the numbers and changed her design on them: the NAS-side lock is now
+**abort-and-report, never wait**.
 
-## 🟡 WITH KAM, HIS HANDS
+## 🟠 OWED BY WEDNESDAY
 
-- The **GitHub identity invite** above — the priority.
-- The **Peter/Stuart unblock message**, drafted 11:47 and paste-ready, nothing in it that
-  is not already on a ticket. **Default if he is silent: nobody is messaged.** They have
-  been blocked, so silence is probably not what he wants — say so rather than let it lapse.
-- Whether an agent opens the **missing KS-926 PR**.
-- The **eight advisory acceptances as ONE review**, well before the 2026-09-24 re-triage.
-- The workspace `CLAUDE.md` tenant section is **behind what he said at 12:15** (two dev
-  tenants — his kreiser.org one, and the developers' one). Shared file, his call.
+1. **23 ruled-but-undelivered Secuura cards** (`decision_queue.sh list ruled --undelivered secuura-`).
+   Three that touch tonight ride in the `%2` brief; two were discharged tonight
+   (`secuura-ks1041-demo-container-recreate`, `secuura-originate-internal-ingress-widened`).
+   The oldest is `ks661-vocab`, 2026-08-24.
+2. **A ruling written locally can be silently UN-RULED by the sync.** Tonight
+   `secuura-originate-internal-ingress-widened` went `ruled` → `open` when panel_sync's rebase
+   resolved a conflict on `decisions.json` in origin's favour. Caught only because
+   `--delivered` refused an unruled card. **Re-verify with `show` after any ruling written near a
+   sync.** Not yet filed as a lesson.
+3. **`NEXT-PICKUP.md` went 31 hours without replacement while TASKS.md called it the live board.**
+   Nothing enforces its freshness.
+4. **KS-1055**, **#936 tier-2 gate never launched**, and the **local stack 16 commits behind** —
+   the stale third box, which is what the pre-push preflight runs against (s169's find).
+5. **WED-148** — `tools/wed_claim.sh:54` runs `pull --rebase --autostash` while
+   `tools/chat_sync.sh:19` forbids it in terms, carrying the 09-09 incident. Filed, deliberately
+   NOT patched: shared tooling, and Tuesday holds the sync work.
+6. **WED-147** — Kam parked the two-seat coordination design until **Monday 2026-09-14**.
 
-## 🟠 OWED BY WEDNESDAY — and they are ONE FAMILY, which is the new part
+## 🟢 STATE, verified tonight — check before acting on any of it
 
-Three fleet tools hardcode **Wednesday's identity** and misbehave at Tuesday's seat. They
-were all written when there was one coordinator, and the 09-08 split made every one of
-them wrong. Kam has an open card on the first instance only (`wed-wakewatch-...`,
-rec `parameterise`); it was raised to him at 12:5x that it is a family of three.
-
-1. **`wake_watch`** polls WEDNESDAY's inbox on whichever seat runs it — it fired at
-   Tuesday this morning. **This is the open card.**
-2. **`send_brief.sh:24`** hardcodes both the sending inbox AND the sender prefix, so
-   **every mail Tuesday sends through it goes out as Wednesday.** Tuesday measured this.
-   Shared file; sequence it when no seat is live on it. **This is the worst of the three.**
-3. **`statusline`** — ✅ **FIXED 12:5x** (`2_Project_Files/tools/statusline_publish.sh`,
-   seat name passed as an argument, no hostname fallback). Kept here as the worked example
-   of the fix shape, not as outstanding work.
-
-Also still owed, unstarted: the **pre-push marker hook** (claimed via `wed_claim.sh` 11:08,
-Tuesday's design adopted whole — she declined the window, it stays Wednesday's) · the
-**"READY FOR QA" artefact rule**: no brief has ever said what READY means as an artefact,
-which is how a whole seat's work ended up with no PR.
-
-## WITH TUESDAY, HERS NOT MINE
-
-Four Datasec cards ruled 12:09 and transcribed by Wednesday (`all-three` · `round3` ·
-`name-tenant` · `structural-look`). ⚠ **`name-tenant` is ruled WITHOUT its answer** — the
-option text is *"Tell Wednesday which tenant"* and Kam has still not named the ID. The card
-reads `ruled`, which is exactly what stops anyone asking. The target is **the developers'
-dev tenant, NOT kreiser.org** — his own words, relayed verbatim. **Wednesday deliberately
-did not guess the ID** despite an obvious candidate, because the workspace file says the
-mapping is unresolved and must not be asserted until checked.
-
-Briefed to her 12:51: pull, point her statusline at the wrapper, and **commit
-`usage_tuesday.json`** — her seat is on another machine and the repo is the only thing that
-carries that file to Kam's dashboard.
+- **KS board: active 137 · In Progress 100 · urgent+P1 91** (`board_count.sh`, real counts, not caps).
+  ⚠ **The KS board needs the SECUURA workspace key**, at
+  `!CODING/Secuura/Blockchain/4_Credentials/.env`. Wednesday's own `LINEAR_API_KEY` returns
+  **TOTAL=0** for team KS — a false absence that looks exactly like an empty board.
+- **WED board: 26 active · 0 `lesson`-labelled.**
+- **Both Secuura boxes on `0f8fb33c3`** — kintsugi 33/33 images rebuilt (32 of 35 serving), demo
+  12/12 (33 of 36), wallets distinct, every rollback tag intact, nothing pruned.
+- **`DEMO_SERVICE_ENABLED` OFF on both** — my ruling; the platform runs no `demo-service` anywhere.
+  **KS-1079** holds the decision. Absent demo-service is not a finding.
+- **Kam's deploy grant EXPIRES END OF SUNDAY 2026-09-13 AEST**, and the parity duty with it.
+  "Everything possible" = what has MERGED. `0_Brain/tasks/EXPIRING-GRANTS.md`.
+- **Weekly allowance 96%, renews in ~2d16h**, shared with Tuesday, who is building NexusAI and
+  HPSM on it now. Flagged to Kam at 19:52; he had ruled `fresh-seat-now` when it read 93%.

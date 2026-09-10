@@ -5,6 +5,9 @@ machine until further notice"*). Datasec belongs to the laptop seat.
 
 | Since | What | Where | State |
 |---|---|---|---|
+| 2026-09-10 19:51 | Secuura seat (%2) — KS-1041 Step 2 gateway-provenance middleware (Kam ruled `fresh-seat-now` 17:11) then close tickets (Kam 19:46) | Secuura/Blockchain, pane %2 | ACTIVE |
+| 2026-09-10 19:5x | The NAS nightly-leg failure: measurement, card `wed-nas-nightly-leg-has-never-completed`, and whatever Kam rules on it | WED / fleet | MINE — Tuesday explicitly declined to duplicate it |
+| 2026-09-10 19:5x | NOT MINE: `nas_sync.sh` itself and the two-seat sync design — TUESDAY claimed it 2026-09-10 09:17 and I have started nothing | Fleet/NAS | HERS |
 | 2026-09-08 18:03 | Secuura seat (%2) — briefs, rulings, gates, merges on the P2 In Review queue from KS-577 | Secuura/Blockchain, pane %2 | ACTIVE |
 | 2026-09-08 18:03 | Correcting the 09-08 boot-spec lesson (its 200K-window premise falsified by measurement) | WED / 0_Brain/learnings | CLOSED 18:0x — corrected, digests regenerated, pushed 09de0120 |
 | — | **EVERY ROW BELOW THIS LINE PREDATES KAM'S 16:01 SHUTDOWN and is HISTORY, not state.** The panes named in them are gone; the Studio rebooted at 17:13. Kept, never deleted. | — | HISTORICAL |
