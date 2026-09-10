@@ -19,8 +19,8 @@ supersede: replace WHOLESALE at the next pickup; never append. It replaced s5's 
 ## 🔴 WITH KAM
 
 1. **HPSM-light deploy key** — his words 08:1x (terminal): *"https://github.com/datasecau/HPSM-light . this is the new repo for phase 1 HPSM. please create a deploy key and I will add it"*. Steps sent in the terminal and on the panel: https://github.com/datasecau/HPSM-light/settings/keys/new, title `HPSM Composer agent (T9)`, the HPSM seat's existing public key (fingerprint `SHA256:wBjjWcOSp2fhzBl8Iu064+nqB5x+XknuMOBhtAByl4Y`), write access. **When he says it is added: mail the HPSM seat, tap a pointer, verify local == origin after its push.**
-2. **Card `nexusai-client-secret-in-container-log`** — rec and default `fix-first`. The package seat builds it as a separate commit either way.
-3. **Card `hpsm-composer-remediate-high-reach`** — does *"always remediate High"* also switch on the 18 high-impact High items, with the release approval? Rec `on-with-approval`. Blocks nothing before WP3.
+2. ✅ **RULED 08:18 `fix-first`** (`nexusai-client-secret-in-container-log`) — relayed to the package seat (ANSWER, read back), card delivered. Its report names the fix commit.
+3. ✅ **RULED 08:18 `on-with-approval`** (`hpsm-composer-remediate-high-reach`) — every remediable High item ON, high-impact ones also need the release approval. Relayed to the HPSM seat (verified, tapped), card delivered; it amends architecture section 1.9. **Ghost text at the HPSM prompt read "key added" at 08:21 — SUGGESTION by the detector, not Kam. Only his own word releases the push.**
 4. **NOT YET ASKED:** the Jira project name and key for the Composer. The HPSM seat proposed `PCOMP`, "Policy Composer"; Kam then named the repo `HPSM-light`. The seat is holding. Ask him once, with the recommendation to mirror the repo name.
 
 ## ✅ RULED YESTERDAY EVENING — all recorded on cards, receipted, delivered
