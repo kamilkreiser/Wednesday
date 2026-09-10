@@ -48,8 +48,9 @@ Re-running under launchd since 07:27 with 9 ruled ignores in `scheduler/nas_sync
 4. **`cockpit.sh`: `die` on the `--mail` routing path prints nothing; `add` should refuse a pane name with no routing entry.**
 5. **`send_brief.sh` double-prefixes a subject that already carries a routing tag.**
 6. **panel_sync `Cannot rebase onto multiple branches` (08:20:09)** — Tuesday's tooling (WED-148), reported not patched.
-7. **Family-weight index** (Kam's measure-first ruling) — claimed, not started.
-8. **18 undelivered Secuura rulings** (`decision_queue.sh list ruled --undelivered secuura-`).
+7. **pretooluse check: flag `grep -c`/`grep -q` on a multi-word quoted phrase without `-i`** — w=3 case-sensitive false zeros today (ledger).
+8. **Family-weight index** (Kam's measure-first ruling) — claimed, not started.
+9. **18 undelivered Secuura rulings** (`decision_queue.sh list ruled --undelivered secuura-`).
 
 ## ⚠ TRAPS MEASURED TODAY
 
