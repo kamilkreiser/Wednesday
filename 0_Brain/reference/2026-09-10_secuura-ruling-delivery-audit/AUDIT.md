@@ -165,3 +165,32 @@ is one query, and it converts this from an argument into a fact.
 |---|---|
 | `secuura-f5-demo-interim-mitigation` (`letitland`) | **KS-946 is `In Review`**, not merged — *"Four path spellings dodge EVERY path-scoped gateway limiter — a CLASS"*. The real fix exists and is awaiting review, so the ruling is in flight rather than delivered. |
 | `secuura-dependabot-triage` (`close-and-rescope`) | **Rescope CONFIRMED done** — `.github/dependabot.yml` on develop declares only `npm` and `docker`; `github-actions` is gone. The "close the 5" half stays unconfirmed. |
+
+---
+
+## 6. THIRD PASS (2026-09-10 11:3x) — ticket states checked, and two rulings have quietly slipped
+
+| Ticket | State | Bears on |
+|---|---|---|
+| **KS-946** | **In Review** | `secuura-f5-demo-interim-mitigation`, ruled **`letitland`** on 2026-09-07 — *"No interim change, land the real fix TODAY"*. **Three days later the fix is still In Review, not landed.** The ruling chose "no interim protection" *on the strength of* the fix landing that day. **That premise has expired, and nobody re-raised it.** This is the shape where a decision stays on the page while the world moves under it: the option Kam picked is now strictly worse than the one he declined, and only because of a delay nobody flagged. |
+| **KS-889** | **Backlog** | `secuura-org-trust-boundary-within-tenant`, ruled **`bind`** 2026-09-07 (403 on an issuer/actor mismatch). The ticket it was meant to unblock is sitting in Backlog. **No evidence the bind was implemented.** |
+| KS-1075 | In Review | The CI-gates ticket from today's item 3. **The Playwright finding must NOT be closed inside it** — filed as its own ticket per my instruction to the seat. |
+| KS-986 · KS-951 | Backlog | The demo-credential residue. Unchanged, unscheduled. |
+| KS-913 | **not returned by the API** | Named in KS-949's description as `Tested Not Deployed`. **My query returned nothing for it** — either it does not exist on the KS team or the id in that description is wrong. **Recorded as unresolved rather than assumed absent**: a query returning nothing is a statement about the instrument until proven otherwise. |
+
+### The pattern this third pass exposes
+
+The first pass asked *"was this ruling actioned?"* — a yes/no. **This pass found a third
+answer that neither column had: the ruling was actioned in the sense of being started, and
+the reason Kam chose it has since expired.** `letitland` was a choice to accept exposure for
+hours, not for days, and it has now run for three days without anyone putting that back in
+front of him.
+
+**A delivered/undelivered ledger cannot see this.** A "start the work" ruling needs a
+by-when, and an expiring precondition needs something that re-raises it. Neither exists.
+That is the gap worth taking to Kam, and it is more valuable than clearing the remaining rows.
+
+**Remaining undelivered: 19 at the start of this pass.** This pass classified rather than
+cleared — I have deliberately not marked anything delivered on the strength of a ticket
+being *In Review*, because in review is not landed and that conflation is the whole finding
+above.

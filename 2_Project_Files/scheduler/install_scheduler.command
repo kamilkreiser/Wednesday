@@ -101,6 +101,20 @@ install_job "com.$AGENT.close" "close_wednesday.sh" 23 0
 if [ "$AGENT" = "tuesday" ]; then NAS_HOUR=23; NAS_MIN=0; else NAS_HOUR=3; NAS_MIN=30; fi
 install_job "com.$AGENT.nassync" "nas_sync.sh" "$NAS_HOUR" "$NAS_MIN"
 
+# ── 15:00 daily sweep (Kam, panel 2026-09-10 11:41 + 11:41:58 "Do this at 3pm Sydney time") ──
+# "archive items that have been deployed, merged, or completed at the end of the day,
+#  and add to this schedule to archive, deploy, or merge any items that are ready to do so."
+#
+# WEDNESDAY'S SEAT ONLY, and that is not a preference. daily_sweep.sh sweeps the SECUURA
+# board and Wednesday's own; arming it as com.tuesday.dailysweep would have the Datasec
+# coordinator archiving another client's tickets on a timer — hard rule 2, on a schedule,
+# with nobody watching. The script carries its own seat guard too; this is the outer half.
+if [ "$AGENT" = "wednesday" ]; then
+  install_job "com.$AGENT.dailysweep" "daily_sweep.sh" 15 0
+else
+  echo "skipped com.$AGENT.dailysweep — the daily sweep is Wednesday's seat only (it sweeps Secuura + WED)"
+fi
+
 echo ""
 echo "── verification ──"
 for label in "com.$AGENT.shiftchange" "com.$AGENT.wake" "com.$AGENT.close" "com.$AGENT.nassync"; do
