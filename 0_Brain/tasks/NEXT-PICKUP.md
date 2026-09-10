@@ -15,21 +15,39 @@ supersede: replace this file wholesale at the next pickup; do not append
 > the merges and the whole-estate deploy of 09-10. **Replaced wholesale, per this file's own rule.**
 > The full narrative state is `0_Brain/daily/2026-09-10.md`.
 
-## 🟢 WHAT IS RUNNING RIGHT NOW
+## 🟢 FOR KAM IN THE MORNING — three things, all one click each
 
-**Secuura/Blockchain seat on pane `%2`**, launched 19:51, brief verified at
-`secuura-blockchain@agentmail.to` 2026-09-10T09:51:24Z, boot observed in the pane (not taken from
-the launcher's receipt). Its queue:
-1. **KS-1041 Step 2** — the gateway-provenance middleware in `originate`. **Kam ruled
-   `fresh-seat-now` on the panel at 17:11**; the tap sat uncaught on its card for 2h33m because no
-   seat was awake, and `reconcile_rulings.py --apply` landed it at 19:44. Tier-1 gate, both arms
-   red-proofed (forged header REFUSED **and** genuine gateway call still SUCCEEDS).
-2. **Then close tickets**, order its own — Kam, panel 19:46 verbatim: *"Keep working on the secure
-   tickets. Close off as many as you can tonight."*
+1. **Approve PR #935** (KS-1057) — gated GO WITH FINDINGS round 2; head is comments + commit-message only past the gated SHA and the gate ruled that needs no re-gate.
+2. **Approve PR #936** (KS-1058) — gated GO WITH FINDINGS tonight, 0 blockers / 0 majors / 2 minors.
+3. **Close KS-1067** — receipt is on the ticket. **Verified independently by Wednesday, not relayed:** FOUR systemTest locks on `origin/develop` at `smol-toml` **1.8.0** (package counts 212/423/274/361 as positive controls); advisory `GHSA-7w5x-hrqm-74c2` vulnerable **≤1.7.0**, first patched **1.7.1**. Fixed with margin, not time-boxed. The seat wrote the receipt and correctly did **not** close it.
 
-**A checkpoint is owed to me after item 1 and before item 2.** Do not let it run past that unreported.
+**Also his, still unactioned and both older than tonight:** `raise-to-1` on the `require-pr-gates` ruleset (**the ONLY brake on develop — required approvals is 0, `required_status_checks` absent, `blocked`=0**) · the **agent GitHub identity invite**, ruled 2026-08-26, which is why no agent can approve anything.
 
-**FLOOR:** Wednesday `%0` · Secuura `%2` · `%1` monitor.
+**Waiting on him, drafted not sent:** `5_Project_History/2026-09-10_peter-protocol/DRAFT-reply-to-peter.md`.
+
+## 🟠 THE MORNING FOLLOW-ON HE HAS NOT SEEN YET
+
+**The NAS partition is necessary and NOT sufficient.** Kam ruled `stop-partition-rerun` at 20:27 and it was executed (both ignores verified active: `!coding/datasec` = 0 against a **16,516** positive control). But the scan is still walking `node_modules` inside Secuura worktrees. **The 2026-09-04 note measured that exact cost: 28 SECONDS with `node_modules` ignored, against 2h23m without.** The profile does not ignore it. **`narrow-hard` was on his card as its own option and he chose otherwise — cutting what a BACKUP contains is his call, so this is a follow-on question, not an override.**
+
+## 🔴 STATE OF THE PR QUEUE — the number is 2, not 7
+
+| PR | ticket | gate | approval-ready? |
+|---|---|---|---|
+| #935 | KS-1057 | GO WITH FINDINGS (r2) | **YES** |
+| #936 | KS-1058 | GO WITH FINDINGS (tonight) | **YES** |
+| #937 | KS-1059 | **never run** | no — gate first |
+| #940 | KS-1075 | **never run** | no — gate first |
+| #941 | KS-1077 | **never run** | no — gate first |
+| #925 | KS-1046 | **never run** | no — gate first |
+| #943 | KS-601 | n/a (docs/runbook) | no tier gate owed — say so explicitly |
+
+⚠ **`mergeable_state` IS INVERTED ON THIS REPO. Do not triage by it.** #925 reads `clean` **only because its three runs are all `startup_failure`** from the billing-dead era, and a run that never starts reports no conclusion. **`clean` here means nothing ever checked it; `unstable` means something did and complained.** Actions is alive again (runs 2026-09-10 10:24Z; `pr`, `PR Security Gates (KS-168)` and `Security Scanning` all failing).
+
+## 🟢 FLOOR
+
+Empty of agents at 21:0x. Wednesday `%0` · `%1` monitor. s170 wrapped 20:55, **scored 1.00**. Nothing merged, nothing deployed, no gate touched, no contact with Peter or Stuart.
+
+**NAS re-run still going** (started 20:29:53, PID tree under `nas_sync.sh`). Owed to Tuesday when it ends: elapsed, percentage, `Deleting` count, and whether it completed.
 
 ## 🔴 THE ONE THAT OUTLIVES TONIGHT
 
