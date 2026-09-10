@@ -7,7 +7,7 @@ status: live
 
 # Boot digest BY TIER — W whole, M rules-only, every project case a handle
 
-Generated 2026-09-10 11:31 from 141 lesson files (730,180 B). M 32 · MIXED 5 · W 104. 28 project CASE sections inside MIXED files are reduced to one line each: the heading and the path to read it at. W blocks are exactly what the default digest carries; M blocks drop the section index and keep the rules; a P file is a single handle. The CASES behind every rule live only in the lesson files — open one the moment its rule fires.
+Generated 2026-09-10 11:37 from 142 lesson files (734,151 B). M 32 · MIXED 5 · W 105. 28 project CASE sections inside MIXED files are reduced to one line each: the heading and the path to read it at. W blocks are exactly what the default digest carries; M blocks drop the section index and keep the rules; a P file is a single handle. The CASES behind every rule live only in the lesson files — open one the moment its rule fires.
 
 ## The T9 SSD is the master — Wednesday must be fully portable
 `2026-07-31_fully-portable-drive.md` · principle · 2026-07-31 · status: superseded — the "T9 is the master" half by [[2026-08-25_one-drive-devmaster-is-master]] (2026-08-25); the portability principle itself still lives · tier: W
@@ -4862,6 +4862,39 @@ sections (open the file for these): The two, one hour apart, both to the princip
 5. **When a lesson names a missing consumer, the consumer is the deliverable.** Writing down that
    nothing reads a field is not a fix; it is a description of the defect with a date on it
    ([[2026-08-07_a-promise-is-not-a-mechanism]]).
+
+
+## A single-FILE bind mount binds the INODE, not the path — replacing the file on the host does not reach the container, and every signal still says success
+`2026-09-10_a-single-file-bind-mount-binds-the-inode.md` · reference · 2026-09-10 · status: live · tier: W
+
+**The case.** KS-1041's fix was one nginx config file. Kam authorised exactly *"push the file
+and reload"* on the strength of the seat's report that it was bind-mounted. The seat did that,
+and:
+
+sections (open the file for these): Why this is a lesson and not a docker footnote · How to apply
+
+## How to apply
+
+1. **A deploy is verified by the BEHAVIOUR of the running service, never by the success of the
+   steps that were supposed to change it.** Insist on the outcome probe, and on a positive
+   control in the same run so an outage cannot masquerade as a fix.
+2. **Directory bind mounts follow the path; single-file bind mounts follow the inode.** If a
+   deploy replaces a bind-mounted FILE, the container needs recreating. Editing in place
+   (`sed -i` without `--follow-symlinks` still replaces; `cat > file` does not) is the only
+   host-side write that keeps the inode.
+3. **`docker exec … nginx -t` reads the container's file, so it tests the OLD config and passes.**
+   A config test that passes tells you the file it read is valid — it does not tell you which
+   file it read.
+4. **When a cheap-path claim underpins an authorisation, the claim is part of the ask.** Kam
+   authorised "a file push and a reload" *because* it was described as bind-mounted and
+   reversible. When that premise fell, the remaining action — a container recreate — was
+   outside his grant, and the seat correctly stopped rather than reading his ruling as covering
+   it. **A premise that turns out false does not silently widen the authority built on it.**
+
+**Family:** [[2026-09-08_the-check-ran-and-was-not-checking-the-thing]] ·
+[[2026-08-11_a-check-that-cannot-fail-is-not-a-check]] ·
+[[2026-09-10_a-detector-keyed-on-remedy-text-matches-the-hint]] ·
+[[2026-08-03_mental-model-not-source-of-truth]] · [[2026-09-06_green-local-proof-is-not-evidence-about-a-different-environment]].
 
 
 ## I endorse things I have not read — and the endorsement is what makes them binding

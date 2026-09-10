@@ -7564,5 +7564,57 @@
    }
   ],
   "amended_ts": "2026-09-10T11:29:35.315551+10:00"
+ },
+ {
+  "id": "secuura-ks1041-demo-container-recreate",
+  "client_project": "Secuura/Blockchain",
+  "title": "Your demo fix deployed, reloaded cleanly — and did NOTHING. A single-file bind mount binds the INODE. Closing it needs a container recreate, which your ruling excluded",
+  "bluf": "YOUR OWN VERIFICATION CRITERION IS THE ONLY REASON WE KNOW THIS. Everything looked right: the config uploaded with a matching checksum, `nginx -t` exit 0 BEFORE the reload, `nginx -s reload` exit 0, container still `Up 2 days (healthy)`. A seat that reported on those signals would have told you the exposure was closed. HALF 1 OF YOUR PAIR FAILED: the credential-free GET returns 401 FROM ORIGINATE, not 404 — which proves the request is still being proxied there. THE EXPOSURE IS OPEN, exactly as it was this morning. HALF 2 IS GREEN so this is NOT an outage: /health, /, /verify/, /admin/ all 200; /api/documents 401 with auth working; the sibling /analytics/ route untouched. The box is fully functional and in the state it was in before anyone touched it. THE CAUSE, MEASURED TO THE INODE RATHER THAN THEORISED: a single-FILE bind mount binds the INODE, not the path. Host file sha ae4cc54c, inode 1311680, 32831 bytes; container sha 265b7a60, inode 1311687, 31596 bytes. The copy replaced the file and produced a NEW inode; the mount still resolves to the original, so nginx reloaded and faithfully re-read the OLD file. And that old inode is now UNLINKED — `find -inum 1311687` returns 0 paths, against a control where `find -inum 1311680` does return its path. SO NO HOST-SIDE WRITE CAN REACH WHAT THAT CONTAINER IS SERVING. Only recreating the container re-resolves the mount. WHOSE ERROR THIS IS, PLAINLY: the seat told Wednesday the file was bind-mounted so an rsync plus a reload would do it, Wednesday passed that to you as the cheap-and-reversible framing, and it is the basis your authorisation rested on. The file IS bind-mounted; what does not follow is that replacing it on the host reaches the container. Wednesday's provenance line at the time said it had not read the demo host and was relying on the seat — that qualification was correct and it is not a defence. The project's own documented redeploy path (`rsync` then `docker compose build && up -d`) works precisely because `up -d` recreates the container; the trap is specific to the shortcut. WHAT IS NEEDED: `docker compose up -d nginx-gateway` in /home/secuura/secuura/Dev. That is a SERVICE RESTART on the demo box, which your ruling explicitly excluded, so the seat stopped and did not do it. Seconds of gateway downtime; rollback held at /home/secuura/nginx-demo.conf.rollback-ks1041-20260910, verified byte-identical to the original. ONE THING TO KNOW BEFORE YOU CHOOSE: the seat left the HOST file as the KS-1041 version rather than restoring it, so the correct config is staged. The consequence, said out loud rather than discovered later: the NEXT `docker compose up -d` on that box, for any reason, by anyone, will apply this change without whoever runs it intending it then. It is the desired change, so it is not dangerous — but nobody should meet it as a surprise.",
+  "default_action": "HOLD. The demo keeps the open route — an unauthenticated read of tenant billing data on the box prospects and the team reach — and Step 2 stays blocked behind Step 1's verification. Nothing degrades and nothing is customer-facing; production does not exist, measured. The staged host file stays staged, so the fix lands whenever that container is next recreated for any other reason.",
+  "options": [
+   {
+    "key": "recreate-now",
+    "label": "Authorise `docker compose up -d nginx-gateway` on demo now, then re-run your pair (Recommended)",
+    "detail": "Recreates the gateway container so the mount re-resolves. Seconds of gateway downtime, rollback held and verified. Then both halves of your verification run again in one go. This is the only action that closes the exposure today, and it is a restart of one container, not a build or a redeploy of the estate."
+   },
+   {
+    "key": "documented-path",
+    "label": "Use the project's documented redeploy path instead — rsync then `docker compose build && up -d`",
+    "detail": "What DEPLOYMENT-ARCHITECTURE.md actually prescribes, so it is the orthodox route and it also re-resolves the mount. Costs a build and touches more than one container, which is a bigger blast radius than the exposure warrants — but it leaves the box in the state the docs describe rather than a hand-recreated one."
+   },
+   {
+    "key": "restore-and-wait",
+    "label": "Restore the host file and leave demo untouched until a planned window",
+    "detail": "Removes the staged-change surprise entirely. The exposure stays open for as long as you wait, and the work has to be redone when you do act."
+   },
+   {
+    "key": "leave-staged",
+    "label": "Change nothing more; let the fix land at the next redeploy for any reason",
+    "detail": "Zero action, zero downtime, and the fix eventually applies itself. Cost: the exposure stays open for an unknown period, and the change lands at a moment nobody chose."
+   }
+  ],
+  "recommended": "recreate-now",
+  "ts": "2026-09-10T11:36:51.351093+10:00",
+  "status": "open",
+  "ruled_choice": null,
+  "ruled_ts": null,
+  "prior_rulings_overridden": [
+   "CARD secuura-ks697-demo-probe",
+   "CARD secuura-demo-deploy-scope-2026-09-03",
+   "CARD secuura-demo-service-persona-switch-2026-09-03",
+   "CARD secuura-demo-service-crash-loop",
+   "CARD secuura-demo-stop-needs-kams-own-word",
+   "CARD secuura-demo-admin-image-rebuild-2026-09-05",
+   "CARD secuura-demo-vm-prune",
+   "CARD secuura-demo-kam-admin-default-password",
+   "CARD secuura-f5-demo-exposure-probe",
+   "CARD secuura-f5-demo-interim-mitigation",
+   "CARD secuura-demo-admin-transcripts",
+   "CARD secuura-demo-admin-mfa",
+   "CARD secuura-demo-row-060-remediation",
+   "CARD secuura-ks968-demo-hash-probe",
+   "CARD secuura-ks1041-fix-shape-demo-exposed",
+   "CARD secuura-ks1041-step1-demo-verify-now"
+  ]
  }
 ]
