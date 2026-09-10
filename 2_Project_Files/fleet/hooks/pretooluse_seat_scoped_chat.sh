@@ -28,7 +28,15 @@ except Exception as e:
 
 # Only the panel chat STORES. chat_reply.sh (writing) and kam_rulings_today.sh / kam_msgs.sh
 # (which already filter) are not the target — see the allow test below.
-if printf '%s\n' "$CMD" | grep -qE 'chat_log\.json|chat_kam\.json'; then
+# TRIGGER IS PER-LINE PROXIMITY, NOT BARE PRESENCE (narrowed 2026-09-10 19:2x, on its FIRST
+# LIVE FIRE, which was a FALSE POSITIVE). The first version refused any command CONTAINING
+# `chat_log.json` — and fired on a Linear ticket body that merely QUOTED an incident mentioning
+# the filename in prose. That call read nothing. It is the exact shape pretooluse_no_cd.sh
+# already documents ("the prose `(cd family)` inside a quoted heredoc refused a note write, and
+# then refused the fix that mentioned it"), repeated in a hook written the same day.
+# A GATE WITH FALSE POSITIVES GETS ROUTED AROUND — that is the whole family this came from.
+# So: refuse only when ONE LINE carries both the store AND a read construct.
+if printf '%s\n' "$CMD" | grep -qE '(cat|head|tail|less|grep|sed|awk|jq|open|load|read|json\.load)[^|]{0,80}(chat_log|chat_kam)\.json|(chat_log|chat_kam)\.json[^|]{0,40}(\)|\||>)' ; then
   # ALLOWED: the sanctioned readers, or any command that demonstrably honours `view`.
   # ALLOW on the bare token `view` — NOT on a quoted/escaped shape. The first version matched
   # ['\"]view['\"] and get(.view.), and BOTH missed `d.get(\"view\")` because the escaped quotes

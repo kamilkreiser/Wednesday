@@ -7,7 +7,7 @@ status: live
 
 # Family-weight index — what a recurrence is measured against
 
-Generated from **825 ledger rows** (808 = 97% cite a lesson file) across `_ledger.md` + `_ledger_archive.md`. **137 families.**
+Generated from **826 ledger rows** (809 = 97% cite a lesson file) across `_ledger.md` + `_ledger_archive.md`. **137 families.**
 
 **`rows` is the hard count** — how many ledger rows cite this lesson; that is the number to quote when assigning a weight. **`max_w` is soft** — the largest `w=N` in any row citing it, and a row citing several lessons attributes its weight to each, so it can overstate. **Sorted by `rows`, not `max_w`** — five families share a max_w of 144 for that reason. Use `max_w` only to ask *"is this family high?"*, then `grep` the archive for the prose.
 
@@ -25,8 +25,8 @@ Generated from **825 ledger rows** (808 = 97% cite a lesson file) across `_ledge
 | [[2026-08-16_an-overstated-record-gets-discounted-wholesale]] | 50 | 27 | 144 | 2026-09-10 |
 | [[2026-09-01_qa-gate-before-my-verification]] | 47 | 8 | 144 | 2026-09-10 |
 | [[2026-09-05_a-relayed-ruling-is-delivered-only-when-it-is-in-the-artefact]] | 42 | 26 | 144 | 2026-09-10 |
+| [[2026-08-06_exercise-mechanisms-before-arming]] | 41 | 17 | 86 | 2026-09-10 |
 | [[2026-08-21_challenge-me-when-you-think-im-wrong]] | 40 | 12 | 123 | 2026-09-10 |
-| [[2026-08-06_exercise-mechanisms-before-arming]] | 40 | 16 | 86 | 2026-09-10 |
 | [[2026-09-06_a-retraction-inherits-the-scope-of-its-measurement]] | 35 | 18 | 144 | 2026-09-10 |
 | [[2026-08-06_brief-provenance-enforcement]] | 35 | 3 | 90 | 2026-09-09 |
 | [[2026-08-26_never-delete-cleanup-means-quarantine]] | 31 | 15 | 3 | 2026-09-10 |
