@@ -19,6 +19,30 @@ supersede: replace WHOLESALE at the next pickup; never append. It replaced the s
 3. **RD-369 at its cap** — tier-1 gate returned NO GO. Ship-and-ticket recommended, **default if he stays silent**. No round 4 without him.
 4. **13B COUNTS 132 FINDINGS AND ENUMERATES ~52.** 80 are tallied and never described. Four INTAKE tickets carry the gap (CWP-4, CPKEY-168, MYP-40, SEC-3). **This also bounds the evidence appendix** — 14 entries because 14 is what the register describes. I told him the appendix covered every finding before I knew this, and corrected it.
 
+## 🔴 LIVE AT HANDOVER (18:5x) — TWO AGENTS RUNNING, both report to tuesday-agent@
+
+1. **HPSM Phase 1 ARCHITECTURE** (pid 56605). Kam commissioned Phase 1 and answered the scoping
+   questions himself, verbatim in `briefs_staged/2026-09-10_hpsm-phase1-architecture.md`:
+   **"internal" = a COMMERCIAL, DATASEC-BRANDED product sold to Datasec's clients — NOT internal-use**
+   (Tuesday read it wrong first); scope is **ALL**, bounded by "everything needed to generate the
+   attached outputs"; every attached output included and **branding must be flexible**;
+   **full authority to build BUT LOCAL FIRST — no cloud, nothing billable, until he approves.**
+   The CRM/finance discovery docx was **attached by accident** — excluded, and the launcher refuses
+   if that exclusion, LOCAL FIRST, or architecture-only goes missing (all three red-proofed).
+   **Kam has said "go ahead and start building once you're ready" — the build is authorised to
+   follow the architecture.**
+2. **NexusAI remediation SUCCESSOR** (pid 58713), worktree `wt-s51-mktremed` @ `58184aa`, clean.
+   **DONE + committed:** `.dockerignore` at-any-depth · item 2 masking · item 2b publisher IDs out
+   of the wizard · item 4 surnames blurred (7 screenshots).
+   🔴 **NOT DONE: item 1 — `docs/Authorized_Users.md` is STILL PRESENT.** The check never completed.
+   Predecessor **ended its turn waiting on background jobs that never woke it** — work committed
+   first, nothing lost. Successor is finishing item 1, verifying what landed, and owes Kam the
+   screenshot re-shoot recommendation.
+
+⚠ **THE LAUNCHER GUARDS MATCH LITERAL PHRASES.** Rewriting a prompt silently drops Kam's rulings:
+this seat's successor prompt was refused twice — rc 18 (lost "CHECK, NOT AN ACTION") and rc 19
+(lost his item-3 "ACCEPTED"). **Both refusals were correct.** Keep those phrases verbatim.
+
 ## 🚦 DEPLOYMENT STATE — measured 15:20, not recalled
 
 **NOTHING DEPLOYED TODAY, NOTHING MERGED**, and that is by design: the day was documents, a review
