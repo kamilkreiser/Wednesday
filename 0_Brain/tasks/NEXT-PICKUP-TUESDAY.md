@@ -19,6 +19,28 @@ supersede: replace WHOLESALE at the next pickup; never append. It replaced the s
 3. **RD-369 at its cap** — tier-1 gate returned NO GO. Ship-and-ticket recommended, **default if he stays silent**. No round 4 without him.
 4. **13B COUNTS 132 FINDINGS AND ENUMERATES ~52.** 80 are tallied and never described. Four INTAKE tickets carry the gap (CWP-4, CPKEY-168, MYP-40, SEC-3). **This also bounds the evidence appendix** — 14 entries because 14 is what the register describes. I told him the appendix covered every finding before I knew this, and corrected it.
 
+## 🚦 DEPLOYMENT STATE — measured 15:20, not recalled
+
+**NOTHING DEPLOYED TODAY, NOTHING MERGED**, and that is by design: the day was documents, a review
+and ticketing, none of which ships code.
+
+    NexusAI origin/main          cd2b543 — unchanged all day
+    RD-369 round 3               7cd0907 on rd-369-round3-s49, NOT merged (at its cap)
+    branches ahead of main       8, incl. rd-362 (pen-test report exposure) and rd-363 (Key Vault)
+    Partner Center               nothing submitted
+    Vision Sales Portal (LIVE)   HTTP 302 to login — control: a non-existent azurewebsites host returns 000
+
+🔑 **`rd-362` being unmerged is the SAME GAP the marketplace review found from the other side** —
+the exclusions missing from `2_Project_Files`'s 26-April `.dockerignore` are the ones that branch
+carries. Two findings, one cause. Worth stating together when Kam rules on either.
+
+⚠ **NOT MEASURED and offered to him: the Azure resource state of NexusAI dev/staging.** No `az` was
+run today. If a successor is asked "is it deployed", that is the gap — verify the tenant first
+(`az account show`), the launcher scopes `AZURE_CONFIG_DIR` per project.
+
+**Summary + deployment status emailed to Kam 15:21** (his ask arrived by email; answered there and
+mirrored to the panel).
+
 ## ✅ DELIVERED TODAY, all verified independently rather than on an agent's word
 
 - **Security Review 13A/13B rebuilt + emailed** (to `kamil.kreiser@datasec.com.au` — Datasec deliverables go to the Datasec address, NOT `kreiser.org@me.com`; he corrected me on that). Appendix E/D evidence locations, 147 entries, 663 file:line citations; 185 tables re-widthed, left column 6.00 cm; two blank lines before `###`. Verified against the pre-edit files as controls: page breaks 175→146 and 50→25, exactly the `###` counts; tables/rows unchanged.
@@ -44,7 +66,7 @@ supersede: replace WHOLESALE at the next pickup; never append. It replaced the s
 **He dictates (Superwhisper).** Read through the noise; where a dictated word decides an action, state your reading and check it, or ask him to type that one word.
 **Cross-seat mail is COORDINATION ONLY. Names, not pronouns. Never delete — quarantine.**
 🔴 **DO NOT run the wrap's vault step** (`end-of-session.md:50` is `git add -A`; the vault holds Secuura paths).
-**Coordinate claims with Wednesday before starting shared work** (Kam, 12:06). She holds: `panel_sync`, the cockpit conversation heldbar, and the decision-panel freeze.
+**Coordinate claims with Wednesday before starting shared work** (Kam, 12:06). She holds: `panel_sync`, the cockpit conversation heldbar, and the decision-panel freeze — **all shipped; the guard CLASS is closed** (swept `cockpit.html`: two deferral guards at `:521` and `:1245`, both fixed, `chat.html` clean). **One untested seam remains and it is `feedBusy` alone** — her harness could not move focus into a collapsed card. `convoBusy` needs no test: Kam's frozen screenshot IS its positive control. If the FEED looks stale, the first question is whether the banner appeared at all.
 
 ## WHAT s5 WOULD SAY IF IT COULD SAY ONE THING
 
