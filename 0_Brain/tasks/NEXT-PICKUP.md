@@ -29,6 +29,48 @@ supersede: replace this file wholesale at the next pickup; do not append
 
 **The NAS partition is necessary and NOT sufficient.** Kam ruled `stop-partition-rerun` at 20:27 and it was executed (both ignores verified active: `!coding/datasec` = 0 against a **16,516** positive control). But the scan is still walking `node_modules` inside Secuura worktrees. **The 2026-09-04 note measured that exact cost: 28 SECONDS with `node_modules` ignored, against 2h23m without.** The profile does not ignore it. **`narrow-hard` was on his card as its own option and he chose otherwise — cutting what a BACKUP contains is his call, so this is a follow-on question, not an override.**
 
+## 🔴 PR #951 — BUILT TONIGHT, AND IT IS **NOT** APPROVAL-READY. IT NEEDS AN INDEPENDENT GATE.
+
+`https://github.com/Secuura/Distributed_Secuura/pull/951` — KS-1041 Step 2, the gateway-provenance
+middleware. **Kam ruled `fresh-seat-now` for it at 17:11 and s170 built it.**
+
+⚠ **THE BUILDER CANNOT BE ITS OWN GATE.** s170 said so itself in its last line: *"PR #951 needs a
+gate someone other than me gives it."* It is right, and it is our own rule
+([[2026-09-01_qa-gate-before-my-verification]] — agent → Wednesday → **testing agent** → Wednesday)
+as well as the protocol Kam adopted tonight. **The evidence on it is the AUTHOR's, however good, and
+it is very good.**
+
+**What is already proven (by the author, so treat it as a strong claim and not as the gate):** three
+arms revert-checked and restored to byte-identical sha256, **cell counts quoted on every tamper**,
+plus a live toggle on the running stack — set → 401, unset → 200. A **named** KS-688 residual: the
+unit probe route is a *copy* of the metering predicate because importing the real router drags in
+`../db`, and the live proof is what covers it. Blast radius after the change: **2 services in
+compose**, and the secret lifted **out of bicep `commonSecrets`** (which reaches 20 apps, one being
+`verifierFrontend`, the container the original 200 was probed from) — declarations 22 → 4.
+
+**FIRST ACTION FOR THE MORNING SEAT: commission a tier-1 QA gate on #951 from a seat that did not
+build it.** Not a re-derivation — the author's evidence is on the PR. What the gate must
+independently establish, at minimum:
+1. **The vouch is not forgeable by a peer container.** Read the resolved compose config yourself and
+   name which services carry the secret, with a **discriminating control** — read the env of
+   `secuura-verifier-frontend` and show it does **not** have it.
+2. **The `TRUST_HEADER_PATTERN` widening landed in the SAME commit as the header's introduction.** A
+   vouch header settable by a client for even one deploy is the same hole renamed.
+3. **The three arms bite** — re-run the tampers and **quote cells-run beside pass/fail**. s170's own
+   first tamper was a **FALSE RED**: it broke compilation and reddened having executed **0 cells**.
+   *Red for the wrong reason is indistinguishable from red for the right one unless you read the
+   count.*
+4. **§3b drift:** the new var present in `.env.example`, `env.example`, the compose service block,
+   `docs/ENVIRONMENT-VARIABLES.md`, and bicep per-service — **name only, never a value.**
+
+**DISCLOSURE THAT RIDES WITH IT (Kam's to rule on, already in the PR's Test Evidence):** to run the
+live proof, s170 appended a **freshly generated** `GATEWAY_VOUCH_SECRET` to the gitignored
+`Blockchain/Dev/.env` on this machine. No pre-existing secret was read, printed or committed; only
+hashes were output; it disclosed unprompted. **Wednesday ruled leave-it-and-state-it and put the
+fault at 60/40 its own** — the brief demanded a live-stack red proof and never said how a secret
+reaches one. **Going forward the convention is Peter's §7/§8, adopted tonight: generate the file,
+name the keys, ask.**
+
 ## 🔴 STATE OF THE PR QUEUE — the number is 2, not 7
 
 | PR | ticket | gate | approval-ready? |
