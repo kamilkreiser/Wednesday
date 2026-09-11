@@ -7,7 +7,7 @@ status: live
 supersede: replace this file wholesale at the next pickup; do not append
 ---
 
-# NEXT PICKUP — 2026-09-11 20:1x (seat booted 18:5x). **#936 + #951 MERGED and verified (develop `b75cff4d6`); s182 scored 1.00 and closed; tier-2 gate LIVE on the docs PR #956.**
+# NEXT PICKUP — 2026-09-11 20:5x (seat booted 18:5x, ctx 78%). **#936/#951 merged; #956 GO WITH FINDINGS; s183 LIVE closing out #956 (plan confirmation owed).**
 
 > Narrative: `0_Brain/daily/2026-09-11.md` (18:53 block onward). **Measure before acting on any line here.**
 
@@ -17,18 +17,17 @@ supersede: replace this file wholesale at the next pickup; do not append
 ## 🟢 FLOOR
 | pane | seat | state | next event the successor owes |
 |---|---|---|---|
-| `%21` | **QA tier-2 gate on PR #956 (KS-1092) @ `5ffe2f95e`** | launched 20:1x, verified at rung 5; brief `fleet/qa-agent/briefs/2026-09-11_secuura-956-ks1092-tier2.md`, launcher red-proofed 11/0 | **verdict mail `[QA -> Wednesday] TIER 2 GATE #956 ROUND 1 (KS-1092) 5ffe2f95e`** (FROM Wednesday — filter on subject) → head re-read at origin → completion check against the brief's 8 asks → GO / fix round (round 1 of 2) → `pane_close.sh %21` → a merge seat squashes #956 on Wednesday's GO (Kam 17:50) and closes + archives KS-1092 |
+| `%22` | **s183 Secuura/Blockchain — close out #956** | launched 20:52 via `brief_and_launch.sh`, brief verified at destination 10:52:50Z | **(1) plan confirmation → ANSWER (rung 6)** · (2) verdict comments + ONE follow-up ticket (QA-1..QA-5 as ruled) → verify at source · (3) #956 squash at `5ffe2f95e` → verify: one parent == T, 3 files, KS-1092 Done + `archivedAt` · (4) root CLAUDE.md :243 fix · (5) follow-up PR READY FOR QA → tier-2 gate (round 1 of 2) · (6) wrap → score AFTER the last gate verdict → `pane_close.sh %22` |
 | `%1` | monitor | — | — |
 
 Brief: `2_Project_Files/fleet/briefs_staged/2026-09-11_s182_merge-936-951-docs-pr.md`. develop at 18:5x = `8a6b0d9c2` → **19:40 = `b75cff4d6`** (#936 squash `27509dc7a` · #951 squash `b75cff4d6`, both VERIFIED AT SOURCE by Wednesday; KS-1058 + KS-1041 Done + archived; residuals on KS-1032 / KS-1091; KS-1090 filed; KS-741 hold met, not started). **s182 now on item 2 (docs PR) → READY FOR QA → tier-2 gate. Owed in its next ANSWER: assign KS-1032 to the board account; set KS-1091's priority.**
 **GO heads:** #936 `de95bd87ad79fde0215beeadf1f3ae5f945b4ea3` (KS-1058) · #951 `02a22f4bbc46a66983c3752a5a12394ff5b1afaf` (KS-1041). #951's round-2 verdict is on NEITHER the PR nor KS-1041 (measured 19:0x) — s182 posts it BEFORE merging. **#951 GO covers the merge only; `GATEWAY_VOUCH_SECRET` stays unset everywhere (KS-1083).**
 **Kam told on the panel 19:0x** (stored 622 chars): s182 merging both; #951 ships switched off; default = merge unless he says "hold 951". **If he says it: ADDENDUM to s182 superseding item 1 by name, before its #951 merge.**
 
-## 🟠 GATE OWED — tier 2 through-code on s182's docs PR (KS-1092)
-Commission on s182's READY FOR QA, after verifying the head at origin. Template: `fleet/qa-agent/launchers/launch_qa_secuura_ks1086_953_round2.sh` and its brief/prompt (red-proof the adapted launcher, fail-counted). §2a: not a checker. Asks: every site where a human's approval is the merge signal is edited like-for-like · sentences about Peter's periodic formal passes and the demo nod are untouched · Kam's words verbatim · no file outside the three docs · the PR body's site list is complete (re-derive with a case-insensitive search + a control). Then Wednesday GOs the merge under Kam's 17:50 approval.
-**s182 CHECKPOINT at 51% (09:49:14Z):** item 2 continues to READY FOR QA; not pushed by ~70% → handover. KS-1032 → board account; KS-1091 → Medium (Wednesday's triage) — verify both at source.
+## 🟢 #956 GATE DONE — GO WITH FINDINGS @ `5ffe2f95e` (verdict 10:37:18Z)
+Report `!CODING/Testing Agent MAIN/projects/secuura/reports/2026-09-11-ks1092-956-5ffe2f95e-tier2-r1/report.md`. Completion COMPLETE against the 8 asks. **RULED 20:5x:** #956 GO · ONE follow-up ticket · QA-1 gate fix-shape · **QA-2 ANNOTATE not strike** (Kam's `raise-to-1` card is his, unapplied) · QA-3 one TESTED gloss + "Wednesday's GO names the head" · **QA-4 author = the authoring SEAT** · QA-5 UAT-nod clause on the 3 deploy lines · CLAUDE.md :223-:228 vs :278 recorded, not reconciled · W-1 root :243 fix by a seat. develop is `051a737a2` (#900 merged by its author 10:15Z, no overlap). s182 score REVISED 0.95 (scored before this verdict — ledger row). **OWED: a QA charter line — no memory maintenance inside a gate session** (the #956 gate compacted its own memory index unbriefed).
 
-## 🔵 AFTER s182 — the kintsugi deploy seat
+## 🔵 AFTER s183 — the kintsugi deploy seat
 Kintsugi first (week deploy grant, through Sunday 13 Sep); demo = UAT waits for Peter's nod. **KS-535: kintsugi never shares demo's `PLATFORM_WALLET_MNEMONIC`.** Compose project name trap (`-p 2_project_files`). Rebuild from develop; re-run KS-597's live cells (own GUID 201 · upper 201 · own K id 201 · other org 403). Root CLAUDE.md `:173`/`:178` ("both targets on every change") vs "UAT waits for Peter" — owed to that seat. The #954 gate's disposable artefacts (orgs A/B/C/E, `qa954-orig-r9`/`qa954-orig-dev`, `ks597b-s180-pg`) still up — decide teardown in that brief; never `rm` without a ruling. **Do not set the vouch secret.** Phase 0 re-tag before building (no rollback on either box).
 
 ## 🟠 THE 36 UNTESTED (census `!CODING/Secuura/Blockchain/5_Project_History/2026-09-11_merge-census/CENSUS-s181.md`)
