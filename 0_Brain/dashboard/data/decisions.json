@@ -8485,5 +8485,46 @@
    }
   ],
   "amended_ts": "2026-09-11T11:36:56.677177+10:00"
+ },
+ {
+  "id": "hpsm-composer-round4-commit-guard-and-forged-release",
+  "client_project": "Datasec/HPSM",
+  "title": "HPSM Policy Composer: a round 4 for the commit-time approver hole and forged releases, or ship what round 3 fixed?",
+  "bluf": "OVERRIDE, with the reason measured: the matches were read. Your round3 ruling authorised round 3 only, and this is round 4 on findings round 3 surfaced. remediate-high-reach rules which remediation defaults are ON as content, not the database transition into released. The rest are Secuura or Composer architecture cards. THE QUESTION: round 3's check (report Testing Agent MAIN/projects/hpsm/reports/2026-09-11-composer-55160dd-tier1r3/report.md) confirms everything round 3 set out to fix is FIXED, measured independently (CI 13/13, legitimate flows unbroken). It found two things, and both predate round 3. (1) MAJOR R3-M1: the approver guard runs at commit under whatever tenant the transaction holds by then. If the app clears or switches tenant before committing, an engagement can end up with zero approvers, including through the product's own creation path. Likelihood is lower than this morning's gap: it needs the app to change tenant mid-transaction. (2) The tester re-graded a backlog item to MAJOR: the database lets a version be marked RELEASED directly, by insert or by update, with ZERO reviews and ZERO customer approvals, and the release then becomes permanent. A bug or a crafted request in the future API could publish a policy nobody signed off. RECOMMENDATION: yes, round 4. Pin the guard's tenant at the start of the transaction, and allow 'released' only from 'approved' with approvals bound to the manifest. Both are database-layer fixes, local only. There is no round 4 without your word.",
+  "default_action": "No round 4 runs. The next HPSM seat pushes 55160dd (it fixes round 2's Major; both new items predate it) and backlogs R3-M1, the forged-release rule and R3-m1.",
+  "options": [
+   {
+    "key": "round4",
+    "label": "Yes — round 4 on the commit-time approver hole and the forged-release rule, then re-check",
+    "detail": ""
+   },
+   {
+    "key": "ship",
+    "label": "No — push what round 3 fixed (55160dd) and backlog both",
+    "detail": ""
+   }
+  ],
+  "recommended": "round4",
+  "ts": "2026-09-11T15:59:56.245270+10:00",
+  "status": "open",
+  "ruled_choice": null,
+  "ruled_ts": null,
+  "prior_rulings_overridden": [
+   "2026-09-08 07:07",
+   "2026-09-08 08:08",
+   "2026-09-11 08:18",
+   "2026-09-11 14:59",
+   "CARD hpsm-41-telemetry-cr",
+   "CARD secuura-892-round4-passed-but-introduced-two-majors",
+   "CARD hpsm-credential-bearing-prd-outside-every-snapshot",
+   "CARD hpsm-phase1-missing-source-workbook",
+   "CARD hpsm-phase1-imagepng-out-of-scope",
+   "CARD hpsm-composer-repo-and-jira-home",
+   "CARD hpsm-composer-silent-columns-severity",
+   "CARD hpsm-composer-remediation-sow-vs-spec",
+   "CARD hpsm-composer-remaining-16-questions",
+   "CARD hpsm-composer-remediate-high-reach",
+   "CARD hpsm-composer-round3-approver-guard"
+  ]
  }
 ]
