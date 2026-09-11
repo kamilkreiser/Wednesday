@@ -83,13 +83,14 @@ diagnosing from*.
 - **Handovers to Peter/Stuart are TEST BLOCKS, never a list of PRs** — the stream parent,
   the PRs in the block, the ONE pass that proves it, and the one thing the human does. A PR
   that fits no block is stated as the exception, with the reason.
-- ~~**Ticket creation AGGREGATES:** one larger ticket per logical path with its items as a
-  checklist, never three or five separate tickets for one line of work.~~ **WITHDRAWN — NOT A
-  RULE.** Kam gave it on 2026-09-06 at 09:42 and withdrew it at 09:45 (panel, verbatim): *"Ignore.
-  The instruction about aggregating tickets. After giving you the instruction, I realized that
-  this is not a good approach for coding."* Never cite it as a reason. Whether findings share a
-  ticket is the seat's call, stated with its own reason. (Struck here 2026-09-11 after s179 cited
-  it; the withdrawal had reached the lesson heading on 09-10 but never this file.)
+- **Ticket creation — the unit is the TEST PASS (Kam, 2026-09-07 13:23, verbatim):** *"if a single
+  test is required, we should be creating one ticket with multiple items inside it rather than
+  multiple tickets. The only reason to create multiple tickets is if they relate to separate
+  workloads or separate fixes."* Full predicate and the brief line: `fleet/specs/brief-standing-lines.md:166`.
+  ⚠ The older 2026-09-06 09:42 wording (*"one larger ticket per logical path"*) was withdrawn by
+  Kam at 09:45 and is NOT the rule — cite the 09-07 test-pass rule, never the 09-06 wording.
+  (Corrected 2026-09-11 14:04: an earlier edit the same day struck the whole line as withdrawn,
+  which was wider than the withdrawal.)
 - **Assignment:** new and unassigned tickets go to our board account. **A ticket already on
   Peter or Stuart stays theirs**, moved only on Kam's word per ticket.
 - **No `--no-verify`, no force pushes, no `--admin`.** A gate that stops you is a question
