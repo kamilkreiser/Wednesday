@@ -7,7 +7,7 @@ status: live
 
 # Boot digest BY TIER — W whole, M rules-only, every project case a handle
 
-Generated 2026-09-11 17:14 from 155 lesson files (792,860 B). M 33 · MIXED 5 · W 117. 28 project CASE sections inside MIXED files are reduced to one line each: the heading and the path to read it at. W blocks are exactly what the default digest carries; M blocks drop the section index and keep the rules; a P file is a single handle. The CASES behind every rule live only in the lesson files — open one the moment its rule fires.
+Generated 2026-09-11 18:03 from 155 lesson files (793,902 B). M 33 · MIXED 5 · W 117. 28 project CASE sections inside MIXED files are reduced to one line each: the heading and the path to read it at. W blocks are exactly what the default digest carries; M blocks drop the section index and keep the rules; a P file is a single handle. The CASES behind every rule live only in the lesson files — open one the moment its rule fires.
 
 ## The T9 SSD is the master — Wednesday must be fully portable
 `2026-07-31_fully-portable-drive.md` · principle · 2026-07-31 · status: superseded — the "T9 is the master" half by [[2026-08-25_one-drive-devmaster-is-master]] (2026-08-25); the portability principle itself still lives · tier: W
@@ -5374,10 +5374,16 @@ than mine:
 
 **The operative case, so the headline matches it:** a Platform K PR of ours has passed its QA gate and Wednesday is about to write "awaiting Peter's review" or hold a merge for his approval. **Stop. Since 16:56 on 2026-09-11 the approval is Kam's or Wednesday's, not Peter's.** The condition is that it is TESTED: the QA gate at the PR's current head plus the author's Test Evidence block.
 
-sections (open the file for these): What the grant covers — Wednesday's reading, stated to Kam on the panel at 16:5x; his word corrects it · What it does NOT cover · Expiry · How to apply
+sections (open the file for these): What the grant covers — Wednesday's reading, stated to Kam on the panel at 16:5x; his word corrects it · What it does NOT cover · Expiry · How to apply · EXTENSION 2026-09-11 17:50 — Kam widened it to ANYTHING finished and tested (panel, `view=wednesday`)
 
 ## How to apply
 - **Before any merge GO:** a gate verdict at the PR's CURRENT head · a Test Evidence block present · the head re-read · base contained correctly (the 09-09 armed-base line).
 - **The 54 open PRs (GitHub search at 16:5x: 53 on base develop, 39 by `kksecura`)** are sorted by a seat into tested (merge, one at a time) and untested (queued for gates) — never merged as a batch.
 - Family: [[2026-09-07_merge-authority-was-already-mine]] · [[2026-09-09_my-authority-and-the-targets-rules-are-two-checks]] (his explicit word amends the project convention; the file edit delivers it) · [[2026-09-10_kintsugi-first-then-demo-behind-gates]] · [[2026-08-07_protocol-v1.3-signed-delegation]].
+
+## EXTENSION 2026-09-11 17:50 — Kam widened it to ANYTHING finished and tested (panel, `view=wednesday`)
+**His words, verbatim (17:50:39):** *"you also have my approval to merge anything that has been finished and tested"* — sent seconds after his *"done"* on #954, which he squash-merged himself on Wednesday's 17:49 recommendation.
+- **What it adds:** the grant is no longer tied to a named PR. Any PR of ours that meets TESTED (a QA gate verdict at the CURRENT head, a Test Evidence block, our own suites) may be merged on Wednesday's GO without asking him.
+- **What it does not change:** "finished and tested" is the same predicate as above, not a looser one. Merges stay one at a time, head pinned, develop re-read after each. Deploys, demo (UAT, Peter's nod), `.github/workflows` PRs (his `kam-merges` card) and other authors' PRs (they merge their own) are all outside it.
+- **How to apply:** the census seat classifies; Wednesday samples each TESTED row at source and GOs it by number and head SHA; the GO names this extension.
 
