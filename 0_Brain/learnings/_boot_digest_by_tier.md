@@ -7,7 +7,7 @@ status: live
 
 # Boot digest BY TIER — W whole, M rules-only, every project case a handle
 
-Generated 2026-09-11 13:26 from 151 lesson files (778,950 B). M 33 · MIXED 5 · W 113. 28 project CASE sections inside MIXED files are reduced to one line each: the heading and the path to read it at. W blocks are exactly what the default digest carries; M blocks drop the section index and keep the rules; a P file is a single handle. The CASES behind every rule live only in the lesson files — open one the moment its rule fires.
+Generated 2026-09-11 13:37 from 154 lesson files (786,848 B). M 33 · MIXED 5 · W 116. 28 project CASE sections inside MIXED files are reduced to one line each: the heading and the path to read it at. W blocks are exactly what the default digest carries; M blocks drop the section index and keep the rules; a P file is a single handle. The CASES behind every rule live only in the lesson files — open one the moment its rule fires.
 
 ## The T9 SSD is the master — Wednesday must be fully portable
 `2026-07-31_fully-portable-drive.md` · principle · 2026-07-31 · status: superseded — the "T9 is the master" half by [[2026-08-25_one-drive-devmaster-is-master]] (2026-08-25); the portability principle itself still lives · tier: W
@@ -5308,6 +5308,42 @@ Related: [[2026-08-15_a-cap-is-never-neutral]] ·
 ## EXTENSION, same day — FOUR instances across THREE agents, and a fourth kind of selector
 A fourth landed within the hour, from the Secuura seat, and it makes the family cross-fleet rather
 than mine:
+
+
+## A reconciler that only runs at boot cannot catch a tap Kam makes mid-session — run it at every checkpoint and before every wrap
+`2026-09-11_a-boot-time-reconciler-cannot-catch-a-mid-session-tap.md` · correction · 2026-09-11 · status: live · tier: W
+
+**The operative case, so the headline matches it:** Wednesday is at a checkpoint, about to write a handover, or about to wrap — and Kam has been on the panel at any point since this seat booted. **Run `2_Project_Files/tools/reconcile_rulings.py` (report mode, then `--apply`) before writing anything that says what Kam has or has not ruled.** His taps are chat messages; nothing writes them onto the card except that tool, and nothing runs that tool except a seat choosing to.
+
+**How to apply:**
+1. **The checkpoint ritual gains one command:** `reconcile_rulings.py` next to `kam_rulings_today.sh`, at the 50% and 70% checkpoints and before the wrap or rotation handover. Report mode first. `--apply` only for this seat's scope.
+2. **A handover line about a card's state is written after the reconcile, never before.** "Nothing ruled since X" rests on a read taken in the same action.
+3. **When a tap is found late, check the ACTION as well as the record.** A card recorded late may also be an instruction nobody carried out; read Kam's next messages after the tap for what he expected to follow.
+4. **Mechanism candidate (named, not built):** the watcher's checkpoint legs run the reconcile in report mode and put any `to rule: N>0` into the wake text. `wake_watch.sh` is shared with Tuesday, so it is claimed with her before it is touched ([[2026-09-10_claim-a-task-with-tuesday-before-starting-it]]).
+
+
+## A fact written into a handover "for Kam to see" is written for the next seat, not for Kam — put it on his panel or on a card in the same action
+`2026-09-11_a-number-left-for-kam-in-a-handover-reaches-no-surface-he-reads.md` · correction · 2026-09-11 · status: live · tier: W
+
+**The operative case, so the headline matches it:** Wednesday is writing a handover block, checkpoint note or daily-note line, and the sentence says, or means, **"this is Kam's to see / to decide / to know"**. **Stop. Kam does not read handovers.** The only surfaces he reads are the panel and the decision cards. Either the fact goes there now, or the sentence admits it is going nowhere.
+
+**How to apply:**
+1. **"Kam's to see" is an action, not a label.** Write the panel message or the card in the same action, then record in the handover that it was sent and when.
+2. **Anything with a clock goes on a card**: a quota, an expiry, a deadline, anything that gets worse while it waits. He rules by tapping cards ([[2026-09-10_kam-rules-by-tapping-cards]]), and a card has a default.
+3. **Test the handover by its reader:** could anyone act on this line if Kam never opened the file? If the only person who can act is Kam, the line is in the wrong place.
+4. **Watch for a figure that keeps appearing as a caveat.** A number cited three times inside other people's decisions is a decision of its own that nobody has asked him.
+
+
+## Before carding a question for Kam, look for the ANSWER as well as the ruling — a measurement he commissioned may already be on disk, undelivered
+`2026-09-11_before-carding-a-measurement-check-it-has-not-already-run.md` · correction · 2026-09-11 · status: live · tier: W
+
+**The operative case, so the headline matches it:** Wednesday is about to file a card that asks Kam to decide something, or to commission a measurement of it. **Before `decision_queue.sh add`, search in two places:** his ruled cards on the same subject (`decision_queue.sh list ruled`) AND `0_Brain/reference/` for a dated measurement folder on it. **A ruled card with no delivery mark is a claim about the paperwork, not about whether the work was done.**
+
+**How to apply:**
+1. **Two searches before any card:** ruled cards on the subject, and `reference/` for a dated folder on it. When the gate refuses, read its ruling and then open the artefact it names ([[2026-09-07_a-prior-ruling-gate-refusal-is-a-research-prompt]]).
+2. **A found-but-undelivered measurement is delivered in the same action** (`--delivered` naming the artefact), then used. It does not go back to Kam as a question.
+3. **If the measurement's recommendation is still unbuilt, that is WORK, not a card.** The 06:03 seat claimed the family-weight index rather than asking again. Carry it in NEXT-PICKUP under "owed", not "with Kam".
+4. **The costliest version of this is quiet:** a card that re-asks a question Kam has already answered spends his attention, and it makes his earlier answer look as if it went unheard.
 
 
 ## A checker's red-proof needs a CLEAN arm for every legitimate shape of the real event it will guard — and a checker whose failure path is a destructive remedy needs a false-DIFF arm as much as a false-CLEAN one
