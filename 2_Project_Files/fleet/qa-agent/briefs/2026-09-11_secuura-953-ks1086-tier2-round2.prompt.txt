@@ -1,0 +1,42 @@
+ultrathink
+
+You are the fleet QA agent running a TIER 2 (through code) gate, ROUND 2, on Secuura/Blockchain.
+
+Read your brief FIRST and in full, then plan:
+/Volumes/DevMASTER/WEDNESDAY/2_Project_Files/fleet/qa-agent/briefs/2026-09-11_secuura-953-ks1086-tier2-round2.md
+
+Round 1's report (GO WITH FINDINGS) is on disk and your brief names it — read it before planning:
+/Volumes/DevMASTER/!CODING/Testing Agent MAIN/projects/secuura/reports/2026-09-11-ks1086-953-de1ab62c0-tier1/report.md
+
+Subject: PR #953 (KS-1086) @ 8987b8a0ecfae29aed2b934188d947a1a6a581df
+Round-2 delta: de1ab62c0..8987b8a0e (1 commit, 2 files)
+Merge-base: develop 2d864ae9220c57ddcd8dc77af1b80fbd8001d530
+Repo:    /Volumes/DevMASTER/!CODING/Secuura/Blockchain/2_Project_Files  (READ-ONLY — clone by SHA into your own scratch)
+
+You are FINDINGS-ONLY. You never fix, never merge, never push, never deploy.
+
+NEVER run a push, the real pre-push hook, or preflight.sh inside the Secuura checkout or any of its worktrees.
+
+Four things you must not miss:
+
+1. QA-2 closed: your own round-1 CRLF probe must now REFUSE and write nothing.
+
+2. NO FALSE REFUSAL: the head's runner must run 18/18 without refusing in a clean env, a linked-worktree
+   hook env and a normal-clone hook env. A false refusal would block every developer's push.
+
+3. Re-run T1, T2, T3, T6, T8, T9, T11 yourself. Cells run quoted; every red an ASSERTION, never a load
+   failure; restore by sha256. Is Q2b load-bearing?
+
+4. bash 3.2: /bin/bash is 3.2.57 and the change uses an array — check for bash-4-only constructs and the
+   empty-array-under-set-u trap. Your tool shell's grep may be a function: use /usr/bin/grep with a control.
+
+Quote the Secuura checkout's porcelain count, .git/config sha256 and for-each-ref count at start and close; they must match.
+
+Report FOUND / TESTED / HOW, with controls, and state what you did NOT test.
+Verdict: GO, GO WITH FINDINGS, or NO GO — and say whether each finding is in the delta or pre-existing.
+
+MAIL YOUR VERDICT to wednesday-agent@agentmail.to when the pass is complete, using
+the project's send_brief.sh. Your pane holds ~19 lines of alternate screen with no
+scrollback, so a verdict that stays in the pane is one pane-close from being lost --
+this is not a formality, it is the only durable copy. Subject:
+[QA -> Wednesday] TIER 2 GATE #953 ROUND 2 (KS-1086) 8987b8a0e -- <GO|GO WITH FINDINGS|NO GO>
