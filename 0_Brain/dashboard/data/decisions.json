@@ -8561,5 +8561,54 @@
    "CARD nexusai-marketplace-screenshot-reshoot",
    "CARD nexusai-marketplace-package-round3"
   ]
+ },
+ {
+  "id": "secuura-kintsugi-build-cache-prune",
+  "client_project": "Secuura/Blockchain",
+  "title": "Kintsugi's disk is 81% full after this morning's deploy. Prune its Docker build cache, keeping every rollback tag?",
+  "bluf": "Kam taps one option. This morning's deploy left kintsugi with 24.5 GB free, 81% used, according to the Secuura agent s187's reading at 22:22Z. Docker's build cache holds 71.8 GB, and 60.8 GB of that is reclaimable. The next full rebuild will probably stop at its 8 GB safety guard. Freeing the space deletes data, so it is Kam's call. On 2026-09-06 Kam ruled 'a' on the same question for the demo VM (card secuura-demo-vm-prune), but that ruling did not cover kintsugi. Wednesday recommends pruning only the build cache and keeping every image and rollback tag. If Kam taps nothing, nothing is pruned.",
+  "default_action": "Nothing is pruned on kintsugi. Before the next full rebuild, the Secuura agent measures the free space and brings this card back to Kam if the 8 GB guard would stop the rebuild.",
+  "options": [
+   {
+    "key": "cache-only",
+    "label": "Prune the build cache only; keep every image and both rollback tag sets",
+    "detail": "The next Secuura seat runs 'docker builder prune' on kintsugi after the tier-1 QA gate on this deploy has closed. No image is removed. Both rollback tag sets stay: ':pre-2026-09-12' (back to this morning's previous build) and ':pre-20260910'. It frees up to about 60 GB of build cache; the next rebuild runs slower because the cache is cold. This matches Kam's 2026-09-06 demo choice 'a' (build cache + dangling images). s187 measured 0 dangling images on kintsugi before the deploy, and the old images now carry the rollback tags, so a dangling-image prune would free almost nothing here."
+   },
+   {
+    "key": "cache-and-old-tags",
+    "label": "Prune the build cache AND drop the superseded :pre-20260910 rollback tags",
+    "detail": "This is 'cache-only' plus removing the 31 ':pre-20260910' tags, so their images can be reclaimed (about 14 GB of images are reclaimable). Kintsugi could then no longer roll back to the 2026-09-10 build (0f8fb33c3). The ':pre-2026-09-12' set stays."
+   },
+   {
+    "key": "hold",
+    "label": "Hold: prune nothing for now",
+    "detail": "Nothing is deleted. When a full kintsugi rebuild is next commissioned, the Secuura agent measures the free space first, and if the 8 GB guard would stop the rebuild the question comes back to Kam."
+   }
+  ],
+  "recommended": "cache-only",
+  "ts": "2026-09-12T08:27:51.692210+10:00",
+  "status": "open",
+  "ruled_choice": null,
+  "ruled_ts": null,
+  "prior_rulings_overridden": [
+   "2026-08-17 20:15",
+   "2026-08-21 09:47",
+   "2026-08-21 19:49",
+   "2026-08-24 11:27",
+   "2026-08-28 09:33",
+   "2026-09-01 17:25",
+   "2026-09-03 09:49",
+   "2026-09-03 12:13",
+   "2026-09-05 21:26",
+   "2026-09-06 16:24",
+   "2026-09-08 07:10",
+   "2026-09-10 09:01",
+   "2026-09-10 09:08",
+   "2026-09-10 09:08",
+   "2026-09-10 18:01",
+   "2026-09-11 16:55",
+   "CARD secuura-demo-vm-prune",
+   "CARD secuura-kintsugi-whole-estate-rebuild"
+  ]
  }
 ]
