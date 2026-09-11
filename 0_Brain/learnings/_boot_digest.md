@@ -7,7 +7,7 @@ status: live
 
 # Boot digest — headline + rules of every lesson (open the file when it fires)
 
-Generated 2026-09-11 15:25 from 154 lesson files (786,084 B). Each block = the lesson's retrieval handle (H1), its frontmatter, the operative paragraph, its section index, and every RULES section verbatim. 7 files carry no rules-shaped section and are included whole. The CASES behind a rule live only in the file: open it the moment the rule fires, or when a diagnosis needs the evidence. `_ledger.md` is read whole beside this digest; `_ledger_archive.md` on demand.
+Generated 2026-09-11 15:27 from 154 lesson files (787,621 B). Each block = the lesson's retrieval handle (H1), its frontmatter, the operative paragraph, its section index, and every RULES section verbatim. 7 files carry no rules-shaped section and are included whole. The CASES behind a rule live only in the file: open it the moment the rule fires, or when a diagnosis needs the evidence. `_ledger.md` is read whole beside this digest; `_ledger_archive.md` on demand.
 
 ## The T9 SSD is the master — Wednesday must be fully portable
 `2026-07-31_fully-portable-drive.md` · principle · 2026-07-31 · status: superseded — the "T9 is the master" half by [[2026-08-25_one-drive-devmaster-is-master]] (2026-08-25); the portability principle itself still lives
@@ -5710,7 +5710,7 @@ than mine:
 
 **The operative case, so the headline matches it:** Wednesday is about to specify, accept or ratify the red-proof arms for a CHECKER — a verify step, a guard, a gate, a protocol — that will then run against a real event (a push, a deploy, a migration, a sync). **Before ratifying, list the legitimate shapes of THAT event from the commission itself, and ask of each: which arm shows the checker reads CLEAN on it?** Then ask the mirror: **if the checker reads DIFF wrongly, what does its failure path DO?** If the answer is "restore", "revert", "delete" or "kill", a false DIFF is a destructive act, and it needs its own arm.
 
-sections (open the file for these): The two cases, one hour apart, same root cause · The diagnosis w=2 owes · How to apply
+sections (open the file for these): The two cases, one hour apart, same root cause · The diagnosis w=2 owes · How to apply · EXTENSION 2026-09-11 15:3x (w=3) — the RULE TEXT in a brief is an arm too: put every legitimate shape through it clause by clause
 
 ## How to apply
 
@@ -5721,4 +5721,11 @@ sections (open the file for these): The two cases, one hour apart, same root cau
 5. **Do not re-aim after the result.** When a real event exposes the gap, the fix goes into the NEXT use of the checker with its new arms written first; the event already verified stays ruled on its evidence.
 
 **Family:** [[2026-08-07_a-check-that-cannot-fail]] (a red-proof that cannot redden for the right reason — and its mirror, a check that cannot pass for the right reason) · [[2026-08-17_check-the-refusal-before-the-kill]] (a destructive remedy behind a refusable check) · [[2026-09-10_a-two-answer-question-hides-a-third-state]] (rule 5: it applies to questions you WRITE — and to matrices you ratify) · [[2026-09-10_i-endorse-things-i-have-not-read]] (a ratification is load-bearing) · [[2026-09-08_a-new-rule-is-most-dangerous-just-after-adoption]] (the w=1 rule failed at its first exception, one hour old).
+
+## EXTENSION 2026-09-11 15:3x (w=3) — the RULE TEXT in a brief is an arm too: put every legitimate shape through it clause by clause
+
+**The rule, extended:**
+1. **A checker's specification has two halves — the RULE and the SHAPE LIST — and they are written from different sources** (the defect and the commission). Before sending, put every shape in the list through the rule, clause by clause, and write the verdict each clause yields. A shape the rule rejects and the list accepts is a contradiction the builder will resolve silently one way and the gate will report the other.
+2. **Ask what the ordinary form of each shape does to the state the rule inspects.** `push -u` writes config; a no-op push can move T; a refused push leaves T stale. The ordinary variants are where a defect-first rule is wrong.
+3. **Enforcement candidate (w=3 promotes it):** every brief for a checker carries a LEGITIMATE-SHAPES table — shape · expected verdict · the rule clause that yields it. The table makes rule 1 a thing written down rather than a thing remembered.
 

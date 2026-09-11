@@ -7,7 +7,7 @@ status: live
 
 # Boot digest BY TIER — W whole, M rules-only, every project case a handle
 
-Generated 2026-09-11 15:25 from 154 lesson files (787,050 B). M 33 · MIXED 5 · W 116. 28 project CASE sections inside MIXED files are reduced to one line each: the heading and the path to read it at. W blocks are exactly what the default digest carries; M blocks drop the section index and keep the rules; a P file is a single handle. The CASES behind every rule live only in the lesson files — open one the moment its rule fires.
+Generated 2026-09-11 15:27 from 154 lesson files (788,587 B). M 33 · MIXED 5 · W 116. 28 project CASE sections inside MIXED files are reduced to one line each: the heading and the path to read it at. W blocks are exactly what the default digest carries; M blocks drop the section index and keep the rules; a P file is a single handle. The CASES behind every rule live only in the lesson files — open one the moment its rule fires.
 
 ## The T9 SSD is the master — Wednesday must be fully portable
 `2026-07-31_fully-portable-drive.md` · principle · 2026-07-31 · status: superseded — the "T9 is the master" half by [[2026-08-25_one-drive-devmaster-is-master]] (2026-08-25); the portability principle itself still lives · tier: W
@@ -5360,4 +5360,11 @@ than mine:
 5. **Do not re-aim after the result.** When a real event exposes the gap, the fix goes into the NEXT use of the checker with its new arms written first; the event already verified stays ruled on its evidence.
 
 **Family:** [[2026-08-07_a-check-that-cannot-fail]] (a red-proof that cannot redden for the right reason — and its mirror, a check that cannot pass for the right reason) · [[2026-08-17_check-the-refusal-before-the-kill]] (a destructive remedy behind a refusable check) · [[2026-09-10_a-two-answer-question-hides-a-third-state]] (rule 5: it applies to questions you WRITE — and to matrices you ratify) · [[2026-09-10_i-endorse-things-i-have-not-read]] (a ratification is load-bearing) · [[2026-09-08_a-new-rule-is-most-dangerous-just-after-adoption]] (the w=1 rule failed at its first exception, one hour old).
+
+## EXTENSION 2026-09-11 15:3x (w=3) — the RULE TEXT in a brief is an arm too: put every legitimate shape through it clause by clause
+
+**The rule, extended:**
+1. **A checker's specification has two halves — the RULE and the SHAPE LIST — and they are written from different sources** (the defect and the commission). Before sending, put every shape in the list through the rule, clause by clause, and write the verdict each clause yields. A shape the rule rejects and the list accepts is a contradiction the builder will resolve silently one way and the gate will report the other.
+2. **Ask what the ordinary form of each shape does to the state the rule inspects.** `push -u` writes config; a no-op push can move T; a refused push leaves T stale. The ordinary variants are where a defect-first rule is wrong.
+3. **Enforcement candidate (w=3 promotes it):** every brief for a checker carries a LEGITIMATE-SHAPES table — shape · expected verdict · the rule clause that yields it. The table makes rule 1 a thing written down rather than a thing remembered.
 

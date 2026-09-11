@@ -28,3 +28,11 @@ tier: M
 5. **Do not re-aim after the result.** When a real event exposes the gap, the fix goes into the NEXT use of the checker with its new arms written first; the event already verified stays ruled on its evidence.
 
 **Family:** [[2026-08-07_a-check-that-cannot-fail]] (a red-proof that cannot redden for the right reason — and its mirror, a check that cannot pass for the right reason) · [[2026-08-17_check-the-refusal-before-the-kill]] (a destructive remedy behind a refusable check) · [[2026-09-10_a-two-answer-question-hides-a-third-state]] (rule 5: it applies to questions you WRITE — and to matrices you ratify) · [[2026-09-10_i-endorse-things-i-have-not-read]] (a ratification is load-bearing) · [[2026-09-08_a-new-rule-is-most-dangerous-just-after-adoption]] (the w=1 rule failed at its first exception, one hour old).
+
+## EXTENSION 2026-09-11 15:3x (w=3) — the RULE TEXT in a brief is an arm too: put every legitimate shape through it clause by clause
+**The case.** The tier-2 gate on `push_protocol.py` @ `d2a53096` reported W-1 as Wednesday's error: the brief's TARGET rule required config IDENTICAL and an UNCHANGED T to equal origin's head, while its item 2 required a refused push and a first push to read CLEAN. A refused push with a stale or absent T, and `git push -u` (which writes `branch.<b>.remote/.merge`), satisfy item 2 and violate TARGET; the file implemented TARGET, and the gate measured three false DIFFs.
+
+**The rule, extended:**
+1. **A checker's specification has two halves — the RULE and the SHAPE LIST — and they are written from different sources** (the defect and the commission). Before sending, put every shape in the list through the rule, clause by clause, and write the verdict each clause yields. A shape the rule rejects and the list accepts is a contradiction the builder will resolve silently one way and the gate will report the other.
+2. **Ask what the ordinary form of each shape does to the state the rule inspects.** `push -u` writes config; a no-op push can move T; a refused push leaves T stale. The ordinary variants are where a defect-first rule is wrong.
+3. **Enforcement candidate (w=3 promotes it):** every brief for a checker carries a LEGITIMATE-SHAPES table — shape · expected verdict · the rule clause that yields it. The table makes rule 1 a thing written down rather than a thing remembered.
