@@ -33,6 +33,11 @@ Until #953 is on develop, no seat runs the pre-push hook or preflight leg 14, on
 - **Asks:** (1) re-run `push-protocol/redproof/redproof_driver.py` AND write at least two arms of the gate's OWN design — a fetch by another process between snapshot and verify (must not read CLEAN), and a tag or multi-ref push; (2) the REAL `.githooks/pre-push` on a no-op push with empty stdin, in a scratch clone (s179 saw a SCRATCH hook fire on that shape); (3) trace the sub-scripts `.githooks/pre-push` and `preflight.sh` call for any fetch / ls-remote / pull that moves another ref (s179 read the top level only); (4) show that no legitimate shape (first push · fast-forward · no-op · refused) can read DIFF, and that no output says restore.
 - **Template:** `2_Project_Files/fleet/qa-agent/launchers/launch_qa_secuura_ks1086_953_round2.sh` + its brief (guards: NEVER-line, MAIL line, ROUND, TIER). **The prompt must forbid a push, the real hook or preflight inside the Secuura checkout.** Read s179's handover (its gate asks + NOT TESTED) before writing the brief.
 
+## 🟠 SYNC INCIDENT 15:06 — RESOLVED, one question open with Tuesday
+- `panel_sync` sat in a stopped rebase 14:40:48 → 15:03:54 (no PULL FAILED / RECOVER line for that rebase); repaired with `rebase --quit` + `branch -f main` + `switch main`; the 15:03:54 cycle recovered normally. Nothing lost (ledger row 15:05).
+- **Open, non-blocking:** Wednesday's QUESTION to `tuesday-agent@` — does a post-push-failure path start a rebase outside the recovery wrapper? Her ANSWER arrives on the mirrored topic.
+- **If `SKIP rebase/merge in progress` repeats in `tools/logs/panel_sync.log`:** copy the non-derived stores out first, check `git ls-files -u` and `.git/rebase-merge/` (stopped-sha, done, todo), and if every conflict is derived data, `rebase --quit` + `branch -f main HEAD` + `switch main`. **Never commit while a rebase is stopped.**
+
 ## 🔴 WITH KAM (all already on his panel — do not re-list in every message)
 1. **`secuura-ks597-bind-compares-two-id-spaces-now-deployed`** (card, rec B) — ALL DEPLOYS HELD; Stuart's two 09-10 comments unanswered; Stuart not told (Kam's conversation).
 2. **#953 needs Peter's review** — optional WhatsApp line given on the panel 13:24.
@@ -56,6 +61,7 @@ Until #953 is on develop, no seat runs the pre-push hook or preflight leg 14, on
 Tonight's 03:30 leg is the first real run of the FIXED deletion counter (`a0d70ca8`) — read its per-root summary line; `UNKNOWN` means normalisation failed, not zero.
 
 ## ⚠ TRAPS
+- **Three Write calls then a later commit = uncommitted non-derived files = panel_sync skips = the 14:40 stuck rebase.** Write and commit in ONE command (python + `git add` + `git commit` in the same Bash call).
 - zsh: no `PIPESTATUS`; no word-split of a variable holding a list or a command; an unmatched glob aborts the command. Capture output to a file, read `$?` on its own line.
 - The Bash tool's `grep` is a shell-snapshot FUNCTION: a `$(` pattern inside `$(…)` read 0. Use `/usr/bin/grep` + a same-file control when a zero enters a sentence.
 - `git rev-parse` takes ONE ref per call in this form ("Needed a single revision").
