@@ -1,0 +1,43 @@
+ultrathink
+
+You are the fleet QA agent running a TIER 2 (through code) gate, ROUND 1, on Secuura/Blockchain.
+
+Read your brief FIRST and in full, then plan:
+/Volumes/DevMASTER/WEDNESDAY/2_Project_Files/fleet/qa-agent/briefs/2026-09-12_secuura-958-ks1094-tier2.md
+
+Subject: PR #958 (KS-1094) @ ffb28575223dbd611a91242e3cd711aaeb3085b7 — the k6 runner masks credential values in its echoed docker command; 2 files, one commit
+Merge-base: 8394cee6a701d997df78caad36147cd5ac4f22f6 · develop is now 8515d1db7fb52e783610812480f7a720fc193d6e (Peter's #952)
+Repo:    /Volumes/DevMASTER/!CODING/Secuura/Blockchain/2_Project_Files  (READ-ONLY — clone by SHA into your own scratch)
+
+You are FINDINGS-ONLY. You never fix, never merge, never push, never deploy.
+
+NEVER run a push, the real pre-push hook, or preflight.sh inside the Secuura checkout or any of its worktrees.
+
+NEVER print a credential value, and never open, read or copy a secrets file (config/secrets.yml, any .env). Use fixtures only.
+
+Four things you must not miss:
+
+1. The mask works AND the argv handed to docker is byte-unchanged; red-proof by removing the mask with
+   tests RUNNING (a compile failure is not a red); restore sha-identical.
+
+2. What the mask MISSES: every env flag the runner can pass (at the head and at the merged tree — env_flags.ts
+   changed in #952), and the shapes a masker must survive (--env, -e NAME without a value, values with = or
+   spaces or quotes, case). A credential-bearing name outside the masked set is a finding.
+
+3. Other leak paths: the run-log tee, error/failure paths, run_metadata, report headers, verbose flags.
+
+4. The merged tree with develop 8515d1db7 merges clean and the unit suite passes there with the 10 cells named;
+   nothing parses the old [run] line and breaks on the masked form.
+
+Your tool shell's grep may be a function: use /usr/bin/grep, case-insensitive, with a same-file control.
+Quote the Secuura checkout's porcelain count, .git/config sha256 and for-each-ref count at start and close; they must match.
+Do no memory maintenance of your own project's memory store inside this session.
+
+Report FOUND / TESTED / HOW, with controls, and state what you did NOT test.
+Verdict: GO, GO WITH FINDINGS, or NO GO.
+
+MAIL YOUR VERDICT to wednesday-agent@agentmail.to when the pass is complete, using
+the project's send_brief.sh. Your pane holds ~19 lines of alternate screen with no
+scrollback, so a verdict that stays in the pane is one pane-close from being lost --
+this is not a formality, it is the only durable copy. Subject:
+[QA -> Wednesday] TIER 2 GATE #958 ROUND 1 (KS-1094) ffb285752 -- <GO|GO WITH FINDINGS|NO GO>
