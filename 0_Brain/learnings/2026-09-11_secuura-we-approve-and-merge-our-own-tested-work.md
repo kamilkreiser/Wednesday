@@ -13,6 +13,7 @@ tier: W
 **His words, verbatim:**
 > 16:56:00 — *"For the time being, I / you will approve our own elements"*
 > 16:56:44 — *"based on this.  FIx and merge all tickets after they are tested"*
+> 16:58:04 — *"yes, still run all our own tests to make sure we only commit things that are working and tested."* — **his confirmation of rule 2 below, the same minute it was stated to him.**
 
 "This" is Stuart's message, forwarded at 16:55:05. Its operative lines: *"lets go back to merging our own code into our develop banches. We deploy to kintsugi and dev-ps as we required to personally test out development work"*; Peter *"will periodically … do a formal test on K and S … by an issue noted in a common project in Linear"*; UAT is updated *"once the nod has been given"*.
 
