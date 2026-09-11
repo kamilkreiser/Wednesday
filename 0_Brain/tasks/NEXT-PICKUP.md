@@ -58,12 +58,14 @@ Verdict `!CODING/Testing Agent MAIN/projects/secuura/reports/2026-09-11-push-pro
 10. Kam's `vault-add-a-stages-another-clients-files` grant, at a quiet floor.
 11. panel_sync `Cannot rebase onto multiple branches` (Tuesday's tooling).
 12. **Wrap rule 3b:** a learnings file was edited this seat (17:50 grant extension) — regenerate BOTH digests at wrap.
+13. **Launcher commits the boot digests it regenerates** (shared with Tuesday's launcher — claim with her first).
 
 ## 🟠 NAS
 Tonight's 03:30 leg is the first real run of the FIXED deletion counter (`a0d70ca8`). Read its per-root summary; `UNKNOWN` means normalisation failed, not zero.
 
 ## ⚠ TRAPS
-- **Write and commit in ONE command.** The launcher's regenerated boot digests block `panel_sync` until committed.
+- **Write and commit in ONE command.** **Commit the launcher's regenerated boot digests as the FIRST write of every boot** — at 17:14 they sat uncommitted 45 min and blocked `panel_sync` (ledger 18:03).
+- **`panel_sync` does a plain `git pull --rebase`:** a local MERGE must be pushed in the same action, or the daemon re-linearises it into the same conflict. `scoreboard.md` is a TWO-WRITER file (both seats insert top rows).
 - **zsh:** no `PIPESTATUS`; a list variable does not word-split; `echo ======` aborts; `VAR=x cmd1 | cmd2` hands VAR to cmd1 only; `sleep N; cmd` is blocked.
 - **The Bash tool's `grep` is a shell-snapshot FUNCTION:** use `/usr/bin/grep` plus a same-file control.
 - **Tool paths:** `brief_and_launch.sh`, `send_brief.sh` and `self_check_view.sh` live in `2_Project_Files/fleet/` (NOT `fleet/cockpit/`); `cockpit.sh`, `pane_close.sh`, `pane_prompt_check.sh` live in `fleet/cockpit/`. `send_brief.sh` has no `--kind addendum` — corrections go as `--kind answer`.
