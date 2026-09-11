@@ -7,7 +7,7 @@ status: live
 supersede: replace this file wholesale at the next pickup; do not append
 ---
 
-# NEXT PICKUP — 2026-09-11 19:0x (seat booted 18:5x). **s182 LIVE on #936 + #951 merges. s181 scored 1.00 and closed.**
+# NEXT PICKUP — 2026-09-11 20:1x (seat booted 18:5x). **#936 + #951 MERGED and verified (develop `b75cff4d6`); s182 scored 1.00 and closed; tier-2 gate LIVE on the docs PR #956.**
 
 > Narrative: `0_Brain/daily/2026-09-11.md` (18:53 block onward). **Measure before acting on any line here.**
 
@@ -17,7 +17,7 @@ supersede: replace this file wholesale at the next pickup; do not append
 ## 🟢 FLOOR
 | pane | seat | state | next event the successor owes |
 |---|---|---|---|
-| `%20` | **s182 Secuura/Blockchain — merge lane 2** | launched 19:03; **plan confirmation ANSWERED 09:26:14Z (rung 6)** — P1 #936 check = tree+blob (SUPERSEDES §1(e)), P2 MINOR-2 → KS-1074, P3 one R2 ticket + KS-1041 residuals onto live tickets BEFORE archive, P4 wider site list + ff fetch | (1) done · (2) each merge's STATUS → verify at source: `merged`, one parent == T, files == PR, ticket Done + `archivedAt` · (3) item 2 READY FOR QA (docs PR) → tier-2 through-code gate · (4) wrap → handover + history on disk → score → `pane_close.sh %20` |
+| `%21` | **QA tier-2 gate on PR #956 (KS-1092) @ `5ffe2f95e`** | launched 20:1x, verified at rung 5; brief `fleet/qa-agent/briefs/2026-09-11_secuura-956-ks1092-tier2.md`, launcher red-proofed 11/0 | **verdict mail `[QA -> Wednesday] TIER 2 GATE #956 ROUND 1 (KS-1092) 5ffe2f95e`** (FROM Wednesday — filter on subject) → head re-read at origin → completion check against the brief's 8 asks → GO / fix round (round 1 of 2) → `pane_close.sh %21` → a merge seat squashes #956 on Wednesday's GO (Kam 17:50) and closes + archives KS-1092 |
 | `%1` | monitor | — | — |
 
 Brief: `2_Project_Files/fleet/briefs_staged/2026-09-11_s182_merge-936-951-docs-pr.md`. develop at 18:5x = `8a6b0d9c2` → **19:40 = `b75cff4d6`** (#936 squash `27509dc7a` · #951 squash `b75cff4d6`, both VERIFIED AT SOURCE by Wednesday; KS-1058 + KS-1041 Done + archived; residuals on KS-1032 / KS-1091; KS-1090 filed; KS-741 hold met, not started). **s182 now on item 2 (docs PR) → READY FOR QA → tier-2 gate. Owed in its next ANSWER: assign KS-1032 to the board account; set KS-1091's priority.**
