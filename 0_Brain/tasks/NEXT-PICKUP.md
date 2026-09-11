@@ -29,14 +29,14 @@ supersede: replace this file wholesale at the next pickup; do not append
 - **Overnight is working time** (08-28). **Deploys to dev take the full tier-1 QA gate** (`learnings/2026-09-05_qa-gate-tiers-and-the-two-nogo-cap.md:16`).
 
 ## 🔵 QUEUE AFTER THE `%29` VERDICT (in order)
-1. **Process the verdict.** GO / GO WITH FINDINGS → score s187; findings → tickets via a Secuura seat (file only, our board account). **The notice-release card's recommended option ("after-gate") depends on this verdict — Kam still taps it.** NO GO → name it to Kam on the panel with the evidence class.
+1. **Process the verdict — and deliver Kam's two 08:50 rulings through ONE Secuura seat after it:** on a GO or GO WITH FINDINGS, post the two drafted refresh comments (mentions verified by `bodyData`), then run `docker builder prune` on kintsugi (no image removal, both `:pre-*` sets kept, free space measured before and after); mark both cards `--delivered` naming the artefacts. On a NO GO: no notice, the prune still runs, and the notice returns to Kam. GO / GO WITH FINDINGS → score s187; findings → tickets via a Secuura seat (file only, our board account). **The notice-release card's recommended option ("after-gate") depends on this verdict — Kam still taps it.** NO GO → name it to Kam on the panel with the evidence class.
 2. **KS-1098 (mask spellings + name set for Peter + PASSWD cell) and KS-1099 (YAML error prints secrets-file lines) fix rounds** → tier-2 gates. **Plus the merge script's TREF gate reading an ABSENT path as its own argv echo under `2>/dev/null`** (s186) → fix to `cat-file -e`. KS-1097 (Low) after.
 3. **The 36 untested PRs** — re-census first (the s181 census is many merges old); plan gates by tier. **7-day allowance read 83% at 08:38 (the QA pane: resets 04:00 AEST Sun)** — spend beyond it is a card for Kam.
 4. **Teardown candidates (Kam's call; quarantine, never delete):** `worktrees/s187-kintsugi`, `worktrees/s184-ks1094`; the #954 gate's disposable artefacts.
 
 ## 🔴 WITH KAM (on his panel — do not re-list in every message)
-1. **Card `secuura-kintsugi-refresh-notice-release`** (rec after-gate; default nothing posted). The draft is in `!CODING/Secuura/Blockchain/5_Project_History/HANDOVER-s187-kintsugi-deploy.md`, lines 108-121.
-2. **Card `secuura-kintsugi-build-cache-prune`** (rec cache-only; default nothing pruned). Kintsugi is at 81% disk, 24.5 GB free.
+1. ~~Card `secuura-kintsugi-refresh-notice-release`~~ **RULED after-gate by Kam 08:50:29 — UNDELIVERED: see QUEUE item 1.** The draft is in `!CODING/Secuura/Blockchain/5_Project_History/HANDOVER-s187-kintsugi-deploy.md`, lines 108-121.
+2. ~~Card `secuura-kintsugi-build-cache-prune`~~ **RULED cache-only by Kam 08:50:39 — UNDELIVERED: see QUEUE item 1.** Kintsugi is at 81% disk, 24.5 GB free.
 3. Carried: the Stuart reply for KS-597 · `Notes (MASTER)/skills/Current/extranet.md` vs his tickets-only rule · the agent GitHub identity invite + deleting `feature/y` / `feature/w` · **measure first:** KS-775's lapsed window · the vault's `daily/2026-09-11.md` uncommitted lines · develop's CI reds (KS-1075, already told).
 
 ## 🟡 OWED BY WEDNESDAY
