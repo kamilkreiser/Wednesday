@@ -17,7 +17,7 @@ supersede: replace this file wholesale at the next pickup; do not append
 ## 🟢 FLOOR
 | pane | seat | state | next event the successor owes |
 |---|---|---|---|
-| `%20` | **s182 Secuura/Blockchain — merge lane 2** | launched 19:03 via `brief_and_launch.sh`, brief verified at destination 09:03:34Z; rung 4 at 19:0x (booting) | **(1) plan confirmation `[Secuura/Blockchain -> Wednesday] QUESTION: plan confirmation s182`** → ANSWER it (rung 6) · (2) each merge's STATUS → verify at source: `merged`, one parent == T, files == PR, ticket Done + `archivedAt` · (3) item 2 READY FOR QA (docs PR) → tier-2 through-code gate · (4) wrap → handover + history on disk → score → `pane_close.sh %20` |
+| `%20` | **s182 Secuura/Blockchain — merge lane 2** | launched 19:03; **plan confirmation ANSWERED 09:26:14Z (rung 6)** — P1 #936 check = tree+blob (SUPERSEDES §1(e)), P2 MINOR-2 → KS-1074, P3 one R2 ticket + KS-1041 residuals onto live tickets BEFORE archive, P4 wider site list + ff fetch | (1) done · (2) each merge's STATUS → verify at source: `merged`, one parent == T, files == PR, ticket Done + `archivedAt` · (3) item 2 READY FOR QA (docs PR) → tier-2 through-code gate · (4) wrap → handover + history on disk → score → `pane_close.sh %20` |
 | `%1` | monitor | — | — |
 
 Brief: `2_Project_Files/fleet/briefs_staged/2026-09-11_s182_merge-936-951-docs-pr.md`. develop at 18:5x = **`8a6b0d9c2`**.
