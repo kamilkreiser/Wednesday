@@ -97,7 +97,7 @@ RULED BY KAM, NOT YET IN AN ARTEFACT
   - `secuura-advisories-high-and-prod-reaching`
   - `secuura-four-advisories-ruled-after-measurement`
 
-SELF-CHECK: re-read end-to-end for contradictions | 2026-09-12 09:28
+SELF-CHECK: re-read end-to-end for contradictions | 2026-09-12 09:30
 
 PROVENANCE:
 - seat number s188 follows s187 | /Volumes/DevMASTER/!CODING/Secuura/Blockchain/5_Project_History/history.md top dated entry (line 24) is s187; 0 occurrences of s188, control s187 4 | read 2026-09-12
@@ -106,9 +106,9 @@ PROVENANCE:
 - the drafted notice text | /Volumes/DevMASTER/!CODING/Secuura/Blockchain/5_Project_History/HANDOVER-s187-kintsugi-deploy.md lines 108-121, read by Wednesday | read 2026-09-12
 - KS-485 and KS-772 Todo, not archived, newest comments 2026-09-10 23:37Z by the board account opening with the BLUF heading and the mention | Secuura Linear GraphQL, read-only, run by Wednesday at 09:2x AEST | read 2026-09-12
 - 0 KS issues updated since 2026-09-11T22:25Z | Secuura Linear GraphQL issues filter on updatedAt, paged to the end, run by Wednesday at 09:2x AEST | read 2026-09-12
-- develop tip 4554b25e21dfd01113bf40e8f6d34573345a5f37 | git ls-remote origin refs/heads/develop in Secuura's 2_Project_Files, a read verb, run by Wednesday at 09:2x AEST | read 2026-09-12
+- develop tip 4554b25e21dfd01113bf40e8f6d34573345a5f37 | git ls-remote origin refs/heads/develop in /Volumes/DevMASTER/!CODING/Secuura/Blockchain/2_Project_Files, a read verb, run by Wednesday at 09:2x AEST | read 2026-09-12
 - kintsugi 81% used, 24,506 MB free, build cache 71.77 GB with 60.76 GB reclaimable, tag sets 33 and 31 | s187's STATUS mail 22:24:45Z V10-V11 as relayed in Wednesday's daily note 2026-09-12 08:26 entry, not re-measured by Wednesday | read 2026-09-12
 - #936 classed TESTED by the s181 census and squash-merged by s182 | /Volumes/DevMASTER/WEDNESDAY/0_Brain/projects_index/scoreboard.md rows for s181 and s182, Wednesday's own record, not re-derived | read 2026-09-12
-- Kam's ticket creation rule of 2026-09-07 13:23 | /Volumes/DevMASTER/WEDNESDAY/0_Brain/learnings/_ledger.md 2026-09-11 row citing fleet/specs/brief-standing-lines.md line 166, read by Wednesday at boot | read 2026-09-12
+- Kam's ticket creation rule of 2026-09-07 13:23 | /Volumes/DevMASTER/WEDNESDAY/0_Brain/learnings/_ledger.md 2026-09-11 row citing /Volumes/DevMASTER/WEDNESDAY/2_Project_Files/fleet/specs/brief-standing-lines.md line 166, read by Wednesday at boot | read 2026-09-12
 - the undelivered ruled set, 20 cards | /Volumes/DevMASTER/WEDNESDAY/2_Project_Files/tools/decision_queue.sh list ruled --undelivered, filtered to secuura- ids, run by Wednesday at 09:2x AEST | read 2026-09-12
 - the standing HOLDS and RULED lines carried forward | /Volumes/DevMASTER/WEDNESDAY/2_Project_Files/fleet/briefs_staged/2026-09-12_s187_kintsugi-deploy-4554b25e2.md sections 8 and 9 and both RULED sections, read by Wednesday | read 2026-09-12
