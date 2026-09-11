@@ -7,15 +7,15 @@ status: live
 supersede: replace this file wholesale at the next pickup; do not append
 ---
 
-# NEXT PICKUP — updated 09:15 AEST at the rotation. **Kintsugi runs `4554b25e2`; its tier-1 deploy gate returned GO WITH FINDINGS; s187 scored 1.00. Kam's two after-gate rulings are released for delivery.**
+# NEXT PICKUP — updated 09:15 AEST at the rotation; FLOOR + QUEUE item 1 updated 09:35 by the 09:15-rotation seat. **Kintsugi runs `4554b25e2`; its tier-1 deploy gate returned GO WITH FINDINGS; s187 scored 1.00. 🔵 Kam's two after-gate rulings are IN FLIGHT as s188 `%30` — do NOT brief a second Secuura seat for them.**
 
 > Narrative: `0_Brain/daily/2026-09-12.md` from the 05:21 boot block. **Measure before acting on any line here.**
 
 ## 🟢 FLOOR
 | pane | seat | state | next event the successor owes |
 |---|---|---|---|
-| `%29` | QA/Secuura-kintsugi-deploy — verdict MAILED 23:11:34Z (GO WITH FINDINGS) | closed by the 05:21 seat at rotation if its transcript read `end_turn`; else close it after checking | — |
-| — | no Secuura seat live | — | **brief ONE Secuura seat for QUEUE item 1** |
+| `%29` | QA/Secuura-kintsugi-deploy — verdict MAILED 23:11:34Z (GO WITH FINDINGS) | CLOSED 09:16 by the 05:21 seat after `end_turn` | — |
+| `%30` | **s188** — QUEUE item 1 (brief `fleet/briefs_staged/2026-09-12_s188_kintsugi-rulings-delivery.md`, verified at destination 23:30:05Z) | booting 09:30; plan-confirmation STOP built in | ANSWER its plan confirmation · on the comment ids → `decision_queue.sh --delivered secuura-kintsugi-refresh-notice-release` · on the prune numbers → `--delivered secuura-kintsugi-build-cache-prune` · completion check + score at its wrap (no gate: records + housekeeping) |
 | `%1` | monitor | — | — |
 
 **develop = `4554b25e2`** (#958; nothing merged since 19:10:50Z at the last read). **Kintsugi = `4554b25e2`** (s187: 33 built, 25 swapped, 0 rolled back, 39/39; Wednesday's public probe agrees). **Demo unchanged** (last deployed `0f8fb33c3` by s169). **Scored overnight:** s183 0.95 · s184 0.90 · s185 0.95 · s186 1.00. **s187 SCORED 1.00 at the verdict; the QA agent 1.00.**
@@ -27,14 +27,14 @@ supersede: replace this file wholesale at the next pickup; do not append
 - **Overnight is working time** (08-28). **Deploys to dev take the full tier-1 QA gate** (`learnings/2026-09-05_qa-gate-tiers-and-the-two-nogo-cap.md:16`).
 
 ## 🔵 QUEUE AFTER THE `%29` VERDICT (in order)
-1. **ONE Secuura seat delivers Kam's two 08:50 rulings — the after-gate condition is MET (GO WITH FINDINGS at 23:11:34Z):**
+1. 🔵 **IN FLIGHT as s188 `%30` (launched 09:30) — ONE Secuura seat delivers Kam's two 08:50 rulings — the after-gate condition is MET (GO WITH FINDINGS at 23:11:34Z):**
    - post the two drafted refresh comments exactly as in `!CODING/Secuura/Blockchain/5_Project_History/HANDOVER-s187-kintsugi-deploy.md` lines 108-121 (`@peter` on KS-485, `@stuart.jamieson` on KS-772; verify each mention by `bodyData`) → `decision_queue.sh rule … --delivered` naming both comment ids;
    - `docker builder prune` on kintsugi — no image removal, both `:pre-*` tag sets kept, free space measured before and after → `--delivered` naming the numbers;
    - file the gate's findings as tickets (our board account, BLUF-first; Kam's 09-07 13:23 rule: separate fixes → separate tickets): F-1 status-page port defaults · F-2 anchoring aggregates read `response.ok` only · F-3 topology on unauthenticated status endpoints · F-4 public verify ignores `hash` · F-5 unnamed verifier tabs · F-6 the admin login placeholder · F-7 the mistyped-id message; G-1 as a coverage ticket naming #728, #872, #936, #808, #896.
    - Gate report: `/Volumes/DevMASTER/!CODING/Testing Agent MAIN/projects/secuura/reports/2026-09-12-kintsugi-deploy-4554b25e2-tier1-r1/report.md`.
 1a. **Card for Kam (G-1's runtime half):** a QA test credential on kintsugi, so #872/#896/#936/#954/#935 can be gated at runtime — his call (a credential on a running system). Through-code gates for #872 and #896 first (the gate's own risk read). **Search BOTH Secuura report trees** (`projects/secuura/` and `projects/secuura-blockchain/`) before calling anything ungated (brief error B-1).
 2. **KS-1098 (mask spellings + name set for Peter + PASSWD cell) and KS-1099 (YAML error prints secrets-file lines) fix rounds** → tier-2 gates. **Plus the merge script's TREF gate reading an ABSENT path as its own argv echo under `2>/dev/null`** (s186) → fix to `cat-file -e`. KS-1097 (Low) after.
-3. **The 36 untested PRs** — re-census first (the s181 census is many merges old); plan gates by tier. **7-day allowance read 83% at 08:38 (the QA pane: resets 04:00 AEST Sun)** — spend beyond it is a card for Kam.
+3. **The 36 untested PRs** — re-census first (the s181 census is many merges old); plan gates by tier. **7-day allowance read 83% at 08:38 (the QA pane: resets 04:00 AEST Sun)** — spend beyond it is a card for Kam. ⚠ **09:3x: SHARED with Tuesday's seats, 85% at 23:31Z, ~1.5 points/hour (Tuesday's trend) → 100% around 19:00-20:00 AEST, before the reset. Kam ruled `raise-limit` on `wed-weekly-quota-97pct` (proceed normally); both coordinators hold one line: from 95%, no new launches, live seats checkpoint and push.** Items 2-3 are the heavy spend — launch only if the rate says they fit.
 4. **Teardown candidates (Kam's call; quarantine, never delete):** `worktrees/s187-kintsugi`, `worktrees/s184-ks1094`; the #954 gate's disposable artefacts.
 
 ## 🔴 WITH KAM (on his panel — do not re-list in every message)
