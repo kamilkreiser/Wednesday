@@ -24,6 +24,7 @@ develop = **`2600229efedae9682339064d8127ccf035b90afc`** (`ls-remote` 17:5x): Pe
 
 ## 🔵 s181's round, and what Wednesday does at each event
 1. **Item 0 mail** (project CLAUDE.md root copy lines 234/237 amended to Kam's words; quarantine copy + sha256s) → read the edited lines back yourself (read-only) before accepting.
+1b. **Item 0 VERIFIED 18:2x** (root CLAUDE.md `:232-:241` + `:266` note, sha `a4cd7d58…`; Stuart draft line 11; KS-1085 comment `96f6350a`). **Owed in the next ANSWER:** s181 posts one correction on KS-925 (its 09-10 comment says step 7 no longer marks seen; `Launch_Claude.command:537` still does).
 2. **#953 merged** → verify at source: `merged`, merge commit has ONE parent (squash), parent == develop tip before it, develop tip == it → **LIFT THE LEG-14 HOLD BY NAME** (mail s181 + this file + the Secuura brief standing lines) → KS-1086 comment + board move verified.
 3. **#954 verify receipt** → KS-597 comment + Tested Not Deployed verified.
 4. **Census mailed** (`!CODING/Secuura/Blockchain/5_Project_History/2026-09-11_merge-census/CENSUS-s181.md`) → sample each TESTED row at source (gate verdict at CURRENT head, Test Evidence, base, mergeable, no workflows) → **GO by PR number + head SHA, one at a time, citing Kam's 17:50 extension.** Other authors' PRs: they merge their own.
