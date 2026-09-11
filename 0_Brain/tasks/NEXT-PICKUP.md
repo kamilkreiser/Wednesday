@@ -7,7 +7,7 @@ status: live
 supersede: replace this file wholesale at the next pickup; do not append
 ---
 
-# NEXT PICKUP — 2026-09-11 14:0x (seat booted 13:26, 65% checkpoint, NOT rotating — band 80-90). **s179 `%15` READY FOR REVIEW (04:26Z), COMPLETE per Wednesday's check, told to WRAP. A tier-2 gate on `push_protocol.py` @ `d2a53096` is OWED before #879/#813.** #953 gate-clean at `8987b8a0e`, 0 reviews, waits on Peter. KAM: last word to Wednesday 08:06.
+# NEXT PICKUP — 2026-09-11 14:0x (seat booted 13:26, 65% checkpoint, NOT rotating — band 80-90). **s179 WRAPPED (pane closed). TIER-2 GATE on `push_protocol.py` @ `d2a53096` LIVE in `%16`.** #953 gate-clean at `8987b8a0e`, 0 reviews, waits on Peter. KAM: last word to Wednesday 08:06.
 
 > Narrative: `0_Brain/daily/2026-09-11.md` (13:3x–14:0x entries). **Measure before acting on any line here.**
 
@@ -17,7 +17,7 @@ Until #953 is on develop, no seat runs the pre-push hook or preflight leg 14, on
 ## 🟢 FLOOR
 | pane | seat | commission | next event Wednesday owes |
 |---|---|---|---|
-| `%15` | **s179** — READY FOR REVIEW 04:26:33Z (spf/dkim/dmarc pass); **COMPLETE per Wednesday's check 14:29** (sha256s, aims-before-code mtimes, restore wording, exit table, quarantine manifest — all read at source); told to WRAP | item 0 DELIVERED + verified at source (KS-1089 Low, related KS-1086 · KS-1086 `efb52344` · #953 `5629351067`); item 1 `!CODING/Secuura/Blockchain/5_Project_History/push-protocol/push_protocol.py` sha256 `d2a5309661d5…`: NEW 14/14 and OLD 14/14 on aims written first, OLD wrong on FF/N/A/X/R2; DIFF and INCOMPLETE print STOP-and-mail, never restore; exit table 0/1/3/4 in the docstring | **its WRAP →** verify handover + history entry on disk → `pane_close.sh %15` (listener count before/after) → **commission the TIER-2 GATE below** → score s179 at that verdict (three-hop). |
+| ~~`%15`~~ | **s179 WRAPPED 04:33:28Z** — handover `HANDOVER-s179-tier2-predicate.md` sha256 `a9ae6cd8…` verified on disk; history entry on top; pane closed via `pane_close.sh %15`, listeners 24 → 24 | item 0 delivered + verified (KS-1089 · KS-1086 `efb52344` · #953 `5629351067`); item 1 READY FOR REVIEW ruled COMPLETE | **score owed at the `%16` gate verdict** |
 | `%1` | monitor | — | — |
 
 **develop = `2d864ae9220c57ddcd8dc77af1b80fbd8001d530`** (unmoved since the 12 squash merges this morning; `ls-remote` 13:3x).
@@ -25,7 +25,10 @@ Until #953 is on develop, no seat runs the pre-push hook or preflight leg 14, on
 **After #953 merges** (Peter approves at head; author squash-merges): HOLD lifts → #879 (approved at `79f1fcb48`) and #813 (Peter's approval WITHDRAWN) per `!CODING/Secuura/Blockchain/5_Project_History/HANDOVER-s176-merge-lane-2.md` Item 2, under the FIXED protocol, reviews read at head before each push.
 **Deferred on purpose:** the #899/#900 review seat — launch only when #896 has merged AND #933's B-1 is fixed (`HANDOVER-s175.md`).
 
-## 🔵 GATE OWED — `push_protocol.py` @ `d2a53096` (tier 2 through-code, round 1) — commission BEFORE it guards #879/#813
+## 🔵 GATE LAUNCHED 14:39 — `push_protocol.py` @ `d2a53096` (tier 2 through-code, round 1), pane `%16` `QA/Secuura-push-protocol`
+- **Brief** `2_Project_Files/fleet/qa-agent/briefs/2026-09-11_secuura-push-protocol-d2a53096-tier2.md` · **prompt** `…tier2.prompt.txt` · **launcher** `2_Project_Files/fleet/qa-agent/launchers/launch_qa_secuura_push_protocol_d2a53096.sh` (`--check` rc 0; red-proof 12 cells FAILS=0: green · NEVER 11 · MAIL 12 · ROUND 15 · TIER 7 · handover 17 · no-write 13 · directive 8 · sha 6 · override-launch 16 · green). Report dir `Testing Agent MAIN/projects/secuura/reports/2026-09-11-push-protocol-d2a53096-tier2-r1/`.
+- **Verdict arrives FROM Wednesday's send path — route on `[QA -> Wednesday] TIER 2 GATE push_protocol.py d2a53096 ROUND 1`.** Then: verify the subject sha unchanged → completion check → score s179 → `pane_close.sh %16`. A NO GO → fix round from s179's handover, under the two-round cap.
+- (Original asks, kept for the record:)
 - **Why tier 2:** tooling, not product. It guards Secuura's SHARED `.git`, its old failure path was a destructive restore, and every arm and aim so far is the author's. **Not urgent:** those pushes wait on Peter's #953 review; pipelining is the point.
 - **Asks:** (1) re-run `push-protocol/redproof/redproof_driver.py` AND write at least two arms of the gate's OWN design — a fetch by another process between snapshot and verify (must not read CLEAN), and a tag or multi-ref push; (2) the REAL `.githooks/pre-push` on a no-op push with empty stdin, in a scratch clone (s179 saw a SCRATCH hook fire on that shape); (3) trace the sub-scripts `.githooks/pre-push` and `preflight.sh` call for any fetch / ls-remote / pull that moves another ref (s179 read the top level only); (4) show that no legitimate shape (first push · fast-forward · no-op · refused) can read DIFF, and that no output says restore.
 - **Template:** `2_Project_Files/fleet/qa-agent/launchers/launch_qa_secuura_ks1086_953_round2.sh` + its brief (guards: NEVER-line, MAIL line, ROUND, TIER). **The prompt must forbid a push, the real hook or preflight inside the Secuura checkout.** Read s179's handover (its gate asks + NOT TESTED) before writing the brief.

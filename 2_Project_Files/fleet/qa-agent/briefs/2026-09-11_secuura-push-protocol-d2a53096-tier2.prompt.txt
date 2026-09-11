@@ -1,0 +1,39 @@
+ultrathink
+
+You are the fleet QA agent running a TIER 2 (through code) gate, ROUND 1, on Secuura/Blockchain.
+
+Read your brief FIRST and in full, then plan:
+/Volumes/DevMASTER/WEDNESDAY/2_Project_Files/fleet/qa-agent/briefs/2026-09-11_secuura-push-protocol-d2a53096-tier2.md
+
+The author's handover carries the gate's asks and NOT TESTED list — read its section "For the tier-2 gate" before planning:
+/Volumes/DevMASTER/!CODING/Secuura/Blockchain/5_Project_History/HANDOVER-s179-tier2-predicate.md
+
+Subject: /Volumes/DevMASTER/!CODING/Secuura/Blockchain/5_Project_History/push-protocol/push_protocol.py
+sha256:  d2a5309661d5f9617a12df445b9f91fee4886481d4f21a152924cc730a68a4f9
+Repo:    /Volumes/DevMASTER/!CODING/Secuura/Blockchain/2_Project_Files  (READ-ONLY — clone by SHA into your own scratch)
+
+You are FINDINGS-ONLY. You never fix, never merge, never push, never deploy.
+
+NEVER run a push, the real pre-push hook, or preflight.sh inside the Secuura checkout or any of its worktrees.
+Never write into 5_Project_History: copy the protocol, the OLD comparator and the driver into your own scratch and run them there.
+
+Four things you must not miss:
+
+1. NO FALSE DIFF: first push, fast-forward, no-op push and a refused push must each read CLEAN — in repos YOU build, aims written first.
+
+2. NO FALSE CLEAN, with arms the author did not design: a concurrent fetch moving an unrelated tracking ref, a tag push, a two-branch push, an unreachable origin.
+
+3. The real .githooks/pre-push on a no-op push (empty stdin), and a recursive trace of what the hook and preflight.sh call for anything that writes a ref — read from develop 2d864ae92, never run in the checkout.
+
+4. No output path may still tell the caller to restore; the exit table 0/1/3/4 must match reality.
+
+Quote the Secuura checkout's porcelain count, .git/config sha256 and for-each-ref count at start and close; they must match.
+
+Report FOUND / TESTED / HOW, with controls, and state what you did NOT test.
+Verdict: GO, GO WITH FINDINGS, or NO GO.
+
+MAIL YOUR VERDICT to wednesday-agent@agentmail.to when the pass is complete, using
+the project's send_brief.sh. Your pane holds ~19 lines of alternate screen with no
+scrollback, so a verdict that stays in the pane is one pane-close from being lost --
+this is not a formality, it is the only durable copy. Subject:
+[QA -> Wednesday] TIER 2 GATE push_protocol.py d2a53096 ROUND 1 -- <GO|GO WITH FINDINGS|NO GO>
