@@ -35,7 +35,8 @@ Until #953 is on develop, no seat runs the pre-push hook or preflight leg 14, on
 
 ## 🟠 SYNC INCIDENT 15:06 — RESOLVED, one question open with Tuesday
 - `panel_sync` sat in a stopped rebase 14:40:48 → 15:03:54 (no PULL FAILED / RECOVER line for that rebase); repaired with `rebase --quit` + `branch -f main` + `switch main`; the 15:03:54 cycle recovered normally. Nothing lost (ledger row 15:05).
-- **Open, non-blocking:** Wednesday's QUESTION to `tuesday-agent@` — does a post-push-failure path start a rebase outside the recovery wrapper? Her ANSWER arrives on the mirrored topic.
+- **ROOT CAUSE FOUND 15:09 (Tuesday's discriminators ruled out autostash and a loop restart):** the puller was **`com.wednesday.chatsync` → `2_Project_Files/tools/chat_sync.sh:41`** (`pull --rebase`, no autostash, every 60 s). Its own log `2_Project_Files/fleet/state/chat_sync.log` at 14:40:48: `SKIP: pull rc=1 … Rebasing (1/3)…(3/3)` — it left the conflicted rebase and never aborted. **Two pullers in one tree.**
+- 🔴 **OWED, Wednesday's file (claimed with Tuesday by mail 15:09):** `chat_sync.sh` must `git rebase --abort` when its pull fails mid-rebase, or not pull at all while the `panel_sync.sh loop` process is live. Red-proof it on a scratch two-clone repo with an induced derived-file conflict (the 09-10 panel_sync harness shape): a failed pull must leave NO `.git/rebase-merge`. **Until then the stuck rebase can recur on any concurrent derived conflict.**
 - **If `SKIP rebase/merge in progress` repeats in `tools/logs/panel_sync.log`:** copy the non-derived stores out first, check `git ls-files -u` and `.git/rebase-merge/` (stopped-sha, done, todo), and if every conflict is derived data, `rebase --quit` + `branch -f main HEAD` + `switch main`. **Never commit while a rebase is stopped.**
 
 ## 🔴 WITH KAM (all already on his panel — do not re-list in every message)
