@@ -6,6 +6,7 @@ permanent change nobody decided to make. Every seat reads this at boot; an entry
 
 | grant | given | EXPIRES | scope, exactly |
 |---|---|---|---|
+| **We approve and merge our own TESTED Platform K work** | Kam, panel 2026-09-11 16:56:00 *"For the time being, I / you will approve our own elements"* + 16:56:44 *"based on this.  FIx and merge all tickets after they are tested"* (on Stuart's forwarded proposal) | **OPEN-ENDED — "for the time being"; stands until Kam withdraws it** | Approval = Kam or Wednesday's GO after the QA gate at head + Test Evidence; squash, author merges; kintsugi gets merged work; **demo = UAT, waits for Peter's formal test and nod (narrows the week deploy grant's demo half — told to Kam)**; raise-to-1 stays unapplied. Platform K only. `learnings/2026-09-11_secuura-we-approve-and-merge-our-own-tested-work.md` |
 | **Deploy freely to kintsugi AND demo** | Kam, email 2026-09-10 15:24 — *"Please deploy everything possible to kintsugi. Also deploy everything possible to demo. This rule stands until the end of the week."* | **END OF SUNDAY 2026-09-13 AEST** | Deploy MERGED work to both boxes. **"Everything possible" = what has merged to develop** — it does NOT authorise merging the 66 unapproved PRs, bypassing a gate, or `--no-verify`. Kintsugi first (his 13:22 rule). Production is untouched and does not exist. |
 
 ⚠ **ASSUMPTION ON THE DATE, FLAGGED TO KAM 2026-09-10 15:2x AND NOT YET CORRECTED:** "end of the

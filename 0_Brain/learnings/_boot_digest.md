@@ -7,7 +7,7 @@ status: live
 
 # Boot digest — headline + rules of every lesson (open the file when it fires)
 
-Generated 2026-09-11 16:57 from 154 lesson files (787,621 B). Each block = the lesson's retrieval handle (H1), its frontmatter, the operative paragraph, its section index, and every RULES section verbatim. 7 files carry no rules-shaped section and are included whole. The CASES behind a rule live only in the file: open it the moment the rule fires, or when a diagnosis needs the evidence. `_ledger.md` is read whole beside this digest; `_ledger_archive.md` on demand.
+Generated 2026-09-11 17:00 from 155 lesson files (791,698 B). Each block = the lesson's retrieval handle (H1), its frontmatter, the operative paragraph, its section index, and every RULES section verbatim. 7 files carry no rules-shaped section and are included whole. The CASES behind a rule live only in the file: open it the moment the rule fires, or when a diagnosis needs the evidence. `_ledger.md` is read whole beside this digest; `_ledger_archive.md` on demand.
 
 ## The T9 SSD is the master — Wednesday must be fully portable
 `2026-07-31_fully-portable-drive.md` · principle · 2026-07-31 · status: superseded — the "T9 is the master" half by [[2026-08-25_one-drive-devmaster-is-master]] (2026-08-25); the portability principle itself still lives
@@ -5728,4 +5728,17 @@ sections (open the file for these): The two cases, one hour apart, same root cau
 1. **A checker's specification has two halves — the RULE and the SHAPE LIST — and they are written from different sources** (the defect and the commission). Before sending, put every shape in the list through the rule, clause by clause, and write the verdict each clause yields. A shape the rule rejects and the list accepts is a contradiction the builder will resolve silently one way and the gate will report the other.
 2. **Ask what the ordinary form of each shape does to the state the rule inspects.** `push -u` writes config; a no-op push can move T; a refused push leaves T stale. The ordinary variants are where a defect-first rule is wrong.
 3. **Enforcement candidate (w=3 promotes it):** every brief for a checker carries a LEGITIMATE-SHAPES table — shape · expected verdict · the rule clause that yields it. The table makes rule 1 a thing written down rather than a thing remembered.
+
+
+## For the time being, WE approve our own Secuura work and merge every ticket once it is TESTED — Peter moves to periodic formal test passes, and demo (UAT) waits for his nod
+`2026-09-11_secuura-we-approve-and-merge-our-own-tested-work.md` · grant · 2026-09-11 · status: live
+
+**The operative case, so the headline matches it:** a Platform K PR of ours has passed its QA gate and Wednesday is about to write "awaiting Peter's review" or hold a merge for his approval. **Stop. Since 16:56 on 2026-09-11 the approval is Kam's or Wednesday's, not Peter's.** The condition is that it is TESTED: the QA gate at the PR's current head plus the author's Test Evidence block.
+
+sections (open the file for these): What the grant covers — Wednesday's reading, stated to Kam on the panel at 16:5x; his word corrects it · What it does NOT cover · Expiry · How to apply
+
+## How to apply
+- **Before any merge GO:** a gate verdict at the PR's CURRENT head · a Test Evidence block present · the head re-read · base contained correctly (the 09-09 armed-base line).
+- **The 54 open PRs (GitHub search at 16:5x: 53 on base develop, 39 by `kksecura`)** are sorted by a seat into tested (merge, one at a time) and untested (queued for gates) — never merged as a batch.
+- Family: [[2026-09-07_merge-authority-was-already-mine]] · [[2026-09-09_my-authority-and-the-targets-rules-are-two-checks]] (his explicit word amends the project convention; the file edit delivers it) · [[2026-09-10_kintsugi-first-then-demo-behind-gates]] · [[2026-08-07_protocol-v1.3-signed-delegation]].
 
