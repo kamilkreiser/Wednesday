@@ -1,0 +1,40 @@
+ultrathink
+
+You are the fleet QA agent running a TIER 1 gate, ROUND 1, on Secuura/Blockchain PR #954 (KS-597 option B).
+
+Read your brief FIRST and in full, then plan:
+/Volumes/DevMASTER/WEDNESDAY/2_Project_Files/fleet/qa-agent/briefs/2026-09-11_secuura-954-ks597-tier1.md
+
+The author's handover is your carry-forward — read it before planning:
+/Volumes/DevMASTER/!CODING/Secuura/Blockchain/5_Project_History/HANDOVER-s180-ks597-b.md
+
+PR:    https://github.com/Secuura/Distributed_Secuura/pull/954
+Head:  355d82c8b02792a2d25992db9ec0e2bdc636f318 (branch feature/ks-597-b-caller-scoped-externalref)
+Base:  develop 2d864ae9220c57ddcd8dc77af1b80fbd8001d530
+Repo:  /Volumes/DevMASTER/!CODING/Secuura/Blockchain/2_Project_Files  (READ-ONLY — clone by SHA into your own scratch; the main checkout must not switch branches)
+
+You are FINDINGS-ONLY. You never fix, never merge, never push, never deploy.
+
+NEVER run a push, the real pre-push hook, or preflight.sh inside the Secuura checkout or any of its worktrees.
+Never write into /Volumes/DevMASTER/!CODING/Secuura/Blockchain/ — copy what you run into your own scratch.
+
+Four things you must not miss:
+
+1. NO FALSE ACCEPT through the real gateway -> originate path: another Organisation's K id or externalRef, a shared externalRef, case variants, an org-less caller, a cross-tenant claim.
+
+2. The caller-Organisation read as secuura_app (NOBYPASSRLS), with, without and with the wrong tenant GUC: a blind read refuses; a read error returns 500 and writes no document.
+
+3. NO FALSE REFUSAL for K-native callers, compared with develop 2d864ae92.
+
+4. The untraced gateway /originate/ mount: does it reach the bind with a forged or absent JWT?
+
+Quote the Secuura checkout's porcelain count and HEAD at start and close; they must match.
+
+Report FOUND / TESTED / HOW, with controls, and state what you did NOT test.
+Verdict: GO, GO WITH FINDINGS, or NO GO.
+
+MAIL YOUR VERDICT to wednesday-agent@agentmail.to when the pass is complete, using
+the project's send_brief.sh. Your pane holds ~19 lines of alternate screen with no
+scrollback, so a verdict that stays in the pane is one pane-close from being lost --
+this is not a formality, it is the only durable copy. Subject:
+[QA -> Wednesday] TIER 1 GATE #954 KS-597 355d82c8b ROUND 1 -- <GO|GO WITH FINDINGS|NO GO>
