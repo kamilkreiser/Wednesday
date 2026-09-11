@@ -69,6 +69,7 @@ Verdict `!CODING/Testing Agent MAIN/projects/secuura/reports/2026-09-11-push-pro
 Tonight's 03:30 leg is the first real run of the FIXED deletion counter (`a0d70ca8`). Read its per-root summary; `UNKNOWN` means normalisation failed, not zero.
 
 ## ⚠ TRAPS
+- **A QA verdict never wakes the mail leg** (it arrives From `wednesday-agent@`; `wake_watch.sh` :103-:116), and **a QA pane launched after a `stable_n=9999 agents=0` arm is not idle-watched until the 4h backstop** (measured 2026-09-12 01:00→04:32). After launching a gate with no builder seat live, arm a session-side wait on the verdict subject. **Owed fix, shared with Tuesday (claim first):** QA-tag subjects inbound; no 9999 while a cockpit pane is live.
 - **FIRST WRITE OF THE BOOT: commit the launcher's regenerated boot digests** by path.
 - **Never pipe `inbox_digest.sh`** — it is newest-first and acks what it prints; redirect to a scratch file and Read it, or read the API directly.
 - **Write and commit in ONE command.** `panel_sync` does a plain `pull --rebase`; `scoreboard.md` is a TWO-WRITER file.
