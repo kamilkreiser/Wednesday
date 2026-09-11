@@ -11,8 +11,8 @@ supersede: replace this file wholesale at the next pickup; do not append
 
 > Narrative: `0_Brain/daily/2026-09-11.md` (17:18–17:55 entries). **Measure before acting on any line here.**
 
-## 🔴 HOLD — SECUURA PREFLIGHT LEG 14 (unchanged)
-Until #953 is on develop **and Wednesday has verified it and lifted the hold BY NAME** (mail to the seat + this file), no seat runs the pre-push hook or preflight leg 14, on any tree containing `ec2d8c4ca`, from any push whose hook receives `GIT_DIR` (a linked worktree, or `git --git-dir=… --work-tree=… push`). Main-checkout pushes do not export `GIT_DIR`.
+## 🟢 LEG-14 HOLD — LIFTED 18:3x, SCOPED (Wednesday, ANSWER to s181)
+#953 verified at source by Wednesday: squash `8a6b0d9c2`, one parent `2600229ef`, files == the PR's 2, develop tip == it. **LIFTED for any push whose tree CONTAINS `8a6b0d9c2`.** **NOT lifted** for a tree containing `ec2d8c4ca` but not `8a6b0d9c2` — the hook runs the pushing tree's own runner, so push it from the MAIN checkout or bring develop in first. Check: `git merge-base --is-ancestor 8a6b0d9c2 HEAD` == 0 before any linked-worktree push. **Every Secuura brief carries THIS wording from now on, not the old hold.**
 
 ## 🟢 FLOOR
 | pane | seat | state | next event Wednesday owes |
@@ -25,7 +25,7 @@ develop = **`2600229efedae9682339064d8127ccf035b90afc`** (`ls-remote` 17:5x): Pe
 ## 🔵 s181's round, and what Wednesday does at each event
 1. **Item 0 mail** (project CLAUDE.md root copy lines 234/237 amended to Kam's words; quarantine copy + sha256s) → read the edited lines back yourself (read-only) before accepting.
 1b. **Item 0 VERIFIED 18:2x** (root CLAUDE.md `:232-:241` + `:266` note, sha `a4cd7d58…`; Stuart draft line 11; KS-1085 comment `96f6350a`). **Owed in the next ANSWER:** s181 posts one correction on KS-925 (its 09-10 comment says step 7 no longer marks seen; `Launch_Claude.command:537` still does).
-2. **#953 merged** → verify at source: `merged`, merge commit has ONE parent (squash), parent == develop tip before it, develop tip == it → **LIFT THE LEG-14 HOLD BY NAME** (mail s181 + this file + the Secuura brief standing lines) → KS-1086 comment + board move verified.
+2. ✅ **DONE 18:3x — #953 merged, verified, hold lifted (scoped).** Was: **#953 merged** → verify at source: `merged`, merge commit has ONE parent (squash), parent == develop tip before it, develop tip == it → **LIFT THE LEG-14 HOLD BY NAME** (mail s181 + this file + the Secuura brief standing lines) → KS-1086 comment + board move verified.
 3. **#954 verify receipt** → KS-597 comment + Tested Not Deployed verified.
 4. **Census mailed** (`!CODING/Secuura/Blockchain/5_Project_History/2026-09-11_merge-census/CENSUS-s181.md`) → sample each TESTED row at source (gate verdict at CURRENT head, Test Evidence, base, mergeable, no workflows) → **GO by PR number + head SHA, one at a time, citing Kam's 17:50 extension.** Other authors' PRs: they merge their own.
 
