@@ -33,3 +33,4 @@ sees the claim rather than discovering it in a conflict.
 | 2026-09-09 21:14 | Kamils-Mac-Studio | decision_queue.sh amend verb + card freshness marker — the stale-card family hit 4x on 2026-09-09 (3 cards + 1 draft), 2 with measured cost; design settled in the 09-09 ledger rows | OPEN | |
 | 2026-09-10 09:05 | Kamils-Mac-Studio | chat input 2000-char cap: Kam's pasted documents are truncated at the input box AND again server-side (chat.html:133 maxlength, server.py:460 [:2000]) — found 2026-09-10 when Peter's triage arrived as a fragment | OPEN | |
 | 2026-09-10 09:11 | Kamils-Mac-Studio | wed-wakewatch-hardcodes-wednesday-inbox-and-pane — Kam ruled 'parameterise' 2026-09-10 09:00; Wednesday's behaviour must stay byte-identical | OPEN | |
+| 2026-09-11 15:16 | Kamils-Mac-Studio | chat_sync.sh: abort a rebase its own failed pull leaves + stand down while this tree's panel_sync loop is live (the 14:40 stuck-rebase root cause; told Tuesday 05:09Z) | OPEN | |
