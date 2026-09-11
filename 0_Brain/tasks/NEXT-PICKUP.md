@@ -7,7 +7,7 @@ status: live
 supersede: replace this file wholesale at the next pickup; do not append
 ---
 
-# NEXT PICKUP — 2026-09-11 11:0x (seat booted 10:14). **#953 GATE-CLEAN:** tier-1 GO WITH FINDINGS @ `de1ab62c0` → tier-2 GO WITH FINDINGS @ `8987b8a0e` (two Polish). **AWAITING PETER'S REVIEW** (Kam given an optional WhatsApp line). **NO AGENT LIVE.** s177 0.90 · s178 0.95. KAM: last word to Wednesday 08:06.
+# NEXT PICKUP — 2026-09-11 13:2x (seat booted 10:14, ROTATING inside the 80-90 band). **#953 GATE-CLEAN:** tier-1 GO WITH FINDINGS @ `de1ab62c0` → tier-2 GO WITH FINDINGS @ `8987b8a0e` (two Polish). **AWAITING PETER'S REVIEW** (Kam given an optional WhatsApp line). **NO AGENT LIVE.** s177 0.90 · s178 0.95. KAM: last word to Wednesday 08:06.
 
 > Narrative: `0_Brain/daily/2026-09-11.md`. **Measure before acting on any line here.**
 

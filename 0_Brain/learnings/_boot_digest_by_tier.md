@@ -7,7 +7,7 @@ status: live
 
 # Boot digest BY TIER — W whole, M rules-only, every project case a handle
 
-Generated 2026-09-11 12:59 from 150 lesson files (773,995 B). M 32 · MIXED 5 · W 113. 28 project CASE sections inside MIXED files are reduced to one line each: the heading and the path to read it at. W blocks are exactly what the default digest carries; M blocks drop the section index and keep the rules; a P file is a single handle. The CASES behind every rule live only in the lesson files — open one the moment its rule fires.
+Generated 2026-09-11 13:26 from 151 lesson files (778,950 B). M 33 · MIXED 5 · W 113. 28 project CASE sections inside MIXED files are reduced to one line each: the heading and the path to read it at. W blocks are exactly what the default digest carries; M blocks drop the section index and keep the rules; a P file is a single handle. The CASES behind every rule live only in the lesson files — open one the moment its rule fires.
 
 ## The T9 SSD is the master — Wednesday must be fully portable
 `2026-07-31_fully-portable-drive.md` · principle · 2026-07-31 · status: superseded — the "T9 is the master" half by [[2026-08-25_one-drive-devmaster-is-master]] (2026-08-25); the portability principle itself still lives · tier: W
@@ -5308,4 +5308,20 @@ Related: [[2026-08-15_a-cap-is-never-neutral]] ·
 ## EXTENSION, same day — FOUR instances across THREE agents, and a fourth kind of selector
 A fourth landed within the hour, from the Secuura seat, and it makes the family cross-fleet rather
 than mine:
+
+
+## A checker's red-proof needs a CLEAN arm for every legitimate shape of the real event it will guard — and a checker whose failure path is a destructive remedy needs a false-DIFF arm as much as a false-CLEAN one
+`2026-09-11_red-proof-arms-cover-every-legitimate-shape-of-the-real-event.md` · correction · 2026-09-11 · status: live · tier: M
+
+**The operative case, so the headline matches it:** Wednesday is about to specify, accept or ratify the red-proof arms for a CHECKER — a verify step, a guard, a gate, a protocol — that will then run against a real event (a push, a deploy, a migration, a sync). **Before ratifying, list the legitimate shapes of THAT event from the commission itself, and ask of each: which arm shows the checker reads CLEAN on it?** Then ask the mirror: **if the checker reads DIFF wrongly, what does its failure path DO?** If the answer is "restore", "revert", "delete" or "kill", a false DIFF is a destructive act, and it needs its own arm.
+
+## How to apply
+
+1. **Enumerate the legitimate shapes of the real event from the commission, in writing, before any arm is accepted.** For a push: first push · fast-forward to an existing branch · push to a branch with an open PR. For a deploy: first deploy · redeploy of the same image · rollback. For a sync: first run · incremental · no-op.
+2. **Every legitimate shape gets a CLEAN arm. Every defect class gets a DIFF arm.** A matrix with one clean arm is a checker proven on one input.
+3. **Ask what the checker's failure path does.** If DIFF triggers a restore, revert or delete, a false DIFF is destructive — write the arm that proves a legitimate shape does NOT trip it, and until that arm exists, the instruction on DIFF is **STOP and ask**, never the remedy.
+4. **Ratifying someone else's arms is writing them.** Apply rules 1–3 to arms an agent proposes, especially one that has just corrected you — the correction is evidence the agent is careful, not that the matrix is complete.
+5. **Do not re-aim after the result.** When a real event exposes the gap, the fix goes into the NEXT use of the checker with its new arms written first; the event already verified stays ruled on its evidence.
+
+**Family:** [[2026-08-07_a-check-that-cannot-fail]] (a red-proof that cannot redden for the right reason — and its mirror, a check that cannot pass for the right reason) · [[2026-08-17_check-the-refusal-before-the-kill]] (a destructive remedy behind a refusable check) · [[2026-09-10_a-two-answer-question-hides-a-third-state]] (rule 5: it applies to questions you WRITE — and to matrices you ratify) · [[2026-09-10_i-endorse-things-i-have-not-read]] (a ratification is load-bearing) · [[2026-09-08_a-new-rule-is-most-dangerous-just-after-adoption]] (the w=1 rule failed at its first exception, one hour old).
 
