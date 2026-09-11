@@ -11,6 +11,8 @@ supersede: replace this file wholesale at the next pickup; do not append
 
 > Narrative: `0_Brain/daily/2026-09-11.md` (15:16–17:1x entries). **Measure before acting on any line here.**
 
+> ▶ **UPDATE 17:45 (seat booted 17:14):** #954 gate **GO @ `355d82c8b`, zero findings** — s180 scored 1.00, `%18` closed (28 → 28). **Floor: no agents.** develop is now **`38a919d40`** (Peter merged #896 at 07:38Z, merge commit, no file overlap with #953/#954; both `mergeable: true`). **The FLOOR table and KS-597 steps 1-2 below are superseded by this line.** Next commission: **s181 merge seat** (CLAUDE.md merge-flow amend → squash #953 → squash #954 → read-only census). Stuart draft goes to Kam **after #954 merges**. Kintsugi deploy = the seat after.
+
 ## 🔴 HOLD — SECUURA PREFLIGHT LEG 14 (unchanged)
 Until #953 is on develop, no seat runs the pre-push hook or preflight leg 14, on any tree containing `ec2d8c4ca`, from any push whose hook receives `GIT_DIR` (a linked worktree, or `git --git-dir=… --work-tree=… push`). Pushes from the MAIN checkout do not export `GIT_DIR` (the tier-2 push-protocol gate, measured in scratch). Every Secuura brief carries it.
 
