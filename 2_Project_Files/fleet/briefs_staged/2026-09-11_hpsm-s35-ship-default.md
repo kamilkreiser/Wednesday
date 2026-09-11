@@ -1,6 +1,6 @@
 # SHIP — Datasec/HPSM, Policy Composer: push what round 2 fixed and backlog the residue
 
-**BLUF.** The round-2 tier-1 gate on `0c3078e8398d016cbbf250712da56585938d734f` returned **NO GO: 1 Major, 5 Minor** (verdict mail 2026-09-11T00:33:51Z; report `/Volumes/KK_T9_External_HDD/!CODING/Testing Agent MAIN/projects/hpsm/reports/2026-09-11-composer-0c3078e-tier1r2/report.md`). **The same report confirms all four round-1 Majors are fixed**, measured independently. **The Major (R2-M1, approver re-parenting) PRE-EXISTS at `a06ada3`.** The cap is reached. **Under the tiered gate's rule, the closed instances ship and the residue is ticketed.** Kam holds the card `hpsm-composer-round3-approver-guard` (rec round 3). **@DEFAULT_LINE@**
+**BLUF.** The round-2 tier-1 gate on `0c3078e8398d016cbbf250712da56585938d734f` returned **NO GO: 1 Major, 5 Minor** (verdict mail 2026-09-11T00:33:51Z; report `/Volumes/KK_T9_External_HDD/!CODING/Testing Agent MAIN/projects/hpsm/reports/2026-09-11-composer-0c3078e-tier1r2/report.md`). **The same report confirms all four round-1 Majors are fixed**, measured independently. **The Major (R2-M1, approver re-parenting) PRE-EXISTS at `a06ada3`.** The cap is reached. **Under the tiered gate's rule, the closed instances ship and the residue is ticketed.** Kam holds the card `hpsm-composer-round3-approver-guard` (rec round 3). **Kam has not ruled it: the card is still open at 11:31 AEST, and Kam was told at 10:33 that this default ships unless he says otherwise. If a Tuesday mail relays a round-3 ruling mid-session, it SUPERSEDES this queue.**
 
 ## QUEUE
 1. **Push `0c3078e` to `datasecau/HPSM-light` main.** Fast-forward only, from `a06ada3`; no force. Verify: local HEAD == `git ls-remote origin refs/heads/main` == `0c3078e8398d016cbbf250712da56585938d734f`. Mail Tuesday both SHAs.
@@ -26,4 +26,4 @@ HPSM-light main == a06ada3, local main == 0c3078e | datasec-hpsm session 34 wrap
 Kam's card hpsm-composer-round3-approver-guard open, rec round3 | decision_queue.sh show | read 2026-09-11
 structural-look undelivered | session 34 plan confirmation 2026-09-10T23:27:41Z | read 2026-09-11
 
-SELF-CHECK: re-read end-to-end for contradictions | 2026-09-11 @NOW@
+SELF-CHECK: re-read end-to-end for contradictions | 2026-09-11 11:31
