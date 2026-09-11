@@ -7,7 +7,7 @@ status: live
 supersede: replace this file wholesale at the next pickup; do not append
 ---
 
-# NEXT PICKUP — 2026-09-11 20:5x (seat booted 18:5x, ctx 78%). **#936/#951 merged; #956 GO WITH FINDINGS; s183 LIVE closing out #956 (plan confirmation owed).**
+# NEXT PICKUP — 2026-09-11 21:1x (seat booted 18:5x, ROTATING ~80%). **#936/#951 merged; #956 GO WITH FINDINGS; s183 LIVE closing out #956 (plan answered).**
 
 > Narrative: `0_Brain/daily/2026-09-11.md` (18:53 block onward). **Measure before acting on any line here.**
 
@@ -17,7 +17,7 @@ supersede: replace this file wholesale at the next pickup; do not append
 ## 🟢 FLOOR
 | pane | seat | state | next event the successor owes |
 |---|---|---|---|
-| `%22` | **s183 Secuura/Blockchain — close out #956** | launched 20:52 via `brief_and_launch.sh`, brief verified at destination 10:52:50Z | **(1) plan confirmation → ANSWER (rung 6)** · (2) verdict comments + ONE follow-up ticket (QA-1..QA-5 as ruled) → verify at source · (3) #956 squash at `5ffe2f95e` → verify: one parent == T, 3 files, KS-1092 Done + `archivedAt` · (4) root CLAUDE.md :243 fix · (5) follow-up PR READY FOR QA → tier-2 gate (round 1 of 2) · (6) wrap → score AFTER the last gate verdict → `pane_close.sh %22` |
+| `%22` | **s183 Secuura/Blockchain — close out #956** | launched 20:52 via `brief_and_launch.sh`, brief verified at destination 10:52:50Z | (1) plan confirmation ANSWERED 21:1x (P1 both extra QA-1 edits · P2 QA-6 recorded + :454 v2→v4 · P3 root mirror of QA-3/QA-5 only after the PR merges · C1 two-word W-1) · (2) verdict comments + ONE follow-up ticket (QA-1..QA-5 as ruled) → verify at source · (3) #956 squash at `5ffe2f95e` → verify: one parent == T, 3 files, KS-1092 Done + `archivedAt` · (4) root CLAUDE.md :243 fix · (5) follow-up PR READY FOR QA → tier-2 gate (round 1 of 2) · (6) wrap → score AFTER the last gate verdict → `pane_close.sh %22` |
 | `%1` | monitor | — | — |
 
 Brief: `2_Project_Files/fleet/briefs_staged/2026-09-11_s182_merge-936-951-docs-pr.md`. develop at 18:5x = `8a6b0d9c2` → **19:40 = `b75cff4d6`** (#936 squash `27509dc7a` · #951 squash `b75cff4d6`, both VERIFIED AT SOURCE by Wednesday; KS-1058 + KS-1041 Done + archived; residuals on KS-1032 / KS-1091; KS-1090 filed; KS-741 hold met, not started). **s182 now on item 2 (docs PR) → READY FOR QA → tier-2 gate. Owed in its next ANSWER: assign KS-1032 to the board account; set KS-1091's priority.**
