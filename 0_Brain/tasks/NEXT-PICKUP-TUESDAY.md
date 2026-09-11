@@ -18,7 +18,7 @@ supersede: replace WHOLESALE at the next pickup; never append. It replaced s7's 
 
 ## 🔴 WITH KAM
 1. **NexusAI round-4 card** (above). 2. **HPSM round-4 card** (default already fired; tap still switches). 3. **Full Disk Access for `/bin/bash`** (ruled `grant` 15:22; the toggle is his hands; not on at 15:26 — probe exit 126). Re-prove with a throwaway plist in the scratchpad running `2_Project_Files/fleet/state/tcc_probe.sh` (`TCC_OK` = granted, 126 = not); never probe with a real ritual or `nas_sync.sh`. 4. **NexusAI registry (B2).** 5. **Jira key for the Composer** (rec `HPSML`). 6. **From S54, told to Kam 17:35:** any environment that ran failing Log Analytics queries with a real token may hold tokens in its log store — unmeasured. 7. MIN-4 (owner name/email in the Datasheet PDF text) is his, unchanged.
-8. **NOT YET TOLD — put it in the next substantive panel message, not in a message of its own:** this Mac's Docker holds **81 orphaned anonymous volumes** (about 59 MB each, so roughly 4.8 GB). They come from HPSM `test-db.sh` runs (R3-m2), measured by s37 at 07:35Z, and no container references any of them. Removing them is his call. Nobody has pruned them; s37 was told to record them only.
+8. **Told 17:4x (panel row 127, verified at origin):** this Mac's Docker holds 81 orphaned anonymous volumes (~4.8 GB) from HPSM `test-db.sh` runs (R3-m2). Removing them is his call; nobody has pruned them.
 
 ## ✅ DONE IN s8
 - Boot: by-tier digest whole (154 files), own ledger whole; ctx 26% after the digest, 41% at 17:3x. Linear WED active 26; `lesson` label exists and has never been used (true zero).
