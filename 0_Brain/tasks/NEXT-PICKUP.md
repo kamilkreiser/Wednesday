@@ -36,7 +36,7 @@ Verdict: `!CODING/Testing Agent MAIN/projects/secuura/reports/2026-09-11-push-pr
 5. Tuesday's Mac mini Full Disk Access toggle — Tuesday's; she gave him the steps at 15:27 and her probe still read exit 126.
 
 ## 🟡 OWED BY WEDNESDAY (none started unless marked)
-1. **QA brief template gains a LEGITIMATE-SHAPES table for any checker** (w=3 promotion) — `2_Project_Files/fleet/qa-agent/BRIEF_TEMPLATE.md`.
+1. ~~QA brief template LEGITIMATE-SHAPES table~~ **DONE 15:4x — `BRIEF_TEMPLATE.md` §2a.** Still a rule in a template, not a gate: the launcher guard that refuses a checker brief without the table is the next rung if it recurs.
 2. Send gate: refuse a Secuura brief containing `extranet` outside a HOLDS / "not a channel" context.
 3. pretooluse hook: refuse `PIPESTATUS`; flag `grep -c`/`-q` on a multi-word phrase without `-i`; flag a bare `grep` with `$(` inside `$(…)`; flag a word beginning `=` after `echo`.
 4. Inbox reads filter on SUBJECT routing tags, never on From.

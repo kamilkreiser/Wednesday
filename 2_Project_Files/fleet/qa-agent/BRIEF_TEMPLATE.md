@@ -38,6 +38,22 @@ brief supplies only WHAT and WHERE.
 - **The claims to challenge:** `<key claims from the spec/PR, as inputs to falsify — NOT as evidence>`
 - **Source tree (read-only, for root-causing):** `<path or "not provided">`
 
+## 2a. LEGITIMATE SHAPES — required whenever the target is a CHECKER (2026-09-11, ledger w=3)
+*A verifier, guard, gate, hook, protocol or alarm. For a product change, write "not a checker" here and move on.*
+
+Fill this table BEFORE the brief is sent: every shape of the REAL event the checker will see in service, the ordinary legitimate ones first, each put through the rule clause by clause.
+
+| shape — its ordinary form, as a seat or user really produces it | expected verdict | the rule clause that yields it |
+|---|---|---|
+| `<e.g. first push with -u, which writes branch.<b>.remote/.merge>` | `<CLEAN>` | `<config IDENTICAL except branch.<pushed>.* — clause N>` |
+| `<e.g. a refused push that leaves the tracking ref stale>` | `<the verdict you intend, and its exit>` | `<clause>` |
+| `<each defect class the checker exists to catch>` | `<DIFF / refuse>` | `<clause>` |
+
+- **A row whose expected verdict and whose clause disagree is a contradiction in the brief — fix the rule or the row before sending.** The 2026-09-11 push-protocol brief sent one: its rule required config IDENTICAL and an unchanged tracking ref equal to origin, while its shape list required `push -u` and refused pushes to read CLEAN. The file implemented the rule, and the tier-2 gate reported three false DIFFs as Wednesday's error (W-1).
+- **Ask what the ordinary variant does to the state the rule inspects.** `push -u` writes config; a no-op push can move a tracking ref; a refused push leaves one stale. A rule written from the defect is wrong on exactly these.
+- **If the checker's failure path is destructive** (restore, revert, delete, kill), a false alarm is damage in its own right: the table needs a row proving each legitimate shape does not trip it, and until those rows are measured the instruction on alarm is STOP and mail, never the remedy.
+- Lesson: `0_Brain/learnings/2026-09-11_red-proof-arms-cover-every-legitimate-shape-of-the-real-event.md` (its w=3 extension).
+
 ## 3. Scope
 - **Charter (one or two sentences):** `<explore X with Y looking for Z>`
 - **In scope:** `<areas / endpoints / journeys>`
