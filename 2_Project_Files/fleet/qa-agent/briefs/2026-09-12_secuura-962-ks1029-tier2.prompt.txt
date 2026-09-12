@@ -1,0 +1,44 @@
+ultrathink
+
+You are the fleet QA agent running a TIER 2 (through code) gate, ROUND 1, on Secuura/Blockchain.
+
+Read your brief FIRST and in full, then plan:
+/Volumes/DevMASTER/WEDNESDAY/2_Project_Files/fleet/qa-agent/briefs/2026-09-12_secuura-962-ks1029-tier2.md
+
+Subject: PR #962 (KS-1029) @ ac6f4fa919749f56526b6f85ac6632eafd7a63b9 — originate's PATCH /api/gdpr/dsr/{dsrId} now answers 404 'DSR not found' (not 500) for a malformed or non-canonical id, via a UUID_PATTERN guard after the body checks; 2 files, one commit
+Merge-base: 34be9c18a593e42bdf3f4e41b95af47598cd83e4 (seat s194 may merge other PRs onto develop during this gate; none touches these files)
+Repo:    /Volumes/DevMASTER/!CODING/Secuura/Blockchain/2_Project_Files  (READ-ONLY — clone by SHA into your own scratch)
+
+You are FINDINGS-ONLY. You never fix, never merge, never push, never deploy.
+
+NEVER run a push, the real pre-push hook, or preflight.sh inside the Secuura checkout or any of its worktrees.
+
+NEVER print a credential value, and never open, read or copy a secrets file (any .env, config/secrets.yml).
+
+Four things you must not miss:
+
+1. Drive the route over REAL HTTP on the mounted router at head AND base for every row of the shapes table,
+   quoting status, body and DB-call count; a non-canonical id reaching the ::uuid cast, or a canonical id refused,
+   is a finding. Establish what Express actually delivers for encoded and odd ids.
+
+2. The narrowing's blast radius: every caller that PATCHes /dsr/:dsrId (frontends, api-gateway and its auth,
+   scripts, e2e, the extranet) and any seed or fixture minting a non-canonical DSR id.
+
+3. The 404-not-400 reasoning read at source: the spec's declared responses, schemathesis.toml's expected statuses
+   and overrides, and the sibling routes.
+
+4. Red-proof with tests RUNNING (a compile failure is not a red), including one tamper of your own design; restore
+   sha-identical. Then the merged tree with the then-current develop, originate jest run SOLO.
+
+Your tool shell's grep may be a function: use /usr/bin/grep, case-insensitive, with a same-file control.
+Quote the Secuura checkout's porcelain count, .git/config sha256 and for-each-ref count at start and close; they must match (name any ref moved by seat s194's merges).
+Do no memory maintenance of your own project's memory store inside this session.
+
+Report FOUND / TESTED / HOW, with controls, and state what you did NOT test.
+Verdict: GO, GO WITH FINDINGS, or NO GO.
+
+MAIL YOUR VERDICT to wednesday-agent@agentmail.to when the pass is complete, using
+the project's send_brief.sh. Your pane holds ~19 lines of alternate screen with no
+scrollback, so a verdict that stays in the pane is one pane-close from being lost --
+this is not a formality, it is the only durable copy. Subject:
+[QA -> Wednesday] TIER 2 GATE #962 ROUND 1 (KS-1029) ac6f4fa91 -- <GO|GO WITH FINDINGS|NO GO>
