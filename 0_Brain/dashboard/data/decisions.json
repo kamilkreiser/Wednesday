@@ -8877,5 +8877,50 @@
    "CARD hpsm-composer-round3-approver-guard",
    "CARD hpsm-composer-round4-commit-guard-and-forged-release"
   ]
+ },
+ {
+  "id": "wed-coordinator-rotation-killed-the-fleet-1604",
+  "client_project": "WED",
+  "title": "Wednesday's self-rotation at 16:04 yesterday destroyed the whole fleet session — should the coordinator pane move to its OWN tmux server?",
+  "bluf": "Measured (read-only diagnosis, 0_Brain/reference/2026-09-13_fleet-loss-1604/): at 16:04:29 the rotate script ran `tmux respawn-pane -k` on Wednesday's pane %0 and 36 ms later the ENTIRE `fleet` tmux session died as one unit — s194 (mid-merge of #961, Bash killed with exit 137), s195, the #962 QA gate and the monitor. The new seat never booted; nothing rebuilds a missing session; the floor stayed empty until you launched a seat at 08:39. Trigger NOT established (no kill call, no update, no crash report); 1 loss in 63 rotations with agents live. Guard that works without knowing the trigger: run Wednesday's pane on its own tmux server (`tmux -L wednesday`) so a respawn can never touch a server holding agents. Cost to you: the cockpit becomes TWO iTerm attaches instead of one. Until ruled, Wednesday does NOT self-rotate while agents are live; it hands over to a seat you launch instead.",
+  "default_action": "Until you rule: Wednesday does not self-rotate while any agent pane is live (it writes the handover and asks you to launch the successor), and builds the check-only half now since it changes nothing you see.",
+  "options": [
+   {
+    "key": "split-servers",
+    "label": "Move Wednesday's pane to its own tmux server (two iTerm attaches), plus the post-respawn liveness check and auto-rebuild",
+    "detail": "Wednesday claims the cockpit change with Tuesday first (her launcher mirrors it), builds it at a quiet floor, red-proofs a rotation with a scratch agent pane live, then resumes self-rotation."
+   },
+   {
+    "key": "check-only",
+    "label": "Keep one server; add only the post-respawn check + auto-rebuild + a FLEET LOST alert",
+    "detail": "Cheaper, no change to your iTerm view; a repeat still kills agents mid-command, but it is noticed within seconds and the fleet is rebuilt and relaunched instead of staying dark."
+   },
+   {
+    "key": "no-self-rotate",
+    "label": "Wednesday never self-rotates while agents are live; you launch the successor",
+    "detail": "No build; every rotation with agents live waits for your hands, which is the situation this morning."
+   }
+  ],
+  "recommended": "split-servers",
+  "ts": "2026-09-13T09:13:11.594467+10:00",
+  "status": "open",
+  "ruled_choice": null,
+  "ruled_ts": null,
+  "prior_rulings_overridden": [
+   "2026-09-02 19:34",
+   "2026-09-04 07:07",
+   "2026-09-04 08:31",
+   "2026-09-10 09:47",
+   "2026-09-10 09:47",
+   "2026-09-10 09:47",
+   "CARD secuura-ks762-db-password-rotation",
+   "CARD secuura-appdb-rotation-vs-800-2026-09-04",
+   "CARD secuura-rotation-shell-inversion",
+   "CARD fleet-vault-note-attribution",
+   "CARD secuura-admin-credential-rotation-183-files",
+   "CARD secuura-ks968-rotation-three-worlds",
+   "CARD fleet-cross-seat-mail-wakes-keep-or-filter",
+   "CARD fleet-comms-names-one-coordinator"
+  ]
  }
 ]
