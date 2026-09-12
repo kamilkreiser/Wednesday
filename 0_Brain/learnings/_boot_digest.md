@@ -7,7 +7,7 @@ status: live
 
 # Boot digest — headline + rules of every lesson (open the file when it fires)
 
-Generated 2026-09-13 09:12 from 155 lesson files (792,936 B). Each block = the lesson's retrieval handle (H1), its frontmatter, the operative paragraph, its section index, and every RULES section verbatim. 7 files carry no rules-shaped section and are included whole. The CASES behind a rule live only in the file: open it the moment the rule fires, or when a diagnosis needs the evidence. `_ledger.md` is read whole beside this digest; `_ledger_archive.md` on demand.
+Generated 2026-09-13 09:17 from 156 lesson files (796,807 B). Each block = the lesson's retrieval handle (H1), its frontmatter, the operative paragraph, its section index, and every RULES section verbatim. 7 files carry no rules-shaped section and are included whole. The CASES behind a rule live only in the file: open it the moment the rule fires, or when a diagnosis needs the evidence. `_ledger.md` is read whole beside this digest; `_ledger_archive.md` on demand.
 
 ## The T9 SSD is the master — Wednesday must be fully portable
 `2026-07-31_fully-portable-drive.md` · principle · 2026-07-31 · status: superseded — the "T9 is the master" half by [[2026-08-25_one-drive-devmaster-is-master]] (2026-08-25); the portability principle itself still lives
@@ -5747,4 +5747,30 @@ sections (open the file for these): What the grant covers — Wednesday's readin
 - **What it adds:** the grant is no longer tied to a named PR. Any PR of ours that meets TESTED (a QA gate verdict at the CURRENT head, a Test Evidence block, our own suites) may be merged on Wednesday's GO without asking him.
 - **What it does not change:** "finished and tested" is the same predicate as above, not a looser one. Merges stay one at a time, head pinned, develop re-read after each. Deploys, demo (UAT, Peter's nod), `.github/workflows` PRs (his `kam-merges` card) and other authors' PRs (they merge their own) are all outside it.
 - **How to apply:** the census seat classifies; Wednesday samples each TESTED row at source and GOs it by number and head SHA; the GO names this extension.
+
+
+## Standing rule, ALL projects: spin up as many agents as possible to finish the task — the only limit is that no two agents work the same code
+`2026-09-13_as-many-agents-as-possible-partitioned-by-code.md` · grant · 2026-09-13 · status: live
+
+**His words, verbatim (2026-09-13 09:1x AEST):**
+> *"this is a new standing rule for all projects - please spin up as many agents as possible to complete the task as long as multiple agents do not create a problem with development through multiple agents working on the same code base.  Also as an FYI - the kreiser.org credits will most likely run out soon and will reset in 3 hours"*
+
+sections (open the file for these): What it widens, and what it does not · How to apply
+
+## How to apply
+1. **Every morning sweep and every checkpoint asks: how many DISJOINT lanes exist right now?** — and
+   launches each one that has a brief-able ticket. The lane sweep artefact (the 2026-09-12
+   `secuura_lanes.md` shape: directory families, open-PR collisions, class A tickets) is the instrument.
+2. **A brief's BLUF names the partition from BOTH sides** — this seat's files, and every other live
+   seat's files as NOT yours — and every live seat is named so a shared-inbox mail addressed to another
+   seat is recognisable.
+3. **Coordinate the launch count with the other coordinator only where the resource is shared** (the
+   allowance, the cockpit machine's load) — never the client work itself
+   ([[2026-09-10_claim-a-task-with-tuesday-before-starting-it]]).
+4. **Record each launch as a receipt**, not a request — the grant removes the pause, not the receipt
+   ([[2026-08-07_autonomy-grant-ship-decisions]]).
+
+**Family:** [[2026-09-09_parallel-seats-on-one-project-grant]] (the mechanism this rule scales up) ·
+[[2026-08-28_overnight-is-working-time]] · [[2026-08-03_go-slow-earn-autonomy]] (rule 5: every grant
+recorded) · [[2026-09-02_coo-actionable-tickets-never-wait-for-kam]] (the queue this rule drains faster).
 
