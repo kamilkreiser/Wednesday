@@ -2,77 +2,69 @@
 date: 2026-09-12
 type: pickup
 scope: DATASEC ONLY — Tuesday, on Kamils-Mac-mini. Secuura and general are Wednesday's, on the Studio.
-source: written WHOLESALE by Tuesday s10 at its ctx-50% checkpoint, 2026-09-12 ~12:20 AEST. s10 booted 11:56 after s9 rotated at S57's wrap.
+source: written WHOLESALE by Tuesday s10 at ctx 63%, 2026-09-12 ~13:05 AEST. s10 booted 11:56.
 status: live
 supersede: replace WHOLESALE at the next pickup; never append.
 ---
 
-# NEXT PICKUP — Tuesday s11. TWO SEATS LIVE: QA gate `%16` (RD-342 + RD-382, tier 2, two verdicts) and NexusAI S58 `%17` (RD-327, plan confirmation owed). Kam holds one question: which registry (B2).
+# NEXT PICKUP — Tuesday s11. LIVE: RD-150 tier-1 gate `%18` · NexusAI S58 `%17` (merging RD-342 then RD-382). STAGED: RD-327 tier-1 gate, launch when `%18` closes. Kam holds one question: which registry (B2) — and RD-391 now bears on it.
 
-**On EVERY wake:** `2_Project_Files/tools/kam_rulings_today.sh` (it withholds the other seat's tab — **never `kam_msgs.sh` unfiltered**, it prints Wednesday's Secuura messages) AND `[Kam -> Tuesday] panel message` mails; list `tuesday-agent@` UNFILTERED and route on SUBJECT; `git status --porcelain | grep -v 0_Brain/dashboard/data/`. Rotation band 80–90. **Kam reads the Studio: verify a panel message AT ORIGIN** (`git ls-remote`, then `git fetch --no-write-fetch-head origin main` + `git show <sha>:0_Brain/dashboard/data/chat_tuesday.json`), never with a plain `git fetch`. **Do NOT read `0_Brain/daily/`** (Wednesday's, Secuura).
+**On EVERY wake:** `2_Project_Files/tools/kam_rulings_today.sh` (never `kam_msgs.sh` unfiltered — it prints Wednesday's Secuura messages) AND `[Kam -> Tuesday]` mails; list `tuesday-agent@` UNFILTERED and route on SUBJECT; `git status --porcelain | grep -v 0_Brain/dashboard/data/`. Rotation band 80–90. **Verify panel messages AT ORIGIN** (`git ls-remote`, `git fetch --no-write-fetch-head origin main`, `git show <sha>:0_Brain/dashboard/data/chat_tuesday.json`). **Do NOT read `0_Brain/daily/`.**
 
 ## 🔴 LIVE — with the next action for each
-1. **QA GATE, pane `%16` `QA/NexusAI-RD342-382`, claude pid 13175, launched 12:08, verified at rung 5** (the pane showed its own step "Reading worktree heads and status at gate start"). Brief `2_Project_Files/fleet/qa-agent/briefs/2026-09-12_nexusai-rd342-c43214e-rd382-d4d3bfb-tier2.md`; launcher `2_Project_Files/fleet/qa-agent/launchers/launch_qa_nexusai_rd342_rd382_tier2.sh` (`--check` passed; head guard red-proofed rc 6 for both heads). **Two verdict mails, RD-342's first:** `[QA/Datasec-NexusAI -> Tuesday] GATE VERDICT — RD-342 @ c43214e (tier 2)`, then `… RD-382 @ d4d3bfb (tier 2)`. Reports: `/Volumes/KK_T9_External_HDD/!CODING/Testing Agent MAIN/projects/nexusai/reports/2026-09-12-rd342-c43214e-tier2/report.md` and `…/2026-09-12-rd382-d4d3bfb-tier2/report.md`. **NEXT at each verdict:** read the report whole; completion check against the brief's attack items; score the gate and the builder (RD-342 = S57, RD-382 = S55); rule. GO / GO WITH FINDINGS → the merge is done by a NexusAI seat on Tuesday's GO (S58 at a clean boundary, or a later seat), each merge regenerating counts with `npm run verify -- --update-counts`. NO GO → a round-2 brief (cap: 2). **When both verdicts are in:** `pane_close.sh %16` (it takes the `%ID`; listeners check). **Then the RD-150 tier-1 gate** (`rd-150-falsy-setting-s55` @ `bec76f686de5415090350117437d11d1a49acb82`, cut from `cd2b543`; two kill switches start taking effect, `red_flag_enabled` and `aiEnabled`: record the behaviour change).
-   **Merge arithmetic:** `main` `34e7fc4` = 2311/119 · `rd-342-s57` = 2324/120 · RD-382 on top of `34e7fc4` predicts 2318/120 (the gate measures it in its own clone).
-2. **NexusAI S58, pane `%17` `Datasec/NexusAI`, launched ~12:15** by `cockpit.sh add` with NexusAI's own `Launch_Claude.command`. Brief `2_Project_Files/fleet/briefs_staged/2026-09-12_nexusai-s58-brief.md`, sent 02:13:31Z **after** one gate refusal was answered (RD-302 provenance), **verified at `datasec-nexusai@` (received, from Tuesday, preview non-null) BEFORE the launch.** Queue: **RD-327 only**, the ⚑5 shape (`build` = first 16 hex of sha256 over the commit SHA; `"unknown"` fallback; never omitted; no raw SHA unauthenticated). **Rung-5 verification was still pending at this checkpoint** (background poll): if not confirmed, capture `%17`; a folder-trust dialog takes "Yes, I trust this folder" (Down, Enter). **NEXT:** its `QUESTION: plan confirmation (S58)` → check its re-derived landing lines and its preflight warnings (expect the RD-342 "not found" WARNING), answer with `send_brief.sh --kind answer` (prefix `WED_AGENT=tuesday`), verify at destination, then tap a pointer with `cockpit.sh say 'Datasec/NexusAI' '<pointer>' --mail '<subject substring>'`. READY → tier-1 gate.
-3. **Kam — registry B2.** He ruled `publish-image` at 11:34; Tuesday asked at 11:36 which registry (option 1 the dev ACR `nexusaidevacrfa39`; option 2, recommended, a separate customer-facing registry he names — a new Basic ACR is money class). **Nothing is built or pushed until he names it.** On his answer: brief a NexusAI seat to build from `7aa5aaf`, push ONLY to the named registry, point `createUiDefinition.json:59` and `:71` at it, rebuild the plan zip; then a tier-2 gate on the zip; then Kam uploads. The Marketplace branch is S56's round: a separate worktree, never S58's RD-327 branch.
-4. **Panel:** Kam told at 12:10 — RD-372 merged (`34e7fc4`), S57 wrapped, the RD-342 + RD-382 gate started 12:08, the registry still his. **Verified AT ORIGIN (`20ae0e22`).**
+1. **RD-150 TIER-1 GATE — pane `%18` `QA/NexusAI-RD150`, claude pid 81861, launched 12:58, verified at rung 5** ("I'll start by reading the brief in full"). Brief `2_Project_Files/fleet/qa-agent/briefs/2026-09-12_nexusai-rd150-bec76f6-tier1.md`, launcher `…/launchers/launch_qa_nexusai_rd150_bec76f6.sh` (`--check` passed; head guard red-proofed rc 6). Verdict subject `[QA/Datasec-NexusAI -> Tuesday] GATE VERDICT — RD-150 @ bec76f6 (tier 1)`; report `/Volumes/KK_T9_External_HDD/!CODING/Testing Agent MAIN/projects/nexusai/reports/2026-09-12-rd150-bec76f6-tier1/report.md`. **Key asks:** the 94 `getSetting` call sites classified (NEWLY WRONG = Major), `''` handling, `aiEnabled` through the real route, the deploy behaviour-change list, and a merge prediction onto the `main` it reads at start. **NEXT at the verdict:** read the report's findings + claims ledger, completion check, score (gate + S55's RD-150 round), rule; `pane_close.sh %18`; **then launch the RD-327 gate** (item 3).
+2. **NexusAI S58 — pane `%17` `Datasec/NexusAI`, claude pid 17879.** **RD-327 READY FOR QA** at `rd-327-build-digest-s58` @ `67c2992b6202588212c68164661ca6393653e24e` (02:56:15Z; ls-remote verified), suite 2348/120, ⚑4 skipped as ruled. **It was told (ANSWER 02:55:26Z, verified delivered; pointer tap 12:58 verified with `--mail`) to MERGE RD-342 then RD-382 into `main`,** with three pre-merge readings (heads; `deploy-demo.yml` guards; both reports' GO lines), counts regenerated with `--update-counts` (expect ~2324/120 then ~2331/121, measured), push `main` with an explicit refspec, then **RD-342 and RD-382 → Release Ready with BLUF comments** (RD-382's must say `JIRA.md`'s recipes normalise only from `2_Project_Files`) **and THREE tickets:** (1) RD-342 F-1+F-2 local-scan coverage limits (merge history; `rebase --continue` runs no hook); (2) RD-342 F-3 launcher line 238 silences a broken preflight script; (3) RD-382 F-1..F-4 Jira normaliser. **NEXT on its MERGED mail:** verify `ls-remote` main == the merge SHA with `c43214e` and `d4d3bfb` both ancestors; read the three ticket keys on Jira; tell Kam on the panel (short); score S58 AFTER the RD-327 gate. **Its ctx read 34% at 12:52.**
+3. **RD-327 TIER-1 GATE — STAGED, NOT LAUNCHED** (held so two gates do not boot servers on this machine at once). Brief `…/briefs/2026-09-12_nexusai-rd327-67c2992-tier1.md`, launcher `…/launchers/launch_qa_nexusai_rd327_67c2992.sh` (`--check` passed 13:0x; red-proof rc 6). **Re-run `--check` before launching** (the report must not exist; the head must still be `67c2992`). Launch: `cockpit.sh add 'QA/NexusAI-RD327' "bash '<launcher>'"`, then verify at rung 5 and watch its pid. Key asks: the raw SHA on ANY unauthenticated surface = Blocker; rule on S58's ⚑3 preload question; `github.sha` per workflow trigger; `shasum` on the CI runner for cell R1b.
+4. **Kam — registry B2, and RD-391.** He ruled `publish-image` (11:34); Tuesday asked at 11:36 which registry. **Nothing is built or pushed until he names it.** **RD-391 (High, filed by S58):** `.dockerignore`'s `*.pem`/`*.key`/`.env` rules are anchored at the context root, so a gitignored key under `backend/` enters any image built from a tree that holds one — and the long-lived `NexusAI/2_Project_Files` holds `backend/ReportingDashboard_key.pem`. **Whether any past image (including the May `nexusaidevacrfa39.azurecr.io/nexusai:2.0.0` customers get today) was built from that tree is UNMEASURED.** Kam told at ~13:00 (verification at origin was polling at write time — re-check with `git show origin`). **The B2 image brief MUST require:** a fresh checkout (never `2_Project_Files`), RD-391's any-depth rules applied or the built image scanned for `*.pem`, `*.key`, `.env*` before any push, and the same READ-ONLY content check of the May image.
+5. **Panel today:** 12:10 note (verified at origin `20ae0e22`); ~13:00 note on the gates + RD-391 (check origin).
 
 ## ⚠ CAPACITY
-7-day allowance **88% at 12:12** (86% at 10:00, 88% at 11:56 with one seat live; two are live now, so expect faster). Reset ~04:00. Kam's `wed-weekly-quota-97pct` ruling = raise-limit, proceed normally. **From 95%: launch nothing new; live seats checkpoint and push.** The RD-150 gate launches only after `%16` closes and below 95%.
+7-day allowance **90% at 13:05** (86% 10:00 → 88% 11:56 → 89% 12:52 → 90%). Two seats live, a third (RD-327 gate) queued. **From 95%: launch nothing new; live seats checkpoint and push.** At ~1%/h the line is ~18:00; with three seats sooner.
 
-## ✅ DONE IN s10 (verified at source or origin)
-- Brain: by-tier digest read whole (5,389 lines, last heading asserted), own ledger whole (97 rows). Statusline `ctx:23%` after the digest, `45%` after the ledger and the gate reads, `50%` at this checkpoint.
-- The launcher-regenerated boot digests were committed (they were blocking `panel_sync`).
-- The gate above: heads, ranges, files, delete-sets and launcher hashes all read at source; both tickets read on Jira (RD-342 Testing, RD-382 Testing).
-- S58 brief sent and delivery verified; S58 launched.
-- The 11:58 wake was Kam's message on WEDNESDAY's tab (Secuura) — hers; not acted on, not relayed.
-- WED board 26 started + unstarted (`board_count.sh`), 0 open `lesson` issues.
-- Ledger row: s10's boot-hour instrument slips (four, all caught).
+## ✅ DONE IN s10 (verified)
+- Brain whole (digest 5,389 lines; own ledger 97 rows); boot digests committed (they blocked `panel_sync`).
+- **RD-342 + RD-382 tier-2 gate** (one session, two verdicts): RD-342 GO WITH FINDINGS 0/0/3 (02:28:12Z), RD-382 GO WITH FINDINGS 0/0/3/1 with a measured merge prediction 2318/120 (02:51:51Z). Completion checks done; scoreboard: both gates 1.00, S55 RD-382 round 0.90, S57 RD-342 post-gate note 0.95. Pane `%16` closed, listeners 12 → 12.
+- **S58 launched on RD-327** (brief refused once for RD-302 provenance, fixed); plan CONFIRMED with six rulings (⚑4 the admin raw SHA DROPPED — `/api/admin/health` is open pre-first-run); RD-327 READY.
+- Ledger rows: s10's boot-hour instrument slips; the S58 brief's two defects (HOLD vs the launcher's boot `git fetch`; the admin-auth premise relayed unread).
+- WED board 26 active, 0 `lesson`. Kam's 11:58 message was Wednesday's tab (Secuura): not acted on.
 
 ## 🔴 WITH KAM (asked; nothing blocks)
-1. `brew install gitleaks` on the Mac mini (optional; RD-342 option E).
-2. **RD-281:** did he accept the rebuilt Sustainability tab render?
-3. Full Disk Access for `/bin/bash` (ruled `grant` 2026-09-11; the toggle is his hands; last probe exit 126).
-4. NexusAI registry (B2) — live item 3. 5. Jira key for the HPSM Composer (rec `HPSML`); R4-m2's owner option; the HPSM-40 analysis-repo remote.
-6. His vault `Notes (MASTER)` on the T9: 484 behind, 102 uncommitted paths from other sessions.
-7. RD-367's premise is dead (told); the branching-model half is his.
-8. **ATTIO follow-up digest still goes to `wednesday-agent@`** (his 09-10 `amend` ruling). Recipient = env `FOLLOWUP_DIGEST_TO` (`ATTIO/2_Project_Files/src/config.js:94`) in the deployed job; app UNMEASURED. At the next ATTIO/Vision session: measure it, flag to Kam as a production change BEFORE changing, and fix `Vision_Sales_Portal/Launch_Claude.command:263`'s wrap address too.
-9. **`rd104-gh-identity-acceptance-false-premise` → `youcheck` (2026-09-07), still undelivered:** Kam checks two GitHub pages — the `demo` environment's required reviewer and the `CI_DEPLOY_ENABLED` variable. It bears on every merge to NexusAI `main`, because `deploy-demo.yml` is the workflow they gate. Read the card before the next NexusAI MERGE instruction.
+1. Registry B2 + RD-391's bearing on it (live item 4). 2. `brew install gitleaks` (RD-342 option E). 3. RD-281: the rebuilt Sustainability tab render. 4. Full Disk Access for `/bin/bash` (ruled `grant`; his hands). 5. HPSM: Jira key (`HPSML`), R4-m2's owner option, the HPSM-40 analysis-repo remote. 6. His vault `Notes (MASTER)` on the T9 (484 behind, 102 uncommitted). 7. RD-367's branching-model half. 8. ATTIO digest still to `wednesday-agent@` (measure `FOLLOWUP_DIGEST_TO` at the next ATTIO session, flag as a production change first). 9. `rd104-gh-identity-acceptance-false-premise` → `youcheck` still undelivered: the `demo` environment reviewer + `CI_DEPLOY_ENABLED` settings pages; it bears on every merge to NexusAI `main`. 10. **Not yet asked:** whether `/api/admin/health` being open before first-run (S58's observation) should be a ticket — Tuesday's call, pending the RD-327 gate's read.
 
 ## ⚠ TRAPS
-1. 🔴 **Never `git pull --rebase --autostash` in this tree.** Wedged rebase: `rebase --abort`, then `git -c core.editor=true merge origin/main`.
+1. 🔴 Never `git pull --rebase --autostash` here. Wedged rebase: `rebase --abort`, then `git -c core.editor=true merge origin/main`.
 2. `setsid` does not exist on macOS — `nohup bash … &`.
-3. **Store writes:** gate on `git merge-base --is-ancestor $(git ls-remote origin refs/heads/main | cut -f1) HEAD` first.
-4. **zsh:** no `PIPESTATUS`; no word-splitting of `$VAR`; loop in python.
+3. Store writes: gate on `git merge-base --is-ancestor $(git ls-remote origin refs/heads/main | cut -f1) HEAD`.
+4. zsh: no `PIPESTATUS`, no word-splitting of `$VAR`; loop in python.
 5. `cockpit.sh say` takes the pane NAME; `pane_close.sh` and `wake_ack.sh` take the `%ID`.
-6. `wake_watch`'s frozen-busy leg fires every ~8 min while a background watcher runs — check the watcher output and the inbox, nothing more.
-7. **Run your own exiting watcher while anything is live:** `watch_s10.sh <MARK> <HH:MM> <pid…>` (copy it from `/private/tmp/claude-501/-Volumes-KK-T9-External-HDD-TUESDAY/98ea263b-c924-4f22-9fe8-945f47f2172f/scratchpad/watch_s10.sh`). **MARK = one second PAST the last processed mail's timestamp** — the compare is a string, and the API's fractional seconds sort after a bare second.
-8. Launch outputs go under `fleet/briefs_staged/*.out` (gitignored).
-9. **Write + commit in ONE action** outside `dashboard/data`; never two commits in parallel tool calls.
-10. `decision_queue.sh add --json` cannot take `--override-prior-rulings`; use the flag form.
-11. `kam_rulings_today.sh`'s FRESHNESS line lags Kam's taps; the `[Kam -> Tuesday]` mails do not.
-12. `wake_watch` wakes this seat for Kam's `view=wednesday` messages — check the view, and use `kam_rulings_today.sh`, which withholds them.
-13. `cockpit.sh launch` cannot start Datasec projects here (`launchers.conf` pins DevMASTER); use `cockpit.sh add`.
-14. 🔴 **Never plain `git fetch` in a verify loop** — it races `panel_sync`.
-15. **Launch QA gates and build seats in a tmux PANE, never nohup headless.**
-16. The card-ID send gate refuses a card id the store cannot show — copy ids from `decision_queue.sh list`.
-17. `send_brief.sh` subjects carry the hard-coded `[Wednesday -> …]` prefix while the sender is correctly `tuesday-agent@` — harmless.
-18. `panel_sync` REBASES local commits, so a local SHA is not the SHA at origin; verify by subject or content.
-19. A probe whose found and not-found branches both exit 0 proves nothing by rc — read its output (s10 wrote one again).
-20. `sleep N` as a foreground wait is blocked — poll in a background loop.
-21. Verify a brief at the destination inbox (subject + non-null preview) BEFORE `cockpit.sh add`.
-22. Before a builder brief leaves, grep the target launcher's FIRST ACTIONS for every verb a HOLD prohibits.
-23. **NEW s10:** `decision_queue.sh` and `reconcile_rulings.py` live in `2_Project_Files/tools/`, not `fleet/`. **Capture a tool's rc on its own line before any `| grep`** — a 127 piped through grep is an empty result.
-24. **NEW s10:** AgentMail `GET …/messages/<id>` needs the id URL-encoded (`urllib.parse.quote(id, safe='')`), else HTTP 400.
-25. **NEW s10:** the send gate refuses any ticket id named in the QUEUE — even inside a quoted title — without its own PROVENANCE state line.
+6. The frozen-busy leg fires on THIS pane while a background watcher runs: check the watcher output + inbox, then `wake_ack.sh %0`.
+7. Exiting watcher: `/private/tmp/claude-501/-Volumes-KK-T9-External-HDD-TUESDAY/98ea263b-c924-4f22-9fe8-945f47f2172f/scratchpad/watch_s10.sh <MARK> <HH:MM> <pid…>`; MARK = one second PAST the last processed mail.
+8. Launch outputs under `fleet/briefs_staged/*.out` (gitignored).
+9. Write + commit in ONE action outside `dashboard/data`; never two commits in parallel calls.
+10. `decision_queue.sh add --json` cannot take `--override-prior-rulings`.
+11. `kam_rulings_today.sh`'s FRESHNESS line lags Kam's taps; `[Kam -> Tuesday]` mails do not.
+12. `wake_watch` wakes this seat for `view=wednesday` messages — check the view.
+13. `cockpit.sh launch` cannot start Datasec projects here; use `cockpit.sh add`.
+14. 🔴 Never plain `git fetch` in a verify loop.
+15. QA gates and build seats in a tmux PANE, never nohup headless.
+16. The card-ID send gate refuses a card id the store cannot show.
+17. `send_brief.sh` subjects carry `[Wednesday -> …]` while the sender is `tuesday-agent@` — harmless.
+18. `panel_sync` rebases local commits: verify by subject/content, not local SHA.
+19. A probe whose found and not-found branches both exit 0 proves nothing by rc.
+20. `sleep` as a foreground wait is blocked — background loops.
+21. Verify a brief at the destination inbox BEFORE `cockpit.sh add`.
+22. Grep the target launcher for EVERY verb and path the HOLDS name — derived from the holds text (the S58 brief's "never write 2_Project_Files" collided with the launcher's boot `git fetch`).
+23. `decision_queue.sh` and `reconcile_rulings.py` live in `2_Project_Files/tools/`. Capture a tool's rc on its own line before any `| grep`.
+24. AgentMail `GET …/messages/<id>` needs the id URL-encoded.
+25. The send gate refuses any ticket id in the QUEUE — even inside a quoted title — without a PROVENANCE state line.
+26. **NEW:** two QA gates booting local servers at once can collide on ports — stage the second, or name ports in both briefs.
 
 ## NAS — WED-149 (unchanged)
-Tuesday's 23:00 leg `com.tuesday.nassync` stays BOOTED OUT until the partition is built INTO the file/plist. Design `1_Project_Definition/Architecture/2026-09-10_nas-two-seat-sync-check.md`.
+`com.tuesday.nassync` stays BOOTED OUT until the partition is built into the file/plist. Design `1_Project_Definition/Architecture/2026-09-10_nas-two-seat-sync-check.md`.
 
 ## OWED, not started
-- **Amend `Launch_Tuesday.command`**: step 5 (Tuesday has no daily note — name the pickup, this seat's ledger and `git log`), and its stale first-boot line (it still tells every boot to read `FIRST-BOOT-TUESDAY.md`, which sits in `tasks/_superseded_2026-09-09/`). Red-proof by a boot, never while a seat's respawn depends on it mid-task.
+- Amend `Launch_Tuesday.command`: step 5 (no Tuesday daily note — name the pickup, this seat's ledger, `git log`) and its stale first-boot line (`FIRST-BOOT-TUESDAY.md` is in `tasks/_superseded_2026-09-09/`). Red-proof by a boot, never mid-task.
 - S53's m2/m3, S54's 8 BACKLOG items and round-3 NEW-3/NEW-4 need ticketing on RD.
-- Undelivered ruled HPSM cards: `hpsm-composer-round3-approver-guard` (mark with its artefact) and `hpsm-credential-bearing-prd-outside-every-snapshot` (BACKLOG since s34).
+- Undelivered ruled HPSM cards: `hpsm-composer-round3-approver-guard`, `hpsm-credential-bearing-prd-outside-every-snapshot`.
 - Raise with Wednesday (shared tool): `send_brief.sh --kind brief` could refuse a bare "No az/gh" when the target launcher runs them.
-- Carried by Tuesday: 4 Dependabot alerts on NexusAI's default branch (RD-354 owns qs 6.15.2); three unread, need a `gh` identity.
+- Carried: 4 Dependabot alerts on NexusAI's default branch (RD-354 owns qs 6.15.2); three need a `gh` identity.
