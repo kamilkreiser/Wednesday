@@ -42,7 +42,7 @@
 Tuesday read `qa-wp4/HANDOVER-lane-b.md` whole, including "Open questions" 1–8.
 - **(a) Credential-shaped free text refused with 422**, not §2.5's redact + warning: **ACCEPTED as a departure for MVP A** (fail closed). State it in the READY; BACKLOG the redact path.
 - **(b) Operational-owner acceptance derived from the latest customer approval, policy-wide:** acceptable for MVP A **only if** `release_allowed` still evaluates the §14.1 term honestly. State the derivation in the READY; the gate judges whether it satisfies §14.1. BACKLOG the per-item record.
-- **(c) `attribute_overrides` has no table:** acceptable as NOT BUILT this round, **provided any route or screen that would take an override REFUSES loudly** (never accepts and drops). List it in the READY and BACKLOG it.
+- **(c) `attribute_overrides` has no table:** acceptable as NOT BUILT this round, **provided any route that would take an override REFUSES loudly** (never accepts and drops), **and WP5 shows Screen 7's inline override control DISABLED with that reason**. List it in the READY and BACKLOG it.
 - **(d) `platform_admin` can never approve:** **ACCEPTED** (segregation of duties, §2.4).
 - **(e) A clone re-pins to the current content release and carries no exceptions:** **follow the architecture's own clone rule, not a preference.** Cite the clause in the READY. If the architecture pins the SOURCE version's releases or carries exceptions, implement that; if it is silent, keep your choice and declare it.
 - **(f) `decided_at` is caller-writable** on approval and exception_decision: **FIX IN WP4, RED-first.** The server sets it and `pc_app` cannot write it (column grant or DEFAULT plus a guard). Lane B numbers the migration. Forged timestamps shown as evidence are a defect, not a decision.
@@ -77,6 +77,6 @@ lane B state, partition (apps/web not lane B's), next steps, open questions 1-8 
 only one HPSM claude process live (PID 5146, wrapped) | ps census run by Tuesday s11 17:18 | read 2026-09-12
 WP3 gate running in pane %21 | tmux capture of %21, run by Tuesday s11 17:18 | read 2026-09-12
 
-SELF-CHECK: re-read — supersedes the 05:44Z lane assignment of WP5 by name; no instruction here launches a seat; the Q1 card is stated as OPEN | 2026-09-12 17:20
+SELF-CHECK: re-read end-to-end for contradictions | 2026-09-12 17:20
 
 Tuesday
