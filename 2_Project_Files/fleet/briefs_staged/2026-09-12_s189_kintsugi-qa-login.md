@@ -39,7 +39,7 @@
 - **Accounts:** create only what the CONFIRMED plan names, on kintsugi only. No change to any existing account, role, password or MFA setting. No platform-admin role unless the plan proved it and Wednesday confirmed it.
 - **No test runs this round** beyond ITEM 2's single login per account; the runtime gates are Wednesday's to commission after the allowance reset.
 - **`GATEWAY_VOUCH_SECRET` stays unset on every environment** (KS-1083). **Kintsugi never shares demo's `PLATFORM_WALLET_MNEMONIC`** (KS-535).
-- **Never print a credential value; no credential or account change on a running system.**
+- **Never print a credential value. No change to any EXISTING credential or account on a running system — the only creation permitted is ITEM 1's, exactly as the CONFIRMED plan names it.** (This narrows the standing line for this round; it SUPERSEDES the s188 brief's wording by name.)
 - **No removal of any kind:** no prune, no image deletion, no `--remove-orphans`, no `down`, no volume removal, no `rm`. Quarantine; never delete.
 - **No build, no deploy, no merge, no push, no PR, no `--no-verify`, no force push.** The main checkout's branch stays as it is.
 - **Leave untouched:** the worktrees `s182-ks1092`, `s183-ks1095`, `s184-ks1094`, `s187-kintsugi`; `feature/y` and `feature/w`; the #954 gate's disposable QA artefacts.
@@ -82,7 +82,7 @@ RULED BY KAM, NOT YET IN AN ARTEFACT
   - `secuura-advisories-high-and-prod-reaching`
   - `secuura-four-advisories-ruled-after-measurement`
 
-SELF-CHECK: re-read end-to-end for contradictions | 2026-09-12 11:37
+SELF-CHECK: re-read end-to-end for contradictions | 2026-09-12 11:38
 
 PROVENANCE:
 - seat number s189 follows s188 | /Volumes/DevMASTER/!CODING/Secuura/Blockchain/5_Project_History/history.md top dated entry (line 24) is s188; 0 occurrences of s189, control s188 3 | read 2026-09-12
