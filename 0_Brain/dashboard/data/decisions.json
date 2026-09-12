@@ -8703,5 +8703,52 @@
    "CARD secuura-kintsugi-build-cache-prune",
    "CARD secuura-kintsugi-refresh-notice-release"
   ]
+ },
+ {
+  "id": "nexusai-marketplace-b2-registry-after-round4",
+  "client_project": "Datasec/NexusAI",
+  "title": "NexusAI Marketplace: round 4 is clean to upload, but the wizard still ships customers the dev registry's May image — where does the fixed image come from (B2)?",
+  "bluf": "OVERRIDE, reason measured: your round-3 option text (2026-09-11 14:59) kept the registry \"for your word\", and the round-4 card default repeats that B2 waits for you; no card has ever asked the registry question itself. THE QUESTION: round 4 passed its tier-1 re-check (GO WITH FINDINGS, no Blocker, no Major; verdict mail 2026-09-12T00:47:33Z): the package is clean to upload (GPT-only, setup save works and survives restart, tenant IDs masked, zips byte-equal to git, gitleaks clean). BUT the wizard still defaults every customer to the DEV registry image: createUiDefinition.json:59 at 7aa5aaf reads nexusaidevacrfa39.azurecr.io/nexusai:2.0.0 (Tuesday read it with git show), a May image with none of rounds 2-4. So a real deployment from this package runs none of the fixes until B2 is decided. Zips: NexusAI/evidence-s56-marketplace-package/DRAFT-submission-package-7aa5aaf/. Report: Testing Agent MAIN/projects/nexusai/reports/2026-09-12-mktpkg-7aa5aaf-tier1r4/report.md.",
+  "default_action": "Nothing is uploaded, built or pushed. The round-4 package stays gated-clean in DRAFT-submission-package-7aa5aaf and the registry (B2) waits for Kam's word.",
+  "options": [
+   {
+    "key": "publish-image",
+    "label": "Publish a fixed image to a registry Kam names",
+    "detail": "Kam authorises building a production image from 7aa5aaf and pushing it to the registry he names (a registry push is his signature class). A NexusAI seat then points the wizard default at it and rebuilds the plan zip, a tier-2 gate checks that zip, and Kam uploads a package whose deployments run rounds 2-4."
+   },
+   {
+    "key": "upload-now",
+    "label": "Upload the two zips now and settle B2 before go-live",
+    "detail": "Kam uploads the current zips to Partner Center for review and decides the registry before the offer goes live. Risk: any deployment made from this package pulls nexusai:2.0.0, which has none of rounds 2-4; whether certification deploys that default is UNMEASURED."
+   },
+   {
+    "key": "hold",
+    "label": "Hold — upload nothing until B2 is decided",
+    "detail": "Nothing is uploaded or pushed. The package stays gated-clean on disk and B2 stays open."
+   }
+  ],
+  "recommended": "publish-image",
+  "ts": "2026-09-12T10:50:33.350669+10:00",
+  "status": "open",
+  "ruled_choice": null,
+  "ruled_ts": null,
+  "prior_rulings_overridden": [
+   "2026-08-17 19:53",
+   "2026-09-03 10:42",
+   "2026-09-03 10:42",
+   "2026-09-08 11:50",
+   "2026-09-08 14:00",
+   "2026-09-08 14:00",
+   "2026-09-09 15:37",
+   "2026-09-11 08:06",
+   "2026-09-11 14:59",
+   "2026-09-11 16:55",
+   "2026-09-12 08:50",
+   "CARD secuura-892-round4-passed-but-introduced-two-majors",
+   "CARD nexusai-marketplace-screenshot-reshoot",
+   "CARD nexusai-marketplace-package-round3",
+   "CARD hpsm-composer-round4-commit-guard-and-forged-release",
+   "CARD nexusai-marketplace-round4-gpt-only-product"
+  ]
  }
 ]
