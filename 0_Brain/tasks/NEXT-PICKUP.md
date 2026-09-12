@@ -54,6 +54,7 @@ supersede: replace this file wholesale at the next pickup; do not append
 The 2026-09-12 03:30 leg: rc 2 (source files changed mid-sync) · 8 deletions, all Secuura working-tree paths from a branch switch in that checkout · **all 4 source/test paths verified ON develop** (GitHub contents API, nonexistent-path control 404).
 
 ## ⚠ TRAPS
+- **Peter's untested build-script branch (Kam relayed 2026-09-12 11:58):** Peter pushed a branch he tests on Monday 2026-09-14, pointing at PS-831 (platform-s #814, slot isolation; platform-k side KS-1096 `start-secuura.sh`). **Before any kintsugi rebuild or local-stack run, read PS-831 + KS-1096 and ask whether Peter's branch has landed; never build from his untested branch.** The branch itself is unmeasured by Wednesday.
 - **FIRST WRITE OF THE BOOT: commit the launcher's regenerated digests** by path — **not** via `wed_claim.sh`.
 - **The `[Datasec/ATTIO -> Wednesday] DAILY FOLLOW-UP DIGEST` lands in `wednesday-agent@` ~07:00 AEST daily** until Tuesday re-routes it — SUBJECT ONLY. **Every inbox reader filters on the expected routing tag BEFORE touching a body.**
 - **The 05:30 shift-change tap says "wrap"; `wake_wednesday.sh` case 3 means a live seat IS the morning seat and continues.**
