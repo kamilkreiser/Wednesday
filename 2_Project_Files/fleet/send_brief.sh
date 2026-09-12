@@ -497,6 +497,7 @@ MSG
     # registry-gap class the 2026-09-06 10:1x ledger row already named, in the third registry
     # that row itself lists. Same board, same cards, same prefix as seat A.
     Secuura/Blockchain-B)        DQ_PREFIX="secuura-" ;;
+    Secuura/Blockchain-C|Secuura/Blockchain-D|Secuura/Blockchain-E) DQ_PREFIX="secuura-" ;;  # 2026-09-13: seats C-E were skipping the undelivered-ruling gate (the s197 drafter found the hole)
     Datasec/NexusAI)             DQ_PREFIX="nexusai-" ;;
     Datasec/Vision_Sales_Portal) DQ_PREFIX="vision-" ;;
     Datasec/HPSM)                DQ_PREFIX="hpsm-" ;;
