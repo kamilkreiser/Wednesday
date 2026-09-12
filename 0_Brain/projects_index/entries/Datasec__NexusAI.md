@@ -3,10 +3,18 @@ client: Datasec
 project: NexusAI
 path: /Volumes/DevMASTER/!CODING/Datasec/NexusAI
 status: active
-updated: 2026-09-06
+updated: 2026-09-12
 ---
 
 # Datasec / NexusAI
+
+**S58 (2026-09-12 12:15 → wrapped 14:37 AEST; whole session scored 0.95 by Tuesday s10) — the 09-06 PAUSE block below is HISTORY; NexusAI has run S47–S58 since on Kam's later commissions.** Four gated merges to `main`: RD-342 `ee2a9b7` · RD-382 `7a11418` · RD-150 `2279eeb` · **RD-327 `c469ae9`** — the last verified at source by Tuesday s11 (read verbs only): ls-remote `main` = `c469ae9b…`, parents `2279eeb` + `67c2992`, counts 2338/122 → 2375/123, `deploy-demo.yml` +1 build-arg line with both `CI_DEPLOY_ENABLED` conditions and `environment: demo` intact. **Nothing deployed.** Filed RD-391..RD-398 (RD-397/398 read on Jira by Tuesday s11: both Medium, linked to RD-327). Handover `NexusAI/HANDOVER-S58.md`; HISTORY on unmerged `s58-history-docs` @ `7e301b9`.
+
+**Open / next (from S58's wrap, 04:37:28Z, DKIM/DMARC pass):**
+- 🔴 **Before ANY demo deploy of `main`:** (1) read `red_flag_enabled` on the live demo AND dev stores — RD-150 makes a stored false stop risk-alert digests, values unmeasured; (2) Kam's check of the two GitHub settings pages (demo environment reviewer · `CI_DEPLOY_ENABLED`) — pushes to `main` trigger `deploy-demo.yml`.
+- **RD-391 (High):** `.dockerignore` secret rules anchored at the root; the stale `2_Project_Files` holds `backend/ReportingDashboard_key.pem`. Gates the B2 image build (registry still Kam's to name).
+- RD-395 product call (`aiEnabled` display-only vs gate AI on it) · residue RD-392/393 (RD-342), RD-394 (RD-382), RD-396 (RD-150), RD-397/398 (RD-327) · RD-302 comment 37353 (CI smoke compare `build` vs `github.sha`).
+- Unmerged `s55-/s57-/s58-history-docs` (merge not authorised) · 7 worktrees left, none removed (`rd-327-s58` holds the real node_modules — remove last) · gitleaks NOT installed on the mini (every local commit skipped the scan; CI scans `main`) · 4 Dependabot alerts on the default branch.
 
 **⏸ PAUSED (Kam, panel 2026-09-06 17:01: "when the nexus agent finishes its round of ticket please retire the agent and we will pause nexus for a few days") — S42 wrapped 17:15 (scored 0.85), pane retired 17:2x, NO successor. Resume only on Kam's word, at `HANDOVER-S42.md` §2 in the NexusAI folder. State at the pause: campaign tip `rd-136-nga-defaults-s12` = `9546da5` (RD-339/347/341/321 merged, pin 2154/112); `rd-334-classify-and-name-s42` = `2952591` **GATE PASSED 18:11 (tier 2, round 1 of 2; report `Testing Agent MAIN/projects/nexusai/reports/2026-09-06-s42-rd334-2952591-tier2/report.md`; QA 1.0, S42's round 0.85) — the diff-set exact, the anchor mechanism measured, the population unchanged, 2166/113; TWO MINOR findings for the resuming seat to ticket BEFORE the merge: F-1 the 'it killed a control' rationale in `dom.js:648–651`/`:745–748`, `rd334-classify-and-name.test.js:11–16` and the ceiling's `_consumer` asserts a dependency `dark-ground-luminance.test.js` does not have (own population + own rule; 28/28 unmoved under an excuse-everything tamper); F-2 eight DARK rows left the scored set (first-run 13→6, index 5→4) with nothing recording them, and the classifier now precedes the dark allowlist whose negative control cannot see it. THEN the merge on Wednesday's GO by SHA onto the campaign tip re-read (`9546da5` or later) with the counts REGENERATED at the merged tip (a fast-forward as of 18:11: merge-tree = the head's own tree `49aa08bb…`);** the deploy of `48e092c`/`0000097` is Kam's, default HOLD, untouched; RD-359 + RD-360 filed (S42's own residue); the winston-transport route un-driven across three gates; local :3001 DOWN (never started by S42). Refreshed 2026-09-06 17:2x by the 17:1x Wednesday seat.**
 
