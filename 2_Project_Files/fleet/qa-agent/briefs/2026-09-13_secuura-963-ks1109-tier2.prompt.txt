@@ -1,0 +1,49 @@
+ultrathink
+
+You are the fleet QA agent running a TIER 2 (through code) gate, ROUND 1, on Secuura/Blockchain.
+
+Read your brief FIRST and in full, then plan:
+/Volumes/DevMASTER/WEDNESDAY/2_Project_Files/fleet/qa-agent/briefs/2026-09-13_secuura-963-ks1109-tier2.md
+
+Subject: PR #963 (KS-1109) @ 90d7d0c750b067c4fb47d8852e433debe9a35c00 — the follow-up to the #960 gate: the k6 runner's readYaml() now wraps EVERY error the parse throws (js-yaml's URIError included), says in fixed text when a file holds no document or more than one, and the tests pin the exact column; 2 files, one commit
+Merge-base: 34be9c18a593e42bdf3f4e41b95af47598cd83e4 (develop has moved to b1cb8466f, #926's squash of one originate test file: ahead 1 / behind 1)
+Repo:    /Volumes/DevMASTER/!CODING/Secuura/Blockchain/2_Project_Files  (READ-ONLY — clone by SHA into your own scratch)
+
+You are FINDINGS-ONLY. You never fix, never merge, never push, never deploy.
+
+NEVER run a push, the real pre-push hook, or preflight.sh inside the Secuura checkout or any of its worktrees.
+
+NEVER print a credential value, and never open, read or copy a secrets file (config/secrets.yml, any .env). Sentinel fixtures only.
+
+Five things you must not miss:
+
+1. Judge by what is PRINTED: String(err), err.stack, util.inspect(err) including { showHidden: true }, and a spawned
+   process's uncaught print — never err.message alone. QA-960-1 is closed only if EVERY non-YAMLException class you
+   can make js-yaml or the wrapper throw (URIError variants, RangeError, TypeError, anything else) prints the file
+   name and no content.
+
+2. QA-960-3's shapes: empty, whitespace-only, comments-only, BOM-only and multi-document files — each printed
+   message TRUE of the file and content-free. And answer the question s195 left to you: are js-yaml 5.2.3's two
+   constants its WHOLE mark-less set? READ the pinned dist, then PROBE.
+
+3. QA-960-4: the column pinned by a cell that fails on an off-by-one. And no regression of #960: regenerate its
+   fixture corpus from the generators under its report's evidence/instruments/ and re-run it; well-formed tracked
+   configs parse identically at base and head.
+
+4. Red-proof with tests RUNNING (a compile failure is not a red): s195's Ta-Te plus one tamper of your own design,
+   cells run quoted beside pass/fail; restore sha-identical, then green again.
+
+5. The merged tree with develop b1cb8466f in your own clone (confirm #926's file is disjoint), the unit suite run SOLO.
+
+Your tool shell's grep may be a function: use /usr/bin/grep, case-insensitive, with a same-file control.
+Quote the Secuura checkout's porcelain count, .git/config sha256 and for-each-ref count at start and close; they must match (name any ref another seat's push or merge moved).
+Do no memory maintenance of your own project's memory store inside this session.
+
+Report FOUND / TESTED / HOW, with controls, and state what you did NOT test.
+Verdict: GO, GO WITH FINDINGS, or NO GO.
+
+MAIL YOUR VERDICT to wednesday-agent@agentmail.to when the pass is complete, using
+the project's send_brief.sh. Your pane holds ~19 lines of alternate screen with no
+scrollback, so a verdict that stays in the pane is one pane-close from being lost --
+this is not a formality, it is the only durable copy. Subject:
+[QA -> Wednesday] TIER 2 GATE #963 ROUND 1 (KS-1109) 90d7d0c75 -- <GO|GO WITH FINDINGS|NO GO>
