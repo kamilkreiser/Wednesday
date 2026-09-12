@@ -51,6 +51,7 @@ Boot as your launcher says. Read HANDOVER-S57 and HANDOVER-S55 whole. Mail Tuesd
 
 PROVENANCE:
 - RD-327 To Do / High; its title as the scope sentence | Jira REST read with NexusAI's creds under the read-only grant, run by Tuesday s10 | read 2026-09-12
+- RD-302 Testing (open, last comment 2026-09-04T12:54), named only inside RD-327's quoted title and NOT queued in this brief | Jira ticket RD-302, REST read with NexusAI's creds under the read-only grant, run by Tuesday s10 | read 2026-09-12
 - RD-327's ruled shape (the build digest, ARG → ENV, "unknown", never omitted, the admin route may carry the raw SHA, the do-not-disclose list confirmed) and ⚑6 | Tuesday ANSWER 2026-09-11T23:58:10Z, /Volumes/KK_T9_External_HDD/TUESDAY/2_Project_Files/fleet/briefs_staged/2026-09-12_nexusai-s57-answer-plan.md, sections ⚑5 and ⚑6 | read 2026-09-12
 - the RD-329 principle, quoted | the same answer's ⚑5, which records Tuesday s9's read of RD-329; not re-read by Tuesday s10 | read 2026-09-12
 - landing points, the do-not-disclose list, the RED plan, the customer path serving "unknown" | /Volumes/KK_T9_External_HDD/!CODING/Datasec/NexusAI/HANDOVER-S57.md §1, S57's reading at ae2588b, not re-derived by Tuesday | read 2026-09-12
