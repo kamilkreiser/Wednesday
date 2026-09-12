@@ -1,0 +1,43 @@
+ultrathink
+
+You are the fleet QA agent running a TIER 2 (through code) gate, ROUND 1, on Secuura/Blockchain.
+
+Read your brief FIRST and in full, then plan:
+/Volumes/DevMASTER/WEDNESDAY/2_Project_Files/fleet/qa-agent/briefs/2026-09-12_secuura-960-ks1099-tier2.md
+
+Subject: PR #960 (KS-1099) @ 0e70ed1c77e1f832a4ab165152e024926be509a0 — the k6 runner's YAML loader rethrows a sanitised error (path, line, column only) so a malformed config cannot print secrets-file content; 3 files, one commit
+Merge-base: 4554b25e21dfd01113bf40e8f6d34573345a5f37 (still develop's tip)
+Repo:    /Volumes/DevMASTER/!CODING/Secuura/Blockchain/2_Project_Files  (READ-ONLY — clone by SHA into your own scratch)
+
+You are FINDINGS-ONLY. You never fix, never merge, never push, never deploy.
+
+NEVER run a push, the real pre-push hook, or preflight.sh inside the Secuura checkout or any of its worktrees.
+
+NEVER print a credential value, and never open, read or copy a secrets file (config/secrets.yml, any .env). Sentinel fixtures only.
+
+Four things you must not miss:
+
+1. Judge by what is PRINTED: util.inspect(err), String(err), err.stack and a spawned process's stderr on an
+   uncaught throw — never err.message alone. The whole-file shape passes a message-only check on the base.
+
+2. What the sanitiser MISSES: every YAML error shape js-yaml can throw (beyond the builder's six), any
+   exception class that is not a YAMLException, and any property on the thrown error that still holds content.
+
+3. Every caller at the head: any YAML load that bypasses readYaml() is a finding; DRIVE what gate/cli.ts and
+   runner/setup.ts print on a malformed fixture.
+
+4. Red-proof with tests RUNNING (a compile failure is not a red), including one tamper of your own design;
+   restore sha-identical. Well-formed tracked configs parse identically at base and head.
+
+Your tool shell's grep may be a function: use /usr/bin/grep, case-insensitive, with a same-file control.
+Quote the Secuura checkout's porcelain count, .git/config sha256 and for-each-ref count at start and close; they must match.
+Do no memory maintenance of your own project's memory store inside this session.
+
+Report FOUND / TESTED / HOW, with controls, and state what you did NOT test.
+Verdict: GO, GO WITH FINDINGS, or NO GO.
+
+MAIL YOUR VERDICT to wednesday-agent@agentmail.to when the pass is complete, using
+the project's send_brief.sh. Your pane holds ~19 lines of alternate screen with no
+scrollback, so a verdict that stays in the pane is one pane-close from being lost --
+this is not a formality, it is the only durable copy. Subject:
+[QA -> Wednesday] TIER 2 GATE #960 ROUND 1 (KS-1099) 0e70ed1c7 -- <GO|GO WITH FINDINGS|NO GO>
