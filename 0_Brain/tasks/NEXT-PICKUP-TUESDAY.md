@@ -12,6 +12,17 @@ supersede: replace WHOLESALE at the next pickup; never append.
 **On EVERY wake:** `2_Project_Files/tools/kam_rulings_today.sh` (never `kam_msgs.sh` unfiltered) AND `[Kam -> Tuesday]` mails; list `tuesday-agent@` UNFILTERED and route on SUBJECT; `git status --porcelain | grep -v 0_Brain/dashboard/data/`. Rotation band 80–90. **Verify panel messages AT ORIGIN** (`git show origin/main:0_Brain/dashboard/data/chat_tuesday.json` on the ref `panel_sync` fetches; `git ls-remote` HUNG 9 min in this tree at 14:28 — bound any network read with a timeout). **Do NOT read `0_Brain/daily/`** (Wednesday's).
 
 ## 🔴 LIVE — with the next action for each
+0028. **S40 VERIFIER REPORT 04:30:17Z on `7135dec` (read whole): GREEN end to end.** Host 910 + 1 skip; clean-clone ci.sh 16/16; demo-ON stack; fence positive control 422; S1→S10 0 console errors; Export PDFs byte-identical to the API with marks; technical approval → awaiting_customer. Evidence `qa-verify-s40-7135dec/`.
+    - **Findings F1–F8, triaged by s11 ~14:3x** (body `2_Project_Files/fleet/briefs_staged/2026-09-13_hpsm-s42-s40-verifier-triage.md`):
+      - **F1:** the e2e suite is RED on a switch-ON stack; `fixtures.ts:64-69` seeds non-synthetic tenants, and CI runs switch-OFF, so it was never covered. → lane W before Monday; the suite passes on ON and OFF; the merge chain gains a switch-ON e2e run.
+      - **F7:** fixture tenant residue → lane W; e2e NEVER run on pc-lane-a/Azure, guarded.
+      - **F5:** Approval screen stale "Failing terms" → lane W before Monday.
+      - **F6:** provisional vs synthetic copy → lane W.
+      - **F8:** breadcrumb space → lane W.
+      - **F4:** "Posture: balanced" contradicts S3 → lane R.
+      - **F3:** device group UUID → lane R (renderer lookup preferred; a manifest change goes via lane C12 with its hash impact named).
+      - **F2:** empty Admin list is expected (Q9 API in lane Q).
+    - **Suggested split:** W1 (the verifier fixes, merge after R) and W2 (2b + Q9, after Q).
 0027. **S42 ACK 04:09:38Z + NOTICE 04:10:39Z (both read whole; no reply needed, both consistent with s11's 04:08 and 04:10 mails):**
     - **Lane C12 RUNNING:** branch `s42/lane-c12` from `7135dec`; paths `packages/engine` + `content/release-demo` (+ `packages/db` only if measured).
       - **SEAT GRANT `packages/content/**`:** the demo generator `packages/content/src/demo.ts` makes release-demo. release-draft is excluded by path, and its `content:check` hash `79364073…` must be proven unchanged. Accepted as within the fence.
