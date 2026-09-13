@@ -1,0 +1,102 @@
+ultrathink
+
+You are the fleet QA agent running a TIER 2 (through code) gate, ROUND 1, on Secuura/Blockchain PR #974 (KS-878 + KS-867).
+
+Read your brief FIRST and in full, then plan:
+/Volumes/DevMASTER/WEDNESDAY/2_Project_Files/fleet/qa-agent/briefs/2026-09-13_secuura-974-ks878-ks867-tier2.md
+
+Subject: 8da6023090d5f28f1a807845bd0608d7919f01cc = PR #974 (KS-878 + KS-867), open against develop, ONE commit whose
+  parent IS develop 0f69129b3 (fast-forward-shaped; merge-base = develop; compare ahead 1 / behind 0). FOUR files +351 -6
+  under Blockchain/Testing/jobs/ and Blockchain/Dev/scripts/__tests__/ — the internal-audit harness's CVE-scan pair:
+  KS-878: 09-aggregate-report.sh treated a 04 artefact that EXISTS but does not PARSE (the 12-byte `{"images":[`+newline
+  the pre-#850 04 wrote under bash 3.2) as a clean scan — 0 findings, rc 0, 0 bytes of output; now `jq -e .` validates
+  it first (:133-135) and an unparseable artefact is its own HIGH finding 04-trivy/unreadable-artefact, rc 1.
+  KS-867: 04-container-trivy.sh:62's image filter `^dev-[a-z-]+:latest$` admitted no digit, so a digit-bearing dev image
+  was never scanned while SOME images matched and the KS-676 examined-nothing alarm stayed silent; now
+  `^dev-[A-Za-z0-9._-]+:latest$` (Kam's Q2 ruling: the ticket's class WITH the dev- prefix and :latest; the uppercase
+  half unproducible — docker lower-cases repository names — so NO cell). Two NEW shell suites (5 + 4 cells) in
+  scripts/__tests__/ (the runner's glob); docker and trivy are STUBS on a private PATH. The harness is a CHECKER:
+  the brief's §2a tables are the legitimate-shapes input set for BOTH scripts.
+Repo:    /Volumes/DevMASTER/!CODING/Secuura/Blockchain/2_Project_Files  (READ-ONLY — clone by SHA into your own scratch)
+
+You are FINDINGS-ONLY. You never fix, never merge, never push, never deploy.
+
+NEVER run a push, the real pre-push hook, or preflight.sh inside the Secuura checkout or any of its worktrees.
+
+NEVER print a credential value, and never open, read or copy a secrets file (any .env, config/secrets.yml). Count, never echo.
+
+Seven things you must not miss:
+
+1. THE §2a TABLES, EVERY ROW, THROUGH THE REAL SCRIPTS AT develop 0f69129b3 AND AT 8da602309 — stubs only, no daemon,
+   exit codes from $? directly. 09 in run-internal-audit.sh:120-121's shape (TARGET_BASE RUN_DIR SELF FAIL_ON
+   AUDIT_RUNS_DIR exported, `cd "$SELF"`, `bash jobs/09-aggregate-report.sh`): absent · clean · one HIGH · one MEDIUM
+   (rc 0 by FAIL_ON) · the three reasons · an unknown reason · the 12-byte truncation · 0 bytes · `null` (valid JSON,
+   refused by -e, described as "not valid JSON") · trailing garbage · THE SAME UNREADABLE ARTEFACT ON THE NEXT RUN
+   (run 2 with run 1's REPORT.json in AUDIT_RUNS_DIR: Wednesday measured findings 1 / new_since_prev 0 / rc 0 — the
+   aggregator's new-only rc gate at :227-240, pre-existing, shared with scan-examined-nothing; Record for Wednesday).
+   Quote per row findings[].id, severity, new_since_prev length, rc, stdout+stderr byte count (0 even when it emits).
+
+2. THE HEADLINE — THE PRODUCIBLE INSTANCE: docker-compose.yml at develop declares 33 `build:` services and exactly one
+   name lies outside [a-z-]: m365-integration. Derive the 33 yourself, feed dev-<name>:latest x 33 to the docker stub
+   (zsh: write "${var}:latest" — "$var:latest" is a MODIFIER and silently yields …atest), run the REAL 04 at base and
+   head: base scans 32, dev-m365-integration:latest 0 times, `across 32 image(s)`, rc 0, NO alarm — the partial
+   silence; head scans 33. Any other real name refused at head is a finding against #974. The PR's fixture uses a
+   synthetic dev-auth2 and no cell names the real service — a coverage note. Then the rest of the 04 table: digits ·
+   dots · underscores (admitted) · uppercase (unproducible, NO cell — READ ONLY) · <none> · non-latest · non-dev ·
+   secuura_slot2-* alone (no-images alarm, LOUD, the ruled trade-off) and alongside dev-* (wrong corpus, silent —
+   Record) · a per-image trivy FAILURE (`|| echo '{}'` :93 — a silent per-image clean, pre-existing class, Record).
+
+3. RED-FIRST AT BASE WITH THE SUITES' OWN KNOBS: AGG_SH=<base 09> → exactly CELL 1 red (rc=0, findings=0, ids=[]),
+   4 green; TRIVY_JOB_SH=<base 04> → exactly CELL 1 red (dev-auth2:latest scanned 0 of 2), 3 green; against head 5/5
+   and 4/4 rc 0 with the SUBJECT sha256 lines quoted (9d6c01c6bf5e6562…, 806f1f90afe062f5…). The knobs' refusals too
+   (set-but-empty → FATAL exit 2; missing path → exit 2).
+
+4. THE RUNNER, in a real checkout of the head (--check-unreached uses git ls-files; an archive SKIPs advisory and that
+   is not an OK): --list shows 27 incl. the two new paths (25 at base); --check-unreached → `OK — all 27 tracked shell
+   suite(s) are reached by the runner.`; the full run → `shell suites: 27 passed, 0 failed (of 27)` rc 0, SOLO (~186 s;
+   other suites in it start sockets); bash -n rc 0 on all four; prove --check-unreached CAN fail (a git-added foo.test.sh
+   outside ROOTS in a scratch copy → `FAIL — these shell suites exist but NOTHING runs them:`).
+
+5. RED-PROOF WITH THE SUITES RUNNING (5 and 4 cells ran; SUBJECT sha changed; predictions written first; your OWN
+   asserting runner; restore sha-identical; green again): T1 the guard :133-135 removed → 09 CELL 1 only; T2 the class
+   back to [a-z-] → 04 CELL 1 only; T3 the class → ^.+$ → 04 CELLS 1, 2, 3; Tg (gate) emit "high" → "low" → 09 CELL 1
+   only (sev AND rc); Th (gate) drop the `:latest$` tail → 04 CELLS 1, 2 AND 3 (CORPUS_NONE's dev-old:v1 now matches);
+   Ti (gate) `jq -e .` → `jq .` → 0 of 5 red (the -e is load-bearing only for null/false, which 04 cannot write) —
+   record it as a line no cell reddens. Write every prediction from the code, not from the builder's record (it
+   under-predicted T3 once; Wednesday mis-predicted Th's CELL 3 once while writing the brief).
+
+6. CLAIMS IN THE DIFF, true as written: 04's corrected step 4 (:45-47) and sentence (:49-50) vs the #850 round-2 report's
+   own §0 retraction (12 bytes at :83); "same line count so :61/:62 keep their numbers" and docker-build.sh:132's
+   pointer; "docker lower-cases repository names" (READ ONLY, no daemon); the PR body's "+20/-6" and "+32/-6" vs
+   measured +14 -6 / +26 -6 (Polish); "run-internal-audit.sh:120-121" (true); the 09 suite header's "without
+   AUDIT_RUNS_DIR the script prints unbound variable and CONTINUES" (measure once); "an id nothing else can occupy"
+   (git grep unreadable-artefact). Then the class hunt: the other jq -r … 2>/dev/null artefact reads in 09 (05 :164,
+   06 :173, 07 :181, 08 :186) have the SAME hole KS-878 closed for 04 only — READ ONLY each, MEASURE one (a 12-byte
+   08-aiken-tests.json) to prove the class is live; Record for Wednesday, not against #974.
+
+7. DOCS §4 and BOARD: neither platform-k HTML doc names 09/04/these suites (0 hits; control orchestrate.sh 1 each) BUT
+   each names one other shell suite (Flow_Diagrams :958, Cheat_Sheet :1190) — so the reason the docs do not move must
+   be "no probe/gate/outcome/timing moved", and Flow_Diagrams :620's Parse → Aggregate node with the new outcome id is
+   your judgement (Polish at most). KS-878 / KS-867 In Progress by automation, attachment #974 each, one comment each
+   (its at-sign is the "PR #974 @ `8da602309`" idiom); KS-676 is Done and ARCHIVED (includeArchived: true — a
+   not-found on it is the archive). The merged tree is a fast-forward to d34ea6af3. Then the verdict on 8da602309.
+
+Your tool shell's grep may be a function: use /usr/bin/grep, case-insensitive, with a same-file control. Never cd in
+your tool shell (the suites cd inside their own subshell — theirs, not yours); the pre-tool hook refuses `git worktree`
+in the Secuura checkout — clone into your scratch and run write verbs THERE. The suites rm their own mktemp dirs on
+EXIT — that is the product's test; you never rm. /bin/bash 3.2.57, /usr/bin/jq 1.7.1; the 04 suite's private PATH is
+$root/bin:/usr/bin:/bin.
+Quote the Secuura checkout's porcelain count, .git/config sha256, for-each-ref count and origin develop SHA at start and
+close; they must match (name any ref another seat's push or merge moved).
+Do no memory maintenance of your own project's memory store inside this session.
+
+Report FOUND / TESTED / HOW, with controls, both §2a tables as measured (base / head), the 33-name row with the stub's
+record quoted, the tamper table (T1–T3, Tg, Th, Ti: prediction · cells run · red titles · restore sha), the runner lines
+verbatim, and state what you did NOT test — a real trivy scan and the real docker corpus first.
+Verdict: GO, GO WITH FINDINGS, or NO GO — on 8da602309.
+
+MAIL YOUR VERDICT to wednesday-agent@agentmail.to when the pass is complete, using
+the project's send_brief.sh. Your pane holds ~19 lines of alternate screen with no
+scrollback, so a verdict that stays in the pane is one pane-close from being lost --
+this is not a formality, it is the only durable copy. Subject:
+[QA -> Wednesday] TIER 2 GATE #974 ROUND 1 (KS-878 KS-867) 8da602309 -- <GO|GO WITH FINDINGS|NO GO>

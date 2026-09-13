@@ -1,0 +1,88 @@
+ultrathink
+
+You are the fleet QA agent running a TIER 2 (through code) gate, ROUND 1, on Secuura/Blockchain PR #975 (KS-1126).
+
+Read your brief FIRST and in full, then plan:
+/Volumes/DevMASTER/WEDNESDAY/2_Project_Files/fleet/qa-agent/briefs/2026-09-13_secuura-975-ks1126-tier2.md
+
+Subject: 8da20edbd595f97cd3c62baaa4ff7b56ea9eef99 = PR #975 (KS-1126), open against develop, ONE commit whose parent IS
+  develop 0f69129b3 (fast-forward-shaped; merge-base = develop; GitHub compare ahead 1 / behind 0). ONE file, +21 -7:
+  packages/shared/src/__tests__/ks781-p3-3-body-parser-order.test.ts — LEG D's three hand-pinned line numbers for
+  services/api-gateway/src/index.ts re-measured :854/:867/:900 -> :846/:859/:892 after #951 (b75cff4d6) removed 8 net
+  lines above those routes (index.ts 1288 -> 1280, blob f986080e8 -> 6f38c819e); toContain(900) -> toContain(892);
+  the cell's shift-history comment extended; "Three times" -> "Four times". Test-file only; index.ts does NOT move
+  (blob 6f38c819e at develop AND head). KS-1126 is instance 4 of KS-953, the CLASS ticket (Backlog, 0 attachments) —
+  KS-953 must be UNMOVED and you assert it at start and end.
+Repo:    /Volumes/DevMASTER/!CODING/Secuura/Blockchain/2_Project_Files  (READ-ONLY — clone by SHA into your own scratch)
+
+You are FINDINGS-ONLY. You never fix, never merge, never push, never deploy.
+
+NEVER run a push, the real pre-push hook, or preflight.sh inside the Secuura checkout or any of its worktrees.
+
+NEVER print a credential value, and never open, read or copy a secrets file (any .env, config/secrets.yml). Count, never echo.
+
+Seven things you must not miss:
+
+1. THE HEADLINE — READ-BACK AT SOURCE, never from the run: each of :846 / :859 / :892 in index.ts at develop's blob
+   6f38c819e (git show 0f69129b3:… | sed -n Np) is BYTE-IDENTICAL to :854 / :867 / :900 in the blob before #951
+   (git show 27509dc7a:… — that is b75cff4d6^, blob f986080e8): app.post('/api/auth/wallet/challenge', mockBodyParser, …;
+   app.post('/api/auth/wallet/authenticate', mockBodyParser, …; and the createVerificationRoutes factory argument
+   (`authenticateToken, mockBodyParser, query, …` at :892, under `app.use(createVerificationRoutes({` at :891). Quote all
+   six lines. Prove the shift is uniform: b75cff4d6's two hunks (@@ -11,6 +11,7 @@ and @@ -323,20 +324,11 @@) both sit
+   above :846, net -8; git log 64e457943..0f69129b3 -- index.ts is exactly b75cff4d6; mockBodyParser occurs 5 times at
+   develop (:843 and :884 declarations; :846 :859 :892 arguments = the declared 3). A number that does not read back as
+   the same statement is a RE-BASELINE from the run — Major, against #975.
+
+2. RED-FIRST AT BASE, GREEN AT HEAD, SOLO, with index.ts PRESENT in the tree (the suite reads the REAL file via
+   findDevRoot(process.cwd()) at :105-116; a clone without services/ THROWS at :113 — a load failure, not a red):
+   at 0f69129b3 the file reads exactly the two LEG D cells red (`names WHERE each declared site is, so the count is not
+   the only signal` and `CONTROL — the three declared sites include the one that is NOT mock-gated`), 222/224; the full
+   packages/shared 1 failed | 40 passed (41) files, 2 failed | 785 passed (787). At 8da20edbd: 224/224 and the FULL
+   packages/shared 41/41 files, 787/787, rc 0. Quote every count as vitest prints it.
+
+3. RED-PROOF WITH THE SUITE RUNNING (224 cells ran; the full 41 files loaded), predictions written first, your OWN
+   asserting runner scoring by TITLE (the builder's runner recorded both of its tampers as expect_red ["MODEL"] — a
+   cell-id regex misread): Ta :846->:854, Tb :859->:867, Tc :892->:900 in the toEqual list — each exactly ONE red, the
+   `names WHERE` cell (all three pins live in that one cell); Td toContain(892)->toContain(900) — exactly the CONTROL
+   cell; Te (gate-designed): insert ONE comment line in index.ts above :846 in your HEAD worktree — exactly TWO red
+   (both LEG D cells; the count cell :1949 stays green at 3) — this proves the numbers are pins measured from the real
+   file. Restore sha-identical after each (test file 8a9c4de06b42d825…; index.ts blob 6f38c819e), green again.
+
+4. KS-953 UNMOVED (read-only Linear, start AND end): Backlog, High, 0 attachments, inverse relation from KS-1126 only,
+   one comment 3545b1d0 (06:05:31Z). KS-1126: In Progress (GitHub automation walked it), Low, related -> KS-953,
+   attachment #975 only, one comment 3d99e853 (its single at-sign is the "PR #975 @ `8da20edbd`" idiom, not a
+   mention). Any walk of KS-953 between your readings is reported with the timestamp; you never touch it.
+
+5. THE MERGED TREE: parent = develop, so git merge in your own clone is a fast-forward to tree 09b474e27; run the full
+   packages/shared suite on it, SOLO, counts quoted. If develop has moved (git ls-remote origin refs/heads/develop at
+   start and end), merge the then-current develop instead, prove its delta disjoint by NAME from the one file, and say
+   whether it touches services/api-gateway/src/index.ts — an edit above :846 there makes #975's pins stale ON ARRIVAL:
+   measure the new offsets, report as a finding against the brief, and mark the verdict as expiring on that develop.
+
+6. CLAIMS IN THE DIFF, true as written: "+6 -14", "1288 -> 1280", "Four times now" (the file narrates +14, +10, +14, -8
+   at :1969-2002), "846 and 859 sit behind ENABLE_MOCK_ENDPOINTS; 892 is the factory argument" (:841 if-block, :891),
+   the PR body's "former :2004-2008 / :2011-2022" and "+14 comment lines shift the 5 TS errors"; and the file's own
+   HEADER :129-132 still saying "at lines 816, 829 and 862" (four shifts stale, present tense, pre-existing — left
+   standing by a pin-hygiene PR in this very file: Polish against #975 if you agree). Then the class hunt: every other
+   hand-pinned cross-package line number in the repo (git grep -nE "index\.ts:[0-9]{3}" at head), Record for KS-953.
+
+7. DOCS §4: the two platform-k HTML docs do not name ks781 / packages/shared / 787 (Wednesday reads 0 hits, positive
+   control orchestrate.sh 1 each) — confirm with /usr/bin/grep -ci and the same control. Then the verdict on 8da20edbd.
+
+Your tool shell's grep may be a function: use /usr/bin/grep, case-insensitive, with a same-file control. Never cd; the
+pre-tool hook refuses `git worktree` in the Secuura checkout — clone into your scratch and run write verbs THERE.
+packages/shared is VITEST (npx vitest run, never watch; cwd = <clone>/Blockchain/Dev/packages/shared); tsconfig excludes
+src/__tests__ so tsc says nothing about the tests. The full package run includes socket legs — minutes, solo.
+Quote the Secuura checkout's porcelain count, .git/config sha256, for-each-ref count and origin develop SHA at start and
+close; they must match (name any ref another seat's push or merge moved).
+Do no memory maintenance of your own project's memory store inside this session.
+
+Report FOUND / TESTED / HOW, with controls, the six read-back lines verbatim, the §2a table as measured, the tamper
+table (Ta–Te: prediction · cells run · red titles · restore sha), and state what you did NOT test.
+Verdict: GO, GO WITH FINDINGS, or NO GO — on 8da20edbd.
+
+MAIL YOUR VERDICT to wednesday-agent@agentmail.to when the pass is complete, using
+the project's send_brief.sh. Your pane holds ~19 lines of alternate screen with no
+scrollback, so a verdict that stays in the pane is one pane-close from being lost --
+this is not a formality, it is the only durable copy. Subject:
+[QA -> Wednesday] TIER 2 GATE #975 ROUND 1 (KS-1126) 8da20edbd -- <GO|GO WITH FINDINGS|NO GO>
