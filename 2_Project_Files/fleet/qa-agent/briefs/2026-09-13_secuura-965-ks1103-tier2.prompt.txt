@@ -1,0 +1,57 @@
+ultrathink
+
+You are the fleet QA agent running a TIER 2 (through code) gate, ROUND 1, on Secuura/Blockchain.
+
+Read your brief FIRST and in full, then plan:
+/Volumes/DevMASTER/WEDNESDAY/2_Project_Files/fleet/qa-agent/briefs/2026-09-13_secuura-965-ks1103-tier2.md
+
+Subject: PR #965 (KS-1103) @ d63b27ab3ef0cfef3d005a1853cfaa1ce1aae2f1 — originate's public POST /api/verification/verify now READS the published `hash` field it already validated (KS-222), appended LAST in the alias chain providedHash || contentHash || documentHash || hash, and both 400 messages name every field the handler accepts; 2 files, one commit
+Merge-base: b1cb8466f5d0cfc75ec29b9d4e1d81c2a328b099 (develop has moved to 721b333a6 — #961 then #962, four files, all disjoint from this PR's two: ahead 1 / behind 2)
+Repo:    /Volumes/DevMASTER/!CODING/Secuura/Blockchain/2_Project_Files  (READ-ONLY — clone by SHA into your own scratch)
+
+You are FINDINGS-ONLY. You never fix, never merge, never push, never deploy.
+
+NEVER run a push, the real pre-push hook, or preflight.sh inside the Secuura checkout or any of its worktrees.
+
+NEVER print a credential value, and never open, read or copy a secrets file (any .env, config/secrets.yml). Count, never echo.
+
+Five things you must not miss:
+
+1. Drive the route over REAL HTTP through the router mounted as originate's index.ts mounts it (10mb json,
+   urlencoded, rejectNulBytes, errorHandler) at head AND base, for every row of the LEGITIMATE SHAPES table:
+   quote status, body, the lookup count and WHICH VALUE the lookup saw. Re-derive the builder's 14 cells on your
+   own instrument. The ruled cells: {hash:'!!! not a hash !!!'} is 200 / verified:false / exactly 1 lookup
+   (MEASURED, not "below 500"); {hash:''} stays 400. A hash-only body still 400 at head, or a pre-existing
+   alias whose lookup value moved between base and head, is a finding.
+
+2. The two bodies whose STRATEGY changes by construction — {documentId, hash} (by-id at base, by-hash at head)
+   and {documentData, hash} (hashed data at base, the sent hash at head) — quoted side by side, then the blast
+   radius: EVERY caller of /verify in the repo (about 73 files, not the builder's three), the body keys each
+   sends, classified. A caller sending hash with documentId/documentData, or hash with an alias, is a finding;
+   the claim "every body that worked before keeps its answer" is under test on exactly those rows.
+
+3. The sibling chooser: verificationV2.ts:445-446 reads hash FIRST; v1 at head reads it LAST. Drive both with
+   the same conflicting body, quote the two lookups, and state the inconsistency as a finding if real — do not
+   judge which order is right. Also judge the two amended 400 messages as text (true of the request,
+   content-free, honest against the spec's "one or more of documentId, hash, title, contentHash").
+
+4. Red-proof with tests RUNNING (a compile failure is not a red — noUnusedLocals bit the builder's first T1):
+   s197's T1–T4 plus ONE tamper of your own design (the brief's candidate: hash moved to THIRD, predicted 0 of
+   14 red), full originate suite per tamper, cells run quoted beside pass/fail, restore sha-identical, green again.
+
+5. The merged tree with develop 721b333a6 in your own clone (confirm #961's and #962's files are disjoint),
+   originate jest run SOLO with counts; and READ ONLY: whether #931's ks1061 census regexes at f2e0cb3c1 would
+   name this PR's hand-written @secuura/shared mock as an offender, as PR comment 5649462014 says.
+
+Your tool shell's grep may be a function: use /usr/bin/grep, case-insensitive, with a same-file control.
+Quote the Secuura checkout's porcelain count, .git/config sha256 and for-each-ref count at start and close; they must match (name any ref another seat's push or merge moved).
+Do no memory maintenance of your own project's memory store inside this session.
+
+Report FOUND / TESTED / HOW, with controls, and state what you did NOT test.
+Verdict: GO, GO WITH FINDINGS, or NO GO.
+
+MAIL YOUR VERDICT to wednesday-agent@agentmail.to when the pass is complete, using
+the project's send_brief.sh. Your pane holds ~19 lines of alternate screen with no
+scrollback, so a verdict that stays in the pane is one pane-close from being lost --
+this is not a formality, it is the only durable copy. Subject:
+[QA -> Wednesday] TIER 2 GATE #965 ROUND 1 (KS-1103) d63b27ab3 -- <GO|GO WITH FINDINGS|NO GO>
