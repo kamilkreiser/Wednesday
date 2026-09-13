@@ -1,0 +1,45 @@
+# item 1 — pretooluse_grep_case.sh exercise, 2026-09-14 07:40:41; harness: scratchpad/grep_hook_exercise.sh (feeds {tool_name:Bash, tool_input:{command}} on stdin)
+PASS  expect=FIRE  observed=FIRE  rc=0  cmd: grep -c 'do not push' /tmp/f
+      stdout: {"hookSpecificOutput": {"hookEventName": "PreToolUse", "additionalContext": "ADVISORY from pretooluse_grep_case.sh (not blocked): `grep -c 'do not push'` is a CASE-SENSITIVE multi-word phrase grep \u2014 its zero would be a false 
+      stderr: ADVISORY from pretooluse_grep_case.sh (not blocked): `grep -c 'do not push'` is a CASE-SENSITIVE multi-word phrase grep 
+PASS  expect=FIRE  observed=FIRE  rc=0  cmd: /usr/bin/grep -q "Context limit" /tmp/f
+      stdout: {"hookSpecificOutput": {"hookEventName": "PreToolUse", "additionalContext": "ADVISORY from pretooluse_grep_case.sh (not blocked): `grep -q \"Context limit\"` is a CASE-SENSITIVE multi-word phrase grep \u2014 its zero would be a fa
+      stderr: ADVISORY from pretooluse_grep_case.sh (not blocked): `grep -q "Context limit"` is a CASE-SENSITIVE multi-word phrase gre
+PASS  expect=QUIET observed=QUIET rc=0  cmd: grep -ci 'do not push' /tmp/f
+PASS  expect=QUIET observed=QUIET rc=0  cmd: grep -c foo /tmp/f
+PASS  expect=QUIET observed=QUIET rc=0  cmd: grep -qi "a b" /tmp/f
+PASS  expect=FIRE  observed=FIRE  rc=0  cmd: grep -c 'x $(y)' /tmp/f
+      stdout: {"hookSpecificOutput": {"hookEventName": "PreToolUse", "additionalContext": "ADVISORY from pretooluse_grep_case.sh (not blocked): grep pattern contains `$(` ('x $(y)') \u2014 a composed command inside the pattern; build the phrase
+      stderr: ADVISORY from pretooluse_grep_case.sh (not blocked): grep pattern contains `$(` ('x $(y)') — a composed command inside t
+PASS  expect=QUIET observed=QUIET rc=0  cmd: grep -F -i -c 'a b' /tmp/f
+PASS  expect=QUIET observed=QUIET rc=0  cmd: /usr/bin/grep -iF -q "a b" /tmp/f
+PASS  expect=FIRE  observed=FIRE  rc=0  cmd: grep -n -E 'a b' /tmp/f
+      stdout: {"hookSpecificOutput": {"hookEventName": "PreToolUse", "additionalContext": "ADVISORY from pretooluse_grep_case.sh (not blocked): `grep -n 'a b'` is a CASE-SENSITIVE multi-word phrase grep \u2014 its zero would be a false zero on 
+      stderr: ADVISORY from pretooluse_grep_case.sh (not blocked): `grep -n 'a b'` is a CASE-SENSITIVE multi-word phrase grep — its ze
+PASS  expect=FIRE  observed=FIRE  rc=0  cmd: /usr/bin/grep -nE "a b" /tmp/f
+      stdout: {"hookSpecificOutput": {"hookEventName": "PreToolUse", "additionalContext": "ADVISORY from pretooluse_grep_case.sh (not blocked): `grep -n \"a b\"` is a CASE-SENSITIVE multi-word phrase grep \u2014 its zero would be a false zero o
+      stderr: ADVISORY from pretooluse_grep_case.sh (not blocked): `grep -n "a b"` is a CASE-SENSITIVE multi-word phrase grep — its ze
+PASS  expect=QUIET observed=QUIET rc=0  cmd: grep 'a b' /tmp/f
+PASS  expect=QUIET observed=QUIET rc=0  cmd: grep -c "$VAR" /tmp/f
+PASS  expect=FIRE  observed=FIRE  rc=0  cmd: cat /tmp/f | /usr/bin/grep -c 'do not push'
+      stdout: {"hookSpecificOutput": {"hookEventName": "PreToolUse", "additionalContext": "ADVISORY from pretooluse_grep_case.sh (not blocked): `grep -c 'do not push'` is a CASE-SENSITIVE multi-word phrase grep \u2014 its zero would be a false 
+      stderr: ADVISORY from pretooluse_grep_case.sh (not blocked): `grep -c 'do not push'` is a CASE-SENSITIVE multi-word phrase grep 
+PASS  expect=QUIET observed=QUIET rc=0  cmd: cat > /tmp/note.md <<'EOF2'
+PASS  expect=QUIET observed=QUIET rc=0  cmd: /usr/bin/grep --count --ignore-case 'a b' /tmp/f
+PASS  expect=FIRE  observed=FIRE  rc=0  cmd: /usr/bin/grep --count 'a b' /tmp/f
+      stdout: {"hookSpecificOutput": {"hookEventName": "PreToolUse", "additionalContext": "ADVISORY from pretooluse_grep_case.sh (not blocked): `grep -c 'a b'` is a CASE-SENSITIVE multi-word phrase grep \u2014 its zero would be a false zero on 
+      stderr: ADVISORY from pretooluse_grep_case.sh (not blocked): `grep -c 'a b'` is a CASE-SENSITIVE multi-word phrase grep — its ze
+PASS  expect=FIRE  observed=FIRE  rc=0  cmd: grep -c -e 'a b' /tmp/f
+      stdout: {"hookSpecificOutput": {"hookEventName": "PreToolUse", "additionalContext": "ADVISORY from pretooluse_grep_case.sh (not blocked): `grep -c 'a b'` is a CASE-SENSITIVE multi-word phrase grep \u2014 its zero would be a false zero on 
+      stderr: ADVISORY from pretooluse_grep_case.sh (not blocked): `grep -c 'a b'` is a CASE-SENSITIVE multi-word phrase grep — its ze
+PASS  expect=QUIET observed=QUIET rc=0  cmd: git grep -c 'a b'
+PASS  expect=FIRE  observed=FIRE  rc=0  cmd: grep -c 'a b' /tmp/f | grep -qi 'c d'
+      stdout: {"hookSpecificOutput": {"hookEventName": "PreToolUse", "additionalContext": "ADVISORY from pretooluse_grep_case.sh (not blocked): `grep -c 'a b'` is a CASE-SENSITIVE multi-word phrase grep \u2014 its zero would be a false zero on 
+      stderr: ADVISORY from pretooluse_grep_case.sh (not blocked): `grep -c 'a b'` is a CASE-SENSITIVE multi-word phrase grep — its ze
+PASS  expect=QUIET observed=QUIET rc=0  cmd: grep -c 'single' /tmp/f && grep -qi 'two words' /tmp/g
+PASS  expect=FIRE  observed=FIRE  rc=0  cmd: grep -q "$(cat /tmp/phrase)" /tmp/f
+      stdout: {"hookSpecificOutput": {"hookEventName": "PreToolUse", "additionalContext": "ADVISORY from pretooluse_grep_case.sh (not blocked): grep pattern contains `$(` (\"$(cat /tmp/phrase)\") \u2014 a composed command inside the pattern; bu
+      stderr: ADVISORY from pretooluse_grep_case.sh (not blocked): grep pattern contains `$(` ("$(cat /tmp/phrase)") — a composed comm
+PASS  expect=QUIET observed=QUIET rc=0  cmd: ls -la /tmp
+PASS  malformed stdin -> quiet, rc=0
+TOTAL pass=23 fail=0
