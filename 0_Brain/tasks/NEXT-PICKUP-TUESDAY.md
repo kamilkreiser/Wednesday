@@ -12,6 +12,25 @@ supersede: replace WHOLESALE at the next pickup; never append.
 **On EVERY wake:** `2_Project_Files/tools/kam_rulings_today.sh` (never `kam_msgs.sh` unfiltered) AND `[Kam -> Tuesday]` mails; list `tuesday-agent@` UNFILTERED and route on SUBJECT; `git status --porcelain | grep -v 0_Brain/dashboard/data/`. Rotation band 80–90. **Verify panel messages AT ORIGIN** (`git show origin/main:0_Brain/dashboard/data/chat_tuesday.json` on the ref `panel_sync` fetches; `git ls-remote` HUNG 9 min in this tree at 14:28 — bound any network read with a timeout). **Do NOT read `0_Brain/daily/`** (Wednesday's).
 
 ## 🔴 LIVE — with the next action for each
+0036. **🔴 S42 APPROVAL-CLASS QUESTION 05:20:39Z (read whole):** LOCAL main `d7a39b3` (lane-w-e2e `d59ea7c` + lane C12 `d7a39b3` merged, chains GREEN, D1 PASS; 219 ahead of afc10e9; NOT pushed).
+    - **MEASURED on `pc-s42-on`:** after the C12 upgrade, an EXISTING engagement pinned to demo `0030d4c6` answers **409 CONTENT_VERSION_CHANGED** on preview (both formats), POST generate and POST validate. There is no re-pin action; only NEW engagements work on `fd7db6b8`.
+    - **Consequence:** both LIVE stacks' synthetic engagements would break on any upgrade ≥ `d7a39b3` (also Q and W, which sit on top).
+    - **S42 HELD the S40 upgrade**; live stacks stay at `c2fbc36`.
+    - **→ CARD `hpsm-composer-live-demo-upgrade-after-c12`** added by s11 ~15:2x:
+      - **rec `upgrade-fresh-with-release`:** the combined post-W upgrade plus fresh engagements incl. a no-device-group one for release;
+      - **alternatives:** `hold-live` (the DEFAULT), `upgrade-fresh-drafts`, `build-repin`;
+      - `--override-prior-rulings` with the reason in the BLUF.
+      - **s11 recommended against S42's hold on purpose:** Kam's build-c12 intent is visible release; the rollback plus the 10-min check bound the risk.
+      - The panel pointer was posted.
+      - **Picking `upgrade-fresh-with-release` also answers the device-group card.**
+    - **Mail to S42 + S40** (body `2_Project_Files/fleet/briefs_staged/2026-09-13_hpsm-s42-live-upgrade-carded.md`):
+      - S40 HOLD at `c2fbc36`;
+      - S42 continues Q → W → READY locally;
+      - S42 PREPARES but does not send the combined upgrade message: pre-checks, rollback to `c2fbc36`, the 10-min check on a fresh engagement, per-option seeding, old engagements left untouched.
+    - **NEXT when Kam taps:**
+      - rule it, relay it, and let S42 send the prepared message;
+      - if `upgrade-fresh-with-release`, note on the device-group card that it is answered by this ruling (do NOT rule that card without his tap; ask him or record it);
+      - if `build-repin`, a lane commission.
 0035. **S42 QUESTION 05:07:09Z (read whole): lane W FINAL.**
     - **`s42/lane-w-e2e` `d19ae0d` (merging now):**
       - F7 guard: `run.sh` refuses `pc-lane-a`, `playwright.config.ts` refuses 18580 and the Azure host; selftest 6/6, mutants 8/8.
