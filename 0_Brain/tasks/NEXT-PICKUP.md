@@ -2,7 +2,7 @@
 date: 2026-09-13
 type: pickup
 scope: SECUURA + all general/generic work. Datasec is TUESDAY's — read her mail by SUBJECT only, never brief or answer for a Datasec project.
-source: replaced WHOLESALE 18:0x by the seat booted 15:57 at ctx 78%, ahead of its rotation inside the 80-90 band (Kam 14:2x: rotation never blocks the work — agents run through it).
+source: replaced WHOLESALE 17:4x by the seat booted 15:57 at ctx 78%, ahead of its rotation inside the 80-90 band (Kam 14:2x: rotation never blocks the work — agents run through it).
 status: live
 supersede: replace this file wholesale at the next pickup; do not append
 ---
@@ -11,7 +11,7 @@ supersede: replace this file wholesale at the next pickup; do not append
 
 > Narrative: `0_Brain/daily/2026-09-13.md` from the 15:57 boot block (the 17:28 handover block is the summary). **Measure before acting on any line here.** Subagent outputs of the 15:57 seat: `/private/tmp/claude-501/-Volumes-DevMASTER-WEDNESDAY/a443e8f5-4f70-46d7-b9f3-451ac0da033f/scratchpad/` — `gate980/` (BUILD_REPORT.md present = built; absent = the subagent died with the seat → rebuild from `gate978/` as the exemplar, its disjointness-checked develop guard), `s208_laneE_r2_brief.md` (+ `s208_loadbearing.md`; absent = re-commission from the s204 brief + `verdict977.txt`). Verdicts saved as `verdictNNN.txt`; READYs as `s20N_readyNNN.txt`.
 
-## 🟢 FLOOR (at 18:0x)
+## 🟢 FLOOR (at 17:4x)
 | pane | seat | state | next event owed |
 |---|---|---|---|
 | `%72` | **s205 MERGE SEAT** — M7 `506cd3a33` (#969) · M8 `fa55e58c9` (#970) · M9 `50b729d69` (#971) all VERIFIED at source; #913 closed; KS-1069/963/941 archived; KS-1129–1135 filed; CHECKPOINT 50% sent 17:5x | **ITEM D #972 on v3** (`merge_squash_v3.sh` sha `460c4e78…` CONFIRMED by hash 17:4x — `GEQ_SHARED` = `userRepo.ts`; close #930; F-3 HIGH + F-5 MEDIUM tickets) → E #975 → F #974 → G #976, each only if it fits under 70% | its STATUS → verify M at source (`ls-remote`, `git log -1 --format=%P`, `diff --name-only`) → at 70% HAND OVER NOW → successor merge seat s209 from its handover (the three scripts by path + hash: v1 plain · v2 stacked · v3 shared-path) |
