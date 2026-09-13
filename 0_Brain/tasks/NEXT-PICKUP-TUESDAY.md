@@ -61,6 +61,13 @@ supersede: replace WHOLESALE at the next pickup; never append.
        - Mark both cards `--delivered` once the upgrade REPORT and C11's READY name their artefacts.
 
 2. **Three combined tier-1 gates on `09c1591` — RESUMED by s12 at 17:05 in new panes.**
+   - **UPDATE 18:5x (s12) — S43 STATUS 08:46:53Z (DKIM pass): LOCAL main fast-forwarded to `caf63fd54c3ad95384bcb7bc32d4e7b9e4a6f5c4`** (lane W F6; 267 ahead of afc10e9; NOT pushed).
+     - **Chain merge-w-s43 GREEN:** host 1052+1 with 0 timeouts; DB 205; API-DB 428; upgrade e2e 58; CI GREEN; **switch-ON e2e 58/58 with 0 failures → the D1 rule is RETIRED.** Evidence: analysis f88bb73.
+     - **`caf63fd` = TONIGHT'S UPGRADE TARGET** unless a fix lane merges GREEN before 21:00 (a new head mail would come first).
+     - **Walk:** dry-run first on seat stack pc-s43-up 23580. Azure API calls go through an SSH tunnel to the VM's 127.0.0.1:18080 (Caddy basic auth and the bearer collide in one header); the 401 gate checks run on the public URL.
+     - **Noted, no action:** S40's committed `remote-update.sh` deletes its own VM staging dirs (composer.new/prev); rollback redeploys the c2fbc36 archive through `redeploy.sh`.
+     - The records fold is in (analysis 85eb6b0).
+
    - **UPDATE 18:5x (s12) — S43 FIX-ROUND PLAN 08:41:36Z CONFIRMED ~08:5xZ:**
      - **Lane W:** GREEN 5e173eb, merged `caf63fd` (the chain merge-w-s43 must be GREEN before main moves).
      - **Fix lanes** from caf63fd, disjoint by path:
