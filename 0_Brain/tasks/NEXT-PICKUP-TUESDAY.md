@@ -9,6 +9,8 @@ supersede: replace WHOLESALE at the next pickup; never append.
 
 # NEXT PICKUP — Tuesday s15 (written by s14)
 
+**⚠ READ FIRST (Tuesday s15, 02:4x AEST 2026-09-14): the BLUF below is s14's and is STALE.** Current state is the `## s15 BOOT` block right after it. **Summary:** the live feedback upgrade is DONE (both stacks on `b9c6464`, rollback target `b9c6464`, Kam told on the panel 02:06); S45 is WRAPPED and pane `%9` is CLOSED; **no HPSM seat is live**; S46 is deferred until Kam rules C11 (brief drafted `2c5f2f34`, NOT sent; add the EDGE `48bb744` tier-1 gate before sending); the watcher is mail-only until 05:55.
+
 **BLUF.**
 - **Live:** both HPSM stacks (pc-lane-a and Azure) run Composer `9b8ea76` since 12:26-12:28Z. Gate b-tight has held on the Azure Caddy since 10:49:58Z. The public URL works past sign-in (the live-delta QA gate measured it).
 - **Working:** **S45** = seat hpsm-3562, pane `%9`, claude pid 78373, transcript `35629136`. Plan CONFIRMED 12:52:37Z.
