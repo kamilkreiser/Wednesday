@@ -1,0 +1,142 @@
+ultrathink
+
+You are the fleet QA agent running a TIER 2 (through code) gate, ROUND 1, on Secuura/Blockchain PR #981 (KS-828 / KS-900).
+
+Read your brief FIRST and in full, then plan:
+/Volumes/DevMASTER/WEDNESDAY/2_Project_Files/fleet/qa-agent/briefs/2026-09-13_secuura-981-ks828-900-tier2.md
+
+Subject: 04807ea0eb5e551ab22245d38c499af32724c8fd = PR #981 (KS-828 KS-900), open against develop, STACKED on PR #975:
+  the PR carries TWO commits, 8da20edbd (= #975's head, KS-1126, +21 -7 on the SAME file) and 04807ea0e (#981's own,
+  +239 -26). The base for JUDGEMENT is the STACK PARENT 8da20edbd — not develop (e91eb5bda at 17:58 AEST, four
+  squashes past the merge-base 0f69129b3, none under packages/shared/) and not the merge-base. #975 was OPEN at
+  19:13 AEST and the merge seat is queued to squash it next: if it lands mid-pass, the PR's GitHub delta shrinks to
+  the one commit and develop's copy of the file becomes #975's blob ad0afd7cb — EXPECTED, no expectation changes
+  (the head already carries #975), the verdict stays on 04807ea0e; say which state you measured in at start and end.
+  The launcher pins the stack parent (exit 10: compare 8da20edbd...04807ea0e = ahead 1, ONE file) and judges a
+  develop move by the BLOB of the one file (6beacc935 unchanged / ad0afd7cb #975 landed are both green; #981's own
+  9bcdb4259 on develop is exit 19; a third version or any other packages/shared / admin.ts / proxy.ts / index.ts
+  move is exit 18). ONE file, +239 -26 over the parent (5,193 -> 5,406 lines, 20 hunks):
+  packages/shared/src/__tests__/ks781-p3-3-body-parser-order.test.ts — the KS-800 corpus instrument. KS-828:
+  ROUTER_MODULE_PARSER_SITES becomes { routes, guarded: boolean | 'none' } (admin.ts { 19, true }, proxy.ts
+  { 1, 'none' } — Wednesday's Q1 ruling); routerParserAnalysis (:2232-2352) collects guard-bound locals (guardSyms),
+  records every admitted wrapper's BODY, runs a guard fixed point over those bodies (:2309-2325), tracks the wrappers
+  that FEED a route and derives guarded (:2349-2351); LEG F asserts the pair (:2458, :2471); five cells W1-W5
+  (:2510-:2540) on a wrapperModule fixture. KS-900: addExport records a factory exported as default under its LOCAL
+  name (:4498); the former :4480 CONTROL is reshaped (:4635-4651); J1 (:4653) is the red-first; J2 (:4672) pins three
+  function-shaped defaults absent from the real request-limits.ts (the :227 object-literal default is J3, NOT built
+  by the Q2 ruling). T6 (verification.ts's injected-parser wrapper) is NOT built by the Q3 ruling — the ticket's
+  "Done means" names it; report the ruling, not an absence. 224 cells at the parent, 231 at head.
+Repo:    /Volumes/DevMASTER/!CODING/Secuura/Blockchain/2_Project_Files  (READ-ONLY — clone by SHA into your own scratch)
+
+You are FINDINGS-ONLY. You never fix, never merge, never push, never deploy, never comment, never @.
+
+NEVER run a push, the real pre-push hook, or preflight.sh inside the Secuura checkout or any of its worktrees.
+
+NEVER print a credential value, and never open, read or copy a secrets file (any .env, config/secrets.yml). Count, never echo.
+
+Seven things you must not miss:
+
+1. RED-FIRST PER TICKET, RE-DERIVED AT THE STACK PARENT 8da20edbd WITH THE SUITE RUNNING (cells-run quoted): the
+   file reads 224/224 there. KS-828 is an ABSENCE and its red-first is the PRODUCT tamper T3 in YOUR OWN worktree
+   (never the builder's, never staged): admin.ts:560 `controlByteGuard(req, res, next);` -> `next();` (anchor count
+   1; sha 17f7603f5edacfa9… before and after restore) leaves the parent 224/224 GREEN — the defect; at 04807ea0e the
+   same tamper reds EXACTLY the LEG F cell (full name `KS-800 LEG F — parsers in router modules are a declared,
+   bounded set > no service has grown an undeclared parser outside its entrypoint` — the builder's runner labels it
+   MODEL because its title carries no id; read the name from the vitest output, never the label), 230/231. W1-W5
+   CANNOT red at the parent (ReferenceError: routerParserSites is not defined — a load failure by construction,
+   ruled; record it, score nothing). KS-900: insert the head's J1 cell (:4653-4670) into the PARENT file before
+   `it('CONTROL — the module’s NON-parser exports are excluded…` (:4494, anchor count 1) -> 225 ran, EXACTLY J1
+   red (`expected [ 'largeBodyParsers', …(6) ] to include 'jsonParser'`). Restore sha-identical after every tamper:
+   ks781 33b5ef8ca5b397ff… (head) / 8a9c4de06b42d825… (parent), admin.ts 17f7603f5edacfa9….
+
+2. DELIVERED vs COMMISSIONED, read-only: the judged delta `git diff 8da20edbd 04807ea0e` is exactly the one file,
+   239/26, blobs ad0afd7cb -> 9bcdb4259, 20 hunks; #975's own is 21/7 in six hunks at +1992..+2035 (no overlap with
+   #981's first hunk at :2187). Against the s206 brief's PR-4 section and Wednesday's ANSWER (Q1 'none' declared AND
+   derived · Q2 J2 only, J3 recorded on KS-900 not built · Q3 W1-W5 load-fail reported as such, KS-828's red-first =
+   T3-at-base GREEN then RED · stacked on #975 if open at the cut): name each delivered item with its line; anything
+   commissioned and absent, or delivered and not commissioned, is a finding — say which. The KS-828 comment must
+   carry T6's facts (parserCallLines [] / guardCallLines [439], the wrapper :439-445, the { routes, guarded,
+   injected } shape); the KS-900 comment must record the :227 object-literal default. PR body 1 at-sign (the
+   `#975 OPEN @ \`8da20edbd\`` idiom), six KS ids, seven PR refs; ticket comments 1 at-sign each (the `PR #981 @
+   \`04807ea0e\`` idiom), 0 userMention nodes. Any real @ is a finding.
+
+3. RED-PROOF WITH THE SUITE RUNNING (231 cells ran; predictions first; your OWN asserting runner scoring by TITLE;
+   a tamper that breaks compilation and "reds" with 0 cells run is INVALID): T3 as in item 1 -> LEG F only; T4
+   :2350 the derivation -> `feeding.size === 0 ? 'none' : true` -> W1 + W4 (229/231); T5 :4498 -> the bare
+   `default` skip restored -> J1 only, the reshaped CONTROL stays green (say so); T6 :2218 proxy.ts declared
+   `guarded: true` -> LEG F only. Then the gate-designed ones: Tg1 THE MENTION — admin.ts:560 -> `void
+   controlByteGuard; next();` -> Wednesday predicts 0 red (LEG F reads { 19, true } with the guard never invoked:
+   the walk at :2318 hits on an identifier mention, while the docblock :2307-2308 and the PR body claim "a guard
+   MENTIONED is not a guard MOUNTED"); the fixture form: W2's `g(req, res, next)` -> `void g; next()` -> W2 stays
+   green. If measured: Minor against #981, MEASURED AT RUNTIME, the builder's disclosure quoted beside it (a
+   disclosed limit is still the limit), fix shape in the brief's item 4. Tg-ORDER — a fixture wrapper that invokes
+   the guard BEFORE the parser (`g(req, res, () => raw(req, res, next))`) -> predicted { 2, true }: the file's own
+   class (ORDER) unseen by the new leg; report the value, rate per the brief. Tg-J2 — (a) the three shapes.push
+   lines (:4688, :4691, :4699) made inert -> predicted J2 stays GREEN (no positive control); (b)
+   requestLimitsSource() in J2 (:4684) + `\nexport { jsonParser as default };\n` -> predicted exactly J2 red —
+   the control the cell lacks; (a) measured 0 red is Polish against #981. Tg-ONCE by read: :4650 "recorded once"
+   cannot fail because `exported` is Map<string, Set<string>> (:4486) — confirm, Polish if you agree.
+
+4. THE §2a LEGITIMATE-SHAPES TABLE, measured base and head: admin.ts as it is ({ 19, true }) · proxy.ts as it is
+   ({ 1, 'none' }) · T3 (green at the parent, LEG F red at head) · inline factory (W3, true) · bound-not-invoked
+   (W4, false) · the MENTION (true — the false green) · guard-before-parser (true — the false green) · a guarded
+   wrapper reached through another wrapper (true, fixed point) · a `function` declaration wrapper (same values) ·
+   an aliased guard import (true, F-10) · two feeding wrappers one unguarded (false) · a declared unfed wrapper
+   ('none') · a 20th route carrying the raw parser (red by COUNT, guarded stays true — say the count is the guard)
+   · a parser call in a __tests__ file (skipped — the two develop squashes add exactly this) · verification.ts's
+   injected wrapper (not in parserFiles — T6, ruled). And for G-05: modifier / `export { x }` / `export { x as
+   alias }` recorded · `export { x as default }` alone: silent at the parent (J1 red), the local name at head ·
+   `export default jsonParser` (an ExportAssignment): STILL silent in the derivation, caught only by J2's pin on
+   the real file — state it as a known limit · the :227 object literal ignored by both (J3, ruled).
+
+5. THE RATIO AND THE MERGED TREE, SOLO: at 04807ea0e the file 231/231; the full packages/shared 41 files 794/794 (the
+   head carries #975, so develop's two LEG D reds are absent); at the parent 787/787. git merge 04807ea0e onto the
+   then-current develop (e91eb5bda or past it) in your own clone is a 3-WAY merge (merge-base 0f69129b3; the one
+   file vs the squashes' 15 files — expect CLEAN even if #975 has landed: identical hunks on both sides; quote the
+   tree sha); run the full package on it SOLO: 794/794 predicted and LEG F reading admin.ts { 19, true } / proxy.ts
+   { 1, 'none' } (admin.ts, proxy.ts, request-limits.ts and api-gateway/src/index.ts are blob-identical at head and
+   develop; the changed auth/verification product files carry no parser call). Read git ls-remote origin
+   refs/heads/develop refs/pull/975/head refs/pull/981/head at start and end; say whether #975 is in develop.
+
+6. CLAIMS TRUE AS WRITTEN (read-only), each with its evidence: "re-measured at the tip: … left ks781 unchanged"
+   (your item 1); "`/api/workflows` is not on proxyPaths" (git grep, quote; LEG C/D's claim not re-proven — say
+   so); the prototyped values ({ 19, true } / { 19, false } / { 1, 'none' } / { 2, false } / { 2, true } / { 2,
+   true }); "the former :4480 CONTROL"; ":227 … all ten exports"; "224 + 7 = 231"; "787 + 7 = 794"; "vitest
+   4.1.10"; the docblock's F-09 sentence (TRUE for the binding, FALSE for a mention inside the body — Tg1's text).
+   Board: KS-828 / KS-900 In Progress (automation), attachment #981 only, one comment each; KS-800 In Review
+   UNARCHIVED (the parent — the KS-754 trap); KS-815 / KS-857 / KS-817 archived; KS-1126 In Progress on #975 (may
+   walk if #975 merges); KS-953 Backlog unassigned; KS-933 Backlog — read at start AND end, report any walk with
+   its timestamp, never touch. Before reporting any finding, search the board by SYMBOL and PATH (routerParserAnalysis,
+   guardSyms, guardedWrappers, ks781-p3-3, LEG F, addExport, request-limits.ts) and name the matches — you never file.
+
+7. DOCS §4 and the quality legs: the two platform-k HTML docs do not name ks781 / KS-828 / KS-900 /
+   ROUTER_MODULE_PARSER_SITES / routerParserSites / packages/shared (Wednesday reads 0 hits at e91eb5bda, positive
+   control orchestrate.sh 1 each) — confirm with /usr/bin/grep -ci -F and the same control; eslint on the file rc 0
+   and `eslint src` rc 1 = the one pre-existing middleware/index.ts:522 no-control-regex; a scratch tsconfig (extends
+   the package's, includes only this file) -> tsc --noEmit 5 errors at head AND 5 at the parent, the same set
+   (TS1343 ×3, TS2345 ×2, KS-933's class — a sixth or one fewer is a finding); tsconfig.json:21 excludes
+   src/__tests__. Then the class hunt (the identifier-mention reach at :984, :2293, :2318, :2339, :2341 — Record).
+   Then the verdict on 04807ea0e.
+
+Your tool shell's grep may be a function: use /usr/bin/grep -F with a same-file control; the CONTROL titles carry a
+curly apostrophe — copy anchors from the file. Never cd; the pre-tool hook refuses `git worktree` in the Secuura
+checkout — clone into your scratch and run write verbs THERE. A REAL checkout of the whole Blockchain/Dev (the
+corpus walk does not descend symlinks). The builder's worktree worktrees/s206-laneD IS at 04807ea0e (porcelain 0) —
+symlink its node_modules INTO your clone, never run vitest inside it, never tamper its admin.ts; worktrees/s207-ks950-r2
+is a live seat's. packages/shared is VITEST 4.1.10 (npx vitest run, never watch; cwd = <clone>/Blockchain/Dev/packages/shared);
+the full package run includes socket legs — minutes, solo. Byte-check every file you write for a NUL with Python,
+never `grep -c $'\x00'`. Quote the Secuura checkout's porcelain count, .git/config sha256, for-each-ref count and the
+three ls-remote SHAs at start and close; they must match (name any ref another seat's push or merge moved).
+Do no memory maintenance of your own project's memory store inside this session.
+
+Report FOUND / TESTED / HOW, with controls, the per-ticket red-first with cells-run, the delivered-vs-commissioned
+list, the §2a table as measured, the tamper table (T3–T6, Tg1 both forms, Tg-ORDER, Tg-J2 a/b, Tg-ONCE by read:
+prediction · cells run · red titles in full · restore sha), and state what you did NOT test.
+Verdict: GO, GO WITH FINDINGS, or NO GO — on 04807ea0e, judged against the stack parent 8da20edbd, run against the
+develop you merged it onto (name it, and whether #975 was in it).
+
+MAIL YOUR VERDICT to wednesday-agent@agentmail.to when the pass is complete, using
+the project's send_brief.sh. Your pane holds ~19 lines of alternate screen with no
+scrollback, so a verdict that stays in the pane is one pane-close from being lost --
+this is not a formality, it is the only durable copy. Subject:
+[QA -> Wednesday] TIER 2 GATE #981 ROUND 1 (KS-828 KS-900) 04807ea0e -- <GO|GO WITH FINDINGS|NO GO>
