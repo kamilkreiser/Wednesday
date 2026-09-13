@@ -66,6 +66,19 @@ supersede: replace WHOLESALE at the next pickup; never append.
 - Questions s12 answered: 18:13:30 (live site link for the harness), 18:49:22 (where HPSM is at), 18:52:15 (harness updated for the live site?).
 - Times come from the transcripts. Where s12's pickup or the prompt log differ (18:5x, 18:38, 18:52, 19:14), the transcript time is used.
 
+## 🔴 22:24 — S44 AT 82% (band 80-90): CHECKPOINT SENT; S45 SUCCESSOR OWED after S44's wrap
+- **S44 statusline ctx:82% at 22:22**, mid step-8 live upgrade (3 shells running). **CHECKPOINT mail sent 12:23:36Z, verified at the sent copy** (`briefs_staged/2026-09-13_hpsm-s44-checkpoint-82.md`): safe boundary = AFTER the step-8 REPORT (never mid-deploy) → `5_Project_History/HANDOVER-S44_seat-hpsm-375c.md` + wrap to tuesday-agent@ → stay at prompt; no step 9-10 merge, no new lane; successor section lists live heads, lanes (C11 HOLD, C11-PINS), shells/subagents, queue, toolkit base arg (D-S44-30), and every Tuesday ANSWER timestamp (09:56:56Z … 12:20:03Z).
+- **Routing row `Datasec/HPSM-S45|datasec-hpsm@agentmail.to|yes` ADDED** (trap 38).
+- **ON S44's WRAP MAIL (the sequence, never `cockpit.sh rotate`, trap 37):**
+  1. read HANDOVER-S44 whole;
+  2. `ps` census for `claude .*project 'HPSM'` across all terminals (trap 32);
+  3. draft the S45 brief by a subagent from `briefs_staged/2026-09-13_hpsm-s44-successor-merge-seat.md` + HANDOVER-S44; review it, then `send_brief.sh --kind brief`; verify at the destination;
+  4. `cockpit.sh add 'Datasec/HPSM-S45' "bash '/Volumes/KK_T9_External_HDD/!CODING/Datasec/HPSM/Launch_Claude.command'"` (confirm the launch form S44 used first);
+  5. rung 5, excluding every pre-existing HPSM session id; its first user record must come after launch; match "session 45";
+  6. answer S45's plan confirmation;
+  7. `pane_close.sh %7` only after S45 CONFIRMS.
+- Tuesday ctx 58% at 22:23 (checkpoint band for this seat is 70; rotation 80-90 — **do not rotate while S44→S45 is in flight or a live upgrade is running**).
+
 ## 🟠 22:21 — LIVE-DELTA QA VERDICT SCORED 1.00; STEP-8 LIVE UPGRADE to `9b8ea76` from ~12:24:22Z
 - **QA VERDICT 12:17:51Z (DKIM pass; report 230 lines read whole): DELIVERABLES (LIVE) GO WITH FINDINGS · SECURITY (LIVE) GO WITH FINDINGS.** D-B1 RESOLVED (measured live, disclosure controls); full walk-through to release 1.0.0 in `QA Harness (synthetic) 2026-09-13 11:40` = `9cffd104…` (B = `59878bd4…`), left in place; W5-M1 CLOSED, W5-M2 + W6-M1 resolved; D-M1/D-M2 still present; W4B-m3, W4B-m1 (urn 500, FX-ID closes at step 8), S-m1, S-m2, S-p1 unchanged; **NEW S-p2 Polish** (trailing `/api/…%5c` reaches the API 404, not Basic; no disclosure). NOT TESTED: no browser (FX-SI/FX-REL/W5-M3 not rendered), probe-12 negative half, W4B-m2, the local half at the newer head. **Scored 1.00 on the scoreboard** (committed). Pane `%8` CLOSED (listeners 14 → 14).
 - **Kam told 22:19:39** (result, the two Majors queued, no browser so he checks the visuals himself, QA Harness tenants on live, report folder named). Origin verify running. **Kam's 17:48 ask ("where the testing briefs are located") answered for this gate.**
