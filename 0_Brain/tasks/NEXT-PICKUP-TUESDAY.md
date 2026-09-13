@@ -66,6 +66,15 @@ supersede: replace WHOLESALE at the next pickup; never append.
 - Questions s12 answered: 18:13:30 (live site link for the harness), 18:49:22 (where HPSM is at), 18:52:15 (harness updated for the live site?).
 - Times come from the transcripts. Where s12's pickup or the prompt log differ (18:5x, 18:38, 18:52, 19:14), the transcript time is used.
 
+## 🟡 22:00 — CHECKPOINT (Tuesday ctx 51%; band 80-90) · C11 FINISHED GREEN and HELD off main
+- **S44 QUESTION 11:57:37Z (DKIM pass, read whole):** C11 GREEN at `s44/lane-c11 bfce726` (one-group synthetic release reachable; SUPPORT_UNKNOWN_ON_DEVICES critical; demo CONTENT_HASH fd7db6b8… → **2971ffc4…**; release-draft unchanged). Merging now would make every later upgrade a content-hash STOP and stale-pin A/B.
+- **Tuesday ANSWER sent 11:59:52Z, VERIFIED at the sent copy** (`briefs_staged/2026-09-13_hpsm-s44-answer-c11-hold.md`): **HOLD** (S44's default) until steps 7-10 are merged AND upgraded live; then C11 as its own batch + head mail + **STOP for Kam** (fresh engagements only on his word). At that merge: re-run merge-tree onto main as it stands then, C11/FX-PIN-Q1 overlap result in the head mail. Seat pins at merge accepted.
+- **Card `hpsm-composer-demo-release-with-device-groups` marked DELIVERED 22:00** against `s44/lane-c11 bfce726` (store write gated on origin-ancestor rc 0; `decisions.json` parses locally; origin verify running).
+- **Kam told on the panel ~22:01** (C11 built, held, stops for his word). Origin verify running.
+- **Carry for Kam (only if C11 goes live before his review):** on REAL content every device-group engagement shows 55 extra critical SUPPORT_UNKNOWN_ON_DEVICES and its manifest hash changes on next Generate (by design). With HOLD it is not a Monday item.
+- **Checkpoint rules:** start nothing heavy; the handover is this block. Waiting on: the live-delta QA verdict (`%8`, transcript b1a0f847); FX-PIN-Q1's web 409 check; S44's next head mail.
+- **Watcher MARK now `2026-09-13T11:57:38`.** Ledger row filed 21:5x: ad-hoc freshness reader printed the other tab (w=2).
+
 ## ✅ 21:27 — LIVE UPGRADE DONE: both stacks on `87c0026` (S44 REPORT 11:25:29Z, DKIM pass, read whole); live-delta QA LAUNCHED
 - **pc-lane-a** 11:22:33-48Z, **Azure** 11:23:13Z-11:24:05Z; rollback not needed. postcheck-ab FULL PASS 20/0/1 on both (Azure's **through the tunnel**). **`browser-gate-public.sh` PUBLIC PASS** (sign-in, /api/dashboard 200, stayed signed in, engagement 200); `public-gate-probes.sh` PUBLIC 26/26. Caddy fingerprint 61f519cd + start time UNCHANGED.
 - **Use (unchanged):** Azure A `3bb6fcb2` / B `a9101d3f` (version b03aae4b); pc-lane-a A `e920ac1d` / B `8ce21d2a`. **Avoid:** Azure `c9bce98b`, `1ec31037`; pc-lane-a the 9 in S43's record. **New on A:** LOCAL_VALUE_NOT_DEFINED critical x7 (FX-LV naming what A never had; expected). A's preview no longer says "No local values are required" (FX-R live).
