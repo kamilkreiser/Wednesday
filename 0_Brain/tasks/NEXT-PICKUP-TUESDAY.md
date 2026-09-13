@@ -12,6 +12,26 @@ supersede: replace WHOLESALE at the next pickup; never append.
 **On EVERY wake:** `2_Project_Files/tools/kam_rulings_today.sh` (never `kam_msgs.sh` unfiltered) AND `[Kam -> Tuesday]` mails; list `tuesday-agent@` UNFILTERED and route on SUBJECT; `git status --porcelain | grep -v 0_Brain/dashboard/data/`. Rotation band 80–90. **Verify panel messages AT ORIGIN** (`git show origin/main:0_Brain/dashboard/data/chat_tuesday.json` on the ref `panel_sync` fetches; `git ls-remote` HUNG 9 min in this tree at 14:28 — bound any network read with a timeout). **Do NOT read `0_Brain/daily/`** (Wednesday's).
 
 ## 🔴 LIVE — with the next action for each
+0024. **S42 STATUS 04:02:55Z (read whole): steps 3 + 4 DONE.**
+    - **Seat ON proof PASS** on `pc-s42-on` at `7135dec`:
+      - synthetic tenant 201; generate and validate 200;
+      - Preview PDF + policy document PDF opened with DRAFT + SYNTHETIC marks;
+      - release blocked by C12 (UNSUPPORTED_HPSM_VERSION) as expected, plus EXCEPTION_REQUIRED ×24.
+    - **SHA + env to S40** by cross-session message, read back. S40's read-only pre-upgrade checks on BOTH stacks:
+      - `PC_PLATFORM_TENANT_ID` = default;
+      - `…da7a` rows 0/0;
+      - switch vars unset;
+      - Azure publishes only edge on 127.0.0.1:18080; NSG 22 (seat IP), 80/443.
+    - **S40 is flipping pc-lane-a (was 1a6b68d) then Azure (was 155764a).**
+    - **Verified by s11 14:0x:**
+      - Azure still 401 + `WWW-Authenticate: Basic`, `/api/health` 401, TLS verify 0;
+      - on-proof evidence present (`!CODING/Datasec/HPSM/1_Project_Definition/Architecture/2026-09-10_policy-composer/qa-s42/on-proof/`: both `%PDF-`, 42,399 and 70,140 B);
+      - **s11 PROOFREAD both PDFs:** the Preview footer "generated from an approved policy manifest" appears on a DRAFT (confirmed). Also:
+        - (a) Preview "Last Modified … 04:00:06 AM" is UTC with no zone shown;
+        - (b) policy document Scope says "No frameworks are selected" while items show "Essential Eight";
+        - (c) the "Unsupported" header wraps mid-word.
+    - **s11 PROMOTED all four to fix before Monday** in a new lane R (`packages/renderers`): released footer wording unchanged from source; truthful draft wording named in the READY; sweep all renderers; do not interrupt S40's flip; the fix reaches the live stacks at the next upgrade (body `2_Project_Files/fleet/briefs_staged/2026-09-13_hpsm-s42-footer-promoted.md`).
+    - **NEXT:** S40's switch-on report (head, stack, one output opened), then re-check Azure 401. Watch for lane R, Q and W READYs, then the combined gate.
 0023. **S42 STATUS 04:00:55Z (read whole): step 2 DONE.** Lane G 0015 merged, so LOCAL main is `7135dec3a953284eef1031957b5f78e8446471d5` (201 ahead of `afc10e9`, NOT pushed).
     - **Verified at source by s11 14:01:** main `7135dec`; `s42/lane-g-0015` `fd7db21` on main; `0015_generation_derived_platform_tenant_and_directory.sql` on main.
     - **Checks:** lane G DB 205/205, API-DB 367/367, 24/24 mutants; merge seat upgrade proof from `b01c5a5` with no new env (migrate applied 0015, PREFLIGHT GREEN, switch-off PASS, e2e 34/34); clean-clone ci.sh GREEN.
