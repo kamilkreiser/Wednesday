@@ -20,9 +20,9 @@ set -u
 
 # ==== HEAD PIN ====================================================================================================================
 # RE-POINT to the upgraded head from the S44 upgrade REPORT before launch
-LIVE_HEAD='caf63fd54c3ad95384bcb7bc32d4e7b9e4a6f5c4'
+LIVE_HEAD='87c0026d94e8e13c14329852239d35a463168503'  # re-pointed by Tuesday s14 from S44 upgrade REPORT 2026-09-13T11:25:29Z
 # ...and re-count for that head: git -C "$REPO" rev-list --count afc10e98c51505be1f1943335370cf2de3b47d44..<LIVE_HEAD>  (267 at caf63fd)
-EXPECTED_COMMITS=267
+EXPECTED_COMMITS=308  # rev-list --count afc10e98..87c0026, measured by Tuesday s14 21:2x
 # ==================================================================================================================================
 
 MODE="${1:-}"
