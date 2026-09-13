@@ -11,6 +11,21 @@ supersede: replace WHOLESALE at the next pickup; never append.
 
 **On EVERY wake:** run `2_Project_Files/tools/kam_rulings_today.sh` (never `kam_msgs.sh` unfiltered) and check `[Kam -> Tuesday]` mails. List `tuesday-agent@` UNFILTERED and route on SUBJECT. Run `git status --porcelain | grep -v 0_Brain/dashboard/data/`. Rotation band is 80–90. **Verify panel messages AT ORIGIN** (`git show origin/main:0_Brain/dashboard/data/chat_tuesday.json`). **Do NOT read `0_Brain/daily/`** (Wednesday's). Kam also types straight into this terminal session: those lines are first-party.
 
+## 🟢 KAM, 18:5x AEST, terminal, verbatim: *"Keep going and finish what you can.  no matter the time.  keep going until completion"* — the successor's first jobs, in order
+1. **Every wake:** the unfiltered inbox. S43's fix-round PLAN, its pre-upgrade head mail, the upgrade REPORT and READYs are answered as they land (rules in LIVE items 1–2).
+2. **When S43 wraps (80–90% ctx):**
+   - census `ps` for HPSM claudes;
+   - brief **S44** from `HANDOVER-S43_*.md`: the fix round, the upgrade rule (by 07:00 Monday at the latest), the F-API/F-WEB feedback lanes, C11, and the credential rebuild after C11;
+   - add a routing row `Datasec/HPSM-S44`, then `cockpit.sh add` a NEW pane and verify rung 5;
+   - close `%5` with `pane_close.sh` only after S44 CONFIRMS its plan;
+   - **never `cockpit.sh rotate` (trap 37).**
+3. **After the fix round merges:** commission ONE delta tier-1 gate on `09c1591..<fix head>` (Q + W + fixes; use the combined launcher as the model). **Push to HPSM-light only on GO + Tuesday's word.**
+4. **After the live-upgrade REPORT:**
+   - launch the acceptance+security harness (LIVE item 3), naming the live head in the launch prompt;
+   - give Kam one short panel note: upgraded, which engagements to use, and the old ones DO NOT USE.
+5. **Tuesday's own rotation:** at the first safe boundary inside 80–90, with the pickup current and HEAD == origin, run `WED_AGENT=tuesday nohup bash 2_Project_Files/fleet/cockpit/wednesday_rotate.sh --self &`. Kam's words above are the authority not to wait for a hand restart; card `tuesday-seat-self-rotate-with-liveness-check` is left for him. **The new seat checks `2_Project_Files/fleet/cockpit/logs/rotate_*.log` for LIVENESS OK and that `%5` (plus any agent panes) survived.**
+6. **Next Datasec lane once HPSM is stable:** NexusAI **RD-391 (High, `.dockerignore` any-depth)**. Brief it only after a fresh read-only Jira read (board_count.sh; NexusAI's own `JIRA_*`; trap 31 in `.pre-1740`). Its residue RD-392/393/394/396/397/398 partitions by file; RD-395 is Kam's product call. **The load on this Mac mini is the constraint** (gate C saw ~115–347): keep NexusAI's docker steps under the shared lock.
+
 ## 🔴 LIVE — with the next action for each
 
 1. **HPSM S43 — pane `%5` `Datasec/HPSM-S43`, launched 17:07:52 by s12 with HPSM's own `Launch_Claude.command`.**
