@@ -44,6 +44,14 @@ supersede: replace WHOLESALE at the next pickup; never append.
   - **Kam ASKED on the panel at 19:24:59 (VERIFIED AT ORIGIN at 19:26) and in the terminal: "go" or "hold" on fix (b)** (Basic stays on everything except `/api/*`; the API keeps its bearer check; `/idp/*` stays gated). **Default until he answers:** S43 prepares and measures only, nothing applied on Azure.
   - **S43 briefed 09:25:25Z** (`briefs_staged/2026-09-13_hpsm-s43-urgent-live-gate-blocker.md`; tap `--mail` verified, prompt clear). The ask: reproduce through the public URL; stage (b) on pc-lane-a with a rollback; measure `/api/*` unauthenticated answers (**a 200 with data and no bearer = STOP**); `/idp/token` still challenges; send a READY-TO-APPLY; add a public-gate browser sign-in + S1 check to every upgrade post-check.
   - **NEXT:** (1) on Kam's go, relay it verbatim (a KAM mail) and S43 applies with a head mail first; warn Kam about the restart. (2) On READY-TO-APPLY, read the `/api` exposure list before relaying anything. (3) After the fix, commission a re-run of the live half of the acceptance gate (the NOT TESTED probes).
+- **20:03 — S44 STATUS 10:03:37Z (DKIM pass, read whole; no reply needed):**
+  - It acknowledged both the CONFIRMED and the verdict routing.
+  - **Merge 1 FX-M1 `f80ebc4`:** checks and upgrade proof GREEN (vitest 1058, e2e OFF 63); clean-clone CI and switch-ON e2e still running; main NOT moved yet.
+  - **Lanes running:** FX-PIN `s44/fx-pin` (24080) and F-WEB-B `s44/f-web-b` 47eabc8 (24280). S43's FX-S7 is still running, untouched.
+  - **Corrections S44 caught:**
+    - (1) `resolution.ts` is `apps/api/src/resolution.ts`, not `routes/`;
+    - (2) **the handover's nginx one-liner (`location = /api/feedback { client_max_body_size 52m; }`) had no proxy_pass**. As an exact match it would have answered `/api/feedback` itself and never proxied it. The seat commit `s44/feedback-root` 15f2542 repeats the `/api/` proxy lines.
+  - D-M1/D-M2 lanes come in a STATUS before step 6 ends; D-M2 after the feedback merge.
 - ✅ **19:58 — ACCEPTANCE+SECURITY GATE VERDICT (09:58:13Z, DKIM pass; report read WHOLE, 538 lines): DELIVERABLES NO GO 1/2/10/4 · SECURITY GO WITH FINDINGS 0/0/3/1.** Scored 1.00 (scoreboard top). Pane `%6` closed with `pane_close.sh`.
   - **Routed to S44 ~10:0xZ** (`briefs_staged/2026-09-13_hpsm-s44-answer-acceptance-verdict-routing.md`), fix round 1 of 2 for this NEW class:
     - D-B1 = the gate fix, waiting on Kam.
