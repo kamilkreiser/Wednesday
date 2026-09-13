@@ -2317,3 +2317,13 @@ Done with it: Dynamics → Kam's team decision (no action); QuickQuote masthead/
 > If you don't need to wait until 2100, don't wait. Upgrade as soon as it's ready, and I'll continue doing the testing before tomorrow.
 
 *Note:* Tuesday s12: receipt on the panel; S43 told to upgrade the live demo NOW on caf63fd (dry-run kept, upgrade gets the docker lock first) and then roll each GREEN fix merge out as soon as ready, batched within ~30 min, head mail + ~5 min panel warning before each later upgrade; Kam testing live tonight.
+
+## 2026-09-13 19:14 — Kam (terminal (typed into Tuesday s12), verbatim)
+> In the HPSM sign-in page, each of the sign-in options needs a much better description of what the options mean. Make this description in gray with a much smaller text at the bottom. Of each tile.
+
+*Note:* Typed 19:01:39 AEST per s12 transcript; dropped across s12's 19:04 self-rotation; found by s13 at 19:1x after Kam asked; relayed to HPSM S43 late, lateness named.
+
+## 2026-09-13 19:14 — Kam (terminal (Tuesday s13), verbatim)
+> Did you get my instructions from the last boot?
+
+*Note:* s13 extracted s12's ten human lines from its transcript; nine carried, the 19:01 sign-in instruction dropped; answered on panel and terminal; ledger row w=4.
