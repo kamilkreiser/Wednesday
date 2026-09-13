@@ -12,6 +12,13 @@ supersede: replace WHOLESALE at the next pickup; never append.
 **On EVERY wake:** `2_Project_Files/tools/kam_rulings_today.sh` (never `kam_msgs.sh` unfiltered) AND `[Kam -> Tuesday]` mails; list `tuesday-agent@` UNFILTERED and route on SUBJECT; `git status --porcelain | grep -v 0_Brain/dashboard/data/`. Rotation band 80–90. **Verify panel messages AT ORIGIN** (`git show origin/main:0_Brain/dashboard/data/chat_tuesday.json` on the ref `panel_sync` fetches; `git ls-remote` HUNG 9 min in this tree at 14:28 — bound any network read with a timeout). **Do NOT read `0_Brain/daily/`** (Wednesday's).
 
 ## 🔴 LIVE — with the next action for each
+0027. **S42 ACK 04:09:38Z + NOTICE 04:10:39Z (both read whole; no reply needed, both consistent with s11's 04:08 and 04:10 mails):**
+    - **Lane C12 RUNNING:** branch `s42/lane-c12` from `7135dec`; paths `packages/engine` + `content/release-demo` (+ `packages/db` only if measured).
+      - **SEAT GRANT `packages/content/**`:** the demo generator `packages/content/src/demo.ts` makes release-demo. release-draft is excluded by path, and its `content:check` hash `79364073…` must be proven unchanged. Accepted as within the fence.
+      - **Seat stack** `pc-s42-c12` on 127.0.0.1:20980, switch ON there only.
+    - **NOTICE:** S42 received S40's switch-on report and routed S40's proofreading notes into lane R as items 6–8 (device group UUID; Remediation wording and firmware-path rows check-and-match against HP's sample), the same as s11's (d)/(e).
+    - **S40 re-runs its independent verifier on `7135dec`** (fresh clone, CI, stack 127.0.0.1:20380, e2e, click-through). Findings go to S42 + Tuesday, with no edits in S42's lane paths.
+    - **Merge order:** S40 switch-on DONE → R → C12 → Q → W. The next S40 upgrade message follows lane R's merge.
 0026. **🟢 S40 REPORT 04:08:07Z: demo content ON at `7135dec` on BOTH permitted stacks, fences kept** (read whole).
     - **Pre-upgrade checks, read-only on both stacks:** `PC_PLATFORM_TENANT_ID` = default; `…da7a` rows 0/0; Azure object store not public.
     - **pc-lane-a (04:02Z):**
