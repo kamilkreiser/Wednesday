@@ -1,0 +1,135 @@
+ultrathink
+
+You are the fleet QA agent running a TIER 2 (through code) gate, ROUND 1, on Secuura/Blockchain PR #977 (KS-877 + KS-922's
+two comment items).
+
+Read your brief FIRST and in full, then plan:
+/Volumes/DevMASTER/WEDNESDAY/2_Project_Files/fleet/qa-agent/briefs/2026-09-13_secuura-977-ks877-tier2.md
+
+Subject: a70585823221d30b0b86684dbc0fb78b0efee784 = PR #977 (KS-877 + KS-922's comment items), open against develop, ONE
+  commit whose ONE parent IS develop M3 0f69129b3 (not amended). ONE build script + ONE NEW shell suite, +164 -5, no
+  product code — THIS PR CHANGES A JOB SCRIPT THAT REFUSES ITS INPUTS:
+  KS-877 docker-build.sh — with an EMPTY SERVICES_TABLE the `[ -n ]` guard left BUILD_LIST genuinely empty and the banner's
+    `${BUILD_LIST[*]}` (:162 at base) died `BUILD_LIST[*]: unbound variable` under bash 3.2 + set -u. The ticket's FIRST
+    option (`${BUILD_LIST[*]:-}`) was TRIED by the builder and only moves the death 55 lines down to the parallel loop's
+    `"${BUILD_LIST[@]}"` (:217 at base) — the SECOND option shipped: `if [ "${#BUILD_LIST[@]}" -eq 0 ]` at :159-162 (head),
+    `ERROR: no services matched — SERVICES_TABLE is empty or unparseable (0 rows); nothing to build` to stderr, exit 1,
+    BEFORE the banner (:176). You re-derive BOTH shapes — the dead option AND the shipped guard — under bash 3.2 with the
+    cells-RAN count quoted.
+  KS-922's two COMMENT items on the same file's re-index note (:238-239 base -> :252-261 head): "correct for a `for` loop"
+    (wrong) and the stale `orchestrate.sh:47` pointer (a blank line) — now cites the symbols stage1_pids / stage2_pids and
+    names the idiom wrong in both shapes. Comment-only. KS-922's OWN fix is PR #971 (a sibling gate); KS-922 carries BOTH
+    PRs on purpose — NOT a finding.
+  NEW Blockchain/Dev/scripts/__tests__/docker_build_empty_table.test.sh: 3 cells; docker a recording stub on a private
+    PATH ($root/bin:/usr/bin:/bin, so the subject runs under /bin/bash 3.2 whatever shell you use); the emptied fixture
+    copy's row count asserted 29 -> 0 before scoring; subject guards set-but-empty / -f / -r BEFORE the SUBJECT printf.
+    The brief's section 2a LEGITIMATE-SHAPES tables (A the script's resolved target list, B the suite's subject guard,
+    C the suite's fixture and oracle) are the input set; you drive every row, cell by cell.
+develop: 0f69129b3156d3adaf0af534a6527b9c3a8d3519 = M3 = the parent = the compare merge-base (ahead 1 / behind 0) — a
+  merge today is a fast-forward. The merge seat may squash #969 onto develop during your pass (service files, disjoint
+  from Blockchain/Dev/scripts by name): then merge the then-current develop 3-way and prove the extra delta disjoint.
+Repo:    /Volumes/DevMASTER/!CODING/Secuura/Blockchain/2_Project_Files  (READ-ONLY — clone --shared by SHA into your own
+  scratch and use detached WORKTREES; run-shell-suites.sh --check-unreached reads `git ls-files`, so it needs a real
+  checkout)
+
+You are FINDINGS-ONLY. You never fix, never merge (outside your own clone), never push, never deploy.
+
+NEVER run a push, the real pre-push hook, or preflight.sh inside the Secuura checkout or any of its worktrees.
+NEVER run docker-build.sh against a real docker, and never from a checkout: every by-hand drive is a COPY at
+<fixture root>/scripts/docker-build.sh (the script cd's to its own PROJECT_ROOT = ../ and passes `.` as the build
+context) with the suite's stub docker on a private PATH, exactly as build_fixture/run_build (:57-77) do. Set TMPDIR
+inside your scratch for EVERY run: the suite (:40 trap, :59) rm -rf's its own fixture dirs; that is the subject's,
+inside your TMPDIR.
+
+NEVER print a credential value, and never open, read or copy a secrets file (any .env, config/secrets.yml). Count, never echo.
+Nothing in this gate needs a credential.
+
+Nine things you must not miss:
+
+1. BASELINE in YOUR head worktree, under /bin/bash 3.2 (quote `bash --version`), SOLO: `3 passed, 0 failed` rc 0; the
+   SUBJECT line's sha256 must read a995da31ab3c2113…; count ok+FAIL lines == 3 before believing the totals line. bash -n on
+   both files at head and on docker-build.sh at base. The suite deletes $WORK on exit — capture out.txt / docker_calls.txt
+   by running the fixture recipe BY HAND into your own directory for every quote you need.
+
+2. RED-FIRST RE-DERIVED, BOTH SHAPES: (i) DOCKER_BUILD_SH=<your copy of the BASE script, sha256 97eb3efc79d79f7a…> bash
+   <head suite> -> predicted EXACTLY `2 passed, 1 failed` rc 1 — CELL 1 red (`unbound variable present=YES, message
+   present=NO, builds=0`, detail `line 131: BUILD_LIST[*]: unbound variable`), CELLS 2-3 green. (ii) THE DEAD OPTION — the
+   base script with `${BUILD_LIST[*]}` -> `${BUILD_LIST[*]:-}` at :162 by an asserting edit -> predicted `2 passed,
+   1 failed` rc 1 with the detail naming `BUILD_LIST[@]` (the LOOP, :217, reported at the enclosing fi) and by hand the
+   banner PRESENT with `Services:  ` then the death. That is the measured refutation of the ticket's first option: say so.
+   (iii) the shipped head script on the emptied copy by hand: the message on stderr, no banner, rc 1, no docker call.
+
+3. THE SUBJECT-GUARD SHAPES BY HAND (table B): DOCKER_BUILD_SH="" -> rc 2, stderr `set but EMPTY`, stdout EMPTY; absent
+   path -> rc 2 `not found`; a directory -> rc 2; a mode-000 copy -> rc 2, stderr `FATAL: DOCKER_BUILD_SH is not readable`,
+   stdout EMPTY (no SUBJECT line); a symlink to a readable copy -> runs 3/3, SUBJECT names the link. Measure, do not infer.
+
+4. THE TWO BUILDER TAMPERS re-run with an ASSERTING runner (anchor count 1, marker grep + sha256 before colour, score only
+   when 3 cells RAN, restore sha-identical a995da31ab3c2113…): T1 the guard block deleted -> CELL 1 only (`line 141:
+   BUILD_LIST[*]: unbound variable`); T2 `-eq 0` -> `-ne 0` -> CELLS 1, 2, 3 (`0 passed, 3 failed`).
+
+5. SIX GATE-DESIGNED TAMPERS, predictions written before they run:
+   Tg — the DEAD OPTION at head's bytes (guard block deleted AND :176 -> `${BUILD_LIST[*]:-}`) -> exactly 1 red, CELL 1,
+     with the detail naming `BUILD_LIST[@]` (the loop) — that difference IS the "55 lines down".
+   Th — the guard moved AFTER the banner -> exactly 1 red, CELL 1 (the banner dies first; ORDER is load-bearing).
+   Ti — the message loses the word SERVICES_TABLE -> exactly 1 red, CELL 1 (the NAMING clause :96; note the bad-detail
+     line greps only `no services matched` and would say `message present=yes` — a Polish observation on diagnostics).
+   Tj — the guard widened `-eq 0` -> `-le 1` -> exactly 1 red, CELL 2 (the one-service control is load-bearing on its
+     own; the builder's T2 reds all three and cannot show that).
+   Tk — the guard's `exit 1` -> `exit 0` -> exactly 1 red, CELL 1 (rc=0; the rc clause :95 IS asserted even though the
+     CELL 1 comment says "not on the exit code" — judge the wording).
+   Tm — in the SUITE swap :36 and :37, run with a mode-000 subject -> rc 2 and the FATAL still present but a `SUBJECT`
+     line with an EMPTY sha prints FIRST (KS-941's defect shape reproduced by one swap; observed by hand, not
+     cell-scored). Restore 8a666b3e44c40734….
+   Each: LANDED asserted, 3 cells RAN (Tg-Tk), restore sha-identical, green again 3/0.
+
+6. SECTION 2a DRIVEN CELL BY CELL: every row of tables A, B, C — the cell that pins it (its ok line quoted) or your by-hand
+   drive through the stub: two names (`auth originate`, 2 builds); the commented-out table and the tab-less table (both
+   -> the message at head, the death at base); an unknown name and `""` and no arguments (rc 1 BEFORE the guard; the new
+   message ABSENT, with the empty-table drive as the positive control); `all extra` (curio); `auth --no-cache` (the flag
+   reaches the stub); `auth --push` THROUGH THE STUB ONLY (one recorded `docker push`; the real ACR path is NOT
+   COMMISSIONED); the bash >= 4.4 row measured or UNMEASURED with the instrument (on such a bash the BASE script's empty
+   table is a SILENT SUCCESS — banner `Services:  `, zero loop iterations, `All builds succeeded!`, rc 0 — and CELL 1 still
+   reds it at base by the message clause). State the direction of every move: a legitimate shape REFUSED at head that
+   built at base is Blocker-class; a defect shape PASSED at head is Major. The guard is reachable ONLY via `all` with a
+   row-less table — every explicit name appends or exits at :144 first.
+
+7. THE CONSUMER, SOLO, in your head worktree: `bash Blockchain/Dev/scripts/run-shell-suites.sh` -> `shell suites: 26
+   passed, 0 failed (of 26)` rc 0 (builder 187 s); `--check-unreached` -> OK all 26; `--list` names the new suite. Another
+   suite failing for a fixture reason is NOT RUN with the blocker named, not a finding; still quote the subject suite's
+   own block and totals. KS-1127 (the runner-level class) is NOT COMMISSIONED; this suite has no skip path.
+
+8. THE MERGED TREE: in your own clone, merge develop into a70585823. If develop is still M3 it is a FAST-FORWARD (say so;
+   the merged tree is a575067748c…). If develop moved: 3-way on M3, clean, the 2 files == head's, everything else ==
+   develop's, the suite 3/0 on the merged tree, and `git diff --name-only 0f69129b3 <develop> -- Blockchain/Dev/scripts`
+   empty. Read `git ls-remote origin refs/heads/develop` yourself at start and end.
+
+9. CLAIMS true as written: "+24/-5, of which 4 lines are code"; ":162", ":217", "fi :269" at base; "55 lines"; "31 lines
+   shorter, :131"; ":252-260" (measured :252-261 — off by one; Polish at most); "29 rows"; the `docker-build.sh:132 ->
+   04-container-trivy.sh:61` pointer (still :61 at develop AND at #974's head 8da602309 — record); the CELL 1 comment's
+   "not on the exit code" vs the oracle's rc == 1 (Tk); the KS-922 comment's "true whichever PR merges first" (read
+   :252-261 against develop's orchestrate.sh :111 and against #971's fix); the docs section-4 statement ("neither
+   Projects Documents/*.html names docker-build.sh or the shell suites" — TRUE for the two section-4 docs, positive
+   control orchestrate.sh 1 hit each; a third html KS-666-Shared-Stack-Safety-Evidence.html:296 names
+   `docker-build.sh:28`, pre-existing, a curio; six prior docker-build.sh commits touched no section-4 doc); the
+   suite's mode 100644 (four sibling suites share it; the runner invokes `bash <path>` — not a finding); the message's
+   literal "(0 rows)" (a fixed string — wording, not a finding). Then the verdict on a70585823.
+
+Your tool shell's grep may be a function: use /usr/bin/grep, case-insensitive, with a same-file control. Never cd (the
+pre-tool hook refuses it; the SUITE's own cd inside its subshell is the subject's). zsh: write "${H}:path" not "$H:path";
+a word starting with = aborts; no PIPESTATUS. git rev-parse --verify takes ONE revision per call; symbolic-ref and
+worktree list are refused against the Secuura checkout (use rev-parse --abbrev-ref). Quote the Secuura checkout's
+porcelain count, .git/config sha256, for-each-ref count and origin develop SHA at start and close; they must match
+(name any ref another seat's push or squash moved — five seats are live on it).
+Do no memory maintenance of your own project's memory store inside this session.
+
+Report FOUND / TESTED / HOW, with controls, the three section-2a tables with measured base/head columns and a direction
+column, the tamper table (T1, T2, Tg, Th, Ti, Tj, Tk, Tm: prediction / cells RAN / passed / failed / red titles / restore
+sha), and state what you did NOT test — preflight, the hook, a real docker or ACR, any stack, CI's ubuntu run (check-runs
+unreadable to the read token), bash >= 4, root, KS-1127, KS-922's own fix (#971's gate).
+Verdict: GO, GO WITH FINDINGS, or NO GO — on a70585823.
+
+MAIL YOUR VERDICT to wednesday-agent@agentmail.to when the pass is complete, using
+the project's send_brief.sh. Your pane holds ~19 lines of alternate screen with no
+scrollback, so a verdict that stays in the pane is one pane-close from being lost --
+this is not a formality, it is the only durable copy. Subject:
+[QA -> Wednesday] TIER 2 GATE #977 ROUND 1 (KS-877 KS-922) a70585823 -- <GO|GO WITH FINDINGS|NO GO>
