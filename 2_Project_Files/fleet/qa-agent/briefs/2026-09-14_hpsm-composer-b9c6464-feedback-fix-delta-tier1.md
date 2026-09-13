@@ -58,10 +58,10 @@
   - L21-31: its results table. It is a CLAIM, not evidence.
   - L33-41: what the seat did NOT settle. L43-44: not claimed.
 - **The feature this delta patches** is described in `/Volumes/KK_T9_External_HDD/!CODING/Datasec/HPSM/1_Project_Definition/Architecture/2026-09-10_policy-composer/qa-s45/feedback-ready/README.md`. Use it as context for the surface only.
-- **Independence.** A separate feature-scoped gate on the delta base is running at the same time, in another pane, on other ports and other compose projects.
+- **Independence.** A separate feature-scoped gate on the delta base ran earlier in another pane, on other ports and other compose projects. It has FINISHED and its stacks are down with volumes kept (Tuesday, 01:09 AEST).
   - This gate is independent of it. There are no results from it to relay, and this brief carries none.
-  - Do not read its report directory, do not wait for it, and do not contact it. §1's leave-alone list covers its stacks.
-  - It shares the docker lock, so concurrent docker steps queue on the lock.
+  - Do not read its report directory and do not touch its kept volumes. §1's leave-alone list covers them.
+  - The docker lock is still shared with other seats' lanes, so a docker step may queue on it.
 - **This codebase has repeatedly shipped tests that could not fail.** The delta's own guard resolves route registrations with a regex over source (test L579-620). Treat it as an instrument that must be proved.
 
 ## Charter (read first, in full)
@@ -103,16 +103,16 @@
   - lane A's stack `pc-lane-a`;
   - S45's seat and lane stacks `pc-s45-*` (among them 24080-24780 and 25080-25699), and `integ-s44`;
   - any `pc-ci-*` you did not start;
-  - **any `policy-composer-qa-*` project other than your two. Another gate is running now;**
+  - **any `policy-composer-qa-*` project or volume other than your two (an earlier gate's volumes are kept on purpose);**
   - any SSH tunnel or local port the S45 seat opens for its live run.
   - **Any port outside 21610-21729 belongs to someone else.**
 - **Shared daemon, THE DOCKER LOCK.**
   - Run EVERY docker step as `lockf -k /private/tmp/claude-501/-Volumes-KK-T9-External-HDD--CODING-Datasec-HPSM/dc13ed6b-f206-4b51-b117-ff3f2723cf9b/scratchpad/docker.lock <cmd>`. That covers build, up, down, run, exec, and every suite that calls docker.
-  - **The lock is shared with the gate that is already running.** Concurrent docker steps queue on it, and a wait on the lock is not a timeout.
+  - **The lock is shared with other seats' lanes.** Concurrent docker steps queue on it, and a wait on the lock is not a timeout.
   - Gates have first claim over lanes (answer L15). Hold the lock one step at a time, never across a pause.
   - Run test runners with `--maxWorkers=2`.
   - **A timeout gets at most 2 re-runs; after that the row is LOAD-BLOCKED** (NOT TESTED, with the reason). Never raise a timeout.
-  - Count volumes at START and at END. There were 145 at briefing (2026-09-13 14:55Z). The other gate creates volumes too, so attribute yours by compose project label, not by the difference in the count.
+  - Count volumes at START and at END. There were 145 at briefing (2026-09-13 14:55Z); other seats may create volumes too, so attribute yours by compose project label, not by the difference in the count.
 - **END:** `docker compose -p <each of your projects> down` with VOLUMES KEPT (no `-v`). Never `docker system|volume|image prune`, and never remove anything you did not create.
 
 ## 2. Spec / DoD - REFERENCE DOCUMENTS (read-only; every row cites document + line)
@@ -398,5 +398,7 @@ PROVENANCE:
 - Implementation lines | `git show b9c6464:<path>` of feedback.ts, routes/feedback.ts, feedback-multipart.ts, feedback-attachments.ts, secrets.ts, app.ts, server.ts, openapi.json (parsed), 0016_feedback.sql, idp-mock app.ts, the web feedback files, api-credential-shapes.db.test.ts; `git show d0466da:apps/api/src/routes/feedback.ts` for the base anchors; `git cat-file -e d0466da:apps/api/test/feedback-fixtures.ts` | read 2026-09-14 00:55-01:02 AEST
 - Ports 21610-21729 free: `lsof -nP -iTCP:21610-21729 -sTCP:LISTEN` returned nothing (rc 1). Control: the same command over the concurrently running gate's block listed its two edge listeners (rc 0), so an empty result is a real reading | read 2026-09-13 14:54Z and 14:59Z
 - 145 volumes; the Playwright image present; docker answers within 30 s; the lock file exists; the report dir absent | docker volume ls, docker image inspect, docker info, ls | read 2026-09-13 14:55Z
+
+AMENDED by Tuesday s15 at review (01:1x AEST): the concurrent gate FINISHED before launch; the four 'running now' lines are now past tense; nothing else changed.
 
 SELF-CHECK: re-read end-to-end for contradictions. LOCAL ONLY throughout. No live host is named. No port, compose project or report path of the running gate is named; the S45 lane ranges appear only in §1's leave-alone list. No result from any other gate is carried. The report path and verdict subject agree with the launcher | 2026-09-14 01:05 AEST
