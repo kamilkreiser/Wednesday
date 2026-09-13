@@ -12,6 +12,20 @@ supersede: replace WHOLESALE at the next pickup; never append.
 **On EVERY wake:** `2_Project_Files/tools/kam_rulings_today.sh` (never `kam_msgs.sh` unfiltered) AND `[Kam -> Tuesday]` mails; list `tuesday-agent@` UNFILTERED and route on SUBJECT; `git status --porcelain | grep -v 0_Brain/dashboard/data/`. Rotation band 80–90. **Verify panel messages AT ORIGIN** (`git show origin/main:0_Brain/dashboard/data/chat_tuesday.json` on the ref `panel_sync` fetches; `git ls-remote` HUNG 9 min in this tree at 14:28 — bound any network read with a timeout). **Do NOT read `0_Brain/daily/`** (Wednesday's).
 
 ## 🔴 LIVE — with the next action for each
+0037. **🟢 COMBINED TIER-1 GATE LAUNCHED ~15:44 on HPSM local main `09c15918fadfee8a9bd590a1282113637f44515d`** (S42 READY FOR QA 05:36:32Z read whole; head verified at source: 249 commits from afc10e9, focus `1a6b68d..09c1591` = 180, tree clean). Split into **THREE parallel gates on disjoint verdict areas** under Kam's standing agents rule.
+    - **Brief:** `2_Project_Files/fleet/qa-agent/briefs/2026-09-13_hpsm-composer-09c1591-combined-tier1.md`; prompts `…-tier1-{A,B,C}.prompt.txt`; ONE parameterised launcher `launchers/launch_qa_hpsm_composer_09c1591_combined.sh <A|B|C>`. All guards passed `--check`.
+    - **Gates:**
+      - **A** engine+content: pane `%26`, PID 31244, project `policy-composer-qa-c-a`, edge 21080 / CI 21095;
+      - **B** api+db: `%27`, PID 31277, `…-c-b`, 21180 / 21195;
+      - **C** web+renderers+OUTPUT PROOFREAD: `%28`, PID 31326, `…-c-c`, 21280 / 21295.
+      - Verified at rung 5: each pane working, no refusal lines, each process names its gate.
+    - **Reports:** `Testing Agent MAIN/projects/hpsm/reports/2026-09-13-composer-09c1591-combined-{a-engine-content,b-api-db,c-web-renderers}-tier1/`. Verdicts are mailed to tuesday-agent@ with subject `GATE VERDICT — Policy Composer combined gate <A|B|C> …`.
+    - **Capacity:** Docker VM 8 CPU / 7.75 GB with only pc-lane-a running (270 MiB) at launch; host 24 GB. **WATCH:** re-check `docker stats` and that pc-lane-a stays healthy while the three gates build.
+    - **S42's 05:40:31Z questions answered** (body `2_Project_Files/fleet/briefs_staged/2026-09-13_hpsm-s42-gate-launched-qa-qb.md`):
+      - **Q-B (a):** gate 09c1591; D2 `fa5fc6c` + lane W fixture/spec rewrite + F6 go in a SECOND small READY, gated separately.
+      - **Q-A (a):** engagement reads carry the engagement's own pinned `content_release {id,label,synthetic}`; no new permission, no hash, allow-list + cross-tenant + pin-not-running tests.
+    - **Live stays HELD at c2fbc36** (card open).
+    - **NEXT:** the three verdicts → aggregate → recommend push (or fix rounds under the cap), plus the second READY for the delta.
 0036. **🔴 S42 APPROVAL-CLASS QUESTION 05:20:39Z (read whole):** LOCAL main `d7a39b3` (lane-w-e2e `d59ea7c` + lane C12 `d7a39b3` merged, chains GREEN, D1 PASS; 219 ahead of afc10e9; NOT pushed).
     - **MEASURED on `pc-s42-on`:** after the C12 upgrade, an EXISTING engagement pinned to demo `0030d4c6` answers **409 CONTENT_VERSION_CHANGED** on preview (both formats), POST generate and POST validate. There is no re-pin action; only NEW engagements work on `fd7db6b8`.
     - **Consequence:** both LIVE stacks' synthetic engagements would break on any upgrade ≥ `d7a39b3` (also Q and W, which sit on top).
