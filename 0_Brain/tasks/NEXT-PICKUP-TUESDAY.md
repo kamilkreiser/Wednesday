@@ -73,7 +73,7 @@ supersede: replace WHOLESALE at the next pickup; never append.
   1. read HANDOVER-S44 whole;
   2. `ps` census for `claude .*project 'HPSM'` across all terminals (trap 32);
   3. draft the S45 brief by a subagent from `briefs_staged/2026-09-13_hpsm-s44-successor-merge-seat.md` + HANDOVER-S44; review it, then `send_brief.sh --kind brief`; verify at the destination;
-  4. `cockpit.sh add 'Datasec/HPSM-S45' "bash '/Volumes/KK_T9_External_HDD/!CODING/Datasec/HPSM/Launch_Claude.command'"` (confirm the launch form S44 used first);
+  4. `cockpit.sh add 'Datasec/HPSM-S45' "bash '/Volumes/KK_T9_External_HDD/!CODING/Datasec/HPSM/Launch_Claude.command'"` (CONFIRMED 22:25: `%7` pane_start_command = `bash "/Volumes/KK_T9_External_HDD/!CODING/Datasec/HPSM/Launch_Claude.command"`, cockpit adds the exited/exec wrapper; the brief must be verified at the destination BEFORE this, trap 21);
   5. rung 5, excluding every pre-existing HPSM session id; its first user record must come after launch; match "session 45";
   6. answer S45's plan confirmation;
   7. `pane_close.sh %7` only after S45 CONFIRMS.
