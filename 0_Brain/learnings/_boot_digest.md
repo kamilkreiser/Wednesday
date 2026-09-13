@@ -7,7 +7,7 @@ status: live
 
 # Boot digest — headline + rules of every lesson (open the file when it fires)
 
-Generated 2026-09-14 06:53 from 158 lesson files (804,886 B). Each block = the lesson's retrieval handle (H1), its frontmatter, the operative paragraph, its section index, and every RULES section verbatim. 7 files carry no rules-shaped section and are included whole. The CASES behind a rule live only in the file: open it the moment the rule fires, or when a diagnosis needs the evidence. `_ledger.md` is read whole beside this digest; `_ledger_archive.md` on demand.
+Generated 2026-09-14 07:03 from 159 lesson files (810,446 B). Each block = the lesson's retrieval handle (H1), its frontmatter, the operative paragraph, its section index, and every RULES section verbatim. 7 files carry no rules-shaped section and are included whole. The CASES behind a rule live only in the file: open it the moment the rule fires, or when a diagnosis needs the evidence. `_ledger.md` is read whole beside this digest; `_ledger_archive.md` on demand.
 
 ## The T9 SSD is the master — Wednesday must be fully portable
 `2026-07-31_fully-portable-drive.md` · principle · 2026-07-31 · status: superseded — the "T9 is the master" half by [[2026-08-25_one-drive-devmaster-is-master]] (2026-08-25); the portability principle itself still lives
@@ -5795,6 +5795,47 @@ sections (open the file for these): Why he said it, and the instance that earned
 5. **Report the rotation, do not request it** ([[2026-08-07_autonomy-grant-ship-decisions]]: the grant removes the pause, not the receipt). The handover block names every live agent and what wakes each one.
 
 **Family:** [[2026-09-02_rotate-in-the-70-80-band-conditionally]] (the band; its safety conditions stand — this file removes "no agents live" from them) · [[2026-08-21_auto-rotate-at-70pct]] (condition 4 there already said "agent sessions keep running untouched — the rotation is MY pane only") · [[2026-08-07_a-promise-is-not-a-mechanism]] (a hold is not a mechanism; the liveness check is) · [[2026-09-07_an-instruction-to-wait-must-name-what-wakes]] (every delegated thing names its wake before the seat rotates) · [[2026-08-16_an-ask-without-a-default-is-an-indefinite-hold]] ("ask Kam to launch the successor" was an ask with no default, and it held 70 minutes).
+
+
+## A detector keyed on the BANNER'S WORDS kills the seat that reports the last kill — the DEAD leg must discriminate the UI banner from a sentence about it, and the fix is a shared predicate with a selftest, not a tighter literal
+`2026-09-14_a-detector-keyed-on-the-banners-words-kills-the-seat-that-reports-the-last-kill.md` · correction · 2026-09-14 · status: live
+
+**The operative case, so the headline matches it:** Wednesday is writing, ratifying or diagnosing
+any detector that reads a PANE (or a log, a transcript, a chat store) for a literal that means
+"the thing is dead / broken / needs killing" — and whose fire path is DESTRUCTIVE (a respawn, a
+kill-pane, a restore). **Ask: what does the pane show when the seat is DIAGNOSING the last fire?**
+It shows the literal. The seat that reports the previous kill — a cat'd diff, a note written by
+heredoc, a `tail` of the runner log — prints the trigger word into the very surface the detector
+reads, and the detector kills it. **The second kill is guaranteed by the first, because the honest
+report of the first is the trigger for the second.**
+
+**How to apply:**
+1. **A destructive detector's literal must be unreachable from tool output.** The predicate now
+   lives in `2_Project_Files/fleet/cockpit/dead_banner_check.sh` (both callers use it): the banner's
+   words on a line with NO quote/backtick, NO `⎿` tool-output prefix, NO `#` / `—` / `;` / `grep`
+   prose markers. Its `--selftest` carries the three real false positives and two true banners.
+   Adding a fourth false positive means adding it to the selftest FIRST.
+2. **Before diagnosing the last kill in a live pane, ask whether the diagnosis prints the trigger.**
+   Redirect to a scratch file and Read it; never `tail` a detector's own log into the pane it reads.
+3. **A fix to a self-killing detector is done BEFORE the re-arm, not claimed and owed.** The
+   09-10 claim-with-Tuesday rule stands for shared tooling — claim AND fix in the same action when
+   the next fire kills the claimer; the claim mail names the commit.
+4. **Do not tighten to the full banner text as the fix.** "Context limit reached · /compact or
+   /clear to continue" is a 2026-09-02 reading of the UI; requiring it makes the leg BLIND if the
+   UI changes, which is the six-hour failure the leg exists to prevent. Exclusions on the reporting
+   shapes discriminate; a longer literal only moves the target.
+5. **Enforcement candidate (w=3 promotes it):** the watcher's DEAD leg requires a SECOND independent
+   source before killing — the seat's transcript jsonl showing no turn since the banner appeared,
+   or a `ctx:` statusline ≥ 95% — a disagreement between two sources refuses
+   ([[2026-09-09_a-guard-refuses-malformed-input-and-the-real-failure-is-stale-input]] rule 2).
+
+**Family:** [[2026-09-10_a-detector-keyed-on-remedy-text-matches-the-hint]] (the sibling: there the
+tool's HINT carried the remedy's name; here the seat's REPORT carries the condition's name) ·
+[[2026-08-07_a-check-that-cannot-fail]] · [[2026-08-17_check-the-refusal-before-the-kill]] (a
+destructive step behind a check that cannot discriminate) · [[2026-09-11_red-proof-arms-cover-every-legitimate-shape-of-the-real-event]]
+(the CLEAN arm this leg never had: "a healthy seat talking about the banner") ·
+[[2026-09-02_the-statusline-is-the-context-instrument]] (the leg's origin) ·
+[[2026-09-13_rotation-never-blocks-the-work-delegate-then-rotate]] (a headless floor is the cost).
 
 
 ## A Kam instruction stands until he withdraws it: a question I ask back does not cancel it, and his silence is not a no
