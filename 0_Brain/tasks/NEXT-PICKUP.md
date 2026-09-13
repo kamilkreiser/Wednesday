@@ -2,7 +2,7 @@
 date: 2026-09-13
 type: pickup
 scope: SECUURA + all general/generic work. Datasec is TUESDAY's — read her mail by SUBJECT only, never brief or answer for a Datasec project.
-source: replaced WHOLESALE 16:2x by the seat booted 15:57 at its 50% checkpoint (Kam 14:2x: rotation never blocks the work — delegate, then rotate with agents live).
+source: replaced WHOLESALE 16:2x and REFRESHED 17:0x (65% checkpoint) by the seat booted 15:57 (Kam 14:2x: rotation never blocks the work — delegate, then rotate with agents live).
 status: live
 supersede: replace this file wholesale at the next pickup; do not append
 ---
@@ -11,17 +11,16 @@ supersede: replace this file wholesale at the next pickup; do not append
 
 > Narrative: `0_Brain/daily/2026-09-13.md` from the 15:57 boot block. **Measure before acting on any line here.** Subagent outputs of the 15:57 seat live in `/private/tmp/claude-501/-Volumes-DevMASTER-WEDNESDAY/a443e8f5-4f70-46d7-b9f3-451ac0da033f/scratchpad/` (gate970/ gate972/ gate971/ gate973/ gate975/ gate974/ s205_merge_brief.md — each `BUILD_REPORT.md` present = built; absent = the subagent died with the seat → rebuild from the gate969 exemplar at `…/e5222267-…/scratchpad/gate969/BUILD_REPORT.md`, which is the recipe). The READY/verdict mails are saved beside them as `s20N_readyNNN.txt`, `verdict969.txt`.
 
-## 🟢 FLOOR (panes at 16:2x)
+## 🟢 FLOOR (panes at 17:0x — the 65% checkpoint)
 | pane | seat | state | next event owed |
 |---|---|---|---|
-| `%67` | **s203 LANE D** (`packages/shared/src/__tests__/`) — CONFIRMED 16:02 (PR-0 first under KS-1126; Q1 yes; Q2 (i); T6 not built; tier 2 ×5) | **#975 @ `8da20edbd` READY** (PR-0, KS-1126); on PR-1 (ks860, KS-876/891/894/895) | READYs → tier-2 gates; its 50% CHECKPOINT / 70% HAND OVER NOW mails (read the gauge at every wake) |
-| `%65` | **s204 LANE E** (`scripts/`) — CONFIRMED 05:2xZ | **#971 @ `c229aa256` READY** (PR-1, KS-922+941) · **#974 @ `8da602309` READY** (PR-2, KS-878+867); on PR-3 (KS-877 + KS-922's comment items) | READY → tier-2 gate; CHECKPOINT/HAND OVER NOW mails |
-| — | s202 lane C WRAPPED 05:59Z, `%64` closed — **#970 @ `ae274f7cb` (KS-963, supersedes #913)** and **#972 @ `b3ce8c9e7` (KS-1052, supersedes #930)** READY, both tier 1; score deferred to their verdicts | — | gates → GO → merge seat closes #913 / #930 |
-| — | s201 lane B WRAPPED 06:11Z, `%66` closed — **#973 @ `dfed981d0` (KS-950/962, supersedes #928)** READY, tier 1; KS-1127 + KS-1128 filed; score deferred | — | gate → GO → merge seat closes #928 (HELD since 09-12) |
-| — | QA #969 tier 2 **GO WITH FINDINGS @ `fb23ca6aa`** (`%68` closed) — RULED, see the 16:24 note line: v2 merge, body-only fix, ONE Medium (F1 root + O1 + JSONB) + ONE Low (F2 twins + P2/P3) | — | **s205 MERGE SEAT** — brief drafting in a subagent → re-read load-bearing table → `brief_and_launch.sh` on pane `Secuura/Blockchain` → plan confirmation → merge |
+| `%72` | **s205 MERGE SEAT** (`Secuura/Blockchain`) — CONFIRMED 06:51Z; **#969 MERGED as M7 `506cd3a33` on v2, VERIFIED; KS-1069 archived; KS-1129 (M) + KS-1130 (L) filed** | on ITEM A (#970 @ `ae274f7cb`, ADDENDUM 06:57Z, v1 expected, close #913 after) then ITEM B (Kam's three 16:55 rulings → comments on KS-1114, KS-1116 + a new Low for accept-split) | its STATUS mails → verify M at source (`ls-remote` + `git log -1 --format=%P`) → mark the three cards `--delivered` with the comment ids → next ADDENDUM per verdict (v1/v2, follow-ups, supersede-close) |
+| `%79` | **s206 LANE D successor** (`Secuura/Blockchain-D`) — launched 17:01 on PR-3 (KS-924, KS-901) + PR-4 (KS-828, KS-900) | plan confirmation OWED (proxy.ts `{ routes, guarded }` value is its named question; PR-4's base conditional on #975) | ANSWER → two READYs → tier-2 gates; CHECKPOINT 50% / HAND OVER NOW 70% |
+| `%70` `%71` `%73` `%74` `%75` `%76` `%78` | QA gates #972 t1 · #971 t2 · #973 t1 · #975 t2 · #974 t2 · #976 t2 · #977 t2 (all pinned to develop M6 `0f69129b3` EXCEPT #977 = M7; their briefs' item "if develop moves mid-pass" covers M7 — api-gateway only) | waits armed (`wait_subject.py`, background/detached) | verdict → completion vs the brief → RULE → score the seat at its LAST verdict (s202 at #972; s201 at #973; s204 at the last of #971/#974/#977; s203 at the last of #975/#976/#978) → ADDENDUM to s205 |
+| — | #978 (KS-885/886, s203 PR-2) gate set BUILDING (`scratchpad/gate978/`); #970 DONE (GO WITH FINDINGS, QA 1.00, `%69` closed) | — | install → `--check` (BRANCH ON THE RC) → commit by name → `cockpit.sh add` → wait |
 | `%1` | monitor | — | — |
 
-**develop = M6 `0f69129b3`** (#932) — relayed from the 14:08 seat's 15:3x source read; the #969 gate read it unmoved at 16:17. Re-read before any merge brief.
+**develop = M7 `506cd3a33`** (#969; parent M6 `0f69129b3`; read at source 16:59 by Wednesday). #970 next (s205). **#913 → close with #970; #930 → with #972; #928 → with #973** (s205's, by ADDENDUM).
 
 ## 🔵 GATE PIPELINE (all tier per Wednesday; verdict subject `[QA -> Wednesday] TIER N GATE #PR ROUND 1 (KS-…) <head7> -- …`)
 | PR | head | tier | build (scratchpad dir) | install → launch → wait |
@@ -37,7 +36,7 @@ Verdict → completion vs the brief → RULE → score the seat at its LAST verd
 ## 🟢 KAM'S RULINGS AND GRANTS IN FORCE
 - Standing rule (09:1x) + the target (14:0x) + rotation-never-blocks (14:2x). Overnight is working time (08-28). We approve and merge our own TESTED Secuura work (09-11 16:56 / 17:50). Kintsugi-first; demo waits for Peter's nod.
 - **The week grants (deploy kintsugi+demo; production ban; merge-for-the-week) END OF SUNDAY 13 SEP — TODAY.** From Monday: v1.3 + the TESTED grant only. `EXPIRING-GRANTS.md` rows → `## Expired` at the first Monday boot. No deploys from any seat tonight.
-- **Cards OPEN on his panel (do not re-list):** `secuura-ks1114-verify-title-strategy` · `secuura-ks1116-presentation-credential-ownership-model` · `secuura-965-f1-verify-hash-precedence-v1-vs-v2` · `wed-coordinator-rotation-killed-the-fleet-1604` (the split-servers question) · one Datasec/HPSM (Tuesday's). `reconcile_rulings.py` at every checkpoint (55 taps / 0 to rule at 16:1x); a tap on a `secuura-` card → `--apply` → deliver into the artefact. Kam → Wednesday: nothing since 08:58 on the panel; 3 `view=tuesday` withheld.
+- **Kam RULED three Secuura cards at 16:55** (reconciled `--apply`): KS-1114 → **implement-title** (AGAINST the rec — a product change, a builder-lane item, tier 1); KS-1116 → bind-creator; #965 F-1 → accept-split. **All three UNDELIVERED until s205's ITEM B comment ids arrive → `decision_queue.sh --delivered`.** Cards still OPEN: `wed-coordinator-rotation-killed-the-fleet-1604` (the split-servers question) · one Datasec/HPSM (Tuesday's). `reconcile_rulings.py` at every checkpoint (55 taps / 0 to rule at 16:1x); a tap on a `secuura-` card → `--apply` → deliver into the artefact. Kam → Wednesday: nothing since 08:58 on the panel; 3 `view=tuesday` withheld.
 
 ## 🔵 QUEUE (in order)
 1. Install + launch each gate set as its BUILD_REPORT lands (pins re-read at source; `--check` rc 0; commit by name); arm its verdict wait.
@@ -53,6 +52,7 @@ Verdict → completion vs the brief → RULE → score the seat at its LAST verd
 - **At the WRAP:** rule 3b BOTH digests only if `learnings/` changed (none this seat so far); rule 3c archive `_ledger.md` rows ≤ 2026-09-10 (the 09-10 rows are ~60 and past three days).
 
 ## ⚠ TRAPS
+- **BRANCH ON `--check`'s rc — never `echo rc; commit; add` in one chain** (17:00: a refused check launched anyway; the launcher's own guard caught it). A develop move re-pins ONLY `DEVELOP_SHA` + the develop lines; the merge-base stays the PR's parent.
 - `/private/tmp` is wiped at reboot (not at rotation). A QA launcher run in the Bash tool runs headless — `cockpit.sh add` only. Resume a gate with `cockpit.sh say <PANE NAME> '<text>'`, never raw `send-keys`, never a pane ID.
 - `--mail "<bare subject>"` on the shared inbox matches the OLDEST same-subject mail — cite the ROUTED subject `[Wednesday -> Secuura/Blockchain-X] …`. `card_id_gate.sh` reads `secuura-<word>` as a card (allow-list by exact name). The provenance gate reads `a/b/c`, branch names, `pulls/N` as relative paths. The seat-scoped chat hook refuses chat-store reads without `view`; the no-cd hook refuses `cd` and `git -C $VAR`.
 - Per-message AgentMail fetches need the `message_id` URL-encoded (`urllib.parse.quote(id, safe='')`) — a bare `<…>` id 400s.
