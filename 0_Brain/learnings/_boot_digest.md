@@ -7,7 +7,7 @@ status: live
 
 # Boot digest — headline + rules of every lesson (open the file when it fires)
 
-Generated 2026-09-14 07:03 from 159 lesson files (810,446 B). Each block = the lesson's retrieval handle (H1), its frontmatter, the operative paragraph, its section index, and every RULES section verbatim. 7 files carry no rules-shaped section and are included whole. The CASES behind a rule live only in the file: open it the moment the rule fires, or when a diagnosis needs the evidence. `_ledger.md` is read whole beside this digest; `_ledger_archive.md` on demand.
+Generated 2026-09-14 07:21 from 160 lesson files (815,325 B). Each block = the lesson's retrieval handle (H1), its frontmatter, the operative paragraph, its section index, and every RULES section verbatim. 7 files carry no rules-shaped section and are included whole. The CASES behind a rule live only in the file: open it the moment the rule fires, or when a diagnosis needs the evidence. `_ledger.md` is read whole beside this digest; `_ledger_archive.md` on demand.
 
 ## The T9 SSD is the master — Wednesday must be fully portable
 `2026-07-31_fully-portable-drive.md` · principle · 2026-07-31 · status: superseded — the "T9 is the master" half by [[2026-08-25_one-drive-devmaster-is-master]] (2026-08-25); the portability principle itself still lives
@@ -5851,4 +5851,43 @@ destructive step behind a check that cannot discriminate) · [[2026-09-11_red-pr
 5. **Only his words withdraw it.** "dont worry" did, at 06:47:42, so nothing was sent afterwards.
 
 **Family:** [[2026-08-16_an-ask-without-a-default-is-an-indefinite-hold]] (its mirror: there a default was missing; here the default was wrong) · [[2026-09-06_a-retraction-inherits-the-scope-of-its-measurement]] (an objection to one part voided the whole) · [[2026-09-09_acknowledge-panel-instructions-on-receipt]] · the 2026-09-10 where-Kam-reads memory (an established fact lost between sessions).
+
+
+## The coordinator adds value or it is waste — three duties (follow instructions · double-check every agent's output as a manager · commission whatever makes the output first rate), and WATCHING is not one of them
+`2026-09-14_the-coordinator-adds-value-or-it-is-waste-three-duties-not-watching.md` · correction · 2026-09-14 · status: live
+
+**His words, verbatim (panel, 2026-09-14 07:20:58 +10:00, view=wednesday):**
+> *"I have stopped using Tuesday until further notice. It was not following my instructions properly
+> and was not coordinating the agents. At least it was coordinating the agents, but was not adding any
+> significant value that I saw. Most of the activity was rotating itself and sitting there watching
+> other agents. This is a waste of effort and credits and not necessary. I want to make sure that the
+> coordinating agent adds value by: 1. Following my instructions diligently 2. By double-checking the
+> work, output, and anything else done by the agents as a manager overseeing their work 3. Enacts any
+> additional agents or any additional work to make sure that the output is first rate Sitting there,
+> just watching the work, is not necessary."*
+
+**How to apply — Wednesday, from this boot:**
+1. **Every wake and checkpoint ends in one of: an answer sent, a verification done, a commission
+   made, or a written reason none was needed.** A turn that produces none of these is not taken —
+   the seat ends its turn and lets the harness re-invoke it on the next real event.
+2. **The morning receipt to Kam leads with the value produced** (verdicts read, defects caught,
+   merges verified, lanes launched), never with the mechanics (rotations, re-arms, pane counts).
+   Mechanics go in the note.
+3. **Delegate the drafting, keep the checking.** The re-read at source is the coordinator's
+   non-delegable act ([[2026-08-11_coordinator-not-carrier]] says the thinking the agents will not do
+   is the job; today he named which thinking: the double-check and the escalation of quality).
+4. **When a seat's own ledger shows a run of rotation/liveness/watcher rows and no product rows, that
+   is the failure shape** — say so at the retro and change the next seat's plan, do not file it as
+   diligence.
+5. **Scope note, stated:** Tuesday is stopped "until further notice"; Datasec does NOT thereby
+   become Wednesday's — the 2026-09-08 split stands until Kam says otherwise. Wednesday's receipt
+   told him so and offered.
+
+**Family:** [[2026-08-11_coordinator-not-carrier]] (context is for the thinking the agents will not
+do) · [[2026-08-10_own-the-spec-not-just-the-escalation]] (escalation is the floor, not the job) ·
+[[2026-09-01_qa-gate-before-my-verification]] (duty 2's mechanism) ·
+[[2026-09-13_as-many-agents-as-possible-partitioned-by-code]] (duty 3's mechanism) ·
+[[2026-09-13_rotation-never-blocks-the-work-delegate-then-rotate]] (rotation is plumbing) ·
+[[2026-08-07_a-promise-is-not-a-mechanism]] (rule 1 above is the mechanism: a turn with no
+output is not taken).
 
