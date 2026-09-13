@@ -8885,7 +8885,7 @@
   "client_project": "WED",
   "title": "Wednesday's self-rotation at 16:04 yesterday destroyed the whole fleet session — should the coordinator pane move to its OWN tmux server?",
   "bluf": "Measured (read-only diagnosis, 0_Brain/reference/2026-09-13_fleet-loss-1604/): at 16:04:29 the rotate script ran `tmux respawn-pane -k` on Wednesday's pane %0 and 36 ms later the ENTIRE `fleet` tmux session died as one unit — s194 (mid-merge of #961, Bash killed with exit 137), s195, the #962 QA gate and the monitor. The new seat never booted; nothing rebuilds a missing session; the floor stayed empty until you launched a seat at 08:39. Trigger NOT established (no kill call, no update, no crash report); 1 loss in 63 rotations with agents live. Guard that works without knowing the trigger: run Wednesday's pane on its own tmux server (`tmux -L wednesday`) so a respawn can never touch a server holding agents. Cost to you: the cockpit becomes TWO iTerm attaches instead of one. Until ruled, Wednesday does NOT self-rotate while agents are live; it hands over to a seat you launch instead.",
-  "default_action": "Until you rule: Wednesday does not self-rotate while any agent pane is live (it writes the handover and asks you to launch the successor), and builds the check-only half now since it changes nothing you see.",
+  "default_action": "AMENDED 2026-09-13 14:2x on Kam's terminal words: Wednesday self-rotates at the band with agents live, after everything in flight has a brief and a wake path (learnings/2026-09-13_rotation-never-blocks-the-work-delegate-then-rotate.md). The check-only half (post-respawn liveness check + rebuild/alarm) is commissioned today as its own agent. Whether the coordinator pane moves to its OWN tmux server (split-servers) remains your tap.",
   "options": [
    {
     "key": "split-servers",
@@ -8923,7 +8923,20 @@
    "CARD secuura-ks968-rotation-three-worlds",
    "CARD fleet-cross-seat-mail-wakes-keep-or-filter",
    "CARD fleet-comms-names-one-coordinator"
-  ]
+  ],
+  "amendments": [
+   {
+    "ts": "2026-09-13T14:22:06.243075+10:00",
+    "reason": "Kam, terminal 2026-09-13 14:2x, verbatim: 'dont let your context rotation get in the way of finishing tasks. You can always delegate to agents and get them to work while you rotate.' The DEFAULT (no self-rotation while agents are live) held the 08:39 seat idle ~70 min at its ceiling with two verdicts unread; his words replace that default. The question (split servers or not) is still his.",
+    "changed": [
+     "default_action"
+    ],
+    "before": {
+     "default_action": "Until you rule: Wednesday does not self-rotate while any agent pane is live (it writes the handover and asks you to launch the successor), and builds the check-only half now since it changes nothing you see."
+    }
+   }
+  ],
+  "amended_ts": "2026-09-13T14:22:06.243087+10:00"
  },
  {
   "id": "hpsm-composer-demo-release-unreachable-c12",
