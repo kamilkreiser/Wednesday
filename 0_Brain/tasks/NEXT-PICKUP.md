@@ -7,7 +7,7 @@ status: live
 supersede: replace this file wholesale at the next pickup; do not append
 ---
 
-# NEXT PICKUP — ⚡ 12:5x. FLOOR = four QA gates + one builder. **FIRST ACTS:** (1) commit the launcher's digests by literal path · (2) `kam_msgs.sh --brief` (his rulings first) · (3) **re-arm TWO verdict waits** (`python3 2_Project_Files/fleet/cockpit/wait_subject.py "<needle>" "<since ISO>" 120 120`, run_in_background, one per gate — needles: `TIER 1 GATE #966 ROUND 1` · `TIER 2 GATE #967+#968 ROUND 1`; since `2026-09-13T02:00:00Z`) — the watcher's mail leg cannot see a QA verdict · (4) do NOT run `wednesday_rotate.sh --self` while agents are live.
+# NEXT PICKUP — ⚡ 13:1x. **UNPROCESSED at the handover: the #967+#968 STACK VERDICT landed 03:08:15Z — `GO WITH FINDINGS` per its subject; body NOT read by the 08:39 seat (at its ceiling). Read it whole first, completion vs the brief's asks, score s199 (with #969's gate still owed), close `%10` after `end_turn`.** FLOOR = four QA gates + one builder. **FIRST ACTS:** (1) commit the launcher's digests by literal path · (2) `kam_msgs.sh --brief` (his rulings first) · (3) **re-arm ONE verdict wait (#966)** (`python3 2_Project_Files/fleet/cockpit/wait_subject.py "<needle>" "<since ISO>" 120 120`, run_in_background, one per gate — needle: `TIER 1 GATE #966 ROUND 1`; since `2026-09-13T02:00:00Z`) — the watcher's mail leg cannot see a QA verdict · (4) do NOT run `wednesday_rotate.sh --self` while agents are live.
 
 > Narrative: `0_Brain/daily/2026-09-13.md` from the 08:39 boot block (the 12:05 handover block + everything after). **Measure before acting on any line here.**
 
