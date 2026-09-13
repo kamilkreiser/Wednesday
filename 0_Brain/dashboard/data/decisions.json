@@ -9442,5 +9442,37 @@
    "2026-09-10 09:01",
    "2026-09-11 16:55"
   ]
+ },
+ {
+  "id": "secuura-launcher-ssh-keepalive",
+  "client_project": "Secuura/Blockchain",
+  "title": "Secuura pushes whose pre-push gate runs past ~6 min die on GitHub's idle SSH cutoff — add two keepalive options to the launcher's core.sshCommand lines (your file)",
+  "bluf": "OVERRIDE OF THE PRIOR-RULING GATE, measured: the only prior card sharing a word is the 2026-08-24 turn-end-line card for the shared scaffold — a different file and subject. I need you to edit Launch_Claude.command in the Secuura Blockchain project (Wednesday never edits another project's files): on every line that sets core.sshCommand (Wednesday read three: the ssh-agent branch at line 130 reads `ssh -o IdentitiesOnly=yes -o StrictHostKeyChecking=no`; the on-disk-key branch below it; the live config today reads `ssh -i .../github_deploy_rw -o IdentitiesOnly=yes -o StrictHostKeyChecking=accept-new`) append ` -o ServerAliveInterval=30 -o ServerAliveCountMax=20`. The rationale: git opens the SSH session to read remote refs BEFORE the pre-push hook runs and keeps it open through the hook; the branch's 15-leg preflight now takes 6 min 17 s (measured by s214 at 22:26–22:32Z on #925's stacked head 5341b1dae — the gate PASSED, then the pack write hit a closed session, rc 141); #903 (5:05) and #918 (5:44) landed on the same shape, so the cutoff sits between. The gate is growing (leg 15 today, 30 shell suites) so every push will cross it. The seat retries each push with keepalives set per command meanwhile, and files ONE KS for the class under L7's stream. My recommendation: make the edit now; alternative: leave it and every seat carries the per-push workaround, which is a rule in memory, not a mechanism.",
+  "default_action": "If unruled by the next morning sweep, Wednesday briefs the next Secuura seat to make the edit itself (option delegate) — it is the project's own file and a reversible one-line change per branch; Wednesday never touches it.",
+  "options": [
+   {
+    "key": "edit",
+    "label": "Edit the launcher lines now (Wednesday's recommendation)",
+    "detail": "Append ` -o ServerAliveInterval=30 -o ServerAliveCountMax=20` to each core.sshCommand value in Launch_Claude.command; the next launch rewrites the repo-local config. Reversible; no push affected until the next launch."
+   },
+   {
+    "key": "delegate",
+    "label": "Let the Secuura seat edit its own launcher",
+    "detail": "Wednesday briefs a Secuura seat to make the same edit (the launcher is inside its project folder, so hard rule 1 allows the project's own agent) and verify with a timed push."
+   },
+   {
+    "key": "leave",
+    "label": "Leave it",
+    "detail": "Seats keep the per-push keepalive workaround; long gates will keep dying until someone forgets."
+   }
+  ],
+  "recommended": "edit",
+  "ts": "2026-09-14T08:36:48.343620+10:00",
+  "status": "open",
+  "ruled_choice": null,
+  "ruled_ts": null,
+  "prior_rulings_overridden": [
+   "CARD launcher-turn-end-line"
+  ]
  }
 ]
