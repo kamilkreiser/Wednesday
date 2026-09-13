@@ -12,6 +12,17 @@ supersede: replace WHOLESALE at the next pickup; never append.
 **On EVERY wake:** `2_Project_Files/tools/kam_rulings_today.sh` (never `kam_msgs.sh` unfiltered) AND `[Kam -> Tuesday]` mails; list `tuesday-agent@` UNFILTERED and route on SUBJECT; `git status --porcelain | grep -v 0_Brain/dashboard/data/`. Rotation band 80–90. **Verify panel messages AT ORIGIN** (`git show origin/main:0_Brain/dashboard/data/chat_tuesday.json` on the ref `panel_sync` fetches; `git ls-remote` HUNG 9 min in this tree at 14:28 — bound any network read with a timeout). **Do NOT read `0_Brain/daily/`** (Wednesday's).
 
 ## 🔴 LIVE — with the next action for each
+0034. **🟢 S40 REPORT 05:00:38Z: BOTH live stacks upgraded to `c2fbc36`** (lane R renderers; no migration; switch ON unchanged; no rollback; no second engagement seeded). Items 1–7 verified on one output per stack, identical on both. Record: `qa-switch-on-s40/upgrade-c2fbc36/`.
+    - **Verified by s11 15:01:**
+      - Azure root and `/api/health` 401, wrong credentials 401, TLS 0;
+      - pc-lane-a 200 on 18580, with edge/api/worker/idp recreated ~2 min earlier and healthy (web not recreated, expected: no web change).
+    - **s11 PROOFREAD the Azure Preview p1** (`…/upgrade-c2fbc36/azure/preview-hpsm.pdf`):
+      - footer "Unreleased draft. Not generated from an approved policy manifest.";
+      - "13 Sep 2026 | 04:06:36 AM UTC" with UTC inside the page;
+      - SYNTHETIC CONTENT header and DRAFT | SYNTHETIC watermark present;
+      - the "UnSupported" column capitalisation matches the HP sample.
+    - **Kam told on the panel ~15:0x.**
+    - **Still open:** card `hpsm-composer-demo-release-with-device-groups`. Queue: lane-w-e2e → C12 → Q → W, with S40 upgrades after each.
 0033. **S42 STATUS 04:58:29Z (read whole): LOCAL main `c2fbc36d2e4fa7e370fbef23632fbeefcf97cf0e`** (lane R rounds 1–3 merged: 365d5ef → a9e2503 → c2fbc36; 210 ahead of `afc10e9`; verified at source by s11 14:59; NOT pushed).
     - **Round 3:** the UTC label is now 8 pt on the time's baseline, 20.50 pt from the right edge, no sample run moved (max 0.80 pt), pinned; opened p1 reads "13 Sep 2026 | 04:00:06 AM UTC".
     - **Every chain GREEN;** switch-ON e2e F1-only each time.
