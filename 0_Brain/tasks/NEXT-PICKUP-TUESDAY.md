@@ -61,6 +61,19 @@ supersede: replace WHOLESALE at the next pickup; never append.
        - Mark both cards `--delivered` once the upgrade REPORT and C11's READY name their artefacts.
 
 2. **Three combined tier-1 gates on `09c1591` — RESUMED by s12 at 17:05 in new panes.**
+   - **UPDATE 18:5x (s12) — S43 FIX-ROUND PLAN 08:41:36Z CONFIRMED ~08:5xZ:**
+     - **Lane W:** GREEN 5e173eb, merged `caf63fd` (the chain merge-w-s43 must be GREEN before main moves).
+     - **Fix lanes** from caf63fd, disjoint by path:
+       - FX-M1 (s43/fx-m1-approver, pc-s43-m1 23180: approver linked + 422 APPROVER_NOT_A_TENANT_MEMBER; not editable after create);
+       - FX-LV (s43/fx-lv-local-values, 23280: LOCAL_VALUE_NOT_DEFINED critical + S8/S10 naming);
+       - FX-R (s43/fx-r-renderers, 23380: W6-M1, m1, m2, m3);
+       - FX-S7 (s43/fx-s7-layout, 23480: W5-M3 + W5-m5; SOLE owner of app.css and e2e/support).
+     - **Then:** FX-PIN (W4B-m2; lifecycle/inputs/resolution.ts), then FX-ID (W4B-m1 central id normalisation, before F-API merges). C11 PAUSED until FX-LV merges.
+     - **BACKLOG notes sent:** the approver picker reads idp-mock `/idp/users` (needs a real directory source); approver-edit op deferred.
+     - **Timeline (S43's estimate):** W chain ~19:05; FX-S7/FX-R ~20:30–21:15; FX-M1 ~21:30; FX-LV ~22:00. **Tonight's 21:00–23:30 upgrade = Q+W + the workaround; the SECOND upgrade before 07:00 = the fixes** (GREEN chains only).
+     - **S43 measured:** CONTENT_VERSION_CHANGED is keyed on the content/capability pins, not engine_version, so the second upgrade should not strand tonight's fresh engagements; its upgrade proof checks this.
+     - NSG 22 source 157.211.46.94/32 = this machine's egress.
+
    - **UPDATE 18:5x (s12, ctx 71%) — ALL THREE GATES IN; all panes closed (`%2`, `%3`, `%4`; control 18580 200 each time):**
      - **A = GO WITH FINDINGS** 0/0/2/4.
      - **B = GO WITH FINDINGS**: API 0/0/5/1, DB 0/0/0/1. Findings: W4B-m1 urn:uuid→500; **W4B-m2** stale-pinned engagement accepts a customer approval after an upgrade, then stuck; W4B-m3 10 more credential shapes; W4B-m4 load 500/504 duplicate; CI-m1; W4B-p1; DB-p1. Report 183 lines, 0 placeholders, DKIM pass.
