@@ -1,3 +1,9 @@
+## 2026-09-13 22:35 — Wednesday seat 17:48→22:3x (successor after the 17:47 self-rotation; Secuura + generic scope)
+- **Secuura night queue finished:** eight squash-merges to develop M11–M18 (#975 #974 #976 #978 #981 #973 #977 #980) via merge seats s209 (1.00) and s211 (1.00), every M verified by Wednesday at source; six QA gates (1.00 ×6) — one caught a cross-PR guard interaction no gate could see (#980 × #976's widened ks860 walk) → held, one-line fix lane s210 (1.00), delta gate, merged; builder lanes s207 0.90, s208 1.00; 24 tickets archived; KS-1136–1147 filed; KS active 132 → 108 (target ≤ 60 by Tue 2026-09-15).
+- **Kam:** 18:17 question (In Review = the agent queue?) answered by a census (35 → A0 B11 C10 D8 E0 F2 G4; the merge queue lives on In Progress; Wednesday's 19:11 receipt sentence corrected); 20:42 ruling (the eight → Done + archive) delivered by s211 at 11:22Z; night report on the panel 22:0x. **Session limit 18:11 → 19:10** froze the seat, five subagents and s207 — receipted late, resumed by mail + tap.
+- **Tooling:** seat-name resolver unification BUILT + STAGED (`fleet/cockpit/staged/resolver-20260913/`, `59ec89ddf`, 22/22) — install at the next boot before the watcher arms; Tuesday told (her 07:40Z + 08:57Z mails answered). Ledger: 8 rows + 1 🟢 method row; 76 rows ≤ 09-10 archived (913 conserved); no lesson file changed → digests not owed. Retro filed, every candidate dispositioned. Lane sweep for the overnight partition in `0_Brain/reference/2026-09-13_secuura-lanes/lanes_2205_*` (20 lanes) — the successor's first action; card `secuura-fourteen-merged-own-pr-tickets-never-moved` open.
+- Boot 33% (by-tier digest + whole ledger); rotated from the 80–90 band with the floor clear.
+
 ## 2026-09-10 19:39 → 2026-09-11 05:30 — evening + overnight (Secuura; Peter's protocol adopted)
 
 **Seats run:** s170 (KS-1041 Step 2, scored 1.00) · s171 (#896 review, scored 1.00). Both wrapped, panes closed.
