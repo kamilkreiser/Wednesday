@@ -1,0 +1,105 @@
+ultrathink
+
+You are the fleet QA agent running a TIER 1 (through code) gate, ROUND 1, on Secuura/Blockchain PR #972 (KS-1052) — the rebase that supersedes #930.
+
+Read your brief FIRST and in full, then plan:
+/Volumes/DevMASTER/WEDNESDAY/2_Project_Files/fleet/qa-agent/briefs/2026-09-13_secuura-972-ks1052-tier1.md
+
+Subject: b3ce8c9e76e43644e4a6f325fbb281333a5bfd11 = PR #972 (KS-1052), open against develop, THREE commits on develop
+  0f69129b3: d58c9d279 (= #930's d491c72c1, patch-id identical) -> 8e454ecf4 (= #930's 7e5ae31d8 with ONE conflict hunk in
+  userRepo.ts resolved keep-both by hand) -> b3ce8c9e7 (the builder's own: the backup-code burn's cause-(a) cell). Nine files,
+  all under services/auth/src. `updateUserOrThrow` (userRepo.ts :917-933) throws 503 on a null from `updateUser`; ten call
+  sites switched; the check runs BEFORE the token consume (auth.ts :826/:827, :870/:871); the read-back is scoped to the
+  UPDATE's tenant (:838-840 hoisted, :883 `getUserById(id, tenantForRls)`); develop's KS-943 0-row arm (:871-878) kept.
+develop: 0f69129b3156d3adaf0af534a6527b9c3a8d3519 = the PR's parent AND its merge-base (compare: ahead 3 / behind 0, 9 files —
+  one number, not three). #930 (7e5ae31d8) is open and `dirty`; #970 (ae274f7cb, KS-963) is the other open auth branch and
+  SHARES userRepo.ts by name with #972 (hunks disjoint) — you merge it locally and drive the interplay.
+Repo:    /Volumes/DevMASTER/!CODING/Secuura/Blockchain/2_Project_Files  (READ-ONLY — clone by SHA into your own scratch)
+Prior:   #930 round 1 (NO GO, d491c72c1) report at
+  /Volumes/DevMASTER/!CODING/Testing Agent MAIN/projects/secuura-blockchain-auth/reports/2026-09-09-pr930-ks1052-tier1/report.md
+  (NOT under projects/secuura/); its evidence/ holds the live-RLS probe files. Round 2 of #930 was never gated.
+
+You are FINDINGS-ONLY. You never fix, never merge, never push, never deploy.
+
+NEVER run a push, the real pre-push hook, or preflight.sh inside the Secuura checkout or any of its worktrees.
+
+NEVER print a credential value, and never open, read or copy a secrets file (any .env, config/secrets.yml). Count, never echo.
+
+Seven things you must not miss:
+
+1. THE CONFLICT HUNK IS THE HIGHEST-RISK LINE OF THIS PR. Read userRepo.ts :825-884 at b3ce8c9e7 against develop's :811-859
+   and #930 round 2's (7e5ae31d8) :802-818 and assert, quoting lines: develop's `const result = await query(` :845 with
+   `tenantForRls` as its third argument; the KS-943 arm `if (result.rowCount === 0) { … return null; }` :871-878 intact
+   INSIDE `if (setClauses.length > 0)` :842; `const tenantForRls` exactly ONCE at :838, ABOVE the `if`; `return
+   getUserById(id, tenantForRls)` :883 with `getUserById(id, tenantId?)` at :403 passing it to query() at :405; exactly
+   THREE hunks in the file's diff from develop; 0 conflict markers in EVERY committed blob of the branch (nine files x
+   d58c9d279, 8e454ecf4, b3ce8c9e7) with 21c5ad4bd — the builder's amended-away marker commit — as the positive control
+   (3 lines), not an ancestor of the head, at 0 origin refs. Either half dropped is a Blocker.
+
+2. THE PRODUCT PATH OVER REAL HTTP through the real routers at BOTH SHAs (develop 0f69129b3 and b3ce8c9e7): reset-password,
+   verify-email, login-with-backup-code — ordinary shape (200, write landed, token consumed / code burned), and cause (a)
+   live via a MISMATCHED x-tenant-id (develop: 200 + consumed + write NOT landed = the headline defect; head: 503 + NOT
+   consumed). Read `docker ps` FIRST: daemon up -> disposable qa972-* postgres:15-alpine + the repo's own docker/init +
+   scripts/run-migrations.sh, secuura_app NOBYPASSRLS, superuser control connection, exactly the #930 round-1 method (its
+   probe files are in evidence/); daemon DOWN (it was at 16:14 AEST) -> do NOT start it (the shared secuura-* stack may
+   come up with it) — record the live leg NOT RUN with the blocker named and drive the same rows through the real routers
+   over the ../db stub shaped per the brief's §2a. Plus the burn-site A1 one layer up: POST /api/auth/login with a valid
+   backup code, real authRoutes + real passwordLoginGate + real userRepo, db stub rowCount 0 with a visible read-back ->
+   503, one UPDATE on mfa_backup_codes, 0 read-backs after it, no tokens; rowCount 1 -> 200 + tokens.
+
+3. RED-PROOF WITH TESTS RUNNING and a runner that names red cells by TITLE (the builder's runner scored the sibling
+   suite's cells as `MODEL` — it matched T1/T2 by COUNT, not by which cell): 15 cells (12 + 3) must RUN per tamper.
+   Re-derive: develop's passwordLoginGate.ts swapped in -> A1 red `resolved "{ ok: true }"`; C0 -> A2; T1 (scope
+   reverted) -> :261, :269, :276 + A2; T2 (both auth.ts guards reverted) -> :188, :195, :216, :223, :308; T3 (0-row arm
+   removed) -> A1 only. Then the gate's own: Tg swap auth.ts :826/:827 (consume BEFORE the check) -> exactly :195; Th
+   `if (!updated)` -> `if (updated === undefined)` -> :188, :195, :216, :223, :308, A1; Tj drop the third argument at
+   getUserById :405 keeping the signature -> :261, :269, :276, A2 (if :276 stays green, the "fix pinned directly" cell
+   pins a signature, not a behaviour). Full auth vitest per tamper (49 files / 672 expected; develop 47 / 657), SOLO,
+   restore sha-identical (userRepo.ts 5720ac8beb5569d8…, auth.ts c1c3515cbb5b7a18…, passwordLoginGate.ts
+   399d3992c33e2295…), green again.
+
+4. THE SEVEN POST-AUTH SITES DRIVEN — mfa.ts :218/:374/:412 and users.ts :974/:1041/:1074/:1108 — the builder converted
+   and type-checked them and never drove them. Mount mfaRoutes / userRoutes with authenticate and ../db stubbed exactly as
+   ks732-mfa-disable-proof.test.ts does (real userRepo): rowCount 1 -> 2xx; rowCount 0 -> 503 SERVICE_UNAVAILABLE whose
+   message starts with the route's operation string and never says "the change was not applied", and no backup codes /
+   secret handed out on the 503. Plus the ONE deliberately unconverted site (mfa.ts :239-251, the revert in the catch):
+   400 either way and an error log when the revert does not land. 16 cells. A route you cannot drive is named with WHY.
+
+5. THE MERGED TREES in your own clone: #970 ae274f7cb into b3ce8c9e7 (3-way on 163ca2c74; SHARED file userRepo.ts, hunks
+   @@ -443/-458 vs @@ -386/-808/-855 — expected clean; a conflict is a finding against the PR body's "no overlap"). Then
+   the interplay: #970 makes getUserByIdPreAuth RETHROW on an infrastructure error and #972's hoist calls it at :840 on
+   every pre-auth updateUser, no-clause path included -> drive one row with the carve-out throwing: 503, 0 UPDATEs, token
+   NOT consumed. Both ks1052 files + ks963-preauth-rethrow.test.ts on the merged tree, then the full suite, SOLO, counts.
+   If develop moved past 0f69129b3, merge it too and prove its delta disjoint by name.
+
+6. THE BUILDER'S NOT-COVERED LIST, reproduced item by item, each MEASURED or declared out of reach with the instrument:
+   F-3 Schemathesis (READ ONLY re-derivation at head: schemathesis_tests.yaml :639 `^/api/auth/` exclusion, the :746
+   comment, verify-email absent from the spec, auth.openapi.ts :66-67 — do NOT run the sweep, it is a null measurement);
+   F-4 MEASURED (an all-undefined update object -> a User returned, 0 UPDATEs, and now — the hoist — the carve-out
+   SELECT + scoped read-back issued anyway) + the census of the ten sites for a producible one; F-5 READ ONLY (users.ts
+   :1254, :1337 still discard); KS-1050 users.ts :933 READ ONLY — NOT converted, NOT this PR's, does not close with #972,
+   under NOT TESTED; the MFA routes -> item 4; live RLS -> item 2.
+
+7. THE CLAIMS AUDIT of the PR body and the class hunt: "merge-tree clean, no overlap" (true at hunk level, FALSE at
+   file level — say both); "mfa.ts auto-merged with an offset (a45204ac9 sits above #930's hunks)" (+25/+75/+75, content
+   identical?); "21 of 24 callers" (your census and its instrument); 49/672 and 47/657; the doc comment :886-916 "already
+   read correctly"; the sibling header's "#929 is on develop as 9e13a434f"; "nothing outside services/auth". Class:
+   mfa.ts :374-379 and users.ts :1108-1113 send `undefined` for mfaSecret/mfaBackupCodes, which updateUser SKIPS (:784) —
+   a 200 "MFA disabled" that leaves the secret and codes stored, pre-existing, Open; db.ts :53-60 the tenantManager pool
+   path skips the GUC; the NULL-tenant row (039 :63-74 backfills); any other pre-auth getUserById(id) caller still blind.
+   Then the verdict on b3ce8c9e7.
+
+Your tool shell's grep may be a function: use /usr/bin/grep, case-insensitive, with a same-file control. Never cd.
+services/auth is VITEST (npx vitest run, never watch), not jest; tsconfig excludes src/__tests__ so tsc says nothing about the tests.
+Never touch a container not named qa972-*; never the :6882 stack; never a Secuura environment (demo/UAT HELD).
+Quote the Secuura checkout's porcelain count, .git/config sha256, for-each-ref count and origin develop / pull/972 / pull/970 SHAs at start and close; they must match (name any ref another seat's push or merge moved).
+Do no memory maintenance of your own project's memory store inside this session.
+
+Report FOUND / TESTED / HOW, with controls, the §2a table with your measured develop / head columns, and state what you did NOT test — the live-RLS leg first if the daemon was down, then KS-1050.
+Verdict: GO, GO WITH FINDINGS, or NO GO — on b3ce8c9e7.
+
+MAIL YOUR VERDICT to wednesday-agent@agentmail.to when the pass is complete, using
+the project's send_brief.sh. Your pane holds ~19 lines of alternate screen with no
+scrollback, so a verdict that stays in the pane is one pane-close from being lost --
+this is not a formality, it is the only durable copy. Subject:
+[QA -> Wednesday] TIER 1 GATE #972 ROUND 1 (KS-1052) b3ce8c9e7 -- <GO|GO WITH FINDINGS|NO GO>
