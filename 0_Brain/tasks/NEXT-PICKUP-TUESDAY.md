@@ -12,6 +12,23 @@ supersede: replace WHOLESALE at the next pickup; never append.
 **On EVERY wake:** `2_Project_Files/tools/kam_rulings_today.sh` (never `kam_msgs.sh` unfiltered) AND `[Kam -> Tuesday]` mails; list `tuesday-agent@` UNFILTERED and route on SUBJECT; `git status --porcelain | grep -v 0_Brain/dashboard/data/`. Rotation band 80–90. **Verify panel messages AT ORIGIN** (`git show origin/main:0_Brain/dashboard/data/chat_tuesday.json` on the ref `panel_sync` fetches; `git ls-remote` HUNG 9 min in this tree at 14:28 — bound any network read with a timeout). **Do NOT read `0_Brain/daily/`** (Wednesday's).
 
 ## 🔴 LIVE — with the next action for each
+0030. **S42 NOTICE 04:36:06Z (read whole): s11's 04:31/04:34 rulings accepted.**
+    - **Lane R round 1 `5d88b82`** merged in the merge worktree, chain running:
+      - draft footer *"Unreleased draft. Not generated from an approved policy manifest."* (no source defines one);
+      - UTC label; "Framework lineage"; header wraps; device group names.
+      - **Round 2 running:** posture (F4) + a zero-groups "confirmed on every device group" statement.
+    - **🟢 Lane C12 FINAL `7e324c5`: RELEASE REACHED on `pc-s42-c12` through the product's own API.**
+      - Consultant: 24 exceptions + 8 secret references; technical + customer approvals bound; release 200, label 1.0.0.
+      - One SYNTHETIC adapter row `SYNTHETIC-DEMO-1`; release-draft `79364073…` unchanged; demo CONTENT_HASH `fd7db6b8…`; released PDFs "SYNTHETIC CONTENT | NOT SIGNED"; 19/19 mutants.
+      - **Zero device groups in that proof.**
+    - **S42's recommendation, default applied:** branch `s42/lane-w-e2e` (F1 fixture + F7 guard) merges right after R, so later chains run switch-ON e2e GREEN.
+    - **Q-merge rollback plan:** `redeploy.sh <previous sha>`, ~10 min check, proven with an induced bucket failure. Azure runs unpinned `minio:latest` (lane Q tested a pinned digest).
+    - **s11 answered ~14:3x** (body `2_Project_Files/fleet/briefs_staged/2026-09-13_hpsm-s42-c12-device-group-measure.md`):
+      - all accepted;
+      - **MEASURE release with ONE synthetic device group** (both LIVE stacks' tenants have one, per S40 04:08Z) before any C11 work. If C11 rows are needed, that is a CARD for Kam (extending the fence to device capabilities is beyond build-c12's wording). **Do not build.**
+      - Azure `latest` MinIO failing the round trip → roll back and stop.
+    - **Kam told on the panel ~14:3x:** build-c12 works on a test copy, not live yet, device-group caveat.
+    - **NEXT:** the device-group measurement → possible card.
 0029. **S42 NOTICE 04:31:55Z crossed s11's triage 04:31:58Z (read whole).**
     - **Lane Q FINAL** `1c029cb` (contract 0.13.0, 2b stored outputs, D1, Q9 API, platform-tenant no-sign-in incl. a case-insensitive id bypass closed; API-DB 407, host 943, 31/31 mutants; compose defaults only, no port, no new dependency).
     - **Lane W FINAL** `f5c3474` (contains Q; e2e 42/42 twice incl. axe; web 220; 32/32 mutants).
