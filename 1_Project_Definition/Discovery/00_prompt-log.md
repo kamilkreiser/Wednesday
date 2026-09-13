@@ -2297,3 +2297,8 @@ Done with it: Dynamics → Kam's team decision (no action); QuickQuote masthead/
 > You can please look at the HPSM initial project brief and write a testing harness prompt to test the platform from a security perspective as well as from a deliverables perspective against the original brief. Include links or the paths to the original briefing documents so that the testing agent can reference these during its testing.
 
 *Note:* Tuesday s12: receipt given in the terminal; an Explore agent is inventorying HPSM's original briefing documents (paths + sections) read-only; the QA brief + prompt are written from that inventory and the QA template, security + deliverables-vs-original-brief.
+
+## 2026-09-13 17:49 — Kam (terminal, verbatim)
+> tell me when the HPSM agent finishes and where the testing briefs are located
+
+*Note:* Tuesday s12: receipt given; background watcher armed on HPSM/QA-HPSM mail to tuesday-agent@ and S43 PID 1666 exit (6 h cap); brief paths answered in the terminal and pointed to on the panel.
