@@ -79,18 +79,9 @@ else
   if [ -z "${ROTATE_TMUX_SESSION:-}" ] || [ "${ROTATE_SELF_GIT_CHECK:-1}" = "1" ]; then
     git -C "$PROJECT_DIR" fetch -q origin main 2>>"$LOG" || { log "REFUSED (--self): git fetch failed (see log)"; exit 4; }
     LOCAL=$(git -C "$PROJECT_DIR" rev-parse HEAD 2>>"$LOG"); REMOTE=$(git -C "$PROJECT_DIR" rev-parse origin/main 2>>"$LOG")
-    # 2026-09-13 15:5x: EQUALITY was the gate until today, and it became structurally
-    # unpassable — two seats and two panel_sync loops push every minute, so origin moves
-    # in the seconds between the fetch and the compare (three refusals in one rotation;
-    # the guard's condition had become NORMAL, not exceptional — learnings/2026-09-10_
-    # a-refusal-nobody-reads-is-indistinguishable-from-working). The property the gate
-    # exists to prove is "nothing local is unpushed" = HEAD is an ANCESTOR of origin/main.
-    # A remote that is AHEAD is fine (the successor pulls at boot); a HEAD with commits
-    # origin lacks is the only refusal.
-    if [ -z "$LOCAL" ] || ! git -C "$PROJECT_DIR" merge-base --is-ancestor "$LOCAL" "$REMOTE" 2>>"$LOG"; then
-      log "REFUSED (--self): HEAD $LOCAL is NOT contained in origin/main $REMOTE — push the handover first (rhythm §3 item 3)"; exit 4
+    if [ -z "$LOCAL" ] || [ "$LOCAL" != "$REMOTE" ]; then
+      log "REFUSED (--self): HEAD $LOCAL != origin/main $REMOTE — push the handover first (rhythm §3 item 3)"; exit 4
     fi
-    [ "$LOCAL" = "$REMOTE" ] || log "note: origin/main $REMOTE is ahead of HEAD $LOCAL (contained) — the successor pulls at boot"
     DIRTY=$(git -C "$PROJECT_DIR" status --porcelain 2>>"$LOG" | grep -v '0_Brain/dashboard/data/' | grep -v '^?? .*conflict_on_' || true)
     if [ -n "$DIRTY" ]; then
       log "REFUSED (--self): working tree has uncommitted changes outside the dashboard data churn — commit + push the handover first:"; printf '%s\n' "$DIRTY" | head -10 >> "$LOG"; exit 4
