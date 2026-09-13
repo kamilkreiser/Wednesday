@@ -20,6 +20,18 @@ supersede: replace WHOLESALE at the next pickup; never append.
   - (4) any product change G9 flags.
 - **Waiting on Kam:** nothing that blocks tonight. His 18:37 *"keep going until completion"* is the working mode.
 
+## s15 BOOT — rotated in 2026-09-14 00:05:45 AEST (Tuesday s15)
+- **Rotation:** LIVENESS OK 3/3 at 00:06:09; `%9` S45, `%10` feedback gate and `%1` monitor all survived. `%0` renamed back to `wednesday` (rc 0, read back).
+- **Dropped-line diff (first action c):** s14 transcript `db070750` has ONE user text record (its launch prompt, 21:00:15); its 56 enqueues are 42 `<task-notification>` + 14 `[wake_watch]`. **Zero human terminal lines dropped.**
+- **Inbox (`tuesday-agent@`, unfiltered, ~00:07):** newest = S45 STATUS 13:56:34Z (CR GREEN). Nothing newer. `kam_rulings_today.sh`: 0 messages on 2026-09-14.
+- **Exiting watcher ARMED by s15** as a harness background task: `watch_tuesday_exiting.sh 2026-09-13T13:56:35 05:55 78373 72373` (S45 pid + feedback gate pid). It dies with this seat; a successor re-arms it from the newest PROCESSED mail.
+- **Panes at 00:07:** S45 `%9` ctx 44%, "Waiting for 2 background agents" (TK + DM2), main still `d0466da` local, nothing pushed or live. Feedback gate `%10` mid-turn.
+- **Brain:** by-tier digest read whole (5,437 lines, 157 lesson files) + `_ledger_laptop_datasec.md` read whole (110 lines); **statusline after the load: ctx 26%.** Launcher digests committed `d486c597a`.
+- **Linear (board_count.sh):** WED `lesson` open = 0 (real count); WED unstarted+started = 27 (real count). DevMASTER not mounted (expected on the mini).
+- **Panel boot note to Kam 00:10** (no action needed; C11 held for Kam; the 0016 feedback upgrade needs TK's proof + a clean verdict and a warning to Kam before live); origin verification running in the background.
+- **Grant check:** `EXPIRING-GRANTS.md` lists only Secuura/Platform K + kintsugi/demo grants (Wednesday's). HPSM live-demo authority rests on Kam's own 2026-09-13 terminal words (18:37 keep going until completion; 18:51 upgrade as soon as ready), not on a week grant.
+- **Morning sweep** not run: boot is inside quiet hours (00:09 AEST). No voice.
+
 ## ON EVERY WAKE
 - Run `2_Project_Files/tools/kam_rulings_today.sh`, **never `kam_msgs.sh` unfiltered** (it prints Wednesday's tab). Check `[Kam -> Tuesday]` mails. List `tuesday-agent@` UNFILTERED and route on SUBJECT.
 - **A freshness comparison prints COUNTS and TIMESTAMPS only, never `text`** (ledger 2026-09-13, w=2). Any ad-hoc read of Kam's chat store filters `view in ("tuesday", "both", None)` in code BEFORE printing any field. When the rulings tool warns STALE-COPY, compare `git show origin/main:<file>` with the local copy by row count and newest `ts`, and never pull with `--autostash`.
