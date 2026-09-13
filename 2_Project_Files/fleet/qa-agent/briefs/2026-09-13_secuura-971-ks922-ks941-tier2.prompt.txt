@@ -1,0 +1,115 @@
+ultrathink
+
+You are the fleet QA agent running a TIER 2 (through code) gate, ROUND 1, on Secuura/Blockchain PR #971 (KS-922 + KS-941).
+
+Read your brief FIRST and in full, then plan:
+/Volumes/DevMASTER/WEDNESDAY/2_Project_Files/fleet/qa-agent/briefs/2026-09-13_secuura-971-ks922-ks941-tier2.md
+
+Subject: c229aa25622a4a5e4ab19c6e586a04d2a8fdac28 = PR #971 (KS-922 + KS-941), open against develop, ONE commit on top of
+  develop M2 6696c6681 (amended once before push from 13f4e4b97 — same tree 039f3fa0d, two parent-ticket ids
+  stripped from the message). TWO CI-harness shell files, +157 -9, no product code — THIS PR CHANGES CHECKERS:
+  KS-922 orchestrate.sh :119 — the Stage-1 JOIN's `"${stage1_pids[@]:-}"` expanded an EMPTY array to one empty word
+    on bash 3.2, so `wait ""` failed and the run logged "a Stage-1 job exited non-zero" about a job that never existed;
+    now `${stage1_pids[@]+"${stage1_pids[@]}"}` (the Stage-2 JOIN's idiom) + a why-comment :111-118 + the Stage-2
+    comment rewritten :173-175.
+  KS-941 orchestrate_jobs.test.sh — `[ -r "$ORCH" ]` guard :54 beside the `[ -f ]` one, BEFORE the SUBJECT printf;
+    skipped=0 + skip() :66; CELL 12/16/17 skip branches; totals "N passed, M failed, K skipped" :538; and RULED
+    Q1 (b) 2026-09-13 (STANDING_LINES rule 2, SUPERSEDES the ticket's counter-only shape): K > 0 exits 1 (:540).
+    CELLS 14-17 new: 13 cells at base -> 17 at head. The brief's section 2a LEGITIMATE-SHAPES tables (A the JOIN,
+    B the subject guard, C the totals/exit rule) are the input set; you drive every row, cell by cell.
+develop: 0f69129b3156d3adaf0af534a6527b9c3a8d3519 = M3 (#932's squash at 15:34 AEST, one file startup-migrations.ts,
+  disjoint). M2 IS an ancestor of M3, so git merge-base = the GitHub compare merge-base = 6696c6681; the M2..M3 delta
+  touches nothing under Blockchain/Testing or Blockchain/Dev/scripts. git diff M2..head = the 2 files; M3..head = 3
+  (develop's startup-migrations.ts reversed) — the subject is the 2.
+Repo:    /Volumes/DevMASTER/!CODING/Secuura/Blockchain/2_Project_Files  (READ-ONLY — clone --shared by SHA into your own
+  scratch and use detached WORKTREES: CELL 1 reads the git INDEX of the repo the harness sits in; a plain copy reds it)
+
+You are FINDINGS-ONLY. You never fix, never merge (outside your own clone), never push, never deploy.
+
+NEVER run a push, the real pre-push hook, or preflight.sh inside the Secuura checkout or any of its worktrees.
+NEVER run orchestrate.sh directly from any checkout (its :46 rm -rf's $SELF/.findings) — only through the harness or on a
+copy inside your own mktemp -d with FINDINGS_DIR set there. Set TMPDIR inside your scratch for EVERY run: the harness
+(:58 trap, :75) and the orchestrator (:46) rm -rf their own fixture dirs; that is the subject's, inside your TMPDIR.
+
+NEVER print a credential value, and never open, read or copy a secrets file (any .env, config/secrets.yml). Count, never echo.
+Nothing in this gate needs a credential.
+
+Nine things you must not miss:
+
+1. BASELINE, both SHAs, in YOUR worktrees, under /bin/bash 3.2 (quote `bash --version`), SOLO: base 13 passed, 0 failed
+   rc 0; head 17 passed, 0 failed, 0 skipped rc 0; the SUBJECT line's sha256 must read 54bf812d9df3b6a1… at base and
+   9e7bc459e00e1c1c… at head. Count ok/FAIL/skip lines == cells before believing a totals line. bash -n both files, both SHAs.
+
+2. RED-FIRST RE-DERIVED: build the "base-shape harness" — head's harness with the four KS-941 edits reverted by ASSERTING
+   edits (delete :54; skip() -> `skip() { ok "$1"; }`; two-counter totals line; exit rule :540 deleted) — and run it with
+   ORCH_SH = your copy of the M2 orchestrate.sh: predicted EXACTLY `14 passed, 3 failed` rc 1 — CELL 14 red (refusals=6,
+   false sentence YES), 15 green, 16 red (rc=1, SUBJECT printed, no FATAL), 17 red (no line with a skipped counter,
+   ok-lines-saying-skipped=3). Then the same base-shape harness against HEAD's orchestrate.sh: 14 green, 16+17 still red.
+
+3. THE LEAKED-GUARD CONTROL BY HAND: `ORCH_SH=<head copy> KS923_SELFTEST_CHILD=1 bash <head harness>` -> `14 passed,
+   0 failed, 3 skipped`, rc 1, three `  skip` lines (CELL 12/16/17); at base -> `13 passed, 0 failed`, rc 0. Then the two
+   LEGITIMATE children by hand: ORCH_SH="" -> rc 2, stderr `set but EMPTY`, stdout EMPTY; ORCH_SH=<mode-000 copy> -> rc 2,
+   stderr `FATAL: ORCH_SH is not readable`, stdout EMPTY (no SUBJECT line, no totals line). These two make the exit rule
+   safe — measure them. And at base the mode-000 child: SUBJECT printed with an EMPTY sha, 0 FATAL, `3 passed, 10 failed`.
+
+4. THE FIVE BUILDER TAMPERS re-run with an ASSERTING runner (anchor count 1, marker grep + sha256 before colour, score only
+   when 17 cells RAN, restore sha-identical 0d8761dd104d1998… / 9e7bc459e00e1c1c…): T1 `:-` restored -> CELL 14 only;
+   T2 `-r` guard deleted -> CELL 16 only; T3 two-counter totals -> CELL 17 only; T4 exit rule dropped -> CELL 17 only;
+   T5 CELL 12's skip printed through ok -> CELL 17 only. CELL 17 INDEPENDENCE (Wednesday's explicit ask): under T1 quote
+   CELL 17's ok line — the child reads `13 passed, 1 failed, 3 skipped` and CELL 17 stays GREEN. If it reddens, run 1's
+   coupling is back: a finding.
+
+5. THREE GATE-DESIGNED TAMPERS, predictions written before they run:
+   Tg — the bare bash-4 idiom `"${stage1_pids[@]}"` at :119 -> predicted 0 of 17 red: under set -u on bash 3.2 the
+     orchestrator DIES at the JOIN ("unbound variable") after the six refusals and before "Stage 1 JOIN complete", and
+     CELL 14's three clauses are satisfied by the crash. Prove the crash from out.txt on a by-hand stage1-absent fixture
+     (untampered head copy as the positive control: "Stage 1 JOIN complete" and "API up" present). If it holds: Minor
+     coverage finding against #971 — CELL 14 cannot tell the fix from a crash; fix-shape: also require "Stage 1 JOIN
+     complete". If the suite reddens under Tg, the brief is wrong — report that as Wednesday's error.
+   Th — swap :54 and :55 (guard AFTER the SUBJECT printf) -> exactly 1 red, CELL 16 (the ORDER clause is load-bearing).
+   Ti — skip() also increments pass -> exactly 1 red, CELL 17 (parity on `passed` is load-bearing).
+
+6. SECTION 2a DRIVEN CELL BY CELL: every row of tables A, B, C at base AND head — the cell that pins it (its ok line quoted)
+   or your by-hand drive: the all-present fixture's out.txt has NO Stage-1 sentence (both SHAs); two failing jobs -> the
+   sentence twice; one-missing -> no sentence; symlink / absent path / directory subjects; KS923_SELFTEST_CHILD=true and
+   ="" -> full 17/0/0 runs; the bash >= 4 row measured or UNMEASURED with the instrument. State the direction of every move:
+   a legitimate shape REFUSED at head that passed at base is Blocker-class; a defect shape PASSED at head is Major.
+
+7. THE CONSUMER, SOLO, in your head worktree: `bash Blockchain/Dev/scripts/run-shell-suites.sh` -> `shell suites: 25
+   passed, 0 failed (of 25)` rc 0 (builder 189 s); `--check-unreached` OK all 25; then with KS923_SELFTEST_CHILD=1
+   exported -> `24 passed, 1 failed (of 25)` + FAILED naming the harness, rc 1 — the ruled shape reaching preflight leg
+   14 (the runner scores rc only, :224/:233, unchanged; the variable is named in exactly ONE tracked file). Another
+   suite failing for a fixture reason is NOT RUN with the blocker named, not a finding. KS-1127 (the runner-level
+   class) is NOT COMMISSIONED.
+
+8. THE MERGED TREE: in your own clone, merge M3 0f69129b3 with c229aa256 (3-way on M2, NOT a fast-forward): clean; the 2
+   files == head's, everything else == M3's; the harness on the merged tree 17/0/0. If develop moved past M3, merge the
+   then-current develop and prove its extra delta disjoint by name.
+
+9. CLAIMS true as written: the PR body's per-file "+11/-3" and "+146/-6" (measured +12 -4 and +145 -5; totals agree);
+   ":111 at base", "#869 :168", "the ticket's verbatim shape"; the head comments :111-118, :173-175, :428-431 ("the
+   six refusals are asserted BY NAME-COUNT so the cell cannot pass by the run dying before the JOIN" — judge it against
+   Tg), :503-507, :532-537; the docs section-4 statement ("both Projects Documents/*.html name orchestrate.sh once, as
+   the TIER input only" — TRUE for the two section-4 docs; a third html, KS-666-Shared-Stack-Safety-Evidence.html:297,
+   also names it, pre-existing, outside section 4 — a curio; the four prior harness commits touched no section-4 doc);
+   the docker-build.sh:238-239 items carried to the builder's PR-3 BY STATEMENT — their absence is NOT a finding; the
+   branch names Linear derives for KS-922/KS-941 carry ks-868/ks-923 — a known trap, NOT a finding. Then the verdict on
+   c229aa256.
+
+Your tool shell's grep may be a function: use /usr/bin/grep, case-insensitive, with a same-file control. Never cd.
+zsh: write "${H}:path" not "$H:path"; a word starting with = aborts; no PIPESTATUS. git rev-parse --verify takes ONE
+revision per call; symbolic-ref and worktree list are refused against the Secuura checkout (use rev-parse --abbrev-ref).
+Quote the Secuura checkout's porcelain count, .git/config sha256, for-each-ref count and origin develop SHA at start and
+close; they must match (name any ref another seat's push or merge moved — four builder seats are live on it).
+Do no memory maintenance of your own project's memory store inside this session.
+
+Report FOUND / TESTED / HOW, with controls, the three section-2a tables with measured base/head columns and a direction
+column, the tamper table (T1-T5, Tg, Th, Ti: prediction / cells RAN / passed / failed / skipped / red titles / restore
+sha), and state what you did NOT test — preflight, the hook, docker/trivy/stack, run-internal-audit.sh, bash >= 4, root.
+Verdict: GO, GO WITH FINDINGS, or NO GO — on c229aa256.
+
+MAIL YOUR VERDICT to wednesday-agent@agentmail.to when the pass is complete, using
+the project's send_brief.sh. Your pane holds ~19 lines of alternate screen with no
+scrollback, so a verdict that stays in the pane is one pane-close from being lost --
+this is not a formality, it is the only durable copy. Subject:
+[QA -> Wednesday] TIER 2 GATE #971 ROUND 1 (KS-922 KS-941) c229aa256 -- <GO|GO WITH FINDINGS|NO GO>
