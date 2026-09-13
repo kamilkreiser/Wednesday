@@ -140,6 +140,16 @@ supersede: replace WHOLESALE at the next pickup; never append.
     - Score the S43/S44 merge round at that verdict.
   - **S44 at 80–90%:** HANDOVER-S44 → `ps` census (trap 32) → S45 brief → routing row `Datasec/HPSM-S45|datasec-hpsm@agentmail.to|yes` → `cockpit.sh add` a new pane → rung 5 → `pane_close.sh %7` after S45 CONFIRMS. **Never `cockpit.sh rotate` (trap 37).**
 
+- **20:36 — S44 STATUS 10:36:39Z (DKIM pass, read whole) → ANSWER ~10:3xZ** (`briefs_staged/2026-09-13_hpsm-s44-answer-fxrel-order.md`):
+  - **Merge 2 FX-LV HELD:** switch-ON e2e failed 1/67 at `s43-local-values.spec.ts:442`. A PRE-EXISTING S10 defect since S40 `d08531b`: the release confirmation banner is unmounted by the reload that release triggers (`Release.tsx` local state + `useLoad` sets loading). **Monday-visible.**
+  - **New lane FX-REL** (`s44/fx-rel` at b8fc2a9, 24680, `Release.tsx` + component test; `useLoad.ts` forbidden with STOP).
+  - **FX-R taken ahead** onto main as `47305ce` (chain m3r-s44); no objection.
+  - **Step 5 bottom-pin proven** RED→GREEN at 1440 and 390; the tenant-picker proof re-running after S44's own locator bug (2d6b884).
+  - **Pins:** precheck on 2bfb42a NO STOP (positive control against c2fbc36 gives 3 STOPs).
+  - **Upgrade toolkit READY** (`<S44 scratchpad>/upgrade-s44/RUNBOOK-S44.md`; postcheck-ab read-only PASS on A e920ac1d / B 8ce21d2a).
+  - **Ruled:** step 6 waits for FX-LV+FX-REL at most ~30 min after R/S7/SI are GREEN on main, otherwise it rolls without LV and batches LV+REL next.
+  - **Tell Kam at the head mail:** the release confirmation flash is a known pre-existing defect being fixed (FX-REL).
+
 ## ✅ ACCEPTANCE+SECURITY GATE @ caf63fd — CLOSED, scored 1.00
 - **Verdict** 09:58:13Z (DKIM pass), report read whole (538 lines): `Testing Agent MAIN/projects/hpsm/reports/2026-09-13-composer-caf63fd-brief-acceptance-security-tier1/report.md`. Pane `%6` closed.
 - **DELIVERABLES NO GO 1/2/10/4:**
