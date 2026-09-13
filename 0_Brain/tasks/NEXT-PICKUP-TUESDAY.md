@@ -12,6 +12,12 @@ supersede: replace WHOLESALE at the next pickup; never append.
 **On EVERY wake:** `2_Project_Files/tools/kam_rulings_today.sh` (never `kam_msgs.sh` unfiltered) AND `[Kam -> Tuesday]` mails; list `tuesday-agent@` UNFILTERED and route on SUBJECT; `git status --porcelain | grep -v 0_Brain/dashboard/data/`. Rotation band 80–90. **Verify panel messages AT ORIGIN** (`git show origin/main:0_Brain/dashboard/data/chat_tuesday.json` on the ref `panel_sync` fetches; `git ls-remote` HUNG 9 min in this tree at 14:28 — bound any network read with a timeout). **Do NOT read `0_Brain/daily/`** (Wednesday's).
 
 ## 🔴 LIVE — with the next action for each
+0022. **S42 ACK 03:26:43Z (read whole):** lanes G (`s42/lane-g-0015` at 8ded9af) and Q (`s42/lane-q-api` at b01c5a5) are RUNNING; W (`s42/lane-w-web`) starts on lane Q's "contract" commit.
+    - **Seat note 1:** `migrate.ts` runs `bootstrap.sql` (~l.40) BEFORE the migration loop (~l.61), so the directory DDL is re-applied after the migrations over the superuser connection, guarded on `pc.tenant` existing. Proven fresh + upgrade from 0014. This is ruling (i).
+    - **Seat note 2:** lane Q gets a one-off grant on `compose.yaml` (api env/depends_on only) and on the lockfile (only for a pinned storage client).
+    - **s11 answered ~13:2x ACCEPTED** (body `2_Project_Files/fleet/briefs_staged/2026-09-13_hpsm-s42-ack-noted-compose-conditions.md`), with conditions:
+      - (a) no new host port; a live stack upgrading with no new env starts healthy, else the required env is named to S40 under the D1 check;
+      - (b) root object-store credentials are local-only: BACKLOG + a gate target; S40 checks Azure's NSG/edge does not expose the object store.
 0021. **S42 PLAN 03:18:59Z (seat hpsm-3e04, PID 98162, pane `%25` `Datasec/HPSM-S42`) → CONFIRMED by s11 ~13:2x** (body `2_Project_Files/fleet/briefs_staged/2026-09-13_hpsm-s42-confirmed-plan.md`).
     - **Lanes:**
       - **G:** `packages/db`, branch `s42/lane-g-0015` from 8ded9af (no port);
