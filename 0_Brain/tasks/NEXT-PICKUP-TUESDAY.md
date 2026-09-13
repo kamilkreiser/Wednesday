@@ -2,352 +2,256 @@
 date: 2026-09-13
 type: pickup
 scope: DATASEC ONLY — Tuesday, on Kamils-Mac-mini (T9 drive). Secuura and general are Wednesday's, on the Studio.
-source: written WHOLESALE by Tuesday s12 at ctx ~58%, 2026-09-13 17:4x AEST (s12 booted 16:48 on Kam's hand restart). The previous pickup (s11, items 0000–0037, traps 1–39, WITH KAM list, OWED list) is kept VERBATIM at `0_Brain/tasks/NEXT-PICKUP-TUESDAY.md.pre-1740`. Read its TRAPS, WITH KAM and OWED sections; its LIVE items are superseded by this file.
+source: drafted for Tuesday s13 by a subagent, REVIEWED AND AMENDED by s13 at 20:32 (S44 state to 10:30Z, watcher MARK, panel-note verification, Monday-list item). Built from s12's pickup plus its s13 blocks, `NEXT-PICKUP-TUESDAY.md.pre-1740` (traps, WITH KAM, OWED), the 2026-09-13 rows of `_ledger_laptop_datasec.md`, the four `briefs_staged/2026-09-13_hpsm-s44-*.md` mails, HANDOVER-S43 S1 plus addendum 1, and Kam's lines extracted from transcripts b511be06 (s12) and 886e95a5 (s13).
 status: live
 supersede: replace WHOLESALE at the next pickup; never append.
 ---
 
-# NEXT PICKUP — Tuesday s13 (written by s12)
+# NEXT PICKUP — Tuesday s14 (written by s13)
 
-**On EVERY wake:** run `2_Project_Files/tools/kam_rulings_today.sh` (never `kam_msgs.sh` unfiltered) and check `[Kam -> Tuesday]` mails. List `tuesday-agent@` UNFILTERED and route on SUBJECT. Run `git status --porcelain | grep -v 0_Brain/dashboard/data/`. Rotation band is 80–90. **Verify panel messages AT ORIGIN** (`git show origin/main:0_Brain/dashboard/data/chat_tuesday.json`). **Do NOT read `0_Brain/daily/`** (Wednesday's). Kam also types straight into this terminal session: those lines are first-party.
+**BLUF.** **One decision waits on Kam: go or hold on live gate fix "b-tight".** Until he answers, the public demo URL is unusable past sign-in.
+- **S44 (pane `%7`) is merging the fix round** toward one rolling upgrade. S43 and every QA pane are CLOSED; the acceptance+security gate is scored and routed.
+- **Tuesday s14 first:** the rotation checks, then the transcript diff (below), then the unfiltered inbox.
 
-## 🟢 s13 BOOT 19:04–19:08 (rotation successor; this block is the only s13 addition so far)
-- **Rotation 19:04:15** by s12 (`--self` after renaming `%0` to tuesday): `respawned OK` + **`LIVENESS OK: 3/3 agent panes present`** (`2_Project_Files/fleet/cockpit/logs/rotate_wednesday.log`, 19:04:39). **`%0` renamed back to `wednesday` at 19:05 (rc 0)** so `arm_wake_watch` taps land.
-- **Brain whole:** by-tier digest 5,437 lines (last heading asserted) + own ledger 101 rows → **ctx:37%**. WED board 27 active, 0 `lesson` (`board_count.sh`). Kam's panel today: 5 shown (view=tuesday), nothing after 18:02. Newest PROCESSED mail = S43 REPORT 08:58:40Z; nothing newer at 19:06.
-- **Floor at 19:07:** `%5` S43 (claude pid 1666, ctx 68%, e2e spec-2 under the docker lock + feedback vitest), `%6` QA/HPSM-ACC (claude pid 83570, running), `%1` monitor. Shared wake runner `wake_watch.sh` pid 85562 alive (baseline 08:58).
-- **s13 exiting watcher** (harness background task, dies with this seat): `watch_tuesday_exiting.sh 2026-09-13T08:58:41 23:55 1666 83570`.
-- Panel note to Kam 19:08:00 (fresh seat, agents survived, fix round + live acceptance test running, nothing needed) — **VERIFIED AT ORIGIN** 19:08:40 (`git show origin/main:…/chat_tuesday.json`, row 188, origin `f1e98441cf`).
-- Prep read 19:08 (read-only): no `HANDOVER-S43*` in HPSM `5_Project_History/` yet; routing has rows for HPSM, HPSM-S42, HPSM-S43 (an S44 row is still to add); the ACC report directory holds `evidence/` only, no `report.md` yet.
-- 🔴 **19:1x — KAM ASKED "Did you get my instructions from the last boot?"** s13 extracted s12's human lines from its transcript (`4_Credentials/.claude/projects/-Volumes-KK-T9-External-HDD-TUESDAY/b511be06-6fe0-42f7-8fc5-eafb0c334965.jsonl`): ten lines, nine carried. **DROPPED: 19:01:39 "In the HPSM sign-in page, each of the sign-in options needs a much better description of what the options mean. Make this description in gray with a much smaller text at the bottom. Of each tile."** It was queued mid-turn and removed at the 19:04 respawn. Ledger row w=4 (the successor-boot transcript-diff rule).
-  - Kam told on the panel 19:11:46 (VERIFIED AT ORIGIN). Prompt-logged.
-  - **Relayed to S43 09:14:09Z** (`briefs_staged/2026-09-13_hpsm-s43-kam-signin-descriptions.md`; sent copy from tuesday-agent@, preview non-null; tapped `Datasec/HPSM-S43` with `--mail` verified, queued behind its turn). Partition: `SignIn.tsx` is in no fix lane, but `app.css` belongs to FX-S7, so it goes inside FX-S7 or after it merges; S43 names the choice and an ETA in its next STATUS. **NEXT:** confirm the STATUS names it; the sign-in change goes into the delta gate (browser leg). **Mark the relay delivered to Kam only once a READY names its artefact.**
-- **S43 QUESTION 09:09:54Z (feedback product name) → (b) RULED 09:14:10Z** (`briefs_staged/2026-09-13_hpsm-s43-answer-feedback-product-name.md`): brand.ts `productName` on screen, HPSM internally. It SUPERSEDES the brief's "HPSM Policy Composer" string line, citing Kam's 16:53 words "registered against HPSM". W45-p2 stays Kam's. S43's 09:10:46Z CORRECTION (the path is `apps/web/src/brand.ts`) needs no reply; it matches what Tuesday read.
-- **S43 ctx 72% at 19:1x** (70% checkpoint). Its successor S44 comes at its 80–90 wrap, via a brief plus a new pane, **never `cockpit.sh rotate`** (the wake text suggests it; trap 37).
-- **Wednesday COORDINATION 09:14:50Z (DKIM pass, read whole, no reply needed):** she CLAIMS the seat-name resolver unification. The cockpit will name the coordinator pane after the seat, and `wednesday_rotate.sh`, `wake_watch.sh` and `arm_wake_watch.sh` will accept the seat name OR the legacy `wednesday`, scratch-tested for both seats before anything is armed. **Until she mails the commit sha plus the scratch-test output, the pickup's item-5 workaround stands** (rename `%0` to tuesday, `WED_AGENT=tuesday --self`, then the successor renames it back to wednesday). She will not change the pane-name contract without mailing first. She also took the statusline-publisher skip-write proposal as owed.
-- **S43 STATUS 09:17:14Z (DKIM pass, read whole; no reply needed):**
-  - (b) naming is relayed to F-WEB: the name comes from brand.ts, with a scan test and a mutant.
-  - **Kam's sign-in descriptions → NEW lane FX-SI** (`s43/fx-si-signin`, stack pc-s43-si 23680, from caf63fd). It owns `SignIn.tsx`, a new `signInDescriptions.ts` (`Record<Role,string>`), a render test and `e2e/s43-signin-descriptions.spec.ts`.
-  - FX-S7 adds ONE css rule, `.pc-choice-desc`: 11px, `--pc-text-muted`, the existing token. If axe contrast fails, the lane reports the ratio to Tuesday rather than changing the colour.
-  - Content comes from `apps/api/src/authz.ts` (role-matrix comment plus the permission sets). `bridge_operator` must say the Bridge is a stub (I-37). No mention of feedback, no HP marks, and `aria-describedby` on each radio.
-  - **READY ETA about 20:05–20:20 AEST;** it ships in the next rolling upgrade and goes to the delta gate (browser leg).
-  - **NEXT:** on the READY, check the descriptions against authz (completion check) and the contrast result. Warn Kam on the panel before the upgrade restart.
-- Panel note to Kam 19:18:24 (the sign-in change has a lane, ETA 45–60 min, next rolling upgrade). **VERIFIED AT ORIGIN** at 19:20 (row 190).
-- 🔴 **19:2x — KAM (terminal): "I didn't see your response to my question whether you got the instruction before we booted and whether the agent has been advised."** Answered in the terminal, with "no" as the first word. Also posted on the panel at 19:21:41 (local API shows it).
-  - **Why he did not see the 19:11 and 19:18 notes, as measured:** both are at origin, and the Studio has pushed commits since, so its copy pulled them. **But `chat.html:190` `inView()` and `cockpit.html:367` `msgInView()` show a reply ONLY when the panel's active view matches its agent.** Tuesday's rows are `agent: tuesday`, so they are **hidden on the WEDNESDAY tab**. His latest typed panel row (18:17) is `view: wednesday`.
-  - **Which tab he was on is UNMEASURED** (per-browser localStorage on the Studio). Kam was told to switch to the orange TUESDAY tab.
-  - **Rule until settled:** a question Kam asks in THIS terminal is answered in the terminal, with the yes/no in the first words; the panel copy is secondary.
-- 🔴🔴 **19:23 — ACCEPTANCE GATE INTERIM (09:23:04Z, DKIM pass): LIVE DEMO BLOCKER on caf63fd.**
-  - Through the public URL, sign-in works, and every API call after it gets 401 from the Caddy Basic gate. The app shows "Your session ended".
-  - **Cause:** the gate and the API both need the `Authorization` header. Verified at source by s13: `apps/api/src/auth.ts:44` accepts only `^Bearer`, and `apps/web/src/api/client.ts:23` sends `Bearer`. **There is no Caddy config anywhere in `6_Policy_Composer`** (grep "caddy" → 0 files; "basic_auth" appears only as a secret-detector pattern in `packages/engine/src/secrets.ts`). **So the gate is VM-only state**: the fix is an operator change on the VM, and the repo holds no record of it — note for the Monday redesign.
-  - **s12's 19:00 "upgraded and back up" note was verified only by a 401 challenge plus a 200 sign-in page**, never an authenticated call through the gate. Ledger row.
-  - The gate is NOT creating its live tenant. Live walk-through probes 2/3/5/7/9/11/12/13 will be NOT TESTED on live and are running on its local stacks instead.
-  - **Kam ASKED on the panel at 19:24:59 (VERIFIED AT ORIGIN at 19:26) and in the terminal: "go" or "hold" on fix (b)** (Basic stays on everything except `/api/*`; the API keeps its bearer check; `/idp/*` stays gated). **Default until he answers:** S43 prepares and measures only, nothing applied on Azure.
-  - **S43 briefed 09:25:25Z** (`briefs_staged/2026-09-13_hpsm-s43-urgent-live-gate-blocker.md`; tap `--mail` verified, prompt clear). The ask: reproduce through the public URL; stage (b) on pc-lane-a with a rollback; measure `/api/*` unauthenticated answers (**a 200 with data and no bearer = STOP**); `/idp/token` still challenges; send a READY-TO-APPLY; add a public-gate browser sign-in + S1 check to every upgrade post-check.
-  - **NEXT:** (1) on Kam's go, relay it verbatim (a KAM mail) and S43 applies with a head mail first; warn Kam about the restart. (2) On READY-TO-APPLY, read the `/api` exposure list before relaying anything. (3) After the fix, commission a re-run of the live half of the acceptance gate (the NOT TESTED probes).
-- 🟢 **20:30 checkpoint (s13, ctx 70%). Newest S44 state; a wholesale S14 pickup draft is being written by a subagent to the s13 scratchpad `NEXT-PICKUP-TUESDAY.draft.md`, and these lines must be folded into it at review:**
-  - **Merge 1 GREEN (S44 STATUS 10:24:25Z):** LOCAL main = `2bfb42a` (FX-M1 + fixture fix; CI GREEN; switch-ON 63/63 zero-failure), NOT pushed. Merge 2 FX-LV `b8fc2a9`: checks and e2e OFF GREEN, CI and switch-ON running at 10:28Z. The 10:21 ruling is applied (D-S44-12, analysis 3757c6d). C11's own test needs customer-approver-a granted in its synthetic tenant (goes in C11's relaunch brief).
-  - **S44 QUESTION 10:28:41Z → ANSWER 10:30:10Z** (`briefs_staged/2026-09-13_hpsm-s44-answer-fxpin-q1-q4.md`):
-    - FX-PIN FINISHED GREEN `d82ca16` (refuseStalePin on all 12 state-changing routes; 18 tests; 15/15 mutants; stale-pin stack proof). F-WEB-B FINISHED GREEN `5b8d843` (e2e 70/70 OFF and ON; body-size proof).
-    - **Q1 YES:** createDraft refuses a stale pin, seat commit at step 7. **Q2** leave updateEngagement. **Q3** leave clone ruling (e), BACKLOG marked **FOR KAM'S MONDAY LIST** (a clone after a content upgrade is born stale), carried by Tuesday, not carded.
-    - **Q4 YES:** FX-ID from d82ca16 (problem.ts/context.ts, 24180) and S-m3 from main (secrets.ts, 24480) start now.
-    - **Consequences ruled:** (1) FX-PIN makes stale-pinned engagements READ-ONLY until re-pin exists, so **any upgrade changing pins turns tonight's A/B read-only**; S44 must measure whether steps 1–5 change any pin and put the answer in the head mail, STOPPING if they do. (2) A browser check of the web screens' handling of the new 409s is REQUIRED before any upgrade carries FX-PIN.
-  - **Step-5 branch ready:** `s44/seat-layout` `85cbe2d` = FX-S7 ce62887 + FX-SI bc61c4f + the merged-code bottom-pin proof (≤1 px at 1440 and 390) + `#pc-tenant` max-width 260px CSS + the e2e typecheck (4→0 errors) + the e2e README. Tenant-picker screenshot still to come.
-  - **Kam told on the panel** (20:22:02, verified at origin): the sign-in descriptions are built.
-  - **s13 watcher:** `watch_tuesday_exiting.sh 2026-09-13T10:28:42 23:55 39799`.
-- ✅ **20:20 — FX-S7 FINAL at `ce62887` (S43 NOTICE 10:20:00Z, DKIM pass; verified by s13 at source).** Report 197 lines, no INTERIM; worktree clean; pc-s43-s7 down; S43's detector reads empty. **The bottom-pin is DONE in FX-S7 CSS** (0 px on 9 tiles, contrast 5.34:1). HANDOVER-S43 addendum 1 is `9e68dd9`.
-  - **S43 pane `%5` CLOSED with `pane_close.sh`** (both conditions met: FX-S7 FINAL and S44 CONFIRMED at 09:56).
-  - S44 told (`briefs_staged/2026-09-13_hpsm-s44-answer-fxs7-final.md`): step 4 merges ce62887; step 5 = PROOF of the bottom-pin on merged code; tenant picker `max-width` ruled into the seat's app.css if cheap, otherwise BACKLOG; Q2 moot (one upgrade after step 5).
-- **s13 watcher re-armed on S44 only:** `watch_tuesday_exiting.sh 2026-09-13T10:20:01 23:55 39799`.
-- **20:10 — S44 STATUS 10:10:41Z (DKIM pass, read whole; no reply needed; its default stands):**
-  - **Merge 1 FX-M1 went RED at clean-clone CI only.** `scripts/stack-api-isolation.mjs` created an engagement whose approver had no tenant membership, and FX-M1 now correctly 422s that.
-  - Fixture fix `2bfb42a` grants the `customer_approver` role in tenant A; the product rule is untouched. Chain m1b-s44 is re-running; main is still caf63fd.
-  - Everything else on f80ebc4 was GREEN, including switch-ON e2e 63 with zero failures.
-  - OWN MISS disclosed (commit chained with `;` after a failed prettier check, amended before any chain).
-  - BACKLOG fold is analysis `6958d88`: 19 entries plus 4 updates.
-  - **Engine serial queue (its default, accepted by silence):** C11 → D-M1 → the credential round's engine part. D-M2 splits into API (after FX-PIN and F-API) and engine (after D-M1), landing together. S-m3 runs as its own small lane when a slot frees. Demo STOPs kept.
-  - The Q2 30-minute clock starts when FX-R reaches main.
-- **s13 watcher re-armed:** `watch_tuesday_exiting.sh 2026-09-13T10:10:42 23:55 1666 39799`.
-- **20:03 — S44 STATUS 10:03:37Z (DKIM pass, read whole; no reply needed):**
-  - It acknowledged both the CONFIRMED and the verdict routing.
-  - **Merge 1 FX-M1 `f80ebc4`:** checks and upgrade proof GREEN (vitest 1058, e2e OFF 63); clean-clone CI and switch-ON e2e still running; main NOT moved yet.
-  - **Lanes running:** FX-PIN `s44/fx-pin` (24080) and F-WEB-B `s44/f-web-b` 47eabc8 (24280). S43's FX-S7 is still running, untouched.
-  - **Corrections S44 caught:**
-    - (1) `resolution.ts` is `apps/api/src/resolution.ts`, not `routes/`;
-    - (2) **the handover's nginx one-liner (`location = /api/feedback { client_max_body_size 52m; }`) had no proxy_pass**. As an exact match it would have answered `/api/feedback` itself and never proxied it. The seat commit `s44/feedback-root` 15f2542 repeats the `/api/` proxy lines.
-  - D-M1/D-M2 lanes come in a STATUS before step 6 ends; D-M2 after the feedback merge.
-- ✅ **19:58 — ACCEPTANCE+SECURITY GATE VERDICT (09:58:13Z, DKIM pass; report read WHOLE, 538 lines): DELIVERABLES NO GO 1/2/10/4 · SECURITY GO WITH FINDINGS 0/0/3/1.** Scored 1.00 (scoreboard top). Pane `%6` closed with `pane_close.sh`.
-  - **Routed to S44 ~10:0xZ** (`briefs_staged/2026-09-13_hpsm-s44-answer-acceptance-verdict-routing.md`), fix round 1 of 2 for this NEW class:
-    - D-B1 = the gate fix, waiting on Kam.
-    - **D-M1** (discovery never required; T3 cannot fail) and **D-M2** (exception fields optional) go into S44's queue after the rolling upgrade. **Both carry DEMO IMPACT and STOP for Tuesday before any upgrade that carries them.**
-    - S-m3 goes into the credential round. S-m1/S-m2 (edge) go to BACKLOG with priority, as a post-round edge commit.
-    - Minors go to the BACKLOG fold. D-m6 needs Kam's ruling on A-17. D-p2 is already settled (D1 retired).
-  - **OWED after the gate fix is applied:** re-run the LIVE half of this gate (the walk-through and probes 2, 3, 5, 7, 9, 11–13) as a live-only delta. Use the launcher model `qa-agent/launchers/launch_qa_hpsm_composer_09c1591_brief_acceptance_security.sh`.
-- 🔄 **19:43 — S43 WRAPPED (09:43:26Z, DKIM pass, read whole). HANDOVER-S43 `1a23e93` read whole (154 lines).**
-  - GREEN unmerged: FX-M1 `32684a3`, FX-LV `19a5caa`, FX-R `5eccefd`, FX-SI `bc61c4f`, F-API `8d86395`. F-WEB `a444af6` step A GREEN, step B not started. C11 `bbd85a1` PAUSED.
-  - **FX-S7 is STILL RUNNING as S43's subagent.** Its report is INTERIM and its branch is at `bfebcd4`.
-  - **`%5` stays open until the FX-S7 report is FINAL AND S44 confirms.**
-  - Routing row `Datasec/HPSM-S44` committed. S44 brief: `briefs_staged/2026-09-13_hpsm-s44-successor-merge-seat.md`.
-  - **S44 LAUNCHED 19:47:28 in pane `%7` `Datasec/HPSM-S44`** (`cockpit.sh add`, HPSM's own `Launch_Claude.command`). Before the launch: brief sent, then VERIFIED at 09:47:21Z (sent copy to datasec-hpsm@, preview non-null); census showed exactly 1 HPSM seat (pid 1666, S43). A background rung-5 check is running (pane `%7` + newest transcript under `~/.claude/projects/-Volumes-KK-T9-External-HDD--CODING-Datasec-HPSM/`).
-  - **S44 RUNG 5 PROVEN 19:48.** Its transcript is `~/.claude/projects/-Volumes-KK-T9-External-HDD--CODING-Datasec-HPSM/375c22cb-878d-495f-b5a7-24379c82f071.jsonl`: first user record 09:47:29Z (after the launch); it lists `5_Project_History` + HANDOVER-S43 and reads its inbox; the S44 brief subject appears in it. S44 claude pid **39799**. (A first checker "passed" on S43's own transcript `28f5c90e`, a selector error caught before any report; ledger row.)
-  - **s13 watcher:** `watch_tuesday_exiting.sh 2026-09-13T09:43:27 23:55 1666 83570` (S44's pid not in it; wake_watch covers the pane).
-  - **S44 PLAN 09:55:35Z (DKIM pass, read whole; matched to seat hpsm-375c, pid 39799, pane `%7`, transcript 375c22cb) → CONFIRMED ~09:5xZ** (`briefs_staged/2026-09-13_hpsm-s44-answer-plan-confirmed.md`).
-    - Merge order: M1 > LV > R > S7(FINAL) > SI + bottom-pin (seat) > rolling upgrade > FX-PIN > FX-ID > F-API + root > F-WEB > C11 (content-hash change → STOPS for Tuesday) > the credential round > READY for the delta gate.
-    - Lanes: FX-PIN (24080) and F-WEB-B (24280) start now; FX-ID after FX-PIN; C11 after FX-LV.
-    - **Q1 yes. Q2 yes with a limit:** if FX-S7 is not FINAL 30 min after FX-R reaches main, roll M1+LV+R early.
-    - **Close `%5` when S44's STATUS names FX-S7 FINAL** (it reads the report and gives the head SHA).
-  - **FX-S7 INTERIM 2 (~09:48Z):** head `aa09ffd` GREEN v3 (pill breaks and clipped select fixed), `chain-final.py` running. **Pinning the sign-in description to the bottom needs FX-SI's markup** (a column flexbox plus `margin-top:auto`), so it is NOT on FX-S7. S44's brief already requires it before FX-SI merges.
-  - **NEXT:** rung-5 check of S44 → confirm its plan → close `%5` only once both conditions hold → relay Kam's gate go/hold → the delta gate after the merges.
-- **19:38 — S43 READY-TO-APPLY 09:37:59Z (DKIM pass, read whole): gate fix "b-tight".**
-  - **Reproduced** FAIL in real Chromium through the public URL.
-  - **Replica** of the VM's `/opt/hpsm/Caddyfile` (caddy:2.9-alpine on 23780 in front of pc-lane-a, since pc-lane-a has no Caddy): PASS.
-  - **b-tight** = Basic skipped only for `/api/*` paths without `..`/`%2e`/`%2f`/`%5c`/backslash (case-insensitive). `/api/healthz`, `/api/openapi.json`, `/idp/*` and 11 traversal variants stay behind Basic.
-  - **No-bearer sweep** of 56 operations + 5 extras on pc-s43-up: 53 answer 401; one 405; a few 404s; the only 200s are healthz and openapi, which stay gated. **No STOP.**
-  - **Apply:** `gate/apply-azure-gate.sh Caddyfile.b-tight` over vm-ssh (backup, validate in the container, write in place with the same inode, graceful `caddy reload`; seconds). Rollback is `gate/rollback-azure-gate.sh`. Post-check: `gate/browser-gate-check.mjs` through the PUBLIC URL, the curl set, and smoke. Head mail before touching the VM.
-  - **EDGE FINDING (BACKLOG):** the nginx edge, hit directly, serves `/api/../idp/token` a TOKEN. Not exposed on Azure (edge bound to 127.0.0.1 behind Caddy), but a raw-prefix exemption would be a bypass. The edge should refuse traversal forms.
-  - S43 OWN MISS disclosed; matches the s13 ledger row. Fix lanes FX-M1 32684a3 / FX-R 5eccefd / FX-LV 19a5caa are GREEN and their merge chains are starting.
-  - **Kam re-asked on the panel at 19:39:17 (VERIFIED AT ORIGIN at 19:40:58) and in the terminal, with the measured, narrower trade-off.** **NEXT on Kam's "go":** a KAM mail to S43 quoting his word verbatim; S43 sends the head mail, applies, runs the post-check, reports; then warn Kam and relay the result. **On "hold":** relay it, and the fix goes to Monday's redesign.
-- **19:3x — S43 at 80% (its band).** CHECKPOINT mail `briefs_staged/2026-09-13_hpsm-s43-checkpoint-80.md`: write HANDOVER-S43 at a safe boundary, record the gate work and every subagent's state, wrap to tuesday-agent@, stay at prompt. **NEXT on its wrap:** `ps` census of HPSM claudes → S44 brief from HANDOVER-S43 (draft: s13 scratchpad `s44_draft.md`) → routing row `Datasec/HPSM-S44|datasec-hpsm@agentmail.to|yes` → `cockpit.sh add` a NEW pane → rung 5 → close `%5` with `pane_close.sh` only after S44 CONFIRMS. **Never `cockpit.sh rotate`.**
-- **s13 watcher re-armed:** `watch_tuesday_exiting.sh 2026-09-13T09:38:00 23:55 1666 83570`.
+## ON EVERY WAKE
+- Run `2_Project_Files/tools/kam_rulings_today.sh`, **never `kam_msgs.sh` unfiltered** (it prints Wednesday's tab); check `[Kam -> Tuesday]` mails; list `tuesday-agent@` UNFILTERED and route on SUBJECT.
+- Run `git status --porcelain | grep -v 0_Brain/dashboard/data/`. Rotation band is 80–90.
+- **Verify every panel message AT ORIGIN:** `git show origin/main:0_Brain/dashboard/data/chat_tuesday.json`.
+- **Do NOT read `0_Brain/daily/`** (Wednesday's). **Kam types straight into this terminal; those lines are first-party.**
+- **Kam sees Tuesday's panel replies ONLY on the orange TUESDAY tab** (`chat.html:190` `inView`, `cockpit.html:367` `msgInView`). Which tab he uses is UNMEASURED, so say where the reply is.
+- **When Kam asks something in the terminal, Tuesday answers in the terminal, with the literal yes or no as the first word.** The panel copy is secondary.
 
-## 🟢 KAM, 18:5x AEST, terminal, verbatim: *"Keep going and finish what you can.  no matter the time.  keep going until completion"* — the successor's first jobs, in order
-1. **Every wake:** the unfiltered inbox. S43's fix-round PLAN, its pre-upgrade head mail, the upgrade REPORT and READYs are answered as they land (rules in LIVE items 1–2).
-2. **When S43 wraps (80–90% ctx):**
-   - census `ps` for HPSM claudes;
-   - brief **S44** from `HANDOVER-S43_*.md`: the fix round, the upgrade rule (by 07:00 Monday at the latest), the F-API/F-WEB feedback lanes, C11, and the credential rebuild after C11;
-   - add a routing row `Datasec/HPSM-S44`, then `cockpit.sh add` a NEW pane and verify rung 5;
-   - close `%5` with `pane_close.sh` only after S44 CONFIRMS its plan;
-   - **never `cockpit.sh rotate` (trap 37).**
-3. **After the fix round merges:** commission ONE delta tier-1 gate on `09c1591..<fix head>` (Q + W + fixes; use the combined launcher as the model). **Push to HPSM-light only on GO + Tuesday's word.**
-4. **After the live-upgrade REPORT:**
-   - launch the acceptance+security harness (LIVE item 3), naming the live head in the launch prompt;
-   - give Kam one short panel note: upgraded, which engagements to use, and the old ones DO NOT USE.
-5. **Tuesday's own rotation — ⚠ `wednesday_rotate.sh --self` REFUSES for this seat as-is (measured by reading, s12 19:1x).**
-   - **Why:** line 67 finds the coordinator pane by `@cockpit_name == $SEAT` = `tuesday`, but this machine's coordinator pane `%0` is named `wednesday`. `arm_wake_watch.sh:134-146` (taps + the DEAD case) HARDCODES `^wednesday|`; `wake_watch.sh:79` uses the seat.
-   - **So:** taps reach this seat only through the hardcoded name, `--self` refuses rc 2, and **a DEAD Tuesday seat cannot be auto-respawned** (`--dead` refuses too). **Never let this seat reach 90%.**
-   - **PROCEDURE, only when no live upgrade is in progress** (a fleet-session loss would kill S43 mid-deploy):
-     1. Pickup current and committed, HEAD in origin, tree clean.
-     2. `tmux set -p -t %0 @cockpit_name tuesday`
-     3. `WED_AGENT=tuesday nohup bash 2_Project_Files/fleet/cockpit/wednesday_rotate.sh --self > /dev/null 2>&1 &` (its log is `logs/rotate_wednesday.log`).
-   - **The SUCCESSOR's first actions:**
-     - (a) check the rotate log for `respawned OK` + `LIVENESS OK`, and that `%5` and the other agent panes survive;
-     - (b) **`tmux set -p -t %0 @cockpit_name wednesday`**, so `arm_wake_watch` taps reach it again.
-   - Wednesday has been told (a coordination mail proposes one naming source).
-   - The ORIGINAL line follows for history: at the first safe boundary inside 80–90, with the pickup current and HEAD == origin, run `WED_AGENT=tuesday nohup bash 2_Project_Files/fleet/cockpit/wednesday_rotate.sh --self &`. Kam's words above are the authority not to wait for a hand restart; card `tuesday-seat-self-rotate-with-liveness-check` is left for him. **The new seat checks `2_Project_Files/fleet/cockpit/logs/rotate_*.log` for LIVENESS OK and that `%5` (plus any agent panes) survived.**
-6. **Next Datasec lane once HPSM is stable:** NexusAI **RD-391 (High, `.dockerignore` any-depth)**. Brief it only after a fresh read-only Jira read (board_count.sh; NexusAI's own `JIRA_*`; trap 31 in `.pre-1740`). Its residue RD-392/393/394/396/397/398 partitions by file; RD-395 is Kam's product call. **The load on this Mac mini is the constraint** (gate C saw ~115–347): keep NexusAI's docker steps under the shared lock.
+## SUCCESSOR FIRST ACTIONS (Tuesday s14, in order)
+1. **(a)** Read `2_Project_Files/fleet/cockpit/logs/rotate_wednesday.log` for `respawned OK` and `LIVENESS OK`. Then check that `%7` (S44) and `%1` (monitor) survived.
+2. **(b)** `tmux set -p -t %0 @cockpit_name wednesday`. The pane is renamed `tuesday` only for the rotation, and `arm_wake_watch` taps match the hardcoded name.
+3. **(c) NEW RULE (ledger w=4):** before the first report to Kam, extract every human-origin line from the PREDECESSOR's transcript and diff it against this pickup.
+   - Transcript: `/Volumes/KK_T9_External_HDD/TUESDAY/4_Credentials/.claude/projects/-Volumes-KK-T9-External-HDD-TUESDAY/886e95a5-f138-4e94-b819-4a03523bfe14.jsonl` (s13).
+   - Keep records `type: user` with text content (skip tool results, `<task-notification>` and `[wake_watch]` lines) and `queue-operation` with `operation: enqueue`, from this pickup's commit time onward. Print them in AEST.
+   - An `enqueue` followed by a `remove` with no assistant turn that mentions the line is the drop signature.
+   - **Why:** at 19:01:39 a Kam instruction was dropped across s12's rotation exactly this way. s13 then told Kam everything had carried over, on panel and mail evidence alone.
+   - s13's human lines up to 20:23 were 19:10:08 and 19:21:13, and both were answered.
+4. **(d)** Re-arm the exiting watcher, detached:
+   - command: `2_Project_Files/fleet/cockpit/watch_tuesday_exiting.sh <MARK> 23:55 39799`;
+   - MARK = one second past the newest mail s13 PROCESSED. At the s13 review (20:3x) that was S44's QUESTION 10:28:41Z, so `2026-09-13T10:28:42`. **If s13 processed later mail, the pickup's newest s13 line says so; take the MARK from there.**
+5. **(e)** Then the normal boot: brain, the board (`2_Project_Files/fleet/board_count.sh`), the inbox, and a short panel note to Kam, verified at origin.
 
-## 🟢 KAM ~18:5x, terminal, verbatim: *"If you don't need to wait until 2100, don't wait. Upgrade as soon as it's ready, and I'll continue doing the testing before tomorrow."*
-- **S43 told (ANSWER ~08:5xZ), SUPERSEDING the 21:00 window and the 'second upgrade before 07:00' rule:**
-  - upgrade NOW on `caf63fd`, keeping the dry-run; the upgrade gets the docker lock first;
-  - then ROLLING upgrades as each fix lane merges GREEN, batched within ~30 min;
-  - before each later upgrade S43 sends a head mail and waits ~5 min.
-- **Tuesday's job on each head mail:** a short panel warning to Kam (the site restarts for a few minutes).
-- **Tuesday's job on each REPORT:** a panel note with what changed, the engagement to use, and the DO NOT USE list.
-- **Kam is TESTING THE LIVE SITE tonight.** No agent touches engagements or tenants it did not create. A later upgrade that would strand engagements (a content hash change) STOPS for Tuesday.
+## ROTATION PROCEDURE (this seat)
+- **Why it is needed:** `wednesday_rotate.sh --self` finds the coordinator pane by `@cockpit_name == $SEAT` (`tuesday`), but `%0` is named `wednesday`. Without the rename `--self` refuses (rc 2), `--dead` refuses too, and a dead Tuesday seat cannot auto-respawn. **Never let this seat reach 90%.**
+- **Only when no live upgrade or gate apply is in progress.** A fleet-session loss would kill S44 mid-deploy.
+  1. Re-read OWN transcript for human input received after this pickup was written, and relay it or add it here (ledger w=4, rule b).
+  2. Check the pickup is committed, HEAD is in origin (the script gates on `merge-base --is-ancestor HEAD origin/main`), and the tree is clean.
+  3. `tmux set -p -t %0 @cockpit_name tuesday`
+  4. `WED_AGENT=tuesday nohup bash 2_Project_Files/fleet/cockpit/wednesday_rotate.sh --self > /dev/null 2>&1 &` (log `logs/rotate_wednesday.log`). `WED_AGENT=tuesday` resolves `Launch_Tuesday.command` (fixed `313325e7b`).
+  5. The successor renames `%0` back to `wednesday` (first action b).
+- **Wednesday CLAIMED the seat-name resolver fix** (COORDINATION 09:14:50Z): the pane named after the seat, and rotate, wake_watch and arm_wake_watch accepting either name. **She mails a commit sha plus scratch-test output before changing the contract. Until then this workaround stands.**
 
-## 🟢 19:0x (s12) — LIVE UPGRADE IN PROGRESS + HARNESS READY
-- **S43 HEAD mail 08:53:18Z** (DKIM pass): upgrade STARTED on `caf63fd` (Q+W, 57 commits since c2fbc36), pc-lane-a first then Azure, rollback to c2fbc36. The dry run on pc-s43-up released 1.0.0. Kam warned on the panel.
-  - **Every engagement created before the upgrade (including any Kam made today) will answer 409** (the demo content changed 0030d4c6 → fd7db6b8). Kam told to use the fresh or post-upgrade engagements.
-- **Acceptance + security harness RE-POINTED to `caf63fd`** (commit 'QA: acceptance+security harness re-pointed…'; `--check` rc 0):
-  - range 267; report dir `…/reports/2026-09-13-composer-caf63fd-brief-acceptance-security-tier1/`; subject `… @ caf63fd (tier 1)`;
-  - cards ruled; gate B/C findings listed as KNOWN fix-in-flight, with the release workaround;
-  - Kam testing live concurrently; pause ≤ 15 min on upgrade restarts.
-  - **LAUNCH it right after S43's upgrade REPORT lands:** `cockpit.sh add 'QA/HPSM-ACC' "bash '/Volumes/KK_T9_External_HDD/TUESDAY/2_Project_Files/fleet/qa-agent/launchers/launch_qa_hpsm_composer_09c1591_brief_acceptance_security.sh'"`, then rung 5. The file name still says 09c1591; the content is caf63fd.
-  - **If main moves before launch:** decide to keep caf63fd (it matches the live head) or re-point HEAD_SHA/EXPECTED_COMMITS/REPORT_DIR/SUBJECT in all three files and re-run `--check`.
+## KAM'S WORDS TODAY (verbatim, AEST; T = terminal transcript, P = panel)
+- **09:17:37 P (tuesday view), standing rule:** *"this is a new standing rule for all projects - please spin up as many agents as possible to complete the task as long as multiple agents do not create a problem with development through multiple agents working on the same code base."*
+- **16:53:31 T** (the prompt log says 16:55): *"Please get the HPSM agent to identify what else is left to complete and whether there are any issues with the product.   Also get the agent to add the feedback feature as deployed in Nexus AI to the HPSM project. Naturally change all settings so that any feedback is registered against HPSM and works properly."*
+- **16:54:18 T** (prompt log 17:00): the acceptance+security harness commission, *"…test the platform from a security perspective as well as from a deliverables perspective against the original brief…"*
+- **17:48:22 T, standing:** *"tell me when the HPSM agent finishes and where the testing briefs are located"*
+- **18:02:05 / 18:02:28 P, card rulings:** `hpsm-composer-live-demo-upgrade-after-c12` → `upgrade-fresh-with-release` (DELIVERED 19:00:48); `hpsm-composer-demo-release-with-device-groups` → `build-c11`.
+- **18:18:03 T** (the prompt log and the harness's APPROVED line say 18:20): *"Please revise the testing harness documents so they test the live site."*
+- **18:37:52 T:** *"Keep going and finish what you can.  no matter the time.  keep going until completion"*
+- **18:51:31 T:** *"If you don't need to wait until 2100, don't wait. Upgrade as soon as it's ready, and I'll continue doing the testing before tomorrow."*
+- **19:01:39 T** (queued into s12, dropped at 19:04:11): *"In the HPSM sign-in page, each of the sign-in options needs a much better description of what the options mean. Make this description in gray with a much smaller text at the bottom. Of each tile."*
+- **19:10:08 T (s13):** *"Did you get my instructions from the last boot?"*
+- **19:21:13 T (s13):** *"I didn't see your response to my question whether you got the instruction before we booted and whether the agent has been advised."* (He re-quoted the 19:01 instruction after it.)
+- Questions s12 answered: 18:13:30 (live site link for the harness), 18:49:22 (where HPSM is at), 18:52:15 (harness updated for the live site?).
+- Times come from the transcripts. Where s12's pickup or the prompt log differ (18:5x, 18:38, 18:52, 19:14), the transcript time is used.
 
-## ✅ 19:0x (s12) — LIVE UPGRADE DONE, HARNESS LAUNCHED
-- **S43 REPORT 08:58:40Z (DKIM pass): the live demo is UPGRADED to `caf63fd` on pc-lane-a AND Azure**, all post-checks GREEN, no rollback.
-  - Azure tenant "Synthetic Customer B (demo content)" `e93302d2…` now holds two fresh engagements: A "Demo drafts, one device group (synthetic)" `3bb6fcb2…`, and B "Demo release walk-through, no device groups (synthetic)" `a9101d3f…` RELEASED 1.0.0 (version `b03aae4b…`). pc-lane-a mirrors them (A `e920ac1d…`, B `8ce21d2a…`).
-  - **Azure DO NOT USE:** "Office fleet hardening (demo)" `c9bce98b…`, "Demo content proofread (synthetic)" `1ec31037…`. pc-lane-a: 9 listed in the REPORT.
-  - Evidence: HPSM analysis `qa-s43/upgrade/live-caf63fd/`.
-  - **Verified by s12 19:00:** / , /api/health and /idp/ answer 401 + Basic; wrong credentials 401; TLS verify 0.
-  - Card `hpsm-composer-live-demo-upgrade-after-c12` marked DELIVERED 19:00:48.
-  - Kam told on the panel: which engagements to use, which to avoid, and the known issues until the fix upgrade.
-- **Acceptance + security harness LAUNCHED 19:00:39** in pane `%6` `QA/HPSM-ACC` (launcher `…/launch_qa_hpsm_composer_09c1591_brief_acceptance_security.sh`, content caf63fd, precheck rc 0).
-  - Verdict subject: `[QA/Datasec-HPSM -> Tuesday] GATE VERDICT — Policy Composer acceptance vs original brief + security @ caf63fd (tier 1)`.
-  - Report: `Testing Agent MAIN/projects/hpsm/reports/2026-09-13-composer-caf63fd-brief-acceptance-security-tier1/report.md`.
-  - **NEXT on its verdict:** read the report whole, run the completion check, score, `pane_close.sh %6`, then a panel note to Kam.
-- **Remaining tonight:** the fix lanes' READYs, the rolling fix upgrade (head mail, then a panel warning), and the delta gate after the fixes merge. Then S43's wrap and an S44 successor if needed.
+## 🔴 WAITING ON KAM — ONE DECISION: go or hold on live gate fix "b-tight"
+- **Asked** on the panel at 19:24:59 and 19:39:17 (both VERIFIED AT ORIGIN) and in the terminal. **No answer as of 20:32.**
+- **The problem:** through the public URL, Caddy Basic and the app's bearer both need the `Authorization` header. Sign-in works, then every `/api` call gets 401 ("Your session ended"). The gate is VM-only state (`/opt/hpsm/Caddyfile`); there is no Caddy config in the repo.
+- **What b-tight is:**
+  - Basic is skipped ONLY for `/api/*` paths with no `..`, `%2e`, `%2f`, `%5c` or backslash (case-insensitive), and the API keeps its bearer check.
+  - `/idp/*`, `/api/healthz`, `/api/openapi.json` and 11 traversal variants stay behind Basic.
+- **Measured exposure (S43, replica Caddy on 23780 in front of pc-lane-a):**
+  - reproduced FAIL in Chromium on the public URL; b-tight gives PASS;
+  - no-bearer sweep of 56 operations plus 5 extras: 53 answer 401, one 405, a few 404s;
+  - the only 200s are healthz and openapi, which stay gated. **No `/api` route returns data without a bearer.**
+- **Scripts** are in `<S43 scratchpad>/gate/` (`/private/tmp/claude-501/-Volumes-KK-T9-External-HDD--CODING-Datasec-HPSM/28f5c90e-532c-47c4-965a-2ec71aa65ff4/scratchpad/`); committed copies at analysis `a8651e8` `qa-s43/gate-blocker/`. **/tmp may not survive a reboot.**
+  - Apply: `apply-azure-gate.sh Caddyfile.b-tight` (backs up to `Caddyfile.pre-s43-<UTC>`, validates in `hpsm-caddy`, writes in place, graceful reload; takes seconds, no SHA change).
+  - Rollback: `rollback-azure-gate.sh Caddyfile.pre-s43-<UTC>`.
+  - Post-check: `browser-gate-check.mjs` through the PUBLIC URL; curl set (`/`, healthz, openapi, `/idp/users`, `POST /idp/token`, traversals all 401 Basic; `/api/dashboard` without a bearer 401 Bearer); `azure/smoke.sh`.
+- **NEXT on "go":**
+  1. Send S44 a mail whose subject starts `KAM`, quoting his word verbatim with its time and channel.
+  2. S44 sends a head mail, runs the identity check and applies. On any failure it rolls back first.
+  3. S44 runs the public-URL browser check and the curl set, then reports.
+  4. Tuesday tells Kam on the panel (TUESDAY tab) and verifies at origin.
+  5. Tuesday commissions the live-half re-run of the acceptance gate.
+  - If the upgrade is also due, the gate goes FIRST.
+- **NEXT on "hold":**
+  1. Send S44 a `KAM` mail with "hold".
+  2. The durable redesign (cookie gate, IP allowlist or dedicated header) goes to Monday's review.
+  3. Upgrade post-checks keep reporting the public browser check as FAIL, and Tuesday says so plainly to Kam.
 
-## 🔴 LIVE — with the next action for each
+## 🔴 LIVE — S44 (seat hpsm-375c, pid 39799, pane `%7` `Datasec/HPSM-S44`, transcript `375c22cb`)
+- **Launch:** 19:47:28 with a brief verified at `datasec-hpsm@` (`briefs_staged/2026-09-13_hpsm-s44-successor-merge-seat.md`). Rung 5 proven from `~/.claude/projects/-Volumes-KK-T9-External-HDD--CODING-Datasec-HPSM/375c22cb-878d-495f-b5a7-24379c82f071.jsonl`.
+- **Plan:** CONFIRMED 09:56:56Z (`…-answer-plan-confirmed.md`). Acceptance routing sent (`…-answer-acceptance-verdict-routing.md`), then the FX-S7 FINAL answer (`…-answer-fxs7-final.md`).
+- **S43 pane `%5` CLOSED 20:21** after FX-S7 FINAL at `ce62887` and S44's CONFIRMED. HANDOVER-S43 is `1a23e93`, addendum 1 `9e68dd9`.
+- **Merge order as ruled.** Each step: chain plus switch-ON e2e at ZERO failures, fast-forward main only on GREEN. **LOCAL main = `2bfb42a` at 10:24Z, NOT pushed** (HPSM-light still `afc10e9`).
+  1. **FX-M1: DONE GREEN.** `f80ebc4` + fixture fix `2bfb42a` (the `stack-api-isolation.mjs` approver had no tenant membership, now correctly 422). CI GREEN, switch-ON 63/63 at zero failures.
+  2. FX-LV `19a5caa`, merged in the seat worktree as `b8fc2a9`: checks and e2e OFF GREEN; CI and switch-ON running at 10:28Z.
+  3. FX-R `5eccefd`.
+  4. FX-S7 `ce62887` (the bottom-pin is in its CSS: 0 px gap on 9 tiles, contrast 5.34:1).
+  5. FX-SI `bc61c4f`: a PROOF of the bottom-pin on MERGED code. **Branch READY: `s44/seat-layout` `85cbe2d`** = ce62887 + bc61c4f + the proof in `s43-signin-descriptions.spec.ts` (≤1 px at 1440 and 390, RED/GREEN on a seat stack) + `#pc-tenant` max-width 260px CSS (1440 screenshot still to come) + e2e typecheck 4→0 + e2e README. A failure is fixed in the seat.
+  6. Rolling upgrade: head mail, then Tuesday warns Kam; pc-lane-a then Azure; the post-check proves the A/B engagements plus the public-URL browser check.
+  7. **FX-PIN (W4B-m2): FINISHED GREEN `d82ca16`** (`refuseStalePin` first on all 12 state-changing routes in lifecycle.ts and inputs.ts; 18 tests; 15/15 mutants; stale-pin stack proof). **Plus a seat commit: `createDraft` refuses a stale pin (Q1 YES).**
+  8. FX-ID (W4B-m1): **lane RUNNING from `d82ca16`** on `problem.ts`, `problem.test.ts`, `context.ts` + new `s44-fx-id.db.test.ts`, stack 24180; lands after FX-PIN and before F-API.
+  9. F-API `8d86395` + seat root commit `s44/feedback-root` `15f2542` (nginx `/api/feedback` 52m WITH proxy_pass; `PC_FEEDBACK_RETENTION_DAYS`).
+  10. F-WEB, then feedback READY FOR QA with naming (b). **F-WEB-B FINISHED GREEN `5b8d843`** (e2e 70/70 OFF and ON; body-size proof through the edge).
+  11. C11: **a content hash change, so it STOPS for Tuesday.**
+  12. The credential round (A-m1, A-p2, N33/N09/N26, W4B-m3; partition in a STATUS first).
+- **Lanes running (10:30Z):**
+  - FX-ID from `d82ca16` on 24180;
+  - S-m3 from main `2bfb42a` on 24480 (`secrets.ts` + unit test + new `s44-sm3-depth.db.test.ts`; STOP if the error code must be enumerated in the contract);
+  - the upgrade-toolkit prep agent (`<S44 scratchpad>/upgrade-s44/`, GETs only on pc-lane-a; upgrade dry-run moved to 24680).
+  - FX-PIN and F-WEB-B are FINISHED (above).
+  - Ports 24080–24580; at most 3 agents plus the seat; docker one step at a time under the lock, gates first.
+- **Engine serial queue** (S44 default, accepted by silence): C11 (24380, after FX-LV on main) → D-M1 → the credential round's engine part.
+  - **D-M2 splits:** the API part after FX-PIN and F-API, the engine part after D-M1, and they land together.
+  - **S-m3** runs as its own small lane when a slot frees.
+- **Seat items:**
+  - Tenant picker `max-width` on `#pc-tenant` is ruled into the seat's `app.css` if cheap (one commit, 1440 px proof), otherwise BACKLOG. It never delays the upgrade.
+  - Out-of-lane commits: `apps/web/e2e/README.md` and `apps/web/e2e/tsconfig.json` (`DOM.Iterable`).
+  - BACKLOG fold at analysis `6958d88`.
+- **FX-PIN RULINGS 10:30:10Z** (`…-answer-fxpin-q1-q4.md`): Q1 createDraft refuses a stale pin (seat commit at step 7); Q2 leave updateEngagement (named in the drift guard); Q3 leave clone ruling (e), BACKLOG **FOR KAM'S MONDAY LIST**; Q4 start FX-ID and S-m3. **Consequences carried:** (1) a stale-pinned engagement is READ-ONLY until re-pin exists, so **any upgrade that changes pins turns Kam's A/B read-only**, and S44 measures whether steps 1–5 change any pin, answering in the head mail; (2) a web 409 browser check (S2/S4/S5 saves, S9 approve) is REQUIRED before any upgrade carries FX-PIN.
+- **STOP for Tuesday:**
+  - any content hash change (C11 certain), **and any pin change in steps 1–5 (see the head mail)**;
+  - D-M1 or D-M2 before any upgrade that carries them (demo impact: measure release/validate on A and B first);
+  - any `/api` 200 with data and no bearer;
+  - an axe contrast failure (report the ratio; never change the colour);
+  - anything on Azure without a head mail;
+  - the gate apply without a `KAM` mail;
+  - any push (none until the delta gate is GO and Tuesday gives the word).
+- **NEXT per expected mail:**
+  - **Head mail:** a short panel warning to Kam (the site restarts for a few minutes), verified at origin.
+  - **Upgrade REPORT:**
+    - a panel note: what changed, the engagements to use, the DO NOT USE list, and the public browser check result;
+    - label any tunnelled check as tunnelled (trap 49);
+    - tell Kam at once (his 17:48 ask).
+  - **Step-5 proof STATUS:** check the sign-in text against `apps/api/src/authz.ts` (bridge_operator says the Bridge is a stub). **Mark Kam's 19:01 relay delivered only when a READY names the artefact.**
+  - **STATUS naming lanes or partitions** (FX-ID, D-M1/D-M2, the credential round): check disjointness by path. Silence accepts a sound default.
+  - **C11 / D-M1 / D-M2 STOP:** put it to Kam as a card or panel question (it strands his A/B engagements). On C11's READY, mark `hpsm-composer-demo-release-with-device-groups` `--delivered`.
+  - **READY FOR QA:** commission ONE delta tier-1 gate on `09c1591..<fix head>` (Q + W + fixes; the combined gates never tested Q+W).
+    - Model launchers: `2_Project_Files/fleet/qa-agent/launchers/resume_qa_hpsm_composer_09c1591_combined.sh` and `launch_qa_hpsm_composer_09c1591_combined.sh` (both exist).
+    - Run it in a pane with `cockpit.sh add`, then rung 5 (trap 47).
+    - Score the S43/S44 merge round at that verdict.
+  - **S44 at 80–90%:** HANDOVER-S44 → `ps` census (trap 32) → S45 brief → routing row `Datasec/HPSM-S45|datasec-hpsm@agentmail.to|yes` → `cockpit.sh add` a new pane → rung 5 → `pane_close.sh %7` after S45 CONFIRMS. **Never `cockpit.sh rotate` (trap 37).**
 
-1. **HPSM S43 — pane `%5` `Datasec/HPSM-S43`, launched 17:07:52 by s12 with HPSM's own `Launch_Claude.command`.**
-   - Census before the launch: 0 HPSM seats.
-   - Brief: `2_Project_Files/fleet/briefs_staged/2026-09-13_hpsm-s43-successor-recover-remaining-feedback.md`, sent 07:05:44Z. Verified at `datasec-hpsm@` (from tuesday-agent@, preview non-null).
-   - Rung 5 verified from its transcript `~/.claude/projects/-Volumes-KK-T9-External-HDD--CODING-Datasec-HPSM/28f5c90e-….jsonl`, 07:13–07:19Z: it read HANDOVER-S42, read the NexusAI feedback files, started a remaining-work analysis subagent, and grepped the roles in authz.ts.
-   - **Its job:**
-     - (1) Recover S42's in-flight state. Main is `09c1591`; `s42/lane-q-d2` `0e9c865` is NOT on main; the merge worktree is detached at `3bc7471`; `s42/lane-w-d2` is at `7c31520`. Then the second READY.
-     - (2) Kam ask 1: `HPSM/5_Project_History/2026-09-13_S43_remaining-work-and-product-issues.md`, measured against the Detailed Scoping Design Specification v1.1. The E8 SOW is context only.
-     - (3) Kam ask 2: port NexusAI's feedback feature, registered against HPSM. Postgres table under RLS; object store; created_by from the token with name + role, no email; role-gated triage; HPSM branding. A report-only sweep whose Jira half stays UNSET, because the Composer Jira key is on HOLD with Kam.
-   - **UPDATE 18:2x (s12):**
-     - **Plan (07:40Z) CONFIRMED late at 08:07:30Z** (body `briefs_staged/2026-09-13_hpsm-s43-answer-plan-confirmed.md`), accepting: triage by platform_admin only; feedback = tenant data, 365 days, report-only expiry, soft delete; F-API numbers migration 0016.
-       - **Amendment 1:** the seat adds compose.yaml env vars.
-       - **Amendment 2 (load):** docker steps one at a time under the lock; vitest `--maxWorkers=2`; timeout-only runs re-run at most twice, then LOAD-BLOCKED; never raise a timeout; gates get the lock first.
-     - **Ask-1 REPORT 08:01:19Z** at `HPSM/5_Project_History/2026-09-13_S43_remaining-work-and-product-issues.md` (a949591). The BLUF and §4 were read by s12 and summarised to Kam at origin.
-     - **STATUS 08:16:15Z:**
-       - the seat is re-running chain qd2-s43 on 3bc7471;
-       - lane W is running (pc-s43-w 22780);
-       - F-API is running (pc-s43-f 22680; contract 0.14.0 first);
-       - F-WEB launches on F-API's contract commit;
-       - the records subagent is folding BACKLOG/history;
-       - S42's worktrees were removed cleanly.
-     - **FINDING:** the Composer has NO CSP anywhere, so the brief's "don't loosen the CSP" was false. It was withdrawn by name in an ANSWER ~08:2xZ; F-WEB builds CSP-clean; BACKLOG entry.
-     - **Kam RULED at 18:02 (cards recorded by s12 at 18:17):**
-       - `hpsm-composer-live-demo-upgrade-after-c12` → `upgrade-fresh-with-release`;
-       - `hpsm-composer-demo-release-with-device-groups` → `build-c11`.
-       - Relayed at 08:14:48Z, verified at the destination (body `briefs_staged/2026-09-13_hpsm-s43-kam-ruled-upgrade-and-c11.md`).
-       - **S43 OPERATES the upgrade after the Q+W merges**, which SUPERSEDES the no-deploy hold for this one upgrade. Steps: identity check; never touch datasec-sales-portal-rg; pc-lane-a first, then Azure; rollback to c2fbc36; a 10-minute check; fresh engagements, one with a group and one with zero groups taken to release through the product; old engagements untouched; REPORT.
-       - C11 lane now: partition by exact file; migration 0017 if needed; propose the "unknown" support issue code.
-     - **NEXT:**
-       - S43's ACK on the KAM RULED mail (C11 paths, migration, issue code, upgrade window). Rule the issue code.
-       - The chain verdict or LOAD-BLOCKED, then the second READY, then the upgrade REPORT, then **tell Kam at once**. He asked to be told when the HPSM agent finishes.
-       - Mark both cards `--delivered` once the upgrade REPORT and C11's READY name their artefacts.
+## ✅ ACCEPTANCE+SECURITY GATE @ caf63fd — CLOSED, scored 1.00
+- **Verdict** 09:58:13Z (DKIM pass), report read whole (538 lines): `Testing Agent MAIN/projects/hpsm/reports/2026-09-13-composer-caf63fd-brief-acceptance-security-tier1/report.md`. Pane `%6` closed.
+- **DELIVERABLES NO GO 1/2/10/4:**
+  - D-B1: the live gate;
+  - D-M1: required discovery is never required (T3 cannot fail, `resolve.ts:694-706`);
+  - D-M2: exception fields optional (201 → approved → released).
+- **SECURITY GO WITH FINDINGS 0/0/3/1:**
+  - S-m3 (deep JSON 500) → its own lane;
+  - S-m1/S-m2 (edge headers; Mailpit/MinIO/worker on the edge) → BACKLOG with priority, as one post-round edge commit.
+- **Routed to S44 as fix round 1 of 2** for this new class. Minors go to the BACKLOG fold. D-p2 is settled (D1 retired).
+- **OWED after the gate fix is APPLIED:** re-run the LIVE half (the walk-through plus probes 2, 3, 5, 7, 9, 11–13) as a live-only delta. Model launcher: `…/launch_qa_hpsm_composer_09c1591_brief_acceptance_security.sh`. Own `QA Harness (synthetic)` tenant only.
+- **D-m6** (S5 re-asks D-001…D-006) needs Kam's ruling on A-17 before anyone changes it.
 
-2. **Three combined tier-1 gates on `09c1591` — RESUMED by s12 at 17:05 in new panes.**
-   - **UPDATE 18:5x (s12) — S43 STATUS 08:46:53Z (DKIM pass): LOCAL main fast-forwarded to `caf63fd54c3ad95384bcb7bc32d4e7b9e4a6f5c4`** (lane W F6; 267 ahead of afc10e9; NOT pushed).
-     - **Chain merge-w-s43 GREEN:** host 1052+1 with 0 timeouts; DB 205; API-DB 428; upgrade e2e 58; CI GREEN; **switch-ON e2e 58/58 with 0 failures → the D1 rule is RETIRED.** Evidence: analysis f88bb73.
-     - **`caf63fd` = TONIGHT'S UPGRADE TARGET** unless a fix lane merges GREEN before 21:00 (a new head mail would come first).
-     - **Walk:** dry-run first on seat stack pc-s43-up 23580. Azure API calls go through an SSH tunnel to the VM's 127.0.0.1:18080 (Caddy basic auth and the bearer collide in one header); the 401 gate checks run on the public URL.
-     - **Noted, no action:** S40's committed `remote-update.sh` deletes its own VM staging dirs (composer.new/prev); rollback redeploys the c2fbc36 archive through `redeploy.sh`.
-     - The records fold is in (analysis 85eb6b0).
+## LIVE DEMO STATE (caf63fd on pc-lane-a AND Azure; upgraded 08:54–08:57Z)
+- **Public URL:** `https://hpsm-composer-demo.australiaeast.cloudapp.azure.com`. **Unusable past sign-in until b-tight.**
+- **USE, tenant "Synthetic Customer B (demo content)":**
+  - Azure (tenant `e93302d2`): A drafts, one group `3bb6fcb2`; B released 1.0.0, zero groups `a9101d3f` (version `b03aae4b`).
+  - pc-lane-a (tenant `fb2de441`): A `e920ac1d`; B `8ce21d2a` (version `3a951c52`).
+- **DO NOT USE** (stale pin `0030d4c6`, they answer 409):
+  - Azure `c9bce98b` "Office fleet hardening (demo)" and `1ec31037` "Demo content proofread (synthetic)";
+  - 9 on pc-lane-a, listed in `sent_mail_s43_report-live-upgrade-caf63fd_seat-hpsm-28f5.txt`.
+- **No agent touches** the `QA Harness (synthetic)` tenant, the `policy-composer-qa-*` stacks, or any engagement or tenant it did not create. **Kam is testing.**
 
-   - **UPDATE 18:5x (s12) — S43 FIX-ROUND PLAN 08:41:36Z CONFIRMED ~08:5xZ:**
-     - **Lane W:** GREEN 5e173eb, merged `caf63fd` (the chain merge-w-s43 must be GREEN before main moves).
-     - **Fix lanes** from caf63fd, disjoint by path:
-       - FX-M1 (s43/fx-m1-approver, pc-s43-m1 23180: approver linked + 422 APPROVER_NOT_A_TENANT_MEMBER; not editable after create);
-       - FX-LV (s43/fx-lv-local-values, 23280: LOCAL_VALUE_NOT_DEFINED critical + S8/S10 naming);
-       - FX-R (s43/fx-r-renderers, 23380: W6-M1, m1, m2, m3);
-       - FX-S7 (s43/fx-s7-layout, 23480: W5-M3 + W5-m5; SOLE owner of app.css and e2e/support).
-     - **Then:** FX-PIN (W4B-m2; lifecycle/inputs/resolution.ts), then FX-ID (W4B-m1 central id normalisation, before F-API merges). C11 PAUSED until FX-LV merges.
-     - **BACKLOG notes sent:** the approver picker reads idp-mock `/idp/users` (needs a real directory source); approver-edit op deferred.
-     - **Timeline (S43's estimate):** W chain ~19:05; FX-S7/FX-R ~20:30–21:15; FX-M1 ~21:30; FX-LV ~22:00. **Tonight's 21:00–23:30 upgrade = Q+W + the workaround; the SECOND upgrade before 07:00 = the fixes** (GREEN chains only).
-     - **S43 measured:** CONTENT_VERSION_CHANGED is keyed on the content/capability pins, not engine_version, so the second upgrade should not strand tonight's fresh engagements; its upgrade proof checks this.
-     - NSG 22 source 157.211.46.94/32 = this machine's egress.
+## OTHER OPEN (not HPSM)
+- **NexusAI RD-391** (High, `.dockerignore` any-depth) is the next Datasec lane once HPSM is stable.
+  - Brief it only after a fresh read-only board read (`fleet/board_count.sh`; NexusAI's own `JIRA_*`, trap 31).
+  - Residue RD-392/393/394/396/397/398 partitions by file; RD-395 is Kam's product call.
+  - **The Mini's load is the constraint** (gate C saw ~115–347): NexusAI docker steps go under the shared lock.
+- **For a future NexusAI seat** (s12's Explore read, not verified line by line): `backend/routes/feedback.js` PATCH/DELETE lack an admin-role check; the widget never sends `created_by` (stored as `'anonymous'`); `server.js:199` `autoCreateAIFeedback` hard-codes the dead VM URL; the Feedback_System link is dead (RD-50).
+- **Wednesday coordination:** the resolver claim (above); she took the statusline-publisher skip-write as owed; traps 37, 38 and `launchers.conf` are on her owed list; the panel_sync race's durable fix is hers.
 
-   - **UPDATE 18:5x (s12, ctx 71%) — ALL THREE GATES IN; all panes closed (`%2`, `%3`, `%4`; control 18580 200 each time):**
-     - **A = GO WITH FINDINGS** 0/0/2/4.
-     - **B = GO WITH FINDINGS**: API 0/0/5/1, DB 0/0/0/1. Findings: W4B-m1 urn:uuid→500; **W4B-m2** stale-pinned engagement accepts a customer approval after an upgrade, then stuck; W4B-m3 10 more credential shapes; W4B-m4 load 500/504 duplicate; CI-m1; W4B-p1; DB-p1. Report 183 lines, 0 placeholders, DKIM pass.
-     - **C = NO GO** (WP5 0/3/5/4, WP6 0/1/3/4).
-     - **COMBINED on 09c1591 = NO GO → NO PUSH.**
-     - **Routed by ANSWER ~08:3xZ:**
-       - W4B-m2 → tonight's upgrade REPORT names old engagements DO NOT USE, plus a fix-round code fix;
-       - W4B-m1 → fix round;
-       - W4B-m3 → the credential rebuild after C11;
-       - m4/CI-m1/p1/DB-p1 → BACKLOG.
-     - Kam told on the panel.
-     - **NEXT after S43's fix round:** ONE delta tier-1 gate on `09c1591..<fix head>` (Q + W + fixes). Push only on GO + Tuesday's word.
-     - **SCORED by s12 18:5x** (scoreboard rows at top): A/B/C 1.00 each; merge seats S41→S42 0.70. ~~OWED: score gates A/B/C (each ~1.00: controls, resumed cleanly, honest NOT-TESTED) and the builder round (S41/S42/S43 merge seat, combined NO GO on C's Majors) on `projects_index/scoreboard.md`.~~ S43's round is scored at its own verdict.
+## 🔴 WITH KAM (asked; nothing blocks)
+1. **b-tight go/hold** (above).
+2. **A-17 ruling** for D-m6.
+3. **Card `tuesday-seat-self-rotate-with-liveness-check`:** `status: open` in `decisions.json` when this was drafted. Mention it once.
+4. `hpsm-composer-monday-review-scope` (amended by his note). **Kam reviews HPSM on Monday 2026-09-14.** W45-p2 stays his.
+5. Which panel tab he reads: UNMEASURED; he was told the TUESDAY tab.
+5a. **Monday list, from S44's Q3:** after a content upgrade, a clone of a released engagement is born stale (ruling (e) vs W4B-m2), next to the missing re-pin action. S44 BACKLOGs it; Tuesday raises it at Monday's review, not as a card tonight.
+6. Carried from s11, not re-measured: Registry B2 plus RD-391's bearing on it; `brew install gitleaks` (RD-342 option E); RD-281, the rebuilt Sustainability tab render; Full Disk Access for `/bin/bash` (ruled grant; his hands); HPSM Jira key (`HPSML`), R4-m2's owner option and the HPSM-40 analysis-repo remote; his vault on the T9 (484 behind, 102 uncommitted); RD-367's branching-model half; the ATTIO digest still going to `wednesday-agent@` (a production change; flag it first); `rd104-gh-identity-acceptance-false-premise` → `youcheck` undelivered. Not yet asked: whether `/api/admin/health` open before first-run should be a ticket (Tuesday's call).
 
-   - **UPDATE 18:4x (s12, ctx 70%):**
-     - **Gate C VERDICT 08:30:21Z (DKIM pass; report 321 lines, 0 placeholders) = WP5 NO GO 0/3/5/4 · WP6 NO GO 0/1/3/4.**
-       - W5-M1: a website-created engagement can never be customer-approved (approver user_id null).
-       - W5-M2: release is silently blocked until 8 secret local values are defined; no issue code.
-       - W6-M1: the document says "No local values are required".
-       - W5-M3: S7 table 3,963 px wide at 1440.
-       - Minors W5-m1..m5, W6-m1..m3.
-     - **Routed by ANSWER ~08:4xZ** = FIX ROUND 2 of 2 under the cap:
-       - Monday fixes (W5-M1, W5-M2+W6-M1, W5-M3, W6-m1..m3, W5-m5) go AHEAD of C11 and feedback; C11 pauses on engine files.
-       - **Tonight's upgrade uses the gate's workaround** on the zero-group release engagement: approvers linked via the API, 8 local values defined via product decisions.
-       - **UPGRADE RULE:** fixes merged + GREEN by 21:00 → in tonight's upgrade; otherwise a second upgrade before Monday 07:00 if GREEN.
-       - The rest goes to BACKLOG.
-     - **Pane `%4` closed.** Kam told on the panel.
-     - **Still waiting:** gate B (`%3`), S43's fix-round PLAN mail.
-     - Push waits for B + a delta gate.
+## ⚠ TRAPS
+1. Never `git pull --rebase --autostash`. A wedged rebase: `rebase --abort`, then `git -c core.editor=true merge origin/main`.
+2. macOS has no `setsid`; use `nohup bash … &`.
+3. Store writes are gated on `git merge-base --is-ancestor <origin sha> HEAD`.
+4. zsh has no `PIPESTATUS` and does not word-split `$VAR`; loop in python.
+5. `cockpit.sh say` takes the pane NAME; `pane_close.sh` and `wake_ack.sh` take the `%ID`.
+6. The frozen-busy leg fires on `%0` while a background watcher runs: check the watcher output and the inbox, then `wake_ack.sh %0`.
+7. The exiting watcher is tracked: `fleet/cockpit/watch_tuesday_exiting.sh <MARK> <HH:MM> <pid…>`.
+8. Launch outputs go under `fleet/briefs_staged/*.out` (gitignored).
+9. Outside `dashboard/data`, write and commit in ONE round; never two commits in parallel calls (a gap holds panel_sync a cycle).
+10. `decision_queue.sh add --json` cannot take `--override-prior-rulings`.
+11. `kam_rulings_today.sh`'s FRESHNESS line lags Kam's taps; `[Kam -> Tuesday]` mails do not.
+12. `wake_watch` wakes this seat for `view=wednesday` messages; check the view.
+13. `cockpit.sh launch` cannot start Datasec projects here; use `cockpit.sh add`.
+14. Never a plain `git fetch` in a verify loop.
+15. QA gates and build seats run in a tmux PANE, never nohup headless.
+16. The card-ID send gate refuses a card id the store cannot show.
+17. `send_brief.sh` subjects say `[Wednesday -> …]` while the sender is tuesday-agent@. Harmless.
+18. panel_sync rebases local commits: verify by subject or content, never by local SHA.
+19. A probe whose found and not-found branches both exit 0 proves nothing by rc.
+20. Foreground `sleep` is blocked; use background loops.
+21. Verify a brief at the destination inbox BEFORE `cockpit.sh add`.
+22. Grep the target launcher for EVERY verb and path the HOLDS name, derived from the holds text.
+23. `decision_queue.sh` and `reconcile_rulings.py` are in `2_Project_Files/tools/`; `board_count.sh` is in `2_Project_Files/fleet/`. Capture an rc on its own line before any `| grep`.
+24. AgentMail `GET …/messages/<id>` needs the id URL-encoded.
+25. The send gate refuses a ticket id in the QUEUE without a PROVENANCE state line.
+26. Two QA gates booting at once collide on ports: stage the second, or name ports in both briefs.
+27. A counts-file merge conflict: `1/1` placeholder, then `npm run verify -- --update-counts`.
+28. A watcher or probe gives "the read failed" its own branch; a parse error is not mail.
+29. Bound every network read (`subprocess.run(..., timeout=)`) and prefer the ref panel_sync already fetched (`ls-remote` hung 9 min).
+30. CronCreate jobs are session-only; a rotation deletes them.
+31. NexusAI Jira: `JIRA_SITE` is scheme-less (prefix `https://`). Parse only `JIRA_*` from NexusAI's own `4_Credentials/.env`; never source the file.
+32. Before any project-seat launch and at rung 5, census `ps -axo pid,tty,lstart,command | grep "claude .*project '<Project>'"` across ALL terminals.
+33. Before answering a plan confirmation, match it to the SEAT by its boot facts, and re-list the inbox for a second mail on the topic.
+34. A harness background task on `%0` counts as BUSY, so frozen-busy wakes come about every 8 min. `wake_ack` cannot hold them under 24 h to a reset (the countdown is in the hash). Run extra waiters detached.
+35. Wednesday's `rotate_liveness.sh` detects a fleet-session loss and relaunches the coordinator, but CANNOT restore other panes (1 loss in 63).
+36. `wednesday_rotate.sh` respawns only its own pane and finds it by seat name (hence the rename procedure).
+37. `cockpit.sh rotate` is UNSAFE for Datasec seats: it polls wednesday-agent@ for the wrap, force-kills at 10 min and brings no successor brief. Use checkpoint → wrap → brief → new pane → close after CONFIRM.
+38. A project's second pane needs its own `inbox_routing.conf` row BEFORE `cockpit.sh say … --mail`; without it, exit 1 and silence. Check the rc and the pane.
+39. A "frozen busy" builder while gates run usually waits on the docker lock or its own subagents. Check the inbox, then transcript and subagent mtimes, then `ps` lockf waiters, then the pane. Never tap a seat waiting on its own agents.
+40. Cockpit "Fresh" kills EVERY agent pane (16:48 incident). When asking Kam to restart this seat, say "Resume, not Fresh" in the same sentence.
+41. `usage_tuesday.json` churn aborts panel_sync rebases on a long backlog. Set `git update-index --assume-unchanged` on it for one cycle, then remove the flag.
+42. Never put a command in a zsh variable (`$G log` fails, and `&& yes || no` prints "no"). Branch on the exact rc: 0 yes, 1 no, anything else ERROR.
+43. `prompt_log.sh <channel> <text> [note]`. Read a tool's usage in a SEPARATE action before the first call.
+44. Resume a killed QA gate with `claude --resume <session>` and `CLAUDE_CONFIG_DIR=TUESDAY/4_Credentials/.claude`. Map session to gate by counting report-dir mentions.
+45. `reconcile_rulings.py` skips every Datasec card. Record Kam's Datasec taps with `WED_AGENT=tuesday decision_queue.sh rule <id> <choice>`; if the gate refuses, wait for panel_sync's pull.
+46. A watcher MARK is one second past the newest PROCESSED mail's own timestamp, never the arming time; list the inbox unfiltered before arming. Kam's taps arrive as `[Kam -> Tuesday] panel message`. The runner's own unsent `[wake_watch]` line at `%0` HOLDS later taps.
+47. **A rung-5 check on a successor:**
+    - EXCLUDES every session id that existed before the launch;
+    - requires the matched transcript's FIRST user record to be after the launch;
+    - matches a string only the successor produces (its brief subject, "session 44").
+    - A checker passed on S43's own transcript `28f5c90e`.
+48. **Panel replies show only on the matching agent tab.** Verify-at-origin proves the row EXISTS, not that it is VISIBLE. Answer in the channel the question came in, yes/no first.
+49. **"The site is up" for a gated site needs one authenticated journey (sign in, first screen) through the PUBLIC path, never a tunnel.** Label any tunnel, port-forward or localhost check as such in the sentence to Kam.
+50. **Queued terminal input is dropped across a rotation.** The successor diffs the predecessor's transcript (first action c); the predecessor re-reads its own before `--self`. Never write "your instructions carried over" from panel and mail alone.
+51. **A HOLD or permission that names a property of the code** ("the CSP", "behind auth") is grepped at source in the same action, or written conditionally. When a helper reports an absence, ask what else in flight assumed the thing exists. (S44 caught HANDOVER-S43's nginx one-liner missing `proxy_pass`.)
 
-   - **UPDATE 18:3x (s12, ctx 69% checkpoint):**
-     - **S43 STATUS 08:26:26Z (DKIM pass): LOCAL main fast-forwarded `09c1591` → `3bc7471df46bd5844f3027c1383d6ea087463555`** (lane Q D2 + Q-A; 257 ahead of afc10e9; NOT pushed). This came after chain qd2-s43 went fully GREEN: host 1045+1 with 0 timeouts; DB 205; API-DB 428; upgrade e2e 49/49; clean-clone CI GREEN; switch-ON D1 PASS. Evidence: analysis repo 7e4b65c.
-     - **Seat decisions ACCEPTED by silence** (in `HPSM/5_Project_History/seat-decisions_s43_seat-hpsm-28f5.md`):
-       - D-S43-02: F-API may make ADDITIVE edits to 3 test files; guards extended, none weakened.
-       - D-S43-03: the upload body limit is scoped per route; the edge limit only on the upload route, at merge.
-     - **A-m1 went to BACKLOG marked 'after C11'.** Make sure it is actually commissioned after C11 merges.
-     - **PUSH DECISION NOTE:** the combined gates tested `09c1591`; `09c1591..3bc7471` (lane Q) and W are UNGATED. Before any push to HPSM-light, decide between a delta tier-2 gate on Q+W and aggregating B/C + the live acceptance harness.
+## OWED, not started
+- The delta tier-1 gate after S44's READY FOR QA, and the live-half acceptance re-run after the gate fix (both above).
+- Monday redesign note: the Caddy gate is VM-only state with no repo record (BACKLOG "durable gate redesign").
+- Amend `Launch_Tuesday.command`: step 5 (no Tuesday daily note; name the pickup, this seat's ledger and `git log`) and the stale `FIRST-BOOT-TUESDAY.md` line. Red-proof it with a boot.
+- NexusAI ticketing (a NexusAI seat's job): S53 m2/m3, S54's 8 BACKLOG items, round-3 NEW-3/NEW-4. Also 4 Dependabot alerts (RD-354 owns qs 6.15.2; three need a `gh` identity).
+- Raise with Wednesday (shared tools, coordination only): `send_brief.sh` refusing a bare "No az/gh" when the launcher runs them; `wake_ack`'s hash including the countdown; `cockpit.sh add` refusing when that project's claude already runs; `--self` refusing while the transcript holds a human line newer than the pickup's last commit; Tuesday replies to Kam carrying `view: both` (or a badge on the other tab); `TASKS.md`'s NEXT PICKUP pointer naming her file.
+- NAS WED-149: `com.tuesday.nassync` stays BOOTED OUT until the partition is built (design `1_Project_Definition/Architecture/2026-09-10_nas-two-seat-sync-check.md`).
+- Capacity: if the allowance hits 100%, every seat on both machines stops mid-turn. Recovery reads each seat's transcript and handover, and a cut gate re-runs under a NEW report path.
 
-   - **UPDATE 18:3x (s12):**
-     - **Gate A VERDICT 08:20:21Z = GO WITH FINDINGS 0/0/2/4** (report read head + mail whole; DKIM pass; placeholders 0).
-       - A-m1: credential detector misses 17 syntaxes (3rd round).
-       - A-m2: 5 non-equivalent mutant survivors (N63/N64/N33/N09/N26).
-       - A-p1..p4.
-     - **Routed in an ANSWER ~08:3xZ:**
-       - N63/N64 + A-p3 → lane C11;
-       - A-m1 (shape rule) + A-p2 + N33/N09/N26 → a follow-up engine lane after C11;
-       - A-p1/A-p4 → BACKLOG.
-     - **Pane `%2` closed** with pane_close.sh (control 18580).
-     - Not yet scored. **Waiting on B (`%3`) and C (`%4`).**
-   - **S43 ACK 08:20:21Z accepted:**
-     - C11 on s43/lane-c11 (pc-s43-c11 23080; + packages/content + web catalogue mirror); no migration.
-     - `SUPPORT_UNKNOWN_ON_DEVICES` critical (a).
-     - **Live upgrade window 21:00–23:30 AEST tonight** after Q+W (latest Monday 07:00).
-     - 3bc7471 checks GREEN at lower load.
-     - C11 is NOT deployed before Monday (its CONTENT_HASH change would 409 the fresh engagements).
-   - **The acceptance+security harness was REVISED at 18:20 on Kam's word** ("Please revise the testing harness documents so they test the live site."): LIVE site a TARGET, `LIVE DEMO RULING: APPROVED by Kam 2026-09-13 18:20`, own `QA Harness (synthetic)` tenant only, credential never printed, ≤1 req/s, stop on degradation, probes 4/6/10/14/16 local-only. `--check` rc 0, committed. **Launch after the live upgrade REPORT + gate verdicts;** name the live head in the launch prompt, and re-point the launcher HEAD/EXPECTED_COMMITS if local should match the upgraded head.
-
-   - Launcher: `2_Project_Files/fleet/qa-agent/launchers/resume_qa_hpsm_composer_09c1591_combined.sh <A|B|C>` (`--check` passed ×3).
-   - Panes and sessions:
-     - `%2` `QA/HPSM-C-A`, session `12eb20ba…`. Its report was written except @@VERDICT@@ and @@MUTANT_HEADLINE@@.
-     - `%3` `QA/HPSM-C-B`, session `258bef81…`.
-     - `%4` `QA/HPSM-C-C`, session `8aef64cf…`.
-   - Rung 5 verified from pane content: each re-derived its own state.
-   - Reports: `Testing Agent MAIN/projects/hpsm/reports/2026-09-13-composer-09c1591-combined-{a-engine-content,b-api-db,c-web-renderers}-tier1/report.md`.
-   - Verdicts come by mail to tuesday-agent@, subject `GATE VERDICT — Policy Composer combined gate <A|B|C> …`.
-   - **NEXT on each verdict:** read report.md whole → completion check against the combined brief → score (scoreboard) → `pane_close.sh %N` → aggregate the three → the PUSH decision for `09c1591` to HPSM-light. Push only on GO + Tuesday's word; the push is executed by S43, which holds main. A NO GO follows the two-round cap rule.
-
-3. **Kam's 17:00 commission — the HPSM ACCEPTANCE-vs-ORIGINAL-BRIEF + SECURITY tier-1 gate: WRITTEN, CHECKED, COMMITTED, NOT LAUNCHED.**
-   - Brief: `2_Project_Files/fleet/qa-agent/briefs/2026-09-13_hpsm-composer-09c1591-brief-acceptance-security-tier1.md`, with its prompt `….prompt.txt` beside it.
-   - Launcher: `2_Project_Files/fleet/qa-agent/launchers/launch_qa_hpsm_composer_09c1591_brief_acceptance_security.sh` (`--check` rc 0 at 17:31).
-   - Two verdicts (DELIVERABLES, SECURITY). Every original brief document is cited by absolute path.
-   - Stacks `policy-composer-qa-bas-on` (21480) and `-off` (21580); CI 21495.
-   - **Default, told to Kam on the panel (at origin):** LAUNCH AFTER the three combined verdicts land (capacity: load average ~190 on the Mini). The live Azure demo is `LIVE DEMO RULING: VETOED by default - Tuesday, Kam has not ruled`.
-   - **Only Kam's own words** switch that line to `APPROVED by Kam <YYYY-MM-DD HH:MM>` (the launcher regex accepts exactly that). Approval allows unauthenticated external probes only.
-   - **Launch:** `cockpit.sh add 'QA/HPSM-ACC' "bash '<launcher>'"`, then the rung-5 check.
-   - **If S43's second READY has moved main before launch:** decide between keeping `09c1591` (it matches the combined gates) and a new head (needs a new launcher head plus EXPECTED_COMMITS).
-
-4. **Kam's open cards (unchanged by s12):**
-   - `hpsm-composer-live-demo-upgrade-after-c12` — HOLD. Live stays at `c2fbc36`. **S40 has CLOSED, so no seat operates the live stacks**: an upgrade ruling needs an operator commissioned; S43 is the candidate.
-   - `hpsm-composer-demo-release-with-device-groups` — HOLD.
-   - `hpsm-composer-monday-review-scope` — amended by Kam's note.
-   - `tuesday-seat-self-rotate-with-liveness-check` — overtaken: Kam restarted Tuesday by hand at 16:48. Leave it for Kam, or mention it once.
-   - **Kam reviews HPSM on Monday 2026-09-14.**
-
-5. **For a future NexusAI seat (not now; found by s12's Explore read, unverified line-by-line):**
-   - `backend/routes/feedback.js` PATCH/DELETE have no admin-role check.
-   - The widget never sends `created_by` (stored as `'anonymous'`).
-   - `server.js:199` `autoCreateAIFeedback` hard-codes the dead VM URL.
-   - The Feedback_System link to NexusAI is dead (RD-50).
-
-## ⚠ INCIDENTS TODAY (measured by s12)
-
-- **16:48:28 FLEET SESSION KILLED.**
-  - The `fleet` tmux session was recreated in the second s12 booted.
-  - `Launch_Cockpit.command`'s Fresh branch runs `kill-session -t fleet` (≈L116–127), behind an R/F/Q prompt and a YES confirmation when agent panes are live. Launch_Tuesday/Wednesday have no kill-session.
-  - **Lost unwrapped:** S42 (`%25`) and the three gates. S40 had wrapped at 16:47 on Kam's word.
-  - Who chose Fresh is NOT established.
-  - Wednesday was told (coordination mail ~07:40Z).
-  - **Rule: whenever Tuesday asks Kam to restart this seat, say "Resume, not Fresh" in the same sentence.**
-- **panel_sync HUNG, then RACED.**
-  - **The hang:** the Thursday loop (pid 91697) forked a cycle subshell (99382) that sat in state R with no children for 6 min, with no log after 17:04. After a guarded TERM both stayed in state E (unkillable; `ps -p` on them hung >120 s — likely a kernel/IO hang on the T9). **A new loop, pid 12441, started 17:27** (detached, tty ??, `WED_AGENT=tuesday`).
-  - **The race:** every cycle then aborted mid-rebase ("local changes would be overwritten"), because `usage_tuesday.json` is rewritten on every statusline render and a 13-commit replay on the T9 cannot finish between writes.
-  - **The fix:** `git update-index --assume-unchanged 0_Brain/dashboard/data/usage_tuesday.json` at 17:37 → one cycle went through → origin/HEAD 0/0, both of s12's panel messages verified AT ORIGIN → flag REMOVED 17:39 (`ls-files -v` shows `H`).
-  - **If the abort recurs with a long local backlog, reuse that flag briefly and remove it after.** The durable fix is Wednesday's (proposal mailed).
-
-## ✅ DONE IN s12 (verified)
-
-- Brain whole: by-tier digest 5,437 lines (last heading asserted) + own ledger 101 rows → `ctx:31%`. Boot digests committed. WED board 27 active, 0 `lesson` (board_count.sh). `reconcile_rulings.py`: 55 taps, 0 to rule.
-- S40's wrap read whole (DKIM/DMARC pass).
-- Kam's two terminal instructions (16:55, 17:00) are in the prompt log. The first entry's swapped arguments were corrected and the correction noted.
-- Ledger row: three s12 slips (zsh unsplit git variable read as NO; prompt_log arguments swapped; own dirt held the sync one cycle).
-- Panel to Kam at origin: the receipt + 16:48 explanation + plan, and the testing-brief summary + defaults.
-
-## ⚠ NEW TRAPS (s12) — older traps 1–39 are in `.pre-1740`
-
-40. **Cockpit Fresh kills EVERY agent pane.** See the incident above.
-41. **`usage_tuesday.json` churn vs panel_sync rebase.** See the incident above.
-42. **zsh does not word-split a variable holding a command.** `G="git -C x"; $G log` fails, and an `&& yes || no` then prints "no". Write paths literally; branch on the exact rc.
-43. **`prompt_log.sh <channel> <text> [note]`.** Read a tool's usage in a separate action before the first call.
-45. **`reconcile_rulings.py` is Wednesday-scoped by construction.**
-    - **Where:** line 43, "This seat coordinates Secuura + Wednesday's own work".
-    - **What happens:** it SKIPS every Datasec card as "OUT OF SCOPE", even with `WED_AGENT=tuesday`.
-    - **Instead:** record Kam's Datasec taps with `WED_AGENT=tuesday decision_queue.sh rule <id> <choice>`, gated in code on `git merge-base --is-ancestor <ls-remote origin sha> HEAD`.
-    - **When the gate refuses** (origin just moved): wait for panel_sync's pull. Never run a plain fetch.
-46. **A mail watcher's MARK is one second past the newest mail already PROCESSED, never the arming time.**
-    - Kam's card taps arrive as `[Kam -> Tuesday] panel message …` (label `sent`), so a watcher regex must match `Kam` too.
-    - **Measured 18:1x:** the shared wake runner's own unsent tap line at %0 made it HOLD every later tap. Clear it only by matching its exact `[wake_watch]` text; C-u did not clear it mid-turn, but it submitted at turn end.
-44. **Resuming a killed QA gate:** `claude --resume <session>` with `CLAUDE_CONFIG_DIR=TUESDAY/4_Credentials/.claude` and the project's identity dirs. Map a session to its gate by counting mentions of its report dir / compose project in the transcript. The first-prompt heuristic is unreliable, because every gate prompt names A, B and C.
+## ✅ DONE IN s13 (verified)
+- Rotation 19:04:15: `respawned OK` + `LIVENESS OK: 3/3 agent panes present` (19:04:39); `%0` renamed back 19:05 (rc 0).
+- **Found the dropped 19:01:39 sign-in instruction** by transcript diff (ten lines, nine carried). Kam told 19:11:46 and answered "no" first in the terminal. Relayed to S43 09:14:09Z, which became lane FX-SI plus the FX-S7 CSS rule; the bottom-pin is in `ce62887`. Ledger w=4.
+- Naming (b) ruled 09:14:10Z (`brand.ts` productName on screen, HPSM internally).
+- Live gate blocker verified at source (`auth.ts:44`, `client.ts:23`, no Caddy in the repo); S43 briefed 09:25:25Z; b-tight READY-TO-APPLY read and measured; Kam asked twice.
+- S44 briefed (verified at the destination 09:47:21Z), launched 19:47:28, rung 5 proven on `375c22cb` (the selector slip was caught before any report), plan CONFIRMED; FX-S7 FINAL answer and tenant-picker ruling sent.
+- Acceptance+security verdict read whole, scored 1.00, `%6` closed, routed to S44. S43 wrapped; HANDOVER read whole; `%5` closed after FX-S7 FINAL.
+- Panel notes VERIFIED AT ORIGIN: 19:08:00, 19:11:46, 19:18:24, 19:24:59, 19:39:17; and **confirmed by s13 reading each verifier's output line "FOUND AT ORIGIN <ts>" (not only its rc):** the handover note 19:49:05, the verdict note 20:01:12, the "sign-in built" note 20:22:02. The 19:21:41 "Straight answer: no" note: VERIFIED AT ORIGIN by s13 at 20:32 (2026-09-13T19:21:41).
+- Ledger rows 2026-09-13: rung-5 selector (w=3), site-up checked the lock not the door (w=1), verified-exists-not-visible (w=1), dropped queued input (w=4).
