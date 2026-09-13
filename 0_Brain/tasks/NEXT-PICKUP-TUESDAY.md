@@ -340,6 +340,16 @@ supersede: replace WHOLESALE at the next pickup; never append.
 30. **NEW:** CronCreate jobs are SESSION-ONLY — a rotation or crash deletes them. s11's `d54df852` was cancelled at 15:3x after the HPSM launch; nothing is scheduled now.
 32. **NEW:** before ANY project-seat launch and at its rung-5 check, census `ps -axo pid,tty,lstart,command | grep "claude .*project '<Project>'"` across ALL terminals — Kam may have opened the project's launcher himself (2026-09-12: two HPSM seats, one inbox).
 36. **NEW (measured by s11 at the 90% ceiling, 09:47 Sun):** `2_Project_Files/fleet/cockpit/wednesday_rotate.sh` only respawns its OWN pane (`respawn-pane -k -t $PANE_ID`, line 76) — it kills no other pane itself. **But line 45 defaults `LAUNCH_CMD` to `bash "$PROJECT_DIR/Launch_Wednesday.command"`** unless `ROTATE_LAUNCH_CMD` is set, and its exit line says 'wednesday'. So on this tree a rotation boots through `Launch_Wednesday.command` (seat resolved by tree name since 09-09, unverified here), and **whatever stopped every Studio pane at 16:04 Sat lives in the LAUNCHER path it boots, not in this script** — not read at the ceiling. **s11 therefore did NOT self-rotate at 90%** (gate `%23` and S41 `%24` live) and asked Kam to restart by hand without closing other panes. Before any `--self`: read `Launch_Wednesday.command`/`Launch_Tuesday.command` for pane-killing or 'Fresh' cockpit steps, and set `ROTATE_LAUNCH_CMD` to Tuesday's launcher.
+39. **NEW (measured by s11 15:57 Sun): a "frozen busy" WAKE on a builder seat while gates run is usually NOT a stall.**
+    - **What it looked like:** `Datasec/HPSM-S42` `%25` was flagged frozen ~6 min. It showed "✻ Waiting for 2 background agents to finish", ctx 73%, successor handover already written.
+    - **Why:** its subagent transcripts last wrote 15:50, and two `lockf -k -t 3600 …/dc13ed6b-…/scratchpad/docker.lock` waiters were queued (15:55, 15:57). The three QA gates and S42's lanes all serialise image builds on that ONE docker lock, so a lane waiting for the lock writes nothing to its transcript for minutes. The QA gates were running vitest meanwhile; `pc-s42-w` was healthy.
+    - **Check order:**
+      1. the inbox;
+      2. transcript and subagent mtimes (`~/.claude/projects/-Volumes-KK-T9-External-HDD--CODING-Datasec-HPSM/<session>/subagents/`);
+      3. `ps` for `lockf` waiters and test runners;
+      4. the pane.
+    - **Rule:** do NOT tap a seat that is waiting on its own background agents. The harness wakes it when they finish. Only a waiter that exceeds the lock's 3600 s timeout, or an agent with no process at all, is a stall.
+
 38. **NEW (measured by s11 13:1x Sun): a second pane for a project needs its OWN row in `2_Project_Files/fleet/inbox_routing.conf` BEFORE any `cockpit.sh say … --mail`.**
     - **Why:** `say --mail` looks up the pane name in that file to find the delivery inbox. With no row it EXITS 1 WITH NO OUTPUT and taps nothing (bash -x: `DEST_INBOX=` empty). `wake_watch.sh` reads the same file.
     - **What happened:** S42 in pane `Datasec/HPSM-S42` was untappable until the row `Datasec/HPSM-S42|datasec-hpsm@agentmail.to|yes` was added. The precedent is the `Secuura/Blockchain-B…E` and `Datasec/NexusAI-B` rows.
