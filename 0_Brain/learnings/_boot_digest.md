@@ -7,7 +7,7 @@ status: live
 
 # Boot digest — headline + rules of every lesson (open the file when it fires)
 
-Generated 2026-09-14 07:21 from 160 lesson files (815,325 B). Each block = the lesson's retrieval handle (H1), its frontmatter, the operative paragraph, its section index, and every RULES section verbatim. 7 files carry no rules-shaped section and are included whole. The CASES behind a rule live only in the file: open it the moment the rule fires, or when a diagnosis needs the evidence. `_ledger.md` is read whole beside this digest; `_ledger_archive.md` on demand.
+Generated 2026-09-14 07:22 from 160 lesson files (815,983 B). Each block = the lesson's retrieval handle (H1), its frontmatter, the operative paragraph, its section index, and every RULES section verbatim. 7 files carry no rules-shaped section and are included whole. The CASES behind a rule live only in the file: open it the moment the rule fires, or when a diagnosis needs the evidence. `_ledger.md` is read whole beside this digest; `_ledger_archive.md` on demand.
 
 ## The T9 SSD is the master — Wednesday must be fully portable
 `2026-07-31_fully-portable-drive.md` · principle · 2026-07-31 · status: superseded — the "T9 is the master" half by [[2026-08-25_one-drive-devmaster-is-master]] (2026-08-25); the portability principle itself still lives
@@ -5890,4 +5890,6 @@ do) · [[2026-08-10_own-the-spec-not-just-the-escalation]] (escalation is the fl
 [[2026-09-13_rotation-never-blocks-the-work-delegate-then-rotate]] (rotation is plumbing) ·
 [[2026-08-07_a-promise-is-not-a-mechanism]] (rule 1 above is the mechanism: a turn with no
 output is not taken).
+
+**EXTENSION 2026-09-14 07:22:04 — Kam, panel, verbatim: *"you do not have to coordinate or send messages to Tuesday until / unless I change my mind."*** This SUSPENDS [[2026-09-10_claim-a-task-with-tuesday-before-starting-it]] and the claim-first half of the shared-tooling rule while the Tuesday seat is stopped: Wednesday fixes shared tooling on its own word, records the change in the daily note + ledger (the receipt stays), and sends NOTHING to `tuesday-agent@`. Mail arriving FROM Tuesday is read subject-only (Datasec content stays hers). No expiry mechanism — it ends on his word, stated as that reading. Recorded 07:2x; receipted on the panel.
 
