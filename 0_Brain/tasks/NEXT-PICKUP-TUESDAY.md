@@ -24,7 +24,15 @@ supersede: replace WHOLESALE at the next pickup; never append.
 - **S43 QUESTION 09:09:54Z (feedback product name) → (b) RULED 09:14:10Z** (`briefs_staged/2026-09-13_hpsm-s43-answer-feedback-product-name.md`): brand.ts `productName` on screen, HPSM internally. It SUPERSEDES the brief's "HPSM Policy Composer" string line, citing Kam's 16:53 words "registered against HPSM". W45-p2 stays Kam's. S43's 09:10:46Z CORRECTION (the path is `apps/web/src/brand.ts`) needs no reply; it matches what Tuesday read.
 - **S43 ctx 72% at 19:1x** (70% checkpoint). Its successor S44 comes at its 80–90 wrap, via a brief plus a new pane, **never `cockpit.sh rotate`** (the wake text suggests it; trap 37).
 - **Wednesday COORDINATION 09:14:50Z (DKIM pass, read whole, no reply needed):** she CLAIMS the seat-name resolver unification. The cockpit will name the coordinator pane after the seat, and `wednesday_rotate.sh`, `wake_watch.sh` and `arm_wake_watch.sh` will accept the seat name OR the legacy `wednesday`, scratch-tested for both seats before anything is armed. **Until she mails the commit sha plus the scratch-test output, the pickup's item-5 workaround stands** (rename `%0` to tuesday, `WED_AGENT=tuesday --self`, then the successor renames it back to wednesday). She will not change the pane-name contract without mailing first. She also took the statusline-publisher skip-write proposal as owed.
-- **s13 watcher re-armed:** `watch_tuesday_exiting.sh 2026-09-13T09:14:51 23:55 1666 83570`.
+- **S43 STATUS 09:17:14Z (DKIM pass, read whole; no reply needed):**
+  - (b) naming is relayed to F-WEB: the name comes from brand.ts, with a scan test and a mutant.
+  - **Kam's sign-in descriptions → NEW lane FX-SI** (`s43/fx-si-signin`, stack pc-s43-si 23680, from caf63fd). It owns `SignIn.tsx`, a new `signInDescriptions.ts` (`Record<Role,string>`), a render test and `e2e/s43-signin-descriptions.spec.ts`.
+  - FX-S7 adds ONE css rule, `.pc-choice-desc`: 11px, `--pc-text-muted`, the existing token. If axe contrast fails, the lane reports the ratio to Tuesday rather than changing the colour.
+  - Content comes from `apps/api/src/authz.ts` (role-matrix comment plus the permission sets). `bridge_operator` must say the Bridge is a stub (I-37). No mention of feedback, no HP marks, and `aria-describedby` on each radio.
+  - **READY ETA about 20:05–20:20 AEST;** it ships in the next rolling upgrade and goes to the delta gate (browser leg).
+  - **NEXT:** on the READY, check the descriptions against authz (completion check) and the contrast result. Warn Kam on the panel before the upgrade restart.
+- Panel note to Kam ~19:19 (the sign-in change has a lane, ETA 45–60 min, next rolling upgrade).
+- **s13 watcher re-armed:** `watch_tuesday_exiting.sh 2026-09-13T09:17:15 23:55 1666 83570`.
 
 ## 🟢 KAM, 18:5x AEST, terminal, verbatim: *"Keep going and finish what you can.  no matter the time.  keep going until completion"* — the successor's first jobs, in order
 1. **Every wake:** the unfiltered inbox. S43's fix-round PLAN, its pre-upgrade head mail, the upgrade REPORT and READYs are answered as they land (rules in LIVE items 1–2).
