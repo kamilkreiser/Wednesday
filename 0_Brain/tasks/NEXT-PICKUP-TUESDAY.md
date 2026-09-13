@@ -12,6 +12,17 @@ supersede: replace WHOLESALE at the next pickup; never append.
 **On EVERY wake:** `2_Project_Files/tools/kam_rulings_today.sh` (never `kam_msgs.sh` unfiltered) AND `[Kam -> Tuesday]` mails; list `tuesday-agent@` UNFILTERED and route on SUBJECT; `git status --porcelain | grep -v 0_Brain/dashboard/data/`. Rotation band 80–90. **Verify panel messages AT ORIGIN** (`git show origin/main:0_Brain/dashboard/data/chat_tuesday.json` on the ref `panel_sync` fetches; `git ls-remote` HUNG 9 min in this tree at 14:28 — bound any network read with a timeout). **Do NOT read `0_Brain/daily/`** (Wednesday's).
 
 ## 🔴 LIVE — with the next action for each
+0033. **S42 STATUS 04:58:29Z (read whole): LOCAL main `c2fbc36d2e4fa7e370fbef23632fbeefcf97cf0e`** (lane R rounds 1–3 merged: 365d5ef → a9e2503 → c2fbc36; 210 ahead of `afc10e9`; verified at source by s11 14:59; NOT pushed).
+    - **Round 3:** the UTC label is now 8 pt on the time's baseline, 20.50 pt from the right edge, no sample run moved (max 0.80 pt), pinned; opened p1 reads "13 Sep 2026 | 04:00:06 AM UTC".
+    - **Every chain GREEN;** switch-ON e2e F1-only each time.
+    - **S40 was SENT the renderer upgrade to `c2fbc36`** (pc-lane-a + Azure):
+      - D1 / 0015 / object-store pre-checks; no env, no migration, CONTENT_HASH unchanged;
+      - **rollback to `7135dec`**;
+      - a ~10 min post-upgrade check of 7 visible changes (the device group UUID stays until lane Q);
+      - the C11 HOLD restated.
+    - **Card `hpsm-composer-demo-release-with-device-groups` still OPEN** at 14:59.
+    - **Queue:** lane-w-e2e (building) → C12 7e324c5 → Q 5b24487 (device group names) → W.
+    - **NEXT:** S40's upgrade report → re-verify Azure 401 + pc-lane-a healthy.
 0032. **S42 QUESTION 04:44:53Z (read whole): the C11 device-group release was MEASURED, and it BLOCKS.** On `pc-s42-c12`, head 7e324c5:
     - **With ONE synthetic device group:** 409 RELEASE_BLOCKED `all_controls_ready_or_approved_excluded`, even after 24 exceptions + both approvals. All 55 items fail `support_resolved` (support "unknown", no C11 `device_capabilities` rows). "Unknown" raises NO issue code.
     - **Zero groups:** released 1.0.0.
