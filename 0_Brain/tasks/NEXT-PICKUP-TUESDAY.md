@@ -12,6 +12,18 @@ supersede: replace WHOLESALE at the next pickup; never append.
 **On EVERY wake:** `2_Project_Files/tools/kam_rulings_today.sh` (never `kam_msgs.sh` unfiltered) AND `[Kam -> Tuesday]` mails; list `tuesday-agent@` UNFILTERED and route on SUBJECT; `git status --porcelain | grep -v 0_Brain/dashboard/data/`. Rotation band 80–90. **Verify panel messages AT ORIGIN** (`git show origin/main:0_Brain/dashboard/data/chat_tuesday.json` on the ref `panel_sync` fetches; `git ls-remote` HUNG 9 min in this tree at 14:28 — bound any network read with a timeout). **Do NOT read `0_Brain/daily/`** (Wednesday's).
 
 ## 🔴 LIVE — with the next action for each
+0029. **S42 NOTICE 04:31:55Z crossed s11's triage 04:31:58Z (read whole).**
+    - **Lane Q FINAL** `1c029cb` (contract 0.13.0, 2b stored outputs, D1, Q9 API, platform-tenant no-sign-in incl. a case-insensitive id bypass closed; API-DB 407, host 943, 31/31 mutants; compose defaults only, no port, no new dependency).
+    - **Lane W FINAL** `f5c3474` (contains Q; e2e 42/42 twice incl. axe; web 220; 32/32 mutants).
+    - **Both held behind R and C12.** R and C12 still running.
+    - **S42 routing:** F1/F5/F8 → W (fixture detects a synthetic release via the API; ON proof on `pc-s42-w`); F3/F4 → R; F2 already fixed in Q+W; F6 no change; F7 + fsevents backlog.
+    - **NEW RISK S42 measured:** lane Q's api calls `ensureBucket()` at startup and REFUSES TO START if the object store is not ready, so an upgrade can take Azure down. S42 will name a pre-upgrade step.
+    - **s11 reconcile mail ~14:3x** (body `2_Project_Files/fleet/briefs_staged/2026-09-13_hpsm-s42-triage-reconcile-rollback.md`):
+      - F7 live-stack GUARD in lane W now (teardown may be backlog);
+      - a switch-ON e2e in EVERY merge chain;
+      - F6 if cheap, else a READY note;
+      - W split moot;
+      - **the Q-merge message to S40 must carry (a) the pre-upgrade objects check, (b) a ROLLBACK command to the previous head, and (c) a post-upgrade health check with a ~10 min deadline (api healthy, gate 401, one store+download round-trip), rolling back first on failure;** (b)+(c) proven on `pc-s42-merge` with an induced bucket failure.
 0028. **S40 VERIFIER REPORT 04:30:17Z on `7135dec` (read whole): GREEN end to end.** Host 910 + 1 skip; clean-clone ci.sh 16/16; demo-ON stack; fence positive control 422; S1→S10 0 console errors; Export PDFs byte-identical to the API with marks; technical approval → awaiting_customer. Evidence `qa-verify-s40-7135dec/`.
     - **Findings F1–F8, triaged by s11 ~14:3x** (body `2_Project_Files/fleet/briefs_staged/2026-09-13_hpsm-s42-s40-verifier-triage.md`):
       - **F1:** the e2e suite is RED on a switch-ON stack; `fixtures.ts:64-69` seeds non-synthetic tenants, and CI runs switch-OFF, so it was never covered. → lane W before Monday; the suite passes on ON and OFF; the merge chain gains a switch-ON e2e run.
