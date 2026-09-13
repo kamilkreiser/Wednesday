@@ -7,7 +7,7 @@ status: live
 
 # Boot digest BY TIER — W whole, M rules-only, every project case a handle
 
-Generated 2026-09-14 07:22 from 160 lesson files (816,949 B). M 33 · MIXED 5 · W 122. 28 project CASE sections inside MIXED files are reduced to one line each: the heading and the path to read it at. W blocks are exactly what the default digest carries; M blocks drop the section index and keep the rules; a P file is a single handle. The CASES behind every rule live only in the lesson files — open one the moment its rule fires.
+Generated 2026-09-14 08:56 from 161 lesson files (820,897 B). M 33 · MIXED 5 · W 123. 28 project CASE sections inside MIXED files are reduced to one line each: the heading and the path to read it at. W blocks are exactly what the default digest carries; M blocks drop the section index and keep the rules; a P file is a single handle. The CASES behind every rule live only in the lesson files — open one the moment its rule fires.
 
 ## The T9 SSD is the master — Wednesday must be fully portable
 `2026-07-31_fully-portable-drive.md` · principle · 2026-07-31 · status: superseded — the "T9 is the master" half by [[2026-08-25_one-drive-devmaster-is-master]] (2026-08-25); the portability principle itself still lives · tier: W
@@ -5531,4 +5531,33 @@ do) · [[2026-08-10_own-the-spec-not-just-the-escalation]] (escalation is the fl
 output is not taken).
 
 **EXTENSION 2026-09-14 07:22:04 — Kam, panel, verbatim: *"you do not have to coordinate or send messages to Tuesday until / unless I change my mind."*** This SUSPENDS [[2026-09-10_claim-a-task-with-tuesday-before-starting-it]] and the claim-first half of the shared-tooling rule while the Tuesday seat is stopped: Wednesday fixes shared tooling on its own word, records the change in the daily note + ledger (the receipt stays), and sends NOTHING to `tuesday-agent@`. Mail arriving FROM Tuesday is read subject-only (Datasec content stays hers). No expiry mechanism — it ends on his word, stated as that reading. Recorded 07:2x; receipted on the panel.
+
+
+## True duplicates are closed and archived by US — no external review, no comment asking for one. Standing rule, all boards.
+`2026-09-14_true-duplicates-are-closed-and-archived-by-us-no-external-review.md` · preference · 2026-09-14 · status: live · tier: W · supersedes: the 'proposal for Peter/Stuart to rule per cluster' shape of card secuura-board-dedupe-31-clusters (ruled b at 08:11, delivered 08:53) — for TRUE duplicates only
+
+**His words, verbatim (2026-09-14 08:55 AEST):**
+> *"On second thought if these are truly duplicates, no need for external review or comment, let's
+> just close them and archive them ourselves. This should be a standing rule going forward."*
+
+**How to apply:**
+1. **Every board-pass brief carries the standing line:** *"TRUE duplicates (same defect or ask,
+   proven at source): mark `Duplicate of <survivor>`, close, archive, ONE facts-only comment — no
+   proposal, no external review (Kam 2026-09-14 08:55). Overlapping-but-distinct: untouched."*
+   → `2_Project_Files/fleet/STANDING_LINES.md` and the board-seat brief shape (s218/s219).
+2. **The survivor rule stays what s219 used:** the ticket with the fixing PR; else the older id; else
+   the one a client human wrote. Stated in the comment.
+3. **The 2026-09-14 instance is executed by s219 itself** (its ADDENDUM): the five TRUE DUPLICATE
+   clusters (C4 → KS-848; C20 → KS-826; C23 → KS-1026; C24 → KS-987; C31 → KS-783; seven relations,
+   all Backlog) closed + archived; its KS-485 comment corrected by a follow-up line so Peter is not
+   asked to rule on those five; the 25 overlapping rows stand as information.
+4. **It generalises to every board Wednesday's seats work** — the rule is his, "going forward", and
+   not scoped to Platform K.
+
+**Family:** [[2026-09-02_coo-actionable-tickets-never-wait-for-kam]] (a ticket that needs no external
+input is executed, never listed — this is that rule pointed at duplicates) ·
+[[2026-09-07_a-classification-list-is-a-representation-not-an-instruction]] (the proof is at source,
+not in a list) · [[2026-09-05_tickets-are-the-channel-whatsapp-via-kam-is-the-escalation]] (what
+does still go to the humans) · [[2026-09-07_a-rule-for-creation-is-not-a-mandate-to-retrofit]] (read
+the verb: "going forward" — and here he also named today's set explicitly).
 

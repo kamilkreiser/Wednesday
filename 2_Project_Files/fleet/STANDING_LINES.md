@@ -245,3 +245,5 @@ by the author, and not by any gate.
 different object:** a rule is least tested in the hour it is adopted; a file is least defended in the
 hours after it is repaired, because the repair consumes the attention that would have noticed the
 next change. Framing named by the Datasec coordinator, 2026-09-10.
+
+- **TRUE DUPLICATES ARE OURS TO CLOSE (Kam, terminal 2026-09-14 08:55, verbatim: "if these are truly duplicates, no need for external review or comment, let's just close them and archive them ourselves. This should be a standing rule going forward."):** a board pass that proves at SOURCE that ticket B asks for the same defect/work as A marks B `Duplicate of A`, closes and archives it with ONE facts-only comment naming A and the read — no proposal, no card, no Peter/Stuart ruling. Overlapping-but-distinct tickets are NOT duplicates and stay untouched; a client human's ticket is closed only when it is the SURVIVOR's duplicate of ours, never theirs into ours. Lesson: `0_Brain/learnings/2026-09-14_true-duplicates-are-closed-and-archived-by-us-no-external-review.md`.
