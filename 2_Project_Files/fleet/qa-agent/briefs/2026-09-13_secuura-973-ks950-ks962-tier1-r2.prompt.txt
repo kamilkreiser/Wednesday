@@ -1,0 +1,125 @@
+ultrathink
+
+You are the fleet QA agent running a TIER 1 (through code — there is NO rendered surface and no request surface, so the
+real-browser half of tier 1 does not apply and you say so) gate, ROUND 2 OF 2 under the two-NO-GO cap, on
+Secuura/Blockchain PR #973 (KS-950 / KS-962).
+
+Read your brief FIRST and in full, then plan:
+/Volumes/DevMASTER/WEDNESDAY/2_Project_Files/fleet/qa-agent/briefs/2026-09-13_secuura-973-ks950-ks962-tier1-r2.md
+
+Then read ROUND 1's report WHOLE (a gate cannot ask; everything round 1 measured is in it):
+/Volumes/DevMASTER/!CODING/Testing Agent MAIN/projects/secuura/reports/2026-09-13-ks950-962-973-dfed981d0-tier1-r1/report.md
+(+ its evidence/ — the farm script, shape asserter, rows scripts, drivers and tamper runner under evidence/instrument/ are
+yours to reuse). Round 1's brief is beside yours: 2026-09-13_secuura-973-ks950-ks962-tier1.md — its §2a rows, items and
+KNOWN-FRAGILE stand; the round-2 brief says which to RE-RUN.
+
+Subject: ca2a9109cebf7ed73f916367b7c78b76d137e35c = PR #973 (KS-950 / KS-962), open against develop, TWO commits on
+  M6 0f69129b3: the round-1 head dfed981d0 (gated NO GO 17:17 AEST on F-973-1 Major + F-973-2 Minor) and the ROUND-2
+  commit ca2a9109c (parent dfed981d0, tree a0f47e818, +59 -19, TEST FILES ONLY): the auth seed-site test
+  services/auth/src/__tests__/ks949-platform-admin-seed-identity.test.ts (+24 -7, blob 30ddc1c70 -> 67316e5da) and the
+  suite scripts/__tests__/ks949_main_seed_idempotence.test.sh (+35 -12, blob 76a40a0ed -> 89c89fef8, mode 100755, 27
+  cells). The product file services/api-gateway/src/startup-migrations.ts is BYTE-IDENTICAL to round 1 (blob ed3e52142,
+  sha256 623a99b9531e7c2c…, verified through the GitHub contents API at both heads). PR files API: 3 files +490 -38.
+  Merge-base = the PR's parent M6 0f69129b3; origin develop = M10 e91eb5bda (19:14 AEST) — M6..M10 is 4 squashes / 15
+  files, NONE of #973's three (userRepo.ts IS in that delta; the brief's auth counts are stated at the head-on-M6
+  tree; the merged-tree count is YOURS to measure). #928 stays open at e28d64b8d; not yours to close or gate.
+The headline questions of a ROUND 2: (1) are F-973-1 and F-973-2 CLOSED at the new head — proven by RUNNING, red-first;
+  (2) did the round-2 diff introduce a NEW defect — a test-only diff still gets its own red-proof; (3) which round-1
+  legs could the change affect — re-run those, NAME the round-1 findings that stand unchanged (F-973-3, F4 — on KS-962
+  by ruling); (4) delivered-vs-commissioned against the s207 brief and Wednesday's ANSWER (P7 NOT taken is by ruling;
+  Q-A taken); (5) the cap — this is round 2 of 2: your verdict names what SHIPS and what is TICKETED.
+Repo:    /Volumes/DevMASTER/!CODING/Secuura/Blockchain/2_Project_Files  (READ-ONLY — clone by SHA into your own scratch;
+  node_modules + packages/shared/dist symlink-farmed FROM worktrees/s207-ks950-r2 (at ca2a9109c, porcelain 0), never
+  into it and never running vitest inside it; worktrees/s201-ks950-rework (dfed981d0) and worktrees/ks950 (e28d64b8d)
+  are not yours to touch)
+
+You are FINDINGS-ONLY. You never fix, never merge, never push, never deploy, never comment, never file, never `@`.
+
+NEVER run a push, the real pre-push hook, or preflight.sh inside the Secuura checkout or any of its worktrees.
+
+NEVER print a credential value, and never open, read or copy a secrets file (any .env, config/secrets.yml). Count, never echo.
+
+NO docker, NO stack of any slot, no kintsugi, no demo. The ONLY database you touch is the socket-only PostgreSQL the
+suite starts from the Homebrew keg in ITS OWN mkdtemps (plus your own socket-only instance for the rows, item 6).
+A LIVE Homebrew postgresql@15 SERVICE listens on 127.0.0.1:5432 on this machine — Kam's, NOT yours (round 1's F1):
+never aim a connection, a control or pg_ctl at it. Every connection you make names a socket directory you created.
+
+Eight things you must not miss:
+
+1. F-973-1 CLOSED, BY RUNNING (item 2): in YOUR clone at head, swap M6's startup-migrations.ts in BY CONTENT (sha
+   15e9b3c33476cac6…), run the ONE auth file SOLO → predicted `2 failed | 28 passed (30)`, EXACTLY :344 (the removal
+   pin, "expected true to be false") and :382 (the .not.toContain pin) — quote the cells-run line and both messages;
+   restore by content (623a99b9531e7c2c…); at head 30/30; auth FULL SOLO at head-on-M6 47 files / 657 / 0 failed. A
+   third red or a different pair is a finding — say against whom.
+
+2. THE ROUND-2 TEST'S OWN RED-PROOF (item 3): three PLANTS on your clone's PRODUCT file, prediction first, anchor
+   asserted, restore sha after each — Tp1 a `-- INSERT INTO users (id) VALUES ('x')` line inside the why-comment block
+   → exactly :344 red; Tp2 the literal platform.admin@secuura-test.invalid inside the same block → exactly :382 red;
+   Tp3 both → the red-first pair. A plant that reds nothing is a Major (an inert pin).
+
+3. F-973-2 CLOSED, WITH THE SUITE RUNNING (item 4): the suite at head `27 passed, 0 failed (of 27 cells)` (quote the
+   15.14 line, the statement sha 186175afcbdc2ae5…, `docker/init 01-08 (11 files) + 48 main-DB migrations`, ID3's ok
+   line, the wall-clock; KS949_KEEP=1; TMPDIR at the 49-char default); the head suite against M6's product tree once →
+   predicted 18 passed, 9 failed (round 1's eight + ID3); then Tg — DELETE the guard line :1043 (anchor 1, the
+   extracted-statement sha becomes b99a972937ce63ed…) → predicted EXACTLY {ID3}, `26 passed, 1 failed (of 27 cells)`,
+   its line `command tag 'UPDATE 12', 12 of 12 updated_at moved`. Score a run ONLY on a `(of 27 cells)` summary — a
+   tamper that breaks the load and reds with zero cells is INVALID. Then the gate-designed Tg2 (guard INVERTED, both
+   arms IS NOT DISTINCT FROM → predicted {AG4, ID3}, ID3 reading 'UPDATE 11', 11 of 12) and Tg3 (slug arm deleted →
+   predicted 0 of 27 — a coverage NOTE: AG4 plants both columns), and Ti on a scratch COPY of the SUITE (WHERE false in
+   both captures → ID3 stays green: the capture half has no size assertion — Polish, not an open F-973-2). Then the
+   builder's T1–T4 and Th with the NEW predictions (T1 7 incl. ID3; T2 6 incl. ID3; T3 2; T4 1; Th 2). Anchor Tg/Tg2/
+   Tg3 on the WHOLE :1043 line (IS DISTINCT FROM also occurs in the comment :1015); assert T1/T2 by full statement
+   text (DO UPDATE SET also occurs at :1139).
+
+4. THE P3 BRANCHES RE-RUN (item 5): the cap die under a long TMPDIR must now print `1 passed, 1 failed (of 27 cells) —
+   aborted` (the 12-ids cell :139 passes BEFORE the mkdtemps) and, with KS949_KEEP unset, leave NO ks949data.*/
+   ks949sock.*/ks949work.* behind (round 1 left three empty dirs); with KS949_KEEP=1 they are kept and named. SKIP on a
+   scratch copy reads `0/27 cells run`, exit 0; FAIL on an unfarmed clone `0 passed, 1 failed (of 27 cells) — aborted`
+   (dist die :113 before tsx :114); bash -n; --check-unreached 26.
+
+5. THE ROWS ID3 SPEAKS FOR, ON YOUR OWN INSTANCE (item 6): R2 (auth-seeded, no change → UPDATE 0, every updated_at
+   identical), R7 (second run; control with the guard deleted → UPDATE 12, 12 moved), R5a / R5b (slug-only / id-only
+   drift → UPDATE 1 each — the arms the suite's AG4 cannot separate), R3. NOT re-run, and say why (byte-identical
+   product file): the RLS row (F-973-3 stands on KS-962 by ruling), the fake-pg matrix, the other §2a rows.
+
+6. THE MERGED TREE (item 7): 3-way merge of M10 e91eb5bda (2 ahead / 4 behind; 0 conflicts expected, the 15 files
+   disjoint by name — if develop moved further, merge the then-current tip and prove disjointness yourself); auth
+   vitest SOLO 0 failed with 50 files (the merged-tree count is YOURS — state it as such), api-gateway (round 1 read
+   34/343 at M7), the suite 27/27 with the twelve triples 12-of-12 against the MERGED userRepo.ts (seedDemoUsers moved
+   to :1213 at M10 — compare by content), run-shell-suites.sh 26/26 with this suite inside at 27 cells, tsc once.
+   Assert the merged auth-test blob is #973's 67316e5da (develop still carries the OLD 30ddc1c70).
+
+7. DELIVERED vs COMMISSIONED + CLAIMS (items 8, 9): the table in the brief — every commissioned element (Q1 the two
+   assertions + header sentence; Q-A the inverse pin; Q2 ID3 / TOTAL_CELLS 27, shape (ii) NOT taken; Q3 P3/P4/P5 in the
+   commit, P1/P2/P6 in the body, P7 NOT taken → NOT covered; Q4 the KS-962 four-facts comment 97fb9b93 + d863f815,
+   KS-950 692689aa, KS-1125 f18bbf67 — relayed by Wednesday, 0 at-signs / 0 mention nodes; Q5 one commit, fast-forward
+   push, PROTOCOL-CLEAN; D1/D2 accepted; F-A owned by Wednesday) against what is AT HEAD. Then the claims: "seven hunks",
+   ":1203-1213", "27 cells", the tamper table, "657/657 at this head (on M6)", "none of the three touched by M6..M10",
+   the README's "`@15` ×1" (the body has 2 package at-signs — precision), "emailExists :622 on develop" (:636 at M10 —
+   precision). A claim that does not hold is a finding against the PR that wrote it.
+
+8. THE CAP (item 12, REPORT): round 2 of 2 — every finding you carry is SHIPS-WITH (Polish) or TICKET (symbol/path for
+   Wednesday's board search; you file nothing). NAME the round-1 findings that stand unchanged: F-973-3 and F4 on
+   KS-962 by ruling. #928: read-only, open at e28d64b8d, closed by nobody. NOT TESTED at equal prominence — the four
+   platform suites, no stack/slot/deploy/deployed DB, the browser half (N/A), the RLS re-measurement, the fake-pg
+   matrix, PG18 optional, F1, F2, P7, the login path under the legacy fallback, KS-1054/1055/960/1125/1127/1128/1135.
+
+Your tool shell's grep may be a function: use /usr/bin/grep with a same-file control. Never cd in your own tool calls (run
+the suite as `bash /abs/path`). zsh: no PIPESTATUS (`cmd > out 2>&1; rc=$?`), no timeout on macOS.
+Quote the Secuura checkout's porcelain count, .git/config sha256, for-each-ref count, origin develop SHA and refs/pull/973/head
+at start and close; they must match (name any ref another seat's push or merge moved). Confirm worktrees/s207-ks950-r2,
+worktrees/s201-ks950-rework and worktrees/ks950 are byte-identical at start and close (porcelain 0 both times).
+Never `rm`: run the suite with KS949_KEEP=1 and stop every postgres you started (pg_ctl stop on YOUR data dirs only).
+Do no memory maintenance of your own project's memory store inside this session.
+
+Report FOUND / TESTED / HOW, with controls; the tamper table (T1–T4, Tg, Th, Tg2, Tg3, Tp1–Tp3, Ti) with cells-run beside
+each colour; the DELIVERED-vs-COMMISSIONED table; the auth counts at head-on-M6 and on the merged tree; the rows re-run
+with base/head/direction; and state what you did NOT test at the same prominence as the findings.
+Verdict: GO, GO WITH FINDINGS, or NO GO — on ca2a9109c. Round 2 of 2 for the KS-950/KS-962 class under the cap: say what
+ships and what is ticketed.
+
+MAIL YOUR VERDICT to wednesday-agent@agentmail.to when the pass is complete, using
+the project's send_brief.sh. Your pane holds ~19 lines of alternate screen with no
+scrollback, so a verdict that stays in the pane is one pane-close from being lost --
+this is not a formality, it is the only durable copy. Subject:
+[QA -> Wednesday] TIER 1 GATE #973 ROUND 2 (KS-950 KS-962) ca2a9109c -- <GO|GO WITH FINDINGS|NO GO>
