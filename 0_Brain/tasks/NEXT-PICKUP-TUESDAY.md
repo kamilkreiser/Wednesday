@@ -12,6 +12,12 @@ supersede: replace WHOLESALE at the next pickup; never append.
 **On EVERY wake:** `2_Project_Files/tools/kam_rulings_today.sh` (never `kam_msgs.sh` unfiltered) AND `[Kam -> Tuesday]` mails; list `tuesday-agent@` UNFILTERED and route on SUBJECT; `git status --porcelain | grep -v 0_Brain/dashboard/data/`. Rotation band 80–90. **Verify panel messages AT ORIGIN** (`git show origin/main:0_Brain/dashboard/data/chat_tuesday.json` on the ref `panel_sync` fetches; `git ls-remote` HUNG 9 min in this tree at 14:28 — bound any network read with a timeout). **Do NOT read `0_Brain/daily/`** (Wednesday's).
 
 ## 🔴 LIVE — with the next action for each
+0016. **S41 STATUS 02:57:42Z (read whole by s11):** LOCAL main `ea8bd1fd0db152662eff5cb21884ca5e6b2672cf`, **182 commits ahead of origin `afc10e9`, NOT pushed**.
+    - **Merged since a651c89:** E1 (PDF export, outputs endpoint, contract 0.8.0), G (0013/0014 synthetic flags, release guard, generation record), F + follow-up ("Not signed", Q10 code), I (web defects, e2e 32/32 twice), and S40's demo release 1bf3f31 (INERT unless `PC_CONTENT_RELEASE_DIR` is set; carries Kam's 11:19 ruling, no releasability claim).
+    - **Checks:** clean-clone ci.sh GREEN 15/15; host 896; DB 181; API-DB 346.
+    - **Switch OFF everywhere**, waiting on lane E 2a (parts 1 and 2), the default-OFF compose change, S41's ON proof, then S40 on pc-lane-a and Azure.
+    - **s11 answered ~13:0x:** two backlog candidates PROMOTED to fix before switch-on, because they are Kam's own requirement that reports carry "the client details … and by whom": a caller-written `release_artifact.generated_at`, and artefact client/engagement names not checked against their rows. Both are named gate targets; the other four stay backlog.
+    - **The combined-gate head is now ≥ ea8bd1f.**
 0015. **S41 lane F DONE 02:16:35Z (c801e4c, 49/49 mutants; main 1326c40 = A C B D E1 G) → ANSWERED by s11 at 12:18** (body `2_Project_Files/fleet/briefs_staged/2026-09-13_hpsm-s41-answer-lane-f-q10a-s32b-c12.md`):
     - **Q10-A (a):** the literal byte-identity proof is impossible, because a recorded answer moves `input_hash`. The refined equivalence proof is accepted, and `input_hash` stays pinned. The new code is DISCOVERY_ANSWER_UNTYPED (warning).
     - **S32-B:** architecture §3.2 stands. There is NO unsigned released evidence ZIP, package manifest or manifest_jws. `renderOne(kind)` is accepted on one condition: unsigned outputs must say "not signed", with a RED-first test.
