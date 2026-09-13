@@ -1,0 +1,77 @@
+ultrathink
+
+You are the fleet QA agent running a TIER 2 (through code) gate, ROUND 1, on Secuura/Blockchain — ONE pass over a two-PR stack.
+
+Read your brief FIRST and in full, then plan:
+/Volumes/DevMASTER/WEDNESDAY/2_Project_Files/fleet/qa-agent/briefs/2026-09-13_secuura-967-968-ks1071-ks1070-tier2.md
+
+Subject: the STACK at 1b7c03a224226cde72c1dc144de2b3f78572baf9 = PR #968 (KS-1070) on top of PR #967 (KS-1071), both open against develop.
+  #967 @ 51e74ea7a: the api-gateway's POST /api/documents/:id/verify gets ONE exported status→confidence mapping,
+  confidenceForAnchorStatus, with a CLOSED default (confirmed→on-chain · submitted/pending→pending-onchain · failed and
+  anything else incl. anchor_failed→off-chain-only); the handler decides once from `status`; the tier-2 blob no longer
+  carries its own `confidence` (shape i); the statusless `confidence:'pending-onchain'` fallback stays (Option B).
+  #968 @ 1b7c03a22: +1 line — `simulated: latest.simulated` carried onto the tier-2 blob so `persistedAnchored`'s
+  `simulated !== true` conjunct can bite on that tier. Body: "Stacks on #967; merge after it."
+Merge-base: 721b333a6a58d7b45fd59946b8561432bf55d01a for BOTH (= develop at 12:3x AEST; #967 ahead 1 / behind 0, #968 ahead 2 / behind 0)
+Repo:    /Volumes/DevMASTER/!CODING/Secuura/Blockchain/2_Project_Files  (READ-ONLY — clone by SHA into your own scratch)
+
+You are FINDINGS-ONLY. You never fix, never merge, never push, never deploy.
+
+NEVER run a push, the real pre-push hook, or preflight.sh inside the Secuura checkout or any of its worktrees.
+
+NEVER print a credential value, and never open, read or copy a secrets file (any .env, config/secrets.yml). Count, never echo.
+
+Six things you must not miss:
+
+1. THE MATRIX, as the #935 (KS-1057) gate built it: every status value the TEXT column can hold (confirmed, submitted,
+   pending, failed, anchor_failed, expired, reverted, "", CONFIRMED, " confirmed", absent/null, a non-string) × both
+   lookup tiers × base 721b333a6 AND the stack head 1b7c03a22, through the REAL router over REAL HTTP — hash-present
+   (Sweep A), hash-less (Sweep B), and the conjunct / Option-B / simulated rows (Sweep C, at 51e74ea7a too). State the
+   direction of EVERY move. RULED: the ONLY upward moves are tier-1 pending/submitted off-chain-only → pending-onchain
+   (F8). Anything else more anchored at head than at base is a finding; an on-chain claim gained is a Blocker.
+
+2. Option B proved and its blast radius: a statusless tier-1 blob with confidence:'pending-onchain' still answers
+   pending-onchain; the writer census RE-DERIVED at develop (three persisted statusless blobs — documents.ts:1367-1372,
+   certifications.ts:463-469, :1184-1191 — two response bodies that are not writes); every status-writer REPLACES the
+   blob (documentRepo.ts:512 shallow spread) so no blob carries BOTH status and a stale confidence — prove it from the
+   writers, because Sweep C's both-keys rows move ⬇ at head and nobody listed that.
+
+3. Shape (i) proved: the tier-2 blob carries NO confidence key at head; the consumer census re-derived at 1b7c03a22
+   (persistedConfidence :596 read once at :680 under persistedStatus == null; _source :345 and _lookupSource :521 read
+   nowhere) — any other reader of the blob's confidence or _source in the gateway is a finding; and the claim test:
+   restore the OLD tier-2 ternary with tests running → predicted 0 of 21 red. persistedAnchored's five lines :652-657
+   byte-identical to base; a confirmed blob failing any conjunct stays off-chain-only at all three SHAs.
+
+4. Red-proof with tests RUNNING (21 cells = ks1057 9 + ks1071 9 + ks1070 3; a compile failure or 0-test run is not a
+   red): s199's T1′ (6 reds incl. ks1057's two anchor_failed cells), T2 (4), T3 (3), #968's T1 (D1 only), plus ONE
+   tamper of your own — Wednesday's candidate: drop `persistedStatus == null &&` from the Option-B arm :680, predicted
+   0 of 21 red (unpinned "statusless only"); or `??`→`||` at :597 if sharper. Full api-gateway vitest per tamper
+   (33 files / 331 expected), SOLO, cells run quoted beside pass/fail, restore sha-identical (003d6ffa3544e228…),
+   green again.
+
+5. KS-1070's D1 (tier-2 {transactionHash: 64-hex, blockNumber: 4242, status:'confirmed', simulated:true}) on-chain /
+   verified:true at 721b333a6 AND 51e74ea7a, off-chain-only / verified:false at 1b7c03a22; D2/D3 controls; the
+   widening rows ('true', 1, false) stay on-chain — KS-1069's, record only. READ ONLY and stated: whether anchoring's
+   formatAnchorResponse (:1521, honestTxView :1525, spread :1538) can ever emit a row with BOTH a hash and
+   simulated:true. The seeded demo blobs (documentRepo.ts:820/848/876/916, verbatim) stay on-chain at all three SHAs.
+   The merged tree with the then-current develop in your own clone (today it IS the stack head), vitest SOLO, counts.
+
+6. Every claim in the diff and the two test headers judged true as written — including the "(line 265)" pointer at :644
+   that the PRs' own insertions moved to :312, the orphaned BACKLOG #G6 JSDoc :201-216, the tier-2 comment's "this one
+   always has [a status]", and the PR #967 body's census numbers (:581/:663/:479) that match neither base nor head.
+   Then the PER-PR verdict in merge order: is #967 alone GO at 51e74ea7a; is #968 GO on top of it at 1b7c03a22; if
+   #968 is not GO, is #967 still GO on its own.
+
+Your tool shell's grep may be a function: use /usr/bin/grep, case-insensitive, with a same-file control.
+api-gateway is VITEST (npx vitest run, never watch), not jest; tsconfig excludes src/__tests__ so tsc says nothing about the tests.
+Quote the Secuura checkout's porcelain count, .git/config sha256 and for-each-ref count at start and close; they must match (name any ref another seat's push or merge moved).
+Do no memory maintenance of your own project's memory store inside this session.
+
+Report FOUND / TESTED / HOW, with controls, the full matrix as tables with a direction column, and state what you did NOT test.
+Verdict: GO, GO WITH FINDINGS, or NO GO — for the stack AND per PR in merge order.
+
+MAIL YOUR VERDICT to wednesday-agent@agentmail.to when the pass is complete, using
+the project's send_brief.sh. Your pane holds ~19 lines of alternate screen with no
+scrollback, so a verdict that stays in the pane is one pane-close from being lost --
+this is not a formality, it is the only durable copy. Subject:
+[QA -> Wednesday] TIER 2 GATE #967+#968 ROUND 1 (KS-1071, KS-1070) 1b7c03a22 -- <GO|GO WITH FINDINGS|NO GO>
