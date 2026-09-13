@@ -56,6 +56,20 @@ supersede: replace WHOLESALE at the next pickup; never append.
   - **LAUNCH it right after S43's upgrade REPORT lands:** `cockpit.sh add 'QA/HPSM-ACC' "bash '/Volumes/KK_T9_External_HDD/TUESDAY/2_Project_Files/fleet/qa-agent/launchers/launch_qa_hpsm_composer_09c1591_brief_acceptance_security.sh'"`, then rung 5. The file name still says 09c1591; the content is caf63fd.
   - **If main moves before launch:** decide to keep caf63fd (it matches the live head) or re-point HEAD_SHA/EXPECTED_COMMITS/REPORT_DIR/SUBJECT in all three files and re-run `--check`.
 
+## ✅ 19:0x (s12) — LIVE UPGRADE DONE, HARNESS LAUNCHED
+- **S43 REPORT 08:58:40Z (DKIM pass): the live demo is UPGRADED to `caf63fd` on pc-lane-a AND Azure**, all post-checks GREEN, no rollback.
+  - Azure tenant "Synthetic Customer B (demo content)" `e93302d2…` now holds two fresh engagements: A "Demo drafts, one device group (synthetic)" `3bb6fcb2…`, and B "Demo release walk-through, no device groups (synthetic)" `a9101d3f…` RELEASED 1.0.0 (version `b03aae4b…`). pc-lane-a mirrors them (A `e920ac1d…`, B `8ce21d2a…`).
+  - **Azure DO NOT USE:** "Office fleet hardening (demo)" `c9bce98b…`, "Demo content proofread (synthetic)" `1ec31037…`. pc-lane-a: 9 listed in the REPORT.
+  - Evidence: HPSM analysis `qa-s43/upgrade/live-caf63fd/`.
+  - **Verified by s12 19:00:** / , /api/health and /idp/ answer 401 + Basic; wrong credentials 401; TLS verify 0.
+  - Card `hpsm-composer-live-demo-upgrade-after-c12` marked DELIVERED 19:00:48.
+  - Kam told on the panel: which engagements to use, which to avoid, and the known issues until the fix upgrade.
+- **Acceptance + security harness LAUNCHED 19:00:39** in pane `%6` `QA/HPSM-ACC` (launcher `…/launch_qa_hpsm_composer_09c1591_brief_acceptance_security.sh`, content caf63fd, precheck rc 0).
+  - Verdict subject: `[QA/Datasec-HPSM -> Tuesday] GATE VERDICT — Policy Composer acceptance vs original brief + security @ caf63fd (tier 1)`.
+  - Report: `Testing Agent MAIN/projects/hpsm/reports/2026-09-13-composer-caf63fd-brief-acceptance-security-tier1/report.md`.
+  - **NEXT on its verdict:** read the report whole, run the completion check, score, `pane_close.sh %6`, then a panel note to Kam.
+- **Remaining tonight:** the fix lanes' READYs, the rolling fix upgrade (head mail, then a panel warning), and the delta gate after the fixes merge. Then S43's wrap and an S44 successor if needed.
+
 ## 🔴 LIVE — with the next action for each
 
 1. **HPSM S43 — pane `%5` `Datasec/HPSM-S43`, launched 17:07:52 by s12 with HPSM's own `Launch_Claude.command`.**
