@@ -12,6 +12,15 @@ supersede: replace WHOLESALE at the next pickup; never append.
 **On EVERY wake:** `2_Project_Files/tools/kam_rulings_today.sh` (never `kam_msgs.sh` unfiltered) AND `[Kam -> Tuesday]` mails; list `tuesday-agent@` UNFILTERED and route on SUBJECT; `git status --porcelain | grep -v 0_Brain/dashboard/data/`. Rotation band 80–90. **Verify panel messages AT ORIGIN** (`git show origin/main:0_Brain/dashboard/data/chat_tuesday.json` on the ref `panel_sync` fetches; `git ls-remote` HUNG 9 min in this tree at 14:28 — bound any network read with a timeout). **Do NOT read `0_Brain/daily/`** (Wednesday's).
 
 ## 🔴 LIVE — with the next action for each
+0018. **S41 ACK 03:01:42Z, which crossed the 03:02:00Z CHECKPOINT by 18 s (read whole by s11):**
+    - **Promoted fixes:** at the DB, lane G migration 0015 (REVOKE column INSERT + BEFORE INSERT trigger for `generated_at` and client/engagement names).
+    - **Lane E 2a:** DONE at 4808208, not merged (contract 0.11.0, 422/409 fences, exact-"true" switch, renderOne + §3.2 503s, `X-Output-Not-Signed` + S10 pill).
+    - **Q9:** not built; it needs a SECURITY DEFINER DB read path, with the audit in the PLATFORM tenant chain.
+    - **Revised sequence:** compose OFF commit → E 2a merge (+ lane I `synthetic:false` fixture fix) → G 0015 merge → ON proof → S40.
+    - **s11 answered (body `2_Project_Files/fleet/briefs_staged/2026-09-13_hpsm-s41-answer-0015-q9-and-checkpoint-order.md`):** the checkpoint governs. FINISH compose + E 2a only if below ~86%; lane G 0015 goes to S42 on its branch; the ON proof and S40's switch-on are S42's.
+    - **Accepted with conditions:** the 0015 shape (+ a cross-tenant same-name trigger test); Q9 platform-tenant audit (row exists, append under RLS without widening, chain verifies); the Q9 read path (exact three columns, no widening args, EXECUTE pc_app only).
+    - **Backlog:** the Release.tsx pill mutant.
+    - **S42's brief must carry all of this.**
 0017. **S41 (`%24`, pid 77347) at ctx 81% ~13:0x → CHECKPOINT mail sent by s11** (body `2_Project_Files/fleet/briefs_staged/2026-09-13_hpsm-s41-checkpoint-81.md`):
     - **Instruction:** start nothing new; bring lane E 2a to a safe boundary (merged, or WIP committed to its branch); write the successor handover in its seat file; mail `Session wrap 2026-09-13 (seat hpsm-982d, session 41)` to tuesday-agent@; then STAY at the prompt. At 88%, wrap immediately with what it has.
     - **NEXT when that wrap lands:** read it whole, then build the S42 successor brief from it (pattern: `2026-09-13_hpsm-s41-parallel-lanes.md`: census of HPSM claudes, rescue-free this time, the lanes left, the SWITCH ON sequence, the promoted fixes, card c12 open, Kam's standing agents rule).
