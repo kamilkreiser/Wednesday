@@ -1,11 +1,11 @@
-# QA GATE, TIER 1: Datasec/HPSM Policy Composer - ACCEPTANCE vs THE ORIGINAL BRIEF + SECURITY @ 09c1591 (new class, round 1) — LIVE SITE + LOCAL STACKS
+# QA GATE, TIER 1: Datasec/HPSM Policy Composer - ACCEPTANCE vs THE ORIGINAL BRIEF + SECURITY @ caf63fd (new class, round 1) — LIVE SITE + LOCAL STACKS
 
 **Commission.** Kam, 2026-09-13 17:00 AEST: *"...test the platform from a security perspective as well as from a deliverables perspective against the original brief. Include links or the paths to the original briefing documents so that the testing agent can reference these during its testing."* He reviews the platform Monday 2026-09-14.
 
-**Head:** `09c15918fadfee8a9bd590a1282113637f44515d`, local `main` of `/Volumes/KK_T9_External_HDD/!CODING/Datasec/HPSM/6_Policy_Composer`.
-- `afc10e9..09c1591` is 249 commits, NOT pushed; HPSM-light `origin/main` = `afc10e98c51505be1f1943335370cf2de3b47d44`.
+**Head:** `caf63fd54c3ad95384bcb7bc32d4e7b9e4a6f5c4`, local `main` of `/Volumes/KK_T9_External_HDD/!CODING/Datasec/HPSM/6_Policy_Composer`.
+- `afc10e9..caf63fd` is 267 commits, NOT pushed; HPSM-light `origin/main` = `afc10e98c51505be1f1943335370cf2de3b47d44`.
 - The launcher refuses unless the head is reachable from `refs/heads/main`.
-- **Your verdicts are about 09c1591 only. Main may move; a later head needs a delta pass.**
+- **Your verdicts are about caf63fd only. Main may move; a later head needs a delta pass.**
 - **TWO verdicts, each GO / GO WITH FINDINGS / NO GO: `DELIVERABLES` and `SECURITY`.**
 
 ## Charter (read first, in full)
@@ -30,7 +30,8 @@
   - rebuild images only under `lockf -k /private/tmp/claude-501/-Volumes-KK-T9-External-HDD--CODING-Datasec-HPSM/dc13ed6b-f206-4b51-b117-ff3f2723cf9b/scratchpad/docker.lock <cmd>`.
 - **LIVE Azure demo — A TARGET.** Kam, 2026-09-13 18:20 AEST, verbatim: *"Please revise the testing harness documents so they test the live site."*
   - **LIVE DEMO RULING: APPROVED by Kam 2026-09-13 18:20** (scope exactly as below; nothing beyond it).
-  - **URL:** `https://hpsm-composer-demo.australiaeast.cloudapp.azure.com`. HTTP basic auth on every request, synthetic data only. **It is Kam's demo for his Monday review.**
+  - **URL:** `https://hpsm-composer-demo.australiaeast.cloudapp.azure.com`. HTTP basic auth on every request, synthetic data only. **It is Kam's demo for his Monday review, and KAM IS TESTING IT HIMSELF TONIGHT.** Everything he creates is his: never read-probe, approve, edit or export his engagements beyond the must-fail cross-tenant attempts.
+  - **The site may be upgraded while you test** (rolling fix upgrades tonight, each with a few minutes' restart). On repeated 5xx or refused connections, pause ≤ 15 min and re-check before stopping the live pass; record every head change.
   - **Credential:** read ONLY `/Volumes/KK_T9_External_HDD/!CODING/Datasec/HPSM/4_Credentials/hpsm-demo-site.txt`, into memory.
     - Never print, copy, log, screenshot or mail its value.
     - Before mailing, grep your whole evidence folder and report for it, and record that the grep ran with a positive control.
@@ -194,7 +195,20 @@ Not a checker. Pair every refusal probe with the ordinary input that must pass. 
 
 **Known-open:**
 - **W3-M6:** an unassessed high_impact is treated as not high-impact. `/Volumes/KK_T9_External_HDD/!CODING/Testing Agent MAIN/projects/hpsm/reports/2026-09-12-composer-0523193-wp3-tier1/report.md` L427; awaits an owner ruling.
-- **Kam's open cards,** not decided: `hpsm-composer-demo-release-with-device-groups`, `hpsm-composer-live-demo-upgrade-after-c12`.
+- **Kam's cards, RULED 2026-09-13 18:02:** `hpsm-composer-live-demo-upgrade-after-c12` → upgrade-fresh-with-release (the live site is upgraded to this head with fresh engagements; pre-existing engagements are named DO NOT USE: stale content pin, 409); `hpsm-composer-demo-release-with-device-groups` → build-c11 (a lane in progress, NOT deployed before Monday: release with a device group stays blocked).
+- **KNOWN, FIX IN FLIGHT (gate C/B round 1 on 09c1591; still present at caf63fd).** Report as "KNOWN, fix in flight", with the gate id, never as new. If a later upgrade has closed one, verify it closed.
+  - W5-M1: an engagement created in the website can never be customer-approved (approver user_id null).
+  - W5-M2: demo release silently blocked until 8 secret local values are defined (no issue code).
+  - W6-M1: the document says "No local values are required".
+  - W5-M3: the S7 table is too wide at 1440.
+  - W6-m1: an approved-unreleased document says no approvals.
+  - W6-m2: mid-word breaks.
+  - W6-m3: the Preview watermark is clipped.
+  - W5-m5: the live-stack guard misses the trailing-dot FQDN.
+  - W4B-m2: a stale-pinned engagement accepts a customer approval.
+  - W4B-m1: `urn:uuid:` ids give 500.
+  - The credential detector's shape gaps (A-m1 17 syntaxes, W4B-m3 10 more) are queued after C11.
+  - **Measured workaround for a release on the live demo (gate C):** link the approvers through the API, and define the 8 local values through S6 decisions.
 
 **Still owed:** a KNOWN item that silently gives a WRONG RESULT, or a security gap reachable in MVP A, IS a finding. Mark it "KNOWN, re-rated" with its backlog line.
 
@@ -202,7 +216,7 @@ Not a checker. Pair every refusal probe with the ordinary input that must pass. 
 - **One session.** Order: the LIVE deliverables walk-through + LIVE probes 17, 3, 2, 5, 7 FIRST (it is the version Kam will show) -> local security 4, 6 -> §22.1 -> §23.1 -> §22.2 -> the rest. Anything unfinished is NOT TESTED, with the reason.
 - **Head readings** of the original repo at start, mid and end: SHA + branch + time.
 - **Siblings:** `reports/2026-09-13-composer-09c1591-combined-{a-engine-content,b-api-db,c-web-renderers}-tier1/`. Cite a finished one as PROBED (sibling); do not redo their mutation work.
-- **Report:** `/Volumes/KK_T9_External_HDD/!CODING/Testing Agent MAIN/projects/hpsm/reports/2026-09-13-composer-09c1591-brief-acceptance-security-tier1/report.md`, in this order:
+- **Report:** `/Volumes/KK_T9_External_HDD/!CODING/Testing Agent MAIN/projects/hpsm/reports/2026-09-13-composer-caf63fd-brief-acceptance-security-tier1/report.md`, in this order:
   - **BLUF:** both verdicts + severity counts;
   - **findings:** FOUND / TESTED / HOW, oracle, evidence class, Blocker / Major / Minor / Polish with justification (priority is the humans' call);
   - the matrix;
@@ -214,7 +228,7 @@ Not a checker. Pair every refusal probe with the ordinary input that must pass. 
   - where the brief is silent, take the safest reading and record it;
   - approval-class work (live demo beyond §1, money, external comms, anything irreversible) is not done; list it under NOT TESTED.
 - **MAIL YOUR VERDICT** to `tuesday-agent@agentmail.to`:
-  - subject `[QA/Datasec-HPSM -> Tuesday] GATE VERDICT — Policy Composer acceptance vs original brief + security @ 09c1591 (tier 1)`;
+  - subject `[QA/Datasec-HPSM -> Tuesday] GATE VERDICT — Policy Composer acceptance vs original brief + security @ caf63fd (tier 1)`;
   - first line `DELIVERABLES: <verdict> · SECURITY: <verdict>`.
   - **Never `wednesday-agent@`.**
 
@@ -227,7 +241,7 @@ Not a checker. Pair every refusal probe with the ordinary input that must pass. 
 - 0523193 WP3: NO GO 0/7/5/3
 - 1a6b68d WP3 r2: NO GO 0/2/3/0
 - 1a6b68d WP4+WP5: GO WITH FINDINGS on both
-- 09c1591 combined A/B/C: in flight.
+- 09c1591 combined: A GO WITH FINDINGS 0/0/2/4 · B GO WITH FINDINGS (API 0/0/5/1, DB 0/0/0/1) · C NO GO (WP5 0/3/5/4, WP6 0/1/3/4). caf63fd = 09c1591 + lane Q (D2, Q-A) + lane W (F6), merged tonight with GREEN chains; a gate C/B fix round is in flight.
 - **This codebase has repeatedly shipped tests that could not fail.**
 
 PROVENANCE:

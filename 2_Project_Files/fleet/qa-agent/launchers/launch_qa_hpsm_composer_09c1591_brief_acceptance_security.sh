@@ -1,7 +1,7 @@
 #!/bin/bash
 # launch_qa_hpsm_composer_09c1591_brief_acceptance_security.sh — cross-project QA agent, TIER 1, NEW gate class, round 1:
 #   platform ACCEPTANCE against the ORIGINAL Composer brief (spec v1.1) + SECURITY, two verdicts (DELIVERABLES, SECURITY),
-#   on the Datasec/HPSM Policy Composer local main @ 09c1591, NOT pushed.
+#   on the Datasec/HPSM Policy Composer local main @ caf63fd (re-pointed from 09c1591 by Tuesday s12, 2026-09-13), NOT pushed.
 # Kam, 2026-09-13 17:00 AEST: "...write a testing harness prompt to test the platform from a security perspective as well as
 #   from a deliverables perspective against the original brief."
 # PATTERN: launch_qa_hpsm_composer_09c1591_combined.sh (reachable-from-main head guard, report-dir, port, identity guards),
@@ -30,14 +30,14 @@ REPO="$HPSM/6_Policy_Composer"
 SRC="$HPSM/1_Project_Definition/Source_Documents/HPSM_Policy_Composer_2026-09-10"
 ARCH="$HPSM/1_Project_Definition/Architecture/2026-09-10_policy-composer"
 SOW="$SRC/_extracted/sow_e8.md"
-REPORT_DIR='/Volumes/KK_T9_External_HDD/!CODING/Testing Agent MAIN/projects/hpsm/reports/2026-09-13-composer-09c1591-brief-acceptance-security-tier1'
+REPORT_DIR='/Volumes/KK_T9_External_HDD/!CODING/Testing Agent MAIN/projects/hpsm/reports/2026-09-13-composer-caf63fd-brief-acceptance-security-tier1'
 ID_ROOT="${QA_IDENTITY_ROOT_OVERRIDE:-$HPSM/4_Credentials}"
 BRANCH='refs/heads/main'
-HEAD_SHA="${QA_HEAD_SHA_OVERRIDE:-09c15918fadfee8a9bd590a1282113637f44515d}"
+HEAD_SHA="${QA_HEAD_SHA_OVERRIDE:-caf63fd54c3ad95384bcb7bc32d4e7b9e4a6f5c4}"
 BASE_SHA='afc10e98c51505be1f1943335370cf2de3b47d44'
-EXPECTED_COMMITS=249
+EXPECTED_COMMITS=267
 PORTS='21480 21495 21580'
-SUBJECT='[QA/Datasec-HPSM -> Tuesday] GATE VERDICT — Policy Composer acceptance vs original brief + security @ 09c1591 (tier 1)'
+SUBJECT='[QA/Datasec-HPSM -> Tuesday] GATE VERDICT — Policy Composer acceptance vs original brief + security @ caf63fd (tier 1)'
 # Every document the tester is told to read. Each must exist and be cited verbatim in the brief (validate what a brief points AT).
 REFS=(
   "$SRC/Datasec_HPSM_Cloud_Policy_Composer_Detailed_Scoping_Design_Specification_v1_1.docx"
