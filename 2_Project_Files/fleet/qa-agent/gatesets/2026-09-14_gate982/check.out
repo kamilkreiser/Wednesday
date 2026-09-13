@@ -1,0 +1,22 @@
+check at 2026-09-14 07:30:33 AEST
+--- no overrides (nothing installed yet; expect rc 3) ---
+brief missing or empty: /Volumes/DevMASTER/WEDNESDAY/2_Project_Files/fleet/qa-agent/briefs/2026-09-14_secuura-982-ks790-tier1.md
+rc=3
+--- with overrides (expect rc 0) ---
+all guards pass:
+  head e62eab87a6263e25c41c9bb814d5831842bb6c7e present at refs/heads/feature/ks-790-oauth-authorization_code-token-exchange-uses-getuserbyid on origin
+  merge-base still 8861e62161466c40f08d2b10a30edeb203123993 (GitHub compare API)
+  origin develop still 8861e62161466c40f08d2b10a30edeb203123993 (M18, the PR's parent and the develop this brief's 51/691 was written against; git ls-remote)
+  brief, prompt, QA project and repo all present
+  brief and prompt agree on TIER 1 and ROUND 1
+  prompt opens with the thinking directive and names the brief
+  brief and prompt both name the head SHA e62eab87a6263e25c41c9bb814d5831842bb6c7e
+  prompt tells the agent to MAIL its verdict
+  prompt forbids pushing / the real hook / preflight in the Secuura checkout
+  prompt forbids memory maintenance inside the gate session
+  prompt forbids printing a credential value
+  a launch (not --check) will refuse unless stdin is a TTY (exit 21)
+rc=0
+--- launch path headless with overrides (expect rc 21, the TTY guard, before the override guard) ---
+REFUSING: stdin is not a TTY — this launcher execs an interactive agent; run it in a cockpit pane, never inside a Bash tool (a headless gate is invisible and dies with the caller's shell)
+rc=21

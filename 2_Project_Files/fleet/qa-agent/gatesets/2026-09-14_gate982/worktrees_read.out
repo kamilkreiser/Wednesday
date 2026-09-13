@@ -1,0 +1,30 @@
+worktrees_read at 2026-09-14 07:13:49 AEST
+== worktrees/ count
+88
+s212-ks790: HEAD=e62eab87a6263e25c41c9bb814d5831842bb6c7e branch=feature/ks-790-oauth-authorization_code-token-exchange-uses-getuserbyid porcelain=0 root_nm=985 auth_nm=8 shared_dist=present shared_nm=present
+s212-ks823: HEAD=f62c975c11ec97cdef04500fd98a43618e702763 branch=feature/ks-823-security-the-apioauthtoken-refresh_token-grant-authenticates porcelain=0 root_nm=985 auth_nm=8 shared_dist=present shared_nm=present
+s212-ks835: HEAD=d00a2015c89a4720eaeab64482bbd9b89d878024 branch=feature/ks-835-security-oauth-consent-is-decorative-the-granted-scope-never porcelain=0 root_nm=985 auth_nm=8 shared_dist=present shared_nm=present
+s212-ks799-r2: HEAD=8ac9db66f6fd0d751f74ecc95bb314210a31ec52 branch=HEAD porcelain=0 root_nm=985 auth_nm=8 shared_dist=present shared_nm=present
+s211-merge: HEAD=1c38077ba2aea5f4c4371c1b68796026dc577764 branch=HEAD porcelain=6 root_nm=985 auth_nm=8 shared_dist=present shared_nm=present
+s210-ks924-fix: HEAD=103c235b4d2be54cc1ade65ed660f397cf03e997 branch=HEAD porcelain=0 root_nm=985 auth_nm=8 shared_dist=present shared_nm=present
+== s212-ks790 vitest version + the file's sha
+  "version": "4.1.10",
+fc54cc5f1494ad48
+55c12270001fd653
+== vitest.setup.ts at head
+// KS-167/184: jwt.ts requires an RS256 private key at module load (no HS256
+// fallback since the cutover). Provision a generated test keypair for every
+// suite so importing auth modules (which transitively load jwt.ts) doesn't
+// fail fast. Tests that exercise key behaviour explicitly set JWT_PRIVATE_KEY /
+// JWT_KEY_ID and call vi.resetModules() to re-import with their own key — this
+// only supplies the baseline so static imports succeed. The keypair is
+// generated at runtime (never committed) and stays in the test process only.
+import crypto from 'crypto';
+
+if (!process.env.JWT_PRIVATE_KEY) {
+  const { privateKey } = crypto.generateKeyPairSync('rsa', { modulusLength: 2048 });
+  process.env.JWT_PRIVATE_KEY = Buffer.from(
+    privateKey.export({ type: 'pkcs8', format: 'pem' }).toString(),
+  ).toString('base64');
+  process.env.JWT_KEY_ID = process.env.JWT_KEY_ID || 'test-kid';
+}

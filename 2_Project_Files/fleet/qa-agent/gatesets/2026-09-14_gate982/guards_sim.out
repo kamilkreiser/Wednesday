@@ -1,0 +1,103 @@
+== blobs / sizes
+ok   oauth.ts@head sha256 fc54cc5f1494ad48 lines 1260 (expect fc54cc5f1494ad48 / 1260)
+ok   oauth.ts@develop sha256 cc4f4ac0df1b3393 lines 1242 (expect cc4f4ac0df1b3393 / 1242)
+ok   ks790 test sha256 55c12270001fd653 lines 249 (expect 55c12270001fd653 / 249)
+ok   ks820 test@head sha256 d0883d41f8a38b96 lines 377 (expect d0883d41f8a38b96 / 377)
+ok   ks820 test@develop sha256 4f66d57fd174c85b lines 369 (expect 4f66d57fd174c85b / 369)
+ok   oauth@head: 0 raw control bytes (got 0)
+ok   oauth@develop: 0 raw control bytes (got 0)
+ok   ks790: 0 raw control bytes (got 0)
+ok   ks820@head: 0 raw control bytes (got 0)
+ok   ks820@develop: 0 raw control bytes (got 0)
+== the oauth.ts delta: 4 hunks; the CODE delta is -4/+3 (import, two swaps, the require removed with no code replacement)
+ok   hunk headers (ks820 first, then oauth.ts x4): ['@@ -122,6 +122,14 @@', '@@ -26,7 +26,7 @@', '@@ -795,8 +795,17 @@', '@@ -829,7 +838,14 @@', '@@ -846,7 +862,9 @@']
+ok   oauth.ts -5 +23 (expect -5 +23)
+ok   CODE lines removed (4): ["import { generateTokenPair } from '../services/jwt';", 'const user = await userRepo.getUserById(result.userId);', "const { verifyRefreshToken } = require('../services/jwt');", 'const user = await userRepo.getUserById(decoded.userId);']
+ok   CODE lines added (3): ["import { generateTokenPair, verifyRefreshToken } from '../services/jwt';", 'const user = await userRepo.getUserByIdPreAuth(result.userId);', 'const user = await userRepo.getUserByIdPreAuth(decoded.userId);']
+ok   the other 20 added lines are comments (20 expected)
+== the ks820 delta: ONE hunk, 8 lines INSERTED after develop:124, everything else byte-identical (ruling 1)
+ok   ks820@head == develop[:124] + 8 lines + develop[124:]
+ok   the 8 inserted lines are the one mock entry (+4 comment lines): ['// KS-790: the token grants resolve the user through the pre', '// now (a code or a refresh token is not a bearer; no tenant', '// Same user as the plain lookup above — this suite is about', '// credential, not about which user lookup runs.', 'getUserByIdPreAuth: vi.fn(async () => ({', "id: 'user-1', email: 'u@secuura.local', status: 'ACTIVE', ro", "verificationLevel: 'BASIC', mfaEnabled: false,", '})),']
+ok   getUserByIdPreAuth in ks820: develop 0 head 1
+ok   ks820 has 13 it( cells at both trees (no assertion added or removed)
+== anchors at head (the tamper table)
+ok   oauth@head  x1 (expect 1)  'userRepo.getUserByIdPreAuth(result.userId)'
+ok   oauth@head  x1 (expect 1)  'userRepo.getUserByIdPreAuth(decoded.userId)'
+ok   oauth@head  x0 (expect 0)  'userRepo.getUserById('
+ok   oauth@head  x1 (expect 1)  "import { generateTokenPair, verifyRefreshToken } from '../services/jwt';"
+ok   oauth@head  x0 (expect 0)  'const { verifyRefreshToken } = require('
+ok   oauth@head  x1 (expect 1)  "require('../services/jwt')"
+ok   oauth@head  x1 (expect 1)  'decoded = verifyRefreshToken(refresh_token);'
+ok   oauth@head  x1 (expect 1)  "if (!user || user.status !== 'ACTIVE')"
+ok   oauth@head  x1 (expect 1)  "description: 'User not found'"
+ok   oauth@head  x1 (expect 1)  "description: 'User inactive or not found'"
+ok   oauth@head  x1 (expect 1)  "description: 'Invalid refresh token'"
+ok   oauth@head  x1 (expect 1)  'enforcePasswordLoginGates({'
+ok   oauth@head  x1 (expect 1)  "oauthRouter.post('/token'"
+ok   oauth@head  x1 (expect 1)  '      let decoded;\n      try {\n        decoded = verifyRefreshToken(refresh_toke'
+ok   oauth@head  x3 (expect 3)  'KS-790'
+ok   oauth@head  x2 (expect 2)  'getUserByIdPreAuth'
+ok   oauth@head:29 = "import { generateTokenPair, verifyRefreshToken } from '../services/jwt"
+ok   oauth@head:808 = 'const user = await userRepo.getUserByIdPreAuth(result.userId);'
+ok   oauth@head:809 = 'if (!user) {'
+ok   oauth@head:849 = 'let decoded;'
+ok   oauth@head:851 = 'decoded = verifyRefreshToken(refresh_token);'
+ok   oauth@head:867 = 'const user = await userRepo.getUserByIdPreAuth(decoded.userId);'
+ok   oauth@head:868 = "if (!user || user.status !== 'ACTIVE') {"
+ok   oauth@head:711 = "oauthRouter.post('/token', async (req: Request, res: Response) => {"
+ok   oauth@head:628 = 'const gate = await enforcePasswordLoginGates({'
+ok   oauth@head:890 = "logger.error('OAuth token error', { error: error.message });"
+ok   oauth@head:843 = "// used to be a `require('../services/jwt')` on this line — redundant "
+ok   the only require( at head (:843) is INSIDE a comment
+ok   oauth@develop x1 (expect 1)  'userRepo.getUserById(result.userId)'
+ok   oauth@develop x1 (expect 1)  'userRepo.getUserById(decoded.userId)'
+ok   oauth@develop x1 (expect 1)  "const { verifyRefreshToken } = require('../services/jwt');"
+ok   oauth@develop x1 (expect 1)  "import { generateTokenPair } from '../services/jwt';"
+ok   oauth@develop x0 (expect 0)  'getUserByIdPreAuth'
+ok   oauth@develop x0 (expect 0)  'KS-790'
+ok   oauth@develop x1 (expect 1)  'enforcePasswordLoginGates({'
+ok   oauth@develop:799 = 'const user = await userRepo.getUserById(result.userId);'
+ok   oauth@develop:832 = "const { verifyRefreshToken } = require('../services/jwt');"
+ok   oauth@develop:849 = 'const user = await userRepo.getUserById(decoded.userId);'
+ok   oauth@develop:833 = 'let decoded;'
+ok   at develop the require sits OUTSIDE the try (:832 require, :833 let decoded, :834 try) — its throw reaches the OUTER catch (500)
+ok   ks790 test x1 (expect 1)  "app.listen(0, '127.0.0.1')"
+ok   ks790 test x1 (expect 1)  'listen('
+ok   ks790 test x1 (expect 1)  "vi.mock('../services/jwt'"
+ok   ks790 test x1 (expect 1)  "vi.mock('../repositories/userRepo'"
+ok   ks790 test x1 (expect 1)  'getUserByIdPreAuth: vi.fn('
+ok   ks790 test x1 (expect 1)  'world.plainLookup = null; world.preAuthLookup = { ...ACTIVE_USER };'
+ok   ks790 test x3 (expect 3)  'expect(world.calls.getUserById).toEqual([]);'
+ok   ks790 test x2 (expect 2)  'expect(world.calls.getUserByIdPreAuth).toEqual([ACTIVE_USER.id]);'
+ok   ks790 test x6 (expect 6)  "  it('"
+ok   ks790 test x4 (expect 4)  "  it('CONTROL"
+ok   ks790 test x1 (expect 1)  "status: 'SUSPENDED'"
+ok   ks790 test x1 (expect 1)  "'not-the-secret'"
+ok   ks790 test x1 (expect 1)  'toMatch(/User not found/)'
+ok   ks790 test x2 (expect 2)  'toMatch(/User inactive or not found/)'
+ok   ks790 test x1 (expect 1)  'net.connect('
+ok   ks790 test x2 (expect 2)  "toContain('MINTED_790')"
+ok   ks790 test x1 (expect 1)  'verifyClientSecret: vi.fn('
+ok   ks790 test x1 (expect 1)  "vi.mock('../middleware/tenantGuc'"
+ok   ks790 test x1 (expect 1)  "vi.mock('../db'"
+ok   ks790 test x1 (expect 1)  'expect(r.status).toBe(401);'
+ok   ks790:138 = "server = app.listen(0, '127.0.0.1');"
+ok   userRepo@head x1 (expect 1)  'export async function getUserByIdPreAuth(id: string): Promise<User | null> {'
+ok   userRepo@head x2 (expect 2)  'FROM auth_find_user_by_id($1)'
+ok   userRepo@head x1 (expect 1)  'export async function getUserById(id: string, tenantId?: string): Promise<User |'
+ok   userRepo :505 getUserByIdPreAuth / :403 getUserById
+ok   jwt.ts:346 exports verifyRefreshToken (the static import resolves)
+== the ks860 loopback guard (:433 / :440 at M18 e0dfadb9c) over the NEW test file — the widened-guard rule
+ok   ks860 over ks790 test -> offenders [] (expect [] — the one listen( at :138 binds 127.0.0.1)
+ok   guard controls: bare listen(0) -> 1 offender; the shipped spelling -> 0
+ok   oauth.ts has no listen( site at either tree (not a test file anyway)
+== predictions the brief carries (drafter) — derived from the bytes above, NOT from a run
+  T1  :808 getUserByIdPreAuth -> getUserById   => ks790 cell 1 red (400 'User not found'); 5 green; 1 failed | 5 passed (6)
+  T2  :867 getUserByIdPreAuth -> getUserById   => ks790 cell 2 red (400 'User inactive or not found'); 1 failed | 5 passed (6)
+  T3d develop's require re-inserted at :849 BEFORE `let decoded;` (outside the try) => 3 refresh rows red, ALL 500 server_error; 3 failed | 3 passed (6)
+  T3b the require inserted INSIDE the try (before :851)                        => 3 refresh rows red, ALL 400 'Invalid refresh token' (the builder's T3 shape); 3 failed | 3 passed (6)
+  T4  :868 `!user || user.status !== 'ACTIVE'` -> `!user`                     => ks790 cell 5 red (200 with MINTED_790 for a SUSPENDED user); 1 failed | 5 passed (6)
+  T5  ks820 mock entry removed (the 8 inserted lines)                          => ks820 :246 / :320 / :328 red (500: getUserByIdPreAuth is not a function); 3 failed | 10 passed (13); ks790 6/6 untouched
+  T6  :809 `if (!user)` -> `if (false)`                                        => ks790 cell 3 red (500 server_error: the mocked createSession/generateTokenPair do not throw over null, but :820 reads `user.id` -> TypeError -> the outer catch); 1 failed | 5 passed (6)
+  T7  ks790 test :197 world inverted (plainLookup = the user, preAuthLookup = null) => cells 1,2 red (400 'User not found' / 'User inactive or not found' — the product asks the carve-out, which now answers null); cells 3,4,5,6 green (they set preAuthLookup themselves or never reach a lookup) -> 2 failed | 4 passed (6): the harness measures the carve-out, not the plain lookup — a harness self-check, optional
+guards_sim: FAILS=0

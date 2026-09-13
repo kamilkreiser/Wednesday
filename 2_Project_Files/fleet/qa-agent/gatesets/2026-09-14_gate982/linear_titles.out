@@ -1,0 +1,22 @@
+read at 2026-09-14 07:16:36 AEST
+KS-756 [Backlog] High archived=None created=2026-09-02 PRs=[]
+   title: Wire up the opaque refresh token that createSession already mints — one write site, zero read sites (KS-329 ruling (a) prerequisite)
+   desc[:400]: **BLUF —** `createSession` **has minted an opaque refresh token on every session since the session service was written, and nothing has ever read it. One write site, zero read sites, measured with a control. Wiring it up is the prerequisite Kam's KS-329 ruling (a) actually names, it is not PQC work, and it can ship without committing to ML-DSA at all.**  **Recommendation:** do this first, on its o
+KS-1018 [Backlog] Medium archived=None created=2026-09-08 PRs=[]
+   title: Security/correctness: three verification-store reads swallow EVERY DB error with a bare `catch { }` and answer from an in-memory map — a DB outage reads as 'no such request'
+   desc[:400]: ## BLUF  **Three functions backing the verification-upgrade surface swallow EVERY database error with a bare** `catch { /* fall through */ }` **and then answer from an in-memory map.** A DB failure is therefore indistinguishable from "no such request" — and worse than that, the route keeps answering, from process-local state that no other replica shares.  This is the **KS-963 swallow class**, not 
+KS-840 [Backlog] Low archived=None created=2026-09-05 PRs=[]
+   title: The OAuth error code travels in error.message and the contract never says so; and authorize refusals answer JSON where RFC 6749 redirects
+   desc[:400]: **From the KS-822 tier-1 gate.** `projects/secuura/reports/2026-09-06-s136-ks822-835-pass1-04994288a-tier1/` (QA tree)  Two related contract defects in the OAuth error envelope, both **pre-existing** (KS-804's shape, not KS-822's changes).  **1. The OAuth code travels in the wrong field and the contract never names it.** Every refusal from the authorize and token endpoints answers `{ success: fals
+KS-1003 [Backlog] Medium archived=None created=2026-09-08 PRs=[]
+   title: The OAuth token endpoint is outside the credential-stuffing rate-limit zone — /api/oauth/ is not keyed in $secuura_auth_limit_key
+   desc[:400]: ## BLUF  `/api/oauth/` **sits OUTSIDE the credential-stuffing rate-limit zone that** `/api/auth/` **sits inside.** The OAuth token endpoint — the one that exchanges codes and redeems refresh tokens — gets only the aggregate `/api/` ceiling, not the 5 r/s + burst 10 bound the config itself calls *"the credential-stuffing bound"*.  **True whether or not** [KS-823](https://linear.app/secuura/issue/KS
+KS-999 [Backlog] High archived=None created=2026-09-08 PRs=[]
+   title: getUserById's decrypt path escapes the KS-253 classifier — `return await fromRow(...)`, and the characterisation cell that cannot reach its own conclusion
+   desc[:400]: ## BLUF  `getUserById`**'s DECRYPT path still escapes the KS-253 classifier, and on an encrypted production row that is the NORMAL path.** The fix is one word — `return await fromRow(...)` — and it was deliberately kept out of [#907](<https://github.com/Secuura/Distributed_Secuura/pull/907>).  ## Why it matters more than one word suggests  `fromRow` fetches a **subject DEK — itself a DB read**. So
+KS-1132 [Backlog] Low archived=None created=2026-09-13 PRs=[]
+   title: getPlatformAdmin swallows an infrastructure failure to null — platform-admin login reads "platform DB down" as "not an admin" and answers InvalidCredentialsError (the class KS-963 removed)
+   desc[:400]: ## BLUF  `services/auth/src/repositories/userRepo.ts` `getPlatformAdmin` (`:1714-1741` at develop after #970) catches every error from the platform-database lookup, logs `Platform admin lookup failed (platform DB may not be configured)` and **returns** `null` (`:1739-1741`). Its caller, `routes/auth.ts:345` `const platformAdmin = await userRepo.getPlatformAdmin(data.email);`, reads `null` as "not 
+KS-943 [Tested Not Deployed] High archived=None created=2026-09-06 PRs=['929']
+   title: updateUser ignores rowCount and wallet.ts:511 discards its return — a 0-row UPDATE is reported as success (the RLS fail-closed case)
+   desc[:400]: `updateUser` issues its UPDATE and **never checks that it matched a row**; `wallet.ts:511` discards the returned user and answers `{ success: true }` unconditionally. An UPDATE matching 0 rows is indistinguishable from one matching 1.  This is the residual of the class [[KS-720]] set out to close: the failure mode moved from *"no statement issued"* to *"statement issued, effect unverified"* — bett

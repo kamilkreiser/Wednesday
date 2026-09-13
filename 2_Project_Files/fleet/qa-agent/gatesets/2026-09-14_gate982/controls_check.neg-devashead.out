@@ -1,0 +1,197 @@
+controls_check.sh — head 8861e6216, develop 8861e6216 — 2026-09-14 07:32:36 AEST
+read oauth = oauth.ts @ 8861e6216: blob 4b03f555e, 61492 bytes, 1242 lines, sha256 cc4f4ac0df1b3393
+read oauth_dev = oauth.ts @ 8861e6216: blob 4b03f555e, 61492 bytes, 1242 lines, sha256 cc4f4ac0df1b3393
+FAIL t790 ABSENT at 8861e6216
+read t820 = ks820-821-token-client-auth-and-apptype.test.ts @ 8861e6216: blob 106c762f1, 17925 bytes, 369 lines, sha256 4f66d57fd174c85b
+read t820_dev = ks820-821-token-client-auth-and-apptype.test.ts @ 8861e6216: blob 106c762f1, 17925 bytes, 369 lines, sha256 4f66d57fd174c85b
+read urepo = userRepo.ts @ 8861e6216: blob 822b3fcd8, 83504 bytes, 1874 lines, sha256 24670fe3656152d2
+read urepo_dev = userRepo.ts @ 8861e6216: blob 822b3fcd8, 83504 bytes, 1874 lines, sha256 24670fe3656152d2
+read jwt = jwt.ts @ 8861e6216: blob d0d55c11b, 13692 bytes, 374 lines, sha256 33545ba5a9c6951a
+read jwt_dev = jwt.ts @ 8861e6216: blob d0d55c11b, 13692 bytes, 374 lines, sha256 33545ba5a9c6951a
+read index = index.ts @ 8861e6216: blob edabbf871, 12509 bytes, 312 lines, sha256 5b75376a2bd29b8c
+read index_dev = index.ts @ 8861e6216: blob edabbf871, 12509 bytes, 312 lines, sha256 5b75376a2bd29b8c
+read m039 = 039_rls_fail_closed.sql @ 8861e6216: blob 9778af893, 12847 bytes, 271 lines, sha256 fc4c7d304576ee60
+ok   t790 ABSENT at develop (HTTP 404 — the file is NEW)
+FAIL oauth blob is 4b03f555e, not 80e05458e
+ok   oauth_dev blob 4b03f555e
+cat: /var/folders/xl/p96z5mmd3lzcn3pt8t6djkl40000gn/T//qa982ctl.3ocCE0/t790.blob: No such file or directory
+cat: /var/folders/xl/p96z5mmd3lzcn3pt8t6djkl40000gn/T//qa982ctl.3ocCE0/t790.blob: No such file or directory
+FAIL t790 blob is , not cfed82d54
+FAIL t820 blob is 106c762f1, not b998b5b7d
+ok   t820_dev blob 106c762f1
+ok   urepo blob 822b3fcd8
+ok   urepo_dev blob 822b3fcd8
+ok   jwt blob d0d55c11b
+ok   jwt_dev blob d0d55c11b
+ok   index blob edabbf871
+ok   index_dev blob edabbf871
+ok   urepo byte-identical at head and develop
+ok   jwt byte-identical at head and develop
+ok   index byte-identical at head and develop
+FAIL oauth.ts byte-identical at head and develop
+FAIL ks820 byte-identical at head and develop
+FAIL oauth sha256 is not fc54cc5f1494ad48
+ok   oauth_dev sha256 cc4f4ac0df1b3393
+shasum: /var/folders/xl/p96z5mmd3lzcn3pt8t6djkl40000gn/T//qa982ctl.3ocCE0/t790: No such file or directory
+FAIL t790 sha256 is not 55c12270001fd653
+FAIL t820 sha256 is not d0883d41f8a38b96
+ok   t820_dev sha256 4f66d57fd174c85b
+ok   urepo sha256 24670fe3656152d2
+ok   jwt sha256 33545ba5a9c6951a
+ok   index sha256 5b75376a2bd29b8c
+FAIL oauth is not 1260 lines
+ok   oauth_dev 1242 lines
+/Volumes/DevMASTER/WEDNESDAY/2_Project_Files/fleet/qa-agent/gatesets/2026-09-14_gate982/controls_check.sh: line 65: /var/folders/xl/p96z5mmd3lzcn3pt8t6djkl40000gn/T//qa982ctl.3ocCE0/t790: No such file or directory
+FAIL t790 is not 249 lines
+FAIL t820 is not 377 lines
+ok   t820_dev 369 lines
+ok   urepo 1874 lines
+ok   jwt 374 lines
+ok   index 312 lines
+ok   m039 271 lines
+FAIL oauth is not 62763 bytes
+ok   oauth_dev 61492 bytes
+/Volumes/DevMASTER/WEDNESDAY/2_Project_Files/fleet/qa-agent/gatesets/2026-09-14_gate982/controls_check.sh: line 69: /var/folders/xl/p96z5mmd3lzcn3pt8t6djkl40000gn/T//qa982ctl.3ocCE0/t790: No such file or directory
+FAIL t790 is not 12429 bytes
+FAIL t820 is not 18387 bytes
+ok   t820_dev 17925 bytes
+ok   urepo 83504 bytes
+ok   jwt 13692 bytes
+ok   index 12509 bytes
+FAIL oauth:29 is: import { generateTokenPair } from '../services/jwt';
+ok   oauth:628 =     const gate = await enforcePasswordLoginGates({
+ok   oauth:711 = oauthRouter.post('/token', async (req: Request, res: Response) => {
+FAIL oauth:808 is:       const session = await createSession(user, req.ip, req.get('user-agent'), undefined, 'browser');
+FAIL oauth:809 is:       const tokens = generateTokenPair(user, session.id);
+FAIL oauth:820 is: 
+FAIL oauth:836 is:       } catch {
+FAIL oauth:843 is:       // the rotation-replay defence.
+FAIL oauth:849 is:       const user = await userRepo.getUserById(decoded.userId);
+FAIL oauth:851 is:         return res.status(400).json({ success: false, error: { code: 'BAD_REQUEST', message: 'invalid_grant', description: 'User inactive or not found' } });
+FAIL oauth:860 is:       return res.json({
+FAIL oauth:867 is:     } else {
+FAIL oauth:868 is:       return res.status(400).json({ success: false, error: { code: 'BAD_REQUEST', message: 'unsupported_grant_type', description: 'Only authorization_code and refresh_token are supported' } });
+FAIL oauth:890 is: 
+ok   oauth_dev:799 =       const user = await userRepo.getUserById(result.userId);
+ok   oauth_dev:832 =       const { verifyRefreshToken } = require('../services/jwt');
+ok   oauth_dev:833 =       let decoded;
+ok   oauth_dev:834 =       try {
+ok   oauth_dev:849 =       const user = await userRepo.getUserById(decoded.userId);
+ok   oauth_dev:800 =       if (!user) {
+sed: /var/folders/xl/p96z5mmd3lzcn3pt8t6djkl40000gn/T//qa982ctl.3ocCE0/t790: No such file or directory
+FAIL t790:138 is: 
+sed: /var/folders/xl/p96z5mmd3lzcn3pt8t6djkl40000gn/T//qa982ctl.3ocCE0/t790: No such file or directory
+FAIL t790:197 is: 
+sed: /var/folders/xl/p96z5mmd3lzcn3pt8t6djkl40000gn/T//qa982ctl.3ocCE0/t790: No such file or directory
+FAIL t790:208 is: 
+FAIL t820:129 is: }));
+ok   urepo:403 = export async function getUserById(id: string, tenantId?: string): Promise<User | null> {
+ok   urepo:505 = export async function getUserByIdPreAuth(id: string): Promise<User | null> {
+ok   urepo:507 =     const result = await query(`SELECT ${USER_COLS} FROM auth_find_user_by_id($1)`, [id]);
+ok   jwt:346 = export function verifyRefreshToken(token: string): JwtPayload {
+ok   m039:199 = CREATE OR REPLACE FUNCTION auth_find_user_by_id(p_id UUID)
+ok   m039:200 = RETURNS SETOF users LANGUAGE sql SECURITY DEFINER SET search_path = public STABLE
+ok   index:102 = app.use(tenantGucContext());
+ok   index:115 = app.use('/api/oauth', oauthRouter);
+FAIL oauth  1 expected, count 0: userRepo.getUserByIdPreAuth(result.userId)
+FAIL oauth  1 expected, count 0: userRepo.getUserByIdPreAuth(decoded.userId)
+FAIL oauth  absent expected, count 2: userRepo.getUserById(
+FAIL oauth  absent expected, count 1: const { verifyRefreshToken } = require(
+ok   oauth  exactly x1 require('../services/jwt')
+ok   oauth  exactly x1 decoded = verifyRefreshToken(refresh_token);
+ok   oauth  exactly x1 if (!user || user.status !== 'ACTIVE')
+ok   oauth  exactly x1 description: 'User not found'
+ok   oauth  exactly x1 description: 'User inactive or not found'
+ok   oauth  exactly x1 description: 'Invalid refresh token'
+ok   oauth  exactly x1 description: 'Refresh token revoked'
+ok   oauth  exactly x1 enforcePasswordLoginGates({
+ok   oauth  exactly x1 oauthRouter.post('/token'
+ok   oauth  exactly x7 seedTenantGuc
+ok   oauth  exactly x3 message: 'server_error'
+FAIL oauth  3 expected, count 0: KS-790
+ok   oauth  exactly x2 generateTokenPair(user, session.id)
+ok   oauth_dev  exactly x1 userRepo.getUserById(result.userId)
+ok   oauth_dev  exactly x1 userRepo.getUserById(decoded.userId)
+ok   oauth_dev  exactly x1 const { verifyRefreshToken } = require('../services/jwt');
+ok   oauth_dev  exactly x1 import { generateTokenPair } from '../services/jwt';
+ok   oauth_dev  absent      getUserByIdPreAuth
+ok   oauth_dev  absent      KS-790
+ok   oauth_dev  exactly x1 enforcePasswordLoginGates({
+grep: /var/folders/xl/p96z5mmd3lzcn3pt8t6djkl40000gn/T//qa982ctl.3ocCE0/t790: No such file or directory
+/Volumes/DevMASTER/WEDNESDAY/2_Project_Files/fleet/qa-agent/gatesets/2026-09-14_gate982/controls_check.sh: line 117: [: : integer expression expected
+FAIL t790  1 expected, count : app.listen(0, '127.0.0.1')
+grep: /var/folders/xl/p96z5mmd3lzcn3pt8t6djkl40000gn/T//qa982ctl.3ocCE0/t790: No such file or directory
+/Volumes/DevMASTER/WEDNESDAY/2_Project_Files/fleet/qa-agent/gatesets/2026-09-14_gate982/controls_check.sh: line 117: [: : integer expression expected
+FAIL t790  1 expected, count : listen(
+grep: /var/folders/xl/p96z5mmd3lzcn3pt8t6djkl40000gn/T//qa982ctl.3ocCE0/t790: No such file or directory
+/Volumes/DevMASTER/WEDNESDAY/2_Project_Files/fleet/qa-agent/gatesets/2026-09-14_gate982/controls_check.sh: line 117: [: : integer expression expected
+FAIL t790  1 expected, count : vi.mock('../services/jwt'
+grep: /var/folders/xl/p96z5mmd3lzcn3pt8t6djkl40000gn/T//qa982ctl.3ocCE0/t790: No such file or directory
+/Volumes/DevMASTER/WEDNESDAY/2_Project_Files/fleet/qa-agent/gatesets/2026-09-14_gate982/controls_check.sh: line 117: [: : integer expression expected
+FAIL t790  1 expected, count : vi.mock('../repositories/userRepo'
+grep: /var/folders/xl/p96z5mmd3lzcn3pt8t6djkl40000gn/T//qa982ctl.3ocCE0/t790: No such file or directory
+/Volumes/DevMASTER/WEDNESDAY/2_Project_Files/fleet/qa-agent/gatesets/2026-09-14_gate982/controls_check.sh: line 117: [: : integer expression expected
+FAIL t790  1 expected, count : vi.mock('../db'
+grep: /var/folders/xl/p96z5mmd3lzcn3pt8t6djkl40000gn/T//qa982ctl.3ocCE0/t790: No such file or directory
+/Volumes/DevMASTER/WEDNESDAY/2_Project_Files/fleet/qa-agent/gatesets/2026-09-14_gate982/controls_check.sh: line 117: [: : integer expression expected
+FAIL t790  1 expected, count : getUserByIdPreAuth: vi.fn(
+grep: /var/folders/xl/p96z5mmd3lzcn3pt8t6djkl40000gn/T//qa982ctl.3ocCE0/t790: No such file or directory
+/Volumes/DevMASTER/WEDNESDAY/2_Project_Files/fleet/qa-agent/gatesets/2026-09-14_gate982/controls_check.sh: line 117: [: : integer expression expected
+FAIL t790  3 expected, count : expect(world.calls.getUserById).toEqual([]);
+grep: /var/folders/xl/p96z5mmd3lzcn3pt8t6djkl40000gn/T//qa982ctl.3ocCE0/t790: No such file or directory
+/Volumes/DevMASTER/WEDNESDAY/2_Project_Files/fleet/qa-agent/gatesets/2026-09-14_gate982/controls_check.sh: line 117: [: : integer expression expected
+FAIL t790  2 expected, count : expect(world.calls.getUserByIdPreAuth).toEqual([ACTIVE_USER.id]);
+grep: /var/folders/xl/p96z5mmd3lzcn3pt8t6djkl40000gn/T//qa982ctl.3ocCE0/t790: No such file or directory
+/Volumes/DevMASTER/WEDNESDAY/2_Project_Files/fleet/qa-agent/gatesets/2026-09-14_gate982/controls_check.sh: line 117: [: : integer expression expected
+FAIL t790  6 expected, count :   it('
+grep: /var/folders/xl/p96z5mmd3lzcn3pt8t6djkl40000gn/T//qa982ctl.3ocCE0/t790: No such file or directory
+/Volumes/DevMASTER/WEDNESDAY/2_Project_Files/fleet/qa-agent/gatesets/2026-09-14_gate982/controls_check.sh: line 117: [: : integer expression expected
+FAIL t790  4 expected, count :   it('CONTROL
+grep: /var/folders/xl/p96z5mmd3lzcn3pt8t6djkl40000gn/T//qa982ctl.3ocCE0/t790: No such file or directory
+/Volumes/DevMASTER/WEDNESDAY/2_Project_Files/fleet/qa-agent/gatesets/2026-09-14_gate982/controls_check.sh: line 117: [: : integer expression expected
+FAIL t790  1 expected, count : status: 'SUSPENDED'
+grep: /var/folders/xl/p96z5mmd3lzcn3pt8t6djkl40000gn/T//qa982ctl.3ocCE0/t790: No such file or directory
+/Volumes/DevMASTER/WEDNESDAY/2_Project_Files/fleet/qa-agent/gatesets/2026-09-14_gate982/controls_check.sh: line 117: [: : integer expression expected
+FAIL t790  1 expected, count : 'not-the-secret'
+grep: /var/folders/xl/p96z5mmd3lzcn3pt8t6djkl40000gn/T//qa982ctl.3ocCE0/t790: No such file or directory
+/Volumes/DevMASTER/WEDNESDAY/2_Project_Files/fleet/qa-agent/gatesets/2026-09-14_gate982/controls_check.sh: line 117: [: : integer expression expected
+FAIL t790  1 expected, count : toMatch(/User not found/)
+grep: /var/folders/xl/p96z5mmd3lzcn3pt8t6djkl40000gn/T//qa982ctl.3ocCE0/t790: No such file or directory
+/Volumes/DevMASTER/WEDNESDAY/2_Project_Files/fleet/qa-agent/gatesets/2026-09-14_gate982/controls_check.sh: line 117: [: : integer expression expected
+FAIL t790  2 expected, count : toMatch(/User inactive or not found/)
+grep: /var/folders/xl/p96z5mmd3lzcn3pt8t6djkl40000gn/T//qa982ctl.3ocCE0/t790: No such file or directory
+/Volumes/DevMASTER/WEDNESDAY/2_Project_Files/fleet/qa-agent/gatesets/2026-09-14_gate982/controls_check.sh: line 117: [: : integer expression expected
+FAIL t790  1 expected, count : net.connect(
+grep: /var/folders/xl/p96z5mmd3lzcn3pt8t6djkl40000gn/T//qa982ctl.3ocCE0/t790: No such file or directory
+/Volumes/DevMASTER/WEDNESDAY/2_Project_Files/fleet/qa-agent/gatesets/2026-09-14_gate982/controls_check.sh: line 117: [: : integer expression expected
+FAIL t790  2 expected, count : toContain('MINTED_790')
+grep: /var/folders/xl/p96z5mmd3lzcn3pt8t6djkl40000gn/T//qa982ctl.3ocCE0/t790: No such file or directory
+/Volumes/DevMASTER/WEDNESDAY/2_Project_Files/fleet/qa-agent/gatesets/2026-09-14_gate982/controls_check.sh: line 117: [: : integer expression expected
+FAIL t790  2 expected, count : 'VALID_REFRESH_790'
+grep: /var/folders/xl/p96z5mmd3lzcn3pt8t6djkl40000gn/T//qa982ctl.3ocCE0/t790: No such file or directory
+/Volumes/DevMASTER/WEDNESDAY/2_Project_Files/fleet/qa-agent/gatesets/2026-09-14_gate982/controls_check.sh: line 117: [: : integer expression expected
+FAIL t790  1 expected, count : expect(r.status).toBe(401);
+grep: /var/folders/xl/p96z5mmd3lzcn3pt8t6djkl40000gn/T//qa982ctl.3ocCE0/t790: No such file or directory
+/Volumes/DevMASTER/WEDNESDAY/2_Project_Files/fleet/qa-agent/gatesets/2026-09-14_gate982/controls_check.sh: line 116: [: : integer expression expected
+FAIL t790  absent expected, count : require(
+FAIL t820  1 expected, count 0: getUserByIdPreAuth: vi.fn(async () => ({
+ok   t820  exactly x1 getUserById: vi.fn(async () => ({
+ok   t820  exactly x13   it('
+FAIL t820  1 expected, count 0: KS-790
+ok   t820_dev  absent      getUserByIdPreAuth
+ok   t820_dev  exactly x13   it('
+ok   urepo  exactly x2 FROM auth_find_user_by_id($1)
+ok   urepo  exactly x6 throw new ServiceUnavailableError('Authentication service temporarily unavailable, please retry');
+ok   jwt  exactly x1 export function generateTokenPair(user: User, sessionId: string): {
+ok   jwt  present x8  import
+ok   jwt  absent      routes/
+ok   m039  exactly x10 SECURITY DEFINER
+ok   m039  exactly x1 'auth_find_user_by_id(UUID)',
+ok   index  exactly x1 app.use(errorHandler);
+Traceback (most recent call last):
+  File "/var/folders/xl/p96z5mmd3lzcn3pt8t6djkl40000gn/T//qa982ctl.3ocCE0/sim.py", line 5, in <module>
+    t = open(f"{W}/t790", encoding="utf-8").read()
+        ~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+FileNotFoundError: [Errno 2] No such file or directory: '/var/folders/xl/p96z5mmd3lzcn3pt8t6djkl40000gn/T//qa982ctl.3ocCE0/t790'
+work dir (kept): /var/folders/xl/p96z5mmd3lzcn3pt8t6djkl40000gn/T//qa982ctl.3ocCE0
+controls_check: FAILS=58

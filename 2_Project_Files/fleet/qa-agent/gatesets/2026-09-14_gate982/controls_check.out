@@ -1,0 +1,157 @@
+controls_check.sh — head e62eab87a, develop 8861e6216 — 2026-09-14 07:32:19 AEST
+read oauth = oauth.ts @ e62eab87a: blob 80e05458e, 62763 bytes, 1260 lines, sha256 fc54cc5f1494ad48
+read oauth_dev = oauth.ts @ 8861e6216: blob 4b03f555e, 61492 bytes, 1242 lines, sha256 cc4f4ac0df1b3393
+read t790 = ks790-token-pre-auth-user-lookup.test.ts @ e62eab87a: blob cfed82d54, 12429 bytes, 249 lines, sha256 55c12270001fd653
+read t820 = ks820-821-token-client-auth-and-apptype.test.ts @ e62eab87a: blob b998b5b7d, 18387 bytes, 377 lines, sha256 d0883d41f8a38b96
+read t820_dev = ks820-821-token-client-auth-and-apptype.test.ts @ 8861e6216: blob 106c762f1, 17925 bytes, 369 lines, sha256 4f66d57fd174c85b
+read urepo = userRepo.ts @ e62eab87a: blob 822b3fcd8, 83504 bytes, 1874 lines, sha256 24670fe3656152d2
+read urepo_dev = userRepo.ts @ 8861e6216: blob 822b3fcd8, 83504 bytes, 1874 lines, sha256 24670fe3656152d2
+read jwt = jwt.ts @ e62eab87a: blob d0d55c11b, 13692 bytes, 374 lines, sha256 33545ba5a9c6951a
+read jwt_dev = jwt.ts @ 8861e6216: blob d0d55c11b, 13692 bytes, 374 lines, sha256 33545ba5a9c6951a
+read index = index.ts @ e62eab87a: blob edabbf871, 12509 bytes, 312 lines, sha256 5b75376a2bd29b8c
+read index_dev = index.ts @ 8861e6216: blob edabbf871, 12509 bytes, 312 lines, sha256 5b75376a2bd29b8c
+read m039 = 039_rls_fail_closed.sql @ e62eab87a: blob 9778af893, 12847 bytes, 271 lines, sha256 fc4c7d304576ee60
+ok   t790 ABSENT at develop (HTTP 404 — the file is NEW)
+ok   oauth blob 80e05458e
+ok   oauth_dev blob 4b03f555e
+ok   t790 blob cfed82d54
+ok   t820 blob b998b5b7d
+ok   t820_dev blob 106c762f1
+ok   urepo blob 822b3fcd8
+ok   urepo_dev blob 822b3fcd8
+ok   jwt blob d0d55c11b
+ok   jwt_dev blob d0d55c11b
+ok   index blob edabbf871
+ok   index_dev blob edabbf871
+ok   urepo byte-identical at head and develop
+ok   jwt byte-identical at head and develop
+ok   index byte-identical at head and develop
+ok   oauth.ts DIFFERS between head and develop (as it must)
+ok   ks820 DIFFERS between head and develop (the one hunk)
+ok   oauth sha256 fc54cc5f1494ad48
+ok   oauth_dev sha256 cc4f4ac0df1b3393
+ok   t790 sha256 55c12270001fd653
+ok   t820 sha256 d0883d41f8a38b96
+ok   t820_dev sha256 4f66d57fd174c85b
+ok   urepo sha256 24670fe3656152d2
+ok   jwt sha256 33545ba5a9c6951a
+ok   index sha256 5b75376a2bd29b8c
+ok   oauth 1260 lines
+ok   oauth_dev 1242 lines
+ok   t790 249 lines
+ok   t820 377 lines
+ok   t820_dev 369 lines
+ok   urepo 1874 lines
+ok   jwt 374 lines
+ok   index 312 lines
+ok   m039 271 lines
+ok   oauth 62763 bytes
+ok   oauth_dev 61492 bytes
+ok   t790 12429 bytes
+ok   t820 18387 bytes
+ok   t820_dev 17925 bytes
+ok   urepo 83504 bytes
+ok   jwt 13692 bytes
+ok   index 12509 bytes
+ok   oauth:29 = import { generateTokenPair, verifyRefreshToken } from '../services/jwt';
+ok   oauth:628 =     const gate = await enforcePasswordLoginGates({
+ok   oauth:711 = oauthRouter.post('/token', async (req: Request, res: Response) => {
+ok   oauth:808 =       const user = await userRepo.getUserByIdPreAuth(result.userId);
+ok   oauth:809 =       if (!user) {
+ok   oauth:820 =       logger.info('OAuth token issued', { clientId: client_id, userId: user.id, scope: result.scope });
+ok   oauth:836 =       // Verify and rotate refresh token. verifyRefreshToken THROWS
+ok   oauth:843 =       // used to be a `require('../services/jwt')` on this line — redundant with
+ok   oauth:849 =       let decoded;
+ok   oauth:851 =         decoded = verifyRefreshToken(refresh_token);
+ok   oauth:860 =       if (decoded.jti && (await isRefreshJtiDenylisted(decoded.jti))) {
+ok   oauth:867 =       const user = await userRepo.getUserByIdPreAuth(decoded.userId);
+ok   oauth:868 =       if (!user || user.status !== 'ACTIVE') {
+ok   oauth:890 =     logger.error('OAuth token error', { error: error.message });
+ok   oauth_dev:799 =       const user = await userRepo.getUserById(result.userId);
+ok   oauth_dev:832 =       const { verifyRefreshToken } = require('../services/jwt');
+ok   oauth_dev:833 =       let decoded;
+ok   oauth_dev:834 =       try {
+ok   oauth_dev:849 =       const user = await userRepo.getUserById(decoded.userId);
+ok   oauth_dev:800 =       if (!user) {
+ok   t790:138 =   server = app.listen(0, '127.0.0.1');
+ok   t790:197 =   world.plainLookup = null; world.preAuthLookup = { ...ACTIVE_USER };
+ok   t790:208 =     expect(world.calls.getUserById).toEqual([]); // the RLS-scoped lookup is not consulted on this pre-auth path
+ok   t820:129 =   getUserByIdPreAuth: vi.fn(async () => ({
+ok   urepo:403 = export async function getUserById(id: string, tenantId?: string): Promise<User | null> {
+ok   urepo:505 = export async function getUserByIdPreAuth(id: string): Promise<User | null> {
+ok   urepo:507 =     const result = await query(`SELECT ${USER_COLS} FROM auth_find_user_by_id($1)`, [id]);
+ok   jwt:346 = export function verifyRefreshToken(token: string): JwtPayload {
+ok   m039:199 = CREATE OR REPLACE FUNCTION auth_find_user_by_id(p_id UUID)
+ok   m039:200 = RETURNS SETOF users LANGUAGE sql SECURITY DEFINER SET search_path = public STABLE
+ok   index:102 = app.use(tenantGucContext());
+ok   index:115 = app.use('/api/oauth', oauthRouter);
+ok   oauth  exactly x1 userRepo.getUserByIdPreAuth(result.userId)
+ok   oauth  exactly x1 userRepo.getUserByIdPreAuth(decoded.userId)
+ok   oauth  absent      userRepo.getUserById(
+ok   oauth  absent      const { verifyRefreshToken } = require(
+ok   oauth  exactly x1 require('../services/jwt')
+ok   oauth  exactly x1 decoded = verifyRefreshToken(refresh_token);
+ok   oauth  exactly x1 if (!user || user.status !== 'ACTIVE')
+ok   oauth  exactly x1 description: 'User not found'
+ok   oauth  exactly x1 description: 'User inactive or not found'
+ok   oauth  exactly x1 description: 'Invalid refresh token'
+ok   oauth  exactly x1 description: 'Refresh token revoked'
+ok   oauth  exactly x1 enforcePasswordLoginGates({
+ok   oauth  exactly x1 oauthRouter.post('/token'
+ok   oauth  exactly x7 seedTenantGuc
+ok   oauth  exactly x3 message: 'server_error'
+ok   oauth  exactly x3 KS-790
+ok   oauth  exactly x2 generateTokenPair(user, session.id)
+ok   oauth_dev  exactly x1 userRepo.getUserById(result.userId)
+ok   oauth_dev  exactly x1 userRepo.getUserById(decoded.userId)
+ok   oauth_dev  exactly x1 const { verifyRefreshToken } = require('../services/jwt');
+ok   oauth_dev  exactly x1 import { generateTokenPair } from '../services/jwt';
+ok   oauth_dev  absent      getUserByIdPreAuth
+ok   oauth_dev  absent      KS-790
+ok   oauth_dev  exactly x1 enforcePasswordLoginGates({
+ok   t790  exactly x1 app.listen(0, '127.0.0.1')
+ok   t790  exactly x1 listen(
+ok   t790  exactly x1 vi.mock('../services/jwt'
+ok   t790  exactly x1 vi.mock('../repositories/userRepo'
+ok   t790  exactly x1 vi.mock('../db'
+ok   t790  exactly x1 getUserByIdPreAuth: vi.fn(
+ok   t790  exactly x3 expect(world.calls.getUserById).toEqual([]);
+ok   t790  exactly x2 expect(world.calls.getUserByIdPreAuth).toEqual([ACTIVE_USER.id]);
+ok   t790  exactly x6   it('
+ok   t790  exactly x4   it('CONTROL
+ok   t790  exactly x1 status: 'SUSPENDED'
+ok   t790  exactly x1 'not-the-secret'
+ok   t790  exactly x1 toMatch(/User not found/)
+ok   t790  exactly x2 toMatch(/User inactive or not found/)
+ok   t790  exactly x1 net.connect(
+ok   t790  exactly x2 toContain('MINTED_790')
+ok   t790  exactly x2 'VALID_REFRESH_790'
+ok   t790  exactly x1 expect(r.status).toBe(401);
+ok   t790  absent      require(
+ok   t820  exactly x1 getUserByIdPreAuth: vi.fn(async () => ({
+ok   t820  exactly x1 getUserById: vi.fn(async () => ({
+ok   t820  exactly x13   it('
+ok   t820  exactly x1 KS-790
+ok   t820_dev  absent      getUserByIdPreAuth
+ok   t820_dev  exactly x13   it('
+ok   urepo  exactly x2 FROM auth_find_user_by_id($1)
+ok   urepo  exactly x6 throw new ServiceUnavailableError('Authentication service temporarily unavailable, please retry');
+ok   jwt  exactly x1 export function generateTokenPair(user: User, sessionId: string): {
+ok   jwt  present x8  import
+ok   jwt  absent      routes/
+ok   m039  exactly x10 SECURITY DEFINER
+ok   m039  exactly x1 'auth_find_user_by_id(UUID)',
+ok   index  exactly x1 app.use(errorHandler);
+ok   ks820@head == develop[:124] + 8 lines + develop[124:] (ONE inserted hunk, nothing else)
+ok   the inserted 8 = 4 comment lines + the one mock entry
+ok   oauth.ts develop -> head: 4 changed regions (expected 4): [('replace', 29, 29, 29, 29), ('replace', 798, 799, 798, 808), ('replace', 832, 832, 841, 848), ('replace', 849, 849, 865, 867)]
+ok   CODE removed (4): ["import { generateTokenPair } from '../services/jwt';", 'const user = await userRepo.getUserById(result.userId);', "const { verifyRefreshToken } = require('../services/jwt');", 'const user = await userRepo.getUserById(decoded.userId);']
+ok   CODE added (3): ["import { generateTokenPair, verifyRefreshToken } from '../services/jwt';", 'const user = await userRepo.getUserByIdPreAuth(result.userId);', 'const user = await userRepo.getUserByIdPreAuth(decoded.userId);']
+ok   raw lines -5 +23 (expected -5 +23)
+ok   ks860 :433/:440 over the new test file -> offenders [] (expected [])
+ok   guard controls: bare listen(0) -> 1 offender; the shipped spelling -> 0
+ok   oauth@head: 0 raw control bytes (got 0)
+ok   oauth@develop: 0 raw control bytes (got 0)
+ok   t790: 0 raw control bytes (got 0)
+work dir (kept): /var/folders/xl/p96z5mmd3lzcn3pt8t6djkl40000gn/T//qa982ctl.rdhDBs
+controls_check: FAILS=0

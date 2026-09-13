@@ -1,0 +1,68 @@
+checkout_read at 2026-09-14 07:13:30 AEST
+== HEAD/branch
+355d82c8b02792a2d25992db9ec0e2bdc636f318
+feature/ks-597-b-caller-scoped-externalref
+== porcelain lines
+0
+== .git/config sha256
+e0fa706f4bdae277
+== for-each-ref count
+848
+== .git/worktrees count
+90
+== worktrees/ dir count
+ls: /Volumes/DevMASTER/!CODING/Secuura/Blockchain/2_Project_Files/worktrees: No such file or directory
+0
+== s212 worktrees
+(eval):12: no matches found: /Volumes/DevMASTER/!CODING/Secuura/Blockchain/2_Project_Files/worktrees/s212-*
+s212-ks790: absent
+s212-ks823: absent
+s212-ks835: absent
+s212-ks799-r2: absent
+== local refs develop
+8861e62161466c40f08d2b10a30edeb203123993
+8861e62161466c40f08d2b10a30edeb203123993
+== local branch/tracking for ks-790
+e62eab87a6263e25c41c9bb814d5831842bb6c7e
+e62eab87a6263e25c41c9bb814d5831842bb6c7e
+== develop log M15..M18
+8861e6216 2026-09-13 22:00:26 +1000 KS-924 KS-901: the entrypoint corpus pins its contributing packages by name and compares SKIP as a set; the census follows three more express-binding shapes (#980)
+a4ef481c8 2026-09-13 21:43:15 +1000 KS-877: docker-build.sh refuses an empty SERVICES_TABLE by name instead of dying on `${BUILD_LIST[*]}`; the re-index comment stops calling the `:-` idiom correct for a `for` loop (KS-922) (#977)
+818002259 2026-09-13 21:29:24 +1000 KS-950 / KS-962: the main-DB user statement creates no row — it re-syncs tenant_id/tenant_slug on rows auth owns; both migration loaders count failures and reserve "complete" for a zero-failure run (#973)
+== M15..M18 files
+Blockchain/Dev/packages/shared/src/__tests__/entrypoint-corpus.test.ts
+Blockchain/Dev/scripts/__tests__/docker_build_empty_table.test.sh
+Blockchain/Dev/scripts/__tests__/ks949_main_seed_idempotence.test.sh
+Blockchain/Dev/scripts/docker-build.sh
+Blockchain/Dev/services/api-gateway/src/startup-migrations.ts
+Blockchain/Dev/services/auth/src/__tests__/ks949-platform-admin-seed-identity.test.ts
+== tracked .test.sh at head
+29
+== vitest versions
+8:    "build": "tsc",
+11:    "test": "vitest"
+48:    "vitest": "^4.1.9"
+import { defineConfig } from 'vitest/config';
+import path from 'path';
+
+export default defineConfig({
+  resolve: {
+    alias: {
+      // The shared package exports map does not include ./utils/logger
+      // but the auth logger re-exports from this path. Map it for tests.
+      // The dist/ target always exists on an installed checkout: the repo
+      // root's postinstall runs `npm run build --workspaces` (KS-381).
+      '@secuura/shared/utils/logger': path.resolve(
+        __dirname,
+        '../../packages/shared/dist/utils/logger.js',
+      ),
+    },
+  },
+  test: {
+    globals: true,
+    environment: 'node',
+    // KS-184: provision a baseline RS256 keypair before any suite imports
+    // jwt.ts (which now requires one — no HS256 fallback).
+    setupFiles: ['./vitest.setup.ts'],
+  },
+});

@@ -1,0 +1,151 @@
+ultrathink
+
+You are the fleet QA agent running a TIER 1 gate (through code AND live where a surface exists — an auth door: the
+OAuth token grants), ROUND 1, on Secuura/Blockchain PR #982 (KS-790): ONE commit on develop M18, three files, two
+one-token swaps that OPEN a door migration 039 had shut by accident. #982 is the BASE of the stack #982 -> #983 -> #984.
+
+Read your brief FIRST and in full, then plan:
+/Volumes/DevMASTER/WEDNESDAY/2_Project_Files/fleet/qa-agent/briefs/2026-09-14_secuura-982-ks790-tier1.md
+
+Then read the adjacent #972 tier-1 report WHOLE (its F-5 named this defect; its evidence/ carries the instruments you
+reuse — farm.sh, runv.sh, tamper.py, qa972-preauth.test.ts):
+/Volumes/DevMASTER/!CODING/Testing Agent MAIN/projects/secuura/reports/2026-09-13-ks1052-972-b3ce8c9e7-tier1-r1/report.md
+
+Subject: e62eab87a6263e25c41c9bb814d5831842bb6c7e = PR #982 (KS-790), open against develop, ONE commit whose parent IS
+  develop M18 8861e6216 (= the merge-base; compare ahead 1 / behind 0). Three files (+280 -5): routes/oauth.ts (+23 -5:
+  the CODE delta is -4/+3 — `:29` import { generateTokenPair, verifyRefreshToken }; `:808` and `:867`
+  userRepo.getUserById -> userRepo.getUserByIdPreAuth at the authorization_code and refresh grants of POST
+  /api/oauth/token; develop's `:832` in-handler require('../services/jwt') REMOVED; the other 20 added lines are
+  comments; blob 4b03f555e -> 80e05458e, 1,242 -> 1,260 lines, sha256 cc4f4ac0df1b3393… -> fc54cc5f1494ad48…);
+  NEW __tests__/ks790-token-pre-auth-user-lookup.test.ts (249 lines, cfed82d54, 55c12270001fd653…; raw socket,
+  app.listen(0, '127.0.0.1') at :138; 6 cells, 4 CONTROLs; mocks ../services/jwt WHOLE); and ONE 8-line hunk in
+  __tests__/ks820-821-token-client-auth-and-apptype.test.ts (:125-132 — a getUserByIdPreAuth mock entry, the same
+  user its getUserById stub returns; 13 cells at both trees; 106c762f1 -> b998b5b7d).
+  WHY: /token holds a code or a refresh token, not a bearer — no tenant GUC is seeded — and userRepo.getUserById is the
+  plain RLS-scoped SELECT, which under 039's fail-closed tenant_isolation with a NOBYPASSRLS role answers ZERO rows;
+  the handler reported that as 400 invalid_grant "User not found" for EVERY code (KS-790's 2026-09-04 live probe:
+  authorize 302 with a code, token 400, the code row already used=true). getUserByIdPreAuth is the SECURITY DEFINER
+  carve-out auth_find_user_by_id (migration 039 :199-203) the other pre-auth flows use (auth.ts:686/:816/:862,
+  wallet.ts:193). The null guards (`:809` if (!user); `:868` if (!user || user.status !== 'ACTIVE')) are byte-identical.
+  The ENABLING change: the runtime require threw "Cannot find module" under vitest (the throw reached the OUTER catch
+  -> 500), so no test had ever reached the refresh branch; the static import makes it reachable. Built service claimed
+  unchanged (module: commonjs — item 7 proves it at the compiled artefact).
+  RULED (verbatim in the brief's RULED section): (1) the ks820-821 mock entry is ACCEPTED by Wednesday — you verify it
+  is the ONE hunk and nothing wider, and that it is load-bearing (T5); (3) tier 1, own by-SHA copy, never the builder's
+  worktree; (4) merge order #881 independent; #982 -> #983 -> #984 — #982 merges FIRST; (5) findings-only; NOT-TESTED
+  mandatory; the verdict MAIL is the wait signal.
+  origin develop = M18 8861e6216 (read 07:08 AEST 2026-09-14). The launcher pins the merge-base 8861e6216 (exit 10) and
+  develop with a DISJOINTNESS CHECK over six guarded paths (the three PR files, the services/auth/ prefix, the ks860
+  loopback guard file, migrations/039_rls_fail_closed.sql — exit 18 only on a hit); if develop moved past M18 at launch,
+  merge the then-current tip and re-derive: services/auth = develop-alone + 6, 0 failed.
+Repo:    /Volumes/DevMASTER/!CODING/Secuura/Blockchain/2_Project_Files  (READ-ONLY — clone by SHA into your own scratch;
+  node_modules symlink-farmed FROM /Volumes/DevMASTER/!CODING/Secuura/Blockchain/worktrees/s212-ks790 (the builder's, ON
+  the branch at e62eab87a, porcelain 0, vitest 4.1.10) via the #972 gate's farm.sh shape — never into it, never vitest
+  inside it; the sibling s212-ks823 / s212-ks835 / s212-ks799-r2 and s211-merge: rev-parse only)
+
+You are FINDINGS-ONLY. You never fix, never merge, never push, never deploy, never comment, never file, never `@`.
+
+NEVER run a push, the real pre-push hook, or preflight.sh inside the Secuura checkout or any of its worktrees.
+
+NEVER print a credential value, and never open, read or copy a secrets file (any .env, config/secrets.yml). Count, never echo.
+
+NO stack, no kintsugi, no demo. Docker ONLY if the daemon is ALREADY up (07:14 AEST: it was DOWN — read `docker ps`
+yourself first; never start the daemon; containers named qa982-* only; never the :6882 stack).
+
+Eight things you must not miss:
+
+1. THE DELTA (item 1): 3 files A/M/M; oauth.ts 4 hunks (-26,7 / -795,8 / -829,7 / -846,7), CODE -4/+3 (strip `//` lines
+   and compare to the brief's four removed / three added lines); userRepo.getUserById( 0 at head / 2 at develop;
+   require( 1 at head INSIDE the :843 comment / 1 at develop as code at :832 OUTSIDE the try; the ks820 file =
+   develop[1..124] + 8 lines + develop[125..369], 13 it( at both trees; userRepo.ts / jwt.ts / index.ts / packages/shared
+   untouched; the commit names KS-790 only, 0 PR refs, 1 at-sign (the Co-Authored-By e-mail).
+
+2. RED-FIRST BOTH WAYS + GREEN (item 2): develop alone 50 files / 685; the new file dropped into the develop worktree ->
+   `4 failed | 2 passed (6)` with cell 1 `expected 400 to be 200` (body "User not found"), cell 2 `expected 500 to be 200`
+   (server_error), cells 4/5 `expected 500 to be 400`, cells 3/6 green; develop's oauth.ts swapped into the head tree ->
+   the same 4/2 with ks820 still 13/13; restore sha-identical. Head: the file 6/6, the two /token harnesses 19/19, the
+   whole services/auth 51 files / 691 tests (develop-alone + 6). tsc --noEmit rc 0; the new file type-checked separately.
+
+3. THE LIVE LEG, OR ITS BLOCKER NAMED (item 3): if the daemon is up — qa982-pg (postgres:15-alpine) + qa982-redis,
+   docker/init/* then scripts/run-migrations.sh (49 .sql; applied=… failed=0), secuura_app rolsuper=f rolbypassrls=f,
+   users relforcerowsecurity=t, auth_find_user_by_id prosecdef=t; seed a user + a confidential app + a code row on a
+   SEPARATE superuser connection; the real oauthRouter + express.json() + tenantGucContext() with the REAL userRepo /
+   db / jwt / session; cells: authorization_code at head 200 + tokens vs develop 400 "User not found" (THE headline
+   pair); refresh at head 200 vs develop 400 "User inactive or not found"; the repository layer as secuura_app with no
+   GUC: getUserById -> null, getUserByIdPreAuth -> the row, CONTROL getUserById(id, tenantId) -> the row; the code row
+   used=true at both SHAs; a SUSPENDED user's code at head -> predicted 200 (the pre-existing gap: no status pin on the
+   code grant — a Record with symbol `:809 if (!user)`, NOT a finding against #982). If the daemon is DOWN: NOT RUN with
+   "docker daemon down at HH:MM", and the same cells over real HTTP through the real router with a ../db stub that
+   MODELS fail-closed RLS (the qa972-preauth shape) and the REAL userRepo + REAL jwt un-mocked. Say which in the BLUF.
+   Cheap and mandatory either way: the two ks781 suites green at head (the authorize-side gates KS-790 was held behind).
+
+4. THE TAMPER TABLE, SUITE RUNNING (item 4; predictions are the drafter's, written before each run; anchors count 1;
+   restore by content with the whole-file sha; score by TITLE; cells-run beside every colour; a 0-cell run is INVALID):
+   T1 :808 reverted -> cell 1 red (400 User not found), 1|5 (6) · T2 :867 reverted -> cell 2 red (400 User inactive or
+   not found), 1|5 · T3d develop's require re-inserted BEFORE `let decoded;` (OUTSIDE the try) -> cells 2/4/5 red ALL
+   500, 3|3 · T3b the same require INSIDE the try -> cells 2/4/5 red ALL 400 "Invalid refresh token", 3|3 (the builder's
+   T3 measured THIS shape — say so; both are "3 refresh rows red") · T4 :868's status pin dropped -> cell 5 red (200 for
+   a SUSPENDED user), 1|5 · T5 the ks820 hunk removed -> ks820 :246 / :320 / :328 red (500, getUserByIdPreAuth is not
+   a function), 3|10 (13), ks790 6/6 — ruling 1's load-bearing half · T6 :809 `if (!user)` -> `if (false)` -> cell 3
+   red (500: `user.id` at :820 over null), 1|5 · Tk the ks790 file's jwt mock REMOVED and a REAL refresh token minted
+   with generateRefreshToken -> the real verifyRefreshToken runs through the static import (adapt the two
+   toContain('MINTED_790') lines; predict 6/6) — the enabling change with the real function · T7 optional (the harness
+   world inverted -> cells 1/2 red, 2|4). Full services/auth on T1, T3d, T5 (51 files; reds confined to the named
+   files); solo; green again after each.
+
+5. THE MERGED SHAPE + THE WIDENED-GUARD RULE (item 6): e62eab87a is a fast-forward of M18 (tree 60327bfa0). If develop
+   moved: 3-way merge in YOUR clone, 0 conflicts, services/auth = develop-alone + 6. Either way run packages/shared at
+   the head tree: the ks860 🔴 cell (ks860-test-listeners-bind-loopback.test.ts:463, toEqual([]) :477) GREEN with the
+   new file in its walk (its one listen( binds '127.0.0.1'); predicted 813/813 on M18 — state the instrument. Read the
+   stack for the PRED line only: #983 f62c975c1 is 1 ahead of e62eab87a (and MODIFIES the ks790 test file); #984
+   d00a2015c on #983; #881 8ac9db66f independent — one `git merge-tree --write-tree` of #881 with #982 onto develop in
+   your clone, conflict/no-conflict reported, charge nothing.
+
+6. THE BUILT ARTEFACT (item 7): tsc both trees into scratch dist/s; diff routes/oauth.js — expected: the import
+   destructure, the two getUserByIdPreAuth calls, the comments, NOTHING else; `require("../services/jwt")` count 2 at
+   develop / 1 at head; `node -e` load of dist-head/routes/oauth.js with JWT_PRIVATE_KEY / JWT_KEY_ID set -> loads.
+   jwt.ts imports no routes/* (jwt.ts:6-13) — no new import edge; keys() is read at CALL time (:117-122).
+
+7. DELIVERED vs COMMISSIONED + CLAIMS (item 9): the table in the brief — both swaps in ONE commit (Wednesday's default),
+   the ks790 file's shape, the branch = Linear's branchName, KS-790 only, CREATED push PROTOCOL-CLEAN (relayed), the
+   READY; the TWO disclosed non-commissioned elements (the ks820 mock entry — ruling 1; the enabling change — item 7
+   decides whether it is behaviour-neutral in the built artefact). A fourth file, a change to userRepo/jwt/index, a
+   ticket moved, a `@`, a second ticket id: a finding.
+
+8. THE THREE RECORDS you MEASURE but do not grade against #982 (pre-existing, reachable only now; symbol/path for
+   Wednesday's board search): the code grant's missing status pin (`:809`); the refresh grant's non-rotation (`:836`
+   "Verify and rotate" — verifies, checks the denylist at :860, mints; /api/auth/refresh rotates at auth.ts:697-701);
+   the outer catch mapping a ServiceUnavailableError (503-class) to 500 server_error (`:889-891`). Name the oracle for
+   each; say whether any changes your verdict and why.
+
+Your tool shell's grep may be a function: use /usr/bin/grep -F with a same-file control; or Python str.count on the blob.
+Never cd in your own tool calls; the pre-tool hook refuses `git worktree` in the Secuura checkout — clone into your
+scratch and run write verbs THERE. A REAL checkout of the whole Blockchain/Dev, not a symlink farm. Keep every scratch
+of yours OUT of <pkg>/src (the corpus walks it) AND out of any __tests__/ or *.test.ts path under services/ or
+packages/ unless it binds 127.0.0.1 (the ks860 guard walks it) — quarantine probes by rename before a packages/shared
+run. services/auth is VITEST 4.1.10 (npx vitest run, never watch; cwd = <clone>/Blockchain/Dev/services/auth; the
+setup file provisions the RS256 key; the farm must carry packages/shared/dist); run suites solo. /bin/bash here is
+3.2 — write runners in Python. zsh: no PIPESTATUS (`cmd > out 2>&1; rc=$?`), no timeout on macOS.
+Quote the Secuura checkout's porcelain count, .git/config sha256, for-each-ref count, origin develop SHA,
+refs/pull/982/head, the branch and refs/pull/983/head at start and close; they must match (name any ref another seat's
+push or merge moved). Confirm worktrees/s212-ks790 (at /Volumes/DevMASTER/!CODING/Secuura/Blockchain/worktrees/) is
+byte-identical at start and close (porcelain 0 both times); read the sibling worktrees by rev-parse HEAD only.
+Never `rm`: fresh mktemp -d per attempt; quarantine probes by rename; qa982-* containers you started may be stopped and
+removed by name at the end — say so.
+Do no memory maintenance of your own project's memory store inside this session.
+
+Report FOUND / TESTED / HOW, with controls; the delta; develop-alone and head counts with the tree named; the RED-FIRST
+pair both ways; the LIVE leg (run, or NOT RUN with the blocker) and the stub-modelled leg; the tamper table (T1, T2, T3d,
+T3b, T4, T5, T6, Tk, optional T7) with cells-run and the status per red; the compiled-artefact diff; the ks781 suites;
+the packages/shared reading with the ks860 cell named; the DELIVERED-vs-COMMISSIONED table; the three Records with
+their symbols; and state what you did NOT test at the same prominence as the findings.
+Verdict: GO, GO WITH FINDINGS, or NO GO — on e62eab87a6263e25c41c9bb814d5831842bb6c7e, against the develop you
+measured it on (name it). Say what ships and what is ticketed (symbol/path); give the merge seat its PRED line: "merge
+e62eab87a6263e25c41c9bb814d5831842bb6c7e onto develop FIRST in the stack #982 -> #983 -> #984; expected services/auth
+= develop's count + 6, 0 failed; packages/shared unchanged".
+
+MAIL YOUR VERDICT to wednesday-agent@agentmail.to when the pass is complete, using
+the project's send_brief.sh. Your pane holds ~19 lines of alternate screen with no
+scrollback, so a verdict that stays in the pane is one pane-close from being lost --
+this is not a formality, it is the only durable copy. Subject:
+[QA -> Wednesday] TIER 1 GATE #982 (KS-790) e62eab87a -- <GO|GO WITH FINDINGS|NO GO>
