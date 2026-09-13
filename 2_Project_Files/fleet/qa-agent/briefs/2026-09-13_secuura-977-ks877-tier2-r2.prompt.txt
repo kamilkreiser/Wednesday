@@ -1,0 +1,150 @@
+ultrathink
+
+You are the fleet QA agent running a TIER 2 (through code — a build script that refuses its own inputs plus the shell
+suite that pins it; docker is a recording stub on a private PATH, no daemon, no image, no stack) gate, ROUND 2 OF 2
+under the two-NO-GO cap, on Secuura/Blockchain PR #977 (KS-877 + KS-922's two comment items).
+
+Read your brief FIRST and in full, then plan:
+/Volumes/DevMASTER/WEDNESDAY/2_Project_Files/fleet/qa-agent/briefs/2026-09-13_secuura-977-ks877-tier2-r2.md
+
+Then read ROUND 1's report WHOLE (a gate cannot ask; everything round 1 measured is in it):
+/Volumes/DevMASTER/!CODING/Testing Agent MAIN/projects/secuura/reports/2026-09-13-ks877-977-a70585823-tier2-r1/report.md
+(+ its evidence/ — drive.sh, tamper.py + tamper-specs/, the by-hand drives, the CI job log 13-code-security-gates-job.log
+are yours to reuse). Round 1's brief is beside yours: 2026-09-13_secuura-977-ks877-tier2.md — its §2a tables, items and
+KNOWN-FRAGILE stand; the round-2 brief says which rows to RE-RUN and which stand on byte-identical paths.
+
+Subject: aede931172dde738912cf5d439681e02d30405e2 = PR #977 (KS-877 + KS-922's comment items), open against develop,
+  TWO commits on M6 0f69129b3: the round-1 head a70585823 (gated GO WITH FINDINGS 17:31 AEST — F1 Major: the new suite
+  RED on CI's ubuntu because docker-build.sh's `((RUNNING++))` :281 / `((RUNNING--))` :240 return status 1 at value 0
+  and bash >= 4.1 `set -e` exits the script on it) and the ROUND-2 commit aede93117 (parent a70585823, tree e97251c27,
+  +92 -8, TWO files, the PR's own): Blockchain/Dev/scripts/docker-build.sh (+11 -2: :240 and :290 are now the
+  ASSIGNMENTS `RUNNING=$((RUNNING - 1))` / `RUNNING=$((RUNNING + 1))` under a 9-line why-comment :281-289; blob
+  1b7d59660 -> 4511614b9, sha256 90565cd4503efbde…, 316 lines) and Blockchain/Dev/scripts/__tests__/
+  docker_build_empty_table.test.sh (+81 -6: CELL 4 the STATIC pin on the construct's absence with its positive control
+  inside the cell, CELL 5 the MASK control — one failing build still lands in FAILED (1), rc 1 — TOTAL_CELLS=5 with
+  `(of 5 cells)` and an INCOMPLETE exit; O1/O2; blob e37212b89 -> 821828e37, sha256 411ed6bb09f95fb9…, 215 lines).
+  Merge-base = the PR's parent M6 0f69129b3; origin develop = M14 6b62ae446 (20:08 AEST; #978's squash), then M15
+  1c38077ba (20:27 AEST; #981's squash, ONE packages/shared test file) — M6..M15 is 9 squashes / 22 files, NONE of
+  #977's two (three scripts/__tests__/ suites are in that delta: run-shell-suites.sh reaches 26 at head, 27 at
+  develop, 28 on the merged tree). develop WILL move again under you (s209 is merging #980, packages/shared/src/
+  __tests__/ only) — the launcher judged the delta at launch; you re-judge at your read.
+The headline questions of a ROUND 2: (1) is F1 CLOSED at the new head — by READING both lines, by the MECHANISM on
+  the bash you have (3.2: `((R++))` at 0 -> status 1, the assignment -> 0), and by CI's per-suite line at aede93117
+  as the RUNTIME instrument (run 34750512638 / job 103706122580 / step 11 — quote them; the job log is 401 to the
+  project token; round 1 read it through the machine's global `gh` login read-only — do the same if that login is on
+  your machine, else write UNREAD and why); (2) the suite RUN locally on 3.2 at head, red-first against the round-1
+  bytes AND the base bytes, then the tamper table with Tn/To on the new lines beside round 1's eight, cells-run quoted
+  beside every red; (3) does CELL 5 genuinely fail when one build fails — red-proof the control itself (Tp, Tp2, Tp3);
+  (4) did the round-2 diff introduce a NEW defect — and what is the static pin's BOUNDARY (Tq, Tr: measured, not
+  assumed); (5) delivered-vs-commissioned against the s208 brief and Wednesday's ANSWER; (6) the cap — round 2 of 2:
+  your verdict names what SHIPS and what is TICKETED; (7) findings-only.
+Repo:    /Volumes/DevMASTER/!CODING/Secuura/Blockchain/2_Project_Files  (READ-ONLY — clone by SHA into your own scratch;
+  node_modules symlink-farmed FROM worktrees/s208-ks877-r2 (detached at aede93117, porcelain 0), never into it;
+  worktrees/s204-pr3 (the branch's checkout at a70585823) and worktrees/s209-merge (the LIVE merge seat) are not yours)
+
+You are FINDINGS-ONLY. You never fix, never merge, never push, never deploy, never comment, never file, never `@`.
+
+NEVER run a push, the real pre-push hook, or preflight.sh inside the Secuura checkout or any of its worktrees.
+
+NEVER print a credential value, and never open, read or copy a secrets file (any .env, config/secrets.yml). Count, never echo.
+
+NO docker, NO stack of any slot, no kintsugi, no demo, NO bash install (Wednesday's ruling Q-bash: the runtime
+instrument is CI). Every docker-build.sh drive goes through the suite's stub recipe on a COPY at
+<fixture root>/scripts/docker-build.sh inside your own mktemp -d — the script cd's to <dir>/.. and passes `.` as the
+build context; never run it from the checkout.
+
+Eight things you must not miss:
+
+1. F1 CLOSED, THREE INSTRUMENTS (item 2): (a) READ :240 and :290 at aede93117 (`git show`), the CELL 4 regex census
+   0 at head / 2 at a70585823 (:240, :281) / 2 at M6 (:226, :262), control 1; (b) MEASURE on /bin/bash 3.2.57 (quote
+   bash --version; say no other bash exists on your machine, or run the same on it): `((RUNNING++))` at 0 -> status 1,
+   the assignment -> 0, `((RUNNING--))` at 1 and 4 -> 0, `((--RUNNING))` at 1 -> 1 (rejected), `set -euo pipefail;
+   R=0; ((R++)); echo reached` -> reached rc 0 (3.2's silence), `false` under set -e -> rc 1, and `let R++` under
+   set -e -> NOT reached rc 1 (a simple command — item 4(d) relies on it); (c) READ CI at the new head: run
+   34750512638, job 103706122580, step 11 `failure` (expected: manifest_readers_agree.test.sh, C3 -> KS-1138; if it
+   reads success, C3 was fixed by someone — say so); the per-suite block `5 passed, 0 failed (of 5 cells)` and
+   `shell suites: 25 passed, 1 failed (of 26)` with FAILED naming ONLY manifest_readers_agree — read through the
+   global `gh` login (read-only `gh api GET`, never a write) if present, else UNREAD with the reason, stated in the
+   BLUF. A block that reads otherwise means F1 is NOT closed as claimed — a Major, against #977 or this brief's
+   prediction: say which by the block's own text.
+
+2. BASELINE + RED-FIRST (item 3): at head `5 passed, 0 failed (of 5 cells)` (quote SUBJECT sha 90565cd4…, all five ok
+   lines, wall-clock; count ok+FAIL = 5 first); vs the ROUND-1 bytes (DOCKER_BUILD_SH=<copy, sha a995da31…>) ->
+   `4 passed, 1 failed (of 5 cells)`, EXACTLY CELL 4 `count=2 (control=1): :240 ((RUNNING--)) :281 ((RUNNING++))`,
+   CELL 5 GREEN (the control on 3.2); vs the BASE bytes (sha 97eb3efc…) -> `3 passed, 2 failed (of 5 cells)`,
+   EXACTLY CELLs 1 (`line 131: BUILD_LIST[*]`, `table named=NO`) and 4 (:226, :262). bash -n rc 0 ×3.
+
+3. THE TAMPER TABLE, SUITE RUNNING (item 4): score ONLY on a `(of 5 cells)` summary with 5 cells RAN; widen round 1's
+   tamper.py totals regex to accept the suffix FIRST (the builder's gate_tamper_copy.py is the one-line reference) or
+   every tamper MISPREDICTS; anchor on FULL code lines with indentation (`((RUNNING++))` / `((RUNNING--))` occur in the
+   comment :281-282; `exit 1` occurs 4×; the wait line occurs at :237 AND :295; `return 1` at :198 and :207); restore
+   sha 90565cd4… (script) / 411ed6bb… (suite); green 5/5 after each. The builder's five: T1 -> {1} `line 141`; T2
+   -> {1,2,3,5}; Tn (:290 -> `((RUNNING++))`) -> {4} `:290 ((RUNNING++))`; To (:240) -> {4}; Tn+To -> {4} count=2;
+   Tp (:312 exit 1 -> exit 0, anchored on its 3-line block) -> {5}. Round 1's six on the new bytes: Tg -> {1}
+   `line 262: BUILD_LIST[@]`; Th -> {1} `line 141`; Ti -> {1} `message present=yes, table named=NO`; Tj -> {2};
+   Tk -> {1} `rc=0`; Tm -> the observation (SUBJECT + empty sha first, rc 2, 0 cells; control: the unswapped suite
+   prints nothing).
+
+4. CELL 5's OWN RED-PROOF (item 4(c)): Tp2 — BOTH wait lines' `|| FAILED+=(...)` -> `|| SUCCEEDED+=(...)` (anchor
+   count 2) -> {5} only (`SUCCEEDED (29):`, `All builds succeeded`, rc 0; CELL 3 green); Tp3 — build_service's
+   `return 1` (:198, anchored with the BUILD FAILED echo) -> `return 0` -> {5} only (the log still says BUILD FAILED;
+   the wait succeeds) — proves the cell watches the wait-status path, not the log text. And by hand: `auth originate`
+   with the auth stub exiting 1 -> `SUCCEEDED (1): originate`, `FAILED (1): auth`, rc 1, 2 build calls (item 6).
+
+5. THE STATIC PIN'S BOUNDARY (item 4(d)(e)(f)) — prediction FIRST: Tq (:290 -> `let RUNNING++`) -> {3, 5} on 3.2
+   with CELL 4 GREEN (regex-blind; `let` is a simple command so 3.2's errexit fires); Tr (:290 -> `(( RUNNING++ ))`
+   with inner spaces) -> NOTHING red, `5 passed, 0 failed (of 5 cells)` — the regex admits no inner whitespace and
+   3.2 ignores the arithmetic status: a COVERAGE NOTE (Polish, ships-with: admit [[:space:]]* inside the parentheses;
+   CI's CELL 3 still catches the shape at runtime), NOT a NO GO — F1 as shipped is closed and the suite's own comment
+   names CI as the runtime pin. If Tr reds anything, re-read bash --version. On scratch COPIES of the suite: Tw
+   (the control here-string `((X++))` -> `((X+))`) -> CELL 4 `bad … instrument cannot fire: the positive control read 0`;
+   Tv (TOTAL_CELLS=5 -> 6) -> `5 passed, 0 failed (of 6 cells)` + `INCOMPLETE — 5 of 6 cells ran`, exit 1 (the
+   runner scores rc — run-shell-suites.sh:224 — so that is a runner red by construction; do not run the runner on it).
+
+6. THE CONSUMER AND THE MERGED TREE (items 5, 7): run-shell-suites.sh SOLO in your checkout at head with a SHORT
+   TMPDIR (a mktemp -d under /private/tmp/claude-501/ — round 1's tsx socket EINVAL under the long scratchpad path)
+   -> `26 passed, 0 failed (of 26)`, the subject's block with `(of 5 cells)`, --check-unreached 26; the 3-way merge
+   of the develop you read (M15 1c38077ba at 20:27: 2 ahead / 9 behind; 0 conflicts expected; if it moved, merge the
+   then-current tip and prove disjointness by name) -> the two files byte-identical to head, `git diff --name-only 0f69129b3 <develop> --
+   Blockchain/Dev/scripts` = the three __tests__ suites (NOT empty), the suite 5/5 on the merged tree, the runner
+   `28 passed, 0 failed (of 28)` there (any red is develop's own — name it by suite, charge nothing).
+
+7. DELIVERED vs COMMISSIONED + CLAIMS (items 8, 9): the table in the brief — Q1 the assignment family at both lines;
+   Q2/Q-cells CELL 4 + CELL 5 + TOTAL_CELLS=5 (an ADDITION, said so); Q3 O1/O2 in the commit, O3/O4 + the platform
+   qualifier in the body (counts in TARGET); Q4 one commit (ids KS-877 + KS-922 only), fast-forward push, verify
+   PROTOCOL-DIFF attributed to s209's squash; Q5 the comments 547f1535 / 3680c557 / 5652589785 (relayed: 0 mention
+   nodes); Q-bash NO install; Q-C3 -> KS-1138; Q-home description only + KS-1139 (its DESCRIPTION types KS-680 — a
+   precision note, not a finding; 0 hits for KS-1138/KS-1139/KS-676/KS-680 in the body + commit + PR comment).
+   Then the claims: "+11/-2 this round", "215 lines, 5 cells", ":240/:290", "the re-index note still :252-261,
+   byte-identical" (assert by the diff's hunk ranges), "11/11 EXACT", every `26 passed, 0 failed (of 26)` qualified
+   (×4), the CI sentence, "develop moved twice under me" (it moved twice MORE — not a finding). A claim that does not
+   hold is a finding against the PR that wrote it.
+
+8. THE CAP (item 12, REPORT): round 2 of 2 — every finding you carry is SHIPS-WITH (Polish) or TICKET (symbol/path
+   for Wednesday's board search; you file nothing). NAME the round-1 findings that stand: C1, C2, C4 pre-existing
+   and NOT covered by ruling; C3 -> KS-1138; the class residue (sync-secrets.sh ×8, validate-lint.sh ×2) -> KS-1139.
+   NOT TESTED at equal prominence — the four platform suites, no docker/stack/slot/deploy, no bash >= 4.1 locally
+   (the CI death is READ, never executed here), the root shape, KS-1127, the byte-identical §2a rows, C1/C2/C4, the
+   `pr` workflow run 34750512891 in_progress (not yours), Linear (relayed).
+
+Your tool shell's grep may be a function: use /usr/bin/grep with a same-file control. Never cd in your own tool calls (run
+the suite as `bash /abs/path`). zsh: no PIPESTATUS (`cmd > out 2>&1; rc=$?`), no timeout on macOS.
+Quote the Secuura checkout's porcelain count, .git/config sha256, for-each-ref count, origin develop SHA, refs/pull/977/head
+and the branch at start and close; they must match (name any ref another seat's push or merge moved). Confirm
+worktrees/s208-ks877-r2 and worktrees/s204-pr3 are byte-identical at start and close (porcelain 0 both times); read
+worktrees/s209-merge by rev-parse HEAD only.
+Never `rm`: TMPDIR inside your scratch for every suite run — the suite deletes its own $WORK; capture fixtures by hand.
+Do no memory maintenance of your own project's memory store inside this session.
+
+Report FOUND / TESTED / HOW, with controls; the tamper table (T1, T2, Tn, To, Tn+To, Tp, Tg, Th, Ti, Tj, Tk, Tm, Tp2, Tp3,
+Tq, Tr, Tw, Tv) with cells-run beside each colour; the DELIVERED-vs-COMMISSIONED table; the three F1 instruments with
+their evidence class; the consumer at head (26) and on the merged tree (28); and state what you did NOT test at the
+same prominence as the findings.
+Verdict: GO, GO WITH FINDINGS, or NO GO — on aede93117. Round 2 of 2 for the KS-877 class under the cap: say what
+ships and what is ticketed.
+
+MAIL YOUR VERDICT to wednesday-agent@agentmail.to when the pass is complete, using
+the project's send_brief.sh. Your pane holds ~19 lines of alternate screen with no
+scrollback, so a verdict that stays in the pane is one pane-close from being lost --
+this is not a formality, it is the only durable copy. Subject:
+[QA -> Wednesday] TIER 2 GATE #977 ROUND 2 (KS-877 KS-922) aede93117 -- <GO|GO WITH FINDINGS|NO GO>
