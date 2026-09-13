@@ -1,0 +1,100 @@
+ultrathink
+
+You are the fleet QA agent running a TIER 2 (through code) gate, ROUND 1, on Secuura/Blockchain PR #976 (KS-876, KS-891, KS-894, KS-895).
+
+Read your brief FIRST and in full, then plan:
+/Volumes/DevMASTER/WEDNESDAY/2_Project_Files/fleet/qa-agent/briefs/2026-09-13_secuura-976-ks876-891-894-895-tier2.md
+
+Subject: 0d5f5e6ab7a9162b84dba7d375260af35ebdde81 = PR #976, open against develop, ONE commit whose parent IS develop
+  0f69129b3 (fast-forward-shaped; merge-base = develop; GitHub compare ahead 1 / behind 0). ONE file, +269 -30, test-only:
+  packages/shared/src/__tests__/ks860-test-listeners-bind-loopback.test.ts — a CHECKER (a source walk over test files,
+  a comment-mask lexer with code/line/block/sq/dq/tpl/regex states, a `.listen(0, …)` site counter, an announcement when
+  the mask lost the file). Four residues: KS-876 the walk covers packages/ too (WALK_ROOTS :98) with the guard's OWN file
+  excluded BY NAME (SELF_EXCLUDED :115-117, the RULED shape) and cell A2 pinning exactly-one-existing-file; KS-891 a desync
+  that RE-SYNCHRONISES before EOF (`if (ok) /a/*b/.test(s);` + listener + a later real `*/` — 0 rows at base, a silent
+  false CLEAN) is announced via a `suspectLine` recorded when a `/*` follows a division-read `/` on the same line
+  (:255-261, :275, :417-432); KS-894 rows carry `announcement: true` and `sitesOnly()` :372-374 filters them wherever a
+  cell means "N sites"; KS-895 `desyncCause()` :381-393 names the real cause. 14 cells at base → 23 at head (A1 A2 · B1 B2
+  B3 · D1 D2 D3 D4). The state-machine TRANSITIONS and `startsRegex` are byte-identical to base — the head only RECORDS.
+Repo:    /Volumes/DevMASTER/!CODING/Secuura/Blockchain/2_Project_Files  (READ-ONLY — clone by SHA into your own scratch)
+
+You are FINDINGS-ONLY. You never fix, never merge, never push, never deploy.
+
+NEVER run a push, the real pre-push hook, or preflight.sh inside the Secuura checkout or any of its worktrees.
+
+NEVER print a credential value, and never open, read or copy a secrets file (any .env, config/secrets.yml). Count, never echo.
+
+Seven things you must not miss:
+
+1. RED-FIRST PER TICKET, RE-DERIVED AT BASE WITH THE SUITE RUNNING, SOLO: a scratch copy of the BASE blob with head's
+   KS-891 + KS-895 describe blocks (:714-784) appended → 21 ran, exactly 4 red: B1, D1, D3, D4 (B2, B3, D2 green); the
+   KS-876 block appended → a LOAD failure (WALK_ROOTS / SELF_EXCLUDED / testFilesUnder / sitesOnly undefined), 0 tests —
+   not a red; KS-894 has NO red-first cell by construction (its base reading is the ticket's repro:
+   offendingListenSites("const oops = 'never closes") → 1 row, 0 sites). Then at head: this file 23/23; the FULL
+   packages/shared 41 files, `2 failed | 794 passed (796)` with the two reds being ks781 LEG D's two cells (#975's fix,
+   OPEN at 16:36 AEST) — or 796/796 if #975 merged first; say which state you measured in. Quote counts as vitest prints.
+
+2. THE FOUR TAMPERS + TWO GATE-DESIGNED, tests RUNNING (23 cells ran, 41 files loaded; asserting runner; score by TITLE
+   — the builder's runner recorded every CONTROL/🔴 red as "MODEL"): T1 WALK_ROOTS → ['services'] → exactly A1, A2 and the
+   walk CONTROL (3); T2 `lastDivisionSlash = i` → `= -1` → exactly B1 (1); T3 startsRegex always false → exactly 4: the
+   🔴 cell (FIVE real files announce — ks815…:151 and ks820-821…:196 via the new suspect path; crypto-agility.guard,
+   ks843-erasure-scope-gate, ks732-mfa-disable-proof at EOF in dq/sq — name all five), the regex-quote repro on its
+   FIRST assertion :621 (quote the failure message — it must be the toHaveLength(1) line, not the :622 toBe(3) line: that
+   is KS-894's regression as the ticket words it), D2, and the WELL-FORMED control :670 (the base ":541 control" —
+   report it, the ANSWER asked); T4 the old sentence restored → exactly D1, D3, D4 (3). Tg: the SELF_EXCLUDED name →
+   a file that does not exist → exactly A2 + the 🔴 cell listing THIS file's 17 self rows (the "silent widening"
+   control, measured); Th: delete `suspectLine === null &&` :256 → 0 red (a line no test can redden — say so). Restore
+   sha-identical (fc62ca7410a06736…) after each; full package per tamper, SOLO.
+
+3. THE LEGITIMATE SHAPES R1–R30 THROUGH THE REAL LEXER at BOTH SHAs (a scratch vitest importing the file's own exports):
+   regexes after `)`, `=`, `(`, `return`, with `/` in a class, with `/*` in the body (B2A), divisions with a same-line
+   `/* */` (R4 — a WELL-FORMED file the new flag ANNOUNCES, and the 🔴 cell pushes announcements as offenders: record the
+   blast radius, 0 such files today), the B1-shape (R3 — TWO announcement rows at head), template literals, URLs in
+   strings, docblocks, shebang, BOM, `//` at EOF (a legitimate `line` end state), unterminated string / `${ }` / block /
+   regex (R14 is the ONLY way to reach a `regex` end state; R15 with a newline is silent — a declared limit), empty file.
+   The `sites` column must be IDENTICAL at head and base on every row; only announcements and cause text differ.
+
+4. THE REAL-TREE WALK, in a clone that HAS services/ AND packages/ (findDevRoot throws at :89 without both — a load
+   failure): Wednesday reads 295 walked (253 services + 42 packages, tracked AND on the builder's disk); the PR body and
+   all four comments say 296 — and 296 − 1 excluded cannot give the 294 scanned they also claim. Measure it. Then 294
+   scanned, 0 sites, 0 announcements; the exclusion control (one name, exists, the unfiltered walk reaches it; self-scan
+   14 sites on the BASE blob, 17 on the HEAD file — :64 and :107 say "14", true of the old shape only); the FOUR loopback
+   listen(0, sites in packages/shared now reached (ks727:281, ks781:183, ks914-pinned-address:47, ks914-shipped-path:147).
+
+5. THE PROPERTY: masked text, endState and tplDepth IDENTICAL at head and base for all 295 walked files and the 30 rows
+   (Wednesday: 295/295; site line-numbers 295/295). From source: the diff of base :157-289 vs head :193-348 is additions
+   + one return line; startsRegex is byte-identical. A file whose masked text differs is Blocker-class.
+
+6. CLAIMS TRUE AS WRITTEN: "296"; ":64/:107 14 rows"; "mechanism changes in two places only"; "the old :327 reads
+   '127.0.0.1' from the MASKED text" (base :327 / head :436-440 — true); the coordinator's "13" → 14 is Wednesday's own
+   corrected error, not the builder's; the KS-891 docblock :172-179 "any other construct that re-synchronises is still
+   silent" (R15 confirms); the ticket comments' B2A base reading (endState code, tplDepth 0, 0 rows); the four comments'
+   one at-sign each = the "PR #976 @ `sha`" idiom, not a mention; the body's seven KS ids (four subjects + KS-860 /
+   KS-933 / KS-256 as context). Docs §4: the two platform-k HTML docs unchanged and 0 hits for ks860 / packages/shared /
+   listen(0 (control orchestrate 3 / 2). eslint on the file rc 0; tsc via a SCRATCH tsconfig that includes the file
+   (tsconfig.json:21 excludes src/__tests__ — the package's tsc is vacuous, say so), 0 errors at head and at the tip.
+
+7. THE MERGED TREE is a fast-forward to tree 6dce51856 — run the full package on it, SOLO; if develop moved (ls-remote at
+   start and end), merge the then-current develop, prove its delta disjoint by NAME (the likely mover is #975's ks781
+   file — disjoint, and it flips the ratio to 796/796). Board state READ ONLY at start and end: the four tickets In
+   Progress by automation, KS-860 Deployed to UAT and KS-873 archived — UNMOVED. Then the verdict on 0d5f5e6ab.
+
+Your tool shell's grep may be a function: use /usr/bin/grep, case-insensitive, with a same-file control. Never cd; the
+pre-tool hook refuses `git worktree` in the Secuura checkout — clone into your scratch and run write verbs THERE.
+packages/shared is VITEST (npx vitest run, never watch; cwd = <clone>/Blockchain/Dev/packages/shared); Node 24 strips
+types natively so a scratch .mts can import the file's exports, but vitest is the instrument for cells. The full package
+run includes socket legs — minutes, solo; a `Test timed out` is a load artefact: re-run solo and say so.
+Quote the Secuura checkout's porcelain count, .git/config sha256, for-each-ref count and origin develop SHA at start and
+close; they must match (name any ref another seat's push or merge moved).
+Do no memory maintenance of your own project's memory store inside this session.
+
+Report FOUND / TESTED / HOW, with controls, the §2a table as measured at both SHAs, the red-first table, the tamper table
+(T1–T4, Tg, Th: prediction · cells run · red titles · T3's first-assertion message · restore sha), the walk census line,
+the masked-identity count, and state what you did NOT test.
+Verdict: GO, GO WITH FINDINGS, or NO GO — on 0d5f5e6ab.
+
+MAIL YOUR VERDICT to wednesday-agent@agentmail.to when the pass is complete, using
+the project's send_brief.sh. Your pane holds ~19 lines of alternate screen with no
+scrollback, so a verdict that stays in the pane is one pane-close from being lost --
+this is not a formality, it is the only durable copy. Subject:
+[QA -> Wednesday] TIER 2 GATE #976 ROUND 1 (KS-876 KS-891 KS-894 KS-895) 0d5f5e6ab -- <GO|GO WITH FINDINGS|NO GO>
