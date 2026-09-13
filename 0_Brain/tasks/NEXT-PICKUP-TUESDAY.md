@@ -46,6 +46,25 @@ supersede: replace WHOLESALE at the next pickup; never append.
        - Mark both cards `--delivered` once the upgrade REPORT and C11's READY name their artefacts.
 
 2. **Three combined tier-1 gates on `09c1591` — RESUMED by s12 at 17:05 in new panes.**
+   - **UPDATE 18:3x (s12):**
+     - **Gate A VERDICT 08:20:21Z = GO WITH FINDINGS 0/0/2/4** (report read head + mail whole; DKIM pass; placeholders 0).
+       - A-m1: credential detector misses 17 syntaxes (3rd round).
+       - A-m2: 5 non-equivalent mutant survivors (N63/N64/N33/N09/N26).
+       - A-p1..p4.
+     - **Routed in an ANSWER ~08:3xZ:**
+       - N63/N64 + A-p3 → lane C11;
+       - A-m1 (shape rule) + A-p2 + N33/N09/N26 → a follow-up engine lane after C11;
+       - A-p1/A-p4 → BACKLOG.
+     - **Pane `%2` closed** with pane_close.sh (control 18580).
+     - Not yet scored. **Waiting on B (`%3`) and C (`%4`).**
+   - **S43 ACK 08:20:21Z accepted:**
+     - C11 on s43/lane-c11 (pc-s43-c11 23080; + packages/content + web catalogue mirror); no migration.
+     - `SUPPORT_UNKNOWN_ON_DEVICES` critical (a).
+     - **Live upgrade window 21:00–23:30 AEST tonight** after Q+W (latest Monday 07:00).
+     - 3bc7471 checks GREEN at lower load.
+     - C11 is NOT deployed before Monday (its CONTENT_HASH change would 409 the fresh engagements).
+   - **The acceptance+security harness was REVISED at 18:20 on Kam's word** ("Please revise the testing harness documents so they test the live site."): LIVE site a TARGET, `LIVE DEMO RULING: APPROVED by Kam 2026-09-13 18:20`, own `QA Harness (synthetic)` tenant only, credential never printed, ≤1 req/s, stop on degradation, probes 4/6/10/14/16 local-only. `--check` rc 0, committed. **Launch after the live upgrade REPORT + gate verdicts;** name the live head in the launch prompt, and re-point the launcher HEAD/EXPECTED_COMMITS if local should match the upgraded head.
+
    - Launcher: `2_Project_Files/fleet/qa-agent/launchers/resume_qa_hpsm_composer_09c1591_combined.sh <A|B|C>` (`--check` passed ×3).
    - Panes and sessions:
      - `%2` `QA/HPSM-C-A`, session `12eb20ba…`. Its report was written except @@VERDICT@@ and @@MUTANT_HEADLINE@@.
