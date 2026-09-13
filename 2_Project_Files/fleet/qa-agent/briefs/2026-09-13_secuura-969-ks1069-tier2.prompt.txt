@@ -1,0 +1,94 @@
+ultrathink
+
+You are the fleet QA agent running a TIER 2 (through code) gate, ROUND 1, on Secuura/Blockchain PR #969 (KS-1069).
+
+Read your brief FIRST and in full, then plan:
+/Volumes/DevMASTER/WEDNESDAY/2_Project_Files/fleet/qa-agent/briefs/2026-09-13_secuura-969-ks1069-tier2.md
+
+Subject: fb23ca6aa1661119beaeb5f45fb41dd006356f74 = PR #969 (KS-1069), open against develop, ONE commit on top of
+  1b7c03a22 (#968's head). The api-gateway's POST /api/documents/:id/verify tier-1 predicate `persistedAnchored`
+  now validates the SHAPE of its three inputs (verification.ts :614-627, substituted at :682-684): the hash is a
+  non-empty string that is not a KS-522 placeholder (/^(tx_sim_|mock_tx_|tx_)/); the height is
+  `typeof === 'number' && Number.isInteger(h) && h > 0` (STRICT — a numeric string is a shape defect, RULED: E7 flips
+  to off-chain-only, pinned as a cell); `simulated` is any truthy value. The `status == null` carve-out is untouched.
+  Echoed txHash/blockHeight values are not rewritten. 12 new tier-1 cells + ks1057's declared-simulated cell widened.
+develop: 0f69129b3156d3adaf0af534a6527b9c3a8d3519 = M3 (#932's squash at 15:34 AEST, one file startup-migrations.ts,
+  disjoint; before it M2 6696c6681 = #968's squash, M1 163ca2c74 = #967's). The GitHub compare merge-base is still
+  721b333a6 (M1/M2/M3 are squashes, so #969's parent is NOT an ancestor of develop). THREE file counts exist and
+  only one is the subject: git diff M3..head = 10 files (7 are develop's from #932/#963/#965/#966); GitHub
+  /pulls/969/files = 5 (against the stale base); the TRUE delta git diff 1b7c03a22..fb23ca6aa = 3 files
+  (verification.ts +32 -3, ks1069 test +256, ks1057 test +12 -5) — and verification.ts + the verify tests are
+  byte-identical at 1b7c03a22, M2 and M3, so those 3 are exactly what #969 adds to develop.
+Repo:    /Volumes/DevMASTER/!CODING/Secuura/Blockchain/2_Project_Files  (READ-ONLY — clone by SHA into your own scratch)
+
+You are FINDINGS-ONLY. You never fix, never merge, never push, never deploy.
+
+NEVER run a push, the real pre-push hook, or preflight.sh inside the Secuura checkout or any of its worktrees.
+
+NEVER print a credential value, and never open, read or copy a secrets file (any .env, config/secrets.yml). Count, never echo.
+
+Seven things you must not miss:
+
+1. THE GUARD'S INPUT SET, as the brief's §2a tables lay it out (H hash × G height × S simulated × X interactions):
+   type × sign × magnitude × string forms per input — 64-hex lower/UPPER, 63/65-hex, 0x-prefixed, the three
+   placeholder prefixes, uppercase/space-led placeholders, '', null, absent, a number/bool/object as hash; heights
+   4242, 1, 0, -1, 4242.5, 1e3, 2^53, 1e21, '4242', '0', ' 4242', '0x1092', '', true, {}, [], null, absent;
+   simulated absent/null/false/0/''/true/'true'/1/'yes'/'false'/-1/{}/[]; the carve-out with defective shapes; the
+   four seeded demo blobs VERBATIM (three carry 62-char hashes — the guard is placeholder-only for that reason); all
+   three defects at once — every row through the REAL router over REAL HTTP at develop M3 0f69129b3 AND at fb23ca6aa, on
+   BOTH lookup tiers. State the direction of EVERY move. RULED: the ONLY upward move allowed is NONE — this PR
+   narrows. Any cell more anchored at head than at base is a finding; an on-chain claim gained is a Blocker. Prove
+   the implication from source too (each new boolean implies the truthy test it replaced).
+
+2. E7 pinned: '4242' on-chain at M3 on both tiers, off-chain-only at head on both; the cell red at M3, green at
+   head; the writer census re-derived at M3 (anchorStateSync.ts:209/244/317/345 and documents.ts:844/866/899/1347
+   write a number or 0; :1369 writes null) — if ANY writer can persist a STRING height, the ruling rests on a false
+   premise: report it against the brief. The JSONB round-trip is NOT TESTED — say so first-class, with what a false
+   expectation would do to E7 (every tier-1 confirmed document off-chain-only).
+
+3. Guards inside the persisted-reads region ONLY: name-only diff vs 1b7c03a22 is the 3 files; verification.ts has
+   exactly TWO hunks (@@ -597,6 +597,35 @@ and @@ -650,9 +679,9 @@); the tier-2 synthesis :290-346, the live reads
+   :579-582, liveAnchored :645, the ternary :704-711, the response :714-743 and the carve-out :685 are byte-identical
+   to M3 (= M2 for that file). Quote the hunk headers.
+
+4. Red-proof with tests RUNNING (33 cells = ks1057 9 + ks1071 9 + ks1070 3 + ks1069 12; a compile failure or 0-test
+   run is a load failure, not a red): the builder's T1 (E1, E2, E11), T2 (E5–E8), T3 (E3, E4 + ks1057 :229) re-run
+   with an ASSERTING runner; then the gate-designed Tg — delete BOTH type clauses of the height guard, leaving
+   `persistedBlockHeight > 0` — predicted exactly 2 red: E7 ('4242' > 0 coerces) and E8. (Wednesday's own tasking
+   said "drop the Number.isInteger half → the numeric-string cell reddens" — WRONG against the code: `typeof ===
+   'number'` alone still refuses the string, and Number.isInteger('4242') is false alone too; run Th (drop typeof
+   only → 0 red, a redundant clause) and Ti (drop isInteger only → E8 only) and record them.) Full api-gateway
+   vitest per tamper (34 files / 343 expected), SOLO, cells run quoted beside pass/fail, restore sha-identical
+   (5c254b10824c8fa6…), green again.
+
+5. The merged tree: in your own clone, merge develop M3 with fb23ca6aa (3-way on base 721b333a6 — NOT a fast-forward).
+   Expected clean; the 3 subject files == head's, everything else == M3's; vitest SOLO, counts quoted (stack gate:
+   33/331 at 1b7c03a22; builder: 34/343 at head). If develop moved past M3, merge the then-current develop and prove
+   its extra delta disjoint by name.
+
+6. Hunt the class: the same three values are read on tier 2 (:301-302, :324 — every E row via tier 2; NO PR cell
+   pins tier 2, a coverage gap) and on the live chain-scan (:579-582 `Number(blockNum)` COERCES; :645 truthiness —
+   drive one live row through the harness's fetch stub: on-chain at BOTH SHAs, safe today only because anchoring's
+   index.ts:595 nulls placeholders before answering). Both are Open/record with evidence class, not findings
+   against #969 unless a producible shape is found.
+
+7. Every claim in the diff judged true as written — the PR body's "+35/−3" (measured +32 −3); #968's comment at
+   :323 "the handler still compares `!== true` (widening is KS-1069)" which #969's own edit falsified and left
+   standing; :610-613 the anchoring :595 / originate :53 citations (three identical case-sensitive regexes, not
+   imported); the ks1069 header's "Measured at base (develop 721b333a6 + #967 + #968)"; the ks1057 widened cell's
+   "the title claims the CLASS"; "Presentation, not changed" — a placeholder hash is still echoed with
+   source:'persisted' (the builder's flagged question, not a finding). Then the verdict on fb23ca6aa.
+
+Your tool shell's grep may be a function: use /usr/bin/grep, case-insensitive, with a same-file control. Never cd.
+api-gateway is VITEST (npx vitest run, never watch), not jest; tsconfig excludes src/__tests__ so tsc says nothing about the tests.
+Quote the Secuura checkout's porcelain count, .git/config sha256, for-each-ref count and origin develop SHA at start and close; they must match (name any ref another seat's push or merge moved).
+Do no memory maintenance of your own project's memory store inside this session.
+
+Report FOUND / TESTED / HOW, with controls, the full §2a matrix as tables with a direction column, and state what you did NOT test — the JSONB round-trip first.
+Verdict: GO, GO WITH FINDINGS, or NO GO — on fb23ca6aa.
+
+MAIL YOUR VERDICT to wednesday-agent@agentmail.to when the pass is complete, using
+the project's send_brief.sh. Your pane holds ~19 lines of alternate screen with no
+scrollback, so a verdict that stays in the pane is one pane-close from being lost --
+this is not a formality, it is the only durable copy. Subject:
+[QA -> Wednesday] TIER 2 GATE #969 ROUND 1 (KS-1069) fb23ca6aa -- <GO|GO WITH FINDINGS|NO GO>
