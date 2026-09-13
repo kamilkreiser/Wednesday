@@ -66,6 +66,15 @@ supersede: replace WHOLESALE at the next pickup; never append.
 - Questions s12 answered: 18:13:30 (live site link for the harness), 18:49:22 (where HPSM is at), 18:52:15 (harness updated for the live site?).
 - Times come from the transcripts. Where s12's pickup or the prompt log differ (18:5x, 18:38, 18:52, 19:14), the transcript time is used.
 
+## ✅ 22:31 — STEP-8 LIVE UPGRADE DONE: both stacks on `9b8ea76` (S44 REPORT 12:30:24Z, DKIM pass, read whole)
+- **Live now:** `9b8ea76c073cefab0319d2bec7b5a82c54b4e9d1` = 87c0026 + S-m3 + FX-PIN + Q1 + FX-ID, switch ON, on pc-lane-a (12:26:48-12:27:03Z) and Azure (redeploy 12:27:22Z; API change window ~12:27:52-12:28:08Z; the web container was NOT recreated). Rollback base 87c0026 not needed. **Caddy 61f519cd + start time UNCHANGED.**
+- **Checks:** postcheck-ab FULL PASS 20/0/1 on both (Azure's **tunnelled**); `browser-gate-public.sh` **PUBLIC PASS**; public gate probes 26/26. **FX-ID CONFIRMED LIVE (tunnelled): urn:uuid → 404, byte-identical → W4B-m1 CLOSED on live.** DO NOT USE engagements now 409 CONTENT_VERSION_CHANGED + red Conflict banner (W4B-m2 fixed).
+- **Use/avoid unchanged:** Azure A `3bb6fcb2` / B `a9101d3f`; pc-lane-a A `e920ac1d` / B `8ce21d2a`; avoid Azure `c9bce98b`, `1ec31037` + the 9 on pc-lane-a.
+- **Kam told on the panel 22:31** (back up, public check named public, A/B tunnelled, Conflict banner, feedback batch after the S44→S45 handover). Origin verify running.
+- **S44 at its safe boundary:** HANDOVER-S44 + wrap mail next; **no step 9-10 chain started; step 9's git merges sit UNCHAINED in the merge worktree (D-S44-33)** — S45 must chain them, not assume them GREEN. Rollback recipe: run-lane-a.sh / run-azure.sh target 87c0026, base 9b8ea76 (D-S44-30).
+- S44's disclosed quirk: its HOLD check first refused at 12:24:57Z because `…12:23:36.000Z` sorts after `…12:23:36` as a string (the same MARK-precision family as this ledger's 09-12 row); it refused safely and re-ran with the exact timestamp.
+- **Watcher MARK now `2026-09-13T12:30:25`.**
+
 ## 🔴 22:24 — S44 AT 82% (band 80-90): CHECKPOINT SENT; S45 SUCCESSOR OWED after S44's wrap
 - **S44 statusline ctx:82% at 22:22**, mid step-8 live upgrade (3 shells running). **CHECKPOINT mail sent 12:23:36Z, verified at the sent copy** (`briefs_staged/2026-09-13_hpsm-s44-checkpoint-82.md`): safe boundary = AFTER the step-8 REPORT (never mid-deploy) → `5_Project_History/HANDOVER-S44_seat-hpsm-375c.md` + wrap to tuesday-agent@ → stay at prompt; no step 9-10 merge, no new lane; successor section lists live heads, lanes (C11 HOLD, C11-PINS), shells/subagents, queue, toolkit base arg (D-S44-30), and every Tuesday ANSWER timestamp (09:56:56Z … 12:20:03Z).
 - **Routing row `Datasec/HPSM-S45|datasec-hpsm@agentmail.to|yes` ADDED** (trap 38).
