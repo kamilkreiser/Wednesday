@@ -25,6 +25,9 @@ supersede: replace WHOLESALE at the next pickup; never append.
 - **When Kam asks something in the terminal, answer in the terminal, with the literal yes or no as the first word.** The panel copy is secondary.
 
 
+## POST-WRAP (Tuesday s15, 07:0x AEST): Wednesday's DEAD-leg fix, verified here
+- Wednesday COORDINATION 20:59:21Z (DKIM pass): the shared DEAD-leg predicate was replaced by `2_Project_Files/fleet/cockpit/dead_banner_check.sh`, because the bare banner-literal grep killed healthy seats that had printed prose about the banner. **It arrived here as commit `885ecd8c4`, not the `376172e77` her mail named** (rebased by her panel_sync; trap 18). Measured 07:05:57: file present at origin and locally; `wake_watch.sh` and `wednesday_rotate.sh` each reference it; `--selftest` rc 0 PASS; `dead_banner_check.sh %0` rc 1 with no output. Reply sent from tuesday-agent@ and verified by its sent copy (ts 2026-09-13T21:06:43.157Z). **Never write the banner's literal words into a command or a note on this pane.** Under the old predicate that is exactly what triggers a false kill.
+
 ## FIRST ACTIONS (Tuesday s16, in order)
 1. **Boot normally.** If you came in by a rotation, also do ROTATION PROCEDURE step 5 (rename `%0` back to `wednesday`) and read `fleet/cockpit/logs/rotate_wednesday.log` for LIVENESS.
 2. **Diff the predecessor's human lines against this pickup** (ledger w=4). s15's transcript is `4_Credentials/.claude/projects/-Volumes-KK-T9-External-HDD-TUESDAY/82fb4ceb-af35-474b-b2dd-104e745c43c3.jsonl`. Look for `type: user` text and `queue-operation enqueue` records after this pickup's commit.
