@@ -35,6 +35,16 @@ supersede: replace WHOLESALE at the next pickup; never append.
 - **Tuesday's job on each REPORT:** a panel note with what changed, the engagement to use, and the DO NOT USE list.
 - **Kam is TESTING THE LIVE SITE tonight.** No agent touches engagements or tenants it did not create. A later upgrade that would strand engagements (a content hash change) STOPS for Tuesday.
 
+## 🟢 19:0x (s12) — LIVE UPGRADE IN PROGRESS + HARNESS READY
+- **S43 HEAD mail 08:53:18Z** (DKIM pass): upgrade STARTED on `caf63fd` (Q+W, 57 commits since c2fbc36), pc-lane-a first then Azure, rollback to c2fbc36. The dry run on pc-s43-up released 1.0.0. Kam warned on the panel.
+  - **Every engagement created before the upgrade (including any Kam made today) will answer 409** (the demo content changed 0030d4c6 → fd7db6b8). Kam told to use the fresh or post-upgrade engagements.
+- **Acceptance + security harness RE-POINTED to `caf63fd`** (commit 'QA: acceptance+security harness re-pointed…'; `--check` rc 0):
+  - range 267; report dir `…/reports/2026-09-13-composer-caf63fd-brief-acceptance-security-tier1/`; subject `… @ caf63fd (tier 1)`;
+  - cards ruled; gate B/C findings listed as KNOWN fix-in-flight, with the release workaround;
+  - Kam testing live concurrently; pause ≤ 15 min on upgrade restarts.
+  - **LAUNCH it right after S43's upgrade REPORT lands:** `cockpit.sh add 'QA/HPSM-ACC' "bash '/Volumes/KK_T9_External_HDD/TUESDAY/2_Project_Files/fleet/qa-agent/launchers/launch_qa_hpsm_composer_09c1591_brief_acceptance_security.sh'"`, then rung 5. The file name still says 09c1591; the content is caf63fd.
+  - **If main moves before launch:** decide to keep caf63fd (it matches the live head) or re-point HEAD_SHA/EXPECTED_COMMITS/REPORT_DIR/SUBJECT in all three files and re-run `--check`.
+
 ## 🔴 LIVE — with the next action for each
 
 1. **HPSM S43 — pane `%5` `Datasec/HPSM-S43`, launched 17:07:52 by s12 with HPSM's own `Launch_Claude.command`.**
