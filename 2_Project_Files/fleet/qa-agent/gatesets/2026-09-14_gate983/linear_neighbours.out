@@ -1,0 +1,153 @@
+read at 2026-09-14 07:14:16 AEST
+
+===== KS-756 [Backlog] High archived=None created=2026-09-02T12:42:56.953Z updated=2026-09-05T23:52:52.698Z PRs=[] comments=0
+TITLE: Wire up the opaque refresh token that createSession already mints — one write site, zero read sites (KS-329 ruling (a) prerequisite)
+--- description (4886c):
+**BLUF —** `createSession` **has minted an opaque refresh token on every session since the session service was written, and nothing has ever read it. One write site, zero read sites, measured with a control. Wiring it up is the prerequisite Kam's KS-329 ruling (a) actually names, it is not PQC work, and it can ship without committing to ML-DSA at all.**
+
+**Recommendation:** do this first, on its own; leave KS-329 to be the algorithm swap, which gets materially smaller once the refresh path carries no signature.
+
+### The measurement
+
+`services/auth/src/services/session.ts:143`:
+
+```
+refreshToken: crypto.randomBytes(32).toString('hex'),
+```
+
+* Write sites for `session.refreshToken`: **1** — `session.ts:289`, inside `rotateSessionRefreshToken`.
+* Read / compare sites across all of `services/`: **0**. The only other occurrence of the identifier anywhere is a comment at `routes/auth.ts:635`.
+* **Control:** the same grep against `session.isActive` — a field that genuinely is compared — returns **6** read sites (`session.ts:265, 304, 346, 357, 363`, `oauth.ts:391`). The search can find comparisons; the zero is real.
+* `session.token` (`session.ts:142`, same `randomBytes(32)` shape) has **zero** read sites too.
+
+The code already says it. `routes/auth.ts:634-635`:
+
+> `// The session-record rotation alone is not enough — nothing in the`
+> `// /refresh path compared the incoming JWT against session.refreshToken.`
+
+The other half of the ruling is already live: `POST /api/auth/refresh` does a server-side session lookup at `routes/auth.ts:606-607` (`verifyRefreshToken` → `getSession(payload.sessionId)`). Both halves exist. What is missing is the wire between them — the cookie carries the JWT, the lookup keys off a claim *inside* that JWT, and the opaque handle sits in Redis unread.
+
+### Why it stands on its own merits, independent of PQC
+
+* **It removes a signature from a path that does not need one.** The refresh token is presented to exactly one endpoint, which already loads server-side state. A signed 942–1071 B JWT is doing work a 64 B handle does better.
+* **It makes the size ceiling disappear permanently.** Measured on develop `8c9559cfd`: an ML-DSA-65 refresh token signs to **5018–5147 B** on real payloads against **3976 B** of usable cookie value (RFC 6265 §6.1 counts name + attributes; the exact options at `auth.ts:644-650` cost 120 B). Over by 1042–1171 B. ML-DSA-44 fits by **14 bytes** on the widest real profile — a coincidence, not a design. A 64 B handle leaves 3912 B spare for any future algorithm.
+* **It simplifies reuse detection.** Today's A-05 control is sound — `denylistRefreshJti` throws rather than skips when Redis is down (`refreshDenylist.ts:30-35`), and the TTL matches the token's own remaining life — but a handle compared against the session record gives the same guarantee by construction, with no `jti`, no denylist and no TTL arithmetic.
+
+### Scope
+
+1. Redis reverse index `refresh:<handle> → sessionId`. Sessions are keyed `sess:<id>` and `user_sessions:<userId>` — there is currently no way to find a session *by* refresh token.
+2. `POST /api/auth/refresh` — look up by handle, compare against `session.refreshToken`, rotate; drop `verifyRefreshToken` from the path.
+3. The three cookie-set sites carry the handle instead of the JWT: `routes/auth.ts:394` (register), `:565` (login), `:644` (refresh).
+4. `routes/oauth.ts` — `:242` and `:289` emit `refresh_token` in the body, and `:254-271` runs its **own** refresh path with its own 
+
+===== KS-836 [Backlog] Medium archived=None created=2026-09-05T20:43:33.636Z updated=2026-09-05T23:52:31.935Z PRs=[] comments=1
+TITLE: Publish a `request:` block for POST /api/oauth/token — the endpoint's shape is asserted nowhere, and adding it moves what Schemathesis generates
+--- description (1774c):
+**Ruled line 3 of KS-822's five, lifted onto its own ticket so it survives that ticket closing.**
+
+`POST /api/oauth/token` publishes **no** `request:` **block**. That is why its description spells the form fields out in prose — `grant_type`, `code`, `code_verifier`, `redirect_uri`, `client_id`, `client_secret`, `refresh_token` are described in a sentence rather than declared as a schema an integrator or a tool can read.
+
+## Why it was NOT added in #831, and the reason still holds
+
+Publishing a form-body schema where none exists **changes what Schemathesis generates against a live auth endpoint.** That is not a docs-only change, and #831 was a prose-scoped round. It wants its own change **with the suite actually run** — the point is precisely that the generator's behaviour moves, so a change that does not run the suite has not been tested.
+
+## What it is worth
+
+The token endpoint's published contract has been tightened repeatedly (KS-820 client authentication; KS-822 F-2d bound the status→code split to assertions). All of that is in prose. A `request:` block is the half a machine can check, and its absence is why the endpoint's shape is asserted nowhere in the spec.
+
+## Done when
+
+* A `request:` block declaring the form body, with `application/x-www-form-urlencoded` as the media type the endpoint actually accepts (it is in `FORM_ALLOWED_PATHS` — the only path that is).
+* **Schemathesis run before and after**, with the operation's case counts and outcomes compared. A change that moves the generator and reports no delta has not been measured.
+* The prose reduced to what the schema cannot say, rather than left to drift beside it.
+
+*Source: KS-822 comment* `e38c5f38` *(line 3), from PR #831's tier-2 gate. Nothing was built for it in KS-822's round.*
+
+===== KS-983 [Backlog] High archived=None created=2026-09-07T13:44:22.913Z updated=2026-09-07T13:44:22.913Z PRs=[] comments=0
+TITLE: systemTest: no suite drives a path-spelling (`//`) variant — the KS-858 class is guarded only by gateway unit tests, and 7 rate-limited auth routes were never driven
+--- description (6014c):
+## BLUF
+
+**No systemTest suite anywhere drives a** `//` **path-spelling variant.** The [KS-858](https://linear.app/secuura/issue/KS-858/security-class-a-scope-gate-mounted-as-an-exact-route-above-a-catch) class — a gate mounted as an exact route above a catch-all prefix, walked around by re-spelling the path — is currently guarded **only by gateway unit tests**. Nothing exercises it black-box, through the live gateway, the way an attacker would reach it.
+
+Raised from Kamil's report (2026-09-07 00:50) of the **auth rate-limiter** instance: an extra slash on `/api/auth//login` skipped the limiter completely, was live on demo, and made the probed route *"about 300x more permissive"*. **He drove one route; his own note says the other seven look the same in code but were not driven there.** Driving them is systemTest work, so it lands here under Review G rather than on the class ticket.
+
+## What is already covered — verified, not assumed
+
+Read from `develop` on 2026-09-07:
+
+|  |  |
+| -- | -- |
+| Fix present | `normaliseRepeatedSlashes()` imported at `services/api-gateway/src/index.ts:28`, mounted at `:234` **as the first layer** |
+| Unit coverage | `src/__tests__/ks858-edge-path-normalisation.test.ts` (22K) and `ks843-erasure-path-bypass.test.ts` |
+| Class ticket | [KS-858](https://linear.app/secuura/issue/KS-858/security-class-a-scope-gate-mounted-as-an-exact-route-above-a-catch) (In Review, PR #884) — covers the **scope-gate** instances (`/api/anchors/batch`, `/api/documents/:id/sig-json`) |
+
+**So the fix is in and unit-guarded. This ticket is not about the fix.** It is about the absence of any end-to-end guard: if the normaliser is ever removed, re-ordered below another predicate, or bypassed by a future mount, **no systemTest suite would notice**.
+
+## What is NOT covered
+
+**Nothing drives the spelling.** A sweep for `//api`, `api//`, double-slash or path-normalisation probes across `systemTest/**` returns **three hits, all false positives** — they match on `https://api.example.test/api`, the protocol slashes, in Playwright unit tests about base-URL resolution.
+
+Worth stating plainly: **Schemathesis cannot find this class.** It fuzzes *values* against a published spec; the spec declares one spelling per path, so an alternate spelling of the same route is not in its input space. It did not find this one and will not find the next.
+
+## The instance family this ticket adds
+
+Seven auth routes carry an exact-path rate-limit mount in `index.ts` — the same *exact route above a catch-all* shape [KS-858](https://linear.app/secuura/issue/KS-858/security-class-a-scope-gate-mounted-as-an-exact-route-above-a-catch) describes:
+
+```
+app.use('/api/auth/login',           rateLimit({...}))
+app.use('/api/auth/register',        rateLimit({...}))
+app.use('/api/auth/forgot-password', rateLimit({...}))
+app.use('/api/auth/refresh',         rateLimit({...}))
+app.use('/api/auth/password-reset',  rateLimit({...}))
+app.use('/api/auth/verify-email',    rateLimit({...}))
+app.use('/api/auth/mfa',             rateLimit({...}))
+```
+
+⚠ **Discrepancy, stated rather than smoothed** (the habit [KS-858](https://linear.app/secuura/issue/KS-858/security-class-a-scope-gate-mounted-as-an-exact-route-above-a-catch) itself models): Kamil's message says **eight** protected auth routes, six unauthenticated. My count of exact-path `app.use('/api/auth/…', rateLimit)` mounts is **seven**. Whoever picks this up should re-derive the population rather than trust either number — the predica
+
+===== KS-329 [Backlog] High archived=None created=2026-06-25T11:36:57.806Z updated=2026-09-02T16:59:22.028Z PRs=[] comments=6
+TITLE: Phase 2 — JWT RS256 → hybrid (RS256 + ML-DSA-65)
+--- description (2173c):
+> **⚠ RE-MEASURED 2026-08-12 (session 19) — the shim blocker below is DEAD, and the real blocker is different. Kam's ruling needed on a design change; see the pinned comment for the measurements.**
+>
+> `jose` 6.2.8 signs and verifies ML-DSA JWTs on Node 24 today — **no liboqs, no WASM shim**. Measured: RS256 435 B / ML-DSA-44 3326 B / **ML-DSA-65 4511 B** / ML-DSA-87 6269 B, and ML-DSA **verifies faster than RS256** (0.3 ms vs 0.5 ms), so performance is not the constraint.
+>
+> **The real blocker is token size against the refresh-token COOKIE.** `generateRefreshToken` (`services/auth/src/services/jwt.ts`) returns a *signed JWT* which `services/auth/src/routes/auth.ts:367,534,613` sets as the `refresh_token` cookie; browsers cap one cookie at **4096 bytes**. ML-DSA-65 measured 4511 B on a *three-field* payload — the real refresh payload is larger. It does not fit. That forces a design change (opaque refresh token + server-side session lookup — the pattern already exists at `services/auth/src/services/session.ts:133`, cookie chunking, or access-token-only migration) — **Kam's ruling, not an implementation detail.**
+>
+> Residual risk from the original refusal, still real: Node reports `ExperimentalWarning: The ML-DSA-65 Web Crypto API algorithm is an experimental feature and might change at any time`. Available ≠ production-hardened.
+>
+> Also: auth signs with `jsonwebtoken` 9.0.2, which has no ML-DSA support — any rollout starts by moving auth's signing path to `jose`.
+
+Migrate JWT signing to hybrid via the Phase-0 registry.
+
+- [X] `~~jsonwebtoken~~`~~ / ~~`~~jose~~`~~ don't yet ship ML-DSA — add a COSE/JOSE PQC shim (liboqs-node or a vetted WASM ML-DSA lib) behind the crypto abstraction.~~ **OBSOLETE 2026-08-12:** `jose` **6.2.8 ships ML-DSA; no shim required. Replaced by: migrate auth's signing from** `jsonwebtoken` **to** `jose`**.**
+- [ ] Roll out **verifier-first** (api-gateway, originate accept both), then signer (auth), then drop classical.
+- [ ] Entra ID / CIAM (RS256) is **Microsoft-owned** — only ensure `obeden-ssd` doesn't hard-fail on their token-alg rotation; track their PQC timeline.
+
+Blocked by Phase 0. Ref: plan §5 Phase 2.
+
+===== KS-1132 [Backlog] Low archived=None created=2026-09-13T07:06:38.490Z updated=2026-09-13T07:06:38.490Z PRs=[] comments=0
+TITLE: getPlatformAdmin swallows an infrastructure failure to null — platform-admin login reads "platform DB down" as "not an admin" and answers InvalidCredentialsError (the class KS-963 removed)
+--- description (4508c):
+## BLUF
+
+`services/auth/src/repositories/userRepo.ts` `getPlatformAdmin` (`:1714-1741` at develop after #970) catches every error from the platform-database lookup, logs `Platform admin lookup failed (platform DB may not be configured)` and **returns** `null` (`:1739-1741`). Its caller, `routes/auth.ts:345` `const platformAdmin = await userRepo.getPlatformAdmin(data.email);`, reads `null` as "not a platform admin" and falls through to the regular-user gate, which answers `InvalidCredentialsError` — the KS-253 shape ("a DB failure reported as no such user") on the highest-privilege door. This is exactly the class KS-963 / PR #970 removed from the five `getUserByIdPreAuth` callers, on a branch **outside KS-963's include** (Kam's scope named `getUserById` → widened to `getUserByIdPreAuth`). Named by the tier-1 gate as F-6 under "hunt the class"; needs its own ruling before a build.
+
+Report: `Testing Agent MAIN/projects/secuura/reports/2026-09-13-ks963-970-ae274f7cb-tier1-r1/report.md` — §9 HUNT THE CLASS (F-6 and the 15-catch census), WHAT WAS NOT TESTED item 3 (the branch was not exercised: `getPlatformAdmin` answered `null` because `PLATFORM_DATABASE_URL` was unset in the harness — which is itself the swallow at work).
+
+## What is and is not established
+
+* **READ ONLY (source at** `ae274f7cb`**):** the catch, its message, the `return null`, the caller at `auth.ts:345`, the fall-through to the regular-user gate (`auth.ts:344-482` is the platform-admin branch).
+* **Catch census at head, brace-matched (the gate's):** 15 `catch` blocks in `userRepo.ts` — `return null` at `decryptPlatformAdminMfaSecret :206`, `getOrganizationTenant :541` (documented "treating as not found"), `getPlatformAdmin :1739` (this ticket); `return undefined` at `decryptPiiCol :109`, `decryptMfaSecret :186`; `return ''` at `decryptEmail :158`; void swallows at `seedDemoUsersInner :1658`, `reencryptMfaSecretIfLegacy :1708`, `reencryptPlatformAdminMfaSecretIfLegacy :1776`; rethrows at `getUserById :394`, `getUserByIdWithPasswordHash :430`, `getUserByIdPreAuth :496`, `getUserByEmail :578`, `getUserBySocialId :611`, `emailExists :638`.
+* **NOT MEASURED:** the platform-admin branch was not driven at the gate (persona untouched); whether a platform-DB outage today produces a 401 on a genuine platform admin is inferred from the source, not observed. The "platform DB may not be configured" comment suggests the swallow is deliberate for single-DB deployments — the ruling has to say whether "not configured" and "configured but down" are the same case.
+
+## Decision needed, then the build
+
+1. **Ruling:** treat a platform-DB failure on the admin login path like KS-963 treats the five pre-auth callers (rethrow → 503, no token consumed, no write) — OR keep the swallow for the not-configured case and distinguish it from a connection/query failure (e.g. swallow only when `PLATFORM_DATABASE_URL` is unset; rethrow otherwise).
+2. **Build (after the ruling):** the change at `:1739-1741` per the ruling + a cell in `ks963-preauth-rethrow.test.ts` (or a sibling) driving `POST /api/auth/login` for a platform-admin email with the platform lookup rejecting → 503, and the not-configured case → unchanged behaviour if the ruling keeps it.
+
+## Neighbours (archived, named for context)
+
+* KS-737 (archived; platform-admin login skipped MFA when `mfaCode` was omitted — the same `auth.ts` admin branch, a different defect).
+* KS-171 (archived; `platform_admins.mfa_secret` plaintext — the same `getPlatform

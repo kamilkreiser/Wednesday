@@ -1,0 +1,158 @@
+=== ls-tree @ 8861e6216
+100644 blob aa4b88f203d8f652d11c6f0ed9994191c8ffd5e7   61424	Blockchain/Dev/services/auth/src/__tests__/auth.integration.test.ts
+100644 blob 106c762f176674c99cb2116707aed0c01ec31e1b   17925	Blockchain/Dev/services/auth/src/__tests__/ks820-821-token-client-auth-and-apptype.test.ts
+100644 blob edabbf87182311241662b20ac71d7244e923b5a3   12509	Blockchain/Dev/services/auth/src/index.ts
+100644 blob 822b3fcd8404b81f0e0a56dcebed784278771c8b   83504	Blockchain/Dev/services/auth/src/repositories/userRepo.ts
+100644 blob 4b03f555e25bf1221081fdd38f530b983cc763e0   61492	Blockchain/Dev/services/auth/src/routes/oauth.ts
+100644 blob d0d55c11beab2bfd8f8140e12de4016cac742134   13692	Blockchain/Dev/services/auth/src/services/jwt.ts
+100644 blob 9b0b4f08afbf3244f6a28b374dd302786a75aab3    9844	Blockchain/Dev/services/auth/src/types/index.ts
+=== ls-tree @ e62eab87a
+100644 blob aa4b88f203d8f652d11c6f0ed9994191c8ffd5e7   61424	Blockchain/Dev/services/auth/src/__tests__/auth.integration.test.ts
+100644 blob cfed82d544158ccd5393d8ad4d2f9bed5681039a   12429	Blockchain/Dev/services/auth/src/__tests__/ks790-token-pre-auth-user-lookup.test.ts
+100644 blob b998b5b7dafc2d59eaea01319030a2e3c3b40f7e   18387	Blockchain/Dev/services/auth/src/__tests__/ks820-821-token-client-auth-and-apptype.test.ts
+100644 blob edabbf87182311241662b20ac71d7244e923b5a3   12509	Blockchain/Dev/services/auth/src/index.ts
+100644 blob 822b3fcd8404b81f0e0a56dcebed784278771c8b   83504	Blockchain/Dev/services/auth/src/repositories/userRepo.ts
+100644 blob 80e05458e9759fbc6c7f33bc8cd90060d30e6149   62763	Blockchain/Dev/services/auth/src/routes/oauth.ts
+100644 blob d0d55c11beab2bfd8f8140e12de4016cac742134   13692	Blockchain/Dev/services/auth/src/services/jwt.ts
+100644 blob 9b0b4f08afbf3244f6a28b374dd302786a75aab3    9844	Blockchain/Dev/services/auth/src/types/index.ts
+=== ls-tree @ f62c975c1
+100644 blob aa4b88f203d8f652d11c6f0ed9994191c8ffd5e7   61424	Blockchain/Dev/services/auth/src/__tests__/auth.integration.test.ts
+100644 blob f98e8c80695bfe454fc35dcb168106a24c240a35   12822	Blockchain/Dev/services/auth/src/__tests__/ks790-token-pre-auth-user-lookup.test.ts
+100644 blob b998b5b7dafc2d59eaea01319030a2e3c3b40f7e   18387	Blockchain/Dev/services/auth/src/__tests__/ks820-821-token-client-auth-and-apptype.test.ts
+100644 blob 2c0135b6fdf3f18a80d7d3f8f9569b404cf105be   15463	Blockchain/Dev/services/auth/src/__tests__/ks823-refresh-grant-client-auth-and-binding.test.ts
+100644 blob edabbf87182311241662b20ac71d7244e923b5a3   12509	Blockchain/Dev/services/auth/src/index.ts
+100644 blob 822b3fcd8404b81f0e0a56dcebed784278771c8b   83504	Blockchain/Dev/services/auth/src/repositories/userRepo.ts
+100644 blob de00ffceaccd8155349e8de10aaeab3a94c33529   67227	Blockchain/Dev/services/auth/src/routes/oauth.ts
+100644 blob 62b6db272c911557d764ee2f0e77f1df26923426   15066	Blockchain/Dev/services/auth/src/services/jwt.ts
+100644 blob 9b0b4f08afbf3244f6a28b374dd302786a75aab3    9844	Blockchain/Dev/services/auth/src/types/index.ts
+=== ls-tree @ d00a2015c
+100644 blob aa4b88f203d8f652d11c6f0ed9994191c8ffd5e7   61424	Blockchain/Dev/services/auth/src/__tests__/auth.integration.test.ts
+100644 blob f98e8c80695bfe454fc35dcb168106a24c240a35   12822	Blockchain/Dev/services/auth/src/__tests__/ks790-token-pre-auth-user-lookup.test.ts
+100644 blob b998b5b7dafc2d59eaea01319030a2e3c3b40f7e   18387	Blockchain/Dev/services/auth/src/__tests__/ks820-821-token-client-auth-and-apptype.test.ts
+100644 blob db9744c97f74411cb46e45935be533639dadf945   15731	Blockchain/Dev/services/auth/src/__tests__/ks823-refresh-grant-client-auth-and-binding.test.ts
+100644 blob edabbf87182311241662b20ac71d7244e923b5a3   12509	Blockchain/Dev/services/auth/src/index.ts
+100644 blob 822b3fcd8404b81f0e0a56dcebed784278771c8b   83504	Blockchain/Dev/services/auth/src/repositories/userRepo.ts
+100644 blob 0bab1b8bdd7c9cb2b085bf94d5487a308eb51dd0   67687	Blockchain/Dev/services/auth/src/routes/oauth.ts
+100644 blob 26562a22470af688ae733000792a2b0321650145   15955	Blockchain/Dev/services/auth/src/services/jwt.ts
+100644 blob 9b0b4f08afbf3244f6a28b374dd302786a75aab3    9844	Blockchain/Dev/services/auth/src/types/index.ts
+=== commit message head
+KS-823: the refresh_token grant authenticates the client and honours a client binding on OAuth-minted tokens
+
+The client-authentication block installed for the authorization_code grant sat
+entirely inside that branch. The refresh branch read no client_id, resolved no
+app and never reached verifyClientSecret -- so a CONFIDENTIAL app's refresh
+token needed no credential, a DEACTIVATED app's refresh token kept working while
+its codes stopped, and nothing checked that the party redeeming a refresh token
+was the client it was issued to. A token-binding weakness: the branch still
+required a VALID refresh token, so a caller with nothing got a 400; what the
+defect bought was that a refresh token, once obtained, could be redeemed by any
+party.
+
+The fix, on the same terms as the code grant (RFC 6749 s6 with s2.3.1):
+- the refresh branch resolves the client -- client_id from the body, or the
+  userid half of an HTTP Basic header (readClientId) -- through the same definer
+  lookup as the code grant, which pins is_active (one 401 invalid_client for
+  unknown and deactivated); a confidential app must present its secret (Basic
+  or body, the existing constant-time check); a public app presents client_id
+  and no secret. The client is authenticated BEFORE the token is verified.
+- OAuth-minted tokens carry the client they were issued to: jwt.ts gains
+  OAuthMintOptions / OAuthTokenClaims (an intersection type -- JwtPayload in
+  types/index.ts is untouched) and generateTokenPair / generateAccessToken /
+  generateRefreshToken take an optional third argument that puts `client_id` on
+  both halves. The code grant mints bound to the redeeming client; the refresh
+  grant re-mints bound to the presenting client.
+- the refresh grant refuses a token whose `client_id` claim does not name the
+  presenting client, or carries none (400 invalid_grant). "None" is fail-closed
+  by decision: a token minted before binding existed, or by the interactive
+  login flow (which never passes through this grant), is not redeemable here.
+  The cost is one re-authorization; the alternative is a token redeemable by
+  anyone who holds it. The alternative (grandfather unbound tokens when the
+  client authenticates) is named in the PR for a ruling, not taken.
+- the SCOPE comment in the code-grant block (written by #825, amended by #831)
+  said the refresh branch authenticated no client and recorded that as an open
+  defect; rewritten to describe the branch as it is now, keeping the reason the
+  sentence existed.
+
+Tests (services/auth, vitest run, node v24.7.0, darwin):
+- NEW ks823-refresh-grant-client-auth-and-binding.test.ts, 11 cells over a raw
+  socket with the REAL jwt.ts (initJwtKeys awaited; tokens minted in-process by
+  generateTokenPair and verified by the real verifyRefreshToken): no credential
+  -> 401; wrong secret -> 401; deactivated app with its right secret -> 401;
+  wrong client redeeming another's token -> 400 invalid_grant; unbound token by
+  an authenticated client -> 400 invalid_grant; no client identification -> 400
+  invalid_request; MINT -- the code grant's pair carries client_id on both
+  halves and the refresh grant's re-issued pair keeps it. Controls: right
+  secret in the body -> 200; right secret over Basic (client_id from the Basic
+  userid) -> 200; a public app with its client_id and no secret -> 200; an
+  invalid token by an authenticated client -> 400 invalid_grant (the existing
+  invalid-token catch survives).
+- Red-first at the parent commit (the unfixed product): Tests 7 failed | 4
+  passed (11) -- every refusal cell answered 200 with a token, and the minted
+  pair carried no client_id; the four controls green. Green 11/11 after.
+- Whole auth suite 52 files / 702 tests (was 51 / 691 on the parent). tsc -p
+  services/auth rc 0; the new test file type-checked separately rc 0.
+- Tampers (unique anchors, restored by content, sha asserted): T1 client auth
+  skipped on refresh -> 2 red (no credential; wrong secret); T2 the binding
+  check removed -> 2 red (wrong client; unbound token); T3 the code grant mints
+  without the client -> 1 red (MINT); T4 the null-app refusal removed -> 1 red
+  (deactivated). 4/4 exact.
+- ks790-token-pre-auth-user-lookup.test.ts (this lane's, stacked): its refresh
+  cases now present the client credential and a bound stub token, as the grant
+  requires; assertions unchanged.
+
+Not covered: a live refresh grant on any environment; the four platform suites;
+which deployed clients hold OAuth refresh tokens today (the re-authorization
+cost of the fail-closed arm is unmeasured -- stated in the PR).
+
+Co-Authored-By: Claude Opus 5 <noreply@anthropic.com>
+Claude-Session: https://claude.ai/code/session_01R6wxuTqTre3pNzzWWk5CdQ
+
+=== commit message parent
+KS-790: the OAuth token grants resolve the user through the pre-auth carve-out, not the RLS-scoped lookup
+
+POST /api/oauth/token holds a code or a refresh token, not a bearer, so no
+tenant GUC is seeded when it runs. Both grants looked the user up with
+userRepo.getUserById -- the plain, RLS-scoped lookup -- which under migration
+039's fail-closed RLS answers nothing pre-auth; the handler reported the empty
+result as `invalid_grant: User not found` for EVERY authorization_code grant,
+MFA or not, and the refresh grant carried the same call one branch over. The
+lookup now goes through getUserByIdPreAuth (the SECURITY DEFINER carve-out the
+other pre-auth token flows already use) at both sites. The null guards and the
+refresh grant's ACTIVE pin are unchanged.
+
+The broken lookup had masked an authorize-side MFA bypass; that bypass's doors
+are all merged, so the mask is no longer load-bearing.
+
+Enabling change, named: verifyRefreshToken comes from the file's existing static
+import now instead of an in-handler `require('../services/jwt')`. Under vitest
+that runtime require answers "Cannot find module" (Node's require does not
+resolve the .ts source), the throw landed in the route's outer catch, and every
+refresh-grant case read 500 whatever it asserted -- which is why no test had
+ever reached that branch. The built service is unchanged (same function).
+
+Tests (services/auth, vitest run, node v24.7.0, darwin):
+- NEW ks790-token-pre-auth-user-lookup.test.ts, raw socket (the ks820-821
+  harness shape), 6 cells: both grants mint when only the carve-out can see the
+  user and the plain lookup is not consulted; controls -- carve-out also null ->
+  both grants still refused; INACTIVE user -> refresh still refused; wrong
+  client secret -> 401 before any lookup.
+- Red-first at develop 8861e6216: Tests 4 failed | 2 passed (6) -- the
+  authorization_code row 400 "User not found" (the ticket's symptom), the three
+  refresh rows 500 (the require). Green 6/6 after.
+- Whole auth suite 51 files / 691 tests (was 50 / 685). tsc -p services/auth
+  rc 0; the new test file type-checked separately rc 0.
+- Tampers (unique anchors, restored by content, sha asserted): T1 the
+  authorization_code site reverted -> 1 red ("User not found"); T2 the refresh
+  site reverted -> 1 red ("User inactive or not found"); T3 a runtime require
+  put back -> all 3 refresh rows red.
+- ks820-821-token-client-auth-and-apptype.test.ts: one mock entry added
+  (getUserByIdPreAuth, the same user its getUserById stub returns) -- its three
+  happy rows read 500 against the fixed product because the mock named only the
+  old lookup; no assertion changed.
+
+Not covered: a live POST /api/oauth/token under migration 039 on any
+environment (the ticket's NOT MEASURED line stands); the four platform suites.
+
+Co-Authored-By: Claude Opus 5 <noreply@anthropic.com>
+Claude-Session: https://claude.ai/code/session_01R6wxuTqTre3pNzzWWk5CdQ
+

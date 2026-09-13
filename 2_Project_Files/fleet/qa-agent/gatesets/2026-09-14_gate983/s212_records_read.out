@@ -1,0 +1,171 @@
+===== red_at_head.out (186 lines)
+4: ❯ src/__tests__/ks823-refresh-grant-client-auth-and-binding.test.ts (11 tests | 10 failed) 1399ms
+5:     × REFUSES a confidential app's refresh token presented with NO credential — 401 invalid_client 13ms
+6:     × CONTROL — the right secret in the body redeems (the real flow keeps working) 1ms
+7:     × CONTROL — the right secret over HTTP Basic redeems, with the client_id taken from the Basic userid (RFC 6749 §2.3.1) 1ms
+8:     × REFUSES a WRONG secret — 401 invalid_client 1ms
+9:     × REFUSES a DEACTIVATED app's refresh token even with its correct secret — 401, one refusal with "unknown" 1ms
+10:     × BINDING — a token minted for client-1 presented by an authenticated client-2 is refused — 400 invalid_grant 1ms
+11:     × BINDING (fail-closed) — a refresh token carrying NO client claim (minted before binding, or by the login flow) is refused even by an authenticated client — 400 invalid_grant 1ms
+12:     × CONTROL — a PUBLIC app redeems its own bound token with its client_id and no secret 0ms
+13:     × REFUSES a refresh with NO client identification at all — 400 invalid_request 1ms
+14:     × MINT — the pair the authorization_code grant issues carries the redeeming client on BOTH halves, and the pair the refresh grant re-issues keeps it 8ms
+16:⎯⎯⎯⎯⎯⎯ Failed Tests 10 ⎯⎯⎯⎯⎯⎯⎯
+18: FAIL  src/__tests__/ks823-refresh-grant-client-auth-and-binding.test.ts > KS-823 — the refresh_token grant authenticates the client and honours the token binding > REFUSES a confidential app's refresh token presented with NO credential — 401 invalid_client
+20: ❯ keys src/services/jwt.ts:119:11
+27: ❯ signToken src/services/jwt.ts:148:13
+28: ❯ generateAccessToken src/services/jwt.ts:178:10
+29: ❯ generateTokenPair src/services/jwt.ts:214:18
+30: ❯ src/__tests__/ks823-refresh-grant-client-auth-and-binding.test.ts:183:30
+34: FAIL  src/__tests__/ks823-refresh-grant-client-auth-and-binding.test.ts > KS-823 — the refresh_token grant authenticates the client and honours the token binding > CONTROL — the right secret in the body redeems (the real flow keeps working)
+36: ❯ keys src/services/jwt.ts:119:11
+43: ❯ signToken src/services/jwt.ts:148:13
+44: ❯ generateAccessToken src/services/jwt.ts:178:10
+45: ❯ generateTokenPair src/services/jwt.ts:214:18
+46: ❯ src/__tests__/ks823-refresh-grant-client-auth-and-binding.test.ts:190:30
+50: FAIL  src/__tests__/ks823-refresh-grant-client-auth-and-binding.test.ts > KS-823 — the refresh_token grant authenticates the client and honours the token binding > CONTROL — the right secret over HTTP Basic redeems, with the client_id taken from the Basic userid (RFC 6749 §2.3.1)
+52: ❯ keys src/services/jwt.ts:119:11
+59: ❯ signToken src/services/jwt.ts:148:13
+60: ❯ generateAccessToken src/services/jwt.ts:178:10
+61: ❯ generateTokenPair src/services/jwt.ts:214:18
+62: ❯ src/__tests__/ks823-refresh-grant-client-auth-and-binding.test.ts:197:30
+66: FAIL  src/__tests__/ks823-refresh-grant-client-auth-and-binding.test.ts > KS-823 — the refresh_token grant authenticates the client and honours the token binding > REFUSES a WRONG secret — 401 invalid_client
+68: ❯ keys src/services/jwt.ts:119:11
+75: ❯ signToken src/services/jwt.ts:148:13
+76: ❯ generateAccessToken src/services/jwt.ts:178:10
+77: ❯ generateTokenPair src/services/jwt.ts:214:18
+78: ❯ src/__tests__/ks823-refresh-grant-client-auth-and-binding.test.ts:203:30
+82: FAIL  src/__tests__/ks823-refresh-grant-client-auth-and-binding.test.ts > KS-823 — the refresh_token grant authenticates the client and honours the token binding > REFUSES a DEACTIVATED app's refresh token even with its correct secret — 401, one refusal with "unknown"
+84: ❯ keys src/services/jwt.ts:119:11
+91: ❯ signToken src/services/jwt.ts:148:13
+92: ❯ generateAccessToken src/services/jwt.ts:178:10
+===== red_at_head_v2.out (156 lines)
+7: ❯ src/__tests__/ks823-refresh-grant-client-auth-and-binding.test.ts (11 tests | 7 failed) 622ms
+8:     × REFUSES a confidential app's refresh token presented with NO credential — 401 invalid_client 28ms
+9:     × REFUSES a WRONG secret — 401 invalid_client 4ms
+10:     × REFUSES a DEACTIVATED app's refresh token even with its correct secret — 401, one refusal with "unknown" 4ms
+11:     × BINDING — a token minted for client-1 presented by an authenticated client-2 is refused — 400 invalid_grant 4ms
+12:     × BINDING (fail-closed) — a refresh token carrying NO client claim (minted before binding, or by the login flow) is refused even by an authenticated client — 400 invalid_grant 4ms
+13:     × REFUSES a refresh with NO client identification at all — 400 invalid_request 4ms
+14:     × MINT — the pair the authorization_code grant issues carries the redeeming client on BOTH halves, and the pair the refresh grant re-issues keeps it 3ms
+16:⎯⎯⎯⎯⎯⎯⎯ Failed Tests 7 ⎯⎯⎯⎯⎯⎯⎯
+18: FAIL  src/__tests__/ks823-refresh-grant-client-auth-and-binding.test.ts > KS-823 — the refresh_token grant authenticates the client and honours the token binding > REFUSES a confidential app's refresh token presented with NO credential — 401 invalid_client
+19:AssertionError: body: {"access_token":"eyJ<test-keypair-JWT-redacted-by-drafter>: expected 200 to be 401 // Object.is equality
+27: ❯ src/__tests__/ks823-refresh-grant-client-auth-and-binding.test.ts:189:55
+37: FAIL  src/__tests__/ks823-refresh-grant-client-auth-and-binding.test.ts > KS-823 — the refresh_token grant authenticates the client and honours the token binding > REFUSES a WRONG secret — 401 invalid_client
+38:AssertionError: expected 200 to be 401 // Object.is equality
+46: ❯ src/__tests__/ks823-refresh-grant-client-auth-and-binding.test.ts:209:22
+56: FAIL  src/__tests__/ks823-refresh-grant-client-auth-and-binding.test.ts > KS-823 — the refresh_token grant authenticates the client and honours the token binding > REFUSES a DEACTIVATED app's refresh token even with its correct secret — 401, one refusal with "unknown"
+57:AssertionError: body: {"access_token":"eyJ<test-keypair-JWT-redacted-by-drafter>: expected 200 to be 401 // Object.is equality
+65: ❯ src/__tests__/ks823-refresh-grant-client-auth-and-binding.test.ts:216:55
+75: FAIL  src/__tests__/ks823-refresh-grant-client-auth-and-binding.test.ts > KS-823 — the refresh_token grant authenticates the client and honours the token binding > BINDING — a token minted for client-1 presented by an authenticated client-2 is refused — 400 invalid_grant
+76:AssertionError: body: {"access_token":"eyJ<test-keypair-JWT-redacted-by-drafter>: expected 200 to be 400 // Object.is equality
+84: ❯ src/__tests__/ks823-refresh-grant-client-auth-and-binding.test.ts:223:55
+94: FAIL  src/__tests__/ks823-refresh-grant-client-auth-and-binding.test.ts > KS-823 — the refresh_token grant authenticates the client and honours the token binding > BINDING (fail-closed) — a refresh token carrying NO client claim (minted before binding, or by the login flow) is refused even by an authenticated client — 400 invalid_grant
+95:AssertionError: body: {"access_token":"eyJ<test-keypair-JWT-redacted-by-drafter>: expected 200 to be 400 // Object.is equality
+103: ❯ src/__tests__/ks823-refresh-grant-client-auth-and-binding.test.ts:232:55
+113: FAIL  src/__tests__/ks823-refresh-grant-client-auth-and-binding.test.ts > KS-823 — the refresh_token grant authenticates the client and honours the token binding > REFUSES a refresh with NO client identification at all — 400 invalid_request
+114:AssertionError: body: {"access_token":"eyJ<test-keypair-JWT-redacted-by-drafter>: expected 200 to be 400 // Object.is equality
+122: ❯ src/__tests__/ks823-refresh-grant-client-auth-and-binding.test.ts:245:55
+132: FAIL  src/__tests__/ks823-refresh-grant-client-auth-and-binding.test.ts > KS-823 — the refresh_token grant authenticates the client and honours the token binding > MINT — the pair the authorization_code grant issues carries the redeeming client on BOTH halves, and the pair the refresh grant re-issues keeps it
+133:AssertionError: expected undefined to be 'client-1' // Object.is equality
+141: ❯ src/__tests__/ks823-refresh-grant-client-auth-and-binding.test.ts:268:30
+152: Test Files  1 failed (1)
+153:      Tests  7 failed | 4 passed (11)
+155:   Duration  1.14s (transform 136ms, setup 25ms, import 363ms, tests 622ms, environment 0ms)
+===== green_ks823.out (9 lines)
+5: Test Files  1 passed (1)
+6:      Tests  11 passed (11)
+8:   Duration  655ms (transform 102ms, setup 56ms, import 164ms, tests 339ms, environment 0ms)
+===== green_auth_all.out (73 lines)
+4: ❯ src/__tests__/ks790-token-pre-auth-user-lookup.test.ts (6 tests | 3 failed) 439ms
+5:     × refresh_token: a valid refresh token mints a token pair when only the carve-out can see the user 5ms
+6:     × CONTROL — refresh_token: when the carve-out ALSO answers null the grant is still refused 2ms
+7:     × CONTROL — refresh_token: an INACTIVE user the carve-out can see is still refused (the status pin survives the swap) 2ms
+9:⎯⎯⎯⎯⎯⎯⎯ Failed Tests 3 ⎯⎯⎯⎯⎯⎯⎯
+11: FAIL  src/__tests__/ks790-token-pre-auth-user-lookup.test.ts > KS-790 — the token grants resolve the user through the pre-auth carve-out > refresh_token: a valid refresh token mints a token pair when only the carve-out can see the user
+12:AssertionError: body: {"success":false,"error":{"code":"BAD_REQUEST","message":"invalid_request","description":"client_id is required"}}: expected 400 to be 200 // Object.is equality
+20: ❯ src/__tests__/ks790-token-pre-auth-user-lookup.test.ts:213:55
+30: FAIL  src/__tests__/ks790-token-pre-auth-user-lookup.test.ts > KS-790 — the token grants resolve the user through the pre-auth carve-out > CONTROL — refresh_token: when the carve-out ALSO answers null the grant is still refused
+31:AssertionError: expected 'client_id is required' to match /User inactive or not found/
+39: ❯ src/__tests__/ks790-token-pre-auth-user-lookup.test.ts:230:28
+49: FAIL  src/__tests__/ks790-token-pre-auth-user-lookup.test.ts > KS-790 — the token grants resolve the user through the pre-auth carve-out > CONTROL — refresh_token: an INACTIVE user the carve-out can see is still refused (the status pin survives the swap)
+50:AssertionError: expected 'client_id is required' to match /User inactive or not found/
+58: ❯ src/__tests__/ks790-token-pre-auth-user-lookup.test.ts:237:28
+69: Test Files  1 failed | 51 passed (52)
+70:      Tests  3 failed | 699 passed (702)
+72:   Duration  3.16s (transform 4.29s, setup 2.21s, import 16.29s, tests 20.14s, environment 3ms)
+===== green_auth_all_v2.out (9 lines)
+5: Test Files  52 passed (52)
+6:      Tests  702 passed (702)
+8:   Duration  2.30s (transform 4.22s, setup 1.98s, import 14.15s, tests 19.00s, environment 3ms)
+===== tamper_T1.out (56 lines)
+7: ❯ src/__tests__/ks823-refresh-grant-client-auth-and-binding.test.ts (11 tests | 2 failed) 247ms
+8:     × REFUSES a confidential app's refresh token presented with NO credential — 401 invalid_client 16ms
+9:     × REFUSES a WRONG secret — 401 invalid_client 4ms
+11:⎯⎯⎯⎯⎯⎯⎯ Failed Tests 2 ⎯⎯⎯⎯⎯⎯⎯
+13: FAIL  src/__tests__/ks823-refresh-grant-client-auth-and-binding.test.ts > KS-823 — the refresh_token grant authenticates the client and honours the token binding > REFUSES a confidential app's refresh token presented with NO credential — 401 invalid_client
+14:AssertionError: body: {"access_token":"eyJ<test-keypair-JWT-redacted-by-drafter>: expected 200 to be 401 // Object.is equality
+22: ❯ src/__tests__/ks823-refresh-grant-client-auth-and-binding.test.ts:189:55
+32: FAIL  src/__tests__/ks823-refresh-grant-client-auth-and-binding.test.ts > KS-823 — the refresh_token grant authenticates the client and honours the token binding > REFUSES a WRONG secret — 401 invalid_client
+33:AssertionError: expected 200 to be 401 // Object.is equality
+41: ❯ src/__tests__/ks823-refresh-grant-client-auth-and-binding.test.ts:209:22
+52: Test Files  1 failed (1)
+53:      Tests  2 failed | 9 passed (11)
+55:   Duration  473ms (transform 97ms, setup 45ms, import 97ms, tests 247ms, environment 0ms)
+===== tamper_T2.out (56 lines)
+7: ❯ src/__tests__/ks823-refresh-grant-client-auth-and-binding.test.ts (11 tests | 2 failed) 245ms
+8:     × BINDING — a token minted for client-1 presented by an authenticated client-2 is refused — 400 invalid_grant 7ms
+9:     × BINDING (fail-closed) — a refresh token carrying NO client claim (minted before binding, or by the login flow) is refused even by an authenticated client — 400 invalid_grant 5ms
+11:⎯⎯⎯⎯⎯⎯⎯ Failed Tests 2 ⎯⎯⎯⎯⎯⎯⎯
+13: FAIL  src/__tests__/ks823-refresh-grant-client-auth-and-binding.test.ts > KS-823 — the refresh_token grant authenticates the client and honours the token binding > BINDING — a token minted for client-1 presented by an authenticated client-2 is refused — 400 invalid_grant
+14:AssertionError: body: {"access_token":"eyJ<test-keypair-JWT-redacted-by-drafter>: expected 200 to be 400 // Object.is equality
+22: ❯ src/__tests__/ks823-refresh-grant-client-auth-and-binding.test.ts:223:55
+32: FAIL  src/__tests__/ks823-refresh-grant-client-auth-and-binding.test.ts > KS-823 — the refresh_token grant authenticates the client and honours the token binding > BINDING (fail-closed) — a refresh token carrying NO client claim (minted before binding, or by the login flow) is refused even by an authenticated client — 400 invalid_grant
+33:AssertionError: body: {"access_token":"eyJ<test-keypair-JWT-redacted-by-drafter>: expected 200 to be 400 // Object.is equality
+41: ❯ src/__tests__/ks823-refresh-grant-client-auth-and-binding.test.ts:232:55
+52: Test Files  1 failed (1)
+53:      Tests  2 failed | 9 passed (11)
+55:   Duration  494ms (transform 95ms, setup 66ms, import 98ms, tests 245ms, environment 0ms)
+===== tamper_T3.out (36 lines)
+7: ❯ src/__tests__/ks823-refresh-grant-client-auth-and-binding.test.ts (11 tests | 1 failed) 256ms
+8:     × MINT — the pair the authorization_code grant issues carries the redeeming client on BOTH halves, and the pair the refresh grant re-issues keeps it 5ms
+10:⎯⎯⎯⎯⎯⎯⎯ Failed Tests 1 ⎯⎯⎯⎯⎯⎯⎯
+12: FAIL  src/__tests__/ks823-refresh-grant-client-auth-and-binding.test.ts > KS-823 — the refresh_token grant authenticates the client and honours the token binding > MINT — the pair the authorization_code grant issues carries the redeeming client on BOTH halves, and the pair the refresh grant re-issues keeps it
+13:AssertionError: expected undefined to be 'client-1' // Object.is equality
+21: ❯ src/__tests__/ks823-refresh-grant-client-auth-and-binding.test.ts:268:30
+32: Test Files  1 failed (1)
+33:      Tests  1 failed | 10 passed (11)
+35:   Duration  506ms (transform 99ms, setup 66ms, import 100ms, tests 256ms, environment 0ms)
+===== tamper_T4.out (36 lines)
+7: ❯ src/__tests__/ks823-refresh-grant-client-auth-and-binding.test.ts (11 tests | 1 failed) 228ms
+8:     × REFUSES a DEACTIVATED app's refresh token even with its correct secret — 401, one refusal with "unknown" 6ms
+10:⎯⎯⎯⎯⎯⎯⎯ Failed Tests 1 ⎯⎯⎯⎯⎯⎯⎯
+12: FAIL  src/__tests__/ks823-refresh-grant-client-auth-and-binding.test.ts > KS-823 — the refresh_token grant authenticates the client and honours the token binding > REFUSES a DEACTIVATED app's refresh token even with its correct secret — 401, one refusal with "unknown"
+13:AssertionError: body: {"success":false,"error":{"code":"INTERNAL_ERROR","message":"server_error"}}: expected 500 to be 401 // Object.is equality
+21: ❯ src/__tests__/ks823-refresh-grant-client-auth-and-binding.test.ts:216:55
+32: Test Files  1 failed (1)
+33:      Tests  1 failed | 10 passed (11)
+35:   Duration  458ms (transform 94ms, setup 45ms, import 100ms, tests 228ms, environment 0ms)
+===== post_tamper_green.out (9 lines)
+5: Test Files  1 passed (1)
+6:      Tests  11 passed (11)
+8:   Duration  454ms (transform 92ms, setup 34ms, import 96ms, tests 247ms, environment 0ms)
+===== tsc_auth.out (0 lines)
+===== tsc_ks823_test.out (0 lines)
+===== probe_500.out (30 lines)
+4: ❯ src/__tests__/ks823-refresh-grant-client-auth-and-binding.test.ts (11 tests | 1 failed | 10 skipped) 169ms
+5:     × CONTROL — the right secret in the body redeems (the real flow keeps working) 3ms
+7:⎯⎯⎯⎯⎯⎯⎯ Failed Tests 1 ⎯⎯⎯⎯⎯⎯⎯
+9: FAIL  src/__tests__/ks823-refresh-grant-client-auth-and-binding.test.ts > KS-823 — the refresh_token grant authenticates the client and honours the token binding > CONTROL — the right secret in the body redeems (the real flow keeps working)
+11: ❯ keys src/services/jwt.ts:119:11
+18: ❯ signToken src/services/jwt.ts:148:13
+19: ❯ generateAccessToken src/services/jwt.ts:178:10
+20: ❯ generateTokenPair src/services/jwt.ts:214:18
+21: ❯ src/__tests__/ks823-refresh-grant-client-auth-and-binding.test.ts:190:30
+26: Test Files  1 failed (1)
+27:      Tests  1 failed | 10 skipped (11)
+29:   Duration  406ms (transform 84ms, setup 71ms, import 86ms, tests 169ms, environment 0ms)
+===== amend_sha.txt (1 lines)
+===== SHA256SUMS count
+     208

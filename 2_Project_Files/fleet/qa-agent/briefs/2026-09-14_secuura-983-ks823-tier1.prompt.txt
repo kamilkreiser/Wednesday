@@ -1,0 +1,170 @@
+ultrathink
+
+You are the fleet QA agent running a TIER 1 gate (a security surface: the OAuth token endpoint's refresh_token grant —
+client authentication + a client_id binding claim minted onto every OAuth-issued token pair; through code AND live over a
+real Express app on 127.0.0.1 in YOUR OWN by-SHA clone — no stack exists), ROUND 1, on Secuura/Blockchain PR #983 (KS-823)
+— a STACKED PR: you gate its DELTA onto its parent #982 AND the merged shape onto the live develop.
+
+Read your brief FIRST and in full, then plan:
+/Volumes/DevMASTER/WEDNESDAY/2_Project_Files/fleet/qa-agent/briefs/2026-09-14_secuura-983-ks823-tier1.md
+
+Subject: f62c975c11ec97cdef04500fd98a43618e702763 = PR #983 (KS-823), open against develop, TWO commits on develop M18
+  8861e6216 (= the merge-base): the PARENT e62eab87a (= refs/pull/982/head, PR #982 KS-790 — the pre-auth user-lookup
+  swap at both grants + the static verifyRefreshToken import; NOT yours to grade) and the HEAD f62c975c1 (parent e62eab87a,
+  tree db10aea98, Kam Kreiser 2026-09-14 00:20:23 +1000; amended once before the push, tree identical). THIS PR's delta =
+  `git diff e62eab87a f62c975c1` = 4 files +395 -22 under services/auth/src/: routes/oauth.ts (+82 -10; blob 80e05458e ->
+  de00ffcea), services/jwt.ts (+31 -10; d0d55c11b -> 62b6db272), NEW __tests__/ks823-refresh-grant-client-auth-and-binding
+  .test.ts (+276; 2c0135b6f; 11 cells over a raw socket with the REAL jwt.ts), __tests__/ks790-token-pre-auth-user-lookup
+  .test.ts (+6 -2; cfed82d54 -> f98e8c806; its refresh cases now present the client credential and a bound stub token; its
+  17 expect( lines byte-identical). GitHub counts the STACK: 5 files +673 -25 (the fifth = #982's ks820-821 +8 mock hunk —
+  ACCEPTED by Wednesday, its own gate's).
+  WHAT IT DOES: the refresh_token branch of POST /api/oauth/token now authenticates the client BEFORE it verifies the
+  token — readClientId (body client_id, else the HTTP Basic userid; oauth.ts:698-712) -> getAppByClientId (the definer pins
+  is_active: one 401 invalid_client for unknown AND deactivated; :883-886) -> a confidential app's secret via the existing
+  readClientSecret + constant-time verifyClientSecret (:887-893); a public app needs its client_id and no secret; THEN
+  verifyRefreshToken (:910) -> the A-05 denylist (:919) -> TOKEN BINDING: `if (decoded.client_id !== refreshClientId)` ->
+  400 invalid_grant (:931-934) -> getUserByIdPreAuth (:938) -> generateTokenPair(user, session.id, { clientId }) (:948).
+  jwt.ts gains OAuthMintOptions / OAuthTokenClaims (an intersection: JwtPayload in types/index.ts is UNTOUCHED, blob
+  9b0b4f08a at head and develop) and the three minters take an optional third argument that puts `client_id` on BOTH
+  halves (:195 access, :219 refresh); the code grant mints bound to the redeeming client (:844); verifyRefreshToken returns
+  the widened type (:367). UNBOUND TOKENS ARE REFUSED, FAIL-CLOSED (a login-flow token or a pre-#983 OAuth token) —
+  Wednesday ACCEPTS that for this gate (RULED item 2): state the deploy-time consequence (one re-authorization per client
+  holding an OAuth refresh token; the population is UNMEASURED) in NOT TESTED / consequences and do NOT grade it.
+  origin develop = M18 8861e6216 (read 07:08:53 AEST 2026-09-14; unmoved since the READY); develop is an ANCESTOR of the
+  head (rev-list 0 2; --is-ancestor rc 0) so the merge onto M18 is a FAST-FORWARD: the merged tree == the head tree
+  db10aea98 while develop stays M18. The launcher pins the merge-base (exit 10), the STACK PARENT refs/pull/982/head =
+  e62eab87a (exit 21) and develop M18 with a DISJOINTNESS CHECK over five guarded paths (exit 18 on any move under
+  services/auth/, the ks860 loopback guard file, the two api-gateway middleware files, the root lockfile — #982's own
+  squash is the expected first mover; then Wednesday re-pins and your item 2 becomes a real three-way merge).
+The headline questions: (1) is the delta EXACTLY the 4 files (blob / numstat / diff / the PR files API) and is the parent
+  still refs/pull/982/head — item 1; (2) the FOUR TREES in your clone (head / parent / develop / merged): RED-FIRST — the
+  head's ks823 file copied onto the PARENT tree reads `Tests 7 failed | 4 passed (11)` with every refusal cell answering 200
+  WITH A TOKEN (quote one assertion message carrying `{"access_token":"eyJ`), and 11/11 at head; the full auth suite 52 files
+  / 702 tests at head and on the merged tree, 51/691 at the parent, 50/685 at develop; the widened ks860 loopback guard in
+  packages/shared 23/23 on the merged tree (both new test files bind 127.0.0.1); the stacked-fixture pair (the parent's ks790
+  bytes against the head product -> 3 red `client_id is required`; the head's ks790 bytes against the parent product -> 6/6)
+  — item 2; (3) the TAMPER TABLE with the suite RUNNING — the builder's T1 (client auth skipped -> 2 red), T2 (binding
+  removed -> 2 red), T3 (the code grant mints unbound -> 1 red MINT), T4 (the null-app guard DELETED -> 1 red, but a 500:
+  a CRASH red, not a red-proof of the guard) re-run; then YOUR T4' (the guard neutralised WITHOUT crashing: `&& false` +
+  `refreshApp?.appType`) -> predicted 0 red of the shipped 11 (the deactivated CONFIDENTIAL cell is refused by
+  verifyClientSecret's own row-less false — services/oauth.ts:161 — a second mechanism) and your Tg-DEADPUB / Tg-UNKNOWN
+  cells (a deactivated PUBLIC app; an unknown client) -> 401 at head, 200 WITH A TOKEN under T4' — the cell the null-app
+  guard alone EARNS, absent from the shipped suite (a coverage gap: described regression test, Minor); T5 (jwt.ts:219 the
+  refresh-half claim deleted -> 4 red: the three CONTROLs go fail-closed 400 + MINT; the wrong-client BINDING cell stays
+  green for the WRONG reason — same 400 invalid_grant); T6 (:195 the access half -> 1 red MINT); T7 (the client block moved
+  AFTER the token verification -> 0 red of the shipped 11; your Tg-ORDER-1 (invalid token + wrong secret: 401 at head, 400
+  under T7) and Tg-ORDER-2 (invalid token + no id: 'client_id is required' at head; the app SQL never queried) go red);
+  T8 (the Basic arm of readClientId -> 1 red CONTROL Basic); C0 inert comment -> 11/11; Csyntax -> a LOAD failure, no
+  Tests line. Aimed count first, then colours; a 0-cell run is INVALID — item 3; (4) the §2a LEGITIMATE-SHAPES table
+  measured over the socket with raw status + description beside every verdict: Basic-only, body-only, both-agreeing,
+  public with and without a secret, Basic `pub-1:`, form-urlencoded (mount express.urlencoded as index.ts:86 does; the
+  endpoint's real media type), the refresh CHAIN, REUSE (the same token twice -> 200, 200: no rotation denylist on the OAuth
+  path — pre-existing, KS-756's family, a Record), Tg-MIX (body client-2 + Basic client-1:secret -> 401), Tg-MIX2 (Basic
+  wins over a correct body secret -> 401, a boundary to record), empty / array client_id -> 400 invalid_request, a
+  denylisted token by the right and by a foreign client -> 'Refresh token revoked' both, the access half as refresh_token ->
+  400 — item 3(c); (5) HUNT THE CLASS — the sibling POST /api/auth/refresh (routes/auth.ts:658-699, blob 132d3b8d3 at head
+  AND develop, untouched by this PR) accepts any valid refresh token from anyone (cookie or body, no client) and re-mints
+  with TWO arguments (:689): mount the real authRoutes with the session/denylist mocks the brief names, present a BOUND
+  OAuth refresh token there with no credential -> predicted 200 + an UNBOUND pair (jwt.decode: no client_id), which
+  /api/oauth/token then refuses (fail-closed) and /api/auth/refresh accepts again; CONTROL: the same probe on the develop
+  tree -> 200 (pre-existing). Report it MEASURED AT RUNTIME with the symbols (authRoutes.post('/refresh') / routes/auth.ts
+  :689 / verifyRefreshToken), severity per the charter, BOTH readings the brief states (a pre-existing class exposure for a
+  ticket — nearest KS-756; and: after #983 the binding can be STRIPPED by one round-trip through the sibling), disposition
+  Wednesday's — on the drafter's reading NOT a NO GO on f62c975c1 — item 6; (6) the claims (PR body, commit message, KS-823
+  comment e64ec267, the READY) true as written, and DELIVERED vs COMMISSIONED against the s212 brief §4/§6/§7/§8 — items 5
+  and 8; (7) quality legs — tsc rc 0 (+ the test file separately, with a planted TS2322 control), eslint 0 errors on the
+  four files (the builder did NOT run eslint) — item 7; (8) findings-only; Wednesday searches the board by symbol; NOT
+  TESTED at equal prominence — item 9.
+Repo:    /Volumes/DevMASTER/!CODING/Secuura/Blockchain/2_Project_Files  (READ-ONLY — clone by SHA into your own scratch;
+  node_modules / packages/shared/dist / services/auth/node_modules symlink-farmed FROM worktrees/s212-ks823 (the builder's,
+  ON the branch at f62c975c1, porcelain 0; packages/shared is byte-identical at develop, parent and head so the dist is
+  valid for every tree), never into it, never vitest inside it; s212-ks790 / s212-ks835 / s212-ks799-r2 — rev-parse only)
+
+You are FINDINGS-ONLY. You never fix, never merge, never push, never deploy, never comment, never file, never `@`.
+
+NEVER run a push, the real pre-push hook, or preflight.sh inside the Secuura checkout or any of its worktrees.
+
+NEVER print a credential value, and never open, read or copy a secrets file (any .env, config/secrets.yml). Count, never echo.
+Nothing in this gate needs a credential: the test keypair is generated in-process by vitest.setup.ts; the app secrets are
+the suite's own literals.
+
+NO docker, NO stack, no kintsugi, no demo, no az, no ssh.
+
+Eight things you must not miss:
+
+1. THE FOUR TREES AND THE RED-FIRST (item 2): head f62c975c1, parent e62eab87a, develop (the SHA you read), merged (a
+   fast-forward while develop is M18 — assert the merged tree sha == db10aea98; otherwise a real three-way, 0 conflicts,
+   merge + tree sha quoted). `git show f62c975c1:<the ks823 path>` into the PARENT worktree (never staged; sha256
+   b4fc5dde6a66d4ad asserted) -> `7 failed | 4 passed (11)`, the seven titles named, the 200-with-a-token quoted; the head
+   file 11/11; full suites 52/702 head+merged, 51/691 parent (the ks823 copy quarantined by rename first), 50/685 develop;
+   ks860 23/23 on the merged tree's packages/shared. Say which tree every count comes from. Run suites SOLO.
+
+2. THE DELTA IS FOUR FILES ON THE PARENT (item 1): numstat 6 2 / 276 0 / 82 10 / 31 10; blobs per the TARGET table; the
+   ks790 delta's 17 expect( lines identical parent->head; the ks820-821 file untouched by #983 (b998b5b7d at parent AND
+   head — #982's hunk, ruled ACCEPTED, its own gate's); types/index.ts, routes/auth.ts, services/oauth.ts, userRepo.ts,
+   routes/wallet.ts blob-identical at head and develop; packages/shared 0 files; lockfiles 0; the commit's parent, ids
+   (KS-823 only), 1 at-sign = the Co-Authored-By e-mail; refs/pull/982/head still e62eab87a at your start.
+
+3. THE TAMPER TABLE, SUITE RUNNING (item 3): prediction and aimed COUNT first; anchors count 1 (`grep -cF`); the tamper
+   shown LANDED before the run; restore by content with the whole-file sha256 (routes/oauth.ts 70c634fdad581d01, jwt.ts
+   bad7e362c6ca68cb); score by title; cells-run beside every colour; a LOAD failure (no Tests line) is INVALID. The
+   builder's T4 is a CRASH red (`expected 500 to be 401`) — say so; YOUR T4' + Tg-DEADPUB / Tg-UNKNOWN are the earning run.
+   T5's wrong-reason green (the two BINDING cells share status AND message; only the description differs and no cell reads
+   it) is a Record. C0 and Csyntax prove the instrument discriminates.
+
+4. THE SHAPES OVER THE SOCKET (item 3(c), §2a): a scratch `__qa983_shapes.test.ts` copied from the ks823 harness (the REAL
+   jwt.ts, `await initJwtKeys()` — without it every cell reads 500, the builder's own incident; `app.listen(0, '127.0.0.1')`),
+   run SOLO by path, QUARANTINED by rename before any full-suite count; every cell states its FAIL condition first and
+   prints the raw status + body beside the verdict. Tg-ORDER-2 also records the db mock's SQL calls (no
+   auth_find_oauth_app_by_client_id call for a request with no identification; the CONTROL-body cell's list DOES carry it).
+
+5. HUNT THE CLASS (item 6): the sibling /api/auth/refresh probe with its develop CONTROL; FAIL condition stated first (a
+   401/400 there for the bound token means the brief's read is wrong — say so); symbols, severity, evidence class, BOTH
+   readings; disposition is Wednesday's. Never fix, never file, never propose it as this PR's change.
+
+6. RULED, NOT GRADED (the brief's RULED section): the fail-closed arm — state the deploy consequence, do not grade it; #982's
+   ks820-821 hunk — assert untouched by #983, do not grade it; ALL FOUR PRs tier 1; the merge order #982 -> #983 -> #984;
+   findings-only; the verdict MAIL is the wait signal (write no mail-subject.txt file).
+
+7. DELIVERED vs COMMISSIONED + CLAIMS (items 5, 8): the table in the brief against the s212 brief §4 ITEM 3 / §6 / §7 / §8
+   (the READ-FIRST "does a refresh token carry a client claim" — done and stated; the ticket's own fix-shape sentence; the
+   raw-socket red-first; KS-823 only in the commit and body — the amend removed a foreign id BEFORE the push; the SCOPE
+   comment rewritten in the same commit; the READY's five; NOT covered); "4/4 EXACT" re-described (T4 crash); "52/702 (was
+   51/691)"; "assertions unchanged" (0 expect( lines changed, and the stacked-fixture pair shows WHY the hunk exists).
+
+8. QUALITY, ONE LINE EACH (item 7): `npx tsc --noEmit -p .` in services/auth rc 0; the ks823 file type-checked separately
+   (scratch tsconfig; a planted TS2322 control that reds); `npx eslint` on the four files: 0 errors (warnings counted; the
+   builder did not run eslint — your run closes it).
+
+Your tool shell's grep may be a function: use /usr/bin/grep with a same-file control. Never cd in your own tool calls; the
+pre-tool hook refuses `git worktree` in the Secuura checkout — clone into your scratch and run write verbs THERE. A REAL
+checkout of the whole Blockchain/Dev, not a symlink farm (node_modules symlinked only). Keep every scratch of yours named
+`__qa983_*` and out of any full-suite count. services/auth is VITEST 4.1.10 (`npx vitest run`, never watch; cwd =
+<clone>/Blockchain/Dev/services/auth; the setup file generates the RS256 keypair; the shared logger alias needs
+packages/shared/dist — farm it); run suites solo. /bin/bash here is 3.2 — write runners in Python; `<<'EOF'` on every
+heredoc. zsh: no PIPESTATUS (`cmd > out 2>&1; rc=$?`), no timeout on macOS.
+Quote the Secuura checkout's porcelain count, .git/config sha256, for-each-ref count, origin develop SHA, refs/pull/982/head,
+refs/pull/983/head and the ks-823 branch at start and close; they must match (name any ref another seat's push or merge
+moved). Three timestamped head readings (start / mid / end) with the branch beside each SHA. Confirm worktrees/s212-ks823
+is byte-identical at start and close (porcelain 0 both times); read the three sibling s212 worktrees by rev-parse HEAD only.
+Never `rm`: fresh mktemp -d per attempt; quarantine scratch files by rename.
+Do no memory maintenance of your own project's memory store inside this session.
+
+Report FOUND / TESTED / HOW, with controls; every finding with its evidence class (MEASURED AT RUNTIME / PROBED / READ ONLY),
+its target and SHIPS-WITH or TICKET (symbol/path); the four trees and their counts; the RED-FIRST pair; the stacked-fixture
+pair; the tamper table (T1, T2, T3, T4 crash, T4', T5, T6, T7, T8, C0, Csyntax) with cells-run and the aimed-vs-measured
+count; the §2a rows measured with raw values; Tg-DEADPUB / Tg-UNKNOWN under T4' and what it means; Tg-LAUNDER with its
+develop control and both readings; the DELIVERED-vs-COMMISSIONED table; the ruled items NAMED as not graded; and state
+what you did NOT test at the same prominence as the findings. Coverage three-way (executed / skipped why / not-applicable
+why). Severity yes, priority no.
+Verdict: GO, GO WITH FINDINGS, or NO GO — on f62c975c1, against its parent e62eab87a AND the develop you merged it onto
+(name both). Say what ships and what is ticketed (symbol/path); give the merge seat its ADDENDUM line: "merge #982
+e62eab87a6263e25c41c9bb814d5831842bb6c7e first (its own gate's GO), then #983 f62c975c11ec97cdef04500fd98a43618e702763 —
+squash via the merge API sha-pinned to the head; expected services/auth = develop's count + 11 + 6, 0 failed;
+packages/shared unchanged".
+
+MAIL YOUR VERDICT to wednesday-agent@agentmail.to when the pass is complete, using
+the project's send_brief.sh. Your pane holds ~19 lines of alternate screen with no
+scrollback, so a verdict that stays in the pane is one pane-close from being lost --
+this is not a formality, it is the only durable copy and the wait signal. Subject:
+[QA -> Wednesday] TIER 1 GATE #983 ROUND 1 (KS-823) f62c975c1 -- <GO|GO WITH FINDINGS|NO GO>

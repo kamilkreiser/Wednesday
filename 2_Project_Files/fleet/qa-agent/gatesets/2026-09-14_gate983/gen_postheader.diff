@@ -1,0 +1,82 @@
+2,8c2,10
+---
+10,15c12,25
+---
+17,23c27,36
+---
+25,35c38,39
+---
+37,39c41,43
+---
+43,44c47,48
+---
+49,50c53,54
+< BRIEF="${QA980R2_BRIEF:-$WED/2_Project_Files/fleet/qa-agent/briefs/2026-09-13_secuura-980-ks924-901-tier2-r2.md}"
+< PROMPT_FILE="${QA980R2_PROMPT:-$WED/2_Project_Files/fleet/qa-agent/briefs/2026-09-13_secuura-980-ks924-901-tier2-r2.prompt.txt}"
+---
+> BRIEF="${QA983_BRIEF:-$WED/2_Project_Files/fleet/qa-agent/briefs/2026-09-14_secuura-983-ks823-tier1.md}"
+> PROMPT_FILE="${QA983_PROMPT:-$WED/2_Project_Files/fleet/qa-agent/briefs/2026-09-14_secuura-983-ks823-tier1.prompt.txt}"
+53,57c57,63
+< BRANCH='refs/heads/feature/ks-924-ks-901-entrypoint-corpus-presence-set-and-three-shapes'
+< HEAD_SHA="${QA980R2_HEAD:-103c235b4d2be54cc1ade65ed660f397cf03e997}"
+< MERGE_BASE='50b729d69c58474624508ed79d05c520dab22cc6'
+< DEVELOP_SHA='1c38077ba2aea5f4c4371c1b68796026dc577764'
+< REAL_BRIEF="$WED/2_Project_Files/fleet/qa-agent/briefs/2026-09-13_secuura-980-ks924-901-tier2-r2.md"
+---
+> BRANCH='refs/heads/feature/ks-823-security-the-apioauthtoken-refresh_token-grant-authenticates'
+> HEAD_SHA="${QA983_HEAD:-f62c975c11ec97cdef04500fd98a43618e702763}"
+> MERGE_BASE='8861e62161466c40f08d2b10a30edeb203123993'
+> STACK_PARENT='e62eab87a6263e25c41c9bb814d5831842bb6c7e'
+> STACK_PARENT_REF='refs/pull/982/head'
+> DEVELOP_SHA='8861e62161466c40f08d2b10a30edeb203123993'
+> REAL_BRIEF="$WED/2_Project_Files/fleet/qa-agent/briefs/2026-09-14_secuura-983-ks823-tier1.md"
+69a76,84
+> if ! git -C "$REPO" ls-remote origin "$STACK_PARENT_REF" | grep -q "^${STACK_PARENT}[[:space:]]"; then
+>   echo "REFUSING: the stack parent $STACK_PARENT_REF is no longer $STACK_PARENT on origin — #982 moved; #983's delta and red-first are about a different product; rewrite the brief" >&2
+>   git -C "$REPO" ls-remote origin "$STACK_PARENT_REF" >&2
+>   exit 21
+> fi
+> 
+87c102
+<   DEV_NOTE="origin develop still $DEVELOP_SHA (M15, the develop this brief's 813/813 was written against; git ls-remote)"
+---
+>   DEV_NOTE="origin develop still $DEVELOP_SHA (M18, the develop this brief's 52/702 and its fast-forward merged shape were written against; git ls-remote)"
+102c117
+< GUARDED = ["Blockchain/Dev/packages/shared/src/__tests__/entrypoint-corpus.test.ts",
+---
+> GUARDED = ["Blockchain/Dev/services/auth/",
+104c119,121
+<            "Blockchain/Dev/packages/shared/"]
+---
+>            "Blockchain/Dev/services/api-gateway/src/middleware/auth.ts",
+>            "Blockchain/Dev/services/api-gateway/src/middleware/scopes.ts",
+>            "Blockchain/Dev/package-lock.json"]
+112c129
+<     DISJOINT*) DEV_NOTE="origin develop MOVED $DEVELOP_SHA -> $CUR_DEV: ${DEV_JUDGEMENT#DISJOINT } — disjoint from the guard's three paths (#980's file, the ks860 loopback guard file, the packages/shared/ prefix); the gate merges the then-current develop, re-states the delta by name and re-derives the ratio (brief items 1 and 2)" ;;
+---
+>     DISJOINT*) DEV_NOTE="origin develop MOVED $DEVELOP_SHA -> $CUR_DEV: ${DEV_JUDGEMENT#DISJOINT } — disjoint from the guard's five paths (services/auth/, the ks860 loopback guard file, the two api-gateway middleware files, the root lockfile); the gate merges the then-current develop with a real three-way merge, re-states the delta by name and re-derives the auth ratio (brief items 1 and 2)" ;;
+118,119c135,136
+< grep -q 'TIER 2' "$BRIEF" && grep -q 'TIER 2' "$PROMPT_FILE" || { echo "REFUSING: brief and prompt disagree about the tier" >&2; exit 7; }
+< grep -q 'ROUND 2' "$BRIEF" && grep -q 'ROUND 2' "$PROMPT_FILE" || { echo "REFUSING: brief and prompt disagree about the round" >&2; exit 15; }
+---
+> grep -q 'TIER 1' "$BRIEF" && grep -q 'TIER 1' "$PROMPT_FILE" || { echo "REFUSING: brief and prompt disagree about the tier" >&2; exit 7; }
+> grep -q 'ROUND 1' "$BRIEF" && grep -q 'ROUND 1' "$PROMPT_FILE" || { echo "REFUSING: brief and prompt disagree about the round" >&2; exit 15; }
+132,135d148
+< R1_REPORT='/Volumes/DevMASTER/!CODING/Testing Agent MAIN/projects/secuura/reports/2026-09-13-ks924-901-980-9c620f890-tier2-r1/report.md'
+< grep -qF "$R1_REPORT" "$BRIEF" || { echo "REFUSING: brief does not name the round-1 report path (a gate cannot ask)" >&2; exit 19; }
+< [ -s "$R1_REPORT" ] || { echo "REFUSING: the round-1 report named by the brief is missing or empty: $R1_REPORT" >&2; exit 19; }
+< 
+139a153
+>   echo "  stack parent $STACK_PARENT_REF still $STACK_PARENT on origin (this PR's delta and red-first are about that product)"
+142c156
+<   echo "  brief and prompt agree on TIER 2 and ROUND 2"
+---
+>   echo "  brief and prompt agree on TIER 1 and ROUND 1"
+149d162
+<   echo "  brief names the round-1 report and it is present on disk"
+153c166
+< [ -z "${QA980R2_BRIEF:-}${QA980R2_PROMPT:-}${QA980R2_HEAD:-}" ] || { echo "REFUSING: a launch with test overrides set" >&2; exit 16; }
+---
+> [ -z "${QA983_BRIEF:-}${QA983_PROMPT:-}${QA983_HEAD:-}" ] || { echo "REFUSING: a launch with test overrides set" >&2; exit 16; }
+154a168,170
+> [ -t 0 ] || { echo "REFUSING: stdin is not a TTY — launch this from a pane (cockpit.sh add), never from inside a Bash tool" >&2; exit 22; }
