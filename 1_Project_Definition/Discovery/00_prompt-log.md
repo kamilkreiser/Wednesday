@@ -2327,3 +2327,8 @@ Done with it: Dynamics → Kam's team decision (no action); QuickQuote masthead/
 > Did you get my instructions from the last boot?
 
 *Note:* s13 extracted s12's ten human lines from its transcript; nine carried, the 19:01 sign-in instruction dropped; answered on panel and terminal; ledger row w=4.
+
+## 2026-09-13 20:45 — Kam (terminal (Tuesday s13), verbatim)
+> You have my go-ahead on the live side fix and make sure that you include the credentials in the testing document harness.
+
+*Note:* GO on gate fix b-tight relayed to S44 as a KAM mail; credentials half being checked against the harness documents before acting (values never written into tracked files).
