@@ -12,6 +12,25 @@ supersede: replace WHOLESALE at the next pickup; never append.
 **On EVERY wake:** `2_Project_Files/tools/kam_rulings_today.sh` (never `kam_msgs.sh` unfiltered) AND `[Kam -> Tuesday]` mails; list `tuesday-agent@` UNFILTERED and route on SUBJECT; `git status --porcelain | grep -v 0_Brain/dashboard/data/`. Rotation band 80–90. **Verify panel messages AT ORIGIN** (`git show origin/main:0_Brain/dashboard/data/chat_tuesday.json` on the ref `panel_sync` fetches; `git ls-remote` HUNG 9 min in this tree at 14:28 — bound any network read with a timeout). **Do NOT read `0_Brain/daily/`** (Wednesday's).
 
 ## 🔴 LIVE — with the next action for each
+0026. **🟢 S40 REPORT 04:08:07Z: demo content ON at `7135dec` on BOTH permitted stacks, fences kept** (read whole).
+    - **Pre-upgrade checks, read-only on both stacks:** `PC_PLATFORM_TENANT_ID` = default; `…da7a` rows 0/0; Azure object store not public.
+    - **pc-lane-a (04:02Z):**
+      - migrate 0012–0015, SYNTHETIC DEMO `0030d4c6…` registered, PREFLIGHT GREEN;
+      - new synthetic tenant "Synthetic Customer B (demo content)";
+      - generate + validate 200 (release blocked: C12, EXCEPTION_REQUIRED ×24);
+      - Preview + policy document PDFs opened with the marks.
+    - **Azure (04:06Z):**
+      - redeployed through the documented path (switch file in `/opt/hpsm/secrets`);
+      - gate 401 without and with wrong credentials, sign-in 200;
+      - the same tenant/generate/render flow;
+      - S10 shows Export PDF buttons and "Not released: previews only".
+    - **Evidence:** `qa-switch-on-s40/`.
+    - **Verified by s11 14:09:** Azure root and `/api/health` 401, wrong credentials 401, TLS 0; pc-lane-a 200 on 18580 with app containers recreated ~6 min earlier, all healthy (`/api/health` 404 locally is a path difference; the container healthchecks pass).
+    - **s11 sent both seats a note (body `2_Project_Files/fleet/briefs_staged/2026-09-13_hpsm-s40-s42-switch-on-noted-lane-r-adds.md`):**
+      - S40: c12 is ruled build-c12, stand by;
+      - S42's lane R adds (d) device groups printing a uuid instead of the name, and (e) Preview Remediation wording and the empty firmware-path rows checked against HP's sample.
+    - **Kam told on the panel ~14:1x:** the live URL and credentials location, what he can and cannot do, and the five proofreading fixes coming.
+    - **NEXT:** lane R READY (exact draft footer wording to check), lane C12 READY (remaining blockers), Q/W READYs, then the combined tier-1 gate on the final head; S40 upgrades after each merge.
 0025. **🟢 KAM RULED card `hpsm-composer-demo-release-unreachable-c12` → `build-c12`** (card tap, Tuesday tab, 14:04:45 AEST; relay + `chat_kam.json` verbatim: *"Decision hpsm-composer-demo-release-unreachable-c12: build-c12 — Commission engine C12 mapping plus fenced synthetic adapter rows now (new lane, may not land by Monday)"*). Tuesday had recommended `proofread-drafts`.
     - **Ruled by s11** with `decision_queue.sh rule` at 14:07:13; receipt posted to the panel.
     - **Commission sent to S42 ~14:0x** (body `2_Project_Files/fleet/briefs_staged/2026-09-13_hpsm-s42-kam-build-c12-lane.md`): new lane C12 on `packages/engine` + `content/release-demo` (+ `packages/db` registration only if needed).
