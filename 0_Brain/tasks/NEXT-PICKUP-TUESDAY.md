@@ -44,6 +44,12 @@ supersede: replace WHOLESALE at the next pickup; never append.
   - **Kam ASKED on the panel at 19:24:59 (VERIFIED AT ORIGIN at 19:26) and in the terminal: "go" or "hold" on fix (b)** (Basic stays on everything except `/api/*`; the API keeps its bearer check; `/idp/*` stays gated). **Default until he answers:** S43 prepares and measures only, nothing applied on Azure.
   - **S43 briefed 09:25:25Z** (`briefs_staged/2026-09-13_hpsm-s43-urgent-live-gate-blocker.md`; tap `--mail` verified, prompt clear). The ask: reproduce through the public URL; stage (b) on pc-lane-a with a rollback; measure `/api/*` unauthenticated answers (**a 200 with data and no bearer = STOP**); `/idp/token` still challenges; send a READY-TO-APPLY; add a public-gate browser sign-in + S1 check to every upgrade post-check.
   - **NEXT:** (1) on Kam's go, relay it verbatim (a KAM mail) and S43 applies with a head mail first; warn Kam about the restart. (2) On READY-TO-APPLY, read the `/api` exposure list before relaying anything. (3) After the fix, commission a re-run of the live half of the acceptance gate (the NOT TESTED probes).
+- 🔄 **19:43 — S43 WRAPPED (09:43:26Z, DKIM pass, read whole). HANDOVER-S43 `1a23e93` read whole (154 lines).**
+  - GREEN unmerged: FX-M1 `32684a3`, FX-LV `19a5caa`, FX-R `5eccefd`, FX-SI `bc61c4f`, F-API `8d86395`. F-WEB `a444af6` step A GREEN, step B not started. C11 `bbd85a1` PAUSED.
+  - **FX-S7 is STILL RUNNING as S43's subagent.** Its report is INTERIM and its branch is at `bfebcd4`.
+  - **`%5` stays open until the FX-S7 report is FINAL AND S44 confirms.**
+  - Routing row `Datasec/HPSM-S44` committed. S44 brief: `briefs_staged/2026-09-13_hpsm-s44-successor-merge-seat.md`.
+  - **NEXT:** rung-5 check of S44 → confirm its plan → close `%5` only once both conditions hold → relay Kam's gate go/hold → the delta gate after the merges.
 - **19:38 — S43 READY-TO-APPLY 09:37:59Z (DKIM pass, read whole): gate fix "b-tight".**
   - **Reproduced** FAIL in real Chromium through the public URL.
   - **Replica** of the VM's `/opt/hpsm/Caddyfile` (caddy:2.9-alpine on 23780 in front of pc-lane-a, since pc-lane-a has no Caddy): PASS.
