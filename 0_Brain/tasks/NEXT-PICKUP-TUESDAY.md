@@ -363,7 +363,19 @@ supersede: replace WHOLESALE at the next pickup; never append.
     - **USE INSTEAD:** a checkpoint mail, then the seat wraps to tuesday-agent@, then a successor brief launched in a new pane, then the old pane closes after the successor confirms.
     - **Fixing the script is fleet tooling, so Wednesday's lane:** mention it in the next COORDINATION mail to her; do not edit it from this seat.
 
-35. **UPDATE 2 (Wednesday COORDINATION 04:24:59Z Sun, read whole):**
+35. **UPDATE 3 (Wednesday COORDINATION 06:08:05Z Sun, read whole): the liveness checker SHIPPED and FIRED.**
+    - **The fire:** `fleet/cockpit/logs/rotate_wednesday.log` "2026-09-13 15:58:12 [liveness] LIVENESS OK: session alive, 6/6 agent panes present" on her Studio self-rotation with 5 agents live.
+    - **The containment gate:** `wednesday_rotate.sh --self` now uses `merge-base --is-ancestor HEAD origin/main` (commit `b3bc22f79`; origin-ahead passes, local-unpushed refuses).
+    - **Verified by s11 16:1x in the local script:**
+      - the seat is resolved from `WED_AGENT`: `tuesday` → `Launch_Tuesday.command` (lines 54–64), so **trap 36's Launch_Wednesday default is FIXED** (`313325e7b`, 14:53);
+      - `rotate_liveness.sh` is present and seat-agnostic.
+    - **Residual risk:** the checker DETECTS a fleet-session loss and relaunches the coordinator, but CANNOT restore other panes. The 16:04 class was 1 in 63.
+    - **→ CARD `tuesday-seat-self-rotate-with-liveness-check`** (rec `rotate-after-verdicts`; alternatives `rotate-now`, `kam-restarts`; default: no self-rotation, Kam restarts by hand).
+      - Kam earlier asked that restarting Tuesday not close other panes, and his "rotation never blocks work" ruling was relayed via Wednesday, not first-party.
+      - **If ruled `rotate-after-verdicts`:** after the three QA gate verdicts land, pull main, confirm nothing is unpushed, kill the scratchpad `ack_loop.py`, run `WED_AGENT=tuesday 2_Project_Files/fleet/cockpit/wednesday_rotate.sh --self` DETACHED, and the successor checks `rotate_*.log` for LIVENESS OK.
+    - **Wednesday's owed list** holds traps 37 / 38 / launchers.conf; claim any by mail if reached first.
+
+    **UPDATE 2 (Wednesday COORDINATION 04:24:59Z Sun, read whole):**
     - **What Wednesday said:** she CLAIMS (a) the post-respawn LIVENESS CHECK in `wednesday_rotate.sh` (records the pane list, a setsid checker confirms the fleet session survived, alarms and relaunches on loss) and (b) a `doctor.sh` FAIL check on `panel_sync` loop liveness plus `Launch_Wednesday.command` arming it (panel_sync died 16:26 Sat, unnoticed 16 h).
     - **Kam's ruling, RELAYED by her, not first-party to Tuesday:** at 14:2x, to Wednesday's terminal: *rotation must never block the work; agents keep running through a rotation.* The "no self-rotation while agents are live" hold is gone FOR WEDNESDAY, and the checker replaces it.
     - **Tuesday s11's position (mailed to her ~14:3x):** neither item started, no conflict. Asked her to let the checker cover Tuesday's `%0` too. **Tuesday keeps the `--self` hold until the checker has shipped and been seen to fire;** Kam restarts this seat by hand meanwhile. Handed her traps 37, 38 and the `launchers.conf` DevMASTER path. **NEXT seat:** confirm the checker covers Tuesday before dropping the hold.
