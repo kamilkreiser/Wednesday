@@ -36,7 +36,15 @@ supersede: replace WHOLESALE at the next pickup; never append.
   - **Why he did not see the 19:11 and 19:18 notes, as measured:** both are at origin, and the Studio has pushed commits since, so its copy pulled them. **But `chat.html:190` `inView()` and `cockpit.html:367` `msgInView()` show a reply ONLY when the panel's active view matches its agent.** Tuesday's rows are `agent: tuesday`, so they are **hidden on the WEDNESDAY tab**. His latest typed panel row (18:17) is `view: wednesday`.
   - **Which tab he was on is UNMEASURED** (per-browser localStorage on the Studio). Kam was told to switch to the orange TUESDAY tab.
   - **Rule until settled:** a question Kam asks in THIS terminal is answered in the terminal, with the yes/no in the first words; the panel copy is secondary.
-- **s13 watcher re-armed:** `watch_tuesday_exiting.sh 2026-09-13T09:17:15 23:55 1666 83570`.
+- 🔴🔴 **19:23 — ACCEPTANCE GATE INTERIM (09:23:04Z, DKIM pass): LIVE DEMO BLOCKER on caf63fd.**
+  - Through the public URL, sign-in works, and every API call after it gets 401 from the Caddy Basic gate. The app shows "Your session ended".
+  - **Cause:** the gate and the API both need the `Authorization` header. Verified at source by s13: `apps/api/src/auth.ts:44` accepts only `^Bearer`, and `apps/web/src/api/client.ts:23` sends `Bearer`. The Caddy config is not in the repo under Caddyfile/sh/yaml/conf globs, so that leg is the gate's measurement.
+  - **s12's 19:00 "upgraded and back up" note was verified only by a 401 challenge plus a 200 sign-in page**, never an authenticated call through the gate. Ledger row.
+  - The gate is NOT creating its live tenant. Live walk-through probes 2/3/5/7/9/11/12/13 will be NOT TESTED on live and are running on its local stacks instead.
+  - **Kam ASKED on the panel ~19:25: "go" or "hold" on fix (b)** (Basic stays on everything except `/api/*`; the API keeps its bearer check; `/idp/*` stays gated). **Default until he answers:** S43 prepares and measures only, nothing applied on Azure.
+  - **S43 briefed 09:25:25Z** (`briefs_staged/2026-09-13_hpsm-s43-urgent-live-gate-blocker.md`; tap `--mail` verified, prompt clear). The ask: reproduce through the public URL; stage (b) on pc-lane-a with a rollback; measure `/api/*` unauthenticated answers (**a 200 with data and no bearer = STOP**); `/idp/token` still challenges; send a READY-TO-APPLY; add a public-gate browser sign-in + S1 check to every upgrade post-check.
+  - **NEXT:** (1) on Kam's go, relay it verbatim (a KAM mail) and S43 applies with a head mail first; warn Kam about the restart. (2) On READY-TO-APPLY, read the `/api` exposure list before relaying anything. (3) After the fix, commission a re-run of the live half of the acceptance gate (the NOT TESTED probes).
+- **s13 watcher re-armed:** `watch_tuesday_exiting.sh 2026-09-13T09:23:05 23:55 1666 83570`.
 
 ## 🟢 KAM, 18:5x AEST, terminal, verbatim: *"Keep going and finish what you can.  no matter the time.  keep going until completion"* — the successor's first jobs, in order
 1. **Every wake:** the unfiltered inbox. S43's fix-round PLAN, its pre-upgrade head mail, the upgrade REPORT and READYs are answered as they land (rules in LIVE items 1–2).
