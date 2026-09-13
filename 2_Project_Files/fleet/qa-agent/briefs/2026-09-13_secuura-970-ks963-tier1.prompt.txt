@@ -1,0 +1,100 @@
+ultrathink
+
+You are the fleet QA agent running a TIER 1 (through code; no rendered surface) gate, ROUND 1, on Secuura/Blockchain PR #970 (KS-963).
+
+Read your brief FIRST and in full, then plan:
+/Volumes/DevMASTER/WEDNESDAY/2_Project_Files/fleet/qa-agent/briefs/2026-09-13_secuura-970-ks963-tier1.md
+
+Subject: ae274f7cbf7034b3b8ae9d8af40d43425516e3a6 = PR #970 (KS-963), open against develop, FOUR commits on develop
+  163ca2c74: three cherry-picks (patch-id EQUAL) of #913's chain fdd8af79d -> 1372dc095 -> b083c0e1e, then the
+  builder's ae274f7cb. services/auth `getUserByIdPreAuth` (userRepo.ts :491-503) throws ServiceUnavailableError (503)
+  on an infrastructure DB error and rethrows any other, instead of returning null = "no such user". Two product lines;
+  FIVE callers (auth.ts :686 refresh, :816 reset, :859 verify-email, wallet.ts :193 wallet sign-in, userRepo.ts :859
+  inside updateUser — reached from the reset/verify success paths AND the login success path auth.ts :587), two of
+  them credential-destroying. 13 unit cells; 3 structural cells rewritten brace-matched; F1 (fifth caller 503, one
+  statement) + F2 control new.
+develop: 0f69129b3156d3adaf0af534a6527b9c3a8d3519 = M3 (16:13 AEST). Merge-base 163ca2c74 (git and the compare API
+  agree; 163ca2c74 IS an ancestor of M3). develop's delta since the base is 3 api-gateway files — disjoint by name.
+  git diff 163ca2c74..ae274f7cb = 2 files (test +327, userRepo.ts +49 -10); M3..head = 5 (those 2 + the 3 reversed).
+Prior evidence: #913 (fdd8af79d, the same change) was gated tier 1 on 2026-09-09, GO WITH FINDINGS F-1..F-8, report at
+  /Volumes/DevMASTER/!CODING/Testing Agent MAIN/projects/secuura-blockchain/reports/2026-09-09-ks963-pr913-tier1/report.md
+  The product diff is CLAIMED identical (Wednesday measured the getUserByIdPreAuth body sha256 b926395def2ed65e at
+  both heads) — re-derive it; the builder did NOT re-drive the five callers on this tree, so you do.
+Repo:    /Volumes/DevMASTER/!CODING/Secuura/Blockchain/2_Project_Files  (READ-ONLY — clone by SHA into your own scratch)
+No running stack: localhost:6882 refuses and docker is down (16:10 AEST). Drive the routers in your own harness over
+  real HTTP (app.listen(0)), mounted as index.ts :85/:112/:113/:181 does, with ../db replaced by a recording SQL
+  dispatcher — the #913 gate's instrument (probe file in its evidence dir). Never start docker or a container.
+
+You are FINDINGS-ONLY. You never fix, never merge, never push, never deploy.
+
+NEVER run a push, the real pre-push hook, or preflight.sh inside the Secuura checkout or any of its worktrees.
+
+NEVER print a credential value, and never open, read or copy a secrets file (any .env, config/secrets.yml). Count, never echo.
+
+Eight things you must not miss:
+
+1. THE FIVE CALLERS AT RUNTIME, at M3 AND at ae274f7cb, over the wire (brief item 2): refresh 401->503 with rotate/
+   denylist/revoke 0 and no Set-Cookie; reset 404+consume(1) -> 503+consume 0; verify-email the same; wallet
+   fall-through-into-createUser -> 503 with INSERT 0, challenge DELETE 0, zero writes; site 5 via the reset SUCCESS
+   path (fail only the SECOND auth_find_user_by_id; preAuthCalls=2) 200+UPDATE(1, tenant undefined)+consume -> 503,
+   UPDATE 0; and row 5b, the LOGIN success path auth.ts:587 — drive it if the harness reaches it, else NOT RE-DRIVEN
+   with the blocker named. Controls with no failure injected. Every caller wrong->correct, none correct->wrong, or say
+   which. Then the 22P02 path at one route (500, not 503, not "no such user").
+
+2. Red-first with tests RUNNING (13 cells or it is a load failure): develop's userRepo.ts (82b3651a844df9bf) swapped in
+   -> predicted 7 failed / 6 passed / 13, the seven NAMED BY TITLE (the builder's runner scored six of them `MODEL`,
+   tamper_runner_vitest.py:33 — its record proves the count, not the identity); restore sha-identical
+   (fd3b8d7763fa6ead); 13/13.
+
+3. Tampers with an ASSERTING runner that reads titles: the builder's C0, T1, T2, T3, T4 (quarantine/2026-09-13-s202/
+   tamper-ks963-{A,B,C}-run2.json), then the gate-designed Tg1 (#913's T-S2, email consume hoisted -> email cell only),
+   Tg2 (#913's T-S3b, a different write before the wallet lookup -> wallet cell only — F-4 closed), Tg3/Tg4 (a comment /
+   a string literal naming consumeResetToken in the gap between the expiry block and the lookup -> predicted FALSE RED,
+   property 2's raw count), Tg5 (`void query(INSERT…)` with no await before the wallet lookup -> predicted 0 red, a gap),
+   Tg6 (the doc comment's fifth row deleted -> 0 red, record). Predictions written BEFORE each runs; cells run quoted
+   beside every red; full services/auth vitest per tamper (48 files / 670 expected), SOLO; restore; green again.
+
+4. §2a — the three structural cells are CHECKERS of auth.ts/wallet.ts: drive the legitimate-shape table (a top-level
+   import, a comment, a string literal, a genuine extra read, a non-await write, the SELECT rewritten, the `\n}\n`
+   slice) and record each row's colour with its clause. A legitimate edit that reds is a Minor against the cells; a
+   defect that stays green is the finding class the #913 gate raised as F-3/F-4.
+
+5. Scope and the identical-diff claim (READ ONLY): 2 files, two hunks in userRepo.ts (@@ -443,14 +443,50 @@ and
+   @@ -458,8 +494,11 @@), the function body sha256 equal at head and fdd8af79d, auth.ts and wallet.ts byte-identical
+   to M3, the three patch-id equalities with a negative control, 0 references to getUserByIdPreAuth outside
+   services/auth, FIVE callers closed by an instrument that is not a symbol grep.
+
+6. The merged tree (M3 + ae274f7cb, 3-way on 163ca2c74, expected clean and disjoint), services/auth vitest on it SOLO
+   (expect 47/657 at M3, 48/670 merged — say what you measure); tsc --noEmit with a planted TS2322 control and
+   tsconfig.json:19's exclusion of src/__tests__ stated (build-clean covers none of the suite); eslint 0 errors.
+
+7. Claims audit of the PR body's Test Evidence, each true as written or a finding: "102 commits behind" (Wednesday
+   measures 106 to 163ca2c74 — 102 was the develop tip at plan time, 721b333a6; polish), "a45204ac9 +36 just above
+   this hunk" (the hunk moved @@ -422 -> @@ -458), "the callers are unchanged since" (true at function level; wallet.ts
+   the FILE moved +42 -3), the five rows' line numbers, the struck "duplicate" clause, F2's "third argument"
+   (db.ts:47-50), 48/670 and 47/657 and 48/668.
+
+8. The builder's NOT-covered list reproduced and each item measured or declared out of reach; F-6 getPlatformAdmin
+   (userRepo.ts:1714-1741) named as OUTSIDE the include, with its caller line at head, under NOT COVERED — not a
+   finding against #970; the catch-swallow census in userRepo.ts with each rationale; NOT TESTED first-class: the
+   RLS/JSONB round-trip of the pre-change tenant-less UPDATE, the wallet INSERT (no PII_ENCRYPTION_KEY — do not invent
+   one), the platform suites (no stack), and whatever of row 5b you could not drive.
+
+Your tool shell's grep may be a function: use /usr/bin/grep, case-insensitive, with a same-file control. Never cd.
+services/auth is VITEST (npx vitest run, never watch), not jest; score reds by the JSON reporter's per-test state and
+title — vitest .rejects reds carry `_Assertion.__VITEST_REJECTS__`, not `AssertionError`.
+Quote the Secuura checkout's porcelain count, .git/config sha256, for-each-ref count and origin develop SHA at start and
+close; they must match (name any ref another seat's push or merge moved — s200 and s202 are live). Never touch the
+builder's worktrees s202-ks963 / s202-ks1052 except to READ from them.
+Do no memory maintenance of your own project's memory store inside this session.
+
+Report FOUND / TESTED / HOW, with controls, the five-caller table with statement counters at both SHAs, the §2a table
+with a measured column, the tamper table, the F-1..F-8 dispositions, and state what you did NOT test — the RLS
+round-trip and the wallet INSERT first.
+Verdict: GO, GO WITH FINDINGS, or NO GO — on ae274f7cb.
+
+MAIL YOUR VERDICT to wednesday-agent@agentmail.to when the pass is complete, using
+the project's send_brief.sh. Your pane holds ~19 lines of alternate screen with no
+scrollback, so a verdict that stays in the pane is one pane-close from being lost --
+this is not a formality, it is the only durable copy. Subject:
+[QA -> Wednesday] TIER 1 GATE #970 ROUND 1 (KS-963) ae274f7cb -- <GO|GO WITH FINDINGS|NO GO>
