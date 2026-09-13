@@ -2307,3 +2307,8 @@ Done with it: Dynamics → Kam's team decision (no action); QuickQuote masthead/
 > Please revise the testing harness documents so they test the live site.
 
 *Note:* Tuesday s12: receipt given (panel + terminal); read as approval beyond outside-only; brief revised: live site a TARGET with its own QA synthetic tenant, credential never printed, load limits, stop-on-degradation; DB/tamper/flood/scan stay local; runs after the live-demo upgrade REPORT.
+
+## 2026-09-13 18:38 — Kam (terminal, verbatim)
+> Keep going and finish what you can.  no matter the time.  keep going until completion
+
+*Note:* Tuesday s12: receipt on the panel; read as authority to run the HPSM fix round, upgrade, feedback and C11 overnight, to launch successor seats as needed, and for this seat to self-rotate at the 80-90 band rather than wait for a hand restart (rotation card tuesday-seat-self-rotate-with-liveness-check left for Kam to tap).
