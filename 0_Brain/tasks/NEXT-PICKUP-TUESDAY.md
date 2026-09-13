@@ -12,6 +12,15 @@ supersede: replace WHOLESALE at the next pickup; never append.
 **On EVERY wake:** `2_Project_Files/tools/kam_rulings_today.sh` (never `kam_msgs.sh` unfiltered) AND `[Kam -> Tuesday]` mails; list `tuesday-agent@` UNFILTERED and route on SUBJECT; `git status --porcelain | grep -v 0_Brain/dashboard/data/`. Rotation band 80–90. **Verify panel messages AT ORIGIN** (`git show origin/main:0_Brain/dashboard/data/chat_tuesday.json` on the ref `panel_sync` fetches; `git ls-remote` HUNG 9 min in this tree at 14:28 — bound any network read with a timeout). **Do NOT read `0_Brain/daily/`** (Wednesday's).
 
 ## 🔴 LIVE — with the next action for each
+0019. **S41 WRAPPED 03:05:02Z** (read whole). Handover `!CODING/Datasec/HPSM/5_Project_History/HANDOVER-S41_seat-hpsm-982d.md` (successor sections 1–8 read by s11).
+    - **Verified at source 13:09:** main `2bd7125` (183 ahead of `afc10e9`); `s41/lane-e-outputs` `4808208` and `s41/lane-g-db-synthetic-generation` `8ded9af` NOT on main (lane G has no 0015 commit yet); every worktree porcelain 0; census PIDs 67724 (S40) + 77350 (S41).
+    - **S42 BRIEF SENT 13:09** (`2_Project_Files/fleet/briefs_staged/2026-09-13_hpsm-s42-successor-switch-on.md`), read back at datasec-hpsm@ 03:09:14Z.
+    - **S42 LAUNCHED ~13:10 in NEW pane `%25` named `Datasec/HPSM-S42`** (pane pid 98160, T9 HPSM `Launch_Claude.command`; census 2 immediately before). HPSM CLAUDE.md:388 makes a fresh seat read datasec-hpsm@ at boot.
+    - **Registry trap:** `launchers.conf` points `Datasec/HPSM` at `/Volumes/DevMASTER/…`, which is not mounted here, so `cockpit.sh launch` would fail. Use `add` with the T9 path.
+    - **NEXT:**
+      (a) S42's plan confirmation. Before CONFIRMING, check S41's pane `%24` is idle at its prompt with no subagent running (lane G). Answer the lane partition and the Q9/2b sequencing.
+      (b) Once S42 confirms, close `%24` with `pane_close.sh` (NOT rotate).
+      (c) Watch for the READY (final head) and then commission the combined tier-1 gate (targets in handover §7).
 0018. **S41 ACK 03:01:42Z, which crossed the 03:02:00Z CHECKPOINT by 18 s (read whole by s11):**
     - **Promoted fixes:** at the DB, lane G migration 0015 (REVOKE column INSERT + BEFORE INSERT trigger for `generated_at` and client/engagement names).
     - **Lane E 2a:** DONE at 4808208, not merged (contract 0.11.0, 422/409 fences, exact-"true" switch, renderOne + §3.2 503s, `X-Output-Not-Signed` + S10 pill).
