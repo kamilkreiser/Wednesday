@@ -7,7 +7,7 @@ status: live
 
 # Boot digest BY TIER — W whole, M rules-only, every project case a handle
 
-Generated 2026-09-14 06:48 from 158 lesson files (805,782 B). M 33 · MIXED 5 · W 120. 28 project CASE sections inside MIXED files are reduced to one line each: the heading and the path to read it at. W blocks are exactly what the default digest carries; M blocks drop the section index and keep the rules; a P file is a single handle. The CASES behind every rule live only in the lesson files — open one the moment its rule fires.
+Generated 2026-09-14 06:53 from 158 lesson files (805,852 B). M 33 · MIXED 5 · W 120. 28 project CASE sections inside MIXED files are reduced to one line each: the heading and the path to read it at. W blocks are exactly what the default digest carries; M blocks drop the section index and keep the rules; a P file is a single handle. The CASES behind every rule live only in the lesson files — open one the moment its rule fires.
 
 ## The T9 SSD is the master — Wednesday must be fully portable
 `2026-07-31_fully-portable-drive.md` · principle · 2026-07-31 · status: superseded — the "T9 is the master" half by [[2026-08-25_one-drive-devmaster-is-master]] (2026-08-25); the portability principle itself still lives · tier: W
@@ -5446,7 +5446,7 @@ sections (open the file for these): Why he said it, and the instance that earned
 2. **Strip only the unsafe part, and deliver the rest.** Here: email the harness document to `kamil.kreiser@datasec.com.au` (Datasec work goes to the Datasec address), name the agent to forward it to and the credential file path, and put no password in the mail.
 3. **When a refinement question goes unanswered, execute the instruction in its safe form.** Say plainly what was adjusted and why.
 4. **Handovers carry a Kam instruction as an OWED ACTION with its safe form written out,** never as an open question with a do-nothing default.
-5. **Only his words withdraw it.** "dont worry" did, at 03:1x, so nothing was sent afterwards.
+5. **Only his words withdraw it.** "dont worry" did, at 06:47:42, so nothing was sent afterwards.
 
 **Family:** [[2026-08-16_an-ask-without-a-default-is-an-indefinite-hold]] (its mirror: there a default was missing; here the default was wrong) · [[2026-09-06_a-retraction-inherits-the-scope-of-its-measurement]] (an objection to one part voided the whole) · [[2026-09-09_acknowledge-panel-instructions-on-receipt]] · the 2026-09-10 where-Kam-reads memory (an established fact lost between sessions).
 

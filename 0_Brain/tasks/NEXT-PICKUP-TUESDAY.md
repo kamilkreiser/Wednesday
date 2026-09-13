@@ -206,7 +206,7 @@ supersede: replace WHOLESALE at the next pickup; never append.
   - the pickup kept current at every event;
   - S46 deferred rather than launched to idle.
 - **Missed:**
-  - repeated the inverted harness-email default in the boot summary without challenging it (Kam corrected it at 03:1x);
+  - repeated the inverted harness-email default in the boot summary without challenging it (Kam corrected it at 06:47:42, transcript);
   - a kill list matched its own shell;
   - the S46 drafting prompt contradicted Tuesday's own C11 ruling (the subagent caught it);
   - s14's first gate brief used a single-marker credential probe (scored against the gate at 0.85).

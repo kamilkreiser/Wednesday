@@ -7,7 +7,7 @@ status: live
 
 # Boot digest — headline + rules of every lesson (open the file when it fires)
 
-Generated 2026-09-14 06:48 from 158 lesson files (804,816 B). Each block = the lesson's retrieval handle (H1), its frontmatter, the operative paragraph, its section index, and every RULES section verbatim. 7 files carry no rules-shaped section and are included whole. The CASES behind a rule live only in the file: open it the moment the rule fires, or when a diagnosis needs the evidence. `_ledger.md` is read whole beside this digest; `_ledger_archive.md` on demand.
+Generated 2026-09-14 06:53 from 158 lesson files (804,886 B). Each block = the lesson's retrieval handle (H1), its frontmatter, the operative paragraph, its section index, and every RULES section verbatim. 7 files carry no rules-shaped section and are included whole. The CASES behind a rule live only in the file: open it the moment the rule fires, or when a diagnosis needs the evidence. `_ledger.md` is read whole beside this digest; `_ledger_archive.md` on demand.
 
 ## The T9 SSD is the master — Wednesday must be fully portable
 `2026-07-31_fully-portable-drive.md` · principle · 2026-07-31 · status: superseded — the "T9 is the master" half by [[2026-08-25_one-drive-devmaster-is-master]] (2026-08-25); the portability principle itself still lives
@@ -5807,7 +5807,7 @@ sections (open the file for these): Why he said it, and the instance that earned
 2. **Strip only the unsafe part, and deliver the rest.** Here: email the harness document to `kamil.kreiser@datasec.com.au` (Datasec work goes to the Datasec address), name the agent to forward it to and the credential file path, and put no password in the mail.
 3. **When a refinement question goes unanswered, execute the instruction in its safe form.** Say plainly what was adjusted and why.
 4. **Handovers carry a Kam instruction as an OWED ACTION with its safe form written out,** never as an open question with a do-nothing default.
-5. **Only his words withdraw it.** "dont worry" did, at 03:1x, so nothing was sent afterwards.
+5. **Only his words withdraw it.** "dont worry" did, at 06:47:42, so nothing was sent afterwards.
 
 **Family:** [[2026-08-16_an-ask-without-a-default-is-an-indefinite-hold]] (its mirror: there a default was missing; here the default was wrong) · [[2026-09-06_a-retraction-inherits-the-scope-of-its-measurement]] (an objection to one part voided the whole) · [[2026-09-09_acknowledge-panel-instructions-on-receipt]] · the 2026-09-10 where-Kam-reads memory (an established fact lost between sessions).
 
