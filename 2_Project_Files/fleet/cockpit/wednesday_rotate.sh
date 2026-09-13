@@ -42,11 +42,30 @@ if [ -n "${ROTATE_TMUX_SESSION:-}" ] && [ -z "${ROTATE_LAUNCH_CMD:-}" ] || [ -z 
   log "REFUSED: test hooks must be set both or none (ROTATE_TMUX_SESSION + ROTATE_LAUNCH_CMD)"; exit 2
 fi
 FLEET="${ROTATE_TMUX_SESSION:-fleet}"
-LAUNCH_CMD="${ROTATE_LAUNCH_CMD:-bash \"$PROJECT_DIR/Launch_Wednesday.command\"}"
+# ── SEAT RESOLUTION (2026-09-13, Tuesday's ask; learnings/2026-09-09_the-seat-
+# resolver-is-the-layer-above-every-agent-aware-fix.md): WED_AGENT if set, else the
+# TREE'S OWN NAME — the same resolver wake_watch.sh uses. Wednesday's tree resolves
+# to "wednesday", so the pane lookup and launcher below are byte-identical to before;
+# Tuesday's seat (same script, her own `fleet`) gets her pane name and her launcher.
+# No fallback to the other seat's launcher: a missing one REFUSES (a guess here
+# boots the wrong identity — the 2026-09-09 case).
+_tree_seat=wednesday
+case "$(basename "$PROJECT_DIR")" in TUESDAY|Tuesday|tuesday) _tree_seat=tuesday ;; esac
+SEAT="${WED_AGENT:-$_tree_seat}"
+case "$SEAT" in
+  tuesday)   SEAT_LAUNCHER="$PROJECT_DIR/Launch_Tuesday.command" ;;
+  wednesday) SEAT_LAUNCHER="$PROJECT_DIR/Launch_Wednesday.command" ;;
+  *) log "REFUSED: WED_AGENT='$SEAT' is not a seat this script knows (wednesday|tuesday)"; exit 2 ;;
+esac
+export WED_AGENT="$SEAT"   # the detached checker resolves the seat from this
+if [ -z "${ROTATE_LAUNCH_CMD:-}" ] && [ ! -f "$SEAT_LAUNCHER" ]; then
+  log "REFUSED: seat '$SEAT' but its launcher is missing: $SEAT_LAUNCHER"; exit 2
+fi
+LAUNCH_CMD="${ROTATE_LAUNCH_CMD:-bash \"$SEAT_LAUNCHER\"}"
 
 "$TMUX_BIN" has-session -t "=$FLEET" 2>/dev/null || { log "REFUSED: no tmux session '$FLEET'"; exit 2; }
-WROW=$("$TMUX_BIN" list-panes -s -t "=$FLEET" -F '#{@cockpit_name}|#{pane_id}' 2>/dev/null | awk -F'|' '$1=="wednesday"' | head -1)
-[ -n "$WROW" ] || { log "REFUSED: no wednesday pane in '$FLEET'"; exit 2; }
+WROW=$("$TMUX_BIN" list-panes -s -t "=$FLEET" -F '#{@cockpit_name}|#{pane_id}' 2>/dev/null | awk -F'|' -v s="$SEAT" '$1==s' | head -1)
+[ -n "$WROW" ] || { log "REFUSED: no '$SEAT' pane in '$FLEET'"; exit 2; }
 PANE_ID="${WROW#*|}"
 
 if [ "$MODE" = "--dead" ]; then
@@ -72,12 +91,60 @@ else
 fi
 
 STAMP=$(date '+%H:%M')
-log "respawning wednesday pane $PANE_ID in '$FLEET' ($MODE): $REASON"
-if "$TMUX_BIN" respawn-pane -k -t "$PANE_ID" "$LAUNCH_CMD; echo; echo '[cockpit] wednesday exited — pane stays for inspection'; exec bash"; then
-  "$TMUX_BIN" set-option -p -t "$PANE_ID" @cockpit_name wednesday 2>>"$LOG" || true
-  log "respawned OK ($MODE)"
+
+# ── POST-RESPAWN LIVENESS CHECK (2026-09-13; the 16:04:29 loss — see
+# reference/2026-09-13_fleet-loss-1604/rotation_1604_diagnosis.md and the header of
+# rotate_liveness.sh). At 16:04:29 on 09-12 the `respawn-pane -k` below was followed
+# 36 ms later by the death of the WHOLE fleet session (3 agents + QA gate + monitor);
+# this script said "respawned OK" and told Kam "agents are untouched" without looking.
+# Now: (1) the pane inventory is recorded BEFORE the respawn, to the log and to a
+# state file; (2) a checker is spawned DETACHED WITH NO TTY before the respawn (it
+# must not share this pane's tty — learnings/2026-09-03_a-pane-close-is-a-session-
+# kill.md) and, ~25 s later, verifies the session, every agent pane and the new
+# coordinator process, alarming + relaunching the coordinator on loss. The
+# `ps -o pid,ppid,sess,tty` of the checker goes in the log: tty must read `??`.
+# (Measured 2026-09-13: macOS `ps -o sess` prints 0 for EVERY process, pane shells
+# included — the tty column is the reading that decides; `os.getsid()` is the
+# instrument if the session id itself is ever needed.)
+# macOS has no setsid(1); python's os.setsid + execvp is the portable shape (the same
+# one the 08:45 panel_sync restart used). The state dir is gitignored by design
+# (.gitignore:44); the SCRIPTS are tracked.
+STATE_DIR="$HERE/state"; mkdir -p "$STATE_DIR"
+BEFORE_TS="$(date '+%Y%m%d_%H%M%S')"
+BEFORE_FILE="$STATE_DIR/rotate_before_${BEFORE_TS}.txt"
+"$TMUX_BIN" list-panes -s -t "=$FLEET" -F '#{pane_id} [#{@cockpit_name}] #{pane_title} #{pane_pid}' > "$BEFORE_FILE" 2>>"$LOG"
+log "pane inventory BEFORE respawn ($(grep -c . "$BEFORE_FILE") panes) -> $BEFORE_FILE"
+while IFS= read -r _row; do log "  before: $_row"; done < "$BEFORE_FILE"
+LIVENESS="$HERE/rotate_liveness.sh"
+if [ -x "$LIVENESS" ]; then
+  LIVENESS_TEST=0; LIVENESS_STUB_DIR=""
+  if [ -n "${ROTATE_TMUX_SESSION:-}" ]; then LIVENESS_TEST=1; LIVENESS_STUB_DIR="${ROTATE_LIVENESS_STUB_DIR:-}"; fi
+  LIVENESS_LAUNCH_CMD="$LAUNCH_CMD" LIVENESS_TEST="$LIVENESS_TEST" LIVENESS_STUB_DIR="$LIVENESS_STUB_DIR" \
+    python3 -c 'import os,sys; os.setsid(); os.execvp(sys.argv[1], sys.argv[1:])' \
+      nohup bash "$LIVENESS" "$FLEET" "$BEFORE_FILE" "$PANE_ID" </dev/null >>"$LOG" 2>&1 &
+  LIVE_PID=$!
+  sleep 1
+  LIVE_PS="$(ps -o pid=,ppid=,sess=,tty= -p "$LIVE_PID" 2>/dev/null | tr -s ' ')"
+  LIVE_TTY="$(printf '%s' "$LIVE_PS" | awk '{print $4}')"
+  if [ -z "$LIVE_PS" ]; then
+    log "WARNING: liveness checker pid $LIVE_PID is NOT running one second after spawn — respawning UNGUARDED (see log above)"
+  elif [ "$LIVE_TTY" != "??" ]; then
+    log "WARNING: liveness checker pid $LIVE_PID has a tty ($LIVE_PS) — it may die with this pane; respawning anyway"
+  else
+    log "liveness checker spawned detached: pid/ppid/sess/tty =$LIVE_PS (fires in ~25 s)"
+  fi
+else
+  log "WARNING: $LIVENESS missing or not executable — respawning UNGUARDED (doctor.sh should have failed on this)"
+fi
+
+log "respawning $SEAT pane $PANE_ID in '$FLEET' ($MODE): $REASON"
+if "$TMUX_BIN" respawn-pane -k -t "$PANE_ID" "$LAUNCH_CMD; echo; echo '[cockpit] $SEAT exited — pane stays for inspection'; exec bash"; then
+  "$TMUX_BIN" set-option -p -t "$PANE_ID" @cockpit_name "$SEAT" 2>>"$LOG" || true
+  log "respawned OK ($MODE) — liveness verdict follows in ~25 s"
   if [ -z "${ROTATE_TMUX_SESSION:-}" ]; then
-    bash "$PROJECT_DIR/2_Project_Files/tools/chat_reply.sh" "Coordinator seat rotated automatically at $STAMP — $REASON. A fresh seat is booting now (about ten minutes); agents are untouched and their mail waits for it." >>"$LOG" 2>&1 || log "chat mirror failed (see log)"
+    # "agents are untouched" is no longer asserted here (the 16:04 loss): the liveness
+    # checker reports the agents' state; this line only says what was checked.
+    bash "$PROJECT_DIR/2_Project_Files/tools/chat_reply.sh" "Coordinator seat rotated automatically at $STAMP — $REASON. A fresh seat is booting now (about ten minutes); agents' mail waits for it. A liveness check runs 25 s after the respawn and will alarm here if the fleet session or any agent pane was lost." >>"$LOG" 2>&1 || log "chat mirror failed (see log)"
     H=$((10#$(date +%H)))
     if [ "$H" -ge 6 ] && [ "$H" -lt 23 ]; then
       bash "$PROJECT_DIR/2_Project_Files/voice/speak.sh" "Kam, my seat rotated itself. A fresh one is booting now." >>"$LOG" 2>&1 || true

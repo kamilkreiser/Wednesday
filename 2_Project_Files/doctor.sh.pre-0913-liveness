@@ -326,66 +326,6 @@ else
   fail "dead-coordinator rotation NOT wired" "a seat at its context limit would sit dead until a human notices (2026-09-02); check wake_watch.sh / arm_wake_watch.sh / wednesday_rotate.sh"
 fi
 
-# --- Rotation LIVENESS check (2026-09-13): at 16:04:29 on 09-12 a `respawn-pane -k`
-# on the coordinator's pane was followed 36 ms later by the death of the WHOLE fleet
-# session — three agents, the QA gate, the monitor — and the rotate script reported
-# "respawned OK; agents are untouched" without looking (1 loss in 63 rotations, trigger
-# never established: reference/2026-09-13_fleet-loss-1604/). The guard is a detached
-# checker, rotate_liveness.sh, that the rotate script spawns BEFORE the respawn. Three
-# parts, each a FAIL if missing: the checker exists + is executable, parses
-# (`bash -n`), and wednesday_rotate.sh actually references it — a checker nothing
-# spawns is decoration.
-RL="$PROJECT_DIR/2_Project_Files/fleet/cockpit/rotate_liveness.sh"
-if [ ! -x "$RL" ]; then
-  fail "rotate_liveness.sh missing or not executable" "a rotation would run UNGUARDED: the 16:04 loss class (whole fleet gone at respawn) goes unnoticed — restore 2_Project_Files/fleet/cockpit/rotate_liveness.sh (+x)"
-elif ! bash -n "$RL" 2>/dev/null; then
-  fail "rotate_liveness.sh does not parse (bash -n)" "the rotate script would spawn a checker that dies at once — fix the syntax error"
-elif ! grep -q 'rotate_liveness.sh' "$RT" 2>/dev/null; then
-  fail "wednesday_rotate.sh does not spawn rotate_liveness.sh" "the post-respawn liveness check is NOT wired — restore the spawn block in wednesday_rotate.sh"
-else
-  ok "rotation liveness check wired (rotate_liveness.sh +x, parses, spawned by wednesday_rotate.sh)"
-fi
-# The checker's FIRE path leaves state/ROTATE_LOSS_<ts>.txt (before + after pane lists).
-# LOUD until a seat reads it: never deleted here — the seat quarantines it (move, never
-# rm; learnings/2026-08-26_never-delete-cleanup-means-quarantine) once the loss is handled.
-ROTATE_LOSS_FILES="$(find "$PROJECT_DIR/2_Project_Files/fleet/cockpit/state" -maxdepth 1 -name 'ROTATE_LOSS_*.txt' 2>/dev/null | sort)"
-if [ -n "$ROTATE_LOSS_FILES" ]; then
-  warn "!!! FLEET LOSS ALARM from a rotation: $(printf '%s\n' "$ROTATE_LOSS_FILES" | xargs -n1 basename | tr '\n' ' ')" \
-       "a rotation lost the fleet session or an agent pane — READ the file(s) (before/after pane lists), relaunch what is missing, then QUARANTINE the file (move it under 0_Brain/reference/<date>_fleet-loss/; never rm)"
-else
-  ok "no ROTATE_LOSS alarm files in cockpit/state"
-fi
-
-# --- panel_sync loop alive (2026-09-13): Kam's ONE chat page is kept current by
-# `panel_sync.sh loop` (60 s cycles, detached, outside tmux). It died with the 09-12
-# 16:27 reboot and nothing noticed until a seat read the log at 08:45 the next morning
-# — his page was 16 hours stale and no check said so. The log is written by the loop
-# itself (every cycle), so the log's mtime IS the newest line's time. Not running with a
-# log present = FAIL (the machine has run it before, so it is expected here); running but
-# the log older than 5 min = WARN with the age (the loop is wedged or sleeping past its
-# cycle). No log at all = never run on this machine (fresh clone): ok, the launcher arms it.
-# EXERCISE OVERRIDES (never set in production; both documented here so the check can be
-# fired without stopping the live loop): DOCTOR_PANEL_SYNC_LOG=<path> points the check at
-# another log (a scratch copy with an old mtime exercises the WARN);
-# DOCTOR_PANEL_SYNC_PGREP_PATTERN=<pattern> replaces the pgrep pattern (one that matches
-# nothing exercises the FAIL).
-PS_LOG="${DOCTOR_PANEL_SYNC_LOG:-$PROJECT_DIR/2_Project_Files/tools/logs/panel_sync.log}"
-PS_PAT="${DOCTOR_PANEL_SYNC_PGREP_PATTERN:-panel_sync\.sh loop}"
-if [ -f "$PS_LOG" ]; then
-  if ! pgrep -f "$PS_PAT" >/dev/null 2>&1; then
-    fail "panel_sync loop NOT running (log exists: $(basename "$PS_LOG"))" "Kam's chat page goes stale — the launcher arms it at boot; by hand: python3 -c 'import os,sys; os.setsid(); os.execvp(sys.argv[1], sys.argv[1:])' nohup bash 2_Project_Files/tools/panel_sync.sh loop </dev/null >> 2_Project_Files/tools/logs/panel_sync.log 2>&1 &"
-  else
-    PS_AGE=$(( $(date +%s) - $(stat -f %m "$PS_LOG" 2>/dev/null || echo 0) ))
-    if [ "$PS_AGE" -gt 300 ]; then
-      warn "panel_sync loop running but its log is ${PS_AGE}s old (>300 s)" "the loop should write every 60 s — read $(basename "$PS_LOG") tail; a wedged loop looks alive to pgrep"
-    else
-      ok "panel_sync loop running, log ${PS_AGE}s fresh"
-    fi
-  fi
-else
-  ok "panel_sync: no log yet on this machine (never run) — the launcher arms it"
-fi
-
 # --- Fleet model pins (Kam ruling 2026-08-12: all projects Opus 5; only Wednesday
 # stays on Fable 5 while the usage limit is tight). Launchers pin --model on the
 # exec line, which OVERRIDES the global default — a stale fable pin silently

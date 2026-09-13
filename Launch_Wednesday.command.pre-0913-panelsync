@@ -206,45 +206,6 @@ else
 fi
 rm -f /tmp/wednesday_boot_digest.$$
 
-# ── Arm panel_sync (2026-09-13) — the loop that keeps Kam's ONE chat page current ──
-# `panel_sync.sh loop` (60 s pull/rebuild/push, tools/panel_sync.sh) ran outside tmux and
-# outside every launcher: it died with the 09-12 16:27 reboot and nothing noticed until a
-# seat read its log at 08:45 the next morning — Kam's page was 16 hours stale. Same class
-# as the wake_watch row below (ledger w=5: hand-arming dies within a day): the launcher is
-# in the path of every boot, so it arms; doctor.sh checks (FAIL when the log exists and
-# no loop runs, WARN when the log is >5 min old).
-# PLACED BEFORE THE DOCTOR PREFLIGHT, deliberately (not beside wake_watch, which is armed
-# after it): every post-reboot boot has a log and no loop, doctor would FAIL on that, and
-# the hard-fail prompt below defaults to N — the boot would refuse itself. Arming first
-# means doctor measures the armed state; a genuine arm failure still prints its own line.
-# Detached with NO tty: macOS ships no setsid(1), so python's os.setsid + execvp (the
-# shape the 08:45 restart used) + nohup, stdin /dev/null, stdout+stderr appended to the
-# loop's own log. pgrep -f is the same instrument doctor uses.
-# `exec` is load-bearing (measured 2026-09-13 in the red-proof): a backgrounded FUNCTION
-# call is a forked subshell, so without exec `$!` named that subshell — a process on the
-# launcher's tty — and not the loop; the loop was python's child in its own session and
-# outlived a kill of `$!`. With exec the subshell BECOMES python -> nohup -> the loop, so
-# `$!` is the loop's pid and the tty reading below is the loop's.
-panel_sync_detach() { exec python3 -c 'import os,sys; os.setsid(); os.execvp(sys.argv[1], sys.argv[1:])' "$@"; }
-arm_panel_sync() {
-  local ps_script="$PROJECT_DIR/2_Project_Files/tools/panel_sync.sh"
-  local ps_log="$PROJECT_DIR/2_Project_Files/tools/logs/panel_sync.log"
-  local pid
-  pid="$(pgrep -f 'panel_sync\.sh loop' 2>/dev/null | head -1)"
-  if [ -n "$pid" ]; then echo "panel_sync: already running pid $pid"; return 0; fi
-  if [ ! -x "$ps_script" ]; then echo "panel_sync: NOT armed — $ps_script missing or not executable"; return 1; fi
-  mkdir -p "$(dirname "$ps_log")"
-  panel_sync_detach nohup bash "$ps_script" loop </dev/null >> "$ps_log" 2>&1 &
-  pid=$!
-  sleep 1
-  if kill -0 "$pid" 2>/dev/null; then
-    echo "panel_sync: armed pid $pid (tty $(ps -o tty= -p "$pid" 2>/dev/null | tr -d ' '), log $ps_log)"
-  else
-    echo "panel_sync: arm FAILED — pid $pid exited within a second; read $ps_log"; return 1
-  fi
-}
-arm_panel_sync || echo "WARNING: panel_sync failed to arm — Kam's page will go stale; report this in the session (no-skip)."
-
 if [ -x "$PROJECT_DIR/2_Project_Files/doctor.sh" ]; then
   if ! "$PROJECT_DIR/2_Project_Files/doctor.sh" --quiet; then
     echo ""
