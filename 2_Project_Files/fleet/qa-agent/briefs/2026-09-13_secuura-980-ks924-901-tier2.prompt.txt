@@ -1,0 +1,144 @@
+ultrathink
+
+You are the fleet QA agent running a TIER 2 (through code) gate, ROUND 1, on Secuura/Blockchain PR #980 (KS-924 / KS-901).
+
+Read your brief FIRST and in full, then plan:
+/Volumes/DevMASTER/WEDNESDAY/2_Project_Files/fleet/qa-agent/briefs/2026-09-13_secuura-980-ks924-901-tier2.md
+
+Subject: 9c620f890fe844b48252b72d935257bfa8b151ba = PR #980 (KS-924 KS-901), open against develop, ONE commit whose
+  parent is 50b729d69 = the merge-base (M9, #971's squash — a PLAIN PR, not stacked). develop MOVED ONCE after the
+  cut: e91eb5bda (17:37 AEST, #972's squash, KS-1052 r2: 9 files ALL under services/auth/src/ — 4 under __tests__,
+  which this corpus SKIPs, and 5 walked files MODIFIED, none added or removed) — disjoint from packages/shared/
+  entirely, so the walked set on the merged tree is still 380 files in the same 27 packages (bytes 4,757,525 ->
+  4,764,340) and the eight-shape census is still []. GitHub compare at 17:58 AEST: diverged, ahead 1 / behind 1.
+  The launcher pins the merge-base 50b729d69 (exit 10) and develop e91eb5bda with a DISJOINTNESS CHECK (exit 18
+  only if a later squash touches packages/shared/, adds a package outside K1's 27, empties one, breaks K3's floor,
+  or lands a pinned express shape in a walked file) — so develop is probably PAST e91eb5bda when you read it;
+  re-state the census. ONE file, +130 -14 (327 -> 443 lines, 9 hunks, 22 -> 29 cells):
+  packages/shared/src/__tests__/entrypoint-corpus.test.ts — the corpus checker's own suite; the module
+  entrypoint-corpus.ts is UNCHANGED (blob a7abd31ef at base, head and develop; sha256 d78a570fb170d61a…).
+  KS-924: K1 derives the set of <root>/<pkg> prefixes that contributed a walked file and compares it, sorted, with
+  a 27-name LITERAL (:395-438) — a whole package vanishing reds BY NAME whatever its size (the floor > 350 has a
+  29-file blind band at 380 walked and 23 of the 27 packages fit inside it: kyc's 11 gone leaves 369, green); K2
+  (:290-307) compares SKIP as a SET (`[...SKIP].sort()` vs a sorted literal — a reorder no longer reds, `+'routes'`
+  still does, 63 files, 317 left); K3 (:309-330) is the floor retitled to what it does, value unchanged. KS-901:
+  three more express-binding shapes — require('express')() direct (H-a6 :164), assign-after-declare (H-a7 :165,
+  requires the `=` at statement start), import('express').then( (H-a8 :166, requires `.then(`) — each pinned
+  FALSE (:251-269, the reader is NOT widened), each a regex in BLIND_SPOT_SHAPES, each planted by P1..P3 (:232-249)
+  and required to be named by EXACTLY ONE regex; the census title (:180) now says "the EIGHT pinned shapes … not
+  'nothing'". Both tickets were F-1/F-2 residues of the #863 and #859 tier-2 gates (report paths in the brief).
+Repo:    /Volumes/DevMASTER/!CODING/Secuura/Blockchain/2_Project_Files  (READ-ONLY — clone by SHA into your own scratch)
+
+You are FINDINGS-ONLY. You never fix, never merge, never push, never deploy, never post to the extranet, never @ anyone, never mark anything seen.
+
+NEVER run a push, the real pre-push hook, or preflight.sh inside the Secuura checkout or any of its worktrees.
+
+NEVER print a credential value, and never open, read or copy a secrets file (any .env, config/secrets.yml). Count, never echo.
+
+Seven things you must not miss:
+
+1. RED-FIRST PER TICKET, RE-DERIVED AT BASE WITH THE SUITE RUNNING (cells-run quoted beside every red): in your own
+   by-SHA worktree of 50b729d69 the file reads 22/22. KS-924 item 1 is an ABSENCE: the module with services/kyc
+   skipped in the walk (`if (e.isDirectory()) walk(join(dir, e.name, 'src'));` -> `… && e.name !== 'kyc' …`, anchor
+   count 1, worktree only, never staged) leaves the base file 22/22 GREEN (369 > 350) — the defect; at 9c620f890
+   the same tamper reds EXACTLY K1 (28/29), K3 green. KS-924 item 2 is an OVER-FIRE: the SKIP literal's first two
+   entries swapped reds the OLD pin at base (21/22) and leaves 29/29 at head. KS-901 is an absence: the head file
+   with the three regex lines :164-166 deleted reds EXACTLY P1 P2 P3 (`expected [] to have a length of 1 but got
+   +0`, 26/29 — the builder's redfirst_step1.out). Restore the test file sha-identical 86b7f7b23b2ac591… and the
+   module d78a570fb170d61a… after every tamper.
+
+2. THE CENSUS AT SOURCE, from blobs, never from the run: git ls-tree -r -l 9c620f890 -- Blockchain/Dev/services
+   Blockchain/Dev/connectors, keep <root>/<pkg>/src/**/*.ts (not .d.ts) with no SKIP name (node_modules dist build
+   coverage .git __tests__ tests) below src = 380 files / 4,757,525 bytes at base and head, 4,764,340 at e91eb5bda;
+   37 dirs under the roots, 28 with src/, 27 contributing (connectors/libreoffice-extension has src/ and no .ts);
+   the per-package counts in the brief; 23 of 27 packages at <= 29 files; the sorted derived set EQUALS K1's literal
+   :410-436 by string equality. Then the eight regexes (H-a7 with the multiline flag) over all 380 blobs: [], the
+   positive control `import X from 'express'` 8 files (named in the brief), `require('express')` 0, the bare
+   `import('express')` 1 (users.ts:850, type position), the ticket's disclosed first-draft regex
+   `^\s*(let|var)\s+\w+;` 10 real files (named). Keep your OWN scratch out of <pkg>/src — a .ts there is walked and a
+   new <root>/<name>/src reds K1 by design.
+
+3. RED-PROOF WITH THE SUITE RUNNING (29 cells ran, or the tamper is INVALID — a compile failure reds having run
+   zero cells and scores nothing): prediction first; anchor count as stated; restore sha-identical; score by TITLE.
+   T1 module kyc skipped -> K1 only (28/29). T2 module SKIP reordered -> 0 red (29/29). T3 module SKIP + 'routes'
+   -> K2 + K3 (`expected 317 to be greater than 350`), K1 GREEN, 27/29. T4/T5/T6 test H-a6/H-a7/H-a8 line deleted ->
+   P1/P2/P3 (28/29 each). Tg1 (gate-designed) module ENTRYPOINT_ROOTS -> ['services'] -> EXACTLY 2 red: the roots
+   pin + K1 (connectors/whatsapp-bot gone), K3 GREEN at 375 — K1, not K3, guards the smallest loss this corpus has
+   actually suffered; the design, report the measurement. Tg2 (gate-designed) the H-a7 line -> the first draft
+   `/^\s*(let|var)\s+\w+;/m` -> EXACTLY 1 red: the 🔴 CENSUS naming the 10 files, P2 GREEN — the census, not the P
+   cell, is the guard on a loosened regex; a green CENSUS here is a Major finding. Tg3 the H-a7 line ->
+   `/require\(\s*['"]express['"]\s*\)/` -> EXACTLY 1 red: P1 (`to have a length of 1 but got 2`) — toHaveLength(1)
+   is load-bearing. Tk the literal's `'services/kyc',` line deleted -> K1 (both directions). Tp, the fix's own
+   exceptions: a plant services/__qa980_planted/src/index.ts in your HEAD worktree -> K1 red by design (K3 green at
+   381), then under connectors/libreoffice-extension/src/ -> the same; a scratch tree with the type-position
+   `import('express').NextFunction` -> 0 shapes (control: append `.then(` -> H-a8); `const ex = require('express')`
+   -> 0 shapes and createsExpressApp TRUE (control: `let ex;\nex = require('express');` -> H-a7). Quarantine every
+   plant by rename to a non-.ts name or outside Blockchain/Dev, never rm; 29/29 and 380 after.
+
+4. THE §2a TABLE AS MEASURED, base and head, one line per shape: a small package gone (green at base · K1 at head)
+   · a large one (floor · K1 + K3) · a root gone (roots pin · roots pin + K1, K3 green) · 30+ files without a
+   package emptied (old pin + floor · K2 + K3) · SKIP reordered (old pin RED · green) · SKIP widened by < 30 files
+   (old pin · K2 only) · a NEW package (green · K1 by design — Record) · a src/ with no .ts (green · green) · a real
+   service in H-a6/H-a7/H-a8's shape (census green at base · census red at head, K1 too) · `const ex =
+   require('express')` (green · green — the reader follows it) · the type-position import('express') (green ·
+   green) · under __tests__/tests, a .d.ts, a .js (green · green — declared limits) · a symlinked package dir (a
+   fixture failure, score nothing). Every green needs its plant-point control, as the #863 and #859 gates did.
+
+5. THE RATIO AND THE MERGED TREE, SOLO: at 9c620f890 the file 29/29; the full packages/shared
+   `2 failed | 792 passed (794)`, `1 failed | 40 passed (41)` files — the two reds are ks781 LEG D's stale pins
+   (`names WHERE each declared site is…`, `CONTROL — the three declared sites include the one that is NOT
+   mock-gated`; PR #975, open at 19:13 AEST) — or 794/794 if #975 has merged: say which state you measured in.
+   Base: `2 failed | 785 passed (787)`. git merge 9c620f890 onto the then-current develop (e91eb5bda at 19:13 AEST
+   or past it) in your own clone is a 3-WAY merge (the 1 file vs #972's nine under services/auth/src/ — expect
+   CLEAN; quote the tree sha); run the full package on it SOLO: the same counts, this file 29/29, the walk at 380
+   files / 4,764,340 bytes / census [] — re-derive if develop moved further. Read git ls-remote origin
+   refs/heads/develop at start and end; prove every squash past 50b729d69 disjoint by NAME from packages/shared/,
+   re-state the census, say whether #975 is in it, and if a squash added a package under the roots say that K1
+   reds on the merged tree by design (a finding against the merge, not #980).
+
+6. CLAIMS TRUE AS WRITTEN (read-only), each with its evidence: "380 / 29 / 23 of 27 / 369" (K3's comment :318-320,
+   the PR body); "37 / 28 / 27" and "libreoffice-extension has src/ and no .ts"; the first draft "matched 10 files"
+   (the ticket said 11 at ITS tip — a different tree, say so); "exactly one type-position import('express')" in
+   users.ts; "no change to entrypoint-corpus.ts"; "22 -> 29", "792/794 = 785 + 7", "vitest 4.1.10"; the census
+   title's "EIGHT" = eight regexes and eight H pins by NAME. The two ticket comments (KS-924 ff243547, KS-901
+   22edc422): 1 at-sign each = the "PR #980 @ `9c620f890`" idiom, 0 mention-shaped; the PR body 0 at-signs; the
+   linear[bot] comment 5651960557 0 at-signs. Board: KS-924/901 In Progress (automation), attachment #980 only, one
+   comment each; KS-899 and KS-857 Deployed to UAT (archived 09-08); KS-800 In Review (unarchived — the KS-754
+   trap's live target; #980's branch carries ks-924 ks-901 only); KS-953 Backlog; KS-933 Backlog; KS-1126 In
+   Progress — read at start AND end, report any walk with its timestamp, never touch. COMMISSIONED vs DELIVERED:
+   confirm every row of the brief's table against the s206 PR-3 section — a gap is a finding, an over-delivery a
+   Record. Before writing any finding, search the board by SYMBOL and PATH (entrypoint-corpus, BLIND_SPOT_SHAPES,
+   sourceFilesUnderRoots, createsExpressApp, ENTRYPOINT_ROOTS, K1, the file path) and cite the ticket that already
+   carries it. Then the class hunt: other floors and hand-maintained literals in this directory whose title claims
+   more than the body checks (ks727's Q-1 wiring cell; ks781's use of the module). Record for Wednesday.
+
+7. DOCS §4 and the quality legs: the two platform-k HTML docs do not name entrypoint-corpus / KS-924 / KS-901 /
+   BLIND_SPOT / contributing packages (Wednesday reads 0 hits, positive control orchestrate.sh 1 each) — confirm
+   with /usr/bin/grep -ci and the same control; eslint on the file rc 0 and `eslint src` rc 1 = the one
+   pre-existing middleware/index.ts:522 no-control-regex; a scratch tsconfig (.json, extends the package's, includes
+   only this file and the module) -> tsc --noEmit 0 errors at head and at the base file; tsconfig.json:21 excludes
+   src/__tests__ (KS-933). Then the verdict on 9c620f890.
+
+Your tool shell's grep may be a function: use /usr/bin/grep, case-insensitive, with a same-file control; for the
+regex-literal anchors use -F with the backslashes doubled for the shell, or Python str.count on the blob. Never cd;
+the pre-tool hook refuses `git worktree` in the Secuura checkout — clone into your scratch and run write verbs THERE.
+A REAL checkout of the whole Blockchain/Dev, not a symlink farm (the walk does not descend symlinked directories —
+K1 reds for the wrong reason). The builder's worktree worktrees/s206-laneD is NOT at 9c620f890 (it is on the seat's
+PR-4 branch) — symlink its node_modules INTO your clone, never read its sources as #980's, never run vitest inside
+it. packages/shared is VITEST 4.1.10 (npx vitest run, never watch; cwd = <clone>/Blockchain/Dev/packages/shared);
+run suites solo. /bin/bash here is 3.2 — keep quote-bearing Python out of $( … ), or write runners in Python.
+Quote the Secuura checkout's porcelain count, .git/config sha256, for-each-ref count and origin develop SHA at start
+and close; they must match (name any ref another seat's push or merge moved).
+Do no memory maintenance of your own project's memory store inside this session.
+
+Report FOUND / TESTED / HOW, with controls, the per-ticket red-first with cells-run, the census table re-derived (with
+the merged tree's row), the COMMISSIONED vs DELIVERED table confirmed, the §2a table as measured, the tamper table
+(T1–T6, Tg1–Tg3, Tk, Tp: prediction · cells run · red titles · restore sha; an under-29-cell run is INVALID, not red),
+and state what you did NOT test.
+Verdict: GO, GO WITH FINDINGS, or NO GO — on 9c620f890, against the develop you merged it onto (name it).
+
+MAIL YOUR VERDICT to wednesday-agent@agentmail.to when the pass is complete, using
+the project's send_brief.sh. Your pane holds ~19 lines of alternate screen with no
+scrollback, so a verdict that stays in the pane is one pane-close from being lost --
+this is not a formality, it is the only durable copy. Subject:
+[QA -> Wednesday] TIER 2 GATE #980 ROUND 1 (KS-924 KS-901) 9c620f890 -- <GO|GO WITH FINDINGS|NO GO>
