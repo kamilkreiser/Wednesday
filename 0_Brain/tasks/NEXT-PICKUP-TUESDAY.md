@@ -66,6 +66,14 @@ supersede: replace WHOLESALE at the next pickup; never append.
 - Questions s12 answered: 18:13:30 (live site link for the harness), 18:49:22 (where HPSM is at), 18:52:15 (harness updated for the live site?).
 - Times come from the transcripts. Where s12's pickup or the prompt log differ (18:5x, 18:38, 18:52, 19:14), the transcript time is used.
 
+## ✅ 21:27 — LIVE UPGRADE DONE: both stacks on `87c0026` (S44 REPORT 11:25:29Z, DKIM pass, read whole); live-delta QA LAUNCHED
+- **pc-lane-a** 11:22:33-48Z, **Azure** 11:23:13Z-11:24:05Z; rollback not needed. postcheck-ab FULL PASS 20/0/1 on both (Azure's **through the tunnel**). **`browser-gate-public.sh` PUBLIC PASS** (sign-in, /api/dashboard 200, stayed signed in, engagement 200); `public-gate-probes.sh` PUBLIC 26/26. Caddy fingerprint 61f519cd + start time UNCHANGED.
+- **Use (unchanged):** Azure A `3bb6fcb2` / B `a9101d3f` (version b03aae4b); pc-lane-a A `e920ac1d` / B `8ce21d2a`. **Avoid:** Azure `c9bce98b`, `1ec31037`; pc-lane-a the 9 in S43's record. **New on A:** LOCAL_VALUE_NOT_DEFINED critical x7 (FX-LV naming what A never had; expected). A's preview no longer says "No local values are required" (FX-R live).
+- **Kam told on the panel 21:26:31** (back up, public check named public, tunnel named tunnel, A's 7 criticals expected, avoid list, re-test starting); origin verify running. **Kam's 19:01 sign-in-descriptions instruction is now LIVE (FX-SI in 87c0026) → DELIVERED.**
+- **Live-delta QA launched 21:27:01 in pane `%8` `QA/HPSM-live-delta`** from the committed launcher re-pointed to `LIVE_HEAD=87c0026…`, `EXPECTED_COMMITS=308` (`--check` rc 0). Report dir `Testing Agent MAIN/projects/hpsm/reports/2026-09-13-composer-87c0026-live-delta-after-gate-fix-tier1/`. Verdict mail subject `… LIVE delta after gate fix @ 87c0026 (tier 1)`. Rung 5 verifying (22 pre-launch session ids excluded, list in s14 scratchpad `qa_sessions_before.txt`). **Score at its verdict.**
+- **S44 NEXT:** step 7 FX-PIN d82ca16 + Q1 seat commit → required web 409 browser check (S2/S4/S5 saves, S9 approve); step 8 FX-ID b57cf09 GREEN waiting; F-API + F-WEB; C11 running (STOPs for Tuesday on its content-hash change). Each GREEN batch gets its own head mail. **S44 ctx 65% at 21:19** (checkpoint only; band 80-90).
+- **Watcher MARK now `2026-09-13T11:25:30`.**
+
 ## 🟠 21:18 — S44 HEAD MAIL 11:16:52Z (DKIM pass, read whole): LIVE UPGRADE to `87c0026` from ~11:22Z, pc-lane-a then Azure
 - **Target** `87c0026d94e8e13c14329852239d35a463168503` = LOCAL main, 41 commits after caf63fd: FX-M1, FX-R, FX-S7, FX-SI+proof, picker, **FX-LV+FX-REL (merge 6 GREEN 11:15:59Z)**. Rollback caf63fd on both. NOT pushed. NOT in it: FX-PIN, FX-ID, S-m3, feedback, C11.
 - **PIN ANSWER: pins UNCHANGED** (content hashes identical, capability sources unchanged) → A/B stay usable. Both prechecks NO STOP. No fresh engagements, no az write, gate b-tight unchanged. **No STOP condition → no HOLD sent.**
