@@ -66,6 +66,18 @@ supersede: replace WHOLESALE at the next pickup; never append.
 - Questions s12 answered: 18:13:30 (live site link for the harness), 18:49:22 (where HPSM is at), 18:52:15 (harness updated for the live site?).
 - Times come from the transcripts. Where s12's pickup or the prompt log differ (18:5x, 18:38, 18:52, 19:14), the transcript time is used.
 
+## 🔄 20:57 — s13 ROTATING at ctx 80% (band), BEFORE S44's upgrade window
+- **Rule-b check done:** s13's transcript since 10:25Z holds only Kam's 20:44:13 GO line and his 20:45:20 "Send me the email with the content…". Both are handled and recorded below. **The successor's first action (c) diffs s13's transcript `886e95a5-f138-4e94-b819-4a03523bfe14.jsonl` from this commit's time onward.**
+- **S44 STATUS 10:52:50Z:** merge 4 FX-S7 GREEN, LOCAL main `693a5db` (switch-ON 71/71 zero-failure), NOT pushed. Step 5 merged as `7dbf83f`, chain m5-s44 running. **PIN ANSWER at 7dbf83f: NO STOP; nothing the stale check reads changes vs live caf63fd, so A/B stay usable.** Both gate backups are identical pre-fix files (sha 27eb0e26); live Caddyfile sha 61f519cd (b-tight). Records at analysis 09760b4 (D-S44-17 = its probe miss).
+- **NEXT expected mails:** step 5 GREEN → the 30-min FX-LV+FX-REL clock → the upgrade HEAD mail (warn Kam; the head mail carries the pin line) → REPORT (panel note to Kam; engagements; the public browser check should now PASS).
+- **Live-delta QA brief:** a subagent was drafting it into `/private/tmp/claude-501/-Volumes-KK-T9-External-HDD-TUESDAY/886e95a5-f138-4e94-b819-4a03523bfe14/scratchpad/qa-live-delta/` (three files: brief .md, .prompt.txt, `launch_qa_hpsm_composer_live_delta_after_gate_fix.sh`). **At rotation the folder did NOT exist yet, so the rotation probably killed the draft.** The successor checks all three exist, the launcher passes `bash -n`, and the brief is complete. **If not, re-draft from the original** `2_Project_Files/fleet/qa-agent/briefs/2026-09-13_hpsm-composer-09c1591-brief-acceptance-security-tier1.md` + `launchers/launch_qa_hpsm_composer_09c1591_brief_acceptance_security.sh`:
+  - scope LIVE ONLY: verify b-tight row by row; the walk-through in its own "QA Harness (synthetic)" tenant; probes 1,2,3,5,7,9,11,12,13, 15-auth, 17-second-control; re-check D-M1/D-M2/S-m1/S-m2/S-p1;
+  - credentials BY PATH: `/Volumes/KK_T9_External_HDD/!CODING/Datasec/HPSM/4_Credentials/hpsm-demo-site.txt` + `gate-check-public.env`, never values;
+  - never Kam's tenant; ≥1.1 s pacing; ≤3 wrong credentials; head variables re-pointed.
+  - **Launch ONLY after the upgrade REPORT:** copy into `2_Project_Files/fleet/qa-agent/`, commit, `--check`, `cockpit.sh add 'QA/HPSM-LIVE' "bash '<launcher>'"`, rung 5 (trap 47).
+- **Panel notes VERIFIED AT ORIGIN since the draft:** credentials answer 20:46:25, gate warning 20:46:48, hiccup 20:50:44, "you can use the live site now" 20:52:41.
+- **Watcher at rotation:** `watch_tuesday_exiting.sh 2026-09-13T10:52:51 23:55 39799` (dies with this seat; re-arm from the newest processed mail).
+
 ## ✅ 20:50 — LIVE GATE FIX b-tight APPLIED AND HOLDING since 10:49:58Z (S44 REPORT 10:51:00Z, DKIM pass, read whole)
 - **Public URL checks:** `browser-gate-check.mjs` PASS (sign-in, /api/dashboard 200, stayed signed in, one engagement opened); curl set 26/26 as expected with no credentials (everything 401 Basic except /api/dashboard and /api/tenants 401 Bearer; /api/healthz/ 404); smoke OK. Live Composer unchanged at caf63fd.
 - **Rollback source:** `/opt/hpsm/Caddyfile.pre-s43-20260913T104751Z` (the original; S44 confirming both backup hashes in its next STATUS).
