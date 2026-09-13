@@ -46,6 +46,22 @@ supersede: replace WHOLESALE at the next pickup; never append.
        - Mark both cards `--delivered` once the upgrade REPORT and C11's READY name their artefacts.
 
 2. **Three combined tier-1 gates on `09c1591` — RESUMED by s12 at 17:05 in new panes.**
+   - **UPDATE 18:4x (s12, ctx 70%):**
+     - **Gate C VERDICT 08:30:21Z (DKIM pass; report 321 lines, 0 placeholders) = WP5 NO GO 0/3/5/4 · WP6 NO GO 0/1/3/4.**
+       - W5-M1: a website-created engagement can never be customer-approved (approver user_id null).
+       - W5-M2: release is silently blocked until 8 secret local values are defined; no issue code.
+       - W6-M1: the document says "No local values are required".
+       - W5-M3: S7 table 3,963 px wide at 1440.
+       - Minors W5-m1..m5, W6-m1..m3.
+     - **Routed by ANSWER ~08:4xZ** = FIX ROUND 2 of 2 under the cap:
+       - Monday fixes (W5-M1, W5-M2+W6-M1, W5-M3, W6-m1..m3, W5-m5) go AHEAD of C11 and feedback; C11 pauses on engine files.
+       - **Tonight's upgrade uses the gate's workaround** on the zero-group release engagement: approvers linked via the API, 8 local values defined via product decisions.
+       - **UPGRADE RULE:** fixes merged + GREEN by 21:00 → in tonight's upgrade; otherwise a second upgrade before Monday 07:00 if GREEN.
+       - The rest goes to BACKLOG.
+     - **Pane `%4` closed.** Kam told on the panel.
+     - **Still waiting:** gate B (`%3`), S43's fix-round PLAN mail.
+     - Push waits for B + a delta gate.
+
    - **UPDATE 18:3x (s12, ctx 69% checkpoint):**
      - **S43 STATUS 08:26:26Z (DKIM pass): LOCAL main fast-forwarded `09c1591` → `3bc7471df46bd5844f3027c1383d6ea087463555`** (lane Q D2 + Q-A; 257 ahead of afc10e9; NOT pushed). This came after chain qd2-s43 went fully GREEN: host 1045+1 with 0 timeouts; DB 205; API-DB 428; upgrade e2e 49/49; clean-clone CI GREEN; switch-ON D1 PASS. Evidence: analysis repo 7e4b65c.
      - **Seat decisions ACCEPTED by silence** (in `HPSM/5_Project_History/seat-decisions_s43_seat-hpsm-28f5.md`):
