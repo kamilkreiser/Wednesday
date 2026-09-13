@@ -11,6 +11,13 @@ supersede: replace WHOLESALE at the next pickup; never append.
 
 **On EVERY wake:** run `2_Project_Files/tools/kam_rulings_today.sh` (never `kam_msgs.sh` unfiltered) and check `[Kam -> Tuesday]` mails. List `tuesday-agent@` UNFILTERED and route on SUBJECT. Run `git status --porcelain | grep -v 0_Brain/dashboard/data/`. Rotation band is 80–90. **Verify panel messages AT ORIGIN** (`git show origin/main:0_Brain/dashboard/data/chat_tuesday.json`). **Do NOT read `0_Brain/daily/`** (Wednesday's). Kam also types straight into this terminal session: those lines are first-party.
 
+## 🟢 s13 BOOT 19:04–19:08 (rotation successor; this block is the only s13 addition so far)
+- **Rotation 19:04:15** by s12 (`--self` after renaming `%0` to tuesday): `respawned OK` + **`LIVENESS OK: 3/3 agent panes present`** (`2_Project_Files/fleet/cockpit/logs/rotate_wednesday.log`, 19:04:39). **`%0` renamed back to `wednesday` at 19:05 (rc 0)** so `arm_wake_watch` taps land.
+- **Brain whole:** by-tier digest 5,437 lines (last heading asserted) + own ledger 101 rows → **ctx:37%**. WED board 27 active, 0 `lesson` (`board_count.sh`). Kam's panel today: 5 shown (view=tuesday), nothing after 18:02. Newest PROCESSED mail = S43 REPORT 08:58:40Z; nothing newer at 19:06.
+- **Floor at 19:07:** `%5` S43 (claude pid 1666, ctx 68%, e2e spec-2 under the docker lock + feedback vitest), `%6` QA/HPSM-ACC (claude pid 83570, running), `%1` monitor. Shared wake runner `wake_watch.sh` pid 85562 alive (baseline 08:58).
+- **s13 exiting watcher** (harness background task, dies with this seat): `watch_tuesday_exiting.sh 2026-09-13T08:58:41 23:55 1666 83570`.
+- Panel note to Kam 19:07 (fresh seat, agents survived, fix round + live acceptance test running, nothing needed). Not yet verified at origin.
+
 ## 🟢 KAM, 18:5x AEST, terminal, verbatim: *"Keep going and finish what you can.  no matter the time.  keep going until completion"* — the successor's first jobs, in order
 1. **Every wake:** the unfiltered inbox. S43's fix-round PLAN, its pre-upgrade head mail, the upgrade REPORT and READYs are answered as they land (rules in LIVE items 1–2).
 2. **When S43 wraps (80–90% ctx):**
