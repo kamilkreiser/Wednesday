@@ -12,6 +12,15 @@ supersede: replace WHOLESALE at the next pickup; never append.
 **On EVERY wake:** `2_Project_Files/tools/kam_rulings_today.sh` (never `kam_msgs.sh` unfiltered) AND `[Kam -> Tuesday]` mails; list `tuesday-agent@` UNFILTERED and route on SUBJECT; `git status --porcelain | grep -v 0_Brain/dashboard/data/`. Rotation band 80–90. **Verify panel messages AT ORIGIN** (`git show origin/main:0_Brain/dashboard/data/chat_tuesday.json` on the ref `panel_sync` fetches; `git ls-remote` HUNG 9 min in this tree at 14:28 — bound any network read with a timeout). **Do NOT read `0_Brain/daily/`** (Wednesday's).
 
 ## 🔴 LIVE — with the next action for each
+0020. **S41 WRAP ADDENDUM 03:11:25Z** (read whole): S41 finished step 2 after its wrap.
+    - **Verified at source:** main `b01c5a5` = lane E 2a merged `4f11c18` + fixture fix, 196 ahead of `afc10e9`; lane G `8ded9af` still not on main; worktrees clean; S41 `%24` idle at ctx 87%.
+    - **S41's two Q9 findings:**
+      1. The platform tenant `…da7a` has NO row, so the "row exists" condition cannot pass.
+      2. SECURITY DEFINER is bound by FORCE RLS on `pc.tenant`.
+    - **s11 AMENDMENT to S42 ~13:1x** (body `2_Project_Files/fleet/briefs_staged/2026-09-13_hpsm-s42-amendment-b01c5a5-q9-rulings.md`): main `b01c5a5`, step 1 DONE, start at step 2.
+      - **Q9-1:** SEED the platform tenant in 0015 and EXCLUDE it from every listing, with tests.
+      - **Q9-2:** a dedicated NOLOGIN directory role (column SELECT on 3 columns, one RLS policy, owns only the function); a `pc_owner` SELECT policy is REFUSED as too wide. Guard tests pin the definer-function set and the role's grants.
+    - **NEXT:** S42's plan confirmation, checked against brief + amendment.
 0019. **S41 WRAPPED 03:05:02Z** (read whole). Handover `!CODING/Datasec/HPSM/5_Project_History/HANDOVER-S41_seat-hpsm-982d.md` (successor sections 1–8 read by s11).
     - **Verified at source 13:09:** main `2bd7125` (183 ahead of `afc10e9`); `s41/lane-e-outputs` `4808208` and `s41/lane-g-db-synthetic-generation` `8ded9af` NOT on main (lane G has no 0015 commit yet); every worktree porcelain 0; census PIDs 67724 (S40) + 77350 (S41).
     - **S42 BRIEF SENT 13:09** (`2_Project_Files/fleet/briefs_staged/2026-09-13_hpsm-s42-successor-switch-on.md`), read back at datasec-hpsm@ 03:09:14Z.
