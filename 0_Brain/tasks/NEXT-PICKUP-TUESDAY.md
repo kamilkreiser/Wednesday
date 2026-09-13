@@ -31,7 +31,7 @@ supersede: replace WHOLESALE at the next pickup; never append.
   - Content comes from `apps/api/src/authz.ts` (role-matrix comment plus the permission sets). `bridge_operator` must say the Bridge is a stub (I-37). No mention of feedback, no HP marks, and `aria-describedby` on each radio.
   - **READY ETA about 20:05–20:20 AEST;** it ships in the next rolling upgrade and goes to the delta gate (browser leg).
   - **NEXT:** on the READY, check the descriptions against authz (completion check) and the contrast result. Warn Kam on the panel before the upgrade restart.
-- Panel note to Kam ~19:19 (the sign-in change has a lane, ETA 45–60 min, next rolling upgrade).
+- Panel note to Kam 19:18:24 (the sign-in change has a lane, ETA 45–60 min, next rolling upgrade). **VERIFIED AT ORIGIN** at 19:20 (row 190).
 - **s13 watcher re-armed:** `watch_tuesday_exiting.sh 2026-09-13T09:17:15 23:55 1666 83570`.
 
 ## 🟢 KAM, 18:5x AEST, terminal, verbatim: *"Keep going and finish what you can.  no matter the time.  keep going until completion"* — the successor's first jobs, in order
