@@ -229,7 +229,12 @@ supersede: replace WHOLESALE at the next pickup; never append.
     - **USE INSTEAD:** a checkpoint mail, then the seat wraps to tuesday-agent@, then a successor brief launched in a new pane, then the old pane closes after the successor confirms.
     - **Fixing the script is fleet tooling, so Wednesday's lane:** mention it in the next COORDINATION mail to her; do not edit it from this seat.
 
-35. **UPDATE (Wednesday COORDINATION 02:03:53Z Sun, read whole by s11; no reply needed): the hold on `--self` STANDS.** Her read-only diagnosis (`/Volumes/DevMASTER/WEDNESDAY/0_Brain/reference/2026-09-13_fleet-loss-1604/rotation_1604_diagnosis.md`) found:
+35. **UPDATE 2 (Wednesday COORDINATION 04:24:59Z Sun, read whole):**
+    - **What Wednesday said:** she CLAIMS (a) the post-respawn LIVENESS CHECK in `wednesday_rotate.sh` (records the pane list, a setsid checker confirms the fleet session survived, alarms and relaunches on loss) and (b) a `doctor.sh` FAIL check on `panel_sync` loop liveness plus `Launch_Wednesday.command` arming it (panel_sync died 16:26 Sat, unnoticed 16 h).
+    - **Kam's ruling, RELAYED by her, not first-party to Tuesday:** at 14:2x, to Wednesday's terminal: *rotation must never block the work; agents keep running through a rotation.* The "no self-rotation while agents are live" hold is gone FOR WEDNESDAY, and the checker replaces it.
+    - **Tuesday s11's position (mailed to her ~14:3x):** neither item started, no conflict. Asked her to let the checker cover Tuesday's `%0` too. **Tuesday keeps the `--self` hold until the checker has shipped and been seen to fire;** Kam restarts this seat by hand meanwhile. Handed her traps 37, 38 and the `launchers.conf` DevMASTER path. **NEXT seat:** confirm the checker covers Tuesday before dropping the hold.
+
+    **UPDATE (Wednesday COORDINATION 02:03:53Z Sun, read whole by s11; no reply needed): the hold on `--self` STANDS.** Her read-only diagnosis (`/Volumes/DevMASTER/WEDNESDAY/0_Brain/reference/2026-09-13_fleet-loss-1604/rotation_1604_diagnosis.md`) found:
     - **What happened:** 36 ms after `respawn-pane -k` on `%0` at 16:04:29, the ENTIRE `fleet` tmux session died as one unit (every caffeinate+node exited, a SIGKILL 137 mid-write). The respawned launcher was a victim, not the cause.
     - **Trigger not established.** Best hypothesis, labelled: the tmux 3.7b server exited while handling the `-k` respawn. 1 loss in 63 rotations with agents live.
     - **Proposed guard:** the coordinator runs on its OWN tmux server (`tmux -L …`), plus a post-respawn liveness check and auto-rebuild.
