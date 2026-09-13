@@ -12,6 +12,21 @@ supersede: replace WHOLESALE at the next pickup; never append.
 **On EVERY wake:** `2_Project_Files/tools/kam_rulings_today.sh` (never `kam_msgs.sh` unfiltered) AND `[Kam -> Tuesday]` mails; list `tuesday-agent@` UNFILTERED and route on SUBJECT; `git status --porcelain | grep -v 0_Brain/dashboard/data/`. Rotation band 80–90. **Verify panel messages AT ORIGIN** (`git show origin/main:0_Brain/dashboard/data/chat_tuesday.json` on the ref `panel_sync` fetches; `git ls-remote` HUNG 9 min in this tree at 14:28 — bound any network read with a timeout). **Do NOT read `0_Brain/daily/`** (Wednesday's).
 
 ## 🔴 LIVE — with the next action for each
+0021. **S42 PLAN 03:18:59Z (seat hpsm-3e04, PID 98162, pane `%25` `Datasec/HPSM-S42`) → CONFIRMED by s11 ~13:2x** (body `2_Project_Files/fleet/briefs_staged/2026-09-13_hpsm-s42-confirmed-plan.md`).
+    - **Lanes:**
+      - **G:** `packages/db`, branch `s42/lane-g-0015` from 8ded9af (no port);
+      - **Q:** `apps/api` + `api-contract`, 2b stored outputs then Q9 API, `pc-s42-q` 20680;
+      - **W:** `apps/web`, `pc-s42-w` 20780;
+      - **merge seat:** `pc-s42-merge` 20480, `pc-s42-on` 20580, CI edge 20880;
+      - **order:** G → ON proof → S40 → Q → W.
+    - **Rulings:**
+      - **D1 accepted:** the api refuses to start without a platform tenant row. CONDITION: S40 checks `PC_PLATFORM_TENANT_ID` on pc-lane-a + Azure before upgrading; unset or default, else stop.
+      - **D2 accepted:** 2b before Q9.
+      - **Lane G trap:** (i) the role, function and ownership go in `bootstrap.sql` (superuser); pc_owner has NO membership. (ii) Fall back only after a measurement comes to Tuesday. Guard tests: `pg_auth_members`, SET ROLE refused, definer set, grants + policy.
+      - **"No sign-in to platform tenant":** no data-scoped session, no memberships, never customer-selectable; a platform_admin token carrying the platform id is allowed.
+      - **S40 channel:** mail fallback, since claude-bridge was CONNECTION_CLOSED.
+    - **For Kam (FYI, no action):** S42 found 30 stale `(conflict_on_2026-08-25|26)` sync copies in HPSM's analysis repo, left untouched.
+    - **NEXT:** close S41 `%24` with pane_close.sh after CONFIRMED is delivered. Then watch S42 for lane G READY, the ON proof and the SHA to S40, then commission the combined gate.
 0020. **S41 WRAP ADDENDUM 03:11:25Z** (read whole): S41 finished step 2 after its wrap.
     - **Verified at source:** main `b01c5a5` = lane E 2a merged `4f11c18` + fixture fix, 196 ahead of `afc10e9`; lane G `8ded9af` still not on main; worktrees clean; S41 `%24` idle at ctx 87%.
     - **S41's two Q9 findings:**
