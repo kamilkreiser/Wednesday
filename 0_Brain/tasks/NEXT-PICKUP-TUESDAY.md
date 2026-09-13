@@ -12,6 +12,15 @@ supersede: replace WHOLESALE at the next pickup; never append.
 **On EVERY wake:** `2_Project_Files/tools/kam_rulings_today.sh` (never `kam_msgs.sh` unfiltered) AND `[Kam -> Tuesday]` mails; list `tuesday-agent@` UNFILTERED and route on SUBJECT; `git status --porcelain | grep -v 0_Brain/dashboard/data/`. Rotation band 80–90. **Verify panel messages AT ORIGIN** (`git show origin/main:0_Brain/dashboard/data/chat_tuesday.json` on the ref `panel_sync` fetches; `git ls-remote` HUNG 9 min in this tree at 14:28 — bound any network read with a timeout). **Do NOT read `0_Brain/daily/`** (Wednesday's).
 
 ## 🔴 LIVE — with the next action for each
+0025. **🟢 KAM RULED card `hpsm-composer-demo-release-unreachable-c12` → `build-c12`** (card tap, Tuesday tab, 14:04:45 AEST; relay + `chat_kam.json` verbatim: *"Decision hpsm-composer-demo-release-unreachable-c12: build-c12 — Commission engine C12 mapping plus fenced synthetic adapter rows now (new lane, may not land by Monday)"*). Tuesday had recommended `proofread-drafts`.
+    - **Ruled by s11** with `decision_queue.sh rule` at 14:07:13; receipt posted to the panel.
+    - **Commission sent to S42 ~14:0x** (body `2_Project_Files/fleet/briefs_staged/2026-09-13_hpsm-s42-kam-build-c12-lane.md`): new lane C12 on `packages/engine` + `content/release-demo` (+ `packages/db` registration only if needed).
+      - Map C12 in `contentFromBundle`; baseline/capabilities only if measured necessary.
+      - Synthetic adapter rows in release-demo ONLY, with SYNTHETIC source_refs; release-draft byte-identical; no invented real-HP facts.
+      - Measure every remaining blocker (EXCEPTION_REQUIRED ×24, reviews, approvals). NEVER fabricate approvals or exceptions. If release is reachable only through the product workflow, prove it; otherwise report back, and a content decision becomes a card.
+      - Merge priority: S40 switch-on → lane R → lane C12 → Q/W.
+    - **The card is marked delivered.**
+    - **NEXT:** lane C12's READY names what still blocks release, then any content card for Kam.
 0024. **S42 STATUS 04:02:55Z (read whole): steps 3 + 4 DONE.**
     - **Seat ON proof PASS** on `pc-s42-on` at `7135dec`:
       - synthetic tenant 201; generate and validate 200;
