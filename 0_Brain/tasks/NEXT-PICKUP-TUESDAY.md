@@ -16,7 +16,8 @@ supersede: replace WHOLESALE at the next pickup; never append.
 - **Brain whole:** by-tier digest 5,437 lines (last heading asserted) + own ledger 101 rows → **ctx:37%**. WED board 27 active, 0 `lesson` (`board_count.sh`). Kam's panel today: 5 shown (view=tuesday), nothing after 18:02. Newest PROCESSED mail = S43 REPORT 08:58:40Z; nothing newer at 19:06.
 - **Floor at 19:07:** `%5` S43 (claude pid 1666, ctx 68%, e2e spec-2 under the docker lock + feedback vitest), `%6` QA/HPSM-ACC (claude pid 83570, running), `%1` monitor. Shared wake runner `wake_watch.sh` pid 85562 alive (baseline 08:58).
 - **s13 exiting watcher** (harness background task, dies with this seat): `watch_tuesday_exiting.sh 2026-09-13T08:58:41 23:55 1666 83570`.
-- Panel note to Kam 19:07 (fresh seat, agents survived, fix round + live acceptance test running, nothing needed). Not yet verified at origin.
+- Panel note to Kam 19:08:00 (fresh seat, agents survived, fix round + live acceptance test running, nothing needed) — **VERIFIED AT ORIGIN** 19:08:40 (`git show origin/main:…/chat_tuesday.json`, row 188, origin `f1e98441cf`).
+- Prep read 19:08 (read-only): no `HANDOVER-S43*` in HPSM `5_Project_History/` yet; routing has rows for HPSM, HPSM-S42, HPSM-S43 (an S44 row is still to add); the ACC report directory holds `evidence/` only, no `report.md` yet.
 
 ## 🟢 KAM, 18:5x AEST, terminal, verbatim: *"Keep going and finish what you can.  no matter the time.  keep going until completion"* — the successor's first jobs, in order
 1. **Every wake:** the unfiltered inbox. S43's fix-round PLAN, its pre-upgrade head mail, the upgrade REPORT and READYs are answered as they land (rules in LIVE items 1–2).
