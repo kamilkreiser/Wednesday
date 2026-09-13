@@ -12,6 +12,14 @@ supersede: replace WHOLESALE at the next pickup; never append.
 **On EVERY wake:** `2_Project_Files/tools/kam_rulings_today.sh` (never `kam_msgs.sh` unfiltered) AND `[Kam -> Tuesday]` mails; list `tuesday-agent@` UNFILTERED and route on SUBJECT; `git status --porcelain | grep -v 0_Brain/dashboard/data/`. Rotation band 80–90. **Verify panel messages AT ORIGIN** (`git show origin/main:0_Brain/dashboard/data/chat_tuesday.json` on the ref `panel_sync` fetches; `git ls-remote` HUNG 9 min in this tree at 14:28 — bound any network read with a timeout). **Do NOT read `0_Brain/daily/`** (Wednesday's).
 
 ## 🔴 LIVE — with the next action for each
+0031. **S42 STATUS 04:41:20Z (read whole): LOCAL main `365d5ef845caca3f3301ff54ff62f8e68bb759a4`** (lane R round 1 merged; 204 ahead of `afc10e9`; verified at source by s11 14:4x; NOT pushed).
+    - **Chain:** seat checks; upgrade proof from 7135dec; clean-clone CI GREEN; the first switch-ON e2e step 20 failed / 14 not run, all classified F1 (422 fence), recorded `qa-s42/merge-seat/on-e2e-merge-r-summary.txt`.
+    - **Lane R round 2 `d63e0fb` GREEN and merging:**
+      - **posture row, exactly:** "Baseline posture | Balanced remediation. Posture cannot be set in this release; it sets remediation defaults only, not target values or unsupported handling." (sources screens-MEASURED:87, S3 Frameworks.tsx:317, A-13:74);
+      - **zero-groups register, exactly:** "No device groups are in scope, so no item's support was checked against a device group.";
+      - only the policy-document DOCX byte pins moved.
+    - **Next:** the S40 upgrade follows lane R round 2's chain (both renderer rounds in one upgrade). Lane C12 is measuring the one-device-group release (measure-only). Lane Q is wiring `device_group_names`. Lane W is building `s42/lane-w-e2e`.
+    - **s11 flagged ~14:4x** (body `2_Project_Files/fleet/briefs_staged/2026-09-13_hpsm-s42-utc-print-margin.md`): the Preview "UTC" run is 12.3 pt from the page edge, so it may clip when printed. Measure ≥ 18 pt, else move it inside the printable area without moving sample runs, else report; add a geometry pin; do it before the S40 upgrade.
 0030. **S42 NOTICE 04:36:06Z (read whole): s11's 04:31/04:34 rulings accepted.**
     - **Lane R round 1 `5d88b82`** merged in the merge worktree, chain running:
       - draft footer *"Unreleased draft. Not generated from an approved policy manifest."* (no source defines one);
