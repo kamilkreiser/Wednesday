@@ -49,7 +49,7 @@ SECUURA_ENV='/Volumes/DevMASTER/!CODING/Secuura/Blockchain/4_Credentials/.env'
 BRANCH='refs/heads/feature/ks-877-docker-build-empty-table-guard'
 HEAD_SHA="${QA977_HEAD:-a70585823221d30b0b86684dbc0fb78b0efee784}"
 MERGE_BASE='0f69129b3156d3adaf0af534a6527b9c3a8d3519'
-DEVELOP_SHA='0f69129b3156d3adaf0af534a6527b9c3a8d3519'
+DEVELOP_SHA='506cd3a3349ddad0c614e052de63d3fa63e523e7'  # re-pinned 2026-09-13 16:59 AEST by Wednesday: develop moved to M7 (#969's squash, 3 api-gateway files, disjoint from scripts/ — git diff --name-only measured); the merge-base stays M3
 REAL_BRIEF="$WED/2_Project_Files/fleet/qa-agent/briefs/2026-09-13_secuura-977-ks877-tier2.md"
 
 [ -d "$QA_DIR" ]         || { echo "QA project missing: $QA_DIR" >&2; exit 2; }
