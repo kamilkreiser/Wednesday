@@ -2,75 +2,61 @@
 date: 2026-09-13
 type: pickup
 scope: SECUURA + all general/generic work. Datasec is TUESDAY's — read her mail by SUBJECT only, never brief or answer for a Datasec project.
-source: replaced WHOLESALE at 2026-09-13 09:0x AEST by the seat booted 08:39 (Kam launched it; the Mac booted 05:28). Boot ctx 37%; written at ctx ~58%.
+source: replaced WHOLESALE at 2026-09-13 12:5x AEST by the seat booted 08:39 (Kam-launched), at ctx ~82%, handing over to a KAM-LAUNCHED successor (no self-rotation while agents are live — card `wed-coordinator-rotation-killed-the-fleet-1604`, default).
 status: live
 supersede: replace this file wholesale at the next pickup; do not append
 ---
 
-# NEXT PICKUP — ⚡ 09:0x (seat 08:39). FLOOR = `%2` QA tier-2 gate on #962 (KS-1029) @ `ac6f4fa91` · `%3` s196 finishing #961's merge (plan confirmation owed) · `%1` monitor.
-**FIRST ACTS for a successor:** (1) **do NOT run `wednesday_rotate.sh --self` until the 16:04 cause below is established** · (2) re-arm the #962 verdict wait (the watcher's mail leg cannot see QA verdicts; the helper lives in the seat scratchpad — re-create it if gone: poll `wednesday-agent@` for a subject needle, exit on hit) · (3) answer s196's plan confirmation · (4) install + launch the #963 gate and send the s197 brief once their drafts are re-read (QUEUE 3-4).
+# NEXT PICKUP — ⚡ 12:5x. FLOOR = four QA gates + one builder. **FIRST ACTS:** (1) commit the launcher's digests by literal path · (2) `kam_msgs.sh --brief` (his rulings first) · (3) **re-arm FOUR verdict waits** (`python3 2_Project_Files/fleet/cockpit/wait_subject.py "<needle>" "<since ISO>" 120 120`, run_in_background, one per gate — needles: `TIER 2 GATE #963 ROUND 1` · `TIER 2 GATE #965 ROUND 1` · `TIER 1 GATE #966 ROUND 1` · `TIER 2 GATE #967+#968 ROUND 1`; since `2026-09-13T02:00:00Z`) — the watcher's mail leg cannot see a QA verdict · (4) do NOT run `wednesday_rotate.sh --self` while agents are live.
 
-> Narrative: `0_Brain/daily/2026-09-13.md` from the 08:39 boot block. **Measure before acting on any line here.**
+> Narrative: `0_Brain/daily/2026-09-13.md` from the 08:39 boot block (the 12:05 handover block + everything after). **Measure before acting on any line here.**
 
-## 🔴 WHAT HAPPENED (measured 08:4x)
-- **16:04:29 2026-09-12:** `wednesday_rotate.sh --self` respawned `%0` (`fleet/cockpit/logs/rotate_wednesday.log:304-305`). **s194, s195 and the #962 gate stopped in the same minute** (transcripts last written 16:04); the watcher armed 16:05:04 with `agents=0`; **no successor Wednesday booted until Kam launched one at 08:39.** Cause: **UNMEASURED** — a read-only diagnosis was commissioned at 08:5x (report: seat scratchpad `rotation_1604_diagnosis.md`; copy anything durable into `0_Brain/reference/` before relying on it).
-- **`panel_sync` died 16:26:14** (cause unmeasured) and nothing re-armed it; **restarted detached 08:45** (pid 9350, ppid 1, tty `??`).
-- **The Mac booted 05:28** → every `/private/tmp` scratchpad was wiped, **including s186's gated merge script** every Secuura merge brief cited.
-- Nothing half-done on develop: `b1cb8466f` = #926 (s194, verified by it, re-read by Wednesday). #961 NOT merged; s194 had filed KS-1111 and posted verdict comments (KS-1098 `7e62ed7c`, PR `5644067216`).
-
-## 🟢 FLOOR
+## 🟢 FLOOR (panes read 12:4x)
 | pane | seat | state | next event owed |
 |---|---|---|---|
-| `%2` | **QA/Secuura-ks1029-962** — tier-2 round 1 on #962 @ `ac6f4fa91` (relaunched 09:00:04 via `cockpit.sh add`; report dir suffix `-relaunch-20260913b`) | running | verdict mail `[QA -> Wednesday] TIER 2 GATE #962 ROUND 1 (KS-1029) ac6f4fa91` (session-side wait armed — RE-ARM after rotation) → report whole → head re-read → completion vs the brief's 8 asks → **score s193** → close after `end_turn` → on GO: a merge (EXPECT_T/EXPECT_TREE; census KS-754 after) |
-| `%3` | **s196** (`Secuura/Blockchain`) — finish s194's ITEM 3: rebuild the merge script durably in `5_Project_History/merge-protocol/`, squash #961 @ `644965d90` onto `b1cb8466f`, KS-1098 closing-round + P7, history for s194 + s196 | booting (brief verified at destination 23:00:07Z) | rung 5 → **ANSWER its plan confirmation** (check: the rebuilt script's gates and three DRYRUN negative controls; EXPECT_TREE vs s194's `e377205046e0…`; KS-1111 + both comments equal to s194's drafts; KS-1098's pre-PUT state) → STATUS with M → verify at source → wrap → score (a merge of a gated PR + records: no new gate) |
+| `%4` | **QA #963** (KS-1109 @ `90d7d0c75`, tier 2) | RESUMED 12:44 (the 12:01 tap had not submitted — ledger); ctx 38% | verdict → report whole → completion vs 9 asks → **score s192 + s195** → close after `end_turn` → on GO: a merge seat squashes #963 with the durable script (`5_Project_History/merge-protocol/merge_squash.sh` sha `9f9860ad…`), EXPECT_T/EXPECT_TREE; **T-move caution: #963's files are under `systemTest/performance/`, which #961 changed — if the gate's merged tree predates `21c74dd2a`, re-run that unit suite on the merged tree first** |
+| `%8` | **QA #965** (KS-1103 @ `d63b27ab3`, tier 2) | launched 12:21; ctx 28% | verdict → completion vs 9 asks → **score s197** → close → on GO: merge (the #931 ↔ #965 mock collision: the second merger converts) → then **card to Kam: KS-1114 (title strategy vs remove `title` from the spec) + KS-1116 (ownership model for presentations/credentials) — one Secuura contract sitting** |
+| `%9` | **QA #966** (KS-1020 item 1 @ `1f0d08841`, tier 1) | launched 12:40; ctx 13% | verdict → completion vs 8 asks → **score s198** → close → on GO: merge; KS-1116 to Kam as above |
+| `%10` | **QA #967+#968 stack** (KS-1071 @ `51e74ea7a`, KS-1070 @ `1b7c03a22`, tier 2) | launched 12:44; ctx 6% | verdict (per-PR mergeability in order) → completion → **score s199** (after its wrap) → close → on GO: merge #967 then #968 (then the KS-1069 PR when its gate passes) |
+| `%7` | **s199** (`Secuura/Blockchain-E`) — KS-1069 stacked on #968 (strict height (a); all four items; guards in the persisted-reads region) | ctx 48% at 12:4x — **CHECKPOINT mail at 50% owed NOW-ish; HAND OVER NOW at 70%** | its READY on KS-1069 → verify at source → a tier-2 gate on the three-PR stack head → its wrap → score after the stack verdict |
 | `%1` | monitor | — | — |
 
-**develop = `b1cb8466f`** (GitHub REST 08:4x). **KS active (unstarted+started types) = 121** (`board_count.sh`, real count, 08:4x). **Kintsugi = `4554b25e2`.** Demo unchanged.
+**develop = `721b333a6`** (#962) ← `21c74dd2a` (#961) ← `b1cb8466f` (#926). **Open PRs of ours awaiting gates: #963 #965 #966 #967 #968** (+ KS-1069's when pushed). **#928 HELD** (KS-962 reverted shape + Peter's review hold; rework = loader half + KS-962's ratified shape, then re-gate). **#913** needs rebase + re-gate.
 
-## 🟢 KAM'S RULINGS AND GRANTS IN FORCE (check expiry by `date`)
-- **Keep the pace** — panel 2026-09-12 13:51 *"please run multiple secure agents if you can.  We need to get through these tickets ASAP"* · 13:55 *"peep the pace going until the tickets are cleared or below 100"*. Stop: tickets cleared / KS active < 100 (121) / allowance out (`7d:1%` at 08:44 — reset landed).
-- **We approve and merge our own TESTED Secuura work** — open-ended (2026-09-11 16:56 / 17:50:39).
-- **Kintsugi deploys rest on v1.3 + Kam 2026-09-10 13:22 "deploy to kintsugi first".**
-- **Week grants (deploy freely to kintsugi AND demo; production ban lifted; merge-for-the-week) — END OF SUNDAY 13 SEP is a reading; `EXPIRING-GRANTS.md` says ASK before relying on them on the 13th. Nothing queued today relies on them.** Demo (UAT) waits for Peter's nod regardless.
-- **Overnight is working time** (08-28). **Deploys to dev take the full tier-1 gate.**
+## 🟢 KAM'S RULINGS AND GRANTS IN FORCE
+- **STANDING RULE (2026-09-13 09:1x, terminal, verbatim in `learnings/2026-09-13_as-many-agents-as-possible-partitioned-by-code.md`):** as many agents as possible on every project, the only limit is collision on the code base. Partition by directory; one worktree per seat; the shared-inbox warning in every brief. Seats registered: `Secuura/Blockchain`, `-B`, `-C`, `-D`, `-E` (routing + launchers + the send gate's DQ_PREFIX).
+- Keep the pace (2026-09-12 13:51/13:55) — stop at tickets cleared / KS active < 100 / allowance out. KS active read 121 at 08:4x (re-count before quoting).
+- We approve and merge our own TESTED Secuura work (2026-09-11 16:56 / 17:50:39). Kintsugi deploys: v1.3 + kintsugi-first (2026-09-10 13:22). Demo waits for Peter's nod.
+- **Week grants (deploy to kintsugi AND demo; production ban lifted; merge-for-the-week) END OF SUNDAY 13 SEP — today. Nothing queued relies on them; from Monday only v1.3 + the TESTED grant stand.**
+- Card OPEN: `wed-coordinator-rotation-killed-the-fleet-1604` (rec split-servers; default: no self-rotation while agents live + build the check-only half). His 08:58 hypothesis (credits) is on the card; the measurement says the tmux session died as a unit.
 
 ## 🔵 QUEUE (in order)
-1. **#962 verdict** → as the `%2` row.
-2. **s196** → as the `%3` row.
-3. **#963 (KS-1109) tier-2 gate** — the set is being drafted by a subagent in the seat scratchpad `gate963/` (launcher + brief + prompt + red-proof on scratch copies). Re-read it, install into `2_Project_Files/fleet/qa-agent/launchers/` and `…/briefs/`, real `--check`, commit, **launch ONLY via `cockpit.sh add "QA/Secuura-ks1109-963" "bash <launcher path>"`**, arm a verdict wait. #963 verified at source 08:5x: `90d7d0c75`, 2 files, ahead 1 / behind 1, merge-base `34be9c18a`, body only KS-1109. **Score s192 + s195 after its verdict.**
-4. **s197 — KS-1103 then E3** (`Secuura/Blockchain-C`) — brief drafted by a subagent at the scratchpad `s197_ks1103_brief.md` + `s197_loadbearing.md`. Re-read every load-bearing line, SELF-CHECK attest, `brief_and_launch.sh --to "Secuura/Blockchain-C"`. Source: `HANDOVER-s193-ks1029-ks1103.md` (FINAL).
-5. **KS-1110 (QA-960-2)** fix round — after #963 merges (same package).
-6. **#928 rework** (loader half + KS-962's ratified shape, then a re-gate) and **#913** rebase + re-gate — builder seats. Before ANY merge GO from a census: read the PR's review comments and every linked ticket.
-7. **Runtime gates on #872** (needs the QA login: keys `KINTSUGI_QA_GATE_OWNER_EMAIL`/`_PASSWORD` in the Secuura `.env`), **#896, #728, #808** on kintsugi — tier 1; possible now the allowance reset. Peter's PS-831 branch is not a base.
-8. **Lanes 2-3** from `0_Brain/reference/2026-09-12_secuura-lanes/secuura_lanes.md` (KS-1020 item 1; KS-1071 → 1070 → 1069) — re-read before briefing.
+1. The four verdicts → scores → merges (the merge seat: brief from the s196 pattern — `fleet/briefs_staged/2026-09-13_s196_finish-961-merge.md` + the two addenda; EXPECT_T/EXPECT_TREE + DRYRUN controls per PR; KS-754-style census around each PUT).
+2. s199's KS-1069 READY → gate on the stack head → wrap → score.
+3. **Cards for Kam after #965/#966 land:** KS-1114 + KS-1116 (one sitting).
+4. New lanes under the standing rule (re-sweep first — `0_Brain/reference/2026-09-12_secuura-lanes/secuura_lanes.md` reserve lanes; a classification list is a representation): KS-1110 (QA-960-2, after #963 merges — same package), KS-1076 (P1, may already be fixed by #896 — verify), the reserve lanes R1-R5.
+5. #928 rework + #913 rebase (builder seats). Runtime gates on #872/#896/#728/#808 on kintsugi (tier 1; QA login keys in the Secuura `.env`).
 
-## 🔴 WITH KAM (on his panel — do not re-list)
-- Carried: the Stuart reply for KS-597 · `Notes (MASTER)/skills/Current/extranet.md` vs his tickets-only rule · the agent GitHub identity invite + raise-to-1 · deleting `feature/y` / `feature/w` · **measure first:** KS-775's lapsed window · the vault's `daily/2026-09-11.md` uncommitted lines · develop's CI reds (KS-1075).
-- Today: **`/login` queued at this seat's prompt** (told on the panel 08:54).
-
-## 🟡 OWED BY WEDNESDAY
-0. **The 16:04 diagnosis → ledger row → fix or card, BEFORE any self-rotation.**
-1. **`panel_sync` has no re-arming** (launcher 0 lines; doctor does not check it) → a doctor FAIL check + launcher arming; claim with Tuesday first (her launcher mirrors it).
-2. **QA launchers exec `claude` directly** → run them only via `cockpit.sh add`; guard candidate: refuse when stdin is not a TTY.
-3. **`wake_watch.sh` fixes (SHARED — claim first):** QA-tag subjects count as inbound · never `stable_n=9999` while panes are live · idle/frozen legs cannot tell a seat waiting on its own background shell from a stall.
-4. `panel_sync` RECOVER detector (Tuesday's 09-12 measurement) · scoreboard union-merge.
-5. **WED-148:** no `wed_claim.sh` verb while `panel_sync` is live — read `0_Brain/tasks/WED-OWNERSHIP.md` directly.
-6. **At the WRAP:** rule 3b regenerate BOTH digests (the ledger changed today) · rule 3c archive ledger rows dated 2026-09-10 and earlier, conservation asserted.
-7. Carried: QA agents' memory notes (non-gate session) · QA charter line · send gate refusing `extranet` outside HOLDS · pretooluse items · `inbox_digest.sh` ack · `send_brief.sh` double-prefix · reconcile in the watcher · 18 Secuura ruled-undelivered cards · Kam's `vault-add-a-stages-another-clients-files` grant · the family-weight index · a tracked home for the verdict-wait helper.
+## 🟡 OWED BY WEDNESDAY (shared tooling: claim with Tuesday first)
+- **`panel_sync` has no re-arming** (launcher 0 lines; doctor blind) — it died 16:26 yesterday and was restarted by hand 08:45. Doctor FAIL check + launcher arming.
+- The rotation card's check-only half (post-respawn liveness check + auto-rebuild in `wednesday_rotate.sh`; the watcher treats "no fleet session" as a rebuild wake).
+- QA launchers exec `claude` directly: launch ONLY via `cockpit.sh add`; guard candidate: refuse when stdin is not a TTY. **Resume a QA gate with `cockpit.sh say <pane> '<short text>'` (pane read-back), never raw `send-keys`** (12:01 → 12:44 loss).
+- Brief template: the concurrent-seat DIFF rule (a DIFF whose only moved refs are another live seat's branch/tracking ref/worktree HEAD is expected; anything else STOPs) + "a round-N brief names round N-1's report path" + the LEGITIMATE-SHAPES table for checkers.
+- `wake_watch.sh` fixes (QA-tag subjects inbound; never `stable_n=9999` with panes live; frozen/idle legs vs a seat waiting on its own background shell).
+- `wait_subject.py` doctor line; `send_brief.sh` double-prefix; `inbox_digest.sh` ack; `reconcile_rulings.py` in the watcher; the launcher committing its digests; 18 Secuura ruled-undelivered cards; the family-weight index.
+- **Teardown candidates (quarantine, never delete; Kam's):** `worktrees/s194-merge`, `s196-merge`, `s190-ks1099`, `s191-ks1098`, `s192-ks1109`, `s193-ks1029`, `s197-ks1103`, `s198-ks1020`.
+- **At the WRAP:** rule 3b BOTH digests (ledger +9 rows today, learning +1); rule 3c archive rows ≤ 2026-09-10.
 
 ## ⚠ TRAPS
-- **`/private/tmp` is wiped at reboot** — nothing a successor needs may live only in a scratchpad.
-- **Never run a QA launcher in the Bash tool** — it runs headless and dies with the seat.
-- **The provenance gate reads `a/b/c` as a relative path** (e.g. `spf/dkim/dmarc`); branch names and `pulls/N` too.
-- **The seat-scoped chat hook refuses any chat-store read that never mentions `view`** — use `kam_msgs.sh`, or print `view`.
-- **FIRST WRITE OF THE BOOT: commit the launcher's regenerated digests** by literal path — not via `wed_claim.sh`.
-- **The `[Datasec/ATTIO -> Wednesday] DAILY FOLLOW-UP DIGEST` lands in `wednesday-agent@` ~07:00 AEST** — SUBJECT ONLY; every inbox reader filters on the expected routing tag BEFORE touching a body.
-- **Linear's suggested branchName can carry ANOTHER ticket's id** (KS-1029 → KS-754 walked). Strip it before the first push; census KS-754 after #962 events.
-- **Peter's untested build-script branch** (PS-831 / KS-1096) — he tests Monday 2026-09-14; never a base.
-- **Peter merges his own PRs at night** — every merge brief STOPs on a moved develop unless the T-move rule clears it.
-- **Builder seats cannot see their own gauge:** CHECKPOINT at 50%, HAND OVER NOW at 70%; read statuslines at every wake.
-- **Before a pane close, read the transcript's last assistant row for `end_turn`.**
-- **Write and commit in ONE command.** zsh: no `PIPESTATUS`; list variables do not split; `echo ======` aborts; `grep` is a shell FUNCTION — `/usr/bin/grep` with a same-file control.
-- **GitHub's compare API caps at 300 files.** A file census comes from an uncapped `git diff`.
-- **The prior-ruling gate refuses on shared words:** open EVERY match, then override with the measurement.
-- **Tool paths:** `brief_and_launch.sh`, `send_brief.sh`, `self_check_view.sh` in `2_Project_Files/fleet/`; `cockpit.sh`, `pane_close.sh`, `pane_prompt_check.sh`, `wednesday_rotate.sh`, `wake_watch.sh` in `fleet/cockpit/`; QA launchers in `fleet/qa-agent/launchers/`.
+- `/private/tmp` is wiped at reboot — nothing a successor needs lives only in a scratchpad.
+- A QA launcher run in the Bash tool runs headless (pane only). A raw `send-keys` tap may not submit.
+- The provenance gate reads `a/b/c` (e.g. `spf/dkim/dmarc`), branch names and `pulls/N` as relative paths.
+- The seat-scoped chat hook refuses chat-store reads without `view`; the no-cd hook refuses `git -C $VAR` (literal paths) and any write verb outside WEDNESDAY.
+- A `python3 -c "…"` in double quotes executes backticks; a `&`-detached wait has no wake path (use run_in_background); compose no sentence in the same command whose output holds the fact (two topology slips today).
+- Linear's branchName can carry ANOTHER ticket's id (KS-754); a ticket's OWN PR walks it to In Progress (leave it); collateral walks are restored with CAS.
+- The `[Datasec/ATTIO -> Wednesday] DAILY FOLLOW-UP DIGEST` lands ~07:00 — subject only.
+- Peter's untested PS-831 branch — never a base. Peter merges his own PRs at night.
+- Builder seats cannot see their gauge: CHECKPOINT 50%, HAND OVER NOW 70%.
+- Before a pane close, read the transcript's last assistant row for `end_turn`; ghost text at a wrapped prompt → close, never clear.
+- Write and commit in ONE command. zsh: no `PIPESTATUS`; list variables do not split; `grep` is a shell FUNCTION — `/usr/bin/grep` with a same-file control.
+- Tool paths: `brief_and_launch.sh`, `send_brief.sh`, `self_check_view.sh` in `2_Project_Files/fleet/`; `cockpit.sh`, `pane_close.sh`, `pane_prompt_check.sh`, `wait_subject.py` in `fleet/cockpit/`; QA launchers in `fleet/qa-agent/launchers/` (newest: `launch_qa_secuura_ks1071_1070_967_968.sh`).
