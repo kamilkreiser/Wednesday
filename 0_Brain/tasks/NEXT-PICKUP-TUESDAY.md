@@ -23,7 +23,18 @@ supersede: replace WHOLESALE at the next pickup; never append.
 4. **After the live-upgrade REPORT:**
    - launch the acceptance+security harness (LIVE item 3), naming the live head in the launch prompt;
    - give Kam one short panel note: upgraded, which engagements to use, and the old ones DO NOT USE.
-5. **Tuesday's own rotation:** at the first safe boundary inside 80–90, with the pickup current and HEAD == origin, run `WED_AGENT=tuesday nohup bash 2_Project_Files/fleet/cockpit/wednesday_rotate.sh --self &`. Kam's words above are the authority not to wait for a hand restart; card `tuesday-seat-self-rotate-with-liveness-check` is left for him. **The new seat checks `2_Project_Files/fleet/cockpit/logs/rotate_*.log` for LIVENESS OK and that `%5` (plus any agent panes) survived.**
+5. **Tuesday's own rotation — ⚠ `wednesday_rotate.sh --self` REFUSES for this seat as-is (measured by reading, s12 19:1x).**
+   - **Why:** line 67 finds the coordinator pane by `@cockpit_name == $SEAT` = `tuesday`, but this machine's coordinator pane `%0` is named `wednesday`. `arm_wake_watch.sh:134-146` (taps + the DEAD case) HARDCODES `^wednesday|`; `wake_watch.sh:79` uses the seat.
+   - **So:** taps reach this seat only through the hardcoded name, `--self` refuses rc 2, and **a DEAD Tuesday seat cannot be auto-respawned** (`--dead` refuses too). **Never let this seat reach 90%.**
+   - **PROCEDURE, only when no live upgrade is in progress** (a fleet-session loss would kill S43 mid-deploy):
+     1. Pickup current and committed, HEAD in origin, tree clean.
+     2. `tmux set -p -t %0 @cockpit_name tuesday`
+     3. `WED_AGENT=tuesday nohup bash 2_Project_Files/fleet/cockpit/wednesday_rotate.sh --self > /dev/null 2>&1 &` (its log is `logs/rotate_wednesday.log`).
+   - **The SUCCESSOR's first actions:**
+     - (a) check the rotate log for `respawned OK` + `LIVENESS OK`, and that `%5` and the other agent panes survive;
+     - (b) **`tmux set -p -t %0 @cockpit_name wednesday`**, so `arm_wake_watch` taps reach it again.
+   - Wednesday has been told (a coordination mail proposes one naming source).
+   - The ORIGINAL line follows for history: at the first safe boundary inside 80–90, with the pickup current and HEAD == origin, run `WED_AGENT=tuesday nohup bash 2_Project_Files/fleet/cockpit/wednesday_rotate.sh --self &`. Kam's words above are the authority not to wait for a hand restart; card `tuesday-seat-self-rotate-with-liveness-check` is left for him. **The new seat checks `2_Project_Files/fleet/cockpit/logs/rotate_*.log` for LIVENESS OK and that `%5` (plus any agent panes) survived.**
 6. **Next Datasec lane once HPSM is stable:** NexusAI **RD-391 (High, `.dockerignore` any-depth)**. Brief it only after a fresh read-only Jira read (board_count.sh; NexusAI's own `JIRA_*`; trap 31 in `.pre-1740`). Its residue RD-392/393/394/396/397/398 partitions by file; RD-395 is Kam's product call. **The load on this Mac mini is the constraint** (gate C saw ~115–347): keep NexusAI's docker steps under the shared lock.
 
 ## 🟢 KAM ~18:5x, terminal, verbatim: *"If you don't need to wait until 2100, don't wait. Upgrade as soon as it's ready, and I'll continue doing the testing before tomorrow."*
