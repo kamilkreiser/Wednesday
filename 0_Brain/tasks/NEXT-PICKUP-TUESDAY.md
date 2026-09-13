@@ -50,7 +50,9 @@ supersede: replace WHOLESALE at the next pickup; never append.
   - **`%5` stays open until the FX-S7 report is FINAL AND S44 confirms.**
   - Routing row `Datasec/HPSM-S44` committed. S44 brief: `briefs_staged/2026-09-13_hpsm-s44-successor-merge-seat.md`.
   - **S44 LAUNCHED 19:47:28 in pane `%7` `Datasec/HPSM-S44`** (`cockpit.sh add`, HPSM's own `Launch_Claude.command`). Before the launch: brief sent, then VERIFIED at 09:47:21Z (sent copy to datasec-hpsm@, preview non-null); census showed exactly 1 HPSM seat (pid 1666, S43). A background rung-5 check is running (pane `%7` + newest transcript under `~/.claude/projects/-Volumes-KK-T9-External-HDD--CODING-Datasec-HPSM/`).
-  - **s13 watcher re-armed:** `watch_tuesday_exiting.sh 2026-09-13T09:43:27 23:55 1666 83570`. Add S44's claude pid after rung 5.
+  - **S44 RUNG 5 PROVEN 19:48.** Its transcript is `~/.claude/projects/-Volumes-KK-T9-External-HDD--CODING-Datasec-HPSM/375c22cb-878d-495f-b5a7-24379c82f071.jsonl`: first user record 09:47:29Z (after the launch); it lists `5_Project_History` + HANDOVER-S43 and reads its inbox; the S44 brief subject appears in it. S44 claude pid **39799**. (A first checker "passed" on S43's own transcript `28f5c90e`, a selector error caught before any report; ledger row.)
+  - **s13 watcher:** `watch_tuesday_exiting.sh 2026-09-13T09:43:27 23:55 1666 83570` (S44's pid not in it; wake_watch covers the pane).
+  - **FX-S7 INTERIM 2 (~09:48Z):** head `aa09ffd` GREEN v3 (pill breaks and clipped select fixed), `chain-final.py` running. **Pinning the sign-in description to the bottom needs FX-SI's markup** (a column flexbox plus `margin-top:auto`), so it is NOT on FX-S7. S44's brief already requires it before FX-SI merges.
   - **NEXT:** rung-5 check of S44 → confirm its plan → close `%5` only once both conditions hold → relay Kam's gate go/hold → the delta gate after the merges.
 - **19:38 — S43 READY-TO-APPLY 09:37:59Z (DKIM pass, read whole): gate fix "b-tight".**
   - **Reproduced** FAIL in real Chromium through the public URL.
