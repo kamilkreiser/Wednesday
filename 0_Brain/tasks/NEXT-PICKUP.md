@@ -2,7 +2,7 @@
 date: 2026-09-13
 type: pickup
 scope: SECUURA + all general/generic work. Datasec is TUESDAY's — read her mail by SUBJECT only, never brief or answer for a Datasec project.
-source: replaced WHOLESALE 16:2x and REFRESHED 17:0x (65% checkpoint) by the seat booted 15:57 (Kam 14:2x: rotation never blocks the work — delegate, then rotate with agents live).
+source: replaced WHOLESALE 16:2x and REFRESHED 17:0x (65%) and 17:2x (70% checkpoint) by the seat booted 15:57 (Kam 14:2x: rotation never blocks the work — delegate, then rotate with agents live).
 status: live
 supersede: replace this file wholesale at the next pickup; do not append
 ---
@@ -11,16 +11,17 @@ supersede: replace this file wholesale at the next pickup; do not append
 
 > Narrative: `0_Brain/daily/2026-09-13.md` from the 15:57 boot block. **Measure before acting on any line here.** Subagent outputs of the 15:57 seat live in `/private/tmp/claude-501/-Volumes-DevMASTER-WEDNESDAY/a443e8f5-4f70-46d7-b9f3-451ac0da033f/scratchpad/` (gate970/ gate972/ gate971/ gate973/ gate975/ gate974/ s205_merge_brief.md — each `BUILD_REPORT.md` present = built; absent = the subagent died with the seat → rebuild from the gate969 exemplar at `…/e5222267-…/scratchpad/gate969/BUILD_REPORT.md`, which is the recipe). The READY/verdict mails are saved beside them as `s20N_readyNNN.txt`, `verdict969.txt`.
 
-## 🟢 FLOOR (panes at 17:0x — the 65% checkpoint)
+## 🟢 FLOOR (panes at 17:2x — the 70% checkpoint; the daily note's 17:28 block is the narrative)
 | pane | seat | state | next event owed |
 |---|---|---|---|
-| `%72` | **s205 MERGE SEAT** (`Secuura/Blockchain`) — CONFIRMED 06:51Z; **#969 MERGED as M7 `506cd3a33` on v2, VERIFIED; KS-1069 archived; KS-1129 (M) + KS-1130 (L) filed** | on ITEM A (#970 @ `ae274f7cb`, ADDENDUM 06:57Z, v1 expected, close #913 after) then ITEM B (Kam's three 16:55 rulings → comments on KS-1114, KS-1116 + a new Low for accept-split) | its STATUS mails → verify M at source (`ls-remote` + `git log -1 --format=%P`) → mark the three cards `--delivered` with the comment ids → next ADDENDUM per verdict (v1/v2, follow-ups, supersede-close) |
-| `%79` | **s206 LANE D successor** (`Secuura/Blockchain-D`) — launched 17:01 on PR-3 (KS-924, KS-901) + PR-4 (KS-828, KS-900) | plan confirmation OWED (proxy.ts `{ routes, guarded }` value is its named question; PR-4's base conditional on #975) | ANSWER → two READYs → tier-2 gates; CHECKPOINT 50% / HAND OVER NOW 70% |
-| `%70` `%71` `%73` `%74` `%75` `%76` `%78` | QA gates #972 t1 · #971 t2 · #973 t1 · #975 t2 · #974 t2 · #976 t2 · #977 t2 (all pinned to develop M6 `0f69129b3` EXCEPT #977 = M7; their briefs' item "if develop moves mid-pass" covers M7 — api-gateway only) | waits armed (`wait_subject.py`, background/detached) | verdict → completion vs the brief → RULE → score the seat at its LAST verdict (s202 at #972; s201 at #973; s204 at the last of #971/#974/#977; s203 at the last of #975/#976/#978) → ADDENDUM to s205 |
-| — | #978 (KS-885/886, s203 PR-2) gate set BUILDING (`scratchpad/gate978/`); #970 DONE (GO WITH FINDINGS, QA 1.00, `%69` closed) | — | install → `--check` (BRANCH ON THE RC) → commit by name → `cockpit.sh add` → wait |
+| `%72` | **s205 MERGE SEAT** — #969 → M7 `506cd3a33`, #970 → M8 `fa55e58c9` (both VERIFIED at source); #913 closed; ITEM B delivered (KS-1114 `de54da40`, KS-1116 `01a8361c`, KS-1133) | queue **C #971 @ `c229aa256` → D #972 @ `b3ce8c9e7` (close #930; F-3 HIGH + F-5 MEDIUM tickets) → E #975 @ `8da20edbd` (one KS-953 comment)** — ADDENDUMs sent 07:04Z / 07:1xZ / 07:2xZ | each STATUS → verify M at source (`ls-remote` + `git log -1 --format=%P` + `diff --name-only`) → next ADDENDUM |
+| `%79` | **s206 LANE D successor** (PR-3 KS-924/901; PR-4 KS-828/900) | plan confirmation OWED (proxy.ts `{ routes, guarded }` its named question; PR-4's base: after #975 merges, cut from develop) | ANSWER → READYs → tier-2 gates |
+| `%75` `%76` `%78` | QA #974 t2 · #976 t2 · #977 t2 | waits armed | verdict → completion → RULE → ADDENDUM; score s204 at the last of #974/#977; s203 at the last of #976/#978 |
+| — | **#973 NO GO round 1 of 2** (auth's ks949 test must move with the ticket; the guard's regression cell) — s201 wrapped → **s207 LANE B ROUND 2 brief drafting** (`scratchpad/s207_laneB_r2_brief.md`) | launch on `Secuura/Blockchain-B` when the draft lands (patch develop at send) | plan confirmation → READY → tier-1 gate ROUND 2 (the cap's last round) → GO → ADDENDUM (close #928) |
+| — | #978 (KS-885/886) gate set BUILDING (`scratchpad/gate978/`) | — | install → `--check` (BRANCH ON THE RC) → commit by name → `cockpit.sh add` → wait |
 | `%1` | monitor | — | — |
 
-**develop = M7 `506cd3a33`** (#969; parent M6 `0f69129b3`; read at source 16:59 by Wednesday). #970 next (s205). **#913 → close with #970; #930 → with #972; #928 → with #973** (s205's, by ADDENDUM).
+**develop = M8 `fa55e58c9`** (#970; ← M7 `506cd3a33` #969 ← M6 `0f69129b3`). Every running gate's launcher is pinned to an older develop by design; their briefs' mid-pass rule covers it.
 
 ## 🔵 GATE PIPELINE (all tier per Wednesday; verdict subject `[QA -> Wednesday] TIER N GATE #PR ROUND 1 (KS-…) <head7> -- …`)
 | PR | head | tier | build (scratchpad dir) | install → launch → wait |
