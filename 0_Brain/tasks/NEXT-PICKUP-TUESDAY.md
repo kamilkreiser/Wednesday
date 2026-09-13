@@ -26,6 +26,15 @@ supersede: replace WHOLESALE at the next pickup; never append.
 5. **Tuesday's own rotation:** at the first safe boundary inside 80–90, with the pickup current and HEAD == origin, run `WED_AGENT=tuesday nohup bash 2_Project_Files/fleet/cockpit/wednesday_rotate.sh --self &`. Kam's words above are the authority not to wait for a hand restart; card `tuesday-seat-self-rotate-with-liveness-check` is left for him. **The new seat checks `2_Project_Files/fleet/cockpit/logs/rotate_*.log` for LIVENESS OK and that `%5` (plus any agent panes) survived.**
 6. **Next Datasec lane once HPSM is stable:** NexusAI **RD-391 (High, `.dockerignore` any-depth)**. Brief it only after a fresh read-only Jira read (board_count.sh; NexusAI's own `JIRA_*`; trap 31 in `.pre-1740`). Its residue RD-392/393/394/396/397/398 partitions by file; RD-395 is Kam's product call. **The load on this Mac mini is the constraint** (gate C saw ~115–347): keep NexusAI's docker steps under the shared lock.
 
+## 🟢 KAM ~18:5x, terminal, verbatim: *"If you don't need to wait until 2100, don't wait. Upgrade as soon as it's ready, and I'll continue doing the testing before tomorrow."*
+- **S43 told (ANSWER ~08:5xZ), SUPERSEDING the 21:00 window and the 'second upgrade before 07:00' rule:**
+  - upgrade NOW on `caf63fd`, keeping the dry-run; the upgrade gets the docker lock first;
+  - then ROLLING upgrades as each fix lane merges GREEN, batched within ~30 min;
+  - before each later upgrade S43 sends a head mail and waits ~5 min.
+- **Tuesday's job on each head mail:** a short panel warning to Kam (the site restarts for a few minutes).
+- **Tuesday's job on each REPORT:** a panel note with what changed, the engagement to use, and the DO NOT USE list.
+- **Kam is TESTING THE LIVE SITE tonight.** No agent touches engagements or tenants it did not create. A later upgrade that would strand engagements (a content hash change) STOPS for Tuesday.
+
 ## 🔴 LIVE — with the next action for each
 
 1. **HPSM S43 — pane `%5` `Datasec/HPSM-S43`, launched 17:07:52 by s12 with HPSM's own `Launch_Claude.command`.**

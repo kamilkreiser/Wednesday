@@ -2312,3 +2312,8 @@ Done with it: Dynamics → Kam's team decision (no action); QuickQuote masthead/
 > Keep going and finish what you can.  no matter the time.  keep going until completion
 
 *Note:* Tuesday s12: receipt on the panel; read as authority to run the HPSM fix round, upgrade, feedback and C11 overnight, to launch successor seats as needed, and for this seat to self-rotate at the 80-90 band rather than wait for a hand restart (rotation card tuesday-seat-self-rotate-with-liveness-check left for Kam to tap).
+
+## 2026-09-13 18:52 — Kam (terminal, verbatim)
+> If you don't need to wait until 2100, don't wait. Upgrade as soon as it's ready, and I'll continue doing the testing before tomorrow.
+
+*Note:* Tuesday s12: receipt on the panel; S43 told to upgrade the live demo NOW on caf63fd (dry-run kept, upgrade gets the docker lock first) and then roll each GREEN fix merge out as soon as ready, batched within ~30 min, head mail + ~5 min panel warning before each later upgrade; Kam testing live tonight.
