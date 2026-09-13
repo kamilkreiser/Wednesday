@@ -1,0 +1,133 @@
+ultrathink
+
+You are the fleet QA agent running a TIER 2 (through code) gate, ROUND 1, on Secuura/Blockchain PR #978 (KS-885 / KS-886).
+
+Read your brief FIRST and in full, then plan:
+/Volumes/DevMASTER/WEDNESDAY/2_Project_Files/fleet/qa-agent/briefs/2026-09-13_secuura-978-ks885-886-tier2.md
+
+Subject: 13b767a7fcf64cee2403c1b810d698243998fb5b = PR #978 (KS-885 KS-886), open against develop, ONE commit whose
+  parent is 0f69129b3 = the merge-base. develop MOVED THREE TIMES while this set was built: 506cd3a33 (16:56 AEST,
+  #969's squash, 3 files under services/api-gateway/), fa55e58c9 (17:08, #970's squash, 2 under services/auth/),
+  50b729d69 (17:21, #971's squash, two .sh) — every one disjoint by name from every file this gate reads and from
+  packages/shared/, but the first two each add ONE walked .ts: the merged tree at 50b729d69 walks 1,286 files /
+  12,791,361 bytes, so the docblock's 1,284 / 12,758,153 is stale on arrival (a prose number, not an assertion).
+  GitHub compare at 17:26 AEST: diverged, ahead 1 / behind 3. The launcher pins the merge-base 0f69129b3 (exit
+  10) and develop 50b729d69 with a DISJOINTNESS CHECK (exit 18 only if a later squash touches the guard's five
+  files or packages/shared/) — so develop is probably PAST 50b729d69 when you read it; re-state the census. ONE
+  file, +128 -24 (180 -> 284 lines, 9 hunks): packages/shared/src/__tests__/ks879-no-raw-control-bytes-repo-wide.test.ts
+  — the raw-control-byte guard. KS-885: the E1 control now holds the six-character escape ITSELF ('doc\u0000bad',
+  as ks847:146 does) and asserts charCodeAt(3) === 0 and length === 7 (it used to build the string with
+  String.fromCharCode(0) — a tautology); a NEW read-only pin cell E2 reads services/transfer/src/__tests__/
+  ks474-delegation-document-id.test.ts and asserts the six-character 'doc…bad' literal occurs exactly twice (:139,
+  :151) and the doubled spelling zero times, with an exists-control (Wednesday's Q2 (i) ruling). KS-886: ROOTS =
+  ['services','packages'] is gone; WALKED = sourceFiles(DEV_ROOT) walks ALL of Blockchain/Dev (1,284 files,
+  12,758,153 bytes at head, 0 raw control bytes — Wednesday re-derived all three from blobs); offendersUnder(root)
+  is the shared walk-and-predicate; F1 pins three NAMED files under tests/, frontend/, scripts/; F2 plants a raw
+  NUL under a scratch tests/ and expects `tests/planted.spec.ts: 0x00 at byte 16`; floors > 1_000 files / > 5 MB;
+  the two I/O cells get 30 s. 5 cells at base, 8 at head. The ks474 fixture is UNCHANGED (blob b8dea87ec at both,
+  sha256 4965bf56d12ca79a…). Both tickets were born as F1/F2 of the #856 tier-2 gate (report path in the brief).
+Repo:    /Volumes/DevMASTER/!CODING/Secuura/Blockchain/2_Project_Files  (READ-ONLY — clone by SHA into your own scratch)
+
+You are FINDINGS-ONLY. You never fix, never merge, never push, never deploy.
+
+NEVER run a push, the real pre-push hook, or preflight.sh inside the Secuura checkout or any of its worktrees.
+
+NEVER print a credential value, and never open, read or copy a secrets file (any .env, config/secrets.yml). Count, never echo.
+
+Seven things you must not miss:
+
+1. RED-FIRST PER TICKET, RE-DERIVED AT BASE WITH THE SUITE RUNNING (cells-run quoted): in your own by-SHA worktree
+   of 0f69129b3 the file reads 5/5. KS-885 is an ABSENCE: respell BOTH ks474 sites 'doc\u0000bad' -> 'doc\\u0000bad' in
+   the BASE worktree -> the base guard stays 5/5 GREEN (nothing reads that file) — the defect; at 13b767a7f the same
+   respell reds EXACTLY E2 (`two sites spelled as the six-character escape: expected 0 to be 2`), 7/8. KS-886 is a
+   walk narrower than its name: at head with WALKED forced back to ['services','packages'].flatMap(…) -> F1 red
+   `expected [ …(791) ] to include 'tests/admin-crud-test-robust.spec.ts'` + the walk CONTROL red `expected 791 to be
+   greater than 1000`, 6/8 — the bracket must say 791 (the PR says 798; the brief's item 5 explains the seven).
+   Restore ks474 sha-identical 4965bf56d12ca79a… and ks879 1c84d58057d63127… after every tamper.
+
+2. THE CENSUS AT SOURCE, from blobs, never from the run: git ls-tree -r -l 13b767a7f -- Blockchain/Dev filtered by
+   the five EXTS (.ts .tsx .js .mjs .cjs) and the SKIP_DIRS names (node_modules dist build coverage .turbo) as path
+   components = 1,284 files / 12,758,153 bytes at head; 1,284 / 12,751,993 at develop (the 6,160 is ks879's own
+   blob 8,280 -> 14,440 — so the docblock's "12,758,153 bytes at 0f69129b3" is the HEAD tree's figure); two roots
+   791 / 8,094,071; tests/ 148; the tickets' 749 of 1,242 are at 6fd033c36; the old sentence's 1,240 is four EXTS
+   at 14914258c. Then git cat-file --batch over all 1,284 head blobs with the :95 predicate re-implemented: 0 raw
+   control bytes, positive control (16, 0) on `const bad = 'doc<0x00>bad';`. Keep your OWN scratch out of
+   Blockchain/Dev or non-EXTS: a .ts you drop there is walked (the builder's 1,291 was seven such files).
+
+3. RED-PROOF WITH THE SUITE RUNNING (8 cells ran; predictions first; your OWN asserting runner scoring by TITLE — the
+   builder's runner records the CONTROL cells as `MODEL`): T1 E1's backslash doubled at :214 -> exactly E1
+   (`expected 92 to be +0`); T2 as in item 1 -> exactly E2; T3 WALKED to two roots -> F1 + the walk CONTROL, and
+   the 🔴 cell STAYS GREEN (it walks DEV_ROOT on its own at :148); T4 the predicate never fires (`b === 0x100`) ->
+   the predicate CONTROL + F2; Tg (gate-designed, the real walk's positive control): plant
+   Blockchain/Dev/tests/__qa978_planted.spec.ts with `const bad = 'doc` + 0x00 + `bad';` (printf/Python bytes —
+   never paste a raw byte into a command; the tool refuses it) -> exactly the 🔴 cell red naming
+   `tests/__qa978_planted.spec.ts: 0x00 at byte 16`; then the same bytes as a .sh -> 0 red (EXTS), under
+   tests/node_modules/ -> 0 red (SKIP), a 0x7f variant -> 1 red; quarantine plants by RENAME, never rm; 8/8 and
+   count 1,284 after. Tg2 (gate-designed, the split walk): :148 offendersUnder(DEV_ROOT) ->
+   offendersUnder(join(DEV_ROOT, 'packages')) with WALKED untouched -> Wednesday predicts 0 red (8/8): the walk
+   CONTROL pins WALKED, the 🔴 cell judges a second, independent walk (at base ONE array served both). If measured,
+   report it as a Minor finding against #978 (MEASURED AT RUNTIME) with the fix shape in the brief's item 4, and
+   show that under Tg2 the Tg plant under tests/ goes unseen.
+
+4. THE §2a LEGITIMATE-SHAPES TABLE, measured base and head: a raw NUL in a .ts under tests/ (green at base — the
+   defect; red at head) · in a .sh (green — a declared EXTS limit) · in a skipped dir (green — SKIP_DIRS) · under a
+   generated dir with another name such as deploy/assets (walked: red — the PR body's own note; the 303 KB tracked
+   bundle frontend/website/deploy/assets/index-7aOk0Jvl.js is in the set and clean) · the six-character escape
+   (green; E1 proves it evaluates to one U+0000) · the doubled escape anywhere but ks474 (green — the pin is on ONE
+   file by design) · a DEL/ESC (red) · an empty .ts (green, walked) · a tree under the floors, e.g. a clone without
+   tests/ or frontend/ (F1 + walk CONTROL red) · a clone missing only mobile/connectors/sdk/deployment (green —
+   nothing names them; Record) · a symlink-farm clone (the walk does NOT descend symlinked dirs — a fixture
+   failure, score no cell). Every green needs its plant-point control (the same bytes with a covered extension in
+   the same directory reds), as the #856 gate did.
+
+5. THE RATIO AND THE MERGED TREE, SOLO: at 13b767a7f the file 8/8; the full packages/shared
+   `2 failed | 788 passed (790)`, `1 failed | 40 passed (41)` files — the two reds are ks781 LEG D's stale pins
+   (`names WHERE each declared site is…`, `CONTROL — the three declared sites include the one that is NOT
+   mock-gated`; PR #975, open at 16:46 AEST) — or 790/790 if #975 has merged: say which state you measured in.
+   Base: `2 failed | 785 passed (787)`. git merge 13b767a7f onto the then-current develop (50b729d69 at 17:26 AEST
+   or past it) in your own clone is a 3-WAY merge (the 1 file vs the squashes' files — expect CLEAN; quote the tree
+   sha); run the full package on it SOLO: the same counts, and the guard's walk at 1,286 files / 12,791,361 bytes /
+   0 offenders on 50b729d69 + head — re-derive if develop moved further. Read git ls-remote origin
+   refs/heads/develop at start and end; prove every squash past 0f69129b3 disjoint by NAME from ks879, the ks474
+   fixture and the three F1-named files, re-state the census, and say whether #975 is in it.
+
+6. CLAIMS TRUE AS WRITTEN (read-only), each with its evidence: "798 files" (comment :161, PR body twice) vs 791
+   tracked and the builder's own `[ …(791) ]`; "749 of the 1,242 files the sentence above counts" (:36-37) while
+   :29 says 1,240 at 14914258c; "12,758,153 bytes at 0f69129b3" (:43) being the head-tree figure; "493 outside",
+   "all 148 under tests/", "the prose used to list four", "as the KS-847 guard does it" (ks847:146),
+   SIX_CHAR.length 14, length 7, vitest 4.1.10, 788/790 = 787 + 3 — all hold by Wednesday's read; confirm. The
+   two ticket comments (KS-885 493bbe69, KS-886 1e9f7b09): 1 at-sign each = the "PR #978 @ `13b767a7f`" idiom,
+   0 mention-shaped, 0 inside code spans; the PR body 0 at-signs; the linear[bot] comment 5651723468 2 at-signs =
+   the "`develop` @ `6fd033c36`" idiom. Board: KS-885/886 In Progress (automation), attachment #978 only, one
+   comment each; KS-879 Deployed to UAT (archived), KS-847 Done (archived), KS-474 Done (archived) — read at start
+   AND end, report any walk with its timestamp, never touch. Then the class hunt: crypto-agility.guard.test.ts:44
+   SCAN_DIRS and ks727-errorhandler-class-guard.test.ts:150 SCAN_ROOTS are two-root walks — do their names or
+   docblocks claim more? Record for Wednesday.
+
+7. DOCS §4 and the quality legs: the two platform-k HTML docs do not name ks879 / packages/shared / control byte /
+   KS-886 (Wednesday reads 0 hits, positive control orchestrate.sh 1 each) — confirm with /usr/bin/grep -ci and the
+   same control; eslint on the file rc 0 and `eslint src` rc 1 = the one pre-existing middleware/index.ts:522
+   no-control-regex; a scratch tsconfig (.json, extends the package's, includes only this file) -> tsc --noEmit 0
+   errors at head and at the base file; tsconfig.json:21 excludes src/__tests__ (KS-933). Then the verdict on
+   13b767a7f.
+
+Your tool shell's grep may be a function: use /usr/bin/grep, case-insensitive, with a same-file control; for the
+escape needles use -F with the backslashes doubled for the shell. Never cd; the pre-tool hook refuses `git worktree`
+in the Secuura checkout — clone into your scratch and run write verbs THERE. A REAL checkout of the whole
+Blockchain/Dev, not a symlink farm. The builder's worktree worktrees/s203-laneD IS at 13b767a7f (porcelain 0) —
+symlink its node_modules INTO your clone, never run vitest inside it. packages/shared is VITEST 4.1.10 (npx vitest
+run, never watch; cwd = <clone>/Blockchain/Dev/packages/shared); the full package run includes socket legs — minutes,
+solo. Quote the Secuura checkout's porcelain count, .git/config sha256, for-each-ref count and origin develop SHA at
+start and close; they must match (name any ref another seat's push or merge moved).
+Do no memory maintenance of your own project's memory store inside this session.
+
+Report FOUND / TESTED / HOW, with controls, the per-ticket red-first with cells-run, the census table re-derived, the
+§2a table as measured, the tamper table (T1–T4, Tg, Tg2: prediction · cells run · red titles · restore sha), and
+state what you did NOT test.
+Verdict: GO, GO WITH FINDINGS, or NO GO — on 13b767a7f, against the develop you merged it onto (name it).
+
+MAIL YOUR VERDICT to wednesday-agent@agentmail.to when the pass is complete, using
+the project's send_brief.sh. Your pane holds ~19 lines of alternate screen with no
+scrollback, so a verdict that stays in the pane is one pane-close from being lost --
+this is not a formality, it is the only durable copy. Subject:
+[QA -> Wednesday] TIER 2 GATE #978 ROUND 1 (KS-885 KS-886) 13b767a7f -- <GO|GO WITH FINDINGS|NO GO>
