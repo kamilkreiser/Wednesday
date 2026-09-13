@@ -46,6 +46,20 @@ supersede: replace WHOLESALE at the next pickup; never append.
        - Mark both cards `--delivered` once the upgrade REPORT and C11's READY name their artefacts.
 
 2. **Three combined tier-1 gates on `09c1591` — RESUMED by s12 at 17:05 in new panes.**
+   - **UPDATE 18:5x (s12, ctx 71%) — ALL THREE GATES IN; all panes closed (`%2`, `%3`, `%4`; control 18580 200 each time):**
+     - **A = GO WITH FINDINGS** 0/0/2/4.
+     - **B = GO WITH FINDINGS**: API 0/0/5/1, DB 0/0/0/1. Findings: W4B-m1 urn:uuid→500; **W4B-m2** stale-pinned engagement accepts a customer approval after an upgrade, then stuck; W4B-m3 10 more credential shapes; W4B-m4 load 500/504 duplicate; CI-m1; W4B-p1; DB-p1. Report 183 lines, 0 placeholders, DKIM pass.
+     - **C = NO GO** (WP5 0/3/5/4, WP6 0/1/3/4).
+     - **COMBINED on 09c1591 = NO GO → NO PUSH.**
+     - **Routed by ANSWER ~08:3xZ:**
+       - W4B-m2 → tonight's upgrade REPORT names old engagements DO NOT USE, plus a fix-round code fix;
+       - W4B-m1 → fix round;
+       - W4B-m3 → the credential rebuild after C11;
+       - m4/CI-m1/p1/DB-p1 → BACKLOG.
+     - Kam told on the panel.
+     - **NEXT after S43's fix round:** ONE delta tier-1 gate on `09c1591..<fix head>` (Q + W + fixes). Push only on GO + Tuesday's word.
+     - **OWED (not done by s12):** score gates A/B/C (each ~1.00: controls, resumed cleanly, honest NOT-TESTED) and the builder round (S41/S42/S43 merge seat, combined NO GO on C's Majors) on `projects_index/scoreboard.md`.
+
    - **UPDATE 18:4x (s12, ctx 70%):**
      - **Gate C VERDICT 08:30:21Z (DKIM pass; report 321 lines, 0 placeholders) = WP5 NO GO 0/3/5/4 · WP6 NO GO 0/1/3/4.**
        - W5-M1: a website-created engagement can never be customer-approved (approver user_id null).
