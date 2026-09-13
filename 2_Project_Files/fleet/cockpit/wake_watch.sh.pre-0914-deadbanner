@@ -80,11 +80,7 @@ while [ $SECONDS -lt $end ]; do
   # "wednesday" pane when this tree's seat IS $SEAT (the mini, 2026-09-13). An
   # absent coordinator pane is not fatal here — the check is simply skipped.
   wpane=$(coord_pane_id "$FLEET" 2>/dev/null || true)
-  # 2026-09-14: the bare literal grep killed a healthy seat twice in 8 h (23:39, 06:53) —
-  # the literal appears in ordinary tool output whenever a seat diagnoses the last kill.
-  # The predicate now lives in dead_banner_check.sh (quote/tool-output/prose exclusions,
-  # selftest inside it) and is shared with wednesday_rotate.sh --dead.
-  if [ -n "$wpane" ] && TMUX_BIN="$TMUX_BIN" bash "$(cd -P "$(dirname "${BASH_SOURCE[0]}")" && pwd)/dead_banner_check.sh" "$wpane"; then
+  if [ -n "$wpane" ] && "$TMUX_BIN" capture-pane -t "$wpane" -p -S -60 2>/dev/null | grep -q 'Context limit reached'; then
     echo "WAKE: pane '$SEAT' DEAD — Context limit reached; the coordinator cannot act — respawn required"; exit 0
   fi
   # (a) mail tripwire
