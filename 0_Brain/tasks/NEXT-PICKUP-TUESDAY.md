@@ -12,6 +12,15 @@ supersede: replace WHOLESALE at the next pickup; never append.
 **On EVERY wake:** `2_Project_Files/tools/kam_rulings_today.sh` (never `kam_msgs.sh` unfiltered) AND `[Kam -> Tuesday]` mails; list `tuesday-agent@` UNFILTERED and route on SUBJECT; `git status --porcelain | grep -v 0_Brain/dashboard/data/`. Rotation band 80–90. **Verify panel messages AT ORIGIN** (`git show origin/main:0_Brain/dashboard/data/chat_tuesday.json` on the ref `panel_sync` fetches; `git ls-remote` HUNG 9 min in this tree at 14:28 — bound any network read with a timeout). **Do NOT read `0_Brain/daily/`** (Wednesday's).
 
 ## 🔴 LIVE — with the next action for each
+0032. **S42 QUESTION 04:44:53Z (read whole): the C11 device-group release was MEASURED, and it BLOCKS.** On `pc-s42-c12`, head 7e324c5:
+    - **With ONE synthetic device group:** 409 RELEASE_BLOCKED `all_controls_ready_or_approved_excluded`, even after 24 exceptions + both approvals. All 55 items fail `support_resolved` (support "unknown", no C11 `device_capabilities` rows). "Unknown" raises NO issue code.
+    - **Zero groups:** released 1.0.0.
+    - **Capability probe:** 55 synthetic rows (model_family "SYNTHETIC MFP", support "supported") clear it; baseline_values is irrelevant.
+    - **Code needed in 4 places:** `content-bundle.ts:54`, `apps/api/src/content.ts:320-322`, `packages/db/src/releases.ts:45/:157-159`, `routes/engagements.ts:50-57`. The seed contract's C11 columns do not match the engine's row shape.
+    - **Both LIVE stacks' demo tenants have one group (S40), so release would be blocked there.**
+    - **→ CARD `hpsm-composer-demo-release-with-device-groups`** added by s11 ~14:4x (rec `zero-group-engagement`, with `build-c11` and `drafts-only` as alternatives; default: nothing changes). Used `--override-prior-rulings` against build-c12, reason in the BLUF.
+    - **HOLD mail to S42** (body `2_Project_Files/fleet/briefs_staged/2026-09-13_hpsm-s42-c11-carded-hold.md`): no C11 work, no second engagement until Kam rules; the queue continues.
+    - **NEXT:** when Kam taps, rule it with `decision_queue.sh rule` and relay. If `zero-group-engagement`: a post-upgrade seed step in S40's C12-upgrade message. If `build-c11`: a new lane commission (engine + content + db + api, fenced like C12).
 0031. **S42 STATUS 04:41:20Z (read whole): LOCAL main `365d5ef845caca3f3301ff54ff62f8e68bb759a4`** (lane R round 1 merged; 204 ahead of `afc10e9`; verified at source by s11 14:4x; NOT pushed).
     - **Chain:** seat checks; upgrade proof from 7135dec; clean-clone CI GREEN; the first switch-ON e2e step 20 failed / 14 not run, all classified F1 (422 fence), recorded `qa-s42/merge-seat/on-e2e-merge-r-summary.txt`.
     - **Lane R round 2 `d63e0fb` GREEN and merging:**
