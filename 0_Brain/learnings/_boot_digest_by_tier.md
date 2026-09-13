@@ -7,7 +7,7 @@ status: live
 
 # Boot digest BY TIER — W whole, M rules-only, every project case a handle
 
-Generated 2026-09-13 14:01 from 156 lesson files (797,773 B). M 33 · MIXED 5 · W 118. 28 project CASE sections inside MIXED files are reduced to one line each: the heading and the path to read it at. W blocks are exactly what the default digest carries; M blocks drop the section index and keep the rules; a P file is a single handle. The CASES behind every rule live only in the lesson files — open one the moment its rule fires.
+Generated 2026-09-13 14:06 from 156 lesson files (798,604 B). M 33 · MIXED 5 · W 118. 28 project CASE sections inside MIXED files are reduced to one line each: the heading and the path to read it at. W blocks are exactly what the default digest carries; M blocks drop the section index and keep the rules; a P file is a single handle. The CASES behind every rule live only in the lesson files — open one the moment its rule fires.
 
 ## The T9 SSD is the master — Wednesday must be fully portable
 `2026-07-31_fully-portable-drive.md` · principle · 2026-07-31 · status: superseded — the "T9 is the master" half by [[2026-08-25_one-drive-devmaster-is-master]] (2026-08-25); the portability principle itself still lives · tier: W
@@ -5394,7 +5394,7 @@ sections (open the file for these): What the grant covers — Wednesday's readin
 **His words, verbatim (2026-09-13 09:1x AEST):**
 > *"this is a new standing rule for all projects - please spin up as many agents as possible to complete the task as long as multiple agents do not create a problem with development through multiple agents working on the same code base.  Also as an FYI - the kreiser.org credits will most likely run out soon and will reset in 3 hours"*
 
-sections (open the file for these): What it widens, and what it does not · How to apply
+sections (open the file for these): What it widens, and what it does not · How to apply · EXTENSION 2026-09-13 14:0x — Kam, terminal, verbatim: *"rotate then keep pushing through the tickets.  use as many agents as necessary.  I would like to get through at least 50% by tuesday"*
 
 ## How to apply
 1. **Every morning sweep and every checkpoint asks: how many DISJOINT lanes exist right now?** — and
@@ -5412,4 +5412,8 @@ sections (open the file for these): What it widens, and what it does not · How 
 **Family:** [[2026-09-09_parallel-seats-on-one-project-grant]] (the mechanism this rule scales up) ·
 [[2026-08-28_overnight-is-working-time]] · [[2026-08-03_go-slow-earn-autonomy]] (rule 5: every grant
 recorded) · [[2026-09-02_coo-actionable-tickets-never-wait-for-kam]] (the queue this rule drains faster).
+
+## EXTENSION 2026-09-13 14:0x — Kam, terminal, verbatim: *"rotate then keep pushing through the tickets.  use as many agents as necessary.  I would like to get through at least 50% by tuesday"*
+- **A TARGET with a date:** at least 50% of the Secuura tickets closed by **Tuesday 2026-09-15** (a weekday and a date — derived: `date -j -f %Y-%m-%d 2026-09-15 +%A` = Tuesday). Baseline: **KS active (unstarted+started types) = 121** at 08:4x on 2026-09-13 (`board_count.sh`, real count) → **≤ 60 active by Tuesday**. Re-count at every morning sweep and report the delta against this line.
+- "As many agents as necessary" restates the standing rule above with the target as the reason. "Rotate" = his word for the coordinator's rotation with the floor clear (no agent live), which the fleet-loss card's default did not forbid.
 

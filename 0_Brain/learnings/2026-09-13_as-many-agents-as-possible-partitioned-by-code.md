@@ -50,3 +50,7 @@ the boundary stated in every brief from each seat's side ([[2026-09-09_parallel-
 **Family:** [[2026-09-09_parallel-seats-on-one-project-grant]] (the mechanism this rule scales up) ·
 [[2026-08-28_overnight-is-working-time]] · [[2026-08-03_go-slow-earn-autonomy]] (rule 5: every grant
 recorded) · [[2026-09-02_coo-actionable-tickets-never-wait-for-kam]] (the queue this rule drains faster).
+
+## EXTENSION 2026-09-13 14:0x — Kam, terminal, verbatim: *"rotate then keep pushing through the tickets.  use as many agents as necessary.  I would like to get through at least 50% by tuesday"*
+- **A TARGET with a date:** at least 50% of the Secuura tickets closed by **Tuesday 2026-09-15** (a weekday and a date — derived: `date -j -f %Y-%m-%d 2026-09-15 +%A` = Tuesday). Baseline: **KS active (unstarted+started types) = 121** at 08:4x on 2026-09-13 (`board_count.sh`, real count) → **≤ 60 active by Tuesday**. Re-count at every morning sweep and report the delta against this line.
+- "As many agents as necessary" restates the standing rule above with the target as the reason. "Rotate" = his word for the coordinator's rotation with the floor clear (no agent live), which the fleet-loss card's default did not forbid.
