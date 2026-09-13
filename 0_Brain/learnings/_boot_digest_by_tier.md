@@ -7,7 +7,7 @@ status: live
 
 # Boot digest BY TIER — W whole, M rules-only, every project case a handle
 
-Generated 2026-09-13 14:17 from 156 lesson files (798,604 B). M 33 · MIXED 5 · W 118. 28 project CASE sections inside MIXED files are reduced to one line each: the heading and the path to read it at. W blocks are exactly what the default digest carries; M blocks drop the section index and keep the rules; a P file is a single handle. The CASES behind every rule live only in the lesson files — open one the moment its rule fires.
+Generated 2026-09-13 14:23 from 157 lesson files (803,021 B). M 33 · MIXED 5 · W 119. 28 project CASE sections inside MIXED files are reduced to one line each: the heading and the path to read it at. W blocks are exactly what the default digest carries; M blocks drop the section index and keep the rules; a P file is a single handle. The CASES behind every rule live only in the lesson files — open one the moment its rule fires.
 
 ## The T9 SSD is the master — Wednesday must be fully portable
 `2026-07-31_fully-portable-drive.md` · principle · 2026-07-31 · status: superseded — the "T9 is the master" half by [[2026-08-25_one-drive-devmaster-is-master]] (2026-08-25); the portability principle itself still lives · tier: W
@@ -5416,4 +5416,22 @@ recorded) · [[2026-09-02_coo-actionable-tickets-never-wait-for-kam]] (the queue
 ## EXTENSION 2026-09-13 14:0x — Kam, terminal, verbatim: *"rotate then keep pushing through the tickets.  use as many agents as necessary.  I would like to get through at least 50% by tuesday"*
 - **A TARGET with a date:** at least 50% of the Secuura tickets closed by **Tuesday 2026-09-15** (a weekday and a date — derived: `date -j -f %Y-%m-%d 2026-09-15 +%A` = Tuesday). Baseline: **KS active (unstarted+started types) = 121** at 08:4x on 2026-09-13 (`board_count.sh`, real count) → **≤ 60 active by Tuesday**. Re-count at every morning sweep and report the delta against this line.
 - "As many agents as necessary" restates the standing rule above with the target as the reason. "Rotate" = his word for the coordinator's rotation with the floor clear (no agent live), which the fleet-loss card's default did not forbid.
+
+
+## Rotation never blocks the work — delegate FIRST, then rotate with the agents running; and keep spinning up as many agents as the code allows
+`2026-09-13_rotation-never-blocks-the-work-delegate-then-rotate.md` · grant · 2026-09-13 · status: live — supersedes the DEFAULT of card `wed-coordinator-rotation-killed-the-fleet-1604` ("no self-rotation while any agent pane is live; ask Kam to launch the successor"); the card's check-only half becomes urgent, not optional · tier: W
+
+**His words, verbatim (2026-09-13 14:2x, terminal):**
+> *"dont let your context rotation get in the way of finishing tasks.  You can always delegate to agents and get them to work while you rotate.  Keep the last standing rule (to spin up as many agents as necessary and to move things as fast as logical and possible) going"*
+
+sections (open the file for these): Why he said it, and the instance that earned it · How to apply
+
+## How to apply
+1. **Rotation is not gated on the floor being clear.** At the band, at a safe boundary (the 08-21 conditions: no unanswered agent QUESTION, no dangling thread with Kam, durable writes pushed), self-rotate — `wednesday_rotate.sh --self`, detached — with agents live. Their mails wait in the inbox; the successor answers them.
+2. **Delegate BEFORE the band, not at it.** Anything that would be "too heavy for this seat" at 70% is briefed to an agent or a drafting subagent at 60%, so that by the band the seat is coordinating, not carrying ([[2026-08-11_coordinator-not-carrier]]). A gate set, a merge brief, a lane sweep — each is a subagent's job with a file as its output.
+3. **The 16:04 loss is answered by a MECHANISM, not by a hold:** the card's "check-only half" — a post-respawn liveness check (is the `fleet` tmux session still alive? are the agent panes still there?) and an automatic rebuild/alarm when it is not — is commissioned as its own agent today. Until it exists, the rotation records the pane list before and after in the handover, and the successor's first act is to compare them.
+4. **The standing rule stays standing:** as many agents as the code partition allows ([[2026-09-13_as-many-agents-as-possible-partitioned-by-code]]), every disjoint lane launched, "as fast as logical and possible" — logical = a plan confirmation, a gate, a partition; possible = the allowance and the machine.
+5. **Report the rotation, do not request it** ([[2026-08-07_autonomy-grant-ship-decisions]]: the grant removes the pause, not the receipt). The handover block names every live agent and what wakes each one.
+
+**Family:** [[2026-09-02_rotate-in-the-70-80-band-conditionally]] (the band; its safety conditions stand — this file removes "no agents live" from them) · [[2026-08-21_auto-rotate-at-70pct]] (condition 4 there already said "agent sessions keep running untouched — the rotation is MY pane only") · [[2026-08-07_a-promise-is-not-a-mechanism]] (a hold is not a mechanism; the liveness check is) · [[2026-09-07_an-instruction-to-wait-must-name-what-wakes]] (every delegated thing names its wake before the seat rotates) · [[2026-08-16_an-ask-without-a-default-is-an-indefinite-hold]] ("ask Kam to launch the successor" was an ask with no default, and it held 70 minutes).
 
