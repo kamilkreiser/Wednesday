@@ -1,0 +1,281 @@
+#!/bin/sh
+# .githooks/pre-push (KS-380) — run the preflight gate before a push leaves the machine.
+#
+# Fires only when the push includes changes under Blockchain/Dev (platform code);
+# skips instantly for vault-only / docs-only / systemTest-only pushes so it stays
+# out of the way. The preflight itself skips any leg whose deps aren't up (Docker
+# down → lockfile leg advisory; stack down → auth-conformance leg skipped), so a
+# normal push is never blocked by infrastructure being off — CI is the hard gate.
+#
+# Enable once per clone:
+#   git config core.hooksPath .githooks && chmod +x .githooks/pre-push
+# Bypass a single push (use sparingly): git push --no-verify
+
+# ---------------------------------------------------------------------------
+# KS-856 — REFUSE A NON-FAST-FORWARD PUSH TO A BRANCH THAT EXISTS AT ORIGIN.
+#
+# The standing rule is: no force push; a rebase becomes a NEW branch. Nothing
+# enforced it. Twice in one session an agent began a push that would have
+# rewritten or moved a branch another process depended on, and both times the
+# only thing that stopped it was noticing at human speed before the hook
+# finished. A rule that survives on attention is not a control.
+#
+# THIS RUNS FIRST, BEFORE THE Blockchain/Dev EARLY RETURN BELOW. If it ran
+# after, a force push carrying only docs would take the `[ -z "$changed" ]
+# && exit 0` path and skip the check entirely — the gate would be conditional
+# on what the push happened to touch, which is not the property being held.
+#
+# git feeds this hook one line per ref on stdin:
+#     <local ref> <local sha> <remote ref> <remote sha>
+# An all-zero REMOTE sha means the branch does not exist at origin — a new
+# branch, which is the sanctioned path and always passes. An all-zero LOCAL sha
+# is a deletion, which rewrites no history.
+#
+# Deliberate force is still possible, but it cannot happen by reflex:
+#     ALLOW_FORCE=1 git push ...
+#
+# NOT closed by this: a legal FAST-FORWARD onto a head that is under a running
+# gate (the other near-miss). That push is a fast-forward and the hook cannot
+# know what is gated. Named here so this is not read as covering both.
+# ---------------------------------------------------------------------------
+ZERO=0000000000000000000000000000000000000000
+force_refused=0
+while read -r _local_ref local_sha _remote_ref remote_sha; do
+    [ -z "$local_sha" ] && continue
+    [ "$local_sha" = "$ZERO" ] && continue      # deleting a branch rewrites nothing
+    [ "$remote_sha" = "$ZERO" ] && continue     # brand-new branch at origin
+    if ! git merge-base --is-ancestor "$remote_sha" "$local_sha" 2>/dev/null; then
+        echo "[pre-push] REFUSED — non-fast-forward push to a branch that exists at origin." >&2
+        echo "           ref:    ${_remote_ref}" >&2
+        echo "           origin: ${remote_sha}" >&2
+        echo "           local:  ${local_sha}" >&2
+        echo "           The rule is: NO FORCE PUSH — a rebase becomes a NEW branch." >&2
+        echo "           Landing this would rewrite history another process may depend on:" >&2
+        echo "           an open PR's head, or a gate running against the SHA you are replacing." >&2
+        echo "           Deliberate case, stated explicitly:  ALLOW_FORCE=1 git push ..." >&2
+        force_refused=1
+    fi
+done
+if [ "$force_refused" -eq 1 ]; then
+    if [ "${ALLOW_FORCE:-0}" = "1" ]; then
+        echo "[pre-push] ALLOW_FORCE=1 — proceeding with a non-fast-forward push, deliberately." >&2
+    else
+        exit 1
+    fi
+fi
+
+# Are any Blockchain/Dev files in the commits about to be pushed?
+#
+# KS-989: the FULL changed list is captured once, and both filters read from it —
+# the Blockchain/Dev one on the next line (which decides the preflight) and the
+# systemTest/* one further down (which decides the formatting gate). This line
+# used to grep at the point of capture and throw the rest away, which is exactly
+# why a systemTest-only push was priced as costless: there was no list left to
+# ask a second question of.
+all_changed=$(git diff --name-only "@{upstream}" HEAD 2>/dev/null || true)
+changed=$(printf '%s\n' "$all_changed" | grep '^Blockchain/Dev/' || true)
+st_all=0   # KS-989: 1 = check every systemTest package, for the two cases below
+
+# ---------------------------------------------------------------------------
+# KS-854 — A BASE THAT CANNOT BE COMPUTED IS NOT AN EMPTY DIFF.
+#
+# New branch with no upstream yet → diff against the merge-base with develop.
+# This used to be a bare `git merge-base develop HEAD`, and on a FRESH CLONE
+# `develop` does not resolve: `git clone` creates only the default branch
+# locally, so develop exists solely as `refs/remotes/origin/develop`. The
+# command failed into a `$(…)` with stderr discarded, `base` was empty,
+# `changed` stayed empty, and the `[ -z "$changed" ] && exit 0` below returned
+# success BEFORE leg 1 — no preflight, and no line saying so.
+#
+# Measured (KS-854 regression suite, and by the #840 gate by accident): a clone
+# whose only local branch is `main`, on a branch with no upstream, carrying a
+# real Blockchain/Dev change, pushed rc 0 in seconds with NO `[pre-push]` output
+# whatsoever. Anyone who clones fresh and branches off `origin/develop` got no
+# gate at all and no signal that they had none.
+#
+# Two changes, and the second is the load-bearing one:
+#   1. resolve the base against the first ref that actually EXISTS, so the
+#      normal fresh-clone case (origin/develop present) simply works; and
+#   2. when NO base can be computed, RUN the preflight and say why. An empty
+#      result must never be read as a pass — that is the same shape as the
+#      CVE scan that reported clean having examined nothing (KS-676), and as
+#      leg 9 passing a planted violation (KS-853). Failing safe here costs a
+#      preflight run in a rare configuration; failing open costs the gate.
+# ---------------------------------------------------------------------------
+# ---------------------------------------------------------------------------
+# KS-882 — A BASE THAT CONTAINS HEAD IS NOT A CLEAN TREE EITHER.
+#
+# The loop above used to stop at the FIRST ref that produced a base, and diff
+# against that one alone. Local `develop` is tried first, so a local `develop`
+# that already CONTAINS the branch tip made `git merge-base develop HEAD`
+# return HEAD, `git diff HEAD HEAD` return nothing, and the
+# `[ -z "$changed" ] && exit 0` below return success — push rc 0, zero
+# `[pre-push]` lines, preflight never invoked, while `origin/develop` still
+# held the old content. A real Blockchain/Dev change went up ungated and
+# nothing said so. Same shape as KS-854 above, one ref further along: AN EMPTY
+# RESULT READ AS A PASS.
+#
+# Two properties, and the second is the one the obvious fix misses:
+#   1. Do not stop at the first base — ask EVERY resolvable ref and run the
+#      gate if ANY of them shows a Blockchain/Dev change. Reordering the list
+#      to put `origin/develop` first would close the reported instance and
+#      leave the shape: whichever ref is consulted first can contain HEAD.
+#   2. When EVERY resolvable base is HEAD itself, the empty diff carries no
+#      information at all — there is no ref that can tell us what is new. That
+#      is the KS-854 condition wearing a different hat, so it takes the same
+#      answer: announce it and RUN, rather than skip in silence.
+# ---------------------------------------------------------------------------
+if [ -z "$changed" ] && ! git rev-parse '@{upstream}' >/dev/null 2>&1; then
+    base=''
+    _informative=0
+    _head=$(git rev-parse HEAD 2>/dev/null)
+    # -----------------------------------------------------------------------
+    # KS-991 — A STALE LOCAL `develop` CAN ONLY INFLATE THE DIFF, SO SKIP IT.
+    #
+    # This is NOT a reorder, and the distinction is the whole justification.
+    # KS-882's author considered putting `origin/develop` first and rejected it,
+    # because whichever ref is consulted FIRST can contain HEAD. That reasoning
+    # stands and is untouched: the union rule below still asks every remaining
+    # ref and still runs unconditionally when none is informative.
+    #
+    # What is skipped here is only a ref that ANOTHER resolvable ref PROVABLY
+    # supersedes — local `develop` when it is a strict ancestor of
+    # `origin/develop`. The two failure directions are opposites:
+    #
+    #   KS-882  a ref CONTAINING the tip  -> empty diff    -> HIDES a change
+    #   KS-991  a ref BEHIND the remote   -> inflated diff -> INVENTS a change
+    #
+    # A stale base sits at or behind the better base, so its diff is a SUPERSET:
+    # it reports files that are on the trunk but not in this branch, and it
+    # cannot conceal anything. Skipping it therefore costs no safety.
+    #
+    # Measured 2026-09-08: three pushes in ONE session ran the full 13-leg
+    # Blockchain/Dev preflight on branches touching no Blockchain/Dev file —
+    # ff5218867 vs 400517aaf, 400517aaf vs 4f337be83, 4f337be83 vs 512480ef1.
+    # Every gap was opened by a merge the same seat had just performed, so the
+    # trigger is "you did the right thing". One run then failed leg 1 with
+    # DEPS MISSING — an environment condition presented as a gate result, and
+    # indistinguishable from a real red without reading 13 legs of output.
+    # -----------------------------------------------------------------------
+    _refs='develop origin/develop refs/remotes/origin/develop'
+    if git rev-parse --verify --quiet develop >/dev/null 2>&1 &&
+       git rev-parse --verify --quiet origin/develop >/dev/null 2>&1 &&
+       git merge-base --is-ancestor develop origin/develop 2>/dev/null; then
+        echo "[pre-push] KS-991: local 'develop' is BEHIND origin/develop — ignoring the" >&2
+        echo "[pre-push]   stale ref for base selection. (git fetch origin develop:develop" >&2
+        echo "[pre-push]   to refresh it.) origin/develop is still consulted below." >&2
+        _refs='origin/develop refs/remotes/origin/develop'
+    fi
+    for _ref in $_refs; do
+        git rev-parse --verify --quiet "$_ref" >/dev/null 2>&1 || continue
+        _b=$(git merge-base "$_ref" HEAD 2>/dev/null) || _b=''
+        [ -n "$_b" ] || continue
+        base="$_b"
+        # A base equal to HEAD means this ref already contains the tip: it can
+        # only ever produce an empty diff, so it is not evidence of anything.
+        [ "$_b" = "$_head" ] && continue
+        _informative=1
+        _files=$(git diff --name-only "$_b" HEAD || true)
+        # KS-989: keep the union of every ref consulted, for the systemTest gate.
+        # The Blockchain/Dev decision on the next lines is byte-for-byte what it
+        # was — same grep, same value, same break — so the KS-854 and KS-882
+        # properties above are untouched. This only retains a list that used to
+        # be discarded inside the pipe.
+        all_changed=$(printf '%s\n%s\n' "$all_changed" "$_files")
+        _c=$(printf '%s\n' "$_files" | grep '^Blockchain/Dev/' || true)
+        if [ -n "$_c" ]; then
+            changed="$_c"
+            break
+        fi
+    done
+    if [ -n "$base" ] && [ "$_informative" -eq 0 ]; then
+        echo "[pre-push] KS-882: every ref that resolves already CONTAINS this commit," >&2
+        echo "[pre-push]   so the diff against it is empty for that reason and not because" >&2
+        echo "[pre-push]   the tree is clean. Running the preflight UNCONDITIONALLY." >&2
+        echo "[pre-push]   (git fetch origin develop to give the gate a real base.)" >&2
+        changed='KS-882: every base contains HEAD — running unconditionally'
+        st_all=1   # KS-989: no usable changed set, so check EVERY systemTest package
+    fi
+    if [ -z "$base" ]; then
+        echo "[pre-push] KS-854: no base to diff against — 'develop' does not resolve," >&2
+        echo "[pre-push]   'origin/develop' does not resolve, and this branch has no upstream." >&2
+        echo "[pre-push]   Running the preflight UNCONDITIONALLY: an uncomputable base is not" >&2
+        echo "[pre-push]   the same as a clean one. (git fetch origin develop to silence this.)" >&2
+        changed='KS-854: base unresolved — running unconditionally'
+        st_all=1   # KS-989: no usable changed set, so check EVERY systemTest package
+    fi
+fi
+
+# ---------------------------------------------------------------------------
+# KS-989 — THE systemTest/* FORMATTING GATE.
+#
+# THIS RUNS BEFORE THE Blockchain/Dev EARLY RETURN BELOW, and that placement is
+# the whole fix. A systemTest-only push takes `[ -z "$changed" ] && exit 0` and
+# would never reach a gate placed after it — which is precisely the hole: six
+# instances in nine days, three paid for by someone other than the author.
+#
+# It is CHEAP by construction (`format:check`, 0-2s per touched package, and
+# nothing at all when the push touches no gated package), so the header's
+# promise that this hook "stays out of the way" still holds. It is deliberately
+# NOT `npm run quality` — see KS-990 and the script's own header: `quality`
+# cannot pass in two of these packages today, and a gate that can never pass
+# gets bypassed.
+#
+# The same KS-854/KS-882 rule applies to it as to the preflight: when no
+# informative base could be computed, `st_all=1` checks EVERY package rather
+# than reading an empty changed set as a clean tree.
+# ---------------------------------------------------------------------------
+_toplevel=$(git rev-parse --show-toplevel 2>/dev/null)
+_fmt_gate="$_toplevel/systemTest/scripts/check-package-format.sh"
+if [ ! -f "$_fmt_gate" ]; then
+    # The hook and the script land in the same commit, so this is not reachable
+    # by branching. It IS reachable by deleting one of them, and a missing gate
+    # that stays quiet is the failure this hook exists to stop.
+    echo "[pre-push] REFUSED — the KS-989 formatting gate is missing at:" >&2
+    echo "           $_fmt_gate" >&2
+    echo "           A gate that cannot be found must not be read as a gate that passed." >&2
+    exit 1
+fi
+if [ "$st_all" -eq 1 ]; then
+    bash "$_fmt_gate" --all || {
+        echo "[pre-push] systemTest formatting gate FAILED — fix the files named above." >&2
+        echo "           (bypass, sparingly: git push --no-verify)" >&2
+        exit 1
+    }
+else
+    printf '%s\n' "$all_changed" | bash "$_fmt_gate" || {
+        echo "[pre-push] systemTest formatting gate FAILED — fix the files named above." >&2
+        echo "           (bypass, sparingly: git push --no-verify)" >&2
+        exit 1
+    }
+fi
+
+[ -z "$changed" ] && exit 0
+
+echo "[pre-push] Blockchain/Dev changes detected → running preflight gate (bypass: --no-verify)"
+# Invoke with `bash`, NOT `sh`. preflight.sh is `#!/usr/bin/env bash` and opens with
+# `set -uo pipefail`, which is a bash builtin option: on Linux /bin/sh is dash, which
+# rejects it with "Illegal option -o pipefail" and aborts the gate before leg 1 — so
+# the preflight could never run on the Ubuntu VM, and every push there either failed
+# or got --no-verify'd. Invisible on macOS, where /bin/sh is bash-in-POSIX-mode and
+# accepts pipefail. Same portability class as KS-600 (`mktemp -t`).
+# Naming the interpreter (rather than the bare path) is deliberate: preflight.sh is
+# committed mode 100644, so a direct exec fails with "permission denied" — the
+# KS-487 session note above. `bash <file>` needs no exec bit.
+# Safe on macOS bash 3.2: the script uses no bash-4 constructs (no mapfile/readarray,
+# no associative arrays, no ${x^^}).
+# KS-691: source slot-target.sh first so the stack-dependent legs (3, 4, 7) probe
+# THIS slot's gateway. preflight.sh defaults GATEWAY to localhost:6882 (slot 1),
+# so from any other slot those legs either silently SKIP (slot 1 down) — the push
+# passes having probed nothing — or probe SLOT 1 and report success for a stack
+# you were not testing (slot 1 up). The second is the worse failure: it is a green
+# gate describing the wrong system. slot-target.sh also unsets COMPOSE_PROJECT_NAME,
+# which must not leak into anything the preflight runs (KS-666).
+( bash -c '
+    cd "$(git rev-parse --show-toplevel)" || exit 1
+    . systemTest/slot-target.sh >/dev/null 2>&1 || true
+    cd Blockchain/Dev && bash scripts/preflight/preflight.sh
+  ' ) || {
+    echo "[pre-push] preflight failed — fix the above, or bypass with: git push --no-verify" >&2
+    exit 1
+}

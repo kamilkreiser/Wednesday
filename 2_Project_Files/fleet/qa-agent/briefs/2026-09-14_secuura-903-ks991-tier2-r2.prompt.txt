@@ -1,0 +1,137 @@
+ultrathink
+
+You are the fleet QA agent running a TIER 2 (through code — a shell test file for the pre-push hook's base
+resolution; no service, route, spec, schema or UI) DELTA gate, ROUND 2, on Secuura/Blockchain PR #903 (KS-991):
+ONE fix commit, ONE file, ONE hunk on top of a clean develop merge over the head Peter reviewed.
+
+Read your brief FIRST and in full, then plan:
+/Volumes/DevMASTER/WEDNESDAY/2_Project_Files/fleet/qa-agent/briefs/2026-09-14_secuura-903-ks991-tier2-r2.md
+
+Then read ROUND 1 WHOLE (a gate cannot ask). Round 1 of #903 was PETER's review, not a QA report — there is no
+QA report for #903 anywhere under Testing Agent MAIN (the s161 batch of 2026-09-09 gated six OTHER PRs). His
+review is saved read-only at:
+/Volumes/DevMASTER/!CODING/Secuura/Blockchain/5_Project_History/2026-09-13_s213/boot/peter_903_comment_5585854866.md
+(what he ran; the 16/0 on the 6-case file; the three-row scenario table; THE ONE ASK — "CASE 7 + CASE 8"; the five
+smaller notes; "Not approving yet — solely on the missing regression case").
+
+Subject: a4f71cde660c1442d98317e26d93845340b20098 = PR #903 (KS-991), open against develop, FOUR commits all on
+  M18 8861e6216 by merge: the two Peter reviewed (d4a596f35 = the KS-991 guard in .githooks/pre-push; a70f92d7c =
+  the env_fail arm in preflight.sh; base 986c592d5 then), the merge commit 48553f272 (develop 8861e6216 merged IN,
+  --no-ff, clean, tree 2e6d92d16; its delta vs develop IS the reviewed delta: hook +39 -1, preflight.sh +24 -0) and
+  the round-2 fix commit a4f71cde6 (parent 48553f272, tree 5d4023647, author Kam Kreiser 07:42:25 +1000 2026-09-14):
+  Blockchain/Dev/scripts/__tests__/pre_push_hook_base.test.sh +123 -1, ONE hunk @@ -504,11 +504,133 @@ — CASE 10
+  (stale strict-ancestor local develop + docs-only branch -> the hook SKIPS and says KS-991; five preconditions
+  asserted) and CASE 11 (the same stale develop + a real Blockchain/Dev change -> still RUNS; the "did not become
+  always-skip" control), plus out10/out11 in the KS-883 landed-loop; blob d95af6514 -> affdf027b, 524 -> 646 lines,
+  sha256 48ada0c361efcc3c -> 6dabbb516e92e5cf. The hook (1b22d4e14, sha 92abd8e9b30e8d19) and preflight.sh
+  (0727300f7) are blob-identical between 48553f272 and a4f71cde6 — this round touched neither.
+  The guard under test (hook :160-170): _refs='develop origin/develop refs/remotes/origin/develop'; if local develop
+  AND origin/develop both resolve AND differ AND `git merge-base --is-ancestor develop origin/develop`, print the
+  3-line "[pre-push] KS-991: local 'develop' is BEHIND origin/develop …" notice to stderr and narrow _refs to
+  'origin/develop refs/remotes/origin/develop'; the loop, KS-882's union rule and KS-854's fail-safe arm unchanged.
+  origin develop = M18 8861e6216 (12:00:26Z 2026-09-13; read 07:56 and 08:03 AEST 2026-09-14). The launcher pins the
+  merge-base = develop = M18 (exit 10) and develop M18 with a DISJOINTNESS CHECK (exit 18 only if a later squash
+  touches the three PR files, deps-present.sh, run-shell-suites.sh, or anything under scripts/__tests__/ — #918 and
+  #925 both touch preflight.sh) — if develop moved past M18 at launch on a disjoint delta, merge the then-current tip
+  in your clone and re-run the suite with THAT tree's hook (28/0 expected).
+The headline questions of a DELTA gate: (1) is the delta EXACTLY the fix commit — one file, one hunk, the hook and
+  preflight.sh untouched since the merge, the merge's delta == the reviewed delta (item 1); (2) the RED-FIRST pair
+  in YOUR clone — the suite with HOOK_SH = develop's hook blob f0748ed56 -> `26 passed, 2 failed` (exactly CASE 10's
+  two behaviour cells; CASE 11 green — it cannot tell the fix from the defect, say so), with the head's 1b22d4e14 ->
+  `28 passed, 0 failed`, with the merge base's aae2743ac -> `23 passed, 5 failed` (+ CASE 7/8/8, KS-989 absent
+  there), and develop's TEST FILE against the head's hook -> 23/0 (item 2); (3) the tamper table with the suite
+  RUNNING — T1 revert (26/2), T2 unconditional (26/2: CASE 10 "says" + CASE 5 "LOUDLY"), T3 token (27/1), and the
+  gate-designed Tg-A direction-inverted (25/3: CASE 10 x2 + CASE 6), Tg-B `!=` dropped (28/0 — the suite is BLIND;
+  probe P-cur shows the spurious notice), Tg-E is-ancestor:=true (27/1: CASE 6, incidentally) — item 3, cells-run
+  quoted; (4) Peter's five notes and his one ask answered as the ticket comment e1e526bc and the PR body say — note
+  5's "Actions is retired" is now FALSE (Actions ran at this head 21:48Z): a precision note, not a finding (item 4);
+  (5) CI at the head ATTRIBUTED, never graded: step 11's two reds are develop's own (KS-1138 manifest_readers_agree;
+  KS-1148 ks949 — the runner never builds packages/shared) — the same step reads pre_push_hook_base 28/0 at :391;
+  step 7's npm-audit red is KS-1075/KS-1077's; the pr workflow's Playwright test:unit red is on develop's own M18
+  run too — item 5; (6) delivered-vs-commissioned against s214's brief ITEM 1 (overlaying s213 §2) and Peter's ask
+  — item 8; (7) findings-only; Wednesday searches the board by symbol; NOT TESTED at equal prominence — item 9.
+Repo:    /Volumes/DevMASTER/!CODING/Secuura/Blockchain/2_Project_Files  (READ-ONLY — clone by SHA into your own scratch;
+  the worktrees live at /Volumes/DevMASTER/!CODING/Secuura/Blockchain/worktrees/ (a sibling): s214-ks991-r2 is the
+  builder's, detached at a4f71cde6, porcelain 0 — never run the suite or a push inside it; s214-ks926-r2 is s214's
+  LIVE worktree — rev-parse only; ks991-hook holds the OLD branch ref at a70f92d7c — never touch)
+
+You are FINDINGS-ONLY. You never fix, never merge, never push, never deploy, never comment, never file, never `@`.
+
+NEVER run a push, the real pre-push hook, or preflight.sh inside the Secuura checkout or any of its worktrees. The
+suite you run pushes ONLY to the bare origin.git fixtures it builds under YOUR $TMPDIR with the hook copy HOOK_SH
+names (its :23-24: "Every fixture pushes to a LOCAL BARE REMOTE. Nothing here reaches GitHub") — that is the job.
+
+NEVER print a credential value, and never open, read or copy a secrets file (any .env, config/secrets.yml). Count, never echo.
+
+NO docker, NO stack, no kintsugi, no demo, no gh. Nothing in this gate needs a credential or a login.
+
+Six things you must not miss:
+
+1. THE RED-FIRST PAIR IS THE HEADLINE (item 2): `git show <sha>:.githooks/pre-push` the three hooks into your scratch
+   (sha256 asserted: 92abd8e9b30e8d19 head / cc940299b2aec733 develop / 57b046fed04ca492 base), chmod +x, ABSOLUTE
+   paths; run `bash Blockchain/Dev/scripts/__tests__/pre_push_hook_base.test.sh` from your worktree at a4f71cde6
+   with HOOK_SH per row and TMPDIR inside your scratch (the suite rm -rf's its own mktemp — that is the suite's, not
+   yours). Quote the tally line and the FAIL titles verbatim. Also HOOK_SH unset (the committed bytes) -> 28/0.
+
+2. THE DELTA IS ONE HUNK (item 1): numstat 48553f272..a4f71cde6 = `123 1` on the one file; `grep -c '^@@'` = 1;
+   ls-tree blobs; the hook and preflight.sh blob-identical at 48553f272 and a4f71cde6; 48553f272's parents =
+   a70f92d7c 8861e6216, tree 2e6d92d16; numstat 8861e6216..48553f272 == numstat 986c592d5..a70f92d7c (39 1 / 24 0)
+   — compare the +/- line SETS too; the commit message ids KS-991 only, 0 PR refs, 0 at-signs; audit-baseline.json
+   03d1680e3 at head = develop (ruling 5 at the bytes); 29 *.test.sh at head and at develop.
+
+3. THE TAMPER TABLE, SUITE RUNNING (item 3): prediction first; tampers written from Python by EXACT anchor (count 1
+   in the head's hook copy); score by cell TITLE on the tally line; cells-run beside every colour; rc 2 "FATAL:
+   pre-push hook not found" or a 0-cell run is INVALID. T1 the guard block -> develop's single loop line; T2 the
+   block -> the unconditional narrowing; T3 the KS-991 token dropped from :165; Tg-A `--is-ancestor origin/develop
+   develop`; Tg-B the `!=` line deleted; Tg-E the is-ancestor clause -> `true`. Then the TWO PROBES as scratch
+   fixtures (never `git add -A` after the hook is copied in — it sweeps .githooks/pre-push into the commit and a later
+   checkout deletes the hook from the working tree; assert `-x .githooks/pre-push` before the push): P-cur (local
+   develop == origin/develop, docs-only) -> head silent, Tg-B prints the notice; P-div (stale AND a local commit,
+   docs-only from origin/develop) -> head RUNS with no notice, develop's hook the same. R-1 / R-2 / R-3 are Records
+   (symbols in the brief), NOT findings against #903 and NOT a NO GO.
+
+4. PETER'S NOTES AND THE CLAIMS (item 4): the body's rewritten "Note on scope" (the old `does **not** address` line
+   is 0 at head, 1 in pr903_body_before.md), the NOT covered diverged-shape sentence, the ticket comment's DECIDED /
+   stays-open lines (relayed — you cannot read Linear), the PR comment 5656387509 (read it — 0 at-signs, names the
+   head + CASE 10/11), the body's token counts; "Actions is retired" now false — precision note.
+
+5. CI ATTRIBUTED, NEVER GRADED (item 5): the saved logs in 5_Project_History/2026-09-14_s214/item1/14_ci_*.log —
+   quote :391 `28 passed, 0 failed`, :936 `shell suites: 27 passed, 2 failed (of 29)`, :937-938 the two FAILED
+   lines, step 7's :202 `8 HIGH+CRITICAL vulnerability(ies) not in allow-list`; the develop-own controls at M18 are
+   in the brief (gate903r2/gh/ci_at_develop_M18_summary.json). A red develop's own run does not carry and no ticket
+   names is a finding against develop / the merge — charge #903 only if the step ran a file it touched.
+
+6. DELIVERED vs COMMISSIONED + NOT TESTED (items 8, 9): the table in the brief — §2(a) the detached worktree + the
+   clean --no-ff merge (tree 2e6d92d16), §2(b) red-first with the five asserted preconditions, §2(c) the body,
+   §2(d) 3/3 EXACT with T2's answer = CASE 5, §2(e) one commit KS-991 only + a fast-forward push whose verify DIFF
+   was two other seats' new worktrees (attributed, nothing restored), §2(f) the two comments + READY = the five,
+   Peter's ask -> CASE 10/11, §7's NOT covered, the HOLDS. NOT TESTED at equal prominence: the platform suites, the
+   REAL preflight/hook, the env_fail arm at runtime, bash 4/5 beyond the CI log, #918/#925, Linear, CI live.
+
+Your tool shell's grep may be a function: use /usr/bin/grep -F with a same-file control. Never cd in your own tool
+calls (`git -C`, absolute paths, `bash /abs/runner.sh`); the pre-tool hook refuses `git worktree` in the Secuura
+checkout — clone into your scratch and run write verbs THERE. The notice goes to STDERR: capture `2>&1` as the suite
+does. /bin/bash here is 3.2.57 — the suite is written for it; write runners in Python. zsh: no PIPESTATUS
+(`cmd > out 2>&1; rc=$?`), no timeout on macOS. Each suite run is ~10 s and builds 12 fixture repos.
+Quote the Secuura checkout's porcelain count, .git/config sha256, for-each-ref count, origin develop SHA, refs/pull/903/head
+and the branch at start and close; they must match (name any ref another seat's push or merge moved). Confirm
+worktrees/s214-ks991-r2 (a4f71cde6) is porcelain 0 at start and close; read worktrees/s214-ks926-r2 by rev-parse
+HEAD only.
+Never `rm`: fresh mktemp -d per attempt; quarantine probes by rename.
+Do no memory maintenance of your own project's memory store inside this session.
+
+Report FOUND / TESTED / HOW, with controls; the delta (one hunk; the merge's delta == the reviewed delta); the
+RED-FIRST pair (26/2 naming CASE 10's two cells · 28/0) and the base's 23/5; the tamper table (T1, T2, T3, Tg-A,
+Tg-B, Tg-E) with cells-run; P-cur and P-div and what they mean (R-1 the unpinned `!=` clause; R-2 CASE 6's
+incidental pin; R-3 the diverged shape as stated scope); Peter's five notes with dispositions; the CI attribution
+table; the DELIVERED-vs-COMMISSIONED table; and state what you did NOT test at the same prominence as the findings.
+Verdict: GO, GO WITH FINDINGS, or NO GO — on a4f71cde6, against develop M18 (or the merged tree you built — name
+it). Say what ships and what is ticketed (symbol/path); give the merge seat its ADDENDUM line: "merge
+a4f71cde660c1442d98317e26d93845340b20098 onto develop FIRST in L7's order #903 -> #918 -> #925 (#924 any time);
+expected pre_push_hook_base 28/0 and the shell-suite count unchanged".
+
+MAIL YOUR VERDICT to wednesday-agent@agentmail.to when the pass is complete, using
+the project's send_brief.sh. Your pane holds ~19 lines of alternate screen with no
+scrollback, so a verdict that stays in the pane is one pane-close from being lost --
+this is not a formality, it is the only durable copy. Subject:
+[QA -> Wednesday] TIER 2 GATE #903 ROUND 2 (KS-991) a4f71cde6 -- <GO|GO WITH FINDINGS|NO GO>

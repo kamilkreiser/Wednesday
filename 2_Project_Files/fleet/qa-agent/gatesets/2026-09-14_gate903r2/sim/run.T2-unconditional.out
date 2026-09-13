@@ -1,0 +1,32 @@
+  ok   CONTROL — the fixture is a real fresh clone: local branches [main], develop local=NO remote=YES, upstream=NONE
+  ok   fresh clone + no upstream + a Blockchain/Dev change → the gate RUNS and says so
+  ok   CASE 1's branch really has no upstream — the precondition is asserted, not assumed
+  ok   …and the preflight was actually invoked, not merely announced
+  ok   a docs-only push still SKIPS the gate — the fix did not become 'always run'
+  ok   no base computable → the hook says so LOUDLY
+  ok   no base computable → the preflight RUNS anyway (fails safe)
+  ok   CASE 4's preconditions hold — local develop contains HEAD, origin/develop does not, branch has no upstream
+  ok   a local develop containing the tip → the gate still RUNS and says so (KS-882)
+  ok   …and the preflight was actually invoked on that push, not merely announced
+  ok   CASE 5's preconditions hold — only local develop resolves, and it contains HEAD
+  FAIL every resolvable base equals HEAD → the hook says so LOUDLY
+     no KS-882 line; an uninformative base was read as a clean tree
+  ok   every resolvable base equals HEAD → the preflight RUNS anyway (fails safe)
+  ok   CASE 6's precondition holds — local develop contains HEAD on a docs-only push
+  ok   a docs-only push still SKIPS even with a local develop containing the tip
+  ok   CASE 7 — a systemTest-only push INVOKES the formatting gate, with the changed path
+  ok   CASE 7 — ...and still does NOT run the platform preflight
+  ok   CASE 8 — a failing formatting gate REFUSES the push
+  ok   CASE 8 — refused for the RIGHT reason (the gate said so, by name)
+  ok   CASE 9's preconditions hold — both bases informative, and ONLY origin/develop's diff carries a Blockchain/Dev path
+  ok   the loop asks EVERY ref — a second, further base finds the change the first missed (KS-909)
+  ok   …and the preflight was actually invoked on that push, not merely announced
+  ok   CASE 10's preconditions hold — local develop is a strict ancestor of origin/develop, the gap carries a Blockchain/Dev path, the branch does not, and it has no upstream
+  FAIL CASE 10 — a stale local develop is IGNORED for base selection, and the hook says so (KS-991)
+     no KS-991 line: the stale ref was consulted silently
+  ok   CASE 10 — a docs-only push on a CURRENT base SKIPS the preflight, despite the stale local develop
+  ok   CASE 11's preconditions hold — the same stale local develop, and the branch has no upstream
+  ok   CASE 11 — a real Blockchain/Dev change on the branch still RUNS the preflight with a stale local develop (the fix did not become 'always skip')
+  ok   every case's commit LANDED before its push, so each assertion is on a real change
+
+  26 passed, 2 failed

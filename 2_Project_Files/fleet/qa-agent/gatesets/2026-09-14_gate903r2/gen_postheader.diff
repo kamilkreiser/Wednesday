@@ -1,0 +1,55 @@
+5,6c5,6
+< BRIEF="${QA980R2_BRIEF:-$WED/2_Project_Files/fleet/qa-agent/briefs/2026-09-13_secuura-980-ks924-901-tier2-r2.md}"
+< PROMPT_FILE="${QA980R2_PROMPT:-$WED/2_Project_Files/fleet/qa-agent/briefs/2026-09-13_secuura-980-ks924-901-tier2-r2.prompt.txt}"
+---
+> BRIEF="${QA903R2_BRIEF:-$WED/2_Project_Files/fleet/qa-agent/briefs/2026-09-14_secuura-903-ks991-tier2-r2.md}"
+> PROMPT_FILE="${QA903R2_PROMPT:-$WED/2_Project_Files/fleet/qa-agent/briefs/2026-09-14_secuura-903-ks991-tier2-r2.prompt.txt}"
+9,13c9,13
+< BRANCH='refs/heads/feature/ks-924-ks-901-entrypoint-corpus-presence-set-and-three-shapes'
+< HEAD_SHA="${QA980R2_HEAD:-103c235b4d2be54cc1ade65ed660f397cf03e997}"
+< MERGE_BASE='50b729d69c58474624508ed79d05c520dab22cc6'
+< DEVELOP_SHA='1c38077ba2aea5f4c4371c1b68796026dc577764'
+< REAL_BRIEF="$WED/2_Project_Files/fleet/qa-agent/briefs/2026-09-13_secuura-980-ks924-901-tier2-r2.md"
+---
+> BRANCH='refs/heads/kamilkreiser/ks-991-stale-local-develop'
+> HEAD_SHA="${QA903R2_HEAD:-a4f71cde660c1442d98317e26d93845340b20098}"
+> MERGE_BASE='8861e62161466c40f08d2b10a30edeb203123993'
+> DEVELOP_SHA='8861e62161466c40f08d2b10a30edeb203123993'
+> REAL_BRIEF="$WED/2_Project_Files/fleet/qa-agent/briefs/2026-09-14_secuura-903-ks991-tier2-r2.md"
+43c43
+<   DEV_NOTE="origin develop still $DEVELOP_SHA (M15, the develop this brief's 813/813 was written against; git ls-remote)"
+---
+>   DEV_NOTE="origin develop still $DEVELOP_SHA (M18, the develop merged INTO the branch and the one this brief's 28/0 was written against; git ls-remote)"
+58,60c58,63
+< GUARDED = ["Blockchain/Dev/packages/shared/src/__tests__/entrypoint-corpus.test.ts",
+<            "Blockchain/Dev/packages/shared/src/__tests__/ks860-test-listeners-bind-loopback.test.ts",
+<            "Blockchain/Dev/packages/shared/"]
+---
+> GUARDED = [".githooks/pre-push",
+>            "Blockchain/Dev/scripts/__tests__/pre_push_hook_base.test.sh",
+>            "Blockchain/Dev/scripts/preflight/preflight.sh",
+>            "Blockchain/Dev/scripts/preflight/deps-present.sh",
+>            "Blockchain/Dev/scripts/run-shell-suites.sh",
+>            "Blockchain/Dev/scripts/__tests__/"]
+68c71
+<     DISJOINT*) DEV_NOTE="origin develop MOVED $DEVELOP_SHA -> $CUR_DEV: ${DEV_JUDGEMENT#DISJOINT } — disjoint from the guard's three paths (#980's file, the ks860 loopback guard file, the packages/shared/ prefix); the gate merges the then-current develop, re-states the delta by name and re-derives the ratio (brief items 1 and 2)" ;;
+---
+>     DISJOINT*) DEV_NOTE="origin develop MOVED $DEVELOP_SHA -> $CUR_DEV: ${DEV_JUDGEMENT#DISJOINT } — disjoint from the guard's six paths (#903's three files, deps-present.sh, run-shell-suites.sh, the scripts/__tests__/ prefix); the gate merges the then-current develop, re-states the delta by name and re-derives the leg-14 count (brief items 1 and 6)" ;;
+88,90c91,93
+< R1_REPORT='/Volumes/DevMASTER/!CODING/Testing Agent MAIN/projects/secuura/reports/2026-09-13-ks924-901-980-9c620f890-tier2-r1/report.md'
+< grep -qF "$R1_REPORT" "$BRIEF" || { echo "REFUSING: brief does not name the round-1 report path (a gate cannot ask)" >&2; exit 19; }
+< [ -s "$R1_REPORT" ] || { echo "REFUSING: the round-1 report named by the brief is missing or empty: $R1_REPORT" >&2; exit 19; }
+---
+> R1_REPORT='/Volumes/DevMASTER/!CODING/Secuura/Blockchain/5_Project_History/2026-09-13_s213/boot/peter_903_comment_5585854866.md'
+> grep -qF "$R1_REPORT" "$BRIEF" || { echo "REFUSING: brief does not name the round-1 record path (Peter's review; a gate cannot ask)" >&2; exit 19; }
+> [ -s "$R1_REPORT" ] || { echo "REFUSING: the round-1 record named by the brief is missing or empty: $R1_REPORT" >&2; exit 19; }
+105c108,109
+<   echo "  brief names the round-1 report and it is present on disk"
+---
+>   echo "  brief names the round-1 record (Peter's review) and it is present on disk"
+>   echo "  a launch (not --check) will refuse unless stdin is a TTY (exit 21)"
+109c113,114
+< [ -z "${QA980R2_BRIEF:-}${QA980R2_PROMPT:-}${QA980R2_HEAD:-}" ] || { echo "REFUSING: a launch with test overrides set" >&2; exit 16; }
+---
+> [ -t 0 ] || { echo "REFUSING: stdin is not a TTY — this launcher execs an interactive agent; run it in a cockpit pane, never inside a Bash tool (a headless gate is invisible and dies with the caller's shell)" >&2; exit 21; }
+> [ -z "${QA903R2_BRIEF:-}${QA903R2_PROMPT:-}${QA903R2_HEAD:-}" ] || { echo "REFUSING: a launch with test overrides set" >&2; exit 16; }

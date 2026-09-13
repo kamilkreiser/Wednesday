@@ -1,0 +1,204 @@
+controls_check.sh — head a4f71cde6, merge 48553f272, develop a4f71cde6 — 2026-09-14 08:27:09 AEST
+read tf = pre_push_hook_base.test.sh @ a4f71cde6: blob affdf027b, 34232 bytes, 646 lines, sha256 6dabbb516e92e5cf
+read tf_merge = pre_push_hook_base.test.sh @ 48553f272: blob d95af6514, 26945 bytes, 524 lines, sha256 48ada0c361efcc3c
+read tf_dev = pre_push_hook_base.test.sh @ a4f71cde6: blob affdf027b, 34232 bytes, 646 lines, sha256 6dabbb516e92e5cf
+read tf_r1 = pre_push_hook_base.test.sh @ a70f92d7c: blob 650215b8a, 18384 bytes, 374 lines, sha256 1b01dc0c581994a5
+read tf_base = pre_push_hook_base.test.sh @ 986c592d5: blob 650215b8a, 18384 bytes, 374 lines, sha256 1b01dc0c581994a5
+read hk = pre-push @ a4f71cde6: blob 1b22d4e14, 16472 bytes, 282 lines, sha256 92abd8e9b30e8d19
+read hk_merge = pre-push @ 48553f272: blob 1b22d4e14, 16472 bytes, 282 lines, sha256 92abd8e9b30e8d19
+read hk_dev = pre-push @ a4f71cde6: blob 1b22d4e14, 16472 bytes, 282 lines, sha256 92abd8e9b30e8d19
+read hk_r1 = pre-push @ a70f92d7c: blob 31d27018a, 13017 bytes, 219 lines, sha256 d397524ddbde5938
+read hk_base = pre-push @ 986c592d5: blob aae2743ac, 10572 bytes, 181 lines, sha256 57b046fed04ca492
+read pf = preflight.sh @ a4f71cde6: blob 0727300f7, 31527 bytes, 545 lines, sha256 b8bb4c873c9fb61d
+read pf_merge = preflight.sh @ 48553f272: blob 0727300f7, 31527 bytes, 545 lines, sha256 b8bb4c873c9fb61d
+read pf_dev = preflight.sh @ a4f71cde6: blob 0727300f7, 31527 bytes, 545 lines, sha256 b8bb4c873c9fb61d
+read ab = audit-baseline.json @ a4f71cde6: blob 03d1680e3, 44616 bytes, 254 lines, sha256 6409a37c4dbd9ba8
+read ab_dev = audit-baseline.json @ a4f71cde6: blob 03d1680e3, 44616 bytes, 254 lines, sha256 6409a37c4dbd9ba8
+read ab_r1 = audit-baseline.json @ a70f92d7c: blob 33bc6f29a, 27178 bytes, 204 lines, sha256 564c2d5d72dc965e
+read rs = run-shell-suites.sh @ a4f71cde6: blob bf766bb54, 11098 bytes, 237 lines, sha256 fa88c8c082158085
+read rs_dev = run-shell-suites.sh @ a4f71cde6: blob bf766bb54, 11098 bytes, 237 lines, sha256 fa88c8c082158085
+ok   tf blob affdf027b
+ok   tf_merge blob d95af6514
+FAIL tf_dev blob is affdf027b, not d95af6514
+ok   tf_r1 blob 650215b8a
+ok   tf_base blob 650215b8a
+ok   hk blob 1b22d4e14
+ok   hk_merge blob 1b22d4e14
+FAIL hk_dev blob is 1b22d4e14, not f0748ed56
+ok   hk_r1 blob 31d27018a
+ok   hk_base blob aae2743ac
+ok   pf blob 0727300f7
+ok   pf_merge blob 0727300f7
+FAIL pf_dev blob is 0727300f7, not acfb7fa3e
+ok   ab blob 03d1680e3
+ok   ab_dev blob 03d1680e3
+ok   ab_r1 blob 33bc6f29a
+ok   rs blob bf766bb54
+ok   rs_dev blob bf766bb54
+ok   hk byte-identical to hk_merge
+ok   pf byte-identical to pf_merge
+FAIL tf_merge DIFFERS from tf_dev
+ok   ab byte-identical to ab_dev
+ok   rs byte-identical to rs_dev
+ok   tf_r1 byte-identical to tf_base
+ok   tf DIFFERS from tf_merge (as it must)
+FAIL hk byte-identical to hk_dev (must differ)
+FAIL pf byte-identical to pf_dev (must differ)
+ok   hk_r1 DIFFERS from hk_base (as it must)
+ok   ab_r1 DIFFERS from ab (as it must)
+ok   tf sha256 6dabbb516e92e5cf
+FAIL tf_dev sha256 is not 48ada0c361efcc3c
+ok   tf_r1 sha256 1b01dc0c581994a5
+ok   hk sha256 92abd8e9b30e8d19
+FAIL hk_dev sha256 is not cc940299b2aec733
+ok   hk_r1 sha256 d397524ddbde5938
+ok   hk_base sha256 57b046fed04ca492
+ok   pf sha256 b8bb4c873c9fb61d
+FAIL pf_dev sha256 is not 7f4083d915708a15
+ok   tf 646 lines
+FAIL tf_dev is not 524 lines
+ok   tf_r1 374 lines
+ok   hk 282 lines
+FAIL hk_dev is not 244 lines
+ok   hk_r1 219 lines
+ok   hk_base 181 lines
+ok   pf 545 lines
+FAIL pf_dev is not 521 lines
+ok   tf 34232 bytes
+FAIL tf_dev is not 26945 bytes
+ok   tf_r1 18384 bytes
+ok   hk 16472 bytes
+FAIL hk_dev is not 14027 bytes
+ok   hk_r1 13017 bytes
+ok   hk_base 10572 bytes
+ok   pf 31527 bytes
+FAIL pf_dev is not 29971 bytes
+ok   hk:128 = if [ -z "$changed" ] && ! git rev-parse '@{upstream}' >/dev/null 2>&1; then
+ok   hk:133 =     # KS-991 — A STALE LOCAL `develop` CAN ONLY INFLATE THE DIFF, SO SKIP IT.
+ok   hk:146 =     #   KS-991  a ref BEHIND the remote   -> inflated diff -> INVENTS a change
+ok   hk:160 =     _refs='develop origin/develop refs/remotes/origin/develop'
+ok   hk:161 =     if git rev-parse --verify --quiet develop >/dev/null 2>&1 &&
+ok   hk:162 =        git rev-parse --verify --quiet origin/develop >/dev/null 2>&1 &&
+ok   hk:163 =        [ "$(git rev-parse develop)" != "$(git rev-parse origin/develop)" ] &&
+ok   hk:164 =        git merge-base --is-ancestor develop origin/develop 2>/dev/null; then
+ok   hk:165 =         echo "[pre-push] KS-991: local 'develop' is BEHIND origin/develop — ignoring the" >&2
+ok   hk:166 =         echo "[pre-push]   stale ref for base selection. (git fetch origin develop:develop" >&2
+ok   hk:167 =         echo "[pre-push]   to refresh it.) origin/develop is still consulted below." >&2
+ok   hk:168 =         _refs='origin/develop refs/remotes/origin/develop'
+ok   hk:170 =     for _ref in $_refs; do
+ok   hk:192 =     if [ -n "$base" ] && [ "$_informative" -eq 0 ]; then
+ok   hk:193 =         echo "[pre-push] KS-882: every ref that resolves already CONTAINS this commit," >&2
+ok   hk:200 =     if [ -z "$base" ]; then
+ok   hk:201 =         echo "[pre-push] KS-854: no base to diff against — 'develop' does not resolve," >&2
+ok   hk:254 = [ -z "$changed" ] && exit 0
+ok   hk:256 = echo "[pre-push] Blockchain/Dev changes detected → running preflight gate (bypass: --no-verify)"
+FAIL hk_dev:132 is:     # -----------------------------------------------------------------------
+ok   tf:29 = #        HOOK_SH=/path/to/other/pre-push bash …   (to test a different copy)
+ok   tf:56 = HOOK="${HOOK_SH:-$REPO_ROOT/.githooks/pre-push}"
+ok   tf:63 = WORK="$(mktemp -d "${TMPDIR:-/tmp}/ks854.XXXXXX")"
+ok   tf:64 = trap 'rm -rf "$WORK"' EXIT
+ok   tf:508 = # CASE 10 — KS-991. A STALE local `develop` must not INVENT a change.
+ok   tf:530 = build_fixture "$WORK/c10" with-develop
+ok   tf:535 =   git branch develop origin/develop
+ok   tf:546 =   git checkout -q -b docs/stale --no-track origin/develop
+ok   tf:555 =   git merge-base --is-ancestor develop origin/develop 2>/dev/null \
+ok   tf:572 = if printf '%s' "$out10" | grep -q 'KS-991'; then
+ok   tf:573 =   ok "CASE 10 — a stale local develop is IGNORED for base selection, and the hook says so (KS-991)"
+ok   tf:578 = if printf '%s' "$out10" | grep -q '\[preflight\] ran'; then
+ok   tf:582 =   ok "CASE 10 — a docs-only push on a CURRENT base SKIPS the preflight, despite the stale local develop"
+ok   tf:586 = # CASE 11 — the KS-991 fix must not become "always skip". The SAME stale local
+ok   tf:592 = build_fixture "$WORK/c11" with-develop
+ok   tf:605 =   echo change > Blockchain/Dev/file.txt
+ok   tf:622 = if printf '%s' "$out11" | grep -q '\[preflight\] ran'; then
+ok   tf:623 =   ok "CASE 11 — a real Blockchain/Dev change on the branch still RUNS the preflight with a stale local develop (the fix did not become 'always skip')"
+ok   tf:633 = for out_name in out1 out2 out3 out4 out5 out6 out7 out8 out9 out10 out11; do
+ok   tf:641 = [ "$landed" -eq 0 ] && ok "every case's commit LANDED before its push, so each assertion is on a real change"
+ok   tf:644 = printf '\n  %d passed, %d failed\n' "$pass" "$fail"
+FAIL tf_dev:511 is: # a commit that touches Blockchain/Dev and the operator never refreshed the
+ok   tf:326 = if printf '%s' "$out5" | grep -q 'KS-882'; then
+ok   tf:364 = if printf '%s' "$out6" | grep -q '\[pre-push\]'; then
+ok   tf_dev:326 = if printf '%s' "$out5" | grep -q 'KS-882'; then
+ok   tf_dev:364 = if printf '%s' "$out6" | grep -q '\[pre-push\]'; then
+ok   pf:96 = env_fail=0   # KS-991: leg 1 could not RUN (no workspace install) vs a real finding
+ok   pf:118 =     env_fail=1
+ok   pf:531 =     if [ "${env_fail:-0}" -ne 0 ]; then
+ok   pf:532 =         echo "PREFLIGHT FAILED — but leg 1 could not RUN: this working tree has no"
+ok   tf  exactly x8 KS-991
+ok   tf  exactly x8 CASE 10
+ok   tf  exactly x6 CASE 11
+ok   tf  exactly x6 out10
+ok   tf  exactly x5 out11
+ok   tf  exactly x33 PRECONDITION-LOST
+ok   tf  exactly x12 build_fixture "$WORK/c
+ok   tf  exactly x27   ok "
+ok   tf  exactly x28   bad "
+ok   tf  exactly x1 [ "$landed" -eq 0 ] && ok "
+ok   tf  exactly x2 merge-base --is-ancestor develop origin/develop
+ok   tf  exactly x4 docs/stale
+ok   tf  exactly x4 feature/stale
+ok   tf  exactly x2 trunk-moved
+ok   tf  exactly x13 COMMIT-DID-NOT-LAND
+ok   tf  exactly x3 GIT_CONFIG_GLOBAL=/dev/null
+ok   tf  exactly x8 \[preflight\] ran
+ok   tf  exactly x1 [preflight] ran
+FAIL tf_dev  absent expected, count 8: KS-991
+FAIL tf_dev  absent expected, count 8: CASE 10
+FAIL tf_dev  absent expected, count 6: CASE 11
+FAIL tf_dev  absent expected, count 6: out10
+FAIL tf_dev  22 expected, count 27:   ok "
+FAIL tf_dev  10 expected, count 12: build_fixture "$WORK/c
+ok   tf_r1  absent      CASE 7
+ok   tf_r1  absent      CASE 9
+ok   tf_r1  exactly x15   ok "
+ok   hk  exactly x2 _refs=
+ok   hk  exactly x3 KS-991
+ok   hk  exactly x1 merge-base --is-ancestor develop origin/develop
+ok   hk  exactly x1 [ "$(git rev-parse develop)" != "$(git rev-parse origin/develop)" ] &&
+ok   hk  exactly x1 [pre-push] KS-991: local 'develop' is BEHIND origin/develop
+ok   hk  exactly x1 for _ref in $_refs; do
+ok   hk  absent      for _ref in develop origin/develop refs/remotes/origin/develop; do
+ok   hk  exactly x1 KS-882: every ref that resolves already CONTAINS this commit
+ok   hk  exactly x1 KS-854: no base to diff against
+ok   hk  exactly x1 check-package-format.sh
+FAIL hk_dev  absent expected, count 2: _refs=
+FAIL hk_dev  absent expected, count 3: KS-991
+FAIL hk_dev  1 expected, count 0: for _ref in develop origin/develop refs/remotes/origin/develop; do
+ok   hk_dev  exactly x1 check-package-format.sh
+ok   hk_base  absent      check-package-format.sh
+ok   hk_base  absent      KS-991
+ok   hk_r1  exactly x3 KS-991
+ok   hk_r1  absent      check-package-format.sh
+ok   pf  exactly x3 env_fail
+ok   pf  exactly x3 KS-991
+ok   pf  exactly x1 PREFLIGHT FAILED — but leg 1 could not RUN
+ok   pf  exactly x1 Do NOT reach for --no-verify
+ok   pf  exactly x1 PREFLIGHT FAILED — fix the above before pushing.
+FAIL pf_dev  absent expected, count 3: env_fail
+FAIL pf_dev  absent expected, count 3: KS-991
+ok   pf_dev  exactly x1 PREFLIGHT FAILED — fix the above before pushing.
+FAIL test file develop -> head: 0 changed regions (expected 2): []
+FAIL region 1 = an INSERT of 122 lines after develop's :506
+FAIL region 2 = the landed-loop line, out9 -> out9 out10 out11
+FAIL head lines = develop lines + 122 (647 vs 647)
+FAIL ok titles: head 28 (28), develop 28 (23)
+FAIL the 5 new titles are CASE 10/11's; the other 23 are develop's in order
+FAIL hook develop -> head: 0 changed region(s) (expected 1: -1/+39): []
+ok   the T1/T2 anchor (the 11-line guard block) occurs once in the head's hook
+ok   the Tg-A/Tg-E anchor line occurs once
+ok   the Tg-B anchor line occurs once
+ok   the T3 anchor line occurs once
+FAIL develop's hook: the single loop line (T1's target) occurs once
+ok   tf: 0 raw control bytes (got 0)
+ok   tf_dev: 0 raw control bytes (got 0)
+ok   hk: 0 raw control bytes (got 0)
+ok   hk_dev: 0 raw control bytes (got 0)
+ok   pf: 0 raw control bytes (got 0)
+ok   pf_dev: 0 raw control bytes (got 0)
+ok   round-1 record on disk, 6230 bytes: /Volumes/DevMASTER/!CODING/Secuura/Blockchain/5_Project_History/2026-09-13_s213/boot/peter_903_comment_5585854866.md
+ok   round-1 record names 'The one ask' once, CASE 7 and CASE 8 twice each, 'Not approving yet' once
+ok   head commit message names KS-991 only
+ok   head commit message 0 at-signs
+ok   head commit message 0 PR refs
+ok   head commit message carries the red-first tallies
+work dir (kept): /var/folders/xl/p96z5mmd3lzcn3pt8t6djkl40000gn/T//qa903ctl.fnuNtp
+controls_check: FAILS=29

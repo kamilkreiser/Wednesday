@@ -1,0 +1,23 @@
+check.out 2026-09-14 08:34:06 AEST
+--- 1. --check, no overrides (nothing installed yet):
+brief missing or empty: /Volumes/DevMASTER/WEDNESDAY/2_Project_Files/fleet/qa-agent/briefs/2026-09-14_secuura-903-ks991-tier2-r2.md
+rc=3
+--- 2. --check with overrides to the OUTPUT DIR copies:
+all guards pass:
+  head a4f71cde660c1442d98317e26d93845340b20098 present at refs/heads/kamilkreiser/ks-991-stale-local-develop on origin
+  merge-base still 8861e62161466c40f08d2b10a30edeb203123993 (GitHub compare API)
+  origin develop still 8861e62161466c40f08d2b10a30edeb203123993 (M18, the develop merged INTO the branch and the one this brief's 28/0 was written against; git ls-remote)
+  brief, prompt, QA project and repo all present
+  brief and prompt agree on TIER 2 and ROUND 2
+  prompt opens with the thinking directive and names the brief
+  brief and prompt both name the head SHA a4f71cde660c1442d98317e26d93845340b20098
+  prompt tells the agent to MAIL its verdict
+  prompt forbids pushing / the real hook / preflight in the Secuura checkout
+  prompt forbids memory maintenance inside the gate session
+  prompt forbids printing a credential value
+  brief names the round-1 record (Peter's review) and it is present on disk
+  a launch (not --check) will refuse unless stdin is a TTY (exit 21)
+rc=0
+--- 3. the LAUNCH path with overrides, headless (stdin /dev/null):
+REFUSING: stdin is not a TTY — this launcher execs an interactive agent; run it in a cockpit pane, never inside a Bash tool (a headless gate is invisible and dies with the caller's shell)
+rc=21
