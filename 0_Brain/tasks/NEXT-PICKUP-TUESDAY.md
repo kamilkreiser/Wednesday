@@ -44,6 +44,13 @@ supersede: replace WHOLESALE at the next pickup; never append.
   - **Kam ASKED on the panel at 19:24:59 (VERIFIED AT ORIGIN at 19:26) and in the terminal: "go" or "hold" on fix (b)** (Basic stays on everything except `/api/*`; the API keeps its bearer check; `/idp/*` stays gated). **Default until he answers:** S43 prepares and measures only, nothing applied on Azure.
   - **S43 briefed 09:25:25Z** (`briefs_staged/2026-09-13_hpsm-s43-urgent-live-gate-blocker.md`; tap `--mail` verified, prompt clear). The ask: reproduce through the public URL; stage (b) on pc-lane-a with a rollback; measure `/api/*` unauthenticated answers (**a 200 with data and no bearer = STOP**); `/idp/token` still challenges; send a READY-TO-APPLY; add a public-gate browser sign-in + S1 check to every upgrade post-check.
   - **NEXT:** (1) on Kam's go, relay it verbatim (a KAM mail) and S43 applies with a head mail first; warn Kam about the restart. (2) On READY-TO-APPLY, read the `/api` exposure list before relaying anything. (3) After the fix, commission a re-run of the live half of the acceptance gate (the NOT TESTED probes).
+- ✅ **19:58 — ACCEPTANCE+SECURITY GATE VERDICT (09:58:13Z, DKIM pass; report read WHOLE, 538 lines): DELIVERABLES NO GO 1/2/10/4 · SECURITY GO WITH FINDINGS 0/0/3/1.** Scored 1.00 (scoreboard top). Pane `%6` closed with `pane_close.sh`.
+  - **Routed to S44 ~10:0xZ** (`briefs_staged/2026-09-13_hpsm-s44-answer-acceptance-verdict-routing.md`), fix round 1 of 2 for this NEW class:
+    - D-B1 = the gate fix, waiting on Kam.
+    - **D-M1** (discovery never required; T3 cannot fail) and **D-M2** (exception fields optional) go into S44's queue after the rolling upgrade. **Both carry DEMO IMPACT and STOP for Tuesday before any upgrade that carries them.**
+    - S-m3 goes into the credential round. S-m1/S-m2 (edge) go to BACKLOG with priority, as a post-round edge commit.
+    - Minors go to the BACKLOG fold. D-m6 needs Kam's ruling on A-17. D-p2 is already settled (D1 retired).
+  - **OWED after the gate fix is applied:** re-run the LIVE half of this gate (the walk-through and probes 2, 3, 5, 7, 9, 11–13) as a live-only delta. Use the launcher model `qa-agent/launchers/launch_qa_hpsm_composer_09c1591_brief_acceptance_security.sh`.
 - 🔄 **19:43 — S43 WRAPPED (09:43:26Z, DKIM pass, read whole). HANDOVER-S43 `1a23e93` read whole (154 lines).**
   - GREEN unmerged: FX-M1 `32684a3`, FX-LV `19a5caa`, FX-R `5eccefd`, FX-SI `bc61c4f`, F-API `8d86395`. F-WEB `a444af6` step A GREEN, step B not started. C11 `bbd85a1` PAUSED.
   - **FX-S7 is STILL RUNNING as S43's subagent.** Its report is INTERIM and its branch is at `bfebcd4`.
