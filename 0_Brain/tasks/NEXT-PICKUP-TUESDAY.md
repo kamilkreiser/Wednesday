@@ -32,6 +32,10 @@ supersede: replace WHOLESALE at the next pickup; never append.
   - **READY ETA about 20:05–20:20 AEST;** it ships in the next rolling upgrade and goes to the delta gate (browser leg).
   - **NEXT:** on the READY, check the descriptions against authz (completion check) and the contrast result. Warn Kam on the panel before the upgrade restart.
 - Panel note to Kam 19:18:24 (the sign-in change has a lane, ETA 45–60 min, next rolling upgrade). **VERIFIED AT ORIGIN** at 19:20 (row 190).
+- 🔴 **19:2x — KAM (terminal): "I didn't see your response to my question whether you got the instruction before we booted and whether the agent has been advised."** Answered in the terminal, with "no" as the first word. Also posted on the panel at 19:21:41 (local API shows it).
+  - **Why he did not see the 19:11 and 19:18 notes, as measured:** both are at origin, and the Studio has pushed commits since, so its copy pulled them. **But `chat.html:190` `inView()` and `cockpit.html:367` `msgInView()` show a reply ONLY when the panel's active view matches its agent.** Tuesday's rows are `agent: tuesday`, so they are **hidden on the WEDNESDAY tab**. His latest typed panel row (18:17) is `view: wednesday`.
+  - **Which tab he was on is UNMEASURED** (per-browser localStorage on the Studio). Kam was told to switch to the orange TUESDAY tab.
+  - **Rule until settled:** a question Kam asks in THIS terminal is answered in the terminal, with the yes/no in the first words; the panel copy is secondary.
 - **s13 watcher re-armed:** `watch_tuesday_exiting.sh 2026-09-13T09:17:15 23:55 1666 83570`.
 
 ## 🟢 KAM, 18:5x AEST, terminal, verbatim: *"Keep going and finish what you can.  no matter the time.  keep going until completion"* — the successor's first jobs, in order
