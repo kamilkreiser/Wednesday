@@ -1,0 +1,26 @@
+fleet panes BEFORE: n=3 ids=[%0 %1 %87 ]
+scratch panes: A=%0 (TUESDAY-tree start cmd) B=%1 C=%2 (WEDNESDAY-tree start cmd)
+PASS  arm1 seat=wednesday tree=wednesday, pane 'wednesday' -> '%0'
+PASS  arm2 seat=tuesday tree=tuesday, pane 'tuesday' -> '%0'
+PASS  arm3 seat=tuesday tree=tuesday, pane 'wednesday' only (legacy fallback) -> '%0'
+PASS  arm4 seat=tuesday, no pane -> REFUSED naming both: coord_pane_id: REFUSED — no coordinator pane in tmux target 'scratch:0' (looked for @cockpit_name 'tuesday' or legacy 'wednesday')
+PASS  arm5 seat=wednesday, pane 'tuesday' only -> REFUSED: coord_pane_id: REFUSED — no coordinator pane in tmux target 'scratch:0' (looked for @cockpit_name 'wednesday')
+PASS  arm5b seat=tuesday tree=wednesday, pane 'wednesday' -> REFUSED (g1): coord_pane_id: REFUSED — pane %0 is named 'wednesday' but this tree's seat is 'wednesday', not 'tuesday'; a 'tuesday' seat may only adopt the legacy pane on its own tree (looked for @cockpit_name 'tuesday' or legacy 'wednesday')
+PASS  arm5c legacy pane started from a WEDNESDAY tree -> REFUSED (g2): coord_pane_id: REFUSED — pane %2 ('wednesday') was started from tree 'WEDNESDAY', which is not a 'tuesday' tree; not adopting another seat's coordinator (looked for @cockpit_name 'tuesday' or legacy 'wednesday')
+PASS  arm5d both 'tuesday' and 'wednesday' present, seat=tuesday -> exact wins -> '%0'
+PASS  arm6a literal '^wednesday|' live=2 patched=0
+PASS  arm6b runner body parses (bash -n)
+PASS  arm6c constructed DEAD command carries WED_AGENT=$SEAT
+PASS  arm6d tap target resolved via coord_pane_id
+PASS  arm6e dry-run: --dead was called with WED_AGENT=tuesday (resolved from the TUESDAY tree): invoked: WED_AGENT=tuesday args=--dead
+PASS  arm6f runner logged its seat line
+PASS  arm6g runner matched the DEAD wake shape without the literal wednesday
+PASS  arm7 bash -n wednesday_rotate.sh
+PASS  arm7 bash -n wake_watch.sh
+PASS  arm7 bash -n arm_wake_watch.sh
+PASS  arm7 bash -n seat_resolve.sh
+PASS  arm8 live fleet, seat=wednesday: live awk vs resolver (read-only) -> '%0'
+PASS  scratch tmux server (-L resolver_test) killed
+fleet panes AFTER:  n=3 ids=[%0 %1 %87 ]
+PASS  fleet pane list unchanged (count+ids) -> '3:%0 %1 %87 '
+FAILS=0
