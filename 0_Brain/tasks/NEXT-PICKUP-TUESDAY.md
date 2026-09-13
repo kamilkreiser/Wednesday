@@ -43,7 +43,13 @@ supersede: replace WHOLESALE at the next pickup; never append.
   3. `tmux set -p -t %0 @cockpit_name tuesday`
   4. `WED_AGENT=tuesday nohup bash 2_Project_Files/fleet/cockpit/wednesday_rotate.sh --self > /dev/null 2>&1 &` (log `logs/rotate_wednesday.log`). `WED_AGENT=tuesday` resolves `Launch_Tuesday.command` (fixed `313325e7b`).
   5. The successor renames `%0` back to `wednesday` (first action b).
-- **Wednesday CLAIMED the seat-name resolver fix** (COORDINATION 09:14:50Z): the pane named after the seat, and rotate, wake_watch and arm_wake_watch accepting either name. **She mails a commit sha plus scratch-test output before changing the contract. Until then this workaround stands.**
+- **Wednesday's seat-name resolver fix is BUILT and STAGED, NOT installed** (COORDINATION 10:40:21Z, DKIM pass, read whole):
+  - Location: `2_Project_Files/fleet/cockpit/staged/resolver-20260913/` at origin `59ec89ddf`.
+  - Contents: a new `seat_resolve.sh` plus patched `wednesday_rotate.sh`, `wake_watch.sh` and `arm_wake_watch.sh`, with `DIFF.md` and `resolver_test.sh`/.out (22 PASS, including seat=tuesday + pane `wednesday` found through the legacy fallback, and the DEAD line carrying `WED_AGENT`).
+  - **Installing it on the mini is Tuesday's call. s13 did NOT install it tonight:** the install means stopping the running `wake_watch.sh` loop, copying the four files together and re-arming, at a boundary with no seat mid-turn, and S44 is live mid-merge. Install at a quiet boundary; `seat_resolve.sh` must sit beside the three.
+  - **The second half, not built (Wednesday claims it):** `cockpit.conf`/`cockpit.sh up`, `apply_layout` (:90), `rotate` (:389) and `Launch_Cockpit.command:104` all hold the literal `wednesday`.
+  - **The live rotate already renames the pane to `$SEAT` after a respawn (line 151)**, which is why the successor must rename `%0` back to `wednesday`.
+  - **Until both halves are installed, the rename workaround above stands.**
 
 ## KAM'S WORDS TODAY (verbatim, AEST; T = terminal transcript, P = panel)
 - **09:17:37 P (tuesday view), standing rule:** *"this is a new standing rule for all projects - please spin up as many agents as possible to complete the task as long as multiple agents do not create a problem with development through multiple agents working on the same code base."*
