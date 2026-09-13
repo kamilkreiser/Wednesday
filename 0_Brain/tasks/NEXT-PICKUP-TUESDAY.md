@@ -44,6 +44,15 @@ supersede: replace WHOLESALE at the next pickup; never append.
   - **Kam ASKED on the panel at 19:24:59 (VERIFIED AT ORIGIN at 19:26) and in the terminal: "go" or "hold" on fix (b)** (Basic stays on everything except `/api/*`; the API keeps its bearer check; `/idp/*` stays gated). **Default until he answers:** S43 prepares and measures only, nothing applied on Azure.
   - **S43 briefed 09:25:25Z** (`briefs_staged/2026-09-13_hpsm-s43-urgent-live-gate-blocker.md`; tap `--mail` verified, prompt clear). The ask: reproduce through the public URL; stage (b) on pc-lane-a with a rollback; measure `/api/*` unauthenticated answers (**a 200 with data and no bearer = STOP**); `/idp/token` still challenges; send a READY-TO-APPLY; add a public-gate browser sign-in + S1 check to every upgrade post-check.
   - **NEXT:** (1) on Kam's go, relay it verbatim (a KAM mail) and S43 applies with a head mail first; warn Kam about the restart. (2) On READY-TO-APPLY, read the `/api` exposure list before relaying anything. (3) After the fix, commission a re-run of the live half of the acceptance gate (the NOT TESTED probes).
+- **20:10 — S44 STATUS 10:10:41Z (DKIM pass, read whole; no reply needed; its default stands):**
+  - **Merge 1 FX-M1 went RED at clean-clone CI only.** `scripts/stack-api-isolation.mjs` created an engagement whose approver had no tenant membership, and FX-M1 now correctly 422s that.
+  - Fixture fix `2bfb42a` grants the `customer_approver` role in tenant A; the product rule is untouched. Chain m1b-s44 is re-running; main is still caf63fd.
+  - Everything else on f80ebc4 was GREEN, including switch-ON e2e 63 with zero failures.
+  - OWN MISS disclosed (commit chained with `;` after a failed prettier check, amended before any chain).
+  - BACKLOG fold is analysis `6958d88`: 19 entries plus 4 updates.
+  - **Engine serial queue (its default, accepted by silence):** C11 → D-M1 → the credential round's engine part. D-M2 splits into API (after FX-PIN and F-API) and engine (after D-M1), landing together. S-m3 runs as its own small lane when a slot frees. Demo STOPs kept.
+  - The Q2 30-minute clock starts when FX-R reaches main.
+- **s13 watcher re-armed:** `watch_tuesday_exiting.sh 2026-09-13T10:10:42 23:55 1666 39799`.
 - **20:03 — S44 STATUS 10:03:37Z (DKIM pass, read whole; no reply needed):**
   - It acknowledged both the CONFIRMED and the verdict routing.
   - **Merge 1 FX-M1 `f80ebc4`:** checks and upgrade proof GREEN (vitest 1058, e2e OFF 63); clean-clone CI and switch-ON e2e still running; main NOT moved yet.
