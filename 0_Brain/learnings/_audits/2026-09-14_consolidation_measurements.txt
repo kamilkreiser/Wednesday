@@ -1,0 +1,515 @@
+# 2026-09-14 consolidation — RAW MEASUREMENTS (generated 2026-09-14 07:21 AEST; window 2026-08-31 → 2026-09-14)
+# Every block: the command, then its output. Re-run any block to check. zsh; /usr/bin/grep; absolute paths; no cd.
+
+## 1. LEDGER VOLUME
+$ wc -c -l /Volumes/DevMASTER/WEDNESDAY/0_Brain/learnings/_ledger.md
+     102   98288 /Volumes/DevMASTER/WEDNESDAY/0_Brain/learnings/_ledger.md
+$ /usr/bin/grep -c '^| 2026-' _ledger.md
+68
+$ /usr/bin/grep -o '^| 2026-[0-9-]*' _ledger.md | sort | uniq -c
+  31 | 2026-09-11
+  12 | 2026-09-12
+  24 | 2026-09-13
+   1 | 2026-09-14
+$ wc -c -l _ledger_archive.md ; grep -c rows
+     918 1569816 /Volumes/DevMASTER/WEDNESDAY/0_Brain/learnings/_ledger_archive.md
+848
+$ /usr/bin/grep -n '^#' _ledger_archive.md   (archive headings — confirms the archive holds rows ≤ 2026-09-10)
+8:## Archived 2026-09-13 22:1x — rows dated 2026-09-10 moved by the 17:48 seat under CLAUDE.md rule 3c (rows older than ~3 days), verbatim, newest-first
+87:## Archived 2026-09-12 10:4x — rows dated 2026-09-09 (112 rows), moved verbatim from `_ledger.md` under CLAUDE.md rule 3c (older than ~3 days; nothing edited, nothing deleted — a move). Conservation asserted: ledger 224 + archive 660 = 884 before; ledger 112 + archive 772 = 884 after. Newest-first.
+204:## Archived 2026-09-11 05:3x — rows dated 2026-09-08, moved under CLAUDE.md rule 3c
+283:# Correction ledger — ARCHIVE (rows dated 2026-08-29 and earlier)
+289:## Archived 2026-09-10 05:3x — rows dated 2026-09-07, moved verbatim from [[_ledger]] under CLAUDE.md rule 3c (older than ~3 days). Nothing edited, nothing deleted; this is a MOVE. 71 rows.
+363:## Archived 2026-09-09 12:5x — rows dated 2026-09-06 (97 rows)
+471:## Archived 2026-09-08 05:3x — rows dated 2026-09-05 (38 rows), moved verbatim from `_ledger.md` under CLAUDE.md rule 3c (Kam 2026-09-04 08:32, card `wed-ledger-boot-cost`: rows older than ~3 days move here; nothing edited, nothing deleted — this is a move). Conservation asserted: ledger 206 + archive 379 = 585 before; ledger 168 + archive 417 = 585 after. Newest-first.
+514:## Archived 2026-09-06 08:07 — rows dated 2026-09-04 (32 rows), moved verbatim from `_ledger.md` under CLAUDE.md rule 3c (Kam 2026-09-04 08:32, card `wed-ledger-boot-cost`: rows older than ~3 days move to the archive; nothing edited, nothing deleted). Conservation asserted: ledger 92 + archive 347 = 439 before; ledger 60 + archive 379 = 439 after.
+551:## Archived 2026-09-06 00:06 — rows dated 2026-09-03, moved verbatim from `_ledger.md` under CLAUDE.md rule 3c (Kam 2026-09-04 08:32, card `wed-ledger-boot-cost`: rows older than ~3 days move to the archive; a move, never an edit or a deletion; newest-first)
+594:## Archived 2026-09-05 08:1x — rows dated 2026-09-02 (52 rows) moved under CLAUDE.md rule 3c (Kam-ruled 2026-09-04 08:32, card wed-ledger-boot-cost: rows older than ~3 days move here verbatim; conservation asserted). Newest-first.
+875:## Archived 2026-09-04 08:37 — rows dated before 2026-09-02 (Kam's ruling `wed-ledger-boot-cost: archive`, 2026-09-04 08:32: archive rows older than ~3 days at every wrap)
+$ archive rows per date, window only
+   4 | 2026-08-31
+  34 | 2026-09-01
+  52 | 2026-09-02
+  38 | 2026-09-03
+  32 | 2026-09-04
+  38 | 2026-09-05
+  97 | 2026-09-06
+  71 | 2026-09-07
+  75 | 2026-09-08
+ 112 | 2026-09-09
+  76 | 2026-09-10
+$ cat _ledger.md _ledger_archive.md | /usr/bin/grep -cE '^\| 2026-(08-3[01]|09-)'   (window rows, Wednesday seat)
+697
+$ wc -c window_rows.txt (bytes of those rows)
+ 1409222
+$ rows naming a seat by clock ('the HH:MM seat' etc.)
+16
+$ [W] seat-tag rows
+80
+$ severity markers (fixed-string grep per marker)
+🔴 189
+🟠 79
+🟡 177
+🟢 88
+🔵 1
+no-marker 163
+$ type column (field 3 on ' | ' split) top
+ 462 correction
+  43 
+  34 positive/method
+  32 praise/insight
+  13 praise/method
+   8 ruling/grant
+   7 finding
+   6 positive/finding
+   6 correction (fleet)
+   4 praise
+   4 correction/finding
+   3 preference
+$ type keyword tallies
+praise      61
+positive    50
+grant       13
+ruling      10
+insight     45
+finding     18
+preference  5
+correction  475
+$ praise-typed rows per date
+   3 | 2026-08-31
+  15 | 2026-09-01
+  15 | 2026-09-02
+   3 | 2026-09-03
+   3 | 2026-09-04
+   3 | 2026-09-05
+   1 | 2026-09-06
+   3 | 2026-09-07
+  15 | 2026-09-08
+$ git: last commit before window + bytes per ledger-family file at BASE vs HEAD
+7f8ab76f6f4c1e30a94146c5193b5643d279c0a0 2026-08-30 16:41:22 +1000 16:41: Kam asked Secuura movement — none measured; rec offered
+_ledger.md base=253543 head=98288 delta=-155255
+_ledger_archive.md base=0 head=1569816 delta=1569816
+_ledger_laptop_datasec.md base=0 head=49716 delta=49716
+_ledger_laptop_datasec_archive.md base=0 head=236975 delta=236975
+_ledger_fleet_insights.md base=0 head=90296 delta=90296
+$ git log --since=2026-08-31 --numstat on the family (lines added/deleted)
+0_Brain/learnings/_ledger_laptop_datasec.md +147 -101
+0_Brain/learnings/_ledger.md +783 -928
+0_Brain/learnings/_ledger_laptop_datasec_archive.md +118 -0
+0_Brain/learnings/_ledger_archive.md +920 -2
+0_Brain/learnings/_ledger_fleet_insights.md +55 -0
+$ commits touching the family since 08-31
+     669
+$ ledger byte size at dated commits (git cat-file -s)
+2026-09-07 by-tier=291126 bare=317538 ledger=391165 (3a20e0224)
+2026-09-10 by-tier=395157 bare=422578 ledger=611827 (8314abeec)
+2026-09-14 by-tier=418347 bare=445930 ledger=98234 (e8e65aeee)
+$ LAPTOP (Tuesday/Datasec) seat — ROW COUNTS ONLY, bodies not read
+current:
+   4 | 2026-09-11
+   8 | 2026-09-12
+   9 | 2026-09-13
+   3 | 2026-09-14
+archive:
+  27 | 2026-09-07
+  33 | 2026-09-08
+  21 | 2026-09-09
+  13 | 2026-09-10
+window total:
+118
+$ fleet_insights rows per date
+  33 | 2026-09-03
+   9 | 2026-09-04
+
+## 2. FAMILY WEIGHTS (Lesson column = field 5 on ' | ' split; a link counted once per row) — STRICT
+ 275 2026-08-14_i-read-representations-they-read-sources
+ 176 2026-08-07_a-check-that-cannot-fail
+ 139 2026-08-09_an-enforcement-you-must-arm-is-not-one
+  69 2026-08-04_validate-brief-pointers
+  67 2026-09-08_a-false-absence-is-usually-my-own-instrument
+  58 2026-08-13_headline-must-match-the-operative-case
+  57 2026-08-16_classification-is-the-field-that-grants-authority
+  47 2026-09-01_qa-gate-before-my-verification
+  46 2026-08-16_an-overstated-record-gets-discounted-wholesale
+  46 2026-08-15_a-cap-is-never-neutral
+  43 2026-08-16_a-recorded-blocker-is-not-a-boundary
+  42 2026-09-05_a-relayed-ruling-is-delivered-only-when-it-is-in-the-artefact
+  36 2026-08-21_challenge-me-when-you-think-im-wrong
+  35 2026-09-06_a-retraction-inherits-the-scope-of-its-measurement
+  34 2026-08-06_exercise-mechanisms-before-arming
+  29 2026-09-07_a-census-complete-over-a-frame-that-is-not
+  29 2026-08-26_never-delete-cleanup-means-quarantine
+  25 2026-08-25_travel-drive-stale-pointers
+  24 2026-08-17_check-the-refusal-before-the-kill
+  24 2026-08-06_artifact-presence-is-not-execution
+  23 2026-08-26_mirror-reports-state-not-intent
+  23 2026-08-07_a-promise-is-not-a-mechanism
+  22 2026-09-04_decisions-held-narration-drifted
+  20 2026-09-01_a-tap-is-a-pointer-not-a-message
+  17 2026-08-07_enumerate-every-surface-before-done
+  16 2026-09-02_coo-actionable-tickets-never-wait-for-kam
+  16 2026-08-16_an-ask-without-a-default-is-an-indefinite-hold
+  16 2026-08-06_never-discard-stderr
+  16 2026-08-06_bluf-write-for-the-reader
+  15 2026-08-06_brief-provenance-enforcement
+  14 2026-08-29_unquoted-heredoc-executes-backticks
+  14 2026-08-20_dashboard-shows-only-live-work
+  14 2026-08-06_ghost-suggestions-in-panes
+  13 2026-09-08_a-safety-claim-names-the-property-it-checked
+  13 2026-09-07_a-mechanism-is-recorded-by-its-path-not-its-runtime-id
+  13 2026-08-13_shared-bus-tag-filter-or-leak
+  12 2026-09-08_the-check-ran-and-was-not-checking-the-thing
+  12 2026-08-11_coordinator-not-carrier
+  11 2026-09-07_git-topology-is-a-measurement-not-a-model
+  11 2026-09-07_an-instruction-to-wait-must-name-what-wakes
+distinct lessons cited (strict):      128
+-- LOOSE (any [[2026-…]] link anywhere in the row, once per row) top 25
+ 284 2026-08-14_i-read-representations-they-read-sources
+ 190 2026-08-07_a-check-that-cannot-fail
+ 147 2026-08-09_an-enforcement-you-must-arm-is-not-one
+  80 2026-09-08_a-false-absence-is-usually-my-own-instrument
+  71 2026-08-04_validate-brief-pointers
+  63 2026-08-13_headline-must-match-the-operative-case
+  57 2026-08-16_classification-is-the-field-that-grants-authority
+  51 2026-08-15_a-cap-is-never-neutral
+  49 2026-09-01_qa-gate-before-my-verification
+  49 2026-08-16_an-overstated-record-gets-discounted-wholesale
+  47 2026-08-16_a-recorded-blocker-is-not-a-boundary
+  45 2026-09-05_a-relayed-ruling-is-delivered-only-when-it-is-in-the-artefact
+  38 2026-09-06_a-retraction-inherits-the-scope-of-its-measurement
+  38 2026-08-21_challenge-me-when-you-think-im-wrong
+  36 2026-08-06_exercise-mechanisms-before-arming
+  31 2026-09-07_a-census-complete-over-a-frame-that-is-not
+  31 2026-08-17_check-the-refusal-before-the-kill
+  29 2026-08-26_never-delete-cleanup-means-quarantine
+  25 2026-08-25_travel-drive-stale-pointers
+  25 2026-08-07_a-promise-is-not-a-mechanism
+  24 2026-08-06_artifact-presence-is-not-execution
+  23 2026-08-26_mirror-reports-state-not-intent
+  22 2026-09-04_decisions-held-narration-drifted
+  20 2026-09-01_a-tap-is-a-pointer-not-a-message
+  20 2026-08-07_enumerate-every-surface-before-done
+distinct (loose):      140
+-- rows with <6 fields on ' | ' split (links only in the loose tally)
+      95
+-- window-born families with >=3 citing rows (strict)
+  67 2026-09-08_a-false-absence-is-usually-my-own-instrument
+  47 2026-09-01_qa-gate-before-my-verification
+  42 2026-09-05_a-relayed-ruling-is-delivered-only-when-it-is-in-the-artefact
+  35 2026-09-06_a-retraction-inherits-the-scope-of-its-measurement
+  29 2026-09-07_a-census-complete-over-a-frame-that-is-not
+  22 2026-09-04_decisions-held-narration-drifted
+  20 2026-09-01_a-tap-is-a-pointer-not-a-message
+  16 2026-09-02_coo-actionable-tickets-never-wait-for-kam
+  13 2026-09-08_a-safety-claim-names-the-property-it-checked
+  13 2026-09-07_a-mechanism-is-recorded-by-its-path-not-its-runtime-id
+  12 2026-09-08_the-check-ran-and-was-not-checking-the-thing
+  11 2026-09-07_git-topology-is-a-measurement-not-a-model
+  11 2026-09-07_an-instruction-to-wait-must-name-what-wakes
+  11 2026-09-07_a-prior-ruling-gate-refusal-is-a-research-prompt
+  11 2026-09-06_other-projects-repos-are-read-only-git-verbs-that-write
+   9 2026-09-09_my-authority-and-the-targets-rules-are-two-checks
+   9 2026-09-02_the-statusline-is-the-context-instrument
+   9 2026-09-02_rotate-in-the-70-80-band-conditionally
+   8 2026-09-09_the-seat-resolver-is-the-layer-above-every-agent-aware-fix
+   8 2026-09-08_a-new-rule-is-most-dangerous-just-after-adoption
+   8 2026-09-07_name-the-field-that-says-whose-it-is
+   8 2026-09-03_a-pane-close-is-a-session-kill
+   7 2026-09-10_i-endorse-things-i-have-not-read
+   7 2026-09-07_a-classification-list-is-a-representation-not-an-instruction
+   7 2026-09-05_qa-gate-tiers-and-the-two-nogo-cap
+   6 2026-09-10_a-refusal-nobody-reads-is-indistinguishable-from-working
+   6 2026-09-08_a-ruling-can-be-voided-by-removing-its-precondition
+   6 2026-09-02_style-guides-never-mixed
+   5 2026-09-07_a-rule-for-creation-is-not-a-mandate-to-retrofit
+   5 2026-09-06_a-scoped-override-carries-its-own-expiry
+   5 2026-09-05_tickets-are-the-channel-whatsapp-via-kam-is-the-escalation
+   4 2026-09-10_a-detector-keyed-on-remedy-text-matches-the-hint
+   4 2026-09-09_acknowledge-panel-instructions-on-receipt
+   3 2026-09-09_parallel-seats-on-one-project-grant
+   3 2026-09-08_the-panel-reads-the-whole-message
+   3 2026-09-05_handovers-to-peter-and-stuart-are-test-blocks
+-- rows containing: 'Enforcement candidate' / 'candidate' / 'owed' / 'mechanism'
+42
+89
+55
+239
+-- every 'Enforcement candidate…' phrase with its row date (verbatim, cut at the next sentence)
+2026-09-13 :: Enforcement candidate: the brief template's tamper table gains a column `predicted-by` (drafter / Wednesday-read), and the gate reports slips only against Wednesday-read rows. 
+2026-09-10 :: Enforcement candidate stands: nothing guards a hand-written query's KEY, and `board_count.sh` guards only totals. 
+2026-09-10 :: Enforcement candidate deliberately NOT proposed yet: the honest fix is one API read before writing a UI step, and a script cannot know which surface an arbitrary ask points at
+2026-09-09 :: Enforcement candidate at w=4:** `send_brief.sh` refuses a HOLDS section containing a bare *"nothing else"* or an unqualified verb-class ban. 
+2026-09-08 :: Enforcement candidate at w=3: `send_brief.sh` requires a card carried into HOLDS to name the artefact checked and the date read, or be listed as UNKNOWN rather than asserted. 
+2026-09-08 :: Enforcement candidate at w=2: a wrap-time check that any cost estimate in a panel message names the file it was checked against. 
+2026-09-08 :: Enforcement candidate: `decision_queue.sh add` refuses a BLUF containing a SQL equality against a column the repo marks encrypted — narrow, and probably better as a standing line in the card template
+2026-09-08 :: Enforcement candidate for `send_brief.sh`: refuse a body containing a universal negative about a deployed/running state (`nothing has been deployed`, `never been`, `no one has`) unless the PROVENANCE block carries a line naming the instrument that WOULD have seen the positive
+2026-09-08 :: Enforcement candidate if it recurs: `safe_push` refuses when the tree is still dirty after its own commit. 
+2026-09-07 :: Enforcement candidate (w=3 would promote it):** `decision_queue.sh` refuses a BLUF containing an arrow-or-`means` construction to an INCIDENT/BLOCKER word unless the same BLUF carries a `does not exclude` / `necessary but not sufficient` clause
+2026-09-07 :: enforcement candidate is a wrap-time grep for `commit -m` in the session transcript 
+2026-09-07 :: enforcement candidate in that lesson (a pretooluse clause refusing `git -C <path outside WEDNESDAY>` + a write verb) is now ONE instance away and should be built at the next quiet point** 
+2026-09-06 :: Enforcement candidate (w=2 promotes it): `send_brief.sh` refuses a body naming a `wednesday-agent@` or `coagent@` message as a thing the recipient must READ, since no project key reaches either. [W] 
+2026-09-06 :: enforcement candidate named
+2026-09-06 :: Enforcement candidate (w=2 promotes it): `pane_close.sh` refuses when the last 8 lines of the pane carry a spinner glyph (`✻ ✢ ✽ ·` + `…`) or when `cockpit.sh say`'s last receipt for that pane was "queued"
+2026-09-06 :: enforcement candidate named at w=6, now the build (a seat below 50%)
+2026-09-06 :: Enforcement candidate (w=7 would promote it): `send_brief.sh` refuses a body whose SELF-CHECK timestamp predates the file's mtime by more than N minutes. [W] 
+2026-09-06 :: enforcement candidate named 
+2026-09-06 :: enforcement candidate (the watcher's idle leg) already exists and fired — no lesson change 
+2026-09-06 :: enforcement candidate at w=3: the pretooluse hook refuses `git -C <path outside WEDNESDAY> (fetch\
+2026-09-06 :: enforcement candidate at w=5. [W] 
+2026-09-06 :: enforcement candidate named 
+2026-09-06 :: Enforcement candidate (w=3 of this costume promotes it — this IS the third listing-cap instance in one day): `inbox_digest.sh --inbound` unbounded, and the boot prompt names it. [W] 
+2026-09-06 :: Enforcement candidate (w=2 would name it): `send_brief.sh --tap` performs the verified pointer tap itself after a successful send to a routed pane. [W] 
+2026-09-06 :: enforcement candidate named 
+2026-09-06 :: Enforcement candidate (w=3 of the CARD costume promotes it): a brief that names a card id is refused by `send_brief.sh` unless `decision_queue.sh show <id>` succeeds. [W] 
+2026-09-06 :: enforcement candidate named 
+2026-09-06 :: Enforcement candidate (w=3 of this costume promotes it): `inbox_digest.sh --inbound` prints inbound only, unbounded, and the boot prompt names it. [W] 
+2026-09-06 :: enforcement candidate named 
+2026-09-06 :: enforcement candidate named for the next seat 
+2026-09-06 :: enforcement candidate at w=3 of THIS costume: `send_brief.sh --kind brief` greps the previous ANSWERs to the project for lines beginning "RULED" and refuses when none of them is quoted
+2026-09-06 :: enforcement candidate named at w=2 — `decision_queue.sh --delivered <artefact>` on a ruled card, `list ruled --undelivered`, and `send_brief.sh --kind brief` refusing a project brief while that view is non-empty for the project and the body lacks the section — is now the build
+2026-09-05 :: enforcement candidate. [W] 
+2026-09-05 :: enforcement candidate named 
+2026-09-05 :: enforcement candidate at w=3: send_brief's self-check refuses a sequencing verb (rebase/merge/after/before) on a PR id the previous mail to that agent sequenced differently unless the body says SUPERSEDES 
+2026-09-05 :: enforcement candidate at w=2: the brief self-check line names "items against each other" explicitly 
+2026-09-05 :: enforcement candidate for send_brief: a queued ticket id must carry a `scope:` clause. 
+2026-09-04 :: Enforcement candidate, not built this seat: `say` should refuse an argument that is not a registered name with a message that provably reaches the caller, and the routing miss should name the valid names. 
+2026-09-03 :: enforcement candidate; second instance now)
+2026-09-03 :: enforcement candidate at consolidation: `cockpit.sh add` refuses a command whose brief path argument does not exist 
+2026-09-03 :: enforcement candidate at consolidation: `cockpit.sh`/`send_brief.sh` inject the target pane's captured ctx so the figure cannot be typed at all 
+2026-09-03 :: enforcement candidate: the Secuura brief template's AUTHORITY section states "a ruling you did not receive by mail does not exist — write 'pending Kam' and stop" 
+2026-09-03 :: enforcement candidate pane_close.sh at w=3 
+2026-09-02 :: Enforcement candidates: (1) the watcher's idle leg recognises 'Do you want to proceed?' / '❯ 1
+2026-09-02 :: Enforcement candidate now has four instances behind it: a boot-prompt line ('never cd — absolute paths in every line of every call') or a PreToolUse hook that refuses a Bash call beginning with `cd `.** 
+2026-09-02 :: enforcement candidate at consolidation 
+2026-09-01 :: enforcement candidate for consolidation — a pre-commit check that refuses a backtick inside any unquoted heredoc body in tracked .sh/.command files (the hook path already exists for artefact classes). 
+2026-09-01 :: enforcement candidate → consolidation 
+2026-09-01 :: enforcement candidate for Sunday consolidation — a "quiet/no-movement" claim NAMES ITS CORPUS in the sentence ("quiet on Linear+mail; GitHub unread from this seat"), and board_watch_peter.sh prints its corpus line at start so the label cannot be read as total coverage
+
+## 3. LESSON FILES
+$ ls 2026-*.md | grep -vc conflict_on_
+159
+$ created in window by filename date
+   2 /2026-09-01
+   4 /2026-09-02
+   3 /2026-09-03
+   1 /2026-09-04
+   6 /2026-09-05
+   3 /2026-09-06
+  15 /2026-09-07
+  10 /2026-09-08
+  10 /2026-09-09
+  14 /2026-09-10
+   5 /2026-09-11
+   2 /2026-09-13
+   2 /2026-09-14
+$ tier values (frontmatter first 12 lines)
+  33 tier: M
+   5 tier: MIXED
+ 121 tier: W
+$ bytes by tier
+M 33 files 143827 bytes
+MIXED 5 files 132239 bytes
+W 121 files 535346 bytes
+$ status: superseded
+/Volumes/DevMASTER/WEDNESDAY/0_Brain/learnings/2026-07-31_fully-portable-drive.md
+/Volumes/DevMASTER/WEDNESDAY/0_Brain/learnings/2026-08-06_morning-shift-change.md
+/Volumes/DevMASTER/WEDNESDAY/0_Brain/learnings/2026-09-13_rotation-never-blocks-the-work-delegate-then-rotate.md
+$ total lesson bytes / window-created bytes
+  811412
+  410468
+$ top 12 lesson files by bytes
+   77770 /Volumes/DevMASTER/WEDNESDAY/0_Brain/learnings/2026-08-07_a-check-that-cannot-fail.md
+   28808 /Volumes/DevMASTER/WEDNESDAY/0_Brain/learnings/2026-08-14_i-read-representations-they-read-sources.md
+   21888 /Volumes/DevMASTER/WEDNESDAY/0_Brain/learnings/2026-09-08_a-false-absence-is-usually-my-own-instrument.md
+   17636 /Volumes/DevMASTER/WEDNESDAY/0_Brain/learnings/2026-08-06_ghost-suggestions-in-panes.md
+   13250 /Volumes/DevMASTER/WEDNESDAY/0_Brain/learnings/2026-09-02_coo-actionable-tickets-never-wait-for-kam.md
+   12260 /Volumes/DevMASTER/WEDNESDAY/0_Brain/learnings/2026-09-05_a-relayed-ruling-is-delivered-only-when-it-is-in-the-artefact.md
+   11810 /Volumes/DevMASTER/WEDNESDAY/0_Brain/learnings/2026-09-01_qa-gate-before-my-verification.md
+   11077 /Volumes/DevMASTER/WEDNESDAY/0_Brain/learnings/2026-09-06_a-retraction-inherits-the-scope-of-its-measurement.md
+   10322 /Volumes/DevMASTER/WEDNESDAY/0_Brain/learnings/2026-09-08_the-boot-spec-outgrew-its-window.md
+   10087 /Volumes/DevMASTER/WEDNESDAY/0_Brain/learnings/2026-08-09_an-enforcement-you-must-arm-is-not-one.md
+    9448 /Volumes/DevMASTER/WEDNESDAY/0_Brain/learnings/2026-08-16_an-overstated-record-gets-discounted-wholesale.md
+    9270 /Volumes/DevMASTER/WEDNESDAY/0_Brain/learnings/2026-08-28_contemplation-mistakes-and-the-fixed-will.md
+$ wc -c boot digests now
+  418347 /Volumes/DevMASTER/WEDNESDAY/0_Brain/learnings/_boot_digest_by_tier.md
+  445930 /Volumes/DevMASTER/WEDNESDAY/0_Brain/learnings/_boot_digest.md
+  864277 total
+$ boot ctx lines (daily notes; python extraction of 'Statusline after the brain load' / 'Boot (measured)' / 'Boot, measured' / 'BOOT COST MEASURED' with ctx%)
+2026-09-08.md:119 ctx 21% (ledger 172 rows) | 2026-09-09.md:158 10:44 Tuesday seat 28% (digest ~14%) | 2026-09-09.md:31 06:11 41% | 2026-09-09.md:69 07:49 22% | 2026-09-09.md:103 09:14 22% | 2026-09-10.md:68 06:11 45% (digest 366 KB, ledger 191 rows/468 KB) | 2026-09-11.md:140 09:32 29% (+yesterday's note whole → 61-62%) | 2026-09-11.md:212 10:20 47% | 2026-09-11.md:256 13:33 44% (ledger 240 rows/484 KB) | 2026-09-11.md:298 15:16 40% | 2026-09-11.md:351 17:18 46% (ledger 247 rows/495 KB) | 2026-09-12.md:56 05:31 47% (ledger 254 lines/505 KB; 50% wake) | 2026-09-12.md:143 09:25 53% (ledger 256 lines/505 KB) | 2026-09-12.md:203 12:13 47% (ledger 148 lines/213 KB after rule 3c) | 2026-09-12.md:274 14:56 40% (ledger 151/216 KB) | 2026-09-13.md:215 17:48 33% (ledger 168 lines) | 2026-09-13.md:275 23:38 29% (ledger 101 lines/96 KB) | 2026-09-14.md:33 06:54 28% (ledger 101 lines/96 KB)
+
+## 4. RETRIEVAL
+lessons total      159; cited in a window row (loose)      140; dangling handles:
+2026-08-30
+2026-09-02_launcher-quote-truncation
+2026-09-06_a-cap-is-never-neutral
+2026-09-08_a-decision-stays-on-the-page-while-the-world-moves
+2026-09-09
+2026-09-09_a-hold-names-the-property-it-protects
+-- NEVER cited in a window ledger row, created before 2026-09-01 (      12 of 82 pre-09-01 files):
+2026-07-31_fully-portable-drive
+2026-07-31_one-question-at-a-time
+2026-07-31_parent-child-learning-model
+2026-08-03_contemplation-the-cockroach
+2026-08-05_life-os-commission-principles
+2026-08-06_morning-shift-change
+2026-08-07_autonomy-grant-ship-decisions
+2026-08-07_valid-is-not-delivered
+2026-08-12_hpsm-continuous-readiness-grant
+2026-08-13_containment-never-run-is-a-claim
+2026-08-22_vendor-asks-scale-to-leverage
+2026-08-28_contemplation-mistakes-and-the-fixed-will
+-- NEVER cited, created IN window (      13):
+2026-09-07_analysis-records-what-tested-and-how
+2026-09-07_deploy-grant-and-fix-the-visible-data
+2026-09-08_a-ghost-suggestion-is-dangerous-in-proportion-to-what-is-unwritten
+2026-09-08_the-boot-spec-outgrew-its-window
+2026-09-09_a-guard-whose-exclusion-list-contains-its-own-subject
+2026-09-09_advisory-baseline-standing-authority
+2026-09-09_quarantine-by-rename-is-not-removal-on-an-additive-sync
+2026-09-10_claim-a-task-with-tuesday-before-starting-it
+2026-09-10_deploy-both-boxes-grant-expires-sunday
+2026-09-10_kintsugi-first-then-demo-behind-gates
+2026-09-11_secuura-we-approve-and-merge-our-own-tested-work
+2026-09-13_as-many-agents-as-possible-partitioned-by-code
+2026-09-14_kams-instruction-stands-until-he-withdraws-it
+-- positive control: window daily notes mentioning the top family by full name: 5 (daily notes rarely cite by filename — a 0 there is weak evidence)
+
+## 6. RITUALS
+$ per daily note: close-bell lines / WRAP CHECK lines / FAILED / OK
+2026-08-31 close=2 wrapcheck=1 FAIL=1 OK=0
+2026-09-01 close=5 wrapcheck=2 FAIL=0 OK=2
+2026-09-02 close=1 wrapcheck=1 FAIL=1 OK=0
+2026-09-03 close=1 wrapcheck=1 FAIL=1 OK=0
+2026-09-04 close=1 wrapcheck=0 FAIL=0 OK=0
+2026-09-05 close=1 wrapcheck=1 FAIL=1 OK=0
+2026-09-06 close=2 wrapcheck=2 FAIL=1 OK=0
+2026-09-07 close=1 wrapcheck=1 FAIL=1 OK=0
+2026-09-08 close=1 wrapcheck=1 FAIL=1 OK=0
+2026-09-09 close=2 wrapcheck=1 FAIL=1 OK=0
+2026-09-10 close=1 wrapcheck=1 FAIL=1 OK=0
+2026-09-11 close=4 wrapcheck=1 FAIL=0 OK=1
+2026-09-12 close=0 wrapcheck=0 FAIL=0 OK=0
+2026-09-13 close=1 wrapcheck=1 FAIL=1 OK=0
+$ per daily note: '### … SEAT|RESPAWN' headings / Boot-measured lines / retro sections
+2026-08-31 H3seat=0 bootmeasured=1 retro=1
+2026-09-01 H3seat=6 bootmeasured=0 retro=9
+2026-09-02 H3seat=15 bootmeasured=0 retro=12
+2026-09-03 H3seat=8 bootmeasured=0 retro=4
+2026-09-04 H3seat=4 bootmeasured=1 retro=3
+2026-09-05 H3seat=9 bootmeasured=0 retro=1
+2026-09-06 H3seat=18 bootmeasured=0 retro=1
+2026-09-07 H3seat=1 bootmeasured=0 retro=4
+2026-09-08 H3seat=0 bootmeasured=1 retro=8
+2026-09-09 H3seat=1 bootmeasured=2 retro=2
+2026-09-10 H3seat=0 bootmeasured=3 retro=1
+2026-09-11 H3seat=4 bootmeasured=12 retro=1
+2026-09-12 H3seat=4 bootmeasured=8 retro=1
+2026-09-13 H3seat=3 bootmeasured=8 retro=2
+2026-09-14 H3seat=1 bootmeasured=2 retro=1
+$ rotate_wednesday.log window lines:      365
+respawned OK (--self): 86 · respawned OK (--dead): 9 · REFUSED: 11 (--self 9 / --dead 2) · [liveness] lines 68 · LIVENESS FAIL 10 (9 in wedtest_* sessions, 1 in rtest — all test harness)
+per-day self/dead/refused:
+2026-08-31 self=0 dead=0 refused=0
+2026-09-01 self=0 dead=0 refused=0
+2026-09-02 self=5 dead=2 refused=2
+2026-09-03 self=9 dead=0 refused=0
+2026-09-04 self=4 dead=0 refused=0
+2026-09-05 self=7 dead=1 refused=0
+2026-09-06 self=17 dead=0 refused=1
+2026-09-07 self=6 dead=0 refused=1
+2026-09-08 self=4 dead=0 refused=0
+2026-09-09 self=6 dead=0 refused=0
+2026-09-10 self=2 dead=0 refused=0
+2026-09-11 self=8 dead=0 refused=3
+2026-09-12 self=5 dead=0 refused=0
+2026-09-13 self=13 dead=4 refused=3
+2026-09-14 self=0 dead=2 refused=1
+all --dead / REFUSED lines:
+2026-09-02 16:20:00 REFUSED (--dead): pane %2 does not show 'Context limit reached' — not killing a seat that may be alive
+2026-09-02 16:20:13 respawned OK (--dead)
+2026-09-02 16:21:02 REFUSED (--self): working tree has uncommitted changes outside the dashboard data churn — commit + push the handover first:
+2026-09-02 16:30:16 respawned OK (--dead)
+2026-09-05 13:32:33 respawned OK (--dead)
+2026-09-06 05:16:41 REFUSED (--self): working tree has uncommitted changes outside the dashboard data churn — commit + push the handover first:
+2026-09-07 16:17:37 REFUSED (--self): working tree has uncommitted changes outside the dashboard data churn — commit + push the handover first:
+2026-09-11 09:18:21 REFUSED (--self): HEAD bda27cce07ea1cd3cd1d65dd41f0762a783dfc4a != origin/main 3cda22f38d73640b42e754cb1af55f53b0fc127f — push the handover first (rhythm §3 item 3)
+2026-09-11 17:12:10 REFUSED (--self): HEAD 3b944c9003a35dd58350e69143b08b807a485c27 != origin/main 7534a2860c7a8a49b54c3c4e8ba329bd0d1cef3a — push the handover first (rhythm §3 item 3)
+2026-09-11 17:13:05 REFUSED (--self): HEAD 326bb302c8805ddd02c1ec43b5ed15bdf3beab8d != origin/main 7534a2860c7a8a49b54c3c4e8ba329bd0d1cef3a — push the handover first (rhythm §3 item 3)
+2026-09-13 14:35:18 respawned OK (--dead) — liveness verdict follows in ~25 s
+2026-09-13 14:39:00 respawned OK (--dead) — liveness verdict follows in ~25 s
+2026-09-13 14:42:11 respawned OK (--dead) — liveness verdict follows in ~25 s
+2026-09-13 15:45:56 REFUSED (--self): HEAD 51fc893c85fb9ca37e79cb769c765d923c25a297 != origin/main d7436fcfad7246ff49c06cca7438bf245ffda8ab — push the handover first (rhythm §3 item 3)
+2026-09-13 15:48:04 REFUSED (--self): HEAD d7436fcfad7246ff49c06cca7438bf245ffda8ab != origin/main e22ca2e6d7bc2562f17395b8abdf9e1e65737534 — push the handover first (rhythm §3 item 3)
+2026-09-13 15:52:23 REFUSED (--self): HEAD 038408c3c3849b229ba37af75990aaf32e772048 != origin/main 836a6c5cfe6a98e4fd5bee0023b83865c614576f — push the handover first (rhythm §3 item 3)
+2026-09-13 23:39:45 respawned OK (--dead) — liveness verdict follows in ~25 s
+2026-09-14 06:53:55 respawned OK (--dead) — liveness verdict follows in ~25 s
+2026-09-14 06:58:22 REFUSED (--dead): pane %0 does not show 'Context limit reached' — not killing a seat that may be alive
+2026-09-14 06:58:31 respawned OK (--dead) — liveness verdict follows in ~25 s
+
+## 5. BOARD KPI — Secuura Platform K (team KS), Linear GraphQL, READ-ONLY. Key read into the shell from 4_Credentials/.env for the call only; never written, never printed.
+$ board_count.sh linear LINEAR_API_KEY '{ team:{key:{eq:"KS"}}, state:{type:{in:["unstarted","started"]}} }'   (ACTIVE)
+TOTAL=108  (limit was 250, so this is a real count and not a cap)
+$ … state:{type:{in:["unstarted","started","backlog"]}}   (OPEN incl. backlog) — board_count REFUSES at its 250 page:
+MORE PAGES EXIST — this is not a total.
+$ so OPEN is stated as the SUM of two disjoint board_count partitions of backlog by createdAt, plus ACTIVE:
+  backlog createdAt < 2026-08-15:
+TOTAL=40  (limit was 250, so this is a real count and not a cap)
+  backlog createdAt >= 2026-08-15:
+TOTAL=232  (limit was 250, so this is a real count and not a cap)
+  cross-check: open(3 types) createdAt < 2026-08-15:
+TOTAL=67  (limit was 250, so this is a real count and not a cap)
+$ INSTRUMENT-SUBJECT TITLE PREDICATE (substring, case-insensitive) = or: [ { title: { containsIgnoreCase: "guard" } }, { title: { containsIgnoreCase: "gate" } }, { title: { containsIgnoreCase: "harness" } }, { title: { containsIgnoreCase: "preflight" } }, { title: { containsIgnoreCase: "hook" } }, { title: { containsIgnoreCase: "red-proof" } }, { title: { containsIgnoreCase: "red proof" } }, { title: { containsIgnoreCase: "census" } }, { title: { containsIgnoreCase: "lint" } } ]
+  open (3 types):
+TOTAL=125  (limit was 250, so this is a real count and not a cap)
+  active only:
+TOTAL=32  (limit was 250, so this is a real count and not a cap)
+  same predicate + bare substring "CI" (matches 'specific', 'incident'… — shown only to bound the class):
+TOTAL=150  (limit was 250, so this is a real count and not a cap)
+  positive control (must be 0): title contains 'zzqqxx':
+TOTAL=0  (limit was 250, so this is a real count and not a cap)
+  closed with completedAt >= 2026-08-31 (non-archived only — Linear default):
+TOTAL=28  (limit was 250, so this is a real count and not a cap)
+
+$ FULL WALK (python, cursor-paged, includeArchived:true, 5 pages of 250) → scratchpad ks_issues.json (identifier/title/state/dates/labels/description[:1500]); counts derived from it:
+  issues 1137 · by state type completed 663 / backlog 324 / started 79 / unstarted 35 / canceled 22 / duplicate 14 · archived 719
+  OPEN (unstarted+started+backlog, not archived) 380 = ACTIVE 108 + backlog 272 (= 40 + 232 above, reconciles) · open-state but archived 58
+  TITLE predicate, WORD-BOUNDARY form ((guard|gate|harness|preflight|hook|red-proof|red proof|census|lint|ci)s?): 98 of 380 open; ACTIVE 35 of 108
+  TITLE predicate, SUBSTRING form: 128 (125 without word-CI); substring-only hits where the word is absent: 'gate' inside gateway/aggregate/delegate… 25, 'hook' inside webhook 4  → the boundary is 98–128 depending on whether 'gateway' counts
+  TITLE-or-DESCRIPTION (first 1500 chars) form: 289 of 380 — too wide to be a subject predicate (every ticket that mentions a gate in its body)
+  per-term title hits (substring, open): gate 80 · guard 38 · preflight 12 · CI(word) 9 · hook 9 · lint 4 · harness 4 · census 1
+  open by state name: Backlog 272 · In Progress 45 · Todo 33 · In Review 25 · Blocked 5
+  OPEN created in window (>= 08-31): 286 (instrument-word 84) · open created before window: 94 (instrument-word 14)
+  CLOSED in window (completedAt/canceledAt >= 08-31, incl. archived): 174 = Done 88 / Deployed to UAT 63 / Tested Not Deployed 10 / Duplicate 9 / Canceled 4; archived among them 140; created in window 124
+  CLOSED-in-window instrument-subject (title-word): 55 (substring form 62)
+  reconstructed open-at (createdAt ≤ d and not closed by d; archive time invisible, so these run HIGH vs the live 380): 08-31 190 (instr 29, 15.3%) · 09-07 13:00 354 (instr 88, 24.9%) · 09-14 07:00 438 (instr 112, 25.6%)
+  duplication (open, title): pairs sharing >=4 significant words OR a file path = 67 · clusters 31 · tickets in any cluster 88 of 380 · strong pairs (>=6 words or same path) 26 · largest clusters 6,6,5,5,5
+  follow-on proxy: of 55 closed instrument tickets, 46 are named by >=1 LATER ticket; later refs split instrument-titled 68 / non-instrument-titled 71; 32 of 55 have >=1 later NON-instrument ticket naming them
+
+## 7. MECHANISM EXISTENCE (grep of the tool named by the rows; count of matching lines, 0 = not found; positive controls are the non-zero rows in the same run)
+hooks/pretooluse_no_cd.sh: refuses leading 'cd'                                1
+hooks/pretooluse_no_cd.sh: 'git -C' outside WEDNESDAY + write verb             4
+hooks/pathguard.py: 'cp' in the write-verb list (source-as-target false positive) 1
+cockpit/dead_banner_check.sh wired in wake_watch.sh                            2
+cockpit/dead_banner_check.sh wired in wednesday_rotate.sh                      2
+fleet/send_brief.sh: placeholder gate @UPPER@                                  2
+fleet/send_brief.sh: card_id_gate                                              2
+fleet/send_brief.sh: undelivered-rulings gate                                  13
+fleet/send_brief.sh: HOLDS bare 'nothing else' refusal (09-09 w=4)             0
+fleet/send_brief.sh: universal-negative refusal (09-08)                        0
+fleet/send_brief.sh: SELF-CHECK vs mtime (09-06)                               0
+fleet/send_brief.sh: --tap after send (09-06)                                  0
+fleet/send_brief.sh: SUPERSEDES sequencing check (09-05)                       0
+fleet/send_brief.sh: 'scope:' clause for queued ids (09-05)                    0
+fleet/send_brief.sh: 'pending Kam' authority line (09-03)                      0
+fleet/send_brief.sh: predicted-by column (09-13)                               0
+qa-agent/BRIEF_TEMPLATE.md: predicted-by column (09-13)                        0
+qa-agent/gen_launcher_from_template.py: §4 control tokens grepped at head (09-13) 0
+0
+tools/decision_queue.sh: --delivered (09-06)                                   35
+tools/decision_queue.sh: arrow/means→INCIDENT refusal (09-07)                  0
+fleet/inbox_digest.sh: --inbound (09-06)                                       5
+cockpit/pane_close.sh: spinner-glyph refusal (09-06)                           0
+cockpit/wake_watch.sh: 'Do you want to proceed' idle leg (09-02)               0
+fleet/board_watch_peter.sh: corpus line (09-01)                                0
+hooks/pre-commit: backtick-in-heredoc refusal (09-01)                          0
+tools/safe_push.sh: dirty-after-commit refusal (09-08)                         0
