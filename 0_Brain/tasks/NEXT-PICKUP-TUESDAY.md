@@ -58,7 +58,7 @@ supersede: replace WHOLESALE at the next pickup; never append.
        - m4/CI-m1/p1/DB-p1 → BACKLOG.
      - Kam told on the panel.
      - **NEXT after S43's fix round:** ONE delta tier-1 gate on `09c1591..<fix head>` (Q + W + fixes). Push only on GO + Tuesday's word.
-     - **OWED (not done by s12):** score gates A/B/C (each ~1.00: controls, resumed cleanly, honest NOT-TESTED) and the builder round (S41/S42/S43 merge seat, combined NO GO on C's Majors) on `projects_index/scoreboard.md`.
+     - **SCORED by s12 18:5x** (scoreboard rows at top): A/B/C 1.00 each; merge seats S41→S42 0.70. ~~OWED: score gates A/B/C (each ~1.00: controls, resumed cleanly, honest NOT-TESTED) and the builder round (S41/S42/S43 merge seat, combined NO GO on C's Majors) on `projects_index/scoreboard.md`.~~ S43's round is scored at its own verdict.
 
    - **UPDATE 18:4x (s12, ctx 70%):**
      - **Gate C VERDICT 08:30:21Z (DKIM pass; report 321 lines, 0 placeholders) = WP5 NO GO 0/3/5/4 · WP6 NO GO 0/1/3/4.**
