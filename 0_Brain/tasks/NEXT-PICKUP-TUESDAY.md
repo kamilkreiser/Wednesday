@@ -66,6 +66,16 @@ supersede: replace WHOLESALE at the next pickup; never append.
 - Questions s12 answered: 18:13:30 (live site link for the harness), 18:49:22 (where HPSM is at), 18:52:15 (harness updated for the live site?).
 - Times come from the transcripts. Where s12's pickup or the prompt log differ (18:5x, 18:38, 18:52, 19:14), the transcript time is used.
 
+## ✅ 20:50 — LIVE GATE FIX b-tight APPLIED AND HOLDING since 10:49:58Z (S44 REPORT 10:51:00Z, DKIM pass, read whole)
+- **Public URL checks:** `browser-gate-check.mjs` PASS (sign-in, /api/dashboard 200, stayed signed in, one engagement opened); curl set 26/26 as expected with no credentials (everything 401 Basic except /api/dashboard and /api/tenants 401 Bearer; /api/healthz/ 404); smoke OK. Live Composer unchanged at caf63fd.
+- **Rollback source:** `/opt/hpsm/Caddyfile.pre-s43-20260913T104751Z` (the original; S44 confirming both backup hashes in its next STATUS).
+- **S44 OWN MISS:** the first apply 10:47:52Z worked, but its probe script mis-scored every row (`grep -c … || echo 0` gives "0\n0"), so it ROLLED BACK at 10:48:06Z per procedure. The instrument was fixed and proven against the rolled-back live gate (3 FAIL exactly on the rows b-tight changes), then re-applied under the same GO. The public browser check ran without the docker lock (a stated exception). **Score this at the round's verdict** (the procedure worked; the instrument was not proven before it was armed).
+- **Kam told on the panel ~20:52:** use A/B, avoid the old engagements, known issues (release confirmation flash; discovery not required).
+- **NEXT:**
+  - (1) The live-half re-run of the acceptance gate is being DRAFTED by a subagent into the s13 scratchpad (`qa-live-delta/`). **Launch it only AFTER S44's step-6 upgrade REPORT** (that upgrade restarts the site and changes the live head). Re-point its head to the upgraded head, copy it into `2_Project_Files/fleet/qa-agent/`, commit, `--check`, then `cockpit.sh add 'QA/HPSM-LIVE'` + rung 5 (trap 47).
+  - (2) S44's upgrade head mail → warn Kam.
+- Kam's open question (should the harness document be emailed to his Datasec address?) is still unanswered.
+
 ## 🟢 20:4x — KAM GAVE GO ON b-tight (terminal, verbatim): *"You have my go-ahead on the live side fix and make sure that you include the credentials in the testing document harness."*
 - **KAM mail to S44 sent 10:45:04Z** (`briefs_staged/2026-09-13_hpsm-s44-kam-go-gate-b-tight.md`; tap `--mail` verified, prompt clear). Gate apply goes FIRST, ahead of step 6; head mail, then apply, public-URL browser check + curl set + smoke, report; rollback first on any failure. Panel receipt to Kam ~20:45. Prompt-logged.
 - **NEXT:** S44 head mail → short panel warning to Kam → REPORT → panel note "you can sign in; use Azure A 3bb6fcb2 / B a9101d3f" (verify at origin) → commission the live-half re-run of the acceptance gate.
