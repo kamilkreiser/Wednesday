@@ -1230,5 +1230,12 @@
   "project": "Datasec",
   "ts": "2026-09-13T18:15:20.477761+10:00",
   "text": "Kam, the live HPSM demo is at hpsm-composer-demo, australia east, cloud app, azure dot com. The full link is in the terminal. Every page asks for a username and password, and they're in the HPSM project's credentials folder, in the file named hpsm-demo-site.\n\nAs written now, the testing harness builds its own private copy of the same code on this machine and tests that, so it can attack it hard without touching your demo. It does not visit the live site. Also, after the upgrade you just approved, the live site will run newer code than the version the harness is set to test.\n\nOne question: should the harness also test the live site? My recommendation: outside checks only, meaning certificate, password prompt on every page, and headers, with no sign-in. Anything that signs in or creates data could disturb what you show on Monday. If I don't hear back, it stays off."
+ },
+ {
+  "role": "wednesday",
+  "seat": "Kamils-Mac-mini.localdomain",
+  "project": "Datasec",
+  "ts": "2026-09-13T18:20:05.733510+10:00",
+  "text": "Received, Kam. I'm revising the testing harness to test the live site.\n\nHow I'm scoping it, and tell me if you want it different. On the live site, the testing agent signs in with the demo login but only ever works inside its own clearly named QA test tenant. It never touches your demo customer or the fresh engagements the upgrade creates for Monday. It walks the delivery flows and runs the security checks that are safe on a live server, one request at a time with strict limits. It stops at once if the site starts to struggle.\n\nThe heavy tests stay on a private copy on this machine: database isolation, audit tampering, flooding and code scanning. Running those live could break your demo.\n\nIt will run once the upgrade you approved has landed, so it tests the version you'll show on Monday."
  }
 ]
