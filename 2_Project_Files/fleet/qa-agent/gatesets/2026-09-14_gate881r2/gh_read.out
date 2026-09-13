@@ -1,0 +1,125 @@
+/Volumes/DevMASTER/WEDNESDAY/2_Project_Files/fleet/qa-agent/gatesets/2026-09-14_gate881r2/gh_read.py:29: DeprecationWarning: datetime.datetime.utcnow() is deprecated and scheduled for removal in a future version. Use timezone-aware objects to represent datetimes in UTC: datetime.datetime.now(datetime.UTC).
+  print('read at', datetime.datetime.now().astimezone().strftime('%Y-%m-%d %H:%M:%S %Z'), '/', datetime.datetime.utcnow().strftime('%H:%M:%SZ'))
+read at 2026-09-14 07:15:21 AEST / 21:15:21Z
+classifier positive control: {'array': 1, 'prep': 1, 'email': 0, 'mention': 1, 'other': 1}
+PR #881: state=open draft=False merged=False author=kksecura base=develop@8861e6216 head=8ac9db66f6fd0d751f74ecc95bb314210a31ec52 branch=feature/ks-798-the-consent-page-posts-the-redirect-uri-in-the-client_id commits=5 files=6 +1095 -24 mergeable=True/blocked created=2026-09-06T15:08:52Z updated=2026-09-13T13:41:08Z title='OAuth consent cluster: KS-798 (client_id) · KS-841 (PKCE guard) · KS-799 (CSRF submit)'
+body chars=14486 at-signs=0 classes={'array': 0, 'prep': 0, 'email': 0, 'mention': 0, 'other': 0}
+KS ids in body: ['KS-781', 'KS-798', 'KS-799', 'KS-804', 'KS-822', 'KS-841']
+PR refs in body: ['#812']
+headings: ['## KS-798 — the consent page posts the real client_id, not the redirect URI', '### What was wrong', '### The fix (3 lines of behaviour)', '### Test Evidence', '## Also resolves KS-841 — public-app consent form posts itself back', '## Also resolves KS-799 — consent page submits under CSRF without exempting the path (Option 2)', '## Round 2 — KS-799 delivery vehicle (answers the CHANGES_REQUESTED review of 2026-09-08)', '### Test Evidence (round 2)']
+  body count 'Round 2': 1
+  body count 'round 2': 1
+  body count 's212': 0
+  body count '8ac9db66f': 2
+  body count 'ffcea35cb': 1
+  body count '787771b97': 7
+  body count '8861e6216': 1
+  body count 'consent.js': 4
+  body count 'CONSENT_SUBMIT_SCRIPT': 1
+  body count '<script src': 5
+  body count 'inline': 11
+  body count 'nonce': 3
+  body count 'helmet': 5
+  body count 'script-src': 8
+  body count 'nginx': 5
+  body count 'jsdom': 7
+  body count '4 failed': 1
+  body count '8 passed': 1
+  body count '12': 4
+  body count '24/24': 0
+  body count '703': 1
+  body count '613': 1
+  body count '54/703': 0
+  body count '47/613': 0
+  body count 'T1': 1
+  body count 'T2': 1
+  body count 'T3': 1
+  body count '3/3/2': 0
+  body count 'audit:gate': 2
+  body count 'audit:locks': 1
+  body count 'NOT run': 2
+  body count 'Not covered': 0
+  body count 'Migrations': 2
+  body count 'CORS_ORIGINS': 3
+  body count 'OpenAPI': 2
+  body count 'allowedHeaders': 1
+  body count 'Playwright': 3
+  body count 'KS-799': 6
+  body count 'KS-798': 4
+  body count 'KS-841': 6
+  body count 'KS-781': 2
+  body count 'KS-245': 0
+  body count 'KS-797': 0
+  body count 'KS-804': 1
+  body count 'KS-822': 1
+  body count 'KS-1003': 0
+  body count 'KS-1139': 0
+  body count 'KS-1135': 0
+  body count 'KS-1138': 0
+  file modified  +14 -21 sha=5e390443f Blockchain/Dev/services/auth/src/__tests__/ks781-n1-empty-mfacode-treated-as-absent.test.ts
+  file added     +201 -0 sha=d5143dc3f Blockchain/Dev/services/auth/src/__tests__/ks798-consent-form-client-id.test.ts
+  file added     +164 -0 sha=a83594c38 Blockchain/Dev/services/auth/src/__tests__/ks799-consent-form-csrf-submit.test.ts
+  file added     +414 -0 sha=995ee34ce Blockchain/Dev/services/auth/src/__tests__/ks799-consent-script-csp-and-execution.test.ts
+  file added     +152 -0 sha=380ea51a4 Blockchain/Dev/services/auth/src/__tests__/ks841-consent-form-pkce-and-client-id.test.ts
+  file modified  +150 -3 sha=ffb573842 Blockchain/Dev/services/auth/src/routes/oauth.ts
+  commit ebd51f7d859273e45b845c32e1cd7a83a4828f7e parents=['306d0db92'] Kam Kreiser <kamil.kreiser@secuura.ai> 2026-09-06T15:07:19Z tree=6b44fff5f subj='KS-798: consent page posts the real client_id, not the redirect URI'
+  commit 24f1c00ce3e6fb158f8e9ade3edfde8305aa6585 parents=['ebd51f7d8'] Kam Kreiser <kamil.kreiser@secuura.ai> 2026-09-06T15:14:25Z tree=2b73b9e20 subj='KS-841: regression guard — public-app consent form posts itself back'
+  commit 787771b97e745a527639241dbad9d164a65325c7 parents=['24f1c00ce'] Kam Kreiser <kamil.kreiser@secuura.ai> 2026-09-06T15:28:05Z tree=ad984bb3d subj='KS-799: consent page submits under CSRF without exempting the path (Option 2)'
+  commit ffcea35cb7c478bdc9d9f32e8232251c15d3300e parents=['787771b97'] Kam Kreiser <kamil.kreiser@secuura.ai> 2026-09-13T13:26:39Z tree=12dd42b2e subj='KS-799 round 2: the consent submit script is an external same-origin resource, so the CSP the browser receives admits it'
+  commit 8ac9db66f6fd0d751f74ecc95bb314210a31ec52 parents=['ffcea35cb', '8861e6216'] Kam Kreiser <kamil.kreiser@secuura.ai> 2026-09-13T13:32:33Z tree=136e6c8cc subj="Merge remote-tracking branch 'origin/develop' into HEAD"
+  message ffcea35cb: KS ids ['KS-799'] PR refs ['#881'] at-signs 1 {'array': 0, 'prep': 0, 'email': 0, 'mention': 0, 'other': 1} chars 4160 lines 62
+  message 8ac9db66f: KS ids [] PR refs [] at-signs 0 {'array': 0, 'prep': 0, 'email': 0, 'mention': 0, 'other': 0} chars 55 lines 1
+reviews: 1
+  review 5140256072 PeterObeden CHANGES_REQUESTED commit=787771b97e745a527639241dbad9d164a65325c7 at=2026-09-08T10:00:43Z chars=1443 at-signs=0
+review comments: 0
+  issue comment 5560125575 linear[bot] 2026-09-06T15:08:55Z chars=8216 at-signs=0 classes={'array': 0, 'prep': 0, 'email': 0, 'mention': 0, 'other': 0} KS=['KS-439', 'KS-781', 'KS-782', 'KS-798', 'KS-799', 'KS-822', 'KS-841'] head-mention=False fix=False r1=False
+  issue comment 5583115315 PeterObeden 2026-09-08T09:53:31Z chars=11080 at-signs=0 classes={'array': 0, 'prep': 0, 'email': 0, 'mention': 0, 'other': 0} KS=['KS-245', 'KS-781', 'KS-798', 'KS-799', 'KS-841'] head-mention=False fix=False r1=False
+  issue comment 5653634628 kksecura 2026-09-13T13:41:07Z chars=5688 at-signs=0 classes={'array': 0, 'prep': 0, 'email': 0, 'mention': 0, 'other': 0} KS=['KS-799'] head-mention=True fix=True r1=True
+compare develop...head: status=ahead merge_base=8861e62161466c40f08d2b10a30edeb203123993 ahead=5 behind=0 files=6
+  cmp file modified  +14 -21 sha=5e390443f Blockchain/Dev/services/auth/src/__tests__/ks781-n1-empty-mfacode-treated-as-absent.test.ts
+  cmp file added     +201 -0 sha=d5143dc3f Blockchain/Dev/services/auth/src/__tests__/ks798-consent-form-client-id.test.ts
+  cmp file added     +164 -0 sha=a83594c38 Blockchain/Dev/services/auth/src/__tests__/ks799-consent-form-csrf-submit.test.ts
+  cmp file added     +414 -0 sha=995ee34ce Blockchain/Dev/services/auth/src/__tests__/ks799-consent-script-csp-and-execution.test.ts
+  cmp file added     +152 -0 sha=380ea51a4 Blockchain/Dev/services/auth/src/__tests__/ks841-consent-form-pkce-and-client-id.test.ts
+  cmp file modified  +150 -3 sha=ffb573842 Blockchain/Dev/services/auth/src/routes/oauth.ts
+compare r1...fix: status=ahead ahead=1 behind=0 commits=1 files=3
+  fix file modified  +21 -10 sha=a83594c38 Blockchain/Dev/services/auth/src/__tests__/ks799-consent-form-csrf-submit.test.ts changes=31
+  fix file added     +414 -0 sha=995ee34ce Blockchain/Dev/services/auth/src/__tests__/ks799-consent-script-csp-and-execution.test.ts changes=414
+  fix file modified  +105 -57 sha=ffb573842 Blockchain/Dev/services/auth/src/routes/oauth.ts changes=162
+compare r1...head: status=ahead ahead=214 behind=0 commits=214 files=300
+branches/develop now: 8861e62161466c40f08d2b10a30edeb203123993 2026-09-13T12:00:26Z 'KS-924 KS-901: the entrypoint corpus pins its contributing packages by name and compares SKIP as a set; the census follo'
+compare M18...develop-now: status=identical ahead=0 behind=0 files=0
+head commit: parents=['ffcea35cb7c478bdc9d9f32e8232251c15d3300e', '8861e62161466c40f08d2b10a30edeb203123993'] files=300 +53267 -9882
+fix commit: parents=['787771b97e745a527639241dbad9d164a65325c7'] files=3 +540 -67
+  fix-commit file modified  +21 -10 sha=a83594c38 Blockchain/Dev/services/auth/src/__tests__/ks799-consent-form-csrf-submit.test.ts
+  fix-commit file added     +414 -0 sha=995ee34ce Blockchain/Dev/services/auth/src/__tests__/ks799-consent-script-csp-and-execution.test.ts
+  fix-commit file modified  +105 -57 sha=ffb573842 Blockchain/Dev/services/auth/src/routes/oauth.ts
+  contents 8ac9db66f oauth.ts: blob=ffb573842 size=69496 sha256=11669c67e982213a lines=1389 ctrl=0 listen(=0 consent.js=4
+  contents 8ac9db66f ks799-consent-form-csrf-submit.test.ts: blob=a83594c38 size=9865 sha256=da8490dbdc8f1666 lines=164 ctrl=0 listen(=1 consent.js=3
+  contents 8ac9db66f ks799-consent-script-csp-and-execution.test.ts: blob=995ee34ce size=22640 sha256=75fd750616f520f9 lines=414 ctrl=0 listen(=1 consent.js=7
+  contents 8ac9db66f ks798-consent-form-client-id.test.ts: blob=d5143dc3f size=9023 sha256=d2df5fa2a12528f0 lines=201 ctrl=0 listen(=1 consent.js=0
+  contents 8ac9db66f ks841-consent-form-pkce-and-client-id.test.ts: blob=380ea51a4 size=8002 sha256=180f74d3024acb3a lines=152 ctrl=0 listen(=1 consent.js=0
+  contents 8ac9db66f ks781-n1-empty-mfacode-treated-as-absent.test.ts: blob=5e390443f size=13464 sha256=7e817327eb3dbaa5 lines=313 ctrl=0 listen(=1 consent.js=0
+  contents 8ac9db66f index.ts: blob=edabbf871 size=12509 sha256=5b75376a2bd29b8c lines=312 ctrl=0 listen(=1 consent.js=0
+  contents ffcea35cb oauth.ts: blob=ffb573842 size=69496 sha256=11669c67e982213a lines=1389 ctrl=0 listen(=0 consent.js=4
+  contents ffcea35cb ks799-consent-form-csrf-submit.test.ts: blob=a83594c38 size=9865 sha256=da8490dbdc8f1666 lines=164 ctrl=0 listen(=1 consent.js=3
+  contents ffcea35cb ks799-consent-script-csp-and-execution.test.ts: blob=995ee34ce size=22640 sha256=75fd750616f520f9 lines=414 ctrl=0 listen(=1 consent.js=7
+  contents ffcea35cb ks798-consent-form-client-id.test.ts: blob=d5143dc3f size=9023 sha256=d2df5fa2a12528f0 lines=201 ctrl=0 listen(=1 consent.js=0
+  contents ffcea35cb ks841-consent-form-pkce-and-client-id.test.ts: blob=380ea51a4 size=8002 sha256=180f74d3024acb3a lines=152 ctrl=0 listen(=1 consent.js=0
+  contents ffcea35cb ks781-n1-empty-mfacode-treated-as-absent.test.ts: blob=5e390443f size=13464 sha256=7e817327eb3dbaa5 lines=313 ctrl=0 listen(=1 consent.js=0
+  contents ffcea35cb index.ts: blob=edabbf871 size=12509 sha256=5b75376a2bd29b8c lines=312 ctrl=0 listen(=1 consent.js=0
+  contents 787771b97 oauth.ts: blob=01c2d320f size=66571 sha256=4416d681c5d5eefb lines=1341 ctrl=0 listen(=0 consent.js=0
+  contents 787771b97 ks799-consent-form-csrf-submit.test.ts: blob=08803feb2 size=9018 sha256=ec1cdc3861c914b3 lines=153 ctrl=0 listen(=1 consent.js=0
+  contents 787771b97 ks799-consent-script-csp-and-execution.test.ts: ABSENT (HTTP 404)
+  contents 787771b97 ks798-consent-form-client-id.test.ts: blob=d5143dc3f size=9023 sha256=d2df5fa2a12528f0 lines=201 ctrl=0 listen(=1 consent.js=0
+  contents 787771b97 ks841-consent-form-pkce-and-client-id.test.ts: blob=380ea51a4 size=8002 sha256=180f74d3024acb3a lines=152 ctrl=0 listen(=1 consent.js=0
+  contents 787771b97 ks781-n1-empty-mfacode-treated-as-absent.test.ts: blob=5e390443f size=13464 sha256=7e817327eb3dbaa5 lines=313 ctrl=0 listen(=1 consent.js=0
+  contents 787771b97 index.ts: blob=edabbf871 size=12509 sha256=5b75376a2bd29b8c lines=312 ctrl=0 listen(=1 consent.js=0
+  contents 8861e6216 oauth.ts: blob=4b03f555e size=61492 sha256=cc4f4ac0df1b3393 lines=1242 ctrl=0 listen(=0 consent.js=0
+  contents 8861e6216 ks799-consent-form-csrf-submit.test.ts: ABSENT (HTTP 404)
+  contents 8861e6216 ks799-consent-script-csp-and-execution.test.ts: ABSENT (HTTP 404)
+  contents 8861e6216 ks798-consent-form-client-id.test.ts: ABSENT (HTTP 404)
+  contents 8861e6216 ks841-consent-form-pkce-and-client-id.test.ts: ABSENT (HTTP 404)
+  contents 8861e6216 ks781-n1-empty-mfacode-treated-as-absent.test.ts: blob=5d5d490eb size=13806 sha256=e9212b7723da4d98 lines=320 ctrl=0 listen(=1 consent.js=0
+  contents 8861e6216 index.ts: blob=edabbf871 size=12509 sha256=5b75376a2bd29b8c lines=312 ctrl=0 listen(=1 consent.js=0
+done at 07:15:44 AEST

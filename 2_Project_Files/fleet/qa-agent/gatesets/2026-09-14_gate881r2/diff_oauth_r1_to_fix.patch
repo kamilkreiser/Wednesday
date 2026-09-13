@@ -1,0 +1,188 @@
+diff --git a/Blockchain/Dev/services/auth/src/routes/oauth.ts b/Blockchain/Dev/services/auth/src/routes/oauth.ts
+index 01c2d320f..ffb573842 100644
+--- a/Blockchain/Dev/services/auth/src/routes/oauth.ts
++++ b/Blockchain/Dev/services/auth/src/routes/oauth.ts
+@@ -7,6 +7,7 @@
+  *
+  * Endpoints:
+  *   GET  /api/oauth/authorize  — Start authorization (shows consent page)
++ *   GET  /api/oauth/consent.js — The consent page's submit script (KS-799 round 2)
+  *   POST /api/oauth/token      — Exchange code for tokens
+  *   POST /api/oauth/revoke     — Revoke a token
+  *   POST /api/oauth/apps       — Register an app
+@@ -526,6 +527,95 @@ oauthRouter.get('/authorize', async (req: Request, res: Response) => {
+ // POST /api/oauth/authorize — Process consent (login + approve)
+ // =============================================================================
+ 
++// =============================================================================
++// KS-799 (round 2) — the consent page's submit script, served as an EXTERNAL
++// same-origin resource.
++//
++// Round 1 rendered these bytes as an inline <script> inside generateConsentPage.
++// Peter's review of PR #881 measured what a browser actually receives on this
++// route: /api/oauth/* is proxied by the api-gateway; this service sets its own
++// Content-Security-Policy on every response (index.ts `app.use(helmet())` —
++// helmet's defaults are script-src 'self' and script-src-attr 'none'); and
++// http-proxy writes upstream headers with res.setHeader, which REPLACES the
++// gateway's deliberate 'unsafe-inline' (KS-245). So script-src as the browser
++// sees it is 'self' — the inline script was refused, no submit listener
++// attached, the native <form> POST went out without X-XSRF-TOKEN, and the page
++// landed back on the 403 CSRF_TOKEN_MISSING this ticket was filed to remove.
++//
++// Of the three vehicles Peter offered (per-request nonce · external same-origin
++// script · per-route CSP), only this one is admitted at EVERY layer without a
++// change outside this file: the production nginx gateway
++// (docker/nginx-gateway/nginx-production.conf) sends script-src 'self' too, and
++// browsers enforce the intersection of the policies they receive, so a nonce
++// minted here would still be refused there. 'self' admits a same-origin
++// <script src> everywhere; no CSP header is authored in a second place.
++//
++// The bytes below are the round-1 script, moved verbatim. They run inside the
++// consent page (see generateConsentPage), so the constraints that applied
++// inside the template literal still apply: no backticks, no dollar-brace.
++// Executed under test by ks799-consent-script-csp-and-execution.test.ts (jsdom
++// drives a real click through this script); admission by the response's own
++// CSP is asserted there too.
++// =============================================================================
++const CONSENT_SUBMIT_SCRIPT = `
++    (function () {
++      var form = document.getElementById('form');
++      var errorEl = document.getElementById('error');
++      if (!form) return;
++      var chosen = 'approve';
++      var btns = form.querySelectorAll('button[type="submit"]');
++      for (var i = 0; i < btns.length; i++) {
++        btns[i].addEventListener('click', function (e) { chosen = e.currentTarget.value || 'approve'; });
++      }
++      function readCookie(name) {
++        var parts = document.cookie ? document.cookie.split('; ') : [];
++        for (var j = 0; j < parts.length; j++) {
++          var eq = parts[j].indexOf('=');
++          if (eq > -1 && parts[j].slice(0, eq) === name) return decodeURIComponent(parts[j].slice(eq + 1));
++        }
++        return '';
++      }
++      function showError(msg) { errorEl.textContent = msg; errorEl.style.display = 'block'; }
++      form.addEventListener('submit', function (ev) {
++        ev.preventDefault();
++        var token = readCookie('XSRF-TOKEN');
++        if (!token) { showError('Your session could not be verified. Please reload this page and try again.'); return; }
++        var body = {};
++        new FormData(form).forEach(function (v, k) { body[k] = v; });
++        body.action = chosen;
++        fetch(form.getAttribute('action'), {
++          method: 'POST',
++          credentials: 'same-origin',
++          redirect: 'manual',
++          headers: {
++            'Content-Type': 'application/json',
++            'Accept': 'application/json',
++            'X-XSRF-TOKEN': token,
++            'X-Requested-With': 'XMLHttpRequest'
++          },
++          body: JSON.stringify(body)
++        }).then(function (res) {
++          return res.json().then(
++            function (d) { return { status: res.status, data: d }; },
++            function () { return { status: res.status, data: {} }; }
++          );
++        }).then(function (r) {
++          if (r.data && r.data.redirect) { window.location.assign(r.data.redirect); return; }
++          var err = r.data && r.data.error;
++          showError((err && (err.description || err.message)) || ('Request failed (' + r.status + ').'));
++        }).catch(function () { showError('Network error. Please try again.'); });
++      });
++    })();
++`;
++
++oauthRouter.get('/consent.js', (_req: Request, res: Response) => {
++  // helmet sets X-Content-Type-Options: nosniff, so the media type is
++  // load-bearing: a browser refuses to execute a script served as anything else.
++  res.setHeader('Content-Type', 'application/javascript; charset=utf-8');
++  res.setHeader('Cache-Control', 'no-store');
++  res.send(CONSENT_SUBMIT_SCRIPT);
++});
++
+ oauthRouter.post('/authorize', async (req: Request, res: Response) => {
+   try {
+     const {
+@@ -1274,64 +1364,22 @@ function generateConsentPage(params: {
+   <!--
+     KS-799: the gateway CSRF guard is double-submit-cookie and requires the
+     X-XSRF-TOKEN *header*, which a top-level <form> POST cannot set — so a native
+-    submit is refused 403 CSRF_TOKEN_MISSING. This script submits via fetch with
+-    the header read from the httpOnly:false XSRF-TOKEN cookie, keeping the CSRF
+-    choke point intact (no exemption, no CSRF-middleware change). The POST is
+-    application/json (authorize is NOT in the media-type form allow-list, KS-781),
+-    and the handler returns the redirect target as JSON for XHR callers because a
+-    fetch cannot follow the OAuth 302 to navigate the page. No backticks and no
+-    dollar-brace interpolation in here — this lives inside a template literal.
++    submit is refused 403 CSRF_TOKEN_MISSING. The submit script below posts via
++    fetch with the header read from the httpOnly:false XSRF-TOKEN cookie, keeping
++    the CSRF choke point intact (no exemption, no CSRF-middleware change).
++
++    Round 2 (Peter's review of PR #881): the script is EXTERNAL, not inline. This
++    service sets its own CSP on every response (index.ts: helmet defaults,
++    script-src 'self'), the api-gateway proxies /api/oauth/* and http-proxy's
++    setHeader replaces the gateway's 'unsafe-inline' with ours, and the production
++    nginx gateway sends script-src 'self' as well — browsers enforce the
++    intersection. An inline script element is therefore refused at every layer
++    and the page silently falls back to the native, headerless POST. A
++    same-origin external script (src attribute) is admitted by 'self' everywhere.
++    The bytes are served by GET /api/oauth/consent.js on this router
++    (CONSENT_SUBMIT_SCRIPT).
+   -->
+-  <script>
+-    (function () {
+-      var form = document.getElementById('form');
+-      var errorEl = document.getElementById('error');
+-      if (!form) return;
+-      var chosen = 'approve';
+-      var btns = form.querySelectorAll('button[type="submit"]');
+-      for (var i = 0; i < btns.length; i++) {
+-        btns[i].addEventListener('click', function (e) { chosen = e.currentTarget.value || 'approve'; });
+-      }
+-      function readCookie(name) {
+-        var parts = document.cookie ? document.cookie.split('; ') : [];
+-        for (var j = 0; j < parts.length; j++) {
+-          var eq = parts[j].indexOf('=');
+-          if (eq > -1 && parts[j].slice(0, eq) === name) return decodeURIComponent(parts[j].slice(eq + 1));
+-        }
+-        return '';
+-      }
+-      function showError(msg) { errorEl.textContent = msg; errorEl.style.display = 'block'; }
+-      form.addEventListener('submit', function (ev) {
+-        ev.preventDefault();
+-        var token = readCookie('XSRF-TOKEN');
+-        if (!token) { showError('Your session could not be verified. Please reload this page and try again.'); return; }
+-        var body = {};
+-        new FormData(form).forEach(function (v, k) { body[k] = v; });
+-        body.action = chosen;
+-        fetch(form.getAttribute('action'), {
+-          method: 'POST',
+-          credentials: 'same-origin',
+-          redirect: 'manual',
+-          headers: {
+-            'Content-Type': 'application/json',
+-            'Accept': 'application/json',
+-            'X-XSRF-TOKEN': token,
+-            'X-Requested-With': 'XMLHttpRequest'
+-          },
+-          body: JSON.stringify(body)
+-        }).then(function (res) {
+-          return res.json().then(
+-            function (d) { return { status: res.status, data: d }; },
+-            function () { return { status: res.status, data: {} }; }
+-          );
+-        }).then(function (r) {
+-          if (r.data && r.data.redirect) { window.location.assign(r.data.redirect); return; }
+-          var err = r.data && r.data.error;
+-          showError((err && (err.description || err.message)) || ('Request failed (' + r.status + ').'));
+-        }).catch(function () { showError('Network error. Please try again.'); });
+-      });
+-    })();
+-  </script>
++  <script src="/api/oauth/consent.js"></script>
+ </body>
+ </html>`;
+ }

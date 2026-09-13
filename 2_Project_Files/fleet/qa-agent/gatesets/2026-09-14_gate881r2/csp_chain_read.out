@@ -1,0 +1,62 @@
+== auth index.ts helmet line(s) at head
+15:import helmet from 'helmet';
+68:app.use(helmet());
+== auth index.ts: oauthRouter mount + express.json order
+16:import cookieParser from 'cookie-parser';
+32:import { oauthRouter } from './routes/oauth';
+69:app.use(cors({
+82:app.use(cookieParser());
+85:app.use(express.json({ limit: '10mb' }));
+89:// inspects `req.body`; on a form-encoded request `express.json()` leaves `req.body` as `{}`
+115:app.use('/api/oauth', oauthRouter);
+== nginx-production.conf script-src lines at head
+247:        add_header Content-Security-Policy "default-src 'self'; script-src 'self'; style-src-elem 'self' fonts.googleapis.com; style-src-attr 'unsafe-inline'; font-src 'self' fonts.gstatic.com; img-src 'self' data: https:; connect-src 'self' https://*.blockfrost.io https://*.cardanoscan.io wss:; frame-ancestors 'self'; base-uri 'self'; form-action 'self';" always;
+273:    #   - Removed `'unsafe-inline'` and `'unsafe-eval'` from script-src.
+281:    add_header Content-Security-Policy "default-src 'self'; script-src 'self'; style-src-elem 'self' fonts.googleapis.com; style-src-attr 'unsafe-inline'; font-src 'self' fonts.gstatic.com; img-src 'self' data: https:; connect-src 'self' https://*.blockfrost.io https://*.cardanoscan.io wss:; frame-ancestors 'self'; base-uri 'self'; form-action 'self';" always;
+== gateway index.ts 240-262
+// authoritative CSP layer — true on local, but Dev/Demo Container Apps expose
+// api-gateway directly with NO nginx in front, so no CSP was applied on cloud at
+// all. The gateway serves mostly JSON plus two self-contained HTML pages
+// (docs/extension-login.html — inline <script> + onclick; docs/developer-portal.html
+// — inline <style>) and Swagger UI (/api/docs, same-origin bundle + inline styles),
+// none of which load external resources — so 'unsafe-inline' for script/style (which
+// the inline handlers + Swagger need) with everything else locked to 'self' fits all
+// of them while still enforcing the meaningful directives (object-src 'none',
+// base-uri 'self', frame-ancestors 'none' — matching the X-Frame-Options: DENY below,
+// default-src 'self'). On local this layers with nginx's CSP on those two docs pages
+// (browser enforces the intersection — harmless); picking a single authoritative CSP
+// layer, and tightening these pages to nonces so 'unsafe-inline' can be dropped, are
+// follow-ups. crossOriginResourcePolicy stays cross-origin for the public verify routes.
+app.use(helmet({
+  contentSecurityPolicy: {
+    useDefaults: false,
+    directives: {
+      defaultSrc: ["'self'"],
+      scriptSrc: ["'self'", "'unsafe-inline'"],
+      styleSrc: ["'self'", "'unsafe-inline'"],
+      imgSrc: ["'self'", 'data:'],
+      fontSrc: ["'self'", 'data:'],
+      connectSrc: ["'self'"],
+== helmet + http-proxy-middleware versions (auth package.json, gateway package.json, root lock)
+11:    "test": "vitest"
+22:    "express": "^4.18.2",
+24:    "helmet": "^7.1.0",
+48:    "vitest": "^4.1.9"
+52:    "express": {
+19:    "helmet": "^7.1.0",
+20:    "http-proxy-middleware": "^2.0.7",
+14740:    "node_modules/helmet": {
+14741-      "version": "7.2.0",
+14742-      "license": "MIT",
+--
+14825:    "node_modules/http-proxy": {
+14826-      "version": "1.18.1",
+14827-      "license": "MIT",
+--
+14848:    "node_modules/http-proxy-middleware": {
+14849-      "version": "2.0.10",
+14850-      "resolved": "https://registry.npmjs.org/http-proxy-middleware/-/http-proxy-middleware-2.0.10.tgz",
+--
+15997:    "node_modules/jsdom": {
+15998-      "version": "29.1.1",
+15999-      "dev": true,

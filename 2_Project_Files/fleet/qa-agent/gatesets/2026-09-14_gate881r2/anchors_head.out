@@ -1,0 +1,68 @@
+== anchors at head (line: text)
+10: *   GET  /api/oauth/consent.js — The consent page's submit script (KS-799 round 2)
+78:  // form-backed SPA that posts its whole state, and a fix living in a `<script>`
+112://     302'd to an attacker-chosen URL (the QA pass's finding);
+113://   - with NO credentials at all, `action=deny` 302'd to an attacker-chosen URL
+137: * PUBLIC app with no `code_challenge` returned 302 with a code minted and
+448: * The gateway CSRF guard is double-submit-cookie: it requires the `X-XSRF-TOKEN`
+451: * httpOnly:false for exactly this). But a browser `fetch` cannot follow this 302
+453: * navigates itself; every other caller keeps the native 302.
+457: * a request without `X-Requested-With: XMLHttpRequest` behaves exactly as before,
+458: * which is why every existing authorize test still sees a 302. Error responses on
+462:  if ((req.get('x-requested-with') || '').toLowerCase() === 'xmlhttprequest') {
+463:    res.status(200).json({ success: true, redirect: url });
+466:  res.redirect(url);
+473:oauthRouter.get('/authorize', async (req: Request, res: Response) => {
+496:    const consentHtml = generateConsentPage({
+510:    res.setHeader('Content-Type', 'text/html');
+534:// Round 1 rendered these bytes as an inline <script> inside generateConsentPage.
+537:// Content-Security-Policy on every response (index.ts `app.use(helmet())` —
+538:// helmet's defaults are script-src 'self' and script-src-attr 'none'); and
+542:// attached, the native <form> POST went out without X-XSRF-TOKEN, and the page
+547:// change outside this file: the production nginx gateway
+548:// (docker/nginx-gateway/nginx-production.conf) sends script-src 'self' too, and
+551:// <script src> everywhere; no CSP header is authored in a second place.
+560:const CONSENT_SUBMIT_SCRIPT = `
+570:      function readCookie(name) {
+580:        ev.preventDefault();
+581:        var token = readCookie('XSRF-TOKEN');
+589:          redirect: 'manual',
+591:            'Content-Type': 'application/json',
+593:            'X-XSRF-TOKEN': token,
+594:            'X-Requested-With': 'XMLHttpRequest'
+603:          if (r.data && r.data.redirect) { window.location.assign(r.data.redirect); return; }
+611:oauthRouter.get('/consent.js', (_req: Request, res: Response) => {
+612:  // helmet sets X-Content-Type-Options: nosniff, so the media type is
+614:  res.setHeader('Content-Type', 'application/javascript; charset=utf-8');
+615:  res.setHeader('Cache-Control', 'no-store');
+616:  res.send(CONSENT_SUBMIT_SCRIPT);
+619:oauthRouter.post('/authorize', async (req: Request, res: Response) => {
+640:    // `302 -> https://evil.example.net/steal?error=access_denied&state=xyz`,
+697:    // valid credentials it minted a code for an unregistered client and 302'd it
+1251:function generateConsentPage(params: {
+1366:    X-XSRF-TOKEN *header*, which a top-level <form> POST cannot set — so a native
+1372:    service sets its own CSP on every response (index.ts: helmet defaults,
+1375:    nginx gateway sends script-src 'self' as well — browsers enforce the
+1379:    The bytes are served by GET /api/oauth/consent.js on this router
+1380:    (CONSENT_SUBMIT_SCRIPT).
+1382:  <script src="/api/oauth/consent.js"></script>
+
+== counts (grep -c -F)
+  1  oauthRouter.get('/consent.js'
+  3  CONSENT_SUBMIT_SCRIPT
+  1  'X-XSRF-TOKEN': token,
+  1  'X-Requested-With': 'XMLHttpRequest'
+  1  <script src="/api/oauth/consent.js"></script>
+  2  <script>
+  1  </script>
+  1  application/javascript; charset=utf-8
+  1  res.setHeader('Cache-Control', 'no-store');
+  1  res.send(CONSENT_SUBMIT_SCRIPT);
+  1  window.location.assign(r.data.redirect)
+  1  readCookie('XSRF-TOKEN')
+  1  ev.preventDefault();
+  1  res.setHeader('Content-Type', 'text/html')
+  2  generateConsentPage(
+  1  Content-Security-Policy
+  4  helmet
+  2  nonce

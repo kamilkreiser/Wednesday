@@ -1,0 +1,73 @@
+5,6c5,6
+< BRIEF="${QA980R2_BRIEF:-$WED/2_Project_Files/fleet/qa-agent/briefs/2026-09-13_secuura-980-ks924-901-tier2-r2.md}"
+< PROMPT_FILE="${QA980R2_PROMPT:-$WED/2_Project_Files/fleet/qa-agent/briefs/2026-09-13_secuura-980-ks924-901-tier2-r2.prompt.txt}"
+---
+> BRIEF="${QA881R2_BRIEF:-$WED/2_Project_Files/fleet/qa-agent/briefs/2026-09-14_secuura-881-ks798-841-799-tier1-r2.md}"
+> PROMPT_FILE="${QA881R2_PROMPT:-$WED/2_Project_Files/fleet/qa-agent/briefs/2026-09-14_secuura-881-ks798-841-799-tier1-r2.prompt.txt}"
+9,13c9,13
+< BRANCH='refs/heads/feature/ks-924-ks-901-entrypoint-corpus-presence-set-and-three-shapes'
+< HEAD_SHA="${QA980R2_HEAD:-103c235b4d2be54cc1ade65ed660f397cf03e997}"
+< MERGE_BASE='50b729d69c58474624508ed79d05c520dab22cc6'
+< DEVELOP_SHA='1c38077ba2aea5f4c4371c1b68796026dc577764'
+< REAL_BRIEF="$WED/2_Project_Files/fleet/qa-agent/briefs/2026-09-13_secuura-980-ks924-901-tier2-r2.md"
+---
+> BRANCH='refs/heads/feature/ks-798-the-consent-page-posts-the-redirect-uri-in-the-client_id'
+> HEAD_SHA="${QA881R2_HEAD:-8ac9db66f6fd0d751f74ecc95bb314210a31ec52}"
+> MERGE_BASE='8861e62161466c40f08d2b10a30edeb203123993'
+> DEVELOP_SHA='8861e62161466c40f08d2b10a30edeb203123993'
+> REAL_BRIEF="$WED/2_Project_Files/fleet/qa-agent/briefs/2026-09-14_secuura-881-ks798-841-799-tier1-r2.md"
+43c43
+<   DEV_NOTE="origin develop still $DEVELOP_SHA (M15, the develop this brief's 813/813 was written against; git ls-remote)"
+---
+>   DEV_NOTE="origin develop still $DEVELOP_SHA (M18, the develop this brief's 54/703 was written against and the head already contains; git ls-remote)"
+58,60c58,72
+< GUARDED = ["Blockchain/Dev/packages/shared/src/__tests__/entrypoint-corpus.test.ts",
+<            "Blockchain/Dev/packages/shared/src/__tests__/ks860-test-listeners-bind-loopback.test.ts",
+<            "Blockchain/Dev/packages/shared/"]
+---
+> GUARDED = ["Blockchain/Dev/services/auth/src/routes/oauth.ts",
+>            "Blockchain/Dev/services/auth/src/__tests__/ks799-consent-script-csp-and-execution.test.ts",
+>            "Blockchain/Dev/services/auth/src/__tests__/ks799-consent-form-csrf-submit.test.ts",
+>            "Blockchain/Dev/services/auth/src/__tests__/ks798-consent-form-client-id.test.ts",
+>            "Blockchain/Dev/services/auth/src/__tests__/ks841-consent-form-pkce-and-client-id.test.ts",
+>            "Blockchain/Dev/services/auth/src/__tests__/ks781-n1-empty-mfacode-treated-as-absent.test.ts",
+>            "Blockchain/Dev/services/auth/",
+>            "Blockchain/Dev/services/api-gateway/src/middleware/csrf.ts",
+>            "Blockchain/Dev/services/api-gateway/src/specRouteMap.ts",
+>            "Blockchain/Dev/services/api-gateway/src/index.ts",
+>            "Blockchain/Dev/services/api-gateway/src/routes/proxy.ts",
+>            "Blockchain/Dev/docker/nginx-gateway/nginx-production.conf",
+>            "Blockchain/Dev/docs/openapi/secuura-api.yaml",
+>            "Blockchain/Dev/packages/shared/src/__tests__/",
+>            "Blockchain/Dev/package-lock.json"]
+68c80
+<     DISJOINT*) DEV_NOTE="origin develop MOVED $DEVELOP_SHA -> $CUR_DEV: ${DEV_JUDGEMENT#DISJOINT } — disjoint from the guard's three paths (#980's file, the ks860 loopback guard file, the packages/shared/ prefix); the gate merges the then-current develop, re-states the delta by name and re-derives the ratio (brief items 1 and 2)" ;;
+---
+>     DISJOINT*) DEV_NOTE="origin develop MOVED $DEVELOP_SHA -> $CUR_DEV: ${DEV_JUDGEMENT#DISJOINT } — disjoint from the fifteen guarded paths (the six PR files, the services/auth/ prefix, the four gateway files, the nginx conf, the spec, the packages/shared tests prefix, the root lockfile); the gate merges the then-current develop, re-states the delta by name and re-derives the ratios (brief items 1, 2, 3, 7)" ;;
+74c86
+< grep -q 'TIER 2' "$BRIEF" && grep -q 'TIER 2' "$PROMPT_FILE" || { echo "REFUSING: brief and prompt disagree about the tier" >&2; exit 7; }
+---
+> grep -q 'TIER 1' "$BRIEF" && grep -q 'TIER 1' "$PROMPT_FILE" || { echo "REFUSING: brief and prompt disagree about the tier" >&2; exit 7; }
+88,90c100,103
+< R1_REPORT='/Volumes/DevMASTER/!CODING/Testing Agent MAIN/projects/secuura/reports/2026-09-13-ks924-901-980-9c620f890-tier2-r1/report.md'
+< grep -qF "$R1_REPORT" "$BRIEF" || { echo "REFUSING: brief does not name the round-1 report path (a gate cannot ask)" >&2; exit 19; }
+< [ -s "$R1_REPORT" ] || { echo "REFUSING: the round-1 report named by the brief is missing or empty: $R1_REPORT" >&2; exit 19; }
+---
+> R1_READ='/Volumes/DevMASTER/!CODING/Secuura/Blockchain/5_Project_History/2026-09-13_s212/item0/peter_comment_5583115315.md'
+> grep -qF "$R1_READ" "$BRIEF" && grep -qF '5140256072' "$BRIEF" \
+>   || { echo "REFUSING: brief does not name the round-1 READ (Peter's review 5140256072 and his comment 5583115315 on disk at $R1_READ) — there is no round-1 QA report for #881 and a gate cannot ask" >&2; exit 19; }
+> [ -s "$R1_READ" ] || { echo "REFUSING: the round-1 read named by the brief is missing or empty: $R1_READ" >&2; exit 19; }
+98c111
+<   echo "  brief and prompt agree on TIER 2 and ROUND 2"
+---
+>   echo "  brief and prompt agree on TIER 1 and ROUND 2"
+105c118,119
+<   echo "  brief names the round-1 report and it is present on disk"
+---
+>   echo "  brief names the round-1 read (Peter's review 5140256072 + comment 5583115315) and it is present on disk"
+>   echo "  (a real launch, not --check, additionally requires a TTY on stdin — exit 21)"
+109c123,124
+< [ -z "${QA980R2_BRIEF:-}${QA980R2_PROMPT:-}${QA980R2_HEAD:-}" ] || { echo "REFUSING: a launch with test overrides set" >&2; exit 16; }
+---
+> [ -t 0 ] || { echo "REFUSING: stdin is not a TTY — this launcher execs an interactive agent and must run in a pane (cockpit.sh add), never inside a Bash tool (a headless gate is invisible and dies with its caller; 2026-09-13 ledger)" >&2; exit 21; }
+> [ -z "${QA881R2_BRIEF:-}${QA881R2_PROMPT:-}${QA881R2_HEAD:-}" ] || { echo "REFUSING: a launch with test overrides set" >&2; exit 16; }

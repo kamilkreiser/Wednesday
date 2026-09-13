@@ -1,0 +1,62 @@
+diff --git a/Blockchain/Dev/services/auth/src/__tests__/ks799-consent-form-csrf-submit.test.ts b/Blockchain/Dev/services/auth/src/__tests__/ks799-consent-form-csrf-submit.test.ts
+index 08803feb2..a83594c38 100644
+--- a/Blockchain/Dev/services/auth/src/__tests__/ks799-consent-form-csrf-submit.test.ts
++++ b/Blockchain/Dev/services/auth/src/__tests__/ks799-consent-form-csrf-submit.test.ts
+@@ -79,7 +79,6 @@ vi.mock('../db', () => ({ query: vi.fn(async () => ({ rows: [] })) }));
+ 
+ let server: Server;
+ let base: string;
+-let generateConsentPage: (p: any) => string;
+ 
+ beforeAll(async () => {
+   const oauthModule = await import('../routes/oauth');
+@@ -107,20 +106,32 @@ const approveBody = { client_id: CLIENT_ID, redirect_uri: REDIRECT_URI, scope: '
+ const denyBody = { client_id: CLIENT_ID, redirect_uri: REDIRECT_URI, state: 'xyz', action: 'deny' };
+ 
+ describe('KS-799 — consent page CSRF-safe submit (Option 2)', () => {
+-  it('the rendered consent page carries the fetch-submit script (reads XSRF-TOKEN, sends the header, posts JSON)', async () => {
++  it('the rendered consent page references the fetch-submit script as an external same-origin resource, and that resource reads XSRF-TOKEN, sends the header, posts JSON', async () => {
++    // KS-799 round 2 (Peter's review of #881): the submit logic used to be an
++    // inline <script>, which the auth service's own CSP (helmet defaults,
++    // script-src 'self') refuses on the proxied route. It is now served by
++    // GET /api/oauth/consent.js and referenced by <script src>, which 'self'
++    // admits. Whether the CSP the browser receives admits every script on the
++    // page, and whether the script EXECUTES, are proven in
++    // ks799-consent-script-csp-and-execution.test.ts; this cell pins the wiring
++    // and the script's text.
+     const html = await (await fetch(authorizeGet())).text();
+-    expect(html).toContain("readCookie('XSRF-TOKEN')");         // reads the double-submit cookie
+-    expect(html).toContain("'X-XSRF-TOKEN': token");             // sends it as the required header
+-    expect(html).toContain("'X-Requested-With': 'XMLHttpRequest'"); // asks the handler for the JSON redirect
+-    expect(html).toContain("'Content-Type': 'application/json'"); // authorize is not form-allowed (KS-781)
+-    expect(html).toContain('window.location.assign');           // navigates the page itself
+-    expect(html).toContain("ev.preventDefault()");              // suppresses the native (headerless) POST
++    expect(html).toContain('<script src="/api/oauth/consent.js">');
++    const jsRes = await fetch(`${base}/api/oauth/consent.js`);
++    expect(jsRes.status).toBe(200);
++    const js = await jsRes.text();
++    expect(js).toContain("readCookie('XSRF-TOKEN')");         // reads the double-submit cookie
++    expect(js).toContain("'X-XSRF-TOKEN': token");             // sends it as the required header
++    expect(js).toContain("'X-Requested-With': 'XMLHttpRequest'"); // asks the handler for the JSON redirect
++    expect(js).toContain("'Content-Type': 'application/json'"); // authorize is not form-allowed (KS-781)
++    expect(js).toContain('window.location.assign');           // navigates the page itself
++    expect(js).toContain("ev.preventDefault()");              // suppresses the native (headerless) POST
+   });
+ 
+   it('APPROVE as XHR → 200 JSON carrying the redirect target with a code (fetch can act on it)', async () => {
+     const res = await postAuthorize(approveBody, true);
+     expect(res.status).toBe(200);
+-    const body = await res.json();
++    const body = (await res.json()) as { success: boolean; redirect: string };
+     expect(body.success).toBe(true);
+     expect(typeof body.redirect).toBe('string');
+     const u = new URL(body.redirect);
+@@ -132,7 +143,7 @@ describe('KS-799 — consent page CSRF-safe submit (Option 2)', () => {
+   it('DENY as XHR → 200 JSON carrying the redirect target with error=access_denied', async () => {
+     const res = await postAuthorize(denyBody, true);
+     expect(res.status).toBe(200);
+-    const body = await res.json();
++    const body = (await res.json()) as { success: boolean; redirect: string };
+     expect(body.success).toBe(true);
+     const u = new URL(body.redirect);
+     expect(u.searchParams.get('error')).toBe('access_denied');

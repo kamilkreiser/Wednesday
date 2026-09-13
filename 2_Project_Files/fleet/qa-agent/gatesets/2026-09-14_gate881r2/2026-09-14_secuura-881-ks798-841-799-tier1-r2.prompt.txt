@@ -1,0 +1,158 @@
+ultrathink
+
+You are the fleet QA agent running a TIER 1 gate (an auth surface: the OAuth consent page — through code AND live
+in your own Express apps: the product's real CSRF middleware, a real proxy front, jsdom driving the page), ROUND 2, on
+Secuura/Blockchain PR #881 (KS-798 / KS-841 / KS-799): the KS-799 delivery vehicle answered to Peter's
+CHANGES_REQUESTED review, plus origin develop M18 merged into the branch.
+
+Read your brief FIRST and in full, then plan:
+/Volumes/DevMASTER/WEDNESDAY/2_Project_Files/fleet/qa-agent/briefs/2026-09-14_secuura-881-ks798-841-799-tier1-r2.md
+
+Then read ROUND 1 WHOLE — there is NO round-1 QA report for #881; round 1 was Peter's human review (a gate cannot ask;
+everything he measured is in it), on disk byte-identical to the API bodies:
+/Volumes/DevMASTER/!CODING/Secuura/Blockchain/5_Project_History/2026-09-13_s212/item0/peter_comment_5583115315.md
+/Volumes/DevMASTER/!CODING/Secuura/Blockchain/5_Project_History/2026-09-13_s212/item0/peter_review_5140256072.md
+This is round 2 of the PR and round 1 of the tier-1 QA class: every leg is a first pass, not a delta re-read.
+
+Subject: 8ac9db66f6fd0d751f74ecc95bb314210a31ec52 = PR #881, open against develop, FIVE commits: Peter's head
+  787771b97 (KS-798 · KS-841 · KS-799, 2026-09-06) + the FIX ffcea35cb (parent 787771b97, THREE files: oauth.ts
+  +105 -57 blob 01c2d320f -> ffb573842; ks799-consent-script-csp-and-execution.test.ts NEW 414 lines blob 995ee34ce,
+  7 cells; ks799-consent-form-csrf-submit.test.ts +21 -10 blob 08803feb2 -> a83594c38, 5 cells) + the MERGE 8ac9db66f
+  (parents ffcea35cb + 8861e6216, tree 136e6c8cc = git merge-tree --write-tree 8861e6216 ffcea35cb EXACTLY — the
+  mechanical union, Wednesday's YES 13:33:35Z after the 09-07 branch's push was refused by its own stale audit legs).
+  develop = M18 8861e6216 (read 07:10 and 07:15 AEST 2026-09-14; unmoved) and it is an ANCESTOR of the head: the head
+  tree IS the merged tree; the PR onto develop is SIX files (the three above + ks798-*, ks841-*, ks781-n1-* — Peter's
+  signed-off bytes, blob-identical to 787771b97). No dependency, config, migration or schema change.
+  THE VEHICLE (Peter's option 2): the round-1 inline <script> (refused by script-src 'self' as the browser sees it —
+  helmet on the auth service; http-proxy's setHeader replaces the gateway's 'unsafe-inline'; nginx-production adds
+  script-src 'self' too) is now a module constant CONSENT_SUBMIT_SCRIPT (oauth.ts:560-609, the bytes moved verbatim)
+  served by GET /api/oauth/consent.js (:611-617: application/javascript; charset=utf-8, Cache-Control: no-store) and
+  the page carries <script src="/api/oauth/consent.js"></script> (:1382). The XHR fork (:461-467) is unchanged. No
+  CSP header authored, no CSRF exemption, index.ts untouched.
+  The launcher pins develop M18 with a DISJOINTNESS CHECK (exit 18 only if a later squash touches services/auth/, the
+  four gateway files, the spec, the nginx conf, packages/shared tests or the root lockfile) — if develop moved past M18
+  at launch and was judged disjoint, do a real 3-way merge of 8ac9db66f onto the tip in YOUR clone and run items 2, 3,
+  7 there too, naming both trees.
+
+The headline questions: (1) the delta is EXACTLY the three fix files on 787771b97 and the merge is the mechanical union
+  (tree-sha equality in your clone; the moved script bytes diff EMPTY against r1's inline body, whitespace normalised)
+  — item 1; (2) RED-FIRST in your clone: the final test bytes against r1's oauth.ts blob 01c2d320f ->
+  `Tests 4 failed | 8 passed (12)` with C1's message `script-src is ['self']; these <script> tags would be refused:
+  inline(…` (Peter's finding as an assertion that ran), C2 404, C4 0 requests, the text cell; the four C3 rows GREEN
+  (jsdom ignores CSP — the executing control); head bytes -> 12/12; the five PR files 5/24/24; the whole auth suite at
+  head 54/703 (the merged-tree number on M18) — item 2; (3) the tamper table SUITE RUNNING with predictions written
+  first: T1 inline shape restored -> 3 (C1, C4, text cell) · T2 the X-XSRF-TOKEN line -> 3 (C2, C3 happy, text cell) ·
+  T3 the XHR fork -> 2 (approve/deny XHR; the 302 controls hold) · Tg-A the script's Content-Type -> text/plain -> 1
+  (C2 ONLY — jsdom runs it anyway; a real browser under nosniff would not; C2 is the only pin) · Tg-B the tag gets
+  type="text/plain" -> 6 (C4 + the four C3 rows + the text cell; C1 and C2 GREEN — the admission cell is blind to a
+  script that never runs; the executing rows earn their cells) · Tg-C ev.preventDefault() removed -> 3 (C2, C3 happy
+  via the HTMLFormElement not-implemented error, text cell) · optional Tg-D the cookie name -> 5 (the no-cookie
+  CONTROL stays green) — count first, colours second, an unaimed red is a finding — item 3; (4) the LIVE legs in YOUR
+  Express apps — G1 the gateway's REAL createCsrfMiddleware (cross-package import from api-gateway/src/middleware/csrf;
+  never a copy) in front of the real router: GET sets XSRF-TOKEN (httpOnly false); the page's request shape (JSON +
+  cookie + X-XSRF-TOKEN + X-Requested-With + Origin) -> 200 {redirect}; without the header -> 403 CSRF_TOKEN_MISSING
+  (the original symptom); foreign Origin / origin not allowed -> 403 CSRF_ORIGIN_INVALID (Peter's #1 measured as a
+  mechanism — the CORS_ORIGINS deployment dependency, a Record); the native form shape -> 403 CSRF_TOKEN_MISSING;
+  mismatched header -> 403 CSRF_TOKEN_MISMATCH; G1-7 if budget: jsdom through the choke point with a forwarding fetch;
+  G2 the gateway's real specRouteMap + the head spec: /api/oauth/consent.js NOT matched (falls through — no 401/405),
+  controls /api/oauth/authorize matched with GET not authed; G3 the real router behind a real http-proxy-middleware
+  front carrying the gateway's CSP block: the proxied page's CSP is helmet's (script-src 'self', the gateway's
+  'unsafe-inline' REPLACED), consent.js 200 application/javascript + nosniff + no-store through the front, jsdom loads
+  the page at the FRONT's URL and the <script src> is fetched through the proxy, the click sends the two headers —
+  item 6, every cell with its FAIL condition first and its RAW values beside the verdict; (5) the widened-guard rule:
+  the full packages/shared suite at head (41 files, 0 failed; the ks860 loopback cell GREEN — the five PR test files
+  bind 127.0.0.1; develop-alone as the control), tsc rc 0, the two KS-799 test files type-checked, eslint one line,
+  audit:gate + audit:locks rc 0 — item 7; (6) Peter's review answered point by point (item 8), delivered-vs-
+  commissioned against the s212 brief + Wednesday's two ANSWERs (item 9), findings-only, Wednesday searches the board
+  by symbol, NOT TESTED at equal prominence (item 10).
+Records the brief pre-names (READ ONLY unless you measure them; not findings against #881 — Wednesday searches and
+  files): the consent page's inline <style> refused by nginx-production's style-src-elem 'self' (pre-existing,
+  cosmetic); CORS_ORIGINS / validateOrigin as a deployment prerequisite; the spec carries neither GET
+  /api/oauth/consent.js nor the 200 {redirect} XHR response (other lane's file by ruling); validateOrigin passes a
+  request with no Origin in non-production; Tg-A's "C2 is the only pin on the nosniff-load-bearing header".
+Repo:    /Volumes/DevMASTER/!CODING/Secuura/Blockchain/2_Project_Files  (READ-ONLY — clone by SHA into your own scratch
+  with --shared --no-checkout + detached worktrees at 8ac9db66f and at the develop you read; node_modules,
+  packages/shared/dist and packages/shared/node_modules symlink-farmed FROM worktrees/s212-ks799-r2 (the builder's,
+  detached at 8ac9db66f, porcelain 0, node_modules 985 entries, vitest 4.1.10), never into it, never vitest inside it;
+  prove require.resolve('jsdom') / ('helmet') from your clone's services/auth land in the farm; worktrees/s211-merge and
+  the three other s212-* worktrees — rev-parse only)
+
+You are FINDINGS-ONLY. You never fix, never merge, never push, never deploy, never comment, never file, never `@`.
+
+NEVER run a push, the real pre-push hook, or preflight.sh inside the Secuura checkout or any of its worktrees.
+
+NEVER print a credential value, and never open, read or copy a secrets file (any .env, config/secrets.yml). Count, never echo.
+
+NO docker, NO stack, no nginx, no kintsugi, no demo, no real browser. Nothing in this gate needs a credential or a login.
+
+Six things you must not miss:
+
+1. TWO FILE ARGUMENTS, SEPARATELY (item 3): the builder's first tamper run passed both KS-799 test paths as ONE quoted
+   argument under zsh — vitest printed `No test files found`, exited 1, printed NO `Tests` line, and the run measured
+   nothing. A run without a `Tests N failed | M passed (12)` line is INVALID; score nothing from it. Run suites SOLO;
+   cwd = <clone>/Blockchain/Dev/services/auth; `npx vitest run <fileA> <fileB>`, never watch.
+
+2. THE CHOKE POINT IS THE PRODUCT'S, NOT A COPY (item 6, G1): import createCsrfMiddleware from
+   <clone>/Blockchain/Dev/services/api-gateway/src/middleware/csrf (relative ../../../api-gateway/src/middleware/csrf
+   from your test file in services/auth/src/__tests__/). If the cross-package import does not resolve under auth's
+   vitest, quote the resolver's message and report G1 as NOT RUN with the blocker — never substitute a reproduction of
+   csrf.ts (a reproduction built from the mount list is more permissive than the product). Mount it yourself:
+   the gateway's index.ts mounts the CSRF pair only when NODE_ENV !== 'test', so the gateway's whole app under vitest
+   has NO choke point. NODE_ENV is `test`: send `Origin` explicitly on every G1 cell (validateOrigin passes a request
+   with no Origin in non-production — say so as a precision note). Your G-leg .test.ts lives under
+   services/auth/src/__tests__/ of YOUR clone, binds 127.0.0.1, and is QUARANTINED BY RENAME (.test.ts -> .qa881.txt)
+   before the packages/shared run — the ks860 guard walks it.
+
+3. RED-FIRST BY BLOB SWAP, RESTORE BY SHA (item 2): `git show 787771b97:<oauth.ts path>` into the head worktree's
+   working copy only (never staged; sha256 4416d681c5d5eefb… asserted, 1,341 lines); run the two files; quote C1's
+   message verbatim; restore the head bytes (11669c67e982213a…, 1,389 lines; `git diff` empty) -> 12/12. A red that
+   arrives as a timeout, an import throw or a 0-test run is a LOAD failure, not a red.
+
+4. READ WHY EACH TAMPER RED IS RED (item 3): Tg-B's reds must be `until(...)` returning false (AssertionError
+   `expected false to be true`), NOT `page load timed out` — a timeout is the harness failing to happen; Tg-C's C3
+   happy red must be the `:363` HTMLFormElement filter, not a missing fetch; Tg-A must leave EVERY C3 row green (jsdom
+   executes an external script whatever its content-type — HTMLScriptElement-impl.js:83 reads it for charset only) —
+   if a C3 row reds under Tg-A, the brief's read of jsdom is wrong: say so. The no-cookie CONTROL reddens under Tg-B by
+   design (no script runs) and must NOT redden under T2/Tg-C/Tg-D. Assert every tamper LANDED (grep the marker; cmp
+   against the pristine copy) before believing its run.
+
+5. THE MERGE IS THE UNION (item 1): `git merge-tree --write-tree 8861e6216 ffcea35cb` in YOUR clone (a write verb — the
+   pre-tool hook refuses it inside the Secuura checkout) must print 136e6c8ccce47c0787d71398dd41010298ac8e17 =
+   `git rev-parse 8ac9db66f^{tree}`; control: with 787771b97 instead -> b78c33c39… (different). The 448-file
+   `git diff ffcea35cb 8ac9db66f` is develop's side, NOT this PR's — name which diff every count comes from.
+
+6. THE FIVE CONTROLS THAT MUST STAY GREEN: the two BACKWARD-COMPAT 302 rows (the fork is real), C3 (control, no
+   cookie) except under Tg-B, KS-798's / KS-841's / KS-781-n1's files (Peter's signed-off bytes, blob-identical —
+   controls, not re-gated), and the develop-alone runs (auth suite; packages/shared) — the instrument that discriminates
+   "this PR" from "develop".
+
+Your tool shell's grep may be a function: use /usr/bin/grep with a same-file control; -F for the anchors. Never cd in
+your own tool calls; the pre-tool hook refuses `git worktree` / `merge-tree` in the Secuura checkout — clone into your
+scratch and run write verbs THERE. A REAL checkout of the whole Blockchain/Dev, not a symlink farm of source (the ks860
+and corpus walks skip symlinked directories). Keep every scratch of yours OUT of <pkg>/src (the corpus walks it) except
+the one G-leg test file, quarantined before item 7. /bin/bash here is 3.2 — write runners in Python. zsh: no PIPESTATUS
+(`cmd > out 2>&1; rc=$?`), no timeout on macOS.
+Quote the Secuura checkout's porcelain count, .git/config sha256, for-each-ref count, origin develop SHA, refs/pull/881/head
+and the branch at start and close; they must match (name any ref another seat's push or merge moved). Confirm
+worktrees/s212-ks799-r2 is byte-identical at start and close (porcelain 0 both times); read worktrees/s211-merge and
+the other s212-* worktrees by rev-parse HEAD only.
+Never `rm`: fresh mktemp -d per attempt; quarantine probes by rename.
+Do no memory maintenance of your own project's memory store inside this session.
+
+Report FOUND / TESTED / HOW, with controls; the delta and the merge-tree equality; the RED-FIRST pair (4/8 with C1's
+message · 12/12); the five-file and whole-suite counts with the tree named; the tamper table (T1, T2, T3, Tg-A, Tg-B,
+Tg-C, optional Tg-D) with cells-run and the decisive message beside every red; G1 (six cells + G1-7 if run), G2, G3
+with raw statuses/headers; the packages/shared run at head with the ks860 cell named green; Peter's review answered
+point by point; the DELIVERED-vs-COMMISSIONED table; the Records with their evidence class and symbol; and state what
+you did NOT test at the same prominence as the findings.
+Verdict: GO, GO WITH FINDINGS, or NO GO — on 8ac9db66f, against the develop it contains (M18 8861e6216, or the tip you
+merged onto — name it). Say what ships and what is ticketed (symbol/path); give the merge seat its ADDENDUM line:
+"merge 8ac9db66f6fd0d751f74ecc95bb314210a31ec52 onto develop (independent; first of s212's four); expected
+services/auth = develop's count + this PR's cells (703 on M18), 0 failed; packages/shared = develop's count + 0, 0 failed".
+
+MAIL YOUR VERDICT to wednesday-agent@agentmail.to when the pass is complete, using
+the project's send_brief.sh. Your pane holds ~19 lines of alternate screen with no
+scrollback, so a verdict that stays in the pane is one pane-close from being lost --
+this is not a formality, it is the only durable copy. The mail IS the wait signal;
+write no mail-subject.txt. Subject:
+[QA -> Wednesday] TIER 1 GATE #881 ROUND 2 (KS-798 KS-841 KS-799) 8ac9db66f -- <GO|GO WITH FINDINGS|NO GO>

@@ -1,0 +1,68 @@
+== log -3 head
+8ac9db66f6fd0d751f74ecc95bb314210a31ec52
+parents ffcea35cb7c478bdc9d9f32e8232251c15d3300e 8861e62161466c40f08d2b10a30edeb203123993
+tree 136e6c8ccce47c0787d71398dd41010298ac8e17
+author Kam Kreiser <kamil.kreiser@secuura.ai> 2026-09-13 23:32:33 +1000
+subject Merge remote-tracking branch 'origin/develop' into HEAD
+---
+ffcea35cb7c478bdc9d9f32e8232251c15d3300e
+parents 787771b97e745a527639241dbad9d164a65325c7
+tree 12dd42b2ebd6a28a1e727a09355d4e04e3e77ef1
+author Kam Kreiser <kamil.kreiser@secuura.ai> 2026-09-13 23:26:39 +1000
+subject KS-799 round 2: the consent submit script is an external same-origin resource, so the CSP the browser receives admits it
+---
+8861e62161466c40f08d2b10a30edeb203123993
+parents a4ef481c897265ae01936ad10d84d547d95557d2
+tree 6ae01e16f90dc02b504f3bbd13542a7efd1f66de
+author kksecura <kamil.kreiser@secuura.ai> 2026-09-13 22:00:26 +1000
+subject KS-924 KS-901: the entrypoint corpus pins its contributing packages by name and compares SKIP as a set; the census follows three more express-binding shapes (#980)
+---
+== merge-base head develop
+8861e62161466c40f08d2b10a30edeb203123993
+== merge-base 787771b97 develop
+306d0db923183f3b62b053f0242549e37bdf362c
+== rev-list --left-right --count develop...head
+0	5
+== rev-list --left-right --count develop...787771b97
+212	3
+== is develop ancestor of head?
+rc=0
+== three-dot diff --stat develop...head (= merge-base(develop,head)..head)
+ ...s781-n1-empty-mfacode-treated-as-absent.test.ts |  35 +-
+ .../__tests__/ks798-consent-form-client-id.test.ts | 201 ++++++++++
+ .../ks799-consent-form-csrf-submit.test.ts         | 164 ++++++++
+ .../ks799-consent-script-csp-and-execution.test.ts | 414 +++++++++++++++++++++
+ .../ks841-consent-form-pkce-and-client-id.test.ts  | 152 ++++++++
+ Blockchain/Dev/services/auth/src/routes/oauth.ts   | 153 +++++++-
+ 6 files changed, 1095 insertions(+), 24 deletions(-)
+== diff --numstat develop...head
+14	21	Blockchain/Dev/services/auth/src/__tests__/ks781-n1-empty-mfacode-treated-as-absent.test.ts
+201	0	Blockchain/Dev/services/auth/src/__tests__/ks798-consent-form-client-id.test.ts
+164	0	Blockchain/Dev/services/auth/src/__tests__/ks799-consent-form-csrf-submit.test.ts
+414	0	Blockchain/Dev/services/auth/src/__tests__/ks799-consent-script-csp-and-execution.test.ts
+152	0	Blockchain/Dev/services/auth/src/__tests__/ks841-consent-form-pkce-and-client-id.test.ts
+150	3	Blockchain/Dev/services/auth/src/routes/oauth.ts
+== diff --numstat 787771b97 ffcea35cb (the fix commit)
+21	10	Blockchain/Dev/services/auth/src/__tests__/ks799-consent-form-csrf-submit.test.ts
+414	0	Blockchain/Dev/services/auth/src/__tests__/ks799-consent-script-csp-and-execution.test.ts
+105	57	Blockchain/Dev/services/auth/src/routes/oauth.ts
+== diff --name-status 787771b97 ffcea35cb
+M	Blockchain/Dev/services/auth/src/__tests__/ks799-consent-form-csrf-submit.test.ts
+A	Blockchain/Dev/services/auth/src/__tests__/ks799-consent-script-csp-and-execution.test.ts
+M	Blockchain/Dev/services/auth/src/routes/oauth.ts
+== diff --numstat ffcea35cb 8ac9db66f (the merge commit vs its first parent)
+     448
+== diff --numstat 8861e6216 8ac9db66f (merge vs develop = what the PR adds to develop)
+14	21	Blockchain/Dev/services/auth/src/__tests__/ks781-n1-empty-mfacode-treated-as-absent.test.ts
+201	0	Blockchain/Dev/services/auth/src/__tests__/ks798-consent-form-client-id.test.ts
+164	0	Blockchain/Dev/services/auth/src/__tests__/ks799-consent-form-csrf-submit.test.ts
+414	0	Blockchain/Dev/services/auth/src/__tests__/ks799-consent-script-csp-and-execution.test.ts
+152	0	Blockchain/Dev/services/auth/src/__tests__/ks841-consent-form-pkce-and-client-id.test.ts
+150	3	Blockchain/Dev/services/auth/src/routes/oauth.ts
+== diff --stat 306d0db92 787771b97 (round 1's PR diff)
+ ...s781-n1-empty-mfacode-treated-as-absent.test.ts |  35 ++--
+ .../__tests__/ks798-consent-form-client-id.test.ts | 201 +++++++++++++++++++++
+ .../ks799-consent-form-csrf-submit.test.ts         | 153 ++++++++++++++++
+ .../ks841-consent-form-pkce-and-client-id.test.ts  | 152 ++++++++++++++++
+ Blockchain/Dev/services/auth/src/routes/oauth.ts   | 105 ++++++++++-
+ 5 files changed, 622 insertions(+), 24 deletions(-)
