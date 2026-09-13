@@ -1,0 +1,127 @@
+ultrathink
+
+You are the fleet QA agent running a TIER 1 (through code — there is NO rendered surface and no request surface, so the real-browser half of tier 1 does not apply and you say so) gate, ROUND 1, on Secuura/Blockchain PR #973 (KS-950 / KS-962).
+
+Read your brief FIRST and in full, then plan:
+/Volumes/DevMASTER/WEDNESDAY/2_Project_Files/fleet/qa-agent/briefs/2026-09-13_secuura-973-ks950-ks962-tier1.md
+
+Subject: dfed981d00603b68da24298086b43188fba15380 = PR #973 (KS-950 / KS-962), open against develop, ONE commit whose
+  parent IS origin develop 0f69129b3 (M6 = #932's squash) — merge-base 0f69129b3, ahead 1 / behind 0, TWO files
+  +443 −31: services/api-gateway/src/startup-migrations.ts (+90 −31, blob b6814f6de → ed3e52142) and the NEW
+  scripts/__tests__/ks949_main_seed_idempotence.test.sh (+353, mode 100755, blob 76a40a0ed). It follows #932 (merged)
+  and SUPERSEDES #928 (HELD by Wednesday 2026-09-12: #928 re-landed plaintext seed rows into an encrypted users.email
+  — the exact change KS-962 records as REVERTED by Kam's `split` ruling of 2026-09-07 12:13; Peter's consolidated
+  comment 5601372608 holds approval for that reason). #928 stays open; it is not yours to close or gate.
+The headline question (KS-962, quoted in the brief from the TICKET): does the head's main-DB user statement write
+  ONLY (id, tenant_id, tenant_slug) via `UPDATE users AS u SET tenant_id, tenant_slug, updated_at FROM (VALUES twelve
+  (id, tenant_id, tenant_slug)) AS v WHERE u.id = v.id::uuid AND (u.tenant_id IS DISTINCT FROM … OR u.tenant_slug IS
+  DISTINCT FROM …)` — never an INSERT, never email / email_lookup_hash / names / role / status — and does a tamper that
+  re-adds `email` redden? SRC1, SRC2 and T3 are the cells that say so; you measure them against the ticket's words.
+Repo:    /Volumes/DevMASTER/!CODING/Secuura/Blockchain/2_Project_Files  (READ-ONLY — clone by SHA into your own scratch;
+  node_modules + packages/shared/dist symlink-farmed FROM worktrees/s201-ks950-rework (at dfed981d0, porcelain 0),
+  never into it; worktrees/ks950 is #928's and is not yours to touch)
+
+You are FINDINGS-ONLY. You never fix, never merge, never push, never deploy.
+
+NEVER run a push, the real pre-push hook, or preflight.sh inside the Secuura checkout or any of its worktrees.
+
+NEVER print a credential value, and never open, read or copy a secrets file (any .env, config/secrets.yml). Count, never echo.
+
+NO docker, NO stack of any slot, no kintsugi, no demo. The ONLY database you touch is the socket-only PostgreSQL the
+suite starts from the Homebrew keg in ITS OWN mkdtemps (plus your own socket-only instance for the RLS row, item 8).
+A LIVE Homebrew postgresql@15 SERVICE listens on 127.0.0.1:5432 on this machine — Kam's, NOT yours: never aim a
+connection, a control or pg_ctl at it. Every connection you make names a socket directory you created.
+
+Eight things you must not miss:
+
+1. THE TICKET'S SHAPE, MEASURED (item 2): the head statement (startup-migrations.ts :1023-1044) against KS-962's
+   ratified text as the brief quotes it — SET names exactly {tenant_id, tenant_slug, updated_at}; the VALUES alias is
+   exactly (id, tenant_id, tenant_slug); no INSERT; keyed on u.id; the IS DISTINCT FROM guard present (RULED as the
+   SHAPE by Wednesday's Q1); the twelve triples equal auth's seedDemoUsers config (userRepo.ts :1254-1426, READ) and
+   equal the twelve develop carried. Then §2a's rows on a real database: empty table → 0 rows created; auth-seeded
+   → byte-identical 12 rows; ONE drifted row → only it re-synced; ALL TWELVE drifted → 12 re-synced and `resynced:12`;
+   a no-change second run → `resynced:0` and updated_at UNCHANGED (the guard's whole point — no PR cell pins it);
+   a 13th user and a NULL-tenant row untouched. A statement that creates a row or changes email/email_lookup_hash/
+   names/role/status on any row at head is a Blocker.
+
+2. THE SUITE RUN, RED-FIRST (item 3): scripts/__tests__/ks949_main_seed_idempotence.test.sh at 0f69129b3 FIRST
+   (predicted 18/26 green, 8 red: GA6 AG2 AG4 ID1 SRC1 SRC2 L1 L2), then at dfed981d0 (26/26). Run it as
+   `KS949_KEEP=1 bash /abs/path/…test.sh` from your clone with TMPDIR left at the system default (the socket path
+   is capped at ~103 bytes; the suite dies above 88 for its socket dir — your scratchpad path is longer, so do NOT
+   point TMPDIR at it; drive that die as a cell). Quote the postgres version line, the `statement extracted … sha256`
+   line, the `deployed shape built: docker/init 01-08 + N main-DB migrations` line and every FAIL line verbatim.
+
+3. TAMPERS WITH THE SUITE RUNNING (item 4), your own ASSERTING runner (anchor count 1, marker grep, sha before
+   reading colour, restore sha-identical 623a99b9531e7c2c…): the builder's T1 develop INSERT → 6 red (GA6 AG2 AG4 ID1
+   SRC1 SRC2) · T2 #928 INSERT → 5 red (GA1 GA4 GA5 SRC1 SRC2; F4: auth's seeder does NOT repair the plaintext rows —
+   assert it from your own T2 seed log) · T3 `email = v.id::text` added to SET → 2 red (AG3 SRC2) · T4 catch to
+   debug → 1 red (L2) — then the gate-designed Tg: DELETE the IS DISTINCT FROM guard line → predicted 0 of 26 red
+   (the RULED guard is unpinned; a coverage finding, regression cell in prose) and Th: change …060's slug in VALUES
+   to 'secuura-co-x' → predicted 2 red (AG4, GA7 — the triples are load-bearing against auth's config).
+
+4. THE CROSS-SERVICE REGRESSION WEDNESDAY PREDICTS FROM SOURCE (item 5) — MEASURE IT: auth's
+   services/auth/src/__tests__/ks949-platform-admin-seed-identity.test.ts reads startup-migrations.ts's TEXT: its
+   cell "the two sites that seed the platform admin still carry the fictional identity" requires
+   `platform.admin@secuura-test.invalid` in the file (count 1 at base, 0 at head), and its seed-site enumeration
+   (`/INSERT\s+INTO\s+(users|platform_admins)\b/i`) requires the file to be a seed site (it no longer is). Run auth's
+   FULL vitest at 0f69129b3 and at dfed981d0, SOLO; predicted: green at base, exactly those two cells red at head.
+   The builder ran api-gateway's suite only; the preflight legs do not run auth's. If measured, it is a finding
+   against #973 (an incomplete change set — the test must move with the ticket: one seed site remains and the removal
+   is pinned the way the test already pins docker/init-platform/01-platform-schema.sql's removal); say what a merge
+   would do to develop's auth suite.
+
+5. THE LOADER HALF (items 6-7): L1-L3 re-derived on the real runStartupMigrations() (two boots); the #932 gate's
+   fake-pg instrument (evidence/instrument/ under its report, path in the brief) re-driven at 0f69129b3 AND dfed981d0
+   over its 36 rows: transcripts IDENTICAL except the one seed statement's text (INSERT → UPDATE); log deltas EXACTLY:
+   39 `[DEBUG] Migration skipped on <db>` (80 chars) → `[WARN] Migration FAILED on <db>` (200 chars) per failing
+   statement; main/platform/file summaries WARN + `INCOMPLETE — N FAILED` iff failed > 0; the tenant summary's text
+   `INCOMPLETE — N tenant(s) FAILED`; the seed lines. This is also how you reach the PLATFORM sites the builder
+   left uncovered (PLATFORM_DATABASE_URL with a failing file migration). State the per-statement WARN volume direction.
+
+6. SKIP / FAIL / CAP branches (item 9): the SKIP branch is NOT reachable by environment on this box (two kegs at
+   fixed paths) — drive it on a scratch COPY of the suite with PG_CANDIDATES pointed at a nonexistent dir (anchor
+   count 1): the exact line `SKIP — no PostgreSQL binaries (initdb pg_ctl postgres psql) found; searched: …; 0/26
+   cells run`, exit 0, 0 cells run; the FAIL branch on an UNFARMED clone (tsx absent → `FAIL — tsx not installed`,
+   exit 1; packages/shared/dist absent → its die); the socket-cap die under a long TMPDIR; `bash -n`;
+   `run-shell-suites.sh` (26 of 26) and `--check-unreached` (26 tracked) in your clone.
+
+7. THE RLS ROW (item 8), on YOUR OWN socket-only instance built the suite's way: run the head statement as a LOGIN
+   NOSUPERUSER NOBYPASSRLS role with no GUC set — predicted `UPDATE 0` (039 FORCEs users.tenant_isolation, fail-closed)
+   and a `resynced:0` … `complete` line at INFO, no error; then with app.tenant_scope_bypass='platform_admin' → rows.
+   Auth's seeder runs inside runWithPlatformScope (packages/shared/src/db/tenant-guc.ts:102,:139); the gateway
+   statement sets no GUC. Out of reach in service today only because the migration role bypasses RLS
+   (deployment/azure/RLS_ROLE_CUTOVER.md:7-11 claims BYPASSRLS; compose's migrations role is the container
+   superuser) — record with evidence class; a finding only if you can show a deployment that migrates as a
+   NOBYPASSRLS role.
+
+8. THE #928 HOLD HONOURED + CLAIMS (items 10-11): read Peter's 5601372608 (an ISSUE comment — "I haven't submitted
+   a formal blocking review"; /pulls/928/reviews is EMPTY) and state, per his three-point path, whether #973 answers
+   it: (1) loader half split and merged — #932 did the tenant counter, #973 carries the file-loader {applied,failed}
+   + INCOMPLETE wording; (2) the seed half re-syncs tenant columns only / no INSERT; (3) the ks949 suite returned to
+   KS-962's contract (both seeders, one real DB, both orders, docker/init shape, isEncryptedPii NOT stubbed, email +
+   email_lookup_hash unchanged on an existing row, with a control). Then every claim in the diff, the PR body and
+   comment 5651545562 true as written: "six hunks" (Wednesday measures 7 at -U3, 15 at -U0), "index.ts:1211-1220"
+   (head :1203-1213), "26 tracked shell suites" (15 + 11), "the twelve triples are the ones develop carried"
+   (identical, ordered), "docker/init/01-schema.sql:21 email TEXT NOT NULL", "F1: #928 kept migrated++
+   unconditional" (re-derive from e28d64b8d READ ONLY), "0 at-signs" (the body has 2 — postgresql@15 ×2 — and the
+   comment 4 — @types/node, @secuura/shared ×2, postgresql@15; 0 user mentions; a real @login mention is a finding).
+
+Your tool shell's grep may be a function: use /usr/bin/grep, case-insensitive, with a same-file control. Never cd in
+your own tool calls (the suite's internal cd is the suite's, run it as `bash /abs/path`).
+Quote the Secuura checkout's porcelain count, .git/config sha256, for-each-ref count and origin develop SHA at start and
+close; they must match (name any ref another seat's push or merge moved). Confirm worktrees/ks950 and
+worktrees/s201-ks950-rework are byte-identical at start and close (porcelain 0 both times).
+Never `rm`: run the suite with KS949_KEEP=1 (its own cleanup is an rm -rf otherwise) and stop every postgres you started
+(pg_ctl stop on YOUR data dirs only). Do no memory maintenance of your own project's memory store inside this session.
+
+Report FOUND / TESTED / HOW, with controls, the §2a rows as a table with base/head columns and a direction column,
+and state what you did NOT test — no docker / stack / slot / deploy / deployed database; the four platform suites; the
+browser half (N/A, no surface); a non-superuser deployment beyond item 7's own-instance row; #928 (named, never gated)
+— at the same prominence as the findings.
+Verdict: GO, GO WITH FINDINGS, or NO GO — on dfed981d0. This is round 1 of 2 for the KS-950/KS-962 class under the cap.
+
+MAIL YOUR VERDICT to wednesday-agent@agentmail.to when the pass is complete, using
+the project's send_brief.sh. Your pane holds ~19 lines of alternate screen with no
+scrollback, so a verdict that stays in the pane is one pane-close from being lost --
+this is not a formality, it is the only durable copy. Subject:
+[QA -> Wednesday] TIER 1 GATE #973 ROUND 1 (KS-950 KS-962) dfed981d0 -- <GO|GO WITH FINDINGS|NO GO>
