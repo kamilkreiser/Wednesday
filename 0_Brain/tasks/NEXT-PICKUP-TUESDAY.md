@@ -66,6 +66,13 @@ supersede: replace WHOLESALE at the next pickup; never append.
 - Questions s12 answered: 18:13:30 (live site link for the harness), 18:49:22 (where HPSM is at), 18:52:15 (harness updated for the live site?).
 - Times come from the transcripts. Where s12's pickup or the prompt log differ (18:5x, 18:38, 18:52, 19:14), the transcript time is used.
 
+## 🟢 20:4x — KAM GAVE GO ON b-tight (terminal, verbatim): *"You have my go-ahead on the live side fix and make sure that you include the credentials in the testing document harness."*
+- **KAM mail to S44 sent 10:45:04Z** (`briefs_staged/2026-09-13_hpsm-s44-kam-go-gate-b-tight.md`; tap `--mail` verified, prompt clear). Gate apply goes FIRST, ahead of step 6; head mail, then apply, public-URL browser check + curl set + smoke, report; rollback first on any failure. Panel receipt to Kam ~20:45. Prompt-logged.
+- **NEXT:** S44 head mail → short panel warning to Kam → REPORT → panel note "you can sign in; use Azure A 3bb6fcb2 / B a9101d3f" (verify at origin) → commission the live-half re-run of the acceptance gate.
+- **Credentials half (measured read-only):** the harness brief `qa-agent/briefs/2026-09-13_hpsm-composer-09c1591-brief-acceptance-security-tier1.md` §1 L35 already names `/Volumes/KK_T9_External_HDD/!CODING/Datasec/HPSM/4_Credentials/hpsm-demo-site.txt` (mode 600, read into memory only), and §4 "Credentials (pointer only)" names the idp-mock personas. HPSM `.gitignore:8` ignores `4_Credentials/`. The tester HAD the credentials; D-B1 was the header collision.
+- **Kam then (terminal): *"Send me the email with the content, and I will send it to the agent that you identify in the email."*** s13 answered: no email is needed and the password is never mailed (the workspace rule "never put secrets in mail"). **Asked ONE question:** does he want the harness document (which names the credential file, not the password) emailed to his Datasec address? **If he says yes: send it to `kamil.kreiser@datasec.com.au` (pinned memory), attaching the brief with NO credential value, and name the agent as the QA agent running the live-half re-run.**
+- **The re-run brief (after the gate fix) carries the same pointer:** the credential file by absolute path, plus the idp personas; values never in a tracked file.
+
 ## 🔴 WAITING ON KAM — ONE DECISION: go or hold on live gate fix "b-tight"
 - **Asked** on the panel at 19:24:59 and 19:39:17 (both VERIFIED AT ORIGIN) and in the terminal. **No answer as of 20:32.**
 - **The problem:** through the public URL, Caddy Basic and the app's bearer both need the `Authorization` header. Sign-in works, then every `/api` call gets 401 ("Your session ended"). The gate is VM-only state (`/opt/hpsm/Caddyfile`); there is no Caddy config in the repo.
@@ -146,6 +153,7 @@ supersede: replace WHOLESALE at the next pickup; never append.
     - Score the S43/S44 merge round at that verdict.
   - **S44 at 80–90%:** HANDOVER-S44 → `ps` census (trap 32) → S45 brief → routing row `Datasec/HPSM-S45|datasec-hpsm@agentmail.to|yes` → `cockpit.sh add` a new pane → rung 5 → `pane_close.sh %7` after S45 CONFIRMS. **Never `cockpit.sh rotate` (trap 37).**
 
+- **20:44 — S44 STATUS 10:44:08Z (before the GO mail):** merge 3 FX-R GREEN, LOCAL main `47305ce` (CI GREEN, switch-ON 63/63 zero-failure), NOT pushed. Step 4 FX-S7 merged as `693a5db`, chain m4-s44 running. Step 5 `s44/seat-layout` `2d6b884` ready (proof run 2 GREEN). **Pins UNCHANGED caf63fd..step 5** (content/db/engine diffs empty; same release hashes). The 30-min FX-LV+FX-REL clock starts when step 5 is GREEN on main.
 - **20:36 — S44 STATUS 10:36:39Z (DKIM pass, read whole) → ANSWER ~10:3xZ** (`briefs_staged/2026-09-13_hpsm-s44-answer-fxrel-order.md`):
   - **Merge 2 FX-LV HELD:** switch-ON e2e failed 1/67 at `s43-local-values.spec.ts:442`. A PRE-EXISTING S10 defect since S40 `d08531b`: the release confirmation banner is unmounted by the reload that release triggers (`Release.tsx` local state + `useLoad` sets loading). **Monday-visible.**
   - **New lane FX-REL** (`s44/fx-rel` at b8fc2a9, 24680, `Release.tsx` + component test; `useLoad.ts` forbidden with STOP).
