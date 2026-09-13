@@ -1,4 +1,4 @@
-# QA GATE, TIER 1: Datasec/HPSM Policy Composer - ACCEPTANCE vs THE ORIGINAL BRIEF + SECURITY @ 09c1591 (new class, round 1)
+# QA GATE, TIER 1: Datasec/HPSM Policy Composer - ACCEPTANCE vs THE ORIGINAL BRIEF + SECURITY @ 09c1591 (new class, round 1) — LIVE SITE + LOCAL STACKS
 
 **Commission.** Kam, 2026-09-13 17:00 AEST: *"...test the platform from a security perspective as well as from a deliverables perspective against the original brief. Include links or the paths to the original briefing documents so that the testing agent can reference these during its testing."* He reviews the platform Monday 2026-09-14.
 
@@ -28,11 +28,29 @@
 - **Shared daemon:**
   - count volumes at START (108 at briefing) and at END;
   - rebuild images only under `lockf -k /private/tmp/claude-501/-Volumes-KK-T9-External-HDD--CODING-Datasec-HPSM/dc13ed6b-f206-4b51-b117-ff3f2723cf9b/scratchpad/docker.lock <cmd>`.
-- **LIVE Azure demo** `https://hpsm-composer-demo.australiaeast.cloudapp.azure.com`: basic auth, synthetic data, runs `c2fbc36`, Kam's Monday demo (`HPSM/5_Project_History/HANDOVER-S40.md` L27).
-  - **LIVE DEMO RULING: VETOED by default - Tuesday, Kam has not ruled 2026-09-13 17:31** (no live-demo probes; Kam's approval switches this line to APPROVED by Kam and allows only the boundary below)****
-  - **Tuesday's PROPOSED boundary, for Kam to veto:** unauthenticated external probes only — TLS versions and certificate; 401 + `WWW-Authenticate` on every path (incl. `/api/*`, `/idp/*`, health, static); headers; error-page leakage.
-  - **Never** read or use the credential. No wrong-password attempts, no data, no load: at most 60 sequential, logged requests.
-  - **VETOED:** do none of it, and list the live demo under NOT TESTED.
+- **LIVE Azure demo — A TARGET.** Kam, 2026-09-13 18:20 AEST, verbatim: *"Please revise the testing harness documents so they test the live site."*
+  - **LIVE DEMO RULING: APPROVED by Kam 2026-09-13 18:20** (scope exactly as below; nothing beyond it).
+  - **URL:** `https://hpsm-composer-demo.australiaeast.cloudapp.azure.com`. HTTP basic auth on every request, synthetic data only. **It is Kam's demo for his Monday review.**
+  - **Credential:** read ONLY `/Volumes/KK_T9_External_HDD/!CODING/Datasec/HPSM/4_Credentials/hpsm-demo-site.txt`, into memory.
+    - Never print, copy, log, screenshot or mail its value.
+    - Before mailing, grep your whole evidence folder and report for it, and record that the grep ran with a positive control.
+  - **Head:** record what the live site runs at START and END (whatever version or health information the app shows after sign-in), and compare it with the head named in Tuesday's launch prompt, if any.
+    - A difference is RECORDED and named in the BLUF.
+    - If the site is mid-upgrade (version flipping, repeated 5xx), STOP the live pass and say so.
+  - **Your own tenant, and only yours:** create ONE synthetic tenant named `QA Harness (synthetic) <YYYY-MM-DD HH:MM>` through the product's own admin flow, and do ALL mutating work inside it: engagements, discovery, generate, validate, exceptions, both approvals, release on a zero-device-group engagement if release is reachable at that head, Export PDF, stored outputs.
+    - **NEVER create, edit, approve, release, export or delete anything in any other tenant.** That includes "Synthetic Customer B (demo content)" and the fresh engagements prepared for Kam's release walk-through.
+    - Cross-tenant probes against those are READ or WRITE attempts that must FAIL (expect 404). **The first one that unexpectedly succeeds stops that probe at once; report it as a Blocker, with what changed.**
+  - **Allowed on LIVE:** the full deliverables walk-through inside your tenant, and security probes **1, 2, 3, 5, 7, 8, 9, 11, 12, 13, 15, 17**, confined to your tenant or run as must-fail cross-tenant attempts.
+  - **LOCAL STACKS ONLY, never live:** probes **4** (DB/RLS as pc_app), **6** (superuser audit tamper), **10** (repo/dependency scanning), **14** (size/rate/flood) and **16** (egress), plus any mutant, fixture, seed or DB script.
+  - **Limits on LIVE:**
+    - sequential requests only, ≤ 1 request/second sustained;
+    - no body over 1 MB except ONE attachment probe at the product's own stated limit;
+    - at most 3 wrong-credential attempts in the whole run;
+    - no path brute-forcing (a fixed list of ≤ 30 paths);
+    - no ssh, no `az`, nothing on the VM itself.
+  - **STOP the live pass and report at once** if any request returns 5xx twice in a row, the site stops answering, or response time exceeds 10 s on 3 consecutive requests.
+  - **Cleanup on LIVE:** delete nothing, never by DB. Leave your QA tenant in place and list EVERYTHING you created there (names, ids, times) in the report, so Kam can see it.
+  - **Evidence class:** live results are MEASURED AT RUNTIME (LIVE). Local results are MEASURED AT RUNTIME (LOCAL). The matrix says which for every row.
 
 ## 2. Spec / DoD - REFERENCE DOCUMENTS (read-only; every row cites document + § + line)
 - **AUTHORITATIVE, the original brief:**
@@ -122,14 +140,15 @@ Not a checker. Pair every refusal probe with the ordinary input that must pass. 
 | 14 | Size/rate: oversize body, deep nesting, 2048+ character strings, at most 50 rapid generate/export calls | a 500, a hang over 30 s, a crash, unbounded growth | a normal request succeeds |
 | 15 | Error leakage, every error class | a stack trace, SQL, path, host, secret, or other-tenant existence | a known 404's body is recorded |
 | 16 | Egress: `egress-test.sh` | a container reaches out | its control network sees egress |
-| 17 | Live demo (§1, only if APPROVED) | a path skips the challenge; TLS below 1.2; a leak | a `-tls1_2` handshake succeeds |
+| 17 | LIVE edge (§1): without credentials every path challenges (incl. `/api/*`, `/idp/*`, health, static); TLS versions and certificate; security headers; error-page leakage | a path answers without the challenge; TLS below 1.2; a leak; a missing header (justify severity) | a `-tls1_2` handshake succeeds, and a signed-in request to your own tenant succeeds |
 
 ## 4. Credentials (pointer only)
 - **Personas:** the idp-mock's seeded users, 7 roles (`apps/idp-mock/src/app.ts` L9-53), plus a second tenant. Generate stack passwords per run (`scripts/ci.sh` L13-17).
-- **Do not read `/Volumes/KK_T9_External_HDD/!CODING/Datasec/HPSM/4_Credentials/`.** Its identity dirs are exported only for isolation. Run no `az`, no `gh`.
+- **Read NOTHING under `/Volumes/KK_T9_External_HDD/!CODING/Datasec/HPSM/4_Credentials/` except `hpsm-demo-site.txt`, and only for the LIVE pass (§1), under §1's credential rules.** Its identity dirs are exported only for isolation. Run no `az`, no `gh`.
 
 ## 5. State-mutation & cleanup
 - **Sanctioned:** your own clone, projects and volumes. Tear down only what you created; list volumes before and after.
+- **LIVE sanctioned:** ONLY your own `QA Harness (synthetic) …` tenant and what you create inside it (§1). Nothing is deleted on live.
 - **Reachable:** draft, generated, validated, review, approved, released synthetic (switch ON, zero device groups), a second version, a clone.
 - **Gaps:** released with a device group (KNOWN); Imported/Verified (MVP B).
 - **Never `rm`:** a new `mktemp -d` per attempt; quarantine, never removal; `${X:?}` on every expansion.
@@ -180,7 +199,7 @@ Not a checker. Pair every refusal probe with the ordinary input that must pass. 
 **Still owed:** a KNOWN item that silently gives a WRONG RESULT, or a security gap reachable in MVP A, IS a finding. Mark it "KNOWN, re-rated" with its backlog line.
 
 ## 8. Logistics
-- **One session.** If budget runs short: security 3, 4, 5, 2, 7 -> §22.1 -> §23.1 -> §22.2 -> the rest. Anything unfinished is NOT TESTED, with the reason.
+- **One session.** Order: the LIVE deliverables walk-through + LIVE probes 17, 3, 2, 5, 7 FIRST (it is the version Kam will show) -> local security 4, 6 -> §22.1 -> §23.1 -> §22.2 -> the rest. Anything unfinished is NOT TESTED, with the reason.
 - **Head readings** of the original repo at start, mid and end: SHA + branch + time.
 - **Siblings:** `reports/2026-09-13-composer-09c1591-combined-{a-engine-content,b-api-db,c-web-renderers}-tier1/`. Cite a finished one as PROBED (sibling); do not redo their mutation work.
 - **Report:** `/Volumes/KK_T9_External_HDD/!CODING/Testing Agent MAIN/projects/hpsm/reports/2026-09-13-composer-09c1591-brief-acceptance-security-tier1/report.md`, in this order:
@@ -218,6 +237,6 @@ PROVENANCE:
 - rulings, KNOWN, W3-M6 | combined brief L46-74; s42 candidates L1-100; 0523193 report L427 | read 2026-09-13
 - ports 21480/21495/21580 free; 108 volumes; Playwright image present | lsof, docker volume ls, docker image inspect | read 2026-09-13 17:05-17:15
 - live demo facts | HANDOVER-S40.md L27; combined brief L13 | read 2026-09-13
-- live-demo boundary | Tuesday's proposal; Kam's ruling is the §1 placeholder | 2026-09-13
+- live site in scope | Kam's terminal instruction verbatim at 2026-09-13 18:20, read by Tuesday s12; scope and limits are Tuesday's reading, told to Kam on the panel | 2026-09-13
 
 SELF-CHECK: re-read end-to-end for contradictions | 2026-09-13 17:25
