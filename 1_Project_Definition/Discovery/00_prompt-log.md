@@ -2287,3 +2287,13 @@ Done with it: Dynamics → Kam's team decision (no action); QuickQuote masthead/
 > dont let your context rotation get in the way of finishing tasks.  You can always delegate to agents and get them to work while you rotate.  Keep the last standing rule (to spin up as many agents as necessary and to move things as fast as logical and possible) going
 
 *Note:* Filed as a W-tier grant/correction (learnings/2026-09-13_rotation-never-blocks-the-work-delegate-then-rotate.md); the rotation card amended; ledger +1 (the 08:39 seat waited ~70 min at its ceiling for a launch).
+
+## 2026-09-13 16:55 — Kam (terminal, verbatim)
+> Please get the HPSM agent to identify what else is left to complete and whether there are any issues with the product.   Also get the agent to add the feedback feature as deployed in Nexus AI to the HPSM project. Naturally change all settings so that any feedback is registered against HPSM and works properly.
+
+*Note:* Tuesday s12: receipt given in the terminal. No HPSM seat was live — S42 and the three combined gates were lost at 16:48 when the fleet tmux session was recreated through the cockpit launcher's Fresh branch. Successor S43 brief being built with both items; NexusAI's feedback feature mapped read-only first. (This entry was first written by `prompt_log.sh` with its channel and text arguments swapped, and corrected by hand the same minute.)
+
+## 2026-09-13 17:00 — Kam (terminal, verbatim)
+> You can please look at the HPSM initial project brief and write a testing harness prompt to test the platform from a security perspective as well as from a deliverables perspective against the original brief. Include links or the paths to the original briefing documents so that the testing agent can reference these during its testing.
+
+*Note:* Tuesday s12: receipt given in the terminal; an Explore agent is inventorying HPSM's original briefing documents (paths + sections) read-only; the QA brief + prompt are written from that inventory and the QA template, security + deliverables-vs-original-brief.
