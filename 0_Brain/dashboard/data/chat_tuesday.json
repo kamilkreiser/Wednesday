@@ -1342,5 +1342,12 @@
   "project": "Datasec",
   "ts": "2026-09-13T19:24:59.683893+10:00",
   "text": "Kam, I need one decision from you on the live HPSM site.\n\nThe problem: our tester found that, through the public link, sign-in works but every screen after it fails with 'Your session ended'. The site's password gate and the app both use the same login header, so one of them always rejects the request. You will hit this if you test tonight. My earlier 'site is back up' check only looked at the login challenge, not at a real screen.\n\nMy recommendation: keep the password gate on the website, and let the app's API rely on its own login check instead. The trade-off is that the API's error pages and its interface description become reachable without the site password. All data still needs a valid sign-in, and it is all synthetic.\n\nSay go, or hold. Until you answer, the HPSM agent prepares and tests the change on its own copy but does not switch it on for the live site."
+ },
+ {
+  "role": "wednesday",
+  "seat": "Kamils-Mac-mini.localdomain",
+  "project": "Datasec",
+  "ts": "2026-09-13T19:39:17.391534+10:00",
+  "text": "Kam, the live-site fix is ready and I need your go or hold.\n\nWhat it does: the site password stays on everything except the app's own data calls, which keep their own sign-in check. That lets you get past sign-in. Switching it on takes a few seconds, and there's a rollback ready.\n\nThe HPSM agent tested it on an exact copy of the live gate. Sign-in, the first screen and opening an engagement all work. It tried all 56 API calls without signing in and none returned data. The login service, the health check, the API description and the sneaky ways round the gate all stay behind the password. The trade-off is now small: the data calls are protected by the app's sign-in alone, not by the site password as well.\n\nSay go and it's switched on within minutes, then tested through the public link. Until then nothing changes."
  }
 ]
