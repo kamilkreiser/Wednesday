@@ -12,6 +12,21 @@ supersede: replace WHOLESALE at the next pickup; never append.
 **On EVERY wake:** `2_Project_Files/tools/kam_rulings_today.sh` (never `kam_msgs.sh` unfiltered) AND `[Kam -> Tuesday]` mails; list `tuesday-agent@` UNFILTERED and route on SUBJECT; `git status --porcelain | grep -v 0_Brain/dashboard/data/`. Rotation band 80–90. **Verify panel messages AT ORIGIN** (`git show origin/main:0_Brain/dashboard/data/chat_tuesday.json` on the ref `panel_sync` fetches; `git ls-remote` HUNG 9 min in this tree at 14:28 — bound any network read with a timeout). **Do NOT read `0_Brain/daily/`** (Wednesday's).
 
 ## 🔴 LIVE — with the next action for each
+0023. **S42 STATUS 04:00:55Z (read whole): step 2 DONE.** Lane G 0015 merged, so LOCAL main is `7135dec3a953284eef1031957b5f78e8446471d5` (201 ahead of `afc10e9`, NOT pushed).
+    - **Verified at source by s11 14:01:** main `7135dec`; `s42/lane-g-0015` `fd7db21` on main; `0015_generation_derived_platform_tenant_and_directory.sql` on main.
+    - **Checks:** lane G DB 205/205, API-DB 367/367, 24/24 mutants; merge seat upgrade proof from `b01c5a5` with no new env (migrate applied 0015, PREFLIGHT GREEN, switch-off PASS, e2e 34/34); clean-clone ci.sh GREEN.
+    - **As built:**
+      - A: REVOKE + BEFORE INSERT trigger;
+      - B: platform tenant seeded "Platform", with a membership CHECK that holds even for superuser;
+      - C: `pc_tenant_directory` NOLOGIN; function + ownership in bootstrap's post-migration section; no membership anywhere; guards pinned.
+    - **Gate notes S42 recorded, not changed — ADD TO THE COMBINED GATE TARGETS:**
+      1. The seed fails closed on a pre-existing `…da7a` row (inferred). The S40 message carries a read-only pre-upgrade count.
+      2. The directory call relies on the role's `USING (true)` policy OR'ed with 0008's PUBLIC `tenant_member_read`.
+      3. The platform id is a literal, so an override fails loudly via D1.
+      4. Data refusal on the platform tenant is lane Q's API work.
+      5. No trigger-order hazard on `release_artifact`.
+    - **Now:** step 3 seat ON proof running on `pc-s42-on`. Lane Q on contract `00bbcc6` (0.12.0) → 2b → D1 → Q9 API. Lane W running on `00bbcc6`.
+    - **No reply was needed.**
 0022. **S42 ACK 03:26:43Z (read whole):** lanes G (`s42/lane-g-0015` at 8ded9af) and Q (`s42/lane-q-api` at b01c5a5) are RUNNING; W (`s42/lane-w-web`) starts on lane Q's "contract" commit.
     - **Seat note 1:** `migrate.ts` runs `bootstrap.sql` (~l.40) BEFORE the migration loop (~l.61), so the directory DDL is re-applied after the migrations over the superuser connection, guarded on `pc.tenant` existing. Proven fresh + upgrade from 0014. This is ruling (i).
     - **Seat note 2:** lane Q gets a one-off grant on `compose.yaml` (api env/depends_on only) and on the lockfile (only for a pinned storage client).
