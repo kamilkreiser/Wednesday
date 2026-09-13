@@ -8991,5 +8991,118 @@
   ],
   "delivered_artefact": "AgentMail tuesday-agent@ -> datasec-hpsm@ 2026-09-13T04:08Z, S42 commission 'KAM RULED build-c12', section RULED BY KAM, read back at destination by cockpit say --mail. Body: 2_Project_Files/fleet/briefs_staged/2026-09-13_hpsm-s42-kam-build-c12-lane.md",
   "delivered_ts": "2026-09-13T14:08:14.395835+10:00"
+ },
+ {
+  "id": "secuura-ks1114-verify-title-strategy",
+  "client_project": "Secuura/Blockchain",
+  "title": "KS-1114: the published verify contract promises a TITLE lookup that does not exist — implement it, or remove title from the spec?",
+  "bluf": "POST /api/verification/verify refuses a title-only body with 400 while the served spec's VerifyRequest says 'Provide ONE OR MORE of documentId, hash, title, contentHash' and names a title strategy. Measured by s193 (row E3, develop 34be9c18a) and re-measured by s197 (b1cb8466f): the handler validates title as a string and never reads it. Pre-existing; not fixed by #965. Product call: what should a title-only verify return? Titles are not unique, so a title lookup is a search, not a verification. PRIOR-RULING CHECK: Gate matches opened: secuura-ks622-mfa-verify-fix (MFA backup codes), secrev-verify-23-and-batch1-filing (a review package), secuura-ks1041-step1-demo-verify-now (a demo nginx route), and three panel lines of Peter's PR triage — every one shares the word 'verify' and none rules on the verify contract's title field. KS-1114 is 15 hours old; no card names it.",
+  "default_action": "Nothing changes: the spec keeps promising title, the handler keeps refusing it, KS-1114 stays Backlog until you tap. No agent builds either option before your word.",
+  "options": [
+   {
+    "key": "remove-title",
+    "label": "Remove title from VerifyRequest and the two descriptions; the 400 lists what is actually required (recommended)",
+    "detail": "Spec stops promising a strategy that does not exist. One spec + handler-description change, one test pass, no behaviour change for any working body. Recommended because a title is not a verifiable identifier."
+   },
+   {
+    "key": "implement-title",
+    "label": "Implement a title lookup strategy in /verify",
+    "detail": "A product feature: title matching is ambiguous (not unique), so the response shape for multiple matches must be designed. Bigger, and it widens the public verifier's surface."
+   }
+  ],
+  "recommended": "remove-title",
+  "ts": "2026-09-13T14:19:41.117645+10:00",
+  "status": "open",
+  "ruled_choice": null,
+  "ruled_ts": null,
+  "prior_rulings_overridden": [
+   "2026-09-10 09:01",
+   "2026-09-10 09:08",
+   "2026-09-10 09:08",
+   "CARD secuura-ks622-mfa-verify-fix",
+   "CARD secrev-verify-23-and-batch1-filing",
+   "CARD secuura-ks1041-step1-demo-verify-now"
+  ]
+ },
+ {
+  "id": "secuura-ks1116-presentation-credential-ownership-model",
+  "client_project": "Secuura/Blockchain",
+  "title": "KS-1116: who OWNS a presentation (and a credential)? GET /api/presentations/:id and GET /credentials/:id have a bearer check and no ownership check",
+  "bluf": "KS-1020 item 1 (#966, exact-or-404, gated GO) closes the fragment disclosure. Item 2 is a decision, not a build: any authenticated principal, any role, can read any presentation or credential by its exact id. Measured on develop 721b333a6: holder_id is NULL on every stored row (written only when POST / was given holderDID); the route sits behind jwtAuthenticate; there is no tenant column on the store. The same shape sits under POST /api/credentials/:id/revoke (the #966 gate's sibling finding). An ownership model is needed before any code, plus a policy for the existing NULL rows. PRIOR-RULING CHECK: Gate matches opened: secuura-ks578-ks643-ownership ('together', 2026-08-26) authorised an ownership check on API-KEY revoke in auth (KEY_ADMIN roles, 'another tenant's key'), delivered as #744 — a different service. Read at develop 721b333a6: vc-issuer routes/credentials.ts POST /:id/revoke calls credentialRepo.revoke(id, reason) with no ownership or role check, and GET /:id calls credentialRepo.getById(id) the same way; the store has no tenant column (the #966 gate, item 5). The other matches (admin credential rotation, an HPSM credential document, an Ollama model) share only a word.",
+  "default_action": "Nothing built: KS-1116 stays Backlog, the routes stay bearer-only, and the revoke sibling ticket (filed by the merge seat) carries the same open question. Wednesday briefs nothing on ownership before your tap.",
+  "options": [
+   {
+    "key": "bind-creator",
+    "label": "Owner = the authenticated principal that created it; existing NULL rows readable by the tenant OWNER role only (recommended)",
+    "detail": "Consistent with your 'bind' ruling on the org trust boundary. holder_id (or a new owner column) set from the JWT subject at POST; reads and revoke check it. Existing NULL rows: OWNER role only until re-bound. A migration + a route guard + a test pass per route."
+   },
+   {
+    "key": "tenant-scoped",
+    "label": "Owner = the tenant; any principal in the same tenant may read",
+    "detail": "Needs a tenant column the store does not have today (a migration) and a policy for NULL rows. Looser than bind-creator; matches how documents are scoped elsewhere."
+   },
+   {
+    "key": "accept-open",
+    "label": "Accept as designed: bearer required, any role, no ownership",
+    "detail": "No build. The exact-id read stays reachable to any authenticated principal; recorded on KS-1116 as accepted, with the revoke half named."
+   }
+  ],
+  "recommended": "bind-creator",
+  "ts": "2026-09-13T14:19:43.761144+10:00",
+  "status": "open",
+  "ruled_choice": null,
+  "ruled_ts": null,
+  "prior_rulings_overridden": [
+   "2026-09-04 15:32",
+   "2026-09-09 12:09",
+   "CARD secuura-ks578-ks643-ownership",
+   "CARD secuura-admin-credential-rotation-183-files",
+   "CARD hpsm-credential-bearing-prd-outside-every-snapshot",
+   "CARD nexusai-ai-screenshot-local-model"
+  ]
+ },
+ {
+  "id": "secuura-965-f1-verify-hash-precedence-v1-vs-v2",
+  "client_project": "Secuura/Blockchain",
+  "title": "#965 F-1: v1 /verify reads a conflicting body hash LAST, v2 reads it FIRST — one order, or accept the split in writing?",
+  "bluf": "KS-1103 (#965, tier-2 gate GO WITH FINDINGS at d63b27ab3) made originate's v1 POST /api/verification/verify honour the published hash field, placed LAST (documentId, then documentData, then hash) so every body that worked before keeps its answer. The gate measured (F-1) that verificationV2 reads hash FIRST (verificationV2.ts:445-446). Both orders are now pinned by tests on their own side. A body carrying a documentId AND a different hash gets a different strategy on v1 than on v2. Pre-existing on v2; a product decision, not a defect in #965. PRIOR-RULING CHECK: Gate matches opened: secuura-ks968-demo-hash-probe and secuura-ks968-hash-population-count rule on a demo-box hash POPULATION incident (KS-968); secuura-ks622-mfa-verify-fix, secrev-verify-23, secuura-ks1041-step1 share 'verify' and rule on MFA, a review package and a demo route. None rules on the precedence of a conflicting hash in a verify body; F-1 is 11 hours old (the #965 gate).",
+  "default_action": "The split stands as measured and pinned on both sides; no agent changes either order. A comment on KS-1103 records F-1 as a product decision pending your tap.",
+  "options": [
+   {
+    "key": "accept-split",
+    "label": "Accept the split in writing: v1 hash-LAST (legacy bodies unchanged), v2 hash-FIRST; document it on both routes' descriptions (recommended)",
+    "detail": "Zero behaviour change; one doc pass on both spec descriptions naming the precedence. Recommended because v1's callers (the mobile app sends {hash}) keep every current answer and v2 already declares hash-first."
+   },
+   {
+    "key": "align-v1-hash-first",
+    "label": "Align v1 to hash-FIRST like v2",
+    "detail": "A behaviour change on the legacy public verifier: a body with documentId + a different hash flips strategy. Needs a caller census before it ships; one test pass."
+   },
+   {
+    "key": "align-v2-hash-last",
+    "label": "Align v2 to hash-LAST like v1",
+    "detail": "Changes v2's declared behaviour; v2's own tests pin hash-first today."
+   }
+  ],
+  "recommended": "accept-split",
+  "ts": "2026-09-13T14:19:46.342165+10:00",
+  "status": "open",
+  "ruled_choice": null,
+  "ruled_ts": null,
+  "prior_rulings_overridden": [
+   "2026-08-21 09:47",
+   "2026-08-21 20:06",
+   "2026-08-26 17:11",
+   "2026-09-04 08:33",
+   "2026-09-10 09:01",
+   "2026-09-10 09:08",
+   "2026-09-10 09:08",
+   "2026-09-10 10:32",
+   "CARD secuura-ks622-mfa-verify-fix",
+   "CARD secuura-ks968-demo-hash-probe",
+   "CARD secuura-ks968-hash-population-count",
+   "CARD secrev-verify-23-and-batch1-filing",
+   "CARD secuura-ks1041-step1-demo-verify-now"
+  ]
  }
 ]
