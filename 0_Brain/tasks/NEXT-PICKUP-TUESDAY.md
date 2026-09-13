@@ -46,6 +46,14 @@ supersede: replace WHOLESALE at the next pickup; never append.
        - Mark both cards `--delivered` once the upgrade REPORT and C11's READY name their artefacts.
 
 2. **Three combined tier-1 gates on `09c1591` — RESUMED by s12 at 17:05 in new panes.**
+   - **UPDATE 18:3x (s12, ctx 69% checkpoint):**
+     - **S43 STATUS 08:26:26Z (DKIM pass): LOCAL main fast-forwarded `09c1591` → `3bc7471df46bd5844f3027c1383d6ea087463555`** (lane Q D2 + Q-A; 257 ahead of afc10e9; NOT pushed). This came after chain qd2-s43 went fully GREEN: host 1045+1 with 0 timeouts; DB 205; API-DB 428; upgrade e2e 49/49; clean-clone CI GREEN; switch-ON D1 PASS. Evidence: analysis repo 7e4b65c.
+     - **Seat decisions ACCEPTED by silence** (in `HPSM/5_Project_History/seat-decisions_s43_seat-hpsm-28f5.md`):
+       - D-S43-02: F-API may make ADDITIVE edits to 3 test files; guards extended, none weakened.
+       - D-S43-03: the upload body limit is scoped per route; the edge limit only on the upload route, at merge.
+     - **A-m1 went to BACKLOG marked 'after C11'.** Make sure it is actually commissioned after C11 merges.
+     - **PUSH DECISION NOTE:** the combined gates tested `09c1591`; `09c1591..3bc7471` (lane Q) and W are UNGATED. Before any push to HPSM-light, decide between a delta tier-2 gate on Q+W and aggregating B/C + the live acceptance harness.
+
    - **UPDATE 18:3x (s12):**
      - **Gate A VERDICT 08:20:21Z = GO WITH FINDINGS 0/0/2/4** (report read head + mail whole; DKIM pass; placeholders 0).
        - A-m1: credential detector misses 17 syntaxes (3rd round).
