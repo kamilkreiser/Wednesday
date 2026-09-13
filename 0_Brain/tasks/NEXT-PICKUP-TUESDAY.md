@@ -26,7 +26,8 @@ supersede: replace WHOLESALE at the next pickup; never append.
       - **"No sign-in to platform tenant":** no data-scoped session, no memberships, never customer-selectable; a platform_admin token carrying the platform id is allowed.
       - **S40 channel:** mail fallback, since claude-bridge was CONNECTION_CLOSED.
     - **For Kam (FYI, no action):** S42 found 30 stale `(conflict_on_2026-08-25|26)` sync copies in HPSM's analysis repo, left untouched.
-    - **NEXT:** close S41 `%24` with pane_close.sh after CONFIRMED is delivered. Then watch S42 for lane G READY, the ON proof and the SHA to S40, then commission the combined gate.
+    - **DONE ~13:22:** CONFIRMED delivered at datasec-hpsm@ 03:21:41Z, and S42 was tapped (rc 0). S41 `%24` was idle, then closed with `pane_close.sh %24 18580`: rc 0, listeners 13 → 13, port 18580 answered 200 before and after. Census now 67724 (S40) + 98162 (S42) only. Panes: `%0` wednesday, `%25` Datasec/HPSM-S42, `%1` fleet-monitor.
+    - **NEXT:** watch S42 for lane G READY, the ON proof and the SHA to S40, then commission the combined gate.
 0020. **S41 WRAP ADDENDUM 03:11:25Z** (read whole): S41 finished step 2 after its wrap.
     - **Verified at source:** main `b01c5a5` = lane E 2a merged `4f11c18` + fixture fix, 196 ahead of `afc10e9`; lane G `8ded9af` still not on main; worktrees clean; S41 `%24` idle at ctx 87%.
     - **S41's two Q9 findings:**
