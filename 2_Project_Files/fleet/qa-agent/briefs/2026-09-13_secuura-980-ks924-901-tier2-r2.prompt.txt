@@ -1,0 +1,139 @@
+ultrathink
+
+You are the fleet QA agent running a TIER 2 (through code — a structural guard's own suite in packages/shared; no
+running system, no rendered surface) DELTA gate, ROUND 2, on Secuura/Blockchain PR #980 (KS-924 / KS-901): ONE new
+commit, ONE file, ONE line on top of the round-1 head you already gated.
+
+Read your brief FIRST and in full, then plan:
+/Volumes/DevMASTER/WEDNESDAY/2_Project_Files/fleet/qa-agent/briefs/2026-09-13_secuura-980-ks924-901-tier2-r2.md
+
+Then read ROUND 1's report WHOLE (a gate cannot ask; everything round 1 measured is in it):
+/Volumes/DevMASTER/!CODING/Testing Agent MAIN/projects/secuura/reports/2026-09-13-ks924-901-980-9c620f890-tier2-r1/report.md
+(+ its evidence/ — census.py, tamper.py, run_vitest.sh, the spec JSONs and the per-run vitest JSON are yours to reuse).
+Round 1's brief is beside yours: 2026-09-13_secuura-980-ks924-901-tier2.md — its TARGET anatomy, §2a table, items 1–10,
+KNOWN-FRAGILE and BOUNDS stand; its line numbers are ALSO the new head's (one line changed in place, 443 -> 443).
+
+Subject: 103c235b4d2be54cc1ade65ed660f397cf03e997 = PR #980 (KS-924 KS-901), open against develop, TWO commits on M9
+  50b729d69 (= the merge-base): the round-1 head 9c620f890 (gated GO WITH FINDINGS 19:58 AEST onto M11 a2257e502,
+  794/794; 1 Polish GF-1; Records R-1..R-4, R-3 -> KS-1142) and the ROUND-2 commit 103c235b4 (parent 9c620f890, tree
+  068aa3d0f, +1 -1, author Kam Kreiser 20:41:44 +1000): packages/shared/src/__tests__/entrypoint-corpus.test.ts:235 —
+  the KS-901 P3 census plant's STRING `app.listen(0);` -> `app.listen(0, '127.0.0.1');` (+13 chars; blob e232b0289 ->
+  d81265b7f; sha256 86b7f7b23b2ac591… -> 020634da9cec74ec…). Nothing else moved: the module entrypoint-corpus.ts is
+  a7abd31ef everywhere; the ks860 loopback guard at #980's tree is still the pre-#976 blob d8842e577.
+  WHY: the merge seat HELD 9c620f890 — on the MERGED tree the ks860 test-listener loopback guard
+  (ks860-test-listeners-bind-loopback.test.ts, widened by #976 = M13 to walk packages/ too, its comment mask
+  preserving string contents by design) read that plant string as a host-less listener: packages/shared 805/806 on
+  M14, 812/813 on M15, the one red = its 🔴 cell (:463, toEqual([]) :477) naming entrypoint-corpus.test.ts:235
+  verbatim; the file green alone (the guard at the head tree walks services/ only). No gate could see it: round 1
+  gated onto M11, M13 came after. Wednesday ruled shape A — the guard's own accepted spelling (its :517 CONTROL; site
+  regex :433 /\.listen\(\s*0\s*(,|\))/g, host check :440 /^\s*(['"])127\.0\.0\.1\1/) — and the census regex H-a8 (:166)
+  reads `import('express').then(` and nothing after it, so the plant is still named by exactly one regex (:243).
+  origin develop = M15 1c38077ba (#981's squash, 10:20:41Z; read 20:53 AEST); M9..M15 = 6 squashes / 16 files, three
+  under packages/shared/ (ks781, ks860, ks879 — all MODIFIED tests), NOT #980's file (472c07dbe at M9 and M15); the
+  corpus's walk is 380 files / 27 packages / census [] at M15. The launcher pins the merge-base 50b729d69 (exit 10)
+  and develop M15 with a DISJOINTNESS CHECK (exit 18 only if a later squash touches #980's file, the ks860 guard file
+  or anything under packages/shared/) — if develop moved past M15 at launch, merge the then-current tip and re-derive:
+  develop-alone + 7, 0 failed.
+The headline questions of a DELTA gate: (1) is the delta EXACTLY the one line (blob, diff, sha — item 1); (2) on the
+  MERGED tree — a 3-way merge of 103c235b4 onto the live develop in YOUR clone — is the full packages/shared green with
+  the ks860 🔴 cell GREEN (813/813 on M15; state the instrument), and does RED-FIRST with round 1's bytes swapped into
+  the SAME tree red exactly that cell naming :235 (`1 failed | 812 passed (813)`) — item 2; (3) does the P3 census
+  still name the plant — T-P3 (the three regex lines :164-166 deleted) still reds P1 P2 P3 (`3 failed | 26 passed
+  (29)`), T6 still reds P3, T-860 (the old string restored on the merged tree) reds the ks860 cell naming :235 with
+  the corpus 29/29, and the gate-designed Tg-A/Tg-B/Tg-E/Tg-F on the host token — item 3, cells-run quoted; (4) are
+  round 1's findings unchanged — GF-1 stands as Polish (NOT taken by ruling, rides the next touch), R-1..R-4 stand,
+  R-3's KS-1142 exists (relayed) — item 4; (5) delivered-vs-commissioned against the s210 brief + Wednesday's ANSWER
+  (shape A; Q1 the M15 export; Q-GF1 not taken) — item 6; (6) findings-only; Wednesday searches the board by symbol;
+  NOT TESTED at equal prominence — item 9.
+Repo:    /Volumes/DevMASTER/!CODING/Secuura/Blockchain/2_Project_Files  (READ-ONLY — clone by SHA into your own scratch;
+  node_modules symlink-farmed FROM worktrees/s210-ks924-fix (the builder's, detached at 103c235b4, porcelain 0), never
+  into it, never vitest inside it; worktrees/s209-merge is the LIVE merge seat — rev-parse only)
+
+You are FINDINGS-ONLY. You never fix, never merge, never push, never deploy, never comment, never file, never `@`.
+
+NEVER run a push, the real pre-push hook, or preflight.sh inside the Secuura checkout or any of its worktrees.
+
+NEVER print a credential value, and never open, read or copy a secrets file (any .env, config/secrets.yml). Count, never echo.
+
+NO docker, NO stack, no kintsugi, no demo. Nothing in this gate needs a credential or a login.
+
+Six things you must not miss:
+
+1. THE MERGED TREE IS THE SUBJECT (item 2): at the head tree alone the guard walks services/ only, so 29/29 there
+   proves nothing about why this PR exists. Build the 3-way merge (103c235b4 onto the develop you read; 0 conflicts;
+   quote merge + tree sha; the file == head's, the guard == develop's), run the FULL package SOLO: 813/813 with the
+   shipped bytes; then swap round 1's blob e232b0289 into the merged worktree (never staged; sha 86b7f7b2… asserted)
+   -> `1 failed | 812 passed (813)`, the ks860 🔴 cell red with the offender line
+   `packages/shared/src/__tests__/entrypoint-corpus.test.ts:235  ['P3 import().then', …app.listen(0);…` quoted; restore
+   (020634da… asserted) -> 813/813 again. Also the two files verbose (52/52), the develop tree alone (806/806 on M15 —
+   the control), the head tree alone (file 29/29; package `2 failed | 792 passed (794)` — the two ks781 reds are #975's,
+   fixed on develop at M11, NOT on this branch: name the tree beside every count).
+
+2. THE DELTA IS ONE LINE (item 1): `git diff 9c620f890 103c235b4` = one hunk @@ -232,7 +232,7 @@ whose two lines are
+   the :235 lines quoted in the brief; numstat 1/1; ls-tree d81265b7f; the ks860 guard d8842e577 at head (untouched by
+   the PR) and e0dfadb9c at develop; the module a7abd31ef; `grep -c 'listen('` 1/1/0 at r2/r1/base; the commit's parent,
+   ids (KS-924 + KS-901 only, the guard by role), 0 PR refs, 1 at-sign = the Co-Authored-By e-mail.
+
+3. THE TAMPER TABLE, SUITE RUNNING (item 3): prediction first; anchors count 1 (`app.listen(0, '127.0.0.1');` occurs
+   ONCE; the three regex-line anchors once each); restore by content with the whole-file sha; score by title; cells-run
+   beside every colour; a 0-cell run is INVALID. T-P3 -> P1 P2 P3 (26/29; two-file 49/52 with ks860 GREEN); T6 -> P3
+   (28/29); T-860 `app.listen(0);` on the merged tree -> the ks860 cell naming :235 (full 812/813; two-file 51/52),
+   corpus 29/29; T-host == T-860 bytes (say so, count once). Gate-designed: Tg-A `'0.0.0.0'` -> ks860 red naming :235
+   (the host is the LITERAL loopback); Tg-E `() => {}` -> red (KS-860's original shape); Tg-F `'127.0.0.1', () => {}`
+   -> nothing red; Tg-B the host as `\"127.0.0.1\"` (escaped double quotes inside the double-quoted literal; write the
+   tamper from Python, assert `grep -cF '\"127.0.0.1\"'` = 1) -> predicted ks860 RED naming :235 although the plant
+   models a correctly bound listener — a boundary of #976's guard (symbol offendingListenSites / :440), a Record for
+   Wednesday's board search, NOT a finding against #980 and NOT a NO GO; if Tg-B is GREEN, the brief's read of the mask
+   is wrong — say so. Under every variant the eight-shape census over the plant BODY names exactly ['H-a8'] (item 3c).
+
+4. ROUND 1 STANDS (item 4): K3 :309-330 is byte-identical -> GF-1 is the same Polish, SHIPS-WITH, rides the next touch
+   (Q-GF1 NOT taken by ruling) — name it, do not re-find it; R-1..R-4 stand; R-3 -> KS-1142 (relayed: Backlog Low, 0
+   attachments). Do NOT re-run T1–T5, Tg1–Tg3, Tk, T3b, T1b, Tp, Tsym, the base column, docs §4 — byte-identical bytes
+   and an unchanged walk; list them in NOT TESTED with that reason. One cheap re-assertion (T1 -> K1 only, 28/29) is
+   welcome if budget allows.
+
+5. DELIVERED vs COMMISSIONED + CLAIMS (items 5, 6): the table in the brief — ITEM 0 (plan CONFIRMED shape A), ITEM 1
+   (the export as the merged-tree instrument per Q1: RUN 1 806/806, RUN 2 812/813 naming :235, RUN 3 813/813 — your
+   3-way merge must agree), ITEM 2 (4/4 EXACT), ITEM 3 (one commit, ids KS-924 + KS-901 only; the five never-type ids
+   0 hits in the commit AND the body; NO new PR comment; fast-forward push PROTOCOL-CLEAN; the local branch ref stays
+   9c620f890 while the tracking ref reads 103c235b4 — expected), ITEM 4 (KS-924 08c78be1 / KS-901 155e5dc0, 0 mention
+   nodes, the hold line 010bf4d1 not repeated; the PR body's round-2 block with the merged-tree ratio LABELLED, the
+   tamper table, "Migrations / config: none", NOT run, Not covered; 12,138 chars, 0 at-signs), ITEM 5 (GF-1 not taken),
+   shapes B/C/D refused (the guard's blob at head unchanged = D not taken). The precision note: the PRE-EXISTING PR
+   comment 5652637828 (s209's verdict record, 10:12:12Z, before s210) types KS-1142 — not s210's; KS-1142 has 0
+   attachments; whether a PR comment attaches at all is UNKNOWN (instrument: KS-1142's attachment count over time).
+
+6. QUALITY, ONE LINE EACH (item 7): `npx eslint` on the file rc 0; the scratch-tsconfig tsc 0 errors (round 1's
+   tsconfig.qa980.*.json in its evidence) — the builder skipped both for a one-line string edit; your run closes it.
+
+Your tool shell's grep may be a function: use /usr/bin/grep with a same-file control; for the regex-literal anchors use
+-F with backslashes doubled, or Python str.count on the blob. Never cd in your own tool calls; the pre-tool hook refuses
+`git worktree` in the Secuura checkout — clone into your scratch and run write verbs THERE. A REAL checkout of the whole
+Blockchain/Dev, not a symlink farm (neither walk descends a symlinked directory — K1 or the ks860 walk reds for the wrong
+reason). Keep every scratch of yours OUT of <pkg>/src (the corpus walks it) AND out of any __tests__/ or *.test.ts path
+under services/ or packages/ (the ks860 guard walks it — a probe file with `listen(0` in it reds the guard for the wrong
+reason; round 1's __qa980_probe.test.ts shape IS walked by ks860). packages/shared is VITEST 4.1.10 (npx vitest run, never
+watch; cwd = <clone>/Blockchain/Dev/packages/shared); run suites solo. /bin/bash here is 3.2 — write runners in Python.
+zsh: no PIPESTATUS (`cmd > out 2>&1; rc=$?`), no timeout on macOS.
+Quote the Secuura checkout's porcelain count, .git/config sha256, for-each-ref count, origin develop SHA, refs/pull/980/head
+and the branch at start and close; they must match (name any ref another seat's push or merge moved). Confirm
+worktrees/s210-ks924-fix is byte-identical at start and close (porcelain 0 both times); read worktrees/s209-merge by
+rev-parse HEAD only.
+Never `rm`: fresh mktemp -d per attempt; quarantine plants and probes by rename.
+Do no memory maintenance of your own project's memory store inside this session.
+
+Report FOUND / TESTED / HOW, with controls; the merged tree you built (develop SHA, merge/tree sha, 0 conflicts) and
+its counts; the RED-FIRST pair (812/813 naming :235 · 813/813); the head-tree counts with the tree named; the tamper
+table (T-P3, T6, T-860, T-host, Tg-A, Tg-B, Tg-E, Tg-F, optional Tg-D) with cells-run and the offender line for the
+ks860 rows; Tg-B's outcome and what it means; the DELIVERED-vs-COMMISSIONED table; the round-1 findings NAMED as
+standing (GF-1 ships-with; R-1..R-4; R-3 -> KS-1142); and state what you did NOT test at the same prominence as the
+findings.
+Verdict: GO, GO WITH FINDINGS, or NO GO — on 103c235b4, against the develop you merged it onto (name it). Say what
+ships and what is ticketed (symbol/path); give the merge seat its ADDENDUM line: "merge
+103c235b4d2be54cc1ade65ed660f397cf03e997 onto develop; expected packages/shared = develop's count + 7, 0 failed".
+
+MAIL YOUR VERDICT to wednesday-agent@agentmail.to when the pass is complete, using
+the project's send_brief.sh. Your pane holds ~19 lines of alternate screen with no
+scrollback, so a verdict that stays in the pane is one pane-close from being lost --
+this is not a formality, it is the only durable copy. Subject:
+[QA -> Wednesday] TIER 2 GATE #980 ROUND 2 (KS-924 KS-901) 103c235b4 -- <GO|GO WITH FINDINGS|NO GO>
