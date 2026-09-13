@@ -1,0 +1,60 @@
+--- proxy.ts + rateLimitEnforce + enforcement + gw auth.ts blobs at head vs develop (untouched by the stack?)
+proxy.ts head=b99f45a4c dev=b99f45a4c SAME
+rateLimitEnforce.ts head=fc5c5a4d9 dev=fc5c5a4d9 SAME
+enforcement.ts head=533cd309c dev=533cd309c SAME
+auth.ts head=20311010d dev=20311010d SAME
+auth.ts head=132d3b8d3 dev=132d3b8d3 SAME
+scopes.ts head=c6040ca14 dev=c6040ca14 SAME
+oauth.ts head=e9953d376 dev=e9953d376 SAME
+--- getDefaultScopesForRole at head
+   225	  return Array.from(out).sort() as Scope[];
+   226	}
+   227	
+   228	/**
+   229	 * KS-151 — default scope grants by role.
+   230	 *
+   231	 * Returns the scopes a freshly-minted JWT for a given role should carry.
+   232	 * Used by the auth service at token-mint time so downstream services see
+   233	 * the right `req.user.scopes` and `isAllowedByRoleOrScope` accepts the
+   234	 * caller without a role-allow-list change.
+   235	 *
+   236	 * Why: per-user (OWNER) accounts register via `/api/auth/register` and
+   237	 * need to create their own documents on Platform K, but ISSUER_ADMIN is
+   238	 * a powerful role we don't want to hand to every public signup. Option D
+   239	 * from KS-151 — grant OWNER the narrow `documents:write` scope only —
+   240	 * reuses the KS-71 scope mechanism that already gates `POST /api/documents`.
+   241	 *
+   242	 * Roles not listed return `[]`: their access is via the existing
+   243	 * role-allow-list paths, no scope needed.
+   244	 *
+   245	 * Case-insensitive on role to match the rest of the RBAC code.
+   246	 */
+   247	export function getDefaultScopesForRole(role: string | undefined | null): Scope[] {
+   248	  const normalised = String(role ?? '').toUpperCase();
+   249	  switch (normalised) {
+   250	    case 'OWNER':
+   251	      return ['documents:write'];
+   252	    default:
+   253	      return [];
+   254	  }
+   255	}
+   256	
+   257	/**
+   258	 * Validate that every entry in `claimed` is either a known scope from
+   259	 * `SCOPES`, the global `*`, or a known-resource `<resource>:*` wildcard.
+   260	 * Used at API-key issuance time so malformed scope strings can't be
+   261	 * stored. Returns the offending entries (empty array means all valid).
+   262	 */
+   263	export function validateScopes(claimed: readonly string[]): string[] {
+   264	  const invalid: string[] = [];
+   265	  const knownResources = new Set<string>();
+   266	  for (const s of SCOPES) {
+   267	    const r = s.split(':')[0];
+   268	    if (r) knownResources.add(r);
+   269	  }
+   270	
+   271	  for (const c of claimed) {
+   272	    if (c === '*') continue;
+   273	    if (c.endsWith(':*')) {
+   274	      const r = c.slice(0, -2);
+   275	      if (!knownResources.has(r)) invalid.push(c);

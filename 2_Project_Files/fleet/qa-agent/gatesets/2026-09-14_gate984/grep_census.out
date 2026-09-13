@@ -1,0 +1,125 @@
+git grep census at head d00a2015c89a4720eaeab64482bbd9b89d878024, 07:11:22 AEST — product code only (excluding __tests__ and *.test.ts and dist/node_modules)
+=== authMethod
+Blockchain/Dev/services/api-gateway/src/config/services.ts:23:  authMethod?: string;
+Blockchain/Dev/services/api-gateway/src/middleware/auth.ts:27:  authMethod?: string;
+Blockchain/Dev/services/api-gateway/src/middleware/auth.ts:147:      authMethod: payload.authMethod || payload.auth_method || 'email',
+Blockchain/Dev/services/api-gateway/src/middleware/auth.ts:277:        authMethod: 'api_key',
+Blockchain/Dev/services/api-gateway/src/middleware/rateLimitEnforce.ts:83:    if (!user || !MACHINE_AUTH_METHODS.has(user.authMethod)) {
+Blockchain/Dev/services/api-gateway/src/middleware/rateLimitEnforce.ts:92:        `[rateLimit] machine caller ${user.connectorId || user.userId} (${user.authMethod}) has no rateLimit — applying default ${DEFAULT_MACHINE_RATE_LIMIT}/${DEFAULT_MACHINE_RATE_WINDOW}s`,
+Blockchain/Dev/services/api-gateway/src/middleware/scopes.ts:35:    const authMethod = user.authMethod || 'jwt';
+Blockchain/Dev/services/api-gateway/src/middleware/scopes.ts:36:    if (authMethod === 'jwt' || authMethod === 'email') {
+Blockchain/Dev/services/api-gateway/src/middleware/scopes.ts:124: * 1. **No `authMethod` short-circuit.** `requireScope` returns `next()` for
+Blockchain/Dev/services/api-gateway/src/middleware/scopes.ts:125: *    any principal whose `authMethod` is `jwt` or `email`. KS-835 records that
+Blockchain/Dev/services/api-gateway/src/routes/admin.ts:25:  authMethod?: string;
+Blockchain/Dev/services/api-gateway/src/routes/admin.ts:1203:          COALESCE(u.auth_method, 'email') AS "authMethod",
+Blockchain/Dev/services/api-gateway/src/routes/admin.ts:1218:        if (r.authMethod && r.authMethod !== 'email' && !socialProviders.includes(r.authMethod as string)) {
+Blockchain/Dev/services/api-gateway/src/routes/admin.ts:1219:          socialProviders.push(r.authMethod as string);
+Blockchain/Dev/services/api-gateway/src/routes/platform.ts:30:  authMethod?: string;
+Blockchain/Dev/services/api-gateway/src/routes/proxy.ts:388:  // automatically (the middleware short-circuits authMethod='jwt'/'email');
+Blockchain/Dev/services/api-gateway/src/routes/proxy.ts:759:  // callers are unaffected (requireScope short-circuits authMethod jwt/email).
+Blockchain/Dev/services/api-gateway/src/routes/verification.ts:31:  authMethod?: string;
+Blockchain/Dev/services/api-gateway/src/services/enforcement.ts:21:  authMethod?: string;
+Blockchain/Dev/services/api-gateway/src/services/enforcement.ts:161:    const userAuthMethod = (user.authMethod || 'email').toLowerCase();
+Blockchain/Dev/services/auth/src/repositories/userRepo.ts:251:    authMethod: row.auth_method ?? 'email',
+Blockchain/Dev/services/auth/src/repositories/userRepo.ts:716:      user.authMethod || 'email',
+Blockchain/Dev/services/auth/src/repositories/userRepo.ts:815:    authMethod: 'auth_method',
+Blockchain/Dev/services/auth/src/repositories/userRepo.ts:826:      if (['role', 'status', 'verificationLevel', 'authMethod'].includes(tsField) && typeof val === 'string') {
+Blockchain/Dev/services/auth/src/routes/auth.ts:1144:        authMethod: 'social',
+Blockchain/Dev/services/auth/src/routes/wallet.ts:210:    authMethod: 'wallet',
+Blockchain/Dev/services/auth/src/services/jwt.ts:17:// the scopes the user GRANTED, and an `authMethod: 'oauth'` label.
+Blockchain/Dev/services/auth/src/services/jwt.ts:28:// granted, nothing allowed) and `authMethod: 'oauth'`, which the gateway gates
+Blockchain/Dev/services/auth/src/services/jwt.ts:41:export type OAuthTokenClaims = JwtPayload & { client_id?: string; authMethod?: 'oauth' };
+Blockchain/Dev/services/auth/src/services/jwt.ts:205:    ...(oauth ? { scopes: [...oauth.scopes], authMethod: 'oauth' as const } : scopes.length > 0 ? { scopes } : {}),
+Blockchain/Dev/services/auth/src/services/jwt.ts:229:    ...(oauth ? { scopes: [...oauth.scopes], authMethod: 'oauth' as const } : scopes.length > 0 ? { scopes } : {}), // KS-835
+Blockchain/Dev/services/auth/src/types/index.ts:204:  authMethod?: 'email' | 'wallet' | 'federated' | 'social';
+Blockchain/Dev/services/originate/src/routes/adminConfig.ts:1499:        authMethod: r.external_provider || 'email',
+Blockchain/Dev/services/timestamping/src/tsa/qualified-tsa.ts:42:  authMethod?: 'none' | 'basic' | 'certificate' | 'api_key';
+Blockchain/Dev/services/timestamping/src/tsa/qualified-tsa.ts:108:    authMethod: 'none',
+Blockchain/Dev/services/timestamping/src/tsa/qualified-tsa.ts:118:    authMethod: 'certificate',
+Blockchain/Dev/services/timestamping/src/tsa/qualified-tsa.ts:128:    authMethod: 'none',
+Blockchain/Dev/services/timestamping/src/tsa/qualified-tsa.ts:138:    authMethod: 'none',
+Blockchain/Dev/services/timestamping/src/tsa/qualified-tsa.ts:150:    authMethod: 'none',
+Blockchain/Dev/services/timestamping/src/tsa/qualified-tsa.ts:162:    authMethod: 'none',
+Blockchain/Dev/services/timestamping/src/tsa/qualified-tsa.ts:172:    authMethod: 'none',
+Blockchain/Dev/services/timestamping/src/tsa/qualified-tsa.ts:182:    authMethod: 'none',
+=== requireScope(
+Blockchain/Dev/packages/shared/src/security/scopes.ts:25: *   3. Apply via `requireScope(...)` (api-gateway side) and/or
+Blockchain/Dev/services/api-gateway/src/middleware/scopes.ts:20: *   router.get('/api/documents', requireScope('documents:read'), handler);
+Blockchain/Dev/services/api-gateway/src/middleware/scopes.ts:21: *   router.post('/api/certifications/issue', requireScope('certifications:write'), handler);
+Blockchain/Dev/services/api-gateway/src/middleware/scopes.ts:23:export function requireScope(...requiredScopes: string[]) {
+Blockchain/Dev/services/api-gateway/src/routes/proxy.ts:375:    requireScope('webhooks:manage'),
+Blockchain/Dev/services/api-gateway/src/routes/proxy.ts:394:    requireScope('users:read'),
+Blockchain/Dev/services/api-gateway/src/routes/proxy.ts:568:    requireScope('documents:read', 'documents:write'),
+Blockchain/Dev/services/api-gateway/src/routes/proxy.ts:575:    requireScope('certifications:read', 'certifications:write'),
+Blockchain/Dev/services/api-gateway/src/routes/proxy.ts:764:    requireScope('anchors:write'),
+Blockchain/Dev/services/api-gateway/src/routes/proxy.ts:770:    requireScope('anchors:write'),
+=== requireScopeOrRole(
+Blockchain/Dev/services/api-gateway/src/middleware/scopes.ts:139:export function requireScopeOrRole(
+Blockchain/Dev/services/api-gateway/src/routes/proxy.ts:731:    requireScopeOrRole(ERASURE_SCOPE, ERASURE_GRACE_ROLES, ERASURE_ENFORCE_FLAG),
+=== isAllowedByRoleOrScope
+Blockchain/Dev/packages/shared/src/security/scopes.ts:26: *      `isAllowedByRoleOrScope(...)` (downstream-service side).
+Blockchain/Dev/packages/shared/src/security/scopes.ts:233: * the right `req.user.scopes` and `isAllowedByRoleOrScope` accepts the
+Blockchain/Dev/services/api-gateway/src/middleware/auth.ts:36:  // `isAllowedByRoleOrScope` so the gateway pass-through and the
+Blockchain/Dev/services/auth/src/services/jwt.ts:188:  // KS-151: attach role-derived scopes so downstream `isAllowedByRoleOrScope`
+Blockchain/Dev/services/auth/src/types/index.ts:64:  // KS-71 scope mechanism (`isAllowedByRoleOrScope` downstream) so OWNER
+Blockchain/Dev/services/originate/src/middleware/auth.ts:24:  // `isAllowedByRoleOrScope` in `./rbac.ts` reads this to grant scoped
+Blockchain/Dev/services/originate/src/middleware/documentWriteRoles.ts:10: * separately by `isAllowedByRoleOrScope`.
+Blockchain/Dev/services/originate/src/middleware/documentWriteRoles.ts:35: * `isAllowedByRoleOrScope(req, allowedRoles, requiredScope)` signature.
+Blockchain/Dev/services/originate/src/middleware/rbac.ts:47:export function isAllowedByRoleOrScope(
+Blockchain/Dev/services/originate/src/routes/certifications.ts:45:import { isAllowedByRoleOrScope } from '../middleware/rbac';
+Blockchain/Dev/services/originate/src/routes/certifications.ts:169:      if (!isAllowedByRoleOrScope(req, DOCUMENT_WRITE_ROLES, 'certifications:write')) {
+Blockchain/Dev/services/originate/src/routes/documents.ts:36:import { isAllowedByRoleOrScope } from '../middleware/rbac';
+Blockchain/Dev/services/originate/src/routes/documents.ts:359:      if (!isAllowedByRoleOrScope(req, ALLOWED_CREATION_ROLES, 'documents:write')) {
+Blockchain/Dev/services/originate/src/routes/documents.ts:1566:      if (!isAllowedByRoleOrScope(req, ALLOWED_TRANSFER_CUSTODY_ROLES, 'documents:transfer-custody')) {
+Blockchain/Dev/services/originate/src/routes/documents.ts:1879:      if (!isAllowedByRoleOrScope(req, ALLOWED_VERSION_ROLES, 'documents:write')) {
+Blockchain/Dev/services/originate/src/routes/documents.ts:2058:      if (!isAllowedByRoleOrScope(req, ALLOWED_DOCUMENT_SHARE_ROLES, 'documents:share')) {
+Blockchain/Dev/services/originate/src/routes/documents.ts:2500:      if (!isAllowedByRoleOrScope(req, ALLOWED_VERSION_ROLES, 'documents:write')) {
+Blockchain/Dev/services/originate/src/routes/documents.ts:2763:      if (!isAllowedByRoleOrScope(req, ALLOWED_VERSION_ROLES, 'documents:write')) {
+=== verifyJwtRs256
+Blockchain/Dev/packages/shared/src/crypto/jwks.ts:197: *   const payload = await verifyJwtRs256(bearerToken);
+Blockchain/Dev/packages/shared/src/crypto/jwks.ts:199:export async function verifyJwtRs256(token: string): Promise<JwtPayload> {
+Blockchain/Dev/packages/shared/src/middleware/index.ts:10:import { verifyJwtRs256 } from '../crypto/jwks';
+Blockchain/Dev/packages/shared/src/middleware/index.ts:51:  return (await verifyJwtRs256(token)) as unknown as JwtPayload;
+Blockchain/Dev/services/api-gateway/src/middleware/auth.ts:14:import { verifyJwtRs256 } from '@secuura/shared/crypto/jwks';
+Blockchain/Dev/services/api-gateway/src/middleware/auth.ts:95:  return (await verifyJwtRs256(token)) as unknown as UserPayload;
+Blockchain/Dev/services/originate/src/middleware/auth.ts:12:import { verifyJwtRs256 } from '@secuura/shared/crypto/jwks';
+Blockchain/Dev/services/originate/src/middleware/auth.ts:45:  return (await verifyJwtRs256(token)) as unknown as JwtPayload;
+=== parseScopeString
+Blockchain/Dev/services/auth/src/routes/oauth.ts:27:  validateScopes, parseScopeString, AVAILABLE_SCOPES,
+Blockchain/Dev/services/auth/src/routes/oauth.ts:388:  const requestedScopes = parseScopeString(scope);
+Blockchain/Dev/services/auth/src/routes/oauth.ts:848:      const tokens = generateTokenPair(user, session.id, { clientId: client_id, scopes: parseScopeString(result.scope || '') });
+Blockchain/Dev/services/auth/src/services/oauth.ts:357:export function parseScopeString(scope?: string): string[] {
+=== getDefaultScopesForRole
+Blockchain/Dev/packages/shared/src/security/scopes.ts:247:export function getDefaultScopesForRole(role: string | undefined | null): Scope[] {
+Blockchain/Dev/services/auth/src/services/jwt.ts:9:import { getDefaultScopesForRole } from '@secuura/shared/security/scopes';
+Blockchain/Dev/services/auth/src/services/jwt.ts:24:// caller's ROLE defaults (`getDefaultScopesForRole`) whatever the user had
+Blockchain/Dev/services/auth/src/services/jwt.ts:192:  const scopes = getDefaultScopesForRole(user.role);
+Blockchain/Dev/services/auth/src/services/jwt.ts:218:  const scopes = getDefaultScopesForRole(user.role);
+Blockchain/Dev/services/auth/src/types/index.ts:66:  // Source of truth: `getDefaultScopesForRole` in
+Blockchain/Dev/services/originate/src/middleware/auth.ts:23:  // KS-151: role-derived scopes minted by auth (`getDefaultScopesForRole`).
+=== attachScopes
+Blockchain/Dev/services/api-gateway/src/middleware/scopes.ts:82:export function attachScopes(req: Request, _res: Response, next: NextFunction): void {
+Blockchain/Dev/services/api-gateway/src/routes/proxy.ts:16:import { requireScope, attachScopes, requireScopeOrRole } from '../middleware/scopes';
+Blockchain/Dev/services/api-gateway/src/routes/proxy.ts:374:    attachScopes,
+Blockchain/Dev/services/api-gateway/src/routes/proxy.ts:393:    attachScopes,
+Blockchain/Dev/services/api-gateway/src/routes/proxy.ts:567:    attachScopes,
+Blockchain/Dev/services/api-gateway/src/routes/proxy.ts:574:    attachScopes,
+Blockchain/Dev/services/api-gateway/src/routes/proxy.ts:730:    attachScopes,
+Blockchain/Dev/services/api-gateway/src/routes/proxy.ts:763:    attachScopes,
+Blockchain/Dev/services/api-gateway/src/routes/proxy.ts:769:    attachScopes,
+=== auth_method
+Blockchain/Dev/services/api-gateway/src/middleware/auth.ts:147:      authMethod: payload.authMethod || payload.auth_method || 'email',
+Blockchain/Dev/services/api-gateway/src/routes/admin.ts:461:  { email: 'alice@secuura.io', display_name: 'Alice Johnson', role: 'issuer_admin', verification_level: 'STANDARD', auth_method: 'email', mfa_enabled: true, wallet_address: 'addr1q9example1', external_provider: 'google', organization_id: 'b0000000-0000-4000-8000-000000000001', metadata: { region: 'EU', social_providers: ['google', 'linkedin'] } },
+Blockchain/Dev/services/api-gateway/src/routes/admin.ts:462:  { email: 'bob@acme-university.edu', display_name: 'Prof. Bob Williams', role: 'issuer_approver', verification_level: 'SOCIAL', auth_method: 'google', mfa_enabled: false, wallet_address: null, external_provider: 'google', organization_id: 'b0000000-0000-4000-8000-000000000002', metadata: { region: 'UK', social_providers: ['google'] } },
+Blockchain/Dev/services/api-gateway/src/routes/admin.ts:463:  { email: 'carol@globalverify.com', display_name: 'Carol Davis', role: 'verifier', verification_level: 'BASIC', auth_method: 'email', mfa_enabled: false, wallet_address: null, external_provider: null, organization_id: 'b0000000-0000-4000-8000-000000000003', metadata: { region: 'US', social_providers: [] } },
+Blockchain/Dev/services/api-gateway/src/routes/admin.ts:464:  { email: 'dave@example.com', display_name: 'Dave Miller', role: 'owner', verification_level: 'SOCIAL', auth_method: 'github', mfa_enabled: false, wallet_address: 'addr1q9example2', external_provider: 'github', organization_id: null, metadata: { region: 'EU', social_providers: ['github'] } },
+Blockchain/Dev/services/api-gateway/src/routes/admin.ts:465:  { email: 'eve@secuura.io', display_name: 'Eve Chen', role: 'system_admin', verification_level: 'STANDARD', auth_method: 'email', mfa_enabled: true, wallet_address: 'addr1q9example3', external_provider: null, organization_id: 'b0000000-0000-4000-8000-000000000001', metadata: { region: 'EU', social_providers: ['google', 'github', 'linkedin'] } },
+Blockchain/Dev/services/api-gateway/src/routes/admin.ts:1156:      await query(`ALTER TABLE users ADD COLUMN IF NOT EXISTS auth_method VARCHAR(20) DEFAULT 'email'`);
+Blockchain/Dev/services/api-gateway/src/routes/admin.ts:1183:          `INSERT INTO users (email, display_name, role, verification_level, auth_method, mfa_enabled, wallet_address, external_provider, organization_id, metadata, password_hash)
+Blockchain/Dev/services/api-gateway/src/routes/admin.ts:1185:          [u.email, u.display_name, u.role, u.verification_level, u.auth_method, u.mfa_enabled, u.wallet_address, u.external_provider, u.organization_id, JSON.stringify(u.metadata), null]
+Blockchain/Dev/services/api-gateway/src/routes/admin.ts:1203:          COALESCE(u.auth_method, 'email') AS "authMethod",
+Blockchain/Dev/services/auth/src/db.ts:117:    'ALTER TABLE users ADD COLUMN IF NOT EXISTS auth_method VARCHAR(20) DEFAULT \'email\'',
+Blockchain/Dev/services/auth/src/repositories/userRepo.ts:251:    authMethod: row.auth_method ?? 'email',
+Blockchain/Dev/services/auth/src/repositories/userRepo.ts:346:const USER_COLS = 'id, email, first_name, last_name, display_name, role, status, email_verified, phone_number, phone_verified, mfa_enabled, mfa_secret, mfa_backup_codes, verification_level, organization_id, tenant_id, tenant_slug, wallet_address, auth_method, external_provider, external_id, google_id, linkedin_id, facebook_id, apple_id, github_id, microsoft_personal_id, metadata, created_at, updated_at, last_login_at';
+Blockchain/Dev/services/auth/src/repositories/userRepo.ts:684:      verification_level, wallet_address, auth_method, organization_id,
+Blockchain/Dev/services/auth/src/repositories/userRepo.ts:815:    authMethod: 'auth_method',

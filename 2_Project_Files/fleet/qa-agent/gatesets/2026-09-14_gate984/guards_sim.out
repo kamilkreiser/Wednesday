@@ -1,0 +1,48 @@
+2026-09-14 07:20:03 AEST
+ok   jwt.ts.head (15955 B, sha256 de0670cb20321114) == contents-API copy gh_jwt.ts.head
+ok   oauth.ts.head (67687 B, sha256 5e1ce25c995c3944) == contents-API copy gh_oauth.ts.head
+ok   scopes.ts.head (8138 B, sha256 e0757e2185c1a832) == contents-API copy gh_scopes.ts.head
+ok   ks835-auth.test.ts.head (11369 B, sha256 bc85078909065297) == contents-API copy gh_ks835-oauth-mint-carries-granted-scope.test.ts.head
+ok   ks835-gw.test.ts.head (7109 B, sha256 42841fc66a28487c) == contents-API copy gh_ks835-oauth-token-scope-gate.test.ts.head
+ok   ks823.test.ts.head (15731 B, sha256 4e743896fdc468e4) == contents-API copy gh_ks823-refresh-grant-client-auth-and-binding.test.ts.head
+ok   ks860 :433/:440 over ks835-auth.test.ts.head: listen(0 sites at [127], offenders [] (expected one site, [])
+ok   ks860 :433/:440 over ks835-gw.test.ts.head: listen(0 sites at [64], offenders [] (expected one site, [])
+ok   ks860 :433/:440 over ks823.test.ts.head: listen(0 sites at [132], offenders [] (expected one site, [])
+ok   guard control 'const s = app.listen(0, () => {});' -> 1 offender(s) (expected 1)
+ok   guard control 'const s = app.listen(0);' -> 1 offender(s) (expected 1)
+ok   guard control "const s = app.listen(0, '127.0.0.1');" -> 0 offender(s) (expected 0)
+ok   guard control "server = app.listen(0, '127.0.0.1', resolve);" -> 0 offender(s) (expected 0)
+ok   gateway test :64 = await new Promise<void>((resolve) => { server = app.listen(0, '127.0.0.1', resolve); });
+ok   auth test :127 = server = app.listen(0, '127.0.0.1');
+--- the gateway cells, from the head mint shape
+ok   cell 1: OAuth mint granted [openid] at requireScope('webhooks:manage') -> 403
+ok   cell 2: the same with webhooks:manage granted -> 200
+ok   cell 3: sk_* key (authMethod api_key, scopes [openid]) -> 403
+ok   cell 4: a LOGIN mint (no label, role default) -> 200 (RBAC governs)
+ok   cell 5: OAuth mint with an EMPTY grant (scopes: []) -> 403 (the [] is truthy in JS; attachScopes leaves it)
+ok   cell 6a: the array wins over a singular scope string
+ok   cell 6b: the legacy string is parsed when no array is present
+ok   cell 6c: nothing to read -> scopes stays undefined
+--- the UNFIXED product (parent mint shape) through the same gate — why H1/H2 were the defect
+ok   PARENT: an OAuth mint granted [openid] carried the role default and no label -> 200 (the ticket's defect, by sim)
+--- gate-designed tampers on scopes.ts (predictions, drafter)
+ok   Tg1 (:36 short-circuits 'oauth' too) -> red ['c1', 'c5'] (predicted exactly c1 + c5; c6 is attachScopes-only, unaffected)
+ok   Tg3 (:42 `user.scopes || ['*']`) -> red ['c5'] (predicted exactly c5 — an EMPTY array is truthy, so only the ABSENT-claim cell reaches the fallback)
+ok   Tg2 (:84 `if (user)`) -> cell 6a reds (the string overrides the array: ['webhooks:manage']); c1-c5 carry no `scope` string, so they stay green -> exactly 1 red
+--- enforcement.ts :159-170 allowedAuthProviders, unlabelled (parent) vs 'oauth' (head)
+ok   allowedAuthProviders=['google']: refused before=True after=True (after must never refuse where before admitted)
+ok   allowedAuthProviders=['email']: refused before=False after=False (after must never refuse where before admitted)
+ok   allowedAuthProviders=['any']: refused before=False after=False (after must never refuse where before admitted)
+ok   allowedAuthProviders=['google', 'email']: refused before=False after=False (after must never refuse where before admitted)
+ok   allowedAuthProviders=['oauth']: refused before=True after=False (after must never refuse where before admitted)
+ok   allowedAuthProviders=['wallet', 'github']: refused before=True after=True (after must never refuse where before admitted)
+ok   allowedAuthProviders=[]: refused before=False after=False (after must never refuse where before admitted)
+--- rateLimitEnforce.ts :61 MACHINE_AUTH_METHODS
+ok   'oauth' is NOT in MACHINE_AUTH_METHODS {'api_key','oauth_app'} — an OAuth-labelled token is NOT per-client rate-limited (it was not before either: unlabelled -> not in the set); the limiter's own comment :58-60 says a new machine auth method must be added there AND populate req.user.rateLimit — a RECORD for the class, symbol MACHINE_AUTH_METHODS, not a #984 regression
+--- the launder path (READ ONLY, drafter): routes/auth.ts :658-689 POST /api/auth/refresh re-mints with generateTokenPair(user, session.id) — no OAuth options
+ok   auth.ts :658 = authRoutes.post('/refresh', async (req: AuthenticatedRequest, res: Response, nex
+ok   auth.ts :665 = const payload = verifyRefreshToken(refreshTokenValue);
+ok   auth.ts :689 = const tokens = generateTokenPair(user, session.id); (NO third argument: the re-mint is LOGIN-shaped)
+ok   auth.ts :658-700 reads neither client_id nor authMethod off the refresh token — an OAuth refresh token is accepted as a login's
+ok   the re-minted pair (sim of :689): no label, no client_id, role-default scopes -> passes requireScope('webhooks:manage') 200 — the grant is shed in one unauthenticated call (PREDICTION for the gate's H-launder cell)
+guards_sim rc=0

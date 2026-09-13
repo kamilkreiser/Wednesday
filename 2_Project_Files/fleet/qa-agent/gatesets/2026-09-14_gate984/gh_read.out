@@ -1,0 +1,138 @@
+GH_TOKEN: set
+read at 2026-09-14 07:15:57 AEST / 21:15:57Z
+classifier positive control: {'array': 1, 'prep': 1, 'email': 0, 'idiom': 0, 'mention': 1, 'other': 1}
+PR #984: state=open draft=False merged=False author=kksecura BASE=develop@8861e6216 head=d00a2015c89a4720eaeab64482bbd9b89d878024 branch=feature/ks-835-security-oauth-consent-is-decorative-the-granted-scope-never commits=3 files=8 +1049 -28 mergeable=True/unstable created=2026-09-13T14:42:09Z updated=2026-09-13T14:42:30Z title="KS-835: an OAuth-minted token carries the scopes the user GRANTED and an 'oauth' label, so the gateway gates it on the grant"
+  body chars=6562 at-signs=0 classes={'array': 0, 'prep': 0, 'email': 0, 'idiom': 0, 'mention': 0, 'other': 0} KS=['KS-835'] PRrefs=['#982', '#983']
+  headings: ['## KS-835 — an OAuth-minted token carries the scopes the user GRANTED and an `oauth` label, so the gateway gates it on the grant', '### What was wrong', "### The three hypotheses, run against the unfixed product FIRST (the ticket's own bar)", '### The fix — the mint', '### Blast radius — stated, as the ticket requires', '### Test Evidence']
+  body count 'd00a2015c': 0
+  body count 'f62c975c1': 2
+  body count 'e62eab87a': 0
+  body count '#983': 4
+  body count '#982': 2
+  body count 'H1': 3
+  body count 'H2': 3
+  body count 'H3': 1
+  body count '53/707': 0
+  body count '35/349': 0
+  body count '52/702': 0
+  body count '34/343': 0
+  body count '4 failed | 1 passed': 1
+  body count 'T1': 2
+  body count 'T2': 2
+  body count 'T3': 2
+  body count 'T4': 2
+  body count 'predicted 2': 1
+  body count 'eight': 1
+  body count 'seven': 0
+  body count 'requireScope': 3
+  body count 'authMethod': 6
+  body count "'oauth'": 3
+  body count 'Not covered': 0
+  body count 'NOT run': 1
+  body count 'Migrations': 1
+  body count 'migrations': 0
+  body count 'KS-823': 0
+  body count 'KS-790': 0
+  body count 'KS-835': 2
+  body count 'KS-843': 0
+  body count 'KS-164': 0
+  body count 'blast': 0
+  body count 'Blast': 1
+  body count 'fail-closed': 0
+  body count 'PREFLIGHT PASSED': 0
+  body count 'PROTOCOL-CLEAN': 0
+  body count 'stacked': 1
+  body count 'STACKED': 0
+  body count 'Stacked': 1
+  body count 's212': 0
+  body count '127.0.0.1': 0
+  body count '/api/auth/refresh': 0
+  body count 'Test Evidence': 1
+  file added     +125 -0 sha=548e1ec12 Blockchain/Dev/services/api-gateway/src/__tests__/ks835-oauth-token-scope-gate.test.ts
+  file modified  +12 -1 sha=7aef335b9 Blockchain/Dev/services/api-gateway/src/middleware/scopes.ts
+  file added     +253 -0 sha=f98e8c806 Blockchain/Dev/services/auth/src/__tests__/ks790-token-pre-auth-user-lookup.test.ts
+  file modified  +8 -0 sha=b998b5b7d Blockchain/Dev/services/auth/src/__tests__/ks820-821-token-client-auth-and-apptype.test.ts
+  file added     +277 -0 sha=db9744c97 Blockchain/Dev/services/auth/src/__tests__/ks823-refresh-grant-client-auth-and-binding.test.ts
+  file added     +219 -0 sha=f61388142 Blockchain/Dev/services/auth/src/__tests__/ks835-oauth-mint-carries-granted-scope.test.ts
+  file modified  +111 -15 sha=0bab1b8bd Blockchain/Dev/services/auth/src/routes/oauth.ts
+  file modified  +44 -12 sha=26562a224 Blockchain/Dev/services/auth/src/services/jwt.ts
+  commit e62eab87a6263e25c41c9bb814d5831842bb6c7e parents=['8861e6216'] Kam Kreiser <kamil.kreiser@secuura.ai> 2026-09-13T14:05:32Z tree=60327bfa0 subj='KS-790: the OAuth token grants resolve the user through the pre-auth carve-out, not the RLS-scoped lookup'
+  commit f62c975c11ec97cdef04500fd98a43618e702763 parents=['e62eab87a'] Kam Kreiser <kamil.kreiser@secuura.ai> 2026-09-13T14:20:23Z tree=db10aea98 subj='KS-823: the refresh_token grant authenticates the client and honours a client binding on OAuth-minted tokens'
+  commit d00a2015c89a4720eaeab64482bbd9b89d878024 parents=['f62c975c1'] Kam Kreiser <kamil.kreiser@secuura.ai> 2026-09-13T14:36:56Z tree=39ab0226a subj="KS-835: an OAuth-minted token carries the scopes the user GRANTED and an 'oauth' label, so the gateway gates it on the grant"
+  reviews: 0 []
+  review comments: 0
+  issue comment 5653952575 linear[bot] 2026-09-13T14:42:13Z chars=5143 at-signs=0 classes={'array': 0, 'prep': 0, 'email': 0, 'idiom': 0, 'mention': 0, 'other': 0} KS=['KS-781', 'KS-804', 'KS-820', 'KS-822', 'KS-835']
+  base-branch check: base IS develop
+PR #983: state=open draft=False merged=False author=kksecura BASE=develop@8861e6216 head=f62c975c11ec97cdef04500fd98a43618e702763 branch=feature/ks-823-security-the-apioauthtoken-refresh_token-grant-authenticates commits=2 files=5 +673 -25 mergeable=True/unstable created=2026-09-13T14:26:20Z updated=2026-09-13T14:26:39Z title='KS-823: the refresh_token grant authenticates the client and honours a client binding on OAuth-minted tokens'
+  body chars=5953 at-signs=0 classes={'array': 0, 'prep': 0, 'email': 0, 'idiom': 0, 'mention': 0, 'other': 0} KS=['KS-823'] PRrefs=['#825', '#831', '#982']
+  headings: ['## KS-823 — the `refresh_token` grant authenticates the client, and OAuth-minted tokens are bound to their client', '### What was wrong', '### The fix — the same terms as the code grant (RFC 6749 §6 with §2.3.1)', '### Test Evidence']
+  file added     +253 -0 sha=f98e8c806 Blockchain/Dev/services/auth/src/__tests__/ks790-token-pre-auth-user-lookup.test.ts
+  file modified  +8 -0 sha=b998b5b7d Blockchain/Dev/services/auth/src/__tests__/ks820-821-token-client-auth-and-apptype.test.ts
+  file added     +276 -0 sha=2c0135b6f Blockchain/Dev/services/auth/src/__tests__/ks823-refresh-grant-client-auth-and-binding.test.ts
+  file modified  +105 -15 sha=de00ffcea Blockchain/Dev/services/auth/src/routes/oauth.ts
+  file modified  +31 -10 sha=62b6db272 Blockchain/Dev/services/auth/src/services/jwt.ts
+  commit e62eab87a6263e25c41c9bb814d5831842bb6c7e parents=['8861e6216'] Kam Kreiser <kamil.kreiser@secuura.ai> 2026-09-13T14:05:32Z tree=60327bfa0 subj='KS-790: the OAuth token grants resolve the user through the pre-auth carve-out, not the RLS-scoped lookup'
+  commit f62c975c11ec97cdef04500fd98a43618e702763 parents=['e62eab87a'] Kam Kreiser <kamil.kreiser@secuura.ai> 2026-09-13T14:20:23Z tree=db10aea98 subj='KS-823: the refresh_token grant authenticates the client and honours a client binding on OAuth-minted tokens'
+  reviews: 0 []
+  review comments: 0
+  issue comment 5653867835 linear[bot] 2026-09-13T14:26:23Z chars=2600 at-signs=1 classes={'array': 0, 'prep': 0, 'email': 0, 'idiom': 0, 'mention': 0, 'other': 1} KS=['KS-820', 'KS-823']
+  base-branch check: base IS develop
+PR #982: state=open draft=False merged=False author=kksecura BASE=develop@8861e6216 head=e62eab87a6263e25c41c9bb814d5831842bb6c7e branch=feature/ks-790-oauth-authorization_code-token-exchange-uses-getuserbyid commits=1 files=3 +280 -5 mergeable=True/unstable created=2026-09-13T14:10:34Z updated=2026-09-13T14:10:55Z title='KS-790: the OAuth token grants resolve the user through the pre-auth carve-out, not the RLS-scoped lookup'
+  body chars=5166 at-signs=0 classes={'array': 0, 'prep': 0, 'email': 0, 'idiom': 0, 'mention': 0, 'other': 0} KS=['KS-790'] PRrefs=[]
+  headings: ['## KS-790 — the OAuth token grants looked the user up with the post-auth, RLS-scoped lookup inside a pre-auth flow', '### What was wrong', '### The fix', '### Test Evidence']
+  file added     +249 -0 sha=cfed82d54 Blockchain/Dev/services/auth/src/__tests__/ks790-token-pre-auth-user-lookup.test.ts
+  file modified  +8 -0 sha=b998b5b7d Blockchain/Dev/services/auth/src/__tests__/ks820-821-token-client-auth-and-apptype.test.ts
+  file modified  +23 -5 sha=80e05458e Blockchain/Dev/services/auth/src/routes/oauth.ts
+  commit e62eab87a6263e25c41c9bb814d5831842bb6c7e parents=['8861e6216'] Kam Kreiser <kamil.kreiser@secuura.ai> 2026-09-13T14:05:32Z tree=60327bfa0 subj='KS-790: the OAuth token grants resolve the user through the pre-auth carve-out, not the RLS-scoped lookup'
+  reviews: 0 []
+  review comments: 0
+  issue comment 5653784846 linear[bot] 2026-09-13T14:10:38Z chars=5047 at-signs=0 classes={'array': 0, 'prep': 0, 'email': 0, 'idiom': 0, 'mention': 0, 'other': 0} KS=['KS-458', 'KS-781', 'KS-790']
+  base-branch check: base IS develop
+#984 head commit message: chars 5227 lines 80 KS ids ['KS-835'] PR refs [] at-signs 1 {'array': 0, 'prep': 0, 'email': 0, 'idiom': 0, 'mention': 0, 'other': 1}
+compare develop...head: status=ahead merge_base=8861e62161466c40f08d2b10a30edeb203123993 ahead=3 behind=0 commits=3 files=8
+  cmp file added     +125 -0 sha=548e1ec12 Blockchain/Dev/services/api-gateway/src/__tests__/ks835-oauth-token-scope-gate.test.ts
+  cmp file modified  +12 -1 sha=7aef335b9 Blockchain/Dev/services/api-gateway/src/middleware/scopes.ts
+  cmp file added     +253 -0 sha=f98e8c806 Blockchain/Dev/services/auth/src/__tests__/ks790-token-pre-auth-user-lookup.test.ts
+  cmp file modified  +8 -0 sha=b998b5b7d Blockchain/Dev/services/auth/src/__tests__/ks820-821-token-client-auth-and-apptype.test.ts
+  cmp file added     +277 -0 sha=db9744c97 Blockchain/Dev/services/auth/src/__tests__/ks823-refresh-grant-client-auth-and-binding.test.ts
+  cmp file added     +219 -0 sha=f61388142 Blockchain/Dev/services/auth/src/__tests__/ks835-oauth-mint-carries-granted-scope.test.ts
+  cmp file modified  +111 -15 sha=0bab1b8bd Blockchain/Dev/services/auth/src/routes/oauth.ts
+  cmp file modified  +44 -12 sha=26562a224 Blockchain/Dev/services/auth/src/services/jwt.ts
+compare parent(#983)...head: status=ahead merge_base=f62c975c11ec97cdef04500fd98a43618e702763 ahead=1 behind=0 commits=1 files=6
+  delta file added     +125 -0 sha=548e1ec12 changes=125 Blockchain/Dev/services/api-gateway/src/__tests__/ks835-oauth-token-scope-gate.test.ts
+  delta file modified  +12 -1 sha=7aef335b9 changes=13 Blockchain/Dev/services/api-gateway/src/middleware/scopes.ts
+  delta file modified  +11 -10 sha=db9744c97 changes=21 Blockchain/Dev/services/auth/src/__tests__/ks823-refresh-grant-client-auth-and-binding.test.ts
+  delta file added     +219 -0 sha=f61388142 changes=219 Blockchain/Dev/services/auth/src/__tests__/ks835-oauth-mint-carries-granted-scope.test.ts
+  delta file modified  +8 -2 sha=0bab1b8bd changes=10 Blockchain/Dev/services/auth/src/routes/oauth.ts
+  delta file modified  +23 -12 sha=26562a224 changes=35 Blockchain/Dev/services/auth/src/services/jwt.ts
+branches/develop now: 8861e62161466c40f08d2b10a30edeb203123993 2026-09-13T12:00:26Z 'KS-924 KS-901: the entrypoint corpus pins its contributing packages by name and compares SKIP as a set; the census follo'
+develop == M18: True
+head commit: parents=['f62c975c11ec97cdef04500fd98a43618e702763'] files=6 +398 -25
+  contents head   jwt.ts: blob=26562a224 size=15955 sha256=de0670cb20321114 lines=406 ctrl=0 listen(=0
+  contents head   oauth.ts: blob=0bab1b8bd size=67687 sha256=5e1ce25c995c3944 lines=1338 ctrl=0 listen(=0
+  contents head   scopes.ts: blob=7aef335b9 size=8138 sha256=e0757e2185c1a832 lines=194 ctrl=0 listen(=0
+  contents head   ks823-refresh-grant-client-auth-and-binding.test.ts: blob=db9744c97 size=15731 sha256=4e743896fdc468e4 lines=277 ctrl=0 listen(=1
+  contents head   ks835-oauth-mint-carries-granted-scope.test.ts: blob=f61388142 size=11369 sha256=bc85078909065297 lines=219 ctrl=0 listen(=1
+  contents head   ks835-oauth-token-scope-gate.test.ts: blob=548e1ec12 size=7109 sha256=42841fc66a28487c lines=125 ctrl=0 listen(=1
+  contents head   auth.ts: blob=132d3b8d3 size=61456 sha256=c1c3515cbb5b7a18 lines=1319 ctrl=0 listen(=0
+  contents head   auth.ts: blob=20311010d size=16968 sha256=1ac19905b3198685 lines=401 ctrl=0 listen(=0
+  contents head   index.ts: blob=9b0b4f08a size=9844 sha256=f76921a737b8e81f lines=287 ctrl=0 listen(=0
+  contents parent jwt.ts: blob=62b6db272 size=15066 sha256=bad7e362c6ca68cb lines=395 ctrl=0 listen(=0
+  contents parent oauth.ts: blob=de00ffcea size=67227 sha256=70c634fdad581d01 lines=1332 ctrl=0 listen(=0
+  contents parent scopes.ts: blob=b5403b189 size=7348 sha256=5ca7309168214d0c lines=183 ctrl=0 listen(=0
+  contents parent ks823-refresh-grant-client-auth-and-binding.test.ts: blob=2c0135b6f size=15463 sha256=b4fc5dde6a66d4ad lines=276 ctrl=0 listen(=1
+  contents parent ks835-oauth-mint-carries-granted-scope.test.ts: ABSENT (HTTP 404)
+  contents parent ks835-oauth-token-scope-gate.test.ts: ABSENT (HTTP 404)
+  contents parent auth.ts: blob=132d3b8d3 size=61456 sha256=c1c3515cbb5b7a18 lines=1319 ctrl=0 listen(=0
+  contents parent auth.ts: blob=20311010d size=16968 sha256=1ac19905b3198685 lines=401 ctrl=0 listen(=0
+  contents parent index.ts: blob=9b0b4f08a size=9844 sha256=f76921a737b8e81f lines=287 ctrl=0 listen(=0
+  contents dev    jwt.ts: blob=d0d55c11b size=13692 sha256=33545ba5a9c6951a lines=374 ctrl=0 listen(=0
+  contents dev    oauth.ts: blob=4b03f555e size=61492 sha256=cc4f4ac0df1b3393 lines=1242 ctrl=0 listen(=0
+  contents dev    scopes.ts: blob=b5403b189 size=7348 sha256=5ca7309168214d0c lines=183 ctrl=0 listen(=0
+  contents dev    ks823-refresh-grant-client-auth-and-binding.test.ts: ABSENT (HTTP 404)
+  contents dev    ks835-oauth-mint-carries-granted-scope.test.ts: ABSENT (HTTP 404)
+  contents dev    ks835-oauth-token-scope-gate.test.ts: ABSENT (HTTP 404)
+  contents dev    auth.ts: blob=132d3b8d3 size=61456 sha256=c1c3515cbb5b7a18 lines=1319 ctrl=0 listen(=0
+  contents dev    auth.ts: blob=20311010d size=16968 sha256=1ac19905b3198685 lines=401 ctrl=0 listen(=0
+  contents dev    index.ts: blob=9b0b4f08a size=9844 sha256=f76921a737b8e81f lines=287 ctrl=0 listen(=0
+done at 07:16:21 AEST

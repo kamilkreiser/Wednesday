@@ -1,0 +1,25 @@
+merge-tree in MY clone 07:18:52 AEST
+merge-tree --write-tree develop head: 39ab0226aa7978499fbf84d9e1980547e889d82f
+rc=0
+head tree: 39ab0226aa7978499fbf84d9e1980547e889d82f
+is develop an ancestor of head: yes
+--- the three commits' trees
+d00a2015c 39ab0226aa7978499fbf84d9e1980547e889d82f KS-835: an OAuth-minted token carries the scopes the user GRANTED and an 'oauth' label, so the gateway gates it on the grant
+f62c975c1 db10aea98aa0b2a494dd516743acbac8a23c84b9 KS-823: the refresh_token grant authenticates the client and honours a client binding on OAuth-minted tokens
+e62eab87a 60327bfa0560fce54b74e95059916f4723ddad70 KS-790: the OAuth token grants resolve the user through the pre-auth carve-out, not the RLS-scoped lookup
+--- ks823 test delta over parent: numstat
+11	10	Blockchain/Dev/services/auth/src/__tests__/ks823-refresh-grant-client-auth-and-binding.test.ts
+mint( lines changed (both sides): 16
+the non-mint changed lines:
+-// and ignores a third; after the fix the third carries the OAuth client.
+-let mint: (user: unknown, sessionId: string, opts?: { clientId: string }) => { accessToken: string; refreshToken: string };
++// and ignores a third; after the fix the third carries the OAuth client (and,
++// since KS-835, the granted scopes — every OAuth mint states its grant).
++let mint: (user: unknown, sessionId: string, opts?: { clientId: string; scopes: readonly string[] }) => { accessToken: string; refreshToken: string };
+expect( lines in ks823 parent/head: 24
+24
+--- it( cells
+ks835-auth head: 5
+ks835-gw head: 6
+ks823 head: 11
+ks823 parent: 11

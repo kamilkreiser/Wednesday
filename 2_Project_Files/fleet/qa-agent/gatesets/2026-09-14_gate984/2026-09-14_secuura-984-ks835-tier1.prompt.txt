@@ -1,0 +1,172 @@
+ultrathink
+
+You are the fleet QA agent running a TIER 1 gate (an auth door: what an OAuth-minted bearer CARRIES and what the
+gateway's scope gate DOES with it — through code AND live on real in-process listeners, no stack), ROUND 1, on
+Secuura/Blockchain PR #984 (KS-835): the THIRD commit of a three-PR STACK (#982 -> #983 -> #984) on origin develop M18.
+
+Read your brief FIRST and in full, then plan:
+/Volumes/DevMASTER/WEDNESDAY/2_Project_Files/fleet/qa-agent/briefs/2026-09-14_secuura-984-ks835-tier1.md
+
+Round 1 on this PR: there is no prior report. The carry-forward is the builder's own record set, named in the brief's
+TARGET (the READY, the PR body, KS-835's comment 18a968ec, 5_Project_History/2026-09-13_s212/item4/, the handover) —
+inputs to falsify, never evidence.
+
+Subject: d00a2015c89a4720eaeab64482bbd9b89d878024 = PR #984 (KS-835), open against develop, STACKED on #983
+  (f62c975c1, KS-823) which is stacked on #982 (e62eab87a, KS-790), all three on develop M18 8861e6216 (0 behind /
+  3 ahead; develop is an ANCESTOR of the head, so the head tree 39ab0226a IS the merged stack — 0 conflicts). The
+  DELTA you gate is `git diff f62c975c1 d00a2015c`: SIX files, +398 -25 —
+  services/auth/src/services/jwt.ts (OAuthMintOptions.scopes REQUIRED; OAuthTokenClaims.authMethod?: 'oauth'; the
+  access :205 and refresh :229 mints spread `{ scopes: [...oauth.scopes], authMethod: 'oauth' }` for an OAuth mint,
+  the role default with no label for a login mint) · services/auth/src/routes/oauth.ts (:848 the code grant passes
+  parseScopeString(result.scope || '') — the consent's VALIDATED list stored on the code row; :954 the refresh grant
+  re-mints decoded.scopes ?? [] — never the role default) · services/api-gateway/src/middleware/scopes.ts (the
+  attachScopes docblock ONLY — +12 -1, no behaviour change) · the lane's own ks823 test (the mint helper's type + 8
+  mint( calls state a grant; 24 expect( lines unchanged) · NEW services/auth/src/__tests__/ks835-oauth-mint-carries-
+  granted-scope.test.ts (5 cells, raw socket, real jwt.ts) · NEW services/api-gateway/src/__tests__/ks835-oauth-token-
+  scope-gate.test.ts (6 cells, RS256 tokens in the minted claim shape through authenticateToken -> attachScopes ->
+  requireScope('webhooks:manage') on a loopback listener — ALL SIX ARE CONTROLS, green at the parent and the head).
+  WHY: the consent screen was decorative — the OAuth grant minted with generateTokenPair(user, session.id), so
+  `scopes` came from getDefaultScopesForRole(user.role) and no label distinguished the token from a browser login;
+  the gateway's requireScope (:35-36) short-circuits unlabelled / 'jwt' / 'email' tokens. The builder ran the three
+  hypotheses against the unfixed product first: H1 ["documents:write"] where ["openid"] belongs (RED); H2 no label
+  (RED); H3 the gate is NOT broken — authenticateToken puts the verified claims on req.user as-is (gateway
+  middleware/auth.ts:370; the ticket's auth.ts:147 is INSIDE parseTestToken) — so the gap was entirely the MINT.
+  The builder's numbers to falsify: auth red-first at the parent `Tests 4 failed | 1 passed (5)` -> 5/5; gateway
+  6/6 at both trees; whole auth 53/707 (52/702 at the parent); whole gateway 35/349 (34/343); tsc rc 0 both;
+  tampers T1 3 / T2 3 (predicted 2 — the empty-grant cell also asserts the label) / T3 1 / T4 3, every red a named
+  cell; the gateway was NEVER tampered.
+  The launcher pins the STACK PARENT f62c975c1 (compare f62c975c1...d00a2015c = ahead 1, 6 files; exit 10 if it
+  changes) and develop M18 judged by CONTENT (develop's jwt.ts blob: d0d55c11b = unmoved or #982 landed; 62b6db272 =
+  #983 landed — EXPECTED, green; 26562a224 = #984 landed, exit 19; any other blob or a GUARDED neighbour moved ->
+  exit 18). If develop moved at launch the launcher printed it; you ls-remote at start and end, and if the stack is no
+  longer a descendant you merge the then-current tip in YOUR clone and re-derive: auth = develop's own + 22, gateway
+  = develop's own + 6, 0 failed.
+Repo:    /Volumes/DevMASTER/!CODING/Secuura/Blockchain/2_Project_Files  (READ-ONLY — clone by SHA into your own scratch;
+  the worktrees live at /Volumes/DevMASTER/!CODING/Secuura/Blockchain/worktrees/ — a SIBLING dir; node_modules
+  symlink-farmed FROM worktrees/s212-ks835 (the builder's, at d00a2015c, porcelain 0: root 985 entries, services/auth 8,
+  services/api-gateway 7, packages/shared/dist 28) — from it, never into it, never vitest inside it; worktrees/s212-ks823
+  is the PARENT tree f62c975c1, read-only; never trust origin/* inside a --shared clone — pin by SHA)
+
+You are FINDINGS-ONLY. You never fix, never merge, never push, never deploy, never comment, never file, never `@`.
+
+NEVER run a push, the real pre-push hook, or preflight.sh inside the Secuura checkout or any of its worktrees.
+
+NEVER print a credential value, and never open, read or copy a secrets file (any .env, config/secrets.yml). The
+harnesses' RS256 test keys live in the process env (__TEST_JWT_PRIVATE_PEM, JWT_PUBLIC_KEY) — never print them or a
+signed token. Count, never echo. Nothing in this gate needs a credential.
+
+NO docker, NO stack, no kintsugi, no demo. "Live" = a real Express listener in-process bound to 127.0.0.1.
+
+Seven things you must not miss:
+
+1. THE TWO RED-FIRSTS AND THE GREENS (item 2): the auth file copied into your PARENT worktree (f62c975c1; the real
+   parent jwt.ts 62b6db272) -> `4 failed | 1 passed (5)` with H1 (:180 receives ['documents:write']), H2 (:188
+   undefined), the refresh cell (:198/:199), the empty-grant cell (:208 undefined) red and the login CONTROL green;
+   at the HEAD: auth 5/5, gateway 6/6 (and 6/6 at the parent too — the gateway did not change; that run is H3 at
+   runtime: c1/c2/c5 pass only if middleware/auth.ts:370 carries `scopes` + `authMethod`); the full suites on the
+   head tree SOLO: auth 53/707, gateway 35/349; the parent's full auth suite 52/702 as the control. Quote the file
+   lines from the verbose output. Name the tree beside every count.
+
+2. THE WIDENED-GUARD RULE, MEASURED (item 2e): packages/shared `npx vitest run src/__tests__/ks860-test-listeners-
+   bind-loopback.test.ts` on the head tree -> 23/23, the 🔴 cell (:463) GREEN with #984's two new test files in its
+   walk (both bind '127.0.0.1'); then the guard's RED-FIRST against #984's shape: the gateway test's :64
+   `app.listen(0, '127.0.0.1', resolve)` -> `app.listen(0, resolve)` in YOUR worktree -> the 🔴 cell reds naming
+   services/api-gateway/src/__tests__/ks835-oauth-token-scope-gate.test.ts:64; restore (sha 42841fc66a28487c… asserted)
+   -> 23/23. The handover says this rule was "checked by eye" — your run is the measurement.
+
+3. THE TAMPER TABLE, SUITES RUNNING (item 3): the DISCRIMINATOR first — T7/Tg4 an inert comment -> all green; T8 a
+   syntax error in jwt.ts -> a LOAD failure with NO `Tests N failed | M passed` line (not a red). Then the builder's
+   four on YOUR head worktree: T1 :205 the access mint carries the role default (3-line anchor :203-205, count 1 —
+   the bare spread occurs TWICE, :205 and :229) -> exactly H1 + refresh + empty grant; T2 the label removed from
+   BOTH :205 and :229 -> exactly H2 + refresh + empty grant (3, not the builder's predicted 2); T3 oauth.ts:954 ->
+   `scopes: ['documents:write']` -> exactly the refresh cell; T4 oauth.ts:848 -> `scopes: ['documents:write']` ->
+   exactly H1 + refresh + empty grant. Gate-designed: T5 :954 -> `scopes: []` -> exactly the refresh cell (it reads
+   the CARRIED grant); T6 'oauth' -> 'oauth_app' at both mints -> the same SET as T2 (say so: one mechanism).
+   GATEWAY, which the builder never tampered — these EARN the six cells: Tg1 scopes.ts:36 short-circuits 'oauth'
+   too -> exactly c1 + c5 red; Tg2 :84 `if (user)` -> exactly c6 red; Tg3 :42 `|| ['*']` -> exactly c5 red (an
+   EMPTY array is truthy; only the ABSENT-claim cell reaches the fallback — Tg3b with an explicit `scopes: []` token
+   stays 403 if you run it). Prediction BEFORE each run; anchor count asserted; marker asserted AFTER the edit; a
+   0-cell run is INVALID; restore by content with the whole-file sha (jwt.ts de0670cb20321114…, oauth.ts
+   5e1ce25c995c3944…, scopes.ts e0757e2185c1a832…); green again after each; the predicted-by column carried.
+
+4. THE REACH — H-LAUNDER (item 4a, the headline of the reach, MEASURED AT RUNTIME): routes/auth.ts:658-689
+   POST /api/auth/refresh takes ANY refresh token (cookie or body `refreshToken`), verifyRefreshToken, getSession
+   (the OAuth grants CREATE a session at oauth.ts:841/:950, so it exists), and :689 `generateTokenPair(user,
+   session.id)` — NO third argument, no client authentication, reads neither client_id nor authMethod. Wednesday's
+   prediction: an OAuth refresh token minted for ['openid'] + 'oauth' + client_id, presented there, yields a LOGIN-
+   shape pair — no label, no client_id, scopes ['documents:write'] (the OWNER default) — which requireScope short-
+   circuits at every mount (200). A scratch vitest file in your head worktree's services/auth (loopback-bound;
+   quarantined by rename after) reusing the ks835 harness's mocks and mounting BOTH oauthRouter and authRoutes (mock
+   getSession / rotateSessionRefreshToken / revokeSession / denylistRefreshJti and whatever else routes/auth.ts pulls
+   in, as vi.fn() passthroughs; read its imports first): redeem the narrow code -> POST /api/auth/refresh with the
+   refresh_token and no credential -> FAIL condition: 200 with an access token carrying no authMethod, no client_id,
+   scopes ['documents:write']. Then re-sign THOSE decoded claims with the gateway harness's test key and drive
+   /gated -> predicted 200 (control: the original narrow token's claims -> 403). If the router cannot be mounted in
+   ~30 minutes, fall back to (a') — generateTokenPair(user, 'sess') with no third argument + the read with the
+   lines quoted — and label it PROBED, naming what it does not cover. Severity is yours; whose it is (#984's or a
+   ticket's) is Wednesday's / Kam's — you name the symbol/path (authRoutes.post('/refresh', routes/auth.ts:689,
+   generateTokenPair) and the fix-shape + regression cell in prose. Board search relayed: 0 owning tickets.
+
+5. THE REST OF THE REACH (items 4b–4g): H-mounts — `git grep -n -F 'requireScope('` on routes/proxy.ts at head = 6
+   lines, requireScopeOrRole( = 1, `attachScopes,` = 8 (7 mounts + the import): SEVEN scope-gated mounts, not the
+   "eight" the commit, PR body, KS-835 comment and the gateway test's :59 comment say — a precision finding against
+   the PR's own text, and the honest blast-radius line (the grant is honoured at 6 mounts; at the 7th by scope OR a
+   grace role; nowhere else — downstream isAllowedByRoleOrScope is role OR scope by KS-151's design). H-enforce —
+   enforcement.ts:161 reads the label: drive its function with allowedAuthProviders ['google'] / ['email'] /
+   ['oauth'] for undefined vs 'oauth' -> a SUPERSET, no new refusal (FAIL: any list refusing 'oauth' while admitting
+   undefined). H-limiter — rateLimitEnforce.ts:61 MACHINE_AUTH_METHODS = {'api_key','oauth_app'}: 'oauth' is not in
+   it; nothing mints 'oauth_app'; a Record (symbol MACHINE_AUTH_METHODS), not a regression. H-wildcard — an app
+   registered allowedScopes ['*'] mints scopes ['*'] -> the gate's wildcard arm; one extra cell if cheap; a Record
+   (symbol validateScopes, services/oauth.ts:353). H-stack-order — a #983-without-#984 deploy re-mints the role
+   default labelled 'oauth' — a CONSEQUENCE for NOT-TESTED, not a finding (ruling 2, ruling 4). The stale sentence in
+   requireScopeOrRole's docblock (scopes.ts:125-126 "KS-835 records that OAuth-minted tokens carry the `email` label
+   too") — a Record. Empty array vs absent claim: check `'scopes' in claims` on the empty-grant cell's decoded token
+   explicitly (the cell's `?? []` would pass on ABSENT too).
+
+6. DELIVERED vs COMMISSIONED + CLAIMS (items 5, 6): the table in the brief — the three hypotheses first; (1) the
+   grant carried; (2) the label; (3) the ticket's "mint the claim or delete the middleware" answered with a THIRD
+   shape (document + pin c6) — report it against the two commissioned; the plan mail's gateway auth.ts edit NOT
+   delivered because H3 refuted it by measurement (disclosed — not a finding); the live cell as two files (the
+   confirmed shape); the blast-radius sentence (the count corrected by item 4b); files within the list + the lane's
+   own tests; commit/body ids KS-835 only, 0 hits for the 13 never-type ids; STACKED rather than cut from develop's
+   tip — disclosed and accepted by ruling 4. Ruling 1's hunk (ks820-821, +8, blob b998b5b7d) is #982's and untouched
+   above it — confirm the blob at f62c975c1 and d00a2015c, do not re-gate it.
+
+7. QUALITY, ONE LINE EACH (item 7): tsc --noEmit rc 0 in both services; the two new files type-checked separately
+   (the gateway one with the project's Express augmentation); eslint if configured. The docblock-only claim on
+   scopes.ts is certified by the diff's own lines (every +/- line begins ` *`), not by a stripper.
+
+Your tool shell's grep may be a function: use /usr/bin/grep -F with a same-file control; for the two-line spread anchor
+use Python str.count. Never cd in your own tool calls; the pre-tool hook refuses `git worktree` in the Secuura checkout —
+clone into your scratch and run write verbs THERE. A REAL checkout of the whole Blockchain/Dev, not a symlink farm
+(the ks860 walk skips symlinked directories). require.resolve('@secuura/shared') from inside your clone's two services
+must land inside your clone's farm — print it once. Both services are VITEST 4.1.10 (npx vitest run, never watch; cwd =
+<clone>/Blockchain/Dev/services/<svc>; the auth config aliases @secuura/shared/utils/logger to packages/shared/dist —
+farm dist too); run suites solo; initJwtKeys() awaited in every harness of yours; the gateway harness stubs global
+fetch at module level and captures the real one first — copy that. /bin/bash here is 3.2 — write runners in Python.
+zsh: no PIPESTATUS (`cmd > out 2>&1; rc=$?`), no timeout on macOS.
+Quote the Secuura checkout's porcelain count, .git/config sha256, for-each-ref count, origin develop SHA,
+refs/pull/984/head, refs/pull/983/head, refs/pull/982/head and the branch at start and close; they must match (name
+any ref another seat's push or merge moved — #881/#982/#983 may land during your pass; that is EXPECTED and the head
+tree does not change). Confirm worktrees/s212-ks835 and s212-ks823 are porcelain 0 with the same HEAD at start and
+close.
+Never `rm`: fresh mktemp -d per attempt; quarantine probes and scratch tests by rename.
+Do no memory maintenance of your own project's memory store inside this session.
+
+Report FOUND / TESTED / HOW, with controls; the delta (six files, blobs, shas) and the merged shape (head tree
+39ab0226a on the develop you read, 0 conflicts) with both full-suite counts and the ks860 guard 23/23 + its red-first
+naming :64; the two red-firsts; the tamper table (T1–T8, Tg1–Tg4, optional Tg3b) with cells-run beside every colour
+and the decisive assertion line for each red; H-launder's measured result and its severity; H-mounts' count;
+H-enforce / H-limiter / H-wildcard / the stale docblock as Records; the DELIVERED-vs-COMMISSIONED table; and state
+what you did NOT test at the same prominence as the findings.
+Verdict: GO, GO WITH FINDINGS, or NO GO — on d00a2015c89a4720eaeab64482bbd9b89d878024, as the DELTA over f62c975c1
+AND as the merged stack on the develop you read (name it). H-launder shapes the verdict: say plainly whether the class
+KS-835 exists to close is closed by these six files or reopened one route away, and pick the honest shape. Give the
+merge seat its ADDENDUM line: "after #982 and #983, squash d00a2015c89a4720eaeab64482bbd9b89d878024 onto develop;
+expected services/auth +5 tests over #983's landing, services/api-gateway +6, 0 failed; the ks860 guard 23/23".
+
+MAIL YOUR VERDICT to wednesday-agent@agentmail.to when the pass is complete, using
+the project's send_brief.sh. Your pane holds ~19 lines of alternate screen with no
+scrollback, so a verdict that stays in the pane is one pane-close from being lost --
+this is not a formality, it is the only durable copy; the verdict MAIL is the wait signal. Subject:
+[QA -> Wednesday] TIER 1 GATE #984 (KS-835) d00a2015c -- <GO|GO WITH FINDINGS|NO GO>

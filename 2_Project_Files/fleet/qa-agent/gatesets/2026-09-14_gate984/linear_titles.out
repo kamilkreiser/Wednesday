@@ -1,0 +1,16 @@
+KS-983 [Backlog High created 2026-09-07 archived=False att=[]] systemTest: no suite drives a path-spelling (`//`) variant — the KS-858 class is guarded only by gateway unit tests, and 7 rate-limited auth routes were never driven
+    | app.use('/api/auth/refresh',         rateLimit({...}))
+KS-756 [Backlog High created 2026-09-02 archived=False att=[]] Wire up the opaque refresh token that createSession already mints — one write site, zero read sites (KS-329 ruling (a) prerequisite)
+    | The other half of the ruling is already live: `POST /api/auth/refresh` does a server-side session lookup at `routes/auth.ts:606-607` (`verifyRefreshToken` → `getSession(payload.sessionId)`). Both halves exist. What is missing is the wire between them — the coo
+    | 2. `POST /api/auth/refresh` — look up by handle, compare against `session.refreshToken`, rotate; drop `verifyRefreshToken` from the path.
+KS-242 [Backlog Medium created 2026-06-10 archived=True att=[]] Euro Office (office.eu) connector — joint Platform K + Platform S build (extend the existing euro-office plugin)
+    | 4. **Auth (extension login)** — `GET /api/auth/extension-login?returnUrl=…` opens a browser popup → callback `/api/auth/extension-login/callback` returns `token`+`refresh` in URL params (stored locally); `POST /api/auth/refresh` to refresh; `GET /api/users/me`
+KS-1003 [Backlog Medium created 2026-09-08 archived=False att=[]] The OAuth token endpoint is outside the credential-stuffing rate-limit zone — /api/oauth/ is not keyed in $secuura_auth_limit_key
+    | **Control that the map's silence is real and not a grep artefact:** the same map DOES key `/api/auth/` and `/api/v1/auth/`, and neighbouring gateway mounts in `proxy.ts` ARE guarded (`/api/webhooks` carries `authenticateToken(true), attachScopes, requireScope(
+KS-855 [Backlog Medium created 2026-09-06 archived=False att=[]] The OAuth `AVAILABLE_SCOPES` list is a second, divergent scope vocabulary — derive it from SCOPES or pin it
+    | * **Nothing anywhere validates a scope string against** `SCOPES` **at runtime.** `requireScope(...)` takes free strings, so a typo'd or invented scope is simply a scope that never matches — silently.
+KS-736 [In Review Medium created 2026-09-01 archived=False att=['923']] Gateway mount-auth check scores authenticateToken(false) as green — six /api mounts satisfy neither leg of its own assertion
+    | | `/api/certifications` | 521 | 521 | **defended** — `attachScopes` + `requireScope('certifications:read','certifications:write')` follow |
+    | 2. Each of the six is then either given real auth, or recorded in the by-design allowlist **with a stated reason** (the `/api/certifications` one is already effectively defended by `requireScope` and may only need recording).
+KS-796 [In Progress High created 2026-09-04 archived=False att=['822', '820', '815', '819', '816']] KS-781 door 3: POST /api/auth/wallet/verify mints a full token pair without MFA, lockout or status
+    | **Measured statically:** `wallet.ts:303-312` calls `createSession(...)` then `generateTokenPair(user, session.id)`. The file references **neither** `isLockedOut`, **nor** `user.status`, **nor** `mfaEnabled` anywhere before doing so.

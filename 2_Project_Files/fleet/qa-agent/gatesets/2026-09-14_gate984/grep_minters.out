@@ -1,0 +1,20 @@
+=== minter call sites at head (product code)
+Blockchain/Dev/services/auth/src/auth.openapi.ts:1595:// spreads generateTokenPair() alongside `success` at the top level
+Blockchain/Dev/services/auth/src/routes/auth.ts:291:    const tokens = generateTokenPair(user, session.id);
+Blockchain/Dev/services/auth/src/routes/auth.ts:394:      // generateTokenPair() on the password alone — a full SYSTEM_ADMIN session.
+Blockchain/Dev/services/auth/src/routes/auth.ts:448:      const tokens = generateTokenPair(
+Blockchain/Dev/services/auth/src/routes/auth.ts:597:    const tokens = generateTokenPair(user, session.id);
+Blockchain/Dev/services/auth/src/routes/auth.ts:689:    const tokens = generateTokenPair(user, session.id);
+Blockchain/Dev/services/auth/src/routes/auth.ts:1234:    const tokens = generateTokenPair(user, session.id);
+Blockchain/Dev/services/auth/src/routes/oauth.ts:848:      const tokens = generateTokenPair(user, session.id, { clientId: client_id, scopes: parseScopeString(result.scope || '') });
+Blockchain/Dev/services/auth/src/routes/oauth.ts:954:      const tokens = generateTokenPair(user, session.id, { clientId: refreshClientId, scopes: decoded.scopes ?? [] });
+Blockchain/Dev/services/auth/src/routes/wallet.ts:371:    const tokens = generateTokenPair(user, session.id);
+Blockchain/Dev/services/auth/src/services/jwt.ts:187:export function generateAccessToken(user: User, sessionId: string, oauth?: OAuthMintOptions): string {
+Blockchain/Dev/services/auth/src/services/jwt.ts:217:export function generateRefreshToken(user: User, sessionId: string, oauth?: OAuthMintOptions): string {
+Blockchain/Dev/services/auth/src/services/jwt.ts:240:export function generateTokenPair(user: User, sessionId: string, oauth?: OAuthMintOptions): {
+Blockchain/Dev/services/auth/src/services/jwt.ts:246:    accessToken: generateAccessToken(user, sessionId, oauth),
+Blockchain/Dev/services/auth/src/services/jwt.ts:247:    refreshToken: generateRefreshToken(user, sessionId, oauth),
+=== verifyRefreshToken call sites
+Blockchain/Dev/services/auth/src/routes/auth.ts:665:    const payload = verifyRefreshToken(refreshTokenValue);
+Blockchain/Dev/services/auth/src/routes/oauth.ts:914:        decoded = verifyRefreshToken(refresh_token);
+Blockchain/Dev/services/auth/src/services/jwt.ts:378:export function verifyRefreshToken(token: string): OAuthTokenClaims {

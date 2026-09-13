@@ -1,0 +1,56 @@
+=== listen( counts in the two new tests + ks823
+ks835-oauth-mint-carries-granted-scope.test.ts: 1
+Blockchain/Dev/services/auth/src/__tests__/ks835-oauth-mint-carries-granted-scope.test.ts:127:  server = app.listen(0, '127.0.0.1');
+ks835-oauth-token-scope-gate.test.ts: 1
+Blockchain/Dev/services/api-gateway/src/__tests__/ks835-oauth-token-scope-gate.test.ts:64:  await new Promise<void>((resolve) => { server = app.listen(0, '127.0.0.1', resolve); });
+ks823-refresh-grant-client-auth-and-binding.test.ts: 1
+Blockchain/Dev/services/auth/src/__tests__/ks823-refresh-grant-client-auth-and-binding.test.ts:132:  server = app.listen(0, '127.0.0.1');
+=== gateway vitest setup: __TEST_JWT_PRIVATE_PEM / JWT_PUBLIC_KEY
+Blockchain/Dev/services/api-gateway/src/middleware/auth.ts:86:// from auth's JWKS endpoint, falling back to the static JWT_PUBLIC_KEY. This
+Blockchain/Dev/services/api-gateway/vitest.config.ts:7:    // KS-184: provision a baseline RS256 keypair (JWT_PUBLIC_KEY) before any
+Blockchain/Dev/services/api-gateway/vitest.setup.ts:3:// reads JWT_PUBLIC_KEY at module load): set JWT_PUBLIC_KEY so the middleware can
+Blockchain/Dev/services/api-gateway/vitest.setup.ts:9:if (!process.env.JWT_PUBLIC_KEY) {
+Blockchain/Dev/services/api-gateway/vitest.setup.ts:11:  process.env.JWT_PUBLIC_KEY = Buffer.from(
+Blockchain/Dev/services/api-gateway/vitest.setup.ts:14:  process.env.__TEST_JWT_PRIVATE_PEM = privateKey.export({ type: 'pkcs8', format: 'pem' }).toString();
+=== gateway vitest config
+import { defineConfig } from 'vitest/config';
+
+export default defineConfig({
+  test: {
+    globals: true,
+    environment: 'node',
+    // KS-184: provision a baseline RS256 keypair (JWT_PUBLIC_KEY) before any
+    // suite imports the auth middleware, which verifies RS256-only.
+    setupFiles: ['./vitest.setup.ts'],
+  },
+});
+=== auth vitest config
+import { defineConfig } from 'vitest/config';
+import path from 'path';
+
+export default defineConfig({
+  resolve: {
+    alias: {
+      // The shared package exports map does not include ./utils/logger
+      // but the auth logger re-exports from this path. Map it for tests.
+      // The dist/ target always exists on an installed checkout: the repo
+      // root's postinstall runs `npm run build --workspaces` (KS-381).
+      '@secuura/shared/utils/logger': path.resolve(
+        __dirname,
+        '../../packages/shared/dist/utils/logger.js',
+      ),
+    },
+  },
+  test: {
+    globals: true,
+    environment: 'node',
+    // KS-184: provision a baseline RS256 keypair before any suite imports
+    // jwt.ts (which now requires one — no HS256 fallback).
+    setupFiles: ['./vitest.setup.ts'],
+  },
+});
+=== vitest versions
+auth:     "test": "vitest"    "vitest": "^4.1.9"
+api-gateway:     "test": "vitest"    "vitest": "^4.1.9"
+=== worktrees of s212
+(eval):1: no matches found: /Volumes/DevMASTER/!CODING/Secuura/Blockchain/2_Project_Files/worktrees/s212-*

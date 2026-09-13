@@ -1,0 +1,137 @@
+git_read at 2026-09-14 07:09:37 AEST
+d00a2015c89a4720eaeab64482bbd9b89d878024 commit
+f62c975c11ec97cdef04500fd98a43618e702763 commit
+e62eab87a6263e25c41c9bb814d5831842bb6c7e commit
+8861e62161466c40f08d2b10a30edeb203123993 commit
+--- log head..develop (the stack, first-parent)
+d00a2015c89a4720eaeab64482bbd9b89d878024 f62c975c11ec97cdef04500fd98a43618e702763 39ab0226aa7978499fbf84d9e1980547e889d82f Kam Kreiser <kamil.kreiser@secuura.ai> 2026-09-14 00:36:56 +1000 KS-835: an OAuth-minted token carries the scopes the user GRANTED and an 'oauth' label, so the gateway gates it on the grant
+f62c975c11ec97cdef04500fd98a43618e702763 e62eab87a6263e25c41c9bb814d5831842bb6c7e db10aea98aa0b2a494dd516743acbac8a23c84b9 Kam Kreiser <kamil.kreiser@secuura.ai> 2026-09-14 00:20:23 +1000 KS-823: the refresh_token grant authenticates the client and honours a client binding on OAuth-minted tokens
+e62eab87a6263e25c41c9bb814d5831842bb6c7e 8861e62161466c40f08d2b10a30edeb203123993 60327bfa0560fce54b74e95059916f4723ddad70 Kam Kreiser <kamil.kreiser@secuura.ai> 2026-09-14 00:05:32 +1000 KS-790: the OAuth token grants resolve the user through the pre-auth carve-out, not the RLS-scoped lookup
+--- merge-base head/develop
+8861e62161466c40f08d2b10a30edeb203123993
+--- merge-base parent/develop
+8861e62161466c40f08d2b10a30edeb203123993
+--- rev-list --left-right --count develop...head
+0	3
+--- numstat parent..head (the #984 delta)
+125	0	Blockchain/Dev/services/api-gateway/src/__tests__/ks835-oauth-token-scope-gate.test.ts
+12	1	Blockchain/Dev/services/api-gateway/src/middleware/scopes.ts
+11	10	Blockchain/Dev/services/auth/src/__tests__/ks823-refresh-grant-client-auth-and-binding.test.ts
+219	0	Blockchain/Dev/services/auth/src/__tests__/ks835-oauth-mint-carries-granted-scope.test.ts
+8	2	Blockchain/Dev/services/auth/src/routes/oauth.ts
+23	12	Blockchain/Dev/services/auth/src/services/jwt.ts
+--- name-status parent..head
+A	Blockchain/Dev/services/api-gateway/src/__tests__/ks835-oauth-token-scope-gate.test.ts
+M	Blockchain/Dev/services/api-gateway/src/middleware/scopes.ts
+M	Blockchain/Dev/services/auth/src/__tests__/ks823-refresh-grant-client-auth-and-binding.test.ts
+A	Blockchain/Dev/services/auth/src/__tests__/ks835-oauth-mint-carries-granted-scope.test.ts
+M	Blockchain/Dev/services/auth/src/routes/oauth.ts
+M	Blockchain/Dev/services/auth/src/services/jwt.ts
+--- shortstat parent..head
+ 6 files changed, 398 insertions(+), 25 deletions(-)
+--- numstat develop..head (the merged stack)
+125	0	Blockchain/Dev/services/api-gateway/src/__tests__/ks835-oauth-token-scope-gate.test.ts
+12	1	Blockchain/Dev/services/api-gateway/src/middleware/scopes.ts
+253	0	Blockchain/Dev/services/auth/src/__tests__/ks790-token-pre-auth-user-lookup.test.ts
+8	0	Blockchain/Dev/services/auth/src/__tests__/ks820-821-token-client-auth-and-apptype.test.ts
+277	0	Blockchain/Dev/services/auth/src/__tests__/ks823-refresh-grant-client-auth-and-binding.test.ts
+219	0	Blockchain/Dev/services/auth/src/__tests__/ks835-oauth-mint-carries-granted-scope.test.ts
+111	15	Blockchain/Dev/services/auth/src/routes/oauth.ts
+44	12	Blockchain/Dev/services/auth/src/services/jwt.ts
+--- shortstat develop..head
+ 8 files changed, 1049 insertions(+), 28 deletions(-)
+--- numstat GP..P (#983 delta)
+6	2	Blockchain/Dev/services/auth/src/__tests__/ks790-token-pre-auth-user-lookup.test.ts
+276	0	Blockchain/Dev/services/auth/src/__tests__/ks823-refresh-grant-client-auth-and-binding.test.ts
+82	10	Blockchain/Dev/services/auth/src/routes/oauth.ts
+31	10	Blockchain/Dev/services/auth/src/services/jwt.ts
+--- numstat develop..GP (#982 delta)
+249	0	Blockchain/Dev/services/auth/src/__tests__/ks790-token-pre-auth-user-lookup.test.ts
+8	0	Blockchain/Dev/services/auth/src/__tests__/ks820-821-token-client-auth-and-apptype.test.ts
+23	5	Blockchain/Dev/services/auth/src/routes/oauth.ts
+--- commit message of head
+KS-835: an OAuth-minted token carries the scopes the user GRANTED and an 'oauth' label, so the gateway gates it on the grant
+
+The consent screen asked the user to approve a list of scopes and the token
+that came out ignored it. The chain: /authorize computed and stored the granted
+scopes; the token grant minted with generateTokenPair(user, session.id) -- the
+grant was not a parameter -- so the `scopes` claim came from
+getDefaultScopesForRole(user.role) (the user's ROLE), and no label
+distinguished an OAuth-minted token from the user's own browser login; the
+gateway's requireScope short-circuits every token whose authMethod is missing /
+'jwt' / 'email'. A third-party app approved for `openid` received a token
+carrying the user's full role-derived authority.
+
+THE THREE HYPOTHESES, RUN AGAINST THE UNFIXED PRODUCT FIRST (the ticket's bar):
+- H1 the mint has no scope parameter: an OWNER approving `openid` got a token
+  whose scopes read ["documents:write"] (the role default). RED, measured.
+- H2 the label: the minted token carried no authMethod. RED, measured.
+- H3 the dead bridge: the gateway's attachScopes parsed a singular `scope`
+  claim nothing mints. Measured as "reads a claim that does not exist", not as
+  a broken gate: authenticateToken puts the verified claims on req.user as-is,
+  so a `scopes` array and an 'oauth' label ARE read by requireScope today --
+  the gateway gates that shape already; nothing minted it.
+
+THE FIX (the mint):
+- jwt.ts: OAuthMintOptions gains `scopes` (required -- every OAuth mint states
+  its grant); OAuthTokenClaims gains `authMethod?: 'oauth'`; an OAuth mint puts
+  `scopes` = the granted list (even when empty: nothing granted, nothing
+  allowed) and `authMethod: 'oauth'` on both halves of the pair; a login mint is
+  UNCHANGED (no label, role-default scopes -- RBAC governs those).
+- oauth.ts: the code grant passes parseScopeString(result.scope) -- validated
+  against the app's allow-list at /authorize -- so the response's informational
+  `scope` now describes the token it accompanies; the refresh grant re-mints the
+  token's OWN granted scopes, never widening back to the role default.
+- api-gateway scopes.ts: attachScopes documented honestly -- the array arrives
+  on the token and is left alone; the singular-string parse is the RFC 6749 3.3
+  wire form nothing here mints, a compatibility arm that runs only when no
+  array is present and never widens a grant. No behaviour change.
+
+BLAST RADIUS, stated: after deploy, every NEW OAuth token is gated by its grant
+at the eight requireScope mounts (RBAC-only routes are unchanged); OAuth ACCESS
+tokens minted before deploy carry no label and keep the bypass until they
+expire (JWT_EXPIRES_IN bounds it); OAuth REFRESH tokens minted before deploy are
+already refused by the client-binding change this branch stacks on, so nothing
+pre-deploy re-mints unlabelled. Which deployed clients hold OAuth tokens today
+is UNMEASURED (the ticket's own line) and stays so.
+
+Tests (vitest run, node v24.7.0, darwin):
+- services/auth NEW ks835-oauth-mint-carries-granted-scope.test.ts (5 cells,
+  raw socket, real jwt.ts): red-first at the parent commit `Tests 4 failed |
+  1 passed (5)` -- H1 ["documents:write"] where ["openid"] belongs, H2 label
+  undefined, the refresh re-mint and the empty grant likewise; the login-shape
+  control green. Green 5/5 after.
+- services/api-gateway NEW ks835-oauth-token-scope-gate.test.ts (6 cells,
+  RS256 tokens in the claim shape jwt.ts mints, real authenticateToken →
+  attachScopes → requireScope on a listener): narrow 'oauth' token -> 403
+  naming granted; the same with the scope granted -> 200; an sk_* key with the
+  narrow scope -> 403 (the gate, not the OAuth path, refuses); an UNLABELLED
+  token with narrow scopes -> 200 (the mechanism the ticket named, pinned as
+  the login rule); 'oauth' with no scopes -> 403; attachScopes' two arms.
+  Green before AND after -- controls: the gate already discriminated on the
+  label; the mint did not produce it. The cross-service assertion (one token
+  minted in auth, gated in the gateway) is by claim-name convention across the
+  two files, NOT a single run -- stated in both.
+- Whole auth suite 53 files / 707 tests (was 52 / 702 on the parent); whole
+  gateway suite 35 files / 349 tests (unchanged count +6 -- 343 before). tsc rc 0
+  in both services; the new test files type-checked separately rc 0.
+- Tampers (restored by content, sha asserted): T1 the access-token mint drops
+  the granted scopes -> 3 red (H1; refresh; empty grant); T2 the label dropped
+  -> 3 red (H2; refresh; empty grant -- predicted 2, the empty-grant cell also
+  asserts the label); T3 the refresh re-mint widened to the role default -> 1
+  red; T4 the code grant mints the role default -> 3 red. All reds are the
+  named cells.
+- ks823-refresh-grant-client-auth-and-binding.test.ts (this lane's, stacked):
+  its mint helper states a grant, as the option type now requires; assertions
+  unchanged.
+
+Not covered: a live token through the real gateway; the four platform suites;
+which deployed clients hold OAuth tokens today.
+
+Co-Authored-By: Claude Opus 5 <noreply@anthropic.com>
+Claude-Session: https://claude.ai/code/session_01R6wxuTqTre3pNzzWWk5CdQ
+
+--- head msg stats
+    5233
+   1 KS-835
+1
