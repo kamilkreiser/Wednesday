@@ -49,11 +49,9 @@ FLEET="${ROTATE_TMUX_SESSION:-fleet}"
 # Tuesday's seat (same script, her own `fleet`) gets her pane name and her launcher.
 # No fallback to the other seat's launcher: a missing one REFUSES (a guess here
 # boots the wrong identity — the 2026-09-09 case).
-# 2026-09-13 (Tuesday's 19:1x finding): the seat AND the pane lookup now come from
-# the ONE shared resolver, seat_resolve.sh — the same rule as before (WED_AGENT,
-# else the tree's own name), so Wednesday's tree still resolves to "wednesday".
-. "$HERE/seat_resolve.sh" || { log "REFUSED: $HERE/seat_resolve.sh missing — cannot resolve the seat"; exit 2; }
-seat_resolve "$PROJECT_DIR"
+_tree_seat=wednesday
+case "$(basename "$PROJECT_DIR")" in TUESDAY|Tuesday|tuesday) _tree_seat=tuesday ;; esac
+SEAT="${WED_AGENT:-$_tree_seat}"
 case "$SEAT" in
   tuesday)   SEAT_LAUNCHER="$PROJECT_DIR/Launch_Tuesday.command" ;;
   wednesday) SEAT_LAUNCHER="$PROJECT_DIR/Launch_Wednesday.command" ;;
@@ -66,14 +64,9 @@ fi
 LAUNCH_CMD="${ROTATE_LAUNCH_CMD:-bash \"$SEAT_LAUNCHER\"}"
 
 "$TMUX_BIN" has-session -t "=$FLEET" 2>/dev/null || { log "REFUSED: no tmux session '$FLEET'"; exit 2; }
-# The pane: @cockpit_name == $SEAT, else the legacy "wednesday" pane IF this tree's
-# own seat is $SEAT (cockpit.conf still names pane 0 "wednesday" on the mini —
-# the case that refused --self and --dead for Tuesday on 2026-09-13). The guard
-# and the refusal wording live in seat_resolve.sh; the respawn below renames the
-# pane to $SEAT, so after one rotation the legacy branch is no longer taken.
-PANE_ID=$(coord_pane_id "=$FLEET" 2>"$LOG_DIR/.rotate_resolve_err.$$") || {
-  log "REFUSED: $(cat "$LOG_DIR/.rotate_resolve_err.$$" 2>/dev/null) [session '$FLEET']"; rm -f "$LOG_DIR/.rotate_resolve_err.$$"; exit 2; }
-rm -f "$LOG_DIR/.rotate_resolve_err.$$"
+WROW=$("$TMUX_BIN" list-panes -s -t "=$FLEET" -F '#{@cockpit_name}|#{pane_id}' 2>/dev/null | awk -F'|' -v s="$SEAT" '$1==s' | head -1)
+[ -n "$WROW" ] || { log "REFUSED: no '$SEAT' pane in '$FLEET'"; exit 2; }
+PANE_ID="${WROW#*|}"
 
 if [ "$MODE" = "--dead" ]; then
   CAP=$("$TMUX_BIN" capture-pane -t "$PANE_ID" -p -S -60 2>/dev/null)

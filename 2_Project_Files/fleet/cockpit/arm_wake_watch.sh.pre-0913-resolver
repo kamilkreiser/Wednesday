@@ -30,8 +30,6 @@
 
 set -u
 HERE="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
-PROJECT_DIR="$(cd -P "$HERE/../../.." && pwd)"
-[ -f "$HERE/seat_resolve.sh" ] || { echo "arm_wake_watch: $HERE/seat_resolve.sh missing — the runner cannot resolve the coordinator seat/pane" >&2; exit 2; }
 STATE_DIR="$HERE/state"
 LOG_DIR="$HERE/logs"
 PIDFILE="$STATE_DIR/wake_watch_runner.pid"
@@ -105,18 +103,8 @@ RUNNER='
   # about everything up to it). A refire on an already-read mail costs one
   # tap; a swallowed mail costs a 15-minute fallback. Always err toward refire.
   BASELINE=$(date -u +%Y-%m-%dT%H:%M)   # first arm only: session boot has read everything
-  # SEAT + coordinator pane (2026-09-13, Tuesday 19:1x finding): this runner used
-  # to HARDCODE the literal wednesday for the DEAD case and the tap target and
-  # handed --dead no WED_AGENT, so a dead Tuesday seat could never be respawned.
-  # The ONE resolver (seat_resolve.sh) now decides: WED_AGENT, else the tree name;
-  # coord_pane_id accepts the seat name OR the legacy wednesday pane on this seat
-  # own tree. On the Studio SEAT resolves to wednesday - byte-identical in effect.
-  . "'"$HERE"'"/seat_resolve.sh || { echo "$(date "+%Y-%m-%d %H:%M:%S") FATAL: seat_resolve.sh missing - runner exiting"; exit 2; }
-  seat_resolve "'"$PROJECT_DIR"'"
-  echo "$(date "+%Y-%m-%d %H:%M:%S") runner seat=$SEAT (tree seat $TREE_SEAT)"
   while true; do
-    # agent panes = everything except the coordinator (by seat name AND the legacy name) and the monitor
-    AGENTS=$('"$TMUX_BIN"' list-panes -t fleet:0 -F "#{@cockpit_name}" 2>/dev/null | grep -vE "^($SEAT|wednesday|fleet-monitor)$" | grep -c . || true)
+    AGENTS=$('"$TMUX_BIN"' list-panes -t fleet:0 -F "#{@cockpit_name}" 2>/dev/null | grep -vE "^(wednesday|fleet-monitor)$" | grep -c . || true)
     if [ "${AGENTS:-0}" -gt 0 ] 2>/dev/null; then N=3; else N=9999; fi
     echo "$(date "+%Y-%m-%d %H:%M:%S") armed: baseline=$BASELINE stable_n=$N agents=$AGENTS"
     OUT=$('"$HERE"'/wake_watch.sh "$BASELINE" "$N" 60 2>&1)
@@ -143,12 +131,9 @@ RUNNER='
       # DEAD coordinator (2026-09-02): do NOT tap a pane that cannot read a tap.
       # Respawn it through wednesday_rotate.sh --dead (which re-checks the
       # literal before killing anything) and give the boot ten minutes.
-      # 2026-09-13: matched on the wake shape, not the literal wednesday (the
-      # message names $SEAT), and WED_AGENT=$SEAT is passed EXPLICITLY so the
-      # rotate script respawns THIS seat with THIS seat launcher.
-      *"DEAD"*"respawn required"*)
-        echo "$(date "+%Y-%m-%d %H:%M:%S") DEAD coordinator ($SEAT) detected — respawning via WED_AGENT=$SEAT wednesday_rotate.sh --dead"
-        if WED_AGENT="$SEAT" "'"$HERE"'"/wednesday_rotate.sh --dead >> "'"$LOG"'" 2>&1; then
+      *"wednesday"*"DEAD"*)
+        echo "$(date "+%Y-%m-%d %H:%M:%S") DEAD coordinator detected — respawning via wednesday_rotate.sh --dead"
+        if "'"$HERE"'"/wednesday_rotate.sh --dead >> "'"$LOG"'" 2>&1; then
           echo "$(date "+%Y-%m-%d %H:%M:%S") respawn issued; waiting 600s for the boot before re-arming"; sleep 600
         else
           echo "$(date "+%Y-%m-%d %H:%M:%S") respawn REFUSED or FAILED (rc=$?) — see rotate_wednesday.log; will re-check next cycle"; sleep 120
@@ -157,9 +142,8 @@ RUNNER='
       *) echo "$(date "+%Y-%m-%d %H:%M:%S") WAKE UNMATCHED by tap case (add a pattern): $OUT"; MSG="" ;;
     esac
     if [ -n "$MSG" ]; then
-        # Tap target = the resolved coordinator pane id (seat name, else the guarded legacy name) - 2026-09-13
-        WPANE=$(coord_pane_id fleet:0 2>/dev/null || true)
-        if [ -n "$WPANE" ]; then
+        if '"$TMUX_BIN"' list-panes -t fleet:0 -F "#{@cockpit_name}|#{pane_id}" 2>/dev/null | grep -q "^wednesday|"; then
+          WPANE=$('"$TMUX_BIN"' list-panes -t fleet:0 -F "#{@cockpit_name}|#{pane_id}" 2>/dev/null | grep "^wednesday|" | head -1 | cut -d"|" -f2)
           # KAM-TYPING GUARD (2026-08-12): the tap presses Enter in the
           # wednesday pane — if Kam is mid-typing there, it SUBMITS his
           # half-written message (happened twice today, both truncated at the
@@ -175,18 +159,18 @@ RUNNER='
               LC_ALL=C perl -pe "s/\x1b\[2m.*?(?=\x1b|\$)//g; s/\x1b\[[0-9;]*m//g; s/\xc2\xa0/ /g; s/^.*\xe2\x9d\xaf//" 2>/dev/null | tr -d "[:space:]")
             [ -z "$PTXT" ] && break
             TRIES=$((TRIES + 1))
-            echo "$(date "+%Y-%m-%d %H:%M:%S") tap held - text at $SEAT prompt (try $TRIES/20)"
+            echo "$(date "+%Y-%m-%d %H:%M:%S") tap held - text at wednesday prompt (try $TRIES/20)"
             sleep 30
           done
           if [ -n "$PTXT" ]; then
             echo "$(date "+%Y-%m-%d %H:%M:%S") WAKE LOG-ONLY (prompt still occupied after 10 min): $MSG"
           else
             '"$TMUX_BIN"' send-keys -t "$WPANE" -l "$MSG" && '"$TMUX_BIN"' send-keys -t "$WPANE" Enter \
-              && echo "$(date "+%Y-%m-%d %H:%M:%S") tapped $SEAT pane $WPANE" \
-              || echo "$(date "+%Y-%m-%d %H:%M:%S") FAILED to tap $SEAT pane $WPANE"
+              && echo "$(date "+%Y-%m-%d %H:%M:%S") tapped wednesday pane $WPANE" \
+              || echo "$(date "+%Y-%m-%d %H:%M:%S") FAILED to tap wednesday pane"
           fi
         else
-          echo "$(date "+%Y-%m-%d %H:%M:%S") no $SEAT coordinator pane (nor an adoptable legacy wednesday pane) — WAKE logged only"
+          echo "$(date "+%Y-%m-%d %H:%M:%S") no wednesday pane — WAKE logged only"
         fi
         sleep 120   # give the session time to read before re-arming
     fi
