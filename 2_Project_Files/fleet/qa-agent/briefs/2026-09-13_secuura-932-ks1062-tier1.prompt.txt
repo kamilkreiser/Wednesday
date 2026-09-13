@@ -1,0 +1,85 @@
+ultrathink
+
+You are the fleet QA agent running a TIER 1 (through code — there is NO rendered surface and no request surface, so the real-browser half of tier 1 does not apply and you say so) gate, ROUND 1, on Secuura/Blockchain.
+
+Read your brief FIRST and in full, then plan:
+/Volumes/DevMASTER/WEDNESDAY/2_Project_Files/fleet/qa-agent/briefs/2026-09-13_secuura-932-ks1062-tier1.md
+
+Subject: PR #932 (KS-1062, QA finding F-928-4) @ c72607d586971180f1a33c5765e403df5677933c — api-gateway's boot-time migration runner: `migrateDatabase` now returns `{applied, failed, firstError}` and the tenant loop counts a tenant as migrated only when `failed === 0`, else `failedTenants++` and a warn line; the summary is warn iff any tenant failed. ONE file (`services/api-gateway/src/startup-migrations.ts` +49 −10), one commit, NO test in the PR.
+Merge-base: d4cf7e3cf73e91422a229b7d0767cf6c3a04fe57 — NOT origin develop (develop is 721b333a6 at Wednesday's read, 93 commits ahead of the base; the file's blob is identical at both, so BASE for every head-vs-base row is d4cf7e3cf and item 7 merges the THEN-CURRENT develop, which the s200 merge seat is moving while you work)
+Repo:    /Volumes/DevMASTER/!CODING/Secuura/Blockchain/2_Project_Files  (READ-ONLY — clone by SHA into your own scratch; node_modules symlink-farmed FROM worktrees/s198-ks1020, never into it; worktrees/ks950 is #928's and is not yours to touch)
+
+You are FINDINGS-ONLY. You never fix, never merge, never push, never deploy.
+
+NEVER run a push, the real pre-push hook, or preflight.sh inside the Secuura checkout or any of its worktrees.
+
+NEVER print a credential value, and never open, read or copy a secrets file (any .env, config/secrets.yml). Count, never echo.
+
+NO docker, NO Postgres, NO stack of any slot, no kintsugi, no demo. The loader is driven ONLY through your fake `pg`.
+
+Five things you must not miss:
+
+1. Drive the product's own runStartupMigrations() with a RECORDER/FAKE over the `pg` module resolved at
+   module-resolution level (`require('pg')` at :935 is a bare CJS require inside the function — vitest's
+   vi.mock does not reach it; use a Module._resolveFilename redirect or a shadow node_modules/pg in YOUR
+   clone, and ASSERT which took effect with a control before believing any green), stage 1 skipped by an
+   empty MIGRATIONS_DIR you own, at head AND base, for EVERY row of the LEGITIMATE SHAPES table: fresh ·
+   already-migrated · partial · missing database · dead host · 7-good+1-ghost (the ticket's shape) · one
+   non-benign failure among successes · non-Error throw · T=0 / T=1 / T=many · ctor-throws and end-rejects
+   (the only ways into the catch arm) · main/platform failures. Quote per row the summary line verbatim,
+   every per-tenant warn line, the Pool count, the query-transcript length and head-vs-base transcript
+   EQUALITY. A tenant whose every statement fails and is still `migrated` at head is a Blocker; a tenant
+   whose every statement resolves and is counted `failed` at head is a Major; a transcript difference is a
+   finding. Then the table of what `migrated++` counts now vs before with the DIRECTION of every change.
+
+2. The PR carries NO test. Write your own red-first cells (G1-G9 in the brief) in YOUR clone's api-gateway
+   package, run them at d4cf7e3cf FIRST and quote the red set (predicted G1 G2 G4 G5 G9 red), then green
+   at c72607d58. Say plainly that a REAL Postgres connection failure is not what you drove — your fake
+   produces the driver's messages; the builder's docker run on 09-09 is the only measurement of the real
+   driver, and you did not repeat it.
+
+3. Scope and blast radius with controls: the delta d4cf7e3cf..c72607d58 is ONE file, ten -U0 hunks, all in
+   migrateDatabase and its exactly three call sites + the tenant loop; `git diff --numstat 721b333a6
+   c72607d58` is NOT the PR (320 files of develop). `tsc --noEmit -p services/api-gateway/tsconfig.json`
+   at head rc 0 with a planted TS2322 control (this file IS type-checked; tests are not). Export surface
+   unchanged (2 exports). Consumers of the summary log line: 0 in code outside the file (control 5
+   inside). The auth service's ks949 test reads this file's TEXT for the seed identity — unchanged
+   (count 1 at both SHAs), READ ONLY. And #928's overlap: re-derive `git diff -U0 d4cf7e3cf {e28d64b8d,
+   c72607d58}`, list the shared base hunks (migrateDatabase :800/:802/:809-:812/:818, call sites
+   :952-:953/:1024-:1025, tenant loop :1099/:1108-:1109/:1116), state in one paragraph how #928's draft
+   differs (it sums STATEMENTS and never stops `migrated++`) — READ ONLY, for s201 who rebases it; you do
+   NOT gate, run or judge #928. #932 is gated ALONE.
+
+4. Red-proof with tests RUNNING under vitest 4.1.10 (`npx vitest run <file> --reporter=json --outputFile=`;
+   `npm test` is bare `vitest` — never watch mode; assert each tamper LANDED by grep -c 0/1 and sha, and
+   that your cells RAN, before reading colour — a compile failure is a load failure, not a red): T1 the
+   `if (outcome.failed > 0)` branch forced false · T2 `failed++` deleted · T3 the summary level forced
+   'info' · T4 the benign substring `'already exists'` → `'exist'` (the ghost's `does not exist` becomes
+   benign — the classifier's width is load-bearing) · T5 `failedTenants++` → `+= outcome.failed` (#928's
+   unit) · T6 one of your own, prediction first. Your cell file AND the full api-gateway suite per tamper,
+   SOLO; restore sha-identical (15e9b3c33476cac6…), green again. If the full suite reds 0 under T1, the PR
+   ships an untested guard — a Minor finding with G1 described in prose as the regression cell.
+
+5. The merged tree with the THEN-CURRENT origin develop in your own clone (re-read `ls-remote origin
+   refs/heads/develop` just before merging — s200 is squashing #963→#965→#966→#967→#968; none touches
+   this file, say what you find): name-only diff since d4cf7e3cf must be disjoint from
+   startup-migrations.ts; api-gateway vitest on the merged tree SOLO with counts (base 721b333a6 measured
+   31 files / 319 tests; the stack measured 33 / 331 at 1b7c03a22; say what you measure and which cells
+   are yours); tsc on the merged tree. Every why-comment / JSDoc / PR-body claim judged true as written —
+   "never throws" (true for statement errors; :817 and :836 can throw — say so), "a pg.Pool does not
+   connect eagerly" (pg-pool 3.13.0 index.js:67-100, READ), "39", "three call sites", "the only gateway
+   suite that reads this module", "Only a clean run counts", "does not gate readiness or the boot"
+   (runStartupMigrations still resolves void on every row).
+
+Your tool shell's grep may be a function: use /usr/bin/grep, case-insensitive, with a same-file control.
+Quote the Secuura checkout's porcelain count, .git/config sha256 and for-each-ref count at start and close; they must match (name any ref another seat's push or merge moved). Confirm worktrees/ks950 and worktrees/s198-ks1020 are byte-identical at start and close.
+Do no memory maintenance of your own project's memory store inside this session.
+
+Report FOUND / TESTED / HOW, with controls, and state what you did NOT test — no real Postgres / docker / stack / kintsugi / demo, the browser half (N/A, no surface), F-928-2 and KS-1055 (not in scope), PR #928 (named, never gated) — at the same prominence as the findings.
+Verdict: GO, GO WITH FINDINGS, or NO GO. This is round 1 of 2 for the KS-1062 class under the cap.
+
+MAIL YOUR VERDICT to wednesday-agent@agentmail.to when the pass is complete, using
+the project's send_brief.sh. Your pane holds ~19 lines of alternate screen with no
+scrollback, so a verdict that stays in the pane is one pane-close from being lost --
+this is not a formality, it is the only durable copy. Subject:
+[QA -> Wednesday] TIER 1 GATE #932 ROUND 1 (KS-1062) c72607d58 -- <GO|GO WITH FINDINGS|NO GO>
