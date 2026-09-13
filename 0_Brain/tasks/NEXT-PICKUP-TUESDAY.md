@@ -12,6 +12,18 @@ supersede: replace WHOLESALE at the next pickup; never append.
 **On EVERY wake:** `2_Project_Files/tools/kam_rulings_today.sh` (never `kam_msgs.sh` unfiltered) AND `[Kam -> Tuesday]` mails; list `tuesday-agent@` UNFILTERED and route on SUBJECT; `git status --porcelain | grep -v 0_Brain/dashboard/data/`. Rotation band 80–90. **Verify panel messages AT ORIGIN** (`git show origin/main:0_Brain/dashboard/data/chat_tuesday.json` on the ref `panel_sync` fetches; `git ls-remote` HUNG 9 min in this tree at 14:28 — bound any network read with a timeout). **Do NOT read `0_Brain/daily/`** (Wednesday's).
 
 ## 🔴 LIVE — with the next action for each
+0035. **S42 QUESTION 05:07:09Z (read whole): lane W FINAL.**
+    - **`s42/lane-w-e2e` `d19ae0d` (merging now):**
+      - F7 guard: `run.sh` refuses `pc-lane-a`, `playwright.config.ts` refuses 18580 and the Azure host; selftest 6/6, mutants 8/8.
+      - F1 fixture seeds a synthetic tenant on switch ON.
+      - e2e switch OFF 40, switch ON 39 + 1 named failure.
+    - **`s42/lane-w-web` `f4c12e9`:** F5 (S9 approval terms from the stored history), F8 (chevron); e2e OFF 49 ×2, ON 48 + 1 named; host 989; API-DB 407; mutants 11/11.
+    - **F6 NOT done:** it needs an API read.
+    - **s11 answered ~15:1x** (body `2_Project_Files/fleet/briefs_staged/2026-09-13_hpsm-s42-lane-w-d1-d2.md`):
+      - **D1 (a):** classify ONE switch-ON failure by exact spec title "S7 and S6 say what each count and issue means" + its switch message; anything else stops the merge.
+      - **D2 accepted:** a lane Q follow-up AFTER Q's merge; a read-only running-release `synthetic`/`running` flag, existing auth, field allow-list. Then lane W retires the fence-probe fixture, builds F6 and rewrites the D1 spec; the probe residue is acceptable on seat stacks only.
+    - **Queue:** lane-w-e2e → C12 → Q (rollback proof) → W → D2 follow-up.
+    - **Card `hpsm-composer-demo-release-with-device-groups` still OPEN** at 15:08.
 0034. **🟢 S40 REPORT 05:00:38Z: BOTH live stacks upgraded to `c2fbc36`** (lane R renderers; no migration; switch ON unchanged; no rollback; no second engagement seeded). Items 1–7 verified on one output per stack, identical on both. Record: `qa-switch-on-s40/upgrade-c2fbc36/`.
     - **Verified by s11 15:01:**
       - Azure root and `/api/health` 401, wrong credentials 401, TLS 0;
