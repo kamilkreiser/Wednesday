@@ -49,6 +49,8 @@ supersede: replace WHOLESALE at the next pickup; never append.
   - **FX-S7 is STILL RUNNING as S43's subagent.** Its report is INTERIM and its branch is at `bfebcd4`.
   - **`%5` stays open until the FX-S7 report is FINAL AND S44 confirms.**
   - Routing row `Datasec/HPSM-S44` committed. S44 brief: `briefs_staged/2026-09-13_hpsm-s44-successor-merge-seat.md`.
+  - **S44 LAUNCHED 19:47:28 in pane `%7` `Datasec/HPSM-S44`** (`cockpit.sh add`, HPSM's own `Launch_Claude.command`). Before the launch: brief sent, then VERIFIED at 09:47:21Z (sent copy to datasec-hpsm@, preview non-null); census showed exactly 1 HPSM seat (pid 1666, S43). A background rung-5 check is running (pane `%7` + newest transcript under `~/.claude/projects/-Volumes-KK-T9-External-HDD--CODING-Datasec-HPSM/`).
+  - **s13 watcher re-armed:** `watch_tuesday_exiting.sh 2026-09-13T09:43:27 23:55 1666 83570`. Add S44's claude pid after rung 5.
   - **NEXT:** rung-5 check of S44 → confirm its plan → close `%5` only once both conditions hold → relay Kam's gate go/hold → the delta gate after the merges.
 - **19:38 — S43 READY-TO-APPLY 09:37:59Z (DKIM pass, read whole): gate fix "b-tight".**
   - **Reproduced** FAIL in real Chromium through the public URL.
