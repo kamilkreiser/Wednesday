@@ -2302,3 +2302,8 @@ Done with it: Dynamics → Kam's team decision (no action); QuickQuote masthead/
 > tell me when the HPSM agent finishes and where the testing briefs are located
 
 *Note:* Tuesday s12: receipt given; background watcher armed on HPSM/QA-HPSM mail to tuesday-agent@ and S43 PID 1666 exit (6 h cap); brief paths answered in the terminal and pointed to on the panel.
+
+## 2026-09-13 18:20 — Kam (terminal, verbatim)
+> Please revise the testing harness documents so they test the live site.
+
+*Note:* Tuesday s12: receipt given (panel + terminal); read as approval beyond outside-only; brief revised: live site a TARGET with its own QA synthetic tenant, credential never printed, load limits, stop-on-degradation; DB/tamper/flood/scan stay local; runs after the live-demo upgrade REPORT.

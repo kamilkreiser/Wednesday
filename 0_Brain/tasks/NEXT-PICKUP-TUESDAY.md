@@ -21,7 +21,29 @@ supersede: replace WHOLESALE at the next pickup; never append.
      - (1) Recover S42's in-flight state. Main is `09c1591`; `s42/lane-q-d2` `0e9c865` is NOT on main; the merge worktree is detached at `3bc7471`; `s42/lane-w-d2` is at `7c31520`. Then the second READY.
      - (2) Kam ask 1: `HPSM/5_Project_History/2026-09-13_S43_remaining-work-and-product-issues.md`, measured against the Detailed Scoping Design Specification v1.1. The E8 SOW is context only.
      - (3) Kam ask 2: port NexusAI's feedback feature, registered against HPSM. Postgres table under RLS; object store; created_by from the token with name + role, no email; role-gated triage; HPSM branding. A report-only sweep whose Jira half stays UNSET, because the Composer Jira key is on HOLD with Kam.
-   - **NEXT:** its PLAN CONFIRMATION mail. Check it against the brief: census, recovery measurements, lane partition by path with ports ≥ 20000, and the three feedback choices (triage roles, retention/tenant-data, partition against lanes Q/W plus migration numbering). Then CONFIRM or amend. When its deliverables land: read them whole, then give Kam a short panel note with the path.
+   - **UPDATE 18:2x (s12):**
+     - **Plan (07:40Z) CONFIRMED late at 08:07:30Z** (body `briefs_staged/2026-09-13_hpsm-s43-answer-plan-confirmed.md`), accepting: triage by platform_admin only; feedback = tenant data, 365 days, report-only expiry, soft delete; F-API numbers migration 0016.
+       - **Amendment 1:** the seat adds compose.yaml env vars.
+       - **Amendment 2 (load):** docker steps one at a time under the lock; vitest `--maxWorkers=2`; timeout-only runs re-run at most twice, then LOAD-BLOCKED; never raise a timeout; gates get the lock first.
+     - **Ask-1 REPORT 08:01:19Z** at `HPSM/5_Project_History/2026-09-13_S43_remaining-work-and-product-issues.md` (a949591). The BLUF and §4 were read by s12 and summarised to Kam at origin.
+     - **STATUS 08:16:15Z:**
+       - the seat is re-running chain qd2-s43 on 3bc7471;
+       - lane W is running (pc-s43-w 22780);
+       - F-API is running (pc-s43-f 22680; contract 0.14.0 first);
+       - F-WEB launches on F-API's contract commit;
+       - the records subagent is folding BACKLOG/history;
+       - S42's worktrees were removed cleanly.
+     - **FINDING:** the Composer has NO CSP anywhere, so the brief's "don't loosen the CSP" was false. It was withdrawn by name in an ANSWER ~08:2xZ; F-WEB builds CSP-clean; BACKLOG entry.
+     - **Kam RULED at 18:02 (cards recorded by s12 at 18:17):**
+       - `hpsm-composer-live-demo-upgrade-after-c12` → `upgrade-fresh-with-release`;
+       - `hpsm-composer-demo-release-with-device-groups` → `build-c11`.
+       - Relayed at 08:14:48Z, verified at the destination (body `briefs_staged/2026-09-13_hpsm-s43-kam-ruled-upgrade-and-c11.md`).
+       - **S43 OPERATES the upgrade after the Q+W merges**, which SUPERSEDES the no-deploy hold for this one upgrade. Steps: identity check; never touch datasec-sales-portal-rg; pc-lane-a first, then Azure; rollback to c2fbc36; a 10-minute check; fresh engagements, one with a group and one with zero groups taken to release through the product; old engagements untouched; REPORT.
+       - C11 lane now: partition by exact file; migration 0017 if needed; propose the "unknown" support issue code.
+     - **NEXT:**
+       - S43's ACK on the KAM RULED mail (C11 paths, migration, issue code, upgrade window). Rule the issue code.
+       - The chain verdict or LOAD-BLOCKED, then the second READY, then the upgrade REPORT, then **tell Kam at once**. He asked to be told when the HPSM agent finishes.
+       - Mark both cards `--delivered` once the upgrade REPORT and C11's READY name their artefacts.
 
 2. **Three combined tier-1 gates on `09c1591` — RESUMED by s12 at 17:05 in new panes.**
    - Launcher: `2_Project_Files/fleet/qa-agent/launchers/resume_qa_hpsm_composer_09c1591_combined.sh <A|B|C>` (`--check` passed ×3).
@@ -86,4 +108,12 @@ supersede: replace WHOLESALE at the next pickup; never append.
 41. **`usage_tuesday.json` churn vs panel_sync rebase.** See the incident above.
 42. **zsh does not word-split a variable holding a command.** `G="git -C x"; $G log` fails, and an `&& yes || no` then prints "no". Write paths literally; branch on the exact rc.
 43. **`prompt_log.sh <channel> <text> [note]`.** Read a tool's usage in a separate action before the first call.
+45. **`reconcile_rulings.py` is Wednesday-scoped by construction.**
+    - **Where:** line 43, "This seat coordinates Secuura + Wednesday's own work".
+    - **What happens:** it SKIPS every Datasec card as "OUT OF SCOPE", even with `WED_AGENT=tuesday`.
+    - **Instead:** record Kam's Datasec taps with `WED_AGENT=tuesday decision_queue.sh rule <id> <choice>`, gated in code on `git merge-base --is-ancestor <ls-remote origin sha> HEAD`.
+    - **When the gate refuses** (origin just moved): wait for panel_sync's pull. Never run a plain fetch.
+46. **A mail watcher's MARK is one second past the newest mail already PROCESSED, never the arming time.**
+    - Kam's card taps arrive as `[Kam -> Tuesday] panel message …` (label `sent`), so a watcher regex must match `Kam` too.
+    - **Measured 18:1x:** the shared wake runner's own unsent tap line at %0 made it HOLD every later tap. Clear it only by matching its exact `[wake_watch]` text; C-u did not clear it mid-turn, but it submitted at turn end.
 44. **Resuming a killed QA gate:** `claude --resume <session>` with `CLAUDE_CONFIG_DIR=TUESDAY/4_Credentials/.claude` and the project's identity dirs. Map a session to its gate by counting mentions of its report dir / compose project in the transcript. The first-prompt heuristic is unreliable, because every gate prompt names A, B and C.
