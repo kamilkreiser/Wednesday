@@ -11,7 +11,12 @@ supersede: replace this file wholesale at the next pickup; do not append
 
 > Narrative: `0_Brain/daily/2026-09-13.md` from the 17:58 boot block to the 22:1x retro. **Measure before acting on any line here.** Durable copies: the lane sweep `0_Brain/reference/2026-09-13_secuura-lanes/lanes_2205_lanes.md` (+ `.json`, `method.md`) and the In Review census `0_Brain/reference/2026-09-13_secuura-inreview-census/`. The 17:48 seat's scratchpad (`/private/tmp/claude-501/-Volumes-DevMASTER-WEDNESDAY/0f8f9fa8-eada-40b6-ad2d-8c8120bb3b2f/scratchpad/`) holds every verdict, rule, gate set and brief of the night — wiped at REBOOT only.
 
-## 🟢 FLOOR (at 22:35): CLEAR — `%0` Wednesday, `%1` monitor. Every seat wrapped and scored; every gate pane closed; nothing in flight.
+## 🟢 FLOOR (at 22:49)
+| pane | seat | state | next event owed |
+|---|---|---|---|
+| `%91` | **s212 LANE L1 auth-oauth** — #881 fix round for Peter's CHANGES_REQUESTED on KS-799 (consent page inline `<script>` vs CSP; three vehicles in the brief), then KS-790 → KS-823 → KS-835; brief `briefs_staged/2026-09-13_s212_L1-auth-oauth.md` (12:49:07Z) | booting/ITEM 0 | **plan confirmation** (`[Secuura/Blockchain -> Wednesday] QUESTION: plan confirmation s212`) → CONFIRM (the drafter embedded rulings as Wednesday's: keep #881 together; `services/auth/src/index.ts` is no lane's — QUESTION before touching; jsdom hoisted) → READY → tier-1 ROUND 2 gate on #881 → RULE → ADDENDUM to a merge seat |
+| `%1` | monitor | — | — |
+Launched by the rotating seat so the machine works through the rotation (Kam 14:2x). The successor launches L7 → `-B`, L9 → `-D`, L5 → `-E` next (the s212 brief names them as coming).
 **develop = M18 `8861e6216`** (#980) ← M17 `a4ef481c8` (#977) ← M16 `818002259` (#973) ← M15 `1c38077ba` (#981) ← M14 `6b62ae446` (#978) ← M13 `3370ef661` (#976) ← M12 `3fc158c39` (#974) ← M11 `a2257e502` (#975) ← M10 `e91eb5bda` — **all eight verified by Wednesday** (ls-remote + the commits API: one parent, file set, tree). Open PRs 42. Archived tonight: 24 tickets. Filed: KS-1136–1147 (+ KS-1138/1139 by s208), KS-1141 = a scope QUESTION for Wednesday (the #978 R2: ks727 / crypto-agility guard scopes — rule on a builder's measurement). #928 closed as superseded. **KS-962 OPEN by ruling** (F-973-3: a deploy seat verifies `secuuraadmin`'s `rolbypassrls` before relying on the re-sync).
 
 ## 🔵 THE OVERNIGHT QUEUE — launch the LANES (Kam's standing rule; the successor's FIRST action after the boot reads)
