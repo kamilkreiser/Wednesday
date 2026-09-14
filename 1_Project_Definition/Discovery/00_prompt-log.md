@@ -2452,3 +2452,8 @@ Done with it: Dynamics → Kam's team decision (no action); QuickQuote masthead/
 > Perfect, that works.
 
 *Note:* 19:15:46 view=wednesday — confirms Wednesday's reading of the 90% rule; receipted
+
+## 2026-09-14 20:06 — Kam (panel, verbatim)
+> Decision secuura-805-guard5-node-rejection-retry: retry — 1 — retry at once on a definitive node rejection (Wednesday's recommendation)
+
+*Note:* 20:06:17 view=wednesday — ruled option 1; receipted; ADDENDUM to s231 to build it before the gate
