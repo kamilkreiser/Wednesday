@@ -2377,3 +2377,13 @@ Done with it: Dynamics → Kam's team decision (no action); QuickQuote masthead/
 > From your message above, am I correct in concluding that it would be a mistake to deploy Quinn?
 
 *Note:* Answered: deploying it was not the mistake; relying on it would be — park it, keep the harness + checkers as the reusable gain; default = parked unless he says otherwise.
+
+## 2026-09-14 14:26 — Kam (dashboard chat, 14:25, verbatim)
+> Please remove Quen from the system as we won't use it going forward. If it's removed, it won't be taking up space.
+
+*Note:* Done 14:2x: ollama rm (17 GB), serve stopped, doctor → INFO, PORTABILITY + README parked; harness kept (his 14:26: Wednesday's decision).
+
+## 2026-09-14 14:26 — Kam (dashboard chat, 14:26, verbatim)
+> You make the decision on the runner and script.
+
+*Note:* Decided: keep (four scripts + 4 MB evidence — the reusable gain); reported on the panel.
