@@ -101,21 +101,8 @@ check() {
     # on the coordinator's own pane the moment that string was typed there in a respawn
     # command (the detector-keyed-on-the-banner's-words lesson, same day). fleet-monitor is
     # not a Claude seat — its title IS the hostname while it lives — so pane_dead only.
-    # 17:52 the same day, THREE false DEATHs: a pane launched seconds earlier carries the
-    # hostname title until Claude sets its own (~10-30 s). A dead pane stays dead; a booting
-    # one does not — so the title condition must hold on TWO consecutive cycles (60 s apart)
-    # before it is a DEATH. pane_dead=1 stays immediate. The marker is a state file, cleared
-    # (moved aside, never rm'd from a Bash tool call — the no-rm hook) when the title is live.
-    local revfile="$STATE_DIR/.rev_${name//[^a-zA-Z0-9]/_}"
-    if [ "$dead" = "1" ]; then
-      alert DEATH "$name" "process exited (pane_dead=1)"; continue
-    elif [ "$name" != "fleet-monitor" ] && [ -n "$host" ] && [ "$title" = "$host" ]; then
-      if [ -f "$revfile" ]; then
-        alert DEATH "$name" "process exited (title reverted to the hostname on two consecutive checks)"; continue
-      fi
-      touch "$revfile"; continue
-    else
-      [ -f "$revfile" ] && mv "$revfile" "$STATE_DIR/.rev_cleared" 2>&1
+    if [ "$dead" = "1" ] || { [ "$name" != "fleet-monitor" ] && [ -n "$host" ] && [ "$title" = "$host" ]; }; then
+      alert DEATH "$name" "process exited (pane_dead=$dead; title reverted to the hostname)"; continue
     fi
     clear_flag DEATH "$name"
     hash=$(printf '%s' "$content" | md5 -q)
