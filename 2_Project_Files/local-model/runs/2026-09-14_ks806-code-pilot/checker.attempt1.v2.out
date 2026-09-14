@@ -1,0 +1,32 @@
+diff_blocks=1 all_blocks=1 prose_outside_chars=0
+wrote /Volumes/DevMASTER/WEDNESDAY/2_Project_Files/local-model/runs/2026-09-14_ks806-code-pilot/out.md.attempt1.checker/patch.diff lines=157
+PASS A1 output is exactly one fenced ```diff block, nothing outside it
+quarantined untracked Blockchain/Dev/services/auth/src/__tests__/ks806-wallet-synthetic-email-injective.test.ts -> /private/tmp/claude-501/-Volumes-DevMASTER-WEDNESDAY/85873ddd-c4f1-4994-8d61-80f2a8670593/scratchpad/qwen806/clone/../quarantine/20260914-134311
+clone clean at pinned tip f09b629457c5800b215621c31c680631f947e879
+--- baseline at the untouched tip (whole services/auth suite + tsc)
+baseline suite rc=0 total=709 passed=709 failed=0 suites_failed=0 loaded=1 failed_names=[]
+baseline tsc rc=0 (0 lines)
+section 1 Blockchain/Dev/services/auth/src/routes/wallet.ts: hunk 1 (@@ -199,7 +199,7 @@) declared old=7 new=7 but actual old=6 new=6
+section 2 Blockchain/Dev/services/auth/src/__tests__/ks806-wallet-synthetic-email-injective.test.ts: hunk 1 (@@ -0,0 +1,123 @@) declared old=0 new=123 but actual old=0 new=144
+sections=2 miscounted_sections=2
+section 1 Blockchain/Dev/services/auth/src/routes/wallet.ts: applies ONLY with --recount --ignore-whitespace (miscounted hunks=1, strict rc=128)
+section 2 Blockchain/Dev/services/auth/src/__tests__/ks806-wallet-synthetic-email-injective.test.ts: applies ONLY with --recount --ignore-whitespace (miscounted hunks=1, strict rc=0)
+PASS A2 diff applies at the tip — with an accommodation: [Blockchain/Dev/services/auth/src/routes/wallet.ts: --recount --ignore-whitespace needed; miscounted hunks=1; strict rc=128] [Blockchain/Dev/services/auth/src/__tests__/ks806-wallet-synthetic-email-injective.test.ts: --recount --ignore-whitespace needed; miscounted hunks=1; strict rc=0]
+touched files (2): Blockchain/Dev/services/auth/src/__tests__/ks806-wallet-synthetic-email-injective.test.ts Blockchain/Dev/services/auth/src/routes/wallet.ts  (+145/-1)
+PASS A3 touched-file set == { Blockchain/Dev/services/auth/src/routes/wallet.ts , Blockchain/Dev/services/auth/src/__tests__/ks806-wallet-synthetic-email-injective.test.ts }
+test-only at tip: rc=1 total=2 passed=0 failed=2 suites_failed=2 loaded=1 failed_names=['KS-806: synthetic email is injective (no collision for same prefix) 🔴 KS-806 — two addresses with same 8-char prefix produce different synthetic emails (fixes collision)', 'KS-806: synthetic email is injective (no collision for same prefix) CONTROL — two addresses with different 8-char prefixes produce different synthetic emails']
+PASS A4 RED-FIRST: src/__tests__/ks806-wallet-synthetic-email-injective.test.ts fails at the untouched tip (2 failed / 2 run)
+test after product hunk: rc=1 total=2 passed=0 failed=2 suites_failed=2 loaded=1 failed_names=['KS-806: synthetic email is injective (no collision for same prefix) 🔴 KS-806 — two addresses with same 8-char prefix produce different synthetic emails (fixes collision)', 'KS-806: synthetic email is injective (no collision for same prefix) CONTROL — two addresses with different 8-char prefixes produce different synthetic emails']
+FAIL A5 GREEN-AFTER: src/__tests__/ks806-wallet-synthetic-email-injective.test.ts still red (or empty) after the product hunk (rc=1, 2 failed / 2 run): ['KS-806:
+INFO control cell present: NO (0 passed before, 0 after) — the task asked for one; not gated
+after suite rc=1 total=711 passed=709 failed=2 suites_failed=2 loaded=1 failed_names=['KS-806: synthetic email is injective (no collision for same prefix) 🔴 KS-806 — two addresses with same 8-char prefix produce different synthetic emails (fixes collision)', 'KS-806: synthetic email is injective (no collision for same prefix) CONTROL — two addresses with different 8-char prefixes produce different synthetic emails']
+baseline: total=709 failed=0 | after: total=711 failed=2
+develop's own reds (attributed, not counted): []
+NEW reds: [('ks806-wallet-synthetic-email-injective.test.ts', 'KS-806: synthetic email is injective (no collision for same prefix) CONTROL — two addresses with different 8-char prefixes produce different synthetic emails'), ('ks806-wallet-synthetic-email-injective.test.ts', 'KS-806: synthetic email is injective (no collision for same prefix) 🔴 KS-806 — two addresses with same 8-char prefix produce different synthetic emails (fixes collision)')]
+reds fixed by the patch: []
+tests added: 2
+FAIL A6 whole services/auth suite: NEW red(s) vs the untouched tip (see suite_delta.out)
+PASS A7 tsc --noEmit for services/auth: rc 0 after the patch (baseline rc=0)
+INFO tsc on the test file alone: rc=2 (4 lines; not gated — vitest does not type-check and the service tsconfig excludes __tests__)
+SUMMARY files=2 +145/-1 test=src/__tests__/ks806-wallet-synthetic-email-injective.test.ts red_first=yes apply_mode=lenient
+RESULT: FAIL (2 failed)

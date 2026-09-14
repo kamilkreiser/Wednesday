@@ -1,0 +1,26 @@
+diff_blocks=1 all_blocks=1 prose_outside_chars=0
+wrote /Volumes/DevMASTER/WEDNESDAY/2_Project_Files/local-model/runs/2026-09-14_ks806-code-pilot/control_positive.mine.out.md.checker/patch.diff lines=153
+PASS A1 output is exactly one fenced ```diff block, nothing outside it
+clone clean at pinned tip f09b629457c5800b215621c31c680631f947e879
+--- baseline at the untouched tip (whole services/auth suite + tsc)
+baseline suite rc=0 total=709 passed=709 failed=0 suites_failed=0 loaded=1 failed_names=[]
+baseline tsc rc=0 (0 lines)
+PASS A2 diff applies at the tip (strict git apply --check)
+touched files (2): Blockchain/Dev/services/auth/src/__tests__/ks806-wallet-synthetic-email-injective.test.ts Blockchain/Dev/services/auth/src/routes/wallet.ts  (+135/-1)
+PASS A3 touched-file set == { Blockchain/Dev/services/auth/src/routes/wallet.ts , Blockchain/Dev/services/auth/src/__tests__/ks806-wallet-synthetic-email-injective.test.ts }
+test-only at tip: rc=1 total=3 passed=1 failed=2 suites_failed=2 loaded=1 failed_names=['KS-806: the synthetic wallet email is injective over the address 🔴 KS-806 — two addresses sharing their first 8 characters create TWO distinct synthetic emails', 'KS-806: the synthetic wallet email is injective over the address 🔴 KS-806 — the same address always derives the same synthetic email (deterministic)']
+PASS A4 RED-FIRST: src/__tests__/ks806-wallet-synthetic-email-injective.test.ts fails at the untouched tip (2 failed / 3 run)
+test after product hunk: rc=0 total=3 passed=3 failed=0 suites_failed=0 loaded=1 failed_names=[]
+PASS A5 GREEN-AFTER: src/__tests__/ks806-wallet-synthetic-email-injective.test.ts passes with the product hunk (3 passed / 3 run)
+INFO control cell present: 1 cell(s) passed BEFORE and 3 AFTER (the harness reaches the code both times)
+after suite rc=0 total=712 passed=712 failed=0 suites_failed=0 loaded=1 failed_names=[]
+baseline: total=709 failed=0 | after: total=712 failed=0
+develop's own reds (attributed, not counted): []
+NEW reds: []
+reds fixed by the patch: []
+tests added: 3
+PASS A6 whole services/auth suite: no NEW red vs the untouched tip
+PASS A7 tsc --noEmit for services/auth: rc 0 after the patch (baseline rc=0)
+INFO tsc on the test file alone: rc=0 (0 lines; not gated — vitest does not type-check and the service tsconfig excludes __tests__)
+SUMMARY files=2 +135/-1 test=src/__tests__/ks806-wallet-synthetic-email-injective.test.ts red_first=yes apply_mode=strict
+RESULT: PASS (7/7)

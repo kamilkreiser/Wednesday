@@ -68,6 +68,74 @@ ticket text):
 | facts_comment | 1 | 44.5s | 3934 | 91.2 | **PASS** — 0 `@`, all ids traced to input, BLUF first line, 551 chars | **FAILs correctly** on a planted output with 2 `@` mentions and 2 invented ids |
 | predicate_classify | 1 | 19.6s | 1747 | 94.0 | **PASS** — second-read python reimplementation agrees with the model on all 7 rows (including the one `UNKNOWN` row, a missing-`state`-field issue) | **FAILs correctly** on a planted output with one wrong class and one out-of-domain class value (`C`) |
 
+## Task type `code_patch` (built 2026-09-14 13:20–14:00, Kam: "get Qwen to try one of the coding tasks")
+
+**Files:** `tasks/code_patch/{task.md, checker.sh, prepare_clone.sh, sample_input.json}`.
+**Pilot:** Secuura **KS-806** (`wallet.ts:200`, the `walletAddress.slice(0, 8)` synthetic-email
+bucket). Run evidence: `runs/2026-09-14_ks806-code-pilot/` (every attempt kept whole —
+`out.md.attemptN`, `.meta.json`, `harness.attemptN.out`, `checker.attemptN.out`, the
+`task.md.attemptN` wording each attempt saw, plus the checker's own controls).
+
+**Shape.** The input carries the ticket text verbatim, the FULL product file, a READ-ONLY
+reference test (ks796 — the repo's own in-process route-contract precedent), the pinned
+`tip` SHA and the paths. The model must answer with ONE fenced ```diff block touching
+exactly `product_file` + ONE test file under `test_dir`. The checker (`checker.sh
+<input.json> <out.md> <clone-dir>`) never edits the patch; it applies it in a scratch
+clone pinned at the tip and prints seven assertions: **A1** one diff block, no prose ·
+**A2** `git apply --check` (strict first; `--recount --ignore-whitespace` is the one
+accommodation, reported apart) · **A3** touched set == {product, one test} · **A4
+RED-FIRST** the test hunk alone fails at the tip with >=1 failed assertion (a load error
+is NOT a red) · **A5 GREEN-AFTER** product hunk applied, the file passes · **A6** whole
+service suite: no NEW red vs the untouched tip (both measured in the same run; develop's
+own reds attributed) · **A7** `tsc --noEmit` rc 0. rc 0 only on 7/7. Untracked leftovers in
+the clone are quarantined (`<clone>/../quarantine/<ts>/`), never deleted.
+
+**Clone discipline.** `git clone --shared --no-checkout <source> <scratch>/clone` +
+`checkout --detach <tip>` in the SESSION SCRATCHPAD (the pre-tool hook refuses git write
+verbs anywhere else, and refuses them through a `$VAR` path — use the literal path).
+`prepare_clone.sh <input.json> <clone>` symlink-farms the source's installed
+`node_modules` INTO the clone (985 root entries + workspace dirs; `.vite` and
+`.package-lock.json` become real clone-local dirs so vitest's cache never lands in the
+source; `@secuura/shared` is re-pointed to the CLONE's `packages/shared`, which the script
+builds with `tsc` because the source's `dist` was 12 days stale). No `npm ci`, no docker,
+no stack. Measured in the clone: services/auth suite **709 tests / 15s**, `tsc` 4s, one
+test file 7s — a full checker run is ~22s.
+
+**Checker controls (all recorded in the run dir):** the builder's own reference patch
+(`control_positive.mine.*` — NOT the model's; it exists so a checker that can never PASS
+is caught) → **PASS 7/7**, red-first 2 failed / 3 run at the tip, 712/712 after, strict
+apply. Planted third-file diff → **FAIL at A3** (n=3, other=1). Planted not-red-first
+test → **FAIL at A4** (0 failed / 3 run at the tip) with A5–A7 still passing, i.e. the
+assertion that catches it is the one that should.
+
+**KS-806 pilot results (real model, `LM_NUM_CTX=32768`, `LM_MAX_LOAD=18`, load 6-7 at launch, no
+`LM_FORCE`; tip pinned `f09b629457c5800b215621c31c680631f947e879` = origin/develop at 13:22 AEST):**
+
+| attempt | wall | prompt tok | eval tok | tok/s | thinking chars | checker (v2, per-section) | failure shape |
+|---|---|---|---|---|---|---|---|
+| 1 (`task.md.attempt1`) | 203s | 11571 | 11737 | 63.6 | 37.5K | **FAIL** A5+A6 (2/7 failed) | product hunk right (`sha256(...).slice(0,24)`, +1/-1) but (a) BOTH hunk headers miscounted (`-199,7` for a 6/6 hunk; `+1,123` for 144 lines) and every context line over-indented by 2 spaces — strict `git apply` rejects it outright (checker v1 stopped at A2); with per-section `--recount --ignore-whitespace` it applies, and then (b) the test file calls `vi.mocked(userRepo.createUser)` without ever importing `userRepo` → `ReferenceError` in BOTH cells before AND after the fix. Red-first "yes" only in the degenerate sense (red on its own bug). |
+| 2 (`task.md.attempt2`, wording tightened with 2a-2c diff mechanics + 6a-6b test rules) | 401s | 12102 | 22543 | 58.7 | 85.2K | **FAIL** A1+A5+A6 (3/7 failed) | (a) generation ran past `<\|endoftext\|>` into prose + a SECOND, degraded copy of the diff (`node/http` for `node:http`) — A1; (b) new-file hunk declared `+1,100` for 127 lines — strict apply "succeeds" and silently truncates the file at line 100 (checker v1 saw a load error; v2's audit catches the miscount and recounts); (c) with the full file applied, the test's `challengeId: 'CHALLENGE_ID'` fails the route's `z.string().uuid()` schema → 400, so its own CONTROL cell fails and `createUser` is never reached (0 created, expected 2) before AND after. Also 12 unused imports + implicit-`any` params (tsc on the test file rc 2, informational). |
+
+**Reading.** The model got the one-line product fix right both times and copied the ks796 mock
+shape plausibly, but a 30B-A3B model cannot yet produce a git-applicable unified diff reliably
+(hunk counts, context indentation) nor a test that reaches the code under test — both attempts'
+CONTROL cells failed, which is the tell. The checker never PASSed a model patch; it PASSed the
+builder's control and FAILed both planted-bads on the right assertion. Nothing from this run is
+PR-ready. What a Secuura seat would do with a PASSING patch is in the run report, not here.
+
+**Checker v1 → v2 (same session, all five inputs re-run under v2, v1 outputs kept as
+`checker.attemptN.out` / `*.checker.out` beside the v2 files):** v1 applied the whole diff with
+`--include` and treated `--recount` as a global accommodation; attempt 1 showed `--recount` makes a
+correctly-counted hunk swallow the next `--- /dev/null` header, and attempt 2 showed a miscounted
+new-file hunk is accepted by strict apply and truncated silently. v2 splits the diff per file,
+audits every hunk header against its actual line counts, and recounts only the miscounted
+section, naming the accommodation in the A2 line.
+
+**Environment note:** one baseline run of the untouched tip (checker.attempt2.out, v1) showed 4
+develop-own reds (`db.retry`, `ks488-smtp-opt-in`, `ks949-platform-admin-seed-identity`,
+`s130-f6-openapi-module`) that were green in the other six baseline runs — flaky under a
+concurrent load, attributed by the delta logic and not counted against the patch.
+
 **Gitignore state:** `2_Project_Files/local-model/models/` and `2_Project_Files/local-model/logs/`
 were **already** gitignored (`.gitignore` lines 128-129, added at the runtime's own creation
 earlier 2026-09-14) — `git check-ignore -v` confirms both; no `.gitignore` edit was needed.
