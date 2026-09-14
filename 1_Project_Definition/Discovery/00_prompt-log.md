@@ -2457,3 +2457,13 @@ Done with it: Dynamics → Kam's team decision (no action); QuickQuote masthead/
 > Decision secuura-805-guard5-node-rejection-retry: retry — 1 — retry at once on a definitive node rejection (Wednesday's recommendation)
 
 *Note:* 20:06:17 view=wednesday — ruled option 1; receipted; ADDENDUM to s231 to build it before the gate
+
+## 2026-09-14 21:48 — Kam (panel, verbatim)
+> How are the agents going? Start wrapping them up.
+
+*Note:* 21:47:27 view=wednesday — receipted with status; wrap sequence: two verdicts → s228's last two merges → s228 wraps; s232 wrapped; no new launches
+
+## 2026-09-14 21:49 — Kam (panel, verbatim)
+> But of course, let them finish their existing tasks, so don't cut something halfway through.
+
+*Note:* 21:48:19 view=wednesday — receipted; s228 finishes #873 then wraps in its own order; nothing cut
