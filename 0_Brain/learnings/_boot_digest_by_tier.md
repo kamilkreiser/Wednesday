@@ -7,7 +7,7 @@ status: live
 
 # Boot digest BY TIER — W whole, M rules-only, every project case a handle
 
-Generated 2026-09-15 09:28 from 167 lesson files (845,322 B). M 33 · MIXED 5 · W 129. 28 project CASE sections inside MIXED files are reduced to one line each: the heading and the path to read it at. W blocks are exactly what the default digest carries; M blocks drop the section index and keep the rules; a P file is a single handle. The CASES behind every rule live only in the lesson files — open one the moment its rule fires.
+Generated 2026-09-15 09:32 from 168 lesson files (849,565 B). M 33 · MIXED 5 · W 130. 28 project CASE sections inside MIXED files are reduced to one line each: the heading and the path to read it at. W blocks are exactly what the default digest carries; M blocks drop the section index and keep the rules; a P file is a single handle. The CASES behind every rule live only in the lesson files — open one the moment its rule fires.
 
 ## The T9 SSD is the master — Wednesday must be fully portable
 `2026-07-31_fully-portable-drive.md` · principle · 2026-07-31 · status: superseded — the "T9 is the master" half by [[2026-08-25_one-drive-devmaster-is-master]] (2026-08-25); the portability principle itself still lives · tier: W
@@ -5740,4 +5740,19 @@ the verb: "going forward" — and here he also named today's set explicitly).
 5. **Enforcement candidate (w=3 promotes it):** `wednesday_rotate.sh --self` and the 23:00 close bell both list the fleet panes and refuse/alarm on any non-coordinator pane whose seat has a wrap mail in the inbox — the census in the path, not in memory.
 
 **Family:** [[2026-08-07_a-promise-is-not-a-mechanism]] · [[2026-08-09_an-enforcement-you-must-arm-is-not-one]] (a wake you must receive is not an enforcement) · [[2026-09-14_the-coordinator-adds-value-or-it-is-waste-three-duties-not-watching]] (duty 1: the instruction was Ornith at night — it was not carried out) · [[2026-09-03_a-pane-close-is-a-session-kill]] (the close's own discipline) · [[2026-09-14_ornith-runs-at-night-in-the-downtime-a-standing-rule]] (the mechanism this protects).
+
+
+## Every Ornith issue gets a TOOLING or INSTRUCTION fix, the same session — and Wednesday writes the model's task from the ticket, the ticket is never the prompt
+`2026-09-15_ornith-every-issue-gets-a-tooling-or-instruction-fix.md` · grant · 2026-09-15 · status: live · tier: W
+
+**The operative case, so the headline matches it:** an Ornith (local-model) run has FAILED, or a source read has found its output wrong. **Do not file it as a verdict and move on.** Ask which of three things failed — the model's sampling, the harness's tolerance, or the prompt's clarity — and put the fix where that answer points: a sampler option, a checker rule with a red arm, or a clearer Wednesday-written brief. Write the row in `2_Project_Files/local-model/IMPROVEMENTS.md` in the same action. And the model never reads the ticket as its task: Wednesday reads the ticket and the code and writes `night/briefs/<TICKET>.md` — the exact edits by line with the line text, what not to touch, the test cells.
+
+**How to apply:**
+1. **A FAIL row in `night/done.md` is a to-do, not a result.** Read the run (`checker.out`, `out.md`, the file at the tip), classify the cause (model / harness / prompt), fix it where it lives, and write the IMPROVEMENTS row with its proof — same session. The morning brief to Kam carries the rows, not just the verdicts.
+2. **Wednesday briefs the model.** Before a ticket is queued, `night/briefs/<TICKET>.md` exists: what is wrong in one paragraph; the exact edits (line number + the line's text at the tip + the new line); what must NOT change; the test cells (red, red, control) and the file to copy the mocking shape from. `build_input.sh` uses it as the prompt when present and says so in the log. A ticket without a brief runs on its description only as a measured baseline, never as the default.
+3. **Every prompt rule gets a checker twin.** "Fix every named site" became `defect_line.sites` + the A3b gate; a rule the checker cannot refuse on is a hope. Red-proof the twin on a real failing output before it is trusted (the 09:19 output is the corpus).
+4. **Batch, then one pass** (Kam 06:51): the model runs its queue back to back; Wednesday reads every PASS diff in one sitting against the tickets' words and the file, and every FAIL against this rule.
+5. **Score the mechanism, not the model** at the weekly consolidation: rows added, arms fired, PASS rate per brief-vs-ticket — the DGM guard (adoption ≠ improvement) applies to Ornith's harness like any other.
+
+**Family:** [[2026-09-14_ornith-runs-at-night-in-the-downtime-a-standing-rule]] (the grant this extends) · [[2026-09-14_local-model-pilot-grant-qwen3-30b-simple-checked-tasks-only]] · [[2026-08-07_a-check-that-cannot-fail]] (every rule needs a checker twin with a red arm) · [[2026-08-14_i-read-representations-they-read-sources]] (a FAIL verdict is a representation of a run; read the run) · [[2026-09-14_the-coordinator-adds-value-or-it-is-waste-three-duties-not-watching]] (duty 3: commission what makes the output first-rate — here, the improvement itself) · [[2026-08-03_go-slow-earn-autonomy]] (rule 5: recorded).
 
