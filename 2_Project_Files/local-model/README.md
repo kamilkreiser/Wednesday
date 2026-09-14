@@ -145,3 +145,31 @@ earlier 2026-09-14) — `git check-ignore -v` confirms both; no `.gitignore` edi
 `local-model/runs/` (this session's real task outputs, kept as pilot evidence) is currently
 **untracked and NOT gitignored** — Wednesday should decide at commit time whether to track it
 as pilot evidence or add a gitignore line for it.
+
+## `LM_THINK` (added 2026-09-14 18:2x) and the night runner (`night/`)
+
+**Un-parked, drive-local (2026-09-14 afternoon → evening):** the PARKED header above records the
+Qwen removal at 14:25; the runtime came back the same day as a DRIVE-LOCAL Ollama v0.34.0
+(`2_Project_Files/tools/ollama/ollama`, `OLLAMA_MODELS=<this>/models`, log
+`logs/ollama_serve_v0.34.log`) with `gpt-oss:120b`, `gpt-oss:20b` and `ornith:35b` for the head-to-head
+(`runs/2026-09-14_head-to-head-REPORT.md`). Kam's 18:15:36 ruling makes Ornith the night worker.
+
+**`LM_THINK`** (env, default `1`): `1` sends `think:true` — the clean `content`/`thinking` split the
+finding above describes; `0` sends `think:false` and strips any `<think>…</think>` block from the answer.
+`0` is the workaround for Ornith's runtime cut (KS-806: `done:false`, content empty, thinking cut at the
+same token twice — a server-side `cancel task`, deterministic at temperature 0). Measured 2026-09-14
+18:21 on `ornith:35b` with a two-line diff task: `LM_THINK=0` → `done:true`, `done_reason:stop`,
+151 chars of clean content, 0 thinking chars, 8.5 s wall (7.6 s of it model load). The meta sidecar
+now records `think_field_requested`, `done` and the stderr line carries `done`/`done_reason`/
+`content_chars`. Which mode a model needs is a per-model measurement (qwen3 needed `1`).
+
+**`tasks/code_patch/task.md` is ticket-agnostic since 18:19** (backup `task.md.pre-0914-generic`): the
+KS-806 fix expression, the `auth_find_user_by_wallet` rule and the "attempt 1 failed here" notes are
+gone; the constraints stay, plus "fix every site the ticket names inside `product_file`" (the KS-871
+lesson — all three models fixed `:280` and missed `:108`). Checker positive control re-run after the
+edit: PASS 7/7, strict apply (the checker never reads task.md; the run proves the clone pipeline).
+
+**`night/`** — the mechanism for the 2026-09-14 standing rule: `night_run.sh` (gates → memory clear →
+queue → harness → checker), `build_input.sh` (ticket → contract input.json), `queue.md` (the curated
+list + rejections), `done.md` (verdicts), `log/`, the launchd template + `install_night.command`.
+Read `night/BUILD_REPORT.md` for what was exercised. Runs land in `runs/<date>_<ticket>-ornith35b-night/`.

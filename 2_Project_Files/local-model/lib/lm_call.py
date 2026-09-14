@@ -48,13 +48,15 @@ SYSTEM_PREAMBLE = (
 
 
 def main():
-    if len(sys.argv) != 8:
+    if len(sys.argv) not in (8, 9):
         sys.stderr.write(
             "lm_call: usage: lm_call.py <task.md> <input.json> <out.md> "
-            "<meta.json> <model> <num_ctx> <base_url>\n"
+            "<meta.json> <model> <num_ctx> <base_url> [<think 1|0>]\n"
         )
         return 2
     task_path, input_path, out_path, meta_path, model, num_ctx_s, base_url = sys.argv[1:8]
+    think_flag = (sys.argv[8] if len(sys.argv) == 9 else "1").strip().lower()
+    think = think_flag not in ("0", "false", "no", "off")
 
     task_text = open(task_path, encoding="utf-8").read()
     input_text = open(input_path, encoding="utf-8").read()
@@ -83,8 +85,9 @@ def main():
             {"role": "user", "content": user_content},
         ],
         "stream": False,
-        "think": True,  # see module docstring: True (not False) is what
-                         # actually yields a clean content/thinking split.
+        "think": think,  # see module docstring: True (not False) is what
+                          # yields a clean content/thinking split on qwen3;
+                          # False is the Ornith runtime-cut workaround (LM_THINK=0).
         "options": {"num_ctx": num_ctx, "temperature": 0},
     }).encode("utf-8")
 
@@ -164,7 +167,8 @@ def main():
         "wall_clock_seconds": round(wall_clock, 3),
         "load_at_start": load_at_start,
         "sha256_task_plus_input": sha,
-        "think_field_requested": True,
+        "think_field_requested": think,
+        "done": j.get("done"),
         "thinking_chars": len(thinking),
         "think_leak_in_content": think_leak_in_content,
         "done_reason": j.get("done_reason"),
@@ -178,8 +182,9 @@ def main():
         toks_per_s = round(meta["eval_count"] / (j["eval_duration"] / 1e9), 2)
     sys.stderr.write(
         f"lm_call: ok wall={wall_clock:.2f}s eval_count={meta['eval_count']} "
-        f"tok/s={toks_per_s} thinking_chars={len(thinking)} "
-        f"think_leak_in_content={think_leak_in_content}\n"
+        f"tok/s={toks_per_s} think={int(think)} thinking_chars={len(thinking)} "
+        f"think_leak_in_content={think_leak_in_content} done={j.get('done')} "
+        f"done_reason={j.get('done_reason')} content_chars={len(cleaned)}\n"
     )
     return 0
 

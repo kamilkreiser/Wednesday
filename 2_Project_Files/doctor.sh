@@ -129,6 +129,66 @@ else
   fi
 fi
 
+# --- Ornith night job (Kam, panel 2026-09-14 18:15:36: "lets use Ornith at night in the
+# downtime (when no other agents run) … Set this up as a rule and get it working on the
+# backlog"). Rule: 0_Brain/learnings/2026-09-14_ornith-runs-at-night-in-the-downtime-a-standing-rule.md.
+# Mechanism: 2_Project_Files/local-model/night/ (night_run.sh + queue.md + install_night.command).
+# Four facts, warn-level (the fleet runs without it; this says whether the NIGHT will):
+#   job armed? · model present on the drive-local Ollama? · queue non-empty? · last run's exit + age.
+# Wednesday's seat only — on another agent's Mac the job is expected absent, so only an INFO line.
+NIGHT_DIR="$PROJECT_DIR/2_Project_Files/local-model/night"
+NIGHT_MODEL_TAG="ornith/35b"
+NIGHT_MANIFEST="$PROJECT_DIR/2_Project_Files/local-model/models/manifests/registry.ollama.ai/library/$NIGHT_MODEL_TAG"
+if [ "${WED_AGENT:-wednesday}" != "wednesday" ]; then
+  ok "ornith night job: not this seat's (Wednesday only) — skipped"
+elif [ ! -f "$NIGHT_DIR/night_run.sh" ]; then
+  warn "ornith night runner missing" "2_Project_Files/local-model/night/night_run.sh is gone — the 2026-09-14 rule has no mechanism (PORTABILITY 15)"
+else
+  if launchctl print "gui/$(id -u)/com.wednesday.ornith-night" >/dev/null 2>&1; then
+    ok "ornith night job armed (com.wednesday.ornith-night, 23:30)"
+  else
+    warn "ornith night job NOT armed" "bash 2_Project_Files/local-model/night/install_night.command (PORTABILITY 15) — nothing runs the backlog at night until it is"
+  fi
+  if [ -f "$NIGHT_MANIFEST" ]; then
+    NIGHT_TAGS=$(curl -sS -m 4 http://127.0.0.1:11434/api/tags 2>&1)
+    if [ $? -eq 0 ] && echo "$NIGHT_TAGS" | grep -q '"ornith:35b"'; then
+      ok "ornith:35b on the drive and served (/api/tags)"
+    else
+      warn "ornith:35b on the drive but Ollama not serving it" "OLLAMA_MODELS=2_Project_Files/local-model/models 2_Project_Files/tools/ollama/ollama serve (PORTABILITY 14/15) — night_run gate G5 will refuse"
+    fi
+  else
+    warn "ornith:35b manifest missing under local-model/models" "OLLAMA_MODELS=<local-model>/models ollama pull ornith:35b (~20 GB; PORTABILITY 15)"
+  fi
+  NIGHT_Q=$(grep -v -E '^[[:space:]]*(#|$)' "$NIGHT_DIR/queue.md" 2>/dev/null | wc -l | tr -d ' ')
+  if [ "${NIGHT_Q:-0}" -gt 0 ]; then
+    ok "ornith night queue: $NIGHT_Q ticket(s) pending in night/queue.md"
+  else
+    warn "ornith night queue EMPTY" "re-derive night/queue.md from the KS board (Backlog/Todo, one file, fix shape, in-process test; see the queue header) — the job exits 4 until then"
+  fi
+  if [ -f "$NIGHT_DIR/log/last_run.json" ]; then
+    NIGHT_LAST=$(python3 - "$NIGHT_DIR/log/last_run.json" <<'PYEOF' 2>/dev/null
+import json, sys, datetime
+j = json.load(open(sys.argv[1])); end = j.get("ended", "")
+age_h = "?"
+try:
+    t = datetime.datetime.strptime(end, "%Y-%m-%d %H:%M:%S"); age_h = round((datetime.datetime.now() - t).total_seconds() / 3600, 1)
+except Exception:
+    pass
+print(f"{j.get('exit')}|{j.get('reason','')}|{age_h}|{j.get('tickets_run',0)}|{','.join(j.get('verdicts',[]))}")
+PYEOF
+)
+    NIGHT_RC="${NIGHT_LAST%%|*}"; NIGHT_REST="${NIGHT_LAST#*|}"; NIGHT_REASON="${NIGHT_REST%%|*}"; NIGHT_REST="${NIGHT_REST#*|}"; NIGHT_AGE="${NIGHT_REST%%|*}"; NIGHT_REST="${NIGHT_REST#*|}"; NIGHT_N="${NIGHT_REST%%|*}"; NIGHT_V="${NIGHT_REST#*|}"
+    case "$NIGHT_RC" in
+      0) ok "ornith night last run: rc 0 ($NIGHT_N ticket(s): ${NIGHT_V:-none}) ${NIGHT_AGE}h ago" ;;
+      4) ok "ornith night last run: rc 4 queue empty, ${NIGHT_AGE}h ago" ;;
+      3) ok "ornith night last run: rc 3 $NIGHT_REASON, ${NIGHT_AGE}h ago (a refusal is the gate working — read night/log/)" ;;
+      *) warn "ornith night last run rc ${NIGHT_RC:-?} ${NIGHT_AGE}h ago" "$NIGHT_REASON — read 2_Project_Files/local-model/night/log/" ;;
+    esac
+  else
+    ok "ornith night: no run recorded yet (night/log/last_run.json absent)"
+  fi
+fi
+
 # --- Repo hooks (ledger w=3 enforcement travels per-clone) ---
 # A TRACKED master copy now lives beside the other hooks, so a stranded seat installs it
 # with one command instead of reconstructing it from a 2026-08-04 commit message. The

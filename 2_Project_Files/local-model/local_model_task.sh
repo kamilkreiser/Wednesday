@@ -16,6 +16,10 @@
 #                doc's "no local generation while a tier-1 gate runs suites
 #                at load > ~16" rule)
 #   LM_FORCE     1 = run anyway when the load rule would refuse
+#   LM_THINK     1 (default) sends think:true — the clean content/thinking
+#                split (README finding); 0 sends think:false and strips any
+#                <think>…</think> from the answer — the Ornith runtime-cut
+#                workaround (2026-09-14 head-to-head; night runner default)
 #   OLLAMA_URL   default http://127.0.0.1:11434
 #
 # Exit codes: 0 ok, 2 usage/missing-input/ollama-unreachable, 3 load rule
@@ -33,6 +37,7 @@ LM_MODEL="${LM_MODEL:-qwen3:30b-a3b}"
 LM_NUM_CTX="${LM_NUM_CTX:-16384}"
 LM_MAX_LOAD="${LM_MAX_LOAD:-16}"
 LM_FORCE="${LM_FORCE:-0}"
+LM_THINK="${LM_THINK:-1}"
 OLLAMA_URL="${OLLAMA_URL:-http://127.0.0.1:11434}"
 
 TASK_FILE="${1:-}"
@@ -81,7 +86,7 @@ mkdir -p "$SCRIPT_DIR/logs"
 RUN_LOG="$SCRIPT_DIR/logs/runs.log"
 START_TS="$(date '+%Y-%m-%d %H:%M:%S')"
 
-OUT_TMP=$(python3 "$SCRIPT_DIR/lib/lm_call.py" "$TASK_FILE" "$INPUT_FILE" "$OUT_FILE" "$META_FILE" "$LM_MODEL" "$LM_NUM_CTX" "$OLLAMA_URL" 2>&1 > /dev/null)
+OUT_TMP=$(python3 "$SCRIPT_DIR/lib/lm_call.py" "$TASK_FILE" "$INPUT_FILE" "$OUT_FILE" "$META_FILE" "$LM_MODEL" "$LM_NUM_CTX" "$OLLAMA_URL" "$LM_THINK" 2>&1 > /dev/null)
 CALL_RC=$?
 # lib/lm_call.py writes its one-line status to stderr; capture it for the log
 # without ever discarding stderr (we re-ran nothing — this captures the same
@@ -93,5 +98,5 @@ if [ "$CALL_RC" -ne 0 ]; then
 fi
 
 echo "$OUT_TMP" >&2
-echo "$START_TS | task=$(basename "$(dirname "$TASK_FILE")") model=$LM_MODEL rc=0 load=$LOAD1 out=$OUT_FILE $OUT_TMP" >> "$RUN_LOG"
+echo "$START_TS | task=$(basename "$(dirname "$TASK_FILE")") model=$LM_MODEL think=$LM_THINK rc=0 load=$LOAD1 out=$OUT_FILE $OUT_TMP" >> "$RUN_LOG"
 exit 0

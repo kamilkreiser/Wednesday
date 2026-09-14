@@ -12,16 +12,11 @@ state it must be fixed in:
 - `test_dir` — the ONLY directory in which your test file may live.
 - `suggested_test_file` — the path to use for a NEW test file.
 - `reference_test_file` + `reference_test_note` — an EXISTING test file (full
-  content in `files[...]`) that shows how this repo drives the same code
+  content in `files[...]`) that shows how this repo drives the same route
   in-process with `vi.mock` stubs. It is a template to copy the mock shape
   from. You must NOT modify it.
 
-Produce a fix for the ticket as ONE unified diff, and nothing else. The fix
-shape comes from the TICKET's own description and from reading the product
-file — the ticket says what is wrong and how it should behave; you decide the
-minimal code change that makes it so. If the ticket names several sites that
-read the same wrong value, fix every named site inside `product_file`, not
-only the first one.
+Produce a fix for the ticket as ONE unified diff, and nothing else.
 
 HARD CONSTRAINTS (a mechanical checker enforces every one; a violation is a
 failed task, not a style point):
@@ -34,19 +29,19 @@ failed task, not a style point):
    content in the input. A new file uses `--- /dev/null` and
    `+++ b/<path>` with a single `@@ -0,0 +1,N @@` hunk where every line is
    prefixed `+`.
-   DIFF MECHANICS (the two errors models most often make):
+   DIFF MECHANICS (attempt 1 failed here — both errors below were made):
    2a. A context line is ONE space followed by the source line UNCHANGED.
-       If the source line has a 2-space indent, the context line is ` ` +
-       that line — three leading spaces in total, never more. Do not
-       re-indent context lines. Take the `-` line's text from the file
-       content (and `defect_line.text`) verbatim.
+       If the source line is `  const user: User = {` (2-space indent) the
+       context line is ` ` + `  const user: User = {` — three leading
+       spaces in total, never more. Do not re-indent context lines.
+       Take the `-` line's text from `defect_line.text` verbatim.
    2b. In `@@ -a,b +c,d @@`, b MUST equal the number of lines in the hunk
        that start with ' ' or '-', and d the number that start with ' ' or
        '+'. Count them. A wrong count makes git read the NEXT file's
        `--- /dev/null` header as a deletion line and the whole patch is
-       rejected. Prefer a small hunk: 3 context lines above, the changed
-       lines, 3 context lines below → `@@ -N,b +N,d @@` where N is the
-       line number of the first context line in the ORIGINAL file.
+       rejected. Prefer a small hunk: 3 context lines above, the one `-`
+       line, the one `+` line, 3 context lines below → `@@ -N,7 +N,7 @@`
+       where N is the line number of the first context line.
    2c. For the new test file, N in `@@ -0,0 +1,N @@` is the exact number
        of `+` lines. Count them.
 3. The diff touches EXACTLY two files: `product_file`, and ONE test file
@@ -54,42 +49,48 @@ failed task, not a style point):
    existing file in `test_dir` other than the reference file). No third
    file. Never touch package.json, lockfiles, configs, or the reference
    test file.
-4. The test file must be RED at the current tip (its ticket-named cell fails
+4. The test file must be RED at the current tip (its KS-named cell fails
    because the defect is present) and GREEN once the product hunk is
    applied. State in the test's `it(...)` title which cell is the red-first
-   one, e.g. `it('🔴 <ticket.identifier> — ...')`. Include at least one
-   CONTROL cell that passes both before and after (proves the harness
-   reaches the code). The checker applies the test hunk ALONE first (must
-   fail with at least one failed assertion — a file that fails to load
-   counts as a load error, not a red), then the product hunk (must pass).
-   The red cell must assert the BEHAVIOUR the ticket describes, at the
-   site(s) it names — not only the easiest observable side effect.
+   one, e.g. `it('🔴 KS-806 — ...')`. Include at least one CONTROL cell that
+   passes both before and after (proves the harness reaches the code).
+   The checker applies the test hunk ALONE first (must fail with at least
+   one failed assertion — a file that fails to load counts as a load error,
+   not a red), then the product hunk (must pass).
 5. The product change is MINIMAL and DETERMINISTIC: only the lines the
    ticket's fix shape requires, using imports the file ALREADY has. No new
    dependencies, no refactors, no renamed symbols, no changed behaviour
-   outside the defect. Keep existing comments; a short
-   `// <ticket.identifier>:` comment on the changed line is welcome.
+   outside the defect. Keep existing comments; a short `// KS-<n>:` comment
+   on the changed line is welcome.
 6. TypeScript must compile under the repo's stated settings (strict,
    noUnusedLocals, noUnusedParameters). Do not leave unused imports,
    variables or parameters in either file. vitest globals are available but
    importing `{ describe, it, expect, beforeAll, afterAll, beforeEach, vi }`
    from 'vitest' is the repo's precedent — follow it.
    6a. Every identifier the test uses must be imported or declared IN the
-       test file. Calling `vi.mocked(someModule.fn)` without importing
-       `someModule` is a ReferenceError at runtime. Simpler and preferred:
-       capture inside the `vi.mock` factory itself — declare a
-       `vi.hoisted(() => ({ ... }))` state object and have the mocked
-       function push into it / read from it.
-   6b. Follow `reference_test_note` literally: it says which mocks must
-       return what for the ticket-named cell to reach the defective code
-       path (an early return, a 400 on a mismatch, or a found-row branch
-       means the code under test is never reached and there is nothing to
-       compare). Keep per-request values in the hoisted state and set them
-       before each request.
+       test file. `vi.mocked(userRepo.createUser)` without an
+       `import * as userRepo from '../repositories/userRepo'` is a
+       ReferenceError at runtime (attempt 1 did this). Simpler and
+       preferred: capture inside the `vi.mock` factory itself — declare a
+       `vi.hoisted(() => ({ created: [] as Array<{ email: string }> }))`
+       state and have the mocked `createUser` push into it.
+   6b. Follow `reference_test_note` literally: for the KS-named cell the
+       `auth_find_user_by_wallet` query mock must return `{ rows: [] }` (so
+       the CREATE branch runs — an existing row means `createUser` is never
+       called and there is nothing to compare), and the challenge row's
+       `wallet_address` must equal the address of the CURRENT request (the
+       handler rejects a mismatch with 400), so keep the current address in
+       the hoisted state and set it before each request.
 7. Where the input lacks a fact you need, write `UNKNOWN` in a comment
    rather than inventing an API, a path, or a value.
 8. The whole test suite of the service must stay green: do not change any
    exported symbol, route, status code, or response shape the existing
    tests assert.
+
+Fix shape for a synthetic-identifier collision (the KS-806 class): derive the
+synthetic local-part from a stable hash of the WHOLE input value, e.g.
+`crypto.createHash('sha256').update(walletAddress).digest('hex').slice(0, 24)`,
+so that two distinct inputs can no longer map to one identifier. Keep the
+`@wallet.local` domain so nothing that keys on the suffix changes.
 
 Output the ```diff block now.

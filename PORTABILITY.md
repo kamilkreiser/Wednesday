@@ -393,3 +393,40 @@ built from nothing:
     - **Degrades to:** the harness (`local_model_task.sh` + the three pilot tasks under
       `local-model/tasks/`) refuses with a clear exit code (2) rather than hanging; nothing else
       in the fleet depends on the local model, so its absence is silent everywhere else.
+15. **Ornith night job — `local-model/night/` (Kam, panel 2026-09-14 18:15:36: "lets use Ornith at night in
+    the downtime (when no other agents run). clear system memory before it runs … Set this up as a rule and
+    get it working on the backlog."). Rule file:
+    `0_Brain/learnings/2026-09-14_ornith-runs-at-night-in-the-downtime-a-standing-rule.md`.** Supersedes
+    item 14's PARKED header in one respect: the local runtime is live again, **drive-local this time** —
+    binary `2_Project_Files/tools/ollama/ollama` (v0.34.0, not Homebrew), weights under
+    `2_Project_Files/local-model/models/` (gitignored; `ornith:35b` ~20 GB, plus `gpt-oss:120b` / `gpt-oss:20b`
+    from the 09-14 head-to-head), server `http://127.0.0.1:11434` started by hand (log
+    `local-model/logs/ollama_serve_v0.34.log`).
+    - **On the drive, portable:** `night/night_run.sh` (the runner: gates → memory clear → queue → harness
+      → checker in a `--shared` scratch clone), `night/build_input.sh` (ticket → contract input.json,
+      read-only Linear + `git show` at the `ls-remote` develop tip), `night/queue.md` (the curated list,
+      pins per line) + `night/done.md` (lines move here with the verdict), `night/log/` (one line per
+      decision + `last_run.json`), the plist TEMPLATE `night/com.wednesday.ornith-night.plist`, and
+      `night/install_night.command`. Runs land in `local-model/runs/<date>_<ticket>-ornith35b-night/`.
+    - **Machine-local (per Mac, ~/Library/LaunchAgents):** the armed job `com.wednesday.ornith-night`
+      (23:30 daily) — arm with `bash 2_Project_Files/local-model/night/install_night.command`
+      (`--render-only <path>` lint-checks without arming; refuses under `WED_AGENT=tuesday` — Wednesday's
+      seat only, like the daily sweep). The Ollama server itself is also a per-boot process (item 14's
+      start line, with the drive-local binary).
+    - **Needs on the Mac:** `tmux` (the pane-census gate reads the `fleet` session), `node`/`npx` (the
+      checker's vitest + tsc, from the Secuura source's installed `node_modules` — symlink-farmed, never
+      installed), `python3`, `curl`, and the Secuura project mounted read-only at
+      `/Volumes/DevMASTER/!CODING/Secuura/Blockchain/` (its `4_Credentials/.env` for the Linear key —
+      read, never printed; its `2_Project_Files` as the `--shared` clone source — git READ verbs only there).
+      Scratch clones live under `/private/tmp/claude-501/night/` (a stale clone is quarantined by `mv`,
+      never deleted).
+    - **Honest limit:** a page-cache purge (`sudo purge`) needs an admin password the seat does not hold;
+      the runner measures `memory_pressure` + `vm_stat` after unloading the other models (`keep_alive:0`)
+      and skips a ticket under 30 GB available. If Kam wants the purge, the sudoers line is
+      `kam_code ALL=(root) NOPASSWD: /usr/sbin/purge` — stated, not done.
+    - **doctor.sh** warns when the job is not armed, when `ornith:35b` is not on the drive / not served,
+      when the queue is empty, and when the last run exited with anything but 0/3/4; it prints the last
+      run's exit + age. Exercised 2026-09-14 (job unarmed → warn; queue 3 → ok; last run rc 3 → ok).
+    - **Degrades to:** nothing — the runner refuses with a named gate (rc 3) or an empty queue (rc 4) and
+      writes one log line; no seat, brief, or gate depends on it. A PASS is evidence for a Secuura seat's
+      morning sweep, never a push.

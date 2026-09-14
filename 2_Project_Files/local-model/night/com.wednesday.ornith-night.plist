@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<!-- TEMPLATE of record for the Ornith night job (Kam, 2026-09-14 18:15:36). install_night.command
+     substitutes the four double-underscore placeholders (night_run path, agent, home, label) and writes the result to
+     ~/Library/LaunchAgents/com.<agent>.ornith-night.plist. Same shape as the WED-16 scheduler jobs.
+     Fires 23:30 local daily; night_run.sh's own gates decide whether anything runs. -->
+<plist version="1.0">
+<dict>
+  <key>Label</key><string>__LABEL__</string>
+  <key>ProgramArguments</key>
+  <array>
+    <string>/bin/bash</string>
+    <string>__NIGHT_RUN__</string>
+  </array>
+  <key>StartCalendarInterval</key>
+  <dict>
+    <key>Hour</key><integer>23</integer>
+    <key>Minute</key><integer>30</integer>
+  </dict>
+  <key>RunAtLoad</key><false/>
+  <key>EnvironmentVariables</key>
+  <dict>
+    <key>WED_AGENT</key><string>__AGENT__</string>
+    <key>PATH</key><string>/opt/homebrew/bin:/usr/local/bin:/usr/bin:/bin:/usr/sbin:/sbin</string>
+  </dict>
+  <key>StandardOutPath</key><string>__HOME__/Library/Logs/__AGENT___ornith-night.out</string>
+  <key>StandardErrorPath</key><string>__HOME__/Library/Logs/__AGENT___ornith-night.err</string>
+</dict>
+</plist>
