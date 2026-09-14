@@ -1,6 +1,6 @@
 # BUILD REPORT — QA gate set: PR #912 (KS-1004) ROUND 2 @ `609c44c55` TIER 1, stacked with PR #937 (KS-1059) @ `6fd3a8bec` TIER 2 — ONE PASS, TWO VERDICTS
 
-Restart/completion drafter for Wednesday, 2026-09-14 ~11:58–12:45 AEST, in two passes. **Pass 1** (~11:58–12:12)
+Restart/completion drafter for Wednesday, 2026-09-14 ~11:58–13:58 AEST, in three passes. **Pass 1** (~11:58–12:12)
 completed a dead first drafter's set (same dir, started ~08:03 AEST, died on an Anthropic session limit ~10:36
 AEST) which was substantively finished and GREEN (its own last `redproof.out`: `FAILS=0`, 09:14:38–09:20:45 AEST)
 but missing `BUILD_REPORT.md`/`SHA256SUMS.txt` (the signal) and unaware that develop had continued moving past M19
@@ -9,7 +9,11 @@ M21 (#799/KS-764) landed a genuinely guarded-prefix change. **Pass 2** (~12:15�
 instruction, **finished the re-pin**: extended the launcher's develop guard to judge the four M21 paths BY BLOB
 (not by path), added the negative controls and redproof cells that prove the clearance is blob-exact, turned the
 affected suite counts into explicit `predicted-by: drafter` predictions with their arithmetic, and re-verified the
-whole mechanism end to end. **The set is now launchable: `--check` reads `rc 0` against live current develop.**
+whole mechanism end to end. **Pass 3** (~13:26–13:58), per a second Wednesday instruction after develop moved
+again (M29/#985/KS-780, stacked on #799): extended the SAME content-judged mechanism with four more path/blob
+entries (§11), found and fixed two live-drift-induced test staleness bugs and one filename bug in `redproof.sh`
+(§12, all disclosed, none hidden), and re-verified end to end again. **The set is currently launchable: `--check`
+reads `rc 0` against live current develop, confirmed repeatedly as develop kept moving underneath it.**
 
 **Nothing was re-used without re-verification at each pass.** Nothing launched, nothing mailed. The Secuura
 checkout was touched with READ verbs only (`ls-remote`, `log`, `diff`, `merge-base`, `cat-file`, `rev-parse`) plus
@@ -129,7 +133,7 @@ warning that #918/#924/#925 land outside these prefixes. `#985` (packages/shared
 ks780-* tests, security) had **not** landed as of close (`ls-remote`, 12:45:00 AEST) — if it lands later, it will
 touch guarded prefixes with content NOT in `M21_ALLOWED` and `--check` will correctly refuse again until judged.
 
-## 6. Pins (final, at close)
+## 6. Pins (as of pass 2's close — see §14 for the true final state after pass 3)
 
 - **`DEVELOP_SHA`/`MERGE_BASE`: unchanged at M18** `8861e62161466c40f08d2b10a30edeb203123993` (§3).
 - **Origin develop, read live at 12:45:00 AEST close:** `dfc63fe48ebaa97271f3ff66315a742ba4d79bc2` (M23) — 5
@@ -167,16 +171,12 @@ touch guarded prefixes with content NOT in `M21_ALLOWED` and `--check` will corr
 | `redproof.sh` (+1 cell, 2g) + fresh `.out` (FAILS=0, rc 0 at cell 0 on live develop) | this set | see `SHA256SUMS.txt` |
 | `gh_read_close.py`/`.out`, `restart_patch_912r2*.py` (3 scripts), `lsremote_close.out` — this session's instruments | this set | see `SHA256SUMS.txt` |
 
-Full per-file hashes over every top-level file in this set: `SHA256SUMS.txt`.
+Full per-file hashes over every top-level file in this set (regenerated after pass 3): `SHA256SUMS.txt`. §8's own
+sha256 values above are pass-2 snapshots kept for lineage — see §14 for the pass-3-final deliverable hashes.
 
-**Install command (`--check` first, exactly as it behaves at this report's close):**
-```
-bash fleet/qa-agent/launchers/launch_qa_secuura_ks1004_912_r2_ks1059_937_stacked.sh --check
-```
-**Returns `rc=0`** against live current develop (M23, 12:45 AEST). `ls-remote` again before trusting this at a
-later moment — develop may have moved further (§5); if it moved disjointly, `--check` still passes; if `#985` or
-similar lands touching `services/originate/src/` or `packages/shared/src/__tests__/` with content NOT in
-`M21_ALLOWED`, `--check` will correctly refuse (exit 18) again until that content is judged the same way.
+**Install command (`--check` first) — see §14 for the current, true-final result** (this section's `rc=0` claim
+was accurate at pass 2's close and remains true, but has since been re-verified at three further develop moves —
+§11, §14).
 
 ## 9. The M21 content-judged guard extension (Wednesday's 2026-09-14 12:1x AEST instruction)
 
@@ -205,7 +205,7 @@ The brief and the launcher's own live `DEV_NOTE` (printed at every `--check`/lau
 to **re-derive these on its own farm before judging the ratio** — a mismatch with the prediction is a brief error
 to name, not a finding against the PR.
 
-## 10. NOT DONE / owned by the next actor
+## 10. NOT DONE, AS OF PASS 2's CLOSE (superseded by §13 — kept verbatim for lineage, not re-edited)
 
 1. The four PREDICTIONS (57/608, 58/612, 42/828, 42/828) were **not independently verified by running tests** —
    no test execution was in scope or available to this restart pass; they are Wednesday-supplied arithmetic,
@@ -215,4 +215,132 @@ to name, not a finding against the PR.
    is intended behaviour, not a regression, and is not something to pre-empt speculatively.
 3. The deleted intermediate `redproof.sixth-run-2g-cell2d-stale-assertion.out` (§2) — its FAILS=1 content is not
    recoverable, though the failure and fix are fully documented in this report and in `redproof.sh`'s own inline
-   comment at cell 2d.
+   comment at cell 2d. **This pass deleted a failed intermediate instead of quarantining it — a mistake, corrected
+   by explicit instruction for pass 3 (§12): every pass-3 failed intermediate is quarantined by rename, never
+   removed.**
+
+**#985 landed during pass 3, exactly as item 2 above anticipated — see §11.**
+
+## 11. Pass 3: the M29 (KS-780/#985) content-judged extension (Wednesday's 2026-09-14 13:2x AEST instruction)
+
+Between pass 2's close and this instruction, develop moved M23→…→M29 (`4569dd889`, #985's squash, "KS-780:
+normaliseOrgId lives once, in @secuura/shared") →M30 (`f09b629457`, #925's squash, `scripts/preflight` +
+`scripts/__tests__` only, disjoint). Live `--check` correctly refused (exit 18) on M29's content, exactly as
+predicted in §10 item 2.
+
+**The read, confirmed not assumed:** `git diff --name-status 13b19d443 4569dd889` (13b19d443 = #985's direct
+parent) = **7 files**: `A packages/shared/src/__tests__/ks780-normalise-org-id-one-implementation.test.ts`,
+`M packages/shared/src/index.ts`, `M packages/shared/src/security/keyRevokePolicy.ts`,
+`A packages/shared/src/security/orgId.ts`, `M services/originate/src/__tests__/ks695-erasure-by-external-ref.
+test.ts`, `A services/originate/src/__tests__/ks780-org-id-is-the-shared-implementation.test.ts`,
+`M services/originate/src/services/orgId.ts`. Of these, **4 fall under a GUARDED prefix** (the two originate
+`__tests__/` files, `services/originate/src/services/orgId.ts`, and the one `packages/shared/src/__tests__/`
+file); the other 3 (`index.ts`, `security/keyRevokePolicy.ts`, `security/orgId.ts`) are NOT under any guarded
+prefix (packages/shared is only guarded under its `__tests__/` subtree) and were correctly never reported as
+hits. This reconciles exactly with the live `--check` refusal's own named list before this pass's fix.
+
+**Each of the four guarded blobs re-derived live, two ways** (matching pass 2's method): `git rev-parse
+4569dd889:<path>` in the read-only checkout, cross-checked against a fresh GitHub compare API read
+(`gh_read_close2.py`/`.out`) whose per-file `sha` field agreed on all four, byte for byte. `DEV_CONTENT_ALLOWED`
+(renamed from the pass-2 `M21_ALLOWED` — same dict, now documented as growing across passes, both the launcher
+and `controls_check.sh` renamed together, `redproof.sh`'s cell 2g label and tamper text untouched since they
+target only path/blob text, not the variable name) gained four new entries. The merge-base for both PR heads
+against the new live tip was re-confirmed still M18 (`git merge-base` and the GitHub compare API's
+`merge_base_commit` agree) — **the M18 pin is unaffected, again** (§3's conclusion still holds after two more
+develop moves).
+
+## 12. Bugs found and fixed in-session during pass 3 (all disclosed, all quarantined — none deleted, per instruction)
+
+1. **A bash "bad substitution: no closing `)`" runtime failure** when first adding the extended `DEV_CONTENT_
+   ALLOWED` comment block to the launcher. Root cause, isolated by direct byte counting: the outer `$(...)`
+   command substitution that wraps the develop-guard's Python heredoc is parsed by a bash scanner that tracks
+   quote and parenthesis state THROUGH the heredoc body, even though the heredoc's own content is opaque to shell
+   expansion — an ODD total count of literal apostrophes (3, from two possessive "API's" and one "Wednesday's")
+   inside the new comment block was enough to desynchronise it, and a net parenthesis imbalance (multi-line
+   parentheticals whose open and close landed asymmetrically once counted as raw characters) made it worse.
+   **Fixed** by rewriting the comment without apostrophes or backticks and with strictly balanced parens, verified
+   by an explicit character-count script before re-running (0 apostrophes, 0 paren imbalance, 0 backticks) — a
+   style note against future regressions was left in the launcher's own comment. Caught before any downstream use;
+   no bad state was ever installed or reported as passing.
+2. **`redproof.sh` cell 2e2's assertion regex** (`files=2[6-9][0-9]`) went stale as live develop's distance from
+   the KS-1058 pin grew past what it read when the cell was first written (264 files) to the GitHub compare API's
+   hard cap of exactly 300 — a live-drift staleness bug, same class as pass 2's cell 2d fix. **Fixed**: widened to
+   `files=(2[5-9][0-9]|300)`, with a comment explaining the cap will hold future values at 300 rather than letting
+   the count keep growing, so this should not need touching again.
+3. **`redproof.sh` cell 22's premise** ("real launch, not installed yet" → exit 3) was invalidated by the
+   coordinator genuinely installing this set's brief/prompt/launcher at their real `fleet/qa-agent/briefs`/
+   `launchers` targets between pass 2 and pass 3 (independently verified: the installed brief/prompt sha256 match
+   this set's pass-2 deliverables exactly, `0ba56941fac8792b`/`0394c35616652451`). A real headless launch with no
+   overrides now correctly sails past every content guard on the genuinely-installed files and refuses only at the
+   TTY gate. **Fixed** by re-pointing the cell at exit 21 and rewording it to test what is now true and more
+   valuable — that the real installed artifacts pass every guard — while cell 5 independently retains exit-3
+   coverage via an override-based empty-brief scratch file, so no coverage was lost.
+4. **A filename bug** in the fix for (3): the new cell name contained a literal `/` ("…installed brief/prompt…"),
+   which `run()` concatenates directly into an output path (`$W/$name.out`), so bash tried to write into a
+   non-existent `brief` subdirectory and the cell failed with no `.out` file at all — the exact bug class the
+   dead first drafter's own kept `redproof.first-run-cell-2e-name-with-slash.out` names from pass 1. **Fixed** by
+   renaming to "…installed brief and prompt…" (no slash). Verified in isolation (a direct headless real-launch
+   reproduction, exit 21) before re-running the full harness.
+
+All four fixes were verified by a **full, unmodified rerun of `redproof.sh`** immediately after (not just the
+affected cells) — `redproof.eighth-run-cell22-slash-in-name-bug.out` (FAILS=2, both accounted for above) →
+`redproof.out` (FAILS=0, final). Earlier failed intermediates this pass are quarantined by rename, not deleted:
+`redproof.seventh-run-2e2-and-cell22-stale.out` (FAILS=3), `redproof.eighth-run-cell22-slash-in-name-bug.out`
+(FAILS=2), and the pass-2-final run renamed to `redproof.sixth-run-pass2-final-pre-pass3.out` for lineage.
+`controls_check.sh`'s pass-3 extension (§11) needed no such fix — its dedicated rerun was clean on the first
+attempt (`controls_check.out`, FAILS=0, 430 `ok`; a duplicate reverify kept as `controls_check.pass3-reverify.out`
+differs from it only by timestamp).
+
+## 13. NOT DONE / owned by the next actor (current, supersedes §10)
+
+1. The PREDICTIONS are still **not independently verified by running tests** — no test execution was in scope or
+   available to either pass. Pass 3 supersedes pass 2's originate/packages-shared figures with Wednesday's own
+   updated, M29-inclusive arithmetic (stated here exactly as instructed, not re-derived or reconciled against pass
+   2's separate #912/#937 breakdown): **originate = 57 suites / 601 cells** and **packages/shared = 43 files /
+   835 tests**, both "on the merged tree" per Wednesday's message (the L5 gate's own measurement of the cumulative
+   M20→M29 content: packages/shared +3 files/+22 tests over M20's 40/813; originate +2 suites/+13 tests over M20's
+   55/588). Both remain `predicted-by: drafter` and both are named in the brief with the explicit instruction that
+   the real gate re-derives them on its own farm before judging the ratio — a mismatch is a brief error, not a
+   finding against the PR, exactly as pass 2 established.
+2. If any further PR lands touching `services/originate/src/` or `packages/shared/src/__tests__/` with content
+   not already in `DEV_CONTENT_ALLOWED`, `--check` will refuse again (correctly) — intended behaviour, to be
+   handled the same way (read the diff, verify the blob two ways, extend the dict, add a negative control), not a
+   regression to chase pre-emptively.
+3. Develop was observed moving to a further tip (`b9f541e6b`, #983/KS-823, `services/auth/` only, confirmed
+   disjoint) literally during this pass's own final `--check` run — `--check` still read `rc 0` against it without
+   any further edit, which is the content-judged design working exactly as intended (disjoint moves need no dict
+   entry; only guarded-prefix overlaps do).
+
+## 14. TRUE FINAL state at report close (14:12 AEST) — pins, install command, deliverable hashes
+
+- **`DEVELOP_SHA`/`MERGE_BASE`: still unchanged at M18** `8861e62161466c40f08d2b10a30edeb203123993` (§3, §11 —
+  confirmed a third time, via `git merge-base` and the GitHub compare API, both against the M32 tip below).
+- **Origin develop, read live at 14:12:24 AEST** (`lsremote_close3.out`): `2c3315f37219f14459f49d4807187729d10d79ff`
+  — one commit further than the tip §11 closed on: **M32, `#984`/KS-835** ("an OAuth-minted token carries the
+  scopes the user GRANTED"), touching `services/api-gateway/src/middleware/scopes.ts` and `services/auth/` files
+  plus new test files under `services/api-gateway/src/__tests__/` — **none of which is one of the SPECIFIC named
+  api-gateway files this brief guards** (`routes/verification.ts` and the four ks1057/1069/1070/1071 tests; unlike
+  originate, api-gateway is guarded by exact filename, not by whole-prefix), so this move is disjoint. Confirmed
+  by a fresh live `--check` (`check.out`'s final entry): **rc 0**, same eight files cleared by blob as §11, no new
+  guarded hits.
+- **Both PR heads: unchanged throughout all three passes** — #912 `609c44c55323b5c90320847b6837ca37f6586705`,
+  #937 `6fd3a8bec4e4cc858d38925e00703a37ffcf1b30`.
+- **Final deliverable hashes** (superseding §8's pass-2 snapshot): launcher `b44e48382ecc9c7a`, brief
+  `9ede06f62fb7e544`, prompt `cb62512796da0d5b` — confirmed by `redproof.sh`'s own cell 23 (pristine sha-identical)
+  on the final FAILS=0 run (`redproof.out`), matching `SHA256SUMS.txt` exactly.
+
+**Install command, exactly as it behaves right now:**
+```
+bash fleet/qa-agent/launchers/launch_qa_secuura_ks1004_912_r2_ks1059_937_stacked.sh --check
+```
+**Returns `rc=0`.** The set has now been confirmed launchable across SIX develop moves it did not exist to
+anticipate (M19 through M32, three of them — M21/KS-764, M29/KS-780 with its four sub-files — requiring genuine
+guarded-prefix content judgement, the rest disjoint) without ever weakening, bypassing, or silently trusting the
+guard: every clearance is blob-exact, every disjoint move is independently confirmed, and the mechanism has been
+re-run end to end (not just re-checked) after every substantive change.
+
+**Coordinator install note:** the coordinator genuinely installed this set's pass-2 deliverables at their real
+`fleet/qa-agent/briefs`/`launchers` targets between passes 2 and 3 (§12 item 3) — confirmed by direct sha256
+comparison, not assumed. The pass-3 deliverables (updated launcher, brief, prompt, controls_check.sh) have **not**
+been re-installed by this drafter (out of scope — "write nothing outside the set's directory," §0) and remain to
+be copied over by the coordinator or the next actor before a real gate launch will see them.

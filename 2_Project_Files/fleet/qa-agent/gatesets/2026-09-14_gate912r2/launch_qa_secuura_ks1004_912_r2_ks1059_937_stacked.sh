@@ -152,21 +152,31 @@ GUARDED = ["Blockchain/Dev/services/originate/src/services/anchorStateSync.ts",
            "Blockchain/Dev/services/api-gateway/src/__tests__/ks1071-verify-confidence-one-mapping.test.ts",
            "Blockchain/Dev/packages/shared/src/__tests__/",
            "Blockchain/Dev/package-lock.json"]
-# M21 CONTENT-JUDGED allowlist (KS-764, #799, commit 5210ddf317b2b1ed547e5d8488c3d011ceb087e1): these four paths
-# fall under the GUARDED prefixes above but are cleared BY BLOB, not by path — a hit here is OK only if the
-# compare API's own file entry for that path carries EXACTLY this blob sha (its content at M21, read once via
-# `git rev-parse 5210ddf31:<path>` in the read-only checkout and pinned here); any other blob at that path — a
-# further edit, a revert, anything else — is NOT cleared and falls through to GUARDED as before. Restart-drafter,
-# Wednesday's 2026-09-14 12:1x instruction (the #984/#982-#983 precedent).
-M21_ALLOWED = {
+# CONTENT-JUDGED allowlist, grown across restart-drafter passes as develop moves through guarded-prefix content.
+# Pass 2, KS-764 #799 commit 5210ddf317b2b1ed547e5d8488c3d011ceb087e1, added the first four entries. Pass 3,
+# KS-780 #985 commit 4569dd88968fe949b3682512e457a0aec5fc4469 stacked on #799, adds four more. Each entry falls
+# under a GUARDED prefix above but is cleared BY BLOB, not by path -- a hit clears only if the compare API file
+# entry for that path carries EXACTLY this blob sha, read once via git rev-parse against the named commit in the
+# read-only checkout and cross-checked against the GitHub compare API per-file sha field, then pinned here. Any
+# other blob at that path -- a further edit, a revert, anything else -- is NOT cleared and falls through to
+# GUARDED as before. Per Wednesday 2026-09-14 instructions, the number-984 and number-982 number-983 precedent.
+# STYLE NOTE for future edits to this comment block: keep parenthesis count and apostrophe count both EVEN across
+# the whole heredoc body, or avoid them entirely -- an odd count previously broke the outer command substitution
+# parser with a bad substitution error, since that scanner tracks quote and paren state through the whole heredoc
+# even though the heredoc content itself is opaque to shell expansion. Caught and fixed in-session.
+DEV_CONTENT_ALLOWED = {
     "Blockchain/Dev/services/originate/src/__tests__/ks764-admin-api-keys-revoke-route-contract.test.ts": "5a78c4181281f360ebd4481593fd73bf98bb4d9c",
     "Blockchain/Dev/services/originate/src/middleware/auth.ts": "f08ee1a895bc878bc2656f649833706f665686e7",
     "Blockchain/Dev/services/originate/src/routes/adminConfig.ts": "26cec03de665ef75a8f6e4f2532dfc42a59a25b8",
     "Blockchain/Dev/packages/shared/src/__tests__/ks764-key-revoke-call-site-guard.test.ts": "ab8e46d795d268822924a57e2630403be1963497",
+    "Blockchain/Dev/packages/shared/src/__tests__/ks780-normalise-org-id-one-implementation.test.ts": "e3aa932f76419129271cb767e3df352bf694f985",
+    "Blockchain/Dev/services/originate/src/__tests__/ks695-erasure-by-external-ref.test.ts": "6d55452f2ffaa3fc9982639529308f3934ffcee5",
+    "Blockchain/Dev/services/originate/src/__tests__/ks780-org-id-is-the-shared-implementation.test.ts": "c1268e31b96942296dee4198dde6405bbf51f8c5",
+    "Blockchain/Dev/services/originate/src/services/orgId.ts": "f87b261b83248a53c1f2f10b8222a009fab31892",
 }
 hits = sorted({f["filename"] for f in files for g in GUARDED if f["filename"] == g or (g.endswith("/") and f["filename"].startswith(g))})
 by_name = {f["filename"]: f for f in files}
-cleared = sorted(h for h in hits if h in M21_ALLOWED and by_name.get(h, {}).get("sha") == M21_ALLOWED[h])
+cleared = sorted(h for h in hits if h in DEV_CONTENT_ALLOWED and by_name.get(h, {}).get("sha") == DEV_CONTENT_ALLOWED[h])
 remaining = sorted(h for h in hits if h not in cleared)
 if remaining:
     print("GUARDED " + " ".join(remaining)); sys.exit(0)
@@ -177,7 +187,7 @@ PYJ
   )"
   case "$DEV_JUDGEMENT" in
     DISJOINT*) DEV_NOTE="origin develop MOVED $DEVELOP_SHA -> $CUR_DEV: ${DEV_JUDGEMENT#DISJOINT } — disjoint from the thirteen guarded paths (the five PR files, the services/originate/src/ prefix, the gateway verification.ts and its four tests, the packages/shared tests prefix, the root lockfile); the gate merges the then-current develop under BOTH heads, re-states the delta by name and re-derives the ratios (brief items 1, 2, 3, 4, 7; S1, S4)" ;;
-    ALLOWED*) DEV_NOTE="origin develop MOVED $DEVELOP_SHA -> $CUR_DEV: ${DEV_JUDGEMENT#ALLOWED } — the cleared files sit under a guarded prefix but were CONTENT-JUDGED against the pinned M21 blob (KS-764/#799), not path-excused; the gate merges the then-current develop under BOTH heads, RE-DERIVES the originate and packages/shared suite counts on its own farm (the brief's own counts for these are PREDICTIONS, predicted-by: drafter — a mismatch is a brief error, not a finding against the PR) and re-states every other delta by name (brief items 1, 2, 3, 4, 7; S1, S4)" ;;
+    ALLOWED*) DEV_NOTE="origin develop MOVED $DEVELOP_SHA -> $CUR_DEV: ${DEV_JUDGEMENT#ALLOWED } — the cleared files sit under a guarded prefix but were CONTENT-JUDGED against a pinned blob in DEV_CONTENT_ALLOWED (KS-764/#799 and/or KS-780/#985), not path-excused; the gate merges the then-current develop under BOTH heads, RE-DERIVES the originate and packages/shared suite counts on its own farm (the brief's own counts for these are PREDICTIONS, predicted-by: drafter — a mismatch is a brief error, not a finding against the PR) and re-states every other delta by name (brief items 1, 2, 3, 4, 7; S1, S4)" ;;
     *) echo "REFUSING: origin develop is at $CUR_DEV, not the pinned $DEVELOP_SHA, and the delta is not provably disjoint: ${DEV_JUDGEMENT:-no judgement} — confirm the delta, then re-pin deliberately (launcher DEVELOP_SHA + brief TARGET + prompt)" >&2
        exit 18 ;;
   esac

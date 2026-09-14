@@ -113,7 +113,11 @@ O="$W/2e pinned to the KS-927 commit (40 files): gateway verification.ts EXACT a
   || { echo "  cell 2e did not name the gateway verification.ts, an originate/src path AND a gateway test among the guarded hits"; FAILS=$((FAILS+1)); }
 cp "$L" "$W/l_dev1058.sh"; ld="$(tamper "$L" "$W/l_dev1058.sh" "$DEVPIN" "DEVELOP_SHA='27509dc7a541d599558317a3258300d0f5e6bf3c'" 1)"
 run "2e2 pinned to the KS-1058 commit: 264+-file delta (>250) -> UNJUDGEABLE -> 18" 18 "$W/l_dev1058.sh" "$B" "$P" "" check "$ld"
-/usr/bin/grep -q "UNJUDGEABLE status=ahead files=2[6-9][0-9]" "$W/2e2 pinned to the KS-1058 commit: 264+-file delta (>250) -> UNJUDGEABLE -> 18.out" || { echo "  cell 2e2 did not say UNJUDGEABLE files=26x/27x"; FAILS=$((FAILS+1)); }
+# NOTE (restart-drafter, pass 3): as live develop keeps growing, this delta's own file count only grows toward
+# (and is capped at) the GitHub compare API's hard 300-file limit -- it read 264 when this cell was first written,
+# 300 as of pass 3. Either is a correct demonstration of the >250 cap; match the whole plausible range 250-300
+# rather than pin one snapshot value that live drift keeps invalidating.
+/usr/bin/grep -Eq "UNJUDGEABLE status=ahead files=(2[5-9][0-9]|300)" "$W/2e2 pinned to the KS-1058 commit: 264+-file delta (>250) -> UNJUDGEABLE -> 18.out" || { echo "  cell 2e2 did not say UNJUDGEABLE files=25x-300"; FAILS=$((FAILS+1)); }
 echo "  cell 2e: $(/usr/bin/grep -o 'GUARDED [^—]*' "$O" | head -1 | cut -c1-220)"
 cp "$W/l_dev17np.sh" "$W/l_dev17aim.sh"; ld="$(tamper "$W/l_dev17np.sh" "$W/l_dev17aim.sh" '"Blockchain/Dev/services/originate/src/services/anchorStateSync.ts",' '"Blockchain/Dev/packages/shared/src/__tests__/entrypoint-corpus.test.ts",' 1)"
 run "2f M17 pin, prefix neutralised, slot-1 entry aimed at entrypoint-corpus -> EXACT arm -> 18" 18 "$W/l_dev17aim.sh" "$B" "$P" "" check "$ld"
@@ -129,6 +133,15 @@ AUTHENTRY='    "Blockchain/Dev/services/originate/src/middleware/auth.ts": "f08e
 cp "$L" "$W/l_dev21weak.sh"; ld="$(tamper "$L" "$W/l_dev21weak.sh" "$AUTHENTRY" "" 1)"
 run "2g M21_ALLOWED weakened (auth.ts entry stripped) on LIVE current develop -> 18" 18 "$W/l_dev21weak.sh" "$B" "$P" "" check "$ld"
 /usr/bin/grep -q "GUARDED.*middleware/auth.ts" "$W/2g M21_ALLOWED weakened (auth.ts entry stripped) on LIVE current develop -> 18.out" || { echo "  cell 2g did not name middleware/auth.ts as the unresolved hit"; FAILS=$((FAILS+1)); }
+
+# ---- cell 2h: pass-3 (M29/KS-780/#985) entry weakened against the REAL LIVE current develop tip ---------------
+# Wednesday's 2026-09-14 13:2x AEST instruction, same technique as 2g but against one of the four M29 entries
+# added in pass 3: stripping the orgId.ts entry must refuse (18) on live current develop even though the other
+# seven DEV_CONTENT_ALLOWED entries (four M21 + three remaining M29) would still clear.
+ORGIDENTRY='    "Blockchain/Dev/services/originate/src/services/orgId.ts": "f87b261b83248a53c1f2f10b8222a009fab31892",'
+cp "$L" "$W/l_dev29weak.sh"; ld="$(tamper "$L" "$W/l_dev29weak.sh" "$ORGIDENTRY" "" 1)"
+run "2h DEV_CONTENT_ALLOWED weakened (orgId.ts entry stripped) on LIVE current develop -> 18" 18 "$W/l_dev29weak.sh" "$B" "$P" "" check "$ld"
+/usr/bin/grep -q "GUARDED.*services/orgId.ts" "$W/2h DEV_CONTENT_ALLOWED weakened (orgId.ts entry stripped) on LIVE current develop -> 18.out" || { echo "  cell 2h did not name services/orgId.ts as the unresolved hit"; FAILS=$((FAILS+1)); }
 cp "$L" "$W/l_mb.sh"; ld="$(tamper "$L" "$W/l_mb.sh" "MERGE_BASE='$M18'" "MERGE_BASE='2222222222222222222222222222222222222222'" 1)"
 run "3 wrong merge-base (launcher tamper)" 10 "$W/l_mb.sh" "$B" "$P" "" check "$ld"
 cp "$L" "$W/l_stack.sh"; ld="$(tamper "$L" "$W/l_stack.sh" '[ "$STACK_READ" = "$HEAD_SHA ahead=4 files=1" ]' '[ "$STACK_READ" = "$HEAD_SHA ahead=1 files=1" ]' 1)"
@@ -201,9 +214,18 @@ run "21a override launch, HEADLESS (stdin not a TTY) -> 21" 21 "$L" "$B" "$P" ""
 /usr/bin/grep -q "stdin is not a TTY" "$W/21a override launch, HEADLESS (stdin not a TTY) -> 21.out" || { echo "  cell 21a wrong reason"; FAILS=$((FAILS+1)); }
 run "21b override launch under script(1)'s pty -> 16 (the guard after the TTY guard)" 16 "$L" "$B" "$P" "" launch-override-pty LANDED
 /usr/bin/grep -q "a launch with test overrides set" "$W/21b override launch under script(1)'s pty -> 16 (the guard after the TTY guard).out" || { echo "  cell 21b wrong reason (expected the override guard, i.e. the TTY guard passed under the pty)"; FAILS=$((FAILS+1)); }
-run "22 real launch (not installed yet), no claude" 3 "$L" "$B" "$P" "" launch-real LANDED
-/usr/bin/grep -q "brief missing or empty: /Volumes/DevMASTER/WEDNESDAY/2_Project_Files/fleet/qa-agent/briefs/2026-09-14_secuura-912-ks1004-tier1-r2-937-ks1059-stacked.md" "$W/22 real launch (not installed yet), no claude.out" \
-  || { echo "  cell 22 did not refuse on the REAL brief path"; FAILS=$((FAILS+1)); }
+# NOTE (restart-drafter, pass 3, 2026-09-14 13:3x AEST): this cell originally asserted exit 3 (brief missing) on
+# the REAL default paths with no overrides, because nothing was installed yet when it was written. Between pass 2
+# and pass 3 the coordinator genuinely installed this set's brief/prompt/launcher at their real fleet/qa-agent
+# targets (confirmed: installed brief/prompt sha256 match this set's pass-2 deliverables exactly) -- so the REAL
+# default paths now resolve to a real, present, content-valid brief and prompt, and a real headless launch with NO
+# overrides correctly sails past every content guard and refuses only at the TTY gate (exit 21), same reason as
+# cell 21a. This is a MORE valuable check now, not a weaker one: it proves the genuinely installed artifacts pass
+# every guard for real. Exit-3 coverage on a missing brief is independently retained by cell 5 (an override-based
+# scratch empty-brief file), so nothing is lost by this update.
+run "22 real launch on the genuinely installed brief and prompt, no claude" 21 "$L" "$B" "$P" "" launch-real LANDED
+/usr/bin/grep -q "stdin is not a TTY" "$W/22 real launch on the genuinely installed brief and prompt, no claude.out" \
+  || { echo "  cell 22 did not reach the TTY guard on the real installed paths"; FAILS=$((FAILS+1)); }
 
 # ---- raw-control-byte census on the whole set + a synthetic positive control ---------------------------------
 python3 - "$L" "$B" "$P" "$G/controls_check.sh" "$G/redproof.sh" "$G/gen_launcher_912r2.py" "$G/gh_read.py" "$G/gh_read_937.py" "$G/linear_read.py" "$G/linear_search.py" "$G/merge_rederive.sh" <<'PY' || FAILS=$((FAILS+1))
