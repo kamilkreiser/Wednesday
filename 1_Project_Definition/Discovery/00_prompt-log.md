@@ -2492,3 +2492,8 @@ Done with it: Dynamics → Kam's team decision (no action); QuickQuote masthead/
 > Perfect. In that case, I'm leaving you to action what you can using predominantly the local agent.
 
 *Note:* 22:12:18 view=wednesday — the go on the Ornith-first plan; receipted; tonight = s234 wrap → Ornith 23:30 → morning brief
+
+## 2026-09-14 22:14 — Kam (panel, verbatim)
+> Thanks, but no need to keep to time for the rest of this week. Rotate and implement whenever things are ready to do so.
+
+*Note:* 22:13:42 view=wednesday — the daily rhythm relaxed for the week (through Sun 2026-09-20, Wednesday's reading); rotate + implement whenever ready; receipted
