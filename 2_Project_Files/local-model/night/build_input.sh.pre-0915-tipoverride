@@ -48,28 +48,13 @@ if [ ! -d "$SRC/.git" ]; then echo "build_input: source checkout missing at $SRC
 # --- tip: origin/develop by ls-remote, object must already be local (no fetch) ---
 TIP="$(git -C "$SRC" ls-remote origin refs/heads/develop 2>/dev/null | awk '{print $1}')"
 if [ -z "$TIP" ]; then echo "build_input: ls-remote origin develop returned nothing (offline?)" >&2; exit 1; fi
-ORIGIN_TIP="$TIP"
 if [ "$(git -C "$SRC" cat-file -t "$TIP" 2>/dev/null)" != "commit" ]; then
-  # --- G6 (2026-09-15, the night the object store was stale): a VERIFIED TIP OVERRIDE ---
-  # night/tip_override.txt holds ONE line: <local sha> <origin tip it was verified against> <instrument> <who/when>
-  # written by the coordinator only after measuring that NO file under $REPO_SUBDIR differs between the
-  # two (the GitHub compare API from the seat that holds the token — read-only). It is honoured ONLY while
-  # origin still sits at the sha it was verified against and the local sha is in the object store; the
-  # moment origin moves again the line is stale and this refuses exactly as before. No fetch, ever.
-  OV="$(dirname "$0")/tip_override.txt"
-  OV_SHA=""; OV_AGAINST=""
-  if [ -f "$OV" ]; then read -r OV_SHA OV_AGAINST OV_REST < "$OV"; fi
-  if [ -n "$OV_SHA" ] && [ "$OV_AGAINST" = "$TIP" ] && [ "$(git -C "$SRC" cat-file -t "$OV_SHA" 2>/dev/null)" = "commit" ]; then
-    echo "build_input: G6 — origin develop $TIP is not local; using VERIFIED OVERRIDE $OV_SHA (verified against this origin tip; $OV_REST)" >&2
-    TIP="$OV_SHA"
-  else
-    echo "build_input: REFUSED — develop tip $TIP is not in the local object store; a fetch is a write verb on the source checkout, so a Secuura seat must fetch first (or the coordinator writes night/tip_override.txt after a measured no-$REPO_SUBDIR-change compare — current override: '${OV_SHA:-none}' against '${OV_AGAINST:-none}')" >&2
-    exit 2
-  fi
+  echo "build_input: REFUSED — develop tip $TIP is not in the local object store; a fetch is a write verb on the source checkout, so a Secuura seat must fetch first" >&2
+  exit 2
 fi
 
 # Everything else is Python: the Linear read, the parse, the JSON emit.
-BUILD_ORIGIN_TIP="$ORIGIN_TIP" python3 - "$TICKET" "$OUT" "$SRC" "$TIP" "$REPO_SUBDIR" "$@" <<'PYEOF'
+python3 - "$TICKET" "$OUT" "$SRC" "$TIP" "$REPO_SUBDIR" "$@" <<'PYEOF'
 import json, os, re, subprocess, sys, urllib.request
 
 ticket, out, src, tip, subdir = sys.argv[1:6]

@@ -104,3 +104,10 @@
 # live lanes' tickets (never queued): L2 s226 KS-739/1068/791 (+ KS-801/1035 named) · L10 s227
 #   KS-993/711/704/973 · L8 s229 KS-945/926/930/937/911/912
 # Peter's / Stuart's: 25 tickets excluded at the filter (assignee), not read.
+#
+# RE-QUEUED 2026-09-15 05:5x by Wednesday: the three BUILD_REFUSED rows of the 05:30 hand run (stale object
+# store) — now buildable on the verified tip override (night/tip_override.txt: a594eb162 vs origin 0f37b85c8,
+# 0 files under Blockchain/Dev between them). Run 24/7 per Kam 2026-09-14 21:57 (G1 informational).
+KS-871 ref=Blockchain/Dev/services/api-gateway/src/__tests__/ks843-erasure-path-bypass.test.ts line=280
+KS-1072 ctx=49152
+KS-1087 line=991 ctx=49152

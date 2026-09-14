@@ -106,12 +106,7 @@ gates() {
   # G1 clock
   local hour
   if [ -n "$NIGHT_HOUR_OVERRIDE" ]; then hour="$((10#$NIGHT_HOUR_OVERRIDE))"; else hour="$((10#$(date +%H)))"; fi
-  # Kam, panel 2026-09-14 21:57:43 (verbatim): "no need to gate it to the nighttime, as this machine is
-  # only used by you. And if you're not pulling up any agents, then you can do the work 24/7." — so the
-  # clock is INFORMATIONAL and G2 (the pane census) is the gate. NIGHT_CLOCK_GATE=1 restores the window.
-  if [ "${NIGHT_CLOCK_GATE:-0}" != "1" ]; then
-    log "GATE G1 clock: hour=$hour — informational only (Kam 2026-09-14 21:57: 24/7 when no other agents run; NIGHT_CLOCK_GATE=1 restores 23:00-06:00) — pass"
-  elif [ "$hour" -ge 23 ] || [ "$hour" -lt 6 ]; then
+  if [ "$hour" -ge 23 ] || [ "$hour" -lt 6 ]; then
     log "GATE G1 clock: hour=$hour inside 23:00-06:00${NIGHT_HOUR_OVERRIDE:+ (OVERRIDE)} — pass"
   else
     log "GATE G1 clock: hour=$hour outside 23:00-06:00${NIGHT_HOUR_OVERRIDE:+ (OVERRIDE)} — REFUSE"; GATE_FAIL="G1-clock"; return 1
