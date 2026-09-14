@@ -7,7 +7,7 @@ status: live
 
 # Boot digest — headline + rules of every lesson (open the file when it fires)
 
-Generated 2026-09-14 08:56 from 161 lesson files (819,931 B). Each block = the lesson's retrieval handle (H1), its frontmatter, the operative paragraph, its section index, and every RULES section verbatim. 7 files carry no rules-shaped section and are included whole. The CASES behind a rule live only in the file: open it the moment the rule fires, or when a diagnosis needs the evidence. `_ledger.md` is read whole beside this digest; `_ledger_archive.md` on demand.
+Generated 2026-09-14 10:41 from 162 lesson files (824,175 B). Each block = the lesson's retrieval handle (H1), its frontmatter, the operative paragraph, its section index, and every RULES section verbatim. 7 files carry no rules-shaped section and are included whole. The CASES behind a rule live only in the file: open it the moment the rule fires, or when a diagnosis needs the evidence. `_ledger.md` is read whole beside this digest; `_ledger_archive.md` on demand.
 
 ## The T9 SSD is the master — Wednesday must be fully portable
 `2026-07-31_fully-portable-drive.md` · principle · 2026-07-31 · status: superseded — the "T9 is the master" half by [[2026-08-25_one-drive-devmaster-is-master]] (2026-08-25); the portability principle itself still lives
@@ -5836,6 +5836,19 @@ destructive step behind a check that cannot discriminate) · [[2026-09-11_red-pr
 (the CLEAN arm this leg never had: "a healthy seat talking about the banner") ·
 [[2026-09-02_the-statusline-is-the-context-instrument]] (the leg's origin) ·
 [[2026-09-13_rotation-never-blocks-the-work-delegate-then-rotate]] (a headless floor is the cost).
+
+
+## A coordinator adds value or it stops: follow Kam's instructions diligently, double-check the agents' output as their manager, and enact the extra agents or work that make it first-rate. Watching, rotating and waiting are not the job
+`2026-09-14_coordinator-adds-value-or-stops.md` · correction · 2026-09-14 · status: live
+
+**The operative case, so the headline matches it:** a coordinator seat (Tuesday or Wednesday) is about to spend a turn. **Ask what the turn changes about the WORK:** an instruction carried out, an agent's output independently checked, or an extra agent or fix commissioned to raise quality. If the honest answer is "I watched, re-armed, rotated or read something back", the turn is overhead, and a seat whose turns are all overhead should not be running.
+
+**How to apply:**
+1. **Instructions first, carried out diligently.** A Kam instruction stands until he withdraws it ([[2026-09-14_kams-instruction-stands-until-he-withdraws-it]]).
+2. **Manage the output, do not relay it.** Independently re-check the headline claims of an agent's work: re-run the key check, read the artefact, probe the live thing. Then push back or commission a fix. "Received, and it goes to the gate" is not managing, unless the gate is commissioned in the same turn.
+3. **Raise the standard proactively.** Spin up the extra reviewer, tester or fix lane that would make the output first-rate. Do not wait to be asked, and do not wait for an agent to report.
+4. **No turn for mechanics alone.** Keep wake handling, watcher arming, rotations and read-backs to the minimum that protects the work. When no agent is live and nothing is owed, stand down: stop the watchers and say so, rather than idling on alarms.
+5. **When stopped, stay stopped.** Do not brief, answer or mail any project agent, or edit its records, until Kam restarts the seat. Then re-derive the state from the projects' own handovers before acting.
 
 
 ## A Kam instruction stands until he withdraws it: a question I ask back does not cancel it, and his silence is not a no

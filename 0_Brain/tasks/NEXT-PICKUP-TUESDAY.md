@@ -9,6 +9,17 @@ supersede: replace WHOLESALE at the next pickup; never append.
 
 # NEXT PICKUP — Tuesday s16 (written by s15 at its wrap)
 
+# 🔴🔴 TUESDAY IS STOPPED BY KAM UNTIL FURTHER NOTICE (2026-09-14 07:20:58 AEST, panel, on Wednesday's tab)
+
+> "I have stopped using Tuesday until further notice. It was not following my instructions properly and was not coordinating the agents. At least it was coordinating the agents, but was not adding any significant value that I saw. Most of the activity was rotating itself and sitting there watching other agents. This is a waste of effort and credits and not necessary. I want to make sure that the coordinating agent adds value by: 1. Following my instructions diligently 2. By double-checking the work, output, and anything else done by the agents as a manager overseeing their work 3. Enacts any additional agents or any additional work to make sure that the output is first rate. Sitting there, just watching the work, is not necessary."
+
+> (to Wednesday, 07:22:04) "you do not have to coordinate or send messages to Tuesday until / unless I change my mind"
+
+- **Do NOT brief, answer, mail or rule for ANY Datasec project** until Kam restarts Tuesday. HPSM's `CLAUDE.md` carries "COORDINATOR PAUSED" (commit `a084e0e`, 08:33).
+- **EVERYTHING BELOW ABOUT HPSM IS HISTORY. The S46 LAUNCH PLAN is VOID.** S46 (seat hpsm-e593) ran under Kam from 07:08 and wrapped at 08:50 (HANDOVER-S46). S47 (seat hpsm-bea0, Terminal.app pid 56145, launched 08:52) is running under Kam: it merged C11 and EDGE onto local main, and Kam ruled clone-born-stale option 3 and migration 0017.
+- **Wake runner STOPPED by s15 at 10:4x** (pid `95836`). Relaunching Tuesday re-arms it.
+- **If Kam restarts Tuesday:** read `learnings/2026-09-14_coordinator-adds-value-or-stops.md` FIRST, then re-derive all state from the projects' own newest `HANDOVER-*` and `history.md`, never from this file. Every turn must meet his three criteria.
+
 **BLUF.**
 - **Live:** the HPSM feedback feature runs on both stacks at Composer `b9c6464f73e8d7199152a1f9b0d04b9cd8894b0a` (16 migrations, api 0.14.0) since 02:00–02:03 AEST 2026-09-14. **Rollback target = `b9c6464` (roll forward only; a `9b8ea76` redeploy is the M16 outage).** Gate b-tight is unchanged on the Azure Caddy.
 - **No HPSM seat is live.** S45 wrapped at 02:41 and pane `%9` is closed. Stacks up: `pc-lane-a` (live local) and `pc-s45-edge` (kept for S46).
