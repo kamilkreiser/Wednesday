@@ -205,21 +205,15 @@ while [ "$k" -le "$N_SEC" ]; do
   SEC_FILE="$(python3 -c 'import json,sys; print(json.load(open(sys.argv[1]))[int(sys.argv[2])-1]["file"])' "$REP/sections.json" "$k")"
   SEC_PATH="$(python3 -c 'import json,sys; print(json.load(open(sys.argv[1]))[int(sys.argv[2])-1]["path"])' "$REP/sections.json" "$k")"
   SEC_MIS="$(python3 -c 'import json,sys; print(json.load(open(sys.argv[1]))[int(sys.argv[2])-1]["miscount"])' "$REP/sections.json" "$k")"
-  # 2026-09-15: the model writes paths RELATIVE TO THE SERVICE ROOT ("services/api-gateway/…") as often as
-  # repo-relative ("Blockchain/Dev/services/…") — three of three runs on 09-15 08:4x lacked the prefix and every
-  # one failed A2 with "No such file". A path form is not a code defect: when the section's path lacks the
-  # repo subdir, git apply gets --directory=<subdir> (recorded in the opts so every later apply uses it too).
-  DIROPT=""
-  case "$SEC_PATH" in "$SUBDIR"/*) ;; *) DIROPT="--directory=$SUBDIR"; echo "section $k $SEC_PATH: path lacks $SUBDIR/ — applying with $DIROPT" ;; esac
-  git -C "$CLONE" apply --check -p1 $DIROPT "$SEC_FILE" > "$REP/apply_check_strict_$k.out" 2>&1
+  git -C "$CLONE" apply --check -p1 "$SEC_FILE" > "$REP/apply_check_strict_$k.out" 2>&1
   rc_strict=$?
-  git -C "$CLONE" apply --check -p1 $DIROPT --recount --ignore-whitespace "$SEC_FILE" > "$REP/apply_check_lenient_$k.out" 2>&1
+  git -C "$CLONE" apply --check -p1 --recount --ignore-whitespace "$SEC_FILE" > "$REP/apply_check_lenient_$k.out" 2>&1
   rc_lenient=$?
   if [ "$SEC_MIS" -eq 0 ] && [ "$rc_strict" -eq 0 ]; then
-    echo "$SEC_FILE" > "$REP/section_$k.opts"; echo "$DIROPT" >> "$REP/section_$k.opts"
+    echo "$SEC_FILE" > "$REP/section_$k.opts"; echo "" >> "$REP/section_$k.opts"
     echo "section $k $SEC_PATH: applies (strict)"
   elif [ "$rc_lenient" -eq 0 ]; then
-    echo "$SEC_FILE" > "$REP/section_$k.opts"; echo "$DIROPT --recount --ignore-whitespace" >> "$REP/section_$k.opts"
+    echo "$SEC_FILE" > "$REP/section_$k.opts"; echo "--recount --ignore-whitespace" >> "$REP/section_$k.opts"
     A2_MODE="lenient"; A2_NOTE="$A2_NOTE [$SEC_PATH: --recount --ignore-whitespace needed; miscounted hunks=$SEC_MIS; strict rc=$rc_strict]"
     echo "section $k $SEC_PATH: applies ONLY with --recount --ignore-whitespace (miscounted hunks=$SEC_MIS, strict rc=$rc_strict)"
   else
@@ -241,7 +235,7 @@ apply_section_for() {
   local want="$1" k=1
   while [ "$k" -le "$N_SEC" ]; do
     local p; p="$(python3 -c 'import json,sys; print(json.load(open(sys.argv[1]))[int(sys.argv[2])-1]["path"])' "$REP/sections.json" "$k")"
-    if [ "$p" = "$want" ] || [ "$SUBDIR/$p" = "$want" ]; then
+    if [ "$p" = "$want" ]; then
       local f o; f="$(sed -n 1p "$REP/section_$k.opts")"; o="$(sed -n 2p "$REP/section_$k.opts")"
       git -C "$CLONE" apply -p1 $o "$f"
       return $?

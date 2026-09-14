@@ -1,0 +1,23 @@
+diff --git a/services/api-gateway/src/middleware/audit.ts b/services/api-gateway/src/middleware/audit.ts
+index f2a9b1c..e4d7f6a 100644
+--- a/services/api-gateway/src/middleware/audit.ts
++++ b/services/api-gateway/src/middleware/audit.ts
+@@ -198,6 +198,8 @@ export function createAuditMiddleware(deps: AuditMiddlewareDeps): RequestHandler
+ 
+     res.on('finish', () => {
+       // Fire-and-forget. If anything goes wrong, log a warning and move on —
++      // <KS-871>: capture req.path at entry (before express trims it under
++      // router.use(prefix, …)) so refused requests still record the real path.
++      const auditPath = req.originalUrl.split('?')[0];
+       void (async () => {
+         try {
+           if (!deps.isDbAvailable()) return;
+@@ -277,7 +279,7 @@ export function createAuditMiddleware(deps: AuditMiddlewareDeps): RequestHandler
+           }
+           const details = JSON.stringify({
+             method: req.method,
+-            path: req.path,
++            path: auditPath, // <KS-871>
+             status: res.statusCode,
+             durationMs: Date.now() - start,
+             tenantId: u?.tenantId || null,

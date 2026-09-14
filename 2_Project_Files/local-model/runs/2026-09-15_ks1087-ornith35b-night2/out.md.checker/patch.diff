@@ -1,0 +1,189 @@
+--- a/services/api-gateway/src/routes/verification.ts
++++ b/services/api-gateway/src/routes/verification.ts
+@@ -978,6 +978,10 @@ export function createVerificationRoutes(deps: VerificationRouteDeps): Router {
+         proxyReq.on('error', (err: Error) => {
+           log('error', 'Failed to forward approved document to originate', { error: err.message });
++          res.status(502).json({ success: false, error: { code: 'BAD_GATEWAY', message: 'Originate service unavailable during approval forwarding' } });
++          return;
++        });
++        proxyReq.end();
++        if (proxyRes.statusCode >= 200 && proxyRes.statusCode < 300) {
++          await redisService.deletePendingDocument(documentId);
+         });
+-        proxyReq.write(payload);
+-        proxyReq.end();
+-        await redisService.deletePendingDocument(documentId);
+       }
+ 
+       res.json({
+--- /dev/null
++++ b/services/api-gateway/src/__tests__/ks1087-workflow-approve-deletes-the-pending-document.test.ts
+@@ -0,0 +1,156 @@
++// KS-1087 — workflow-approve deletes the pending document and answers 200
++// "Document has been created" without reading originate's response — a refused
++// forward (401, measured) loses the document.
++//
++// The ticket describes three failure modes for `POST
++// /api/workflow-instances/:id/approve` when it is on its last step:
++//   * originate returns 4xx or 5xx → caller still told 200 `approved`,
++//     "All workflow steps approved. Document has been created." AND the
+++    pending document in Redis was deleted anyway;
+++  * originate returns network error → same outcome as above ("Failed to
++//     forward" logged but pending doc gone);
+++  * originate returns 401 → MEASURED by QA gate P2 F2b with no bearer token
++//     forwarded (`x-user-id` only), regardless of whether vouch secret is set.
++//
+++ THE FIX: report approval and delete the pending document ONLY after
+++ originate returns 2xx. On any other status, or a network error, keep the
+++ pending document and return an error to the caller. Forward a credential
+++ originate accepts (today the forward carries `x-user-id` alone, which gets
+++ 401 back).
++
++import { describe, it, expect, beforeAll, afterAll, vi } from 'vitest';
++import express from 'express';
++import http from 'node:http';
++import type { Server } from 'node:http';
++import type { AddressInfo } from 'node:net';
++import type { RequestHandler } from 'express';
++
++const INSTANCE_ID = 'wfi-ks1087';
++const DOC_ID = 'doc-ks1087';
++let gateway: Server;
++let gatewayPort: number;
++let originate: Server;
++/** Status code the stub originate will reply with for each cell. */
++let originateStatus = 200;
++/** Body the stub originate will reply with. */
++let originateBody: Record<string, unknown> | string = {};
++/** Whether the stub should simulate a socket-level error instead of replying. */
++let originateSocketError = false;
++/** Captured outgoing headers so we can assert what was forwarded. */
++const capturedHeaders: Array<Record<string, string>> = [];
++const jsonHead = { 'Content-Type': 'application/json' };
++
++beforeAll(async () => {
++  originate = http.createServer((req, res) => {
++    if (req.url === '/api/documents') {
++      const chunks: Buffer[] = [];
++      req.on('data', (c: Buffer) => chunks.push(c));
++      req.on('end', () => {
++        // Capture headers for assertions on forwarding shape.
++        const h: Record<string, string> = {};
++        for (const [k, v] of Object.entries(req.headers)) {
++          if (typeof v === 'string') h[k.toLowerCase()] = v;
++        }
++        capturedHeaders.push(h);
++        if (originateSocketError) {
++          res.destroy();
++          return;
++        }
++        res.writeHead(originateStatus, jsonHead);
++        res.end(typeof originateBody === 'string' ? originateBody : JSON.stringify(originateBody));
++      });
++      return;
++    }
++    res.writeHead(404, jsonHead);
++    res.end('{}');
++  });
++  originate.listen(0, '127.0.0.1');
++  await new Promise<void>((r) => originate.once('listening', () => r()));
++  const origPort = (originate.address() as AddressInfo).port;
++
++  const { createVerificationRoutes } = await import('../routes/verification');
++  const mockBodyParser: RequestHandler = express.json({ limit: '1mb' });
++
++  /** The pending document stored in Redis before approve is called. */
++  let pendingDocShape: Record<string, unknown> | null = {
++    title: 'Test Doc',
++    documentType: 'DEGREE',
++    contentHash: 'h'.repeat(64),
++    createdBy: 'user-1',
++  };
++
++  const app = express();
++  app.use(
++    createVerificationRoutes({
++      authenticateToken: () => (req, _res, next) => {
++        (req as any).user = { userId: 'u1', email: 'u@secuura.local', role: 'ADMIN', verificationLevel: 'FULL' };
++        next();
++      },
++      mockBodyParser,
++      query: vi.fn(async () => ({ rows: [] })) as never,
++      isDbAvailable: () => false,
++      redisService: {
++        getPendingDocument: vi.fn(async (id: string) => id === DOC_ID ? pendingDocShape : null),
++        deletePendingDocument: vi.fn(async () => undefined),
++        getAllWorkflowInstances: vi.fn(async () => []),
++        setWorkflowInstance: vi.fn(async () => undefined),
++        getWorkflowInstance: vi.fn(async (id: string) => {
++          // Last-step instance so the route enters the forward branch.
++          if (id !== INSTANCE_ID) return null;
++          return {
++            status: 'pending_approval',
++            currentStepIndex: 0,
++            steps: [{ name: 'Approve', approverValue: 'admin', approverType: 'role', status: 'pending' }],
++            documentId: DOC_ID,
++          };
++        }),
++      } as never,
++      services: { originate: { url: `http://127.0.0.1:${origPort}` } } as never,
++      log: () => undefined,
++      memWorkflowToDocumentMap: new Map(),
++      memRejectedDocuments: new Map(),
++      dbSaveRejection: vi.fn(async () => undefined),
++      ADMIN_ROLES: ['ADMIN'],
++      enforceDocumentTypeRules: vi.fn() as never,
++      createWorkflowInstanceIfRequired: vi.fn() as never,
++      meetsVerificationLevel: () => true,
++    }),
++  );
++
++  gateway = app.listen(0, '127.0.0.1');
++  await new Promise<void>((r) => gateway.once('listening', () => r()));
++  gatewayPort = (gateway.address() as AddressInfo).port);
++});
++
++afterAll(async () => {
++  await new Promise<void>((r) => gateway.close(() => r()));
++  await new Promise<void>((r) => originate.close(() => r()));
++});
++
++async function approve(): Promise<{ status: number; body: any }> {
++  const r = await fetch(`http://127.0.0.1:${gatewayPort}/api/workflow-instances/${INSTANCE_ID}/approve`, {
++    method: 'POST',
++    headers: { Authorization: 'Bearer t' },
++  });
++  let body: any = {};
++  try { body = await r.json(); } catch {}
++  return { status: r.status, body };
++}
++
++describe('KS-1087 — workflow-approve must not lose pending doc on non-2xx originate', () => {
++  it('🔴 KS-1087 F1: a 401 from originate keeps the pending document and returns an error to the caller', async () => {
++    // Base: 200 approved + "created" message AND deletePendingDocument called.
++    originateStatus = 401;
++    originateBody = { error: 'Unauthorized' };
++    capturedHeaders.length = 0;
++    const res = await approve();
++    expect(res.status).not.toBe(200);
++    expect(capturedHeaders[0]['x-user-id']).toBe('user-1');
++    expect(capturedHeaders[0].authorization).toBeUndefined();
++  });
++
++  it('🔴 KS-1087 F2: a network error from originate keeps the pending document and returns an error to the caller', async () => {
++    // Base: same outcome as above ("Failed to forward" logged but still 200).
++    originateSocketError = true;
++    const res = await approve();
++    expect(res.status).not.toBe(200);
++  });
++
++  it('C3 CONTROL: a 2xx from originate answers 200 `approved` with the success message', async () => {
++    // Green at base and after. Proves the harness reaches the happy path.
++    originateStatus = 201;
++    originateBody = { id: DOC_ID };
++    const res = await approve();
++    expect(res.status).toBe(200);
++    expect(res.body.success).toBe(true);
++    expect(res.body.message).toContain('All workflow steps approved.');
++  });
++});

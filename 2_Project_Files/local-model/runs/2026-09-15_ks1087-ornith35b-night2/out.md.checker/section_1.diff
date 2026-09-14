@@ -1,0 +1,18 @@
+--- a/services/api-gateway/src/routes/verification.ts
++++ b/services/api-gateway/src/routes/verification.ts
+@@ -978,6 +978,10 @@ export function createVerificationRoutes(deps: VerificationRouteDeps): Router {
+         proxyReq.on('error', (err: Error) => {
+           log('error', 'Failed to forward approved document to originate', { error: err.message });
++          res.status(502).json({ success: false, error: { code: 'BAD_GATEWAY', message: 'Originate service unavailable during approval forwarding' } });
++          return;
++        });
++        proxyReq.end();
++        if (proxyRes.statusCode >= 200 && proxyRes.statusCode < 300) {
++          await redisService.deletePendingDocument(documentId);
+         });
+-        proxyReq.write(payload);
+-        proxyReq.end();
+-        await redisService.deletePendingDocument(documentId);
+       }
+ 
+       res.json({
