@@ -12,8 +12,14 @@ SCRATCH = ("/private/tmp/", "/tmp/")
 def under_scratch(p):
     return p.startswith(SCRATCH)
 
-# split into command segments at shell command positions; keep it lexical, not a full parser
-segments = re.split(r'(?:^|\n|;|&&|\|\||\||\$\(|`|\bthen\b|\bdo\b)', cmd)
+# split into command segments at shell command positions; keep it lexical, not a full parser.
+# Command positions: line start, `;`, `&&`, `||`, `|`, `$(`, `then`, `do`. NOT the backtick —
+# the first live fire (2026-09-14 15:4x, minutes after wiring) refused Wednesday's own daily-note
+# heredoc because markdown code spans like `git rm` and `find -delete` became "commands". Backtick
+# command substitution is not used in this fleet's commands; markdown backticks are in every note.
+# A gate with false positives gets routed around, so the splitter loses the backtick (a backtick-
+# substituted rm is the one shape this hook now does not see — stated, accepted).
+segments = re.split(r'(?:^|\n|;|&&|\|\||\||\$\(|\bthen\b|\bdo\b)', cmd)
 problems = []
 for seg in segments:
     s = seg.strip()
