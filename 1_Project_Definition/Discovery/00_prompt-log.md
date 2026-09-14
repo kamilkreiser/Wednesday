@@ -2472,3 +2472,13 @@ Done with it: Dynamics → Kam's team decision (no action); QuickQuote masthead/
 > Tell me if there's anything that needs to be pulled or merged, and identify whether there's any potential blockers for us or anyone else in the team outstanding. If not, we might be using the local agent to first work through the backlog items and then continue with other tickets if that structure works. As we're approaching 90% of this week's usage, we might keep this going for the rest of the week so that you have enough context left to supervise the local agent properly. But before we can go ahead with this plan, I need to know that there's nothing blocking us or the team that requires a local agent to complete.
 
 *Note:* 21:52:55 view=wednesday — answered from a live read (19 open PRs + reviews; 75 active by assignee/state): no team blockers; 4 ready PRs need a Claude seat; #887 + PS 759/760 his; recommendation = Ornith nightly on contract-fit + one short Claude seat/day
+
+## 2026-09-14 21:56 — Kam (panel, verbatim)
+> If you want me to merge anything, make sure it's ready and provide me the link so I can merge it. Archive and close off any Litnia tickets that have been finished. Anything that's stale, close off and archive. Anything that's done, do the same. And anything that's been deployed can also be archived.
+
+*Note:* 21:56:13 view=wednesday — receipted; nothing ready for him tonight; a board seat briefed for the archive pass with the stale bar stated as Wednesday's reading (30 days, no PR/branch)
+
+## 2026-09-14 21:59 — Kam (panel, verbatim)
+> This is, of course, in addition to the agent you specified.
+
+*Note:* 21:58:28 view=wednesday — the archive pass is additional to the daily Claude seat in the plan; receipted
