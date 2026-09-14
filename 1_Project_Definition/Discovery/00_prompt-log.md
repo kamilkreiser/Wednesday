@@ -2482,3 +2482,8 @@ Done with it: Dynamics → Kam's team decision (no action); QuickQuote masthead/
 > This is, of course, in addition to the agent you specified.
 
 *Note:* 21:58:28 view=wednesday — the archive pass is additional to the daily Claude seat in the plan; receipted
+
+## 2026-09-14 22:12 — Kam (panel, verbatim)
+> Decision secuura-archive-peters-nine-done-tickets: leave — Leave them — Peter archives his own
+
+*Note:* 22:11:46 view=wednesday — ruled leave; reconciled; delivered as no-write (s234's holds already list-only)
