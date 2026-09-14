@@ -116,6 +116,16 @@ def main():
         return 4
     wall_clock = time.time() - t0
 
+    # 2026-09-14 16:3x: keep the RAW response beside out.md. The Ornith KS-806 leg came back with
+    # empty content, thinking 15.7K chars, eval_count None and done_reason None — a shape the
+    # meta could name but not explain, because the raw body was gone. A probe minutes later
+    # returned a normal done/stop/eval_count body, so the instrument works; only the raw tells
+    # which side of the wire dropped the fields (a-false-absence-is-usually-my-own-instrument).
+    try:
+        with open(out_path + ".raw.json", "wb") as rf:
+            rf.write(raw)
+    except OSError as e:
+        sys.stderr.write(f"lm_call: could not save raw response: {e}\n")
     try:
         j = json.loads(raw)
     except json.JSONDecodeError as e:
