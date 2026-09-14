@@ -23,17 +23,6 @@ minimal code change that makes it so. If the ticket names several sites that
 read the same wrong value, fix every named site inside `product_file`, not
 only the first one.
 
-NAMED-SITE CHECKLIST (2026-09-15 — the rule that turns "fix every site" into
-something checkable): the input carries `defect_line.sites`, one entry per
-site the ticket's `Where` list names, each with `line`, `text_at_tip` and
-`must_change`. BEFORE you write the diff, list every `must_change: true` site
-and decide what its line becomes. Your product hunks MUST change every one of
-them — each `text_at_tip` must appear as a `-` line in your diff, at that site.
-A diff that leaves one `must_change` site untouched is refused by the checker
-(A3b) before any test runs, whatever else it does right. Sites with
-`must_change: false` are context the ticket cites; do not change them unless
-the fix shape requires it.
-
 HARD CONSTRAINTS (a mechanical checker enforces every one; a violation is a
 failed task, not a style point):
 

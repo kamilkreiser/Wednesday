@@ -69,7 +69,7 @@ if [ "$(git -C "$SRC" cat-file -t "$TIP" 2>/dev/null)" != "commit" ]; then
 fi
 
 # Everything else is Python: the Linear read, the parse, the JSON emit.
-NIGHT_BRIEFS_DIR="$(dirname "$0")/briefs" BUILD_ORIGIN_TIP="$ORIGIN_TIP" python3 - "$TICKET" "$OUT" "$SRC" "$TIP" "$REPO_SUBDIR" "$@" <<'PYEOF'
+BUILD_ORIGIN_TIP="$ORIGIN_TIP" python3 - "$TICKET" "$OUT" "$SRC" "$TIP" "$REPO_SUBDIR" "$@" <<'PYEOF'
 import json, os, re, subprocess, sys, urllib.request
 
 ticket, out, src, tip, subdir = sys.argv[1:6]
@@ -291,44 +291,12 @@ repo = {
     "test_runner": runner,
     "typescript": f"{ts_desc}; the product file's imports at the tip are: " + (" | ".join(i.strip() for i in imports) if imports else "(none)"),
 }
-# ---------------------------------------------------------------- 5b. NAMED SITES (2026-09-15, Kam 09:28)
-# Kam: "Is there a way to fix it going red through either instructions or rules or skills?" The KS-871
-# think=1 run fixed ONE of the two sites the ticket's `## Where` list names (:280, not :108) — a PARTIAL
-# that every model has produced on this ticket. So the sites are PARSED, read at the tip, and handed
-# to the model as a checklist; the checker's A3b refuses a product hunk that leaves a must_change
-# site untouched. Heuristic (stated, not hidden): a `:NNN` bullet under a `Where` heading is a site;
-# it is must_change when its bullet carries emphasis (`**…**`) and is not marked "(correct)".
-named_sites = []
-m_where = re.search(r"^##+\s*Where\b.*?$(.*?)(?=^##+\s|\Z)", desc, re.M | re.S)
-if m_where:
-    for b in re.finditer(r"^\s*[*-]\s*`?:(\d+)`?\s*[—–-]?\s*(.*)$", m_where.group(1), re.M):
-        ln = int(b.group(1)); note = b.group(2).strip()
-        txt = lines[ln - 1] if 0 < ln <= len(lines) else None
-        named_sites.append({"line": ln, "text_at_tip": txt, "note": note,
-                            "must_change": ("**" in note) and ("(correct)" not in note.lower())})
-    print(f"  named sites from '## Where': {len(named_sites)} ({sum(1 for x in named_sites if x['must_change'])} must_change)")
-else:
-    print("  named sites: no '## Where' section — checklist empty (A3b passes vacuously)")
-
-# ---------------------------------------------------------------- 5c. WEDNESDAY'S BRIEF (2026-09-15, Kam 09:30)
-# Kam: "rather than getting it to pick up tickets directly, you pick up the ticket and create a prompt based
-# on the ticket for the agent addressing some of the issues and rewording it so that it's clearer." When
-# night/briefs/<TICKET>.md exists, ITS text REPLACES the ticket description the model sees — the ticket
-# stops being the prompt; the sites checklist + A3b still bind. The log line says which was used.
-brief_path = os.path.join(os.path.dirname(os.path.abspath(sys.argv[0])) if False else os.environ.get("NIGHT_BRIEFS_DIR", ""), f"{ticket}.md")
-prompt_desc = desc
-if brief_path and os.path.isfile(brief_path):
-    prompt_desc = open(brief_path, encoding="utf-8").read()
-    print(f"  prompt source: WEDNESDAY BRIEF {brief_path} ({len(prompt_desc)} chars) — the ticket description is NOT the prompt")
-else:
-    print("  prompt source: the ticket description (no night/briefs/<ticket>.md)")
 inp = {
     "ticket": {"identifier": n["identifier"], "title": n["title"], "state": state,
-               "priority": n["priorityLabel"], "description": prompt_desc},
+               "priority": n["priorityLabel"], "description": desc},
     "repo": repo,
     "product_file": product,
-    "defect_line": {"line": defect_no, "text": defect_text, "sites": named_sites,
-                    "sites_rule": "every site with must_change=true MUST be changed by the product hunk (its text appears as a '-' line); the checker refuses a diff that leaves one untouched (A3b) before any test runs"},
+    "defect_line": {"line": defect_no, "text": defect_text},
     "test_dir": f"{subdir}/{test_dir_rel}",
     "suggested_test_file": suggested,
     "reference_test_file": ref_path,

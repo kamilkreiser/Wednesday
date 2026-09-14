@@ -294,6 +294,41 @@ else
 fi
 TEST_REL="${TEST_FILE#$SUBDIR/$SERVICE/}"
 
+# ---------------------------------------------------------------- A3b named sites (2026-09-15)
+# Kam 09:28: "Is there a way to fix it going red through instructions or rules?" — the model fixed one
+# of the two sites the ticket names. The input's defect_line.sites (parsed from the ticket's Where
+# list at build time) is a checklist: every must_change site's text_at_tip must appear as a removed
+# ('-') line in the PRODUCT section. Refuses before any test runs, so a partial fix is named as
+# partial rather than surfacing as "the test is still red" three assertions later.
+A3B_MISSED=""
+N_SITES="$(python3 -c 'import json,sys; d=json.load(open(sys.argv[1])); print(len([x for x in d.get("defect_line",{}).get("sites",[]) if x.get("must_change")]))' "$INPUT")"
+if [ "${N_SITES:-0}" -gt 0 ]; then
+  PROD_SEC="$(python3 -c 'import json,sys; sub=sys.argv[3]; want=sys.argv[2]
+for o in json.load(open(sys.argv[1])):
+    if o["path"]==want or sub+"/"+o["path"]==want: print(o["file"]); break' "$REP/sections.json" "$PRODUCT" "$SUBDIR")"
+  A3B_MISSED="$(python3 - "$INPUT" "$PROD_SEC" <<'PY3B'
+import json, sys
+d = json.load(open(sys.argv[1])); sec = open(sys.argv[2], encoding="utf-8", errors="replace").read().split("\n")
+removed = [l[1:].strip() for l in sec if l.startswith("-") and not l.startswith("---")]
+missed = []
+for x in d.get("defect_line", {}).get("sites", []):
+    if not x.get("must_change"): continue
+    t = (x.get("text_at_tip") or "").strip()
+    if t and t not in removed: missed.append(f":{x['line']} `{t[:70]}`")
+print(" · ".join(missed))
+PY3B
+)"
+  if [ -z "$A3B_MISSED" ]; then
+    pass "A3b every must_change site the ticket names is changed by the product hunk ($N_SITES site(s))"
+  else
+    fail "A3b PARTIAL FIX — the product hunk leaves $(echo "$A3B_MISSED" | awk -F' · ' '{print NF}') of $N_SITES named site(s) untouched: $A3B_MISSED"
+    echo "RESULT: FAIL ($FAILS failed) — stopped at A3b (a partial fix; the tests are not run)"
+    exit 1
+  fi
+else
+  echo "A3b: no must_change sites in the input — skipped"
+fi
+
 # ---------------------------------------------------------------- A4 red-first
 apply_section_for "$TEST_FILE" > "$REP/apply_test.out" 2>&1
 rc=$?
