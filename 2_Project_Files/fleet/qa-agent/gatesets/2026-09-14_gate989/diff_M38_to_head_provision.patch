@@ -1,0 +1,381 @@
+diff --git a/systemTest/fixtures/provision.ts b/systemTest/fixtures/provision.ts
+index b95f4ee39..68c801d62 100644
+--- a/systemTest/fixtures/provision.ts
++++ b/systemTest/fixtures/provision.ts
+@@ -30,25 +30,25 @@
+  * =============================================================================
+  */
+ 
+-import type { ActorSpec } from './actors.ts';
++import type { ActorSpec } from "./actors.ts";
+ 
+ /** An actor that now exists on the platform. */
+ export interface ProvisionedActor {
+-    readonly key: string;
+-    readonly email: string;
+-    readonly password: string;
+-    /** The platform's id for the account — never a seeded id. */
+-    readonly userId: string;
+-    /** The role the platform ACTUALLY granted, which may differ from desired. */
+-    readonly role: string;
+-    /** How the account came to exist this run. */
+-    readonly via: 'registered' | 'existing';
++  readonly key: string;
++  readonly email: string;
++  readonly password: string;
++  /** The platform's id for the account — never a seeded id. */
++  readonly userId: string;
++  /** The role the platform ACTUALLY granted, which may differ from desired. */
++  readonly role: string;
++  /** How the account came to exist this run. */
++  readonly via: "registered" | "existing";
+ }
+ 
+ /** A user as any of these endpoints returns it. */
+ interface UserPayload {
+-    id?: string;
+-    role?: string;
++  id?: string;
++  role?: string;
+ }
+ 
+ /**
+@@ -64,17 +64,17 @@ interface UserPayload {
+  * exactly why it would have gone unnoticed.
+  */
+ interface AuthEnvelope {
+-    success?: boolean;
+-    data?: UserPayload & {
+-        accessToken?: string;
+-        user?: UserPayload;
+-    };
+-    error?: { code?: string; message?: string };
++  success?: boolean;
++  data?: UserPayload & {
++    accessToken?: string;
++    user?: UserPayload;
++  };
++  error?: { code?: string; message?: string };
+ }
+ 
+ /** @returns the user from either envelope shape, or `undefined`. */
+ function userFrom(envelope: AuthEnvelope): UserPayload | undefined {
+-    return envelope.data?.user ?? (envelope.data?.id ? envelope.data : undefined);
++  return envelope.data?.user ?? (envelope.data?.id ? envelope.data : undefined);
+ }
+ 
+ /** HTTP statuses that mean "this actor already exists", not "this failed". */
+@@ -94,8 +94,8 @@ const ALREADY_EXISTS_STATUSES = new Set([409, 400, 422]);
+  * account" to "one documented account bootstraps generated ones".
+  */
+ export interface BootstrapAdmin {
+-    readonly email: string;
+-    readonly password: string;
++  readonly email: string;
++  readonly password: string;
+ }
+ 
+ /**
+@@ -107,24 +107,24 @@ export interface BootstrapAdmin {
+  * @returns the HTTP status and the parsed envelope.
+  */
+ async function postJson(
+-    baseUrl: string,
+-    path: string,
+-    body: Record<string, unknown>,
++  baseUrl: string,
++  path: string,
++  body: Record<string, unknown>,
+ ): Promise<{ status: number; envelope: AuthEnvelope }> {
+-    const response = await fetch(`${baseUrl}${path}`, {
+-        method: 'POST',
+-        headers: { 'Content-Type': 'application/json' },
+-        body: JSON.stringify(body),
+-    });
++  const response = await fetch(`${baseUrl}${path}`, {
++    method: "POST",
++    headers: { "Content-Type": "application/json" },
++    body: JSON.stringify(body),
++  });
+ 
+-    let envelope: AuthEnvelope = {};
+-    try {
+-        envelope = (await response.json()) as AuthEnvelope;
+-    } catch {
+-        // A non-JSON body (gateway HTML error page) leaves the envelope empty;
+-        // the status alone then decides, which is what the callers check.
+-    }
+-    return { status: response.status, envelope };
++  let envelope: AuthEnvelope = {};
++  try {
++    envelope = (await response.json()) as AuthEnvelope;
++  } catch {
++    // A non-JSON body (gateway HTML error page) leaves the envelope empty;
++    // the status alone then decides, which is what the callers check.
++  }
++  return { status: response.status, envelope };
+ }
+ 
+ /**
+@@ -134,24 +134,27 @@ async function postJson(
+  * @param baseUrl - API root.
+  * @returns the provisioned actor, or `null` when the credentials are rejected.
+  */
+-async function login(spec: ActorSpec, baseUrl: string): Promise<ProvisionedActor | null> {
+-    const { status, envelope } = await postJson(baseUrl, '/api/auth/login', {
+-        email: spec.email,
+-        password: spec.password,
+-        clientType: 'api',
+-    });
++async function login(
++  spec: ActorSpec,
++  baseUrl: string,
++): Promise<ProvisionedActor | null> {
++  const { status, envelope } = await postJson(baseUrl, "/api/auth/login", {
++    email: spec.email,
++    password: spec.password,
++    clientType: "api",
++  });
+ 
+-    const user = userFrom(envelope);
+-    if (status !== 200 || !user?.id) return null;
++  const user = userFrom(envelope);
++  if (status !== 200 || !user?.id) return null;
+ 
+-    return {
+-        key: spec.key,
+-        email: spec.email,
+-        password: spec.password,
+-        userId: user.id,
+-        role: user.role ?? 'UNKNOWN',
+-        via: 'existing',
+-    };
++  return {
++    key: spec.key,
++    email: spec.email,
++    password: spec.password,
++    userId: user.id,
++    role: user.role ?? "UNKNOWN",
++    via: "existing",
++  };
+ }
+ 
+ /**
+@@ -161,13 +164,16 @@ async function login(spec: ActorSpec, baseUrl: string): Promise<ProvisionedActor
+  * @param baseUrl - API root.
+  * @returns the bearer token, or `null` if the admin cannot log in.
+  */
+-export async function bootstrapToken(admin: BootstrapAdmin, baseUrl: string): Promise<string | null> {
+-    const { status, envelope } = await postJson(baseUrl, '/api/auth/login', {
+-        email: admin.email,
+-        password: admin.password,
+-        clientType: 'api',
+-    });
+-    return status === 200 ? (envelope.data?.accessToken ?? null) : null;
++export async function bootstrapToken(
++  admin: BootstrapAdmin,
++  baseUrl: string,
++): Promise<string | null> {
++  const { status, envelope } = await postJson(baseUrl, "/api/auth/login", {
++    email: admin.email,
++    password: admin.password,
++    clientType: "api",
++  });
++  return status === 200 ? (envelope.data?.accessToken ?? null) : null;
+ }
+ 
+ /**
+@@ -184,42 +190,73 @@ export async function bootstrapToken(admin: BootstrapAdmin, baseUrl: string): Pr
+  * @returns the provisioned actor, or `null` if the admin path was unavailable.
+  */
+ async function createAsAdmin(
+-    spec: ActorSpec,
+-    baseUrl: string,
+-    token: string,
++  spec: ActorSpec,
++  baseUrl: string,
++  token: string,
+ ): Promise<ProvisionedActor | null> {
+-    const response = await fetch(`${baseUrl}/api/users/admin/create`, {
+-        method: 'POST',
+-        headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
+-        body: JSON.stringify({
+-            email: spec.email,
+-            password: spec.password,
+-            firstName: spec.firstName,
+-            lastName: spec.lastName,
+-            role: spec.desiredRole,
+-        }),
+-    });
++  const response = await fetch(`${baseUrl}/api/users/admin/create`, {
++    method: "POST",
++    headers: {
++      "Content-Type": "application/json",
++      Authorization: `Bearer ${token}`,
++    },
++    body: JSON.stringify({
++      email: spec.email,
++      password: spec.password,
++      firstName: spec.firstName,
++      lastName: spec.lastName,
++      role: spec.desiredRole,
++    }),
++  });
+ 
+-    if (response.status !== 200 && response.status !== 201) return null;
++  if (response.status !== 200 && response.status !== 201) return null;
+ 
+-    let envelope: AuthEnvelope = {};
+-    try {
+-        envelope = (await response.json()) as AuthEnvelope;
+-    } catch {
+-        return null;
+-    }
++  let envelope: AuthEnvelope = {};
++  try {
++    envelope = (await response.json()) as AuthEnvelope;
++  } catch {
++    return null;
++  }
+ 
+-    const created = userFrom(envelope);
+-    if (!created?.id) return null;
++  const created = userFrom(envelope);
++  if (!created?.id) return null;
+ 
+-    return {
+-        key: spec.key,
+-        email: spec.email,
+-        password: spec.password,
+-        userId: created.id,
+-        role: created.role ?? spec.desiredRole,
+-        via: 'registered',
+-    };
++  return {
++    key: spec.key,
++    email: spec.email,
++    password: spec.password,
++    userId: created.id,
++    role: created.role ?? spec.desiredRole,
++    via: "registered",
++  };
++}
++
++/**
++ * Replace every occurrence of each secret in `text` with `[REDACTED]`.
++ *
++ * Where/when: applied to a server's error message before it is interpolated into a thrown Error
++ * (KS-973 item 6), because that Error's message becomes the pre-suite DEGRADED banner every suite
++ * prints. A plain split/join, not a regex: the secrets are generated passwords and may carry
++ * regex metacharacters.
++ *
++ * @param text - the message to scrub, e.g. a server's `error.message`.
++ * @param secrets - the values that must not appear; an empty string is ignored, since it would
++ *   match everywhere and erase the message rather than redact it.
++ * @returns `text` with every occurrence of every non-empty secret replaced by `[REDACTED]`.
++ * @example
++ *   redactSecrets('rejected {"password":"Pw!1"}', ['Pw!1']);  // 'rejected {"password":"[REDACTED]"}'
++ */
++export function redactSecrets(
++  text: string,
++  secrets: readonly string[],
++): string {
++  let scrubbed = text;
++  // Step: scrub each secret in turn; split/join replaces every occurrence, unlike a bare replace.
++  for (const secret of secrets) {
++    if (secret.length === 0) continue;
++    scrubbed = scrubbed.split(secret).join("[REDACTED]");
++  }
++  return scrubbed;
+ }
+ 
+ /**
+@@ -240,45 +277,53 @@ async function createAsAdmin(
+  *   actor.via;   // 'registered' on the first run, 'existing' thereafter
+  */
+ export async function provisionActor(
+-    spec: ActorSpec,
+-    baseUrl: string,
+-    adminToken?: string | null,
++  spec: ActorSpec,
++  baseUrl: string,
++  adminToken?: string | null,
+ ): Promise<ProvisionedActor> {
+-    // Try the admin path first: it is the only one that can grant a role.
+-    // An existing actor makes this fail, and login below then resolves it.
+-    if (adminToken) {
+-        const created = await createAsAdmin(spec, baseUrl, adminToken);
+-        if (created) return created;
++  // Try the admin path first: it is the only one that can grant a role.
++  // An existing actor makes this fail, and login below then resolves it.
++  if (adminToken) {
++    const created = await createAsAdmin(spec, baseUrl, adminToken);
++    if (created) return created;
+ 
+-        const existing = await login(spec, baseUrl);
+-        if (existing) return existing;
+-    }
++    const existing = await login(spec, baseUrl);
++    if (existing) return existing;
++  }
+ 
+-    const { status, envelope } = await postJson(baseUrl, '/api/auth/register', {
+-        email: spec.email,
+-        password: spec.password,
+-        firstName: spec.firstName,
+-        lastName: spec.lastName,
+-    });
++  const { status, envelope } = await postJson(baseUrl, "/api/auth/register", {
++    email: spec.email,
++    password: spec.password,
++    firstName: spec.firstName,
++    lastName: spec.lastName,
++  });
+ 
+-    const registered = userFrom(envelope);
+-    if ((status === 200 || status === 201) && registered?.id) {
+-        return {
+-            key: spec.key,
+-            email: spec.email,
+-            password: spec.password,
+-            userId: registered.id,
+-            role: registered.role ?? 'UNKNOWN',
+-            via: 'registered',
+-        };
+-    }
++  const registered = userFrom(envelope);
++  if ((status === 200 || status === 201) && registered?.id) {
++    return {
++      key: spec.key,
++      email: spec.email,
++      password: spec.password,
++      userId: registered.id,
++      role: registered.role ?? "UNKNOWN",
++      via: "registered",
++    };
++  }
+ 
+-    // Deterministic actors are expected to already exist on a re-run.
+-    if (ALREADY_EXISTS_STATUSES.has(status)) {
+-        const existing = await login(spec, baseUrl);
+-        if (existing) return existing;
+-    }
++  // Deterministic actors are expected to already exist on a re-run.
++  if (ALREADY_EXISTS_STATUSES.has(status)) {
++    const existing = await login(spec, baseUrl);
++    if (existing) return existing;
++  }
+ 
+-    const reason = envelope.error?.message ?? `HTTP ${status}`;
+-    throw new Error(`could not provision actor "${spec.key}" (${spec.email}): ${reason}`);
++  // KS-973 item 6: the server's message is interpolated into an Error that `pre-suite.ts` prints
++  // in its DEGRADED banner. Against a stub that echoed the request body, the generated password
++  // appeared in that banner in cleartext. Whether a real endpoint echoes payloads is unverified;
++  // the pipe is redacted regardless, at the one site that interpolates a server message.
++  const reason = redactSecrets(envelope.error?.message ?? `HTTP ${status}`, [
++    spec.password,
++  ]);
++  throw new Error(
++    `could not provision actor "${spec.key}" (${spec.email}): ${reason}`,
++  );
+ }

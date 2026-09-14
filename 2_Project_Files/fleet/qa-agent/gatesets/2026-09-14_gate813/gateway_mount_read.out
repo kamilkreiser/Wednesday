@@ -1,0 +1,55 @@
+gateway_mount_read 17:30:36 AEST at 7b6fb960d
+-- enforceJsonContentType references:
+7b6fb960d:Blockchain/Dev/services/api-gateway/src/index.ts:36:import { csrfMiddleware, enforceJsonContentType } from './middleware';
+7b6fb960d:Blockchain/Dev/services/api-gateway/src/index.ts:397:app.use(enforceJsonContentType);
+7b6fb960d:Blockchain/Dev/services/api-gateway/src/middleware/contentType.ts:115: * app.use(enforceJsonContentType); // before express.json() and the proxies
+7b6fb960d:Blockchain/Dev/services/api-gateway/src/middleware/contentType.ts:117:export function enforceJsonContentType(req: Request, res: Response, next: NextFunction): void {
+7b6fb960d:Blockchain/Dev/services/api-gateway/src/middleware/index.ts:13:export { enforceJsonContentType } from './contentType';
+-- case sensitive routing:
+7b6fb960d:Blockchain/Dev/services/api-gateway/src/__tests__/ks843-erasure-path-bypass.test.ts:51: * service nor originate sets `case sensitive routing`), so every one of these
+7b6fb960d:Blockchain/Dev/services/api-gateway/src/routes/proxy.ts:698:   * nor originate sets `case sensitive routing`). So `ERASURES`, `Erasures`,
+-- verify-file in gateway src:
+7b6fb960d:Blockchain/Dev/services/api-gateway/src/docs/developer-portal.html:174:curl -X POST https://api.secuura.io/api/verification/verify-file \
+7b6fb960d:Blockchain/Dev/services/api-gateway/src/docs/developer-portal.html:257:      <li><code>POST /api/verification/verify-file</code> — Verify by file upload</li>
+7b6fb960d:Blockchain/Dev/services/api-gateway/src/docs/developer-portal.html:293:      <tr><td><span class="method method-post">POST</span></td><td><code>/api/verification/verify-file</code></td><td>Upload file for server-side hash verification</td><td><span class="badge badge-public">Public</span></td></tr>
+7b6fb960d:Blockchain/Dev/services/api-gateway/src/middleware/contentType.ts:57: * KS-791: the two verify-file operations are the only ones on the `/api/*`
+7b6fb960d:Blockchain/Dev/services/api-gateway/src/middleware/contentType.ts:76:  '/api/verification/verify-file',
+7b6fb960d:Blockchain/Dev/services/api-gateway/src/middleware/contentType.ts:77:  '/api/v2/verification/verify-file',
+7b6fb960d:Blockchain/Dev/services/api-gateway/src/middleware/contentType.ts:133:  // KS-791 exception: the two verify-file operations take raw bytes, because
+7b6fb960d:Blockchain/Dev/services/api-gateway/src/middleware/csrf.ts:97:    // (startsWith match covers /verify, /verify-file, /verify-batch.)
+-- verify-file in originate src (routes):
+7b6fb960d:Blockchain/Dev/services/originate/src/routes/verification.ts:502: * POST /api/verification/verify-file
+7b6fb960d:Blockchain/Dev/services/originate/src/routes/verification.ts:511:verificationRouter.post('/verify-file', async (req: Request, res: Response) => {
+7b6fb960d:Blockchain/Dev/services/originate/src/routes/verification.ts:624:        logger.warn('Chain-first verify-file lookup failed', { error: chainErr?.message });
+7b6fb960d:Blockchain/Dev/services/originate/src/routes/verification.ts:693: * For strongest verification, use /verify-file with the actual document.
+7b6fb960d:Blockchain/Dev/services/originate/src/routes/verificationV2.ts:18: *   POST /api/v2/verification/verify-file   raw file bytes as body
+7b6fb960d:Blockchain/Dev/services/originate/src/routes/verificationV2.ts:497: * POST /api/v2/verification/verify-file
+7b6fb960d:Blockchain/Dev/services/originate/src/routes/verificationV2.ts:501:verificationV2Router.post('/verify-file', async (req: Request, res: Response) => {
+-- proxy mounts for verification:
+7b6fb960d:Blockchain/Dev/services/api-gateway/src/routes/proxy.ts:588:  // Verification — proxy to originate (no auth required for public verification)
+7b6fb960d:Blockchain/Dev/services/api-gateway/src/routes/proxy.ts:589:  router.use('/api/verification',
+7b6fb960d:Blockchain/Dev/services/api-gateway/src/routes/proxy.ts:590:    proxy('originate', { '^/api/verification': '/api/verification' }),
+7b6fb960d:Blockchain/Dev/services/api-gateway/src/routes/proxy.ts:594:  router.use('/api/v2/verification',
+7b6fb960d:Blockchain/Dev/services/api-gateway/src/routes/proxy.ts:595:    proxy('originate', { '^/api/v2/verification': '/api/v2/verification' }),
+7b6fb960d:Blockchain/Dev/services/api-gateway/src/routes/proxy.ts:877:  // tokenless verification is the verifier story. Mounted before the authed
+-- express.json / raw in gateway index:
+7b6fb960d:Blockchain/Dev/services/api-gateway/src/index.ts:107:app.set('trust proxy', 1);
+7b6fb960d:Blockchain/Dev/services/api-gateway/src/index.ts:397:app.use(enforceJsonContentType);
+7b6fb960d:Blockchain/Dev/services/api-gateway/src/index.ts:416:app.use((req, res, next) => { if (shouldParseBody(req)) express.json({ limit: '1mb' })(req, res, next); else next(); });
+7b6fb960d:Blockchain/Dev/services/api-gateway/src/index.ts:417:app.use((req, res, next) => { if (shouldParseBody(req)) express.urlencoded({ extended: true, limit: '1mb' })(req, res, next); else next(); });
+7b6fb960d:Blockchain/Dev/services/api-gateway/src/index.ts:420:const uploadBodyParser = express.json({ limit: '10mb' });
+7b6fb960d:Blockchain/Dev/services/api-gateway/src/index.ts:843:  const mockBodyParser = express.json({ limit: '1mb' });
+7b6fb960d:Blockchain/Dev/services/api-gateway/src/index.ts:884:  const mockBodyParser = express.json({ limit: '1mb' });
+-- gateway src files:
+Blockchain/Dev/services/api-gateway/src/__tests__
+Blockchain/Dev/services/api-gateway/src/api-gateway.openapi.ts
+Blockchain/Dev/services/api-gateway/src/config
+Blockchain/Dev/services/api-gateway/src/db.ts
+Blockchain/Dev/services/api-gateway/src/docs
+Blockchain/Dev/services/api-gateway/src/index.ts
+Blockchain/Dev/services/api-gateway/src/middleware
+Blockchain/Dev/services/api-gateway/src/routes
+Blockchain/Dev/services/api-gateway/src/services
+Blockchain/Dev/services/api-gateway/src/specRouteMap.ts
+Blockchain/Dev/services/api-gateway/src/startup-migrations.ts
+Blockchain/Dev/services/api-gateway/src/utils

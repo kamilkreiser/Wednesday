@@ -1,0 +1,20 @@
+reformat_precedent_read 18:28:42 AEST
+4dcc992b76ec25009694c91fd1c9f19d82c1ffff 2026-09-10 11:11:35 +0100
+KS-682: undo Prettier's whole-file reformat of fixtures/provision-actors.ts — the previous commit's intended change is 8 lines, not 157
+
+ec61abf8e ran the Playwright package's Prettier config over a file outside
+that package (fixtures/ has no formatter), rewriting quotes and indentation
+on 150 lines it did not mean to touch. Restored from 715150f57 with only the
+two intended hunks: the --base-url usage line in the header, and the
+precedence line. Behaviour identical; provision_base_url.test.sh 20/20.
+
+Co-Authored-By: Claude Opus 5 <noreply@anthropic.com>
+
+
+ systemTest/fixtures/provision-actors.ts | 288 +++++++++++++++-----------------
+ 1 file changed, 132 insertions(+), 156 deletions(-)
+-- 3537c9828 delta small enough? files between 3537c9828 and M38:
+57
+     104
+0
+-- the most recent develop commit whose parent-delta to M38 is < 250 files and touches systemTest/fixtures:

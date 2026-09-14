@@ -1,0 +1,72 @@
+actors_read 17:36:50 AEST at 9d0e2016ae60658ec908ee5e500583fd3a318c8a (blob 8443c682b = M38)
+8: * All three test projects currently fall back to the platform's SEEDED
+14: *   performance     ADMIN_EMAIL / ADMIN_PASSWORD from secrets.yml
+16: * Two problems with that. The passwords are the pen-test F-05 vocabulary
+18: * accounts the seed happens to create, so a seed change breaks them and the
+19: * suite can never exercise a role the seed does not provide.
+28: * DETERMINISTIC, NOT RANDOM
+30: * Addresses derive from a stable seed, so the same run id always yields the
+43:export const GENERATED_EMAIL_DOMAIN = 'secuura-test.invalid';
+49:export interface ActorSpec {
+52:    readonly email: string;
+53:    readonly password: string;
+73:const MIN_PASSWORD_LENGTH = 8;
+76: * Build a password that is strong, deterministic, and cannot trip the F-05
+80: * passwords.sh` fails the build on that pattern, and it is the exact vocabulary
+81: * the pen test flagged. The seed is mixed in so two runs with different ids
+85: * @param seed - the run seed.
+86: * @returns a deterministic password of at least {@link MIN_PASSWORD_LENGTH}.
+89: *   buildPassword('issuer', 'a1b2c3');  // 'Ks256-issuer-a1b2c3-Pw!'
+91:export function buildPassword(key: string, seed: string): string {
+92:    const password = `Ks256-${key}-${seed}-Pw!`;
+93:    if (password.length < MIN_PASSWORD_LENGTH) {
+94:        throw new Error(`generated password for "${key}" is shorter than the platform minimum`);
+96:    return password;
+107: * email against the manifest failed on the case alone — the account was
+112: * @param seed - the run seed, which keeps concurrent runs from colliding.
+116: *   buildEmail('orgAdmin', 'a1b2c3');  // 'ks256-orgadmin-a1b2c3@secuura-test.invalid'
+118:export function buildEmail(key: string, seed: string): string {
+119:    return `ks256-${key}-${seed}@${GENERATED_EMAIL_DOMAIN}`.toLowerCase();
+125: * Pure: no I/O, no clock, no randomness. The same seed always produces the
+129: * @param seed - stable identifier for this actor generation.
+134: *   actors[1].email;  // 'ks256-issuer-local@secuura-test.invalid'
+136:export function generateActors(seed: string): ActorSpec[] {
+137:    if (!/^[a-z0-9-]{1,32}$/.test(seed)) {
+138:        throw new Error(`seed must be 1-32 chars of [a-z0-9-], got "${seed}"`);
+143:        email: buildEmail(key, seed),
+144:        password: buildPassword(key, seed),
+--- the password generator, in context:
+70- * Minimum length the platform enforces on registration
+71- * (`services/auth/src/routes/auth.ts` — `z.string().min(8)`).
+72- */
+73:const MIN_PASSWORD_LENGTH = 8;
+74-
+75-/**
+76- * Build a password that is strong, deterministic, and cannot trip the F-05
+77- * guard.
+78- *
+79- * Deliberately contains NO `<word>123` sequence: `scripts/check-no-default-
+80- * passwords.sh` fails the build on that pattern, and it is the exact vocabulary
+81- * the pen test flagged. The seed is mixed in so two runs with different ids
+82- * never share a credential.
+83- *
+84- * @param key - the actor key, e.g. `'issuer'`.
+85- * @param seed - the run seed.
+--
+88- * @example
+89- *   buildPassword('issuer', 'a1b2c3');  // 'Ks256-issuer-a1b2c3-Pw!'
+90- */
+91:export function buildPassword(key: string, seed: string): string {
+92:    const password = `Ks256-${key}-${seed}-Pw!`;
+93-    if (password.length < MIN_PASSWORD_LENGTH) {
+94-        throw new Error(`generated password for "${key}" is shorter than the platform minimum`);
+95-    }
+96-    return password;
+97-}
+98-
+99-/**
+100- * Build the address for one actor.
+101- *
+102- * ⚠ LOWER-CASED DELIBERATELY. The auth service normalises addresses to
+103- * lower-case on write (the same normalisation `/api/users/lookup` documents),
+104- * so a camelCase key like `orgAdmin` produces an address the API stores and

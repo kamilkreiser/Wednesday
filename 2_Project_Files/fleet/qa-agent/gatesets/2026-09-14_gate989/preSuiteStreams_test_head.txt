@@ -1,0 +1,106 @@
+/**
+ * KS-973 item 5 — the DEGRADED banner goes to stderr, and it is pinned rather than documented.
+ *
+ * THE FINDING (KS-973 item 5): `pre-suite.ts` routes DEGRADED to stderr with a comment explaining
+ * why, and nothing pinned it — collapsing both branches to `console.log` left every suite green
+ * because the shell harness merges the streams with `2>&1`. "A documented invariant with no test is
+ * a comment." These cells spawn the real CLI body against a port that refuses (`127.0.0.1:1` — the
+ * same arm `__tests__/pre_suite.test.sh` uses), so the DEGRADED path runs with NO stack and the
+ * streams are read separately.
+ *
+ * The second describe pins KS-973's round-5 residue (e): invoked through a SYMLINK the CLI body never
+ * runs and the process exits 0 with empty output, because `invokedDirectly` compares a realpath'd
+ * `import.meta.url` against an unresolved `process.argv[1]`. Bounded — every production hook passes a
+ * real path — and recorded here as the KNOWN shape so the silent exit 0 is never mistaken for success.
+ *
+ * @module tests/unit/fixtures/preSuiteStreams.test
+ */
+
+import { spawnSync } from 'node:child_process';
+import * as fs from 'node:fs';
+import * as os from 'node:os';
+import * as path from 'node:path';
+import { fileURLToPath } from 'node:url';
+
+import { afterEach, describe, expect, it } from 'vitest';
+
+const HERE = path.dirname(fileURLToPath(import.meta.url));
+/** The real step, by its real path — what every production hook passes. */
+const PRE_SUITE = path.resolve(HERE, '..', '..', '..', '..', 'fixtures', 'pre-suite.ts');
+/** This package's own tsx, so the cell runs the step exactly as `npx tsx` would. */
+const TSX = path.resolve(HERE, '..', '..', '..', 'node_modules', '.bin', 'tsx');
+/** Port 1 refuses the connection: `fetch` throws before any envelope, the DEGRADED arm is reached. */
+const REFUSING_BASE = 'http://127.0.0.1:1';
+
+/** What one spawn of the step produced, streams kept apart. */
+interface SpawnOutcome {
+    readonly status: number | null;
+    readonly stdout: string;
+    readonly stderr: string;
+}
+
+/**
+ * Spawn the pre-suite step as its own process, the way the suites' `pre*` hooks do.
+ *
+ * @param {string} script - the path handed to tsx (the real file, or a symlink to it).
+ * @returns {SpawnOutcome} exit status and the two streams, separately.
+ */
+function runStep(script: string): SpawnOutcome {
+    const result = spawnSync(TSX, [script, 'streams-cell', '--base-url', REFUSING_BASE], {
+        env: {
+            ...process.env,
+            // KS-1016: a local target must name its slot, or the step REFUSES before it degrades.
+            SECUURA_STACK_SLOT: '1',
+            // The refusal-vs-degraded split does not depend on this, but a set value keeps the run
+            // on the provisioning path rather than the "unset password" message.
+            BOOTSTRAP_ADMIN_PASSWORD: 'unused-port-1-refuses-first',
+        },
+        encoding: 'utf8',
+        timeout: 10_000,
+    });
+    return { status: result.status, stdout: result.stdout, stderr: result.stderr };
+}
+
+describe('pre-suite.ts CLI — DEGRADED is written to stderr, not stdout (KS-973 item 5)', () => {
+    it('puts the DEGRADED banner on stderr and nothing about it on stdout, exit 0', () => {
+        const { status, stdout, stderr } = runStep(PRE_SUITE);
+
+        // The control that this cell exercised the CLI body at all: the banner APPEARED somewhere.
+        // Without it, a symlink-shaped silent exit 0 (below) would read as "no DEGRADED on stdout".
+        expect(stderr).toContain('[pre-suite:streams-cell] DEGRADED');
+        // `pre-suite.ts`: "DEGRADED goes to stderr so it survives a pipeline that only keeps stdout,
+        // which is how a warning becomes invisible." Collapsing both branches to console.log used to
+        // leave the suite green — the harness merges streams; this cell reads them apart.
+        expect(stdout).not.toContain('DEGRADED');
+        // DEGRADED is not fatal by default (`SYSTEMTEST_REQUIRE_PROVISIONED` unset).
+        expect(status).toBe(0);
+    });
+});
+
+describe('pre-suite.ts CLI through a symlink — the KNOWN residue (KS-973 round-5 residue e)', () => {
+    let tmpDir = '';
+
+    afterEach(() => {
+        // The symlink and its directory are this cell's own `mkdtemp`.
+        if (tmpDir !== '' && fs.existsSync(tmpDir)) {
+            fs.rmSync(tmpDir, { recursive: true, force: true });
+        }
+    });
+
+    it('exits 0 with EMPTY output — the CLI body never runs, and nothing says so', () => {
+        tmpDir = fs.mkdtempSync(path.join(os.tmpdir(), 'ks973-symlink-'));
+        const link = path.join(tmpDir, 'pre-suite.ts');
+        fs.symlinkSync(PRE_SUITE, link);
+
+        const { status, stdout, stderr } = runStep(link);
+
+        // KS-973 comment a55ab963 (2026-09-07): "Invoked through a symlink the two differ,
+        // `invokedDirectly` is false, the CLI body never runs — and the process exits 0 having done
+        // nothing. Correctly bounded and NOT a live defect: all four production hooks resolve real
+        // paths before invoking it." Pinned as the KNOWN shape, not as desired behaviour: the day
+        // this cell goes red is the day the residue was fixed, and the assertions flip with it.
+        expect(status).toBe(0);
+        expect(stdout).toBe('');
+        expect(stderr).toBe('');
+    });
+});

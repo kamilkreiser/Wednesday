@@ -1,0 +1,170 @@
+ultrathink
+
+You are the fleet QA agent running ONE TIER 1 ROUND 1 gate over Secuura/Blockchain PR #989 (KS-973, builder s227, pane
+-D) at head 9d0e2016ae60658ec908ee5e500583fd3a318c8a — `redactSecrets` in systemTest/fixtures/provision.ts (:249-260,
+applied at THE ONE interpolation site :323-328) reaches every suite's pre-suite error path: a secret-handling surface.
+Also in the PR: the DEGRADED-to-stderr routing of pre-suite.ts pinned by a cell that spawns the REAL step; the
+drift-arm quarantine driven end-to-end; the symlink shape of `invokedDirectly` pinned as KNOWN (a comment at :226-229).
+KS-973's items 3/4 are NOT in this PR (on #927); items 1/2 are NOT built (L11/L12 files). KS-973 STAYS OPEN.
+
+Read your brief FIRST and in full, then plan:
+/Volumes/DevMASTER/WEDNESDAY/2_Project_Files/fleet/qa-agent/briefs/2026-09-14_secuura-989-ks973-tier1-r1.md
+
+Head (git ls-remote 17:29:04 AEST, the API 17:35:51, both agree; the launcher re-asserts it):
+  #989 9d0e2016ae60658ec908ee5e500583fd3a318c8a  = refs/pull/989/head = feature/ks-973-ks-969-round-1-gate-residue-the-pre-suite-step-and-its-own
+       parent 3fa0a22b1 <- develop M38 0e78c7270 (an ANCESTOR: rev-list --count M38..head = 2); tree 562dacac8;
+       the Blockchain subtree is M38's (38a814360) — nothing under Blockchain/Dev changes.
+  5 files, +795 -276 by git AND the API (the PR body says "+332 -1" — it is not): systemTest/fixtures/provision.ts
+  68c801d62 (+171 -126 exact; +65 -20 with -w), systemTest/fixtures/pre-suite.ts f5f839a84 (+161 -150 exact; +33 -22
+  with -w: a 4-line comment + wraps), three NEW cell files under systemTest/performance/tests/unit/fixtures/
+  (provisionRedaction 5 cells, preSuiteStreams 2, provisionDriftQuarantine 2). BOTH fixture files were WHOLE-FILE
+  REFORMATTED to prettier DEFAULTS (2-space, double quotes, 80 columns) — undisclosed; the semantic delta is the -w diff.
+  develop may have moved (#916 / #988 expected to squash tonight; #927 may; the L2 PRs) — the launcher judges the move BY
+  CONTENT; if it printed "origin develop MOVED", ls-remote at start and close, merge the then-current develop onto
+  9d0e2016a in YOUR clone (expect 0 conflicts — disjoint files) and re-derive every count on it (the whole-suite figures
+  MOVE with #916/#988's cells — the brief's 59/1051 is a prediction, a mismatch there is a brief error, not a finding).
+Repo:    /Volumes/DevMASTER/!CODING/Secuura/Blockchain/2_Project_Files  (READ-ONLY — clone by SHA into your own scratch;
+  the builder's worktree worktrees/s227-ks973 may or may not still exist — farm systemTest/performance/node_modules
+  FROM it or `npm ci` in your clone's systemTest/performance; never into it, never vitest inside it; never trust origin/*
+  inside a --shared clone — pin by SHA)
+
+You are FINDINGS-ONLY. You never fix, never merge, never push, never deploy, never comment, never file, never `@`.
+
+NEVER run a push, the real pre-push hook, or preflight.sh inside the Secuura checkout or any of its worktrees.
+
+NEVER print a credential value, and never open, read or copy a secrets file (any .env, config/secrets.yml). The cells'
+secrets are inline synthetic strings; the generated passwords are `Ks256-<key>-<seed>-Pw!` on .invalid accounts — still,
+count, never echo a real one. Nothing in this gate needs a credential value.
+
+NO docker, NO stack of any slot, no kintsugi, no demo, NEVER the wallet mnemonic (KS-535 IS ABSOLUTE). A vitest cell
+that spawns pre-suite.ts against 127.0.0.1:1 is not a stack. You add no listener. Never write under the REAL
+systemTest/fixtures/generated/ — assert it is ABSENT in your clone before and after every run.
+
+Ten things you must not miss:
+
+1. SCOPE + THE REFORMAT PROVEN SEMANTICS-PRESERVING (brief item 1): exactly the 5 files; numstat 161/150 · 171/126 ·
+   106/0 · 154/0 · 203/0 and -w 33/22 · 65/20; the Blockchain subtree identical. Then the instrument: `npx prettier
+   --no-config --parser typescript` (prettier 3.9.6 from systemTest/performance/node_modules) over M38's provision.ts
+   and pre-suite.ts, diffed against the HEAD files — the residual must be EXACTLY the semantic hunks (the redactSecrets
+   docblock + function + the two call-site hunks; the 4-line comment) and nothing else. tsc -p
+   systemTest/fixtures/tsconfig.json --noEmit rc 0 at head AND at M38. FAIL: any residual token outside those hunks.
+   FINDING with REPO PRECEDENT: the undisclosed reformat + the body's "+332 -1" / "a comment only" claims; the
+   directory's style is now 5 files 2-space vs 3 files 4-space; no formatter config resolves for systemTest/fixtures/
+   (the performance package's prettier.config.js says tabWidth 4 / singleQuote / 120 and its format:check runs over
+   `.` only). Develop's own 4dcc992b7 (KS-682, 2026-09-10) UNDID the identical shape on provision-actors.ts —
+   "restored ... with only the two intended hunks; behaviour identical". Describe the fix-shape in prose (restore both
+   files from M38's blobs with only the -w hunks, before the squash) and recommend whether it blocks; Wednesday routes.
+
+2. RED-FIRST at M38 (brief item 2): the three cell files copied into an M38 tree (provision.ts b95f4ee39, pre-suite.ts
+   01024fadd) -> `4 failed | 5 passed (9)`: `redactSecrets is not a function` x2, the provisionActor password cell
+   (`expected '...' not to contain 'Ks256-owner-s227-redaction-Pw!'`), the runPreSuite DEGRADED-banner cell; the
+   streams, symlink and both drift cells GREEN at M38 (pins, not fixes). Quote the decisive assertion line of each red.
+   FAIL: any other cell red at M38, or fewer than 4 reds. At head: 9/9.
+
+3. THE GATE-DESIGNED redactSecrets CELLS G1-G8 (brief item 3) in a scratch vitest file importing the HEAD provision.ts,
+   prediction BEFORE each run, predicted-by: drafter: G1 twice -> both replaced; G2 POSITIVE CONTROL a message with no
+   secret and the `HTTP 500` fallback -> byte-identical passthrough; G3 a message already carrying `[REDACTED]` ->
+   unchanged; G4 two secrets one a prefix of the other -> order matters (BOUNDARY, unreachable at the call site); G5 the
+   secret JSON-escaped in the echo -> NOT redacted (BOUNDARY — unreachable for generated passwords: no JSON-escapable
+   char in `Ks256-<key>-<seed>-Pw!`, actors.ts:91-97 / :137); G6 a different case -> NOT redacted (same boundary);
+   G7 RECONSTRUCTION — from the thrown message alone take spec.key (verbatim) + the seed from the email and call
+   buildPassword(key, seed) -> === spec.password: the literal is redacted but the banner still carries the two inputs of
+   a deterministic password function in a repo file — a RECORD (READ ONLY + MEASURED) for Wednesday, not a grade on
+   item 6, whose fix-shape ("redact `password` keys before interpolation") is delivered exactly; G8 an empty secrets
+   list -> unchanged.
+
+4. THE TAMPER TABLE, SUITES RUNNING (brief item 4): the builder's 9 cells + your G-cells, prediction + aimed cells before
+   each run, anchor count asserted, marker asserted after the edit, restore by whole-file sha256 RE-DERIVED from blobs
+   68c801d62 / f5f839a84, green again after each; a 0-cell run is INVALID. T1 the CLI tail collapsed to console.log
+   (anchor `(result.outcome === "PROVISIONED" ? console.log : console.error)(` count 1) -> 1|8, exactly the streams
+   cell; T2 THE INTERPOLATION SITE RESTORED to the raw interpolation (`const reason = envelope.error?.message ?? \`HTTP
+   ${status}\`;`, anchor `redactSecrets(envelope.error?.message` count 1) -> 2|7, exactly the provisionActor password
+   cell + the runPreSuite banner cell; T3 redactSecrets a no-op -> 3|6 (+ the every-occurrence cell); T4 split/join ->
+   replace (first occurrence only) -> 1|8 (the every-occurrence cell alone — the echo carries the password once);
+   T5 the empty-secret guard deleted -> 1|8 (the empty-secret cell); T6 invokedDirectly forced true -> 1|8 (the
+   SYMLINK cell reds because the body now runs through the symlink — proves it pins the KNOWN shape); T7 inert -> 9;
+   T8 syntax error -> LOAD failure, no `Tests N failed` line.
+
+5. THE STREAMS CELL IS A RUNTIME MEASUREMENT (brief item 5): preSuiteStreams.test.ts:48-62 spawns the REAL pre-suite.ts
+   through the package's own tsx (:31) against 127.0.0.1:1 with SECUURA_STACK_SLOT=1 and BOOTSTRAP_ADMIN_PASSWORD set to
+   a synthetic value — read that spawn's stderr yourself and add the gate assertion that the DEGRADED banner does NOT
+   carry the bootstrap value (predicted absent: the port refuses before any envelope). Then the SHELL SUITE on the head
+   tree: `bash Blockchain/Dev/scripts/run-shell-suites.sh` the way preflight leg 14 runs it (READ the runner first —
+   roots Blockchain/Dev/scripts/__tests__ + systemTest/__tests__, :49-50) — pre_suite.test.sh drives the SHIPPED,
+   now-reformatted step (:92 `npx tsx "$STEP"`; the DEGRADED arm :139; the no-slot arms :104/:113); the builder did NOT
+   run it (running #927's file is not editing it). s226's push hook read `30 passed, 0 failed (of 30)` on M38 (RELAYED)
+   — re-derive at head AND at M38; if #927 has merged the count moves — say so. FAIL: a shell cell red at head that is
+   green at M38.
+
+6. TYPECHECK (brief item 6): `npm run typecheck` from systemTest/ DOES NOT EXIST at this head — systemTest/package.json
+   is #916's file, ABSENT at M38 and at 9d0e2016a. Run its seven configs by hand with the same binary
+   (systemTest/performance/node_modules/.bin/tsc --noEmit -p fixtures/tsconfig.json · playwright/tsconfig.json ·
+   performance/tsconfig.json · performance/tsconfig.node.json · akto/tsconfig.json · api-explorer/tsconfig.json ·
+   api-explorer/tsconfig.test.json), rc on its own line each; the fixtures one is the load-bearing one (the only config
+   covering the two changed files). Configs whose package has no node_modules in your clone: NOT RUN with the reason.
+   In systemTest/performance: `npm run lint` 0/0, `npm run knip` rc 0, `npm run format:check` rc 0 — and state that
+   format:check does NOT cover ../fixtures. If #916 has landed on the develop you read, run ITS `npm run typecheck` too.
+
+7. THE PERFORMANCE UNIT SUITE at head vs M38 (brief item 7): `npx vitest run --config vitest.unit.config.ts` in
+   systemTest/performance (NEVER bare vitest — the k6 aliases live in the config; never jest): head 59 files / 1051
+   (the builder) vs M38 56 / 1042 as the CONTROL column; tests/unit/fixtures/ 11 / 260 vs 8 / 251. Re-derive both; a
+   pre-existing red at M38 is develop's fact. Name the load. fixtures/generated/ ABSENT before and after.
+
+8. DELIVERED vs COMMISSIONED (brief item 8): KS-973's six items vs the PR's table — 5, 6 + residues (d)/(e) built;
+   items 3/4 NOT started (pre_suite.test.sh is #927's — read /pulls/927 at start and close, state OPEN/merged and the
+   head); items 1/2 NOT built (akto/tests/preSuiteSetup.ts 9e74cdd8f and schemathesis/scripts/run.py 89d30de6e are
+   M38's blobs — untouched, as commissioned). The s227 commission §5 (b)-(g) vs what landed, including the DEVIATION the
+   builder named for (d): the vi.mock redirect of manifest.ts — quarantineManifest(provisionedAt, target =
+   manifestPath()) at manifest.ts:137 takes a real target and manifestPath() is fixed to fixtures/generated/ (:45-46),
+   manifest.ts is untouched (a6bfe3e76) -> not a widening; say so. The three cells' rmSync calls are on their own
+   mkdtemp only (manifestPaths.test.ts at M38 is the precedent) — confirm each target by reading
+   preSuiteStreams:85-87 / provisionRedaction:122-126 / provisionDriftQuarantine:99-107.
+
+9. EXPLICIT NOT-RUN LINES, written FIRST in NOT-TESTED.written-first.md: items 3/4 (on #927); items 1/2 (L11/L12);
+   live provisioning against any stack (HOLD); Schemathesis / Akto / Playwright / k6 suites; item 6's premise (a real
+   endpoint echoing payloads) — unverified by design; the configs you could not typecheck.
+
+10. §2a LEGITIMATE SHAPES (brief): a limiter message, a no-envelope `HTTP 502`, a message naming the EMAIL (kept by
+    design — see G7), a `fetch failed` — all byte-identical passthrough; the password once/twice/alone -> `[REDACTED]`.
+    The filter's failure path is a text replacement — non-destructive; no STOP rule applies.
+
+Your tool shell's grep may be a function: use /usr/bin/grep -F -i with a same-file positive control; multi-line anchors
+by Python str.count. Never cd in your own tool calls; the pre-tool hook refuses `git worktree` in the Secuura checkout —
+clone into your scratch and run write verbs THERE. A REAL checkout of the whole repo (systemTest/ is at the REPO ROOT,
+beside Blockchain/, not under Blockchain/Dev — the cells import ../../../../fixtures/*.ts by relative path, so the tree
+shape must be real). /bin/bash here is 3.2 — write runners in Python. zsh: no PIPESTATUS (`cmd > out 2>&1; rc=$?`),
+no timeout on macOS. Run suites solo; the suites run at whatever load exists — name the load beside a slow count (the
+tsx spawns cost 1-2 s each; testTimeout is 15 s).
+Quote the Secuura checkout's porcelain count, .git/config sha256, for-each-ref count, .git/worktrees count, origin
+develop SHA, refs/pull/989/head and the branch, and /pulls/927's state at start, mid and close as THREE timestamped
+readings; they must match on the head (name any ref another seat moved — #916 / #988 / #927 / #919 / #939 / #813
+landing is EXPECTED and the head tree does not change; if refs/pull/989/head moves, STOP — the brief is about a
+different SHA).
+Never `rm`: fresh mktemp -d per attempt; quarantine probes and scratch tests by rename. Your hands delete nothing —
+the cells under test clean their own mkdtemp, which is theirs to do, not yours to copy.
+Do no memory maintenance of your own project's memory store inside this session.
+
+Report FOUND / TESTED / HOW, with controls: the scope with the exact and -w numstats; the prettier reproduction diffs;
+the red-first at M38 with the decisive lines; the G1-G8 cells with prediction vs measurement; the tamper table
+(cells-run beside every colour, the decisive assertion line for each red, predicted-by on every row); the streams
+spawn's stderr and the shell-suite tallies at head and M38; the seven tsc lines; the suite figures both columns with the
+tree named; DELIVERED-vs-COMMISSIONED; and what you did NOT test at the same prominence as the findings. Client-facing
+communication = ticket comments only; the extranet is not a channel; anything needing a push goes to Wednesday as an
+escalation candidate for Kam's WhatsApp. Handovers to Peter/Stuart are test blocks, never a list of PRs. Never delete;
+cleanup means quarantine.
+Verdict: ONE line — GO, GO WITH FINDINGS, or NO GO — on 9d0e2016ae60658ec908ee5e500583fd3a318c8a, as the delta over
+M38 AND as the merged tree on the develop you read (name it). Say plainly whether the reformat is semantics-preserving
+and that the PR body's stated delta is not the delta on origin; the red-first shape at M38; that the interpolation site
+is the ONLY one and its tamper reds exactly the two cells; the G7 reconstruction as a Record; the figures with the tree
+named; and the explicit NOT-RUN lines for items 3/4 (on #927) and 1/2 (L11/L12). Give the merge seat its ADDENDUM line:
+"squash 9d0e2016a onto develop (independent of #916/#988/#927 — any order); performance unit 56/1042 -> 59/1051 (+3
+files, +9; re-derive on the live develop); KS-973 STAYS OPEN — items 1/2 on L11/L12, items 3/4 a successor's stacked
+commit after #927; FINDING: the undisclosed whole-file reformat of two shared fixture files — the KS-682 4dcc992b7
+precedent says restore-with-intended-hunks-only before the squash (Wednesday routes; recommend the shape); Records: the
+G7 reconstruction, the G4/G5/G6 boundaries".
+
+MAIL YOUR VERDICT to wednesday-agent@agentmail.to when the pass is complete, using
+the project's send_brief.sh. Your pane holds ~19 lines of alternate screen with no
+scrollback, so a verdict that stays in the pane is one pane-close from being lost --
+this is not a formality, it is the only durable copy; the verdict MAIL is the wait signal. Subject:
+[QA -> Wednesday] TIER 1 GATE #989 (KS-973) 9d0e2016a — <VERDICT>

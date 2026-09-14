@@ -1,0 +1,329 @@
+/**
+ * =============================================================================
+ * systemTest — provisioning generated actors against the live API (KS-256)
+ * =============================================================================
+ *
+ * Turns an {@link ActorSpec} into an account that exists, by talking to the
+ * real `/api/auth/register` and `/api/auth/login`. Two consequences worth
+ * stating, because they are the point rather than side effects:
+ *
+ *   · The suite stops depending on whatever the seed happens to create. It
+ *     brings its own actors, so a seed change cannot break it and a role the
+ *     seed omits can still be exercised.
+ *   · The bootstrap sequence a partner integrator would follow — register,
+ *     log in, act — is EXECUTED on every run rather than merely documented,
+ *     so it cannot rot.
+ *
+ * REGISTER-OR-LOGIN, DELIBERATELY
+ * -------------------------------
+ * Actors are deterministic, so a second run finds them already present. Rather
+ * than treat that as an error, provisioning falls through to login. That makes
+ * the whole step idempotent: runs reuse actors instead of accumulating them,
+ * which is the mess `cleanup-dev-cruft-tenants.sh` exists to clear up.
+ *
+ * RATE LIMIT
+ * ----------
+ * `/api/auth/register` is capped at 5/hour/IP in production but 100/hour in
+ * non-prod (`api-gateway/src/index.ts` — `REGISTER_RATE_LIMIT || (isNonProd ?
+ * '100' : '5')`). Five actors per run sits comfortably inside the non-prod cap
+ * and nowhere near the production one, which this must never run against.
+ * =============================================================================
+ */
+
+import type { ActorSpec } from "./actors.ts";
+
+/** An actor that now exists on the platform. */
+export interface ProvisionedActor {
+  readonly key: string;
+  readonly email: string;
+  readonly password: string;
+  /** The platform's id for the account — never a seeded id. */
+  readonly userId: string;
+  /** The role the platform ACTUALLY granted, which may differ from desired. */
+  readonly role: string;
+  /** How the account came to exist this run. */
+  readonly via: "registered" | "existing";
+}
+
+/** A user as any of these endpoints returns it. */
+interface UserPayload {
+  id?: string;
+  role?: string;
+}
+
+/**
+ * The auth service's success envelope.
+ *
+ * ⚠ TWO SHAPES, verified against the live API rather than assumed:
+ *   `/api/auth/{register,login}`  ->  `data.user.{id,role}`
+ *   `/api/users/admin/create`     ->  `data.{id,role}`   (no `user` wrapper)
+ *
+ * Reading only the first made `createAsAdmin` return null for a user it had
+ * just successfully created, so provisioning fell through to login and
+ * reported every actor as pre-existing. The role was still right, which is
+ * exactly why it would have gone unnoticed.
+ */
+interface AuthEnvelope {
+  success?: boolean;
+  data?: UserPayload & {
+    accessToken?: string;
+    user?: UserPayload;
+  };
+  error?: { code?: string; message?: string };
+}
+
+/** @returns the user from either envelope shape, or `undefined`. */
+function userFrom(envelope: AuthEnvelope): UserPayload | undefined {
+  return envelope.data?.user ?? (envelope.data?.id ? envelope.data : undefined);
+}
+
+/** HTTP statuses that mean "this actor already exists", not "this failed". */
+const ALREADY_EXISTS_STATUSES = new Set([409, 400, 422]);
+
+/**
+ * Credentials for the one account that bootstraps the rest.
+ *
+ * ⚠ THE SINGLE REMAINING SEEDED-ACCOUNT DEPENDENCY, and it is unavoidable:
+ * self-service registration only ever grants OWNER (verified — all five actors
+ * came back `role=OWNER`), because letting a registrant name their own role
+ * would be a privilege-escalation hole. Something with authority has to grant
+ * roles, so one bootstrap admin creates the others via
+ * `POST /api/users/admin/create`, which assigns the role directly.
+ *
+ * That reduces the dependency from "all three suites hardcode every seeded
+ * account" to "one documented account bootstraps generated ones".
+ */
+export interface BootstrapAdmin {
+  readonly email: string;
+  readonly password: string;
+}
+
+/**
+ * POST JSON to the API and parse the auth envelope.
+ *
+ * @param baseUrl - API root, e.g. `http://localhost:6882`.
+ * @param path - endpoint path, e.g. `/api/auth/login`.
+ * @param body - request payload.
+ * @returns the HTTP status and the parsed envelope.
+ */
+async function postJson(
+  baseUrl: string,
+  path: string,
+  body: Record<string, unknown>,
+): Promise<{ status: number; envelope: AuthEnvelope }> {
+  const response = await fetch(`${baseUrl}${path}`, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify(body),
+  });
+
+  let envelope: AuthEnvelope = {};
+  try {
+    envelope = (await response.json()) as AuthEnvelope;
+  } catch {
+    // A non-JSON body (gateway HTML error page) leaves the envelope empty;
+    // the status alone then decides, which is what the callers check.
+  }
+  return { status: response.status, envelope };
+}
+
+/**
+ * Log in as an actor.
+ *
+ * @param spec - the generated actor.
+ * @param baseUrl - API root.
+ * @returns the provisioned actor, or `null` when the credentials are rejected.
+ */
+async function login(
+  spec: ActorSpec,
+  baseUrl: string,
+): Promise<ProvisionedActor | null> {
+  const { status, envelope } = await postJson(baseUrl, "/api/auth/login", {
+    email: spec.email,
+    password: spec.password,
+    clientType: "api",
+  });
+
+  const user = userFrom(envelope);
+  if (status !== 200 || !user?.id) return null;
+
+  return {
+    key: spec.key,
+    email: spec.email,
+    password: spec.password,
+    userId: user.id,
+    role: user.role ?? "UNKNOWN",
+    via: "existing",
+  };
+}
+
+/**
+ * Obtain an access token for the bootstrap admin.
+ *
+ * @param admin - the bootstrap credentials.
+ * @param baseUrl - API root.
+ * @returns the bearer token, or `null` if the admin cannot log in.
+ */
+export async function bootstrapToken(
+  admin: BootstrapAdmin,
+  baseUrl: string,
+): Promise<string | null> {
+  const { status, envelope } = await postJson(baseUrl, "/api/auth/login", {
+    email: admin.email,
+    password: admin.password,
+    clientType: "api",
+  });
+  return status === 200 ? (envelope.data?.accessToken ?? null) : null;
+}
+
+/**
+ * Create an actor WITH its intended role, as an admin.
+ *
+ * `POST /api/users/admin/create` makes a pre-verified user and assigns the
+ * role, which self-service registration cannot do. Returns `null` on any
+ * failure so the caller can fall back to registration rather than abort — an
+ * OWNER-role actor is still far better than a hardcoded seeded account.
+ *
+ * @param spec - the generated actor.
+ * @param baseUrl - API root.
+ * @param token - bearer token for an admin able to grant `spec.desiredRole`.
+ * @returns the provisioned actor, or `null` if the admin path was unavailable.
+ */
+async function createAsAdmin(
+  spec: ActorSpec,
+  baseUrl: string,
+  token: string,
+): Promise<ProvisionedActor | null> {
+  const response = await fetch(`${baseUrl}/api/users/admin/create`, {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+      Authorization: `Bearer ${token}`,
+    },
+    body: JSON.stringify({
+      email: spec.email,
+      password: spec.password,
+      firstName: spec.firstName,
+      lastName: spec.lastName,
+      role: spec.desiredRole,
+    }),
+  });
+
+  if (response.status !== 200 && response.status !== 201) return null;
+
+  let envelope: AuthEnvelope = {};
+  try {
+    envelope = (await response.json()) as AuthEnvelope;
+  } catch {
+    return null;
+  }
+
+  const created = userFrom(envelope);
+  if (!created?.id) return null;
+
+  return {
+    key: spec.key,
+    email: spec.email,
+    password: spec.password,
+    userId: created.id,
+    role: created.role ?? spec.desiredRole,
+    via: "registered",
+  };
+}
+
+/**
+ * Replace every occurrence of each secret in `text` with `[REDACTED]`.
+ *
+ * Where/when: applied to a server's error message before it is interpolated into a thrown Error
+ * (KS-973 item 6), because that Error's message becomes the pre-suite DEGRADED banner every suite
+ * prints. A plain split/join, not a regex: the secrets are generated passwords and may carry
+ * regex metacharacters.
+ *
+ * @param text - the message to scrub, e.g. a server's `error.message`.
+ * @param secrets - the values that must not appear; an empty string is ignored, since it would
+ *   match everywhere and erase the message rather than redact it.
+ * @returns `text` with every occurrence of every non-empty secret replaced by `[REDACTED]`.
+ * @example
+ *   redactSecrets('rejected {"password":"Pw!1"}', ['Pw!1']);  // 'rejected {"password":"[REDACTED]"}'
+ */
+export function redactSecrets(
+  text: string,
+  secrets: readonly string[],
+): string {
+  let scrubbed = text;
+  // Step: scrub each secret in turn; split/join replaces every occurrence, unlike a bare replace.
+  for (const secret of secrets) {
+    if (secret.length === 0) continue;
+    scrubbed = scrubbed.split(secret).join("[REDACTED]");
+  }
+  return scrubbed;
+}
+
+/**
+ * Ensure one actor exists, registering it if it does not.
+ *
+ * Where/when: called once per actor by `provision-actors.ts`, before any suite
+ * runs. Never call this against production — it creates accounts.
+ *
+ * @param spec - the generated actor to provision.
+ * @param baseUrl - API root, e.g. `http://localhost:6882`.
+ * @returns the provisioned actor.
+ * @throws when the actor can be neither registered nor logged into, since a
+ *         suite running without its actors would fail in a far less obvious
+ *         place.
+ *
+ * @example
+ *   const actor = await provisionActor(spec, 'http://localhost:6882');
+ *   actor.via;   // 'registered' on the first run, 'existing' thereafter
+ */
+export async function provisionActor(
+  spec: ActorSpec,
+  baseUrl: string,
+  adminToken?: string | null,
+): Promise<ProvisionedActor> {
+  // Try the admin path first: it is the only one that can grant a role.
+  // An existing actor makes this fail, and login below then resolves it.
+  if (adminToken) {
+    const created = await createAsAdmin(spec, baseUrl, adminToken);
+    if (created) return created;
+
+    const existing = await login(spec, baseUrl);
+    if (existing) return existing;
+  }
+
+  const { status, envelope } = await postJson(baseUrl, "/api/auth/register", {
+    email: spec.email,
+    password: spec.password,
+    firstName: spec.firstName,
+    lastName: spec.lastName,
+  });
+
+  const registered = userFrom(envelope);
+  if ((status === 200 || status === 201) && registered?.id) {
+    return {
+      key: spec.key,
+      email: spec.email,
+      password: spec.password,
+      userId: registered.id,
+      role: registered.role ?? "UNKNOWN",
+      via: "registered",
+    };
+  }
+
+  // Deterministic actors are expected to already exist on a re-run.
+  if (ALREADY_EXISTS_STATUSES.has(status)) {
+    const existing = await login(spec, baseUrl);
+    if (existing) return existing;
+  }
+
+  // KS-973 item 6: the server's message is interpolated into an Error that `pre-suite.ts` prints
+  // in its DEGRADED banner. Against a stub that echoed the request body, the generated password
+  // appeared in that banner in cleartext. Whether a real endpoint echoes payloads is unverified;
+  // the pipe is redacted regardless, at the one site that interpolates a server message.
+  const reason = redactSecrets(envelope.error?.message ?? `HTTP ${status}`, [
+    spec.password,
+  ]);
+  throw new Error(
+    `could not provision actor "${spec.key}" (${spec.email}): ${reason}`,
+  );
+}

@@ -1,0 +1,179 @@
+format_read 17:35:13 AEST
+-- prettier/eslint configs anywhere under systemTest at M38:
+systemTest/akto/.prettierignore
+systemTest/akto/eslint.config.d.ts
+systemTest/akto/eslint.config.js
+systemTest/akto/prettier.config.js
+systemTest/akto/tsconfig.json
+systemTest/api-explorer/.prettierignore
+systemTest/api-explorer/eslint.config.js
+systemTest/api-explorer/prettier.config.js
+systemTest/api-explorer/tsconfig.json
+systemTest/api-explorer/tsconfig.test.json
+systemTest/fixtures/tsconfig.json
+systemTest/performance/.prettierignore
+systemTest/performance/eslint.config.js
+systemTest/performance/prettier.config.js
+systemTest/performance/tsconfig.json
+systemTest/performance/tsconfig.node.json
+systemTest/playwright/.prettierignore
+systemTest/playwright/eslint.config.js
+systemTest/playwright/prettier.config.js
+systemTest/playwright/tests-unit/prettier-ignore.test.ts
+systemTest/playwright/tsconfig.json
+systemTest/schemathesis/.prettierignore
+-- root-level editorconfig/prettier:
+-- performance prettier.config.js:
+/**
+ * Copyright © 2026 Secuura PTE Ltd
+ * All rights reserved.
+ *
+ * Unauthorized copying, modification, or distribution of this file,
+ * via any medium, is strictly prohibited without prior written permission.
+ */
+/**
+ * Prettier configuration
+ * @type {import('prettier').Config}
+ */
+export default {
+    printWidth: 120,
+    tabWidth: 4,
+    useTabs: false,
+    semi: true,
+    singleQuote: true,
+    quoteProps: 'consistent',
+    trailingComma: 'all',
+    bracketSpacing: true,
+    arrowParens: 'always',
+    proseWrap: 'always',
+    embeddedLanguageFormatting: 'auto',
+    overrides: [
+        {
+            files: ['*.ts', '*.tsx'],
+            options: {
+                proseWrap: 'preserve',
+            },
+        },
+        {
+            files: ['**/*.md', '*.md'],
+            options: {
+                proseWrap: 'always',
+            },
+        },
+        {
+            files: '*.json',
+            options: {
+                trailingComma: 'none', // JSON doesn't support trailing commas
+            },
+        },
+        {
+            files: ['*.yml', '*.yaml'],
+            options: {},
+        },
+        {
+            files: '*.txt',
+            options: {
+                parser: 'markdown',
+            },
+        },
+    ],
+};
+-- performance .prettierignore:
+# Artifacts
+dist/
+reports/
+test-results/
+
+# Dependencies
+node_modules/
+package-lock.json
+
+# Local/Sensitive
+.env
+.env.*
+
+# Binary/Images
+*.png
+*.jpg
+*.jpeg
+*.gif
+*.svg
+*.ico
+*.pdf
+-- performance package.json scripts:
+9:    "scripts": {
+10-        "update-deps": "npm-check-updates -u --reject node,@types/node,@types/k6 && npm install",
+11-        "setup": "npm install && npx tsx runner/setup.ts",
+12-        "lint": "tsc -p tsconfig.json --noEmit && tsc -p tsconfig.node.json --noEmit && eslint . --ext .ts --config eslint.config.js",
+13-        "lint:fix": "tsc -p tsconfig.json --noEmit && tsc -p tsconfig.node.json --noEmit && eslint . --ext .ts --fix --config eslint.config.js",
+14-        "format": "prettier --write --editorconfig --ignore-path .prettierignore .",
+15-        "format:check": "prettier --check --editorconfig --ignore-path .prettierignore .",
+16-        "fix": "npm run format && npm run lint:fix",
+17-        "knip": "knip",
+18-        "audit": "npm audit --omit=dev --audit-level=high",
+19-        "quality": "npm run format:check && npm run lint && npm run knip && npm run test:unit && npm run audit",
+20-        "quality:static": "npm run format:check && npm run lint && npm run knip && npm run audit",
+21-        "test:unit": "vitest run --config vitest.unit.config.ts",
+22-        "test": "npm run test:unit",
+23-        "test:watch": "vitest --config vitest.unit.config.ts",
+24-        "test:smoke": "npx tsx runner/cli.ts --scenario smoke --env local && npx tsx gate/cli.ts --scenario smoke",
+25-        "test:load": "npx tsx runner/cli.ts --scenario load --env local && npx tsx gate/cli.ts --scenario load",
+26-        "test:stress": "npx tsx runner/cli.ts --scenario stress --env local && npx tsx gate/cli.ts --scenario stress",
+27-        "test:spike": "npx tsx runner/cli.ts --scenario spike --env local && npx tsx gate/cli.ts --scenario spike",
+28-        "test:soak": "npx tsx runner/cli.ts --scenario soak --env local && npx tsx gate/cli.ts --scenario soak",
+29-        "test:scalability": "npx tsx runner/cli.ts --scenario scalability --env local && npx tsx gate/cli.ts --scenario scalability",
+30-        "test:auth-spike": "npx tsx runner/cli.ts --scenario auth-spike --env local && npx tsx gate/cli.ts --scenario auth-spike",
+31-        "test:nightly": "npx tsx runner/cli.ts --scenario nightly --env local && npx tsx gate/cli.ts --scenario nightly",
+-- systemTest/package.json:
+fatal: path 'systemTest/package.json' does not exist in '0e78c7270188ac45c1c29f927bdf90728f10215d'
+-- fixtures/tsconfig.json:
+{
+    // KS-993: nothing type-checked this directory.
+    //
+    // `systemTest/fixtures/` holds the provisioning step every suite runs
+    // (`pre-suite.ts`, `manifest.ts`, `provision-actors.ts`). It is executed via
+    // `tsx`, which TRANSPILES WITHOUT TYPE-CHECKING — so until this file existed a
+    // type error here did not fail a build, it failed at runtime inside whichever
+    // suite happened to run it.
+    //
+    // Deliberately the NARROWEST config that covers the directory: it type-checks
+    // and emits nothing. The per-package tsconfigs cannot reach here — each sets
+    // `rootDir: "."` at its own package root, and their `@fixtures/*` aliases point
+    // at their OWN fixtures subdirectory, not this shared one.
+    "compilerOptions": {
+        "target": "ESNext",
+        "lib": ["ESNext"],
+        "module": "ESNext",
+        "moduleResolution": "bundler",
+        "rootDir": ".",
+        "types": ["node"],
+        // KS-993: this directory has no node_modules of its own; the type packages
+        // live in the sibling suites that consume it. Pointed here rather than
+        // dropping `types` — removing it would silence node builtins instead of
+        // resolving them, which is loosening the config to make it pass.
+        "typeRoots": ["../performance/node_modules/@types"],
+
+        // These modules import each other with explicit `.ts` extensions
+        // (`./manifest.ts`), which is how `tsx` runs them. Type-check them the
+        // same way rather than rewriting the imports to suit the checker.
+        "allowImportingTsExtensions": true,
+        "noEmit": true,
+
+        "strict": true,
+        "esModuleInterop": true,
+        "forceConsistentCasingInFileNames": true,
+        "skipLibCheck": true
+    },
+    "include": ["**/*.ts"],
+    "exclude": ["node_modules", "generated"]
+}
+-- indent style of the OTHER fixtures files at M38 (first indented line):
+actors.ts: 4
+manifest.ts: 4
+provision-actors.ts: 4
+slot.ts: 2
+slot-required.ts: 2
+target.ts: 2
+-- quote style: single-quote count / double-quote count at M38 in provision.ts and at head:
+21
+10

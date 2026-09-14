@@ -1,0 +1,62 @@
+csrf_v2_read 17:30:58 AEST at 7b6fb960d
+43:  excludedPaths: string[];
+75:  // 2026-05-05: also excluded the /api/verification/verify* family.
+78:  // verification metadata about a requested document — there is no user
+80:  // portal cannot complete a verification because its safeFetch wrapper
+82:  excludedPaths: [
+90:    // Verification endpoint is public-read by design: third-party clients
+97:    // (startsWith match covers /verify, /verify-file, /verify-batch.)
+98:    '/api/verification/verify',
+307:    if (config.excludedPaths.some(path => req.path.startsWith(path))) {
+326:    //   - Requests with no cookies skip CSRF: no ambient authority means
+334:    //     in services/ are auth refresh/logout, both in excludedPaths and
+337:    if (req.headers.authorization?.startsWith('Bearer ') || req.headers['x-api-key']) {
+-- develop M38 same:
+0
+-- csrf.ts blob head vs dev:
+100644 blob 1f16e2f899af46b8afc5e3872261e079c2cf88f5	Blockchain/Dev/services/api-gateway/src/middleware/csrf.ts
+1f16e2f899af46b8afc5e3872261e079c2cf88f5
+1f16e2f899af46b8afc5e3872261e079c2cf88f5
+-- originate verification.ts:500-530 (the handler's body read):
+
+/**
+ * POST /api/verification/verify-file
+ * Upload a document file → server hashes it → looks up hash in registry.
+ * This is the strongest verification — the server computes the hash from
+ * the raw file bytes, so a client cannot lie about the hash.
+ *
+ * If the hash matches a certified document: VERIFIED (authentic)
+ * If the hash is not found: NOT VERIFIED (document was never certified,
+ * or has been modified — even a single byte change fails verification)
+ */
+verificationRouter.post('/verify-file', async (req: Request, res: Response) => {
+  try {
+    // Read raw body and hash it
+    const chunks: Buffer[] = [];
+    await new Promise<void>((resolve, reject) => {
+      req.on('data', (chunk: Buffer) => chunks.push(chunk));
+      req.on('end', resolve);
+      req.on('error', reject);
+    });
+
+    const fileBuffer = Buffer.concat(chunks);
+    if (fileBuffer.length === 0) {
+      return res.status(400).json({
+        verified: false,
+        error: 'No file content received. Upload the document file as the request body.',
+      });
+    }
+
+    const fileHash = `sha256:${crypto.createHash('sha256').update(fileBuffer).digest('hex')}`;
+    const hashNorm = fileHash.replace('sha256:', '');
+
+    logger.info('File verification request', { size: fileBuffer.length, hash: fileHash.substring(0, 30) + '...' });
+
+    const db = (req as any).db || prisma;
+
+    // Search for this hash in current tenant DB.
+    // KS-584 (interim): fetch the same-hash SET (bounded) — selection happens
+    // in selectVerifiableRow, not in an arbitrary LIMIT 1.
+    let rows: any[] = await db.$queryRaw`
+      SELECT d.id, d.external_id, d.title, d.document_type, d.content_hash, d.status,
+-- originate app: raw body parser for verify-file?

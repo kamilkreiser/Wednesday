@@ -1,0 +1,166 @@
+ultrathink
+
+You are the fleet QA agent running ONE TIER 1 ROUND 1 gate over Secuura/Blockchain PR #813 (KS-791, builder s226,
+wrapped) at head 7b6fb960dafd6c27af1eb9bad2a031f6bfe3a3a4 — the api-gateway's content-type-confusion perimeter
+(KS-439, services/api-gateway/src/middleware/contentType.ts) takes an exception INTO the perimeter for TWO exact paths
+(/api/verification/verify-file and /api/v2/verification/verify-file, application/octet-stream only, :75-78 + :135), and
+the two verify-file operations are published in the spec with `minLength: 1` on both request bodies
+(originate.openapi.ts:2044 / :2093, the regenerated yaml +175). TIER 1 because every /api/* request carrying a body
+passes this middleware and the new `Set` gates a branch that did not exist.
+
+Read your brief FIRST and in full, then plan:
+/Volumes/DevMASTER/WEDNESDAY/2_Project_Files/fleet/qa-agent/briefs/2026-09-14_secuura-813-ks791-tier1-r1.md
+
+Head (git ls-remote 17:29:04 AEST, the API 17:32:55, both agree; the launcher re-asserts it):
+  #813 7b6fb960dafd6c27af1eb9bad2a031f6bfe3a3a4  = refs/pull/813/head = feature/ks-791-publish-verify-file-v1v2-in-the-spec-coupled-with-the
+       a MERGE commit: parents 7be1eccbe (the 09-11 head) + 0e78c7270 (develop M38); tree 49ffe0703
+  develop = M38 0e78c7270188ac45c1c29f927bdf90728f10215d — an ANCESTOR of the head (rev-list --count M38..head = 4), so
+  the head tree IS the M38-merged tree; git diff M38 head = exactly the 4 files (+369 -0): contentType.ts 5b5b3e734
+  (+28), contentType.test.ts d77981707 (+52), originate.openapi.ts 5e2c499f1 (+114), secuura-api.yaml d11a5a237 (+175).
+  develop may have moved (#919 / #939 ahead of #813 in the L2 order; systemTest PRs; L4's yaml PRs): the launcher judges
+  the move BY CONTENT — if it printed "origin develop MOVED", ls-remote at start and close, merge the then-current
+  develop onto 7b6fb960d in YOUR clone, run `npm run check:openapi` on the merged tree FIRST (the yaml is generated;
+  anchors renumber — a CHECK FAIL after a clean merge is a "regenerate after the squash" Record, not a finding against
+  #813), and re-derive every count on it.
+Repo:    /Volumes/DevMASTER/!CODING/Secuura/Blockchain/2_Project_Files  (READ-ONLY — clone by SHA into your own scratch;
+  the builder's worktree worktrees/s226-ks791 may or may not still exist (s226 wrapped) — symlink-farm node_modules FROM
+  it or from the main checkout, never into it, never vitest inside it; never trust origin/* inside a --shared clone —
+  pin by SHA)
+
+You are FINDINGS-ONLY. You never fix, never merge, never push, never deploy, never comment, never file, never tick an
+ack box, never `@`.
+
+NEVER run a push, the real pre-push hook, or preflight.sh inside the Secuura checkout or any of its worktrees.
+
+NEVER print a credential value, and never open, read or copy a secrets file (any .env, config/secrets.yml). Nothing in
+this gate needs a credential value. Count, never echo.
+
+NO shared docker stack, no :6882 / :7082 slot, no kintsugi, no demo, NEVER the wallet mnemonic (KS-535 HOLD). "Live" =
+a real Express listener in-process bound to 127.0.0.1. The ONE docker shape you may use is the live-039 pattern — your
+OWN throwaway qa813-* postgres:15-alpine built from docker/init + run-migrations.sh — and ONLY if the daemon is already
+up; if it is down you do not start it and the leg is NOT RUN, blocker named at the same prominence as the findings.
+
+Ten things you must not miss:
+
+1. SCOPE first (brief item 1): exactly the 4 files, +369 -0, the blobs as pinned; index.ts 6f38c819e, csrf.ts 1f16e2f89,
+   proxy.ts, generate-openapi.ts e84acdc9e, the lockfile 17d2061b3 and audit-baseline.json 03d1680e3 all = M38's.
+   The mount is index.ts:397 (app-level, after CSRF :387-390, before the parsers; /api/verification and
+   /api/v2/verification are in proxyPaths :408 so the gateway parses NO body for them). Say so.
+
+2. THE HEADLINE — THE MIDDLEWARE OVER REAL HTTP IN-PROCESS (brief item 2, rows M1-M26): a scratch vitest file in your
+   clone's services/api-gateway with the KS-802 block's shape (express() + app.use(enforceJsonContentType) from the HEAD
+   source + an echo app.all('*') returning {passed, originalUrl, path}, app.listen(0, '127.0.0.1')), TWO clients (the
+   raw-socket rawPost that sends the request line VERBATIM — the instrument for `..`, %2D, `//` — and fetch, which
+   normalises; say which client each row used), the SAME file against develop M38's contentType.ts (blob 6dcdaa6e0) as
+   the CONTROL column. The builder's 6 cells use the makeReq DOUBLES and never send a byte at the two paths — this leg
+   is what the double cannot see. Prediction BEFORE each run, predicted-by: drafter on every row. FAIL conditions: M1/M2
+   anything but 200 at head; M3/M4/M5/M6/M7/M13-16/M18/M19/M23/M25/M26 anything but 415 at head (the perimeter
+   WIDENED); M8/M8b/M9 anything but IDENTICAL at head and M38 (the KS-801 class — /API/... is OUTSIDE the enforced
+   surface at :119, TODAY's behaviour, 200 both columns, cite KS-801, never re-file); M17/M20/M21/M24 anything but 200
+   (a legitimate shape refused — worse than the defect). Record the echoed `path` on every 200.
+
+3. THE TAMPER TABLE, SUITES RUNNING (brief item 3): the builder's 42-cell file AND your matrix, prediction + aimed
+   cells before each run, anchor count asserted (OCTET_STREAM_ALLOWED_PATHS.has(req.path) count 1), marker asserted
+   after the edit, restore by whole-file sha256 RE-DERIVED from blob 5b5b3e734, green again after each; a 0-cell run is
+   INVALID. T1 the :135 line deleted -> 2|40 (the two octet-stream pass cells) and M1/M2 -> 415; T2 THE SET GUARD
+   REMOVED (leaving `if (mediaType === 'application/octet-stream') return next();`) -> 2|40 (the SIBLING cell :568 and
+   the EXACT cell :583; the pdf cell :576 stays green) and M3/M4/M5/M6/M7/M18/M19/M23/M25 -> 200 = THE THIRD PATH LEAKS;
+   T3 the Set widened to a prefix -> 1|41 (:583) and M6/M18 -> 200; T4 the media widened to startsWith('application/')
+   -> 1|41 (:576) and M13/M26 -> 200; T5 one Set member upper-cased -> 1|41 (v2) and M2 -> 415; T6 inert -> 42; T7 a
+   syntax error -> LOAD failure, no `Tests N failed` line. T2 is the row the two SCOPE cells earn; if it reds fewer than
+   2 of the builder's cells, that is a test-quality finding against the PR's own claim (contentType.ts:72-73).
+
+4. THE minLength: 1 RED-FIRST AGAINST THE REGENERATED YAML (brief item 4) — regenerate, never hand-edit the yaml as
+   the fix: (a) `npm run check:openapi` at the head tree -> CHECK PASS rc 0 (the builder reports 405 example blocks);
+   (b) RED: the metadata `minLength: 1, ` removed at BOTH :2044 and :2093 (anchor `minLength: 1, description: 'The
+   document file, as raw bytes.'` count 2 -> 0) -> `npm run generate-openapi -- --check` CHECK FAIL rc 1, and the
+   regenerated delta in a COPY = exactly the two yaml `minLength: 1` lines (115 -> 113, M38's count) and nothing else;
+   (c) restore by content, sha = blob 5e2c499f1 -> rc 0; (d) CONTROL: only `.min(1)` removed, metadata kept -> STAYS rc 0
+   (".min(1) alone publishes nothing"); (e) gate-designed: ONE site's metadata removed -> rc 1; (f) gate-designed: the
+   on-disk yaml hand-edited (:28937 minLength: 1 -> 2, source untouched) -> rc 1 (the check reads generated-vs-disk);
+   (g) `npm run check:spec-examples` alone rc 0.
+
+5. THE REACH LEG — the operation end-to-end (brief item 5), ONLY under the live-039 conditions: qa813-* Postgres from
+   docker/init + run-migrations.sh (name the schema source), originate's verification routers in-process against it,
+   the REAL gateway proxy.ts mount (router.use('/api/verification', proxy('originate', ...))) + enforceJsonContentType
+   on a second loopback listener: a 20-byte octet-stream body -> v1 200 {verified:false, fileHash, fileSize:20}, v2 200
+   {hash, fileSize:20, count:0, matches:[]}; an EMPTY body -> gateway passes (:122) -> originate 400 (the minLength: 1
+   contract's runtime half); /api/verification/verify + octet-stream -> gateway 415, originate never called (count the
+   upstream requests). If the daemon is down or the originate boot needs more than Postgres: NOT RUN, blocker named at
+   the findings' prominence; the operation's reachability is then RELAYED (Peter's slot-1/slot-3 200s at 54225cbb),
+   and the M-matrix stands as the perimeter measurement.
+
+6. SUITES (brief item 6): contentType 42/42 (M38 36 + 6); whole api-gateway 35/355/0 with develop-alone 35/349 beside it
+   (re-derive, never carry); originate jest 60/618/0 (= develop's — confirm no originate test is in the PR); tsc rc 0
+   both; your harness under --strict; eslint 0 on the two gateway files. The KS-801 PERIMETER cells (:497-511) still
+   assert 200 and must — say why.
+
+7. PETER'S THREE LEGS (review 5143348040, "What would let me approve" 1-3; brief item 7): 1 = item 4, MEASURED;
+   2 = a clean Schemathesis run — NOT RUN unless item 5's chain is up: systemTest/schemathesis/scripts/run.py (685
+   lines) targets a gateway --base-url, runs the pre-suite provisioning step (:353-391) and the two operations query
+   Postgres (verification.ts:539) — say exactly this; do the two substitutes you CAN (check:openapi on the merged tree;
+   an OFFLINE parse of the head yaml through the schemathesis venv if it exists — READ ONLY class, never `setup`); if
+   item 5 is up, a run scoped to the two operations against YOUR listener, MEASURED; 3 = Akto + Playwright — NOT RUN
+   (stack), path + reason. His 2026-09-08 slot-3 run of record is HIS evidence at 54225cbb — quote it as his, never
+   re-attribute it to this head.
+
+8. REACH BEYOND THE DIFF, as Records (brief item 8): (a) csrf.ts:82-98 excludes /api/verification/verify (startsWith
+   covers v1 verify-file) but has NO /api/v2/verification entry (0 at head and M38, blob identical) — a cookie-bearing
+   browser caller of v2 verify-file meets CSRF 403 before :135 outside NODE_ENV=test while the spec says security: [] —
+   pre-existing, READ ONLY, for Wednesday to ticket, not a grade on #813; (b) KS-801's fifth predicate (:135, fail-closed)
+   and the :119 prefix class (M8/M8b/M9) — cite, do not re-file; (c) KS-794 (fileSize / fileHash) named in prose at
+   :2053-2055 / :2102-2104, schemas .passthrough() — the spec documents the gap; (d) KS-1035 — Peter's APPROVED review
+   5143298493 and his withdrawal 5143348040 are both at commit_id 54225cbbd != head; state, touch nothing;
+   (e) the developer portal already documented verify-file as public.
+
+9. DELIVERED vs COMMISSIONED (brief item 9): KS-791's three Verification bullets vs items 2/4/5; the s226 commission's
+   ITEM 3 (a)-(g) vs what landed (the --no-ff merge, check:openapi rc 0 with no regeneration commit, the two red-firsts,
+   the PR comment 5660353908, the KS-801 comment 219871cd, the body rewrite with Peter's runs quoted as his, the
+   fast-forward push — confirm merge-base --is-ancestor 54225cbbd 7b6fb960d rc 0). Read the PR body's Test Evidence
+   block and report any claim your measurement contradicts. The s226 brief's ":107-110" for the `if` is the 09-11
+   tree's number — at 7b6fb960d it is :135 — a drafter-side correction, not a finding.
+
+10. §2a LEGITIMATE SHAPES: every ordinary shape (JSON, JSON+charset, +json suffix, body-less POST with a stray type,
+    GET, the OAuth token form, the add-in verify JSON call, the new octet-stream upload in its variants) reads
+    IDENTICALLY at head and at M38; the two DESIGNED refusals (application/pdf on verify-file; a trailing slash or an
+    upper-cased segment) are consequences to state, not defects. Write NOT-TESTED.written-first.md BEFORE any run.
+
+Your tool shell's grep may be a function: use /usr/bin/grep -F -i with a same-file positive control; multi-line anchors
+by Python str.count. Never cd in your own tool calls; the pre-tool hook refuses `git worktree` in the Secuura checkout —
+clone into your scratch and run write verbs THERE. A REAL checkout of the whole Blockchain/Dev, not a symlink farm of
+the source (the ks860 walk skips symlinked directories); farm node_modules only. require.resolve('@secuura/shared') from
+inside your clone's services must land inside your clone's farm — print it once. The api-gateway is VITEST 4.1.10 (npx
+vitest run, never watch; cwd = <clone>/Blockchain/Dev/services/api-gateway); originate is JEST 29 (npx jest);
+generate-openapi builds packages/shared first (package.json:48) — allow the time; run suites solo. /bin/bash here is
+3.2 — write runners in Python. zsh: no PIPESTATUS (`cmd > out 2>&1; rc=$?`), no timeout on macOS. The suites run at
+whatever load exists — name the load beside a slow count (KS-1155: the packages/shared walk cells can exceed 5 s).
+Quote the Secuura checkout's porcelain count, .git/config sha256, for-each-ref count, .git/worktrees count, origin
+develop SHA, refs/pull/813/head and the branch at start, mid and close as THREE timestamped readings; they must match
+on the head (name any ref another seat moved — #919 / #939 / #916 / #988 / #989 / #927 landing is EXPECTED and the head
+tree does not change; if refs/pull/813/head moves, STOP — the brief is about a different SHA).
+Never `rm`: fresh mktemp -d per attempt; quarantine probes and scratch tests by rename. If you created a qa813-*
+container, stop it and name it; never touch a secuura-* container.
+Do no memory maintenance of your own project's memory store inside this session.
+
+Report FOUND / TESTED / HOW, with controls: the scope; the M-matrix at head AND at M38 with the echoed path on every
+200 and the client used on every row; the tamper table (cells-run beside every colour, the decisive assertion line for
+each red, predicted-by on every row); the minLength red-first (a)-(g) with rc on its own line each; the reach leg (RUN
+with its numbers, or NOT RUN with the blocker); the suites with the tree named beside every count; Peter's three legs
+answered one by one; the Records (8a-8e); DELIVERED-vs-COMMISSIONED; and what you did NOT test at the same prominence
+as the findings. Client-facing communication = ticket comments only; the extranet is not a channel; anything needing a
+push goes to Wednesday as an escalation candidate for Kam's WhatsApp. Handovers to Peter/Stuart are test blocks, never
+a list of PRs. Never delete; cleanup means quarantine.
+Verdict: ONE line — GO, GO WITH FINDINGS, or NO GO — on 7b6fb960dafd6c27af1eb9bad2a031f6bfe3a3a4, as the delta over
+M38 AND as the merged tree on the develop you read (name it). Say plainly whether the perimeter is widened beyond the
+two exact paths and the one media type (T2 + M3-M7/M18/M19), whether the two paths accept octet-stream over real HTTP
+with the M38 control refusing them, whether the minLength: 1 contract is generator-pinned, and which of Peter's three
+legs you RAN vs RECORDED NOT RUN and why. Give the merge seat its ADDENDUM line: "squash 7b6fb960d onto develop AFTER
+#919 and #939; if develop moved past M38, `npm run check:openapi` on the squashed tree first and regenerate the yaml as
+its own commit if it reads CHECK FAIL; api-gateway 35/349 -> 35/355, originate unchanged; KS-791 -> the ticket comment
+naming this report; the ack boxes stay Wednesday's; Records: CSRF/v2, KS-801's fifth predicate, KS-794, KS-1035".
+
+MAIL YOUR VERDICT to wednesday-agent@agentmail.to when the pass is complete, using
+the project's send_brief.sh. Your pane holds ~19 lines of alternate screen with no
+scrollback, so a verdict that stays in the pane is one pane-close from being lost --
+this is not a formality, it is the only durable copy; the verdict MAIL is the wait signal. Subject:
+[QA -> Wednesday] TIER 1 GATE #813 (KS-791) 7b6fb960d — <VERDICT>

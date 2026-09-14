@@ -1,0 +1,78 @@
+schemathesis_read 17:31:22 AEST at 7b6fb960d (systemTest/ is at the repo ROOT, not under Blockchain/Dev)
+-- run.py lines:      685
+9:  pr:               4 examples, positive mode, 2 phases (examples+fuzzing), read-only baseline checks
+47:  stateful_workflows:    POST->GET->DELETE chains, operation linking
+52:    python3 scripts/run.py setup                   # First time: venv + deps + .env files + API token (alias: install)
+71:    python3 scripts/run.py contract_schema --base-url=http://custom:6882  # Custom API host
+114:# runner.bootstrap._ensure_in_venv(), and importing that module pulls in runner.config, which uses
+122:# Kept in lockstep with runner.config.VENV_PYTHON by tests/unit/runner/test_prevenv_bootstrap.py,
+129:    # system binary, so resolve() would match and skip the switch when a different venv is active.
+133:from runner.bootstrap import _ensure_in_venv, _maybe_enable_hooks  # noqa: E402
+150:    evaluate_schemathesis_baseline,
+249:def _run_pytest_anchoring(output_dir: Path, base_url: str) -> int:
+263:        base_url: Target gateway host, forwarded as ``API_BASE_URL`` to the integration fixtures.
+288:    env = {**os.environ, "API_BASE_URL": base_url, "SCHEMATHESIS_RUN_DIR": str(output_dir)}
+294:def _run_integration_suite(output_dir: Path, base_url: str) -> int:
+299:        base_url: Target gateway host forwarded to the fixtures.
+303:        skip (so CI gates on it). The report is regenerated regardless of pass/fail.
+305:    code = _run_pytest_anchoring(output_dir, base_url)
+306:    # KS-589: apply the same skip→INCOMPLETE gate the profile path uses. Prior behaviour returned
+307:    # pytest's exit code alone, which is 0 for a skip — so `run.py integration` reported success on
+312:    # all and the skip accounting was silently absent exactly when something had already gone wrong.
+325:#: the pre-suite step, so a new subcommand is provisioned by default and only a
+329:#: SET, which fixed `integration` running 17 live httpx cells with no pre-suite
+341:#:   setup / install   venv, deps, .env files, API token. Creates the environment;
+353:def _run_pre_suite(command: str, base_url: str) -> int:
+354:    """Run the shared pre-suite provisioning step (KS-969 item 1).
+370:        base_url: the target, forwarded as ``API_BASE_URL`` so the step's
+379:    step = _PROJECT_ROOT.parent / "fixtures" / "pre-suite.ts"
+381:        Logger.error(f"pre-suite step not found at {step}")
+383:    env = {**os.environ, "API_BASE_URL": base_url}
+393:def main() -> int:
+418:    # cells with zero pre-suite lines. Placement after "the last short-circuit I
+427:        # pre-suite step creates anything, with the slot command to run instead. Before, an unset
+430:            assert_slot_named_for_local_target(str(args.base_url), f"python3 scripts/run.py {args.command}")
+434:        pre_rc = _run_pre_suite(str(args.command), str(args.base_url))
+436:            Logger.error("Pre-suite provisioning step failed — not starting the run.")
+449:        return _run_integration_suite(OUTPUT_DIR, str(args.base_url))
+467:    # Apply CLI overrides (--workers / --max-examples / --base-url)
+471:    if args.base_url:
+472:        config["base_url"] = args.base_url
+482:        # Step 2 — bootstrap .env/.env.local and acquire the API token, so first-time setup is
+484:        # env files offline and attempts a token login, warning rather than failing if Docker
+486:        Logger.section("Bootstrapping environment (.env files + API token)")
+496:    # `quality:static` skips both pytest suites (the PR CI path — the suites are mandatory locally
+530:    # authenticates authed operations per-persona instead of getting 401.
+531:    _maybe_enable_hooks(str(config["base_url"]))
+542:    # trip the login rate limiter / lockout, after which the IDOR fixtures
+562:        pytest_data = run_pytest_idor(OUTPUT_DIR, str(config["base_url"]))
+568:        integration_data = run_pytest_integration(OUTPUT_DIR, str(config["base_url"]))
+571:        # `anchoring_success = _run_pytest_anchoring(...) == 0`, and pytest exits 0 on a skip — so a
+572:        # skipped anchoring scenario passed the gate silently while every sibling suite already
+574:        # scenarios skipped with no coverage problem reported.
+575:        anchoring_code = _run_pytest_anchoring(OUTPUT_DIR, str(config["base_url"]))
+578:        # why: short-circuiting skipped it entirely whenever pytest had already exited non-zero.
+581:        preconditions_data = run_pytest_preconditions(OUTPUT_DIR, str(config["base_url"]))
+585:    # Fast profiles (test-fast, local-debug) use reduced example counts and skip
+621:    # has failed the two downstream gates never run AND never print — a silent skip that
+628:            "SKIPPED — upstream gate failed: report reconciliation and the schemathesis "
+629:            "baseline gate were not evaluated for this run."
+633:        # KS-256: a check/operation failure absent from the triaged baseline fails the run.
+637:            success = evaluate_schemathesis_baseline(
+638:                OUTPUT_DIR, _PROJECT_ROOT / "config" / "schemathesis-baseline.json"
+642:                "SKIPPED — upstream gate failed: the schemathesis baseline gate was not evaluated for this run."
+652:    # the live suites were skippable. `is_skip` is False only when credentials AND the platform
+670:        # KS-684: when the live precondition was never met, the gated trio reports SKIPPED with the
+671:        # reason rather than FAILED. Prior behaviour: `API_TOKEN not found` rendered four healthy
+673:        gated_suites_skipped_reason=(None if _readiness.is_skip is False else _readiness.reason),
+-- fixtures/pre-suite (systemTest/fixtures):
+systemTest/fixtures/.gitignore
+systemTest/fixtures/actors.ts
+systemTest/fixtures/manifest.ts
+systemTest/fixtures/pre-suite.ts
+systemTest/fixtures/provision-actors.ts
+systemTest/fixtures/provision.ts
+systemTest/fixtures/slot-required.ts
+systemTest/fixtures/slot.ts
+systemTest/fixtures/target.ts
+systemTest/fixtures/tsconfig.json

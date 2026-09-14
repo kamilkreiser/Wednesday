@@ -1,0 +1,112 @@
+gateway_index_read 17:30:44 AEST at 7b6fb960d
+L1(+379)	// Cookie parsing & CSRF
+L2(+379)	app.use(cookieParser());
+L3(+379)	// Pen-test F-14 fix: enable CSRF in every environment except `test` (where
+L4(+379)	// the test runner needs to hit endpoints without juggling tokens). The
+L5(+379)	// previous gate of `NODE_ENV === 'production'` left dev / staging / demo
+L6(+379)	// without CSRF protection — and demo carries seeded credentials (F-05) +
+L7(+379)	// public URLs, so it absolutely needs CSRF.
+L8(+379)	if (NODE_ENV !== 'test') {
+L9(+379)	  app.use(csrfMiddleware.generateToken);
+L10(+379)	  app.use(csrfMiddleware.protect);
+L11(+379)	}
+L12(+379)	
+L13(+379)	// KS-439: strict media-type enforcement — an /api/* request carrying a body
+L14(+379)	// must declare application/json (sole exception: the OAuth token endpoint's
+L15(+379)	// RFC 6749 form encoding). Mounted before the parsers AND the proxies so one
+L16(+379)	// choke point covers gateway-parsed and proxied paths alike; after CSRF so
+L17(+379)	// ambient-authority requests keep failing 403 first (auth posture).
+L18(+379)	app.use(enforceJsonContentType);
+L19(+379)	
+L20(+379)	// Conditional body parsing — skip for proxied routes (they need raw body stream)
+L21(+379)	const proxyPaths = [
+L22(+379)	  '/api/credentials', '/api/status', '/api/presentations',
+L23(+379)	  '/api/auth', '/api/oauth', '/api/webhooks', '/api/documents', '/api/certifications',
+L24(+379)	  '/api/anchoring', '/api/prism', '/api/timestamp',
+L25(+379)	  '/api/wallet', '/api/security', '/api/m365',
+L26(+379)	  '/api/staking', '/api/referral', '/api/governance',
+L27(+379)	  '/api/analytics', '/api/billing', '/api/transfers',
+L28(+379)	  '/api/delegations', '/api/kyc',
+L29(+379)	  '/api/gdpr', '/api/verification', '/api/v2/verification', '/api/nft', '/webhooks',
+L30(+379)	  '/api/admin', '/api/signatories', '/api/system-errors',
+L31(+379)	  '/api/onedrive', '/api/teams',
+L32(+379)	  '/api/users', '/api/sessions', '/api/issuer-certs',
+L33(+379)	];
+L34(+379)	const shouldParseBody = (req: Request): boolean => !proxyPaths.some(p => req.path.startsWith(p));
+L35(+379)	
+L36(+379)	// Default 1MB body limit; file upload routes get 10MB via their own middleware
+L37(+379)	app.use((req, res, next) => { if (shouldParseBody(req)) express.json({ limit: '1mb' })(req, res, next); else next(); });
+L38(+379)	app.use((req, res, next) => { if (shouldParseBody(req)) express.urlencoded({ extended: true, limit: '1mb' })(req, res, next); else next(); });
+L39(+379)	
+L40(+379)	// 10MB limit for file upload paths
+L41(+379)	const uploadBodyParser = express.json({ limit: '10mb' });
+L42(+379)	app.use('/api/documents/upload', uploadBodyParser);
+L43(+379)	app.use('/api/nft/upload', uploadBodyParser);
+L44(+379)	
+L45(+379)	// KS-471: no U+0000 may pass the boundary on any gateway-parsed body (raw-500 /
+L46(+379)	// persist class). No-op when req.body is unset, so mounting unconditionally
+-- shouldParseBody def:
+413:const shouldParseBody = (req: Request): boolean => !proxyPaths.some(p => req.path.startsWith(p));
+416:app.use((req, res, next) => { if (shouldParseBody(req)) express.json({ limit: '1mb' })(req, res, next); else next(); });
+417:app.use((req, res, next) => { if (shouldParseBody(req)) express.urlencoded({ extended: true, limit: '1mb' })(req, res, next); else next(); });
+458:app.use((req, res, next) => { if (shouldParseBody(req)) sanitizeInput(req, res, next); else next(); });
+459:app.use((req, res, next) => { if (shouldParseBody(req)) detectSuspiciousRequests(req, res, next); else next(); });
+-- csrf.ts:90-105:
+    '/api/auth/wallet/challenge',
+    '/api/auth/wallet/authenticate',
+    // Verification endpoint is public-read by design: third-party clients
+    // (Outlook add-in, Gmail add-on, custom verifier scripts) call it to
+    // look up a content hash. It performs no state-changing operation —
+    // POST is used for the request body only. CSRF doesn't apply to
+    // read-only RPCs that don't carry session-derived authority. Origin
+    // is still checked via CORS_ORIGINS for browser callers; non-browser
+    // callers (no Origin header) fall through to the rate limiter.
+    // (startsWith match covers /verify, /verify-file, /verify-batch.)
+    '/api/verification/verify',
+    // Client-side logger sink — sendBeacon fires-and-forgets a JSON batch
+    // of warn/error events from the SPA's logger. No session auth, no
+    // CSRF interaction; the body is already sanitised client-side. Origin
+    // is still policed by CORS for browser callers.
+    '/api/logs',
+    '/webhooks/',
+  ],
+  allowedOrigins: process.env.CORS_ORIGINS?.split(',') || (() => {
+-- proxy.ts:580-600
+  // (KS-320, Option 2). JWT-required (mirrors the billing customer endpoints'
+  // auth); the tenant is enforced server-side in originate, so a partner caller
+  // (Platform-S) only ever sees its own tenant's usage.
+  router.use('/api/metering',
+    authenticateToken(true),
+    proxy('originate', { '^/api/metering': '/api/metering' }),
+  );
+
+  // Verification — proxy to originate (no auth required for public verification)
+  router.use('/api/verification',
+    proxy('originate', { '^/api/verification': '/api/verification' }),
+  );
+  // KS-584 P3: v2 verify-list contract — same public posture as v1 above.
+  // ABSENT bearer → anonymous 200; PRESENT-but-invalid → originate 401s.
+  router.use('/api/v2/verification',
+    proxy('originate', { '^/api/v2/verification': '/api/v2/verification' }),
+  );
+
+  // Signatories — proxy to originate, relaying status verbatim. Audit A-09:
+  // the previous shim swallowed ANY non-OK upstream (including 401/403/500)
+  // and returned a fake success with an empty list — masking auth failures
+-- proxy.ts:690-705
+   *
+   * — so mounting on the `/api/gdpr/erasures` PREFIX alone, the obvious fix,
+   * closes only three of the six.
+   *
+   * KS-843 F-9 — the SECOND hole, which the fix for the first one created.
+   * Round 2 closed those six with a hand-rolled matcher tested against the
+   * collapsed sub-path. That matcher was case-SENSITIVE, while both express
+   * routers in the request path match case-INSENSITIVELY (neither this service
+   * nor originate sets `case sensitive routing`). So `ERASURES`, `Erasures`,
+   * `Erasures/`, `//ERASURES`, `/API/GDPR/ERASURES` and `GET …/ERASURES/abc`
+   * walked around the door and ran originate's erasure handler in ENFORCING
+   * mode for a principal with neither the scope nor an accepted role — five of
+   * which the PARENT commit had refused. Two matchers inside one request path,
+   * two answers, one upstream.
+   *
+   * So the door does not do its own matching any more. `erasureDoor` is an

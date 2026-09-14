@@ -1,0 +1,244 @@
+#!/usr/bin/env npx tsx
+/**
+ * =============================================================================
+ * systemTest — THE PRE-SUITE STEP (KS-969 item 1)
+ * =============================================================================
+ * Provisioning existed and nothing ran it. `provision-actors.ts` was a CLI you
+ * had to type, so in practice every suite fell through to the platform's SEEDED
+ * accounts and the generated-actor path was dead code — measured on develop:
+ * `systemTest/fixtures/generated` held 0 files and no automated caller existed.
+ *
+ * This is the step that runs it. Each suite invokes it through an npm `pre*`
+ * hook (or, for Schemathesis, from `run.py`), so provisioning happens because
+ * you ran the suite, not because you remembered.
+ *
+ * THREE OUTCOMES, AND THE DISTINCTION BETWEEN THEM IS THE POINT
+ * -------------------------------------------------------------
+ *   PROVISIONED  the manifest is written; suites read generated actors.
+ *   DEGRADED     provisioning could not complete. The suites still run, on
+ *                their seeded fallbacks — which is the SANCTIONED path until
+ *                KS-969 item 4 removes them — but the banner says so in words,
+ *                because the failure this replaces was a SILENT fallback.
+ *   REFUSED      the target is not one we may create accounts on. Always fatal,
+ *                and deliberately NOT downgradable by the flag below: a safety
+ *                refusal that a flag can turn into a warning is not a refusal.
+ *
+ * WHY DEGRADED IS NOT FATAL BY DEFAULT
+ * ------------------------------------
+ * Making it fatal today would break every suite run on a machine without
+ * `BOOTSTRAP_ADMIN_PASSWORD` — and the seeded fallbacks are still the live,
+ * intended path until item 4 retires them. So the default is "run, and say
+ * loudly what you are running as". `SYSTEMTEST_REQUIRE_PROVISIONED=true` makes it
+ * fatal, and that flag is what item 4 flips to the default: the migration is a
+ * one-line change rather than a rewrite.
+ * =============================================================================
+ */
+
+import { pathToFileURL } from "node:url";
+
+import { manifestPath, quarantineManifest } from "./manifest.ts";
+import { provisionActors } from "./provision-actors.ts";
+import { NO_SLOT_REFUSAL } from "./slot-required.ts";
+
+export type PreSuiteOutcome = "PROVISIONED" | "DEGRADED" | "REFUSED";
+
+/**
+ * KS-969 F3 (round-1 gate). The flag was `=== '1'`, so `" true"`, `"TRUE"`,
+ * `"yes"`, `"01"` and even `"1 "` with a trailing space all failed OPEN with no
+ * warning. A strictness flag that silently means false is worse than no flag.
+ *
+ * The spelling is the repo's own: `performance/config/environment.ts`'s
+ * `parseBoolean` is `value?.toLowerCase().trim() === 'true'`, and its docstring
+ * advertises `parseBoolean('TRUE')`. REPLICATED rather than imported because it
+ * is not exported and lives in a different npm workspace — importing it would
+ * couple the shared fixtures to the performance suite. Replicating the exact
+ * expression is the smaller cost; inventing a THIRD spelling is what the gate
+ * refused, so `'1'` is no longer accepted either.
+ *
+ * Anything else non-empty is UNRECOGNISED and says so, rather than meaning false.
+ */
+function strictFlag(value: string | undefined, name: string): boolean {
+  if (value === undefined || value.trim() === "") return false;
+  const normalised = value.toLowerCase().trim();
+  if (normalised === "true") return true;
+  if (normalised === "false") return false;
+  console.error(
+    `[pre-suite] ${name}="${value}" is not recognised — expected "true" or "false". ` +
+      "Treating it as UNSET, which is the permissive arm. This warning exists because a " +
+      "strictness flag that silently means false is worse than no flag at all.",
+  );
+  return false;
+}
+
+export interface PreSuiteResult {
+  readonly outcome: PreSuiteOutcome;
+  /** Non-zero only when the caller should stop. */
+  readonly exitCode: number;
+  /** One line, already formatted, safe to print. */
+  readonly summary: string;
+}
+
+/** A refusal is about the TARGET, not about a missing credential or a down stack. */
+function isRefusal(err: unknown): boolean {
+  // KS-1016: a local target with no slot named is a refusal too — fatal, nothing created.
+  return (
+    err instanceof Error &&
+    (err.message.startsWith("refusing to provision accounts against") ||
+      err.message.startsWith(NO_SLOT_REFUSAL))
+  );
+}
+
+/**
+ * Run provisioning for a suite, and classify what happened.
+ *
+ * @param suite - the suite name, for the banner.
+ * @param argv - forwarded to the provisioner (e.g. `['--seed', 'ci-run-42']`).
+ * @returns the outcome, an exit code and a one-line summary. Never throws:
+ *          classifying the failure IS this function's job.
+ */
+export async function runPreSuite(
+  suite: string,
+  argv: string[] = [],
+): Promise<PreSuiteResult> {
+  const required = strictFlag(
+    process.env.SYSTEMTEST_REQUIRE_PROVISIONED,
+    "SYSTEMTEST_REQUIRE_PROVISIONED",
+  );
+  try {
+    const { manifest, drifted, written } = await provisionActors(argv);
+    const count = Object.keys(manifest.actors).length;
+
+    // KS-969 F1 (BLOCKER). A ROLE COLLAPSE IS NOT A SUCCESS. The manifest
+    // outranks the seeded accounts in every consumer, so publishing one
+    // whose actors have collapsed to OWNER switches every wired suite to
+    // wrongly-roled identities and reports green. `provisionActors` refuses
+    // to publish it; this refuses to call it PROVISIONED.
+    if (drifted.length > 0 || written === null) {
+      return {
+        outcome: "DEGRADED",
+        exitCode: required ? 1 : 0,
+        summary:
+          `[pre-suite:${suite}] DEGRADED — ${drifted.length} actor(s) did not get the ` +
+          `role they were provisioned for (${drifted.join(", ")}). The manifest was NOT ` +
+          `published, so the suite keeps its correctly-roled SEEDED accounts.\n` +
+          `[pre-suite:${suite}] This is almost always BOOTSTRAP_ADMIN_PASSWORD being ` +
+          `unset: no self-service path can grant a role, so every actor lands as OWNER.` +
+          (required
+            ? `\n[pre-suite:${suite}] SYSTEMTEST_REQUIRE_PROVISIONED is set, so this is FATAL.`
+            : ""),
+      };
+    }
+
+    return {
+      outcome: "PROVISIONED",
+      exitCode: 0,
+      summary:
+        `[pre-suite:${suite}] PROVISIONED — ${count} generated actor(s) from seed ` +
+        `"${manifest.seed}" against ${manifest.baseUrl}; manifest at ${manifestPath()}`,
+    };
+  } catch (err: unknown) {
+    const reason = err instanceof Error ? err.message : String(err);
+
+    if (isRefusal(err)) {
+      // Never downgraded by SYSTEMTEST_REQUIRE_PROVISIONED in either
+      // direction: the flag raises DEGRADED to fatal, it does not lower a
+      // refusal to a warning.
+      return {
+        outcome: "REFUSED",
+        exitCode: 1,
+        summary: `[pre-suite:${suite}] REFUSED — ${reason}`,
+      };
+    }
+
+    // KS-969 F1-A (round-4 gate). Provisioning STARTED and did not publish, so
+    // any manifest already on disk is now stale — and it survives an exception
+    // exactly as it survived a rejection before round 3. **A non-write is not a
+    // removal, and neither is a throw.** Round 3 quarantined only the drift arm
+    // inside `provisionActors`; every other non-publishing outcome landed here,
+    // where `exitCode` is 0 and THE SUITE STILL RUNS. That is the dangerous
+    // combination: a stale manifest outranks the seeded accounts in every
+    // consumer, and the banner below used to promise the opposite.
+    //
+    // Deliberately NOT on the refusal branch above: a refused target is FATAL,
+    // the suite never runs, and provisioning never started — so nothing was
+    // superseded and quarantining there would destroy a VALID manifest for an
+    // unrelated reason. That distinction is pinned by its own cell.
+    // KS-969 F-1: this call is INSIDE the catch block, so nothing above it can
+    // catch what it throws. `runPreSuite`'s contract at :90 is "Never throws:
+    // classifying the failure IS this function's job" — a quarantine that threw
+    // here would break exactly that contract, and the caller would get an
+    // exception where it expected a DEGRADED classification.
+    //
+    // And it CAN throw. `quarantineManifest` (manifest.ts:107-114) is a TOCTOU:
+    // it calls `existsSync(manifestPath)` and then `renameSync(manifestPath, …)`,
+    // and `run-in-slot.sh` runs slots in PARALLEL against one checkout — so a
+    // concurrent run can move the manifest between those two calls and
+    // `renameSync` throws ENOENT. Measured by the gate: two concurrent runs in
+    // one checkout crashed 9 of 12; the parent-commit control crashed 0 of 12.
+    //
+    // Swallowing it silently would be worse than the throw: the manifest may
+    // still be on disk and still stale, and a consumer prefers a manifest over
+    // the seeded accounts. So the failure is REPORTED in the summary below
+    // rather than hidden — the reader is told the quarantine did not happen.
+    let superseded: string | null = null;
+    let quarantineFailure: string | null = null;
+    try {
+      superseded = quarantineManifest(new Date().toISOString());
+    } catch (err) {
+      quarantineFailure = err instanceof Error ? err.message : String(err);
+    }
+
+    return {
+      outcome: "DEGRADED",
+      exitCode: required ? 1 : 0,
+      summary:
+        `[pre-suite:${suite}] DEGRADED — provisioning did not complete: ${reason}\n` +
+        (required
+          ? `[pre-suite:${suite}] SYSTEMTEST_REQUIRE_PROVISIONED is set, so this is FATAL ` +
+            `and the suite will not run.`
+          : // Round 4: this used to PREDICT what the suite would run as
+            // ("will run on the platform's SEEDED accounts, NOT generated
+            // actors"), which was false whenever a stale manifest survived.
+            // It now REPORTS what was actually done to the manifest. A
+            // prediction can be wrong while staying green; a report of an
+            // action can be pinned to that action.
+            (quarantineFailure
+              ? // F-1: the quarantine did not happen. Say so, loudly and
+                // specifically — a manifest may still be on disk, and every
+                // consumer prefers a manifest over the seeded accounts, so
+                // this is the case where the suite is MOST likely to run on
+                // stale actors while believing it is degraded.
+                `[pre-suite:${suite}] The stale manifest could NOT be quarantined ` +
+                `(${quarantineFailure}). It may still be on disk — if it is, the suite ` +
+                `will read it IN PREFERENCE to the seeded accounts. Check ` +
+                `fixtures/generated/actors.json before trusting this run.\n`
+              : superseded
+                ? `[pre-suite:${suite}] A previously published manifest was STALE and has ` +
+                  `been superseded — moved to ${superseded}. No manifest is published, so ` +
+                  `the suite runs on the platform's SEEDED accounts.\n`
+                : `[pre-suite:${suite}] No manifest was on disk, so none is published and ` +
+                  `the suite runs on the platform's SEEDED accounts.\n`) +
+            `[pre-suite:${suite}] Set SYSTEMTEST_REQUIRE_PROVISIONED=true to make this fatal.`),
+    };
+  }
+}
+
+// KS-973 residue (e): `import.meta.url` is realpath'd by the ESM loader while `argv[1]` is not, so
+// invoked THROUGH A SYMLINK this is false, the body below never runs and the process exits 0 with
+// empty output. Bounded — every production hook passes a real path — and pinned as the known shape
+// by `performance/tests/unit/fixtures/preSuiteStreams.test.ts`.
+const invokedDirectly =
+  process.argv[1] !== undefined &&
+  import.meta.url === pathToFileURL(process.argv[1]).href;
+
+if (invokedDirectly) {
+  const suite = process.argv[2] ?? "unknown";
+  runPreSuite(suite, process.argv.slice(3)).then((result) => {
+    // DEGRADED goes to stderr so it survives a pipeline that only keeps
+    // stdout, which is how a warning becomes invisible.
+    (result.outcome === "PROVISIONED" ? console.log : console.error)(
+      result.summary,
+    );
+    process.exit(result.exitCode);
+  });
+}

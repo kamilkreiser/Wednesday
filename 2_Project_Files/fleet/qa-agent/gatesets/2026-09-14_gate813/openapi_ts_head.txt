@@ -1,0 +1,3856 @@
+/**
+ * =============================================================================
+ * ORIGINATE SERVICE — OpenAPI registrations (Track 2 stage 2)
+ * =============================================================================
+ *
+ * Second service migrated to the Track 2 generated-spec pattern. Walks the
+ * primary public endpoints exposed by the originate service:
+ *   - /api/documents/* (list, get, create, anchor, verify, revoke)
+ *   - /api/verification/verify (canonical verifier endpoint — single source
+ *     of truth across all envs after the 2026-04-29 verifier consolidation)
+ *   - /api/certifications/* (issue, list, get)
+ *   - /api/webhooks/* (subscribe, list, update, rotate-secret, test, deliveries)
+ *   - /api/gdpr/* (consent, DSRs, exports, erasure, retention, deletion-log)
+ *   - /api/system-errors/* (ingest, list, stats, resolve)
+ *
+ * Schemas are mirrored from frontend/shared/src/schemas/* so the generated
+ * spec matches what the frontend already validates against. Until services
+ * can import from a single shared schema source, keep these in lockstep
+ * manually — when frontend/shared schemas change, update the matching
+ * registrations here.
+ *
+ * Endpoints not yet registered (deferred to follow-up commits, low risk
+ * because the Stage 2 deliverable was the originate proof + canonical
+ * surface):
+ *   - documents: /:id/sign/request, /:id/sign
+ *   - verification: /verify-file, /hash, /status/:documentId
+ *   - certifications: /:id/revoke, /:id/verify, /:id/share, /:id/recertify,
+ *     /:id/lineage, /:id/evidence-bundle
+ * =============================================================================
+ */
+
+// KS-256: FX is the canonical published-example fixture set.
+// `recipientEmail` previously carried a third persona alongside auth's
+// two; drawing from FX collapses them onto one counterparty.
+import { z, sharedRegistry, commonErrorResponses, rateLimit, sla, FX } from '@secuura/shared';
+import { LIFECYCLE_EVENT_ACTIONS } from './lifecycleActions';
+// QA F-8: the sentinel is INTERPOLATED into the published descriptions rather
+// than hand-written, so the value a relying party reads in the spec cannot
+// drift from the value the erasure actually writes. This file is TypeScript;
+// there is no reason for it to carry a copy of the literal.
+import { ERASED_MARKER } from './utils/erasureMarker';
+
+// -----------------------------------------------------------------------------
+// SHARED SCHEMAS (registered once, referenced by routes)
+// -----------------------------------------------------------------------------
+
+// KS-367: charset-safety constraint for id-style path parameters. Every id the
+// platform mints (doc-<ts>-<8hex>, ce_<uuid>, plain UUIDs, webhook ids) fits
+// this pattern; what it EXCLUDES is NUL/control bytes and other unsafe
+// characters, which gateways (local nginx, ACA Envoy) reject with their own
+// undocumented 400 before the request reaches a service. Constraining the
+// spec makes such values schema-invalid input rather than a documented-
+// response violation. Charset safety only — NOT an entity id format.
+// Exported for runtime enforcement (KS-466 §8: routes/documents.ts rejects
+// charset-illegal path ids before any DB query — the published grammar and
+// the runtime guard must stay one definition).
+export const SAFE_ID_PATTERN = /^[A-Za-z0-9][A-Za-z0-9._-]{0,127}$/;
+
+// Reusable `{id}` path-params objects carrying the safe-charset constraint.
+//
+// KS-665 item 2: these were ONE shared `idPathParams` used by 18 routes across
+// three different resource types. That is fine for the constraint (the grammar
+// is the same) but it makes a published example impossible: a single `example:`
+// here would document a document id on `/api/webhooks/{id}`. That is the same
+// defect class as the 16 `address` fields in §3 and the `userAgent` in §4 — a
+// legitimate fixture value landing on a field it does not describe — so the
+// helper is split by resource and each carries its own example.
+//
+// The examples below are FORMAT-TRUE AND ACCOUNT-FALSE by design: FX names no
+// live row (see the fixture-set header). A path-param example documents the
+// SHAPE a caller must send, not an id they can fetch.
+const idPathParamsBase = (description: string) =>
+  z.string().regex(SAFE_ID_PATTERN).openapi({ description });
+
+const documentIdPathParams = z.object({
+  id: idPathParamsBase(
+    'Document id (1-128 chars: alphanumeric plus `.`, `_`, `-`; must start alphanumeric)',
+  ).openapi({ example: FX.document.id }),
+});
+
+const certificationIdPathParams = z.object({
+  id: idPathParamsBase(
+    'Certification id (1-128 chars: alphanumeric plus `.`, `_`, `-`; must start alphanumeric)',
+  ).openapi({ example: FX.certification.id }),
+});
+
+// No example deliberately: FX carries no webhook-shaped id, and the fixture
+// rule is that published literals come only from curated FX or from schema
+// synthesis. Adding one means a new FX entry AND the matching accept-list
+// entry in scripts/spec-examples/check/contract.mjs — out of scope here.
+// See the KS-665 comment for the 90 parameters in the same position.
+const webhookIdPathParams = z.object({
+  id: idPathParamsBase(
+    'Webhook id (1-128 chars: alphanumeric plus `.`, `_`, `-`; must start alphanumeric)',
+  ),
+});
+
+// Document list item — mirrors frontend/shared/src/schemas/documents.ts.
+// passthrough() because the originate service projects DocumentRecord
+// fields permissively; structural id/status are load-bearing.
+const DocumentListItemSchema = sharedRegistry.register(
+  'DocumentListItem',
+  z
+    .object({
+      id: z.string(),
+      title: z.string().openapi({
+        description:
+          `The document title. The exact string '${ERASED_MARKER}' is a SENTINEL, not a `
+          + 'filename: it means the title was removed under a GDPR Art. 17 erasure. '
+          + 'The column is NOT NULL, so an erased title holds this marker rather '
+          + 'than null. Treat it as "no title available", never as content.',
+      }),
+      documentType: z.string().optional().nullable().openapi({
+        description:
+          `Caller-supplied classification. The exact string '${ERASED_MARKER}' is the same `
+          + 'GDPR Art. 17 sentinel as on `title` (QA F-2): the column is free text that '
+          + 'nothing sanitises, so it is erased with the subject. The column is NOT NULL, '
+          + 'so an erased row holds the marker rather than null. An erased document will '
+          + 'therefore not match any real type filter — that is intended.',
+      }),
+      status: z.string(),
+      contentHash: z.string().optional().nullable(),
+      createdAt: z.string(),
+      updatedAt: z.string(),
+    })
+    .passthrough()
+    .openapi({
+               // KS-256: generated example (synthesised, masked). Guarded by
+               // `npm run check:openapi` -> check-spec-examples (E1-E7).
+               example: {
+                 id: 'example-id',
+                 title: 'example-title',
+                 status: 'example-status',
+                 createdAt: 'example-createdAt',
+                 updatedAt: 'example-updatedAt',
+               },
+      description: 'A document as returned in list views (projected from DocumentRecord).',
+    }),
+);
+
+const DocumentListResponseSchema = sharedRegistry.register(
+  'DocumentListResponse',
+  z.object({
+    documents: z.array(DocumentListItemSchema),
+    total: z.number().int().nonnegative(),
+    page: z.number().int().positive(),
+    limit: z.number().int().positive(),
+  }).openapi({
+  // KS-256: generated example (synthesised, masked). Guarded by
+  // `npm run check:openapi` -> check-spec-examples (E1-E7).
+    example: {
+    documents: [
+      {
+        id: 'example-id',
+        title: 'example-title',
+        status: 'example-status',
+        createdAt: FX.timestamps.createdAt,
+        updatedAt: FX.timestamps.createdAt,
+      },
+      {
+        id: 'example-id',
+        title: 'example-title',
+        status: 'example-status',
+        createdAt: FX.timestamps.createdAt,
+        updatedAt: FX.timestamps.createdAt,
+      },
+    ],
+    total: 0,
+    page: 1,
+    limit: 1,
+  },
+  }),
+);
+
+const DocumentDetailSchema = sharedRegistry.register(
+  'DocumentDetail',
+  z
+    .object({
+      id: z.string(),
+      // KS-596 Phase B: canonical UUID alongside the legacy id on reads.
+      documentUuid: z.string().uuid().nullable().optional(),
+      type: z.string().optional(),
+      status: z.string(),
+      contentHash: z.string().optional().nullable(),
+      createdAt: z.string(),
+      updatedAt: z.string(),
+      owner: z
+        .object({
+          id: z.string().optional(),
+          name: z.string().optional().nullable(),
+        })
+        .passthrough()
+        .optional()
+        .nullable(),
+      data: z.record(z.string(), z.unknown()).optional().nullable(),
+      // KS-480 §6: creation attribution echo (first-class provenance).
+      // Present only on connector-created documents that carried onBehalfOf;
+      // pseudonymised rows (post-erasure) echo externalRef with null
+      // email/displayName and pseudonymised=true.
+      createdOnBehalfOf: z
+        .object({
+          email: z.string().nullable(),
+          displayName: z.string().nullable(),
+          externalRef: z.string().nullable(),
+          resolvedUserId: z.string().nullable(),
+          pseudonymised: z.boolean(),
+        })
+        .optional(),
+    })
+    .passthrough()
+    .openapi({
+      description: 'Full document including provenance + nested data.',
+      example: {
+        id: 'doc-0000000000000-5eeded0c',
+        type: 'PROPERTY_DEED',
+        status: 'CERTIFIED',
+        contentHash: 'a1b2c3d4e5f60718293a4b5c6d7e8f901a2b3c4d5e6f70819203a4b5c6d7e8f9',
+        createdAt: '2026-04-29T10:14:21.120Z',
+        updatedAt: '2026-04-29T10:14:23.481Z',
+        owner: {
+          // KS-256: was `user_01HC9ZK1ABCDEFGHIJKL`. `verify-spec-examples`
+          // observed 7 of 7 real `data.user.id` values to be UUIDs, so the
+          // ULID-ish form published a format the API never emits. FX.issuer.id
+          // is UUID-shaped and backs no account. Guard rule E8 catches this now.
+          id: FX.issuer.id,
+          name: FX.issuer.displayName,
+        },
+        data: {
+          propertyAddress: '42 Plinth Lane, London EC1A 1BB, UK',
+          titleNumber: 'TGL123456',
+          recipientEmail: FX.holder.email,
+        },
+      },
+    }),
+);
+
+// KS-480 §6: connector-only attribution of the real Platform-S user behind an
+// sk_-key call. JWT callers sending it get 400; a cross-org email gets 403.
+// Stored encrypted off-chain (action_provenance), NEVER anchored on-chain.
+const OnBehalfOfSchema = sharedRegistry.register(
+  'OnBehalfOf',
+  z
+    .object({
+      email: z.string().trim().min(3).max(255).email(),
+      displayName: z.string().trim().min(1).max(255).optional(),
+      externalRef: z.string().trim().min(1).max(128).optional().openapi({
+        description: "The caller's stable user id (Platform S PersonGuid) — survives GDPR pseudonymisation as the attribution id.",
+      }),
+    })
+    .openapi({
+               // KS-256: generated example (synthesised, masked). Guarded by
+               // `npm run check:openapi` -> check-spec-examples (E1-E7).
+               example: {
+                 email: FX.issuer.email,
+               },
+      description:
+        'Connector-only (sk_ key) attribution of the real user the connector acts for. ' +
+        'Interactive (JWT) callers must not send it (400). Resolved tenant-scoped against ' +
+        "the key's own Organisation: same-org K user → per-user attribution; different " +
+        'org → 403; no K user → stored verbatim as provenance. Never creates an account, ' +
+        'never grants auth, never anchored on-chain.',
+    }),
+);
+
+const DocumentCreateRequestSchema = sharedRegistry.register(
+  'DocumentCreateRequest',
+  z
+    .object({
+      title: z.string(),
+      documentType: z.string().optional(),
+      data: z.record(z.string(), z.unknown()).optional(),
+      onBehalfOf: OnBehalfOfSchema.optional(),
+      // KS-596 (architecture P1, Phase A): optional S-supplied identifiers.
+      // KS-663 divergence 2: the runtime guard (documents.ts UUID_V4_RE) rejects
+      // any non-v4 documentUuid with 400, but the generated spec published a bare
+      // `format: uuid`, which every RFC 4122 version satisfies — so a v7 UUID
+      // passed spec validation and 400'd at runtime. `.uuid()` keeps `format:
+      // uuid`; the explicit `pattern` publishes the v4 constraint the code
+      // actually enforces. Case-insensitive `[0-9a-fA-F]` because the runtime
+      // regex uses the /i flag and JSON Schema `pattern` has no flag.
+      // (userUuid / organizationUuid keep bare `format: uuid` on purpose — the
+      // runtime accepts any RFC 4122 version for those; only documentUuid is v4.)
+      documentUuid: z.string().uuid().optional().openapi({
+        pattern: '^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-4[0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}$',
+        description:
+          'Optional caller-supplied registration UUID (v4). Becomes the '
+          + "document's canonical identifier (stored as external_id, which is "
+          + 'UNIQUE). Re-POSTing a seen documentUuid with the SAME contentHash '
+          + 'returns 200 with the existing registration (idempotent retry); '
+          + 'the same documentUuid with DIFFERENT content is 409. When absent, '
+          + 'K mints its legacy id exactly as before.',
+      }),
+      userUuid: z.string().uuid().optional().openapi({
+        description:
+          'Optional caller-supplied acting-user UUID (Platform S resolves it '
+          + 'at login). Accepted and preserved with the registration; not yet '
+          + 'an authorization input.',
+      }),
+      organizationUuid: z.string().uuid().optional().openapi({
+        description:
+          'Optional organization UUID the registration is attributed to. It is '
+          + 'BOUND TO THE ACTING ORGANISATION and must identify it by one of its two '
+          + 'identifiers: its Platform K organization id, or the `externalRef` it was '
+          + 'registered with through register-connector (so a Platform S connector may '
+          + 'send its own Organisation GUID). A value that DIFFERS FROM both is refused '
+          + 'with 403 — it is not silently ignored. The test is identity with the acting '
+          + 'Organisation, not membership: a well-formed UUID belonging to another '
+          + 'Organisation, or to no Organisation at all, is refused too. Either accepted '
+          + 'form is attributed to the acting Organisation by its Platform K id. '
+          + 'A caller with no Organisation of its own is not refused, but its '
+          + 'value cannot be bound and so is not attributed (the column is left '
+          + 'empty; the value you sent is still preserved in the registration '
+          + 'metadata). Omitting the field is unchanged and remains valid — this '
+          + 'is a refusal, not a new requirement. To attribute on behalf of '
+          + 'another party, use `onBehalfOf`, not this field.',
+      }),
+    })
+    .openapi({
+      example: {
+        title: 'Property Deed — 42 Plinth Lane',
+        documentType: 'PROPERTY_DEED',
+        data: {
+          propertyAddress: '42 Plinth Lane, London EC1A 1BB, UK',
+          titleNumber: 'TGL123456',
+          recipientEmail: FX.holder.email,
+        },
+      },
+    }),
+);
+
+// KS-440: POST /api/documents returns a FLAT body, not a `{ document: … }`
+// wrapper. This flat shape is the Platform-S contract — S's
+// CardanoAnchorService.cs reads `{ id, status, contentHash }` off the top
+// level (confirmed) — so the published response documents exactly what the
+// handler emits (routes/documents.ts `res.status(201).json({ id, type,
+// status, contentHash, txHash, createdAt, requiresWalletSignature })`).
+// `txHash` is always present but null until anchoring confirms (the handler's
+// F-DOC-RESP-SHAPE-01 note); `.passthrough()` keeps it forward-compatible.
+const DocumentCreateResponseSchema = sharedRegistry.register(
+  'DocumentCreateResponse',
+  z
+    .object({
+      id: z.string(),
+      // KS-596 Phase B: canonical UUID for the registration — the caller's
+      // documentUuid when one was supplied, else the row's own UUID key.
+      // Both resolve via GET /api/documents/{id}.
+      documentUuid: z.string().uuid(),
+      type: z.string(),
+      status: z.string(),
+      contentHash: z.string(),
+      txHash: z.string().nullable(),
+      createdAt: z.string(),
+      requiresWalletSignature: z.boolean(),
+    })
+    .passthrough().openapi({
+  // KS-256: generated example (synthesised, masked). Guarded by
+  // `npm run check:openapi` -> check-spec-examples (E1-E7).
+    example: {
+    id: FX.document.id,
+    // KS-596 Phase B made documentUuid required on this schema; the KS-256
+    // example was written before that and omitted it, which failed tsc in the
+    // originate image after the develop merge. See FX.document.uuid.
+    documentUuid: FX.document.uuid,
+    type: 'example-type',
+    status: 'example-status',
+    contentHash: FX.document.contentHash,
+    txHash: null,
+    createdAt: FX.timestamps.createdAt,
+    requiresWalletSignature: true,
+  },
+  }),
+);
+
+// Verify shapes — mirrors frontend/shared/src/schemas/verify.ts.
+// `partial()` on checks supports BOTH the originate (production) shape AND
+// the legacy api-gateway-mock shape, so older clients (Gmail addon, third-
+// party verifier scripts) keep parsing cleanly during the cutover.
+const VerifyChecksSchema = sharedRegistry.register(
+  'VerifyChecks',
+  z
+    .object({
+      // Originate (production) shape:
+      documentExists: z.boolean(),
+      hashValid: z.boolean(),
+      // KS-563: `isCertified` means an issuer CERTIFIED this document
+      // (`status === 'certified'`) — nothing else. It was previously true for
+      // merely-anchored and signed documents too, so upload-only documents
+      // reported a certification nobody performed.
+      isCertified: z.boolean().openapi({
+        description:
+          'True only when an issuer certified this document. A document that '
+          + 'was merely originated and anchored is NOT certified — read '
+          + '`isAnchored` for chain presence and `certification` for the '
+          + 'certification act itself. KS-584: the evidence is read from the '
+          + 'whole same-hash registration set (the certify flow records the '
+          + 'act on a derived row), not only the selected row’s status.',
+      }),
+      // KS-563: chain presence, distinct from certification. KS-522 rules
+      // apply — a simulated anchor (tx_sim_/mock_tx_) is never `isAnchored`.
+      isAnchored: z.boolean().openapi({
+        description:
+          'True when the document has a real on-chain anchor. Simulated anchors '
+          + '(`simulated: true`) never set this.',
+      }),
+      isRevoked: z.boolean(),
+      integrityVerified: z.boolean().openapi({
+        description:
+          'Hash matched, document is registry-valid (certified, anchored or signed) '
+          + 'and not revoked. Deliberately BROADER than `isCertified` — it does not '
+          + 'assert that anyone certified the document.',
+      }),
+      // Legacy / api-gateway-mock shape:
+      exists: z.boolean(),
+      notRevoked: z.boolean(),
+      hasSignatures: z.boolean(),
+      blockchainAnchored: z.boolean(),
+    })
+    .partial().openapi({
+  // KS-256: generated example (synthesised, masked). Guarded by
+  // `npm run check:openapi` -> check-spec-examples (E1-E7).
+    example: {
+    documentExists: true,
+    hashValid: true,
+    isCertified: true,
+    isRevoked: true,
+    integrityVerified: true,
+    exists: true,
+    notRevoked: true,
+    hasSignatures: true,
+    blockchainAnchored: true,
+  },
+  }),
+);
+
+// KS-563: the certification act, distinct from anchoring. Emitted ONLY when an
+// issuer certified the document, so consumers can test presence rather than
+// inferring certification from a status or an anchor.
+const VerifyCertificationSchema = sharedRegistry.register(
+  'VerifyCertification',
+  z
+    .object({
+      certificationId: z.string().nullable().openapi({ description: 'Id of the certification that certified this document.' }),
+      certificationType: z.string().nullable().openapi({ description: 'Certification type recorded at issue time.' }),
+      certifiedAt: z.string().nullable().openapi({ description: 'UTC ISO-8601 timestamp of the certification act.' }),
+      certifiedBy: z.string().nullable().openapi({ description: 'Display name of the certifying issuer.' }),
+      certifierOrganizationId: z.string().nullable().openapi({ description: 'Organisation id of the certifying issuer.' }),
+    })
+    .passthrough()
+    .openapi({
+      description:
+        'The certification act. Present ONLY when an issuer certified the document — '
+        + 'its absence means no certification happened (KS-563). Fields may be null '
+        + 'for certifications issued before a given field was recorded.',
+    }),
+);
+
+const VerifyResponseSchema = sharedRegistry.register(
+  'VerifyResponse',
+  z
+    .object({
+      verified: z.boolean(),
+      documentId: z.string().optional(),
+      certificationId: z.string().optional(),
+      status: z.string().optional(),
+      revoked: z.boolean().optional(),
+      hash: z.string().optional(),
+      matchedBy: z.string().optional(),
+      strategy: z.string().optional(),
+      source: z.string().optional(),
+      reason: z.string().optional(),
+      error: z.string().optional(),
+      code: z.string().optional(),
+      verifiedAt: z.string().optional(),
+      verificationConfidence: z.string().optional(),
+      checks: VerifyChecksSchema.optional(),
+      onChainMetadata: z.unknown().optional(),
+      requestedFields: z.array(z.string()).optional(),
+      purpose: z.string().optional(),
+      // KS-522: honest labelling of simulated anchors. When present and true,
+      // the document's anchor is a simulation (tx_sim_/mock_tx_ placeholder —
+      // NO Cardano transaction exists): `blockchain.txHash` is null, the
+      // placeholder moves to `blockchain.simulatedTxRef`, and no relying party
+      // should treat the result as on-chain proof.
+      simulated: z.boolean().optional(),
+      // KS-563: the certification act. PRESENT only when an issuer actually
+      // certified the document; its ABSENCE is the honest signal that no
+      // certification happened (a merely-anchored document has no such object).
+      certification: VerifyCertificationSchema.optional(),
+    })
+    .passthrough()
+    .openapi({
+      description:
+        'Verification envelope. Load-bearing field is `verified`; everything else is ' +
+        'rendered when present. Originate is the single source of truth across all ' +
+        'envs after the 2026-04-29 verifier consolidation. Note `verified` means ' +
+        '"registry-valid, hash intact, not revoked" — it does NOT mean certified; ' +
+        'read `checks.isCertified` / `certification` for that (KS-563).',
+      example: {
+        verified: true,
+        documentId: 'doc-0000000000000-5eeded0c',
+        status: 'CERTIFIED',
+        revoked: false,
+        hash: 'a1b2c3d4e5f60718293a4b5c6d7e8f901a2b3c4d5e6f70819203a4b5c6d7e8f9',
+        matchedBy: 'documentId',
+        strategy: 'chain-first',
+        source: 'cardano-preprod',
+        verifiedAt: '2026-04-29T10:20:00.000Z',
+        verificationConfidence: 'high',
+        checks: {
+          documentExists: true,
+          hashValid: true,
+          isCertified: true,
+          isAnchored: true,
+          isRevoked: false,
+          integrityVerified: true,
+        },
+        // KS-256: ids drawn from FX, not written inline. The literals here
+        // before were a hand-written cert id and a random UUID, which guard
+        // rule E8 fails — an off-fixture identifier may name a live account.
+        certification: {
+          certificationId: FX.certification.id,
+          certificationType: FX.certification.type,
+          certifiedAt: '2026-04-29T10:19:00.000Z',
+          certifiedBy: 'Oxford University',
+          certifierOrganizationId: FX.certification.organizationId,
+        },
+      },
+    }),
+);
+
+const VerifyRequestSchema = sharedRegistry.register(
+  'VerifyRequest',
+  z
+    .object({
+      documentId: z.string().optional(),
+      hash: z.string().optional(),
+      title: z.string().optional(),
+      contentHash: z.string().optional(),
+    })
+    .passthrough()
+    .openapi({
+               // KS-256: generated example (synthesised, masked). Guarded by
+               // `npm run check:openapi` -> check-spec-examples (E1-E7).
+               example: {
+                 documentId: FX.document.id,
+                 hash: 'example-hash',
+                 title: 'example-title',
+                 contentHash: '<contentHash>',
+               },
+      description:
+        'Verification request. Provide ONE OR MORE of documentId, hash, title, contentHash. ' +
+        'The verifier tries chain-first, then originate-id lookup, then hash/title strategies.',
+    }),
+);
+
+// -----------------------------------------------------------------------------
+// KS-584 P3 — the /v2 verify-list contract
+// -----------------------------------------------------------------------------
+// v1 collapses the same-hash registration set to ONE row; v2 returns every
+// registration as its own match, each standing on its own evidence. Anchor
+// truth is caller-independent: the anchoring chain-fact read is pre-auth and
+// no caller bearer is forwarded, so anonymous and authenticated callers get
+// identical anchor facts.
+
+const V2VerifyRequestSchema = sharedRegistry.register(
+  'V2VerifyRequest',
+  z
+    .object({
+      hash: z.string().optional().openapi({ description: 'SHA-256 content hash, with or without the sha256: prefix.' }),
+      contentHash: z.string().optional().openapi({ description: 'Alias of hash.' }),
+      providedHash: z.string().optional().openapi({ description: 'Alias of hash.' }),
+      documentHash: z.string().optional().openapi({ description: 'Alias of hash.' }),
+      documentId: z.string().optional().openapi({
+        description:
+          'Registration identifier — the S-supplied documentUuid (KS-596) or the platform '
+          + 'document id. Used only when no hash is supplied; answers existence, not integrity.',
+      }),
+      documentData: z.record(z.string(), z.unknown()).optional().openapi({
+        description: 'Raw JSON document content to hash server-side when no hash is supplied.',
+      }),
+    })
+    .passthrough()
+    .openapi({
+      description:
+        'v2 verification request. Provide a content hash (strongest — proves integrity), '
+        + 'documentData to hash server-side, or a documentId (existence only).',
+    }),
+);
+
+const V2VerifyMatchSchema = sharedRegistry.register(
+  'V2VerifyMatch',
+  z
+    .object({
+      documentId: z.string().nullable().openapi({ description: 'Legacy identifier (external_id, else pkey UUID) — same value v1 reports.' }),
+      documentUuid: z.string().nullable().openapi({
+        description:
+          'UUID-primary identifier (KS-596): the S-supplied documentUuid when registration '
+          + 'carried one, else the platform pkey UUID. Resolvable via GET /api/documents/{id}.',
+      }),
+      title: z.string().nullable().openapi({
+        description:
+          `As on DocumentListItem: the exact string '${ERASED_MARKER}' is the GDPR Art. 17 `
+          + 'erasure sentinel, not a filename.',
+      }),
+      documentType: z.string().nullable().openapi({
+        description:
+          `As on DocumentListItem: the exact string '${ERASED_MARKER}' is the GDPR Art. 17 `
+          + 'erasure sentinel, not a classification.',
+      }),
+      status: z.string(),
+      contentHash: z.string().nullable(),
+      createdAt: z.string().nullable(),
+      certifiedAt: z.string().nullable(),
+      issuer: z.string().nullable(),
+      blockchain: z.unknown().nullable().openapi({
+        description:
+          'The anchor record, through the KS-522 honesty rules: a simulated anchor makes no '
+          + 'on-chain claim (txHash null, simulated true). Healed against the chain index when '
+          + 'the stored state is stale-pending — identically for every caller.',
+      }),
+      simulated: z.boolean().optional(),
+      certification: VerifyCertificationSchema.optional().openapi({
+        description:
+          'The certification act recorded ON THIS registration (KS-563). No sibling smear: '
+          + 'in the list contract the certification-act row appears as its own match.',
+      }),
+      fieldsWithheld: z.boolean().optional().openapi({
+        description:
+          'True when tenant-owned naming (title, issuer, certifiedBy) was withheld because the '
+          + 'registration belongs to a different tenant than the caller (KS-584 scoping).',
+      }),
+      checks: VerifyChecksSchema.optional(),
+    })
+    .passthrough()
+    .openapi({
+      description:
+        'One registration of the supplied bytes, presented through the same honesty rules v1 '
+        + 'applies to its selected row. Matches are ordered: certified (most recent act first), '
+        + 'then real confirmed on-chain tx, then in-flight tx, then oldest-first — so matches[0] '
+        + 'is v1’s answer for the same hash.',
+    }),
+);
+
+const V2VerifyResponseSchema = sharedRegistry.register(
+  'V2VerifyResponse',
+  z
+    .object({
+      hash: z.string().nullable().openapi({ description: 'Canonical sha256:-prefixed hash the lookup ran on; null for documentId-only lookups.' }),
+      count: z.number().int(),
+      matches: z.array(V2VerifyMatchSchema),
+      verifiedAt: z.string(),
+    })
+    .passthrough()
+    .openapi({
+      description:
+        'The verify-list envelope. count 0 with an empty matches array is the honest '
+        + '"never registered" answer (still HTTP 200).',
+      example: {
+        hash: 'sha256:a1b2c3d4e5f60718293a4b5c6d7e8f901a2b3c4d5e6f70819203a4b5c6d7e8f9',
+        count: 2,
+        matches: [
+          {
+            documentId: 'doc-0000000000000-5eeded0c',
+            documentUuid: '2f1c8a9e-6d4b-4f7a-9c2e-8b5d3a1f7e60',
+            title: 'Degree Certificate',
+            documentType: 'certificate',
+            status: 'anchored',
+            contentHash: 'sha256:a1b2c3d4e5f60718293a4b5c6d7e8f901a2b3c4d5e6f70819203a4b5c6d7e8f9',
+            createdAt: '2026-04-29T10:15:00.000Z',
+            certifiedAt: null,
+            issuer: 'Oxford University',
+            blockchain: { status: 'confirmed', txHash: 'b3c4d5e6f60718293a4b5c6d7e8f901a2b3c4d5e6f70819203a4b5c6d7e8f9a1', network: 'preview' },
+            checks: { documentExists: true, hashValid: true, isCertified: false, isAnchored: true, isRevoked: false, integrityVerified: true },
+          },
+          {
+            documentId: 'doc-0000000000001-8a1b2c3d',
+            documentUuid: '7e60d3a1-f7e6-4f7a-9c2e-8b5d2f1c8a9e',
+            title: 'Degree Certificate',
+            documentType: 'certificate',
+            status: 'signed',
+            contentHash: 'sha256:a1b2c3d4e5f60718293a4b5c6d7e8f901a2b3c4d5e6f70819203a4b5c6d7e8f9',
+            createdAt: '2026-04-29T10:19:00.000Z',
+            certifiedAt: '2026-04-29T10:19:00.000Z',
+            issuer: 'Oxford University',
+            blockchain: null,
+            certification: {
+              certificationId: 'cert-0000000000000-1a2b3c4d',
+              certificationType: 'AUTHENTICITY',
+              certifiedAt: '2026-04-29T10:19:00.000Z',
+              certifiedBy: 'Oxford University',
+              certifierOrganizationId: '2f1c8a9e-6d4b-4f7a-9c2e-8b5d3a1f7e60',
+            },
+            checks: { documentExists: true, hashValid: true, isCertified: true, isAnchored: false, isRevoked: false, integrityVerified: true },
+          },
+        ],
+        verifiedAt: '2026-08-12T00:30:00.000Z',
+      },
+    }),
+);
+
+const CertificationSchema = sharedRegistry.register(
+  'Certification',
+  z
+    .object({
+      id: z.string(),
+      documentId: z.string().optional(),
+      issuerId: z.string().optional(),
+      status: z.string(),
+      issuedAt: z.string().optional(),
+      revokedAt: z.string().nullable().optional(),
+      contentHash: z.string().optional(),
+    })
+    .passthrough()
+    .openapi({
+               // KS-256: generated example (synthesised, masked). Guarded by
+               // `npm run check:openapi` -> check-spec-examples (E1-E7).
+               example: {
+                 id: '00000000-0000-4000-8000-0000000000ff',
+                 status: 'example-status',
+               },
+      description: 'A certification record issued against a document.',
+    }),
+);
+
+const CertificationIssueRequestSchema = sharedRegistry.register(
+  'CertificationIssueRequest',
+  z
+    .object({
+      // KS-430: the runtime validator (routes/certifications.ts) requires
+      // `type` (this enum) and `data` (an object) — the certification's core
+      // payload — and treats `documentId` as OPTIONAL (used only by the
+      // pre-lineage certify path). The published schema had drifted to require
+      // `documentId` and omit `type`/`data`, so a spec-minimal `{documentId}`
+      // body earned a 400. Declare the real contract: `type`/`data` required,
+      // `documentId` optional. Enum mirrors the runtime's allowed list so a
+      // spec-valid `type` is a runtime-valid `type` (not a stricter narrowing
+      // of an existing spec field — the field was previously absent).
+      type: z
+        .enum([
+          'educational_degree',
+          'employment_certificate',
+          'professional_certification',
+          'employment_reference',
+          'identity_document',
+          'certificate',
+          'verification_certificate',
+          'signed_document',
+          'DOCUMENT',
+        ])
+        .openapi({ description: 'Certification type. Required by the certify route.' }),
+      data: z.record(z.string(), z.unknown()).openapi({
+        description:
+          'Certification payload object (required). Free-form issuer data. ' +
+          'KS-475 (§4): values must be storable — payloads Postgres cannot ' +
+          'persist (e.g. NUL escape sequences, over-length or uncastable ' +
+          'values) answer 400 BAD_REQUEST "Certification payload contains ' +
+          'values that cannot be stored". The rule is a storage boundary, ' +
+          'not a fixed field constraint, so it cannot be expressed as a ' +
+          'schema pattern. KS-543: this object is CONTENT-HASHED into the ' +
+          'certification (immutable once issued), so do not place personal ' +
+          'data in it — the reserved identity keys `actorName`, `actorEmail` ' +
+          'and `onBehalfOf` are silently STRIPPED before hashing (use the ' +
+          'top-level onBehalfOf field for attribution instead).',
+      }),
+      documentId: z.string().optional(),
+      metadata: z.record(z.string(), z.unknown()).optional(),
+      onBehalfOf: OnBehalfOfSchema.optional(),
+      // KS-70: optional lifecycle parent. When set, the certify route
+      // creates a NEW document linked via parent_document_id (a child
+      // node in the lifecycle chain) and rejects with 422 LINEAGE_CYCLE
+      // if the proposed ancestor chain would loop. See SCOPES.md and the
+      // verify endpoint's lineage response for how this is surfaced.
+      parentDocumentId: z.string().optional().openapi({
+        description:
+          'External id of the predecessor document. When set, the issued ' +
+          'certification produces a new linked document (same external_id ' +
+          'as the certification) with `parent_document_id` pointing at this. ' +
+          'Cycles are rejected with 422 LINEAGE_CYCLE before any anchor or ' +
+          'write happens. Walk capped at MAX_LINEAGE_DEPTH (default 12).',
+      }),
+    })
+    .passthrough().openapi({
+  // KS-256: generated example (synthesised, masked). Guarded by
+  // `npm run check:openapi` -> check-spec-examples (E1-E7).
+    example: {
+    type: 'educational_degree',
+    data: {},
+  },
+  }),
+);
+
+const CertificationListResponseSchema = sharedRegistry.register(
+  'CertificationListResponse',
+  z.object({
+    certifications: z.array(CertificationSchema),
+    total: z.number().int().nonnegative().optional(),
+  }).openapi({
+  // KS-256: generated example (synthesised, masked). Guarded by
+  // `npm run check:openapi` -> check-spec-examples (E1-E7).
+    example: {
+    certifications: [
+      {
+        id: '00000000-0000-4000-8000-0000000000ff',
+        status: 'example-status',
+      },
+      {
+        id: '00000000-0000-4000-8000-0000000000ff',
+        status: 'example-status',
+      },
+    ],
+  },
+  }),
+);
+
+const SuccessEnvelopeSchema = sharedRegistry.register(
+  'SuccessEnvelope',
+  z
+    .object({
+      success: z.boolean(),
+      message: z.string().optional(),
+    })
+    .passthrough().openapi({
+  // KS-256: generated example (synthesised, masked). Guarded by
+  // `npm run check:openapi` -> check-spec-examples (E1-E7).
+    example: {
+    success: true,
+  },
+  }),
+);
+
+// -----------------------------------------------------------------------------
+// ROUTES — /api/documents
+// -----------------------------------------------------------------------------
+
+sharedRegistry.registerPath({
+  method: 'get',
+  path: '/api/documents',
+  tags: ['Documents'],
+  summary: 'List documents',
+  description: 'Paginated list of documents owned by the authenticated user.',
+  security: [{ bearerAuth: [] }],
+  responses: {
+    400: commonErrorResponses[400],
+    200: {
+      description: 'Document list',
+      content: {
+        'application/json': { schema: DocumentListResponseSchema },
+      },
+    },
+    401: { ...commonErrorResponses[401], description: 'Missing or invalid Bearer token' },
+    403: commonErrorResponses[403],
+    429: commonErrorResponses[429],
+    500: commonErrorResponses[500],
+    404: commonErrorResponses[404],
+    502: commonErrorResponses[502],
+    503: commonErrorResponses[503],
+  },
+});
+
+sharedRegistry.registerPath({
+  method: 'post',
+  path: '/api/documents',
+  tags: ['Documents'],
+  summary: 'Create a document',
+  description:
+    'Creates a new document owned by the authenticated user. Triggers an ' +
+    'asynchronous state-thread NFT mint via the anchoring service (F6 Sprint 2).',
+  security: [{ bearerAuth: [] }],
+  ...rateLimit('global'),
+  ...sla('write'),
+  request: {
+    // KS-444 (KS-283 precedent): the runtime 400s on a missing title, so an
+    // absent body is a schema violation (negative), never a positive case.
+    body: {
+      required: true,
+      content: {
+        'application/json': { schema: DocumentCreateRequestSchema },
+      },
+    },
+  },
+  responses: {
+    201: {
+      description: 'Document created',
+      // KS-154: 201 carries a Location header pointing at the canonical
+      // resource URL (RFC 7231 §6.3.2). Clients can follow it without
+      // parsing the body.
+      headers: {
+        Location: {
+          description: 'Canonical URL of the created document, e.g. `/api/documents/{id}`.',
+          schema: { type: 'string' },
+        },
+      },
+      content: {
+        'application/json': { schema: DocumentCreateResponseSchema },
+      },
+    },
+    // KS-596 ruled idempotency: re-POST of a seen documentUuid with the SAME
+    // contentHash returns the existing registration — a retry can never mint
+    // a phantom second document.
+    200: {
+      description:
+        'Idempotent replay: the supplied documentUuid is already registered '
+        + 'with the same contentHash; the existing registration is returned '
+        + 'unchanged (no new document, no new anchor).',
+      headers: {
+        Location: {
+          description: 'Canonical URL of the existing document.',
+          schema: { type: 'string' },
+        },
+      },
+      content: {
+        'application/json': { schema: DocumentCreateResponseSchema },
+      },
+    },
+    400: commonErrorResponses[400],
+    401: { ...commonErrorResponses[401], description: 'Missing or invalid Bearer token' },
+    // KS-597: the generic 403 named no condition, while the bind introduced a
+    // refusal an integrator can hit with a well-formed body. Name it here or it
+    // is not in the contract at all.
+    403: {
+      ...commonErrorResponses[403],
+      description:
+        'The caller is authenticated but not permitted. This operation returns 403 for '
+        + 'SEVERAL conditions and the list below is NOT exhaustive — always read '
+        + '`error.code` and `error.message` rather than inferring the cause from this text. '
+        + 'Known conditions: the role or `documents:write` scope does not permit document '
+        + 'creation; the supplied `organizationUuid` DIFFERS FROM both identifiers of the '
+        + 'ACTING Organisation — its organization id and the `externalRef` it was registered '
+        + 'with (the test is identity, not membership — a well-formed UUID belonging to '
+        + 'another Organisation or to no Organisation is refused too); an `onBehalfOf` subject in a '
+        + 'different Organisation than the key; and gateway enforcement, which may return '
+        + '`DOC_TYPE_DISABLED`, `INSUFFICIENT_VERIFICATION_LEVEL`, `MFA_REQUIRED` or '
+        + '`AUTH_PROVIDER_NOT_ALLOWED`.',
+    },
+    // KS-596: same documentUuid with DIFFERENT content — surfaces an S-side
+    // duplicate-UUID bug instead of masking it (S-pack §3.2, ruling b).
+    409: {
+      ...commonErrorResponses[409],
+      description: 'documentUuid is already registered with different content',
+    },
+    429: commonErrorResponses[429],
+    500: commonErrorResponses[500],
+    404: commonErrorResponses[404],
+    502: commonErrorResponses[502],
+    503: commonErrorResponses[503],
+  },
+});
+
+sharedRegistry.registerPath({
+  method: 'get',
+  path: '/api/documents/{id}',
+  tags: ['Documents'],
+  summary: 'Get document detail',
+  security: [{ bearerAuth: [] }],
+  request: {
+    params: documentIdPathParams,
+  },
+  responses: {
+    400: commonErrorResponses[400],
+    200: {
+      description: 'Document detail',
+      content: {
+        'application/json': { schema: DocumentDetailSchema },
+      },
+    },
+    401: { ...commonErrorResponses[401], description: 'Missing or invalid Bearer token' },
+    404: { ...commonErrorResponses[404], description: 'Document not found' },
+    403: commonErrorResponses[403],
+    429: commonErrorResponses[429],
+    500: commonErrorResponses[500],
+    502: commonErrorResponses[502],
+    503: commonErrorResponses[503],
+  },
+});
+
+sharedRegistry.registerPath({
+  method: 'post',
+  path: '/api/documents/{id}/anchor',
+  tags: ['Documents', 'Anchoring'],
+  summary: 'Anchor a document on-chain',
+  description: 'Submits the document hash to Cardano via the anchoring service.',
+  security: [{ bearerAuth: [] }],
+  ...rateLimit('global'),
+  ...sla('blockchain'),
+  request: {
+    params: documentIdPathParams,
+  },
+  responses: {
+    400: commonErrorResponses[400],
+    202: {
+      // KS-154: 202 Accepted — the anchor tx has been submitted but
+      // on-chain confirmation can take ~30-60s on Cardano. Clients should
+      // poll GET /api/documents/{id} or the verification endpoint to
+      // observe confirmation. The dev-fallback path (anchoring service
+      // unreachable in non-production) returns the same 202 with
+      // `confidence: 'pending-onchain'` and a null `transactionHash`.
+      description: 'Anchor submitted — confirmation pending on-chain',
+      content: { 'application/json': { schema: SuccessEnvelopeSchema } },
+    },
+    401: { ...commonErrorResponses[401], description: 'Missing or invalid Bearer token' },
+    404: { ...commonErrorResponses[404], description: 'Document not found' },
+    403: commonErrorResponses[403],
+    429: commonErrorResponses[429],
+    500: commonErrorResponses[500],
+    502: commonErrorResponses[502],
+    503: commonErrorResponses[503],
+  },
+});
+
+sharedRegistry.registerPath({
+  method: 'post',
+  path: '/api/documents/{id}/verify',
+  tags: ['Documents', 'Verification'],
+  summary: '[DEPRECATED] Verify a specific document by id — use /api/verification/verify',
+  deprecated: true,
+  description:
+    'KS-48: **DEPRECATED**. Use `POST /api/verification/verify` instead — ' +
+    'it resolves cross-tenant via the platform document registry and is ' +
+    'the canonical verify path used by the verifier portal, the SSD ' +
+    'connector, and any cross-environment workflow. This endpoint is ' +
+    'owner-scoped (the doc must be in the caller\'s tenant) and a verifier ' +
+    'role calling it gets a confusing 404 for docs it doesn\'t own.\\n\\n' +
+    'Every response carries RFC 8594 headers:\\n' +
+    '- `Deprecation: true`\\n' +
+    '- `Sunset: Thu, 14 Aug 2026 00:00:00 GMT`\\n' +
+    '- `Link: </api/verification/verify>; rel="successor-version"`\\n\\n' +
+    'Removal: after 2026-08-14 (or earlier if telemetry shows usage has dropped).',
+  security: [{ bearerAuth: [] }],
+  ...rateLimit('global'),
+  ...sla('read'),
+  request: {
+    params: documentIdPathParams,
+  },
+  responses: {
+    400: commonErrorResponses[400],
+    200: {
+      description: 'Verification result',
+      content: { 'application/json': { schema: VerifyResponseSchema } },
+    },
+    401: commonErrorResponses[401],
+    // KS-144: a not-found document still returns a verification *result*
+    // (`{ verified:false, checks, ... }`), not the standard error envelope.
+    404: {
+      description: 'Document not found — returns a verification result with verified:false.',
+      content: { 'application/json': { schema: VerifyResponseSchema } },
+    },
+    403: commonErrorResponses[403],
+    429: commonErrorResponses[429],
+    500: commonErrorResponses[500],
+    502: commonErrorResponses[502],
+    503: commonErrorResponses[503],
+  },
+});
+
+sharedRegistry.registerPath({
+  method: 'post',
+  path: '/api/documents/{id}/version',
+  tags: ['Documents'],
+  summary: 'VERSION — record a new versioned document for an issuer-side action (KS-86; Option B action 2 of 3)',
+  description:
+    'KS-86 (2026-05-15): records a new versioned document with ' +
+    '`parent_document_id` pointing at the source. Used for any byte-changing ' +
+    'action the issuer has already performed externally — typically a ' +
+    'watermark, or an X.509 sign-and-sidecar. Platform K is a hash-only ' +
+    'registry; the actual file bytes live with the issuer.\n\n' +
+    'Body: `{action, newContentHash, metadata?, title?}`. `action` is one ' +
+    "of `watermark` | `sign-cert`. `newContentHash` is a sha256 hex digest " +
+    '(64 lowercase hex chars, optional `sha256:` prefix). `metadata` is ' +
+    "free-form issuer metadata folded into the new doc's data blob.\n\n" +
+    'Anchoring is intentionally NOT triggered here — call `POST ' +
+    '/api/documents/{newId}/anchor` separately when ready. Keeps Cardano ' +
+    'cost decisions in the issuer\'s hands per the KS-70 model.',
+  security: [{ bearerAuth: [] }],
+  request: {
+    params: documentIdPathParams,
+    // KS-444 (KS-283 precedent): the runtime 400s on missing action/newContentHash.
+    body: {
+      required: true,
+      content: {
+        'application/json': {
+          schema: z.object({
+            action: z.enum(['watermark', 'sign-cert']).openapi({
+              description:
+                'Which Option B lifecycle action produced these new bytes. Locked enum — new verbs land via a deliberate ticket.',
+            }),
+            // KS-444: the digest grammar was described in prose but not
+            // declared, so a plain string like "0" was spec-legal yet earned
+            // the runtime's 400 (CONTENT_HASH_RE in routes/documents.ts).
+            // Publishing the pattern documents the field's real vocabulary —
+            // this is a hash registry; a non-sha256 value is meaningless.
+            // Case-insensitive hex: the runtime lowercases before checking.
+            newContentHash: z.string().regex(/^(sha256:)?[0-9a-fA-F]{64}$/).openapi({
+              description:
+                'Sha256 hex digest of the new bytes. Optional `sha256:` prefix accepted (and stripped); 64 hex chars required after the prefix (normalised to lowercase server-side).',
+            }),
+            metadata: z.record(z.string(), z.unknown()).optional().openapi({
+              description:
+                'Free-form issuer metadata folded into the new document\'s data blob. ' +
+                'Recommended shape: `{watermarkText, watermarkPosition}` for `watermark`; ' +
+                '`{signedBy, certThumbprint, sidecarUrl}` for `sign-cert`.',
+            }),
+            title: z.string().optional().openapi({
+              description:
+                'Optional title override for the new version. Defaults to "<source title> (watermarked)" / "<source title> (signed)".',
+            }),
+            onBehalfOf: OnBehalfOfSchema.optional(),
+          }),
+        },
+      },
+    },
+  },
+  responses: {
+    201: {
+      description: 'New versioned document created',
+      // KS-515: the handler returns `{ document: {...} }` — no success
+      // envelope. Shape from routes/documents.ts POST /:id/version.
+      content: {
+        'application/json': {
+          schema: z.object({
+            document: z
+              .object({
+                id: z.string(),
+                parentDocumentId: z.string(),
+                type: z.string(),
+                status: z.literal('draft'),
+                contentHash: z.string(),
+                action: z.enum(['watermark', 'sign-cert']),
+                title: z.string(),
+                versionedAt: z.string(),
+                anchored: z.literal(false),
+              })
+              .passthrough(),
+          }),
+        },
+      },
+    },
+    400: commonErrorResponses[400],
+    401: { ...commonErrorResponses[401], description: 'Missing or invalid Bearer token' },
+    403: commonErrorResponses[403],
+    404: { ...commonErrorResponses[404], description: 'Source document not found in this tenant' },
+    422: {
+      ...commonErrorResponses[400],
+      description:
+        'KS-70 LINEAGE_CYCLE — the source document\'s parent chain already references the new id (corrupted parent chain).',
+    },
+    429: commonErrorResponses[429],
+    500: commonErrorResponses[500],
+    502: commonErrorResponses[502],
+    503: commonErrorResponses[503],
+  },
+});
+
+sharedRegistry.registerPath({
+  method: 'post',
+  path: '/api/documents/{id}/sign-cert',
+  tags: ['Documents'],
+  summary: 'SIGN — issuer-cert sign producing an out-of-band .sig.json envelope (KS-83 PR 3)',
+  description:
+    'KS-83 PR 3 (2026-05-17): active X.509 signing path for Platform K. ' +
+    'The source document\'s bytes stay untouched (KS-21 Q3 v1: out-of-band ' +
+    'JSON envelope, not embedded). Flow:\n\n' +
+    '  1. Resolve source doc in caller\'s tenant.\n' +
+    '  2. Forward to auth-service `POST /api/issuer-certs/sign` with ' +
+    '     source.contentHash (caller\'s Bearer token rides along so the ' +
+    '     RBAC there applies — caller needs `issuer-certs:sign` scope OR ' +
+    '     ORG_ADMIN+ role).\n' +
+    '  3. Mint a new versioned doc (parent_document_id = source) with the ' +
+    '     signature envelope in its `data.sigJson` blob. The new doc\'s ' +
+    '     contentHash equals the source\'s — bytes unchanged.\n' +
+    '  4. Return new doc + envelope inline + sidecar URL.\n\n' +
+    'Anchoring intentionally NOT auto-triggered — caller hits ' +
+    '`POST /api/documents/{newId}/anchor` separately when ready.\n\n' +
+    'Why a dedicated endpoint (vs `POST /version action=\'sign-cert\'`): ' +
+    'this path actively uses K\'s stored cert; /version is passive ' +
+    '(record what the issuer did externally). Different concern.',
+  security: [{ bearerAuth: [] }],
+  request: {
+    params: documentIdPathParams,
+    body: {
+      content: {
+        'application/json': {
+          schema: z.object({
+            metadata: z.record(z.string(), z.unknown()).optional().openapi({
+              description: 'Free-form issuer metadata folded into the new doc\'s data blob.',
+            }),
+            title: z.string().optional().openapi({
+              description: 'Optional title override. Defaults to "<source title> (signed)".',
+            }),
+            certId: z.string().uuid().optional().openapi({
+              description: 'Optional cert id override (default: tenant\'s most recently uploaded active cert).',
+            }),
+          }),
+        },
+      },
+    },
+  },
+  responses: {
+    201: {
+      description: 'Signed — new versioned doc + .sig.json envelope inline + sidecar URL',
+      content: { 'application/json': { schema: SuccessEnvelopeSchema } },
+    },
+    400: commonErrorResponses[400],
+    401: { ...commonErrorResponses[401], description: 'Missing or invalid Bearer token' },
+    403: {
+      ...commonErrorResponses[403],
+      description: 'FORBIDDEN (no documents:write) or CERT_SIGN_FORBIDDEN (caller has documents:write but not issuer-certs:sign — request the scope).',
+    },
+    404: { ...commonErrorResponses[404], description: 'Source document not found in this tenant' },
+    409: {
+      ...commonErrorResponses[400],
+      description: 'NO_ACTIVE_CERT (upload one via POST /api/issuer-certs first) or CERT_NOT_ACTIVE (current cert is revoked/expired).',
+    },
+    422: {
+      ...commonErrorResponses[400],
+      description: 'LINEAGE_CYCLE (source parent chain already references the new id — corrupted chain).',
+    },
+    429: commonErrorResponses[429],
+    500: commonErrorResponses[500],
+    502: { ...commonErrorResponses[502], description: 'Cert sign upstream (auth-service) unreachable or returned 5xx.' },
+    503: commonErrorResponses[503],
+  },
+});
+
+sharedRegistry.registerPath({
+  method: 'post',
+  path: '/api/documents/{id}/sign-wallet',
+  tags: ['Documents'],
+  summary: 'SIGN — detached Cardano wallet signature, server-verified (KS-278)',
+  description:
+    'KS-278 (KS-274 decision): the `sign` verb split into `sign-cert` (X.509) ' +
+    'and `sign-wallet` (Cardano wallet). The caller signs the source ' +
+    'document\'s `contentHash` with their wallet (CIP-30 `signData`) and ' +
+    'submits `{walletAddress, signature, key}`. The signature is **detached** ' +
+    '(bytes unchanged), so this mints a new versioned doc whose contentHash ' +
+    'EQUALS the source\'s, carrying the wallet-signature envelope in ' +
+    '`data.sigWallet`.\n\n' +
+    'K **verifies the signature server-side** (Ed25519 over the COSE ' +
+    'Sig_structure1, RFC 9052) against the source\'s contentHash BEFORE ' +
+    'minting — an invalid signature is rejected (400 INVALID_WALLET_SIGNATURE), ' +
+    'never recorded or anchored. Anchoring is NOT auto-triggered — call ' +
+    '`POST /api/documents/{newId}/anchor` separately when ready.',
+  security: [{ bearerAuth: [] }],
+  request: {
+    params: documentIdPathParams,
+    // KS-444 (KS-283 precedent): the runtime 400s on missing walletAddress/signature/key.
+    body: {
+      required: true,
+      content: {
+        'application/json': {
+          schema: z.object({
+            // KS-475 (§2): the runtime rejects empty strings too (express-validator
+            // .notEmpty() on all three) — publish minLength 1.
+            walletAddress: z.string().min(1).openapi({ description: 'Bech32 or hex Cardano address that produced the signature.' }),
+            signature: z.string().min(1).openapi({ description: 'Hex-encoded COSESign1 from CIP-30 signData().signature.' }),
+            key: z.string().min(1).openapi({ description: 'Hex-encoded COSEKey from CIP-30 signData().key.' }),
+            metadata: z.record(z.string(), z.unknown()).optional().openapi({
+              description: 'Free-form issuer metadata folded into the new doc\'s data blob.',
+            }),
+            title: z.string().optional().openapi({
+              description: 'Optional title override. Defaults to "<source title> (wallet-signed)".',
+            }),
+          }),
+        },
+      },
+    },
+  },
+  responses: {
+    201: {
+      description: 'Wallet-signed — new versioned doc + wallet-signature envelope inline',
+      content: { 'application/json': { schema: SuccessEnvelopeSchema } },
+    },
+    400: {
+      ...commonErrorResponses[400],
+      description: 'VALIDATION_ERROR (missing fields) or INVALID_WALLET_SIGNATURE (signature did not verify against the document contentHash).',
+    },
+    401: { ...commonErrorResponses[401], description: 'Missing or invalid Bearer token' },
+    403: { ...commonErrorResponses[403], description: 'FORBIDDEN — caller lacks documents:write scope / role.' },
+    404: { ...commonErrorResponses[404], description: 'Source document not found in this tenant' },
+    422: {
+      ...commonErrorResponses[400],
+      description: 'LINEAGE_CYCLE (source parent chain already references the new id — corrupted chain).',
+    },
+    429: commonErrorResponses[429],
+    500: commonErrorResponses[500],
+    503: commonErrorResponses[503],
+  },
+});
+
+sharedRegistry.registerPath({
+  method: 'get',
+  path: '/api/documents/{id}/sig-json',
+  security: [],
+  tags: ['Documents'],
+  summary: 'GET — out-of-band signature envelope for a sign-cert\'d doc (KS-83 PR 3)',
+  description:
+    'Returns the `.sig.json` companion envelope for a doc that was signed ' +
+    'via `POST /api/documents/{id}/sign-cert`. The envelope is what offline ' +
+    'verifiers download alongside the original bytes to validate the ' +
+    'signature.\n\n' +
+    '**No auth required** — same as the public verifier. The envelope only ' +
+    'contains data that\'s intended for offline distribution (signature, ' +
+    'public cert, content hash).\n\n' +
+    'Response carries Content-Disposition: inline; filename="{id}.sig.json" ' +
+    'so the body can be saved straight to disk.\n\n' +
+    'Revoked-cert state is NOT inferred here — verifiers should check ' +
+    'current cert status against `GET /api/issuer-certs/{certId}` (or the ' +
+    'published CRL, future).',
+  request: { params: documentIdPathParams },
+  responses: {
+    200: {
+      description: 'Signature envelope',
+      content: { 'application/json': { schema: SuccessEnvelopeSchema } },
+    },
+    // KS-508: the KS-466 §8 `router.param('id')` guard rejects any id failing
+    // SAFE_ID_PATTERN with a 400 VALIDATION_ERROR before any DB work. That guard
+    // is mounted on BOTH document routers, so it applies to every `{id}` route —
+    // and 17 of the 18 operations taking idPathParams already declared this 400.
+    // This one was the sole outlier, which is why the Schemathesis
+    // status_code_conformance check kept surfacing it (and only it).
+    400: {
+      ...commonErrorResponses[400],
+      description:
+        'VALIDATION_ERROR — the `{id}` path segment does not match the published ' +
+        'id charset (1-128 chars, alphanumeric plus `.`, `_`, `-`, starting ' +
+        'alphanumeric). Rejected before any lookup, so it is distinct from 404.',
+    },
+    404: {
+      ...commonErrorResponses[404],
+      description: 'NOT_FOUND (no such doc) or NO_SIG_JSON (doc exists but was not created via /sign-cert).',
+    },
+    429: commonErrorResponses[429],
+    500: commonErrorResponses[500],
+    502: commonErrorResponses[502],
+    503: commonErrorResponses[503],
+  },
+});
+
+// KS-440: POST /api/documents/{id}/revoke returns a FLAT revoke record, not a
+// `{ success }` envelope. The handler (routes/documents.ts) emits
+// `{ id, status, revokedAt, reason, anchorId, anchor: { id, txHash, status } }`
+// via KS-319's emitLifecycleAnchor — `anchorId` / `anchor.id` / `anchor.txHash`
+// are null when anchoring is unavailable. Publish that real shape so the
+// contract matches (the previous SuccessEnvelopeSchema required a `success`
+// field the handler never sends).
+const DocumentRevokeResponseSchema = sharedRegistry.register(
+  'DocumentRevokeResponse',
+  z
+    .object({
+      id: z.string(),
+      status: z.string(),
+      revokedAt: z.string(),
+      reason: z.string().nullable().optional(),
+      anchorId: z.string().nullable(),
+      anchor: z.object({
+        id: z.string().nullable(),
+        txHash: z.string().nullable(),
+        status: z.string(),
+      }),
+    })
+    .passthrough().openapi({
+  // KS-256: generated example (synthesised, masked). Guarded by
+  // `npm run check:openapi` -> check-spec-examples (E1-E7).
+    example: {
+    id: 'example-id',
+    status: 'example-status',
+    revokedAt: 'example-revokedAt',
+    anchorId: 'example-anchorId',
+    anchor: {
+      id: 'example-id',
+      txHash: '<txHash>',
+      status: 'example-status',
+    },
+  },
+  }),
+);
+
+// KS-566: the revoke REQUEST body was never published, though the handler has
+// always read `reason` from it and echoes it back in DocumentRevokeResponse
+// above — a response field whose request counterpart is undeclared is a
+// contract that lies about half the round trip. Published now alongside
+// `onBehalfOf`, which Kam's 2026-08-05 G-1 ruling (KS-539) puts ON this
+// operation: share / revoke / transfer-custody attribute to the real person
+// behind a connector call. The body stays OPTIONAL — a bodyless revoke is
+// valid today and must remain a positive case, not a schema violation.
+const DocumentRevokeRequestSchema = sharedRegistry.register(
+  'DocumentRevokeRequest',
+  z
+    .object({
+      reason: z.string().min(1).max(1024).optional().openapi({
+        description: 'Free-text reason, echoed back on the revoke record. Not anchored.',
+      }),
+      onBehalfOf: OnBehalfOfSchema.optional(),
+    })
+    .openapi({ example: { reason: 'Superseded by a corrected issue' } }),
+);
+
+sharedRegistry.registerPath({
+  method: 'post',
+  path: '/api/documents/{id}/revoke',
+  tags: ['Documents'],
+  summary: 'Revoke a document',
+  security: [{ bearerAuth: [] }],
+  request: {
+    params: documentIdPathParams,
+    body: {
+      required: false,
+      content: {
+        'application/json': { schema: DocumentRevokeRequestSchema },
+      },
+    },
+  },
+  responses: {
+    400: commonErrorResponses[400],
+    200: {
+      description: 'Document revoked',
+      content: { 'application/json': { schema: DocumentRevokeResponseSchema } },
+    },
+    401: { ...commonErrorResponses[401], description: 'Missing or invalid Bearer token' },
+    404: { ...commonErrorResponses[404], description: 'Document not found' },
+    403: commonErrorResponses[403],
+    429: commonErrorResponses[429],
+    500: commonErrorResponses[500],
+    502: commonErrorResponses[502],
+    503: commonErrorResponses[503],
+  },
+});
+
+// -----------------------------------------------------------------------------
+// ROUTES — /api/documents/{id}/share + /transfer-custody (KS-536)
+// -----------------------------------------------------------------------------
+// Both were LIVE but unpublished — the KS-486-remediation-#3 class (an
+// unpublished op is invisible to Schemathesis, which generates from the spec,
+// and to Akto, which imports it). Kam decided to publish (2026-07-30), same
+// call as the admin routes. Schemas describe what the handlers ACTUALLY accept
+// and return (runtime-is-truth, KS-430/440/444 precedent) — deliberately not
+// tightened: `shareType` is the runtime's real closed set, but the
+// either/or recipient and holder rules are cross-field constraints the runtime
+// enforces with a 400 and are documented in prose rather than narrowed here
+// (OpenAPI can express them only via oneOf gymnastics that would regress
+// negative-data generation).
+
+const ShareRecipientSchema = sharedRegistry.register(
+  'ShareRecipient',
+  z
+    .object({
+      email: z.string().optional().openapi({
+        description: 'Recipient email — the unregistered-recipient form (the share row carries the email and is claimed if they sign up later, KS-74).',
+      }),
+      userId: z.string().uuid().optional().openapi({
+        description: 'Resolved recipient user id (UUID) — the form Platform S uses after a GET /api/users/lookup hit (KS-69). A non-UUID is refused with 400 (KS-536: it previously reached a ::uuid cast and raised a 500).',
+      }),
+      name: z.string().optional(),
+      shareType: z.enum(['view', 'verify', 'reshare']).optional().openapi({
+        description: "Defaults to 'view'. A value outside this set is refused with 400.",
+      }),
+    })
+    .openapi({
+               // KS-256: generated example (synthesised, masked). Guarded by
+               // `npm run check:openapi` -> check-spec-examples (E1-E7).
+               example: {
+                 email: FX.issuer.email,
+                 userId: FX.issuer.id,
+                 name: 'example-name',
+                 shareType: 'view',
+               },
+      description: 'One share recipient. **An `email` OR a `userId` is required** (neither → 400).',
+    }),
+);
+
+const DocumentShareRequestSchema = sharedRegistry.register(
+  'DocumentShareRequest',
+  z.object({
+    recipients: z.array(ShareRecipientSchema).min(1).openapi({
+      description: 'At least one recipient is required.',
+    }),
+    message: z.string().optional().openapi({ description: 'Optional note stored on each share row.' }),
+    expiresAt: z.string().optional().openapi({ description: 'Optional share expiry, stored on each share row.' }),
+    onBehalfOf: OnBehalfOfSchema.optional(),
+  }).openapi({
+  // KS-256: generated example (synthesised, masked). Guarded by
+  // `npm run check:openapi` -> check-spec-examples (E1-E7).
+    example: {
+    recipients: [
+      {
+        email: FX.issuer.email,
+        userId: FX.issuer.id,
+        name: 'example-name',
+        shareType: 'view',
+      },
+      {
+        email: FX.issuer.email,
+        userId: FX.issuer.id,
+        name: 'example-name',
+        shareType: 'view',
+      },
+    ],
+  },
+  }),
+);
+
+const DocumentShareResponseSchema = sharedRegistry.register(
+  'DocumentShareResponse',
+  z
+    .object({
+      documentId: z.string(),
+      sharesCreated: z.number().int().nonnegative(),
+      shares: z.array(
+        z
+          .object({
+            id: z.string(),
+            recipientEmail: z.string().nullable().optional(),
+            recipientUserId: z.string().nullable().optional(),
+            shareType: z.string(),
+          })
+          .passthrough(),
+      ),
+      // KS-319: the share is anchored through the shared lifecycle emitter —
+      // `anchorId` is null when anchoring is unavailable, and `txHash` stays
+      // null until the chain confirms (KS-522: a simulated anchor is labelled,
+      // never presented as a real on-chain claim).
+      anchorId: z.string().nullable().optional(),
+      anchor: z
+        .object({
+          id: z.string().nullable().optional(),
+          txHash: z.string().nullable().optional(),
+          status: z.string().nullable().optional(),
+        })
+        .passthrough()
+        .optional(),
+    })
+    .passthrough().openapi({
+  // KS-256: generated example (synthesised, masked). Guarded by
+  // `npm run check:openapi` -> check-spec-examples (E1-E7).
+    example: {
+    documentId: FX.document.id,
+    sharesCreated: 0,
+    shares: [
+      {
+        id: 'example-id',
+        shareType: 'example-shareType',
+      },
+      {
+        id: 'example-id',
+        shareType: 'example-shareType',
+      },
+    ],
+  },
+  }),
+);
+
+sharedRegistry.registerPath({
+  method: 'post',
+  path: '/api/documents/{id}/share',
+  tags: ['Documents'],
+  summary: 'Share a document with one or more recipients',
+  description:
+    'Creates a share per recipient and records an anchored `share` lifecycle event. ' +
+    'Each recipient needs an `email` OR a `userId` (neither → 400); `shareType` defaults ' +
+    "to 'view' and an out-of-set value is refused with 400. Requires the " +
+    '`documents:share` scope (or an ISSUER_ADMIN / ORG_ADMIN / SYSTEM_ADMIN role). ' +
+    "Tenant-scoped: a document outside the caller's tenant is 404, not 403.",
+  security: [{ bearerAuth: [] }],
+  request: {
+    params: documentIdPathParams,
+    body: {
+      content: { 'application/json': { schema: DocumentShareRequestSchema } },
+    },
+  },
+  responses: {
+    201: {
+      description: 'Shares created (one row per recipient) + the anchored share event',
+      content: { 'application/json': { schema: DocumentShareResponseSchema } },
+    },
+    400: {
+      ...commonErrorResponses[400],
+      description: 'Empty `recipients`, a recipient with neither email nor userId, or an invalid `shareType`',
+    },
+    401: { ...commonErrorResponses[401], description: 'Missing or invalid Bearer token' },
+    403: { ...commonErrorResponses[403], description: 'Role/scope does not permit sharing' },
+    404: { ...commonErrorResponses[404], description: "Document not found in the caller's tenant" },
+    429: commonErrorResponses[429],
+    500: commonErrorResponses[500],
+    502: commonErrorResponses[502],
+    503: commonErrorResponses[503],
+  },
+});
+
+const TransferCustodyRequestSchema = sharedRegistry.register(
+  'TransferCustodyRequest',
+  z
+    .object({
+      newHolderId: z.string().optional().openapi({ description: 'Resolved new rights-holder user id.' }),
+      newHolderEmail: z.string().optional().openapi({
+        description: "New holder's email — resolved server-side via the auth service's user lookup; an unresolvable email is 404.",
+      }),
+      reason: z.string().optional(),
+      // KS-536 sweep: published as a bare string, so a spec-legal "" reached the
+      // runtime's isISO8601() and 400'd. Runtime is truth — declare the real
+      // grammar. `datetime({offset:true})` matches express-validator's
+      // isISO8601(), which accepts a numeric offset as well as Z (the KS-427
+      // lesson: never narrow a legal RFC 3339 offset away).
+      effectiveAt: z.string().datetime({ offset: true }).optional().openapi({
+        description: 'ISO-8601 / RFC 3339 timestamp (Z or a numeric offset); defaults to now. A non-ISO-8601 value is refused with 400.',
+      }),
+      onBehalfOf: OnBehalfOfSchema.optional(),
+    })
+    .openapi({
+               // KS-256: generated example (synthesised, masked). Guarded by
+               // `npm run check:openapi` -> check-spec-examples (E1-E7).
+               // KS-665 item 1: this published BOTH `newHolderId` and
+               // `newHolderEmail`, four lines above a description saying that
+               // sending both is a 400 — so copying the example guaranteed the
+               // error the description warns about. Pins ONE.
+               //
+               // Custody rebase (KS-256 delta pass, F-3): the original wording
+               // kept the email "because `FX.issuer` is a seeded principal that
+               // actually resolves". It does not — and must not. The fixture-set
+               // header is explicit: "NOTHING HERE IDENTIFIES A LIVE ACCOUNT …
+               // the emails are RFC 2606 example.com addresses matching no
+               // seeded user … undeliverable and unauthenticatable", and the
+               // `idPathParams` note 1,450 lines above says the same thing.
+               // The email is the right half to keep because its failure mode
+               // is the one this operation DOCUMENTS — an unresolvable email is
+               // the declared 404, where a bare `example-newHolderId` was the
+               // 400 the description warns against. Format-true, account-false.
+               example: {
+                 newHolderEmail: FX.issuer.email,
+                 reason: 'example-reason',
+                 effectiveAt: '2026-01-01T00:00:00Z',
+               },
+      description:
+        'Exactly ONE of `newHolderId` / `newHolderEmail` is required — neither is 400, both is 400.',
+    }),
+);
+
+const TransferCustodyResponseSchema = sharedRegistry.register(
+  'TransferCustodyResponse',
+  z
+    .object({
+      transfer: z
+        .object({
+          id: z.string(),
+          documentId: z.string(),
+          fromHolderId: z.string().nullable().optional(),
+          toHolderId: z.string().nullable().optional(),
+          effectiveAt: z.string(),
+          anchoredTxHash: z.string().nullable().optional(),
+          anchorId: z.string().nullable().optional(),
+          anchor: z
+            .object({
+              id: z.string().nullable().optional(),
+              txHash: z.string().nullable().optional(),
+              status: z.string().nullable().optional(),
+            })
+            .passthrough()
+            .optional(),
+        })
+        .passthrough(),
+    })
+    .passthrough().openapi({
+  // KS-256: generated example (synthesised, masked). Guarded by
+  // `npm run check:openapi` -> check-spec-examples (E1-E7).
+    example: {
+    transfer: {
+      id: 'example-id',
+      documentId: FX.document.id,
+      effectiveAt: 'example-effectiveAt',
+    },
+  },
+  }),
+);
+
+sharedRegistry.registerPath({
+  method: 'post',
+  path: '/api/documents/{id}/transfer-custody',
+  tags: ['Documents'],
+  summary: 'Transfer custody (rights-holder) of a document',
+  description:
+    'Reassigns the document\'s rights holder and records an anchored `transfer-custody` ' +
+    'lifecycle event (metadata-only — the document bytes and contentHash are unchanged, ' +
+    'which is why this is its own route rather than a `/version` action, KS-68). ' +
+    'Supply exactly one of `newHolderId` / `newHolderEmail`. Requires the ' +
+    '`documents:transfer-custody` scope (or an ISSUER_ADMIN / ORG_ADMIN / SYSTEM_ADMIN ' +
+    "role). Tenant-scoped: a document outside the caller's tenant is 404, not 403.",
+  security: [{ bearerAuth: [] }],
+  request: {
+    params: documentIdPathParams,
+    body: {
+      content: { 'application/json': { schema: TransferCustodyRequestSchema } },
+    },
+  },
+  responses: {
+    201: {
+      description: 'Custody transferred + the anchored transfer-custody event',
+      content: { 'application/json': { schema: TransferCustodyResponseSchema } },
+    },
+    400: {
+      ...commonErrorResponses[400],
+      description: 'Neither or both holder fields, or a non-ISO-8601 `effectiveAt`',
+    },
+    401: { ...commonErrorResponses[401], description: 'Missing or invalid Bearer token' },
+    403: { ...commonErrorResponses[403], description: 'Role/scope does not permit custody transfer' },
+    404: {
+      ...commonErrorResponses[404],
+      description: "Document not found in the caller's tenant, or `newHolderEmail` resolved to no user",
+    },
+    429: commonErrorResponses[429],
+    500: commonErrorResponses[500],
+    502: { ...commonErrorResponses[502], description: 'The auth-service user lookup was unreachable' },
+    503: commonErrorResponses[503],
+  },
+});
+
+// -----------------------------------------------------------------------------
+// ROUTES — /api/documents/{id}/lifecycle-events (KS-387)
+// -----------------------------------------------------------------------------
+
+// The vocabulary subset this endpoint accepts — verbs with NO dedicated route
+// (single source of truth: src/lifecycleActions.ts; contract: docs/VOCABULARY.md).
+const LifecycleEventRequestSchema = sharedRegistry.register(
+  'LifecycleEventRequest',
+  z
+    .object({
+      action: z.enum(LIFECYCLE_EVENT_ACTIONS).openapi({
+        description:
+          'Lifecycle verb to record. Only verbs WITHOUT a dedicated endpoint are ' +
+          'accepted — share/transfer-custody/revoke etc. must use their own routes.',
+      }),
+      payload: z.record(z.string(), z.unknown()).optional().openapi({
+        description:
+          'Verb-specific detail (e.g. rename\'s new display name, share-revoke\'s share id). Free-form object. ' +
+          'Do NOT place personal data here (emails, names, phone numbers) — lifecycle events are retained audit ' +
+          'records; send opaque references or counts instead (e.g. `recipientCount`, a rights-profile id). ' +
+          'KS-537: payloads are encrypted at rest, but references are the contract.',
+      }),
+      // KS-566: `onBehalfOf` REMOVED. Kam's 2026-08-05 G-1 ruling (KS-539) puts
+      // lifecycle on the CONNECTOR pattern — the event is attributed to the key
+      // that acted, recorded on a connector-only action_provenance row. A sent
+      // field is ignored (not 400'd) while Platform S is still sending it.
+    })
+    .openapi({ example: { action: 'rights-unassign', payload: { rightsProfile: 'reviewer', reference: 'case-8891' } } }),
+);
+
+const LifecycleEventResponseSchema = sharedRegistry.register(
+  'LifecycleEventResponse',
+  z.object({
+    documentId: z.string(),
+    eventId: z.string(),
+    action: z.enum(LIFECYCLE_EVENT_ACTIONS),
+    recordedAt: z.string(),
+    anchorId: z.string().nullable().openapi({
+      description: 'Resolvable anchor id (GET /api/anchors/{id}); null when anchoring was unavailable at event time.',
+    }),
+    anchor: z.object({
+      id: z.string().nullable(),
+      txHash: z.string().nullable(),
+      status: z.string(),
+    }),
+  }).openapi({
+  // KS-256: generated example (synthesised, masked). Guarded by
+  // `npm run check:openapi` -> check-spec-examples (E1-E7).
+    example: {
+    documentId: FX.document.id,
+    eventId: '00000000-0000-4000-8000-0000000000ff',
+    action: 'rights-unassign',
+    recordedAt: FX.timestamps.createdAt,
+    anchorId: 'example-anchorId',
+    anchor: {
+      id: 'example-id',
+      txHash: null,
+      status: 'example-status',
+    },
+  },
+  }),
+);
+
+const LifecycleEventListResponseSchema = sharedRegistry.register(
+  'LifecycleEventListResponse',
+  z.object({
+    documentId: z.string(),
+    count: z.number().int(),
+    events: z.array(
+      z.object({
+        id: z.string(),
+        tenantId: z.string(),
+        documentId: z.string(),
+        action: z.string(),
+        payload: z.record(z.string(), z.unknown()),
+        actorUserId: z.string().nullable(),
+        anchorId: z.string().nullable(),
+        createdAt: z.string(),
+      }),
+    ),
+  }).openapi({
+  // KS-256: generated example (synthesised, masked). Guarded by
+  // `npm run check:openapi` -> check-spec-examples (E1-E7).
+    example: {
+    documentId: FX.document.id,
+    count: 1,
+    events: [
+      {
+        id: '00000000-0000-4000-8000-0000000000ff',
+        tenantId: FX.tenant.id,
+        documentId: FX.document.id,
+        action: 'example-action',
+        payload: {},
+        actorUserId: '00000000-0000-4000-8000-0000000000ff',
+        anchorId: 'example-anchorId',
+        createdAt: FX.timestamps.createdAt,
+      },
+      {
+        id: '00000000-0000-4000-8000-0000000000ff',
+        tenantId: FX.tenant.id,
+        documentId: FX.document.id,
+        action: 'example-action',
+        payload: {},
+        actorUserId: '00000000-0000-4000-8000-0000000000ff',
+        anchorId: 'example-anchorId',
+        createdAt: FX.timestamps.createdAt,
+      },
+    ],
+  },
+  }),
+);
+
+sharedRegistry.registerPath({
+  method: 'post',
+  path: '/api/documents/{id}/lifecycle-events',
+  tags: ['Documents'],
+  summary: 'Record a non-mutating lifecycle event (generic verb endpoint — KS-387)',
+  description:
+    'One extensible endpoint for the KS-134 lifecycle verbs that have NO dedicated ' +
+    'route: rights-unassign, share-revoke, share-permission-change, rename, the ' +
+    'KS-389 delete/restore pair (S\'s recoverable owner soft-delete records here — ' +
+    'never as /revoke, which is a terminal global withdrawal), and the KS-415/PS-235 ' +
+    'share-edit four (share-recipient-change, share-expiry-change, share-token-rotate, ' +
+    'share-resend). The event is ' +
+    'NON-MUTATING: bytes are unchanged, so it attaches to the CURRENT document via ' +
+    'a parent_document_id-linked lifecycle row (no version fork), mirroring S\'s ' +
+    'PreviousChainId chain. Emits a resolvable top-level `anchorId` ' +
+    '(GET /api/anchors/{id}) via the same shared emitter as /share, ' +
+    '/transfer-custody and /revoke; `anchorId` is null when anchoring is ' +
+    'unavailable (callers fall back to POST /api/anchors). Unknown verbs — ' +
+    'including verbs that HAVE a dedicated endpoint — are rejected with 400. ' +
+    'Full vocabulary contract: docs/VOCABULARY.md.',
+  security: [{ bearerAuth: [] }],
+  request: {
+    params: documentIdPathParams,
+    // KS-444 (KS-283 precedent): the runtime 400s on a missing/unknown action,
+    // so an absent body is a schema violation (negative), never a positive case.
+    body: {
+      required: true,
+      content: {
+        'application/json': { schema: LifecycleEventRequestSchema },
+      },
+    },
+  },
+  responses: {
+    201: {
+      description: 'Lifecycle event recorded (with resolvable anchorId when anchoring is up)',
+      content: { 'application/json': { schema: LifecycleEventResponseSchema } },
+    },
+    400: { ...commonErrorResponses[400], description: 'Unknown lifecycle action, or non-object payload' },
+    401: { ...commonErrorResponses[401], description: 'Missing or invalid Bearer token' },
+    404: { ...commonErrorResponses[404], description: 'Document not found in this tenant' },
+    403: commonErrorResponses[403],
+    429: commonErrorResponses[429],
+    500: commonErrorResponses[500],
+    502: commonErrorResponses[502],
+    503: commonErrorResponses[503],
+  },
+});
+
+sharedRegistry.registerPath({
+  method: 'get',
+  path: '/api/documents/{id}/lifecycle-events',
+  tags: ['Documents'],
+  summary: 'List a document\'s recorded lifecycle events (newest first — KS-387)',
+  description:
+    'The read side of the generic lifecycle endpoint: every non-mutating event ' +
+    'recorded for this document (tenant-scoped, newest first), each carrying its ' +
+    'action, payload, actor, and the anchor id it was anchored under (null when ' +
+    'anchoring was down at event time).',
+  security: [{ bearerAuth: [] }],
+  request: { params: documentIdPathParams },
+  responses: {
+    200: {
+      description: 'Lifecycle events for the document',
+      content: { 'application/json': { schema: LifecycleEventListResponseSchema } },
+    },
+    400: commonErrorResponses[400],
+    401: { ...commonErrorResponses[401], description: 'Missing or invalid Bearer token' },
+    404: { ...commonErrorResponses[404], description: 'Document not found in this tenant' },
+    403: commonErrorResponses[403],
+    429: commonErrorResponses[429],
+    500: commonErrorResponses[500],
+    502: commonErrorResponses[502],
+    503: commonErrorResponses[503],
+  },
+});
+
+// -----------------------------------------------------------------------------
+// ROUTES — /api/verification
+// -----------------------------------------------------------------------------
+
+sharedRegistry.registerPath({
+  method: 'post',
+  path: '/api/verification/verify',
+  security: [],
+  tags: ['Verification'],
+  summary: 'Verify a document (canonical endpoint)',
+  description:
+    'Single source of truth for document verification across all environments ' +
+    '(Local, Dev, Demo) after the 2026-04-29 verifier consolidation. The ' +
+    'request envelope is permissive: provide documentId, hash, title, or ' +
+    'contentHash. Strategy: chain-first → originate-id lookup → hash/title fallback. ' +
+    'KS-70: when the resolved document has a `parent_document_id` lineage, the ' +
+    'response carries an additional `lineage: LineageEntry[]` array (newest ' +
+    'first) plus `lineageTruncated: boolean` and, when truncated, ' +
+    '`lineageDepthAtTruncation: number` (the env-configurable MAX_LINEAGE_DEPTH, ' +
+    'default 12). KS-280: when newer/derived versions exist, the response also ' +
+    'carries `newerVersions: LineageEntry[]` (the descendant tree, oldest first), ' +
+    '`newerVersionsTruncated: boolean`, and `hasNewerCertifiedVersion: boolean` — ' +
+    'so presenting an older version flags that a newer (and possibly certified) ' +
+    'version supersedes it. Walks are tenant-scoped — a cross-tenant parent stops the walk.',
+  ...rateLimit('verification'),
+  ...sla('read'),
+  request: {
+    body: {
+      content: {
+        'application/json': { schema: VerifyRequestSchema },
+      },
+    },
+  },
+  responses: {
+    200: {
+      description: 'Verification result (always 200 — `verified` field is the discriminator)',
+      content: { 'application/json': { schema: VerifyResponseSchema } },
+    },
+    // KS-118: verify speaks its own {verified,...} contract — its missing-input
+    // 400 returns {verified:false, error} (routes/verification.ts), not the
+    // canonical error envelope. Documented as-is (no behaviour change).
+    400: {
+      description: 'Missing verification input (no documentId / hash / documentData)',
+      content: {
+        'application/json': {
+          schema: z.object({ verified: z.boolean(), error: z.string() }),
+        },
+      },
+    },
+    429: commonErrorResponses[429],
+    500: commonErrorResponses[500],
+    502: commonErrorResponses[502],
+    503: commonErrorResponses[503],
+    404: commonErrorResponses[404],
+    401: commonErrorResponses[401],
+  },
+});
+
+// KS-584 P3 — the versioned verify-list contract. v1 above is UNTOUCHED until
+// the coordinated cutover (Kam's word alone).
+sharedRegistry.registerPath({
+  method: 'post',
+  path: '/api/v2/verification/verify',
+  security: [],
+  tags: ['Verification'],
+  summary: 'Verify a document — list contract (v2)',
+  description:
+    'KS-584 P3. v1 collapses the same-hash registration set to one row; v2 returns EVERY ' +
+    'registration of the supplied bytes as its own match (the certify flow legitimately ' +
+    'creates original + signed_document rows; templates are registered by many parties), so ' +
+    'the row-selection problem dissolves. Each match passes the same honesty rules as v1 ' +
+    '(KS-522 simulated labelling, KS-563 narrow certification claim, KS-584 tenant scoping ' +
+    'with an explicit fieldsWithheld marker). Anchor truth is CALLER-INDEPENDENT: the chain ' +
+    'fact is read pre-auth with no bearer forwarded, so anonymous and authenticated callers ' +
+    'get identical answers. Auth posture: no Authorization header → anonymous 200; a PRESENT ' +
+    'but invalid bearer → 401 (re-auth signal). Matches are ordered certified → confirmed ' +
+    'on-chain → in-flight → oldest, so matches[0] equals v1’s answer for the same hash.',
+  ...rateLimit('verification'),
+  ...sla('read'),
+  request: {
+    body: {
+      content: {
+        'application/json': { schema: V2VerifyRequestSchema },
+      },
+    },
+  },
+  responses: {
+    200: {
+      description: 'Verify-list result — count 0 with empty matches is the honest "never registered" answer',
+      content: { 'application/json': { schema: V2VerifyResponseSchema } },
+    },
+    400: {
+      ...commonErrorResponses[400],
+      description: 'No verifiable input (no hash / documentData / documentId), or wrong-typed fields. Canonical error envelope — unlike v1, v2 does not speak the legacy {verified:false,error} shape.',
+    },
+    401: { ...commonErrorResponses[401], description: 'Authorization header PRESENT but invalid/expired. Anonymous requests (no header) are served 200.' },
+    429: commonErrorResponses[429],
+    500: commonErrorResponses[500],
+    502: commonErrorResponses[502],
+    503: commonErrorResponses[503],
+    404: commonErrorResponses[404],
+  },
+});
+
+// -----------------------------------------------------------------------------
+// KS-791 — verify-file (v1 + v2). RAW BYTES, not JSON.
+//
+// These two are the only /api/* operations whose request body is binary: the
+// SERVER computes the hash from the uploaded bytes, which is what makes them
+// the strongest verification — the caller cannot assert a hash it did not
+// produce. They are published here only now because until KS-791 the gateway's
+// JSON-only rule (KS-439) 415'd every file content-type, so publishing an
+// octet-stream contract would have documented a request the gateway refused.
+// The gateway now allows `application/octet-stream` on these two exact paths
+// and no others (api-gateway/src/middleware/contentType.ts).
+// Both request bodies declare `minLength: 1` IN THE .openapi() METADATA as well as via
+// `.min(1)`: with an explicit type/format override the generator does not carry the zod
+// check into the published schema (measured: `.min(1)` alone changed zero bytes of the
+// YAML). Without it an EMPTY body is schema-valid while the handler answers 400, which
+// is the #813 review finding. `check:openapi` pins the published line.
+// -----------------------------------------------------------------------------
+
+sharedRegistry.registerPath({
+  method: 'post',
+  path: '/api/verification/verify-file',
+  security: [],
+  tags: ['Verification'],
+  summary: 'Verify an uploaded file — the server hashes the bytes (v1)',
+  description:
+    'Upload the document as the RAW REQUEST BODY (application/octet-stream). The server '
+    + 'computes sha256 over the received bytes and looks that hash up in the registry, so '
+    + 'unlike /api/verification/verify the caller cannot supply a hash of its choosing. '
+    + 'Always 200 with `verified` as the discriminator once a body is present; an EMPTY body '
+    + 'is the one 400, and it speaks v1\'s legacy {verified:false, error} shape rather than '
+    + 'the canonical envelope (KS-118, documented as-is, no behaviour change).',
+  ...rateLimit('verification'),
+  ...sla('read'),
+  request: {
+    body: {
+      required: true,
+      content: {
+        'application/octet-stream': {
+          schema: z.string().min(1).openapi({ type: 'string', format: 'binary', minLength: 1, description: 'The document file, as raw bytes.' }),
+        },
+      },
+    },
+  },
+  responses: {
+    200: {
+      description:
+        'Verification result (always 200 — `verified` is the discriminator). '
+        + 'NOTE: the handler additionally returns `fileSize` (bytes of the uploaded body) on every 200. '
+        + 'It is not declared in VerifyResponse, which is `.passthrough()`, so the response validates — '
+        + 'but the field is undocumented in the schema. Tracked rather than papered over: see KS-794.',
+      content: { 'application/json': { schema: VerifyResponseSchema } },
+    },
+    400: {
+      description: 'Empty request body — no file content received. v1 legacy shape, not the canonical envelope.',
+      content: {
+        'application/json': {
+          schema: z.object({ verified: z.boolean(), error: z.string() }),
+        },
+      },
+    },
+    429: commonErrorResponses[429],
+    500: commonErrorResponses[500],
+    502: commonErrorResponses[502],
+    503: commonErrorResponses[503],
+    404: commonErrorResponses[404],
+    401: commonErrorResponses[401],
+  },
+});
+
+sharedRegistry.registerPath({
+  method: 'post',
+  path: '/api/v2/verification/verify-file',
+  security: [],
+  tags: ['Verification'],
+  summary: 'Verify an uploaded file — list contract (v2)',
+  description:
+    'Raw file bytes as the request body; the server computes the hash. Same list contract as '
+    + 'POST /api/v2/verification/verify — EVERY registration of those bytes is returned as its '
+    + 'own match, rather than collapsing the same-hash set to one row. Unlike v1, the empty-body '
+    + '400 uses the canonical error envelope.',
+  ...rateLimit('verification'),
+  ...sla('read'),
+  request: {
+    body: {
+      required: true,
+      content: {
+        'application/octet-stream': {
+          schema: z.string().min(1).openapi({ type: 'string', format: 'binary', minLength: 1, description: 'The document file, as raw bytes.' }),
+        },
+      },
+    },
+  },
+  responses: {
+    200: {
+      description:
+        'Verify-list result for the uploaded bytes. count 0 with empty matches is the honest '
+        + '"never registered" answer. NOTE: the handler additionally returns `fileSize` (bytes of the '
+        + 'uploaded body) on every 200; V2VerifyResponse is `.passthrough()` so it validates, but the '
+        + 'field is undocumented in the schema. See KS-794.',
+      content: { 'application/json': { schema: V2VerifyResponseSchema } },
+    },
+    400: {
+      ...commonErrorResponses[400],
+      description: 'Empty request body — no file content received. Canonical error envelope.',
+    },
+    429: commonErrorResponses[429],
+    500: commonErrorResponses[500],
+    502: commonErrorResponses[502],
+    503: commonErrorResponses[503],
+    404: commonErrorResponses[404],
+    401: commonErrorResponses[401],
+  },
+});
+
+// -----------------------------------------------------------------------------
+// ROUTES — /api/certifications
+// -----------------------------------------------------------------------------
+
+sharedRegistry.registerPath({
+  method: 'post',
+  path: '/api/certifications/issue',
+  tags: ['Certifications'],
+  summary: 'CERTIFY — issuer marker, does not modify document bytes (Option B action 1 of 3)',
+  description:
+    'KS-84 (2026-05-15): Platform K models the post-creation document ' +
+    'lifecycle as three independent actions, any subset of which an issuer ' +
+    'may apply in any order:\n\n' +
+    '  1. **certify** (this endpoint) — records "this issuer asserts this ' +
+    '     hash is theirs at this time". Creates a Cardano anchor + ' +
+    '     certification record + (when parentDocumentId is supplied) a ' +
+    '     KS-70 lineage child document. **Never modifies the original bytes** ' +
+    '     — the contentHash on the predecessor stays valid.\n' +
+    '  2. **watermark** — `POST /api/documents/{id}/watermark` (planned, ' +
+    '     KS-84b). Optional. Adds visual overlay → new versioned document ' +
+    '     with new contentHash, linked via parent_document_id.\n' +
+    '  3. **sign** — `POST /api/documents/{id}/sign-cert` (planned, KS-84c, ' +
+    '     blocked on KS-83 per-issuer X.509 cert infrastructure). Optional. ' +
+    '     Produces an out-of-band `.sig.json` companion served by the verify ' +
+    '     endpoint; does NOT embed in the file (per KS-21 Q3 v1 decision).\n\n' +
+    'The wallet-signature flow at `POST /api/documents/{id}/sign` is a ' +
+    'different concern — that is the recipient-attestation / Cardano ' +
+    'keypair flow, not the X.509 issuer-sign action above.',
+  security: [{ bearerAuth: [] }],
+  request: {
+    // KS-444 (KS-283 precedent): the runtime 400s on missing type/data.
+    body: {
+      required: true,
+      content: {
+        'application/json': { schema: CertificationIssueRequestSchema },
+      },
+    },
+  },
+  responses: {
+    201: {
+      description: 'Certification issued — marker recorded, source bytes unchanged',
+      content: { 'application/json': { schema: CertificationSchema } },
+    },
+    400: commonErrorResponses[400],
+    401: { ...commonErrorResponses[401], description: 'Missing or invalid Bearer token' },
+    403: commonErrorResponses[403],
+    422: {
+      ...commonErrorResponses[400],
+      description:
+        'KS-70 LINEAGE_CYCLE — the supplied parentDocumentId would form a ' +
+        'cycle in the document lineage chain (parent already references the ' +
+        'document we are about to issue against it).',
+    },
+    429: commonErrorResponses[429],
+    500: commonErrorResponses[500],
+    404: commonErrorResponses[404],
+    502: commonErrorResponses[502],
+    503: commonErrorResponses[503],
+  },
+});
+
+sharedRegistry.registerPath({
+  method: 'get',
+  path: '/api/certifications',
+  tags: ['Certifications'],
+  summary: 'List certifications',
+  security: [{ bearerAuth: [] }],
+  responses: {
+    400: commonErrorResponses[400],
+    200: {
+      description: 'Certification list',
+      content: { 'application/json': { schema: CertificationListResponseSchema } },
+    },
+    401: { ...commonErrorResponses[401], description: 'Missing or invalid Bearer token' },
+    403: commonErrorResponses[403],
+    429: commonErrorResponses[429],
+    500: commonErrorResponses[500],
+    404: commonErrorResponses[404],
+    502: commonErrorResponses[502],
+    503: commonErrorResponses[503],
+  },
+});
+
+sharedRegistry.registerPath({
+  method: 'get',
+  path: '/api/certifications/{id}',
+  tags: ['Certifications'],
+  summary: 'Get a single certification by id',
+  security: [{ bearerAuth: [] }],
+  request: {
+    params: certificationIdPathParams,
+  },
+  responses: {
+    400: commonErrorResponses[400],
+    200: {
+      description: 'Certification detail',
+      content: { 'application/json': { schema: CertificationSchema } },
+    },
+    401: { ...commonErrorResponses[401], description: 'Missing or invalid Bearer token' },
+    404: { ...commonErrorResponses[404], description: 'Certification not found' },
+    403: commonErrorResponses[403],
+    429: commonErrorResponses[429],
+    500: commonErrorResponses[500],
+    502: commonErrorResponses[502],
+    503: commonErrorResponses[503],
+  },
+});
+
+// =============================================================================
+// SCHEMAS — webhooks, GDPR, system errors
+// =============================================================================
+
+const WebhookEventEnum = z.enum([
+  'certification.issued',
+  'certification.revoked',
+  'certification.verified',
+  'document.created',
+  'document.anchored',
+  'document.revoked',
+  'user.registered',
+  'user.login',
+]);
+
+const WebhookCreateRequestSchema = sharedRegistry.register(
+  'WebhookCreateRequest',
+  z.object({
+    url: z.string().url(),
+    events: z.array(WebhookEventEnum).min(1),
+    description: z.string().optional(),
+  }).openapi({
+  // KS-256: generated example (synthesised, masked). Guarded by
+  // `npm run check:openapi` -> check-spec-examples (E1-E7).
+    example: {
+    url: 'https://example.com/resource',
+    events: [
+      'certification.issued',
+      'certification.issued',
+    ],
+  },
+  }),
+);
+
+const WebhookSummarySchema = sharedRegistry.register(
+  'WebhookSummary',
+  z
+    .object({
+      id: z.string(),
+      url: z.string(),
+      events: z.array(z.string()),
+      isActive: z.boolean(),
+      description: z.string().nullable().optional(),
+      createdAt: z.string().optional(),
+      updatedAt: z.string().nullable().optional(),
+    })
+    .passthrough().openapi({
+  // KS-256: generated example (synthesised, masked). Guarded by
+  // `npm run check:openapi` -> check-spec-examples (E1-E7).
+    example: {
+    id: 'example-id',
+    url: 'example-url',
+    events: [
+      'example-events[]',
+      'example-events[]',
+    ],
+    isActive: true,
+  },
+  }),
+);
+
+const WebhookCreateResponseSchema = sharedRegistry.register(
+  'WebhookCreateResponse',
+  z.object({
+    success: z.literal(true),
+    webhook: WebhookSummarySchema,
+    secret: z.string().openapi({
+      description:
+        'Plaintext webhook signing secret. Returned ONLY at creation + rotate. ' +
+        'Used to verify HMAC-SHA256 payload signatures.',
+    }),
+    warning: z.string(),
+  }).openapi({
+  // KS-256: generated example (synthesised, masked). Guarded by
+  // `npm run check:openapi` -> check-spec-examples (E1-E7).
+    example: {
+    success: true,
+    webhook: {
+      id: '00000000-0000-4000-8000-0000000000ff',
+      url: 'https://api.example.com/v1/resource',
+      events: [
+        'example-events[]',
+        'example-events[]',
+      ],
+      isActive: true,
+    },
+    secret: '<secret>',
+    warning: 'example-warning',
+  },
+  }),
+);
+
+// KS-498: the list handler (routes/webhooks.ts) returns the raw svc_webhooks
+// rows — snake_case is_active/created_at/updated_at — while the create/rotate
+// responses build the camelCase WebhookSummary by hand. Two genuinely
+// different shapes; published as such.
+const WebhookListResponseSchema = sharedRegistry.register(
+  'WebhookListResponse',
+  z.object({
+    success: z.literal(true),
+    webhooks: z.array(
+      z
+        .object({
+          id: z.string(),
+          url: z.string(),
+          events: z.array(z.string()),
+          is_active: z.boolean(),
+          description: z.string().nullable().optional(),
+          created_at: z.string(),
+          updated_at: z.string().nullable().optional(),
+        })
+        .passthrough(),
+    ),
+  }).openapi({
+  // KS-256: generated example (synthesised, masked). Guarded by
+  // `npm run check:openapi` -> check-spec-examples (E1-E7).
+    example: {
+    success: true,
+    webhooks: [
+      {
+        id: '00000000-0000-4000-8000-0000000000ff',
+        url: 'https://api.example.com/v1/resource',
+        events: [
+          'example-events[]',
+          'example-events[]',
+        ],
+        is_active: true,
+        created_at: FX.timestamps.createdAt,
+      },
+      {
+        id: '00000000-0000-4000-8000-0000000000ff',
+        url: 'https://api.example.com/v1/resource',
+        events: [
+          'example-events[]',
+          'example-events[]',
+        ],
+        is_active: true,
+        created_at: FX.timestamps.createdAt,
+      },
+    ],
+  },
+  }),
+);
+
+const WebhookUpdateRequestSchema = sharedRegistry.register(
+  'WebhookUpdateRequest',
+  z
+    .object({
+      url: z.string().url().optional(),
+      events: z.array(WebhookEventEnum).optional(),
+      description: z.string().optional(),
+      isActive: z.boolean().optional(),
+    })
+    .passthrough().openapi({
+  // KS-256: generated example (synthesised, masked). Guarded by
+  // `npm run check:openapi` -> check-spec-examples (E1-E7).
+    example: {
+    url: 'https://example.com/resource',
+    events: [
+      'certification.issued',
+      'certification.issued',
+    ],
+    description: 'example-description',
+    isActive: true,
+  },
+  }),
+);
+
+const WebhookRotateSecretResponseSchema = sharedRegistry.register(
+  'WebhookRotateSecretResponse',
+  z.object({
+    success: z.literal(true),
+    secret: z.string(),
+  }).openapi({
+  // KS-256: generated example (synthesised, masked). Guarded by
+  // `npm run check:openapi` -> check-spec-examples (E1-E7).
+    example: {
+    success: true,
+    secret: '<secret>',
+  },
+  }),
+);
+
+const WebhookTestResponseSchema = sharedRegistry.register(
+  'WebhookTestResponse',
+  z.object({
+    success: z.boolean(),
+    delivery: z.object({
+      url: z.string(),
+      status: z.number().int().nullable().optional(),
+      success: z.boolean(),
+      duration_ms: z.number().int().optional(),
+      error: z.string().nullable().optional(),
+    }),
+  }).openapi({
+  // KS-256: generated example (synthesised, masked). Guarded by
+  // `npm run check:openapi` -> check-spec-examples (E1-E7).
+    example: {
+    success: true,
+    delivery: {
+      url: 'example-url',
+      success: true,
+    },
+  },
+  }),
+);
+
+const WebhookDeliveryListResponseSchema = sharedRegistry.register(
+  'WebhookDeliveryListResponse',
+  z.object({
+    success: z.literal(true),
+    deliveries: z.array(
+      z
+        .object({
+          id: z.string(),
+          event_type: z.string(),
+          response_status: z.number().int().nullable().optional(),
+          success: z.boolean(),
+          attempt: z.number().int(),
+          error: z.string().nullable().optional(),
+          duration_ms: z.number().int().nullable().optional(),
+          delivered_at: z.string(),
+        })
+        .passthrough(),
+    ),
+  }).openapi({
+  // KS-256: generated example (synthesised, masked). Guarded by
+  // `npm run check:openapi` -> check-spec-examples (E1-E7).
+    example: {
+    success: true,
+    deliveries: [
+      {
+        id: 'example-id',
+        event_type: 'example-event_type',
+        success: true,
+        attempt: 1,
+        delivered_at: 'example-delivered_at',
+      },
+      {
+        id: 'example-id',
+        event_type: 'example-event_type',
+        success: true,
+        attempt: 1,
+        delivered_at: 'example-delivered_at',
+      },
+    ],
+  },
+  }),
+);
+
+const OriginateSuccessSchema = sharedRegistry.register(
+  'OriginateSuccess',
+  z
+    .object({
+      success: z.boolean(),
+      message: z.string().optional(),
+    })
+    .passthrough().openapi({
+  // KS-256: generated example (synthesised, masked). Guarded by
+  // `npm run check:openapi` -> check-spec-examples (E1-E7).
+    example: {
+    success: true,
+  },
+  }),
+);
+
+const ConsentPurposeEnum = z.enum([
+  'marketing',
+  'analytics',
+  'profiling',
+  'data_processing',
+  'third_party_sharing',
+  'cookies',
+  'communications',
+  'document_signing',
+]);
+
+const ConsentRecordRequestSchema = sharedRegistry.register(
+  'ConsentRecordRequest',
+  z.object({
+    // KS-475 (§2): the runtime rejects empty strings ("userId and purpose are
+    // required" truthy checks in routes/gdpr.ts) — publish minLength so a
+    // spec-legal request can't be an empty string. Same for the other GDPR
+    // request schemas below.
+    userId: z.string().min(1),
+    purpose: ConsentPurposeEnum,
+    version: z.string().optional(),
+    source: z.string().optional(),
+    expiresInDays: z.number().int().positive().optional(),
+    metadata: z.record(z.string(), z.unknown()).optional(),
+  }).openapi({
+  // KS-256: generated example (synthesised, masked). Guarded by
+  // `npm run check:openapi` -> check-spec-examples (E1-E7).
+    example: {
+    userId: FX.issuer.id,
+    purpose: 'marketing',
+  },
+  }),
+);
+
+const ConsentSchema = sharedRegistry.register(
+  'Consent',
+  z
+    .object({
+      id: z.string(),
+      userId: z.string(),
+      purpose: z.string(),
+      version: z.string().optional(),
+      source: z.string().optional(),
+      ipAddress: z.string().nullable().optional(),
+      userAgent: z.string().nullable().optional(),
+      // KS-440: the runtime returns `givenAt` (gdprService.ConsentRecord /
+      // mapConsentRow reads consent_records.given_at), never `grantedAt` —
+      // the previous required `grantedAt` failed every consent response.
+      // Publish the field the handler actually emits.
+      givenAt: z.string(),
+      expiresAt: z.string().nullable().optional(),
+      withdrawnAt: z.string().nullable().optional(),
+      metadata: z.record(z.string(), z.unknown()).nullable().optional(),
+    })
+    .passthrough().openapi({
+  // KS-256: generated example (synthesised, masked). Guarded by
+  // `npm run check:openapi` -> check-spec-examples (E1-E7).
+    example: {
+    id: 'example-id',
+    userId: FX.issuer.id,
+    purpose: 'example-purpose',
+    givenAt: 'example-givenAt',
+  },
+  }),
+);
+
+const ConsentResponseSchema = sharedRegistry.register(
+  'ConsentResponse',
+  z.object({ success: z.literal(true), consent: ConsentSchema }).openapi({
+  // KS-256: generated example (synthesised, masked). Guarded by
+  // `npm run check:openapi` -> check-spec-examples (E1-E7).
+    example: {
+    success: true,
+    consent: {
+      id: '00000000-0000-4000-8000-0000000000ff',
+      userId: FX.issuer.id,
+      purpose: 'example-purpose',
+      givenAt: FX.timestamps.createdAt,
+    },
+  },
+  }),
+);
+
+const ConsentListResponseSchema = sharedRegistry.register(
+  'ConsentListResponse',
+  z.object({ success: z.literal(true), consents: z.array(ConsentSchema) }).openapi({
+  // KS-256: generated example (synthesised, masked). Guarded by
+  // `npm run check:openapi` -> check-spec-examples (E1-E7).
+    example: {
+    success: true,
+    consents: [
+      {
+        id: 'example-id',
+        userId: FX.issuer.id,
+        purpose: 'example-purpose',
+        givenAt: 'example-givenAt',
+      },
+      {
+        id: 'example-id',
+        userId: FX.issuer.id,
+        purpose: 'example-purpose',
+        givenAt: 'example-givenAt',
+      },
+    ],
+  },
+  }),
+);
+
+const ConsentWithdrawRequestSchema = sharedRegistry.register(
+  'ConsentWithdrawRequest',
+  z.object({ userId: z.string().min(1), purpose: ConsentPurposeEnum }).openapi({
+  // KS-256: generated example (synthesised, masked). Guarded by
+  // `npm run check:openapi` -> check-spec-examples (E1-E7).
+    example: {
+    userId: FX.issuer.id,
+    purpose: 'marketing',
+  },
+  }),
+);
+
+const ConsentCheckResponseSchema = sharedRegistry.register(
+  'ConsentCheckResponse',
+  z.object({ success: z.literal(true), hasConsent: z.boolean() }).openapi({
+  // KS-256: generated example (synthesised, masked). Guarded by
+  // `npm run check:openapi` -> check-spec-examples (E1-E7).
+    example: {
+    success: true,
+    hasConsent: true,
+  },
+  }),
+);
+
+const DSRTypeEnum = z.enum([
+  'access',
+  'rectification',
+  'erasure',
+  'portability',
+  'restriction',
+  'objection',
+]);
+
+const DSRCreateRequestSchema = sharedRegistry.register(
+  'DSRCreateRequest',
+  z.object({
+    type: DSRTypeEnum,
+    userId: z.string().min(1),
+    email: z.string().email(),
+    notes: z.string().optional(),
+  }).openapi({
+  // KS-256: generated example (synthesised, masked). Guarded by
+  // `npm run check:openapi` -> check-spec-examples (E1-E7).
+    example: {
+    type: 'access',
+    userId: FX.issuer.id,
+    email: FX.issuer.email,
+  },
+  }),
+);
+
+const DSRSchema = sharedRegistry.register(
+  'DSR',
+  z
+    .object({
+      id: z.string(),
+      type: z.string(),
+      userId: z.string(),
+      email: z.string(),
+      status: z.string(),
+      // KS-440: the runtime returns `requestedAt` + `deadline` + `auditTrail`
+      // (gdprService.DataSubjectRequest / mapDsrRow reads requested_at,
+      // deadline, audit_trail), never `createdAt`/`updatedAt` — the previous
+      // required `createdAt` failed every DSR response (create, pending list,
+      // get-by-id). Publish the fields the handler actually emits.
+      requestedAt: z.string(),
+      deadline: z.string(),
+      notes: z.string().nullable().optional(),
+      processedBy: z.string().nullable().optional(),
+      completedAt: z.string().nullable().optional(),
+      auditTrail: z
+        .array(
+          z.object({
+            action: z.string(),
+            timestamp: z.string(),
+            actor: z.string(),
+          }),
+        )
+        .optional(),
+    })
+    .passthrough().openapi({
+  // KS-256: generated example (synthesised, masked). Guarded by
+  // `npm run check:openapi` -> check-spec-examples (E1-E7).
+    example: {
+    id: 'example-id',
+    type: 'example-type',
+    userId: FX.issuer.id,
+    email: FX.issuer.email,
+    status: 'example-status',
+    requestedAt: 'example-requestedAt',
+    deadline: 'example-deadline',
+  },
+  }),
+);
+
+const DSRResponseSchema = sharedRegistry.register(
+  'DSRResponse',
+  z.object({ success: z.literal(true), request: DSRSchema }).openapi({
+  // KS-256: generated example (synthesised, masked). Guarded by
+  // `npm run check:openapi` -> check-spec-examples (E1-E7).
+    example: {
+    success: true,
+    request: {
+      id: '00000000-0000-4000-8000-0000000000ff',
+      type: 'example-type',
+      userId: FX.issuer.id,
+      email: FX.issuer.email,
+      status: 'example-status',
+      requestedAt: FX.timestamps.createdAt,
+      deadline: FX.timestamps.createdAt,
+    },
+  },
+  }),
+);
+
+const DSRListResponseSchema = sharedRegistry.register(
+  'DSRListResponse',
+  z.object({ success: z.literal(true), requests: z.array(DSRSchema) }).openapi({
+  // KS-256: generated example (synthesised, masked). Guarded by
+  // `npm run check:openapi` -> check-spec-examples (E1-E7).
+    example: {
+    success: true,
+    requests: [
+      {
+        id: '00000000-0000-4000-8000-0000000000ff',
+        type: 'example-type',
+        userId: FX.issuer.id,
+        email: FX.issuer.email,
+        status: 'example-status',
+        requestedAt: FX.timestamps.createdAt,
+        deadline: FX.timestamps.createdAt,
+      },
+      {
+        id: '00000000-0000-4000-8000-0000000000ff',
+        type: 'example-type',
+        userId: FX.issuer.id,
+        email: FX.issuer.email,
+        status: 'example-status',
+        requestedAt: FX.timestamps.createdAt,
+        deadline: FX.timestamps.createdAt,
+      },
+    ],
+  },
+  }),
+);
+
+const DSRUpdateRequestSchema = sharedRegistry.register(
+  'DSRUpdateRequest',
+  z.object({
+    // KS-444: publish the runtime's true status vocabulary. The schema had
+    // drifted to ['pending','in_progress','completed','rejected'], but the
+    // platform stores 'processing'/'denied'/'extended' (DataSubjectRequest
+    // in services/gdprService.ts + the data_subject_requests CHECK constraint
+    // in migrations/001_initial-schema.sql) — 'in_progress'/'rejected' were
+    // spec-legal yet unstorable. Documenting the real vocabulary, not
+    // narrowing a spec grant the runtime honoured.
+    status: z.enum(['pending', 'processing', 'completed', 'denied', 'extended']),
+    processedBy: z.string().min(1),
+    notes: z.string().optional(),
+  }).openapi({
+  // KS-256: generated example (synthesised, masked). Guarded by
+  // `npm run check:openapi` -> check-spec-examples (E1-E7).
+    example: {
+    status: 'pending',
+    processedBy: 'example-processedBy',
+  },
+  }),
+);
+
+const ErasureRequestSchema = sharedRegistry.register(
+  'ErasureRequest',
+  z.object({ dsrId: z.string().min(1), performedBy: z.string().min(1) }).openapi({
+  // KS-256: generated example (synthesised, masked). Guarded by
+  // `npm run check:openapi` -> check-spec-examples (E1-E7).
+    example: {
+    dsrId: 'example-dsrId',
+    performedBy: 'example-performedBy',
+  },
+  }),
+);
+
+const ErasureResponseSchema = sharedRegistry.register(
+  'ErasureResponse',
+  z.object({
+    success: z.boolean(),
+    message: z.string(),
+    deletionLog: z.array(z.record(z.string(), z.unknown())).optional(),
+  }).openapi({
+  // KS-256: generated example (synthesised, masked). Guarded by
+  // `npm run check:openapi` -> check-spec-examples (E1-E7).
+    example: {
+    success: true,
+    message: 'example-message',
+  },
+  }),
+);
+
+const RetentionPolicyListResponseSchema = sharedRegistry.register(
+  'RetentionPolicyListResponse',
+  z.object({
+    success: z.literal(true),
+    policies: z.array(z.record(z.string(), z.unknown())),
+  }).openapi({
+  // KS-256: generated example (synthesised, masked). Guarded by
+  // `npm run check:openapi` -> check-spec-examples (E1-E7).
+    example: {
+    success: true,
+    policies: [
+      {},
+      {},
+    ],
+  },
+  }),
+);
+
+const DeletionLogResponseSchema = sharedRegistry.register(
+  'DeletionLogResponse',
+  z.object({
+    success: z.literal(true),
+    logs: z.array(z.record(z.string(), z.unknown())),
+  }).openapi({
+  // KS-256: generated example (synthesised, masked). Guarded by
+  // `npm run check:openapi` -> check-spec-examples (E1-E7).
+    example: {
+    success: true,
+    logs: [
+      {},
+      {},
+    ],
+  },
+  }),
+);
+
+const SystemErrorIngestRequestSchema = sharedRegistry.register(
+  'SystemErrorIngestRequest',
+  z.object({
+    service: z.string().min(1),
+    errorType: z.string().optional(),
+    message: z.string().min(1),
+    stack: z.string().optional(),
+    requestPath: z.string().optional(),
+    requestMethod: z.string().optional(),
+    userId: z.string().optional(),
+    // KS-444: the platform's severity domain is warning/error/critical —
+    // errorTrackingService types it so, and the GET /api/system-errors filter
+    // (KS-267, published below) only offers those three. The old
+    // debug/info/warn/error/fatal enum was stale drift: it advertised values
+    // the list filter can't select and the tracking service doesn't model.
+    severity: z.enum(['warning', 'error', 'critical']).optional(),
+    metadata: z.record(z.string(), z.unknown()).optional(),
+  }).openapi({
+  // KS-256: generated example (synthesised, masked). Guarded by
+  // `npm run check:openapi` -> check-spec-examples (E1-E7).
+    example: {
+    service: 'example-service',
+    message: 'example-message',
+  },
+  }),
+);
+
+const ClientErrorIngestRequestSchema = sharedRegistry.register(
+  'ClientErrorIngestRequest',
+  z.object({
+    error: z.string().optional(),
+    componentStack: z.string().optional(),
+    url: z.string().optional(),
+    userAgent: z.string().optional(),
+    source: z.string().optional(),
+  }).openapi({
+  // KS-256: generated example (synthesised, masked). Guarded by
+  // `npm run check:openapi` -> check-spec-examples (E1-E7).
+    example: {
+    error: 'example-error',
+    componentStack: 'example-componentStack',
+    url: 'example-url',
+    // KS-665 item 4: this published the person literal 'Demo Issuer' as a
+    // user agent. Same class as the 16 `address` fields fixed in 704c8c0f2 —
+    // a legitimate PERSON fixture landing on a non-person field, so E5
+    // certifies it rather than missing it. No client sends a display name
+    // as a User-Agent; this is a documentation defect, not a leak.
+    userAgent: FX.userAgent,
+    source: 'example-source',
+  },
+  }),
+);
+
+const SystemErrorSchema = sharedRegistry.register(
+  'SystemError',
+  z
+    .object({
+      id: z.string(),
+      service: z.string(),
+      errorType: z.string().nullable().optional(),
+      message: z.string(),
+      severity: z.string(),
+      resolved: z.boolean(),
+      resolvedAt: z.string().nullable().optional(),
+      createdAt: z.string(),
+    })
+    .passthrough().openapi({
+  // KS-256: generated example (synthesised, masked). Guarded by
+  // `npm run check:openapi` -> check-spec-examples (E1-E7).
+    example: {
+    id: 'example-id',
+    service: 'example-service',
+    message: 'example-message',
+    severity: 'example-severity',
+    resolved: true,
+    createdAt: 'example-createdAt',
+  },
+  }),
+);
+
+const SystemErrorListResponseSchema = sharedRegistry.register(
+  'SystemErrorListResponse',
+  z.object({
+    success: z.literal(true),
+    errors: z.array(SystemErrorSchema),
+    total: z.number().int().nonnegative().optional(),
+  }).openapi({
+  // KS-256: generated example (synthesised, masked). Guarded by
+  // `npm run check:openapi` -> check-spec-examples (E1-E7).
+    example: {
+    success: true,
+    errors: [
+      {
+        id: '00000000-0000-4000-8000-0000000000ff',
+        service: 'example-service',
+        message: 'example-message',
+        severity: 'example-severity',
+        resolved: true,
+        createdAt: FX.timestamps.createdAt,
+      },
+      {
+        id: '00000000-0000-4000-8000-0000000000ff',
+        service: 'example-service',
+        message: 'example-message',
+        severity: 'example-severity',
+        resolved: true,
+        createdAt: FX.timestamps.createdAt,
+      },
+    ],
+  },
+  }),
+);
+
+const SystemErrorStatsResponseSchema = sharedRegistry.register(
+  'SystemErrorStatsResponse',
+  z.object({
+    success: z.literal(true),
+    stats: z.record(z.string(), z.unknown()),
+  }).openapi({
+  // KS-256: generated example (synthesised, masked). Guarded by
+  // `npm run check:openapi` -> check-spec-examples (E1-E7).
+    example: {
+    success: true,
+    stats: {},
+  },
+  }),
+);
+
+const SystemErrorResolveByServiceRequestSchema = sharedRegistry.register(
+  'SystemErrorResolveByServiceRequest',
+  z.object({ service: z.string().min(1) }).openapi({
+  // KS-256: generated example (synthesised, masked). Guarded by
+  // `npm run check:openapi` -> check-spec-examples (E1-E7).
+    example: {
+    service: 'example-service',
+  },
+  }),
+);
+
+const SystemErrorResolveByServiceResponseSchema = sharedRegistry.register(
+  'SystemErrorResolveByServiceResponse',
+  z.object({ success: z.literal(true), resolved: z.number().int().nonnegative() }).openapi({
+  // KS-256: generated example (synthesised, masked). Guarded by
+  // `npm run check:openapi` -> check-spec-examples (E1-E7).
+    example: {
+    success: true,
+    resolved: 0,
+  },
+  }),
+);
+
+// =============================================================================
+// ROUTES — /api/webhooks (originate; requires webhooks:manage scope at gateway)
+// =============================================================================
+
+sharedRegistry.registerPath({
+  method: 'get',
+  path: '/api/webhooks',
+  tags: ['Webhooks'],
+  summary: 'List webhook subscriptions for the caller',
+  security: [{ bearerAuth: [] }],
+  responses: {
+    400: commonErrorResponses[400],
+    200: {
+      description: 'Subscription list',
+      content: { 'application/json': { schema: WebhookListResponseSchema } },
+    },
+    401: commonErrorResponses[401],
+    403: { ...commonErrorResponses[403], description: 'Missing webhooks:manage scope' },
+    429: commonErrorResponses[429],
+    500: commonErrorResponses[500],
+    404: commonErrorResponses[404],
+    502: commonErrorResponses[502],
+    503: commonErrorResponses[503],
+  },
+});
+
+sharedRegistry.registerPath({
+  method: 'post',
+  path: '/api/webhooks',
+  tags: ['Webhooks'],
+  summary: 'Subscribe a URL to one or more event types',
+  description:
+    'Returns a plaintext signing `secret` that is shown ONCE — store it ' +
+    'immediately. Subsequent deliveries are signed with HMAC-SHA256 over ' +
+    'the JSON body using this secret.',
+  security: [{ bearerAuth: [] }],
+  request: {
+    // KS-444 (KS-283 precedent): the runtime 400s on missing url/events.
+    body: {
+      required: true,
+      content: { 'application/json': { schema: WebhookCreateRequestSchema } },
+    },
+  },
+  responses: {
+    201: {
+      description: 'Subscription created (plaintext secret returned ONCE)',
+      content: { 'application/json': { schema: WebhookCreateResponseSchema } },
+    },
+    400: { ...commonErrorResponses[400], description: 'Validation error / unsupported event / URL rejected' },
+    401: commonErrorResponses[401],
+    403: { ...commonErrorResponses[403], description: 'Missing webhooks:manage scope' },
+    429: commonErrorResponses[429],
+    500: commonErrorResponses[500],
+    404: commonErrorResponses[404],
+    502: commonErrorResponses[502],
+    503: commonErrorResponses[503],
+  },
+});
+
+sharedRegistry.registerPath({
+  method: 'patch',
+  path: '/api/webhooks/{id}',
+  tags: ['Webhooks'],
+  summary: 'Update webhook subscription (URL / events / active)',
+  security: [{ bearerAuth: [] }],
+  request: {
+    params: webhookIdPathParams,
+    body: {
+      content: { 'application/json': { schema: WebhookUpdateRequestSchema } },
+    },
+  },
+  responses: {
+    200: {
+      description: 'Updated',
+      content: { 'application/json': { schema: OriginateSuccessSchema } },
+    },
+    400: commonErrorResponses[400],
+    401: commonErrorResponses[401],
+    403: commonErrorResponses[403],
+    404: commonErrorResponses[404],
+    429: commonErrorResponses[429],
+    500: commonErrorResponses[500],
+    502: commonErrorResponses[502],
+    503: commonErrorResponses[503],
+  },
+});
+
+sharedRegistry.registerPath({
+  method: 'delete',
+  path: '/api/webhooks/{id}',
+  tags: ['Webhooks'],
+  summary: 'Deactivate (soft-delete) a webhook subscription',
+  security: [{ bearerAuth: [] }],
+  request: { params: webhookIdPathParams },
+  responses: {
+    400: commonErrorResponses[400],
+    200: {
+      description: 'Deactivated',
+      content: { 'application/json': { schema: OriginateSuccessSchema } },
+    },
+    401: commonErrorResponses[401],
+    403: commonErrorResponses[403],
+    404: commonErrorResponses[404],
+    429: commonErrorResponses[429],
+    500: commonErrorResponses[500],
+    502: commonErrorResponses[502],
+    503: commonErrorResponses[503],
+  },
+});
+
+sharedRegistry.registerPath({
+  method: 'post',
+  path: '/api/webhooks/{id}/rotate-secret',
+  tags: ['Webhooks'],
+  summary: 'Rotate the HMAC signing secret for a subscription',
+  description:
+    'Returns a fresh plaintext signing secret. The old one is invalidated immediately.',
+  security: [{ bearerAuth: [] }],
+  request: { params: webhookIdPathParams },
+  responses: {
+    400: commonErrorResponses[400],
+    200: {
+      description: 'Secret rotated (plaintext returned ONCE)',
+      content: { 'application/json': { schema: WebhookRotateSecretResponseSchema } },
+    },
+    401: commonErrorResponses[401],
+    404: { ...commonErrorResponses[404], description: 'Webhook not found' },
+    403: commonErrorResponses[403],
+    429: commonErrorResponses[429],
+    500: commonErrorResponses[500],
+    502: commonErrorResponses[502],
+    503: commonErrorResponses[503],
+  },
+});
+
+sharedRegistry.registerPath({
+  method: 'post',
+  path: '/api/webhooks/{id}/test',
+  tags: ['Webhooks'],
+  summary: 'Send a test event to verify the subscription is reachable',
+  security: [{ bearerAuth: [] }],
+  request: { params: webhookIdPathParams },
+  responses: {
+    400: commonErrorResponses[400],
+    200: {
+      description: 'Test event delivery result',
+      content: { 'application/json': { schema: WebhookTestResponseSchema } },
+    },
+    401: commonErrorResponses[401],
+    404: { ...commonErrorResponses[404], description: 'Webhook not found or inactive' },
+    403: commonErrorResponses[403],
+    429: commonErrorResponses[429],
+    500: commonErrorResponses[500],
+    502: commonErrorResponses[502],
+    503: commonErrorResponses[503],
+  },
+});
+
+sharedRegistry.registerPath({
+  method: 'get',
+  path: '/api/webhooks/{id}/deliveries',
+  tags: ['Webhooks'],
+  summary: 'List the last 50 deliveries for this subscription',
+  security: [{ bearerAuth: [] }],
+  request: { params: webhookIdPathParams },
+  responses: {
+    400: commonErrorResponses[400],
+    200: {
+      description: 'Delivery history',
+      content: { 'application/json': { schema: WebhookDeliveryListResponseSchema } },
+    },
+    401: commonErrorResponses[401],
+    403: commonErrorResponses[403],
+    404: commonErrorResponses[404],
+    429: commonErrorResponses[429],
+    500: commonErrorResponses[500],
+    502: commonErrorResponses[502],
+    503: commonErrorResponses[503],
+  },
+});
+
+// =============================================================================
+// ROUTES — /api/gdpr (consent, DSRs, exports, erasure, retention)
+// =============================================================================
+
+sharedRegistry.registerPath({
+  method: 'post',
+  path: '/api/gdpr/consent',
+  tags: ['GDPR', 'Consent'],
+  summary: 'Record or renew a user consent',
+  security: [{ bearerAuth: [] }],
+  request: {
+    // KS-444 (KS-283 precedent): the runtime 400s on missing userId/purpose,
+    // so an absent body is a schema violation (negative), never a positive case.
+    body: { required: true, content: { 'application/json': { schema: ConsentRecordRequestSchema } } },
+  },
+  responses: {
+    201: {
+      description: 'Consent recorded',
+      content: { 'application/json': { schema: ConsentResponseSchema } },
+    },
+    400: commonErrorResponses[400],
+    401: commonErrorResponses[401],
+    403: commonErrorResponses[403],
+    429: commonErrorResponses[429],
+    500: commonErrorResponses[500],
+    404: commonErrorResponses[404],
+    502: commonErrorResponses[502],
+    503: commonErrorResponses[503],
+  },
+});
+
+sharedRegistry.registerPath({
+  method: 'post',
+  path: '/api/gdpr/consent/withdraw',
+  tags: ['GDPR', 'Consent'],
+  summary: 'Withdraw an active consent',
+  security: [{ bearerAuth: [] }],
+  request: {
+    // KS-444 (KS-283 precedent): the runtime 400s on missing userId/purpose.
+    body: { required: true, content: { 'application/json': { schema: ConsentWithdrawRequestSchema } } },
+  },
+  responses: {
+    200: {
+      description: 'Withdraw result (success=false if no active consent found)',
+      content: { 'application/json': { schema: OriginateSuccessSchema } },
+    },
+    400: commonErrorResponses[400],
+    401: commonErrorResponses[401],
+    403: commonErrorResponses[403],
+    429: commonErrorResponses[429],
+    500: commonErrorResponses[500],
+    404: commonErrorResponses[404],
+    502: commonErrorResponses[502],
+    503: commonErrorResponses[503],
+  },
+});
+
+sharedRegistry.registerPath({
+  method: 'get',
+  path: '/api/gdpr/consent/check',
+  tags: ['GDPR', 'Consent'],
+  summary: 'Check whether a user has valid consent for a purpose',
+  security: [{ bearerAuth: [] }],
+  request: {
+    query: z.object({ userId: z.string(), purpose: z.string() }),
+  },
+  responses: {
+    200: {
+      description: 'Consent status',
+      content: { 'application/json': { schema: ConsentCheckResponseSchema } },
+    },
+    400: { ...commonErrorResponses[400], description: 'Missing userId or purpose' },
+    401: commonErrorResponses[401],
+    403: commonErrorResponses[403],
+    429: commonErrorResponses[429],
+    500: commonErrorResponses[500],
+    404: commonErrorResponses[404],
+    502: commonErrorResponses[502],
+    503: commonErrorResponses[503],
+  },
+});
+
+sharedRegistry.registerPath({
+  method: 'get',
+  path: '/api/gdpr/consent/{userId}',
+  tags: ['GDPR', 'Consent'],
+  summary: 'Get all consents for a user',
+  security: [{ bearerAuth: [] }],
+  request: { params: z.object({ userId: z.string().openapi({ example: FX.holder.id }) }) },
+  responses: {
+    400: commonErrorResponses[400],
+    200: {
+      description: 'Consent list',
+      content: { 'application/json': { schema: ConsentListResponseSchema } },
+    },
+    401: commonErrorResponses[401],
+    403: commonErrorResponses[403],
+    429: commonErrorResponses[429],
+    500: commonErrorResponses[500],
+    404: commonErrorResponses[404],
+    502: commonErrorResponses[502],
+    503: commonErrorResponses[503],
+  },
+});
+
+sharedRegistry.registerPath({
+  method: 'post',
+  path: '/api/gdpr/dsr',
+  tags: ['GDPR', 'DSR'],
+  summary: 'Create a Data Subject Request',
+  security: [{ bearerAuth: [] }],
+  request: {
+    // KS-444 (KS-283 precedent): the runtime 400s on missing type/userId/email.
+    body: { required: true, content: { 'application/json': { schema: DSRCreateRequestSchema } } },
+  },
+  responses: {
+    201: {
+      description: 'DSR created',
+      content: { 'application/json': { schema: DSRResponseSchema } },
+    },
+    400: { ...commonErrorResponses[400], description: 'Validation error / unknown DSR type' },
+    401: commonErrorResponses[401],
+    403: commonErrorResponses[403],
+    429: commonErrorResponses[429],
+    500: commonErrorResponses[500],
+    404: commonErrorResponses[404],
+    502: commonErrorResponses[502],
+    503: commonErrorResponses[503],
+  },
+});
+
+sharedRegistry.registerPath({
+  method: 'get',
+  path: '/api/gdpr/dsr/pending',
+  tags: ['GDPR', 'DSR'],
+  summary: 'List pending DSRs (admin)',
+  description: 'In dev this route is open to support the admin frontend; in production it requires SYSTEM_ADMIN or ORG_ADMIN.',
+  security: [{ bearerAuth: [] }],
+  responses: {
+    400: commonErrorResponses[400],
+    200: {
+      description: 'Pending DSRs',
+      content: { 'application/json': { schema: DSRListResponseSchema } },
+    },
+    401: commonErrorResponses[401],
+    403: { ...commonErrorResponses[403], description: 'Insufficient role (production only)' },
+    429: commonErrorResponses[429],
+    500: commonErrorResponses[500],
+    404: commonErrorResponses[404],
+    502: commonErrorResponses[502],
+    503: commonErrorResponses[503],
+  },
+});
+
+sharedRegistry.registerPath({
+  method: 'get',
+  path: '/api/gdpr/dsr/{dsrId}',
+  tags: ['GDPR', 'DSR'],
+  summary: 'Get a DSR by id',
+  security: [{ bearerAuth: [] }],
+  request: { params: z.object({ dsrId: z.string() }) },
+  responses: {
+    400: commonErrorResponses[400],
+    200: {
+      description: 'DSR detail',
+      content: { 'application/json': { schema: DSRResponseSchema } },
+    },
+    401: commonErrorResponses[401],
+    404: { ...commonErrorResponses[404], description: 'DSR not found' },
+    403: commonErrorResponses[403],
+    429: commonErrorResponses[429],
+    500: commonErrorResponses[500],
+    502: commonErrorResponses[502],
+    503: commonErrorResponses[503],
+  },
+});
+
+sharedRegistry.registerPath({
+  method: 'get',
+  path: '/api/gdpr/dsr/user/{userId}',
+  tags: ['GDPR', 'DSR'],
+  summary: 'List all DSRs for a user',
+  security: [{ bearerAuth: [] }],
+  request: { params: z.object({ userId: z.string().openapi({ example: FX.holder.id }) }) },
+  responses: {
+    400: commonErrorResponses[400],
+    200: {
+      description: 'DSR list for the user',
+      content: { 'application/json': { schema: DSRListResponseSchema } },
+    },
+    401: commonErrorResponses[401],
+    403: commonErrorResponses[403],
+    429: commonErrorResponses[429],
+    500: commonErrorResponses[500],
+    404: commonErrorResponses[404],
+    502: commonErrorResponses[502],
+    503: commonErrorResponses[503],
+  },
+});
+
+sharedRegistry.registerPath({
+  method: 'patch',
+  path: '/api/gdpr/dsr/{dsrId}',
+  tags: ['GDPR', 'DSR'],
+  summary: 'Update DSR status (admin)',
+  security: [{ bearerAuth: [] }],
+  request: {
+    params: z.object({ dsrId: z.string() }),
+    // KS-444 (KS-283 precedent): the runtime 400s on missing status/processedBy.
+    body: { required: true, content: { 'application/json': { schema: DSRUpdateRequestSchema } } },
+  },
+  responses: {
+    200: {
+      description: 'DSR updated (success=false if id not found)',
+      content: { 'application/json': { schema: OriginateSuccessSchema } },
+    },
+    400: commonErrorResponses[400],
+    401: commonErrorResponses[401],
+    403: { ...commonErrorResponses[403], description: 'Insufficient role' },
+    404: commonErrorResponses[404],
+    429: commonErrorResponses[429],
+    500: commonErrorResponses[500],
+    502: commonErrorResponses[502],
+    503: commonErrorResponses[503],
+  },
+});
+
+sharedRegistry.registerPath({
+  method: 'get',
+  path: '/api/gdpr/export/{userId}',
+  tags: ['GDPR', 'Export'],
+  summary: 'Export all data the platform holds for a user (Article 20)',
+  security: [{ bearerAuth: [] }],
+  request: { params: z.object({ userId: z.string().openapi({ example: FX.holder.id }) }) },
+  responses: {
+    400: commonErrorResponses[400],
+    200: {
+      description: 'JSON export envelope',
+      content: {
+        'application/json': {
+          schema: z.object({
+            success: z.literal(true),
+            data: z.record(z.string(), z.unknown()),
+          }),
+        },
+      },
+    },
+    401: commonErrorResponses[401],
+    403: commonErrorResponses[403],
+    429: commonErrorResponses[429],
+    500: commonErrorResponses[500],
+    404: commonErrorResponses[404],
+    502: commonErrorResponses[502],
+    503: commonErrorResponses[503],
+  },
+});
+
+sharedRegistry.registerPath({
+  method: 'get',
+  path: '/api/gdpr/export/{userId}/download',
+  tags: ['GDPR', 'Export'],
+  summary: 'Download the user data export as a JSON file attachment',
+  security: [{ bearerAuth: [] }],
+  request: { params: z.object({ userId: z.string().openapi({ example: FX.holder.id }) }) },
+  responses: {
+    400: commonErrorResponses[400],
+    200: {
+      description: 'JSON file attachment (Content-Disposition: attachment)',
+      content: { 'application/json': { schema: z.record(z.string(), z.unknown()) } },
+    },
+    401: commonErrorResponses[401],
+    403: commonErrorResponses[403],
+    429: commonErrorResponses[429],
+    500: commonErrorResponses[500],
+    404: commonErrorResponses[404],
+    502: commonErrorResponses[502],
+    503: commonErrorResponses[503],
+  },
+});
+
+// KS-695 ask 1 — connector-driven erasure addressed by external_ref.
+// security is declared explicitly on both (KS-424 guard). The caller presents
+// `x-api-key: sk_…`; the gateway exchanges it for a connector JWT and forwards
+// a Bearer, so bearerAuth is the accurate declaration at this hop.
+const ConnectorErasureResponseSchema = z.object({
+  success: z.boolean().openapi({ example: true }),
+  data: z.object({
+    // Both values are TERMINAL — S stops retrying on either. `denied` was added
+    // for QA F-1: `data_subject_requests.status` admits 'denied' (schema CHECK,
+    // `docker/init/01-schema.sql:490`), and treating it as non-terminal caused a
+    // human-refused erasure to be re-driven and executed. It is reported, not
+    // raised as an error, because a 5xx would put S back into unbounded retry.
+    status: z.enum(['completed', 'denied', 'unresolvable']).openapi({
+      example: 'completed',
+      description:
+        'Terminal outcome. `completed` — K holds nothing further erasable for this subject. '
+        + '`denied` — an erasure request for this subject was REFUSED by a human (e.g. an Art. 17(3) '
+        + 'exemption); the decision stands and the caller must stop retrying. '
+        + '`unresolvable` — K could not identify the subject SAFELY and erased NOTHING; see `reason`. '
+        + 'All three are terminal: none should be re-driven.',
+    }),
+    alreadyErased: z.boolean().openapi({
+      example: false,
+      description: 'Always false when `status` is `denied` or `unresolvable` — nothing was erased.',
+    }),
+    // QA Blocker 2. A CONTRACT CHANGE for legacy keys: a connector key minted
+    // WITHOUT an organizationId previously received `completed` here, because
+    // an unresolvable subject fell through to the branch that blanks provenance
+    // and terminates. It now receives `unresolvable` + `org_less_key` and K
+    // erases nothing on that path. The old answer was the more dangerous one —
+    // it reported an Art. 17 obligation discharged that had not been — but the
+    // change is visible to S and is called out for that reason.
+    reason: z.enum([
+      'org_less_key',
+      'subject_outside_connector_organisation',
+      'ambiguous_subject',
+    ]).optional().openapi({
+      description:
+        'Present only when `status` is `unresolvable`. `org_less_key` — the calling key carries no '
+        + 'Organisation, so K cannot attribute the subject to it (re-mint the key with an '
+        + 'organizationId). `subject_outside_connector_organisation` — the matched user belongs to no '
+        + 'Organisation, so membership of the caller\'s cannot be shown. `ambiguous_subject` — the ref '
+        + 'matched MORE THAN ONE user; K refuses to guess which one to erase irreversibly.',
+      example: 'org_less_key',
+    }),
+  }),
+}).openapi('ConnectorErasureResponse');
+
+const ConnectorErasureRequestSchema = z.object({
+  externalRef: z.string().trim().min(1).max(128).openapi({
+    description: "Platform S's Person.PersonGuid — the subject key K receives as onBehalfOf.externalRef. "
+      + 'Limit matches the stored column (VARCHAR(128)) and the write-side validator (QA/Peter F4): '
+      + 'a longer or untrimmed ref matches no row and must not be reported as a discharged erasure.',
+    example: '7f3c1a90-2b44-4d31-9e5a-0c8f2d61b7aa',
+  }),
+}).openapi('ConnectorErasureRequest');
+
+sharedRegistry.registerPath({
+  method: 'post',
+  path: '/api/gdpr/erasures',
+  tags: ['GDPR', 'Erasure'],
+  summary: 'Erase a data subject addressed by external_ref (connector)',
+  description:
+    'Connector-authenticated Art.17 erasure keyed on external_ref, for callers that hold no K user id. '
+    + 'Idempotent: a repeat returns alreadyErased true without re-executing. Never 404s — an external_ref '
+    + 'K cannot resolve is a subject K holds nothing erasable for, and is reported completed, because the '
+    + 'caller retries unbounded and a non-terminal answer strands the erasure.',
+  security: [{ bearerAuth: [] }],
+  request: {
+    body: { required: true, content: { 'application/json': { schema: ConnectorErasureRequestSchema } } },
+  },
+  responses: {
+    200: { description: 'Erasure completed', content: { 'application/json': { schema: ConnectorErasureResponseSchema } } },
+    400: commonErrorResponses[400],
+    401: commonErrorResponses[401],
+    403: {
+      ...commonErrorResponses[403],
+      description:
+        "Not a connector, the token carries no tenant, or the externalRef resolves to a subject in a "
+        + "DIFFERENT Organisation. Terminal: the caller must stop retrying.",
+    },
+    // No 404 — deliberately. The description above says this operation never
+    // 404s, and declaring one invites S to codegen a branch that never fires,
+    // or worse to treat it as terminal and stop retrying.
+    429: commonErrorResponses[429],
+    500: commonErrorResponses[500],
+    502: commonErrorResponses[502],
+    503: commonErrorResponses[503],
+  },
+});
+
+sharedRegistry.registerPath({
+  method: 'get',
+  path: '/api/gdpr/erasures/{externalRef}',
+  tags: ['GDPR', 'Erasure'],
+  summary: 'Erasure status for a data subject addressed by external_ref (connector)',
+  description: 'Read-only convergence check for a connector retry sweep. Never writes and never 404s.',
+  security: [{ bearerAuth: [] }],
+  request: {
+    params: z.object({
+      externalRef: z.string().trim().min(1).max(128).openapi({ example: '7f3c1a90-2b44-4d31-9e5a-0c8f2d61b7aa' }),
+    }),
+  },
+  responses: {
+    200: { description: 'Erasure status', content: { 'application/json': { schema: ConnectorErasureResponseSchema } } },
+    400: commonErrorResponses[400],
+    401: commonErrorResponses[401],
+    403: {
+      ...commonErrorResponses[403],
+      description:
+        "Not a connector, the token carries no tenant, or the externalRef resolves to a subject in a "
+        + "DIFFERENT Organisation. Terminal: the caller must stop retrying.",
+    },
+    // No 404 — same reason as the POST. "Never writes and never 404s" above.
+    429: commonErrorResponses[429],
+    500: commonErrorResponses[500],
+    502: commonErrorResponses[502],
+    503: commonErrorResponses[503],
+  },
+});
+
+sharedRegistry.registerPath({
+  method: 'post',
+  path: '/api/gdpr/erasure/{userId}',
+  tags: ['GDPR', 'Erasure'],
+  summary: 'Right-to-be-forgotten — cascading delete of user data (admin)',
+  description:
+    'Requires SYSTEM_ADMIN. Returns the deletion log on success, including ' +
+    'partial-failure info if any cascade step did not complete.',
+  security: [{ bearerAuth: [] }],
+  request: {
+    params: z.object({ userId: z.string().openapi({ example: FX.holder.id }) }),
+    // KS-444 (KS-283 precedent): the runtime 400s on missing dsrId/performedBy.
+    body: { required: true, content: { 'application/json': { schema: ErasureRequestSchema } } },
+  },
+  responses: {
+    200: {
+      description: 'Erasure result',
+      content: { 'application/json': { schema: ErasureResponseSchema } },
+    },
+    401: commonErrorResponses[401],
+    403: { ...commonErrorResponses[403], description: 'Insufficient role' },
+    400: commonErrorResponses[400],
+    404: commonErrorResponses[404],
+    429: commonErrorResponses[429],
+    500: commonErrorResponses[500],
+    502: commonErrorResponses[502],
+    503: commonErrorResponses[503],
+  },
+});
+
+sharedRegistry.registerPath({
+  method: 'get',
+  path: '/api/gdpr/retention',
+  tags: ['GDPR', 'Retention'],
+  summary: 'List data-retention policies',
+  security: [{ bearerAuth: [] }],
+  responses: {
+    400: commonErrorResponses[400],
+    200: {
+      description: 'Policy list',
+      content: {
+        'application/json': { schema: RetentionPolicyListResponseSchema },
+      },
+    },
+    401: commonErrorResponses[401],
+    403: commonErrorResponses[403],
+    429: commonErrorResponses[429],
+    500: commonErrorResponses[500],
+    404: commonErrorResponses[404],
+    502: commonErrorResponses[502],
+    503: commonErrorResponses[503],
+  },
+});
+
+sharedRegistry.registerPath({
+  method: 'post',
+  path: '/api/gdpr/retention/enforce',
+  tags: ['GDPR', 'Retention'],
+  summary: 'Trigger manual retention enforcement (admin)',
+  security: [{ bearerAuth: [] }],
+  responses: {
+    400: commonErrorResponses[400],
+    200: {
+      description: 'Enforcement complete — returns the deletion log',
+      content: { 'application/json': { schema: ErasureResponseSchema } },
+    },
+    401: commonErrorResponses[401],
+    403: { ...commonErrorResponses[403], description: 'Insufficient role' },
+    429: commonErrorResponses[429],
+    500: commonErrorResponses[500],
+    404: commonErrorResponses[404],
+    502: commonErrorResponses[502],
+    503: commonErrorResponses[503],
+  },
+});
+
+sharedRegistry.registerPath({
+  method: 'get',
+  path: '/api/gdpr/deletion-log',
+  tags: ['GDPR'],
+  summary: 'Get the deletion audit trail',
+  description:
+    'In dev this route is open to support the admin frontend; in production ' +
+    'it requires SYSTEM_ADMIN or ORG_ADMIN.',
+  security: [{ bearerAuth: [] }],
+  request: {
+    query: z.object({ userId: z.string().optional() }),
+  },
+  responses: {
+    400: commonErrorResponses[400],
+    200: {
+      description: 'Deletion log entries',
+      content: { 'application/json': { schema: DeletionLogResponseSchema } },
+    },
+    401: commonErrorResponses[401],
+    403: commonErrorResponses[403],
+    429: commonErrorResponses[429],
+    500: commonErrorResponses[500],
+    404: commonErrorResponses[404],
+    502: commonErrorResponses[502],
+    503: commonErrorResponses[503],
+  },
+});
+
+// =============================================================================
+// ROUTES — /api/system-errors (error tracking + admin dashboard)
+// =============================================================================
+
+sharedRegistry.registerPath({
+  method: 'post',
+  path: '/api/system-errors/ingest',
+  security: [{ bearerAuth: [] }],
+  tags: ['System Errors'],
+  summary: 'Ingest a server-side error from another service',
+  description:
+    'Service-to-service: any service that hits an unexpected error posts ' +
+    'it here for centralised tracking + admin dashboarding.',
+  request: {
+    body: {
+      content: {
+        'application/json': { schema: SystemErrorIngestRequestSchema },
+      },
+    },
+  },
+  responses: {
+    201: {
+      description: 'Error tracked',
+      content: { 'application/json': { schema: OriginateSuccessSchema } },
+    },
+    400: { ...commonErrorResponses[400], description: 'service and message are required' },
+    429: commonErrorResponses[429],
+    500: commonErrorResponses[500],
+    404: commonErrorResponses[404],
+    502: commonErrorResponses[502],
+    503: commonErrorResponses[503],
+    401: commonErrorResponses[401],
+  },
+});
+
+sharedRegistry.registerPath({
+  method: 'post',
+  path: '/api/system-errors/client-errors',
+  security: [{ bearerAuth: [] }],
+  tags: ['System Errors'],
+  summary: 'Ingest a client-side error from a React Error Boundary',
+  request: {
+    body: {
+      content: {
+        'application/json': { schema: ClientErrorIngestRequestSchema },
+      },
+    },
+  },
+  responses: {
+    201: {
+      description: 'Error tracked',
+      content: { 'application/json': { schema: OriginateSuccessSchema } },
+    },
+    400: commonErrorResponses[400],
+    429: commonErrorResponses[429],
+    500: commonErrorResponses[500],
+    404: commonErrorResponses[404],
+    502: commonErrorResponses[502],
+    503: commonErrorResponses[503],
+    401: commonErrorResponses[401],
+  },
+});
+
+sharedRegistry.registerPath({
+  method: 'get',
+  path: '/api/system-errors/stats',
+  tags: ['System Errors'],
+  summary: 'Get error statistics (admin dashboard)',
+  description:
+    'In dev this route is open to support the admin frontend; in production ' +
+    'it requires SYSTEM_ADMIN or ORG_ADMIN.',
+  security: [{ bearerAuth: [] }],
+  responses: {
+    400: commonErrorResponses[400],
+    200: {
+      description: 'Error stats',
+      content: {
+        'application/json': { schema: SystemErrorStatsResponseSchema },
+      },
+    },
+    401: commonErrorResponses[401],
+    403: commonErrorResponses[403],
+    429: commonErrorResponses[429],
+    500: commonErrorResponses[500],
+    404: commonErrorResponses[404],
+    502: commonErrorResponses[502],
+    503: commonErrorResponses[503],
+  },
+});
+
+sharedRegistry.registerPath({
+  method: 'get',
+  path: '/api/system-errors',
+  tags: ['System Errors'],
+  summary: 'List recent errors with optional filters (admin)',
+  description:
+    'In dev this route is open to support the admin frontend; in production ' +
+    'it requires SYSTEM_ADMIN or ORG_ADMIN.',
+  security: [{ bearerAuth: [] }],
+  request: {
+    // KS-267: mirror the handler's SystemErrorsQuerySchema (routes/systemErrors.ts)
+    // — severity is the SystemError union, limit/offset are bounded integers — so
+    // schemathesis's negative_data_rejection probes hit declared, validated params.
+    query: z.object({
+      service: z.string().min(1).optional(),
+      severity: z.enum(['warning', 'error', 'critical']).optional(),
+      resolved: z.enum(['true', 'false']).optional(),
+      limit: z.coerce.number().int().positive().max(500).optional(),
+      // KS-423: .openapi({type:'integer'}) pins the emitted type — zod-to-openapi
+      // renders coerce+min(0) as `type: [integer, "null"]`, admitting a null the
+      // handler correctly 400s (positive_data_acceptance false-accept).
+      offset: z.coerce.number().int().min(0).optional().openapi({ type: 'integer', minimum: 0 }),
+    }),
+  },
+  responses: {
+    400: commonErrorResponses[400],
+    200: {
+      description: 'Error list',
+      content: {
+        'application/json': { schema: SystemErrorListResponseSchema },
+      },
+    },
+    401: commonErrorResponses[401],
+    403: commonErrorResponses[403],
+    429: commonErrorResponses[429],
+    500: commonErrorResponses[500],
+    404: commonErrorResponses[404],
+    502: commonErrorResponses[502],
+    503: commonErrorResponses[503],
+  },
+});
+
+sharedRegistry.registerPath({
+  method: 'patch',
+  path: '/api/system-errors/{errorId}/resolve',
+  tags: ['System Errors'],
+  summary: 'Mark a single error as resolved (admin)',
+  security: [{ bearerAuth: [] }],
+  request: { params: z.object({ errorId: z.string() }) },
+  responses: {
+    400: commonErrorResponses[400],
+    200: {
+      description: 'Resolve result (success=false if id not found)',
+      content: { 'application/json': { schema: OriginateSuccessSchema } },
+    },
+    401: commonErrorResponses[401],
+    403: { ...commonErrorResponses[403], description: 'Insufficient role' },
+    404: commonErrorResponses[404],
+    429: commonErrorResponses[429],
+    500: commonErrorResponses[500],
+    502: commonErrorResponses[502],
+    503: commonErrorResponses[503],
+  },
+});
+
+sharedRegistry.registerPath({
+  method: 'post',
+  path: '/api/system-errors/resolve-by-service',
+  tags: ['System Errors'],
+  summary: 'Bulk-resolve all open errors for a service (admin)',
+  security: [{ bearerAuth: [] }],
+  request: {
+    body: {
+      content: {
+        'application/json': { schema: SystemErrorResolveByServiceRequestSchema },
+      },
+    },
+  },
+  responses: {
+    200: {
+      description: 'Bulk resolve count',
+      content: {
+        'application/json': { schema: SystemErrorResolveByServiceResponseSchema },
+      },
+    },
+    400: { ...commonErrorResponses[400], description: 'service is required' },
+    401: commonErrorResponses[401],
+    403: { ...commonErrorResponses[403], description: 'Insufficient role' },
+    429: commonErrorResponses[429],
+    500: commonErrorResponses[500],
+    404: commonErrorResponses[404],
+    502: commonErrorResponses[502],
+    503: commonErrorResponses[503],
+  },
+});

@@ -1,0 +1,186 @@
+diff --git a/Blockchain/Dev/docs/openapi/secuura-api.yaml b/Blockchain/Dev/docs/openapi/secuura-api.yaml
+index 298d95e4a..d11a5a237 100644
+--- a/Blockchain/Dev/docs/openapi/secuura-api.yaml
++++ b/Blockchain/Dev/docs/openapi/secuura-api.yaml
+@@ -28909,6 +28909,181 @@ paths:
+               schema:
+                 $ref: "#/components/schemas/ErrorResponse"
+       operationId: postV2VerificationVerify
++  /api/verification/verify-file:
++    post:
++      security: []
++      tags:
++        - Verification
++      summary: Verify an uploaded file — the server hashes the bytes (v1)
++      description: Upload the document as the RAW REQUEST BODY (application/octet-stream). The server
++        computes sha256 over the received bytes and looks that hash up in the registry, so unlike
++        /api/verification/verify the caller cannot supply a hash of its choosing. Always 200 with
++        `verified` as the discriminator once a body is present; an EMPTY body is the one 400, and it
++        speaks v1's legacy {verified:false, error} shape rather than the canonical envelope (KS-118,
++        documented as-is, no behaviour change).
++      x-ratelimit-policy: verification
++      x-ratelimit-window-ms: 60000
++      x-ratelimit-max: 60
++      x-ratelimit-scope: ip
++      x-sla: *a20
++      requestBody:
++        required: true
++        content:
++          application/octet-stream:
++            schema:
++              type: string
++              description: The document file, as raw bytes.
++              format: binary
++              minLength: 1
++      responses:
++        "200":
++          description: "Verification result (always 200 — `verified` is the discriminator). NOTE: the handler
++            additionally returns `fileSize` (bytes of the uploaded body) on every 200. It is not
++            declared in VerifyResponse, which is `.passthrough()`, so the response validates — but
++            the field is undocumented in the schema. Tracked rather than papered over: see KS-794."
++          content:
++            application/json:
++              schema:
++                $ref: "#/components/schemas/VerifyResponse"
++        "400":
++          description: Empty request body — no file content received. v1 legacy shape, not the canonical
++            envelope.
++          content:
++            application/json:
++              schema:
++                type: object
++                properties:
++                  verified:
++                    type: boolean
++                  error:
++                    type: string
++                required:
++                  - verified
++                  - error
++        "401":
++          description: Unauthenticated — missing, expired, or invalid bearer token. Acquire a fresh token via
++            `POST /api/auth/login`.
++          content:
++            application/json:
++              schema:
++                $ref: "#/components/schemas/ErrorResponse"
++        "404":
++          description: Not found — the requested resource does not exist or is not visible to the caller.
++          content:
++            application/json:
++              schema:
++                $ref: "#/components/schemas/ErrorResponse"
++        "415":
++          $ref: "#/components/responses/UnsupportedMediaType"
++        "429":
++          description: Rate limit exceeded — retry after the duration in the `Retry-After` header. See route
++            extensions for the applicable limit class.
++          content:
++            application/json:
++              schema:
++                $ref: "#/components/schemas/ErrorResponse"
++        "500":
++          description: Internal server error.
++          content:
++            application/json:
++              schema:
++                $ref: "#/components/schemas/ErrorResponse"
++        "502":
++          description: Upstream / blockchain error — a downstream service or chain provider failed. `details`
++            may carry chain context.
++          content:
++            application/json:
++              schema:
++                $ref: "#/components/schemas/ErrorResponse"
++        "503":
++          description: Service unavailable — temporary outage or required dependency down.
++          content:
++            application/json:
++              schema:
++                $ref: "#/components/schemas/ErrorResponse"
++      operationId: postVerificationVerifyFile
++  /api/v2/verification/verify-file:
++    post:
++      security: []
++      tags:
++        - Verification
++      summary: Verify an uploaded file — list contract (v2)
++      description: Raw file bytes as the request body; the server computes the hash. Same list contract as
++        POST /api/v2/verification/verify — EVERY registration of those bytes is returned as its own
++        match, rather than collapsing the same-hash set to one row. Unlike v1, the empty-body 400
++        uses the canonical error envelope.
++      x-ratelimit-policy: verification
++      x-ratelimit-window-ms: 60000
++      x-ratelimit-max: 60
++      x-ratelimit-scope: ip
++      x-sla: *a20
++      requestBody:
++        required: true
++        content:
++          application/octet-stream:
++            schema:
++              type: string
++              description: The document file, as raw bytes.
++              format: binary
++              minLength: 1
++      responses:
++        "200":
++          description: 'Verify-list result for the uploaded bytes. count 0 with empty matches is the honest
++            "never registered" answer. NOTE: the handler additionally returns `fileSize` (bytes of
++            the uploaded body) on every 200; V2VerifyResponse is `.passthrough()` so it validates,
++            but the field is undocumented in the schema. See KS-794.'
++          content:
++            application/json:
++              schema:
++                $ref: "#/components/schemas/V2VerifyResponse"
++        "400":
++          description: Empty request body — no file content received. Canonical error envelope.
++          content:
++            application/json:
++              schema:
++                $ref: "#/components/schemas/ErrorResponse"
++        "401":
++          description: Unauthenticated — missing, expired, or invalid bearer token. Acquire a fresh token via
++            `POST /api/auth/login`.
++          content:
++            application/json:
++              schema:
++                $ref: "#/components/schemas/ErrorResponse"
++        "404":
++          description: Not found — the requested resource does not exist or is not visible to the caller.
++          content:
++            application/json:
++              schema:
++                $ref: "#/components/schemas/ErrorResponse"
++        "415":
++          $ref: "#/components/responses/UnsupportedMediaType"
++        "429":
++          description: Rate limit exceeded — retry after the duration in the `Retry-After` header. See route
++            extensions for the applicable limit class.
++          content:
++            application/json:
++              schema:
++                $ref: "#/components/schemas/ErrorResponse"
++        "500":
++          description: Internal server error.
++          content:
++            application/json:
++              schema:
++                $ref: "#/components/schemas/ErrorResponse"
++        "502":
++          description: Upstream / blockchain error — a downstream service or chain provider failed. `details`
++            may carry chain context.
++          content:
++            application/json:
++              schema:
++                $ref: "#/components/schemas/ErrorResponse"
++        "503":
++          description: Service unavailable — temporary outage or required dependency down.
++          content:
++            application/json:
++              schema:
++                $ref: "#/components/schemas/ErrorResponse"
++      operationId: postV2VerificationVerifyFile
+   /api/certifications/issue:
+     post:
+       tags:

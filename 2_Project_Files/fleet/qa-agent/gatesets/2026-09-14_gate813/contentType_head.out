@@ -1,0 +1,145 @@
+     1	/**
+     2	 * Strict request media-type enforcement (KS-439).
+     3	 *
+     4	 * The published OpenAPI contract declares `application/json` for every request
+     5	 * body on the `/api/*` surface (sole exception: the OAuth 2.0 token endpoint,
+     6	 * which RFC 6749 §4.1.3 defines as `application/x-www-form-urlencoded`). The
+     7	 * platform previously parsed JSON leniently — a `text/plain` request with a
+     8	 * JSON-parseable body was accepted — which made the runtime broader than the
+     9	 * contract (found by the post-KS-428 sweep, decided on KS-439: enforce).
+    10	 *
+    11	 * Rule: an `/api/*` request that CARRIES A BODY must declare a JSON media
+    12	 * type, or it is rejected 415 before any parsing or proxying. Requests
+    13	 * without a body (no Content-Length / zero / no Transfer-Encoding) pass
+    14	 * untouched — several spec'd POSTs legitimately have no requestBody
+    15	 * (e.g. rotate-secret, webhook test), and clients often omit Content-Type
+    16	 * on empty requests.
+    17	 */
+    18	
+    19	import type { NextFunction, Request, Response } from 'express';
+    20	
+    21	/** Paths outside the enforced surface: everything not under /api/ (health, metrics, bare /webhooks receivers). */
+    22	const ENFORCED_PREFIX = '/api/';
+    23	
+    24	/**
+    25	 * The OAuth 2.0 token endpoint is the one operation whose spec'd request body
+    26	 * is form-encoded (RFC 6749); JSON is also accepted for SPA convenience.
+    27	 *
+    28	 * ⚠ KS-781: `/api/oauth/authorize` WAS added here and has been REVERTED on
+    29	 * Kam's ruling (2026-09-05). Do not re-add it without reading why:
+    30	 *
+    31	 *  1. It bought no working functionality. The consent page still could not
+    32	 *     submit — the gateway mounts `csrfMiddleware.protect` BEFORE this
+    33	 *     middleware and `/api/oauth/authorize` is not in CSRF's `excludedPaths`,
+    34	 *     so a browser form POST is answered `403 CSRF_TOKEN_MISSING` and never
+    35	 *     reaches the 415 this entry would have relaxed. The page's brokenness is
+    36	 *     PRE-EXISTING, predates KS-781, and is tracked on its own ticket.
+    37	 *  2. It cost a new attack surface. Allowing a form body opens a cross-origin,
+    38	 *     PREFLIGHT-FREE path to a credential-verifying, lockout-accruing endpoint
+    39	 *     — removing the exact defence csrf.ts's own H21 comment cites for
+    40	 *     pre-session endpoints ("CSRF attacks via image/form tags can't set
+    41	 *     Content-Type"). `/api/oauth/token` already sits in that class; authorize
+    42	 *     would have been the first member taking a PASSWORD.
+    43	 *
+    44	 * If it is ever taken deliberately, it is taken with Origin/Sec-Fetch-Site
+    45	 * enforced BEFORE csrf.ts's no-cookie bail-out, and it is its own ticket and
+    46	 * its own review — not a line added here.
+    47	 */
+    48	// ⚠ KS-801: this membership test is CASE-SENSITIVE while Express routing is not.
+    49	// `req.path` arrives as the client sent it, so `/API/oauth/token` matches no
+    50	// entry here and skips the form allowance — and three sibling predicates in this
+    51	// gateway have the same shape, which is why KS-801 tracks them together rather
+    52	// than patching this one line. Do not "fix" it here in isolation: the class is
+    53	// the ticket.
+    54	const FORM_ALLOWED_PATHS = new Set(['/api/oauth/token']);
+    55	
+    56	/**
+    57	 * KS-791: the two verify-file operations are the only ones on the `/api/*`
+    58	 * surface whose spec'd request body is RAW BYTES — the SERVER computes the
+    59	 * hash from the uploaded file (`verification.ts:511`, `verificationV2.ts:501`)
+    60	 * rather than receiving a hex digest in JSON. The JSON-only rule therefore made
+    61	 * them unreachable through the gateway: measured live, `octet-stream`, `pdf`,
+    62	 * `text/plain`, `multipart` and no content-type ALL returned 415, and only
+    63	 * `application/json` reached the handler — where it is the wrong body.
+    64	 *
+    65	 * The relaxation is deliberately as small as it can be:
+    66	 *   - two EXACT paths, matched by equality, never a prefix or a pattern;
+    67	 *   - ONE additional media type, `application/octet-stream`, and no other;
+    68	 *   - every other `/api/*` path keeps the strict rule unchanged.
+    69	 *
+    70	 * The JSON-only rule is a content-type-confusion defence (KS-439), so widening
+    71	 * it anywhere it is not required would trade a real defence for convenience.
+    72	 * `contentType.test.ts` pins both halves: these two paths accept octet-stream,
+    73	 * and a sibling verification route still 415s the identical binary body.
+    74	 */
+    75	const OCTET_STREAM_ALLOWED_PATHS = new Set([
+    76	  '/api/verification/verify-file',
+    77	  '/api/v2/verification/verify-file',
+    78	]);
+    79	
+    80	/**
+    81	 * Media types accepted as "JSON" — the exact type plus any registered
+    82	 * `application/*+json` structured-syntax suffix (merge-patch, json-patch, …).
+    83	 *
+    84	 * @param mediaType - lowercased media type with parameters already stripped
+    85	 * @returns true when the type is a JSON media type per the contract
+    86	 */
+    87	function isJsonMediaType(mediaType: string): boolean {
+    88	  return mediaType === 'application/json' || (mediaType.startsWith('application/') && mediaType.endsWith('+json'));
+    89	}
+    90	
+    91	/**
+    92	 * Whether the request actually carries a body. Deliberately NOT type-is's
+    93	 * `hasbody` — that treats `Content-Length: 0` as "has body", which would 415
+    94	 * every body-less POST a curl/SDK sends with an explicit zero length.
+    95	 *
+    96	 * @param req - incoming request
+    97	 * @returns true when a non-empty body is being transmitted
+    98	 */
+    99	function hasBody(req: Request): boolean {
+   100	  if (req.headers['transfer-encoding'] !== undefined) return true;
+   101	  const contentLength = Number(req.headers['content-length']);
+   102	  return Number.isFinite(contentLength) && contentLength > 0;
+   103	}
+   104	
+   105	/**
+   106	 * Reject `/api/*` requests whose body is not declared as JSON with 415 and
+   107	 * the standard error envelope (KS-367 shape). Mounted ahead of the body
+   108	 * parsers AND the service proxies so the whole API surface is covered by
+   109	 * one choke point.
+   110	 *
+   111	 * @param req - incoming request
+   112	 * @param res - response used to emit the 415 envelope on mismatch
+   113	 * @param next - continuation for conforming (or out-of-scope) requests
+   114	 * @example
+   115	 * app.use(enforceJsonContentType); // before express.json() and the proxies
+   116	 */
+   117	export function enforceJsonContentType(req: Request, res: Response, next: NextFunction): void {
+   118	  // Out-of-scope surfaces (health, metrics, external webhook receivers) keep their own rules.
+   119	  if (!req.path.startsWith(ENFORCED_PREFIX)) return next();
+   120	
+   121	  // No body → nothing to type-check; empty POSTs are legitimate for ops with no requestBody.
+   122	  if (!hasBody(req)) return next();
+   123	
+   124	  // Strip parameters (charset etc.) — only the media type itself is contractual.
+   125	  const raw = req.headers['content-type'] ?? '';
+   126	  const mediaType = raw.split(';')[0].trim().toLowerCase();
+   127	
+   128	  if (isJsonMediaType(mediaType)) return next();
+   129	
+   130	  // RFC 6749 exception: the token endpoint's spec'd body is form-encoded.
+   131	  if (FORM_ALLOWED_PATHS.has(req.path) && mediaType === 'application/x-www-form-urlencoded') return next();
+   132	
+   133	  // KS-791 exception: the two verify-file operations take raw bytes, because
+   134	  // the server — not the client — computes the hash.
+   135	  if (OCTET_STREAM_ALLOWED_PATHS.has(req.path) && mediaType === 'application/octet-stream') return next();
+   136	
+   137	  res.status(415).json({
+   138	    success: false,
+   139	    error: {
+   140	      code: 'UNSUPPORTED_MEDIA_TYPE',
+   141	      message: 'This API accepts application/json request bodies. Please send Content-Type: application/json.',
+   142	      details: { received: mediaType === '' ? '(none)' : mediaType.slice(0, 100) },
+   143	    },
+   144	  });
+   145	}

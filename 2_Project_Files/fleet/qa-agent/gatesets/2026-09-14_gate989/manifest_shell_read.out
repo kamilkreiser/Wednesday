@@ -1,0 +1,107 @@
+manifest_read 18:17:45 AEST at 9d0e2016ae60658ec908ee5e500583fd3a318c8a
+3: * systemTest — the generated-actor manifest (KS-256)
+16: * They are generated, belong to `.invalid` accounts on a local stack, and are
+18: * file in git. `generated/` is gitignored, and `check-no-default-passwords.sh`
+45:export function manifestPath(): string {
+46:    return path.join(fixturesDir, 'generated', manifestFileName());
+51:    /** The seed the actors were generated from; reproduces them exactly. */
+71: * Write the manifest, creating `generated/` if needed.
+76:export function writeManifest(manifest: ActorManifest): string {
+77:    fs.mkdirSync(path.dirname(manifestPath()), { recursive: true });
+78:    fs.writeFileSync(manifestPath(), `${JSON.stringify(manifest, null, 2)}\n`);
+79:    return manifestPath();
+94:export function rejectedManifestPath(): string {
+95:    return path.join(fixturesDir, 'generated', `actors.rejected-${slotTag(resolveSlot())}.json`);
+105:export function writeRejectedManifest(manifest: ActorManifest): string {
+106:    fs.mkdirSync(path.dirname(rejectedManifestPath()), { recursive: true });
+107:    fs.writeFileSync(rejectedManifestPath(), `${JSON.stringify(manifest, null, 2)}\n`);
+108:    return rejectedManifestPath();
+115: * being one: `generated/` is gitignored and survives across runs, so a manifest
+137:export function quarantineManifest(provisionedAt: string, target: string = manifestPath()): string | null {
+165:export function readManifest(): ActorManifest | null {
+-- rmSync in the pre-existing fixtures tests at M38 (the cells' own-temp-dir pattern):
+actors.test.ts: rmSync=0 mkdtemp=0
+fixturesSlot.test.ts: rmSync=0 mkdtemp=0
+manifestPaths.test.ts: rmSync=1 mkdtemp=1
+provisionBootstrap.test.ts: rmSync=0 mkdtemp=0
+provisionTarget.test.ts: rmSync=0 mkdtemp=0
+slotEnvReads.test.ts: rmSync=0 mkdtemp=0
+slotRequired.test.ts: rmSync=0 mkdtemp=0
+slotSelectionMatrix.test.ts: rmSync=0 mkdtemp=0
+-- head's three new files:
+provisionRedaction: rmSync=1 mkdtemp=2 it(=5
+preSuiteStreams: rmSync=1 mkdtemp=2 it(=2
+provisionDriftQuarantine: rmSync=1 mkdtemp=2 it(=2
+-- run-shell-suites.sh: how it runs pre_suite.test.sh
+6:# The defect this exists for: `scripts/__tests__/check_slot_credentials.test.sh`
+21:# same measurement scoped to `Blockchain/Dev/scripts/__tests__/` alone, which
+32:#     CI / local:  bash scripts/run-shell-suites.sh
+33:#     preflight:   bash scripts/run-shell-suites.sh --check-unreached
+34:#     inspection:  bash scripts/run-shell-suites.sh --list
+49:  "Blockchain/Dev/scripts/__tests__"
+50:  "systemTest/__tests__"
+63:for root in "${ROOTS[@]}"; do
+65:  for f in "$REPO_ROOT/$root"/*.test.sh; do
+88:  # variable" on bash 3.2 — which is what macOS ships and what the pre-push hook
+100:  # pointing at empty directories would make `unreached` empty for the wrong
+190:for v in $git_local_env; do
+-- pre_suite.test.sh DEGRADED arm line + its tsx invocation:
+3:# TESTS for systemTest/fixtures/pre-suite.ts (KS-969 item 1)
+23:STEP="${PRE_SUITE_TS:-$HERE/../fixtures/pre-suite.ts}"
+38:# These cells drive the SHIPPED step for real (`npx tsx "$STEP"` below), and round
+39:# 4 gave that step a quarantine on its catch path: pre-suite.ts:157 calls
+92:  out="$(cd "$HERE/.." && SECUURA_STACK_SLOT="${SECUURA_STACK_SLOT:-1}" npx tsx "$STEP" "$1" 2>&1)"; rc=$?
+99:  out="$(cd "$HERE/.." && env -u SECUURA_STACK_SLOT -u STACK_SLOT -u CI npx tsx "$STEP" "$1" 2>&1)"; rc=$?
+104:result="$(API_BASE_URL=http://127.0.0.1:1 run_step_unslotted noslot-arm)"
+109:if grep -q 'SECUURA_STACK_SLOT=2 ' <<<"$result" && grep -q 'run-in-slot.sh 2 ' <<<"$result"; then
+113:result="$(cd "$HERE/.." && env -u SECUURA_STACK_SLOT -u STACK_SLOT CI=true API_BASE_URL=http://127.0.0.1:1 npx tsx "$STEP" noslot-ci 2>&1; printf '\n---RC:%s\n' "$?")"
+116:echo "== pre-suite.ts =="
+133:result="$(API_BASE_URL=http://127.0.0.1:1 ALLOW_REMOTE_PROVISION=1 run_step refused-control)"
+139:result="$(API_BASE_URL=http://127.0.0.1:1 run_step degraded-arm)"
+-- vitest.unit.config.ts:
+/**
+ * Vitest configuration for the FAST, OFFLINE unit / characterization layer.
+ *
+ * Mirrors the sibling `systemTest/akto` pattern: a minimal config (no reporters,
+ * no globalSetup, no live services) so the characterization net runs in well
+ * under a second and can be re-run after every restructure step.
+ *
+ * It picks up ONLY `tests/unit/**` and never touches the network or a real k6
+ * runtime. The `k6/execution` module is aliased to a local stub so helper
+ * modules that import it (e.g. `helpers/data.ts`) load under Node — k6/http is
+ * imported as `import type` in the helpers, so it is erased at runtime and needs
+ * no alias.
+ *
+ * Invoked by `npm run test:unit`.
+ */
+
+import { fileURLToPath } from 'node:url';
+
+import { defineConfig } from 'vitest/config';
+
+// 10 s is generous for pure, in-memory unit tests; the only heavier test spawns
+// the ci-gate CLI once per scenario fixture (tsx cold start ~1-2 s).
+const UNIT_TEST_TIMEOUT_MS = 15_000;
+
+export default defineConfig({
+    test: {
+        globals: true,
+        environment: 'node',
+        include: ['tests/unit/**/*.test.ts'],
+        testTimeout: UNIT_TEST_TIMEOUT_MS,
+        alias: {
+            'k6/execution': fileURLToPath(new URL('./tests/unit/k6mocks/execution.ts', import.meta.url)),
+            'k6': fileURLToPath(new URL('./tests/unit/k6mocks/k6.ts', import.meta.url)),
+        },
+    },
+});
+-- provision.ts M38 :281-282 (the interpolation site the ticket cites):
+        if (existing) return existing;
+    }
+
+    const reason = envelope.error?.message ?? `HTTP ${status}`;
+    throw new Error(`could not provision actor "${spec.key}" (${spec.email}): ${reason}`);
+}
+-- pre-suite.ts head DEGRADED reason line:
+195:        `[pre-suite:${suite}] DEGRADED — provisioning did not complete: ${reason}\n` +
+140:    const reason = err instanceof Error ? err.message : String(err);

@@ -1,0 +1,325 @@
+#!/usr/bin/env npx tsx
+/**
+ * =============================================================================
+ * systemTest — provision the generated actors (KS-256)
+ * =============================================================================
+ *
+ * Run this before a suite. It generates the actor set from a seed, ensures each
+ * one exists on the target stack, and writes the manifest the suites read.
+ *
+ * WHAT THIS REPLACES
+ * ------------------
+ * All three projects currently fall back to the platform's SEEDED accounts,
+ * hardcoded in their own source with the pen-test F-05 password vocabulary:
+ * `admin@secuura.com` / the password supplied by BOOTSTRAP_ADMIN_PASSWORD, `issuer@secuura.com` / `issuer123`,
+ * `verifier@secuura.com` / `verifier123`. After provisioning they use accounts
+ * this created, on an undeliverable `.invalid` domain, with generated
+ * passwords — and the published spec keeps naming no live account at all.
+ *
+ * SAFETY
+ * ------
+ * This CREATES ACCOUNTS, so it refuses to run against anything but a local
+ * stack unless `ALLOW_REMOTE_PROVISION=1` is set deliberately. The production
+ * register cap is 5/hour/IP; local is 100/hour, which five actors sit well
+ * inside.
+ *
+ * Usage:
+ *   npx tsx systemTest/fixtures/provision-actors.ts
+ *   npx tsx systemTest/fixtures/provision-actors.ts --seed ci-run-42
+ *   API_BASE_URL=http://localhost:6882 npx tsx .../provision-actors.ts
+ *   npx tsx .../provision-actors.ts --base-url http://localhost:6982   # KS-682: explicit slot
+ *
+ * PER SLOT (KS-971) — the supported way, and it now works:
+ *   systemTest/run-in-slot.sh 2 npx tsx systemTest/fixtures/provision-actors.ts
+ * That sources `slot-target.sh`, which exports `SECUURA_GATEWAY_URL` for the
+ * slot; `target.ts` prefers it and `slot.ts` names the manifest after the slot,
+ * so each slot provisions its own stack and keeps its own manifest.
+ * =============================================================================
+ */
+
+import { pathToFileURL } from 'node:url';
+
+import { generateActors } from './actors.ts';
+import { writeManifest, writeRejectedManifest, quarantineManifest, type ActorManifest } from './manifest.ts';
+import { bootstrapToken, provisionActor, type ProvisionedActor } from './provision.ts';
+import { resolveSlot, slotTag } from './slot.ts';
+import { assertSlotNamedForLocalTarget } from './slot-required.ts';
+import { resolveProvisionTarget } from './target.ts';
+
+/** Hosts we will create accounts on without an explicit override. */
+const LOCAL_HOSTS = new Set(['localhost', '127.0.0.1', '[::1]']);
+
+/** @returns the value after `flag`, or `undefined`. */
+function argValue(argv: string[], flag: string): string | undefined {
+    const index = argv.indexOf(flag);
+    return index !== -1 ? argv[index + 1] : undefined;
+}
+
+/**
+ * Refuse to create accounts anywhere unexpected.
+ *
+ * Provisioning writes to the database. Pointed at a shared or customer-facing
+ * environment that is a data-integrity problem, not a test-setup one, so the
+ * default is local-only and the override has to be typed on purpose.
+ *
+ * @param baseUrl - the target API root.
+ * @throws when the target is remote and `ALLOW_REMOTE_PROVISION` is unset.
+ */
+function assertSafeTarget(baseUrl: string): void {
+    if (process.env.ALLOW_REMOTE_PROVISION === '1') return;
+
+    const { hostname } = new URL(baseUrl);
+    if (LOCAL_HOSTS.has(hostname)) return;
+
+    throw new Error(
+        `refusing to provision accounts against "${hostname}" — this creates real accounts.\n` +
+            'Set ALLOW_REMOTE_PROVISION=1 only if you are certain the target is disposable.',
+    );
+}
+
+/**
+ * The provisioning run, as a function.
+ *
+ * KS-969 item 1: this was only ever a CLI `main()`, so the only way to invoke it
+ * was to type it — and nothing did. `pre-suite.ts` calls this; the CLI entry at
+ * the bottom of the file is unchanged and still works exactly as documented.
+ *
+ * @param argv - CLI-style arguments, so the two entry points share one parser.
+ * @returns the manifest written, so a caller can report rather than re-read it.
+ * @throws when the target is remote without `ALLOW_REMOTE_PROVISION`, or when
+ *         a registration fails. Both are conditions a caller must SEE.
+ */
+export interface ProvisionResult {
+    readonly manifest: ActorManifest;
+    /** Actor keys whose role is NOT the one requested. Non-empty => DEGRADED. */
+    readonly drifted: readonly string[];
+    /** Where the manifest went. `null` when it was REJECTED and not published. */
+    readonly written: string | null;
+}
+
+/**
+ * The gateway ROOT, given whatever `API_BASE_URL` happens to hold.
+ *
+ * WHY THIS EXISTS
+ * ---------------
+ * `API_BASE_URL` carries two incompatible contracts. The Playwright suite wants
+ * it WITH the `/api` prefix (`playwright/.env.example:17`, default
+ * `http://localhost:6882/api`), and `systemTest/slot-target.sh:100` exports it
+ * that way for every sourced run. Provisioning wants it WITHOUT: `provision.ts`
+ * posts to paths that already begin `/api` (`/api/auth/register`,
+ * `/api/auth/login`), and `DEFAULT_BASE_URL` in `target.ts` is the bare gateway.
+ *
+ * Unreconciled, every run through `run-in-slot.sh` — the documented route — hit
+ * `POST /api/api/auth/register`, 404'd, and provisioned nothing, so every actor
+ * fell back to OWNER and the pre-suite reported DEGRADED. That reads as a
+ * missing `BOOTSTRAP_ADMIN_PASSWORD`, which is why it survived: the bootstrap
+ * login 404s the same way and reports UNAVAILABLE rather than "wrong URL".
+ * Measured on four live slots, 2026-09-08.
+ *
+ * Normalising HERE rather than changing either producer keeps both documented
+ * usages working: the bare form in this file's own header, and the `/api` form
+ * every suite and the slot wrapper already rely on. Pre-existing on develop —
+ * `slot-target.sh:100` is byte-identical there (KS-701 #753) — so this is the
+ * KS-969 provisioning path meeting it, not a KS-682 regression.
+ *
+ * @param raw - the configured base URL, with or without a trailing `/api`.
+ * @returns the gateway root, with no trailing `/api` and no trailing slash.
+ * @example
+ *   apiRootFrom('http://localhost:6982/api'); // 'http://localhost:6982'
+ *   apiRootFrom('http://localhost:6882');     // 'http://localhost:6882'
+ */
+export function apiRootFrom(raw: string): string {
+    const trimmed = raw.trim().replace(/\/+$/, '');
+    return trimmed.replace(/\/api$/, '');
+}
+
+/**
+ * Refuse to provision when the bootstrap admin could not log in (KS-1016).
+ *
+ * WHY THIS EXISTS
+ * ---------------
+ * Until 2026-09-11 an unavailable bootstrap admin was a WARNING and provisioning carried on by
+ * self-service registration, so every actor was CREATED as `OWNER`. That looked like a
+ * degraded run and was actually a poisoned stack: an existing account cannot be re-roled, so
+ * every later run on that stack — with the password set or not — found the same OWNER actors,
+ * reported DEGRADED, and (for Playwright, whose admin password comes from the manifest since
+ * KS-966) failed at auth-setup. Measured on slot 4 during the KS-1016 verification: one
+ * Schemathesis run without `BOOTSTRAP_ADMIN_PASSWORD` cost the k6 and Playwright runs after it
+ * and a database reset. Refusing BEFORE the first registration keeps the stack clean, so the
+ * next run with the variable set provisions correctly.
+ *
+ * Pure so it can be unit-tested without a stack; `provisionActors` calls it right after the
+ * bootstrap login. `pre-suite.ts` classifies the throw as DEGRADED (non-fatal by default,
+ * fatal under SYSTEMTEST_REQUIRE_PROVISIONED), exactly as it does for any other incomplete
+ * provisioning — the suites keep their seeded accounts and nothing is written.
+ *
+ * @param adminToken - the bootstrap bearer token, or `null` when the login failed.
+ * @param context - what to name in the refusal.
+ * @throws Error naming the account, the target and the missing variable when there is no token.
+ * @example
+ *   assertBootstrapAvailable(null, { email: 'admin@secuura.com', passwordSet: false, baseUrl });
+ *   // throws: "bootstrap admin: UNAVAILABLE — refusing to provision …"
+ */
+export function assertBootstrapAvailable(
+    adminToken: string | null,
+    context: { readonly email: string; readonly passwordSet: boolean; readonly baseUrl: string },
+): void {
+    if (adminToken !== null) return;
+    const why = context.passwordSet
+        ? `login as ${context.email} at ${context.baseUrl} did not return 200 — check the password matches ` +
+          `the ADMIN_USER_PASSWORD the stack was seeded with, and that the account is not locked out`
+        : `BOOTSTRAP_ADMIN_PASSWORD is unset (login as ${context.email} at ${context.baseUrl} sent an empty password)`;
+    throw new Error(
+        `bootstrap admin: UNAVAILABLE — refusing to provision: ${why}. ` +
+            'Without an admin every generated actor would be created as OWNER by self-service ' +
+            'registration and STAY that way for every later run on this stack (an existing account ' +
+            'cannot be re-roled), so nothing was created. Export BOOTSTRAP_ADMIN_PASSWORD and rerun; ' +
+            'if OWNER actors already exist from an earlier run, reset this slot (--fresh-db) or use a ' +
+            'fresh --seed. KS-1016.',
+    );
+}
+
+export async function provisionActors(argv: string[] = []): Promise<ProvisionResult> {
+    const seed = argValue(argv, '--seed') ?? process.env.FIXTURE_SEED ?? 'local';
+    // KS-682: a caller that already knows its slot passes the gateway explicitly. Playwright's
+    // global-setup derives `:6982` from SECUURA_STACK_SLOT=2 on its own, but this step read only
+    // API_BASE_URL and defaulted to slot 1 — so an unsourced slot-2 run provisioned its actors
+    // against `:6882`, which was DOWN, and the suite fell back and 401'd. Measured 2026-09-10 on
+    // the slot rotation; invisible on slot 1, where the two coincide. `--base-url` therefore takes
+    // precedence over the environment.
+    //
+    // KS-971 (merged with KS-682, 2026-09-11): everything below the explicit flag goes through
+    // `target.ts`. It was `process.env.API_BASE_URL ?? DEFAULT_BASE_URL`, which took
+    // slot-target.sh's `<gateway>/api` at face value and sent every request to `/api/api/auth/...`
+    // (404); `resolveProvisionTarget()` prefers SECUURA_GATEWAY_URL, normalises API_BASE_URL the
+    // same way `apiRootFrom` does, derives the slot's gateway from SECUURA_STACK_SLOT when neither
+    // is set, and refuses a local url on ANOTHER slot's port.
+    const explicit = argValue(argv, '--base-url');
+    const baseUrl = explicit !== undefined ? apiRootFrom(explicit) : resolveProvisionTarget();
+    // KS-1016 (Peter, 2026-09-11): a LOCAL target with no slot named is refused before anything is
+    // created. Before, an unset slot meant slot 1 silently — another ticket's stack.
+    assertSlotNamedForLocalTarget(baseUrl, 'npx tsx systemTest/fixtures/provision-actors.ts');
+
+    assertSafeTarget(baseUrl);
+
+    const specs = generateActors(seed);
+    // KS-971: name the slot. Four concurrent provisioning runs previously produced four
+    // indistinguishable transcripts, and the manifest they each wrote overwrote the last.
+    console.log(
+        `[provision-actors] seed "${seed}" -> ${specs.length} actors against ${baseUrl} (${slotTag(resolveSlot())})`,
+    );
+
+    // The one seeded account still relied on, and only to grant roles: no
+    // self-service path can, by design. Without it provisioning REFUSES (KS-1016) —
+    // an OWNER-only actor set is not degraded-but-usable, it is a stack that every
+    // later run inherits.
+    const bootstrapEmail = process.env.BOOTSTRAP_ADMIN_EMAIL ?? 'admin@secuura.com';
+    const bootstrapPassword = process.env.BOOTSTRAP_ADMIN_PASSWORD ?? '';
+    const adminToken = await bootstrapToken(
+        {
+            email: bootstrapEmail,
+            // KS-964: no published default. Unset => provisioning fails
+            // visibly instead of bootstrapping a known-password SYSTEM_ADMIN.
+            password: bootstrapPassword,
+        },
+        baseUrl,
+    );
+    // KS-1016: was a warning followed by OWNER-only registration — the poisoned-stack shape
+    // described on assertBootstrapAvailable. Now a refusal before anything is created.
+    assertBootstrapAvailable(adminToken, { email: bootstrapEmail, passwordSet: bootstrapPassword !== '', baseUrl });
+    console.log('  bootstrap admin: authenticated — roles will be assigned');
+
+    const actors: Record<string, ProvisionedActor> = {};
+    const drifted: string[] = [];
+    for (const spec of specs) {
+        // Sequential on purpose: the register limiter counts per IP, and a
+        // burst of parallel registrations is the shape most likely to trip it.
+        const actor = await provisionActor(spec, baseUrl, adminToken);
+        actors[actor.key] = actor;
+
+        // An actor that already exists keeps whatever role it was created
+        // with — idempotency cannot retroactively promote it. Say so loudly:
+        // a suite expecting ISSUER_ADMIN and silently getting OWNER fails as a
+        // baffling 403 somewhere far from the cause.
+        const drifted_ = actor.role !== spec.desiredRole;
+        const mark = actor.via === 'registered' ? '+' : '=';
+        const note = drifted_ ? `  ⚠ wanted ${spec.desiredRole} — re-run with a fresh --seed to get it` : '';
+        console.log(`  ${mark} ${actor.key.padEnd(9)} ${actor.email}  role=${actor.role}${note}`);
+        if (drifted_) drifted.push(actor.key);
+    }
+
+    const slot = resolveSlot();
+    const manifest: ActorManifest = {
+        seed,
+        baseUrl,
+        // KS-971: the slot the `userId`s below belong to. Same seed on two slots yields identical
+        // emails and passwords but DIFFERENT ids, so the manifest must say which stack issued them.
+        slot,
+        slotTag: slotTag(slot),
+        provisionedAt: new Date().toISOString(),
+        actors,
+    };
+
+    // KS-969 F1. A manifest is a PROMISE OF CORRECTLY ROLED ACTORS, and it
+    // OUTRANKS the seeded accounts in every consumer. So publishing one whose
+    // actors have collapsed to OWNER does not degrade the run — it switches
+    // every wired suite from correctly-roled identities to wrongly-roled ones
+    // and reports success. In a repo with no CI, where these suites are the only
+    // instrument, "tests the wrong thing and passes" is worse than "does not
+    // run".
+    //
+    // ROUND 3 — CORRECTING THIS COMMENT'S OWN EARLIER CLAIM. It used to say that
+    // when we cannot keep the promise "the manifest is NOT published, every
+    // consumer falls back to its seeded accounts BECAUSE THE FILE SIMPLY IS NOT
+    // THERE". That last clause was an assumption about the filesystem, not a
+    // property this code established: `generated/` is gitignored and survives
+    // across runs, so a manifest published by an EARLIER pass stays exactly
+    // where every consumer looks. A NON-WRITE IS NOT A REMOVAL.
+    //
+    // It was live on the worktree that carried this change: `actors.json`
+    // (seed `presuite-test-72460`, 07:57:14Z) sat beside `actors.rejected.json`
+    // (seed `presuite-strict-47722`, 08:50:37Z) — the NEWER run refused, the
+    // OLDER manifest still the one being read, and its seed the
+    // `presuite-test-$$` shape `__tests__/pre_suite.test.sh` writes. Consumers
+    // were pointed at accounts a test script created for itself.
+    //
+    // So a rejection now MOVES an existing manifest aside as well as withholding
+    // a new one. Moved, never deleted — the superseded copy is the record of
+    // what the suites would otherwise have run on. That the guard lives in the
+    // FILESYSTEM and not in a reader is load-bearing:
+    // `schemathesis/tests/actor_manifest.py` parses the JSON directly, so a
+    // TypeScript-side staleness check would never have covered it, and any
+    // consumer that forgot one would silently keep the old behaviour.
+    if (drifted.length > 0) {
+        const rejected = writeRejectedManifest(manifest);
+        const superseded = quarantineManifest(manifest.provisionedAt);
+        console.warn(
+            `[provision-actors] ${drifted.length} actor(s) hold a role other than the one requested ` +
+                `(${drifted.join(', ')}). MANIFEST NOT PUBLISHED — suites keep their seeded accounts. ` +
+                `Rejected copy: ${rejected}` +
+                (superseded
+                    ? `. A previously published manifest was superseded and moved to ${superseded}`
+                    : ''),
+        );
+        return { manifest, drifted, written: null };
+    }
+
+    const written = writeManifest(manifest);
+    console.log(`[provision-actors] wrote ${written}`);
+    return { manifest, drifted, written };
+}
+
+/**
+ * CLI entry — unchanged behaviour, but only when this file is the process's
+ * entry point. Without the guard, importing it (which `pre-suite.ts` now does)
+ * would run a provisioning pass as a side effect of the import.
+ */
+const invokedDirectly =
+    process.argv[1] !== undefined && import.meta.url === pathToFileURL(process.argv[1]).href;
+
+if (invokedDirectly) {
+    provisionActors(process.argv.slice(2)).catch((err: unknown) => {
+        console.error(`[provision-actors] ${err instanceof Error ? err.message : String(err)}`);
+        process.exit(1);
+    });
+}

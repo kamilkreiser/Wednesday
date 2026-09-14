@@ -1,0 +1,52 @@
+openapi_scripts_read 17:31:41 AEST at 7b6fb960d
+17:    "test": "npm run test --workspaces",
+42:    "check:openapi": "npm run generate-openapi -- --check && npm run check:spec-examples",
+43:    "check:spec-examples": "node scripts/spec-examples/check-spec-examples.mjs",
+44:    "verify:spec-examples": "node scripts/spec-examples/verify-spec-examples.mjs",
+48:    "generate-openapi": "npm run build --workspace=packages/shared && tsx scripts/generate-openapi.ts",
+50:    "test:connectors": "jest --config tests/connectors/jest.config.cjs",
+51:    "test:migrations": "bash ./migrations/__tests__/ks667-044-scenarios.sh",
+52:    "test:contract": "python3 ../../systemTest/schemathesis/scripts/run.py pr",
+54:    "test:shell": "bash scripts/run-shell-suites.sh"
+102:    "@asteasolutions/zod-to-openapi": "^7.3.4",
+-- generate-openapi script:
+Blockchain/Dev/scripts/generate-openapi.ts
+Blockchain/Dev/scripts/openapi-examples
+-- the generator's --check semantics:
+== Blockchain/Dev/scripts/generate-openapi.ts
+12: *   npm run generate-openapi -- --check  # CI mode: exit 1 if YAML drifted
+30:const checkMode = process.argv.includes('--check');
+72:    process.exit(2);
+84:      process.exit(2);
+134:      { name: 'GDPR', description: 'Consent management + DSRs — request / withdraw / check; data export, erasure, retention policy, deletion log.' },
+141:      { name: 'Health', description: 'Service health checks. `/health` is shallow, `/health/deep` walks every downstream dependency.' },
+215:            'Third-party verifier (Gmail / Outlook addin, web verifier) reads a document + checks ' +
+232:  // undeclared op is caught here — and therefore in `check:openapi`, preflight, and CI —
+252:    process.exit(2);
+257:  if (checkMode) {
+259:      console.error('[gen-openapi] CHECK FAIL: output file does not exist on disk');
+260:      process.exit(1);
+262:    const onDisk = fs.readFileSync(OUT_PATH, 'utf8');
+264:      console.error('[gen-openapi] CHECK FAIL: generated YAML differs from on-disk version');
+266:      process.exit(1);
+268:    console.log('[gen-openapi] CHECK PASS: on-disk YAML matches generated');
+269:    process.exit(0);
+273:  fs.writeFileSync(OUT_PATH, newYaml, 'utf8');
+280:  process.exit(2);
+== Blockchain/Dev/scripts/openapi-examples
+1:tree 7b6fb960d:Blockchain/Dev/scripts/openapi-examples
+-- api-gateway package.json test scripts:
+10:    "lint": "eslint src",
+11:    "test": "vitest"
+39:    "eslint": "^10.7.0",
+42:    "vitest": "^4.1.9"
+-- vitest version in lockfile:
+21148:    "node_modules/vitest": {
+21149-      "version": "4.1.10",
+21150-      "dev": true,
+-- originate package.json test:
+10:    "test": "jest",
+11:    "test:integration": "jest --config jest.integration.config.js",
+39:    "@types/jest": "^29.5.14",
+45:    "jest": "^29.7.0",
+47:    "ts-jest": "^29.4.11",

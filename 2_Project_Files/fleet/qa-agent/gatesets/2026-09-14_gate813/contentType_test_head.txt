@@ -1,0 +1,590 @@
+/**
+ * Unit tests for the strict media-type middleware (KS-439).
+ *
+ * The contract: an /api/* request that carries a body must declare a JSON
+ * media type (application/json or application/*+json) or it is rejected 415
+ * with the standard envelope. Body-less requests, non-/api surfaces, and the
+ * OAuth token endpoint's RFC 6749 form encoding all pass through untouched.
+ * @module middleware/contentType
+ */
+
+import { describe, it, expect, beforeAll, afterAll } from 'vitest';
+import type { Request, Response } from 'express';
+import express from 'express';
+import type { Server } from 'node:http';
+import type { AddressInfo } from 'node:net';
+import { connect as netConnect } from 'node:net';
+import { enforceJsonContentType } from '../middleware/contentType';
+
+// ---------------------------------------------------------------------------
+// Helpers
+// ---------------------------------------------------------------------------
+
+/**
+ * Build a minimal Request double for the middleware.
+ *
+ * @param overrides - fields to merge over the POST /api/documents default
+ * @returns a Request-shaped object with headers/path/method set
+ */
+function makeReq(overrides: Partial<Record<string, unknown>> = {}): Request {
+  return {
+    headers: {},
+    path: '/api/documents',
+    method: 'POST',
+    ...overrides,
+  } as unknown as Request;
+}
+
+/**
+ * Build a Response double that records status + json payload.
+ *
+ * @returns a Response-shaped recorder exposing _status and _json
+ */
+function makeRes(): Response & { _status: number; _json: unknown } {
+  const res = {
+    _status: 0,
+    _json: null as unknown,
+    status(code: number) {
+      this._status = code;
+      return this;
+    },
+    json(payload: unknown) {
+      this._json = payload;
+      return this;
+    },
+  };
+  return res as unknown as Response & { _status: number; _json: unknown };
+}
+
+/**
+ * Run the middleware and report whether it passed the request through.
+ *
+ * @param req - request double under test
+ * @returns pass/reject outcome plus the recorded response
+ */
+function run(req: Request): { passed: boolean; res: ReturnType<typeof makeRes> } {
+  const res = makeRes();
+  let passed = false;
+  enforceJsonContentType(req, res, () => {
+    passed = true;
+  });
+  return { passed, res };
+}
+
+/** Headers describing a non-empty body of the given declared type. */
+function bodyHeaders(contentType?: string): Record<string, string> {
+  const headers: Record<string, string> = { 'content-length': '17' };
+  if (contentType !== undefined) headers['content-type'] = contentType;
+  return headers;
+}
+
+// ---------------------------------------------------------------------------
+// Conforming requests pass
+// ---------------------------------------------------------------------------
+
+describe('enforceJsonContentType — conforming requests', () => {
+  it('passes application/json', () => {
+    const { passed } = run(makeReq({ headers: bodyHeaders('application/json') }));
+    expect(passed).toBe(true);
+  });
+
+  it('passes application/json with a charset parameter', () => {
+    const { passed } = run(makeReq({ headers: bodyHeaders('application/json; charset=utf-8') }));
+    expect(passed).toBe(true);
+  });
+
+  it('passes an application/*+json structured suffix (merge-patch)', () => {
+    const { passed } = run(makeReq({ headers: bodyHeaders('application/merge-patch+json') }));
+    expect(passed).toBe(true);
+  });
+
+  it('is case-insensitive on the media type', () => {
+    const { passed } = run(makeReq({ headers: bodyHeaders('Application/JSON') }));
+    expect(passed).toBe(true);
+  });
+});
+
+// ---------------------------------------------------------------------------
+// Non-JSON bodies are rejected 415
+// ---------------------------------------------------------------------------
+
+describe('enforceJsonContentType — mismatched media types', () => {
+  it('rejects text/plain with 415 and the standard envelope', () => {
+    const { passed, res } = run(makeReq({ headers: bodyHeaders('text/plain') }));
+    expect(passed).toBe(false);
+    expect(res._status).toBe(415);
+    const payload = res._json as { success: boolean; error: { code: string; details: { received: string } } };
+    expect(payload.success).toBe(false);
+    expect(payload.error.code).toBe('UNSUPPORTED_MEDIA_TYPE');
+    expect(payload.error.details.received).toBe('text/plain');
+  });
+
+  it('rejects a body with no Content-Type at all', () => {
+    const { passed, res } = run(makeReq({ headers: bodyHeaders() }));
+    expect(passed).toBe(false);
+    expect(res._status).toBe(415);
+    expect((res._json as { error: { details: { received: string } } }).error.details.received).toBe('(none)');
+  });
+
+  it('rejects a +json suffix outside the application tree (text/weird+json)', () => {
+    const { passed, res } = run(makeReq({ headers: bodyHeaders('text/weird+json') }));
+    expect(passed).toBe(false);
+    expect(res._status).toBe(415);
+  });
+
+  it('rejects form encoding on a normal API path', () => {
+    const { passed, res } = run(makeReq({ headers: bodyHeaders('application/x-www-form-urlencoded') }));
+    expect(passed).toBe(false);
+    expect(res._status).toBe(415);
+  });
+
+  it('rejects a chunked body (no content-length) with a wrong type', () => {
+    const { passed, res } = run(
+      makeReq({ headers: { 'transfer-encoding': 'chunked', 'content-type': 'text/plain' } })
+    );
+    expect(passed).toBe(false);
+    expect(res._status).toBe(415);
+  });
+});
+
+// ---------------------------------------------------------------------------
+// Body-less requests are out of scope
+// ---------------------------------------------------------------------------
+
+describe('enforceJsonContentType — body-less requests pass untouched', () => {
+  it('passes a GET with no body headers', () => {
+    const { passed } = run(makeReq({ method: 'GET', headers: {} }));
+    expect(passed).toBe(true);
+  });
+
+  it('passes a body-less POST (no requestBody ops like rotate-secret)', () => {
+    const { passed } = run(makeReq({ path: '/api/webhooks/x/rotate-secret', headers: {} }));
+    expect(passed).toBe(true);
+  });
+
+  it('passes Content-Length: 0 even with a stray non-JSON Content-Type', () => {
+    // curl -X POST sends content-length: 0; some clients attach a default type.
+    const { passed } = run(makeReq({ headers: { 'content-length': '0', 'content-type': 'text/plain' } }));
+    expect(passed).toBe(true);
+  });
+});
+
+// ---------------------------------------------------------------------------
+// Scope boundaries
+// ---------------------------------------------------------------------------
+
+describe('enforceJsonContentType — scope', () => {
+  it('ignores non-/api surfaces (bare /webhooks receivers keep their own rules)', () => {
+    const { passed } = run(makeReq({ path: '/webhooks/inbound', headers: bodyHeaders('text/plain') }));
+    expect(passed).toBe(true);
+  });
+
+  it('allows RFC 6749 form encoding on the OAuth token endpoint only', () => {
+    const token = run(
+      makeReq({ path: '/api/oauth/token', headers: bodyHeaders('application/x-www-form-urlencoded') })
+    );
+    expect(token.passed).toBe(true);
+  });
+
+  it('still allows JSON on the OAuth token endpoint', () => {
+    const { passed } = run(makeReq({ path: '/api/oauth/token', headers: bodyHeaders('application/json') }));
+    expect(passed).toBe(true);
+  });
+
+  it('still rejects other types on the OAuth token endpoint', () => {
+    const { passed, res } = run(makeReq({ path: '/api/oauth/token', headers: bodyHeaders('text/plain') }));
+    expect(passed).toBe(false);
+    expect(res._status).toBe(415);
+  });
+
+  // ---------------------------------------------------------------------------
+  // KS-781 — THE AUTHORIZE ENDPOINT IS DELIBERATELY *NOT* FORM-ALLOWED.
+  //
+  // This was added in an earlier round of #812 and REVERTED on Kam's ruling
+  // (2026-09-05). The revert is pinned by a test rather than by a comment,
+  // because a comment does not fail. The reasoning is on FORM_ALLOWED_PATHS in
+  // contentType.ts: the relaxation bought no working functionality (a browser
+  // form POST is stopped one layer earlier by CSRF, which is a pre-existing
+  // defect on its own ticket) and cost a cross-origin, preflight-free path to
+  // an endpoint that verifies a PASSWORD and accrues lockout.
+  //
+  // If this test is ever deleted or inverted, that is the decision being
+  // re-taken — take it deliberately, on a ticket, with Origin/Sec-Fetch-Site
+  // enforced before csrf.ts's no-cookie bail-out.
+  // ---------------------------------------------------------------------------
+  it('REFUSES form encoding on the OAuth authorize endpoint (KS-781 revert)', () => {
+    const { passed, res } = run(
+      makeReq({ path: '/api/oauth/authorize', headers: bodyHeaders('application/x-www-form-urlencoded') })
+    );
+    expect(passed, '/api/oauth/authorize must not accept a form body — see FORM_ALLOWED_PATHS').toBe(false);
+    expect(res._status).toBe(415);
+  });
+
+  it('still allows JSON on the OAuth authorize endpoint', () => {
+    const { passed } = run(makeReq({ path: '/api/oauth/authorize', headers: bodyHeaders('application/json') }));
+    expect(passed).toBe(true);
+  });
+});
+
+
+// ===========================================================================
+// KS-802 (re-gate (4) Q4-3 / Q4-4) — the revert pin and the allow-set bound,
+// asserted over a REAL Express app.
+//
+// WHY THIS EXISTS ALONGSIDE THE DOUBLES ABOVE.
+// `makeReq()` hands the middleware a `req.path` that the test itself wrote.
+// That is fine for the branch logic, but it means the assertion never observes
+// the thing Express actually does: derive `req.path` from the request line.
+// The revert pin is load-bearing for a security decision Kam ruled on
+// (2026-09-05) — "form encoding must not reach /api/oauth/authorize" — and a
+// fabricated path is the wrong instrument for that claim. If Express derived a
+// different `req.path` than the test imagines (a mount prefix, a retained query
+// string, a case difference — see KS-801), the doubles above would stay green
+// while the live gateway let a form through.
+//
+// So these drive the middleware over a real socket. The `token` case is the
+// DISCRIMINATION CONTROL: if it ever fails, this block is refusing everything
+// and its 415s prove nothing.
+// ===========================================================================
+
+describe('KS-802 — the media-type contract over a real Express app (real req.path)', () => {
+  let base: string;
+  let port: number;
+  let server: Server;
+
+  beforeAll(async () => {
+    const app = express();
+    app.use(enforceJsonContentType);
+    // Echo, so a pass is observable as 200 rather than as an absence of 415.
+    //
+    // KS-833 Q-2: the echo now returns `originalUrl` and `path` as well. The
+    // VERBATIM control below used to assert only that `authorize?` 415s while
+    // `token?` 200s — but those two differ for reasons that have nothing to do
+    // with the `?`, so a client that silently stripped the trailing byte kept
+    // the control green. A control that cannot fail is not a control. Reading
+    // the value back is the only assertion that actually pins the byte.
+    app.all('*', (req, res) => {
+      res.status(200).json({ passed: true, originalUrl: req.originalUrl, path: req.path });
+    });
+    // KS-800 item 8 / #818 F-05(b): bind loopback. `app.listen(0)` binds `::`,
+    // so on a shared host the probe server is briefly reachable off-box — and
+    // the base below already says 127.0.0.1.
+    server = app.listen(0, '127.0.0.1');
+    await new Promise<void>((r) => server.once('listening', () => r()));
+    port = (server.address() as AddressInfo).port;
+    base = `http://127.0.0.1:${port}`;
+  });
+
+  afterAll(async () => {
+    await new Promise<void>((r) => server.close(() => r()));
+  });
+
+  /**
+   * KS-818 G-06 — POST over a RAW SOCKET, because `fetch` cannot express the
+   * request this block needs. `fetch` normalises a bare trailing `?` out of the
+   * URL, so `/api/oauth/token?` arrives as `/api/oauth/token` and the case
+   * becomes indistinguishable from the CONTROL — which is exactly why it was
+   * removed from the list below. The case was right and the instrument was
+   * wrong; a socket sends the request line verbatim.
+   */
+  function rawPost(
+    requestTarget: string,
+    contentType: string,
+    body: string,
+  ): Promise<{ status: number; text: string }> {
+    return new Promise((resolve, reject) => {
+      const sock = netConnect(port, '127.0.0.1');
+      const chunks: Buffer[] = [];
+      sock.on('error', reject);
+      sock.on('connect', () => {
+        const payload = Buffer.from(body, 'utf8');
+        sock.write(
+          Buffer.concat([
+            Buffer.from(
+              `POST ${requestTarget} HTTP/1.1\r\nHost: 127.0.0.1:${port}\r\n` +
+                `Content-Type: ${contentType}\r\nContent-Length: ${payload.length}\r\n` +
+                'Connection: close\r\n\r\n',
+              'latin1',
+            ),
+            payload,
+          ]),
+        );
+      });
+      sock.on('data', (d) => chunks.push(d as Buffer));
+      sock.on('close', () => {
+        const text = Buffer.concat(chunks).toString('utf8');
+        const m = /^HTTP\/1\.1 (\d{3})/.exec(text);
+        resolve({ status: m ? Number(m[1]) : 0, text });
+      });
+    });
+  }
+
+  /**
+   * The body of a raw response. `rawPost` resolves the WHOLE wire text — status
+   * line, headers and body — so a caller that wants JSON must cut at the blank
+   * line. Written as its own function because the first version of Q-2's control
+   * did `JSON.parse(r.text)` and failed on `Unexpected token 'H'` — a mistake
+   * that reads at a glance like the endpoint returning non-JSON.
+   */
+  function rawBody(text: string): string {
+    const i = text.indexOf('\r\n\r\n');
+    return i === -1 ? text : text.slice(i + 4);
+  }
+
+  async function post(path: string, contentType: string, body: string) {
+    const res = await fetch(`${base}${path}`, {
+      method: 'POST',
+      headers: { 'content-type': contentType },
+      body,
+    });
+    return { status: res.status, json: (await res.json().catch(() => null)) as any };
+  }
+
+  const FORM = 'application/x-www-form-urlencoded';
+
+  it('CONTROL — /api/oauth/token DOES accept a form body (RFC 6749), so a 415 below means something', async () => {
+    const r = await post('/api/oauth/token', FORM, 'grant_type=authorization_code');
+    expect(
+      r.status,
+      'the token endpoint must still accept form encoding — if this 415s, every other ' +
+        'assertion in this block is satisfied by a middleware that refuses everything',
+    ).toBe(200);
+  });
+
+  it('REFUSES a form body on /api/oauth/authorize — the KS-781 revert, on a path Express derived', async () => {
+    const r = await post('/api/oauth/authorize', FORM, 'client_id=x&state=y');
+    expect(r.status).toBe(415);
+    expect(r.json?.error?.code).toBe('UNSUPPORTED_MEDIA_TYPE');
+  });
+
+  // ---------------------------------------------------------------------------
+  // KS-800 item 8 / #818 F-02 — the query-string property is asserted where it
+  // can FAIL.
+  //
+  // This used to be `/api/oauth/authorize?…` expecting 415, and it could not
+  // discriminate: authorize is refused whether or not the query is stripped,
+  // because it is not in the allow-set under EITHER value. Both hypotheses
+  // satisfied it.
+  //
+  // The direction where `req.path`'s query-stripping is load-bearing is the
+  // allow-set HIT. Measured by the gate: substituting `req.originalUrl` for
+  // `req.path` leaves this whole block green while
+  // `POST /api/oauth/token?foo=bar` regresses 200 -> 415 — a live break of the
+  // RFC 6749 token endpoint for any client that appends a query parameter.
+  // ---------------------------------------------------------------------------
+  //
+  // A bare `?` is NOT in the `it.each` list below and does not belong there —
+  // it needs a socket, and it has one of its own further down (KS-818 G-06).
+  it.each([
+    ['?foo=bar'],
+    ['?redirect_uri=https%3A%2F%2Fx.test&state=abc'],
+  ])('the token endpoint still accepts a form body with %s attached — the allow-set is keyed on the PATH', async (qs) => {
+    const r = await post(`/api/oauth/token${qs}`, FORM, 'grant_type=authorization_code');
+    expect(
+      r.status,
+      `POST /api/oauth/token${qs} must still be 200. If it 415s, the allow-set is being ` +
+        'consulted with a query-bearing value (req.originalUrl rather than req.path), which ' +
+        'breaks every RFC 6749 client that appends a query parameter.',
+    ).toBe(200);
+  });
+
+  // ---------------------------------------------------------------------------
+  // KS-818 G-06 — THE BARE `?`, RESTORED, OVER A RAW SOCKET.
+  //
+  // This case was deleted with the note "`fetch` drops it, so the request
+  // arrives as `/api/oauth/token` … indistinguishable from the CONTROL". That
+  // was true of the HARNESS and false of the ENDPOINT: `fetch` normalises the
+  // bare `?` out of the URL, so what was measured was never the case that was
+  // written. Over a socket the request line is sent verbatim and the two values
+  // genuinely differ:
+  //
+  //   req.path        -> '/api/oauth/token'    (allow-set HIT  -> 200)
+  //   req.originalUrl -> '/api/oauth/token?'   (allow-set MISS -> 415)
+  //
+  // So it discriminates exactly the tamper this block exists to catch, and it
+  // is the CHEAPEST such case — one character.
+  // ---------------------------------------------------------------------------
+  it('CONTROL — the socket client itself works: no query, form body, still 200', async () => {
+    // Without this, a 200 below could mean "the case passes" or "rawPost cannot
+    // reach the server at all"; a 0 status would read as neither.
+    const r = await rawPost('/api/oauth/token', FORM, 'grant_type=authorization_code');
+    expect(r.status, 'the socket client reaches the app and gets a real status').toBe(200);
+  });
+
+  it('a bare `?` on the token endpoint is still 200 — the case fetch could not express', async () => {
+    const r = await rawPost('/api/oauth/token?', FORM, 'grant_type=authorization_code');
+    expect(
+      r.status,
+      'POST /api/oauth/token? must still be 200. If it 415s, the allow-set is being consulted ' +
+        'with a query-bearing value (req.originalUrl rather than req.path) — and a bare `?` is ' +
+        'the smallest input that shows it.',
+    ).toBe(200);
+  });
+
+  it('🔴 CONTROL — the socket sends the target VERBATIM: the app SEES the trailing `?`', async () => {
+    // KS-833 Q-2. The previous version of this control asserted that
+    // `authorize?` 415s and `token?` 200s, and that the two differ. Measured by
+    // the #834 gate: a `rawPost` that strips the trailing `?` keeps that green
+    // at 35/35, and under the `originalUrl` product tamper all three G-06 cells
+    // stay green while the defect is live. Those two endpoints differ because of
+    // their PATHS, not because of the `?`, so the assertion never touched the
+    // property it claimed to guard.
+    //
+    // Reading `req.originalUrl` back off the wire is the assertion that cannot
+    // be satisfied by a client that rewrote the request line.
+    const r = await rawPost('/api/oauth/token?', FORM, 'grant_type=authorization_code');
+    expect(r.status).toBe(200);
+    const echoed = JSON.parse(rawBody(r.text)) as { originalUrl: string; path: string };
+    expect(
+      echoed.originalUrl,
+      'the app must SEE the bare `?`. If this is `/api/oauth/token`, the harness ' +
+        'normalised the request line and every case in this block is measuring a ' +
+        'request nobody sent.',
+    ).toBe('/api/oauth/token?');
+    expect(echoed.originalUrl.endsWith('?'), 'the trailing byte survived to the app').toBe(true);
+    // And the two values genuinely differ, which is the whole premise of the
+    // allow-set case above: path HITS the allow-set, originalUrl would MISS it.
+    expect(echoed.path).toBe('/api/oauth/token');
+    expect(echoed.originalUrl).not.toBe(echoed.path);
+  });
+
+  it('CONTROL — the echo is not answering a constant: a DIFFERENT target comes back different', async () => {
+    // Without this, the cell above would pass against an echo hard-coded to the
+    // one string it asserts.
+    const r = await rawPost('/api/oauth/token?x=1', FORM, 'grant_type=authorization_code');
+    // KS-833 F-6 — assert the STATUS before parsing the body. Without this the
+    // cell still reds under a product defect, but it reds with
+    // `expected undefined to be '/api/oauth/token?x=1'` — a message that points
+    // at the echo harness when the fault is a 415 from the product. Its sibling
+    // control above already does this; this cell was the one that did not.
+    expect(
+      r.status,
+      'the echo must answer 200 before its body means anything — a non-200 here is a ' +
+        'PRODUCT refusal, not a broken echo',
+    ).toBe(200);
+    const echoed = JSON.parse(rawBody(r.text)) as { originalUrl: string; path: string };
+    expect(echoed.originalUrl).toBe('/api/oauth/token?x=1');
+    expect(echoed.path).toBe('/api/oauth/token');
+  });
+
+  it('and authorize is still refused with a query attached — the weaker guard, kept', async () => {
+    const r = await post('/api/oauth/authorize?redirect_uri=https%3A%2F%2Fx.test', FORM, 'client_id=x');
+    expect(r.status).toBe(415);
+  });
+
+  it('still accepts JSON on /api/oauth/authorize', async () => {
+    const r = await post('/api/oauth/authorize', 'application/json', '{"client_id":"x"}');
+    expect(r.status).toBe(200);
+  });
+
+  // ---------------------------------------------------------------------------
+  // KS-800 item 8 / #818 F-01 — THE ENFORCED PERIMETER IS CASE-SENSITIVE, AND
+  // THAT IS ON THE RECORD HERE RATHER THAN IMPLIED.
+  //
+  // This block's own comment named "a case difference — see KS-801" as one of
+  // the three risks the doubles could not see, and then sent zero case-varied
+  // requests. `contentType.ts` tests `req.path.startsWith('/api/')`, a
+  // case-sensitive prefix, so `/Api/oauth/authorize` never enters the enforced
+  // surface at all — and on a mount-shaped app (the shape the gateway uses at
+  // routes/proxy.ts:317) Express's default case-INSENSITIVE routing still
+  // routes it to the `/api/oauth` handler. Guard misses, router hits.
+  //
+  // ⚠ These assert 200 — TODAY'S behaviour, not the desired one. The product
+  // defect is KS-801's and is cited, not re-filed here. When KS-801 lands these
+  // flip to 415 and this block goes red, which is the point: the fix is caught
+  // by an existing test rather than needing someone to remember this perimeter.
+  // ---------------------------------------------------------------------------
+  it.each([
+    ['/Api/oauth/authorize'],
+    ['/API/oauth/authorize'],
+    ['/aPi/oauth/authorize'],
+  ])('KS-801 PERIMETER — %s + form is 200 today, because the guard prefix is case-sensitive', async (path) => {
+    const r = await post(path, FORM, 'client_id=x&state=y');
+    expect(
+      r.status,
+      `${path} is outside the enforced surface: contentType.ts keys on ` +
+        "req.path.startsWith('/api/'), which is case-sensitive, while Express routing is not. " +
+        'This is 200 TODAY and asserted as such deliberately (KS-800 item 8 / #818 F-01). ' +
+        'When KS-801 makes the prefix case-insensitive, flip this to 415 — a red here is that ' +
+        'fix landing, not a regression.',
+    ).toBe(200);
+  });
+
+  it('CONTROL — the correctly-cased path IS enforced, so the cases above measure case and nothing else', async () => {
+    const r = await post('/api/oauth/authorize', FORM, 'client_id=x&state=y');
+    expect(r.status).toBe(415);
+  });
+
+  // -------------------------------------------------------------------------
+  // Q4-3: the allow-set BOUND. #812 added these and the revert removed them
+  // with the rest of its diff — but the bound predates #812 in spirit: it says
+  // the form exception is for ONE path, not for the /api/oauth/* family.
+  // Without it, a future entry could widen the exception to a sibling and no
+  // test would notice.
+  // -------------------------------------------------------------------------
+  it.each([
+    ['/api/oauth/apps'],
+    ['/api/oauth/introspect'],
+    ['/api/oauth/revoke'],
+    ['/api/oauth/userinfo'],
+  ])('BOUND — %s does NOT inherit the token endpoint form exception', async (path) => {
+    const r = await post(path, FORM, 'a=b');
+    expect(
+      r.status,
+      `${path} must not accept form encoding — the RFC 6749 exception is scoped to ` +
+        `/api/oauth/token alone, not to the /api/oauth/* family`,
+    ).toBe(415);
+  });
+});
+
+// ---------------------------------------------------------------------------
+// KS-791 — the two verify-file operations take raw bytes
+// ---------------------------------------------------------------------------
+
+describe('enforceJsonContentType — KS-791 verify-file octet-stream exception', () => {
+  const V1 = '/api/verification/verify-file';
+  const V2 = '/api/v2/verification/verify-file';
+
+  it('passes application/octet-stream on v1 verify-file', () => {
+    // Measured before the fix: 415. The server computes the hash from these
+    // bytes, so a JSON-only gateway made the operation unreachable.
+    const { passed } = run(makeReq({ path: V1, headers: bodyHeaders('application/octet-stream') }));
+    expect(passed).toBe(true);
+  });
+
+  it('passes application/octet-stream on v2 verify-file', () => {
+    const { passed } = run(makeReq({ path: V2, headers: bodyHeaders('application/octet-stream') }));
+    expect(passed).toBe(true);
+  });
+
+  it('still passes application/json on verify-file (the exception ADDS, it does not replace)', () => {
+    const { passed } = run(makeReq({ path: V1, headers: bodyHeaders('application/json') }));
+    expect(passed).toBe(true);
+  });
+
+  // -- Scope. These three are the reason the exception is safe, and they are
+  // -- the cases that fail if someone later widens it "just a little".
+
+  it('SCOPE — a SIBLING verification route still 415s the identical binary body', () => {
+    // The JSON-only rule is a content-type-confusion defence (KS-439). If this
+    // ever passes, the defence has been removed rather than scoped.
+    const { passed, res } = run(makeReq({ path: '/api/verification/verify', headers: bodyHeaders('application/octet-stream') }));
+    expect(passed).toBe(false);
+    expect(res._status).toBe(415);
+  });
+
+  it('SCOPE — verify-file still 415s a NON-octet-stream binary type (application/pdf)', () => {
+    // One media type was allowed, not "anything that looks like a file".
+    const { passed, res } = run(makeReq({ path: V1, headers: bodyHeaders('application/pdf') }));
+    expect(passed).toBe(false);
+    expect(res._status).toBe(415);
+  });
+
+  it('SCOPE — the match is EXACT, not a prefix: a suffixed path is still refused', () => {
+    // Set equality, never startsWith. A prefix match would open
+    // /api/verification/verify-file-anything to raw bytes.
+    const { passed, res } = run(makeReq({ path: `${V1}/../documents`, headers: bodyHeaders('application/octet-stream') }));
+    expect(passed).toBe(false);
+    expect(res._status).toBe(415);
+  });
+});

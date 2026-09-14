@@ -1,0 +1,203 @@
+/**
+ * KS-973 item 6 — the pre-suite step must not echo a generated password.
+ *
+ * THE FINDING (KS-973 item 6, from the #892 round-1 gate): `provision.ts:282` interpolated the
+ * server's `error.message` verbatim into the thrown Error, and `pre-suite.ts` interpolated that
+ * into the DEGRADED banner. Against a stub that echoes the request body, the generated password
+ * appeared in the banner in cleartext. The gate proved the PIPE is unredacted; it did NOT prove the
+ * real endpoint echoes payloads — and neither does this file: the stub below is the ticket's own
+ * harness, and the premise stays unverified by design. The pipe is redacted regardless.
+ *
+ * Every cell here stubs `fetch`; nothing reaches a stack.
+ *
+ * @module tests/unit/fixtures/provisionRedaction.test
+ */
+
+import * as fs from 'node:fs';
+import * as path from 'node:path';
+
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
+
+import { generateActors, type ActorSpec } from '../../../../fixtures/actors.ts';
+import { runPreSuite } from '../../../../fixtures/pre-suite.ts';
+import { provisionActor, redactSecrets } from '../../../../fixtures/provision.ts';
+
+/**
+ * Where the mocked manifest module points. Filled by the mock factory below, which runs before this
+ * file's imports — so by the time a cell runs, the directory exists and is this file's own.
+ */
+const tmp = vi.hoisted(() => ({ dir: '', target: '' }));
+
+/**
+ * The manifest module is redirected to a temp directory so `runPreSuite`'s DEGRADED arm — which
+ * quarantines whatever manifest is on disk — can never touch this worktree's real
+ * `fixtures/generated/`. `manifestPaths.test.ts` pins the real functions; here they are scenery.
+ */
+vi.mock('../../../../fixtures/manifest.ts', async (importActual) => {
+    const actual = await importActual<typeof import('../../../../fixtures/manifest.ts')>();
+    const fsMod = await import('node:fs');
+    const osMod = await import('node:os');
+    const pathMod = await import('node:path');
+    tmp.dir = fsMod.mkdtempSync(pathMod.join(osMod.tmpdir(), 'ks973-redaction-'));
+    tmp.target = pathMod.join(tmp.dir, 'actors-cell.json');
+    return {
+        ...actual,
+        manifestPath: () => tmp.target,
+        quarantineManifest: (provisionedAt: string) => actual.quarantineManifest(provisionedAt, tmp.target),
+    };
+});
+
+/** A minimal `Response` for the stub — the two members `postJson` reads. */
+function reply(status: number, body: unknown): Response {
+    return { status, json: () => Promise.resolve(body) } as unknown as Response;
+}
+
+/** Route → responder over the parsed JSON request body, so each cell states the conversation it stubs. */
+type Route = (body: Record<string, unknown>) => Response;
+
+/**
+ * Install a `fetch` stub that answers by URL path.
+ *
+ * @param {Record<string, Route>} routes - path → responder; an unrouted path rejects so a cell cannot pass by accident.
+ * @returns {void}
+ */
+function stubFetch(routes: Record<string, Route>): void {
+    vi.stubGlobal('fetch', (url: string, init?: { body?: string }): Promise<Response> => {
+        const pathname = new URL(url).pathname;
+        const route = routes[pathname];
+        if (route === undefined) {
+            return Promise.reject(new Error(`stub has no route for ${pathname}`));
+        }
+        const body = init?.body !== undefined ? (JSON.parse(init.body) as Record<string, unknown>) : {};
+        return Promise.resolve(route(body));
+    });
+}
+
+const BASE = 'http://127.0.0.1:1';
+const SEED = 's227-redaction';
+/**
+ * The first generated actor — typed as present, because a fixture with no actors cannot mean anything.
+ *
+ * @returns {ActorSpec} the first `ActorSpec` for `SEED`.
+ */
+function firstSpec(): ActorSpec {
+    const first = generateActors(SEED)[0];
+    if (first === undefined) {
+        throw new Error('generateActors returned no specs — the fixture cannot mean anything');
+    }
+    return first;
+}
+const spec = firstSpec();
+
+/** The ticket's harness: the register endpoint echoes the request body, password included. */
+const ECHOING_REGISTER: Route = (body) =>
+    reply(400, { success: false, error: { code: 'ECHO', message: `rejected payload ${JSON.stringify(body)}` } });
+
+/**
+ * Run `provisionActor` expecting a throw, and hand back the thrown message.
+ *
+ * @returns {Promise<string>} the Error's message; fails the cell if nothing was thrown.
+ */
+async function thrownMessage(): Promise<string> {
+    const outcome = await provisionActor(spec, BASE, 'admin-token').then(
+        () => null,
+        (err: unknown) => (err instanceof Error ? err.message : String(err)),
+    );
+    if (outcome === null) {
+        throw new Error('provisionActor resolved — the cell needs it to throw');
+    }
+    return outcome;
+}
+
+beforeEach(() => {
+    process.env['SECUURA_STACK_SLOT'] = '1';
+});
+
+afterEach(() => {
+    vi.unstubAllGlobals();
+    Reflect.deleteProperty(process.env, 'SECUURA_STACK_SLOT');
+    Reflect.deleteProperty(process.env, 'BOOTSTRAP_ADMIN_PASSWORD');
+    // The temp directory is this file's own `mkdtemp`; anything in it is a cell's own output
+    // (a superseded copy would be). Cleaning its own output is the rule; a foreign path never is.
+    if (tmp.dir !== '' && fs.existsSync(tmp.dir)) {
+        for (const entry of fs.readdirSync(tmp.dir)) {
+            fs.rmSync(path.join(tmp.dir, entry), { force: true });
+        }
+    }
+});
+
+describe('redactSecrets', () => {
+    it('replaces every occurrence of each secret and leaves everything else alone', () => {
+        expect(redactSecrets('pw=hunter2 again hunter2; token=abc', ['hunter2', 'abc'])).toBe(
+            'pw=[REDACTED] again [REDACTED]; token=[REDACTED]',
+        );
+    });
+
+    it('ignores an empty secret — an empty string matches everywhere and would erase the message', () => {
+        expect(redactSecrets('nothing to hide', [''])).toBe('nothing to hide');
+    });
+});
+
+describe('provisionActor — a server error that echoes the request body (KS-973 item 6)', () => {
+    it('throws a message that names the actor but never carries its password', async () => {
+        stubFetch({
+            '/api/users/admin/create': () => reply(500, {}),
+            '/api/auth/login': () => reply(401, { success: false }),
+            '/api/auth/register': ECHOING_REGISTER,
+        });
+
+        const message = await thrownMessage();
+
+        // KS-973 item 6 fix-shape (the ticket): "redact `password` keys before interpolation".
+        // The gate's measured shape was the generated password in the banner in cleartext.
+        expect(message).toContain('could not provision actor');
+        expect(message).not.toContain(spec.password);
+        expect(message).toContain('[REDACTED]');
+        // The diagnostic value stays: the actor and its email are what a reader needs.
+        expect(message).toContain(spec.key);
+        expect(message).toContain(spec.email);
+    });
+
+    it('CONTROL — a server message with no secret in it passes through unchanged', async () => {
+        stubFetch({
+            '/api/users/admin/create': () => reply(500, {}),
+            '/api/auth/login': () => reply(401, { success: false }),
+            '/api/auth/register': () =>
+                reply(400, {
+                    success: false,
+                    error: { code: 'LIMIT', message: 'register limiter: 100/hour exceeded' },
+                }),
+        });
+
+        const message = await thrownMessage();
+
+        expect(message).toContain('register limiter: 100/hour exceeded');
+        expect(message).not.toContain('[REDACTED]');
+    });
+});
+
+describe('runPreSuite — the DEGRADED banner carries the redacted reason (KS-973 item 6)', () => {
+    it('reports DEGRADED without the generated password', async () => {
+        process.env['BOOTSTRAP_ADMIN_PASSWORD'] = 'bootstrap-pw-for-the-cell';
+        stubFetch({
+            '/api/auth/login': (body) =>
+                // The bootstrap admin authenticates; every actor's fallback login is refused.
+                body['email'] === 'admin@secuura.com'
+                    ? reply(200, { success: true, data: { accessToken: 'admin-token' } })
+                    : reply(401, { success: false }),
+            '/api/users/admin/create': () => reply(500, {}),
+            '/api/auth/register': ECHOING_REGISTER,
+        });
+
+        const result = await runPreSuite('cell', ['--seed', SEED, '--base-url', BASE]);
+
+        expect(result.outcome).toBe('DEGRADED');
+        // `pre-suite.ts` interpolates the thrown reason into the banner; the redaction upstream is
+        // what keeps the password out of it — this cell is the pipe end-to-end, stub to banner.
+        expect(result.summary).toContain('provisioning did not complete');
+        expect(result.summary).not.toContain(spec.password);
+        expect(result.summary).toContain('[REDACTED]');
+        // Nothing was on disk to quarantine, and nothing was published.
+        expect(fs.existsSync(tmp.target)).toBe(false);
+    });
+});

@@ -1,0 +1,171 @@
+diff --git a/systemTest/fixtures/provision.ts b/systemTest/fixtures/provision.ts
+index b95f4ee39..68c801d62 100644
+--- a/systemTest/fixtures/provision.ts
++++ b/systemTest/fixtures/provision.ts
+@@ -30,7 +30,7 @@
+  * =============================================================================
+  */
+ 
+-import type { ActorSpec } from './actors.ts';
++import type { ActorSpec } from "./actors.ts";
+ 
+ /** An actor that now exists on the platform. */
+ export interface ProvisionedActor {
+@@ -42,7 +42,7 @@ export interface ProvisionedActor {
+   /** The role the platform ACTUALLY granted, which may differ from desired. */
+   readonly role: string;
+   /** How the account came to exist this run. */
+-    readonly via: 'registered' | 'existing';
++  readonly via: "registered" | "existing";
+ }
+ 
+ /** A user as any of these endpoints returns it. */
+@@ -112,8 +112,8 @@ async function postJson(
+   body: Record<string, unknown>,
+ ): Promise<{ status: number; envelope: AuthEnvelope }> {
+   const response = await fetch(`${baseUrl}${path}`, {
+-        method: 'POST',
+-        headers: { 'Content-Type': 'application/json' },
++    method: "POST",
++    headers: { "Content-Type": "application/json" },
+     body: JSON.stringify(body),
+   });
+ 
+@@ -134,11 +134,14 @@ async function postJson(
+  * @param baseUrl - API root.
+  * @returns the provisioned actor, or `null` when the credentials are rejected.
+  */
+-async function login(spec: ActorSpec, baseUrl: string): Promise<ProvisionedActor | null> {
+-    const { status, envelope } = await postJson(baseUrl, '/api/auth/login', {
++async function login(
++  spec: ActorSpec,
++  baseUrl: string,
++): Promise<ProvisionedActor | null> {
++  const { status, envelope } = await postJson(baseUrl, "/api/auth/login", {
+     email: spec.email,
+     password: spec.password,
+-        clientType: 'api',
++    clientType: "api",
+   });
+ 
+   const user = userFrom(envelope);
+@@ -149,8 +152,8 @@ async function login(spec: ActorSpec, baseUrl: string): Promise<ProvisionedActor
+     email: spec.email,
+     password: spec.password,
+     userId: user.id,
+-        role: user.role ?? 'UNKNOWN',
+-        via: 'existing',
++    role: user.role ?? "UNKNOWN",
++    via: "existing",
+   };
+ }
+ 
+@@ -161,11 +164,14 @@ async function login(spec: ActorSpec, baseUrl: string): Promise<ProvisionedActor
+  * @param baseUrl - API root.
+  * @returns the bearer token, or `null` if the admin cannot log in.
+  */
+-export async function bootstrapToken(admin: BootstrapAdmin, baseUrl: string): Promise<string | null> {
+-    const { status, envelope } = await postJson(baseUrl, '/api/auth/login', {
++export async function bootstrapToken(
++  admin: BootstrapAdmin,
++  baseUrl: string,
++): Promise<string | null> {
++  const { status, envelope } = await postJson(baseUrl, "/api/auth/login", {
+     email: admin.email,
+     password: admin.password,
+-        clientType: 'api',
++    clientType: "api",
+   });
+   return status === 200 ? (envelope.data?.accessToken ?? null) : null;
+ }
+@@ -189,8 +195,11 @@ async function createAsAdmin(
+   token: string,
+ ): Promise<ProvisionedActor | null> {
+   const response = await fetch(`${baseUrl}/api/users/admin/create`, {
+-        method: 'POST',
+-        headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
++    method: "POST",
++    headers: {
++      "Content-Type": "application/json",
++      Authorization: `Bearer ${token}`,
++    },
+     body: JSON.stringify({
+       email: spec.email,
+       password: spec.password,
+@@ -218,10 +227,38 @@ async function createAsAdmin(
+     password: spec.password,
+     userId: created.id,
+     role: created.role ?? spec.desiredRole,
+-        via: 'registered',
++    via: "registered",
+   };
+ }
+ 
++/**
++ * Replace every occurrence of each secret in `text` with `[REDACTED]`.
++ *
++ * Where/when: applied to a server's error message before it is interpolated into a thrown Error
++ * (KS-973 item 6), because that Error's message becomes the pre-suite DEGRADED banner every suite
++ * prints. A plain split/join, not a regex: the secrets are generated passwords and may carry
++ * regex metacharacters.
++ *
++ * @param text - the message to scrub, e.g. a server's `error.message`.
++ * @param secrets - the values that must not appear; an empty string is ignored, since it would
++ *   match everywhere and erase the message rather than redact it.
++ * @returns `text` with every occurrence of every non-empty secret replaced by `[REDACTED]`.
++ * @example
++ *   redactSecrets('rejected {"password":"Pw!1"}', ['Pw!1']);  // 'rejected {"password":"[REDACTED]"}'
++ */
++export function redactSecrets(
++  text: string,
++  secrets: readonly string[],
++): string {
++  let scrubbed = text;
++  // Step: scrub each secret in turn; split/join replaces every occurrence, unlike a bare replace.
++  for (const secret of secrets) {
++    if (secret.length === 0) continue;
++    scrubbed = scrubbed.split(secret).join("[REDACTED]");
++  }
++  return scrubbed;
++}
++
+ /**
+  * Ensure one actor exists, registering it if it does not.
+  *
+@@ -254,7 +291,7 @@ export async function provisionActor(
+     if (existing) return existing;
+   }
+ 
+-    const { status, envelope } = await postJson(baseUrl, '/api/auth/register', {
++  const { status, envelope } = await postJson(baseUrl, "/api/auth/register", {
+     email: spec.email,
+     password: spec.password,
+     firstName: spec.firstName,
+@@ -268,8 +305,8 @@ export async function provisionActor(
+       email: spec.email,
+       password: spec.password,
+       userId: registered.id,
+-            role: registered.role ?? 'UNKNOWN',
+-            via: 'registered',
++      role: registered.role ?? "UNKNOWN",
++      via: "registered",
+     };
+   }
+ 
+@@ -279,6 +316,14 @@ export async function provisionActor(
+     if (existing) return existing;
+   }
+ 
+-    const reason = envelope.error?.message ?? `HTTP ${status}`;
+-    throw new Error(`could not provision actor "${spec.key}" (${spec.email}): ${reason}`);
++  // KS-973 item 6: the server's message is interpolated into an Error that `pre-suite.ts` prints
++  // in its DEGRADED banner. Against a stub that echoed the request body, the generated password
++  // appeared in that banner in cleartext. Whether a real endpoint echoes payloads is unverified;
++  // the pipe is redacted regardless, at the one site that interpolates a server message.
++  const reason = redactSecrets(envelope.error?.message ?? `HTTP ${status}`, [
++    spec.password,
++  ]);
++  throw new Error(
++    `could not provision actor "${spec.key}" (${spec.email}): ${reason}`,
++  );
+ }

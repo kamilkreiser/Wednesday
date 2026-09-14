@@ -1,0 +1,125 @@
+diff --git a/Blockchain/Dev/services/originate/src/originate.openapi.ts b/Blockchain/Dev/services/originate/src/originate.openapi.ts
+index 12fb03ba6..5e2c499f1 100644
+--- a/Blockchain/Dev/services/originate/src/originate.openapi.ts
++++ b/Blockchain/Dev/services/originate/src/originate.openapi.ts
+@@ -2003,6 +2003,120 @@ sharedRegistry.registerPath({
+   },
+ });
+ 
++// -----------------------------------------------------------------------------
++// KS-791 — verify-file (v1 + v2). RAW BYTES, not JSON.
++//
++// These two are the only /api/* operations whose request body is binary: the
++// SERVER computes the hash from the uploaded bytes, which is what makes them
++// the strongest verification — the caller cannot assert a hash it did not
++// produce. They are published here only now because until KS-791 the gateway's
++// JSON-only rule (KS-439) 415'd every file content-type, so publishing an
++// octet-stream contract would have documented a request the gateway refused.
++// The gateway now allows `application/octet-stream` on these two exact paths
++// and no others (api-gateway/src/middleware/contentType.ts).
++// Both request bodies declare `minLength: 1` IN THE .openapi() METADATA as well as via
++// `.min(1)`: with an explicit type/format override the generator does not carry the zod
++// check into the published schema (measured: `.min(1)` alone changed zero bytes of the
++// YAML). Without it an EMPTY body is schema-valid while the handler answers 400, which
++// is the #813 review finding. `check:openapi` pins the published line.
++// -----------------------------------------------------------------------------
++
++sharedRegistry.registerPath({
++  method: 'post',
++  path: '/api/verification/verify-file',
++  security: [],
++  tags: ['Verification'],
++  summary: 'Verify an uploaded file — the server hashes the bytes (v1)',
++  description:
++    'Upload the document as the RAW REQUEST BODY (application/octet-stream). The server '
++    + 'computes sha256 over the received bytes and looks that hash up in the registry, so '
++    + 'unlike /api/verification/verify the caller cannot supply a hash of its choosing. '
++    + 'Always 200 with `verified` as the discriminator once a body is present; an EMPTY body '
++    + 'is the one 400, and it speaks v1\'s legacy {verified:false, error} shape rather than '
++    + 'the canonical envelope (KS-118, documented as-is, no behaviour change).',
++  ...rateLimit('verification'),
++  ...sla('read'),
++  request: {
++    body: {
++      required: true,
++      content: {
++        'application/octet-stream': {
++          schema: z.string().min(1).openapi({ type: 'string', format: 'binary', minLength: 1, description: 'The document file, as raw bytes.' }),
++        },
++      },
++    },
++  },
++  responses: {
++    200: {
++      description:
++        'Verification result (always 200 — `verified` is the discriminator). '
++        + 'NOTE: the handler additionally returns `fileSize` (bytes of the uploaded body) on every 200. '
++        + 'It is not declared in VerifyResponse, which is `.passthrough()`, so the response validates — '
++        + 'but the field is undocumented in the schema. Tracked rather than papered over: see KS-794.',
++      content: { 'application/json': { schema: VerifyResponseSchema } },
++    },
++    400: {
++      description: 'Empty request body — no file content received. v1 legacy shape, not the canonical envelope.',
++      content: {
++        'application/json': {
++          schema: z.object({ verified: z.boolean(), error: z.string() }),
++        },
++      },
++    },
++    429: commonErrorResponses[429],
++    500: commonErrorResponses[500],
++    502: commonErrorResponses[502],
++    503: commonErrorResponses[503],
++    404: commonErrorResponses[404],
++    401: commonErrorResponses[401],
++  },
++});
++
++sharedRegistry.registerPath({
++  method: 'post',
++  path: '/api/v2/verification/verify-file',
++  security: [],
++  tags: ['Verification'],
++  summary: 'Verify an uploaded file — list contract (v2)',
++  description:
++    'Raw file bytes as the request body; the server computes the hash. Same list contract as '
++    + 'POST /api/v2/verification/verify — EVERY registration of those bytes is returned as its '
++    + 'own match, rather than collapsing the same-hash set to one row. Unlike v1, the empty-body '
++    + '400 uses the canonical error envelope.',
++  ...rateLimit('verification'),
++  ...sla('read'),
++  request: {
++    body: {
++      required: true,
++      content: {
++        'application/octet-stream': {
++          schema: z.string().min(1).openapi({ type: 'string', format: 'binary', minLength: 1, description: 'The document file, as raw bytes.' }),
++        },
++      },
++    },
++  },
++  responses: {
++    200: {
++      description:
++        'Verify-list result for the uploaded bytes. count 0 with empty matches is the honest '
++        + '"never registered" answer. NOTE: the handler additionally returns `fileSize` (bytes of the '
++        + 'uploaded body) on every 200; V2VerifyResponse is `.passthrough()` so it validates, but the '
++        + 'field is undocumented in the schema. See KS-794.',
++      content: { 'application/json': { schema: V2VerifyResponseSchema } },
++    },
++    400: {
++      ...commonErrorResponses[400],
++      description: 'Empty request body — no file content received. Canonical error envelope.',
++    },
++    429: commonErrorResponses[429],
++    500: commonErrorResponses[500],
++    502: commonErrorResponses[502],
++    503: commonErrorResponses[503],
++    404: commonErrorResponses[404],
++    401: commonErrorResponses[401],
++  },
++});
++
+ // -----------------------------------------------------------------------------
+ // ROUTES — /api/certifications
+ // -----------------------------------------------------------------------------

@@ -1,0 +1,140 @@
+diff --git a/systemTest/fixtures/pre-suite.ts b/systemTest/fixtures/pre-suite.ts
+index 01024fadd..f5f839a84 100644
+--- a/systemTest/fixtures/pre-suite.ts
++++ b/systemTest/fixtures/pre-suite.ts
+@@ -34,13 +34,13 @@
+  * =============================================================================
+  */
+ 
+-import { pathToFileURL } from 'node:url';
++import { pathToFileURL } from "node:url";
+ 
+-import { manifestPath, quarantineManifest } from './manifest.ts';
+-import { provisionActors } from './provision-actors.ts';
+-import { NO_SLOT_REFUSAL } from './slot-required.ts';
++import { manifestPath, quarantineManifest } from "./manifest.ts";
++import { provisionActors } from "./provision-actors.ts";
++import { NO_SLOT_REFUSAL } from "./slot-required.ts";
+ 
+-export type PreSuiteOutcome = 'PROVISIONED' | 'DEGRADED' | 'REFUSED';
++export type PreSuiteOutcome = "PROVISIONED" | "DEGRADED" | "REFUSED";
+ 
+ /**
+  * KS-969 F3 (round-1 gate). The flag was `=== '1'`, so `" true"`, `"TRUE"`,
+@@ -58,14 +58,14 @@ export type PreSuiteOutcome = 'PROVISIONED' | 'DEGRADED' | 'REFUSED';
+  * Anything else non-empty is UNRECOGNISED and says so, rather than meaning false.
+  */
+ function strictFlag(value: string | undefined, name: string): boolean {
+-    if (value === undefined || value.trim() === '') return false;
++  if (value === undefined || value.trim() === "") return false;
+   const normalised = value.toLowerCase().trim();
+-    if (normalised === 'true') return true;
+-    if (normalised === 'false') return false;
++  if (normalised === "true") return true;
++  if (normalised === "false") return false;
+   console.error(
+     `[pre-suite] ${name}="${value}" is not recognised — expected "true" or "false". ` +
+-            'Treating it as UNSET, which is the permissive arm. This warning exists because a ' +
+-            'strictness flag that silently means false is worse than no flag at all.',
++      "Treating it as UNSET, which is the permissive arm. This warning exists because a " +
++      "strictness flag that silently means false is worse than no flag at all.",
+   );
+   return false;
+ }
+@@ -83,7 +83,8 @@ function isRefusal(err: unknown): boolean {
+   // KS-1016: a local target with no slot named is a refusal too — fatal, nothing created.
+   return (
+     err instanceof Error &&
+-        (err.message.startsWith('refusing to provision accounts against') || err.message.startsWith(NO_SLOT_REFUSAL))
++    (err.message.startsWith("refusing to provision accounts against") ||
++      err.message.startsWith(NO_SLOT_REFUSAL))
+   );
+ }
+ 
+@@ -95,10 +96,13 @@ function isRefusal(err: unknown): boolean {
+  * @returns the outcome, an exit code and a one-line summary. Never throws:
+  *          classifying the failure IS this function's job.
+  */
+-export async function runPreSuite(suite: string, argv: string[] = []): Promise<PreSuiteResult> {
++export async function runPreSuite(
++  suite: string,
++  argv: string[] = [],
++): Promise<PreSuiteResult> {
+   const required = strictFlag(
+     process.env.SYSTEMTEST_REQUIRE_PROVISIONED,
+-        'SYSTEMTEST_REQUIRE_PROVISIONED',
++    "SYSTEMTEST_REQUIRE_PROVISIONED",
+   );
+   try {
+     const { manifest, drifted, written } = await provisionActors(argv);
+@@ -111,22 +115,22 @@ export async function runPreSuite(suite: string, argv: string[] = []): Promise<P
+     // to publish it; this refuses to call it PROVISIONED.
+     if (drifted.length > 0 || written === null) {
+       return {
+-                outcome: 'DEGRADED',
++        outcome: "DEGRADED",
+         exitCode: required ? 1 : 0,
+         summary:
+           `[pre-suite:${suite}] DEGRADED — ${drifted.length} actor(s) did not get the ` +
+-                    `role they were provisioned for (${drifted.join(', ')}). The manifest was NOT ` +
++          `role they were provisioned for (${drifted.join(", ")}). The manifest was NOT ` +
+           `published, so the suite keeps its correctly-roled SEEDED accounts.\n` +
+           `[pre-suite:${suite}] This is almost always BOOTSTRAP_ADMIN_PASSWORD being ` +
+           `unset: no self-service path can grant a role, so every actor lands as OWNER.` +
+           (required
+             ? `\n[pre-suite:${suite}] SYSTEMTEST_REQUIRE_PROVISIONED is set, so this is FATAL.`
+-                        : ''),
++            : ""),
+       };
+     }
+ 
+     return {
+-            outcome: 'PROVISIONED',
++      outcome: "PROVISIONED",
+       exitCode: 0,
+       summary:
+         `[pre-suite:${suite}] PROVISIONED — ${count} generated actor(s) from seed ` +
+@@ -140,7 +144,7 @@ export async function runPreSuite(suite: string, argv: string[] = []): Promise<P
+       // direction: the flag raises DEGRADED to fatal, it does not lower a
+       // refusal to a warning.
+       return {
+-                outcome: 'REFUSED',
++        outcome: "REFUSED",
+         exitCode: 1,
+         summary: `[pre-suite:${suite}] REFUSED — ${reason}`,
+       };
+@@ -185,7 +189,7 @@ export async function runPreSuite(suite: string, argv: string[] = []): Promise<P
+     }
+ 
+     return {
+-            outcome: 'DEGRADED',
++      outcome: "DEGRADED",
+       exitCode: required ? 1 : 0,
+       summary:
+         `[pre-suite:${suite}] DEGRADED — provisioning did not complete: ${reason}\n` +
+@@ -219,15 +223,22 @@ export async function runPreSuite(suite: string, argv: string[] = []): Promise<P
+   }
+ }
+ 
++// KS-973 residue (e): `import.meta.url` is realpath'd by the ESM loader while `argv[1]` is not, so
++// invoked THROUGH A SYMLINK this is false, the body below never runs and the process exits 0 with
++// empty output. Bounded — every production hook passes a real path — and pinned as the known shape
++// by `performance/tests/unit/fixtures/preSuiteStreams.test.ts`.
+ const invokedDirectly =
+-    process.argv[1] !== undefined && import.meta.url === pathToFileURL(process.argv[1]).href;
++  process.argv[1] !== undefined &&
++  import.meta.url === pathToFileURL(process.argv[1]).href;
+ 
+ if (invokedDirectly) {
+-    const suite = process.argv[2] ?? 'unknown';
++  const suite = process.argv[2] ?? "unknown";
+   runPreSuite(suite, process.argv.slice(3)).then((result) => {
+     // DEGRADED goes to stderr so it survives a pipeline that only keeps
+     // stdout, which is how a warning becomes invisible.
+-        (result.outcome === 'PROVISIONED' ? console.log : console.error)(result.summary);
++    (result.outcome === "PROVISIONED" ? console.log : console.error)(
++      result.summary,
++    );
+     process.exit(result.exitCode);
+   });
+ }

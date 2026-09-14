@@ -1,0 +1,106 @@
+diff --git a/Blockchain/Dev/services/api-gateway/src/__tests__/contentType.test.ts b/Blockchain/Dev/services/api-gateway/src/__tests__/contentType.test.ts
+index 1799ef843..d77981707 100644
+--- a/Blockchain/Dev/services/api-gateway/src/__tests__/contentType.test.ts
++++ b/Blockchain/Dev/services/api-gateway/src/__tests__/contentType.test.ts
+@@ -536,3 +536,55 @@ describe('KS-802 — the media-type contract over a real Express app (real req.p
+     ).toBe(415);
+   });
+ });
++
++// ---------------------------------------------------------------------------
++// KS-791 — the two verify-file operations take raw bytes
++// ---------------------------------------------------------------------------
++
++describe('enforceJsonContentType — KS-791 verify-file octet-stream exception', () => {
++  const V1 = '/api/verification/verify-file';
++  const V2 = '/api/v2/verification/verify-file';
++
++  it('passes application/octet-stream on v1 verify-file', () => {
++    // Measured before the fix: 415. The server computes the hash from these
++    // bytes, so a JSON-only gateway made the operation unreachable.
++    const { passed } = run(makeReq({ path: V1, headers: bodyHeaders('application/octet-stream') }));
++    expect(passed).toBe(true);
++  });
++
++  it('passes application/octet-stream on v2 verify-file', () => {
++    const { passed } = run(makeReq({ path: V2, headers: bodyHeaders('application/octet-stream') }));
++    expect(passed).toBe(true);
++  });
++
++  it('still passes application/json on verify-file (the exception ADDS, it does not replace)', () => {
++    const { passed } = run(makeReq({ path: V1, headers: bodyHeaders('application/json') }));
++    expect(passed).toBe(true);
++  });
++
++  // -- Scope. These three are the reason the exception is safe, and they are
++  // -- the cases that fail if someone later widens it "just a little".
++
++  it('SCOPE — a SIBLING verification route still 415s the identical binary body', () => {
++    // The JSON-only rule is a content-type-confusion defence (KS-439). If this
++    // ever passes, the defence has been removed rather than scoped.
++    const { passed, res } = run(makeReq({ path: '/api/verification/verify', headers: bodyHeaders('application/octet-stream') }));
++    expect(passed).toBe(false);
++    expect(res._status).toBe(415);
++  });
++
++  it('SCOPE — verify-file still 415s a NON-octet-stream binary type (application/pdf)', () => {
++    // One media type was allowed, not "anything that looks like a file".
++    const { passed, res } = run(makeReq({ path: V1, headers: bodyHeaders('application/pdf') }));
++    expect(passed).toBe(false);
++    expect(res._status).toBe(415);
++  });
++
++  it('SCOPE — the match is EXACT, not a prefix: a suffixed path is still refused', () => {
++    // Set equality, never startsWith. A prefix match would open
++    // /api/verification/verify-file-anything to raw bytes.
++    const { passed, res } = run(makeReq({ path: `${V1}/../documents`, headers: bodyHeaders('application/octet-stream') }));
++    expect(passed).toBe(false);
++    expect(res._status).toBe(415);
++  });
++});
+diff --git a/Blockchain/Dev/services/api-gateway/src/middleware/contentType.ts b/Blockchain/Dev/services/api-gateway/src/middleware/contentType.ts
+index 6dcdaa6e0..5b5b3e734 100644
+--- a/Blockchain/Dev/services/api-gateway/src/middleware/contentType.ts
++++ b/Blockchain/Dev/services/api-gateway/src/middleware/contentType.ts
+@@ -53,6 +53,30 @@ const ENFORCED_PREFIX = '/api/';
+ // the ticket.
+ const FORM_ALLOWED_PATHS = new Set(['/api/oauth/token']);
+ 
++/**
++ * KS-791: the two verify-file operations are the only ones on the `/api/*`
++ * surface whose spec'd request body is RAW BYTES — the SERVER computes the
++ * hash from the uploaded file (`verification.ts:511`, `verificationV2.ts:501`)
++ * rather than receiving a hex digest in JSON. The JSON-only rule therefore made
++ * them unreachable through the gateway: measured live, `octet-stream`, `pdf`,
++ * `text/plain`, `multipart` and no content-type ALL returned 415, and only
++ * `application/json` reached the handler — where it is the wrong body.
++ *
++ * The relaxation is deliberately as small as it can be:
++ *   - two EXACT paths, matched by equality, never a prefix or a pattern;
++ *   - ONE additional media type, `application/octet-stream`, and no other;
++ *   - every other `/api/*` path keeps the strict rule unchanged.
++ *
++ * The JSON-only rule is a content-type-confusion defence (KS-439), so widening
++ * it anywhere it is not required would trade a real defence for convenience.
++ * `contentType.test.ts` pins both halves: these two paths accept octet-stream,
++ * and a sibling verification route still 415s the identical binary body.
++ */
++const OCTET_STREAM_ALLOWED_PATHS = new Set([
++  '/api/verification/verify-file',
++  '/api/v2/verification/verify-file',
++]);
++
+ /**
+  * Media types accepted as "JSON" — the exact type plus any registered
+  * `application/*+json` structured-syntax suffix (merge-patch, json-patch, …).
+@@ -106,6 +130,10 @@ export function enforceJsonContentType(req: Request, res: Response, next: NextFu
+   // RFC 6749 exception: the token endpoint's spec'd body is form-encoded.
+   if (FORM_ALLOWED_PATHS.has(req.path) && mediaType === 'application/x-www-form-urlencoded') return next();
+ 
++  // KS-791 exception: the two verify-file operations take raw bytes, because
++  // the server — not the client — computes the hash.
++  if (OCTET_STREAM_ALLOWED_PATHS.has(req.path) && mediaType === 'application/octet-stream') return next();
++
+   res.status(415).json({
+     success: false,
+     error: {
