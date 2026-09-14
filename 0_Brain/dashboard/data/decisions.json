@@ -9779,5 +9779,41 @@
   ],
   "delivered_artefact": "KS-1157 rescoped to the OAuth session marker by s225 04:55:52Z (comment 45aa66e7; Medium; window accepted per Kam 14:53)",
   "delivered_ts": "2026-09-14T14:57:57.835852+10:00"
+ },
+ {
+  "id": "secuura-805-guard5-node-rejection-retry",
+  "client_project": "Secuura/Blockchain",
+  "title": "#805 (KS-726): when the Cardano node REJECTS a transaction (a 400 with a status_code), should guard 5 retry at once or keep today's 24-hour hold? Peter asked; the code cannot answer it",
+  "bluf": "[override: the five prior panel hits are the 08-21 anchor census, two 09-03 status lines and the #800 nudge card — none on guard 5 / #805 / KS-726.] Guard 5 in anchorSubmission.ts holds a document 24 hours when a submit's reply is LOST, so a second fee-paying transaction is never minted. A node REJECTION (HTTP 400 carrying a status_code) is not a lost reply — the node answered — but today it falls into the same 24-hour hold. Peter (2026-09-08, PR #805): 'if you tell me the trade is deliberate I will take your read and approve'. The seat (s231) measured the code at head 1885d5166: no comment, test, body or ticket line names the rejected case — the trade is NOT assertable as deliberate, so nobody has answered him. Develop already carries the discriminator (isChainReachableError, cardano/provider.ts:128-134, KS-671 #728). The tier-1 gate on the head runs now either way; a ruling of 1 becomes a follow-up commit by s231 and a delta re-gate.",
+  "default_action": "If unruled: the tier-1 gate runs on 1885d5166 now and #805 merges on GO WITH FINDINGS (option 3's shape) — Peter's question is answered on the PR as 'with the owner, tracked' and Wednesday files the Medium ticket at the merge; option 1 is built only on Kam's word. Link for Kam's read: https://github.com/Secuura/Distributed_Secuura/pull/805",
+  "options": [
+   {
+    "key": "retry",
+    "label": "1 — retry at once on a definitive node rejection (Wednesday's recommendation)",
+    "detail": "s231 adds the guard condition (fall through when isChainReachableError(error) is true), re-words the guard-5 comment, and adds one cell (status_code 400 after onSigned → scheduleRetry, no 'submitting' rest) plus one control cell (no status_code → guard 5 as today); Peter's two smaller notes (batch ordering, bumpRetryCount) ride the same commit. Answer to Peter goes on the PR by file:line. Cost: ~30 min + a delta re-gate. Why: a refused transaction is safe to retry (no second fee), and stranding a document 24 h on a definitive refusal is the worse outcome."
+   },
+   {
+    "key": "comment",
+    "label": "2 — keep the 24-hour hold for rejections; document it as deliberate",
+    "detail": "s231 re-words the comment and the NOT HANDLED header to say a node rejection is treated like a lost reply on purpose, answers Peter on the PR with that sentence. No behaviour change, no new cells. Cost: ~10 min + the same delta re-gate of the comment-only diff."
+   },
+   {
+    "key": "later",
+    "label": "3 — merge #805 as-is now; decide the rejection case on its own ticket",
+    "detail": "The gate runs on 1885d5166; #805 merges on GO; Peter's question is answered 'tracked as KS-new' on the PR; a new Medium ticket carries options 1/2. Fastest merge; the question outlives the PR."
+   }
+  ],
+  "recommended": "retry",
+  "ts": "2026-09-14T20:05:34.441374+10:00",
+  "status": "open",
+  "ruled_choice": null,
+  "ruled_ts": null,
+  "prior_rulings_overridden": [
+   "2026-08-21 20:06",
+   "2026-09-03 11:37",
+   "2026-09-03 16:20",
+   "2026-09-04 07:07",
+   "2026-09-04 08:33"
+  ]
  }
 ]
