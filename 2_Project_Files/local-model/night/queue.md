@@ -49,9 +49,6 @@
 #    survive"). CAVEAT: item 2 (which credential originate accepts) is a design call — the model must NOT
 #    touch it; a PASS here is item 1 only. Same reference test family as KS-1072. ctx=49152.
 #
-KS-871 ref=Blockchain/Dev/services/api-gateway/src/__tests__/ks843-erasure-path-bypass.test.ts line=280
-KS-1072 ctx=49152
-KS-1087 line=991 ctx=49152
 #
 # ─────────────────────────────────────────────────────────────────────────────────────────────────────
 # REJECTED (read, one line each — id · reason). Re-check a "coverage-only" ticket only if the contract
