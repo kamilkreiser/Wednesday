@@ -1,0 +1,12 @@
+--- a/Blockchain/Dev/services/auth/src/routes/wallet.ts
++++ b/Blockchain/Dev/services/auth/src/routes/wallet.ts
+@@ -165,7 +165,7 @@
+   // Create a new wallet user via userRepo (persists to DB)
+   const user: User = {
+     id: uuidv4(),
+-    email: `${walletAddress.slice(0, 8)}...@wallet.local`,
++    // KS-806: use hash of full wallet address for synthetic email to avoid collisions
++    email: `${crypto.createHash('sha256').update(walletAddress).digest('hex').slice(0, 24)}...@wallet.local`,
+     emailVerified: false,
+     phoneVerified: false,
+     mfaEnabled: false,
