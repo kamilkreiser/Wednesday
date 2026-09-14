@@ -64,7 +64,7 @@ def sampler_options(num_ctx):
         "temperature": 0,
         "repeat_penalty": float(os.environ.get("LM_REPEAT_PENALTY", "1.15")),
         "repeat_last_n": int(os.environ.get("LM_REPEAT_LAST_N", "512")),
-        "num_predict": int(os.environ.get("LM_NUM_PREDICT", "12288")),
+        "num_predict": int(os.environ.get("LM_NUM_PREDICT", "32768")),  # 2026-09-15 09:35: 12288 cut a think=1 run BEFORE its diff (47,728 thinking chars); thinking counts against num_predict
     }
 
 def main():
