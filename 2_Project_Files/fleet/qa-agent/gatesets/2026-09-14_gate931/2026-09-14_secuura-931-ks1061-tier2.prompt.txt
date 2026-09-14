@@ -1,0 +1,207 @@
+ultrathink
+
+You are the fleet QA agent running a TIER 2 (through code — a unit-test mock-factory helper and its own
+completeness guard under services/originate/src/__tests__/; NO product file, no service, route, spec,
+schema or UI) gate, ROUND 1, on Secuura/Blockchain PR #931 (KS-1061): a rebase-onto-live-develop plus two
+folds of hand-written root @secuura/shared mock factories into makeSharedMock.
+
+Read your brief FIRST and in full, then plan — it opens with a RE-PIN notice: the gateable head is
+7953070230d285fdebc0c65b834ac8340c02c0b6, NOT the 53b8a1f7a named deeper in this prompt's own subject
+block below (that head is SUPERSEDED — the rest of this prompt's body was written against it before a
+second develop merge-in landed; the brief explains exactly what changed and what stayed the same):
+/Volumes/DevMASTER/WEDNESDAY/2_Project_Files/fleet/qa-agent/briefs/2026-09-14_secuura-931-ks1061-tier2.md
+
+GATE THIS HEAD: 7953070230d285fdebc0c65b834ac8340c02c0b6 — PR #931 (KS-1061), open against develop, FOUR
+  commits (the three below, PLUS a fourth `795307023` = a second `--no-ff` merge of a LATER develop tip
+  `b9f541e6b` (M31, containing #985's squash) INTO the branch, resolving the ks695-erasure-by-external-
+  ref.test.ts conflict as the UNION: the helper form with #985's `normaliseOrgId` pass-through kept as an
+  OVERRIDE, never a stub. Builder-measured at this head (CONFIRM by running): completeness guard 3/3,
+  ks695 alone 40/40, ks780-org-id-* alone 3/3, whole originate 58 suites/604 tests, and a NEW discriminator
+  tamper T5 (delete the pass-through override -> ks695 reds 10 failed/30 passed/40 total). PR files API:
+  14, +236 -99 — the SAME 14-file set as before; independently confirmed by this drafter that ONLY
+  ks695-erasure-by-external-ref.test.ts (+4 lines) and the brand-new ks780-org-id-is-the-shared-
+  implementation.test.ts (+49, 0 root shared mocks) differ, byte-for-byte, between the old and new heads
+  within services/originate/src/__tests__/ — the ten conversions and the two folds (ks1103, ks764) are
+  UNCHANGED blobs, confirmed by direct blob comparison.
+
+The subject block below was written against the SUPERSEDED head 53b8a1f7a6056c1560af71252c753c005bee8f06 —
+its THREE-commit history, the ks444 resolution, and the two folds are all still accurate FACTS about the
+branch's history (nothing in them was undone), just not the current head. Read it as history, then apply
+the RE-PIN notice above:
+  f2e0cb3c1 (the PR's own build — makeSharedMock, the completeness guard, ten converted factories) ->
+  3da9623fe (merge develop dfc63fe48/M23 IN, --no-ff, parents f2e0cb3c1+dfc63fe48, ONE resolved conflict on
+  ks444-webhooks-create-description-guard.test.ts: develop's KS-927 comment block kept byte-for-byte + the
+  helper form of the old factory, assertSafeOutboundUrl override kept) -> 53b8a1f7a (the two folds, ONE
+  commit, KS-1061 only: ks1103-verify-hash-field.test.ts's factory and ks764-admin-api-keys-revoke-route-
+  contract.test.ts's factory, the second in the EXPRESSION form with a `...actual` spread). PR files API =
+  14 (the 12 + the two folds), +232 -95, 0 product files, every path under
+  Blockchain/Dev/services/originate/src/__tests__/.
+
+  Merge-base with develop (GitHub compare's merge_base_commit) = dfc63fe48ebaa97271f3ff66315a742ba4d79bc2
+  (M23) — this does NOT move unless the branch is re-merged (it hasn't, since 53b8a1f7a). origin/develop's
+  OWN tip keeps moving independently and is READ LIVE by the launcher's --check (exit 18) and by
+  controls_check.sh §6 every run — do not trust any SHA this brief states for "the live tip" as still
+  current; re-read it yourself as your first action.
+
+The headline questions of this gate:
+  (1) Is the delta genuinely tests-only, exactly 14 paths, all under services/originate/src/__tests__/? —
+      cross-check git diff --name-only dfc63fe48..HEAD against GitHub's /pulls/931/files AND compare
+      develop...HEAD; all three must agree (FOUND F1).
+  (2) The jest.mock('@secuura/shared', ...) root-factory census: 12 at develop(M23) (all hand-written,
+      0 via the helper — the helper doesn't exist on develop), 10 at the PR's own pre-merge tip (all via
+      helper, 0 offenders), 12 at HEAD (all via helper, 0 offenders — GREEN). RUN
+      `npx jest src/__tests__/ks1061-shared-mock-completeness.test.ts` yourself at HEAD to confirm.
+  (3) RED-FIRST: build the merge commit 3da9623fe in your OWN scratch clone (never the read-only checkout;
+      never `git worktree`/`fetch`/`merge`/`merge-tree` there — the session's own pretooluse_no_cd.sh hook
+      will refuse it) and run the SAME guard suite on that tree BEFORE the fold commit. The drafter's own
+      simulation (guards_sim.py, NOT executed jest — a prediction only) says you should see EXACTLY
+      `Tests: 1 failed, 2 passed, 3 total`, offenders = ks1103-verify-hash-field.test.ts (1 factories, 0 via
+      helper) and ks764-admin-api-keys-revoke-route-contract.test.ts (1 factories, 0 via helper),
+      totalFactories=12. Confirm or refute this by RUNNING jest — do not take the simulation's word for it.
+  (4) The tamper table — T1 revert the ks764 fold (predict: guard reds on ks764 only), T2 revert the ks1103
+      fold (predict: guard reds on ks1103 only), T3 delete the assertSafeOutboundUrl override from the
+      resolved ks444 factory (predict: the completeness guard STAYS GREEN — it only counts factories, not
+      their keys; ks444's OWN suite reds on both 201 cells with Received: 500 — this is the point of T3: two
+      DIFFERENT guards, only one reddens), T4 an inert comment inside the guard file (predict: 3/3 still
+      green). Anchor uniqueness asserted (grep -c = 1) before every tamper; restore by content with a
+      whole-file sha256 asserted; RE-RUN the suite after each restore, never assume the hash alone proves
+      the file works.
+  (5) The whole-originate-suite count at HEAD, and at HEAD merged with the LIVE develop tip (folding the
+      ks695 conflict — see (6)). The lane brief predicted 57 suites / 601 tests at HEAD alone; if #985's
+      squash is under the live tip (it is, verified at drafting time — check again live), the merged suite
+      count grows by exactly one file (ks780-org-id-is-the-shared-implementation.test.ts, which independently
+      reads 0 root @secuura/shared mocks and so does not touch the completeness guard's own count).
+  (6) The live-develop content guard: `git merge-tree --write-tree <live-develop-tip> 53b8a1f7a` in your OWN
+      isolated clone (`git clone --shared --no-checkout` — never the real checkout) must show EXACTLY ONE
+      conflict, on ks695-erasure-by-external-ref.test.ts, and no GUARDED hit on any OTHER file under
+      services/originate/src/__tests__/. This is re-derived fresh at your OWN run time — origin/develop
+      will very likely have moved again since this brief was drafted. If a NEW file under that directory
+      carries a root @secuura/shared mock and is NOT one of this PR's own 14 files, that is a genuine
+      GUARDED hit and the round-1 verdict at 53b8a1f7a EXPIRES — say so; do not silently absorb it.
+  (7) Delivered vs commissioned against the lane brief's ITEM 1 §2(a)-(d) (quoted in your brief's own
+      DELIVERED VS COMMISSIONED table) — confirm or correct each row; the drafter's brief flags which rows
+      are independently CONFIRMED (GH/Linear reads) vs merely CLAIMED by the builder (push success, tsc rc 0,
+      red-first/tamper numbers) — the CLAIMED rows are exactly what you exist to confirm by running the work.
+
+Repo: /Volumes/DevMASTER/!CODING/Secuura/Blockchain/2_Project_Files (READ-ONLY — clone by SHA into your own
+  scratch for anything that writes; the builder's own worktree worktrees/s223-ks1061 is READ-ONLY reference
+  only — never run a suite or a push inside it, never touch it).
+
+You are FINDINGS-ONLY. You never fix, never merge, never push, never deploy, never comment on the PR or
+ticket, never file a ticket, never `@` mention anyone.
+
+NEVER push, from this gate, to origin. Any push your jest/tsc setup needs (there should be none) stays
+inside your own scratch clone's local fixtures — nothing here reaches GitHub.
+
+NEVER print a credential value, and never open, read or copy a secrets file (.env, config/secrets.yml).
+GH_TOKEN and LINEAR_API_KEY are read by NAME from /Volumes/DevMASTER/!CODING/Secuura/Blockchain/4_Credentials/.env
+— count, quote structure, never echo the value.
+
+NO docker, NO stack, no kintsugi, no demo. This gate needs no running service — everything it measures is
+static analysis, jest unit suites (mocked), and read-only git/GitHub/Linear reads.
+
+Six things you must not miss:
+
+1. THE RED-FIRST TRIPLE IS THE HEADLINE (question 3): build 3da9623fe in your scratch clone, run the
+   completeness guard BEFORE the fold commit lands — quote jest's own tally line verbatim, and the offenders
+   array verbatim. Then the SAME suite at HEAD (53b8a1f7a) — expect 3/3. A hash or a grep is not proof a
+   suite passes; RUN it.
+
+2. THE FOLDS' EXACT SHAPE (question 2/drafter's controls_check.sh §3): the drafter matched both folds
+   byte-for-byte against the brief's prescribed text using perl -0777 (macOS /usr/bin/grep has no -P/-z).
+   Re-derive this yourself, independently, on the real HEAD tree — do not trust the drafter's saved
+   model/*.head copies without a fresh git show.
+
+3. THE TAMPER TABLE, SUITE RUNNING (question 4): T1/T2/T3/T4 as specified above. T3 is the subtle one —
+   read guards_sim.py's own comment on why the completeness guard is BLIND to a deleted override (it counts
+   factories, not their contents) and confirm that blindness is real, not a drafter error, by running BOTH
+   guards (the completeness guard AND ks444's own suite) after the T3 tamper.
+
+4. THE LIVE-DEVELOP GUARD IS TIME-SENSITIVE (question 6): do not reuse the drafter's SHA for "origin/
+   develop's live tip" — read it yourself, first, with git ls-remote, and run your own merge-tree in your
+   own isolated clone against whatever you read. If it disagrees with the drafter's F3 finding (conflict
+   count, file, or a new GUARDED hit), that disagreement IS the finding — report it plainly, it is not an
+   error in your gate.
+
+5. tsc --noEmit -p services/originate MUST return rc 0 on the resolved tree — the builder claims this, the
+   drafter did NOT independently verify it (no jest/tsc run by the drafter, per charter) — this is squarely
+   yours to run.
+
+6. DELIVERED vs COMMISSIONED + NOT TESTED (question 7): the table in your brief; confirm every CLAIMED row
+   by actually doing the measurement; state plainly which rows you could confirm and which you could not
+   and why. NOT TESTED at equal prominence: the four platform suites (HOLD, no stack), test:integration
+   (DB-backed), any deployed environment, the real assertSafeOutboundUrl resolution path (Peter's own note:
+   "that coverage exists in my shell, not in the repo").
+
+Your tool shell's grep may be a function: use /usr/bin/grep -F with a same-file positive control, or perl
+-0777 for anything multi-line (macOS grep has no -P/-z). Never cd in your own tool calls (git -C, absolute
+paths, bash /abs/runner.sh); the pre-tool hook refuses git worktree/fetch/merge-tree writes in the Secuura
+checkout — clone into your scratch and run write verbs THERE. zsh has no PIPESTATUS (cmd > out 2>&1; rc=$?),
+no timeout on macOS. Rebuild packages/shared's dist at EVERY ref you measure before running tsc or jest
+against it — a stale dist reads as a tree problem it is not (the builder's own "dist trap" note).
+Quote the Secuura checkout's porcelain count and origin/develop SHA at start and close of your pass; they
+should not move mid-gate (if they do, name what moved and re-derive anything downstream of it).
+Never `rm`: fresh mktemp -d per attempt; quarantine by rename, never delete.
+Do no memory maintenance of your own project's memory store inside this session.
+
+Report FOUND / TESTED / HOW, with controls, matching your brief's FOUND items F1-F5 (confirm, refute, or
+extend each with your own run's numbers); the red-first triple; the fold shapes; the tamper table (T1-T4)
+with cells-run; the live-develop guard's fresh result (conflict count, file, any new GUARDED hit); the
+whole-suite count at HEAD and (if you merge the live develop tip to test question 5) at the merged tree; the
+DELIVERED-vs-COMMISSIONED table with each row confirmed/refuted; and state what you did NOT test at the same
+prominence as the findings.
+
+Verdict: GO, GO WITH FINDINGS, or NO GO — on 7953070230d285fdebc0c65b834ac8340c02c0b6 (the RE-PINNED head —
+NOT 53b8a1f7a, which is superseded), against whatever develop tip you read live (name it). The ks695
+conflict this prompt describes earlier is ALREADY RESOLVED on this head (the union, T5's discriminator) —
+confirm it stayed resolved and matches the claimed 40/40, not "expect a conflict". If the live-develop guard
+shows the round-1 verdict has EXPIRED (a NEW GUARDED hit beyond the ks695/ks780 pair, on top of THIS head),
+say DELTA-EXPIRED and name exactly what moved. Give the merge seat its ADDENDUM line if relevant: order
+remains #931 before #720 on the ks444 factory; #931 before the KS-777 rename.
+
+=====================================================================================================
+PART 2 — ADDED MID-DRAFT: PR #720 (KS-487; KS-657 rides by its BACKLOG row and does NOT close on it)
+
+Same lane L3b, same brief file (see PART 2 section near the end of the brief). Subject:
+cd62c9f89491072ce4e6e7bde9946d22409b1110 = PR #720 (KS-487), open against develop, 10 commits (8 asks +
+  the develop merge-in 406a3ae43 + the asks commit cd62c9f89). PR files API = 2: BACKLOG.md (+190 -14) and
+  ks444-webhooks-create-description-guard.test.ts (+12 -0 — a handle + two assertion blocks, Peter's ask 1;
+  it does NOT touch the mock factory itself, whose blob (b00744574, develop's KS-927 text) is unchanged by
+  this diff — independently confirmed by the drafter). 0 product files.
+
+Headline questions for PART 2:
+  (8) Is the delta genuinely 2 files, 0 product — cross-check git diff --name-only against GitHub's
+      /pulls/720/files.
+  (9) Ask 1's tamper pair: T1 both toHaveBeenCalledTimes(1) -> (0) on the two 201 cells (predict both fail
+      with Expected 0 / Received 1); T2 an inert comment (predict 4/4 green). RUN this — the drafter only
+      confirmed the diff's shape, not the tamper behaviour.
+  (10) Ask 2 ("met by develop's text") — grep the resolved ks444 factory region for "3 of 5" (expect 0) and
+      count assertSafeOutboundUrl occurrences against develop's own count (NOT independently checked by the
+      drafter — do this yourself).
+  (11) Ask 6's suite count — fcc611d29 (pre-merge #720 tip) claimed 48/509; HEAD (cd62c9f89) claimed
+      57/601 (same as #931's PART-1 prediction, both measured against post-#925 develop). RUN both.
+  (12) The BACKLOG.md merge-conflict recovery (F7 in the brief): the builder claims a 3-way-merge trap
+      silently dropped develop's threadTokenMint row and it was restored by hand. The drafter did NOT
+      independently re-derive the row-set audit (develop 48 rows / branch 44 / base 43 / merged 49, 0
+      branch rows missing) — walk BACKLOG.md's rows at the four refs yourself and confirm or refute.
+  (13) Peter's asks 2/3/4/5 (BACKLOG.md prose) — fetch his two source PR comments (5479494525, 5600892508)
+      and diff their text against the BACKLOG.md hunk's actual wording; the drafter did NOT do this,
+      given time — it is squarely yours.
+  (14) The shared-factory collision with #931 (F6): confirm #720's 12 lines are unaffected by whichever
+      factory FORM (#931's helper form vs develop's hand-written form) is present when #720 is built on
+      top — this is the fact the "merge #931 before #720" order rests on.
+
+NOT DONE for PART 2 by the drafter (named in the brief, repeated here): no jest run of any kind; the
+BACKLOG.md row-set audit; Peter's asks 2-5 verified against his source comments; a fresh Linear read for
+KS-487/657/658 (their comment ids are taken from the builder's READY mail, not independently re-confirmed).
+These are yours to do, not gaps to silently inherit as fact.
+
+Repo, findings-only, no-push, no-credential, no-docker/stack rules above apply to PART 2 identically.
+
+MAIL YOUR VERDICT — ONE mail, TWO per-PR verdicts — to wednesday-agent@agentmail.to when BOTH passes are
+complete. Subject exactly:
+[QA -> Wednesday] TIER 2 GATE L3b #931 #720 (KS-1061 KS-487) 795307023 cd62c9f89 — <VERDICT931> <VERDICT720>
+where each VERDICT is independently GO / GO WITH FINDINGS / NO GO / DELTA-EXPIRED — the two PRs need not
+share a verdict. #931's head is ALREADY the re-pinned 7953070230d285fdebc0c65b834ac8340c02c0b6 (see the
+RE-PIN notice at the top of this prompt and of the brief) — if it has moved AGAIN by the time you run,
+re-check ready_931_r1b.txt (or its successor) and gate whatever is current, saying so in your mail.
