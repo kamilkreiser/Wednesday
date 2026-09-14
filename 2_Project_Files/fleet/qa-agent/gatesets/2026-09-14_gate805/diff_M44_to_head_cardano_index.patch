@@ -1,0 +1,112 @@
+diff --git a/Blockchain/Dev/services/anchoring/src/cardano/index.ts b/Blockchain/Dev/services/anchoring/src/cardano/index.ts
+index c59345d03..d7b44482d 100644
+--- a/Blockchain/Dev/services/anchoring/src/cardano/index.ts
++++ b/Blockchain/Dev/services/anchoring/src/cardano/index.ts
+@@ -153,6 +153,49 @@ export interface AnchorSubmitResult {
+   fee: number;
+ }
+ 
++/**
++ * Options for {@link submitAnchor}.
++ */
++export interface AnchorSubmitOptions {
++  /**
++   * KS-726 — write-ahead hook. Called with the deterministic transaction hash
++   * AFTER the transaction is built and signed but BEFORE it is submitted.
++   *
++   * A Cardano transaction hash is the blake2b-256 of the serialised transaction
++   * body (`transaction.ts:126`), so it is fully known locally before the network
++   * ever sees the transaction. Persisting it here — rather than learning it from
++   * the submit reply — is what makes a LOST reply survivable: if `submit` throws
++   * after the node already accepted the transaction, the row still names it, and
++   * the reconciler can settle it instead of the retry path minting a second
++   * fee-paying transaction for one document.
++   *
++   * Ordering is the contract, and it is load-bearing in both directions:
++   *   - it runs before submit, so a lost reply cannot orphan a paid transaction;
++   *   - if it THROWS, the submit does not happen at all, so we never spend a fee
++   *     for a transaction no row can name.
++   *
++   * ⚠ THE SECOND HALF IS INERT IN THE PRODUCTION WIRING, and saying so is the
++   * point (#805 review F3). The only production hook calls
++   * `dbUpdateAnchorStatus`, which swallows every error
++   * (`catch (err) { log('warn', …) }`), so it CANNOT throw. A DB failure during
++   * the write-ahead therefore does not stop the submit — the transaction is
++   * sent and paid for against a row that may not name it.
++   *
++   * So the guarantee this callback offers is BEST-EFFORT, not absolute, and the
++   * PR body's "any failure at any point leaves a row that names the
++   * transaction" should be read that way. The residual window is closed on the
++   * other side instead: both write-ahead guards now re-write the hash
++   * themselves (#805 F2), so a swallowed write still ends with a
++   * reconciler-visible row. Changing the swallow is a much larger decision than
++   * this ticket and is deliberately not taken here.
++   *
++   * Optional. Omitting it leaves the pre-KS-726 behaviour exactly as it was,
++   * which is what keeps the two-argument call sites — including the `deps.submit`
++   * that #756 extracted into `anchorSubmission.ts` — type-compatible.
++   */
++  onSigned?: (txHash: string) => Promise<void>;
++}
++
+ /**
+  * Submit a single document anchor transaction to Cardano.
+  * In demo mode, delegates to MockAnchoringProvider for instant results.
+@@ -163,8 +206,31 @@ export interface AnchorSubmitResult {
+ export async function submitAnchor(
+   metadataLabel: number,
+   metadataPayload: object,
++  options: AnchorSubmitOptions = {},
+ ): Promise<AnchorSubmitResult> {
+-  // Demo mode: delegate to mock provider
++  // Demo mode: delegate to mock provider.
++  //
++  // KS-726 — `onSigned` is deliberately NOT called here, and this carve-out is
++  // a control property rather than an omission: name what it prevents, or the
++  // next reader simplifies it away.
++  //
++  // MockAnchoringProvider returns a BARE 64-hex sha256 (`mocks/mockProvider.ts`),
++  // which does NOT match `FABRICATED_TX_PREFIX` (/^(tx_sim_|mock_tx_|tx_)/) and
++  // DOES match the /^[0-9a-f]{64}$/i test that both write-ahead guards use to
++  // decide "this row names a real transaction" (`REAL_TX_64HEX` in
++  // anchorSubmission.ts, `REAL_TX_64HEX_RETRY` on the batch path in index.ts).
++  // Measured in #764, not assumed.
++  //
++  // So writing ahead in demo mode would make a mock hash indistinguishable from
++  // a real one to the failure path, with two consequences neither this change
++  // nor KS-726 ever intended: demo anchors would stop retrying, and the
++  // reconciler would poll the chain for a transaction that was never submitted
++  // and then fail it after `giveUpMs`.
++  //
++  // The mislabelling predates KS-726; what is new is that KS-726 is the first
++  // thing to make BEHAVIOUR depend on it. Skipping the write-ahead here keeps
++  // the defect where it was rather than building on it. The label itself is
++  // KS-587's to fix.
+   if (demoMode && mockProvider) {
+     const contentHash = JSON.stringify(metadataPayload);
+     const result = await mockProvider.submitAnchor(contentHash);
+@@ -185,6 +251,13 @@ export async function submitAnchor(
+     metadataPayload,
+   );
+ 
++  // KS-726 — WRITE-AHEAD. The hash above is derived locally from the signed
++  // body; nothing after this point can teach us anything about it that we do
++  // not already know. Persist it BEFORE the network is involved, so that every
++  // failure from here on leaves a row that names the transaction. If this
++  // throws we deliberately do not submit — see AnchorSubmitOptions.onSigned.
++  if (options.onSigned) await options.onSigned(txHash);
++
+   // Submit to the network
+   const submittedHash = await submitTransaction(txCborHex);
+ 
+@@ -204,8 +277,9 @@ export async function submitAndConfirmAnchor(
+   metadataLabel: number,
+   metadataPayload: object,
+   onStatusUpdate?: (attempt: number, status: string) => void,
++  options: AnchorSubmitOptions = {},
+ ): Promise<AnchorSubmitResult & ConfirmationResult> {
+-  const submission = await submitAnchor(metadataLabel, metadataPayload);
++  const submission = await submitAnchor(metadataLabel, metadataPayload, options);
+ 
+   // Demo mode: instant confirmation via mock
+   if (demoMode && mockProvider) {

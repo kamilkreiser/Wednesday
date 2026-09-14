@@ -1,0 +1,76 @@
+=== reconciler config in index.ts ===
+33:import { createStuckAnchorReconciler } from './reconciler';
+36:// bootless-unit-test reason as reconciler.ts. `withWalletLock` is imported (not
+932:    // KS-535: surfaced so originate's poller/reconciler can record WHY a
+1515: * reconciler's own guard, so the batch failure path, the single path and the
+1516: * reconciler agree on what "this row names a transaction" means.
+1887:      // reconciliation path — the reconciler only ever selects `anchor_store`
+1888:      // (reconciler.ts). So this early return leaves the batch row resting in
+1890:      // reconciler, and the two can diverge indefinitely. That is the RIGHT
+1901:            // and no hash, which the reconciler (`transaction_hash IS NOT NULL`)
+1905:            errorMessage: `Batch submit reply lost after signing; tx ${batchWrittenAheadTxHash} may be on chain — left for the reconciler (KS-726)`,
+=== anchoring package.json ===
+  "name": "@secuura/anchoring-service",
+    "build": "tsc",
+    "test": "vitest run"
+    "@blockfrost/blockfrost-js": "^6.1.0",
+    "typescript": "^5.3.2",
+    "vitest": "^4.1.9"
+=== anchoring tsconfig ===
+    "strict": true,
+  "include": [
+  "exclude": [
+    "src/__tests__"
+=== root package.json scripts ===
+    "check:openapi": "npm run generate-openapi -- --check && npm run check:spec-examples",
+    "check:spec-examples": "node scripts/spec-examples/check-spec-examples.mjs",
+    "generate-openapi": "npm run build --workspace=packages/shared && tsx scripts/generate-openapi.ts",
+=== anchoring test files at head ===
+      15
+anchorSchema.test.ts
+anchoring.test.ts
+db.retry.test.ts
+ks480-provenance-exclusion.test.ts
+ks566-connector-attribution.test.ts
+ks584-reconciler.test.ts
+ks587-honest-anchor.test.ts
+ks671-chain-health.test.ts
+ks671-health-derivation.test.ts
+ks705-submission-idempotency.test.ts
+ks726-review-f1-f3.test.ts
+ks726-write-ahead-tx-hash.test.ts
+mock-provider.test.ts
+threadMintRequest.test.ts
+threadTokenMint.test.ts
+=== generate-openapi --check lines ===
+30:const checkMode = process.argv.includes('--check');
+257:  if (checkMode) {
+259:      console.error('[gen-openapi] CHECK FAIL: output file does not exist on disk');
+264:      console.error('[gen-openapi] CHECK FAIL: generated YAML differs from on-disk version');
+268:    console.log('[gen-openapi] CHECK PASS: on-disk YAML matches generated');
+=== markers in anchorSubmission.ts at head (with controls) ===
+400                      head=1 dev=1
+BadInputs                head=2 dev=1
+refus                    head=6 dev=0
+status_code              head=4 dev=0
+definitive               head=5 dev=0
+reply lost               head=2 dev=0
+isChainReachableError    head=5 dev=0
+NOT HANDLED              head=3 dev=3
+'absent'                 head=4 dev=0
+'unknown'                head=3 dev=0
+ALREADY_INCLUDED_REPLY   head=3 dev=0
+bumpRetryCount           head=3 dev=2
+--- line numbers ---
+41: *     surfaces a node rejection as an HTTP 400 whose `message` carries the
+46: *     wrappers, `BadInputsUTxO`, and any node-specific "transaction already
+74: * BadInputsUTxO, ValueNotConservedUTxO, an expired TTL, "All inputs are spent")
+73: * ARRIVED and said no (`isChainReachableError`: a `status_code` on the error;
+92:// `isChainReachableError` is #728's discriminator — a `status_code` on the
+440:      // that discriminator: a `status_code` on the error means the node
+468:          anchorId, txHash: writtenAheadTxHash, statusCode: (err as { status_code?: number })?.status_code, error: message,
+430:      //   2. guard 5  — signed and named, reply LOST      → acceptance UNKN
+484:          errorMessage: `Submit reply lost after signing; tx ${writtenAheadT
+158:  bumpRetryCount: (anchorId: string) => Promise<void>;
+486:        // #805 review (2026-09-08), note 2: NO `bumpRetryCount` here. No re
+539:      await deps.bumpRetryCount(anchorId);

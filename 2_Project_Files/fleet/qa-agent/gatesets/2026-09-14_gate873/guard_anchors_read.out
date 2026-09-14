@@ -1,0 +1,99 @@
+--- guard anchors at head
+61:export type SsrfCheckResult =
+65:export interface SsrfGuardOptions {
+90:export function classifyIPv4(ip: string): string | null {
+97:  if (a === 10) return 'RFC1918 private (10.0.0.0/8)';
+102:  if (a === 172 && b >= 16 && b <= 31) return 'RFC1918 private (172.16.0.0/12)';
+103:  if (a === 192 && b === 168) return 'RFC1918 private (192.168.0.0/16)';
+165:export function classifyIPv6(ip: string): string | null {
+190:export function classifyAddress(addr: string): string | null {
+203:function classifyHostname(host: string): string | null {
+235:export function checkUrlLiteral(raw: unknown, options: SsrfGuardOptions = {}): SsrfCheckResult {
+253:        : 'url must use https:// — payloads are not delivered over plaintext HTTP',
+310:export async function resolvePublicAddresses(
+345:export async function assertResolvedHostPublic(host: string): Promise<string | null> {
+346:  const r = await resolvePublicAddresses(host);
+358:export async function assertSafeOutboundUrl(
+360:  options: SsrfGuardOptions = {},
+388:export function pinnedLookup(address: string) {
+405:export interface SafeOutboundResponse {
+430:export type SafeOutboundFailureReason = 'blocked' | 'request_failed';
+432:export type SafeOutboundResult =
+436:export interface SafeOutboundInit {
+465:export async function safeOutboundRequest(
+468:  options: SsrfGuardOptions = {},
+474:  const resolved = await resolvePublicAddresses(url.hostname);
+--- guard: count of anchors
+done({ ok: false, reason: 'request_failed', error: (err as Error).message });              head 2 base 0
+req = mod.request(                                                                         head 1 base 1
+req.destroy();                                                                             head 2 base 1
+reason: 'request_failed'                                                                   head 5 base 3
+reason: 'blocked'                                                                          head 3 base 3
+let req: ReturnType<typeof mod.request>;                                                   head 1 base 0
+} catch (err) {                                                                            head 3 base 1
+if (init.body) req.write(init.body);                                                       head 1 base 1
+req.end();                                                                                 head 1 base 1
+req.on('error'                                                                             head 1 base 1
+--- three-line catch anchor (python str.count)
+T1 first-catch 4-line head 1 base 0
+second-catch 4-line head 1 base 0
+write/end comment 2-line head 1 base 0
+head sha256 f847a643838a715e bytes 25211
+base sha256 c57e3a0b90898311 bytes 23348
+head lines 581 base lines 543
+--- ssrf-guard.test.ts + ks914-pinned-address cells (it( counts) at head
+ssrf-guard.test.ts it( 29 it.each rows(approx) 30
+ks914-pinned-address.test.ts it( 6 it.each rows(approx) 0
+ks914-shipped-path.test.ts it( 8 it.each rows(approx) 3
+--- m365 call site
+m365      1	
+m365      2	    for (const wh of webhooks) {
+m365      3	      try {
+m365      4	        // KS-487 B-1: re-check immediately before the request, not only at
+m365      5	        // registration. This is the load-bearing half here for two reasons:
+m365      6	        // registration is gated behind requireM365 (so it is unreachable
+m365      7	        // wherever Entra is unconfigured) while THIS route is not, and every
+m365      8	        // row written before this guard existed is still in the table
+m365      9	        // unvalidated. Also re-resolves, so a record repointed after
+m365     10	        // registration is caught.
+m365     11	        // KS-914: validate and connect in one call, against one resolution.
+m365     12	        const result = await safeOutboundRequest(wh.webhook_url, {
+m365     13	          method: 'POST',
+m365     14	          headers: { 'Content-Type': 'application/json' },
+m365     15	          body: JSON.stringify(card),
+m365     16	        });
+m365     17	        if (!result.ok) {
+m365     18	          // KS-914 A-4/A-5: blocked and failed are distinguishable again, and
+m365     19	          // the distinction is in the type rather than in a comment. This loop
+m365     20	          // reports only ids, so the log line is the only surface an operator
+m365     21	          // has for WHY a row failed.
+m365     22	          log(
+m365     23	            'warn',
+m365     24	            result.reason === 'blocked'
+m365     25	              ? 'Teams webhook delivery blocked by SSRF guard'
+m365     26	              : 'Teams webhook delivery failed',
+m365     27	            { id: wh.id, reason: result.error },
+m365     28	          );
+m365     29	          failed.push(wh.id);
+m365     30	          continue;
+m365     31	        }
+m365     32	        const resp = result.response;
+m365     33	        if (resp.ok) {
+m365     34	          sent.push(wh.id);
+m365     35	          await query('UPDATE svc_teams_webhooks SET last_sent_at = NOW() WHERE id = $1', [wh.id]);
+m365     36	        } else {
+m365     37	          failed.push(wh.id);
+m365     38	        }
+m365     39	      } catch { failed.push(wh.id); }
+m365     40	    }
+m365     41	
+m365     42	    log('info', 'Teams notifications sent', { event, sent: sent.length, failed: failed.length });
+m365     43	    res.json({ success: true, data: { sent: sent.length, failed: failed.length, total: webhooks.length } });
+m365     44	  } catch (error) { next(error); }
+m365     45	});
+m365     46	
+m365     47	// =============================================================================
+m365     48	// OUTLOOK INTEGRATION ROUTES
+m365     49	// =============================================================================
+m365     50	
+m365     51	const exchangeTokenSchema = z.object({

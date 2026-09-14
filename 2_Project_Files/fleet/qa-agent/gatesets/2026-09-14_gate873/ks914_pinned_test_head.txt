@@ -1,0 +1,145 @@
+/**
+ * KS-914 — the connection must go to the address the guard validated.
+ *
+ * The defect these cells exist for: `assertSafeOutboundUrl(url)` followed by
+ * `fetch(url)` resolves DNS TWICE. The guard classifies the answer to the first
+ * resolution; the socket is opened on the answer to the second. A record that
+ * changes in between is contacted without ever being classified.
+ *
+ * The cells below prove the mechanism that closes it — a `lookup` handed to the
+ * agent, so the socket cannot go anywhere the classifier did not pass — AND
+ * that the shipped function is the thing wired to that mechanism.
+ *
+ * KS-914 A-2. The first round tested `pinnedLookup` only. A reviewer stripped
+ * `lookup:` from BOTH agents inside `safeOutboundRequest`, leaving
+ * `pinnedLookup` untouched, and the repo answered 778 passed / 0 failed: the
+ * pinning was gone from the only path that ships and nothing noticed. The
+ * `safeOutboundRequest` block below closes that — it asserts the agent actually
+ * handed to `http.request` carries a lookup that answers with the validated
+ * address, and it reds under exactly that tamper.
+ *
+ * WHAT THESE CELLS DO NOT DO: they do not drive `safeOutboundRequest` end to
+ * end against a rebinding server. That would need the classifier to accept a
+ * loopback address, i.e. a test-only hole in the guard, and weakening the guard
+ * to test the guard is not a trade worth making. The socket-level cell below is
+ * the strongest proof available without it, and it is a real one: an
+ * unresolvable hostname reaches a live server through the pinned lookup, and
+ * fails with ENOTFOUND without it.
+ */
+
+import { describe, it, expect, afterEach, vi } from 'vitest';
+import * as http from 'http';
+import type { AddressInfo } from 'net';
+import { pinnedLookup, safeOutboundRequest } from '../security/ssrf-guard';
+
+const servers: http.Server[] = [];
+
+afterEach(() => {
+  while (servers.length) servers.pop()?.close();
+});
+
+async function startServer(): Promise<number> {
+  const server = http.createServer((_req, res) => {
+    res.writeHead(200, { 'Content-Type': 'text/plain' });
+    res.end('reached');
+  });
+  servers.push(server);
+  await new Promise<void>((resolve) => server.listen(0, '127.0.0.1', resolve));
+  return (server.address() as AddressInfo).port;
+}
+
+/*
+ * KS-914 A-7. This helper's guard WAS `req.setTimeout(4000, …)`, which is a
+ * socket-inactivity timer: not armed until a socket is assigned, and reset by
+ * every arriving byte. It bounded nothing here, and the ~5004 ms a previous
+ * run attributed to it was vitest's own `testTimeout`, not a connect timeout.
+ * Replaced with a total deadline, which is the same correction made to
+ * `safeOutboundRequest` itself (A-1) — the identical shape shipped in both
+ * places, and only one of them had vitest standing behind it.
+ */
+function get(url: string, agent?: http.Agent): Promise<{ status?: number; error?: string }> {
+  return new Promise((resolve) => {
+    let deadline: ReturnType<typeof setTimeout> | undefined;
+    const settle = (r: { status?: number; error?: string }) => {
+      if (deadline) clearTimeout(deadline);
+      resolve(r);
+    };
+    const req = http.get(url, { agent }, (res) => {
+      res.resume();
+      res.on('end', () => settle({ status: res.statusCode }));
+    });
+    deadline = setTimeout(() => {
+      req.destroy();
+      settle({ error: 'DEADLINE' });
+    }, 4000);
+    req.on('error', (err: NodeJS.ErrnoException) => settle({ error: err.code || err.message }));
+  });
+}
+
+describe('KS-914 pinnedLookup', () => {
+  it('answers with the pinned address for ANY hostname, in callback form', async () => {
+    const lookup = pinnedLookup('203.0.113.7');
+    const seen = await new Promise<{ addr: unknown; fam: unknown }>((resolve) => {
+      (lookup as any)('anything.example', {}, (_e: unknown, addr: unknown, fam: unknown) =>
+        resolve({ addr, fam }),
+      );
+    });
+    expect(seen.addr).toBe('203.0.113.7');
+    expect(seen.fam).toBe(4);
+  });
+
+  it('answers with the pinned address in all:true form', async () => {
+    const lookup = pinnedLookup('203.0.113.7');
+    const all = await new Promise<any>((resolve) => {
+      (lookup as any)('anything.example', { all: true }, (_e: unknown, addrs: unknown) => resolve(addrs));
+    });
+    expect(all).toEqual([{ address: '203.0.113.7', family: 4 }]);
+  });
+
+  it('classifies IPv6 family correctly', async () => {
+    const lookup = pinnedLookup('2001:db8::1');
+    const fam = await new Promise<unknown>((resolve) => {
+      (lookup as any)('anything.example', {}, (_e: unknown, _a: unknown, f: unknown) => resolve(f));
+    });
+    expect(fam).toBe(6);
+  });
+
+  /**
+   * THE DISCRIMINATING CELL. The hostname is in `.invalid`, reserved by RFC 2606
+   * to never resolve. With the pinned lookup the request reaches a real server;
+   * without it, the same request cannot resolve at all. That difference IS the
+   * fix: where the packets go stops being DNS's decision.
+   */
+  it('sends the socket to the pinned address even when the hostname cannot resolve', async () => {
+    const port = await startServer();
+    const url = `http://pinned-target.invalid:${port}/`;
+
+    const pinned = await get(url, new http.Agent({ lookup: pinnedLookup('127.0.0.1') as any }));
+    expect(pinned.status).toBe(200);
+  });
+
+  it('NEGATIVE CONTROL: the same request without the pinned lookup does not resolve', async () => {
+    const port = await startServer();
+    const url = `http://pinned-target.invalid:${port}/`;
+
+    const unpinned = await get(url);
+    expect(unpinned.status).toBeUndefined();
+    expect(unpinned.error).toMatch(/ENOTFOUND|EAI_AGAIN/);
+  });
+
+  /**
+   * A second resolution cannot override the pin: the agent asks our lookup, and
+   * our lookup ignores its argument. This is the rebind case reduced to its
+   * mechanism — DNS "changing" is modelled by asking for a different hostname.
+   */
+  it('ignores the hostname it is asked about, which is what defeats a rebind', async () => {
+    const port = await startServer();
+    const agent = new http.Agent({ lookup: pinnedLookup('127.0.0.1') as any });
+
+    const first = await get(`http://first-name.invalid:${port}/`, agent);
+    const second = await get(`http://totally-different-name.invalid:${port}/`, agent);
+
+    expect(first.status).toBe(200);
+    expect(second.status).toBe(200);
+  });
+});

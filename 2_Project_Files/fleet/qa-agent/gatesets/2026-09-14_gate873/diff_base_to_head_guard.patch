@@ -1,0 +1,77 @@
+diff --git a/Blockchain/Dev/packages/shared/src/security/ssrf-guard.ts b/Blockchain/Dev/packages/shared/src/security/ssrf-guard.ts
+index a1203248f..5a838e0d6 100644
+--- a/Blockchain/Dev/packages/shared/src/security/ssrf-guard.ts
++++ b/Blockchain/Dev/packages/shared/src/security/ssrf-guard.ts
+@@ -452,6 +452,11 @@ export interface SafeOutboundInit {
+  * this guard carries `reason: 'blocked'`, a destination that would not answer
+  * carries `reason: 'request_failed'`. See SafeOutboundFailureReason.
+  *
++ * "Rather than throwing it" is now literally true, including for a synchronous
++ * throw out of `http.request` itself (KS-931) — it was not when that sentence
++ * was first written, and a caller had already dropped its try/catch on the
++ * strength of it.
++ *
+  * `timeoutMs` is a TOTAL deadline on the whole operation — DNS-free connect,
+  * TLS, request, response and drain — not a socket-idle timer. That distinction
+  * is the reason this function exists in its current form; see the deadline
+@@ -489,7 +494,28 @@ export async function safeOutboundRequest(
+       resolve(r);
+     };
+ 
+-    const req = mod.request(
++    /*
++     * KS-931 (KS-914 gate F2). `mod.request` validates header CONTENT
++     * SYNCHRONOUSLY and throws `ERR_INVALID_CHAR` — measured on CRLF, on
++     * non-latin1 and on NUL, with a clean value returning the tagged failure as
++     * the control. That throw escapes the Promise executor and reaches the
++     * caller as an exception, while this module documents that it "returns the
++     * guard's error rather than throwing it" — and `deliverWebhook` dropped the
++     * `try/catch` that used to absorb it, precisely because of that sentence.
++     *
++     * The contract is the thing worth keeping, so the contract is what is made
++     * true: a synchronous failure to even construct the request becomes a tagged
++     * failure like any other.
++     *
++     * WHY `request_failed` AND NOT `blocked`: `blocked` means THIS GUARD refused
++     * for an SSRF reason, and an operator reads it as "we decided not to send".
++     * An unencodable header is not that decision — nothing about the destination
++     * was refused. Mislabelling it would corrupt the one signal the discriminator
++     * exists to carry.
++     */
++    let req: ReturnType<typeof mod.request>;
++    try {
++      req = mod.request(
+       {
+         protocol: url.protocol,
+         hostname: url.hostname,
+@@ -504,7 +530,11 @@ export async function safeOutboundRequest(
+         res.resume(); // drain; no caller reads the body
+         res.on('end', () => done({ ok: true, response: { ok: status >= 200 && status < 300, status } }));
+       },
+-    );
++      );
++    } catch (err) {
++      done({ ok: false, reason: 'request_failed', error: (err as Error).message });
++      return;
++    }
+ 
+     /*
+      * KS-914 A-1. This WAS `req.setTimeout(timeoutMs, …)`, which is a
+@@ -537,7 +567,15 @@ export async function safeOutboundRequest(
+     }, timeoutMs);
+ 
+     req.on('error', (err) => done({ ok: false, reason: 'request_failed', error: err.message }));
+-    if (init.body) req.write(init.body);
+-    req.end();
++
++    // `write`/`end` can throw synchronously too (an unencodable body, a socket
++    // already destroyed by the deadline above). Same contract, same handling.
++    try {
++      if (init.body) req.write(init.body);
++      req.end();
++    } catch (err) {
++      req.destroy();
++      done({ ok: false, reason: 'request_failed', error: (err as Error).message });
++    }
+   });
+ }

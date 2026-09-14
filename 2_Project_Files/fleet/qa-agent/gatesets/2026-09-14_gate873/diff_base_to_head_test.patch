@@ -1,0 +1,55 @@
+diff --git a/Blockchain/Dev/packages/shared/src/__tests__/ks914-shipped-path.test.ts b/Blockchain/Dev/packages/shared/src/__tests__/ks914-shipped-path.test.ts
+index 944a5530c..69706c1ef 100644
+--- a/Blockchain/Dev/packages/shared/src/__tests__/ks914-shipped-path.test.ts
++++ b/Blockchain/Dev/packages/shared/src/__tests__/ks914-shipped-path.test.ts
+@@ -115,6 +115,50 @@ describe('KS-914 safeOutboundRequest — the shipped path', () => {
+     expect(requestMock).toHaveBeenCalledTimes(1);
+   });
+ 
++  /**
++   * KS-931 (KS-914 gate F2) — the contract says it RETURNS. It must return.
++   *
++   * `http.request` validates header content SYNCHRONOUSLY and throws
++   * `ERR_INVALID_CHAR` from inside the Promise executor. That escaped to the
++   * caller as an exception while this module documented that it "returns the
++   * guard's error rather than throwing it" — and `deliverWebhook` had already
++   * dropped its `try/catch` on the strength of that sentence.
++   *
++   * All three inputs below threw before the fix; the clean one did not. The
++   * clean case is the CONTROL and it is load-bearing: without it these cells
++   * pass on any failure at all, and every call to an unroutable address fails.
++   * It is distinguished by its MESSAGE, not merely by not throwing.
++   */
++  it.each([
++    ['CRLF', 'a\r\nX-Injected: 1'],
++    ['non-latin1', 'café中文'],
++    ['NUL', 'a\u0000b'],
++  ])('an unencodable %s header returns a tagged failure instead of throwing', async (_label, value) => {
++    const result = await safeOutboundRequest('https://203.0.113.7/', {
++      headers: { 'X-Probe': value },
++      timeoutMs: 150,
++    });
++    expect(result.ok).toBe(false);
++    if (!result.ok) {
++      expect(result.reason).toBe('request_failed');
++      // pinned to ITS cause, not to "some failure"
++      expect(result.error).toMatch(/Invalid character in header content/);
++    }
++  });
++
++  it('CONTROL: an encodable header reaches the transport and fails on the DEADLINE, not on encoding', async () => {
++    const result = await safeOutboundRequest('https://203.0.113.7/', {
++      headers: { 'X-Probe': 'ordinary-value' },
++      timeoutMs: 150,
++    });
++    expect(result.ok).toBe(false);
++    if (!result.ok) {
++      expect(result.reason).toBe('request_failed');
++      expect(result.error).toMatch(/deadline/);
++      expect(result.error).not.toMatch(/Invalid character/);
++    }
++  });
++
+   /**
+    * KS-914 A-1 — the deadline is TOTAL, not socket-idle.
+    *

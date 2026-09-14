@@ -1,0 +1,194 @@
+ultrathink
+
+You are the fleet QA agent running ONE TIER 1 ROUND 1 gate over Secuura/Blockchain PR #805 (KS-726, builder s231,
+wrapped) at head cd5e62e96c373c2690b97bafb277683402f1e70b — the builder's ROUND-2 head. KS-726 writes the Cardano tx
+hash AHEAD of the submit (services/anchoring/src/anchorSubmission.ts, the path every real Cardano submission takes on
+demo — preview testnet, fee-paying) so a LOST submit reply cannot orphan a paid transaction; at this head, on Kam's
+OPTION 1 ruling of 2026-09-14 20:06 (card secuura-805-guard5-node-rejection-retry), guard 5 (:463-494) rests ONLY a
+lost reply and a DEFINITIVE node rejection (isChainReachableError — a numeric status_code on the error, cardano/
+provider.ts:128-134) keeps the ordinary fail-and-retry; guard 3 (:499-531) re-polls the written-ahead hash FIRST on an
+"All inputs are spent" 400 and retries only when reconfirmKnownSubmission (:234-278, now 'confirmed' | 'absent' |
+'unknown') reports it ABSENT; the enum value 'submitting' is published on Anchor.status (anchoring.openapi.ts:57, the
+yaml :1004). TIER 1 because a wrong guard mints a second fee-paying transaction or strands a document 24 h.
+
+Read your brief FIRST and in full, then plan:
+/Volumes/DevMASTER/WEDNESDAY/2_Project_Files/fleet/qa-agent/briefs/2026-09-14_secuura-805-ks726-tier1-r1.md
+
+Head (git ls-remote 20:29:36 AEST, the API 20:30:55, both agree; the launcher re-asserts it):
+  #805 cd5e62e96c373c2690b97bafb277683402f1e70b  = refs/pull/805/head = feature/ks-726-write-ahead-tx-hash-port-onto-anchorsubmission
+       parent 1885d5166 (the ROUND-1 head, superseded by name: 97e2161fa + develop M44 merged in --no-ff); tree 32e6396ab;
+       ONE commit on top: +219 -21 in anchorSubmission.ts / ks726-write-ahead-tx-hash.test.ts / index.ts
+  merge-base with develop = M44 346b491f27fb1cbf4d72cc1c86d417d0252a5f84 (an ANCESTOR; rev-list --count M44..head = 7)
+  develop = M46 bc067e3e91821116f3344b2aa5a1d7a5cc968d18 = M44 + #879 (scripts/check-shared-relink.sh + its test) +
+  #874 (docs/KS-926-CHECKS-THAT-CANNOT-FAIL.md) — 2 commits, 3 files, NONE of #805's nine. The compare develop...head =
+  diverged, merge_base M44, ahead 7, behind 2, files 9 (+1120 -31). So the head tree is NOT the develop-merged tree:
+  merge the develop you read onto cd5e62e96 in YOUR clone (3-way; expect CLEAN and the nine blobs unchanged), run
+  `npm run check:openapi` on the merged tree FIRST (the yaml is generated), and re-derive every count on it. The nine:
+  anchorSubmission.ts 7879a6ba1 (+237 -21) · anchoring index.ts da4abd432 (+127 -6) · cardano/index.ts d7b44482d ·
+  reconciler.ts 55e2fe694 · anchoring.openapi.ts 49b8b38da · secuura-api.yaml 122d3a2f8 (+1) · ADDED
+  ks726-write-ahead-tx-hash.test.ts ea5495f58 (462 lines, 13 cells) · ks726-review-f1-f3.test.ts 6dc62c8db (7 cells) ·
+  verifyAnchorStatus.ts b8b73078e. UNTOUCHED: cardano/provider.ts 9232d4d0a, cardano/confirmation.ts c5042ca91.
+  develop may have moved (#922 / KS-741 push to their own branches; the merge seat is idle until your verdict): the
+  launcher judges the move BY CONTENT — if it printed "origin develop MOVED", ls-remote at start and close, merge the
+  then-current develop, check:openapi first (a CHECK FAIL after a clean merge with #922 landed is a "regenerate after
+  the squash" Record, not a finding against #805).
+Repo:    /Volumes/DevMASTER/!CODING/Secuura/Blockchain/2_Project_Files  (READ-ONLY — clone by SHA into your own scratch;
+  the builder's worktree worktrees/s231-ks726 may or may not still exist (s231 wrapped) — symlink-farm node_modules FROM
+  it or from the main checkout, never into it, never vitest inside it; never trust origin/* inside a --shared clone —
+  pin by SHA; `git worktree list` is a WRITE verb to the pre-tool hook — read .git/worktrees/ as a directory)
+
+You are FINDINGS-ONLY. You never fix, never merge, never push, never deploy, never comment, never file, never tick an
+ack box, never `@`.
+
+NEVER run a push, the real pre-push hook, or preflight.sh inside the Secuura checkout or any of its worktrees.
+
+NEVER print a credential value, and never open, read or copy a secrets file (any .env, config/secrets.yml). Nothing in
+this gate needs a credential value. Count, never echo.
+
+NO live chain call of any kind — no BLOCKFROST_API_KEY, no PLATFORM_WALLET_MNEMONIC, no preview-testnet request (KS-535
+ABSOLUTE). Every "chain" in this gate is an injected deps object or a mocked getTransaction. NO shared docker stack, no
+:6882 / :7082 slot, no kintsugi, no demo. The docker daemon was DOWN at 18:47, 19:06 and 20:36 AEST: re-measure ONCE
+with `docker info`, rc on its own line; if it is down you do not start it, and anything needing a stack is NOT RUN,
+blocker named at the same prominence as the findings. Nothing in this gate needs docker.
+
+Ten things you must not miss:
+
+1. SCOPE first (brief item 1): exactly the 9 files, +1120 -31, the blobs as pinned; provider.ts, confirmation.ts,
+   generate-openapi.ts, the lockfile 17d2061b3, audit-baseline.json 03d1680e3 and threadTokenMint.test.ts b88b3a43e
+   all = develop's; the head tree 32e6396ab; after YOUR merge of develop the nine blobs are unchanged. Read
+   migrations/003_consolidate-anchors.sql:26 and confirm anchor_store.status carries no CHECK constraint (no migration).
+
+2. THE SUITES, re-derived (brief item 2): anchoring vitest at head 227/1 (228, 15 files — the red is
+   threadTokenMint.test.ts, byte-identical to develop's; quote its first failure line); the two ks726 files 20/20 (13 +
+   7 — count the it( cells from source); develop ALONE (a second clone at M46) as the CONTROL column — the drafter
+   predicts 207/1 (208, 13 files), predicted-by: drafter, re-derive never carry; the merged tree = head's counts; tsc
+   --noEmit -p services/anchoring rc 0 at head and merged (say it EXCLUDES src/__tests__ — vitest does not type-check);
+   check:openapi rc 0 on the merged tree FIRST, then at head. Name the tree beside every count; name the load.
+
+3. THE TAMPER TABLE, SUITES RUNNING (brief item 3, T1-T10): prediction + aimed cells before each run, anchor count
+   asserted, marker asserted AFTER the edit (a green on an unlanded tamper is the unmutated file — prove the edit is
+   there before reading the run), restore by whole-file sha256 RE-DERIVED from blob 7879a6ba1, 20/20 again after each;
+   a 0-cell run is INVALID. T1 the lost-reply branch (:470) -> false: 5 reds (:172, :211, :388 + F2's two); T2 the
+   terminal failed write + bumpRetryCount (:535-539) hoisted above :463: 3 reds (:211, :388, :172); T3 F2's carry at
+   :483 removed: 2 reds (f1-f3 :110/:127); T4 `&& isChainReachableError(err)` -> `&& false`: 5 reds (:374 :406 :424
+   :436 :448; :388 green — the builder measured this); T5 `found === 'absent' &&` -> `false &&`: 1 (:406); T6
+   `return 'absent'` -> `return 'unknown'`: 1 (:406); T7 THE GATE'S MOST IMPORTANT TAMPER — `found === 'absent' &&`
+   -> `true &&` (a FOUND re-poll retries anyway): 2 reds and :436 THE FOUND CONTROL MUST BE ONE OF THEM (:448 the
+   other; :424 stays green) — if :436 does not red, the double-mint guard the (c) answer exists for is unpinned:
+   NO GO-class test-quality finding; T8 the `!ALREADY_INCLUDED_REPLY.test(...)` clause (:519) removed: predicted GREEN
+   20/20 = an unpinned clause, a Record with the cell to add; T9 `known === writtenAheadTxHash &&` (:518) removed:
+   predicted GREEN = a defensive clause no cell reaches, Record; T10 a syntax error at :463 -> LOAD failure, no
+   `Tests N failed` line. Report cells-run / reds / the decisive assertion line / predicted vs measured on every row.
+
+4. THE SPEC HALF (brief item 4): check:openapi rc 0 (a); RED: 'submitting', removed from the enum at
+   anchoring.openapi.ts:57 (anchor count 1) -> `npm run generate-openapi -- --check` CHECK FAIL rc 1, the regenerated
+   delta in a COPY = exactly the yaml line :1004 `- submitting` and nothing else (b); restore by content, sha = blob
+   49b8b38da -> rc 0 (c); the HAND-EDIT control: the on-disk yaml :1004 removed, source untouched -> CHECK FAIL rc 1
+   (d); check:spec-examples alone rc 0 (e). rc on its own line each.
+
+5. THE HEADLINE BEYOND THE CELLS — THE PRODUCTION ERROR SHAPE AND THE PRODUCTION POLL (brief item 5, rows E1-E10),
+   MEASURED AT RUNTIME in a scratch vitest file in your clone (the harness copied from makeHarness :72-135 +
+   throwingSubmit :366-371; quarantine it by rename after): the six shipped cells throw a SYNTHETIC
+   `Object.assign(new Error(msg), { status_code: 400 })` and inject a hand-written confirm — they never meet the SDK's
+   class or the real poller. (i) `import { BlockfrostServerError, BlockfrostClientError } from
+   '@blockfrost/blockfrost-js'` (6.1.1 from the farm; print require.resolve + version once): E1 a ServerError 400
+   (ValueNotConservedUTxO) -> retry, no re-poll; E2 a ClientError ECONNRESET (no status_code) -> rests; E3 a ServerError
+   500 -> rests; E4 402 / 408 / 429 -> rests (a CONSEQUENCE to state — a 402 on txSubmit means nothing reached the node,
+   yet the row rests 24 h by #728's classification; deliberate per the ruling); E5 status_code '400' as a STRING ->
+   rests (fail-SAFE). (ii) the REAL waitForConfirmation from ../cardano/confirmation as `confirm`, bounds shrunk to
+   (h, 3, 1, 1, cb), with getTransaction mocked via vi.mock('../cardano/provider', importOriginal + override
+   getTransaction only) so isChainReachableError stays REAL: E6 getTransaction -> null on all 3 attempts (404s) ->
+   'absent' -> retry (the (c) answer's intended case); E7 getTransaction returns a tx on attempt 2 -> 'confirmed', no
+   retry, ONE submit; E8 THE FOUND CANDIDATE: getTransaction THROWS a ServerError 503 (or 402) on ALL 3 attempts ->
+   waitForConfirmation NEVER throws (confirmation.ts:55-59 catches every attempt, :66-69 returns confirmed:false) ->
+   reconfirmKnownSubmission returns 'absent' NOT 'unknown' -> scheduleRetry IS called: the 'unknown' branch and the
+   THROWS control cell :448 are UNREACHABLE through the production confirm (index.ts:1706); a chain that could not be
+   polled reads as ABSENT. E9 the retry made real: call the submitter AGAIN after E6 (the row is pending with the
+   stale hash) -> it mints TX_B, exactly ONE fee-paying tx overall; E10 the same second call after E8 -> TX_B minted
+   while TX_A may be on chain = the KS-705 orphan through the new path, under {an "inputs spent" reply because OUR
+   earlier submit landed} AND {Blockfrost unreachable for the whole ~28 min window (30 attempts, 10 s -> 60 s backoff,
+   index.ts:1706)}. Grade E8/E10 yourself on the measured blast radius (severity HIGH — a duplicate fee-paying tx with an
+   orphan on chain; likelihood LOW — two independent failures; the drafter predicts GO WITH FINDINGS with E8 as a
+   TICKET); give the owner the fix-shape in prose (waitForConfirmation reports whether ANY attempt reached the chain;
+   "every attempt threw" maps to 'unknown') and the regression cell (E8 asserting NO scheduleRetry). If E8 does NOT
+   call scheduleRetry, the drafter's read of waitForConfirmation is wrong: say so, retract E8/E10 in the open, name the
+   line. predicted-by: drafter on every E row. FAIL: E1 not a retry (the ruling not built); E2/E3 not a rest (the
+   lost-reply guard weakened); E7 more than ONE submit (the double-mint guard broken).
+
+6. PETER'S QUESTION AND THE BUILDER'S ANSWER (brief item 6) — a RECORD, no severity, the ruling is Kam's: read comment
+   5662521346 against the code at head and mark every file:line claim TRUE / FALSE (the drafter's controls read all
+   TRUE — re-derive); the round-1 markers in anchorSubmission.ts (`400` 1 at :41, `BadInputs` 2, `refus` 6,
+   `status_code` 4, `isChainReachableError` 5; develop reads 0/0/0 on the last three — controls); state plainly that
+   at head a status_code 400 after onSigned takes fail-and-retry and a code-less reply takes the 24 h hold, as the
+   header now says at :72-82, and that the BATCH path (index.ts:1894-1912) still takes the 24 h hold for BOTH — the
+   residue the builder named. Peter's two smaller notes: index.ts:1840 after the writes; no bumpRetryCount at :486-489
+   and the lost-reply cell's retryCount 0 at :189 — TRUE/FALSE each.
+
+7. DELIVERED vs COMMISSIONED (brief item 7): Wednesday's ADDENDUM (10:07:19Z) and ANSWER (c) (10:13:17Z) — both on
+   disk in the gate set's mail/ — vs what landed: the fall-through, the re-wording (the NOT HANDLED header :38-57 is
+   UNCHANGED; the new text sits at :72-82 beside it — say whether that satisfies "re-worded to say so"), the cell + the
+   control (:374 / :388), the (c)/(d)/(e) cells (:406 / :424 / :436) + the builder's own :448, the two notes, T4, the
+   second READY superseding the first by name, the PR comment (0 at-signs) and the KS-726 comment. Read the PR body's
+   Test Evidence block (round 2 prepended, round 1 kept) and report any claim your measurement contradicts.
+
+8. RECORDS (brief item 8): (a) the batch catch's blanket (index.ts:1894-1912) — a refused batch tx rests every
+   constituent anchor 24 h, no tests, READ ONLY, a filing candidate for Wednesday; (b) the 402/408/429 consequence;
+   (c) the ~28 min bounded poll before an "inputs spent" retry vs the "~15 s" the comment at :443 promises for the
+   non-re-polled class — state both numbers; (d) tsc excludes the tests; (e) giveUpMs is against created_at; (f) the
+   T8/T9 unpinned clauses; (g) "already been included" after a swallowed write-ahead still falls to retry
+   (NOT HANDLED :48-52, pre-existing).
+
+9. §2a LEGITIMATE SHAPES: every ordinary shape of the real submit path (an ordinary submit; a lost reply; a definitive
+   400 the text does not match; "inputs spent" because OUR tx landed; "inputs spent" because someone else spent our
+   inputs; "already been included"; a 402/408/429; the write-ahead throwing; a mock hash; a re-anchor on a resting
+   row; a pending row with a stale hash; the #756 window; a throw before onSigned) reads as the brief's table says at
+   head AND on the merged tree; the two designed consequences (the 402 rest; the ~28 min poll) are consequences to
+   state, not defects. Write NOT-TESTED.written-first.md BEFORE any run.
+
+10. NOT TESTABLE HERE, at the findings' prominence (brief item 9): a live chain submission; Schemathesis pr profile /
+    Akto / Playwright / k6 (no stack; docker measured); processBatchAnchor (no tests exist — record, do not build); the
+    onSigned "if the hook throws, the submit does not happen" contract above the seam; the reconciler's 24 h give-up at
+    real time.
+
+Your tool shell's grep may be a function: use /usr/bin/grep -F -i with a same-file positive control; multi-line anchors
+by Python str.count. Never cd in your own tool calls; the pre-tool hook refuses every git write verb in the Secuura
+checkout — clone into your scratch and run write verbs THERE. A REAL checkout of the whole Blockchain/Dev, not a symlink
+farm of the source (the ks860 walk skips symlinked directories); farm node_modules only. require.resolve('@secuura/shared')
+from inside your clone's services must land inside your clone's farm — print it once. The anchoring service is VITEST
+4.1.x (npx vitest run, never watch; cwd = <clone>/Blockchain/Dev/services/anchoring); generate-openapi builds
+packages/shared first — allow the time; run suites solo. /bin/bash here is 3.2 — write runners in Python. zsh: no
+PIPESTATUS (`cmd > out 2>&1; rc=$?`), no timeout on macOS. The suites run at whatever load exists — name the load beside a
+slow count. The waitForConfirmation jitter is crypto.randomInt(0, 2000) per attempt — a shrunken 3-attempt poll still
+takes up to ~6 s; allow it, never patch it.
+Quote the Secuura checkout's porcelain count, .git/config sha256, for-each-ref count, .git/worktrees count, origin
+develop SHA, refs/pull/805/head and the branch at start, mid and close as THREE timestamped readings; they must match
+on the head (name any ref another seat moved — #922 / KS-741 pushes to their own branches are EXPECTED; if
+refs/pull/805/head moves, STOP — the brief is about a different SHA).
+Never `rm`: fresh mktemp -d per attempt; quarantine probes and scratch tests by rename. No container of any kind.
+Do no memory maintenance of your own project's memory store inside this session.
+
+Report FOUND / TESTED / HOW, with controls: the scope; the suites with the tree named beside every count and
+develop-alone as the control column; the tamper table T1-T10 (cells-run beside every colour, the decisive assertion
+line for each red, predicted-by on every row, T7's :436 named explicitly); the spec half (a)-(e) with rc on its own
+line each; the E-matrix E1-E10 with the SDK class used, the poll outcome ('confirmed' / 'absent' / 'unknown'),
+scheduleRetry's call count and the mint count on every row, and your grade of E8/E10 with the evidence class; Peter's
+question and the answer read against the code, claim by claim; DELIVERED-vs-COMMISSIONED; the Records (8a-8g); and what
+you did NOT test at the same prominence as the findings. Client-facing communication = ticket comments only; the
+extranet is not a channel; anything needing a push goes to Wednesday as an escalation candidate for Kam's WhatsApp.
+Handovers to Peter/Stuart are test blocks, never a list of PRs. Never delete; cleanup means quarantine.
+Verdict: ONE line — GO, GO WITH FINDINGS, or NO GO — on cd5e62e96c373c2690b97bafb277683402f1e70b, as the delta over
+M44 AND as the merged tree on the develop you read (name it). Say plainly whether the ruling is BUILT (a status_code
+4xx after onSigned retries, a code-less reply rests), whether the double-mint guard HELD (T7 reds :436; E7 one submit),
+whether the production error shape matches the discriminator (E1-E5 through the SDK's own classes), what E8/E10
+measured and how you graded it, whether the enum is generator-pinned, and the batch path's residue. Give the merge seat
+its ADDENDUM line: "squash cd5e62e96 onto develop as KS-726 only (attachments #805 + the closed #764; Closes KS-726 in
+the body); order vs #922 either — whichever lands second, `npm run check:openapi` on the squashed tree first and
+regenerate the yaml as its own commit if it reads CHECK FAIL; anchoring vitest 207/1 -> 227/1 (13 -> 15 files), measured;
+KS-726 -> the ticket comment naming this report; the ack boxes stay Wednesday's; Records: the batch catch's blanket
+(index.ts:1894), E8 if ticketed, the 402 consequence, the T8/T9 unpinned clauses".
+
+MAIL YOUR VERDICT to wednesday-agent@agentmail.to when the pass is complete, using
+the project's send_brief.sh. Your pane holds ~19 lines of alternate screen with no
+scrollback, so a verdict that stays in the pane is one pane-close from being lost --
+this is not a formality, it is the only durable copy; the verdict MAIL is the wait signal. Subject:
+[QA -> Wednesday] TIER 1 GATE #805 (KS-726) cd5e62e96 — <VERDICT>

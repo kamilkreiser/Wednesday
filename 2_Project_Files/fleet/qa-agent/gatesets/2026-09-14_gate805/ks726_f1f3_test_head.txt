@@ -1,0 +1,153 @@
+/**
+ * =============================================================================
+ * KS-726 — #805 review findings F1, F2 and F3
+ * =============================================================================
+ * Peter found all three by READING. Two of them the existing suite could not
+ * have caught, and one of those is worth stating plainly:
+ *
+ *   the guard-5 case asserts `h.row.transactionHash === TX_A` under the header
+ *   "names the tx" — but `row.transactionHash` was set by the WRITE-AHEAD write,
+ *   which succeeds in that harness. It passes whether or not guard 5 carries the
+ *   hash. The property is named and unobserved.
+ *
+ * So these assert on the WRITE guard 5 actually makes, and drive the case where
+ * the write-ahead did NOT land.
+ * =============================================================================
+ */
+
+import { describe, it, expect, vi } from 'vitest';
+import { deriveVerifyAcceptance } from '../verifyAnchorStatus';
+import { createAnchorSubmitter, type AnchorSubmissionDeps, type AnchorSnapshot } from '../anchorSubmission';
+
+const TX_A = 'a'.repeat(64);
+const ANCHOR_ID = 'anchor-f1f3';
+
+// ===========================================================================
+// F1 — verify-by-hash must be able to say "not acknowledged"
+// ===========================================================================
+describe('#805 F1 — an unacknowledged submission is distinguishable from a confirmed one', () => {
+  it('a written-ahead row is NOT acknowledged', () => {
+    const a = deriveVerifyAcceptance('db', 'submitting');
+    expect(a.status).toBe('submitting');
+    expect(a.acknowledged).toBe(false);
+  });
+
+  it('CONTROL — submitted and confirmed ARE acknowledged, so this is not a blanket false', () => {
+    expect(deriveVerifyAcceptance('db', 'submitted')).toEqual({ status: 'submitted', acknowledged: true });
+    expect(deriveVerifyAcceptance('db', 'confirmed')).toEqual({ status: 'confirmed', acknowledged: true });
+  });
+
+  it('a chain-sourced answer is acknowledged by construction — it was found ON the chain', () => {
+    expect(deriveVerifyAcceptance('chain', undefined)).toEqual({ status: 'confirmed', acknowledged: true });
+  });
+
+  it('a missing or non-string status degrades to null, never to a claim', () => {
+    expect(deriveVerifyAcceptance('db', undefined)).toEqual({ status: null, acknowledged: false });
+    expect(deriveVerifyAcceptance('db', '')).toEqual({ status: null, acknowledged: false });
+    expect(deriveVerifyAcceptance('db', 7)).toEqual({ status: null, acknowledged: false });
+  });
+});
+
+// ===========================================================================
+// F2 / F3 — guard 5, driven through the real submitter
+// ===========================================================================
+type Harness = {
+  deps: AnchorSubmissionDeps;
+  statusWrites: Array<Record<string, unknown>>;
+  row: AnchorSnapshot;
+};
+
+/**
+ * @param writeAhead 'lands'    — the normal case.
+ *                   'swallowed'— the PRODUCTION shape: dbUpdateAnchorStatus
+ *                                catches its own errors, so a DB blip does not
+ *                                throw and the submit proceeds anyway.
+ *                   'throws'   — the hypothetical the contract documents.
+ */
+function harness(writeAhead: 'lands' | 'swallowed' | 'throws'): Harness {
+  const row: AnchorSnapshot = {
+    // transactionHash is OPTIONAL on AnchorSnapshot, not nullable — left unset
+    // rather than null, which is what the row looks like before the write-ahead.
+    id: ANCHOR_ID, status: 'pending',
+    retryCount: 0, metadataLabel: 674, metadataPayload: { secuura: { hash: 'h' } },
+  };
+  const statusWrites: Array<Record<string, unknown>> = [];
+  let seenSigned = false;
+
+  const deps: AnchorSubmissionDeps = {
+    getAnchor: vi.fn(async () => ({ ...row })),
+    submit: vi.fn(async (_l: number, _p: object, opts?: { onSigned?: (h: string) => Promise<void> }) => {
+      if (opts?.onSigned) { seenSigned = true; await opts.onSigned(TX_A); }
+      // The response-read-timeout shape: the node accepted it, the reply is lost.
+      throw new Error('socket hang up');
+    }) as unknown as AnchorSubmissionDeps['submit'],
+    confirm: vi.fn(async () => ({ confirmed: true, blockNumber: 1, slot: 1, blockHash: 'b', confirmations: 1 })),
+    updateStatus: vi.fn(async (_id: string, updates: Record<string, unknown>) => {
+      // Discriminate the WRITE-AHEAD write from guard 5's write. Both carry
+      // status 'submitting', and once the write-ahead is swallowed both also
+      // see row.transactionHash === null — so that condition selects BOTH and
+      // the harness silently swallows the very write under test. (It did, on
+      // the first run: guard5.length came back 0.) Only guard 5 carries an
+      // errorMessage, so that is the discriminator.
+      const isWriteAhead = updates.status === 'submitting' && seenSigned && !updates.errorMessage;
+      if (isWriteAhead) {
+        if (writeAhead === 'throws') throw new Error('pool exhausted writing the write-ahead row');
+        if (writeAhead === 'swallowed') { statusWrites.push({ ...updates, __swallowed: true }); return; }
+      }
+      statusWrites.push(updates);
+      if (typeof updates.status === 'string') row.status = updates.status as AnchorSnapshot['status'];
+      if (typeof updates.transactionHash === 'string') row.transactionHash = updates.transactionHash;
+    }),
+    bumpRetryCount: vi.fn(async () => { row.retryCount += 1; }),
+    scheduleRetry: vi.fn(),
+    log: vi.fn(),
+    withWalletLock: (<T,>(fn: () => Promise<T>) => fn()) as AnchorSubmissionDeps['withWalletLock'],
+  };
+  return { deps, statusWrites, row };
+}
+
+describe('#805 F2 — guard 5 must NAME the transaction in its own write', () => {
+  it('carries transactionHash even when the write-ahead write was SWALLOWED', async () => {
+    const h = harness('swallowed');
+    await createAnchorSubmitter(h.deps)(ANCHOR_ID);
+
+    const guard5 = h.statusWrites.filter(w => w.status === 'submitting' && !w.__swallowed);
+    expect(guard5.length).toBe(1);
+
+    // THE ASSERTION THE EXISTING SUITE COULD NOT MAKE: on guard 5's own write,
+    // not on row.transactionHash, which the write-ahead had already set there.
+    expect(guard5[0].transactionHash).toBe(TX_A);
+
+    // Without this the row is invisible to the reconciler
+    // (transaction_hash IS NOT NULL) and to knownChainSubmission, and nothing
+    // retries it — a paid transaction with no row that names it.
+    expect(h.row.transactionHash).toBe(TX_A);
+  });
+
+  it('carries it in the ordinary case too — idempotent, not conditional', async () => {
+    const h = harness('lands');
+    await createAnchorSubmitter(h.deps)(ANCHOR_ID);
+    const last = h.statusWrites[h.statusWrites.length - 1];
+    expect(last.status).toBe('submitting');
+    expect(last.transactionHash).toBe(TX_A);
+  });
+});
+
+describe('#805 F3 — a write-ahead that THROWS means no transaction was ever sent', () => {
+  it('does not arm guard 5, and takes the ordinary retry path instead', async () => {
+    const h = harness('throws');
+    await createAnchorSubmitter(h.deps)(ANCHOR_ID);
+
+    // onSigned threw, so submit never happened. Resting the row in 'submitting'
+    // with no retry would strand it for a transaction that does not exist;
+    // an ordinary retry is correct and free.
+    const restedInSubmitting = h.statusWrites.some(w => w.status === 'submitting');
+    expect(restedInSubmitting).toBe(false);
+
+    // CONTROL — the same harness DOES arm guard 5 when the write lands, so the
+    // assertion above is about the throw, not about a guard that never fires.
+    const ok = harness('lands');
+    await createAnchorSubmitter(ok.deps)(ANCHOR_ID);
+    expect(ok.statusWrites.some(w => w.status === 'submitting')).toBe(true);
+  });
+});

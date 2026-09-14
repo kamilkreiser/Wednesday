@@ -1,0 +1,543 @@
+/**
+ * =============================================================================
+ * SSRF guard — literal checks + DNS-resolution re-check (KS-487 B-1 + B-2)
+ * =============================================================================
+ * One implementation, used by every service that fetches a caller-supplied URL.
+ *
+ * Why this lives in @secuura/shared rather than being copied:
+ *   B-1 (m365 Teams webhooks) had NO guard at all — `z.string().url()` accepts
+ *   http://169.254.169.254/ (Azure IMDS). B-2 says originate's guard blocks only
+ *   IP *literals* despite a comment claiming request-time resolution. Fixing B-1
+ *   by copying originate's guard would have closed the literal hole while
+ *   importing B-2's bypass into a second service — and it would have READ as
+ *   remediated. So both are fixed here, once.
+ *
+ * Two layers, and both are required:
+ *   1. `checkUrlLiteral`  — scheme + host predicates, no I/O. Cheap, total.
+ *   2. `assertResolvedHostPublic` — every address the host actually resolves to
+ *      runs through the SAME predicates. This is what a public hostname
+ *      pointing at 10.0.0.5 (or at the metadata service) fails.
+ *
+ * Call `assertSafeOutboundUrl` at BOTH registration and immediately before the
+ * request. Registration-time-only validation is defeated by simply changing the
+ * DNS record afterwards — no race required, just a TTL.
+ *
+ * ── What is closed, and what is not (KS-914) ───────────────────────────────
+ * `safeOutboundRequest` connects to an address this module validated: it
+ * resolves once, classifies every answer, and hands the agent a `lookup` that
+ * returns that address, so the runtime does not resolve a second time. The gap
+ * between the check and the socket — where a record could change under a
+ * caller that validated and then called `fetch` — is closed FOR CALLERS THAT
+ * USE IT. No new dependency: `net.connect` takes a `lookup` and
+ * `http.Agent`/`https.Agent` pass it through.
+ *
+ * Still true, and the reason this module is not called rebind-proof:
+ *  - A caller that runs `assertSafeOutboundUrl` and then `fetch` has the old
+ *    two-resolution gap. The guard cannot fix a caller that does not use it.
+ *  - We pin the ADDRESS, not the identity. TLS still verifies the certificate
+ *    against the hostname, which is the property you want — but a host that
+ *    legitimately resolves to several addresses is contacted on the first one
+ *    that passed, not on all of them in turn.
+ *  - Nothing here defends a destination that is public at check time and
+ *    becomes hostile later; that is not a rebind, it is a compromised host.
+ *
+ * ── Redirects are no longer followed (KS-914), and that cuts both ways ──────
+ * The callers this replaced used `fetch`, which follows 3xx. `http.request`
+ * does not, so `safeOutboundRequest` returns the 3xx to the caller.
+ *  - The SECURITY half favours the change: `fetch` ran the guard once on the
+ *    original URL and then followed `Location` with a fresh, UNVALIDATED
+ *    resolution. A `Location: http://169.254.169.254/latest/meta-data/` was
+ *    followed to an address this classifier refuses as a direct target.
+ *  - The AVAILABILITY half is real: a subscriber whose endpoint answers 3xx
+ *    used to be delivered to and now is not. Nothing in the repo asserts
+ *    following, so CI is silent about it — a real subscriber will not be.
+ * ============================================================================= */
+
+import { lookup } from 'dns/promises';
+import { isIP } from 'net';
+import * as http from 'http';
+import * as https from 'https';
+
+export type SsrfCheckResult =
+  | { ok: true; url: string }
+  | { ok: false; error: string };
+
+export interface SsrfGuardOptions {
+  /**
+   * Name of the env var holding a comma-separated list of permitted host
+   * suffixes. When the var is set and non-empty, ONLY those hosts pass.
+   * Defaults to `WEBHOOK_URL_ALLOWLIST` (originate's existing contract).
+   */
+  allowlistEnvVar?: string;
+  /**
+   * Permit `http:` as well as `https:`. Default false — plaintext delivery of
+   * signed payloads is not something we do, and `z.string().url()` happily
+   * accepts `http://`, which is half of why B-1 was exploitable.
+   */
+  allowHttp?: boolean;
+}
+
+const DEFAULT_ALLOWLIST_ENV = 'WEBHOOK_URL_ALLOWLIST';
+
+/* -------------------------------------------------------------------------- */
+/* Address classification                                                     */
+/* -------------------------------------------------------------------------- */
+
+/**
+ * Returns a human-readable reason when an IPv4 literal is not a safe public
+ * destination, or null when it is acceptable.
+ */
+export function classifyIPv4(ip: string): string | null {
+  const m = ip.match(/^(\d{1,3})\.(\d{1,3})\.(\d{1,3})\.(\d{1,3})$/);
+  if (!m) return 'not a dotted-quad IPv4 address';
+  const [a, b, c, d] = m.slice(1, 5).map((n) => parseInt(n, 10));
+  if ([a, b, c, d].some((n) => n > 255)) return 'malformed IPv4 (octet > 255)';
+
+  if (a === 0) return 'unspecified / "this network" (0.0.0.0/8)';
+  if (a === 10) return 'RFC1918 private (10.0.0.0/8)';
+  if (a === 127) return 'IPv4 loopback (127.0.0.0/8)';
+  if (a === 169 && b === 254) {
+    return 'link-local (169.254.0.0/16 — includes the cloud metadata service at 169.254.169.254)';
+  }
+  if (a === 172 && b >= 16 && b <= 31) return 'RFC1918 private (172.16.0.0/12)';
+  if (a === 192 && b === 168) return 'RFC1918 private (192.168.0.0/16)';
+  if (a === 192 && b === 0 && c === 0) return 'IETF protocol assignments (192.0.0.0/24)';
+  if (a === 192 && b === 0 && c === 2) return 'documentation range (192.0.2.0/24)';
+  if (a === 100 && b >= 64 && b <= 127) return 'carrier-grade NAT (100.64.0.0/10)';
+  if (a === 198 && (b === 18 || b === 19)) return 'benchmarking (198.18.0.0/15)';
+  if (a >= 224) return 'multicast / reserved / broadcast (>= 224.0.0.0)';
+  return null;
+}
+
+/**
+ * Expand an IPv6 literal (with or without `::`, with or without a trailing
+ * embedded IPv4) into its eight 16-bit groups. Returns null if unparseable.
+ */
+function expandIPv6(ip: string): number[] | null {
+  let text = ip;
+
+  // Embedded IPv4 tail, e.g. ::ffff:127.0.0.1 or 64:ff9b::192.0.2.1
+  const v4Tail = text.match(/(\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3})$/);
+  if (v4Tail) {
+    const octets = v4Tail[1].split('.').map((n) => parseInt(n, 10));
+    if (octets.some((n) => Number.isNaN(n) || n > 255)) return null;
+    const hi = ((octets[0] << 8) | octets[1]).toString(16);
+    const lo = ((octets[2] << 8) | octets[3]).toString(16);
+    text = text.slice(0, v4Tail.index) + `${hi}:${lo}`;
+  }
+
+  const halves = text.split('::');
+  if (halves.length > 2) return null;
+
+  const parseGroups = (s: string): number[] | null => {
+    if (s === '') return [];
+    const out: number[] = [];
+    for (const part of s.split(':')) {
+      if (!/^[0-9a-fA-F]{1,4}$/.test(part)) return null;
+      out.push(parseInt(part, 16));
+    }
+    return out;
+  };
+
+  const head = parseGroups(halves[0]);
+  if (head === null) return null;
+
+  if (halves.length === 1) return head.length === 8 ? head : null;
+
+  const tail = parseGroups(halves[1]);
+  if (tail === null) return null;
+  const fill = 8 - head.length - tail.length;
+  if (fill < 0) return null;
+  return [...head, ...new Array(fill).fill(0), ...tail];
+}
+
+/**
+ * Returns a reason when an IPv6 literal is not a safe public destination, or
+ * null when it is acceptable.
+ *
+ * NB the failure this replaces: originate's guard tested `host === '::1'` and
+ * `host.startsWith('fd')`, but a URL's `hostname` keeps the brackets (`[::1]`),
+ * so NONE of those comparisons could ever match and the whole IPv6 branch was
+ * inert. Brackets are stripped before we get here, and classification is done
+ * on expanded groups rather than string prefixes — `startsWith('fe80')` also
+ * missed fe90::/fea0::/feb0::, which are equally link-local.
+ */
+export function classifyIPv6(ip: string): string | null {
+  const g = expandIPv6(ip);
+  if (!g) return 'malformed IPv6 address';
+
+  if (g.every((x) => x === 0)) return 'IPv6 unspecified (::)';
+  if (g.slice(0, 7).every((x) => x === 0) && g[7] === 1) return 'IPv6 loopback (::1)';
+
+  // IPv4-mapped (::ffff:a.b.c.d), IPv4-compatible (::a.b.c.d) and NAT64
+  // (64:ff9b::a.b.c.d) all reach an IPv4 destination — classify the inner v4.
+  const isMapped = g.slice(0, 5).every((x) => x === 0) && (g[5] === 0xffff || g[5] === 0);
+  const isNat64 = g[0] === 0x64 && g[1] === 0xff9b;
+  if (isMapped || isNat64) {
+    const v4 = `${g[6] >> 8}.${g[6] & 0xff}.${g[7] >> 8}.${g[7] & 0xff}`;
+    const reason = classifyIPv4(v4);
+    if (reason) return `IPv4-mapped IPv6 reaching ${v4} → ${reason}`;
+  }
+
+  const hi = g[0];
+  if ((hi & 0xfe00) === 0xfc00) return 'IPv6 unique-local (fc00::/7)';
+  if ((hi & 0xffc0) === 0xfe80) return 'IPv6 link-local (fe80::/10)';
+  if ((hi & 0xff00) === 0xff00) return 'IPv6 multicast (ff00::/8)';
+  return null;
+}
+
+/** Classify any IP literal (v4 or v6). Null means "acceptable". */
+export function classifyAddress(addr: string): string | null {
+  const bare = stripBrackets(addr);
+  const family = isIP(bare);
+  if (family === 4) return classifyIPv4(bare);
+  if (family === 6) return classifyIPv6(bare);
+  return 'not an IP address';
+}
+
+function stripBrackets(host: string): string {
+  return host.startsWith('[') && host.endsWith(']') ? host.slice(1, -1) : host;
+}
+
+/** Hostnames that name something inside the perimeter regardless of DNS. */
+function classifyHostname(host: string): string | null {
+  // A trailing dot is the same name to a resolver but a different string to
+  // `===`, so "localhost." would otherwise walk straight past the check.
+  const h = host.replace(/\.$/, '');
+  if (h === 'localhost' || h.endsWith('.localhost')) {
+    return 'loopback hostname (localhost)';
+  }
+  if (h.endsWith('.internal') || h.includes('.internal.')) {
+    return 'internal service hostname (.internal)';
+  }
+  if (h.endsWith('.svc.cluster.local') || h.endsWith('.cluster.local')) {
+    return 'cluster-internal hostname (.cluster.local)';
+  }
+  if (h.endsWith('.local')) return 'mDNS / link-local hostname (.local)';
+  if (!h.includes('.')) return 'single-label hostname (resolves only inside the local network)';
+  return null;
+}
+
+/* -------------------------------------------------------------------------- */
+/* Layer 1 — literal checks (no I/O)                                          */
+/* -------------------------------------------------------------------------- */
+
+/**
+ * Scheme + host checks with no DNS. Safe to call anywhere, including in a
+ * synchronous validation path.
+ *
+ * Note that we parse with WHATWG `URL` first and then inspect `hostname`, which
+ * matters more than it looks: the parser normalises the alternate IPv4 spellings
+ * attackers reach for — `https://2130706433/`, `https://0x7f000001/` and
+ * `https://127.1/` all arrive here as `127.0.0.1`, and `https://0/` as
+ * `0.0.0.0`. Verified against Node 24, and pinned by tests.
+ */
+export function checkUrlLiteral(raw: unknown, options: SsrfGuardOptions = {}): SsrfCheckResult {
+  if (typeof raw !== 'string' || !raw.trim()) {
+    return { ok: false, error: 'url must be a non-empty string' };
+  }
+
+  let parsed: URL;
+  try {
+    parsed = new URL(raw.trim());
+  } catch {
+    return { ok: false, error: 'url is not a valid absolute URL' };
+  }
+
+  const allowedSchemes = options.allowHttp ? ['https:', 'http:'] : ['https:'];
+  if (!allowedSchemes.includes(parsed.protocol)) {
+    return {
+      ok: false,
+      error: options.allowHttp
+        ? `url scheme "${parsed.protocol}" is not http(s)`
+        : 'url must use https:// — payloads are not delivered over plaintext HTTP',
+    };
+  }
+
+  const host = parsed.hostname.toLowerCase();
+  if (!host) return { ok: false, error: 'url has no host' };
+
+  const bare = stripBrackets(host);
+  const family = isIP(bare);
+  if (family !== 0) {
+    const reason = family === 4 ? classifyIPv4(bare) : classifyIPv6(bare);
+    if (reason) return { ok: false, error: `url host ${bare} is forbidden: ${reason}` };
+  } else {
+    const reason = classifyHostname(host);
+    if (reason) return { ok: false, error: `url host "${host}" is forbidden: ${reason}` };
+  }
+
+  const allowlistRaw = process.env[options.allowlistEnvVar ?? DEFAULT_ALLOWLIST_ENV];
+  if (allowlistRaw && allowlistRaw.trim().length > 0) {
+    const suffixes = allowlistRaw
+      .split(',')
+      .map((s) => s.trim().toLowerCase())
+      .filter(Boolean);
+    const bareHost = host.replace(/\.$/, '');
+    if (!suffixes.some((suffix) => bareHost === suffix || bareHost.endsWith('.' + suffix))) {
+      return {
+        ok: false,
+        error: `url host "${host}" not in ${options.allowlistEnvVar ?? DEFAULT_ALLOWLIST_ENV}`,
+      };
+    }
+  }
+
+  return { ok: true, url: parsed.toString() };
+}
+
+/* -------------------------------------------------------------------------- */
+/* Layer 2 — DNS resolution re-check                                          */
+/* -------------------------------------------------------------------------- */
+
+/**
+ * Resolve `host` and run EVERY returned address through the same predicates as
+ * the literal check. Returns a reason string when the host must not be
+ * contacted, or null when every resolved address is acceptable.
+ *
+ * Two deliberate choices:
+ *  - `all: true`. A host with one public and one private A record is not safe;
+ *    checking only the first address is how a multi-record bypass works.
+ *  - Resolution failure is a REJECTION, not a pass. We cannot show the
+ *    destination is external, so we do not contact it. (A guard that fails open
+ *    on a dependency error is the KS-616 shape and was rejected there too.)
+ */
+/**
+ * KS-914. Resolve a host and return the addresses that PASSED the classifier,
+ * instead of discarding them. `assertResolvedHostPublic` kept its old contract
+ * (an error string or null) and threw the addresses away — which is precisely
+ * why the connection could not be pinned to what was checked.
+ */
+export async function resolvePublicAddresses(
+  host: string,
+): Promise<{ ok: true; addresses: string[] } | { ok: false; error: string }> {
+  const bare = stripBrackets(host.toLowerCase());
+
+  // An IP literal has nothing to resolve; the literal check already ruled.
+  if (isIP(bare) !== 0) {
+    const reason = classifyAddress(bare);
+    return reason ? { ok: false, error: reason } : { ok: true, addresses: [bare] };
+  }
+
+  let addresses: Array<{ address: string; family: number }>;
+  try {
+    addresses = await lookup(bare, { all: true, verbatim: true });
+  } catch (err) {
+    return {
+      ok: false,
+      error: `host "${bare}" could not be resolved (${(err as Error).message}) — refusing to contact an unverifiable destination`,
+    };
+  }
+
+  if (!addresses || addresses.length === 0) {
+    return { ok: false, error: `host "${bare}" resolved to no addresses` };
+  }
+
+  for (const { address } of addresses) {
+    const reason = classifyAddress(address);
+    if (reason) {
+      return { ok: false, error: `host "${bare}" resolves to ${address}, which is forbidden: ${reason}` };
+    }
+  }
+
+  return { ok: true, addresses: addresses.map((a) => a.address) };
+}
+
+export async function assertResolvedHostPublic(host: string): Promise<string | null> {
+  const r = await resolvePublicAddresses(host);
+  return r.ok ? null : r.error;
+}
+
+/* -------------------------------------------------------------------------- */
+/* Combined                                                                   */
+/* -------------------------------------------------------------------------- */
+
+/**
+ * The call every consumer should use: literal checks, then DNS re-check.
+ * Use at registration AND immediately before the outbound request.
+ */
+export async function assertSafeOutboundUrl(
+  raw: unknown,
+  options: SsrfGuardOptions = {},
+): Promise<SsrfCheckResult> {
+  const literal = checkUrlLiteral(raw, options);
+  if (!literal.ok) return literal;
+
+  const host = new URL(literal.url).hostname;
+  const reason = await assertResolvedHostPublic(host);
+  if (reason) return { ok: false, error: reason };
+
+  return literal;
+}
+
+/* -------------------------------------------------------------------------- */
+/* KS-914 — pin the validated address into the connection                      */
+/* -------------------------------------------------------------------------- */
+
+/**
+ * A `lookup` that ignores DNS and answers with an address we already validated.
+ *
+ * This is the whole of the rebind fix. `assertSafeOutboundUrl` resolves and
+ * classifies, then the runtime used to resolve AGAIN when it opened the socket
+ * — two independent lookups, and the second one is the one that decides where
+ * the packets go. Handing the agent this `lookup` collapses that to one: the
+ * socket connects to an address the classifier passed, or to nothing.
+ *
+ * The hostname is still what TLS sees (`servername`/`Host` come from the URL),
+ * so certificate validation is unchanged — we pin the ADDRESS, not the identity.
+ */
+export function pinnedLookup(address: string) {
+  const family = isIP(address);
+  return function lookupPinned(
+    _hostname: string,
+    options: any,
+    callback?: (err: Error | null, addr?: any, fam?: number) => void,
+  ): void {
+    const cb = typeof options === 'function' ? options : callback!;
+    const opts = typeof options === 'function' ? {} : options || {};
+    if (opts.all) {
+      cb(null, [{ address, family }] as any);
+      return;
+    }
+    cb(null, address as any, family);
+  };
+}
+
+export interface SafeOutboundResponse {
+  ok: boolean;
+  status: number;
+}
+
+/**
+ * KS-914 A-4/A-5. Two comments used to claim that blocked and failed "stay
+ * distinguishable at the call site". They were not: the failure arm was a bare
+ * `{ok:false; error:string}` with nothing to branch on, and both call sites
+ * proved it by taking the same branch, logging the same line and persisting the
+ * same `status 0 / success false`. `blocked by SSRF guard` went from two files
+ * to zero, and the loss showed on two operator-facing surfaces — the persisted
+ * `svc_webhook_deliveries.error` and the `delivery.error` of the test-send
+ * response.
+ *
+ * The claim is now carried by the type rather than by a comment:
+ *  - `blocked`        — WE refused to send. The URL failed the literal check,
+ *                       or its host resolved to an address the classifier
+ *                       forbids. Nothing left this process.
+ *  - `request_failed` — we sent, and the destination did not answer usefully:
+ *                       connection refused, TLS failure, or the deadline below.
+ *
+ * An operator reading a delivery log can tell "we refused to send" from "their
+ * endpoint was down", which is the distinction that has an owner attached.
+ */
+export type SafeOutboundFailureReason = 'blocked' | 'request_failed';
+
+export type SafeOutboundResult =
+  | { ok: true; response: SafeOutboundResponse }
+  | { ok: false; reason: SafeOutboundFailureReason; error: string };
+
+export interface SafeOutboundInit {
+  method?: string;
+  headers?: Record<string, string>;
+  body?: string;
+  timeoutMs?: number;
+}
+
+/**
+ * Validate a URL, then make the request to the address that was validated.
+ *
+ * Callers previously did `assertSafeOutboundUrl(url)` and then `fetch(url)`.
+ * That is safe against a stale registration but not against a record that
+ * changes between the two, because `fetch` resolves for itself. This performs
+ * both halves against one address.
+ *
+ * Returns the guard's error rather than throwing it, and tags it: a refusal by
+ * this guard carries `reason: 'blocked'`, a destination that would not answer
+ * carries `reason: 'request_failed'`. See SafeOutboundFailureReason.
+ *
+ * `timeoutMs` is a TOTAL deadline on the whole operation — DNS-free connect,
+ * TLS, request, response and drain — not a socket-idle timer. That distinction
+ * is the reason this function exists in its current form; see the deadline
+ * below.
+ */
+export async function safeOutboundRequest(
+  raw: unknown,
+  init: SafeOutboundInit = {},
+  options: SsrfGuardOptions = {},
+): Promise<SafeOutboundResult> {
+  const literal = checkUrlLiteral(raw, options);
+  if (!literal.ok) return { ok: false, reason: 'blocked', error: literal.error };
+
+  const url = new URL(literal.url);
+  const resolved = await resolvePublicAddresses(url.hostname);
+  if (!resolved.ok) return { ok: false, reason: 'blocked', error: resolved.error };
+
+  const address = resolved.addresses[0];
+  const isTls = url.protocol === 'https:';
+  const mod = isTls ? https : http;
+  const agent = isTls
+    ? new https.Agent({ lookup: pinnedLookup(address) as any })
+    : new http.Agent({ lookup: pinnedLookup(address) as any });
+
+  const timeoutMs = init.timeoutMs ?? 10_000;
+
+  return new Promise((resolve) => {
+    let settled = false;
+    let deadline: ReturnType<typeof setTimeout> | undefined;
+    const done = (r: SafeOutboundResult) => {
+      if (settled) return;
+      settled = true;
+      if (deadline) clearTimeout(deadline);
+      agent.destroy();
+      resolve(r);
+    };
+
+    const req = mod.request(
+      {
+        protocol: url.protocol,
+        hostname: url.hostname,
+        port: url.port || (isTls ? 443 : 80),
+        path: `${url.pathname}${url.search}`,
+        method: init.method ?? 'GET',
+        headers: init.headers,
+        agent,
+      },
+      (res) => {
+        const status = res.statusCode ?? 0;
+        res.resume(); // drain; no caller reads the body
+        res.on('end', () => done({ ok: true, response: { ok: status >= 200 && status < 300, status } }));
+      },
+    );
+
+    /*
+     * KS-914 A-1. This WAS `req.setTimeout(timeoutMs, …)`, which is a
+     * socket-INACTIVITY timer: it is not armed until a socket is assigned, and
+     * every arriving byte resets it. It bounded neither the connect nor the
+     * total. Measured against an unroutable-but-public destination
+     * (`https://198.51.100.1/`, TEST-NET-2, which the classifier passes):
+     * declared 3000 ms, ELAPSED 75014 ms. The `fetch` it replaced returned in
+     * 10005 ms, because `AbortSignal.timeout` bounds the whole operation.
+     * Second manifestation: a server dripping one byte every 1.5 s holds the
+     * request open indefinitely, because the response handler also drains the
+     * body and waits for `end`.
+     *
+     * So the ceiling is on the WHOLE operation — connect, TLS, request,
+     * response and drain — armed before the connection is attempted. Cleared in
+     * `done`, so a completed request leaves no timer behind.
+     *
+     * Honest qualifier, because it is not a regression everywhere: for m365
+     * the base called `fetch` with NO signal at all, so that path had no bound
+     * before this PR either. What the head added was a parameter that READS
+     * like a bound. It is one now.
+     */
+    deadline = setTimeout(() => {
+      req.destroy();
+      done({
+        ok: false,
+        reason: 'request_failed',
+        error: `request exceeded its ${timeoutMs}ms deadline (connect, transfer and drain)`,
+      });
+    }, timeoutMs);
+
+    req.on('error', (err) => done({ ok: false, reason: 'request_failed', error: err.message }));
+    if (init.body) req.write(init.body);
+    req.end();
+  });
+}

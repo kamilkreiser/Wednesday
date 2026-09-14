@@ -1,0 +1,458 @@
+/**
+ * =============================================================================
+ * ANCHORING SERVICE — OpenAPI registrations (Track 2 proof-of-concept)
+ * =============================================================================
+ *
+ * Worked example for the Zod-to-OpenAPI migration recipe in
+ * `TRACK2_OPENAPI_MIGRATION.md`. Walks the anchoring service's primary
+ * routes + state-thread NFT endpoints (today's F6 Phase 2 work) and
+ * registers them with the shared registry.
+ *
+ * The generator script (`scripts/generate-openapi.mjs`) imports this
+ * file, the registry gets populated as a side-effect of import, then
+ * the document is generated from `sharedRegistry`.
+ *
+ * Migration recipe for the next service:
+ *   1. Copy this file's structure to `services/<svc>/src/<svc>.openapi.ts`
+ *   2. Import the service's existing Zod request/response schemas
+ *      (from packages/shared/src/schemas/* or local definitions)
+ *   3. Call `sharedRegistry.registerPath({...})` for each route
+ *   4. Run `npm run generate-openapi` to regenerate the YAML
+ *   5. Verify the new endpoints render in Swagger UI at /api/docs
+ * =============================================================================
+ */
+
+// Use the SHARED z (not 'zod' directly) so `.openapi()` is on the same
+// Zod prototype that registry.ts extended.
+import { z, sharedRegistry, commonErrorResponses, rateLimit, sla, FX } from "@secuura/shared";
+// KS-534: the runtime's frozen verb tuple is the single source of truth for the
+// published enum — see the note on `documentType` below.
+import { ACCEPTED_LIFECYCLE_VERBS } from './anchorSchema';
+
+// -----------------------------------------------------------------------------
+// SHARED SCHEMAS (registered once, referenced by routes)
+// -----------------------------------------------------------------------------
+
+const AnchorSchema = sharedRegistry.register(
+  'Anchor',
+  z.object({
+    id: z.string(),
+    documentId: z.string(),
+    contentHash: z.string().regex(/^[a-f0-9]{64}$/),
+    transactionHash: z.string().nullable(),
+    blockNumber: z.number().int().nullable(),
+    blockHash: z.string().nullable(),
+    confirmedAt: z.string().datetime().nullable(),
+    createdAt: z.string().datetime(),
+    network: z.enum(['mainnet', 'preprod', 'preview', 'devnet']),
+    // KS-726: 'submitting' is part of the published contract. The value domain
+    // of a published field IS contract surface — it is what Schemathesis reads —
+    // so a GET on a written-ahead row would return a status outside its own
+    // declared enum. `check:openapi` cannot see that: spec and generator agree
+    // with each other, and both would be wrong about the service.
+    //
+    // 'submitting' means: the transaction is SIGNED and its hash is derived and
+    // persisted, but the node has not acknowledged it. Distinct from 'submitted'
+    // (node acknowledged) and from 'pending' (nothing signed).
+    status: z.enum(['pending', 'submitting', 'submitted', 'confirmed', 'failed']),
+    confirmations: z.number().int().nonnegative().optional(),
+    metadataLabel: z.number().int().optional(),
+    anchorType: z.string().optional(),
+    // KS-587: honest labelling on anchor reads. When the stored hash is a
+    // mock/simulated placeholder (`tx_sim_`/`mock_tx_`/`tx_…`), it is surfaced
+    // here instead of `transactionHash`, with `simulated: true` — the anchor
+    // makes no on-chain claim.
+    simulated: z.boolean().optional(),
+    simulatedTxRef: z.string().optional(),
+  }).openapi({
+    description:
+      'A blockchain anchor record. Anchors are publicly observable on Cardanoscan ' +
+      'after confirmation; this record is the off-chain mirror for fast lookup.',
+    example: {
+      // KS-256: was `anc_01HC9ZP3WXYZQ12345VWXY` — a SECOND anchor id, differing
+      // from the one the fixture set declares. Two ids for one canonical anchor
+      // is the drift FX exists to stop; collapsed onto the fixture.
+      id: FX.anchor.id,
+      documentId: FX.document.id,
+      contentHash: 'a1b2c3d4e5f60718293a4b5c6d7e8f901a2b3c4d5e6f70819203a4b5c6d7e8f9',
+      transactionHash: '4f1e6a8d2c7b9e3f1a5b7c9d2e4f6a8b1c3d5e7f9a2b4c6d8e0f2a4b6c8d0e2f',
+      blockNumber: 11234567,
+      blockHash: '987abc123def456789abc123def456789abc123def456789abc123def4567890',
+      confirmedAt: '2026-04-29T10:18:42.000Z',
+      createdAt: '2026-04-29T10:14:21.120Z',
+      network: 'preprod',
+      status: 'confirmed',
+      confirmations: 12,
+      metadataLabel: 1989,
+      anchorType: 'document',
+    },
+  }),
+);
+
+const ThreadTokenStateSchema = sharedRegistry.register(
+  'ThreadTokenState',
+  z.object({
+    documentId: z.string(),
+    threadToken: z
+      .object({
+        policyId: z.string().regex(/^[a-f0-9]{56}$/),
+        assetName: z.string(),
+        scriptAddress: z.string(),
+        seedTxOutRef: z.string(),
+        mintTxHash: z.string().nullable(),
+        network: z.enum(['mainnet', 'preprod', 'preview', 'devnet']),
+        originatorPkh: z.string().regex(/^[a-f0-9]{56}$/),
+        status: z.enum(['active', 'burned']),
+        createdAt: z.string().datetime(),
+        burnedAt: z.string().datetime().nullable(),
+        burnTxHash: z.string().nullable(),
+      })
+      .nullable(),
+    phase: z.enum(['pre-nft', 'pre-migration', 'registered-not-minted', 'live']),
+    note: z.string().optional(),
+  }).openapi({
+  // KS-256: generated example (synthesised, masked). Guarded by
+  // `npm run check:openapi` -> check-spec-examples (E1-E7).
+    example: {
+    documentId: FX.document.id,
+    threadToken: null,
+    phase: 'pre-nft',
+  },
+  }),
+);
+
+const ThreadMintRequestSchema = sharedRegistry.register(
+  'ThreadMintRequest',
+  z.object({
+    // KS-444: documentId/documentType carry the handler's long-standing
+    // non-empty requirement (threadMintRequestSchema, "Missing or invalid
+    // field: …" — an empty id/type can never mint), so publish it as min(1):
+    // an empty string was spec-legal but 400'd (positive_data_acceptance).
+    documentId: z.string().min(1),
+    documentHashHex: z.string().regex(/^[a-f0-9]{64}$/),
+    originatorPkhHex: z.string().regex(/^[a-f0-9]{56}$/),
+    documentType: z.string().min(1),
+    metadataHashHex: z.string().regex(/^[a-f0-9]{64}$/),
+    deploymentIdHex: z.string().optional(),
+    createdAtMs: z.number().int().optional(),
+    dryRun: z.boolean().optional(),
+  }).openapi({
+    example: {
+      documentId: 'doc-0000000000000-5eeded0c',
+      documentHashHex: 'a1b2c3d4e5f60718293a4b5c6d7e8f901a2b3c4d5e6f70819203a4b5c6d7e8f9',
+      originatorPkhHex: '0123456789abcdef0123456789abcdef0123456789abcdef01234567',
+      documentType: 'PROPERTY_DEED',
+      metadataHashHex: 'fedcba0987654321fedcba0987654321fedcba0987654321fedcba0987654321',
+      deploymentIdHex: '7365637575726130312d70726f64',
+      createdAtMs: 1777346021120,
+      dryRun: false,
+    },
+  }),
+);
+
+const ThreadMintResponseSchema = sharedRegistry.register(
+  'ThreadMintResponse',
+  z.object({
+    success: z.boolean(),
+    data: z.object({
+      policyId: z.string().regex(/^[a-f0-9]{56}$/),
+      scriptAddress: z.string(),
+      mintTxHash: z.string(),
+      seedTxOutRef: z.string(),
+      network: z.enum(['mainnet', 'preprod', 'preview', 'devnet']),
+    }),
+  }).openapi({
+    example: {
+      success: true,
+      data: {
+        policyId: '4d3c2b1a0987654321fedcba9876543210fedcba9876543210fedcba',
+        scriptAddress: 'addr_test1wq3v2x8y7z9w8u7t6r5e4d3c2b1a0987654321fedcba98765432109',
+        mintTxHash: '4f1e6a8d2c7b9e3f1a5b7c9d2e4f6a8b1c3d5e7f9a2b4c6d8e0f2a4b6c8d0e2f',
+        seedTxOutRef: '4f1e6a8d2c7b9e3f1a5b7c9d2e4f6a8b1c3d5e7f9a2b4c6d8e0f2a4b6c8d0e2f:0',
+        network: 'preprod',
+      },
+    },
+  }),
+);
+
+// -----------------------------------------------------------------------------
+// ROUTES
+// -----------------------------------------------------------------------------
+
+// KS-95: /anchoring/health removed from the client spec — it's an internal
+// health/monitoring endpoint (cf. config/services.ts healthPath), not a
+// gateway-routed client operation, so it doesn't belong in secuura-api.yaml.
+// Its HealthStatus schema was removed alongside the path (it had no other
+// consumer and tripped noUnusedLocals once the rate limit stopped masking the
+// anchoring build — KS-102).
+
+// -----------------------------------------------------------------------------
+// KS-480: the flat anchor — Platform S's fallback path for unrouted lifecycle
+// verbs and per-verb dispatch failures. Live since the beginning but never
+// published (the KS-486 remediation-#3 class: live-but-unpublished ops are
+// invisible to Schemathesis/Akto). Published with the S↔K contract's
+// connector semantics: gateway-gated `anchors:write` for machine callers, and
+// since KS-566 CONNECTOR-ONLY attribution — the operation is recorded against
+// the key that acted (action_provenance, off-chain), with no caller-supplied
+// principal.
+// Field shapes MIRROR the runtime validator in anchorSchema.ts — keep in
+// lockstep (that module uses plain zod, so it can't be imported here without
+// crossing .openapi() prototypes).
+// -----------------------------------------------------------------------------
+
+const FlatAnchorRequestSchema = sharedRegistry.register(
+  'FlatAnchorRequest',
+  z.object({
+    documentId: z.string().min(1).max(128).openapi({
+      description: 'doc-… external id or a UUID (anchorSchema.ts documentId pattern).',
+    }),
+    contentHash: z.string().regex(/^[a-f0-9]{64}$/i),
+    environment: z.string().min(1).max(32).optional(),
+    issuerOrgId: z.string().min(1).max(128).optional(),
+    issuerName: z.string().min(1).max(256).optional().openapi({
+      description: 'Accepted for backward compatibility but NOT anchored (KS-240 on-chain minimisation).',
+    }),
+    certId: z.string().min(1).max(128).optional(),
+    metadata: z
+      .object({
+        // KS-388/KS-134 frozen verb vocabulary. KS-534: this now IMPORTS the
+        // runtime tuple (`LIFECYCLE_VERBS` from anchorSchema.ts) instead of
+        // restating it — the hand-copied mirror it replaces would have needed a
+        // lockstep edit on every verb addition, which is exactly the drift class
+        // KS-415/KS-534 keep re-reporting. Only the schema OBJECT would cross
+        // .openapi() prototypes; the `as const` string tuple imports cleanly
+        // (same pattern originate.openapi.ts uses for LIFECYCLE_EVENT_ACTIONS).
+        documentType: z.enum(ACCEPTED_LIFECYCLE_VERBS).optional().openapi({
+          description:
+            'KS-388: the KS-134 lifecycle verb vocabulary; out-of-vocabulary verbs 400. ' +
+            'KS-661: `certify` was renamed `declare`. `certify` is still accepted as a ' +
+            'TRANSITIONAL alias so an un-upgraded Platform-S keeps anchoring across the ' +
+            'deploy window (PS-499 — an unknown verb 400s the whole anchor), and is ' +
+            'listed here because the server accepts it. New callers MUST emit `declare`; ' +
+            'the alias is removed once every S instance has switched.',
+        }),
+        timestamp: z.string().datetime({ offset: true }).optional().openapi({
+          description:
+            'KS-555: the CLIENT-ASSERTED event time (ISO 8601, offset allowed; non-ISO 400s). ' +
+            'Anchored as `occurredAt` (normalised to UTC) alongside K’s own anchoring timestamp — ' +
+            '"when it happened" (caller-asserted) vs "when it hit chain" (K-asserted).',
+        }),
+        identityCommitment: z.string().max(128).regex(/^[a-z0-9-]+\.v\d+:[0-9a-f]{64}$/).optional().openapi({
+          description:
+            'KS-721: Platform-S\'s opaque keyed identity commitment, `<label>.v<N>:<64 lowercase hex>` ' +
+            '(malformed values 400). Anchored VERBATIM alongside documentType/occurredAt so a verifier ' +
+            'gets tamper-evidence for the identity claim shown beside a document while all identity ' +
+            'data stays off-chain (KS-240). `vN` is the S-SIDE key version: on erasure S destroys that ' +
+            'key version, so the anchored value becomes permanently unverifiable rather than a ' +
+            'permanent checkable pseudonym. K validates SHAPE only — the non-identifying property is ' +
+            'Platform-S\'s assertion, not something K can prove.',
+        }),
+      })
+      .optional()
+      .openapi({ description: 'Unknown keys are stripped (KS-240) — only the whitelisted non-PII fields reach the chain.' }),
+    // KS-566: `onBehalfOf` REMOVED from this contract. Kam's 2026-08-05 G-1
+    // ruling (KS-539) puts the flat anchor on the connector pattern —
+    // attribution is `connector:<id>`, never a named principal. The runtime
+    // strips a sent field rather than 400ing it (anchorSchema.ts explains
+    // why), and writes a connector-only action_provenance row instead.
+  }).openapi({
+  // KS-256: generated example (synthesised, masked). Guarded by
+  // `npm run check:openapi` -> check-spec-examples (E1-E7).
+    example: {
+    documentId: FX.document.id,
+    contentHash: 'abcdef0123456789abcdef0123456789abcdef0123456789abcdef0123456789',
+  },
+  }),
+);
+
+const FlatAnchorResponseSchema = sharedRegistry.register(
+  'FlatAnchorResponse',
+  z.object({
+    success: z.literal(true),
+    data: z
+      .object({
+        id: z.string(),
+        documentId: z.string(),
+        contentHash: z.string(),
+        status: z.string(),
+        network: z.string(),
+        metadataLabel: z.number().int(),
+        createdAt: z.string(),
+        message: z.string(),
+      })
+      .passthrough(),
+  }).openapi({
+  // KS-256: generated example (synthesised, masked). Guarded by
+  // `npm run check:openapi` -> check-spec-examples (E1-E7).
+    example: {
+    success: true,
+    data: {
+      id: 'example-id',
+      documentId: FX.document.id,
+      contentHash: FX.document.contentHash,
+      status: 'example-status',
+      network: 'example-network',
+      metadataLabel: 1,
+      createdAt: FX.timestamps.createdAt,
+      message: 'example-message',
+    },
+  },
+  }),
+);
+
+sharedRegistry.registerPath({
+  method: 'post',
+  path: '/api/anchors',
+  tags: ['Anchoring'],
+  summary: 'Anchor a document hash on Cardano (flat path — Platform S fallback)',
+  description:
+    'Submits a single document anchor. Accepted metadata is whitelisted (KS-240 on-chain ' +
+    'minimisation) — only non-identifying fields reach the chain. Machine callers (sk_ keys / ' +
+    'OAuth apps) require the `anchors:write` scope (gateway-enforced, KS-480); human JWT ' +
+    'callers are unaffected. Responds 202 — the Cardano transaction confirms asynchronously ' +
+    '(poll GET /api/anchors/document/{documentId}).',
+  security: [{ bearerAuth: [] }],
+  ...rateLimit('global'),
+  ...sla('blockchain'),
+  request: {
+    body: {
+      content: {
+        'application/json': { schema: FlatAnchorRequestSchema },
+      },
+    },
+  },
+  responses: {
+    202: {
+      description: 'Anchor request accepted (asynchronous confirmation)',
+      content: {
+        'application/json': { schema: FlatAnchorResponseSchema },
+      },
+    },
+    400: { ...commonErrorResponses[400], description: 'Validation failed (schema or verb vocabulary)' },
+    401: commonErrorResponses[401],
+    403: { ...commonErrorResponses[403], description: 'Machine caller without anchors:write' },
+    429: commonErrorResponses[429],
+    500: commonErrorResponses[500],
+    502: commonErrorResponses[502],
+    503: commonErrorResponses[503],
+    404: commonErrorResponses[404],
+  },
+});
+
+sharedRegistry.registerPath({
+  method: 'post',
+  path: '/api/anchors/thread-mint',
+  tags: ['Anchoring', 'State-Thread NFT'],
+  summary: 'Mint state-thread NFT (F6 + AUDIT S-3/S-17 Sprint 2 Phase 2)',
+  description:
+    'Mints the per-document state-thread NFT and locks the initial Draft ' +
+    'DocumentDatum at the parameterised document_contract script address. ' +
+    'Internal-only — called by services/originate during document creation. ' +
+    'Currently blocked at submit on lucid-evolution#683 (Conway PlutusV3 ' +
+    'cost-model digest drift); script execution itself succeeds.',
+  security: [{ bearerAuth: [] }],
+  ...rateLimit('global'),
+  ...sla('blockchain'),
+  request: {
+    body: {
+      content: {
+        'application/json': { schema: ThreadMintRequestSchema },
+      },
+    },
+  },
+  responses: {
+    200: {
+      description: 'Mint successful (or dry-run)',
+      content: {
+        'application/json': { schema: ThreadMintResponseSchema },
+      },
+    },
+    401: commonErrorResponses[401],
+    400: { ...commonErrorResponses[400], description: 'Missing or invalid required field' },
+    500: { ...commonErrorResponses[500], description: 'Mint failed (currently expected on real Preview pending lucid-evolution#683)' },
+    403: commonErrorResponses[403],
+    429: commonErrorResponses[429],
+    502: commonErrorResponses[502],
+    503: commonErrorResponses[503],
+    404: commonErrorResponses[404],
+  },
+});
+
+sharedRegistry.registerPath({
+  method: 'get',
+  path: '/api/anchors/thread-state/{documentId}',
+  tags: ['Anchoring', 'State-Thread NFT'],
+  summary: 'State-thread registry lookup (F6 + AUDIT S-3/S-17 Sprint 2 Phase 1)',
+  description:
+    'Visibility endpoint for the state-thread NFT registry. Always 200 — ' +
+    'a missing registry entry is not 404, it is a phase status.',
+  security: [{ bearerAuth: [] }],
+  request: {
+    params: z.object({
+      documentId: z.string().openapi({
+        description: 'Off-chain document UUID',
+        example: 'doc-0000000000000-5eeded0c',
+      }),
+    }),
+  },
+  responses: {
+    400: commonErrorResponses[400],
+    200: {
+      description: 'Thread state lookup result (always 200)',
+      content: {
+        'application/json': { schema: ThreadTokenStateSchema },
+      },
+    },
+    401: commonErrorResponses[401],
+    403: commonErrorResponses[403],
+    404: commonErrorResponses[404],
+    429: commonErrorResponses[429],
+    500: commonErrorResponses[500],
+    502: commonErrorResponses[502],
+    503: commonErrorResponses[503],
+  },
+});
+
+sharedRegistry.registerPath({
+  method: 'get',
+  path: '/api/anchors/document/{documentId}',
+  tags: ['Anchoring'],
+  summary: 'List anchors for a document',
+  description:
+    'Returns every anchor record for the given documentId. Anchor metadata ' +
+    '(txHash, blockHeight, contentHash, network) is publicly observable on ' +
+    'Cardanoscan, so this endpoint is intentionally readable by any ' +
+    'authenticated user — verifier roles use this lookup. Cross-tenant ' +
+    'access is by-design per baseline 06-tenant-isolation.txt.',
+  security: [{ bearerAuth: [] }],
+  request: {
+    params: z.object({
+      documentId: z.string().openapi({ example: FX.document.id }),
+    }),
+  },
+  responses: {
+    400: commonErrorResponses[400],
+    200: {
+      description: 'List of anchors for the document',
+      content: {
+        'application/json': {
+          schema: z.object({
+            success: z.boolean(),
+            data: z.object({
+              documentId: z.string(),
+              anchors: z.array(AnchorSchema),
+              count: z.number().int().nonnegative(),
+            }),
+          }),
+        },
+      },
+    },
+    401: commonErrorResponses[401],
+    404: { ...commonErrorResponses[404], description: 'No anchors found for the given documentId' },
+    403: commonErrorResponses[403],
+    429: commonErrorResponses[429],
+    500: commonErrorResponses[500],
+    502: commonErrorResponses[502],
+    503: commonErrorResponses[503],
+  },
+});

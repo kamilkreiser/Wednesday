@@ -1,0 +1,74 @@
+/**
+ * =============================================================================
+ * TRANSACTION CONFIRMATION POLLER
+ * =============================================================================
+ * Polls Blockfrost for transaction confirmation status with exponential backoff.
+ * =============================================================================
+ */
+
+import { getTransaction } from './provider';
+
+export interface ConfirmationResult {
+  confirmed: boolean;
+  blockHash?: string;
+  blockNumber?: number;
+  slot?: number;
+  confirmations?: number;
+  error?: string;
+}
+
+/**
+ * Wait for a transaction to appear on chain.
+ *
+ * @param txHash               - Transaction hash to monitor
+ * @param maxAttempts          - Maximum number of polling attempts (default 30)
+ * @param initialDelayMs       - Initial delay between attempts in ms (default 10000)
+ * @param maxDelayMs           - Maximum delay between attempts (default 60000)
+ * @param onStatusUpdate       - Optional callback for status updates
+ */
+export async function waitForConfirmation(
+  txHash: string,
+  maxAttempts = 30,
+  initialDelayMs = 10_000,
+  maxDelayMs = 60_000,
+  onStatusUpdate?: (attempt: number, status: string) => void,
+): Promise<ConfirmationResult> {
+  let delay = initialDelayMs;
+
+  for (let attempt = 1; attempt <= maxAttempts; attempt++) {
+    try {
+      const tx = await getTransaction(txHash);
+
+      if (tx) {
+        return {
+          confirmed: true,
+          blockHash: tx.block,
+          blockNumber: tx.block_height,
+          slot: tx.slot,
+          confirmations: 1,
+        };
+      }
+
+      if (onStatusUpdate) {
+        onStatusUpdate(attempt, `pending (attempt ${attempt}/${maxAttempts})`);
+      }
+    } catch (err: any) {
+      if (onStatusUpdate) {
+        onStatusUpdate(attempt, `error: ${err?.message}`);
+      }
+    }
+
+    // Exponential backoff with jitter
+    await sleep(delay + require('crypto').randomInt(0, 2000));
+    delay = Math.min(delay * 1.5, maxDelayMs);
+  }
+
+  return {
+    confirmed: false,
+    error: `Transaction ${txHash} not confirmed after ${maxAttempts} attempts`,
+  };
+}
+
+function sleep(ms: number): Promise<void> {
+  return new Promise(resolve => setTimeout(resolve, ms));
+}

@@ -1,0 +1,68 @@
+20:36:02 AEST
+docker info rc=1
+/Volumes/DevMASTER/!CODING/Testing Agent MAIN
+btn-primary-first-frame.png
+CLAUDE.md
+p8-index-dark-active-filter-7.27.png
+p8-loadtime-1200ms-darksheet-delayed.png
+p8-loadtime-settled-dark.png
+p8-wizard-advanced-dark.png
+projects
+r51-matrix.json
+rd258-empty-window-dark.png
+rd258-empty-window-light.png
+2026-09-14-ks835-984-d00a2015c-tier1-r1
+2026-09-14-ks973-989-9d0e2016a-tier1-r1
+2026-09-14-ks991-903-a4f71cde6-tier2-r2
+2026-09-14-L7-918r2-924-925-b54487216-b85f1db24-5341b1dae-tier2
+2026-09-14-L9-940-941-942-887-ks1075-1077-1078-961-tier2-r1
+(eval):4: no matches found: /Volumes/DevMASTER/!CODING/Testing Agent MAIN/*send_brief*
+56:import { lookup } from 'dns/promises';
+57:import { isIP } from 'net';
+58:import * as http from 'http';
+59:import * as https from 'https';
+5
+--- dispatchEvent( call sites at head across services (positive control = the definition in webhooks.ts)
+Blockchain/Dev/services/originate/src/routes/webhooks.ts:503:export async function dispatchEvent(
+--- KS-931 description + comment e96239ac
+## The module documents "returns the guard's error rather than throwing it". It can throw.
+
+**This is the one regression PR #868 introduced**, and it goes first because the contract and the behaviour disagree — the exact class we spent 2026-09-06 closing everywhere else.
+
+### What the gate measured
+
+`https.request` validates header content **synchronously**, inside the Promise executor. CRLF, non-latin1 and NUL header values all threw `ERR_INVALID_CHAR`; a clean value returned the tagged failure as documented. So the throw escapes the Promise and reaches the caller as an exception, not as `{ok:false, reason, error}`.
+
+`deliverWebhook` previously wrapped its `fetch` in `try/catch`. The KS-914 rewrite removed it, because the new function was documented as non-throwing. **Both halves of that assumption need to be true and one of them is not.**
+
+### Reachability: LATENT, not live — and the gate looked rather than assuming
+
+* `POST /api/webhooks/:id/test` hard-codes the payload `'test.ping'`.
+* `dispatchEvent` has **zero product call sites**.
+
+So no current path feeds attacker-influenced header content into it. That is why it did not hold the merge. **It is still a defect**: the next caller that passes a header value it did not construct gets an unhandled throw where the type promises a tagged failure.
+
+### Fix shape — decide which is true, then make it so
+
+Either **(a)** wrap the executor body so the documented contract holds (a synchronous throw becomes `{ok:false, reason:'request_failed', …}`), or **(b)** change the contract and restore `try/catch` at both call sites. **(a) is preferable** — one place, and it keeps the discriminator meaningful.
+
+Red-proof with the gate's own inputs: a CRLF header value must return a tagged failure, not throw. **A clean value returning the tagged failure is the control** — without it the cell passes on any refusal.
+
+*From the #868 round-1 gate (F2). Filed by s141, 2026-09-06.*
+----comments
+c025c736 2026-09-09T12:46:35.485Z 6846 chars
+63338f32 2026-09-09T12:50:34.861Z 4488 chars
+e96239ac 2026-09-14T10:23:53.148Z 2535 chars
+---- e96239ac body
+**PR #873 is READY FOR QA at `c624c9a8dd24129dad46cf7a204ae75ecb875dc3` (tier 1, round 1) — 2026-09-14, s232.**
+
+**What settled this round.** The review's open item was one number: the `packages/shared` tally at the base `ff5218867` — 784 (the body as first written) or 787 (the review, twice). Measured by the review's own method (a full-tree `git archive ff5218867` export, `node_modules` symlinked in from a fresh `npm ci`, `vitest run` from `packages/shared`; vitest 4.1.10, node v24.7.0): **787 passed / 41 files**. Head `7d8a3f0e4`: 791 / 41. Delta **+4** (`ks914-shipped-path.test.ts` 6 → 10: three `it.each` rows + the control). The PR body's pending block is replaced by the settled table; the template blocks restored on 2026-09-09 are kept byte-for-byte.
+
+**The head.** develop `852e1fff7` merged into the branch `--no-ff` as `c624c9a8d` (no rebase; `7d8a3f0e4` an ancestor). The two files — `packages/shared/src/security/ssrf-guard.ts` (+42 −4) and `src/__tests__/ks914-shipped-path.test.ts` (+44) — are byte-identical to the reviewed head (blobs `5a838e0d6` / `69706c1ef`; develop never moved them). `git diff --name-only develop...HEAD` = exactly the two files.
+
+**Measured at the merged head:** `packages/shared` 839 passed / 43 files (791 + develop's two suites since 09-06); `ks914-shipped-path.test.ts` 10 / 10; red-proof on the base guard reproduced (`3 failed | 7 passed (10)`, `TypeError: Invalid character in header content ["X-Probe"]` on the three unencodable cells, control green); one tamper (the executor's `catch` at `:534-536` → `throw err;`) → 3 red, restored with the file's sha256 asserted, 10 / 10 again; originate KS-914 call-site cells 4 / 4; `tsc --noEmit` rc 0; eslint 0 errors / 1 pre-existing warning; the push's in-hook preflight `PREFLIGHT INCOMPLETE — 12/15 legs ran, 3 SKIPPED. Nothing failed.` (legs 3/4/8 need a local stack; leg 14 shell suites 33/33; leg 15 all 21 tracked guards accounted for).
+
+**Not run:** the four platform suites (no live path reaches `dispatchEvent` — the review's own reasoning); the review's bare `https.request` and `write`/`end` probe sets (its evidence, not re-run); no stack, no container, nothing deployed.
+
+**For the merge seat:** the QA gate runs on `c624c9a8dd24129dad46cf7a204ae75ecb875dc3` in its own copy; equality targets are the two blobs above. `Closes KS-931` in the PR body is the fix's own claim — this ticket moves to Done at the merge seat's hand after the GO, not before. The PR comment answering the review's three items by number is on #873.
+

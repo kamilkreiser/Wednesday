@@ -1,0 +1,47 @@
+/**
+ * =============================================================================
+ * KS-726 — what verify-by-hash tells a caller about acceptance (#805 review F1)
+ * =============================================================================
+ * The verify-by-hash DB lookup admits rows in 'submitting': the transaction is
+ * signed and its hash written ahead, but the node has NOT acknowledged it.
+ *
+ * The lookup's comment used to claim the row's status was "selected and
+ * returned". It was selected and then DROPPED — so verify answered
+ * `verified: true` with a real 64-hex hash and a live explorer link for a
+ * submission whose acceptance was unknown, indistinguishable from a confirmed
+ * anchor. KS-522's honesty branch could not help: it keys off the tx-hash
+ * PREFIX (tx_sim_ / mock_tx_ / tx_), which a genuine written-ahead hash passes.
+ *
+ * This is a separate module for the same reason chainHealthStatus.ts is:
+ * buildResponse is a closure inside a route handler, so anything decided there
+ * cannot be tested without booting the service — which is how a dropped field
+ * survives a review in the first place.
+ * =============================================================================
+ */
+
+export interface VerifyAcceptance {
+  /** The anchor's own lifecycle state, or null when the source cannot supply one. */
+  status: string | null;
+  /** Has the node accepted the transaction? False for a written-ahead submission. */
+  acknowledged: boolean;
+}
+
+/**
+ * @param source 'chain' means the anchor was FOUND by scanning the chain, so it
+ *               is acknowledged by construction, whatever a local row says.
+ * @param rowStatus the anchor_store row's status, when the answer came from the DB.
+ */
+export function deriveVerifyAcceptance(
+  source: 'db' | 'chain',
+  rowStatus: unknown,
+): VerifyAcceptance {
+  if (source === 'chain') return { status: 'confirmed', acknowledged: true };
+
+  const status = typeof rowStatus === 'string' && rowStatus.length > 0 ? rowStatus : null;
+
+  // Only these two mean the node answered. 'submitting' is the written-ahead
+  // state this whole ticket introduces, and it is precisely NOT acknowledged.
+  const acknowledged = status === 'confirmed' || status === 'submitted';
+
+  return { status, acknowledged };
+}

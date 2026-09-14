@@ -1,0 +1,462 @@
+/**
+ * =============================================================================
+ * KS-726 — write-ahead the Cardano tx hash
+ * =============================================================================
+ * KS-705 made anchoring idempotent on the SUBMISSION wherever we know the
+ * transaction hash. This is the class it structurally cannot reach: the cases
+ * where the submit SUCCEEDS but we never learn the hash. All three KS-705
+ * guards key off a hash the row already carries, and a lost reply means there
+ * is none — so the retry submits a SECOND fee-paying transaction for one
+ * document, which is the exact defect KS-705 exists to close, reached by a door
+ * it cannot shut.
+ *
+ * A Cardano transaction hash is the blake2b-256 of the serialised transaction
+ * body, so it is fully known BEFORE the network sees it. Write-ahead inverts the
+ * ordering: build, sign, compute the hash, PERSIST it, and only then submit.
+ * After that, any failure at any point leaves a row that names the transaction,
+ * and recovery is the ordinary case rather than a special one.
+ *
+ * These tests drive `createAnchorSubmitter` against its INJECTED deps — no
+ * module mocking. That is a deliberately simpler harness than #764's, which was
+ * shaped around `index.ts`; #756 extracted the submit path into
+ * `anchorSubmission.ts`, so the seam is now the `deps` object.
+ *
+ * WHAT IS NOT TESTED HERE, AND WHY — stated rather than left to be discovered:
+ * the `AnchorSubmitOptions.onSigned` contract "if the hook THROWS, the submit
+ * does not happen at all" lives in `cardano/index.ts`, above this seam. In this
+ * harness `submit` is injected, so a test of that ordering would be asserting
+ * on the harness's own fake rather than on production code — a test that cannot
+ * reach its subject. It is named here so the gap is visible.
+ * =============================================================================
+ */
+
+import { describe, it, expect, vi } from 'vitest';
+
+import {
+  createAnchorSubmitter,
+  type AnchorSubmissionDeps,
+  type AnchorSnapshot,
+} from '../anchorSubmission';
+
+/** Real 64-hex preview-testnet shapes, reused from the KS-705 measurement. */
+const TX_A = '408e72087942198b69d686401829b5b9419d018dc4cc64917283aa3cdb084994';
+const TX_B = 'df797be3e68f2d190b797b34172e324eb7742c5e96e0b10bfe9a38ed971338cf';
+const ANCHOR_ID = 'anchor_a93bd8dd-10c8-4d52-b12e-c0bff6f5c790';
+
+/**
+ * The failure this ticket is about: the node took the transaction, and the
+ * reply never reached us. A response-read timeout, a dropped connection, a
+ * Blockfrost 5xx AFTER the ledger accepted it.
+ */
+const LOST_REPLY = new Error('socket hang up (ECONNRESET) reading submit response');
+
+/** Same shape as the production wallet lock: a promise chain as a mutex. */
+function makeLock() {
+  let chain: Promise<unknown> = Promise.resolve();
+  return function lock<T>(fn: () => Promise<T>): Promise<T> {
+    const next = chain.catch(() => undefined).then(() => fn());
+    chain = next.catch(() => undefined);
+    return next;
+  };
+}
+
+/**
+ * A fake anchor_store + chain whose `submit` honours the write-ahead contract:
+ * it calls `options.onSigned(txHash)` with the hash it is about to submit, then
+ * either returns or throws as the test directs. `throwAfterSigned` is the whole
+ * point — it reproduces "signed, named, reply lost".
+ *
+ * `minted` counts transactions the chain actually produced, so a double-mint is
+ * visible as a length of 2 rather than inferred.
+ */
+function makeHarness(opts: {
+  throwAfterSigned?: boolean;
+  signedHash?: string;
+  seed?: Partial<AnchorSnapshot>;
+  over?: Partial<AnchorSubmissionDeps>;
+} = {}) {
+  const row: AnchorSnapshot = {
+    id: ANCHOR_ID,
+    status: 'pending',
+    transactionHash: undefined,
+    retryCount: 0,
+    metadataLabel: 674,
+    metadataPayload: { documentId: 'doc-1787874883988-04d3ee24' },
+    ...opts.seed,
+  };
+
+  /** Every `updateStatus` payload, in call order. The ORDER is the assertion. */
+  const statusWrites: Array<Record<string, unknown>> = [];
+  const minted: string[] = [];
+  const signedHashes: string[] = [];
+
+  const submit = vi.fn(async (
+    _label: number,
+    _payload: object,
+    options?: { onSigned?: (txHash: string) => Promise<void> },
+  ) => {
+    const txHash = opts.signedHash ?? (minted.length === 0 ? TX_A : TX_B);
+
+    // Write-ahead: the hook runs BEFORE the network is involved.
+    if (options?.onSigned) {
+      signedHashes.push(txHash);
+      await options.onSigned(txHash);
+    }
+
+    if (opts.throwAfterSigned) throw LOST_REPLY;
+
+    minted.push(txHash);
+    return { txHash, fee: 181_825 };
+  });
+
+  const deps: AnchorSubmissionDeps = {
+    getAnchor: vi.fn(async () => ({ ...row })),
+    submit,
+    confirm: vi.fn(async (txHash: string) => ({
+      confirmed: true,
+      blockNumber: 4_609_927,
+      slot: 1,
+      blockHash: 'block-' + txHash.slice(0, 8),
+      confirmations: 1,
+    })),
+    updateStatus: vi.fn(async (_id: string, updates: Record<string, unknown>) => {
+      statusWrites.push(updates);
+      if (typeof updates.status === 'string') row.status = updates.status as AnchorSnapshot['status'];
+      if (typeof updates.transactionHash === 'string') row.transactionHash = updates.transactionHash;
+    }),
+    bumpRetryCount: vi.fn(async () => { row.retryCount += 1; }),
+    scheduleRetry: vi.fn(),
+    log: vi.fn(),
+    withWalletLock: makeLock(),
+    ...opts.over,
+  };
+
+  return { deps, row, statusWrites, minted, signedHashes, submit };
+}
+
+/** The status values written, in call order. */
+const statusSeq = (writes: Array<Record<string, unknown>>) =>
+  writes.map(w => w.status).filter((s): s is string => typeof s === 'string');
+
+describe('KS-726 — the hash is persisted BEFORE the transaction is submitted', () => {
+  it('writes the hash ahead, and the write-ahead lands BEFORE the submitted write', async () => {
+    const h = makeHarness();
+    await createAnchorSubmitter(h.deps)(ANCHOR_ID);
+
+    // The hook fired with the hash the chain went on to accept.
+    expect(h.signedHashes).toEqual([TX_A]);
+
+    const seq = statusSeq(h.statusWrites);
+    expect(seq).toEqual(['submitting', 'submitted', 'confirmed']);
+
+    // Not merely "both present" — 'submitting' must PRECEDE 'submitted', which
+    // is the entire ordering claim of this ticket.
+    expect(seq.indexOf('submitting')).toBeLessThan(seq.indexOf('submitted'));
+
+    // The write-ahead names the transaction, so a crash from here on leaves a
+    // recoverable row rather than an anonymous one.
+    expect(h.statusWrites[0]).toMatchObject({ status: 'submitting', transactionHash: TX_A });
+
+    // Exactly one transaction for one anchor.
+    expect(h.minted).toEqual([TX_A]);
+    expect(h.submit).toHaveBeenCalledTimes(1);
+  });
+});
+
+describe('KS-726 — guard 5: a LOST submit reply must not mint a second transaction', () => {
+  /**
+   * The ticket's own "done when": submit throws AFTER the node accepted (the
+   * response-read-timeout shape), and the anchor still ends up with the correct
+   * hash and exactly ONE transaction. Red on pre-KS-726 code, green after.
+   */
+  it('rests the row in submitting, names the tx, and never submits again', async () => {
+    const h = makeHarness({ throwAfterSigned: true });
+    await createAnchorSubmitter(h.deps)(ANCHOR_ID);
+
+    expect(h.signedHashes).toEqual([TX_A]);
+    expect(h.submit).toHaveBeenCalledTimes(1);
+
+    // The row names the signed transaction and rests in the recoverable state.
+    expect(h.row.status).toBe('submitting');
+    expect(h.row.transactionHash).toBe(TX_A);
+
+    // Guard 5 schedules NO retry — the reconciler owns settling this row — and
+    // (#805 review, note 2) no longer bumps the retry count either: no retry is
+    // coming from this branch, the reconciler's give-up is time-based, so a
+    // bump only spent budget a later front-door re-anchor inherited reduced.
+    expect(h.deps.scheduleRetry).not.toHaveBeenCalled();
+    expect(h.deps.bumpRetryCount).not.toHaveBeenCalled();
+    expect(h.row.retryCount).toBe(0);
+
+    // The error message names the transaction, so an operator reading the row
+    // can find it on chain.
+    const last = h.statusWrites[h.statusWrites.length - 1];
+    expect(String(last.errorMessage)).toContain(TX_A);
+    expect(String(last.errorMessage)).toContain('KS-726');
+  });
+
+  /**
+   * THE ORDERING TEST — the one the branch tests cannot replace.
+   *
+   * Branch tests pass on a WRONG order. #764's review found the 'failed' write
+   * landing first, with the write-ahead check ~25 lines later: the row spent a
+   * real window claiming 'failed' — terminal by construction (KS-535), and
+   * acted on by originate's poller — before settling into 'submitting'.
+   *
+   * The END STATE IS 'submitting' EITHER WAY. So this asserts the CALL
+   * SEQUENCE: `updateStatus` must never be called with 'failed' at all. That is
+   * what goes red when the ordering moves; an end-state assertion passes
+   * straight through the bug.
+   */
+  it('never writes failed at any point — asserted on the call sequence, not the end state', async () => {
+    const h = makeHarness({ throwAfterSigned: true });
+    await createAnchorSubmitter(h.deps)(ANCHOR_ID);
+
+    const seq = statusSeq(h.statusWrites);
+
+    // The sequence assertion — no 'failed' anywhere in it.
+    expect(seq).not.toContain('failed');
+
+    // And the end state, which on its own would NOT catch a mis-ordering.
+    expect(h.row.status).toBe('submitting');
+
+    // Stated exactly: the transient 'failed' flash is what this forbids.
+    expect(h.deps.updateStatus).not.toHaveBeenCalledWith(
+      ANCHOR_ID,
+      expect.objectContaining({ status: 'failed' }),
+    );
+
+    // 'pending' is the other half of the KS-535 retry reset. Its absence is
+    // what proves the row was not sent back round the normal path.
+    expect(seq).not.toContain('pending');
+  });
+});
+
+describe('KS-726 — the catch is ordered by the strength of the fact each branch rests on', () => {
+  /**
+   * Guard 4 (KS-705) rests on a STRONGER fact than guard 5: `deps.submit()`
+   * RETURNED, so the node acknowledged. Its remedy is to re-poll, which is
+   * strictly better than resting in 'submitting'. So when both facts are
+   * available, guard 4 must win.
+   *
+   * Reached by letting submit return normally and making the 'submitted' row
+   * write throw — the #756 window — while the write-ahead has already run.
+   */
+  it('prefers guard 4 (submit returned) over guard 5 (reply lost) when both apply', async () => {
+    const h = makeHarness();
+    let thrown = false;
+    const realUpdate = h.deps.updateStatus;
+    h.deps.updateStatus = vi.fn(async (id: string, updates: Record<string, unknown>) => {
+      if (updates.status === 'submitted' && !thrown) {
+        thrown = true;
+        throw new Error('pool exhausted writing the submitted row');
+      }
+      return realUpdate(id, updates);
+    }) as AnchorSubmissionDeps['updateStatus'];
+
+    await createAnchorSubmitter(h.deps)(ANCHOR_ID);
+
+    // Guard 4's remedy — the transaction is re-polled and CONFIRMED, rather
+    // than the row being left to the reconciler.
+    expect(h.row.status).toBe('confirmed');
+    expect(h.deps.confirm).toHaveBeenCalledWith(TX_A, expect.any(Function));
+
+    // Still exactly one transaction, and no 'failed' at any point.
+    expect(h.minted).toEqual([TX_A]);
+    expect(statusSeq(h.statusWrites)).not.toContain('failed');
+  });
+
+  /**
+   * NEGATIVE CONTROL — the guard is bounded by the real-transaction test, so it
+   * cannot be reached by a fabricated ref.
+   *
+   * This is why `cardano/index.ts` never calls `onSigned` in demo/mock mode:
+   * MockAnchoringProvider returns a BARE 64-hex sha256 that MATCHES
+   * /^[0-9a-f]{64}$/i, so a mock hash written ahead would be indistinguishable
+   * from a real one to this branch. Here the hash is a `mock_tx_` ref, which
+   * fails the test — so guard 5 must NOT fire and the ordinary failure path
+   * must run.
+   *
+   * Without this case, a guard that fired on ANY truthy hash would pass every
+   * other test in this file.
+   */
+  it('does not fire for a fabricated tx ref — falls through to the ordinary failure path', async () => {
+    const h = makeHarness({
+      throwAfterSigned: true,
+      signedHash: 'mock_tx_' + 'a'.repeat(56),
+    });
+    await createAnchorSubmitter(h.deps)(ANCHOR_ID);
+
+    // Guard 5 declined it, so the terminal failure path ran as it always did.
+    expect(statusSeq(h.statusWrites)).toContain('failed');
+    expect(h.deps.scheduleRetry).toHaveBeenCalled();
+  });
+});
+
+describe('KS-726 — a row RESTING in submitting must not be submitted again', () => {
+  /**
+   * The gap the write-ahead itself opens, and it is reachable through the front
+   * door rather than the retry:
+   *
+   * `dbPersistAnchor` returns the EXISTING row's id on a re-anchor of the same
+   * document+network (KS-281/KS-319) and `POST /api/anchors` then calls
+   * `processAnchor` unconditionally (index.ts). A create plus a custody
+   * transfer for one document — the very producer KS-705's header describes —
+   * therefore lands on a row left resting in 'submitting' by guard 5.
+   *
+   * Before KS-726 this could not arise: a lost reply wrote 'failed', resolved
+   * to 'pending', and the retry path owned it. The write-ahead is what makes a
+   * row REST in a state the guards could not read, so `knownChainSubmission`
+   * has to learn the state its own change creates — otherwise the second call
+   * mints a second fee-paying transaction for a document whose first one may
+   * already be in a block.
+   *
+   * Re-polling is the weaker-harm choice on the same asymmetry guard 5 turns
+   * on: the re-poll is bounded, leaves a confirmed row alone, and never writes
+   * 'failed'.
+   */
+  it('re-polls the written-ahead hash instead of minting a second transaction', async () => {
+    const h = makeHarness({
+      seed: { status: 'submitting', transactionHash: TX_A },
+    });
+
+    await createAnchorSubmitter(h.deps)(ANCHOR_ID);
+
+    // The decisive assertion: no new transaction was produced.
+    expect(h.submit).not.toHaveBeenCalled();
+    expect(h.minted).toEqual([]);
+
+    // It re-polled the hash the row already named, and settled it.
+    expect(h.deps.confirm).toHaveBeenCalledWith(TX_A, expect.any(Function));
+    expect(h.row.status).toBe('confirmed');
+    expect(statusSeq(h.statusWrites)).not.toContain('failed');
+  });
+
+  /**
+   * CONTROL for the case above — the same shape with a status the guard should
+   * NOT treat as a known submission. A 'pending' row carrying a stale hash must
+   * still be submitted, or the guard above would be a blanket "never resubmit"
+   * and would strand every retryable anchor.
+   */
+  it('CONTROL — a pending row is still submitted, so the guard is not a blanket refusal', async () => {
+    const h = makeHarness({
+      seed: { status: 'pending', transactionHash: TX_A },
+    });
+
+    await createAnchorSubmitter(h.deps)(ANCHOR_ID);
+
+    expect(h.submit).toHaveBeenCalledTimes(1);
+    expect(h.minted).toEqual([TX_A]);
+  });
+});
+
+describe('KS-726 — a DEFINITIVE node rejection keeps the ordinary retry; only a LOST reply rests in submitting (#805 review, ruled 2026-09-14)', () => {
+  /**
+   * After the write-ahead `writtenAheadTxHash` is set for EVERY real
+   * submission, so a guard 5 keyed on it alone would catch every error thrown
+   * after signing and make the retry path unreachable for the whole class. The
+   * discriminator is #728's `isChainReachableError`: a `status_code` on the
+   * error means the node ANSWERED. A refused transaction is definitively not on
+   * chain and nothing was paid — retrying is safe and free; resting it would
+   * trade a ~15 s recovery for the reconciler's 24 h give-up.
+   *
+   * Every cell here submits through a hook that runs `onSigned(TX_A)` (the
+   * write-ahead lands) and then throws the reply under test.
+   */
+  function throwingSubmit(reply: Error) {
+    return vi.fn(async (_l: number, _p: object, options?: { onSigned?: (h: string) => Promise<void> }) => {
+      if (options?.onSigned) await options.onSigned(TX_A);
+      throw reply;
+    });
+  }
+  const refused = (message: string) => Object.assign(new Error(message), { status_code: 400 });
+
+  it('a 400 the node answered with (ValueNotConservedUTxO) after onSigned → scheduleRetry is called and the row does NOT rest in submitting', async () => {
+    const h = makeHarness({ over: { submit: throwingSubmit(refused('Transaction submission failed: ValueNotConservedUTxO')) } });
+    await createAnchorSubmitter(h.deps)(ANCHOR_ID);
+
+    // The write-ahead DID land (the hook ran) …
+    expect(h.deps.updateStatus).toHaveBeenCalledWith(ANCHOR_ID, expect.objectContaining({ status: 'submitting', transactionHash: TX_A }));
+    // … and guard 5 fell through: the ordinary failed → pending → retry path.
+    expect(h.deps.scheduleRetry).toHaveBeenCalledTimes(1);
+    expect(statusSeq(h.statusWrites)).toEqual(['submitting', 'failed', 'pending']);
+    expect(h.row.status).not.toBe('submitting');
+    // Nothing was re-polled: this reply names no transaction as already in the ledger.
+    expect(h.deps.confirm).not.toHaveBeenCalled();
+  });
+
+  it('CONTROL — the same throw with NO status_code (a lost reply) → guard 5 as today: no retry, the row rests in submitting', async () => {
+    const h = makeHarness({ over: { submit: throwingSubmit(new Error('socket hang up (ECONNRESET) reading submit response')) } });
+    await createAnchorSubmitter(h.deps)(ANCHOR_ID);
+
+    expect(h.deps.scheduleRetry).not.toHaveBeenCalled();
+    expect(h.row.status).toBe('submitting');
+    expect(h.row.transactionHash).toBe(TX_A);
+    expect(statusSeq(h.statusWrites)).not.toContain('failed');
+  });
+
+  /**
+   * "All inputs are spent" is what a node says BOTH when our own earlier
+   * submit already landed (KS-705 — re-poll, never resubmit) AND when someone
+   * else spent our inputs (KS-535 — our transaction can never land). The reply
+   * cannot tell them apart; the chain can. So guard 3 re-polls the hash we just
+   * wrote ahead FIRST, and only when the bounded poll shows it ABSENT is the
+   * rejection definitive and the ordinary retry follows.
+   */
+  it('a 400 "All inputs are spent" after onSigned, the re-poll finds the hash ABSENT → re-polled once, then scheduleRetry, no submitting rest', async () => {
+    const h = makeHarness({
+      over: {
+        submit: throwingSubmit(refused('Transaction submission failed: ConwayMempoolFailure "All inputs are spent"')),
+        confirm: vi.fn(async () => ({ confirmed: false })),
+      },
+    });
+    await createAnchorSubmitter(h.deps)(ANCHOR_ID);
+
+    // The re-poll happened, on the written-ahead hash …
+    expect(h.deps.confirm).toHaveBeenCalledTimes(1);
+    expect((h.deps.confirm as ReturnType<typeof vi.fn>).mock.calls[0][0]).toBe(TX_A);
+    // … found nothing, so the rejection is definitive: retry, and no rest.
+    expect(h.deps.scheduleRetry).toHaveBeenCalledTimes(1);
+    expect(h.row.status).not.toBe('submitting');
+    expect(statusSeq(h.statusWrites)).toEqual(['submitting', 'failed', 'pending']);
+  });
+
+  it('CONTROL — a 400 "already been included" after onSigned → re-polled and confirmed, scheduleRetry NOT called (the hash IS on chain)', async () => {
+    const h = makeHarness({ over: { submit: throwingSubmit(refused('Transaction submission failed: this transaction has already been included')) } });
+    await createAnchorSubmitter(h.deps)(ANCHOR_ID);
+
+    expect(h.deps.confirm).toHaveBeenCalledTimes(1);
+    expect((h.deps.confirm as ReturnType<typeof vi.fn>).mock.calls[0][0]).toBe(TX_A);
+    expect(h.deps.scheduleRetry).not.toHaveBeenCalled();
+    expect(h.row.status).toBe('confirmed');
+    expect(h.row.transactionHash).toBe(TX_A);
+    expect(statusSeq(h.statusWrites)).not.toContain('failed');
+  });
+
+  it('CONTROL — a 400 "All inputs are spent" whose re-poll FINDS the hash → confirmed, scheduleRetry NOT called (the double-mint guard held)', async () => {
+    const h = makeHarness({ over: { submit: throwingSubmit(refused('Transaction submission failed: ConwayMempoolFailure "All inputs are spent"')) } });
+    await createAnchorSubmitter(h.deps)(ANCHOR_ID);
+
+    expect(h.deps.confirm).toHaveBeenCalledTimes(1);
+    expect(h.deps.scheduleRetry).not.toHaveBeenCalled();
+    // never a second transaction (`h.deps.submit`, not `h.submit` — `over` replaced the harness default)
+    expect(h.deps.submit).toHaveBeenCalledTimes(1);
+    expect(h.row.status).toBe('confirmed');
+    expect(statusSeq(h.statusWrites)).not.toContain('failed');
+  });
+
+  it('CONTROL — a 400 "All inputs are spent" whose re-poll THROWS (the chain unreadable) → no retry, the row rests for the reconciler', async () => {
+    const h = makeHarness({
+      over: {
+        submit: throwingSubmit(refused('Transaction submission failed: ConwayMempoolFailure "All inputs are spent"')),
+        confirm: vi.fn(async () => { throw new Error('Blockfrost 503'); }),
+      },
+    });
+    await createAnchorSubmitter(h.deps)(ANCHOR_ID);
+
+    expect(h.deps.confirm).toHaveBeenCalledTimes(1);
+    expect(h.deps.scheduleRetry).not.toHaveBeenCalled();
+    expect(h.row.status).toBe('submitting');
+    expect(statusSeq(h.statusWrites)).not.toContain('failed');
+  });
+});

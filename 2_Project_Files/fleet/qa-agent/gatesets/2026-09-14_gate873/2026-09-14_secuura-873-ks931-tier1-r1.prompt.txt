@@ -1,0 +1,218 @@
+ultrathink
+
+You are the fleet QA agent running ONE TIER 1 ROUND 1 gate over Secuura/Blockchain PR #873 (KS-931, builder s232,
+pane -C, now on #811) at head c624c9a8dd24129dad46cf7a204ae75ecb875dc3 — safeOutboundRequest, the platform's ONE
+outbound-HTTP (SSRF) guard (packages/shared/src/security/ssrf-guard.ts:465), is made to honour its own "returns the
+guard's error rather than throwing it" contract: http.request validates header CONTENT synchronously and threw
+ERR_INVALID_CHAR out of the Promise executor (a REJECTION at the caller) on CRLF / non-latin1 / NUL header values; the
+PR wraps the construction (:517-537, the executor's catch at :534-536 -> done({ok:false, reason:'request_failed'}))
+and the write/end pair (:573-579) and adds four cells (three it.each rows + a control, ks914-shipped-path.test.ts
+:132-160). TIER 1 because every product webhook/HTTP POST goes through this guard (webhooks.ts:450 with no try/catch
+of its own; the m365 loop :1236) and the catch's TAG is the one signal that tells "we refused to send" from "their
+endpoint failed" — a wrong catch either lets a throw escape or turns a security block into a retryable failure.
+
+Read your brief FIRST and in full, then plan:
+/Volumes/DevMASTER/WEDNESDAY/2_Project_Files/fleet/qa-agent/briefs/2026-09-14_secuura-873-ks931-tier1-r1.md
+
+Head (git ls-remote 20:28:06 AEST, the API 20:29:38, both agree; the launcher re-asserts it):
+  #873 c624c9a8dd24129dad46cf7a204ae75ecb875dc3  = refs/pull/873/head = kamilkreiser/ks-931-safeoutboundrequest-can-throw
+       a MERGE commit (--no-ff): parents 7d8a3f0e4 (the reviewed head, 2026-09-06) + 852e1fff7 (develop M45); tree
+       055076544 (= the builder's merge-tree prediction)
+  base M45 852e1fff773bd358170c11334d59496f05fdd8a7 — an ANCESTOR of the head (rev-list --count M45..head = 2);
+  git diff M45 head = exactly the 2 files (+86 -4): ssrf-guard.ts 5a838e0d6 (+42 -4) and ks914-shipped-path.test.ts
+  69706c1ef (+44) — both byte-identical to the reviewed head 7d8a3f0e4; the base blobs a1203248f / 944a5530c are
+  the same at ff5218867, M45 and M46.
+  develop = M46 bc067e3e91821116f3344b2aa5a1d7a5cc968d18 at draft time — NOT an ancestor of the head (M45 + one docs
+  file, docs/KS-926-CHECKS-THAT-CANNOT-FAIL.md); by 20:50 it was M47 b76e8e6e8 (#811's squash, one docs file under
+  docs/archive/, disjoint) and by 21:06 ede711ca9 (five squashes past M46, 6 files, all disjoint — the launcher stays
+  pinned at M46 and its content arm passed every move): merge the develop
+  YOU read onto c624c9a8d in YOUR clone (0 conflicts) and run the packages/shared suite on BOTH the head tree and the
+  develop-merged tree, naming each. develop may have moved further
+  (#805 / #922 / #811 / #943 / #905 / #989 are the live lanes): the launcher judges the move BY CONTENT — if it
+  printed "origin develop MOVED", ls-remote at start and close, merge the then-current develop onto c624c9a8d in
+  your clone and re-derive every count on it (if #922 landed, packages/shared gains its ks256 cells — say so).
+Repo:    /Volumes/DevMASTER/!CODING/Secuura/Blockchain/2_Project_Files  (READ-ONLY — clone by SHA into your own scratch;
+  the builder's worktree worktrees/s232-ks931 is detached at c624c9a8d and s232 is LIVE on #811 — symlink-farm
+  node_modules FROM it or from the main checkout, never into them, never vitest inside them; never trust origin/*
+  inside a --shared clone — pin by SHA)
+
+You are FINDINGS-ONLY. You never fix, never merge, never push, never deploy, never comment, never file, never tick an
+ack box, never `@`.
+
+NEVER run a push, the real pre-push hook, or preflight.sh inside the Secuura checkout or any of its worktrees.
+
+NEVER print a credential value, and never open, read or copy a secrets file (any .env, config/secrets.yml) — a script
+may read AGENTMAIL_API_KEY / GH_TOKEN / LINEAR_API_KEY by NAME from the named .env for the API calls the brief allows,
+and never echoes them. Nothing in this gate needs a credential value on the page. Count, never echo.
+
+NO shared docker stack, no :6882 / :7082 slot, no kintsugi, no demo, NEVER the wallet mnemonic (KS-535 HOLD). This gate
+needs NO container: every leg is in-process (vitest cells, bare https.request probes, loopback servers). Run
+`docker info` ONCE, print its rc on its own line (the drafter read rc 1 — DOWN — at 20:36), never start the daemon,
+and record "a live outbound request from a running service: NOT RUN (no stack)" at the same prominence as the
+findings.
+
+Ten things you must not miss:
+
+1. SCOPE first (brief item 1): exactly the 2 files, numstat 44 0 / 42 4, the blobs as pinned, the head tree 055076544,
+   7d8a3f0e4 an ancestor; webhooks.ts c88eb97db, the originate ks914 test eb655301e (develop's — moved via the
+   sharedModuleMock helper, not this PR's), m365 index.ts 1f3a91d4f, vitest.config.ts 2a226c006, tsconfig.json
+   1fd016cc2, the root lockfile 17d2061b3 and audit-baseline.json 03d1680e3 all = M46's. Say so.
+
+2. THE HEADLINE — THE RED-PROOF AGAINST THE BASE GUARD AND THE BASE COUNT BY YOUR OWN INSTRUMENT (brief item 2):
+   (a) a FULL-tree `git archive ff5218867 | tar -x` export (Peter's method: Blockchain/Dev/node_modules AND
+   packages/shared/node_modules symlinked from your farm; `node ../../node_modules/vitest/vitest.mjs run` from
+   packages/shared) -> the whole suite: SAY WHETHER 787 passed / 41 files OR 784 REPRODUCES (Peter twice and the
+   builder once read 787; the body's first write said 784); (b) the HEAD test file (blob 69706c1ef, diff -q clean)
+   over that export with the base guard a1203248f in place -> `3 failed | 7 passed (10)`: CRLF / non-latin1 / NUL red
+   on a REJECTION (TypeError: Invalid character in header content ["X-Probe"], ERR_INVALID_CHAR, stack at
+   ssrf-guard.ts:492 `const req = mod.request(`), the CONTROL (:149, /deadline/ at 150 ms) GREEN — the control's
+   green is what makes the three reds a proof; (c) the builder's own instrument slip as a CONTROL of the instrument:
+   a packages/shared-ONLY export starves the repo-walking suites (crypto-agility, ks727, ks781, ks860, ks879, ks256,
+   entrypoint-corpus) — predict the SHAPE (fewer files, far under 787), report what you got. FAIL: (b) anything but
+   3|7, the control red, or a red whose message is not the header-content TypeError.
+
+3. THE TAMPER TABLE, SUITES RUNNING (brief item 3): the 10-cell file AND the whole packages/shared suite (839 / 43 at
+   the head tree), prediction + aimed cells before each run, the MULTI-LINE anchor counted by Python str.count (the
+   `done(...)` line alone occurs TWICE, :535 and :578), marker asserted after the edit, restore by whole-file sha256
+   RE-DERIVED from blob 5a838e0d6 (f847a643838a715e...), green again after each; a 0-cell run is INVALID; a load
+   failure is NOT a red. T1 the executor's catch :535-536 -> `throw err;` -> 3|7 (rejections) and 3|836; T1b the
+   done(...) line deleted, `return;` kept -> 3|7 by TIMEOUT (Test timed out in 5000ms — the deadline :560 never arms
+   because construction failed) — a swallow is a hang and the cells catch it; T2 the first catch's tag
+   'request_failed' -> 'blocked' -> 3|7 at :143 (the discriminator MISLABELLED); T3 :471 the literal-layer 'blocked'
+   -> 'request_failed' -> 2|8 (:84 and :95 — a security block turned into a retryable failure); T4 :475 the
+   DNS-layer 'blocked' -> 'request_failed' -> 0 reds in the file AND 0 in the whole suite (every cell is an IP
+   literal; the rebind cells drive assertSafeOutboundUrl, not this function) = an UNPINNED decision point,
+   pre-existing (base :470), a RECORD with G-3 as the regression test — run G-3 under T4: 1 red; T5 the write/end
+   catch :576-579 -> `throw err;` -> 0 reds anywhere (no cell reaches the wrap) — then G-4 under T5: 1 red
+   (ERR_INVALID_ARG_TYPE); T6 inert (a comment line) -> 10 and 839; T7 a syntax error at :534 -> LOAD failure, no
+   `Tests N failed` line. If T1, T1b or T2 red fewer than 3 cells, the shipped cells do not pin what the PR claims —
+   a test-quality finding against the PR.
+
+4. THE GATE'S OWN CELLS (brief item 4) in a scratch vitest file src/__tests__/qa873-gate.test.ts in your clone's
+   packages/shared (the include is src/__tests__/**/*.test.ts; the same vi.mock('https') preamble as the shipped
+   file :37-42 where the guard is driven; quarantine by rename after): G-1 Peter's bare https.request probe with NO
+   repo code on node v24.7.0 (his was v24.18.0 — name both): CRLF / non-latin1 / NUL THROW ERR_INVALID_CHAR, clean
+   RETURNS; G-2 his write/end probe set with NO repo code: lone surrogate / NUL / non-latin1 / CRLF / 1 MB / empty /
+   after destroy() all RETURN, a non-string body (123 as any) THROWS ERR_INVALID_ARG_TYPE — if ANY string-body row
+   throws on v24.7.0 the wrap is LIVE and that is a finding with the row; G-3 the DNS-layer rebind through the
+   SHIPPED function (vi.mock('dns/promises') lookup -> 10.0.0.5 for https://rebind.example.com/x) -> blocked,
+   https.request NOT called, identical at base; G-4 a non-string body through the SHIPPED function
+   ({ body: 123 as any, timeoutMs: 150 }) -> head RESOLVES {ok:false, reason:'request_failed', error:/"chunk"
+   argument/} in well under 150 ms; base REJECTS ERR_INVALID_ARG_TYPE — the ONLY input that reaches the wrap;
+   G-5 the call-site shape in originate JEST (a scratch file beside ks914-deliver-webhook-blocked-vs-failed.test.ts
+   with its sharedModuleMock preamble :21-38; DATABASE_URL throwaway in that command's env only): (i) the mock
+   REJECTS with the header-content TypeError -> deliverWebhook REJECTS (no try/catch at webhooks.ts:450) — the
+   pre-fix reach: /:id/test's outer catch :390-391 -> 500 INTERNAL_ERROR echoing err.message; dispatchEvent's
+   :543-545 -> returns 0 and the fan-out to later subscribers is ABORTED; (ii) the mock resolves
+   {ok:false, reason:'request_failed', error:'Invalid character...'} -> {status:0, success:false, error} +
+   logger.warn('webhook delivery failed'), NOT the `blocked by SSRF guard:` prefix. predicted-by: drafter on every row.
+
+5. SUITES (brief item 5), the tree named beside every count: packages/shared at the base export 787/41; at the
+   reviewed head 7d8a3f0e4 (a second export) 791/41; at the head tree 839/43; at develop M46 alone (a third export,
+   the control) 835/43 — nobody has read that number, predicted-by: drafter; at the M46-merged tree 839/43 (+ #922's
+   cells if it landed); ks914-shipped-path.test.ts 6/6 at base, 10/10 at head and merged; originate jest
+   ks914-deliver-webhook-blocked-vs-failed.test.ts 4/4 (develop's file — say so); npm run build --workspace
+   packages/shared rc 0; tsc --noEmit -p packages/shared/tsconfig.json rc 0 AND what that proves — tsconfig
+   EXCLUDES src/__tests__ (KS-933 -> the KS-1000 class), so as a PROBE type-check the shipped test file with a
+   scratch tsconfig / explicit flags and report rc + the first error (predicted rc 0; a non-zero outside the +44
+   lines is a KS-1000 Record, not a #873 finding); eslint on the two files 0 errors / 1 warning (prefer-const
+   `deadline` :488 at head, :483 at base — pre-existing; confirm both). The two sibling guard suites
+   (ssrf-guard.test.ts, ks914-pinned-address.test.ts) stay green — name their counts.
+
+6. PETER'S write/end OBSERVATION — LIVE DEFECT OR RECORD (brief item 6; the gate's finding, not the builder's scope):
+   the wrap :573-579 "looks unreachable given the declared type"; the comment's two reasons (:571-572 — an
+   unencodable body; a socket destroyed by the deadline) are both untrue on Node 24 (bodies are utf-8 ENCODED;
+   write/end after destroy() return; the deadline is async and cannot fire inside the synchronous :560-:579 run).
+   Decide from G-2 + G-4 + T5 and STATE IT with its evidence class: the drafter predicts a RECORD, severity
+   informational (documentation) — the wrap is inert for every string body, reachable only by a type violation
+   where it does turn a rejection into the tagged failure; no runtime defect; SHIPS-WITH; the comment polish is the
+   owner's. Upgrade to a finding with severity only if a string-body row THROWS on v24.7.0. (The commission says
+   res.write/end; the lines are req.write/req.end :574-575 — a drafter-side correction.)
+
+7. REACH (brief item 7): the guard's callers at head — webhooks.ts:450 (headers :454-459 are constants plus
+   x-secuura-event = payload.type and x-secuura-delivery = payload.id; /:id/test :357 hard-codes 'test.ping' :373;
+   dispatchEvent :503 takes eventType from a caller and has 0 product call sites — `git grep -n -i 'dispatchEvent('
+   <head> -- Blockchain/Dev/services` = 1 hit, the definition, the positive control; re-run and quote it) and
+   m365-integration/src/index.ts:1236 (Content-Type only; inside its own try/catch :1263). The throw is LATENT on
+   every live path (KS-931's own reachability paragraph; Peter agrees); G-5 measures the BOUND on the reach. State
+   it as READ ONLY + MEASURED (G-5); severity for the pre-fix shape = the ticket's; not a grade on the fix.
+
+8. RECORDS (brief item 8): (a) the DNS-layer tag inside safeOutboundRequest is pinned by no cell (T4/G-3) —
+   pre-existing since KS-914, regression test G-3 described in prose; (b) KS-933 -> KS-1000 class: packages/shared
+   tsconfig excludes src/__tests__, so "tsc rc 0" says nothing about the +44 test lines — cite, do not re-file;
+   (c) the prefer-const warning on `deadline` is pre-existing; (d) the m365 loop's own try/catch (:1263) is now
+   redundant belt-and-braces — note; (e) Peter has NOT approved — no review object exists, his two ISSUE COMMENTS
+   5602055926 + 5602110186 hold approval on the body + the counts, both answered in 5662500697 — state, touch
+   nothing; (f) /:id/test's 500 echoes err.message (:391; the same pattern at 7 sites in the router) — pre-existing,
+   a Record for Wednesday; (g) 839 = 791 + develop's ks764 + ks780 suites, and the originate ks914 test is develop's
+   eb655301e — say so beside the counts so nobody reads the delta as this PR's.
+
+9. DELIVERED vs COMMISSIONED (brief item 9): KS-931's fix shape (a) delivered at :517-537 (+ :573-579); its
+   red-proof spec delivered as :132-160; Peter's three items answered by number in 5662500697; the s232 commission's
+   ITEM 1 vs what landed (the --no-ff M45 merge-in with merge-tree 055076544 = the real tree, the counts by Peter's
+   method, the red-proof, one tamper, the PR comment, the KS-931 comment e96239ac, the body PATCH with Peter's lines
+   1-104 byte-identical, the fast-forward push 7d8a3f0e4..c624c9a8d, the two slips the builder named itself — the
+   packages/shared-only first export and the brief's F9 wording). Read the PR body's Test Evidence block and report
+   any claim your measurement contradicts. #873 attaches to KS-931 only (re-read the ticket's attachments and say so).
+
+10. §2a LEGITIMATE SHAPES: the ordinary webhook POST (public https, ASCII headers, a JSON body — to a loopback server
+    via requestMock.mockImplementationOnce, asserting the body ARRIVES intact), the empty body, the 1 MB / non-latin1
+    / NUL / CRLF / lone-surrogate STRING bodies, the unanswering and the dripping destination, the private / plaintext
+    / rebind URLs, the explicit port + query string — every one reads IDENTICALLY at head and at base; the ONE shape
+    that changes is a header value with CRLF / non-latin1 / NUL (head resolves request_failed + /Invalid character/,
+    base rejects); the non-string body is a TYPE violation listed so the boundary is on the page. A legitimate shape
+    refused or changed at head only is worse than the defect. Write NOT-TESTED.written-first.md BEFORE any run.
+
+Your tool shell's grep may be a function: use /usr/bin/grep -F -i with a same-file positive control; multi-line anchors
+by Python str.count. Never cd in your own tool calls; the pre-tool hook refuses `git worktree` in the Secuura checkout —
+clone into your scratch and run write verbs THERE. A REAL checkout of the whole Blockchain/Dev, not a symlink farm of
+the source (the repo-walking guard suites read services/ and scripts/; the ks860 walk skips symlinked directories);
+farm node_modules only. require.resolve('@secuura/shared') from inside your clone's services must land inside your
+clone's farm — print it once. packages/shared is VITEST 4.1.10 (npx vitest run, never watch; cwd =
+<clone>/Blockchain/Dev/packages/shared; the vitest.config.ts alias runs the WORKING TREE, not dist/); originate is
+JEST 29 (npx jest, cwd services/originate, DATABASE_URL throwaway in that command's env only — nothing connects); run
+suites solo. /bin/bash here is 3.2 — write runners in Python. zsh: no PIPESTATUS (`cmd > out 2>&1; rc=$?`), no timeout
+on macOS. The suites run at whatever load exists — name the load beside a slow count (KS-1155: the packages/shared
+walk cells can exceed 5 s; the deadline cells at :211/:224 are timing cells — re-run once under load, never a
+--testTimeout in the tree). The three it.each rows and the control use timeoutMs 150 against 203.0.113.7 — if your
+host answers TEST-NET-3 with an immediate ENETUNREACH the control's /deadline/ match fails on the HOST, not the PR:
+say so with the error text.
+Quote the Secuura checkout's porcelain count, .git/config sha256, for-each-ref count, .git/worktrees count, origin
+develop SHA, refs/pull/873/head and the branch at start, mid and close as THREE timestamped readings; they must match
+on the head (name any ref another seat moved — #805 cd5e62e96 / #811 / #922 / #943 / #905 / #989 moving is EXPECTED
+and disjoint; the head tree does not change; if refs/pull/873/head moves, STOP — the brief is about a different SHA).
+Never `rm`: fresh mktemp -d per attempt (the exports of ff5218867, 7d8a3f0e4 and M46 each in their own); quarantine
+probes and scratch tests by rename. No container is created; never touch a secuura-* container.
+Do no memory maintenance of your own project's memory store inside this session.
+
+Report FOUND / TESTED / HOW, with controls: the scope; the base count by Peter's method (787 or 784) with the
+instrument control; the red-proof against the base guard (3|7, the error class, the control green); the tamper table
+(cells-run beside every colour, the decisive assertion line for each red, predicted-by on every row, T4 and T5 with
+their 0-red result AND the G-3 / G-4 cells that red under them); the gate's own cells G-1..G-5 with the Node version
+on every probe row; the suites with the tree named beside every count; Peter's write/end observation decided (LIVE
+DEFECT with severity, or RECORD) with its evidence class; the reach as READ + measured; the Records (8a-8g);
+DELIVERED-vs-COMMISSIONED; and what you did NOT test at the same prominence as the findings (`docker info` rc on its
+own line; the four platform suites by path; a live outbound request from a running service; a multi-address DNS
+answer; the m365 route end-to-end). Client-facing communication = ticket comments only; the extranet is not a channel;
+anything needing a push goes to Wednesday as an escalation candidate for Kam's WhatsApp. Handovers to Peter/Stuart are
+test blocks, never a list of PRs. Never delete; cleanup means quarantine.
+Verdict: ONE line — GO, GO WITH FINDINGS, or NO GO — on c624c9a8dd24129dad46cf7a204ae75ecb875dc3, as the delta over
+M45 AND as the merged tree on the develop you read (name it). Say plainly which base count reproduced and the +4;
+that the three new cells red against the base guard and green at head with the control green in both; which tampers
+red as predicted and that T4/T5 red nothing (the two unpinned points, with G-3/G-4 closing each); whether Peter's
+write/end observation is a live defect or a record; the reach as measured; and what was NOT tested. Give the merge
+seat its ADDENDUM line: "squash c624c9a8d onto develop (any order — file-disjoint from every open lane PR; #873
+attaches to KS-931 only); equality targets ssrf-guard.ts 5a838e0d6 / ks914-shipped-path.test.ts 69706c1ef;
+packages/shared 835/43 -> 839/43 on develop (plus #922's cells if it landed first); originate unchanged; KS-931 ->
+Done at the merge seat's hand after the GO (Closes KS-931 is in the body); the ack boxes stay Wednesday's; Records:
+the DNS-layer tag unpinned (T4/G-3), the KS-1000 tsconfig class, the write/end comment polish, the m365 redundant
+catch, the /:id/test err.message echo".
+
+MAIL YOUR VERDICT to wednesday-agent@agentmail.to when the pass is complete, using
+the project's send_brief.sh. Your pane holds ~19 lines of alternate screen with no
+scrollback, so a verdict that stays in the pane is one pane-close from being lost --
+this is not a formality, it is the only durable copy; the verdict MAIL is the wait signal. Subject:
+[QA -> Wednesday] TIER 1 GATE #873 (KS-931) c624c9a8d — <VERDICT>
+(The QA project has no send_brief.sh of its own — the brief's VERDICT DESTINATION names the path that worked today:
+the AgentMail API from coagent@agentmail.to, AGENTMAIL_API_KEY by NAME from Wednesday's .env, never echoed. Confirm
+the API answered 2xx and quote the message id in your final pane line. The MAIL is the end state.)

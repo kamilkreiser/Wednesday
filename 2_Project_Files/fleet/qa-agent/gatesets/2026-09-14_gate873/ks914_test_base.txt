@@ -1,0 +1,182 @@
+/**
+ * KS-914 A-2 — the cells that bind the SHIPPED path.
+ *
+ * The first round tested `pinnedLookup` only. A reviewer stripped `lookup:`
+ * from BOTH agents inside `safeOutboundRequest`, left `pinnedLookup` untouched,
+ * and the repo answered 778 passed / 0 failed — the pinning was gone from the
+ * only path that ships and nothing noticed. These cells close that: they assert
+ * the agent actually handed to `https.request` carries a lookup answering with
+ * the validated address, and they red under exactly that tamper.
+ *
+ * WHY `https` IS MOCKED HERE AND NOT IN THE SIBLING FILE: the guard refuses
+ * plaintext (`url must use https:// — payloads are not delivered over
+ * plaintext HTTP`), so every URL reaching `safeOutboundRequest` is https and
+ * the module takes its `https` branch. `vi.spyOn(https, 'request')` cannot work
+ * on an ESM namespace object — it throws `Cannot redefine property: request` —
+ * so the module registry is the only interception point. The sibling file keeps
+ * real `http` for its socket-level cells, which is why this is a separate file
+ * rather than a mock bolted onto that one.
+ *
+ * NO TEST-ONLY HOLE IN THE GUARD. The hosts below are IP literals from
+ * TEST-NET-3 (203.0.113.0/24, RFC 5737), which `resolvePublicAddresses` returns
+ * without touching DNS and `classifyIPv4` passes — measured, not assumed;
+ * 192.0.2.0/24 is explicitly refused as a documentation range while
+ * 203.0.113.0/24 is not. So these cells need no network, no DNS and no
+ * weakening of the classifier.
+ *
+ * WHAT THEY DO NOT PROVE: that the pinned address is `resolved.addresses[0]`
+ * out of SEVERAL. An IP literal yields exactly one address; a multi-address
+ * answer needs real DNS. Stated rather than glossed.
+ */
+
+import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
+import * as https from 'https';
+import * as http from 'http';
+import type { AddressInfo } from 'net';
+
+vi.mock('https', async (importOriginal) => {
+  const actual = await importOriginal<typeof import('https')>();
+  return { ...actual, default: actual, request: vi.fn(actual.request) };
+});
+
+const { safeOutboundRequest } = await import('../security/ssrf-guard');
+
+const requestMock = https.request as unknown as ReturnType<typeof vi.fn>;
+
+const servers: http.Server[] = [];
+
+describe('KS-914 safeOutboundRequest — the shipped path', () => {
+  beforeEach(() => {
+    requestMock.mockClear();
+  });
+
+  afterEach(() => {
+    while (servers.length) servers.pop()?.close();
+  });
+
+  it('hands https.request an agent whose lookup answers with the validated address', async () => {
+    // 203.0.113.7 is unroutable, so this never connects; the deadline ends it.
+    // The assertion is about what was handed over, not about the reply.
+    const pending = safeOutboundRequest('https://203.0.113.7/', { timeoutMs: 200 });
+
+    // `safeOutboundRequest` awaits `resolvePublicAddresses` before it calls
+    // `https.request`, so asserting synchronously here reads 0 calls and says
+    // nothing about the wiring. Wait for the call rather than for a tick count.
+    await vi.waitFor(() => expect(requestMock).toHaveBeenCalledTimes(1));
+    const opts = requestMock.mock.calls[0][0] as any;
+
+    const agent = opts.agent;
+    expect(agent).toBeDefined();
+
+    const lookupFn = agent?.options?.lookup;
+    expect(typeof lookupFn).toBe('function');
+
+    // It must ignore the hostname it is asked about — that is what defeats a
+    // rebind — and answer with the address the classifier passed.
+    const answered = await new Promise<unknown>((resolve) => {
+      lookupFn('somewhere-else.invalid', {}, (_e: unknown, addr: unknown) => resolve(addr));
+    });
+    expect(answered).toBe('203.0.113.7');
+
+    await pending;
+  });
+
+  it('a refusal by the guard is `blocked`, and NO socket is opened', async () => {
+    const result = await safeOutboundRequest('https://10.0.0.1/');
+    expect(result.ok).toBe(false);
+    if (!result.ok) {
+      expect(result.reason).toBe('blocked');
+      expect(result.error).toMatch(/RFC1918/);
+    }
+    // THE CONTROL that gives `blocked` its meaning: nothing left the process.
+    expect(requestMock).not.toHaveBeenCalled();
+  });
+
+  it('plaintext is refused as `blocked` by the literal check, before any resolution', async () => {
+    const result = await safeOutboundRequest('http://203.0.113.7/');
+    expect(result.ok).toBe(false);
+    if (!result.ok) {
+      expect(result.reason).toBe('blocked');
+      // Pinned to ITS rule: without this the cell passes on any refusal, and
+      // an https-only guard makes that mistake very easy to make.
+      expect(result.error).toMatch(/must use https/);
+    }
+    expect(requestMock).not.toHaveBeenCalled();
+  });
+
+  it('a destination that will not answer is `request_failed`, NOT `blocked`', async () => {
+    const result = await safeOutboundRequest('https://203.0.113.7/', { timeoutMs: 200 });
+    expect(result.ok).toBe(false);
+    if (!result.ok) {
+      expect(result.reason).toBe('request_failed');
+      expect(result.error).toMatch(/deadline|ECONN|EHOSTUNREACH|ENETUNREACH|ETIMEDOUT/);
+    }
+    // and the socket WAS attempted — the other half of the distinction
+    expect(requestMock).toHaveBeenCalledTimes(1);
+  });
+
+  /**
+   * KS-914 A-1 — the deadline is TOTAL, not socket-idle.
+   *
+   * `req.setTimeout` is not armed until a socket is assigned, so an unroutable
+   * destination was bounded by nothing: the gate measured a declared 3000 ms
+   * against an ELAPSED 75014 ms. 203.0.113.7 never yields a socket, which is
+   * exactly the case the old timer could not reach.
+   */
+  /**
+   * KS-914 A-1, the gate's SECOND case: the drain.
+   *
+   * A server dripping one byte at a time resets a socket-idle timer on every
+   * byte, so `req.setTimeout` never fires — and the response handler drains the
+   * body and waits for `end` for a body no caller reads, so the request is held
+   * open for as long as the server cares to drip. The total deadline is what
+   * bounds it.
+   *
+   * The transport is redirected ONCE at a real loopback drip server, so the
+   * function under test is the shipped `safeOutboundRequest` — its deadline,
+   * its drain, its `done()` — driven by a genuinely dripping socket. The
+   * classifier is untouched: the URL is still a public TEST-NET-3 literal.
+   */
+  it('bounds a server that drips bytes forever (the drain case)', async () => {
+    const ticks: ReturnType<typeof setInterval>[] = [];
+    const server = http.createServer((_req, res) => {
+      res.writeHead(200, { 'Content-Type': 'text/plain' });
+      ticks.push(setInterval(() => res.write('x'), 40));
+    });
+    servers.push(server);
+    await new Promise<void>((resolve) => server.listen(0, '127.0.0.1', resolve));
+    const port = (server.address() as AddressInfo).port;
+
+    requestMock.mockImplementationOnce((opts: any, cb: any) =>
+      http.request({ hostname: '127.0.0.1', port, path: opts.path, method: opts.method }, cb),
+    );
+
+    const started = Date.now();
+    const result = await safeOutboundRequest('https://203.0.113.7/', { timeoutMs: 400 });
+    const elapsed = Date.now() - started;
+
+    ticks.forEach(clearInterval);
+
+    expect(result.ok).toBe(false);
+    if (!result.ok) {
+      expect(result.reason).toBe('request_failed');
+      expect(result.error).toMatch(/deadline/);
+    }
+    // The drip never stops on its own: without a total deadline this cell runs
+    // until vitest kills it.
+    expect(elapsed).toBeLessThan(3000);
+  }, 30_000);
+
+  it('bounds an unroutable destination by its declared deadline', async () => {
+    const started = Date.now();
+    const result = await safeOutboundRequest('https://203.0.113.7/', { timeoutMs: 400 });
+    const elapsed = Date.now() - started;
+
+    expect(result.ok).toBe(false);
+    if (!result.ok) expect(result.reason).toBe('request_failed');
+    // A generous ceiling: the claim is "bounded at all", not a tight timing
+    // one. The base ran 25x its declared bound; anything near the declaration
+    // falsifies that shape. Kept well under the connect timeout of any OS.
+    expect(elapsed).toBeLessThan(5000);
+  }, 30_000);
+});

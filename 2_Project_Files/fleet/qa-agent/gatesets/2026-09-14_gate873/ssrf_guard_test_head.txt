@@ -1,0 +1,251 @@
+/**
+ * KS-487 B-1 + B-2 — SSRF guard.
+ *
+ * These cases are written as red-proofs of specific defects, not as coverage:
+ *
+ *  - B-1: m365's Teams webhook accepted any `z.string().url()`, so plain
+ *    `http://169.254.169.254/` (Azure IMDS) was storable and fetchable.
+ *  - B-2: originate validated only at registration and resolved no DNS, so a
+ *    public hostname pointing at an internal address walked through.
+ *  - Found while lifting the code: originate's ENTIRE IPv6 branch was inert.
+ *    `URL.hostname` keeps the brackets (`[::1]`), so `host === '::1'` and
+ *    `host.startsWith('fd')` could never match. `startsWith('fe80')` also missed
+ *    fe90::/fea0::/feb0::, which are equally link-local.
+ */
+
+import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
+
+const lookupMock = vi.fn();
+vi.mock('dns/promises', () => ({ lookup: (...args: unknown[]) => lookupMock(...args) }));
+
+import {
+  assertSafeOutboundUrl,
+  assertResolvedHostPublic,
+  checkUrlLiteral,
+  classifyIPv4,
+  classifyIPv6,
+} from '../security/ssrf-guard';
+
+const publicAddr = [{ address: '93.184.216.34', family: 4 }];
+
+beforeEach(() => {
+  lookupMock.mockReset();
+  lookupMock.mockResolvedValue(publicAddr);
+  delete process.env.WEBHOOK_URL_ALLOWLIST;
+});
+
+afterEach(() => {
+  delete process.env.WEBHOOK_URL_ALLOWLIST;
+});
+
+describe('checkUrlLiteral — scheme', () => {
+  it('rejects plaintext http (B-1: z.string().url() accepted it)', () => {
+    const r = checkUrlLiteral('http://hooks.example.com/abc');
+    expect(r.ok).toBe(false);
+    expect(r.ok === false && r.error).toMatch(/https/);
+  });
+
+  it('accepts http only when explicitly opted in', () => {
+    expect(checkUrlLiteral('http://hooks.example.com/abc', { allowHttp: true }).ok).toBe(true);
+  });
+
+  it('rejects non-http schemes even with allowHttp', () => {
+    expect(checkUrlLiteral('file:///etc/passwd', { allowHttp: true }).ok).toBe(false);
+    expect(checkUrlLiteral('gopher://x.example.com/', { allowHttp: true }).ok).toBe(false);
+  });
+
+  it('rejects a non-string, an empty string and a relative URL', () => {
+    expect(checkUrlLiteral(undefined).ok).toBe(false);
+    expect(checkUrlLiteral('   ').ok).toBe(false);
+    expect(checkUrlLiteral('/relative/path').ok).toBe(false);
+  });
+});
+
+describe('checkUrlLiteral — IPv4 literals', () => {
+  it.each([
+    ['https://169.254.169.254/metadata', 'cloud metadata'],
+    ['https://127.0.0.1/x', 'loopback'],
+    ['https://10.1.2.3/x', 'RFC1918 10/8'],
+    ['https://172.16.0.1/x', 'RFC1918 172.16/12'],
+    ['https://172.31.255.255/x', 'RFC1918 172.16/12 upper bound'],
+    ['https://192.168.1.1/x', 'RFC1918 192.168/16'],
+    ['https://0.0.0.0/x', 'unspecified'],
+    ['https://100.64.0.1/x', 'CGNAT'],
+    ['https://198.18.0.1/x', 'benchmarking'],
+    ['https://224.0.0.1/x', 'multicast'],
+    ['https://255.255.255.255/x', 'broadcast'],
+  ])('rejects %s (%s)', (url) => {
+    expect(checkUrlLiteral(url).ok).toBe(false);
+  });
+
+  it('accepts a public IPv4 literal', () => {
+    expect(checkUrlLiteral('https://93.184.216.34/hook').ok).toBe(true);
+  });
+
+  it('allows 172.15 and 172.32, which are NOT in 172.16/12', () => {
+    expect(checkUrlLiteral('https://172.15.0.1/x').ok).toBe(true);
+    expect(checkUrlLiteral('https://172.32.0.1/x').ok).toBe(true);
+  });
+});
+
+describe('checkUrlLiteral — alternate IPv4 spellings (WHATWG normalisation)', () => {
+  // Pins the behaviour the guard depends on: the URL parser rewrites these to
+  // dotted-quad before we ever see them. If a runtime ever stopped doing that,
+  // the dotted-quad predicates would silently stop covering these forms.
+  it.each([
+    'https://2130706433/x', // decimal 127.0.0.1
+    'https://0x7f000001/x', // hex 127.0.0.1
+    'https://127.1/x', // short form 127.0.0.1
+    'https://0/x', // 0.0.0.0
+  ])('rejects %s', (url) => {
+    expect(checkUrlLiteral(url).ok).toBe(false);
+  });
+});
+
+describe('checkUrlLiteral — IPv6 literals (the branch that was inert)', () => {
+  it.each([
+    ['https://[::1]/x', 'loopback — old code compared against an unbracketed "::1"'],
+    ['https://[::]/x', 'unspecified'],
+    ['https://[fd00::1]/x', 'unique-local — old code used startsWith on a bracketed host'],
+    ['https://[fc00::1]/x', 'unique-local'],
+    ['https://[fe80::1]/x', 'link-local'],
+    ['https://[fe90::1]/x', 'link-local — startsWith("fe80") missed this'],
+    ['https://[feb0::1]/x', 'link-local — startsWith("fe80") missed this'],
+    ['https://[ff02::1]/x', 'multicast'],
+    ['https://[::ffff:127.0.0.1]/x', 'IPv4-mapped loopback'],
+    ['https://[::ffff:169.254.169.254]/x', 'IPv4-mapped metadata service'],
+    ['https://[64:ff9b::10.0.0.1]/x', 'NAT64-wrapped RFC1918'],
+  ])('rejects %s (%s)', (url) => {
+    expect(checkUrlLiteral(url).ok).toBe(false);
+  });
+
+  it('accepts a public IPv6 literal', () => {
+    expect(checkUrlLiteral('https://[2606:2800:220:1:248:1893:25c8:1946]/x').ok).toBe(true);
+  });
+});
+
+describe('checkUrlLiteral — hostnames', () => {
+  it.each([
+    ['https://localhost/x', 'localhost'],
+    ['https://localhost./x', 'trailing dot — string equality alone misses this'],
+    ['https://api.localhost/x', 'localhost subdomain'],
+    ['https://postgres.internal/x', '.internal'],
+    ['https://svc.internal.example/x', '.internal. infix'],
+    ['https://redis.svc.cluster.local/x', 'cluster-internal'],
+    ['https://printer.local/x', 'mDNS'],
+    ['https://secuura-postgres/x', 'single-label container hostname'],
+  ])('rejects %s (%s)', (url) => {
+    expect(checkUrlLiteral(url).ok).toBe(false);
+  });
+
+  it('accepts an ordinary public hostname', () => {
+    expect(checkUrlLiteral('https://hooks.example.com/services/abc').ok).toBe(true);
+  });
+});
+
+describe('checkUrlLiteral — allowlist', () => {
+  it('restricts to suffixes when the env var is set', () => {
+    process.env.WEBHOOK_URL_ALLOWLIST = 'example.com, office.com';
+    expect(checkUrlLiteral('https://hooks.example.com/x').ok).toBe(true);
+    expect(checkUrlLiteral('https://example.com/x').ok).toBe(true);
+    expect(checkUrlLiteral('https://evil.net/x').ok).toBe(false);
+  });
+
+  it('is inert when unset or empty', () => {
+    process.env.WEBHOOK_URL_ALLOWLIST = '   ';
+    expect(checkUrlLiteral('https://anything.example.org/x').ok).toBe(true);
+  });
+
+  it('does not let a suffix match a lookalike domain', () => {
+    process.env.WEBHOOK_URL_ALLOWLIST = 'example.com';
+    expect(checkUrlLiteral('https://notexample.com/x').ok).toBe(false);
+  });
+});
+
+describe('assertResolvedHostPublic — B-2, the check that did not exist', () => {
+  it('rejects a public hostname that resolves to an internal address', async () => {
+    lookupMock.mockResolvedValue([{ address: '10.0.0.5', family: 4 }]);
+    const reason = await assertResolvedHostPublic('totally-legit.example.com');
+    expect(reason).toMatch(/10\.0\.0\.5/);
+    expect(reason).toMatch(/RFC1918/);
+  });
+
+  it('rejects a hostname resolving to the cloud metadata service', async () => {
+    lookupMock.mockResolvedValue([{ address: '169.254.169.254', family: 4 }]);
+    expect(await assertResolvedHostPublic('metadata.example.com')).toMatch(/metadata service/);
+  });
+
+  it('rejects when ANY of several records is internal', async () => {
+    lookupMock.mockResolvedValue([
+      { address: '93.184.216.34', family: 4 },
+      { address: '192.168.10.10', family: 4 },
+    ]);
+    expect(await assertResolvedHostPublic('multi.example.com')).toMatch(/192\.168\.10\.10/);
+  });
+
+  it('rejects a hostname resolving to an internal IPv6 address', async () => {
+    lookupMock.mockResolvedValue([{ address: 'fd00::5', family: 6 }]);
+    expect(await assertResolvedHostPublic('v6.example.com')).toMatch(/unique-local/);
+  });
+
+  it('fails CLOSED when resolution errors', async () => {
+    lookupMock.mockRejectedValue(new Error('ENOTFOUND'));
+    expect(await assertResolvedHostPublic('nope.example.com')).toMatch(/refusing to contact/);
+  });
+
+  it('fails closed when resolution returns nothing', async () => {
+    lookupMock.mockResolvedValue([]);
+    expect(await assertResolvedHostPublic('empty.example.com')).toMatch(/no addresses/);
+  });
+
+  it('passes a hostname that resolves entirely to public addresses', async () => {
+    expect(await assertResolvedHostPublic('hooks.example.com')).toBeNull();
+  });
+
+  it('does not resolve an IP literal, it classifies it directly', async () => {
+    expect(await assertResolvedHostPublic('93.184.216.34')).toBeNull();
+    expect(await assertResolvedHostPublic('[::1]')).toMatch(/loopback/);
+    expect(lookupMock).not.toHaveBeenCalled();
+  });
+});
+
+describe('assertSafeOutboundUrl — both layers', () => {
+  it('accepts a public https URL resolving publicly', async () => {
+    const r = await assertSafeOutboundUrl('https://hooks.example.com/services/abc');
+    expect(r.ok).toBe(true);
+  });
+
+  it('short-circuits on the literal check without hitting DNS', async () => {
+    const r = await assertSafeOutboundUrl('http://169.254.169.254/latest/meta-data/');
+    expect(r.ok).toBe(false);
+    expect(lookupMock).not.toHaveBeenCalled();
+  });
+
+  it('catches the rebind shape: literal-clean host, internal A record', async () => {
+    lookupMock.mockResolvedValue([{ address: '127.0.0.1', family: 4 }]);
+    const r = await assertSafeOutboundUrl('https://rebind.example.com/x');
+    expect(r.ok).toBe(false);
+    expect(r.ok === false && r.error).toMatch(/127\.0\.0\.1/);
+  });
+
+  it('normalises the URL it returns', async () => {
+    const r = await assertSafeOutboundUrl('  https://hooks.example.com/a?b=1  ');
+    expect(r.ok && r.url).toBe('https://hooks.example.com/a?b=1');
+  });
+});
+
+describe('classifiers', () => {
+  it('classifyIPv4 returns null only for public addresses', () => {
+    expect(classifyIPv4('93.184.216.34')).toBeNull();
+    expect(classifyIPv4('10.0.0.1')).not.toBeNull();
+    expect(classifyIPv4('999.1.1.1')).toMatch(/malformed/);
+    expect(classifyIPv4('not-an-ip')).toMatch(/not a dotted-quad/);
+  });
+
+  it('classifyIPv6 expands correctly', () => {
+    expect(classifyIPv6('2606:2800:220:1:248:1893:25c8:1946')).toBeNull();
+    expect(classifyIPv6('::1')).toMatch(/loopback/);
+    expect(classifyIPv6('::ffff:10.0.0.1')).toMatch(/RFC1918/);
+    expect(classifyIPv6('garbage::::1')).toMatch(/malformed/);
+  });
+});

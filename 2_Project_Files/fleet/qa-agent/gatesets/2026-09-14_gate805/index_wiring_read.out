@@ -1,0 +1,115 @@
+=== index.ts: createAnchorSubmitter wiring ===
+26:  waitForConfirmation,
+39:import { createAnchorSubmitter, withWalletLock } from './anchorSubmission';
+114:   * KS-726 adds 'submitting': the transaction is signed and its deterministic
+121:  status: 'pending' | 'submitting' | 'submitted' | 'confirmed' | 'failed';
+606:    // KS-726 (#805 review F1): the query above admits 'submitting' rows, whose
+655:          -- KS-726: 'submitting' included. The row carries a REAL, locally
+658:          -- in 'submitting' (the state the failure path now leaves behind)
+675:          WHERE LOWER(content_hash) = $1 AND status IN ('submitting','submitted','confirmed')
+841:    processBatchAnchor(batchId, anchorIds);
+1269:  // KS-726: 'submitting' gets its own counter. Without a case in the switch
+1274:  let pending = 0, submitting = 0, submitted = 0, confirmed = 0, failed = 0;
+1286:          case 'submitting': submitting = cnt; break;
+1301:      stats: { pending, submitting, submitted, confirmed, failed },
+1518:const REAL_TX_64HEX_RETRY = /^[0-9a-f]{64}$/i;
+1687:const submitAnchorToChain = createAnchorSubmitter({
+1706:  confirm: (txHash, onStatusUpdate) => waitForConfirmation(txHash, 30, 10_000, 60_000, onStatusUpdate),
+1708:  bumpRetryCount: async (anchorId) => {
+1713:  scheduleRetry: (anchorId, delayMs) => { setTimeout(() => { processAnchor(anchorId); }, delayMs); },
+1732:    await submitAnchorToChain(anchorId);
+1780:async function processBatchAnchor(batchId: string, anchorIds: string[]) {
+1813:    let batchWrittenAheadTxHash: string | undefined;
+1825:      // Only the constituent ANCHOR rows move to 'submitting'; the batch row is
+1838:              await dbUpdateAnchorStatus(anchorId, { status: 'submitting', transactionHash: txHash });
+1840:            batchWrittenAheadTxHash = txHash;
+1854:      waitForConfirmation(result.txHash).then(async (confirmation) => {
+1894:      if (batchWrittenAheadTxHash && REAL_TX_64HEX_RETRY.test(batchWrittenAheadTxHash)) {
+1897:            status: 'submitting',
+1904:            transactionHash: batchWrittenAheadTxHash,
+1905:            errorMessage: `Batch submit reply lost after signing; tx ${batchWrittenAheadTxHash} may be on chain — left for the reconciler (KS-726)`,
+1909:          batchId, txHash: batchWrittenAheadTxHash, error: err?.message,
+2028:    checkTx: (tx: string) => waitForConfirmation(tx, 1, 0, 0),
+
+=== index.ts around the submitter deps ===
+  1682	/**
+  1683	 * The real-Cardano submit path (KS-705), wired to this module's db + chain
+  1684	 * helpers. Behaviour is unchanged apart from the idempotency guards; see
+  1685	 * anchorSubmission.ts for what is and is not handled.
+  1686	 */
+  1687	const submitAnchorToChain = createAnchorSubmitter({
+  1688	  getAnchor: async (anchorId) => {
+  1689	    const row = await dbGetAnchorById(anchorId);
+  1690	    return row
+  1691	      ? {
+  1692	          id: row.id,
+  1693	          status: row.status,
+  1694	          transactionHash: row.transactionHash,
+  1695	          retryCount: row.retryCount,
+  1696	          metadataLabel: row.metadataLabel,
+  1697	          metadataPayload: row.metadataPayload,
+  1698	        }
+  1699	      : null;
+  1700	  },
+  1701	  // KS-726: the third argument MUST be forwarded. Dropping it here would leave
+  1702	  // `onSigned` unreachable and the whole write-ahead inert while every unit test
+  1703	  // that injects its own `submit` still passed — a guard wired to nothing, which
+  1704	  // is the defect class F-731-01/F-800-01 was filed for.
+  1705	  submit: (metadataLabel, metadataPayload, options) => submitAnchor(metadataLabel, metadataPayload, options),
+  1706	  confirm: (txHash, onStatusUpdate) => waitForConfirmation(txHash, 30, 10_000, 60_000, onStatusUpdate),
+  1707	  updateStatus: (anchorId, updates) => dbUpdateAnchorStatus(anchorId, updates as Partial<Anchor>),
+  1708	  bumpRetryCount: async (anchorId) => {
+  1709	    try {
+  1710	      await query('UPDATE anchor_store SET retry_count = retry_count + 1 WHERE id = $1', [anchorId]);
+  1711	    } catch { /* ignore */ }
+  1712	  },
+  1713	  scheduleRetry: (anchorId, delayMs) => { setTimeout(() => { processAnchor(anchorId); }, delayMs); },
+  1714	  log,
+  1715	  withWalletLock,
+  1716	});
+  1717	
+  1718	/**
+  1719	 * Process a single anchor.
+  1720	 * Uses real Cardano transactions when Blockfrost is configured,
+  1721	 * otherwise falls back to mock mode for development.
+  1722	 */
+  1723	async function processAnchor(anchorId: string) {
+  1724	  const anchor = await dbGetAnchorById(anchorId);
+  1725	  if (!anchor) return;
+  1726	
+  1727	  // ── Real Cardano anchoring ──────────────────────────────────────────────
+  1728	  // KS-705: the submit/confirm/retry flow lives in anchorSubmission.ts so it is
+  1729	  // unit-testable without booting this service, and so the idempotency guards
+  1730	  // that stop one document minting two fee-paying transactions sit in one place.
+  1731	  if (isCardanoReady()) {
+  1732	    await submitAnchorToChain(anchorId);
+  1733	    return;
+  1734	  }
+  1735	
+  1736	  // ── Mock mode (no Blockfrost credentials) ───────────────────────────────
+  1737	  if (process.env.NODE_ENV === 'production') {
+  1738	    // In production, refuse to fake transactions
+  1739	    await dbUpdateAnchorStatus(anchorId, {
+  1740	      status: 'failed',
+  1741	      errorMessage: 'Cardano integration not configured — cannot anchor in production without BLOCKFROST_API_KEY',
+  1742	    });
+  1743	    log('error', 'Anchor failed — no Cardano provider in production', { anchorId });
+  1744	    return;
+  1745	  }
+  1746	
+  1747	  // Development/test mock mode
+  1748	  setTimeout(async () => {
+  1749	    const mockTxHash = `mock_tx_${crypto.randomBytes(32).toString('hex')}`;
+  1750	
+  1751	    await dbUpdateAnchorStatus(anchorId, {
+  1752	      status: 'submitted',
+  1753	      transactionHash: mockTxHash,
+  1754	    });
+  1755	
+  1756	    log('info', 'Anchor submitted (mock)', { anchorId, txHash: mockTxHash });
+  1757	
+  1758	    setTimeout(async () => {
+  1759	      const blockNumber = null as any; // F-03: real blockHeight populates after confirmation
+  1760	      const blockHash = `mock_block_${crypto.randomBytes(32).toString('hex')}`;
+  1761	
+  1762	      await dbUpdateAnchorStatus(anchorId, {

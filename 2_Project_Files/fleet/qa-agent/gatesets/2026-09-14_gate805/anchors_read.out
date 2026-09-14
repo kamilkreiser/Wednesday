@@ -1,0 +1,197 @@
+=== index.ts :1805-1850 (batch onSigned) ===
+  1805	
+  1806	  // ── Real Cardano batch anchoring ────────────────────────────────────────
+  1807	  if (isCardanoReady()) {
+  1808	    // Declared OUTSIDE the try for the same reason as the single path in
+  1809	    // anchorSubmission.ts: a variable the catch cannot see is exactly the defect
+  1810	    // KS-726 exists to close. (#764 wrote it inside the try first and tsc
+  1811	    // rejected the catch with TS2304 — the compiler reproducing the ticket in
+  1812	    // miniature.)
+  1813	    let batchWrittenAheadTxHash: string | undefined;
+  1814	
+  1815	    try {
+  1816	      const batchMetadata = firstAnchor.metadataPayload;
+  1817	      log('info', 'Submitting batch anchor to Cardano', { batchId, anchorCount: anchorIds.length });
+  1818	
+  1819	      // KS-726: the batch path carries the IDENTICAL double-mint exposure — one
+  1820	      // signed, fee-paying transaction covering MANY documents, whose hash was
+  1821	      // recorded only after submit returned. #756 extracted only the single
+  1822	      // path, so this half stays here. Threaded rather than listed, because the
+  1823	      // mechanism is the same one and a paragraph in a PR is not a guard.
+  1824	      //
+  1825	      // Only the constituent ANCHOR rows move to 'submitting'; the batch row is
+  1826	      // untouched, so MerkleBatch's status union stays as scoped.
+  1827	      const result = await withWalletLock(() =>
+  1828	        submitAnchor(675, batchMetadata, {
+  1829	          onSigned: async (txHash) => {
+  1830	            // #805 review (2026-09-08), note 1 — the mirror of F3b on the single
+  1831	            // path: assigned AFTER the writes, not before. `onSigned` runs BEFORE
+  1832	            // the network is asked, so if these writes throw NO transaction
+  1833	            // exists and an ordinary retry is correct and free; assigning first
+  1834	            // would arm the catch's write-ahead branch for a transaction that was
+  1835	            // never sent. (Inert today because dbUpdateAnchorStatus swallows —
+  1836	            // one refactor away from being real, same as the single path.)
+  1837	            for (const anchorId of anchorIds) {
+  1838	              await dbUpdateAnchorStatus(anchorId, { status: 'submitting', transactionHash: txHash });
+  1839	            }
+  1840	            batchWrittenAheadTxHash = txHash;
+  1841	          },
+  1842	        }),
+  1843	      );
+  1844	
+  1845	      await dbUpdateBatchStatus(batchId, 'submitted', result.txHash);
+  1846	
+  1847	      for (const anchorId of anchorIds) {
+  1848	        await dbUpdateAnchorStatus(anchorId, { status: 'submitted', transactionHash: result.txHash });
+  1849	      }
+  1850	
+=== index.ts :1886-1920 (batch catch) ===
+  1886	      // KNOWN GAP, recorded rather than hidden: the `anchor_batches` row has no
+  1887	      // reconciliation path — the reconciler only ever selects `anchor_store`
+  1888	      // (reconciler.ts). So this early return leaves the batch row resting in
+  1889	      // its pre-submit status while its constituent anchors are settled by the
+  1890	      // reconciler, and the two can diverge indefinitely. That is the RIGHT
+  1891	      // trade — a stranded batch row beats terminally failing every anchor in a
+  1892	      // batch whose transaction is on chain — and the settling half is KS-774,
+  1893	      // filed under KS-489. Peter's finding on #764, carried intact.
+  1894	      if (batchWrittenAheadTxHash && REAL_TX_64HEX_RETRY.test(batchWrittenAheadTxHash)) {
+  1895	        for (const anchorId of anchorIds) {
+  1896	          await dbUpdateAnchorStatus(anchorId, {
+  1897	            status: 'submitting',
+  1898	            // #805 review F2: carry the hash. dbUpdateAnchorStatus SWALLOWS its
+  1899	            // errors, so a DB blip during the write-ahead does not throw and the
+  1900	            // submit proceeds regardless — leaving a row with a paid transaction
+  1901	            // and no hash, which the reconciler (`transaction_hash IS NOT NULL`)
+  1902	            // and knownChainSubmission both skip, and which nothing retries.
+  1903	            // Idempotent when the write-ahead landed; the whole fix when it did not.
+  1904	            transactionHash: batchWrittenAheadTxHash,
+  1905	            errorMessage: `Batch submit reply lost after signing; tx ${batchWrittenAheadTxHash} may be on chain — left for the reconciler (KS-726)`,
+  1906	          });
+  1907	        }
+  1908	        log('warn', 'Batch anchor submit failed AFTER the hash was written ahead — not failing the batch, reconciler will settle it', {
+  1909	          batchId, txHash: batchWrittenAheadTxHash, error: err?.message,
+  1910	        });
+  1911	        return;
+  1912	      }
+  1913	
+  1914	      await dbUpdateBatchStatus(batchId, 'failed');
+  1915	
+  1916	      for (const anchorId of anchorIds) {
+  1917	        await dbUpdateAnchorStatus(anchorId, { status: 'failed', errorMessage: err?.message });
+  1918	      }
+  1919	
+  1920	      log('error', 'Batch anchor submission failed', { batchId, error: err?.message });
+=== reconciler.ts ===
+10:    10	 * CAUSE — make the stored status honest — rather than preferring-confirmed
+24:    24	 * Dependency-injected so it is unit-testable without booting the service
+29:    29	export interface ReconcilerDeps {
+32:    32	  query: (sql: string, params?: unknown[]) => Promise<{ rows: any[] }>;
+35:    35	  updateStatus: (anchorId: string, updates: Record<string, unknown>) => Promise<void>;
+40:    40	export interface ReconcilerConfig {
+41:    41	  minAgeMs: number;
+42:    42	  giveUpMs: number;
+46:    46	export interface ReconcilerResult {
+54:    54	export function createStuckAnchorReconciler(deps: ReconcilerDeps, config: ReconcilerConfig) {
+57:    57	  return async function reconcileStuckAnchors(): Promise<ReconcilerResult> {
+66:    66	        `SELECT id, transaction_hash, created_at, updated_at FROM anchor_store
+67:    67	          -- KS-726: 'submitting' is the write-ahead state — the row NAMES a
+73:    73	          WHERE status IN ('pending', 'submitted', 'submitting')
+74:    74	            AND transaction_hash IS NOT NULL
+79:    79	        [String(config.minAgeMs), config.batch],
+82:    82	        const tx = String(row.transaction_hash || '');
+88:    88	            await deps.updateStatus(row.id, {
+89:    89	              status: 'confirmed',
+98:    98	          } else if (now() - new Date(row.created_at).getTime() > config.giveUpMs) {
+99:    99	            await deps.updateStatus(row.id, {
+100:   100	              status: 'failed',
+101:   101	              errorMessage: `transaction never appeared on chain within ${Math.round(config.giveUpMs / 3_600_000)}h (reconciler)`,
+=== confirmation.ts imports ===
+/**
+ * =============================================================================
+ * TRANSACTION CONFIRMATION POLLER
+ * =============================================================================
+ * Polls Blockfrost for transaction confirmation status with exponential backoff.
+ * =============================================================================
+ */
+
+import { getTransaction } from './provider';
+
+export interface ConfirmationResult {
+  confirmed: boolean;
+=== anchoring.openapi.ts :40-70 ===
+    40	    documentId: z.string(),
+    41	    contentHash: z.string().regex(/^[a-f0-9]{64}$/),
+    42	    transactionHash: z.string().nullable(),
+    43	    blockNumber: z.number().int().nullable(),
+    44	    blockHash: z.string().nullable(),
+    45	    confirmedAt: z.string().datetime().nullable(),
+    46	    createdAt: z.string().datetime(),
+    47	    network: z.enum(['mainnet', 'preprod', 'preview', 'devnet']),
+    48	    // KS-726: 'submitting' is part of the published contract. The value domain
+    49	    // of a published field IS contract surface — it is what Schemathesis reads —
+    50	    // so a GET on a written-ahead row would return a status outside its own
+    51	    // declared enum. `check:openapi` cannot see that: spec and generator agree
+    52	    // with each other, and both would be wrong about the service.
+    53	    //
+    54	    // 'submitting' means: the transaction is SIGNED and its hash is derived and
+    55	    // persisted, but the node has not acknowledged it. Distinct from 'submitted'
+    56	    // (node acknowledged) and from 'pending' (nothing signed).
+    57	    status: z.enum(['pending', 'submitting', 'submitted', 'confirmed', 'failed']),
+    58	    confirmations: z.number().int().nonnegative().optional(),
+    59	    metadataLabel: z.number().int().optional(),
+    60	    anchorType: z.string().optional(),
+    61	    // KS-587: honest labelling on anchor reads. When the stored hash is a
+    62	    // mock/simulated placeholder (`tx_sim_`/`mock_tx_`/`tx_…`), it is surfaced
+    63	    // here instead of `transactionHash`, with `simulated: true` — the anchor
+    64	    // makes no on-chain claim.
+    65	    simulated: z.boolean().optional(),
+    66	    simulatedTxRef: z.string().optional(),
+    67	  }).openapi({
+    68	    description:
+    69	      'A blockchain anchor record. Anchors are publicly observable on Cardanoscan ' +
+    70	      'after confirmation; this record is the off-chain mirror for fast lookup.',
+=== yaml around :1004 ===
+   996	            - mainnet
+   997	            - preprod
+   998	            - preview
+   999	            - devnet
+  1000	        status:
+  1001	          type: string
+  1002	          enum:
+  1003	            - pending
+  1004	            - submitting
+  1005	            - submitted
+  1006	            - confirmed
+  1007	            - failed
+  1008	        confirmations:
+  1009	          type: integer
+  1010	          minimum: 0
+  1011	        metadataLabel:
+  1012	          type: integer
+yaml 'submitting' head=1 dev=0 control 'pending' head=39
+=== f1-f3 test cell names ===
+28:describe('#805 F1 — an unacknowledged submission is distinguishable from a confirmed one', () => {
+29:  it('a written-ahead row is NOT acknowledged', () => {
+35:  it('CONTROL — submitted and confirmed ARE acknowledged, so this is not a blanket false', () => {
+40:  it('a chain-sourced answer is acknowledged by construction — it was found ON the chain', () => {
+44:  it('a missing or non-string status degrades to null, never to a claim', () => {
+109:describe('#805 F2 — guard 5 must NAME the transaction in its own write', () => {
+110:  it('carries transactionHash even when the write-ahead write was SWALLOWED', async () => {
+127:  it('carries it in the ordinary case too — idempotent, not conditional', async () => {
+136:describe('#805 F3 — a write-ahead that THROWS means no transaction was ever sent', () => {
+137:  it('does not arm guard 5, and takes the ordinary retry path instead', async () => {
+=== ks726 test cell names (count) ===
+13
+142:  it('writes the hash ahead, and the write-ahead lands BEFORE the submitted write', async () => {
+172:  it('rests the row in submitting, names the tx, and never submits again', async () => {
+211:  it('never writes failed at any point — asserted on the call sequence, not the end state', async () => {
+245:  it('prefers guard 4 (submit returned) over guard 5 (reply lost) when both apply', async () => {
+283:  it('does not fire for a fabricated tx ref — falls through to the ordinary failure path', async () => {
+318:  it('re-polls the written-ahead hash instead of minting a second transaction', async () => {
+341:  it('CONTROL — a pending row is still submitted, so the guard is not a blanket refusal', async () => {
+374:  it('a 400 the node answered with (ValueNotConservedUTxO) after onSigned → scheduleRetry is called and the row does
+388:  it('CONTROL — the same throw with NO status_code (a lost reply) → guard 5 as today: no retry, the row rests in sub
+406:  it('a 400 "All inputs are spent" after onSigned, the re-poll finds the hash ABSENT → re-polled once, then schedule
+424:  it('CONTROL — a 400 "already been included" after onSigned → re-polled and confirmed, scheduleRetry NOT called (th
+436:  it('CONTROL — a 400 "All inputs are spent" whose re-poll FINDS the hash → confirmed, scheduleRetry NOT called (the
+448:  it('CONTROL — a 400 "All inputs are spent" whose re-poll THROWS (the chain unreadable) → no retry, the row rests f

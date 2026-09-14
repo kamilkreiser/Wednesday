@@ -1,0 +1,222 @@
+diff --git a/Blockchain/Dev/services/anchoring/src/index.ts b/Blockchain/Dev/services/anchoring/src/index.ts
+index 9f3eba10c..da4abd432 100644
+--- a/Blockchain/Dev/services/anchoring/src/index.ts
++++ b/Blockchain/Dev/services/anchoring/src/index.ts
+@@ -31,6 +31,7 @@ import {
+ import { deriveHealth } from './chainHealthStatus';
+ import { validateEnv } from './utils/logger';
+ import { createStuckAnchorReconciler } from './reconciler';
++import { deriveVerifyAcceptance } from './verifyAnchorStatus';
+ // KS-705: the Cardano submit/confirm/retry flow, extracted for the same
+ // bootless-unit-test reason as reconciler.ts. `withWalletLock` is imported (not
+ // redefined) so the batch path below shares the SAME wallet mutex — two
+@@ -109,7 +110,15 @@ interface Anchor {
+   network: string;
+   metadataLabel: number;
+   metadataPayload: object;
+-  status: 'pending' | 'submitted' | 'confirmed' | 'failed';
++  /**
++   * KS-726 adds 'submitting': the transaction is signed and its deterministic
++   * hash is persisted, but the node has not yet acknowledged it. Distinct from
++   * 'submitted' (node accepted) and from 'pending' (nothing signed yet), because
++   * only this state means "a transaction bearing our name may already be on
++   * chain". 'failed' remains TERMINAL by construction (KS-535) — originate's
++   * poller depends on that and this state does not disturb it.
++   */
++  status: 'pending' | 'submitting' | 'submitted' | 'confirmed' | 'failed';
+   fee?: number;
+   confirmations: number;
+   confirmedAt?: Date;
+@@ -594,10 +603,19 @@ const handleAnchorVerifyByHash = async (req: Request, res: Response) => {
+     // explorer URL is fabricated for a non-existent tx.
+     const simulated = typeof rawTxHash === 'string' && /^(tx_sim_|mock_tx_|tx_)/.test(rawTxHash);
+     const txHash = simulated ? null : rawTxHash;
++    // KS-726 (#805 review F1): the query above admits 'submitting' rows, whose
++    // transaction the node has NOT acknowledged. `verified: true` alone cannot
++    // express that, so the anchor's own lifecycle state is returned, plus a
++    // boolean so a consumer need not know the status vocabulary to read it.
++    // A chain-sourced result was found by scanning the chain, so it is
++    // acknowledged by construction.
++    const acceptance = deriveVerifyAcceptance(source, row?.status);
+     return {
+       verified: true,
+       source,
+       network: CARDANO_NETWORK,
++      status: acceptance.status,
++      acknowledged: acceptance.acknowledged,
+       txHash,
+       ...(simulated ? { simulated: true, simulatedTxRef: rawTxHash } : {}),
+       cardanoScanUrl: txHash ? `${explorerBase}/${txHash}` : null,
+@@ -634,7 +652,27 @@ const handleAnchorVerifyByHash = async (req: Request, res: Response) => {
+         `SELECT id, document_id, content_hash, transaction_hash, block_number,
+                 block_hash, confirmed_at, created_at, metadata_payload, status
+            FROM anchor_store
+-          WHERE LOWER(content_hash) = $1 AND status IN ('submitted','confirmed')
++          -- KS-726: 'submitting' included. The row carries a REAL, locally
++          -- derived transaction hash at this point, so omitting it made a
++          -- written-ahead anchor invisible to verify-by-hash — and a row RESTING
++          -- in 'submitting' (the state the failure path now leaves behind)
++          -- invisible indefinitely. Invisible is the worse failure.
++          --
++          -- #805 review F1: this comment used to claim the status was "selected
++          -- and returned". It was selected and then DROPPED — buildResponse had
++          -- no status key, verified:true is unconditional, and KS-522's honesty
++          -- branch keys off the tx-hash PREFIX, which a real written-ahead
++          -- 64-hex passes straight through. So the caller was handed
++          -- verified:true plus a live explorer link for a submission the node
++          -- had never acknowledged, with no way to tell it from a confirmed
++          -- one. The mitigation is now actually implemented: see the status and
++          -- acknowledged fields in buildResponse.
++          --
++          -- NOTE: no backticks in this block. It sits inside a TEMPLATE
++          -- LITERAL, so a backtick here terminates the string and the SQL
++          -- comment marker gives no protection — it fails as a JS syntax error
++          -- pointing at the WHERE clause, ten lines below the real cause.
++          WHERE LOWER(content_hash) = $1 AND status IN ('submitting','submitted','confirmed')
+           ORDER BY confirmed_at DESC NULLS LAST, created_at DESC
+           LIMIT 1`,
+         [hash],
+@@ -1228,7 +1266,12 @@ app.post('/api/anchoring/submit', async (req: Request, res: Response) => {
+  * Get queue status
+  */
+ app.get('/api/anchors/queue', async (_req: Request, res: Response) => {
+-  let pending = 0, submitted = 0, confirmed = 0, failed = 0;
++  // KS-726: 'submitting' gets its own counter. Without a case in the switch
++  // below those rows land in NO bucket, so queueLength and stats under-report by
++  // exactly the anchors most worth surfacing — the ones that may have a
++  // transaction on chain and no acknowledgement. Same class as KS-710 (a count
++  // that silently omits what it cannot classify).
++  let pending = 0, submitting = 0, submitted = 0, confirmed = 0, failed = 0;
+ 
+   try {
+     if (isDbAvailable()) {
+@@ -1240,6 +1283,7 @@ app.get('/api/anchors/queue', async (_req: Request, res: Response) => {
+         const cnt = Number(row.cnt);
+         switch (row.status) {
+           case 'pending': pending = cnt; break;
++          case 'submitting': submitting = cnt; break;
+           case 'submitted': submitted = cnt; break;
+           case 'confirmed': confirmed = cnt; break;
+           case 'failed': failed = cnt; break;
+@@ -1254,7 +1298,7 @@ app.get('/api/anchors/queue', async (_req: Request, res: Response) => {
+     success: true,
+     data: {
+       queueLength: pending,
+-      stats: { pending, submitted, confirmed, failed },
++      stats: { pending, submitting, submitted, confirmed, failed },
+       network: CARDANO_NETWORK,
+     },
+   });
+@@ -1465,6 +1509,14 @@ async function dbGetAnchorByTx(txHash: string): Promise<Anchor | undefined> {
+   }
+ }
+ 
++/**
++ * KS-726: only a 64-hex ref is a REAL chain transaction — `mock_tx_…` / `tx_sim_…`
++ * are not (KS-587). Mirrors `REAL_TX_64HEX` in anchorSubmission.ts and the
++ * reconciler's own guard, so the batch failure path, the single path and the
++ * reconciler agree on what "this row names a transaction" means.
++ */
++const REAL_TX_64HEX_RETRY = /^[0-9a-f]{64}$/i;
++
+ async function dbUpdateAnchorStatus(anchorId: string, updates: Partial<Anchor>): Promise<void> {
+   try {
+     if (!isDbAvailable()) return;
+@@ -1646,7 +1698,11 @@ const submitAnchorToChain = createAnchorSubmitter({
+         }
+       : null;
+   },
+-  submit: (metadataLabel, metadataPayload) => submitAnchor(metadataLabel, metadataPayload),
++  // KS-726: the third argument MUST be forwarded. Dropping it here would leave
++  // `onSigned` unreachable and the whole write-ahead inert while every unit test
++  // that injects its own `submit` still passed — a guard wired to nothing, which
++  // is the defect class F-731-01/F-800-01 was filed for.
++  submit: (metadataLabel, metadataPayload, options) => submitAnchor(metadataLabel, metadataPayload, options),
+   confirm: (txHash, onStatusUpdate) => waitForConfirmation(txHash, 30, 10_000, 60_000, onStatusUpdate),
+   updateStatus: (anchorId, updates) => dbUpdateAnchorStatus(anchorId, updates as Partial<Anchor>),
+   bumpRetryCount: async (anchorId) => {
+@@ -1749,11 +1805,42 @@ async function processBatchAnchor(batchId: string, anchorIds: string[]) {
+ 
+   // ── Real Cardano batch anchoring ────────────────────────────────────────
+   if (isCardanoReady()) {
++    // Declared OUTSIDE the try for the same reason as the single path in
++    // anchorSubmission.ts: a variable the catch cannot see is exactly the defect
++    // KS-726 exists to close. (#764 wrote it inside the try first and tsc
++    // rejected the catch with TS2304 — the compiler reproducing the ticket in
++    // miniature.)
++    let batchWrittenAheadTxHash: string | undefined;
++
+     try {
+       const batchMetadata = firstAnchor.metadataPayload;
+       log('info', 'Submitting batch anchor to Cardano', { batchId, anchorCount: anchorIds.length });
+ 
+-      const result = await withWalletLock(() => submitAnchor(675, batchMetadata));
++      // KS-726: the batch path carries the IDENTICAL double-mint exposure — one
++      // signed, fee-paying transaction covering MANY documents, whose hash was
++      // recorded only after submit returned. #756 extracted only the single
++      // path, so this half stays here. Threaded rather than listed, because the
++      // mechanism is the same one and a paragraph in a PR is not a guard.
++      //
++      // Only the constituent ANCHOR rows move to 'submitting'; the batch row is
++      // untouched, so MerkleBatch's status union stays as scoped.
++      const result = await withWalletLock(() =>
++        submitAnchor(675, batchMetadata, {
++          onSigned: async (txHash) => {
++            // #805 review (2026-09-08), note 1 — the mirror of F3b on the single
++            // path: assigned AFTER the writes, not before. `onSigned` runs BEFORE
++            // the network is asked, so if these writes throw NO transaction
++            // exists and an ordinary retry is correct and free; assigning first
++            // would arm the catch's write-ahead branch for a transaction that was
++            // never sent. (Inert today because dbUpdateAnchorStatus swallows —
++            // one refactor away from being real, same as the single path.)
++            for (const anchorId of anchorIds) {
++              await dbUpdateAnchorStatus(anchorId, { status: 'submitting', transactionHash: txHash });
++            }
++            batchWrittenAheadTxHash = txHash;
++          },
++        }),
++      );
+ 
+       await dbUpdateBatchStatus(batchId, 'submitted', result.txHash);
+ 
+@@ -1790,6 +1877,40 @@ async function processBatchAnchor(batchId: string, anchorIds: string[]) {
+       });
+ 
+     } catch (err: any) {
++      // KS-726 — checked BEFORE anything is written, for the same reason as the
++      // single path's guard 5: a known hash means the transaction is signed and
++      // may be on chain and fee-paying, so marking every constituent anchor
++      // terminally 'failed' would propagate PERMANENT document failures for a
++      // batch that succeeded. 'failed' is terminal by construction (KS-535).
++      //
++      // KNOWN GAP, recorded rather than hidden: the `anchor_batches` row has no
++      // reconciliation path — the reconciler only ever selects `anchor_store`
++      // (reconciler.ts). So this early return leaves the batch row resting in
++      // its pre-submit status while its constituent anchors are settled by the
++      // reconciler, and the two can diverge indefinitely. That is the RIGHT
++      // trade — a stranded batch row beats terminally failing every anchor in a
++      // batch whose transaction is on chain — and the settling half is KS-774,
++      // filed under KS-489. Peter's finding on #764, carried intact.
++      if (batchWrittenAheadTxHash && REAL_TX_64HEX_RETRY.test(batchWrittenAheadTxHash)) {
++        for (const anchorId of anchorIds) {
++          await dbUpdateAnchorStatus(anchorId, {
++            status: 'submitting',
++            // #805 review F2: carry the hash. dbUpdateAnchorStatus SWALLOWS its
++            // errors, so a DB blip during the write-ahead does not throw and the
++            // submit proceeds regardless — leaving a row with a paid transaction
++            // and no hash, which the reconciler (`transaction_hash IS NOT NULL`)
++            // and knownChainSubmission both skip, and which nothing retries.
++            // Idempotent when the write-ahead landed; the whole fix when it did not.
++            transactionHash: batchWrittenAheadTxHash,
++            errorMessage: `Batch submit reply lost after signing; tx ${batchWrittenAheadTxHash} may be on chain — left for the reconciler (KS-726)`,
++          });
++        }
++        log('warn', 'Batch anchor submit failed AFTER the hash was written ahead — not failing the batch, reconciler will settle it', {
++          batchId, txHash: batchWrittenAheadTxHash, error: err?.message,
++        });
++        return;
++      }
++
+       await dbUpdateBatchStatus(batchId, 'failed');
+ 
+       for (const anchorId of anchorIds) {

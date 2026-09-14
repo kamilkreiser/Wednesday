@@ -1,0 +1,130 @@
+blockfrost-js version:   "version": "6.1.1",
+--- errors.js ---
+     1	"use strict";
+     2	Object.defineProperty(exports, "__esModule", { value: true });
+     3	exports.handleError = exports.isBlockfrostErrorResponse = exports.BlockfrostClientError = exports.BlockfrostServerError = exports.SignatureVerificationError = void 0;
+     4	const got_1 = require("got");
+     5	class SignatureVerificationError extends Error {
+     6	    constructor(message, detail) {
+     7	        super(message);
+     8	        this.name = 'SignatureVerificationError';
+     9	        this.message = message;
+    10	        this.detail = detail;
+    11	        Object.setPrototypeOf(this, SignatureVerificationError.prototype);
+    12	    }
+    13	}
+    14	exports.SignatureVerificationError = SignatureVerificationError;
+    15	class BlockfrostServerError extends Error {
+    16	    constructor(error) {
+    17	        super(error.message);
+    18	        this.name = 'BlockfrostServerError';
+    19	        this.status_code = error.status_code;
+    20	        this.message = error.message;
+    21	        this.error = error.error;
+    22	        this.url = error.url;
+    23	        this.body = error.body;
+    24	        Object.setPrototypeOf(this, BlockfrostServerError.prototype);
+    25	    }
+    26	}
+    27	exports.BlockfrostServerError = BlockfrostServerError;
+    28	class BlockfrostClientError extends Error {
+    29	    constructor(error) {
+    30	        super(error.message);
+    31	        this.name = 'BlockfrostClientError';
+    32	        this.code = error.code;
+    33	        this.message = error.message;
+    34	        this.url = error.url;
+    35	        Object.setPrototypeOf(this, BlockfrostClientError.prototype);
+    36	    }
+    37	}
+    38	exports.BlockfrostClientError = BlockfrostClientError;
+    39	const hasProp = (
+    40	// eslint-disable-next-line @typescript-eslint/ban-types
+    41	data, prop) => {
+    42	    return prop in data;
+    43	};
+    44	const isBlockfrostErrorResponse = (data) => {
+    45	    // type guard for narrowing response body to an error object that should be returned by Blockfrost API
+    46	    return (typeof data === 'object' &&
+    47	        data !== null &&
+    48	        hasProp(data, 'status_code') &&
+    49	        hasProp(data, 'message') &&
+    50	        hasProp(data, 'error'));
+    51	};
+    52	exports.isBlockfrostErrorResponse = isBlockfrostErrorResponse;
+    53	const handleError = (error) => {
+    54	    if (error instanceof got_1.HTTPError) {
+    55	        let errorInstance;
+    56	        const url = error.request.requestUrl;
+    57	        const responseBody = error.response.body;
+    58	        if ((0, exports.isBlockfrostErrorResponse)(responseBody)) {
+    59	            errorInstance = new BlockfrostServerError({ ...responseBody, url });
+    60	        }
+    61	        else {
+    62	            // response.body may contain html output (eg. errors returned by nginx)
+    63	            const { statusCode } = error.response;
+    64	            const statusText = error.response.statusMessage ?? error.message;
+    65	            errorInstance = new BlockfrostServerError({
+    66	                status_code: statusCode,
+    67	                message: `${statusCode}: ${statusText}`,
+    68	                error: statusText,
+    69	                url,
+    70	                // Sometimes original body can be helpful so let's forward it
+    71	                // Eg. communicating directly with Cardano Submit API which returns 400 with the error from cardano-node in the body of the request)
+    72	                body: error.response.body ? error.response.body : undefined,
+    73	            });
+    74	        }
+    75	        // remove undefined body prop so it doesn't pollute string representation of the error
+    76	        if (errorInstance.body === undefined) {
+    77	            delete errorInstance.body;
+    78	        }
+    79	        return errorInstance;
+    80	    }
+    81	    // system errors such as -3008 ENOTFOUND and various got errors like ReadError, CacheError, MaxRedirectsError, TimeoutError,...
+    82	    // https://github.com/sindresorhus/got/blob/main/documentation/8-errors.md
+    83	    return new BlockfrostClientError({
+    84	        code: error.code ?? 'ERR_GOT_REQUEST_ERROR',
+    85	        message: error.message,
+    86	        url: error.request?.requestUrl,
+    87	    });
+    88	};
+    89	exports.handleError = handleError;
+--- txSubmit (txs/index.js :150-170) ---
+   150	 * Obtains transaction metadata in JSON format.
+   151	 * @see {@link https://docs.blockfrost.io/#tag/Cardano-Transactions/paths/~1txs~1%7Bhash%7D~1metadata/get | API docs for Transaction metadata}
+   152	 *
+   153	 * @param hash - Transaction hash
+   154	 * @returns Transaction metadata in JSON
+   155	 *
+   156	 */
+   157	async function txsMetadata(hash) {
+   158	    try {
+   159	        const res = await this.instance(`txs/${hash}/metadata`);
+   160	        return res.body;
+   161	    }
+   162	    catch (error) {
+   163	        throw (0, errors_1.handleError)(error);
+   164	    }
+   165	}
+   166	exports.txsMetadata = txsMetadata;
+   167	/**
+   168	 * Obtains transaction metadata in CBOR format.
+   169	 * @see {@link https://docs.blockfrost.io/#tag/Cardano-Transactions/paths/~1txs~1%7Bhash%7D~1metadata~1cbor/get | API docs for Transaction metadata in CBOR}
+   170	 *
+   171	 * @param hash - Transaction hash
+   172	 * @returns Transaction metadata in CBOR
+   173	 *
+   174	 */
+   175	async function txsMetadataCbor(hash) {
+--- getTransaction in provider.ts ---
+     1	export async function getTransaction(txHash: string) {
+     2	  if (!blockfrost) return null;
+     3	  try {
+     4	    return await blockfrost.txs(txHash);
+     5	  } catch (err: any) {
+     6	    // 404 = the chain answered: tx not on chain yet. Reachability is recorded
+     7	    // by the client proxy; this only decides what the CALLER gets back.
+     8	    if (err?.status_code === 404) return null;
+     9	    throw err;
+    10	  }
+    11	}

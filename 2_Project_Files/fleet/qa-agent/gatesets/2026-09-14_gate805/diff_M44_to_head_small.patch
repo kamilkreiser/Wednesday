@@ -1,0 +1,53 @@
+diff --git a/Blockchain/Dev/docs/openapi/secuura-api.yaml b/Blockchain/Dev/docs/openapi/secuura-api.yaml
+index d327a249a..122d3a2f8 100644
+--- a/Blockchain/Dev/docs/openapi/secuura-api.yaml
++++ b/Blockchain/Dev/docs/openapi/secuura-api.yaml
+@@ -1001,6 +1001,7 @@ components:
+           type: string
+           enum:
+             - pending
++            - submitting
+             - submitted
+             - confirmed
+             - failed
+diff --git a/Blockchain/Dev/services/anchoring/src/anchoring.openapi.ts b/Blockchain/Dev/services/anchoring/src/anchoring.openapi.ts
+index ca7c92850..49b8b38da 100644
+--- a/Blockchain/Dev/services/anchoring/src/anchoring.openapi.ts
++++ b/Blockchain/Dev/services/anchoring/src/anchoring.openapi.ts
+@@ -45,7 +45,16 @@ const AnchorSchema = sharedRegistry.register(
+     confirmedAt: z.string().datetime().nullable(),
+     createdAt: z.string().datetime(),
+     network: z.enum(['mainnet', 'preprod', 'preview', 'devnet']),
+-    status: z.enum(['pending', 'submitted', 'confirmed', 'failed']),
++    // KS-726: 'submitting' is part of the published contract. The value domain
++    // of a published field IS contract surface — it is what Schemathesis reads —
++    // so a GET on a written-ahead row would return a status outside its own
++    // declared enum. `check:openapi` cannot see that: spec and generator agree
++    // with each other, and both would be wrong about the service.
++    //
++    // 'submitting' means: the transaction is SIGNED and its hash is derived and
++    // persisted, but the node has not acknowledged it. Distinct from 'submitted'
++    // (node acknowledged) and from 'pending' (nothing signed).
++    status: z.enum(['pending', 'submitting', 'submitted', 'confirmed', 'failed']),
+     confirmations: z.number().int().nonnegative().optional(),
+     metadataLabel: z.number().int().optional(),
+     anchorType: z.string().optional(),
+diff --git a/Blockchain/Dev/services/anchoring/src/reconciler.ts b/Blockchain/Dev/services/anchoring/src/reconciler.ts
+index dc65347f6..55e2fe694 100644
+--- a/Blockchain/Dev/services/anchoring/src/reconciler.ts
++++ b/Blockchain/Dev/services/anchoring/src/reconciler.ts
+@@ -64,7 +64,13 @@ export function createStuckAnchorReconciler(deps: ReconcilerDeps, config: Reconc
+       // still actively working (it touches updated_at as it goes).
+       const rows = await deps.query(
+         `SELECT id, transaction_hash, created_at, updated_at FROM anchor_store
+-          WHERE status IN ('pending', 'submitted')
++          -- KS-726: 'submitting' is the write-ahead state — the row NAMES a
++          -- signed transaction whose submit reply we never received. Those are
++          -- precisely the rows this reconciler exists for: the transaction may
++          -- be on chain and fee-paying, and nothing else will ever settle it.
++          -- Omitting the state here would make write-ahead pointless, since the
++          -- hash would be stored and then never looked at.
++          WHERE status IN ('pending', 'submitted', 'submitting')
+             AND transaction_hash IS NOT NULL
+             AND simulated = FALSE
+             AND updated_at < NOW() - ($1 || ' milliseconds')::interval

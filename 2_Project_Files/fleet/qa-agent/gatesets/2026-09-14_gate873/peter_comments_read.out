@@ -1,0 +1,322 @@
+====================================================================================================
+COMMENT 5602055926 PeterObeden 2026-09-09T12:46:04Z
+====================================================================================================
+## Review — verified independently, holding approval on the PR body only
+
+Kam, this is a good fix and the reasoning in it holds up. I re-measured everything from scratch on a
+second machine rather than reading your numbers back to you, and the substance stands. I'm holding
+approval on one clerical thing and one number that doesn't match — neither is about the code.
+
+### The defect reproduces, exactly as you described it
+
+Independently, with no repo code in the loop — a bare `https.request` probe:
+
+```
+CRLF             THREW    ERR_INVALID_CHAR: Invalid character in header content ["X-Probe"]
+non-latin1       THREW    ERR_INVALID_CHAR: Invalid character in header content ["X-Probe"]
+NUL              THREW    ERR_INVALID_CHAR: Invalid character in header content ["X-Probe"]
+CLEAN(control)   RETURNED (no sync throw)
+```
+
+And the call site is exposed as you said: `services/originate/src/routes/webhooks.ts:450` has no
+`try/catch` around the call, while the m365 loop still has its own at `index.ts:1263`. So the
+asymmetry you found is real.
+
+### Red → green, reproduced rather than taken on trust
+
+Two trees: your head `7d8a3f0e4`, and the base guard `ff5218867` with your test file copied over
+**byte-identical** (`diff -q` clean), so only the guard differs.
+
+```
+head      Test Files  1 passed (1)    Tests  10 passed (10)
+redproof  Test Files  1 failed (1)    Tests   3 failed | 7 passed (10)
+          × CRLF   × non-latin1   × NUL
+          TypeError: Invalid character in header content ["X-Probe"]
+            at src/security/ssrf-guard.ts:492:21   (const req = mod.request()
+```
+
+Exactly the three unencodable cells red, the control green. The control is doing real work — pinned
+by message (`/deadline/`, asserted *not* to match `/Invalid character/`), so it can't pass on "some
+failure". That's the part that makes this a proof rather than a green.
+
+### Everything else I ran
+
+| Gate | Result |
+|---|---|
+| `packages/shared` vitest — head `7d8a3f0e4` | **791 passed / 41 files**, 0 failed |
+| `packages/shared` vitest — base `ff5218867` | **787 passed / 41 files** |
+| `packages/shared` vitest — your two files onto **current `develop`** | **791 passed / 41 files**, 0 failed |
+| `ks914-shipped-path.test.ts` — cells, base → head | **6 → 10** |
+| `services/originate` jest — KS-914 call-site cells | **4 passed / 4** |
+| `eslint` on both changed files | **0 errors, 1 warning** — and that warning (`prefer-const` on `deadline`) is byte-identical on the base, so it isn't yours |
+| `tsc --noEmit -p packages/shared/tsconfig.json` | **exit 0** |
+
+Host caveat, so you can weigh it: arm64 Mac, Node v24.18.0, no stack running. `preflight.sh` I did
+*not* re-run — several legs want a live gateway and a fresh install, and against a detached
+extraction the results would be noise rather than evidence. I'm taking your 12 legs as read.
+
+### Could you double-check two figures?
+
+The head total agrees exactly. The other two don't, and I'd rather you settle it than me:
+
+| | PR body | what I measured |
+|---|---|---|
+| base `ff5218867` | 784 | **787 passed / 41 files** |
+| head `7d8a3f0e4` | 791 | 791 — agrees |
+| cells added | +7 | **+4** (`ks914-shipped-path.test.ts` 6 → 10, which is the 3 `it.each` rows plus the control) |
+
+It may well be my extraction rather than your run — I built the base tree with `git archive` and
+linked `node_modules` in, so a stale build artefact on either side could explain it. Worth one
+re-run on your machine either way, since 787 + 4 and 784 + 7 both land on 791 and only one of them
+is true.
+
+### Why I haven't approved yet
+
+Only this: the PR description doesn't carry the template. There's no `## Linear` section with the
+ticket URL, and neither pre-merge acknowledgment checkbox
+(`ack:schemathesis` / `ack:akto`) is present — the template's own header note asks that block be
+kept on every PR, and `pr-premerge-ack.yml` parses those two markers. The Linear linkback comment
+and `Closes KS-931` cover the traceability in practice, so this is form rather than substance, but
+with the ack boxes gone there's nothing recording that the suites were considered.
+
+I'd suggest restoring the block with **both boxes unticked and a line under each saying why the
+suite doesn't apply here** — no route, no spec, no schema, no endpoint — rather than deleting the
+section. That way the gate stays visible and the "not applicable" is a stated decision rather than a
+blank. Same for the PII block: an explicit "not applicable" reads better than empty boxes. I've
+drafted a full replacement body and can drop it here or hand it over, whichever you prefer.
+
+Once that's in and the counts are settled, I'm happy to approve.
+
+### Two small observations, entirely your call
+
+**The `write`/`end` wrap looks unreachable given the declared type.** I went looking for a test for
+that branch and couldn't construct one, so I measured what actually throws there — Node v24.18.0:
+
+```
+write+end  lone surrogate   RETURNED (no sync throw)
+write+end  NUL in body      RETURNED (no sync throw)
+write+end  non-latin1       RETURNED (no sync throw)
+write+end  CRLF             RETURNED (no sync throw)
+write+end  1MB string       RETURNED (no sync throw)
+after destroy()             RETURNED (no sync throw)
+non-string body             THREW    ERR_INVALID_ARG_TYPE
+```
+
+Header *content* is latin-1 validated — which is exactly why your header cells throw — but bodies
+are utf-8 encoded, so the same characters go through fine. And `write`/`end` after `destroy()`
+returns rather than throwing, so the comment's second case doesn't arise either (the deadline is
+async, so it couldn't have fired before those synchronous lines in any event). The only synchronous
+throw I could produce is a non-string body, which `SafeOutboundInit`'s `body?: string` rules out.
+
+The wrap costs nothing and I'd not ask you to remove it — belt and braces on a contract this
+load-bearing seems fair. It's the two reasons in the comment above it I'd gently flag, since the
+rest of this PR is careful to measure rather than assert.
+
+**Branch is 111 commits behind `develop`.** Inert, as far as I can tell — both files you touch are
+byte-identical on `develop` and on your base, and I ran the suite as-if-merged onto current
+`develop`: 791 / 41, clean. So no re-measurement needed, just noting it against CONTRIBUTING's
+"up to date with base" line.
+
+### For the record, on what isn't here
+
+I agree with not running the platform suites, and I'd have made the same call. Your own reachability
+note on KS-931 is the reason — `POST /api/webhooks/:id/test` hard-codes its payload and
+`dispatchEvent` has no product call sites, so there's no live path that would exercise this. A
+stack sweep would have produced a green that proved nothing about the change. The vitest cells are
+the right gate and they're honest ones.
+
+Likewise the KS-933 note in your evidence block — flagging that `src/__tests__` sits outside the
+type gate, rather than quietly benefiting from the ambiguity, is the right way round.
+
+Nice piece of work. It's a small diff that closes a real gap between what the module says and what
+it does, and the control cell is what makes it stick.
+
+====================================================================================================
+COMMENT 5602110186 PeterObeden 2026-09-09T12:50:13Z
+====================================================================================================
+## The count difference, with everything I ran — so you can point at where we diverge
+
+Following up on the counts, since "784 + 7" and "787 + 4" both land on 791 and only one of them can
+be right. Rather than just assert mine, here is the whole set with the method, so you can reproduce
+or contradict it.
+
+### Method, so the difference is locatable
+
+No checkout was switched and nothing was built. Both trees are `git archive` extractions of the two
+commits into a scratch directory, with `node_modules` symlinked in from an already-installed
+reference copy:
+
+```
+git archive ff5218867 | tar -x -C <scratch>/basefull      # PR base
+git archive 7d8a3f0e4 | tar -x -C <scratch>/full          # PR head
+ln -s <ref>/Blockchain/Dev/node_modules                 <scratch>/<tree>/Blockchain/Dev/node_modules
+ln -s <ref>/Blockchain/Dev/packages/shared/node_modules <scratch>/<tree>/Blockchain/Dev/packages/shared/node_modules
+
+cd <scratch>/<tree>/Blockchain/Dev/packages/shared
+node ../../node_modules/vitest/vitest.mjs run
+```
+
+Host: arm64 Mac, **Node v24.18.0**, **vitest v4.1.10**, no stack running, nothing else on the
+machine. Worth noting the shared `node_modules` is the one variable I could not isolate — both runs
+used the *same* installed tree, so if that tree differs from yours, both my numbers move together.
+
+### Raw output — full `packages/shared` suite
+
+**Base `ff5218867`**
+```
+ Test Files  41 passed (41)
+      Tests  787 passed (787)
+```
+
+**Head `7d8a3f0e4`**
+```
+ Test Files  41 passed (41)
+      Tests  791 passed (791)
+```
+
+**Head's two files applied onto current `origin/develop`** (111 commits ahead of your base; both
+files are byte-identical there, so this is what a merge would actually run)
+```
+ Test Files  41 passed (41)
+      Tests  791 passed (791)
+```
+
+**Current `origin/develop`, untouched** — for calibration
+```
+ Test Files  41 passed (41)
+      Tests  787 passed (787)
+```
+
+### Where the four cells are — per-file diff, base vs head
+
+Parsed from `--reporter=json` on both trees rather than counted by eye. Only rows that changed:
+
+```
+file                                                     base head delta
+__tests__/ks914-shipped-path.test.ts                        6   10     4
+--------------------------------------------------------------------------
+TOTAL                                                     787  791     4
+files: 41 -> 41
+```
+
+Exactly one file moves, by exactly four. That matches the diff: three `it.each` rows plus the
+control. Confirmed directly against the file, too:
+
+```
+ks914-shipped-path.test.ts   base:  Tests  6 passed (6)
+ks914-shipped-path.test.ts   head:  Tests 10 passed (10)
+```
+
+### Red-proof — base guard, head test file, nothing else changed
+
+Head's test file copied onto the base tree, `diff -q` clean against head's copy first, so the guard
+is the only difference:
+
+```
+head      Test Files  1 passed (1)    Tests  10 passed (10)
+
+redproof  Test Files  1 failed (1)    Tests   3 failed | 7 passed (10)
+          × an unencodable CRLF header returns a tagged failure instead of throwing
+          × an unencodable non-latin1 header returns a tagged failure instead of throwing
+          × an unencodable NUL header returns a tagged failure instead of throwing
+          TypeError: Invalid character in header content ["X-Probe"]
+            ❯ src/security/ssrf-guard.ts:492:21     const req = mod.request(
+            ❯ safeOutboundRequest src/security/ssrf-guard.ts:481:10
+            ❯ src/__tests__/ks914-shipped-path.test.ts:137:20
+```
+
+Three red, control green, 10/10 after. No disagreement here at all — this part reproduces exactly as
+you wrote it.
+
+### The rest of what I ran
+
+**`services/originate` — KS-914 call-site cells** (jest, not vitest; needed a throwaway
+`DATABASE_URL` to let `config.ts` load, pointing at nothing)
+```
+PASS src/__tests__/ks914-deliver-webhook-blocked-vs-failed.test.ts
+  KS-914 deliverWebhook — blocked vs failed
+    ✓ a guard refusal is prefixed `blocked by SSRF guard:` and logged as blocked
+    ✓ a transport failure is NOT prefixed, and is logged as a failure
+    ✓ a delivered webhook reports the destination status and logs no warning
+    ✓ passes a TOTAL deadline to the guard, not a socket-idle timer
+
+Tests:       4 passed, 4 total
+```
+
+**eslint, both changed files**
+```
+packages/shared/src/security/ssrf-guard.ts
+  488:9  warning  'deadline' is never reassigned. Use 'const' instead  prefer-const
+
+✖ 1 problem (0 errors, 1 warning)
+```
+That warning sits at `483:9` on the base with identical text, so it predates this PR — flagging only
+so it isn't mistaken for something the change introduced.
+
+**typecheck**
+```
+tsc --noEmit -p packages/shared/tsconfig.json     exit 0
+```
+
+**Defect reproduction, no repo code involved** — bare `https.request`, Node v24.18.0
+```
+CRLF             THREW    ERR_INVALID_CHAR: Invalid character in header content ["X-Probe"]
+non-latin1       THREW    ERR_INVALID_CHAR: Invalid character in header content ["X-Probe"]
+NUL              THREW    ERR_INVALID_CHAR: Invalid character in header content ["X-Probe"]
+CLEAN(control)   RETURNED (no sync throw)
+```
+
+**`write`/`end`, same probe shape** — the branch I couldn't write a test for
+```
+write+end  lone surrogate   RETURNED (no sync throw)
+write+end  NUL in body      RETURNED (no sync throw)
+write+end  non-latin1       RETURNED (no sync throw)
+write+end  CRLF             RETURNED (no sync throw)
+write+end  1MB string       RETURNED (no sync throw)
+write+end  empty            RETURNED (no sync throw)
+after destroy()             RETURNED (no sync throw)
+non-string body             THREW    ERR_INVALID_ARG_TYPE
+```
+
+### Not run, so it isn't read as green
+
+- `Blockchain/Dev/scripts/preflight/preflight.sh` — several legs want a live gateway and a fresh
+  install into `scripts/preflight`; against a detached extraction the output would be noise rather
+  than evidence. Your 12 legs taken as read.
+- `check-port-crossover.mjs` — no ports or allocations moved.
+- The four platform suites — agreed with your reasoning for skipping them; nothing here is
+  reachable from a running stack.
+- No container built, nothing deployed, no stack started at any point.
+
+### What I'd ask
+
+Just a single `vitest run` on your base `ff5218867` and a look at the number it prints. If it says
+787 the PR body needs two edits; if it says 784 then something differs between our installed trees
+and I'd genuinely like to know what, because it would mean three cells that run here don't run
+there. Either answer is useful — I've flagged the figures as pending your confirmation in the body
+rather than overwriting them, so the correction stays yours to make.
+
+Everything else above agrees with your evidence block.
+
+====================================================================================================
+COMMENT 5662500697 kksecura 2026-09-14T10:23:09Z
+====================================================================================================
+## BLUF — the base count is 787: the export at `ff5218867` prints `Tests 787 passed (787)` / 41 files; the head 791 / 41; the delta is +4. The two body lines are edited (the pending block is replaced by the settled table). develop `852e1fff7` is merged in as `c624c9a8d` — the two files are byte-identical to the reviewed head.
+
+Measured 2026-09-14 10:10–10:20Z, darwin arm64, node v24.7.0, vitest 4.1.10, from a detached worktree at `7d8a3f0e4` and then the merged head `c624c9a8d`. Every number below is a printed tally line, not a count by eye.
+
+| item, as written in the review | what was measured | where |
+|---|---|---|
+| 1 — *"Could you double-check two figures? … base `ff5218867` 784 vs 787 … cells added +7 vs +4 … Just a single `vitest run` on your base"* | **787 passed / 41 files** at the base, by the review's own method: a full-tree `git archive ff5218867 \| tar -x` export, `Blockchain/Dev/node_modules` and `packages/shared/node_modules` symlinked in from a fresh `npm ci`, `node ../../node_modules/vitest/vitest.mjs run` from `packages/shared`. Head `7d8a3f0e4`: **791 passed / 41 files**. Delta **+4** = `ks914-shipped-path.test.ts` 6 → 10 (the three `it.each` rows + the control). The 784 / +7 was a first-write error; nothing differs between the installed trees. Body lines edited: the pending blockquote → the settled table. | body `## Test Evidence`; `5_Project_History/2026-09-14_s232/item1/suite_base.out`, `suite_head.out` |
+| 2 — *"the PR description doesn't carry the template … restore the block with both boxes unticked and a line under each saying why"* | The body carries it — the 2026-09-09 restoration is kept byte-for-byte above `## Test Evidence` (verified: the text above that heading is identical before and after this round's PATCH). Ack boxes unticked with their reasons; the PII block reads "Not applicable" with its reason; `## Linear` carries the KS-931 URL. | body lines 1–104 |
+| 3 — *"The `write`/`end` wrap looks unreachable given the declared type … It's the two reasons in the comment above it I'd gently flag"* and *"Branch is 111 commits behind `develop`"* | Recorded, not changed: the wrap stays as belt-and-braces; the comment's two reasons stand as written on this PR — a one-line comment correction is a separate polish if wanted, not part of this round. develop `852e1fff7` merged in `--no-ff` as `c624c9a8d` (no rebase; `7d8a3f0e4` stays an ancestor); `git merge-tree` predicted CLEAN and the real merge matched byte-for-byte; the two files at the merged head are the reviewed blobs `5a838e0d6` / `69706c1ef` (develop never moved them); `git diff --name-only develop...HEAD` = exactly the two files; `scripts/audit/audit-baseline.json` now develop's `03d1680e3`. | `git log --format=%P c624c9a8d` = `7d8a3f0e4 852e1fff7` |
+
+Also measured this round, facts only:
+- **Merged tree:** `packages/shared` **839 passed / 43 files** (791 + develop's own two suites since 09-06, `ks764-key-revoke-call-site-guard` and `ks780-normalise-org-id-one-implementation`); `ks914-shipped-path.test.ts` alone 10 / 10.
+- **Red-proof on the base guard reproduced:** the head's test file over the export (`diff -q` clean; guard blob `a1203248f`) → `3 failed | 7 passed (10)`, `TypeError: Invalid character in header content ["X-Probe"]` on the CRLF / non-latin1 / NUL cells, the control green — the same shape as the review's.
+- **One tamper at the merged head:** the executor's `catch` at `ssrf-guard.ts:534-536` replaced by `throw err;` → `3 failed | 7 passed (10)`; restored by content, whole-file sha256 `f847a643…` asserted, re-run 10 / 10.
+- `services/originate` KS-914 call-site cells `4 passed, 4 total` at the merged head (jest, throwaway `DATABASE_URL` in the command's environment); `tsc --noEmit -p packages/shared/tsconfig.json` rc 0; `eslint` on the two files 0 errors / 1 warning (`prefer-const` on `deadline` at `:488`, byte-identical on the base).
+- The push's in-hook preflight at `c624c9a8d`: `PREFLIGHT INCOMPLETE — 12/15 legs ran, 3 SKIPPED. Nothing failed.` (legs 3/4/8 need a local stack; leg 14 shell suites 33/33; leg 15 all 21 tracked guards accounted for).
+
+Not run this round: the bare `https.request` and `write`/`end` probe sets (the review's evidence stands as written); the four platform suites (no live path reaches `dispatchEvent`); no stack, no container.
+

@@ -1,0 +1,121 @@
+/**
+ * =============================================================================
+ * KS-584 (P3) — stuck-anchor reconciler
+ * =============================================================================
+ * The in-process confirmation poll dies with the service (KS-535) and its
+ * 30-attempt window is shorter than a congested chain, so anchor_store rows
+ * can sit 'pending'/'submitted' forever while their tx is settled on-chain —
+ * the stale state behind the QA-High false negative (an anonymous verifier
+ * told a settled anchor is not anchored, 2026-08-11). Kam's ruling: fix the
+ * CAUSE — make the stored status honest — rather than preferring-confirmed
+ * over wrong data at read time.
+ *
+ * Properties:
+ *   - idempotent; survives restarts by construction (reads the DB, not
+ *     process state);
+ *   - only ever moves a row TOWARD chain truth: real-tx rows to 'confirmed'
+ *     when the chain has the tx in a block, or to terminal 'failed' when the
+ *     tx has not appeared within the give-up window (its inputs were spent by
+ *     something else — the KS-535 `All inputs are spent` class);
+ *   - fabricated refs (`tx_sim_`/`mock_tx_`) are never chain-checked — KS-587
+ *     owns those rows;
+ *   - a chain-provider error leaves the row untouched for the next pass.
+ *
+ * Dependency-injected so it is unit-testable without booting the service
+ * (index.ts starts the HTTP listener on import).
+ * =============================================================================
+ */
+
+export interface ReconcilerDeps {
+  isDbAvailable: () => boolean;
+  isCardanoReady: () => boolean;
+  query: (sql: string, params?: unknown[]) => Promise<{ rows: any[] }>;
+  /** Single-shot chain check for a tx — waitForConfirmation(tx, 1, 0, 0). */
+  checkTx: (txHash: string) => Promise<{ confirmed: boolean; blockHash?: string; blockNumber?: number; slot?: number; confirmations?: number }>;
+  updateStatus: (anchorId: string, updates: Record<string, unknown>) => Promise<void>;
+  log: (level: string, message: string, meta?: Record<string, unknown>) => void;
+  now?: () => number;
+}
+
+export interface ReconcilerConfig {
+  minAgeMs: number;
+  giveUpMs: number;
+  batch: number;
+}
+
+export interface ReconcilerResult {
+  scanned: number;
+  confirmed: number;
+  failed: number;
+}
+
+const REAL_TX_64HEX = /^[0-9a-f]{64}$/i;
+
+export function createStuckAnchorReconciler(deps: ReconcilerDeps, config: ReconcilerConfig) {
+  let running = false;
+
+  return async function reconcileStuckAnchors(): Promise<ReconcilerResult> {
+    const out: ReconcilerResult = { scanned: 0, confirmed: 0, failed: 0 };
+    if (running || !deps.isDbAvailable() || !deps.isCardanoReady()) return out;
+    running = true;
+    const now = deps.now ?? Date.now;
+    try {
+      // MIN_AGE keeps the reconciler off rows the live submit/confirm loop is
+      // still actively working (it touches updated_at as it goes).
+      const rows = await deps.query(
+        `SELECT id, transaction_hash, created_at, updated_at FROM anchor_store
+          -- KS-726: 'submitting' is the write-ahead state — the row NAMES a
+          -- signed transaction whose submit reply we never received. Those are
+          -- precisely the rows this reconciler exists for: the transaction may
+          -- be on chain and fee-paying, and nothing else will ever settle it.
+          -- Omitting the state here would make write-ahead pointless, since the
+          -- hash would be stored and then never looked at.
+          WHERE status IN ('pending', 'submitted', 'submitting')
+            AND transaction_hash IS NOT NULL
+            AND simulated = FALSE
+            AND updated_at < NOW() - ($1 || ' milliseconds')::interval
+          ORDER BY updated_at ASC
+          LIMIT $2`,
+        [String(config.minAgeMs), config.batch],
+      );
+      for (const row of rows.rows) {
+        const tx = String(row.transaction_hash || '');
+        if (!REAL_TX_64HEX.test(tx)) continue;
+        out.scanned++;
+        try {
+          const confirmation = await deps.checkTx(tx);
+          if (confirmation.confirmed) {
+            await deps.updateStatus(row.id, {
+              status: 'confirmed',
+              confirmations: confirmation.confirmations ?? 1,
+              blockNumber: confirmation.blockNumber,
+              slot: confirmation.slot,
+              blockHash: confirmation.blockHash,
+              confirmedAt: new Date(),
+            });
+            out.confirmed++;
+            deps.log('info', 'Reconciler: stale anchor confirmed against chain (KS-584)', { anchorId: row.id, txHash: tx, blockNumber: confirmation.blockNumber });
+          } else if (now() - new Date(row.created_at).getTime() > config.giveUpMs) {
+            await deps.updateStatus(row.id, {
+              status: 'failed',
+              errorMessage: `transaction never appeared on chain within ${Math.round(config.giveUpMs / 3_600_000)}h (reconciler)`,
+            });
+            out.failed++;
+            deps.log('warn', 'Reconciler: stale anchor marked failed — tx never appeared (KS-584)', { anchorId: row.id, txHash: tx });
+          }
+        } catch (err: any) {
+          // Chain-provider hiccup — leave the row for the next pass. Never guess.
+          deps.log('warn', 'Reconciler: chain check errored; leaving row as-is', { anchorId: row.id, error: err?.message });
+        }
+      }
+      if (out.scanned > 0) {
+        deps.log('info', 'Reconciler pass complete (KS-584)', { ...out });
+      }
+    } catch (err: any) {
+      deps.log('warn', 'Reconciler pass failed', { error: err?.message });
+    } finally {
+      running = false;
+    }
+    return out;
+  };
+}

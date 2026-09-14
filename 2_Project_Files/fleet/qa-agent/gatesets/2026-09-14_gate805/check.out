@@ -1,0 +1,25 @@
+Mon 14 Sep 2026 21:06:50 AEST
+--- --check, nothing installed (expect rc 3 on the real brief path) ---
+brief missing or empty: /Volumes/DevMASTER/WEDNESDAY/2_Project_Files/fleet/qa-agent/briefs/2026-09-14_secuura-805-ks726-tier1-r1.md
+rc=3
+--- --check with overrides (expect rc 0) ---
+all guards pass:
+  head on origin: #805 cd5e62e96c373c2690b97bafb277683402f1e70b at refs/heads/feature/ks-726-write-ahead-tx-hash-port-onto-anchorsubmission
+  compare (GitHub API): develop...#805 = 346b491f27fb1cbf4d72cc1c86d417d0252a5f84 ahead=7 files=9
+  anchorSubmission.ts 66fa7e6f7 = M44; index.ts 9f3eba10c = M44; index.ts c59345d03 = M44; secuura-api.yaml d327a249a = M44; reconciler.ts dc65347f6 = M44; anchoring.openapi.ts ca7c92850 = M44; ks726-write-ahead-tx-hash.test.ts ABSENT = absent on develop; ks726-review-f1-f3.test.ts ABSENT = absent on develop; verifyAnchorStatus.ts ABSENT = absent on develop; provider.ts 9232d4d0a = M44; confirmation.ts c5042ca91 = M44; generate-openapi.ts e84acdc9e = M44 | origin develop MOVED bc067e3e91821116f3344b2aa5a1d7a5cc968d18 -> ede711ca9ad13a320a3f409efb459c61ac3998bd: commits=5 files=6 — disjoint from the GUARDED list (services/anchoring/, the yaml, the generator, spec-examples, shared openapi/, the lockfile); the gate merges the then-current develop onto cd5e62e96 in its own clone, runs check:openapi on the MERGED tree first (a CHECK FAIL after a clean merge = the generated yaml = a regenerate-after-squash Record), names the delta and re-derives every count (brief TARGET)
+  brief, prompt, QA project and repo all present
+  brief and prompt agree on TIER 1 and ROUND 1
+  prompt opens with the thinking directive and names the brief
+  brief and prompt both name the head SHA
+  prompt tells the agent to MAIL its verdict
+  prompt forbids pushing / the real hook / preflight in the Secuura checkout
+  prompt forbids memory maintenance inside the gate session
+  prompt forbids printing a credential value
+  a launch (not --check) will refuse unless stdin is a TTY (exit 21)
+rc=0
+--- headless LAUNCH with overrides (expect rc 21, the TTY guard) ---
+REFUSING: stdin is not a TTY — this launcher execs an interactive agent; run it in a cockpit pane, never inside a Bash tool (a headless gate is invisible and dies with the caller's shell)
+rc=21
+ede711ca9ad13a320a3f409efb459c61ac3998bd	refs/heads/develop
+cd5e62e96c373c2690b97bafb277683402f1e70b	refs/pull/805/head
+Mon 14 Sep 2026 21:07:19 AEST

@@ -1,0 +1,207 @@
+--- guard :200-345
+   200	}
+   201	
+   202	/** Hostnames that name something inside the perimeter regardless of DNS. */
+   203	function classifyHostname(host: string): string | null {
+   204	  // A trailing dot is the same name to a resolver but a different string to
+   205	  // `===`, so "localhost." would otherwise walk straight past the check.
+   206	  const h = host.replace(/\.$/, '');
+   207	  if (h === 'localhost' || h.endsWith('.localhost')) {
+   208	    return 'loopback hostname (localhost)';
+   209	  }
+   210	  if (h.endsWith('.internal') || h.includes('.internal.')) {
+   211	    return 'internal service hostname (.internal)';
+   212	  }
+   213	  if (h.endsWith('.svc.cluster.local') || h.endsWith('.cluster.local')) {
+   214	    return 'cluster-internal hostname (.cluster.local)';
+   215	  }
+   216	  if (h.endsWith('.local')) return 'mDNS / link-local hostname (.local)';
+   217	  if (!h.includes('.')) return 'single-label hostname (resolves only inside the local network)';
+   218	  return null;
+   219	}
+   220	
+   221	/* -------------------------------------------------------------------------- */
+   222	/* Layer 1 — literal checks (no I/O)                                          */
+   223	/* -------------------------------------------------------------------------- */
+   224	
+   225	/**
+   226	 * Scheme + host checks with no DNS. Safe to call anywhere, including in a
+   227	 * synchronous validation path.
+   228	 *
+   229	 * Note that we parse with WHATWG `URL` first and then inspect `hostname`, which
+   230	 * matters more than it looks: the parser normalises the alternate IPv4 spellings
+   231	 * attackers reach for — `https://2130706433/`, `https://0x7f000001/` and
+   232	 * `https://127.1/` all arrive here as `127.0.0.1`, and `https://0/` as
+   233	 * `0.0.0.0`. Verified against Node 24, and pinned by tests.
+   234	 */
+   235	export function checkUrlLiteral(raw: unknown, options: SsrfGuardOptions = {}): SsrfCheckResult {
+   236	  if (typeof raw !== 'string' || !raw.trim()) {
+   237	    return { ok: false, error: 'url must be a non-empty string' };
+   238	  }
+   239	
+   240	  let parsed: URL;
+   241	  try {
+   242	    parsed = new URL(raw.trim());
+   243	  } catch {
+   244	    return { ok: false, error: 'url is not a valid absolute URL' };
+   245	  }
+   246	
+   247	  const allowedSchemes = options.allowHttp ? ['https:', 'http:'] : ['https:'];
+   248	  if (!allowedSchemes.includes(parsed.protocol)) {
+   249	    return {
+   250	      ok: false,
+   251	      error: options.allowHttp
+   252	        ? `url scheme "${parsed.protocol}" is not http(s)`
+   253	        : 'url must use https:// — payloads are not delivered over plaintext HTTP',
+   254	    };
+   255	  }
+   256	
+   257	  const host = parsed.hostname.toLowerCase();
+   258	  if (!host) return { ok: false, error: 'url has no host' };
+   259	
+   260	  const bare = stripBrackets(host);
+   261	  const family = isIP(bare);
+   262	  if (family !== 0) {
+   263	    const reason = family === 4 ? classifyIPv4(bare) : classifyIPv6(bare);
+   264	    if (reason) return { ok: false, error: `url host ${bare} is forbidden: ${reason}` };
+   265	  } else {
+   266	    const reason = classifyHostname(host);
+   267	    if (reason) return { ok: false, error: `url host "${host}" is forbidden: ${reason}` };
+   268	  }
+   269	
+   270	  const allowlistRaw = process.env[options.allowlistEnvVar ?? DEFAULT_ALLOWLIST_ENV];
+   271	  if (allowlistRaw && allowlistRaw.trim().length > 0) {
+   272	    const suffixes = allowlistRaw
+   273	      .split(',')
+   274	      .map((s) => s.trim().toLowerCase())
+   275	      .filter(Boolean);
+   276	    const bareHost = host.replace(/\.$/, '');
+   277	    if (!suffixes.some((suffix) => bareHost === suffix || bareHost.endsWith('.' + suffix))) {
+   278	      return {
+   279	        ok: false,
+   280	        error: `url host "${host}" not in ${options.allowlistEnvVar ?? DEFAULT_ALLOWLIST_ENV}`,
+   281	      };
+   282	    }
+   283	  }
+   284	
+   285	  return { ok: true, url: parsed.toString() };
+   286	}
+   287	
+   288	/* -------------------------------------------------------------------------- */
+   289	/* Layer 2 — DNS resolution re-check                                          */
+   290	/* -------------------------------------------------------------------------- */
+   291	
+   292	/**
+   293	 * Resolve `host` and run EVERY returned address through the same predicates as
+   294	 * the literal check. Returns a reason string when the host must not be
+   295	 * contacted, or null when every resolved address is acceptable.
+   296	 *
+   297	 * Two deliberate choices:
+   298	 *  - `all: true`. A host with one public and one private A record is not safe;
+   299	 *    checking only the first address is how a multi-record bypass works.
+   300	 *  - Resolution failure is a REJECTION, not a pass. We cannot show the
+   301	 *    destination is external, so we do not contact it. (A guard that fails open
+   302	 *    on a dependency error is the KS-616 shape and was rejected there too.)
+   303	 */
+   304	/**
+   305	 * KS-914. Resolve a host and return the addresses that PASSED the classifier,
+   306	 * instead of discarding them. `assertResolvedHostPublic` kept its old contract
+   307	 * (an error string or null) and threw the addresses away — which is precisely
+   308	 * why the connection could not be pinned to what was checked.
+   309	 */
+   310	export async function resolvePublicAddresses(
+   311	  host: string,
+   312	): Promise<{ ok: true; addresses: string[] } | { ok: false; error: string }> {
+   313	  const bare = stripBrackets(host.toLowerCase());
+   314	
+   315	  // An IP literal has nothing to resolve; the literal check already ruled.
+   316	  if (isIP(bare) !== 0) {
+   317	    const reason = classifyAddress(bare);
+   318	    return reason ? { ok: false, error: reason } : { ok: true, addresses: [bare] };
+   319	  }
+   320	
+   321	  let addresses: Array<{ address: string; family: number }>;
+   322	  try {
+   323	    addresses = await lookup(bare, { all: true, verbatim: true });
+   324	  } catch (err) {
+   325	    return {
+   326	      ok: false,
+   327	      error: `host "${bare}" could not be resolved (${(err as Error).message}) — refusing to contact an unverifiable destination`,
+   328	    };
+   329	  }
+   330	
+   331	  if (!addresses || addresses.length === 0) {
+   332	    return { ok: false, error: `host "${bare}" resolved to no addresses` };
+   333	  }
+   334	
+   335	  for (const { address } of addresses) {
+   336	    const reason = classifyAddress(address);
+   337	    if (reason) {
+   338	      return { ok: false, error: `host "${bare}" resolves to ${address}, which is forbidden: ${reason}` };
+   339	    }
+   340	  }
+   341	
+   342	  return { ok: true, addresses: addresses.map((a) => a.address) };
+   343	}
+   344	
+   345	export async function assertResolvedHostPublic(host: string): Promise<string | null> {
+--- tsconfig + vitest.config
+{
+  "compilerOptions": {
+    "target": "ES2022",
+    "module": "commonjs",
+    "lib": ["ES2022", "DOM"],
+    "declaration": true,
+    "declarationMap": true,
+    "sourceMap": true,
+    "outDir": "./dist",
+    "rootDir": "./src",
+    "strict": true,
+    "noUnusedLocals": true,
+    "noUnusedParameters": true,
+    "esModuleInterop": true,
+    "skipLibCheck": true,
+    "forceConsistentCasingInFileNames": true,
+    "resolveJsonModule": true,
+    "moduleResolution": "node"
+  },
+  "include": ["src/**/*.ts", "src/types/**/*.d.ts"],
+  "exclude": ["node_modules", "dist", "src/__tests__"]
+}
+import { defineConfig } from 'vitest/config';
+import { resolve } from 'node:path';
+
+export default defineConfig({
+  resolve: {
+    alias: {
+      // KS-727 class guard: the guard imports service middleware from outside
+      // this package, and those modules import `@secuura/shared` by name. Node
+      // resolution sends that to `dist/`, so without this alias the suite would
+      // measure the LAST BUILD rather than the working tree — a source fix
+      // would leave the guard green until someone happened to rebuild, which is
+      // the same inert-proof trap the #774 review recorded. It also keeps class
+      // identity single: the guard's `instanceof` controls compare against the
+      // same `AppError` the imported handlers see.
+      //
+      // Scope check: nothing inside `packages/shared/src` imports itself by
+      // package name (all internal imports are relative), so this alias only
+      // affects modules pulled in from outside the package.
+      '@secuura/shared': resolve(__dirname, 'src/index.ts'),
+    },
+  },
+  test: {
+    include: ['src/__tests__/**/*.test.ts'],
+    globals: true,
+  },
+});
+--- root package.json vitest/eslint/tsx versions
+6:  "workspaces": [
+61:    "eslint": "^10.7.0",
+67:    "typescript": "^5.3.3",
+68:    "tsx": "^4.23.1",
+--- originate jest config
+2:  "name": "@secuura/originate",
+10:    "test": "jest",
+45:    "jest": "^29.7.0",
+Blockchain/Dev/services/originate/jest.config.js
+Blockchain/Dev/services/originate/jest.integration.config.js
