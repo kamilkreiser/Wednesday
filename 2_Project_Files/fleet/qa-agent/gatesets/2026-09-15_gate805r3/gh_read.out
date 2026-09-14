@@ -1,0 +1,48 @@
+gh_read 20:30:55 AEST
+PR 805 open draft False head cd5e62e96c373c2690b97bafb277683402f1e70b feature/ks-726-write-ahead-tx-hash-port-onto-anchorsubmission base develop 346b491f2 mergeable True unstable commits 7 files 9 +1120 -31 title: KS-726: write-ahead the Cardano tx hash so a lost submit reply cannot orphan a paid transaction (ported onto anchorSubmission.ts; supersedes #764)
+body chars 19527 at-signs 0 ack:schemathesis 1 ack:akto 1 Closes KS-726 1 ## Test Evidence 1 ticked [x] 2 unticked [ ] 3
+files 9
+  Blockchain/Dev/docs/openapi/secuura-api.yaml                                               122d3a2f8 +1 -0 modified
+  Blockchain/Dev/services/anchoring/src/__tests__/ks726-review-f1-f3.test.ts                 6dc62c8db +153 -0 added
+  Blockchain/Dev/services/anchoring/src/__tests__/ks726-write-ahead-tx-hash.test.ts          ea5495f58 +462 -0 added
+  Blockchain/Dev/services/anchoring/src/anchorSubmission.ts                                  7879a6ba1 +237 -21 modified
+  Blockchain/Dev/services/anchoring/src/anchoring.openapi.ts                                 49b8b38da +10 -1 modified
+  Blockchain/Dev/services/anchoring/src/cardano/index.ts                                     d7b44482d +76 -2 modified
+  Blockchain/Dev/services/anchoring/src/index.ts                                             da4abd432 +127 -6 modified
+  Blockchain/Dev/services/anchoring/src/reconciler.ts                                        55e2fe694 +7 -1 modified
+  Blockchain/Dev/services/anchoring/src/verifyAnchorStatus.ts                                b8b73078e +47 -0 added
+commits 7
+   36979baca 2026-09-03T14:55:14Z | KS-726: write-ahead the Cardano tx hash — production code, ported onto anchorSubmission.ts | parents ['7dd304b7c']
+   143d3dc50 2026-09-03T15:11:17Z | KS-726: the write-ahead suite — 7 cases, 5 red-proofs, and the ordering case that earns its place | parents ['36979baca']
+   2c167cc71 2026-09-03T15:16:30Z | KS-726: regenerate the served spec for the 'submitting' status | parents ['143d3dc50']
+   ebabe25a4 2026-09-08T11:00:41Z | Merge origin/develop into KS-726 — bring the branch current (234 behind) | parents ['2c167cc71', '067554d65']
+   97e2161fa 2026-09-08T11:07:22Z | KS-726: Peter's F1, F2 and F3 from the #805 review | parents ['ebabe25a4']
+   1885d5166 2026-09-14T09:50:06Z | Merge develop `346b491f2` (M44) into ks-726 — the branch's 09-08 base moves 167 commits forward (KS-671's chai | parents ['97e2161fa', '346b491f2']
+   cd5e62e96 2026-09-14T10:18:10Z | KS-726: a DEFINITIVE node rejection keeps the ordinary retry — guard 5 rests only a LOST reply (#805 review, r | parents ['1885d5166']
+reviews 0
+review comments 0
+issue comments 7
+   5527928849 linear[bot] 2026-09-03T15:19:44Z chars 6454 at-signs 0 | <!-- linear-linkback -->
+   5528415301 kksecura 2026-09-03T15:57:47Z chars 3316 at-signs 1 | ## Schemathesis: RUN, with a develop baseline and a repeat. **No regression from this PR.**
+   5537266190 PeterObeden 2026-09-04T07:34:21Z chars 11062 at-signs 0 | ## Review — not approving yet, and I want to be precise about why
+   5547271447 kksecura 2026-09-04T22:42:22Z chars 2439 at-signs 2 | ## Test Evidence — and #764 is closed, so this is the only open PR on KS-726
+   5584200312 kksecura 2026-09-08T11:08:51Z chars 5587 at-signs 2 | ## BLUF — @PeterObeden all four addressed. `97e2161fa` (develop merged in first, 234 behind, clean).
+   5584860862 PeterObeden 2026-09-08T12:06:12Z chars 7448 at-signs 2 | ## Review of `97e2161fa` — F1–F4 all land. Holding on one new finding, and it is a question rather than a verdict.
+   5662521346 kksecura 2026-09-14T10:25:05Z chars 5674 at-signs 0 | ## The guard-5 breadth question (2026-09-08) — answered at `cd5e62e96c373c2690b97bafb277683402f1e70b`, by file:line
+compare_develop_head status diverged merge_base 346b491f27fb1cbf4d72cc1c86d417d0252a5f84 ahead 7 behind 2 files 9 commits 7
+     Blockchain/Dev/docs/openapi/secuura-api.yaml 122d3a2f8 +1 -0
+     Blockchain/Dev/services/anchoring/src/__tests__/ks726-review-f1-f3.test.ts 6dc62c8db +153 -0
+     Blockchain/Dev/services/anchoring/src/__tests__/ks726-write-ahead-tx-hash.test.ts ea5495f58 +462 -0
+     Blockchain/Dev/services/anchoring/src/anchorSubmission.ts 7879a6ba1 +237 -21
+     Blockchain/Dev/services/anchoring/src/anchoring.openapi.ts 49b8b38da +10 -1
+     Blockchain/Dev/services/anchoring/src/cardano/index.ts d7b44482d +76 -2
+     Blockchain/Dev/services/anchoring/src/index.ts da4abd432 +127 -6
+     Blockchain/Dev/services/anchoring/src/reconciler.ts 55e2fe694 +7 -1
+     Blockchain/Dev/services/anchoring/src/verifyAnchorStatus.ts b8b73078e +47 -0
+compare_M44_develop status ahead merge_base 346b491f27fb1cbf4d72cc1c86d417d0252a5f84 ahead 2 behind 0 files 3 commits 2
+     Blockchain/Dev/docs/KS-926-CHECKS-THAT-CANNOT-FAIL.md 9c2b8bf98 +356 -0
+     Blockchain/Dev/scripts/__tests__/check_shared_relink.test.sh 867ce728a +191 -0
+     Blockchain/Dev/scripts/check-shared-relink.sh d41c79538 +77 -7
+compare_M45_develop status ahead merge_base 852e1fff773bd358170c11334d59496f05fdd8a7 ahead 1 behind 0 files 1 commits 1
+     Blockchain/Dev/docs/KS-926-CHECKS-THAT-CANNOT-FAIL.md 9c2b8bf98 +356 -0
+develop bc067e3e91821116f3344b2aa5a1d7a5cc968d18 2026-09-14T10:14:34Z | KS-926: state the family — ten checks that cannot fail, and the premise under each (#874)

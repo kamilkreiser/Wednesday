@@ -1,41 +1,39 @@
 #!/bin/bash
-# launch_qa_secuura_805_ks726.sh — cross-project QA agent, ONE TIER 1 ROUND 3 gate over Secuura/Blockchain PR #805 (KS-726,
-# builder s233, wrapped) @ a4d182bf9efaa5b19b74c4a861f22746491e91b4 — a DELTA re-gate over round 2's GO WITH FINDINGS on
-# cd5e62e96c373c2690b97bafb277683402f1e70b (ONE parent, fast-forward). Round 2 found F1: waitForConfirmation could not
-# distinguish "polled and absent" from "could not poll", so a chain unreachable for the whole bounded poll after an
-# "inputs spent" 400 read as ABSENT and retried — a second fee-paying transaction for a document whose first may already
-# be on chain. This round's ONE commit fixes exactly that: cardano/confirmation.ts's ConfirmationResult now carries
-# polled/errored counters and anchorSubmission.ts's reconfirmKnownSubmission maps polled === 0 to 'unknown' instead of
-# 'absent'. Guard 5 / guard 3's own shape (round 1/round 2) is UNCHANGED this round. TIER 1 (RULED by Wednesday): a wrong
-# guard mints a second fee-paying transaction or strands a document 24 h.
+# launch_qa_secuura_805_ks726.sh — cross-project QA agent, ONE TIER 1 ROUND 1 gate over Secuura/Blockchain PR #805 (KS-726,
+# builder s231, wrapped) @ cd5e62e96c373c2690b97bafb277683402f1e70b — the builder's ROUND-2 head (the 09-08 review head
+# 97e2161fa + develop M44 346b491f2 merged in --no-ff = 1885d5166, + ONE commit on Kam's OPTION 1 ruling of 2026-09-14 20:06,
+# card secuura-805-guard5-node-rejection-retry); tree 32e6396ab. anchorSubmission.ts is the path every real Cardano
+# submission takes on demo (preview testnet, fee-paying): guard 5 now rests ONLY a LOST reply and a DEFINITIVE node
+# rejection (isChainReachableError — a status_code on the error) keeps the ordinary fail-and-retry; guard 3 re-polls the
+# written-ahead hash on an "inputs spent" 400 and retries only when the bounded poll shows it ABSENT; the published enum
+# value 'submitting' on Anchor.status. TIER 1 (RULED by Wednesday): a wrong guard mints a second fee-paying transaction
+# or strands a document 24 h.
 #
-# THE SHAPE, as read 2026-09-14T21:04Z / 07:04 AEST 2026-09-15 (git + the compare API agree): the merge-base of the head
-# with develop is STILL M44 346b491f2 (an ANCESTOR of the head; rev-list --count M44..head = 8, was 7). Develop has moved
-# to 0f37b85c8 — 14 commits past M44 — but ZERO of them touch services/anchoring/, the yaml, the generator, spec-examples,
-# packages/shared/src/openapi/ or the lockfile (the 11 Blockchain/Dev files that DID move are deployment/docs/docker-init/
-# packages-shared-security/scripts-bootstrap only; ~80 more are under systemTest/, a disjoint directory). The compare
-# develop...head = merge_base M44, ahead 8, files 11 (+241 over round 2's +1120, ins+del shorthand). The compare is
-# asserted as merge_base + ahead + files (exit 10); `behind` is deliberately NOT asserted.
+# THE SHAPE, as read 20:29-20:38 AEST 2026-09-14 (git + the compare API agree): the merge-base of the head with develop is
+# M44 346b491f2 (an ANCESTOR of the head; rev-list --count M44..head = 7); develop is M46 bc067e3e9 = M44 + #879 (scripts/
+# check-shared-relink.sh + its test) + #874 (docs/KS-926-CHECKS-THAT-CANNOT-FAIL.md) — 2 commits, 3 files, NONE of #805's
+# nine. The compare develop...head = merge_base M44, ahead 7, behind 2, files 9 (+1120 -31). The compare is asserted as
+# merge_base + ahead + files (exit 10); `behind` is deliberately NOT asserted, so a develop that moves on does not trip
+# this guard — the develop arm below judges the move by CONTENT.
 #
-# The develop pin is judged by CONTENT, not bare (unchanged mechanism from round 2's 813/AUTH4 + 912r2 DEV_CONTENT_ALLOWED
-# shape): (a) THIRTEEN paths by blob at the CURRENT develop — the six of #805's nine that EXIST on develop (anchorSubmission.ts
-# M44 66fa7e6f7; anchoring index.ts 9f3eba10c; cardano/index.ts c59345d03; the yaml d327a249a OR #922's 19f6a4193 once #922
-# squashes; reconciler.ts dc65347f6; anchoring.openapi.ts ca7c92850 OR #922's a899176eb) — #805's own (round-3) blob on any
-# of them means the PR has landed and THIS brief is stale: exit 19; the FOUR files #805 ADDS (ks726-write-ahead-tx-hash.test.ts,
-# ks726-review-f1-f3.test.ts, verifyAnchorStatus.ts, and — new this round — ks726-gate-f1-unreachable-chain.test.ts) must be
-# ABSENT on develop (present with #805's blob -> LANDED, exit 19; present with any other blob -> exit 18);
-# cardano/provider.ts 9232d4d0a and scripts/generate-openapi.ts e84acdc9e must be develop's, and cardano/confirmation.ts
-# (now judged separately — its OWN blob this round is 5690eb24f, its develop-OK blob is STILL M44's c5042ca91, unchanged)
-# — any blob nobody pinned -> exit 18; (b) if develop != the pin, the compare pin...develop is read and REFUSES (exit 18)
-# only when the delta touches a GUARDED path — anything under services/anchoring/, the yaml, scripts/generate-openapi.ts,
-# scripts/spec-examples/, packages/shared/src/openapi/, or the root package-lock.json — UNLESS every hit is cleared BY
-# BLOB in DEV_CONTENT_ALLOWED (#922's four blobs, unaffected by this round — #922 has NOT landed, its blobs have not
-# moved), or cannot be judged (unreadable, not ahead, >250 files); otherwise it proceeds printing the move and its file
-# count, which the gate re-states (brief TARGET: the gate merges the then-current develop onto a4d182bf9 in its own
-# clone, runs check:openapi on the merged tree FIRST and re-derives every count). Expected: nothing new (round 3 is a
-# single delta commit; #922 has not landed as of this draft). If #922 lands first -> ALLOWED by blob (the gate then
-# 3-way merges the yaml + anchoring.openapi.ts hunks — disjoint — and runs check:openapi first); KS-741's PR
-# (anchoring/src/index.ts at a comment only) -> exit 18, re-pin deliberately.
+# The develop pin is judged by CONTENT, not bare (the 813/AUTH4 launcher's shape + the 912r2 DEV_CONTENT_ALLOWED table):
+# (a) TWELVE paths by blob at the CURRENT develop — the six of #805's nine that EXIST on develop (anchorSubmission.ts M44
+# 66fa7e6f7; anchoring index.ts 9f3eba10c; cardano/index.ts c59345d03; the yaml d327a249a OR #922's 19f6a4193 once #922
+# squashes; reconciler.ts dc65347f6; anchoring.openapi.ts ca7c92850 OR #922's a899176eb) — #805's own blob on any of them
+# means the PR has landed and THIS brief is stale: exit 19; the three files #805 ADDS (ks726-write-ahead-tx-hash.test.ts,
+# ks726-review-f1-f3.test.ts, verifyAnchorStatus.ts) must be ABSENT on develop (present with #805's blob -> LANDED, exit
+# 19; present with any other blob -> exit 18); cardano/provider.ts 9232d4d0a, cardano/confirmation.ts c5042ca91 and
+# scripts/generate-openapi.ts e84acdc9e must be develop's — any blob nobody pinned -> exit 18; (b) if develop != M46, the
+# compare M46...develop is read and REFUSES (exit 18) only when the delta touches a GUARDED path — anything under
+# services/anchoring/, the yaml, scripts/generate-openapi.ts, scripts/spec-examples/, packages/shared/src/openapi/, or
+# the root package-lock.json — UNLESS every hit is cleared BY BLOB in DEV_CONTENT_ALLOWED (#922's four blobs: its squash
+# on M46 yields exactly them because M46 did not touch those files after #922's merge-base M45 — read 20:37 from
+# e60a24c50), or cannot be judged (unreadable, not ahead, >250 files); otherwise it proceeds printing the move and its
+# file count, which the gate re-states (brief TARGET: the gate merges the then-current develop onto cd5e62e96 in its own
+# clone, runs check:openapi on the merged tree FIRST and re-derives every count). Expected tonight: nothing (s228 the
+# merge seat is idle until this verdict; s231 and s232 push to their own branches). If #922 lands first -> ALLOWED by
+# blob (the gate then 3-way merges the yaml + anchoring.openapi.ts hunks — disjoint, :1004/:1032 and :48/:66 — and runs
+# check:openapi first); KS-741's PR (anchoring/src/index.ts at a comment only) -> exit 18, re-pin deliberately.
 #
 # exit 21: the LAUNCH path refuses when stdin is not a TTY. This launcher execs an interactive agent; run it in a cockpit
 # pane, never inside a Bash tool — a gate launched there runs headless, invisible to Kam, and dies with the caller's
@@ -50,15 +48,15 @@ set -u
 
 QA_DIR='/Volumes/DevMASTER/!CODING/Testing Agent MAIN'
 WED='/Volumes/DevMASTER/WEDNESDAY'
-BRIEF="${QA805_BRIEF:-$WED/2_Project_Files/fleet/qa-agent/briefs/2026-09-15_secuura-805-ks726-tier1-r3.md}"
-PROMPT_FILE="${QA805_PROMPT:-$WED/2_Project_Files/fleet/qa-agent/briefs/2026-09-15_secuura-805-ks726-tier1-r3.prompt.txt}"
+BRIEF="${QA805_BRIEF:-$WED/2_Project_Files/fleet/qa-agent/briefs/2026-09-14_secuura-805-ks726-tier1-r1.md}"
+PROMPT_FILE="${QA805_PROMPT:-$WED/2_Project_Files/fleet/qa-agent/briefs/2026-09-14_secuura-805-ks726-tier1-r1.prompt.txt}"
 REPO='/Volumes/DevMASTER/!CODING/Secuura/Blockchain/2_Project_Files'
 SECUURA_ENV='/Volumes/DevMASTER/!CODING/Secuura/Blockchain/4_Credentials/.env'
 BRANCH='refs/heads/feature/ks-726-write-ahead-tx-hash-port-onto-anchorsubmission'
-HEAD_SHA="${QA805_HEAD:-a4d182bf9efaa5b19b74c4a861f22746491e91b4}"
+HEAD_SHA="${QA805_HEAD:-cd5e62e96c373c2690b97bafb277683402f1e70b}"
 MERGE_BASE='346b491f27fb1cbf4d72cc1c86d417d0252a5f84'   # M44 = the merge-base of the head with develop (M44 is an ancestor of the head)
-DEVELOP_SHA='0f37b85c80b65d742a01e6529ee8194317a7cc57'  # develop at draft time, round 3 (2026-09-15, ls-remote); judged by content below if it moves
-REAL_BRIEF="$WED/2_Project_Files/fleet/qa-agent/briefs/2026-09-15_secuura-805-ks726-tier1-r3.md"
+DEVELOP_SHA='bc067e3e91821116f3344b2aa5a1d7a5cc968d18'  # M46 = develop at draft time; judged by content below if it moves
+REAL_BRIEF="$WED/2_Project_Files/fleet/qa-agent/briefs/2026-09-14_secuura-805-ks726-tier1-r1.md"
 
 [ -d "$QA_DIR" ]         || { echo "QA project missing: $QA_DIR" >&2; exit 2; }
 [ -s "$BRIEF" ]          || { echo "brief missing or empty: $BRIEF" >&2; exit 3; }
@@ -74,7 +72,7 @@ if ! printf '%s\n' "$LSR" | grep -q "^${HEAD_SHA}[[:space:]]${BRANCH}\$"; then
 fi
 
 # The compare (GitHub compare API), asserted whole (merge_base + ahead + files; NOT behind — see the header):
-# develop...#805 = M44 ahead 8 files 11 (round 3).
+# develop...#805 = M44 ahead 7 files 9.
 COMPARE="$(
   set -a; . "$SECUURA_ENV"; set +a
   HEAD_SHA="$HEAD_SHA" python3 - <<'PY'
@@ -87,10 +85,10 @@ print("%s ahead=%d files=%d" % (c["merge_base_commit"]["sha"], c["ahead_by"], le
 PY
 )"
 [ -n "$COMPARE" ] || { echo "REFUSING: could not read the compare develop...head from the GitHub compare API" >&2; exit 13; }
-[ "$COMPARE" = "$MERGE_BASE ahead=8 files=11" ] || { echo "REFUSING: #805 develop...head reads '$COMPARE', brief pins '$MERGE_BASE ahead=8 files=11'" >&2; exit 10; }
+[ "$COMPARE" = "$MERGE_BASE ahead=7 files=9" ] || { echo "REFUSING: #805 develop...head reads '$COMPARE', brief pins '$MERGE_BASE ahead=7 files=9'" >&2; exit 10; }
 
-# The develop pin, judged by CONTENT (see the header): thirteen paths by blob at the CURRENT develop, then — if develop
-# moved — the pinned...develop delta against the GUARDED list with the DEV_CONTENT_ALLOWED blobs cleared.
+# The develop pin, judged by CONTENT (see the header): twelve paths by blob at the CURRENT develop, then — if develop
+# moved — the M46...develop delta against the GUARDED list with the DEV_CONTENT_ALLOWED blobs cleared.
 CUR_DEV="$(git -C "$REPO" ls-remote origin refs/heads/develop | cut -f1)"
 [ -n "$CUR_DEV" ] || { echo "REFUSING: could not read origin develop (git ls-remote)" >&2; exit 18; }
 DEV_JUDGEMENT="$(
@@ -105,7 +103,7 @@ cur = os.environ["CUR_DEV"]; pinned = os.environ["DEVELOP_SHA"]
 D = "Blockchain/Dev/"; A = D + "services/anchoring/src/"
 # path -> (develop-OK blobs {blob: label} — the token ABSENT means a 404 is the pinned state, LANDED blobs {blob: label})
 JUDGED = {
-  A + "anchorSubmission.ts":                          ({"66fa7e6f759284c2d96ca07fb53995e71b6c5f6b": "M44"}, {"d3ad106d8e5764a526456b3218e1e8d9ad1a38ba": "#805 own (round 3)"}),
+  A + "anchorSubmission.ts":                          ({"66fa7e6f759284c2d96ca07fb53995e71b6c5f6b": "M44"}, {"7879a6ba14a1411fc7cdc14afb786252ca199d69": "#805 own"}),
   A + "index.ts":                                     ({"9f3eba10ccd40b3eb8b6716725e7efb4c01b5d88": "M44"}, {"da4abd43292186da45c1533017fe042fa512bd43": "#805 own"}),
   A + "cardano/index.ts":                             ({"c59345d03532ebf9ade1a6ba6d337756c11af4f2": "M44"}, {"d7b44482d54dd35550536cd3c24c0d9a4fb87c3f": "#805 own"}),
   D + "docs/openapi/secuura-api.yaml":                ({"d327a249a2ef7261b685d1baeb6aec3c9f7b677d": "M44", "19f6a41933d4842c88f1ac66f913cab54c0cd0a4": "#922 landed (KS-679)"}, {"122d3a2f84cf77bf2b7e2dc51489a0d5f823db1f": "#805 own"}),
@@ -113,10 +111,9 @@ JUDGED = {
   A + "anchoring.openapi.ts":                         ({"ca7c92850ae9d80a86a22490382a842c61891c46": "M44", "a899176eb36c8beae4d2a8e8c0c0eeeea73b1a0f": "#922 landed (KS-679)"}, {"49b8b38da7764e071711ded751fa006ae21e808d": "#805 own"}),
   A + "__tests__/ks726-write-ahead-tx-hash.test.ts":  ({"ABSENT": "absent on develop"}, {"ea5495f58ec40fde9c462f8f3c56f450924229ec": "#805 own"}),
   A + "__tests__/ks726-review-f1-f3.test.ts":         ({"ABSENT": "absent on develop"}, {"6dc62c8dbcc1ff462b33af8b50ea0ffee5d4643f": "#805 own"}),
-  A + "__tests__/ks726-gate-f1-unreachable-chain.test.ts": ({"ABSENT": "absent on develop"}, {"82058c305ffaf375ef7941351063d4f236f878b9": "#805 own (round 3, new)"}),
   A + "verifyAnchorStatus.ts":                        ({"ABSENT": "absent on develop"}, {"b8b73078e456916c9d3d47c350046758975a1208": "#805 own"}),
   A + "cardano/provider.ts":                          ({"9232d4d0a8a5950a1096cfa473da6705751da77e": "M44"}, {}),
-  A + "cardano/confirmation.ts":                      ({"c5042ca91b2e4fb211da50f30c097efd3a0b8902": "M44"}, {"5690eb24fe8dca6ac175fec021031524d6904221": "#805 own (round 3)"}),
+  A + "cardano/confirmation.ts":                      ({"c5042ca91b2e4fb211da50f30c097efd3a0b8902": "M44"}, {}),
   D + "scripts/generate-openapi.ts":                  ({"e84acdc9e1be073751fcd6a8bb95504e23688019": "M44"}, {}),
 }
 state = []
@@ -138,7 +135,7 @@ for f, (ok, landed) in JUDGED.items():
     state.append(f.split("/")[-1] + " " + blob[:9] + " = " + ok[blob])
 state = "; ".join(state)
 if cur == pinned:
-    print("OK " + state + " | origin develop still " + pinned + " (the draft pin; git ls-remote)"); sys.exit(0)
+    print("OK " + state + " | origin develop still " + pinned + " (M46; git ls-remote)"); sys.exit(0)
 try:
     c = get("/compare/" + pinned + "..." + cur)
 except Exception as e:
@@ -171,7 +168,7 @@ cleared = sorted(h for h in hits if h in DEV_CONTENT_ALLOWED and by_name.get(h, 
 remaining = sorted(h for h in hits if h not in cleared)
 if remaining:
     print("GUARDED " + " ".join(remaining)); sys.exit(0)
-tail = "the gate merges the then-current develop onto a4d182bf9 in its own clone, runs check:openapi on the MERGED tree first (a CHECK FAIL after a clean merge = the generated yaml = a regenerate-after-squash Record), names the delta and re-derives every count (brief TARGET)"
+tail = "the gate merges the then-current develop onto cd5e62e96 in its own clone, runs check:openapi on the MERGED tree first (a CHECK FAIL after a clean merge = the generated yaml = a regenerate-after-squash Record), names the delta and re-derives every count (brief TARGET)"
 if cleared:
     print("OK " + state + " | origin develop MOVED %s -> %s: commits=%d files=%d, cleared BY BLOB under guarded paths: %s (#922 / KS-679 landed) — %s" % (pinned, cur, c["ahead_by"], len(files), ",".join(x.split("/")[-1] for x in cleared), tail)); sys.exit(0)
 print("OK " + state + " | origin develop MOVED %s -> %s: commits=%d files=%d — disjoint from the GUARDED list (services/anchoring/, the yaml, the generator, spec-examples, shared openapi/, the lockfile); %s" % (pinned, cur, c["ahead_by"], len(files), tail)); sys.exit(0)
@@ -184,7 +181,7 @@ case "$DEV_JUDGEMENT" in
      exit 18 ;;
 esac
 grep -q 'TIER 1' "$BRIEF" && grep -q 'TIER 1' "$PROMPT_FILE" || { echo "REFUSING: brief and prompt disagree about the tier" >&2; exit 7; }
-grep -q 'ROUND 3' "$BRIEF" && grep -q 'ROUND 3' "$PROMPT_FILE" || { echo "REFUSING: brief and prompt disagree about the round (ROUND 3)" >&2; exit 15; }
+grep -q 'ROUND 1' "$BRIEF" && grep -q 'ROUND 1' "$PROMPT_FILE" || { echo "REFUSING: brief and prompt disagree about the round (ROUND 1)" >&2; exit 15; }
 head -1 "$PROMPT_FILE" | grep -q 'ultrathink' || { echo "REFUSING: prompt does not open with the thinking directive" >&2; exit 8; }
 grep -qF "$REAL_BRIEF" "$PROMPT_FILE" || { echo "REFUSING: prompt does not name the brief path" >&2; exit 9; }
 grep -qF "$HEAD_SHA" "$PROMPT_FILE" && grep -qF "$HEAD_SHA" "$BRIEF" \
@@ -203,7 +200,7 @@ if [ "${1:-}" = "--check" ]; then
   echo "  compare (GitHub API): develop...#805 = $COMPARE"
   echo "  $DEV_NOTE"
   echo "  brief, prompt, QA project and repo all present"
-  echo "  brief and prompt agree on TIER 1 and ROUND 3"
+  echo "  brief and prompt agree on TIER 1 and ROUND 1"
   echo "  prompt opens with the thinking directive and names the brief"
   echo "  brief and prompt both name the head SHA"
   echo "  prompt tells the agent to MAIL its verdict"

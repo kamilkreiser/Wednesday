@@ -1,0 +1,98 @@
+/**
+ * =============================================================================
+ * TRANSACTION CONFIRMATION POLLER
+ * =============================================================================
+ * Polls Blockfrost for transaction confirmation status with exponential backoff.
+ * =============================================================================
+ */
+
+import { getTransaction } from './provider';
+
+export interface ConfirmationResult {
+  confirmed: boolean;
+  blockHash?: string;
+  blockNumber?: number;
+  slot?: number;
+  confirmations?: number;
+  error?: string;
+  /**
+   * KS-726 (#805 tier-1 gate, F1): how many attempts REACHED the chain — the
+   * provider answered, with the transaction or with "not found" — and how many
+   * THREW (5xx, 402 quota, DNS, socket). `confirmed: false` with `polled: 0`
+   * means the chain was never asked, which says nothing about the transaction;
+   * a caller that reads it as "absent" re-submits a transaction that may
+   * already be in a block. Both are counts of what ran, never a verdict.
+   */
+  polled?: number;
+  errored?: number;
+}
+
+/**
+ * Wait for a transaction to appear on chain.
+ *
+ * @param txHash               - Transaction hash to monitor
+ * @param maxAttempts          - Maximum number of polling attempts (default 30)
+ * @param initialDelayMs       - Initial delay between attempts in ms (default 10000)
+ * @param maxDelayMs           - Maximum delay between attempts (default 60000)
+ * @param onStatusUpdate       - Optional callback for status updates
+ */
+export async function waitForConfirmation(
+  txHash: string,
+  maxAttempts = 30,
+  initialDelayMs = 10_000,
+  maxDelayMs = 60_000,
+  onStatusUpdate?: (attempt: number, status: string) => void,
+): Promise<ConfirmationResult> {
+  let delay = initialDelayMs;
+  // KS-726 (#805 gate F1): count what each attempt DID. `getTransaction` returns
+  // null when the chain answered "not found" (a 404 — provider.ts) and throws
+  // when it could not answer; the two must not collapse into one `confirmed:
+  // false`, because the caller's next step differs (re-submit vs rest).
+  let polled = 0;
+  let errored = 0;
+
+  for (let attempt = 1; attempt <= maxAttempts; attempt++) {
+    try {
+      const tx = await getTransaction(txHash);
+      polled += 1;
+
+      if (tx) {
+        return {
+          confirmed: true,
+          blockHash: tx.block,
+          blockNumber: tx.block_height,
+          slot: tx.slot,
+          confirmations: 1,
+          polled,
+          errored,
+        };
+      }
+
+      if (onStatusUpdate) {
+        onStatusUpdate(attempt, `pending (attempt ${attempt}/${maxAttempts})`);
+      }
+    } catch (err: any) {
+      errored += 1;
+      if (onStatusUpdate) {
+        onStatusUpdate(attempt, `error: ${err?.message}`);
+      }
+    }
+
+    // Exponential backoff with jitter
+    await sleep(delay + require('crypto').randomInt(0, 2000));
+    delay = Math.min(delay * 1.5, maxDelayMs);
+  }
+
+  return {
+    confirmed: false,
+    polled,
+    errored,
+    error: polled === 0
+      ? `Transaction ${txHash} could not be checked: ${errored}/${maxAttempts} attempts failed to reach the chain`
+      : `Transaction ${txHash} not confirmed after ${maxAttempts} attempts (${polled} answered, ${errored} failed)`,
+  };
+}
+
+function sleep(ms: number): Promise<void> {
+  return new Promise(resolve => setTimeout(resolve, ms));
+}

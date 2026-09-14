@@ -1,0 +1,586 @@
+/**
+ * =============================================================================
+ * KS-705 — ANCHOR SUBMISSION (idempotent on the SUBMISSION, not only the row)
+ * =============================================================================
+ * The real-Cardano half of `processAnchor`, extracted for the same
+ * bootless-unit-test reason as `reconciler.ts` and `anchorSchema.ts`
+ * (index.ts calls app.listen on import, and the only honest way to assert
+ * "the submit path ran once" is against a fake chain — a real assertion costs
+ * a real transaction).
+ *
+ * WHAT WENT WRONG (measured on demo 2026-08-27T23:54–23:55Z, KS-697 probe):
+ * one document produced THREE `Submitting anchor to Cardano` calls for a
+ * single anchor id and TWO confirmed, fee-paying transactions —
+ * 408e7208… (block 4,609,927) and df797be3… (block 4,609,929), 181,825
+ * lovelace each. `anchor_store` kept only the second. The first is on chain,
+ * carrying the same metadata for the same document, and no row points at it.
+ *
+ * Two independent producers, both closed here:
+ *
+ *   1. A create + a custody transfer both call `POST /api/anchors` for one
+ *      document. They correctly resolve to the SAME row (KS-319 — keep that),
+ *      but both then entered the submit path. The second waited on the wallet
+ *      lock and submitted a SECOND transaction for a document already
+ *      anchored. A pre-lock read cannot see this: on demo the two calls were
+ *      389 ms apart and the row was still 'pending' for both. The re-read
+ *      INSIDE the lock is what makes the submission idempotent.
+ *
+ *   2. That second submission was rejected with
+ *      `ConwayMempoolFailure "All inputs are spent. Transaction has probably
+ *      already been included…"` — the node saying the opposite of failure. The
+ *      catch marked the row 'failed' (clobbering a status that was already
+ *      'confirmed'), reset it to 'pending' and submitted a THIRD transaction,
+ *      which also confirmed.
+ *
+ * THE RULE: a reply that names an already-submitted transaction whose hash we
+ * know is a re-poll condition, never a resubmit.
+ *
+ * NOT HANDLED — enumerated deliberately (KS-705); extend this list, not the
+ * retry:
+ *   - Any node reply other than the two texts matched below. Blockfrost
+ *     surfaces a node rejection as an HTTP 400 whose `message` carries the
+ *     ledger's prose; the SDK exposes no enumerated code for "already in
+ *     ledger"/"duplicate tx", so there is nothing further to match that would
+ *     be a read rather than a guess. Sibling replies known to exist but NOT
+ *     observed by us, and so NOT matched: `TxValidationErrorInCardanoMode`
+ *     wrappers, `BadInputsUTxO`, and any node-specific "transaction already
+ *     exists"/"duplicate transaction" text.
+ *   - "Already included" on a row carrying NO real transaction hash. We
+ *     cannot re-poll a transaction we cannot name, so that case keeps today's
+ *     fail-and-retry behaviour rather than being silently swallowed. This is
+ *     also the KS-535 cross-deployment shape (two deployments on one wallet),
+ *     which this module does not and cannot fix.
+ *   - Two PROCESSES submitting for one anchor. `withWalletLock` and the
+ *     in-lock re-read are both process-local. A second replica still races;
+ *     that needs a DB-level claim and is not in scope here. KS-726 does not
+ *     close this one either — a write-ahead is still a single process's
+ *     record — so this entry stands as written.
+ *
+ * The "row write lost after a successful submit" window found on the #756
+ * review is NOT in this list: guard 4 below closes it, by hoisting the hash
+ * out of the lock callback so the catch can re-poll rather than retry.
+ *
+ * KS-726 (write-ahead) is now IMPLEMENTED here rather than pending: the hash is
+ * persisted from inside `deps.submit` via `onSigned`, BEFORE the node is asked
+ * to accept the transaction, so a LOST submit reply leaves a row that names the
+ * transaction instead of one the retry path answers with a second fee-paying
+ * transaction. That is the class guard 4 structurally cannot reach — guard 4
+ * needs `deps.submit()` to have RETURNED. See guard 5 in the catch, the
+ * 'submitting' state, and `knownChainSubmission` above. The two are
+ * complementary, not alternatives.
+ *
+ * Guard 5 rests ONLY a LOST reply. A DEFINITIVE node rejection — the reply
+ * ARRIVED and said no (`isChainReachableError`: a `status_code` on the error;
+ * BadInputsUTxO, ValueNotConservedUTxO, an expired TTL, "All inputs are spent")
+ * — keeps the ordinary fail-and-retry path: nothing is on chain and nothing was
+ * paid, so a retry is safe and free, and resting such a row in 'submitting'
+ * would trade a ~15 s recovery for the reconciler's 24 h give-up (#805 review,
+ * 2026-09-08; ruled 2026-09-14). One consequence for guard 3, below: on an
+ * "inputs spent" reply the hash the node just refused is on the row (the
+ * write-ahead put it there) and IS re-polled first — that reply is also what
+ * a node says when our own earlier submit already landed (KS-705) — and only
+ * when the bounded poll shows it ABSENT does the ordinary retry follow.
+ *
+ * Still NOT closed by the write-ahead, and deliberately: a crash of the whole
+ * process between signing and the 'submitting' row write. The write-ahead
+ * shrinks that gap to a single DB round-trip but cannot remove it, because
+ * something has to be the first durable record.
+ * =============================================================================
+ */
+
+// KS-726 (#805 review, ruled 2026-09-14): the ONE thing this module imports.
+// `isChainReachableError` is #728's discriminator — a `status_code` on the
+// error means the node ANSWERED (any 4xx other than 402/408/429); no code, or
+// 402/408/429/5xx, means it did not. Guard 5 below turns on it.
+import { isChainReachableError } from './cardano/provider';
+
+/** Only a 64-hex ref is a real chain transaction — `mock_tx_…`/`tx_sim_…` are not (KS-587). */
+const REAL_TX_64HEX = /^[0-9a-f]{64}$/i;
+
+/**
+ * The node replies we have actually observed for "your inputs are gone because
+ * your own earlier transaction is already in flight or in a block".
+ *   - the first is the demo measurement (KS-705, 2026-08-27T23:55:12Z);
+ *   - the second is the shorter form recorded against KS-535.
+ * Anything else is left to the failure path on purpose — see NOT HANDLED above.
+ */
+/**
+ * The one node reply that names THIS transaction as in the ledger. Guard 3
+ * re-polls on it even when the hash on the row is the one just written ahead
+ * (KS-726) — because there the node is saying our transaction landed.
+ */
+const ALREADY_INCLUDED_REPLY = /already been included/i;
+
+const ALREADY_SUBMITTED_REPLIES = [
+  /all inputs are spent/i,
+  ALREADY_INCLUDED_REPLY,
+];
+
+/** True when a submission error is the node telling us the tx is already in the ledger. */
+export function isAlreadySubmittedError(err: unknown): boolean {
+  const message = (err as { message?: unknown })?.message;
+  if (typeof message !== 'string' || message.length === 0) return false;
+  return ALREADY_SUBMITTED_REPLIES.some(pattern => pattern.test(message));
+}
+
+export interface AnchorSnapshot {
+  id: string;
+  status: 'pending' | 'submitting' | 'submitted' | 'confirmed' | 'failed';
+  transactionHash?: string;
+  retryCount: number;
+  metadataLabel: number;
+  metadataPayload: object;
+}
+
+export interface ConfirmationLike {
+  confirmed: boolean;
+  blockHash?: string;
+  blockNumber?: number;
+  slot?: number;
+  confirmations?: number;
+  /**
+   * KS-726 (#805 gate F1): attempts that REACHED the chain / attempts that
+   * THREW — `cardano/confirmation.ts` reports both. Optional so every injected
+   * double stays type-compatible; a `confirm` that reports neither keeps the
+   * pre-fix reading (`confirmed: false` → 'absent').
+   */
+  polled?: number;
+  errored?: number;
+}
+
+export interface AnchorSubmissionDeps {
+  getAnchor: (anchorId: string) => Promise<AnchorSnapshot | null>;
+  /**
+   * KS-726: the optional third argument carries the write-ahead hook. Optional
+   * so every existing injector — and #756's own two-argument call — stays
+   * type-compatible; `cardano/index.ts`'s `AnchorSubmitOptions` is already
+   * shaped for it.
+   */
+  submit: (
+    metadataLabel: number,
+    metadataPayload: object,
+    options?: { onSigned?: (txHash: string) => Promise<void> },
+  ) => Promise<{ txHash: string; fee: number }>;
+  confirm: (txHash: string, onStatusUpdate?: (attempt: number, status: string) => void) => Promise<ConfirmationLike>;
+  updateStatus: (anchorId: string, updates: Record<string, unknown>) => Promise<void>;
+  bumpRetryCount: (anchorId: string) => Promise<void>;
+  scheduleRetry: (anchorId: string, delayMs: number) => void;
+  log: (level: 'info' | 'warn' | 'error', message: string, meta?: Record<string, unknown>) => void;
+  /** The shared process-wide wallet mutex — see `withWalletLock` below. */
+  withWalletLock?: <T>(fn: () => Promise<T>) => Promise<T>;
+  maxRetries?: number;
+  backoffMsPerAttempt?: number;
+}
+
+/**
+ * Serialize Cardano submissions against the platform wallet. The UTXO model
+ * means two concurrent submissions race to spend the same UTxO; the second one
+ * fails with "All inputs are spent". We take a Promise chain as a process-local
+ * mutex so each submission only begins once the prior one has committed. This
+ * is the minimum viable solution — at scale we'd batch or use multi-UTxO coin
+ * selection.
+ *
+ * Exported so the batch-anchor path in index.ts shares the SAME chain: two
+ * independent locks on one wallet would be no lock at all.
+ */
+let walletSubmissionChain: Promise<unknown> = Promise.resolve();
+export function withWalletLock<T>(fn: () => Promise<T>): Promise<T> {
+  const next = walletSubmissionChain.catch(() => undefined).then(() => fn());
+  walletSubmissionChain = next.catch(() => undefined);
+  return next;
+}
+
+/**
+ * The hash of an existing REAL chain submission for this anchor, if there is one.
+ *
+ * KS-726: 'submitting' counts. It is the write-ahead state — the row names a
+ * transaction that was SIGNED, and whose submit reply we never received, so a
+ * transaction bearing our name may already be on chain and fee-paying.
+ *
+ * Leaving it out is a reachable double-mint that the write-ahead itself opens,
+ * not a hypothetical. `dbPersistAnchor` returns the EXISTING row's id on a
+ * re-anchor of the same document+network (KS-281/KS-319) and `POST /api/anchors`
+ * then calls `processAnchor` unconditionally (index.ts). So a second create — or
+ * the custody-transfer hop that KS-705's own header describes — lands on a row
+ * resting in 'submitting', both guards below see "no known submission", and the
+ * path mints a SECOND transaction for a document whose first one may already be
+ * in a block. That is the exact defect this module exists to prevent, reached
+ * through the front door rather than the retry.
+ *
+ * Before KS-726 the case could not arise: a lost reply wrote 'failed' and
+ * resolved to 'pending', and the retry path owned it. The write-ahead is what
+ * makes the row REST in a state the guards could not read — so the guard has to
+ * learn the state its own change creates.
+ *
+ * Re-polling such a row is safe and is the weaker-harm choice, on the same
+ * asymmetry guard 5 turns on: `reconfirmKnownSubmission` is bounded, leaves a
+ * confirmed row alone, and NEVER writes 'failed' — worst case it times out,
+ * logs, and leaves the row for the reconciler, which owns the give-up decision
+ * (KS-584). A delayed anchor is recoverable; a duplicate fee-paying transaction
+ * is not.
+ */
+function knownChainSubmission(anchor: AnchorSnapshot | null): string | undefined {
+  if (!anchor) return undefined;
+  if (anchor.status !== 'submitting' && anchor.status !== 'submitted' && anchor.status !== 'confirmed') {
+    return undefined;
+  }
+  const tx = anchor.transactionHash ?? '';
+  return REAL_TX_64HEX.test(tx) ? tx : undefined;
+}
+
+export function createAnchorSubmitter(deps: AnchorSubmissionDeps) {
+  const lock = deps.withWalletLock ?? withWalletLock;
+  const maxRetries = deps.maxRetries ?? 3;
+  const backoffMsPerAttempt = deps.backoffMsPerAttempt ?? 5000;
+
+  /**
+   * Bring the row into line with a transaction that is ALREADY on its way —
+   * never a new submission. Leaves a confirmed row alone; never writes 'failed'
+   * (a tx we have not found yet is not a tx that failed — the reconciler owns
+   * the give-up decision, KS-584).
+   */
+  async function reconfirmKnownSubmission(
+    anchorId: string,
+    txHash: string,
+    why: string,
+  ): Promise<'confirmed' | 'absent' | 'unknown'> {
+    // The return value is read by guard 3 only (KS-726): 'absent' means the
+    // bounded poll ENDED without finding the transaction — the chain answered
+    // and it is not there; 'unknown' means the poll itself failed — it threw,
+    // or no attempt ever reached the chain — which says nothing about the
+    // chain and keeps today's behaviour.
+    deps.log('info', 'Anchor already submitted — re-polling the known transaction instead of submitting again (KS-705)', {
+      anchorId, txHash, why,
+    });
+    const current = await deps.getAnchor(anchorId);
+    if (current?.status === 'confirmed') return 'confirmed';
+    try {
+      const confirmation = await deps.confirm(txHash, (attempt, status) =>
+        deps.log('info', 'Anchor confirmation poll', { anchorId, attempt, status }));
+      if (confirmation.confirmed) {
+        await deps.updateStatus(anchorId, {
+          status: 'confirmed',
+          // KS-705 (#756 review): name the transaction that confirmed it.
+          // Without this we confirm a row while never recording WHICH
+          // transaction confirmed it — the same orphan this module exists to
+          // prevent, one step later. The re-poll path is reached from rows
+          // that already carry the hash AND from the catch below, where the
+          // row write may never have landed.
+          transactionHash: txHash,
+          confirmations: confirmation.confirmations ?? 1,
+          blockNumber: confirmation.blockNumber,
+          slot: confirmation.slot,
+          blockHash: confirmation.blockHash,
+          confirmedAt: new Date(),
+        });
+        deps.log('info', 'Anchor confirmed on Cardano', {
+          anchorId, txHash, blockNumber: confirmation.blockNumber, slot: confirmation.slot,
+        });
+        return 'confirmed';
+      }
+      // #805 tier-1 gate F1 (2026-09-14): the poll ended without ONE attempt
+      // reaching the chain — every attempt threw (Blockfrost 5xx / 402 quota,
+      // DNS, socket). That is not "the chain answered and it is not there"; it
+      // is "we never asked". Reporting 'absent' here let guard 3 read an
+      // unreachable chain as a DEFINITIVE rejection and schedule the ordinary
+      // retry, which mints a SECOND fee-paying transaction for a document
+      // whose first may already be in a block — the KS-705 class, reached
+      // through the write-ahead path. 'unknown' rests the row in 'submitting'
+      // for the reconciler (KS-584): the same weaker-harm choice guard 5 makes
+      // for a lost reply. A `confirm` that reports no `polled` count (an
+      // injected double) keeps the 'absent' reading.
+      if (confirmation.polled === 0) {
+        deps.log('warn', 'Anchor confirmation poll never reached the chain — treating the transaction as UNKNOWN, not absent (KS-726)', {
+          anchorId, txHash, errored: confirmation.errored,
+        });
+        return 'unknown';
+      }
+      deps.log('warn', 'Anchor confirmation timed out', { anchorId, txHash, polled: confirmation.polled, errored: confirmation.errored });
+      return 'absent';
+    } catch (err) {
+      deps.log('error', 'Anchor confirmation polling failed', { anchorId, error: (err as Error)?.message });
+      return 'unknown';
+    }
+  }
+
+  /** Submit one anchor to Cardano — at most one transaction per anchor. */
+  return async function submitAnchorToChain(anchorId: string): Promise<void> {
+    const anchor = await deps.getAnchor(anchorId);
+    if (!anchor) return;
+
+    // Guard 1 (cheap, pre-lock): this anchor already has a transaction on chain.
+    const alreadyKnown = knownChainSubmission(anchor);
+    if (alreadyKnown) {
+      await reconfirmKnownSubmission(anchorId, alreadyKnown, 'row already carries a chain submission');
+      return;
+    }
+
+    // KS-705 (#756 review): the hash of a transaction we have already put on
+    // chain, hoisted out of the lock callback so the catch below can see it.
+    //
+    // `deps.submit()` mints and pays for a transaction; the row write on the
+    // NEXT line records its hash. If that write throws — a Postgres blip, pool
+    // exhaustion, a restart — the hash dies with the stack frame, the catch
+    // sees an ordinary error, and the retry submits a SECOND transaction for a
+    // document that is already anchored. Guards 1 and 2 cannot see it: they
+    // read the ROW, and the row is exactly what failed to be written.
+    let submittedTxHash: string | undefined;
+
+    // KS-726: the write-ahead hash — set from inside `deps.submit` via
+    // `onSigned`, BEFORE the node is asked to accept the transaction.
+    //
+    // Declared OUT here for exactly the reason `submittedTxHash` is: a variable
+    // the catch cannot see is precisely the defect this closes. #764 first wrote
+    // it inside the try and `tsc` rejected the catch with TS2304 — the compiler
+    // reproducing the ticket in miniature.
+    //
+    // The two are NOT the same fact and they do not have the same remedy:
+    //   - `submittedTxHash` set  ⇒ `deps.submit()` RETURNED ⇒ the node
+    //     acknowledged. Re-polling is safe (guard 4).
+    //   - `writtenAheadTxHash` set and `submittedTxHash` NOT ⇒ the transaction
+    //     was signed and named, and the reply was LOST. Acceptance is unknown.
+    let writtenAheadTxHash: string | undefined;
+
+    try {
+      // Hold the wallet lock through submit + confirmation. The Cardano UTXO
+      // model means a freshly-spent UTxO stays in Blockfrost's "available"
+      // view until the tx is in a block (~20–60s). Concurrent submissions race
+      // and the second one fails with "All inputs are spent". This design
+      // serializes at the wallet level: at most one anchor tx in-flight from
+      // the platform wallet. Throughput is intentionally bounded (~one cert
+      // per block slot). A proper multi-UTXO coin selector is the
+      // commercialisation upgrade path.
+      const outcome = await lock(async (): Promise<{ kind: 'submitted' } | { kind: 'already'; txHash: string }> => {
+        // Guard 2 (KS-705): re-read INSIDE the lock. Guard 1 ran before we
+        // queued; by the time we hold the lock, the call ahead of us may have
+        // submitted this very anchor. This is the guard that would have stopped
+        // demo's second transaction.
+        const current = (await deps.getAnchor(anchorId)) ?? anchor;
+        const known = knownChainSubmission(current);
+        if (known) return { kind: 'already', txHash: known };
+
+        deps.log('info', 'Submitting anchor to Cardano', { anchorId });
+
+        const submission = await deps.submit(current.metadataLabel, current.metadataPayload, {
+          // KS-726 — write-ahead. Runs after the transaction is built and
+          // signed, before it is handed to the network. The hash is the
+          // blake2b-256 of the signed body, so it is fully known here; nothing
+          // the network says afterwards can teach us anything about it.
+          onSigned: async (txHash) => {
+            // #805 review F3: assigned AFTER the write, NOT before — the mirror
+            // of `submittedTxHash` below, and the inverse case.
+            //
+            // `submittedTxHash` is captured before its write because by then the
+            // transaction HAS been submitted: the fact must survive a failing
+            // row write. Here the opposite holds — `onSigned` runs BEFORE the
+            // network is asked, so if this write throws, NO transaction exists.
+            // Assigning first would arm guard 5, which rests the row in
+            // 'submitting' and schedules no retry, for a transaction that was
+            // never sent — where an ordinary retry is correct and free.
+            //
+            // Assigned here, the variable means what guard 5 reads it as: the
+            // hash is durable. Unreachable today only because the injected
+            // updateStatus swallows (see the contract note in cardano/index.ts);
+            // one refactor away from being real, and guard 4's own test already
+            // simulates this shape.
+            await deps.updateStatus(anchorId, { status: 'submitting', transactionHash: txHash });
+            writtenAheadTxHash = txHash;
+          },
+        });
+        // Assign BEFORE the row write, not after: the write is the thing that
+        // can fail, and this assignment is what survives it.
+        submittedTxHash = submission.txHash;
+        await deps.updateStatus(anchorId, { status: 'submitted', transactionHash: submission.txHash });
+        deps.log('info', 'Anchor submitted to Cardano', { anchorId, txHash: submission.txHash, fee: submission.fee });
+
+        // Block inside the lock until confirmed (or timed out). The next anchor
+        // waiting on the lock will then read UTxOs that reflect this tx.
+        try {
+          const confirmation = await deps.confirm(submission.txHash, (attempt, status) =>
+            deps.log('info', 'Anchor confirmation poll', { anchorId, attempt, status }));
+          if (confirmation.confirmed) {
+            await deps.updateStatus(anchorId, {
+              status: 'confirmed',
+              confirmations: confirmation.confirmations ?? 1,
+              blockNumber: confirmation.blockNumber,
+              slot: confirmation.slot,
+              blockHash: confirmation.blockHash,
+              confirmedAt: new Date(),
+            });
+            deps.log('info', 'Anchor confirmed on Cardano', {
+              anchorId,
+              txHash: submission.txHash,
+              blockNumber: confirmation.blockNumber,
+              slot: confirmation.slot,
+            });
+          } else {
+            deps.log('warn', 'Anchor confirmation timed out', { anchorId, txHash: submission.txHash });
+          }
+        } catch (err) {
+          deps.log('error', 'Anchor confirmation polling failed', { anchorId, error: (err as Error).message });
+        }
+        return { kind: 'submitted' };
+      });
+
+      // Re-polling happens OUTSIDE the lock: we are not spending a UTxO, so
+      // holding the wallet hostage for another anchor's confirmation window
+      // would throttle the platform for no benefit.
+      if (outcome.kind === 'already') {
+        await reconfirmKnownSubmission(anchorId, outcome.txHash, 'another call submitted this anchor while we waited on the wallet lock');
+      }
+    } catch (err: unknown) {
+      const message = (err as { message?: string })?.message;
+
+      // Guard 4 (KS-705, #756 review): we know we put a transaction on chain,
+      // whatever this error says. Checked FIRST, before the node-reply matcher
+      // and before any failure is recorded, because it is the strongest fact
+      // available here: a hash in this variable means `deps.submit()` returned,
+      // so the transaction is real and fee-paying. Answering that with another
+      // transaction is the double-mint; marking the row terminally 'failed'
+      // would propagate a permanent document failure for an anchor that
+      // succeeded. Re-poll instead — the same treatment as the node's
+      // "already included" reply, reached by a different route.
+      if (submittedTxHash && REAL_TX_64HEX.test(submittedTxHash)) {
+        deps.log('warn', 'Anchor submission threw AFTER the transaction reached the chain — re-polling the known hash instead of retrying (KS-705)', {
+          anchorId, txHash: submittedTxHash, error: message,
+        });
+        await reconfirmKnownSubmission(anchorId, submittedTxHash, 'the row write failed after a successful submit');
+        return;
+      }
+
+      // Guard 5 (KS-726) — the write-ahead branch. Sits BELOW guard 4 and
+      // ABOVE guard 3 and the 'failed' write, because the catch is ordered by
+      // the STRENGTH OF THE FACT each branch rests on, strongest first:
+      //
+      //   1. guard 4  — `deps.submit()` returned          → the node acknowledged
+      //   2. guard 5  — signed and named, reply LOST      → acceptance UNKNOWN
+      //   3. guard 3  — an inferred error-message shape   → weakest
+      //   4. fall through — nothing
+      //
+      // Guard 5 covers ONE case: the reply was LOST. It does NOT cover a
+      // DEFINITIVE rejection — the reply ARRIVED and said no. After the
+      // write-ahead `writtenAheadTxHash` is set for EVERY real submission, so
+      // without the discriminator below this branch would catch every error
+      // thrown after signing and the retry path would be unreachable for the
+      // whole class (#805 review, 2026-09-08). `isChainReachableError` (#728) is
+      // that discriminator: a `status_code` on the error means the node
+      // answered. A refused transaction is definitively NOT on chain and
+      // nothing was paid, so it falls through to guard 3 and the ordinary
+      // fail-and-retry write — a ~15 s recovery instead of the reconciler's
+      // 24 h give-up on the most ordinary Cardano failure class. Ruled
+      // 2026-09-14 (option 1 of the two the review offered).
+      //
+      // Why the LOST-reply case does NOT re-poll: after a lost reply we do not know the node
+      // accepted it. Polling could block on a transaction that never landed;
+      // writing 'failed' could permanently fail a document whose transaction is
+      // on chain and fee-paying. The harms are asymmetric, so the guard resolves
+      // toward the RECOVERABLE state — 'submitting', which the reconciler
+      // selects (reconciler.ts) and settles either way.
+      //
+      // Its position is load-bearing, not cosmetic. #764's own review found the
+      // 'failed' write landing FIRST, with the write-ahead check ~25 lines
+      // later. Pre-KS-726 that flash resolved back to 'pending' and the row
+      // re-entered the normal path — the KS-535 trade-off. WITH a write-ahead it
+      // resolved to 'submitting' and STAYED, so the row spent a real window
+      // claiming 'failed'. 'failed' is terminal by construction (KS-535) and
+      // originate's poller acts on it, so a poller ticking inside that window
+      // could propagate a PERMANENT document failure for a transaction that is
+      // on chain. Ordering it here removes the window rather than documenting it.
+      if (writtenAheadTxHash && REAL_TX_64HEX.test(writtenAheadTxHash) && isChainReachableError(err)) {
+        // The node ANSWERED and refused the transaction we signed. Nothing is
+        // on chain, nothing was paid: fall through to guard 3 and the terminal
+        // 'failed' write + retry below, exactly as a pre-write-ahead failure did.
+        deps.log('warn', 'Node REFUSED the written-ahead transaction — the reply arrived, nothing is on chain, keeping the ordinary fail-and-retry path (KS-726)', {
+          anchorId, txHash: writtenAheadTxHash, statusCode: (err as { status_code?: number })?.status_code, error: message,
+        });
+      } else if (writtenAheadTxHash && REAL_TX_64HEX.test(writtenAheadTxHash)) {
+        await deps.updateStatus(anchorId, {
+          status: 'submitting',
+          // #805 review F2: carry the hash. The injected updateStatus SWALLOWS
+          // its errors, so a DB blip during the write-ahead does not throw and
+          // the submit proceeds anyway. If the reply is then lost, this guard
+          // fires for a row that names no transaction — invisible to the
+          // reconciler (`transaction_hash IS NOT NULL`), invisible to
+          // knownChainSubmission (the empty fallback fails REAL_TX_64HEX), and
+          // never retried, because this branch returns without scheduleRetry.
+          // A stranded row with a paid transaction on chain: the exact failure
+          // this ticket exists to close, surviving in a narrower window.
+          // Idempotent when the write-ahead landed; the whole fix when it did not.
+          transactionHash: writtenAheadTxHash,
+          errorMessage: `Submit reply lost after signing; tx ${writtenAheadTxHash} may be on chain — left for the reconciler (KS-726)`,
+        });
+        // #805 review (2026-09-08), note 2: NO `bumpRetryCount` here. No retry is
+        // coming from this branch, the reconciler's give-up is time-based
+        // (`giveUpMs` against `created_at`, reconciler.ts), so a bump would only
+        // spend budget that a later front-door re-anchor inherits reduced.
+        deps.log('warn', 'Anchor submit failed AFTER the hash was written ahead — not retrying, reconciler will settle it', {
+          anchorId, txHash: writtenAheadTxHash, error: message,
+        });
+        return;
+      }
+
+      // Guard 3 (KS-705): the node telling us the inputs are spent because our
+      // own transaction is already in the ledger is not a failure. Re-poll the
+      // hash we know; never answer it with another transaction.
+      if (isAlreadySubmittedError(err)) {
+        const current = await deps.getAnchor(anchorId);
+        const known = knownChainSubmission(current);
+        if (known) {
+          const found = await reconfirmKnownSubmission(anchorId, known, 'node reported the transaction is already included');
+          // KS-726 (ruled 2026-09-14): the write-ahead put the hash of the
+          // transaction we JUST signed on the row before the node answered, so
+          // `known` can be that very hash. "inputs spent" is what a node says
+          // BOTH when our own earlier submit already landed (KS-705 — the
+          // re-poll above is the right answer, and skipping it is the
+          // double-mint) AND when someone else spent our inputs (KS-535 — our
+          // transaction can never land). The reply text cannot tell the two
+          // apart; the chain can. So the re-poll runs first, bounded, and only
+          // when it shows the hash we just wrote ahead ABSENT is the rejection
+          // definitive — then the ordinary retry below follows, instead of the
+          // reconciler's 24 h give-up. "already been included" names THIS
+          // transaction as in the ledger and never reaches this branch's retry.
+          const refusedAndAbsent =
+            found === 'absent' &&
+            known === writtenAheadTxHash &&
+            !ALREADY_INCLUDED_REPLY.test(message ?? '');
+          if (!refusedAndAbsent) return;
+          deps.log('warn', 'The transaction just written ahead is ABSENT on chain after the re-poll and the node said "inputs spent" — a definitive rejection; keeping the ordinary fail-and-retry path (KS-726)', {
+            anchorId, txHash: known, error: message,
+          });
+        } else {
+          // No hash of ours to re-poll — fall through. Swallowing this would
+          // strand the anchor with no record and no retry (see NOT HANDLED).
+          deps.log('warn', 'Node reported an already-included transaction, but this anchor has no known tx hash to re-poll (KS-705)', {
+            anchorId, error: message,
+          });
+        }
+      }
+
+      const currentRetry = anchor.retryCount + 1;
+
+      await deps.updateStatus(anchorId, {
+        status: 'failed',
+        errorMessage: message || 'Cardano submission failed',
+      });
+      await deps.bumpRetryCount(anchorId);
+
+      deps.log('error', 'Anchor submission failed', { anchorId, error: message, retryCount: currentRetry });
+
+      // Retry up to `maxRetries` times with backoff.
+      // KS-535: reset to 'pending' BEFORE the backoff timer starts, not inside
+      // it — this makes `status: 'failed'` TERMINAL (no retry coming), which
+      // originate's poller/reconciler relies on to propagate a failure to the
+      // document. Previously the row sat as 'failed' for the 5–10s backoff
+      // window, so an observer could not distinguish "retrying" from "given
+      // up". (Trade-off: a crash during the backoff now leaves the row
+      // 'pending' instead of 'failed' — a stuck-pending, same as any other
+      // restart-lost anchor; anchoring has no restart re-queue either way.)
+      if (currentRetry < maxRetries) {
+        const backoff = currentRetry * backoffMsPerAttempt;
+        deps.log('info', `Scheduling retry in ${backoff}ms`, { anchorId, retryCount: currentRetry });
+        await deps.updateStatus(anchorId, { status: 'pending' });
+        deps.scheduleRetry(anchorId, backoff);
+      }
+    }
+  };
+}

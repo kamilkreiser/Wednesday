@@ -1,0 +1,141 @@
+ultrathink
+
+You are the fleet QA agent running ONE TIER 1 ROUND 3 gate over Secuura/Blockchain PR #805 (KS-726, builder
+s233, wrapped) at head a4d182bf9efaa5b19b74c4a861f22746491e91b4 — a DELTA over round 2's GO WITH FINDINGS
+verdict on cd5e62e96c373c2690b97bafb277683402f1e70b. Round 2's gate found F1: waitForConfirmation could not
+distinguish "polled and absent" from "could not poll", so a chain unreachable for the whole bounded poll after
+an "inputs spent" 400 read as ABSENT and the row retried — a second fee-paying transaction for a document
+whose first may already be on chain. This round's ONE commit fixes exactly that: cardano/confirmation.ts's
+ConfirmationResult now carries polled/errored counters, and anchorSubmission.ts's reconfirmKnownSubmission maps
+polled === 0 (no attempt ever reached the chain) to 'unknown' instead of 'absent', which rests the row for the
+reconciler instead of retrying. TIER 1 because a wrong guard mints a second fee-paying transaction or strands a
+document 24 h.
+
+Read your brief FIRST and in full, then plan:
+/Volumes/DevMASTER/WEDNESDAY/2_Project_Files/fleet/qa-agent/briefs/2026-09-15_secuura-805-ks726-tier1-r3.md
+
+This is a DELTA gate. Round 2's full nine-file scope, its T1-T10 tamper table, its suite counts (227/1 at head,
+207/1 develop-alone control, 20/20 the two ks726 files), its spec-half checks and its read of Peter's question
+are ALREADY GO and are NOT re-run here — cite round 2's report by path, do not repeat its runs:
+/Volumes/DevMASTER/!CODING/Testing Agent MAIN/projects/secuura/reports/2026-09-14-ks726-805-cd5e62e96-tier1-r1/report.md
+
+Head (re-read by the drafter 2026-09-14T21:04:22Z / 07:04:22 AEST via git ls-remote, both the branch and
+refs/pull/805/head agree; the launcher re-asserts it at launch):
+  #805 a4d182bf9efaa5b19b74c4a861f22746491e91b4 = refs/pull/805/head = feature/ks-726-write-ahead-tx-hash-port-onto-anchorsubmission
+       ONE parent cd5e62e96c373c2690b97bafb277683402f1e70b (round 2's head, fast-forward); tree 41be8de2b90
+       THREE files changed on top of round 2: cardano/confirmation.ts 5690eb24f (+25/-1, 98 lines) ·
+       anchorSubmission.ts d3ad106d8 (+29/-3, 586 lines) · NEW __tests__/ks726-gate-f1-unreachable-chain.test.ts
+       82058c305 (187 lines, new). The other SIX of round 2's nine files (index.ts, cardano/index.ts, the
+       write-ahead test, the yaml, reconciler.ts, verifyAnchorStatus.ts, anchoring.openapi.ts, the f1-f3 test)
+       are byte-identical to round 2 — re-assert this yourself (git diff --stat cd5e62e96 a4d182bf9 = EXACTLY
+       the three files above), never take it from this prompt or the READY.
+  merge-base with develop = STILL M44 346b491f27fb1cbf4d72cc1c86d417d0252a5f84 (rev-list --count M44..head = 8,
+  was 7). develop (re-read at launch) touches NONE of the nine judged paths even though it has moved well past
+  where round 2 last read it — confirm by CONTENT exactly as the launcher's guard does; the compare
+  develop...a4d182bf9 reads merge_base M44 ahead=8 files=11 (re-derive via the GitHub compare API with Secuura's
+  GH_TOKEN, by NAME, never printed).
+Repo:    /Volumes/DevMASTER/!CODING/Secuura/Blockchain/2_Project_Files  (READ-ONLY — clone by SHA into your own
+  scratch; git verbs on the checkout are ls-remote / cat-file / show / ls-tree / diff / log / rev-list /
+  merge-base ONLY — never fetch / checkout / worktree / merge-tree --write-tree / merge / push / reset / switch)
+
+You are FINDINGS-ONLY. You never fix, never merge, never push, never deploy, never comment, never file, never
+tick an ack box, never @.
+
+NEVER run a push, the real pre-push hook, or preflight.sh inside the Secuura checkout or any of its worktrees.
+
+NEVER print a credential value, and never open, read or copy a secrets file (any .env, config/secrets.yml).
+Nothing in this gate needs a credential value. Count, never echo.
+
+NO live chain call of any kind — no BLOCKFROST_API_KEY, no PLATFORM_WALLET_MNEMONIC, no preview-testnet request
+(KS-535 ABSOLUTE). Every "chain" in this gate is an injected deps object or a mocked getTransaction. NO shared
+docker stack, no kintsugi, no demo. Docker is DOWN on this Studio: re-measure ONCE with docker info, rc on its
+own line; if down, do not start it, and anything needing a stack is NOT RUN, blocker named at the same
+prominence as the findings.
+
+Five things you must not miss (this round's DELTA — brief section 1a, items 1-5):
+
+1. F1/F4 CLOSED AT HEAD, MEASURED not accepted from the READY: drive the REAL waitForConfirmation (bounds
+   shrunk to h,3,1,1,cb; getTransaction mocked) through createAnchorSubmitter for (a) all-throw (the new test's
+   three UNREACHABLE rows, :138-153) -> scheduleRetry 0, row rests submitting/TX_A, the NEW log line
+   "Anchor confirmation poll never reached the chain -- treating the transaction as UNKNOWN, not absent
+   (KS-726)" present, the OLD line "Anchor confirmation timed out" ABSENT; (b) all-404 CONTROL (:156-167) ->
+   scheduleRetry 1, seq submitting -> failed -> pending, the OLD log line present; (c) mixed window (one 404,
+   two throws) -> reads absent -> retries (this is the RESIDUE, item 4); (d) a counter-less confirm double
+   (:178-186) -> getTransaction called 0 times, scheduleRetry 1 (pre-fix behaviour preserved). Confirm
+   confirmation.ts contains ZERO throw statements (the substring "throw" appears once at :48, inside a
+   comment only) and that "polled === 0" reads false for an injected double that omits the field entirely.
+
+2. THE THREE ROUND-2 CONTROLS STILL HOLD, unaffected by this delta: guard 5's discriminator
+   (isChainReachableError, provider.ts:128-134, UNCHANGED); the all-404 "inputs spent" retry (round 2's E6);
+   T7's shape (a FOUND re-poll must never retry) -- confirm the new polled===0 branch sits strictly BETWEEN the
+   confirmed check and the old absent fallthrough, so a FOUND result never reaches it.
+
+3. THE TAMPER TABLE, T1-T3 RE-DERIVED (never carried from the READY) plus at least two of your own (brief
+   1a.3): T1 the mapping disabled (anchorSubmission.ts, "if (confirmation.polled === 0) {" -> "if (false) {")
+   -> predicted 3 reds (the three E8-shape cells); T2 a thrown attempt counted as polled (confirmation.ts,
+   "errored += 1;" -> "polled += 1;") -> predicted 5 reds (the three E8-shape cells + two unit cells); T3 the
+   answered counter never incremented (confirmation.ts, "polled += 1;" removed) -> predicted 5 reds the OTHER
+   way (three unit cells + two harness cells -- note: the retry CONTROL cell can fail under this tamper because
+   the mapping now misfires on a chain that DID answer; if it does not fail, say why). Restore by whole-file
+   sha256 RE-DERIVED from the blobs (anchorSubmission.ts d3ad106d8, confirmation.ts 5690eb24f) -- never trust
+   the brief's printed hashes without checking. Report cells-run/reds/decisive-line/predicted-vs-measured on
+   every row, plus your own two extra tamper rows (the brief proposes deleting the errored field, and swapping
+   the confirmed/polled-check order).
+
+4. THE RESIDUE -- MEASURE AND GRADE IT YOURSELF (brief 1a.4): the mixed-window cell shows one EARLY successful
+   poll followed by total unreachability for the rest of the (shrunken) window still reads 'absent' and
+   retries, because the fix's rule is "ANY attempt reached the chain", not "the LAST attempt reached the
+   chain". State the blast radius in round 2's units (severity/likelihood/one document/~181,825 lovelace) and
+   grade TICKET (ships-with) / SHIPS-WITH (no ticket) / NO GO -- this is YOUR grade, not the builder's framing
+   from the READY, which calls it "RESIDUE 1" and predicts nothing.
+
+5. THE UNTOUCHED SIX + THE MERGED TREE: check:openapi on the merged tree FIRST (merge the develop you read onto
+   a4d182bf9 in your own clone, expect CLEAN); the anchoring suite in full (threadTokenMint.test.ts's red is
+   pre-existing, develop's own, name it); tsc --noEmit -p services/anchoring (excludes src/__tests__, say so).
+   NOT RE-RUN: round 2's full T1-T10 on the nine files (already GO -- cite the report); any docker-dependent
+   suite (measure docker info once, say NOT RUN).
+
+Your tool shell's grep may be a function: use /usr/bin/grep -F -i with a same-file positive control; multi-line
+anchors by Python str.count. Never cd in your own tool calls; the pre-tool hook refuses every git write verb in
+the Secuura checkout -- clone into your scratch and run write verbs THERE. The new test file's
+"for (const shape of UNREACHABLE)" loop (:137-154) produces 3 runtime cells from 1 source it( line -- count
+both ways and say which you report. The anchoring service is VITEST 4.1.x (npx vitest run, never watch; cwd =
+<clone>/Blockchain/Dev/services/anchoring). /bin/bash here is 3.2 -- write runners in Python. zsh: no
+PIPESTATUS, no timeout on macOS. The waitForConfirmation jitter is crypto.randomInt(0, 2000) per attempt -- a
+shrunken 3-attempt poll still takes up to ~6 s; allow it, never patch it.
+
+Quote the Secuura checkout's porcelain count, .git/config sha256, for-each-ref count, .git/worktrees count,
+origin develop SHA, refs/pull/805/head and the branch at start, mid and close as THREE timestamped readings;
+they must match on the head (name any ref another seat moved). If refs/pull/805/head moves, STOP -- the brief
+is about a different SHA.
+
+Never rm: fresh mktemp -d per attempt; quarantine probes and scratch tests by rename. No container of any kind.
+Do no memory maintenance of your own project's memory store inside this session.
+
+Report FOUND / TESTED / HOW, with controls: item 1's four rows (measured, not the READY's claim); item 2's
+three-control smoke check; the tamper table T1-T3 + your own two rows, cells-run beside every colour, the
+decisive assertion line for each red, predicted-by on every row; item 4's residue grade with the blast radius
+in round 2's units and your own evidence class; item 5's merged-tree suite counts, check:openapi, tsc, and a
+clean citation of round 2's report for everything NOT re-run; what you did NOT test at the same prominence as
+the findings (docker). Client-facing communication = ticket comments only; the extranet is not a channel;
+anything needing a push goes to Wednesday as an escalation candidate for Kam's WhatsApp. Handovers to
+Peter/Stuart are test blocks, never a list of PRs. Never delete; cleanup means quarantine.
+
+Verdict: ONE line -- GO, GO WITH FINDINGS, or NO GO -- on a4d182bf9efaa5b19b74c4a861f22746491e91b4, as the delta
+over round 2's cd5e62e96 AND as the merged tree on the develop you read (name it). Say plainly whether F1 is
+CLOSED (the E8-shape rows read 'unknown', not 'absent', and scheduleRetry is NOT called), whether the three
+round-2 controls still hold, what the tamper table measured, your own grade of the mixed-window residue, the
+merged-tree suite counts, and that round 2's nine-file tamper table was NOT re-run (name why: already GO).
+Give the merge seat its ADDENDUM: "squash a4d182bf9 onto develop as KS-726 only (attachments #805 + the closed
+#764 + round 2's cd5e62e96; Closes KS-726 in the body); order vs #922 either; npm run check:openapi on the
+squashed tree first; anchoring vitest 227/1 -> the merged count, measured; the new test file adds cells beyond
+round 2's 20 -- name the count both ways (source lines / runtime cells); KS-726 -> the ticket comment naming
+this report; Records carried from round 2: the batch catch's blanket (index.ts:1894), the 402 consequence, the
+T8/T9 unpinned clauses, F2's ruling question (still open, unaffected by this delta -- confirm); this round's own
+Record: the mixed-window residue (your grade)."
+
+MAIL YOUR VERDICT to wednesday-agent@agentmail.to when the pass is complete, using
+the project's send_brief.sh. Your pane holds ~19 lines of alternate screen with no
+scrollback, so a verdict that stays in the pane is one pane-close from being lost --
+this is not a formality, it is the only durable copy; the verdict MAIL is the wait signal. Subject:
+[QA -> Wednesday] TIER 1 GATE #805 (KS-726) a4d182bf9 — <VERDICT>

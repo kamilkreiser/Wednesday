@@ -1,0 +1,79 @@
+controls_check (round 3) --neg-token 07:21:26 AEST
+live develop = 0f37b85c80b65d742a01e6529ee8194317a7cc57
+ok   anchorSubmission.ts blob d3ad106d8 size 32849 (expect d3ad106d8 32849) at head
+ok   confirmation.ts blob 5690eb24f size 3369 (expect 5690eb24f 3369) at head
+ok   ks726-gate-f1-unreachable-chain.test.ts blob 82058c305 size 10327 (expect 82058c305 10327) at head
+ok   carried-forward index.ts blob da4abd432 unchanged at head (git, not API — avoids a 9th API round-trip)
+ok   carried-forward index.ts blob d7b44482d unchanged at head (git, not API — avoids a 9th API round-trip)
+ok   carried-forward ks726-write-ahead-tx-hash.test.ts blob ea5495f58 unchanged at head (git, not API — avoids a 9th API round-trip)
+ok   carried-forward ks726-review-f1-f3.test.ts blob 6dc62c8db unchanged at head (git, not API — avoids a 9th API round-trip)
+ok   carried-forward reconciler.ts blob 55e2fe694 unchanged at head (git, not API — avoids a 9th API round-trip)
+ok   carried-forward verifyAnchorStatus.ts blob b8b73078e unchanged at head (git, not API — avoids a 9th API round-trip)
+ok   carried-forward anchoring.openapi.ts blob 49b8b38da unchanged at head (git, not API — avoids a 9th API round-trip)
+ok   yaml blob 122d3a2f8 unchanged at head (git)
+ok   untouched provider.ts blob 9232d4d0a == develop's == round-2's (git)
+ok   untouched generate-openapi.ts blob e84acdc9e == develop's == round-2's (git)
+ok   untouched package-lock.json blob 17d2061b3 == develop's == round-2's (git)
+ok   untouched audit-baseline.json blob 03d1680e3 == develop's == round-2's (git)
+ok   untouched threadTokenMint.test.ts blob b88b3a43e == develop's == round-2's (git)
+ok   untouched chainHealthStatus.ts blob 8be4e7e16 == develop's == round-2's (git)
+ok   develop anchorSubmission.ts blob 66fa7e6f7 == M44 66fa7e6f7
+ok   develop index.ts blob 9f3eba10c == M44 9f3eba10c
+ok   develop index.ts blob c59345d03 == M44 c59345d03
+ok   develop secuura-api.yaml blob d327a249a == M44 d327a249a
+ok   develop reconciler.ts blob dc65347f6 == M44 dc65347f6
+ok   develop anchoring.openapi.ts blob ca7c92850 == M44 ca7c92850
+ok   develop provider.ts blob 9232d4d0a == M44 9232d4d0a
+ok   develop confirmation.ts blob c5042ca91 == M44 c5042ca91
+ok   develop generate-openapi.ts blob e84acdc9e == M44 e84acdc9e
+ok   develop ks726-write-ahead-tx-hash.test.ts ABSENT (pinned state)
+ok   develop ks726-review-f1-f3.test.ts ABSENT (pinned state)
+ok   develop verifyAnchorStatus.ts ABSENT (pinned state)
+ok   develop ks726-gate-f1-unreachable-chain.test.ts ABSENT (pinned state)
+ok   confirmation.ts 98 lines / :9 import
+ok   confirmation.ts:11-28 ConfirmationResult (:26-27 the new counters)
+ok   confirmation.ts:39-45 the signature (return type unchanged)
+ok   confirmation.ts:51-52 the two counters initialised
+ok   confirmation.ts:56-57 an ANSWERED attempt increments polled
+ok   confirmation.ts:74-75 a THROWN attempt increments errored
+ok   confirmation.ts:86-90 the not-confirmed return carries both counters
+ok   confirmation.ts tamper anchors: polled += 1; (1), errored += 1; (1) — positive controls: polled/errored appear 8/7+ times total
+ok   confirmation.ts: 0 CODE throw statements (regex, multiline); the word "throw" appears once, in the :48 comment only (positive control)
+ok   anchorSubmission.ts 586 lines / :135 ConfirmationLike / :147-148 the two optional counters
+ok   anchorSubmission.ts:242-246 the (unchanged) tri-state signature, shifted +8 from round 2's :234-238
+ok   anchorSubmission.ts:260 the CONFIRMED check runs FIRST (the new branch cannot pre-empt a FOUND result)
+ok   anchorSubmission.ts:281-299 the F1 fix — THE TAMPER ANCHOR at :292, THIRD in the if-chain after :260 (confirmed) and BEFORE the old :299 absent fallthrough
+ok   anchorSubmission.ts tamper anchor T1: "if (confirmation.polled === 0) {" count 1
+ok   anchorSubmission.ts:489 guard 5's discriminated condition (round 2's :463, shift +26 — UNCHANGED text, confirmed present at the shifted line)
+ok   anchorSubmission.ts:529 guard 3's re-poll call (round 2's :503, shift +26)
+ok   anchorSubmission.ts:542-545 refusedAndAbsent (round 2's :516-519, shift +26 — the T7/T8/T9 anchors, NOT re-tampered this round)
+ok   ks726-gate-f1-unreachable-chain.test.ts 187 lines / 8 SOURCE it( lines (10 RUNTIME cells: the :137-154 for-loop over 3 UNREACHABLE shapes multiplies one source line into three cells — count both ways)
+ok   test :50-54 the three UNREACHABLE shapes (503, 402, ENOTFOUND — E8/E8b/E8c)
+ok   test :101/:110/:118/:126 the four unit cells on waitForConfirmation
+ok   test :138 the E8-shape template (x3 runtime) / :156/:169/:178 the three harness-level cells
+ok   test imports the SDK classes and the REAL poller (0 synthetic status_code doubles this round — contrast with round 2's six shipped cells)
+ok   head parent = cd5e62e96 (round 2's head — ONE parent, fast-forward)
+ok   the head object is present in the local store (git cat-file -t) — no fetch run by the drafter
+ok   merge-base(head, current develop) = STILL M44 (unaffected by this round)
+ok   rev-list --count M44..head = 8 (was 7 at round 2)
+ok   head tree 41be8de2b
+ok   git diff --name-only cd5e62e96..head = EXACTLY the three round-3 files
+ok   numstat cd5e62e96..head = the three rows, sorted by path (187/0 test, 29/3 anchorSubmission.ts, 25/1 confirmation.ts — total +241 -4)
+ok   M44..current-develop touches 92 files total (git); the Blockchain/Dev subset is 11, none under services/anchoring/ or the yaml — see the next check
+ok   M44..develop under Blockchain/Dev/ = 11 files, 0 guarded-path hits: ['DRAFT-kintsugi-notice-HELD.md', 'KINTSUGI-REBUILD-RUNBOOK.md', '01-schema.sql', 'KS-926-CHECKS-THAT-CANNOT-FAIL.md', 'PR-STATUS-FOR-PETER-2026-09-04.md', 'ks914-shipped-path.test.ts', 'ssrf-guard.ts', 'bootstrap_env_slot_ports.test.sh', 'check_shared_relink.test.sh', 'bootstrap-env.sh', 'check-shared-relink.sh']
+ok   anchorSubmission.ts pristine sha256 re-derived = 173d350af3949311 (matches the brief's printed value — re-checked, not trusted)
+ok   confirmation.ts pristine sha256 re-derived = a7ddcdcd7c15a622 (matches the brief's printed value — re-checked, not trusted)
+ok   prompt: the MAIL YOUR VERDICT paragraph verbatim (1), the subject (1), ultrathink first line (positive control)
+ok   prompt: no rival verb (SEND YOUR VERDICT 0 — negative control); the INSTALLED brief path once
+ok   prompt carries 'NEVER run a push, the real pre-push hook, or pre'
+ok   prompt carries 'no memory maintenance'
+ok   prompt carries 'NEVER print a credential value'
+ok   prompt carries 'ROUND 3'
+ok   prompt carries 'a4d182bf9efaa5b19b74c4a861f22746491e91b4'
+ok   brief carries TIER 1, ROUND 3, the head SHA, the subject once, predicted-by
+ok   brief: >= 5 predictions carry drafter (table rows ending "| drafter |" or "/ drafter N", plus inline predicted-by: drafter — a smaller DELTA brief than round 2's 20+, honestly sized to this round's scope); no Wednesday-read row composed here
+ok   brief names round 2's head (the parent) and F1 (the finding it closes)
+FAIL NEG: anchorSubmission.ts "return 'unknown';" demanded ABSENT at head (known present, at :296 and :303-ish — the catch block's own unknown return)
+FAIL NEG: confirmation.ts "polled += 1;" demanded ABSENT at head (known present, count 1)
+FAIL NEG: the MAIL paragraph demanded under a rival verb (known 0)
+TALLY ok=73 FAILS=3 live_develop=0f37b85c8 07:21:39

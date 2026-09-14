@@ -1,0 +1,187 @@
+/**
+ * KS-726 — #805 tier-1 gate, F1 (2026-09-14): an UNREACHABLE chain must not read as ABSENT.
+ *
+ * The finding, measured by the gate at `cd5e62e96` (its E8 / E8b / E8c rows): after a
+ * definitive "All inputs are spent" 400, guard 3 re-polls the hash it just wrote ahead.
+ * `waitForConfirmation` swallowed every attempt's error into the status callback and
+ * returned `confirmed: false` regardless, so `reconfirmKnownSubmission` read a chain that
+ * was UNREACHABLE for the whole bounded poll (Blockfrost 5xx / 402 / DNS) as `'absent'` —
+ * "the chain answered and it is not there" — and scheduled the ordinary retry. That retry
+ * mints a SECOND fee-paying transaction for a document whose first may already be in a
+ * block: the KS-705 orphan, reached through the write-ahead path this module exists to
+ * close. The `'unknown'` arm at `reconfirmKnownSubmission` was reachable only when
+ * `confirm` THREW, which the production `waitForConfirmation` never does.
+ *
+ * The fix: `waitForConfirmation` reports how many attempts REACHED the chain (`polled`)
+ * and how many THREW (`errored`); `reconfirmKnownSubmission` maps `polled === 0` —
+ * no attempt reached the chain — to `'unknown'`, which rests the row in `submitting`
+ * for the reconciler (KS-584), the same weaker-harm choice guard 5 makes for a lost reply.
+ *
+ * Harness: the gate's E-matrix shape — the REAL `waitForConfirmation` with only
+ * `getTransaction` mocked, driven through `createAnchorSubmitter` so the cells measure
+ * the row, the retry and the mint, not a unit in isolation. Three attempts at 1 ms so a
+ * cell runs in seconds (the poller adds up to 2 s of jitter per attempt).
+ */
+import { describe, it, expect, vi, beforeEach } from 'vitest';
+import { BlockfrostServerError, BlockfrostClientError } from '@blockfrost/blockfrost-js';
+import { createAnchorSubmitter, type AnchorSubmissionDeps, type AnchorSnapshot } from '../anchorSubmission';
+
+vi.mock('../cardano/provider', async (importOriginal) => {
+  const orig = await importOriginal<typeof import('../cardano/provider')>();
+  return { ...orig, getTransaction: vi.fn() };
+});
+import { getTransaction } from '../cardano/provider';
+import { waitForConfirmation } from '../cardano/confirmation';
+
+const TX_A = '408e72087942198b69d686401829b5b9419d018dc4cc64917283aa3cdb084994';
+const ANCHOR_ID = 'anchor_a93bd8dd-10c8-4d52-b12e-c0bff6f5c790';
+const gt = getTransaction as unknown as ReturnType<typeof vi.fn>;
+
+/** The KS-535 short form of the node's "inputs spent" reply — the one that reaches guard 3's retry arm. */
+const INPUTS_SPENT_SHORT = () =>
+  new BlockfrostServerError({
+    status_code: 400,
+    error: 'Bad Request',
+    message: 'Transaction submission failed: ConwayMempoolFailure "All inputs are spent"',
+    url: 'x',
+  });
+
+/** The three "chain unreachable for every attempt" shapes the gate measured (E8, E8b, E8c). */
+const UNREACHABLE: Array<{ label: string; make: () => Error }> = [
+  { label: 'ServerError 503 on every attempt', make: () => new BlockfrostServerError({ status_code: 503, error: 'Service Unavailable', message: '503: Service Unavailable', url: 'x' }) },
+  { label: 'ServerError 402 (quota) on every attempt', make: () => new BlockfrostServerError({ status_code: 402, error: 'Payment Required', message: '402: Payment Required', url: 'x' }) },
+  { label: 'ClientError ENOTFOUND (network) on every attempt', make: () => new BlockfrostClientError({ code: 'ENOTFOUND', message: 'getaddrinfo ENOTFOUND', url: 'x' }) },
+];
+
+function makeLock() {
+  let chain: Promise<unknown> = Promise.resolve();
+  return function lock<T>(fn: () => Promise<T>): Promise<T> {
+    const next = chain.catch(() => undefined).then(() => fn());
+    chain = next.catch(() => undefined);
+    return next;
+  };
+}
+
+/** The gate's harness: a real row, a submit that signs TX_A (firing the write-ahead) then throws the node reply. */
+function makeHarness(reply: Error) {
+  const row: AnchorSnapshot = {
+    id: ANCHOR_ID, status: 'pending', transactionHash: undefined, retryCount: 0,
+    metadataLabel: 674, metadataPayload: { documentId: 'doc-1787874883988-04d3ee24' },
+  };
+  const statusWrites: Array<Record<string, unknown>> = [];
+  const signedHashes: string[] = [];
+  const logs: Array<{ level: string; message: string; meta?: Record<string, unknown> }> = [];
+  const submit = vi.fn(async (_label: number, _payload: object, options?: { onSigned?: (txHash: string) => Promise<void> }) => {
+    if (options?.onSigned) { signedHashes.push(TX_A); await options.onSigned(TX_A); }
+    throw reply;
+  });
+  const deps: AnchorSubmissionDeps = {
+    getAnchor: vi.fn(async () => ({ ...row })),
+    submit,
+    // The PRODUCTION poller, bounded to three 1 ms attempts; only `getTransaction` is mocked.
+    confirm: vi.fn((h: string, cb?: (attempt: number, status: string) => void) => waitForConfirmation(h, 3, 1, 1, cb)),
+    updateStatus: vi.fn(async (_id: string, updates: Record<string, unknown>) => {
+      statusWrites.push(updates);
+      if (typeof updates.status === 'string') row.status = updates.status as AnchorSnapshot['status'];
+      if (typeof updates.transactionHash === 'string') row.transactionHash = updates.transactionHash;
+    }),
+    bumpRetryCount: vi.fn(async () => { row.retryCount += 1; }),
+    scheduleRetry: vi.fn(),
+    log: vi.fn((level, message, meta) => { logs.push({ level, message, meta }); }),
+    withWalletLock: makeLock(),
+  };
+  const statusSeq = () => statusWrites.map(w => w.status).filter((s): s is string => typeof s === 'string');
+  const calls = (fn: unknown) => (fn as ReturnType<typeof vi.fn>).mock.calls.length;
+  return { deps, row, statusSeq, signedHashes, logs, calls };
+}
+
+beforeEach(() => { gt.mockReset(); });
+
+describe('waitForConfirmation reports whether any attempt reached the chain (KS-726, #805 gate F1)', () => {
+  it('every attempt THROWS → confirmed:false with polled 0 / errored 3 — the chain was never asked', async () => {
+    gt.mockRejectedValue(UNREACHABLE[0].make());
+    const r = await waitForConfirmation(TX_A, 3, 1, 1);
+    expect(r.confirmed).toBe(false);
+    expect(r.polled).toBe(0);
+    expect(r.errored).toBe(3);
+    expect(gt).toHaveBeenCalledTimes(3);
+  }, 60_000);
+
+  it('CONTROL — every attempt ANSWERS "not found" → confirmed:false with polled 3 / errored 0', async () => {
+    gt.mockResolvedValue(null);
+    const r = await waitForConfirmation(TX_A, 3, 1, 1);
+    expect(r.confirmed).toBe(false);
+    expect(r.polled).toBe(3);
+    expect(r.errored).toBe(0);
+  }, 60_000);
+
+  it('a mixed window (throw, not found, throw) → polled 1 / errored 2 — one attempt reached the chain', async () => {
+    gt.mockRejectedValueOnce(UNREACHABLE[0].make()).mockResolvedValueOnce(null).mockRejectedValueOnce(UNREACHABLE[2].make());
+    const r = await waitForConfirmation(TX_A, 3, 1, 1);
+    expect(r.confirmed).toBe(false);
+    expect(r.polled).toBe(1);
+    expect(r.errored).toBe(2);
+  }, 60_000);
+
+  it('found on attempt 2 → confirmed:true, and the counters still say what ran (polled 2 / errored 0)', async () => {
+    gt.mockResolvedValueOnce(null).mockResolvedValueOnce({ block: 'b', block_height: 4_609_927, slot: 1 });
+    const r = await waitForConfirmation(TX_A, 3, 1, 1);
+    expect(r.confirmed).toBe(true);
+    expect(r.blockNumber).toBe(4_609_927);
+    expect(r.polled).toBe(2);
+    expect(r.errored).toBe(0);
+  }, 60_000);
+});
+
+describe('guard 3 after "inputs spent": an unreachable chain rests the row; an absent hash retries (the gate\'s E8 + control)', () => {
+  for (const shape of UNREACHABLE) {
+    it(`E8 — ${shape.label}: NO scheduleRetry, the row rests in 'submitting' naming TX_A`, async () => {
+      gt.mockRejectedValue(shape.make());
+      const h = makeHarness(INPUTS_SPENT_SHORT());
+      await createAnchorSubmitter(h.deps)(ANCHOR_ID);
+
+      expect(gt).toHaveBeenCalledTimes(3);                 // the poll ran its bounded window …
+      expect(h.calls(h.deps.confirm)).toBe(1);             // … once, on the written-ahead hash
+      expect(h.signedHashes).toEqual([TX_A]);
+      expect(h.calls(h.deps.scheduleRetry)).toBe(0);       // THE FINDING: no second mint is scheduled
+      expect(h.calls(h.deps.bumpRetryCount)).toBe(0);
+      expect(h.statusSeq()).not.toContain('failed');
+      expect(h.row.status).toBe('submitting');
+      expect(h.row.transactionHash).toBe(TX_A);
+      expect(h.logs.some(l => l.message.startsWith('Anchor confirmation poll never reached the chain'))).toBe(true);
+      expect(h.logs.some(l => l.message === 'Anchor confirmation timed out')).toBe(false);
+    }, 60_000);
+  }
+
+  it('CONTROL — the chain ANSWERS "not found" ×3: the rejection is definitive → retry (the (c) path, unchanged)', async () => {
+    gt.mockResolvedValue(null);
+    const h = makeHarness(INPUTS_SPENT_SHORT());
+    await createAnchorSubmitter(h.deps)(ANCHOR_ID);
+
+    expect(gt).toHaveBeenCalledTimes(3);
+    expect(h.calls(h.deps.scheduleRetry)).toBe(1);
+    expect(h.calls(h.deps.bumpRetryCount)).toBe(1);
+    expect(h.statusSeq()).toEqual(['submitting', 'failed', 'pending']);
+    expect(h.logs.some(l => l.message === 'Anchor confirmation timed out')).toBe(true);
+    expect(h.logs.some(l => l.message.startsWith('Anchor confirmation poll never reached the chain'))).toBe(false);
+  }, 60_000);
+
+  it('a mixed window (throw, not found, throw) reads ABSENT — one answer is enough for the commissioned "any attempt" rule → retry', async () => {
+    gt.mockRejectedValueOnce(UNREACHABLE[0].make()).mockResolvedValueOnce(null).mockRejectedValueOnce(UNREACHABLE[0].make());
+    const h = makeHarness(INPUTS_SPENT_SHORT());
+    await createAnchorSubmitter(h.deps)(ANCHOR_ID);
+
+    expect(h.calls(h.deps.scheduleRetry)).toBe(1);
+    expect(h.statusSeq()).toEqual(['submitting', 'failed', 'pending']);
+  }, 60_000);
+
+  it('CONTROL — an injected confirm that reports NO counters keeps today\'s reading: confirmed:false → absent → retry', async () => {
+    const h = makeHarness(INPUTS_SPENT_SHORT());
+    (h.deps.confirm as ReturnType<typeof vi.fn>).mockImplementation(async () => ({ confirmed: false }));
+    await createAnchorSubmitter(h.deps)(ANCHOR_ID);
+
+    expect(gt).toHaveBeenCalledTimes(0);
+    expect(h.calls(h.deps.scheduleRetry)).toBe(1);
+    expect(h.statusSeq()).toEqual(['submitting', 'failed', 'pending']);
+  }, 60_000);
+});
