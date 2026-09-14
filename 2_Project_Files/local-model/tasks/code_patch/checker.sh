@@ -192,6 +192,11 @@ for k, sec in enumerate(sections, 1):
             print(f"section {k} {path}: hunk {hunks} ({L[i]}) declared old={b} new={d} but actual old={old} new={new}")
         i = j
     fn = f"{rep}/section_{k}.diff"
+    # 2026-09-15: a diff line is never EMPTY (context lines start with a space) — a trailing empty line is
+    # the model's fence artefact, and --recount then reads it as a context line ("new file depends on old
+    # contents" on KS-871's test section). Strip trailing empty lines from every section.
+    while L and L[-1] == "":
+        L.pop()
     open(fn, "w", encoding="utf-8").write("\n".join(L) + "\n")
     out.append({"n": k, "path": path, "file": fn, "hunks": hunks, "miscount": miscount})
 json.dump(out, open(f"{rep}/sections.json", "w"), indent=1)
@@ -223,7 +228,19 @@ while [ "$k" -le "$N_SEC" ]; do
     A2_MODE="lenient"; A2_NOTE="$A2_NOTE [$SEC_PATH: --recount --ignore-whitespace needed; miscounted hunks=$SEC_MIS; strict rc=$rc_strict]"
     echo "section $k $SEC_PATH: applies ONLY with --recount --ignore-whitespace (miscounted hunks=$SEC_MIS, strict rc=$rc_strict)"
   else
-    A2_OK=0; A2_NOTE="$A2_NOTE [$SEC_PATH: does not apply — strict: $(head -2 "$REP/apply_check_strict_$k.out" | tr '\n' ' ') | lenient: $(head -2 "$REP/apply_check_lenient_$k.out" | tr '\n' ' ')]"
+    # 2026-09-15 third mode — FUZZY (-C1): the model's OUTER context line often differs by a word or a
+    # space while the inner lines match (KS-871 think=1: hunk 3 landed at :281 for a stated :277 once
+    # only one context line was required). Placement is then guarded by A4–A6 and the human source
+    # read; the mode is recorded LOUDLY in the verdict so a PASS says "fuzzy" beside its counts.
+    git -C "$CLONE" apply --check -p1 $DIROPT --recount --ignore-whitespace -C1 "$SEC_FILE" > "$REP/apply_check_fuzzy_$k.out" 2>&1
+    rc_fuzzy=$?
+    if [ "$rc_fuzzy" -eq 0 ]; then
+      echo "$SEC_FILE" > "$REP/section_$k.opts"; echo "$DIROPT --recount --ignore-whitespace -C1" >> "$REP/section_$k.opts"
+      A2_MODE="fuzzy"; A2_NOTE="$A2_NOTE [$SEC_PATH: FUZZY — applies only with -C1 (one context line): $(head -1 "$REP/apply_check_fuzzy_$k.out" | tr '\n' ' '); strict rc=$rc_strict lenient rc=$rc_lenient]"
+      echo "section $k $SEC_PATH: applies ONLY FUZZY (-C1): $(head -1 "$REP/apply_check_fuzzy_$k.out")"
+    else
+      A2_OK=0; A2_NOTE="$A2_NOTE [$SEC_PATH: does not apply — strict: $(head -2 "$REP/apply_check_strict_$k.out" | tr '\n' ' ') | lenient: $(head -2 "$REP/apply_check_lenient_$k.out" | tr '\n' ' ') | fuzzy(-C1): $(head -2 "$REP/apply_check_fuzzy_$k.out" | tr '\n' ' ')]"
+    fi
   fi
   k=$((k+1))
 done
