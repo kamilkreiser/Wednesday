@@ -1,0 +1,61 @@
+diff --git a/Blockchain/Dev/docs/openapi/secuura-api.yaml b/Blockchain/Dev/docs/openapi/secuura-api.yaml
+index f14ab17ed..298d95e4a 100644
+--- a/Blockchain/Dev/docs/openapi/secuura-api.yaml
++++ b/Blockchain/Dev/docs/openapi/secuura-api.yaml
+@@ -10041,8 +10041,10 @@ components:
+           description: Override the default S-connector scope set (contract §8). Defaults to the signed-off set.
+         rotate:
+           type: boolean
+-          description: Mint a replacement key for an already-registered Organisation (§5 rotation, step 1).
+-            The old key stays active until explicitly revoked.
++          description: "Mint a replacement key for an already-registered Organisation (§5 rotation). The prior
++            active keys of the same connector are retired as part of the mint: deactivated at once
++            by default, or left valid for at most the API_KEY_ROTATION_GRACE_SECONDS window when the
++            security service sets one."
+       required:
+         - externalRef
+       example:
+@@ -35568,11 +35570,12 @@ paths:
+       description: "One platform-admin-authorised handshake per Platform S Organisation: upserts the
+         organizations row (idempotent on externalRef), binds it to a tenant, and mints the per-org
+         sk_ connector key. Re-registration with the same externalRef returns the existing org and NO
+-        key; `rotate: true` mints a replacement (revoke the old key separately). Authorised by
+-        EITHER a platform-admin bearer OR a connector key carrying the provisioning-only
+-        `organizations:register` scope (§4 amendment 2026-07-30). A provisioning key is constrained
+-        to its own tenant, may not override the minted scope set, and may not rotate (403 each) —
+-        rotation stays platform-admin-only."
++        key; `rotate: true` mints a replacement and retires the prior active keys of the same
++        connector (at once by default, or at the end of the API_KEY_ROTATION_GRACE_SECONDS window
++        when the security service sets one). Authorised by EITHER a platform-admin bearer OR a
++        connector key carrying the provisioning-only `organizations:register` scope (§4 amendment
++        2026-07-30). A provisioning key is constrained to its own tenant, may not override the
++        minted scope set, and may not rotate (403 each) — rotation stays platform-admin-only."
+       security:
+         - bearerAuth: []
+         - connectorApiKey: []
+diff --git a/Blockchain/Dev/services/tenant-provisioning/src/tenant-provisioning.openapi.ts b/Blockchain/Dev/services/tenant-provisioning/src/tenant-provisioning.openapi.ts
+index 5903759c7..7b7e0be14 100644
+--- a/Blockchain/Dev/services/tenant-provisioning/src/tenant-provisioning.openapi.ts
++++ b/Blockchain/Dev/services/tenant-provisioning/src/tenant-provisioning.openapi.ts
+@@ -673,7 +673,7 @@ const RegisterConnectorRequestSchema = sharedRegistry.register(
+     rotate: z
+       .boolean()
+       .optional()
+-      .openapi({ description: 'Mint a replacement key for an already-registered Organisation (§5 rotation, step 1). The old key stays active until explicitly revoked.' }),
++      .openapi({ description: 'Mint a replacement key for an already-registered Organisation (§5 rotation). The prior active keys of the same connector are retired as part of the mint: deactivated at once by default, or left valid for at most the API_KEY_ROTATION_GRACE_SECONDS window when the security service sets one.' }),
+   }).openapi({
+   // KS-256: generated example (synthesised, masked). Guarded by
+   // `npm run check:openapi` -> check-spec-examples (E1-E7).
+@@ -729,8 +729,10 @@ sharedRegistry.registerPath({
+     'One platform-admin-authorised handshake per Platform S Organisation: upserts the ' +
+     'organizations row (idempotent on externalRef), binds it to a tenant, and mints the ' +
+     'per-org sk_ connector key. Re-registration with the same externalRef returns the ' +
+-    'existing org and NO key; `rotate: true` mints a replacement (revoke the old key ' +
+-    'separately). Authorised by EITHER a platform-admin bearer OR a connector key carrying ' +
++    'existing org and NO key; `rotate: true` mints a replacement and retires the prior ' +
++    'active keys of the same connector (at once by default, or at the end of the ' +
++    'API_KEY_ROTATION_GRACE_SECONDS window when the security service sets one). Authorised ' +
++    'by EITHER a platform-admin bearer OR a connector key carrying ' +
+     'the provisioning-only `organizations:register` scope (§4 amendment 2026-07-30). A ' +
+     'provisioning key is constrained to its own tenant, may not override the minted scope ' +
+     'set, and may not rotate (403 each) — rotation stays platform-admin-only.',

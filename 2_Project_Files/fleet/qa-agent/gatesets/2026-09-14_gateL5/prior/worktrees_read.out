@@ -1,0 +1,109 @@
+2026-09-14 08:17:19 AEST
+--- checkout readings
+355d82c8b02792a2d25992db9ec0e2bdc636f318
+feature/ks-597-b-caller-scoped-externalref
+porcelain 0
+.git/config sha256 e0fa706f4bdae277
+refs 848
+.git/worktrees 99
+worktrees/ entries 97
+--- s216 worktrees
+/Volumes/DevMASTER/!CODING/Secuura/Blockchain/worktrees/s216-ks577-r2
+/Volumes/DevMASTER/!CODING/Secuura/Blockchain/worktrees/s216-ks764-r3
+== /Volumes/DevMASTER/!CODING/Secuura/Blockchain/worktrees/s216-ks577-r2
+a704137de38a3055e40ee62adc343c0239f34ea9
+HEAD
+porcelain 0
+== /Volumes/DevMASTER/!CODING/Secuura/Blockchain/worktrees/s216-ks764-r3
+6da848891924f859179d097d464a7b97c9783a6a
+HEAD
+porcelain 0
+--- farm source counts in /Volumes/DevMASTER/!CODING/Secuura/Blockchain/worktrees/s216-ks764-r3
+Blockchain/Dev/node_modules                                  985
+Blockchain/Dev/services/originate/node_modules               9
+Blockchain/Dev/services/security/node_modules                6
+Blockchain/Dev/packages/shared/node_modules                  7
+Blockchain/Dev/packages/shared/dist                          28
+Blockchain/Dev/services/api-gateway/node_modules             7
+--- runners
+vitest 4.1.10
+jest 29.7.0
+ts-jest 29.4.11
+typescript 5.9.3
+--- originate jest config
+module.exports = {
+  preset: 'ts-jest',
+  testEnvironment: 'node',
+  roots: ['<rootDir>/src'],
+  testMatch: ['**/__tests__/**/*.test.ts'],
+  // Integration tests are DB-backed and run via jest.integration.config.js
+  // (`npm run test:integration`); the default run stays unit-only + mock-DB.
+  testPathIgnorePatterns: ['/node_modules/', '\\.integration\\.test\\.ts$'],
+  moduleFileExtensions: ['ts', 'js', 'json'],
+  // uuid@14 is ESM-only and jest's CJS runtime can't parse it — every suite
+  // importing routes/repos load-failed since the bump (KS-466 fix). The stub
+  // exports the one API the service uses (v4). Runtime uses the real package.
+  moduleNameMapper: {
+    '^uuid$': '<rootDir>/src/testUtils/uuid-cjs.ts',
+  },
+};
+--- security vitest config
+package.json
+vitest.config.ts
+import { defineConfig } from 'vitest/config';
+
+/**
+ * Pen-test H13 scaffold. Coverage thresholds are present but only enforced
+ * by the explicit `npm run test:coverage` script — the default `npm test`
+ * runs the suite without coverage so adding a service with zero tests
+ * doesn't immediately break CI. Ratchet thresholds quarterly.
+ */
+export default defineConfig({
+  test: {
+    globals: true,
+    environment: 'node',
+    coverage: {
+      provider: 'v8',
+      reporter: ['text', 'json-summary'],
+      include: ['src/**/*.ts'],
+      exclude: ['src/__tests__/**', 'src/**/*.d.ts'],
+      thresholds: {
+        statements: 60,
+        branches: 50,
+        functions: 60,
+        lines: 60,
+      },
+    },
+  },
+});
+--- packages/shared vitest config
+import { defineConfig } from 'vitest/config';
+import { resolve } from 'node:path';
+
+export default defineConfig({
+  resolve: {
+    alias: {
+      // KS-727 class guard: the guard imports service middleware from outside
+      // this package, and those modules import `@secuura/shared` by name. Node
+      // resolution sends that to `dist/`, so without this alias the suite would
+      // measure the LAST BUILD rather than the working tree — a source fix
+      // would leave the guard green until someone happened to rebuild, which is
+      // the same inert-proof trap the #774 review recorded. It also keeps class
+      // identity single: the guard's `instanceof` controls compare against the
+      // same `AppError` the imported handlers see.
+      //
+      // Scope check: nothing inside `packages/shared/src` imports itself by
+      // package name (all internal imports are relative), so this alias only
+      // affects modules pulled in from outside the package.
+      '@secuura/shared': resolve(__dirname, 'src/index.ts'),
+    },
+  },
+  test: {
+    include: ['src/__tests__/**/*.test.ts'],
+    globals: true,
+  },
+});
+--- node
+v24.7.0
+--- docker
+Cannot connect to the Docker daemon at unix:///Users/kam_code/.docker/run/docker.sock. Is the docker daemon running?

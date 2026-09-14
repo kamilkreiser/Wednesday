@@ -1,0 +1,179 @@
+GH_TOKEN: set
+read at 2026-09-14 08:12:24 AEST / 22:12:24Z
+classifier positive control: {'array': 1, 'prep': 1, 'email': 0, 'idiom': 0, 'mention': 2, 'scope': 1, 'other': 1}
+PR #799: state=open draft=False merged=False author=kksecura BASE=develop@8861e6216 head=6da848891924f859179d097d464a7b97c9783a6a branch=feature/ks-764-security-decidekeyrevoke-has-no-organisation-arm-an commits=12 files=12 +1576 -98 mergeable=True/unstable created=2026-09-03T11:07:46Z updated=2026-09-13T22:03:47Z title='KS-764: close the second revoke surface in originate, and bind the organisation arm to its call sites'
+  body chars=16291 at-signs=6 classes={'array': 0, 'prep': 0, 'email': 0, 'idiom': 0, 'mention': 2, 'scope': 4, 'other': 0} KS=['KS-643', 'KS-650', 'KS-764', 'KS-779', 'KS-780'] PRrefs=['#790', '#795', '#797']
+  headings: ['## BLUF', '## F-764-01 — the sibling route', '### The rule is shared, not copied', '## F-764-02 — the arm is bound to its call sites', '## F-764-03 — @kam, a live-behaviour decision, raised not decided', '## ⚠️ One thing that will bite the reviewer', '## Test Evidence', '### Platform suites — final check', '## Update 2026-09-03 — head `04e9ef23d`', '### F-799-01 (Major) — the sweep now reads the tree', '### F-795-01 — the citation #795 deleted', '### Test Evidence', "## Update 2026-09-04 — head `b36757f7a` — Peter's Majors 1 and 2", '### Test Evidence — as measured at this head', '### The remaining findings', "## Test Evidence — round for Peter's three lines and a fixture (head `6da848891924f859179d097d464a7b97c9783a6a`, 2026-09-14)"]
+  body count '6da848891': 2
+  body count 'e6e25421e': 1
+  body count '38f6377b9': 2
+  body count '8861e6216': 1
+  body count '7dfc7ebca': 0
+  body count '@kam': 2
+  body count '@secuura/shared': 4
+  body count 'Test Evidence': 5
+  body count '828/828': 0
+  body count '205/205': 0
+  body count '598/598': 0
+  body count '343/343': 0
+  body count '23/23': 1
+  body count '1 failed | 22 passed': 0
+  body count '1 failed | 9 passed': 0
+  body count '1 failed | 6 passed': 0
+  body count 'caller has no tenant': 0
+  body count 'ADMIN_NO_TENANT': 0
+  body count 'typeof': 1
+  body count 'T1': 1
+  body count 'T2': 1
+  body count 'T3': 1
+  body count 'loopback': 2
+  body count 'F-2': 1
+  body count 'F-3': 1
+  body count 'F-1': 1
+  body count '6(b)': 2
+  body count '6(c)': 2
+  body count 'nit': 2
+  body count 'NOT done': 0
+  body count 'Not covered': 0
+  body count 'HOLD': 0
+  body count '127.0.0.1': 0
+  body count 'M18': 0
+  body count 'Migrations': 4
+  body count 'migration': 1
+  body count 'F-764-03': 1
+  body count 'startup-migrations': 0
+  body count 'PREFLIGHT': 1
+  body count 'PROTOCOL': 0
+  body count 'ks742': 1
+  body count 'KS-742': 0
+  body count 'KS-860': 0
+  body count 'ks860': 0
+  body count 'round': 2
+  files API: 12 files, +1576 -98
+  file modified  +27 -0 sha=94ee03ea9 changes=27 BACKLOG.md
+  file added     +458 -0 sha=ab8e46d79 changes=458 Blockchain/Dev/packages/shared/src/__tests__/ks764-key-revoke-call-site-guard.test.ts
+  file modified  +12 -0 sha=8794bca5f changes=12 Blockchain/Dev/packages/shared/src/index.ts
+  file modified  +17 -0 sha=3a67987a7 changes=17 Blockchain/Dev/packages/shared/src/middleware/index.ts
+  file added     +268 -0 sha=dcd774a30 changes=268 Blockchain/Dev/packages/shared/src/security/keyRevokePolicy.ts
+  file added     +293 -0 sha=5a78c4181 changes=293 Blockchain/Dev/services/originate/src/__tests__/ks764-admin-api-keys-revoke-route-contract.test.ts
+  file modified  +17 -0 sha=f08ee1a89 changes=17 Blockchain/Dev/services/originate/src/middleware/auth.ts
+  file modified  +70 -1 sha=26cec03de changes=71 Blockchain/Dev/services/originate/src/routes/adminConfig.ts
+  file added     +168 -0 sha=1fe8671b0 changes=168 Blockchain/Dev/services/security/src/__tests__/ks764-key-revoke-organisation-arm.test.ts
+  file added     +214 -0 sha=3bae312af changes=214 Blockchain/Dev/services/security/src/__tests__/ks764-revoke-organisation-route-contract.test.ts
+  file modified  +13 -2 sha=1bb567a09 changes=15 Blockchain/Dev/services/security/src/index.ts
+  file modified  +19 -95 sha=b0493aa67 changes=114 Blockchain/Dev/services/security/src/keyRevokePolicy.ts
+  commits API: 12
+  commit 011aeae6e9231cc4637660d8fffdf987216251b9 parents=['b0373773b'] Kam Kreiser <kamil.kreiser@secuura.ai> 2026-09-03T06:01:00Z tree=fce06eb2f subj='KS-764: bound an org-scoped admin to its own organisation on key revoke'
+  commit 52edde340ba4c3f9298b8083c141bad74c6f2f3b parents=['011aeae6e'] Kam Kreiser <kamil.kreiser@secuura.ai> 2026-09-03T08:28:48Z tree=96ea56142 subj='KS-764: close the second revoke surface, and bind the organisation arm to its call sites'
+  commit 124e9819285ae73b5c6493cddf227ec3a16ea7a7 parents=['52edde340'] Kam Kreiser <kamil.kreiser@secuura.ai> 2026-09-03T11:06:17Z tree=9c3c3cc50 subj='docs(backlog): a stale packages/shared/dist makes healthy suites fail 22 tests and misnames the cause'
+  commit 04e9ef23da95392e7736d0670a6b83615618150a parents=['124e98192'] Kam Kreiser <kamil.kreiser@secuura.ai> 2026-09-03T12:25:21Z tree=c56ea79e9 subj='KS-764: measure the precondition, close F-799-01, and repoint the citation #795 deleted'
+  commit e358ca4b7ad757ecb8491f3d7f5949d3c8508e7d parents=['04e9ef23d'] Kam Kreiser <kamil.kreiser@secuura.ai> 2026-09-03T16:03:40Z tree=7a0d1e80d subj='KS-764: widen the swept corpus, add an idiom-proof drift guard, and stop the probe writing into live source (QA F-799-09/10)'
+  commit cc9c08e4570e85d9a4a5e692ebc6d902cbecb199 parents=['e358ca4b7'] Kam Kreiser <kamil.kreiser@secuura.ai> 2026-09-03T16:05:38Z tree=1f6e84feb subj='KS-764: correct the reason this guard is a source guard — the obstacle it claimed does not exist'
+  commit 4cb07b79f151b07477c3ca8fb3cb892aac6374ce parents=['cc9c08e45'] Kam Kreiser <kamil.kreiser@secuura.ai> 2026-09-03T16:13:40Z tree=341d8e021 subj="KS-764: declare tenantId — the authorisation input that was load-bearing, undeclared and invisible to the compiler (Peter's #799 finding 3)"
+  commit b36757f7a01fb644d8cd9820983869faa9594dd1 parents=['4cb07b79f'] Kam Kreiser <kamil.kreiser@secuura.ai> 2026-09-03T16:44:48Z tree=ca0141ff6 subj="KS-764: put both revoke surfaces under an on-the-wire test (Peter's #799 Majors 1 and 2)"
+  commit 7dfc7ebca63595718f6f0a65804ea16ee8a0a492 parents=['b36757f7a', '5ffaaf396'] PeterObeden <peter@obeden.com> 2026-09-08T13:39:05Z tree=0a214c1cd subj="Merge remote-tracking branch 'origin/develop' into feature/ks-764-security-decidekeyrevoke-has-no-organisation-arm-an"
+  commit 38f6377b9c6429be2627cb5454e98a36104a25b8 parents=['7dfc7ebca', '0f8fb33c3'] PeterObeden <peter@obeden.com> 2026-09-10T07:20:34Z tree=a0845167c subj="Merge remote-tracking branch 'origin/develop' into feature/ks-764-security-decidekeyrevoke-has-no-organisation-arm-an"
+  commit e6e25421e98ba8f11153f5fc394fe79fc96549a0 parents=['38f6377b9', '8861e6216'] Kam Kreiser <kamil.kreiser@secuura.ai> 2026-09-13T21:48:24Z tree=7bb31ccb1 subj="Merge develop `8861e6216` into ks-764 — bring the branch to the current base (the loopback guard it is measured by is develop's) before Peter's three-"
+  commit 6da848891924f859179d097d464a7b97c9783a6a parents=['e6e25421e'] Kam Kreiser <kamil.kreiser@secuura.ai> 2026-09-13T21:56:11Z tree=0f2c7b9b5 subj="KS-764: Peter's three lines and a fixture — loopback binds, the export-presence control, the no-tenant refusal pinned on both routes"
+  reviews: 5
+  review 5102832918 PeterObeden COMMENTED @04e9ef23d 2026-09-03T13:56:32Z chars=10769 at-signs=0 classes={'array': 0, 'prep': 0, 'email': 0, 'idiom': 0, 'mention': 0, 'scope': 0, 'other': 0}
+  review 5141511500 PeterObeden COMMENTED @b36757f7a 2026-09-08T12:13:37Z chars=7067 at-signs=0 classes={'array': 0, 'prep': 0, 'email': 0, 'idiom': 0, 'mention': 0, 'scope': 0, 'other': 0}
+  review 5141756436 PeterObeden COMMENTED @b36757f7a 2026-09-08T12:38:36Z chars=6222 at-signs=2 classes={'array': 0, 'prep': 0, 'email': 0, 'idiom': 0, 'mention': 0, 'scope': 0, 'other': 2}
+  review 5141804554 PeterObeden COMMENTED @b36757f7a 2026-09-08T12:43:42Z chars=4271 at-signs=0 classes={'array': 0, 'prep': 0, 'email': 0, 'idiom': 0, 'mention': 0, 'scope': 0, 'other': 0}
+  review 5153121542 PeterObeden COMMENTED @7dfc7ebca 2026-09-09T10:39:57Z chars=7732 at-signs=1 classes={'array': 0, 'prep': 0, 'email': 0, 'idiom': 0, 'mention': 0, 'scope': 1, 'other': 0}
+  review (inline) comments: 0
+  issue comments: 8
+  issue comment 5524778224 linear[bot] 2026-09-03T11:07:50Z chars=6446 at-signs=0 classes={'array': 0, 'prep': 0, 'email': 0, 'idiom': 0, 'mention': 0, 'scope': 0, 'other': 0} KS=['KS-486', 'KS-577', 'KS-621', 'KS-643', 'KS-695', 'KS-742', 'KS-748', 'KS-764']
+  issue comment 5528535223 kksecura 2026-09-03T16:07:19Z chars=6429 at-signs=0 classes={'array': 0, 'prep': 0, 'email': 0, 'idiom': 0, 'mention': 0, 'scope': 0, 'other': 0} KS=['KS-779']
+  issue comment 5528634270 kksecura 2026-09-03T16:15:07Z chars=4298 at-signs=0 classes={'array': 0, 'prep': 0, 'email': 0, 'idiom': 0, 'mention': 0, 'scope': 0, 'other': 0} KS=['KS-779']
+  issue comment 5529025547 kksecura 2026-09-03T16:46:18Z chars=5889 at-signs=1 classes={'array': 0, 'prep': 0, 'email': 0, 'idiom': 0, 'mention': 0, 'scope': 1, 'other': 0} KS=['KS-643', 'KS-650', 'KS-660', 'KS-742', 'KS-764', 'KS-779']
+  issue comment 5529715057 kksecura 2026-09-03T17:42:38Z chars=4538 at-signs=0 classes={'array': 0, 'prep': 0, 'email': 0, 'idiom': 0, 'mention': 0, 'scope': 0, 'other': 0} KS=[]
+  issue comment 5586037815 PeterObeden 2026-09-08T13:38:36Z chars=6245 at-signs=2 classes={'array': 0, 'prep': 0, 'email': 0, 'idiom': 0, 'mention': 0, 'scope': 1, 'other': 1} KS=['KS-764', 'KS-779']
+  issue comment 5600549339 PeterObeden 2026-09-09T10:43:01Z chars=974 at-signs=0 classes={'array': 0, 'prep': 0, 'email': 0, 'idiom': 0, 'mention': 0, 'scope': 0, 'other': 0} KS=['KS-764', 'KS-860']
+  issue comment 5656460918 kksecura 2026-09-13T22:02:52Z chars=5212 at-signs=0 classes={'array': 0, 'prep': 0, 'email': 0, 'idiom': 0, 'mention': 0, 'scope': 0, 'other': 0} KS=[]
+  base-branch check: base IS develop
+#799 head commit message: chars 3978 lines 28 KS ids ['KS-764'] PR refs ['#799'] at-signs 1 {'array': 0, 'prep': 0, 'email': 0, 'idiom': 0, 'mention': 0, 'scope': 0, 'other': 1}
+#799 merge commit message: "Merge develop `8861e6216` into ks-764 — bring the branch to the current base (the loopback guard it is measured by is develop's) before Peter's three-line round" KS ids [] at-signs 0
+compare develop...head: status=ahead merge_base=8861e62161466c40f08d2b10a30edeb203123993 ahead=12 behind=0 commits=12 files=12
+  cmp file modified  +27 -0 sha=94ee03ea9 changes=27 BACKLOG.md
+  cmp file added     +458 -0 sha=ab8e46d79 changes=458 Blockchain/Dev/packages/shared/src/__tests__/ks764-key-revoke-call-site-guard.test.ts
+  cmp file modified  +12 -0 sha=8794bca5f changes=12 Blockchain/Dev/packages/shared/src/index.ts
+  cmp file modified  +17 -0 sha=3a67987a7 changes=17 Blockchain/Dev/packages/shared/src/middleware/index.ts
+  cmp file added     +268 -0 sha=dcd774a30 changes=268 Blockchain/Dev/packages/shared/src/security/keyRevokePolicy.ts
+  cmp file added     +293 -0 sha=5a78c4181 changes=293 Blockchain/Dev/services/originate/src/__tests__/ks764-admin-api-keys-revoke-route-contract.test.ts
+  cmp file modified  +17 -0 sha=f08ee1a89 changes=17 Blockchain/Dev/services/originate/src/middleware/auth.ts
+  cmp file modified  +70 -1 sha=26cec03de changes=71 Blockchain/Dev/services/originate/src/routes/adminConfig.ts
+  cmp file added     +168 -0 sha=1fe8671b0 changes=168 Blockchain/Dev/services/security/src/__tests__/ks764-key-revoke-organisation-arm.test.ts
+  cmp file added     +214 -0 sha=3bae312af changes=214 Blockchain/Dev/services/security/src/__tests__/ks764-revoke-organisation-route-contract.test.ts
+  cmp file modified  +13 -2 sha=1bb567a09 changes=15 Blockchain/Dev/services/security/src/index.ts
+  cmp file modified  +19 -95 sha=b0493aa67 changes=114 Blockchain/Dev/services/security/src/keyRevokePolicy.ts
+compare merge-commit...head (the FIX commit's delta): status=ahead merge_base=e6e25421e98ba8f11153f5fc394fe79fc96549a0 ahead=1 behind=0 commits=1 files=2
+  delta file modified  +57 -1 sha=5a78c4181 changes=58 Blockchain/Dev/services/originate/src/__tests__/ks764-admin-api-keys-revoke-route-contract.test.ts
+  delta file modified  +23 -1 sha=3bae312af changes=24 Blockchain/Dev/services/security/src/__tests__/ks764-revoke-organisation-route-contract.test.ts
+compare 38f6377b9...head (what moved since Peter's last read): status=ahead merge_base=38f6377b9c6429be2627cb5454e98a36104a25b8 ahead=105 behind=0 commits=105 files=300
+branches/develop now: 8861e62161466c40f08d2b10a30edeb203123993 2026-09-13T12:00:26Z 'KS-924 KS-901: the entrypoint corpus pins its contributing packages by name and compares SKIP as a set; the census follo'
+develop == M18: True
+head commit: parents=['e6e25421e98ba8f11153f5fc394fe79fc96549a0'] files=2 +80 -2
+merge commit: parents=['38f6377b9c6429be2627cb5454e98a36104a25b8', '8861e62161466c40f08d2b10a30edeb203123993'] files(vs first parent)=300 +43734 -9225
+PR #880 (the sibling on security index.ts): state=open base=develop head=85f8263c2bf42a68301bf9389361eecbe4ad2728 mergeable=True/clean
+  contents head   BACKLOG.md: blob=94ee03ea9 size=93281 sha256=5a6fa96811375c35 lines=1036 ctrl=0 listen(=2
+  contents head   packages__shared__src____tests____ks764-key-revoke-call-site-guard.test.ts: blob=ab8e46d79 size=21292 sha256=3fff77eca94e326e lines=458 ctrl=0 listen(=0
+  contents head   packages__shared__src__index.ts: blob=8794bca5f size=8686 sha256=707ff7ed71e87254 lines=232 ctrl=0 listen(=0
+  contents head   packages__shared__src__middleware__index.ts: blob=3a67987a7 size=24879 sha256=60f8398e94e35627 lines=675 ctrl=0 listen(=0
+  contents head   packages__shared__src__security__keyRevokePolicy.ts: blob=dcd774a30 size=13411 sha256=9539d243958a9123 lines=268 ctrl=0 listen(=0
+  contents head   services__originate__src____tests____ks764-admin-api-keys-revoke-route-contract.test.ts: blob=5a78c4181 size=13913 sha256=32edded63a6bc739 lines=293 ctrl=0 listen(=1
+  contents head   services__originate__src__middleware__auth.ts: blob=f08ee1a89 size=8825 sha256=70ea4009b9ae457a lines=199 ctrl=0 listen(=0
+  contents head   services__originate__src__routes__adminConfig.ts: blob=26cec03de size=102539 sha256=d08949fd4dba1bec lines=2133 ctrl=0 listen(=0
+  contents head   services__security__src____tests____ks764-key-revoke-organisation-arm.test.ts: blob=1fe8671b0 size=9144 sha256=567a565916b9164f lines=168 ctrl=0 listen(=0
+  contents head   services__security__src____tests____ks764-revoke-organisation-route-contract.test.ts: blob=3bae312af size=10621 sha256=4b68c363d7a517f8 lines=214 ctrl=0 listen(=2
+  contents head   services__security__src__index.ts: blob=1bb567a09 size=63447 sha256=6ed6dc98a9840db5 lines=1496 ctrl=0 listen(=1
+  contents head   services__security__src__keyRevokePolicy.ts: blob=b0493aa67 size=2596 sha256=25a239331101360a lines=53 ctrl=0 listen(=0
+  contents head   packages__shared__src____tests____ks860-test-listeners-bind-loopback.test.ts: blob=e0dfadb9c size=35744 sha256=fc62ca7410a06736 lines=784 ctrl=0 listen(=38
+  contents head   services__security__src____tests____ks742-keys-tenancy-route-contract.test.ts: blob=d35e2d5dc size=30854 sha256=142d083967cb2911 lines=613 ctrl=0 listen(=1
+  contents head   scripts__audit__audit-baseline.json: blob=03d1680e3 size=44616 sha256=6409a37c4dbd9ba8 lines=254 ctrl=0 listen(=0
+  contents merge  BACKLOG.md: blob=94ee03ea9 size=93281 sha256=5a6fa96811375c35 lines=1036 ctrl=0 listen(=2
+  contents merge  packages__shared__src____tests____ks764-key-revoke-call-site-guard.test.ts: blob=ab8e46d79 size=21292 sha256=3fff77eca94e326e lines=458 ctrl=0 listen(=0
+  contents merge  packages__shared__src__index.ts: blob=8794bca5f size=8686 sha256=707ff7ed71e87254 lines=232 ctrl=0 listen(=0
+  contents merge  packages__shared__src__middleware__index.ts: blob=3a67987a7 size=24879 sha256=60f8398e94e35627 lines=675 ctrl=0 listen(=0
+  contents merge  packages__shared__src__security__keyRevokePolicy.ts: blob=dcd774a30 size=13411 sha256=9539d243958a9123 lines=268 ctrl=0 listen(=0
+  contents merge  services__originate__src____tests____ks764-admin-api-keys-revoke-route-contract.test.ts: blob=3331f59ce size=10614 sha256=c1feaef34781718c lines=237 ctrl=0 listen(=1
+  contents merge  services__originate__src__middleware__auth.ts: blob=f08ee1a89 size=8825 sha256=70ea4009b9ae457a lines=199 ctrl=0 listen(=0
+  contents merge  services__originate__src__routes__adminConfig.ts: blob=26cec03de size=102539 sha256=d08949fd4dba1bec lines=2133 ctrl=0 listen(=0
+  contents merge  services__security__src____tests____ks764-key-revoke-organisation-arm.test.ts: blob=1fe8671b0 size=9144 sha256=567a565916b9164f lines=168 ctrl=0 listen(=0
+  contents merge  services__security__src____tests____ks764-revoke-organisation-route-contract.test.ts: blob=7a75d2c65 size=9290 sha256=fe9b2b9bb5b853f2 lines=192 ctrl=0 listen(=1
+  contents merge  services__security__src__index.ts: blob=1bb567a09 size=63447 sha256=6ed6dc98a9840db5 lines=1496 ctrl=0 listen(=1
+  contents merge  services__security__src__keyRevokePolicy.ts: blob=b0493aa67 size=2596 sha256=25a239331101360a lines=53 ctrl=0 listen(=0
+  contents merge  packages__shared__src____tests____ks860-test-listeners-bind-loopback.test.ts: blob=e0dfadb9c size=35744 sha256=fc62ca7410a06736 lines=784 ctrl=0 listen(=38
+  contents merge  services__security__src____tests____ks742-keys-tenancy-route-contract.test.ts: blob=d35e2d5dc size=30854 sha256=142d083967cb2911 lines=613 ctrl=0 listen(=1
+  contents merge  scripts__audit__audit-baseline.json: blob=03d1680e3 size=44616 sha256=6409a37c4dbd9ba8 lines=254 ctrl=0 listen(=0
+  contents p38f   BACKLOG.md: blob=4d18fe63c size=91789 sha256=aedcb8b95844ef2d lines=1017 ctrl=0 listen(=2
+  contents p38f   packages__shared__src____tests____ks764-key-revoke-call-site-guard.test.ts: blob=ab8e46d79 size=21292 sha256=3fff77eca94e326e lines=458 ctrl=0 listen(=0
+  contents p38f   packages__shared__src__index.ts: blob=8794bca5f size=8686 sha256=707ff7ed71e87254 lines=232 ctrl=0 listen(=0
+  contents p38f   packages__shared__src__middleware__index.ts: blob=3a67987a7 size=24879 sha256=60f8398e94e35627 lines=675 ctrl=0 listen(=0
+  contents p38f   packages__shared__src__security__keyRevokePolicy.ts: blob=dcd774a30 size=13411 sha256=9539d243958a9123 lines=268 ctrl=0 listen(=0
+  contents p38f   services__originate__src____tests____ks764-admin-api-keys-revoke-route-contract.test.ts: blob=3331f59ce size=10614 sha256=c1feaef34781718c lines=237 ctrl=0 listen(=1
+  contents p38f   services__originate__src__middleware__auth.ts: blob=f08ee1a89 size=8825 sha256=70ea4009b9ae457a lines=199 ctrl=0 listen(=0
+  contents p38f   services__originate__src__routes__adminConfig.ts: blob=26cec03de size=102539 sha256=d08949fd4dba1bec lines=2133 ctrl=0 listen(=0
+  contents p38f   services__security__src____tests____ks764-key-revoke-organisation-arm.test.ts: blob=1fe8671b0 size=9144 sha256=567a565916b9164f lines=168 ctrl=0 listen(=0
+  contents p38f   services__security__src____tests____ks764-revoke-organisation-route-contract.test.ts: blob=7a75d2c65 size=9290 sha256=fe9b2b9bb5b853f2 lines=192 ctrl=0 listen(=1
+  contents p38f   services__security__src__index.ts: blob=1bb567a09 size=63447 sha256=6ed6dc98a9840db5 lines=1496 ctrl=0 listen(=1
+  contents p38f   services__security__src__keyRevokePolicy.ts: blob=b0493aa67 size=2596 sha256=25a239331101360a lines=53 ctrl=0 listen(=0
+  contents p38f   packages__shared__src____tests____ks860-test-listeners-bind-loopback.test.ts: blob=d8842e577 size=23481 sha256=6eed634cb0b7ff9d lines=545 ctrl=0 listen(=33
+  contents p38f   services__security__src____tests____ks742-keys-tenancy-route-contract.test.ts: blob=8fae07cb9 size=13446 sha256=9c7fc3fb9dd721d2 lines=298 ctrl=0 listen(=1
+  contents p38f   scripts__audit__audit-baseline.json: blob=03d1680e3 size=44616 sha256=6409a37c4dbd9ba8 lines=254 ctrl=0 listen(=0
+  contents dev    BACKLOG.md: blob=9d99b3bec size=91017 sha256=b0a9509e2f698ddb lines=1009 ctrl=0 listen(=2
+  contents dev    packages__shared__src____tests____ks764-key-revoke-call-site-guard.test.ts: ABSENT (HTTP 404)
+  contents dev    packages__shared__src__index.ts: blob=6731f0f2f size=8211 sha256=b3b4154f2b968056 lines=220 ctrl=0 listen(=0
+  contents dev    packages__shared__src__middleware__index.ts: blob=b5932490c size=23914 sha256=95939971ab16f993 lines=658 ctrl=0 listen(=0
+  contents dev    packages__shared__src__security__keyRevokePolicy.ts: ABSENT (HTTP 404)
+  contents dev    services__originate__src____tests____ks764-admin-api-keys-revoke-route-contract.test.ts: ABSENT (HTTP 404)
+  contents dev    services__originate__src__middleware__auth.ts: blob=38a0db12a size=7860 sha256=d64617807a90e91c lines=182 ctrl=0 listen(=0
+  contents dev    services__originate__src__routes__adminConfig.ts: blob=ccb3222a6 size=98869 sha256=f8060c361e586742 lines=2064 ctrl=0 listen(=0
+  contents dev    services__security__src____tests____ks764-key-revoke-organisation-arm.test.ts: ABSENT (HTTP 404)
+  contents dev    services__security__src____tests____ks764-revoke-organisation-route-contract.test.ts: ABSENT (HTTP 404)
+  contents dev    services__security__src__index.ts: blob=ed0239d79 size=62872 sha256=c31a0fa2b7632421 lines=1485 ctrl=0 listen(=1
+  contents dev    services__security__src__keyRevokePolicy.ts: blob=60bd9ef5e size=5896 sha256=6d934522bbf64a87 lines=129 ctrl=0 listen(=0
+  contents dev    packages__shared__src____tests____ks860-test-listeners-bind-loopback.test.ts: blob=e0dfadb9c size=35744 sha256=fc62ca7410a06736 lines=784 ctrl=0 listen(=38
+  contents dev    services__security__src____tests____ks742-keys-tenancy-route-contract.test.ts: blob=d35e2d5dc size=30854 sha256=142d083967cb2911 lines=613 ctrl=0 listen(=1
+  contents dev    scripts__audit__audit-baseline.json: blob=03d1680e3 size=44616 sha256=6409a37c4dbd9ba8 lines=254 ctrl=0 listen(=0
+done at 08:12:59 AEST

@@ -1,0 +1,61 @@
+bash: GNU bash, version 3.2.57(1)-release (arm64-apple-darwin25)
+subject launcher: /Volumes/DevMASTER/WEDNESDAY/2_Project_Files/fleet/qa-agent/gatesets/2026-09-14_gateL5/launch_qa_secuura_L5_799_880_985.sh (sha256 2f7211124eececb9)
+0 green --check (scratch brief+prompt)                                         |   0 |   0 | LANDED | ok
+  develop note at cell 0:   origin develop still a5334350221c819f54d4a20a3308daeb9ca09617 (M20 = M18 + #982's three services/auth files + #903's hook / shell test / preflight.sh; the merge-base of all three heads is M18; the f
+1a wrong #799 head (env override) -> 6                                         |   6 |   6 | LANDED | ok
+1b wrong #880 head (env override) -> 6                                         |   6 |   6 | LANDED | ok
+1c wrong #985 head (env override) -> 6                                         |   6 |   6 | LANDED | ok
+1d #985 head := #799's head (real SHA, wrong branch) -> 6                      |   6 |   6 | LANDED | ok
+2a #799 compare pinned ahead=11 -> live reads ahead=12 -> 10                   |  10 |  10 | LANDED | ok
+2b #880 compare pinned files=6 -> live reads files=5 -> 10                     |  10 |  10 | LANDED | ok
+2c #985 stack-parent pinned to M18 -> live merge_base is #799's head -> 10     |  10 |  10 | LANDED | ok
+2d MERGE_BASE := the merge commit e6e25421e -> compare reads M18 -> 10         |  10 |  10 | LANDED | ok
+3 unknown develop pin -> compare unreadable -> UNJUDGEABLE -> 18               |  18 |  18 | LANDED | ok
+3b pinned to M15: live M15..develop delta DISJOINT from the thirty paths -> 0 (MOVED note) |   0 |   0 | LANDED | ok
+  cell 3b note: origin develop MOVED 1c38077ba2aea5f4c4371c1b68796026dc577764 -> a5334350221c819f54d4a20a3308daeb9ca09617: commits=5 files=12 
+3c pinned to M9: live delta hits the ks860 guard file (+ others) -> 18         |  18 |  18 | LANDED | ok
+  cell 3c: GUARDED Blockchain/Dev/packages/shared/src/__tests__/ks860-test-listeners-bind-loopback.test.ts 
+3d M9 pin, ks860 entry neutralised: the lone hit gone -> 0 (MOVED note)        |   0 |   0 | LANDED | ok
+3e pinned to M18: the live M18..M20 delta (two squashes, six files) DISJOINT -> 0 |   0 |   0 | LANDED | ok
+3f pinned to M19: the live M19..M20 delta (#903, three hook and preflight files) DISJOINT -> 0 |   0 |   0 | LANDED | ok
+4 env file missing -> compare API unreadable -> 13                             |  13 |  13 | LANDED | ok
+5 empty brief                                                                  |   3 |   3 | LANDED | ok
+6 empty prompt                                                                 |   4 |   4 | LANDED | ok
+7 QA project dir missing (launcher tamper)                                     |   2 |   2 | LANDED | ok
+8 repo dir missing (launcher tamper)                                           |   5 |   5 | LANDED | ok
+9 brief says TIER 3 everywhere (brief tamper)                                  |   7 |   7 | LANDED | ok
+10 prompt says TIER 3 everywhere (prompt tamper)                               |   7 |   7 | LANDED | ok
+11 brief says ROUND 3 (brief tamper)                                           |  15 |  15 | LANDED | ok
+12 prompt says ROUND 3 (prompt tamper)                                         |  15 |  15 | LANDED | ok
+13 prompt lacks ultrathink first line                                          |   8 |   8 | LANDED | ok
+14 prompt lacks the real brief path                                            |   9 |   9 | LANDED | ok
+15 prompt lacks MAIL YOUR VERDICT                                              |  12 |  12 | LANDED | ok
+16 prompt lacks the NEVER-push line                                            |  11 |  11 | LANDED | ok
+17 prompt lacks no-memory-maintenance                                          |  14 |  14 | LANDED | ok
+18 prompt lacks NEVER-print-a-credential                                       |  17 |  17 | LANDED | ok
+20a prompt lacks the full #799 SHA -> 20                                       |  20 |  20 | LANDED | ok
+20b brief lacks the full #880 SHA -> 20                                        |  20 |  20 | LANDED | ok
+20c prompt lacks the full #985 SHA -> 20                                       |  20 |  20 | LANDED | ok
+21 override launch, HEADLESS (stdin dev-null) -> the TTY guard, 21             |  21 |  21 | LANDED | ok
+REFUSING: a launch with test overrides set
+21b override launch under a PTY -> the TTY guard passes, the override guard fires, 16 |  16 |  16 | LANDED | ok
+21c TTY guard neutralised, headless override launch -> the override guard, 16 (the guard was what stood between a Bash tool and the exec) |  16 |  16 | LANDED | ok
+22 real launch (not installed yet), headless, no claude -> 3                   |   3 |   3 | LANDED | ok
+  raw-control-byte census launch_qa_secuura_L5_799_880_985.sh: 0
+  raw-control-byte census 2026-09-14_secuura-L5-799-880-985-ks764-577-780-tier1.md: 0
+  raw-control-byte census 2026-09-14_secuura-L5-799-880-985-ks764-577-780-tier1.prompt.txt: 0
+  raw-control-byte census controls_check.sh: 0
+  raw-control-byte census redproof.sh: 0
+  raw-control-byte census gen_launcher_L5.py: 0
+  raw-control-byte census brief_patch_L5.py: 0
+  raw-control-byte census prompt_patch_L5.py: 0
+  raw-control-byte census controls_patch_L5.py: 0
+  raw-control-byte census redproof_patch_L5.py: 0
+  raw-control-byte census gh_read_m20.py: 0
+  positive control (synthetic NUL): offsets [16]
+  exit codes declared in the launcher (distinct): exit 0 exit 10 exit 11 exit 12 exit 13 exit 14 exit 15 exit 16 exit 17 exit 18 exit 2 exit 20 exit 21 exit 3 exit 4 exit 5 exit 6 exit 7 exit 8 exit 9 
+  /bin/bash -n launcher: ok
+23 green again (pristine sha-identical)                                        |   0 |   0 | LANDED | ok
+pristine sha256: launcher 2f7211124eececb9 brief 776ff054ea488fe4 prompt 3eed69f7fa01537a
+work dir (kept, never rm'd): /Volumes/DevMASTER/WEDNESDAY/2_Project_Files/fleet/qa-agent/gatesets/2026-09-14_gateL5/redproof.RsvjzL
+FAILS=0

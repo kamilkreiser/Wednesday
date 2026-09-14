@@ -1,0 +1,156 @@
+diff --git a/Blockchain/Dev/services/originate/src/__tests__/ks764-admin-api-keys-revoke-route-contract.test.ts b/Blockchain/Dev/services/originate/src/__tests__/ks764-admin-api-keys-revoke-route-contract.test.ts
+index 3331f59ce..5a78c4181 100644
+--- a/Blockchain/Dev/services/originate/src/__tests__/ks764-admin-api-keys-revoke-route-contract.test.ts
++++ b/Blockchain/Dev/services/originate/src/__tests__/ks764-admin-api-keys-revoke-route-contract.test.ts
+@@ -30,9 +30,22 @@
+  *     the real `setUser` (middleware/auth.ts:69) does — `requireRole` reads the
+  *     first, the route reads the second, and a stub setting one would silently
+  *     disable half the chain.
++ *   - STUBBED, and declared because it is NOT what `authenticate()` does: the
++ *     stub also sets `req.tenantId` from the principal's `tenantId`. The real
++ *     `authenticate()` never touches `req.tenantId`; in production it is set by
++ *     `extractTenantContext` (@secuura/shared, from the gateway-resolved
++ *     `x-tenant-id` header). So a principal with NO `tenantId` leaves
++ *     `req.tenantId` unset here and the route falls back to its default-tenant
++ *     literal — the row still resolves, and the policy refuses the CALLER for
++ *     having no tenant of its own. That is the shape the no-tenant case below
++ *     exercises.
+  *   - STUBBED: the database. `$queryRaw` returns the key row under test and
+  *     `$executeRaw` records the UPDATE, so the happy path's write is observable
+  *     rather than assumed.
++ *   - OBSERVED, not replaced: `logger.warn` is spied and calls through. The
++ *     route's 403 body is generic by KS-764's own design (four causes, one
++ *     message), so the refusal's ARM is visible only in the log's `reason` —
++ *     the spy is how the no-tenant case names the arm it is pinning.
+  *
+  * THE CONTROL THAT MATTERS MOST is `decideKeyRevoke` NOT being a mock. Mocking
+  * `@secuura/shared` wholesale is the obvious way to write this file and it would
+@@ -94,6 +107,7 @@ jest.mock('@secuura/shared', () => {
+ import express from 'express';
+ import * as shared from '@secuura/shared';
+ import { adminConfigRouter } from '../routes/adminConfig';
++import { logger } from '../utils/logger';
+ 
+ const TENANT_A = 'a0000000-0000-4000-8000-0000000000aa';
+ const ORG_A = '11111111-1111-4111-8111-111111111111';
+@@ -108,6 +122,13 @@ const ADMIN_NO_ORG = { userId: 'u2', role: 'ORG_ADMIN', tenantId: TENANT_A };
+ const PLATFORM = { userId: 'u3', role: 'super_admin', tenantId: TENANT_A };
+ /** A role the router does NOT admit — proves the role gate is live. */
+ const VIEWER = { userId: 'u4', role: 'VIEWER', tenantId: TENANT_A };
++/**
++ * ORG_ADMIN naming its organisation but carrying NO tenant claim — the one
++ * refusal this PR introduces on this route (`403 caller has no tenant`). The
++ * auth service signs `tenantId` conditionally (jwt.ts:263), so this is a token
++ * shape that exists, not a hypothetical.
++ */
++const ADMIN_NO_TENANT = { userId: 'u5', role: 'ORG_ADMIN', organizationId: ORG_A };
+ 
+ const app = express();
+ app.use(express.json());
+@@ -118,7 +139,10 @@ let server: ReturnType<typeof app.listen>;
+ 
+ beforeAll(async () => {
+   await new Promise<void>((resolve) => {
+-    server = app.listen(0, () => resolve());
++    // Loopback, explicitly. A function in argument 2 is the CALLBACK, so the
++    // host is unset and the socket binds `::` — every interface — which the
++    // packages/shared test-listener guard reds. Host second, callback last.
++    server = app.listen(0, '127.0.0.1', () => resolve());
+   });
+   const address = server.address();
+   baseUrl = `http://127.0.0.1:${typeof address === 'object' && address ? address.port : 0}`;
+@@ -151,6 +175,13 @@ async function revoke(principal: object | null): Promise<{ status: number; body:
+ 
+ describe('KS-764 / Peter Major 2 — the originate revoke surface, on the wire', () => {
+   it('CONTROL: decideKeyRevoke is the REAL implementation, not a jest mock', () => {
++    // FIRST: the export must EXIST. The two lines below it pass when it does
++    // not — `jest.isMockFunction(undefined)` is `false` and `undefined ===
++    // undefined` — which is exactly the stale-`packages/shared/dist` state this
++    // repo has already had ("decideKeyRevoke is not a function", 22 failures,
++    // BACKLOG.md). A control that is green against an absent subject is not a
++    // control; this line is what makes the other two mean something.
++    expect(typeof shared.decideKeyRevoke).toBe('function');
+     // Without this the whole file could be green against a stub. `toBe(false)`
+     // on isMockFunction is the direct statement; the identity check proves the
+     // spread did not shadow it with something else that merely is not a mock.
+@@ -217,6 +248,31 @@ describe('KS-764 / Peter Major 2 — the originate revoke surface, on the wire',
+     expect(mockExecuteRaw).not.toHaveBeenCalled();
+   });
+ 
++  it('CASE 5 — a TENANT-LESS CALLER is refused on an org-owned key (`caller has no tenant`), and nothing is written', async () => {
++    // The refusal this PR introduces on this route: before KS-764 it made no
++    // tenant comparison at all, so a principal with no tenant claim was never
++    // refused here. Same organisation on both sides, so the organisation arm
++    // would ALLOW — only the tenant floor can produce this 403. The body is
++    // generic by design; the arm is named in the refusal log's `reason`.
++    const warn = jest.spyOn(logger, 'warn');
++    try {
++      keyOwnedBy(ORG_A);
++      const { status, body } = await revoke(ADMIN_NO_TENANT);
++      expect(status).toBe(403);
++      expect(body.error?.code).toBe('FORBIDDEN');
++      // The row resolved (the SELECT ran) — the refusal is the policy's, not an
++      // empty read's.
++      expect(mockQueryRaw).toHaveBeenCalledTimes(1);
++      expect(warn).toHaveBeenCalledWith(
++        'API key revoke refused',
++        expect.objectContaining({ reason: 'caller has no tenant' }),
++      );
++      expect(mockExecuteRaw).not.toHaveBeenCalled();
++    } finally {
++      warn.mockRestore();
++    }
++  });
++
+   it('CONTROL: the PLATFORM bypass survives on this surface too', async () => {
+     keyOwnedBy(ORG_B);
+     const { status, body } = await revoke(PLATFORM);
+diff --git a/Blockchain/Dev/services/security/src/__tests__/ks764-revoke-organisation-route-contract.test.ts b/Blockchain/Dev/services/security/src/__tests__/ks764-revoke-organisation-route-contract.test.ts
+index 7a75d2c65..3bae312af 100644
+--- a/Blockchain/Dev/services/security/src/__tests__/ks764-revoke-organisation-route-contract.test.ts
++++ b/Blockchain/Dev/services/security/src/__tests__/ks764-revoke-organisation-route-contract.test.ts
+@@ -82,6 +82,13 @@ const ADMIN_ORG_A = () =>
+   token({ role: 'ISSUER_ADMIN', tenantId: TENANT_A, organizationId: ORG_A });
+ /** Org-bounded and tenanted, but carrying NO organisation claim — Peter's case 4. */
+ const ADMIN_NO_ORG = () => token({ role: 'ISSUER_ADMIN', tenantId: TENANT_A });
++/**
++ * Org-bounded, naming organisation A, but carrying NO tenant claim. The tenant
++ * floor refuses this caller outright (`caller has no tenant`) before the
++ * organisation arm is consulted — the one refusal in KS-764's shared policy
++ * that neither this file's four cases nor ks742's DELETE cells reached.
++ */
++const ADMIN_NO_TENANT = () => token({ role: 'ISSUER_ADMIN', organizationId: ORG_A });
+ /** Platform role: bypasses both arms. KS-577's revoke-on-rotate depends on it. */
+ const PLATFORM = () => token({ role: 'super_admin' });
+ 
+@@ -125,7 +132,10 @@ beforeAll(async () => {
+ 
+   const app = (await import('../index')).default;
+   await new Promise<void>((resolve) => {
+-    server = app.listen(0, resolve);
++    // Loopback, explicitly — `listen(0, resolve)` puts the callback in the host
++    // slot and binds every interface, which the packages/shared test-listener
++    // guard reds. Host second, callback last; `resolve` still fires on 'listening'.
++    server = app.listen(0, '127.0.0.1', resolve);
+   });
+   base = `http://127.0.0.1:${(server.address() as AddressInfo).port}`;
+ });
+@@ -183,6 +193,18 @@ describe('KS-764 / Peter Major 1 — the organisation arm reaches the client', (
+     expect(body.error?.code).toBe('FORBIDDEN');
+   });
+ 
++  it('CASE 5 — a TENANT-LESS CALLER is refused on an org-owned key (403, the tenant floor)', async () => {
++    // Same organisation on both sides, so the organisation arm would ALLOW this
++    // caller; the refusal can only come from the tenant floor's no-tenant arm.
++    // The 401 CONTROL above is what separates this from "the token was bad":
++    // this token verifies, and the route still says no.
++    const keyId = await mint('org-owned key, tenant-less caller', ORG_A);
++    const { status, body } = await revoke(keyId, ADMIN_NO_TENANT());
++    expect(status).toBe(403);
++    expect(body.error?.code).toBe('FORBIDDEN');
++    expect(body.success).toBe(false);
++  });
++
+   it('CONTROL: the PLATFORM bypass survives — KS-577 revoke-on-rotate depends on it', async () => {
+     const keyId = await mint('platform reach', ORG_B);
+     const { status, body } = await revoke(keyId, PLATFORM());

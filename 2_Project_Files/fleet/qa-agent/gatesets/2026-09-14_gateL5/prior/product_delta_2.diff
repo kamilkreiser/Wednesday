@@ -1,0 +1,89 @@
+diff --git a/Blockchain/Dev/services/originate/src/routes/adminConfig.ts b/Blockchain/Dev/services/originate/src/routes/adminConfig.ts
+index ccb3222a6..26cec03de 100644
+--- a/Blockchain/Dev/services/originate/src/routes/adminConfig.ts
++++ b/Blockchain/Dev/services/originate/src/routes/adminConfig.ts
+@@ -18,7 +18,7 @@ import { authenticate, requireRole } from '../middleware/auth';
+ // tenant filter. Under fail-closed RLS (migration 039) those statements need
+ // the platform-scope GUC bundled into their transaction, or they silently
+ // see/affect zero rows.
+-import { runWithPlatformScope, queryWithTenantGuc } from '@secuura/shared';
++import { runWithPlatformScope, queryWithTenantGuc, decideKeyRevoke } from '@secuura/shared';
+ import { logger } from '../utils/logger';
+ import { isDemoSeedEnabled } from '../utils/demoSeedGate';
+ 
+@@ -981,6 +981,75 @@ adminConfigRouter.delete('/api-keys/:id', async (req: Request, res: Response) =>
+     // same mechanism the mint endpoint uses; otherwise revocation is scoped to the
+     // caller's own tenant (default-tenant fallback in single-tenancy).
+     const tenantId = ((req as any).tenantId as string | undefined) || 'a0000000-0000-4000-8000-000000000001';
++
++    // KS-764 (QA F-764-01): this route is the SECOND surface that revokes a key,
++    // and until now it authorised on ROLE + TENANT only. `adminConfigRouter`
++    // admits ORG_ADMIN (see the requireRole at the top of this file), so an
++    // ORG_ADMIN in organisation A could revoke organisation B's key inside the
++    // same tenant — the exact defect KS-764 closed on
++    // services/security's DELETE /api/keys/:id, still open here.
++    //
++    // It now routes through the SAME `decideKeyRevoke` as that route, imported
++    // from @secuura/shared. Not a second copy of the rule: two implementations
++    // of one policy cannot witness each other drifting.
++    //
++    // RESOLVE FIRST, THEN AUTHORISE — the comparison needs the key's own
++    // organisation, so the row is read before the decision. The read stays
++    // TENANT-SCOPED exactly as the UPDATE below always was: the defect is
++    // same-tenant cross-ORGANISATION, so no platform-scope widening is needed
++    // or wanted here (services/security wraps its lookup only because it must
++    // resolve rows in OTHER tenants).
++    const keyRows: any[] = await ((req as any).db || prisma).$queryRaw`
++      SELECT id, tenant_id, organization_id
++        FROM svc_api_keys
++       WHERE id = ${req.params.id}
++         AND tenant_id = ${tenantId}::uuid
++    `;
++    if (keyRows.length === 0) {
++      return res.json({ success: false, message: 'Not found' });
++    }
++    // BLAST RADIUS — a comparison this route did NOT make before (Peter's #799
++    // review, finding 3). `decideKeyRevoke` delegates to `decideTenantAccess`,
++    // which evaluates `user.tenantId !== targetTenantId` and refuses a caller
++    // with NO tenant outright (`403 caller has no tenant`). This route
++    // previously made no tenant comparison at all.
++    //
++    // It works today only because the auth service signs `tenantId` into
++    // interactive JWTs — and it does so CONDITIONALLY
++    // (`services/auth/src/services/jwt.ts:263`), so a tenant-less user receives
++    // a token without the claim and is refused here. Any other token minter, or
++    // a token predating that field, is refused for the same reason.
++    //
++    // That refusal is the intended fail-closed direction and is NOT being
++    // softened: defaulting a missing tenant would let the caller's absence
++    // choose the answer. It is recorded here because the organisation arm's
++    // blast radius was documented and this one was not, and an undeclared
++    // dependency is the half that surprises someone later. Both `JwtPayload`
++    // types now DECLARE `tenantId` so the requirement is visible to the
++    // compiler rather than resting on what auth happens to sign.
++    const decision = decideKeyRevoke((req as any).user, {
++      id: String(keyRows[0].id),
++      // The SELECT above matched `tenant_id = ${tenantId}`, so the row's tenant IS
++      // this value — passing it is exact, not a widening of the row's own field.
++      tenantId,
++      organizationId: keyRows[0].organization_id == null ? undefined : String(keyRows[0].organization_id),
++    });
++    if (!decision.allow) {
++      logger.warn('API key revoke refused', {
++        keyId: String(keyRows[0].id),
++        keyTenantId: keyRows[0].tenant_id,
++        keyOrganizationId: keyRows[0].organization_id,
++        callerTenantId: (req as any).user?.tenantId,
++        callerOrganizationId: (req as any).user?.organizationId,
++        callerRole: (req as any).user?.role,
++        reason: decision.reason,
++      });
++      return res.status(403).json({
++        success: false,
++        error: { code: 'FORBIDDEN', message: 'Not authorised to revoke this key' },
++      });
++    }
++
+     // KS-337: svc_api_keys has no `updated_at` column (the mint INSERT never
+     // declares one), so the previous `SET …, updated_at = NOW()` 500'd on every
+     // revoke — keys could never be revoked. is_active = false is all revocation

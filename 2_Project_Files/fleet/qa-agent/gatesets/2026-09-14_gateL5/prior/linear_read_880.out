@@ -1,0 +1,104 @@
+LINEAR_API_KEY: set
+read at 2026-09-14 08:24:14 AEST
+KS-577 In Review High 2026-09-13T22:17:37.190Z
+
+===== 357c6ece-615c-4ae8-b337-e9def04a1f38 2026-09-09T08:58:59.553Z stuart.jamieson@secuura.ai chars=3935 at-signs=3 mention-nodes=2
+## Cutover decision (@stuart.jamieson, 2026-09-09): **HELD — and here is the S-side fact that makes holding the right answer, not a deferral.**
+
+@kamil.kreiser — thank you for building [#880](https://github.com/Secuura/Distributed_Secuura/pull/880) as one value with the choice left open, and for the banner saying merging first would pick instant-revoke for S by default. That was the correct call. Before naming a number I went and checked what actually happens on S when a key is rotated, and the answer changes the question.
+
+## S cannot adopt a rotated key at ANY window length
+
+Two things on `develop`, both verified in code:
+
+1. **The positive key cache never expires.** `CardanoAnchorAuthClient._orgKeyCache` is a plain `ConcurrentDictionary<int, string>` with no TTL and no invalidation path. Only the *negative* cache (`_orgKeyMissingUntil`) has a lifetime, and that is `AnchorFailureCacheSeconds = 30`. So once S has used an Organisation's key, it keeps presenting **that** key for the life of the process.
+2. **Nothing can write a replacement in.** `PlatformKOrganisation.EncryptedApiKey` is written only by the registrar's first-mint path, §4 returns no key on re-registration, and the S-side inlet is [PS-740](https://linear.app/secuura/issue/PS-740) — filed, unstarted.
+
+So after a rotation, that Organisation stops anchoring and stays stopped until a human re-provisions S's stored key — for which **there is no supported path today**. A restart does not help: S's database still holds the old encrypted key.
+
+**Therefore the grace window does not do the job its name implies.** Its entire purpose is to give S time to adopt the new credential; S has no mechanism to adopt it. A window >0 does not avoid the breakage — it postpones it, while leaving the compromised credential valid for exactly that period, which is the thing this ticket exists to fix.
+
+## The decision
+
+**The cutover value is not chooseable in a way that means anything until [PS-740](https://linear.app/secuura/issue/PS-740) lands**, so it stays formally open and I am not recording a number today. What that does and does not imply:
+
+- **[#880](https://github.com/Secuura/Distributed_Secuura/pull/880) is not blocked by this.** If you want the revoke-on-rotate mechanism on `develop` behind its `0` default, that is fine by S — merge it on your own judgement. Nothing in S is calling rotate, so the default cannot bite us today. Please just keep the ticket open rather than letting the merge read as the contract being settled, exactly as your banner says.
+- **[KS-576](https://linear.app/secuura/issue/KS-576) and [KS-583](https://linear.app/secuura/issue/KS-583) stay blocked**, and I would rather that were visible than papered over. A bulk re-key executed today would break every Organisation it touched, silently — under async anchoring a 401 surfaces as documents that quietly never anchor, which is @peter's [PS-463](https://linear.app/secuura/issue/PS-463) point on this ticket and it is now the concrete failure mode, not a hypothetical.
+- **The real prerequisite is an S-side adoption path, not a number on K.** That is PS-740, which is also where the grant-based shape proposed on [KS-576](https://linear.app/secuura/issue/KS-576)/[KS-582](https://linear.app/secuura/issue/KS-582) would land: if S executes the re-key itself under a grant, it holds the new key the instant the response arrives and the window question largely dissolves — which is the argument for building that before fixing a number here.
+- **Option 3 becomes buildable at the same moment.** "S confirms adoption, then the old key dies" needs the S-side acknowledgement path your PR correctly declined to invent. PS-740 is that path.
+
+**Done-when on this ticket is unchanged and still accurate** — the shape agreed and recorded here. It is now explicitly waiting on PS-740 rather than on me, and I have said so on PS-740 too so the dependency is visible from both ends.
+
+===== d7a12a89-3621-4c29-8122-8cfd2d03bdcd 2026-09-09T10:59:30.628Z peter@obeden.com chars=6582 at-signs=4 mention-nodes=2
+## Conditional approval on [#880](https://github.com/Secuura/Distributed_Secuura/pull/880) — two lines of YAML, and this is a yes
+
+**BLUF: I will approve [#880](https://github.com/Secuura/Distributed_Secuura/pull/880) once the two `secuura-api.yaml` descriptions are corrected. Everything else on my list is @kamil.kreiser's to accept or decline, and I would much rather have his answer than his compliance.** Full review is on the PR; recorded here so it reads from the ticket end too.
+
+Two things moved since Friday, and one of them was neither mine nor Kam's to move.
+
+### @stuart.jamieson has answered — and released the PR
+
+Thank you for going and checking what actually happens on S before naming a number. The answer changing the question is a far more useful outcome than a number would have been.
+
+Recorded so it is not lost: the cutover value is **HELD** because S cannot adopt a rotated key at any window length — `_orgKeyCache` has no TTL and no invalidation path, `PlatformKOrganisation.EncryptedApiKey` is written only on the first-mint path, and the S-side inlet is [PS-740](https://linear.app/secuura/issue/PS-740), filed and unstarted. So a grace window does not do the job its name implies; it postpones the breakage while leaving the credential live for exactly that period.
+
+That retires **blocker 1** from my 8 Sep review, in the only way it could have been retired. @kamil.kreiser's banner did exactly what it was built to do: it kept the decision Stuart's, rather than letting a merge inherit it.
+
+### Blocker 2 is done, and I reproduced the numbers rather than reading them
+
+`47b2b60f2` → `85f8263c2`, merged in rather than rebased — no force push, old head still an ancestor, and the resolution keeps **both** seams with both comments (`memApiKeys` for this ticket, `rateLimits` for [KS-698](https://linear.app/secuura/issue/KS-698)). `mergeStateStatus` **DIRTY → CLEAN**.
+
+Run at PR head `85f8263c2` in a clean worktree, locally on this Mac. Offline: no stack, no Docker (`docker ps` = 0 containers), nothing deployed.
+
+| Step | Result |
+| -- | -- |
+| `npm ci` at `Blockchain/Dev` | 1834 packages, 22s, **exit 0** |
+| `npm run build --workspaces --if-present` | **exit 0**, `0` occurrences of `error TS`, `packages/shared/dist` present |
+| Full security suite (`vitest run`) | **15 files, 187 tests, 187 passed, 0 failed** — 777ms |
+| `ks577-revoke-on-rotate.test.ts` alone | **8 passed (8)** |
+
+**Kam's 187/187 reproduces exactly.** His `packages/shared/dist` note saved me the false reading — I built before running rather than after being surprised — so I cannot independently confirm his 18-failed, but the mechanism is real and PR #887 ([KS-961](https://linear.app/secuura/issue/KS-961)) is pointed at the right thing.
+
+`develop` has not drifted underneath the merge either: `git log b6884888d..origin/develop` over the three touched files returns nothing.
+
+### The one condition — item 2
+
+In `Blockchain/Dev/docs/openapi/secuura-api.yaml`, unchanged by the PR:
+
+- **`:10039`** — `RegisterConnectorRequest.rotate`: *"The old key stays active until explicitly revoked."*
+- **`:35561`** — the `register-connector` operation: *"`rotate: true` mints a replacement (revoke the old key separately)."*
+
+Both become false at merge, and this is the document Platform S reads. `check:openapi` compares structure rather than prose, so a clean 13/13 genuinely cannot see it — no reflection on the preflight run. Given what Stuart has just told us about S's inability to pick up a replacement key, a published contract promising the old one survives is close to the worst line that team could be reading.
+
+### Items 3–5 — Kam's call, and I am not holding the approval over them
+
+I re-ran the SQL tamper at the new head to check the merge had not changed the picture. It has not: delete ` AND tenant_id = $2::uuid` from **the SQL only** (2 occurrences → 0, in-memory clause untouched) and the suite still reports **8 passed (8)** — undetected. Restored byte-identical, sha256 `dcee25d9855ea5621cf8a744c524a152ca6ae4eb00788b92758b66a7ada10f7b`, `git status` clean, baseline back to 8/8.
+
+So both `UPDATE` statements and `createApiKeySchema.rotate` still have zero cells, and the null-`connector_id` case stands as written — [KS-869](https://linear.app/secuura/issue/KS-869)'s `COALESCE` backfills only when the in-memory copy already knows its `connectorId`, so a row holding NULL is skipped by both halves, `priorKeysRevoked` returns `0`, and nothing warns because the gateway only reacts to `null`.
+
+**These are Kam's service and Kam's unit tests, and I said last week that 3 and 4 were recommendations with evidence attached rather than instructions — so they are not going to hold an approval.** What I have asked for instead is a line either way: "doing it" and "not doing it, here is why" both close it properly. If Kam declines, I will record that here as declined with his reasoning rather than leaving it looking outstanding.
+
+### What merging does and does not mean
+
+- **This ticket stays open** — done-when 1 is unmet, and now waits on [PS-740](https://linear.app/secuura/issue/PS-740) rather than on @stuart.jamieson. Exactly as he asked.
+- **[KS-576](https://linear.app/secuura/issue/KS-576) and [KS-583](https://linear.app/secuura/issue/KS-583) stay blocked**, visibly. Stuart's point is the concrete form of the [PS-463](https://linear.app/secuura/issue/PS-463) one: under async anchoring a 401 surfaces as documents that quietly never anchor, so a bulk re-key today would break every Organisation it touched, silently.
+- **The [KS-843](https://linear.app/secuura/issue/KS-843) precondition Kam recorded on 8 Sep still applies** — either set `API_KEY_ROTATION_GRACE_SECONDS` for that rotation, or do the cutover mint with `rotate: false`. Both are already supported; neither needs a code change.
+
+### Worth saying plainly
+
+Mint-before-revoke argued rather than assumed, fail-closed scoping, the window left as one value so the contract question stayed with the person who owned it, and a banner declaring the PR's own limits — that combination is why Stuart could answer this cleanly today instead of inheriting a default from a merge. That was the right way to hand it over, and it worked.
+
+*— Peter. Run locally on this Mac (arm64; CI is amd64) against `85f8263c2` in a clean worktree. Nothing built beyond the workspace, nothing deployed, no stack started, no Docker container running. systemTest suites deliberately NOT run: no route, no schema and no migration, and the verification that would matter is KS-583 step 4, now blocked behind PS-740.*
+
+===== 9c3b9d8e-335f-403c-8758-14301d0265a7 2026-09-13T22:17:37.206Z kamil.kreiser@secuura.ai chars=2805 at-signs=0 mention-nodes=0
+## [PR #880](https://github.com/Secuura/Distributed_Secuura/pull/880) — Peter's one condition met at head `a704137de38a3055e40ee62adc343c0239f34ea9`; READY FOR QA; the merge is Kam's
+
+**BLUF: the two `secuura-api.yaml` descriptions Peter conditioned his approval on are corrected at their source (`services/tenant-provisioning/src/tenant-provisioning.openapi.ts` `:676` and `:732-733`) and the yaml regenerated — one fix commit `a704137de38a3055e40ee62adc343c0239f34ea9` on top of a merge of develop `8861e6216` (merge commit `6114a15d7`, no rebase). READY FOR QA, tier 1, round 1. Nothing merged, nothing deployed. The merge of this PR is Kam's — it picks a cutover default for Platform S — and this ticket stays open after any merge, per Stuart's 2026-09-09 note.**
+
+- **The two descriptions now say what a rotate does** (written from `revokePriorConnectorKeys` at the head): the prior active keys of the same connector are retired as part of the mint — at once by default, or at the end of the `API_KEY_ROTATION_GRACE_SECONDS` window when the security service sets one. The register-connector response is not promised a `priorKeysRevoked` field, because the gateway consumes it and returns `rotated`.
+- **Regenerated, never hand-edited:** `--check` PASS before the edit, FAIL between the edit and the regen (the control), exactly 2 files / 2 yaml hunks after, `check:openapi` PASS on both halves.
+- **Suites at head** (offline, bash 3.2.57 / node v24.7.0 / arm64): security 15 files 195/195 (ks577 8/8) · api-gateway 343/343 · tenant-provisioning 13/13 · tsc clean ×3. Preflight legs 3/4/8 skipped (no stack); leg 1 `OK — spec is in sync`; leg 14 `shell suites: 29 passed, 0 failed (of 29)`.
+- **Pair with PR #799 (both edit `services/security/src/index.ts`):** `merge-tree` of the two current heads → 0 conflict markers; on that tree tsc clean and security 213/213. Either merge order works; #880 is not stacked on #799.
+- **Not addressed at this head, for Kam's line (Peter asked for a line either way):** items 3–5 of his 2026-09-08 review — the SQL-statement cells, the route cells on the ks742 harness, the `rotate && priorKeysRevoked === 0` warning/backfill, the validate-path cell. The S-side validate-path check (this ticket's third done-when) is NOT run, blocked behind the Platform S inlet.
+- **Inputs to Kam's merge decision, quoted:** Stuart (2026-09-09): *"merge it on your own judgement … Nothing in S is calling rotate, so the default cannot bite us today. Please just keep the ticket open."* Peter (2026-09-09): *"KS-577 stays open. Done-when 1 is unmet and now waits on [the S-side inlet] rather than on Stuart."* The precondition Kam recorded on 2026-09-08 still applies at the first real rotation: set the grace window for that rotation, or do the cutover mint with `rotate: false`.
+

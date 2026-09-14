@@ -1,0 +1,29 @@
+2026-09-14 10:54:14 AEST
+## bare token normOrgId at #985 head (packages + services)
+fcd8a01e40d34d6cb4055e7b4fd58b9bb908bbe0:Blockchain/Dev/packages/shared/src/__tests__/ks780-normalise-org-id-one-implementation.test.ts:6: * (originate's `services/orgId.ts` and a private `normOrgId` inside the shared
+fcd8a01e40d34d6cb4055e7b4fd58b9bb908bbe0:Blockchain/Dev/packages/shared/src/security/keyRevokePolicy.ts:97: * (`normOrgId`) because `@secuura/shared` cannot import from a service; moving
+fcd8a01e40d34d6cb4055e7b4fd58b9bb908bbe0:Blockchain/Dev/packages/shared/src/security/orgId.ts:8: * private `normOrgId` inside `keyRevokePolicy.ts` beside this file (the
+## normOrgId( as code at head: 0 files (control normaliseOrgId( : 7 files)
+## definitions census (grep -P) at head / at the parent
+fcd8a01e40d34d6cb4055e7b4fd58b9bb908bbe0:Blockchain/Dev/packages/shared/src/security/orgId.ts:42:export function normaliseOrgId(v: string | null | undefined): string | null {
+--
+6da848891924f859179d097d464a7b97c9783a6a:Blockchain/Dev/packages/shared/src/security/keyRevokePolicy.ts:122:function normOrgId(v: string | null | undefined): string | null {
+6da848891924f859179d097d464a7b97c9783a6a:Blockchain/Dev/services/originate/src/services/orgId.ts:36:export const normaliseOrgId = (v: string | null | undefined): string | null =>
+## ks695 hunk
+diff --git a/Blockchain/Dev/services/originate/src/__tests__/ks695-erasure-by-external-ref.test.ts b/Blockchain/Dev/services/originate/src/__tests__/ks695-erasure-by-external-ref.test.ts
+index d377aa8c2..6d55452f2 100644
+--- a/Blockchain/Dev/services/originate/src/__tests__/ks695-erasure-by-external-ref.test.ts
++++ b/Blockchain/Dev/services/originate/src/__tests__/ks695-erasure-by-external-ref.test.ts
+@@ -35,0 +36,4 @@ jest.mock('@secuura/shared', () => ({
++  // KS-780: the org-id normaliser now lives in @secuura/shared and originate's
++  // orgId.ts re-exports it, so this hand-listed mock must pass the REAL one
++  // through — a stub here would be a second implementation, the thing removed.
++  normaliseOrgId: jest.requireActual('@secuura/shared').normaliseOrgId,
+## #985 numstat
+85	0	Blockchain/Dev/packages/shared/src/__tests__/ks780-normalise-org-id-one-implementation.test.ts
+5	0	Blockchain/Dev/packages/shared/src/index.ts
+18	40	Blockchain/Dev/packages/shared/src/security/keyRevokePolicy.ts
+44	0	Blockchain/Dev/packages/shared/src/security/orgId.ts
+4	0	Blockchain/Dev/services/originate/src/__tests__/ks695-erasure-by-external-ref.test.ts
+49	0	Blockchain/Dev/services/originate/src/__tests__/ks780-org-id-is-the-shared-implementation.test.ts
+29	26	Blockchain/Dev/services/originate/src/services/orgId.ts

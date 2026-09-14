@@ -1,0 +1,276 @@
+ultrathink
+
+You are the fleet QA agent running a TIER 1 gate (through code AND live on real in-process loopback listeners — a
+security package's middleware: the shared API-key REVOKE policy and its two destructive routes), ROUND 1 of the
+EXECUTING gate, on Secuura/Blockchain PR #799 (KS-764) @ 6da848891924f859179d097d464a7b97c9783a6a — PLUS a TIER 2
+section, ROUND 1, on PR #880 (KS-577) @ a704137de38a3055e40ee62adc343c0239f34ea9 (same lane L5, builder s216):
+two regenerated OpenAPI descriptions — PLUS a TIER 2 section, ROUND 1, on PR #985 (KS-780) @
+fcd8a01e40d34d6cb4055e7b4fd58b9bb908bbe0, STACKED on #799's head: the org-id normaliser moved into @secuura/shared
+with behaviour pinned unchanged. ONE report, ONE verdict mail, a verdict PER PR (three).
+
+Read your brief FIRST and in full, then plan:
+/Volumes/DevMASTER/WEDNESDAY/2_Project_Files/fleet/qa-agent/briefs/2026-09-14_secuura-799-880-ks764-577-tier1.md
+
+Subject A: 6da848891924f859179d097d464a7b97c9783a6a = PR #799 (KS-764), open against develop, a MERGE-SHAPED head:
+  ONE fix commit (6da848891, tree 0f2c7b9b5) on a merge commit e6e25421e (= Peter's last read 38f6377b9 + develop M18
+  8861e6216, --no-ff; tree 7bb31ccb1 = the clean 3-way, verified). develop is an ANCESTOR of the head (0 behind / 12
+  ahead; merge-base 8861e6216), so the head tree IS the PR merged onto live develop. THE ROUND's delta (e6e25421e..
+  6da848891) = TWO test files only: services/originate/src/__tests__/ks764-admin-api-keys-revoke-route-contract.test.ts
+  (+57 -1, 3331f59ce -> 5a78c4181, sha256 32edded63a6bc739…, JEST, 10 cells) and services/security/src/__tests__/
+  ks764-revoke-organisation-route-contract.test.ts (+23 -1, 7a75d2c65 -> 3bae312af, 4b68c363d7a517f8…, VITEST,
+  7 cells). NO product file moved this round; the PR's 11 product/test files are blob-identical at 38f6377b9,
+  e6e25421e and (10 of 11) 6da848891; BACKLOG.md merged clean with both blocks (:6 the PR's, :34 develop's). The whole
+  PR vs develop = 12 files +1576 -98: packages/shared keyRevokePolicy.ts (NEW, the policy — :175-177 the no-tenant
+  arm `caller has no tenant`; :229 org-less KEY allowed (Kam's ruling); :238 org-less CALLER 403; :241 cross-org
+  403), shared index.ts (:222-232 the exports), shared middleware/index.ts + originate middleware/auth.ts (:42/:36
+  `tenantId?: string` declared), originate adminConfig.ts (:977 the route; :1002 the tenant-scoped SELECT; :1030-1036
+  decideKeyRevoke; :1037 `if (!decision.allow)`; :1038 logger.warn 'API key revoke refused'; :1047 the hardcoded 403),
+  security index.ts (:1122 the route; :1135-1139 decideKeyRevoke with the row's organizationId; :1140
+  `if (!decision.allow)`; :1153 `decision.status ?? 403`), security keyRevokePolicy.ts (a re-export shim), the ks764
+  source guard (15 cells) and the security arm test (11 cells).
+  THE COMMISSION: Peter's PR comment 5600549339 (2026-09-09T10:43:01Z) — "three lines and a fixture": [1] KS-860 —
+  `app.listen(0, '127.0.0.1', cb)` in both wire files (was :121 / :128; the ks860 loopback guard e0dfadb9c arrived on
+  the branch by his develop merge and reddened them); [2] F-2 — `expect(typeof shared.decideKeyRevoke).toBe(
+  'function')` AHEAD of the mock control that passes when the export is absent; [3] F-3 — one fixture with no
+  `tenantId` to cover the `403 caller has no tenant` this PR introduces (on originate). Delivered: originate :145 and
+  security :138 the binds; originate :184 the typeof line FIRST; ADMIN_NO_TENANT + CASE 5 on BOTH surfaces (originate
+  :131/:251 — the arm pinned through a spied `logger.warn` because the 403 body is generic by design; security
+  :91/:196 — Wednesday's accepted deviation D2); the originate docblock's two new sentences (:33-41, :45-48).
+  RULED (verbatim in the brief's RULED section): tier 1 for #799 / tier 2 for #880 (the advance ruling 07:3x); D2
+  accepted (the F-3 cell on both surfaces); D1 belongs to #880 (the register-connector prose); the widened-guard rule
+  IS this round; findings-only; NOT-TESTED mandatory; the verdict MAIL is the wait signal. The register of decisions
+  you are NOT making is in the brief — read it.
+  origin develop = M19 6e78961e1 (#982's squash, 23:00:09Z; read 09:07 AEST 2026-09-14) = M18 8861e6216 (the builder's
+  cut, the merge-base of all three heads) + three services/auth files — disjoint from every guarded path; the four suites
+  you run are untouched by it (develop-alone figures hold at M19 = M18 for them). The
+  launcher pins the THREE heads at their branches (exit 6), the three compares (develop...6da848891 = merge_base
+  8861e6216 ahead 12 files 12; develop...a704137de = merge_base 8861e6216 ahead 4 files 5; the stack-parent compare
+  6da848891...fcd8a01e4 = merge_base 6da848891 ahead 1 files 7; exit 10) and develop with a DISJOINTNESS CHECK over
+  the guarded paths (the three PRs' files, the policy dir, the ks860 guard, ks742, security index.ts, adminConfig.ts,
+  jwt.ts, platform.ts, the yaml, the generator, the .ts source of the yaml, orgId.ts's three callers, the four
+  originate suites the #985 red-proof reds — exit 18 only on a hit; #880 or #799 landing trips it by design). If develop moved past M19 at launch, merge the then-current tip in your own clone and re-derive:
+  packages/shared = develop-alone + 15, services/security + 18, services/originate + 10, services/api-gateway + 0.
+
+Subject B (TIER 2 section): a704137de38a3055e40ee62adc343c0239f34ea9 = PR #880 (KS-577), open against develop, ONE fix
+  commit on a merge commit 6114a15d7 (= 85f8263c2 + develop M18; tree 654a000ce = the clean 3-way, verified).
+  THE ROUND's delta (6114a15d7..a704137de) = exactly two files: services/tenant-provisioning/src/tenant-provisioning.
+  openapi.ts (+5 -3: the :676 `rotate` field description and the :732-735 register-connector operation string) and the
+  REGENERATED docs/openapi/secuura-api.yaml (+10 -7: exactly two hunks, @@ -10041,8 +10041,10 @@ and @@ -35568,11
+  +35570,12 @@, description text only, the second re-wrapped at lineWidth 100). Peter's condition (review 5153311061 /
+  KS-577 d7a12a89, 2026-09-09): "approving once the two secuura-api.yaml descriptions are corrected" — his two FALSE
+  sentences ("The old key stays active until explicitly revoked." at :10039; "`rotate: true` mints a replacement (revoke
+  the old key separately)." at :35561) must be GONE and the replacements TRUE to revokePriorConnectorKeys (security
+  index.ts :242-291 at a704137de). D1: the prose names what the register-connector CALLER can see — platform.ts
+  :712-717 consumes priorKeysRevoked (logs when null) and :748 returns `rotated`. #880's MERGE IS KAM'S.
+
+Subject C (TIER 2 section, STACKED): fcd8a01e40d34d6cb4055e7b4fd58b9bb908bbe0 = PR #985 (KS-780), open against
+  develop, ONE commit whose PARENT IS #799's head 6da848891 (compare 6da848891...fcd8a01e4 = ahead 1, files 7; the
+  launcher's stack-parent pin, exit 10). 7 files +234 -66: NEW packages/shared/src/security/orgId.ts (the ONE
+  implementation, :42-44 `v.trim().toLowerCase()`), exported at packages/shared/src/index.ts :237; keyRevokePolicy.ts
+  -40 +18 (`normOrgId` DELETED; :52 imports `./orgId`; :174-175 the two call sites repointed; the no-tenant arm now at
+  :153-155 — same text); services/originate/src/services/orgId.ts a re-export (:40) with the docblock rewritten — its
+  three callers (provenance.ts 483aa9eb3, gdprService.ts 4d138883c, routes/documents.ts b2f4bf351) blob-identical to
+  develop; NEW ks780 tests (shared 7 cells: P1-P4 + S1-S3; originate 3 cells: I1-I3; the fixture uuid carries hex
+  LETTERS on purpose — an all-digit one made the case cells vacuous, measured and fixed by the builder); and the ONE
+  outside-Owns hunk ruled YES by Wednesday (22:26:06Z): L3b's ks695-erasure-by-external-ref.test.ts :36-39, the
+  pass-through `normaliseOrgId: jest.requireActual('@secuura/shared').normaliseOrgId,` (+4 lines, nothing else).
+  Definitions census (grep -P) = 1 at head, 2 at the parent. Merge order #799 -> #985.
+
+Repo:    /Volumes/DevMASTER/!CODING/Secuura/Blockchain/2_Project_Files  (READ-ONLY — clone by SHA into your own scratch,
+  detached worktrees at 6da848891, a704137de, fcd8a01e4 and 8861e6216 (develop-alone control); node_modules
+  symlink-farmed FROM /Volumes/DevMASTER/!CODING/Secuura/Blockchain/worktrees/s216-ks764-r3 (#799's farm source;
+  detached at 6da848891, porcelain 0, root node_modules 985, originate 9, security 6, shared 7, gateway 7; vitest
+  4.1.10, jest 29.7.0), worktrees/s216-ks577-r2 (#880's; detached at a704137de) and worktrees/s216-ks780 (#985's;
+  detached at fcd8a01e4) — the #972 gate's farm.sh shape: EVERY top-level entry
+  EXCEPT @secuura linked; node_modules/@secuura/* REBUILT as relative links inside YOUR clone (the builder's are
+  relative links that would otherwise resolve into HIS packages/shared); the nested node_modules linked (skip .vite);
+  packages/shared/dist BUILT BY YOU (`npm run build --workspace=packages/shared`), never symlinked or copied as the
+  thing under test, and BUILT SEPARATELY in each of your worktrees (each has its own policy bytes). Print
+  realpath(require.resolve('@secuura/shared', { paths: [<clone>/…/services/originate] })) and the same for
+  services/security before any count — both inside your clone. Never into the builder's worktrees; never jest/vitest
+  inside them; rb-880 and every other worktree: rev-parse only.)
+
+You are FINDINGS-ONLY. You never fix, never merge, never push, never deploy, never comment, never file, never `@`.
+
+NEVER run a push, the real pre-push hook, or preflight.sh inside the Secuura checkout or any of its worktrees.
+
+NEVER print a credential value, and never open, read or copy a secrets file (any .env, config/secrets.yml). Count, never
+echo. The security harness generates its own RSA pair in-process and sets JWT_PUBLIC_KEY — never print it or any token.
+
+NO stack, no kintsugi, no demo, no docker (the daemon was DOWN at 08:17 AEST; never start it). Peter's live 8-case
+matrix is HIS, on a stack nothing here stands up — HOLD; say so in NOT TESTED.
+
+Eleven things you must not miss:
+
+1. THE DELTA (item 1): the round = the two test files (numstat 57 1 / 23 1); the merge commit's tree 7bb31ccb1 =
+   `git merge-tree --write-tree 38f6377b9 8861e6216` in YOUR clone (no evil merge); the head tree 0f2c7b9b5 =
+   `merge-tree --write-tree 8861e6216 6da848891`; the 12 blobs at head/merge/38f6377b9/develop as the brief pins them;
+   the commit names KS-764 only, PR refs #799 only, 1 at-sign (the Co-Authored-By e-mail); the never-type ids -> 0 in
+   the message and in the round's new body bytes; BACKLOG.md carries both blocks. For #880: numstat 10 7 / 5 3; the
+   .ts changed lines = -3 +5 and ONLY the two strings; `git diff -U0` on the yaml = exactly two @@ headers; the merge
+   tree 654a000ce = `merge-tree --write-tree 85f8263c2 8861e6216`; the 3 feature files blob-identical at 85f8263c2 /
+   6114a15d7 / a704137de; KS-577 only. THE PAIR: `merge-tree --write-tree 6da848891 a704137de` = c1758ada4 in either
+   order, 0 conflict markers in the merged security index.ts (positive control: a synthetic marker -> 1).
+
+2. THE THREE RED-FIRSTS, RE-DERIVED (item 2; write the AIMED SET before each run): (a) the ks860 guard on YOUR head
+   worktree with BOTH binds reverted (originate :145 -> `app.listen(0, () => resolve())`; security :138 ->
+   `app.listen(0, resolve)`; anchors x1; markers asserted) -> `Tests 1 failed | 22 passed (23)`, the 🔴 cell's
+   Received = EXACTLY two entries naming …route-contract.test.ts:145 and …route-contract.test.ts:138 (the HEAD's lines,
+   not Peter's :121/:128) and NO third path; then each alone (T1o, T1s); restore (shas 32edded6… / 4b68c363…) -> 23/23,
+   quote the :480 CONTROL that the walk reached services/originate and packages/shared. (b) F-2 BOTH WAYS on the
+   originate file (10 cells): delete `  decideKeyRevoke,` from packages/shared/src/index.ts (:230, x1), REBUILD shared,
+   run -> `Tests: 7 failed, 3 passed, 10 total` with the CONTROL cell `Expected: "function" / Received: "undefined"`
+   and CASE 1-5 + PLATFORM red by 500 (consequence); then with the :184 typeof line commented out (export still
+   absent) -> `6 failed, 4 passed` and THE CONTROL CELL GREEN (Peter's claim: isMockFunction(undefined) is false;
+   undefined === undefined); restore both (707ff7ed… / 32edded6…), REBUILD (dist index.js d688faa7…), 10/10. The cell
+   EARNS itself only if the first is red AND the second is green. (c) F-3 on BOTH surfaces: keyRevokePolicy.ts
+   :175-177 -> `return { allow: true, reason: 'same-tenant' };` (x1), REBUILD, originate -> `1 failed, 9 passed`
+   (CASE 5 `Expected: 403 / Received: 200`), security -> `1 failed | 6 passed (7)` (CASE 5 `expected 200 to be 403`);
+   restore (9539d243…), REBUILD, 10/10 and 7/7. The security red under (c) IS the proof the route reaches the policy
+   for a tenant-less caller (D2's load-bearing half).
+
+3. GREEN AT HEAD (items 2d-2f): the four ks764 files 15/15, 11/11, 7/7, 10/10 (titles quoted as ✓); the full suites
+   on the head tree — packages/shared 42 files / 828 (the ks860 guard 23/23 within, 🔴 cell green by title), security
+   16 / 205, originate (jest) 56 suites / 598, api-gateway 34 / 343; develop-alone (your 8861e6216 worktree, own
+   farm) — predicted 41/813, 14/187, 55/588, 34/343 (the ks444 webhooks pair green THERE too: it is develop's fix);
+   0 timeouts; the instrument named for every number.
+
+4. THE TAMPER TABLE, SUITES RUNNING (item 3; predictions are the drafter's, written before each run; anchors x1;
+   restore by content with the whole-file sha; REBUILD shared after every shared tamper AND restore; score by TITLE;
+   cells-run beside every colour; a 0-cell run is INVALID): FIRST T7 inert comment -> 10/10 and T8 a syntax error in
+   the policy -> BUILD/LOAD failure, no scoring line (the discriminator). Then T1o, T1s (the security half the builder
+   did not run), T2 (i)/(ii), T3 as in item 2; T4 security index.ts :1140 `if (!decision.allow) {` ->
+   `if (false && !decision.allow) {` -> security route-contract solo EXACTLY 3 red (CASE 2, 4, 5 — `expected 200 to
+   be 403`) and the ks764 source guard solo EXACTLY 1 red (`services/security … > refuses when the decision refuses`);
+   under the FULL security suite ks742 :596 is the ONE additional expected red; T5 adminConfig.ts :1035 the
+   organizationId line deleted -> originate solo EXACTLY 2 red (CASE 2 with the UPDATE called, CASE 4; CASE 5 stays
+   403) and the source guard EXACTLY 1 red (`services/originate … > passes the KEY OWN organisation into the
+   decision`); T6 the stub's :88 `if (principal.tenantId)` made unconditional -> 10/10 (inert — the 403 is the
+   POLICY's); T9o originate :131 ADMIN_NO_TENANT gains `tenantId: TENANT_A` -> EXACTLY 1 red (CASE 5: 200, warn not
+   called, UPDATE called); T9s security :91 the same -> EXACTLY 1 red (CASE 5 200); T10 optional: adminConfig.ts :1038
+   'API key revoke refused' -> 'API key revoke REFUSED' -> EXACTLY 1 red (CASE 5 at :266, status still 403). Read the
+   failure SETS as mechanism counts: T3/T9 = one mechanism, two tampers; T4 = the wire + the source guard, two
+   instruments on one mechanism — say so.
+
+5. THE REACH (item 4): H-reach — no tenantId read between security :1122 and :1135 (awk + grep, positive control
+   :1145 callerTenantId); H-default — whose 403 the originate CASE 5 is (the policy's) and which callers meet it (any
+   interactive token minted for a user with User.tenantId undefined — jwt.ts:173); the tenant-less population is
+   UNMEASURED by anyone — say so; H-guard-walk — the T1 reds prove the ks860 walk READS both files; H-citation
+   (PROBED, one line) — `node -e "console.log(JSON.stringify({ tenantId: undefined, role: 'x' }))"` -> {"role":"x"},
+   then READ jwt.ts :173 (generateAccessToken, the interactive minter, unconditional key) vs :263
+   (generateConnectorToken, the conditional spread the four docblocks cite) — the CLAIM holds, the LINE names the
+   wrong minter: a Polish Record (symbol generateAccessToken), not a defect; H-pair as in item 1.
+
+6. #880 (the section, items a-e): in your a704137de worktree, `npm run generate-openapi -- --check` -> `CHECK PASS:
+   on-disk YAML matches generated` rc 0; CONTROL: one character changed in the :676 string (x1) -> `CHECK FAIL:
+   generated YAML differs from on-disk version` rc 1; restore (d274e5d3f3ac39b1…) -> PASS. Peter's two false sentences
+   -> 0 at head and 1 each at develop's yaml f14ab17ed (the positive control); the two replacements present x1 each
+   (grep the unwrapped fragment `retires the prior active keys of the same` -> 2 at head, 0 at develop); quote develop's
+   :10044-10045 / :35571 and the head's :10044-10047 / :35573-35575 side by side. The prose-vs-code table: "the prior
+   active keys of the same connector" <-> `WHERE connector_id = $1 AND tenant_id = $2::uuid AND id <> $3 AND is_active
+   = true`; "retired as part of the mint" <-> :1133-1135 mint first then revoke; "deactivated at once by default" <->
+   grace 0 -> is_active = false; "left valid for at most the … window" <-> LEAST(COALESCE(expires_at,'infinity'),
+   NOW()+grace); "when the security service sets one" <-> process.env.API_KEY_ROTATION_GRACE_SECONDS at :247; the
+   caller sees `rotated` (:748), never priorKeysRevoked (:712-717 consumes it). Two Records, READ ONLY, state not grade:
+   a FAILED revoke (null) reaches only the gateway's console.error while the caller gets 200 + rotated:true + a contract
+   that says the keys "are retired" (pre-existing at 85f8263c2; symbol `priorKeysRevoked === null`); the two
+   descriptions phrase the window differently ("at most" vs "at the end of"). Suites: security 15 / 195 (ks577 8/8),
+   tenant-provisioning 3 / 13, api-gateway 34 / 343, tsc rc 0 x3, `npm run check:openapi` PASS both halves (405 example
+   blocks). Optional Record: Peter's SQL tamper (` AND tenant_id = $2::uuid` deleted from the two SQL strings only, 2 ->
+   0) -> predicted 8 passed (8), undetected — confirming the gap he measured, NOT a finding against this round.
+
+7. DELIVERED vs COMMISSIONED + CLAIMS (items 5, 6): the table in the brief — the s216 brief ITEM 1 (a)-(g) vs the head
+   (TWO files, not the brief's "three files" — report that as Wednesday's miscount if you agree; the security fixture +
+   cell is a DEVIATION from (c) accepted as D2 — not a finding); Peter's three checkboxes by file:line; every ratio,
+   red-first count and "blob-identical" claim re-derived; the citation Record. A product file in the round, a third
+   test file, a ticket moved, a `@`, a never-type id: a finding.
+
+8. QUALITY + DOCS (items 7, 8): tsc --noEmit rc 0 in originate and security (and the three #880 services); eslint if
+   configured; the round touches no .md/yaml/migration/config on #799 (BACKLOG.md moved at the MERGE); the security
+   refusal log's title 'Cross-tenant API key revoke refused' names one of four causes — a Polish Record, pre-existing.
+
+9. NOT TESTED at equal prominence (item 9 and the #880 (d) list): no stack / docker / deploy; Peter's live 8-case matrix
+   (HIS); the four platform suites (NOT COMMISSIONED — no runnable environment; no route/schema/migration); preflight,
+   the hook, any push; a real auth-service RS256 token crossing to originate/security; F-3(a) (a req.tenantId naming
+   ANOTHER tenant on originate — NOT covered, by name); the 09-04 pass's F-1; 6(b)/6(c)/the nit (Peter's backlog); the
+   deploy precondition (stock-seed org-less admins meet `caller has no organisation` on both routes — ruling 2's shape:
+   state, do not grade); KS-780; for #880: Peter's items 3-5 (Kam's line), the S-side validate path (PS-740), the
+   cutover value (HELD), the shared yaml (REGENERATE after #813/#919/#805/#922, never hand-merge), the first-rotation
+   precondition (KS-843); Linear (relayed); your memory store.
+
+10. THE VERDICT PARAGRAPH FOR #880 must say, in these words: "#880's MERGE is Kam's — it selects a Platform S cutover
+    default; KS-577 stays OPEN after any merge (Stuart, KS-577 comment 357c6ece 2026-09-09T08:58:59Z: 'merge it on your
+    own judgement … Please just keep the ticket open')."
+
+11. #985 (the section, items a-e): in your fcd8a01e4 worktree — (a) the delta onto 6da848891 is EXACTLY the seven
+    files by blob (numstat 85 0 / 5 0 / 18 40 / 44 0 / 4 0 / 49 0 / 29 26); the ks695 hunk = ONE @@ with 4 `+` lines
+    and 0 `-`; the three callers blob-identical; KS-780 only; `merge-tree --write-tree 8861e6216 fcd8a01e4` =
+    07553a609; the definitions census `git grep -n -P '^\s*(export\s+)?(function|const)\s+norm(alise)?OrgId\b'`
+    over packages/ + services/ = 1 at head and 2 at the parent (the control), `normOrgId(` as code = 0 files
+    (control `normaliseOrgId(` = 7), and the PLANT-AND-FIND control: plant `function normOrgId(v: string) { return
+    v; }` in a scratch copy, the same census over the working tree reads 2, remove it, 1. (b) greens at head: shared
+    43 / 835 (ks780 7/7), security 16 / 205, originate 57 / 601 (ks780 3/3; ks695 40/40 WITH the pass-through),
+    gateway 34 / 343, tsc rc 0 x3; then T780: orgId.ts :43 `v.trim().toLowerCase()` -> `v.trim()` (x1), REBUILD
+    shared -> AIMED 9 cells across 3 packages: shared `2 failed | 833 (835)` (P2, S3); security `1 failed | 204 (205)`
+    (the ks764 arm test's "organisation ids compare NORMALISED"); originate `6 failed, 595, 601` in 5 suites (qa-f4 x2,
+    ks780 I3, ks695 "an UPPERCASE organizationId claim…" THROUGH the mock, ks597-b "(d) a lower-case claim matches an
+    UPPER-case…", ks597-issuer-org-bind "does NOT 403 on a case-only difference"); restore (430e912ef5bb2772…),
+    REBUILD, all green. Read WHY ks597-b's sibling cell "(d) an UPPER-case claim matches a lower-case stored…" stays
+    green under a normaliser that no longer lowercases (a second lowercase path — SQL LOWER(), a route-level
+    toLowerCase, or an already-lowercase fixture) — a Record, not a #985 defect. T780b: the ks695 hunk reverted (4
+    lines, x1) -> the ks695 file alone 11 failed (`normaliseOrgId is not a function`), 29 green — the pass-through is
+    load-bearing; restore (f1bde33e2f01b105…) -> 40/40. T780c inert comment in the shared orgId.ts + rebuild -> all
+    green. T780d: a byte-identical private `function normOrgId(...)` re-introduced into the policy -> shared ks780 S2
+    red ONLY (1/7) — the structural cell is the only thing that sees a behaviourally identical copy; restore
+    (19bd8b1ad9789060…). (c) no second implementation: `git grep -n -F ".trim().toLowerCase()"` over packages/ +
+    services/ at head — name every hit and say which normalises an ORGANISATION id (only orgId.ts should); other
+    services importing normaliseOrgId: 0. (d) merge order: #985's first commit IS #799's head; `merge-tree
+    --write-tree fcd8a01e4 a704137de` clean (name the tree). (e) NOT TESTED: the platform suites, preflight, no new
+    caller cells (the builder's choice — T780 shows whether the existing ones discriminate), the merge.
+
+Your tool shell's grep may be a function: use /usr/bin/grep -F with a same-file control; or Python str.count on the
+blob. Never cd in your own tool calls; the pre-tool hook refuses `git worktree` and every write verb in the Secuura
+checkout — clone into your scratch and run write verbs THERE. A REAL checkout of the whole Blockchain/Dev, root
+included (three walks read your tree: the ks860 guard over __tests__/ and *.test.ts, the ks764 source guard over
+non-test .ts under src/ mentioning svc_api_keys + is_active, the ks742 config scan wanting the repo root's compose
+files). Keep every scratch of yours OUT of those paths; quarantine probes by rename before a packages/shared run.
+Originate is JEST (npx jest <path>; `Tests: N failed, M passed, K total`); security / shared / gateway /
+tenant-provisioning are VITEST 4.1.10 (npx vitest run <path>, never watch; `Tests N failed | M passed (K)`); one runner
+that parses both trailers; run suites SOLO; the security route-contract file boots the whole app under
+SECURITY_DISABLE_BOOT=1 and needs no database. @secuura/shared resolves to packages/shared/dist from both services
+(build first; rebuild after every shared tamper and restore — a hash proves the bytes, only a run proves the file
+works); packages/shared's own vitest aliases it to src. The default-tenant literal line occurs SIX times in
+adminConfig.ts and the Not-found 200 line THREE times — never anchor on them. /bin/bash here is 3.2 — write runners in
+Python. zsh: no PIPESTATUS (`cmd > out 2>&1; rc=$?`), no timeout on macOS.
+Quote the Secuura checkout's porcelain count, .git/config sha256, for-each-ref count, origin develop SHA,
+refs/pull/799/head, refs/pull/880/head, refs/pull/985/head and the three branches at start and close; they must match
+(name any ref another seat's push or merge moved). Confirm worktrees/s216-ks764-r3 (6da848891), s216-ks577-r2
+(a704137de) and s216-ks780 (fcd8a01e4) are byte-identical at start and close (porcelain 0 both times); read every
+other worktree by rev-parse HEAD only.
+Never `rm`: fresh mktemp -d per attempt; quarantine probes by rename.
+Do no memory maintenance of your own project's memory store inside this session.
+
+Report FOUND / TESTED / HOW, with controls; the delta (all three PRs); develop-alone and head counts with the tree named;
+the three RED-FIRSTS re-derived; the tamper table (T1o, T1s, T2(i)/(ii), T3, T4, T5, T6, T7, T8, T9o, T9s, optional
+T10) with cells-run and the decisive assertion per red; the reach items; the #880 section (--check PASS/FAIL/PASS, the
+sentences side by side, the prose-vs-code table, the suites, the two Records); the #985 section (the seven blobs, the
+census 1/2 with the plant control, the greens, T780/T780b/T780c/T780d with cells-run, the ks597-b Record if it
+measured, the merge order); the DELIVERED-vs-COMMISSIONED tables;
+every Record with its symbol/path; and state what you did NOT test at the same prominence as the findings.
+Verdict, ONE PER PR (three): #799 GO / GO WITH FINDINGS / NO GO on 6da848891924f859179d097d464a7b97c9783a6a, as the
+round's delta over e6e25421e AND as the whole PR merged onto the develop you measured (name it); #880 GO / GO WITH
+FINDINGS / NO GO on a704137de38a3055e40ee62adc343c0239f34ea9 likewise — the merge is KAM's regardless; #985 GO / GO
+WITH FINDINGS / NO GO on fcd8a01e40d34d6cb4055e7b4fd58b9bb908bbe0 as the delta over its stack parent 6da848891 AND
+merged onto the develop you measured — merge order #799 -> #985. Give the merge seat its PRED lines: "#799: squash 6da848891924f859179d097d464a7b97c9783a6a onto develop; expected packages/shared = develop's
+count + 15 / +2 files, services/security + 18 / +2 files, services/originate + 10 / +1 suite, services/api-gateway + 0,
+0 failed; the ks860 guard 23/23; #799 and #880 merge clean in either order (c1758ada4)" and "#880: MERGE IS KAM's —
+route with Stuart's and Peter's sentences in front of him; KS-577 stays open; after #813/#919/#805/#922 land,
+REGENERATE the yaml, never hand-merge" and "#985: AFTER #799, squash fcd8a01e40d34d6cb4055e7b4fd58b9bb908bbe0 onto
+develop; expected packages/shared = develop's count + 22 / +3 files, services/security + 18, services/originate + 13 /
++2 suites, api-gateway + 0, 0 failed; the definitions census 1; the ks695 mock line rides with it".
+
+MAIL YOUR VERDICT to wednesday-agent@agentmail.to when the pass is complete, using
+the project's send_brief.sh. Your pane holds ~19 lines of alternate screen with no
+scrollback, so a verdict that stays in the pane is one pane-close from being lost --
+this is not a formality, it is the only durable copy. Subject:
+[QA -> Wednesday] TIER 1 GATE #799 (KS-764) 6da848891 -- <GO|GO WITH FINDINGS|NO GO> ; TIER 2 #880 (KS-577) a704137de -- <GO|GO WITH FINDINGS|NO GO> ; TIER 2 #985 (KS-780) fcd8a01e4 -- <GO|GO WITH FINDINGS|NO GO>

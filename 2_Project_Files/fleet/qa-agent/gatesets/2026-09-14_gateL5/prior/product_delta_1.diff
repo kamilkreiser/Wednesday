@@ -1,0 +1,240 @@
+diff --git a/Blockchain/Dev/packages/shared/src/index.ts b/Blockchain/Dev/packages/shared/src/index.ts
+index 6731f0f2f..8794bca5f 100644
+--- a/Blockchain/Dev/packages/shared/src/index.ts
++++ b/Blockchain/Dev/packages/shared/src/index.ts
+@@ -218,3 +218,15 @@ export * from './openapi/async';
+ // check-spec-examples (runs under `npm run check:openapi`) and
+ // verify-spec-examples (runs against the systemTest cassette).
+ export * from './openapi/examples';
++
++// API-key revoke policy (KS-643/KS-764). The single implementation of the rule,
++// imported by BOTH revoke call sites — services/security's DELETE /api/keys/:id
++// and services/originate's DELETE /api/admin/api-keys/:id. Pure: the caller
++// resolves the key row and passes it in.
++export {
++  isOrgBoundedRole,
++  isPlatformRole,
++  decideTenantAccess,
++  decideKeyRevoke,
++} from './security/keyRevokePolicy';
++export type { RevokeDecision } from './security/keyRevokePolicy';
+diff --git a/Blockchain/Dev/packages/shared/src/middleware/index.ts b/Blockchain/Dev/packages/shared/src/middleware/index.ts
+index b5932490c..3a67987a7 100644
+--- a/Blockchain/Dev/packages/shared/src/middleware/index.ts
++++ b/Blockchain/Dev/packages/shared/src/middleware/index.ts
+@@ -23,6 +23,23 @@ export interface JwtPayload {
+   email: string;
+   role: string;
+   organizationId?: string;
++  /**
++   * KS-764 (Peter's #799 review, finding 3): DECLARED because a policy reads it.
++   *
++   * `decideTenantAccess` — which `decideKeyRevoke` delegates to — compares
++   * `user.tenantId` against the target and returns `403 caller has no tenant`
++   * when it is absent (`keyRevokePolicy.ts:175`). Until this line, no payload
++   * type declared the field: the revoke routes worked only because the auth
++   * service HAPPENS to sign it in, and `services/auth/src/services/jwt.ts:263`
++   * signs it CONDITIONALLY — `...(meta.tenantId ? { tenantId } : {})` — so a
++   * tenant-less user genuinely receives a token without the claim.
++   *
++   * The dependency was real, load-bearing and invisible to the compiler, which
++   * is what made it undeclared rather than merely optional. Declaring it does
++   * not change behaviour; it makes the contract checkable, so a future token
++   * minter can see what the authorisation path requires.
++   */
++  tenantId?: string;
+   verificationLevel: string;
+   iat?: number;
+   exp?: number;
+diff --git a/Blockchain/Dev/services/originate/src/middleware/auth.ts b/Blockchain/Dev/services/originate/src/middleware/auth.ts
+index 38a0db12a..f08ee1a89 100644
+--- a/Blockchain/Dev/services/originate/src/middleware/auth.ts
++++ b/Blockchain/Dev/services/originate/src/middleware/auth.ts
+@@ -17,6 +17,23 @@ export interface JwtPayload {
+   email: string;
+   role: string;
+   organizationId?: string;
++  /**
++   * KS-764 (Peter's #799 review, finding 3): DECLARED because a policy reads it.
++   *
++   * `decideTenantAccess` — which `decideKeyRevoke` delegates to — compares
++   * `user.tenantId` against the target and returns `403 caller has no tenant`
++   * when it is absent (`keyRevokePolicy.ts:175`). Until this line, no payload
++   * type declared the field: the revoke routes worked only because the auth
++   * service HAPPENS to sign it in, and `services/auth/src/services/jwt.ts:263`
++   * signs it CONDITIONALLY — `...(meta.tenantId ? { tenantId } : {})` — so a
++   * tenant-less user genuinely receives a token without the claim.
++   *
++   * The dependency was real, load-bearing and invisible to the compiler, which
++   * is what made it undeclared rather than merely optional. Declaring it does
++   * not change behaviour; it makes the contract checkable, so a future token
++   * minter can see what the authorisation path requires.
++   */
++  tenantId?: string;
+   verificationLevel: string;
+   // KS-257: session id minted by auth at login; present on interactive JWTs.
+   sessionId?: string;
+diff --git a/Blockchain/Dev/services/security/src/index.ts b/Blockchain/Dev/services/security/src/index.ts
+index ed0239d79..1bb567a09 100644
+--- a/Blockchain/Dev/services/security/src/index.ts
++++ b/Blockchain/Dev/services/security/src/index.ts
+@@ -1130,18 +1130,29 @@ app.delete('/api/keys/:id', requireKeyAdmin, async (req: Request, res: Response)
+   // the tenant-scoped ORG_ADMIN / ISSUER_ADMIN / ADMIN — so without this a
+   // tenant-scoped admin could revoke another customer's key. Resolve first,
+   // then authorise: the comparison needs the key's own tenant.
+-  const decision = decideKeyRevoke((req as any).user, { id: apiKey.id, tenantId: apiKey.tenantId });
++  // KS-764: the key's ORGANISATION goes in too. Tenant alone let an org-bounded
++  // admin in organisation A revoke organisation B's key inside the same tenant.
++  const decision = decideKeyRevoke((req as any).user, {
++    id: apiKey.id,
++    tenantId: apiKey.tenantId,
++    organizationId: apiKey.organizationId,
++  });
+   if (!decision.allow) {
+     log('warn', 'Cross-tenant API key revoke refused', {
+       keyId: apiKey.id,
+       keyTenantId: apiKey.tenantId,
++      keyOrganizationId: apiKey.organizationId,
+       callerTenantId: (req as any).user?.tenantId,
++      callerOrganizationId: (req as any).user?.organizationId,
+       callerRole: (req as any).user?.role,
+       reason: decision.reason,
+     });
++    // KS-764: the message no longer asserts "another tenant" — the refusal now
++    // has four causes and three of them are not that. Saying the wrong one to a
++    // caller debugging a 403 costs them the time the message was meant to save.
+     return res.status(decision.status ?? 403).json({
+       success: false,
+-      error: { code: 'FORBIDDEN', message: 'API key belongs to another tenant' },
++      error: { code: 'FORBIDDEN', message: 'Not authorised to revoke this API key' },
+     });
+   }
+ 
+diff --git a/Blockchain/Dev/services/security/src/keyRevokePolicy.ts b/Blockchain/Dev/services/security/src/keyRevokePolicy.ts
+index 60bd9ef5e..b0493aa67 100644
+--- a/Blockchain/Dev/services/security/src/keyRevokePolicy.ts
++++ b/Blockchain/Dev/services/security/src/keyRevokePolicy.ts
+@@ -1,104 +1,28 @@
+ /**
+- * KS-643 / KS-578 — who may revoke which API key.
+- *
+- * `DELETE /api/keys/:id` was gated on role alone (`requireKeyAdmin`), and
+- * `KEY_ADMIN_ROLES` includes the **tenant-scoped** ORG_ADMIN / ISSUER_ADMIN /
+- * ADMIN. Nothing compared the key's tenant to the caller's, so a tenant-scoped
+- * admin could revoke another customer's key — an auth denial-of-service against
+- * that customer (KS-643). Measured live before this module existed: an
+- * ISSUER_ADMIN in tenant A revoked a tenant-B key and got 200, with `is_active`
+- * flipping t -> f; the same call as OWNER returned 403 and with no token 401,
+- * so the role gate worked and only the tenancy check was missing.
+- *
+- * KS-578 is the other half. The lookup that feeds this decision ran under the
+- * caller's tenant GUC, so a foreign-tenant row was RLS-hidden and the handler
+- * 404'd on a key that exists. Those two interact, which is why they land
+- * together: platform-scoping the lookup WITHOUT this check would have made the
+- * KS-643 cross-tenant revoke fully reliable instead of only mostly reliable.
+- * Resolve first, then authorise — the tenant comparison needs the key's tenant,
+- * which cannot be known until the row is read.
+- *
+- * Kam's ruling 2026-08-26: "together — Authorise the ownership check in the
+- * same PR as KS-578", minimal shape — non-platform KEY_ADMIN roles act only on
+- * their own tenant's keys, platform-admin cross-tenant revoke preserved
+- * (KS-577's revoke-on-rotate depends on that half).
++ * =============================================================================
++ * API-KEY REVOKE — this service's half (KS-643 / KS-764 / KS-578)
++ * =============================================================================
++ * The DECISION moved to `@secuura/shared` (KS-764, QA F-764-01) so that
++ * `originate`'s sibling revoke route can be bound to the same rule instead of
++ * carrying a second copy of it. It is re-exported here unchanged, so every
++ * existing import of this module — including this service's own routes and the
++ * KS-764 test suite — keeps working and there is exactly one implementation.
++ *
++ * What stays: `lookupKeyForRevoke`, which needs this service's pool and the
++ * platform-scope wrapper. That is the half that cannot be shared.
++ * =============================================================================
+  */
+ 
+ import { runWithPlatformScope } from '@secuura/shared';
+ import { query } from './db';
+ 
+-/**
+- * Roles that may act across tenants. Deliberately NOT the whole of
+- * KEY_ADMIN_ROLES: ORG_ADMIN / ISSUER_ADMIN / ADMIN are tenant-scoped and are
+- * exactly the escalation KS-643 describes.
+- */
+-const PLATFORM_ROLES = new Set(['SYSTEM_ADMIN', 'SUPER_ADMIN']);
+-
+-export interface RevokeDecision {
+-  allow: boolean;
+-  status?: number;
+-  reason?: string;
+-}
+-
+-/**
+- * True when the caller's role may act across tenants.
+- *
+- * KS-742: the list endpoint needs this predicate on its own — it filters a
+- * collection rather than authorising one resolved key, so it has no single
+- * `targetTenantId` to hand `decideTenantAccess`. Exported so there is exactly
+- * one definition of "platform role" in this service rather than a second copy
+- * drifting inside index.ts.
+- *
+- * @param role - the caller's JWT role claim, in either casing.
+- * @returns true for SYSTEM_ADMIN / SUPER_ADMIN, false for everything else.
+- */
+-export function isPlatformRole(role: string | undefined): boolean {
+-  return PLATFORM_ROLES.has(String(role || '').toUpperCase());
+-}
+-
+-/**
+- * The one tenancy rule for the whole `/api/keys` family.
+- *
+- * KS-742: KS-643 fixed `DELETE /api/keys/:id` by comparing the key's tenant to
+- * the caller's, but wrote that comparison inline for revoke alone. `GET` and
+- * `POST` needed the identical rule, and a second copy of a security decision is
+- * how the two halves drift. `decideKeyRevoke` below is now a thin wrapper over
+- * this, so its behaviour is unchanged and there is a single definition.
+- *
+- * @param user - the verified principal (role / tenant) from the JWT.
+- * @param targetTenantId - the tenant the operation would actually touch, which
+- *        for a mint means the tenant AFTER resolution, not the one requested.
+- * @returns an allow decision naming the authorising path, or a 403 deny.
+- * @example decideTenantAccess({role:'ISSUER_ADMIN',tenantId:'a'}, 'b') // deny
+- */
+-export function decideTenantAccess(
+-  user: { role?: string; tenantId?: string } | undefined,
+-  targetTenantId: string,
+-): RevokeDecision {
+-  // JWTs in this repo carry both casings (`super_admin` and `SUPER_ADMIN`).
+-  if (isPlatformRole(user?.role)) {
+-    return { allow: true, reason: 'platform-admin' };
+-  }
+-
+-  // A caller with no tenant is refused rather than defaulted. Defaulting here
+-  // would silently hand every tenant-less principal the default tenant's keys.
+-  if (!user?.tenantId) {
+-    return { allow: false, status: 403, reason: 'caller has no tenant' };
+-  }
+-
+-  if (user.tenantId !== targetTenantId) {
+-    return { allow: false, status: 403, reason: 'cross-tenant' };
+-  }
+-
+-  return { allow: true, reason: 'same-tenant' };
+-}
+-
+-export function decideKeyRevoke(
+-  user: { role?: string; tenantId?: string } | undefined,
+-  key: { id: string; tenantId: string },
+-): RevokeDecision {
+-  return decideTenantAccess(user, key.tenantId);
+-}
++export {
++  isOrgBoundedRole,
++  isPlatformRole,
++  decideTenantAccess,
++  decideKeyRevoke,
++} from '@secuura/shared';
++export type { RevokeDecision } from '@secuura/shared';
+ 
+ /**
+  * KS-578: resolve the key for a revoke regardless of the caller's tenant GUC.

@@ -1,0 +1,56 @@
+2026-09-14 10:38:25 AEST
+## develop M18..M20 log
+a5334350221c819f54d4a20a3308daeb9ca09617 6e78961e1d04277ecbdb0537e630afa0bf63b13c 5d251d14d5de661f842645d66e610ecbbd7bf289 2026-09-14T09:18:09+10:00 KS-991: skip a local develop that origin/develop provably supersedes (#903)
+6e78961e1d04277ecbdb0537e630afa0bf63b13c 8861e62161466c40f08d2b10a30edeb203123993 60327bfa0560fce54b74e95059916f4723ddad70 2026-09-14T09:00:09+10:00 KS-790: the OAuth token grants resolve the user through the pre-auth carve-out, not the RLS-scoped lookup (#982)
+## numstat M19..M20
+39	1	.githooks/pre-push
+123	1	Blockchain/Dev/scripts/__tests__/pre_push_hook_base.test.sh
+24	0	Blockchain/Dev/scripts/preflight/preflight.sh
+## numstat M18..M20
+39	1	.githooks/pre-push
+123	1	Blockchain/Dev/scripts/__tests__/pre_push_hook_base.test.sh
+24	0	Blockchain/Dev/scripts/preflight/preflight.sh
+249	0	Blockchain/Dev/services/auth/src/__tests__/ks790-token-pre-auth-user-lookup.test.ts
+8	0	Blockchain/Dev/services/auth/src/__tests__/ks820-821-token-client-auth-and-apptype.test.ts
+23	5	Blockchain/Dev/services/auth/src/routes/oauth.ts
+## name-status M18..M20
+M	.githooks/pre-push
+M	Blockchain/Dev/scripts/__tests__/pre_push_hook_base.test.sh
+M	Blockchain/Dev/scripts/preflight/preflight.sh
+A	Blockchain/Dev/services/auth/src/__tests__/ks790-token-pre-auth-user-lookup.test.ts
+M	Blockchain/Dev/services/auth/src/__tests__/ks820-821-token-client-auth-and-apptype.test.ts
+M	Blockchain/Dev/services/auth/src/routes/oauth.ts
+## 6da848891924f859179d097d464a7b97c9783a6a vs M20: merge-base 8861e62161466c40f08d2b10a30edeb203123993 ; left-right 2	12
+## a704137de38a3055e40ee62adc343c0239f34ea9 vs M20: merge-base 8861e62161466c40f08d2b10a30edeb203123993 ; left-right 2	4
+## fcd8a01e40d34d6cb4055e7b4fd58b9bb908bbe0 vs M20: merge-base 8861e62161466c40f08d2b10a30edeb203123993 ; left-right 2	13
+## M20 commit message
+KS-991: skip a local develop that origin/develop provably supersedes (#903)
+
+* KS-991: skip a LOCAL develop that origin/develop provably supersedes
+
+Three pushes in one session ran the full 13-leg Blockchain/Dev preflight on
+branches touching no Blockchain/Dev file, because the local `develop` ref was
+behind `origin/develop` and the hook's base loop consults it first:
+
+    ff5218867 vs 400517aaf    (systemTest-only branch)
+    400517aaf vs 4f337be83    (CLAUDE.md-only branch)
+    4f337be83 vs 512480ef1    (one new file)
+
+Every gap was opened by a merge the same seat had just performed, so the trigger
+is "you did the right thing". One of those runs then failed leg 1 with
+DEPS MISSING — an environment condition presented as a gate result and, without
+reading 13 legs of output, indistinguishable from a real red. That is the shape
+that gets answered with --no-verify.
+
+NOT A REORDER, and that distinction is the whole justification. KS-882's author
+considered putting origin/develop first and rejected it, because whichever ref is
+consulted FIRST can contain HEAD. This skips a ref only when ANOTHER resolvable
+ref provably supersedes it — local `develop` when it is a strict ancestor of
+origin/develop. The two failure directions are opposites:
+
+    KS-882  a ref CONTAINING the tip  -> empty diff    -> HIDES a change
+    KS-991  a ref BEHIND the remote   -> inflated diff -> INVENTS a change
+
+A stale base sits at or behind the better base, so its diff is a SUPERSET: it can
+report files that are on the trunk but not in this branch, and it cannot conceal
+anything. Skipping it costs no safety.
