@@ -1,0 +1,31 @@
+diff_blocks=1 all_blocks=1 prose_outside_chars=0
+wrote /Volumes/DevMASTER/WEDNESDAY/2_Project_Files/local-model/runs/2026-09-14_ks871-gptoss120b/out.md.checker/patch.diff lines=121
+PASS A1 output is exactly one fenced ```diff block, nothing outside it
+clone clean at pinned tip 7d1fccfcc750ca05a1ca7da5a019bdb40ccd14ce
+--- baseline at the untouched tip (whole services/api-gateway suite + tsc)
+baseline suite rc=0 total=349 passed=349 failed=0 suites_failed=0 loaded=1 failed_names=[]
+baseline tsc rc=0 (0 lines)
+section 1 Blockchain/Dev/services/api-gateway/src/middleware/audit.ts: hunk 2 (@@ -182,3 +182,4 @@) declared old=3 new=4 but actual old=4 new=4
+section 2 Blockchain/Dev/services/api-gateway/src/__tests__/ks871-audit-path-captured-at-entry.test.ts: hunk 1 (@@ -0,0 +1,102 @@) declared old=0 new=102 but actual old=0 new=106
+sections=2 miscounted_sections=2
+section 1 Blockchain/Dev/services/api-gateway/src/middleware/audit.ts: applies ONLY with --recount --ignore-whitespace (miscounted hunks=1, strict rc=128)
+section 2 Blockchain/Dev/services/api-gateway/src/__tests__/ks871-audit-path-captured-at-entry.test.ts: applies ONLY with --recount --ignore-whitespace (miscounted hunks=1, strict rc=0)
+PASS A2 diff applies at the tip — with an accommodation: [Blockchain/Dev/services/api-gateway/src/middleware/audit.ts: --recount --ignore-whitespace needed; miscounted hunks=1; strict rc=128] [Blockchain/Dev/services/api-gateway/src/__tests__/ks871-audit-path-captured-at-entry.test.ts: --recount --ignore-whitespace needed; miscounted hunks=1; strict rc=0]
+touched files (2): Blockchain/Dev/services/api-gateway/src/__tests__/ks871-audit-path-captured-at-entry.test.ts Blockchain/Dev/services/api-gateway/src/middleware/audit.ts  (+108/-1)
+PASS A3 touched-file set == { Blockchain/Dev/services/api-gateway/src/middleware/audit.ts , Blockchain/Dev/services/api-gateway/src/__tests__/ks871-audit-path-captured-at-entry.test.ts }
+test-only at tip: rc=1 total=2 passed=1 failed=1 suites_failed=2 loaded=1 failed_names=['KS-871 audit path capture 🔴 KS-871 — refused erasure logs full path (was trimmed)']
+PASS A4 RED-FIRST: src/__tests__/ks871-audit-path-captured-at-entry.test.ts fails at the untouched tip (1 failed / 2 run)
+test after product hunk: rc=0 total=2 passed=2 failed=0 suites_failed=0 loaded=1 failed_names=[]
+PASS A5 GREEN-AFTER: src/__tests__/ks871-audit-path-captured-at-entry.test.ts passes with the product hunk (2 passed / 2 run)
+INFO control cell present: 1 cell(s) passed BEFORE and 2 AFTER (the harness reaches the code both times)
+after suite rc=0 total=351 passed=351 failed=0 suites_failed=0 loaded=1 failed_names=[]
+baseline: total=349 failed=0 | after: total=351 failed=0
+develop's own reds (attributed, not counted): []
+NEW reds: []
+reds fixed by the patch: []
+tests added: 2
+PASS A6 whole services/api-gateway suite: no NEW red vs the untouched tip
+PASS A7 tsc --noEmit for services/api-gateway: rc 0 after the patch (baseline rc=0)
+INFO tsc on the test file alone: rc=2 (9 lines; not gated — vitest does not type-check and the service tsconfig excludes __tests__)
+SUMMARY files=2 +108/-1 test=src/__tests__/ks871-audit-path-captured-at-entry.test.ts red_first=yes apply_mode=lenient
+RESULT: PASS (7/7)

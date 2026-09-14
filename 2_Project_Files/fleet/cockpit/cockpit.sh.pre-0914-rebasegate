@@ -105,22 +105,6 @@ apply_layout() {
 add_pane() { # name, cmd
   local name="$1" cmd="$2"
   if pane_exists "$name"; then echo "pane '$name' already present — skip"; return 0; fi
-  # 2026-09-14 15:0x: a gate launcher reads its installed brief + prompt from the TRACKED
-  # tree at startup. The 14:15 L3b launch ran ONE second after a commit that let panel_sync's
-  # rebase fire; the rebase rewrote the working tree while the launcher read it ("No such
-  # file"), the launcher refused and exited, and the pane sat as a bare shell for 45 minutes.
-  # So: never start a pane while this repo is mid-rebase/merge. Wait up to 90 s for the sync
-  # loop to finish (its cycles are ~1 s of rebase per minute), then REFUSE — a refusal here
-  # costs a retry; a launch into a moving tree costs a silent dead gate.
-  local waited=0
-  while [ -d "$PROJECT_DIR/.git/rebase-merge" ] || [ -d "$PROJECT_DIR/.git/rebase-apply" ] || [ -f "$PROJECT_DIR/.git/MERGE_HEAD" ]; do
-    if [ "$waited" -ge 90 ]; then
-      echo "cockpit add: REFUSED — $PROJECT_DIR is mid-rebase/merge after ${waited}s (panel_sync stuck? see 2_Project_Files/tools/logs/panel_sync.log); a launcher that reads tracked files must not start into a moving tree. Retry when .git/rebase-merge is gone." >&2
-      return 7
-    fi
-    [ "$waited" -eq 0 ] && echo "cockpit add: repo mid-rebase/merge — waiting for the sync loop before launching '$name'…"
-    sleep 3; waited=$((waited + 3))
-  done
   local pane_id
   pane_id=$("$TMUX_BIN" split-window -t "$SESSION:0" -P -F '#{pane_id}' -d "$cmd; echo; echo '[cockpit] $name exited — pane stays for inspection'; exec bash")
   "$TMUX_BIN" set-option -p -t "$pane_id" @cockpit_name "$name"
