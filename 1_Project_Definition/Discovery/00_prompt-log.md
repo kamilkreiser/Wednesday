@@ -2437,3 +2437,18 @@ Done with it: Dynamics → Kam's team decision (no action); QuickQuote masthead/
 > ok.  thanks.  lets use Ornith at night in the downtime (when no other agents run).  clear system memory before it runs so that's not a problem.  Set this up as a rule and get it working on the backlog.  Prepare a list of tickets for it to work on.
 
 *Note:* Kam 18:15:36 — GRANT + instruction: Ornith night runs in downtime; rule + runner + ticket list commissioned
+
+## 2026-09-14 19:13 — Kam (panel, verbatim)
+> Thanks. Keep working through the secure tickets, and I'll check back shortly.
+
+*Note:* 19:12:56 view=wednesday — receipted on the panel 19:1x; the standing rule continues, nothing new commissioned beyond the running plan
+
+## 2026-09-14 19:15 — Kam (panel, verbatim)
+> Based on the clawed usage, close off the obvious tickets.  Once it reaches 90%, let's stop using other agents and we'll move to a model of you working with the local model to close off backlog.
+
+*Note:* 19:14:25 view=wednesday — receipted 19:1x with Wednesday's reading (7d statusline gauge; 90% = no new launches, in-flight items finish, then Wednesday + Ornith); grant + usage_gate.sh mechanism this session
+
+## 2026-09-14 19:17 — Kam (panel, verbatim)
+> Perfect, that works.
+
+*Note:* 19:15:46 view=wednesday — confirms Wednesday's reading of the 90% rule; receipted
