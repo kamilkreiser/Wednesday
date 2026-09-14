@@ -2467,3 +2467,8 @@ Done with it: Dynamics → Kam's team decision (no action); QuickQuote masthead/
 > But of course, let them finish their existing tasks, so don't cut something halfway through.
 
 *Note:* 21:48:19 view=wednesday — receipted; s228 finishes #873 then wraps in its own order; nothing cut
+
+## 2026-09-14 21:54 — Kam (panel, verbatim)
+> Tell me if there's anything that needs to be pulled or merged, and identify whether there's any potential blockers for us or anyone else in the team outstanding. If not, we might be using the local agent to first work through the backlog items and then continue with other tickets if that structure works. As we're approaching 90% of this week's usage, we might keep this going for the rest of the week so that you have enough context left to supervise the local agent properly. But before we can go ahead with this plan, I need to know that there's nothing blocking us or the team that requires a local agent to complete.
+
+*Note:* 21:52:55 view=wednesday — answered from a live read (19 open PRs + reviews; 75 active by assignee/state): no team blockers; 4 ready PRs need a Claude seat; #887 + PS 759/760 his; recommendation = Ornith nightly on contract-fit + one short Claude seat/day
