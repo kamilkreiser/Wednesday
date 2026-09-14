@@ -2397,3 +2397,8 @@ Done with it: Dynamics → Kam's team decision (no action); QuickQuote masthead/
 > What about Quen coder next?
 
 *Note:* Answered: Qwen3-Coder-480B out (~270 GB); Qwen3-Coder-30B-A3B (18 GB, agentic-coding tuned) is the best-matched cheap trial; waits for his go (re-pulling onto the drive he just cleared).
+
+## 2026-09-14 14:56 — Kam (dashboard chat, 14:54, verbatim)
+> okay, please deploy. gpt-oss one-hundred-twenty-B and test it tonight on a backload coding task. Let's see how it goes. But you don't have to wait till tonight. Just deploy it when it's a quiet time. / Deploy now. Test when it's a quiet time.
+
+*Note:* Pull started 14:56 (detached, ~65 GB, logs/pull_gpt-oss-120b.log); the test = the successor's at a quiet load window: code_patch on KS-806 (comparable) + one fresh backlog ticket; checker decides.
