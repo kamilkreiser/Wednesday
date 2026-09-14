@@ -2337,3 +2337,23 @@ Done with it: Dynamics → Kam's team decision (no action); QuickQuote masthead/
 - **11:0x, terminal:** "I'm currently using Opus 5 for all sub agents. Can you review whether the QA agents or potentially other agents could use a different model like Sonnet 5? After two days, I'm approaching the credit limit, which is not a problem. I'll buy more credits if necessary, but I want to see if we can be more intelligent about how we allocate difficulty level and tasks to sub agents. If this is not logical, tell me. If you think this would work, tell me and we'll scope it out." → answered: tier by task SHAPE (mechanism-checked work to Sonnet; tier-1 gates, security builders, the coordinator stay Opus); pilot scored per model.
 - **11:12, panel:** "Let's switch back to this window. Can you please analyze the system performance while we go through multiple agents and multiple tasks, and identify whether we have enough room to run a local model? If not, an alternative will be for us to push through at this pace, which I prefer, and potentially switch to you. Coordinating a local model towards the end of the week. Can you consider this and let me know whether this machine has enough headroom as well as which model you think would be most suitable? And lastly, whether that model would be good enough to handle certain tasks in linear." + **11:13:** "Also consider the token window for this, especially when you're coordinating tasks." → `1_Project_Definition/Architecture/2026-09-14_local-model-headroom.md`.
 - **11:26, panel:** "Alright, let's try it out. Please download and implement Quent 3.30b and use it within the workflow in conjunction with other agents. Assign simple and manageable tasks to it as you see fit." → grant `learnings/2026-09-14_local-model-pilot-grant-qwen3-30b-simple-checked-tasks-only.md`; ollama serve + qwen3:30b-a3b pull started 11:3x; harness owed.
+
+## 2026-09-14 11:43 — Kam (dashboard chat, 11:12, verbatim)
+> Let's switch back to this window. Can you please analyze the system performance while we go through multiple agents and multiple tasks, and identify whether we have enough room to run a local model? If not, an alternative will be for us to push through at this pace, which I prefer, and potentially switch to you. Coordinating a local model towards the end of the week. Can you consider this and let me know whether this machine has enough headroom as well as which model you think would be most suitable? And lastly, whether that model would be good enough to handle certain tasks in linear.
+
+*Note:* Answered by the 06:53 seat 11:14 (panel) + 1_Project_Definition/Architecture/2026-09-14_local-model-headroom.md. Logged by the 11:34 seat (capture was owed).
+
+## 2026-09-14 11:43 — Kam (dashboard chat, 11:13, verbatim)
+> Also consider the token window for this, especially when you're coordinating tasks.
+
+*Note:* Folded into the headroom answer: a local model never coordinates; the coordinator stays on Claude.
+
+## 2026-09-14 11:43 — Kam (dashboard chat, 11:26, verbatim)
+> Alright, let's try it out. Please download and implement Quent 3.30b and use it within the workflow in conjunction with other agents. Assign simple and manageable tasks to it as you see fit.
+
+*Note:* Grant recorded: learnings/2026-09-14_local-model-pilot-grant-qwen3-30b-simple-checked-tasks-only.md. Pull done 11:31; harness commissioned 11:42 by the 11:34 seat.
+
+## 2026-09-14 11:43 — Kam (dashboard chat, 11:30, verbatim)
+> Can QUEN 30B be implemented within the same layout and structure? And do you see any problems coordinating with it?
+
+*Note:* Answered 11:31 (panel): seat-shaped; a thin runner does its I/O; bounded problems (window, tool use, load) — no structural one.
