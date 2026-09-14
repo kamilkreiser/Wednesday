@@ -2372,3 +2372,8 @@ Done with it: Dynamics → Kam's team decision (no action); QuickQuote masthead/
 > Can you get Gwen to try one of the coding tasks and see if that works? Choose something from the backlog.
 
 *Note:* Widened pilot: KS-806 (one-line wallet synthetic-email bucket) chosen; code_patch task + red-first checker commissioned 13:21 (Opus subagent); result reported by the checker's verdict.
+
+## 2026-09-14 14:22 — Kam (dashboard chat, 14:22, verbatim)
+> From your message above, am I correct in concluding that it would be a mistake to deploy Quinn?
+
+*Note:* Answered: deploying it was not the mistake; relying on it would be — park it, keep the harness + checkers as the reusable gain; default = parked unless he says otherwise.
