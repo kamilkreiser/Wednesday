@@ -2402,3 +2402,8 @@ Done with it: Dynamics → Kam's team decision (no action); QuickQuote masthead/
 > okay, please deploy. gpt-oss one-hundred-twenty-B and test it tonight on a backload coding task. Let's see how it goes. But you don't have to wait till tonight. Just deploy it when it's a quiet time. / Deploy now. Test when it's a quiet time.
 
 *Note:* Pull started 14:56 (detached, ~65 GB, logs/pull_gpt-oss-120b.log); the test = the successor's at a quiet load window: code_patch on KS-806 (comparable) + one fresh backlog ticket; checker decides.
+
+## 2026-09-14 15:57 — Kam (panel, verbatim)
+> how does gpt-oss one-twenty-B compare to get-oss
+
+*Note:* Kam 15:56:53 — read as 120B vs 20B; answered on the panel from the model cards (20B unmeasured here); trial offered, not started
