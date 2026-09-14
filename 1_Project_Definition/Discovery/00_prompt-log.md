@@ -2387,3 +2387,8 @@ Done with it: Dynamics → Kam's team decision (no action); QuickQuote masthead/
 > You make the decision on the runner and script.
 
 *Note:* Decided: keep (four scripts + 4 MB evidence — the reusable gain); reported on the panel.
+
+## 2026-09-14 14:47 — Kam (dashboard chat, 14:46, verbatim)
+> Going back to the local agent question, is there any other model that would fit on the studio that would be suitable? I've had a look, and there are a number of models which would work great, but they would require either 256 or 512 gigabytes of RAM.
+
+*Note:* Answered: 96 GB ceiling ≈ dense 70B Q4 or MoE ~120B-class Q4; candidates gpt-oss-120b (~65 GB, quiet hours only) and Qwen3-32B dense (~20 GB, first to try); newer releases unmeasured; nothing runs until he says.
