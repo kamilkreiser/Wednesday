@@ -120,27 +120,6 @@ fi
   echo "usage: send_brief.sh --to '<Client>/<Project>' (--subject '<topic>' | --subject-file <path>) --body-file <path> [--kind brief|answer]" >&2; exit 2; }
 [ -f "$BODY_FILE" ] || { echo "body file not found: $BODY_FILE" >&2; exit 2; }
 
-# ── SUBJECT ROUTING TOKENS (ledger w=3, 2026-09-14 — promoted to a refusal) ───
-# The seats' mail guards read a subject BEFORE a human does: STOP / HOLD /
-# HAND OVER NOW / CHECKPOINT in a subject are ROUTING to a regex, whatever the
-# sentence around them means. Three times in two days a Wednesday subject
-# carried one as prose ("… at 70% you will get HAND OVER NOW", "Q2 (a) hold
-# KS-664", "#880 is Kam's (stop)") and the receiving seat had to scope its guard
-# past Wednesday's own mail. Rule: a token appears in a subject ONLY as the
-# instruction itself, i.e. as the FIRST word(s). Anywhere else → refused (rc 1).
-# Override, stated in the body: SEND_BRIEF_ALLOW_SUBJECT_TOKEN=1.
-SUBJ_TOKEN_RE='(^|[^[:alnum:]])(stop|hold|hand over now|checkpoint)([^[:alnum:]]|$)'
-if printf '%s' "$SUBJECT" | /usr/bin/grep -qiE "$SUBJ_TOKEN_RE"; then
-  LEAD="$(printf '%s' "$SUBJECT" | /usr/bin/grep -oiE '^(stop|hold|hand over now|checkpoint)([^[:alnum:]]|$)' | head -1)"
-  REST="$(printf '%s' "$SUBJECT" | sed -E 's/^(stop|hold|hand over now|checkpoint)([^[:alnum:]]|$)//I')"
-  if [ -z "$LEAD" ] || printf '%s' "$REST" | /usr/bin/grep -qiE "$SUBJ_TOKEN_RE"; then
-    if [ "${SEND_BRIEF_ALLOW_SUBJECT_TOKEN:-0}" != "1" ]; then
-      echo "send_brief: REFUSED — the subject carries a routing token (stop / hold / hand over now / checkpoint) outside the leading position: '$SUBJECT'. The seats' mail guards read it as an instruction (ledger w=3, 2026-09-14). Put the token FIRST if it IS the instruction, otherwise reword the subject and keep the sentence in the body. Override (state why in the body): SEND_BRIEF_ALLOW_SUBJECT_TOKEN=1" >&2
-      exit 1
-    fi
-  fi
-fi
-
 BODY="$(cat "$BODY_FILE")"
 
 # ── THE GATE VIEW OF THE BODY (ledger w=5, 2026-09-09) ───────────────────────
