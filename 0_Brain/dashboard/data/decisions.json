@@ -9665,5 +9665,60 @@
   ],
   "delivered_artefact": "ruled by Kam's ACT, not a tap: GitHub merged_by/merged_at read at 13:0x AEST — #940 02:54:53Z, #941 02:55:53Z, #942 02:56:58Z; #887 open pending Peter's approval",
   "delivered_ts": "2026-09-14T13:07:37.267494+10:00"
+ },
+ {
+  "id": "secuura-oauth-refresh-launder-forward-only-window",
+  "client_project": "Secuura/Blockchain",
+  "title": "The refresh-token laundering fix (#986) is gated GO — but OAuth refresh tokens minted BEFORE it still launder until they expire (7 days): close the window at deploy?",
+  "bluf": "OVERRIDE of the prior-ruling gate, measured: the matches share the words deploy / oauth / refresh; none rules on this window. No action needed today — this decides what the NEXT kintsugi/demo deploy of the auth service carries. The fact (the AUTH4 gate, 13:28, measured at runtime): #986 refuses an OAuth-bound refresh token at /api/auth/refresh with nothing issued and no side effect, and every legitimate login shape is byte-for-byte unchanged — but a refresh token minted BEFORE #983/#984 landed carries neither client_id nor authMethod, so the guard cannot recognise it and it still launders into full authority until it expires (JWT_REFRESH_EXPIRES_IN default 7 days). Population unmeasured (no deployment read). Two ways to close it at deploy: (a) denylist every pre-deploy OAuth refresh jti in the deploy step (a small migration; only OAuth-app users re-authorise, silently on their next call); (b) force re-authorisation for ALL sessions at deploy (every user logs in again). My recommendation is (a): it is the narrow fix and it is a build we can do — I will have a ticket filed and a builder do it so the deploy carries it; (b) is a client-facing choice and is yours. If you rule (a), nothing else is needed from you.",
+  "default_action": "If unruled by the next auth deploy: Wednesday has the denylist ticket filed and built (option a — inside v1.3: a build, no deploy); the deploy itself still waits for your word.",
+  "options": [
+   {
+    "key": "denylist-at-deploy",
+    "label": "Denylist pre-deploy OAuth refresh jtis in the deploy step (Wednesday's recommendation)",
+    "detail": "A ticket + a small migration/script; the next auth deploy runs it; OAuth-app users re-authorise on their next refresh; interactive logins untouched."
+   },
+   {
+    "key": "force-reauth",
+    "label": "Force re-authorisation for all sessions at the next deploy",
+    "detail": "Every user logs in again once; closes the window instantly; client-facing — your call and Stuart/Peter should hear it first."
+   },
+   {
+    "key": "accept-window",
+    "label": "Accept the 7-day window",
+    "detail": "Nothing built; the window closes by expiry ~7 days after the deploy."
+   }
+  ],
+  "recommended": "denylist-at-deploy",
+  "ts": "2026-09-14T13:34:09.549538+10:00",
+  "status": "open",
+  "ruled_choice": null,
+  "ruled_ts": null,
+  "prior_rulings_overridden": [
+   "2026-08-17 20:01",
+   "2026-08-17 20:05",
+   "2026-08-21 20:06",
+   "2026-08-22 19:55",
+   "2026-09-02 16:08",
+   "2026-09-02 17:34",
+   "2026-09-02 19:28",
+   "2026-09-02 19:34",
+   "2026-09-03 11:59",
+   "2026-09-03 16:00",
+   "2026-09-04 08:33",
+   "2026-09-04 15:25",
+   "2026-09-05 14:56",
+   "2026-09-05 21:26",
+   "2026-09-07 11:43",
+   "2026-09-08 10:14",
+   "2026-09-11 16:55",
+   "2026-09-12 08:50",
+   "2026-09-14 11:13",
+   "CARD nexusai-rd196-dashboard-default-window",
+   "CARD secuura-ks329-refresh-token-size",
+   "CARD nexusai-rd260-window-persistence-2026-09-03",
+   "CARD wed-boot-read-exceeds-the-context-window",
+   "CARD secuura-kintsugi-refresh-notice-release"
+  ]
  }
 ]
