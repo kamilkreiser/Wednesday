@@ -2432,3 +2432,8 @@ Done with it: Dynamics → Kam's team decision (no action); QuickQuote masthead/
 > No need to do it now. We're going to deploy both models and test them against each other.  But if you didn't know which model specifically, there was no way to compare.
 
 *Note:* Kam 16:20:19 — receipted; the running 20B leg kept as head-to-head leg 1; one comparison message when all three are in
+
+## 2026-09-14 18:16 — Kam (panel, verbatim)
+> ok.  thanks.  lets use Ornith at night in the downtime (when no other agents run).  clear system memory before it runs so that's not a problem.  Set this up as a rule and get it working on the backlog.  Prepare a list of tickets for it to work on.
+
+*Note:* Kam 18:15:36 — GRANT + instruction: Ornith night runs in downtime; rule + runner + ticket list commissioned
