@@ -2487,3 +2487,8 @@ Done with it: Dynamics → Kam's team decision (no action); QuickQuote masthead/
 > Decision secuura-archive-peters-nine-done-tickets: leave — Leave them — Peter archives his own
 
 *Note:* 22:11:46 view=wednesday — ruled leave; reconciled; delivered as no-write (s234's holds already list-only)
+
+## 2026-09-14 22:12 — Kam (panel, verbatim)
+> Perfect. In that case, I'm leaving you to action what you can using predominantly the local agent.
+
+*Note:* 22:12:18 view=wednesday — the go on the Ornith-first plan; receipted; tonight = s234 wrap → Ornith 23:30 → morning brief
