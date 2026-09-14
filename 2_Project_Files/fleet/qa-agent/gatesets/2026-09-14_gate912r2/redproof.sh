@@ -99,7 +99,12 @@ run "2c pinned to M17, shipped list: packages-shared tests prefix arm -> 18" 18 
 /usr/bin/grep -q "not provably disjoint: GUARDED Blockchain/Dev/packages/shared/src/__tests__/entrypoint-corpus.test.ts " "$W/2c pinned to M17, shipped list: packages-shared tests prefix arm -> 18.out" || { echo "  cell 2c did not name entrypoint-corpus.test.ts as the (only) guarded hit"; FAILS=$((FAILS+1)); }
 cp "$W/l_dev17.sh" "$W/l_dev17np.sh"; ld="$(tamper "$W/l_dev17.sh" "$W/l_dev17np.sh" "$PKGPFX" '"Blockchain/Dev/packages/shared/src/__tests__-NOT-GUARDED/",' 1)"
 run "2d M17 pin, packages prefix neutralised: one-file delta disjoint -> 0" 0 "$W/l_dev17np.sh" "$B" "$P" "" check "$ld"
-/usr/bin/grep -q "origin develop MOVED $M17 -> .*: commits=[0-9]* files=[0-9]* — disjoint from the thirteen guarded paths" "$W/2d M17 pin, packages prefix neutralised: one-file delta disjoint -> 0.out" || { echo "  cell 2d did not report MOVED … commits=1 files=1 — disjoint"; FAILS=$((FAILS+1)); }
+# NOTE (restart-drafter, 2026-09-14 12:2x AEST): this pin spans M17 through the LIVE current tip, which as of the
+# M21_ALLOWED content-judged guard (Wednesday's instruction) may now ALSO pick up the four cleared M21 paths
+# alongside the neutralised packages-shared prefix -- the guard then reports "ALLOWED … cleared=…" rather than
+# "DISJOINT … — disjoint from the thirteen guarded paths"; either is correct (both are rc 0, exit code is what the
+# `run` harness already checked above), so this assertion accepts either wording rather than pinning one.
+/usr/bin/grep -Eq "origin develop MOVED $M17 -> .*(— disjoint from the thirteen guarded paths|cleared=)" "$W/2d M17 pin, packages prefix neutralised: one-file delta disjoint -> 0.out" || { echo "  cell 2d did not report a MOVED note (disjoint or content-cleared)"; FAILS=$((FAILS+1)); }
 echo "  cell 2d note: $(/usr/bin/grep 'origin develop MOVED' "$W/2d M17 pin, packages prefix neutralised: one-file delta disjoint -> 0.out" | cut -c1-150)"
 cp "$L" "$W/l_dev927.sh"; ld="$(tamper "$L" "$W/l_dev927.sh" "$DEVPIN" "DEVELOP_SHA='$KS927C'" 1)"
 run "2e pinned to the KS-927 commit (40 files): gateway verification.ts EXACT arm + originate-src prefix arm -> 18" 18 "$W/l_dev927.sh" "$B" "$P" "" check "$ld"
@@ -113,6 +118,17 @@ echo "  cell 2e: $(/usr/bin/grep -o 'GUARDED [^—]*' "$O" | head -1 | cut -c1-2
 cp "$W/l_dev17np.sh" "$W/l_dev17aim.sh"; ld="$(tamper "$W/l_dev17np.sh" "$W/l_dev17aim.sh" '"Blockchain/Dev/services/originate/src/services/anchorStateSync.ts",' '"Blockchain/Dev/packages/shared/src/__tests__/entrypoint-corpus.test.ts",' 1)"
 run "2f M17 pin, prefix neutralised, slot-1 entry aimed at entrypoint-corpus -> EXACT arm -> 18" 18 "$W/l_dev17aim.sh" "$B" "$P" "" check "$ld"
 /usr/bin/grep -q "GUARDED Blockchain/Dev/packages/shared/src/__tests__/entrypoint-corpus.test.ts " "$W/2f M17 pin, prefix neutralised, slot-1 entry aimed at entrypoint-corpus -> EXACT arm -> 18.out" || { echo "  cell 2f did not name entrypoint-corpus.test.ts"; FAILS=$((FAILS+1)); }
+
+# ---- cell 2g: M21_ALLOWED weakened (one dict entry stripped) against the REAL LIVE current develop tip --------
+# Wednesday's 2026-09-14 12:1x AEST instruction: prove the M21 content-judged clearance is blob-EXACT per path,
+# not a blanket exemption for the whole services/originate/src/ or packages/shared/src/__tests__/ prefix. A
+# scratch copy of the REAL launcher (M18 pin unchanged, live develop read as-is -- no DEVELOP_SHA tamper) with the
+# auth.ts entry stripped from M21_ALLOWED must refuse (18) on live current develop even though three of the four
+# M21 paths would still clear -- one unrecognised guarded hit is enough to refuse the whole merge.
+AUTHENTRY='    "Blockchain/Dev/services/originate/src/middleware/auth.ts": "f08ee1a895bc878bc2656f649833706f665686e7",'
+cp "$L" "$W/l_dev21weak.sh"; ld="$(tamper "$L" "$W/l_dev21weak.sh" "$AUTHENTRY" "" 1)"
+run "2g M21_ALLOWED weakened (auth.ts entry stripped) on LIVE current develop -> 18" 18 "$W/l_dev21weak.sh" "$B" "$P" "" check "$ld"
+/usr/bin/grep -q "GUARDED.*middleware/auth.ts" "$W/2g M21_ALLOWED weakened (auth.ts entry stripped) on LIVE current develop -> 18.out" || { echo "  cell 2g did not name middleware/auth.ts as the unresolved hit"; FAILS=$((FAILS+1)); }
 cp "$L" "$W/l_mb.sh"; ld="$(tamper "$L" "$W/l_mb.sh" "MERGE_BASE='$M18'" "MERGE_BASE='2222222222222222222222222222222222222222'" 1)"
 run "3 wrong merge-base (launcher tamper)" 10 "$W/l_mb.sh" "$B" "$P" "" check "$ld"
 cp "$L" "$W/l_stack.sh"; ld="$(tamper "$L" "$W/l_stack.sh" '[ "$STACK_READ" = "$HEAD_SHA ahead=4 files=1" ]' '[ "$STACK_READ" = "$HEAD_SHA ahead=1 files=1" ]' 1)"

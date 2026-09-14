@@ -482,6 +482,45 @@ ck(disk.count(b"NO GO") == 3 and disk.count(b"F1") == 5, "the verdict file reads
 for f in ["anchor", "ks1004", "ks1058", "ks535", "ks1059"]:
     b = open(f"{W}/{f}", "rb").read()
     ck(not [i for i, x in enumerate(b) if (x < 0x20 and x not in (9, 10, 13)) or x == 0x7f], f"{f}: 0 raw control bytes")
+
+# --- M21 content-judged guard (Wednesday's 2026-09-14 12:1x AEST instruction): the launcher's M21_ALLOWED dict
+# clears four M21 (KS-764/#799) paths by BLOB, not by path. Two checks: (a) the four pinned blobs in the launcher
+# source are what git itself reads at M21 RIGHT NOW (a live re-derivation, not trust-the-constant); (b) a
+# reimplementation of the launcher's exact hits/cleared/remaining algorithm, fed a synthetic compare-API file list
+# where ONE of the four paths carries a THIRD blob (neither M18-absent nor the pinned M21 blob) -- NEGATIVE
+# CONTROL: this must stay GUARDED (the clearance is blob-exact, not a path exemption).
+M21 = '5210ddf317b2b1ed547e5d8488c3d011ceb087e1'
+M21_ALLOWED = {
+    "Blockchain/Dev/services/originate/src/__tests__/ks764-admin-api-keys-revoke-route-contract.test.ts": "5a78c4181281f360ebd4481593fd73bf98bb4d9c",
+    "Blockchain/Dev/services/originate/src/middleware/auth.ts": "f08ee1a895bc878bc2656f649833706f665686e7",
+    "Blockchain/Dev/services/originate/src/routes/adminConfig.ts": "26cec03de665ef75a8f6e4f2532dfc42a59a25b8",
+    "Blockchain/Dev/packages/shared/src/__tests__/ks764-key-revoke-call-site-guard.test.ts": "ab8e46d795d268822924a57e2630403be1963497",
+}
+LAUNCHER_SRC = open('/Volumes/DevMASTER/WEDNESDAY/2_Project_Files/fleet/qa-agent/gatesets/2026-09-14_gate912r2/launch_qa_secuura_ks1004_912_r2_ks1059_937_stacked.sh', encoding='utf-8').read()
+for path, blob in M21_ALLOWED.items():
+    live = git("rev-parse", M21 + ":" + path).stdout.strip()
+    ck(live == blob, f"M21 live blob for {path.split('/')[-1]}: git rev-parse {M21[:9]}:{path.split('/')[-1]} = {live[:9]} == pinned {blob[:9]}")
+    ck(f'"{path}": "{blob}"' in LAUNCHER_SRC, f"launcher source pins {path.split('/')[-1]} at exactly this blob (live-verified)")
+GUARDED_TEST = [
+    "Blockchain/Dev/services/originate/src/services/anchorStateSync.ts",
+    "Blockchain/Dev/services/originate/src/",
+    "Blockchain/Dev/packages/shared/src/__tests__/",
+]
+def judge_hits(files):
+    by_name = {f["filename"]: f for f in files}
+    hits = sorted({f["filename"] for f in files for g in GUARDED_TEST if f["filename"] == g or (g.endswith("/") and f["filename"].startswith(g))})
+    cleared = sorted(h for h in hits if h in M21_ALLOWED and by_name.get(h, {}).get("sha") == M21_ALLOWED[h])
+    remaining = sorted(h for h in hits if h not in cleared)
+    return remaining, cleared
+# positive: all four at their pinned blob, plus a disjoint file -> remaining empty, all four cleared
+pos_files = [{"filename": p, "sha": b} for p, b in M21_ALLOWED.items()] + [{"filename": "Blockchain/Dev/scripts/preflight/preflight.sh", "sha": "deadbeef"}]
+rem, clr = judge_hits(pos_files)
+ck(rem == [] and len(clr) == 4, f"guard simulation, all four at pinned blob: remaining={rem} cleared={len(clr)}")
+# NEGATIVE CONTROL: one of the four at a THIRD blob (neither M18-absent nor the pinned M21 blob) -> stays GUARDED
+tampered_path = "Blockchain/Dev/services/originate/src/middleware/auth.ts"
+neg_files = [{"filename": p, "sha": (b if p != tampered_path else "0000000000000000000000000000000000dead")} for p, b in M21_ALLOWED.items()]
+rem2, clr2 = judge_hits(neg_files)
+ck(tampered_path in rem2 and len(clr2) == 3, f"NEGATIVE CONTROL, {tampered_path.split('/')[-1]} at a third blob: remaining={rem2} (must include it) cleared={len(clr2)} (must be 3, not 4)")
 sys.exit(1 if fails else 0)
 PY
 python3 "$W/merge.py" "$W" "$CLONE" "$R1_READ" || FAILS=$((FAILS+1))
