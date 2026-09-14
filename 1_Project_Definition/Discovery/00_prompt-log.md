@@ -2357,3 +2357,18 @@ Done with it: Dynamics → Kam's team decision (no action); QuickQuote masthead/
 > Can QUEN 30B be implemented within the same layout and structure? And do you see any problems coordinating with it?
 
 *Note:* Answered 11:31 (panel): seat-shaped; a thin runner does its I/O; bounded problems (window, tool use, load) — no structural one.
+
+## 2026-09-14 13:24 — Kam (dashboard chat, 13:04, verbatim)
+> this is taking a very long time to verify - https://github.com/Secuura/Distributed_Secuura/pull/881. Loading Checking for the ability to merge automatically... all other ones are done. please check
+
+*Note:* Measured: the block was Peter's undismissed review, not the spinner; steps sent; he dismissed + merged 881 at 13:09 (M28).
+
+## 2026-09-14 13:24 — Kam (dashboard chat, 13:09, verbatim)
+> how did you go with the deployment of Qwen and is it working?
+
+*Note:* Answered straight: deployed + working as a tool; first real task ran at 13:1x and FAILED its checker (27/30 rows) — output unused, scored 0.00.
+
+## 2026-09-14 13:24 — Kam (dashboard chat, 13:20, verbatim)
+> Can you get Gwen to try one of the coding tasks and see if that works? Choose something from the backlog.
+
+*Note:* Widened pilot: KS-806 (one-line wallet synthetic-email bucket) chosen; code_patch task + red-first checker commissioned 13:21 (Opus subagent); result reported by the checker's verdict.

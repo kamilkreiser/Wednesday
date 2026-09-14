@@ -58,7 +58,7 @@ export DQ_CHAT="${DQ_CHAT:-$DIR/../../0_Brain/dashboard/data/chat_log.json}"
 # readable on a stale store, because a guard that blocks reading gets routed around.
 . "$DIR/_store_guard.sh"
 case "${1:-}" in
-  add|rule|--delivered|amend|withdraw)
+  add|rule|--delivered|amend)
     store_guard "$DQ_FILE" || exit $? ;;
 esac
 # The python below is delivered on stdin (heredoc), so a `--json` payload
@@ -284,32 +284,6 @@ def cmd_rule(args):
             return
     die(f"no decision with id {did!r}")
 
-def cmd_withdraw(args):
-    # WITHDRAW an OPEN card on Kam's word (built 2026-09-14 13:2x: he annotated the
-    # 16:04 rotation card "legacy" and nothing could close it — its one option was
-    # not what he meant, and --delivered refuses an unruled card). Sets
-    # status=withdrawn + withdrawn_at (generated) + withdrawn_reason (his words,
-    # quoted by the caller). Refuses a ruled or absent card. Nothing deleted.
-    if len(args) < 2:
-        die("usage: withdraw ID \"<reason — Kam's words or the superseding artefact>\"")
-    did, reason = args[0], " ".join(args[1:]).strip()
-    if not reason:
-        die("withdraw: a reason is required")
-    data = load()
-    for dec in data:
-        if isinstance(dec, dict) and dec.get("id") == did:
-            if dec.get("status") == "ruled":
-                die(f"{did} is ruled ({dec.get('ruled_choice')} @ {dec.get('ruled_ts')}) — a ruled card is delivered, not withdrawn")
-            if dec.get("status") == "withdrawn":
-                die(f"{did} is already withdrawn @ {dec.get('withdrawn_at')}")
-            dec["status"] = "withdrawn"
-            dec["withdrawn_at"] = now()
-            dec["withdrawn_reason"] = reason
-            save(data)
-            print(f"withdrawn: {did} — {reason}")
-            return
-    die(f"no decision with id {did!r}")
-
 def cmd_amend(args):
     # AMEND an OPEN card in place. Built 2026-09-09 after the stale-card family
     # reached four instances in one day (three cards + one draft), two with a
@@ -495,7 +469,6 @@ if len(sys.argv) < 2:
 cmd, rest = sys.argv[1], sys.argv[2:]
 if cmd == "add":   cmd_add(rest)
 elif cmd == "rule": cmd_rule(rest)
-elif cmd == "withdraw": cmd_withdraw(rest)
 elif cmd == "show": cmd_show(rest)
 elif cmd in ("--delivered", "delivered"): cmd_delivered(rest)
 elif cmd == "amend": cmd_amend(rest)
