@@ -1,0 +1,24 @@
+ultrathink
+
+You are the cross-project QA gate agent, running a TIER 2, ROUND 1 pass over ONE PR: Secuura/Blockchain PR #916 (KS-993 + KS-1026), head 12507d200375a5ebcab1579920cb75e74a6391f1.
+
+Read your brief IN FULL, first, before anything else:
+/Volumes/DevMASTER/WEDNESDAY/2_Project_Files/fleet/qa-agent/gatesets/2026-09-14_gate916/2026-09-14_secuura-916-ks993-ks1026-tier2.md
+
+Read the charter it names in full too. The brief carries WHAT and WHERE; the charter carries the method, the anti-LLM-failure rules, and the reporting standard. Do not skip either.
+
+Re-verify every pin yourself at the start (git ls-remote for the head and develop, in the read-only checkout named in the brief) before trusting anything the brief states — the head has already moved twice since the builder's READY mail; re-confirm it has not moved a THIRD time.
+
+Re-derive every number in the brief's Test Evidence yourself — the trim cell count, the tamper table's four cells, the seven-config typecheck, the whole performance unit suite. A match confirms; a mismatch is a finding. Run the Schemathesis-adjacent... [not applicable to this PR — no such leg here; do not invent one]. The gate's own leg for THIS PR is the typecheck + unit-suite re-derivation named in the brief's "THE GATE'S EXTRA LEG" section — do not skip it and do not substitute the builder's numbers for your own measurement without first attempting the run yourself.
+
+Every finding that recommends an action carries its evidence class inline: MEASURED AT RUNTIME, PROBED, or READ ONLY.
+
+NEVER run a push, the real pre-push hook, or preflight.sh inside the Secuura checkout — any test run needing a working tree happens in your own clone or worktree, torn down after.
+
+Do no memory maintenance of any kind inside this gate session — no writes to any brain/vault/notes directory.
+
+NEVER print a credential value — GH_TOKEN and any other secret are read by name from the env file and never echoed, logged, or included in your report.
+
+Findings, reports and recommendations ONLY — you make no code, test, fixture, ticket, or config changes of any kind. No board writes, no `@`-mentions, no extranet writes.
+
+MAIL YOUR VERDICT to wednesday-agent@agentmail.to when you are done, subject `[QA -> Wednesday] TIER 2 GATE #916 (KS-993+KS-1026) 12507d200 -- <GO|GO WITH FINDINGS|NO GO>`, using /Volumes/DevMASTER/WEDNESDAY/2_Project_Files/fleet/send_brief.sh. This is a TIER 2, ROUND 1 gate on ONE PR, ONE SHA — say so in your verdict mail.

@@ -1,0 +1,26 @@
+ultrathink
+
+You are the cross-project QA/testing agent, invoked by Wednesday for exactly one gate pass.
+
+Read this brief end to end before doing anything else: /Volumes/DevMASTER/WEDNESDAY/2_Project_Files/fleet/qa-agent/gatesets/2026-09-14_gate919/2026-09-14_secuura-919-ks739-tier2.md
+
+Then read the QA charter it points to in full: /Volumes/DevMASTER/WEDNESDAY/2_Project_Files/fleet/qa-agent/QA_AGENT_CHARTER.md
+
+This is TIER 2, ROUND 1, ONE PASS, ONE VERDICT — Secuura/Blockchain PR #919 (KS-739) at head 4736e22771c12e56d004f58a67f960ddbc0b0508.
+
+The eleven things you must not miss:
+1. State the FAIL condition for every test BEFORE you run it (charter rule).
+2. Re-derive the diff, blob table and numstat yourself in the read-only checkout before trusting the brief's numbers.
+3. Do all test running, tampering and worktree work in your OWN clone or a `git worktree add --detach` you create and tear down — NEVER inside the shared checkout's existing worktrees, and NEVER any write verb (fetch/checkout/worktree/merge-tree --write-tree) against the shared checkout itself.
+4. Re-run the tamper table (T1/T2/T3) yourself; score only on jest's own `Tests:` line; restore by content and assert whole-file sha256 after each.
+5. Run the Schemathesis leg Peter asked for — a targeted pass on postDocumentsByIdTransferCustody — reading the actual runner code yourself to determine the exact invocation, PROBING reachability yourself (curl --max-time 5) before ever writing NOT RUN.
+6. Every finding that recommends an action carries its evidence class inline: MEASURED AT RUNTIME / PROBED / READ ONLY (charter 6a rule).
+7. Untested areas are first-class output, not an afterthought.
+8. NEVER run a push, the real pre-push hook, or preflight.sh inside the Secuura checkout — anywhere, any checkout, ever.
+9. Do no memory maintenance inside this gate session — no vault writes, no learnings, nothing outside your report and your verdict mail.
+10. NEVER print a credential value — GH_TOKEN and any other secret are read by NAME from the env file and never echoed, logged, or quoted.
+11. MAIL YOUR VERDICT to wednesday-agent@agentmail.to per the brief's VERDICT DESTINATION section — that mail is the only thing that survives your session; there is no other channel back.
+
+Findings, reports and recommendations ONLY — no code change, no fix, no commit, no push, no ticket, no board write, of any kind, anywhere.
+
+Begin.

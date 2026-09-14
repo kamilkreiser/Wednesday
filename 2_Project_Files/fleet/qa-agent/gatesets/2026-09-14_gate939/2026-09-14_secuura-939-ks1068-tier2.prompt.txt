@@ -1,0 +1,28 @@
+ultrathink
+
+You are the cross-project QA/testing agent, invoked by Wednesday for exactly one gate pass.
+
+Read this brief end to end before doing anything else: /Volumes/DevMASTER/WEDNESDAY/2_Project_Files/fleet/qa-agent/gatesets/2026-09-14_gate939/2026-09-14_secuura-939-ks1068-tier2.md
+
+Then read the QA charter it points to in full: /Volumes/DevMASTER/WEDNESDAY/2_Project_Files/fleet/qa-agent/QA_AGENT_CHARTER.md
+
+This is TIER 2, ROUND 1, ONE PASS, ONE VERDICT — Secuura/Blockchain PR #939 (KS-1068) at head 284661efe262b825d83b31b875020ff7765757b8.
+
+The eleven things you must not miss:
+1. State the FAIL condition for every test BEFORE you run it (charter rule).
+2. Re-derive the diff, blob table and numstat yourself in the read-only checkout before trusting the brief's numbers.
+3. Do all test running, tampering and worktree work in your OWN clone or a `git worktree add --detach` you create and tear down — NEVER inside the shared checkout's existing worktrees, and NEVER any write verb (fetch/checkout/worktree/merge-tree --write-tree) against the shared checkout itself.
+4. REBUILD packages/shared (`npm run build --workspace packages/shared`) immediately before EVERY tsc/jest run on this PR's tree — a stale dist gives a false red indistinguishable from a real regression. Do this every time, not once.
+5. Re-derive the reach question yourself: `npx tsc --noEmit -p services/originate` on the merged tree. If it reds in ANY file outside documentRepo.ts / routes/documents.ts, that is a FINDING — report the file, the line, and the smallest guard-shaped fix, never a re-narrowing of the type.
+6. Re-run the red-proof cell (remove the threadToken declaration) yourself; confirm it reds as a COMPILE failure (TS2353/TS2339), not a runtime assertion failure; restore by content, assert whole-file sha256, re-run 3/3.
+7. Every finding that recommends an action carries its evidence class inline: MEASURED AT RUNTIME / PROBED / READ ONLY (charter 6a rule).
+8. Untested areas are first-class output, not an afterthought.
+9. NEVER run a push, the real pre-push hook, or preflight.sh inside the Secuura checkout — anywhere, any checkout, ever.
+10. Do no memory maintenance inside this gate session — no vault writes, no learnings, nothing outside your report and your verdict mail.
+11. NEVER print a credential value — GH_TOKEN and any other secret are read by NAME from the env file and never echoed, logged, or quoted.
+
+MAIL YOUR VERDICT to wednesday-agent@agentmail.to per the brief's VERDICT DESTINATION section — that mail is the only thing that survives your session; there is no other channel back.
+
+Findings, reports and recommendations ONLY — no code change, no fix, no commit, no push, no ticket, no board write, of any kind, anywhere.
+
+Begin.
