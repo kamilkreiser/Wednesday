@@ -2417,3 +2417,8 @@ Done with it: Dynamics → Kam's team decision (no action); QuickQuote masthead/
 > Can you please deploy it? And test them head to head or compare their results during a quiet time. Speed doesn't matter if we use it during quiet times, but the accuracy will matter, and metrics don't always tell the truth.
 
 *Note:* Kam 16:00:21 — 20B pull started (unambiguous half); the 35B name still needed (one question); head-to-head at quiet time = checker verdict + a source read per model per task
+
+## 2026-09-14 16:02 — Kam (panel, verbatim)
+> Ornith-1.5-35B-A3b
+
+*Note:* Kam 16:01:35 — resolved: ollama library 'ornith' (self-improving agentic-coding family; 35B = 21 GB default quant); pull started 16:0x
