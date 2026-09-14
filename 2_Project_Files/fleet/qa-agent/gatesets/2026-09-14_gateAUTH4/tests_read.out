@@ -1,0 +1,162 @@
+Mon 14 Sep 2026 11:45:46 AEST
+=== ks1151 test at H986: it()/describe/vi.mock/listen/expect lines ===
+7:// re-minted a login-shape pair: `generateTokenPair(user, session.id)` with no
+8:// third argument — no `client_id`, no `authMethod`, scopes = the role default.
+12:// route over ("the launder"). Worse, the route rotated + denylisted the
+17:// carrying `client_id` OR `authMethod: 'oauth'` is refused at this route with
+18:// 401, BEFORE the session lookup, so it is neither rotated nor denylisted.
+21:// the tokens are minted in-process by `generateTokenPair` against the setup
+24://   1. H-LAUNDER (body)   — an OAuth-minted refresh token → 401; NOT rotated,
+25://                           NOT denylisted; no token issued.  RED before the fix
+26://                           (200 + a login-shape pair; the session rotated).
+29://   3. the `client_id`-only arm — a token carrying `client_id` and NO label
+31://      minted OAuth token decoded, `authMethod` removed, re-signed with the
+32://      same key → 401. Makes the arm on `authMethod` alone insufficient.
+35://      the re-minted access token carries no `client_id` / `authMethod`, and
+36://      the session IS rotated (the interactive flow is unchanged).
+52:vi.mock('../utils/logger', () => ({ logger: silent, createLogger: () => silent, validateEnv: vi.fn() }));
+53:vi.mock('@secuura/shared/utils/logger', () => ({ logger: silent, createLogger: () => silent }));
+62:  rotated: [] as string[],
+63:  denylisted: [] as string[],
+67:vi.mock('../db', () => ({ query: vi.fn(async () => ({ rows: [], rowCount: 0 })) }));
+68:vi.mock('../repositories/userRepo', () => ({
+79:vi.mock('../services/session', () => ({
+81:  getSession: vi.fn(async (id: string) => {
+85:  rotateSessionRefreshToken: vi.fn(async (id: string) => { world.rotated.push(id); }),
+91:vi.mock('../services/refreshDenylist', () => ({
+92:  isRefreshJtiDenylisted: vi.fn(async () => false),
+93:  denylistRefreshJti: vi.fn(async (jti: string) => { world.denylisted.push(jti); }),
+95:vi.mock('../services/accountLockout', () => ({
+99:vi.mock('../services/password', () => ({
+103:vi.mock('../services/email', () => ({ sendVerificationEmail: vi.fn(async () => undefined), sendPasswordResetEmail: vi.fn(async () => undefined) }));
+104:vi.mock('../events', () => ({ publishEvent: vi.fn(async () => undefined), EventTypes: {} }));
+112:  await jwtMod.initJwtKeys();
+113:  mint = jwtMod.generateTokenPair as unknown as typeof mint;
+122:  server = app.listen(0, '127.0.0.1');
+147:      const setCookie = head.split('\r\n').filter((l) => /^set-cookie:/i.test(l)).map((l) => l.slice(11).trim());
+156:const claims = (tok: unknown) => (jwt.decode(String(tok)) as Record<string, unknown> | null) ?? {};
+165: * The #983-era shape: `client_id` bound, no `authMethod` label. Built from a real
+172:  const { authMethod: _label, iat: _iat, exp: _exp, ...rest } = claims(refreshToken) as Record<string, unknown>;
+174:  expect(rest.client_id).toBe('client-1');
+176:  return jwt.sign(rest, privatePem, { algorithm: 'RS256', expiresIn: 600, ...(process.env.JWT_KEY_ID ? { keyid: process.env.JWT_KEY_ID } : {}) });
+179:beforeEach(() => { world.rotated = []; world.denylisted = []; world.sessionLookups = []; vi.clearAllMocks(); });
+181:describe('KS-1151 — POST /api/auth/refresh refuses an OAuth-minted refresh token (fail-closed, before any side effect)', () => {
+182:  it('1. H-LAUNDER — an OAuth-minted refresh token in the body → 401, no token issued, the session NOT rotated, the jti NOT denylisted', async () => {
+184:    expect(claims(refreshToken).client_id, 'the fixture IS bound').toBe('client-1');
+185:    expect(claims(refreshToken).authMethod, 'the fixture IS labelled').toBe('oauth');
+187:    expect(r.status, `body: ${r.body.slice(0, 200)}`).toBe(401);
+190:    expect(world.rotated, 'the presented token must not be consumed by rotation').toEqual([]);
+191:    expect(world.denylisted, 'the presented jti must not be denylisted').toEqual([]);
+194:  it('2. H-LAUNDER-COOKIE — the same token in the refresh_token cookie, no body → 401, nothing rotated or denylisted', async () => {
+197:    expect(r.status, `body: ${r.body.slice(0, 200)}`).toBe(401);
+199:    expect(world.rotated).toEqual([]);
+200:    expect(world.denylisted).toEqual([]);
+203:  it('3. the client_id-only arm — a bound token with NO authMethod label → 401 (the label arm alone would let it through)', async () => {
+205:    expect(claims(token).authMethod).toBeUndefined();
+206:    expect(claims(token).client_id).toBe('client-1');
+208:    expect(r.status, `body: ${r.body.slice(0, 200)}`).toBe(401);
+210:    expect(world.rotated).toEqual([]);
+211:    expect(world.denylisted).toEqual([]);
+214:  it('4. CONTROL — a login-minted pair (no third argument) still refreshes → 200, unbound access token, the session rotated', async () => {
+216:    expect(claims(refreshToken).client_id).toBeUndefined();
+217:    expect(claims(refreshToken).authMethod).toBeUndefined();
+219:    expect(r.status, `body: ${r.body.slice(0, 200)}`).toBe(200);
+222:    expect(claims(data.accessToken).client_id).toBeUndefined();
+223:    expect(claims(data.accessToken).authMethod).toBeUndefined();
+225:    expect(world.rotated).toEqual(['sess-x']); // the interactive flow's own rotation, unchanged
+226:    expect(world.denylisted).toHaveLength(1);
+229:  it('5. CONTROL — garbage → 401 (the route verifies; the harness discriminates)', async () => {
+231:    expect(r.status).toBe(401);
+232:    expect(world.rotated).toEqual([]);
+=== ks1150 test at H987: it()/describe/vi.mock/listen/expect ===
+2:// KS-1150 R-1 — the authorization_code grant pins user.status === 'ACTIVE'.
+6:// guarded only `if (!user)`: a SUSPENDED user's code minted 200 + a token pair
+9:// user.status !== 'ACTIVE'` → 400 'User inactive or not found'); so does
+14:// missing and inactive, ONE description ('User inactive or not found'). This
+20://   1. DEFECT  — SUSPENDED user, valid code, authenticated confidential client
+21://                → 400 invalid_grant 'User inactive or not found'.
+23://   2. CONTROL — ACTIVE user → 200 + a pair.                GREEN both sides.
+24://   3. CONTROL — the refresh grant with the SUSPENDED user → 400 already (the
+26://   4. null (the carve-out cannot see the user) → 400 'User inactive or not
+41:vi.mock('../utils/logger', () => ({ logger: silent, createLogger: () => silent, validateEnv: vi.fn() }));
+42:vi.mock('@secuura/shared/utils/logger', () => ({ logger: silent, createLogger: () => silent }));
+44:const ACTIVE_USER = {
+45:  id: 'user-1150', email: 'u1150@secuura.local', status: 'ACTIVE', role: 'OWNER',
+54:  preAuthLookup: null as null | Record<string, unknown>,
+55:  calls: { getUserByIdPreAuth: [] as string[] },
+58:vi.mock('../db', () => ({
+80:vi.mock('../services/oauth', async (importOriginal) => {
+85:vi.mock('../repositories/userRepo', () => ({
+87:  getUserByIdPreAuth: vi.fn(async (id: string) => { world.calls.getUserByIdPreAuth.push(id); return world.preAuthLookup; }),
+94:vi.mock('../services/session', () => ({
+100:vi.mock('../services/jwt', () => ({
+105:    return { userId: ACTIVE_USER.id, sessionId: 'sess-old', jti: 'jti-1150', type: 'refresh', client_id: 'client-1' };
+108:vi.mock('../services/refreshDenylist', () => ({ isRefreshJtiDenylisted: vi.fn(async () => false) }));
+109:vi.mock('../services/accountLockout', () => ({
+113:vi.mock('../middleware/authenticate', () => ({
+119:vi.mock('../middleware/tenantGuc', () => ({ seedTenantGuc: (_r: unknown, _s: unknown, n: () => void) => n() }));
+120:vi.mock('../events', () => ({ publishEvent: vi.fn(async () => undefined), EventTypes: {} }));
+130:  server = app.listen(0, '127.0.0.1');
+165:    organization_id: 'org-1', tenant_id: 'ten-1', is_active: true,
+171:    code: 'THE_CODE', client_id: 'client-1', user_id: ACTIVE_USER.id,
+187:  world.preAuthLookup = { ...ACTIVE_USER };
+188:  world.calls.getUserByIdPreAuth.length = 0;
+192:describe('KS-1150 R-1 — the authorization_code grant pins user.status === ACTIVE', () => {
+193:  it('1. DEFECT — a SUSPENDED user\'s valid code is refused: 400 invalid_grant "User inactive or not found", no pair minted', async () => {
+194:    world.preAuthLookup = { ...ACTIVE_USER, status: 'SUSPENDED' };
+196:    expect(r.status, `body: ${r.body.slice(0, 200)}`).toBe(400);
+198:    expect(description(r)).toMatch(/User inactive or not found/);
+200:    expect(world.calls.getUserByIdPreAuth).toEqual([ACTIVE_USER.id]); // the refusal is the status pin, not a missing lookup
+203:  it('2. CONTROL — an ACTIVE user\'s valid code still mints a token pair', async () => {
+205:    expect(r.status, `body: ${r.body.slice(0, 200)}`).toBe(200);
+209:  it('3. CONTROL — the refresh grant refuses the same SUSPENDED user already (the oracle this pin copies)', async () => {
+210:    world.preAuthLookup = { ...ACTIVE_USER, status: 'SUSPENDED' };
+212:    expect(r.status).toBe(400);
+213:    expect(description(r)).toMatch(/User inactive or not found/);
+216:  it('4. the null case keeps its refusal and takes the unified description: carve-out answers null → 400 "User inactive or not found"', async () => {
+217:    world.preAuthLookup = null;
+219:    expect(r.status).toBe(400);
+220:    expect(description(r)).toMatch(/User inactive or not found/);
+=== auth.ts guard lines at H986 (grep -n) ===
+658:authRoutes.post('/refresh', async (req: AuthenticatedRequest, res: Response, next) => {
+665:    const payload = verifyRefreshToken(refreshTokenValue);
+677:    if (payload.client_id !== undefined || payload.authMethod === 'oauth') {
+678:      logger.warn('Refresh refused: OAuth-minted token presented at the interactive refresh route', {
+686:    const session = await getSession(payload.sessionId);
+715:    await rotateSessionRefreshToken(session.id, tokens.refreshToken);
+718:      await denylistRefreshJti(payload.jti, remaining);
+=== oauth.ts pin lines at H987 (grep -n) ===
+829:      // failed `invalid_grant: User not found` for EVERY code, MFA or not. The
+832:      const user = await userRepo.getUserByIdPreAuth(result.userId);
+833:      // KS-1150 (R-1): pin user.status === 'ACTIVE' here as the refresh grant below
+837:      if (!user || user.status !== 'ACTIVE') {
+838:        return res.status(400).json({ success: false, error: { code: 'BAD_REQUEST', message: 'invalid_grant', description: 'User inactive or not found' } });
+852:      const tokens = generateTokenPair(user, session.id, { clientId: client_id, scopes: parseScopeString(result.scope || '') });
+927:      if (decoded.jti && (await isRefreshJtiDenylisted(decoded.jti))) {
+946:      const user = await userRepo.getUserByIdPreAuth(decoded.userId);
+947:      if (!user || user.status !== 'ACTIVE') {
+948:        return res.status(400).json({ success: false, error: { code: 'BAD_REQUEST', message: 'invalid_grant', description: 'User inactive or not found' } });
+958:      const tokens = generateTokenPair(user, session.id, { clientId: refreshClientId, scopes: decoded.scopes ?? [] });
+=== same at H984 (parent control) ===
+800:      if (!user) {
+801:        return res.status(400).json({ success: false, error: { code: 'BAD_REQUEST', message: 'invalid_grant', description: 'User not found' } });
+850:      if (!user || user.status !== 'ACTIVE') {
+851:        return res.status(400).json({ success: false, error: { code: 'BAD_REQUEST', message: 'invalid_grant', description: 'User inactive or not found' } });
+=== errorHandler: InvalidCredentialsError status ===
+ac1c119b56888bc064a820f9b191c409c520df64:Blockchain/Dev/services/auth/src/middleware/errorHandler.ts:11:  public readonly statusCode: number;
+ac1c119b56888bc064a820f9b191c409c520df64:Blockchain/Dev/services/auth/src/middleware/errorHandler.ts:17:    statusCode: number = 500,
+ac1c119b56888bc064a820f9b191c409c520df64:Blockchain/Dev/services/auth/src/middleware/errorHandler.ts:22:    this.statusCode = statusCode;
+ac1c119b56888bc064a820f9b191c409c520df64:Blockchain/Dev/services/auth/src/middleware/errorHandler.ts:38:    super(message, 401, 'UNAUTHORIZED');
+ac1c119b56888bc064a820f9b191c409c520df64:Blockchain/Dev/services/auth/src/middleware/errorHandler.ts:76:// timeouts). Distinct from 401 — clients should retry, ops should alert.
+ac1c119b56888bc064a820f9b191c409c520df64:Blockchain/Dev/services/auth/src/middleware/errorHandler.ts:84:export class InvalidCredentialsError extends UnauthorizedError {
+ac1c119b56888bc064a820f9b191c409c520df64:Blockchain/Dev/services/auth/src/middleware/errorHandler.ts:300:    res.status(err.statusCode).json({
+Mon 14 Sep 2026 11:45:47 AEST
+
+### CORRECTION (drafter, 11:47 AEST) — the "same at H984 (parent control)" section above is WRONG: the command that produced it never
+### defined H984, so `$H984:path` expanded to `:path` = the checkout's INDEX (branch feature/ks-597-…, HEAD 355d82c8b), not the #984
+### tree. Re-read with the variable defined (blob 0bab1b8bd, three instruments agree — unquoted, quoted, cat-file -p):
+###   833:      if (!user) {                                   (code grant, the line #987 changes)
+###   834:        ... description: 'User not found' ...
+###   943:      if (!user || user.status !== 'ACTIVE') {       (refresh grant, the oracle #987 copies)
+###   944:        ... description: 'User inactive or not found' ...
+### Kept, not deleted. Every later script uses `set -u`.

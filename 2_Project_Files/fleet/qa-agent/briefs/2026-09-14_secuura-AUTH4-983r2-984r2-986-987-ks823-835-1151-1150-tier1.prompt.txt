@@ -1,0 +1,157 @@
+ultrathink
+
+You are the fleet QA agent running ONE TIER 1 gate — "the AUTH4 pass" — over FOUR stacked Secuura/Blockchain PRs of
+the auth lane (builder s221): PR #983 ROUND 2 (KS-823, a DELTA re-gate of a merge commit), PR #984 ROUND 2 (KS-835,
+delta re-gate), PR #986 ROUND 1 (KS-1151 — THE SUBJECT: POST /api/auth/refresh now REFUSES an OAuth-minted refresh
+token, closing the launder both round-1 gates measured at runtime), PR #987 ROUND 1 (KS-1150 R-1, the code grant's
+status pin). Four sections, one report, ONE verdict mail with a verdict PER PR.
+
+Read your brief FIRST and in full, then plan:
+/Volumes/DevMASTER/WEDNESDAY/2_Project_Files/fleet/qa-agent/briefs/2026-09-14_secuura-AUTH4-983r2-984r2-986-987-ks823-835-1151-1150-tier1.md
+
+Round 2 on #983 / #984: the round-1 reports are named in the brief's TARGET (reports/2026-09-14-ks823-983-f62c975c1-
+tier1-r1/ and reports/2026-09-14-ks835-984-d00a2015c-tier1-r1/) — read them; the delta since each is a MERGE commit
+whose TREE is the round-1 head's tree (db10aea98 / 39ab0226a), so the round-1 evidence holds byte-for-byte and your job
+there is to PROVE the tree identity and re-run the suites once for the record. Round 1 on #986 / #987: no prior report;
+the builder's READY mails, PR bodies, ticket comments and 5_Project_History/2026-09-14_s221/ are inputs to falsify.
+
+Heads (git ls-remote 11:42 AEST, the API 11:47, both agree; the launcher re-asserts them):
+  #983 5b0f4dd583c745e5606c9dbd580fa31f90191c6c  parents f62c975c1 + 6e78961e1 (develop M19)   tree db10aea98
+  #984 9b020ff827be9c83fbf5e9d62d47bc020a44519d  parents d00a2015c + 5b0f4dd58                  tree 39ab0226a
+  #986 ac1c119b56888bc064a820f9b191c409c520df64  parent  9b020ff82                              tree 01d807f5c
+  #987 b6ed60f3b1bfe2f72ada658242b0995d0bef7424  parent  9b020ff82  — a SIBLING of #986, NOT stacked on it
+  develop = M20 a5334350221c819f54d4a20a3308daeb9ca09617 (#903, scripts/hook only). NO head contains M20: every
+  head's merge-base with develop is M19 6e78961e1; develop is 1 ahead. The merges onto M20 in Wednesday's clone were
+  clean: #983 -> ae32301fc, #984 -> 06427fb92, #986 -> 0888d29b0, #987 -> 521c4c209, END STATE (#986 + #987, either
+  order) -> 52c438a65. develop may have moved to M21/M22 (#799 / #985 landing — disjoint from services/auth,
+  services/api-gateway, the ks860 guard; they move the two @secuura/shared barrels, which the launcher judges by blob):
+  if the launcher printed "origin develop MOVED", ls-remote at start and close, merge the then-current develop in YOUR
+  clone, rebuild packages/shared dist from the merged tree and re-derive every count on it.
+Repo:    /Volumes/DevMASTER/!CODING/Secuura/Blockchain/2_Project_Files  (READ-ONLY — clone by SHA into your own scratch;
+  the builder's worktrees s221-ks823-r2 / s221-ks835-r2 / s221-hlaunder / s221-r1 live under
+  /Volumes/DevMASTER/!CODING/Secuura/Blockchain/worktrees/ — symlink-farm node_modules FROM one, never into it, never
+  vitest inside it; never trust origin/* inside a --shared clone — pin by SHA)
+
+You are FINDINGS-ONLY. You never fix, never merge, never push, never deploy, never comment, never file, never `@`.
+
+NEVER run a push, the real pre-push hook, or preflight.sh inside the Secuura checkout or any of its worktrees.
+
+NEVER print a credential value, and never open, read or copy a secrets file (any .env, config/secrets.yml). The
+harnesses' RS256 test keys live in the process env (__TEST_JWT_PRIVATE_PEM, JWT_PUBLIC_KEY) — never print them or a
+signed token. Count, never echo. Nothing in this gate needs a credential value.
+
+NO docker, NO stack, no kintsugi, no demo, NEVER the wallet mnemonic (KS-535 HOLD). "Live" = a real Express listener
+in-process bound to 127.0.0.1. docker may be down: if a leg falls to a stub-modelled fallback, say so at the same
+prominence as the findings.
+
+Ten things you must not miss:
+
+1. TREE IDENTITY FOR THE TWO ROUND-2 SECTIONS (A(a), B(a)): 5b0f4dd58^{tree} == f62c975c1^{tree} (db10aea98) and
+   9b020ff82^{tree} == d00a2015c^{tree} (39ab0226a); e62eab87a^{tree} == 6e78961e1^{tree} (why the #983 merge was
+   content-clean); git diff 6e78961e1 5b0f4dd58 == 4 files, byte-equal per file to git diff e62eab87a f62c975c1
+   (control: vs M18 differs); the blobs the brief lists. Then ONE suite run each for the record on the M20-merged
+   trees (auth 52/702 + the lane's 30; auth 53/707 + gateway 35/349 + ks860 23/23), develop-alone beside each.
+   Say in the verdict: the round-1 evidence holds because the bytes are the same; F-1 (the launder) is closed by
+   #986, not by #983; R-1 is open on KS-1150 as R-2.
+
+2. #986 RED-FIRST at the parent 9b020ff82 with the builder's file: 3 failed | 2 passed (cells 1/2/3 `expected 200
+   to be 401`; the two CONTROLS green). GREEN at head 5/5; auth 54/712 on 0888d29b0; auth.integration.test.ts
+   -t 'POST /api/auth/refresh' 3/3; parent 53/707 as the control. Quote the file lines.
+
+3. THE GATE-DESIGNED HARNESS (C item 4) — the headline: ONE loopback listener mounting BOTH oauthRouter and
+   authRoutes with the REAL jwt.ts (the #984 gate's evidence/08_launder shape); redeem a narrow ['openid'] code,
+   take the OAuth refresh_token, present it at POST /api/auth/refresh with NO credential -> C1 401, no token, no
+   Set-Cookie (was 200 + a full-RBAC pair); C2 the cookie form -> 401; C3 the SIDE-EFFECT ORDER: getSession = 0,
+   isRefreshJtiDenylisted = 0, rotateSessionRefreshToken = 0, denylistRefreshJti = 0, revokeSession = 0, and the
+   ORIGINAL OAuth token still redeems at its own grant AFTER the refusal (round 1 read 'Refresh token revoked'
+   because the sibling consumed it — it must not any more); C4 CONTROL password-login shape -> 200, unbound access
+   token, rotated once, one jti denylisted (AN OUTAGE HERE IS WORSE THAN THE DEFECT); C5 social and wallet login
+   shapes -> 200 (the JWT claim authMethod is set only from the oauth option, jwt.ts:205/:229 — the USER field
+   authMethod 'social'/'wallet' is never copied; measure it); C6 the client_id-only arm -> 401; C7 the LABEL-ONLY
+   arm (authMethod 'oauth', no client_id — the builder has NO such cell) -> 401; C8 garbage / an access token ->
+   401. Prediction BEFORE each run; predicted-by carried (drafter).
+
+4. THE #986 TAMPER TABLE, SUITES RUNNING (C item 5), the builder's file AND your harness: T1 guard deleted -> 3|2
+   and C1/C2/C6/C7 200; T2 client_id arm dropped -> 1|4 (cell 3) and C6 200; T3 guard moved below
+   rotateSessionRefreshToken -> 3|2 on the rotation assertion, C3 rotate=1; T4 inert -> green; T5 (GATE-DESIGNED)
+   guard moved BELOW getSession and above the replay check -> the builder's suite STAYS 5/5 (world.sessionLookups
+   is recorded at :64/:82 but no cell asserts it — 30 expect( lines, 0 on it) while your C3 getSession=1 REDS;
+   T6 (GATE-DESIGNED) the authMethod arm dropped -> the builder's suite STAYS 5/5 (every OAuth fixture carries
+   client_id) while your C7 REDS; T7 'oauth' -> 'OAUTH' same as T6; T8 syntax error -> LOAD failure, no
+   `Tests N failed` line. Anchor count asserted (the guard line count 1), marker asserted after the edit, restore by
+   whole-file sha256 re-derived from blob 18946cd7c, green again after each; a 0-cell run is INVALID. T5/T6 are
+   test-quality Records (Polish) against the PR's own tests, not defects in the guard.
+
+5. EVERY OTHER MINTING DOOR (C item 6): generateTokenPair( call sites at ac1c119b5 = auth.ts :291 :448 :597 :709
+   :1254 (:394 a comment), wallet.ts :371, oauth.ts :852 and :958 (the only two WITH a third argument), openapi 1
+   doc mention; signToken( and generateRefreshToken( in jwt.ts only; verifyRefreshToken( callers auth.ts 1 +
+   oauth.ts 1. FAIL: a third argument outside oauth.ts, or a minter outside jwt.ts. Re-derive with git grep at the
+   head SHA, never carry.
+
+6. THE FORWARD-ONLY WINDOW (C item 7) as a RULED consequence for Kam, not a grade on #986: pre-#983 OAuth refresh
+   tokens carry neither claim and launder until expiry (JWT_REFRESH_EXPIRES_IN default '7d'); population
+   unmeasured; the refused token is deliberately NOT denylisted (alive at its own grant, whose rotation is R-2).
+
+7. #987 RED-FIRST BOTH HALVES (D item 2): the new file at the parent -> 2 failed | 2 passed (cells 1 and 4); the
+   ORIGINAL ks790 file (blob f98e8c806) against the FIXED product -> 1 failed | 5 passed, exactly its :227 null-case
+   control. GREEN: ks1150 4/4 + ks790 6/6 on 521c4c209; auth 54/711. The pin is at oauth.ts:837 (comment
+   :833-836), its twin at :947 — the bare guard line occurs TWICE at head, once (:943) at the parent, whose
+   `if (!user) {` is at :833. (The drafter's first parent read was wrong — an unset variable read the index; the
+   corrected numbers are these; re-derive them yourself.)
+
+8. THE #987 TAMPER TABLE (D item 4): T1 pin reverted -> 1|3 (cell 1); T2 !== -> === -> 2|2 (cells 1+2); T3 inert;
+   T4 (GATE-DESIGNED) description reverted to 'User not found' with the pin kept -> cells 1 and 4 AND ks790 :227
+   red (3 reds, 2 files — the description is load-bearing); T5 (GATE-DESIGNED) the REFRESH grant's twin at :947
+   reverted instead -> cell 3 (the oracle) red, cell 1 green — cell 3 reads the refresh grant; T6 syntax -> LOAD
+   failure. Anchors carry the KS-1150 comment's last line (the bare guard count 2 printed as the control).
+
+9. H-pending (D item 5, READ then state): does /authorize (oauth.ts:447 GET / :499 POST, createAuthorizationCode)
+   pin ACTIVE before minting a code? If not, PENDING / INVITED / DEACTIVATED users with a live session now meet a
+   NEW refusal at the code grant — consistent with the refresh grant and /api/auth/refresh (auth.ts:707), a
+   CONSEQUENCE to state, not a regression. USER_STATUSES = PENDING, ACTIVE, SUSPENDED, DEACTIVATED, INVITED
+   (types/index.ts:109).
+
+10. QUALITY + DELIVERED-vs-COMMISSIONED per section (C items 8-9, D items 6-8, B (c)-(d)): tsc rc 0, the new test
+    files under --strict, eslint 0, ks860 23/23 with each new listener in its walk plus its red-first against the
+    listener line (:122 for ks1151, :130 for ks1150), gateway 35/349; H-mounts "eight" still unedited (Record); the
+    three #984 r1 Records and R-2 / R-3 open; the ks790 expect( count unchanged; commit ac1c119b5 amended once,
+    tree unchanged (confirm if dfa23fe16 is reachable, else "relayed").
+
+Your tool shell's grep may be a function: use /usr/bin/grep -F -i with a same-file positive control; multi-line anchors
+by Python str.count. Never cd in your own tool calls; the pre-tool hook refuses `git worktree` in the Secuura checkout —
+clone into your scratch and run write verbs THERE. A REAL checkout of the whole Blockchain/Dev, not a symlink farm (the
+ks860 walk skips symlinked directories). require.resolve('@secuura/shared') from inside your clone's services must land
+inside your clone's farm — print it once. Both services are VITEST 4.1.10 (npx vitest run, never watch; cwd =
+<clone>/Blockchain/Dev/services/<svc>; the auth config aliases @secuura/shared/utils/logger to packages/shared/dist —
+farm dist too, rebuilt from the merged tree if develop moved); run suites solo; initJwtKeys() awaited in every harness
+of yours. /bin/bash here is 3.2 — write runners in Python. zsh: no PIPESTATUS (`cmd > out 2>&1; rc=$?`), no timeout
+on macOS. The suites run at whatever load exists — name the load beside a slow count.
+Quote the Secuura checkout's porcelain count, .git/config sha256, for-each-ref count, .git/worktrees count, origin
+develop SHA, refs/pull/{983,984,986,987}/head and the four branches at start and close; they must match (name any ref
+another seat moved — #799 / #985 landing is EXPECTED and the four head trees do not change). Confirm the builder's
+four worktrees are porcelain 0 with the same HEAD at start and close.
+Never `rm`: fresh mktemp -d per attempt; quarantine probes and scratch tests by rename.
+Do no memory maintenance of your own project's memory store inside this session.
+
+Report FOUND / TESTED / HOW, with controls, per section: the deltas (files, blobs, shas), the merged shapes (the four
+M20 trees + the end state 52c438a65 on the develop you read, 0 conflicts) with every suite count and the tree named
+beside it; the two tree identities; the #986 and #987 red-firsts; both tamper tables (cells-run beside every colour,
+the decisive assertion line for each red, predicted-by on every row); the gate-designed harness C1-C8 with the
+side-effect counts; the minting-door census; H-pending; the DELIVERED-vs-COMMISSIONED tables; the open Records; and
+what you did NOT test at the same prominence as the findings. Client-facing communication = ticket comments only; the
+extranet is not a channel; anything needing a push goes to Wednesday as an escalation candidate for Kam's WhatsApp.
+Handovers to Peter/Stuart are test blocks, never a list of PRs. Never delete; cleanup means quarantine.
+Verdict: FOUR lines — GO, GO WITH FINDINGS, or NO GO — on 5b0f4dd583c745e5606c9dbd580fa31f90191c6c,
+9b020ff827be9c83fbf5e9d62d47bc020a44519d, ac1c119b56888bc064a820f9b191c409c520df64 and
+b6ed60f3b1bfe2f72ada658242b0995d0bef7424, each as the DELTA over its parent AND as the merged tree on the develop you
+read (name it), then ONE overall word. #986 shapes the overall: say plainly whether the launder class is CLOSED at the
+interactive refresh route with the login shapes UNCHANGED, and pick the honest shape. Give the merge seat its ADDENDUM
+line: "squash 5b0f4dd58 then 9b020ff82 then ac1c119b5 and b6ed60f3b (either order) onto develop; expected end-state
+tree 52c438a65 on M20 (re-derive on the live develop); auth 54/716 on the end state (MEASURE it), gateway +6, ks860
+23/23; open Records R-2 / R-3 on KS-1150, the three #984 r1 Records, the H-mounts 'eight'".
+
+MAIL YOUR VERDICT to wednesday-agent@agentmail.to when the pass is complete, using
+the project's send_brief.sh. Your pane holds ~19 lines of alternate screen with no
+scrollback, so a verdict that stays in the pane is one pane-close from being lost --
+this is not a formality, it is the only durable copy; the verdict MAIL is the wait signal. Subject:
+[QA -> Wednesday] TIER 1 GATE AUTH4 #983r2+#984r2+#986+#987 (KS-823/835/1151/1150) 5b0f4dd58 9b020ff82 ac1c119b5 b6ed60f3b — <VERDICT>

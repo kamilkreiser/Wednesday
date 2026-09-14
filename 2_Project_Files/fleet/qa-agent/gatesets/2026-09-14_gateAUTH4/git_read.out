@@ -1,0 +1,75 @@
+Mon 14 Sep 2026 11:43:02 AEST
+a5334350221c819f54d4a20a3308daeb9ca09617 type=commit a5334350221c819f54d4a20a3308daeb9ca09617 parents=[6e78961e1d04277ecbdb0537e630afa0bf63b13c] tree=5d251d14d5de661f842645d66e610ecbbd7bf289 2026-09-14T09:18:09+10:00 KS-991: skip a local develop that origin/develop provably supersedes (#903)
+6e78961e1d04277ecbdb0537e630afa0bf63b13c type=commit 6e78961e1d04277ecbdb0537e630afa0bf63b13c parents=[8861e62161466c40f08d2b10a30edeb203123993] tree=60327bfa0560fce54b74e95059916f4723ddad70 2026-09-14T09:00:09+10:00 KS-790: the OAuth token grants resolve the user through the pre-auth carve-out, not the RLS-scoped lookup (#982)
+5b0f4dd583c745e5606c9dbd580fa31f90191c6c type=commit 5b0f4dd583c745e5606c9dbd580fa31f90191c6c parents=[f62c975c11ec97cdef04500fd98a43618e702763 6e78961e1d04277ecbdb0537e630afa0bf63b13c] tree=db10aea98aa0b2a494dd516743acbac8a23c84b9 2026-09-14T09:16:48+10:00 Merge develop `6e78961e1` (M19: #982 squashed) into ks-823 — the stack's base is now on develop; the add/add on the ks790 test and the one `oauth.ts` region resolved to this branch's own delta; no product change
+9b020ff827be9c83fbf5e9d62d47bc020a44519d type=commit 9b020ff827be9c83fbf5e9d62d47bc020a44519d parents=[d00a2015c89a4720eaeab64482bbd9b89d878024 5b0f4dd583c745e5606c9dbd580fa31f90191c6c] tree=39ab0226aa7978499fbf84d9e1980547e889d82f 2026-09-14T10:38:08+10:00 Merge ks-823 `5b0f4dd58` (develop `6e78961e1` merged in) into ks-835 — the stack re-based on develop by merge; no product change
+ac1c119b56888bc064a820f9b191c409c520df64 type=commit ac1c119b56888bc064a820f9b191c409c520df64 parents=[9b020ff827be9c83fbf5e9d62d47bc020a44519d] tree=01d807f5c9ae6cadaa6353afaabb122313e29efb 2026-09-14T10:52:57+10:00 KS-1151: POST /api/auth/refresh refuses an OAuth-minted refresh token (fail-closed, 401, before any side effect)
+b6ed60f3b1bfe2f72ada658242b0995d0bef7424 type=commit b6ed60f3b1bfe2f72ada658242b0995d0bef7424 parents=[9b020ff827be9c83fbf5e9d62d47bc020a44519d] tree=d8c5cdb704c92b68b8a1f681b3ccec5f000d2b28 2026-09-14T11:03:55+10:00 KS-1150 R-1: the authorization_code grant pins user.status === 'ACTIVE' (one refusal, one description)
+f62c975c1 type=commit f62c975c11ec97cdef04500fd98a43618e702763 parents=[e62eab87a6263e25c41c9bb814d5831842bb6c7e] tree=db10aea98aa0b2a494dd516743acbac8a23c84b9 2026-09-14T00:20:37+10:00 KS-823: the refresh_token grant authenticates the client and honours a client binding on OAuth-minted tokens
+d00a2015c type=commit d00a2015c89a4720eaeab64482bbd9b89d878024 parents=[f62c975c11ec97cdef04500fd98a43618e702763] tree=39ab0226aa7978499fbf84d9e1980547e889d82f 2026-09-14T00:36:56+10:00 KS-835: an OAuth-minted token carries the scopes the user GRANTED and an 'oauth' label, so the gateway gates it on the grant
+--- merge-bases ---
+mb(M20,H983)=6e78961e1d04277ecbdb0537e630afa0bf63b13c
+mb(M20,H984)=6e78961e1d04277ecbdb0537e630afa0bf63b13c
+mb(M20,H986)=6e78961e1d04277ecbdb0537e630afa0bf63b13c
+mb(M20,H987)=6e78961e1d04277ecbdb0537e630afa0bf63b13c
+mb(H983,H984)=5b0f4dd583c745e5606c9dbd580fa31f90191c6c
+mb(H984,H986)=9b020ff827be9c83fbf5e9d62d47bc020a44519d
+mb(H984,H987)=9b020ff827be9c83fbf5e9d62d47bc020a44519d
+mb(H986,H987)=9b020ff827be9c83fbf5e9d62d47bc020a44519d
+--- is M20 an ancestor of each head? (rc 0 = yes) ---
+M20 in 5b0f4dd583c745e5606c9dbd580fa31f90191c6c rc=1
+M19 in 5b0f4dd583c745e5606c9dbd580fa31f90191c6c rc=0
+M20 in 9b020ff827be9c83fbf5e9d62d47bc020a44519d rc=1
+M19 in 9b020ff827be9c83fbf5e9d62d47bc020a44519d rc=0
+M20 in ac1c119b56888bc064a820f9b191c409c520df64 rc=1
+M19 in ac1c119b56888bc064a820f9b191c409c520df64 rc=0
+M20 in b6ed60f3b1bfe2f72ada658242b0995d0bef7424 rc=1
+M19 in b6ed60f3b1bfe2f72ada658242b0995d0bef7424 rc=0
+--- rev-list counts ---
+M20..H983=3  M19..H983=3  H983..M20=1
+M20..H984=5  H983..H984=2
+M20..H986=6  H984..H986=1
+M20..H987=6  H984..H987=1
+H986..H987=1  H987..H986=1
+M19..M20=1
+--- numstat own deltas ---
+[M19..H983]
+6	2	Blockchain/Dev/services/auth/src/__tests__/ks790-token-pre-auth-user-lookup.test.ts
+276	0	Blockchain/Dev/services/auth/src/__tests__/ks823-refresh-grant-client-auth-and-binding.test.ts
+82	10	Blockchain/Dev/services/auth/src/routes/oauth.ts
+31	10	Blockchain/Dev/services/auth/src/services/jwt.ts
+[M20..H983 (three-dot = merge-base M19)]
+6	2	Blockchain/Dev/services/auth/src/__tests__/ks790-token-pre-auth-user-lookup.test.ts
+276	0	Blockchain/Dev/services/auth/src/__tests__/ks823-refresh-grant-client-auth-and-binding.test.ts
+82	10	Blockchain/Dev/services/auth/src/routes/oauth.ts
+31	10	Blockchain/Dev/services/auth/src/services/jwt.ts
+[H983..H984]
+125	0	Blockchain/Dev/services/api-gateway/src/__tests__/ks835-oauth-token-scope-gate.test.ts
+12	1	Blockchain/Dev/services/api-gateway/src/middleware/scopes.ts
+11	10	Blockchain/Dev/services/auth/src/__tests__/ks823-refresh-grant-client-auth-and-binding.test.ts
+219	0	Blockchain/Dev/services/auth/src/__tests__/ks835-oauth-mint-carries-granted-scope.test.ts
+8	2	Blockchain/Dev/services/auth/src/routes/oauth.ts
+23	12	Blockchain/Dev/services/auth/src/services/jwt.ts
+[H984..H986]
+234	0	Blockchain/Dev/services/auth/src/__tests__/ks1151-auth-refresh-refuses-oauth-token.test.ts
+20	0	Blockchain/Dev/services/auth/src/routes/auth.ts
+[H984..H987]
+222	0	Blockchain/Dev/services/auth/src/__tests__/ks1150-code-grant-status-pin.test.ts
+3	1	Blockchain/Dev/services/auth/src/__tests__/ks790-token-pre-auth-user-lookup.test.ts
+6	2	Blockchain/Dev/services/auth/src/routes/oauth.ts
+[M19..M20]
+39	1	.githooks/pre-push
+123	1	Blockchain/Dev/scripts/__tests__/pre_push_hook_base.test.sh
+24	0	Blockchain/Dev/scripts/preflight/preflight.sh
+[M20 vs H984 two-dot (what a merge onto M20 would carry from each side)]
+1	39	.githooks/pre-push
+1	123	Blockchain/Dev/scripts/__tests__/pre_push_hook_base.test.sh
+0	24	Blockchain/Dev/scripts/preflight/preflight.sh
+125	0	Blockchain/Dev/services/api-gateway/src/__tests__/ks835-oauth-token-scope-gate.test.ts
+12	1	Blockchain/Dev/services/api-gateway/src/middleware/scopes.ts
+6	2	Blockchain/Dev/services/auth/src/__tests__/ks790-token-pre-auth-user-lookup.test.ts
+277	0	Blockchain/Dev/services/auth/src/__tests__/ks823-refresh-grant-client-auth-and-binding.test.ts
+219	0	Blockchain/Dev/services/auth/src/__tests__/ks835-oauth-mint-carries-granted-scope.test.ts
+88	10	Blockchain/Dev/services/auth/src/routes/oauth.ts
+44	12	Blockchain/Dev/services/auth/src/services/jwt.ts
+Mon 14 Sep 2026 11:43:04 AEST

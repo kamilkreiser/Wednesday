@@ -1,0 +1,119 @@
+Mon 14 Sep 2026 11:45:06 AEST
+=== auth.ts :640-735 at H986 (the refresh route) ===
+    // counter (`normaliseEmailForKey` lower-cases and trims, so `data.email` and
+    // the gate's `user.email` derive one key), so it was idempotent — but a
+    // control that counts is exactly the instrument that should decide this, and
+    // it said one clear.
+    //
+    // Ownership now matches the gate's own documented contract: "clearing the
+    // counter is the shared gate's job, and it must happen only once every gate
+    // has passed" (`passwordLoginGate.ts`). The platform-admin branch above keeps
+    // its own `recordSuccess` — it does not pass through the gate.
+    res.json({ success: true, data: response });
+  } catch (error) {
+    next(error);
+  }
+});
+
+// =============================================================================
+// POST /api/auth/refresh
+// =============================================================================
+authRoutes.post('/refresh', async (req: AuthenticatedRequest, res: Response, next) => {
+  try {
+    const refreshTokenValue: string | undefined =
+      (req as any).cookies?.refresh_token || req.body?.refreshToken;
+
+    if (!refreshTokenValue) throw new InvalidCredentialsError();
+
+    const payload = verifyRefreshToken(refreshTokenValue);
+
+    // KS-1151: an OAuth-minted refresh token — bound to a client (`client_id`,
+    // KS-823) and/or labelled `authMethod: 'oauth'` (KS-835) — is redeemable ONLY
+    // at POST /api/oauth/token, by the client it was issued to: the mirror of that
+    // grant's fail-closed binding refusal. Refused HERE, before the session
+    // lookup, so a refused token is neither rotated nor denylisted and the
+    // legitimate client's token stays alive at its own grant. Before this guard
+    // the route re-minted such a token as an UNBOUND, role-default login pair
+    // (the launder: a narrow OAuth grant became the user's full authority in one
+    // unauthenticated call). Both arms stay: a token minted before the label
+    // existed carries only `client_id`.
+    if (payload.client_id !== undefined || payload.authMethod === 'oauth') {
+      logger.warn('Refresh refused: OAuth-minted token presented at the interactive refresh route', {
+        userId: payload.userId,
+        clientId: payload.client_id ?? null,
+        authMethod: payload.authMethod ?? null,
+      });
+      throw new InvalidCredentialsError();
+    }
+
+    const session = await getSession(payload.sessionId);
+    if (!session) throw new InvalidCredentialsError();
+
+    // Audit A-05: detect token-reuse. If this jti was already rotated/revoked,
+    // an attacker is replaying. RFC 6819 §5.2.2.3 says burn the whole session
+    // — both the legitimate user and the attacker have to log in again, but
+    // the attacker no longer has a foothold.
+    if (payload.jti && (await isRefreshJtiDenylisted(payload.jti))) {
+      await revokeSession(session.id);
+      logger.warn('Refresh-token reuse detected — session revoked', {
+        userId: payload.userId,
+        sessionId: session.id,
+        jti: payload.jti,
+      });
+      res.clearCookie('refresh_token', { path: '/api/auth' });
+      throw new InvalidCredentialsError();
+    }
+
+    // KS-458: refresh runs pre-auth (the proven refresh token is the
+    // credential) — use the SECURITY DEFINER carve-out lookup.
+    const user = await userRepo.getUserByIdPreAuth(payload.userId);
+    if (!user || user.status !== 'ACTIVE') throw new InvalidCredentialsError();
+
+    const tokens = generateTokenPair(user, session.id);
+
+    // Rotate: invalidate the old refresh token by updating the session in Redis,
+    // and denylist the predecessor's jti for whatever's left of its natural
+    // lifetime. The session-record rotation alone is not enough — nothing in the
+    // /refresh path compared the incoming JWT against session.refreshToken.
+    await rotateSessionRefreshToken(session.id, tokens.refreshToken);
+    if (payload.jti && payload.exp) {
+      const remaining = payload.exp - Math.floor(Date.now() / 1000);
+      await denylistRefreshJti(payload.jti, remaining);
+    }
+
+    logger.info('Token refreshed', { userId: user.id });
+
+    res.cookie('refresh_token', tokens.refreshToken, {
+      httpOnly: true,
+      secure: process.env.NODE_ENV === 'production',
+      sameSite: 'strict',
+      maxAge: 7 * 24 * 60 * 60 * 1000,
+      path: '/api/auth',
+    });
+
+    res.json({
+      success: true,
+      data: {
+        accessToken: tokens.accessToken,
+        expiresIn: tokens.expiresIn,
+=== auth.ts :444-456 (the MFA-path mint) ===
+        req.get('user-agent'),
+        data.deviceId,
+        data.clientType ?? 'browser',
+      );
+      const tokens = generateTokenPair(
+        { ...syntheticUser, role: platformAdmin.role as any },
+        session.id,
+      );
+
+      logger.info('Platform admin logged in', { userId: platformAdmin.id, email: maskEmail(platformAdmin.email), role: platformAdmin.role });
+
+      res.cookie('refresh_token', tokens.refreshToken, {
+        httpOnly: true,
+=== signToken( callers, JWT_REFRESH_EXPIRES_IN default ===
+services/jwt.ts:175:function signToken(payload: Omit<OAuthTokenClaims, 'iat' | 'exp'>, expiresInSeconds: number): string {
+services/jwt.ts:209:  return signToken(payload, parseDuration(JWT_EXPIRES_IN));
+services/jwt.ts:234:  return signToken(payload, parseDuration(JWT_REFRESH_EXPIRES_IN));
+Blockchain/Dev/services/auth/src/services/jwt.ts:44:const JWT_REFRESH_EXPIRES_IN = process.env.JWT_REFRESH_EXPIRES_IN || '7d';
+Blockchain/Dev/services/auth/src/services/jwt.ts:234:  return signToken(payload, parseDuration(JWT_REFRESH_EXPIRES_IN));
+Mon 14 Sep 2026 11:45:06 AEST

@@ -1,0 +1,23 @@
+Mon 14 Sep 2026 12:01:33 AEST
+--- --check, nothing installed (expect rc 3 on the real brief path) ---
+brief missing or empty: /Volumes/DevMASTER/WEDNESDAY/2_Project_Files/fleet/qa-agent/briefs/2026-09-14_secuura-AUTH4-983r2-984r2-986-987-ks823-835-1151-1150-tier1.md
+rc=3
+--- --check with overrides (expect rc 0) ---
+all guards pass:
+  heads on origin: #983 5b0f4dd583c745e5606c9dbd580fa31f90191c6c at refs/heads/feature/ks-823-security-the-apioauthtoken-refresh_token-grant-authenticates; #984 9b020ff827be9c83fbf5e9d62d47bc020a44519d at refs/heads/feature/ks-835-security-oauth-consent-is-decorative-the-granted-scope-never; #986 ac1c119b56888bc064a820f9b191c409c520df64 at refs/heads/feature/ks-1151-security-post-apiauthrefresh-re-mints-an-oauth-bound-refresh; #987 b6ed60f3b1bfe2f72ada658242b0995d0bef7424 at refs/heads/feature/ks-1150-oauth-token-grant-hardening-measured-by-the-982-gate-pre
+  compares (GitHub API): develop...#983 = 6e78961e1d04277ecbdb0537e630afa0bf63b13c ahead=3 files=4; develop...#984 = 6e78961e1d04277ecbdb0537e630afa0bf63b13c ahead=5 files=7; #984...#986 = 9b020ff827be9c83fbf5e9d62d47bc020a44519d ahead=1 files=2; #984...#987 = 9b020ff827be9c83fbf5e9d62d47bc020a44519d ahead=1 files=3
+  auth/routes/auth.ts 132d3b8d3 = develop's (M18 = M19 = M20); auth/routes/oauth.ts 80e05458e = develop's (M19 = M20, #982 landed); auth/services/jwt.ts d0d55c11b = develop's (M18 = M19 = M20); shared/index.ts 8794bca5f = #799 landed; shared/middleware/index.ts 3a67987a7 = #799 or #985 landed | origin develop MOVED a5334350221c819f54d4a20a3308daeb9ca09617 -> 5210ddf317b2b1ed547e5d8488c3d011ceb087e1: commits=1 files=12 (packages/shared 4) — disjoint from the GUARDED list (services/auth/, services/api-gateway/, the ks860 guard, shared security/scopes.ts, the lockfile); the gate merges the then-current develop in its own clone, names the delta and re-derives every count on the merged tree (brief TARGET)
+  brief, prompt, QA project and repo all present
+  brief and prompt agree on TIER 1 and on ROUND 2 (#983, #984) + ROUND 1 (#986, #987)
+  prompt opens with the thinking directive and names the brief
+  brief and prompt both name all four head SHAs
+  prompt tells the agent to MAIL its verdict
+  prompt forbids pushing / the real hook / preflight in the Secuura checkout
+  prompt forbids memory maintenance inside the gate session
+  prompt forbids printing a credential value
+  a launch (not --check) will refuse unless stdin is a TTY (exit 21)
+rc=0
+--- headless LAUNCH with overrides (expect rc 21, the TTY guard) ---
+REFUSING: stdin is not a TTY — this launcher execs an interactive agent; run it in a cockpit pane, never inside a Bash tool (a headless gate is invisible and dies with the caller's shell)
+rc=21
+Mon 14 Sep 2026 12:02:25 AEST

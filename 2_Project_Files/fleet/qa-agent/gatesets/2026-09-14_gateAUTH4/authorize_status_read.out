@@ -1,0 +1,84 @@
+Mon 14 Sep 2026 11:56:22 AEST
+=== oauth.ts at H987: every status check / ACTIVE / authorize route ===
+26:  createAuthorizationCode, exchangeCode, verifyClientSecret,
+447:oauthRouter.get('/authorize', async (req: Request, res: Response) => {
+499:oauthRouter.post('/authorize', async (req: Request, res: Response) => {
+645:    const code = await createAuthorizationCode({
+734:oauthRouter.post('/token', async (req: Request, res: Response) => {
+810:      const result = await exchangeCode({
+833:      // KS-1150 (R-1): pin user.status === 'ACTIVE' here as the refresh grant below
+837:      if (!user || user.status !== 'ACTIVE') {
+947:      if (!user || user.status !== 'ACTIVE') {
+=== user status values (types/index.ts) ===
+97: *   - `mapDbStatus`     (DB string -> domain)  — knew 5, fell back to 'ACTIVE'
+99: *                                                deleted, pending
+101: * NEITHER of the other two, so they hit `mapDbStatus`'s `|| 'ACTIVE'` fallback
+103: * full token pair. `deactivated`, meanwhile, is one of the two statuses the
+109:export const USER_STATUSES = ['PENDING', 'ACTIVE', 'SUSPENDED', 'DEACTIVATED', 'INVITED'] as const;
+122:  active: 'ACTIVE',
+123:  pending: 'PENDING',
+124:  suspended: 'SUSPENDED',
+=== does the authenticate middleware pin ACTIVE? ===
+68: * KS-564 (Kam ruling 2026-08-06 — Option A): accept an interactive access token
+87: *     tenant GUC exactly as the interactive path does (KS-468).
+94:  const interactive = authenticate();
+114:    return interactive(req, res, next);
+146:      // Validate session is still active
+=== ks1151 suite: any assertion on sessionLookups / getSession calls? ===
+64:  sessionLookups: [] as string[],
+82:    world.sessionLookups.push(id);
+86:  revokeSession: vi.fn(async () => undefined),
+128:type Reply = { status: number; body: string; json: Record<string, unknown> | null; setCookie: string[] };
+147:      const setCookie = head.split('\r\n').filter((l) => /^set-cookie:/i.test(l)).map((l) => l.slice(11).trim());
+151:      resolve({ status, body: bodyText, json, setCookie });
+161:  return typeof data.accessToken !== 'string' && !r.setCookie.some((c) => c.startsWith('refresh_token='));
+179:beforeEach(() => { world.rotated = []; world.denylisted = []; world.sessionLookups = []; vi.clearAllMocks(); });
+224:    expect(r.setCookie.some((c) => c.startsWith('refresh_token='))).toBe(true);
+(positive control — count of 'expect(' lines:) 30
+=== ks1151 :56-100 (world + mocks) ===
+  id: 'user-1151', email: 'u1151@secuura.local', status: 'ACTIVE', role: 'OWNER',
+  verificationLevel: 'BASIC', mfaEnabled: false, tenantId: 'ten-1', organizationId: 'org-1',
+};
+
+/** The persistence the route touches, recorded so the cells can assert what was NOT done. */
+const world = vi.hoisted(() => ({
+  rotated: [] as string[],
+  denylisted: [] as string[],
+  sessionLookups: [] as string[],
+}));
+
+vi.mock('../db', () => ({ query: vi.fn(async () => ({ rows: [], rowCount: 0 })) }));
+vi.mock('../repositories/userRepo', () => ({
+  getUserById: vi.fn(async () => null),
+  getUserByIdPreAuth: vi.fn(async () => ({ ...USER })),
+  getUserByEmail: vi.fn(async () => null),
+  updateUser: vi.fn(async () => undefined),
+  getPlatformAdmin: vi.fn(async () => null),
+  updatePlatformAdminPassword: vi.fn(async () => undefined),
+  reencryptMfaSecretIfLegacy: vi.fn(async () => undefined),
+  reencryptPlatformAdminMfaSecretIfLegacy: vi.fn(async () => undefined),
+}));
+// The OAuth grants create a session, so the token's sessionId IS a live session — modelled as always-live.
+vi.mock('../services/session', () => ({
+  createSession: vi.fn(async () => ({ id: 'sess-new' })),
+  getSession: vi.fn(async (id: string) => {
+    world.sessionLookups.push(id);
+    return { id, userId: USER.id, isActive: true, expiresAt: new Date(Date.now() + 3_600_000), refreshToken: 'opaque', createdAt: new Date(), lastActivityAt: new Date() };
+  }),
+  rotateSessionRefreshToken: vi.fn(async (id: string) => { world.rotated.push(id); }),
+  revokeSession: vi.fn(async () => undefined),
+  getRedisClient: vi.fn(() => null),
+  validateSession: vi.fn(async () => true),
+  updateSessionActivity: vi.fn(async () => undefined),
+}));
+vi.mock('../services/refreshDenylist', () => ({
+  isRefreshJtiDenylisted: vi.fn(async () => false),
+  denylistRefreshJti: vi.fn(async (jti: string) => { world.denylisted.push(jti); }),
+}));
+vi.mock('../services/accountLockout', () => ({
+  isLockedOut: vi.fn(async () => false), recordFailure: vi.fn(async () => 1),
+  recordSuccess: vi.fn(async () => undefined), clearFailures: vi.fn(async () => undefined),
+}));
+vi.mock('../services/password', () => ({
+  verifyPassword: vi.fn(async () => false), hashPassword: vi.fn(async () => '$argon2id$stub'),
+Mon 14 Sep 2026 11:56:23 AEST

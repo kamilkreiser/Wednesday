@@ -1,0 +1,69 @@
+Mon 14 Sep 2026 11:44:07 AEST
+=== #986 own delta: auth.ts ===
+diff --git a/Blockchain/Dev/services/auth/src/routes/auth.ts b/Blockchain/Dev/services/auth/src/routes/auth.ts
+index 132d3b8d3..18946cd7c 100644
+--- a/Blockchain/Dev/services/auth/src/routes/auth.ts
++++ b/Blockchain/Dev/services/auth/src/routes/auth.ts
+@@ -663,6 +663,26 @@ authRoutes.post('/refresh', async (req: AuthenticatedRequest, res: Response, nex
+     if (!refreshTokenValue) throw new InvalidCredentialsError();
+ 
+     const payload = verifyRefreshToken(refreshTokenValue);
++
++    // KS-1151: an OAuth-minted refresh token — bound to a client (`client_id`,
++    // KS-823) and/or labelled `authMethod: 'oauth'` (KS-835) — is redeemable ONLY
++    // at POST /api/oauth/token, by the client it was issued to: the mirror of that
++    // grant's fail-closed binding refusal. Refused HERE, before the session
++    // lookup, so a refused token is neither rotated nor denylisted and the
++    // legitimate client's token stays alive at its own grant. Before this guard
++    // the route re-minted such a token as an UNBOUND, role-default login pair
++    // (the launder: a narrow OAuth grant became the user's full authority in one
++    // unauthenticated call). Both arms stay: a token minted before the label
++    // existed carries only `client_id`.
++    if (payload.client_id !== undefined || payload.authMethod === 'oauth') {
++      logger.warn('Refresh refused: OAuth-minted token presented at the interactive refresh route', {
++        userId: payload.userId,
++        clientId: payload.client_id ?? null,
++        authMethod: payload.authMethod ?? null,
++      });
++      throw new InvalidCredentialsError();
++    }
++
+     const session = await getSession(payload.sessionId);
+     if (!session) throw new InvalidCredentialsError();
+ 
+=== #987 own delta: oauth.ts + ks790 ===
+diff --git a/Blockchain/Dev/services/auth/src/__tests__/ks790-token-pre-auth-user-lookup.test.ts b/Blockchain/Dev/services/auth/src/__tests__/ks790-token-pre-auth-user-lookup.test.ts
+index f98e8c806..33e9d51ad 100644
+--- a/Blockchain/Dev/services/auth/src/__tests__/ks790-token-pre-auth-user-lookup.test.ts
++++ b/Blockchain/Dev/services/auth/src/__tests__/ks790-token-pre-auth-user-lookup.test.ts
+@@ -224,7 +224,9 @@ describe('KS-790 — the token grants resolve the user through the pre-auth carv
+     world.preAuthLookup = null;
+     const r = await redeemCode();
+     expect(r.status).toBe(400);
+-    expect(description(r)).toMatch(/User not found/);
++    // KS-1150 (R-1): the code grant's null refusal now shares the refresh grant's
++    // description ('User inactive or not found'); the refusal itself is unchanged.
++    expect(description(r)).toMatch(/User inactive or not found/);
+   });
+ 
+   it('CONTROL — refresh_token: when the carve-out ALSO answers null the grant is still refused', async () => {
+diff --git a/Blockchain/Dev/services/auth/src/routes/oauth.ts b/Blockchain/Dev/services/auth/src/routes/oauth.ts
+index 0bab1b8bd..7bfdcc2ad 100644
+--- a/Blockchain/Dev/services/auth/src/routes/oauth.ts
++++ b/Blockchain/Dev/services/auth/src/routes/oauth.ts
+@@ -830,8 +830,12 @@ oauthRouter.post('/token', async (req: Request, res: Response) => {
+       // null guard below is unchanged: a user the carve-out cannot see is still
+       // refused.
+       const user = await userRepo.getUserByIdPreAuth(result.userId);
+-      if (!user) {
+-        return res.status(400).json({ success: false, error: { code: 'BAD_REQUEST', message: 'invalid_grant', description: 'User not found' } });
++      // KS-1150 (R-1): pin user.status === 'ACTIVE' here as the refresh grant below
++      // and POST /api/auth/refresh already do — a SUSPENDED user's code minted a
++      // pair (the window is a code minted before a suspension); ONE refusal and
++      // ONE description for missing and inactive, the refresh grant's.
++      if (!user || user.status !== 'ACTIVE') {
++        return res.status(400).json({ success: false, error: { code: 'BAD_REQUEST', message: 'invalid_grant', description: 'User inactive or not found' } });
+       }
+ 
+       // KS-43: OAuth authorization_code grants are user-redirect-driven flows.
+Mon 14 Sep 2026 11:44:07 AEST

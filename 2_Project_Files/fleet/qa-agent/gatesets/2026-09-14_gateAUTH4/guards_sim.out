@@ -1,0 +1,33 @@
+route call order at head: verifyRefreshToken -> GUARD -> getSession -> isRefreshJtiDenylisted -> revokeSession -> getUserByIdPreAuth -> generateTokenPair -> rotateSessionRefreshToken -> denylistRefreshJti -> res.cookie
+
+=== status per fixture per guard (pos = head position) ===
+fixture                            HEAD   T1     T2     T6     T7    
+C1 OAuth-minted (both claims)      401    200    401    401    401   
+C6 client_id-only (#983-era)       401    200    200    401    401   
+C7 label-only (no client_id)       401    200    401    200    200   
+C4 password login                  200    200    200    200    200   
+C5 social login                    200    200    200    200    200   
+C5 wallet login                    200    200    200    200    200   
+
+=== side-effect ORDER for the OAuth fixture C1 ===
+HEAD (:677 before :686)          status=401 calls=[]
+T5 (guard below getSession)      status=401 calls=['getSession']
+T3 (guard below rotate)          status=401 calls=['getSession', 'isRefreshJtiDenylisted', 'getUserByIdPreAuth', 'generateTokenPair', 'rotateSessionRefreshToken', 'denylistRefreshJti']
+
+=== the builder's 5 cells vs the gate's harness under each tamper (predicted-by: drafter) ===
+T1 guard deleted             builder red cells=['1', '2', '3'] (3 failed | 2 passed)   gate red=['C1', 'C6', 'C7']
+T2 client_id arm dropped     builder red cells=['3']        (1 failed | 4 passed)   gate red=['C6']
+T3 guard after rotate        builder red cells=['1', '2', '3'] (3 failed | 2 passed)   gate red=['C1(order)', 'C6(order)', 'C7(order)']
+T5 guard after getSession    builder red cells=[]           (0 failed | 5 passed)   gate red=['C1(order)', 'C6(order)', 'C7(order)']
+T6 authMethod arm dropped    builder red cells=[]           (0 failed | 5 passed)   gate red=['C7']
+T7 oauth->OAUTH              builder red cells=[]           (0 failed | 5 passed)   gate red=['C7']
+HEAD                         builder red cells=[]           (0 failed | 5 passed)   gate red=[]
+
+=== #987 code-grant pin over USER_STATUSES (oauth.ts:837) ===
+PENDING      parent(:833 !user)=200  head(:837 !user || status!==ACTIVE)=400  NEW REFUSAL
+ACTIVE       parent(:833 !user)=200  head(:837 !user || status!==ACTIVE)=200  
+SUSPENDED    parent(:833 !user)=200  head(:837 !user || status!==ACTIVE)=400  NEW REFUSAL
+DEACTIVATED  parent(:833 !user)=200  head(:837 !user || status!==ACTIVE)=400  NEW REFUSAL
+INVITED      parent(:833 !user)=200  head(:837 !user || status!==ACTIVE)=400  NEW REFUSAL
+None         parent(:833 !user)=400  head(:837 !user || status!==ACTIVE)=400  
+T1 (pin reverted, description kept): cell1 red only; T2 (!== -> ===): SUSPENDED admitted (cell1 red) AND ACTIVE refused (cell2 red); T4 (description reverted, pin kept): cells 1+4 + ks790:229 red (3 across 2 files)

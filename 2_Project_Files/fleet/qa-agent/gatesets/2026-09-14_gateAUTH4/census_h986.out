@@ -1,0 +1,71 @@
+Mon 14 Sep 2026 11:44:27 AEST
+=== git grep at H986: authMethod / client_id / generateTokenPair / generateRefreshToken / verifyRefreshToken / MACHINE_AUTH_METHODS (services/auth/src, non-test) ===
+authMethod                       repositories/userRepo.ts:4 routes/auth.ts:4 routes/wallet.ts:1 services/jwt.ts:5 types/index.ts:1 
+client_id                        auth.openapi.ts:9 providers/social/apple.ts:2 providers/social/facebook.ts:2 providers/social/github.ts:2 providers/social/google.ts:2 providers/social/linkedin.ts:2 providers/social/microsoft-personal.ts:2 routes/auth.ts:4 routes/oauth.ts:41 services/jwt.ts:5 services/oauth.ts:6 
+generateTokenPair(               auth.openapi.ts:1 routes/auth.ts:6 routes/oauth.ts:2 routes/wallet.ts:1 services/jwt.ts:1 
+generateRefreshToken(            services/jwt.ts:2 
+verifyRefreshToken(              routes/auth.ts:1 routes/oauth.ts:1 services/jwt.ts:1 
+MACHINE_AUTH_METHODS             
+authMethod: 'oauth'              routes/auth.ts:1 services/jwt.ts:4 
+authMethod: 'password'           
+InvalidCredentialsError          middleware/errorHandler.ts:1 repositories/userRepo.ts:1 routes/auth.ts:10 routes/mfa.ts:13 services/accountLockout.ts:2 
+rotateSessionRefreshToken(       routes/auth.ts:1 services/session.ts:1 
+denylistRefreshJti(              routes/auth.ts:2 services/refreshDenylist.ts:1 
+isRefreshJtiDenylisted(          routes/auth.ts:1 routes/oauth.ts:1 services/refreshDenylist.ts:1 
+getSession(                      routes/auth.ts:1 services/session.ts:3 
+=== jwt.ts at H986: the payload interfaces + generateTokenPair + verifyRefreshToken ===
+9:import { getDefaultScopesForRole } from '@secuura/shared/security/scopes';
+17:// the scopes the user GRANTED, and an `authMethod: 'oauth'` label.
+20:// client and refuses a refresh token whose `client_id` claim does not name the
+24:// caller's ROLE defaults (`getDefaultScopesForRole`) whatever the user had
+25:// approved, and carried no label, so the gateway's `requireScope` treated a
+27:// mint now carries `scopes` = the granted list (possibly empty — nothing
+28:// granted, nothing allowed) and `authMethod: 'oauth'`, which the gateway gates
+29:// on its scopes. Tokens minted by the interactive login flows are UNCHANGED:
+30:// no label, role-default scopes — RBAC governs those.
+35:export interface OAuthMintOptions {
+36:  /** The OAuth client (`oauth_apps.client_id`) the token is issued to. */
+38:  /** The scopes the user granted (already validated against the app's allow-list). */
+39:  scopes: readonly string[];
+41:export type OAuthTokenClaims = JwtPayload & { client_id?: string; authMethod?: 'oauth' };
+59:interface JwtKeyMaterial {
+93:  const publicPem = crypto.createPublicKey(privatePem).export({ type: 'spki', format: 'pem' }).toString();
+106:export async function initJwtKeys(): Promise<void> {
+187:export function generateAccessToken(user: User, sessionId: string, oauth?: OAuthMintOptions): string {
+188:  // KS-151: attach role-derived scopes so downstream `isAllowedByRoleOrScope`
+192:  const scopes = getDefaultScopesForRole(user.role);
+199:    sessionId,
+200:    type: 'access',
+203:    // KS-835: an OAuth mint carries the GRANTED scopes (even when empty) and the
+205:    ...(oauth ? { scopes: [...oauth.scopes], authMethod: 'oauth' as const } : scopes.length > 0 ? { scopes } : {}),
+206:    ...(oauth ? { client_id: oauth.clientId } : {}), // KS-823
+213: * Generate refresh token. Includes a per-token jti so rotation can denylist
+217:export function generateRefreshToken(user: User, sessionId: string, oauth?: OAuthMintOptions): string {
+218:  const scopes = getDefaultScopesForRole(user.role);
+225:    sessionId,
+226:    type: 'refresh',
+229:    ...(oauth ? { scopes: [...oauth.scopes], authMethod: 'oauth' as const } : scopes.length > 0 ? { scopes } : {}), // KS-835
+230:    ...(oauth ? { client_id: oauth.clientId } : {}), // KS-823: the refresh grant checks this against the presenting client
+231:    jti: crypto.randomUUID(),
+240:export function generateTokenPair(user: User, sessionId: string, oauth?: OAuthMintOptions): {
+246:    accessToken: generateAccessToken(user, sessionId, oauth),
+247:    refreshToken: generateRefreshToken(user, sessionId, oauth),
+258:// sessionId (nothing to revoke — key revocation propagates via the exchange
+259:// TTL) and `type: 'connector'` so it can never pass verifyAccessToken /
+264:export interface ConnectorTokenClaims {
+270:  type: 'connector';
+272:  scopes: string[];
+281:export function generateConnectorToken(meta: {
+285:  scopes: string[];
+294:    type: 'connector',
+296:    scopes: meta.scopes,
+313:export function verifyToken(token: string): JwtPayload {
+329:export function getActiveJwk(): { kid?: string; alg: Algorithm; publicKeyPem: string } {
+337:export function verifyAccessToken(token: string): JwtPayload {
+355: * so its token is `type: 'connector'` and auth rejected it — meaning
+359: * algorithm confusion is introduced. Connector tokens carry no sessionId
+367:export function verifyConnectorToken(token: string): ConnectorTokenClaims {
+378:export function verifyRefreshToken(token: string): OAuthTokenClaims {
+389:export function decodeToken(token: string): JwtPayload | null {
+400:export function getTokenExpiration(token: string): Date | null {
+Mon 14 Sep 2026 11:44:27 AEST

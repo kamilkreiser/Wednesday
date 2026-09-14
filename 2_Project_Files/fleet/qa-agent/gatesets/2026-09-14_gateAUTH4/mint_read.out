@@ -1,0 +1,138 @@
+Mon 14 Sep 2026 11:44:43 AEST
+=== jwt.ts :185-250 at H986 ===
+ * Generate access token
+ */
+export function generateAccessToken(user: User, sessionId: string, oauth?: OAuthMintOptions): string {
+  // KS-151: attach role-derived scopes so downstream `isAllowedByRoleOrScope`
+  // checks accept callers (e.g. OWNER → `documents:write`) without the role
+  // allow-list having to grow. Empty for roles that already pass via the
+  // role path.
+  const scopes = getDefaultScopesForRole(user.role);
+  const payload: Omit<OAuthTokenClaims, 'iat' | 'exp'> = {
+    userId: user.id,
+    email: user.email,
+    role: user.role,
+    organizationId: user.organizationId,
+    verificationLevel: user.verificationLevel,
+    sessionId,
+    type: 'access',
+    tenantId: user.tenantId,
+    tenantSlug: user.tenantSlug,
+    // KS-835: an OAuth mint carries the GRANTED scopes (even when empty) and the
+    // 'oauth' label; a login mint keeps the role default and no label.
+    ...(oauth ? { scopes: [...oauth.scopes], authMethod: 'oauth' as const } : scopes.length > 0 ? { scopes } : {}),
+    ...(oauth ? { client_id: oauth.clientId } : {}), // KS-823
+  };
+
+  return signToken(payload, parseDuration(JWT_EXPIRES_IN));
+}
+
+/**
+ * Generate refresh token. Includes a per-token jti so rotation can denylist
+ * the predecessor (audit A-05 — without this, a stolen refresh token keeps
+ * working for its full 7-day lifetime even after the user has rotated).
+ */
+export function generateRefreshToken(user: User, sessionId: string, oauth?: OAuthMintOptions): string {
+  const scopes = getDefaultScopesForRole(user.role);
+  const payload: Omit<OAuthTokenClaims, 'iat' | 'exp'> = {
+    userId: user.id,
+    email: user.email,
+    role: user.role,
+    organizationId: user.organizationId,
+    verificationLevel: user.verificationLevel,
+    sessionId,
+    type: 'refresh',
+    tenantId: user.tenantId,
+    tenantSlug: user.tenantSlug,
+    ...(oauth ? { scopes: [...oauth.scopes], authMethod: 'oauth' as const } : scopes.length > 0 ? { scopes } : {}), // KS-835
+    ...(oauth ? { client_id: oauth.clientId } : {}), // KS-823: the refresh grant checks this against the presenting client
+    jti: crypto.randomUUID(),
+  };
+
+  return signToken(payload, parseDuration(JWT_REFRESH_EXPIRES_IN));
+}
+
+/**
+ * Generate token pair (access + refresh)
+ */
+export function generateTokenPair(user: User, sessionId: string, oauth?: OAuthMintOptions): {
+  accessToken: string;
+  refreshToken: string;
+  expiresIn: number;
+} {
+  return {
+    accessToken: generateAccessToken(user, sessionId, oauth),
+    refreshToken: generateRefreshToken(user, sessionId, oauth),
+    expiresIn: parseDuration(JWT_EXPIRES_IN),
+  };
+}
+=== jwt.ts :375-390 verifyRefreshToken ===
+/**
+ * Verify refresh token specifically
+ */
+export function verifyRefreshToken(token: string): OAuthTokenClaims {
+  const payload = verifyToken(token) as OAuthTokenClaims;
+  if (payload.type !== 'refresh') {
+    throw new InvalidTokenError();
+  }
+  return payload;
+}
+
+/**
+ * Decode token without verification (for debugging)
+ */
+export function decodeToken(token: string): JwtPayload | null {
+  try {
+=== authMethod lines: types/index.ts, userRepo.ts, wallet.ts, auth.ts ===
+repositories/userRepo.ts:251:    authMethod: row.auth_method ?? 'email',
+repositories/userRepo.ts:716:      user.authMethod || 'email',
+repositories/userRepo.ts:815:    authMethod: 'auth_method',
+repositories/userRepo.ts:826:      if (['role', 'status', 'verificationLevel', 'authMethod'].includes(tsField) && typeof val === 'string') {
+routes/auth.ts:668:    // KS-823) and/or labelled `authMethod: 'oauth'` (KS-835) — is redeemable ONLY
+routes/auth.ts:677:    if (payload.client_id !== undefined || payload.authMethod === 'oauth') {
+routes/auth.ts:681:        authMethod: payload.authMethod ?? null,
+routes/auth.ts:1164:        authMethod: 'social',
+routes/wallet.ts:210:    authMethod: 'wallet',
+types/index.ts:204:  authMethod?: 'email' | 'wallet' | 'federated' | 'social';
+=== generateTokenPair callers in routes/auth.ts + wallet.ts + oauth.ts (with 3rd arg?) ===
+routes/auth.ts:291:    const tokens = generateTokenPair(user, session.id);
+routes/auth.ts:394:      // generateTokenPair() on the password alone — a full SYSTEM_ADMIN session.
+routes/auth.ts:448:      const tokens = generateTokenPair(
+routes/auth.ts:597:    const tokens = generateTokenPair(user, session.id);
+routes/auth.ts:709:    const tokens = generateTokenPair(user, session.id);
+routes/auth.ts:1254:    const tokens = generateTokenPair(user, session.id);
+routes/oauth.ts:848:      const tokens = generateTokenPair(user, session.id, { clientId: client_id, scopes: parseScopeString(result.scope || '') });
+routes/oauth.ts:954:      const tokens = generateTokenPair(user, session.id, { clientId: refreshClientId, scopes: decoded.scopes ?? [] });
+routes/wallet.ts:371:    const tokens = generateTokenPair(user, session.id);
+=== social providers: what does a social login mint through? grep routes for social/provider callback ===
+ac1c119b56888bc064a820f9b191c409c520df64:Blockchain/Dev/services/auth/src/routes/auth.ts:39:  // KS-795 (KS-781 door 2): the social callback may not auto-link on an
+ac1c119b56888bc064a820f9b191c409c520df64:Blockchain/Dev/services/auth/src/routes/auth.ts:41:  SocialEmailUnavailableError,
+ac1c119b56888bc064a820f9b191c409c520df64:Blockchain/Dev/services/auth/src/routes/auth.ts:42:  SocialSignInRefusedError,
+ac1c119b56888bc064a820f9b191c409c520df64:Blockchain/Dev/services/auth/src/routes/auth.ts:905:// SOCIAL LOGIN ROUTES
+ac1c119b56888bc064a820f9b191c409c520df64:Blockchain/Dev/services/auth/src/routes/auth.ts:909:  SocialProviderFactory,
+ac1c119b56888bc064a820f9b191c409c520df64:Blockchain/Dev/services/auth/src/routes/auth.ts:911:  type SocialProviderName,
+ac1c119b56888bc064a820f9b191c409c520df64:Blockchain/Dev/services/auth/src/routes/auth.ts:912:} from '../providers/social';
+ac1c119b56888bc064a820f9b191c409c520df64:Blockchain/Dev/services/auth/src/routes/auth.ts:914:// generateTokenPair already imported above — used directly for social login token creation
+ac1c119b56888bc064a820f9b191c409c520df64:Blockchain/Dev/services/auth/src/routes/auth.ts:916:const socialFactory = new SocialProviderFactory();
+ac1c119b56888bc064a820f9b191c409c520df64:Blockchain/Dev/services/auth/src/routes/auth.ts:918:// List enabled social providers
+ac1c119b56888bc064a820f9b191c409c520df64:Blockchain/Dev/services/auth/src/routes/auth.ts:919:authRoutes.get('/social/providers', (_req, res: Response) => {
+ac1c119b56888bc064a820f9b191c409c520df64:Blockchain/Dev/services/auth/src/routes/auth.ts:920:  const enabled = socialFactory.getEnabled();
+ac1c119b56888bc064a820f9b191c409c520df64:Blockchain/Dev/services/auth/src/routes/auth.ts:925:authRoutes.get('/social/:provider', async (req, res: Response, next) => {
+ac1c119b56888bc064a820f9b191c409c520df64:Blockchain/Dev/services/auth/src/routes/auth.ts:928:    if (!socialFactory.isValidProvider(providerName)) {
+ac1c119b56888bc064a820f9b191c409c520df64:Blockchain/Dev/services/auth/src/routes/auth.ts:929:      throw new BadRequestError(`Unknown social provider: ${providerName}`);
+ac1c119b56888bc064a820f9b191c409c520df64:Blockchain/Dev/services/auth/src/routes/auth.ts:931:    const provider = socialFactory.get(providerName as SocialProviderName);
+ac1c119b56888bc064a820f9b191c409c520df64:Blockchain/Dev/services/auth/src/routes/auth.ts:933:      throw new BadRequestError(`Social provider ${providerName} is not enabled in this deployment`);
+ac1c119b56888bc064a820f9b191c409c520df64:Blockchain/Dev/services/auth/src/routes/auth.ts:965:authRoutes.get('/social/:provider/callback', async (req: AuthenticatedRequest, res: Response, next) => {
+ac1c119b56888bc064a820f9b191c409c520df64:Blockchain/Dev/services/auth/src/routes/auth.ts:968:    if (!socialFactory.isValidProvider(providerName)) {
+ac1c119b56888bc064a820f9b191c409c520df64:Blockchain/Dev/services/auth/src/routes/auth.ts:969:      throw new BadRequestError(`Unknown social provider: ${providerName}`);
+Blockchain/Dev/services/auth/src/routes/auth.ts
+Blockchain/Dev/services/auth/src/routes/health.ts
+Blockchain/Dev/services/auth/src/routes/internal.ts
+Blockchain/Dev/services/auth/src/routes/issuerCerts.ts
+Blockchain/Dev/services/auth/src/routes/jwks.ts
+Blockchain/Dev/services/auth/src/routes/mfa.ts
+Blockchain/Dev/services/auth/src/routes/oauth.ts
+Blockchain/Dev/services/auth/src/routes/sessions.ts
+Blockchain/Dev/services/auth/src/routes/users.ts
+Blockchain/Dev/services/auth/src/routes/wallet.ts
+Mon 14 Sep 2026 11:44:43 AEST
