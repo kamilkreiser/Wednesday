@@ -2392,3 +2392,8 @@ Done with it: Dynamics → Kam's team decision (no action); QuickQuote masthead/
 > Going back to the local agent question, is there any other model that would fit on the studio that would be suitable? I've had a look, and there are a number of models which would work great, but they would require either 256 or 512 gigabytes of RAM.
 
 *Note:* Answered: 96 GB ceiling ≈ dense 70B Q4 or MoE ~120B-class Q4; candidates gpt-oss-120b (~65 GB, quiet hours only) and Qwen3-32B dense (~20 GB, first to try); newer releases unmeasured; nothing runs until he says.
+
+## 2026-09-14 14:49 — Kam (dashboard chat, 14:48, verbatim)
+> What about Quen coder next?
+
+*Note:* Answered: Qwen3-Coder-480B out (~270 GB); Qwen3-Coder-30B-A3B (18 GB, agentic-coding tuned) is the best-matched cheap trial; waits for his go (re-pulling onto the drive he just cleared).
