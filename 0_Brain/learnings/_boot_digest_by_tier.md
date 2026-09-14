@@ -7,7 +7,7 @@ status: live
 
 # Boot digest BY TIER — W whole, M rules-only, every project case a handle
 
-Generated 2026-09-14 15:40 from 163 lesson files (827,934 B). M 33 · MIXED 5 · W 125. 28 project CASE sections inside MIXED files are reduced to one line each: the heading and the path to read it at. W blocks are exactly what the default digest carries; M blocks drop the section index and keep the rules; a P file is a single handle. The CASES behind every rule live only in the lesson files — open one the moment its rule fires.
+Generated 2026-09-14 16:21 from 164 lesson files (832,411 B). M 33 · MIXED 5 · W 126. 28 project CASE sections inside MIXED files are reduced to one line each: the heading and the path to read it at. W blocks are exactly what the default digest carries; M blocks drop the section index and keep the rules; a P file is a single handle. The CASES behind every rule live only in the lesson files — open one the moment its rule fires.
 
 ## The T9 SSD is the master — Wednesday must be fully portable
 `2026-07-31_fully-portable-drive.md` · principle · 2026-07-31 · status: superseded — the "T9 is the master" half by [[2026-08-25_one-drive-devmaster-is-master]] (2026-08-25); the portability principle itself still lives · tier: W
@@ -5488,6 +5488,38 @@ destructive step behind a check that cannot discriminate) · [[2026-09-11_red-pr
 3. **Raise the standard proactively.** Spin up the extra reviewer, tester or fix lane that would make the output first-rate. Do not wait to be asked, and do not wait for an agent to report.
 4. **No turn for mechanics alone.** Keep wake handling, watcher arming, rotations and read-backs to the minimum that protects the work. When no agent is live and nothing is owed, stand down: stop the watchers and say so, rather than idling on alarms.
 5. **When stopped, stay stopped.** Do not brief, answer or mail any project agent, or edit its records, until Kam restarts the seat. Then re-derive the state from the projects' own handovers before acting.
+
+
+## Do not guess — a comparison recited from memory and labelled "from the model cards" is a guess wearing a citation; a comparison to Kam rests on a measurement taken or a document read in the same action, or says "unmeasured"
+`2026-09-14_do-not-guess-a-comparison-a-citation-you-did-not-open-is-a-guess.md` · correction · 2026-09-14 · status: live · tier: W
+
+**His words, verbatim (2026-09-14 16:19:29):**
+> *"I just realized that when you gave me the original comparison between the two models, you were
+> guessing. Please don't do this. Whether it was because of expedience or anything else, do not
+> guess. Analyze and check."*
+
+sections (open the file for these): The case · Why the existing rules did not fire · How to apply
+
+## How to apply
+1. **Every comparison or factual characterisation to Kam names its instrument inline** — *"read at
+   ollama.com/library/gpt-oss, 16:2x"*, *"measured on this machine: 164 s, 50 tok/s"* — or carries
+   the word **unmeasured**. "From the model cards" is a claim that the cards were read *now*.
+2. **When the answer is in memory, that is the trigger to read, not the licence to skip reading.**
+   The cost is one `curl` and a minute; Kam priced the alternative as trust.
+3. **Speed and quality claims about a model come from a run on THIS machine on OUR tasks**, never from
+   memory of benchmarks — his own ruling the same hour: *"metrics don't always tell the truth"*, and
+   the KS-871 pass-with-a-partial-fix is the case. The head-to-head design (same tasks, same
+   checker, an agent's source read, diffs attached) is the mechanism.
+4. **Expedience is the named cause, so the countermeasure is structural:** an ask that needs a read
+   or a run gets a receipt first (*"received — measuring, answer in N minutes"*) and the answer
+   second; a fast full answer to a comparison question is the smell.
+5. **Own it in the ledger the same session** with the specific sentences that were guessed, not a
+   general apology; the retraction is scoped to what was recited (the speed multiple, the eval
+   placement), and the figures that a later read confirmed are marked confirmed, not retracted.
+
+**Family:** [[2026-08-14_i-read-representations-they-read-sources]] · [[2026-09-04_decisions-held-narration-drifted]]
+(rule 3) · [[2026-09-10_i-endorse-things-i-have-not-read]] · [[2026-09-09_acknowledge-panel-instructions-on-receipt]]
+(the receipt-first shape that makes "measuring, N minutes" the default) · [[2026-08-07_a-check-that-cannot-fail]].
 
 
 ## A Kam instruction stands until he withdraws it: a question I ask back does not cancel it, and his silence is not a no

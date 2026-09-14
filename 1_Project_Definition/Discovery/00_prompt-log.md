@@ -2422,3 +2422,13 @@ Done with it: Dynamics → Kam's team decision (no action); QuickQuote masthead/
 > Ornith-1.5-35B-A3b
 
 *Note:* Kam 16:01:35 — resolved: ollama library 'ornith' (self-improving agentic-coding family; 35B = 21 GB default quant); pull started 16:0x
+
+## 2026-09-14 16:19 — Kam (panel, verbatim)
+> I just realized that when you gave me the original comparison between the two models, you were guessing. Please don't do this. Whether it was because of expedience or anything else, do not guess. Analyze and check.
+
+*Note:* Kam 16:19:29 — CORRECTION; receipted; lesson + ledger this session; the 20B measured now
+
+## 2026-09-14 16:21 — Kam (panel, verbatim)
+> No need to do it now. We're going to deploy both models and test them against each other.  But if you didn't know which model specifically, there was no way to compare.
+
+*Note:* Kam 16:20:19 — receipted; the running 20B leg kept as head-to-head leg 1; one comparison message when all three are in
