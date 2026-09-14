@@ -1,0 +1,138 @@
+/Volumes/DevMASTER/WEDNESDAY/2_Project_Files/fleet/qa-agent/gatesets/2026-09-14_gate912r2/gh_read.py:29: DeprecationWarning: datetime.datetime.utcnow() is deprecated and scheduled for removal in a future version. Use timezone-aware objects to represent datetimes in UTC: datetime.datetime.now(datetime.UTC).
+  print('read at', datetime.datetime.now().astimezone().strftime('%Y-%m-%d %H:%M:%S %Z'), '/', datetime.datetime.utcnow().strftime('%H:%M:%SZ'))
+read at 2026-09-14 08:08:53 AEST / 22:08:53Z
+classifier positive control: {'array': 1, 'prep': 1, 'email': 0, 'mention': 1, 'other': 1}
+negative control /pulls/99999 -> 404
+PR #912: state=open draft=False merged=False author=kksecura base=develop@8861e6216 head=609c44c55323b5c90320847b6837ca37f6586705 branch=feature/ks-1004-anchor-failed-lockout commits=3 files=4 +303 -18 mergeable=True/unstable created=2026-09-08T21:06:00Z updated=2026-09-13T21:58:05Z title='KS-1004: a document carrying a txHash can now be marked anchor-failed (non-destructive write, guard narrowed to confirmed)'
+body chars=12075 at-signs=0 classes={'array': 0, 'prep': 0, 'email': 0, 'mention': 0, 'other': 0}
+KS ids in body: ['KS-1004', 'KS-1017', 'KS-256', 'KS-587']
+PR refs in body: ['#936', '#937', '#939']
+headings: ['> ## ⚠️ Before merging — run the pre-merge suites', '### Pre-merge acknowledgment (author)', '### PII review (KS-256 R15/R16)', '## What this fixes', "## 🔴 The old guard's intent was right, and it is preserved", '## The third change, which is the one to review hardest', '### The rule this change earned, stated for whoever widens a predicate next', '## ⚠ The ticket understates the defect — the lockout blocked BOTH directions', '## ⚠ A test was green over the guard it was named for', '## Round 2 (2026-09-14) — what changed since `ae8751f38`', '## Test Evidence (round 2, at `609c44c55`)']
+ack lines: ['- [ ] <!--ack:schemathesis--> **Schemathesis** pre-merge sweep run and **passing** (`python3 scripts/run.py pre-merge`)', '- [ ] <!--ack:akto--> **Akto** pre-merge scan run and **passing** (`npm run test:pre-merge`)']
+ack ticked (regex ^- \[[xX]\]): []
+  body count 'Before merging': 2
+  body count '<!--ack:schemathesis-->': 1
+  body count '<!--ack:akto-->': 1
+  body count '- [ ] <!--ack:': 2
+  body count '- [x] <!--ack:': 0
+  body count '- [X] <!--ack:': 0
+  body count 'PII': 2
+  body count 'Not applicable': 2
+  body count 'originate.openapi.ts:601': 2
+  body count 'z.unknown().nullable()': 2
+  body count '609c44c55': 2
+  body count '323151415': 1
+  body count 'ae8751f38': 1
+  body count '8861e6216': 1
+  body count '27509dc7a': 1
+  body count '1cc021a44': 1
+  body count '039da8d6e': 1
+  body count '163ca2c74': 1
+  body count 'anchoredAt': 8
+  body count 'threadToken': 4
+  body count 'confidence': 3
+  body count 'narrow': 3
+  body count 'Test Evidence': 1
+  body count 'NOT run': 1
+  body count 'Not run': 0
+  body count 'Schemathesis': 2
+  body count 'Akto': 2
+  body count 'Playwright': 1
+  body count 'k6': 1
+  body count 'node v24': 1
+  body count 'bash 3.2.57': 1
+  body count 'darwin': 1
+  body count '55 passed': 0
+  body count '598': 2
+  body count '56 passed': 0
+  body count '2 failed': 3
+  body count '4 passed': 1
+  body count 'T1': 1
+  body count 'T2': 2
+  body count 'T3': 1
+  body count 'T4': 1
+  body count '4/4': 0
+  body count 'tsc': 2
+  body count 'eslint': 1
+  body count 'Migrations': 1
+  body count 'migrations': 0
+  body count 'KS-1004': 2
+  body count 'KS-1017': 1
+  body count 'KS-1019': 0
+  body count 'KS-587': 1
+  body count 'KS-1058': 0
+  body count 'KS-1057': 0
+  body count 'KS-1071': 0
+  body count 'KS-1068': 0
+  body count 'KS-535': 0
+  body count 'KS-520': 0
+  body count '5602883901': 1
+  body count '5597511879': 0
+  body count '5656435630': 0
+  body count '<!-- name -->': 1
+  body count '<!-- @who -->': 0
+  file added     +225 -0 sha=4684fb3ad Blockchain/Dev/services/originate/src/__tests__/ks1004-anchor-failed-lockout.test.ts
+  file modified  +13 -6 sha=1c78b4a61 Blockchain/Dev/services/originate/src/__tests__/ks1058-anchor-failed-preserves-thread-token.test.ts
+  file modified  +19 -3 sha=b1791e94f Blockchain/Dev/services/originate/src/__tests__/ks535-anchor-async-fail-propagates.test.ts
+  file modified  +46 -9 sha=d8e988f7a Blockchain/Dev/services/originate/src/services/anchorStateSync.ts
+  commit ae8751f380ed361505694ba71ad9bf1308ee0e87 parents=['e559f7bba'] Kam Kreiser <kamil.kreiser@secuura.ai> 2026-09-08T21:04:18Z tree=dd970b844 subj='KS-1004: a document carrying a txHash can now be marked anchor-failed'
+  commit 3231514154aaa8a469e6cdd5f553ee8ce6079b89 parents=['ae8751f38', '8861e6216'] Kam Kreiser <kamil.kreiser@secuura.ai> 2026-09-13T21:47:56Z tree=632eed5bb subj='Merge develop 8861e6216 into ks-1004 — the gateway confidence fix and the threadToken carry come under this branch'
+  commit 609c44c55323b5c90320847b6837ca37f6586705 parents=['323151415'] Kam Kreiser <kamil.kreiser@secuura.ai> 2026-09-13T21:51:48Z tree=b95db5090 subj='KS-1004: an anchor time is carried only alongside a hash; the guard cell that pinned the retired txHash arm is re-stated as the union'
+  message ae8751f38: KS ids ['KS-1004', 'KS-587'] PR refs [] at-signs 1 {'array': 0, 'prep': 0, 'email': 0, 'mention': 0, 'other': 1} chars 1977 lines 34
+  message 323151415: KS ids ['KS-1004'] PR refs [] at-signs 0 {'array': 0, 'prep': 0, 'email': 0, 'mention': 0, 'other': 0} chars 1346 lines 22
+  message 609c44c55: KS ids ['KS-1004'] PR refs [] at-signs 0 {'array': 0, 'prep': 0, 'email': 0, 'mention': 0, 'other': 0} chars 3180 lines 49
+reviews: 0
+review comments: 0
+  issue comment 5591865195 linear[bot] 2026-09-08T21:06:04Z chars=3279 sha256=e07b50402147f9bf at-signs=0 classes={'array': 0, 'prep': 0, 'email': 0, 'mention': 0, 'other': 0} KS=['KS-1004', 'KS-535', 'KS-726'] PRs=['#805'] head=False merge=False r1=False NOGO=0 F1=0
+  issue comment 5597511879 kksecura 2026-09-09T06:55:05Z chars=4200 sha256=b27fbc1f6206efca at-signs=0 classes={'array': 0, 'prep': 0, 'email': 0, 'mention': 0, 'other': 0} KS=[] PRs=['#912'] head=False merge=False r1=False NOGO=4 F1=5
+  issue comment 5602883901 PeterObeden 2026-09-09T13:44:00Z chars=10083 sha256=cd0c1f0d7d8fcd17 at-signs=0 classes={'array': 0, 'prep': 0, 'email': 0, 'mention': 0, 'other': 0} KS=['KS-1004', 'KS-520', 'KS-587', 'KS-685'] PRs=['#912'] head=False merge=False r1=True NOGO=0 F1=4
+  issue comment 5656435630 kksecura 2026-09-13T21:58:05Z chars=5028 sha256=b4f54e59ff9ea135 at-signs=0 classes={'array': 0, 'prep': 0, 'email': 0, 'mention': 0, 'other': 0} KS=[] PRs=['#912', '#936', '#937', '#939'] head=True merge=True r1=False NOGO=0 F1=1
+compare develop...head: status=ahead merge_base=8861e62161466c40f08d2b10a30edeb203123993 ahead=3 behind=0 files=4
+  cmp file added     +225 -0 sha=4684fb3ad Blockchain/Dev/services/originate/src/__tests__/ks1004-anchor-failed-lockout.test.ts
+  cmp file modified  +13 -6 sha=1c78b4a61 Blockchain/Dev/services/originate/src/__tests__/ks1058-anchor-failed-preserves-thread-token.test.ts
+  cmp file modified  +19 -3 sha=b1791e94f Blockchain/Dev/services/originate/src/__tests__/ks535-anchor-async-fail-propagates.test.ts
+  cmp file modified  +46 -9 sha=d8e988f7a Blockchain/Dev/services/originate/src/services/anchorStateSync.ts
+compare merge...head (the fix commit): status=ahead ahead=1 behind=0 commits=1 files=3
+  fix file modified  +21 -0 sha=4684fb3ad Blockchain/Dev/services/originate/src/__tests__/ks1004-anchor-failed-lockout.test.ts changes=21
+  fix file modified  +13 -6 sha=1c78b4a61 Blockchain/Dev/services/originate/src/__tests__/ks1058-anchor-failed-preserves-thread-token.test.ts changes=19
+  fix file modified  +4 -1 sha=d8e988f7a Blockchain/Dev/services/originate/src/services/anchorStateSync.ts changes=5
+compare r1...head: status=ahead ahead=124 behind=0 commits=124 files=300 (develop's side included)
+compare develop...r1: status=diverged merge_base=e559f7bba ahead=1 behind=122 files=3
+branches/develop now: 8861e62161466c40f08d2b10a30edeb203123993 2026-09-13T12:00:26Z 'KS-924 KS-901: the entrypoint corpus pins its contributing packages by name and compares SKIP as a set; the census follo'
+compare M18...develop-now: status=identical ahead=0 behind=0 files=0
+head commit: parents=['3231514154aaa8a469e6cdd5f553ee8ce6079b89'] files=3 +38 -7
+  head-commit file modified  +21 -0 sha=4684fb3ad Blockchain/Dev/services/originate/src/__tests__/ks1004-anchor-failed-lockout.test.ts
+  head-commit file modified  +13 -6 sha=1c78b4a61 Blockchain/Dev/services/originate/src/__tests__/ks1058-anchor-failed-preserves-thread-token.test.ts
+  head-commit file modified  +4 -1 sha=d8e988f7a Blockchain/Dev/services/originate/src/services/anchorStateSync.ts
+merge commit: parents=['ae8751f380ed361505694ba71ad9bf1308ee0e87', '8861e62161466c40f08d2b10a30edeb203123993'] files=300 +44466 -9404 (the API diffs a merge against its FIRST parent = develop's side)
+PR #937: state=open head=6fd3a8bec branch=feature/ks-1059-anchorstatesyncts360-removing-inflight-from- mergeable=True/unstable updated=2026-09-13T22:06:29Z files=[('ks1004-anchor-failed-lockout.test.ts', 225, 0), ('ks1058-anchor-failed-preserves-thread-token.test.ts', 13, 6), ('ks1059-sim-leg-must-not-resurrect-a-terminal-document.test.ts', 199, 0), ('ks535-anchor-async-fail-propagates.test.ts', 19, 3), ('anchorStateSync.ts', 46, 9)]
+PR #939: state=open head=481e0267f branch=feature/ks-1068-threadtoken-confidence-blockchain-blob-type mergeable=True/unstable updated=2026-09-10T01:05:17Z files=[('ks1068-blockchain-blob-type.test.ts', 82, 0), ('documentRepo.ts', 31, 4), ('documents.ts', 7, 7)]
+  contents 609c44c55 anchorStateSync.ts: blob=d8e988f7a size=18382 sha256=34988176c83f68c6 lines=396 ctrl=0 listen(=0 anchoredAt=14
+  contents 609c44c55 ks1004-anchor-failed-lockout.test.ts: blob=4684fb3ad size=10467 sha256=2f3b5d72aae1a2d6 lines=225 ctrl=0 listen(=0 anchoredAt=6
+  contents 609c44c55 ks1058-anchor-failed-preserves-thread-token.test.ts: blob=1c78b4a61 size=9452 sha256=9765ab7bf75b422c lines=198 ctrl=0 listen(=0 anchoredAt=5
+  contents 609c44c55 ks535-anchor-async-fail-propagates.test.ts: blob=b1791e94f size=11918 sha256=162735972e348956 lines=257 ctrl=0 listen(=0 anchoredAt=0
+  contents 609c44c55 documentRepo.ts: blob=f715095c1 size=39147 sha256=625dde8cc0367a02 lines=945 ctrl=0 listen(=0 anchoredAt=5
+  contents 609c44c55 verification.ts: blob=95c13b01f size=65726 sha256=5c254b10824c8fa6 lines=1417 ctrl=0 listen(=0 anchoredAt=3
+  contents 609c44c55 audit-baseline.json: blob=03d1680e3 size=44616 sha256=6409a37c4dbd9ba8 lines=254 ctrl=0 listen(=0 anchoredAt=0
+  contents 323151415 anchorStateSync.ts: blob=174d122ec size=18142 sha256=7fbe8f20c9bf5fcb lines=393 ctrl=0 listen(=0 anchoredAt=14
+  contents 323151415 ks1004-anchor-failed-lockout.test.ts: blob=da63727ca size=9278 sha256=a7563fee1dead2a2 lines=204 ctrl=0 listen(=0 anchoredAt=2
+  contents 323151415 ks1058-anchor-failed-preserves-thread-token.test.ts: blob=349be4653 size=9003 sha256=914efe1781b9a37e lines=191 ctrl=0 listen(=0 anchoredAt=5
+  contents 323151415 ks535-anchor-async-fail-propagates.test.ts: blob=b1791e94f size=11918 sha256=162735972e348956 lines=257 ctrl=0 listen(=0 anchoredAt=0
+  contents 323151415 documentRepo.ts: blob=f715095c1 size=39147 sha256=625dde8cc0367a02 lines=945 ctrl=0 listen(=0 anchoredAt=5
+  contents 323151415 verification.ts: blob=95c13b01f size=65726 sha256=5c254b10824c8fa6 lines=1417 ctrl=0 listen(=0 anchoredAt=3
+  contents 323151415 audit-baseline.json: blob=03d1680e3 size=44616 sha256=6409a37c4dbd9ba8 lines=254 ctrl=0 listen(=0 anchoredAt=0
+  contents ae8751f38 anchorStateSync.ts: blob=604c21dbb size=17029 sha256=3004ee3adcfb6a1b lines=378 ctrl=0 listen(=0 anchoredAt=13
+  contents ae8751f38 ks1004-anchor-failed-lockout.test.ts: blob=da63727ca size=9278 sha256=a7563fee1dead2a2 lines=204 ctrl=0 listen(=0 anchoredAt=2
+  contents ae8751f38 ks1058-anchor-failed-preserves-thread-token.test.ts: ABSENT (HTTP 404)
+  contents ae8751f38 ks535-anchor-async-fail-propagates.test.ts: blob=b1791e94f size=11918 sha256=162735972e348956 lines=257 ctrl=0 listen(=0 anchoredAt=0
+  contents ae8751f38 documentRepo.ts: blob=9c49f6ec8 size=37749 sha256=a0ea203914a4a91b lines=915 ctrl=0 listen(=0 anchoredAt=5
+  contents ae8751f38 verification.ts: blob=489ac1600 size=53671 sha256=8f7383ee19e85a47 lines=1226 ctrl=0 listen(=0 anchoredAt=2
+  contents ae8751f38 audit-baseline.json: blob=33bc6f29a size=27178 sha256=564c2d5d72dc965e lines=204 ctrl=0 listen(=0 anchoredAt=0
+  contents 8861e6216 anchorStateSync.ts: blob=846ebe5bf size=15888 sha256=af4b3a69df24d9c0 lines=359 ctrl=0 listen(=0 anchoredAt=10
+  contents 8861e6216 ks1004-anchor-failed-lockout.test.ts: ABSENT (HTTP 404)
+  contents 8861e6216 ks1058-anchor-failed-preserves-thread-token.test.ts: blob=349be4653 size=9003 sha256=914efe1781b9a37e lines=191 ctrl=0 listen(=0 anchoredAt=5
+  contents 8861e6216 ks535-anchor-async-fail-propagates.test.ts: blob=ee08e85b3 size=10816 sha256=b433bf1f4092b8bc lines=241 ctrl=0 listen(=0 anchoredAt=0
+  contents 8861e6216 documentRepo.ts: blob=f715095c1 size=39147 sha256=625dde8cc0367a02 lines=945 ctrl=0 listen(=0 anchoredAt=5
+  contents 8861e6216 verification.ts: blob=95c13b01f size=65726 sha256=5c254b10824c8fa6 lines=1417 ctrl=0 listen(=0 anchoredAt=3
+  contents 8861e6216 audit-baseline.json: blob=03d1680e3 size=44616 sha256=6409a37c4dbd9ba8 lines=254 ctrl=0 listen(=0 anchoredAt=0
+done at 08:09:18 AEST

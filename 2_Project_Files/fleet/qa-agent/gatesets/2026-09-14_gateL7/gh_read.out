@@ -1,0 +1,253 @@
+/Volumes/DevMASTER/WEDNESDAY/2_Project_Files/fleet/qa-agent/gatesets/2026-09-14_gateL7/gh_read.py:41: DeprecationWarning: datetime.datetime.utcnow() is deprecated and scheduled for removal in a future version. Use timezone-aware objects to represent datetimes in UTC: datetime.datetime.now(datetime.UTC).
+  print('read at', datetime.datetime.now().astimezone().strftime('%Y-%m-%d %H:%M:%S %Z'), '/', datetime.datetime.utcnow().strftime('%H:%M:%SZ'))
+read at 2026-09-14 08:51:25 AEST / 22:51:25Z
+classifier positive control: {'array': 1, 'prep': 0, 'email': 0, 'mention': 1, 'codespan': 1, 'other': 1}
+branches/develop now: 8861e62161466c40f08d2b10a30edeb203123993 2026-09-13T12:00:26Z 'KS-924 KS-901: the entrypoint corpus pins its contributing packages by name and compares SKIP as a set; the census follo' | == M18: True
+
+================ PR #918 (KS-926) ================
+PR #918: state=open draft=False merged=False author=kksecura base=develop@8861e6216 head=b54487216ebb49f1de7ed9349f089d92a3e5bfc1 branch=feature/ks-926-wire-unreachable-guards commits=3 files=4 +439 -14 mergeable=True/unstable created=2026-09-09T03:21:00Z updated=2026-09-13T22:07:21Z title='KS-926: wire 14 of the 17 unreached guards, and add the census that fails the push when a guard is in no bucket'
+  head == pinned: True
+  body chars=13046 lines=157 at-signs=0 classes={'array': 0, 'prep': 0, 'email': 0, 'mention': 0, 'codespan': 0, 'other': 0}
+  KS ids in body: ['KS-1032', 'KS-1033', 'KS-1034', 'KS-666', 'KS-771', 'KS-926']
+  PR refs in body: []
+  headings: ['## What this does', '### The numbers, derived from the census rather than quoted', '### The three NOT wired — the reasoning a successor cannot re-derive (KS-1033)', '### Wiring the guards caught a latent defect on the first real invocation (KS-1034)', '## Test Evidence', "### Platform suites — final check (Kam's rule 2026-08-27)", '### Where the red-proofs are, for sample testing', "## Round 2 — the reviewer's one finding, plus what the develop merge brought", '## Stream']
+    body count 'Test Evidence': 1
+    body count 'b54487216': 2
+    body count 'ed954f09e': 4
+    body count 'bash 3.2.57': 1
+    body count 'node v24': 1
+    body count 'darwin': 1
+    body count 'NOT run': 2
+    body count 'NOT covered': 1
+    body count 'Migrations': 1
+    body count 'Round 2': 1
+    body count 'DEFERRED': 5
+    body count 'HOMED_ELSEWHERE': 7
+    body count 'check-environment.sh': 5
+    body count 'check-akto-container-names.sh': 3
+    body count '13 wired': 1
+    body count 'OK — all 21': 3
+    body count 'OK — 13 code guards passed': 1
+    body count '15 passed, 0 failed': 3
+    body count '55 passed, 0 failed': 1
+    body count '53 passed, 2 failed': 1
+    body count 'PREFLIGHT PASSED.': 1
+    body count '30 passed, 0 failed': 1
+    body count 'docker info': 1
+    body count 'env -i': 3
+  file modified  +9 -0 changes=9 sha=343f24a6e Blockchain/Dev/scripts/__tests__/preflight_deps.test.sh
+  file added     +158 -0 changes=158 sha=55a376f76 Blockchain/Dev/scripts/__tests__/run_code_guards.test.sh
+  file modified  +47 -14 changes=61 sha=8f445a4bb Blockchain/Dev/scripts/preflight/preflight.sh
+  file added     +225 -0 changes=225 sha=2f06e19d3 Blockchain/Dev/scripts/run-code-guards.sh
+  PR commits via API: 3
+  commit ed954f09e parents=['fe0fd640c'] 2026-09-09T01:40:07Z tree=a6b6c4a5c ids=['KS-1032', 'KS-1033', 'KS-1034', 'KS-666', 'KS-926'] PRrefs=[] at=1 chars=5799 subj='KS-926: give every check-*.sh guard a home, and make "no home" fail the push'
+  commit 21368d250 parents=['ed954f09e', '8861e6216'] 2026-09-13T21:54:28Z tree=d64774355 ids=[] PRrefs=[] at=0 chars=184 subj='Merge develop `8861e6216` into ks-926 — bring the branch to the current base; the two appended legs become 14/'
+  commit b54487216 parents=['21368d250'] 2026-09-13T22:00:09Z tree=09e693d5a ids=['KS-926'] PRrefs=[] at=0 chars=4134 subj='KS-926: check-environment.sh leaves WIRED for DEFERRED, the 21st guard is homed, and the leg-1 fixture learns '
+  reviews: 1 [(5151452193, 'PeterObeden', 'COMMENTED', '2026-09-09T08:04:45Z', 'ed954f09e', 7780)]
+  review comments: 0
+  issue comment 5595261031 linear[bot] 2026-09-09T03:21:04Z chars=5357 at-signs=1 classes={'array': 0, 'prep': 0, 'email': 0, 'mention': 0, 'codespan': 1, 'other': 0} KS=['KS-731', 'KS-921', 'KS-926'] head-named=False
+  issue comment 5656486018 kksecura 2026-09-13T22:07:21Z chars=4213 at-signs=0 classes={'array': 0, 'prep': 0, 'email': 0, 'mention': 0, 'codespan': 0, 'other': 0} KS=[] head-named=True
+  compare develop...head: status=ahead merge_base=8861e62161466c40f08d2b10a30edeb203123993 ahead=3 behind=0 files=4 total_commits=3
+    cmp file modified  +9 -0 sha=343f24a6e Blockchain/Dev/scripts/__tests__/preflight_deps.test.sh
+    cmp file added     +158 -0 sha=55a376f76 Blockchain/Dev/scripts/__tests__/run_code_guards.test.sh
+    cmp file modified  +47 -14 sha=8f445a4bb Blockchain/Dev/scripts/preflight/preflight.sh
+    cmp file added     +225 -0 sha=2f06e19d3 Blockchain/Dev/scripts/run-code-guards.sh
+  compare 21368d250...head: status=ahead ahead=1 behind=0 files=2: [('preflight_deps.test.sh', 9, 0), ('run-code-guards.sh', 22, 2)]
+    hunks in preflight_deps.test.sh: ['@@ -335,6 +335,15 @@ preflight_fixture_run() {            # $1 = deps rc, $2 = fixture-suite rc, $3 =']
+    hunks in run-code-guards.sh: ['@@ -66,12 +66,18 @@ REPO_ROOT="$(cd "$DEV_DIR/../.." && pwd)"', '@@ -91,15 +97,24 @@ HOMED_ELSEWHERE=(', '@@ -174,9 +189,14 @@ if [ "$MODE" = "check" ]; then']
+  compare ed954f09e...head: status=ahead ahead=117 behind=0 files=300 total_commits=117
+  actions runs at head: 7
+    run 'pr-premerge-ack' id=34785835119 event=pull_request status=completed conclusion=success created=2026-09-13T22:07:23Z
+       job 'Pre-merge acknowledged — Schemathesis' completed/success failed_steps=[]
+       job 'Linear ticket present' completed/success failed_steps=[]
+       job 'Pre-merge acknowledged — Akto' completed/success failed_steps=[]
+    run 'pr-premerge-ack' id=34785776693 event=pull_request status=completed conclusion=success created=2026-09-13T22:06:14Z
+       job 'Linear ticket present' completed/success failed_steps=[]
+       job 'Pre-merge acknowledged — Schemathesis' completed/success failed_steps=[]
+       job 'Pre-merge acknowledged — Akto' completed/success failed_steps=[]
+    run 'PR — Lockfiles (path-skip twin)' id=34785776587 event=pull_request status=completed conclusion=success created=2026-09-13T22:06:14Z
+       job 'Standalone locks pass clean-room npm ci' completed/success failed_steps=[]
+    run 'Security Scanning' id=34785776582 event=pull_request status=completed conclusion=failure created=2026-09-13T22:06:14Z
+       job 'Infrastructure Security Scan' completed/success failed_steps=[]
+       job 'Dependency Audit' completed/failure failed_steps=[(7, "Audit-contract suites (the gates' own validator)", 'failure')]
+       job 'Secret Detection' completed/success failed_steps=[]
+       job 'Container Security Scan' completed/skipped failed_steps=[]
+       job 'Code Security Gates' completed/skipped failed_steps=[]
+       job 'SAST Analysis' completed/skipped failed_steps=[]
+       job 'Security Summary' completed/success failed_steps=[]
+    run 'PR Security Gates (KS-168)' id=34785776637 event=pull_request status=completed conclusion=failure created=2026-09-13T22:06:14Z
+       job 'Code Security Gates' completed/failure failed_steps=[(11, 'All shell test suites (KS-666 / KS-731 — globbed, not listed)', 'failure')]
+    run 'pr' id=34785776727 event=pull_request status=completed conclusion=failure created=2026-09-13T22:06:14Z
+       job 'Migration behaviour (KS-667)' completed/success failed_steps=[]
+       job 'build / Build + push platform images (fresh)' completed/success failed_steps=[]
+       job 'Akto suite (PR)' completed/failure failed_steps=[(8, 'Boot Akto stack + import spec + load templates', 'failure'), (16, 'Enforce Akto PR result (block on any failure)', 'failure')]
+       job 'Performance suite (k6 smoke)' completed/failure failed_steps=[(10, 'Enforce Performance result (block on any failure)', 'failure'), (11, 'Upload performance reports', 'failure')]
+       job 'Playwright suite' completed/failure failed_steps=[(7, 'Quality gate — unit suite (test:unit)', 'failure'), (11, 'Upload Playwright report', 'failure')]
+       job 'Schemathesis suite' completed/success failed_steps=[]
+    run 'Dependabot standalone locks' id=34785775081 event=pull_request_target status=completed conclusion=skipped created=2026-09-13T22:06:12Z
+       job 'Regenerate drifted standalone locks' completed/skipped failed_steps=[]
+
+================ PR #924 (KS-773) ================
+PR #924: state=open draft=False merged=False author=kksecura base=develop@d4cf7e3cf head=b85f1db24596a5e0ce98fe2b1343d9f515a1a995 branch=kamilkreiser/ks-773-cleanroom-skip-mcp-server commits=3 files=1 +26 -11 mergeable=True/clean created=2026-09-09T10:10:25Z updated=2026-09-13T22:10:40Z title='KS-773: the clean-room skip rested on a reason its own lock refutes — remove it and name the corpus'
+  head == pinned: True
+  body chars=7123 lines=84 at-signs=7 classes={'array': 0, 'prep': 0, 'email': 0, 'mention': 1, 'codespan': 6, 'other': 0}
+  KS ids in body: ['KS-773']
+  PR refs in body: ['#797']
+  headings: ['## BLUF', '## The reason on record was false in both halves', '## The cost was never the skipped member', '## Test Evidence', '## Test Evidence — re-gate at `b85f1db24` (the current head)', '## Review note']
+    body count 'Test Evidence': 2
+    body count 'b85f1db24': 7
+    body count '1497b39de': 2
+    body count 'node v24': 1
+    body count 'darwin': 1
+    body count 'NOT run': 2
+    body count 'NOT covered': 2
+    body count 'Migrations': 1
+    body count 're-gate': 3
+    body count 's161': 1
+    body count '2026-09-09-s161': 1
+    body count '35 standalone': 2
+    body count 'covered: ': 2
+    body count 'CHECKED[*]': 3
+    body count 'unbound variable': 2
+    body count 'F-924-1': 4
+    body count 'F-924-2': 2
+    body count 'F-924-3': 2
+  file modified  +26 -11 changes=37 sha=518bffeea Blockchain/Dev/scripts/preflight/lockfile-cleanroom.sh
+  PR commits via API: 3
+  commit 1497b39de parents=['b6884888d'] 2026-09-09T10:06:03Z tree=0ed6441e3 ids=['KS-773'] PRrefs=['#797'] at=4 chars=1919 subj='KS-773: the clean-room skip rested on a reason its own lock refutes — remove it and name the corpus'
+  commit a849f9ac9 parents=['1497b39de'] 2026-09-09T13:55:07Z tree=46269e6b6 ids=['KS-773'] PRrefs=[] at=3 chars=1259 subj='KS-773: ${CHECKED[*]} on an empty corpus kills the gate after printing success'
+  commit b85f1db24 parents=['a849f9ac9', 'd4cf7e3cf'] 2026-09-09T13:55:34Z tree=88ca71338 ids=[] PRrefs=[] at=1 chars=209 subj='Merge develop into ks-773 — keep the branch current before pushing the F-924-1 fix'
+  reviews: 0 []
+  review comments: 0
+  issue comment 5600161255 linear[bot] 2026-09-09T10:10:28Z chars=2788 at-signs=6 classes={'array': 0, 'prep': 0, 'email': 0, 'mention': 0, 'codespan': 6, 'other': 0} KS=['KS-374', 'KS-763', 'KS-768', 'KS-773'] head-named=False
+  issue comment 5600281046 kksecura 2026-09-09T10:20:43Z chars=1573 at-signs=0 classes={'array': 0, 'prep': 0, 'email': 0, 'mention': 0, 'codespan': 0, 'other': 0} KS=['KS-1046', 'KS-773'] head-named=False
+  issue comment 5603150434 kksecura 2026-09-09T14:02:26Z chars=1803 at-signs=1 classes={'array': 1, 'prep': 0, 'email': 0, 'mention': 0, 'codespan': 0, 'other': 0} KS=[] head-named=True
+  compare develop...head: status=diverged merge_base=d4cf7e3cf73e91422a229b7d0767cf6c3a04fe57 ahead=3 behind=111 files=1 total_commits=3
+    cmp file modified  +26 -11 sha=518bffeea Blockchain/Dev/scripts/preflight/lockfile-cleanroom.sh
+  compare a849f9ac9...head: status=ahead ahead=3 behind=0 files=2: [('pre_suite.test.sh', 26, 1), ('quarantine_call_sites.test.sh', 27, 1)]
+    hunks in pre_suite.test.sh: ['@@ -48,9 +48,34 @@ STASH="$TMP/stash"']
+    hunks in quarantine_call_sites.test.sh: ['@@ -42,9 +42,35 @@ STASH="$TMP/stash"']
+  compare 1497b39de...head: status=ahead ahead=4 behind=0 files=3 total_commits=4
+  actions runs at head: 4
+    run 'pr-premerge-ack' id=34786004721 event=pull_request status=completed conclusion=success created=2026-09-13T22:10:43Z
+       job 'Pre-merge acknowledged — Schemathesis' completed/success failed_steps=[]
+       job 'Linear ticket present' completed/success failed_steps=[]
+       job 'Pre-merge acknowledged — Akto' completed/success failed_steps=[]
+    run '' id=34360633339 event=pull_request status=completed conclusion=startup_failure created=2026-09-09T13:59:19Z
+    run '' id=34360630514 event=pull_request_target status=completed conclusion=startup_failure created=2026-09-09T13:59:17Z
+    run '' id=34360627333 event=push status=completed conclusion=startup_failure created=2026-09-09T13:59:16Z
+
+================ PR #925 (KS-1046) ================
+PR #925: state=open draft=False merged=False author=kksecura base=develop@8861e6216 head=5341b1daed8afe4254e05ef66ef4350fd8220d4f branch=feature/ks-1046-preflight-passed-is-printed-identically-whether-13-legs-ran commits=14 files=6 +860 -36 mergeable=True/unstable created=2026-09-09T10:31:48Z updated=2026-09-13T22:40:05Z title='KS-1046: the preflight verdict must not outlive its corpus — name the legs that ran'
+  head == pinned: True
+  body chars=11611 lines=109 at-signs=0 classes={'array': 0, 'prep': 0, 'email': 0, 'mention': 0, 'codespan': 0, 'other': 0}
+  KS ids in body: ['KS-1046', 'KS-773']
+  PR refs in body: ['#924', '#925']
+  headings: ['## BLUF', '## The defect, proven by control rather than argued', '## After', '## Shape follows precedent rather than inventing a third', '## The judgement call, stated so it can be disagreed with', '## Test Evidence', '## One stale comment found in passing (not changed here)', '## Round 3 — re-gate at `5341b1daed8afe4254e05ef66ef4350fd8220d4f`, STACKED on the census branch and the stale-develop branch', '## Review note']
+    body count 'Test Evidence': 2
+    body count '5341b1dae': 3
+    body count '8a5aff863': 2
+    body count 'bash 3.2.57': 1
+    body count 'node v24': 1
+    body count 'darwin': 1
+    body count 'NOT run': 4
+    body count 'NOT covered': 2
+    body count 'Migrations': 1
+    body count 'round 2': 2
+    body count 'Round 3': 1
+    body count 're-gate': 1
+    body count 's161': 2
+    body count '2026-09-09-s161': 1
+    body count '55 passed, 0 failed': 1
+    body count '53 passed, 2 failed': 1
+    body count '56 passed, 0 failed': 1
+    body count '54 passed, 1 failed': 1
+    body count 'F-925-1': 1
+    body count 'F-925-2': 1
+    body count 'F-925-3': 4
+    body count 'F-925-4': 2
+    body count 'F-925-5': 1
+    body count 'PREFLIGHT INCOMPLETE — 12/15': 1
+    body count 'PREFLIGHT PASSED.': 5
+    body count 'PREFLIGHT_STRICT_LEGS': 5
+    body count 'HEADER-MISMATCH': 1
+    body count 'TOTAL_LEGS=16': 2
+    body count 'PREFLIGHT ABORTED': 1
+    body count 'stacked': 1
+    body count 'STACKED': 1
+    body count '#924': 4
+    body count '#925': 1
+    body count 'Nothing failed': 3
+    body count 'legs 3 4 8': 4
+    body count '30 passed, 0 failed': 2
+    body count '13/13 legs ran': 3
+    body count '10/13': 2
+  file modified  +39 -1 changes=40 sha=1b22d4e14 .githooks/pre-push
+  file modified  +123 -1 changes=124 sha=affdf027b Blockchain/Dev/scripts/__tests__/pre_push_hook_base.test.sh
+  file modified  +53 -4 changes=57 sha=5ad054131 Blockchain/Dev/scripts/__tests__/preflight_deps.test.sh
+  file added     +158 -0 changes=158 sha=55a376f76 Blockchain/Dev/scripts/__tests__/run_code_guards.test.sh
+  file modified  +262 -30 changes=292 sha=28d3636c1 Blockchain/Dev/scripts/preflight/preflight.sh
+  file added     +225 -0 changes=225 sha=2f06e19d3 Blockchain/Dev/scripts/run-code-guards.sh
+  PR commits via API: 14
+  commit d4a596f35 parents=['986c592d5'] 2026-09-07T23:58:30Z tree=761816247 ids=['KS-882', 'KS-991'] PRrefs=[] at=1 chars=2184 subj='KS-991: skip a LOCAL develop that origin/develop provably supersedes'
+  commit a70f92d7c parents=['d4a596f35'] 2026-09-08T00:11:56Z tree=7053cb2d7 ids=['KS-991'] PRrefs=[] at=1 chars=1629 subj='KS-991 item 1: say WHICH failure it was — a tree with no install is not a finding'
+  commit ed954f09e parents=['fe0fd640c'] 2026-09-09T01:40:07Z tree=a6b6c4a5c ids=['KS-1032', 'KS-1033', 'KS-1034', 'KS-666', 'KS-926'] PRrefs=[] at=1 chars=5799 subj='KS-926: give every check-*.sh guard a home, and make "no home" fail the push'
+  commit 0956c3dbe parents=['b6884888d'] 2026-09-09T10:29:57Z tree=8b26a17dd ids=['KS-1046', 'KS-773'] PRrefs=['#924'] at=1 chars=2486 subj='KS-1046: the preflight verdict must not outlive its corpus — name the legs that ran'
+  commit 8a5aff863 parents=['0956c3dbe'] 2026-09-09T13:16:17Z tree=c6c9d73f7 ids=['KS-1046', 'KS-1047'] PRrefs=[] at=1 chars=3373 subj='KS-1046 round 2 (QA F-925-1 + F-925-2): the header described an escape that never existed, and the leg count w'
+  commit 48553f272 parents=['a70f92d7c', '8861e6216'] 2026-09-13T21:35:51Z tree=2e6d92d16 ids=[] PRrefs=[] at=0 chars=104 subj='Merge develop `8861e6216` into ks-991 — bring the branch to the current base before the CASE 10/11 round'
+  commit a4f71cde6 parents=['48553f272'] 2026-09-13T21:42:25Z tree=5d4023647 ids=['KS-991'] PRrefs=[] at=0 chars=3035 subj='KS-991: pin the stale-develop skip with CASE 10 (skips, says why) and CASE 11 (a real change still runs)'
+  commit 21368d250 parents=['ed954f09e', '8861e6216'] 2026-09-13T21:54:28Z tree=d64774355 ids=[] PRrefs=[] at=0 chars=184 subj='Merge develop `8861e6216` into ks-926 — bring the branch to the current base; the two appended legs become 14/'
+  commit b54487216 parents=['21368d250'] 2026-09-13T22:00:09Z tree=09e693d5a ids=['KS-926'] PRrefs=[] at=0 chars=4134 subj='KS-926: check-environment.sh leaves WIRED for DEFERRED, the 21st guard is homed, and the leg-1 fixture learns '
+  commit ba23b2240 parents=['8a5aff863', '8861e6216'] 2026-09-13T22:12:16Z tree=352be9a4a ids=[] PRrefs=[] at=0 chars=103 subj='Merge develop `8861e6216` into ks-1046 — bring the branch to the current base; the leg count becomes 14'
+  commit 4ece7b008 parents=['ba23b2240', 'b54487216'] 2026-09-13T22:12:41Z tree=92a04af70 ids=[] PRrefs=[] at=0 chars=103 subj='Merge `b54487216` (the ks-926 branch: leg 15, the guard census) into ks-1046 — the leg count becomes 15'
+  commit 6ab1944c9 parents=['4ece7b008', 'a4f71cde6'] 2026-09-13T22:13:04Z tree=72824aaa4 ids=[] PRrefs=[] at=0 chars=99 subj='Merge `a4f71cde6` (the ks-991 branch: the stale-develop skip and the env_fail verdict) into ks-1046'
+  commit 4459a6068 parents=['6ab1944c9'] 2026-09-13T22:14:33Z tree=27d3c47b8 ids=['KS-1046'] PRrefs=[] at=0 chars=1785 subj="KS-1046: the leg-1 fixture accepts the honest pass shape and does not inherit the operator's strict setting"
+  commit 5341b1dae parents=['4459a6068'] 2026-09-13T22:15:50Z tree=213663535 ids=['KS-1046'] PRrefs=[] at=0 chars=1535 subj='KS-1046: TOTAL_LEGS is checked, not trusted — a step header whose denominator disagrees aborts the run (QA F-9'
+  reviews: 0 []
+  review comments: 0
+  issue comment 5600421772 linear[bot] 2026-09-09T10:31:52Z chars=5760 at-signs=0 classes={'array': 0, 'prep': 0, 'email': 0, 'mention': 0, 'codespan': 0, 'other': 0} KS=['KS-1046', 'KS-773'] head-named=False
+  issue comment 5602496590 kksecura 2026-09-09T13:17:48Z chars=3489 at-signs=0 classes={'array': 0, 'prep': 0, 'email': 0, 'mention': 0, 'codespan': 0, 'other': 0} KS=['KS-1047'] head-named=False
+  compare develop...head: status=ahead merge_base=8861e62161466c40f08d2b10a30edeb203123993 ahead=14 behind=0 files=6 total_commits=14
+    cmp file modified  +39 -1 sha=1b22d4e14 .githooks/pre-push
+    cmp file modified  +123 -1 sha=affdf027b Blockchain/Dev/scripts/__tests__/pre_push_hook_base.test.sh
+    cmp file modified  +53 -4 sha=5ad054131 Blockchain/Dev/scripts/__tests__/preflight_deps.test.sh
+    cmp file added     +158 -0 sha=55a376f76 Blockchain/Dev/scripts/__tests__/run_code_guards.test.sh
+    cmp file modified  +262 -30 sha=28d3636c1 Blockchain/Dev/scripts/preflight/preflight.sh
+    cmp file added     +225 -0 sha=2f06e19d3 Blockchain/Dev/scripts/run-code-guards.sh
+  compare 4459a6068...head: status=ahead ahead=1 behind=0 files=2: [('preflight_deps.test.sh', 26, 2), ('preflight.sh', 18, 1)]
+    hunks in preflight_deps.test.sh: ['@@ -280,10 +280,11 @@ expect "DEV-PROCESS records the Akto budgets as unbaselined here" "1" \\', '@@ -295,6 +296,17 @@ preflight_fixture_run() {            # $1 = deps rc, $2 = fixture-suite rc, $3 =', '@@ -401,7 +413,8 @@ preflight_fixture_run() {            # $1 = deps rc, $2 = fixture-suite rc, $3 =', '@@ -435,6 +448,17 @@ expect "leg 14: a RED suite fails the push, after de-slotting" \\']
+    hunks in preflight.sh: ['@@ -156,7 +156,24 @@ _leg_concluded() {']
+  compare 8a5aff863...head: status=ahead ahead=125 behind=0 files=300 total_commits=125
+  actions runs at head: 7
+    run 'pr-premerge-ack' id=34787476870 event=pull_request status=completed conclusion=success created=2026-09-13T22:40:08Z
+       job 'Linear ticket present' completed/success failed_steps=[]
+       job 'Pre-merge acknowledged — Akto' completed/success failed_steps=[]
+       job 'Pre-merge acknowledged — Schemathesis' completed/success failed_steps=[]
+    run 'PR — Lockfiles (path-skip twin)' id=34787428668 event=pull_request status=completed conclusion=success created=2026-09-13T22:39:11Z
+       job 'Standalone locks pass clean-room npm ci' completed/success failed_steps=[]
+    run 'pr-premerge-ack' id=34787428618 event=pull_request status=completed conclusion=success created=2026-09-13T22:39:11Z
+       job 'Linear ticket present' completed/success failed_steps=[]
+       job 'Pre-merge acknowledged — Akto' completed/success failed_steps=[]
+       job 'Pre-merge acknowledged — Schemathesis' completed/success failed_steps=[]
+    run 'Security Scanning' id=34787428627 event=pull_request status=completed conclusion=failure created=2026-09-13T22:39:11Z
+       job 'Secret Detection' completed/success failed_steps=[]
+       job 'Dependency Audit' completed/failure failed_steps=[(7, "Audit-contract suites (the gates' own validator)", 'failure')]
+       job 'Infrastructure Security Scan' completed/success failed_steps=[]
+       job 'SAST Analysis' completed/skipped failed_steps=[]
+       job 'Code Security Gates' completed/skipped failed_steps=[]
+       job 'Container Security Scan' completed/skipped failed_steps=[]
+       job 'Security Summary' completed/success failed_steps=[]
+    run 'PR Security Gates (KS-168)' id=34787428639 event=pull_request status=completed conclusion=failure created=2026-09-13T22:39:11Z
+       job 'Code Security Gates' completed/failure failed_steps=[(11, 'All shell test suites (KS-666 / KS-731 — globbed, not listed)', 'failure')]
+    run 'pr' id=34787428786 event=pull_request status=in_progress conclusion=None created=2026-09-13T22:39:11Z
+       job 'Migration behaviour (KS-667)' completed/success failed_steps=[]
+       job 'build / Build + push platform images (fresh)' completed/success failed_steps=[]
+       job 'Akto suite (PR)' in_progress/None failed_steps=[]
+       job 'Playwright suite' completed/failure failed_steps=[(7, 'Quality gate — unit suite (test:unit)', 'failure'), (11, 'Upload Playwright report', 'failure')]
+       job 'Performance suite (k6 smoke)' in_progress/None failed_steps=[(10, 'Enforce Performance result (block on any failure)', 'failure'), (11, 'Upload performance reports', 'failure')]
+       job 'Schemathesis suite' completed/success failed_steps=[]
+    run 'Dependabot standalone locks' id=34787426861 event=pull_request_target status=completed conclusion=skipped created=2026-09-13T22:39:08Z
+       job 'Regenerate drifted standalone locks' completed/skipped failed_steps=[]
+
+PR #903: state=open merged=False head=a4f71cde660c1442d98317e26d93845340b20098 mergeable=True/unstable updated=2026-09-13T21:49:50Z
+done at 08:52:24 AEST

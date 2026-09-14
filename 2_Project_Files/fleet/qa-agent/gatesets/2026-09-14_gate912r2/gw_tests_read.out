@@ -1,0 +1,69 @@
+== ks1057-verify-confidence-is-status-aware: 369 lines, it( 9, listen( 2
+12:// KS-1004 (#912), `status === 'anchor_failed'` implied `txHash === null`,
+53://     blob went `anchor_failed` on a raced signal.
+123:  originate.listen(0, '127.0.0.1');
+177:  gateway = app.listen(0, '127.0.0.1');
+207:  it('DEFECT: an anchor_failed blob carrying a hash AND a height must not report on-chain', async () => {
+209:      status: 'anchor_failed',
+211:      blockHeight: 4242,
+226:    expect(body.blockchain.blockHeight).toBe(4242);
+229:  it('DEFECT: a declared-simulated blob must not report on-chain even when confirmed', async () => {
+247:  it('CONTROL (pre-#912 shape): anchor_failed with no hash and zero height stays off-chain', async () => {
+252:      status: 'anchor_failed', txHash: null, blockHeight: 0, error: 'anchor failed on chain',
+258:  it('CONTROL (non-zero): a confirmed blob still reports on-chain and verified', async () => {
+262:      status: 'confirmed', txHash: REAL_TX, blockHeight: 4242, network: 'preview',
+269:  it('REGRESSION: a legacy statusless blob keeps reporting on-chain (the seeded demo documents)', async () => {
+316:  it('F1 DEFECT: a FAILED anchor reached via tier 2 must not report on-chain', async () => {
+318:      transactionHash: REAL_TX, blockNumber: 4242, status: 'failed',
+324:  it('F1 DEFECT: a SUBMITTED anchor reached via tier 2 must not report on-chain', async () => {
+338:  it("F1 CONTROL (non-zero): a CONFIRMED anchor reached via tier 2 enters the `=== 'confirmed'` arm and still reports on-chain", async () => {
+351:      transactionHash: REAL_TX, blockNumber: 4242, status: 'confirmed',
+357:  it('REGRESSION: live chain evidence still heals a blob that says anchor_failed', async () => {
+359:    // scan must still override a stale or raced `anchor_failed` — so the fix
+362:      { status: 'anchor_failed', txHash: null, blockHeight: 0 },
+== ks1069-persisted-anchored-input-shape: 256 lines, it( 12, listen( 2
+17://     positive integer: the STRING '0', -1, 4242.5 and the string '4242' all
+92:  originate.listen(0, '127.0.0.1');
+145:  gateway = app.listen(0, '127.0.0.1');
+179:const CONFIRMED_REAL = { txHash: REAL_TX, blockHeight: 4242, status: 'confirmed' } as const;
+183:  it('E1 DEFECT (item 2): a tx_sim_ placeholder hash with a height and confirmed must not report on-chain', async () => {
+189:  it('E2 DEFECT (item 2): a mock_tx_ placeholder hash must not report on-chain', async () => {
+194:  it('E11 DEFECT (item 2): a bare tx_ placeholder hash — the third KS-522 prefix — must not report on-chain', async () => {
+201:  it("E3 DEFECT (item 3): simulated: 'true' (a string) must count as simulated", async () => {
+206:  it('E4 DEFECT (item 3): simulated: 1 must count as simulated', async () => {
+211:  it('E12 CONTROL (item 3): simulated: false still reports on-chain — the guard refuses truthy, not present', async () => {
+220:  it("E5 DEFECT (item 1): blockHeight '0' (the STRING zero) must not report on-chain", async () => {
+225:  it('E6 DEFECT (item 1): blockHeight -1 must not report on-chain', async () => {
+230:  it("E7 RULED (item 1, strict): blockHeight '4242' (a numeric STRING) must not report on-chain", async () => {
+233:    const body = await verifyTier1({ ...CONFIRMED_REAL, blockHeight: '4242' });
+237:  it('E8 DEFECT (item 1): blockHeight 4242.5 (not an integer) must not report on-chain', async () => {
+238:    const body = await verifyTier1({ ...CONFIRMED_REAL, blockHeight: 4242.5 });
+242:  it('E9 CONTROL (item 1): blockHeight 0 (the number, the fail-closed writer shape) stays off-chain-only', async () => {
+248:  it('E10 CONTROL (non-zero): a real 64-hex hash, a positive integer height and confirmed still report on-chain', async () => {
+254:    expect(body.blockchain.blockHeight).toBe(4242);
+== ks1070-tier2-carries-simulated: 212 lines, it( 3, listen( 2
+15:// `{transactionHash: <64 hex>, blockNumber: 4242, status: 'confirmed',
+84:  originate.listen(0, '127.0.0.1');
+137:  gateway = app.listen(0, '127.0.0.1');
+181:  it('D1 DEFECT (tier 2): a CONFIRMED anchor with a real hash AND simulated: true must not report on-chain', async () => {
+185:      transactionHash: REAL_TX, blockNumber: 4242, status: 'confirmed', simulated: true,
+193:  it('D2 CONTROL (non-zero, tier 2): the same row WITHOUT simulated still reports on-chain', async () => {
+197:      transactionHash: REAL_TX, blockNumber: 4242, status: 'confirmed',
+203:  it('D3 CONTROL (tier 1): the byte-equivalent blob via tier 1 already reports off-chain-only', async () => {
+207:      txHash: REAL_TX, blockHeight: 4242, status: 'confirmed', simulated: true,
+== ks1071-verify-confidence-one-mapping: 291 lines, it( 9, listen( 2
+108:  originate.listen(0, '127.0.0.1');
+161:  gateway = app.listen(0, '127.0.0.1');
+205:  it('C1 DEFECT (F8, tier 1): a `pending` anchor answers pending-onchain, as tier 2 already did', async () => {
+214:  it('C2 DEFECT (F8, tier 1): a `submitted` anchor answers pending-onchain, as tier 2 already did', async () => {
+224:  it("C3 PIN (tier 2): a `pending` anchor — the column's own DEFAULT — answers pending-onchain", async () => {
+232:  it('C4 DEFECT (F10, tier 2): an out-of-union status answers off-chain-only, not "still coming"', async () => {
+236:    const body = await verifyTier2({ transactionHash: REAL_TX, blockNumber: 4242, status: 'expired' });
+242:  it('C5 CONTROL (tier 1): the same out-of-union status answers off-chain-only on tier 1 too', async () => {
+246:    const body = await verifyTier1({ txHash: REAL_TX, blockHeight: 4242, status: 'expired' });
+251:  it('C6 DEFECT: the mapping is ONE exported function with a closed default', async () => {
+265:  it("C7 REGRESSION (tier 1): a STATUSLESS blob carrying `confidence: 'pending-onchain'` keeps answering pending-onchain", async () => {
+276:  it("C8 CONTROL (tier 1): originate's own `anchor_failed` — out of anchoring's union — stays off-chain-only", async () => {
+280:    const body = await verifyTier1({ txHash: null, blockHeight: 0, status: 'anchor_failed' });
+285:  it('C9 CONTROL (tier 1): a `failed` anchor stays off-chain-only', async () => {
+287:    const body = await verifyTier1({ txHash: REAL_TX, blockHeight: 4242, status: 'failed' });

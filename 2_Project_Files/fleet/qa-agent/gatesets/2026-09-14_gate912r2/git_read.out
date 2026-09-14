@@ -1,0 +1,71 @@
+== 2026-09-14 08:03:55 AEST git reads (read verbs only) ==
+== log -3 head (H, parents, tree, author, date, subject)
+609c44c55323b5c90320847b6837ca37f6586705
+P 3231514154aaa8a469e6cdd5f553ee8ce6079b89
+T b95db50904732799f5f099a94c298990d32b2727
+A Kam Kreiser <kamil.kreiser@secuura.ai> 2026-09-14 07:51:48 +1000
+S KS-1004: an anchor time is carried only alongside a hash; the guard cell that pinned the retired txHash arm is re-stated as the union
+--
+3231514154aaa8a469e6cdd5f553ee8ce6079b89
+P ae8751f380ed361505694ba71ad9bf1308ee0e87 8861e62161466c40f08d2b10a30edeb203123993
+T 632eed5bb623305e08db3eacc464600532059e37
+A Kam Kreiser <kamil.kreiser@secuura.ai> 2026-09-14 07:47:56 +1000
+S Merge develop 8861e6216 into ks-1004 — the gateway confidence fix and the threadToken carry come under this branch
+--
+8861e62161466c40f08d2b10a30edeb203123993
+P a4ef481c897265ae01936ad10d84d547d95557d2
+T 6ae01e16f90dc02b504f3bbd13542a7efd1f66de
+A kksecura <kamil.kreiser@secuura.ai> 2026-09-13 22:00:26 +1000
+S KS-924 KS-901: the entrypoint corpus pins its contributing packages by name and compares SKIP as a set; the census follows three more express-binding shapes (#980)
+--
+== merge-base head develop
+8861e62161466c40f08d2b10a30edeb203123993
+== is-ancestor develop head rc
+rc=0
+== is-ancestor ae8751f38 head rc
+rc=0
+== merge-base ae8751f38 develop
+e559f7bbace5281668637755410273ff58068c15
+== rev-list --left-right --count develop...head
+0	3
+== rev-list --left-right --count develop...ae8751f38
+122	1
+== diff --numstat develop..head (the PR onto develop)
+225	0	Blockchain/Dev/services/originate/src/__tests__/ks1004-anchor-failed-lockout.test.ts
+13	6	Blockchain/Dev/services/originate/src/__tests__/ks1058-anchor-failed-preserves-thread-token.test.ts
+19	3	Blockchain/Dev/services/originate/src/__tests__/ks535-anchor-async-fail-propagates.test.ts
+46	9	Blockchain/Dev/services/originate/src/services/anchorStateSync.ts
+== diff --name-status develop head
+A	Blockchain/Dev/services/originate/src/__tests__/ks1004-anchor-failed-lockout.test.ts
+M	Blockchain/Dev/services/originate/src/__tests__/ks1058-anchor-failed-preserves-thread-token.test.ts
+M	Blockchain/Dev/services/originate/src/__tests__/ks535-anchor-async-fail-propagates.test.ts
+M	Blockchain/Dev/services/originate/src/services/anchorStateSync.ts
+== diff --numstat merge..fix (323151415 609c44c55)
+21	0	Blockchain/Dev/services/originate/src/__tests__/ks1004-anchor-failed-lockout.test.ts
+13	6	Blockchain/Dev/services/originate/src/__tests__/ks1058-anchor-failed-preserves-thread-token.test.ts
+4	1	Blockchain/Dev/services/originate/src/services/anchorStateSync.ts
+== diff --numstat e559f7bba ae8751f38 (round 1 PR diff)
+204	0	Blockchain/Dev/services/originate/src/__tests__/ks1004-anchor-failed-lockout.test.ts
+19	3	Blockchain/Dev/services/originate/src/__tests__/ks535-anchor-async-fail-propagates.test.ts
+43	8	Blockchain/Dev/services/originate/src/services/anchorStateSync.ts
+== diff --numstat ae8751f38 323151415 | wc -l (develop's side of the merge)
+     369
+== diff --numstat develop 323151415 (merge commit vs develop)
+204	0	Blockchain/Dev/services/originate/src/__tests__/ks1004-anchor-failed-lockout.test.ts
+19	3	Blockchain/Dev/services/originate/src/__tests__/ks535-anchor-async-fail-propagates.test.ts
+43	9	Blockchain/Dev/services/originate/src/services/anchorStateSync.ts
+== log develop..head oneline
+609c44c55 KS-1004: an anchor time is carried only alongside a hash; the guard cell that pinned the retired txHash arm is re-stated as the union
+323151415 Merge develop 8861e6216 into ks-1004 — the gateway confidence fix and the threadToken carry come under this branch
+ae8751f38 KS-1004: a document carrying a txHash can now be marked anchor-failed
+== log e559f7bba..develop -- api-gateway verification.ts
+506cd3a33 2026-09-13 16:56:51 +1000 KS-1069: persistedAnchored validates the shape of its inputs — placeholder hash, non-integer height, any truthy simulated (stacks on #968 → #967) (#969)
+6696c6681 2026-09-13 15:27:21 +1000 KS-1070: carry `simulated` into the tier-2 verify blob so the simulated guard can bite on that tier (stacks on #967) (#968)
+163ca2c74 2026-09-13 15:16:28 +1000 KS-1071: one status→confidence mapping for both gateway verify tiers, with a closed default (#967)
+dd9463b37 2026-09-10 08:05:57 +1000 KS-1057 F5/F6: correct two comments that name the wrong guard
+039da8d6e 2026-09-10 07:16:07 +1000 KS-1057 F1/F2: tier 2 was still presence-keyed — carry the anchor's real status
+1cc021a44 2026-09-10 06:29:31 +1000 KS-1057: a failed anchor carrying a hash must not report verified
+== log e559f7bba..develop -- anchorStateSync.ts
+27509dc7a 2026-09-11 19:31:47 +1000 KS-1058: a failed anchor must not destroy a thread token it did not mint — and confidence must NOT be carried (#936)
+== log e559f7bba..develop -- originate __tests__ | wc -l
+       7

@@ -1,0 +1,62 @@
+2026-09-14 09:08:46 AEST
+bash: GNU bash, version 3.2.57(1)-release (arm64-apple-darwin25)
+0 green --check (scratch brief+prompt)                                     |   0 |   0 | LANDED | ok
+  green output lacks the develop note (still M18, or MOVED-disjoint)
+  develop note at cell 0:   develop's security-scan.yml blob 47da5cac9 (M18) / pr-security-gates.yml blob 571817703 (M18) / pr-platform-suites.yml blob a509ad793 (M18
+1a wrong #940 head (env override)                                          |   6 |   6 | LANDED | ok
+1b wrong #941 head (env override)                                          |   6 |   6 | LANDED | ok
+1c wrong #942 head (env override: the ORIGINAL commit c1676269d)           |   6 |   6 | LANDED | ok
+1d wrong #887 head (env override: the REVIEWED head cb7a3e3be)             |   6 |   6 | LANDED | ok
+21a #942's run re-pointed at the base's run 34427586025 (at c1676269d) -> 21 |  21 |  21 | LANDED | ok
+21b #887's run id -> 1 (does not exist) -> 21                              |  21 |  21 | LANDED | ok
+3 wrong #940-#941 merge-base pin (launcher tamper) -> 10                   |  10 |  10 | LANDED | ok
+4 env file missing -> the run guard cannot read the API -> 21 (first API guard) |  21 |  21 | LANDED | ok
+2 unknown develop sha -> the compare guard reads #942 and #887 mb != pin -> 10 |  10 |  10 | LANDED | ok
+19 develop's real scan blob listed as '#940 landed' (launcher tamper) -> 19 |  19 |  19 | LANDED | ok
+18a develop's real suites blob pinned as neither OK nor LANDED -> OTHER -> 18 |  18 |  18 | LANDED | ok
+18b pinned to M15 (compare pins aimed at M18): the launcher JUDGES the live M15..M18 delta -> 0 |   0 |   0 | LANDED | ok
+  cell 18b judgement: origin develop MOVED 1c38077ba2aea5f4c4371c1b68796026dc577764 -> 6e78961e1d04277ecbdb0537e630afa0bf63b13c: commits=4 files=9 (.test.sh files 2) — disjoint from the three judged files (by blob) and the
+18c M15 pin, tests prefix neutralised, the doc slot AIMED at the ks949 auth test (in M15..M18) -> 18 |  18 |  18 | LANDED | ok
+18d M15 pin, tests prefix neutralised, nothing aimed: the delta judged on the other seven paths -> 0 |   0 |   0 | LANDED | ok
+  cell 18d judgement: origin develop MOVED 1c38077ba2aea5f4c4371c1b68796026dc577764 -> 6e78961e1d04277ecbdb0537e630afa0bf63b13c: commits=4 files=9 (.test.sh files 2) — disjoint from the three judged files (by blob) and the eight GUARDED paths
+5 empty brief                                                              |   3 |   3 | LANDED | ok
+6 empty prompt                                                             |   4 |   4 | LANDED | ok
+7 QA project dir missing (launcher tamper)                                 |   2 |   2 | LANDED | ok
+8 repo dir missing (launcher tamper)                                       |   5 |   5 | LANDED | ok
+9 brief says TIER 3 (brief tamper)                                         |   7 |   7 | LANDED | ok
+10 prompt says TIER 3 (prompt tamper)                                      |   7 |   7 | LANDED | ok
+11 brief says ROUND 3 (brief tamper)                                       |  15 |  15 | LANDED | ok
+12 prompt says ROUND 3 (prompt tamper)                                     |  15 |  15 | LANDED | ok
+13 prompt lacks ultrathink first line                                      |   8 |   8 | LANDED | ok
+14 prompt lacks the real brief path                                        |   9 |   9 | LANDED | ok
+15 prompt lacks MAIL YOUR VERDICT                                          |  12 |  12 | LANDED | ok
+16 prompt lacks the NEVER-push line                                        |  11 |  11 | LANDED | ok
+17 prompt lacks no-memory-maintenance                                      |  14 |  14 | LANDED | ok
+18 prompt lacks NEVER-print-a-credential                                   |  17 |  17 | LANDED | ok
+20a prompt lacks #887's full head SHA (exit 20)                            |  20 |  20 | LANDED | ok
+20b brief lacks #941's full head SHA (exit 20)                             |  20 |  20 | LANDED | ok
+23 override launch, no claude on PATH -> 16                                |  16 |  16 | LANDED | ok
+24 real launch (not installed yet), no claude -> 3                         |   3 |   3 | LANDED | ok
+22 real launch shape (defaults -> scratch set), stdin not a TTY -> 22      |  22 |  22 | LANDED | ok
+  cell 22 did not reach the DEV_NOTE echo (a guard refused earlier)
+22b the same under a pty (script), claude absent -> 127 at the exec line   | 127 | 127 | LANDED | ok
+  raw-control-byte census launch_qa_secuura_L9_940_941_942_887.sh: 0
+  raw-control-byte census 2026-09-14_secuura-L9-940-941-942-887-ks1075-1077-1078-961-tier2.md: 0
+  raw-control-byte census 2026-09-14_secuura-L9-940-941-942-887-ks1075-1077-1078-961-tier2.prompt.txt: 0
+  raw-control-byte census controls_check.sh: 0
+  raw-control-byte census redproof.sh: 0
+  raw-control-byte census gen_launcher_L9.py: 0
+  raw-control-byte census gen_patch_887.py: 0
+  raw-control-byte census brief_patch_887.py: 0
+  raw-control-byte census gh_read.py: 0
+  raw-control-byte census gh_read_887.py: 0
+  raw-control-byte census linear_read.py: 0
+  raw-control-byte census guards_sim.py: 0
+  positive control (synthetic NUL): offsets [16]
+  exit codes declared in the launcher (distinct): exit 0 exit 1 exit 10 exit 11 exit 12 exit 13 exit 14 exit 15 exit 16 exit 17 exit 18 exit 19 exit 2 exit 20 exit 21 exit 22 exit 3 exit 4 exit 5 exit 6 exit 7 exit 8 exit 9 
+  /bin/bash -n launcher: ok
+25 green again (pristine sha-identical)                                    |   0 |   0 | LANDED | ok
+pristine sha256: launcher 2c69685a668b8886 brief 427c62779ae3f0e6 prompt 23474b7019a48a93
+work dir (kept, never rm'd): /Volumes/DevMASTER/WEDNESDAY/2_Project_Files/fleet/qa-agent/gatesets/2026-09-14_gateL9/redproof.HzmWpi
+FAILS=2
+2026-09-14 09:14:20 AEST

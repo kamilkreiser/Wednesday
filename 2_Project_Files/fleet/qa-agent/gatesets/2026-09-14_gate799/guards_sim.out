@@ -1,0 +1,86 @@
+--- 1. ks860 regexes over the two test files
+ok   originate@head: sites [145] offenders [] (want sites [145], offenders [])
+ok   security@head: sites [138] offenders [] (want sites [138], offenders [])
+ok   originate@38f6377b9: offenders [121] (want [121] — Peter's :121/:128)
+ok   security@38f6377b9: offenders [128] (want [128] — Peter's :121/:128)
+ok   predicate fires on the three defect spellings (:507/:508/:511 controls)
+ok   the three loopback spellings accepted (:515-517 controls)
+ok   the security file's :135 comment is masked, :138 accepted
+ok   T1o: anchor x1; tampered -> offenders [145] (want [145])
+ok   T1s: anchor x1; tampered -> offenders [138] (want [138])
+--- 2. the policy over the §2a(A) shapes (drafter rows)
+ok   platform x any: (True, 'platform-admin') (want (True, 'platform-admin'))
+ok   CASE 1 same org: (True, 'same-organisation') (want (True, 'same-organisation'))
+ok   CASE 2 cross org: (False, 'cross-organisation') (want (False, 'cross-organisation'))
+ok   CASE 3 org-less key: (True, 'same-tenant') (want (True, 'same-tenant'))
+ok   CASE 4 org-less caller: (False, 'caller has no organisation') (want (False, 'caller has no organisation'))
+ok   CASE 5 tenant-less caller (F-3): (False, 'caller has no tenant') (want (False, 'caller has no tenant'))
+ok   cross-tenant: (False, 'cross-tenant') (want (False, 'cross-tenant'))
+ok   ADMIN tenant-wide, cross org: (True, 'same-tenant') (want (True, 'same-tenant'))
+ok   case/padding normalised: (True, 'same-organisation') (want (True, 'same-organisation'))
+ok   no scope (KS-742 callers): omitting organisationScope applies no bound
+ok   T3 (no-tenant arm -> allow) flips exactly ['CASE 5 tenant-less caller (F-3)']
+ok   T9 (ADMIN_NO_TENANT gains tenantId A) -> the same call now ALLOWS (CASE 5 reds 200)
+ok   T5 (organizationId dropped at the originate call): CASE 2 -> (True, 'same-tenant'), CASE 4 -> (True, 'same-tenant'), CASE 5 -> (False, 'caller has no tenant') (aimed reds = CASE 2 + CASE 4)
+--- 3. cell censuses
+ok   originate route test: 10 it( (want 10)
+ok   security route test: 7 it( (want 7)
+ok   security arm test: 11 it( (want 11)
+ok   ks860 guard: 23 it( (want 23)
+ok   ks577 (#880): 8 it( (want 8)
+ok   ks764 source guard: 5 per-site cells x 2 sites + 5 top-level = 15 (want 15)
+ok   at 38f6377b9: originate 9 (want 9), security 6 (want 6) — one new cell each this round
+--- 4. develop-alone arithmetic (predictions)
+ok   828-15=813; 205-18=187; 598-10=588; #880: 195-8=187 (= Peter's 187 at 85f8263c2 + develop's 8 reconcile); the pair 187+18+8=213
+--- 5. jwt.ts :173 vs :263
+ok   jwt.ts:173 = 'tenantId: user.tenantId,'; :263 = '...(meta.tenantId ? { tenantId: meta.tenantId } : {}),'
+ok   jwt.ts blob-identical head = develop (d0d55c11b)
+ok   an undefined-valued key is dropped by JSON serialisation (Python model of JSON.stringify; the gate runs the node one-liner)
+ok   adminConfig.ts: cites jwt.ts:263 x1
+ok   auth.ts: cites jwt.ts:263 x1
+ok   index.ts: cites jwt.ts:263 x1
+ok   ks764-admin-api-keys-revoke-route-contract.test.ts: cites jwt.ts:263 x1
+--- 6. tamper anchors
+ok   T2 (F-2 at source): count 1 (want 1)
+ok   F-2 line :184: count 1 (want 1)
+ok   T3 :175-177: count 1 (want 1)
+ok   T4 security :1140: count 1 (want 1)
+ok   T5 originate :1035: count 1 (want 1)
+ok   T6 stub :88: count 1 (want 1)
+ok   T9o :131: count 1 (want 1)
+ok   T9s :91: count 1 (want 1)
+ok   T10 :1038: count 1 (want 1)
+ok   originate if(!decision.allow) :1037: count 1 (want 1)
+ok   the default-tenant literal line (NEVER an anchor): count 6 (want 6)
+ok   the Not-found 200 line (NEVER an anchor): count 3 (want 3)
+ok   the warn spy: count 1 (want 1)
+ok   the log pin: count 1 (want 1)
+ok   originate authenticate() never touches req.tenantId (docblock claim): count 0 (want 0)
+ok   positive control for the zero above: count 3 (want 3)
+ok   6(b) security: count 1 (want 1)
+ok   6(b) originate — the hardcoded-403 line file-wide (x2: :1047 the revoke route, :1901 another route); the in-route count is asserted below: count 2 (want 2)
+ok   within the revoke route: one hardcoded 403 and the 6(c) text
+ok   6(c) security text x1
+ok   security DELETE route x1
+ok   H-reach: no tenantId read between security :1122 and :1135; the refusal log's callerTenantId is the positive control
+--- 7. two reads of the bytes agree
+ok   ks764-admin-api-keys-revoke-route-contract.test.ts: git show == contents API (32edded63a6bc739)
+ok   ks764-revoke-organisation-route-contract.test.ts: git show == contents API (4b68c363d7a517f8)
+ok   keyRevokePolicy.ts: git show == contents API (9539d243958a9123)
+ok   index.ts: git show == contents API (6ed6dc98a9840db5)
+ok   adminConfig.ts: git show == contents API (d08949fd4dba1bec)
+ok   ks860-test-listeners-bind-loopback.test.ts: git show == contents API (fc62ca7410a06736)
+ok   ks764-admin-api-keys-revoke-route-contract.test.ts: sha256 32edded63a6bc739… = the builder's pristine
+ok   ks764-revoke-organisation-route-contract.test.ts: sha256 4b68c363d7a517f8… = the builder's pristine
+ok   keyRevokePolicy.ts: sha256 9539d243958a9123… = the builder's pristine
+--- 8. #880 — the two strings
+ok   false sentence 1 absent at head, x1 at develop
+ok   false sentence 2 absent at head, x1 at develop
+ok   the two true descriptions present x1 each at head (the second wrapped at lineWidth 100), 0 at develop
+ok   the .ts source carries the env name x2 at head, 0 at develop
+ok   the .ts round delta = 8 changed lines (-3 +5)
+ok   the yaml round delta = 2 hunks: ['@@ -10044,2 +10044,4 @@', '@@ -35571,5 +35573,6 @@']
+ok   at the merge commit the .ts source and the yaml are develop's bytes
+ok   the generator's byte-compare and lineWidth:100
+ok   platform.ts consumes priorKeysRevoked (:712) and returns rotated (:748); priorKeysRevoked is not in the response block
+guards_sim: FAILS=0

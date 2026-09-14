@@ -1,0 +1,106 @@
+5,6c5,6
+< BRIEF="${QA881R2_BRIEF:-$WED/2_Project_Files/fleet/qa-agent/briefs/2026-09-14_secuura-881-ks798-841-799-tier1-r2.md}"
+< PROMPT_FILE="${QA881R2_PROMPT:-$WED/2_Project_Files/fleet/qa-agent/briefs/2026-09-14_secuura-881-ks798-841-799-tier1-r2.prompt.txt}"
+---
+> BRIEF="${QA912R2_BRIEF:-$WED/2_Project_Files/fleet/qa-agent/briefs/2026-09-14_secuura-912-ks1004-tier1-r2-937-ks1059-stacked.md}"
+> PROMPT_FILE="${QA912R2_PROMPT:-$WED/2_Project_Files/fleet/qa-agent/briefs/2026-09-14_secuura-912-ks1004-tier1-r2-937-ks1059-stacked.prompt.txt}"
+9,10c9,12
+< BRANCH='refs/heads/feature/ks-798-the-consent-page-posts-the-redirect-uri-in-the-client_id'
+< HEAD_SHA="${QA881R2_HEAD:-8ac9db66f6fd0d751f74ecc95bb314210a31ec52}"
+---
+> BRANCH='refs/heads/feature/ks-1004-anchor-failed-lockout'
+> BRANCH_937='refs/heads/feature/ks-1059-anchorstatesyncts360-removing-inflight-from-the-ks-587-sim'
+> HEAD_SHA="${QA912R2_HEAD:-609c44c55323b5c90320847b6837ca37f6586705}"
+> HEAD_937='6fd3a8bec4e4cc858d38925e00703a37ffcf1b30'
+13c15
+< REAL_BRIEF="$WED/2_Project_Files/fleet/qa-agent/briefs/2026-09-14_secuura-881-ks798-841-799-tier1-r2.md"
+---
+> REAL_BRIEF="$WED/2_Project_Files/fleet/qa-agent/briefs/2026-09-14_secuura-912-ks1004-tier1-r2-937-ks1059-stacked.md"
+24a27,31
+> if ! git -C "$REPO" ls-remote origin "$BRANCH_937" | grep -q "^${HEAD_937}[[:space:]]"; then
+>   echo "REFUSING: $HEAD_937 is not at $BRANCH_937 on origin — the stacked head moved; the brief is about a different SHA" >&2
+>   git -C "$REPO" ls-remote origin "$BRANCH_937" >&2
+>   exit 22
+> fi
+38a46,61
+> # The STACK pin: #937's delta onto #912 must be exactly ONE file over #912's head (the compare's merge_base = #912's head).
+> STACK_READ="$(
+>   set -a; . "$SECUURA_ENV"; set +a
+>   HEAD_SHA="$HEAD_SHA" HEAD_937="$HEAD_937" python3 - <<'PYS'
+> import json, os, urllib.request
+> t = os.environ.get("GH_TOKEN", "")
+> u = "https://api.github.com/repos/Secuura/Distributed_Secuura/compare/" + os.environ["HEAD_SHA"] + "..." + os.environ["HEAD_937"]
+> r = urllib.request.urlopen(urllib.request.Request(u, headers={"Authorization": "Bearer " + t, "Accept": "application/vnd.github+json"}), timeout=60)
+> c = json.load(r)
+> print("%s ahead=%d files=%d" % (c["merge_base_commit"]["sha"], c["ahead_by"], len(c.get("files") or [])))
+> PYS
+> )"
+> [ -n "$STACK_READ" ] || { echo "REFUSING: could not read the stack compare (#912 head...#937 head) from the GitHub compare API" >&2; exit 13; }
+> [ "$STACK_READ" = "$HEAD_SHA ahead=4 files=1" ] \
+>   || { echo "REFUSING: the stacked delta is not ONE file over #912's head: compare reads '$STACK_READ', brief pins '$HEAD_SHA ahead=4 files=1' (merge order #912 -> #937 is the premise of section S)" >&2; exit 23; }
+> 
+43c66
+<   DEV_NOTE="origin develop still $DEVELOP_SHA (M18, the develop this brief's 54/703 was written against and the head already contains; git ls-remote)"
+---
+>   DEV_NOTE="origin develop still $DEVELOP_SHA (M18, the develop this brief's 56/598 and 57/602 were written against and BOTH heads already contain; git ls-remote)"
+58,70c81,91
+< GUARDED = ["Blockchain/Dev/services/auth/src/routes/oauth.ts",
+<            "Blockchain/Dev/services/auth/src/__tests__/ks799-consent-script-csp-and-execution.test.ts",
+<            "Blockchain/Dev/services/auth/src/__tests__/ks799-consent-form-csrf-submit.test.ts",
+<            "Blockchain/Dev/services/auth/src/__tests__/ks798-consent-form-client-id.test.ts",
+<            "Blockchain/Dev/services/auth/src/__tests__/ks841-consent-form-pkce-and-client-id.test.ts",
+<            "Blockchain/Dev/services/auth/src/__tests__/ks781-n1-empty-mfacode-treated-as-absent.test.ts",
+<            "Blockchain/Dev/services/auth/",
+<            "Blockchain/Dev/services/api-gateway/src/middleware/csrf.ts",
+<            "Blockchain/Dev/services/api-gateway/src/specRouteMap.ts",
+<            "Blockchain/Dev/services/api-gateway/src/index.ts",
+<            "Blockchain/Dev/services/api-gateway/src/routes/proxy.ts",
+<            "Blockchain/Dev/docker/nginx-gateway/nginx-production.conf",
+<            "Blockchain/Dev/docs/openapi/secuura-api.yaml",
+---
+> GUARDED = ["Blockchain/Dev/services/originate/src/services/anchorStateSync.ts",
+>            "Blockchain/Dev/services/originate/src/__tests__/ks1004-anchor-failed-lockout.test.ts",
+>            "Blockchain/Dev/services/originate/src/__tests__/ks1058-anchor-failed-preserves-thread-token.test.ts",
+>            "Blockchain/Dev/services/originate/src/__tests__/ks535-anchor-async-fail-propagates.test.ts",
+>            "Blockchain/Dev/services/originate/src/__tests__/ks1059-sim-leg-must-not-resurrect-a-terminal-document.test.ts",
+>            "Blockchain/Dev/services/originate/src/",
+>            "Blockchain/Dev/services/api-gateway/src/routes/verification.ts",
+>            "Blockchain/Dev/services/api-gateway/src/__tests__/ks1057-verify-confidence-is-status-aware.test.ts",
+>            "Blockchain/Dev/services/api-gateway/src/__tests__/ks1069-persisted-anchored-input-shape.test.ts",
+>            "Blockchain/Dev/services/api-gateway/src/__tests__/ks1070-tier2-carries-simulated.test.ts",
+>            "Blockchain/Dev/services/api-gateway/src/__tests__/ks1071-verify-confidence-one-mapping.test.ts",
+80c101
+<     DISJOINT*) DEV_NOTE="origin develop MOVED $DEVELOP_SHA -> $CUR_DEV: ${DEV_JUDGEMENT#DISJOINT } — disjoint from the fifteen guarded paths (the six PR files, the services/auth/ prefix, the four gateway files, the nginx conf, the spec, the packages/shared tests prefix, the root lockfile); the gate merges the then-current develop, re-states the delta by name and re-derives the ratios (brief items 1, 2, 3, 7)" ;;
+---
+>     DISJOINT*) DEV_NOTE="origin develop MOVED $DEVELOP_SHA -> $CUR_DEV: ${DEV_JUDGEMENT#DISJOINT } — disjoint from the thirteen guarded paths (the five PR files, the services/originate/src/ prefix, the gateway verification.ts and its four tests, the packages/shared tests prefix, the root lockfile); the gate merges the then-current develop under BOTH heads, re-states the delta by name and re-derives the ratios (brief items 1, 2, 3, 4, 7; S1, S4)" ;;
+91a113,114
+> grep -qF "$HEAD_937" "$PROMPT_FILE" && grep -qF "$HEAD_937" "$BRIEF" \
+>   || { echo "REFUSING: brief or prompt does not name the stacked head SHA $HEAD_937 — a gate about another SHA is another gate" >&2; exit 20; }
+100,102c123,125
+< R1_READ='/Volumes/DevMASTER/!CODING/Secuura/Blockchain/5_Project_History/2026-09-13_s212/item0/peter_comment_5583115315.md'
+< grep -qF "$R1_READ" "$BRIEF" && grep -qF '5140256072' "$BRIEF" \
+<   || { echo "REFUSING: brief does not name the round-1 READ (Peter's review 5140256072 and his comment 5583115315 on disk at $R1_READ) — there is no round-1 QA report for #881 and a gate cannot ask" >&2; exit 19; }
+---
+> R1_READ='/Volumes/DevMASTER/WEDNESDAY/2_Project_Files/fleet/qa-agent/reports/2026-09-09_secuura-ks1004-912-tier1-VERDICT.md'
+> grep -qF "$R1_READ" "$BRIEF" && grep -qF '5597511879' "$BRIEF" \
+>   || { echo "REFUSING: brief does not name the round-1 READ (the recovered tier-1 NO GO verdict file at $R1_READ and its transcription onto the PR, issue comment 5597511879) — a gate cannot ask" >&2; exit 19; }
+107a131
+>   echo "  stacked head $HEAD_937 present at $BRANCH_937 on origin"
+108a133
+>   echo "  stack relation still merge_base $HEAD_SHA / ONE file for 609c44c55...6fd3a8bec (GitHub compare API: $STACK_READ)"
+111c136
+<   echo "  brief and prompt agree on TIER 1 and ROUND 2"
+---
+>   echo "  brief and prompt agree on TIER 1 and ROUND 2 (#912; #937 rides as TIER 2 ROUND 1 STACKED in the same files)"
+113c138
+<   echo "  brief and prompt both name the head SHA $HEAD_SHA"
+---
+>   echo "  brief and prompt both name the head SHA $HEAD_SHA and the stacked head SHA $HEAD_937"
+118c143
+<   echo "  brief names the round-1 read (Peter's review 5140256072 + comment 5583115315) and it is present on disk"
+---
+>   echo "  brief names the round-1 read (the recovered NO GO verdict file + transcription comment 5597511879) and it is present on disk"
+124c149
+< [ -z "${QA881R2_BRIEF:-}${QA881R2_PROMPT:-}${QA881R2_HEAD:-}" ] || { echo "REFUSING: a launch with test overrides set" >&2; exit 16; }
+---
+> [ -z "${QA912R2_BRIEF:-}${QA912R2_PROMPT:-}${QA912R2_HEAD:-}" ] || { echo "REFUSING: a launch with test overrides set" >&2; exit 16; }

@@ -1,0 +1,298 @@
+===== 01-merge.txt
+# merge — 2026-09-13T21:48:43Z
+HEAD e6e25421e98ba8f11153f5fc394fe79fc96549a0 parents: 38f6377b9 8861e6216
+tree: 7bb31ccb1dcd017b997f681db2633fe495cacbf3
+== BACKLOG.md head (both blocks?) ==
+# Fix Backlog
+
+Deferred problems noticed during other work, per the workspace "never skip a problem" rule.
+Promote items to Linear (Secuura-PK / KS) when picked up.
+
+- [ ] A stale `packages/shared/dist/` makes healthy service suites fail 22 tests, and the error
+      names the symptom instead of the cause
+  - Where: `Blockchain/Dev/packages/shared` (`main: dist/index.js`), reached by every service that
+...
+6:- [ ] A stale `packages/shared/dist/` makes healthy service suites fail 22 tests, and the error
+34:- [ ] `stack_env.test.sh` and `slot_target.test.sh` are not hermetic to ambient slot variables
+BACKLOG.md vs develop:  1 file changed, 27 insertions(+)
+BACKLOG.md vs 38f6377b9:  1 file changed, 19 insertions(+)
+== #799's 11 product/test files: blob identical to 38f6377b9? ==
+  same  8794bca5f Blockchain/Dev/packages/shared/src/index.ts
+  same  3a67987a7 Blockchain/Dev/packages/shared/src/middleware/index.ts
+  same  dcd774a30 Blockchain/Dev/packages/shared/src/security/keyRevokePolicy.ts
+  same  ab8e46d79 Blockchain/Dev/packages/shared/src/__tests__/ks764-key-revoke-call-site-guard.test.ts
+  same  26cec03de Blockchain/Dev/services/originate/src/routes/adminConfig.ts
+  same  f08ee1a89 Blockchain/Dev/services/originate/src/middleware/auth.ts
+  same  3331f59ce Blockchain/Dev/services/originate/src/__tests__/ks764-admin-api-keys-revoke-route-contract.test.ts
+  same  1bb567a09 Blockchain/Dev/services/security/src/index.ts
+  same  b0493aa67 Blockchain/Dev/services/security/src/keyRevokePolicy.ts
+  same  1fe8671b0 Blockchain/Dev/services/security/src/__tests__/ks764-key-revoke-organisation-arm.test.ts
+  same  7a75d2c65 Blockchain/Dev/services/security/src/__tests__/ks764-revoke-organisation-route-contract.test.ts
+guard blob now: e0dfadb9c (develop e0dfadb9c)
+audit-baseline: 03d1680e3
+diff HEAD vs develop (three-dot = my branch's own changes): 12 files
+BACKLOG.md
+Blockchain/Dev/packages/shared/src/__tests__/ks764-key-revoke-call-site-guard.test.ts
+Blockchain/Dev/packages/shared/src/index.ts
+Blockchain/Dev/packages/shared/src/middleware/index.ts
+Blockchain/Dev/packages/shared/src/security/keyRevokePolicy.ts
+Blockchain/Dev/services/originate/src/__tests__/ks764-admin-api-keys-revoke-route-contract.test.ts
+Blockchain/Dev/services/originate/src/middleware/auth.ts
+Blockchain/Dev/services/originate/src/routes/adminConfig.ts
+Blockchain/Dev/services/security/src/__tests__/ks764-key-revoke-organisation-arm.test.ts
+Blockchain/Dev/services/security/src/__tests__/ks764-revoke-organisation-route-contract.test.ts
+Blockchain/Dev/services/security/src/index.ts
+Blockchain/Dev/services/security/src/keyRevokePolicy.ts
+rev-list develop..HEAD: 11
+
+===== 04-ks860-redfirst-AIMED.txt
+AIMED SET (written before the run): exactly 2 paths — services/originate/src/__tests__/ks764-admin-api-keys-revoke-route-contract.test.ts:121 and services/security/src/__tests__/ks764-revoke-organisation-route-contract.test.ts:128; expect 'Tests 1 failed' in the ks860 file
+
+===== 04-ks860-redfirst.out
+
+ RUN  v4.1.10 /Volumes/DevMASTER/!CODING/Secuura/Blockchain/worktrees/s216-ks764-r3/Blockchain/Dev/packages/shared
+
+ ❯ src/__tests__/ks860-test-listeners-bind-loopback.test.ts (23 tests | 1 failed) 685ms
+     × 🔴 no test file under services/ or packages/ calls app.listen(0) without binding 127.0.0.1 639ms
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 1 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  src/__tests__/ks860-test-listeners-bind-loopback.test.ts > KS-860 — every test listener under services/ and packages/ binds loopback > 🔴 no test file under services/ or packages/ calls app.listen(0) without binding 127.0.0.1
+AssertionError: A test listener bound every interface. `listen(port[, host][, backlog][, callback])` — a FUNCTION in argument 2 is the callback, so no host is set and the server binds `::`, briefly reachable off-box on a shared or CI host. Pass the host explicitly: `app.listen(0, '127.0.0.1', cb)`. The callback stays the last argument and still fires on 'listening', so anything reading `server.address()` inside it is unaffected.: expected [ …(2) ] to deeply equal []
+
+- Expected
++ Received
+
+- []
++ [
++   "services/originate/src/__tests__/ks764-admin-api-keys-revoke-route-contract.test.ts:121  server = app.listen(0, () => resolve());",
++   "services/security/src/__tests__/ks764-revoke-organisation-route-contract.test.ts:128  server = app.listen(0, resolve);",
++ ]
+
+ ❯ src/__tests__/ks860-test-listeners-bind-loopback.test.ts:477:7
+    475|         "`app.listen(0, '127.0.0.1', cb)`. The callback stays the last…
+    476|         "on 'listening', so anything reading `server.address()` inside…
+    477|     ).toEqual([]);
+       |       ^
+    478|   });
+    479|
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/1]⎯
+
+
+ Test Files  1 failed (1)
+      Tests  1 failed | 22 passed (23)
+   Start at  07:49:35
+   Duration  882ms (transform 24ms, setup 0ms, import 71ms, tests 685ms, environment 0ms)
+
+
+===== 05-ks860-green.out
+
+ RUN  v4.1.10 /Volumes/DevMASTER/!CODING/Secuura/Blockchain/worktrees/s216-ks764-r3/Blockchain/Dev/packages/shared
+
+
+ Test Files  1 passed (1)
+      Tests  23 passed (23)
+   Start at  07:52:14
+   Duration  387ms (transform 22ms, setup 0ms, import 72ms, tests 208ms, environment 0ms)
+
+
+===== 08-pristine-shas.txt
+32edded63a6bc739278c5507aa6d3dcab78eef3b0718aefd3ad7ca8090fd7288  services/originate/src/__tests__/ks764-admin-api-keys-revoke-route-contract.test.ts
+4b68c363d7a517f852686bd4efd8b7024800a6fd6156f24fa9ec64d128768015  services/security/src/__tests__/ks764-revoke-organisation-route-contract.test.ts
+9539d243958a91235e691ccd10704433238cebf1b678e24b0a9297749329dba6  packages/shared/src/security/keyRevokePolicy.ts
+d688faa7b8b78d21b6f41630b7e67c80b4a4304581cdf0a47ff3e8ad82cd1339  packages/shared/dist/index.js
+
+===== 09-T2a-AIMED.txt
+AIMED T2a (typeof line PRESENT): CONTROL cell RED with expected 'function' received 'undefined'; CASE 1-5 red by 500 (route calls undefined); 401/VIEWER/cannot-see controls green
+
+===== 10-T2b-AIMED.txt
+AIMED T2b (typeof line ABSENT, dist export still absent): CONTROL cell GREEN — Peter's claim: isMockFunction(undefined) is false and undefined === undefined; CASE cells still red by 500
+
+===== 12-T3-AIMED.txt
+AIMED T3: originate CASE 5 RED (200 + UPDATE called), every other originate cell green (9/10); security CASE 5 RED (200), every other security cell green (6/7)
+
+===== 14-T1-AIMED.txt
+AIMED T1: guard 🔴 cell red naming EXACTLY services/originate/src/__tests__/ks764-admin-api-keys-revoke-route-contract.test.ts:<line> and no other path (1 path)
+
+===== 15-shared-full.out
+
+ RUN  v4.1.10 /Volumes/DevMASTER/!CODING/Secuura/Blockchain/worktrees/s216-ks764-r3/Blockchain/Dev/packages/shared
+
+
+ Test Files  42 passed (42)
+      Tests  828 passed (828)
+   Start at  07:54:37
+   Duration  8.56s (transform 3.22s, setup 0ms, import 12.94s, tests 27.13s, environment 2ms)
+
+
+===== 15-security-full.out
+
+ RUN  v4.1.10 /Volumes/DevMASTER/!CODING/Secuura/Blockchain/worktrees/s216-ks764-r3/Blockchain/Dev/services/security
+
+7:54:46 am [vite] (ssr) warning: invalid import "../${POLICY_NAME}". A file extension must be included in the static part of the import. For example: import(`./foo/${bar}.js`).
+  Plugin: vite:dynamic-import-vars
+  File: /Volumes/DevMASTER/!CODING/Secuura/Blockchain/worktrees/s216-ks764-r3/Blockchain/Dev/services/security/src/__tests__/ks578-ks643-revoke-authorization.test.ts
+
+ Test Files  16 passed (16)
+      Tests  205 passed (205)
+   Start at  07:54:45
+   Duration  4.91s (transform 1.48s, setup 0ms, import 2.71s, tests 9.30s, environment 1ms)
+
+
+===== 15-gateway-full.out
+
+ RUN  v4.1.10 /Volumes/DevMASTER/!CODING/Secuura/Blockchain/worktrees/s216-ks764-r3/Blockchain/Dev/services/api-gateway
+
+(node:63146) [DEP0060] DeprecationWarning: The `util._extend` API is deprecated. Please use Object.assign() instead.
+(Use `node --trace-deprecation ...` to show where the warning was created)
+(node:63137) [DEP0060] DeprecationWarning: The `util._extend` API is deprecated. Please use Object.assign() instead.
+(Use `node --trace-deprecation ...` to show where the warning was created)
+(node:63156) [DEP0060] DeprecationWarning: The `util._extend` API is deprecated. Please use Object.assign() instead.
+(Use `node --trace-deprecation ...` to show where the warning was created)
+
+ Test Files  34 passed (34)
+      Tests  343 passed (343)
+   Start at  07:54:51
+   Duration  1.83s (transform 2.92s, setup 1.91s, import 13.51s, tests 6.10s, environment 2ms)
+
+
+===== 09-T2a-typeof-present.out
+4:    ✕ CONTROL: decideKeyRevoke is the REAL implementation, not a jest mock (2 ms)
+5:    ✓ CONTROL: an unauthenticated caller is refused 401 by the real role gate (13 ms)
+6:    ✓ CONTROL: a role the router does not admit is refused BEFORE the handler (3 ms)
+7:    ✕ CASE 1 — same organisation: the revoke succeeds AND the UPDATE runs (2 ms)
+8:    ✕ CASE 2 — cross organisation, SAME tenant: 403 and NO write (the finding) (1 ms)
+9:    ✕ CASE 3 — an ORG-LESS KEY stays revocable by its tenant’s admin (Kam’s ruling) (1 ms)
+10:    ✕ CASE 4 — an ORG-LESS CALLER is refused on an org-owned key, and nothing is written (1 ms)
+11:    ✕ CASE 5 — a TENANT-LESS CALLER is refused on an org-owned key (`caller has no tenant`), and nothing is written (1 ms)
+12:    ✕ CONTROL: the PLATFORM bypass survives on this surface too
+13:    ✓ CONTROL: a key the tenant-scoped SELECT cannot see is reported missing, not refused (1 ms)
+17:    expect(received).toBe(expected) // Object.is equality
+19:    Expected: "function"
+20:    Received: "undefined"
+34:    expect(received).toBe(expected) // Object.is equality
+36:    Expected: 200
+37:    Received: 500
+51:    expect(received).toBe(expected) // Object.is equality
+53:    Expected: 403
+54:    Received: 500
+68:    expect(received).toBe(expected) // Object.is equality
+70:    Expected: 200
+71:    Received: 500
+85:    expect(received).toBe(expected) // Object.is equality
+87:    Expected: 403
+88:    Received: 500
+102:    expect(received).toBe(expected) // Object.is equality
+104:    Expected: 403
+105:    Received: 500
+119:    expect(received).toBe(expected) // Object.is equality
+121:    Expected: 200
+122:    Received: 500
+134:Test Suites: 1 failed, 1 total
+135:Tests:       7 failed, 3 passed, 10 total
+===== 10-T2b-typeof-absent.out
+4:    ✓ CONTROL: decideKeyRevoke is the REAL implementation, not a jest mock (1 ms)
+5:    ✓ CONTROL: an unauthenticated caller is refused 401 by the real role gate (16 ms)
+6:    ✓ CONTROL: a role the router does not admit is refused BEFORE the handler (3 ms)
+7:    ✕ CASE 1 — same organisation: the revoke succeeds AND the UPDATE runs (3 ms)
+8:    ✕ CASE 2 — cross organisation, SAME tenant: 403 and NO write (the finding) (1 ms)
+9:    ✕ CASE 3 — an ORG-LESS KEY stays revocable by its tenant’s admin (Kam’s ruling) (1 ms)
+10:    ✕ CASE 4 — an ORG-LESS CALLER is refused on an org-owned key, and nothing is written (1 ms)
+11:    ✕ CASE 5 — a TENANT-LESS CALLER is refused on an org-owned key (`caller has no tenant`), and nothing is written (1 ms)
+12:    ✕ CONTROL: the PLATFORM bypass survives on this surface too (1 ms)
+13:    ✓ CONTROL: a key the tenant-scoped SELECT cannot see is reported missing, not refused (1 ms)
+17:    expect(received).toBe(expected) // Object.is equality
+19:    Expected: 200
+20:    Received: 500
+34:    expect(received).toBe(expected) // Object.is equality
+36:    Expected: 403
+37:    Received: 500
+51:    expect(received).toBe(expected) // Object.is equality
+53:    Expected: 200
+54:    Received: 500
+68:    expect(received).toBe(expected) // Object.is equality
+70:    Expected: 403
+71:    Received: 500
+85:    expect(received).toBe(expected) // Object.is equality
+87:    Expected: 403
+88:    Received: 500
+102:    expect(received).toBe(expected) // Object.is equality
+104:    Expected: 200
+105:    Received: 500
+117:Test Suites: 1 failed, 1 total
+118:Tests:       6 failed, 4 passed, 10 total
+===== 12-T3-originate.out
+6:    ✓ CONTROL: decideKeyRevoke is the REAL implementation, not a jest mock
+7:    ✓ CONTROL: an unauthenticated caller is refused 401 by the real role gate (11 ms)
+8:    ✓ CONTROL: a role the router does not admit is refused BEFORE the handler (3 ms)
+9:    ✓ CASE 1 — same organisation: the revoke succeeds AND the UPDATE runs (2 ms)
+10:    ✓ CASE 2 — cross organisation, SAME tenant: 403 and NO write (the finding) (2 ms)
+11:    ✓ CASE 3 — an ORG-LESS KEY stays revocable by its tenant’s admin (Kam’s ruling) (1 ms)
+12:    ✓ CASE 4 — an ORG-LESS CALLER is refused on an org-owned key, and nothing is written (1 ms)
+13:    ✕ CASE 5 — a TENANT-LESS CALLER is refused on an org-owned key (`caller has no tenant`), and nothing is written (1 ms)
+14:    ✓ CONTROL: the PLATFORM bypass survives on this surface too (1 ms)
+15:    ✓ CONTROL: a key the tenant-scoped SELECT cannot see is reported missing, not refused (1 ms)
+19:    expect(received).toBe(expected) // Object.is equality
+21:    Expected: 403
+22:    Received: 200
+34:Test Suites: 1 failed, 1 total
+35:Tests:       1 failed, 9 passed, 10 total
+===== 12-T3-security.out
+19: ❯ src/__tests__/ks764-revoke-organisation-route-contract.test.ts (7 tests | 1 failed) 284ms
+20:     × CASE 5 — a TENANT-LESS CALLER is refused on an org-owned key (403, the tenant floor) 5ms
+22:⎯⎯⎯⎯⎯⎯⎯ Failed Tests 1 ⎯⎯⎯⎯⎯⎯⎯
+25:AssertionError: expected 200 to be 403 // Object.is equality
+27:- Expected
+28:+ Received
+44: Test Files  1 failed (1)
+45:      Tests  1 failed | 6 passed (7)
+47:   Duration  476ms (transform 77ms, setup 0ms, import 72ms, tests 284ms, environment 0ms)
+===== 14-T1-guard.out
+4: ❯ src/__tests__/ks860-test-listeners-bind-loopback.test.ts (23 tests | 1 failed) 575ms
+5:     × 🔴 no test file under services/ or packages/ calls app.listen(0) without binding 127.0.0.1 543ms
+7:⎯⎯⎯⎯⎯⎯⎯ Failed Tests 1 ⎯⎯⎯⎯⎯⎯⎯
+10:AssertionError: A test listener bound every interface. `listen(port[, host][, backlog][, callback])` — a FUNCTION in argument 2 is the callback, so no host is set and the server binds `::`, briefly reachable off-box on a shared or CI host. Pass the host explicitly: `app.listen(0, '127.0.0.1', cb)`. The callback stays the last argument and still fires on 'listening', so anything reading `server.address()` inside it is unaffected.: expected [ Array(1) ] to deeply equal []
+12:- Expected
+13:+ Received
+31: Test Files  1 failed (1)
+32:      Tests  1 failed | 22 passed (23)
+34:   Duration  737ms (transform 22ms, setup 0ms, import 67ms, tests 575ms, environment 0ms)
+===== 15-originate-full.out
+1:PASS src/__tests__/ks1058-anchor-failed-preserves-thread-token.test.ts (8.819 s)
+21:PASS src/__tests__/ks914-deliver-webhook-blocked-vs-failed.test.ts
+79:      2026-09-14 07:55:08.968 [originate] [33mwarn[39m: KS-584 stale-anchor confirmation lookup failed; presenting stored state {"error":"chain lookup disabled in test"}
+87:      2026-09-14 07:55:09.005 [originate] [33mwarn[39m: KS-584 stale-anchor confirmation lookup failed; presenting stored state {"error":"chain lookup disabled in test"}
+95:      2026-09-14 07:55:08.983 [originate] [33mwarn[39m: Chain-first /verify lookup failed — falling back to DB {"error":"chain lookup disabled in test"}
+100:      2026-09-14 07:55:09.009 [originate] [33mwarn[39m: Chain-first /verify lookup failed — falling back to DB {"error":"chain lookup disabled in test"}
+105:      2026-09-14 07:55:09.020 [originate] [33mwarn[39m: Chain-first /verify lookup failed — falling back to DB {"error":"chain lookup disabled in test"}
+110:      2026-09-14 07:55:09.023 [originate] [33mwarn[39m: Chain-first /verify lookup failed — falling back to DB {"error":"chain lookup disabled in test"}
+115:      2026-09-14 07:55:09.027 [originate] [33mwarn[39m: Chain-first /verify lookup failed — falling back to DB {"error":"chain lookup disabled in test"}
+120:      2026-09-14 07:55:09.029 [originate] [33mwarn[39m: Chain-first /verify lookup failed — falling back to DB {"error":"chain lookup disabled in test"}
+125:      2026-09-14 07:55:09.032 [originate] [33mwarn[39m: Chain-first /verify lookup failed — falling back to DB {"error":"chain lookup disabled in test"}
+130:      2026-09-14 07:55:09.034 [originate] [33mwarn[39m: Chain-first /verify lookup failed — falling back to DB {"error":"chain lookup disabled in test"}
+138:      2026-09-14 07:55:09.072 [originate] [33mwarn[39m: v2 verify: chain-fact read failed; matches present stored state {"error":"chain lookup disabled in test"}
+143:      2026-09-14 07:55:09.096 [originate] [33mwarn[39m: v2 verify: chain-fact read failed; matches present stored state {"error":"chain lookup disabled in test"}
+167:      2026-09-14 07:55:10.382 [originate] [31merror[39m: certificationRepo: database connection FAILED — certifications will not be available {"error":"Error: Cannot find module '.prisma/client/default' from 'node_modules/@prisma/client/default.js'\n\nRequire stack:\n  node_modules/@prisma/client/default.js\n  src/db.ts\n  src/services/provenance.ts\n  src/routes/certifications.ts\n  src/index.ts\n  src/__tests__/ks1041-provenance-mount-wiring.test.ts\n"}
+172:      2026-09-14 07:55:10.384 [originate] [31merror[39m: Failed to init repo {"error":"Database is required for certification operations"}
+177:      2026-09-14 07:55:10.390 [originate] [31merror[39m: DB write failed for document {"id":"doc-demo-degree-001","error":"Error: Cannot find module '.prisma/client/default' from 'node_modules/@prisma/client/default.js'\n\nRequire stack:\n  node_modules/@prisma/client/default.js\n  src/db.ts\n  src/services/provenance.ts\n  src/routes/certifications.ts\n  src/index.ts\n  src/__tests__/ks1041-provenance-mount-wiring.test.ts\n"}
+182:      2026-09-14 07:55:10.392 [originate] [31merror[39m: Failed to seed demo documents {"error":"Error: Cannot find module '.prisma/client/default' from 'node_modules/@prisma/client/default.js'\n\nRequire stack:\n  node_modules/@prisma/client/default.js\n  src/db.ts\n  src/services/provenance.ts\n  src/routes/certifications.ts\n  src/index.ts\n  src/__tests__/ks1041-provenance-mount-wiring.test.ts\n"}
+187:Test Suites: 56 passed, 56 total
+188:Tests:       598 passed, 598 total
+===== 06-originate-ks764-green.out
+7:    ✓ CONTROL: decideKeyRevoke is the REAL implementation, not a jest mock (1 ms)
+8:    ✓ CONTROL: an unauthenticated caller is refused 401 by the real role gate (16 ms)
+9:    ✓ CONTROL: a role the router does not admit is refused BEFORE the handler (3 ms)
+10:    ✓ CASE 1 — same organisation: the revoke succeeds AND the UPDATE runs (2 ms)
+11:    ✓ CASE 2 — cross organisation, SAME tenant: 403 and NO write (the finding) (1 ms)
+12:    ✓ CASE 3 — an ORG-LESS KEY stays revocable by its tenant’s admin (Kam’s ruling) (1 ms)
+13:    ✓ CASE 4 — an ORG-LESS CALLER is refused on an org-owned key, and nothing is written (1 ms)
+14:    ✓ CASE 5 — a TENANT-LESS CALLER is refused on an org-owned key (`caller has no tenant`), and nothing is written (1 ms)
+15:    ✓ CONTROL: the PLATFORM bypass survives on this surface too (1 ms)
+16:    ✓ CONTROL: a key the tenant-scoped SELECT cannot see is reported missing, not refused (2 ms)
+18:Test Suites: 1 passed, 1 total
+19:Tests:       10 passed, 10 total
+===== 07-security-ks764-green.out
+5: Test Files  1 passed (1)
+6:      Tests  7 passed (7)
+8:   Duration  447ms (transform 91ms, setup 0ms, import 38ms, tests 330ms, environment 0ms)

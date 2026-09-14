@@ -1,0 +1,98 @@
+== #941's log: the audit-contract step group (the swallow: from its ##[group] to ##[error])
+run-echo line: [215]
+    ##[group]Run set -uo pipefail
+    [36;1mset -uo pipefail[0m
+    [36;1mout=$(npm run audit:contract --silent 2>&1); rc=$?[0m
+    [36;1mprintf '%s\n' "$out"[0m
+    [36;1mif [ "$rc" -ne 0 ]; then echo "audit-contract suites are red"; exit 1; fi[0m
+    [36;1mcases=$(printf '%s\n' "$out" | grep -oE ' tests [0-9]+' | tail -1 | grep -oE '[0-9]+')[0m
+    [36;1mexpected=$(tr -d '[:space:]' < scripts/audit/expected-case-count)[0m
+    [36;1mif [ -z "$expected" ]; then echo "expected-case-count missing or empty"; exit 1; fi[0m
+    [36;1mif [ -z "$cases" ]; then echo "no case count reported — a run of zero cases is not a pass"; exit 1; fi[0m
+    [36;1mif [ "$cases" -ne "$expected" ]; then[0m
+    [36;1m  echo "ran $cases cases, expected $expected — fewer means cases were lost; more means update scripts/audit/expected-case-count"[0m
+    [36;1m  exit 1[0m
+    [36;1mfi[0m
+    [36;1mecho "OK — $cases audit-contract cases pass (expected $expected)"[0m
+    shell: /usr/bin/bash -e {0}
+    env:
+      REGISTRY: ghcr.io
+      IMAGE_NAME: Secuura/Distributed_Secuura
+    ##[endgroup]
+    ##[error]Process completed with exit code 1.
+    Post job cleanup.
+    [command]/usr/bin/git version
+    git version 2.55.0
+    Temporarily overriding HOME='/home/runner/work/_temp/7a2b16b3-aa4e-47c4-923a-277309f4190e' before making global git config changes
+    Adding repository directory to the temporary git global config as a safe directory
+    [command]/usr/bin/git config --global --add safe.directory /home/runner/work/Distributed_Secuura/Distributed_Secuura
+    Removing SSH command configuration
+    [command]/usr/bin/git config --local --name-only --get-regexp core\.sshCommand
+    [command]/usr/bin/git submodule foreach --recursive sh -c "git config --local --name-only --get-regexp 'core\.sshCommand' && git config --local --unse
+    Removing HTTP extra header
+
+== #940's log: after the ##[endgroup] of step 7 — the printed reason (first 12 lines of step output)
+step output starts at line 232
+    ✔ a fully-populated entry produces no problems (the validator CAN return empty) (5.354551ms)
+    ✔ removing `package` is reported — and named (0.451613ms)
+    ✔ an empty-string `package` is reported too (present is not the same as filled) (0.312684ms)
+    ✔ removing `reason` is reported — and named (0.197078ms)
+    ✔ an empty-string `reason` is reported too (present is not the same as filled) (0.257029ms)
+    ✔ removing `ticket` is reported — and named (0.26241ms)
+    ✔ an empty-string `ticket` is reported too (present is not the same as filled) (0.24667ms)
+    ✔ a NEW entry without `expires` is refused (0.238535ms)
+    ✔ a GRANDFATHERED entry without `expires` is allowed — and only because it is listed (0.523406ms)
+    ✔ `{}` — the exact shape that used to suppress an advisory silently — names all three (0.360883ms)
+    ✔ a non-object entry is refused rather than crashing the gate (0.285372ms)
+    ✔ several bad entries are ALL reported, not just the first (0.383575ms)
+    ✔ `expires` means DEAD ON that day, not alive through it (0.339013ms)
+    ✔ utcToday is UTC, not the local calendar date (0.261779ms)
+    ✔ `expires: "soon"` is REFUSED — free text is not a date (0.194092ms)
+   ...
+        code: 'ERR_ASSERTION',
+        actual: 1,
+        expected: 3,
+        operator: 'strictEqual',
+        diff: 'simple'
+      }
+    audit-contract suites are red
+    ##[error]Process completed with exit code 1.
+    Post job cleanup.
+
+== #941's SCA step output (the gate passes)
+    audit-gate: 36 distinct advisories reported, 38 baselined.
+    OK — no advisories outside the triaged baseline.
+    OK — no advisories outside the triaged baseline
+    ##[group]Run set -uo pipefail
+    [36;1mset -uo pipefail[0m
+    [36;1mout=$(npm run audit:contract --silent 2>&1); rc=$?[0m
+    [36;1mprintf '%s\n' "$out"[0m
+
+== #940's SCA step output (the pre-PR shape: check-npm-audit and the 8-package list)
+    ##[endgroup]
+    [check-npm-audit] 8 HIGH+CRITICAL vulnerability(ies) not in allow-list:
+      - @prisma/config (high) → advisory id(s) (no source id)
+      - browserslist (high) → advisory id(s) 1153171, 1153172
+      - deepmerge-ts (high) → advisory id(s) 1145093
+      - ip-address (high) → advisory id(s) 1118827, 1130722
+      - js-yaml (high) → advisory id(s) 1193726
+      - mysql2 (high) → advisory id(s) 1153173, 1158532
+      - prisma (high) → advisory id(s) (no source id)
+      - undici (high) → advisory id(s) 1112496, 1114594, 1114638, 1114640, 1114642, 1121242, 1121245, 1121255, 1130716, 1130727, 1130732, 1137243
+    Either upgrade/override the dep, or add an entry to .security/exceptions.yml.
+    ##[error]Process completed with exit code 1.
+    ##[group]Run set -uo pipefail
+== 'shell:' lines the runner printed per job log (the shell each step actually ran under)
+-- job 102712486541
+-- job 102714559749
+-- job 103800717653
+-- #942's own Security Scanning job 103800717653 = develop's shape (no #940 line: bash -e)
+== 'shell:' lines the runner printed per job log
+-- job 102712486541
+157: shell: /usr/bin/bash -e {0}
+197: shell: /usr/bin/bash -e {0}
+227: shell: /usr/bin/bash {0}
+-- job 102714559749
+157: shell: /usr/bin/bash -e {0}
+205: shell: /usr/bin/bash {0}
+227: shell: /usr/bin/bash -e {0}

@@ -1,0 +1,57 @@
+== YAML parse + job/step census (the parse cell)
+   security-scan.yml.8861e6216: jobs=7 steps[dependency-audit]=6 shell=None step="Audit-contract suites (the gates' own va"
+   security-scan.yml.1aa708be9: jobs=7 steps[dependency-audit]=6 shell='bash {0}' step="Audit-contract suites (the gates' own va"
+   security-scan.yml.d105e07a8: jobs=7 steps[dependency-audit]=6 shell=None step="Audit-contract suites (the gates' own va"
+   security-scan.yml.940+941: jobs=7 steps[dependency-audit]=6 shell='bash {0}' step="Audit-contract suites (the gates' own va"
+   pr-security-gates.yml.8861e6216: jobs=1 steps[code-security-gates]=11 shell=None step='All shell test suites (KS-666 / KS-731 —'
+   pr-security-gates.yml.53b9c3cc1: jobs=1 steps[code-security-gates]=12 shell=None step='All shell test suites (KS-666 / KS-731 —'
+== #940: the audit-contract step script, byte-identical develop vs head? (only shell: differs)
+ok   the `run:` block of the audit-contract step is byte-identical at develop, #940, #941 and the #940x#941 merge (only `shell:` differs)
+ok   shell: develop=None (GitHub default `bash -e {0}`), #940=`bash {0}`, #941=None (the head does NOT carry #940's line), #940x#941 merged=`bash {0}`
+ok   working-directory Blockchain/Dev
+== #940 CASE table (stub npm; the step's own `run:` bytes from the head file)
+ok   CASE A under the DEFAULT shell (bash -e): suites red -> exit 1, stdout 0 lines (the swallow: nothing printed)
+ok   CASE A under the PR shell (bash {0}): suites red -> exit 1, 5 lines, last = 'audit-contract suites are red' (the reason printed)
+ok   CASE B (bash -e): green 59 -> exit 0, last 'OK — 59 audit-contract cases pass (expected 59)'
+ok   CASE C (bash -e): 40 cases -> exit 1, the count line printed
+ok   CASE D (bash -e): silent exit-0 npm -> exit 1, 1 lines — a SECOND swallow: `cases=$(… | grep …)` is a failing pipeline under pipefail, so -e aborts before "no case count reported" can print (drafter finding — the PR body names only CASE A)
+ok   CASE B (bash {0}): green 59 -> exit 0, last 'OK — 59 audit-contract cases pass (expected 59)'
+ok   CASE C (bash {0}): 40 cases -> exit 1, the count line printed
+ok   CASE D (bash {0}): silent exit-0 npm -> exit 1, "no case count reported" printed
+ok   TAMPER T-940a `shell: bash` (= bash -eo pipefail): CASE A prints nothing again -> exit 1, 0 lines (the behaviour cell REDS)
+   parse of the mis-indented file raises: ParserError
+ok   TAMPER T-940b `shell:` mis-indented by 2 -> yaml.safe_load raises (the parse cell REDS)
+   duplicate key: PyYAML silently keeps the last ( bash {0} ) — say so: a duplicate-key tamper is NOT caught by yaml.safe_load; the GitHub runner rejects it at workflow validation
+   (T-940c duplicate `shell:` key: not a parse red under PyYAML — record, do not score)
+ok   TAMPER T-940d `shell:` line deleted -> the step has no shell key (parses; the BEHAVIOUR cell reds by CASE A under the default shell)
+== #941: the SCA step script — the exit-code table with a stub node, under bash {0} and under the -e tamper
+ok   step renamed: allow-list -> the triaged baseline
+ok   continue-on-error kept: ${{ github.event_name == 'pull_request' }} (warn-first on PRs, blocking on push)
+ok   SCA run: develop = check-npm-audit.mjs vs exceptions.yml (one line); head = audit-gate.mjs + the case table under shell bash {0}
+ok   SCA table under bash {0}: gate exit 0 -> step exit 0, last line 'OK — no advisories outside the triaged baseline'
+ok      the -e tamper, gate exit 0 -> step exit 0 (same)
+ok   SCA table under bash {0}: gate exit 1 -> step exit 1, last line 'FAIL — new or lapsed advisories; triage them (fix, or a reasoned baseline entry with a ticket)'
+ok      TAMPER T-941a `shell:` removed (bash -e): gate exit 1 -> step aborts at the node line with exit 1, NO case-table line (exit 2 becomes a FAILURE instead of SKIP; exit 3 loses its REFUSED message)
+ok   SCA table under bash {0}: gate exit 2 -> step exit 0, last line 'SKIP (advisory) — npm audit could not run (offline / registry unreachable)'
+ok      TAMPER T-941a `shell:` removed (bash -e): gate exit 2 -> step aborts at the node line with exit 2, NO case-table line (exit 2 becomes a FAILURE instead of SKIP; exit 3 loses its REFUSED message)
+ok   SCA table under bash {0}: gate exit 3 -> step exit 1, last line 'FAIL — the audit gate REFUSED to report a verdict (see its line above)'
+ok      TAMPER T-941a `shell:` removed (bash -e): gate exit 3 -> step aborts at the node line with exit 3, NO case-table line (exit 2 becomes a FAILURE instead of SKIP; exit 3 loses its REFUSED message)
+ok   SCA table under bash {0}: gate exit 7 -> step exit 1, last line 'FAIL — new or lapsed advisories; triage them (fix, or a reasoned baseline entry with a ticket)'
+ok      TAMPER T-941a `shell:` removed (bash -e): gate exit 7 -> step aborts at the node line with exit 7, NO case-table line (exit 2 becomes a FAILURE instead of SKIP; exit 3 loses its REFUSED message)
+== #942: the probe guard clause on the MERGED bytes (:66-67), three stub arms + the T1 (2>&1) tamper, run from a scratch dir
+ok   merged :66-67 = develop's env -u prefix + this PR's 2>"$TMP/probe.err" redirect + the != "NULL" disjunct
+ok   live 2>&1 outside comments in the merged suite: [] (total mentions incl. comments: 2)
+ok   merged               arm1 stderr noise + NULL   -> guard passed; predicted pass
+ok   merged               arm2a npx non-zero         -> FAIL harness (rc 1); predicted fire | stdout: NULL / stderr: npx: launch failure (stub)
+ok   merged               arm2b wrong stdout         -> FAIL harness (rc 1); predicted fire | stdout: not-the-answer / stderr:
+ok   T1 2>&1 restored     arm1 stderr noise + NULL   -> FAIL harness (rc 1); predicted fire | stdout: npm warn exec The following package was not found and will be installed: tsx@4.23.13 / NULL
+ok   T1 2>&1 restored     arm2a npx non-zero         -> FAIL harness (rc 1); predicted fire | stdout: npx: launch failure (stub) / NULL
+ok   T1 2>&1 restored     arm2b wrong stdout         -> FAIL harness (rc 1); predicted fire | stdout: not-the-answer / stderr:
+ok   T2 disjunct dropped  arm1 stderr noise + NULL   -> guard passed; predicted pass
+ok   T2 disjunct dropped  arm2a npx non-zero         -> FAIL harness (rc 1); predicted fire | stdout: NULL / stderr: npx: launch failure (stub)
+ok   T2 disjunct dropped  arm2b wrong stdout         -> guard passed; predicted pass
+== the pin step
+ok   pin step run = 'npm install --global --no-audit --no-fund tsx@4.23.12'; jobs=1; steps=12 (develop: 11)
+ok   the pin step is the step immediately BEFORE the shell suites
+work dir (kept): /Volumes/DevMASTER/WEDNESDAY/2_Project_Files/fleet/qa-agent/gatesets/2026-09-14_gateL9/l9sim.tnzo6ahi
+FAILS=0

@@ -1,0 +1,78 @@
+== 2026-09-14 10:35:47 AEST M20 read (read verbs in the checkout)
+a53343502 a5334350221c819f54d4a20a3308daeb9ca09617 6e78961e1d04277ecbdb0537e630afa0bf63b13c 2026-09-14T09:18:09+10:00 2026-09-14T09:18:09+10:00 kksecura | KS-991: skip a local develop that origin/develop provably supersedes (#903)
+6e78961e1 6e78961e1d04277ecbdb0537e630afa0bf63b13c 8861e62161466c40f08d2b10a30edeb203123993 2026-09-14T09:00:09+10:00 2026-09-14T09:00:09+10:00 kksecura | KS-790: the OAuth token grants resolve the user through the pre-auth carve-out, not the RLS-scoped lookup (#982)
+8861e6216 8861e62161466c40f08d2b10a30edeb203123993 a4ef481c897265ae01936ad10d84d547d95557d2 2026-09-13T22:00:26+10:00 2026-09-13T22:00:26+10:00 kksecura | KS-924 KS-901: the entrypoint corpus pins its contributing packages by name and compares SKIP as a set; the census follows three more express-binding shapes (#980)
+== M20 tree: 5d251d14d5de661f842645d66e610ecbbd7bf289
+== files M19..M20 (numstat)
+39	1	.githooks/pre-push
+123	1	Blockchain/Dev/scripts/__tests__/pre_push_hook_base.test.sh
+24	0	Blockchain/Dev/scripts/preflight/preflight.sh
+== files M18..M20
+39	1	.githooks/pre-push
+123	1	Blockchain/Dev/scripts/__tests__/pre_push_hook_base.test.sh
+24	0	Blockchain/Dev/scripts/preflight/preflight.sh
+249	0	Blockchain/Dev/services/auth/src/__tests__/ks790-token-pre-auth-user-lookup.test.ts
+8	0	Blockchain/Dev/services/auth/src/__tests__/ks820-821-token-client-auth-and-apptype.test.ts
+23	5	Blockchain/Dev/services/auth/src/routes/oauth.ts
+== M20 message ids
+KS-991: skip a local develop that origin/develop provably supersedes (#903)
+
+* KS-991: skip a LOCAL develop that origin/develop provably supersedes
+
+Three pushes in one session ran the full 13-leg Blockchain/Dev preflight on
+branches touching no Blockchain/Dev file, because the local `develop` ref was
+behind `origin/develop` and the hook's base loop consults it first:
+
+    ff5218867 vs 400517aaf    (systemTest-only branch)
+    400517aaf vs 4f337be83    (CLAUDE.md-only branch)
+    4f337be83 vs 512480ef1    (one new file)
+
+Every gap was opened by a merge the same seat had just performed, so the trigger
+is "you did the right thing". One of those runs then failed leg 1 with
+DEPS MISSING — an environment condition presented as a gate result and, without
+reading 13 legs of output, indistinguishable from a real red. That is the shape
+that gets answered with --no-verify.
+
+NOT A REORDER, and that distinction is the whole justification. KS-882's author
+considered putting origin/develop first and rejected it, because whichever ref is
+== is a4f71cde6 (#903 head) an ancestor of M20?
+rc=1 (0=yes 1=no)
+== is M19 an ancestor of M20?
+rc=0
+== merge-base of each head with M20
+b54487216ebb49f1de7ed9349f089d92a3e5bfc1: 8861e62161466c40f08d2b10a30edeb203123993
+b85f1db24596a5e0ce98fe2b1343d9f515a1a995: d4cf7e3cf73e91422a229b7d0767cf6c3a04fe57
+5341b1daed8afe4254e05ef66ef4350fd8220d4f: 8861e62161466c40f08d2b10a30edeb203123993
+a4f71cde660c1442d98317e26d93845340b20098: 8861e62161466c40f08d2b10a30edeb203123993
+== rev-list --left-right --count M20...head
+b54487216: 2	3
+b85f1db24: 113	3
+5341b1dae: 2	14
+== blobs of #903's three files at M20 vs #903 head a4f71cde6 vs M18
+.githooks/pre-push @ a53343502: 100755 blob 1b22d4e146487aa25698310b353152a7d09986b5   16472	.githooks/pre-push
+.githooks/pre-push @ a4f71cde6: 100755 blob 1b22d4e146487aa25698310b353152a7d09986b5   16472	.githooks/pre-push
+.githooks/pre-push @ 8861e6216: 100755 blob f0748ed560666665f5034e1e6c3eeb147304311f   14027	.githooks/pre-push
+.githooks/pre-push @ 6e78961e1: 100755 blob f0748ed560666665f5034e1e6c3eeb147304311f   14027	.githooks/pre-push
+Blockchain/Dev/scripts/__tests__/pre_push_hook_base.test.sh @ a53343502: 100644 blob affdf027bff11e3690d374e902e3e93274788c62   34232	Blockchain/Dev/scripts/__tests__/pre_push_hook_base.test.sh
+Blockchain/Dev/scripts/__tests__/pre_push_hook_base.test.sh @ a4f71cde6: 100644 blob affdf027bff11e3690d374e902e3e93274788c62   34232	Blockchain/Dev/scripts/__tests__/pre_push_hook_base.test.sh
+Blockchain/Dev/scripts/__tests__/pre_push_hook_base.test.sh @ 8861e6216: 100644 blob d95af6514412ed9ff314ef05a72ddfea04cc8c26   26945	Blockchain/Dev/scripts/__tests__/pre_push_hook_base.test.sh
+Blockchain/Dev/scripts/__tests__/pre_push_hook_base.test.sh @ 6e78961e1: 100644 blob d95af6514412ed9ff314ef05a72ddfea04cc8c26   26945	Blockchain/Dev/scripts/__tests__/pre_push_hook_base.test.sh
+Blockchain/Dev/scripts/preflight/preflight.sh @ a53343502: 100644 blob 0727300f79938fd26b578ed77fca281e49662c6f   31527	Blockchain/Dev/scripts/preflight/preflight.sh
+Blockchain/Dev/scripts/preflight/preflight.sh @ a4f71cde6: 100644 blob 0727300f79938fd26b578ed77fca281e49662c6f   31527	Blockchain/Dev/scripts/preflight/preflight.sh
+Blockchain/Dev/scripts/preflight/preflight.sh @ 8861e6216: 100644 blob acfb7fa3e82b6b12573139a04f2e544404b2dcec   29971	Blockchain/Dev/scripts/preflight/preflight.sh
+Blockchain/Dev/scripts/preflight/preflight.sh @ 6e78961e1: 100644 blob acfb7fa3e82b6b12573139a04f2e544404b2dcec   29971	Blockchain/Dev/scripts/preflight/preflight.sh
+== M18..M20 files vs #903 head..M18 diff (content equality of the three files)
+SAME .githooks/pre-push 1b22d4e146487aa25698310b353152a7d09986b5
+SAME Blockchain/Dev/scripts/__tests__/pre_push_hook_base.test.sh affdf027bff11e3690d374e902e3e93274788c62
+SAME Blockchain/Dev/scripts/preflight/preflight.sh 0727300f79938fd26b578ed77fca281e49662c6f
+== other L7 files at M20 (must be develop's / absent)
+Blockchain/Dev/scripts/run-code-guards.sh @ M20: 
+Blockchain/Dev/scripts/__tests__/run_code_guards.test.sh @ M20: 
+Blockchain/Dev/scripts/__tests__/preflight_deps.test.sh @ M20: 100644 blob a713a94e7cffd22fc6429f8c877bb9c98736a32c   27888	Blockchain/Dev/scripts/__tests__/preflight_deps.test.sh
+Blockchain/Dev/scripts/preflight/lockfile-cleanroom.sh @ M20: 100644 blob 26e7feb2b9764256beb8171fb10a734e1af326e7    5183	Blockchain/Dev/scripts/preflight/lockfile-cleanroom.sh
+Blockchain/Dev/scripts/check-environment.sh @ M20: 100755 blob 172cabff4e731a37257c92095c990cf026d11677    4493	Blockchain/Dev/scripts/check-environment.sh
+Blockchain/Dev/scripts/preflight/deps-present.sh @ M20: 100644 blob ccf65697be1fc2d8621277db8f6afc544304d50e    5565	Blockchain/Dev/scripts/preflight/deps-present.sh
+Blockchain/Dev/scripts/run-shell-suites.sh @ M20: 100644 blob bf766bb54828cf6abad817f0f21a0c2f674d783f   11098	Blockchain/Dev/scripts/run-shell-suites.sh
+== tracked *.test.sh and check-*.sh at M20
+18
+21

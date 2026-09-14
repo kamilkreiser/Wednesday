@@ -1,0 +1,42 @@
+diff --git a/Blockchain/Dev/services/originate/src/services/anchorStateSync.ts b/Blockchain/Dev/services/originate/src/services/anchorStateSync.ts
+index 604c21dbb..174d122ec 100644
+--- a/Blockchain/Dev/services/originate/src/services/anchorStateSync.ts
++++ b/Blockchain/Dev/services/originate/src/services/anchorStateSync.ts
+@@ -138,6 +138,10 @@ export async function fetchAnchorState(
+  * `confirmed` alone. A failed transaction KEEPS its hash: it is real, it is on
+  * chain, and it is the forensic trail for why the anchor failed. Only the
+  * status becomes honest.
++ *
++ * KS-1058: the write REPLACES the blockchain blob (updateDocument spreads
++ * shallowly), so anything not restated here is destroyed. `threadToken` is
++ * carried forward; `confidence` deliberately is NOT — see the call site.
+  */
+ export async function markDocumentAnchorFailed(
+   documentId: string,
+@@ -148,7 +152,7 @@ export async function markDocumentAnchorFailed(
+   const doc = await getDocument(documentId, tenantId);
+   if (!doc) return;
+   if (doc.blockchain?.status === 'confirmed') return;
+-  const prior = doc.blockchain;
++  const prior = doc.blockchain as (typeof doc.blockchain & { threadToken?: unknown }) | undefined;
+   const revertStatus: DocumentRecord['status'] = doc.signatures?.length ? 'signed' : 'draft';
+   await updateDocument(documentId, tenantId, {
+     status: revertStatus,
+@@ -162,6 +166,17 @@ export async function markDocumentAnchorFailed(
+       ...(prior?.network ? { network: prior.network } : {}),
+       ...(prior?.anchoredAt ? { anchoredAt: prior.anchoredAt } : {}),
+       ...(anchorId ? { anchorId } : {}),
++      // KS-1058: `updateDocument` shallow-spreads (`{...doc, ...updates}`),
++      // so this object REPLACES the blockchain blob wholesale and every key
++      // it does not restate is destroyed. `threadToken` is the one key that
++      // matters: it is written at `routes/documents.ts:739` as a cache over
++      // `state_thread_registry`, it is unrelated to whether the anchor
++      // succeeded, and a mint that already happened is not undone by a failed
++      // anchor. Carried explicitly rather than by spreading `prior`, because
++      // a blanket spread would also carry `anchoredAt`, which the blob's own
++      // contract (`documentRepo.ts:60-61`) says is "Absent in the KS-520
++      // fail-closed state — nothing was anchored".
++      ...(prior?.threadToken ? { threadToken: prior.threadToken } : {}),
+       error: errorMessage || 'anchor failed on chain',
+       failedAt: new Date().toISOString(),
+     },

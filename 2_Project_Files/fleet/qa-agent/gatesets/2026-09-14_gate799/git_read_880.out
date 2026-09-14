@@ -1,0 +1,89 @@
+2026-09-14 08:21:57 AEST
+8861e62161466c40f08d2b10a30edeb203123993	refs/heads/develop
+a704137de38a3055e40ee62adc343c0239f34ea9	refs/heads/kamilkreiser/ks-577-revoke-on-rotate
+6da848891924f859179d097d464a7b97c9783a6a	refs/pull/799/head
+a704137de38a3055e40ee62adc343c0239f34ea9	refs/pull/880/head
+22:22:00Z
+a704137de38a3055e40ee62adc343c0239f34ea9 commit
+6114a15d7 commit
+85f8263c2 commit
+--- log 8861e6216..a704137de38a3055e40ee62adc343c0239f34ea9
+a704137de38a3055e40ee62adc343c0239f34ea9 6114a15d7f98c543f211b2c65c36314956636413 3f496a12ef2b408de2072133b7a5dbcafef4b8c7 Kam Kreiser <kamil.kreiser@secuura.ai> 2026-09-14T08:08:56+10:00 KS-577: the two register-connector descriptions now say what a rotate does — corrected at their source and regenerated
+6114a15d7f98c543f211b2c65c36314956636413 85f8263c2bf42a68301bf9389361eecbe4ad2728 8861e62161466c40f08d2b10a30edeb203123993 654a000ce706dc962871749087c2d596f54c6619 Kam Kreiser <kamil.kreiser@secuura.ai> 2026-09-14T08:05:48+10:00 Merge develop 8861e6216 into ks-577 — bring the branch to the current base before Peter's two-description round
+85f8263c2bf42a68301bf9389361eecbe4ad2728 47b2b60f2c6434da6c1292d282c7f2111e59cb93 b6884888da5ee326d7fbc224797bbc9dbb9e7179 a1325047f8b6fb45c76af471783436ae983d505b Kam Kreiser <kamil.kreiser@secuura.ai> 2026-09-09T15:04:54+10:00 Merge remote-tracking branch 'origin/develop' into kamilkreiser/ks-577-revoke-on-rotate
+47b2b60f2c6434da6c1292d282c7f2111e59cb93 306d0db923183f3b62b053f0242549e37bdf362c 3101212cf5c3964a2a4cebde763c73d2a7d195a9 Kam Kreiser <kamil.kreiser@secuura.ai> 2026-09-07T00:56:57+10:00 KS-577: a rotate must retire the prior credential — revoke-on-rotate, with the window as one value
+--- rev-list --left-right --count 8861e6216...a704137de38a3055e40ee62adc343c0239f34ea9
+0	4
+--- merge-base a704137de38a3055e40ee62adc343c0239f34ea9 8861e6216
+8861e62161466c40f08d2b10a30edeb203123993
+--- merge-base 85f8263c2 8861e6216
+b6884888da5ee326d7fbc224797bbc9dbb9e7179
+--- log -1 6114a15d7
+6114a15d7f98c543f211b2c65c36314956636413
+parents 85f8263c2bf42a68301bf9389361eecbe4ad2728 8861e62161466c40f08d2b10a30edeb203123993
+tree 654a000ce706dc962871749087c2d596f54c6619
+Kam Kreiser 2026-09-14T08:05:48+10:00
+Merge develop 8861e6216 into ks-577 — bring the branch to the current base before Peter's two-description round
+
+--- log -1 a704137de38a3055e40ee62adc343c0239f34ea9
+a704137de38a3055e40ee62adc343c0239f34ea9
+parents 6114a15d7f98c543f211b2c65c36314956636413
+tree 3f496a12ef2b408de2072133b7a5dbcafef4b8c7
+Kam Kreiser 2026-09-14T08:08:56+10:00
+KS-577: the two register-connector descriptions now say what a rotate does — corrected at their source and regenerated
+
+Peter's one condition on PR #880 (review 5153311061): two `secuura-api.yaml` descriptions became false the moment revoke-on-rotate lands — "The old key stays active until explicitly revoked." and "`rotate: true` mints a replacement (revoke the old key separately)." — and this is the document Platform S reads.
+
+Both live in `services/tenant-provisioning/src/tenant-provisioning.openapi.ts` (the yaml is generated from it): the `rotate` field description (`RegisterConnectorRequestSchema.rotate`) and the `register-connector` operation description. Rewritten from the code at this head — `revokePriorConnectorKeys` in `services/security/src/index.ts` retires every prior ACTIVE key of the same connector in the same tenant as part of the mint: `is_active = false` at once when `API_KEY_ROTATION_GRACE_SECONDS` is unset or 0, otherwise `expires_at` is clamped to now + that window. The env name is spelled as `index.ts` spells it. Nothing narrates a failure mode into the contract, and the text names only what the register-connector caller can observe (the gateway consumes `priorKeysRevoked` and returns `rotated`).
+
+The yaml was REGENERATED (`npm run generate-openapi`), never hand-edited. Measured in order: `generate-openapi -- --check` PASS on the merged tree before the edit; after the .ts edit and before the regen, `--check` FAIL rc 1 ("generated YAML differs from on-disk version") — the control that a published sentence is checked by regenerating; after the regen, `git status` = exactly these two files and `git diff -U0` on the yaml = exactly 2 hunks, one at each description, no other path, schema or example; `npm run check:openapi` PASS (both halves: the byte compare and check-spec-examples, 405 example blocks).
+
+Suites at this head (offline; bash 3.2.57, node v24.7.0, darwin arm64): services/security 15 files 195/195 (the ks577 file 8/8) · services/api-gateway 34 files 343/343 · services/tenant-provisioning 3 files 13/13 · tsc --noEmit clean in all three.
+
+Not built this round, on the ticket for Kam's line as Peter asked: his items 3–5 (SQL-statement cells on the ks869 pattern; route cells on the ks742 harness; the zero-revoked warning/backfill; the validate-path cell). The merge of this PR is Kam's: it picks a cutover shape for Platform S.
+
+Co-Authored-By: Claude Opus 5 <noreply@anthropic.com>
+Claude-Session: https://claude.ai/code/session_01C3W3P9xvRewZHjrq3Yvqck
+
+--- FIX delta numstat 6114a15d7..a704137de38a3055e40ee62adc343c0239f34ea9
+10	7	Blockchain/Dev/docs/openapi/secuura-api.yaml
+5	3	Blockchain/Dev/services/tenant-provisioning/src/tenant-provisioning.openapi.ts
+--- PR delta vs develop numstat 8861e6216..a704137de38a3055e40ee62adc343c0239f34ea9
+10	7	Blockchain/Dev/docs/openapi/secuura-api.yaml
+20	1	Blockchain/Dev/services/api-gateway/src/routes/platform.ts
+131	0	Blockchain/Dev/services/security/src/__tests__/ks577-revoke-on-rotate.test.ts
+102	1	Blockchain/Dev/services/security/src/index.ts
+5	3	Blockchain/Dev/services/tenant-provisioning/src/tenant-provisioning.openapi.ts
+--- PR at 85f8263c2 vs its merge-base
+20	1	Blockchain/Dev/services/api-gateway/src/routes/platform.ts
+131	0	Blockchain/Dev/services/security/src/__tests__/ks577-revoke-on-rotate.test.ts
+102	1	Blockchain/Dev/services/security/src/index.ts
+--- develop commits since that base touching the PR's files
+0  Blockchain/Dev/services/api-gateway/src/routes/platform.ts
+0  Blockchain/Dev/services/security/src/__tests__/ks577-revoke-on-rotate.test.ts
+0  Blockchain/Dev/services/security/src/index.ts
+--- ls-tree of the PR files + yaml/source at H8 / 6114a15d7 / 85f8263c2 / develop
+== @a704137de38a3055e40ee62adc343c0239f34ea9
+100644 blob 298d95e4a12b2384f360f83878c6ae84773cf00b 1334421	Blockchain/Dev/docs/openapi/secuura-api.yaml
+100644 blob 4550401f8d7d76afa848855cdf7558a35fd02de0   44637	Blockchain/Dev/services/api-gateway/src/routes/platform.ts
+100644 blob 1c5966786e4e13df011582710b9ff969e675a2fa    6088	Blockchain/Dev/services/security/src/__tests__/ks577-revoke-on-rotate.test.ts
+100644 blob fb806451aab9df4d31b1a91031bffca89fa6bb89   68104	Blockchain/Dev/services/security/src/index.ts
+100644 blob 7b7e0be14619a05b1189c9f9741f470706160c72   26590	Blockchain/Dev/services/tenant-provisioning/src/tenant-provisioning.openapi.ts
+== @6114a15d7
+100644 blob f14ab17ed1557bdf6ce6da0d4ec7ad96efa40923 1334093	Blockchain/Dev/docs/openapi/secuura-api.yaml
+100644 blob 4550401f8d7d76afa848855cdf7558a35fd02de0   44637	Blockchain/Dev/services/api-gateway/src/routes/platform.ts
+100644 blob 1c5966786e4e13df011582710b9ff969e675a2fa    6088	Blockchain/Dev/services/security/src/__tests__/ks577-revoke-on-rotate.test.ts
+100644 blob fb806451aab9df4d31b1a91031bffca89fa6bb89   68104	Blockchain/Dev/services/security/src/index.ts
+100644 blob 5903759c7b40dc88493561522bf493c0385f3534   26278	Blockchain/Dev/services/tenant-provisioning/src/tenant-provisioning.openapi.ts
+== @85f8263c2
+100644 blob 39c1b64c710fd8d3c5a06067fab0f6f8e91c05c3 1333035	Blockchain/Dev/docs/openapi/secuura-api.yaml
+100644 blob 4550401f8d7d76afa848855cdf7558a35fd02de0   44637	Blockchain/Dev/services/api-gateway/src/routes/platform.ts
+100644 blob 1c5966786e4e13df011582710b9ff969e675a2fa    6088	Blockchain/Dev/services/security/src/__tests__/ks577-revoke-on-rotate.test.ts
+100644 blob fb806451aab9df4d31b1a91031bffca89fa6bb89   68104	Blockchain/Dev/services/security/src/index.ts
+100644 blob 5903759c7b40dc88493561522bf493c0385f3534   26278	Blockchain/Dev/services/tenant-provisioning/src/tenant-provisioning.openapi.ts
+== @8861e6216
+100644 blob f14ab17ed1557bdf6ce6da0d4ec7ad96efa40923 1334093	Blockchain/Dev/docs/openapi/secuura-api.yaml
+100644 blob 2e1699aa07bba056e04c41851f567e0dd0cc08d6   43522	Blockchain/Dev/services/api-gateway/src/routes/platform.ts
+ABSENT Blockchain/Dev/services/security/src/__tests__/ks577-revoke-on-rotate.test.ts
+100644 blob ed0239d79e40a2e3ffe3cbd2780504445df6dc52   62872	Blockchain/Dev/services/security/src/index.ts
+100644 blob 5903759c7b40dc88493561522bf493c0385f3534   26278	Blockchain/Dev/services/tenant-provisioning/src/tenant-provisioning.openapi.ts

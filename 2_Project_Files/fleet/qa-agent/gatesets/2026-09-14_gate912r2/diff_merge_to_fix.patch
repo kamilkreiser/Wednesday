@@ -1,0 +1,78 @@
+diff --git a/Blockchain/Dev/services/originate/src/__tests__/ks1004-anchor-failed-lockout.test.ts b/Blockchain/Dev/services/originate/src/__tests__/ks1004-anchor-failed-lockout.test.ts
+index da63727ca..4684fb3ad 100644
+--- a/Blockchain/Dev/services/originate/src/__tests__/ks1004-anchor-failed-lockout.test.ts
++++ b/Blockchain/Dev/services/originate/src/__tests__/ks1004-anchor-failed-lockout.test.ts
+@@ -132,6 +132,27 @@ describe('KS-1004 — markDocumentAnchorFailed reaches a hashed document', () =>
+     expect(updates.blockchain.txHash).toBeNull();
+     expect(updates.blockchain.blockHeight).toBe(0);
+   });
++
++  it('CONTRACT: a NO-txHash prior carrying anchoredAt does NOT keep it — an anchor time is retained only alongside a hash', async () => {
++    // The blob type's own contract (`documentRepo.ts:60-61`): `anchoredAt` is
++    // absent in the fail-closed state where nothing was anchored. The carry
++    // is for a transaction that was BUILT and then failed, so it is keyed on
++    // the hash — with no hash there is nothing whose anchor time could be
++    // kept. (`ks1058-anchor-failed-preserves-thread-token.test.ts` pins the
++    // same fact from the other side.)
++    mockGetDocument.mockResolvedValue(baseDoc({
++      blockchain: {
++        txHash: null, blockHeight: 0, status: 'pending', anchorId: 'anchor_1',
++        anchoredAt: '2026-02-02T00:00:00.000Z',
++      },
++    } as Partial<DocumentRecord>));
++    await markDocumentAnchorFailed('doc-ks1004', 'tenant-1', 'anchor_1', 'boom');
++    const [, , updates] = mockUpdateDocument.mock.calls[0];
++    expect('anchoredAt' in updates.blockchain).toBe(false);
++    // and the write still happened, fail-closed shape intact
++    expect(updates.blockchain.status).toBe('anchor_failed');
++    expect(updates.blockchain.txHash).toBeNull();
++  });
+ });
+ 
+ describe('KS-1004 — reconcileDocumentAnchorState heals a hashed, failed document', () => {
+diff --git a/Blockchain/Dev/services/originate/src/__tests__/ks1058-anchor-failed-preserves-thread-token.test.ts b/Blockchain/Dev/services/originate/src/__tests__/ks1058-anchor-failed-preserves-thread-token.test.ts
+index 349be4653..1c78b4a61 100644
+--- a/Blockchain/Dev/services/originate/src/__tests__/ks1058-anchor-failed-preserves-thread-token.test.ts
++++ b/Blockchain/Dev/services/originate/src/__tests__/ks1058-anchor-failed-preserves-thread-token.test.ts
+@@ -180,12 +180,19 @@ describe('KS-1058 — the fail-closed write must not destroy an unrelated minted
+     expect(blob.anchorId).toBe('anchor_1');
+   });
+ 
+-  it('CONTROL: the existing guard still no-ops on a document carrying a real txHash', async () => {
+-    // The KS-535 guard is untouched by this change and must stay untouched.
+-    mockGetDocument.mockResolvedValueOnce(docWithBlob({
++  it('UNION with KS-1004: a hashed prior IS written — status anchor_failed, txHash and blockHeight carried, threadToken preserved', async () => {
++    // KS-1004 (#912) narrowed the guard to `confirmed` alone, so a document
++    // carrying a real txHash is now written — the ks1004 suite's REPRO and
++    // "confirmed is still refused" cells and the split ks535 cells pin the
++    // guard itself. What THIS file pins is that the write keeps what it
++    // found: the chain facts are carried and the thread token survives, for
++    // the hashed population exactly as for the no-hash one above.
++    const blob = await writtenBlobFor({
+       txHash: 'd'.repeat(64), blockHeight: 42, status: 'submitted', threadToken: THREAD_TOKEN,
+-    }));
+-    await markDocumentAnchorFailed('doc-ks1058', 'tenant-1', 'anchor_1', 'boom');
+-    expect(mockUpdateDocument).not.toHaveBeenCalled();
++    });
++    expect(blob.status).toBe('anchor_failed');
++    expect(blob.txHash).toBe('d'.repeat(64));
++    expect(blob.blockHeight).toBe(42);
++    expect(blob.threadToken).toEqual(THREAD_TOKEN);
+   });
+ });
+diff --git a/Blockchain/Dev/services/originate/src/services/anchorStateSync.ts b/Blockchain/Dev/services/originate/src/services/anchorStateSync.ts
+index 174d122ec..d8e988f7a 100644
+--- a/Blockchain/Dev/services/originate/src/services/anchorStateSync.ts
++++ b/Blockchain/Dev/services/originate/src/services/anchorStateSync.ts
+@@ -164,7 +164,10 @@ export async function markDocumentAnchorFailed(
+       txHash: prior?.txHash ?? null,
+       blockHeight: prior?.blockHeight ?? 0,
+       ...(prior?.network ? { network: prior.network } : {}),
+-      ...(prior?.anchoredAt ? { anchoredAt: prior.anchoredAt } : {}),
++      // KS-1004: an anchor time is retained only for a transaction that was
++      // built and then failed — a no-hash fail-closed blob has none, which is
++      // the blob type's own contract (`documentRepo.ts:60-61`).
++      ...(prior?.txHash && prior?.anchoredAt ? { anchoredAt: prior.anchoredAt } : {}),
+       ...(anchorId ? { anchorId } : {}),
+       // KS-1058: `updateDocument` shallow-spreads (`{...doc, ...updates}`),
+       // so this object REPLACES the blockchain blob wholesale and every key

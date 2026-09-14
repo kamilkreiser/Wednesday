@@ -1,0 +1,202 @@
+== gw verification.ts at head :625-650
+   625	      persistedBlockHeight > 0;
+   626	    // Simulated: any truthy value is a declaration, not only boolean `true`.
+   627	    const persistedDeclaredSimulated = Boolean(persistedSimulated);
+   628	
+   629	    // Live data wins when available; persisted is the fallback.
+   630	    const txHash = liveTxHash || persistedTxHash;
+   631	    const blockHeight = liveBlockHeight || persistedBlockHeight;
+   632	
+   633	    // KS-1057: `confidence` used to be keyed on PRESENCE alone — `txHash &&
+   634	    // blockHeight`. That was safe only by accident: `status === 'anchor_failed'`
+   635	    // USED to imply `txHash === null`, and KS-1004 (#912) deliberately and
+   636	    // correctly retired that invariant so a failed transaction keeps its hash
+   637	    // as a forensic trail. A hash proves a transaction was BUILT, not that it
+   638	    // succeeded, so presence can no longer stand in for success.
+   639	    //
+   640	    // Live chain evidence is judged on its own and stays authoritative: a tx
+   641	    // observed in a block IS on chain whatever a stale persisted status says.
+   642	    // That is the whole point of the scan above and it must still be able to
+   643	    // heal a document whose blob went `anchor_failed` on a raced signal — so
+   644	    // this deliberately does NOT consult `persistedStatus`.
+   645	    const liveAnchored = Boolean(liveTxHash && liveBlockHeight);
+   646	
+   647	    // Persisted evidence is only as good as the status stored beside it. This
+   648	    // mirrors originate's `isAnchoredHonestly` (services/originate/src/routes/
+   649	    // verification.ts): only `confirmed` earns the claim — 'submitted' means
+   650	    // the tx is in flight and may still fail, the KS-535 class — and a
+== :695-720
+   695	    // a tier-1 blob in flight answered `off-chain-only` while the same anchor
+   696	    // via tier 2 answered `pending-onchain` (F8). The `persistedConfidence`
+   697	    // fallback stays, for STATUSLESS blobs only: originate writes
+   698	    // `{txHash: null, blockHeight: null, confidence: 'pending-onchain'}` with no
+   699	    // status key when anchoring is unavailable (routes/documents.ts:1367-1372)
+   700	    // and at certification create (routes/certifications.ts:463-469,
+   701	    // :1184-1191) — "the verifier UI must honour" it. A blob never carries
+   702	    // both, so the two arms cannot disagree. The mapping's `on-chain` is never
+   703	    // emitted from here: `persistedAnchored` above owns that claim.
+   704	    const confidence: 'on-chain' | 'pending-onchain' | 'off-chain-only' =
+   705	      liveAnchored || persistedAnchored
+   706	        ? 'on-chain'
+   707	        : confidenceForAnchorStatus(persistedStatus) === 'pending-onchain'
+   708	        ? 'pending-onchain'
+   709	        : persistedStatus == null && persistedConfidence === 'pending-onchain'
+   710	        ? 'pending-onchain'
+   711	        : 'off-chain-only';
+   712	    const blockchainAnchored = confidence === 'on-chain';
+   713	
+   714	    res.json({
+   715	      verified: !isRevoked && hashValid && blockchainAnchored,
+   716	      documentId: id,
+   717	      certificationId: id,
+   718	      status: doc.status || 'anchored',
+   719	      revoked: isRevoked,
+   720	      checks: {
+== confidenceForAnchorStatus definition + callers (grep -n)
+224: * `persistedAnchored` and then let anything without its own
+238: * `null`/absent is NOT this function's decision. The tier-1 `persistedAnchored`
+247:export function confidenceForAnchorStatus(
+340:                  // `confidenceForAnchorStatus`; a second copy here would be
+600:    // KS-1069: `persistedAnchored` below used to trust the SHAPE of these three
+645:    const liveAnchored = Boolean(liveTxHash && liveBlockHeight);
+681:    const persistedAnchored = Boolean(
+703:    // emitted from here: `persistedAnchored` above owns that claim.
+705:      liveAnchored || persistedAnchored
+707:        : confidenceForAnchorStatus(persistedStatus) === 'pending-onchain'
+== at r1/base (489ac1600) the presence-keyed line
+510:    const persistedConfidence = (doc as any).blockchain?.confidence;
+516:      txHash && blockHeight
+== gateway tests at head naming ks1057/1069/1070/1071
+Blockchain/Dev/services/api-gateway/src/__tests__/ks1057-verify-confidence-is-status-aware.test.ts
+Blockchain/Dev/services/api-gateway/src/__tests__/ks1069-persisted-anchored-input-shape.test.ts
+Blockchain/Dev/services/api-gateway/src/__tests__/ks1070-tier2-carries-simulated.test.ts
+Blockchain/Dev/services/api-gateway/src/__tests__/ks1071-verify-confidence-one-mapping.test.ts
+== gateway __tests__ count at head
+34
+== gateway package.json test runner
+11:    "test": "vitest"
+42:    "vitest": "^4.1.9"
+== originate jest config present?
+Blockchain/Dev/services/originate/jest.config.js
+Blockchain/Dev/services/originate/jest.integration.config.js
+Blockchain/Dev/services/originate/tsconfig.json
+== gw :660-694 (persistedAnchored)
+   655	    // was written and it licensed exactly the future writer this guard worries
+   656	    // about. Producers, counted from source:
+   657	    //   * the four seeded demo documents (documentRepo.ts:790/818/846/886),
+   658	    //     including the canonical OpenAPI example (KS-481) — these are why the
+   659	    //     carve-out exists, and the cell below pins them;
+   660	    //   * the CURRENT retry route `POST /api/documents/:id/anchor`
+   661	    //     (originate routes/documents.ts:1313-1322), whose create-path sibling
+   662	    //     at :836 DOES write a status. It is inert today only because
+   663	    //     anchoring's 202 body carries neither a txHash nor a blockHeight —
+   664	    //     an accident of a response shape, not a guard.
+   665	    // This branch is fail-OPEN by construction: a writer that omits `status`
+   666	    // while setting a height is treated as on-chain, and it is the weakest part
+   667	    // of this predicate — narrowing it needs the statusless producers closed
+   668	    // first.
+   669	    //
+   670	    // ⚠ IT IS TIER 1 ONLY. An earlier version of this comment said the tier-2
+   671	    // verifier path depends on it. That was true of the code it was written
+   672	    // against and the F1 fix in the same commit made it false: tier 2 now
+   673	    // synthesises its blob with `status: latest.status` (line 265) from
+   674	    // anchoring's `formatAnchorResponse`, which emits `status: anchor.status`
+   675	    // unconditionally (anchoring/src/index.ts:1503) over a column declared
+   676	    // `TEXT NOT NULL DEFAULT 'pending'` (migrations 001:714, 003:26). So a
+   677	    // tier-2 blob ALWAYS carries a status and can never reach `== null`.
+   678	    // Measured: deleting this carve-out reds exactly ONE cell — the tier-1
+   679	    // `REGRESSION: a legacy statusless blob` — and every tier-2 cell stays
+   680	    // green. Its only producers are the two counted above, and both are tier 1.
+   681	    const persistedAnchored = Boolean(
+   682	      persistedTxHashIsReal &&           // KS-1069: was `persistedTxHash &&`
+   683	      persistedBlockHeightIsHeight &&    // KS-1069: was `persistedBlockHeight &&`
+   684	      !persistedDeclaredSimulated &&     // KS-1069: was `persistedSimulated !== true`
+   685	      (persistedStatus === 'confirmed' || persistedStatus == null),
+   686	    );
+   687	
+   688	    // KS-1071: the in-flight decision is made HERE, once, for BOTH tiers —
+   689	    // a tier-2 blob arrives with `status` and no `confidence` of its own (see
+   690	    // makeFetchDocFromAnchorStore). Keyed on the persisted status through the
+   691	    // one exported mapping. Prior behaviour: this read only
+   692	    // `persistedConfidence === 'pending-onchain'`, a field originate's
+   693	    // status-writers never set (anchorStateSync.ts:212/247/348 write
+   694	    // `status: 'submitted'`/`'pending'`/`'confirmed'` and no `confidence`), so
+== confidenceForAnchorStatus :220-275
+   220	 * Before this the decision lived twice. Tier 2 (the blob synthesised from the
+   221	 * anchor store, below) mapped `confirmed`→on-chain, `failed`→off-chain-only and
+   222	 * EVERYTHING ELSE→pending-onchain — an OPEN default. Tier 1 (the persisted
+   223	 * document blob, in the verify handler) admitted only `confirmed`/null into
+   224	 * `persistedAnchored` and then let anything without its own
+   225	 * `confidence: 'pending-onchain'` fall to off-chain-only — a CLOSED default.
+   226	 * Measured at develop 721b333a6: a `pending`/`submitted` anchor answered
+   227	 * `pending-onchain` via tier 2 and `off-chain-only` via tier 1 (F8), and an
+   228	 * out-of-union value such as `expired` answered `pending-onchain` via tier 2
+   229	 * (F10) — "still coming", to the third-party verifier, with nothing red.
+   230	 * `anchor_store.status` is `TEXT NOT NULL DEFAULT 'pending'` with no CHECK
+   231	 * (migrations 001:714, 003:26), so a new terminal value lands there silently.
+   232	 *
+   233	 * The default is CLOSED: only anchoring's own union
+   234	 * ('pending' | 'submitted' | 'confirmed' | 'failed', anchoring/src/index.ts:112)
+   235	 * is mapped; anything else — including originate's own `anchor_failed`
+   236	 * vocabulary — is off-chain-only.
+   237	 *
+   238	 * `null`/absent is NOT this function's decision. The tier-1 `persistedAnchored`
+   239	 * carve-out (the seeded demo documents, KS-1057) and the statusless
+   240	 * `confidence: 'pending-onchain'` fallback (originate routes/documents.ts:1367-1372,
+   241	 * routes/certifications.ts:463-469 and :1184-1191) stay where they are.
+   242	 *
+   243	 * `on-chain` here means "the status alone would allow the claim". The tier-1
+   244	 * predicate still requires the hash, the height and `simulated !== true`
+   245	 * before it is made (KS-1057; KS-1069 and KS-1070 own those conjuncts).
+   246	 */
+   247	export function confidenceForAnchorStatus(
+   248	  status: unknown,
+   249	): 'on-chain' | 'pending-onchain' | 'off-chain-only' {
+   250	  switch (status) {
+   251	    case 'confirmed':
+   252	      return 'on-chain';
+   253	    case 'submitted':
+   254	    case 'pending':
+   255	      return 'pending-onchain';
+   256	    case 'failed':
+   257	      return 'off-chain-only';
+   258	    default:
+   259	      // KS-1071 F10: closed. Tier 2's prior behaviour here was 'pending-onchain'.
+   260	      return 'off-chain-only';
+   261	  }
+   262	}
+   263	
+   264	function makeFetchDocFromAnchorStore(services: Record<string, ServiceConfig>) {
+   265	  return (docId: string, authHeader?: string): Promise<Record<string, any> | null> => {
+   266	    return new Promise((resolve) => {
+   267	      const anchoringUrl = services.anchoring?.url || 'http://anchoring:4005';
+   268	      const url = new URL(`${anchoringUrl}/api/anchors/document/${docId}`);
+   269	      const http = anchoringUrl.startsWith('https') ? require('https') : require('http');
+   270	      const req = http.get(
+   271	        {
+   272	          hostname: url.hostname,
+   273	          port: url.port,
+   274	          path: url.pathname,
+   275	          timeout: 3000,
+== base :505-525
+   505	    }
+   506	
+   507	    // Persisted state from originate's document record.
+   508	    const persistedTxHash = (doc as any).blockchain?.txHash ?? null;
+   509	    const persistedBlockHeight = (doc as any).blockchain?.blockHeight ?? null;
+   510	    const persistedConfidence = (doc as any).blockchain?.confidence;
+   511	
+   512	    // Live data wins when available; persisted is the fallback.
+   513	    const txHash = liveTxHash || persistedTxHash;
+   514	    const blockHeight = liveBlockHeight || persistedBlockHeight;
+   515	    const confidence: 'on-chain' | 'pending-onchain' | 'off-chain-only' =
+   516	      txHash && blockHeight
+   517	        ? 'on-chain'
+   518	        : persistedConfidence === 'pending-onchain'
+   519	        ? 'pending-onchain'
+   520	        : 'off-chain-only';
+   521	    const blockchainAnchored = confidence === 'on-chain';
+   522	
+   523	    res.json({
+   524	      verified: !isRevoked && hashValid && blockchainAnchored,
+   525	      documentId: id,

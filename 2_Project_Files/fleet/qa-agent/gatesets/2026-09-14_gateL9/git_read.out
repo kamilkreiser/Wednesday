@@ -1,0 +1,73 @@
+2026-09-14 08:17:07 AEST
+== cat-file -t
+1aa708be9fcf7a23575398546d84848c967e81c5 commit
+d105e07a81c8549b7f47c0542e9594204ce6f599 commit
+53b9c3cc1a89f513620516c580a5de5bd60c64de commit
+8861e62161466c40f08d2b10a30edeb203123993 commit
+c1676269d4b438b9b3f897d80bfeae1161dbec39 commit
+a1e49d151 commit
+== merge-base
+1aa708be9: a1e49d15152102acec7c97d96918211227c7fe1e
+d105e07a8: a1e49d15152102acec7c97d96918211227c7fe1e
+53b9c3cc1: 8861e62161466c40f08d2b10a30edeb203123993
+== rev-list --left-right --count DEV...head
+1aa708be9: 109	1
+d105e07a8: 109	1
+53b9c3cc1: 0	2
+== log --format=%H %P %T %ad %s (head commits)
+1aa708be9fcf7a23575398546d84848c967e81c5 parents=a1e49d15152102acec7c97d96918211227c7fe1e tree=9dfdfa7940e42581ab5358406e916b5e390c05b2 2026-09-10T11:30:59+10:00 Kam Kreiser <kamil.kreiser@secuura.ai> | KS-1075: the audit-contract gate exits 1 printing NOTHING — take it off `bash -e` so it can say why
+d105e07a81c8549b7f47c0542e9594204ce6f599 parents=a1e49d15152102acec7c97d96918211227c7fe1e tree=10bdd3bf4a948b1929879a237db8c16d7e3a8f6b 2026-09-10T11:49:20+10:00 Kam Kreiser <kamil.kreiser@secuura.ai> | KS-1077: two npm-audit allow-lists disagreed and CI's was empty — make the GHSA-keyed baseline the single source
+53b9c3cc1a89f513620516c580a5de5bd60c64de parents=c1676269d4b438b9b3f897d80bfeae1161dbec39 8861e62161466c40f08d2b10a30edeb203123993 tree=a4c7ef372dad2dfcb59e0d00c6939af9149d6dba 2026-09-14T08:02:42+10:00 Kam Kreiser <kamil.kreiser@secuura.ai> | Merge develop 8861e6216 into ks-1078 — bring the branch to the current base
+== #942 two commits
+53b9c3cc1a89f513620516c580a5de5bd60c64de parents=c1676269d4b438b9b3f897d80bfeae1161dbec39 8861e62161466c40f08d2b10a30edeb203123993 tree=a4c7ef372dad2dfcb59e0d00c6939af9149d6dba 2026-09-14T08:02:42+10:00 | Merge develop 8861e6216 into ks-1078 — bring the branch to the current base
+c1676269d4b438b9b3f897d80bfeae1161dbec39 parents=a1e49d15152102acec7c97d96918211227c7fe1e tree=bcd8ef5729295defe5bee22c90b9793b3b649bef 2026-09-10T11:57:34+10:00 | KS-1078: the tsx probe folded stderr into its own verdict — separate the streams, and pin tsx
+== numstat per PR vs merge-base
+-- #940 a1e49d151..1aa708be9fcf7a23575398546d84848c967e81c5
+22	3	.github/workflows/security-scan.yml
+ 1 file changed, 22 insertions(+), 3 deletions(-)
+-- #941 a1e49d151..d105e07a81c8549b7f47c0542e9594204ce6f599
+42	10	.github/workflows/security-scan.yml
+22	0	Blockchain/Dev/.security/exceptions.yml
+ 2 files changed, 64 insertions(+), 10 deletions(-)
+-- #942 DEV..53b9c3cc1a89f513620516c580a5de5bd60c64de (develop is an ancestor after the merge)
+17	0	.github/workflows/pr-security-gates.yml
+17	0	BACKLOG.md
+19	2	systemTest/__tests__/manifest_quarantine.test.sh
+ 3 files changed, 53 insertions(+), 2 deletions(-)
+M	.github/workflows/pr-security-gates.yml
+M	BACKLOG.md
+M	systemTest/__tests__/manifest_quarantine.test.sh
+-- #940 vs DEV (2-dot; develop's 109 commits show as the branch's — for the record)
+ 347 files changed, 9278 insertions(+), 43848 deletions(-)
+== ls-tree blobs
+.github/workflows/security-scan.yml                a1e49d151  47da5cac924cbe6c58edce8bba7593b81e13257b
+.github/workflows/security-scan.yml                8861e6216  47da5cac924cbe6c58edce8bba7593b81e13257b
+.github/workflows/security-scan.yml                1aa708be9  fac9ef1b89d53884d3655e3e50ea73c54c9a022a
+.github/workflows/security-scan.yml                d105e07a8  3b272c2d9ecbd9ab130390ca22c1ac06ac40c27d
+.github/workflows/security-scan.yml                53b9c3cc1  47da5cac924cbe6c58edce8bba7593b81e13257b
+.github/workflows/security-scan.yml                c1676269d  47da5cac924cbe6c58edce8bba7593b81e13257b
+.github/workflows/pr-security-gates.yml            a1e49d151  571817703e76b167d2275748e6e455e35b8affb1
+.github/workflows/pr-security-gates.yml            8861e6216  571817703e76b167d2275748e6e455e35b8affb1
+.github/workflows/pr-security-gates.yml            1aa708be9  571817703e76b167d2275748e6e455e35b8affb1
+.github/workflows/pr-security-gates.yml            d105e07a8  571817703e76b167d2275748e6e455e35b8affb1
+.github/workflows/pr-security-gates.yml            53b9c3cc1  eac30f09b461bd4fd270ba4da1d24423a53255c1
+.github/workflows/pr-security-gates.yml            c1676269d  eac30f09b461bd4fd270ba4da1d24423a53255c1
+Blockchain/Dev/.security/exceptions.yml            a1e49d151  d238e899af53e8c1a14815f79a5545a869b2f353
+Blockchain/Dev/.security/exceptions.yml            8861e6216  d238e899af53e8c1a14815f79a5545a869b2f353
+Blockchain/Dev/.security/exceptions.yml            1aa708be9  d238e899af53e8c1a14815f79a5545a869b2f353
+Blockchain/Dev/.security/exceptions.yml            d105e07a8  d6401126ea699d01e6484d813dbcb8a2bd4da68f
+Blockchain/Dev/.security/exceptions.yml            53b9c3cc1  d238e899af53e8c1a14815f79a5545a869b2f353
+Blockchain/Dev/.security/exceptions.yml            c1676269d  d238e899af53e8c1a14815f79a5545a869b2f353
+systemTest/__tests__/manifest_quarantine.test.sh   a1e49d151  dbf52276b17e3f362e42b1a58c4c8a7d3cbc85ca
+systemTest/__tests__/manifest_quarantine.test.sh   8861e6216  57a0f3582ca1a169c6eb6ceacc45780dcf128abc
+systemTest/__tests__/manifest_quarantine.test.sh   1aa708be9  dbf52276b17e3f362e42b1a58c4c8a7d3cbc85ca
+systemTest/__tests__/manifest_quarantine.test.sh   d105e07a8  dbf52276b17e3f362e42b1a58c4c8a7d3cbc85ca
+systemTest/__tests__/manifest_quarantine.test.sh   53b9c3cc1  2ae67f244ddd6e38b4a2b72255d101216cf30314
+systemTest/__tests__/manifest_quarantine.test.sh   c1676269d  e585189669d56c726ed381c505cf5ceeb74111a2
+BACKLOG.md                                         a1e49d151  03eee06947cc2b0ed2be5a6b087fc88331ce7320
+BACKLOG.md                                         8861e6216  9d99b3bececb5890520a4566d71e33d7c1d23b41
+BACKLOG.md                                         1aa708be9  03eee06947cc2b0ed2be5a6b087fc88331ce7320
+BACKLOG.md                                         d105e07a8  03eee06947cc2b0ed2be5a6b087fc88331ce7320
+BACKLOG.md                                         53b9c3cc1  a8dadd27eaebbb4fdf56bfaffe19e8525c78e938
+BACKLOG.md                                         c1676269d  23d99a5dc76e46ae7471a5d4bb2bb0bff045167c
+08:17:10 AEST

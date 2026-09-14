@@ -1,0 +1,59 @@
+ok   every bare import in scripts/audit/*.mjs is declared in its package.json
+ok   scripts/* is NOT in the root workspaces list
+ok   deps-present.sh self-test passes
+ok   a partial install (root present, nested absent) is refused
+ok   a complete install is accepted
+ok   preflight runs deps-present.sh BEFORE the drift check
+ok   pre-push hook sources slot-target.sh BEFORE running preflight
+ok   hook makes preflight probe slot 1's gateway
+ok   hook makes preflight probe slot 2's gateway
+ok   hook makes preflight probe slot 3's gateway
+ok   hook makes preflight probe slot 4's gateway
+ok   nginx /health block exists (guards against a vacuous pass)
+ok   nginx /health JSON hardcodes no port
+ok   /health advertises at least one route (guards a vacuous pass)
+ok   every route in /health has a location block (KS-641 /demo-api/ class)
+ok   the allocation yielded platform-k ports to check (non-vacuity)
+ok   PORT-REGISTRY.md cites K6_WEB_DASHBOARD_PORT's real base (5665)
+ok   PORT-REGISTRY.md cites CARDANO_MOCK_PORT's real base (6090)
+ok   PORT-REGISTRY.md cites CARDANO_N2N_PORT's real base (6091)
+ok   PORT-REGISTRY.md cites YACI_STORE_PORT's real base (6092)
+ok   PORT-REGISTRY.md cites CARDANO_ADMIN_PORT's real base (6093)
+ok   PORT-REGISTRY.md cites CARDANO_SUBMIT_PORT's real base (6094)
+ok   PORT-REGISTRY.md cites REDIS_EXTERNAL_PORT's real base (6379)
+ok   PORT-REGISTRY.md cites POSTGRES_EXTERNAL_PORT's real base (6432)
+ok   PORT-REGISTRY.md cites PGBOUNCER_PORT's real base (6433)
+ok   PORT-REGISTRY.md cites WEBSITE_PORT's real base (6881)
+ok   PORT-REGISTRY.md cites GATEWAY_PORT's real base (6882)
+ok   PORT-REGISTRY.md cites TOKENOMICS_PORT's real base (8881)
+ok   PORT-REGISTRY.md cites AKTO_MONGO_EXPRESS_PORT's real base (9490)
+ok   PORT-REGISTRY.md cites AKTO_DASHBOARD_PORT's real base (9091)
+ok   PORT-REGISTRY.md cites PW_REPORT_PORT's real base (9324)
+ok   PORT-REGISTRY.md cites OLLAMA_PORT's real base (11434)
+ok   PORT-REGISTRY.md cites AKTO_MONGO_PORT's real base (27017)
+ok   PORT-REGISTRY.md no longer binds mongo-express on host 8081
+ok   preflight installs scripts/audit deps BEFORE audit-locks.mjs
+ok   an un-installable scripts/audit is a SKIP, not a FAIL
+ok   scripts/audit has its own lockfile
+ok   that lock pins semver
+ok   lock root name matches package.json (lock is in sync)
+ok   declared semver range is satisfied by the pinned version
+ok   DEV-PROCESS records the Akto budgets as unbaselined here
+ok   leg 1 FAILS the run when deps-present exits non-zero
+FAIL leg 1 lets the run proceed when deps-present exits 0
+       want "0", got "1"
+FAIL leg 14: suites green -> preflight passes
+       want "SUITES-GREEN/0", got "SUITES-RED/1"
+ok   leg 14: a RED suite fails the push, after de-slotting
+ok   leg 14: an empty de-slot measurement REFUSES rather than running polluted
+ok   leg 14: the refusal SHORT-CIRCUITS — a red suite present, still not run
+ok   deps-present says it is NOT spec drift
+ok   deps-present names the actual fix (npm ci)
+ok   deps-present names WHERE to run it (Blockchain/Dev)
+ok   KS-469 STALE classifier still present
+ok   real spec drift still has its own FAIL branch
+ok   KS-376 esbuild SKIP branch still present
+ok   precondition precedes the STALE branch
+ok   precondition precedes the drift catch-all
+
+preflight_deps: 53 passed, 2 failed

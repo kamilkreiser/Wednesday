@@ -1,0 +1,25 @@
+=== CASE 1 — a fully bucketed tree: census OK, guards run green ===
+  ok   census on a clean fixture (=0)
+  ok   run of two green guards (=0)
+  ok   --list (=0)
+=== CASE 2 — RED-PROOF: a tracked guard in NO bucket must fail the census ===
+  ok   census sees the orphan (=1)
+  ok   control: run path unaffected by an unbucketed guard (=0)
+=== CASE 3 — RED-PROOF: a bucket naming a guard NOT in the tree must fail ===
+  ok   census sees the ghost (=1)
+=== CASE 4 — POSITIVE CONTROL: enumerating ZERO guards must FAIL, not pass ===
+  ok   census with 0 tracked guards fails loudly (=1)
+=== CASE 5 — RED-PROOF: a wired guard that FAILS must fail the run ===
+  ok   run reports a red guard (=1)
+  ok   control: census still OK (bucketing unchanged) (=0)
+=== CASE 6 — POSITIVE CONTROL: running ZERO guards must FAIL, not pass ===
+  ok   run with an empty WIRED list fails loudly (=1)
+=== CASE 7 — a wired guard missing from the tree must fail the run ===
+  ok   run reports a missing wired guard (=1)
+=== CASE 8 — the HOOK'S GIT ENV must not reach the guards (KS-926, found by wiring) ===
+  ok   RED-PROOF: the guard alone under GIT_DIR does fail (=1)
+  ok   control: the same guard without GIT_DIR passes (=0)
+  ok   the runner shields guards from the hook env (=0)
+  ok   RED-PROOF: removing the unset brings the failure back (=1)
+
+run_code_guards.test.sh — 15 passed, 0 failed

@@ -1,0 +1,184 @@
+diff --git a/Blockchain/Dev/packages/shared/src/index.ts b/Blockchain/Dev/packages/shared/src/index.ts
+index 8794bca5f..aeaf90dad 100644
+--- a/Blockchain/Dev/packages/shared/src/index.ts
++++ b/Blockchain/Dev/packages/shared/src/index.ts
+@@ -230,3 +230,8 @@ export {
+   decideKeyRevoke,
+ } from './security/keyRevokePolicy';
+ export type { RevokeDecision } from './security/keyRevokePolicy';
++
++// Organisation-id normalisation (KS-780). The ONE implementation: used by the
++// revoke policy above and re-exported by services/originate's `orgId.ts` for
++// its resolvers, so no service carries a private copy that could drift.
++export { normaliseOrgId } from './security/orgId';
+diff --git a/Blockchain/Dev/packages/shared/src/security/keyRevokePolicy.ts b/Blockchain/Dev/packages/shared/src/security/keyRevokePolicy.ts
+index dcd774a30..86b554052 100644
+--- a/Blockchain/Dev/packages/shared/src/security/keyRevokePolicy.ts
++++ b/Blockchain/Dev/packages/shared/src/security/keyRevokePolicy.ts
+@@ -49,6 +49,8 @@
+  */
+ 
+ 
++import { normaliseOrgId } from './orgId';
++
+ /**
+  * Roles that may act across tenants. Deliberately NOT the whole of
+  * KEY_ADMIN_ROLES: ORG_ADMIN / ISSUER_ADMIN / ADMIN are tenant-scoped and are
+@@ -82,46 +84,22 @@ export function isOrgBoundedRole(role: string | undefined): boolean {
+   return ORG_BOUNDED_ROLES.has(String(role || '').toUpperCase());
+ }
+ 
+-/**
+- * Normalise an id before comparing it (KS-764).
+- *
+- * `svc_api_keys.organization_id` is **TEXT** while `tenant_id` is UUID, so a raw
+- * `!==` on two org ids compares whatever casing each side happened to store — a
++/*
++ * Organisation ids are normalised before comparison (KS-764) — `svc_api_keys.
++ * organization_id` is TEXT while `tenant_id` is UUID, so a raw `!==` on two org
++ * ids compares whatever casing each side happened to store, and a
+  * differently-cased claim would read as a different Organisation and refuse a
+- * legitimate revoke, while nothing would catch it.
+- *
+- * CITATION CORRECTED (QA F-795-01). This used to cite "the normaliser merged in
+- * #790 (`gdprService.ts:1251`)". #795 merged as `7dd304b7c` and DELETED that
+- * line: Peter's review made the point that two byte-identical private copies is
+- * the arrangement that produces drift, so both originate resolvers were
+- * consolidated onto one implementation at
+- * `services/originate/src/services/orgId.ts:36` (`normaliseOrgId`). Citing a
+- * deleted line inside a security decision file is how a convention quietly
+- * loses its anchor.
+- *
+- * WHERE THIS FUNCTION SHOULD LIVE, stated rather than left implicit, because
+- * #795 and this change reach opposite-looking conclusions:
+- *
+- *   - The two implementations are behaviourally IDENTICAL — both are
+- *     `trim() !== '' ? trim().toLowerCase() : null`, verified by reading both.
+- *   - They are in different LAYERS, and that is why this is not simply reuse:
+- *     `orgId.ts` is inside a service, and `@secuura/shared` cannot import from a
+- *     service. Reuse in this direction is not available.
+- *   - `orgId.ts`'s own docblock justifies staying service-local because
+- *     "nothing outside it compares organisation ids this way". **This file
+- *     falsifies that reason the moment it lands.**
+- *
+- * So `@secuura/shared` wins as the eventual single home, and moving it is a
+- * follow-up that touches the two originate resolvers Peter has just reviewed —
+- * not something to fold into this PR. Until then there are two copies, they
+- * must change together, and each names the other.
+- *
+- * Empty and whitespace-only collapse to null so "absent" has ONE representation
+- * at the comparison, and the org-less arms below decide it explicitly.
++ * legitimate revoke while nothing caught it.
++ *
++ * The normaliser is `normaliseOrgId` from `./orgId` (KS-780) — the ONE
++ * implementation, which `services/originate/src/services/orgId.ts` re-exports
++ * for its own resolvers. This file used to carry a private byte-identical copy
++ * (`normOrgId`) because `@secuura/shared` cannot import from a service; moving
++ * the function here rather than reusing the service's was the only direction
++ * available, and it is done. Empty and whitespace-only collapse to null so
++ * "absent" has ONE representation at the comparison, and the org-less arms
++ * below decide it explicitly.
+  */
+-function normOrgId(v: string | null | undefined): string | null {
+-  return typeof v === 'string' && v.trim() !== '' ? v.trim().toLowerCase() : null;
+-}
+ 
+ export interface RevokeDecision {
+   allow: boolean;
+@@ -193,8 +171,8 @@ export function decideTenantAccess(
+   // so that adding a bound to another surface later is an explicit act at the
+   // call site rather than a value that could arrive as undefined by accident.
+   if (organisationScope && isOrgBoundedRole(user.role)) {
+-    const targetOrg = normOrgId(organisationScope.targetOrganizationId);
+-    const callerOrg = normOrgId(user.organizationId);
++    const targetOrg = normaliseOrgId(organisationScope.targetOrganizationId);
++    const callerOrg = normaliseOrgId(user.organizationId);
+ 
+     // KS-764's filed fix-shape said an ORG-LESS KEY must be refused. Kam ruled
+     // otherwise on 2026-09-03, and the reasoning is worth keeping because the
+diff --git a/Blockchain/Dev/services/originate/src/__tests__/ks695-erasure-by-external-ref.test.ts b/Blockchain/Dev/services/originate/src/__tests__/ks695-erasure-by-external-ref.test.ts
+index d377aa8c2..6d55452f2 100644
+--- a/Blockchain/Dev/services/originate/src/__tests__/ks695-erasure-by-external-ref.test.ts
++++ b/Blockchain/Dev/services/originate/src/__tests__/ks695-erasure-by-external-ref.test.ts
+@@ -33,6 +33,10 @@ jest.mock('@secuura/shared', () => ({
+   isSubjectDekCiphertext: jest.fn(() => false),
+   isEncryptedPii: jest.fn(() => false),
+   runWithPlatformScope: jest.fn(<T,>(fn: () => T): T => fn()),
++  // KS-780: the org-id normaliser now lives in @secuura/shared and originate's
++  // orgId.ts re-exports it, so this hand-listed mock must pass the REAL one
++  // through — a stub here would be a second implementation, the thing removed.
++  normaliseOrgId: jest.requireActual('@secuura/shared').normaliseOrgId,
+   SubjectDekProvider: class {
+     getOrCreateDek = async () => Buffer.alloc(32);
+     getDek = async () => null;
+diff --git a/Blockchain/Dev/services/originate/src/services/orgId.ts b/Blockchain/Dev/services/originate/src/services/orgId.ts
+index a40475112..f87b261b8 100644
+--- a/Blockchain/Dev/services/originate/src/services/orgId.ts
++++ b/Blockchain/Dev/services/originate/src/services/orgId.ts
+@@ -1,37 +1,40 @@
+ /**
+  * =============================================================================
+- * Organisation-id normalisation — ONE implementation, two resolvers (QA F-4)
++ * Organisation-id normalisation — ONE implementation, re-exported (QA F-4 / KS-780)
+  * =============================================================================
+- * `resolveOnBehalfOf` (provenance.ts) and the GDPR subject resolver
+- * (gdprService.ts) both compare a PG-canonical `organization_id` against a
+- * connector-supplied claim that nothing normalises. Both were fixed by adding a
+- * local `norm`, and the two copies were byte-identical.
++ * `resolveOnBehalfOf` (provenance.ts), the GDPR subject resolver
++ * (gdprService.ts) and the documents route's caller-scoped externalRef check
++ * all compare a PG-canonical `organization_id` against a connector-supplied
++ * claim that nothing normalises. Each was fixed by a local `norm`, and the
++ * copies were byte-identical.
+  *
+  * Peter Obeden's review of #795 made the point that two identical private copies
+  * is precisely the arrangement that produced the drift in the first place: fix a
+  * normalisation bug in one — NFKC, a `::uuid` canonicalisation, a locale-aware
+- * lowercase — and the other sits there looking correct. The comment above each
+- * copy claimed "the two resolvers cannot drift apart again", which was a claim
+- * the code did not support.
++ * lowercase — and the other sits there looking correct. This module was that
++ * consolidation for originate.
+  *
+- * It lives in `originate/src/services/` rather than `@secuura/shared` because
+- * both call sites are in this service and nothing outside it compares
+- * organisation ids this way. Widening the package surface for two callers would
+- * also put this on the shared build path, where a stale `dist/` makes the
+- * failure look like a defect in the consumer (recorded in BACKLOG.md).
+- * =============================================================================
+- */
+-
+-/**
+- * Normalise an organisation id for identity comparison.
++ * WHY IT IS NOW A RE-EXPORT (KS-780). This module used to justify staying
++ * service-local because "nothing outside it compares organisation ids this
++ * way". That stopped being true when the API-key revoke policy in
++ * `@secuura/shared` (`security/keyRevokePolicy.ts`) grew an organisation arm
++ * and — unable to import from a service — carried its own byte-identical copy,
++ * on a DESTRUCTIVE surface. Two layers, two implementations, neither able to
++ * witness the other drifting. The implementation now lives once, in
++ * `@secuura/shared` (`security/orgId.ts`), beside the policy that needs it; this
++ * module re-exports it so every existing originate import line is unchanged.
++ * `git grep` finds one definition.
+  *
+- * Trim-then-lowercase, with blank treated as absent. The two properties that
+- * matter to the callers: a whitespace-only or empty value is `null` rather than
+- * a distinct id, and case is not identity — a PG-canonical lowercase uuid and a
+- * caller's upper-cased rendering of the same uuid are the SAME organisation.
++ * The two PROPERTIES the callers rely on are unchanged: a whitespace-only or
++ * empty value is `null` rather than a distinct id (blank is absent), and case is
++ * not identity — a PG-canonical lowercase uuid and a caller's upper-cased
++ * rendering of the same uuid are the SAME organisation.
+  *
+- * @param v - the raw organisation id from a database row or a caller's claim.
+- * @returns the normalised id, or `null` when absent, empty or whitespace-only.
++ * The stale-`dist/` trap this file's old docblock warned about is real and is
++ * now this module's too: a service test that fails with "normaliseOrgId is not
++ * a function" is reading a stale `packages/shared/dist`, not a defect here —
++ * `npm run build --workspace=packages/shared` first (BACKLOG.md).
++ * =============================================================================
+  */
+-export const normaliseOrgId = (v: string | null | undefined): string | null =>
+-  typeof v === 'string' && v.trim() !== '' ? v.trim().toLowerCase() : null;
++
++export { normaliseOrgId } from '@secuura/shared';

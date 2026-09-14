@@ -1,0 +1,496 @@
+#!/usr/bin/env bash
+# =============================================================================
+# TESTS for the preflight's dependency preconditions (KS-691)
+# =============================================================================
+# Two legs of the pre-push preflight depended on dependencies that nothing
+# declared, so they failed in any tree without the ROOT workspace install — a
+# fresh `git worktree`, a fresh clone — and reported the failure as something
+# else entirely:
+#
+#   leg 1  needs packages/shared's NESTED @types/node ^20. Without it tsc
+#          resolves the hoisted 26 (which dropped crypto.JsonWebKey), fails in
+#          jwks.ts, and the catch-all announced "FAIL — spec drifted".
+#   leg 6  imports `semver` in audit-locks.mjs, which NO package.json declared.
+#          It resolved only as a hoisted transitive, so elsewhere the leg died
+#          with ERR_MODULE_NOT_FOUND and preflight called that a lock advisory.
+#
+# The cases below pin the structural properties that keep both shut. The
+# import-declaration case is the general one: it fails for ANY future undeclared
+# import in scripts/audit, not just semver.
+#
+# Usage: bash Blockchain/Dev/scripts/__tests__/preflight_deps.test.sh
+# =============================================================================
+
+set -uo pipefail
+
+HERE="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+DEV_ROOT="${PREFLIGHT_DEPS_TEST_ROOT:-$(cd "$HERE/../.." && pwd)}"
+PASS=0
+FAIL=0
+
+expect() {
+  local desc="$1" want="$2" got="$3"
+  if [[ "$got" == "$want" ]]; then
+    PASS=$((PASS + 1)); printf 'ok   %s\n' "$desc"
+  else
+    FAIL=$((FAIL + 1)); printf 'FAIL %s\n       want "%s", got "%s"\n' "$desc" "$want" "$got"
+  fi
+}
+
+# --- leg 6: every non-builtin import of the audit scripts must be DECLARED -----
+# The general guard. `semver` was the instance; an undeclared import added
+# tomorrow breaks the leg the same way, in the same invisible manner.
+undeclared=""
+for mjs in "$DEV_ROOT"/scripts/audit/*.mjs; do
+  while IFS= read -r spec; do
+    case "$spec" in
+      node:*|.*|/*) continue ;;                       # builtins and relative paths
+    esac
+    # Bare specifier: strip any subpath, keeping the scope for @scoped names.
+    case "$spec" in
+      @*) pkg="$(printf '%s' "$spec" | cut -d/ -f1,2)" ;;
+      *)  pkg="$(printf '%s' "$spec" | cut -d/ -f1)" ;;
+    esac
+    if ! grep -q "\"$pkg\"" "$DEV_ROOT/scripts/audit/package.json" 2>/dev/null; then
+      undeclared="${undeclared}${pkg} (in $(basename "$mjs")) "
+    fi
+  done < <(grep -oE "from '[^']+'" "$mjs" | sed "s/from '//; s/'$//")
+done
+expect "every bare import in scripts/audit/*.mjs is declared in its package.json" "" "$undeclared"
+
+# --- leg 6: the member must be standalone, never folded into the workspaces ---
+# Adding it to the root workspaces list would move its deps into the root lock,
+# which is the thing KS-376 says not to touch.
+in_workspaces=$(node -e '
+  const w = require("'"$DEV_ROOT"'/package.json").workspaces || [];
+  process.stdout.write(w.some(p => String(p).startsWith("scripts")) ? "yes" : "no");
+' 2>/dev/null)
+expect "scripts/* is NOT in the root workspaces list" "no" "$in_workspaces"
+
+# --- leg 1: the precondition script exists and its own self-test passes -------
+bash "$DEV_ROOT/scripts/preflight/deps-present.sh" --self-test >/dev/null 2>&1
+expect "deps-present.sh self-test passes" "0" "$?"
+
+# --- leg 1: the PARTIAL install is detected -----------------------------------
+# Root present, packages/shared's nested tree absent. This is the state that
+# produced TS2694 and was misreported as spec drift; if it ever passes, the fix
+# is gone. Built from scratch rather than reusing the self-test's fixture so the
+# two cannot rot together.
+tmp="$(mktemp -d "${TMPDIR:-/tmp}/ks691-partial.XXXXXX")"
+trap 'rm -rf "$tmp"' EXIT INT TERM
+mkdir -p "$tmp/node_modules/.bin" "$tmp/packages/shared"
+: > "$tmp/node_modules/.bin/tsx"
+DEPS_PRESENT_ROOT="$tmp" bash "$DEV_ROOT/scripts/preflight/deps-present.sh" >/dev/null 2>&1
+expect "a partial install (root present, nested absent) is refused" "1" "$?"
+
+# ...and a complete one is accepted, so the check above is not vacuous.
+mkdir -p "$tmp/packages/shared/node_modules/@types/node"
+DEPS_PRESENT_ROOT="$tmp" bash "$DEV_ROOT/scripts/preflight/deps-present.sh" >/dev/null 2>&1
+expect "a complete install is accepted" "0" "$?"
+
+# --- leg 1: preflight must gate the drift check on the precondition -----------
+# Ordering is the property: if deps-present.sh is invoked AFTER check:openapi,
+# the misleading "spec drifted" is printed before anyone sees the real reason.
+guard_line=$(grep -n 'deps-present.sh' "$DEV_ROOT/scripts/preflight/preflight.sh" | head -1 | cut -d: -f1)
+drift_line=$(grep -n 'check:openapi' "$DEV_ROOT/scripts/preflight/preflight.sh" | head -1 | cut -d: -f1)
+if [[ -n "$guard_line" && -n "$drift_line" && "$guard_line" -lt "$drift_line" ]]; then
+  ordered="yes"
+else
+  ordered="no (guard=${guard_line:-absent} drift=${drift_line:-absent})"
+fi
+expect "preflight runs deps-present.sh BEFORE the drift check" "yes" "$ordered"
+
+# --- KS-691: the pre-push hook must target THIS slot, not always slot 1 -------
+# preflight.sh defaults GATEWAY to localhost:6882. The hook used to invoke it with
+# no slot context, so from a slot-2 worktree legs 3/4/7 either silently SKIPped
+# (slot 1 down — a green push that probed nothing) or probed SLOT 1 and reported
+# success for a stack that was not under test. Sourcing slot-target.sh first
+# exports this slot's GATEWAY_URL, which preflight honours.
+HOOK="$DEV_ROOT/../../.githooks/pre-push"
+if [[ -f "$HOOK" ]]; then
+  src_line=$(grep -n 'slot-target.sh' "$HOOK" | head -1 | cut -d: -f1)
+  pf_line=$(grep -n 'preflight/preflight.sh' "$HOOK" | tail -1 | cut -d: -f1)
+  if [[ -n "$src_line" && -n "$pf_line" && "$src_line" -lt "$pf_line" ]]; then
+    ordered=yes
+  else
+    ordered="no (slot-target=${src_line:-absent} preflight=${pf_line:-absent})"
+  fi
+else
+  ordered="no (hook not found at $HOOK)"
+fi
+expect "pre-push hook sources slot-target.sh BEFORE running preflight" "yes" "$ordered"
+
+# --- KS-691 (B): the HOOK must make preflight probe THIS slot ----------------
+# Earlier these cases sourced slot-target.sh directly and asserted GATEWAY_URL.
+# That was green against develop TOO, because slot-target.sh always exported it —
+# it is the HOOK that changed. A case that passes with and without the fix proves
+# nothing about the fix, so it now runs the hook's own invocation block against a
+# STUB preflight that reports the gateway it was handed. On develop that block
+# never sources slot-target.sh, so it reports 6882 for every slot and these fail.
+HOOK_FILE="${HOOK_UNDER_TEST:-$(cd "$DEV_ROOT/../.." && pwd)/.githooks/pre-push}"
+REPO_TOP="$(cd "$DEV_ROOT/../.." && pwd)"
+
+hook_gateway_for_slot() {
+  local slot="$1"
+  local tmp; tmp="$(mktemp -d "${TMPDIR:-/tmp}/ks691-hook.XXXXXX")"
+  mkdir -p "$tmp/Blockchain/Dev/scripts/preflight" "$tmp/systemTest"
+  cp "$REPO_TOP/systemTest/slot-target.sh"            "$tmp/systemTest/"           2>/dev/null
+  cp "$REPO_TOP/Blockchain/Dev/scripts/stack_env.sh"  "$tmp/Blockchain/Dev/scripts/" 2>/dev/null
+  # The stub stands in for preflight.sh and prints the gateway it would probe —
+  # i.e. preflight.sh:51's own expression, evaluated in the hook's environment.
+  printf '#!/usr/bin/env bash\nprintf "%%s" "${GATEWAY_URL:-http://localhost:6882}"\n' \
+    > "$tmp/Blockchain/Dev/scripts/preflight/preflight.sh"
+  ( cd "$tmp" && git init -q . && git add -A >/dev/null 2>&1 &&
+    git -c user.email=t@t -c user.name=t commit -qm fixture >/dev/null 2>&1 ) || { rm -rf "$tmp"; echo "FIXTURE-FAILED"; return; }
+  # Take the hook's preflight invocation verbatim — the lines under test.
+  sed -n '/^( *bash -c/,/^}/p;/^( *cd Blockchain\/Dev/,/^}/p' "$HOOK_FILE" > "$tmp/invoke.sh"
+  [[ -s "$tmp/invoke.sh" ]] || { rm -rf "$tmp"; echo "NO-INVOCATION-BLOCK"; return; }
+  local out
+  out="$( cd "$tmp" && env -i HOME="$HOME" PATH="$PATH" SECUURA_STACK_SLOT="$slot" bash invoke.sh 2>/dev/null )"
+  rm -rf "$tmp"
+  printf '%s' "$out"
+}
+
+expect "hook makes preflight probe slot 1's gateway" "http://localhost:6882" "$(hook_gateway_for_slot 1)"
+expect "hook makes preflight probe slot 2's gateway" "http://localhost:6982" "$(hook_gateway_for_slot 2)"
+expect "hook makes preflight probe slot 3's gateway" "http://localhost:7082" "$(hook_gateway_for_slot 3)"
+expect "hook makes preflight probe slot 4's gateway" "http://localhost:7182" "$(hook_gateway_for_slot 4)"
+
+# --- KS-691 (D): the gateway /health JSON must not hardcode a port -----------
+# nginx-demo.conf is bind-mounted read-only into EVERY slot, so a literal port in
+# that JSON is wrong on three slots out of four. Asserted statically so it does
+# not need four running stacks to catch a regression.
+HEALTH_BLOCK="$(awk '/location = \/health \{/,/^    \}/' "$DEV_ROOT/docker/nginx-gateway/nginx-demo.conf")"
+expect "nginx /health block exists (guards against a vacuous pass)" "yes" \
+  "$([ -n "$HEALTH_BLOCK" ] && echo yes || echo no)"
+expect "nginx /health JSON hardcodes no port" "0" \
+  "$(printf '%s' "$HEALTH_BLOCK" | grep -c '"port"')"
+
+# --- KS-691 (E): /health must not advertise a route the gateway does not serve
+# The KS-641 merge exposed this class: `/demo-api/` was deleted from the config
+# but stayed in the JSON, and PORT-REGISTRY.md carried a note flagging the JSON
+# as stale rather than anyone fixing it. A health endpoint that lists a route
+# returning 404 is worse than one that lists nothing — it is used to discover
+# what the gateway serves. Every route key must have a real `location` block.
+NGINX_CONF="$DEV_ROOT/docker/nginx-gateway/nginx-demo.conf"
+advertised=$(printf '%s' "$HEALTH_BLOCK" \
+  | grep -o '"/[a-z-]*/\?":"' | sed 's/^"//;s/":"$//' | sort -u)
+expect "/health advertises at least one route (guards a vacuous pass)" "yes" \
+  "$([ -n "$advertised" ] && echo yes || echo no)"
+missing=""
+for route in $advertised; do
+  # `/` is the catch-all and is spelled `location /` with no trailing token.
+  if [ "$route" = "/" ]; then
+    grep -qE '^[[:space:]]*location[[:space:]]+/[[:space:]]*\{' "$NGINX_CONF" || missing="$missing $route"
+  else
+    grep -qE "^[[:space:]]*location[[:space:]]+(=[[:space:]]*)?${route}" "$NGINX_CONF" || missing="$missing $route"
+  fi
+done
+expect "every route in /health has a location block (KS-641 /demo-api/ class)" "" "$missing"
+
+# --- KS-691 (F): PORT-REGISTRY.md must agree with port-allocations.json -------
+# The registry listed akto-mongo-express on host 8081 while the allocation (and
+# the compose default it mirrors) had moved to 9490 for KS-666. Three other
+# places in the same document recorded the move; this row did not, so the file
+# contradicted itself and the wrong number was the one next to the binding.
+ALLOC="$DEV_ROOT/scripts/port-allocations.json"
+REGISTRY="$DEV_ROOT/../../Projects Documents/PORT-REGISTRY.md"
+if [ -f "$REGISTRY" ] && [ -f "$ALLOC" ]; then
+  # KS-971: was a hardcoded list of three Akto names, so a NEWLY allocated port was covered by
+  # nothing — which is how K6_WEB_DASHBOARD_PORT (5665) came to be bound and slot-offset by the
+  # performance runner while appearing in neither this gate nor the registry. Now derived from
+  # the allocation itself, so every present and future platform-k port is checked without anyone
+  # remembering to extend a list. (It also immediately found CARDANO_SUBMIT_PORT 6094 absent.)
+  #
+  # bash 3.2 on macOS: no mapfile/readarray, hence the while-read pipeline.
+  alloc_vars=$(sed -n '/"platform-k"/,/^        }/p' "$ALLOC" | grep -oE '"[A-Z0-9_]+_PORT": *[0-9]+')
+  expect "the allocation yielded platform-k ports to check (non-vacuity)" "yes" \
+    "$([ -n "$alloc_vars" ] && echo yes || echo no)"
+  # A here-string, NOT a pipeline: `... | while read` runs the loop in a SUBSHELL, so every
+  # expect() inside it increments a copy of FAIL that is discarded on exit — the suite prints the
+  # failure and still reports "0 failed". Caught in review of this very change.
+  while IFS= read -r entry; do
+    [ -n "$entry" ] || continue
+    var=$(printf '%s' "$entry" | grep -oE '^"[A-Z0-9_]+_PORT"' | tr -d '"')
+    base=$(printf '%s' "$entry" | grep -oE '[0-9]+$')
+    expect "PORT-REGISTRY.md cites $var's real base ($base)" "yes" \
+      "$(grep -q "$base" "$REGISTRY" && echo yes || echo "no — $base absent")"
+  done <<< "$alloc_vars"
+  # The superseded Mongo Express binding must not reappear as a HOST port.
+  expect "PORT-REGISTRY.md no longer binds mongo-express on host 8081" "0" \
+    "$(grep -c '8081:8081' "$REGISTRY")"
+else
+  expect "PORT-REGISTRY.md and port-allocations.json are both present" "yes" "no"
+fi
+
+# --- KS-691: leg 6 must install scripts/audit's deps BEFORE it runs ---------
+# The mirror of the leg-1 ordering case. audit-locks.mjs imports semver; if the
+# bootstrap were ever moved after the invocation (or dropped), the leg would go
+# back to dying with ERR_MODULE_NOT_FOUND on a fresh tree and preflight would
+# again report that as a standalone-lock advisory finding.
+PF="$DEV_ROOT/scripts/preflight/preflight.sh"
+boot_line=$(grep -n 'cd scripts/audit && npm ci' "$PF" | head -1 | cut -d: -f1)
+run_line=$(grep -n 'node scripts/audit/audit-locks.mjs' "$PF" | head -1 | cut -d: -f1)
+if [[ -n "$boot_line" && -n "$run_line" && "$boot_line" -lt "$run_line" ]]; then bo=yes
+else bo="no (bootstrap=${boot_line:-absent} run=${run_line:-absent})"; fi
+expect "preflight installs scripts/audit deps BEFORE audit-locks.mjs" "yes" "$bo"
+
+# A failed install is offline, not a lock defect, so it must SKIP (rc 2) rather
+# than FAIL — matching this leg's own exit-2 semantics. If that ever became a
+# hard fail, every offline push would be blocked by a leg that cannot run.
+expect "an un-installable scripts/audit is a SKIP, not a FAIL" "1" \
+  "$(grep -c 'locks_rc=2' "$PF")"
+
+# --- KS-691: the new standalone member's lock must be real and in sync -------
+# The lock is what a clean-room `npm ci` installs (leg 2). A hand-edited or
+# absent lock would pass the "declared imports" case above while still failing
+# to install anywhere.
+AUD="$DEV_ROOT/scripts/audit"
+expect "scripts/audit has its own lockfile" "yes" "$([ -f "$AUD/package-lock.json" ] && echo yes || echo no)"
+expect "that lock pins semver" "1" \
+  "$(node -e 'const l=require(process.argv[1]);process.stdout.write(String(l.packages&&l.packages["node_modules/semver"]?1:0))' "$AUD/package-lock.json" 2>/dev/null)"
+expect "lock root name matches package.json (lock is in sync)" "same" \
+  "$(node -e '
+     const p=require(process.argv[1]), l=require(process.argv[2]);
+     const lockRoot=(l.packages&&l.packages[""])||{};
+     process.stdout.write(p.name===l.name && p.name===lockRoot.name && p.version===lockRoot.version ? "same" : "DIFFERENT");
+   ' "$AUD/package.json" "$AUD/package-lock.json" 2>/dev/null)"
+expect "declared semver range is satisfied by the pinned version" "yes" \
+  "$(node -e '
+     const p=require(process.argv[1]), l=require(process.argv[2]);
+     const want=p.dependencies.semver, got=(l.packages["node_modules/semver"]||{}).version||"";
+     const maj=v=>v.split(".")[0];
+     process.stdout.write(want.startsWith("^") && maj(want.slice(1))===maj(got) ? "yes" : "no ("+want+" vs "+got+")");
+   ' "$AUD/package.json" "$AUD/package-lock.json" 2>/dev/null)"
+
+# --- KS-691 (E): the DEV-PROCESS caveat must stay put ------------------------
+# Without it the ~7-8 min Akto budgets read as measured on this hardware, which
+# they are not.
+expect "DEV-PROCESS records the Akto budgets as unbaselined here" "1" \
+  "$(grep -c 'unbaselined on this hardware' "$DEV_ROOT/docs/DEV-PROCESS.md")"
+
+# --- KS-691: leg 1 must HONOUR deps-present's exit code, not merely call it ---
+# The ordering case proves deps-present.sh runs first. It does NOT prove the leg
+# acts on the answer: `if ! bash ...; then fail=1` could become `bash ... || true`
+# and every case above would stay green while a tree with no install sailed
+# through. Driven with a stub deps-present so no real install state is needed.
+# QA R2-4 (s123): PARAMETERISED. Leg 14 was only ever driven green — the fixture
+# gave it one passing suite and a slot stub that exports something, so the
+# de-slot positive control and both failure branches had no case at all and the
+# QA report was the only thing that had ever run them. The three knobs below let
+# the same fixture reach every branch; `leg1_outcome` keeps its old signature so
+# the two leg-1 cases are unchanged.
+preflight_fixture_run() {            # $1 = deps rc, $2 = fixture-suite rc, $3 = slot stub: ok|noexport, $4 = header: ok|mismatch
+  local rc="$1"
+  local suite_rc="${2:-0}"
+  local slot_mode="${3:-ok}"
+  local header_mode="${4:-ok}"
+  local tmp; tmp="$(mktemp -d "${TMPDIR:-/tmp}/ks691-leg1.XXXXXX")"
+  # QA FR-800-03: the fixture tree is NESTED at Blockchain/Dev inside $tmp rather
+  # than laid out flat at $tmp. run-shell-suites.sh derives
+  # REPO_ROOT="$DEV_DIR/../.." — with a flat fixture that resolves OUTSIDE $tmp
+  # entirely, into whatever happens to sit two levels above the temp directory,
+  # so its ROOTS could never match anything the fixture wrote and run mode exited
+  # 1 on "no shell suites found". Nesting puts REPO_ROOT back at $tmp, which is
+  # what lets leg 14 reach a genuine verdict here instead of being stubbed out.
+  local dev="$tmp/Blockchain/Dev"
+  mkdir -p "$dev/scripts/preflight" "$dev/scripts/audit" "$dev/scripts/__tests__"
+  cp "$DEV_ROOT/scripts/preflight/preflight.sh" "$dev/scripts/preflight/"
+  # KS-1046 / QA F-925-3: TOTAL_LEGS was a convention — nothing checked that
+  # the `N/TOTAL` in each step() header agreed with it, so a new leg pasted in
+  # with a stale denominator would count under one total and print another.
+  # `mismatch` rewrites leg 3's header denominator to 99 in the FIXTURE COPY
+  # only (the real file is never touched) so the cell below can show the run
+  # refuses on it. Portable sed: no -i (its argument shape differs by platform).
+  if [ "$header_mode" = "mismatch" ]; then
+    sed -E 's#^step "3/[0-9]+ #step "3/99 #' "$dev/scripts/preflight/preflight.sh" > "$dev/scripts/preflight/preflight.sh.tmp" \
+      && mv "$dev/scripts/preflight/preflight.sh.tmp" "$dev/scripts/preflight/preflight.sh"
+    grep -q '^step "3/99 ' "$dev/scripts/preflight/preflight.sh" || echo "TAMPER-DID-NOT-LAND"
+  fi
+  printf '#!/usr/bin/env bash\nexit %s\n' "$rc" > "$dev/scripts/preflight/deps-present.sh"
+  # Neutralise every other leg so only leg 1's decision is under test.
+  printf '#!/usr/bin/env bash\nexit 0\n' > "$dev/scripts/preflight/lockfile-cleanroom.sh"
+  printf '#!/usr/bin/env bash\nexit 0\n' > "$dev/scripts/preflight/no-tracked-credentials.sh"
+  # QA F-800-07: leg 12 asks scripts/run-shell-suites.sh whether any tracked
+  # shell suite is unreachable. The REAL script is copied in rather than stubbed
+  # `exit 0`, because a stub would make this case pass even if leg 12 stopped
+  # honouring the answer — the exact weakness the leg-1 cases above exist to
+  # catch, one leg along. In this fixture tree it self-SKIPs (not a git
+  # checkout), so leg 12 contributes 0 without being neutered.
+  cp "$DEV_ROOT/scripts/run-shell-suites.sh" "$dev/scripts/"
+  # PRE-EXISTING BREAK, fixed here rather than skipped (QA F-800-07 is exactly
+  # about this). Legs 10 and 11 (`bare-path-scripts-executable.sh`,
+  # `action-pins-labelled.sh`, KS-667 F-16 / KS-751) and leg 5's stored
+  # `expected-case-count` (KS-763) all landed on develop WITHOUT being added to
+  # this fixture. Each one made the leg-1 "exits 0 -> run proceeds" case fail,
+  # because the missing file sets fail=1 and the run exits 1 for reasons that
+  # have nothing to do with leg 1.
+  #
+  # Measured: develop's OWN preflight.sh in this same fixture exits 1 with three
+  # `No such file or directory` errors, and this suite reads 22/11 on develop
+  # against 35/1 here. Nobody saw it because this suite was invoked by NOTHING —
+  # the defect F-800-07 closes, demonstrating itself on its first wired run.
+  printf '#!/usr/bin/env bash\nexit 0\n' > "$dev/scripts/preflight/bare-path-scripts-executable.sh"
+  printf '#!/usr/bin/env bash\nexit 0\n' > "$dev/scripts/preflight/action-pins-labelled.sh"
+  # Leg 13 (KS-921, `check-shared-relink.sh`) is the fourth instance of the class
+  # this comment block describes, added the same way. It is stubbed rather than
+  # left to self-SKIP deliberately: the real guard REFUSES a corpus in which no
+  # Dockerfile consumes the shared-builder stage, because a guard that reports
+  # clean over zero files is the vacuous green this repo has paid for more than
+  # once. Teaching it to shrug at an empty tree to satisfy a fixture would be
+  # removing the assertion to make the test pass. This fixture holds no
+  # Dockerfiles at all, so the leg has nothing to say here.
+  #
+  # MERGE NOTE (KS-731 leg-14 branch): develop wrote this stub to "$tmp/scripts/",
+  # which is where the fixture lived on develop. This branch roots the fixture at
+  # $dev ("$tmp/Blockchain/Dev") so it mirrors the real repo layout, so the path is
+  # translated rather than copied — a stub at the develop path would simply not be
+  # found, and the leg would fail for a reason unrelated to what it tests.
+  printf '#!/usr/bin/env bash\nexit 0\n' > "$dev/scripts/check-shared-relink.sh"
+  # Leg 15 (KS-926, `run-code-guards.sh`) is the fifth instance of the same
+  # class: the leg calls scripts/run-code-guards.sh twice (the census, then the
+  # run), and a fixture with no such file sets fail=1 for a reason that has
+  # nothing to do with leg 1. Measured before this line: 53 passed, 2 failed —
+  # `leg 1 lets the run proceed` and `leg 14: suites green -> preflight passes`
+  # both red. Stubbed the same way as legs 10, 11 and 13: this fixture holds no
+  # check-*.sh guards, so the leg has nothing to census here. The real runner has
+  # its own suite (run_code_guards.test.sh) and is exercised by leg 15 itself.
+  printf '#!/usr/bin/env bash\necho "OK — 0 code guards (fixture stub)"\nexit 0\n' > "$dev/scripts/run-code-guards.sh"
+  # Leg 5 compares a case count against this stored expectation. The stub
+  # audit-gate above emits no " tests N" line, so the parsed count is empty and
+  # the leg's own guard handles the mismatch; the file only has to EXIST so the
+  # `tr` does not error. Its content is deliberately not the real 55 — this
+  # fixture is not asserting the audit contract.
+  printf '0\n' > "$dev/scripts/audit/expected-case-count"
+  printf 'console.log("audit-gate stub");process.exit(0);\n' > "$dev/scripts/audit/audit-gate.mjs"
+  printf 'console.log("audit-locks stub");process.exit(0);\n' > "$dev/scripts/audit/audit-locks.mjs"
+  mkdir -p "$dev/scripts/audit/node_modules/semver"
+  # Leg 5 (KS-763, added by #796) runs `npm run audit:contract` and CANNOT skip
+  # by design, so the fixture has to provide it. The stub emits a " tests N"
+  # line because the leg asserts the case count for EQUALITY against
+  # scripts/audit/expected-case-count (KS-763 QA F1 — a floor of 1 let the
+  # suites rot from 54 cases to 1 and still print OK). Both are 0 here: this
+  # fixture tests leg 1's decision, not the audit contract.
+  printf '{"name":"x","scripts":{"check:openapi":"true","audit:contract":"echo \\"# tests 0\\""}}\n' > "$dev/package.json"
+  # Leg 14 (QA FR-800-03) RUNS the shell suites. With REPO_ROOT now inside the
+  # fixture, the runner globs $dev/scripts/__tests__ — so give it exactly one
+  # trivial passing suite. That makes leg 14 reach a real verdict rather than
+  # being neutralised, and it keeps the runner's own positive control ("the glob
+  # reached 0 suites") satisfied honestly rather than by suppression.
+  printf '#!/usr/bin/env bash\necho "fixture stub suite"\nexit %s\n' "$suite_rc" > "$dev/scripts/__tests__/fixture_stub.test.sh"
+  # Leg 14 measures what systemTest/slot-target.sh exports, so it can clear those
+  # before running the suites (they include derivation tests that an ambient
+  # AKTO_PREFIX makes vacuous). Its positive control REFUSES when that
+  # measurement comes back empty, which is correct and which this fixture would
+  # otherwise trip: the fixture tree has no systemTest/. A stub that exports one
+  # variable is enough for leg 14 to proceed, because this fixture is asserting
+  # leg 1's decision and nothing about slot targeting. The REAL measurement is
+  # exercised on every actual push, not here.
+  mkdir -p "$tmp/systemTest"
+  # `noexport` reproduces the state leg 14's positive control exists for: the
+  # file is present and sources cleanly, but the before/after diff comes back
+  # EMPTY, so the de-slot list cannot be built. Asserted rather than assumed,
+  # because the alternative — running the suites in a polluted environment while
+  # printing a pass — is the exact failure the control was written to prevent.
+  if [ "$slot_mode" = "noexport" ]; then
+    printf '#!/usr/bin/env bash\n: # sources cleanly, exports nothing\n' > "$tmp/systemTest/slot-target.sh"
+  else
+    printf '#!/usr/bin/env bash\nexport FIXTURE_SLOT_VAR=1\n' > "$tmp/systemTest/slot-target.sh"
+  fi
+  local out prc
+  # KS-1046: the nested preflight must not inherit the OPERATOR's strict
+  # setting. The fixture's gateway is closed by construction (127.0.0.1:1), so
+  # under PREFLIGHT_STRICT_LEGS=1 the nested run takes the strict refusal
+  # (rc 1) for the fixture's OWN skips, and this suite reads two cells red for
+  # a reason that is the operator's environment, not leg 1's decision — the
+  # same isolation this file already does for GIT_CONFIG_GLOBAL. Measured: the
+  # suite alone under PREFLIGHT_STRICT_LEGS=1 read 53 passed, 2 failed
+  # without this pin, 55 passed, 0 failed with it.
+  out=$( cd "$dev" && GATEWAY_URL="http://127.0.0.1:1" PREFLIGHT_STRICT_LEGS=0 bash scripts/preflight/preflight.sh 2>&1 )
+  prc=$?
+  # VERDICT + STATUS, never rc alone. Every one of these states exits non-zero,
+  # so an rc-only oracle cannot tell a de-slot refusal from a red suite from any
+  # other leg failing — and would go green against the defect it names. Same
+  # lesson the run-mode empty case recorded one script along.
+  local verdict
+  if   printf '%s' "$out" | grep -q 'step header .* disagrees with TOTAL_LEGS'; then verdict='HEADER-MISMATCH'
+  elif printf '%s' "$out" | grep -q 'could not measure what'; then verdict='DESLOT-REFUSED'
+  elif printf '%s' "$out" | grep -q 'de-slotted .* variable'; then
+    # KS-1046: the honest pass shape. The fixture's gateway is closed by
+    # construction, so legs 3/4/8 always SKIP here and `PREFLIGHT PASSED —
+    # N/N legs ran.` is unreachable in this fixture; the verdict a green
+    # fixture yields is `PREFLIGHT INCOMPLETE — … SKIPPED. Nothing failed.`
+    # with rc 0. SUITES-GREEN is therefore rc 0 AND either pass line — never
+    # the old `PREFLIGHT PASSED.` alone, which asserted the very verdict text
+    # this branch exists to stop printing over skipped legs. Measured on the
+    # stacked tree before this line: 54 passed, 1 failed (this cell).
+    if printf '%s' "$out" | grep -q 'PREFLIGHT PASSED'; then verdict='SUITES-GREEN'
+    else verdict='SUITES-RED'; fi
+  else verdict='OTHER'; fi
+  printf '%s/%s' "$verdict" "$prc"
+}
+
+leg1_outcome() {                     # $1 = exit code the stub returns -> "<rc>"
+  local v; v="$(preflight_fixture_run "$1" 0 ok)"
+  printf '%s' "${v##*/}"
+}
+expect "leg 1 FAILS the run when deps-present exits non-zero" "1" "$(leg1_outcome 1)"
+expect "leg 1 lets the run proceed when deps-present exits 0"  "0" "$(leg1_outcome 0)"
+
+# --- QA R2-4: leg 14's three branches, none of which had a case --------------
+# The de-slot positive control and both suite outcomes were verified only by
+# construction in the QA report's own scratch. A branch whose only execution was
+# in a reviewer's scratch directory is not covered; it is described.
+expect "leg 14: suites green -> preflight passes" \
+  "SUITES-GREEN/0" "$(preflight_fixture_run 0 0 ok)"
+expect "leg 14: a RED suite fails the push, after de-slotting" \
+  "SUITES-RED/1" "$(preflight_fixture_run 0 1 ok)"
+expect "leg 14: an empty de-slot measurement REFUSES rather than running polluted" \
+  "DESLOT-REFUSED/1" "$(preflight_fixture_run 0 0 noexport)"
+
+# --- KS-1046 / QA F-925-3: TOTAL_LEGS is a mechanism, not a convention -------
+# A step() header whose denominator disagrees with TOTAL_LEGS must ABORT the run
+# and name the header — otherwise a leg added with a stale `N/13` counts under
+# one total and prints another, and the ratio the verdict is built on is
+# unfalsifiable from its own output. Red-first: without the check in step() this
+# fixture reads SUITES-GREEN/0 (the mismatched header is printed and ignored).
+# The green control is the `leg 14: suites green` cell above — the same fixture
+# with every header agreeing.
+expect "F-925-3: a step header whose denominator disagrees with TOTAL_LEGS ABORTS the run, naming the header" \
+  "HEADER-MISMATCH/1" "$(preflight_fixture_run 0 0 ok mismatch)"
+
+# CONTROL: the refusal must WITHHOLD the run, not merely report. If the de-slot
+# measurement fails and the suites run anyway, the leg has reported a problem and
+# then done the unsafe thing — which is worse than either alone, and rc would not
+# show it. Asserted on the absence of the de-slot line the run path always prints.
+expect "leg 14: the refusal SHORT-CIRCUITS — a red suite present, still not run" \
+  "DESLOT-REFUSED/1" "$(preflight_fixture_run 0 1 noexport)"
+
+# --- KS-691: the message is the deliverable, so assert its content ------------
+# The whole point of this leg is that a missing install does NOT read as spec
+# drift. A reworded message that dropped that would leave every other case green.
+DP_OUT="$(DEPS_PRESENT_ROOT="$(mktemp -d)" bash "$DEV_ROOT/scripts/preflight/deps-present.sh" 2>&1)"
+expect "deps-present says it is NOT spec drift" "1" "$(printf '%s' "$DP_OUT" | grep -c 'NOT spec drift')"
+expect "deps-present names the actual fix (npm ci)" "1" "$(printf '%s' "$DP_OUT" | grep -c 'npm ci')"
+expect "deps-present names WHERE to run it (Blockchain/Dev)" "1" \
+  "$(printf '%s' "$DP_OUT" | grep -c 'cd Blockchain/Dev')"
+
+# --- KS-469 regression: BOTH of its paths must survive this change ------------
+# KS-469's acceptance was explicit — "real spec drift still fails check 1 as it
+# does today (regression-test both paths)". This change inserted a precondition
+# ahead of that branch, so the branch itself must still be present and still be
+# reached. Asserted structurally: the STALE classifier and the drift catch-all
+# both remain, and both sit AFTER the precondition rather than being displaced.
+PF="$DEV_ROOT/scripts/preflight/preflight.sh"
+expect "KS-469 STALE classifier still present" "1" "$(grep -c 'STALE — host workspace install is behind' "$PF")"
+expect "real spec drift still has its own FAIL branch" "1" "$(grep -v "^[[:space:]]*#" "$PF" | grep -c 'echo "FAIL — spec drifted')"
+expect "KS-376 esbuild SKIP branch still present" "1" "$(grep -c 'KS-376 esbuild lock inconsistency' "$PF")"
+dp=$(grep -vn '^[[:space:]]*#' "$PF" | grep 'deps-present.sh' | head -1 | cut -d: -f1)
+st=$(grep -vn '^[[:space:]]*#' "$PF" | grep 'echo "STALE — host workspace install' | head -1 | cut -d: -f1)
+dr=$(grep -vn '^[[:space:]]*#' "$PF" | grep 'echo "FAIL — spec drifted' | head -1 | cut -d: -f1)
+expect "precondition precedes the STALE branch" "yes" "$([ "$dp" -lt "$st" ] && echo yes || echo "no ($dp vs $st)")"
+expect "precondition precedes the drift catch-all" "yes" "$([ "$dp" -lt "$dr" ] && echo yes || echo "no ($dp vs $dr)")"
+
+echo ""
+echo "preflight_deps: $PASS passed, $FAIL failed"
+[ "$FAIL" -eq 0 ]

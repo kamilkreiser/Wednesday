@@ -1,0 +1,122 @@
+== build headers in the job log
+32
+@secuura/shared@0.3.0 build @secuura/analytics@1.0.0 build @secuura/anchoring-service@0.1.0 build @secuura/api-gateway@0.1.0 build @secuura/auth-service@0.1.0 build @secuura/billing@1.0.0 build @secuura/demo-service@0.1.0 build @secuura/governance-service@1.0.0 build @secuura/guardian-service@0.1.0 build @secuura/kyc-service@0.1.0 build @secuura/m365-integration@0.1.0 build @secuura/mcp-server@1.0.0 build @secuura/nft-certificate@1.0.0 build @secuura/originate@0.1.0 build @secuura/prism-service@0.1.0 build @secuura/queue-service@0.1.0 build @secuura/referral-service@0.1.0 build @secuura/security-service@0.1.0 build @secuura/service-utils@1.0.0 build @secuura/staking-service@0.1.0 build @secuura/tenant-provisioning@1.0.0 build @secuura/timestamping-service@0.1.0 build @secuura/tokenisation@1.0.0 build @secuura/transfer-service@0.1.0 build @secuura/vc-issuer-service@0.1.0 build @secuura/wallet-connector@1.0.0 build @secuura/admin-dashboard@0.1.0 build @secuura/demo-overlay@0.1.0 build @secuura/issuer-frontend@0.1.0 build @secuura/outlook-addin@0.1.0 build @secuura/verifier-frontend@0.1.0 build @secuura/website@1.0.0 build 
+-- positive control: the two that failed are the last two headers?
+> @secuura/outlook-addin@0.1.0 build
+> @secuura/verifier-frontend@0.1.0 build
+> @secuura/website@1.0.0 build
+== records for #887 (item5) now present?
+addendum
+boot
+item0
+item1
+item2
+item3
+item4
+item5
+item6
+mail
+SHA256SUMS
+wrap
+doc_commit_amend.out
+doc_commit_msg.txt
+doc_commit.out
+fetch.out
+joblog_103803259738.txt
+ks1148_note.log
+ks1148_note.md
+ks961_comment_draft.md
+ks961_comment_filled.md
+ks961_comment.md
+ks961.log
+l887job.txt
+live_job_read.log
+live_job_summary.json
+merge_msg.txt
+merge.out
+patch_doc.py
+patch887.log
+peter_rerun.sh
+poll_job.log
+poll_job.log.job.json
+poll_job.py
+poll.log
+pr887_body_new.md
+pr887_body_readback.md
+pr887_comment_draft.md
+pr887_comment_filled.md
+pr887_comment_readback.json
+pr887_comment.log
+pr887_comment.md
+push_timing.txt
+push.out
+push.sh
+run1_cb7a3e3be
+run2_merged
+snapshot.out
+te887_draft.md
+te887_filled.md
+verify.out
+wf_hunk_now.diff
+== the doc commit diff
+diff --git a/Blockchain/Dev/docs/DEV-PROCESS.md b/Blockchain/Dev/docs/DEV-PROCESS.md
+index 1eba87408..efe300e69 100644
+--- a/Blockchain/Dev/docs/DEV-PROCESS.md
++++ b/Blockchain/Dev/docs/DEV-PROCESS.md
+@@ -85,9 +85,13 @@ Prerequisites for anything that scans a running system: Docker Desktop up and th
+ **KS-961 / Kam 2026-09-07 `wire-nonblocking`.** This command exists in exactly two workflows:
+ `ci.yml:51`, whose only trigger is `workflow_dispatch`, and `deploy-demo.yml:140`, which runs at
+ **deploy — after merge**. So the aggregate suite has never met a PR. An advisory, non-blocking job was
+-added to `pr-platform-suites.yml`; **it cannot run today** (Actions is retired for this repo — the
+-twenty most recent runs are all run-level `startup_failure` with zero jobs, measured 2026-09-07,
+-including runs triggered minutes earlier by a push). **This row is the gate that operates.**
++added to `pr-platform-suites.yml`. **It could not run when it was written** (measured 2026-09-07: the
++twenty most recent runs were all run-level `startup_failure` with zero jobs, including runs triggered
++minutes earlier by a push). **Actions resumed on 2026-09-09** — runs have started on every PR and every
++`develop` push since ~20:41Z that day — so the job now executes on each push of this branch; its first
++execution and the numbers it printed are recorded on PR #887. **By rule this row is still the gate that
++operates:** the merge gate is a QA GO plus a Test Evidence block filled from LOCAL runs, and the job is
++advisory (`continue-on-error: true`), so what it prints is evidence, not a verdict.
+ 
+     cd Blockchain/Dev
+     npm run build --workspaces --if-present   # REQUIRED FIRST — see below
+@@ -100,15 +104,15 @@ worktree** every workspace importing `@secuura/shared` fails to resolve it. Meas
+ = 2**, the baseline below. Both existing call sites of this command already build first
+ (`ci.yml:40`, `deploy-demo.yml:130`); this row and the advisory job did not, until now.
+ 
+-**Measured baseline, 2026-09-07 on develop `61df129e9`:**
++**Measured baseline — two measurements, dated; the newer column is the live contract:**
+ 
+-| | |
+-|---|---|
+-| wall-clock | **32 s** |
+-| workspaces with a `test` script | **26** |
+-| skipped silently by `--if-present` | **6** — `frontend/`: admin, demo-overlay, issuer, outlook-addin, verifier, website |
+-| exit code | **1** |
+-| failing workspaces | **2** — `@secuura/anchoring-service` (1 of 172: `threadTokenMint` emulator round-trip) and `@secuura/originate` (2 of 480: `ks444-webhooks-create-description-guard` 500s where it expects 201) |
++| | 2026-09-07, develop `61df129e9` | 2026-09-14, head `de376a9f1` (= `cb7a3e3be` + develop `8861e6216`), fresh tree, macOS arm64, OpenSSL 3.6.3 first on `PATH` |
++|---|---|---|
++| wall-clock | **32 s** | **58 s** |
++| workspaces with a `test` script | **26** | **26** |
++| skipped silently by `--if-present` | **6** — `frontend/`: admin, demo-overlay, issuer, outlook-addin, verifier, website | **6** — the same six |
++| exit code | **1** | **1** |
++| failing workspaces | **2** — `@secuura/anchoring-service` (1 of 172: `threadTokenMint` emulator round-trip) and `@secuura/originate` (2 of 480: `ks444-webhooks-create-description-guard` 500s where it expects 201) | **1** — `@secuura/anchoring-service` (1 of 208: the same `threadTokenMint` emulator round-trip); `@secuura/originate` now **0 of 588** — its two `ks444` cells are green on develop `8861e6216` |
+ 
+ **Both failures are PRE-EXISTING on develop**, verified by running each workspace on develop with no
+ branch changes in the tree. **So the aggregate lane is red today**, and that is the single most
+== the s215 PR comment (5656613944) head
+## The re-run asked for in review `5153400898` — posted as measured
+
+Two runs of the exact three commands (`npm ci` → `npm run build --workspaces --if-present` → `npm run test --workspaces --if-present`, in `Blockchain/Dev`), each in a **fresh** tree (a new detached worktree with no `node_modules` and no `dist/` at the first run; `npm ci` again before the second), macOS arm64, node v24.7.0 / npm 11.5.1. `which openssl` → `/opt/homebrew/bin/openssl`, `openssl version` → **OpenSSL 3.6.3** (Homebrew's is first on `PATH`, so the LibreSSL third-workspace artefact from the doc's fifth note does not apply here — and `auth-service` reads 635/635 in both runs).
+
+| | `cb7a3e3be` (the reviewed head, fresh tree) | `3aee3deed` (= `cb7a3e3be` + develop `8861e6216`, merged then `npm ci` again) |
+|---|---|---|
+| wall-clock (the test command, `date +%s` around it) | **40 s** | **58 s** |
+| workspaces with a `test` script (the job's own counting script, run by hand) | **26** | **26** |
+| skipped by `--if-present` | **6** — `frontend/`: admin, demo-overlay, issuer, outlook-addin, verifier, website | **6** — the same six |
+| exit code | **1** | **1** |
+| failing set | **2** — `anchoring-service` **1 of 172** (`threadTokenMint.test.ts › threadTokenMint emulator round-trip › parameterises mint + spend with a deterministic per-seed policyId`) · `originate` **2 of 515** (`ks444-webhooks-create-description-guard.test.ts` — `201s with a string description and stores the subscription`, `201s with description omitted`) | **1** — `anchoring-service` **1 of 208** (the same `threadTokenMint` cell) · `originate` **0 of 588** — its two `ks444` cells are green on develop `8861e6216` |
+
+`npm ci` 22 s / build 120 s (`packages/shared/dist/index.js` absent before, present after) at `cb7a3e3be`; `npm ci` 39 s / build 115 s at the merged head. The other 24 workspaces: all green in both runs (tallies in the session record). No stack was running for either run; nothing in the set needed one.
+
+**So it still lands on 2** at the reviewed head, with `originate`'s denominator grown from 480 to 515 since the 09-07 baseline (the same two cells fail). The doc row's stamp is updated

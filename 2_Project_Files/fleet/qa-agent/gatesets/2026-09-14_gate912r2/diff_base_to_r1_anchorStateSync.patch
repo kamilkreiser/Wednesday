@@ -1,0 +1,89 @@
+diff --git a/Blockchain/Dev/services/originate/src/services/anchorStateSync.ts b/Blockchain/Dev/services/originate/src/services/anchorStateSync.ts
+index 55454f715..604c21dbb 100644
+--- a/Blockchain/Dev/services/originate/src/services/anchorStateSync.ts
++++ b/Blockchain/Dev/services/originate/src/services/anchorStateSync.ts
+@@ -121,9 +121,23 @@ export async function fetchAnchorState(
+  * honest "not anchored" states and the signing flow keys off signing
+  * requests, not this field.)
+  *
+- * No-ops when the document already carries a real txHash or a confirmed
+- * anchor — never downgrade recorded chain facts on a late/raced failure
+- * signal. `preserveTerminalStatuses` keeps revoked/deleted authoritative.
++ * No-ops when the anchor is already `confirmed` — never downgrade a recorded
++ * success on a late/raced failure signal. `preserveTerminalStatuses` keeps
++ * revoked/deleted authoritative.
++ *
++ * KS-1004: this used to no-op on `txHash` TOO, which made the failure writer
++ * unreachable for the population most likely to need it — a transaction that
++ * reached the chain and then failed. The guard's stated intent was right
++ * ("never downgrade recorded chain facts"), but it was enforced by refusing to
++ * WRITE rather than by not DESTROYING: the write nulled `txHash` and zeroed
++ * `blockHeight`, so admitting a hashed document would have erased the very
++ * facts the guard protected.
++ *
++ * So the write is now non-destructive — an existing `txHash`, `blockHeight`,
++ * `network` and `anchoredAt` are carried forward — and the guard narrows to
++ * `confirmed` alone. A failed transaction KEEPS its hash: it is real, it is on
++ * chain, and it is the forensic trail for why the anchor failed. Only the
++ * status becomes honest.
+  */
+ export async function markDocumentAnchorFailed(
+   documentId: string,
+@@ -133,14 +147,20 @@ export async function markDocumentAnchorFailed(
+ ): Promise<void> {
+   const doc = await getDocument(documentId, tenantId);
+   if (!doc) return;
+-  if (doc.blockchain?.txHash || doc.blockchain?.status === 'confirmed') return;
++  if (doc.blockchain?.status === 'confirmed') return;
++  const prior = doc.blockchain;
+   const revertStatus: DocumentRecord['status'] = doc.signatures?.length ? 'signed' : 'draft';
+   await updateDocument(documentId, tenantId, {
+     status: revertStatus,
+     blockchain: {
+       status: 'anchor_failed',
+-      txHash: null,
+-      blockHeight: 0,
++      // KS-1004: carry the chain facts forward rather than nulling them. A tx
++      // that failed on chain still has a hash worth keeping; `?? null` / `?? 0`
++      // reproduce the previous values exactly for the no-hash case.
++      txHash: prior?.txHash ?? null,
++      blockHeight: prior?.blockHeight ?? 0,
++      ...(prior?.network ? { network: prior.network } : {}),
++      ...(prior?.anchoredAt ? { anchoredAt: prior.anchoredAt } : {}),
+       ...(anchorId ? { anchorId } : {}),
+       error: errorMessage || 'anchor failed on chain',
+       failedAt: new Date().toISOString(),
+@@ -281,7 +301,14 @@ export async function reconcileDocumentAnchorState(
+   const bc = document.blockchain;
+   if (!bc?.anchorId) return document;
+   if (bc.simulated) return document;
+-  const inFlight = !bc.txHash && bc.status !== 'anchor_failed' && bc.status !== 'confirmed';
++  // KS-1004: "in flight" means NOT YET TERMINAL — it must not also require the
++  // absence of a txHash. The poller writes the hash together with the
++  // optimistic `status: 'anchored'` as soon as the node reports one, well
++  // before confirmation, so keying off the hash excluded every `submitted`
++  // document from the failure branch below: exactly the rows whose anchors are
++  // most likely to end `failed`. `confirmed` and `anchor_failed` are the two
++  // terminal states, and they are the whole condition.
++  const inFlight = bc.status !== 'anchor_failed' && bc.status !== 'confirmed';
+   const failed = bc.status === 'anchor_failed';
+   if (!inFlight && !failed) return document;
+ 
+@@ -321,8 +348,16 @@ export async function reconcileDocumentAnchorState(
+   // authoritative txHash), so pre-fix documents sit `pending` forever with no
+   // `simulated` key. Once healed, the `bc.simulated` early-return above stops
+   // this document from re-reconciling on every read.
++  //
++  // KS-1004: `!bc.txHash` is stated explicitly here now. It used to be implied
++  // by `inFlight`, and widening that condition would otherwise have exposed
++  // this branch — which writes `txHash: null` — to documents carrying a real
++  // hash. This leg is for blobs with NO authoritative txHash, exactly as the
++  // comment above says, so the guard belongs in the condition rather than
++  // inherited from one that no longer carries it. Behaviour is byte-identical
++  // to before KS-1004 for every document this branch was ever meant to reach.
+   const simFields = simulatedFieldsFromAnchor(anchor);
+-  if (inFlight && simFields.simulated) {
++  if (inFlight && !bc.txHash && simFields.simulated) {
+     const refreshed = await updateDocument(document.id, tenantId, {
+       blockchain: {
+         txHash: null,

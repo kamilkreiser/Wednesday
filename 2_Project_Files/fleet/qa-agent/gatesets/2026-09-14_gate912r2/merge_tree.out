@@ -1,0 +1,84 @@
+merge_rederive.sh — 2026-09-14 08:05:52 AEST — clone /Volumes/DevMASTER/WEDNESDAY/2_Project_Files/fleet/qa-agent/gatesets/2026-09-14_gate912r2/model/clone912
+== merge-tree --write-tree develop r1
+rc=1
+68ef2e83739d1331e54368f0a3f71f6c985ee678
+100644 55454f715131bd3ba1ab2efd501d4537616fd62a 1	Blockchain/Dev/services/originate/src/services/anchorStateSync.ts
+100644 846ebe5bfe7720b3a2c06cdca7fdb5a5cefd9991 2	Blockchain/Dev/services/originate/src/services/anchorStateSync.ts
+100644 604c21dbb2aa906a13966f2a055e25839b7d76eb 3	Blockchain/Dev/services/originate/src/services/anchorStateSync.ts
+
+Auto-merging Blockchain/Dev/services/originate/src/services/anchorStateSync.ts
+CONFLICT (content): Merge conflict in Blockchain/Dev/services/originate/src/services/anchorStateSync.ts
+== the merge commit's tree
+632eed5bb623305e08db3eacc464600532059e37
+== diff-tree --name-status <git's conflicted auto-merge tree> <merge commit tree>  (expect exactly Blockchain/Dev/services/originate/src/services/anchorStateSync.ts)
+M	Blockchain/Dev/services/originate/src/services/anchorStateSync.ts
+== diff --numstat between them
+5	12	Blockchain/Dev/services/originate/src/services/anchorStateSync.ts
+== the patch: git's auto-merge (with markers) -> the builder's hand resolution
+diff --git a/Blockchain/Dev/services/originate/src/services/anchorStateSync.ts b/Blockchain/Dev/services/originate/src/services/anchorStateSync.ts
+index 1c9dc2224..174d122ec 100644
+--- a/Blockchain/Dev/services/originate/src/services/anchorStateSync.ts
++++ b/Blockchain/Dev/services/originate/src/services/anchorStateSync.ts
+@@ -121,15 +121,6 @@ export async function fetchAnchorState(
+  * honest "not anchored" states and the signing flow keys off signing
+  * requests, not this field.)
+  *
+-<<<<<<< 8861e62161466c40f08d2b10a30edeb203123993
+- * No-ops when the document already carries a real txHash or a confirmed
+- * anchor — never downgrade recorded chain facts on a late/raced failure
+- * signal. `preserveTerminalStatuses` keeps revoked/deleted authoritative.
+- *
+- * KS-1058: the write REPLACES the blockchain blob (updateDocument spreads
+- * shallowly), so anything not restated here is destroyed. `threadToken` is
+- * carried forward; `confidence` deliberately is NOT — see the call site.
+-=======
+  * No-ops when the anchor is already `confirmed` — never downgrade a recorded
+  * success on a late/raced failure signal. `preserveTerminalStatuses` keeps
+  * revoked/deleted authoritative.
+@@ -147,7 +138,10 @@ export async function fetchAnchorState(
+  * `confirmed` alone. A failed transaction KEEPS its hash: it is real, it is on
+  * chain, and it is the forensic trail for why the anchor failed. Only the
+  * status becomes honest.
+->>>>>>> ae8751f380ed361505694ba71ad9bf1308ee0e87
++ *
++ * KS-1058: the write REPLACES the blockchain blob (updateDocument spreads
++ * shallowly), so anything not restated here is destroyed. `threadToken` is
++ * carried forward; `confidence` deliberately is NOT — see the call site.
+  */
+ export async function markDocumentAnchorFailed(
+   documentId: string,
+@@ -158,9 +152,8 @@ export async function markDocumentAnchorFailed(
+   const doc = await getDocument(documentId, tenantId);
+   if (!doc) return;
+   if (doc.blockchain?.status === 'confirmed') return;
+-  const prior = doc.blockchain;
+-  const revertStatus: DocumentRecord['status'] = doc.signatures?.length ? 'signed' : 'draft';
+   const prior = doc.blockchain as (typeof doc.blockchain & { threadToken?: unknown }) | undefined;
++  const revertStatus: DocumentRecord['status'] = doc.signatures?.length ? 'signed' : 'draft';
+   await updateDocument(documentId, tenantId, {
+     status: revertStatus,
+     blockchain: {
+== conflict-marker census in git's auto-merge blob (positive control: 'markDocumentAnchorFailed' count on the same blob)
+3
+4
+== 'const prior' count: git's auto-merge blob / merge commit / head  (expect 2 / 1 / 1)
+68ef2e83739d: 2
+632eed5bb623: 1
+609c44c55323: 1
+== control 1: merge-tree develop develop == develop's tree
+6ae01e16f90dc02b504f3bbd13542a7efd1f66de
+6ae01e16f90dc02b504f3bbd13542a7efd1f66de
+== control 2: merge-tree develop <merge commit> == the merge commit's tree (develop is its ancestor; nothing to merge)
+632eed5bb623305e08db3eacc464600532059e37
+632eed5bb623305e08db3eacc464600532059e37
+== control 3: merge-tree develop <head> == head's tree
+b95db50904732799f5f099a94c298990d32b2727
+b95db50904732799f5f099a94c298990d32b2727
+== merge-base head develop / --is-ancestor develop head rc / rev-list --left-right --count develop...head
+8861e62161466c40f08d2b10a30edeb203123993
+rc=0
+0	3
+== the merge's parents / the fix's parent
+ae8751f380ed361505694ba71ad9bf1308ee0e87 8861e62161466c40f08d2b10a30edeb203123993
+3231514154aaa8a469e6cdd5f553ee8ce6079b89
+done 08:05:52 AEST

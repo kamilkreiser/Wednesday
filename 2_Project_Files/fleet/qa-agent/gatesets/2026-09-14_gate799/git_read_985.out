@@ -1,0 +1,125 @@
+2026-09-14 08:40:51 AEST
+8861e62161466c40f08d2b10a30edeb203123993	refs/heads/develop
+fcd8a01e40d34d6cb4055e7b4fd58b9bb908bbe0	refs/heads/feature/ks-780-normalise-org-id-into-shared
+6da848891924f859179d097d464a7b97c9783a6a	refs/pull/799/head
+a704137de38a3055e40ee62adc343c0239f34ea9	refs/pull/880/head
+fcd8a01e40d34d6cb4055e7b4fd58b9bb908bbe0	refs/pull/985/head
+22:40:54Z
+fcd8a01e40d34d6cb4055e7b4fd58b9bb908bbe0 commit
+--- log 6da848891..fcd8a01e40d34d6cb4055e7b4fd58b9bb908bbe0
+fcd8a01e40d34d6cb4055e7b4fd58b9bb908bbe0 6da848891924f859179d097d464a7b97c9783a6a 07553a609ce2086a771a8d7e27662e0f1dc089bc Kam Kreiser <kamil.kreiser@secuura.ai> 2026-09-14T08:29:27+10:00 KS-780: normaliseOrgId lives ONCE, in @secuura/shared — the revoke policy's private copy is gone and originate re-exports the shared one
+--- rev-list --left-right --count 6da848891...fcd8a01e40d34d6cb4055e7b4fd58b9bb908bbe0 / 8861e6216...fcd8a01e40d34d6cb4055e7b4fd58b9bb908bbe0
+0	1
+0	13
+--- merge-base fcd8a01e40d34d6cb4055e7b4fd58b9bb908bbe0 8861e6216 / fcd8a01e40d34d6cb4055e7b4fd58b9bb908bbe0 6da848891
+8861e62161466c40f08d2b10a30edeb203123993
+6da848891924f859179d097d464a7b97c9783a6a
+--- log -1 fcd8a01e40d34d6cb4055e7b4fd58b9bb908bbe0
+fcd8a01e40d34d6cb4055e7b4fd58b9bb908bbe0
+parents 6da848891924f859179d097d464a7b97c9783a6a
+tree 07553a609ce2086a771a8d7e27662e0f1dc089bc
+Kam Kreiser 2026-09-14T08:29:27+10:00
+KS-780: normaliseOrgId lives ONCE, in @secuura/shared — the revoke policy's private copy is gone and originate re-exports the shared one
+
+Two behaviourally identical normalisers sat in two layers: `services/originate/src/services/orgId.ts` (the two originate resolvers and the documents route) and a private `normOrgId` inside `packages/shared/src/security/keyRevokePolicy.ts` (the organisation arm of API-key revocation, a destructive surface). Neither could witness the other drifting.
+
+The move:
+  - NEW `packages/shared/src/security/orgId.ts` — the one implementation (trim-then-lowercase; blank and non-string are null), exported from `packages/shared/src/index.ts`.
+  - `keyRevokePolicy.ts` — `normOrgId` deleted; the org arm's two call sites call `normaliseOrgId` from `./orgId`; the docblock that argued for the copy now records the move.
+  - `services/originate/src/services/orgId.ts` — `export { normaliseOrgId } from '@secuura/shared';` with the docblock rewritten: its old reason for staying service-local ("nothing outside it compares organisation ids this way") stopped being true when the policy landed. `provenance.ts`, `gdprService.ts` and `routes/documents.ts` are untouched — their import lines are byte-identical and their blobs asserted unchanged.
+  - Definitions census (git grep -P, untracked included): exactly ONE `normaliseOrgId`/`normOrgId` definition under packages/ + services/ (control at the parent head: 2).
+
+Cells:
+  - `packages/shared/src/__tests__/ks780-normalise-org-id-one-implementation.test.ts` — P1 trim · P2 case · P3 blank-is-absent · P4 non-string-is-absent · S1 the package export IS the module function · S2 the policy's source carries no private normaliser and imports the shared one, calling it twice · S3 the policy really goes through it (an upper-cased claim on a padded key is `same-organisation`).
+  - `services/originate/src/__tests__/ks780-org-id-is-the-shared-implementation.test.ts` — I1 the re-export IS the shared function (identity) · I2 the module's source is a re-export with no private definition · I3 the properties hold through it.
+  - The fixture uuid carries hex LETTERS on purpose: the first draft used an all-digit uuid, which upper-cases to itself, and the red-proof below left P2/S3/I3 green — a case cell that cannot fail. Measured, then fixed.
+
+ONE deliberate hunk outside the move's own files, ruled YES by Wednesday (22:26Z): `services/originate/src/__tests__/ks695-erasure-by-external-ref.test.ts` mocks `@secuura/shared` by listing its exports by hand, so after the re-export `gdprService.ts` read `normaliseOrgId is not a function` on the 11 cells that reach the subject-org comparison. Added one pass-through line — `normaliseOrgId: jest.requireActual('@secuura/shared').normaliseOrgId,` — the REAL function, not a stub (a stub there would be the second implementation this removes). Nothing else in that file changed.
+
+Red-proof, the ticket's own done-means (one character in the shared implementation — `.toLowerCase()` dropped — packages/shared rebuilt, three packages run):
+  packages/shared      2 failed | 833 passed (835)   P2, S3
+  services/security    1 failed | 204 passed (205)   ks764 policy: "organisation ids compare NORMALISED"
+  services/originate   6 failed | 595 passed (601)   ks597-b (d) lower-case claim vs UPPER-case · ks597-issuer-org-bind case-only difference · ks695 UPPERCASE organizationId claim (through the pass-through mock) · ks780 I3 · qa-f4 caller-claim case · qa-f4 stored-value case
+  Restored by content (whole-file sha asserted), rebuilt (dist sha identical), green: shared 43 files 835/835 · security 16 files 205/205 · originate 57 suites 601/601 · api-gateway 34 files 343/343 · tsc --noEmit clean in shared, security, originate.
+
+STACKED on PR #799's current head 6da848891 (the policy file this edits is #799's); merge order #799 then this. Behaviour pinned unchanged.
+
+Co-Authored-By: Claude Opus 5 <noreply@anthropic.com>
+Claude-Session: https://claude.ai/code/session_01C3W3P9xvRewZHjrq3Yvqck
+
+--- numstat 6da848891..fcd8a01e40d34d6cb4055e7b4fd58b9bb908bbe0
+85	0	Blockchain/Dev/packages/shared/src/__tests__/ks780-normalise-org-id-one-implementation.test.ts
+5	0	Blockchain/Dev/packages/shared/src/index.ts
+18	40	Blockchain/Dev/packages/shared/src/security/keyRevokePolicy.ts
+44	0	Blockchain/Dev/packages/shared/src/security/orgId.ts
+4	0	Blockchain/Dev/services/originate/src/__tests__/ks695-erasure-by-external-ref.test.ts
+49	0	Blockchain/Dev/services/originate/src/__tests__/ks780-org-id-is-the-shared-implementation.test.ts
+29	26	Blockchain/Dev/services/originate/src/services/orgId.ts
+ 7 files changed, 234 insertions(+), 66 deletions(-)
+A	Blockchain/Dev/packages/shared/src/__tests__/ks780-normalise-org-id-one-implementation.test.ts
+M	Blockchain/Dev/packages/shared/src/index.ts
+M	Blockchain/Dev/packages/shared/src/security/keyRevokePolicy.ts
+A	Blockchain/Dev/packages/shared/src/security/orgId.ts
+M	Blockchain/Dev/services/originate/src/__tests__/ks695-erasure-by-external-ref.test.ts
+A	Blockchain/Dev/services/originate/src/__tests__/ks780-org-id-is-the-shared-implementation.test.ts
+M	Blockchain/Dev/services/originate/src/services/orgId.ts
+--- numstat 8861e6216..fcd8a01e40d34d6cb4055e7b4fd58b9bb908bbe0 (the stack vs develop)
+ 17 files changed, 1770 insertions(+), 124 deletions(-)
+--- ls-tree of the 7 files at H9 / 6da848891 / develop
+== @fcd8a01e40d34d6cb4055e7b4fd58b9bb908bbe0
+100644 blob e3aa932f76419129271cb767e3df352bf694f985    4454	Blockchain/Dev/packages/shared/src/__tests__/ks780-normalise-org-id-one-implementation.test.ts
+100644 blob aeaf90dadff7ad1d426111756c5ec54ee2b34fb8    8968	Blockchain/Dev/packages/shared/src/index.ts
+100644 blob 86b55405290f6337def1221c869fab68bdf7c2b2   12199	Blockchain/Dev/packages/shared/src/security/keyRevokePolicy.ts
+100644 blob a42d7783dfc0c44fffc2c7b8cb4f2961adc32769    2385	Blockchain/Dev/packages/shared/src/security/orgId.ts
+100644 blob 6d55452f2ffaa3fc9982639529308f3934ffcee5   40297	Blockchain/Dev/services/originate/src/__tests__/ks695-erasure-by-external-ref.test.ts
+100644 blob c1268e31b96942296dee4198dde6405bbf51f8c5    2551	Blockchain/Dev/services/originate/src/__tests__/ks780-org-id-is-the-shared-implementation.test.ts
+100644 blob f87b261b83248a53c1f2f10b8222a009fab31892    2410	Blockchain/Dev/services/originate/src/services/orgId.ts
+== @6da848891924f859179d097d464a7b97c9783a6a
+ABSENT Blockchain/Dev/packages/shared/src/__tests__/ks780-normalise-org-id-one-implementation.test.ts
+100644 blob 8794bca5fefe419bf95144cb24eac3a2697d332d    8686	Blockchain/Dev/packages/shared/src/index.ts
+100644 blob dcd774a30b27feeee1df4dcdd7915d79a39d54ea   13411	Blockchain/Dev/packages/shared/src/security/keyRevokePolicy.ts
+ABSENT Blockchain/Dev/packages/shared/src/security/orgId.ts
+100644 blob d377aa8c24fb16487be4284afb4d83a9807b5398   39986	Blockchain/Dev/services/originate/src/__tests__/ks695-erasure-by-external-ref.test.ts
+ABSENT Blockchain/Dev/services/originate/src/__tests__/ks780-org-id-is-the-shared-implementation.test.ts
+100644 blob a404751128b60c86a003b827e443bc27f19a8d03    2141	Blockchain/Dev/services/originate/src/services/orgId.ts
+== @8861e6216
+ABSENT Blockchain/Dev/packages/shared/src/__tests__/ks780-normalise-org-id-one-implementation.test.ts
+100644 blob 6731f0f2f230869b96afe486131b22a80e7cb0f0    8211	Blockchain/Dev/packages/shared/src/index.ts
+ABSENT Blockchain/Dev/packages/shared/src/security/keyRevokePolicy.ts
+ABSENT Blockchain/Dev/packages/shared/src/security/orgId.ts
+100644 blob d377aa8c24fb16487be4284afb4d83a9807b5398   39986	Blockchain/Dev/services/originate/src/__tests__/ks695-erasure-by-external-ref.test.ts
+ABSENT Blockchain/Dev/services/originate/src/__tests__/ks780-org-id-is-the-shared-implementation.test.ts
+100644 blob a404751128b60c86a003b827e443bc27f19a8d03    2141	Blockchain/Dev/services/originate/src/services/orgId.ts
+--- the three originate callers, blob at H9 / 6da848891 / develop
+fcd8a01e4  483aa9eb331d2caa5af285e20d9668a9dbcd92a6 Blockchain/Dev/services/originate/src/services/provenance.ts
+6da848891  483aa9eb331d2caa5af285e20d9668a9dbcd92a6 Blockchain/Dev/services/originate/src/services/provenance.ts
+8861e6216  483aa9eb331d2caa5af285e20d9668a9dbcd92a6 Blockchain/Dev/services/originate/src/services/provenance.ts
+fcd8a01e4  4d138883c70e651a24d4d9a302df6ec21e2eac33 Blockchain/Dev/services/originate/src/services/gdprService.ts
+6da848891  4d138883c70e651a24d4d9a302df6ec21e2eac33 Blockchain/Dev/services/originate/src/services/gdprService.ts
+8861e6216  4d138883c70e651a24d4d9a302df6ec21e2eac33 Blockchain/Dev/services/originate/src/services/gdprService.ts
+fcd8a01e4  b2f4bf35182e8d878a35d4da7cd535832f5e7750 Blockchain/Dev/services/originate/src/routes/documents.ts
+6da848891  b2f4bf35182e8d878a35d4da7cd535832f5e7750 Blockchain/Dev/services/originate/src/routes/documents.ts
+8861e6216  b2f4bf35182e8d878a35d4da7cd535832f5e7750 Blockchain/Dev/services/originate/src/routes/documents.ts
+--- definitions census at H9 and at 6da848891 (grep -P)
+fcd8a01e40d34d6cb4055e7b4fd58b9bb908bbe0:Blockchain/Dev/packages/shared/src/security/orgId.ts:42:export function normaliseOrgId(v: string | null | undefined): string | null {
+== at 6da848891:
+6da848891924f859179d097d464a7b97c9783a6a:Blockchain/Dev/packages/shared/src/security/keyRevokePolicy.ts:122:function normOrgId(v: string | null | undefined): string | null {
+6da848891924f859179d097d464a7b97c9783a6a:Blockchain/Dev/services/originate/src/services/orgId.ts:36:export const normaliseOrgId = (v: string | null | undefined): string | null =>
+--- normOrgId anywhere at H9 (product + tests)
+fcd8a01e40d34d6cb4055e7b4fd58b9bb908bbe0:Blockchain/Dev/packages/shared/src/__tests__/ks780-normalise-org-id-one-implementation.test.ts:6: * (originate's `services/orgId.ts` and a private `normOrgId` inside the shared
+fcd8a01e40d34d6cb4055e7b4fd58b9bb908bbe0:Blockchain/Dev/packages/shared/src/security/keyRevokePolicy.ts:97: * (`normOrgId`) because `@secuura/shared` cannot import from a service; moving
+fcd8a01e40d34d6cb4055e7b4fd58b9bb908bbe0:Blockchain/Dev/packages/shared/src/security/orgId.ts:8: * private `normOrgId` inside `keyRevokePolicy.ts` beside this file (the
+count: 3 files
+--- normaliseOrgId usages at H9 (files)
+fcd8a01e40d34d6cb4055e7b4fd58b9bb908bbe0:Blockchain/Dev/packages/shared/src/__tests__/ks780-normalise-org-id-one-implementation.test.ts:15
+fcd8a01e40d34d6cb4055e7b4fd58b9bb908bbe0:Blockchain/Dev/packages/shared/src/index.ts:1
+fcd8a01e40d34d6cb4055e7b4fd58b9bb908bbe0:Blockchain/Dev/packages/shared/src/security/keyRevokePolicy.ts:4
+fcd8a01e40d34d6cb4055e7b4fd58b9bb908bbe0:Blockchain/Dev/packages/shared/src/security/orgId.ts:3
+fcd8a01e40d34d6cb4055e7b4fd58b9bb908bbe0:Blockchain/Dev/services/originate/src/__tests__/ks597-b-caller-scoped-externalref.test.ts:1
+fcd8a01e40d34d6cb4055e7b4fd58b9bb908bbe0:Blockchain/Dev/services/originate/src/__tests__/ks597-issuer-org-bind.test.ts:2
+fcd8a01e40d34d6cb4055e7b4fd58b9bb908bbe0:Blockchain/Dev/services/originate/src/__tests__/ks695-erasure-by-external-ref.test.ts:1
+fcd8a01e40d34d6cb4055e7b4fd58b9bb908bbe0:Blockchain/Dev/services/originate/src/__tests__/ks780-org-id-is-the-shared-implementation.test.ts:9
+fcd8a01e40d34d6cb4055e7b4fd58b9bb908bbe0:Blockchain/Dev/services/originate/src/routes/documents.ts:6
+fcd8a01e40d34d6cb4055e7b4fd58b9bb908bbe0:Blockchain/Dev/services/originate/src/services/gdprService.ts:4
+fcd8a01e40d34d6cb4055e7b4fd58b9bb908bbe0:Blockchain/Dev/services/originate/src/services/orgId.ts:2
+fcd8a01e40d34d6cb4055e7b4fd58b9bb908bbe0:Blockchain/Dev/services/originate/src/services/provenance.ts:4

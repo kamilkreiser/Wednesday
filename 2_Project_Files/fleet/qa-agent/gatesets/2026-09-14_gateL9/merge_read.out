@@ -1,0 +1,104 @@
+2026-09-14 08:19:10 AEST
+1aa708be9 commit
+d105e07a8 commit
+53b9c3cc1 commit
+8861e6216 commit
+a1e49d151 commit
+== merge-tree develop x #940
+rc=0 tree=cae422e6ab25b8e4ea0dfd743a43914df8e1de13
+100644 blob fac9ef1b89d53884d3655e3e50ea73c54c9a022a	.github/workflows/security-scan.yml
+== merge-tree develop x #941
+rc=0 tree=73840318a60a5f57d53c146d1a147074a967d10e
+100644 blob 3b272c2d9ecbd9ab130390ca22c1ac06ac40c27d	.github/workflows/security-scan.yml
+100644 blob d6401126ea699d01e6484d813dbcb8a2bd4da68f	Blockchain/Dev/.security/exceptions.yml
+== merge-tree #940 x #941 (merge-base a1e49d151; the post-#940 shape of #941's file)
+rc=0 tree=7b0aabdc993ae0936d4751794947f9a1302d0635
+100644 blob dc728543b91ba5a93037911a72ceca0700b2eabe	.github/workflows/security-scan.yml
+show rc=0
+     527 /Volumes/DevMASTER/WEDNESDAY/2_Project_Files/fleet/qa-agent/gatesets/2026-09-14_gateL9/model/security-scan.yml.940+941
+121:        shell: bash {0}
+158:        # KS-1075: `shell: bash {0}` is load-bearing — do NOT delete it, and do
+159:        # NOT "tidy" it to `shell: bash`.
+161:        # GitHub's default for `run:` is `bash -e {0}`, and `shell: bash` is
+175:        shell: bash {0}
+125:          rc=$?
+178:          out=$(npm run audit:contract --silent 2>&1); rc=$?
+-- diff (develop x #940 x #941 merged file) vs #941's head file = exactly #940's hunks?
+ .github/workflows/security-scan.yml | 25 ++++++++++++++++++++++---
+ 1 file changed, 22 insertions(+), 3 deletions(-)
+25
+-- and vs #940's head file = exactly #941's hunks?
+ .github/workflows/security-scan.yml | 52 ++++++++++++++++++++++++++++++-------
+ 1 file changed, 42 insertions(+), 10 deletions(-)
+-- the merged tree's other files = #941's (only the one shared file differs from #941's tree)
+ .github/workflows/security-scan.yml | 25 ++++++++++++++++++++++---
+ 1 file changed, 22 insertions(+), 3 deletions(-)
+== merge-tree develop x #942 (develop is an ancestor -> tree == head tree)
+rc=0 tree=a4c7ef372dad2dfcb59e0d00c6939af9149d6dba
+a4c7ef372dad2dfcb59e0d00c6939af9149d6dba
+== ancestry
+develop is-ancestor of #942 head rc=0
+develop is-ancestor of #940 head rc=1 (1 = no, expected)
+develop is-ancestor of #941 head rc=1 (1 = no, expected)
+== #942: the original commit vs base, and the merge commit vs each parent
+17	0	.github/workflows/pr-security-gates.yml
+18	0	BACKLOG.md
+19	2	systemTest/__tests__/manifest_quarantine.test.sh
+-- merge commit vs parent1 (c1676269d): develop's 109 commits + the two resolutions
+ 346 files changed, 43844 insertions(+), 9256 deletions(-)
+-- merge commit vs parent2 (develop): the PR's delta on develop
+17	0	.github/workflows/pr-security-gates.yml
+17	0	BACKLOG.md
+19	2	systemTest/__tests__/manifest_quarantine.test.sh
+-- conflict re-derivation: merge-tree c1676269d x develop (expected: CONFLICT in the two files)
+rc=1
+9cd37e34b8431e7b2f5f5a463659d98ef7cb4631
+CONFLICT (content): Merge conflict in BACKLOG.md
+CONFLICT (content): Merge conflict in systemTest/__tests__/manifest_quarantine.test.sh
+-- the resolution, re-derived: the merged suite's :66 line
+if ! probe="$(cd "$FIXTURES" && env -u SECUURA_STACK_SLOT -u STACK_SLOT -u SECUURA_ARTIFACT_SUFFIX npx tsx "$TMP/drive.ts" '2026-01-01T00:00:00.000Z' "$TMP/does-not-exist.json" 2>"$TMP/probe.err")" \
+-- live 2>&1 outside comments in the merged suite (positive control: the total count incl. comments)
+2
+0
+-- BACKLOG.md: both blocks whole?
+994:- [ ] smoke-test.sh section 6 calls the now-closed `/originate/` route, and passes no token
+995:  - Where: `Blockchain/Dev/scripts/smoke-test.sh:224-239` (8 call sites)
+1006:    combined. Rewriting a smoke-test section's auth model inside the route-closure PR would widen
+1010:- [ ] `quarantine_call_sites.test.sh` uses the same `2>&1` capture the KS-1078 probe was fixed for
+/Volumes/DevMASTER/WEDNESDAY/2_Project_Files/fleet/qa-agent/gatesets/2026-09-14_gateL9/model/BACKLOG.md.8861e6216:32
+/Volumes/DevMASTER/WEDNESDAY/2_Project_Files/fleet/qa-agent/gatesets/2026-09-14_gateL9/model/BACKLOG.md.53b9c3cc1:33
+-- develop's BACKLOG lines all present in the merged copy (every line of develop's file is a line of the head's file, in order)?
+every develop line present in order: yes; head has 17 extra lines
+-- bash -n the merged suite (and develop's, control)
+rc=0
+rc=0
+== the merge commit's message
+Merge develop 8861e6216 into ks-1078 — bring the branch to the current base
+
+Two content conflicts, resolved:
+
+- systemTest/__tests__/manifest_quarantine.test.sh:51-70 — the probe line.
+  develop (3537c9828) prefixed it with `env -u SECUURA_STACK_SLOT -u STACK_SLOT
+  -u SECUURA_ARTIFACT_SUFFIX`; this branch changed its redirect from `2>&1` to
+  `2>"$TMP/probe.err"`. The merged line (now :66) carries develop's prefix AND
+  this branch's redirect; the explanatory comment block above it is this
+  branch's. Zero live `2>&1` redirects remain outside comments; both diagnostic
+  lines (`stdout:` / `stderr:`) intact; `bash -n` clean. The three-arm stub
+  red-proof on these exact bytes: arm 1 passes, arms 2a/2b still fire.
+- BACKLOG.md:994-1029 — a both-append at the same anchor. develop's
+  `smoke-test.sh section 6` item (cb2bae9f3) and this branch's
+  `quarantine_call_sites.test.sh` item are both kept whole, develop's first
+  (a ledger has no order dependency). 33 open items = develop's 32 + this
+  branch's 1; every line of both sides is present.
+
+No other file was touched by hand. The merge base was a1e49d151 (109 develop
+commits behind); no fix rides in this commit.
+
+Co-Authored-By: Claude Opus 5 <noreply@anthropic.com>
+Claude-Session: https://claude.ai/code/session_01CufNiLbz5DpSvxrh3EP3vT
+
+== #940/#941 commit messages: ids
+1aa708be9: chars 2380 KS ['KS-1075'] PRrefs [] at 1
+d105e07a8: chars 3476 KS ['KS-1077'] PRrefs [] at 6
+c1676269d: chars 3019 KS ['KS-1075', 'KS-1078'] PRrefs [] at 2
+08:19:11 AEST

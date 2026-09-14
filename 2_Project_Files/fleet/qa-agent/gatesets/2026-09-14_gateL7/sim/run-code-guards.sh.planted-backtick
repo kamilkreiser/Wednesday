@@ -1,0 +1,225 @@
+#!/usr/bin/env bash
+# =============================================================================
+# run-code-guards.sh — the single definition of which check-*.sh guards run
+# =============================================================================
+# KS-926. Of the 20 `check-*.sh` guards in this directory, THREE ran from a live
+# entry point and seventeen ran from none. A guard nothing invokes is a check
+# that CANNOT FAIL, and it is worse than no guard: twenty named checks in a tree
+# read as coverage to anyone auditing it — including `check-no-sql-injection.sh`
+# and `check-no-trust-header-reads.sh`.
+#
+# Four of the seventeen were not rotten. They were wired to
+# `.github/workflows/pr-security-gates.yml` and `security-scan.yml`, and their
+# RUNNER was switched off when Actions was retired (Kam, 2026-08-27). Nobody
+# re-homed them onto the manual gate that replaced it.
+#
+# WHY THIS IS A SCRIPT AND NOT A LIST PASTED INTO THE HOOK: the same reason
+# `run-shell-suites.sh` exists. Callers must agree on which guards exist and
+# which are reached, and three copies of a list is three things nothing keeps in
+# agreement. So this script is the definition and every caller asks it:
+#
+#     preflight / local:  bash scripts/run-code-guards.sh
+#     preflight census:   bash scripts/run-code-guards.sh --check-unreached
+#     inspection:         bash scripts/run-code-guards.sh --list
+#
+# ADDING A GUARD: drop `check-<thing>.sh` in this directory and put it in
+# exactly one bucket below. Put it in none and `--check-unreached` FAILS the
+# push, naming the file. That is the property KS-926 says did not exist for
+# guards — `run-shell-suites.sh --check-unreached` already enforces it for
+# SUITES, which is precisely why this gap went unseen for so long.
+#
+# bash 3.2 — macOS ships it and the pre-push hook runs it. No associative
+# arrays, and an empty array under `set -u` must be expanded with the
+# +alternate form or it raises "unbound variable" (QA R2-2).
+# =============================================================================
+set -uo pipefail
+
+# --- THE HOOK'S GIT ENVIRONMENT MUST NOT REACH THE GUARDS ---------------------
+# Git exports GIT_DIR (and friends) to its hooks. Under that environment
+# `git rev-parse --show-toplevel` does NOT return the repo root — it returns the
+# directory you asked from. Guards derive their repo root that way, so inside the
+# pre-push hook they resolve every repo-root-relative path one level too deep and
+# report present files as MISSING.
+#
+# Measured on check-stack-safety.sh, same tree, four minutes apart:
+#   without GIT_DIR   --show-toplevel -> <repo>                     guard exit 0
+#   with    GIT_DIR   --show-toplevel -> <repo>/Blockchain/Dev      guard exit 1
+# and its failure text was "KS-666's behavioural coverage was deleted" about four
+# files that are present — false, and alarming, which is the worst combination.
+#
+# This is fixed HERE rather than in that one guard because ANY guard using
+# `rev-parse` has the same latent bug, and because guards are written to be run
+# standalone (`bash scripts/check-foo.sh`) — the hook's environment is the
+# anomaly, not the default. The guard's own fragile derivation is ticketed
+# separately so this does not quietly mask it.
+#
+# This defect could not have been observed before KS-926: the guard had never run
+# inside a hook, because it had never run anywhere. That is the ticket's thesis
+# demonstrating itself on the first invocation.
+unset GIT_DIR GIT_WORK_TREE GIT_INDEX_FILE GIT_PREFIX GIT_COMMON_DIR \
+      GIT_OBJECT_DIRECTORY GIT_ALTERNATE_OBJECT_DIRECTORIES
+
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+DEV_DIR="$(cd "$SCRIPT_DIR/.." && pwd)"
+REPO_ROOT="$(cd "$DEV_DIR/../.." && pwd)"
+
+# --- BUCKET 1: run here, on every push. -------------------------------------
+# Each was RUN against the tree at fe0fd640c on 2026-09-09 and exited 0, and
+# each is a static reader — it reads files, starts nothing and touches no
+# running service. (That sentence was false for one of the original fourteen:
+# check-environment.sh runs `docker info`. It is DEFERRED below, with the
+# reviewer's measurement, so the sentence is true again for the thirteen.)
+# Wall-clock for all thirteen together: ~10 s on darwin arm64 with the
+# workspace installed, which is the push-time condition (measured 2026-09-14:
+# the three tree-walkers no-sql-injection / script-portability / no-pii-store
+# are 8 s of it); ~2-3 s on a tree with no node_modules (the reviewer measured
+# 2.0 s for the fourteen on 2026-09-09).
+WIRED=(
+  check-connector-xss.sh
+  check-dockerfile-non-root.sh
+  check-env-consistency.sh
+  check-no-default-passwords.sh
+  check-no-latest-tags.sh
+  check-no-math-random.sh
+  check-no-pii-store.sh
+  check-no-sql-injection.sh
+  check-no-strictness-patches.sh
+  check-production-guard.sh
+  check-script-portability.sh
+  check-stack-safety.sh
+  check-test-wallet-testnet.sh
+)
+
+# --- BUCKET 2: already reached from a live entry point. ----------------------
+# Listed so the census knows they are homed; NOT re-run here, because running a
+# guard twice per push buys nothing and doubles its cost.
+HOMED_ELSEWHERE=(
+  "check-app-db-password-default.sh|start-local.sh:90, start-environment.sh:118"
+  "check-slot-credentials.sh|start-local.sh:63, start-environment.sh:91"
+  "check-shared-relink.sh|preflight/preflight.sh, leg 13"
+  "check-akto-container-names.sh|check-stack-safety.sh:334"
+)
+
+# --- BUCKET 3: deliberately NOT wired, each with its reason. -----------------
+# These are findings, not omissions. KS-926's own rule: "wiring is not the
+# automatic answer — a guard re-homed onto the pre-push gate that fires falsely
+# will get bypassed with --no-verify, which is worse than the status quo."
+#
+# THE REASON STRINGS ARE LIVE BASH. Each entry is a double-quoted string, so a
+# backtick or a dollar sign inside a reason is EXECUTED when this array is
+# defined — measured 2026-09-13: a draft reason that quoted the guard's own
+# docker-info line ran docker info three times per invocation, before --list
+# had printed anything. Reasons carry no backtick, no dollar sign and no inner
+# quote; name a command in words, never in its own syntax.
+DEFERRED=(
+  "check-no-trust-header-reads.sh|RED ON THE TREE: 9 trust-header reads outside auth middleware (pen-test F-04), in api-gateway, security, prism, originate x3 and packages/shared. Its default level is 'fail' (line 48, TRUST_HEADER_LINT_MODE:-fail), so wiring it today blocks every push in the repo. Wire it once the 9 are cleaned, or wire it warn-first per Kam's KS-961 'wire-nonblocking' ruling."
+  "check-no-demo-mutation.sh|WRONG BASE FOR THIS BRANCHING MODEL: it defaults to BASE=origin/main (line 58) and diffs BASE...HEAD. Under Git Flow develop is permanently ahead of main, so EVERY develop-based branch shows the whole develop-vs-main delta as its own change. Measured on a branch that touched nothing: it reported 4 demo files as modified. Fix its base to the merge-base with origin/develop before wiring."
+  "check-environment.sh|NOT A PROPERTY OF THE TREE, AND NO LIVE HOME: a developer-machine prerequisites check with no advisory path. Four gates decide its exit - line 28 requires macOS; line 38 requires Homebrew; line 76 requires docker on PATH and line 81 runs docker info against a live daemon; line 119 exits with the error count - so under a GUI-launched git client with the default PATH, or on any non-macOS host, it reds on machine state that no code change can clear, and leg 15 would refuse the push (reviewer measurement on PR 918, review 5151452193; reproduced here under env -i PATH=/usr/bin:/bin:/usr/sbin:/sbin). It was the one wired guard that touched a running service. NOT homed elsewhere: git grep at develop 8861e6216 finds no caller anywhere in the tree (the only other mention is a comment at check-slot-credentials.sh line 122), none in the out-of-repo launcher, none in the open start-up PR - and the guard itself tells the user to run start-environment.sh (line 112), not the reverse. Its home is a start-up script that chooses to call it, never the push."
+  "check-container-isolation.sh|NOT A PROPERTY: it runs `docker info` and it reads whole-machine Docker state (docker ps -a, docker network ls). On this machine it failed on another session's containers, days old (ks597-qa-pg, qa-ks800-wabot-*, secuura-queue, secuura-guardian), and on having only 1 platform stack up, which it calls a vacuous comparison. A pre-push gate that reds on a colleague's stale container is the --no-verify generator KS-926 warns about. Its home is stack start-up, not the push."
+)
+
+MODE="run"
+case "${1:-}" in
+  --list)            MODE="list" ;;
+  --check-unreached) MODE="check" ;;
+  "")                MODE="run" ;;
+  *) echo "usage: run-code-guards.sh [--list|--check-unreached]" >&2; exit 2 ;;
+esac
+
+if [ "$MODE" = "list" ]; then
+  echo "WIRED HERE (${#WIRED[@]}):"
+  printf '  %s\n' ${WIRED[@]+"${WIRED[@]}"}
+  echo "HOMED ELSEWHERE (${#HOMED_ELSEWHERE[@]}):"
+  for e in ${HOMED_ELSEWHERE[@]+"${HOMED_ELSEWHERE[@]}"}; do
+    echo "  ${e%%|*}  <- ${e#*|}"
+  done
+  echo "DEFERRED, with reason (${#DEFERRED[@]}):"
+  for e in ${DEFERRED[@]+"${DEFERRED[@]}"}; do
+    echo "  ${e%%|*}"
+  done
+  exit 0
+fi
+
+# --- the census --------------------------------------------------------------
+if [ "$MODE" = "check" ]; then
+  if ! command -v git >/dev/null 2>&1 || ! git -C "$REPO_ROOT" rev-parse --git-dir >/dev/null 2>&1; then
+    echo "SKIP (advisory) — not a git checkout, cannot enumerate tracked guards"
+    exit 0
+  fi
+
+  tracked=$(git -C "$REPO_ROOT" ls-files 'Blockchain/Dev/scripts/check-*.sh' | xargs -n1 basename 2>/dev/null | sort)
+  tracked_count=$(printf '%s\n' "$tracked" | grep -c . || true)
+
+  accounted=$(
+    { printf '%s\n' ${WIRED[@]+"${WIRED[@]}"}
+      for e in ${HOMED_ELSEWHERE[@]+"${HOMED_ELSEWHERE[@]}"}; do echo "${e%%|*}"; done
+      for e in ${DEFERRED[@]+"${DEFERRED[@]}"};         do echo "${e%%|*}"; done
+    } | sort -u
+  )
+  accounted_count=$(printf '%s\n' "$accounted" | grep -c . || true)
+
+  # POSITIVE CONTROL, load-bearing. If `git ls-files` returned nothing — wrong
+  # CWD, a pathspec that stopped matching — then `comm` finds no orphans and
+  # this census reports a clean bill of health having examined ZERO guards.
+  # That is the exact defect KS-926 is about, reproduced inside its own fix.
+  if [ "$tracked_count" -eq 0 ]; then
+    echo "FAIL — the census enumerated 0 tracked guards."
+    echo "       That is this script being broken, not a clean tree. Check the pathspec."
+    exit 1
+  fi
+
+  orphans=$(comm -23 <(printf '%s\n' "$tracked") <(printf '%s\n' "$accounted"))
+  ghosts=$(comm -13 <(printf '%s\n' "$tracked") <(printf '%s\n' "$accounted"))
+
+  rc=0
+  if [ -n "$orphans" ]; then
+    echo "FAIL — guard(s) in the tree that no bucket accounts for:"
+    printf '%s\n' "$orphans" | sed 's/^/  /'
+    echo "  Put each in WIRED, HOMED_ELSEWHERE or DEFERRED in scripts/run-code-guards.sh."
+    echo "  A guard in no bucket is a check that cannot fail (KS-926)."
+    rc=1
+  fi
+  if [ -n "$ghosts" ]; then
+    echo "FAIL — bucket(s) naming a guard that is not in the tree:"
+    printf '%s\n' "$ghosts" | sed 's/^/  /'
+    rc=1
+  fi
+  [ "$rc" -eq 0 ] && echo "OK — all $tracked_count tracked guards accounted for ($accounted_count buckets entries)."
+  exit $rc
+fi
+
+# --- run ---------------------------------------------------------------------
+# exit 9: this script could not even reach its own directory — distinct from 1
+# (a guard or the census failed) and 2 (bad usage), so a caller can tell them apart.
+cd "$DEV_DIR" || exit 9
+fail=0
+ran=0
+# Wired guards resolve by BASENAME against scripts/. The census (git ls-files
+# with a * that crosses /) would count a guard nested under scripts/, but this
+# loop could not run it — a nested guard needs its path here, not its name.
+for g in ${WIRED[@]+"${WIRED[@]}"}; do
+  if [ ! -f "scripts/$g" ]; then
+    echo "FAIL — wired guard missing from the tree: scripts/$g"
+    fail=1
+    continue
+  fi
+  ran=$((ran + 1))
+  if ! bash "scripts/$g"; then
+    echo "  ^ FAILED: $g"
+    fail=1
+  fi
+done
+
+# The same control as the census, on the run path: exiting 0 having run nothing
+# is the failure this whole script exists to prevent.
+if [ "$ran" -eq 0 ]; then
+  echo "FAIL — ran 0 guards. That is this script being broken, not a green tree."
+  exit 1
+fi
+
+if [ "$fail" -ne 0 ]; then
+  echo "CODE GUARDS FAILED — $ran guard(s) run, at least one red."
+  exit 1
+fi
+echo "OK — $ran code guards passed."
+exit 0

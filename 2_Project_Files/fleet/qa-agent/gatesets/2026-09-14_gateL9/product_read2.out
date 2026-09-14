@@ -1,0 +1,33 @@
+== run-shell-suites.sh location
+Blockchain/Dev/scripts/run-shell-suites.sh
+-- the workflow's defaults.run working-directory
+45:    defaults:
+47:        working-directory: Blockchain/Dev
+== playwright tsx range at the PRs' base vs M18 vs #942 head (when did ^4.23.13 arrive?)
+a1e49d151: "tsx":"^4.23.12","tsx":"^4.23.1","tsx":"^4.23.1",
+c1676269d: "tsx":"^4.23.12","tsx":"^4.23.1","tsx":"^4.23.1",
+8861e6216: "tsx":"^4.23.12","tsx":"^4.23.1","tsx":"^4.23.13",
+53b9c3cc1: "tsx":"^4.23.12","tsx":"^4.23.1","tsx":"^4.23.13",
+-- the commit that moved playwright's tsx range
+a5f3903b7 2026-09-07T09:09:55+01:00 KS-682: update Playwright package versions; pin TypeScript inside the linter's range
+== semver check: does 4.23.12 satisfy ^4.23.13? (python: caret = >=4.23.13 <5)
+4.23.12 satisfies ^4.23.13: False
+4.23.12 satisfies ^4.23.12: True
+4.23.12 satisfies ^4.23.1: True
+== what does the shell suite call — npx tsx from the fixtures dir; is there a package.json/node_modules there in CI? (systemTest/__tests__/fixtures?)
+26:FIXTURES="$HERE/../fixtures"
+-- the drive.ts import (what tsx must resolve)
+36:# The driver imports the real function and points it at a temp path, so the
+38:# The import is ABSOLUTE: the driver lives in $TMP, so a relative specifier
+42:import { quarantineManifest } from '$FIXTURES/manifest.ts';
+179:# The default path must resolve at CALL time, not import time (the frozen
+180:# MANIFEST_PATH flagged on #896): set the slot after import, quarantine with no
+183:import { quarantineManifest } from '$FIXTURES/manifest.ts';
+193:  actors.superseded-slot4-*.json) ok "default path resolves at call time: slot set after import quarantines THAT slot's manifest" ;;
+== run-shell-suites.sh tally + glob
+6:# The defect this exists for: `scripts/__tests__/check_slot_credentials.test.sh`
+16:#     of 9 tracked *.test.sh, 5 were invoked and 4 were not
+65:  for f in "$REPO_ROOT/$root"/*.test.sh; do
+86:  tracked=$(git -C "$REPO_ROOT" ls-files '*.test.sh' | sort)
+233:echo "shell suites: $pass passed, $fail failed (of ${#reached[@]})"
+235:  printf 'FAILED: %s\n' "${failed_names[@]}"

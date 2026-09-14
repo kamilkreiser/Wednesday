@@ -1,0 +1,161 @@
+== anchor suite files at head (ks520 / ks587 / ks535 / ks1004 / ks1058 / ks1059)
+Blockchain/Dev/services/originate/src/__tests__/ks1004-anchor-failed-lockout.test.ts
+Blockchain/Dev/services/originate/src/__tests__/ks1058-anchor-failed-preserves-thread-token.test.ts
+Blockchain/Dev/services/originate/src/__tests__/ks520-anchor-fail-closed.test.ts
+Blockchain/Dev/services/originate/src/__tests__/ks535-anchor-async-fail-propagates.test.ts
+Blockchain/Dev/services/originate/src/__tests__/ks587-anchors-honest-simulated.test.ts
+Blockchain/Dev/services/originate/src/__tests__/ks587-document-blob-simulated.test.ts
+== per-file cell counts from the builder's F.jest-anchor.out
+PASS src/__tests__/ks1004-anchor-failed-lockout.test.ts
+  KS-1004 — markDocumentAnchorFailed reaches a hashed document
+    ✓ REPRO: records the failure on a submitted document carrying a txHash (was: inert) (4 ms)
+    ✓ the txHash is CARRIED FORWARD, not nulled — the failed tx keeps its forensic trail
+  KS-1004 — reconcileDocumentAnchorState heals a hashed, failed document
+    ✓ REPRO: a stale submitted-with-hash document whose anchor failed is healed to anchor_failed
+    ✓ CONTROL: an already anchor_failed document is not re-written by the failure branch
+PASS src/__tests__/ks1058-anchor-failed-preserves-thread-token.test.ts
+  KS-1058 — the fail-closed write must not destroy an unrelated minted fact
+    ✓ DEFECT: a prior threadToken survives the anchor_failed write (4 ms)
+    ✓ DELIBERATE: confidence is NOT carried forward — it would report a terminal failure as pending
+    ✓ CONTROL (non-zero): the writer still records the failure it is for
+== the builder's jest invocation (first lines of F.jest-anchor.out / tampers.py)
+PASS src/__tests__/ks1004-anchor-failed-lockout.test.ts
+  KS-1004 — markDocumentAnchorFailed reaches a hashed document
+    ✓ REPRO: records the failure on a submitted document carrying a txHash (was: inert) (4 ms)
+    ✓ the txHash is CARRIED FORWARD, not nulled — the failed tx keeps its forensic trail
+    ✓ CONTROL: a confirmed anchor is still refused — the guard kept its real job
+19:    out=subprocess.run(["npx","jest",*SUITES,"--verbose"],capture_output=True,text=True)
+20:    log=out.stdout+out.stderr; open(f"{os.environ['R']}/{name.split()[0]}.jest.out","w").write(log)
+== BACKLOG.md:265-280 at develop (the ks444 pair)
+  - Why deferred: needs a way to distinguish caller-supplied from server-supplied values in the
+    error path; a design question rather than a fix, and the concrete instance is now closed.
+  - Discovered: 2026-08-07 during KS-564 (live end-to-end proof of Option A).
+
+- [ ] Bare connector writes on `/share` + `/lifecycle-events` record no actor at all
+  - Where: `Blockchain/Dev/services/originate/src/routes/documents.ts` (`/:id/share`,
+    `/:id/lifecycle-events`) with `services/provenance.ts` — `handleOnBehalfOf` writes an
+    `action_provenance` row ONLY when the caller supplied `onBehalfOf`.
+  - Symptom: KS-564 folds a non-UUID connector principal to NULL in `shares.shared_by_id` /
+    `document_lifecycle_events.actor_user_id` (it cannot go in a UUID column). When the connector
+    ALSO omits `onBehalfOf`, no provenance row is written either, so the row has no actor anywhere —
+    "who shared this" is unanswerable for bare connector shares. Verified live 2026-08-06: a bare
+    connector share produced `shared_by_id = NULL` and no `action='share'` provenance row; the same
+    call WITH `onBehalfOf` did produce one. Not a regression (pre-KS-564 the write 500'd outright),
+    but the audit trail is thinner than the KS-480 §6 design implies. Fix is likely to record a
+    connector-only provenance row (no `onBehalfOf` triplet) for every connector-authored action.
+== Wednesday's 2026-09-09 daily lines 129-132, 377
+- 10:36 — 🔴 **THE #912 GATE CAME BACK `NO GO` WITH A CROSS-SERVICE BLOCKER — AND WEDNESDAY NEARLY LOST THE WHOLE VERDICT, BECAUSE THE PROMPT NEVER TOLD IT WHERE TO SEND IT.** The pass ran 09:47 → 10:03 and produced a 13 KB tier-1 report. **It was never mailed.** The QA agent is WRITE-ONLY (no inbox — the 09-09 ledger row) and its pane is an alternate screen holding **19 lines with NO scrollback**,
+**THE ERROR IS EXACTLY LOCATABLE AND IT IS WEDNESDAY'S:** the working ks963_913 prompt carries the line *"Mail your verdict to wednesday-agent@agentmail.to when the pass is complete"* at its line 41. **The ks1004 prompt simply omitted it.** Wednesday wrote a brief that specified what to REPORT and never where to SEND it — on the one agent in this fleet that cannot be asked afterwards. **Fixed in t
+🔴 **THE VERDICT ITSELF, and it is a genuine security finding on a PUBLIC surface — F1, BLOCKER.** Before this PR, `blockchain.status === 'anchor_failed'` implied `txHash === null`. **KS-1004 deliberately and correctly breaks that invariant — and `services/api-gateway/src/routes/verification.ts` (~:508) silently depends on it.** `POST /api/documents/:id/verify` is **purely presence-keyed** (`confid
+**THE FIX IS NOT IN THIS PR** — `anchorStateSync.ts` is correct and well-guarded; the gateway's `confidence` computation must become status-aware, as `isAnchoredHonestly` and `healBlobWithChainFact` already are. **RULED (merge authority is Wednesday's this week): #912 does NOT merge until the gateway fix lands with or before it.** Originate's own verify surfaces were checked and are safe; the gate
+  🔴 **A TIER-1 *NO GO* HAS BEEN HOLDING #912 ALL DAY AND EXISTS NOWHERE A READER LANDS.** The brief asserted it; the seat checked and found **the PR carries no such verdict and has zero reviews**. **Both right — the gap is the finding.** The verdict is real, **13,654 bytes, in WEDNESDAY'S OWN FOLDER**, never posted to the PR or the ticket. **So a real Blocker is held by something nobody can see, o
+== secuura-test-discipline SKILL present at head
+.claude/skills/secuura-test-discipline/SKILL.md
+== originate jest.config.js at head
+module.exports = {
+  preset: 'ts-jest',
+  testEnvironment: 'node',
+  roots: ['<rootDir>/src'],
+  testMatch: ['**/__tests__/**/*.test.ts'],
+  // Integration tests are DB-backed and run via jest.integration.config.js
+  // (`npm run test:integration`); the default run stays unit-only + mock-DB.
+  testPathIgnorePatterns: ['/node_modules/', '\\.integration\\.test\\.ts$'],
+  moduleFileExtensions: ['ts', 'js', 'json'],
+  // uuid@14 is ESM-only and jest's CJS runtime can't parse it — every suite
+  // importing routes/repos load-failed since the bump (KS-466 fix). The stub
+  // exports the one API the service uses (v4). Runtime uses the real package.
+  moduleNameMapper: {
+    '^uuid$': '<rootDir>/src/testUtils/uuid-cjs.ts',
+  },
+};
+== ks860 loopback guard blob at head / dev
+e0dfadb9cd78d5c648dd263d5df320df8f26b909
+e0dfadb9cd78d5c648dd263d5df320df8f26b909
+41
+ks520-anchor-fail-closed                 it( 3  blob head 9ed5513a3 dev 9ed5513a3
+ks587-anchors-honest-simulated           it( 4  blob head 9ffe9e8f9 dev 9ffe9e8f9
+ks587-document-blob-simulated            it( 16  blob head 194d72c53 dev 194d72c53
+== ks587 files: fixtures with txHash null? (grep -c 'txHash: null' / 'anchor_failed')
+ks587-anchors-honest-simulated: txHash-null 0 anchor_failed 0 reconcile 0 markDocumentAnchorFailed 0
+ks587-document-blob-simulated: txHash-null 5 anchor_failed 3 reconcile 6 markDocumentAnchorFailed 1
+ks520-anchor-fail-closed: txHash-null 0 anchor_failed 3 reconcile 0 markDocumentAnchorFailed 0
+== BACKLOG.md at head: ks444-webhooks lines
+287:  - Where: `Blockchain/Dev/services/originate/src/__tests__/ks444-webhooks-create-description-guard.test.ts`
+481:    `ks444-webhooks-create-description-guard.test.ts` (2 tests, `POST /api/webhooks` returns 500
+== ks444-webhooks test: what moved on develop (r1 229a3ccde -> dev b00744574), numstat
+18	0	Blockchain/Dev/services/originate/src/__tests__/ks444-webhooks-create-description-guard.test.ts
+b1cb8466f 2026-09-12 15:58:15 +1000 KS-927: the mock omitted an export the route calls, so both POSITIVE cells 500'd and the suite still printed two ticks (#926)
+== documentRepo.ts:56-66 at head (the anchoredAt comment Peter's item 2 names)
+    56	    signedAt: string;
+    57	  }>;
+    58	  blockchain?: {
+    59	    txHash: string | null;
+    60	    blockHeight: number;
+    61	    // Absent in the KS-520 fail-closed state — nothing was anchored, so
+    62	    // there is no anchor time to record.
+    63	    anchoredAt?: string;
+    64	    network?: string;
+    65	    status?: string;
+    66	    anchorId?: string;
+== documentRepo.ts:476-484 at head (the spread)
+   476	    }
+   477	    // `inserted` is only meaningful in skip mode (DO UPDATE also reports 1
+   478	    // affected row); skip-mode callers use it to detect a conflict that raced
+   479	    // in between their pre-check and this insert.
+   480	    return { dbId, inserted: affected > 0 };
+   481	  } catch (err: any) {
+   482	    logger.error('DB write failed for document', { id: doc.id, error: err instanceof Error ? err.message : String(err) });
+   483	    throw err;
+   484	  }
+== ResultPage.tsx at head
+Blockchain/Dev/frontend/verifier/src/components/ResultPage.tsx
+  ResultPage.tsx:+409      1	                    <div className="flex items-center gap-3">
+  ResultPage.tsx:+409      2	                      <Calendar className="w-5 h-5 text-primary shrink-0" />
+  ResultPage.tsx:+409      3	                      <div>
+  ResultPage.tsx:+409      4	                        <p className="text-sm font-medium">Verified At</p>
+  ResultPage.tsx:+409      5	                        <p className="text-xs text-muted-foreground">{formatDate(result.verifiedAt)}</p>
+  ResultPage.tsx:+409      6	                      </div>
+  ResultPage.tsx:+409      7	                    </div>
+  ResultPage.tsx:+409      8	                  )}
+  ResultPage.tsx:+409      9	                </CardContent>
+  result.verified count: 14
+== originate tsconfig.json at head (exclude?)
+{
+  "compilerOptions": {
+    "target": "ES2022",
+    "module": "commonjs",
+    "lib": ["ES2022"],
+    "outDir": "./dist",
+    "rootDir": "./src",
+    "strict": true,
+    "noUnusedLocals": true,
+    "noUnusedParameters": true,
+    "esModuleInterop": true,
+    "skipLibCheck": true,
+    "forceConsistentCasingInFileNames": true,
+    "resolveJsonModule": true,
+    "declaration": true,
+    "sourceMap": true
+  },
+  "include": ["src/**/*"],
+  "exclude": ["node_modules", "dist", "src/__tests__", "src/**/*.test.ts", "src/**/*.integration.test.ts"]
+}
+== fix-libsodium-symlink: where
+Blockchain/Dev/scripts/fix-libsodium-symlink.js
+17:    "test": "npm run test --workspaces",
+41:    "postinstall": "node scripts/fix-libsodium-symlink.js && npm run build --workspaces --if-present",
+45:    "audit:locks": "node scripts/audit/audit-locks.mjs",
+47:    "audit:gate": "node scripts/audit/audit-gate.mjs",
+== originate/node_modules entries in the builder's worktree (9)
+@ioredis
+@prisma
+@types
+cluster-key-slot
+ioredis
+jsonwebtoken
+jwa
+jws
+prisma
+total 32
+drwxr-xr-x@   6 kam_code  staff    192 14 Sep 07:48 .
+drwxr-xr-x@ 989 kam_code  staff  31648 14 Sep 07:48 ..

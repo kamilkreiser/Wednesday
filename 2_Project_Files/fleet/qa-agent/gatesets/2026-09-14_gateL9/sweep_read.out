@@ -1,0 +1,129 @@
+== sweep: the out=$(...); rc=$? pattern across .github/workflows at develop / #940 / #941 (git grep -F in the clone)
+8861e6216: 8861e6216:.github/workflows/security-scan.yml:127:          out=$(npm run audit:contract --silent 2>&1); rc=$? 
+1aa708be9: 1aa708be9:.github/workflows/security-scan.yml:146:          out=$(npm run audit:contract --silent 2>&1); rc=$? 
+d105e07a8: d105e07a8:.github/workflows/security-scan.yml:159:          out=$(npm run audit:contract --silent 2>&1); rc=$? 
+53b9c3cc1: 53b9c3cc1:.github/workflows/security-scan.yml:127:          out=$(npm run audit:contract --silent 2>&1); rc=$? 
+-- positive control: 'rc=$?' bare
+d105e07a8:.github/workflows/security-scan.yml:2
+== continue-on-error on the SCA step (develop vs #941)
+/Volumes/DevMASTER/WEDNESDAY/2_Project_Files/fleet/qa-agent/gatesets/2026-09-14_gateL9/model/security-scan.yml.8861e6216:7:# checks, so they do not block merges yet (each is continue-on-error on PR; f
+/Volumes/DevMASTER/WEDNESDAY/2_Project_Files/fleet/qa-agent/gatesets/2026-09-14_gateL9/model/security-scan.yml.8861e6216:21:# (`continue-on-error`) and findings are published as workflow ARTIFACTS
+/Volumes/DevMASTER/WEDNESDAY/2_Project_Files/fleet/qa-agent/gatesets/2026-09-14_gateL9/model/security-scan.yml.8861e6216:95:      # continue-on-error so it surfaces in the PR but does not block the me
+/Volumes/DevMASTER/WEDNESDAY/2_Project_Files/fleet/qa-agent/gatesets/2026-09-14_gateL9/model/security-scan.yml.8861e6216:97:      # drop continue-on-error, and add this check to branch protection.
+/Volumes/DevMASTER/WEDNESDAY/2_Project_Files/fleet/qa-agent/gatesets/2026-09-14_gateL9/model/security-scan.yml.8861e6216:99:        continue-on-error: ${{ github.event_name == 'pull_request' }}
+/Volumes/DevMASTER/WEDNESDAY/2_Project_Files/fleet/qa-agent/gatesets/2026-09-14_gateL9/model/security-scan.yml.8861e6216:110:      # NOT continue-on-error: this needs no network and has no flake mode.
+/Volumes/DevMASTER/WEDNESDAY/2_Project_Files/fleet/qa-agent/gatesets/2026-09-14_gateL9/model/security-scan.yml.8861e6216:149:    continue-on-error: ${{ github.event_name == 'pull_request' }}
+/Volumes/DevMASTER/WEDNESDAY/2_Project_Files/fleet/qa-agent/gatesets/2026-09-14_gateL9/model/security-scan.yml.8861e6216:175:        continue-on-error: true
+/Volumes/DevMASTER/WEDNESDAY/2_Project_Files/fleet/qa-agent/gatesets/2026-09-14_gateL9/model/security-scan.yml.8861e6216:309:    continue-on-error: ${{ github.event_name == 'pull_request' }}
+/Volumes/DevMASTER/WEDNESDAY/2_Project_Files/fleet/qa-agent/gatesets/2026-09-14_gateL9/model/security-scan.yml.8861e6216:335:        continue-on-error: true
+/Volumes/DevMASTER/WEDNESDAY/2_Project_Files/fleet/qa-agent/gatesets/2026-09-14_gateL9/model/security-scan.yml.8861e6216:356:    continue-on-error: ${{ github.event_name == 'pull_request' }}
+/Volumes/DevMASTER/WEDNESDAY/2_Project_Files/fleet/qa-agent/gatesets/2026-09-14_gateL9/model/security-scan.yml.8861e6216:378:        continue-on-error: true
+/Volumes/DevMASTER/WEDNESDAY/2_Project_Files/fleet/qa-agent/gatesets/2026-09-14_gateL9/model/security-scan.yml.d105e07a8:7:# checks, so they do not block merges yet (each is continue-on-error on PR; f
+/Volumes/DevMASTER/WEDNESDAY/2_Project_Files/fleet/qa-agent/gatesets/2026-09-14_gateL9/model/security-scan.yml.d105e07a8:21:# (`continue-on-error`) and findings are published as workflow ARTIFACTS
+/Volumes/DevMASTER/WEDNESDAY/2_Project_Files/fleet/qa-agent/gatesets/2026-09-14_gateL9/model/security-scan.yml.d105e07a8:115:        continue-on-error: ${{ github.event_name == 'pull_request' }}
+/Volumes/DevMASTER/WEDNESDAY/2_Project_Files/fleet/qa-agent/gatesets/2026-09-14_gateL9/model/security-scan.yml.d105e07a8:142:      # NOT continue-on-error: this needs no network and has no flake mode.
+/Volumes/DevMASTER/WEDNESDAY/2_Project_Files/fleet/qa-agent/gatesets/2026-09-14_gateL9/model/security-scan.yml.d105e07a8:181:    continue-on-error: ${{ github.event_name == 'pull_request' }}
+/Volumes/DevMASTER/WEDNESDAY/2_Project_Files/fleet/qa-agent/gatesets/2026-09-14_gateL9/model/security-scan.yml.d105e07a8:207:        continue-on-error: true
+/Volumes/DevMASTER/WEDNESDAY/2_Project_Files/fleet/qa-agent/gatesets/2026-09-14_gateL9/model/security-scan.yml.d105e07a8:341:    continue-on-error: ${{ github.event_name == 'pull_request' }}
+/Volumes/DevMASTER/WEDNESDAY/2_Project_Files/fleet/qa-agent/gatesets/2026-09-14_gateL9/model/security-scan.yml.d105e07a8:367:        continue-on-error: true
+/Volumes/DevMASTER/WEDNESDAY/2_Project_Files/fleet/qa-agent/gatesets/2026-09-14_gateL9/model/security-scan.yml.d105e07a8:388:    continue-on-error: ${{ github.event_name == 'pull_request' }}
+/Volumes/DevMASTER/WEDNESDAY/2_Project_Files/fleet/qa-agent/gatesets/2026-09-14_gateL9/model/security-scan.yml.d105e07a8:410:        continue-on-error: true
+== the audit step's script block is byte-identical develop vs #940 (only the shell: line + comments added)
+2,20c2,14
+<           npm audit --json > npm-audit.json || true
+<           jq '.metadata.vulnerabilities // {}' npm-audit.json
+< 
+<       - name: Upload audit results
+<         uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a  # v7.0.1 (AUDIT D-7 SHA-pin)
+<         with:
+<           name: npm-audit-report
+<           path: Blockchain/Dev/npm-audit.json
+< 
+<       # KS-230: the SCA gate — HIGH/CRITICAL advisories must be allow-listed in
+<       # .security/exceptions.yml (non-expired) or the script exits 1. WARN-FIRST:
+<       # continue-on-error so it surfaces in the PR but does not block the merge.
+<       # To make it blocking: triage the current advisories into exceptions.yml,
+<       # drop continue-on-error, and add this check to branch protection.
+<       - name: SCA gate — npm audit vs allow-list (warn-first)
+<         continue-on-error: ${{ github.event_name == 'pull_request' }}
+<         working-directory: Blockchain/Dev
+<         run: node scripts/check-npm-audit.mjs npm-audit.json .security/exceptions.yml
+< 
+---
+>           set -uo pipefail
+>           out=$(npm run audit:contract --silent 2>&1); rc=$?
+>           printf '%s\n' "$out"
+>           if [ "$rc" -ne 0 ]; then echo "audit-contract suites are red"; exit 1; fi
+>           cases=$(printf '%s\n' "$out" | grep -oE ' tests [0-9]+' | tail -1 | grep -oE '[0-9]+')
+>           expected=$(tr -d '[:space:]' < scripts/audit/expected-case-count)
+>           if [ -z "$expected" ]; then echo "expected-case-count missing or empty"; exit 1; fi
+>           if [ -z "$cases" ]; then echo "no case count reported — a run of zero cases is not a pass"; exit 1; fi
+>           if [ "$cases" -ne "$expected" ]; then
+>             echo "ran $cases cases, expected $expected — fewer means cases were lost; more means update scripts/audit/expected-case-count"
+>             exit 1
+>           fi
+>           echo "OK — $cases audit-contract cases pass (expected $expected)"
+== #940 head: the step lines 143-159
+        shell: bash {0}
+        run: |
+          set -uo pipefail
+          out=$(npm run audit:contract --silent 2>&1); rc=$?
+          printf '%s\n' "$out"
+          if [ "$rc" -ne 0 ]; then echo "audit-contract suites are red"; exit 1; fi
+          cases=$(printf '%s\n' "$out" | grep -oE ' tests [0-9]+' | tail -1 | grep -oE '[0-9]+')
+          expected=$(tr -d '[:space:]' < scripts/audit/expected-case-count)
+          if [ -z "$expected" ]; then echo "expected-case-count missing or empty"; exit 1; fi
+          if [ -z "$cases" ]; then echo "no case count reported — a run of zero cases is not a pass"; exit 1; fi
+          if [ "$cases" -ne "$expected" ]; then
+            echo "ran $cases cases, expected $expected — fewer means cases were lost; more means update scripts/audit/expected-case-count"
+            exit 1
+          fi
+          echo "OK — $cases audit-contract cases pass (expected $expected)"
+
+  # ===========================================================================
+== #941 head: the SCA step lines 116-134
+        working-directory: Blockchain/Dev
+        # Same exit-code table as preflight leg 6/13, and it must stay the same:
+        #   0 clean · 1 advisories outside the baseline · 2 registry unreachable
+        #   (SKIP) · 3 the baseline is unreadable, which is NOT a skip — nothing
+        #   was established, so it must fail rather than pass quietly.
+        shell: bash {0}
+        run: |
+          set -uo pipefail
+          node scripts/audit/audit-gate.mjs
+          rc=$?
+          case "$rc" in
+            0) echo "OK — no advisories outside the triaged baseline" ;;
+            2) echo "SKIP (advisory) — npm audit could not run (offline / registry unreachable)" ;;
+            3) echo "FAIL — the audit gate REFUSED to report a verdict (see its line above)"; exit 1 ;;
+            *) echo "FAIL — new or lapsed advisories; triage them (fix, or a reasoned baseline entry with a ticket)"; exit 1 ;;
+          esac
+
+      # KS-763 (QA finding A): the contract suites that hold BOTH audit gates'
+      # validator honest had no runner anywhere — this workflow invoked the
+== builder's stubs (records, read-only)
+-- arm1
+#!/bin/bash
+echo "npm warn exec The following package was not found and will be installed: tsx@4.23.13" >&2
+printf NULL
+exit 0
+-- arm2a
+#!/bin/bash
+echo "npx: launch failure (stub)" >&2
+printf NULL
+exit 7
+-- arm2b
+#!/bin/bash
+printf not-the-answer
+exit 0
+== builder's arm outputs on the merged bytes
+-- merged.arm1:      got 'NULL'||  2 passed, 12 failed|
+-- merged.arm2a:   FAIL harness: the tsx driver did not run|     stdout: NULL|     stderr: npx: launch failure (stub)|
+-- merged.arm2b:   FAIL harness: the tsx driver did not run|     stdout: not-the-answer|     stderr: |
+-- real_merged:   ok   default path resolves at call time: slot set after import quarantines THAT slot's manifest||  14 passed, 0 failed|
+-- real_before:   ok   default path resolves at call time: slot set after import quarantines THAT slot's manifest||  14 passed, 0 failed|
+-- host_tsx: tsx v4.23.13|node v24.7.0|
+-- T1_arm1:      stdout: npm warn exec The following package was not found and will be installed: tsx@4.23.13|NULL|     stderr: |
+-- T2_arm2b:      got 'not-the-answer'||  1 passed, 13 failed|
+-- T2_arm2a:   FAIL harness: the tsx driver did not run|     stdout: NULL|     stderr: npx: launch failure (stub)|
+-- post_arm1:      got 'NULL'||  2 passed, 12 failed|

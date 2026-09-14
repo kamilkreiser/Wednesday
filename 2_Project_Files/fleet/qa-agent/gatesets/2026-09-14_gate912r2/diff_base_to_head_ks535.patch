@@ -1,0 +1,40 @@
+diff --git a/Blockchain/Dev/services/originate/src/__tests__/ks535-anchor-async-fail-propagates.test.ts b/Blockchain/Dev/services/originate/src/__tests__/ks535-anchor-async-fail-propagates.test.ts
+index ee08e85b3..b1791e94f 100644
+--- a/Blockchain/Dev/services/originate/src/__tests__/ks535-anchor-async-fail-propagates.test.ts
++++ b/Blockchain/Dev/services/originate/src/__tests__/ks535-anchor-async-fail-propagates.test.ts
+@@ -9,8 +9,11 @@
+  *     consecutive observations; anchoring resets retrying rows to 'pending'
+  *     before their backoff, so 'failed' is terminal) it writes the KS-520
+  *     fail-closed shape and reverts the accept-time optimistic status.
+- *  2. `markDocumentAnchorFailed` — never downgrades a document that already
+- *     carries a real txHash / confirmed anchor.
++ *  2. `markDocumentAnchorFailed` — never downgrades a CONFIRMED anchor.
++ *     (KS-1004 narrowed this: it used to refuse on a txHash too, which made
++ *     the failure writer unreachable for a transaction that reached the chain
++ *     and then failed. The write is now non-destructive — the hash is carried
++ *     forward — so the guard no longer has to refuse in order to protect it.)
+  *  3. `reconcileDocumentAnchorState` — read-time self-healing for documents
+  *     whose poller died (restart / failure landed after the poll window),
+  *     in both directions (stale-pending → anchor_failed, and
+@@ -158,7 +161,20 @@ describe('pollAnchorUntilConfirmed — terminal failure propagates (the KS-535 d
+ });
+ 
+ describe('markDocumentAnchorFailed — never downgrades recorded chain facts', () => {
+-  it('no-ops when the document already carries a real txHash', async () => {
++  // KS-1004: this cell used to be named "no-ops when the document already
++  // carries a real txHash" and its fixture set txHash AND status:'confirmed'
++  // TOGETHER — so the `confirmed` arm alone satisfied it and the cell could
++  // never detect a change to the txHash arm. It was green over the guard it
++  // was named for. The two conditions are now exercised separately.
++  it('no-ops when the anchor is confirmed — WITHOUT a txHash, so this isolates the confirmed arm', async () => {
++    mockGetDocument.mockResolvedValue(baseDoc({
++      blockchain: { txHash: null, blockHeight: 100, status: 'confirmed', anchorId: 'anchor_1' },
++    }));
++    await markDocumentAnchorFailed('doc-ks535', 'tenant-1', 'anchor_1', 'late failure signal');
++    expect(mockUpdateDocument).not.toHaveBeenCalled();
++  });
++
++  it('no-ops on a confirmed anchor even when it also carries a txHash (the original fixture)', async () => {
+     mockGetDocument.mockResolvedValue(baseDoc({
+       blockchain: { txHash: REAL_TX, blockHeight: 100, status: 'confirmed', anchorId: 'anchor_1' },
+     }));

@@ -1,0 +1,62 @@
+== #941's log: from the audit-contract step header to the end (zero output between the run echo and the red line expected)
+35:2026-09-10T01:51:08.3096848Z Complete job name: Dependency Audit
+...
+2026-09-10T01:51:35.0917548Z [command]/usr/bin/git submodule foreach --recursive sh -c "git config --local --name-only --get-regexp 'http\.https\:\/\/github\.com\/\.extra
+2026-09-10T01:51:35.1299611Z Removing includeIf entries pointing to credentials config files
+2026-09-10T01:51:35.1319645Z [command]/usr/bin/git config --local --name-only --get-regexp ^includeIf\.gitdir:
+2026-09-10T01:51:35.1335016Z includeif.gitdir:/home/runner/work/Distributed_Secuura/Distributed_Secuura/.git.path
+2026-09-10T01:51:35.1337708Z includeif.gitdir:/home/runner/work/Distributed_Secuura/Distributed_Secuura/.git/worktrees/*.path
+2026-09-10T01:51:35.1339022Z includeif.gitdir:/github/workspace/.git.path
+2026-09-10T01:51:35.1339925Z includeif.gitdir:/github/workspace/.git/worktrees/*.path
+2026-09-10T01:51:35.1342595Z [command]/usr/bin/git config --local --get-all includeif.gitdir:/home/runner/work/Distributed_Secuura/Distributed_Secuura/.git.path
+2026-09-10T01:51:35.1385155Z /home/runner/work/_temp/git-credentials-1cc19273-7732-4422-b9d8-1f8b80144b76.config
+2026-09-10T01:51:35.1401825Z [command]/usr/bin/git config --local --unset includeif.gitdir:/home/runner/work/Distributed_Secuura/Distributed_Secuura/.git.path /home/runne
+2026-09-10T01:51:35.1477634Z [command]/usr/bin/git config --local --get-all includeif.gitdir:/home/runner/work/Distributed_Secuura/Distributed_Secuura/.git/worktrees/*.pa
+2026-09-10T01:51:35.1514389Z /home/runner/work/_temp/git-credentials-1cc19273-7732-4422-b9d8-1f8b80144b76.config
+2026-09-10T01:51:35.1542447Z [command]/usr/bin/git config --local --unset includeif.gitdir:/home/runner/work/Distributed_Secuura/Distributed_Secuura/.git/worktrees/*.path
+2026-09-10T01:51:35.1663185Z [command]/usr/bin/git config --local --get-all includeif.gitdir:/github/workspace/.git.path
+2026-09-10T01:51:35.1699413Z /github/runner_temp/git-credentials-1cc19273-7732-4422-b9d8-1f8b80144b76.config
+2026-09-10T01:51:35.1724958Z [command]/usr/bin/git config --local --unset includeif.gitdir:/github/workspace/.git.path /github/runner_temp/git-credentials-1cc19273-7732-4
+2026-09-10T01:51:35.1750003Z [command]/usr/bin/git config --local --get-all includeif.gitdir:/github/workspace/.git/worktrees/*.path
+2026-09-10T01:51:35.1777589Z /github/runner_temp/git-credentials-1cc19273-7732-4422-b9d8-1f8b80144b76.config
+2026-09-10T01:51:35.1822569Z [command]/usr/bin/git config --local --unset includeif.gitdir:/github/workspace/.git/worktrees/*.path /github/runner_temp/git-credentials-1cc
+2026-09-10T01:51:35.1848887Z [command]/usr/bin/git submodule foreach --recursive git config --local --show-origin --name-only --get-regexp remote.origin.url
+2026-09-10T01:51:35.2258289Z Removing credentials config '/home/runner/work/_temp/git-credentials-1cc19273-7732-4422-b9d8-1f8b80144b76.config'
+2026-09-10T01:51:35.2313595Z Cleaning up orphan processes
+
+== #940's log: the step's own lines from 'npm run audit:contract' to the end
+215:2026-09-10T01:40:52.0875389Z [36;1mout=$(npm run audit:contract --silent 2>&1); rc=$?[0m
+...
+2026-09-10T01:40:52.0874702Z ##[group]Run set -uo pipefail
+2026-09-10T01:40:52.0875070Z [36;1mset -uo pipefail[0m
+2026-09-10T01:40:52.0875389Z [36;1mout=$(npm run audit:contract --silent 2>&1); rc=$?[0m
+2026-09-10T01:40:52.0875730Z [36;1mprintf '%s\n' "$out"[0m
+2026-09-10T01:40:52.0876086Z [36;1mif [ "$rc" -ne 0 ]; then echo "audit-contract suites are red"; exit 1; fi[0m
+2026-09-10T01:40:52.0876633Z [36;1mcases=$(printf '%s\n' "$out" | grep -oE ' tests [0-9]+' | tail -1 | grep -oE '[0-9]+')[0m
+2026-09-10T01:40:52.0877174Z [36;1mexpected=$(tr -d '[:space:]' < scripts/audit/expected-case-count)[0m
+2026-09-10T01:40:52.0877899Z [36;1mif [ -z "$expected" ]; then echo "expected-case-count missing or empty"; exit 1; fi[0m
+2026-09-10T01:40:52.0878546Z [36;1mif [ -z "$cases" ]; then echo "no case count reported — a run of zero cases is not a pass"; exit 1; fi[0m
+2026-09-10T01:40:52.0879075Z [36;1mif [ "$cases" -ne "$expected" ]; then[0m
+2026-09-10T01:40:52.0879703Z [36;1m  echo "ran $cases cases, expected $expected — fewer means cases were lost; more means update scripts/audit/expected-case-count"[0m
+2026-09-10T01:40:52.0880275Z [36;1m  exit 1[0m
+2026-09-10T01:40:52.0880473Z [36;1mfi[0m
+2026-09-10T01:40:52.0880788Z [36;1mecho "OK — $cases audit-contract cases pass (expected $expected)"[0m
+   ...
+2026-09-10T01:40:56.4815197Z /github/runner_temp/git-credentials-f0d172f9-70fd-4d13-8850-d28b23d44d7f.config
+2026-09-10T01:40:56.4860375Z [command]/usr/bin/git config --local --unset includeif.gitdir:/github/workspace/.git.path /github/runner_temp/git-credentials-f0d172f9-70fd-4
+2026-09-10T01:40:56.4915501Z [command]/usr/bin/git config --local --get-all includeif.gitdir:/github/workspace/.git/worktrees/*.path
+2026-09-10T01:40:56.4917159Z /github/runner_temp/git-credentials-f0d172f9-70fd-4d13-8850-d28b23d44d7f.config
+2026-09-10T01:40:56.4928071Z [command]/usr/bin/git config --local --unset includeif.gitdir:/github/workspace/.git/worktrees/*.path /github/runner_temp/git-credentials-f0d
+2026-09-10T01:40:56.5016646Z [command]/usr/bin/git submodule foreach --recursive git config --local --show-origin --name-only --get-regexp remote.origin.url
+2026-09-10T01:40:56.5297510Z Removing credentials config '/home/runner/work/_temp/git-credentials-f0d172f9-70fd-4d13-8850-d28b23d44d7f.config'
+2026-09-10T01:40:56.5458005Z Cleaning up orphan processes
+
+== #940's log: the seven ✖ (first list) with their file:line
+   ✖ failing tests:
+   ✖ audit-locks: a malformed baseline entry exits 3, not 1 and not 2 (34.781753ms)
+   ✖ audit-locks: an entry with a MALFORMED expiry exits 3 (a fuse that cannot blow is refused) (33.460297ms)
+   ✖ audit-locks: an UNPARSEABLE baseline exits 3, not 1 (KS-763 QA F3) (34.715436ms)
+   ✖ audit-locks: an endpoint that never answers is SKIP (2), not a hang (KS-788) (34.227175ms)
+   ✖ audit-locks: a REAL finding still FAILS (1) — the bound does not convert findings into skips (KS-788) (35.231986ms)
+   ✖ audit-locks: POSITIVE CONTROL — a reachable endpoint with no advisories is 0, not 1 and not 2 (33.830495ms)
+   ✖ audit-locks: an unreadable BOUND is refused (3), never silently defaulted (KS-788) (34.831008ms)
