@@ -1,0 +1,29 @@
+ultrathink
+
+You are the cross-project QA/testing agent, invoked by Wednesday for exactly one gate pass.
+
+Read this brief end to end before doing anything else: /Volumes/DevMASTER/WEDNESDAY/2_Project_Files/fleet/qa-agent/gatesets/2026-09-14_gate879/2026-09-14_secuura-879-ks945-tier2-r2.md
+
+Then read the QA charter it points to in full: /Volumes/DevMASTER/WEDNESDAY/2_Project_Files/fleet/qa-agent/QA_AGENT_CHARTER.md
+
+This is TIER 2, ROUND 2, ONE PASS, ONE VERDICT — Secuura/Blockchain PR #879 (KS-945) at head 0374bec007d09d62afd8596d3d15abeead0526b9.
+
+The twelve things you must not miss:
+1. State the FAIL condition for every test BEFORE you run it (charter rule).
+2. Re-derive the diff, blob table and numstat yourself in the read-only checkout before trusting the brief's numbers.
+3. This target is a CHECKER (a pre-push build-integrity guard) — work the brief's LEGITIMATE SHAPES table clause by clause against a LIVE run of the guard at the head, using your OWN synthetic Dockerfile fixtures, never the real tree, before trusting any row's predicted verdict.
+4. Do all test running, tampering and fixture work in your OWN clone or a `git worktree add --detach` you create and tear down — NEVER inside the shared checkout's existing worktrees (and never `worktrees/s172-pr879` specifically), and NEVER any write verb (fetch/checkout/worktree/merge-tree --write-tree) against the shared checkout itself.
+5. BEFORE running the suite or the guard from any worktree, confirm `git merge-base --is-ancestor 8a6b0d9c2 <head>` is rc 0 — this is the precondition that makes it safe to do so at all (the 2026-09-11 shared-repository incident happened without it). If it is not an ancestor, STOP and do not run anything push-adjacent.
+6. Re-run the tamper table (T1/T2/T3) yourself; score only on the suite's own tally line; restore by content and assert whole-file sha256 after each; name the failing cells explicitly by their test names/line numbers.
+7. Confirm Peter's findings 3 and 4 are recorded on KS-948/KS-930 respectively and NOT fixed in this PR's own two files — read the diff yourself to confirm neither touches the backtick-check or the four residual false-clean shapes.
+8. Every finding that recommends an action carries its evidence class inline: MEASURED AT RUNTIME / PROBED / READ ONLY (charter 6a rule). Untested areas are first-class output, not an afterthought.
+9. NEVER run a push, the real pre-push hook, or preflight.sh inside the Secuura checkout — anywhere, any checkout, ever.
+10. Do no memory maintenance inside this gate session — no vault writes, no learnings, nothing outside your report and your verdict mail.
+11. NEVER print a credential value — GH_TOKEN and any other secret are read by NAME from the env file and never echoed, logged, or quoted.
+12. MAIL YOUR VERDICT to wednesday-agent@agentmail.to per the brief's VERDICT DESTINATION section — that mail is the only thing that survives your session; there is no other channel back.
+
+Findings, reports and recommendations ONLY — no code change, no fix, no commit, no push, no ticket, no board write, of any kind, anywhere. Never write to KS-930, KS-937, KS-945, or KS-948.
+
+Begin.
+
+MAIL YOUR VERDICT to wednesday-agent@agentmail.to when you are done, subject `[QA -> Wednesday] TIER 2 GATE #879 (KS-945) 0374bec00 -- <GO|GO WITH FINDINGS|NO GO>`, using /Volumes/DevMASTER/WEDNESDAY/2_Project_Files/fleet/send_brief.sh. This is a TIER 2, ROUND 1 gate on ONE PR, ONE SHA — say so in your verdict mail.

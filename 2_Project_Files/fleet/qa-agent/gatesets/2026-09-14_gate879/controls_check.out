@@ -1,0 +1,31 @@
+controls_check.sh — #879 0374bec00, develop 0e78c7270 — 2026-09-14 18:23:30 AEST
+read guard_h = check-shared-relink.sh @ 0374bec00: blob d41c79538, 40256 bytes, 690 lines, sha256 56e5a44ba1016b6f
+read guard_d = check-shared-relink.sh @ 0e78c7270: blob 7426b1874, 35839 bytes, 620 lines, sha256 7211350394a32929
+read suite_h = check_shared_relink.test.sh @ 0374bec00: blob 867ce728a, 61460 bytes, 1228 lines, sha256 ee582dadcb4c7ce5
+read suite_d = check_shared_relink.test.sh @ 0e78c7270: blob 239ea9637, 52376 bytes, 1037 lines, sha256 b41efa2d8bdac50e
+read base_h = audit-baseline.json @ 0374bec00: blob 03d1680e3, 44616 bytes, 254 lines, sha256 6409a37c4dbd9ba8
+read base_d = audit-baseline.json @ 0e78c7270: blob 03d1680e3, 44616 bytes, 254 lines, sha256 6409a37c4dbd9ba8
+ok   guard_h blob d41c79538
+ok   guard_d blob 7426b1874
+ok   suite_h blob 867ce728a
+ok   suite_d blob 239ea9637
+ok   base_h blob 03d1680e3
+ok   base_d blob 03d1680e3
+ok   audit-baseline.json identical both sides (this PR does not touch it)
+ok   guard_h 'function pm_writes(L,   t, n, a, i, verb, segs, sg, k)' = 1
+ok   guard_d 'function pm_writes(L,   t, n, a, i, verb, segs, sg, k)' = 0
+ok   guard_h 'if (verb ~ /^(-v|--version|-h|--help)$/) continue' = 1
+ok   guard_d 'if (verb ~ /^(-v|--version|-h|--help)$/) continue' = 0
+ok   guard_h 'if (verb ~ /^(ls|list|view|info|show|config|ping|whoami|outdated|pack|version|help|search|docs|why|explain|team|owner|dist-tag|root|prefix|bin)$/) continue' = 1
+ok   guard_h 'if (pm_writes(L)) {' = 1
+ok   guard_d 'if (L ~ /npm[ \t]+(ci|install|i)([ \t]|$)/ || L ~ /(yarn|pnpm)[ \t]+install([ \t]|$)/) {' = 1
+ok   guard_h 'if (L ~ /npm[ \t]+(ci|install|i)([ \t]|$)/ || L ~ /(yarn|pnpm)[ \t]+install([ \t]|$)/) {' = 0
+ok   suite_h 'expect "KS-945: \`npm run build\` after the re-link is a write' = 1
+ok   suite_h 'expect "KS-945: \`npm --version\` is a probe, not an install"' = 1
+ok   suite_h 'expect "KS-945: \`node -v && npm -v\` is a probe' = 1
+ok   suite_h 'expect "KS-945: \`npm --help && pnpm -h\` is a probe"' = 1
+ok   suite_h 'expect "KS-945: \`yarn --frozen-lockfile\` still blocks' = 1
+ok   suite_d 'KS-945' = 0
+ok   raw control bytes across the 6 fetched files: 0 (synthetic NUL control at offset [16])
+work dir (kept): /var/folders/xl/p96z5mmd3lzcn3pt8t6djkl40000gn/T//qa879ctl.2QyUXZ
+controls_check: FAILS=0
