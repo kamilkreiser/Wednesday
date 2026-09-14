@@ -2407,3 +2407,13 @@ Done with it: Dynamics → Kam's team decision (no action); QuickQuote masthead/
 > how does gpt-oss one-twenty-B compare to get-oss
 
 *Note:* Kam 15:56:53 — read as 120B vs 20B; answered on the panel from the model cards (20B unmeasured here); trial offered, not started
+
+## 2026-09-14 15:58 — Kam (panel, verbatim)
+> sorry how does it compare to ornate-1.5-35b
+
+*Note:* Kam 15:57:53 — name unresolved from dictation; answered the dense-35B frame + asked which model (one question)
+
+## 2026-09-14 16:01 — Kam (panel, verbatim)
+> Can you please deploy it? And test them head to head or compare their results during a quiet time. Speed doesn't matter if we use it during quiet times, but the accuracy will matter, and metrics don't always tell the truth.
+
+*Note:* Kam 16:00:21 — 20B pull started (unambiguous half); the 35B name still needed (one question); head-to-head at quiet time = checker verdict + a source read per model per task
