@@ -47,26 +47,6 @@ SYSTEM_PREAMBLE = (
 )
 
 
-
-def sampler_options(num_ctx):
-    """Greedy (temperature 0) is what the reproducibility hash rests on — kept.
-    2026-09-15: Ornith's KS-871 run fell into a REPETITION LOOP (a mock object
-    with the same properties repeated hundreds of times) and hit the length cut
-    at 22,077 tokens with its diff fence never closed -> A1 FAIL for a sampler
-    reason, not a ticket reason. Greedy decoding with no repeat penalty is the
-    classic recipe. So: a repeat penalty over a long window, and a hard output
-    cap well above any real single-file patch + test. Each is env-overridable
-    (LM_REPEAT_PENALTY / LM_REPEAT_LAST_N / LM_NUM_PREDICT) and every value is
-    written into meta.json so a run says what it sampled with."""
-    import os
-    return {
-        "num_ctx": num_ctx,
-        "temperature": 0,
-        "repeat_penalty": float(os.environ.get("LM_REPEAT_PENALTY", "1.15")),
-        "repeat_last_n": int(os.environ.get("LM_REPEAT_LAST_N", "512")),
-        "num_predict": int(os.environ.get("LM_NUM_PREDICT", "12288")),
-    }
-
 def main():
     if len(sys.argv) not in (8, 9):
         sys.stderr.write(
@@ -108,7 +88,7 @@ def main():
         "think": think,  # see module docstring: True (not False) is what
                           # yields a clean content/thinking split on qwen3;
                           # False is the Ornith runtime-cut workaround (LM_THINK=0).
-        "options": sampler_options(num_ctx),
+        "options": {"num_ctx": num_ctx, "temperature": 0},
     }).encode("utf-8")
 
     load_at_start = ""
@@ -179,7 +159,6 @@ def main():
     meta = {
         "model": model,
         "num_ctx": num_ctx,
-        "sampler": sampler_options(num_ctx),
         "prompt_bytes": prompt_bytes,
         "prompt_eval_count": j.get("prompt_eval_count"),
         "eval_count": j.get("eval_count"),

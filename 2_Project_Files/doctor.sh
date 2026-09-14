@@ -149,6 +149,13 @@ else
   else
     warn "ornith night job NOT armed" "bash 2_Project_Files/local-model/night/install_night.command (PORTABILITY 15) — nothing runs the backlog at night until it is"
   fi
+  # 2026-09-15 (Kam 2026-09-14 21:57: Ornith 24/7 when no other agents run): the 15-minute loop job.
+  # night_run.sh's own G2 pane census is the gate; a run lock stops overlap with the 23:30 job.
+  if launchctl print "gui/$(id -u)/com.wednesday.ornith-loop" >/dev/null 2>&1; then
+    ok "ornith 24/7 loop armed (com.wednesday.ornith-loop, every 900 s; G2 refuses while any agent pane is live)"
+  else
+    warn "ornith 24/7 loop NOT armed" "render 2_Project_Files/local-model/night/com.wednesday.ornith-loop.plist to ~/Library/LaunchAgents and launchctl bootstrap it (PORTABILITY 15b) — Ornith then runs only at 23:30"
+  fi
   if [ -f "$NIGHT_MANIFEST" ]; then
     NIGHT_TAGS=$(curl -sS -m 4 http://127.0.0.1:11434/api/tags 2>&1)
     if [ $? -eq 0 ] && echo "$NIGHT_TAGS" | grep -q '"ornith:35b"'; then

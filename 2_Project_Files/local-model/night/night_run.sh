@@ -97,6 +97,20 @@ PYEOF
 }
 finish() { write_state "$1" "$2"; log "END rc=$1 $2 (attempted=$TICKETS_ATTEMPTED run=$TICKETS_RUN)"; exit "$1"; }
 
+# RUN LOCK (2026-09-15): with Kam's 24/7 ruling the runner is also fired every 15 min by
+# com.wednesday.ornith-loop; two runs must never overlap (one model, one queue). mkdir is the
+# portable atomic lock; a stale lock (owner pid dead) is taken over, and the lock is released
+# on every exit path. A refused start is logged, quietly, at rc 0 — the loop is not an error.
+LOCKDIR="$NIGHT_LOG_DIR/.night_run.lock"
+if ! mkdir "$LOCKDIR" 2>/dev/null; then
+  OWNER="$(cat "$LOCKDIR/pid" 2>/dev/null || echo)"
+  if [ -n "$OWNER" ] && kill -0 "$OWNER" 2>/dev/null; then
+    echo "$(date '+%F %T') LOCK: another night_run is live (pid $OWNER) — this start exits 0" | tee -a "$LOG"; exit 0
+  fi
+  echo "$(date '+%F %T') LOCK: stale lock (owner ${OWNER:-unknown} dead) — taking it over" | tee -a "$LOG"
+fi
+echo $$ > "$LOCKDIR/pid"
+trap 'rmdir "$LOCKDIR" 2>/dev/null || { rm -f "$LOCKDIR/pid" 2>/dev/null; rmdir "$LOCKDIR" 2>/dev/null; }' EXIT
 log "START night_run model=$NIGHT_MODEL think=$NIGHT_THINK num_ctx=$NIGHT_NUM_CTX max=$NIGHT_MAX_TICKETS dry=$NIGHT_DRY_RUN queue=$NIGHT_QUEUE socket=${NIGHT_TMUX_SOCKET:-default}"
 
 # ---------------------------------------------------------------- gates

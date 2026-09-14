@@ -420,6 +420,17 @@ built from nothing:
       read, never printed; its `2_Project_Files` as the `--shared` clone source — git READ verbs only there).
       Scratch clones live under `/private/tmp/claude-501/night/` (a stale clone is quarantined by `mv`,
       never deleted).
+    - **15b (2026-09-15) — the 24/7 loop, machine-local:** Kam ruled (panel 2026-09-14 21:57) that Ornith
+      is not gated to the night — "if you're not pulling up any agents, then you can do the work 24/7". So a
+      second job `com.wednesday.ornith-loop` fires `night_run.sh` every 900 s; G1 (the clock) is now
+      informational (`NIGHT_CLOCK_GATE=1` restores it) and G2 (the pane census) is the gate; a `mkdir`
+      run lock in `night/log/.night_run.lock` stops the two jobs overlapping. Template
+      `night/com.wednesday.ornith-loop.plist`; arm on a new Mac by rendering it with the same four
+      substitutions `install_night.command` uses (label `com.wednesday.ornith-loop`, stdio
+      `~/Library/Logs/wednesday_ornith-loop.{out,err}`) and `launchctl bootstrap gui/$(id -u) <plist>`.
+      `doctor.sh` warns when it is not armed. Also new: `night/tip_override.txt` (G6 — a verified tip
+      override for a stale object store; expires by itself when origin moves) and the sampler settings in
+      `lib/lm_call.py` (repeat penalty + output cap, recorded in every run's meta.json).
     - **Honest limit:** a page-cache purge (`sudo purge`) needs an admin password the seat does not hold;
       the runner measures `memory_pressure` + `vm_stat` after unloading the other models (`keep_alive:0`)
       and skips a ticket under 30 GB available. If Kam wants the purge, the sudoers line is
