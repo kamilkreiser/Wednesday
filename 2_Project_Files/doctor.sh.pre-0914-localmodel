@@ -103,27 +103,6 @@ fi
 [ -x "$PROJECT_DIR/2_Project_Files/tools/codex-cli/node_modules/.bin/codex" ] || [ -d "$PROJECT_DIR/2_Project_Files/tools/codex-cli" ] && ok "codex CLI (drive-local)" || warn "codex CLI dir missing" "gpt seat unavailable (PORTABILITY 7-9)"
 [ -d "/Volumes/DevMASTER" ] && ok "DevMASTER mounted" || warn "DevMASTER not mounted" "cross-project context read-only unavailable — fine on the laptop"
 
-# --- Local model harness (Kam, panel 2026-09-14 11:26: "download and implement
-# Qwen 3 30b ... use it within the workflow"). Machine-local (Homebrew ollama)
-# + weights on the drive (PORTABILITY item added same day). Warn-level only —
-# the fleet runs fine without the local model, this just says the seat is dark.
-LM_MODELS_DIR="$PROJECT_DIR/2_Project_Files/local-model/models"
-LM_MODEL_TAG="qwen3/30b-a3b"
-LM_MANIFEST="$LM_MODELS_DIR/manifests/registry.ollama.ai/library/$LM_MODEL_TAG"
-if ! command -v ollama >/dev/null 2>&1; then
-  warn "ollama not on PATH" "brew install ollama — local-model harness unavailable (PORTABILITY: local-model)"
-elif [ ! -f "$LM_MANIFEST" ]; then
-  warn "qwen3:30b-a3b manifest missing under local-model/models" "OLLAMA_MODELS=$LM_MODELS_DIR ollama pull qwen3:30b-a3b (~18 GB; PORTABILITY: local-model)"
-else
-  LM_TAGS=$(curl -sS -m 4 http://127.0.0.1:11434/api/tags 2>&1)
-  LM_TAGS_RC=$?
-  if [ "$LM_TAGS_RC" -ne 0 ] || ! echo "$LM_TAGS" | grep -q '"qwen3:30b-a3b"'; then
-    warn "ollama serve not answering /api/tags with qwen3:30b-a3b loaded" "OLLAMA_MODELS=$LM_MODELS_DIR ollama serve (PORTABILITY: local-model) — local-model harness tasks will refuse (rc 2)"
-  else
-    ok "local-model harness: ollama serving qwen3:30b-a3b"
-  fi
-fi
-
 # --- Repo hooks (ledger w=3 enforcement travels per-clone) ---
 # A TRACKED master copy now lives beside the other hooks, so a stranded seat installs it
 # with one command instead of reconstructing it from a 2026-08-04 commit message. The

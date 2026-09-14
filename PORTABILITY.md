@@ -370,3 +370,26 @@ built from nothing:
     whichever Mac ran the leg (`backup = Name *`, `maxbackups = 5`, `backuploc = central`) — **not on
     the drives**. So a deletion propagated from Tuesday's machine is recoverable only there. Worth
     knowing before assuming the T9 holds a copy.
+
+14. **Local model — ollama + Qwen3 (added 2026-09-14, Kam's panel 11:26 commission: "download
+    and implement Qwen 3 30b and use it within the workflow ... assign simple and manageable
+    tasks to it").** `2_Project_Files/local-model/`.
+    - **Machine-local (Homebrew, per-Mac):** `ollama` itself — `brew install ollama`. The
+      `ollama serve` daemon is a plain process, not (yet) a launchd job; start it detached on a
+      new machine with `OLLAMA_MODELS=/Volumes/DevMASTER/WEDNESDAY/2_Project_Files/local-model/models
+      ollama serve` (background it — macOS has no `setsid`, use Python's
+      `subprocess.Popen(..., start_new_session=True)` or `nohup ... &`).
+    - **On the drive, portable:** the model weights themselves — `OLLAMA_MODELS` is pointed at
+      `2_Project_Files/local-model/models/` so `qwen3:30b-a3b` (~18 GB Q4) travels with the drive
+      and does not need re-pulling on a machine that already has this checkout. That directory
+      (and `local-model/logs/`) is gitignored — too large/too runtime-local for GitHub.
+    - **On a new Mac:** install ollama, start `ollama serve` with `OLLAMA_MODELS` pointed at the
+      on-drive path above, confirm with `ollama list` (or `curl http://127.0.0.1:11434/api/tags`)
+      that `qwen3:30b-a3b` shows up — if the drive already carries the weights, no pull is needed;
+      otherwise `ollama pull qwen3:30b-a3b`.
+    - **doctor.sh** warns (does not fail) when `ollama` is not on PATH, when the on-drive
+      `OLLAMA_MODELS` directory is missing the `qwen3:30b-a3b` manifest, or when `/api/tags`
+      does not answer with that model loaded — exercised both ways 2026-09-14.
+    - **Degrades to:** the harness (`local_model_task.sh` + the three pilot tasks under
+      `local-model/tasks/`) refuses with a clear exit code (2) rather than hanging; nothing else
+      in the fleet depends on the local model, so its absence is silent everywhere else.
