@@ -167,10 +167,7 @@ except Exception: print('')" 2>/dev/null)
     # coord_pane_id resolved this cycle (empty = no coordinator pane found).
     [ -n "$wpane" ] && [ "$pid" = "$wpane" ] && continue
     key=$(printf '%s' "$pid" | tr -c 'A-Za-z0-9' '_')
-    # 2026-09-15: the statusline (ctx:NN% | 7d:NN% renews:Nd Nh) drifts every few minutes with no
-    # pane activity, so it is EXCLUDED from the hash — else an idle ack voids itself within minutes
-    # (wake_ack.sh computes the same way; keep the two in step).
-    tail=$("$TMUX_BIN" capture-pane -t "$pid" -p 2>/dev/null | grep -v '^$' | grep -v 'ctx:[0-9-]*%' | tail -20)
+    tail=$("$TMUX_BIN" capture-pane -t "$pid" -p 2>/dev/null | grep -v '^$' | tail -20)
     h=$(printf '%s' "$tail" | shasum | cut -c1-12)
     hf="$STATE_DIR/h_$key"; cf="$STATE_DIR/c_$key"
     prev=$(cat "$hf" 2>/dev/null || echo none)
