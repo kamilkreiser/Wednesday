@@ -110,12 +110,7 @@ fi
 LM_MODELS_DIR="$PROJECT_DIR/2_Project_Files/local-model/models"
 LM_MODEL_TAG="qwen3/30b-a3b"
 LM_MANIFEST="$LM_MODELS_DIR/manifests/registry.ollama.ai/library/$LM_MODEL_TAG"
-# PARKED 2026-09-14 14:2x — Kam, panel 14:25: "Please remove Quen from the system as we won't use
-# it going forward." The model was removed (ollama rm), the server stopped; the harness + checkers
-# stay for a future trial. This check is a one-line INFO, never a warning, until Kam un-parks it.
-if [ "${LM_UNPARK:-0}" != "1" ]; then
-  ok "local-model: PARKED 2026-09-14 (Kam) — model removed, server stopped; harness kept (LM_UNPARK=1 re-enables this check)"
-elif ! command -v ollama >/dev/null 2>&1; then
+if ! command -v ollama >/dev/null 2>&1; then
   warn "ollama not on PATH" "brew install ollama — local-model harness unavailable (PORTABILITY: local-model)"
 elif [ ! -f "$LM_MANIFEST" ]; then
   warn "qwen3:30b-a3b manifest missing under local-model/models" "OLLAMA_MODELS=$LM_MODELS_DIR ollama pull qwen3:30b-a3b (~18 GB; PORTABILITY: local-model)"

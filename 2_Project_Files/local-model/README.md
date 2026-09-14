@@ -1,3 +1,6 @@
+# ⏸ PARKED 2026-09-14 14:2x (Kam, panel 14:25: "Please remove Quen from the system as we won't use it going forward.")
+Model removed (`ollama rm qwen3:30b-a3b`, `models/` 0 B), `ollama serve` stopped (pid 6442 killed; /api/tags down). Two mechanism-checked pilots FAILED (census 27/30 rows; code_patch ×2 — fix line right, test invalid): scoreboard rows 0.00. The harness (`local_model_task.sh`, `lib/`, `tasks/`, `runs/` evidence) stays so any future local model is a ten-minute trial on the same two tasks. Re-enable: `brew install ollama` (if absent) → `OLLAMA_MODELS=<this>/models ollama serve` → `ollama pull <model>` → `LM_UNPARK=1` for doctor.
+
 # Local model (Kam, panel 2026-09-14 11:26 — "let's try it out … download and implement Qwen 3 30b and use it within the workflow in conjunction with other agents. Assign simple and manageable tasks to it as you see fit.")
 
 - **Runtime:** `ollama serve` (Homebrew `/opt/homebrew/bin/ollama`), models ON THE DRIVE: `OLLAMA_MODELS=/Volumes/DevMASTER/WEDNESDAY/2_Project_Files/local-model/models` (portability rule — weights travel with the drive; `models/` is gitignored). Started detached 2026-09-14 11:3x (python `start_new_session`; `setsid` does not exist on macOS). Logs: `logs/ollama_serve.log`, `logs/pull_*.log`.

@@ -371,7 +371,7 @@ built from nothing:
     the drives**. So a deletion propagated from Tuesday's machine is recoverable only there. Worth
     knowing before assuming the T9 holds a copy.
 
-14. **Local model — ollama + Qwen3 (added 2026-09-14, Kam's panel 11:26 commission: "download
+14. **⏸ PARKED 2026-09-14 14:2x — Kam, panel 14:25: "Please remove Quen from the system as we won't use it going forward." Model removed (`ollama rm`), server stopped, `models/` empty; the harness + checkers under `2_Project_Files/local-model/` stay for a future trial; `doctor.sh` prints one INFO line (`LM_UNPARK=1` re-enables the check). Nothing below is required on a new Mac while parked.** Local model — ollama + Qwen3 (added 2026-09-14, Kam's panel 11:26 commission: "download
     and implement Qwen 3 30b and use it within the workflow ... assign simple and manageable
     tasks to it").** `2_Project_Files/local-model/`.
     - **Machine-local (Homebrew, per-Mac):** `ollama` itself — `brew install ollama`. The
