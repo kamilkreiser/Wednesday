@@ -1,0 +1,216 @@
+--- template(post-header)
++++ L7(post-header)
+@@ -4,11 +4,26 @@
+ WED='/Volumes/DevMASTER/WEDNESDAY'
+-BRIEF="${QA903R2_BRIEF:-$WED/2_Project_Files/fleet/qa-agent/briefs/2026-09-14_secuura-903-ks991-tier2-r2.md}"
+-PROMPT_FILE="${QA903R2_PROMPT:-$WED/2_Project_Files/fleet/qa-agent/briefs/2026-09-14_secuura-903-ks991-tier2-r2.prompt.txt}"
++MODE="${1:-}"                                            # captured FIRST: the head-guard loop below uses `set --` (the first --check read 21 — check.first-run-*.out)
++BRIEF="${QAL7_BRIEF:-$WED/2_Project_Files/fleet/qa-agent/briefs/2026-09-14_secuura-L7-918r2-924-925-ks926-ks773-ks1046-tier2.md}"
++PROMPT_FILE="${QAL7_PROMPT:-$WED/2_Project_Files/fleet/qa-agent/briefs/2026-09-14_secuura-L7-918r2-924-925-ks926-ks773-ks1046-tier2.prompt.txt}"
+ REPO='/Volumes/DevMASTER/!CODING/Secuura/Blockchain/2_Project_Files'
+ SECUURA_ENV='/Volumes/DevMASTER/!CODING/Secuura/Blockchain/4_Credentials/.env'
+-BRANCH='refs/heads/kamilkreiser/ks-991-stale-local-develop'
+-HEAD_SHA="${QA903R2_HEAD:-a4f71cde660c1442d98317e26d93845340b20098}"
+-MERGE_BASE='8861e62161466c40f08d2b10a30edeb203123993'
+-DEVELOP_SHA='8861e62161466c40f08d2b10a30edeb203123993'
+-REAL_BRIEF="$WED/2_Project_Files/fleet/qa-agent/briefs/2026-09-14_secuura-903-ks991-tier2-r2.md"
++BRANCH_918='refs/heads/feature/ks-926-wire-unreachable-guards'
++BRANCH_924='refs/heads/kamilkreiser/ks-773-cleanroom-skip-mcp-server'
++BRANCH_925='refs/heads/feature/ks-1046-preflight-passed-is-printed-identically-whether-13-legs-ran'
++HEAD_918="${QAL7_HEAD918:-b54487216ebb49f1de7ed9349f089d92a3e5bfc1}"
++HEAD_924="${QAL7_HEAD924:-b85f1db24596a5e0ce98fe2b1343d9f515a1a995}"
++HEAD_925="${QAL7_HEAD925:-5341b1daed8afe4254e05ef66ef4350fd8220d4f}"
++HEAD_903='a4f71cde660c1442d98317e26d93845340b20098'     # merged as M20 — pinned only as #925's stack parent (ancestry)
++M18='8861e62161466c40f08d2b10a30edeb203123993'          # the merge-base of #918 / #925 / #903 with develop (unchanged by the squash)
++BASE_924='d4cf7e3cf73e91422a229b7d0767cf6c3a04fe57'     # #924's own merge-base with develop
++DEVELOP_SHA='a5334350221c819f54d4a20a3308daeb9ca09617'  # M20 = #903's squash
++# the SEVEN content-judged files at develop: ok blobs (M20's, or a stack member landed in order) · the blob that means #925 LANDED
++JUDGED='Blockchain/Dev/scripts/preflight/preflight.sh=0727300f79938fd26b578ed77fca281e49662c6f:M20,8840ac6619a9e4d967373c338a7bd03f768b7b41:#918-landed,28d3636c13a4259bbdade8b15ac527cbe93742c3:LANDED925
++Blockchain/Dev/scripts/__tests__/preflight_deps.test.sh=a713a94e7cffd22fc6429f8c877bb9c98736a32c:M20,343f24a6ef1d68f56edafe68e177fe1296fb020f:#918-landed,5ad0541313589635c6c100677cf14fb02d00be78:LANDED925
++Blockchain/Dev/scripts/run-code-guards.sh=ABSENT:M20,2f06e19d3d33d649d7229e44ade8a35c0df3a0db:#918-landed
++Blockchain/Dev/scripts/__tests__/run_code_guards.test.sh=ABSENT:M20,55a376f769e078ceeeadc25d026364c0e06961b1:#918-landed
++Blockchain/Dev/scripts/preflight/lockfile-cleanroom.sh=26e7feb2b9764256beb8171fb10a734e1af326e7:M20,518bffeeaf4a3c47a4660f594f822f34e26c2d15:#924-landed
++.githooks/pre-push=1b22d4e146487aa25698310b353152a7d09986b5:M20
++Blockchain/Dev/scripts/__tests__/pre_push_hook_base.test.sh=affdf027bff11e3690d374e902e3e93274788c62:M20'
++REAL_BRIEF="$WED/2_Project_Files/fleet/qa-agent/briefs/2026-09-14_secuura-L7-918r2-924-925-ks926-ks773-ks1046-tier2.md"
+ 
+@@ -19,35 +34,70 @@
+ 
+-if ! git -C "$REPO" ls-remote origin "$BRANCH" | grep -q "^${HEAD_SHA}[[:space:]]"; then
+-  echo "REFUSING: $HEAD_SHA is not at $BRANCH on origin — the head moved; the brief is about a different SHA" >&2
+-  git -C "$REPO" ls-remote origin "$BRANCH" >&2
+-  exit 6
+-fi
++for pair in "$HEAD_918 $BRANCH_918 918" "$HEAD_924 $BRANCH_924 924" "$HEAD_925 $BRANCH_925 925"; do
++  set -- $pair
++  if ! git -C "$REPO" ls-remote origin "$2" | grep -q "^${1}[[:space:]]"; then
++    echo "REFUSING: $1 is not at $2 on origin — #$3's head moved; the brief is about a different SHA" >&2
++    git -C "$REPO" ls-remote origin "$2" >&2
++    exit 6
++  fi
++done
+ 
+-ACTUAL_MB="$(
++# The stack, pinned through the GitHub compare API: each line is "<base>...<head> merge_base ahead files" as the brief states it.
++STACK_READ="$(
+   set -a; . "$SECUURA_ENV"; set +a
+-  HEAD_SHA="$HEAD_SHA" python3 - <<'PY'
+-import json, os, urllib.request
++  HEAD_918="$HEAD_918" HEAD_924="$HEAD_924" HEAD_925="$HEAD_925" HEAD_903="$HEAD_903" M18="$M18" BASE_924="$BASE_924" python3 - <<'PY'
++import json, os, sys, urllib.request
+ t = os.environ.get("GH_TOKEN", "")
+-u = "https://api.github.com/repos/Secuura/Distributed_Secuura/compare/develop..." + os.environ["HEAD_SHA"]
+-r = urllib.request.urlopen(urllib.request.Request(u, headers={"Authorization": "Bearer " + t, "Accept": "application/vnd.github+json"}))
+-print(json.load(r)["merge_base_commit"]["sha"])
++api = "https://api.github.com/repos/Secuura/Distributed_Secuura/compare/"
++E = os.environ
++for a, b in [(E["M18"], E["HEAD_918"]), (E["M18"], E["HEAD_925"]), (E["BASE_924"], E["HEAD_924"]), (E["HEAD_918"], E["HEAD_925"]), (E["HEAD_903"], E["HEAD_925"])]:
++    try:
++        c = json.load(urllib.request.urlopen(urllib.request.Request(api + a + "..." + b, headers={"Authorization": "Bearer " + t, "Accept": "application/vnd.github+json"}), timeout=60))
++    except Exception as e:
++        print("UNREADABLE " + type(e).__name__); sys.exit(0)
++    print("%s %s %d %d" % (b[:9], c["merge_base_commit"]["sha"][:9], c["ahead_by"], len(c.get("files") or [])))
+ PY
+ )"
+-[ -n "$ACTUAL_MB" ] || { echo "REFUSING: could not read the merge-base from the GitHub compare API" >&2; exit 13; }
+-[ "$ACTUAL_MB" = "$MERGE_BASE" ] || { echo "REFUSING: merge-base is now '$ACTUAL_MB', brief says '$MERGE_BASE'" >&2; exit 10; }
++case "$STACK_READ" in UNREADABLE*|"") echo "REFUSING: could not read the stack compares from the GitHub compare API: ${STACK_READ:-empty}" >&2; exit 13 ;; esac
++STACK_WANT="$(printf '%s\n' "${HEAD_918:0:9} ${M18:0:9} 3 4" "${HEAD_925:0:9} ${M18:0:9} 14 6" "${HEAD_924:0:9} ${BASE_924:0:9} 3 1" "${HEAD_925:0:9} ${HEAD_918:0:9} 11 4" "${HEAD_925:0:9} ${HEAD_903:0:9} 10 4")"
++[ "$STACK_READ" = "$STACK_WANT" ] || { printf 'REFUSING: the stack is not what the brief pins (head merge_base ahead files):\n--- read\n%s\n--- brief\n%s\n' "$STACK_READ" "$STACK_WANT" >&2; exit 10; }
+ 
+-# The develop pin, disjointness-checked (see the header). GUARDED = the files whose movement changes this brief.
++# The develop pin, judged by CONTENT on the seven L7 files (see the header), then by the GUARDED list over the rest of the move.
+ CUR_DEV="$(git -C "$REPO" ls-remote origin refs/heads/develop | cut -f1)"
+ [ -n "$CUR_DEV" ] || { echo "REFUSING: could not read origin develop (git ls-remote)" >&2; exit 18; }
+-if [ "$CUR_DEV" = "$DEVELOP_SHA" ]; then
+-  DEV_NOTE="origin develop still $DEVELOP_SHA (M18, the develop merged INTO the branch and the one this brief's 28/0 was written against; git ls-remote)"
+-else
+-  DEV_JUDGEMENT="$(
+-    set -a; . "$SECUURA_ENV"; set +a
+-    DEVELOP_SHA="$DEVELOP_SHA" CUR_DEV="$CUR_DEV" python3 - <<'PYJ'
+-import json, os, sys, urllib.request
++DEV_JUDGEMENT="$(
++  set -a; . "$SECUURA_ENV"; set +a
++  DEVELOP_SHA="$DEVELOP_SHA" CUR_DEV="$CUR_DEV" JUDGED="$JUDGED" python3 - <<'PYJ'
++import json, os, sys, urllib.request, urllib.error
+ t = os.environ.get("GH_TOKEN", "")
+-u = "https://api.github.com/repos/Secuura/Distributed_Secuura/compare/" + os.environ["DEVELOP_SHA"] + "..." + os.environ["CUR_DEV"]
++api = "https://api.github.com/repos/Secuura/Distributed_Secuura"
++def get(p):
++    return json.load(urllib.request.urlopen(urllib.request.Request(api + p, headers={"Authorization": "Bearer " + t, "Accept": "application/vnd.github+json"}), timeout=60))
++cur = os.environ["CUR_DEV"]; pinned = os.environ["DEVELOP_SHA"]
++judged = {}
++for line in os.environ["JUDGED"].splitlines():
++    path, spec = line.split("=", 1)
++    judged[path] = [tuple(x.split(":", 1)) for x in spec.split(",")]
++state = []; landed925 = []; other = []
++for path, okl in judged.items():
++    try:
++        blob = get("/contents/" + path + "?ref=" + cur)["sha"]
++    except urllib.error.HTTPError as e:
++        if e.code == 404: blob = "ABSENT"
++        else: print("UNJUDGEABLE develop blob unreadable: HTTP %d on %s" % (e.code, path)); sys.exit(0)
++    except Exception as e:
++        print("UNJUDGEABLE develop blob unreadable: " + type(e).__name__); sys.exit(0)
++    label = dict(okl).get(blob)
++    short = path.split("/")[-1] + " " + blob[:9]
++    if label is None: other.append(short)
++    elif label == "LANDED925": landed925.append(short)
++    else: state.append(short + " (" + label + ")")
++if landed925:
++    print("LANDED925 " + ", ".join(landed925) + " — #925 (and with it #918) has landed on develop; nothing left to gate but #924 — re-issue a #924-only gate"); sys.exit(0)
++if other:
++    print("GUARDED develop carries a version nobody pinned: " + ", ".join(other)); sys.exit(0)
++st = "; ".join(state)
++if cur == pinned:
++    print("OK origin develop still " + pinned + " (M20 = #903's squash; git ls-remote) | judged files: " + st); sys.exit(0)
+ try:
+-    c = json.load(urllib.request.urlopen(urllib.request.Request(u, headers={"Authorization": "Bearer " + t, "Accept": "application/vnd.github+json"}), timeout=60))
++    c = get("/compare/" + pinned + "..." + cur)
+ except Exception as e:
+@@ -57,27 +107,28 @@
+     print("UNJUDGEABLE status=%s files=%d" % (c.get("status"), len(files))); sys.exit(0)
+-GUARDED = [".githooks/pre-push",
+-           "Blockchain/Dev/scripts/__tests__/pre_push_hook_base.test.sh",
+-           "Blockchain/Dev/scripts/preflight/preflight.sh",
+-           "Blockchain/Dev/scripts/preflight/deps-present.sh",
++GUARDED = ["Blockchain/Dev/scripts/preflight/deps-present.sh",
+            "Blockchain/Dev/scripts/run-shell-suites.sh",
+-           "Blockchain/Dev/scripts/__tests__/"]
+-hits = sorted({f["filename"] for f in files for g in GUARDED if f["filename"] == g or (g.endswith("/") and f["filename"].startswith(g))})
++           "Blockchain/Dev/scripts/__tests__/",
++           "Blockchain/Dev/scripts/preflight/",
++           "Blockchain/Dev/scripts/check-",
++           ".githooks/"]
++hits = sorted({f["filename"] for f in files if f["filename"] not in judged for g in GUARDED if f["filename"] == g or (not g.endswith(".sh") and f["filename"].startswith(g))})
+ if hits:
+     print("GUARDED " + " ".join(hits)); sys.exit(0)
+-print("DISJOINT commits=%d files=%d" % (c["ahead_by"], len(files)))
++print("OK origin develop MOVED %s -> %s: commits=%d files=%d — the seven judged files are at pinned versions (%s) and the rest of the move is disjoint from the guard's six paths (deps-present.sh, run-shell-suites.sh, scripts/__tests__/, scripts/preflight/, scripts/check-*, .githooks/); the gate reads develop at start and end and re-derives the merged shapes onto it (brief TARGET + items 6)" % (pinned, cur, c["ahead_by"], len(files), st)); sys.exit(0)
+ PYJ
+-  )"
+-  case "$DEV_JUDGEMENT" in
+-    DISJOINT*) DEV_NOTE="origin develop MOVED $DEVELOP_SHA -> $CUR_DEV: ${DEV_JUDGEMENT#DISJOINT } — disjoint from the guard's six paths (#903's three files, deps-present.sh, run-shell-suites.sh, the scripts/__tests__/ prefix); the gate merges the then-current develop, re-states the delta by name and re-derives the leg-14 count (brief items 1 and 6)" ;;
+-    *) echo "REFUSING: origin develop is at $CUR_DEV, not the pinned $DEVELOP_SHA, and the delta is not provably disjoint: ${DEV_JUDGEMENT:-no judgement} — confirm the delta, then re-pin deliberately (launcher DEVELOP_SHA + brief TARGET + prompt)" >&2
+-       exit 18 ;;
+-  esac
+-fi
+-
++)"
++case "$DEV_JUDGEMENT" in
++  OK*) DEV_NOTE="${DEV_JUDGEMENT#OK }" ;;
++  LANDED925*) echo "REFUSING: ${DEV_JUDGEMENT#LANDED925 } (develop $CUR_DEV)" >&2; exit 22 ;;
++  *) echo "REFUSING: origin develop is at $CUR_DEV (pinned $DEVELOP_SHA) and the move is not provably disjoint: ${DEV_JUDGEMENT:-no judgement} — confirm the delta, then re-pin deliberately (launcher DEVELOP_SHA/JUDGED + brief TARGET + prompt)" >&2
++     exit 18 ;;
++esac
+ grep -q 'TIER 2' "$BRIEF" && grep -q 'TIER 2' "$PROMPT_FILE" || { echo "REFUSING: brief and prompt disagree about the tier" >&2; exit 7; }
+-grep -q 'ROUND 2' "$BRIEF" && grep -q 'ROUND 2' "$PROMPT_FILE" || { echo "REFUSING: brief and prompt disagree about the round" >&2; exit 15; }
++grep -q 'ROUND 2' "$BRIEF" && grep -q 'ROUND 2' "$PROMPT_FILE" && grep -q 'RE-GATE' "$BRIEF" && grep -q 'RE-GATE' "$PROMPT_FILE" || { echo "REFUSING: brief and prompt disagree about the rounds (#918 ROUND 2; #924/#925 RE-GATE)" >&2; exit 15; }
+ head -1 "$PROMPT_FILE" | grep -q 'ultrathink' || { echo "REFUSING: prompt does not open with the thinking directive" >&2; exit 8; }
+ grep -qF "$REAL_BRIEF" "$PROMPT_FILE" || { echo "REFUSING: prompt does not name the brief path" >&2; exit 9; }
+-grep -qF "$HEAD_SHA" "$PROMPT_FILE" && grep -qF "$HEAD_SHA" "$BRIEF" \
+-  || { echo "REFUSING: brief or prompt does not name the head SHA $HEAD_SHA — a gate about another SHA is another gate" >&2; exit 20; }
++for h in "$HEAD_918" "$HEAD_924" "$HEAD_925"; do
++  grep -qF "$h" "$PROMPT_FILE" && grep -qF "$h" "$BRIEF" \
++    || { echo "REFUSING: brief or prompt does not name the head SHA $h — a gate about another SHA is another gate" >&2; exit 20; }
++done
+ grep -qi 'MAIL YOUR VERDICT' "$PROMPT_FILE" || { echo "REFUSING: prompt does not tell the agent to MAIL its verdict" >&2; exit 12; }
+@@ -90,15 +141,20 @@
+ 
+-R1_REPORT='/Volumes/DevMASTER/!CODING/Secuura/Blockchain/5_Project_History/2026-09-13_s213/boot/peter_903_comment_5585854866.md'
+-grep -qF "$R1_REPORT" "$BRIEF" || { echo "REFUSING: brief does not name the round-1 record path (Peter's review; a gate cannot ask)" >&2; exit 19; }
+-[ -s "$R1_REPORT" ] || { echo "REFUSING: the round-1 record named by the brief is missing or empty: $R1_REPORT" >&2; exit 19; }
++R1_918='/Volumes/DevMASTER/!CODING/Secuura/Blockchain/5_Project_History/2026-09-13_s213/boot/peter_918_review_5151452193.md'
++R1_S161='/Volumes/DevMASTER/!CODING/Testing Agent MAIN/projects/secuura-blockchain/reports/2026-09-09-s161-batch-six-prs/report.md'
++for r in "$R1_918" "$R1_S161"; do
++  grep -qF "$r" "$BRIEF" || { echo "REFUSING: brief does not name the round-1 record path $r (a gate cannot ask)" >&2; exit 19; }
++  [ -s "$r" ] || { echo "REFUSING: the round-1 record named by the brief is missing or empty: $r" >&2; exit 19; }
++done
+ 
+-if [ "${1:-}" = "--check" ]; then
++if [ "$MODE" = "--check" ]; then
+   echo "all guards pass:"
+-  echo "  head $HEAD_SHA present at $BRANCH on origin"
+-  echo "  merge-base still $MERGE_BASE (GitHub compare API)"
++  echo "  head #918 $HEAD_918 present at $BRANCH_918 on origin"
++  echo "  head #924 $HEAD_924 present at $BRANCH_924 on origin"
++  echo "  head #925 $HEAD_925 present at $BRANCH_925 on origin"
++  echo "  the stack holds (GitHub compare API): #918 and #925 on M18 (3 commits / 4 files; 14 / 6), #924 on d4cf7e3cf (3 / 1), #925 contains #918 (ahead 11 / 4 files) and #903 (ahead 10 / 4 files)"
+   echo "  $DEV_NOTE"
+   echo "  brief, prompt, QA project and repo all present"
+-  echo "  brief and prompt agree on TIER 2 and ROUND 2"
++  echo "  brief and prompt agree on TIER 2, ROUND 2 (#918) and RE-GATE (#924, #925)"
+   echo "  prompt opens with the thinking directive and names the brief"
+-  echo "  brief and prompt both name the head SHA $HEAD_SHA"
++  echo "  brief and prompt both name the three head SHAs"
+   echo "  prompt tells the agent to MAIL its verdict"
+@@ -107,3 +163,3 @@
+   echo "  prompt forbids printing a credential value"
+-  echo "  brief names the round-1 record (Peter's review) and it is present on disk"
++  echo "  brief names both round-1 records (Peter's #918 review; the s161 report) and both are present on disk"
+   echo "  a launch (not --check) will refuse unless stdin is a TTY (exit 21)"
+@@ -113,3 +169,3 @@
+ [ -t 0 ] || { echo "REFUSING: stdin is not a TTY — this launcher execs an interactive agent; run it in a cockpit pane, never inside a Bash tool (a headless gate is invisible and dies with the caller's shell)" >&2; exit 21; }
+-[ -z "${QA903R2_BRIEF:-}${QA903R2_PROMPT:-}${QA903R2_HEAD:-}" ] || { echo "REFUSING: a launch with test overrides set" >&2; exit 16; }
++[ -z "${QAL7_BRIEF:-}${QAL7_PROMPT:-}${QAL7_HEAD918:-}${QAL7_HEAD924:-}${QAL7_HEAD925:-}" ] || { echo "REFUSING: a launch with test overrides set" >&2; exit 16; }
+ echo "$DEV_NOTE" >&2

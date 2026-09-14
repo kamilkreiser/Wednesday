@@ -1,0 +1,25 @@
+2026-09-14 10:58:26 AEST
+== --check, no overrides (nothing installed -> expect rc 3)
+brief missing or empty: /Volumes/DevMASTER/WEDNESDAY/2_Project_Files/fleet/qa-agent/briefs/2026-09-14_secuura-L7-918r2-924-925-ks926-ks773-ks1046-tier2.md
+rc=3
+== --check with overrides -> expect rc 0
+all guards pass:
+  head #918 b54487216ebb49f1de7ed9349f089d92a3e5bfc1 present at refs/heads/feature/ks-926-wire-unreachable-guards on origin
+  head #924 b85f1db24596a5e0ce98fe2b1343d9f515a1a995 present at refs/heads/kamilkreiser/ks-773-cleanroom-skip-mcp-server on origin
+  head #925 5341b1daed8afe4254e05ef66ef4350fd8220d4f present at refs/heads/feature/ks-1046-preflight-passed-is-printed-identically-whether-13-legs-ran on origin
+  the stack holds (GitHub compare API): #918 and #925 on M18 (3 commits / 4 files; 14 / 6), #924 on d4cf7e3cf (3 / 1), #925 contains #918 (ahead 11 / 4 files) and #903 (ahead 10 / 4 files)
+  origin develop still a5334350221c819f54d4a20a3308daeb9ca09617 (M20 = #903's squash; git ls-remote) | judged files: preflight.sh 0727300f7 (M20); preflight_deps.test.sh a713a94e7 (M20); run-code-guards.sh ABSENT (M20); run_code_guards.test.sh ABSENT (M20); lockfile-cleanroom.sh 26e7feb2b (M20); pre-push 1b22d4e14 (M20); pre_push_hook_base.test.sh affdf027b (M20)
+  brief, prompt, QA project and repo all present
+  brief and prompt agree on TIER 2, ROUND 2 (#918) and RE-GATE (#924, #925)
+  prompt opens with the thinking directive and names the brief
+  brief and prompt both name the three head SHAs
+  prompt tells the agent to MAIL its verdict
+  prompt forbids pushing / the real hook / preflight in the Secuura checkout
+  prompt forbids memory maintenance inside the gate session
+  prompt forbids printing a credential value
+  brief names both round-1 records (Peter's #918 review; the s161 report) and both are present on disk
+  a launch (not --check) will refuse unless stdin is a TTY (exit 21)
+rc=0
+== launch path with overrides, headless -> expect rc 21
+REFUSING: stdin is not a TTY — this launcher execs an interactive agent; run it in a cockpit pane, never inside a Bash tool (a headless gate is invisible and dies with the caller's shell)
+rc=21

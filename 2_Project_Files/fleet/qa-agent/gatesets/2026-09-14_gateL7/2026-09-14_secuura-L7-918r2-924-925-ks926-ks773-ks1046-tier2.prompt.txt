@@ -1,0 +1,152 @@
+ultrathink
+
+You are the fleet QA agent running ONE TIER 2 (through code — shell scripts under Blockchain/Dev/scripts/ plus the
+pre-push hook and its test file that #925 carries from #903; no service, route, spec, schema or UI) pass over THREE
+Secuura/Blockchain PRs of LANE L7, with THREE verdicts, ONE report and ONE mail:
+  #918 (KS-926) ROUND 2 — Peter's one ask answered;   #924 (KS-773) RE-GATE at an unchanged head;
+  #925 (KS-1046) RE-GATE, STACKED on #918 and #903.
+
+Read your brief FIRST and in full, then plan:
+/Volumes/DevMASTER/WEDNESDAY/2_Project_Files/fleet/qa-agent/briefs/2026-09-14_secuura-L7-918r2-924-925-ks926-ks773-ks1046-tier2.md
+
+Then read ROUND 1 WHOLE (a gate cannot ask) — TWO records, both on disk:
+  #918: Peter's review 5151452193 (2026-09-09, on ed954f09e) saved read-only at
+  /Volumes/DevMASTER/!CODING/Secuura/Blockchain/5_Project_History/2026-09-13_s213/boot/peter_918_review_5151452193.md
+  (his ONE ask: check-environment.sh out of WIRED; two non-blocking notes; his own limits).
+  #924 and #925: the s161 TIER-2 batch report of 2026-09-09 (#925 @ 0956c3dbe, #924 @ 1497b39de; §5 = #925, §6 = #924) at
+  /Volumes/DevMASTER/!CODING/Testing Agent MAIN/projects/secuura-blockchain/reports/2026-09-09-s161-batch-six-prs/report.md
+  (F-925-1..5, F-924-1..3 and their dispositions are restated in the brief's ROUND-N block).
+
+Subjects (the three heads; every one = its branch = refs/pull/N/head, read 10:35 AEST 2026-09-14):
+  #918 b54487216ebb49f1de7ed9349f089d92a3e5bfc1 on feature/ks-926-wire-unreachable-guards — 3 commits on M18 8861e6216:
+    ed954f09e (Peter's reviewed head) + the develop merge 21368d250 (ONE conflict block in preflight.sh resolved to 15 legs;
+    carries NO fix — run-code-guards.sh blob-identical 83c4b7c15 across it) + the fix commit b54487216 (run-code-guards.sh
+    +22 -2: check-environment.sh WIRED -> DEFERRED with a reason string carrying no backtick / $ / inner quote, the akto guard
+    HOMED at check-stack-safety.sh:334, the header "thirteen", Peter's two note-comments; preflight_deps.test.sh +9: ruling
+    4(a)'s ONE fixture stub line at :346). 4 files vs develop: +439 -14.
+  #924 b85f1db24596a5e0ce98fe2b1343d9f515a1a995 on kamilkreiser/ks-773-cleanroom-skip-mcp-server — UNCHANGED since
+    2026-09-09T13:55:34Z (1497b39de the s161-gated fix; a849f9ac9 = F-924-1's `${CHECKED[*]-}`; b85f1db24 = the develop
+    merge). ONE file: lockfile-cleanroom.sh 518bffeea. No code this round: s214 re-ran the corpus (35/35) and the three
+    F-924-1 cells on an export and wrote the PR body block + KS-773 comment affad068.
+  #925 5341b1daed8afe4254e05ef66ef4350fd8220d4f on feature/ks-1046-preflight-passed-is-printed-identically-whether-13-legs-ran
+    — 14 commits: the round-2 head 8a5aff863 + THREE merges (ba23b2240 develop M18 IN; 4ece7b008 #918's b54487216 IN;
+    6ab1944c9 #903's a4f71cde6 IN — each ONE conflict block, as s213 measured) + 4459a6068 (rulings 4(b) the leg-14 oracle at
+    preflight_deps.test.sh:427 widened to rc 0 AND `PREFLIGHT PASSED|Nothing failed`; 4(c) PREFLIGHT_STRICT_LEGS=0 pinned on
+    the nested run at :409; two comment rewords) + 5341b1dae (ruling 2 / F-925-3: step() parses each header's /N and ABORTS
+    naming the header when N != TOTAL_LEGS; one red cell). 6 files vs develop: +860 -36. By ANCESTRY it contains #918's and
+    #903's heads; it does NOT contain #924 (F-925-5: independent).
+
+DEVELOP HAS MOVED TWICE SINCE THE BUILDER'S CUT AND THE MERGE SEAT NEEDS WHAT YOU MEASURE: origin develop = M20
+  a5334350221c819f54d4a20a3308daeb9ca09617 = #903's SQUASH (23:18:09Z 2026-09-13; M19 6e78961e1 = #982's squash, three
+  services/auth files, disjoint). A squash: a4f71cde6 is NOT an ancestor of M20, but M20's three #903 files are byte-identical
+  to #903's head (pre-push 1b22d4e14, pre_push_hook_base.test.sh affdf027b, preflight.sh 0727300f7). The merge-base of #918
+  and #925 with M20 is STILL M18, so #925's merge onto develop is a 3-way from M18 with #903's hunk on BOTH sides. Wednesday's
+  drafter measured (gateL7/mt_*.out, merge-tree in its own clone): #918 onto M20 CLEAN (4 files, tree f089eaffe; preflight.sh
+  = #918's + #903's env_fail +24, blob 8840ac661); #924 onto M20 CLEAN (tree 4641202fd); #925 onto M20 CONFLICTS in
+  preflight.sh (ONE block: the FAILED line), and #925 onto M20+#918 CONFLICTS in preflight.sh (THREE blocks: the KS-1046
+  machinery insertion, the leg-2 run_delegated line, the FAILED-line ratio) — EVERY block resolved by taking #925's side, and
+  the resolved file is BYTE-IDENTICAL to #925's head blob 28d3636c1 (sha256 a65577f0176b5394); the resolved TREE is
+  364e44ca1923755e329c3a8407e011bd495d6dfc in EITHER order (= #925's head tree + M19's three services/auth files). GitHub
+  agrees: #925 reads mergeable false / dirty since M20; #918 true / unstable; #924 true / clean. You RE-DERIVE all of this in
+  your own clone (merge-tree --write-tree; resolve the conflict by content; assert the blob and the tree) and run the suites
+  on the merged trees (brief items 6): M21 (#918 on M20) -> 13/4/4 · OK all 21 · OK 13 · 15/0 · 55/0 · the plain
+  `PREFLIGHT PASSED.` verdict (no ratio) with 3 stack SKIPs in the fixture; END (#925 resolved) -> 56/0 plain AND under
+  STRICT · OK all 21 · 15/0 · pre_push_hook_base 28/0 · `PREFLIGHT INCOMPLETE — 12/15 legs ran, 3 SKIPPED. Nothing failed.`
+  rc 0 / STRICT rc 1; #924 on M20 -> `All 35 standalone lock(s) pass clean-room npm ci.` with services/mcp-server OK.
+  The launcher pinned M20 and judges a later move by CONTENT on seven files (exit 22 if #925 has landed; exit 18 on a
+  guarded path); if it printed a MOVE at launch, read develop at start and end and build the merged shapes on THAT develop.
+
+The headline questions, per PR (the brief's items are the contract; the drafter re-derived every prediction on git-show
+copies and merge-tree trees — gateL7/guards_sim.out 143 ok, merged_sim.out 59 ok — so a row that differs is first a check of
+the drafter, then a finding):
+
+#918 (Section A): (1) the delta since Peter's head = the develop merge (carries no fix; its preflight.sh delta vs develop is
+  the 13 renumbers + the appended leg 15 — every `-` line a step header or the displaced verdict-adjacent lines) + ONE fix
+  commit (2 files, 4 hunks; ids KS-926 only, 0 PR refs, 0 at-signs); (2) in YOUR detached worktree at b54487216: `--list`
+  13/4/4 = 21, `--check-unreached` `OK — all 21 tracked guards accounted for (21 buckets entries).`, the run `OK — 13 code
+  guards passed.`, run_code_guards.test.sh 15/0, preflight_deps.test.sh 55/0; the (a) red-first: the :346 stub removed on a
+  COPY -> 53/2 naming `leg 1 lets the run proceed when deps-present exits 0` and `leg 14: suites green -> preflight passes`;
+  (3) the tamper table with the census RUNNING (T2 akto line dropped -> census red naming it; T3 a tracked plant -> red; T4 a
+  ghost in WIRED -> red; T1a the guard ALONE under env -i PATH=/usr/bin:/bin:/usr/sbin:/sbin -> rc 4, four "not installed",
+  0 daemon lines — ONLY after `command -v docker brew node npm` reads EMPTY on that PATH; T1b the guard back in WIRED, the
+  runner under the same env -i -> rc 1, exactly one `^ FAILED: check-environment.sh`, the other thirteen green; INERT: a
+  `docker` SHIM first on PATH -> 0 invocations from the shipped `--list`, >= 1 from a planted backticked copy; REGEX 0
+  offenders); (4) Peter's ask + two notes answered as PR comment 5656486018 says — DEFERRED not HOMED because the proposed
+  home does not call it: re-grep `check-environment` at head (3 hits: run-code-guards.sh:70, :117, check-slot-credentials.sh:122)
+  with the control (`check-slot-credentials.sh|check-app-db-password-default.sh` in start-environment.sh / start-local.sh -> 4);
+  (5) CI ATTRIBUTED never graded (the saved logs: :445 55/0, :480 15/0, :958 28/2 of 30 = KS-1138 + KS-1148; step 7 = KS-1075/1077);
+  (6) the merged shape onto M20 (above). R-918-A (the advisory-skip arm unpinned) and R-918-B (nested guards) are Records.
+
+#924 (Section B): (1) the head unchanged (ls-remote at start and end); merge-base d4cf7e3cf; the one file; a849f9ac9 = `6 1`;
+  the develop merge touched the file 0 times; (2) the corpus RUN at the head AND at the M20-merged tree: `All 35 standalone
+  lock(s) pass clean-room npm ci.`, `OK    services/mcp-server`, 0 FAIL 0 SKIP, USE_DOCKER resolved to 0 (host node 24);
+  (3) F-924-1 red-first, the three cells: BEFORE (the 1497b39de bytes beside the guard) `docs` -> `line 128: CHECKED[*]:
+  unbound variable` rc 1 · AFTER -> `  covered: ` rc 0 · CONTROL scripts/preflight -> `All 1 …` rc 0; (4) the body block and
+  KS-773 affad068 (relayed) hold; R-924-A (`@secuura/shared` outside a code span at body line 8) and R-924-B (no CI ever ran
+  the gates at this head) are Records.
+
+#925 (Section C): (1) the stack by ancestry (`merge-base --is-ancestor` a4f71cde6 / b54487216 / 8861e6216 -> 0; b85f1db24
+  -> 1; a4f71cde6 not in b54487216); the parent chain; the two fix commits KS-1046 only; the four inherited blobs equal their
+  PRs'; (2) preflight_deps.test.sh at the head: 56/0 plain AND with PREFLIGHT_STRICT_LEGS=1 in the environment; (3) FIVE
+  red-first rows on COPIES: R-b the :427 oracle restored to `grep -q 'PREFLIGHT PASSED'` -> 55/1 (`leg 14: suites green` gets
+  SUITES-RED/0 on the INCOMPLETE verdict); R-c-STRICT the :409 pin removed + PREFLIGHT_STRICT_LEGS=1 -> 54/2 (leg 1 rc 1; leg
+  14 SUITES-RED/1 — s213's 29/1 leak seen from the suite); R-c-plain the same copy unset -> 56/0 (the pin is load-bearing ONLY
+  under STRICT); R-F9253 the head's test file against a worktree at 4459a6068 (no step() check) -> 55/1 (`want
+  "HEADER-MISMATCH/1", got "SUITES-GREEN/0"`); T16 TOTAL_LEGS=16 on a COPY in a scratch tree, under a 60 s alarm, tamper
+  asserted landed FIRST -> rc 1 `PREFLIGHT ABORTED — step header "1/15  OpenAPI spec drift (generated spec vs Zod source)"
+  says /15 but TOTAL_LEGS=16.`, ZERO `=== ` banners; (4) the verdict shape WITHOUT the real gate — the suite's own fixture
+  (gateL7/probe_verdict.sh's recipe): head -> `PREFLIGHT INCOMPLETE — 12/15 legs ran, 3 SKIPPED. Nothing failed.` rc 0;
+  STRICT -> + `PREFLIGHT_STRICT_LEGS=1 — refusing to pass on legs that did not run.` rc 1; develop M18's acfb7fa3e -> three
+  SKIPs then `PREFLIGHT PASSED.` rc 0 (the defect, the control); #918's 8f445a4bb -> `PREFLIGHT PASSED.` (the plain verdict:
+  why the order matters); the REAL PROOF 1/2/3 quoted from s214's records (push3-ks1046/attempt2/push.out; item4/17_proof2_strict.out;
+  17_proof3_old_control.out); (5) F-925-1..5 dispositions (F-925-4 NOT addressed — say so; F-925-5 = sequencing: the stacked
+  tree's lockfile-cleanroom.sh is develop's 26e7feb2b); (6) the merged shape: the CONFLICT and its resolution (above) — the
+  gate's central new fact for the merge seat; (7) quality legs; (8) delivered-vs-commissioned vs the s214 brief ITEM 4
+  (overlaying s213 §5) + rulings 2 / 4(b) / 4(c) + the 22:37Z ANSWER (KS-1149 filed 5 minutes AFTER the READY — a precision
+  note); (9) NOT TESTED: the gateway-UP `PREFLIGHT PASSED — 15/15 legs ran.` leg is HOLD for everyone today.
+
+Widened-guard census (say it with the file list): none of the SEVEN files these PRs move sits under services/ or packages/ —
+  #918: scripts/__tests__/preflight_deps.test.sh, scripts/__tests__/run_code_guards.test.sh, scripts/preflight/preflight.sh,
+  scripts/run-code-guards.sh; #924: scripts/preflight/lockfile-cleanroom.sh; #925: the four + .githooks/pre-push +
+  scripts/__tests__/pre_push_hook_base.test.sh. The ks860 loopback guard walks packages/ and services/ and is not reached.
+
+RULED (state in the report): Wednesday's five rulings of 2026-09-14 verbatim in the brief's RULED section, plus the L7 rulings
+  to s214 (ruling 1 plan confirmed; ruling 2 the F-925-3 denominator check; ruling 4 (a)/(b)/(c); ruling 5 merge --no-ff never
+  rebase; the 22:37Z ANSWER). The DEFERRED-vs-HOMED decision is RULED — you verify the FACTS it rests on, you do not re-decide.
+  Findings-only; board search by SYMBOL/path is Wednesday's; NOT-TESTED at equal prominence.
+
+HOLDS AND HANDLING: NEVER run a push, the real pre-push hook, or preflight.sh inside the Secuura checkout or any worktree of it
+  (worktrees/s214-ks926-r2, s214-ks1046-r2, s214-ks991-r2, ks773, ks1046, s157-guards, ks991-hook and every s215-*..s221-* are
+  other seats' — read `rev-parse HEAD` and `--no-optional-locks status --porcelain` only). Clone by SHA into your own scratch
+  (`git clone --shared --no-checkout` + detached worktrees; the pre-tool hook refuses `git worktree`/`merge` aimed at the
+  Secuura checkout — write your clone's path as a LITERAL, not a variable). NO docker: the ONE guard that touches a daemon is
+  the one #918 defers (check-environment.sh:81 `docker info`); run it ONLY under env -i with `command -v docker` asserted EMPTY
+  first, and never as a control on the normal PATH (s214's own incident); the inertness cell uses a SHIM. The DEFERRED reason
+  strings are LIVE BASH — a tamper never writes a backtick or `$` into the array except the planted copy the shim catches.
+  The REAL 15-leg preflight is NOT commissioned (item 7's optional leg only, with the farm, and say so). Set TMPDIR INSIDE your
+  scratch before every suite run (the suites rm -rf their own mktemp — theirs, not yours). Never `rm`: fresh mktemp -d per
+  attempt; quarantine tampered copies and plants by rename. `"${X:?unset}"` on every expansion.
+  Your tool shell's grep may be a function: /usr/bin/grep -F with a same-file control. Never cd in your own tool calls
+  (`git -C`, absolute paths). /bin/bash here is 3.2.57 — the suites are written for it; write runners in Python. zsh: no
+  PIPESTATUS, no timeout on macOS (`perl -e 'alarm N; exec @ARGV'`). Each preflight_deps run is ~5 s; the clean-room ~11 s;
+  pre_push_hook_base ~11 s; a run that takes minutes is the REAL preflight — check what you launched.
+  Quote the Secuura checkout's porcelain count, .git/config sha256, for-each-ref count, `.git/worktrees` and `worktrees/`
+  counts, origin develop and the four refs/pull heads at start and close; they must match (name any ref another seat's push
+  or merge moved). NEVER open, read, copy or print a secrets file; NEVER print a credential value — nothing here needs one.
+  Do no memory maintenance of your own project's memory store inside this session.
+
+Report FOUND / TESTED / HOW with controls, three PR sections, each with: the delta; the runtime lines verbatim; the red-first /
+tamper rows with cells-run; the claims checked; the CI attribution; the merged shape onto M20 (and for #925 the conflict, the
+resolution, the blob and tree identities); the DELIVERED-vs-COMMISSIONED table; NOT TESTED at the same prominence as the
+findings. Verdict per PR: GO, GO WITH FINDINGS, or NO GO — on b54487216 / b85f1db24 / 5341b1dae against develop M20 (or the
+develop you read). Say what ships and what is ticketed (symbol/path). Give the merge seat its ADDENDUM: the order #918
+b54487216ebb49f1de7ed9349f089d92a3e5bfc1 -> #925 5341b1daed8afe4254e05ef66ef4350fd8220d4f (#924 b85f1db24596a5e0ce98fe2b1343d9f515a1a995
+any time); #925 will NOT merge from the button (dirty since M20) — resolve preflight.sh by taking #925's side whole and assert
+the resolved blob 28d3636c1 / tree 364e44ca1 (or the tree you derived if develop moved), then expect on develop: leg 14's
+count 30, `OK — all 21`, preflight_deps 56/0, the honest `PREFLIGHT INCOMPLETE — N/15 …` / `PREFLIGHT PASSED — 15/15 legs ran.`
+verdict; after #924: `All 35 …` with services/mcp-server in the corpus; step 11's two reds are develop's own (KS-1138 / KS-1148).
+
+MAIL YOUR VERDICT to wednesday-agent@agentmail.to when the pass is complete, using the project's send_brief.sh (dry run
+first). Your pane holds ~19 lines of alternate screen with no scrollback and you cannot receive mail, so a verdict that stays
+in the pane is one pane-close from being lost -- this is not a formality, it is the only durable copy. Subject:
+[QA -> Wednesday] TIER 2 GATE L7 #918 r2 #924 #925 (KS-926 KS-773 KS-1046) b54487216 b85f1db24 5341b1dae -- #918 <GO|GO WITH FINDINGS|NO GO> / #924 <GO|GO WITH FINDINGS|NO GO> / #925 <GO|GO WITH FINDINGS|NO GO>
