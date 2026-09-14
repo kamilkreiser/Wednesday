@@ -112,12 +112,6 @@ add_pane() { # name, cmd
   # So: never start a pane while this repo is mid-rebase/merge. Wait up to 90 s for the sync
   # loop to finish (its cycles are ~1 s of rebase per minute), then REFUSE — a refusal here
   # costs a retry; a launch into a moving tree costs a silent dead gate.
-  # 2026-09-14 19:2x — USAGE GATE (Kam 19:14: no new agents at 90% weekly usage). The
-  # gate reads the seat's statusline-published 7d figure; rc 3 at/over the cut, rc 4 stale.
-  # COCKPIT_SESSION (the test hook) bypasses it so the rebase-gate arms still run.
-  if [ "$SESSION" = fleet ]; then
-    bash "$SCRIPT_DIR/../usage_gate.sh" || die "cockpit add: REFUSED by usage_gate (rc $?) — no new pane"
-  fi
   local waited=0
   while [ -d "$PROJECT_DIR/.git/rebase-merge" ] || [ -d "$PROJECT_DIR/.git/rebase-apply" ] || [ -f "$PROJECT_DIR/.git/MERGE_HEAD" ]; do
     if [ "$waited" -ge 90 ]; then

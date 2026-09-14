@@ -51,13 +51,6 @@ fi
 INBOX="$(grep -v '^[[:space:]]*#' "$ROUTING" | grep -F "$TO|" | head -1 | cut -d'|' -f2)"
 [ -n "$INBOX" ] || { echo "REFUSED — '$TO' not in $ROUTING" >&2; exit 1; }
 
-# ── STEP 0: USAGE GATE (Kam 2026-09-14 19:14 — no new agents at 90% weekly usage) ──
-# Refuses BEFORE the send so no brief lands in an inbox for a seat that will not be launched.
-if [ -z "${BAL_SEND_CMD:-}" ]; then   # test hooks bypass it (all-or-none guard above)
-  bash "$SELF_DIR/usage_gate.sh"; urc=$?
-  if [ "$urc" -ne 0 ]; then echo "REFUSED — usage_gate rc=$urc (see above); nothing sent, nothing launched." >&2; exit 1; fi
-fi
-
 # ── STEP 1: SEND (may refuse) ─────────────────────────────────────────────
 if [ -n "${BAL_SEND_CMD:-}" ]; then
   $BAL_SEND_CMD --to "$TO" --subject "$SUBJECT" --body-file "$BODY_FILE"; rc=$?

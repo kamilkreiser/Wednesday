@@ -189,29 +189,6 @@ PYEOF
   fi
 fi
 
-# --- Weekly-usage launch gate (Kam, panel 2026-09-14 19:14:25: "Once it reaches 90%, let's stop
-# using other agents and we'll move to a model of you working with the local model"; confirmed
-# 19:15:46). Mechanism: fleet/usage_gate.sh in BOTH launch paths (brief_and_launch.sh STEP 0,
-# cockpit.sh add). Each part alone is decoration — a missing wiring is a hard FAIL.
-UG="$PROJECT_DIR/2_Project_Files/fleet/usage_gate.sh"
-if [ ! -x "$UG" ]; then
-  fail "usage gate script missing/not executable" "2_Project_Files/fleet/usage_gate.sh — the 2026-09-14 90% rule has no mechanism"
-else
-  UG_W=0
-  grep -q 'usage_gate.sh' "$PROJECT_DIR/2_Project_Files/fleet/brief_and_launch.sh" 2>/dev/null && UG_W=$((UG_W+1))
-  grep -q 'usage_gate.sh' "$PROJECT_DIR/2_Project_Files/fleet/cockpit/cockpit.sh" 2>/dev/null && UG_W=$((UG_W+1))
-  if [ "$UG_W" -eq 2 ]; then
-    UG_OUT=$(bash "$UG" --check 2>&1); UG_RC=$?
-    case "$UG_RC" in
-      0) ok "usage gate wired ×2; $(printf '%s' "$UG_OUT" | sed 's/^usage_gate: OK — //')" ;;
-      3) warn "USAGE GATE CLOSED — no new agents" "$(printf '%s' "$UG_OUT" | tail -1 | cut -c1-120)" ;;
-      *) warn "usage gate gauge unreadable/stale" "$(printf '%s' "$UG_OUT" | tail -1 | cut -c1-120)" ;;
-    esac
-  else
-    fail "usage gate wired in $UG_W of 2 launch paths" "brief_and_launch.sh + cockpit.sh add must both call fleet/usage_gate.sh"
-  fi
-fi
-
 # --- Repo hooks (ledger w=3 enforcement travels per-clone) ---
 # A TRACKED master copy now lives beside the other hooks, so a stranded seat installs it
 # with one command instead of reconstructing it from a 2026-08-04 commit message. The
