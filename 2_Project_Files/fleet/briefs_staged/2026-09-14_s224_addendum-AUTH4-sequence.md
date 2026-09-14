@@ -1,0 +1,12 @@
+## BLUF
+- ADDENDUM to s224 (Wednesday, 13:3x AEST) — **the AUTH4 gate passed all four; your ITEMs 2–4 are now live, in this sequence, each triggered by Wednesday's pointer (a STATUS from the merge seat names each squash):**
+- **ITEM 2 — #984 r2 (KS-835) @ `9b020ff827be9c83fbf5e9d62d47bc020a44519d`: as soon as #983 r2 lands on develop as a squash** (the merge seat's next PUT; Wednesday taps you with the SHA), merge origin/develop INTO #984's branch (`refs/pull/984/head`'s branch — read the refname), `--no-ff`, every conflict to #984's side; own-delta assertion = exactly the SIX files of #984's gated delta over #983 (`git diff --name-only 5b0f4dd58 9b020ff82` — read it; expect gateway ks835 test, `packages/shared/src/security/scopes.ts`? no — READ the list, do not trust this parenthesis), every blob == `9b020ff82:<path>`; suites: `services/auth`, `services/api-gateway`, `packages/shared` (ks860 23/23) at the gate's counts (auth 57/725, gateway 35/349 on the M24 read — attributed; re-derive); push; STACK READY.
+- **ITEM 3 — #986 (KS-1151) @ `ac1c119b5` AND ITEM 4 — #987 (KS-1150) @ `b6ed60f3b` are SIBLINGS on #984: after #984 lands as a squash, do BOTH merge-ins (either order; #986 first — it is the security fix), each with its own-delta assertion (`git diff --name-only 9b020ff82 <head>`; #986 = `routes/auth.ts` + its ks1151 test; #987 = `routes/oauth.ts` + its ks1150 test — READ them), STACK READY each. After the FIRST of them lands as a squash, the OTHER needs a merge-in AGAIN (its branch lacks the sibling's squash) — a third round for that one; Wednesday taps you with each squash SHA.
+- The gate's expiry clause: nothing else may land under `services/auth/src/routes/{auth,oauth}.ts` or `services/jwt.ts` between these steps — your merge-ins are the sanctioned moves.
+
+## Recommendation
+- Between items, your ≤ 1/min poll with an exiting job; Wednesday's tap names the squash SHA each time.
+
+PROVENANCE:
+- The four verdicts, the sibling topology, the expiry clause | the AUTH4 gate's verdict mail 03:28:31Z (spf/dkim/dmarc pass) and its report at /Volumes/DevMASTER/!CODING/Testing Agent MAIN/projects/secuura/reports/2026-09-14-ks823-835-1151-1150-AUTH4-5b0f4dd58-9b020ff82-ac1c119b5-b6ed60f3b-tier1-r1/report.md | read 2026-09-14
+- develop M30 f09b629457c5800b215621c31c680631f947e879 | git ls-remote origin from /Volumes/DevMASTER/!CODING/Secuura/Blockchain/2_Project_Files at 13:2x AEST | read 2026-09-14
