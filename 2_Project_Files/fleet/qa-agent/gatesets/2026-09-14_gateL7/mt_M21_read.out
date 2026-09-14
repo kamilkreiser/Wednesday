@@ -1,0 +1,55 @@
+== 10:37:28 AEST (4) simulate M21 = #918 squashed onto M20 (scratch commit in the clone, parent M20, never pushed)
+M21 scratch=caf4aad1509fd08df9b9639f8b2c817da2e3cb1a tree=f089eaffee03a552c78a55fd0472a38d9210a1d3
+merge-base 5341b1dae vs M21: 8861e62161466c40f08d2b10a30edeb203123993
+== (5) #925 onto M21
+rc=1
+523dd2b773f0b29e843c533955d7206fb57c5dd3
+Blockchain/Dev/scripts/preflight/preflight.sh
+
+Auto-merging Blockchain/Dev/scripts/__tests__/preflight_deps.test.sh
+Auto-merging Blockchain/Dev/scripts/preflight/preflight.sh
+CONFLICT (content): Merge conflict in Blockchain/Dev/scripts/preflight/preflight.sh
+== files in the conflicted tree vs M21 (numstat)
+44	4	Blockchain/Dev/scripts/__tests__/preflight_deps.test.sh
+200	14	Blockchain/Dev/scripts/preflight/preflight.sh
+== the conflicted preflight.sh: marker census + the block
+136:<<<<<<< caf4aad1509fd08df9b9639f8b2c817da2e3cb1a
+137:=======
+214:>>>>>>> 5341b1daed8afe4254e05ef66ef4350fd8220d4f
+266:<<<<<<< caf4aad1509fd08df9b9639f8b2c817da2e3cb1a
+268:=======
+270:>>>>>>> 5341b1daed8afe4254e05ef66ef4350fd8220d4f
+711:<<<<<<< caf4aad1509fd08df9b9639f8b2c817da2e3cb1a
+713:=======
+715:>>>>>>> 5341b1daed8afe4254e05ef66ef4350fd8220d4f
+== (6) resolution = take #925's side of the ONE block -> compare to #925's head blob 28d3636c1
+conflict blocks: 3 | ours lines: 2 | theirs lines: 78
+theirs-resolved == #925 head preflight.sh: True
+sha256 theirs-resolved: a65577f0176b5394  #925 head: a65577f0176b5394
+--- OURS side (M21 = develop's verdict block + #903's env_fail arm), first/last 3 lines:
+   |if bash scripts/preflight/lockfile-cleanroom.sh; then
+   |    echo "PREFLIGHT FAILED — fix the above before pushing."
+   |...
+   |if bash scripts/preflight/lockfile-cleanroom.sh; then
+   |    echo "PREFLIGHT FAILED — fix the above before pushing."
+--- THEIRS side (#925's verdict block), first/last 3 lines:
+   |# KS-1046 / QA F-925-2: `n_ran` used to be TOTAL_LEGS - n_skipped. That is a
+   |# claim about arithmetic, not about execution: a leg that no-opped inside its own
+   |# sub-script never called skip_advisory, so it was counted as having RUN.
+   |...
+   |
+   |if run_delegated bash scripts/preflight/lockfile-cleanroom.sh; then
+   |    echo "PREFLIGHT FAILED — fix the above before pushing. ($n_ran/$TOTAL_LEGS legs ran)"
+== (7) control: the SAME 3-way on M18 base is what s214 resolved by hand — his resolution's numstat vs the auto-merge: git diff M21..5341b1dae preflight.sh
+44	4	Blockchain/Dev/scripts/__tests__/preflight_deps.test.sh
+191	16	Blockchain/Dev/scripts/preflight/preflight.sh
+0	249	Blockchain/Dev/services/auth/src/__tests__/ks790-token-pre-auth-user-lookup.test.ts
+0	8	Blockchain/Dev/services/auth/src/__tests__/ks820-821-token-client-auth-and-apptype.test.ts
+5	23	Blockchain/Dev/services/auth/src/routes/oauth.ts
+== (8) the four other #925 files at the conflicted tree = #925's blobs? (auto-merged clean)
+SAME .githooks/pre-push 1b22d4e14
+SAME Blockchain/Dev/scripts/__tests__/pre_push_hook_base.test.sh affdf027b
+SAME Blockchain/Dev/scripts/__tests__/preflight_deps.test.sh 5ad054131
+SAME Blockchain/Dev/scripts/run-code-guards.sh 2f06e19d3
+SAME Blockchain/Dev/scripts/__tests__/run_code_guards.test.sh 55a376f76
+M21_SCRATCH=caf4aad1509fd08df9b9639f8b2c817da2e3cb1a
