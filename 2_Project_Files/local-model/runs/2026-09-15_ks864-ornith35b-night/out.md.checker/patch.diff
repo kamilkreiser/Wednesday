@@ -1,0 +1,177 @@
+--- a/services/api-gateway/src/routes/system-status.ts
++++ b/services/api-gateway/src/routes/system-status.ts
+@@ -38,16 +38,16 @@ interface DependencyDefinition {
+ 
+ // Helper to determine environment-appropriate URL
+-const getServiceUrl = (envVar: string, localPort: number, azureServiceName?: string): string => {
++// KS-864: rename parameter so noUnusedParameters accepts it — body never reads it.
++const getServiceUrl = (envVar: string, localPort: number, _azureServiceName?: string): string => {
+   // Check for explicit environment variable first
+   const envUrl = process.env[envVar];
+   if (envUrl) return envUrl;
+   
+   // In Azure staging, use internal URLs
+   if (process.env.NODE_ENV === 'staging' && azureServiceName) {
+     return `https://${azureServiceName}.internal.ashypond-b460d1a1.westeurope.azurecontainerapps.io`;
+   }
+   
+   // Default to localhost for development
+   return `http://localhost:${localPort}`;
+ };
+@@ -228,30 +228,30 @@ const SERVICES: ServiceDefinition[] = [
+   // Frontend Portals (public URLs)
+   {
+     name: 'issuer-portal',
+     description: 'Document issuer web application',
+     port: 8882,
+-    url: process.env.NODE_ENV === 'staging' 
+-      ? 'https://secuura-staging-issuer.ashypond-b460d1a1.westeurope.azurecontainerapps.io'
+-      : (process.env.ISSUER_PORTAL_URL || 'http://issuer-frontend:80'),
++    // KS-864: dead estate removed — fall through to env var or compose default.
++    url: process.env.ISSUER_PORTAL_URL || 'http://issuer-frontend:80',
+     healthPath: '/',
+     category: 'frontend',
+     required: false,
+   },
+   {
+     name: 'verifier-portal',
+     description: 'Document verification web application',
+     port: 8882,
+-    url: process.env.NODE_ENV === 'staging'
+-      ? 'https://secuura-staging-verifier.ashypond-b460d1a1.westeurope.azurecontainerapps.io'
+-      : (process.env.VERIFIER_PORTAL_URL || 'http://verifier-frontend:80'),
++    // KS-864: dead estate removed — fall through to env var or compose default.
++    url: process.env.VERIFIER_PORTAL_URL || 'http://verifier-frontend:80',
+     healthPath: '/verify/',
+     category: 'frontend',
+     required: false,
+   },
+   {
+     name: 'admin-portal',
+     description: 'Enterprise administration dashboard',
+     port: 8882,
+-    url: process.env.NODE_ENV === 'staging'
+-      ? 'https://secuura-staging-admin.ashypond-b460d1a1.westeurope.azurecontainerapps.io'
+-      : (process.env.ADMIN_PORTAL_URL || 'http://admin-frontend:80'),
++    // KS-864: dead estate removed — fall through to env var or compose default.
++    url: process.env.ADMIN_PORTAL_URL || 'http://admin-frontend:80',
+     healthPath: '/admin/',
+     category: 'frontend',
+     required: false,
+   },
+ ];
+
+--- /dev/null
++++ b/services/api-gateway/src/__tests__/ks864-dead-estate-pointers-in-runtime-source.test.ts
+@@ -0,0 +1,95 @@
++/**
++ * Regression test for KS-864: no served service URL may reference the
++ * decommissioned Azure staging estate (`ashypond-b460d1a1`, `westeurope`).
++ */
++
++import { describe, it, expect, vi, beforeAll, afterAll } from 'vitest';
++import http from 'node:http';
++
++// Set NODE_ENV BEFORE importing so the module's import-time table picks up
++// the branch that used to select the dead literals.
++const SAVED_NODE_ENV = process.env.NODE_ENV;
++const SAVED_ISSUER = process.env.ISSUER_PORTAL_URL;
++const SAVED_VERIFIER = process.env.VERIFIER_PORTAL_URL;
++const SAVED_ADMIN = process.env.ADMIN_PORTAL_URL;
++
++beforeAll(() => {
++  process.env.NODE_ENV = 'staging';
++  process.env.API_GATEWAY_URL = 'http://gw.example:1';
++  delete process.env.ISSUER_PORTAL_URL;
++  delete process.env.VERIFIER_PORTAL_URL;
++  delete process.env.ADMIN_PORTAL_URL;
++});
++
++afterAll(() => {
++  if (SAVED_NODE_ENV !== undefined) process.env.NODE_ENV = SAVED_NODE_ENV;
++  else delete process.env.NODE_ENV;
++  if (SAVED_ISSUER !== undefined) process.env.ISSUER_PORTAL_URL = SAVED_ISSUER;
++  else delete process.env.ISSUER_PORTAL_URL;
++  if (SAVED_VERIFIER !== undefined) process.env.VERIFIER_PORTAL_URL = SAVED_VERIFIER;
++  else delete process.env.VERIFIER_PORTAL_URL;
++  if (SAVED_ADMIN !== undefined) process.env.ADMIN_PORTAL_URL = SAVED_ADMIN;
++  else delete process.env.ADMIN_PORTAL_URL;
++  vi.unstubAllGlobals();
++});
++
++vi.mock('../services/redis', () => ({
++  getRedisHealth: vi.fn(async () => ({ status: 'healthy' })),
++}));
++vi.stubGlobal('fetch', vi.fn(async () => { throw new Error('offline in test'); }));
++
++let server: http.Server | null = null;
++let port: number | null = null;
++
++async function startServer() {
++  const router = (await import('../routes/system-status')).default;
++  // eslint-disable-next-line @typescript-eslint/no-var-requires
++  const express = require('express');
++  const app = express();
++  app.use('/api/system', router);
++  return new Promise<{ srv: http.Server; p: number }>((resolve, reject) => {
++    const srv = app.listen(0, '127.0.0.1', () => {
++      const addr = srv.address();
++      if (!addr || typeof addr === 'string') {
++        reject(new Error(`unexpected address ${String(addr)}`));
++        return;
++      }
++      resolve({ srv, p: addr.port });
++    });
++    srv.on('error', reject);
++  });
++}
++
++function get(path: string): Promise<any> {
++  return new Promise((resolve, reject) => {
++    http.get(`http://127.0.0.1:${port}${path}`, (res) => {
++      let body = '';
++      res.setEncoding('utf-8');
++      for await (const chunk of res) body += chunk;
++      try { resolve(JSON.parse(body)); } catch (e) { reject(e as Error); }
++    }).on('error', reject);
++  });
++}
++
++describe('KS-864 — dead estate pointers removed from runtime source', () => {
++  beforeAll(async () => {
++    const { srv, p } = await startServer();
++    server = srv;
++    port = p;
++  }, 5_000);
++  afterAll(() => {
++    if (server) server.close();
++  });
++
++  it('🔴 KS-864 — no served service URL names the dead estate', async () => {
++    const body = await get('/api/system/status');
++    const allUrls = Object.values(body.services).flat().map((s: any) => s.url);
++    expect(allUrls.join('\n')).not.toContain('ashypond-b460d1a1');
++    expect(allUrls.join('\n')).not.toContain('westeurope');
++    const portalUrls = allUrls.filter((u: string) => u.includes('-portal'));
++    for (const u of portalUrls) {
++      expect(u).not.toContain('secuura-staging-issuer');
++      expect(u).not.toContain('secuura-staging-verifier');
++      expect(u).not.toContain('secuura-staging-admin');
++    }
++  });
++
++  it("🔴 KS-864 — the issuer portal falls back to its compose default when its env var is unset", async () => {
++    const body = await get('/api/system/status');
++    const portals = Object.values(body.services).flat() as Array<{ name: string; url?: string }>;
++    const entry = portals.find((p) => p.name === 'issuer-portal');
++    expect(entry?.url).toBe('http://issuer-frontend:80');
++  });
++
++  it('KS-864 control — an explicit env var still wins', async () => {
++    const body = await get('/api/system/status');
++    const core = Object.values(body.services).flat() as Array<{ name: string; url?: string }>;
++    const entry = core.find((c) => c.name === 'api-gateway');
++    expect(entry?.url).toBe('http://gw.example:1');
++  });
++});
+

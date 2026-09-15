@@ -1,0 +1,113 @@
+--- /dev/null
++++ b/services/api-gateway/src/__tests__/ks864-dead-estate-pointers-in-runtime-source.test.ts
+@@ -0,0 +1,95 @@
++/**
++ * Regression test for KS-864: no served service URL may reference the
++ * decommissioned Azure staging estate (`ashypond-b460d1a1`, `westeurope`).
++ */
++
++import { describe, it, expect, vi, beforeAll, afterAll } from 'vitest';
++import http from 'node:http';
++
++// Set NODE_ENV BEFORE importing so the module's import-time table picks up
++// the branch that used to select the dead literals.
++const SAVED_NODE_ENV = process.env.NODE_ENV;
++const SAVED_ISSUER = process.env.ISSUER_PORTAL_URL;
++const SAVED_VERIFIER = process.env.VERIFIER_PORTAL_URL;
++const SAVED_ADMIN = process.env.ADMIN_PORTAL_URL;
++
++beforeAll(() => {
++  process.env.NODE_ENV = 'staging';
++  process.env.API_GATEWAY_URL = 'http://gw.example:1';
++  delete process.env.ISSUER_PORTAL_URL;
++  delete process.env.VERIFIER_PORTAL_URL;
++  delete process.env.ADMIN_PORTAL_URL;
++});
++
++afterAll(() => {
++  if (SAVED_NODE_ENV !== undefined) process.env.NODE_ENV = SAVED_NODE_ENV;
++  else delete process.env.NODE_ENV;
++  if (SAVED_ISSUER !== undefined) process.env.ISSUER_PORTAL_URL = SAVED_ISSUER;
++  else delete process.env.ISSUER_PORTAL_URL;
++  if (SAVED_VERIFIER !== undefined) process.env.VERIFIER_PORTAL_URL = SAVED_VERIFIER;
++  else delete process.env.VERIFIER_PORTAL_URL;
++  if (SAVED_ADMIN !== undefined) process.env.ADMIN_PORTAL_URL = SAVED_ADMIN;
++  else delete process.env.ADMIN_PORTAL_URL;
++  vi.unstubAllGlobals();
++});
++
++vi.mock('../services/redis', () => ({
++  getRedisHealth: vi.fn(async () => ({ status: 'healthy' })),
++}));
++vi.stubGlobal('fetch', vi.fn(async () => { throw new Error('offline in test'); }));
++
++let server: http.Server | null = null;
++let port: number | null = null;
++
++async function startServer() {
++  const router = (await import('../routes/system-status')).default;
++  // eslint-disable-next-line @typescript-eslint/no-var-requires
++  const express = require('express');
++  const app = express();
++  app.use('/api/system', router);
++  return new Promise<{ srv: http.Server; p: number }>((resolve, reject) => {
++    const srv = app.listen(0, '127.0.0.1', () => {
++      const addr = srv.address();
++      if (!addr || typeof addr === 'string') {
++        reject(new Error(`unexpected address ${String(addr)}`));
++        return;
++      }
++      resolve({ srv, p: addr.port });
++    });
++    srv.on('error', reject);
++  });
++}
++
++function get(path: string): Promise<any> {
++  return new Promise((resolve, reject) => {
++    http.get(`http://127.0.0.1:${port}${path}`, (res) => {
++      let body = '';
++      res.setEncoding('utf-8');
++      for await (const chunk of res) body += chunk;
++      try { resolve(JSON.parse(body)); } catch (e) { reject(e as Error); }
++    }).on('error', reject);
++  });
++}
++
++describe('KS-864 — dead estate pointers removed from runtime source', () => {
++  beforeAll(async () => {
++    const { srv, p } = await startServer();
++    server = srv;
++    port = p;
++  }, 5_000);
++  afterAll(() => {
++    if (server) server.close();
++  });
++
++  it('🔴 KS-864 — no served service URL names the dead estate', async () => {
++    const body = await get('/api/system/status');
++    const allUrls = Object.values(body.services).flat().map((s: any) => s.url);
++    expect(allUrls.join('\n')).not.toContain('ashypond-b460d1a1');
++    expect(allUrls.join('\n')).not.toContain('westeurope');
++    const portalUrls = allUrls.filter((u: string) => u.includes('-portal'));
++    for (const u of portalUrls) {
++      expect(u).not.toContain('secuura-staging-issuer');
++      expect(u).not.toContain('secuura-staging-verifier');
++      expect(u).not.toContain('secuura-staging-admin');
++    }
++  });
++
++  it("🔴 KS-864 — the issuer portal falls back to its compose default when its env var is unset", async () => {
++    const body = await get('/api/system/status');
++    const portals = Object.values(body.services).flat() as Array<{ name: string; url?: string }>;
++    const entry = portals.find((p) => p.name === 'issuer-portal');
++    expect(entry?.url).toBe('http://issuer-frontend:80');
++  });
++
++  it('KS-864 control — an explicit env var still wins', async () => {
++    const body = await get('/api/system/status');
++    const core = Object.values(body.services).flat() as Array<{ name: string; url?: string }>;
++    const entry = core.find((c) => c.name === 'api-gateway');
++    expect(entry?.url).toBe('http://gw.example:1');
++  });
++});
