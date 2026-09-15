@@ -113,4 +113,7 @@
 # one model in memory at a time (10:53 "dont run them side by side"). q4 set first (NIGHT_MODEL=ornith:35b), then the
 # q8 set (NIGHT_MODEL=ornith:35b-q8_0). Pins are as of develop M55 48e65c435 (the checkout holds it; s233 fetched).
 # ─── q8 set (NIGHT_MODEL=ornith:35b-q8_0, NIGHT_MIN_FREE_GB=45) — queued 11:4x after the q4 batch ended
-KS-1171 product=Blockchain/Dev/services/anchoring/src/anchorSubmission.ts ref=Blockchain/Dev/services/anchoring/src/__tests__/ks726-gate-f1-unreachable-chain.test.ts line=260 ctx=49152
+KS-1120 product=Blockchain/Dev/services/vc-issuer/src/routes/presentations.ts ref=Blockchain/Dev/services/vc-issuer/src/__tests__/ks1020-presentation-lookup-exact-or-404.test.ts line=128 ctx=49152
+# second ten — the DEFAULT told to Kam 12:0x: the fixed-brief fails re-run on q4 (KS-1050, KS-908); KS-864/KS-1018 go on q8 by a later batch
+KS-1050 product=Blockchain/Dev/services/auth/src/routes/users.ts ref=Blockchain/Dev/services/auth/src/__tests__/ks1013-admin-patch-malformed-id.test.ts line=933 ctx=49152
+KS-908 product=Blockchain/Dev/services/security/src/index.ts ref=Blockchain/Dev/services/security/src/__tests__/ks742-keys-tenancy-route-contract.test.ts line=1149 ctx=49152
