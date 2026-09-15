@@ -38,24 +38,4 @@ added_nocomment = {_without_trailing_comment(l) for l in plus}
 missing = [e for e in exp if e.strip() and e.strip() not in added and e.strip() not in added_nocomment]
 for m in missing:
     print(m)
-if missing:
-    sys.exit(1)
-
-# A3d (2026-09-15 23:4x, KS-1133 A r1): the model copied the brief's fenced block and marked its CONTEXT lines
-# (`summary:` / `description:`) as '+' beside the one real addition. `git apply --recount` APPLIED it, so the file
-# carried a duplicated `description:` and tsc failed TS1005 three assertions later — a corrupt hunk that reads as a
-# model failure. Rule: in a brief-driven task every product '+' line is in the brief's expected set; a '+' line that
-# is NOT expected and whose stripped text equals a line of the TIP product file is a context line marked as an
-# addition. Refused by name (exit 2) so RETRY-ONCE can feed the lines back. Short lines (< 8 chars: braces, blanks)
-# are never flagged — a brace the brief did not spell out is a different, quieter defect.
-_pf = d.get("product_file") or ""
-_tip = set()
-for _p, _txt in (d.get("files") or {}).items():
-    if _p == _pf or _p.endswith(_pf) or _pf.endswith(_p):
-        _tip = {l.strip() for l in _txt.split("\n") if len(l.strip()) >= 8}
-_expected = {e.strip() for e in exp} | {_without_trailing_comment(e) for e in exp}
-context_as_plus = [l for l in plus if len(_norm(l)) >= 8 and _norm(l) not in _expected
-                   and _without_trailing_comment(l) not in _expected and _norm(l) in _tip]
-for c in context_as_plus:
-    print("A3D " + c.strip())
-sys.exit(2 if context_as_plus else 0)
+sys.exit(1 if missing else 0)
