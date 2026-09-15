@@ -24,4 +24,9 @@ out=$(python3 "$A3C" "$R3/input.json" "$(sec_of $R3/out.md.checker/sections.json
 TMP=$(mktemp); printf '%s\n' '--- a/x.ts' '+++ b/x.ts' '@@ -1,1 +1,2 @@' ' unchanged line here' '+  nothing the brief asked for' > "$TMP"
 out=$(python3 "$A3C" "$R2/input.json" "$TMP"); rc=$?
 [ "$rc" -eq 1 ] && echo "ARM4 PASS (rc=1, dropped expected lines refused first)" || { echo "ARM4 FAIL (rc=$rc)"; fail=1; }
+# 5 (23:5x) the KS-1133 A r2 RETRY product section — the model wrote `\u2192`/`\u2014` escapes for → / — ; the runtime
+#   string is identical, so A3c must read the expected lines as PRESENT                       → exit 0, quiet
+R5=$LM/runs/2026-09-15_ks1133-ornith35b-night2/retry
+out=$(python3 "$A3C" "$R5/input.json" "$(sec_of $R5/out.md.checker/sections.json openapi)"); rc=$?
+[ "$rc" -eq 0 ] && [ -z "$out" ] && echo "ARM5 PASS (rc=0, \\u-escaped additions read as present)" || { echo "ARM5 FAIL (rc=$rc: $out)"; fail=1; }
 exit $fail

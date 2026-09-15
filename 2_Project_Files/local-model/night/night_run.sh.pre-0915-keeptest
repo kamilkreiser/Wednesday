@@ -415,37 +415,16 @@ for ln in re.findall(r":(\d+) `", verdict):
     for s_ in d.get("defect_line", {}).get("sites", []):
         if str(s_.get("line")) == ln:
             missed.append({"line": s_["line"], "text_at_tip": s_.get("text_at_tip", s_.get("text", ""))})
-# 2026-09-15 23:5x (KS-1133 A r2): the retry FIXED the product hunk and replaced its attempt-1 test file (54 lines, 5
-# cells, A2b clean) with a 2-line stub patch to the REFERENCE file — the feedback said "emit the COMPLETE diff again" and
-# nothing told the model its test was already right. When attempt 1's TEST section was accepted (A2b did not fire and
-# the section carries an it()/test() cell), it travels into the retry VERBATIM with the instruction to reproduce it.
-keep_test = ""
-try:
-    import os as _os
-    _sj = _os.path.join(_os.path.dirname(chk), "out.md.checker", "sections.json")
-    if "A2b PLACEHOLDER" not in c and _os.path.exists(_sj):
-        for _o in json.load(open(_sj, encoding="utf-8")):
-            if "__tests__" in _o.get("path", "") and _os.path.exists(_o.get("file", "")):
-                _t = open(_o["file"], encoding="utf-8", errors="replace").read()
-                if re.search(r"^\+\s*(it|test)\(", _t, re.M) and len(_t) <= 24000:
-                    keep_test = _t
-                break
-except Exception as _e:  # never let the feedback builder kill the retry — the retry runs without the section
-    print(f"retry input: keep_test skipped ({_e})")
 d["retry_feedback"] = {
     "attempt": 2,
     "verdict": verdict[:600],
     "missed_sites": missed,
-    "accepted_test_section": keep_test,
     "instruction": ("Your first diff was REFUSED: " + verdict[:600] + ". Emit the COMPLETE diff again. If the verdict carries COMPILER/LOADER lines, fix exactly what they name (remove an unused declaration/import, add a missing import, replace a vitest idiom with the jest one) and change nothing else. For every "
         "missed site the `-` line is `text_at_tip` copied character for character (do NOT edit the comment or the "
         "line beside it); keep the test exactly as specified. If the verdict names a PLACEHOLDER test file, write "
         "the full test file this time. If the verdict names CONTEXT MARKED AS ADDITION, the lines it lists ALREADY EXIST in the file: "
         "emit them with a leading SPACE as context (or leave them out), never as `+` — the ONLY `+` lines in the product hunk are the "
-        "new lines the task spells out; an insert-only edit adds exactly those lines and removes nothing. "
-        "If `accepted_test_section` is non-empty, your attempt-1 TEST FILE section was ACCEPTED: reproduce that section "
-        "BYTE FOR BYTE as the test file part of your diff (same path, same `--- /dev/null` header, every cell) and change "
-        "ONLY the product section as the verdict says — never replace the test with a stub or a patch to the reference file."),
+        "new lines the task spells out; an insert-only edit adds exactly those lines and removes nothing."),
 }
 json.dump(d, open(out, "w", encoding="utf-8"), indent=1)
 print(f"retry input: {len(missed)} missed site(s) carried; verdict={verdict[:120]!r}")

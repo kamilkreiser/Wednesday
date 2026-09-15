@@ -21,22 +21,12 @@ import sys
 _TRAIL = re.compile(r"\s+//[^\n]*$")
 
 
-_UESC = re.compile(r"\\u([0-9a-fA-F]{4})")
-
-
-def _unescape(line: str) -> str:
-    # 2026-09-15 23:5x (KS-1133 A r2 retry): the model echoed the JSON input's `\u2192` / `\u2014` escapes into the
-    # TS source instead of the characters. Inside a single-quoted TS string a `\uXXXX` escape yields the same
-    # runtime character, so the '+' line is compared with the escapes DECODED; the expectation is never touched.
-    return _UESC.sub(lambda m: chr(int(m.group(1), 16)), line)
-
-
 def _norm(line: str) -> str:
-    return _unescape(line).strip()
+    return line.strip()
 
 
 def _without_trailing_comment(line: str) -> str:
-    return _TRAIL.sub("", _unescape(line)).strip()
+    return _TRAIL.sub("", line).strip()
 
 
 d = json.load(open(sys.argv[1], encoding="utf-8"))
