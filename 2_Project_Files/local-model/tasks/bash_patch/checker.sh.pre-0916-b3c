@@ -5,7 +5,6 @@
 #   B2 the diff applies at the tip (strict; --recount --ignore-whitespace named as an accommodation)
 #   B3 touched-file set == { product_file, ONE NEW *.test.sh at suggested_test_file } — never the reference, never a third file
 #   B3b every must_change site is a '-' line of the script hunk; every brief '+' line is added (a3c_plus.py, A3c/A3d)
-#   B3c no '(correct) … stays' site is a '-' line (the insert-after dialect that deletes its anchor — KS-1093 r1)
 #   B4 RED-FIRST: the test ALONE at the tip parses (bash -n), RUNS, exits non-zero with >= 1 `FAIL:` line and NO load error
 #   B5 GREEN-AFTER: the script hunk applied, `bash -n` on the script passes, the same test exits 0 with 0 `FAIL:` and >= 1 pass
 #   B6 sibling suites that drive this script (any *.test.sh in test_dir naming its basename) show no NEW failure after
@@ -160,35 +159,6 @@ for s in (d.get("defect_line") or {}).get("sites",[]):
 PY
 )"
 if [ -n "$MISSING_SITES" ]; then fail "B3b must_change site(s) NOT changed by the script hunk: $(printf '%s' "$MISSING_SITES" | tr '\n' '·')"; echo "RESULT: FAIL ($FAILS failed) — stopped at B3b"; exit 1; fi
-# B3c (2026-09-16, KS-1093 r1): a site the brief marks "(correct) … stays" (must_change false) must NOT appear as a '-' line —
-# the model's insert-after dialect REPLACES the anchor context line, deleting a sentence the brief said stays; B3b was blind to it.
-REMOVED_STAYS="$(python3 - "$INPUT" "$PROD_SEC" <<'PY'
-import json,sys
-d=json.load(open(sys.argv[1])); sec=open(sys.argv[2],encoding="utf-8").read().split("\n")
-minus={l[1:].strip() for l in sec if l.startswith("-") and not l.startswith("---")}
-for s in (d.get("defect_line") or {}).get("sites",[]):
-    t=(s.get("text_at_tip") or "").strip()
-    if not s.get("must_change") and t and t in minus: print(f":{s['line']} {t[:80]}")
-PY
-)"
-if [ -n "$REMOVED_STAYS" ]; then
-  # REPAIR (an accommodation the verdict names): the '-' on a stays-site becomes a context line (' '), the hunk is
-  # re-counted by git apply, and the repaired section is what B5 applies. Unrepairable → FAIL by name.
-  cp "$PROD_SEC" "$PROD_SEC.pre-b3c"
-  python3 - "$INPUT" "$PROD_SEC" <<'PY'
-import json,sys
-d=json.load(open(sys.argv[1])); p=sys.argv[2]; sec=open(p,encoding="utf-8").read().split("\n")
-stays={(s.get("text_at_tip") or "").strip() for s in (d.get("defect_line") or {}).get("sites",[]) if not s.get("must_change")}
-out=[(" "+l[1:]) if (l.startswith("-") and not l.startswith("---") and l[1:].strip() in stays) else l for l in sec]
-open(p,"w",encoding="utf-8").write("\n".join(out))
-PY
-  if git -C "$CLONE" apply --check -p1 --recount --ignore-whitespace "$PROD_SEC" > "$PROD_SEC.check_b3c.out" 2>&1; then
-    APPLY_OPTS="--recount --ignore-whitespace"
-    pass "B3c stays-site(s) marked '-' by the model RESTORED as context (an accommodation the verdict names): $(printf '%s' "$REMOVED_STAYS" | tr '\n' '·')"
-  else
-    fail "B3c a line the brief says STAYS was REMOVED and the repaired hunk does not apply: $(printf '%s' "$REMOVED_STAYS" | tr '\n' '·') — $(head -1 "$PROD_SEC.check_b3c.out")"; echo "RESULT: FAIL ($FAILS failed) — stopped at B3c (a stays-line removed)"; exit 1
-  fi
-fi
 A3C_MISSING="$(python3 "$CODE_DIR/a3c_plus.py" "$INPUT" "$PROD_SEC" "$PRODUCT" 2>/dev/null)"; A3C_RC=$?
 if [ "$A3C_RC" -eq 0 ]; then pass "B3b every must_change site is a '-' line; every brief '+' line is in the script hunk; no tip line re-added as '+'"
 elif [ "$A3C_RC" -eq 2 ]; then fail "B3b CONTEXT MARKED AS ADDITION (A3d): $(printf '%s' "$A3C_MISSING" | sed 's/^A3D //' | head -3 | cut -c1-90 | tr '\n' '·')"; echo "RESULT: FAIL ($FAILS failed) — stopped at B3b (a context line marked '+')"; exit 1

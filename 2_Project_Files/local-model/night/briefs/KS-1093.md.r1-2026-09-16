@@ -1,0 +1,65 @@
+# KS-1093 — Wednesday's task for Ornith, BASH_PATCH (one probe line + a two-line comment; written 07:05 on 2026-09-16 from the file at develop M55 `48e65c435` — `Blockchain/Dev/scripts/check-stack-safety.sh` lines 285–336 read; the defect REPRODUCED by Wednesday in a scratch clone at this tip: with `systemTest/playwright/results/latest-slot4` a symlink, the gate prints `::error::latest-slot4/index.html is NOT gitignored on slot 4 (KS-682).` and exits 1; the one-line fix below makes it exit 0 with `100 shared-stack safety invariants hold` on the same tree AND on a clean tree)
+
+## What is wrong (one paragraph)
+§6f's KS-682 loop (`:323–:335`) probes six per-slot Playwright artefact shapes with `git check-ignore -q`. The fourth shape is `results/latest-slot${slot}/index.html`. Since KS-682 a real run makes `results/latest-slot<N>` a **symlink** to the timestamped report directory, and `git check-ignore` refuses any path *beyond* a symlink (`fatal: pathspec '…' is beyond a symbolic link`, rc 128). The loop reads the non-zero rc as "not ignored" and the gate goes red exactly when it has just been used — a false red naming a real-looking defect. Measured at this tip: `git check-ignore -q systemTest/playwright/results/latest-slot4` (the symlink ITSELF) is rc 0 both when the symlink exists and on a clean tree (the blanket `results/` rule at `systemTest/playwright/.gitignore:17` covers it), so probing the symlink itself removes the failure without weakening what is proven. **This task: E1 adds a two-line comment naming the rule; E2 changes the ONE probe line to the symlink itself; plus one NEW shell suite with two text reds, one behavioural red (the gate run with a `latest-slot4` symlink present), and three controls.** NOT in this task: the other five shapes, §6f2, any other block.
+
+## The exact change — TWO edits in `Blockchain/Dev/scripts/check-stack-safety.sh`
+E1 — two comment lines INSERTED after line 321 (context: line 321 is `# one holding a bearer token, which is why it is here for every slot and not just slot 3.`, line 322 is `PW_STAMP="2026-01-01T00-00-00-000Z"` — copy both from the file as context; this edit has NO `-` line):
+```
+ # one holding a bearer token, which is why it is here for every slot and not just slot 3.
++# KS-1093: `latest-slot<N>` is a SYMLINK once a run exists, and `git check-ignore` refuses any path
++# beyond a symlink (fatal, rc 128 — read as "not ignored"). Probe the symlink ITSELF, never through it.
+ PW_STAMP="2026-01-01T00-00-00-000Z"
+```
+E2 — line 328, ONE-LINE REPLACEMENT (context: line 327 is `    "$REPO/systemTest/playwright/results/har-ks-682-${PW_STAMP}-slot${slot}/1.har" \`, line 329 is `    "$REPO/systemTest/playwright/.auth-ks-682-slot${slot}/token.json" \` — copy both from the file as context; keep the four leading spaces and the trailing space-backslash exactly):
+```
+-    "$REPO/systemTest/playwright/results/latest-slot${slot}/index.html" \
++    "$REPO/systemTest/playwright/results/latest-slot${slot}" \
+```
+The `+` lines are byte-exact — copy them; do not touch any other line; do not add a trailing comment; a comment line inside the backslash-continued list would BREAK the list, which is why E1 sits above `PW_STAMP=`.
+
+## The test — ONE NEW shell suite, bash 3.2, beside the reference (it lives under `Blockchain/Dev/scripts/__tests__/` and READS + RUNS the subject at `$REPO_ROOT/Blockchain/Dev/scripts/check-stack-safety.sh`)
+File: `Blockchain/Dev/scripts/__tests__/check_stack_safety_latest_slot_symlink.test.sh`
+Copy the SHAPE of `scripts/__tests__/docker_build_empty_table.test.sh`: `#!/usr/bin/env bash`, a header comment naming KS-1093, `set -uo pipefail`, `TOTAL_CELLS=6`, `HERE`/`REPO_ROOT` resolved from `${BASH_SOURCE[0]}` exactly as the reference does (`REPO_ROOT="$(cd "$HERE/../../../.." && pwd)"`), the subject `SUBJ="${CHECK_STACK_SAFETY_SH-$REPO_ROOT/Blockchain/Dev/scripts/check-stack-safety.sh}"` with the same set-but-empty refusal and the `[ -f "$SUBJ" ]` / `[ -r "$SUBJ" ]` FATAL lines, the `printf 'SUBJECT %s\n        sha256 %s\n\n' …` line, `WORK="$(mktemp -d "${TMPDIR:-/tmp}/ks1093.XXXXXX")"` + `trap 'rm -rf "$WORK"' EXIT` (reference lines 48–49 verbatim, ks877 → ks1093), `pass=0; fail=0`, the `ok()` / `bad()` printers VERBATIM, and the reference's LAST SEVEN LINES verbatim (the totals printf, the INCOMPLETE guard, `[ "$fail" -eq 0 ] || exit 1`, `exit 0`). **Your diff for this file is a NEW-FILE diff: `--- /dev/null`, `+++ b/<path>`, ONE hunk header `@@ -0,0 +1,N @@`, then EVERY line with a leading `+` — no context lines, no `-` lines: you are not diffing the reference.** The subject derives its repo root from ITS OWN location, so the behavioural cells run it in place: `RES="$REPO_ROOT/systemTest/playwright/results"`. Cells, in this order, as ONE fenced block of literal calls:
+```
+# CELL 1 — RED at the tip: the through-symlink probe is gone.
+through_hits="$(grep -c 'results/latest-slot${slot}/index.html' "$SUBJ" || true)"
+if [ "$through_hits" -eq 0 ]; then ok "the probe no longer reads THROUGH the latest-slot symlink (index.html)"; else bad "the probe no longer reads THROUGH the latest-slot symlink (index.html)" "count=$through_hits (expected 0)"; fi
+# CELL 2 — RED at the tip: the probe of the symlink itself is present.
+self_hits="$(grep -c 'results/latest-slot${slot}" ' "$SUBJ" || true)"
+if [ "$self_hits" -eq 1 ]; then ok "the probe names the latest-slot symlink ITSELF"; else bad "the probe names the latest-slot symlink ITSELF" "count=$self_hits (expected 1)"; fi
+# CELL 3 — CONTROL on a clean checkout: the gate exits 0 on this tree as found (nothing created yet).
+bash "$SUBJ" > "$WORK/clean.out" 2>&1; rc_clean=$?
+if [ "$rc_clean" -eq 0 ]; then ok "the gate exits 0 on this tree as found"; else bad "the gate exits 0 on this tree as found" "rc=$rc_clean: $(grep '::error::' "$WORK/clean.out" | head -2 | tr '\n' ' ')"; fi
+# CELL 4 — RED at the tip: with a latest-slot4 SYMLINK present the gate still exits 0 and names no latest-slot error.
+made_results=0; made_link=0
+[ -d "$RES" ] || { mkdir -p "$RES"; made_results=1; }
+if [ ! -e "$RES/latest-slot4" ] && [ ! -L "$RES/latest-slot4" ]; then
+  mkdir -p "$RES/playwright-report-ks-1093-slot4"; : > "$RES/playwright-report-ks-1093-slot4/index.html"
+  ln -s playwright-report-ks-1093-slot4 "$RES/latest-slot4"; made_link=1
+fi
+bash "$SUBJ" > "$WORK/symlink.out" 2>&1; rc_link=$?
+link_errors="$(grep -c '::error::latest-slot' "$WORK/symlink.out" || true)"
+if [ "$made_link" -eq 1 ]; then rm "$RES/latest-slot4"; rm "$RES/playwright-report-ks-1093-slot4/index.html"; rmdir "$RES/playwright-report-ks-1093-slot4"; fi
+if [ "$made_results" -eq 1 ]; then rmdir "$RES" 2>/dev/null || true; fi
+if [ "$rc_link" -eq 0 ] && [ "$link_errors" -eq 0 ]; then ok "with a latest-slot4 symlink present the gate exits 0 and names no latest-slot error"; else bad "with a latest-slot4 symlink present the gate exits 0 and names no latest-slot error" "rc=$rc_link latest-slot errors=$link_errors"; fi
+# CELL 5 — CONTROL: the git mechanism the fix rests on, in a throwaway repo (through the symlink: rc 128; the symlink itself: rc 0).
+git -C "$WORK" init -q; printf 'results/\n' > "$WORK/.gitignore"
+mkdir -p "$WORK/results/playwright-report-x-slot4"; ln -s playwright-report-x-slot4 "$WORK/results/latest-slot4"
+git -C "$WORK" check-ignore -q results/latest-slot4/index.html 2>/dev/null; rc_through=$?
+git -C "$WORK" check-ignore -q results/latest-slot4 2>/dev/null; rc_self=$?
+if [ "$rc_through" -eq 128 ] && [ "$rc_self" -eq 0 ]; then ok "git check-ignore refuses a path beyond a symlink (rc 128) and accepts the symlink itself (rc 0)"; else bad "git check-ignore refuses a path beyond a symlink (rc 128) and accepts the symlink itself (rc 0)" "through=$rc_through self=$rc_self"; fi
+# CELL 6 — CONTROL: the subject parses.
+if bash -n "$SUBJ" >/dev/null 2>&1; then ok "check-stack-safety.sh parses (bash -n)"; else bad "check-stack-safety.sh parses (bash -n)" "$(bash -n "$SUBJ" 2>&1 | head -5 | tr '\n' ' ')"; fi
+```
+Expected at the untouched tip on a clean checkout: CELL 1 red (count=1), CELL 2 red (count=0), CELL 3 ok, CELL 4 red (rc=1, 1 latest-slot error), CELL 5 ok, CELL 6 ok → `3 passed, 3 failed (of 6 cells)`, exit 1. After E1+E2: 6/6, exit 0.
+
+## Where (parsed into the checklist — every **must change** line must appear as a `-` line in your diff)
+* `:328` — **must change**: `    "$REPO/systemTest/playwright/results/latest-slot${slot}/index.html" \`
+* `:321` — (correct) `# one holding a bearer token, which is why it is here for every slot and not just slot 3.` — stays; E1 inserts after it
+* `:322` — (correct) `PW_STAMP="2026-01-01T00-00-00-000Z"` — stays
+* `:327` — (correct) `    "$REPO/systemTest/playwright/results/har-ks-682-${PW_STAMP}-slot${slot}/1.har" \` — stays
+* `:329` — (correct) `    "$REPO/systemTest/playwright/.auth-ks-682-slot${slot}/token.json" \` — stays
+
+## Output
+Exactly ONE ```diff block with TWO files: `--- a/Blockchain/Dev/scripts/check-stack-safety.sh` / `+++ b/Blockchain/Dev/scripts/check-stack-safety.sh` (E1 and E2 fit ONE hunk over :321–:329 — or two hunks, one per edit), then `--- /dev/null` / `+++ b/Blockchain/Dev/scripts/__tests__/check_stack_safety_latest_slot_symlink.test.sh` (one `@@ -0,0 +1,N @@` hunk, all `+`); paths repo-relative; blank context lines keep their leading space.
