@@ -2502,3 +2502,8 @@ Done with it: Dynamics → Kam's team decision (no action); QuickQuote masthead/
 > ok. lets use the smaller model for the rest of the week. complete as many tickets as possible. work with the local LLM. we will do QA on these Sunday night and merge / commit all at once
 
 *Note:* Filed as the q4-only / volume / Sunday-QA grant (W tier, expires end of Sunday 2026-09-20); Wednesday reading put back 16:37 (auth/MFA/OAuth product edits held until named); first widened batch queued.
+
+## 2026-09-15 16:40 — Kam (dashboard chat, verbatim)
+> dont add auth ones or anything too complex. start with simple and correct / improve the model as you go. By the end of this process, hopefully the model will have better instructions, skills, rules, etc. and the instructions / limitations will be more obvious. you can then decide if the model is able to handle more complex ones
+
+*Note:* Refines the 16:36 grant: simple tickets only, auth OUT for the week, complexity earned via the IMPROVEMENTS record. Receipted 16:41.

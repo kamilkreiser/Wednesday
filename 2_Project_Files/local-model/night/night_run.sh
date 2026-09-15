@@ -385,7 +385,7 @@ PYEOF
   # IMPROVEMENTS.md). One retry, same model, input + `retry_feedback` (verdict, missed sites from the A3b
   # line, an instruction); the retry's out.md/checker.out live under $RUN/retry/; the FIRST attempt's files
   # are untouched. NIGHT_RETRY_ON_PARTIAL=0 disables. The done.md row carries both verdicts.
-  if [ "${NIGHT_RETRY_ON_PARTIAL:-1}" = "1" ] && [ -z "${RETRY_DONE:-}" ] && echo "$VERDICT" | /usr/bin/grep -q -i -E 'stopped at A3b|A2b PLACEHOLDER'; then
+  if [ "${NIGHT_RETRY_ON_PARTIAL:-1}" = "1" ] && [ -z "${RETRY_DONE:-}" ] && echo "$VERDICT" | /usr/bin/grep -q -i -E 'stopped at A3b|stopped at A2b|A2b PLACEHOLDER'; then
     RETRY_DONE=1; FIRST_VERDICT="$VERDICT"
     mkdir -p "$RUN/retry"
     python3 - "$INPUT" "$RUN/checker.out" "$RUN/retry/input.json" <<'PYR'

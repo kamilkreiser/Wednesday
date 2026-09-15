@@ -188,18 +188,6 @@ for ln in lines:
     # header"). The path is known: the input's suggested_test_file. Split it into its own section with the header
     # synthesised, and say so — an accommodation the verdict names, never a silent repair.
     if re.match(r"^@@ -0,0 \+1(,\d+)? @@", ln) and any(l.startswith("@@ ") for l in cur["lines"]):
-        # 2026-09-15 16:4x (KS-888 q4): the SAME shape inside a `--- /dev/null` section whose only hunk so far is a
-        # 1-2 line STUB ("// placeholder for new test file content below") is NOT a second file — it is the model
-        # writing the file's header once and its body as a second hunk. Drop the stub hunk and keep the body under the
-        # SAME path; name it. (Before this, the stub was judged A2b PLACEHOLDER at the model's path and the real test
-        # was split to a second, invented path.)
-        if cur["lines"][0].startswith("--- /dev/null"):
-            body = [l for l in cur["lines"] if not l.startswith(("---", "+++", "@@"))]
-            if len(body) <= 2:
-                hdr = [l for l in cur["lines"] if l.startswith(("---", "+++"))]
-                cur["lines"] = hdr + [ln]; cur["stub_dropped"] = len(body)
-                print(f"section {len(sections)}: STUB HUNK DROPPED — a {len(body)}-line new-file stub was followed by a second new-file hunk for the same path; the second hunk is the file (an accommodation the verdict names)")
-                continue
         cur = {"lines": ["--- /dev/null", "+++ b/" + SUGGESTED_TEST, ln], "has_minus": True, "synth": True}; sections.append(cur)
         print(f"section {len(sections)}: HEADERLESS NEW-FILE hunk split out of the previous section and given the header +++ b/{SUGGESTED_TEST} (the model forgot it)")
         continue
