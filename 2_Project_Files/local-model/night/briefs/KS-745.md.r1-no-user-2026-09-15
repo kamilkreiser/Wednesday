@@ -8,7 +8,7 @@ with `id = "logs"` and answers 404 — the export 404s every time (`BAD_GATEWAY`
 `entries = (data as any)?.data || (data as any)?.logs || [];` — the list route answers `{ success: true, data: { logs, total,
 limit, offset } }` (`security/src/index.ts:772-780`), so `data.data` is the OBJECT, not the array. **Fix shape (the ticket's): the
 list path `/api/audit`, and read `data.data.logs`.** NOT in this task: the security service, the CSV/JSON writers (lines 167–197),
-validation (lines 96–121), the admin guard (lines 83–94 — the test satisfies it).
+validation (lines 96–121).
 
 ## The exact change — TWO one-line edits in ONE hunk (lines 138 and 144; the hunk spans lines 135–147 with the tip's lines verbatim as context)
 ```
@@ -50,10 +50,7 @@ const router = (await import('../routes/audit-export')).default;
 
 let server: http.Server; let port = 0;
 beforeAll(async () => {
-  const app = express();
-  // the route is admin-only (audit-export.ts:83-94): 401 without req.user, 403 without an admin role — set both before the router
-  app.use((req, _res, next) => { (req as any).user = { id: 'admin-ks745', role: 'platform_admin' }; next(); });
-  app.use('/api/admin/audit', router);
+  const app = express(); app.use('/api/admin/audit', router);
   await new Promise<void>((r) => { server = app.listen(0, '127.0.0.1', () => { port = (server.address() as any).port; r(); }); }, 10_000);
 }, 10_000);
 afterAll(async () => {
