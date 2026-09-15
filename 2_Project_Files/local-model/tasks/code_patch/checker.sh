@@ -94,7 +94,9 @@ if [ "$HEAD_SHA" != "$TIP" ]; then
   exit 1
 fi
 Q="$CLONE/../quarantine/$(date +%Y%m%d-%H%M%S)"
-git -C "$CLONE" status --porcelain --untracked-files=all -- "$SUBDIR/$SERVICE/src" > "$REP/pre_status.out" 2>&1
+# 2026-09-15 20:1x (KS-1164 Part B, tool mode): the previous round's untracked test file under tests/unit/ was not under
+# src/ — scan the input's TEST_DIR too, or a PASS leaves the next round "not clean" (r3 and Part B both hit it).
+git -C "$CLONE" status --porcelain --untracked-files=all -- "$SUBDIR/$SERVICE/src" "$TEST_DIR" > "$REP/pre_status.out" 2>&1
 while IFS= read -r line; do
   [ -z "$line" ] && continue
   st="${line:0:2}"; p="${line:3}"
