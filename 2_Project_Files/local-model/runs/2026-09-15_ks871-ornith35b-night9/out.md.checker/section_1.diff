@@ -1,0 +1,38 @@
+--- a/services/api-gateway/src/middleware/audit.ts
++++ b/services/api-gateway/src/__tests__/ks871-the-audit-log-records-req-path.test.ts
+@@ -92,7 +92,7 @@ function deriveAction(req: Request): {
+  * wrong (e.g. POST /api/documents/:id/verify is a 'verify', not a 'create').
+  * Auth routes also don't fit the CRUD shape.
+  */
+-function deriveAction(req: Request): {
++function deriveAction(req: Request, auditPath: string): {
+   action: string;
+   resourceType: string;
+   resourceId: string | null;
+@@ -105,7 +105,7 @@ function deriveAction(req: Request): {
+     : method === 'DELETE' ? 'delete'
+     : method.toLowerCase();
+ 
+   // Trim trailing slashes and pull the first 3-4 segments after /api.
+-  const segments = req.path.replace(/\/+$/, '').split('/').filter(Boolean);
++  const segments = auditPath.replace(/\/+$/, '').split('/').filter(Boolean);
+   // segments[0] === 'api' for everything we audit
+   const section = segments[1] || 'unknown';
+   const subResource = segments[2];
+@@ -227,7 +227,7 @@ export function createAuditMiddleware(deps: AuditMiddlewareDeps): RequestHandler
+       void (async () => {
+         try {
+           if (!deps.isDbAvailable()) return;
+-          const { action, resourceType, resourceId: routeResourceId } = deriveAction(req);
++          const { action, resourceType, resourceId: routeResourceId } = deriveAction(req, auditPath);
+ 
+           const u = (req as Request & { user?: { userId?: string; organizationId?: string; tenantId?: string } }).user;
+           let userId: string | null = u?.userId || null;
+@@ -277,7 +277,7 @@ export function createAuditMiddleware(deps: AuditMiddlewareDeps): RequestHandler
+           const details = JSON.stringify({
+             method: req.method,
+-            path: req.path,
++            path: auditPath,
+             status: res.statusCode,
+             durationMs: Date.now() - start,
+             tenantId: u?.tenantId || null,

@@ -1,0 +1,16 @@
+--- a/services/api-gateway/src/routes/verification.ts
++++ b/services/api-gateway/src/routes/verification.ts
+@@ -285,9 +285,13 @@
+               const anchors = data?.data?.anchors;
+               if (!Array.isArray(anchors) || anchors.length === 0) { resolve(null); return; }
+               // Latest = highest blockNumber, fall back to most-recent confirmedAt.
+-              const latest = anchors.slice().sort((a: any, b: any) =>
+-                (b.blockNumber || 0) - (a.blockNumber || 0))[0];
++              const latest = anchors.slice().sort((a: any, b: any) => {
++                const byBlock = (b.blockNumber || 0) - (a.blockNumber || 0);
++                if (byBlock !== 0) return byBlock;
++                return (Date.parse(b.confirmedAt) || 0) - (Date.parse(a.confirmedAt) || 0);
++              })[0];
+               resolve({
+                 id: docId,
+                 // We can't know revocation status without the doc record;
