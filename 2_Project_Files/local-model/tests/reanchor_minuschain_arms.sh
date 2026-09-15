@@ -15,7 +15,7 @@
 set -u
 LM=/Volumes/DevMASTER/WEDNESDAY/2_Project_Files/local-model
 REAN=${REAN:-$LM/tasks/code_patch/reanchor.py}
-OLD=$LM/tasks/code_patch/reanchor.py.pre-0916-minuschain
+OLD=$LM/tasks/code_patch/reanchor.py.pre-0916-minuschain   # arms 2/8b use the script as it was BEFORE this morning (both defects present)
 RUN=$LM/runs/2026-09-16_ks958-ornith35b-night
 SRC="/Volumes/DevMASTER/!CODING/Secuura/Blockchain/2_Project_Files"
 TIP=48e65c435
@@ -143,6 +143,36 @@ open(sys.argv[1],"w",encoding="utf-8").write(body)
 PY2
 python3 "$REAN" "$W/nonconst.diff" "$W/hook_tip.sh" "$W/nonconst.rean.diff" > "$W/nonconst.rean.out" 2>&1
 if grep -q "shift is not constant" "$W/nonconst.rean.out" && ! grep -q "INDENT SHIFT" "$W/nonconst.rean.out"; then ok "7 NONCONST: a non-constant indent shift is refused by name"; else bad "7 NONCONST: $(cat "$W/nonconst.rean.out" | tr '\n' ' ' | cut -c1-200)"; fi
+
+# ARM 8 — SPLIT GROUPS (KS-1089 r1): a hunk whose two '+' lines sit INSIDE an if/else with context between them and
+# whose one '-' sits after the `fi` — the applied file must carry each assignment in its OWN branch, and the old
+# script's collapse (both after the `fi`) must be the negative
+R1089=$LM/runs/2026-09-16_ks1089-ornith35b-night
+git -C "$SRC" show "$TIP:Blockchain/Dev/scripts/run-shell-suites.sh" > "$W/runner_tip.sh"
+awk '/^```diff/{f=1;next} /^```$/{f=0} f' "$R1089/out.md" | awk 'BEGIN{p=1} /^--- \/dev\/null/{p=0} p' > "$W/runner.real.diff"
+order_ok() { # $1 file → the printed-nothing assignment comes right after its state line, the GIT_DIR one right after ITS state line
+  python3 - "$1" <<'PY3'
+import sys
+L=[l.strip() for l in open(sys.argv[1]).read().split("\n")]
+try:
+    i=L.index('git_env_state="printed nothing"'); j=L.index('git_env_state="printed a list with $git_env_total usable name(s), GIT_DIR absent"')
+except ValueError: sys.exit(1)
+ok = L[i+1].startswith('git_env_headline="FAIL — could not ask') and L[j+1].startswith('git_env_headline="FAIL — git listed')
+sys.exit(0 if ok else 1)
+PY3
+}
+for which in NEW OLD; do
+  [ $which = NEW ] && SCR=$REAN || SCR=$OLD
+  python3 "$SCR" "$W/runner.real.diff" "$W/runner_tip.sh" "$W/runner.$which.diff" > "$W/runner.$which.out" 2>&1
+  rr=$(mktemp -d "$W/runnerrepo.XXXXXX"); mkdir -p "$rr/Blockchain/Dev/scripts"; cp "$W/runner_tip.sh" "$rr/Blockchain/Dev/scripts/run-shell-suites.sh"
+  git -C "$rr" init -q && git -C "$rr" add -A && git -C "$rr" -c user.email=a@b -c user.name=arm commit -qm tip
+  git -C "$rr" apply "$W/runner.$which.diff" 2>"$W/runner.$which.err"; ap=$?
+  if [ $which = NEW ]; then
+    if [ $ap = 0 ] && order_ok "$rr/Blockchain/Dev/scripts/run-shell-suites.sh" && grep -q "split -/+ groups: positions kept" "$W/runner.NEW.out"; then ok "8 SPLIT-GROUPS: each headline assignment sits in its own branch (positions kept)"; else bad "8 SPLIT-GROUPS: apply=$ap $(cat "$W/runner.NEW.out" | tr '\n' ' ' | cut -c1-200)"; fi
+  else
+    if [ $ap = 0 ] && ! order_ok "$rr/Blockchain/Dev/scripts/run-shell-suites.sh"; then ok "8b OLD control: the pre-splitgroups script collapses both assignments after the fi (the defect reproduced)"; else bad "8b OLD control: apply=$ap order_ok=$(order_ok "$rr/Blockchain/Dev/scripts/run-shell-suites.sh" && echo yes || echo no)"; fi
+  fi
+done
 
 echo "reanchor_minuschain_arms: $PASS passed, $FAIL failed (work dir kept: $W)"
 [ "$FAIL" -eq 0 ] || exit 1

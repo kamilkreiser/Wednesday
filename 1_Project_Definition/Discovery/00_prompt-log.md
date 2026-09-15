@@ -2522,3 +2522,8 @@ Done with it: Dynamics → Kam's team decision (no action); QuickQuote masthead/
 > it will be from Monday night so we will have a full day to work through things but the summary is good
 
 *Note:* Kam leaves Monday night 2026-09-21; the unattended loop must be built + piloted by Monday morning. Folded into the never-idle lesson.
+
+## 2026-09-16 06:40 — Kam (dashboard chat, verbatim)
+> thanks for fixing it.  I am glad you are onto it.  please keep going through the day with the local agent
+
+*Note:* receipted on the panel; the day standing instruction — Wednesday + the local model, never idle

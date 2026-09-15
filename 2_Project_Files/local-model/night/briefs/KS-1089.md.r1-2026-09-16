@@ -1,0 +1,83 @@
+# KS-1089 — Wednesday's task for Ornith, BASH_PATCH (both polish items, QA-8 + QA-7; written 06:34 on 2026-09-16 from the file at develop M55 `48e65c435` — `Blockchain/Dev/scripts/run-shell-suites.sh` (237 lines) read whole; the reference suite `Blockchain/Dev/scripts/__tests__/run_shell_suites.test.sh` (396 lines) helpers :22–:95 and its two git-shim cells :306–:318 / :380–:393 read; the reference PINS `could not ask git which variables` for the printed-nothing cause and `with N usable name(s), GIT_DIR absent` in the parenthetical — both survive this change by design)
+
+## What is wrong (one paragraph)
+Two Polish findings from the #953 tier-2 gate, both in `Blockchain/Dev/scripts/run-shell-suites.sh`, one ticket because one test file proves both. **QA-8:** `--list` on a tree with zero reached suites dies on bash 3.2 under `set -u` — line 72 expands `"${reached[@]}"` on an EMPTY array (`line 72: reached[@]: unbound variable`, rc 1); line 92 of the same file already converts the same expansion to `${reached[@]+"${reached[@]}"}` and line 72 was never converted. **QA-7:** the run-mode refusal at :202 prints the ONE headline `FAIL — could not ask git which variables are repository-local` for every cause — including when git DID print a list that simply lacks `GIT_DIR`; only the parenthetical on :203 names the cause. Fix: the headline is chosen per cause where `git_env_state` already is (:197–:201), and :202 prints it. NOT in this task: :203–:206 (the parenthetical and the rest of the refusal — untouched, the reference suite pins its wording), the `--check-unreached` block, anything else.
+
+## The exact change — TWO edits in `Blockchain/Dev/scripts/run-shell-suites.sh`
+E1 — line 72 (context: line 71 is `if [ "$MODE" = "list" ]; then`, line 73 is `  exit 0`):
+```
+-  printf '%s\n' "${reached[@]}"
++  printf '%s\n' ${reached[@]+"${reached[@]}"}
+```
+E2 — lines 197–202, ONE contiguous block: six `-` lines then eight `+` lines (context: line 196 is `if [ "$git_env_total" -eq 0 ] || [ "$git_env_has_dir" -ne 1 ]; then`, line 203 is `  echo "       (git rev-parse --local-env-vars $git_env_state). Refusing to run the"` — copy both from the file as context):
+```
+-  if [ -z "$git_local_env" ]; then
+-    git_env_state="printed nothing"
+-  else
+-    git_env_state="printed a list with $git_env_total usable name(s), GIT_DIR absent"
+-  fi
+-  echo "FAIL — could not ask git which variables are repository-local"
++  if [ -z "$git_local_env" ]; then
++    git_env_state="printed nothing"
++    git_env_headline="FAIL — could not ask git which variables are repository-local"
++  else
++    git_env_state="printed a list with $git_env_total usable name(s), GIT_DIR absent"
++    git_env_headline="FAIL — git listed its repository-local variables, but GIT_DIR is not among them"
++  fi
++  echo "$git_env_headline"
+```
+Every `+` line is byte-exact — copy it (two-space and four-space indents as shown); do not touch any other line; do not add trailing comments.
+
+## The test — ONE NEW shell suite, bash 3.2, beside the reference (it copies the reference's helpers and drives the runner in throwaway git repos exactly as the reference does)
+File: `Blockchain/Dev/scripts/__tests__/run_shell_suites_polish.test.sh`
+The new file, top to bottom — the helper blocks are TEXT TO COPY from the reference, verbatim:
+1. `#!/usr/bin/env bash`, a header comment naming KS-1089 (QA-8: `--list` on an empty tree; QA-7: a headline per cause), then `set -uo pipefail`.
+2. VERBATIM from the reference :24–:29 — the `HERE=` line, the `RUNNER=` line and the four-line `if [[ ! -f "$RUNNER" ]]` FATAL block.
+3. VERBATIM from the reference :37–:47 — the `ROOTS=()` while-read loop that reads ROOTS out of the runner, the FATAL block if empty, and `PRIMARY_ROOT="${ROOTS[0]}"` / `SECOND_ROOT="${ROOTS[1]:-$PRIMARY_ROOT}"`.
+4. VERBATIM from the reference :49–:52 — `TMP="$(mktemp -d)"`, `trap 'rm -rf "$TMP"' EXIT`, `PASS=0`, `FAIL=0`.
+5. VERBATIM from the reference :54–:60 — the `check()` function (label, expected, actual → `  ok   …` / `  FAIL …`).
+6. VERBATIM from the reference :65–:76 — the `new_repo()` function (a real `git init` repo with the runner copied in and committed), then :78–:81 `suite_at()`, then :83 `commit_all()`, then :85–:89 `run_runner()` and :91–:94 `runner_out()`.
+7. `echo "run_shell_suites_polish: KS-1089"`
+8. The cells — copy this block VERBATIM:
+```
+# --- QA-8: --list on a tree with ZERO reached suites --------------------------
+R="$(new_repo)"
+check 'QA-8: --list on an empty tree exits 0 (bash 3.2, set -u)' 0 \
+  "$(run_runner "$R" --list)"
+check 'QA-8: --list on an empty tree raises no unbound-variable error' 0 \
+  "$(runner_out "$R" --list | grep -c 'unbound variable')"
+R="$(new_repo)"; suite_at "$R" "$PRIMARY_ROOT/one.test.sh" 0; commit_all "$R"
+check 'CONTROL: --list with one suite still prints it' 1 \
+  "$(runner_out "$R" --list | grep -c "$PRIMARY_ROOT/one.test.sh")"
+
+# --- QA-7: the git-list refusal has a headline PER CAUSE -----------------------
+K_REALGIT="$(command -v git)"
+K_NODIRBIN="$(mktemp -d "$TMP/nodirbin.XXXXXX")"
+printf '#!/usr/bin/env bash\nif [ "${1:-}" = rev-parse ] && [ "${2:-}" = --local-env-vars ]; then "%s" rev-parse --local-env-vars | grep -vx GIT_DIR; exit 0; fi\nexec "%s" "$@"\n' "$K_REALGIT" "$K_REALGIT" > "$K_NODIRBIN/git"
+chmod +x "$K_NODIRBIN/git"
+R="$(new_repo)"; suite_at "$R" "$PRIMARY_ROOT/one.test.sh" 0; commit_all "$R"
+K_NODIR="$( cd "$R/Blockchain/Dev" && PATH="$K_NODIRBIN:$PATH" bash scripts/run-shell-suites.sh 2>&1 )"
+check 'QA-7: a list WITHOUT GIT_DIR gets the GIT_DIR headline' 1 \
+  "$(printf '%s\n' "$K_NODIR" | grep -c 'GIT_DIR is not among them')"
+check 'QA-7: that case no longer prints the could-not-ask headline' 0 \
+  "$(printf '%s\n' "$K_NODIR" | grep -c 'could not ask git which variables')"
+check 'CONTROL: the parenthetical still names the cause (the reference pins it)' 1 \
+  "$(printf '%s\n' "$K_NODIR" | grep -cE 'with [1-9][0-9]* usable name\(s\), GIT_DIR absent')"
+K_EMPTYBIN="$(mktemp -d "$TMP/emptybin.XXXXXX")"
+printf '#!/usr/bin/env bash\nexit 0\n' > "$K_EMPTYBIN/git"; chmod +x "$K_EMPTYBIN/git"
+K_EMPTY="$( cd "$R/Blockchain/Dev" && PATH="$K_EMPTYBIN:$PATH" bash scripts/run-shell-suites.sh 2>&1 )"
+check 'CONTROL: git printing NOTHING keeps the could-not-ask headline' 1 \
+  "$(printf '%s\n' "$K_EMPTY" | grep -c 'could not ask git which variables')"
+```
+(At the untouched tip: the two QA-8 cells FAIL — rc 1 and one `unbound variable` line — and the two QA-7 cells FAIL — 0 GIT_DIR-headline lines, 1 could-not-ask line; the three CONTROL cells are green on both trees. Measured by Wednesday's reading of :72 and :196–:207 against the reference's :306–:318 and :380–:393.)
+9. The reference's LAST THREE LINES verbatim: `echo`, `echo "run_shell_suites_polish: $PASS passed, $FAIL failed"` (the label changed to this file's name — the only edit), `[[ "$FAIL" -eq 0 ]]`.
+**Your diff for this file is a NEW-FILE diff: `--- /dev/null`, `+++ b/<path>`, ONE hunk header `@@ -0,0 +1,N @@`, then EVERY line with a leading `+` — no context lines, no `-` lines: you are not diffing the reference.** No line in this file carries a backslash before a `$` — the git shim is written with a single-quoted printf so `${1:-}` and `$@` are literal.
+
+## Where (parsed into the checklist — every **must change** line must appear as a `-` line in your diff)
+* `:72` — **must change**: `  printf '%s\n' "${reached[@]}"`
+* `:202` — **must change**: `  echo "FAIL — could not ask git which variables are repository-local"`
+* `:92` — (correct) `  reached_sorted=$(printf '%s\n' ${reached[@]+"${reached[@]}"} | sort)` — the shape :72 copies; stays
+* `:203` — (correct) `  echo "       (git rev-parse --local-env-vars $git_env_state). Refusing to run the"` — stays (pinned by the reference suite)
+
+## Output
+Exactly ONE ```diff block with TWO files: `--- a/Blockchain/Dev/scripts/run-shell-suites.sh` / `+++ b/Blockchain/Dev/scripts/run-shell-suites.sh` (TWO hunks: :72 and :197–:202), then `--- /dev/null` / `+++ b/Blockchain/Dev/scripts/__tests__/run_shell_suites_polish.test.sh` (one `@@ -0,0 +1,N @@` hunk, all `+`); paths repo-relative; blank context lines keep their leading space.

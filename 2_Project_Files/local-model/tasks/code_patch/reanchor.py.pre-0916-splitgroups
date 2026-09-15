@@ -312,15 +312,6 @@ def _must_remove():
 
 def rebuild(hunk, file_lines, notes, idx):
     body = [b for b in hunk["body"] if b != "\\ No newline at end of file"]
-    # DROPPED CONTEXT MARKER (2026-09-16 06:4x, KS-1089 r1): the model emits a context line with NO leading space
-    # (`fi` for ` fi`) — the same dropped-marker dialect the new-file path restores. Every path below reads b[1:],
-    # so a bare line loses its first character (`fi` → `i`) and the old-side anchor cannot close. A body line that
-    # starts with none of ' ', '-', '+', '\\' IS a context line: restore the marker, and say so.
-    bare = [b for b in body if b and not b.startswith((" ", "-", "+", "\\"))]
-    if bare:
-        body = [(" " + b) if (b and not b.startswith((" ", "-", "+", "\\"))) else b for b in body]
-        notes.append(f"hunk {idx}: {len(bare)} context line(s) had no leading-space marker — restored as context")
-        hunk = {"header": hunk["header"], "body": body}   # the helpers below re-read hunk["body"]
     if os.environ.get("REANCHOR_REFLOW") == "1":
         body = reflow(body, file_lines, notes, idx)
     if any(b.startswith("++++ b/") or b.startswith("+--- ") for b in body):
@@ -329,19 +320,7 @@ def rebuild(hunk, file_lines, notes, idx):
     minus = [b[1:] for b in body if b.startswith("-")]
     plus = [b[1:] for b in body if b.startswith("+")]
     ctx = [b[1:] for b in body if b.startswith(" ")]
-    # SPLIT GROUPS (2026-09-16 06:4x, KS-1089 r1): the contiguous-'-'-block path below re-emits EVERY '+' line at the
-    # '-' block's position, dropping the context between them — a hunk whose '+' lines sit INSIDE an if/else (two
-    # assignments, one per branch) and whose single '-' sits after the `fi` was rebuilt with both assignments after
-    # the `fi`, so the last one always won. The model's hunk was right; the rebuild was not. When the body's -/+
-    # lines are not ONE contiguous run, positions are load-bearing: try the whole-old-side rebuild (which keeps
-    # every '+' where the model put it relative to the file's lines) FIRST, and only fall through if it cannot anchor.
     if minus:
-        chg = [i for i, b in enumerate(body) if b.startswith(("-", "+"))]
-        if chg and (chg[-1] - chg[0] + 1) != len(chg):
-            alt = rebuild_old_side(hunk, file_lines, notes, idx)
-            if alt is not None:
-                notes[-1] = notes[-1] + " [split -/+ groups: positions kept]"
-                return alt
         hits = find_block(file_lines, minus)
         blank_span = None
         if len(hits) == 0:
