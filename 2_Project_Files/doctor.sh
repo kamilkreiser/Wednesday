@@ -149,6 +149,17 @@ else
   else
     warn "ornith night job NOT armed" "bash 2_Project_Files/local-model/night/install_night.command (PORTABILITY 15) — nothing runs the backlog at night until it is"
   fi
+  # 2026-09-15 23:1x (Kam 18:19 "know progress continues through the week"): the 06:45 daily RECEIPT job posts one
+  # counted panel line from the runner's own records (night/daily_receipt.sh --post). Monday-loop piece (e).
+  if [ -f "$PROJECT_DIR/2_Project_Files/local-model/night/daily_receipt.sh" ]; then
+    if launchctl print "gui/$(id -u)/com.wednesday.ornith-receipt" >/dev/null 2>&1; then
+      ok "ornith daily receipt armed (com.wednesday.ornith-receipt, 06:45 → the panel)"
+    else
+      warn "ornith daily receipt NOT armed" "bash 2_Project_Files/local-model/night/install_receipt.command (PORTABILITY 15) — Kam gets no morning line from the night's work until it is"
+    fi
+  else
+    warn "ornith daily receipt script missing" "2_Project_Files/local-model/night/daily_receipt.sh is gone — the 18:19 rule's receipt has no mechanism"
+  fi
   # 2026-09-15 (Kam 2026-09-14 21:57: Ornith 24/7 when no other agents run): the 15-minute loop job.
   # night_run.sh's own G2 pane census is the gate; a run lock stops overlap with the 23:30 job.
   if launchctl print "gui/$(id -u)/com.wednesday.ornith-loop" >/dev/null 2>&1; then

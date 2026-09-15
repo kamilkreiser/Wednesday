@@ -6,18 +6,7 @@
 # no typed clock — the panel stamps it). Every number is COUNTED here, never carried from a note (ledger w=5, 08-14).
 set -u
 HERE="$(cd "$(dirname "$0")" && pwd)"; LM="$(cd "$HERE/.." && pwd)"; W="$(cd "$LM/../.." && pwd)"
-# 2026-09-15 23:1x: the date is the FIRST argument that LOOKS like a date, in any position — `daily_receipt.sh --post`
-# (the launchd job's shape) used to read DAY="--post" and would have posted a garbage line (caught at the render arm).
-# RECEIPT_DRY=1 prints the line that WOULD be posted, without posting (the test seam).
-DAY=""; POST=0
-for a in "$@"; do
-  case "$a" in
-    --post) POST=1 ;;
-    [0-9][0-9][0-9][0-9]-[0-9][0-9]-[0-9][0-9]) DAY="$a" ;;
-    *) echo "daily_receipt: unknown argument '$a' (usage: daily_receipt.sh [YYYY-MM-DD] [--post])" >&2; exit 2 ;;
-  esac
-done
-[ -n "$DAY" ] || DAY="$(date +%F)"
+DAY="${1:-$(date +%F)}"; POST=0; for a in "$@"; do [ "$a" = "--post" ] && POST=1; done
 DONE="$HERE/done.md"
 pass=$(/usr/bin/grep -i "| done $DAY " "$DONE" 2>/dev/null | /usr/bin/grep -ci 'RESULT: PASS')
 fail=$(/usr/bin/grep -i "| done $DAY " "$DONE" 2>/dev/null | /usr/bin/grep -ci 'RESULT: FAIL')
@@ -33,4 +22,4 @@ lock="$HERE/log/.night_run.lock/pid"; running="idle"; [ -f "$lock" ] && kill -0 
 LINE="Ornith daily receipt for $DAY: $pass passes, $fail fails, $refused build-refusals in the runner's log today; $newtoday new pins held today; $pins pins across $tickets tickets held for Sunday in total ($files files); $rows harness improvement rows written today; the model is $running now; Claude allowance at ${gauge}%."
 [ "$retracted" -gt 0 ] && LINE="$LINE $retracted verdict(s) stand retracted in done.md."
 echo "$LINE"
-if [ "$POST" = 1 ]; then if [ "${RECEIPT_DRY:-0}" = 1 ]; then echo "DRY (would post): $LINE"; else bash "$W/2_Project_Files/tools/chat_reply.sh" "$LINE" > /dev/null 2>&1 && echo "posted to the panel" || echo "post FAILED" >&2; fi; fi
+if [ "$POST" = 1 ]; then bash "$W/2_Project_Files/tools/chat_reply.sh" "$LINE" > /dev/null 2>&1 && echo "posted to the panel" || echo "post FAILED" >&2; fi

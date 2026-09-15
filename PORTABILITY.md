@@ -413,6 +413,10 @@ built from nothing:
       (`--render-only <path>` lint-checks without arming; refuses under `WED_AGENT=tuesday` — Wednesday's
       seat only, like the daily sweep). The Ollama server itself is also a per-boot process (item 14's
       start line, with the drive-local binary).
+    - **Machine-local, added 2026-09-15 23:1x:** the armed job `com.wednesday.ornith-receipt` (06:45 daily →
+      `night/daily_receipt.sh --post`, ONE counted panel line for Kam — his 18:19 "know progress continues") — arm with
+      `bash 2_Project_Files/local-model/night/install_receipt.command` (`--render-only <path>` lints without arming;
+      `RECEIPT_DRY=1` on the script prints the line without posting). doctor.sh warns when it is not loaded.
     - **Needs on the Mac:** `tmux` (the pane-census gate reads the `fleet` session), `node`/`npx` (the
       checker's vitest + tsc, from the Secuura source's installed `node_modules` — symlink-farmed, never
       installed), `python3`, `curl`, and the Secuura project mounted read-only at
