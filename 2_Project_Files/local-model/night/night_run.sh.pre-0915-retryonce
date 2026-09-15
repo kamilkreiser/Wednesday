@@ -378,58 +378,6 @@ PYEOF
     echo "source checkout tracked-modified: before=$SRC_DIRTY_BEFORE after=$SRC_DIRTY_AFTER (must be equal)" >> "$RLOG"
     [ "$SRC_DIRTY_BEFORE" = "$SRC_DIRTY_AFTER" ] || log "WARNING $TICKET: source checkout modified count changed $SRC_DIRTY_BEFORE → $SRC_DIRTY_AFTER — read the run.log"
   fi
-  # ---------------------------------------------------------------- RETRY-ONCE (2026-09-15 15:5x)
-  # A3b PARTIAL (a named site left untouched — four times on audit.ts it was the NEIGHBOUR that changed) and
-  # A2b PLACEHOLDER (a one-line test file) are SAMPLE failures, not model verdicts: the same brief on a fresh
-  # sample with the checker's own words in front of the model is the cheapest next step (row 33 of
-  # IMPROVEMENTS.md). One retry, same model, input + `retry_feedback` (verdict, missed sites from the A3b
-  # line, an instruction); the retry's out.md/checker.out live under $RUN/retry/; the FIRST attempt's files
-  # are untouched. NIGHT_RETRY_ON_PARTIAL=0 disables. The done.md row carries both verdicts.
-  if [ "${NIGHT_RETRY_ON_PARTIAL:-1}" = "1" ] && [ -z "${RETRY_DONE:-}" ] && echo "$VERDICT" | /usr/bin/grep -q -i -E 'stopped at A3b|A2b PLACEHOLDER'; then
-    RETRY_DONE=1; FIRST_VERDICT="$VERDICT"
-    mkdir -p "$RUN/retry"
-    python3 - "$INPUT" "$RUN/checker.out" "$RUN/retry/input.json" <<'PYR'
-import json, re, sys
-inp, chk, out = sys.argv[1:4]
-d = json.load(open(inp, encoding="utf-8")); c = open(chk, encoding="utf-8").read()
-m = re.search(r"^(FAIL A3b PARTIAL FIX.*|FAIL A2b PLACEHOLDER.*)$", c, re.M)
-verdict = m.group(1).strip() if m else "the checker refused the first attempt (see verdict)"
-missed = []
-for ln in re.findall(r":(\d+) `", verdict):
-    for s_ in d.get("defect_line", {}).get("sites", []):
-        if str(s_.get("line")) == ln:
-            missed.append({"line": s_["line"], "text_at_tip": s_.get("text_at_tip", s_.get("text", ""))})
-d["retry_feedback"] = {
-    "attempt": 2,
-    "verdict": verdict[:600],
-    "missed_sites": missed,
-    "instruction": ("Your first diff was REFUSED: " + verdict[:300] + ". Emit the COMPLETE diff again. For every "
-        "missed site the `-` line is `text_at_tip` copied character for character (do NOT edit the comment or the "
-        "line beside it); keep the test exactly as specified. If the verdict names a PLACEHOLDER test file, write "
-        "the full test file this time."),
-}
-json.dump(d, open(out, "w", encoding="utf-8"), indent=1)
-print(f"retry input: {len(missed)} missed site(s) carried; verdict={verdict[:120]!r}")
-PYR
-    log "TICKET $TICKET RETRY-ONCE on '$FIRST_VERDICT' — $(tail -1 "$RLOG" 2>/dev/null | head -c 0)same model, input + retry_feedback → $RUN/retry/"
-    TR0="$(date +%s)"
-    LM_MODEL="$NIGHT_MODEL" LM_THINK="$NIGHT_THINK" LM_NUM_CTX="$CTX" LM_MAX_LOAD="$NIGHT_MAX_LOAD" OLLAMA_URL="$OLLAMA_URL" \
-      bash "$LM_DIR/local_model_task.sh" "$TASK" "$RUN/retry/input.json" "$RUN/retry/out.md" >> "$RLOG" 2>&1
-    rrc=$?; TR1="$(date +%s)"
-    echo "retry harness rc=$rrc wall=$((TR1 - TR0))s" >> "$RLOG"
-    if [ "$rrc" -eq 0 ]; then
-      bash "$TASK_DIR/prepare_clone.sh" "$INPUT" "$CLONE" >> "$RLOG" 2>&1
-      bash "$TASK_DIR/checker.sh" "$RUN/retry/input.json" "$RUN/retry/out.md" "$CLONE" > "$RUN/retry/checker.out" 2>&1
-      RV="$(/usr/bin/grep -m1 '^RESULT:' "$RUN/retry/checker.out" | head -c 120)"; RV="${RV:-CHECKER_NO_RESULT}"
-      /usr/bin/grep -E '^(PASS|FAIL|SUMMARY|RESULT)' "$RUN/retry/checker.out" | sed 's/^/retry: /' >> "$RLOG"
-      VERDICT="$RV — RETRY of [$FIRST_VERDICT] (retry/out.md, $((TR1 - TR0))s)"
-      log "TICKET $TICKET retry verdict: $RV (first: $FIRST_VERDICT)"
-    else
-      log "TICKET $TICKET retry harness rc=$rrc — first verdict stands"
-      VERDICT="$FIRST_VERDICT — retry harness rc=$rrc"
-    fi
-  fi
-  RETRY_DONE=""
   log "TICKET $TICKET verdict: $VERDICT"
   VERDICTS="$VERDICTS;$TICKET=$(echo "$VERDICT" | tr ' ;' '_,')"
   python3 - "$RUN/night_meta.json" "$TICKET" "$NIGHT_MODEL" "$CTX" "$MEM_NOTE" "$VERDICT" "$((T1 - T0))" "$LINE" <<'PYEOF'

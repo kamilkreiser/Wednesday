@@ -23,16 +23,6 @@ minimal code change that makes it so. If the ticket names several sites that
 read the same wrong value, fix every named site inside `product_file`, not
 only the first one.
 
-RETRY FEEDBACK (2026-09-15 15:5x — added after the fourth "changed the neighbour" slip on one
-file): if the input carries a `retry_feedback` object, this is your SECOND attempt at this exact
-task and the checker REFUSED your first one. Read `retry_feedback` BEFORE anything else. It names
-the verdict (`verdict`), the site line(s) your first diff left untouched (`missed_sites`, each with
-`line` and `text_at_tip`), and an `instruction`. Emit the COMPLETE diff again (every product hunk
-and the test) — and for every missed site the `-` line of your hunk MUST be `text_at_tip` copied
-character for character, with the line ABOVE and BELOW it as unchanged context. The commonest way
-the first attempt failed is editing the comment or the line NEXT TO the named line; do not touch a
-neighbour.
-
 NAMED-SITE CHECKLIST (2026-09-15 — the rule that turns "fix every site" into
 something checkable): the input carries `defect_line.sites`, one entry per
 site the ticket's `Where` list names, each with `line`, `text_at_tip` and
