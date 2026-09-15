@@ -118,4 +118,3 @@
 # ─── Kam 12:38: every ticket on BOTH quants. q4 twins of the q8-only passes (active lines — the loop job / a hand q4 run takes them):
 # q8 twins of the q4-only passes — PARKED (#Q8): uncomment + hand-launch with NIGHT_MODEL=ornith:35b-q8_0 NIGHT_MIN_FREE_GB=45 NIGHT_MAX_TICKETS=6 when no runner is live
 # 2026-09-15 21:1x — a MEASURED BASELINE for the successor (ticket-only prompt, no brief): KS-974 item 1, /check key bound at security/src/index.ts:600 (the ticket cites :513 at an older SHA). Expect a shape FAIL; the successor writes the brief (helper boundedByCodePoints — find its home in requestSchemas.ts; the KS-742 driver has an opt-in boot guard env, read lines 52-60).
-KS-972 input=/Volumes/DevMASTER/WEDNESDAY/2_Project_Files/local-model/night/inputs/bash_972.json task=/Volumes/DevMASTER/WEDNESDAY/2_Project_Files/local-model/tasks/bash_patch/task.md ctx=49152
