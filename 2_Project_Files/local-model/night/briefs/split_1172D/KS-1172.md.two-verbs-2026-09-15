@@ -1,7 +1,7 @@
-# KS-1172 — Wednesday's task for Ornith, **PART D — DOCUMENTATION (`docs/VOCABULARY.md`, no code)** (REVISED 20:29 for THREE verbs — Stuart's own KS-1173 adds `certified`; written 19:59 on 2026-09-15 from the file at develop M55 `48e65c435`: `Blockchain/Dev/docs/VOCABULARY.md` §2 (lines 31–60) and §3 (lines 115–160) read whole)
+# KS-1172 — Wednesday's task for Ornith, **PART D — DOCUMENTATION (`docs/VOCABULARY.md`, no code)** (written 19:59 on 2026-09-15 from the file at develop M55 `48e65c435`: `Blockchain/Dev/docs/VOCABULARY.md` §2 (lines 31–60) and §3 (lines 115–160) read whole)
 
 ## What to change (one paragraph)
-Platform S (Stuart, 2026-09-15 — KS-1172 + his own KS-1173) gets THREE new lifecycle verbs: `note` (a user attached a short plain-text note to a document —
+Platform S (Stuart, 2026-09-15) gets two new lifecycle verbs: `note` (a user attached a short plain-text note to a document —
 non-mutating; the payload carries only `noteSha256` / `noteLength`, never the text) and `verified` (the Verify FLOW's completion
 event — every required verifier has completed; verifier identities as DID / credential references only). The code halves add both
 to `LIFECYCLE_VERBS` (`services/anchoring/src/anchorSchema.ts`, the §2 flat path) and to `LIFECYCLE_EVENT_ACTIONS`
@@ -15,7 +15,7 @@ line 50 is the closing triple backtick, line 51 is blank):
  delete · rename · view · download ·
 -protect · unprotect · restore
 +protect · unprotect · restore ·
-+note · certified · verified
++note · verified
  ```
 ```
 E2 — §3 code block, line 128 `share-attach-consent · protect · unprotect` becomes two lines (context: line 127 is
@@ -24,7 +24,7 @@ E2 — §3 code block, line 128 `share-attach-consent · protect · unprotect` b
  share-recipient-change · share-expiry-change · share-token-rotate · share-resend ·
 -share-attach-consent · protect · unprotect
 +share-attach-consent · protect · unprotect ·
-+note · certified · verified
++note · verified
  ```
 ```
 E3 — §3 bullet list: insert ONE new bullet (five lines, copy verbatim) between line 153 `  the fallback path for all three.` and
@@ -32,20 +32,18 @@ line 154 `- Read side: ` … (context: line 152 is `  \`restore\` (already accep
 line 153 is `  the fallback path for all three.`, line 154 begins `- Read side:`):
 ```
    the fallback path for all three.
-+- `note` / `certified` / `verified` (**Stuart's Flow project, KS-1172 + KS-1173, 2026-09-15**) — `note`: a user
++- `note` / `verified` (**Stuart's request, accepted since KS-1172, 2026-09-15**) — `note`: a user
 +  attached a short plain-text note to a document; the text stays on S and the payload carries only
-+  `noteSha256` / `noteLength` (a content commitment, never the text). `certified`: the Certify FLOW completed
-+  (every required declaration made and the organisation's signature applied — one row per flow, after its
-+  `declare` and `sign` events; not the transitional `certify` alias). `verified`: the Verify FLOW completed —
-+  every required verifier confirmed; verifier identities as DID / credential references only. All three
-+  non-mutating, exactly the KS-387 shape; also added to the flat-path vocabulary in §2.
++  `noteSha256` / `noteLength` (a content commitment, never the text). `verified`: the Verify FLOW's
++  completion event — every required verifier has completed; verifier identities as DID / credential
++  references only. Both non-mutating, exactly the KS-387 shape; also added to the flat-path vocabulary in §2.
  - Read side: `GET /api/documents/{id}/lifecycle-events` (tenant-scoped, newest first).
 ```
 (The E3 context line after the insert is line 154 exactly as it is in the file — copy it from `files[...]`.)
 
 ## Required (the checker's proof — each token ABSENT in the section before, PRESENT after)
-- `## 2. Flat anchor` :: note, certified, verified
-- `## 3. Lifecycle events` :: note, certified, verified
+- `## 2. Flat anchor` :: note, verified
+- `## 3. Lifecycle events` :: note, verified
 
 ## Output
 Exactly ONE ```diff block, ONE file section `--- a/Blockchain/Dev/docs/VOCABULARY.md` / `+++ b/Blockchain/Dev/docs/VOCABULARY.md`,

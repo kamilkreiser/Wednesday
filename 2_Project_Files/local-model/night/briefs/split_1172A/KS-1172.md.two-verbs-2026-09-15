@@ -1,4 +1,4 @@
-# KS-1172 — Wednesday's task for Ornith, **PART A of two — JEST service (originate)** (REVISED 20:29 for THREE verbs — Stuart's own KS-1173 adds `certified`; written 18:50 on 2026-09-15 from the file at develop M55 `48e65c435`: `services/originate/src/lifecycleActions.ts` read WHOLE (59 lines); the EXISTING test `services/originate/src/__tests__/lifecycleEventRepo.test.ts` lines 1–72 read whole; the route guard `routes/documents.ts:2373-2381` read)
+# KS-1172 — Wednesday's task for Ornith, **PART A of two — JEST service (originate)** (written 18:50 on 2026-09-15 from the file at develop M55 `48e65c435`: `services/originate/src/lifecycleActions.ts` read WHOLE (59 lines); the EXISTING test `services/originate/src/__tests__/lifecycleEventRepo.test.ts` lines 1–72 read whole; the route guard `routes/documents.ts:2373-2381` read)
 
 ## What is wrong (one paragraph)
 Platform S (Stuart, 2026-09-15) is about to emit two lifecycle verbs Platform K does not accept: `note` (a user attached a short
@@ -7,32 +7,30 @@ plain-text note to a document — non-mutating; the payload carries only `noteSh
 out-of-vocabulary verb 400s the WHOLE lifecycle event: `routes/documents.ts:2373` `if (typeof action !== 'string' ||
 !LIFECYCLE_EVENT_ACTIONS.includes(action as LifecycleEventAction))` → 400 with the accepted list. The vocabulary lives in ONE
 tuple, `services/originate/src/lifecycleActions.ts:38-57` `export const LIFECYCLE_EVENT_ACTIONS = [ … ] as const;` — thirteen
-verbs today, `'unprotect',` the last at line 56, `] as const;` at line 57. **This task: add `'note'`, `'certified'` and `'verified'` to that tuple,
-and update the EXISTING pin test so the whole originate suite stays green.** NOT in this task: the anchoring service's twin list (Part B), `docs/VOCABULARY.md`, the regenerated OpenAPI yaml, any endpoint or migration.
+verbs today, `'unprotect',` the last at line 56, `] as const;` at line 57. **This task: add `'note'` and `'verified'` to that tuple,
+and update the EXISTING pin test so the whole originate suite stays green.** NOT in this task: `certified` (Stuart did not ask for
+it), the anchoring service's twin list (Part B), `docs/VOCABULARY.md`, the regenerated OpenAPI yaml, any endpoint or migration.
 
-## The exact change — THREE INSERT-ONLY EDITS (five inserted lines in E1, three in E2) (nothing existing changes; nothing is removed)
-E1 — PRODUCT `services/originate/src/lifecycleActions.ts`: insert FIVE lines between line 56 `  'unprotect',` and line 57 `] as const;`
+## The exact change — THREE INSERT-ONLY EDITS (nothing existing changes; nothing is removed)
+E1 — PRODUCT `services/originate/src/lifecycleActions.ts`: insert FOUR lines between line 56 `  'unprotect',` and line 57 `] as const;`
 (context: line 55 is `  'protect',`, line 56 is `  'unprotect',`, line 57 is `] as const;`, line 58 is blank, line 59 is
 `export type LifecycleEventAction = (typeof LIFECYCLE_EVENT_ACTIONS)[number];`):
 ```
    'protect',
    'unprotect',
 +  // KS-1172 (Stuart 2026-09-15): `note` (a user's short note on a document; payload = noteSha256/noteLength only)
-+  // `certified` (the Certify FLOW completed) and `verified` (the Verify FLOW completed) — KS-1173. All non-mutating,
-+  // KS-387 shape; paired in anchorSchema.ts.
++  // and `verified` (the Verify FLOW's completion event). Both non-mutating, KS-387 shape; paired in anchorSchema.ts.
 +  'note',
-+  'certified',
 +  'verified',
  ] as const;
 ```
-E2 — TEST `services/originate/src/__tests__/lifecycleEventRepo.test.ts`: inside the literal list of the pin cell, insert THREE lines
+E2 — TEST `services/originate/src/__tests__/lifecycleEventRepo.test.ts`: inside the literal list of the pin cell, insert TWO lines
 between line 59 `        'unprotect',` and line 60 `        'rights-unassign',` (context: line 58 is `        'restore',`, line 59 is
 `        'unprotect',`, line 60 is `        'rights-unassign',`; the list is `.sort()`ed on both sides at line 53/68, so position is free):
 ```
          'restore',
          'unprotect',
 +        'note',
-+        'certified',
 +        'verified',
          'rights-unassign',
 ```
@@ -42,12 +40,11 @@ E3 — TEST, same file: insert ONE new `it` between line 70 `  });` (the end of 
      );
    });
 +
-+  it('🔴 KS-1172 / KS-1173 — accepts note, certified and verified (Stuart 2026-09-15); declare keeps its dedicated route', () => {
++  it('🔴 KS-1172 — accepts note and verified (Stuart 2026-09-15); certified was NOT requested and stays out', () => {
 +    expect(LIFECYCLE_EVENT_ACTIONS).toContain('note');
-+    expect(LIFECYCLE_EVENT_ACTIONS).toContain('certified');
 +    expect(LIFECYCLE_EVENT_ACTIONS).toContain('verified');
-+    // CONTROL — green on both trees: a verb WITH a dedicated K route is never accepted here.
-+    expect(LIFECYCLE_EVENT_ACTIONS).not.toContain('declare');
++    // CONTROL — green on both trees: widening must not admit a verb nobody asked for.
++    expect(LIFECYCLE_EVENT_ACTIONS).not.toContain('certified');
 +  });
  });
 ```
@@ -60,7 +57,7 @@ with the ordinary header `--- a/Blockchain/Dev/services/originate/src/__tests__/
 lines 68–73). Its existing `jest.mock('../db'…)`, `jest.mock('../utils/logger'…)`, the imports at 36–41 (`LIFECYCLE_EVENT_ACTIONS` is
 already imported at line 41), `TENANT`, `beforeEach`, and the `createLifecycleEvent` / `setLifecycleEventAnchor` /
 `listLifecycleEvents` describes all stay byte-identical. ts-jest type-checks the file (`noUnusedLocals`): you declare nothing new.
-Red at the tip: the pin cell's `toEqual` (16 expected vs 13 actual) and the new cell's three `toContain`s; the `not.toContain` and
+Red at the tip: the pin cell's `toEqual` (15 expected vs 13 actual) and the new cell's two `toContain`s; the `not.toContain` and
 every other cell are green on both trees.
 
 ## Where (parsed into the checklist — INSERT-ONLY: no line must change, so there is NO must-change line; the anchors are (correct))

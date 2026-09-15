@@ -1,4 +1,4 @@
-# KS-1172 — Wednesday's task for Ornith, **PART B of two — VITEST service (anchoring)** (REVISED 20:29 for THREE verbs — Stuart's own KS-1173 adds `certified`; written 18:51 on 2026-09-15 from the file at develop M55 `48e65c435`: `services/anchoring/src/anchorSchema.ts` lines 1–95 read whole; the EXISTING test `services/anchoring/src/__tests__/anchorSchema.test.ts` lines 17–100 read whole)
+# KS-1172 — Wednesday's task for Ornith, **PART B of two — VITEST service (anchoring)** (written 18:51 on 2026-09-15 from the file at develop M55 `48e65c435`: `services/anchoring/src/anchorSchema.ts` lines 1–95 read whole; the EXISTING test `services/anchoring/src/__tests__/anchorSchema.test.ts` lines 17–100 read whole)
 
 ## What is wrong (one paragraph)
 Platform S (Stuart, 2026-09-15) is about to emit two lifecycle verbs Platform K's FLAT-ANCHOR path does not accept: `note` (a user
@@ -7,34 +7,31 @@ and `verified` (the Verify FLOW's completion event — every required verifier h
 as `metadata.documentType`, validated by `anchorDocumentSchema` (`anchorSchema.ts:95` `export const anchorDocumentSchema = z.object({` … `:118` `documentType: z.enum(ACCEPTED_LIFECYCLE_VERBS).optional()`),
 and `ACCEPTED_LIFECYCLE_VERBS` (`:90-93`) is `[...LIFECYCLE_VERBS, ...TRANSITIONAL_LIFECYCLE_VERBS]` — so the ONE place to widen is the
 canonical tuple `export const LIFECYCLE_VERBS = [ … ] as const;` at `anchorSchema.ts:18-63`: twenty-two verbs today, `'restore',` the
-last at line 62, `] as const;` at line 63. An out-of-vocabulary verb 400s the WHOLE anchor (PS-499). **This task: add `'note'`, `'certified'` and
+last at line 62, `] as const;` at line 63. An out-of-vocabulary verb 400s the WHOLE anchor (PS-499). **This task: add `'note'` and
 `'verified'` to `LIFECYCLE_VERBS`, and update the EXISTING pin test so the whole anchoring suite stays green.** NOT in this task:
-`TRANSITIONAL_LIFECYCLE_VERBS` (untouched — `certify` stays the transitional alias of `declare`; `certified` is a DIFFERENT verb), the originate twin list (Part A), `docs/VOCABULARY.md`,
+`certified` (not requested), `TRANSITIONAL_LIFECYCLE_VERBS` (untouched), the originate twin list (Part A), `docs/VOCABULARY.md`,
 the regenerated OpenAPI yaml, any endpoint or migration.
 
 ## The exact change — THREE INSERT-ONLY EDITS (nothing existing changes; nothing is removed)
-E1 — PRODUCT `services/anchoring/src/anchorSchema.ts`: insert FIVE lines between line 62 `  'restore',` and line 63 `] as const;`
+E1 — PRODUCT `services/anchoring/src/anchorSchema.ts`: insert FOUR lines between line 62 `  'restore',` and line 63 `] as const;`
 (context: line 60 is `  'protect',`, line 61 is `  'unprotect',`, line 62 is `  'restore',`, line 63 is `] as const;`, line 64 is blank,
 line 65 is `// ─────────────────────────────────────────────────────────────────────────────`):
 ```
    'unprotect',
    'restore',
 +  // KS-1172 (Stuart 2026-09-15): `note` (a user's short note on a document; payload = noteSha256/noteLength only)
-+  // `certified` (the Certify FLOW completed) and `verified` (the Verify FLOW completed) — KS-1173. All non-mutating;
-+  // paired in originate's lifecycleActions.ts.
++  // and `verified` (the Verify FLOW's completion event). Both non-mutating; paired in originate's lifecycleActions.ts.
 +  'note',
-+  'certified',
 +  'verified',
  ] as const;
 ```
-E2 — TEST `services/anchoring/src/__tests__/anchorSchema.test.ts`: inside the literal list of the pin cell, insert THREE lines between
+E2 — TEST `services/anchoring/src/__tests__/anchorSchema.test.ts`: inside the literal list of the pin cell, insert TWO lines between
 line 63 `        'unprotect',` and line 64 `        'upload',` (context: line 62 is `        'sign',`, line 63 is `        'unprotect',`,
 line 64 is `        'upload',`; the list is `.sort()`ed on both sides at line 43/67, so position is free):
 ```
          'sign',
          'unprotect',
 +        'note',
-+        'certified',
 +        'verified',
          'upload',
 ```
@@ -46,12 +43,11 @@ line 82 blank / line 83 `  it('rejects a document-type CODE on the flat path …
      expect(result.success).toBe(false);
    });
 +
-+  it('🔴 KS-1172 / KS-1173 — accepts note, certified and verified on the flat path (Stuart 2026-09-15); an invented verb stays rejected', () => {
++  it('🔴 KS-1172 — accepts note and verified on the flat path (Stuart 2026-09-15); certified was NOT requested and stays rejected', () => {
 +    expect(anchorDocumentSchema.safeParse({ ...BASE_BODY, metadata: { documentType: 'note' } }).success).toBe(true);
-+    expect(anchorDocumentSchema.safeParse({ ...BASE_BODY, metadata: { documentType: 'certified' } }).success).toBe(true);
 +    expect(anchorDocumentSchema.safeParse({ ...BASE_BODY, metadata: { documentType: 'verified' } }).success).toBe(true);
 +    // CONTROL — false on both trees: widening must not admit a verb nobody asked for.
-+    expect(anchorDocumentSchema.safeParse({ ...BASE_BODY, metadata: { documentType: 'attested' } }).success).toBe(false);
++    expect(anchorDocumentSchema.safeParse({ ...BASE_BODY, metadata: { documentType: 'certified' } }).success).toBe(false);
 +  });
  
 ```
@@ -63,8 +59,8 @@ of your diff is a MODIFICATION of the existing file `services/anchoring/src/__te
 and TWO hunks (E2 at lines 61–66, E3 at lines 79–84). Its imports (`describe, it, expect` from vitest at line 19; `anchorDocumentSchema`,
 `LIFECYCLE_VERBS` … from `../anchorSchema` at 23–29), `BASE_BODY` (31–34), the `it.each([...LIFECYCLE_VERBS])` cell (71–75 — it
 covers the two new verbs automatically after E1) and every other describe stay byte-identical. You declare nothing new.
-Red at the tip: the pin cell's `toEqual` (25 expected vs 22 actual) and the new cell's three `toBe(true)`s (the schema rejects
-all three today); the `attested` control and every other cell are green on both trees.
+Red at the tip: the pin cell's `toEqual` (24 expected vs 22 actual) and the new cell's two `toBe(true)`s (the schema rejects
+`note` / `verified` today); the `certified` control and every other cell are green on both trees.
 
 ## Where (parsed into the checklist — INSERT-ONLY: no line must change, so there is NO must-change line; the anchors are (correct))
 * `:62` — (correct) `  'restore',` — the last verb today; E1 inserts AFTER it — stays
