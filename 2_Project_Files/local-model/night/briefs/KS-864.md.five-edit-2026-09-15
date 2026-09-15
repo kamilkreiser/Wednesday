@@ -1,0 +1,93 @@
+# KS-864 — Wednesday's task for Ornith (written from the ticket AND the code at develop M55 `48e65c435`, 2026-09-15 11:31)
+
+## What is wrong (one paragraph)
+`services/api-gateway/src/routes/system-status.ts` hard-codes a DEAD Azure estate (a subscription decommissioned
+2026-06-25): `getServiceUrl` (lines 41–53) builds `https://<name>.internal.ashypond-b460d1a1.westeurope.azurecontainerapps.io`
+when `NODE_ENV === 'staging'` (lines 46–49), and the three portal entries hard-code
+`https://secuura-staging-{issuer,verifier,admin}.ashypond-b460d1a1.westeurope.azurecontainerapps.io` under the same
+condition (lines 231–233, 242–244, 253–255). `GET /status` serves these strings to callers. Fix: remove the dead
+staging literals so every URL comes from its environment variable (already read first at lines 43–44 and in the
+portal fallbacks) or the local/compose default. Nothing else about the module changes; the `azureServiceName`
+arguments at the 17 `getServiceUrl(...)` call sites STAY (do not touch those lines) — the parameter is kept, renamed
+with a leading underscore so `noUnusedParameters` accepts it.
+
+## The exact change — FIVE SMALL EDITS, each its own hunk with 3 lines of context, never one big rewrite
+(Keep every line not named below byte-identical, including indentation.)
+
+E1 — line 41 `const getServiceUrl = (envVar: string, localPort: number, azureServiceName?: string): string => {` becomes
+```
+const getServiceUrl = (envVar: string, localPort: number, _azureServiceName?: string): string => {
+```
+E2 — lines 46–49 are REPLACED by ONE line (a `-`/`+` shape, not a pure deletion — the q8 round merged this with E1
+    and altered a `-` line; keep it its own hunk and copy the four `-` lines CHARACTER FOR CHARACTER from here, line
+    45 above them is EMPTY and line 50 below them is EMPTY):
+```
+-  // In Azure staging, use internal URLs
+-  if (process.env.NODE_ENV === 'staging' && azureServiceName) {
+-    return `https://${azureServiceName}.internal.ashypond-b460d1a1.westeurope.azurecontainerapps.io`;
+-  }
++  // KS-864: the Azure staging estate is decommissioned — URLs come from the env var above or the local default.
+```
+    (the two empty lines 45 and 50 stay as context — a single space each.)
+E3 — lines 231–233 are THREE lines and ALL THREE are removed (the 13:0x round removed only two and left the file
+    unparsable at :230 — tsc TS1136). Emit exactly this `-`/`+` shape, the three `-` lines copied character for character:
+```
+-    url: process.env.NODE_ENV === 'staging' 
+-      ? 'https://secuura-staging-issuer.ashypond-b460d1a1.westeurope.azurecontainerapps.io'
+-      : (process.env.ISSUER_PORTAL_URL || 'http://issuer-frontend:80'),
++    url: process.env.ISSUER_PORTAL_URL || 'http://issuer-frontend:80',
+```
+    (NOTE line 231 ends with a trailing space after `'staging'` — copy it as is; the checker ignores whitespace anyway.)
+E4 — lines 242–244, the same three-line shape:
+```
+-    url: process.env.NODE_ENV === 'staging'
+-      ? 'https://secuura-staging-verifier.ashypond-b460d1a1.westeurope.azurecontainerapps.io'
+-      : (process.env.VERIFIER_PORTAL_URL || 'http://verifier-frontend:80'),
++    url: process.env.VERIFIER_PORTAL_URL || 'http://verifier-frontend:80',
+```
+E5 — lines 253–255, the same three-line shape:
+```
+-    url: process.env.NODE_ENV === 'staging'
+-      ? 'https://secuura-staging-admin.ashypond-b460d1a1.westeurope.azurecontainerapps.io'
+-      : (process.env.ADMIN_PORTAL_URL || 'http://admin-frontend:80'),
++    url: process.env.ADMIN_PORTAL_URL || 'http://admin-frontend:80',
+```
+Nothing else changes: no call site, no other entry, no import. After the change the file contains ZERO occurrences of
+`ashypond`, `westeurope` and `secuura-staging-` outside the untouched `getServiceUrl(...)` third arguments.
+
+## The test — one new vitest file, in-process, no network
+File: `services/api-gateway/src/__tests__/ks864-system-status-no-dead-estate.test.ts`
+The module builds its tables at import time from `process.env`, so set the environment FIRST, then import ONCE:
+```
+process.env.NODE_ENV = 'staging';                    // the branch that used to select the dead literals
+process.env.API_GATEWAY_URL = 'http://gw.example:1'; // the control: an explicit env var wins on both trees
+delete process.env.ISSUER_PORTAL_URL; delete process.env.VERIFIER_PORTAL_URL; delete process.env.ADMIN_PORTAL_URL;
+vi.mock('../services/redis', () => ({ getRedisHealth: vi.fn(async () => ({ status: 'healthy' })) }));
+vi.stubGlobal('fetch', vi.fn(async () => { throw new Error('offline in test'); }));   // every probe fails fast
+const router = (await import('../routes/system-status')).default;
+```
+Mount it on an express app at `/api/system`, listen on 127.0.0.1:0 (copy the listen/close shape from
+`services/api-gateway/src/__tests__/csrf.test.ts`'s neighbours or from `ks1071-verify-confidence-one-mapping.test.ts`),
+`GET /api/system/status` with the real `http` module or `undici`'s request — NOT the stubbed global `fetch` (use
+`http.get` from `node:http` in the test). The body's `services` is an object of category arrays; flatten
+`Object.values(body.services).flat()`. Cells:
+- 🔴 `it('🔴 KS-864 — no served service URL names the dead estate')`: assert no `url` in the flattened list contains
+  `ashypond-b460d1a1` or `westeurope` and none of the three portals' urls contains `secuura-staging-`. (Untouched code
+  under NODE_ENV=staging: 20 of them do — the red.)
+- 🔴 `it('🔴 KS-864 — the issuer portal falls back to its compose default when its env var is unset')`: the entry named
+  `issuer-portal` has `url === 'http://issuer-frontend:80'`. (Untouched code: the dead https URL — the red.)
+- CONTROL `it('KS-864 control — an explicit env var still wins')`: the entry named `api-gateway` has
+  `url === 'http://gw.example:1'` — before and after.
+Restore the env in `afterAll` (`vi.unstubAllGlobals()`, put back the saved `process.env` entries).
+
+## Where (parsed into the checklist — every **must change** line must appear as a `-` line in your diff)
+* `:41` — **must change**: `const getServiceUrl = (envVar: string, localPort: number, azureServiceName?: string): string => {`
+* `:48` — **must change**: `    return \`https://${azureServiceName}.internal.ashypond-b460d1a1.westeurope.azurecontainerapps.io\`;`
+* `:232` — **must change**: `      ? 'https://secuura-staging-issuer.ashypond-b460d1a1.westeurope.azurecontainerapps.io'`
+* `:243` — **must change**: `      ? 'https://secuura-staging-verifier.ashypond-b460d1a1.westeurope.azurecontainerapps.io'`
+* `:254` — **must change**: `      ? 'https://secuura-staging-admin.ashypond-b460d1a1.westeurope.azurecontainerapps.io'`
+* `:62` — (correct) `    url: getServiceUrl('API_GATEWAY_URL', 8080, 'secuura-staging-api'),` — a call site; stays
+
+## Output
+Exactly ONE ```diff block; paths repo-relative (`Blockchain/Dev/services/api-gateway/...`); correct hunk counts; blank
+context lines keep their leading space; the product hunks stay inside lines 38–55 and 228–258.

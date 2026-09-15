@@ -1,0 +1,62 @@
+# KS-871 — Wednesday's task for Ornith (written from the ticket AND the code at develop M55 `48e65c435`, 2026-09-15 09:4x; SPLIT into one-line hunks 11:3x after nine patch-shape failures)
+
+## What is wrong (one paragraph)
+`services/api-gateway/src/middleware/audit.ts` records the request path AFTER the response finishes. When an
+earlier `router.use(prefix, handler)` gate has already answered (a REFUSED GDPR erasure is the case), Express
+has by then trimmed `req.path` to the mount-relative remainder — often `/` — so the audit row carries the wrong
+path. The path must be captured ONCE, at entry, and that captured value used everywhere the finish handler
+needs a path.
+
+## The exact change — FIVE ONE-LINE EDITS, emitted as FIVE SEPARATE HUNKS with ONE line of context each side
+(Every earlier attempt failed on the PATCH SHAPE, not the fix: invented context lines and wrong hunk counts. So: each
+hunk is exactly `@@ -N,3 +N,3 @@` (or `-N,3 +N,4` for the insertion) — the line above, the changed line, the line
+below — and the context lines are copied CHARACTER FOR CHARACTER from the quotes below. Never merge two edits into one
+hunk. Never add context beyond the one line each side.)
+
+E1 — INSERT one line after line 210. The three lines at the tip are:
+    line 209 (empty) · line 210 `    const start = Date.now();` · line 211 (empty)
+    Hunk `@@ -209,3 +209,4 @@`: context (empty), context `    const start = Date.now();`, ADD
+    `    const auditPath = req.originalUrl.split('?')[0];`, context (empty).
+    (Do NOT put this inside `res.on('finish', …)` — that is the defect.)
+E2 — line 95 `function deriveAction(req: Request): {` becomes `function deriveAction(req: Request, auditPath: string): {`
+    Hunk `@@ -94,3 +94,3 @@`: context ` */`, the `-`/`+` pair, context `  action: string;`.
+E3 — line 108 `  const segments = req.path.replace(/\/+$/, '').split('/').filter(Boolean);` becomes
+    `  const segments = auditPath.replace(/\/+$/, '').split('/').filter(Boolean);`
+    Hunk `@@ -107,3 +107,3 @@`: context `  // Trim trailing slashes and pull the first 3-4 segments after /api.`, the pair,
+    context `  // segments[0] === 'api' for everything we audit`.
+E4 — line 230 `          const { action, resourceType, resourceId: routeResourceId } = deriveAction(req);` becomes
+    `          const { action, resourceType, resourceId: routeResourceId } = deriveAction(req, auditPath);`
+    Hunk `@@ -229,3 +229,3 @@`: context `          if (!deps.isDbAvailable()) return;`, the pair, context (empty).
+E5 — line 280 `            path: req.path,` becomes `            path: auditPath,`
+    Hunk `@@ -279,3 +279,3 @@`: context `            method: req.method,`, the pair, context `            status: res.statusCode,`.
+Every other line stays byte-identical. No new imports. Do not touch lines 206–208 (the entry gates read `req.path`
+deliberately and correctly — the ticket says so). Emit the hunks in file order: E2 (94), E3 (107), E1 (209), E4 (229), E5 (279).
+
+## The test — one new vitest file, in-process, no server
+File: `services/api-gateway/src/__tests__/ks871-audit-path-captured-at-entry.test.ts`
+Copy the mocking shape from `services/api-gateway/src/__tests__/ks843-erasure-path-bypass.test.ts` (it drives
+the exact refused-erasure route through the real router). Build an express app: mount
+`createAuditMiddleware(deps)` with a `deps.query` stub that CAPTURES the SQL params, then mount a router at
+`/api/gdpr` whose `router.use` handler responds 403 without calling next() (the KS-843 shape). Send
+`DELETE /api/gdpr/erasures/abc`. Cells:
+- 🔴 `it('🔴 KS-871 — details.path is the original request path, not the trimmed remainder')`: parse the
+  captured `details` JSON param and assert `path === '/api/gdpr/erasures/abc'` (on the untouched code it is
+  `/` or `/erasures/abc` — the red).
+- 🔴 `it('🔴 KS-871 — action/resource are derived from the original path')`: assert the derived
+  `resourceType`/`action` param reflects `gdpr` + `erasures`, not `unknown` (the :108 site).
+- CONTROL `it('KS-871 control — an ordinary POST /api/documents still audits its own path')`: a route that
+  answers normally; assert `path === '/api/documents'` before and after.
+The checker applies the test ALONE first (must be red on the untouched file — a load error is not a red),
+then the product hunk (must be green), then the whole api-gateway suite and `tsc` (rc 0 required: E2/E4
+keep the types consistent — if you change the signature you must change the call).
+
+## Where (parsed into the checklist — every **must change** line must appear as a `-` line in your diff)
+* `:95` — **must change**: `function deriveAction(req: Request): {`
+* `:108` — **must change**: `  const segments = req.path.replace(/\/+$/, '').split('/').filter(Boolean);`
+* `:230` — **must change**: `          const { action, resourceType, resourceId: routeResourceId } = deriveAction(req);`
+* `:280` — **must change**: `            path: req.path,`
+* `:206` — (correct) the entry gate reads `req.path` deliberately — do not touch
+
+## Output
+Exactly ONE ```diff block; paths repo-relative (`Blockchain/Dev/services/api-gateway/...`); hunk headers with
+correct counts; blank context lines carry their leading space.
