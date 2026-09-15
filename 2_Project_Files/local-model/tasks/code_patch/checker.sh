@@ -156,9 +156,11 @@ echo "baseline tsc rc=$rc_base_tsc ($(wc -l < "$REP/baseline_tsc.out" | tr -d ' 
 # correctly-counted hunk swallow the next `--- /dev/null` header as a `-`
 # line (attempt 1's shape). So: one section per file, `--recount` only on a
 # section whose header is miscounted, reported as the accommodation it is.
-python3 - "$DIFF" "$REP" > "$REP/hunk_audit.out" 2>&1 <<'PYEOF2'
-import re, sys, json
+SUGGESTED_TEST_REL="$(python3 -c 'import json,sys; d=json.load(open(sys.argv[1])); print(d.get("suggested_test_file",""))' "$INPUT")"
+SUGGESTED_TEST_REL="$SUGGESTED_TEST_REL" python3 - "$DIFF" "$REP" > "$REP/hunk_audit.out" 2>&1 <<'PYEOF2'
+import re, sys, json, os
 diff_path, rep = sys.argv[1], sys.argv[2]
+SUGGESTED_TEST = os.environ.get("SUGGESTED_TEST_REL", "") or "UNKNOWN_TEST_PATH.test.ts"
 lines = open(diff_path, encoding="utf-8").read().split("\n")
 if lines and lines[-1] == "": lines.pop()
 # split into file sections at each '--- ' header (a 'diff --git' line, if any, belongs to the following section)
@@ -173,6 +175,14 @@ for ln in lines:
         continue
     if cur is None:
         cur = {"lines": [], "has_minus": False}; sections.append(cur)
+    # 2026-09-15 (KS-1073 q8): a `@@ -0,0 +1,N @@` NEW-FILE hunk that follows another hunk INSIDE a section is the
+    # model's test file with its `--- /dev/null` / `+++ b/<path>` header forgotten ("patch fragment without
+    # header"). The path is known: the input's suggested_test_file. Split it into its own section with the header
+    # synthesised, and say so — an accommodation the verdict names, never a silent repair.
+    if re.match(r"^@@ -0,0 \+1(,\d+)? @@", ln) and any(l.startswith("@@ ") for l in cur["lines"]):
+        cur = {"lines": ["--- /dev/null", "+++ b/" + SUGGESTED_TEST, ln], "has_minus": True, "synth": True}; sections.append(cur)
+        print(f"section {len(sections)}: HEADERLESS NEW-FILE hunk split out of the previous section and given the header +++ b/{SUGGESTED_TEST} (the model forgot it)")
+        continue
     cur["lines"].append(ln)
 out = []
 for k, sec in enumerate(sections, 1):
@@ -253,7 +263,28 @@ while [ "$k" -le "$N_SEC" ]; do
       A2_MODE="fuzzy"; A2_NOTE="$A2_NOTE [$SEC_PATH: FUZZY — applies only with -C1 (one context line): $(head -1 "$REP/apply_check_fuzzy_$k.out" | tr '\n' ' '); strict rc=$rc_strict lenient rc=$rc_lenient]"
       echo "section $k $SEC_PATH: applies ONLY FUZZY (-C1): $(head -1 "$REP/apply_check_fuzzy_$k.out")"
     else
-      A2_OK=0; A2_NOTE="$A2_NOTE [$SEC_PATH: does not apply — strict: $(head -2 "$REP/apply_check_strict_$k.out" | tr '\n' ' ') | lenient: $(head -2 "$REP/apply_check_lenient_$k.out" | tr '\n' ' ') | fuzzy(-C1): $(head -2 "$REP/apply_check_fuzzy_$k.out" | tr '\n' ' ')]"
+      # 2026-09-15 fourth mode — REANCHORED: the model's `-`/`+` lines are kept and every hunk is rebuilt with the
+      # FILE's own context around the unique (or nearest-to-declared) location of its `-` block (tasks/code_patch/
+      # reanchor.py). Built from the ten-ticket test: KS-844 q4 (an import edit under neighbours ten lines away) and
+      # KS-1018 q8 (three identical catch lines, context drift) both apply strictly once reanchored; KS-864 q8 does
+      # not (a `-` line the file never had — a real model error, correctly refused). Recorded LOUDLY; a hunk the
+      # tool cannot place is kept as written, so a PASS here still says exactly which hunks were rebuilt.
+      REAN="$REP/section_${k}.reanchored.diff"; REAN_NOTE=""
+      case "$SEC_PATH" in "$SUBDIR"/*) SEC_ABS="$CLONE/$SEC_PATH" ;; *) SEC_ABS="$CLONE/$SUBDIR/$SEC_PATH" ;; esac
+      if [ -f "$SEC_ABS" ] && python3 "$(dirname "$0")/reanchor.py" "$SEC_FILE" "$SEC_ABS" "$REAN" > "$REP/reanchor_$k.out" 2>&1; then
+        REAN_NOTE="$(tr '\n' ';' < "$REP/reanchor_$k.out")"
+        git -C "$CLONE" apply --check -p1 $DIROPT "$REAN" > "$REP/apply_check_reanchored_$k.out" 2>&1
+        rc_rean=$?
+      else
+        rc_rean=1; REAN_NOTE="reanchor not attempted (new file or tool error: $(head -1 "$REP/reanchor_$k.out" 2>/dev/null))"
+      fi
+      if [ "$rc_rean" -eq 0 ]; then
+        echo "$REAN" > "$REP/section_$k.opts"; echo "$DIROPT" >> "$REP/section_$k.opts"
+        A2_MODE="reanchored"; A2_NOTE="$A2_NOTE [$SEC_PATH: REANCHORED — the model's context lines did not match the file; every hunk rebuilt from its -/+ lines at the file's real location ($REAN_NOTE); strict rc=$rc_strict lenient rc=$rc_lenient fuzzy rc=$rc_fuzzy]"
+        echo "section $k $SEC_PATH: applies ONLY REANCHORED ($REAN_NOTE)"
+      else
+        A2_OK=0; A2_NOTE="$A2_NOTE [$SEC_PATH: does not apply — strict: $(head -2 "$REP/apply_check_strict_$k.out" | tr '\n' ' ') | lenient: $(head -2 "$REP/apply_check_lenient_$k.out" | tr '\n' ' ') | fuzzy(-C1): $(head -2 "$REP/apply_check_fuzzy_$k.out" | tr '\n' ' ') | reanchored: $REAN_NOTE $(head -1 "$REP/apply_check_reanchored_$k.out" 2>/dev/null | tr '\n' ' ')]"
+      fi
     fi
   fi
   k=$((k+1))
