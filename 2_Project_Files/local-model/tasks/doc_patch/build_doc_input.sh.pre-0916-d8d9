@@ -40,25 +40,12 @@ for blk in re.findall(r"^```[^\n]*\n(.*?)^```", text, re.M|re.S):
             readded.add(ln[1:].rstrip())
 # a whole-run replacement re-adds its unchanged lines as '+' — those are not removals (21:5x, KS-1097 B: line 457)
 must_remove=[m for m in must_remove if m not in readded]
-# 2026-09-16 00:0x (KS-1049 A r1, a FALSE GREEN — row 99): the model dropped the inline backticks from both '+' lines and
-# placed the bullet BELOW the paragraph the brief said to insert ABOVE; D0-D7 all passed (tokens present, region inside the
-# section). Two more facts the brief states and the checker can hold: every fenced '+' line, EXACTLY (D8), and the line the
-# insert must follow — "Insert AFTER line N" (D9). Both are read from the brief here; absent → the gates print INFO.
-expected_plus=[]
-for blk in re.findall(r"^```[^\n]*\n(.*?)^```", text, re.M|re.S):
-    for ln in blk.split("\n"):
-        if ln.startswith("+") and not ln.startswith("+++"):
-            expected_plus.append(ln[1:].rstrip())
-_ia = re.search(r"Insert AFTER line (\d+)", text)
-insert_after = int(_ia.group(1)) if _ia else None
-if insert_after is not None and insert_after > len(tipl_raw := r.stdout.split("\n")):
-    sys.stderr.write(f"build_doc_input: REFUSED — 'Insert AFTER line {insert_after}' is past the file's end ({len(tipl_raw)} lines)\n"); sys.exit(2)
 tipl=[l.rstrip() for l in r.stdout.split("\n")]
 missing=[m for m in must_remove if m not in tipl]
 if missing: sys.stderr.write(f"build_doc_input: REFUSED — {len(missing)} brief '-' line(s) do not exist at the tip (read the file, not the ticket): {missing[:2]}\n"); sys.exit(2)
 inp = {"ticket": {"identifier": ident, "title": text.splitlines()[0].lstrip("# ").strip()[:200], "description": text},
        "repo": {"source_checkout": src, "tip": tip, "branch": "develop"},
-       "product_file": prod, "defect_line": {"required": req, "must_remove": must_remove, "expected_plus": expected_plus, "insert_after": insert_after}, "files": {prod: r.stdout},
+       "product_file": prod, "defect_line": {"required": req, "must_remove": must_remove}, "files": {prod: r.stdout},
        # top-level `tip` as well: night_run.sh reads input["tip"] for the clone (20:02: absent → the good clone
        # was quarantined, `checkout ''` failed, the checker measured an empty tree)
        "tip": tip}

@@ -112,35 +112,7 @@ if mr:
     elif still: print(f"FAIL D7 must-remove line(s) STILL PRESENT after the patch ({len(still)} of {len(mr)}): {[x[:80] for x in still[:3]]}"); fails+=1
     else: print(f"PASS D7 every must-remove line ({len(mr)}) present before and absent after (control: all found at the tip)")
 else: print("INFO D7 no must-remove lines in the input (an insert-only brief, or one built before 21:4x)")
-# D8 (2026-09-16 00:0x, KS-1049 A r1 false green — row 99): every '+' line the brief's fenced blocks add is present in
-# AFTER exactly (rstrip only) — the doc twin of code_patch's A3c. Dropped backticks, a re-flowed clause or a paraphrase
-# is a FAIL by name, before the PASS is believed.
-ep=inp["defect_line"].get("expected_plus",[])
-al_=[l.rstrip() for l in after]
-if ep:
-    miss=[e for e in ep if e.strip() and e not in al_]
-    if miss: print(f"FAIL D8 ADDITION ALTERED — {len(miss)} of {len(ep)} brief '+' line(s) are not in the file AFTER, exactly: {[x[:70] for x in miss[:3]]}"); fails+=1
-    else: print(f"PASS D8 every brief '+' line ({len(ep)}) is in the file AFTER, exactly")
-else: print("INFO D8 no expected '+' lines in the input (built before 00:0x)")
-# D9 (same case): an insert-only brief names the line the block must FOLLOW ("Insert AFTER line N", read at build time).
-# The first added line must sit immediately after that tip line's position in AFTER — the model put the bullet under the
-# paragraph instead of above it and every other gate was green.
-ia=inp["defect_line"].get("insert_after")
-if ia and ep:
-    anchor=before[ia-1].rstrip() if 0 < ia <= len(before) else None
-    first=next((e for e in ep if e.strip()), None)
-    pos=[i for i,l in enumerate(al_) if l==first]
-    if anchor is None: print(f"FAIL D9 instrument: insert_after={ia} outside the BEFORE file"); fails+=1
-    elif not pos: print(f"FAIL D9 the first brief '+' line is not in AFTER (see D8)"); fails+=1
-    else:
-        ok=any(i>0 and al_[i-1]==anchor for i in pos)
-        # a leading blank '+' line: the anchor sits one line further up
-        if not ok and ep and ep[0].strip()=="" : ok=any(i>1 and al_[i-1]=="" and al_[i-2]==anchor for i in pos)
-        if ok: print(f"PASS D9 the insert follows its named anchor (tip line {ia}: {anchor[:50]!r})")
-        else: print(f"FAIL D9 INSERT MISPLACED — the brief says 'Insert AFTER line {ia}' ({anchor[:50]!r}) but the first '+' line sits elsewhere in AFTER (preceded by {al_[pos[0]-1][:50]!r})"); fails+=1
-else: print("INFO D9 no insert_after anchor in the input (not an insert-only brief, or built before 00:0x)")
 total=7 if mr else 6
-total += (1 if ep else 0) + (1 if (ia and ep) else 0)
 print(f"RESULT: {'PASS (%d/%d)' % (total,total) if fails==0 else f'FAIL ({fails} failed)'}")
 sys.exit(1 if fails else 0)
 PY
