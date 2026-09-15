@@ -292,9 +292,6 @@ while [ "$TICKETS_RUN" -lt "$NIGHT_MAX_TICKETS" ] && [ "$ITER" -lt $((NIGHT_MAX_
   fi
   CTX="$(pin "$LINE" ctx)"; CTX="${CTX:-$(python3 -c "import json;print(json.load(open('$INPUT')).get('_night_num_ctx',$NIGHT_NUM_CTX))")}"
   TASK="$(pin "$LINE" task)"; TASK="${TASK:-$TASK_DIR/task.md}"
-  # 2026-09-15 20:0x (Kam 19:55 "see how the local agents perform on the docs"): a pinned task= selects its own
-  # task TYPE — prepare_clone.sh (if the type has one) and checker.sh come from the task's directory.
-  TDIR="$(cd "$(dirname "$TASK")" && pwd)"
   NOCHECK="$(pin "$LINE" nocheck)"
 
   # memory — 2026-09-15 10:55 (q8 round 7): right after a 37 GB model unloads, vm_stat still shows ~3 GB
@@ -368,12 +365,12 @@ PYEOF
       git -C "$CLONE" checkout --detach "$TIP" >> "$RLOG" 2>&1; echo "checkout rc=$?" >> "$RLOG"
     fi
     SRC_DIRTY_BEFORE="$(git -C "$SRC" status --porcelain --untracked-files=no | wc -l | tr -d ' ')"
-    if [ -f "$TDIR/prepare_clone.sh" ]; then bash "$TDIR/prepare_clone.sh" "$INPUT" "$CLONE" >> "$RLOG" 2>&1; prc=$?; else prc=0; echo "prepare_clone: none for $TDIR (doc task)" >> "$RLOG"; fi; echo "prepare_clone rc=$prc" >> "$RLOG"
+    bash "$TASK_DIR/prepare_clone.sh" "$INPUT" "$CLONE" >> "$RLOG" 2>&1; prc=$?; echo "prepare_clone rc=$prc" >> "$RLOG"
     if [ "$prc" -ne 0 ]; then
       VERDICT="PREPARE_FAIL rc=$prc"
     else
       T2="$(date +%s)"
-      bash "$TDIR/checker.sh" "$INPUT" "$RUN/out.md" "$CLONE" > "$RUN/checker.out" 2>&1
+      bash "$TASK_DIR/checker.sh" "$INPUT" "$RUN/out.md" "$CLONE" > "$RUN/checker.out" 2>&1
       crc=$?
       echo "checker rc=$crc wall=$(( $(date +%s) - T2 ))s" >> "$RLOG"
       VERDICT="$(/usr/bin/grep -m1 '^RESULT:' "$RUN/checker.out" | head -c 120)"; VERDICT="${VERDICT:-CHECKER_NO_RESULT rc=$crc}"
@@ -432,8 +429,8 @@ PYR
     rrc=$?; TR1="$(date +%s)"
     echo "retry harness rc=$rrc wall=$((TR1 - TR0))s" >> "$RLOG"
     if [ "$rrc" -eq 0 ]; then
-      [ -f "$TDIR/prepare_clone.sh" ] && bash "$TDIR/prepare_clone.sh" "$INPUT" "$CLONE" >> "$RLOG" 2>&1
-      bash "$TDIR/checker.sh" "$RUN/retry/input.json" "$RUN/retry/out.md" "$CLONE" > "$RUN/retry/checker.out" 2>&1
+      bash "$TASK_DIR/prepare_clone.sh" "$INPUT" "$CLONE" >> "$RLOG" 2>&1
+      bash "$TASK_DIR/checker.sh" "$RUN/retry/input.json" "$RUN/retry/out.md" "$CLONE" > "$RUN/retry/checker.out" 2>&1
       RV="$(/usr/bin/grep -m1 '^RESULT:' "$RUN/retry/checker.out" | head -c 120)"; RV="${RV:-CHECKER_NO_RESULT}"
       /usr/bin/grep -E '^(PASS|FAIL|SUMMARY|RESULT)' "$RUN/retry/checker.out" | sed 's/^/retry: /' >> "$RLOG"
       VERDICT="$RV — RETRY of [$FIRST_VERDICT] (retry/out.md, $((TR1 - TR0))s)"

@@ -310,6 +310,10 @@ if ref_path.replace(subdir + "/", "") == product_rel:
 slug = re.sub(r"[^a-z0-9]+", "-", n["title"].lower()).strip("-")
 slug = "-".join(slug.split("-")[:6])[:60].rstrip("-")
 suggested = f"{subdir}/{test_dir_rel}/ks{number}-{slug}.test.ts"
+# 2026-09-15 20:0x (KS-1164, tool mode): the NEW test lives BESIDE the reference test, because the relative
+# imports the model copies from it (`../../../gate/report.ts`) resolve only from that directory. For the
+# services' flat src/__tests__ this is the same path; for a nested tests/unit/<area>/ it is the fix.
+suggested = f"{os.path.dirname(ref_path)}/ks{number}-{slug}.test.ts"
 if runner_kind == "vitest":
     runner = f"vitest (run one file with `npx vitest run{(' --config ' + vitest_cfg) if vitest_cfg else ''} <file>` from {subdir}/{service_dir}" + \
              ("; setupFiles ./vitest.setup.ts" if has_setup else "") + (")" if has_cfg else "; no vitest.config.ts at the tip)")

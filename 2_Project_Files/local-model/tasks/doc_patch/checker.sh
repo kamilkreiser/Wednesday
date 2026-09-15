@@ -1,0 +1,78 @@
+#!/bin/bash
+# checker.sh <input.json> <out.md> <clone-dir> — doc_patch
+#   D1 output is exactly one ```diff block          D2 diff applies at the tip (strict; --recount named as an accommodation)
+#   D3 touched-file set == { product_file }         D4 BEFORE: every required token ABSENT in its section (else nothing to prove)
+#   D5 AFTER: every required token PRESENT in its section
+#   D6 every hunk lies inside a required section (nothing outside the brief's sections changed)
+# Sections = from a line matching `## …<section substring>` to the next `## ` heading, measured on the TIP file.
+set -uo pipefail
+INPUT="${1:-}"; OUT="${2:-}"; CLONE="${3:-}"
+[ -f "$INPUT" ] && [ -f "$OUT" ] && [ -d "$CLONE/.git" ] || { echo "usage: checker.sh <input.json> <out.md> <clone-dir>" >&2; exit 1; }
+REP="$OUT.checker"; mkdir -p "$REP"
+PRODUCT="$(python3 -c 'import json,sys; print(json.load(open(sys.argv[1]))["product_file"])' "$INPUT")"
+FAILS=0; pass(){ echo "PASS $*"; }; fail(){ echo "FAIL $*"; FAILS=$((FAILS+1)); }
+# D0 the SUBJECT exists: the clone sits at the input's tip and carries the product file (a verifier asserts its
+# subject before anything about it — 2026-09-08). Without this, an empty tree reads as "patch does not apply".
+TIP="$(python3 -c 'import json,sys; d=json.load(open(sys.argv[1])); print(d.get("tip") or d.get("repo",{}).get("tip",""))' "$INPUT")"
+HEADC="$(git -C "$CLONE" rev-parse HEAD 2>/dev/null)"
+if [ -z "$TIP" ] || [ "$HEADC" != "$TIP" ] || [ ! -f "$CLONE/$PRODUCT" ]; then
+  echo "FAIL D0 subject: clone HEAD=${HEADC:-none} input tip=${TIP:-none} file present=$([ -f "$CLONE/$PRODUCT" ] && echo yes || echo no)"; echo "RESULT: FAIL (1 failed) — stopped at D0 (the harness, not the model)"; exit 1
+fi
+pass "D0 subject: clone at $TIP, $PRODUCT present"
+# D1
+python3 - "$OUT" "$REP/patch.diff" <<'PY' || { echo "RESULT: FAIL (1 failed) — stopped at D1"; exit 1; }
+import re,sys
+t=open(sys.argv[1],encoding="utf-8").read()
+blocks=re.findall(r"```diff\n(.*?)\n```", t, re.S)
+if len(blocks)!=1: print(f"FAIL D1 expected exactly one ```diff block, found {len(blocks)}"); sys.exit(1)
+open(sys.argv[2],"w",encoding="utf-8").write(blocks[0].rstrip("\n")+"\n"); print("PASS D1 output is exactly one fenced ```diff block")
+PY
+# D2
+if git -C "$CLONE" apply --check -p1 "$REP/patch.diff" > "$REP/apply_check.out" 2>&1; then APPLY_OPTS=""; pass "D2 diff applies at the tip (strict)"
+elif git -C "$CLONE" apply --check -p1 --recount --ignore-whitespace "$REP/patch.diff" > "$REP/apply_check_lenient.out" 2>&1; then APPLY_OPTS="--recount --ignore-whitespace"; pass "D2 diff applies at the tip — with an accommodation: --recount --ignore-whitespace (miscounted hunk headers)"
+else
+  # third mode (same as code_patch's A2 REANCHORED): hunks rebuilt from the model's -/+ lines at the file's real
+  # location — the model's context lines come from memory (20:04: an invented ` Notes:` after the §2 fence).
+  REAN="$REP/patch.reanchored.diff"; SRC_DIR="$(dirname "$0")/../code_patch"
+  if python3 "$SRC_DIR/reanchor.py" "$REP/patch.diff" "$CLONE/$PRODUCT" "$REAN" > "$REP/reanchor.out" 2>&1 && git -C "$CLONE" apply --check -p1 "$REAN" > "$REP/apply_check_rean.out" 2>&1; then
+    cp "$REAN" "$REP/patch.diff"; APPLY_OPTS=""; pass "D2 diff applies at the tip — ONLY REANCHORED (an accommodation the verdict names): $(tr '\n' ';' < "$REP/reanchor.out" | cut -c1-200)"
+  else fail "D2 diff does NOT apply at the tip: strict: $(head -2 "$REP/apply_check.out" | tr '\n' ' ') | reanchored: $(head -2 "$REP/reanchor.out" 2>/dev/null | tr '\n' ' ') $(head -1 "$REP/apply_check_rean.out" 2>/dev/null)"; echo "RESULT: FAIL ($FAILS failed) — stopped at D2"; exit 1; fi
+fi
+# D3
+TOUCHED="$(git -C "$CLONE" apply --numstat -p1 $APPLY_OPTS "$REP/patch.diff" 2>/dev/null | awk '{print $3}' | sort -u)"
+if [ "$TOUCHED" = "$PRODUCT" ]; then pass "D3 touched-file set == { $PRODUCT }"; else fail "D3 touched-file set is not { $PRODUCT }: $(echo "$TOUCHED" | tr '\n' ' ')"; echo "RESULT: FAIL ($FAILS failed) — stopped at D3"; exit 1; fi
+# D4/D5/D6 (python over the tip file, the patched file, and the hunk headers)
+git -C "$CLONE" show "HEAD:$PRODUCT" > "$REP/before.md"
+git -C "$CLONE" apply -p1 $APPLY_OPTS "$REP/patch.diff" > "$REP/apply.out" 2>&1 || { fail "D5 apply failed: $(head -2 "$REP/apply.out")"; echo "RESULT: FAIL ($FAILS failed)"; exit 1; }
+cp "$CLONE/$PRODUCT" "$REP/after.md"; git -C "$CLONE" checkout -q -- "$PRODUCT"
+python3 - "$INPUT" "$REP/before.md" "$REP/after.md" "$REP/patch.diff" <<'PY'
+import json,re,sys
+inp=json.load(open(sys.argv[1])); before=open(sys.argv[2],encoding="utf-8").read().split("\n"); after=open(sys.argv[3],encoding="utf-8").read().split("\n"); patch=open(sys.argv[4],encoding="utf-8").read()
+req=inp["defect_line"]["required"]; fails=0
+def section(lines, sub):
+    start=next((i for i,l in enumerate(lines) if l.startswith("## ") and sub in l), None)
+    if start is None: return None
+    end=next((i for i in range(start+1,len(lines)) if lines[i].startswith("## ")), len(lines))
+    return start,end
+ranges=[]
+for r in req:
+    sb=section(before,r["section"]); sa=section(after,r["section"])
+    if sb is None: print(f"FAIL D4 section '{r['section']}' not found at the tip"); fails+=1; continue
+    ranges.append(sb)
+    tb="\n".join(before[sb[0]:sb[1]]); ta="\n".join(after[sa[0]:sa[1]]) if sa else ""
+    absent=[t for t in r["tokens"] if not re.search(r"(?<![\w-])"+re.escape(t)+r"(?![\w-])", tb)]
+    if len(absent)!=len(r["tokens"]): print(f"FAIL D4 BEFORE: in '{r['section']}' already present at the tip: {[t for t in r['tokens'] if t not in absent]} — nothing to prove"); fails+=1
+    else: print(f"PASS D4 BEFORE: '{r['section']}' lacks {r['tokens']} at the tip (control: section found, {sb[1]-sb[0]} lines)")
+    present=[t for t in r["tokens"] if re.search(r"(?<![\w-])"+re.escape(t)+r"(?![\w-])", ta)]
+    if len(present)==len(r["tokens"]): print(f"PASS D5 AFTER: '{r['section']}' carries {r['tokens']}")
+    else: print(f"FAIL D5 AFTER: '{r['section']}' still lacks {[t for t in r['tokens'] if t not in present]}"); fails+=1
+# D6: every hunk's OLD range inside some required section (1-based old-file lines)
+bad=[]
+for m in re.finditer(r"^@@ -(\d+)(?:,(\d+))? \+", patch, re.M):
+    s=int(m.group(1)); n=int(m.group(2) or 1); e=s+n-1
+    if not any(s>=a+1 and e<=b for a,b in ranges): bad.append(f"{s}-{e}")
+if bad: print(f"FAIL D6 hunk(s) outside the required sections: {bad}"); fails+=1
+else: print(f"PASS D6 every hunk lies inside the required sections ({len(ranges)} section(s))")
+print(f"RESULT: {'PASS (6/6)' if fails==0 else f'FAIL ({fails} failed)'}")
+sys.exit(1 if fails else 0)
+PY
