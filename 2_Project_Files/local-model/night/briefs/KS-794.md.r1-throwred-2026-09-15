@@ -1,0 +1,58 @@
+# KS-794 — Wednesday's task for Ornith (written 22:22 on 2026-09-15 from the file at develop M55 `48e65c435`: `services/originate/src/originate.openapi.ts` lines 457–500, 644–660 and 2041–2125 read whole; the reference test `ks978-published-contract-organizationuuid.test.ts` read whole) — **JEST service**
+
+## What is wrong (one paragraph)
+Both verify-file handlers return `fileSize` (bytes of the uploaded body) on EVERY 200 — `routes/verification.ts:590/632/664` and `routes/verificationV2.ts:520` — but neither published response schema declares it: `VerifyResponse` (`originate.openapi.ts:457-500`, the v1 envelope) and `V2VerifyResponse` (`:644-660`, the v2 list envelope). Both are `.passthrough()`, so the responses validate; the contract is simply narrower than the behaviour, and a consumer reading the spec cannot know `fileSize` is there. The two 200 descriptions at `:2067-2070` and `:2116-2119` say so in prose and point at KS-794. Fix shape = the ticket author's option 1 (their stated preference, the smallest change): **add `fileSize` as an OPTIONAL int to the two BASE schemas** — no new schema, no new example, no allowlist entry. "Optional and absent" is an honest description for `/api/verification/verify` and `/api/v2/verification/verify`, which share the schemas and never return it. Nothing else in the file changes; the two NOTE descriptions stay as they are in THIS task (the PR seat amends the prose).
+
+## The exact change — TWO INSERT-ONLY one-line edits, each its own hunk with 3 lines of context
+E1 — insert ONE line immediately AFTER line 461 (context: line 460 is `    .object({`, line 461 is `      verified: z.boolean(),` — the FIRST field of `VerifyResponse`; line 462 is `      documentId: z.string().optional(),`). No line is removed:
+```
+       verified: z.boolean(),
++      fileSize: z.number().int().optional().openapi({ description: 'Bytes of the uploaded body (KS-794).' }),
+       documentId: z.string().optional(),
+```
+E2 — insert ONE line immediately AFTER line 649 (context: line 648 ends `documentId-only lookups.' }),`, line 649 is `      count: z.number().int(),` — the second field of `V2VerifyResponse`; line 650 is `      matches: z.array(V2VerifyMatchSchema),`). No line is removed:
+```
+       count: z.number().int(),
++      fileSize: z.number().int().optional().openapi({ description: 'Bytes of the uploaded body (KS-794).' }),
+       matches: z.array(V2VerifyMatchSchema),
+```
+The inserted line is IDENTICAL in both places (same text, six-space indent). Do NOT touch line 1797 (`    count: z.number().int(),` under a different schema, four-space indent), the two 200 descriptions, or the `example:` blocks.
+
+## THIS IS JEST, NOT VITEST
+`repo.test_runner` begins with `jest`: globals `describe/it/expect`. No `vi.*`, no `import ... from 'vitest'`. ts-jest TYPE-CHECKS the file (`noUnusedLocals`): declare only what you use. No mocks are needed — the test reads the shared registry, exactly as the reference does.
+
+## The test — one new jest file, the ks978 registry-reading shape copied
+File: `services/originate/src/__tests__/ks794-verify-file-responses-declare-filesize.test.ts`
+Copy from `services/originate/src/__tests__/ks978-published-contract-organizationuuid.test.ts`: its two imports (`import { sharedRegistry } from '@secuura/shared';` and the side-effect `import '../originate.openapi';`) and the `type AnyDef = Record<string, any>;` line. Do NOT copy `createDocumentRoute` or `requestBodyPropDescription`; write these two helpers instead (the same registry walk, pointed at a POST route by path and at its 200 schema):
+```
+const V1 = '/api/verification/verify-file';
+const V2 = '/api/v2/verification/verify-file';
+
+function postRoute(path: string): AnyDef {
+  const defs = (sharedRegistry as unknown as { definitions: AnyDef[] }).definitions;
+  const route = defs.find((d) => d.type === 'route' && d.route?.method === 'post' && d.route?.path === path);
+  return route?.route as AnyDef;
+}
+
+function response200Shape(route: AnyDef): AnyDef {
+  const schema = route?.responses?.[200]?.content?.['application/json']?.schema;
+  // zod-to-openapi keeps the ZodObject; .shape (or _def.shape()) lists the declared fields.
+  return schema?._def?.shape?.() ?? schema?.shape ?? {};
+}
+```
+Cells (every cell 🔴 or CONTROL, nothing optional), inside `describe('KS-794 — verify-file responses declare fileSize', () => { ... })`:
+- CONTROL `it('KS-794 control — both verify-file routes are registered at all')`: `expect(postRoute(V1)).toBeDefined(); expect(postRoute(V2)).toBeDefined();` — green on both trees (the discriminator: a red elsewhere is about the schema, not an empty registry).
+- 🔴 `it('🔴 KS-794 — VerifyResponse (v1 verify-file 200) declares fileSize')`: `expect(Object.keys(response200Shape(postRoute(V1)))).toContain('fileSize');` (Untouched code: the v1 shape has no `fileSize` key — the red.)
+- 🔴 `it('🔴 KS-794 — V2VerifyResponse (v2 verify-file 200) declares fileSize')`: `expect(Object.keys(response200Shape(postRoute(V2)))).toContain('fileSize');` (Untouched code: the v2 shape has no `fileSize` key — the red.)
+- 🔴 `it('🔴 KS-794 — fileSize is declared OPTIONAL on both, so /verify and /v2/verify stay honest')`: `expect(response200Shape(postRoute(V1)).fileSize.isOptional()).toBe(true); expect(response200Shape(postRoute(V2)).fileSize.isOptional()).toBe(true);` (Untouched code: `fileSize` is undefined, so `.isOptional` throws — the red.)
+- CONTROL `it('KS-794 control — the fields that were already declared are still there')`: `expect(Object.keys(response200Shape(postRoute(V1)))).toContain('verified'); expect(Object.keys(response200Shape(postRoute(V2)))).toContain('count');` — green on both trees.
+
+## Where (parsed into the checklist — every **must change** line must appear as a `-` line in your diff)
+* `:461` — (correct) `      verified: z.boolean(),` — the ANCHOR for E1: the new `fileSize` line is inserted immediately after it (no line is removed; an insert-only edit has NO must-change line)
+* `:649` — (correct) `      count: z.number().int(),` — the ANCHOR for E2: the new `fileSize` line is inserted immediately after it (no line is removed)
+* `:1797` — (correct) `    count: z.number().int(),` — a DIFFERENT schema (four-space indent); stays — do NOT touch
+* `:2067` — (correct) `      description:` — the v1 200 NOTE prose; stays in this task
+* `:2116` — (correct) `      description:` — the v2 200 NOTE prose; stays in this task
+
+## Output
+Exactly ONE ```diff block; paths repo-relative (`Blockchain/Dev/services/originate/...`); correct hunk counts; blank context lines keep their leading space; the two product hunks stay inside lines 458–465 and 646–653.
