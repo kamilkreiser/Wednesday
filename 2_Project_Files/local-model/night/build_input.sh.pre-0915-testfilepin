@@ -314,31 +314,6 @@ note = (
     "Where the reference test's mocks do not cover a dependency your cell needs, add a vi.mock for it in YOUR test file "
     "following the same factory shape; write UNKNOWN in a comment rather than inventing an API."
 )
-# ---------------------------------------------------------------- 7b. test_file= pin (2026-09-15 18:5x, KS-1172 Part A)
-# A ticket whose fix widens a PINNED list (an exact-set toEqual in an existing test) cannot ship a NEW test file:
-# the old pin stays red at A6. The only shape that passes is a diff that MODIFIES the existing pin file — which
-# task.md rule 3 already allows ("an extension of an existing file in test_dir other than the reference file")
-# and which the input never supported: the file to modify was not in `files`, so the model invented its
-# context lines (KS-1172 Part A, 18:53: FAIL A2 on a hallucinated test hunk while the product hunk was right).
-# `test_file=<path>` puts that file's FULL content into `files`, makes it the `suggested_test_file`, and tells
-# the model in the note that the test section is a MODIFICATION (`--- a/` header, context copied from it).
-# Refused when it names the reference test (the checker's A3 refuses that pair) or is absent at the tip.
-edit_test_path = None; edit_test_body = None
-if "test_file" in pins:
-    edit_test_path = pins["test_file"] if pins["test_file"].startswith(subdir) else f"{subdir}/{pins['test_file']}"
-    if edit_test_path == ref_path:
-        refuse(f"test_file= names the reference test {ref_path} — pin a different ref= (A3 refuses the pair)")
-    if not edit_test_path.startswith(f"{subdir}/{test_dir_rel}/"):
-        refuse(f"test_file= {edit_test_path} is not under {subdir}/{test_dir_rel}")
-    edit_test_body = show(edit_test_path[len(subdir) + 1:])
-    if edit_test_body is None: refuse(f"pinned test_file {edit_test_path} is not at the tip")
-    suggested = edit_test_path
-    note = (
-        f"MODIFY THE EXISTING TEST FILE `{edit_test_path}` — its FULL content is in files[...]; your test section is "
-        f"`--- a/{edit_test_path}` / `+++ b/{edit_test_path}` with hunks whose context lines are copied byte-for-byte from "
-        "that content. Do NOT create a new test file and do NOT use `--- /dev/null`. " + note
-    )
-    print(f"test_file PINNED (modify in place): {edit_test_path} ({len(edit_test_body)} B) — suggested_test_file = it")
 repo = {
     "source_checkout": src, "tip": tip, "branch": "develop", "repo_subdir": subdir,
     "service_dir": service_dir, "shared_pkg_dir": "packages/shared", "shared_pkg_name": "@secuura/shared",
@@ -362,13 +337,10 @@ _src_for_sites = _brief_for_sites if (_brief_for_sites and re.search(r"^##+\s*Wh
 m_where = re.search(r"^##+\s*Where\b.*?$(.*?)(?=^##+\s|\Z)", _src_for_sites, re.M | re.S)
 if m_where:
     for b in re.finditer(r"^\s*[*-]\s*`?:(\d+)`?\s*[—–-]?\s*(.*)$", m_where.group(1), re.M):
-        # 2026-09-15 18:5x: this loop used the name `note` and CLOBBERED the reference_test_note built above
-        # (every briefed run since 10:5x sent the last Where-line's text as the note) — found by the test_file
-        # pin's positive arm reading the note back; renamed site_note.
-        ln = int(b.group(1)); site_note = b.group(2).strip()
+        ln = int(b.group(1)); note = b.group(2).strip()
         txt = lines[ln - 1] if 0 < ln <= len(lines) else None
-        named_sites.append({"line": ln, "text_at_tip": txt, "note": site_note,
-                            "must_change": ("**" in site_note) and ("(correct)" not in site_note.lower())})
+        named_sites.append({"line": ln, "text_at_tip": txt, "note": note,
+                            "must_change": ("**" in note) and ("(correct)" not in note.lower())})
     print(f"  named sites from '## Where' ({'BRIEF' if _src_for_sites is _brief_for_sites else 'ticket'}): {len(named_sites)} ({sum(1 for x in named_sites if x['must_change'])} must_change)")
 else:
     print("  named sites: no '## Where' section — checklist empty (A3b passes vacuously)")
@@ -445,7 +417,7 @@ inp = {
     "suggested_test_file": suggested,
     "reference_test_file": ref_path,
     "reference_test_note": note,
-    "files": {product: content, ref_path: ref_body, **({edit_test_path: edit_test_body} if edit_test_path else {})},
+    "files": {product: content, ref_path: ref_body},
     "source_checkout": src, "tip": tip, "repo_subdir": subdir, "service_dir": service_dir,
     "shared_pkg_dir": "packages/shared", "shared_pkg_name": "@secuura/shared",
 }

@@ -25,7 +25,7 @@
 #     else skip the ticket with the reason. `sudo purge` is NOT attempted (needs admin —
 #     see the rule's honest-limit line).
 #   QUEUE  night/queue.md: one ticket per line, `# comments`, optional `k=v` pins after
-#     the id (product= ref= line= ctx= test_file= input= task= nocheck=1 out=). The first not-done line
+#     the id (product= ref= line= ctx= input= task= nocheck=1 out=). The first not-done line
 #     is taken; when its run ends the line MOVES to night/done.md with the verdict and the
 #     run dir. At most NIGHT_MAX_TICKETS (4) model runs per night; gates re-checked after
 #     each ticket (a seat may have launched) — stop on the first failure.
@@ -275,9 +275,7 @@ while [ "$TICKETS_RUN" -lt "$NIGHT_MAX_TICKETS" ] && [ "$ITER" -lt $((NIGHT_MAX_
   if [ -n "$PRE" ]; then
     cp "$PRE" "$INPUT"; echo "input: pre-built $PRE" >> "$RLOG"; log "TICKET $TICKET input pre-built: $PRE"
   else
-    # 2026-09-15 18:5x: test_file= forwarded (KS-1172 — a widened pin needs the EXISTING test file in the input;
-    # the allow-list silently dropped it on the first relaunch, files stayed 2, the model invented context again).
-    PINS=""; for kk in product ref line ctx test_file; do v="$(pin "$LINE" $kk)"; [ -n "$v" ] && PINS="$PINS $kk=$v"; done
+    PINS=""; for kk in product ref line ctx; do v="$(pin "$LINE" $kk)"; [ -n "$v" ] && PINS="$PINS $kk=$v"; done
     bash "$SELF_DIR/build_input.sh" "$TICKET" "$INPUT" $PINS > "$RUN/build_input.out" 2>&1
     brc=$?
     cat "$RUN/build_input.out" >> "$RLOG"
