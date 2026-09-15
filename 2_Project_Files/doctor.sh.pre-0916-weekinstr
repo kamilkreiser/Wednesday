@@ -624,26 +624,6 @@ else
   ok "Kam's week-scoped merge + deploy + PRODUCTION grants (2026-09-07) live until $WED_WEEK_GRANTS_UNTIL (production: SECUURA ONLY, confirmed by Kam 12:10)"
 fi
 
-# ── WEEK INSTRUCTION — Kam's away-week standing instruction expires itself (added 2026-09-16) ──
-# 1_Project_Definition/Architecture/2026-09-16_unattended-week-loop.md piece (a): a fresh seat boots on
-# 0_Brain/tasks/WEEK-INSTRUCTION.md instead of Kam while he is away (Monday night 2026-09-21 →). The file
-# carries `status:` and `valid_until:`; a live file past its date is the 09-06 scoped-override failure
-# (a permanent instruction nobody decided to make), so this leg WARNS on it at every launch.
-WI="$PROJECT_DIR/0_Brain/tasks/WEEK-INSTRUCTION.md"
-if [ -f "$WI" ]; then
-  WI_STATUS=$(/usr/bin/grep -m1 -i '^status:' "$WI" | sed 's/^[Ss]tatus:[[:space:]]*//' | tr -d '[:space:]')
-  WI_UNTIL=$(/usr/bin/grep -m1 -i '^valid_until:' "$WI" | sed 's/^[Vv]alid_until:[[:space:]]*//' | tr -d '[:space:]')
-  if [ "$WI_STATUS" = "live" ] && [ -n "$WI_UNTIL" ] && [ "$(date +%Y-%m-%d)" \> "$WI_UNTIL" ]; then
-    warn "WEEK-INSTRUCTION.md is LIVE but LAPSED (valid_until $WI_UNTIL)" "Kam's away-week instruction outlived its date: STOP briefing on its authority; set status: lapsed and card Kam (learnings/2026-09-06_a-scoped-override-carries-its-own-expiry.md)"
-  elif [ "$WI_STATUS" = "live" ]; then
-    ok "WEEK-INSTRUCTION.md LIVE until $WI_UNTIL — Kam away; the boot's first act is to brief the next candidates"
-  else
-    ok "WEEK-INSTRUCTION.md status: ${WI_STATUS:-none} — no away-week instruction in force (normal boot)"
-  fi
-else
-  warn "WEEK-INSTRUCTION.md missing" "the launcher's boot step 4 names it; restore it from git"
-fi
-
 # ── Tailscale remote-access leg (added 2026-08-20; DORMANT-BY-DEFAULT per Kam
 # 2026-08-20 ruling 17: "case by case. I will ask or turn it on when I need.
 # Keep it dormant in the meantime."). Down is the EXPECTED state — report it
