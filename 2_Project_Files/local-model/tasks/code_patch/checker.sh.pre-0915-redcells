@@ -116,10 +116,6 @@ echo "clone clean at pinned tip $TIP"
 # mimics (numTotalTests / testResults[].assertionResults), so summ() reads both; a single file is a positional
 # path pattern for both. Name kept (run_vitest) so every call site stays as it was.
 RUNNER_KIND="$(python3 -c 'import json,sys; print((json.load(open(sys.argv[1])).get("repo",{}).get("test_runner","vitest").split(" ")[0]))' "$INPUT")"
-# 2026-09-15 19:5x TOOL MODE: a package whose unit config is named explicitly carries `--config <file>` inside
-# repo.test_runner (no new input key); pass it to every vitest run. Empty for the services.
-VITEST_CFG="$(python3 -c 'import json,re,sys; m=re.search(r"--config (\S+?)(?=[ )`])", json.load(open(sys.argv[1])).get("repo",{}).get("test_runner","")); print(m.group(1) if m else "")' "$INPUT")"
-VITEST_CFG_OPT=""; [ -n "$VITEST_CFG" ] && VITEST_CFG_OPT="--config $VITEST_CFG"
 case "$RUNNER_KIND" in vitest|jest) ;; *) echo "checker: unknown runner kind $RUNNER_KIND in repo.test_runner — refusing" >&2; exit 1;; esac
 echo "runner: $RUNNER_KIND"
 run_vitest() {
@@ -128,7 +124,7 @@ run_vitest() {
   if [ "$RUNNER_KIND" = jest ]; then
     ( cd "$SVC" && npx jest "$@" --json --outputFile="$REP/$label.json" ) > "$REP/$label.out" 2>&1
   else
-    ( cd "$SVC" && npx vitest run $VITEST_CFG_OPT "$@" --reporter=json --outputFile="$REP/$label.json" ) > "$REP/$label.out" 2>&1
+    ( cd "$SVC" && npx vitest run "$@" --reporter=json --outputFile="$REP/$label.json" ) > "$REP/$label.out" 2>&1
   fi
   echo $?
 }
@@ -395,7 +391,7 @@ else
   echo "RESULT: FAIL ($FAILS failed) — stopped at A3 (cannot sequence red-first without exactly one test file)"
   exit 1
 fi
-TEST_REL="${TEST_FILE#$SUBDIR/$SERVICE/}"; [ "$SERVICE" = "." ] && TEST_REL="${TEST_FILE#$SUBDIR/}"   # tool mode: service_dir is "."
+TEST_REL="${TEST_FILE#$SUBDIR/$SERVICE/}"
 
 # ---------------------------------------------------------------- A3b named sites (2026-09-15)
 # Kam 09:28: "Is there a way to fix it going red through instructions or rules?" — the model fixed one
@@ -499,28 +495,20 @@ red_total="$(getn "$RED" total)"; red_failed="$(getn "$RED" failed)"; red_passed
 # not defined` — a test-side bug read as a red, and the CONTROL cell red too. A red counts only when it is
 # an ASSERTION failure and every non-🔴 cell (the controls) PASSES at the untouched tip; otherwise the
 # harness cannot reach the code and the "red" proves nothing.
-# 2026-09-15 19:0x (KS-1172, modify-in-place): an EXISTING cell the brief DECLARES under `## Red cells`
-# (input defect_line.red_cells, title substrings) counts as a red when its failure is an ASSERTION —
-# a widened exact-set pin has no 🔴 in its title. Undeclared non-🔴 reds are still control reds.
-A4_NOTE="$(python3 - "$REP/red_first.json" "$INPUT" <<'PY4'
+A4_NOTE="$(python3 - "$REP/red_first.json" <<'PY4'
 import json, sys, re
 try: j = json.load(open(sys.argv[1]))
 except Exception as e: print(f"UNREADABLE {e}"); sys.exit()
-declared = ((json.load(open(sys.argv[2])).get("defect_line") or {}).get("red_cells")) or []
-ctrl_red = []; nonassert = []; declared_hit = []
+ctrl_red = []; nonassert = []
 for tf in j.get("testResults", []):
     for a in tf.get("assertionResults", []):
         t = a.get("title", ""); msgs = " ".join(a.get("failureMessages") or [])
         if a.get("status") == "failed":
-            is_assert = ("AssertionError" in msgs) or ("expected" in msgs.lower())
-            if "🔴" not in t:
-                if any(d and d in t for d in declared) and is_assert: declared_hit.append(t[:60])
-                else: ctrl_red.append(t[:60])
+            if "🔴" not in t: ctrl_red.append(t[:60])
             if re.search(r"\b(ReferenceError|TypeError|SyntaxError|RangeError)\b", msgs) and "AssertionError" not in msgs and "expected" not in msgs.lower():
                 nonassert.append(t[:60] + " -> " + msgs.strip().split("\n")[0][:90])
 out = []
 if ctrl_red: out.append("CONTROL cell(s) red at the tip: " + " | ".join(ctrl_red))
-if declared_hit: sys.stderr.write("A4 declared red cell(s) (brief ## Red cells, assertion red): " + " | ".join(declared_hit) + "\n")
 if nonassert: out.append("non-assertion failure(s): " + " | ".join(nonassert))
 print(" ; ".join(out))
 PY4

@@ -39,10 +39,6 @@ case "$TICKET" in KS-[0-9]*) ;; *) echo "build_input: not a KS id: $TICKET" >&2;
 SRC="${NIGHT_SOURCE_CHECKOUT:-/Volumes/DevMASTER/!CODING/Secuura/Blockchain/2_Project_Files}"
 ENV_FILE="${NIGHT_SECUURA_ENV:-/Volumes/DevMASTER/!CODING/Secuura/Blockchain/4_Credentials/.env}"
 REPO_SUBDIR="Blockchain/Dev"
-# 2026-09-15 19:5x (Kam 18:19 "extend the checker" — the TOOLING tier): `tool=systemTest/performance` makes that
-# self-contained package the repo subdir (own package.json, vitest.unit.config.ts, tests/unit/, node_modules on disk);
-# service_dir becomes "." and there is no shared package to build. Everything else (tip, briefs, pins, checker) is unchanged.
-for a in "$@"; do case "$a" in tool=*) REPO_SUBDIR="${a#tool=}";; esac; done
 
 if [ ! -f "$ENV_FILE" ]; then echo "build_input: Secuura .env missing at $ENV_FILE" >&2; exit 1; fi
 set -a; source "$ENV_FILE"; set +a
@@ -142,11 +138,7 @@ bases.discard(os.path.basename(product_rel))
 if bases and "product" not in pins:
     refuse(f"besides {os.path.basename(product_rel)} the ticket also cites {sorted(bases)} — more than one site; pin product= if the fix is unambiguous")
 product = f"{subdir}/{product_rel}"
-tool_mode = "tool" in pins
-if tool_mode:
-    if "product" not in pins: refuse("tool= needs product= (the ticket's paths are not parsed in tool mode)")
-    service_dir = "."
-elif product_rel.startswith("services/"):
+if product_rel.startswith("services/"):
     service_dir = "services/" + product_rel.split("/")[1]
 elif product_rel.startswith("packages/shared/"):
     service_dir = "packages/shared"
@@ -193,16 +185,10 @@ if fm is not None:
 def show(path):
     r = git("show", f"{tip}:{subdir}/{path}")
     return r.stdout if r.returncode == 0 else None
-svc_prefix = "" if service_dir == "." else service_dir + "/"
-pkg = show(f"{svc_prefix}package.json")
+pkg = show(f"{service_dir}/package.json")
 if pkg is None:
     refuse(f"{service_dir}/package.json is not at the tip")
 test_script = json.loads(pkg).get("scripts", {}).get("test", "")
-# 2026-09-15 19:5x tool mode: `"test": "npm run test:unit"` is an indirection — resolve ONE level so the runner kind is read
-# from the script that actually runs (systemTest/performance).
-_m_indir = re.match(r"^npm run (\S+)$", test_script.strip())
-if _m_indir:
-    test_script = json.loads(pkg).get("scripts", {}).get(_m_indir.group(1), test_script)
 # 2026-09-15 18:2x (Kam 18:19 "extend the checker"): jest services (originate, governance — ts-jest) are IN. The runner
 # kind is the first word of repo.test_runner (no new key — the input contract's key set is unchanged); the checker
 # branches on it. Anything that is neither vitest nor jest is still refused by name.
@@ -212,13 +198,10 @@ elif "jest" in test_script:
     runner_kind = "jest"
 else:
     refuse(f"{service_dir} test script is {test_script!r} — the checker runs vitest or jest only")
-has_setup = show(f"{svc_prefix}vitest.setup.ts") is not None
-has_cfg = show(f"{svc_prefix}vitest.config.ts") is not None
-has_jest_cfg = show(f"{svc_prefix}jest.config.js") is not None
-tsconfig_txt = show(f"{svc_prefix}tsconfig.json") or "{}"
-# tool packages name their unit config explicitly (performance: vitest.unit.config.ts); the checker reads `--config <x>`
-# out of repo.test_runner (no new key — the contract's key set is unchanged).
-vitest_cfg = pins.get("vitest_config") or ("vitest.unit.config.ts" if (not has_cfg and show(f"{svc_prefix}vitest.unit.config.ts") is not None) else "")
+has_setup = show(f"{service_dir}/vitest.setup.ts") is not None
+has_cfg = show(f"{service_dir}/vitest.config.ts") is not None
+has_jest_cfg = show(f"{service_dir}/jest.config.js") is not None
+tsconfig_txt = show(f"{service_dir}/tsconfig.json") or "{}"
 try:
     co = json.loads(re.sub(r"//[^\n]*", "", tsconfig_txt)).get("compilerOptions", {})
 except Exception:
@@ -274,12 +257,12 @@ if len(anchored) > 1:
 imports = [ln for ln in lines if ln.startswith("import ")][:12]
 
 # ---------------------------------------------------------------- 6. reference test (imports the product module)
-test_dir_rel = (pins.get("test_dir") or "tests/unit") if tool_mode else f"{service_dir}/src/__tests__"
+test_dir_rel = f"{service_dir}/src/__tests__"
 r = git("ls-tree", "-r", "--name-only", tip, "--", f"{subdir}/{test_dir_rel}")
 tests = [p for p in r.stdout.split("\n") if p.endswith(".test.ts")]
 if not tests:
     refuse(f"no test files under {test_dir_rel} at the tip")
-mod_rel = product_rel if tool_mode else product_rel[len(service_dir) + len("/src/"):]   # e.g. middleware/audit.ts (tool mode: gate/report.ts)
+mod_rel = product_rel[len(service_dir) + len("/src/"):]          # e.g. middleware/audit.ts
 mod_noext = re.sub(r"\.ts$", "", mod_rel)                          # middleware/audit
 mod_base = os.path.basename(mod_noext)                             # audit
 scored = []
@@ -311,7 +294,7 @@ slug = re.sub(r"[^a-z0-9]+", "-", n["title"].lower()).strip("-")
 slug = "-".join(slug.split("-")[:6])[:60].rstrip("-")
 suggested = f"{subdir}/{test_dir_rel}/ks{number}-{slug}.test.ts"
 if runner_kind == "vitest":
-    runner = f"vitest (run one file with `npx vitest run{(' --config ' + vitest_cfg) if vitest_cfg else ''} <file>` from {subdir}/{service_dir}" + \
+    runner = f"vitest (run one file with `npx vitest run <file>` from {subdir}/{service_dir}" + \
              ("; setupFiles ./vitest.setup.ts" if has_setup else "") + (")" if has_cfg else "; no vitest.config.ts at the tip)")
 else:
     runner = (f"jest (ts-jest; run one file with `npx jest <file>` from {subdir}/{service_dir}"
@@ -358,7 +341,7 @@ if "test_file" in pins:
     print(f"test_file PINNED (modify in place): {edit_test_path} ({len(edit_test_body)} B) — suggested_test_file = it")
 repo = {
     "source_checkout": src, "tip": tip, "branch": "develop", "repo_subdir": subdir,
-    "service_dir": service_dir, "shared_pkg_dir": "" if tool_mode else "packages/shared", "shared_pkg_name": "" if tool_mode else "@secuura/shared",
+    "service_dir": service_dir, "shared_pkg_dir": "packages/shared", "shared_pkg_name": "@secuura/shared",
     "test_runner": runner,
     "typescript": f"{ts_desc}; the product file's imports at the tip are: " + (" | ".join(i.strip() for i in imports) if imports else "(none)"),
 }
@@ -476,7 +459,7 @@ inp = {
     "reference_test_note": note,
     "files": {product: content, ref_path: ref_body, **({edit_test_path: edit_test_body} if edit_test_path else {})},
     "source_checkout": src, "tip": tip, "repo_subdir": subdir, "service_dir": service_dir,
-    "shared_pkg_dir": "" if tool_mode else "packages/shared", "shared_pkg_name": "" if tool_mode else "@secuura/shared",
+    "shared_pkg_dir": "packages/shared", "shared_pkg_name": "@secuura/shared",
 }
 # contract self-check against the KS-871 input's key set, when that evidence is present
 kt = "/Volumes/DevMASTER/WEDNESDAY/2_Project_Files/local-model/runs/2026-09-14_ks871-gptoss120b/input.json"

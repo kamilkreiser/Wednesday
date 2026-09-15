@@ -116,10 +116,6 @@ echo "clone clean at pinned tip $TIP"
 # mimics (numTotalTests / testResults[].assertionResults), so summ() reads both; a single file is a positional
 # path pattern for both. Name kept (run_vitest) so every call site stays as it was.
 RUNNER_KIND="$(python3 -c 'import json,sys; print((json.load(open(sys.argv[1])).get("repo",{}).get("test_runner","vitest").split(" ")[0]))' "$INPUT")"
-# 2026-09-15 19:5x TOOL MODE: a package whose unit config is named explicitly carries `--config <file>` inside
-# repo.test_runner (no new input key); pass it to every vitest run. Empty for the services.
-VITEST_CFG="$(python3 -c 'import json,re,sys; m=re.search(r"--config (\S+?)(?=[ )`])", json.load(open(sys.argv[1])).get("repo",{}).get("test_runner","")); print(m.group(1) if m else "")' "$INPUT")"
-VITEST_CFG_OPT=""; [ -n "$VITEST_CFG" ] && VITEST_CFG_OPT="--config $VITEST_CFG"
 case "$RUNNER_KIND" in vitest|jest) ;; *) echo "checker: unknown runner kind $RUNNER_KIND in repo.test_runner — refusing" >&2; exit 1;; esac
 echo "runner: $RUNNER_KIND"
 run_vitest() {
@@ -128,7 +124,7 @@ run_vitest() {
   if [ "$RUNNER_KIND" = jest ]; then
     ( cd "$SVC" && npx jest "$@" --json --outputFile="$REP/$label.json" ) > "$REP/$label.out" 2>&1
   else
-    ( cd "$SVC" && npx vitest run $VITEST_CFG_OPT "$@" --reporter=json --outputFile="$REP/$label.json" ) > "$REP/$label.out" 2>&1
+    ( cd "$SVC" && npx vitest run "$@" --reporter=json --outputFile="$REP/$label.json" ) > "$REP/$label.out" 2>&1
   fi
   echo $?
 }
@@ -395,7 +391,7 @@ else
   echo "RESULT: FAIL ($FAILS failed) — stopped at A3 (cannot sequence red-first without exactly one test file)"
   exit 1
 fi
-TEST_REL="${TEST_FILE#$SUBDIR/$SERVICE/}"; [ "$SERVICE" = "." ] && TEST_REL="${TEST_FILE#$SUBDIR/}"   # tool mode: service_dir is "."
+TEST_REL="${TEST_FILE#$SUBDIR/$SERVICE/}"
 
 # ---------------------------------------------------------------- A3b named sites (2026-09-15)
 # Kam 09:28: "Is there a way to fix it going red through instructions or rules?" — the model fixed one

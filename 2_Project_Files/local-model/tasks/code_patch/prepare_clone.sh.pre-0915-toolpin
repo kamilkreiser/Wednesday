@@ -62,16 +62,6 @@ farm() {
 
 ROOT_SRC="$SOURCE/$SUBDIR/node_modules"
 ROOT_DST="$CLONE/$SUBDIR/node_modules"
-# 2026-09-15 19:5x TOOL MODE (shared_pkg_dir empty — a self-contained package such as systemTest/performance):
-# farm its own node_modules and stop; there is no workspace scope and no shared package to build.
-if [ -z "$SHARED" ]; then
-  farm "$ROOT_SRC" "$ROOT_DST" .vite .package-lock.json || exit 1
-  mkdir -p "$ROOT_DST/.vite"
-  echo "tool mode: farmed $ROOT_SRC (no shared package)"
-  SRC_DIRTY="$(git -C "$SOURCE" status --porcelain --untracked-files=no | wc -l | tr -d ' ')"
-  echo "source checkout dirty lines (tracked): $SRC_DIRTY (read-only check)"
-  exit 0
-fi
 # @secuura (the workspace scope) is rebuilt as a REAL dir so the shared package
 # resolves to the CLONE's copy (built below at the tip), not the source's.
 SCOPE="${SHARED_NAME%%/*}"

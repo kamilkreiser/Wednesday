@@ -277,7 +277,7 @@ while [ "$TICKETS_RUN" -lt "$NIGHT_MAX_TICKETS" ] && [ "$ITER" -lt $((NIGHT_MAX_
   else
     # 2026-09-15 18:5x: test_file= forwarded (KS-1172 — a widened pin needs the EXISTING test file in the input;
     # the allow-list silently dropped it on the first relaunch, files stayed 2, the model invented context again).
-    PINS=""; for kk in product ref line ctx test_file; do v="$(pin "$LINE" $kk)"; [ -n "$v" ] && PINS="$PINS $kk=$v"; done
+    PINS=""; for kk in product ref line ctx test_file tool test_dir vitest_config; do v="$(pin "$LINE" $kk)"; [ -n "$v" ] && PINS="$PINS $kk=$v"; done
     bash "$SELF_DIR/build_input.sh" "$TICKET" "$INPUT" $PINS > "$RUN/build_input.out" 2>&1
     brc=$?
     cat "$RUN/build_input.out" >> "$RLOG"
