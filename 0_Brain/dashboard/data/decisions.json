@@ -10137,5 +10137,79 @@
    }
   ],
   "amended_ts": "2026-09-16T07:46:46.128825+10:00"
+ },
+ {
+  "id": "secuura-ks1168-ilike-search-on-encrypted-pii",
+  "client_project": "Secuura/Blockchain",
+  "title": "KS-1168 (P3): userRepo.ts searches encrypted PII columns with ILIKE — a name/email search can never match (ciphertext vs pattern) and looks like no such user; which search design replaces it?",
+  "bluf": "OVERRIDE of the prior-ruling gate (its four matched panel messages READ by Wednesday 07:5x: the 08-28 dashboard thanks, the KS-963 getUserById rethrow ruling, the 09-09 Tuesday-tab routing note and the security-review proofread ask — none is about a user search or KS-1168). Secuura / Blockchain. userRepo.ts:1017 (listUsersInner) and :1061 (countUsersInner) push (email ILIKE OR first_name ILIKE OR last_name ILIKE OR display_name ILIKE) with %search% — every one of those columns is written through encryptPiiCol with AAD bound to the user id, so the stored value is per-row ciphertext and the ILIKE never errors and never matches: an admin or tenant user-list with a search term shows an empty, internally consistent result. The file's own docblock (:562-568) already moved getUserByEmail to an HMAC lookup against email_lookup_hash for exactly this reason; the two search sites were left on the old shape. The design is yours because each option changes what search MEANS. Nothing waits on it today.",
+  "default_action": "If no ruling by Monday 2026-09-21 09:00 AEST: option a — HMAC lookup hashes for email + display_name, exact match, the UI label changed; a Claude seat's item (two files + a migration for the new hash column).",
+  "options": [
+   {
+    "key": "a",
+    "label": "EXACT-only search",
+    "detail": "the search term is HMAC-hashed like email_lookup_hash and matched against lookup hashes for email (exists) and, added, for display_name — substring search is dropped and the UI says exact match:the existing KS-253 shape; no plaintext ever leaves the column; substring search goes away"
+   },
+   {
+    "key": "b",
+    "label": "Decrypt-side filter",
+    "detail": "the query narrows by tenant/role, rows are decrypted in the app and filtered by substring in memory, paginated after:keeps substring search; cost grows with the tenant's user count; PII decrypted in bulk per search"
+   },
+   {
+    "key": "c",
+    "label": "Remove the search parameter from both routes and the UI until a searchable-encryption design exists; document it on the ticket",
+    "detail": "honest and smallest; a feature goes away"
+   }
+  ],
+  "recommended": "a",
+  "ts": "2026-09-16T07:47:28.152471+10:00",
+  "status": "open",
+  "ruled_choice": null,
+  "ruled_ts": null,
+  "prior_rulings_overridden": [
+   "2026-08-28 10:17",
+   "2026-09-08 14:00",
+   "2026-09-09 16:08",
+   "2026-09-09 16:14"
+  ]
+ },
+ {
+  "id": "secuura-ks910-preflight-leg12-runs-nothing",
+  "client_project": "Secuura/Blockchain",
+  "title": "KS-910 (P3): preflight leg 12 is a REACHABILITY check that executes zero shell-suite cells — with Actions back, is leg 12 kept as reachability (option 2) and the false comment corrected?",
+  "bluf": "OVERRIDE of the prior-ruling gate (its eight matched panel messages READ by Wednesday 07:5x: dashboard-tile and cockpit-autoplay asks, the BLUF-principle note, and Peter's 09-09 PR-triage forward ×3 — none is about the preflight or KS-910). Secuura / Blockchain. preflight.sh:400 runs run-shell-suites.sh --check-unreached, which sets MODE=check and executes zero cells (measured: a full gated push emitted 0 suite ok lines; one suite run directly, same grep, 16). The ticket's two options: (1) a leg that RUNS the suites on every gated push (minutes added to every push); (2) keep leg 12 as reachability, run the suites where Actions ran, and correct the comment in pre_push_hook_base.test.sh:49-51 (reaches → reachable). The ticket was written when Actions was retired; on 2026-09-10 the fleet measured Actions is BACK and its PR Security Gates job runs every shell suite (KS-1148 (b) names that step). So option 2's gap is closed by CI today; what remains is the one-word comment fix. Nothing waits on it today.",
+  "default_action": "If no ruling by Monday 2026-09-21 09:00 AEST: option a — the comment fix ships as polish citing this card; leg 12 stays reachability.",
+  "options": [
+   {
+    "key": "a",
+    "label": "Option 2 — keep leg 12 as reachability (CI runs the suites), correct the comment; close on the comment fix (polish)",
+    "detail": "one comment edit; an Ornith-sized item"
+   },
+   {
+    "key": "b",
+    "label": "Option 1 — add a leg that runs every shell suite on every gated push, on top of CI",
+    "detail": "every push slower for every author; belt and braces"
+   },
+   {
+    "key": "c",
+    "label": "Option 2 now, revisit if Actions is retired again",
+    "detail": "same as a with the trigger written on the ticket"
+   }
+  ],
+  "recommended": "a",
+  "ts": "2026-09-16T07:47:55.093087+10:00",
+  "status": "open",
+  "ruled_choice": null,
+  "ruled_ts": null,
+  "prior_rulings_overridden": [
+   "2026-08-10 08:45",
+   "2026-08-21 19:52",
+   "2026-08-21 19:54",
+   "2026-09-08 15:34",
+   "2026-09-10 09:01",
+   "2026-09-10 09:08",
+   "2026-09-10 09:08",
+   "2026-09-16 07:01"
+  ]
  }
 ]
