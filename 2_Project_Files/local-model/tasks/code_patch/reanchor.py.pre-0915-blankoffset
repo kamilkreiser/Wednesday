@@ -295,15 +295,7 @@ def rebuild(hunk, file_lines, notes, idx):
             elif b.startswith(" "):
                 (after if seen_plus else before).append(b[1:])
         anchor = None
-        # 2026-09-15 23:5x (KS-1035 D, row 98): the BLANK context lines between the '+' block and the line that
-        # anchors it are part of the placement. Anchoring "after" on `### 3.` while the hunk showed a blank between
-        # the insert and that heading put the insert BELOW the blank (double blank above, none before the heading).
-        # The offset = the blanks skipped on the way to the anchor, subtracted (after) / added (before).
-        gap = 0
         for cand in reversed(before):
-            if not cand.strip():
-                gap += 1
-                continue
             if cand.strip():
                 # 2026-09-15 22:0x (KS-976 B r1): an insert anchored right after a line that OPENS a block comment
                 # (`/**`, `/*`) lands inside the comment — the helper was commented out and tsc could not find it.
@@ -314,23 +306,18 @@ def rebuild(hunk, file_lines, notes, idx):
                 if len(hits) == 1:
                     anchor = ("before", hits[0]); break
         if anchor is None:
-            gap = 0
             for cand in after:
-                if not cand.strip():
-                    gap += 1
-                    continue
-                hits = find_block(file_lines, [cand])
-                if len(hits) == 1:
-                    anchor = ("after", hits[0]); break
+                if cand.strip():
+                    hits = find_block(file_lines, [cand])
+                    if len(hits) == 1:
+                        anchor = ("after", hits[0]); break
         if anchor is None:
             notes.append(f"hunk {idx}: ambiguous — insert-only and no unique context line; kept as written")
             return None
         if anchor[0] == "before":
-            start = end = anchor[1] + 1 + gap
+            start = end = anchor[1] + 1
         else:
-            start = end = max(0, anchor[1] - gap)
-        if gap:
-            notes.append(f"hunk {idx}: insert-only — {gap} blank context line(s) between the insert and its anchor kept in place")
+            start = end = anchor[1]
         # 2026-09-15 22:0x (KS-976 B r1): an insert placed just below a block-comment opener (`/**`, `/*`) — the
         # "after" branch anchored on ` * POST …` — lands INSIDE the comment; move it above the opener.
         moved = 0
