@@ -109,6 +109,6 @@
 # store) — now buildable on the verified tip override (night/tip_override.txt: a594eb162 vs origin 0f37b85c8,
 # 0 files under Blockchain/Dev between them). Run 24/7 per Kam 2026-09-14 21:57 (G1 informational).
 # KS-871 re-queued 06:0x: its 05:56 run FAILED at A1 for a SAMPLER reason (repetition loop → length cut, fence never closed); lm_call.py now carries repeat_penalty 1.15 / repeat_last_n 512 / num_predict 12288.
-KS-871 ref=Blockchain/Dev/services/api-gateway/src/__tests__/ks843-erasure-path-bypass.test.ts line=280
 KS-1072 ctx=49152
 KS-1087 line=991 ctx=49152
+KS-871 ref=Blockchain/Dev/services/api-gateway/src/__tests__/ks843-erasure-path-bypass.test.ts line=280

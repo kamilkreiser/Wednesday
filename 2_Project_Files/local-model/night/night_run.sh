@@ -55,7 +55,7 @@ PF_DIR="$(cd -P "$LM_DIR/.." && pwd)"                   # 2_Project_Files
 TASK_DIR="$LM_DIR/tasks/code_patch"
 
 NIGHT_MODEL="${NIGHT_MODEL:-ornith:35b}"
-NIGHT_THINK="${NIGHT_THINK:-1}"   # 2026-09-15: think=1 is the default — placement was right only with thinking; num_predict 32768 bounds it
+NIGHT_THINK="${NIGHT_THINK:-0}"   # 2026-09-15 10:4x: think=0 again — WITH a Wednesday brief the brief is the reasoning (KS-1087 round 3 produced the correct fix at think=0); think=1 + brief over-thought into the context wall twice (47K and 78K chars). Set NIGHT_THINK=1 only for a ticket with no brief.
 NIGHT_NUM_CTX="${NIGHT_NUM_CTX:-32768}"
 NIGHT_MAX_TICKETS="${NIGHT_MAX_TICKETS:-4}"
 NIGHT_MAX_LOAD="${NIGHT_MAX_LOAD:-8}"
@@ -369,7 +369,13 @@ PYEOF
   move_done "$LINE" "$VERDICT" "$RUN"
   echo "== $(date '+%F %T') end $TICKET verdict=$VERDICT" >> "$RLOG"
 
-  # re-check the gates before the next ticket (a seat may have launched)
+  # re-check the gates before the next ticket (a seat may have launched).
+  # 2026-09-15: the checker's OWN vitest/tsc leaves the 1-min load above 8 for a minute or two after a
+  # ticket (rounds 3 and 4 both STOPPED at G4 on their own load, not on a seat). So: settle 60 s first,
+  # and the between-ticket G4 bar is NIGHT_MAX_LOAD_BETWEEN (12) — G2 (the pane census) is still the
+  # gate that detects a launched seat, and it is re-checked here unchanged.
+  log "settle 60 s before the between-ticket gate re-check (the checker's own load)"; sleep 60
+  NIGHT_MAX_LOAD="${NIGHT_MAX_LOAD_BETWEEN:-12}"
   if ! gates; then log "STOP after $TICKET: gate $GATE_FAIL failed (a seat may have launched)"; break; fi
 done
 
