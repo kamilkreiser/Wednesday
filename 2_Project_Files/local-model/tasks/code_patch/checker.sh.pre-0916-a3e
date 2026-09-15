@@ -453,28 +453,6 @@ PY3B
 )"
   if [ -z "$A3B_MISSED" ]; then
     pass "A3b every must_change site the ticket names is changed by the product hunk ($N_SITES site(s))"
-    # A3e (2026-09-16, the vitest twin of bash_patch B3c): a site the brief marks "(correct) … stays" (must_change
-    # false) must not be REMOVED — a '-' line with no matching '+' (a rewrite that re-adds the line is fine). The
-    # model's insert-after dialect replaces its anchor (KS-1093 r1-r3); B3b/A3b were blind to a stays-line removed.
-    # Detection only here (no repair): the fix is the brief/retry, and the message names the line.
-    A3E_REMOVED="$(python3 - "$INPUT" "$PROD_SEC" <<'PY3E'
-import json, sys
-d = json.load(open(sys.argv[1])); sec = open(sys.argv[2], encoding="utf-8", errors="replace").read().split("\n")
-minus = {l[1:].strip() for l in sec if l.startswith("-") and not l.startswith("---")}
-plus  = {l[1:].strip() for l in sec if l.startswith("+") and not l.startswith("+++")}
-gone = []
-for x in d.get("defect_line", {}).get("sites", []):
-    if x.get("must_change"): continue
-    t = (x.get("text_at_tip") or "").strip()
-    if t and t in minus and t not in plus: gone.append(f":{x['line']} `{t[:70]}`")
-print(" · ".join(gone))
-PY3E
-)"
-    if [ -n "$A3E_REMOVED" ]; then
-      fail "A3e a line the brief says STAYS was REMOVED by the product hunk ('-' with no '+'): $A3E_REMOVED"
-      echo "RESULT: FAIL ($FAILS failed) — stopped at A3e (a stays-line removed; the tests are not run)"
-      exit 1
-    fi
   else
     fail "A3b PARTIAL FIX — the product hunk leaves $(echo "$A3B_MISSED" | awk -F' · ' '{print NF}') of $N_SITES named site(s) untouched: $A3B_MISSED"
     echo "RESULT: FAIL ($FAILS failed) — stopped at A3b (a partial fix; the tests are not run)"

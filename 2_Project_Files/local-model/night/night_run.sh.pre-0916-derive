@@ -257,20 +257,6 @@ pin() { # pin <line> <key>  → value or ""
 if ! gates; then finish 3 "gate refused: $GATE_FAIL"; fi
 if [ -z "$(next_ticket)" ]; then
   log "QUEUE: $NIGHT_QUEUE has no pending ticket"
-  # (b) of the 2026-09-16 unattended-week design: an empty DEFAULT queue re-derives the candidate pool when
-  # night/candidates.md is older than NIGHT_DERIVE_H hours (default 6) — a ticket closed/archived/taken during the
-  # day must drop out and a new one must appear without a seat. Read-only board query under the 2026-08-03 grant
-  # (the Secuura .env is sourced transiently for the query, never copied); the file's own header says what it read.
-  if [ "$NIGHT_QUEUE" = "$SELF_DIR/queue.md" ] && [ -f "$SELF_DIR/derive_candidates.py" ]; then
-    _cand="$SELF_DIR/candidates.md"; _age_h="${NIGHT_DERIVE_H:-6}"; _env="/Volumes/DevMASTER/!CODING/Secuura/Blockchain/4_Credentials/.env"
-    if [ ! -f "$_cand" ] || [ "$(( ( $(date +%s) - $(stat -f %m "$_cand") ) / 3600 ))" -ge "$_age_h" ]; then
-      if [ "${NIGHT_DERIVE_DRY:-0}" = 1 ]; then log "DERIVE: candidates.md older than ${_age_h}h — would re-derive (DRY)"
-      elif [ -f "$_env" ]; then
-        log "DERIVE: candidates.md older than ${_age_h}h — re-deriving from the board (read-only)"
-        ( set -a; . "$_env"; set +a; python3 "$SELF_DIR/derive_candidates.py" ) > "$SELF_DIR/log/derive_$(date +%F_%H%M).out" 2>&1 && log "DERIVE: ok — $(tail -1 "$SELF_DIR/log/derive_$(date +%F_%H%M).out" | cut -c1-160)" || log "DERIVE: FAILED — see $SELF_DIR/log/derive_$(date +%F_%H%M).out"
-      else log "DERIVE: candidates.md older than ${_age_h}h but the Secuura .env is not at $_env — not re-derived"; fi
-    fi
-  fi
   # G7 (2026-09-16, unattended-week design piece d): an EMPTY queue during 06-23 is the never-idle failure
   # (Kam 2026-09-15 18:19) and nothing woke anyone for it. Record when the drought began; after
   # NIGHT_IDLE_ALERT_H hours (default 2) post ONE panel line, then at most one more per NIGHT_IDLE_ALERT_H.
