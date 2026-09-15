@@ -29,7 +29,9 @@ ts-jest: use `jest.mock('<module>', () => ({ ... }))` (auto-hoisted above the im
 afterAll / beforeEach` as globals (or `import { describe, it, expect, jest } from '@jest/globals'`), and copy
 the reference test's mock shape exactly — it is a jest test. If it begins with `vitest`, everything below
 about `vi.*` applies. A vitest idiom in a jest file (or the reverse) fails to LOAD and the checker reads that
-as a load error, never as a red.
+as a load error, never as a red. ts-jest also TYPE-CHECKS your test file with the service's tsconfig
+(`noUnusedLocals` / `noUnusedParameters` are on): an unused import, constant or parameter is compile
+error TS6133 and the file never runs — declare only what you use (measured 2026-09-15 18:25, KS-1118).
 
 RETRY FEEDBACK (2026-09-15 15:5x — added after the fourth "changed the neighbour" slip on one
 file): if the input carries a `retry_feedback` object, this is your SECOND attempt at this exact

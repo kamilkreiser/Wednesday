@@ -13,7 +13,6 @@ TEST-ONLY. Your diff contains EXACTLY ONE file: the new test file below. **No hu
 your 🔴 cell by planting the tamper named at the bottom into a clone, then expects it GREEN at the untouched tip.
 
 ## THIS IS JEST, NOT VITEST
-ts-jest TYPE-CHECKS the test file (`noUnusedLocals`, `noUnusedParameters`): every declared constant, import and parameter must be USED, or the file fails to compile (TS6133) and no cell runs. Copy only what your cells and helpers read; drop the rest.
 `repo.test_runner` begins with `jest`. The reference test uses `jest.mock(...)` (auto-hoisted) and `jest.fn()`. **Do not write
 `vi.mock`, `vi.hoisted`, `vi.fn`, `vi.stubGlobal` or `import ... from 'vitest'`** — a vitest idiom fails to LOAD under ts-jest and
 the checker reads that as a load error, never as a red. `describe / it / expect / beforeAll / afterAll` are jest globals.
@@ -23,9 +22,8 @@ File: `services/originate/src/__tests__/ks1118-verify-documenthash-over-hash.tes
 Copy `services/originate/src/__tests__/ks1103-verify-hash-field.test.ts` from its first line through the end of its helpers —
 i.e. everything BEFORE its `describe(` at line 155: the header comment, `const mockQueryRaw = jest.fn();` (line 33), ALL FOUR
 `jest.mock(...)` blocks (lines 35–57: `../db`, `../middleware/auth`, `@secuura/shared`, `../repositories/documentRepo`), the
-imports of `express` and `verificationRouter` (58–59), the constants your cells and helpers USE — `HASH`, `OTHER`, `REAL_TX`,
-`DOC_ID` (read by `anchoredRow()`) — and NOT `MSG_MISSING` / `MSG_INVALID` / `MSG_NOT_REGISTERED` (ts-jest type-checks this file
-with `noUnusedLocals`: an unused top-level constant is compile error TS6133 and the file never runs — measured 18:25), `anchoredRow()`, the `app` setup + `baseUrl` /
+imports of `express` and `verificationRouter` (58–59), EVERY constant (`HASH`, `OTHER`, `REAL_TX`, `DOC_ID`, `MSG_MISSING`,
+`MSG_INVALID`, `MSG_NOT_REGISTERED` — copy all of them even if one looks unused), `anchoredRow()`, the `app` setup + `baseUrl` /
 `server` / `realFetch` declarations, the `beforeAll` / `afterAll` that listen and close, the `Answer` type, `verify(body, rows)`
 (lines 125–143) and `compared(a)` (145–153). Drop every `it(...)` of the original; write these three:
 - 🔴 `it('🔴 KS-1118 F-2 {documentHash:A, hash:B} — the lookup sees A only (hash is read last)')`:

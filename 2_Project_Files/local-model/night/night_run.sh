@@ -385,15 +385,24 @@ PYEOF
   # IMPROVEMENTS.md). One retry, same model, input + `retry_feedback` (verdict, missed sites from the A3b
   # line, an instruction); the retry's out.md/checker.out live under $RUN/retry/; the FIRST attempt's files
   # are untouched. NIGHT_RETRY_ON_PARTIAL=0 disables. The done.md row carries both verdicts.
-  if [ "${NIGHT_RETRY_ON_PARTIAL:-1}" = "1" ] && [ -z "${RETRY_DONE:-}" ] && echo "$VERDICT" | /usr/bin/grep -q -i -E 'stopped at A3b|stopped at A2b|A2b PLACEHOLDER'; then
+  if [ "${NIGHT_RETRY_ON_PARTIAL:-1}" = "1" ] && [ -z "${RETRY_DONE:-}" ] && echo "$VERDICT" | /usr/bin/grep -q -i -E 'stopped at A3b|stopped at A2b|A2b PLACEHOLDER' || /usr/bin/grep -q -i 'FAIL A4 RED-FIRST: the test file did not run any test' "$RUN/checker.out"; then
     RETRY_DONE=1; FIRST_VERDICT="$VERDICT"
     mkdir -p "$RUN/retry"
     python3 - "$INPUT" "$RUN/checker.out" "$RUN/retry/input.json" <<'PYR'
 import json, re, sys
 inp, chk, out = sys.argv[1:4]
 d = json.load(open(inp, encoding="utf-8")); c = open(chk, encoding="utf-8").read()
-m = re.search(r"^(FAIL A3b PARTIAL FIX.*|FAIL A2b PLACEHOLDER.*)$", c, re.M)
+m = re.search(r"^(FAIL A3b PARTIAL FIX.*|FAIL A2b PLACEHOLDER.*|FAIL A4 RED-FIRST: the test file did not run any test.*)$", c, re.M)
 verdict = m.group(1).strip() if m else "the checker refused the first attempt (see verdict)"
+# 2026-09-15 18:3x: a LOAD/COMPILE error (ts-jest TS6133, a vitest idiom under jest, a missing import) carries the
+# compiler's own lines so the retry can act on them — the first 25 error lines of red_first.out, ANSI stripped.
+if "did not run any test" in verdict:
+    import os
+    rf = os.path.join(os.path.dirname(chk), "out.md.checker", "red_first.out")
+    if os.path.exists(rf):
+        txt = re.sub(r"\x1b\[[0-9;]*m", "", open(rf, encoding="utf-8", errors="replace").read())
+        errs = [l.rstrip() for l in txt.split("\n") if re.search(r"error TS\d+|Cannot find|is not defined|SyntaxError|ReferenceError|TypeError", l)]
+        verdict = verdict[:300] + " | COMPILER/LOADER SAID: " + " ⏎ ".join(errs[:25])[:1500]
 missed = []
 for ln in re.findall(r":(\d+) `", verdict):
     for s_ in d.get("defect_line", {}).get("sites", []):
@@ -403,7 +412,7 @@ d["retry_feedback"] = {
     "attempt": 2,
     "verdict": verdict[:600],
     "missed_sites": missed,
-    "instruction": ("Your first diff was REFUSED: " + verdict[:300] + ". Emit the COMPLETE diff again. For every "
+    "instruction": ("Your first diff was REFUSED: " + verdict[:600] + ". Emit the COMPLETE diff again. If the verdict carries COMPILER/LOADER lines, fix exactly what they name (remove an unused declaration/import, add a missing import, replace a vitest idiom with the jest one) and change nothing else. For every "
         "missed site the `-` line is `text_at_tip` copied character for character (do NOT edit the comment or the "
         "line beside it); keep the test exactly as specified. If the verdict names a PLACEHOLDER test file, write "
         "the full test file this time."),
