@@ -321,6 +321,23 @@ apply_section_for() {
   echo "no section for $want" >&2; return 1
 }
 
+# ---------------------------------------------------------------- A2b placeholder test file (2026-09-15: KS-1130 ×2, KS-1120-F1)
+# A "test file" with no `it(`/`test(` is the model's shortcut output ("placeholder line; content below replaces
+# this"). Name it, do not let it reach A4 as a load error the reader has to decode.
+k=1; PH=""
+while [ "$k" -le "$N_SEC" ]; do
+  pf="$(sed -n 1p "$REP/section_$k.opts" 2>/dev/null)"; pp="$(python3 -c 'import json,sys; print(json.load(open(sys.argv[1]))[int(sys.argv[2])-1]["path"])' "$REP/sections.json" "$k")"
+  case "$pp" in *__tests__/*|*.test.ts)
+    if [ -n "$pf" ] && [ "$(/usr/bin/grep -c -E "^\+\s*(it|test)\(" "$pf")" -eq 0 ]; then PH="$PH $pp ($(/usr/bin/grep -c '^+' "$pf") lines, 0 cells)"; fi ;;
+  esac
+  k=$((k+1))
+done
+if [ -n "$PH" ]; then
+  fail "A2b PLACEHOLDER test file — no it()/test() cell in:$PH — the model emitted a stub instead of the test; retry the ticket (a fresh sample), do not read the load error"
+  echo "RESULT: FAIL ($FAILS failed) — stopped at A2b (placeholder test file)"
+  exit 1
+fi
+
 # ---------------------------------------------------------------- A3 touched set
 : > "$REP/numstat.out"
 k=1
