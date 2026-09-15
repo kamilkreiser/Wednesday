@@ -64,6 +64,9 @@ def find_block(file_lines, block):
 
 def rebuild(hunk, file_lines, notes, idx):
     body = [b for b in hunk["body"] if b != "\\ No newline at end of file"]
+    if any(b.startswith("++++ b/") or b.startswith("+--- ") for b in body):
+        notes.append(f"hunk {idx}: a file HEADER sits inside the hunk as a '+' line — refused, kept as written (the splitter should have caught it)")
+        return None
     minus = [b[1:] for b in body if b.startswith("-")]
     plus = [b[1:] for b in body if b.startswith("+")]
     ctx = [b[1:] for b in body if b.startswith(" ")]

@@ -163,6 +163,14 @@ diff_path, rep = sys.argv[1], sys.argv[2]
 SUGGESTED_TEST = os.environ.get("SUGGESTED_TEST_REL", "") or "UNKNOWN_TEST_PATH.test.ts"
 lines = open(diff_path, encoding="utf-8").read().split("\n")
 if lines and lines[-1] == "": lines.pop()
+# 2026-09-15 (KS-1073 q8, the real cause): the model wrote ` --- /dev/null` with ONE leading space — a context-line
+# prefix on a file header — so the header read as a context line and the following `+++ b/<test>` as a `+` line
+# INSIDE the product hunk (tsc: "Expected 0-1 arguments" from a `+++ b/…` line landing in a Boolean(...)). A file
+# header never carries a leading space; strip it and say so.
+for _i in range(len(lines)):
+    if re.match(r"^ (--- (/dev/null|a/)|\+\+\+ b/)", lines[_i]):
+        print(f"line {_i+1}: file header written with a leading space ({lines[_i][:24]!r}) — the space stripped, read as a header")
+        lines[_i] = lines[_i][1:]
 # split into file sections at each '--- ' header (a 'diff --git' line, if any, belongs to the following section)
 sections = []; cur = None
 for ln in lines:
