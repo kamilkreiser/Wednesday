@@ -20,13 +20,6 @@ KEY = os.environ.get("LINEAR_API_KEY") or sys.exit("derive_candidates: LINEAR_AP
 
 # Set-aside register: id → reason (recorded the day it was read; a successor re-reads a ticket only when its updatedAt moves).
 SET_ASIDE = {
-    # 2026-09-16 06:5x (the 06:00 seat, bash tier): read at the tip, each with its reason
-    "KS-1088": "decision-class: 'filing only; decide whether the runner should enforce isolation' — a ruling, not a patch",
-    "KS-1135": "diagnosis-first: which of the six suites spawns tsx (direct vs shared preamble) is UNMEASURED; the fix shape is prose",
-    "KS-1034": "its fix flips run_code_guards.test.sh CASE 8 — two files (script + test) → a Claude seat",
-    "KS-808": "item 1 is a recorded decision; items 2–3 need psql → a Claude seat",
-    "KS-897": "the subject IS a test file — the bash tier's B3 wants ONE new test beside a reference", "KS-906": "a test file → a Claude seat",
-    "KS-1063": "decision-class: its own words say the design question comes first",
     "KS-1112": "two files: option 1 reds ks1029's A1 cell (2026-09-15 18:45)",
     "KS-1113": "an e2e spec under tests/e2e — no Playwright checker yet",
     "KS-1142": "a test refactor with no product tamper", "KS-1132": "services/auth — security surface (Kam 16:40: auth LAST)",
@@ -42,11 +35,6 @@ SET_ASIDE = {
 }
 AUTH = re.compile(r"\b(auth|mfa|oauth|login|session|jwt|password|csrf|rbac|permission|lockout|token)\b", re.I)
 PATH = re.compile(r"(?:Blockchain/Dev/)?((?:services/[a-z0-9\-]+|packages/shared)/src/[\w./\-]+\.ts|systemTest/(?:performance|akto|playwright|fixtures)/[\w./\-]+\.ts)(?::(\d+))?")
-# 2026-09-16 06:5x BASH TIER (Kam 18:19 "extend the checker"; tasks/bash_patch/ opened 00:4x): a description that names a
-# shell script — Blockchain/Dev/scripts/*.sh, Start_Up/*.sh, systemTest/{scripts,schemathesis,...}/*.sh, a .githooks/ hook —
-# is a bash_patch candidate; before this the predicate called them "names no product file" (KS-865/884/958/972/1089/1127 were
-# all briefed by hand from the excluded list). Tests (__tests__/, *.test.sh) are never products.
-SHPATH = re.compile(r"(?:Blockchain/Dev/)?((?:scripts|Start_Up|systemTest/[\w\-]+|\.githooks)/[\w./\-]+(?:\.sh)?)(?::(\d+))?")
 FIX = re.compile(r"^##+\s*(fix[- ]shape|recommendation|fix:|acceptance|the fix|what needs doing)", re.I | re.M)
 
 def q(query, variables=None):
@@ -119,7 +107,7 @@ def resolve_files(desc):
         if found: return found, "route"
     return [], ""
 
-tiers = {"T1 services (vitest, one file)": [], "T2 tooling (systemTest/*, one file)": [], "T2b bash (bash_patch — one script + a *.test.sh beside the reference)": [], "T3 jest services (originate, governance)": [], "T4 docs (doc_patch)": [], "T5 multi-file / later": []}
+tiers = {"T1 services (vitest, one file)": [], "T2 tooling (systemTest/*, one file)": [], "T3 jest services (originate, governance)": [], "T4 docs (doc_patch)": [], "T5 multi-file / later": []}
 excluded, held, aside = [], [], []
 for n in nodes:
     ident, title, desc = n["identifier"], n["title"], n["description"] or ""
@@ -133,11 +121,6 @@ for n in nodes:
         p = m.group(1)
         if "__tests__" in p or p.endswith(".test.ts") or "/tests/" in p: continue
         if p not in files: files.append(p)
-    for m in SHPATH.finditer(desc):
-        p = m.group(1)
-        if not (p.endswith(".sh") or "/.githooks/" in p or p.startswith(".githooks/")): continue
-        if "__tests__" in p or p.endswith(".test.sh") or "/tests/" in p: continue
-        if p not in files: files.append(p)
     resolved_by = ""
     if not files:
         # 2026-09-15 22:5x RESOLVER (IMPROVEMENTS row 90): the bare predicate hid 152 tickets as "names no product file"
@@ -149,8 +132,7 @@ for n in nodes:
     if resolved_by: title = f"[resolved:{resolved_by}, a HINT — read the file] " + title  # prefix, so the 80-char cut keeps it
     if len(files) > 1: tiers["T5 multi-file / later"].append((ident, n["priority"], title[:80], files[:3])); continue
     f = files[0]
-    if f.endswith(".sh") or ".githooks/" in f: tiers["T2b bash (bash_patch — one script + a *.test.sh beside the reference)"].append((ident, n["priority"], title[:80], [f]))
-    elif f.startswith("systemTest/"): tiers["T2 tooling (systemTest/*, one file)"].append((ident, n["priority"], title[:80], [f]))
+    if f.startswith("systemTest/"): tiers["T2 tooling (systemTest/*, one file)"].append((ident, n["priority"], title[:80], [f]))
     elif f.startswith("services/originate/") or f.startswith("services/governance/"): tiers["T3 jest services (originate, governance)"].append((ident, n["priority"], title[:80], [f]))
     else: tiers["T1 services (vitest, one file)"].append((ident, n["priority"], title[:80], [f]))
 
