@@ -9,21 +9,14 @@ Nothing else changes — NOT lines 598–599 (already the ruled shape), NOT 602,
 `## Pull Request Process`) and D (`CLAUDE.md`) are separate tasks.
 
 ## The exact change — TWO EDITS, each its own hunk with 3 lines of context
-E1 — lines 600–601 become ONE line. ⚠ Both file lines are BULLETS that begin with `- ` — so in the diff the removed line 600 reads
-`-- **The author performs the merge**…` (the diff marker `-` followed by the bullet's own `- `), line 601 reads `-  not the reviewer…`, and the
-added line reads `+- **The author performs the merge**…` (marker `+`, then the bullet's `- `). Never write `+--`. Context is EXACTLY line 599
-above (`  Wednesday's GO naming the head SHA (Kam, 2026-09-11)`) and line 602 below (`- The ticket and the review must not sit with the same person`);
-start the hunk at line 599 (`@@ -599,4 +599,3 @@`). Do NOT include the `## Related Issues` / `Closes #<issue-number>` template lines (594–596) in any hunk:
+E1 — lines 600–601 become ONE line (context: line 598 is `- TESTED before merge, as defined in step 6 of *Adopted merge flow* above, and`,
+line 599 is `  Wednesday's GO naming the head SHA (Kam, 2026-09-11)`, line 602 is `- The ticket and the review must not sit with the same person`):
 ```
-   Wednesday's GO naming the head SHA (Kam, 2026-09-11)
 -- **The author performs the merge**, once the PR is TESTED and has Wednesday's GO —
 -  not the reviewer (Kam, 2026-09-11; see *Adopted merge flow* above)
 +- **The author performs the merge**, once the PR is TESTED and has Wednesday's GO (Kam, 2026-09-11; see *Adopted merge flow* above)
- - The ticket and the review must not sit with the same person
 ```
-(r2 emitted `+--` lines and then looped on the template block until the token budget ran out; the marker note and the pinned context are the fix.)
-
-E2 — lines 603–604 (one bullet hard-wrapped over two lines) become these two lines. Line 603 is a bullet beginning `- `, so its diff lines read `-- **GitHub Actions…` and `+- **GitHub Actions…`; line 604 is a continuation (two leading spaces): `-  pass. The gate…` / `+  pass. The gate…`. Context: line 602 above, line 605 below; start the hunk at 602 (`@@ -602,4 +602,4 @@`) — REPLACE BOTH LINES: emit BOTH as `-` lines and
+E2 — lines 603–604 (one bullet hard-wrapped over two lines) become these two lines — REPLACE BOTH LINES: emit BOTH as `-` lines and
 BOTH as `+` lines; line 603 is repeated unchanged, only the continuation line 604 changes (context: line 602 is
 `- The ticket and the review must not sit with the same person`; line 605 is `- A filled-in **Test Evidence** block in the PR description, including the four`
 and it STAYS — it is context, never a `-` line):
