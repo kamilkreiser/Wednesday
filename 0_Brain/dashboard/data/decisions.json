@@ -9898,5 +9898,40 @@
   "status": "open",
   "ruled_choice": null,
   "ruled_ts": null
+ },
+ {
+  "id": "secuura-ks1102-public-status-what-may-show",
+  "client_project": "Secuura/Blockchain",
+  "title": "KS-1102: the public status endpoints publish internal URLs, ports, versions and which keys are unset — what may the PUBLIC page still show?",
+  "bluf": "OVERRIDE REASON (gate refusal read by Wednesday 23:05): the four prior matches are Kam FORWARDING Stuart's 2026-08-21 anchor_store report and Peter's 2026-09-10 PR-triage text — relays, not rulings, and none mentions the status endpoints. Measured at develop M55: GET /system/status and /api/system/status (routes/system-status.ts :396-480, mounted twice at index.ts :791/:798) and /api/system/health/dashboard answer 200 with no credential and carry per-service url+port+version, node/npm versions, uptime, memory, NODE_ENV, expectedVersions, a troubleshooting block and each dependency's configured/missing state (Blockfrost, Stripe, WalletConnect). The public status page (frontend/status/index.html) reads ONLY status, responseTime, summary.*, services.{core,blockchain,integration,frontend} and dependencies[].{name,type,required,status}; the admin app reads summary.services.healthy. A stripped PUBLIC variant keeps the page working; the one open question is whether the public page may still show WHICH dependency is missing — a product-contract call. Held diffs only until Sunday; nothing deploys on this card.",
+  "default_action": "Wednesday briefs option (b) for Ornith as a held diff after Sunday's QA sitting if no ruling by then — nothing public changes until the PR merges on Wednesday's GO under the TESTED grant",
+  "options": [
+   {
+    "key": "a",
+    "label": "Strip everything the page does not read (url, port, version, environment, expectedVersions, troubleshooting) AND collapse dependencies to counts only — the page's dependency tiles go blank",
+    "detail": ""
+   },
+   {
+    "key": "b",
+    "label": "Strip the same, but KEEP dependencies[].{name,type,required,status} because the page renders them today and a missing-key NAME is a config fact, not a secret; full detail moves behind admin auth",
+    "detail": ""
+   },
+   {
+    "key": "c",
+    "label": "Gate all three routes behind admin auth and give the public page its own minimal endpoint (status + counts) — a frontend change too, a bigger PR",
+    "detail": ""
+   }
+  ],
+  "recommended": "b",
+  "ts": "2026-09-15T23:05:53.011460+10:00",
+  "status": "open",
+  "ruled_choice": null,
+  "ruled_ts": null,
+  "prior_rulings_overridden": [
+   "2026-08-21 20:06",
+   "2026-09-10 09:01",
+   "2026-09-10 09:08",
+   "2026-09-10 09:08"
+  ]
  }
 ]
