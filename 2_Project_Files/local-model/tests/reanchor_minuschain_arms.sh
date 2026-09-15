@@ -174,6 +174,25 @@ for which in NEW OLD; do
   fi
 done
 
+# ARM 9 — EOF CLAMP (KS-1127 r1): a whole-tail rewrite hunk (20 '-' / 29 '+', an invented blank '-' line, a bogus
+# "\ No newline" marker) reaching the file's LAST line — the rebuilt hunk must not carry the phantom "" past EOF;
+# the applied file must equal the hand-fixed runner byte-for-byte
+R1127=$LM/runs/2026-09-16_ks1127-ornith35b-night
+S1127=$R1127/out.md.checker/section_2.diff.as-written; [ -f "$S1127" ] || S1127=$R1127/out.md.checker/section_2.diff
+awk '/^```diff/{f=1;next} /^```$/{f=0} f' "$R1127/out.md" | awk '/^--- a\/Blockchain\/Dev\/scripts\/run-shell-suites.sh/{p=1} p' > "$W/tail.real.diff"
+python3 "$REAN" "$W/tail.real.diff" "$W/runner_tip.sh" "$W/tail.rean.diff" > "$W/tail.rean.out" 2>&1
+tr=$(mktemp -d "$W/tailrepo.XXXXXX"); mkdir -p "$tr/Blockchain/Dev/scripts"; cp "$W/runner_tip.sh" "$tr/Blockchain/Dev/scripts/run-shell-suites.sh"
+git -C "$tr" init -q && git -C "$tr" add -A && git -C "$tr" -c user.email=a@b -c user.name=arm commit -qm tip
+FIX1127=/private/tmp/claude-501/-Volumes-DevMASTER-WEDNESDAY/328d9efb-cfae-479b-8bf8-10663522ecd1/scratchpad/ks1127/fix.sh
+if git -C "$tr" apply "$W/tail.rean.diff" 2>"$W/tail.apply.err" && [ -f "$FIX1127" ] && cmp -s "$tr/Blockchain/Dev/scripts/run-shell-suites.sh" "$FIX1127"; then
+  ok "9 EOF-CLAMP: the whole-tail rewrite applies and the applied runner == the hand fix byte-for-byte"
+elif [ ! -f "$FIX1127" ]; then ok "9 EOF-CLAMP: applies (hand-fix copy absent on this machine — byte compare skipped, stated)"
+else bad "9 EOF-CLAMP: $(head -2 "$W/tail.apply.err" | tr '\n' ' ') $(cat "$W/tail.rean.out" | tr '\n' ' ' | cut -c1-160)"; fi
+python3 "$OLD" "$W/tail.real.diff" "$W/runner_tip.sh" "$W/tail.old.diff" > "$W/tail.old.out" 2>&1
+tr2=$(mktemp -d "$W/tailrepo.XXXXXX"); mkdir -p "$tr2/Blockchain/Dev/scripts"; cp "$W/runner_tip.sh" "$tr2/Blockchain/Dev/scripts/run-shell-suites.sh"
+git -C "$tr2" init -q && git -C "$tr2" add -A && git -C "$tr2" -c user.email=a@b -c user.name=arm commit -qm tip
+if ! git -C "$tr2" apply --check "$W/tail.old.diff" 2>/dev/null; then ok "9b OLD control: the pre-clamp script's rebuilt hunk does not apply (the defect reproduced)"; else bad "9b OLD control: the old script's hunk applied"; fi
+
 echo "reanchor_minuschain_arms: $PASS passed, $FAIL failed (work dir kept: $W)"
 [ "$FAIL" -eq 0 ] || exit 1
 exit 0

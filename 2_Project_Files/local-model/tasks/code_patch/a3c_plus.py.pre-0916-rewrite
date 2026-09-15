@@ -67,15 +67,8 @@ for _p, _txt in (d.get("files") or {}).items():
     if _p == _pf or _p.endswith(_pf) or _pf.endswith(_p):
         _tip = {l.strip() for l in _txt.split("\n") if len(l.strip()) >= 8}
 _expected = {e.strip() for e in exp} | {_without_trailing_comment(e) for e in exp}
-# 2026-09-16 06:5x (KS-1127 r1): a WHOLE-BLOCK REWRITE removes a run of lines and re-adds them with the edits inside —
-# every re-added unchanged line is a tip line marked '+', but it is ALSO a '-' line of the same section, so nothing is
-# duplicated in the applied file (the applied runner was byte-identical to the hand fix). A3d's target is DUPLICATION
-# (KS-1133: a context line added beside its original). So a '+' tip line that the section also REMOVES is a rewrite,
-# not a context-marked-as-addition, and is not flagged. A '+' tip line with no matching '-' still is.
-_removed = {_norm(l[1:]) for l in sec if l.startswith("-") and not l.startswith("---")}
 context_as_plus = [l for l in plus if len(_norm(l)) >= 8 and _norm(l) not in _expected
-                   and _without_trailing_comment(l) not in _expected and _norm(l) in _tip
-                   and _norm(l) not in _removed]
+                   and _without_trailing_comment(l) not in _expected and _norm(l) in _tip]
 for c in context_as_plus:
     print("A3D " + c.strip())
 sys.exit(2 if context_as_plus else 0)

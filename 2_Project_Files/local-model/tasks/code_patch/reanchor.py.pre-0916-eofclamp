@@ -47,11 +47,6 @@ def recount(header, body):
     return f"@@ -{m.group(1)},{old} +{m.group(2)},{new} @@{m.group(3)}"
 
 
-def _n_file(file_lines):
-    """the file's real line count — split("\n") on a newline-terminated file leaves a trailing "" that is NOT a line;
-    a hunk whose trailing context includes it fails to apply at EOF (2026-09-16 06:5x, KS-1127 r1: a whole-tail rewrite)"""
-    return len(file_lines) - (1 if file_lines and file_lines[-1] == "" else 0)
-
 def find_block(file_lines, block):
     """all start indexes where block (list of stripped-right strings) occurs contiguously"""
     n = len(block)
@@ -120,7 +115,7 @@ def rebuild_old_side(hunk, file_lines, notes, idx):
         out.append(("-" if b.startswith("-") else " ") + file_lines[pos]); pos += 1
     while pos < end:
         out.append(" " + file_lines[pos]); pos += 1
-    pre = file_lines[max(0, start - 3):start]; post = file_lines[end:min(end + 3, _n_file(file_lines))]   # 2026-09-16: never a phantom blank past EOF (KS-1127 r1)
+    pre = file_lines[max(0, start - 3):start]; post = file_lines[end:end + 3]
     old_count = len(pre) + sum(1 for o in out if o.startswith((" ", "-"))) + len(post)
     new_count = len(pre) + sum(1 for o in out if o.startswith((" ", "+"))) + len(post)
     res = [f"@@ -{max(0, start - 3) + 1},{old_count} +{max(0, start - 3) + 1},{new_count} @@"]
@@ -455,7 +450,7 @@ def rebuild(hunk, file_lines, notes, idx):
             notes.append(f"hunk {idx}: insert-only — moved above a block-comment opener ({moved} line(s)) so the insert is not commented out")
         mid = ["+" + p for p in plus]
     pre = file_lines[max(0, start - 3):start]
-    post = file_lines[end:min(end + 3, _n_file(file_lines))]   # 2026-09-16: never a phantom blank past EOF (KS-1127 r1)
+    post = file_lines[end:end + 3]
     old_count = len(pre) + len(minus) + len(post)
     new_count = len(pre) + len(plus) + len(post)
     out = [f"@@ -{max(0, start - 3) + 1},{old_count} +{max(0, start - 3) + 1},{new_count} @@"]
