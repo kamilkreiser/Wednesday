@@ -80,15 +80,20 @@
 
 **Reading (measured, not felt):** first-run PASS 2/5 on q4 and 1/5 on q8 — but the q8 set held the harder shapes (a five-hunk split, a four-site file, a 215-line test) and its one pass was the new mode. **Seven of the ten product hunks were RIGHT** (KS-1050, 932, 844, 1165, 1018, 1073's line, 1123 n/a) and the failures were patch SHAPE in five of the seven fails; the harness now repairs the shape it can prove (reanchor, headerless split, leading-space header) and names what it cannot (KS-864's altered `-` line, KS-871's neighbour hunk, KS-908's two-file header). Speed: q4 26–41 s per ticket, q8 30–52 s — the q8 quant did not change a verdict in either direction on the shared shapes. **Keep Q4_K_M as the worker** (the 10:5x reading stands); the next lever is the A3b retry and the brief rules, not the quant.
 
-## The pair table (Kam 12:38 — every ticket on both quants until one wins a ticket the other loses; updated 2026-09-15 12:5x)
+## The pair table (Kam 12:38 — every ticket on both quants until one wins a ticket the other loses; updated 2026-09-15 13:0x, 13 pairs)
 | Ticket (brief) | ornith:35b Q4_K_M | ornith:35b-q8_0 | Verdict |
 |---|---|---|---|
 | KS-1072 | PASS | PASS | tie |
 | KS-1123 F3 (test-only) | PASS | PASS | tie |
 | KS-1120 F-2 (test-only) | PASS | PASS | tie |
 | KS-1171 8j (test-only) | PASS | PASS | tie |
+| KS-1050 | PASS (round 3) | PASS | tie |
+| KS-932 | PASS | PASS | tie |
+| KS-1165 | PASS | PASS | tie |
+| KS-844 | PASS (reanchored) | PASS | tie |
 | KS-871 (split brief) | FAIL (A3b) | FAIL (A3b) | tie |
 | KS-1073 | FAIL (A4: the control cell wrong) | PASS (round 2) | **q8** |
 | KS-1018 | FAIL (A3b: 1 of 4 sites) | PASS (reanchor + TDZ-inline) | **q8** |
-| KS-908 · KS-1050 · KS-932 · KS-1165 · KS-844 · KS-1130 | PASS | (q8 twins parked, `#Q8` lines) | pending |
-**Reading:** q8 has won two of seven same-brief pairs, q4 none, five ties — the two wins are the multi-site / long-copy tickets. Cost stays Q4's (half the memory, ~30% faster). Not yet clear (single runs per cell); the rule stands.
+| KS-908 | PASS (reanchored) | FAIL (A4: transform/syntax error in the test file) | **q4** |
+| KS-1130 E1 twin (test-only) | PASS (round 3) | FAIL (A4: a one-line placeholder file) | **q4** |
+**Reading (13 pairs, single runs per cell):** q8 2 · q4 2 · ties 9. Each quant's wins are the other's patch-shape slips, not precision — the same slip classes (placeholder, TDZ, a dropped site) appear on both. **No outcome signal between the quants; Q4 stays the worker on cost (21 vs 37 GB, ~30% faster).** The rule (both quants) stands until Kam lifts it; the lever is the harness, not the quant.

@@ -1,0 +1,11 @@
+--- a/Blockchain/Dev/services/api-gateway/src/middleware/csrf.ts
++++ b/Blockchain/Dev/services/api-gateway/src/middleware/csrf.ts
+@@ -95,6 +95,8 @@ const DEFAULT_CONFIG: CsrfConfig = {
+     // (startsWith match covers /verify, /verify-file, /verify-batch.)
+     '/api/verification/verify',
++    // KS-1165: the v2 twins are published anonymous (security: []) like v1 — same exclusion, same startsWith rule.
++    '/api/v2/verification/verify',
+     // Client-side logger sink — sendBeacon fires-and-forgets a JSON batch
+     // of warn/error events from the SPA's logger. No session auth, no
+     // CSRF interaction; the body is already sanitised client-side. Origin
+ 

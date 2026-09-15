@@ -1,0 +1,18 @@
+--- a/services/security/src/index.ts
++++ b/services/security/src/index.ts
+@@ -1147,6 +1147,7 @@
+         scopes: apiKey.scopes,
+         rateLimit: apiKey.rateLimit,
+         createdAt: apiKey.createdAt,
++        connectorId: apiKey.connectorId || null, // KS-908: was persisted but invisible through POST response.
+         // KS-577: reported, not assumed. `null` means the revoke was attempted
+         // and FAILED, so the prior credential is still valid — a caller that
+         // ignores this is back to the bug.
+@@ -1208,6 +1208,7 @@
+       usageCount: k.usageCount,
+       isActive: k.isActive,
+       createdAt: k.createdAt,
++      connectorId: k.connectorId || null, // KS-908: was persisted but invisible through GET list response.
+     }));
+   
+   res.json({
