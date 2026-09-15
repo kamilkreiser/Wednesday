@@ -85,7 +85,15 @@ failed task, not a style point):
    variables or parameters in either file. vitest globals are available but
    importing `{ describe, it, expect, beforeAll, afterAll, beforeEach, vi }`
    from 'vitest' is the repo's precedent — follow it.
-   6a. Every identifier the test uses must be imported or declared IN the
+   6a. IDENTIFIER SELF-CHECK (2026-09-15): before you write the diff, list
+       every identifier your test file uses (helpers like `deleteFn`, stubs,
+       servers, ports) and the line that declares or imports it; an
+       undeclared one is a `ReferenceError` that fails EVERY cell including
+       the control, and the checker now refuses that as "not a real red".
+       Also: the test file's path is `<test_dir>/<name>.test.ts` EXACTLY as
+       `test_dir` is given in the input (repo-relative) — never `__tests__/`
+       at the repo root.
+   6a-original. Every identifier the test uses must be imported or declared IN the
        test file. Calling `vi.mocked(someModule.fn)` without importing
        `someModule` is a ReferenceError at runtime. Simpler and preferred:
        capture inside the `vi.mock` factory itself — declare a

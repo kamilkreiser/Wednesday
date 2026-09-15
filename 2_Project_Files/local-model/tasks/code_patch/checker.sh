@@ -341,8 +341,34 @@ rc_red="$(run_vitest red_first "$TEST_REL")"
 RED="$(summ red_first)"
 echo "test-only at tip: rc=$rc_red $RED"
 red_total="$(getn "$RED" total)"; red_failed="$(getn "$RED" failed)"; red_passed="$(getn "$RED" passed)"
-if [ "$rc_red" -ne 0 ] && [ "$red_total" -gt 0 ] && [ "$red_failed" -ge 1 ]; then
-  pass "A4 RED-FIRST: $TEST_REL fails at the untouched tip ($red_failed failed / $red_total run)"
+# 2026-09-15 A4 twin (KS-1087 night3): all three cells "failed" at the tip with `ReferenceError: deleteFn is
+# not defined` — a test-side bug read as a red, and the CONTROL cell red too. A red counts only when it is
+# an ASSERTION failure and every non-🔴 cell (the controls) PASSES at the untouched tip; otherwise the
+# harness cannot reach the code and the "red" proves nothing.
+A4_NOTE="$(python3 - "$REP/red_first.json" <<'PY4'
+import json, sys, re
+try: j = json.load(open(sys.argv[1]))
+except Exception as e: print(f"UNREADABLE {e}"); sys.exit()
+ctrl_red = []; nonassert = []
+for tf in j.get("testResults", []):
+    for a in tf.get("assertionResults", []):
+        t = a.get("title", ""); msgs = " ".join(a.get("failureMessages") or [])
+        if a.get("status") == "failed":
+            if "🔴" not in t: ctrl_red.append(t[:60])
+            if re.search(r"\b(ReferenceError|TypeError|SyntaxError|RangeError)\b", msgs) and "AssertionError" not in msgs and "expected" not in msgs.lower():
+                nonassert.append(t[:60] + " -> " + msgs.strip().split("\n")[0][:90])
+out = []
+if ctrl_red: out.append("CONTROL cell(s) red at the tip: " + " | ".join(ctrl_red))
+if nonassert: out.append("non-assertion failure(s): " + " | ".join(nonassert))
+print(" ; ".join(out))
+PY4
+)"
+if [ "$rc_red" -ne 0 ] && [ "$red_total" -gt 0 ] && [ "$red_failed" -ge 1 ] && [ -z "$A4_NOTE" ]; then
+  pass "A4 RED-FIRST: $TEST_REL fails at the untouched tip ($red_failed failed / $red_total run; controls green; assertion reds)"
+elif [ "$rc_red" -ne 0 ] && [ "$red_total" -gt 0 ] && [ "$red_failed" -ge 1 ]; then
+  fail "A4 RED-FIRST: the test is red at the tip but NOT for the right reason — $A4_NOTE ($red_failed failed / $red_total run); the harness does not reach the code, so the red proves nothing"
+  echo "RESULT: FAIL ($FAILS failed) — stopped at A4 (a test-side defect, not a product red)"
+  exit 1
 elif [ "$red_total" -eq 0 ]; then
   fail "A4 RED-FIRST: the test file did not run any test at the tip (load/compile error, not a red) — $(head -c 300 "$REP/red_first.out" | tr '\n' ' ')"
 else

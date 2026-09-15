@@ -55,7 +55,7 @@ PF_DIR="$(cd -P "$LM_DIR/.." && pwd)"                   # 2_Project_Files
 TASK_DIR="$LM_DIR/tasks/code_patch"
 
 NIGHT_MODEL="${NIGHT_MODEL:-ornith:35b}"
-NIGHT_THINK="${NIGHT_THINK:-0}"
+NIGHT_THINK="${NIGHT_THINK:-1}"   # 2026-09-15: think=1 is the default — placement was right only with thinking; num_predict 32768 bounds it
 NIGHT_NUM_CTX="${NIGHT_NUM_CTX:-32768}"
 NIGHT_MAX_TICKETS="${NIGHT_MAX_TICKETS:-4}"
 NIGHT_MAX_LOAD="${NIGHT_MAX_LOAD:-8}"

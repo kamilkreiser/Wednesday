@@ -1,0 +1,34 @@
+diff_blocks=1 all_blocks=1 prose_outside_chars=0
+wrote /Volumes/DevMASTER/WEDNESDAY/2_Project_Files/local-model/runs/2026-09-15_ks1087-ornith35b-night3/out.md.checker/patch.diff lines=189
+PASS A1 output is exactly one fenced ```diff block, nothing outside it
+clone clean at pinned tip 48e65c43517926da6f137993053c82c83e122f5d
+--- baseline at the untouched tip (whole services/api-gateway suite + tsc)
+baseline suite rc=0 total=355 passed=355 failed=0 suites_failed=0 loaded=1 failed_names=[]
+baseline tsc rc=0 (0 lines)
+section 1 services/api-gateway/src/routes/verification.ts: hunk 1 (@@ -972,31 +972,42 @@ export function createVerificationRoutes(deps: VerificationRouteDeps): Router {) declared old=31 new=42 but actual old=34 new=45
+section 2 services/api-gateway/src/__tests__/ks1087-workflow-approve-deletes-the-pending-document.test.ts: hunk 1 (@@ -0,0 +1,146 @@) declared old=0 new=146 but actual old=0 new=128
+sections=2 miscounted_sections=2
+section 1 services/api-gateway/src/routes/verification.ts: path lacks Blockchain/Dev/ — applying with --directory=Blockchain/Dev
+section 1 services/api-gateway/src/routes/verification.ts: applies ONLY with --recount --ignore-whitespace (miscounted hunks=1, strict rc=128)
+section 2 services/api-gateway/src/__tests__/ks1087-workflow-approve-deletes-the-pending-document.test.ts: path lacks Blockchain/Dev/ — applying with --directory=Blockchain/Dev
+section 2 services/api-gateway/src/__tests__/ks1087-workflow-approve-deletes-the-pending-document.test.ts: applies ONLY with --recount --ignore-whitespace (miscounted hunks=1, strict rc=128)
+PASS A2 diff applies at the tip — with an accommodation: [services/api-gateway/src/routes/verification.ts: --recount --ignore-whitespace needed; miscounted hunks=1; strict rc=128] [services/api-gateway/src/__tests__/ks1087-workflow-approve-deletes-the-pending-document.test.ts: --recount --ignore-whitespace needed; miscounted hunks=1; strict rc=128]
+touched files (2): Blockchain/Dev/services/api-gateway/src/__tests__/ks1087-workflow-approve-deletes-the-pending-document.test.ts Blockchain/Dev/services/api-gateway/src/routes/verification.ts  (+148/-9)
+PASS A3 touched-file set == { Blockchain/Dev/services/api-gateway/src/routes/verification.ts , Blockchain/Dev/services/api-gateway/src/__tests__/ks1087-workflow-approve-deletes-the-pending-document.test.ts }
+A3b: no must_change sites in the input — skipped
+test-only at tip: rc=1 total=3 passed=0 failed=3 suites_failed=2 loaded=1 failed_names=['KS-1087 — workflow-approve keeps the pending document on non-2xx originate responses 🔴 KS-1087 — originate 401: no 200 approved, and the pending document survives', 'KS-1087 — workflow-approve keeps the pending document on non-2xx originate responses 🔴 KS-1087 — originate unreachable: the pending document survives', 'KS-1087 — workflow-approve keeps the pending document on non-2xx originate responses KS-1087 control — originate 201: approved and the pending document is deleted']
+PASS A4 RED-FIRST: src/__tests__/ks1087-workflow-approve-deletes-the-pending-document.test.ts fails at the untouched tip (3 failed / 3 run)
+test after product hunk: rc=1 total=3 passed=0 failed=3 suites_failed=2 loaded=1 failed_names=['KS-1087 — workflow-approve keeps the pending document on non-2xx originate responses 🔴 KS-1087 — originate 401: no 200 approved, and the pending document survives', 'KS-1087 — workflow-approve keeps the pending document on non-2xx originate responses 🔴 KS-1087 — originate unreachable: the pending document survives', 'KS-1087 — workflow-approve keeps the pending document on non-2xx originate responses KS-1087 control — originate 201: approved and the pending document is deleted']
+FAIL A5 GREEN-AFTER: src/__tests__/ks1087-workflow-approve-deletes-the-pending-document.test.ts still red (or empty) after the product hunk (rc=1, 3 failed / 3 run): ['KS-1087
+INFO control cell present: NO (0 passed before, 0 after) — the task asked for one; not gated
+after suite rc=1 total=358 passed=355 failed=3 suites_failed=2 loaded=1 failed_names=['KS-1087 — workflow-approve keeps the pending document on non-2xx originate responses 🔴 KS-1087 — originate 401: no 200 approved, and the pending document survives', 'KS-1087 — workflow-approve keeps the pending document on non-2xx originate responses 🔴 KS-1087 — originate unreachable: the pending document survives', 'KS-1087 — workflow-approve keeps the pending document on non-2xx originate responses KS-1087 control — originate 201: approved and the pending document is deleted']
+baseline: total=355 failed=0 | after: total=358 failed=3
+develop's own reds (attributed, not counted): []
+NEW reds: [('ks1087-workflow-approve-deletes-the-pending-document.test.ts', 'KS-1087 — workflow-approve keeps the pending document on non-2xx originate responses KS-1087 control — originate 201: approved and the pending document is deleted'), ('ks1087-workflow-approve-deletes-the-pending-document.test.ts', 'KS-1087 — workflow-approve keeps the pending document on non-2xx originate responses 🔴 KS-1087 — originate 401: no 200 approved, and the pending document survives'), ('ks1087-workflow-approve-deletes-the-pending-document.test.ts', 'KS-1087 — workflow-approve keeps the pending document on non-2xx originate responses 🔴 KS-1087 — originate unreachable: the pending document survives')]
+reds fixed by the patch: []
+tests added: 3
+FAIL A6 whole services/api-gateway suite: NEW red(s) vs the untouched tip (see suite_delta.out)
+PASS A7 tsc --noEmit for services/api-gateway: rc 0 after the patch (baseline rc=0)
+INFO tsc on the test file alone: rc=2 (4 lines; not gated — vitest does not type-check and the service tsconfig excludes __tests__)
+SUMMARY files=2 +148/-9 test=src/__tests__/ks1087-workflow-approve-deletes-the-pending-document.test.ts red_first=yes apply_mode=lenient
+RESULT: FAIL (2 failed)

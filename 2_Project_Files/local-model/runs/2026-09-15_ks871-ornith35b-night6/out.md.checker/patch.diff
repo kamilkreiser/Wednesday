@@ -1,0 +1,210 @@
+diff --git a/services/api-gateway/src/__tests__/ks871-the-audit-log-records-req-path.test.ts b/services/api-gateway/src/__tests__/ks871-the-audit-log-records-req-path.test.ts
+new file mode 100644
+index 0000000..abcdef0
+--- /dev/null
++++ b/services/api-gateway/src/__tests__/ks871-the-audit-log-records-req-path.test.ts
+@@ -1,95 +1,95 @@
++/**
++ * KS-871: audit middleware records `details.path` AFTER response finishes.
++ * When an earlier router.use() gate answers (REFUSED erasure), Express has
++ * trimmed req.path to the mount-relative remainder (/) so the audit row
++ * carries the wrong path. This test drives that exact refused-erasure code
++ * path through the real router and asserts on what was captured at entry.
++ */
++import { describe, it, expect, beforeAll, afterAll, beforeEach, vi } from 'vitest';
++import express from 'express';
++import http from 'node:http';
++import type { AddressInfo } from 'node:net';
++import type { RequestHandler } from 'express';
++import { createAuditMiddleware } from '../middleware/audit';
++
++const CAPTURED_PARAMS: Array<{ sql: string; params: unknown[] }> = [];
++
++function buildApp() {
++  const query = async (_sql: string, params: unknown[]) => {
++    CAPTURED_PARAMS.push({ sql: _sql, params });
++    return { rows: [] };
++  };
++  const deps = {
++    query,
++    isDbAvailable: () => true,
++    log: () => {},
++  };
++  const app = express();
++  app.use(express.json());
++  // Mount audit BEFORE routes — exactly how production wires it.
++  app.use(createAuditMiddleware(deps));
++  return app;
++}
++
++async function drive(method: 'POST' | 'DELETE', path: string): Promise<number> {
++  const server = buildApp().listen(0, '127.0.0.1');
++  await new Promise<void>((r) => server.once('listening', () => r()));
++  const port = (server.address() as AddressInfo).port;
++  const status = await new Promise<number>((resolve) => {
++    const req = http.request(
++      { host: '127.0.0.1', port, path, method },
++      (res) => { res.resume(); resolve(res.statusCode ?? 0); },
++    );
++    req.on('error', () => resolve(-1));
++    req.end(method === 'POST' ? '{}' : undefined);
++  });
++  await new Promise<void>((r) => server.close(() => r()));
++  return status;
++}
++
++describe('KS-871 — audit logs original request path even when trimmed by Express', () => {
++  beforeEach(() => {
++    CAPTURED_PARAMS.length = 0;
++  });
++
++  it('🔴 KS-871 — details.path is the original request path, not the trimmed remainder', async () => {
++    // Refused erasure: router.use at /api/gdpr answers without calling next(),
++    // so Express trims req.path to '/'. The audit row must still carry the
++    // full original path per the ticket fix shape.
++    const app = express();
++    app.use(express.json());
++    app.use((req, res) => {
++      if (req.path.startsWith('/api/gdpr')) {
++        res.status(403).json({ error: 'refused' });
++        return;
++      }
++      // fall through to audit middleware would be wrong here — we need a
++      // separate app instance for this cell only. See CONTROL below.
++    });
++    void app.listen(0, '127.0.0.1');
++    // Use the shared builder but mount the refusing gate BEFORE audit.
++    const refactoredBuild = (() => {
++      const query = async (_sql: string, params: unknown[]) => {
++        CAPTURED_PARAMS.push({ sql: _sql, params });
++        return { rows: [] };
++      };
++      const deps = { query, isDbAvailable: () => true, log: () => {} };
++      const innerApp = express();
++      innerApp.use(express.json());
++      // Gate that refuses gdpr paths WITHOUT calling next() → Express trims req.path.
++      innerApp.use('/api/gdpr', (req, res) => {
++        res.status(403).json({ error: 'refused' });
++      });
++      innerApp.use(createAuditMiddleware(deps));
++      return innerApp;
++    })();
++    const server = refactoredBuild.listen(0, '127.0.0.1');
++    await new Promise<void>((r) => server.once('listening', () => r()));
++    const port = (server.address() as AddressInfo).port;
++    await new Promise<number>((resolve) => {
++      http.request(
++        { host: '127.0.0.1', port, path: '/api/gdpr/erasures/abc', method: 'DELETE' },
++        (res) => { res.resume(); resolve(res.statusCode ?? 0); },
++      ).end();
++    });
++    await new Promise<void>((r) => server.close(() => r()));
++    // Wait briefly for fire-and-forget write to complete.
++    await new Promise((r) => setTimeout(r, 50));
++    expect(CAPTURED_PARAMS.length).toBeGreaterThan(0);
++    const lastParams = CAPTURED_PARAMS[CAPTURED_PARAMS.length - 1].params;
++    const detailsJson = String(lastParams[lastParams.length - 2]);
++    const details = JSON.parse(detailsJson);
++    expect(details.path).toBe('/api/gdpr/erasures/abc');
++  });
++
++  it('🔴 KS-871 — action/resource are derived from the original path', async () => {
++    const query = async (_sql: string, params: unknown[]) => {
++      CAPTURED_PARAMS.push({ sql: _sql, params });
++      return { rows: [] };
++    };
++    const deps = { query, isDbAvailable: () => true, log: () => {} };
++    const app = express();
++    app.use(express.json());
++    app.use('/api/gdpr', (req, res) => {
++      res.status(403).json({ error: 'refused' });
++    });
++    app.use(createAuditMiddleware(deps));
++    const server = app.listen(0, '127.0.0.1');
++    await new Promise<void>((r) => server.once('listening', () => r()));
++    const port = (server.address() as AddressInfo).port;
++    await new Promise<number>((resolve) => {
++      http.request(
++        { host: '127.0.0.1', port, path: '/api/gdpr/erasures/abc', method: 'DELETE' },
++        (res) => { res.resume(); resolve(res.statusCode ?? 0); },
++      ).end();
++    });
++    await new Promise<void>((r) => server.close(() => r()));
++    await new Promise((r) => setTimeout(r, 50));
++    const lastParams = CAPTURED_PARAMS[CAPTURED_PARAMS.length - 1].params;
++    const action = String(lastParams[3]);
++    const resourceType = String(lastParams[4]);
++    // Per deriveAction logic at line ~108 using auditPath='/api/gdpr/erasures/abc':
++    //   section='gdpr', subResource='erasures', verb=delete → action=`gdpr.delete`, resourceType=`gdpr`
++    expect(action).not.toBe('unknown.delete');
++    expect(resourceType).not.toBe('unknown');
++    expect([action, resourceType]).toContain('gdpr');
++  });
++
++  it('KS-871 control — an ordinary POST /api/documents still audits its own path', async () => {
++    const query = async (_sql: string, params: unknown[]) => {
++      CAPTURED_PARAMS.push({ sql: _sql, params });
++      return { rows: [] };
++    };
++    const deps = { query, isDbAvailable: () => true, log: () => {} };
++    const app = express();
++    app.use(express.json());
++    app.post('/api/documents', (req, res) => {
++      res.status(201).json({ id: 'doc-1' });
++    });
++    app.use(createAuditMiddleware(deps));
++    const status = await drive('POST', '/api/documents');
++    expect(status).toBe(201);
++    await new Promise((r) => setTimeout(r, 50));
++    expect(CAPTURED_PARAMS.length).toBeGreaterThan(0);
++    const lastParams = CAPTURED_PARAMS[CAPTURED_PARAMS.length - 1].params;
++    const detailsJson = String(lastParams[lastParams.length - 2]);
++    const details = JSON.parse(detailsJson);
++    expect(details.path).toBe('/api/documents');
++  });
++});
+diff --git a/services/api-gateway/src/middleware/audit.ts b/services/api-gateway/src/middleware/audit.ts
+index abcdef1..abcdef2 100644
+--- a/services/api-gateway/src/middleware/audit.ts
++++ b/services/api-gateway/src/middleware/audit.ts
+@@ -92,7 +92,7 @@ const EXCLUDED_PREFIXES = [
+  * tail without needing to enumerate every route.
+  */
+-function deriveAction(req: Request): {
++function deriveAction(req: Request, auditPath: string): { // KS-871: capture original path at entry
+   action: string;
+   resourceType: string;
+   resourceId: string | null;
+@@ -105,7 +105,7 @@ function deriveAction(req: Request): {
+ 
+   // Trim trailing slashes and pull the first 3-4 segments after /api.
+-  const segments = req.path.replace(/\/+$/, '').split('/').filter(Boolean);
++  const segments = auditPath.replace(/\/+$/, '').split('/').filter(Boolean); // KS-871: use captured path
+ 
+   // segments[0] === 'api' for everything we audit
+   const section = segments[1] || 'unknown';
+@@ -207,6 +207,7 @@ export function createAuditMiddleware(deps: AuditMiddlewareDeps): RequestHandler
+     if (EXCLUDED_PREFIXES.some((p) => req.path.startsWith(p))) return next();
+ 
+     const start = Date.now();
++    const auditPath = req.originalUrl.split('?')[0]; // KS-871: capture once at entry before any handler trims req.path
+ 
+     // Wrap res.json so the login-success path can extract the userId from the
+     // response body. Without this, /api/auth/login audit entries have a null
+@@ -221,7 +222,7 @@ export function createAuditMiddleware(deps: AuditMiddlewareDeps): RequestHandler
+         try {
+           if (!deps.isDbAvailable()) return;
+-          const { action, resourceType, resourceId: routeResourceId } = deriveAction(req);
++          const { action, resourceType, resourceId: routeResourceId } = deriveAction(req, auditPath); // KS-871: pass captured path
+ 
+           const u = (req as Request & { user?: { userId?: string; organizationId?: string; tenantId?: string } }).user;
+           let userId: string | null = u?.userId || null;
+@@ -277,7 +278,7 @@ export function createAuditMiddleware(deps: AuditMiddlewareDeps): RequestHandler
+           const details = JSON.stringify({
+             method: req.method,
+-            path: req.path,
++            path: auditPath, // KS-871: write captured path, not trimmed remainder
+             status: res.statusCode,
+             durationMs: Date.now() - start,
+             tenantId: u?.tenantId || null,
+

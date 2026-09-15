@@ -1,0 +1,57 @@
+--- a/services/api-gateway/src/routes/verification.ts
++++ b/services/api-gateway/src/routes/verification.ts
+@@ -972,31 +972,42 @@ export function createVerificationRoutes(deps: VerificationRouteDeps): Router {
+       if (pendingDoc) {
+         const originateUrl = services.originate?.url || 'http://localhost:6000';
+         const http = originateUrl.startsWith('https') ? require('https') : require('http');
+-        const url = new URL(`${originateUrl}/api/documents`);
++        const forwardUrl = new URL(`${originateUrl}/api/documents`);
+         const payload = JSON.stringify({
+           title: pendingDoc.title,
+           documentType: pendingDoc.documentType || pendingDoc.type,
+           description: pendingDoc.description,
+           contentHash: pendingDoc.contentHash,
+           data: pendingDoc.data,
+         });
+         const forwardHeaders: Record<string, string> = {
+           'Content-Type': 'application/json',
+           'Content-Length': String(Buffer.byteLength(payload)),
+         };
+         if (pendingDoc.createdBy) forwardHeaders['x-user-id'] = pendingDoc.createdBy as string;
+ 
+-        const proxyReq = http.request(
+-          { hostname: url.hostname, port: url.port, path: url.pathname, method: 'POST', headers: forwardHeaders },
++        // KS-1087: await the forward so we don't lose the doc on failure.
++        const status = await new Promise<{ statusCode: number }>((resolve, reject) => {
++          const req = http.request(
++            { hostname: forwardUrl.hostname, port: forwardUrl.port, path: forwardUrl.pathname, method: 'POST', headers: forwardHeaders },
+             (proxyRes: any) => {
+               let body = '';
+               proxyRes.on('data', (chunk: string) => { body += chunk; });
+               proxyRes.on('end', () => {
+                 log('info', 'Workflow approved — document forwarded to originate', { documentId });
++                resolve(proxyRes);
+               });
+             },
+           );
+-          proxyReq.on('error', (err: Error) => {
+-            log('error', 'Failed to forward approved document to originate', { error: err.message });
+-          });
+-          proxyReq.write(payload);
+-          proxyReq.end();
+-          await redisService.deletePendingDocument(documentId);
++          req.on('error', (err: Error) => {
++            log('error', 'Failed to forward approved document to originate', { error: err.message });
++            reject(err);
++          });
++          req.write(payload);
++          req.end();
++        }).then(p => p.statusCode).catch(() => 0);
++
++        if (status >= 200 && status < 300) {
++          await redisService.deletePendingDocument(documentId);
++        } else {
++          res.status(502).json({ success: false, error: { code: 'ORIGINATE_FORWARD_FAILED', message: 'Approved, but the document could not be created in originate; the pending document was kept', status } });
++          return;
++        }
+       }
