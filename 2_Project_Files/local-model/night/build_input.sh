@@ -69,7 +69,7 @@ if [ "$(git -C "$SRC" cat-file -t "$TIP" 2>/dev/null)" != "commit" ]; then
 fi
 
 # Everything else is Python: the Linear read, the parse, the JSON emit.
-NIGHT_BRIEFS_DIR="$(dirname "$0")/briefs" BUILD_ORIGIN_TIP="$ORIGIN_TIP" python3 - "$TICKET" "$OUT" "$SRC" "$TIP" "$REPO_SUBDIR" "$@" <<'PYEOF'
+NIGHT_BRIEFS_DIR="${NIGHT_BRIEFS_DIR:-$(dirname "$0")/briefs}" BUILD_ORIGIN_TIP="$ORIGIN_TIP" python3 - "$TICKET" "$OUT" "$SRC" "$TIP" "$REPO_SUBDIR" "$@" <<'PYEOF'
 import json, os, re, subprocess, sys, urllib.request
 
 ticket, out, src, tip, subdir = sys.argv[1:6]
@@ -146,25 +146,40 @@ else:
     refuse(f"product path is neither services/* nor packages/shared: {product_rel}")
 
 # ---------------------------------------------------------------- 3. fix shape
+# 2026-09-15 12:3x (Kam 09:30 — Wednesday writes the model's task from the ticket; the ticket is never the
+# prompt): when night/briefs/<TICKET>.md EXISTS, the brief IS the fix shape and it states any decision the
+# ticket left open, so the ticket-prose gates below (no fix shape / decision needed) do NOT apply — they were
+# refusing KS-1050 ("needs a call") and KS-908 (no Fix-shape heading) on tickets Wednesday had already briefed.
+# The brief's "## The exact change" heading is the fix sentence the input carries. Without a brief the gates
+# stand exactly as before.
+_early_brief = os.path.join(os.environ.get("NIGHT_BRIEFS_DIR", ""), f"{ticket}.md")
+_early_brief_text = open(_early_brief, encoding="utf-8").read() if (_early_brief and os.path.isfile(_early_brief)) else None
 FIX_RE = re.compile(r"(?im)^\s*(?:#+\s*|\*\*)?(fix shape[^\n]*|recommendation[^\n]*|fix:[^\n]*|the fix[^\n]*|acceptance[^\n]*)")
-fm = FIX_RE.search(desc)
-if not fm:
+if _early_brief_text is not None:
+    _bm = re.search(r"(?im)^##+\s*(the exact change[^\n]*)", _early_brief_text)
+    fix_sentence = (_bm.group(1).strip() if _bm else "Wednesday brief: the exact change is stated in the brief")
+    print(f"fix shape: WEDNESDAY BRIEF ({os.path.basename(_early_brief)}) — the ticket's fix-shape/decision gates are bypassed; the brief states the change and any decision → {fix_sentence[:120]!r}")
+    fm = None
+else:
+    fm = FIX_RE.search(desc)
+if fm is None and _early_brief_text is None:
     refuse("no fix shape in the description (no 'Fix shape' / 'Recommendation' / 'Fix:' / 'Acceptance' section) — a ruling, not a task")
+if fm is not None:
 # the quotable sentence: the inline text after the heading's colon (`**Fix shape:** do X`),
 # else the first non-empty line after the heading
-head = fm.group(1).strip()
-inline = ""
-if re.search(r"^(fix shape|recommendation|fix|the fix|acceptance)[^:\n]{0,80}:\**\s*\S", head, flags=re.I):
-    inline = re.sub(r"^(fix shape|recommendation|fix|the fix|acceptance)[^:\n]{0,80}:\**\s*", "", head, flags=re.I).strip("* ").strip()
-if len(inline) >= 25:
-    fix_sentence = inline
-else:
-    after = desc[fm.end():].lstrip("\n")
-    fix_sentence = next((ln.strip() for ln in after.split("\n") if ln.strip()), head)
-print(f"fix shape: {fm.group(1).strip()[:60]!r} → {fix_sentence[:160]!r}")
-# a fix shape that is explicitly a question/decision is refused
-if re.search(r"(?i)\b(decision needed|needs a (call|ruling)|do not reconcile|fix shape deliberately blank|not chosen)\b", desc[fm.start():fm.start()+600]):
-    refuse("the fix-shape section itself says a decision/ruling is needed first")
+    head = fm.group(1).strip()
+    inline = ""
+    if re.search(r"^(fix shape|recommendation|fix|the fix|acceptance)[^:\n]{0,80}:\**\s*\S", head, flags=re.I):
+        inline = re.sub(r"^(fix shape|recommendation|fix|the fix|acceptance)[^:\n]{0,80}:\**\s*", "", head, flags=re.I).strip("* ").strip()
+    if len(inline) >= 25:
+        fix_sentence = inline
+    else:
+        after = desc[fm.end():].lstrip("\n")
+        fix_sentence = next((ln.strip() for ln in after.split("\n") if ln.strip()), head)
+    print(f"fix shape: {fm.group(1).strip()[:60]!r} → {fix_sentence[:160]!r}")
+    # a fix shape that is explicitly a question/decision is refused
+    if re.search(r"(?i)\b(decision needed|needs a (call|ruling)|do not reconcile|fix shape deliberately blank|not chosen)\b", desc[fm.start():fm.start()+600]):
+        refuse("the fix-shape section itself says a decision/ruling is needed first")
 
 # ---------------------------------------------------------------- 4. test runner at the tip
 def show(path):

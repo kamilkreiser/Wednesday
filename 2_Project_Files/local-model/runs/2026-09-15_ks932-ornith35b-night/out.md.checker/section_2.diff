@@ -1,0 +1,78 @@
+--- /dev/null
++++ b/packages/shared/src/__tests__/ks932-timeout-bounds-dns.test.ts
+@@ -0,0 +1,107 @@
++/**
++ * KS-932 — verify that `timeoutMs` bounds DNS resolution end-to-end.
++ */
++
++import { describe, it, expect, vi, beforeEach } from 'vitest';
++
++vi.mock('dns/promises', () => ({
++  lookup: vi.fn(),
++}));
++
++const { safeOutboundRequest } = await import('../security/ssrf-guard');
++const { lookup } = await import('dns/promises') as typeof import('dns/promises');
++
++function settledWithin<T>(promise: Promise<T>, ms: number): Promise<[true, T] | [false, undefined]> {
++  return new Promise((resolve) => {
++    const timer = setTimeout(() => resolve([false, undefined]), ms);
++    promise.then(
++      (v) => { clearTimeout(timer); resolve([true, v]); },
++      (e) => { clearTimeout(timer); resolve([true, e]); },
++    );
++  });
++}
++
++describe('KS-932 — timeoutMs bounds DNS resolution', () => {
++  beforeEach(() => {
++    vi.clearAllTimers();
++  });
++
++  it('🔴 KS-932 — a lookup that never calls back: the call settles within the declared bound', async () => {
++    (lookup as unknown as ReturnType<typeof vi.fn>).mockImplementation(() => new Promise(() => {}));
++
++    const resultPromise = safeOutboundRequest('https://hang.example/', { timeoutMs: 300 });
++    const [settledFirst, valueOrErr] = await settledWithin(resultPromise, 1500);
++
++    expect(settledFirst).toBe(true);
++    if (!valueOrErr || !(valueOrErr instanceof Error)) {
++      expect(valueOrErr).toBeDefined();
++      expect((valueOrErr as any).ok).toBe(false);
++      expect((valueOrErr as any).reason).toBe('blocked');
++      expect(String((valueOrErr as any).error)).toMatch(/300ms/);
++    } else {
++      throw new Error('expected SafeOutboundResult, got error');
++    }
++  });
++
++  it('🔴 KS-932 — the budget is shared: a slow lookup leaves less for the request', async () => {
++    (lookup as unknown as ReturnType<typeof vi.fn>).mockImplementationOnce((_host: string) =>
++      new Promise<{ address: string; family: number }>((resolve) => {
++        setTimeout(() => resolve([{ address: '203.0.113.7', family: 4 }]), 200);
++      }),
++    );
++
++    const started = Date.now();
++    const result = await safeOutboundRequest('https://slow.example/', { timeoutMs: 400 });
++    const elapsed = Date.now() - started;
++
++    expect(elapsed).toBeLessThan(550);
++    expect(result.ok).toBe(false);
++    if (!result.ok) {
++      expect(result.reason).toBe('request_failed');
++    }
++  }, 10_000);
++
++  it('KS-932 control — a lookup that answers promptly still reaches the request and the deadline', async () => {
++    (lookup as unknown as ReturnType<typeof vi.fn>).mockResolvedValue([{ address: '203.0.113.7', family: 4 }] as never);
++
++    const result = await safeOutboundRequest('https://fast.example/', { timeoutMs: 300 });
++
++    expect(result.ok).toBe(false);
++    if (!result.ok) {
++      expect(result.reason).toBe('request_failed');
++      expect(result.error).toMatch(/deadline/);
++    }
++  }, 10_000);
++});

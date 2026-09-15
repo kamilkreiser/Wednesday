@@ -109,3 +109,8 @@
 # store) — now buildable on the verified tip override (night/tip_override.txt: a594eb162 vs origin 0f37b85c8,
 # 0 files under Blockchain/Dev between them). Run 24/7 per Kam 2026-09-14 21:57 (G1 informational).
 # KS-871 re-queued 06:0x: its 05:56 run FAILED at A1 for a SAMPLER reason (repetition loop → length cut, fence never closed); lm_call.py now carries repeat_penalty 1.15 / repeat_last_n 512 / num_predict 12288.
+# ─── 2026-09-15 12:3x — Kam 11:06/11:07: TEN tickets, FIVE per quant, Wednesday-written briefs (night/briefs/<id>.md),
+# one model in memory at a time (10:53 "dont run them side by side"). q4 set first (NIGHT_MODEL=ornith:35b), then the
+# q8 set (NIGHT_MODEL=ornith:35b-q8_0). Pins are as of develop M55 48e65c435 (the checkout holds it; s233 fetched).
+KS-1165 product=Blockchain/Dev/services/api-gateway/src/middleware/csrf.ts ref=Blockchain/Dev/services/api-gateway/src/__tests__/csrf.test.ts line=98 ctx=49152
+KS-908 product=Blockchain/Dev/services/security/src/index.ts ref=Blockchain/Dev/services/security/src/__tests__/ks742-keys-tenancy-route-contract.test.ts line=1149 ctx=49152

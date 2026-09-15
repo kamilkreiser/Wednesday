@@ -1,0 +1,27 @@
+--- a/services/demo-service/src/app.ts
++++ b/services/demo-service/src/app.ts
+@@ -10,7 +10,7 @@ import { createLogger } from './utils/logger';
+ import { requireDemoKey } from './middleware/demoGuard';
+ import { healthRouter } from './routes/health';
+ import { personaRouter } from './routes/persona';
+-import express, { Request, Response } from 'express';
++import express, { NextFunction, Request, Response } from 'express';
+ 
+ const logger = createLogger('demo-service');
+@@ -82,6 +82,17 @@ export function createApp() {
+       error: { code: 'NOT_FOUND', message: `Cannot ${_req.method} ${_req.path}` },
+     });
+   });
++
++  // KS-844: a mounted error handler — never express's default HTML page (stack trace + absolute paths).
++  app.use((err: Error & { status?: number; statusCode?: number }, _req: Request, res: Response, _next: NextFunction) => {
++    const status = err.status ?? err.statusCode ?? 500;
++    const code = status === 400 ? 'BAD_REQUEST' : status === 413 ? 'PAYLOAD_TOO_LARGE' : status >= 500 ? 'INTERNAL_ERROR' : 'REQUEST_ERROR';
++    res.status(status).json({
++      success: false,
++      error: { code, message: status >= 500 ? 'Internal server error' : err.message },
++    });
++  });
++
+   return app;
+ }
