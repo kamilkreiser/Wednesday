@@ -55,7 +55,7 @@ if [ "$TOUCHED" = "$PRODUCT" ]; then pass "D3 touched-file set == { $PRODUCT }";
 git -C "$CLONE" show "HEAD:$PRODUCT" > "$REP/before.md"
 git -C "$CLONE" apply -p1 $APPLY_OPTS "$REP/patch.diff" > "$REP/apply.out" 2>&1 || { fail "D5 apply failed: $(head -2 "$REP/apply.out")"; echo "RESULT: FAIL ($FAILS failed)"; exit 1; }
 cp "$CLONE/$PRODUCT" "$REP/after.md"; git -C "$CLONE" checkout -q -- "$PRODUCT"
-DOC_TASK_DIR="$(cd "$(dirname "$0")" && pwd)" python3 - "$INPUT" "$REP/before.md" "$REP/after.md" "$REP/patch.diff" <<'PY'
+python3 - "$INPUT" "$REP/before.md" "$REP/after.md" "$REP/patch.diff" <<'PY'
 import json,re,sys
 inp=json.load(open(sys.argv[1])); before=open(sys.argv[2],encoding="utf-8").read().split("\n"); after=open(sys.argv[3],encoding="utf-8").read().split("\n"); patch=open(sys.argv[4],encoding="utf-8").read()
 req=inp["defect_line"]["required"]; fails=0
@@ -76,15 +76,13 @@ for r in req:
     present=[t for t in r["tokens"] if re.search(r"(?<![\w-])"+re.escape(t)+r"(?![\w-])", ta)]
     if len(present)==len(r["tokens"]): print(f"PASS D5 AFTER: '{r['section']}' carries {r['tokens']}")
     else: print(f"FAIL D5 AFTER: '{r['section']}' still lacks {[t for t in r['tokens'] if t not in present]}"); fails+=1
-# D6: every CHANGED REGION (before.md vs after.md, located on the before file) inside some required section.
-# 2026-09-15 23:1x (row 92): the `@@` header's declared range is a representation the model miscounts on most runs
-# (D2 recounts it); a correct edit in the LAST section read as outside it. d6_ranges.py measures the artefact.
-import os, subprocess
-_d6 = subprocess.run([sys.executable, os.path.join(os.path.dirname(os.path.abspath(sys.argv[1])) if False else os.environ.get("DOC_TASK_DIR",""), "d6_ranges.py"), sys.argv[2], sys.argv[3], ",".join(f"{a}-{b}" for a,b in ranges)], capture_output=True, text=True)
-bad=[l for l in _d6.stdout.split("\n") if l.strip()]
-if _d6.returncode not in (0,1): print(f"FAIL D6 instrument error rc={_d6.returncode}: {_d6.stderr.strip()[:200]}"); fails+=1
-elif bad: print(f"FAIL D6 changed region(s) outside the required sections (old-file lines): {bad}"); fails+=1
-else: print(f"PASS D6 every changed region lies inside the required sections ({len(ranges)} section(s), measured on before/after)")
+# D6: every hunk's OLD range inside some required section (1-based old-file lines)
+bad=[]
+for m in re.finditer(r"^@@ -(\d+)(?:,(\d+))? \+", patch, re.M):
+    s=int(m.group(1)); n=int(m.group(2) or 1); e=s+n-1
+    if not any(s>=a+1 and e<=b for a,b in ranges): bad.append(f"{s}-{e}")
+if bad: print(f"FAIL D6 hunk(s) outside the required sections: {bad}"); fails+=1
+else: print(f"PASS D6 every hunk lies inside the required sections ({len(ranges)} section(s))")
 # D7 (2026-09-15 21:4x, KS-1097 D r2 false green): every must-remove line (the brief's fenced '-' lines) is PRESENT in
 # before and ABSENT in after — a dropped '-' line kept as context by the re-anchor is exactly the corruption this sees.
 mr=inp["defect_line"].get("must_remove",[])
