@@ -1,0 +1,35 @@
+mode: test_only (tamper at Blockchain/Dev/services/api-gateway/src/routes/verification.ts:597)
+diff_blocks=1 all_blocks=1 prose_outside_chars=0
+wrote /Volumes/DevMASTER/WEDNESDAY/2_Project_Files/local-model/runs/2026-09-15_ks1123-ornith35b-night/out.md.checker/patch.diff lines=183
+PASS A1 output is exactly one fenced ```diff block, nothing outside it
+quarantined untracked Blockchain/Dev/services/api-gateway/src/__tests__/ks1123-api-gateway-verify-an-empty-string.test.ts -> /private/tmp/claude-501/night/clone_ks1123/../quarantine/20260915-124341
+clone clean at pinned tip 48e65c43517926da6f137993053c82c83e122f5d
+--- baseline at the untouched tip (whole services/api-gateway suite + tsc)
+baseline suite rc=0 total=355 passed=355 failed=0 suites_failed=0 loaded=1 failed_names=[]
+baseline tsc rc=0 (0 lines)
+section 1 services/api-gateway/src/__tests__/ks1123-empty-string-status-is-not-confirmed.test.ts: hunk 1 (@@ -0,0 +1,215 @@) declared old=0 new=215 but actual old=0 new=180
+sections=1 miscounted_sections=1
+section 1 services/api-gateway/src/__tests__/ks1123-empty-string-status-is-not-confirmed.test.ts: path lacks Blockchain/Dev/ — applying with --directory=Blockchain/Dev
+section 1 services/api-gateway/src/__tests__/ks1123-empty-string-status-is-not-confirmed.test.ts: applies ONLY with --recount --ignore-whitespace (miscounted hunks=1, strict rc=128)
+PASS A2 diff applies at the tip — with an accommodation: [services/api-gateway/src/__tests__/ks1123-empty-string-status-is-not-confirmed.test.ts: --recount --ignore-whitespace needed; miscounted hunks=1; strict rc=128]
+touched files (1): Blockchain/Dev/services/api-gateway/src/__tests__/ks1123-empty-string-status-is-not-confirmed.test.ts  (+180/-0)
+PASS A3 (test-only) touched-file set == { Blockchain/Dev/services/api-gateway/src/__tests__/ks1123-empty-string-status-is-not-confirmed.test.ts } — the product file is untouched, as the ticket requires
+A3b: no must_change sites in the input — skipped
+A4 (test-only): tampered /private/tmp/claude-501/night/clone_ks1123/Blockchain/Dev/services/api-gateway/src/routes/verification.ts:597: '    const persistedStatus = (doc as any).blockchain?.status ?? null;' -> '    const persistedStatus = (doc as any).blockchain?.status || null;'
+test-only at tip: rc=1 total=3 passed=1 failed=2 suites_failed=2 loaded=1 failed_names=['KS-1123 F3 — empty-string / falsy blockchain.status must stay off-chain-only 🔴 KS-1123 F3 — tier 1: an EMPTY-STRING status with a real hash and height is off-chain-only', 'KS-1123 F3 — empty-string / falsy blockchain.status must stay off-chain-only 🔴 KS-1123 F3 — tier 2: the empty-string twin is off-chain-only too']
+A4 (test-only): tamper reverted (Blockchain/Dev/services/api-gateway/src/routes/verification.ts back to the tip)
+PASS A4 RED-FIRST: src/__tests__/ks1123-empty-string-status-is-not-confirmed.test.ts fails at the untouched tip (2 failed / 3 run; controls green; assertion reds)
+test after product hunk: rc=0 total=3 passed=3 failed=0 suites_failed=0 loaded=1 failed_names=[]
+PASS A5 GREEN-AFTER: src/__tests__/ks1123-empty-string-status-is-not-confirmed.test.ts passes with the product hunk (3 passed / 3 run)
+INFO control cell present: 1 cell(s) passed BEFORE and 3 AFTER (the harness reaches the code both times)
+after suite rc=0 total=358 passed=358 failed=0 suites_failed=0 loaded=1 failed_names=[]
+baseline: total=355 failed=0 | after: total=358 failed=0
+develop's own reds (attributed, not counted): []
+NEW reds: []
+reds fixed by the patch: []
+tests added: 3
+PASS A6 whole services/api-gateway suite: no NEW red vs the untouched tip
+PASS A7 tsc --noEmit for services/api-gateway: rc 0 after the patch (baseline rc=0)
+INFO tsc on the test file alone: rc=0 (0 lines; not gated — vitest does not type-check and the service tsconfig excludes __tests__)
+SUMMARY files=1 +180/-0 test=src/__tests__/ks1123-empty-string-status-is-not-confirmed.test.ts red_first=yes apply_mode=lenient
+RESULT: PASS (7/7)

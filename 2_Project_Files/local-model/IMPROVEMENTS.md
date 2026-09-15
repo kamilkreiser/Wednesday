@@ -54,6 +54,7 @@
 | 2026-09-15 12:3x | **q8 half of the second ten: KS-1120-F2 PASS 7/7 · KS-1171-8j PASS 7/7 (both first run on q8 — the two pins pass on BOTH quants) · KS-1018 A4 LOAD ERROR (the hoisted-const TDZ again, product hunks applied by reanchor) · KS-864 A2 (E1+E2 merged AGAIN, blank line 45 dropped from the `-` block, a `+` comment mid-block)** | model ×2 (the TDZ reflex; the merge reflex) | KS-1018 brief now carries the hoisted block verbatim (the KS-1050 fix that worked); `reanchor.py` gained a blank-line-tolerant `-` match (KS-864's block still fails: its `-` lines are NON-CONTIGUOUS — two runs with context between — the next reanchor step is to anchor on the whole OLD SIDE (context + minus) blank-tolerantly and rebuild from the file's real span) | KS-1018 re-run owed; KS-864 the reanchor old-side step owed |
 | 2026-09-15 12:4x | **KS-1018 round 3 (q8): the hoisted-const TDZ a THIRD time on this ticket — with the block given verbatim to copy** (product hunks applied by reanchor every time) | model: an unfixable reflex on this file shape (KS-1050 obeyed the same text; KS-1018 did not, three rounds) | **`tasks/code_patch/tdz_inline.py` + checker pre-A4 TDZ-INLINE**: every file-scope `const NAME = '<literal>'` read inside a `vi.hoisted(` span is inlined as the literal, named in the verdict — the repair is mechanical, so the harness does it | proven on KS-1018's real section (1 line inlined); end-to-end re-check running (`rean1018_checker.out`) |
 | 2026-09-15 12:4x | **KS-1130 round 3 PASS 7/7 (q4, test-only)** — the brief rewritten in the KS-1073 shape (three cells: two 🔴 + one CONTROL, no optional helper, no "only one of these is red" sentence) after two one-line placeholder outputs | prompt: a brief that offers the model a CHOICE ("may stay or go", cells that are neither red nor control) is where it bails | brief rule: every cell is 🔴 or CONTROL and nothing in the brief is optional; a second task carries the E7/E3 twins | second ten: 6 new tickets held |
+| 2026-09-15 12:5x | **THE PAIR TABLE'S FIRST DIVERGENCES (same briefs, Kam 12:38): KS-1073 q8 PASS (round 2) vs q4 FAIL at A4 (the model's tier-1 legacy CONTROL cell red at the tip — a test-side slip); KS-1018 q8 PASS (with reanchor + TDZ-inline) vs q4 FAIL at A3b (only the import hunk emitted, 3 of 4 catch sites untouched); KS-1123 PASS on both.** | model: on the two multi-site / long-copy tickets q4 dropped work q8 completed (single runs — sampling variance is real; q8's KS-1018 also needed three rounds for the TDZ) | pair table below updated; the both-quants rule stands until the sample settles | told Kam 12:5x |
 
 ## The q4 vs q8 comparison (2026-09-15, same briefs, checklist, sampler, checker; best round per cell)
 | Ticket | ornith:35b Q4_K_M (21 GB) | ornith:35b-q8_0 (37 GB) |
@@ -78,3 +79,16 @@
 | q8 | KS-1123 (F3, TEST-ONLY) | **PASS 7/7** (52 s) | — (the first tamper run) | held READY |
 
 **Reading (measured, not felt):** first-run PASS 2/5 on q4 and 1/5 on q8 — but the q8 set held the harder shapes (a five-hunk split, a four-site file, a 215-line test) and its one pass was the new mode. **Seven of the ten product hunks were RIGHT** (KS-1050, 932, 844, 1165, 1018, 1073's line, 1123 n/a) and the failures were patch SHAPE in five of the seven fails; the harness now repairs the shape it can prove (reanchor, headerless split, leading-space header) and names what it cannot (KS-864's altered `-` line, KS-871's neighbour hunk, KS-908's two-file header). Speed: q4 26–41 s per ticket, q8 30–52 s — the q8 quant did not change a verdict in either direction on the shared shapes. **Keep Q4_K_M as the worker** (the 10:5x reading stands); the next lever is the A3b retry and the brief rules, not the quant.
+
+## The pair table (Kam 12:38 — every ticket on both quants until one wins a ticket the other loses; updated 2026-09-15 12:5x)
+| Ticket (brief) | ornith:35b Q4_K_M | ornith:35b-q8_0 | Verdict |
+|---|---|---|---|
+| KS-1072 | PASS | PASS | tie |
+| KS-1123 F3 (test-only) | PASS | PASS | tie |
+| KS-1120 F-2 (test-only) | PASS | PASS | tie |
+| KS-1171 8j (test-only) | PASS | PASS | tie |
+| KS-871 (split brief) | FAIL (A3b) | FAIL (A3b) | tie |
+| KS-1073 | FAIL (A4: the control cell wrong) | PASS (round 2) | **q8** |
+| KS-1018 | FAIL (A3b: 1 of 4 sites) | PASS (reanchor + TDZ-inline) | **q8** |
+| KS-908 · KS-1050 · KS-932 · KS-1165 · KS-844 · KS-1130 | PASS | (q8 twins parked, `#Q8` lines) | pending |
+**Reading:** q8 has won two of seven same-brief pairs, q4 none, five ties — the two wins are the multi-site / long-copy tickets. Cost stays Q4's (half the memory, ~30% faster). Not yet clear (single runs per cell); the rule stands.

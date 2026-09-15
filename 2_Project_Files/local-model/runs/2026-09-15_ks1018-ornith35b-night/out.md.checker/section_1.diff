@@ -1,0 +1,50 @@
+--- a/services/auth/src/routes/users.ts
++++ b/services/auth/src/routes/users.ts
+@@ -13,7 +13,7 @@ import crypto from 'crypto';
+ import { AuthenticatedRequest, User, UserRole, VerificationLevel, ADMIN_WRITABLE_STATUSES } from '../types';
+ import { authenticate, authenticateAccessOrConnector } from '../middleware/authenticate';
+ import { hashPassword, checkPasswordStrength, verifyPassword } from '../services/password';
+-import { BadRequestError, NotFoundError, ValidationError } from '../middleware/errorHandler';
++import { BadRequestError, NotFoundError, ServiceUnavailableError, ValidationError } from '../middleware/errorHandler'; // KS-1018: needed to rethrow infra errors as 503
+ import { logger } from '../utils/logger';
+ import * as userRepo from '../repositories/userRepo';
+ import { revokeAllUserSessions } from '../services/session';
+@@ -16,6 +16,7 @@ import { hasNulByte } from '@secuura/shared';
+ 
+ import { query as dbQuery, isDbAvailable } from '../db';
+ 
++import { isInfrastructureDbError } from '../repositories/dbErrors'; // KS-1018: predicate for distinguishing infra failures from other DB errors
+ interface VerificationRequest {
+   id: string;
+   userId: string;
+@@ -1180,7 +1181,10 @@ async function getVerificationRequest(id: string): Promise<VerificationRequest |
+           reviewedBy: r.reviewed_by || undefined,
+           rejectionReason: r.rejection_reason || undefined,
+         };
+       }
+     } catch { /* fall through */ }
+   }
+   return memVerificationRequests.get(id) || null;
+ }
+ 
+@@ -1201,7 +1205,10 @@ async function findPendingVerificationRequest(userId: string): Promise<Verifica
+         status: r.status, submittedAt: r.submitted_at?.toISOString?.() || r.submitted_at,
+       };
+       return null;
+     } catch { /* fall through */ }
+   }
+   return Array.from(memVerificationRequests.values()).find(
+     r => r.userId === userId && r.status === 'PENDING'
+   ) || null;
+ }
+ 
+@@ -1223,7 +1230,10 @@ async function listUserVerificationRequests(userId: string): Promise<Verificati
+         reviewedBy: r.reviewed_by || undefined,
+         rejectionReason: r.rejection_reason || undefined,
+       }));
+     } catch { /* fall through */ }
+   }
+   return Array.from(memVerificationRequests.values())
+     .filter(r => r.userId === userId)
+     .sort((a, b) => new Date(b.submittedAt).getTime() - new Date(a.submittedAt).getTime());
+ }
