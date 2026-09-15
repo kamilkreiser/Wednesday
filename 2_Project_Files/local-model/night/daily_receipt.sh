@@ -23,7 +23,7 @@ pass=$(/usr/bin/grep -i "| done $DAY " "$DONE" 2>/dev/null | /usr/bin/grep -ci '
 fail=$(/usr/bin/grep -i "| done $DAY " "$DONE" 2>/dev/null | /usr/bin/grep -ci 'RESULT: FAIL')
 # 2026-09-16 07:4x: "fails" counted VERDICT LINES — on 09-16 the 06:45 line said "10 fails" when every one was a harness/brief
 # round later held (a representation read as a result). UNRESOLVED = tickets with a FAIL row today and NO READY_<id>* file.
-rounds=$(/usr/bin/grep -ci "| done $DAY " "$DONE" 2>/dev/null)
+rounds=$(/usr/bin/grep -i "| done $DAY " "$DONE" 2>/dev/null | /usr/bin/grep -vci "DRY-RUN ROW")
 unresolved=$(/usr/bin/grep -i "| done $DAY " "$DONE" 2>/dev/null | /usr/bin/grep -i 'RESULT: FAIL' | sed -E 's/^(KS-[0-9]+).*/\1/' | sort -u | while IFS= read -r id; do [ -n "$id" ] || continue; held=0; for f in "$HERE"/READY_"$id"_* "$HERE"/READY_"$id"-*; do [ -e "$f" ] && held=1; done; [ "$held" = 1 ] || echo "$id"; done | tr '\n' ' ' | sed 's/ $//')
 unresolved_n=$(printf '%s' "$unresolved" | wc -w | tr -d ' ')
 refused=$(/usr/bin/grep -i "| done $DAY " "$DONE" 2>/dev/null | /usr/bin/grep -ci 'BUILD_REFUSED')

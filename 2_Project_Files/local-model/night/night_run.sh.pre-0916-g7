@@ -255,26 +255,7 @@ pin() { # pin <line> <key>  → value or ""
 
 # ---------------------------------------------------------------- run
 if ! gates; then finish 3 "gate refused: $GATE_FAIL"; fi
-if [ -z "$(next_ticket)" ]; then
-  log "QUEUE: $NIGHT_QUEUE has no pending ticket"
-  # G7 (2026-09-16, unattended-week design piece d): an EMPTY queue during 06-23 is the never-idle failure
-  # (Kam 2026-09-15 18:19) and nothing woke anyone for it. Record when the drought began; after
-  # NIGHT_IDLE_ALERT_H hours (default 2) post ONE panel line, then at most one more per NIGHT_IDLE_ALERT_H.
-  # Only the DEFAULT queue counts (a split queue going empty is normal). A non-empty run resets the marker.
-  if [ "$NIGHT_QUEUE" = "$SELF_DIR/queue.md" ]; then
-    _idle_marker="$SELF_DIR/log/.queue_empty_since"; _idle_alert="$SELF_DIR/log/.queue_empty_alerted"
-    _now=$(date +%s); _hour=$(date +%H | sed 's/^0//'); _alert_h="${NIGHT_IDLE_ALERT_H:-2}"
-    [ -f "$_idle_marker" ] || echo "$_now" > "$_idle_marker"
-    _since=$(cat "$_idle_marker" 2>/dev/null || echo "$_now"); _last=$(cat "$_idle_alert" 2>/dev/null || echo 0)
-    if [ "$_hour" -ge 6 ] && [ "$_hour" -lt 23 ] && [ $((_now - _since)) -ge $((_alert_h * 3600)) ] && [ $((_now - _last)) -ge $((_alert_h * 3600)) ]; then
-      _since_hm=$(date -r "$_since" +%H:%M 2>/dev/null || echo "?")
-      log "G7 IDLE ALERT: queue empty since $_since_hm — posting to the panel"
-      echo "$_now" > "$_idle_alert"
-      [ "${NIGHT_IDLE_ALERT_DRY:-0}" = 1 ] || bash "$SELF_DIR/../../tools/chat_reply.sh" "Ornith has had nothing queued since $_since_hm — the coordinator owes it a brief or a reason (never-idle, 2026-09-15 18:19)." > /dev/null 2>&1 || log "G7 IDLE ALERT: post FAILED"
-    fi
-  fi
-  finish 4 "queue empty"
-fi
+if [ -z "$(next_ticket)" ]; then log "QUEUE: $NIGHT_QUEUE has no pending ticket"; finish 4 "queue empty"; fi
 
 ITER=0
 while [ "$TICKETS_RUN" -lt "$NIGHT_MAX_TICKETS" ] && [ "$ITER" -lt $((NIGHT_MAX_TICKETS + 8)) ]; do
@@ -288,8 +269,6 @@ while [ "$TICKETS_RUN" -lt "$NIGHT_MAX_TICKETS" ] && [ "$ITER" -lt $((NIGHT_MAX_
   mkdir -p "$RUN"
   RLOG="$RUN/run.log"
   log "TICKET $TICKET take: '$LINE' → $RUN"
-  # G7: a taken ticket ends the drought — clear the empty-queue markers (default queue only).
-  [ "$NIGHT_QUEUE" = "$SELF_DIR/queue.md" ] && { mkdir -p "$SELF_DIR/log/_quarantine_g7" 2>/dev/null; for _m in "$SELF_DIR/log/.queue_empty_since" "$SELF_DIR/log/.queue_empty_alerted"; do [ -f "$_m" ] && mv "$_m" "$SELF_DIR/log/_quarantine_g7/$(basename "$_m").$(date +%s)"; done; :; }
   echo "== $(date '+%F %T') night_run $TICKET line='$LINE' model=$NIGHT_MODEL think=$NIGHT_THINK" >> "$RLOG"
 
   # build input (or take a pre-built one — the FIRE test uses a hand-made tiny input)
