@@ -147,6 +147,11 @@ def reflow(body, file_lines, notes, idx):
         if not b or b[0] not in " -+" or b[1:].rstrip() in tip_set or b == "\\ No newline at end of file":
             out.append(b); continue
         kind, text = b[0], b[1:].rstrip()
+        # 2026-09-15 21:5x (KS-1097 C r3): a '-' or context line carrying a DOUBLE marker — "--  not the reviewer" where
+        # the tip line is "  not the reviewer" — the model applied the bullet rule ("-- " = marker + bullet) to a
+        # continuation line. Repair only when the stripped text IS a tip line and the unstripped is not.
+        if kind in " -" and text.startswith("-") and text[1:].rstrip() in tip_set:
+            out.append(kind + text[1:]); notes.append(f"hunk {idx}: REFLOW — a '{kind}' line carried a double marker; one '-' stripped to match the tip line"); continue
         best = None  # (start, n, exact)
         for s0 in range(len(file_lines)):
             first = file_lines[s0].rstrip()
@@ -173,13 +178,50 @@ def reflow(body, file_lines, notes, idx):
             out += [kind + pc for pc in pieces]
             notes.append(f"hunk {idx}: REFLOW — a '{kind}' line was the space-join of tip lines {s0 + 1}-{s0 + n}; split back")
         elif kind == "+":
-            rem = text[len(_join_run(file_lines, s0, n)):]
-            out += ["+" + pc for pc in pieces[:-1]] + ["+" + pieces[-1] + rem]
+            n, pieces, model_last = _extend_last(file_lines, s0, n, pieces, text)
+            out += ["+" + pc for pc in pieces[:-1]] + ["+" + model_last]
             notes.append(f"hunk {idx}: REFLOW — a '+' line started with the space-join of tip lines {s0 + 1}-{s0 + n}; split back, the remainder kept on the last line")
         else:
-            notes.append(f"hunk {idx}: REFLOW REFUSED — a '{kind}' line is the space-join of tip lines {s0 + 1}-{s0 + n} PLUS extra text: an edit hidden in a context line is not inferred")
-            out.append(b)
+            # 2026-09-15 21:5x (KS-1097 B r1-r3, three rounds of one shape): the model writes the whole paragraph as ONE
+            # CONTEXT line carrying the appended tail. Inferring an edit from context is refused in general — UNLESS the
+            # brief's own must_remove list (REANCHOR_MUST_REMOVE=<file of lines>, written by the doc checker) names the
+            # LAST joined tip line: then the brief authorised replacing exactly that line, and the tail is the edit.
+            n, pieces, model_last = _extend_last(file_lines, s0, n, pieces, text)
+            last = pieces[-1]
+            rem = model_last[len(last.rstrip(".;:,!?")):] if model_last.startswith(last.rstrip(".;:,!?")) else model_last
+            if kind == " " and last in _must_remove() and rem.strip():
+                out += [" " + pc for pc in pieces[:-1]] + ["-" + last, "+" + model_last]
+                notes.append(f"hunk {idx}: REFLOW INFERRED — a context line was the space-join of tip lines {s0 + 1}-{s0 + n} plus a tail; line {s0 + n} is a brief must-remove line, so the tail is applied to it as -/+ (D7/D5 judge the result)")
+            else:
+                notes.append(f"hunk {idx}: REFLOW REFUSED — a '{kind}' line is the space-join of tip lines {s0 + 1}-{s0 + n} PLUS extra text: an edit hidden in a context line is not inferred")
+                out.append(b)
     return out
+
+
+def _extend_last(file_lines, s0, n, pieces, text):
+    """the model drops a line's trailing punctuation before its tail ("…author*." → "…author* — superseded"): if the
+    remainder starts with the NEXT tip line minus trailing punctuation, that line is part of the run and the model's
+    version of it (core + tail) is the last '+' line. Returns (n, pieces, model_last)."""
+    rem = text[len(_join_run(file_lines, s0, n)):]
+    nxt_i = s0 + n
+    if nxt_i < len(file_lines):
+        nxt = file_lines[nxt_i].rstrip(); core = nxt.rstrip(".;:,!?")
+        if core and rem.lstrip().startswith(core):
+            pieces = pieces + [nxt]
+            return n + 1, pieces, core + rem.lstrip()[len(core):]
+    return n, pieces, pieces[-1] + rem
+
+
+_MR = None
+def _must_remove():
+    global _MR
+    if _MR is None:
+        pth = os.environ.get("REANCHOR_MUST_REMOVE", "")
+        try:
+            _MR = {l.rstrip("\n") for l in open(pth, encoding="utf-8")} if pth else set()
+        except OSError:
+            _MR = set()
+    return _MR
 
 
 def rebuild(hunk, file_lines, notes, idx):
@@ -284,6 +326,61 @@ def rebuild(hunk, file_lines, notes, idx):
     return out
 
 
+def _deoverlap(lines, notes):
+    """2026-09-15 21:5x (KS-1097 C r3): two rebuilt hunks four lines apart share context; `git apply` refuses
+    overlapping hunks AND asymmetric context (3 leading / 0 trailing), so trimming cannot fix it — overlapping
+    hunks are MERGED into one by old-file line number. Context lines are the file's own text in both, so the
+    union is exact; '+' lines keep their place after the old line they followed. Later hunks' '+' starts are
+    recomputed from the net delta of the hunks before them."""
+    head, hunks, cur = [], [], None
+    for ln in lines:
+        if ln.startswith("@@"):
+            cur = [ln]; hunks.append(cur)
+        elif cur is None:
+            head.append(ln)
+        else:
+            cur.append(ln)
+    def parse_h(h):
+        m = re.match(r"@@ -(\d+)(?:,(\d+))? \+(\d+)(?:,(\d+))? @@(.*)$", h[0])
+        s0 = int(m.group(1)); rows = []; num = s0 - 1
+        for b in h[1:]:
+            if b.startswith("+"):
+                rows.append((num, "+", b))          # attached after old line `num`
+            else:
+                num += 1; rows.append((num, b[0], b))
+        return s0, num, rows, m.group(5)
+    merged = []
+    for h in hunks:
+        s0, e0, rows, tail = parse_h(h)
+        if merged and merged[-1][1] >= s0:
+            ps, pe, prow, ptail = merged[-1]
+            byline = {}; plus = {}
+            for num, k, b in prow + rows:
+                if k == "+":
+                    plus.setdefault(num, []).append(b)
+                else:
+                    if k == "-" or num not in byline:
+                        byline[num] = (k, b)
+            rows2 = []
+            for num in range(min(ps, s0), max(pe, e0) + 1):
+                if num in byline:
+                    rows2.append((num, byline[num][0], byline[num][1]))
+                for b in plus.get(num, []):
+                    rows2.append((num, "+", b))
+            for b in plus.get(min(ps, s0) - 1, []):
+                rows2.insert(0, (min(ps, s0) - 1, "+", b))
+            merged[-1] = (min(ps, s0), max(pe, e0), rows2, ptail)
+            notes.append(f"hunks merged: {ps}-{pe} and {s0}-{e0} overlapped (one hunk now)")
+        else:
+            merged.append((s0, e0, rows, tail))
+    out = list(head); delta = 0
+    for s0, e0, rows, tail in merged:
+        body = [b for _, _, b in rows]
+        on = sum(1 for _, k, _ in rows if k != "+"); nn = sum(1 for _, k, _ in rows if k != "-")
+        out.append(f"@@ -{s0},{on} +{s0 + delta},{nn} @@{tail}"); out += body; delta += nn - on
+    return out
+
+
 def main():
     if len(sys.argv) != 4:
         print(__doc__); sys.exit(2)
@@ -299,6 +396,7 @@ def main():
             out.append(recount(h["header"], h["body"])); out += h["body"]
         else:
             out += rb; changed += 1
+    out = _deoverlap(out, notes)
     open(sys.argv[3], "w", encoding="utf-8").write("\n".join(out).rstrip("\n") + "\n")
     for n in notes:
         print(n)

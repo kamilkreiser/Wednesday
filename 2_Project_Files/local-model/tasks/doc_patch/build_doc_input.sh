@@ -31,11 +31,15 @@ if not req: sys.stderr.write("build_doc_input: REFUSED — the brief has no `## 
 # 2026-09-15 21:4x (KS-1097 D r2, a FALSE GREEN): the model dropped three old lines from its '-' side and the re-anchor kept them
 # as context, so the applied doc carried the NEW annotation and the OLD one and D0-D6 all passed. The brief's fenced diff
 # blocks name the lines that must go: every fenced line starting with '-' (not '---') is a must-remove line, asserted by D7.
-must_remove=[]
+must_remove=[]; readded=set()
 for blk in re.findall(r"^```[^\n]*\n(.*?)^```", text, re.M|re.S):
     for ln in blk.split("\n"):
         if ln.startswith("-") and not ln.startswith("---") and ln[1:].strip():
             must_remove.append(ln[1:].rstrip())
+        elif ln.startswith("+") and not ln.startswith("+++"):
+            readded.add(ln[1:].rstrip())
+# a whole-run replacement re-adds its unchanged lines as '+' — those are not removals (21:5x, KS-1097 B: line 457)
+must_remove=[m for m in must_remove if m not in readded]
 tipl=[l.rstrip() for l in r.stdout.split("\n")]
 missing=[m for m in must_remove if m not in tipl]
 if missing: sys.stderr.write(f"build_doc_input: REFUSED — {len(missing)} brief '-' line(s) do not exist at the tip (read the file, not the ticket): {missing[:2]}\n"); sys.exit(2)
