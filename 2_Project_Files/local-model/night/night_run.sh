@@ -202,7 +202,17 @@ free=g("Pages free"); spec=g("Pages speculative"); inact=g("Pages inactive")
 print(f"{(free+spec)*ps/2**30:.1f} {inact*ps/2**30:.1f} {(free+spec+inact)*ps/2**30:.1f}")')"
   set -- $FREE_GB
   MEM_NOTE="memory_pressure free=${mp:-?}% · vm_stat free+speculative=${1} GB, inactive(reclaimable)=${2} GB, available=${3} GB"
-  FREE_GB="$3"
+  # 2026-09-15 11:0x: the vm_stat sum (free+speculative+inactive) UNDERCOUNTS on macOS after a model unloads —
+  # q8 round 8 read 27.8 GB by vm_stat while memory_pressure said 55% free of 96 GB (~53 GB); the kernel's own
+  # figure is the instrument, vm_stat stays in the note. available = free% x hw.memsize (falls back to vm_stat
+  # only when memory_pressure printed nothing).
+  RAM_GB="$(sysctl -n hw.memsize 2>/dev/null | awk '{printf "%.1f", $1/1073741824}')"
+  if [ -n "${mp:-}" ] && [ -n "$RAM_GB" ]; then
+    FREE_GB="$(python3 -c "print(f'{float('$mp')/100*float('$RAM_GB'):.1f}')")"
+    MEM_NOTE="$MEM_NOTE · available by memory_pressure = ${FREE_GB} GB (${mp}% of ${RAM_GB} GB) — the gate's figure"
+  else
+    FREE_GB="$3"
+  fi
   log "MEMORY: $MEM_NOTE · sudo purge NOT attempted (needs admin; sudoers line if Kam wants it: \`$(id -un) ALL=(root) NOPASSWD: /usr/sbin/purge\`)"
   if python3 -c "import sys; sys.exit(0 if float('$FREE_GB') >= float('$NIGHT_MIN_FREE_GB') else 1)"; then
     log "MEMORY: available $FREE_GB GB >= $NIGHT_MIN_FREE_GB GB — ok"; return 0

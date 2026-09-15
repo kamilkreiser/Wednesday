@@ -1,0 +1,38 @@
+--- a/services/api-gateway/src/routes/verification.ts
++++ b/services/api-gateway/src/routes/verification.ts
+@@ -972,24 +972,37 @@ export function createVerificationRoutes(deps: VerificationRouteDeps): Router {
+         if (pendingDoc.createdBy) forwardHeaders['x-user-id'] = pendingDoc.createdBy as string;
+ 
+-        const proxyReq = http.request(
++        const forwardToOriginate = new Promise<{ status: number }>((resolve, reject) => {
+           { hostname: url.hostname, port: url.port, path: url.pathname, method: 'POST', headers: forwardHeaders },
+           (proxyRes: any) => {
+             let body = '';
+             proxyRes.on('data', (chunk: string) => { body += chunk; });
+             proxyRes.on('end', () => {
+               log('info', 'Workflow approved — document forwarded to originate', { documentId });
++              resolve(proxyRes);
+             });
+           },
+         );
+-        proxyReq.on('error', (err: Error) => {
++        proxyReq.on('error', (err: Error) => {
+           log('error', 'Failed to forward approved document to originate', { error: err.message });
++          reject(err);
++        });
++        proxyReq.write(payload);
++        proxyReq.end();
++        return forwardToOriginate;
++      })();
++
++      try {
++        await forwardPromise;
++        // <KS-1087>: only delete the pending doc on success
++        await redisService.deletePendingDocument(documentId);
++      } catch (_err) {
++        res.status(502).json({ success: false, error: { code: 'ORIGINATE_FORWARD_FAILED', message: 'Approved, but the document could not be created in originate; the pending document was kept' } });
++        return;
++      }
+       }
+ 
+       res.json({

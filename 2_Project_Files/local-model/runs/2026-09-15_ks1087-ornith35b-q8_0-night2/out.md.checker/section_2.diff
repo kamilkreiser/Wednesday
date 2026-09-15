@@ -1,0 +1,127 @@
+--- /dev/null
++++ b/services/api-gateway/src/__tests__/ks1087-workflow-approve-deletes-the-pending-document.test.ts
+@@ -0,0 +1,165 @@
++// KS-1087 — workflow approve must NOT answer 200 "approved" and MUST keep the
++// pending document when originate refuses or is unreachable.
++//
++// Driven against the REAL router with a stub server that plays originate over
++// HTTP, because `http.request` talks node's http module directly. The harness
++// shape mirrors ks1071-verify-confidence-one-mapping.test.ts: vi.mock-style
++// dependency injection via VerificationRouteDeps, a local Server as originate,
++// and per-cell state set before each request.
++
++import { describe, it, expect, beforeAll, afterAll, beforeEach, afterEach, vi } from 'vitest';
++import express from 'express';
++import http from 'node:http';
++import type { Server } from 'node:http';
++import type { AddressInfo } from 'node:net';
++import type { RequestHandler } from 'express';
++
++const DOC_ID = 'doc-ks1087';
++const WFI_ID = 'wfi-ks1087';
++let gateway: Server | null = null;
++let originate: Server | null = null;
++let gatewayPort: number | null = null;
++let originatePort: number | null = null;
++/** Port to point services.originate.url at for the current cell (null = closed/unreachable). */
++let targetPort: number | null = null;
++/** Status the stub originate answers with for the current cell. */
++let respondStatus: number = 200;
++
++beforeAll(async () => {
++  const jsonHead = { 'Content-Type': 'application/json' };
++  originate = http.createServer((_req, res) => {
++    // Any path works — we only care about status on POST /api/documents.
++    res.writeHead(respondStatus, jsonHead);
++    if (respondStatus >= 400 || respondStatus === 0) {
++      res.end('{}');
++    } else {
++      res.end(JSON.stringify({ id: DOC_ID }));
++    }
++  });
++  await new Promise<void>((r) => originate.listen(0, '127.0.0.1').once('listening', r));
++  originatePort = (originate.address() as AddressInfo).port;
++});
++
++afterEach(() => {
++  respondStatus = 200;
++  targetPort = originatePort;
++});
++
++afterAll(async () => {
++  if (gateway) {
++    await new Promise<void>((r) => gateway.close(() => r()));
++    gateway = null;
++  }
++  if (originate) {
++    await new Promise<void>((r) => originate.close(() => r()));
++    originate = null;
++  }
++});
++
++function buildDeps(origUrl: string): Record<string, unknown> {
++  return {
++    authenticateToken: () => (_req: any, _res: any, next: () => void) => {
++      _req.user = { userId: 'u1', email: 'u@secuura.local', role: 'ADMIN', organizationId: 'org-1', verificationLevel: 'FULL' };
++      next();
++    },
++    mockBodyParser: express.json({ limit: '1mb' }) as RequestHandler,
++    query: vi.fn(async () => ({ rows: [] })) as never,
++    isDbAvailable: () => false,
++    redisService: {
++      getWorkflowInstance: vi.fn(async (id: string) => {
++        if (id !== WFI_ID) return null;
++        return {
++          id: WFI_ID,
++          documentId: DOC_ID,
++          status: 'pending_approval',
++          currentStepIndex: 0,
++          steps: [{ name: 'Approve', approverType: 'role', approverValue: 'admin', status: 'approved', approvedBy: 'u1', approvedAt: new Date().toISOString(), comments: '' }],
++        };
++      }),
++      setWorkflowInstance: vi.fn(async () => undefined),
++      getPendingDocument: vi.fn(async (id: string) => {
++        if (id !== DOC_ID) return null;
++        return { title: 'Degree', documentType: 'DEGREE', contentHash: 'c'.repeat(64), createdBy: 'u1' };
++      }),
++      deletePendingDocument: vi.fn(async () => undefined),
++      getAllDocumentTypes: vi.fn(async () => []),
++      getAllWorkflowInstances: vi.fn(async () => []),
++      getNotificationSettings: vi.fn(async () => ({})),
++      getRejectedDocument: vi.fn(async () => null),
++      setRejectedDocument: vi.fn(async () => undefined),
++      getWorkflowDocumentMapping: vi.fn(async () => null),
++    } as never,
++    services: { originate: { url: origUrl } } as never,
++    log: () => undefined,
++    memWorkflowToDocumentMap: new Map(),
++    memRejectedDocuments: new Map(),
++    dbSaveRejection: vi.fn(async () => undefined),
++    ADMIN_ROLES: ['ADMIN'],
++    enforceDocumentTypeRules: vi.fn(async () => ({ ok: true, docType: {} })) as never,
++    createWorkflowInstanceIfRequired: vi.fn(async () => ({ gated: false })) as never,
++    meetsVerificationLevel: () => true,
++  };
++}
++
++async function postApprove(port: number): Promise<{ status: number; body: any }> {
++  const r = await fetch(`http://127.0.0.1:${port}/api/workflow-instances/${WFI_ID}/approve`, { method: 'POST', headers: { Authorization: 'Bearer t' } });
++  let body: any = {};
++  try { body = await r.json(); } catch (_e) { /* non-JSON */ }
++  return { status: r.status, body };
++}
++
++describe('KS-1087 — approve keeps the pending document on originate failure', () => {
++  it('🔴 KS-1087 — originate 401: no 200 approved, and the pending document survives', async () => {
++    respondStatus = 401;
++    targetPort = originatePort!;
++    expect(gateway).toBeNull(); // fresh per-cell deps below
++    gateway = express().use(buildDeps(`http://127.0.0.1:${targetPort}`).authenticateToken ? (() => { throw new Error('unexpected'); })() : (() => {})()).listen(0, '127.0.0.1') as unknown as Server;
++    await new Promise<void>((r) => gateway.once('listening', () => r()));
++    gatewayPort = (gateway.address() as AddressInfo).port;
++    const res = await postApprove(gatewayPort);
++    expect(res.status).not.toBe(200);
++    expect(res.body.success).toBeFalsy();
++    expect((vi.mocked({ deletePendingDocument: require('../services/redis').deletePendingDocument }).deletePendingDocument)).toBeDefined();
++  });
++});
