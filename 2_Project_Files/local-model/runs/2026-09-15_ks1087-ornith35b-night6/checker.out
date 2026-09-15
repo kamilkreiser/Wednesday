@@ -1,0 +1,35 @@
+diff_blocks=1 all_blocks=1 prose_outside_chars=0
+wrote /Volumes/DevMASTER/WEDNESDAY/2_Project_Files/local-model/runs/2026-09-15_ks1087-ornith35b-night6/out.md.checker/patch.diff lines=206
+PASS A1 output is exactly one fenced ```diff block, nothing outside it
+clone clean at pinned tip 48e65c43517926da6f137993053c82c83e122f5d
+--- baseline at the untouched tip (whole services/api-gateway suite + tsc)
+baseline suite rc=0 total=355 passed=355 failed=0 suites_failed=0 loaded=1 failed_names=[]
+baseline tsc rc=0 (0 lines)
+section 1 services/api-gateway/src/routes/verification.ts: hunk 1 (@@ -972,7 +972,8 @@ export function createVerificationRoutes(deps: VerificationRouteDeps): Router {) declared old=7 new=8 but actual old=6 new=7
+section 1 services/api-gateway/src/routes/verification.ts: hunk 2 (@@ -980,15 +981,19 @@ export function createVerificationRoutes(deps: VerificationRouteDeps): Router {) declared old=15 new=19 but actual old=14 new=21
+section 2 services/api-gateway/src/__tests__/ks1087-workflow-approve-deletes-the-pending-document.test.ts: hunk 1 (@@ -0,0 +1,165 @@) declared old=0 new=165 but actual old=0 new=169
+sections=2 miscounted_sections=2
+section 1 services/api-gateway/src/routes/verification.ts: path lacks Blockchain/Dev/ — applying with --directory=Blockchain/Dev
+section 1 services/api-gateway/src/routes/verification.ts: applies ONLY with --recount --ignore-whitespace (miscounted hunks=2, strict rc=128)
+section 2 services/api-gateway/src/__tests__/ks1087-workflow-approve-deletes-the-pending-document.test.ts: path lacks Blockchain/Dev/ — applying with --directory=Blockchain/Dev
+section 2 services/api-gateway/src/__tests__/ks1087-workflow-approve-deletes-the-pending-document.test.ts: applies ONLY with --recount --ignore-whitespace (miscounted hunks=1, strict rc=0)
+PASS A2 diff applies at the tip — with an accommodation: [services/api-gateway/src/routes/verification.ts: --recount --ignore-whitespace needed; miscounted hunks=2; strict rc=128] [services/api-gateway/src/__tests__/ks1087-workflow-approve-deletes-the-pending-document.test.ts: --recount --ignore-whitespace needed; miscounted hunks=1; strict rc=0]
+touched files (2): Blockchain/Dev/services/api-gateway/src/__tests__/ks1087-workflow-approve-deletes-the-pending-document.test.ts Blockchain/Dev/services/api-gateway/src/routes/verification.ts  (+179/-2)
+PASS A3 touched-file set == { Blockchain/Dev/services/api-gateway/src/routes/verification.ts , Blockchain/Dev/services/api-gateway/src/__tests__/ks1087-workflow-approve-deletes-the-pending-document.test.ts }
+PASS A3b every must_change site the ticket names is changed by the product hunk (2 site(s))
+test-only at tip: rc=1 total=3 passed=1 failed=2 suites_failed=2 loaded=1 failed_names=['KS-1087 — workflow approve keeps pending doc on originate failure 🔴 KS-1087 — originate 401: no 200 approved, and the pending document survives', 'KS-1087 — workflow approve keeps pending doc on originate failure 🔴 KS-1087 — originate unreachable: the pending document survives']
+PASS A4 RED-FIRST: src/__tests__/ks1087-workflow-approve-deletes-the-pending-document.test.ts fails at the untouched tip (2 failed / 3 run; controls green; assertion reds)
+test after product hunk: rc=0 total=3 passed=3 failed=0 suites_failed=0 loaded=1 failed_names=[]
+PASS A5 GREEN-AFTER: src/__tests__/ks1087-workflow-approve-deletes-the-pending-document.test.ts passes with the product hunk (3 passed / 3 run)
+INFO control cell present: 1 cell(s) passed BEFORE and 3 AFTER (the harness reaches the code both times)
+after suite rc=0 total=358 passed=358 failed=0 suites_failed=0 loaded=1 failed_names=[]
+baseline: total=355 failed=0 | after: total=358 failed=0
+develop's own reds (attributed, not counted): []
+NEW reds: []
+reds fixed by the patch: []
+tests added: 3
+PASS A6 whole services/api-gateway suite: no NEW red vs the untouched tip
+PASS A7 tsc --noEmit for services/api-gateway: rc 0 after the patch (baseline rc=0)
+INFO tsc on the test file alone: rc=2 (2 lines; not gated — vitest does not type-check and the service tsconfig excludes __tests__)
+SUMMARY files=2 +179/-2 test=src/__tests__/ks1087-workflow-approve-deletes-the-pending-document.test.ts red_first=yes apply_mode=lenient
+RESULT: PASS (7/7)

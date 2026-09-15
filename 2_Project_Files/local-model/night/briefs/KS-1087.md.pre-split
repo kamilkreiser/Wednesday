@@ -10,39 +10,17 @@ delete the pending document ONLY after originate returns 2xx; on any other statu
 pending document and return an error.** Item 2 (which credential originate accepts) is a design decision — do NOT
 change `forwardHeaders` or add any header.
 
-## The exact change — THREE SMALL EDITS, each its own hunk with 3 lines of context, never one big rewrite
-(Every earlier attempt rewrote the whole 30-line block in one hunk and produced a corrupt patch. Do not do that.
-Keep every line not named below byte-identical, including indentation.)
-
-E1 — line 975: `        const proxyReq = http.request(` becomes TWO lines (the promise wrapper opens, the request is
-    assigned inside it):
-```
-        const forwardStatus: number = await new Promise<number>((resolveStatus) => {
-        const proxyReq = http.request(
-```
-E2 — lines 983 and 987–988 (inside the callbacks, add one line each; keep the two `log(...)` lines exactly):
-    after line 983 `log('info', 'Workflow approved — document forwarded to originate', { documentId });` add
-```
-              resolveStatus(proxyRes.statusCode || 0);
-```
-    after line 988 `log('error', 'Failed to forward approved document to originate', { error: err.message });` add
-```
-          resolveStatus(0);
-```
-E3 — lines 990–991: `        proxyReq.end();` stays; the line `        await redisService.deletePendingDocument(documentId);`
-    becomes this block (the promise closes, then the 2xx gate):
-```
-        proxyReq.end();
-        });
-        if (forwardStatus < 200 || forwardStatus >= 300) {
-          res.status(502).json({ success: false, error: { code: 'ORIGINATE_FORWARD_FAILED', message: 'Approved, but the document could not be created in originate; the pending document was kept', status: forwardStatus } });
-          return;
-        }
-        await redisService.deletePendingDocument(documentId);
-```
-Nothing else changes: `payload`, `forwardHeaders`, `originateUrl`, `url`, the 200 `res.json` block (lines 994–1002),
-the reject handler. No new imports. The result: the request is awaited; a non-2xx or a network error keeps the
-pending document and answers 502; 2xx deletes it and falls through to the existing 200.
+## The exact change — the block at lines 975–1002 (inside `if (pendingDoc) { … }`), one site
+Today the request is fire-and-forget: the `proxyRes.on('end')` callback only logs (line 983), the `error` handler
+only logs (line 987), and lines 991 + 994 run unconditionally. Rewrite ONLY this block so that:
+1. The forward is awaited: wrap `http.request(...)` in a `Promise<{ status: number }>` that resolves with
+   `proxyRes.statusCode` on `'end'` and REJECTS on the `'error'` event (keep the two existing `log(...)` calls
+   where they are, inside the callbacks).
+2. After awaiting it: if the status is 2xx (`status >= 200 && status < 300`) → `await redisService.deletePendingDocument(documentId)` and fall through to the existing 200 `res.json({... status: 'approved' ...})` (lines 994–1002, unchanged).
+3. Otherwise (a non-2xx status, or the promise rejected) → do NOT delete the pending document; respond
+   `res.status(502).json({ success: false, error: { code: 'ORIGINATE_FORWARD_FAILED', message: 'Approved, but the document could not be created in originate; the pending document was kept', status: <the status or 0> } })` and `return;`.
+Keep `payload`, `forwardHeaders`, `originateUrl`, `url` exactly as they are (lines 959–974). Do not touch the
+reject handler (line 1006 onward) or anything above line 955. No new imports.
 
 ## The test — one new vitest file, in-process, no server
 File: `services/api-gateway/src/__tests__/ks1087-workflow-approve-keeps-doc-on-originate-failure.test.ts`
@@ -63,6 +41,7 @@ Close the stub server in `afterEach`.
 
 ## Where (parsed into the checklist — every **must change** line must appear as a `-` line in your diff)
 * `:975` — **must change**: `        const proxyReq = http.request(`
+* `:987` — **must change**: `        proxyReq.on('error', (err: Error) => {`
 * `:991` — **must change**: `        await redisService.deletePendingDocument(documentId);`
 * `:994` — (correct) `      res.json({` — stays; it is reached only on 2xx after your change
 
