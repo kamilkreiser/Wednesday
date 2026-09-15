@@ -58,55 +58,6 @@ try:
         if m: done_pass.add(m.group(1))
 except FileNotFoundError: pass
 
-import subprocess, functools
-SRC_CHECKOUT = os.environ.get("NIGHT_SOURCE_CHECKOUT", "/Volumes/DevMASTER/!CODING/Secuura/Blockchain/2_Project_Files")
-BASENAME = re.compile(r"`?([A-Za-z][\w.\-]*\.ts)`?(?::\d+)?")
-DOCFILE = re.compile(r"(?:Blockchain/Dev/)?((?:docs/[\w./\-]+\.md|CONTRIBUTING\.md|DEV-PROCESS\.md|VOCABULARY\.md|CLAUDE\.md|README\.md))")
-ROUTE = re.compile(r"\b(?:GET|POST|PUT|PATCH|DELETE)\s+(/api/[\w/\-{}:.]+)")
-def _git(*args):
-    r = subprocess.run(["git", "-C", SRC_CHECKOUT, *args], capture_output=True, text=True)
-    return r.stdout if r.returncode == 0 else ""
-@functools.lru_cache(maxsize=1)
-def tip_tree():
-    tip = (_git("ls-remote", "origin", "refs/heads/develop").split() or [""])[0]
-    if not tip or not _git("cat-file", "-t", tip).strip(): return "", []
-    return tip, [l for l in _git("ls-tree", "-r", "--name-only", tip).split("\n") if l.startswith("Blockchain/Dev/")]
-def _is_product(p):
-    return p.endswith(".ts") and "__tests__" not in p and not p.endswith(".test.ts") and "/tests/" not in p and "/node_modules/" not in p
-def resolve_files(desc):
-    """Return (files, how) — files repo-relative under Blockchain/Dev/, READ verbs only on the source checkout."""
-    tip, tree = tip_tree()
-    if not tip: return [], ""
-    # (a) docs: a docs/*.md or a named root doc → T4
-    docs = []
-    for m in DOCFILE.finditer(desc):
-        cands = [t for t in tree if t.endswith("/" + m.group(1)) or t == "Blockchain/Dev/" + m.group(1)]
-        for c in cands[:1]:
-            rel = c[len("Blockchain/Dev/"):]
-            if rel not in docs: docs.append(rel)
-    if docs: return docs, "docs"
-    # (b) a *.ts basename that resolves to exactly ONE product file at the tip
-    found = []
-    for m in BASENAME.finditer(desc):
-        b = m.group(1)
-        if b.endswith(".test.ts") or b.endswith(".d.ts") or b in ("index.ts",): continue
-        cands = sorted({t for t in tree if t.endswith("/" + b) and _is_product(t)})
-        if len(cands) == 1:
-            rel = cands[0][len("Blockchain/Dev/"):]
-            if rel not in found: found.append(rel)
-    if found: return found, "basename"
-    # (c) a route literal, grepped at the tip (read verb); keep files that carry it as a string literal
-    for m in ROUTE.finditer(desc):
-        route = m.group(1).rstrip(".,;:)")
-        out = _git("grep", "-l", "--fixed-strings", "-e", f"'{route}'", tip, "--", "Blockchain/Dev/services", "Blockchain/Dev/packages")
-        for line in out.split("\n"):
-            p = line.split(":", 1)[-1].strip() if ":" in line else ""
-            if p and _is_product(p) and "openapi" not in p:
-                rel = p[len("Blockchain/Dev/"):]
-                if rel not in found: found.append(rel)
-        if found: return found, "route"
-    return [], ""
-
 tiers = {"T1 services (vitest, one file)": [], "T2 tooling (systemTest/*, one file)": [], "T3 jest services (originate, governance)": [], "T4 docs (doc_patch)": [], "T5 multi-file / later": []}
 excluded, held, aside = [], [], []
 for n in nodes:
@@ -121,15 +72,8 @@ for n in nodes:
         p = m.group(1)
         if "__tests__" in p or p.endswith(".test.ts") or "/tests/" in p: continue
         if p not in files: files.append(p)
-    resolved_by = ""
-    if not files:
-        # 2026-09-15 22:5x RESOLVER (IMPROVEMENTS row 90): the bare predicate hid 152 tickets as "names no product file"
-        # — KS-1097 (docs) and KS-794 (a route + a schema name) among them, both done by hand that night. A description
-        # that names a *.ts BASENAME, a docs file, or a ROUTE is resolved to files at the tip with READ verbs only.
-        files, resolved_by = resolve_files(desc)
-    if not files: excluded.append((ident, "names no product file (after basename/docs/route resolution)")); continue
-    if resolved_by == "docs": tiers["T4 docs (doc_patch)"].append((ident, n["priority"], "[resolved:docs, a HINT — the ticket MENTIONS the file] " + title[:80], files[:3])); continue
-    if resolved_by: title = f"[resolved:{resolved_by}, a HINT — read the file] " + title  # prefix, so the 80-char cut keeps it
+    if not files: excluded.append((ident, "names no product file")); continue
+    if "docs/" in desc and not files: tiers["T4 docs (doc_patch)"].append((ident, n["priority"], title[:80], files)); continue
     if len(files) > 1: tiers["T5 multi-file / later"].append((ident, n["priority"], title[:80], files[:3])); continue
     f = files[0]
     if f.startswith("systemTest/"): tiers["T2 tooling (systemTest/*, one file)"].append((ident, n["priority"], title[:80], [f]))

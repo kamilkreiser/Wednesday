@@ -1,0 +1,331 @@
+# Ornith candidates — derived 2026-09-15 20:27 from 311 KS Backlog/Todo tickets (read-only, unpaginated)
+
+A CENSUS for the coordinator to brief from, easy → hard (Kam 2026-09-15 16:40 / 18:19). A ticket here is a candidate, not a task: read it, read the file at the tip, write `night/briefs/<id>.md`, then queue it. Auth-shaped titles are excluded (LAST); Peter/Stuart tickets and PR-attached tickets are excluded outright.
+
+## T1 services (vitest, one file) — 18
+- KS-1173 (P2) Flow verbs: add `note`, `certified` and `verified` to the lifecycle vocabulary ( — `services/anchoring/src/anchorSchema.ts`
+- KS-683 (P2) Anchor-status standoff: a consumer repolls anchors K reports as terminally faile — `services/anchoring/src/index.ts`
+- KS-692 (P2) Security: /api/status revoke/unrevoke has no tenant ownership check — an ISSUER_ — `services/vc-issuer/src/routes/status.ts`
+- KS-953 (P2) CLASS: editing api-gateway/src/index.ts silently reddens packages/shared, and no — `services/api-gateway/src/index.ts`
+- KS-974 (P2) Published bound vs runtime bound on rate-limit scope: /check enforces code UNITS — `services/security/src/index.ts`
+- KS-1121 (P3) Security: credentialRepo.getById resolves a credential by SUBSTRING (LIKE '%id%' — `services/vc-issuer/src/repositories/credentialRepo.ts`
+- KS-1168 (P3) userRepo.ts: ILIKE search on encrypted PII columns can never match — :1017 and : — `services/auth/src/repositories/userRepo.ts`
+- KS-579 (P3) Per-person platform-admin identities — the shared seeded admin cannot carry attr — `services/api-gateway/src/routes/platform.ts`
+- KS-581 (P3) register-connector: volume alerting, rate limit, and correlation of refused re-k — `services/api-gateway/src/routes/platform.ts`
+- KS-627 (P3) Implement real wallet signature verification (CIP-8/COSE + address binding) — ne — `services/wallet-connector/src/types/index.ts`
+- KS-746 (P3) Security events carry no tenant at all — KS-743 had to gate them platform-only,  — `services/security/src/index.ts`
+- KS-839 (P3) Security: an allowedScopes of ['*'] bypasses the invalid_scope refusal entirely  — `services/auth/src/services/oauth.ts`
+- KS-915 (P3) A clean stack has no supported way to obtain its first privileged account — `services/auth/src/routes/auth.ts`
+- KS-960 (P3) Two schema sources disagree on whether users.email is unique — a statement valid — `services/auth/src/repositories/userRepo.ts`
+- KS-975 (P3) rateLimitScope tri-state: a MALFORMED `sub` silently became a 403 on the ungated — `services/security/src/rateLimitScope.ts`
+- KS-976 (P3) Rate-limit refusals name the wrong field: 400 says "Key required" when the key w — `services/security/src/index.ts`
+- KS-1125 (P4) api-gateway startup-migrations: the tenant-failure guard `if (outcome.failed > 0 — `services/api-gateway/src/startup-migrations.ts`
+- KS-1145 (P4) ks949 suite coverage (KS-950 / KS-962, #973): ID3's capture half has no size ass — `services/api-gateway/src/startup-migrations.ts`
+
+## T2 tooling (systemTest/*, one file) — 1
+- KS-972 (P3) start-secuura.sh banner prints admin@secuura.com / admin123, which has returned  — `systemTest/fixtures/provision-actors.ts`
+
+## T3 jest services (originate, governance) — 3
+- KS-1019 (P3) [Question] The document's whole `blockchain` block is published as z.unknown() — — `services/originate/src/originate.openapi.ts`
+- KS-759 (P3) tenantId is read through two `as unknown as` casts because it is not on JwtPaylo — `services/originate/src/middleware/auth.ts`
+- KS-1084 (P0) READ ONLY / unverified: the gateway's own Authorization-only calls to originate  — `services/originate/src/index.ts`
+
+## T4 docs (doc_patch) — 0
+
+## T5 multi-file / later — 21
+- KS-1055 (P2) Per-tenant databases never receive the file migrations — CORE_MIGRATIONS FORCEs  — `services/api-gateway/src/startup-migrations.ts`, `services/tenant-provisioning/src/index.ts`
+- KS-485 (P2) Security review — plan, methodology & handover (Platform K) — `services/api-gateway/src/routes/notifications.ts`, `services/originate/src/repositories/documentRepo.ts`, `services/originate/src/index.ts`
+- KS-491 (P2) Review F — Edge, WAF, DDoS & anti-automation — `services/api-gateway/src/middleware/rateLimitEnforce.ts`, `services/auth/src/routes/auth.ts`
+- KS-576 (P2) Bulk re-key: one admin-authorised rotate across a named set of externalRefs — `services/api-gateway/src/routes/platform.ts`, `services/security/src/index.ts`, `packages/shared/src/db/tenant-guc.ts`
+- KS-624 (P2) prism issues VCs with random bytes as the Ed25519 proof and verifies them as pas — `services/vc-issuer/src/routes/credentials.ts`, `services/prism/src/index.ts`
+- KS-730 (P2) Security: 71 inline handlers still return err.message verbatim off-production —  — `services/originate/src/routes/adminConfig.ts`, `services/originate/src/routes/gdpr.ts`, `services/originate/src/routes/systemErrors.ts`
+- KS-753 (P2) Timestamping fail-closed: a mock TSA fallback must not report verified: true (ex — `services/timestamping/src/tsa/qualified-tsa.ts`, `services/timestamping/src/index.ts`
+- KS-1101 (P3) Gateway health aggregates read anchoring's HTTP status only, so its degraded bod — `services/anchoring/src/index.ts`, `services/api-gateway/src/services/health.ts`, `services/api-gateway/src/routes/system-status.ts`
+- KS-1174 (P3) api-gateway collapses every API-key failure into 401 'Invalid API key' — forward — `services/security/src/index.ts`, `services/api-gateway/src/middleware/auth.ts`
+- KS-526 (P3) KMS: move platform wallet mnemonic to Key Vault (KS-326 follow-up) — `services/anchoring/src/index.ts`, `services/anchoring/src/cardano/wallet.ts`, `packages/shared/src/vault/key-vault.ts`
+- KS-580 (P3) Append-only recovery audit held outside the estate being recovered — `services/api-gateway/src/routes/platform.ts`, `services/security/src/index.ts`
+- KS-621 (P3) Document reads are scoped by tenant and owner, never by organization — cross-org — `services/originate/src/repositories/documentRepo.ts`, `services/originate/src/routes/documents.ts`
+- KS-625 (P3) /presentations/verify reports a presentation verified without checking the holde — `services/vc-issuer/src/routes/presentations.ts`, `services/vc-issuer/src/routes/credentials.ts`
+- KS-629 (P3) kyc `livenessVideo` is accepted by spec and runtime, then silently discarded — n — `services/kyc/src/index.ts`, `services/kyc/src/kyc.openapi.ts`
+- KS-658 (P3) The demo VM runs every service as NODE_ENV=development while the code names "dem — `services/auth/src/index.ts`, `services/api-gateway/src/index.ts`
+- KS-745 (P3) api-gateway audit export calls /api/audit/logs — a route the security service do — `services/api-gateway/src/routes/audit-export.ts`, `services/security/src/index.ts`
+- KS-807 (P3) The control-byte guard cannot see a raw body — findNulBytePath returns null for  — `services/billing/src/index.ts`, `packages/shared/src/middleware/request-limits.ts`
+- KS-870 (P3) Every ADMITTED erasure authenticates twice — the door's chain and the catch-all  — `services/api-gateway/src/routes/proxy.ts`, `services/api-gateway/src/middleware/auth.ts`
+- KS-954 (P3) KS-858 residue: the repeated-slash collapse does not complete for the /api/billi — `services/api-gateway/src/routes/proxy.ts`, `services/api-gateway/src/middleware/normalisePath.ts`
+- KS-1082 (P4) The Playwright env guard added in #896 reads config/ only — the variable breakin — `systemTest/fixtures/provision-actors.ts`, `systemTest/playwright/global-setup.ts`
+- KS-1083 (P0) GATEWAY_VOUCH_SECRET: nothing provisions it and no deploy order or rotation is w — `services/api-gateway/src/routes/verification.ts`, `packages/shared/src/db/tenant-context.ts`
+
+## HELD (READY_* or done.md PASS) — 24
+- KS-1018 Security/correctness: three verification-store reads swallow EVERY DB error with
+- KS-1050 users.ts:933 answers success: true over a 0-row profile update — KS-943 changes 
+- KS-1072 The latest-anchor selector documents a `confirmedAt` tiebreak it does not implem
+- KS-1073 Tier-2 verify has no statusless-blob cell — the carve-out is unguarded on the ti
+- KS-1087 workflow-approve deletes the pending document and answers 200 "Document has been
+- KS-1108 Akto harness: loadSecretsYml() parses config/secrets.yml with no catch — the KS-
+- KS-1117 k6 YAML loader: a BOM immediately followed by a comment is a marked syntax error
+- KS-1118 POST /api/verification/verify: the `documentHash`-over-`hash` precedence is unpi
+- KS-1120 GET /api/presentations/:id exact-or-404: the memory-path PREFIX class and the DB
+- KS-1123 api-gateway verify: an empty-string / 0 / false anchor status is one edit (`??`→
+- KS-1130 ks1069: tier-2 twin cells for E1/E7/E3 + the falsified comments (:323, :244, :61
+- KS-1158 L3a gate records (#912 r2 / #937): the placeholder-hash anchoredAt carry keys on
+- KS-1160 originate POST /api/webhooks persists the RAW url where PATCH persists the norma
+- KS-1164 gate/report.ts writeGateReport overwrites the input summary when --summary does 
+- KS-1165 api-gateway CSRF excludedPaths carries no /api/v2/verification entry — the v2 ve
+- KS-1171 Guard 3's re-poll reads a MIXED window as ABSENT — one early "not found" then an
+- KS-1172 Add `note` and `verified` to the lifecycle vocabulary (LIFECYCLE_VERBS + LIFECYC
+- KS-747 Spec drift: GET /api/security/keys declares no parameters while the handler requ
+- KS-844 demo-service mounts no error handler — a raw 0x00 body returns express's default
+- KS-864 Dead-estate pointers in RUNTIME SOURCE outside deployment/azure — system-status.
+- KS-871 The audit log records `req.path` AFTER the response, so a REFUSED erasure is log
+- KS-888 dbSaveApiKey SWALLOWS a failed INSERT — POST /api/keys answers 201 for a key tha
+- KS-908 connectorId persists but is invisible through the API — POST and GET both return
+- KS-932 timeoutMs does not bound DNS resolution — a hung lookup leaves safeOutboundReque
+
+## SET ASIDE with a recorded reason — 21 (re-read only if the ticket's updatedAt moved)
+- KS-1076 — likely already fixed at M55 (docblock present since ec61abf8e/0882f7661) — measure with eslint in a tool-mode clone; item 2 is a Claude seat's (updated 2026-09-13)
+- KS-1111 — a masking guard with an unruled fix-shape (a)/(b), security-adjacent (updated 2026-09-12)
+- KS-1112 — two files: option 1 reds ks1029's A1 cell (2026-09-15 18:45) (updated 2026-09-13)
+- KS-1113 — an e2e spec under tests/e2e — no Playwright checker yet (updated 2026-09-13)
+- KS-1114 — decision-class (spec vs implementation of a title strategy) (updated 2026-09-13)
+- KS-1119 — multi-tenant security surface (updated 2026-09-13)
+- KS-1128 — the seed's pg is a require inside the function (updated 2026-09-13)
+- KS-1129 — three services, anchoring index.ts listens on import (updated 2026-09-13)
+- KS-1132 — services/auth — security surface (Kam 16:40: auth LAST) (updated 2026-09-13)
+- KS-1142 — a test refactor with no product tamper (updated 2026-09-13)
+- KS-1159 — a guard widening with three fixture files — later tier (updated 2026-09-14)
+- KS-590 — verification.ts, security-adjacent (updated 2026-09-13)
+- KS-755 — diagnosis-first (which side is wrong is unmeasured) (updated 2026-09-10)
+- KS-757 — blocked by the ticket's own measurement (updated 2026-09-08)
+- KS-777 — tracker ticket — all four findings FIXED on #795; a board close (updated 2026-09-05)
+- KS-849 — kyc has no in-process driver (app.listen at import) (updated 2026-09-06)
+- KS-880 — two-file refactor (Claude seat) (updated 2026-09-06)
+- KS-889 — a measurement/ruling ticket, not a patch (updated 2026-09-06)
+- KS-979 — comment-only: no cell can red it (updated 2026-09-07)
+- KS-980 — decision-class (a second DB role or a claim correction) (updated 2026-09-07)
+- KS-981 — lives only on the frozen #892 branch (updated 2026-09-07)
+
+## EXCLUDED by predicate — 223
+- KS-1000 — has a PR attached
+- KS-1003 — auth-shaped title (LAST, Kam 16:40)
+- KS-1005 — auth-shaped title (LAST, Kam 16:40)
+- KS-1006 — auth-shaped title (LAST, Kam 16:40)
+- KS-1009 — auth-shaped title (LAST, Kam 16:40)
+- KS-101 — on Peter/Stuart
+- KS-1010 — names no product file
+- KS-1011 — names no product file
+- KS-1012 — names no product file
+- KS-1014 — names no product file
+- KS-1015 — auth-shaped title (LAST, Kam 16:40)
+- KS-1017 — auth-shaped title (LAST, Kam 16:40)
+- KS-1022 — names no product file
+- KS-1023 — names no product file
+- KS-1025 — names no product file
+- KS-1028 — names no product file
+- KS-1030 — names no product file
+- KS-1031 — names no product file
+- KS-1032 — auth-shaped title (LAST, Kam 16:40)
+- KS-1033 — names no product file
+- KS-1034 — names no product file
+- KS-1035 — names no product file
+- KS-1036 — names no product file
+- KS-1037 — names no product file
+- KS-1038 — auth-shaped title (LAST, Kam 16:40)
+- KS-1039 — names no product file
+- KS-1040 — auth-shaped title (LAST, Kam 16:40)
+- KS-1042 — on Peter/Stuart
+- KS-1044 — names no product file
+- KS-1045 — names no product file
+- KS-1047 — names no product file
+- KS-1048 — names no product file
+- KS-1049 — names no product file
+- KS-1051 — names no product file
+- KS-1053 — auth-shaped title (LAST, Kam 16:40)
+- KS-1054 — names no product file
+- KS-1063 — names no product file
+- KS-1074 — names no product file
+- KS-1079 — names no product file
+- KS-1080 — names no product file
+- KS-1081 — names no product file
+- KS-1085 — names no product file
+- KS-1088 — names no product file
+- KS-1089 — names no product file
+- KS-1090 — names no product file
+- KS-1091 — auth-shaped title (LAST, Kam 16:40)
+- KS-1093 — names no product file
+- KS-1097 — names no product file
+- KS-1100 — names no product file
+- KS-1102 — names no product file
+- KS-1104 — names no product file
+- KS-1105 — auth-shaped title (LAST, Kam 16:40)
+- KS-1106 — names no product file
+- KS-1107 — auth-shaped title (LAST, Kam 16:40)
+- KS-1110 — names no product file
+- KS-1115 — names no product file
+- KS-1116 — names no product file
+- KS-1124 — auth-shaped title (LAST, Kam 16:40)
+- KS-1127 — names no product file
+- KS-1131 — names no product file
+- KS-1133 — names no product file
+- KS-1134 — names no product file
+- KS-1135 — names no product file
+- KS-1136 — names no product file
+- KS-1137 — names no product file
+- KS-1138 — names no product file
+- KS-1139 — names no product file
+- KS-1140 — names no product file
+- KS-1141 — names no product file
+- KS-1143 — names no product file
+- KS-1144 — names no product file
+- KS-1146 — auth-shaped title (LAST, Kam 16:40)
+- KS-1147 — names no product file
+- KS-1148 — names no product file
+- KS-1149 — auth-shaped title (LAST, Kam 16:40)
+- KS-1152 — auth-shaped title (LAST, Kam 16:40)
+- KS-1153 — names no product file
+- KS-1154 — names no product file
+- KS-1155 — names no product file
+- KS-1156 — auth-shaped title (LAST, Kam 16:40)
+- KS-1157 — auth-shaped title (LAST, Kam 16:40)
+- KS-1161 — names no product file
+- KS-1162 — names no product file
+- KS-1163 — names no product file
+- KS-1170 — on Peter/Stuart
+- KS-135 — on Peter/Stuart
+- KS-139 — on Peter/Stuart
+- KS-188 — on Peter/Stuart
+- KS-239 — on Peter/Stuart
+- KS-263 — names no product file
+- KS-304 — has a PR attached
+- KS-305 — names no product file
+- KS-329 — auth-shaped title (LAST, Kam 16:40)
+- KS-339 — names no product file
+- KS-492 — on Peter/Stuart
+- KS-502 — on Peter/Stuart
+- KS-525 — on Peter/Stuart
+- KS-528 — names no product file
+- KS-530 — names no product file
+- KS-562 — names no product file
+- KS-565 — has a PR attached
+- KS-568 — on Peter/Stuart
+- KS-571 — on Peter/Stuart
+- KS-572 — on Peter/Stuart
+- KS-582 — names no product file
+- KS-583 — names no product file
+- KS-588 — on Peter/Stuart
+- KS-591 — names no product file
+- KS-593 — has a PR attached
+- KS-595 — names no product file
+- KS-598 — names no product file
+- KS-602 — names no product file
+- KS-603 — names no product file
+- KS-604 — names no product file
+- KS-605 — names no product file
+- KS-607 — names no product file
+- KS-608 — on Peter/Stuart
+- KS-61 — on Peter/Stuart
+- KS-618 — auth-shaped title (LAST, Kam 16:40)
+- KS-619 — auth-shaped title (LAST, Kam 16:40)
+- KS-623 — auth-shaped title (LAST, Kam 16:40)
+- KS-630 — names no product file
+- KS-636 — names no product file
+- KS-638 — names no product file
+- KS-648 — names no product file
+- KS-651 — names no product file
+- KS-655 — names no product file
+- KS-668 — auth-shaped title (LAST, Kam 16:40)
+- KS-678 — names no product file
+- KS-696 — names no product file
+- KS-699 — names no product file
+- KS-709 — names no product file
+- KS-716 — names no product file
+- KS-723 — names no product file
+- KS-724 — auth-shaped title (LAST, Kam 16:40)
+- KS-725 — names no product file
+- KS-735 — names no product file
+- KS-738 — names no product file
+- KS-744 — auth-shaped title (LAST, Kam 16:40)
+- KS-748 — names no product file
+- KS-749 — has a PR attached
+- KS-752 — names no product file
+- KS-756 — auth-shaped title (LAST, Kam 16:40)
+- KS-758 — names no product file
+- KS-760 — names no product file
+- KS-761 — names no product file
+- KS-765 — names no product file
+- KS-766 — names no product file
+- KS-767 — names no product file
+- KS-768 — names no product file
+- KS-769 — names no product file
+- KS-770 — names no product file
+- KS-772 — names no product file
+- KS-782 — auth-shaped title (LAST, Kam 16:40)
+- KS-783 — names no product file
+- KS-784 — names no product file
+- KS-785 — names no product file
+- KS-787 — auth-shaped title (LAST, Kam 16:40)
+- KS-789 — names no product file
+- KS-793 — auth-shaped title (LAST, Kam 16:40)
+- KS-794 — names no product file
+- KS-805 — auth-shaped title (LAST, Kam 16:40)
+- KS-808 — names no product file
+- KS-810 — auth-shaped title (LAST, Kam 16:40)
+- KS-811 — names no product file
+- KS-812 — names no product file
+- KS-813 — names no product file
+- KS-824 — auth-shaped title (LAST, Kam 16:40)
+- KS-825 — auth-shaped title (LAST, Kam 16:40)
+- KS-829 — names no product file
+- KS-834 — auth-shaped title (LAST, Kam 16:40)
+- KS-836 — auth-shaped title (LAST, Kam 16:40)
+- KS-837 — names no product file
+- KS-838 — names no product file
+- KS-840 — auth-shaped title (LAST, Kam 16:40)
+- KS-846 — names no product file
+- KS-851 — names no product file
+- KS-855 — auth-shaped title (LAST, Kam 16:40)
+- KS-865 — names no product file
+- KS-866 — names no product file
+- KS-872 — names no product file
+- KS-884 — names no product file
+- KS-887 — names no product file
+- KS-890 — names no product file
+- KS-896 — names no product file
+- KS-897 — names no product file
+- KS-902 — names no product file
+- KS-903 — names no product file
+- KS-906 — names no product file
+- KS-910 — names no product file
+- KS-918 — auth-shaped title (LAST, Kam 16:40)
+- KS-919 — names no product file
+- KS-925 — auth-shaped title (LAST, Kam 16:40)
+- KS-928 — has a PR attached
+- KS-934 — names no product file
+- KS-938 — auth-shaped title (LAST, Kam 16:40)
+- KS-939 — names no product file
+- KS-940 — names no product file
+- KS-944 — auth-shaped title (LAST, Kam 16:40)
+- KS-947 — names no product file
+- KS-948 — has a PR attached
+- KS-951 — auth-shaped title (LAST, Kam 16:40)
+- KS-955 — names no product file
+- KS-956 — names no product file
+- KS-957 — names no product file
+- KS-958 — names no product file
+- KS-959 — names no product file
+- KS-964 — has a PR attached
+- KS-965 — names no product file
+- KS-967 — names no product file
+- KS-977 — auth-shaped title (LAST, Kam 16:40)
+- KS-982 — names no product file
+- KS-983 — on Peter/Stuart
+- KS-984 — on Peter/Stuart
+- KS-985 — on Peter/Stuart
+- KS-986 — names no product file
+- KS-987 — names no product file
+- KS-990 — names no product file
+- KS-995 — names no product file
+- KS-996 — names no product file
+- KS-997 — names no product file
+- KS-998 — names no product file
+- KS-999 — names no product file
+

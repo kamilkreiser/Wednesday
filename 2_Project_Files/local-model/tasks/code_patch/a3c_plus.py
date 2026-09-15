@@ -5,15 +5,37 @@
 hunk that defined the helper those sites call — tsc failed three assertions later. A3b sees removals only; this
 is its twin for ADDITIONS: `defect_line.expected_plus` (built from the '+' lines of the brief's edit blocks) must
 each appear as a '+' line in the PRODUCT section, compared whitespace-stripped. Prints the missing lines, one per
-line; exit 0 when none. Used by checker.sh as A3c; runnable standalone on a run's artefacts (that is the arm)."""
+line; exit 0 when none. Used by checker.sh as A3c; runnable standalone on a run's artefacts (that is the arm).
+
+2026-09-15 22:5x (KS-999 r1, IMPROVEMENTS row 89): the model appended a trailing `// KS-999: …` comment to an
+otherwise byte-identical product line and A3c called the addition ABSENT — a false FAIL on a correct hunk (the
+KS-1074 B/C outputs carried the same trailing comments and were never measured by A3c, which only runs with a
+must_change site). A '+' line now also matches when it equals the expected line AFTER a trailing `// …` comment
+is removed. Exact match is tried first; the strip is applied to the '+' line only, never to the expectation, and
+only at the LAST ` //` — a `//` inside a string earlier on the line is untouched because the exact match wins.
+Arms: local-model/tests/a3c_arms.sh (real KS-999 output → PASS; a dropped hunk → FAIL; an altered token → FAIL)."""
 import json
+import re
 import sys
+
+_TRAIL = re.compile(r"\s+//[^\n]*$")
+
+
+def _norm(line: str) -> str:
+    return line.strip()
+
+
+def _without_trailing_comment(line: str) -> str:
+    return _TRAIL.sub("", line).strip()
+
 
 d = json.load(open(sys.argv[1], encoding="utf-8"))
 exp = d.get("defect_line", {}).get("expected_plus", [])
 sec = open(sys.argv[2], encoding="utf-8", errors="replace").read().split("\n")
-added = {l[1:].strip() for l in sec if l.startswith("+") and not l.startswith("+++")}
-missing = [e for e in exp if e.strip() and e.strip() not in added]
+plus = [l[1:] for l in sec if l.startswith("+") and not l.startswith("+++")]
+added = {_norm(l) for l in plus}
+added_nocomment = {_without_trailing_comment(l) for l in plus}
+missing = [e for e in exp if e.strip() and e.strip() not in added and e.strip() not in added_nocomment]
 for m in missing:
     print(m)
 sys.exit(1 if missing else 0)
