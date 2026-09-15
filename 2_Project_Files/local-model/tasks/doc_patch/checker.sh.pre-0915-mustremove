@@ -73,18 +73,6 @@ for m in re.finditer(r"^@@ -(\d+)(?:,(\d+))? \+", patch, re.M):
     if not any(s>=a+1 and e<=b for a,b in ranges): bad.append(f"{s}-{e}")
 if bad: print(f"FAIL D6 hunk(s) outside the required sections: {bad}"); fails+=1
 else: print(f"PASS D6 every hunk lies inside the required sections ({len(ranges)} section(s))")
-# D7 (2026-09-15 21:4x, KS-1097 D r2 false green): every must-remove line (the brief's fenced '-' lines) is PRESENT in
-# before and ABSENT in after — a dropped '-' line kept as context by the re-anchor is exactly the corruption this sees.
-mr=inp["defect_line"].get("must_remove",[])
-if mr:
-    bl=[l.rstrip() for l in before]; al=[l.rstrip() for l in after]
-    ctrl=[m for m in mr if m not in bl]
-    still=[m for m in mr if m in al]
-    if ctrl: print(f"FAIL D7 control: {len(ctrl)} must-remove line(s) not in the file BEFORE (the input is wrong): {ctrl[:2]}"); fails+=1
-    elif still: print(f"FAIL D7 must-remove line(s) STILL PRESENT after the patch ({len(still)} of {len(mr)}): {[x[:80] for x in still[:3]]}"); fails+=1
-    else: print(f"PASS D7 every must-remove line ({len(mr)}) present before and absent after (control: all found at the tip)")
-else: print("INFO D7 no must-remove lines in the input (an insert-only brief, or one built before 21:4x)")
-total=7 if mr else 6
-print(f"RESULT: {'PASS (%d/%d)' % (total,total) if fails==0 else f'FAIL ({fails} failed)'}")
+print(f"RESULT: {'PASS (6/6)' if fails==0 else f'FAIL ({fails} failed)'}")
 sys.exit(1 if fails else 0)
 PY

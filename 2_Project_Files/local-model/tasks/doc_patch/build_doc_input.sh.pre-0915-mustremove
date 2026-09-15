@@ -28,20 +28,9 @@ if m:
             sec, toks = l[2:].split("::",1)
             req.append({"section": sec.strip().strip("`"), "tokens": [t.strip().strip("`") for t in toks.split(",") if t.strip()]})
 if not req: sys.stderr.write("build_doc_input: REFUSED — the brief has no `## Required` block (nothing the checker could prove)\n"); sys.exit(2)
-# 2026-09-15 21:4x (KS-1097 D r2, a FALSE GREEN): the model dropped three old lines from its '-' side and the re-anchor kept them
-# as context, so the applied doc carried the NEW annotation and the OLD one and D0-D6 all passed. The brief's fenced diff
-# blocks name the lines that must go: every fenced line starting with '-' (not '---') is a must-remove line, asserted by D7.
-must_remove=[]
-for blk in re.findall(r"^```[^\n]*\n(.*?)^```", text, re.M|re.S):
-    for ln in blk.split("\n"):
-        if ln.startswith("-") and not ln.startswith("---") and ln[1:].strip():
-            must_remove.append(ln[1:].rstrip())
-tipl=[l.rstrip() for l in r.stdout.split("\n")]
-missing=[m for m in must_remove if m not in tipl]
-if missing: sys.stderr.write(f"build_doc_input: REFUSED — {len(missing)} brief '-' line(s) do not exist at the tip (read the file, not the ticket): {missing[:2]}\n"); sys.exit(2)
 inp = {"ticket": {"identifier": ident, "title": text.splitlines()[0].lstrip("# ").strip()[:200], "description": text},
        "repo": {"source_checkout": src, "tip": tip, "branch": "develop"},
-       "product_file": prod, "defect_line": {"required": req, "must_remove": must_remove}, "files": {prod: r.stdout},
+       "product_file": prod, "defect_line": {"required": req}, "files": {prod: r.stdout},
        # top-level `tip` as well: night_run.sh reads input["tip"] for the clone (20:02: absent → the good clone
        # was quarantined, `checkout ''` failed, the checker measured an empty tree)
        "tip": tip}
