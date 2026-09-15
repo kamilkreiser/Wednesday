@@ -62,16 +62,6 @@ out_path, diff_path = sys.argv[1], sys.argv[2]
 text = open(out_path, encoding="utf-8").read()
 blocks = re.findall(r"```diff[^\n]*\n(.*?)```", text, flags=re.DOTALL)
 allblocks = re.findall(r"```[^\n]*\n.*?```", text, flags=re.DOTALL)
-# 2026-09-15 22:1x (KS-871 05:56 + KS-1097 C r2 — twice today): a SAMPLER LOOP (a 1-6-line cycle repeated to the token cut)
-# leaves no closed fence; name it here (rc 4) instead of "no diff block". Doc twin: tasks/doc_patch/checker.sh D1.
-tail0 = [l for l in text.split("\n") if l.strip()][-41:]
-for tail in (tail0, tail0[:-1]):
-    if len(tail) >= 12:
-        for k in (1, 2, 3, 4, 5, 6):
-            cyc = tail[-k:]; n = min(len(tail), 8 * k)
-            if all(tail[-(i + 1)] == cyc[-(i % k + 1)] for i in range(n)):
-                print(f"REPETITION LOOP: the output's last {n} non-blank lines repeat a {k}-line cycle starting {cyc[0][:60]!r}")
-                sys.exit(4)
 outside = re.sub(r"```[^\n]*\n.*?```", "", text, flags=re.DOTALL).strip()
 print(f"diff_blocks={len(blocks)} all_blocks={len(allblocks)} prose_outside_chars={len(outside)}")
 if outside:
@@ -83,22 +73,11 @@ if len(blocks) >= 1:
     open(diff_path, "w", encoding="utf-8").write(body)
     print(f"wrote {diff_path} lines={body.count(chr(10))}")
     sys.exit(0 if (len(blocks) == 1 and len(allblocks) == 1 and not outside) else 3)
-# no diff block: say whether the TOKEN BUDGET cut it (KS-871 05:56 — a property-repeat loop no line-cycle test sees)
-try:
-    import json
-    if json.load(open(out_path + ".meta.json")).get("done_reason") == "length":
-        print("TOKEN BUDGET CUT: done_reason=length and no closed diff fence — a runaway generation (repetition), not a diff"); sys.exit(4)
-except Exception:
-    pass
 sys.exit(2)
 PYEOF
 rc=$?
 cat "$REP/extract.out"
-if [ "$rc" -eq 4 ]; then
-  fail "A1 REPETITION LOOP — a sampler loop, not a diff (done_reason length): $(tail -1 "$REP/extract.out" | cut -c1-140)"
-  echo "RESULT: FAIL ($FAILS failed) — stopped at A1 (sampler loop)"
-  exit 1
-elif [ "$rc" -eq 2 ]; then
+if [ "$rc" -eq 2 ]; then
   fail "A1 output contains no \`\`\`diff block — prose instead of a diff; nothing to apply"
   echo "RESULT: FAIL ($FAILS failed) — stopped at A1"
   exit 1
