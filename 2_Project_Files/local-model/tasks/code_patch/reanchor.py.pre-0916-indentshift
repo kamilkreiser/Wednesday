@@ -150,49 +150,22 @@ def rebuild_from_minus(hunk, file_lines, notes, idx):
         return None
     n_file = len(file_lines) - (1 if file_lines and file_lines[-1] == "" else 0)   # split("\n") leaves a trailing ""
     window = len(body) * 3 + 10
-
-    def _chains(eq):
-        first_hits = [i for i in range(n_file) if eq(file_lines[i], groups[0][0])]
-        found = []
-        for s0 in first_hits:
-            idxs = [s0]; pos = s0 + 1; ok = True
-            for m, _ in groups[1:]:
-                nxt = next((i for i in range(pos, min(n_file, pos + window)) if eq(file_lines[i], m)), None)
-                if nxt is None:
-                    ok = False; break
-                idxs.append(nxt); pos = nxt + 1
-            if ok:
-                found.append(idxs)
-        return found
-
-    shift = 0
-    chains = _chains(lambda f, m: f.rstrip() == m.rstrip())
-    if len(chains) == 0:
-        # INDENT-SHIFT (2026-09-16 06:4x, KS-884 r1+r2 — IMPROVEMENTS rows 110/111): the model indents EVERY line of
-        # a hunk by a constant amount (+4 on `.githooks/pre-push`, where the file has 4 and the model wrote 8), so
-        # no '-' line is byte-exact. Match the '-' lines with LEADING whitespace ignored; accept only when every
-        # matched pair shares ONE delta (a constant shift, not a re-indent), and apply the same shift to the '+'
-        # lines. Named in the verdict; a '+' line shallower than the shift refuses (nothing to remove).
-        chains = _chains(lambda f, m: f.strip() == m.strip() and f.strip() != "")
-        if len(chains) == 1:
-            def _lead(t): return len(t) - len(t.lstrip(" \t"))
-            deltas = {_lead(g[0]) - _lead(file_lines[i]) for i, g in zip(chains[0], groups)}
-            if len(deltas) != 1 or 0 in deltas:
-                notes.append(f"hunk {idx}: the '-' lines match only with indent ignored but the shift is not constant ({sorted(deltas)}) — kept as written")
-                return None
-            shift = deltas.pop()
-            for _, plus in groups:
-                for pl in plus:
-                    if shift > 0 and (_lead(pl) < shift or pl[:shift] != " " * shift):
-                        notes.append(f"hunk {idx}: indent shift {shift:+d} but a '+' line has less leading space than that — kept as written")
-                        return None
+    first_hits = [i for i in range(n_file) if file_lines[i].rstrip() == groups[0][0].rstrip()]
+    chains = []
+    for s0 in first_hits:
+        idxs = [s0]; pos = s0 + 1; ok = True
+        for m, _ in groups[1:]:
+            nxt = next((i for i in range(pos, min(n_file, pos + window)) if file_lines[i].rstrip() == m.rstrip()), None)
+            if nxt is None:
+                ok = False; break
+            idxs.append(nxt); pos = nxt + 1
+        if ok:
+            chains.append(idxs)
     if len(chains) != 1:
         if len(chains) > 1:
             notes.append(f"hunk {idx}: the '-' chain occurs {len(chains)}x in the file — not unique, kept as written")
         return None
     idxs = chains[0]
-    if shift:
-        groups = [[m, [(pl[shift:] if shift > 0 else " " * (-shift) + pl) for pl in plus]] for m, plus in groups]
     start = max(0, idxs[0] - 3); end = min(n_file, idxs[-1] + 1 + 3)
     plus_at = {i: g[1] for i, g in zip(idxs, groups)}
     out = []
@@ -203,10 +176,7 @@ def rebuild_from_minus(hunk, file_lines, notes, idx):
             out.append(" " + file_lines[i])
     old_count = sum(1 for o in out if o[0] in " -"); new_count = sum(1 for o in out if o[0] in " +")
     res = [f"@@ -{start + 1},{old_count} +{start + 1},{new_count} @@"] + out
-    if shift:
-        notes.append(f"hunk {idx}: reanchored on the '-' LINES at {idxs[0] + 1}..{idxs[-1] + 1} with INDENT SHIFT {-shift:+d} applied to the '+' lines (the model indented every line by {shift:+d}; context taken from the file)")
-    else:
-        notes.append(f"hunk {idx}: reanchored on the '-' LINES at {idxs[0] + 1}..{idxs[-1] + 1} (a replacement hunk whose leading context did not match the file — context taken from the file)")
+    notes.append(f"hunk {idx}: reanchored on the '-' LINES at {idxs[0] + 1}..{idxs[-1] + 1} (a replacement hunk whose leading context did not match the file — context taken from the file)")
     return res
 
 

@@ -29,7 +29,10 @@ git -C "$SRC" show "$TIP:Blockchain/Dev/scripts/check-shared-relink.sh" > "$W/ti
 sed -e '338s/if (L ~ \/node_modules|npm|npx|yarn|pnpm\/)/if (tolower(L) ~ \/node_modules|npm|npx|yarn|pnpm\/)/' \
     -e '342s/else if (L ~ /else if (tolower(L) ~ /' "$W/tip.sh" > "$W/golden.sh"
 [ "$(diff "$W/tip.sh" "$W/golden.sh" | grep -c '^[<>]')" = 4 ] || { echo "SETUP FAIL: golden is not a 2-line change"; exit 1; }
-cp "$RUN/out.md.checker/section_1.diff" "$W/real.diff"
+# the model's hunk comes from the IMMUTABLE out.md — the checker writes its REANCHORED result back over
+# section_1.diff at every run (the .as-written copy sits beside it), so that file is a mutated artefact
+awk '/^```diff/{f=1;next} /^```$/{f=0} f' "$RUN/out.md" | awk 'BEGIN{p=1} /^--- \/dev\/null/{p=0} p' > "$W/real.diff"
+grep -q '^--- a/Blockchain/Dev/scripts/check-shared-relink.sh' "$W/real.diff" && grep -q "reproduced, in the round" "$W/real.diff" || { echo "SETUP FAIL: real.diff is not the model's product section from out.md"; exit 1; }
 
 apply_check() { # $1 diff → prints the applied file at $2 (a fresh git repo in $W so `git apply` has a tree), rc of --check
   local d=$1 outf=$2 r; r=$(mktemp -d "$W/repo.XXXXXX")
@@ -106,6 +109,40 @@ open(sys.argv[1],"w",encoding="utf-8").write(body)
 PY
 python3 "$REAN" "$W/zero.diff" "$W/tip.sh" "$W/zero.rean.diff" > "$W/zero.rean.out" 2>&1
 if grep -q "occur 0x in the file; kept as written" "$W/zero.rean.out"; then ok "5 ZERO: a '-' line absent from the file is refused"; else bad "5 ZERO: $(cat "$W/zero.rean.out" | tr '\n' ' ' | cut -c1-160)"; fi
+
+# ARM 6 — INDENT-SHIFT (KS-884 r2, IMPROVEMENTS rows 110/111): the model indented every line of the hunk by +4 on
+# `.githooks/pre-push`; the '-' lines chain with indent ignored at ONE constant delta → shifted, applies, and the
+# applied hook's replaced lines carry the FILE's indent (4), never the model's (8)
+R884=$LM/runs/2026-09-16_ks884-ornith35b-night2
+git -C "$SRC" show "$TIP:.githooks/pre-push" > "$W/hook_tip.sh"
+awk '/^```diff/{f=1;next} /^```$/{f=0} f' "$R884/out.md" | awk 'BEGIN{p=1} /^--- \/dev\/null/{p=0} p' > "$W/hook.real.diff"
+python3 "$REAN" "$W/hook.real.diff" "$W/hook_tip.sh" "$W/hook.rean.diff" > "$W/hook.rean.out" 2>&1
+hr=$(mktemp -d "$W/hookrepo.XXXXXX"); mkdir -p "$hr/.githooks"; cp "$W/hook_tip.sh" "$hr/.githooks/pre-push"
+git -C "$hr" init -q && git -C "$hr" add -A && git -C "$hr" -c user.email=a@b -c user.name=arm commit -qm tip
+if grep -q "INDENT SHIFT -4" "$W/hook.rean.out" && git -C "$hr" apply --check "$W/hook.rean.diff" 2>"$W/hook.apply.err" && git -C "$hr" apply "$W/hook.rean.diff" 2>>"$W/hook.apply.err" \
+   && [ "$(grep -c "^        _refs='refs/heads/develop" "$hr/.githooks/pre-push")" = 0 ] && [ "$(grep -c "^    _refs='refs/heads/develop" "$hr/.githooks/pre-push")" = 1 ] \
+   && [ "$(grep -c "^    _refs='develop origin/develop" "$hr/.githooks/pre-push")" = 0 ]; then
+  ok "6 INDENT-SHIFT: KS-884 r2 shifted -4, applies, replaced lines at the file's indent (4 not 8)"
+else
+  bad "6 INDENT-SHIFT: $(cat "$W/hook.rean.out" | tr '\n' ' ' | cut -c1-200) apply.err=$(head -2 "$W/hook.apply.err" 2>/dev/null | tr '\n' ' ')"
+fi
+
+# ARM 7 — a NON-CONSTANT shift (one '-' line at +4, another at +8) → refused by name
+python3 - "$W/nonconst.diff" <<'PY2'
+import sys
+body="""--- a/.githooks/pre-push
++++ b/.githooks/pre-push
+@@ -159,4 +159,4 @@
+        # a leading context line that is NOT in the file
+-        _refs='develop origin/develop refs/remotes/origin/develop'
++        _refs='develop refs/heads/develop refs/remotes/origin/develop'
+-            if git rev-parse --verify --quiet develop >/dev/null 2>&1 &&
++            if git rev-parse --verify --quiet refs/heads/develop >/dev/null 2>&1 &&
+"""
+open(sys.argv[1],"w",encoding="utf-8").write(body)
+PY2
+python3 "$REAN" "$W/nonconst.diff" "$W/hook_tip.sh" "$W/nonconst.rean.diff" > "$W/nonconst.rean.out" 2>&1
+if grep -q "shift is not constant" "$W/nonconst.rean.out" && ! grep -q "INDENT SHIFT" "$W/nonconst.rean.out"; then ok "7 NONCONST: a non-constant indent shift is refused by name"; else bad "7 NONCONST: $(cat "$W/nonconst.rean.out" | tr '\n' ' ' | cut -c1-200)"; fi
 
 echo "reanchor_minuschain_arms: $PASS passed, $FAIL failed (work dir kept: $W)"
 [ "$FAIL" -eq 0 ] || exit 1
