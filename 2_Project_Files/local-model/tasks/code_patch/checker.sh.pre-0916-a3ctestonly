@@ -378,14 +378,7 @@ k=1; PH=""
 while [ "$k" -le "$N_SEC" ]; do
   pf="$(sed -n 1p "$REP/section_$k.opts" 2>/dev/null)"; pp="$(python3 -c 'import json,sys; print(json.load(open(sys.argv[1]))[int(sys.argv[2])-1]["path"])' "$REP/sections.json" "$k")"
   case "$pp" in *__tests__/*|*.test.ts)
-    # 2026-09-16 00:3x (KS-887 r1+retry — the first MODIFY-IN-PLACE test diff with NO new cell): a section that edits
-    # an EXISTING test file (`--- a/` header, not /dev/null) can legitimately add zero `it(` — it rewrites assertions
-    # inside a cell the tip already has. For those the stub property is "cells REMOVED, none added"; a new file's is
-    # "no cell at all". Before this the rule read every test section as a new file and refused a correct hunk twice.
-    # The predicate lives in a2b_placeholder.sh (armed by tests/a2b_arms.sh on real artefacts).
-    if [ -n "$pf" ]; then
-      why="$(bash "$(dirname "$0")/a2b_placeholder.sh" "$pf")" || PH="$PH $pp ($why)"
-    fi ;;
+    if [ -n "$pf" ] && [ "$(/usr/bin/grep -c -E "^\+\s*(it|test)\(" "$pf")" -eq 0 ]; then PH="$PH $pp ($(/usr/bin/grep -c '^+' "$pf") lines, 0 cells)"; fi ;;
   esac
   k=$((k+1))
 done
@@ -468,20 +461,10 @@ fi
 # row named the gap); KS-1133 A r1 then applied a hunk whose context lines were marked '+' and tsc caught it late.
 N_PLUS="$(python3 -c 'import json,sys; print(len(json.load(open(sys.argv[1])).get("defect_line",{}).get("expected_plus",[])))' "$INPUT" 2>/dev/null || echo 0)"
 if [ "${N_PLUS:-0}" -gt 0 ]; then
-  # 2026-09-16 00:3x (KS-887, the first TEST-ONLY brief with fenced '+' edits): in test-only mode the diff carries NO
-  # product section, so measuring the brief's '+' lines against $PRODUCT was a check with no subject — every line
-  # "absent", a false FAIL by construction. The section under test is the ONE file the diff touches: the test file
-  # in test-only mode, the product file otherwise; a3c_plus.py gets that path as argv[3] so A3d reads ITS tip.
-  if [ "$MODE" = test_only ]; then A3_TARGET="$TEST_FILE"; else A3_TARGET="$PRODUCT"; fi
   PROD_SEC="$(python3 -c 'import json,sys; sub=sys.argv[3]; want=sys.argv[2]
 for o in json.load(open(sys.argv[1])):
-    if o["path"]==want or sub+"/"+o["path"]==want: print(o["file"]); break' "$REP/sections.json" "$A3_TARGET" "$SUBDIR")"
-  if [ -z "$PROD_SEC" ] || [ ! -s "$PROD_SEC" ]; then
-    fail "A3c has NO SECTION to measure for $A3_TARGET (mode $MODE) — the diff's sections do not carry the file the brief's '+' lines belong to"
-    echo "RESULT: FAIL ($FAILS failed) — stopped at A3c (no section for the brief's additions)"
-    exit 1
-  fi
-  A3C_MISSING="$(python3 "$(dirname "$0")/a3c_plus.py" "$INPUT" "$PROD_SEC" "$A3_TARGET" 2>/dev/null)"; A3C_RC=$?
+    if o["path"]==want or sub+"/"+o["path"]==want: print(o["file"]); break' "$REP/sections.json" "$PRODUCT" "$SUBDIR")"
+  A3C_MISSING="$(python3 "$(dirname "$0")/a3c_plus.py" "$INPUT" "$PROD_SEC" 2>/dev/null)"; A3C_RC=$?
   if [ "$A3C_RC" -eq 0 ]; then
     pass "A3c every '+' line the brief adds is in the product hunk ($N_PLUS line(s)), and no tip line is re-added as a '+' (A3d)"
   elif [ "$A3C_RC" -eq 2 ]; then

@@ -58,10 +58,7 @@ if missing:
 # is NOT expected and whose stripped text equals a line of the TIP product file is a context line marked as an
 # addition. Refused by name (exit 2) so RETRY-ONCE can feed the lines back. Short lines (< 8 chars: braces, blanks)
 # are never flagged — a brace the brief did not spell out is a different, quieter defect.
-# 2026-09-16 00:3x TEST-ONLY twin: in test-only mode the file the diff touches is the TEST file, so the checker
-# passes ITS path as argv[3] and A3d compares against that file's tip (present in `files` when test_file= is
-# pinned; a NEW test file has no tip lines, so A3d is inert for it — correct). No argv[3] = the product file.
-_pf = sys.argv[3] if len(sys.argv) > 3 and sys.argv[3] else (d.get("product_file") or "")
+_pf = d.get("product_file") or ""
 _tip = set()
 for _p, _txt in (d.get("files") or {}).items():
     if _p == _pf or _p.endswith(_pf) or _pf.endswith(_p):
