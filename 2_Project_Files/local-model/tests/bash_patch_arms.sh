@@ -9,6 +9,7 @@
 #   5 the new test written over the REFERENCE suite's path          → REFUSED at B2 (a new-file hunk cannot apply over an existing path) or B3
 #   6 a 🔴 cell that reds by a LOAD error (a misspelt helper)        → FAIL B4 (load error, not a red)
 #   7 the :42 must_change line kept as context (its `-` dropped)      → FAIL B3b (a must_change site not changed)
+#   8 the REAL KS-865 r1 output (micro-hunks, off-by-three headers)     → PASS 7/7 via B2 REANCHORED
 # Usage: bash bash_patch_arms.sh <golden out.md> <input.json> <scratch clone dir>
 set -u
 LM=/Volumes/DevMASTER/WEDNESDAY/2_Project_Files/local-model
@@ -44,5 +45,8 @@ variant 6 't = t.replace("+run_case \"$d\"\n+check \"🔴 KS-865 — a listed in
 run_arm 6 "$W/arm6.md" '^FAIL B4 the test hit a LOAD error' "misspelt helper → B4 load error"
 variant 7 't = t.replace("-  [ -f \"$f\" ] || continue\n", "   [ -f \"$f\" ] || continue\n", 1).replace("@@ -28,18 +28,24 @@", "@@ -28,18 +28,25 @@")'
 run_arm 7 "$W/arm7.md" '^FAIL B3b must_change site' "must_change :42 kept as context → B3b"
+# 8 the REAL KS-865 r1 output (four micro-hunks, off-by-three headers; every -/+ line byte-exact) → PASS via B2 REANCHORED
+R8=$LM/runs/2026-09-16_ks865-ornith35b-night/out.md
+if [ -f "$R8" ]; then cp "$R8" "$W/arm8.md"; run_arm 8 "$W/arm8.md" '^PASS B2 .*REANCHORED' "real r1 micro-hunks → REANCHORED"; /usr/bin/grep -q '^RESULT: PASS (7/7)' "$W/arm8.md.checker.out" && echo "ARM8b PASS (the real r1 output PASSES 7/7)" || { echo "ARM8b FAIL"; fail=1; }; else echo "ARM8 SKIP (run artefact absent)"; fi
 echo "work dir kept (never deleted): $W"
 exit $fail

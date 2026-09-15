@@ -75,15 +75,7 @@ APPLY_OPTS=""; B2_NOTE=""
 for sf in "$REP"/section_*.diff; do
   if git -C "$CLONE" apply --check -p1 "$sf" > "$sf.check.out" 2>&1; then :
   elif git -C "$CLONE" apply --check -p1 --recount --ignore-whitespace "$sf" > "$sf.check_lenient.out" 2>&1; then APPLY_OPTS="--recount --ignore-whitespace"; B2_NOTE="$B2_NOTE $(basename "$sf"): --recount --ignore-whitespace needed;"
-  else
-    # third mode (as code_patch A2 / doc D2): hunks REBUILT from the model's -/+ lines at the file's real location —
-    # KS-865 r1 (00:44): four `@@ -N,1 +N,1 @@` micro-hunks, line numbers off by three, a trailing blank context line
-    # on each; every -/+ line byte-exact. Only a section that EDITS an existing file can be re-anchored.
-    spath="$(python3 -c 'import json,sys; [print(o["path"]) for o in json.load(open(sys.argv[1])) if o["file"]==sys.argv[2]]' "$REP/sections.json" "$sf" | head -1)"
-    if /usr/bin/grep -q -E '^--- (a/|"a/)' "$sf" && [ -f "$CLONE/$spath" ] && python3 "$CODE_DIR/reanchor.py" "$sf" "$CLONE/$spath" "$sf.reanchored" > "$sf.reanchor.out" 2>&1 && git -C "$CLONE" apply --check -p1 "$sf.reanchored" > "$sf.check_rean.out" 2>&1; then
-      cp "$sf" "$sf.as-written"; cp "$sf.reanchored" "$sf"; B2_NOTE="$B2_NOTE $(basename "$sf"): REANCHORED ($(tr '\n' ';' < "$sf.reanchor.out" | cut -c1-160));"
-    else fail "B2 $(basename "$sf") does NOT apply at the tip: strict: $(head -2 "$sf.check.out" | tr '\n' ' ') | reanchored: $(head -2 "$sf.reanchor.out" 2>/dev/null | tr '\n' ' ') $(head -1 "$sf.check_rean.out" 2>/dev/null)"; echo "RESULT: FAIL ($FAILS failed) — stopped at B2"; exit 1; fi
-  fi
+  else fail "B2 $(basename "$sf") does NOT apply at the tip: $(head -3 "$sf.check.out" | tr '\n' ' ')"; echo "RESULT: FAIL ($FAILS failed) — stopped at B2"; exit 1; fi
 done
 if [ -z "$APPLY_OPTS" ]; then pass "B2 every section applies at the tip (strict)"; else pass "B2 every section applies at the tip — with an accommodation:$B2_NOTE (miscounted hunk headers)"; fi
 # B3
