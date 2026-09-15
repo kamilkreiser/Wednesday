@@ -10,12 +10,12 @@ for a PATH parameter (`request: { params: z.object({ id: z.string() }) }` at lin
 `request: { query: z.object({ organizationId: z.string().uuid() }) }`. `z` is already imported from `@secuura/shared` (line 37).
 The handler does not change.
 
-## The exact change — ONE edit: INSERT one line after line 809 (an insert-only hunk; line 809 stays as context)
-Context: line 808 is `    'to verify a specific key.',`, line 809 is `  security: [{ bearerAuth: [] }],`, line 810 is `  responses: {`.
+## The exact change — ONE edit, a `-`/`+` pair (re-emit line 809 unchanged and add ONE line after it)
+Context: line 808 is `    'to verify a specific key.',` and line 810 is `  responses: {`.
 ```
-   security: [{ bearerAuth: [] }],
+-  security: [{ bearerAuth: [] }],
++  security: [{ bearerAuth: [] }],
 +  request: { query: z.object({ organizationId: z.string().uuid() }) },
-   responses: {
 ```
 Nothing else changes: the POST registration at 773–799, the DELETE at 826–835, the `responses` block at 810–823 all stay
 byte-identical. Only the GET `/api/security/keys` registration (801–824) gains the `request:` line.
@@ -43,7 +43,7 @@ Cells (exactly three):
   — green on both trees (registered at line 832 and untouched).
 
 ## Where (parsed into the checklist — every **must change** line must appear as a `-` line in your diff)
-* `:809` — (correct) `  security: [{ bearerAuth: [] }],` — the ANCHOR: the new `request:` line is inserted immediately after it (no line is removed — amended 16:45: the v1 brief demanded a `-` line for an insert and refused two correct samples)
+* `:809` — **must change**: `  security: [{ bearerAuth: [] }],` (re-emitted identically; the new `request:` line follows it — the `-`/`+` pair is the shape)
 * `:781` — (correct) `  security: [{ bearerAuth: [] }],` — the POST registration's line; stays (do NOT touch this one — it is 20 lines ABOVE the target, under `summary: 'Issue an API key'`)
 * `:832` — (correct) `  request: { params: z.object({ id: z.string() }) },` — the DELETE's path param; stays
 

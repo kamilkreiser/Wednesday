@@ -33,7 +33,7 @@ Cells (every cell 🔴 or CONTROL, nothing optional):
 
 ## Where (parsed into the checklist — every **must change** line must appear as a \`-\` line in your diff)
 * \`:<n>\` — **must change**: \`<exact line>\`
-* \`:<m>\` — (correct) \`<exact line>\` — stays
+* \`:<m>\` — (correct) \`<exact line>\` — stays   (an INSERT-ONLY edit names its anchor here as (correct) and has NO must-change line — A3b cannot see an insertion; 2026-09-15 KS-747)
 
 ## Tamper (TEST-ONLY mode only — delete this section for a product fix)
 line: <n>
