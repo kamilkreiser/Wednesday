@@ -24,15 +24,6 @@ python3 - "$OUT" "$REP/patch.diff" <<'PY' || { echo "RESULT: FAIL (1 failed) —
 import re,sys
 t=open(sys.argv[1],encoding="utf-8").read()
 blocks=re.findall(r"```diff\n(.*?)\n```", t, re.S)
-# 2026-09-15 22:1x (KS-871 05:56, KS-1097 C r2 21:27 — twice today): a repetition loop (a <=6-line cycle repeated to the
-# token budget) leaves NO closed fence, so D1 read "found 0" and the reader had to open the output to see why. Name it.
-tail0=[l for l in t.split("\n") if l.strip()][-41:]
-for tail in (tail0, tail0[:-1]):          # the last line is often the TRUNCATED one (the token cut mid-line)
-    if len(tail)>=12:
-        for k in (1,2,3,4,5,6):
-            cyc=tail[-k:]; n=min(len(tail),8*k)
-            if all(tail[-(i+1)]==cyc[-(i%k+1)] for i in range(n)):
-                print(f"FAIL D1 REPETITION LOOP: the output's last {n} non-blank lines repeat a {k}-line cycle starting {cyc[0][:60]!r} — a sampler loop, not a diff (done_reason length)"); sys.exit(1)
 if len(blocks)!=1: print(f"FAIL D1 expected exactly one ```diff block, found {len(blocks)}"); sys.exit(1)
 open(sys.argv[2],"w",encoding="utf-8").write(blocks[0].rstrip("\n")+"\n"); print("PASS D1 output is exactly one fenced ```diff block")
 PY
