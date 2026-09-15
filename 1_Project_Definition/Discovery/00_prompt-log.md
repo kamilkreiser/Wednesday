@@ -2507,3 +2507,8 @@ Done with it: Dynamics → Kam's team decision (no action); QuickQuote masthead/
 > dont add auth ones or anything too complex. start with simple and correct / improve the model as you go. By the end of this process, hopefully the model will have better instructions, skills, rules, etc. and the instructions / limitations will be more obvious. you can then decide if the model is able to handle more complex ones
 
 *Note:* Refines the 16:36 grant: simple tickets only, auth OUT for the week, complexity earned via the IMPROVEMENTS record. Receipted 16:41.
+
+## 2026-09-15 18:20 — Kam (dashboard chat, verbatim)
+> extend the checker. dont let it go idle. action all backlog and to do from easy to hard. you act as a gate keeper. check, fix and lineup everything that passes. reject what does not. Next week I will be away and would love to give you an instruction at the start of the week and know progress continues through the week and does not stop. especially after just over an hour
+
+*Note:* Correction + standing order: never idle, whole backlog easy→hard, gatekeeper role, next-week autonomy. Lesson filed (W); ledger w=2; checker extension started.

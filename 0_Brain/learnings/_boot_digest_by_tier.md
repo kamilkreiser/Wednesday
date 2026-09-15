@@ -7,7 +7,7 @@ status: live
 
 # Boot digest BY TIER — W whole, M rules-only, every project case a handle
 
-Generated 2026-09-15 16:40 from 169 lesson files (853,426 B). M 33 · MIXED 5 · W 131. 28 project CASE sections inside MIXED files are reduced to one line each: the heading and the path to read it at. W blocks are exactly what the default digest carries; M blocks drop the section index and keep the rules; a P file is a single handle. The CASES behind every rule live only in the lesson files — open one the moment its rule fires.
+Generated 2026-09-15 18:20 from 170 lesson files (857,738 B). M 33 · MIXED 5 · W 132. 28 project CASE sections inside MIXED files are reduced to one line each: the heading and the path to read it at. W blocks are exactly what the default digest carries; M blocks drop the section index and keep the rules; a P file is a single handle. The CASES behind every rule live only in the lesson files — open one the moment its rule fires.
 
 ## The T9 SSD is the master — Wednesday must be fully portable
 `2026-07-31_fully-portable-drive.md` · principle · 2026-07-31 · status: superseded — the "T9 is the master" half by [[2026-08-25_one-drive-devmaster-is-master]] (2026-08-25); the portability principle itself still lives · tier: W
@@ -5740,6 +5740,21 @@ the verb: "going forward" — and here he also named today's set explicitly).
 5. **Enforcement candidate (w=3 promotes it):** `wednesday_rotate.sh --self` and the 23:00 close bell both list the fleet panes and refuse/alarm on any non-coordinator pane whose seat has a wrap mail in the inbox — the census in the path, not in memory.
 
 **Family:** [[2026-08-07_a-promise-is-not-a-mechanism]] · [[2026-08-09_an-enforcement-you-must-arm-is-not-one]] (a wake you must receive is not an enforcement) · [[2026-09-14_the-coordinator-adds-value-or-it-is-waste-three-duties-not-watching]] (duty 1: the instruction was Ornith at night — it was not carried out) · [[2026-09-03_a-pane-close-is-a-session-kill]] (the close's own discipline) · [[2026-09-14_ornith-runs-at-night-in-the-downtime-a-standing-rule]] (the mechanism this protects).
+
+
+## Never let the local model idle — when the pool runs dry the GATEKEEPER widens the harness, never stops; the whole Backlog/Todo is the queue, easy to hard, and next week that loop must run from a Monday instruction without Kam
+`2026-09-15_never-idle-the-gatekeeper-widens-the-harness-when-the-pool-runs-dry.md` · correction · 2026-09-15 · status: live · tier: W
+
+**His words, verbatim (2026-09-15 18:19:13):**
+> *"extend the checker. dont let it go idle. action all backlog and to do from easy to hard. you act as a gate keeper. check, fix and lineup everything that passes. reject what does not. Next week I will be away and would love to give you an instruction at the start of the week and know progress continues through the week and does not stop. especially after just over an hour"*
+
+**How to apply (from 18:19, standing):**
+1. **The queue is the WHOLE KS Backlog/Todo, ordered easy → hard.** Easy = one-file service patches and TEST-ONLY pins (done first today); then tooling/systemTest TS with their own runners; then jest services (originate, governance); then multi-file; **auth/MFA/OAuth LAST**, taken only once the model's record on the easier tiers earns them (his 16:40 stands as the ORDER, not as a permanent exclusion — his 18:19 "all backlog" widens the destination, not the sequence). State the tier in each brief header.
+2. **Gatekeeper = check · fix · line up · reject.** Every output through the checker; every FAIL classified (model / harness / brief) and fixed where it lives with an IMPROVEMENTS row (the 09:28 rule); a PASS is source-read and lined up as a READY for the Sunday seat; a genuine model reject is recorded with its reason and the ticket goes back in the queue for a later tier or a Claude seat.
+3. **Never idle:** when nothing is queued, the next action is a harness extension or a brief, never a stand-down. A seat may END ITS TURN (no polling) only with the model RUNNING or a batch queued; "nothing running, nothing queued, seat waiting" is the 18:19 shape.
+4. **Next week's autonomy (design, owed to the 09-16 morning seat):** an instruction at the start of the week must run all week — that needs (a) the coordinator seat continuously alive (the allowance renews Sat; rotation self-healing per 09-13 rules), (b) a candidate DERIVATION mechanism (board → tiered queue file) so briefs are the only human-shaped step, (c) Wednesday-written briefs batched ahead (a day's worth queued each morning), (d) the loop job pulling `queue.md` 24/7 (exists), (e) a daily receipt to Kam's panel he can read from anywhere. Build it Tuesday/Wednesday; pilot it before he leaves.
+
+**Family:** [[2026-09-14_the-coordinator-adds-value-or-it-is-waste-three-duties-not-watching]] (duty 3 — commission what makes the output first rate; here: extend the instrument) · [[2026-09-15_ornith-q4-only-volume-week-qa-sunday-merge-once]] (the week's shape this sharpens) · [[2026-09-15_ornith-every-issue-gets-a-tooling-or-instruction-fix]] · [[2026-08-12_hpsm-continuous-readiness-grant]] (the diminishing-returns duty that was mis-applied) · [[2026-08-07_a-promise-is-not-a-mechanism]] (next week's loop is a mechanism or it is a hope).
 
 
 ## Every Ornith issue gets a TOOLING or INSTRUCTION fix, the same session — and Wednesday writes the model's task from the ticket, the ticket is never the prompt
