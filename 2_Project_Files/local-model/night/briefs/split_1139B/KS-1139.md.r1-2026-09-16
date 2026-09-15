@@ -1,0 +1,37 @@
+# KS-1139 — Wednesday's task for Ornith, PART B of two — BASH_PATCH (`validate-lint.sh`, the two errexit-live sites; written 00:53 on 2026-09-16 from the file at develop M55 `48e65c435` — `systemTest/schemathesis/validate-lint.sh` (75 lines) lines 1–45 read; the census regex at the tip: exactly 2 hits at :33 :38; the reference suite `Blockchain/Dev/scripts/__tests__/docker_build_empty_table.test.sh` lines 33–53 and 151–178 (CELL 4) read)
+
+## What is wrong (one paragraph)
+`systemTest/schemathesis/validate-lint.sh` runs under `set -e` (:6) and its `run_check()` counts with a bare arithmetic command —
+`((PASS_COUNT++))` at :33 and `((FAIL_COUNT++))` at :38, each in the BODY of an `if`/`else` (not the condition), so errexit applies:
+the FIRST increment of each counter (at 0) exits 1 and bash ≥ 4.1 `set -e` exits the script on it, silently; bash 3.2 (macOS) does
+not, so the script passes here. **This task: the two sites become the assignment form `X=$((X + 1))` (exit status 0 at every value,
+identical effect — the shape Part A used in `sync-secrets.sh` and #977 in `docker-build.sh`), plus one new shell suite pinning the
+construct's ABSENCE with the census regex and its positive control (the reference's CELL 4 shape).** NOT in this task: any other line
+of the script, Part A's file, `check-script-portability.sh`.
+
+## The exact change — TWO ONE-LINE REPLACEMENTS in `systemTest/schemathesis/validate-lint.sh` (the indent is eight spaces at both sites)
+E1 — line 33 (context: line 32 is `        echo -e "${GREEN}✓ PASS${NC}"`, line 34 is `    else`):
+```
+-        ((PASS_COUNT++))
++        PASS_COUNT=$((PASS_COUNT + 1))
+```
+E2 — line 38 (context: line 37 is `        eval "$cmd"`, line 39 is `    fi`):
+```
+-        ((FAIL_COUNT++))
++        FAIL_COUNT=$((FAIL_COUNT + 1))
+```
+Both `+` lines are byte-exact — copy them with their eight-space indent; do not touch any other line; do not add a trailing comment.
+
+## The test — ONE NEW shell suite, bash 3.2, beside the reference (the suite lives under `Blockchain/Dev/scripts/__tests__/` and READS the subject at `$REPO_ROOT/systemTest/schemathesis/validate-lint.sh`)
+File: `Blockchain/Dev/scripts/__tests__/validate_lint_errexit.test.sh`
+Copy the SHAPE of `scripts/__tests__/docker_build_empty_table.test.sh`: `#!/usr/bin/env bash`, a header comment naming KS-1139 Part B, `set -uo pipefail`, `TOTAL_CELLS=3`, `HERE`/`REPO_ROOT` resolved from `${BASH_SOURCE[0]}` exactly as the reference does (`REPO_ROOT="$(cd "$HERE/../../../.." && pwd)"`), the subject `SUBJ="${VALIDATE_LINT_SH-$REPO_ROOT/systemTest/schemathesis/validate-lint.sh}"` with the same set-but-empty refusal and the `[ -f "$SUBJ" ]` / `[ -r "$SUBJ" ]` FATAL lines, `pass=0; fail=0`, the `ok()` / `bad()` printers VERBATIM (`  ok   %s` / `  FAIL %s\n     %s`), and the reference's LAST SEVEN LINES verbatim (the `passed, failed (of N cells)` summary, the INCOMPLETE check, `[ "$fail" -eq 0 ] || exit 1`, `exit 0`). No temp dir is needed. Every line of the new file begins with `+` in your diff — comment lines included. Cells:
+- 🔴 CELL 1 — copy the reference's CELL 4 VERBATIM (`ARITH_RE=…`, the `arith_control` here-string, `arith_hits` over `$SUBJ`, the three-way if) with the ok/bad texts saying "validate-lint.sh has NO bare arithmetic-command post-increment/decrement". (Untouched script: 2 hits → `bad` — the red.)
+- 🔴 CELL 2 — the counters are assignments: `asg_count="$(grep -cE '^[[:space:]]*(PASS_COUNT|FAIL_COUNT)=[$][(][(](PASS_COUNT|FAIL_COUNT) [+] 1[)][)][[:space:]]*$' "$SUBJ" || true)"` (bracket expressions on purpose — no backslashes); `ok` when `$asg_count` equals 2 ("both counters advance by assignment"), else `bad` with the count. (Untouched script: 0 — the red.)
+- CONTROL CELL 3 — `bash -n "$SUBJ"` exits 0 → `ok "validate-lint.sh parses (bash -n)"`, else `bad`. Green on both trees.
+
+## Where (parsed into the checklist — every **must change** line must appear as a `-` line in your diff)
+* `:33` — **must change**: `        ((PASS_COUNT++))`
+* `:38` — **must change**: `        ((FAIL_COUNT++))`
+
+## Output
+Exactly ONE ```diff block with TWO files: `--- a/systemTest/schemathesis/validate-lint.sh` / `+++ b/systemTest/schemathesis/validate-lint.sh` (one hunk covering :30–:41, correct counts), then `--- /dev/null` / `+++ b/Blockchain/Dev/scripts/__tests__/validate_lint_errexit.test.sh`; paths repo-relative; blank context lines keep their leading space.

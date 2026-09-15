@@ -78,22 +78,37 @@ for sf in "$REP"/section_*.diff; do
     n_fixed="$(python3 - "$sf" <<'PYN'
 import sys,re
 p=sys.argv[1]; L=open(p,encoding="utf-8").read().split("\n")
-out=[]; fixed=0; inhunk=False; body=0
+out=[]; fixed=0; inhunk=False; body=0; synth=0
+# a new-file section with NO hunk header at all (the KS-1073 headerless dialect, met again on KS-1139 B): a new
+# file has exactly one hunk and it starts at line 1 — synthesise `@@ -0,0 +1,N @@` after the `+++` line.
+if not any(l.startswith("@@ ") for l in L):
+    L2=[]
+    for ln in L:
+        L2.append(ln)
+        if ln.startswith("+++ "): L2.append("@@ -0,0 +1,0 @@"); synth=1
+    L=L2
 for ln in L:
     if ln.startswith("@@ "): inhunk=True; out.append(ln); continue
     if not inhunk or ln.startswith(("---","+++")): out.append(ln); continue
     if ln=="" : out.append(ln); continue
     if ln.startswith("+") or ln.startswith("\\"): out.append(ln); body+=1; continue
+    # KS-1139 B r1 (00:5x): the model diffed "reference -> new test" — reference lines it kept came as CONTEXT
+    # (a leading space), lines it dropped as '-'. A new file has no old side: a context line IS content to add
+    # (strip the marker), a '-' line is not in the file (drop it). Both counted and named in the verdict.
+    if ln.startswith(" "): out.append("+"+ln[1:]); fixed+=1; body+=1; continue
+    if ln.startswith("-"): dropped=globals().get("dropped",0)+1; globals()["dropped"]=dropped; continue
     out.append("+"+ln); fixed+=1; body+=1
-if fixed:
-    open(p+".as-written","w",encoding="utf-8").write("\n".join(L))
+if fixed or synth:
+    open(p+".as-written","w",encoding="utf-8").write(open(p,encoding="utf-8").read())
     txt="\n".join(out)
     txt=re.sub(r"@@ -0,0 \+1(,\d+)? @@", f"@@ -0,0 +1,{body} @@", txt, count=1)
     open(p,"w",encoding="utf-8").write(txt)
-print(fixed)
+print(fixed + (100 if synth else 0) + 10000*globals().get("dropped",0))
 PYN
 )"
-    [ "${n_fixed:-0}" -gt 0 ] && NF_NOTE="$NF_NOTE $(basename "$sf"): $n_fixed line(s) restored to '+' in the new-file hunk (a dropped marker);"
+    n_drop=$(( ${n_fixed:-0} / 10000 )); n_rest=$(( ${n_fixed:-0} % 10000 ))
+    if [ "$n_rest" -ge 100 ]; then NF_NOTE="$NF_NOTE $(basename "$sf"): hunk header SYNTHESISED (a headerless new file; $((n_rest-100)) context/bare line(s) restored to '+'; $n_drop '-' line(s) dropped — no old side in a new file);"
+    elif [ "$n_rest" -gt 0 ] || [ "$n_drop" -gt 0 ]; then NF_NOTE="$NF_NOTE $(basename "$sf"): $n_rest line(s) restored to '+' in the new-file hunk, $n_drop '-' line(s) dropped;"; fi
   fi
 done
 [ -n "$NF_NOTE" ] && echo "B2 new-file normalisation (an accommodation the verdict names):$NF_NOTE"
