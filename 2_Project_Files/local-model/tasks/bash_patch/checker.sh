@@ -1,0 +1,152 @@
+#!/bin/bash
+# checker.sh <input.json> <out.md> <clone-dir> — bash_patch (2026-09-16 00:4x; Kam 2026-09-15 18:19 "extend the checker")
+#   B0 the SUBJECT exists (clone at the tip, script + reference suite present)
+#   B1 output is exactly one ```diff block (sampler-loop detector as D1/A1)
+#   B2 the diff applies at the tip (strict; --recount --ignore-whitespace named as an accommodation)
+#   B3 touched-file set == { product_file, ONE NEW *.test.sh at suggested_test_file } — never the reference, never a third file
+#   B3b every must_change site is a '-' line of the script hunk; every brief '+' line is added (a3c_plus.py, A3c/A3d)
+#   B4 RED-FIRST: the test ALONE at the tip parses (bash -n), RUNS, exits non-zero with >= 1 `FAIL:` line and NO load error
+#   B5 GREEN-AFTER: the script hunk applied, `bash -n` on the script passes, the same test exits 0 with 0 `FAIL:` and >= 1 pass
+#   B6 sibling suites that drive this script (any *.test.sh in test_dir naming its basename) show no NEW failure after
+#   B7 shellcheck on the script after, when installed — INFORMATIONAL, never gated
+# Every write verb runs inside <clone-dir>; the source checkout is never touched. Untracked files a previous run left in the
+# clone are QUARANTINED, never deleted. bash 3.2. Tests run with a 120 s budget through python (macOS has no `timeout`).
+set -uo pipefail
+INPUT="${1:-}"; OUT="${2:-}"; CLONE="${3:-}"
+[ -f "$INPUT" ] && [ -f "$OUT" ] && [ -d "$CLONE/.git" ] || { echo "usage: checker.sh <input.json> <out.md> <clone-dir>" >&2; exit 1; }
+REP="$OUT.checker"; mkdir -p "$REP"
+field() { python3 -c 'import json,sys; print(json.load(open(sys.argv[1]))[sys.argv[2]])' "$INPUT" "$1"; }
+PRODUCT="$(field product_file)"; REF_TEST="$(field reference_test_file)"; TEST_FILE="$(field suggested_test_file)"; TEST_DIR="$(field test_dir)"
+TIP="$(python3 -c 'import json,sys; d=json.load(open(sys.argv[1])); print(d.get("tip") or d.get("repo",{}).get("tip",""))' "$INPUT")"
+FAILS=0; pass(){ echo "PASS $*"; }; fail(){ echo "FAIL $*"; FAILS=$((FAILS+1)); }
+CODE_DIR="$(cd "$(dirname "$0")/../code_patch" && pwd)"
+# B0
+HEADC="$(git -C "$CLONE" rev-parse HEAD 2>/dev/null)"
+if [ -z "$TIP" ] || [ "$HEADC" != "$TIP" ] || [ ! -f "$CLONE/$PRODUCT" ] || [ ! -f "$CLONE/$REF_TEST" ]; then
+  echo "FAIL B0 subject: clone HEAD=${HEADC:-none} input tip=${TIP:-none} script=$([ -f "$CLONE/$PRODUCT" ] && echo yes || echo no) ref=$([ -f "$CLONE/$REF_TEST" ] && echo yes || echo no)"; echo "RESULT: FAIL (1 failed) — stopped at B0 (the harness, not the model)"; exit 1
+fi
+pass "B0 subject: clone at $TIP, $PRODUCT and $REF_TEST present"
+# quarantine + reset (never delete)
+Q="$CLONE/../quarantine/$(date +%Y%m%d-%H%M%S)_bash"
+git -C "$CLONE" status --porcelain --untracked-files=all -- "$(dirname "$PRODUCT")" "$TEST_DIR" > "$REP/pre_status.out" 2>&1
+while IFS= read -r line; do [ -z "$line" ] && continue; st="${line:0:2}"; p="${line:3}"
+  case "$st" in "??") mkdir -p "$Q/$(dirname "$p")"; mv "$CLONE/$p" "$Q/$p"; echo "quarantined untracked $p -> $Q" ;; esac
+done < "$REP/pre_status.out"
+git -C "$CLONE" checkout -q -- "$(dirname "$PRODUCT")" "$TEST_DIR" 2>/dev/null
+# B1
+python3 - "$OUT" "$REP/patch.diff" <<'PY' || { echo "RESULT: FAIL (1 failed) — stopped at B1"; exit 1; }
+import re,sys
+t=open(sys.argv[1],encoding="utf-8").read()
+blocks=re.findall(r"```diff[^\n]*\n(.*?)```", t, re.S)
+tail0=[l for l in t.split("\n") if l.strip()][-41:]
+for tail in (tail0, tail0[:-1]):
+    if len(tail)>=12:
+        for k in (1,2,3,4,5,6):
+            cyc=tail[-k:]; n=min(len(tail),8*k)
+            if all(tail[-(i+1)]==cyc[-(i%k+1)] for i in range(n)):
+                print(f"FAIL B1 REPETITION LOOP: the output's last {n} non-blank lines repeat a {k}-line cycle starting {cyc[0][:60]!r} — a sampler loop, not a diff"); sys.exit(1)
+if len(blocks)!=1: print(f"FAIL B1 expected exactly one ```diff block, found {len(blocks)}"); sys.exit(1)
+open(sys.argv[2],"w",encoding="utf-8").write(blocks[0].rstrip("\n")+"\n"); print("PASS B1 output is exactly one fenced ```diff block")
+PY
+# sections (one file per `--- ` header)
+python3 - "$REP/patch.diff" "$REP" <<'PY'
+import sys,json,re
+d=open(sys.argv[1],encoding="utf-8").read().split("\n"); rep=sys.argv[2]
+secs=[]; cur=None
+for ln in d:
+    if ln.startswith("--- ") and (cur is None or cur["closed"]):
+        cur={"lines":[ln],"closed":False,"path":None}; secs.append(cur); continue
+    if ln.startswith("--- ") and cur is not None and not cur["closed"] and cur["path"] is not None:
+        cur["closed"]=True; cur={"lines":[ln],"closed":False,"path":None}; secs.append(cur); continue
+    if cur is None: cur={"lines":[],"closed":False,"path":None}; secs.append(cur)
+    cur["lines"].append(ln)
+    if ln.startswith("+++ ") and cur["path"] is None:
+        cur["path"]=re.sub(r"^\+\+\+ (b/)?","",ln).strip()
+out=[]
+for i,s in enumerate(secs,1):
+    p=f"{rep}/section_{i}.diff"; open(p,"w",encoding="utf-8").write("\n".join(s["lines"]).rstrip("\n")+"\n"); out.append({"path":s["path"],"file":p})
+json.dump(out,open(f"{rep}/sections.json","w"))
+print("sections:",[o["path"] for o in out])
+PY
+# B2 — PER SECTION (2026-09-16 00:5x, the golden arm: `git apply --recount` on the WHOLE patch mis-parses when the
+# new-file hunk's header count is wrong and then reports the PREVIOUS file's hunk as "patch failed" — each section
+# alone applies. code_patch applies per section for the same reason.)
+APPLY_OPTS=""; B2_NOTE=""
+for sf in "$REP"/section_*.diff; do
+  if git -C "$CLONE" apply --check -p1 "$sf" > "$sf.check.out" 2>&1; then :
+  elif git -C "$CLONE" apply --check -p1 --recount --ignore-whitespace "$sf" > "$sf.check_lenient.out" 2>&1; then APPLY_OPTS="--recount --ignore-whitespace"; B2_NOTE="$B2_NOTE $(basename "$sf"): --recount --ignore-whitespace needed;"
+  else fail "B2 $(basename "$sf") does NOT apply at the tip: $(head -3 "$sf.check.out" | tr '\n' ' ')"; echo "RESULT: FAIL ($FAILS failed) — stopped at B2"; exit 1; fi
+done
+if [ -z "$APPLY_OPTS" ]; then pass "B2 every section applies at the tip (strict)"; else pass "B2 every section applies at the tip — with an accommodation:$B2_NOTE (miscounted hunk headers)"; fi
+# B3
+TOUCHED="$(for sf in "$REP"/section_*.diff; do git -C "$CLONE" apply --numstat -p1 $APPLY_OPTS "$sf" 2>/dev/null | awk '{print $3}'; done | sort -u)"
+N_TOUCHED="$(printf '%s\n' "$TOUCHED" | /usr/bin/grep -c .)"
+HAS_PRODUCT="$(printf '%s\n' "$TOUCHED" | /usr/bin/grep -c -x -F "$PRODUCT")"; HAS_TEST="$(printf '%s\n' "$TOUCHED" | /usr/bin/grep -c -x -F "$TEST_FILE")"
+if [ "$N_TOUCHED" -eq 2 ] && [ "$HAS_PRODUCT" -eq 1 ] && [ "$HAS_TEST" -eq 1 ] && [ "$TEST_FILE" != "$REF_TEST" ] && [ ! -f "$CLONE/$TEST_FILE" ]; then pass "B3 touched-file set == { $PRODUCT , $TEST_FILE (new) }"
+else fail "B3 touched-file set is not {script, ONE new test at $TEST_FILE}: n=$N_TOUCHED product=$HAS_PRODUCT test=$HAS_TEST exists_at_tip=$([ -f "$CLONE/$TEST_FILE" ] && echo yes || echo no) — touched: $(printf '%s' "$TOUCHED" | tr '\n' ' ')"; echo "RESULT: FAIL ($FAILS failed) — stopped at B3"; exit 1; fi
+PROD_SEC="$(python3 -c 'import json,sys; [print(o["file"]) for o in json.load(open(sys.argv[1])) if o["path"]==sys.argv[2]]' "$REP/sections.json" "$PRODUCT" | head -1)"
+TEST_SEC="$(python3 -c 'import json,sys; [print(o["file"]) for o in json.load(open(sys.argv[1])) if o["path"]==sys.argv[2]]' "$REP/sections.json" "$TEST_FILE" | head -1)"
+[ -s "$PROD_SEC" ] && [ -s "$TEST_SEC" ] || { fail "B3 sections: could not split the diff into script + test sections"; echo "RESULT: FAIL ($FAILS failed) — stopped at B3"; exit 1; }
+# B3b must_change sites as '-' lines; expected '+' lines present (A3c) and no tip line re-added (A3d)
+MISSING_SITES="$(python3 - "$INPUT" "$PROD_SEC" <<'PY'
+import json,sys
+d=json.load(open(sys.argv[1])); sec=open(sys.argv[2],encoding="utf-8").read().split("\n")
+minus={l[1:].strip() for l in sec if l.startswith("-") and not l.startswith("---")}
+for s in (d.get("defect_line") or {}).get("sites",[]):
+    if s.get("must_change") and (s.get("text_at_tip") or "").strip() not in minus: print(f":{s['line']} {s['text_at_tip'].strip()[:80]}")
+PY
+)"
+if [ -n "$MISSING_SITES" ]; then fail "B3b must_change site(s) NOT changed by the script hunk: $(printf '%s' "$MISSING_SITES" | tr '\n' '·')"; echo "RESULT: FAIL ($FAILS failed) — stopped at B3b"; exit 1; fi
+A3C_MISSING="$(python3 "$CODE_DIR/a3c_plus.py" "$INPUT" "$PROD_SEC" "$PRODUCT" 2>/dev/null)"; A3C_RC=$?
+if [ "$A3C_RC" -eq 0 ]; then pass "B3b every must_change site is a '-' line; every brief '+' line is in the script hunk; no tip line re-added as '+'"
+elif [ "$A3C_RC" -eq 2 ]; then fail "B3b CONTEXT MARKED AS ADDITION (A3d): $(printf '%s' "$A3C_MISSING" | sed 's/^A3D //' | head -3 | cut -c1-90 | tr '\n' '·')"; echo "RESULT: FAIL ($FAILS failed) — stopped at B3b (a context line marked '+')"; exit 1
+else fail "B3b INCOMPLETE (A3c): brief '+' line(s) ABSENT from the script hunk: $(printf '%s' "$A3C_MISSING" | head -3 | cut -c1-90 | tr '\n' '·')"; echo "RESULT: FAIL ($FAILS failed) — stopped at B3b (a dropped addition)"; exit 1; fi
+# run helper: bash <file> from the clone root with a 120 s budget; prints rc, PASS/FAIL line counts, load-error flag
+run_suite() {  # $1 = repo-relative test path, $2 = report prefix
+  python3 - "$CLONE" "$1" "$REP/$2" <<'PY'
+import subprocess,sys,re
+clone,test,prefix=sys.argv[1:4]
+try:
+    r=subprocess.run(["bash",test],cwd=clone,capture_output=True,text=True,timeout=120); rc=r.returncode; out=r.stdout+"\n"+r.stderr; to=False
+except subprocess.TimeoutExpired as e:
+    rc=124; out=(e.stdout or "")+"\n"+(e.stderr or ""); to=True
+open(prefix+".out","w",encoding="utf-8").write(out)
+nf=len(re.findall(r"^\s*FAIL[: ]",out,re.M)); npass=len(re.findall(r"^\s*(PASS|ok)[: ]",out,re.M))
+load=bool(re.search(r"(syntax error|command not found|unbound variable|No such file or directory: .*\.test\.sh)",out))
+print(f"rc={rc} fail_lines={nf} pass_lines={npass} load_error={int(load)} timeout={int(to)}")
+PY
+}
+# B4 RED-FIRST: the test alone at the tip
+git -C "$CLONE" apply -p1 $APPLY_OPTS "$TEST_SEC" > "$REP/apply_test.out" 2>&1 || { fail "B4 the test hunk alone did not apply: $(head -2 "$REP/apply_test.out" | tr '\n' ' ')"; echo "RESULT: FAIL ($FAILS failed) — stopped at B4"; exit 1; }
+if ! bash -n "$CLONE/$TEST_FILE" > "$REP/test_syntax.out" 2>&1; then fail "B4 the new test does not parse (bash -n): $(head -2 "$REP/test_syntax.out" | tr '\n' ' ')"; echo "RESULT: FAIL ($FAILS failed) — stopped at B4 (a test-side defect)"; exit 1; fi
+RED="$(run_suite "$TEST_FILE" red_first)"; echo "B4 run at the tip: $RED"
+red_rc="$(printf '%s' "$RED" | sed -E 's/.*rc=([0-9]+).*/\1/')"; red_nf="$(printf '%s' "$RED" | sed -E 's/.*fail_lines=([0-9]+).*/\1/')"; red_load="$(printf '%s' "$RED" | sed -E 's/.*load_error=([0-9]).*/\1/')"; red_to="$(printf '%s' "$RED" | sed -E 's/.*timeout=([0-9]).*/\1/')"
+if [ "$red_to" = "1" ]; then fail "B4 the test did not finish in 120 s at the tip (a hang, not a red)"; echo "RESULT: FAIL ($FAILS failed) — stopped at B4"; exit 1
+elif [ "$red_load" = "1" ]; then fail "B4 the test hit a LOAD error at the tip (syntax/command/unbound — a test-side defect, not a red): $(/usr/bin/grep -m1 -E 'syntax error|command not found|unbound variable' "$REP/red_first.out" | cut -c1-140)"; echo "RESULT: FAIL ($FAILS failed) — stopped at B4"; exit 1
+elif [ "$red_rc" -ne 0 ] && [ "$red_nf" -ge 1 ]; then pass "B4 RED-FIRST: $TEST_FILE fails at the untouched tip (rc=$red_rc, $red_nf FAIL line(s))"
+else fail "B4 RED-FIRST: the test is NOT red at the untouched tip (rc=$red_rc, $red_nf FAIL line(s)) — it does not prove the defect"; echo "RESULT: FAIL ($FAILS failed) — stopped at B4"; exit 1; fi
+# B6 baseline: sibling suites that name the script, BEFORE the script hunk
+BASE="$(basename "$PRODUCT")"; SIBS="$(/usr/bin/grep -l -F "$BASE" "$CLONE/$TEST_DIR"/*.test.sh 2>/dev/null | /usr/bin/grep -v -F "$TEST_FILE" | /usr/bin/grep -v -F "/$(basename "$TEST_FILE")" || true)"
+i=0; SIB_BEFORE=""
+for s in $SIBS; do i=$((i+1)); rel="${s#$CLONE/}"; r="$(run_suite "$rel" "sib${i}_before")"; SIB_BEFORE="$SIB_BEFORE|$rel=$r"; done
+# B5 GREEN-AFTER
+git -C "$CLONE" apply -p1 $APPLY_OPTS "$PROD_SEC" > "$REP/apply_product.out" 2>&1 || { fail "B5 the script hunk did not apply: $(head -2 "$REP/apply_product.out" | tr '\n' ' ')"; echo "RESULT: FAIL ($FAILS failed) — stopped at B5"; exit 1; }
+cp "$CLONE/$PRODUCT" "$REP/after.sh"
+if ! bash -n "$CLONE/$PRODUCT" > "$REP/product_syntax.out" 2>&1; then fail "B5a the script does not parse after the hunk (bash -n): $(head -2 "$REP/product_syntax.out" | tr '\n' ' ')"; echo "RESULT: FAIL ($FAILS failed) — stopped at B5a"; exit 1; else pass "B5a the script parses after the hunk (bash -n)"; fi
+GREEN="$(run_suite "$TEST_FILE" green_after)"; echo "B5 run after the script hunk: $GREEN"
+g_rc="$(printf '%s' "$GREEN" | sed -E 's/.*rc=([0-9]+).*/\1/')"; g_nf="$(printf '%s' "$GREEN" | sed -E 's/.*fail_lines=([0-9]+).*/\1/')"; g_np="$(printf '%s' "$GREEN" | sed -E 's/.*pass_lines=([0-9]+).*/\1/')"; g_load="$(printf '%s' "$GREEN" | sed -E 's/.*load_error=([0-9]).*/\1/')"
+if [ "$g_rc" -eq 0 ] && [ "$g_nf" -eq 0 ] && [ "$g_load" = "0" ]; then pass "B5 GREEN-AFTER: $TEST_FILE passes with the script hunk (rc=0, 0 FAIL lines, $g_np pass line(s))"
+else fail "B5 GREEN-AFTER: still red after the script hunk (rc=$g_rc, $g_nf FAIL line(s), load_error=$g_load): $(/usr/bin/grep -m2 -E '^\s*FAIL' "$REP/green_after.out" | cut -c1-120 | tr '\n' '·')"; fi
+# B6 after
+i=0; NEWRED=""
+for s in $SIBS; do i=$((i+1)); rel="${s#$CLONE/}"; a="$(run_suite "$rel" "sib${i}_after")"; b="$(printf '%s' "$SIB_BEFORE" | tr '|' '\n' | /usr/bin/grep -F "$rel=" | sed 's/^[^=]*=//')"
+  b_nf="$(printf '%s' "$b" | sed -E 's/.*fail_lines=([0-9]+).*/\1/')"; a_nf="$(printf '%s' "$a" | sed -E 's/.*fail_lines=([0-9]+).*/\1/')"
+  [ "${a_nf:-0}" -gt "${b_nf:-0}" ] && NEWRED="$NEWRED $rel(before=$b_nf after=$a_nf)"; done
+if [ -z "$SIBS" ]; then echo "INFO B6 no sibling suite in $TEST_DIR names $BASE — nothing else drives this script (stated, not counted)"
+elif [ -z "$NEWRED" ]; then pass "B6 sibling suite(s) that drive $BASE: no NEW failure after ($(printf '%s' "$SIBS" | /usr/bin/grep -c .) suite(s))"
+else fail "B6 NEW failure(s) in sibling suite(s) after the hunk:$NEWRED"; fi
+# B7 shellcheck (informational)
+if command -v shellcheck >/dev/null 2>&1; then shellcheck -S warning "$CLONE/$PRODUCT" > "$REP/shellcheck.out" 2>&1; echo "INFO B7 shellcheck rc=$? ($(/usr/bin/grep -c -E '^In ' "$REP/shellcheck.out") finding(s); informational)"; else echo "INFO B7 shellcheck not installed (informational)"; fi
+git -C "$CLONE" checkout -q -- "$PRODUCT"; mkdir -p "$Q"; mv "$CLONE/$TEST_FILE" "$Q/$(basename "$TEST_FILE")" 2>/dev/null; echo "clone restored (the new test quarantined to $Q, never deleted)"
+echo "SUMMARY files=2 test=$TEST_FILE red_first=yes apply_mode=$([ -n "$APPLY_OPTS" ] && echo lenient || echo strict)"
+if [ "$FAILS" -eq 0 ]; then echo "RESULT: PASS (7/7)"; exit 0; else echo "RESULT: FAIL ($FAILS failed)"; exit 1; fi
