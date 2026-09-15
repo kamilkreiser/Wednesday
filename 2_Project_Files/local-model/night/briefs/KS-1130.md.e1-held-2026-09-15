@@ -1,4 +1,4 @@
-# KS-1130 — Wednesday's task for Ornith, F2, the E7 tier-2 twin ONLY (the E1 twin is already held), TEST-ONLY MODE (E7 twin written 14:58 from the held E1 brief; originally 12:07; REWRITTEN in the KS-1073 shape 12:37 after two placeholder outputs)
+# KS-1130 — Wednesday's task for Ornith, F2, the E1 tier-2 twin ONLY, TEST-ONLY MODE (written from the ticket AND the code at develop M55 `48e65c435`, 2026-09-15 12:07; REWRITTEN in the KS-1073 shape 12:37 after two placeholder outputs)
 
 ## What is wrong (one paragraph)
 PR #969 (KS-1069) shipped three shape guards in `services/api-gateway/src/routes/verification.ts` — `persistedTxHashIsReal`
@@ -7,7 +7,7 @@ PR #969 (KS-1069) shipped three shape guards in `services/api-gateway/src/routes
 synthesised from the anchor store (`txHash: latest.transactionHash`, `blockHeight: latest.blockNumber`,
 `simulated: latest.simulated` at lines 301, 302, 324), measured on 9 tier-2 defect rows, but no cell pins that. A
 regression that re-opened only the tier-2 read would not redden the suite. **The code is RIGHT at the tip. Nothing in
-the product changes. This task is the PIN: one new test file with the tier-2 twin of E7 — a `blockNumber` that is the STRING '4242' must be off-chain-only (the E1 twin is held; E3 is a third task).** The ticket's
+the product changes. This task is the PIN: one new test file with the tier-2 twin of E1 (E7/E3 are a second task).** The ticket's
 comment/polish items (P2, P3, the census wording) are NOT part of this task.
 
 ## THE MODE — read this twice
@@ -16,17 +16,17 @@ checker reddens your 🔴 cell by planting the tamper named at the bottom into a
 untouched tip. A diff that touches `verification.ts` is refused at A3.
 
 ## The test — one new vitest file, in-process, the ks1057 driver copied VERBATIM
-File: `services/api-gateway/src/__tests__/ks1130-tier2-e7-twin.test.ts`
+File: `services/api-gateway/src/__tests__/ks1130-tier2-e1-twin.test.ts`
 Copy `services/api-gateway/src/__tests__/ks1057-verify-confidence-is-status-aware.test.ts` from its first line through
 the end of `beforeAll`/`afterAll` (the stub originate server, the stub anchor store, the gateway app on a random port,
 `REAL_TX`, `DOC_ID`, `CONTENT_HASH`, the `verify(blob)` helper at line 189 and the `verifyViaAnchorStore(row)` helper
 at line 298 — including its `expect(body.blockchain.source).toBe('persisted')` guard). Drop every `it(...)` of the
 original; write these three:
-- 🔴 `it('🔴 KS-1130 E7 twin — a tier-2 row whose blockNumber is the STRING "4242" is off-chain-only')`:
-  `const body = await verifyViaAnchorStore({ transactionHash: REAL_TX, blockNumber: '4242', status: 'confirmed' });`
-  assert `body.verified === false` and `body.verificationConfidence === 'off-chain-only'`. (Under the tamper a string
-  height counts as a height → `'on-chain'` — the red.)
-- 🔴 `it('🔴 KS-1130 E7 twin — the same string-height row reports blockchain.anchored false')`: same call; assert
+- 🔴 `it('🔴 KS-1130 E1 twin — a tier-2 row whose transactionHash is a tx_sim_ placeholder is off-chain-only')`:
+  `const body = await verifyViaAnchorStore({ transactionHash: 'tx_sim_' + 'a'.repeat(57), blockNumber: 4242, status: 'confirmed' });`
+  assert `body.verified === false` and `body.verificationConfidence === 'off-chain-only'`. (Under the tamper the
+  placeholder counts as a real hash → `'on-chain'` — the red.)
+- 🔴 `it('🔴 KS-1130 E1 twin — the same placeholder row reports blockchain.anchored false')`: same call; assert
   `body.blockchain.anchored === false`. (Under the tamper: `true` — the red.)
 - CONTROL `it('KS-1130 control — a well-shaped confirmed tier-2 row still reports on-chain')`:
   `await verifyViaAnchorStore({ transactionHash: REAL_TX, blockNumber: 4242, status: 'confirmed' })` →
@@ -34,13 +34,13 @@ original; write these three:
 (The E7 and E3 twins the ticket also asks for are a SECOND task with their own tampers — not this one.)
 
 ## Where (no product site changes — the list is informational)
-* `:622` — (correct) `    const persistedBlockHeightIsHeight =` — stays; the tamper corrupts line 623 below it
-* `:623` — (correct) `      typeof persistedBlockHeight === 'number' &&` — stays
+* `:614` — (correct) `    const persistedTxHashIsReal =` — stays; the tamper corrupts line 617 below it
+* `:617` — (correct) `      !/^(tx_sim_|mock_tx_|tx_)/.test(persistedTxHash);` — stays
 
-## Tamper (test-only mode — the checker plants this in a clone to prove the 🔴 cells can go red)
-line: 623
-from: `      typeof persistedBlockHeight === 'number' &&`
-to: `      (typeof persistedBlockHeight === 'number' || typeof persistedBlockHeight === 'string') && Number(persistedBlockHeight) > 0 && // TAMPER: a string height accepted`
+## Tamper (test-only mode — the checker plants this in a clone to prove the 🔴 cell can go red)
+line: 617
+from: `      !/^(tx_sim_|mock_tx_|tx_)/.test(persistedTxHash);`
+to: `      true; // TAMPER: the placeholder-prefix guard removed`
 
 ## Output
 Exactly ONE ```diff block containing ONLY the new test file (`--- /dev/null` with NO leading space, then `+++ b/<path>`);
