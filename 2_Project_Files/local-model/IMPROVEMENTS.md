@@ -29,4 +29,13 @@
 | 2026-09-15 10:55 | q8 round 7: KS-1087 and KS-871 SKIP_MEMORY — one `vm_stat` read right after the 37 GB model unloaded showed 3.2 GB free / 45 required, and the skip moved both lines to done.md as if they were verdicts | harness: a single memory read during kernel reclaim; a timing fact recorded as a ticket result | `night_run.sh`: up to 4 memory reads 30 s apart before a skip; a skip leaves the line IN the queue and stops the runner (never a done.md row) | q8 round 8 (`manual_…_q8round8.out`) runs the two |
 | 2026-09-15 11:00 | q8 round 8: KS-871 SKIP_MEMORY after 4 reads — vm_stat sum 27.8 GB < 45 while `memory_pressure` read 55% free (≈53 GB of 96) | harness: the vm_stat sum undercounts reclaimable memory on macOS after an unload; the wrong instrument | `night_run.sh`: the gate's figure = memory_pressure free% × hw.memsize; vm_stat kept in the note | q8 round 9 runs KS-871 |
 | 2026-09-15 10:57 | KS-1087 on q8: A2 corrupt patch at line 39 (the 30-line rewrite again) | model — same class as q4 round 6 (row 17); the brief's edit is too large for one hunk | (open — split the brief into two small edits; row 17's candidate, now confirmed on both quants) | — |
+| 2026-09-15 11:02 | KS-871 on q8: A2 corrupt patch at line 11 — the first hunk header's count is wrong (`-92,7` for 6 body lines), then content mismatch under `--recount` | model: hunk-count and outer-context errors (the same class on both quants) | (open — candidate: task.md asks for MINIMAL context (1 line each side) so a miscount cannot span a real line; a `-U1` instruction + the checker's `-C1` fuzzy mode already accept it) | — |
+
+## The q4 vs q8 comparison (2026-09-15, same briefs, checklist, sampler, checker; best round per cell)
+| Ticket | ornith:35b Q4_K_M (21 GB) | ornith:35b-q8_0 (37 GB) |
+|---|---|---|
+| KS-1072 | **PASS 7/7** (round 6, 52 s) | **PASS 7/7** (round 7, 63 s) |
+| KS-1087 | best: A1–A3b ✓, A4 ✗ (round 6); the CORRECT product fix once (round 3, sunk by a test bug) | A2 ✗ corrupt (both attempts) |
+| KS-871 | best: A1–A4 ✓ then A5–A7 ✗ (think=1, round 2 — partial fix); A2 ✗ on the brief rounds | A2 ✗ corrupt |
+**Reading:** the q8 quant reproduced the pass and did not improve either failure; run times 40–63 s on both. The failures are structural (hunk counts, a 30-line rewrite, outer context) — a brief-shape problem, not a precision one. **Keep Q4_K_M as the worker (half the memory); re-test q8 after the brief-splitting fix (row 17/22).**
 

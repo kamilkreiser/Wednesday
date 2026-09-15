@@ -1,0 +1,39 @@
+--- a/Blockchain/Dev/services/api-gateway/src/middleware/audit.ts
++++ b/Blockchain/Dev/services/api-gateway/src/middleware/audit.ts
+@@ -92,7 +92,7 @@ const EXCLUDED_PREFIXES = [
+  * tail without needing to enumerate every route.
+  */
+-function deriveAction(req: Request): {
++function deriveAction(req: Request, auditPath: string): {   // KS-871: capture original URL so refused mounts don't trim req.path
+   action: string;
+   resourceType: string;
+   resourceId: string | null;
+@@ -105,7 +105,7 @@ function deriveAction(req: Request): {
+     : method === 'DELETE' ? 'delete'
+     : method.toLowerCase();
+ 
+   // Trim trailing slashes and pull the first 3-4 segments after /api.
+-  const segments = req.path.replace(/\/+$/, '').split('/').filter(Boolean);
++  const segments = auditPath.replace(/\/+$/, '').split('/').filter(Boolean);   // KS-871: use captured entry path, not trimmed mount-relative remainder
+   // segments[0] === 'api' for everything we audit
+   const section = segments[1] || 'unknown';
+   const subResource = segments[2];
+@@ -227,7 +227,7 @@ export function createAuditMiddleware(deps: AuditMiddlewareDeps): RequestHandler
+ 
+       void (async () => {
+         try {
+           if (!deps.isDbAvailable()) return;
+-          const { action, resourceType, resourceId: routeResourceId } = deriveAction(req);
++          const { action, resourceType, resourceId: routeResourceId } = deriveAction(req, auditPath);   // KS-871: pass captured entry path
+           
+           const u = (req as Request & { user?: { userId?: string; organizationId?: string; tenantId?: string } }).user;
+           let userId: string | null = u?.userId || null;
+@@ -277,7 +277,7 @@ export function createAuditMiddleware(deps: AuditMiddlewareDeps): RequestHandler
+           }
+           const details = JSON.stringify({
+             method: req.method,
+-            path: req.path,
++            path: auditPath,   // KS-871: record original request path, not Express-trimmed remainder after router.use() gate
+             status: res.statusCode,
+             durationMs: Date.now() - start,
+             tenantId: u?.tenantId || null,
