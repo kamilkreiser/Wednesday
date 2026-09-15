@@ -68,35 +68,6 @@ for i,s in enumerate(secs,1):
 json.dump(out,open(f"{rep}/sections.json","w"))
 print("sections:",[o["path"] for o in out])
 PY
-# NEW-FILE NORMALISATION (2026-09-16 00:5x, KS-1139 A r1): inside a `--- /dev/null` section every body line MUST be a
-# '+' line (a new file has no context and no '-' lines). The model drops the '+' on lines that begin with '#' (the
-# doc-patch continuation dialect) and git says "corrupt patch". Restore the marker and recount — a repair with a
-# provable invariant, named in the verdict; the as-written section is kept beside it.
-NF_NOTE=""
-for sf in "$REP"/section_*.diff; do
-  if head -1 "$sf" | /usr/bin/grep -q '^--- /dev/null'; then
-    n_fixed="$(python3 - "$sf" <<'PYN'
-import sys,re
-p=sys.argv[1]; L=open(p,encoding="utf-8").read().split("\n")
-out=[]; fixed=0; inhunk=False; body=0
-for ln in L:
-    if ln.startswith("@@ "): inhunk=True; out.append(ln); continue
-    if not inhunk or ln.startswith(("---","+++")): out.append(ln); continue
-    if ln=="" : out.append(ln); continue
-    if ln.startswith("+") or ln.startswith("\\"): out.append(ln); body+=1; continue
-    out.append("+"+ln); fixed+=1; body+=1
-if fixed:
-    open(p+".as-written","w",encoding="utf-8").write("\n".join(L))
-    txt="\n".join(out)
-    txt=re.sub(r"@@ -0,0 \+1(,\d+)? @@", f"@@ -0,0 +1,{body} @@", txt, count=1)
-    open(p,"w",encoding="utf-8").write(txt)
-print(fixed)
-PYN
-)"
-    [ "${n_fixed:-0}" -gt 0 ] && NF_NOTE="$NF_NOTE $(basename "$sf"): $n_fixed line(s) restored to '+' in the new-file hunk (a dropped marker);"
-  fi
-done
-[ -n "$NF_NOTE" ] && echo "B2 new-file normalisation (an accommodation the verdict names):$NF_NOTE"
 # B2 — PER SECTION (2026-09-16 00:5x, the golden arm: `git apply --recount` on the WHOLE patch mis-parses when the
 # new-file hunk's header count is wrong and then reports the PREVIOUS file's hunk as "patch failed" — each section
 # alone applies. code_patch applies per section for the same reason.)
@@ -114,7 +85,7 @@ for sf in "$REP"/section_*.diff; do
     else fail "B2 $(basename "$sf") does NOT apply at the tip: strict: $(head -2 "$sf.check.out" | tr '\n' ' ') | reanchored: $(head -2 "$sf.reanchor.out" 2>/dev/null | tr '\n' ' ') $(head -1 "$sf.check_rean.out" 2>/dev/null)"; echo "RESULT: FAIL ($FAILS failed) — stopped at B2"; exit 1; fi
   fi
 done
-if [ -z "$APPLY_OPTS$B2_NOTE$NF_NOTE" ]; then pass "B2 every section applies at the tip (strict)"; else pass "B2 every section applies at the tip — with an accommodation:$B2_NOTE$NF_NOTE"; fi
+if [ -z "$APPLY_OPTS" ]; then pass "B2 every section applies at the tip (strict)"; else pass "B2 every section applies at the tip — with an accommodation:$B2_NOTE (miscounted hunk headers)"; fi
 # B3
 TOUCHED="$(for sf in "$REP"/section_*.diff; do git -C "$CLONE" apply --numstat -p1 $APPLY_OPTS "$sf" 2>/dev/null | awk '{print $3}'; done | sort -u)"
 N_TOUCHED="$(printf '%s\n' "$TOUCHED" | /usr/bin/grep -c .)"
