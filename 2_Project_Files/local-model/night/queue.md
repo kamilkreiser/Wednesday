@@ -115,4 +115,3 @@
 # ─── q8 set (NIGHT_MODEL=ornith:35b-q8_0, NIGHT_MIN_FREE_GB=45) — queued 11:4x after the q4 batch ended
 # second ten — the DEFAULT told to Kam 12:0x: the fixed-brief fails re-run on q4 (KS-1050, KS-908); KS-864/KS-1018 go on q8 by a later batch
 # q8 half of the second ten — run with NIGHT_MODEL=ornith:35b-q8_0 NIGHT_MIN_FREE_GB=45 AFTER the q4 lines above are done (the loop job runs q4 by default; a hand launch with the q8 env is needed for these — one model at a time)
-KS-1018 product=Blockchain/Dev/services/auth/src/routes/users.ts ref=Blockchain/Dev/services/auth/src/__tests__/ks1013-admin-patch-malformed-id.test.ts line=1183 ctx=49152

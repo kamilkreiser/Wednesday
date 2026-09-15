@@ -389,6 +389,21 @@ else
 fi
 
 # ---------------------------------------------------------------- A4 red-first
+# 2026-09-15 TDZ-INLINE (KS-1050 ×2, KS-1018 ×3): a file-scope string const read inside `vi.hoisted(` kills the
+# file before any test runs; the repair is mechanical (tasks/code_patch/tdz_inline.py) and named loudly.
+TK=1
+while [ "$TK" -le "$N_SEC" ]; do
+  tp="$(python3 -c 'import json,sys; print(json.load(open(sys.argv[1]))[int(sys.argv[2])-1]["path"])' "$REP/sections.json" "$TK")"
+  if [ "$tp" = "$TEST_FILE" ] || [ "$SUBDIR/$tp" = "$TEST_FILE" ]; then
+    tf="$(sed -n 1p "$REP/section_$TK.opts")"; to="$(sed -n 2p "$REP/section_$TK.opts")"
+    python3 "$(dirname "$0")/tdz_inline.py" "$tf" "$REP/section_${TK}.tdz.diff" > "$REP/tdz_inline.out" 2>&1
+    if ! /usr/bin/grep -q "^inlined 0" "$REP/tdz_inline.out"; then
+      echo "$REP/section_${TK}.tdz.diff" > "$REP/section_$TK.opts"; echo "$to" >> "$REP/section_$TK.opts"
+      echo "A4 TDZ-INLINED (accommodation): $(tr '\n' ';' < "$REP/tdz_inline.out")"
+    fi
+  fi
+  TK=$((TK+1))
+done
 apply_section_for "$TEST_FILE" > "$REP/apply_test.out" 2>&1
 rc=$?
 if [ "$rc" -ne 0 ]; then
