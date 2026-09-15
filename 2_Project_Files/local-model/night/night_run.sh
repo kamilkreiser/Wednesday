@@ -58,7 +58,9 @@ NIGHT_MODEL="${NIGHT_MODEL:-ornith:35b}"
 NIGHT_THINK="${NIGHT_THINK:-0}"   # 2026-09-15 10:4x: think=0 again — WITH a Wednesday brief the brief is the reasoning (KS-1087 round 3 produced the correct fix at think=0); think=1 + brief over-thought into the context wall twice (47K and 78K chars). Set NIGHT_THINK=1 only for a ticket with no brief.
 NIGHT_NUM_CTX="${NIGHT_NUM_CTX:-32768}"
 NIGHT_MAX_TICKETS="${NIGHT_MAX_TICKETS:-4}"
-NIGHT_MAX_LOAD="${NIGHT_MAX_LOAD:-8}"
+# 2026-09-15 20:2x: macOS mediaanalysisd (560% CPU, days) keeps the 1-min load ~9 with NO seat live; G2 (the pane census)
+# is the seat gate, G4 only protects the checker from a busy box — 14 lets the loop run under that daemon.
+NIGHT_MAX_LOAD="${NIGHT_MAX_LOAD:-14}"
 NIGHT_MIN_FREE_GB="${NIGHT_MIN_FREE_GB:-30}"
 NIGHT_QUEUE="${NIGHT_QUEUE:-$SELF_DIR/queue.md}"
 NIGHT_DONE="${NIGHT_DONE:-$(dirname "$NIGHT_QUEUE")/done.md}"
@@ -459,7 +461,7 @@ PYEOF
   # and the between-ticket G4 bar is NIGHT_MAX_LOAD_BETWEEN (12) — G2 (the pane census) is still the
   # gate that detects a launched seat, and it is re-checked here unchanged.
   log "settle 60 s before the between-ticket gate re-check (the checker's own load)"; sleep 60
-  NIGHT_MAX_LOAD="${NIGHT_MAX_LOAD_BETWEEN:-12}"
+  NIGHT_MAX_LOAD="${NIGHT_MAX_LOAD_BETWEEN:-14}"
   if ! gates; then log "STOP after $TICKET: gate $GATE_FAIL failed (a seat may have launched)"; break; fi
 done
 
