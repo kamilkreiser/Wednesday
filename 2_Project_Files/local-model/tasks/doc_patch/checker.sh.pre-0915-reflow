@@ -34,7 +34,7 @@ else
   # third mode (same as code_patch's A2 REANCHORED): hunks rebuilt from the model's -/+ lines at the file's real
   # location — the model's context lines come from memory (20:04: an invented ` Notes:` after the §2 fence).
   REAN="$REP/patch.reanchored.diff"; SRC_DIR="$(dirname "$0")/../code_patch"
-  if REANCHOR_REFLOW=1 python3 "$SRC_DIR/reanchor.py" "$REP/patch.diff" "$CLONE/$PRODUCT" "$REAN" > "$REP/reanchor.out" 2>&1 && git -C "$CLONE" apply --check -p1 "$REAN" > "$REP/apply_check_rean.out" 2>&1; then
+  if python3 "$SRC_DIR/reanchor.py" "$REP/patch.diff" "$CLONE/$PRODUCT" "$REAN" > "$REP/reanchor.out" 2>&1 && git -C "$CLONE" apply --check -p1 "$REAN" > "$REP/apply_check_rean.out" 2>&1; then
     cp "$REAN" "$REP/patch.diff"; APPLY_OPTS=""; pass "D2 diff applies at the tip — ONLY REANCHORED (an accommodation the verdict names): $(tr '\n' ';' < "$REP/reanchor.out" | cut -c1-200)"
   else fail "D2 diff does NOT apply at the tip: strict: $(head -2 "$REP/apply_check.out" | tr '\n' ' ') | reanchored: $(head -2 "$REP/reanchor.out" 2>/dev/null | tr '\n' ' ') $(head -1 "$REP/apply_check_rean.out" 2>/dev/null)"; echo "RESULT: FAIL ($FAILS failed) — stopped at D2"; exit 1; fi
 fi

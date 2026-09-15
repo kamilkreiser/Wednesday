@@ -12,7 +12,6 @@ unique in the file. Anything ambiguous is left exactly as the model wrote it, an
 Exit 0 = wrote out.diff (possibly identical); the notes on stdout say per hunk: reanchored / kept / ambiguous.
 This is an ACCOMMODATION the checker records loudly (A2 "REANCHORED"), never a silent repair.
 """
-import os
 import re
 import sys
 
@@ -124,68 +123,8 @@ def rebuild_old_side(hunk, file_lines, notes, idx):
     return res
 
 
-def _join_run(file_lines, s, n):
-    """the space-join of n tip lines from s: continuation lines lose their indent (a wrapped bullet), and a BLANK
-    line ends a paragraph — a run may never span one (returns None so the caller stops)"""
-    seg = file_lines[s:s + n]
-    if len(seg) < n or any(not l.strip() for l in seg):
-        return None
-    return " ".join((l.rstrip() if k == 0 else l.strip()) for k, l in enumerate(seg))
-
-
-def reflow(body, file_lines, notes, idx):
-    """2026-09-15 21:4x (KS-1097 B r2, a doc_patch): the model RE-FLOWS a hard-wrapped markdown paragraph into ONE
-    line — five tip lines joined by single spaces — and the hunk cannot apply. Gated by REANCHOR_REFLOW=1 (set by
-    the doc_patch checker only). For each body line whose text is not a tip line: a '-' or ' ' line that EQUALS the
-    space-join of N>=2 consecutive tip lines is split back into those N lines; a '+' line whose text STARTS with such
-    a join (N>=2) is split so the first N-1 lines are the tip's and the last carries the tip line plus the remainder.
-    A ' ' (context) line that starts with a join but carries EXTRA text is an edit hidden in a context line —
-    refused by name, never inferred. Every split is a note the verdict carries."""
-    out = []
-    tip_set = {l.rstrip() for l in file_lines}
-    for b in body:
-        if not b or b[0] not in " -+" or b[1:].rstrip() in tip_set or b == "\\ No newline at end of file":
-            out.append(b); continue
-        kind, text = b[0], b[1:].rstrip()
-        best = None  # (start, n, exact)
-        for s0 in range(len(file_lines)):
-            first = file_lines[s0].rstrip()
-            if not first or not text.startswith(first):
-                continue
-            n = 1
-            while s0 + n < len(file_lines):
-                jn = _join_run(file_lines, s0, n + 1)
-                if jn is None or not text.startswith(jn):
-                    break
-                n += 1
-            if n < 2:
-                continue
-            j = _join_run(file_lines, s0, n)
-            if text == j:
-                best = (s0, n, True); break
-            if best is None or n > best[1]:
-                best = (s0, n, False)
-        if best is None:
-            out.append(b); continue
-        s0, n, exact = best
-        pieces = [file_lines[s0 + k].rstrip() for k in range(n)]
-        if exact:
-            out += [kind + pc for pc in pieces]
-            notes.append(f"hunk {idx}: REFLOW — a '{kind}' line was the space-join of tip lines {s0 + 1}-{s0 + n}; split back")
-        elif kind == "+":
-            rem = text[len(_join_run(file_lines, s0, n)):]
-            out += ["+" + pc for pc in pieces[:-1]] + ["+" + pieces[-1] + rem]
-            notes.append(f"hunk {idx}: REFLOW — a '+' line started with the space-join of tip lines {s0 + 1}-{s0 + n}; split back, the remainder kept on the last line")
-        else:
-            notes.append(f"hunk {idx}: REFLOW REFUSED — a '{kind}' line is the space-join of tip lines {s0 + 1}-{s0 + n} PLUS extra text: an edit hidden in a context line is not inferred")
-            out.append(b)
-    return out
-
-
 def rebuild(hunk, file_lines, notes, idx):
     body = [b for b in hunk["body"] if b != "\\ No newline at end of file"]
-    if os.environ.get("REANCHOR_REFLOW") == "1":
-        body = reflow(body, file_lines, notes, idx)
     if any(b.startswith("++++ b/") or b.startswith("+--- ") for b in body):
         notes.append(f"hunk {idx}: a file HEADER sits inside the hunk as a '+' line — refused, kept as written (the splitter should have caught it)")
         return None
