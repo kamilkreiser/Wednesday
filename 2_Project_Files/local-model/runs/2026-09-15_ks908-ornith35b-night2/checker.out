@@ -1,0 +1,35 @@
+mode: code_patch
+diff_blocks=1 all_blocks=1 prose_outside_chars=0
+wrote /Volumes/DevMASTER/WEDNESDAY/2_Project_Files/local-model/runs/2026-09-15_ks908-ornith35b-night2/out.md.checker/patch.diff lines=151
+PASS A1 output is exactly one fenced ```diff block, nothing outside it
+clone clean at pinned tip 48e65c43517926da6f137993053c82c83e122f5d
+--- baseline at the untouched tip (whole services/security suite + tsc)
+baseline suite rc=0 total=213 passed=213 failed=0 suites_failed=0 loaded=1 failed_names=[]
+baseline tsc rc=0 (0 lines)
+section 1 services/security/src/index.ts: hunk 2 (@@ -1207,6 +1208,7 @@ app.get('/api/keys', requireKeyAdmin, (req: Request, res: Response) => {) declared old=6 new=7 but actual old=7 new=8
+section 2 services/security/src/__tests__/ks908-connectorid-persists-but-is-invisible-through.test.ts: hunk 1 (@@ -0,0 +1,107 @@) declared old=0 new=107 but actual old=0 new=129
+sections=2 miscounted_sections=2
+section 1 services/security/src/index.ts: path lacks Blockchain/Dev/ — applying with --directory=Blockchain/Dev
+section 1 services/security/src/index.ts: applies ONLY REANCHORED (hunk 1: reanchored at 1150 (0 '-' / 1 '+' lines; model header -1146,6 +1146,7);hunk 2: reanchored at 1211 (0 '-' / 1 '+' lines; model header -1207,6 +1208,7);reanchored 2/2 hunk(s);)
+section 2 services/security/src/__tests__/ks908-connectorid-persists-but-is-invisible-through.test.ts: path lacks Blockchain/Dev/ — applying with --directory=Blockchain/Dev
+section 2 services/security/src/__tests__/ks908-connectorid-persists-but-is-invisible-through.test.ts: applies ONLY with --recount --ignore-whitespace (miscounted hunks=1, strict rc=0)
+PASS A2 diff applies at the tip — with an accommodation: [services/security/src/index.ts: REANCHORED — the model's context lines did not match the file; every hunk rebuilt from its -/+ lines at the file's real location (hunk 1: reanchored at 1150 (0 '-' / 1 '+' lines; model header -1146,6 +1146,7);hunk 2: reanchored at 1211 (0 '-' / 1 '+' lines; model header -1207,6 +1208,7);reanchored 2/2 hunk(s);); strict rc=1 lenient rc=1 fuzzy rc=1] [services/security/src/__tests__/ks908-connectorid-persists-but-is-invisible-through.test.ts: --recount --ignore-whitespace needed; miscounted hunks=1; strict rc=0]
+touched files (2): Blockchain/Dev/services/security/src/__tests__/ks908-connectorid-persists-but-is-invisible-through.test.ts Blockchain/Dev/services/security/src/index.ts  (+131/-0)
+PASS A3 touched-file set == { Blockchain/Dev/services/security/src/index.ts , Blockchain/Dev/services/security/src/__tests__/ks908-connectorid-persists-but-is-invisible-through.test.ts }
+A3b: no must_change sites in the input — skipped
+test-only at tip: rc=1 total=3 passed=1 failed=2 suites_failed=2 loaded=1 failed_names=['KS-908 — connectorId persists but is invisible through the API 🔴 KS-908 — POST /api/keys returns the connectorId it was given', 'KS-908 — connectorId persists but is invisible through the API 🔴 KS-908 — GET /api/keys lists the connectorId for that key']
+PASS A4 RED-FIRST: src/__tests__/ks908-connectorid-persists-but-is-invisible-through.test.ts fails at the untouched tip (2 failed / 3 run; controls green; assertion reds)
+test after product hunk: rc=0 total=3 passed=3 failed=0 suites_failed=0 loaded=1 failed_names=[]
+PASS A5 GREEN-AFTER: src/__tests__/ks908-connectorid-persists-but-is-invisible-through.test.ts passes with the product hunk (3 passed / 3 run)
+INFO control cell present: 1 cell(s) passed BEFORE and 3 AFTER (the harness reaches the code both times)
+after suite rc=0 total=216 passed=216 failed=0 suites_failed=0 loaded=1 failed_names=[]
+baseline: total=213 failed=0 | after: total=216 failed=0
+develop's own reds (attributed, not counted): []
+NEW reds: []
+reds fixed by the patch: []
+tests added: 3
+PASS A6 whole services/security suite: no NEW red vs the untouched tip
+PASS A7 tsc --noEmit for services/security: rc 0 after the patch (baseline rc=0)
+INFO tsc on the test file alone: rc=2 (1 lines; not gated — vitest does not type-check and the service tsconfig excludes __tests__)
+SUMMARY files=2 +131/-0 test=src/__tests__/ks908-connectorid-persists-but-is-invisible-through.test.ts red_first=yes apply_mode=lenient
+RESULT: PASS (7/7)
