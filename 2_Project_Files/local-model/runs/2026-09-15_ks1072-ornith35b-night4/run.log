@@ -1,0 +1,33 @@
+== 2026-09-15 10:37:19 night_run KS-1072 line='KS-1072 ctx=49152' model=ornith:35b think=0
+ticket KS-1072 · Backlog (backlog) · Low · assignee=- · updated 2026-09-09T22:09:02.799Z
+fix shape: 'Fix shape:** implement the documented tiebreak (or correct t' → 'implement the documented tiebreak (or correct the comment to say there is none), and pin it with a cell driving two equal-`blockNumber` anchors.'
+product services/api-gateway/src/routes/verification.ts (65575 B, 1418 lines) defect line 289 [anchored on quoted snippet '(b.blockNumber || 0) - (a.blockNumber || 0)' (cited :240 not confirmed — line numbers drift)]: '(b.blockNumber || 0) - (a.blockNumber || 0))[0];'
+reference test: Blockchain/Dev/services/api-gateway/src/__tests__/ks1071-verify-confidence-one-mapping.test.ts (imports '../routes/verification'; 0 vi.mock stubs; 7 candidate(s))
+  named sites: no '## Where' section — checklist empty (A3b passes vacuously)
+  prompt source: WEDNESDAY BRIEF /Volumes/DevMASTER/WEDNESDAY/2_Project_Files/local-model/night/briefs/KS-1072.md (3275 chars) — the ticket description is NOT the prompt
+contract: key set == KS-871 input (top-level, ticket, repo)
+wrote /Volumes/DevMASTER/WEDNESDAY/2_Project_Files/local-model/runs/2026-09-15_ks1072-ornith35b-night4/input.json (89265 B; ~22394 prompt tokens at 4 B/token — num_ctx 49152 leaves ~26758 for the answer)
+memory: memory_pressure free=93% · vm_stat free+speculative=35.6 GB, inactive(reclaimable)=26.2 GB, available=61.8 GB
+lm_call: ok wall=52.19s eval_count=2616 tok/s=75.26 think=0 thinking_chars=0 think_leak_in_content=False done=True done_reason=stop content_chars=8641
+harness rc=0 wall=52s
+clone HEAD == pinned tip 48e65c43517926da6f137993053c82c83e122f5d
+farmed /private/tmp/claude-501/night/clone_ks1072/Blockchain/Dev/node_modules: 985 linked, 3 skipped (real clone-local dirs instead)
+farmed /private/tmp/claude-501/night/clone_ks1072/Blockchain/Dev/node_modules/@secuura: 31 linked, 1 skipped (real clone-local dirs instead)
+@secuura/shared -> ../../packages/shared (clone-local)
+farmed /private/tmp/claude-501/night/clone_ks1072/Blockchain/Dev/services/api-gateway/node_modules: 7 linked, 2 skipped (real clone-local dirs instead)
+farmed /private/tmp/claude-501/night/clone_ks1072/Blockchain/Dev/packages/shared/node_modules: 7 linked, 2 skipped (real clone-local dirs instead)
+shared built in clone: 28 dist entries
+source checkout tracked-modified count after prepare: 0 (must equal what it was before — the caller compares)
+prepare_clone rc=0
+checker rc=1 wall=10s
+PASS A1 output is exactly one fenced ```diff block, nothing outside it
+PASS A2 diff applies at the tip — with an accommodation: [services/api-gateway/src/routes/verification.ts: --recount --ignore-whitespace needed; miscounted hunks=1; strict rc=128] [services/api-gateway/src/__tests__/ks1072-the-latest-anchor-selector-documents-a.test.ts: --recount --ignore-whitespace needed; miscounted hunks=1; strict rc=0]
+PASS A3 touched-file set == { Blockchain/Dev/services/api-gateway/src/routes/verification.ts , Blockchain/Dev/services/api-gateway/src/__tests__/ks1072-the-latest-anchor-selector-documents-a.test.ts }
+PASS A4 RED-FIRST: src/__tests__/ks1072-the-latest-anchor-selector-documents-a.test.ts fails at the untouched tip (2 failed / 3 run; controls green; assertion reds)
+FAIL A5 GREEN-AFTER: src/__tests__/ks1072-the-latest-anchor-selector-documents-a.test.ts still red (or empty) after the product hunk (rc=1, 0 failed / 3 run): []
+FAIL A6 whole services/api-gateway suite: NEW red(s) vs the untouched tip (see suite_delta.out)
+FAIL A7 tsc --noEmit for services/api-gateway: rc=2 after the patch (baseline rc=0): src/routes/verification.ts(288,21): error TS2451: Cannot redeclare block-scoped variable 'latest'. src/routes/verification.ts(293,21): error TS2451: Cannot redeclare block-scoped variable 'latest'. 
+SUMMARY files=2 +172/-0 test=src/__tests__/ks1072-the-latest-anchor-selector-documents-a.test.ts red_first=yes apply_mode=lenient
+RESULT: FAIL (3 failed)
+source checkout tracked-modified: before=0 after=0 (must be equal)
+== 2026-09-15 10:38:34 end KS-1072 verdict=RESULT: FAIL (3 failed)

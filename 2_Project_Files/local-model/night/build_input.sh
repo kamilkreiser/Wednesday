@@ -299,14 +299,20 @@ repo = {
 # site untouched. Heuristic (stated, not hidden): a `:NNN` bullet under a `Where` heading is a site;
 # it is must_change when its bullet carries emphasis (`**…**`) and is not marked "(correct)".
 named_sites = []
-m_where = re.search(r"^##+\s*Where\b.*?$(.*?)(?=^##+\s|\Z)", desc, re.M | re.S)
+# 2026-09-15 10:5x: the BRIEF may carry its own `## Where` (it names the exact lines Wednesday wants changed);
+# when present it wins over the ticket's, so A3b checks Wednesday's sites — the brief is read before this point.
+_brief_for_sites = None
+_bp = os.path.join(os.environ.get("NIGHT_BRIEFS_DIR", ""), f"{ticket}.md")
+if _bp and os.path.isfile(_bp): _brief_for_sites = open(_bp, encoding="utf-8").read()
+_src_for_sites = _brief_for_sites if (_brief_for_sites and re.search(r"^##+\s*Where\b", _brief_for_sites, re.M)) else desc
+m_where = re.search(r"^##+\s*Where\b.*?$(.*?)(?=^##+\s|\Z)", _src_for_sites, re.M | re.S)
 if m_where:
     for b in re.finditer(r"^\s*[*-]\s*`?:(\d+)`?\s*[—–-]?\s*(.*)$", m_where.group(1), re.M):
         ln = int(b.group(1)); note = b.group(2).strip()
         txt = lines[ln - 1] if 0 < ln <= len(lines) else None
         named_sites.append({"line": ln, "text_at_tip": txt, "note": note,
                             "must_change": ("**" in note) and ("(correct)" not in note.lower())})
-    print(f"  named sites from '## Where': {len(named_sites)} ({sum(1 for x in named_sites if x['must_change'])} must_change)")
+    print(f"  named sites from '## Where' ({'BRIEF' if _src_for_sites is _brief_for_sites else 'ticket'}): {len(named_sites)} ({sum(1 for x in named_sites if x['must_change'])} must_change)")
 else:
     print("  named sites: no '## Where' section — checklist empty (A3b passes vacuously)")
 
