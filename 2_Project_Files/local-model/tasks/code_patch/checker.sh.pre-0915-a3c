@@ -430,19 +430,6 @@ PY3B
     echo "RESULT: FAIL ($FAILS failed) — stopped at A3b (a partial fix; the tests are not run)"
     exit 1
   fi
-  # A3c (2026-09-15 22:0x, KS-976 B r1): every '+' line the BRIEF's edit blocks add must be added — the twin of A3b for
-  # insertions (an insert-only helper hunk dropped by the model reached tsc as "Cannot find name" three assertions later).
-  N_PLUS="$(python3 -c 'import json,sys; print(len(json.load(open(sys.argv[1])).get("defect_line",{}).get("expected_plus",[])))' "$INPUT" 2>/dev/null || echo 0)"
-  if [ "${N_PLUS:-0}" -gt 0 ]; then
-    A3C_MISSING="$(python3 "$(dirname "$0")/a3c_plus.py" "$INPUT" "$PROD_SEC" 2>/dev/null)"; A3C_RC=$?
-    if [ "$A3C_RC" -eq 0 ]; then
-      pass "A3c every '+' line the brief adds is in the product hunk ($N_PLUS line(s))"
-    else
-      fail "A3c INCOMPLETE — $(printf '%s\n' "$A3C_MISSING" | /usr/bin/grep -c .) of $N_PLUS line(s) the brief adds are ABSENT from the product hunk: $(printf '%s' "$A3C_MISSING" | head -3 | cut -c1-90 | tr '\n' '·')"
-      echo "RESULT: FAIL ($FAILS failed) — stopped at A3c (a dropped addition; the tests are not run)"
-      exit 1
-    fi
-  fi
 else
   echo "A3b: no must_change sites in the input — skipped"
 fi

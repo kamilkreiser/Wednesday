@@ -297,6 +297,11 @@ def rebuild(hunk, file_lines, notes, idx):
         anchor = None
         for cand in reversed(before):
             if cand.strip():
+                # 2026-09-15 22:0x (KS-976 B r1): an insert anchored right after a line that OPENS a block comment
+                # (`/**`, `/*`) lands inside the comment — the helper was commented out and tsc could not find it.
+                if cand.strip() in ("/**", "/*") or cand.strip().endswith(("/**", "/*")):
+                    notes.append(f"hunk {idx}: insert-only — refused to anchor after a block-comment opener ({cand.strip()!r}); trying the line before it")
+                    continue
                 hits = find_block(file_lines, [cand])
                 if len(hits) == 1:
                     anchor = ("before", hits[0]); break
@@ -313,6 +318,13 @@ def rebuild(hunk, file_lines, notes, idx):
             start = end = anchor[1] + 1
         else:
             start = end = anchor[1]
+        # 2026-09-15 22:0x (KS-976 B r1): an insert placed just below a block-comment opener (`/**`, `/*`) — the
+        # "after" branch anchored on ` * POST …` — lands INSIDE the comment; move it above the opener.
+        moved = 0
+        while start > 0 and (file_lines[start - 1].strip() in ("/**", "/*") or file_lines[start - 1].strip().endswith(("/**", "/*"))):
+            start -= 1; end = start; moved += 1
+        if moved:
+            notes.append(f"hunk {idx}: insert-only — moved above a block-comment opener ({moved} line(s)) so the insert is not commented out")
         mid = ["+" + p for p in plus]
     pre = file_lines[max(0, start - 3):start]
     post = file_lines[end:end + 3]

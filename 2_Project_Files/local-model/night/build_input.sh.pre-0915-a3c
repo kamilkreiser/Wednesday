@@ -393,17 +393,6 @@ if m_where:
     print(f"  named sites from '## Where' ({'BRIEF' if _src_for_sites is _brief_for_sites else 'ticket'}): {len(named_sites)} ({sum(1 for x in named_sites if x['must_change'])} must_change)")
 else:
     print("  named sites: no '## Where' section — checklist empty (A3b passes vacuously)")
-# 2026-09-15 22:0x (KS-976 B r1 dropped its insert-only helper hunk): the '+' lines of the brief's edit blocks
-# ("## The exact change" up to the next '## ') are the additions the product hunk must carry — A3c's checklist.
-expected_plus = []
-if _brief_for_sites:
-    _mx = re.search(r"^##+\s*The exact change\b.*?$(.*?)(?=^##+\s|\Z)", _brief_for_sites, re.M | re.S)
-    if _mx:
-        for blk in re.findall(r"^```[^\n]*\n(.*?)^```", _mx.group(1), re.M | re.S):
-            for ln in blk.split("\n"):
-                if ln.startswith("+") and not ln.startswith("+++") and ln[1:].strip():
-                    expected_plus.append(ln[1:].strip())
-    print(f"  expected '+' lines from the brief's edit blocks: {len(expected_plus)} (A3c)")
 
 # ---------------------------------------------------------------- 5b2. TEST-ONLY TAMPER (2026-09-15 12:xx)
 # A coverage-only ticket (the code is right at the tip; a PIN is owed — KS-1073, KS-1123-F3, KS-1130, KS-1120) cannot
@@ -481,7 +470,7 @@ inp = {
                "priority": n["priorityLabel"], "description": prompt_desc},
     "repo": repo,
     "product_file": product,
-    "defect_line": {"line": defect_no, "text": defect_text, "sites": named_sites, "expected_plus": expected_plus,
+    "defect_line": {"line": defect_no, "text": defect_text, "sites": named_sites,
                     "sites_rule": "every site with must_change=true MUST be changed by the product hunk (its text appears as a '-' line); the checker refuses a diff that leaves one untouched (A3b) before any test runs",
                     **({"tamper": tamper} if tamper else {}),
                     **({"red_cells": red_cells} if red_cells else {})},
