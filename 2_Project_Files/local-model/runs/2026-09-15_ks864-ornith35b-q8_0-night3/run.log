@@ -9,3 +9,27 @@ reference test PINNED: Blockchain/Dev/services/api-gateway/src/__tests__/csrf.te
 contract: key set == KS-871 input (top-level, ticket, repo)
 wrote /Volumes/DevMASTER/WEDNESDAY/2_Project_Files/local-model/runs/2026-09-15_ks864-ornith35b-q8_0-night3/input.json (35631 B; ~8900 prompt tokens at 4 B/token — num_ctx 49152 leaves ~40252 for the answer)
 memory: memory_pressure free=92% · vm_stat free+speculative=11.3 GB, inactive(reclaimable)=44.1 GB, available=55.3 GB · available by memory_pressure = 88.3 GB (92% of 96.0 GB) — the gate's figure
+lm_call: ok wall=37.63s eval_count=1999 tok/s=71.62 think=0 thinking_chars=0 think_leak_in_content=False done=True done_reason=stop content_chars=6504
+harness rc=0 wall=38s
+clone HEAD == pinned tip 48e65c43517926da6f137993053c82c83e122f5d
+farmed /private/tmp/claude-501/night/clone_ks864/Blockchain/Dev/node_modules: 985 linked, 3 skipped (real clone-local dirs instead)
+farmed /private/tmp/claude-501/night/clone_ks864/Blockchain/Dev/node_modules/@secuura: 31 linked, 1 skipped (real clone-local dirs instead)
+@secuura/shared -> ../../packages/shared (clone-local)
+farmed /private/tmp/claude-501/night/clone_ks864/Blockchain/Dev/services/api-gateway/node_modules: 7 linked, 2 skipped (real clone-local dirs instead)
+farmed /private/tmp/claude-501/night/clone_ks864/Blockchain/Dev/packages/shared/node_modules: 7 linked, 2 skipped (real clone-local dirs instead)
+shared built in clone: 28 dist entries
+source checkout tracked-modified count after prepare: 0 (must equal what it was before — the caller compares)
+prepare_clone rc=0
+checker rc=1 wall=9s
+PASS A1 output is exactly one fenced ```diff block, nothing outside it
+PASS A2 diff applies at the tip — with an accommodation: [Blockchain/Dev/services/api-gateway/src/routes/system-status.ts: REANCHORED — the model's context lines did not match the file; every hunk rebuilt from its -/+ lines at the file's real location (hunk 1: reanchored on the whole OLD SIDE at 37-53 (the '-' lines were not one run);hunk 2: reanchored at 231 (2 '-' / 1 '+' lines; model header -229,8 +227,7);hunk 3: reanchored at 242 (2 '-' / 1 '+' lines; model header -240,8 +237,7);hunk 4: reanchored at 253 (2 '-' / 1 '+' lines; model header -251,8 +247,7);reanchored 4/4 hunk(s);); strict rc=1 lenient rc=1 fuzzy rc=1] [Blockchain/Dev/services/api-gateway/src/__tests__/ks864-dead-estate-pointers-in-runtime-source.test.ts: --recount --ignore-whitespace needed; miscounted hunks=1; strict rc=128]
+PASS A3 touched-file set == { Blockchain/Dev/services/api-gateway/src/routes/system-status.ts , Blockchain/Dev/services/api-gateway/src/__tests__/ks864-dead-estate-pointers-in-runtime-source.test.ts }
+PASS A3b every must_change site the ticket names is changed by the product hunk (5 site(s))
+PASS A4 RED-FIRST: src/__tests__/ks864-dead-estate-pointers-in-runtime-source.test.ts fails at the untouched tip (2 failed / 3 run; controls green; assertion reds)
+FAIL A5 GREEN-AFTER: src/__tests__/ks864-dead-estate-pointers-in-runtime-source.test.ts still red (or empty) after the product hunk (rc=1, 0 failed / 0 run): ['<LOAD
+FAIL A6 whole services/api-gateway suite: NEW red(s) vs the untouched tip (see suite_delta.out)
+FAIL A7 tsc --noEmit for services/api-gateway: rc=2 after the patch (baseline rc=0): src/routes/system-status.ts(230,7): error TS1136: Property assignment expected. src/routes/system-status.ts(231,15): error TS1005: ';' expected. src/routes/system-status.ts(232,13): error TS1005: ';' expected. src/routes/system-status.ts(233,13): error TS1005: ';' expected. src/routes/system-status.ts(234,3): error TS1109: Expression expected. 
+SUMMARY files=2 +94/-11 test=src/__tests__/ks864-dead-estate-pointers-in-runtime-source.test.ts red_first=yes apply_mode=lenient
+RESULT: FAIL (3 failed)
+source checkout tracked-modified: before=0 after=0 (must be equal)
+== 2026-09-15 13:02:52 end KS-864 verdict=RESULT: FAIL (3 failed)
