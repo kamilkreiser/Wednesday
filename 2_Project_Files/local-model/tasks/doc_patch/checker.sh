@@ -60,6 +60,14 @@ import json,re,sys
 inp=json.load(open(sys.argv[1])); before=open(sys.argv[2],encoding="utf-8").read().split("\n"); after=open(sys.argv[3],encoding="utf-8").read().split("\n"); patch=open(sys.argv[4],encoding="utf-8").read()
 req=inp["defect_line"]["required"]; fails=0
 def section(lines, sub):
+    # 2026-09-15 23:2x (KS-1045 Part B, row 93): a brief may name the document's `# ` TITLE as the section — the
+    # preamble between the title and the first `## ` had no name, so an edit there could not be proved. A `sub`
+    # beginning `# ` (one hash) matches a `# ` line and runs to the next heading of ANY level; `## ` names are unchanged.
+    if sub.startswith("# "):
+        start=next((i for i,l in enumerate(lines) if l.startswith("# ") and not l.startswith("## ") and sub in l), None)
+        if start is None: return None
+        end=next((i for i in range(start+1,len(lines)) if lines[i].startswith("#")), len(lines))
+        return start,end
     start=next((i for i,l in enumerate(lines) if l.startswith("## ") and sub in l), None)
     if start is None: return None
     end=next((i for i in range(start+1,len(lines)) if lines[i].startswith("## ")), len(lines))
