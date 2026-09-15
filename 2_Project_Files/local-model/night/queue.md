@@ -117,3 +117,8 @@ KS-1120 product=Blockchain/Dev/services/vc-issuer/src/routes/presentations.ts re
 # second ten — the DEFAULT told to Kam 12:0x: the fixed-brief fails re-run on q4 (KS-1050, KS-908); KS-864/KS-1018 go on q8 by a later batch
 KS-1050 product=Blockchain/Dev/services/auth/src/routes/users.ts ref=Blockchain/Dev/services/auth/src/__tests__/ks1013-admin-patch-malformed-id.test.ts line=933 ctx=49152
 KS-908 product=Blockchain/Dev/services/security/src/index.ts ref=Blockchain/Dev/services/security/src/__tests__/ks742-keys-tenancy-route-contract.test.ts line=1149 ctx=49152
+# q8 half of the second ten — run with NIGHT_MODEL=ornith:35b-q8_0 NIGHT_MIN_FREE_GB=45 AFTER the q4 lines above are done (the loop job runs q4 by default; a hand launch with the q8 env is needed for these — one model at a time)
+#Q8 KS-864 product=Blockchain/Dev/services/api-gateway/src/routes/system-status.ts ref=Blockchain/Dev/services/api-gateway/src/__tests__/csrf.test.ts line=48 ctx=49152
+#Q8 KS-1018 product=Blockchain/Dev/services/auth/src/routes/users.ts ref=Blockchain/Dev/services/auth/src/__tests__/ks1013-admin-patch-malformed-id.test.ts line=1183 ctx=49152
+#Q8 KS-1120 product=Blockchain/Dev/services/vc-issuer/src/routes/presentations.ts ref=Blockchain/Dev/services/vc-issuer/src/__tests__/ks1020-presentation-lookup-exact-or-404.test.ts line=128 ctx=49152
+#Q8 KS-1171 product=Blockchain/Dev/services/anchoring/src/anchorSubmission.ts ref=Blockchain/Dev/services/anchoring/src/__tests__/ks726-gate-f1-unreachable-chain.test.ts line=260 ctx=49152
