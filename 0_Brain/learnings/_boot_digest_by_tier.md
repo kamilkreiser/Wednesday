@@ -7,7 +7,7 @@ status: live
 
 # Boot digest BY TIER — W whole, M rules-only, every project case a handle
 
-Generated 2026-09-15 15:09 from 168 lesson files (849,565 B). M 33 · MIXED 5 · W 130. 28 project CASE sections inside MIXED files are reduced to one line each: the heading and the path to read it at. W blocks are exactly what the default digest carries; M blocks drop the section index and keep the rules; a P file is a single handle. The CASES behind every rule live only in the lesson files — open one the moment its rule fires.
+Generated 2026-09-15 16:37 from 169 lesson files (852,737 B). M 33 · MIXED 5 · W 131. 28 project CASE sections inside MIXED files are reduced to one line each: the heading and the path to read it at. W blocks are exactly what the default digest carries; M blocks drop the section index and keep the rules; a P file is a single handle. The CASES behind every rule live only in the lesson files — open one the moment its rule fires.
 
 ## The T9 SSD is the master — Wednesday must be fully portable
 `2026-07-31_fully-portable-drive.md` · principle · 2026-07-31 · status: superseded — the "T9 is the master" half by [[2026-08-25_one-drive-devmaster-is-master]] (2026-08-25); the portability principle itself still lives · tier: W
@@ -5755,4 +5755,19 @@ the verb: "going forward" — and here he also named today's set explicitly).
 5. **Score the mechanism, not the model** at the weekly consolidation: rows added, arms fired, PASS rate per brief-vs-ticket — the DGM guard (adoption ≠ improvement) applies to Ornith's harness like any other.
 
 **Family:** [[2026-09-14_ornith-runs-at-night-in-the-downtime-a-standing-rule]] (the grant this extends) · [[2026-09-14_local-model-pilot-grant-qwen3-30b-simple-checked-tasks-only]] · [[2026-08-07_a-check-that-cannot-fail]] (every rule needs a checker twin with a red arm) · [[2026-08-14_i-read-representations-they-read-sources]] (a FAIL verdict is a representation of a run; read the run) · [[2026-09-14_the-coordinator-adds-value-or-it-is-waste-three-duties-not-watching]] (duty 3: commission what makes the output first-rate — here, the improvement itself) · [[2026-08-03_go-slow-earn-autonomy]] (rule 5: recorded).
+
+
+## Grant: the SMALL quant only for the rest of the week; complete as many tickets as possible with the local LLM; QA Sunday night and merge / commit all at once
+`2026-09-15_ornith-q4-only-volume-week-qa-sunday-merge-once.md` · grant · 2026-09-15 · status: live · tier: W
+
+**His words, verbatim (2026-09-15 16:36:04):**
+> *"ok. lets use the smaller model for the rest of the week. complete as many tickets as possible. work with the local LLM. we will do QA on these Sunday night and merge / commit all at once"*
+
+**How to apply:**
+1. `NIGHT_MODEL=ornith:35b` everywhere (the runner's default); no q8 launches; the pair table stays frozen at 13.
+2. The Backlog/Todo sweep for candidates is re-run by every seat (`board_count.sh` for totals; the 308 of 15:5x is the measured baseline); briefs per the HOW-TO-WRITE-A-BRIEF rules in NEXT-PICKUP (split > 3 edits; list the declarations; `statement_ok`; text-to-copy; shell-stamped clock via `night/new_brief.sh`); RETRY-ONCE handles the neighbour-slip class.
+3. The Sunday plan is a SEAT with a brief: `fleet/briefs_staged/secuura_raise_ornith_ready_diffs.md` (staged 15:5x) grows with every new READY; QA = the tiered gate per PR; merges one at a time on Wednesday's GO under the TESTED grant (re-check its expiry — it was "for the time being").
+4. **Expiry:** recorded in [[../tasks/EXPIRING-GRANTS]]; after Sunday the 09-14 night rule and contract return unless he renews.
+
+**Family:** [[2026-09-14_ornith-runs-at-night-in-the-downtime-a-standing-rule]] · [[2026-09-15_ornith-every-issue-gets-a-tooling-or-instruction-fix]] · [[2026-09-14_at-90pct-weekly-usage-no-new-agents-wednesday-plus-local-model]] · [[2026-09-06_a-scoped-override-carries-its-own-expiry]] · [[2026-08-03_go-slow-earn-autonomy]] (rule 5).
 

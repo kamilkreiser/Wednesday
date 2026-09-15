@@ -2497,3 +2497,8 @@ Done with it: Dynamics → Kam's team decision (no action); QuickQuote masthead/
 > Thanks, but no need to keep to time for the rest of this week. Rotate and implement whenever things are ready to do so.
 
 *Note:* 22:13:42 view=wednesday — the daily rhythm relaxed for the week (through Sun 2026-09-20, Wednesday's reading); rotate + implement whenever ready; receipted
+
+## 2026-09-15 16:37 — Kam (dashboard chat, verbatim)
+> ok. lets use the smaller model for the rest of the week. complete as many tickets as possible. work with the local LLM. we will do QA on these Sunday night and merge / commit all at once
+
+*Note:* Filed as the q4-only / volume / Sunday-QA grant (W tier, expires end of Sunday 2026-09-20); Wednesday reading put back 16:37 (auth/MFA/OAuth product edits held until named); first widened batch queued.

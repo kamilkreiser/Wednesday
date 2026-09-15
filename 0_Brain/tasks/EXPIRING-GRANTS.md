@@ -6,6 +6,7 @@ permanent change nobody decided to make. Every seat reads this at boot; an entry
 
 | grant | given | EXPIRES | scope, exactly |
 |---|---|---|---|
+| **Ornith q4 ONLY; volume across the whole KS Backlog/Todo; QA Sunday night, merge all at once** | Kam, panel 2026-09-15 16:36:04 *"lets use the smaller model for the rest of the week. complete as many tickets as possible. work with the local LLM. we will do QA on these Sunday night and merge / commit all at once"* | **end of SUNDAY 2026-09-20** (derived: 2026-09-20 is a Sunday) | held diffs only until Sunday's QA; auth/MFA/OAuth product edits stay out until he names them (Wednesday's reading 16:37). Lesson: `learnings/2026-09-15_ornith-q4-only-volume-week-qa-sunday-merge-once.md` |
 | **We approve and merge our own TESTED Platform K work** | Kam, panel 2026-09-11 16:56:00 *"For the time being, I / you will approve our own elements"* + 16:56:44 *"based on this.  FIx and merge all tickets after they are tested"* (on Stuart's forwarded proposal) | **OPEN-ENDED — "for the time being"; stands until Kam withdraws it** | Approval = Kam or Wednesday's GO after the QA gate at head + Test Evidence; squash, author merges; kintsugi gets merged work; **demo = UAT, waits for Peter's formal test and nod (narrows the week deploy grant's demo half — told to Kam)**; raise-to-1 stays unapplied. Platform K only. `learnings/2026-09-11_secuura-we-approve-and-merge-our-own-tested-work.md` |
 
 ⚠ **ASSUMPTION ON THE DATE, FLAGGED TO KAM 2026-09-10 15:2x AND NOT YET CORRECTED:** "end of the
