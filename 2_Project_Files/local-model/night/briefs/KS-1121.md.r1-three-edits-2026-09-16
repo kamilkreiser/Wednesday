@@ -1,0 +1,101 @@
+# KS-1121 — Wednesday's task for Ornith (written 07:10 on 2026-09-16 from the file at develop M55 `48e65c435`: `services/vc-issuer/src/repositories/credentialRepo.ts` lines 1–110 and 228–248 read whole; the test to MODIFY `src/__tests__/credentialRepo.test.ts` lines 1–75 read whole; the reference `src/__tests__/ks1020-presentation-lookup-exact-or-404.test.ts` is the same fix on presentations, #966) — **VITEST service** — **KAM RULED 2026-09-16 07:01 (card `secuura-ornith-decision-class-tickets-1121-629-975`, option a): "delete the substring branch exactly as #966 did for presentations (exact-or-404) and flip the one pinned test."**
+
+## What is wrong (one paragraph)
+`credentialRepo.getById` (`:75-108`) resolves a credential by its exact id and then, finding nothing, by SUBSTRING: on the DB path a second query `WHERE id LIKE $1 LIMIT 1` with `` `%${id}%` `` (`:87-92`), on the memory path a `key.includes(id) || value.id.includes(id)` scan (`:102-106`). Its JSDoc (`:73`) documents this as intended. Two routes sit on it — `GET /api/credentials/:id` and `POST /api/credentials/:id/revoke` (`revoke()` at `:235` calls `getById` and then rewrites `credentialStatus.revoked = true`) — so a fragment returns, or REVOKES, an arbitrary credential. PR #966 deleted the identical shape from `routes/presentations.ts:getPresentation` (KS-1020); the existing test `credentialRepo.test.ts:59-64` pins the substring lookup as intended, so this is the same deletion PLUS the pin flipped. **This task: THREE product edits (the JSDoc line; the DB LIKE block; the memory includes scan) and the EXISTING test file MODIFIED — the pin cell replaced by three 🔴 cells (fragments → undefined on the memory path; revoke on a fragment mutates nothing; DB path costs ONE lookup and never a LIKE).** NOT in this task: `routes/credentials.ts`, ownership (KS-1116), `revoke()` itself (:231-247 stays — it inherits the exact lookup).
+
+## The exact change — THREE edits in `Blockchain/Dev/services/vc-issuer/src/repositories/credentialRepo.ts`
+E1 — line 73, ONE-LINE REPLACEMENT (context: line 72 is `/**`, line 74 is ` */` — copy both from the file as context):
+```
+- * Retrieve a credential by its full ID, or by a partial-match substring.
++ * Retrieve a credential by its EXACT id. KS-1121 (the KS-1020 rule, #966): the LIKE fallback and the
++ * includes() scan are deleted — there is no legitimate caller who knows a fragment of an id and not the id.
+```
+E2 — DELETE lines 86–92 (a blank line, the `// Partial match` comment, the LIKE query and its `if`) — SEVEN `-` lines, NO `+` line (context: line 85 is `      if (result.rows.length > 0) return result.rows[0].credential;`, line 93 is `    } catch (err: any) {` — copy both from the file as context):
+```
+       if (result.rows.length > 0) return result.rows[0].credential;
+-
+-      // Partial match
+-      result = await query<{ credential: SecuuraCredential }>(
+-        'SELECT credential FROM vc_credentials_store WHERE id LIKE $1 LIMIT 1',
+-        [`%${id}%`],
+-      );
+-      if (result.rows.length > 0) return result.rows[0].credential;
+     } catch (err: any) {
+```
+E3 — DELETE lines 101–106 (a blank line and the five-line `for` scan) — SIX `-` lines, NO `+` line (context: line 100 is `  if (exact) return exact;`, line 107 is `  return undefined;` — copy both from the file as context):
+```
+   if (exact) return exact;
+-
+-  for (const [key, value] of memoryStore.entries()) {
+-    if (key.includes(id) || value.id.includes(id)) {
+-      return value;
+-    }
+-  }
+   return undefined;
+```
+Leave `let result` at `:80` as it is (a `let` that is assigned once compiles; do not touch it). Do NOT touch `ensureTable` (:28-41), `store`, `revoke` (:231-247), or any other function.
+
+## THIS IS VITEST, NOT JEST
+`repo.test_runner` begins with `vitest`: `vi.mock(...)`, `vi.fn()`, `vi.mocked(...)`, and `describe/it/expect/vi/beforeEach` imported from `'vitest'` — the existing file already does all of this (its line 6). No `jest.*`.
+
+## The test — MODIFY THE EXISTING FILE `Blockchain/Dev/services/vc-issuer/src/__tests__/credentialRepo.test.ts` (its FULL content is in files[...]; your test section is `--- a/…` / `+++ b/…` with context lines copied byte-for-byte; do NOT create a new file, do NOT use `--- /dev/null`)
+T1 — INSERT one import line immediately AFTER line 19 (context: line 19 is `import * as repo from '../repositories/credentialRepo';`, line 20 is blank, line 21 is `function makeCredential(overrides: Record<string, unknown> = {}) {`). The `vi.mock('../db', …)` at lines 10–13 is hoisted above every import, so this import receives the mocked `vi.fn()`s:
+```
+ import * as repo from '../repositories/credentialRepo';
++import { isDbAvailable, query } from '../db';
+ 
+ function makeCredential(overrides: Record<string, unknown> = {}) {
+```
+T2 — REPLACE lines 59–64 (the pinned substring cell, SIX `-` lines: `  it('getById supports partial-match substring lookup', async () => {` through its closing `  });`) with the three cells below, verbatim (context: line 58 is blank — the line after the round-trip cell's `  });` at :57 — and line 65 is blank, line 66 is `  it('getById returns undefined for a totally absent id', async () => {`):
+```
+-  it('getById supports partial-match substring lookup', async () => {
+-    const c = makeCredential({ id: 'urn:vc:abcdef-1234' });
+-    await repo.store(c);
+-    const got = await repo.getById('abcdef');
+-    expect(got?.id).toBe('urn:vc:abcdef-1234');
+-  });
++  it('🔴 KS-1121 — getById resolves a credential by its EXACT id only: every fragment is undefined', async () => {
++    const c = makeCredential({ id: 'urn:vc:abcdef-1234' });
++    await repo.store(c);
++    expect((await repo.getById(c.id))?.id).toBe('urn:vc:abcdef-1234');
++    for (const fragment of ['abcdef', 'urn:vc:abc', '1234', 'bcde', 'urn:vc:abcdef-123', '%', '_']) {
++      expect(await repo.getById(fragment), `fragment ${fragment}`).toBeUndefined();
++    }
++  });
++
++  it('🔴 KS-1121 — revoke on a fragment returns undefined and mutates nothing', async () => {
++    const c = makeCredential({ id: 'urn:vc:revoke-target-5678' });
++    await repo.store(c);
++    expect(await repo.revoke('revoke-target', 'fragment')).toBeUndefined();
++    expect((await repo.getById(c.id))?.credentialStatus?.revoked).toBe(false);
++  });
++
++  it('🔴 KS-1121 — DB path: an unknown id costs exactly ONE lookup query, and it is never a LIKE', async () => {
++    vi.mocked(isDbAvailable).mockReturnValue(true);
++    vi.mocked(query).mockResolvedValue({ rows: [] } as any);
++    try {
++      expect(await repo.getById('abcdef')).toBeUndefined();
++      const lookups = vi.mocked(query).mock.calls.map((call) => String(call[0])).filter((sql) => /SELECT credential/i.test(sql));
++      expect(lookups).toHaveLength(1);
++      expect(lookups[0]).not.toMatch(/ LIKE /i);
++    } finally {
++      vi.mocked(isDbAvailable).mockReturnValue(false);
++      vi.mocked(query).mockReset();
++    }
++  });
+```
+Why each is red at the untouched tip: cell 1 — `getById('abcdef')` finds `urn:vc:abcdef-1234` by `includes()`, so the first `toBeUndefined()` fails by assertion; cell 2 — `revoke('revoke-target')` resolves the credential by substring, revokes it and returns it (defined), so `toBeUndefined()` fails, and `revoked` is then `true`; cell 3 — the tip issues the exact SELECT and then the LIKE SELECT (two lookups; `ensureTable`'s CREATE TABLE is filtered out by the `/SELECT credential/` filter), so `toHaveLength(1)` fails. After E1–E3 all three pass; the existing `'store + getById round-trips a credential'` (:51-57) and `'getById returns undefined for a totally absent id'` (:66-69) cells are the CONTROLS — green on both trees, untouched.
+
+## Where (parsed into the checklist — every **must change** line must appear as a `-` line in your diff)
+* `:73` — **must change**: ` * Retrieve a credential by its full ID, or by a partial-match substring.`
+* `:88` — **must change**: `      result = await query<{ credential: SecuuraCredential }>(`
+* `:89` — **must change**: `        'SELECT credential FROM vc_credentials_store WHERE id LIKE $1 LIMIT 1',`
+* `:103` — **must change**: `    if (key.includes(id) || value.id.includes(id)) {`
+* `:80` — (correct) `      let result = await query<{ credential: SecuuraCredential }>(` — stays
+* `:85` — (correct) `      if (result.rows.length > 0) return result.rows[0].credential;` — stays (the exact match's return; E2's context)
+* `:100` — (correct) `  if (exact) return exact;` — stays (E3's context)
+* `:107` — (correct) `  return undefined;` — stays
+* `:235` — (correct) `  const credential = await getById(id);` — stays (revoke inherits the exact lookup)
+
+## Output
+Exactly ONE ```diff block with TWO files: `--- a/Blockchain/Dev/services/vc-issuer/src/repositories/credentialRepo.ts` / `+++ b/…` (E1, E2 and E3 as three hunks — or E2+E3 may share one hunk over :85–:107), then `--- a/Blockchain/Dev/services/vc-issuer/src/__tests__/credentialRepo.test.ts` / `+++ b/…` (T1 and T2 as two hunks); paths repo-relative; blank context lines keep their leading space; correct hunk counts.
