@@ -413,20 +413,6 @@ while [ "$TK" -le "$N_SEC" ]; do
   tp="$(python3 -c 'import json,sys; print(json.load(open(sys.argv[1]))[int(sys.argv[2])-1]["path"])' "$REP/sections.json" "$TK")"
   if [ "$tp" = "$TEST_FILE" ] || [ "$SUBDIR/$tp" = "$TEST_FILE" ]; then
     tf="$(sed -n 1p "$REP/section_$TK.opts")"; to="$(sed -n 2p "$REP/section_$TK.opts")"
-    # 2026-09-15 15:2x DECL-SPLICE (KS-1130 E7 twin, q8): the model copies the reference driver and PRUNES a file-scope
-    # `let` its copied helpers still read (`currentBlob`, `liveAnchorReply`) — every cell dies with a ReferenceError
-    # before an assertion runs. Where the reference declares it on one line, the harness restores it (decl_splice.py),
-    # named loudly; multi-line declarations are named as unrepairable, never guessed. Runs BEFORE the TDZ inline.
-    if [ -n "$REF_TEST" ] && [ -f "$CLONE/$REF_TEST" ]; then
-      python3 "$(dirname "$0")/decl_splice.py" "$tf" "$CLONE/$REF_TEST" "$REP/section_${TK}.decl.diff" > "$REP/decl_splice.out" 2>&1
-      if ! /usr/bin/grep -q "^spliced 0" "$REP/decl_splice.out"; then
-        tf="$REP/section_${TK}.decl.diff"
-        echo "$tf" > "$REP/section_$TK.opts"; echo "$to" >> "$REP/section_$TK.opts"
-        echo "A4 DECL-SPLICED (accommodation): $(tr '\n' ';' < "$REP/decl_splice.out")"
-      elif /usr/bin/grep -q "UNREPAIRABLE" "$REP/decl_splice.out"; then
-        echo "A4 DECL-SPLICE note: $(tr '\n' ';' < "$REP/decl_splice.out")"
-      fi
-    fi
     python3 "$(dirname "$0")/tdz_inline.py" "$tf" "$REP/section_${TK}.tdz.diff" > "$REP/tdz_inline.out" 2>&1
     if ! /usr/bin/grep -q "^inlined 0" "$REP/tdz_inline.out"; then
       echo "$REP/section_${TK}.tdz.diff" > "$REP/section_$TK.opts"; echo "$to" >> "$REP/section_$TK.opts"

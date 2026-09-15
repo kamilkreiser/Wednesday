@@ -1,0 +1,118 @@
+#!/usr/bin/env python3
+"""decl_splice.py <test-section.diff> <reference-test-file> <out.diff> — restore file-scope declarations the model
+pruned from its copy of the reference test.
+
+WHY (2026-09-15 14:59, KS-1130 E7 twin on q8): the brief says "copy the ks1057 driver VERBATIM through the helpers";
+the model copied `verifyViaAnchorStore` — including its `currentBlob = undefined;` reset — and dropped the
+`let currentBlob: … | undefined;` at file scope (reference :84) and the stub's `...(currentBlob ? …)` read (:116).
+Every cell, the CONTROL included, died with `ReferenceError: currentBlob is not defined` before an assertion ran. The
+E1 twin (held, q4) had pruned BOTH lines and so happened to run. A pruned declaration is a reflex the model applies
+inconsistently; where the reference declares the identifier on ONE line at file scope, the repair is mechanical.
+
+WHAT: for every file-scope `let|const|var NAME …;` (single line) in the REFERENCE file whose NAME is used in the new
+file's `+` lines (word-bounded, outside `//` comments) and NOT declared or imported there, the reference's declaration
+line is spliced in after the new file's last `import` line (all such declarations are module-level and referenced only
+at run time, so position after the imports is safe). The `@@ -0,0 +1,N @@` header is recounted. Multi-line
+declarations are NAMED as unrepairable, never guessed. Exit 0 always; prints `spliced N` (N=0 = byte-identical).
+"""
+import re
+import sys
+
+sec_path, ref_path, out_path = sys.argv[1], sys.argv[2], sys.argv[3]
+sec = open(sec_path, encoding="utf-8").read().split("\n")
+ref = open(ref_path, encoding="utf-8").read().split("\n")
+
+DECL = re.compile(r"^(?:export\s+)?(let|const|var)\s+([A-Za-z_$][\w$]*)\b")
+
+def single_line_decl(line: str) -> bool:
+    # ends the statement on this line: a ';' after balanced brackets, or a bare `let x: T;`
+    body = line.split("//")[0].rstrip()
+    if not body.endswith(";"):
+        return False
+    depth = 0
+    for ch in body:
+        if ch in "([{":
+            depth += 1
+        elif ch in ")]}":
+            depth -= 1
+    return depth == 0
+
+ref_decls = {}          # NAME -> (line_no, text) single-line only
+ref_multi = {}          # NAME -> line_no (multi-line — unrepairable here)
+for i, ln in enumerate(ref, 1):
+    m = DECL.match(ln)
+    if not m:
+        continue
+    name = m.group(2)
+    if single_line_decl(ln):
+        ref_decls.setdefault(name, (i, ln))
+    else:
+        ref_multi.setdefault(name, i)
+
+plus = [ln[1:] for ln in sec if ln.startswith("+") and not ln.startswith("+++")]
+new_text = "\n".join(plus)
+
+def declared_in_new(name: str) -> bool:
+    pat = re.compile(r"^\s*(?:export\s+)?(?:let|const|var|function|class|async\s+function)\s+" + re.escape(name) + r"\b")
+    imp = re.compile(r"^\s*import\b.*\b" + re.escape(name) + r"\b")
+    for b in plus:
+        if pat.match(b) or imp.match(b):
+            return True
+    return False
+
+def used_in_new(name: str) -> bool:
+    pat = re.compile(r"(?<![\w$.])" + re.escape(name) + r"(?![\w$])")
+    for b in plus:
+        code = b.split("//")[0]
+        if pat.search(code):
+            return True
+    return False
+
+missing = [n for n in ref_decls if used_in_new(n) and not declared_in_new(n)]
+unrepairable = [n for n in ref_multi if n not in ref_decls and used_in_new(n) and not declared_in_new(n)]
+
+if not missing:
+    open(out_path, "w", encoding="utf-8").write("\n".join(sec))
+    msg = "spliced 0"
+    if unrepairable:
+        msg += " — UNREPAIRABLE (multi-line in the reference, used and undeclared in the new file): " + ", ".join(
+            f"{n} (ref :{ref_multi[n]})" for n in unrepairable)
+    print(msg)
+    sys.exit(0)
+
+# find the insertion point: after the last '+import …' line (a multi-line import ends at the line containing ' from ')
+last_import_idx = -1
+for i, ln in enumerate(sec):
+    if ln.startswith("+") and re.match(r"^\+\s*import\b", ln):
+        last_import_idx = i
+        # multi-line import: advance to the line that closes it
+        if " from " not in ln and not re.search(r"^\+\s*import\s+['\"]", ln):
+            j = i
+            while j + 1 < len(sec) and " from " not in sec[j]:
+                j += 1
+            last_import_idx = j
+if last_import_idx < 0:
+    # no import lines: insert after the hunk header
+    for i, ln in enumerate(sec):
+        if ln.startswith("@@"):
+            last_import_idx = i
+            break
+
+insert = ["+" + ref_decls[n][1] for n in sorted(missing, key=lambda n: ref_decls[n][0])]
+out = sec[: last_import_idx + 1] + insert + sec[last_import_idx + 1 :]
+
+# recount the new-file hunk header
+hdr_re = re.compile(r"^@@ -0,0 \+1,(\d+) @@(.*)$")
+for i, ln in enumerate(out):
+    m = hdr_re.match(ln)
+    if m:
+        n_plus = sum(1 for x in out[i + 1 :] if x.startswith("+") and not x.startswith("+++"))
+        out[i] = f"@@ -0,0 +1,{n_plus} @@{m.group(2)}"
+        break
+
+open(out_path, "w", encoding="utf-8").write("\n".join(out))
+notes = "; ".join(f"{n} <- ref :{ref_decls[n][0]} {ref_decls[n][1].strip()[:60]}" for n in missing)
+msg = f"spliced {len(missing)} after line {last_import_idx + 1} of the section: {notes}"
+if unrepairable:
+    msg += " — UNREPAIRABLE: " + ", ".join(f"{n} (ref :{ref_multi[n]})" for n in unrepairable)
+print(msg)

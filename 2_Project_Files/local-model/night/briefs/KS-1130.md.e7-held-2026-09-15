@@ -1,0 +1,48 @@
+# KS-1130 — Wednesday's task for Ornith, F2, the E7 tier-2 twin ONLY (the E1 twin is already held), TEST-ONLY MODE (E7 twin written 14:58 from the held E1 brief; originally 12:07; REWRITTEN in the KS-1073 shape 12:37 after two placeholder outputs)
+
+## What is wrong (one paragraph)
+PR #969 (KS-1069) shipped three shape guards in `services/api-gateway/src/routes/verification.ts` — `persistedTxHashIsReal`
+(lines 614–617: a string, non-empty, not `tx_sim_`/`mock_tx_`/`tx_`), `persistedBlockHeightIsHeight` (line 622) and
+`persistedDeclaredSimulated` (line 627) — and 12 cells, EVERY one tier 1. The guards also bite on the TIER-2 blob
+synthesised from the anchor store (`txHash: latest.transactionHash`, `blockHeight: latest.blockNumber`,
+`simulated: latest.simulated` at lines 301, 302, 324), measured on 9 tier-2 defect rows, but no cell pins that. A
+regression that re-opened only the tier-2 read would not redden the suite. **The code is RIGHT at the tip. Nothing in
+the product changes. This task is the PIN: one new test file with the tier-2 twin of E7 — a `blockNumber` that is the STRING '4242' must be off-chain-only (the E1 twin is held; E3 is a third task).** The ticket's
+comment/polish items (P2, P3, the census wording) are NOT part of this task.
+
+## THE MODE — read this twice
+TEST-ONLY. Your diff contains EXACTLY ONE file: the new test file below. **No hunk for `verification.ts`.** The
+checker reddens your 🔴 cell by planting the tamper named at the bottom into a clone, then expects it GREEN at the
+untouched tip. A diff that touches `verification.ts` is refused at A3.
+
+## The test — one new vitest file, in-process, the ks1057 driver copied VERBATIM
+File: `services/api-gateway/src/__tests__/ks1130-tier2-e7-twin.test.ts`
+Copy `services/api-gateway/src/__tests__/ks1057-verify-confidence-is-status-aware.test.ts` from its first line through
+the end of `beforeAll`/`afterAll` (the stub originate server, the stub anchor store, the gateway app on a random port,
+`REAL_TX`, `DOC_ID`, `CONTENT_HASH`, the `verify(blob)` helper at line 189 and the `verifyViaAnchorStore(row)` helper
+at line 298 — including its `expect(body.blockchain.source).toBe('persisted')` guard). Drop every `it(...)` of the
+original; write these three:
+- 🔴 `it('🔴 KS-1130 E7 twin — a tier-2 row whose blockNumber is the STRING "4242" is off-chain-only')`:
+  `const body = await verifyViaAnchorStore({ transactionHash: REAL_TX, blockNumber: '4242', status: 'confirmed' });`
+  assert `body.verified === false` and `body.verificationConfidence === 'off-chain-only'`. (Under the tamper a string
+  height counts as a height → `'on-chain'` — the red. The tamper at :623 short-circuits :624-625 as well.)
+- 🔴 `it('🔴 KS-1130 E7 twin — the same string-height row reports blockchain.anchored false')`: same call; assert
+  `body.blockchain.anchored === false`. (Under the tamper: `true` — the red.)
+- CONTROL `it('KS-1130 control — a well-shaped confirmed tier-2 row still reports on-chain')`:
+  `await verifyViaAnchorStore({ transactionHash: REAL_TX, blockNumber: 4242, status: 'confirmed' })` →
+  `verified === true`, `'on-chain'` — green at the tip AND under the tamper.
+(The E7 and E3 twins the ticket also asks for are a SECOND task with their own tampers — not this one.)
+
+## Where (no product site changes — the list is informational)
+* `:622` — (correct) `    const persistedBlockHeightIsHeight =` — stays; the tamper corrupts line 623 below it
+* `:623` — (correct) `      typeof persistedBlockHeight === 'number' &&` — stays
+
+## Tamper (test-only mode — the checker plants this in a clone to prove the 🔴 cells can go red)
+line: 623
+from: `      typeof persistedBlockHeight === 'number' &&`
+to: `      (typeof persistedBlockHeight === 'number' || typeof persistedBlockHeight === 'string') && Number(persistedBlockHeight) > 0 ? true : false || // TAMPER (corrected 15:3x): a numeric string is accepted as a height — the ternary short-circuits lines 624-625 (`Number.isInteger(persistedBlockHeight) && persistedBlockHeight > 0`), which the v1 tamper left in force so a string could never pass; measured in node before this edit`
+statement_ok: :623 is the first clause of a three-line `const persistedBlockHeightIsHeight =` predicate (:623 `typeof === 'number' &&`, :624 `Number.isInteger(persistedBlockHeight) &&`, :625 `persistedBlockHeight > 0;`). The corrected `to` is a ternary whose true-branch short-circuits :624-625 (`… ? true : false || <624 && 625>`), measured in node 15:2x: '4242' → true, 4242 → true, '0'/-1/undefined → false. The v1 tamper left :624 in force and could never red. Read at M55 by Wednesday.
+
+## Output
+Exactly ONE ```diff block containing ONLY the new test file (`--- /dev/null` with NO leading space, then `+++ b/<path>`);
+path repo-relative (`Blockchain/Dev/services/api-gateway/src/__tests__/ks1130-…test.ts`); correct hunk counts.

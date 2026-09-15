@@ -354,27 +354,6 @@ if _brief_for_sites:
             refuse(f"tamper `from` does not match the tip: line {_tl} is {_lines[_tl-1]!r}, the brief says {m_f.group(1)!r}")
         if m_f.group(1).strip() == m_to.group(1).strip():
             refuse("tamper `to` equals `from` — a tamper that changes nothing cannot redden anything")
-        # 2026-09-15 15:3x STATEMENT GATE (ledger w=3, endorse-unread / authored-design: the KS-1130 E7 tamper at :623
-        # replaced `typeof … === 'number' &&` and left :624 `Number.isInteger(persistedBlockHeight) &&` in force, so a
-        # string could NEVER pass and the 🔴 cells could never red — one model round and a Wednesday read to find it,
-        # the third brief line this fortnight written from a grep hit without its enclosing lines). A `from` line that
-        # sits MID-STATEMENT — it ends with a continuation token, or the next non-blank tip line begins with one —
-        # requires a `statement_ok:` clause in the block: the writer names why the REST of the statement cannot veto
-        # the tamper. The gate cannot prove semantics; it forces the read that would have. Single-line statements pass.
-        _cont_end = re.compile(r"(&&|\|\||\?|:|,|\(|\[|\{|=|\+|-|\*|/|\.)\s*(//.*)?$")
-        _cont_start = re.compile(r"^\s*(&&|\|\||\?|:|\.|\)|\]|\})")
-        _from_code = re.sub(r"//.*$", "", m_f.group(1)).rstrip()
-        _next = ""
-        for _k in range(_tl, min(_tl + 3, len(_lines))):
-            if _lines[_k].strip():
-                _next = _lines[_k]; break
-        _mid = bool(_cont_end.search(_from_code)) or bool(_cont_start.match(_next)) or (not _from_code.rstrip().endswith((";", "{", "}", ")")) and _next.startswith(" ") and len(_next) - len(_next.lstrip()) > len(m_f.group(1)) - len(m_f.group(1).lstrip()))
-        m_ok = re.search(r"^\s*statement_ok:\s*(\S.*)$", blk, re.M)
-        if _mid and not m_ok:
-            _rest = "\n".join(_lines[_tl-1:_tl+3])
-            refuse("tamper `from` sits MID-STATEMENT (it continues on the next line) and the block carries no `statement_ok:` clause — read the whole statement at the tip and state why its remaining lines cannot veto the tamper (KS-1130 E7: :624 `Number.isInteger(...)` vetoed a :623 tamper). The statement as the tip has it:\n" + _rest)
-        if m_ok:
-            print(f"  tamper statement_ok: {m_ok.group(1).strip()[:120]}")
         tamper = {"line": _tl, "from": m_f.group(1), "to": m_to.group(1),
                   "rule": "TEST-ONLY MODE: emit ONLY the new test file (no product hunk). The checker reddens your cells by replacing this product line with `to` in a clone, then expects them GREEN at the untouched tip."}
         print(f"  TEST-ONLY tamper from the brief: {product_rel}:{_tl} {m_f.group(1).strip()[:60]!r} -> {m_to.group(1).strip()[:60]!r}")
