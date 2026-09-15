@@ -1,0 +1,48 @@
+--- a/Blockchain/Dev/services/auth/src/routes/users.ts
++++ b/Blockchain/Dev/services/auth/src/routes/users.ts
+@@ -13,7 +13,8 @@
+ import { AuthenticatedRequest, User, UserRole, VerificationLevel, ADMIN_WRITABLE_STATUSES } from '../types';
+ import { authenticate, authenticateAccessOrConnector } from '../middleware/authenticate';
+ import { hashPassword, checkPasswordStrength, verifyPassword } from '../services/password';
+-import { BadRequestError, NotFoundError, ValidationError } from '../middleware/errorHandler';
++import { BadRequestError, NotFoundError, ServiceUnavailableError, ValidationError } from '../middleware/errorHandler'; // KS-1018: rethrow infra errors as 503
++import { isInfrastructureDbError } from '../repositories/dbErrors'; // KS-1018: predicate for infra-error detection
+ import { logger } from '../utils/logger';
+ import * as userRepo from '../repositories/userRepo';
+ import { revokeAllUserSessions } from '../services/session';
+@@ -1180,7 +1180,10 @@
+           rejectionReason: r.rejection_reason || undefined,
+         };
+       }
+-    } catch { /* fall through */ }
++    } catch (err: any) { // KS-1018: name the error and rethrow infrastructure failures as 503
++      logger.error('DB getVerificationRequest failed', { error: err?.message, code: err?.code });
++      if (isInfrastructureDbError(err)) throw new ServiceUnavailableError('Authentication service temporarily unavailable, please retry');
++    }
+   }
+   return memVerificationRequests.get(id) || null;
+ }
+@@ -1201,7 +1201,10 @@
+         };
+       }
+       return null;
+-    } catch { /* fall through */ }
++    } catch (err: any) { // KS-1018: name the error and rethrow infrastructure failures as 503
++      logger.error('DB findPendingVerificationRequest failed', { error: err?.message, code: err?.code });
++      if (isInfrastructureDbError(err)) throw new ServiceUnavailableError('Authentication service temporarily unavailable, please retry');
++    }
+   }
+   return Array.from(memVerificationRequests.values()).find(
+     r => r.userId === userId && r.status === 'PENDING'
+@@ -1223,7 +1223,10 @@
+         reviewedBy: r.reviewed_by || undefined,
+         rejectionReason: r.rejection_reason || undefined,
+       }));
+-    } catch { /* fall through */ }
++    } catch (err: any) { // KS-1018: name the error and rethrow infrastructure failures as 503
++      logger.error('DB listUserVerificationRequests failed', { error: err?.message, code: err?.code });
++      if (isInfrastructureDbError(err)) throw new ServiceUnavailableError('Authentication service temporarily unavailable, please retry');
++    }
+   }
+   return Array.from(memVerificationRequests.values())
+     .filter(r => r.userId === userId)

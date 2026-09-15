@@ -1,0 +1,52 @@
+--- a/Blockchain/Dev/services/api-gateway/src/routes/system-status.ts
++++ b/Blockchain/Dev/services/api-gateway/src/routes/system-status.ts
+@@ -38,16 +38,14 @@ interface DependencyDefinition {
+   required: boolean;
+ }
+ 
+-const getServiceUrl = (envVar: string, localPort: number, azureServiceName?: string): string => {
++// KS-864: rename to underscore-prefixed so noUnusedParameters accepts it.
++const getServiceUrl = (envVar: string, localPort: number, _azureServiceName?: string): string => {
+   // Check for explicit environment variable first
+   const envUrl = process.env[envVar];
+   if (envUrl) return envUrl;
+   
+-  // In Azure staging, use internal URLs
+-  if (process.env.NODE_ENV === 'staging' && azureServiceName) {
+-    return `https://${azureServiceName}.internal.ashypond-b460d1a1.westeurope.azurecontainerapps.io`;
+-  }
++  // KS-864: the Azure staging estate is decommissioned — URLs come from the env var above or the local default.
+   
+   // Default to localhost for development
+   return `http://localhost:${localPort}`;
+ };
+@@ -228,8 +228,7 @@
+     name: 'issuer-portal',
+     description: 'Document issuer web application',
+     port: 8882,
+-    url: process.env.NODE_ENV === 'staging' 
+-      ? 'https://secuura-staging-issuer.ashypond-b460d1a1.westeurope.azurecontainerapps.io'
++    url: process.env.ISSUER_PORTAL_URL || 'http://issuer-frontend:80',
+       : (process.env.ISSUER_PORTAL_URL || 'http://issuer-frontend:80'),
+     healthPath: '/',
+     category: 'frontend',
+@@ -239,8 +239,7 @@
+     name: 'verifier-portal',
+     description: 'Document verification web application',
+     port: 8882,
+-    url: process.env.NODE_ENV === 'staging'
+-      ? 'https://secuura-staging-verifier.ashypond-b460d1a1.westeurope.azurecontainerapps.io'
++    url: process.env.VERIFIER_PORTAL_URL || 'http://verifier-frontend:80',
+       : (process.env.VERIFIER_PORTAL_URL || 'http://verifier-frontend:80'),
+     healthPath: '/verify/',
+     category: 'frontend',
+@@ -250,8 +250,7 @@
+     name: 'admin-portal',
+     description: 'Enterprise administration dashboard',
+     port: 8882,
+-    url: process.env.NODE_ENV === 'staging'
+-      ? 'https://secuura-staging-admin.ashypond-b460d1a1.westeurope.azurecontainerapps.io'
++    url: process.env.ADMIN_PORTAL_URL || 'http://admin-frontend:80',
+       : (process.env.ADMIN_PORTAL_URL || 'http://admin-frontend:80'),
+     healthPath: '/admin/',
+     category: 'frontend',

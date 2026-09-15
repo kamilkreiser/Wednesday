@@ -1,0 +1,34 @@
+mode: test_only (tamper at Blockchain/Dev/services/anchoring/src/anchorSubmission.ts:260)
+diff_blocks=1 all_blocks=1 prose_outside_chars=0
+wrote /Volumes/DevMASTER/WEDNESDAY/2_Project_Files/local-model/runs/2026-09-15_ks1171-ornith35b-q8_0-night/out.md.checker/patch.diff lines=111
+PASS A1 output is exactly one fenced ```diff block, nothing outside it
+quarantined untracked Blockchain/Dev/services/anchoring/src/__tests__/ks1171-8j-confirmed-wins-over-polled-zero.test.ts -> /private/tmp/claude-501/night/clone_ks1171/../quarantine/20260915-122944
+clone clean at pinned tip 48e65c43517926da6f137993053c82c83e122f5d
+--- baseline at the untouched tip (whole services/anchoring suite + tsc)
+baseline suite rc=1 total=238 passed=237 failed=1 suites_failed=2 loaded=1 failed_names=['threadTokenMint emulator round-trip parameterises mint + spend with a deterministic per-seed policyId']
+baseline tsc rc=0 (0 lines)
+section 1 Blockchain/Dev/services/anchoring/src/__tests__/ks1171-guard-3-s-re-poll-reads.test.ts: hunk 1 (@@ -0,0 +1,105 @@) declared old=0 new=105 but actual old=0 new=108
+sections=1 miscounted_sections=1
+section 1 Blockchain/Dev/services/anchoring/src/__tests__/ks1171-guard-3-s-re-poll-reads.test.ts: applies ONLY with --recount --ignore-whitespace (miscounted hunks=1, strict rc=0)
+PASS A2 diff applies at the tip — with an accommodation: [Blockchain/Dev/services/anchoring/src/__tests__/ks1171-guard-3-s-re-poll-reads.test.ts: --recount --ignore-whitespace needed; miscounted hunks=1; strict rc=0]
+touched files (1): Blockchain/Dev/services/anchoring/src/__tests__/ks1171-guard-3-s-re-poll-reads.test.ts  (+108/-0)
+PASS A3 (test-only) touched-file set == { Blockchain/Dev/services/anchoring/src/__tests__/ks1171-guard-3-s-re-poll-reads.test.ts } — the product file is untouched, as the ticket requires
+A3b: no must_change sites in the input — skipped
+A4 (test-only): tampered /private/tmp/claude-501/night/clone_ks1171/Blockchain/Dev/services/anchoring/src/anchorSubmission.ts:260: '      if (confirmation.confirmed) {' -> '      if (confirmation.confirmed && confirmation.polled !== 0) {'
+test-only at tip: rc=1 total=3 passed=1 failed=2 suites_failed=2 loaded=1 failed_names=['KS-1171 — confirmed:true with polled:0 confirms the row at the tip (test-only mode) 🔴 KS-1171 8j — an injected confirmed:true with polled 0 CONFIRMS the row', 'KS-1171 — confirmed:true with polled:0 confirms the row at the tip (test-only mode) 🔴 KS-1171 8j — no "never reached the chain" log when the transaction was found']
+A4 (test-only): tamper reverted (Blockchain/Dev/services/anchoring/src/anchorSubmission.ts back to the tip)
+PASS A4 RED-FIRST: src/__tests__/ks1171-guard-3-s-re-poll-reads.test.ts fails at the untouched tip (2 failed / 3 run; controls green; assertion reds)
+test after product hunk: rc=0 total=3 passed=3 failed=0 suites_failed=0 loaded=1 failed_names=[]
+PASS A5 GREEN-AFTER: src/__tests__/ks1171-guard-3-s-re-poll-reads.test.ts passes with the product hunk (3 passed / 3 run)
+INFO control cell present: 1 cell(s) passed BEFORE and 3 AFTER (the harness reaches the code both times)
+after suite rc=1 total=241 passed=240 failed=1 suites_failed=2 loaded=1 failed_names=['threadTokenMint emulator round-trip parameterises mint + spend with a deterministic per-seed policyId']
+baseline: total=238 failed=1 | after: total=241 failed=1
+develop's own reds (attributed, not counted): [('threadTokenMint.test.ts', 'threadTokenMint emulator round-trip parameterises mint + spend with a deterministic per-seed policyId')]
+NEW reds: []
+reds fixed by the patch: []
+tests added: 3
+PASS A6 whole services/anchoring suite: no NEW red vs the untouched tip
+PASS A7 tsc --noEmit for services/anchoring: rc 0 after the patch (baseline rc=0)
+INFO tsc on the test file alone: rc=2 (3 lines; not gated — vitest does not type-check and the service tsconfig excludes __tests__)
+SUMMARY files=1 +108/-0 test=src/__tests__/ks1171-guard-3-s-re-poll-reads.test.ts red_first=yes apply_mode=lenient
+RESULT: PASS (7/7)

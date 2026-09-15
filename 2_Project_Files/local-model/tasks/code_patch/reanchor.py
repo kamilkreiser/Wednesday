@@ -72,6 +72,32 @@ def rebuild(hunk, file_lines, notes, idx):
     ctx = [b[1:] for b in body if b.startswith(" ")]
     if minus:
         hits = find_block(file_lines, minus)
+        blank_span = None
+        if len(hits) == 0:
+            # 2026-09-15 (KS-864 q8 ×2): the model DROPS blank lines from a '-' block (the four staging lines
+            # follow the signature line with the file's empty line 45 omitted). Match the NON-BLANK '-' lines
+            # in order, allowing only blank FILE lines between them; the real span (blanks included) becomes
+            # the '-' block, so the rebuilt hunk removes exactly what the file holds there.
+            nb = [m for m in minus if m.strip()]
+            if nb:
+                cands = []
+                for s0 in range(len(file_lines)):
+                    if file_lines[s0].rstrip() != nb[0].rstrip():
+                        continue
+                    k = 0; pos = s0
+                    while pos < len(file_lines) and k < len(nb):
+                        if file_lines[pos].rstrip() == nb[k].rstrip():
+                            k += 1; pos += 1
+                        elif not file_lines[pos].strip():
+                            pos += 1
+                        else:
+                            break
+                    if k == len(nb):
+                        cands.append((s0, pos))
+                if len(cands) == 1:
+                    blank_span = cands[0]
+                    hits = [blank_span[0]]
+                    notes.append(f"hunk {idx}: '-' block matched with the model's dropped blank line(s) restored from the file (span {blank_span[0]+1}-{blank_span[1]})")
         if len(hits) == 0:
             notes.append(f"hunk {idx}: ambiguous — the {len(minus)} '-' line(s) occur 0x in the file; kept as written")
             return None
@@ -87,6 +113,11 @@ def rebuild(hunk, file_lines, notes, idx):
         # where do the '+' lines sit relative to the '-' block? keep the model's ordering of -/+ within the body
         mid = [b for b in body if b.startswith("-") or b.startswith("+")]
         end = start + len(minus)
+        if blank_span is not None:
+            end = blank_span[1]
+            minus = file_lines[start:end]
+            plus_only = [b for b in body if b.startswith("+")]
+            mid = ["-" + l for l in minus] + plus_only
     else:
         # insert-only: anchor on the first non-blank context line BEFORE the '+' block, else AFTER it
         before, after = [], []
