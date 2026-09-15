@@ -62,6 +62,67 @@ def find_block(file_lines, block):
     return hits
 
 
+def span_match(file_lines, seq):
+    """unique (start,end) span where seq's NON-BLANK lines occur in order with only blank FILE lines between; None if not unique"""
+    nb = [m for m in seq if m.strip()]
+    if not nb:
+        return None
+    cands = []
+    for s0 in range(len(file_lines)):
+        if file_lines[s0].rstrip() != nb[0].rstrip():
+            continue
+        k = 0; pos = s0; gap = 0
+        while pos < len(file_lines) and k < len(nb):
+            if file_lines[pos].rstrip() == nb[k].rstrip():
+                k += 1; pos += 1; gap = 0
+            elif not file_lines[pos].strip():
+                pos += 1
+            elif gap < 2:
+                gap += 1; pos += 1          # the model DROPPED a file line (a comment, usually) — tolerate up to 2 per gap
+            else:
+                break
+        if k == len(nb):
+            cands.append((s0, pos))
+    return cands[0] if len(cands) == 1 else None
+
+
+def rebuild_old_side(hunk, file_lines, notes, idx):
+    """2026-09-15 (KS-864 q8 ×2): '-' lines in TWO runs with context between them — anchor on the whole OLD SIDE
+    (context + '-'), blank-tolerant, and re-emit the hunk over the file's real span: context lines take the file's
+    text, '-' lines mark the file's line, '+' lines keep the model's text and position."""
+    body = [b for b in hunk["body"] if b != "\\ No newline at end of file"]
+    old_side = [b[1:] for b in body if b.startswith((" ", "-"))]
+    sp = span_match(file_lines, old_side)
+    if sp is None:
+        return None
+    start, end = sp
+    out = []; pos = start
+    for b in body:
+        if b.startswith("+"):
+            out.append(b); continue
+        want = b[1:]
+        # consume file lines up to the one matching this body line (blank file lines in between become context)
+        gap = 0
+        while pos < end and file_lines[pos].rstrip() != want.rstrip():
+            if not file_lines[pos].strip() or gap < 2:
+                if file_lines[pos].strip(): gap += 1
+                out.append(" " + file_lines[pos]); pos += 1   # a file line the model dropped becomes context
+            else:
+                return None
+        if pos >= end:
+            return None
+        out.append(("-" if b.startswith("-") else " ") + file_lines[pos]); pos += 1
+    while pos < end:
+        out.append(" " + file_lines[pos]); pos += 1
+    pre = file_lines[max(0, start - 3):start]; post = file_lines[end:end + 3]
+    old_count = len(pre) + sum(1 for o in out if o.startswith((" ", "-"))) + len(post)
+    new_count = len(pre) + sum(1 for o in out if o.startswith((" ", "+"))) + len(post)
+    res = [f"@@ -{max(0, start - 3) + 1},{old_count} +{max(0, start - 3) + 1},{new_count} @@"]
+    res += [" " + l for l in pre] + out + [" " + l for l in post]
+    notes.append(f"hunk {idx}: reanchored on the whole OLD SIDE at {start + 1}-{end} (the '-' lines were not one run)")
+    return res
+
+
 def rebuild(hunk, file_lines, notes, idx):
     body = [b for b in hunk["body"] if b != "\\ No newline at end of file"]
     if any(b.startswith("++++ b/") or b.startswith("+--- ") for b in body):
@@ -99,6 +160,9 @@ def rebuild(hunk, file_lines, notes, idx):
                     hits = [blank_span[0]]
                     notes.append(f"hunk {idx}: '-' block matched with the model's dropped blank line(s) restored from the file (span {blank_span[0]+1}-{blank_span[1]})")
         if len(hits) == 0:
+            alt = rebuild_old_side(hunk, file_lines, notes, idx)
+            if alt is not None:
+                return alt
             notes.append(f"hunk {idx}: ambiguous — the {len(minus)} '-' line(s) occur 0x in the file; kept as written")
             return None
         if len(hits) > 1:
