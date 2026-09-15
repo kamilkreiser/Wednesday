@@ -124,62 +124,6 @@ def rebuild_old_side(hunk, file_lines, notes, idx):
     return res
 
 
-def rebuild_from_minus(hunk, file_lines, notes, idx):
-    """2026-09-16 06:1x (KS-958 r1, a bash_patch): the '-' lines sit in TWO runs and each is byte-exact in the file,
-    but the model's LEADING context line is a TRUNCATED copy of a tip line ("# reproduced, in the round…" for
-    "# cannot fail -- reproduced, in the round…"), so the whole-old-side anchor (rebuild_old_side) has no first line
-    to stand on and the hunk was "kept as written" — a false FAIL on a correct product hunk.
-    For a pure REPLACEMENT hunk — every '+' group immediately follows a '-' line — the '-' lines ARE the anchor:
-    chain them in order (each '-' line's file index, the next found forward within a bounded window), require the
-    chain to be UNIQUE, and re-emit the hunk over the file's real span with three lines of the FILE's context each
-    side. Context lines take the file's text; each '+' group keeps the model's text right after its '-' line.
-    Refused (None): a '+' group with no '-' before it (an insert — its placement is the context's, which is exactly
-    what cannot be trusted here); a '-' line that occurs 0x; a chain that is not unique."""
-    body = [b for b in hunk["body"] if b != "\\ No newline at end of file"]
-    groups = []; prev_minus = False
-    for b in body:
-        if b.startswith("-"):
-            groups.append([b[1:], []]); prev_minus = True
-        elif b.startswith("+"):
-            if not prev_minus:
-                return None
-            groups[-1][1].append(b[1:])
-        else:
-            prev_minus = False
-    if not groups:
-        return None
-    n_file = len(file_lines) - (1 if file_lines and file_lines[-1] == "" else 0)   # split("\n") leaves a trailing ""
-    window = len(body) * 3 + 10
-    first_hits = [i for i in range(n_file) if file_lines[i].rstrip() == groups[0][0].rstrip()]
-    chains = []
-    for s0 in first_hits:
-        idxs = [s0]; pos = s0 + 1; ok = True
-        for m, _ in groups[1:]:
-            nxt = next((i for i in range(pos, min(n_file, pos + window)) if file_lines[i].rstrip() == m.rstrip()), None)
-            if nxt is None:
-                ok = False; break
-            idxs.append(nxt); pos = nxt + 1
-        if ok:
-            chains.append(idxs)
-    if len(chains) != 1:
-        if len(chains) > 1:
-            notes.append(f"hunk {idx}: the '-' chain occurs {len(chains)}x in the file — not unique, kept as written")
-        return None
-    idxs = chains[0]
-    start = max(0, idxs[0] - 3); end = min(n_file, idxs[-1] + 1 + 3)
-    plus_at = {i: g[1] for i, g in zip(idxs, groups)}
-    out = []
-    for i in range(start, end):
-        if i in plus_at:
-            out.append("-" + file_lines[i]); out += ["+" + p for p in plus_at[i]]
-        else:
-            out.append(" " + file_lines[i])
-    old_count = sum(1 for o in out if o[0] in " -"); new_count = sum(1 for o in out if o[0] in " +")
-    res = [f"@@ -{start + 1},{old_count} +{start + 1},{new_count} @@"] + out
-    notes.append(f"hunk {idx}: reanchored on the '-' LINES at {idxs[0] + 1}..{idxs[-1] + 1} (a replacement hunk whose leading context did not match the file — context taken from the file)")
-    return res
-
-
 def _join_run(file_lines, s, n):
     """the space-join of n tip lines from s: continuation lines lose their indent (a wrapped bullet), and a BLANK
     line ends a paragraph — a run may never span one (returns None so the caller stops)"""
@@ -320,9 +264,6 @@ def rebuild(hunk, file_lines, notes, idx):
                     notes.append(f"hunk {idx}: '-' block matched with the model's dropped blank line(s) restored from the file (span {blank_span[0]+1}-{blank_span[1]})")
         if len(hits) == 0:
             alt = rebuild_old_side(hunk, file_lines, notes, idx)
-            if alt is not None:
-                return alt
-            alt = rebuild_from_minus(hunk, file_lines, notes, idx)   # 2026-09-16: the '-' lines as the anchor
             if alt is not None:
                 return alt
             notes.append(f"hunk {idx}: ambiguous — the {len(minus)} '-' line(s) occur 0x in the file; kept as written")

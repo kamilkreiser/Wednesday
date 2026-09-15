@@ -10,17 +10,7 @@ ID="${1:-}"; OUT="${2:-}"; BRIEF="${3:-}"; shift 3 2>/dev/null
 SRC="${NIGHT_SOURCE_CHECKOUT:-/Volumes/DevMASTER/!CODING/Secuura/Blockchain/2_Project_Files}"
 TIP="$(git -C "$SRC" ls-remote origin refs/heads/develop 2>/dev/null | awk '{print $1}')"
 [ -n "$TIP" ] || { echo "build_doc_input: ls-remote returned nothing" >&2; exit 1; }
-# G6 (2026-09-16 06:2x): the VERIFIED TIP OVERRIDE, honoured exactly as build_input.sh / build_bash_input.sh honour it —
-# before this the docs tier REFUSED every build the moment origin moved past the local objects (found by the doc_d8d9 arms).
-if [ "$(git -C "$SRC" cat-file -t "$TIP" 2>/dev/null)" != "commit" ]; then
-  OV="$(dirname "$0")/../../night/tip_override.txt"; OV_SHA=""; OV_AGAINST=""
-  [ -f "$OV" ] && read -r OV_SHA OV_AGAINST OV_REST < "$OV"
-  if [ -n "$OV_SHA" ] && [ "$OV_AGAINST" = "$TIP" ] && [ "$(git -C "$SRC" cat-file -t "$OV_SHA" 2>/dev/null)" = "commit" ]; then
-    echo "build_doc_input: G6 — origin develop $TIP is not local; using VERIFIED OVERRIDE $OV_SHA ($OV_REST)" >&2; TIP="$OV_SHA"
-  else
-    echo "build_doc_input: REFUSED — tip $TIP not local and no valid override (no fetch from here)" >&2; exit 2
-  fi
-fi
+[ "$(git -C "$SRC" cat-file -t "$TIP" 2>/dev/null)" = "commit" ] || { echo "build_doc_input: REFUSED — tip $TIP not local (no fetch from here)" >&2; exit 2; }
 python3 - "$ID" "$OUT" "$BRIEF" "$SRC" "$TIP" "$@" <<'PY'
 import json, re, subprocess, sys
 ident, out, brief, src, tip = sys.argv[1:6]

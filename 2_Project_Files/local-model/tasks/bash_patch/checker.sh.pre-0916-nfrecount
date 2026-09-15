@@ -75,10 +75,10 @@ PY
 NF_NOTE=""
 for sf in "$REP"/section_*.diff; do
   if head -1 "$sf" | /usr/bin/grep -q '^--- /dev/null'; then
-    nf_line="$(python3 - "$sf" <<'PYN'
+    n_fixed="$(python3 - "$sf" <<'PYN'
 import sys,re
 p=sys.argv[1]; L=open(p,encoding="utf-8").read().split("\n")
-out=[]; fixed=0; inhunk=False; body=0; synth=0; declared=-1
+out=[]; fixed=0; inhunk=False; body=0; synth=0
 # a new-file section with NO hunk header at all (the KS-1073 headerless dialect, met again on KS-1139 B): a new
 # file has exactly one hunk and it starts at line 1 — synthesise `@@ -0,0 +1,N @@` after the `+++` line.
 if not any(l.startswith("@@ ") for l in L):
@@ -88,10 +88,7 @@ if not any(l.startswith("@@ ") for l in L):
         if ln.startswith("+++ "): L2.append("@@ -0,0 +1,0 @@"); synth=1
     L=L2
 for ln in L:
-    if ln.startswith("@@ "):
-        inhunk=True; out.append(ln)
-        m=re.match(r"@@ -0,0 \+1(?:,(\d+))? @@", ln); declared=int(m.group(1)) if (m and m.group(1)) else (1 if m else -1)
-        continue
+    if ln.startswith("@@ "): inhunk=True; out.append(ln); continue
     if not inhunk or ln.startswith(("---","+++")): out.append(ln); continue
     if ln=="" : out.append(ln); continue
     if ln.startswith("+") or ln.startswith("\\"): out.append(ln); body+=1; continue
@@ -101,24 +98,17 @@ for ln in L:
     if ln.startswith(" "): out.append("+"+ln[1:]); fixed+=1; body+=1; continue
     if ln.startswith("-"): dropped=globals().get("dropped",0)+1; globals()["dropped"]=dropped; continue
     out.append("+"+ln); fixed+=1; body+=1
-# HEADER RECOUNT (2026-09-16 06:2x, KS-958 r2): the model declared `+1,75` over an 85-line body; `git apply` took 75
-# lines STRICTLY and silently dropped the last ten (the boundary cell, the summary and the `exit 1`) — the applied
-# test then exited 0 with four FAIL lines and B4 called it not red. The content of a new file IS its '+' lines: the
-# header count is always recounted from the body, and a declared count that differs is named in the verdict.
-recount = 1 if (declared != -1 and declared != body) else 0
-if fixed or synth or recount:
+if fixed or synth:
     open(p+".as-written","w",encoding="utf-8").write(open(p,encoding="utf-8").read())
     txt="\n".join(out)
     txt=re.sub(r"@@ -0,0 \+1(,\d+)? @@", f"@@ -0,0 +1,{body} @@", txt, count=1)
     open(p,"w",encoding="utf-8").write(txt)
-print(fixed, 1 if synth else 0, globals().get("dropped",0), recount, declared, body)
+print(fixed + (100 if synth else 0) + 10000*globals().get("dropped",0))
 PYN
 )"
-    read -r n_fixed n_synth n_drop n_recount n_decl n_body <<< "$nf_line"
-    n_rest="${n_fixed:-0}"; n_drop="${n_drop:-0}"
-    if [ "${n_synth:-0}" = 1 ]; then NF_NOTE="$NF_NOTE $(basename "$sf"): hunk header SYNTHESISED (a headerless new file; $n_rest context/bare line(s) restored to '+'; $n_drop '-' line(s) dropped — no old side in a new file);"
+    n_drop=$(( ${n_fixed:-0} / 10000 )); n_rest=$(( ${n_fixed:-0} % 10000 ))
+    if [ "$n_rest" -ge 100 ]; then NF_NOTE="$NF_NOTE $(basename "$sf"): hunk header SYNTHESISED (a headerless new file; $((n_rest-100)) context/bare line(s) restored to '+'; $n_drop '-' line(s) dropped — no old side in a new file);"
     elif [ "$n_rest" -gt 0 ] || [ "$n_drop" -gt 0 ]; then NF_NOTE="$NF_NOTE $(basename "$sf"): $n_rest line(s) restored to '+' in the new-file hunk, $n_drop '-' line(s) dropped;"; fi
-    if [ "${n_recount:-0}" = 1 ]; then NF_NOTE="$NF_NOTE $(basename "$sf"): new-file header count RECOUNTED ${n_decl} -> ${n_body} (the declared count would have applied ${n_decl} of ${n_body} lines and dropped the rest silently);"; fi
   fi
 done
 [ -n "$NF_NOTE" ] && echo "B2 new-file normalisation (an accommodation the verdict names):$NF_NOTE"

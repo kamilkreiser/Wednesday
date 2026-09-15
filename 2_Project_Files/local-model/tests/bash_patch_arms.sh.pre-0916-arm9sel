@@ -49,7 +49,7 @@ run_arm 7 "$W/arm7.md" '^FAIL B3b must_change site' "must_change :42 kept as con
 R8=$LM/runs/2026-09-16_ks865-ornith35b-night/out.md
 if [ -f "$R8" ]; then cp "$R8" "$W/arm8.md"; run_arm 8 "$W/arm8.md" '^PASS B2 .*REANCHORED' "real r1 micro-hunks → REANCHORED"; /usr/bin/grep -q '^RESULT: PASS (7/7)' "$W/arm8.md.checker.out" && echo "ARM8b PASS (the real r1 output PASSES 7/7)" || { echo "ARM8b FAIL"; fail=1; }; else echo "ARM8 SKIP (run artefact absent)"; fi
 # 9 the REAL KS-1139 A r1 output (two '+' markers dropped inside the new-file hunk) → PASS via the new-file normalisation
-R9=$LM/runs/2026-09-16_ks1139-ornith35b-night   # the A r1 run EXACTLY (2026-09-16 06:3x: `ls … | tail -1` had drifted to the B r2 run once night2/night3 existed — a selector, paired with the A input)
+R9=$(ls -d $LM/runs/2026-09-16_ks1139* 2>/dev/null | tail -1)
 if [ -n "$R9" ] && [ -f "$R9/out.md" ]; then cp "$R9/out.md" "$W/arm9.md"; I9=$LM/night/inputs/bash_1139A.json; bash "$CHK" "$I9" "$W/arm9.md" "$CLONE" > "$W/arm9.md.checker.out" 2>&1; /usr/bin/grep -q "restored to '+'" "$W/arm9.md.checker.out" && /usr/bin/grep -q '^RESULT: PASS (7/7)' "$W/arm9.md.checker.out" && echo "ARM9 PASS (real r1 dropped-marker new file → normalised → PASS 7/7)" || { echo "ARM9 FAIL: $(/usr/bin/grep -E '^(FAIL|RESULT)' "$W/arm9.md.checker.out" | head -2 | tr '\n' '·')"; fail=1; }; else echo "ARM9 SKIP (run artefact absent)"; fi
 echo "work dir kept (never deleted): $W"
 exit $fail
