@@ -1,0 +1,196 @@
+# READY — KS-1018 — Ornith ornith:35b-q8_0 PASS 7/7 on the RE-CHECK of its round-3 output (12:37) under two named accommodations: REANCHORED (four product hunks placed at :16/:1183/:1204/:1226 from the model's -/+ lines) and TDZ-INLINED (one hoisted-block constant inlined). tip develop M55 48e65c435
+# Source read by Wednesday: the product hunks are the brief's E1–E5 (ServiceUnavailableError + isInfrastructureDbError imports; the three catches log + rethrow infra errors, else fall through as before); cells 2 red / control green, green after, auth suite Δ 0, tsc 0. Evidence: the rebuilt sections are what is pasted below (the raw out.md is in the run dir). HELD for a Secuura seat (tier 1).
+
+```diff
+--- a/Blockchain/Dev/services/auth/src/routes/users.ts
++++ b/Blockchain/Dev/services/auth/src/routes/users.ts
+@@ -13,7 +13,8 @@
+ import { AuthenticatedRequest, User, UserRole, VerificationLevel, ADMIN_WRITABLE_STATUSES } from '../types';
+ import { authenticate, authenticateAccessOrConnector } from '../middleware/authenticate';
+ import { hashPassword, checkPasswordStrength, verifyPassword } from '../services/password';
+-import { BadRequestError, NotFoundError, ValidationError } from '../middleware/errorHandler';
++import { BadRequestError, NotFoundError, ServiceUnavailableError, ValidationError } from '../middleware/errorHandler'; // KS-1018: needed to rethrow infra errors as 503
++import { isInfrastructureDbError } from '../repositories/dbErrors'; // KS-1018: predicate for distinguishing infra DB failures
+ import { logger } from '../utils/logger';
+ import * as userRepo from '../repositories/userRepo';
+ import { revokeAllUserSessions } from '../services/session';
+@@ -1180,7 +1180,10 @@
+           rejectionReason: r.rejection_reason || undefined,
+         };
+       }
+-    } catch { /* fall through */ }
++    } catch (err: any) { // KS-1018: name the error and rethrow infrastructure failures so they surface instead of reading stale memory
++      logger.error('DB getVerificationRequest failed', { error: err?.message, code: err?.code });
++      if (isInfrastructureDbError(err)) throw new ServiceUnavailableError('Authentication service temporarily unavailable, please retry');
++    }
+   }
+   return memVerificationRequests.get(id) || null;
+ }
+@@ -1201,7 +1201,10 @@
+         };
+       }
+       return null;
+-    } catch { /* fall through */ }
++    } catch (err: any) { // KS-1018: name the error and rethrow infrastructure failures so they surface instead of reading stale memory
++      logger.error('DB findPendingVerificationRequest failed', { error: err?.message, code: err?.code });
++      if (isInfrastructureDbError(err)) throw new ServiceUnavailableError('Authentication service temporarily unavailable, please retry');
++    }
+   }
+   return Array.from(memVerificationRequests.values()).find(
+     r => r.userId === userId && r.status === 'PENDING'
+@@ -1223,7 +1223,10 @@
+         reviewedBy: r.reviewed_by || undefined,
+         rejectionReason: r.rejection_reason || undefined,
+       }));
+-    } catch { /* fall through */ }
++    } catch (err: any) { // KS-1018: name the error and rethrow infrastructure failures so they surface instead of reading stale memory
++      logger.error('DB listUserVerificationRequests failed', { error: err?.message, code: err?.code });
++      if (isInfrastructureDbError(err)) throw new ServiceUnavailableError('Authentication service temporarily unavailable, please retry');
++    }
+   }
+   return Array.from(memVerificationRequests.values())
+     .filter(r => r.userId === userId)
+
+--- /dev/null
++++ b/Blockchain/Dev/services/auth/src/__tests__/ks1018-security-correctness-three-verification-store-reads.test.ts
+@@ -0,0 +1,145 @@
++/**
++ * KS-1018 — three verification-store reads swallow EVERY DB error with a bare
++ * `catch {}` and answer from an in-memory map. A refused connection must now
++ * propagate as 503 SERVICE_UNAVAILABLE rather than masquerading as "no such
++ * request". The predicate under test is NOT mocked — only the db layer itself.
++ *
++ * Cells:
++ *   🔴 REPRO GET /me/verification — ECONNREFUSED → 503 (was 200 `{ requests: [] }`)
++ *   🔴 REPRO POST /verification/:id/review SYSTEM_ADMIN — ECONNREFUSED → 503 (was 404)
++ *   CONTROL non-infra DB error still falls through to the in-memory map
++ */
++
++import { describe, it, expect, beforeAll, afterAll, beforeEach, vi } from 'vitest';
++import type { AddressInfo } from 'node:net';
++import type { Server } from 'node:http';
++import express from 'express';
++
++const SEED_USER_ID = 'aaaaaaaa-2222-4222-8222-aaaaaaaaaaaa';
++
++// NOTE: state MUST be declared AFTER these hoisted blocks — see reference test
++// ks1013 for why vitest's hoisting order matters here.
++const state = vi.hoisted(() => ({
++  caller: { userId: 'aaaaaaaa-2222-4222-8222-aaaaaaaaaaaa', role: 'USER', tenantId: 'tenant-default' },
++  users: new Map<string, Record<string, unknown>>(),
++}));
++const dbQuery = vi.hoisted(() => vi.fn());
++
++vi.mock('../repositories/userRepo', () => {
++  const repoMock = {
++    getUserById: vi.fn(async (id: string) => state.users.get(id) ?? null),
++    getUserByIdPlatformScope: vi.fn(async (id: string) => state.users.get(id) ?? null),
++    updateUser: vi.fn(async () => null),
++    updateUserPlatformScope: vi.fn(async () => null),
++    listUsers: vi.fn(async () => []),
++    countUsers: vi.fn(async () => 0),
++    listOrganizations: vi.fn(async () => []),
++    getOrganizationTenant: vi.fn(async () => ({ tenantId: 'tenant-default' })),
++    emailExists: vi.fn(async () => false),
++    createUser: vi.fn(async (user: Record<string, unknown>) => user),
++    createInvitedStub: vi.fn(async () => ({ user: {}, alreadyExisted: false })),
++  };
++  return { default: repoMock, __esModule: true, ...repoMock };
++});
++
++vi.mock('../middleware/authenticate', () => {
++  const injectCaller =
++    () => (req: express.Request & { user?: unknown }, _res: express.Response, next: express.NextFunction) => {
++      (req as { user: unknown }).user = { ...state.caller };
++      next();
++    };
++  return { authenticate: injectCaller, authenticateAccessOrConnector: injectCaller };
++});
++
++vi.mock('../db', () => ({ isDbAvailable: () => true, query: dbQuery }));
++
++vi.mock('../services/session', () => ({ revokeAllUserSessions: vi.fn(async () => 0) }));
++vi.mock('../services/password', () => ({
++  hashPassword: vi.fn(async () => 'hashed'),
++  checkPasswordStrength: vi.fn(() => ({ ok: true })),
++  verifyPassword: vi.fn(async () => true),
++}));
++vi.mock('../utils/logger', () => ({
++  logger: { info: vi.fn(), warn: vi.fn(), error: vi.fn(), debug: vi.fn() },
++}));
++
++import { userRoutes } from '../routes/users';
++import { errorHandler } from '../middleware/errorHandler';
++
++let server: Server;
++let baseUrl: string;
++
++beforeAll(async () => {
++  const app = express();
++  app.use(express.json());
++  app.use('/', userRoutes);
++  app.use(errorHandler);
++  await new Promise<void>((resolve) => {
++    server = app.listen(0, '127.0.0.1', () => {
++      const { port } = server.address() as AddressInfo;
++      baseUrl = `http://127.0.0.1:${port}`;
++      resolve();
++    });
++  });
++});
++
++afterAll(async () => {
++  await new Promise<void>((resolve) => server.close(() => resolve()));
++});
++
++beforeEach(() => {
++  vi.clearAllMocks();
++  state.users.clear();
++  state.users.set(SEED_USER_ID, {
++    id: SEED_USER_ID,
++    email: 'a@tenant-a.example',
++    role: 'USER',
++    status: 'ACTIVE',
++    verificationLevel: 'BASIC',
++    tenantId: 'tenant-default',
++  });
++  state.caller = { userId: SEED_USER_ID, role: 'USER', tenantId: 'tenant-default' };
++  // Default to a healthy DB so the control cell's "non-infra failure" branch
++  // actually reaches the code under test (the catch).
++  dbQuery.mockResolvedValue({ rows: [] });
++});
++
++const INFRA_ERROR = Object.assign(new Error('connect ECONNREFUSED 127.0.0.1:5432'), { code: 'ECONNREFUSED' });
++
++describe('KS-1018 — three verification-store reads must rethrow infrastructure errors as SERVICE_UNAVAILABLE', () => {
++  it('🔴 KS-1018 — GET /me/verification: a refused DB connection answers 503, not 200 from memory', async () => {
++    dbQuery.mockRejectedValue(INFRA_ERROR);
++    const res = await fetch(`${baseUrl}/me/verification`);
++    expect(res.status).toBe(503);
++    const body = await res.json();
++    expect(body.error.code).toBe('SERVICE_UNAVAILABLE');
++  });
++
++  it('🔴 KS-1018 — POST /verification/:id/review as SYSTEM_ADMIN: a refused DB connection answers 503, not 404', async () => {
++    state.caller = { userId: SEED_USER_ID, role: 'SYSTEM_ADMIN', tenantId: 'tenant-default' };
++    dbQuery.mockRejectedValue(INFRA_ERROR);
++    const res = await fetch(`${baseUrl}/verification/some-id/review`, {
++      method: 'POST',
++      headers: { 'Content-Type': 'application/json' },
++      body: JSON.stringify({ action: 'approve' }),
++    });
++    expect(res.status).toBe(503);
++    const body = await res.json();
++    expect(body.error.code).toBe('SERVICE_UNAVAILABLE');
++  });
++
++  it('KS-1018 control — a non-infrastructure DB error still falls through to the in-memory map', async () => {
++    // A relation-missing error is NOT an infra failure → should fall through and answer empty.
++    dbQuery.mockRejectedValue(Object.assign(new Error('relation does not exist'), { code: '42P01' }));
++    const res = await fetch(`${baseUrl}/me/verification`);
++    expect(res.status).toBe(200);
++    const body = await res.json();
++    expect(body.data.requests).toEqual([]);
++  });
++});
+```
