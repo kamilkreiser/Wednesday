@@ -282,12 +282,20 @@ while [ "$TICKETS_RUN" -lt "$NIGHT_MAX_TICKETS" ] && [ "$ITER" -lt $((NIGHT_MAX_
   TASK="$(pin "$LINE" task)"; TASK="${TASK:-$TASK_DIR/task.md}"
   NOCHECK="$(pin "$LINE" nocheck)"
 
-  # memory
-  if ! clear_memory; then
-    echo "memory: $MEM_NOTE — skipped" >> "$RLOG"
+  # memory — 2026-09-15 10:55 (q8 round 7): right after a 37 GB model unloads, vm_stat still shows ~3 GB
+  # free + ~3 GB inactive for a minute while the kernel reclaims; one read skipped two of three tickets.
+  # So: up to 4 reads, 30 s apart, before a skip — and a memory skip goes BACK TO THE QUEUE (the front),
+  # never to done.md as a verdict: it is a timing fact about the machine, not a result about the ticket.
+  MEM_TRY=0; MEM_OK=0
+  while [ "$MEM_TRY" -lt 4 ]; do
+    if clear_memory; then MEM_OK=1; break; fi
+    MEM_TRY=$((MEM_TRY + 1)); log "MEMORY: not yet reclaimed (try $MEM_TRY/4) — waiting 30 s"; sleep 30
+  done
+  if [ "$MEM_OK" -ne 1 ]; then
+    echo "memory: $MEM_NOTE — skipped after 4 reads; line returned to the queue" >> "$RLOG"
     VERDICTS="$VERDICTS;$TICKET=SKIP_MEMORY"
-    move_done "$LINE" "SKIP_MEMORY ($MEM_NOTE)" "$RUN"
-    continue
+    log "SKIP_MEMORY $TICKET after 4 reads ($MEM_NOTE) — the line STAYS in the queue (next_ticket only reads; move_done is what removes), the runner stops here"
+    break
   fi
   echo "memory: $MEM_NOTE" >> "$RLOG"
 
