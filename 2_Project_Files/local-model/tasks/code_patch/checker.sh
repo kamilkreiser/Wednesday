@@ -39,6 +39,13 @@ SERVICE="$(field service_dir)"
 PRODUCT="$(field product_file)"
 TEST_DIR="$(field test_dir)"
 REF_TEST="$(field reference_test_file)"
+# 2026-09-15 12:xx TEST-ONLY mode (KS-1073 / KS-1123-F3 class: the code is right at the tip and a PIN is owed):
+# when the input's defect_line.tamper is set (parsed by build_input from the brief's `## Tamper` block), the diff
+# must touch ONLY one test file; A4 reds under the TAMPER (the product line replaced in the clone, then reverted)
+# instead of at the tip; A5 is green at the UNTOUCHED tip. Without a tamper the mode is code_patch, unchanged.
+TAMPER_LINE="$(python3 -c 'import json,sys; d=json.load(open(sys.argv[1])); t=(d.get("defect_line") or {}).get("tamper") or {}; print(t.get("line",""))' "$INPUT")"
+if [ -n "$TAMPER_LINE" ]; then MODE=test_only; else MODE=code_patch; fi
+echo "mode: $MODE$( [ "$MODE" = test_only ] && echo " (tamper at $PRODUCT:$TAMPER_LINE)")"
 SVC="$CLONE/$SUBDIR/$SERVICE"
 REP="$OUT.checker"
 mkdir -p "$REP"
@@ -216,6 +223,13 @@ while [ "$k" -le "$N_SEC" ]; do
   # repo subdir, git apply gets --directory=<subdir> (recorded in the opts so every later apply uses it too).
   DIROPT=""
   case "$SEC_PATH" in "$SUBDIR"/*) ;; *) DIROPT="--directory=$SUBDIR"; echo "section $k $SEC_PATH: path lacks $SUBDIR/ — applying with $DIROPT" ;; esac
+  # 2026-09-15 (KS-908 q4): a section whose `--- a/<x>` and `+++ b/<y>` name DIFFERENT files (neither /dev/null) is
+  # a rename to git and applies nowhere — say so by name instead of "No such file" on the wrong path (task.md 2d).
+  HDR_MINUS="$(sed -n '1p' "$SEC_FILE" | sed -E 's#^--- (a/)?##')"; HDR_PLUS="$(sed -n '2p' "$SEC_FILE" | sed -E 's#^\+\+\+ (b/)?##')"
+  if [ "$HDR_MINUS" != "/dev/null" ] && [ "$HDR_PLUS" != "/dev/null" ] && [ "$HDR_MINUS" != "$HDR_PLUS" ]; then
+    echo "section $k: MISMATCHED HEADER — '--- $HDR_MINUS' paired with '+++ $HDR_PLUS' (two files in one section; git reads a rename)"
+    A2_NOTE="$A2_NOTE [section $k: MISMATCHED HEADER '--- $HDR_MINUS' vs '+++ $HDR_PLUS' — the model paired the product file's --- with another file's +++ (task.md 2d)]"
+  fi
   git -C "$CLONE" apply --check -p1 $DIROPT "$SEC_FILE" > "$REP/apply_check_strict_$k.out" 2>&1
   rc_strict=$?
   git -C "$CLONE" apply --check -p1 $DIROPT --recount --ignore-whitespace "$SEC_FILE" > "$REP/apply_check_lenient_$k.out" 2>&1
@@ -285,7 +299,13 @@ HAS_PRODUCT="$(echo "$TOUCHED" | /usr/bin/grep -c -x -F "$PRODUCT")"
 TEST_FILE="$(echo "$TOUCHED" | /usr/bin/grep -v -x -F "$PRODUCT" | /usr/bin/grep "^$TEST_DIR/" | head -1)"
 N_OTHER="$(echo "$TOUCHED" | /usr/bin/grep -v -x -F "$PRODUCT" | /usr/bin/grep -v "^$TEST_DIR/" | /usr/bin/grep -c .)"
 N_TESTS="$(echo "$TOUCHED" | /usr/bin/grep -v -x -F "$PRODUCT" | /usr/bin/grep -c "^$TEST_DIR/")"
-if [ "$N_TOUCHED" -eq 2 ] && [ "$HAS_PRODUCT" -eq 1 ] && [ "$N_TESTS" -eq 1 ] && [ "$N_OTHER" -eq 0 ] && [ "$TEST_FILE" != "$REF_TEST" ]; then
+if [ "$MODE" = test_only ] && [ "$N_TOUCHED" -eq 1 ] && [ "$HAS_PRODUCT" -eq 0 ] && [ "$N_TESTS" -eq 1 ] && [ "$N_OTHER" -eq 0 ] && [ "$TEST_FILE" != "$REF_TEST" ]; then
+  pass "A3 (test-only) touched-file set == { $TEST_FILE } — the product file is untouched, as the ticket requires"
+elif [ "$MODE" = test_only ]; then
+  fail "A3 (test-only) touched-file set must be exactly ONE new test under $TEST_DIR and NOTHING else: n=$N_TOUCHED product=$HAS_PRODUCT tests=$N_TESTS other=$N_OTHER"
+  echo "RESULT: FAIL ($FAILS failed) — stopped at A3 (test-only mode: the product file must not change)"
+  exit 1
+elif [ "$N_TOUCHED" -eq 2 ] && [ "$HAS_PRODUCT" -eq 1 ] && [ "$N_TESTS" -eq 1 ] && [ "$N_OTHER" -eq 0 ] && [ "$TEST_FILE" != "$REF_TEST" ]; then
   pass "A3 touched-file set == { $PRODUCT , $TEST_FILE }"
 else
   fail "A3 touched-file set is not {product, one test under $TEST_DIR}: n=$N_TOUCHED product=$HAS_PRODUCT tests=$N_TESTS other=$N_OTHER ref_test_touched=$([ "$TEST_FILE" = "$REF_TEST" ] && echo yes || echo no)"
@@ -337,9 +357,31 @@ if [ "$rc" -ne 0 ]; then
   echo "RESULT: FAIL ($FAILS failed) — stopped at A4"
   exit 1
 fi
+if [ "$MODE" = test_only ]; then
+  # plant the brief's tamper: the exact line at the tip is replaced; refuse if the text does not match
+  python3 - "$INPUT" "$CLONE/$PRODUCT" > "$REP/tamper.out" 2>&1 <<'PYT'
+import json, sys
+d = json.load(open(sys.argv[1])); t = d["defect_line"]["tamper"]; p = sys.argv[2]
+lines = open(p, encoding="utf-8").read().split("\n")
+i = int(t["line"]) - 1
+if lines[i].strip() != t["from"].strip():
+    print(f"TAMPER REFUSED: line {t['line']} at the tip is {lines[i]!r}, the brief says {t['from']!r}"); sys.exit(2)
+lines[i] = t["to"]; open(p, "w", encoding="utf-8").write("\n".join(lines)); print(f"tampered {p}:{t['line']}: {t['from']!r} -> {t['to']!r}")
+PYT
+  rc_t=$?
+  if [ "$rc_t" -ne 0 ]; then
+    fail "A4 (test-only) the tamper could not be planted: $(cat "$REP/tamper.out" | tr '\n' ' ')"
+    echo "RESULT: FAIL ($FAILS failed) — stopped at A4 (tamper)"
+    exit 1
+  fi
+  echo "A4 (test-only): $(cat "$REP/tamper.out")"
+fi
 rc_red="$(run_vitest red_first "$TEST_REL")"
 RED="$(summ red_first)"
 echo "test-only at tip: rc=$rc_red $RED"
+if [ "$MODE" = test_only ]; then
+  git -C "$CLONE" checkout -- "$PRODUCT" > "$REP/tamper_revert.out" 2>&1 && echo "A4 (test-only): tamper reverted ($PRODUCT back to the tip)" || echo "A4 (test-only): WARNING tamper revert failed: $(cat "$REP/tamper_revert.out")"
+fi
 red_total="$(getn "$RED" total)"; red_failed="$(getn "$RED" failed)"; red_passed="$(getn "$RED" passed)"
 # 2026-09-15 A4 twin (KS-1087 night3): all three cells "failed" at the tip with `ReferenceError: deleteFn is
 # not defined` — a test-side bug read as a red, and the CONTROL cell red too. A red counts only when it is
@@ -376,8 +418,12 @@ else
 fi
 
 # ---------------------------------------------------------------- A5 green-after
+if [ "$MODE" = test_only ]; then
+  echo "A5 (test-only): no product hunk — the test must be GREEN at the untouched tip" > "$REP/apply_product.out"; rc=0
+else
 apply_section_for "$PRODUCT" > "$REP/apply_product.out" 2>&1
 rc=$?
+fi
 if [ "$rc" -ne 0 ]; then
   fail "A5 the product hunk did not apply (rc=$rc): $(head -3 "$REP/apply_product.out" | tr '\n' ' ')"
   echo "RESULT: FAIL ($FAILS failed) — stopped at A5"

@@ -112,5 +112,7 @@
 # ─── 2026-09-15 12:3x — Kam 11:06/11:07: TEN tickets, FIVE per quant, Wednesday-written briefs (night/briefs/<id>.md),
 # one model in memory at a time (10:53 "dont run them side by side"). q4 set first (NIGHT_MODEL=ornith:35b), then the
 # q8 set (NIGHT_MODEL=ornith:35b-q8_0). Pins are as of develop M55 48e65c435 (the checkout holds it; s233 fetched).
-KS-1165 product=Blockchain/Dev/services/api-gateway/src/middleware/csrf.ts ref=Blockchain/Dev/services/api-gateway/src/__tests__/csrf.test.ts line=98 ctx=49152
-KS-908 product=Blockchain/Dev/services/security/src/index.ts ref=Blockchain/Dev/services/security/src/__tests__/ks742-keys-tenancy-route-contract.test.ts line=1149 ctx=49152
+# ─── q8 set (NIGHT_MODEL=ornith:35b-q8_0, NIGHT_MIN_FREE_GB=45) — queued 11:4x after the q4 batch ended
+KS-1018 product=Blockchain/Dev/services/auth/src/routes/users.ts ref=Blockchain/Dev/services/auth/src/__tests__/ks1013-admin-patch-malformed-id.test.ts line=1183 ctx=49152
+KS-1073 product=Blockchain/Dev/services/api-gateway/src/routes/verification.ts ref=Blockchain/Dev/services/api-gateway/src/__tests__/ks1057-verify-confidence-is-status-aware.test.ts line=685 ctx=49152
+KS-1123 product=Blockchain/Dev/services/api-gateway/src/routes/verification.ts ref=Blockchain/Dev/services/api-gateway/src/__tests__/ks1057-verify-confidence-is-status-aware.test.ts line=597 ctx=49152

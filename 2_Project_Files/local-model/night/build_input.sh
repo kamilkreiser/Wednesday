@@ -331,6 +331,33 @@ if m_where:
 else:
     print("  named sites: no '## Where' section — checklist empty (A3b passes vacuously)")
 
+# ---------------------------------------------------------------- 5b2. TEST-ONLY TAMPER (2026-09-15 12:xx)
+# A coverage-only ticket (the code is right at the tip; a PIN is owed — KS-1073, KS-1123-F3, KS-1130, KS-1120) cannot
+# pass RED-FIRST at the tip. The brief may carry a `## Tamper` block naming the ONE product line whose corruption the
+# new cell must detect:  line: NNN / from: `<exact line at the tip>` / to: `<replacement>`.  The checker then runs in
+# test-only mode (A3: only a test file may change; A4: red under the tamper; A5: green at the tip). `from` is checked
+# against the tip here and refused on a mismatch, so a stale brief cannot plant a tamper on the wrong line.
+tamper = None
+if _brief_for_sites:
+    m_t = re.search(r"^##+\s*Tamper\b.*?$(.*?)(?=^##+\s|\Z)", _brief_for_sites, re.M | re.S)
+    if m_t:
+        blk = m_t.group(1)
+        m_l = re.search(r"^\s*line:\s*(\d+)\s*$", blk, re.M)
+        m_f = re.search(r"^\s*from:\s*`(.*)`\s*$", blk, re.M)
+        m_to = re.search(r"^\s*to:\s*`(.*)`\s*$", blk, re.M)
+        if not (m_l and m_f and m_to):
+            refuse("the brief's `## Tamper` block must carry `line: N`, from: `…` and to: `…` on their own lines")
+        _tl = int(m_l.group(1)); _lines = content.split("\n")
+        if _tl < 1 or _tl > len(_lines):
+            refuse(f"tamper line {_tl} is outside {product_rel} ({len(_lines)} lines at the tip)")
+        if _lines[_tl-1].strip() != m_f.group(1).strip():
+            refuse(f"tamper `from` does not match the tip: line {_tl} is {_lines[_tl-1]!r}, the brief says {m_f.group(1)!r}")
+        if m_f.group(1).strip() == m_to.group(1).strip():
+            refuse("tamper `to` equals `from` — a tamper that changes nothing cannot redden anything")
+        tamper = {"line": _tl, "from": m_f.group(1), "to": m_to.group(1),
+                  "rule": "TEST-ONLY MODE: emit ONLY the new test file (no product hunk). The checker reddens your cells by replacing this product line with `to` in a clone, then expects them GREEN at the untouched tip."}
+        print(f"  TEST-ONLY tamper from the brief: {product_rel}:{_tl} {m_f.group(1).strip()[:60]!r} -> {m_to.group(1).strip()[:60]!r}")
+
 # ---------------------------------------------------------------- 5c. WEDNESDAY'S BRIEF (2026-09-15, Kam 09:30)
 # Kam: "rather than getting it to pick up tickets directly, you pick up the ticket and create a prompt based
 # on the ticket for the agent addressing some of the issues and rewording it so that it's clearer." When
@@ -349,7 +376,8 @@ inp = {
     "repo": repo,
     "product_file": product,
     "defect_line": {"line": defect_no, "text": defect_text, "sites": named_sites,
-                    "sites_rule": "every site with must_change=true MUST be changed by the product hunk (its text appears as a '-' line); the checker refuses a diff that leaves one untouched (A3b) before any test runs"},
+                    "sites_rule": "every site with must_change=true MUST be changed by the product hunk (its text appears as a '-' line); the checker refuses a diff that leaves one untouched (A3b) before any test runs",
+                    **({"tamper": tamper} if tamper else {})},
     "test_dir": f"{subdir}/{test_dir_rel}",
     "suggested_test_file": suggested,
     "reference_test_file": ref_path,

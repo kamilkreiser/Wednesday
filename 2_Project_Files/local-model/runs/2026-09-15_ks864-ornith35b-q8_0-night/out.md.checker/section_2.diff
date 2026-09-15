@@ -1,0 +1,102 @@
+--- /dev/null
++++ b/Blockchain/Dev/services/api-gateway/src/__tests__/ks864-dead-estate-pointers-in-runtime-source.test.ts
+@@ -0,0 +1,95 @@
++/**
++ * KS-864 regression: no served service URL may name the decommissioned Azure estate.
++ * @module routes/system-status
++ */
++
++import { describe, it, expect, vi, beforeAll, afterAll } from 'vitest';
++import http from 'node:http';
++
++// Set env BEFORE importing the module so its import-time table reads our values.
++const savedEnv = { ...process.env };
++beforeAll(() => {
++  process.env.NODE_ENV = 'staging';
++  process.env.API_GATEWAY_URL = 'http://gw.example:1';
++  delete process.env.ISSUER_PORTAL_URL;
++  delete process.env.VERIFIER_PORTAL_URL;
++  delete process.env.ADMIN_PORTAL_URL;
++});
++afterAll(() => {
++  // Restore previous environment exactly as we found it.
++  for (const k of Object.keys(process.env)) delete process.env[k];
++  Object.assign(process.env, savedEnv);
++  vi.unstubAllGlobals();
++});
++
++vi.mock('../services/redis', () => ({
++  getRedisHealth: vi.fn(async () => ({ status: 'healthy' })),
++}));
++vi.stubGlobal('fetch', vi.fn(async () => { throw new Error('offline in test'); }));
++
++let router: any;
++beforeAll(async () => {
++  const mod = await import('../routes/system-status');
++  router = mod.default;
++});
++
++function mountAndListen(r: any): Promise<{ port: number; close: () => void }> {
++  return new Promise((resolve, reject) => {
++    const express = require('express');
++    const app = express();
++    app.use('/api/system', r);
++    const server = app.listen(0, '127.0.0.1');
++    server.on('error', reject);
++    const { port } = server.address() as { port: number };
++    resolve({ port, close: () => new Promise<void>((res) => server.close(() => res())) });
++  });
++}
++
++function get(urlPath: string, port: number): Promise<any> {
++  return new Promise((resolve, reject) => {
++    http.get(`http://127.0.0.1:${port}${urlPath}`, (res) => {
++      let body = '';
++      res.setEncoding('utf-8');
++      res.on('data', (chunk: string) => { body += chunk; });
++      res.on('end', () => {
++        try { resolve(JSON.parse(body)); } catch (e) { reject(e); }
++      });
++    }).on('error', reject);
++  });
++}
++
++describe('KS-864 — no dead Azure estate pointers served by /status', () => {
++  let port!: number;
++  let close!: () => void;
++  beforeAll(async () => {
++    const srv = await mountAndListen(router);
++    port = srv.port;
++    close = srv.close;
++  });
++  afterAll(close);
++
++  it('🔴 KS-864 — no served service URL names the dead estate', async () => {
++    // Red at tip: every staging branch still emits ashypond-b460d1a1/westeurope URLs.
++    const body = await get('/api/system/status', port);
++    const urls = Object.values(body.services).flat().map((s: any) => s.url);
++    for (const u of urls) {
++      expect(u).not.toContain('ashypond-b460d1a1');
++      expect(u).not.toContain('westeurope');
++    }
++    const portalUrls = urls.filter((u: string) => /issuer|verifier|admin/.test(u));
++    for (const u of portalUrls) {
++      expect(u).not.toContain('secuura-staging-');
++    }
++  });
++
++  it('🔴 KS-864 — the issuer portal falls back to its compose default when its env var is unset', async () => {
++    const body = await get('/api/system/status', port);
++    const flat = Object.values(body.services).flat();
++    const entry = flat.find((s: any) => s.name === 'issuer-portal')!;
++    expect(entry.url).toBe('http://issuer-frontend:80');
++  });
++
++  it('KS-864 control — an explicit env var still wins', async () => {
++    // Control cell: must pass both red and green trees.
++    const body = await get('/api/system/status', port);
++    const flat = Object.values(body.services).flat();
++    const entry = flat.find((s: any) => s.name === 'api-gateway')!;
++    expect(entry.url).toBe('http://gw.example:1');
++  });
++});

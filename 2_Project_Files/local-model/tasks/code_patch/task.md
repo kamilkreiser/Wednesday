@@ -60,11 +60,25 @@ failed task, not a style point):
        line number of the first context line in the ORIGINAL file.
    2c. For the new test file, N in `@@ -0,0 +1,N @@` is the exact number
        of `+` lines. Count them.
+   2d. Within ONE file section the `--- a/<path>` and `+++ b/<path>` lines
+       name the SAME path (a new file: `--- /dev/null` then `+++ b/<path>`).
+       Never pair the product file's `---` with the test file's `+++` —
+       git reads that as a rename and rejects the section (KS-908, 2026-09-15).
+   2e. Every edit's context lines are the ACTUAL neighbours of the changed
+       line in the file content — copy the line above and the line below
+       from the file, never from memory (KS-844, 2026-09-15: a one-line
+       import edit placed under three imports that sit ten lines lower).
 3. The diff touches EXACTLY two files: `product_file`, and ONE test file
    under `test_dir` (new at `suggested_test_file`, or an extension of an
    existing file in `test_dir` other than the reference file). No third
    file. Never touch package.json, lockfiles, configs, or the reference
    test file.
+3b. Inside `vi.hoisted(() => ({ … }))` use STRING LITERALS only — never a
+   `const` declared elsewhere in the file: vitest lifts the hoisted block
+   above every declaration, so `SEED_USER_ID` read inside it throws
+   `Cannot access 'SEED_USER_ID' before initialization` and the whole file
+   fails to load (KS-1050, 2026-09-15). Declare the constant INSIDE the
+   hoisted object, or repeat the literal.
 4. The test file must be RED at the current tip (its ticket-named cell fails
    because the defect is present) and GREEN once the product hunk is
    applied. State in the test's `it(...)` title which cell is the red-first
