@@ -117,3 +117,4 @@
 # q8 half of the second ten — run with NIGHT_MODEL=ornith:35b-q8_0 NIGHT_MIN_FREE_GB=45 AFTER the q4 lines above are done (the loop job runs q4 by default; a hand launch with the q8 env is needed for these — one model at a time)
 # ─── Kam 12:38: every ticket on BOTH quants. q4 twins of the q8-only passes (active lines — the loop job / a hand q4 run takes them):
 # q8 twins of the q4-only passes — PARKED (#Q8): uncomment + hand-launch with NIGHT_MODEL=ornith:35b-q8_0 NIGHT_MIN_FREE_GB=45 NIGHT_MAX_TICKETS=6 when no runner is live
+KS-1118 product=Blockchain/Dev/services/originate/src/routes/verification.ts ref=Blockchain/Dev/services/originate/src/__tests__/ks1103-verify-hash-field.test.ts line=742 ctx=49152

@@ -23,14 +23,6 @@ minimal code change that makes it so. If the ticket names several sites that
 read the same wrong value, fix every named site inside `product_file`, not
 only the first one.
 
-TEST RUNNER (2026-09-15 18:2x): read `repo.test_runner` FIRST. If it begins with `jest`, this service runs
-ts-jest: use `jest.mock('<module>', () => ({ ... }))` (auto-hoisted above the imports — do NOT write
-`vi.mock`, `vi.hoisted`, `vi.fn`, `vi.stubGlobal`; use `jest.fn()`), `describe / it / expect / beforeAll /
-afterAll / beforeEach` as globals (or `import { describe, it, expect, jest } from '@jest/globals'`), and copy
-the reference test's mock shape exactly — it is a jest test. If it begins with `vitest`, everything below
-about `vi.*` applies. A vitest idiom in a jest file (or the reverse) fails to LOAD and the checker reads that
-as a load error, never as a red.
-
 RETRY FEEDBACK (2026-09-15 15:5x — added after the fourth "changed the neighbour" slip on one
 file): if the input carries a `retry_feedback` object, this is your SECOND attempt at this exact
 task and the checker REFUSED your first one. Read `retry_feedback` BEFORE anything else. It names

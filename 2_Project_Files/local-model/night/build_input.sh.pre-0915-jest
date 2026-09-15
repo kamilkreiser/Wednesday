@@ -189,18 +189,10 @@ pkg = show(f"{service_dir}/package.json")
 if pkg is None:
     refuse(f"{service_dir}/package.json is not at the tip")
 test_script = json.loads(pkg).get("scripts", {}).get("test", "")
-# 2026-09-15 18:2x (Kam 18:19 "extend the checker"): jest services (originate, governance — ts-jest) are IN. The runner
-# kind is the first word of repo.test_runner (no new key — the input contract's key set is unchanged); the checker
-# branches on it. Anything that is neither vitest nor jest is still refused by name.
-if "vitest" in test_script:
-    runner_kind = "vitest"
-elif "jest" in test_script:
-    runner_kind = "jest"
-else:
-    refuse(f"{service_dir} test script is {test_script!r} — the checker runs vitest or jest only")
+if "vitest" not in test_script:
+    refuse(f"{service_dir} test script is {test_script!r} — the checker runs vitest only (jest services are out of the contract)")
 has_setup = show(f"{service_dir}/vitest.setup.ts") is not None
 has_cfg = show(f"{service_dir}/vitest.config.ts") is not None
-has_jest_cfg = show(f"{service_dir}/jest.config.js") is not None
 tsconfig_txt = show(f"{service_dir}/tsconfig.json") or "{}"
 try:
     co = json.loads(re.sub(r"//[^\n]*", "", tsconfig_txt)).get("compilerOptions", {})
@@ -293,14 +285,8 @@ if ref_path.replace(subdir + "/", "") == product_rel:
 slug = re.sub(r"[^a-z0-9]+", "-", n["title"].lower()).strip("-")
 slug = "-".join(slug.split("-")[:6])[:60].rstrip("-")
 suggested = f"{subdir}/{test_dir_rel}/ks{number}-{slug}.test.ts"
-if runner_kind == "vitest":
-    runner = f"vitest (run one file with `npx vitest run <file>` from {subdir}/{service_dir}" + \
-             ("; setupFiles ./vitest.setup.ts" if has_setup else "") + (")" if has_cfg else "; no vitest.config.ts at the tip)")
-else:
-    runner = (f"jest (ts-jest; run one file with `npx jest <file>` from {subdir}/{service_dir}"
-              + ("; config jest.config.js" if has_jest_cfg else "; no jest.config.js at the tip")
-              + "; use `jest.mock(...)` (auto-hoisted — there is NO vi.mock / vi.hoisted / vi.fn here; use jest.fn), "
-              + "`describe/it/expect/beforeAll/afterAll` are globals or `import { ... } from '@jest/globals'`)")
+runner = f"vitest (run one file with `npx vitest run <file>` from {subdir}/{service_dir}" + \
+         ("; setupFiles ./vitest.setup.ts" if has_setup else "") + (")" if has_cfg else "; no vitest.config.ts at the tip)")
 note = (
     f"READ-ONLY template: `{ref_path}` is an EXISTING test in the same __tests__ directory that imports the "
     f"product module (`{mod_noext}`) and drives it in-process" +

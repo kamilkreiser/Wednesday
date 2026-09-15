@@ -2512,3 +2512,13 @@ Done with it: Dynamics → Kam's team decision (no action); QuickQuote masthead/
 > extend the checker. dont let it go idle. action all backlog and to do from easy to hard. you act as a gate keeper. check, fix and lineup everything that passes. reject what does not. Next week I will be away and would love to give you an instruction at the start of the week and know progress continues through the week and does not stop. especially after just over an hour
 
 *Note:* Correction + standing order: never idle, whole backlog easy→hard, gatekeeper role, next-week autonomy. Lesson filed (W); ledger w=2; checker extension started.
+
+## 2026-09-15 18:22 — Kam (dashboard chat, verbatim)
+> any reason you are referring to wednesday in the 3rd person? who am I talking to?
+
+*Note:* Answered in the first person; names-not-pronouns lesson amended: third person is for notes/handovers only, first person on the panel.
+
+## 2026-09-15 18:23 — Kam (dashboard chat, verbatim)
+> it will be from Monday night so we will have a full day to work through things but the summary is good
+
+*Note:* Kam leaves Monday night 2026-09-21; the unattended loop must be built + piloted by Monday morning. Folded into the never-idle lesson.

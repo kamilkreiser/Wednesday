@@ -20,3 +20,6 @@ tier: W
 5. **Test by its handle:** read the sentence as Kam on a phone with no context: can every "who" be answered without scrolling? If not, name it.
 
 **Related:** [[2026-08-06_bluf-write-for-the-reader]] · [[2026-08-06_ask-format-client-project-options-rec]] · [[2026-08-21_steps-get-line-breaks]] · [[2026-08-04_validate-brief-pointers]] (a pronoun is a relative path) · [[2026-08-17_conversation-needs-a-stable-panel]] (the panel is where Kam reads)
+
+## AMENDED 2026-09-15 18:21 — Kam: "any reason you are referring to wednesday in the 3rd person? who am I talking to?"
+The rule's scope is NOTES, HANDOVERS, CARDS and BRIEFS — surfaces a different reader lands on later. **On the panel, in conversation with Kam, Wednesday speaks in the FIRST person** ("I held it", "my brief was wrong"); other actors are still named. The third-person habit spilled from the note tool into the chat tool across an afternoon of mirroring, and it read to him as someone else reporting on Wednesday. Rule 4 ("'Wednesday' for this seat's own acts, never 'I'") is for the note and the handover block ONLY.

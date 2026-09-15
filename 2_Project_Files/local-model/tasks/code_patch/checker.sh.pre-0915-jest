@@ -111,21 +111,10 @@ if [ "$n_dirty" -ne 0 ]; then
 fi
 echo "clone clean at pinned tip $TIP"
 
-# 2026-09-15 18:2x (Kam 18:19 "extend the checker"): the runner KIND is the first word of repo.test_runner — vitest or
-# jest (originate, governance). jest's `--json --outputFile` writes the same report shape vitest's json reporter
-# mimics (numTotalTests / testResults[].assertionResults), so summ() reads both; a single file is a positional
-# path pattern for both. Name kept (run_vitest) so every call site stays as it was.
-RUNNER_KIND="$(python3 -c 'import json,sys; print((json.load(open(sys.argv[1])).get("repo",{}).get("test_runner","vitest").split(" ")[0]))' "$INPUT")"
-case "$RUNNER_KIND" in vitest|jest) ;; *) echo "checker: unknown runner kind $RUNNER_KIND in repo.test_runner — refusing" >&2; exit 1;; esac
-echo "runner: $RUNNER_KIND"
 run_vitest() {
   # run_vitest <label> [file]  -> writes $REP/<label>.json + .out; echoes rc
   local label="$1"; shift
-  if [ "$RUNNER_KIND" = jest ]; then
-    ( cd "$SVC" && npx jest "$@" --json --outputFile="$REP/$label.json" ) > "$REP/$label.out" 2>&1
-  else
-    ( cd "$SVC" && npx vitest run "$@" --reporter=json --outputFile="$REP/$label.json" ) > "$REP/$label.out" 2>&1
-  fi
+  ( cd "$SVC" && npx vitest run "$@" --reporter=json --outputFile="$REP/$label.json" ) > "$REP/$label.out" 2>&1
   echo $?
 }
 summ() {
