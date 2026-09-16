@@ -1,0 +1,158 @@
+# KS-1033 — Wednesday's task for Ornith, BASH_PATCH (item 1 of 3 ONLY — the demo-mutation guard's default base; written 20:21 on 2026-09-16 from the files at develop M55 `48e65c435` — `Blockchain/Dev/scripts/check-no-demo-mutation.sh` read whole (140 lines), the diff-range block at `:49-60` measured byte-for-byte; `Blockchain/Dev/scripts/run-code-guards.sh:115-120` (the DEFERRED bucket) read; `Blockchain/Dev/CONTRIBUTING.md:37-62` (Git Flow) read; `.github/workflows/ci.yml` read for triggers and for the guard's name) — PRE-MEASURED in a scratch clone (see the raise notes).
+
+## What is wrong (one paragraph)
+`check-no-demo-mutation.sh:58` defaults to `BASE="origin/main"` when neither `GITHUB_BASE_REF` nor an argument is given, then diffs `BASE...HEAD` (`:69`) and scans `git log BASE..HEAD` for the override token (`:98`). Under this repo's Git Flow, `feature/*` branches are cut from `develop` and `develop` runs ahead of `main`, so every develop-based branch carries the whole develop-vs-main delta as its own change: a branch that touched nothing is BLOCKED for demo files it never edited. That is why KS-926 could not wire the guard (`run-code-guards.sh:116`, DEFERRED: "Fix its base to the merge-base with origin/develop before wiring"). **This task: the default base becomes `origin/develop` (`git diff A...B` already diffs from the merge-base), the comment above the block says so, plus one new shell suite that builds a throwaway git repo and proves a clean develop-based branch now passes while a branch that edits `env.demo.json` itself is still refused.** NOT in this task: items 2 and 3 of KS-1033 (`check-no-trust-header-reads.sh`, `check-container-isolation.sh` — item 2 is a decision), wiring the guard, `run-code-guards.sh`, the guard's header comment `:17-19`.
+
+## The exact change — TWO ONE-LINE REPLACEMENTS in `Blockchain/Dev/scripts/check-no-demo-mutation.sh`
+E1 — line 50 (context: line 49 is `# Determine the diff range. In CI this is the PR base..head; locally`, line 51 is `if [ -n "${GITHUB_BASE_REF:-}" ]; then` — copy both from the file as context):
+```
+-# default to comparing against origin/main.
++# default to origin/develop, the line feature/* branches are cut from (KS-1033); a hotfix/* branch passes origin/main as the first argument.
+```
+E2 — line 58 (context: line 57 is `else`, line 59 is `  HEAD="HEAD"` — copy both from the file as context; the two leading spaces on line 58 stay):
+```
+-  BASE="origin/main"
++  BASE="origin/develop"
+```
+Both `+` lines are byte-exact — copy them; each is ONE physical line; do not touch any other line; do not add a trailing comment.
+
+## The test — CREATE THE NEW FILE `Blockchain/Dev/scripts/__tests__/check_no_demo_mutation_base.test.sh`
+
+File: `Blockchain/Dev/scripts/__tests__/check_no_demo_mutation_base.test.sh`
+
+bash 3.2. It lives beside the reference `Blockchain/Dev/scripts/__tests__/run_code_guards.test.sh` (full content in `files[...]`), whose shape it follows: a header comment, `set -uo pipefail`, the subject located from `${BASH_SOURCE[0]}`, a FATAL guard, pass/fail counters, a REAL `git` fixture built under `mktemp -d` with a `trap` cleanup, and a totals line with `exit 1` on any failure. It never touches the repository's own files: the guard runs inside the throwaway repo.
+
+**Reproduce the file below EXACTLY as written — every line, in order.** Do not invent a helper, do not rename a variable, do not reword a message. Every value a cell reads is assigned FIRST, above the first cell. The file contains no backslash anywhere; keep it that way. **Your diff for this file is a NEW-FILE diff: `--- /dev/null`, `+++ b/Blockchain/Dev/scripts/__tests__/check_no_demo_mutation_base.test.sh`, ONE hunk header `@@ -0,0 +1,99 @@`, then EVERY line with a leading `+` (a blank line is a lone `+`) — no context lines, no `-` lines: you are not diffing the reference.**
+
+```
+#!/usr/bin/env bash
+# =============================================================================
+# TESTS for Blockchain/Dev/scripts/check-no-demo-mutation.sh — the default base
+# (KS-1033 item 1)
+# =============================================================================
+# The defect: with no GITHUB_BASE_REF and no arguments the guard compared
+# against origin/main. Under Git Flow develop is permanently ahead of main, so
+# every develop-based branch carried the whole develop-vs-main delta as its own
+# change, and a branch that touched nothing was BLOCKED for demo files it never
+# edited. The default base is now origin/develop.
+#
+# The fixture is a throwaway git repo with origin/main and origin/develop refs:
+# develop changes env.demo.json once, feature/clean touches only notes.md, and
+# feature/demo changes env.demo.json itself without the override token.
+#
+# Usage: bash Blockchain/Dev/scripts/__tests__/check_no_demo_mutation_base.test.sh
+#        DEMO_GUARD_SH=/path/to/other/copy bash ...   (red-proof)
+# =============================================================================
+set -uo pipefail
+TOTAL_CELLS=5
+export GIT_CONFIG_GLOBAL=/dev/null GIT_CONFIG_SYSTEM=/dev/null
+
+HERE="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+REPO_ROOT="$(cd "$HERE/../../../.." && pwd)"
+if [ "${DEMO_GUARD_SH+set}" = set ] && [ -z "$DEMO_GUARD_SH" ]; then
+  echo "FATAL: DEMO_GUARD_SH is set but EMPTY - refusing to silently grade the shipped script." >&2
+  exit 2
+fi
+SUBJ="${DEMO_GUARD_SH-$REPO_ROOT/Blockchain/Dev/scripts/check-no-demo-mutation.sh}"
+[ -f "$SUBJ" ] || { echo "FATAL: check-no-demo-mutation.sh not found at $SUBJ" >&2; exit 2; }
+command -v git >/dev/null 2>&1 || { echo "FATAL: git is required" >&2; exit 2; }
+
+pass=0; fail=0
+ok()  { echo "  ok   $1"; pass=$((pass + 1)); }
+bad() { echo "  FAIL $1"; echo "     $2"; fail=$((fail + 1)); }
+
+WORK="$(mktemp -d "${TMPDIR:-/tmp}/ks1033.XXXXXX")"
+trap 'rm -rf "$WORK"' EXIT
+F="$WORK/repo"
+DEMO="Blockchain/Dev/deployment/azure/env.demo.json"
+mkdir -p "$F/Blockchain/Dev/deployment/azure"
+{
+  git -C "$F" init -q -b main . &&
+  git -C "$F" config user.email t@t.t &&
+  git -C "$F" config user.name t &&
+  echo base > "$F/README.md" &&
+  echo base > "$F/$DEMO" &&
+  git -C "$F" add -A &&
+  git -C "$F" commit -qm base &&
+  git -C "$F" update-ref refs/remotes/origin/main HEAD &&
+  git -C "$F" checkout -q -b develop &&
+  echo reviewed > "$F/$DEMO" &&
+  git -C "$F" commit -qam "demo config reviewed on develop" &&
+  git -C "$F" update-ref refs/remotes/origin/develop HEAD &&
+  git -C "$F" checkout -q -b feature/clean &&
+  echo docs > "$F/notes.md" &&
+  git -C "$F" add notes.md &&
+  git -C "$F" commit -qm "docs only" &&
+  git -C "$F" checkout -q -b feature/demo develop &&
+  echo changed > "$F/$DEMO" &&
+  git -C "$F" commit -qam "demo change without the token"
+} > "$WORK/fixture.log" 2>&1 || { echo "FATAL: fixture did not build" >&2; cat "$WORK/fixture.log" >&2; exit 2; }
+
+run_guard() {
+  git -C "$F" checkout -q "$1" || return 99
+  ( cd "$F" && env -u GITHUB_BASE_REF bash "$SUBJ" ${2+"$2"} ${3+"$3"} 2>&1 )
+}
+rc_clean=0; out_clean="$(run_guard feature/clean)" || rc_clean=$?
+rc_demo=0; out_demo="$(run_guard feature/demo)" || rc_demo=$?
+rc_args=0; out_args="$(run_guard feature/clean origin/develop HEAD)" || rc_args=$?
+
+# CELL 1 - red at the tip
+if [ "$rc_clean" -eq 0 ]; then ok "a develop-based branch that touched nothing passes with the default base"
+else bad "a develop-based branch that touched nothing was refused with the default base" "rc=$rc_clean"; fi
+
+# CELL 2 - red at the tip
+if printf '%s' "$out_clean" | grep -qF 'no demo-shaping paths touched'; then ok "the default base reports no demo-shaping paths for that branch"
+else bad "the default base did not report no demo-shaping paths" "$(printf '%s' "$out_clean" | grep -m1 -F 'DEMO MUTATION')"; fi
+
+# CONTROL CELL 3 - green on both trees
+if [ "$rc_demo" -eq 1 ] && printf '%s' "$out_demo" | grep -qF 'env.demo.json'; then ok "CONTROL a branch that changes env.demo.json itself is still refused"
+else bad "CONTROL a branch that changes env.demo.json itself was not refused" "rc=$rc_demo"; fi
+
+# CONTROL CELL 4 - green on both trees
+if [ "$rc_args" -eq 0 ]; then ok "CONTROL an explicit base argument still wins"
+else bad "CONTROL an explicit base argument no longer works" "rc=$rc_args out=$out_args"; fi
+
+# CONTROL CELL 5 - green on both trees
+if bash -n "$SUBJ"; then ok "CONTROL check-no-demo-mutation.sh parses (bash -n)"
+else bad "CONTROL check-no-demo-mutation.sh does not parse" "bash -n failed"; fi
+
+echo ""
+echo "  $pass passed, $fail failed (of $TOTAL_CELLS cells)"
+if [ "$((pass + fail))" -ne "$TOTAL_CELLS" ]; then
+  echo "  INCOMPLETE - $((pass + fail)) of $TOTAL_CELLS cells ran"
+  exit 1
+fi
+[ "$fail" -eq 0 ] || exit 1
+exit 0
+```
+
+CELL 1 and CELL 2 are red at the untouched tip **by assertion** (the guard exits 1 and prints `DEMO MUTATION DETECTED` for `feature/clean`, so `rc_clean` is 1 and the `no demo-shaping paths touched` line is absent — all values assigned above the cells, nothing crashes). CONTROL CELLS 3, 4 and 5 are green on both trees: a branch that edits `env.demo.json` itself is refused under either base, an explicit `origin/develop HEAD` argument never used the default, and a two-line edit cannot break `bash -n`.
+
+## Where (parsed into the checklist — every **must change** line must appear as a `-` line in your diff)
+* `:50` — **must change**: `# default to comparing against origin/main.`
+* `:58` — **must change**: `  BASE="origin/main"`
+* `:49` — (correct) `# Determine the diff range. In CI this is the PR base..head; locally` — stays
+* `:51` — (correct) `if [ -n "${GITHUB_BASE_REF:-}" ]; then` — stays
+
+## Output
+Exactly ONE ```diff block with TWO files: `--- a/Blockchain/Dev/scripts/check-no-demo-mutation.sh` / `+++ b/Blockchain/Dev/scripts/check-no-demo-mutation.sh` (two one-line hunks, or one hunk spanning 49-59), then `--- /dev/null` / `+++ b/Blockchain/Dev/scripts/__tests__/check_no_demo_mutation_base.test.sh` (one `@@ -0,0 +1,99 @@` hunk, all `+`); paths repo-relative; blank context lines keep their leading space.
+
+## Premises (measured)
+
+Every factual claim the two `+` lines and the new suite assert or rely on. `git show 48e65c435:<file>` on 2026-09-16 (20:1x–20:2x) unless another instrument is named.
+
+1. **The guard's no-argument default is `origin/main`** — `check-no-demo-mutation.sh:57-58` `else` / `  BASE="origin/main"`; `:51-52` `GITHUB_BASE_REF` wins when set; `:54-56` an explicit `$1` wins next; `:69` `git diff --name-only "$BASE...$HEAD"`; `:98` `git log "$BASE..$HEAD"`. `origin/main` occurs on exactly two lines, `:50` and `:58`.
+2. **"`feature/*` branches are cut from `develop`" / "`hotfix/*` is cut from `main`"** (the new comment) — `CONTRIBUTING.md:54` `develop` = "Integration line. All feature work branches from, and merges back into, `develop`."; `:60` `feature/*` cut from `develop`; `:61` `release/*` cut from `develop`; `:62` `hotfix/*` cut from `main`. NOT claimed: that `develop` is the GitHub default branch — `GET /repos/Secuura/Distributed_Secuura` → `default_branch: "main"`.
+3. **"a hotfix/* branch passes origin/main as the first argument"** — the argument path exists (`:54-56`) and CONTROL CELL 4 pins it; this sentence is guidance in a comment, not a behaviour change.
+4. **The defect as measured by the ticket reproduces in a fixture** — pre-measured (raise notes): at the tip a develop-based branch that touched only `notes.md` exits 1 with `DEMO MUTATION DETECTED`; with the edit it exits 0 with `no demo-shaping paths touched`.
+5. **The change alters no gate that runs today** — `run-code-guards.sh:116` lists the guard in `DEFERRED` (not run); `.github/workflows/ci.yml:9-10` `on: workflow_dispatch:` only, and the file does not contain `demo-mutation` (`grep -c` = 0); `git grep check-no-demo-mutation 48e65c435 -- .github .githooks` → 0 files. The guard's own header `:17-18` claiming `ci.yml` wiring is therefore stale — NOT touched here (raise notes).
+6. **The ruling for item 1** — Linear KS-1033 (read 20:1x), item 1 carries its own **Fix:** "base it on the merge-base with `origin/develop` (or on `GITHUB_BASE_REF` when set, which it already honours at line 51-52)". Item 2 says "Deciding which is the point" — that item is excluded. No Kam ruling is claimed.
+
+Claims deliberately NOT made: that the guard is or should be wired; anything about the live demo.
+
+## Notes for the raise (not for the model)
+
+- **Pre-measured before this brief was written** (scratch clone `git clone --shared` of the Secuura checkout at `48e65c435`, by script file): the new suite alone at the tip → `3 passed, 2 failed (of 5 cells)`, rc 1, both reds by assertion (CELL 2's detail line prints the guard's `DEMO MUTATION DETECTED` banner); with E1+E2 → `5 passed, 0 failed (of 5 cells)`, rc 0; the same green run with `GITHUB_BASE_REF=main` exported in the caller → still 5/5 (the suite clears it with `env -u`, so a CI runner cannot flip the cells); completeness arm proven on the GREEN tree (CONTROL CELL 5 cut → `INCOMPLETE - 4 of 5 cells ran`, rc 1). `bash -n` on the edited guard rc 0. 99 lines, 0 backslashes. No sibling suite under `scripts/__tests__/` names `check-no-demo-mutation.sh` (`git grep -l`), so the checker's B6 has nothing to run.
+- **Why a multi-item ticket fits.** KS-1033 records three guards that could not be wired, each with its own reason and its own fix; item 1 is one file, carries a concrete fix in the ticket, and nothing requires items 2 and 3 to land with it. Close-out should say item 1 is fixed and items 2–3 remain (item 2 needs Kam's warn-vs-fail decision).
+- **Follow-ups this leaves stale — not the model's to touch:** (a) `run-code-guards.sh:116`'s DEFERRED reason quotes "defaults to BASE=origin/main (line 58)"; once this lands the reason is false and the guard can be moved to WIRED — that move is the wiring decision, a separate PR. (b) The guard's header `:17-19` says it is wired into `.github/workflows/ci.yml` — measured false (point 5). (c) A local run on a `hotfix/*` branch cut from `main` now compares against `develop`'s merge-base unless `origin/main` is passed; the new comment says so. In CI `GITHUB_BASE_REF` decides, unchanged.
+- **Not security-/auth-class:** the guard protects demo CONFIG paths from unreviewed edits; it issues nothing and authenticates nothing, and it runs nowhere today.

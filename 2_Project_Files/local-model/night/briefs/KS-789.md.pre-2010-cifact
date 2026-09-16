@@ -1,0 +1,109 @@
+# KS-789 — Wednesday's task for Ornith, **DOCUMENTATION (`Blockchain/Dev/CONTRIBUTING.md`, no code)** (written 2026-09-16 from the file at develop M55 `48e65c435`: `Blockchain/Dev/CONTRIBUTING.md` read whole (681 lines) with `### Pre-push preflight (KS-380)` at `:360` read in full through `:408`, and `Blockchain/Dev/docs/DEV-PROCESS.md` read for the `## Manual CI-gate equivalents` heading at `:77` and the `## GitHub Actions is retired for this repository (Kam, 2026-08-27)` heading at `:69`). ⚠ NOT pre-measured: this commission is READ-ONLY against the Secuura checkout, so no scratch clone was built — every `-` line was measured byte-for-byte at the tip (see the raise notes).
+
+## What to change (one paragraph)
+
+`CONTRIBUTING.md:384-386` justifies TWO mechanisms — the pre-push hook's graceful degradation, and its
+documented `--no-verify` bypass — with a single clause: **"CI is the hard gate."** There is no CI.
+GitHub Actions is retired for this repository (Kam, 2026-08-27), a fact this same document records
+elsewhere and which is the stated premise of `docs/DEV-PROCESS.md` §*Manual CI-gate equivalents*. So the
+passage tells every reader that a leg which degraded, or a push that used the bypass, will be caught
+later — and nothing catches it. The sentence is not merely inaccurate: it is **load-bearing for a
+decision an author makes under pressure**, because how sparingly you reach for `--no-verify` depends
+entirely on what is standing behind you. The honest replacement is not the clause struck out; it is a
+statement of what actually catches a bypassed push (the PR's Test Evidence block and the reviewer, and
+nothing else), the obligation that follows (say on the PR that you bypassed, and which legs ran), and a
+pointer to `docs/DEV-PROCESS.md` §*Manual CI-gate equivalents*, which is the real answer to "what runs
+now". **Removing the bypass is explicitly NOT proposed** — the ticket is clear that a hook that cannot be
+bypassed makes the repository unpushable, which is what KS-788 describes happening; the bypass is
+correct and its *justification* is what is being replaced.
+
+## Where
+
+- `:384` — (correct) `The hook degrades gracefully — a leg whose dependency is down (Docker off →` stays
+  EXACTLY as it is, as a CONTEXT line with one leading space. The graceful degradation is real and is
+  still being described; only its justification changes.
+- `:385` — **replaced.** `lockfile leg advisory; stack off → auth leg skipped) never blocks a push; CI is`
+  — the first half of the false clause.
+- `:386` — **replaced.** ``the hard gate. Bypass a single push with `git push --no-verify`.`` — the
+  second half, plus the bypass sentence that carries no obligation.
+- `:387` — (correct) the blank line below stays.
+- `:417` — (correct) `### Required status checks (enforced on `develop` and `main`) — RETIRED` — the
+  heading that already records the retirement. NOT touched; this task does not restate it there.
+- `:445` — (correct) `### Adopted merge flow (Kam, 2026-08-25) — the standing flow` and everything under
+  it. NOT touched (that section is KS-866's).
+
+## The exact change — ONE hunk in `Blockchain/Dev/CONTRIBUTING.md`, replacing exactly TWO consecutive lines
+
+The block below replaces lines 385-386 with ten lines. **Every line inside the fence carries a leading
+`+` or a leading `-`; there is no context line anywhere in it.** The context the hunk needs is named here
+in prose and must be copied VERBATIM from `files[...]`, never retyped from this brief: the line ABOVE the
+first `-` line is line 384, `The hook degrades gracefully — a leg whose dependency is down (Docker off →`,
+and the line BELOW the last `-` line is line 387, which is BLANK (a single space as a diff context line).
+Both stay untouched.
+
+**Both `-` lines contain characters that are not ASCII** — line 385 carries a RIGHTWARDS ARROW (`→`) and
+line 386 carries backticks around `git push --no-verify`. Reproduce both exactly as printed below, from
+`files[...]`. The `+` lines carry EM DASHES (`—`, one long dash, not two hyphens) in three places;
+reproduce those exactly too. No `+` line contains a backslash.
+
+```
+-lockfile leg advisory; stack off → auth leg skipped) never blocks a push; CI is
+-the hard gate. Bypass a single push with `git push --no-verify`.
++lockfile leg advisory; stack off → auth leg skipped) never blocks a push.
++**There is no CI behind that.** GitHub Actions is retired for this repository
++(Kam, 2026-08-27), so nothing re-checks a leg that degraded or a push that was
++bypassed — the PR's Test Evidence block and the reviewer are the only backstop.
++What runs now is listed in [`docs/DEV-PROCESS.md`](docs/DEV-PROCESS.md)
++§ *Manual CI-gate equivalents*.
++
++Bypass a single push with `git push --no-verify` — sparingly, and for a reason
++you can name, because nothing catches what it skips. A bypassed push **must say
++so on the PR**, naming which legs did and did not run.
+```
+
+That is 2 removed lines and 10 added lines, in ONE hunk.
+
+Touch nothing else in the file. Do not edit `docs/DEV-PROCESS.md`. Do not edit `.githooks/pre-push`. Do
+not remove or discourage the bypass itself. Do not renumber, reflow or re-wrap any paragraph the hunk
+does not contain.
+
+## Required (the checker's proof — each token ABSENT in the section before, PRESENT after)
+
+- `### Pre-push preflight (KS-380)` :: There is no CI behind that, Manual CI-gate equivalents, which legs did and did not run
+
+## Output
+
+Exactly ONE ```diff block, ONE file section `--- a/Blockchain/Dev/CONTRIBUTING.md` /
+`+++ b/Blockchain/Dev/CONTRIBUTING.md`, ONE hunk with correct counts; context lines copied verbatim from
+`files[...]` (the blank context line is a single space); the ten `+` lines are exactly the text above,
+each ONE physical line.
+
+## Notes for the raise (not for the model)
+
+- **Measured at `48e65c435`, not eyeballed.** `git show 48e65c435:Blockchain/Dev/CONTRIBUTING.md` piped
+  into python: the file is 681 lines; the substring `CI is the hard gate` occurs on line 386 and NOWHERE
+  else (the clause is split across 385/386 by the reflow, so the grep hit is line 386 alone); line 385 is
+  `'lockfile leg advisory; stack off → auth leg skipped) never blocks a push; CI is'` and line 386 is
+  ``'the hard gate. Bypass a single push with `git push --no-verify`.'`` by exact string equality, each
+  occurring once. Line 384 is unchanged and stays as context — it is NOT re-added as a `+`, which is what
+  keeps the hunk minimal and keeps the builder's context-as-addition gate quiet.
+- **The three tokens are absent from that section at the tip and one is present elsewhere in the file.**
+  Measured over `### Pre-push preflight (KS-380)` (`:360` to the next `###` at `:409`):
+  `There is no CI behind that` — absent from the section AND from the whole file;
+  `which legs did and did not run` — absent from the section AND from the whole file;
+  `Manual CI-gate equivalents` — absent from the SECTION, present elsewhere in the file. D4 measures the
+  section only, so that third token is a legitimate proof; it was chosen deliberately because a
+  cross-reference to the document that answers "what runs now" is item 3 of the ticket's fix-shape.
+- **The section boundary is safe.** `### Pre-push preflight (KS-380) — run before every push` is at
+  `:360`; the next heading of level 3 or higher is `### Before Submitting` at `:409`. The hunk at 385-386
+  is inside it, so D6 (every changed region inside a required section) holds with room to spare.
+- **What this deliberately does NOT do.** It does not remove the `--no-verify` bypass (the ticket's "Not
+  proposed" section forbids it). It does not touch `.githooks/pre-push:12`'s unexplained "use sparingly"
+  — that is item 4 of the fix-shape, it lives in a different file, and this tier patches ONE document per
+  task. It does not edit `docs/DEV-PROCESS.md`, which is already correct and is what this passage now
+  points at. And it does not restate the Actions retirement, which `:417`'s `— RETIRED` heading already
+  records.
+- **Why the obligation sentence is in the diff rather than left to habit.** Item 2 of the ticket's
+  fix-shape: a `--no-verify` push should say so on the PR with which legs ran. It was done by hand on
+  #800 once. A documented expectation is the difference between one author's habit and a rule the next
+  reader inherits — which is the whole complaint the ticket makes about the clause being replaced.

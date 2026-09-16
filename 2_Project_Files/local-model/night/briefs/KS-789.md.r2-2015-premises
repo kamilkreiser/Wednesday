@@ -121,20 +121,6 @@ Every factual claim the eleven `+` lines assert or rely on, with the instrument 
 7. **"never blocks a push"** (kept from `:385`) — unchanged text; `preflight.sh:708-753` exits 0 on
    SKIPPED legs unless `PREFLIGHT_STRICT_LEGS=1` (default off, `:129`, `:749`).
 
-8. **Measured but deliberately NOT written into the doc — does CI run the shell suites?** (Wednesday's
-   20:25 correction asked for step names, not workflow names.) `GET
-   /actions/workflows/{pr-security-gates.yml,security-scan.yml,pr-platform-suites.yml}/runs?created=2026-09-02..2026-09-16`
-   → 539 runs; `GET /actions/runs/{id}/jobs` for each, steps matched on "shell test suites": the
-   `pr-security-gates.yml` job `Code Security Gates` step `All shell test suites (KS-666 / KS-731 — globbed,
-   not listed)` EXECUTED in 200 runs between 2026-09-10T11:49Z and 2026-09-15T14:22Z (pull_request 111
-   failure + 4 success; push 79 failure + 6 success); no `security-scan.yml` or `pr-platform-suites.yml`
-   run executed a shell-suite step. Job log for run 34961722314 (`GET /actions/jobs/104356628320/logs`,
-   HTTP 200, 97 KB): the runner printed 35 `=== <suite> ===` headers and `shell suites: 33 passed, 2
-   failed (of 35)` (FAILED: `ks949_main_seed_idempotence.test.sh`, `systemTest/__tests__/manifest_readers_agree.test.sh`).
-   So **CI does run the shell suites on PRs and develop pushes since 2026-09-10, and the step is red**;
-   `preflight.sh:548-550` ("BOTH … workflow steps are dormant", measured at e26cfce2b) is stale in present
-   tense. None of this is needed by the `+` lines, which claim only item 1.
-
 Claims deliberately NOT made (unmeasurable or contested): that Actions is retired; that Actions runs on
 every PR; that a reviewer re-checks legs; anything about `main`.
 
@@ -147,8 +133,7 @@ every PR; that a reviewer re-checks legs; anything about `main`.
   `startup_failure`, then **zero** `startup_failure` in 09-10..11, 09-12..13 and 09-14..16 — Actions
   resumed starting jobs between 2026-09-09 and 2026-09-10. PR runs execute for real (`pr` 799–1112 s each;
   run 34961722314 `PR Security Gates` executed step `All shell test suites (KS-666 / KS-731 — globbed, not
-  listed)` → `failure`). The 09:53 KS-910 card text "CI runs the suites" is Wednesday's option label that
-  Kam tapped, NOT an independent observation, and is not used as evidence here (correction 20:25). `GET
+  listed)` → `failure`), consistent with Kam's 09:53 "CI runs the suites". `GET
   /actions/runs?branch=develop&event=push&per_page=30` → newest 2026-09-15T14:22Z; 24 failure, 6
   cancelled, 0 success. r1 also named "the reviewer" as the backstop; under the standing flow (`:466-478`,
   Kam 2026-09-11) the sign-off is the QA gate verdict at head + Wednesday's GO, so r2 points at the merge

@@ -32,6 +32,32 @@ A CENSUS for the coordinator to brief from, easy → hard (Kam 2026-09-15 16:40 
 
 ## T2 tooling (systemTest/*, one file) — 0
 
+<!-- REJECTION TABLE (T2b / T3 / T5 / set-aside re-read), measured 2026-09-16 20:07–20:40 by a search commission — do NOT re-derive these.
+     FITS from that search: KS-1034 (queued 20:4x). KS-813 = ALREADY FIXED at the tip → a record-defect close for a Claude seat, not model work.
+     KS-1031  run-migrations.sh exit 0 on failure is a recorded trade-off (:147-155: known-failing 002 would block compose recreate) — flipping needs a ruling; the doc half is deploy-condition guidance whose premise (target DB state) cannot be measured from here
+     KS-630   decision-class ("or decide not to"); adds a leg to the shared pre-push gate
+     KS-813   already FIXED at tip — preflight.sh:704-753 prints "N/15 legs ran", PREFLIGHT INCOMPLETE on skips, TOTAL_LEGS check
+     KS-1019  [Question] ticket — "should it be typed?" is a decision, not a patch
+     KS-1084  "READ ONLY / unverified", measure-first on a two-tenant stack; tenancy/auth surface
+     KS-759   auth middleware + shared JwtPayload type (auth surface, multi-file type change)
+     KS-967   needs a new line-level credential check designed across two guards plus a deliberate flip of a self-test; credential-guard surface
+     KS-1153  a records ticket: each item closes "fixed or accepted with a line" (triage decision); its only code item (preflight.sh:166 TAB tail) is latent — "no such header exists today"
+     KS-1051  fix shapes explicitly "not a ruling"; adds a CI/preflight gate
+     KS-954   "Mechanism NOT determined. Reproduce before fixing" — needs a live gateway
+     KS-1082  guard exists only on unmerged #896 head, not at 48e65c435; systemTest is Peter's; two open questions for Peter
+     KS-807   "Decide first" — scan raw bodies (A) vs declare out (B)
+     KS-730   gateway part already changed at tip (api-gateway/src/index.ts:1136-1143, KS-727 extracted+redacted); tokenisation/src/index.ts listens on import (:411, no in-process driver); originate parts are 46/15/6 sites (jest, not one hunk); security response surface
+     KS-753   open design question for the ruling (503 vs verified:false)
+     KS-658   "Filed, deliberately not fixed ... Kam's call" — demo-affecting config
+     KS-1055  per-tenant RLS/migrations design; needs real Postgres; multi-file security
+     KS-897   the '-' line `  ) >/dev/null 2>&1` is NOT unique at tip (:123, :543, :602); the ticket's fix `( … ) >log || exit 2` catches only the last command (subshell has no set -e) — fix shape needs design; also same file as KS-910
+     KS-906   test-logic refactor with no product change (rename a case, change its precondition); a text-grep suite cannot prove the precondition is right
+     KS-979   comment fix in a .ts test file: bash_patch B5a runs `bash -n` on the product, doc_patch needs markdown section headings — no tier grades it
+     KS-1033  item 1 already briefed and PASS 7/7 at 20:10 (duplicate — see above); item 2 decision-class; item 3 relocation
+     title-level only (not read in full; auth/security/feature/review, per skip rules): KS-485 (security review plan), KS-491 (edge/WAF review + auth.ts), KS-576 (bulk re-key feature), KS-624 (VC proof crypto), KS-526 (KMS move), KS-580 (recovery-audit feature), KS-621 (cross-org authz), KS-625 (presentation holder binding), KS-870 (erasure double-auth), KS-1174 (API-key auth failures), KS-1083 (P0 secret provisioning/rotation)
+     set-aside, reason not stale, not re-read: KS-1063, KS-1076, KS-1088, KS-1111, KS-1112, KS-1113, KS-1114, KS-1119, KS-1128, KS-1129, KS-1132, KS-1135, KS-1142, KS-1159, KS-590, KS-755, KS-757, KS-777, KS-808, KS-849, KS-880, KS-889, KS-980, KS-981
+     skipped per instructions: HELD list, KS-998, KS-1168, KS-1163, KS-1148, KS-1162, KS-1081 (done PASS), KS-866 (briefed), T1 rejection-table IDs
+-->
 ## T2b bash (bash_patch — one script + a *.test.sh beside the reference) — 11
 - KS-1031 (P2) KS-754 gate F-4: DEPLOY CONDITION — apply 048 BEFORE rolling the originate image — `scripts/run-migrations.sh`
 - KS-1081 (P2) CONFIG DRIFT: two tracked env templates disagree by ~39 vars — bootstrap-env.sh  — `scripts/bootstrap-env.sh`
