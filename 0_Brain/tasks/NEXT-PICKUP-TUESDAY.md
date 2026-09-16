@@ -250,6 +250,30 @@ click it is better to ask once while he is awake. **Do it in daylight — and do
 erode into an emergency; it is a task with a date, not a someday.** NexusAI has been told explicitly
 not to spend context on it.
 
+## 🔴 HPSM: the 2026-09-14 live release cannot be shown to have been verified
+
+Card `hpsm-live-release-verification-unprovable`. **This is a claim about our EVIDENCE, not about the
+product — keep them apart in anything written to Kam.** The hardened toolkit that produced the live
+release's 115/0, 21/0 and 11/0 results lived only in a `/private/tmp` session scratchpad and is
+**gone**. The only surviving copy predates the hardening and **passes while its probes fail**: a failed
+bucket listing reads as an empty bucket *and the backup then records every object as the empty-input
+hash*; empty API output with rc 0 reads PASS and 26 checks vanish; a manifest hash mismatch still
+reports PASS.
+
+**Correct wording: the release is UNVERIFIED, not unsafe.** Nothing suggests the product is wrong.
+
+**One untried recovery path, running tonight:** the Azure VM's `~/purge-s47-live`, never inspected.
+HPSM told to **copy, not run, and not tidy** — that directory is evidence now. Found → the gap narrows
+to re-examining results. Not found → whether to rebuild and re-verify is Kam's, because it touches live
+stacks. **Either way the toolkit must be recovered or rebuilt before any NEXT live run.**
+
+**Nothing is being fixed** — HPSM held correctly. V6 is the one to fix first when Kam rules: it does not
+merely fail to detect, it **manufactures a false success and writes it into the evidence.**
+
+Quality note worth keeping: every finding in that audit carries a red control that was actually run,
+and HPSM sent an unprompted correction when one figure turned out to have come from prose rather than
+measurement (18 of 27, not 16).
+
 ## 🔴 TWO FINDINGS FOR KAM, both carded/boarded 2026-09-16 ~23:45. Neither woke him; reasons recorded.
 
 ### F-1 — an anonymous stranger can permanently lock the owner out. **Pre-existing, so LIVE in 2.1.1.**
