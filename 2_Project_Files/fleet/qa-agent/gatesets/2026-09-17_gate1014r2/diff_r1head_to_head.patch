@@ -1,0 +1,168 @@
+diff --git a/Blockchain/Dev/services/api-gateway/src/__tests__/ks1176-connector-key-level-ranks-as-none.test.ts b/Blockchain/Dev/services/api-gateway/src/__tests__/ks1176-connector-key-level-ranks-as-none.test.ts
+index 5820520ae..43cebf8d7 100644
+--- a/Blockchain/Dev/services/api-gateway/src/__tests__/ks1176-connector-key-level-ranks-as-none.test.ts
++++ b/Blockchain/Dev/services/api-gateway/src/__tests__/ks1176-connector-key-level-ranks-as-none.test.ts
+@@ -10,8 +10,8 @@
+ // POST /api/documents under a connector key answered 403 INSUFFICIENT_VERIFICATION_LEVEL.
+ //
+ // The fix is the narrower of the two shapes on the ticket: an unrecognised USER level
+-// ranks as 'none'. It satisfies a 'none' requirement, which an unauthenticated caller
+-// already passes (enforceDocumentTypeRules' no-user branch), and nothing higher.
++// ranks as 'none', the lowest authenticated level: it satisfies a 'none' requirement and
++// nothing higher.
+ // Known levels are unchanged. So is an unknown REQUIRED level, which still passes every
+ // authenticated caller: that fail-open is KS-1190, pinned below as it is today so this
+ // change cannot move it silently. It is recorded, not endorsed.
+@@ -23,9 +23,11 @@
+ //   C. KS-1190: an unknown REQUIRED level passes every authenticated principal (base)
+ //   D. POST /api/documents through the real router and the real enforceDocumentTypeRules
+ //   E. POST /api/documents/:id/verify: a verifier-gated type still refuses a connector key
++//   F. (fix round 2, gate F-1) a connector's allowedDocumentTypes applies to `type` as well as
++//      `documentType`: before this, a restricted connector named any none-rank type via `type`
+ // =============================================================================
+ 
+-import { describe, it, expect, beforeAll, afterAll, vi } from 'vitest';
++import { describe, it, expect, beforeAll, afterAll, afterEach, vi } from 'vitest';
+ import express from 'express';
+ import http from 'node:http';
+ import type { Server } from 'node:http';
+@@ -177,6 +179,11 @@ const STANDARD_TYPE = {
+   allowedAuthProviders: [],
+   metadataSchema: [],
+ };
++const DOCUMENT_TYPE = SEED_DOCUMENT_TYPES.find((dt) => (dt as { code?: string }).code === 'DOCUMENT') as
++  | Record<string, unknown>
++  | undefined;
++/** KS-1176 F: the connector's integration allow-list for the current cell; null = no restriction configured. */
++let connectorAllowedTypes: string[] | null = null;
+ const OPEN_VERIFY_TYPE = {
+   id: 'dt-ks1176-open',
+   name: 'KS1176 open',
+@@ -203,7 +210,7 @@ const realFetch = globalThis.fetch;
+ const jsonHead = { 'Content-Type': 'application/json' };
+ 
+ beforeAll(async () => {
+-  catalogue.types = [SSD_DOCUMENT as Record<string, unknown>, STANDARD_TYPE, OPEN_VERIFY_TYPE];
++  catalogue.types = [SSD_DOCUMENT as Record<string, unknown>, DOCUMENT_TYPE as Record<string, unknown>, STANDARD_TYPE, OPEN_VERIFY_TYPE];
+ 
+   // Stub originate: serves DOC_ID for the verify route's first lookup tier.
+   originate = http.createServer((req, res) => {
+@@ -247,7 +254,10 @@ beforeAll(async () => {
+         deletePendingDocument: vi.fn(async () => undefined),
+         getAllDocumentTypes: vi.fn(async () => catalogue.types),
+         getAllWorkflowInstances: vi.fn(async () => []),
+-        getNotificationSettings: vi.fn(async () => ({})),
++        // KS-1176 F: the route reads the connector's allow-list from platform-settings integrations.
++        getNotificationSettings: vi.fn(async () => (connectorAllowedTypes
++          ? { integrations: [{ id: CONNECTOR_META.connectorId, config: { allowedDocumentTypes: connectorAllowedTypes } }] }
++          : {})),
+         getRejectedDocument: vi.fn(async () => null),
+         setRejectedDocument: vi.fn(async () => undefined),
+         getWorkflowDocumentMapping: vi.fn(async () => null),
+@@ -293,6 +303,19 @@ async function createDocument(as: Record<string, unknown>, documentType: string)
+   return { status: r.status, body: await r.json() };
+ }
+ 
++/** KS-1176 F: POST /api/documents with a caller-shaped body (`type`, `documentType`, or neither). */
++async function createDocumentWithBody(as: Record<string, unknown>, body: Record<string, unknown>): Promise<{ status: number; body: any }> {
++  principal = as;
++  enforceSpy.mockClear();
++  workflowSpy.mockClear();
++  const r = await realFetch(`http://127.0.0.1:${gatewayPort}/api/documents`, {
++    method: 'POST',
++    headers: { 'Content-Type': 'application/json', Authorization: 'Bearer t' },
++    body: JSON.stringify({ title: 'KS-1176 F', contentHash: CONTENT_HASH, ...body }),
++  });
++  return { status: r.status, body: await r.json() };
++}
++
+ async function verifyDocument(as: Record<string, unknown>, documentType: string): Promise<{ status: number; body: any }> {
+   principal = as;
+   storedDocType = documentType;
+@@ -361,3 +384,50 @@ describe('KS-1176 E — POST /api/documents/:id/verify: the verifier gate is unc
+     expect(body.code).toBeUndefined();
+   });
+ });
++
++// KS-1176 fix round 2 (QA gate F-1, Major): the allow-list at routes/verification.ts checked
++// `body.documentType` only, while enforcement (and originate) resolve `documentType || type`. At base a
++// restricted connector's `type`-named none-rank request was stopped by the level check by accident;
++// ranking api_key as 'none' removed that stop, so the allow-list now reads the same key enforcement reads.
++describe('KS-1176 F — a connector allow-list applies to `type` as well as `documentType`', () => {
++  afterEach(() => {
++    connectorAllowedTypes = null;
++  });
++
++  it('the seeded catalogue carries DOCUMENT at creatorVerificationLevel none', () => {
++    expect(DOCUMENT_TYPE?.creatorVerificationLevel).toBe('none');
++  });
++
++  it('a connector restricted to DOCUMENT naming SSD_DOCUMENT via `type` is refused 403 FORBIDDEN (201 at 616c766a5)', async () => {
++    connectorAllowedTypes = ['DOCUMENT'];
++    const { status, body } = await createDocumentWithBody(CONNECTOR, { type: 'SSD_DOCUMENT' });
++    expect(status).toBe(403);
++    expect(body.error.code).toBe('FORBIDDEN');
++    expect(enforceSpy).not.toHaveBeenCalled();
++    expect(workflowSpy).not.toHaveBeenCalled();
++  });
++
++  it('the same restriction naming SSD_DOCUMENT via `documentType` is still refused 403 FORBIDDEN', async () => {
++    connectorAllowedTypes = ['DOCUMENT'];
++    const { status, body } = await createDocumentWithBody(CONNECTOR, { documentType: 'SSD_DOCUMENT' });
++    expect(status).toBe(403);
++    expect(body.error.code).toBe('FORBIDDEN');
++    expect(enforceSpy).not.toHaveBeenCalled();
++  });
++
++  it('control: the allowed type named via `type` still passes the allow-list and enforcement', async () => {
++    connectorAllowedTypes = ['DOCUMENT'];
++    const { status, body } = await createDocumentWithBody(CONNECTOR, { type: 'DOCUMENT' });
++    expect(enforceSpy).toHaveBeenCalledTimes(1);
++    expect((await enforceSpy.mock.results[0].value).ok).toBe(true);
++    expect(status).toBe(201);
++    expect(body.data.ks1176).toBe('past-enforcement');
++  });
++
++  it('record: an untyped body is not refused by the allow-list, exactly as at base (it resolves to no type)', async () => {
++    connectorAllowedTypes = ['DOCUMENT'];
++    const { status, body } = await createDocumentWithBody(CONNECTOR, {});
++    expect(status).toBe(201);
++    expect(body.data.ks1176).toBe('past-enforcement');
++  });
++});
+diff --git a/Blockchain/Dev/services/api-gateway/src/routes/verification.ts b/Blockchain/Dev/services/api-gateway/src/routes/verification.ts
+index 04b3d980f..6bd095f62 100644
+--- a/Blockchain/Dev/services/api-gateway/src/routes/verification.ts
++++ b/Blockchain/Dev/services/api-gateway/src/routes/verification.ts
+@@ -1213,8 +1213,12 @@ export function createVerificationRoutes(deps: VerificationRouteDeps): Router {
+           if (found?.config) connectorConfig = found.config as Record<string, unknown>;
+         } catch {}
+         const allowedTypes = (connectorConfig.allowedDocumentTypes || []) as string[];
+-        if (allowedTypes.length > 0 && body.documentType && !allowedTypes.includes(body.documentType as string)) {
+-          res.status(403).json({ success: false, error: { code: 'FORBIDDEN', message: `Connector is not permitted to register document type "${body.documentType}"` } });
++        // KS-1176 (QA gate F-1): read the key enforcement reads (enforcement.ts `body.documentType || body.type`).
++        // This checked `body.documentType` only, so a restricted connector could name any type via `type`;
++        // the verification-level check used to stop the none-rank ones by accident.
++        const requestedType = body.documentType || body.type;
++        if (allowedTypes.length > 0 && requestedType && !allowedTypes.includes(requestedType as string)) {
++          res.status(403).json({ success: false, error: { code: 'FORBIDDEN', message: `Connector is not permitted to register document type "${requestedType}"` } });
+           return;
+         }
+       }
+diff --git a/Blockchain/Dev/services/api-gateway/src/services/enforcement.ts b/Blockchain/Dev/services/api-gateway/src/services/enforcement.ts
+index 3e314ba11..be466fbf4 100644
+--- a/Blockchain/Dev/services/api-gateway/src/services/enforcement.ts
++++ b/Blockchain/Dev/services/api-gateway/src/services/enforcement.ts
+@@ -56,9 +56,9 @@ export function meetsVerificationLevel(userLevel: string, requiredLevel: string)
+   // KS-1176: a user level outside the order ranks as 'none'. A connector key carries
+   // 'api_key' (middleware/auth.ts), which indexOf read as -1, and `-1 >= 0` failed even a
+   // 'none' requirement, so every connector-key POST /api/documents on a 'none' type
+-  // (SSD_DOCUMENT) was refused 403. Ranking it as 'none' grants nothing an unauthenticated
+-  // caller does not already get (enforceDocumentTypeRules' no-user branch) and nothing
+-  // above 'none'. Known levels are unchanged; so is an unknown REQUIRED level (KS-1190).
++  // (SSD_DOCUMENT) was refused 403. An unrecognised level now ranks as 'none', the lowest
++  // authenticated level: it meets a 'none' requirement and nothing above it. Known levels are
++  // unchanged; so is an unknown REQUIRED level (KS-1190).
+   const userRank = userIdx === -1 ? 0 : userIdx;
+   return userRank >= reqIdx;
+ }

@@ -1,0 +1,433 @@
+// =============================================================================
+// KS-1176 — a connector key's verification level ranks as 'none'
+// =============================================================================
+//
+// A connector-key principal carries verificationLevel 'api_key' (middleware/auth.ts,
+// the sk_ branch of authenticateToken). 'api_key' is not in VERIFICATION_LEVEL_ORDER,
+// so meetsVerificationLevel's indexOf returned -1 and `-1 >= 0` failed even a 'none'
+// requirement. Once the document-type catalogue is seeded (KS-388 registers
+// SSD_DOCUMENT at creatorVerificationLevel 'none'), every Platform-S
+// POST /api/documents under a connector key answered 403 INSUFFICIENT_VERIFICATION_LEVEL.
+//
+// The fix is the narrower of the two shapes on the ticket: an unrecognised USER level
+// ranks as 'none', the lowest authenticated level: it satisfies a 'none' requirement and
+// nothing higher.
+// Known levels are unchanged. So is an unknown REQUIRED level, which still passes every
+// authenticated caller: that fail-open is KS-1190, pinned below as it is today so this
+// change cannot move it silently. It is recorded, not endorsed.
+//
+// Cells:
+//   A. the ticket's unit cells (api_key vs none / basic / standard; an unknown string
+//      behaves exactly as api_key)
+//   B. parity: every known user level x every known required level is unchanged
+//   C. KS-1190: an unknown REQUIRED level passes every authenticated principal (base)
+//   D. POST /api/documents through the real router and the real enforceDocumentTypeRules
+//   E. POST /api/documents/:id/verify: a verifier-gated type still refuses a connector key
+//   F. (fix round 2, gate F-1) a connector's allowedDocumentTypes applies to `type` as well as
+//      `documentType`: before this, a restricted connector named any none-rank type via `type`
+// =============================================================================
+
+import { describe, it, expect, beforeAll, afterAll, afterEach, vi } from 'vitest';
+import express from 'express';
+import http from 'node:http';
+import type { Server } from 'node:http';
+import type { AddressInfo } from 'node:net';
+import type { RequestHandler } from 'express';
+
+const catalogue = vi.hoisted(() => ({ types: [] as Array<Record<string, unknown>> }));
+
+// enforceDocumentTypeRules resolves document types through this module directly.
+vi.mock('../services/redis', () => ({
+  getAllDocumentTypes: vi.fn(async () => catalogue.types),
+}));
+
+import { meetsVerificationLevel, enforceDocumentTypeRules } from '../services/enforcement';
+import { SEED_DOCUMENT_TYPES } from '../routes/admin';
+
+// An independent copy of the known order, so the parity cell does not compare the
+// module's array with itself.
+const KNOWN = ['none', 'basic', 'social', 'standard', 'enhanced', 'high', 'government'];
+const UNKNOWN_USER_LEVELS = ['api_key', 'API_KEY', 'oauth_app', 'FULL', 'kyc-pending'];
+
+/** The base comparison for levels the order knows ('' reads as 'none', as in the helper). */
+function knownRank(level: string): number {
+  return KNOWN.indexOf((level || 'none').toLowerCase());
+}
+
+// ---------------------------------------------------------------------------
+// A. the ticket's unit cells
+// ---------------------------------------------------------------------------
+
+describe('KS-1176 A — a connector key meets none and nothing higher', () => {
+  it('api_key meets a none requirement, in every spelling of none (false at base)', () => {
+    expect(meetsVerificationLevel('api_key', 'none')).toBe(true);
+    expect(meetsVerificationLevel('api_key', 'NONE')).toBe(true);
+    expect(meetsVerificationLevel('api_key', '')).toBe(true);
+  });
+
+  it('api_key meets no known requirement above none', () => {
+    expect(meetsVerificationLevel('api_key', 'basic')).toBe(false);
+    expect(meetsVerificationLevel('api_key', 'standard')).toBe(false);
+    const passedAboveNone = KNOWN.slice(1).filter((r) => meetsVerificationLevel('api_key', r));
+    expect(passedAboveNone).toEqual([]);
+  });
+
+  it('an arbitrary unrecognised level behaves exactly as api_key', () => {
+    const required = ['', ...KNOWN, ...KNOWN.map((k) => k.toUpperCase())];
+    const differs: string[] = [];
+    for (const u of UNKNOWN_USER_LEVELS) {
+      for (const r of required) {
+        if (meetsVerificationLevel(u, r) !== meetsVerificationLevel('api_key', r)) differs.push(`${u} vs ${r}`);
+      }
+      // Without this, the equality above also holds at base, where both fail everything.
+      expect(meetsVerificationLevel(u, 'none')).toBe(true);
+      expect(meetsVerificationLevel(u, 'basic')).toBe(false);
+    }
+    expect(differs).toEqual([]);
+  });
+});
+
+// ---------------------------------------------------------------------------
+// B. parity for every known level
+// ---------------------------------------------------------------------------
+
+describe('KS-1176 B — known levels are unchanged', () => {
+  it('every known user level x every known required level returns the base comparison', () => {
+    const levels = ['', ...KNOWN, ...KNOWN.map((k) => k.toUpperCase())];
+    const mismatches: string[] = [];
+    let rows = 0;
+    for (const u of levels) {
+      for (const r of levels) {
+        rows++;
+        const base = knownRank(u) >= knownRank(r);
+        if (meetsVerificationLevel(u, r) !== base) mismatches.push(`${u || "''"} vs ${r || "''"}: base ${base}`);
+      }
+    }
+    expect(rows).toBe(225);
+    expect(mismatches).toEqual([]);
+  });
+});
+
+// ---------------------------------------------------------------------------
+// C. KS-1190, pinned as it is at base
+// ---------------------------------------------------------------------------
+
+describe('KS-1176 C — an unknown REQUIRED level is unchanged (KS-1190, recorded not endorsed)', () => {
+  it('an off-canonical required level still passes every authenticated principal', () => {
+    const users = [...KNOWN, ...UNKNOWN_USER_LEVELS];
+    const refused: string[] = [];
+    for (const u of users) {
+      for (const r of ['standrd', 'api_key', 'kyc']) {
+        if (!meetsVerificationLevel(u, r)) refused.push(`${u} vs ${r}`);
+      }
+    }
+    expect(refused).toEqual([]);
+  });
+});
+
+// ---------------------------------------------------------------------------
+// D + E. the two production callers, through the real router
+// ---------------------------------------------------------------------------
+
+const DOC_ID = 'doc-ks1176';
+const CONTENT_HASH = 'c'.repeat(64);
+
+/** The principal authenticateToken builds for an sk_ key (middleware/auth.ts). */
+const CONNECTOR = {
+  userId: 'connector:ks1176-c1',
+  email: 'connector@secuura.io',
+  role: 'connector',
+  organizationId: 'org-1',
+  verificationLevel: 'api_key',
+  authMethod: 'api_key',
+  connectorId: 'ks1176-c1',
+  rateLimit: 100,
+  rateLimitWindow: 60,
+  scopes: ['documents:write'],
+  tenantId: 't1',
+};
+const CONNECTOR_META = {
+  connectorId: 'ks1176-c1',
+  scopes: ['documents:write'],
+  organizationId: 'org-1',
+  tenantId: 't1',
+  rateLimit: 100,
+  rateLimitWindow: 60,
+};
+const HUMAN_STANDARD = {
+  userId: 'u-ks1176',
+  email: 'u@secuura.local',
+  role: 'ISSUER',
+  organizationId: 'org-1',
+  tenantId: 't1',
+  verificationLevel: 'STANDARD',
+  authMethod: 'email',
+  mfaEnabled: true,
+};
+
+const SSD_DOCUMENT = SEED_DOCUMENT_TYPES.find((dt) => (dt as { code?: string }).code === 'SSD_DOCUMENT') as
+  | Record<string, unknown>
+  | undefined;
+const STANDARD_TYPE = {
+  id: 'dt-ks1176-standard',
+  name: 'KS1176 standard',
+  code: 'KS1176_STANDARD',
+  isActive: true,
+  creatorVerificationLevel: 'standard',
+  verifierVerificationLevel: 'standard',
+  requireMFA: false,
+  allowedAuthProviders: [],
+  metadataSchema: [],
+};
+const DOCUMENT_TYPE = SEED_DOCUMENT_TYPES.find((dt) => (dt as { code?: string }).code === 'DOCUMENT') as
+  | Record<string, unknown>
+  | undefined;
+/** KS-1176 F: the connector's integration allow-list for the current cell; null = no restriction configured. */
+let connectorAllowedTypes: string[] | null = null;
+const OPEN_VERIFY_TYPE = {
+  id: 'dt-ks1176-open',
+  name: 'KS1176 open',
+  code: 'KS1176_OPEN',
+  isActive: true,
+  creatorVerificationLevel: 'none',
+  verifierVerificationLevel: 'none',
+  requireMFA: false,
+  allowedAuthProviders: [],
+  metadataSchema: [],
+};
+
+let principal: Record<string, unknown> = CONNECTOR;
+/** documentType the stub originate reports for DOC_ID. */
+let storedDocType = STANDARD_TYPE.code;
+
+const enforceSpy = vi.fn(enforceDocumentTypeRules);
+const workflowSpy = vi.fn(async () => ({ gated: true as const, response: { success: true, data: { ks1176: 'past-enforcement' } } }));
+
+let gateway: Server;
+let originate: Server;
+let gatewayPort: number;
+const realFetch = globalThis.fetch;
+const jsonHead = { 'Content-Type': 'application/json' };
+
+beforeAll(async () => {
+  catalogue.types = [SSD_DOCUMENT as Record<string, unknown>, DOCUMENT_TYPE as Record<string, unknown>, STANDARD_TYPE, OPEN_VERIFY_TYPE];
+
+  // Stub originate: serves DOC_ID for the verify route's first lookup tier.
+  originate = http.createServer((req, res) => {
+    if (req.url === `/api/documents/${DOC_ID}`) {
+      res.writeHead(200, jsonHead);
+      res.end(JSON.stringify({
+        id: DOC_ID,
+        status: 'anchored',
+        contentHash: CONTENT_HASH,
+        documentType: storedDocType,
+        owner: { id: 'org-1' },
+      }));
+      return;
+    }
+    res.writeHead(404, jsonHead);
+    res.end('{}');
+  });
+  originate.listen(0, '127.0.0.1');
+  await new Promise<void>((r) => originate.once('listening', () => r()));
+  const originatePort = (originate.address() as AddressInfo).port;
+
+  // The verify route's chain scan answers "no live hit".
+  globalThis.fetch = (async () => ({ ok: false, status: 404, json: async () => ({}), text: async () => '' })) as never;
+
+  const { createVerificationRoutes } = await import('../routes/verification');
+  const mockBodyParser: RequestHandler = express.json({ limit: '1mb' });
+
+  const app = express();
+  app.use(
+    createVerificationRoutes({
+      authenticateToken: () => (req, _res, next) => {
+        (req as { user?: unknown }).user = { ...principal };
+        if (principal.authMethod === 'api_key') (req as { connectorMeta?: unknown }).connectorMeta = { ...CONNECTOR_META };
+        next();
+      },
+      mockBodyParser,
+      query: vi.fn(async () => ({ rows: [] })) as never,
+      isDbAvailable: () => false,
+      redisService: {
+        getPendingDocument: vi.fn(async () => null),
+        deletePendingDocument: vi.fn(async () => undefined),
+        getAllDocumentTypes: vi.fn(async () => catalogue.types),
+        getAllWorkflowInstances: vi.fn(async () => []),
+        // KS-1176 F: the route reads the connector's allow-list from platform-settings integrations.
+        getNotificationSettings: vi.fn(async () => (connectorAllowedTypes
+          ? { integrations: [{ id: CONNECTOR_META.connectorId, config: { allowedDocumentTypes: connectorAllowedTypes } }] }
+          : {})),
+        getRejectedDocument: vi.fn(async () => null),
+        setRejectedDocument: vi.fn(async () => undefined),
+        getWorkflowDocumentMapping: vi.fn(async () => null),
+        getWorkflowInstance: vi.fn(async () => null),
+        setWorkflowInstance: vi.fn(async () => undefined),
+      } as never,
+      services: {
+        originate: { url: `http://127.0.0.1:${originatePort}` },
+        anchoring: { url: `http://127.0.0.1:${originatePort}` },
+      } as never,
+      log: () => undefined,
+      memWorkflowToDocumentMap: new Map(),
+      memRejectedDocuments: new Map(),
+      dbSaveRejection: vi.fn(async () => undefined),
+      ADMIN_ROLES: ['ADMIN', 'admin'],
+      // The real helpers: these cells are about what they decide.
+      enforceDocumentTypeRules: enforceSpy as never,
+      createWorkflowInstanceIfRequired: workflowSpy as never,
+      meetsVerificationLevel,
+    }),
+  );
+
+  gateway = app.listen(0, '127.0.0.1');
+  await new Promise<void>((r) => gateway.once('listening', () => r()));
+  gatewayPort = (gateway.address() as AddressInfo).port;
+});
+
+afterAll(async () => {
+  globalThis.fetch = realFetch;
+  await new Promise<void>((r) => gateway.close(() => r()));
+  await new Promise<void>((r) => originate.close(() => r()));
+});
+
+async function createDocument(as: Record<string, unknown>, documentType: string): Promise<{ status: number; body: any }> {
+  principal = as;
+  enforceSpy.mockClear();
+  workflowSpy.mockClear();
+  const r = await realFetch(`http://127.0.0.1:${gatewayPort}/api/documents`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json', Authorization: 'Bearer t' },
+    body: JSON.stringify({ title: 'KS-1176', documentType, contentHash: CONTENT_HASH }),
+  });
+  return { status: r.status, body: await r.json() };
+}
+
+/** KS-1176 F: POST /api/documents with a caller-shaped body (`type`, `documentType`, or neither). */
+async function createDocumentWithBody(as: Record<string, unknown>, body: Record<string, unknown>): Promise<{ status: number; body: any }> {
+  principal = as;
+  enforceSpy.mockClear();
+  workflowSpy.mockClear();
+  const r = await realFetch(`http://127.0.0.1:${gatewayPort}/api/documents`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json', Authorization: 'Bearer t' },
+    body: JSON.stringify({ title: 'KS-1176 F', contentHash: CONTENT_HASH, ...body }),
+  });
+  return { status: r.status, body: await r.json() };
+}
+
+async function verifyDocument(as: Record<string, unknown>, documentType: string): Promise<{ status: number; body: any }> {
+  principal = as;
+  storedDocType = documentType;
+  const r = await realFetch(`http://127.0.0.1:${gatewayPort}/api/documents/${DOC_ID}/verify`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json', Authorization: 'Bearer t' },
+    body: JSON.stringify({ purpose: 'test' }),
+  });
+  return { status: r.status, body: await r.json() };
+}
+
+describe('KS-1176 D — POST /api/documents under a connector key, real enforcement', () => {
+  it('the seeded catalogue carries SSD_DOCUMENT at creatorVerificationLevel none', () => {
+    expect(SSD_DOCUMENT?.creatorVerificationLevel).toBe('none');
+    expect(SSD_DOCUMENT?.isActive).toBe(true);
+  });
+
+  it('a connector key creating SSD_DOCUMENT passes enforcement (403 at base)', async () => {
+    const { status, body } = await createDocument(CONNECTOR, 'SSD_DOCUMENT');
+    expect(enforceSpy).toHaveBeenCalledTimes(1);
+    const decided = await enforceSpy.mock.results[0].value;
+    expect(decided.ok).toBe(true);
+    expect(status).toBe(201);
+    expect(body.data.ks1176).toBe('past-enforcement');
+  });
+
+  it('a connector key creating a standard type still answers 403 INSUFFICIENT_VERIFICATION_LEVEL', async () => {
+    const { status, body } = await createDocument(CONNECTOR, STANDARD_TYPE.code);
+    expect(status).toBe(403);
+    expect(body.success).toBe(false);
+    expect(body.error.code).toBe('INSUFFICIENT_VERIFICATION_LEVEL');
+    expect(workflowSpy).not.toHaveBeenCalled();
+  });
+
+  it('control: a standard human creating the same type passes, so the refusal above is the level', async () => {
+    const { status, body } = await createDocument(HUMAN_STANDARD, STANDARD_TYPE.code);
+    expect(status).toBe(201);
+    expect(body.data.ks1176).toBe('past-enforcement');
+  });
+
+  it('control: an unregistered type answers 400, so the catalogue is live (not the empty-catalogue pass-through)', async () => {
+    const { status, body } = await createDocument(CONNECTOR, 'KS1176_NOT_REGISTERED');
+    expect(status).toBe(400);
+    expect(body.error.code).toBe('UNKNOWN_DOCUMENT_TYPE');
+  });
+});
+
+describe('KS-1176 E — POST /api/documents/:id/verify: the verifier gate is unchanged', () => {
+  it('a connector key verifying a standard-gated type is still refused 403', async () => {
+    const { status, body } = await verifyDocument(CONNECTOR, STANDARD_TYPE.code);
+    expect(status).toBe(403);
+    expect(body.code).toBe('INSUFFICIENT_VERIFICATION_LEVEL');
+    expect(body.requiredLevel).toBe('standard');
+    expect(body.currentLevel).toBe('api_key');
+  });
+
+  it('control: a standard human verifying the same document is not refused', async () => {
+    const { status, body } = await verifyDocument(HUMAN_STANDARD, STANDARD_TYPE.code);
+    expect(status).toBe(200);
+    expect(body.code).toBeUndefined();
+  });
+
+  it('control: a connector key verifying a type whose verifier level is none is not refused', async () => {
+    const { status, body } = await verifyDocument(CONNECTOR, OPEN_VERIFY_TYPE.code);
+    expect(status).toBe(200);
+    expect(body.code).toBeUndefined();
+  });
+});
+
+// KS-1176 fix round 2 (QA gate F-1, Major): the allow-list at routes/verification.ts checked
+// `body.documentType` only, while enforcement (and originate) resolve `documentType || type`. At base a
+// restricted connector's `type`-named none-rank request was stopped by the level check by accident;
+// ranking api_key as 'none' removed that stop, so the allow-list now reads the same key enforcement reads.
+describe('KS-1176 F — a connector allow-list applies to `type` as well as `documentType`', () => {
+  afterEach(() => {
+    connectorAllowedTypes = null;
+  });
+
+  it('the seeded catalogue carries DOCUMENT at creatorVerificationLevel none', () => {
+    expect(DOCUMENT_TYPE?.creatorVerificationLevel).toBe('none');
+  });
+
+  it('a connector restricted to DOCUMENT naming SSD_DOCUMENT via `type` is refused 403 FORBIDDEN (201 at 616c766a5)', async () => {
+    connectorAllowedTypes = ['DOCUMENT'];
+    const { status, body } = await createDocumentWithBody(CONNECTOR, { type: 'SSD_DOCUMENT' });
+    expect(status).toBe(403);
+    expect(body.error.code).toBe('FORBIDDEN');
+    expect(enforceSpy).not.toHaveBeenCalled();
+    expect(workflowSpy).not.toHaveBeenCalled();
+  });
+
+  it('the same restriction naming SSD_DOCUMENT via `documentType` is still refused 403 FORBIDDEN', async () => {
+    connectorAllowedTypes = ['DOCUMENT'];
+    const { status, body } = await createDocumentWithBody(CONNECTOR, { documentType: 'SSD_DOCUMENT' });
+    expect(status).toBe(403);
+    expect(body.error.code).toBe('FORBIDDEN');
+    expect(enforceSpy).not.toHaveBeenCalled();
+  });
+
+  it('control: the allowed type named via `type` still passes the allow-list and enforcement', async () => {
+    connectorAllowedTypes = ['DOCUMENT'];
+    const { status, body } = await createDocumentWithBody(CONNECTOR, { type: 'DOCUMENT' });
+    expect(enforceSpy).toHaveBeenCalledTimes(1);
+    expect((await enforceSpy.mock.results[0].value).ok).toBe(true);
+    expect(status).toBe(201);
+    expect(body.data.ks1176).toBe('past-enforcement');
+  });
+
+  it('record: an untyped body is not refused by the allow-list, exactly as at base (it resolves to no type)', async () => {
+    connectorAllowedTypes = ['DOCUMENT'];
+    const { status, body } = await createDocumentWithBody(CONNECTOR, {});
+    expect(status).toBe(201);
+    expect(body.data.ks1176).toBe('past-enforcement');
+  });
+});

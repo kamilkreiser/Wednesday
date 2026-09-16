@@ -1,0 +1,753 @@
+diff --git a/Blockchain/Dev/services/api-gateway/src/__tests__/ks1072-the-latest-anchor-selector-documents-a.test.ts b/Blockchain/Dev/services/api-gateway/src/__tests__/ks1072-the-latest-anchor-selector-documents-a.test.ts
+new file mode 100644
+index 000000000..4ad1cdcd1
+--- /dev/null
++++ b/Blockchain/Dev/services/api-gateway/src/__tests__/ks1072-the-latest-anchor-selector-documents-a.test.ts
+@@ -0,0 +1,177 @@
++// =============================================================================
++// KS-1072 — latest-anchor selector documents a confirmedAt tiebreak it does
++// not implement
++// =============================================================================
++//
++// In makeFetchDocFromAnchorStore the comment promises: "Latest = highest
++// blockNumber, fall back to most-recent confirmedAt." The comparator only
++// orders by blockNumber descending; two anchors with the same blockNumber are
++// ordered arbitrarily. Since KS-1057 this selection decides the verdict.
++//
++// Driven against the real router with a stub server that plays originate AND
++// anchoring over HTTP, copied from the KS-1071 file's mocking shape so both
++// files cannot fail together on a shared helper.
++// =============================================================================
++
++import { describe, it, expect, beforeAll, afterAll, vi } from 'vitest';
++import express from 'express';
++import http from 'node:http';
++import type { Server } from 'node:http';
++import type { AddressInfo } from 'node:net';
++import type { RequestHandler } from 'express';
++
++const DOC_ID = 'doc-ks1072';
++const CONTENT_HASH = 'b'.repeat(64);
++
++let gateway: Server;
++let anchorServer: Server;
++let gatewayPort: number;
++/** Tier-2 rows served by the stub anchor store for the current cell. */
++let anchorStoreRows: Array<Record<string, unknown>> | null = null;
++// KS-1072 (seat A): the READY's `tier1Absent` flag was assigned but never read (the stub originate below 404s
++// every request, which is what forces tier 2), so it is removed; the originate stub is now closed in afterAll.
++let originate: Server;
++const jsonHead = { 'Content-Type': 'application/json' };
++
++beforeAll(async () => {
++  // Stub anchor store: serves `data.data.anchors` under test control.
++  anchorServer = http.createServer((req, res) => {
++    if (req.url === `/api/anchors/document/${DOC_ID}`) {
++      if (!anchorStoreRows || anchorStoreRows.length === 0) {
++        res.writeHead(404, jsonHead);
++        res.end('{}');
++        return;
++      }
++      res.writeHead(200, jsonHead);
++      res.end(JSON.stringify({ data: { anchors: anchorStoreRows } }));
++      return;
++    }
++    res.writeHead(404, jsonHead);
++    res.end('{}');
++  });
++  anchorServer.listen(0, '127.0.0.1');
++  await new Promise<void>((r) => anchorServer.once('listening', () => r()));
++  const anchorPort = (anchorServer.address() as AddressInfo).port;
++
++  // Stub originate: always 404s to force the tier-2 path through anchoring.
++  originate = http.createServer((_req, res) => {
++    res.writeHead(404, jsonHead);
++    res.end('{}');
++  });
++  originate.listen(0, '127.0.0.1');
++  await new Promise<void>((r) => originate.once('listening', () => r()));
++  const origPort = (originate.address() as AddressInfo).port;
++
++  const { createVerificationRoutes } = await import('../routes/verification');
++  const mockBodyParser: RequestHandler = express.json({ limit: '1mb' });
++
++  const app = express();
++  app.use(
++    createVerificationRoutes({
++      authenticateToken: () => (_req, _res, next) => next(),
++      mockBodyParser,
++      query: vi.fn(async () => ({ rows: [] })) as never,
++      isDbAvailable: () => false,
++      redisService: {
++        getPendingDocument: vi.fn(async () => null),
++        deletePendingDocument: vi.fn(async () => undefined),
++        getAllDocumentTypes: vi.fn(async () => []),
++        getAllWorkflowInstances: vi.fn(async () => []),
++        getNotificationSettings: vi.fn(async () => ({})),
++        getRejectedDocument: vi.fn(async () => null),
++        setRejectedDocument: vi.fn(async () => undefined),
++        getWorkflowDocumentMapping: vi.fn(async () => null),
++        getWorkflowInstance: vi.fn(async () => null),
++        setWorkflowInstance: vi.fn(async () => undefined),
++      } as never,
++      services: {
++        originate: { url: `http://127.0.0.1:${origPort}` },
++        anchoring: { url: `http://127.0.0.1:${anchorPort}` },
++      } as never,
++      log: () => undefined,
++      memWorkflowToDocumentMap: new Map(),
++      memRejectedDocuments: new Map(),
++      dbSaveRejection: vi.fn(async () => undefined),
++      ADMIN_ROLES: ['ADMIN', 'admin'],
++      enforceDocumentTypeRules: vi.fn(async () => ({ ok: true, docType: {} })) as never,
++      createWorkflowInstanceIfRequired: vi.fn(async () => ({ gated: false })) as never,
++      meetsVerificationLevel: () => true,
++    }),
++  );
++
++  gateway = app.listen(0, '127.0.0.1');
++  await new Promise<void>((r) => gateway.once('listening', () => r()));
++  gatewayPort = (gateway.address() as AddressInfo).port;
++});
++
++afterAll(async () => {
++  await new Promise<void>((r) => gateway.close(() => r()));
++  await new Promise<void>((r) => anchorServer.close(() => r()));
++  await new Promise<void>((r) => originate.close(() => r()));
++});
++
++async function postTier2(rows: Array<Record<string, unknown>>): Promise<any> {
++  anchorStoreRows = rows.map((r) => ({ contentHash: CONTENT_HASH, ...r }));
++  const res = await fetch(`http://127.0.0.1:${gatewayPort}/api/documents/${DOC_ID}/verify`, {
++    method: 'POST',
++    headers: { 'Content-Type': 'application/json' },
++    body: JSON.stringify({ purpose: 'test' }),
++  });
++  expect(res.status).toBe(200);
++  const body = await res.json();
++  // KS-1072 (seat A): guard the whole family — if tier 2 were not the tier that answered, every txHash below
++  // would be about the wrong code path.
++  expect(body.blockchain.source).toBe('persisted');
++  return body;
++}
++
++describe('KS-1072 — latest-anchor selector confirmedAt tiebreak', () => {
++  it('\u{1F534} KS-1072 \u2014 equal blockNumber: the most recent confirmedAt wins', async () => {
++    // Base: stable sort keeps first-in-array when byBlock === 0 → old anchor selected.
++    const body = await postTier2([
++      { blockNumber: 100, confirmedAt: '2026-01-01T00:00:00Z', transaction_hash: 'a'.repeat(64), status: 'confirmed' },
++      { blockNumber: 100, confirmedAt: '2026-06-01T00:00:00Z', transaction_hash: 'b'.repeat(64), status: 'confirmed' },
++    ]);
++    expect(body.blockchain.txHash).toBe('b'.repeat(64));
++  });
++
++  it('\u{1F534} KS-1072 \u2014 a missing confirmedAt loses the tiebreak', async () => {
++    // A dated anchor beats an undated one on equal blockNumber: Date.parse(undefined) || 0 is 0. At base the
++    // comparator returned 0 for the pair, so the stable sort kept the undated anchor listed first.
++    // (KS-1072, seat A: replaces the READY's working-out comment; the cell is unchanged.)
++    const body = await postTier2([
++      { blockNumber: 100, transaction_hash: 'c'.repeat(64), status: 'confirmed' },
++      { blockNumber: 100, confirmedAt: '2026-06-01T00:00:00Z', transaction_hash: 'd'.repeat(64), status: 'confirmed' },
++    ]);
++    expect(body.blockchain.txHash).toBe('d'.repeat(64));
++  });
++
++  // KS-1072 (seat A): the ticket names the common 0/null blockNumber case, which `|| 0` collapses to a tie.
++  it('\u{1F534} KS-1072 \u2014 a null and a 0 blockNumber tie, and the most recent confirmedAt wins', async () => {
++    const body = await postTier2([
++      { blockNumber: null, confirmedAt: '2026-02-01T00:00:00Z', transaction_hash: '1'.repeat(64), status: 'confirmed' },
++      { blockNumber: 0, confirmedAt: '2026-07-01T00:00:00Z', transaction_hash: '2'.repeat(64), status: 'confirmed' },
++    ]);
++    expect(body.blockchain.txHash).toBe('2'.repeat(64));
++  });
++
++  // KS-1072 (seat A): every tie above lists the OLDER anchor first, so a comparator that picked the oldest would
++  // red them exactly as a missing tiebreak does. Listing the newer anchor first separates the two: this cell is
++  // green at base (the stable sort keeps the first row) and reds only if recency is ordered the wrong way.
++  it('KS-1072 control \u2014 equal blockNumber with the newer anchor listed first: the newer still wins', async () => {
++    const body = await postTier2([
++      { blockNumber: 100, confirmedAt: '2026-08-01T00:00:00Z', transaction_hash: '3'.repeat(64), status: 'confirmed' },
++      { blockNumber: 100, confirmedAt: '2026-03-01T00:00:00Z', transaction_hash: '4'.repeat(64), status: 'confirmed' },
++    ]);
++    expect(body.blockchain.txHash).toBe('3'.repeat(64));
++  });
++
++  it('KS-1072 control \u2014 a higher blockNumber still wins regardless of confirmedAt', async () => {
++    // Green at base and after — blockNumber ordering is unchanged.
++    const body = await postTier2([
++      { blockNumber: 101, confirmedAt: '2026-01-01T00:00:00Z', transaction_hash: 'e'.repeat(64), status: 'confirmed' },
++      { blockNumber: 100, confirmedAt: '2026-12-01T00:00:00Z', transaction_hash: 'f'.repeat(64), status: 'confirmed' },
++    ]);
++    expect(body.blockchain.txHash).toBe('e'.repeat(64));
++  });
++});
+diff --git a/Blockchain/Dev/services/api-gateway/src/__tests__/ks871-audit-path-captured-at-entry.test.ts b/Blockchain/Dev/services/api-gateway/src/__tests__/ks871-audit-path-captured-at-entry.test.ts
+new file mode 100644
+index 000000000..8d66dfaf7
+--- /dev/null
++++ b/Blockchain/Dev/services/api-gateway/src/__tests__/ks871-audit-path-captured-at-entry.test.ts
+@@ -0,0 +1,138 @@
++/**
++ * KS-871 — audit path must be captured at entry, not after response
++ */
++
++import { describe, it, expect, beforeAll, afterAll, beforeEach, vi, type Mock } from 'vitest';
++import express from 'express';
++import http from 'node:http';
++import type { AddressInfo } from 'node:net';
++import type { RequestHandler } from 'express';
++import { createAuditMiddleware } from '../middleware/audit';
++import { createProxyRoutes } from '../routes/proxy';
++
++const FLAG = 'SUBJECTS_ERASE_SCOPE_ENFORCED';
++
++let upstream: http.Server;
++let upstreamPort = 0;
++let received: string[] = [];
++
++beforeAll(async () => {
++  upstream = http.createServer((req, res) => {
++    received.push(`${req.method} ${req.url}`);
++    res.writeHead(200, { 'content-type': 'application/json' });
++    res.end('{"ok":true}');
++  });
++  await new Promise<void>((r) => upstream.listen(0, '127.0.0.1', () => r()));
++  upstreamPort = (upstream.address() as AddressInfo).port;
++});
++
++afterAll(async () => {
++  await new Promise<void>((r) => upstream.close(() => r()));
++});
++
++beforeEach(() => {
++  received = [];
++});
++
++const ROLE_ONLY = {
++  userId: 'connector:test', role: 'connector', authMethod: 'api_key',
++  scopes: ['documents:read'], connectorId: 'conn-1', organizationId: 'org-1',
++};
++
++const WITH_SCOPE = { ...ROLE_ONLY, scopes: ['documents:read', 'subjects:erase'] };
++
++// KS-871 (seat edit): the audit query mock carries createAuditMiddleware's signature, so
++// query.mock.calls[0][1] type-checks (was vi.fn(async () => ...): 12 including-tsc errors).
++type QueryMock = Mock<(sql: string, params: unknown[]) => Promise<{ rows: unknown[] }>>;
++const makeQuery = (): QueryMock => vi.fn(async (_sql: string, _params: unknown[]) => ({ rows: [] as unknown[] }));
++
++function buildApp(user: object, query: QueryMock) {
++  const authenticateToken = ((_required?: boolean) =>
++    ((req, _res, next) => {
++      (req as unknown as { user: object }).user = { ...user };
++      next();
++    }) as RequestHandler) as (required?: boolean) => RequestHandler;
++
++  const app = express();
++  app.use(express.json());
++  app.use(createAuditMiddleware({ query, isDbAvailable: () => true, log: () => {} }));
++  app.use(
++    createProxyRoutes({
++      services: { originate: { url: `http://127.0.0.1:${upstreamPort}`, name: 'originate' } },
++      authenticateToken,
++      log: () => {},
++    } as unknown as Parameters<typeof createProxyRoutes>[0]),
++  );
++  return app;
++}
++
++async function drive(user: object, method: 'POST' | 'GET', path: string, query: QueryMock): Promise<number> {
++  const server = buildApp(user, query).listen(0, '127.0.0.1');
++  await new Promise<void>((r) => server.once('listening', () => r()));
++  const port = (server.address() as AddressInfo).port;
++  const status = await new Promise<number>((resolve) => {
++    const req = http.request(
++      { host: '127.0.0.1', port, path, method, headers: { 'content-type': 'application/json' } },
++      (res) => { res.resume(); resolve(res.statusCode ?? 0); },
++    );
++    req.on('error', () => resolve(-1));
++    req.end(method === 'POST' ? '{}' : undefined);
++  });
++  await new Promise<void>((r) => server.close(() => r()));
++  return status;
++}
++
++async function pollQueryCalls(query: QueryMock, timeout = 2000): Promise<void> {
++  const start = Date.now();
++  while (Date.now() - start < timeout) {
++    if (query.mock.calls.length > 0) return;
++    await new Promise((r) => setTimeout(r, 50));
++  }
++  throw new Error('query was never called within timeout');
++}
++
++describe('KS-871 — audit path must be captured at entry', () => {
++  it('🔴 KS-871 — refused erasure is audited with the full path, not the trimmed remainder', async () => {
++    process.env[FLAG] = 'true';
++    try {
++      const query = makeQuery();
++      const status = await drive(ROLE_ONLY, 'POST', '/api/gdpr/erasures', query);
++      expect(status).toBe(403);
++      await pollQueryCalls(query);
++      const params = query.mock.calls[0][1] as unknown[];
++      const details = JSON.parse(params[8] as string);
++      expect(details.path).toBe('/api/gdpr/erasures');
++    } finally {
++      delete process.env[FLAG];
++    }
++  });
++
++  // KS-871's acceptance also names the refused GET /api/gdpr/erasures/:ref. The audit
++  // middleware never writes a GET (AUDITED_METHODS in middleware/audit.ts is POST, PUT,
++  // PATCH, DELETE), so there is no GET audit row whose path could be wrong. This cell
++  // pins that, so the clause is not read as covered by the POST cells.
++  it('KS-871 — a refused GET erasure read writes no audit row at all', async () => {
++    process.env[FLAG] = 'true';
++    try {
++      const query = makeQuery();
++      const status = await drive(ROLE_ONLY, 'GET', '/api/gdpr/erasures/abc', query);
++      expect(status).toBe(403);
++      await new Promise((r) => setTimeout(r, 300));
++      expect(query).not.toHaveBeenCalled();
++    } finally {
++      delete process.env[FLAG];
++    }
++  });
++
++  it('CONTROL — admitted erasure is audited with the full path', async () => {
++    delete process.env[FLAG];
++    const query = makeQuery();
++    const status = await drive(WITH_SCOPE, 'POST', '/api/gdpr/erasures', query);
++    expect(status).toBe(200);
++    expect(received.length).toBe(1);
++    await pollQueryCalls(query);
++    const params = query.mock.calls[0][1] as unknown[];
++    const details = JSON.parse(params[8] as string);
++    expect(details.path).toBe('/api/gdpr/erasures');
++  });
++});
+diff --git a/Blockchain/Dev/services/api-gateway/src/__tests__/ks871-real-app-canonical-audit-rows.test.ts b/Blockchain/Dev/services/api-gateway/src/__tests__/ks871-real-app-canonical-audit-rows.test.ts
+new file mode 100644
+index 000000000..ef19446f2
+--- /dev/null
++++ b/Blockchain/Dev/services/api-gateway/src/__tests__/ks871-real-app-canonical-audit-rows.test.ts
+@@ -0,0 +1,193 @@
++/**
++ * =============================================================================
++ * KS-871 round 2 (QA gate F-1011-5 on PR #1011) — audit rows through the REAL
++ * gateway app, in test AND production mode
++ * =============================================================================
++ * The Part A / Part B files drive `createAuditMiddleware` + `createProxyRoutes`
++ * in isolation. The tier-1 gate on #1011 round 1 measured three things they cannot
++ * see, because only the real app has index.ts's version redirect and `/api/v1`
++ * strip mounted ABOVE the audit middleware (index.ts:530 / :561 / :570):
++ *   F-1011-1  under NODE_ENV=production every refused erasure arrives as
++ *             /api/v1/gdpr/erasures after the 307, and a path read from
++ *             `req.originalUrl` audits it as `v1.erasures`;
++ *   F-1011-2  the same source rewrote ADMITTED non-gdpr rows (`/api/v1/logs` →
++ *             `v1.create`);
++ *   F-1011-5  no cell pinned a non-gdpr row, a `/api/v1/` row or production mode
++ *             (tampers G-NONGDPR / G-V1 / G-D3 were 0 red).
++ *
++ * This file imports the REAL app exported by index.ts (its `require.main` guard
++ * keeps it from listening; the ks1165 real-app pattern), with `../db` mocked so
++ * `isDbAvailable()` is true and `query` records the audit INSERT. Rows are matched
++ * by a unique User-Agent, never by timing. Harness shape: the gate's
++ * `qa1011-census.test.ts` (report 2026-09-17-ks871-1011-0a1f8900c-tier1-r1).
++ * =============================================================================
++ */
++import { describe, it, expect, beforeAll, afterAll, vi } from 'vitest';
++import http from 'http';
++import jwt from 'jsonwebtoken';
++import type { AddressInfo } from 'net';
++
++const rec = vi.hoisted(() => ({ calls: [] as Array<{ sql: string; params: unknown[] }> }));
++vi.mock('../db', async (orig) => {
++  const real = (await orig()) as Record<string, unknown>;
++  return {
++    ...real,
++    isDbAvailable: () => true,
++    query: async (sql: string, params: unknown[] = []) => {
++      rec.calls.push({ sql, params });
++      return { rows: [], rowCount: 0 };
++    },
++  };
++});
++
++interface AuditRow { action: unknown; resourceType: unknown; path: unknown }
++
++/** The audit INSERT whose user_agent (param 7) is `ua`, read back as action / resource_type / details.path. */
++function rowFor(ua: string): AuditRow | undefined {
++  const call = rec.calls.find((c) => /INSERT INTO audit_logs/.test(c.sql) && c.params[7] === ua);
++  if (!call) return undefined;
++  const details = JSON.parse(String(call.params[8])) as { path?: unknown };
++  return { action: call.params[3], resourceType: call.params[4], path: details.path };
++}
++
++/** One assertion per field, so a failure names the field and both values. */
++function expectRow(row: AuditRow | undefined, want: AuditRow, label: string): void {
++  expect(row, `${label}: an audit row was written`).toBeDefined();
++  expect(row?.action, `${label}: action`).toBe(want.action);
++  expect(row?.resourceType, `${label}: resource_type`).toBe(want.resourceType);
++  expect(row?.path, `${label}: details.path`).toBe(want.path);
++}
++
++async function waitForRow(ua: string, timeoutMs = 3000): Promise<AuditRow | undefined> {
++  const started = Date.now();
++  while (Date.now() - started < timeoutMs) {
++    const row = rowFor(ua);
++    if (row) return row;
++    await new Promise((r) => setTimeout(r, 25));
++  }
++  return undefined;
++}
++
++const seen: string[] = [];
++let recorder: http.Server | undefined;
++let recorderUrl = '';
++
++async function listen(server: http.Server): Promise<string> {
++  await new Promise<void>((resolve) => server.listen(0, '127.0.0.1', () => resolve()));
++  return `http://127.0.0.1:${(server.address() as AddressInfo).port}`;
++}
++
++function post(base: string, path: string, headers: Record<string, string>): Promise<{ status: number; location: string | undefined }> {
++  return new Promise((resolve, reject) => {
++    const target = new URL(base);
++    const body = '{}';
++    const req = http.request(
++      { hostname: target.hostname, port: target.port, path, method: 'POST', agent: false,
++        headers: { 'content-type': 'application/json', 'content-length': String(Buffer.byteLength(body)), ...headers } },
++      (res) => { res.resume(); res.on('end', () => resolve({ status: res.statusCode ?? 0, location: res.headers.location })); },
++    );
++    req.on('error', reject);
++    req.end(body);
++  });
++}
++
++/** A connector WITHOUT `subjects:erase`, signed with vitest.setup.ts's in-process RS256 key. */
++function connectorToken(): string {
++  return 'Bearer ' + jwt.sign(
++    { userId: 'c0000000-0000-4000-8000-00000000000c', role: 'connector', authMethod: 'api_key', scopes: ['documents:read'],
++      tenantId: 'a0000000-0000-4000-8000-000000000001', organizationId: 'd0000000-0000-4000-8000-00000000000d', verificationLevel: 'BASIC' },
++    process.env.__TEST_JWT_PRIVATE_PEM as string,
++    { algorithm: 'RS256', expiresIn: '10m' },
++  );
++}
++
++async function bootApp(): Promise<{ server: http.Server; url: string }> {
++  vi.resetModules();
++  const app = (await import('../index')).default;
++  const server = http.createServer(app as http.RequestListener);
++  return { server, url: await listen(server) };
++}
++
++async function closeServer(server: http.Server | undefined): Promise<void> {
++  if (!server) return;
++  server.closeAllConnections();
++  await new Promise<void>((r) => server.close(() => r()));
++}
++
++beforeAll(async () => {
++  recorder = http.createServer((req, res) => {
++    req.resume();
++    req.on('end', () => {
++      seen.push(`${req.method} ${req.url}`);
++      res.writeHead(200, { 'content-type': 'application/json' });
++      res.end('{"recorder":true}');
++    });
++  });
++  recorderUrl = await listen(recorder);
++});
++
++afterAll(async () => {
++  await closeServer(recorder);
++  vi.unstubAllEnvs();
++});
++
++describe('KS-871 real app, NODE_ENV=test — an admitted non-gdpr row is canonical in every spelling', () => {
++  let gateway: { server: http.Server; url: string } | undefined;
++
++  beforeAll(async () => {
++    vi.stubEnv('ORIGINATE_SERVICE_URL', recorderUrl);
++    vi.stubEnv('GATEWAY_VOUCH_SECRET', '');
++    gateway = await bootApp();
++  }, 60000);
++
++  afterAll(async () => { await closeServer(gateway?.server); });
++
++  it('KS-871 real app — POST /api/logs is audited logs.create / log at /api/logs (resource_type is singular, audit.ts deriveAction)', async () => {
++    const ua = 'ks871-real-app-logs';
++    const res = await post(gateway!.url, '/api/logs', { 'user-agent': ua });
++    expect(res.status).toBe(204);
++    expectRow(await waitForRow(ua), { action: 'logs.create', resourceType: 'log', path: '/api/logs' }, 'the audit row for POST /api/logs');
++  });
++
++  it('🔴 KS-871 real app — POST /api/v1/logs is audited as the SAME canonical row, not v1.create', async () => {
++    const ua = 'ks871-real-app-v1-logs';
++    const res = await post(gateway!.url, '/api/v1/logs', { 'user-agent': ua });
++    expect(res.status).toBe(204);
++    expectRow(await waitForRow(ua), { action: 'logs.create', resourceType: 'log', path: '/api/logs' }, 'the audit row for POST /api/v1/logs');
++  });
++});
++
++describe('KS-871 real app, NODE_ENV=production — a refused erasure after the 307 is audited canonically', () => {
++  let gateway: { server: http.Server; url: string } | undefined;
++
++  beforeAll(async () => {
++    // Production boot needs these (the gate's census_run.py): a stub CSRF secret and
++    // DB / Redis URLs pointed at a closed loopback port. `../db` is mocked above.
++    vi.stubEnv('NODE_ENV', 'production');
++    vi.stubEnv('CSRF_SECRET', 'ks871-stub-csrf-not-a-real-secret');
++    vi.stubEnv('DATABASE_URL', 'postgres://ks871:ks871@127.0.0.1:1/ks871');
++    vi.stubEnv('REDIS_URL', 'redis://127.0.0.1:1');
++    vi.stubEnv('ENABLE_TEST_TOKENS', '');
++    vi.stubEnv('ENABLE_MOCK_ENDPOINTS', '');
++    vi.stubEnv('ORIGINATE_SERVICE_URL', recorderUrl);
++    vi.stubEnv('GATEWAY_VOUCH_SECRET', '');
++    vi.stubEnv('SUBJECTS_ERASE_SCOPE_ENFORCED', 'true');
++    gateway = await bootApp();
++  }, 60000);
++
++  afterAll(async () => { await closeServer(gateway?.server); });
++
++  it('🔴 KS-871 real app, production — a refused POST /api/gdpr/erasures is audited gdpr.create at /api/gdpr/erasures, not v1.erasures', async () => {
++    const auth = connectorToken();
++    const first = await post(gateway!.url, '/api/gdpr/erasures', { 'user-agent': 'ks871-prod-307', authorization: auth });
++    expect(first.status, 'production redirects the unversioned path').toBe(307);
++    expect(first.location).toBe('/api/v1/gdpr/erasures');
++
++    const ua = 'ks871-prod-erasure-refused';
++    const hitsBefore = seen.length;
++    const refused = await post(gateway!.url, first.location as string, { 'user-agent': ua, authorization: auth });
++    expect(refused.status, 'the door refuses a connector without subjects:erase').toBe(403);
++    expect(seen.length - hitsBefore, 'nothing reached originate, so the 403 is the door').toBe(0);
++    expectRow(await waitForRow(ua), { action: 'gdpr.create', resourceType: 'gdpr', path: '/api/gdpr/erasures' }, 'the audit row for the refused erasure');
++  });
++});
+diff --git a/Blockchain/Dev/services/api-gateway/src/__tests__/ks871-the-audit-log-records-req-path.test.ts b/Blockchain/Dev/services/api-gateway/src/__tests__/ks871-the-audit-log-records-req-path.test.ts
+new file mode 100644
+index 000000000..f6bf4f9d4
+--- /dev/null
++++ b/Blockchain/Dev/services/api-gateway/src/__tests__/ks871-the-audit-log-records-req-path.test.ts
+@@ -0,0 +1,140 @@
++/**
++ * KS-871 — audit path must be captured at entry, not after response
++ */
++
++import { describe, it, expect, beforeAll, afterAll, beforeEach, vi, type Mock } from 'vitest';
++import express from 'express';
++import http from 'node:http';
++import type { AddressInfo } from 'node:net';
++import type { RequestHandler } from 'express';
++import { createAuditMiddleware } from '../middleware/audit';
++import { createProxyRoutes } from '../routes/proxy';
++
++const FLAG = 'SUBJECTS_ERASE_SCOPE_ENFORCED';
++
++let upstream: http.Server;
++let upstreamPort = 0;
++let received: string[] = [];
++
++beforeAll(async () => {
++  upstream = http.createServer((req, res) => {
++    received.push(`${req.method} ${req.url}`);
++    res.writeHead(200, { 'content-type': 'application/json' });
++    res.end('{"ok":true}');
++  });
++  await new Promise<void>((r) => upstream.listen(0, '127.0.0.1', () => r()));
++  upstreamPort = (upstream.address() as AddressInfo).port;
++});
++
++afterAll(async () => {
++  await new Promise<void>((r) => upstream.close(() => r()));
++});
++
++beforeEach(() => {
++  received = [];
++});
++
++const ROLE_ONLY = {
++  userId: 'connector:test', role: 'connector', authMethod: 'api_key',
++  scopes: ['documents:read'], connectorId: 'conn-1', organizationId: 'org-1',
++};
++
++const WITH_SCOPE = { ...ROLE_ONLY, scopes: ['documents:read', 'subjects:erase'] };
++
++// KS-871 (seat edit): the audit query mock carries createAuditMiddleware's signature, so
++// query.mock.calls[0][1] type-checks (was vi.fn(async () => ...): 12 including-tsc errors).
++type QueryMock = Mock<(sql: string, params: unknown[]) => Promise<{ rows: unknown[] }>>;
++const makeQuery = (): QueryMock => vi.fn(async (_sql: string, _params: unknown[]) => ({ rows: [] as unknown[] }));
++
++function buildApp(user: object, query: QueryMock) {
++  const authenticateToken = ((_required?: boolean) =>
++    ((req, _res, next) => {
++      (req as unknown as { user: object }).user = { ...user };
++      next();
++    }) as RequestHandler) as (required?: boolean) => RequestHandler;
++
++  const app = express();
++  app.use(express.json());
++  app.use(createAuditMiddleware({ query, isDbAvailable: () => true, log: () => {} }));
++  app.use(
++    createProxyRoutes({
++      services: { originate: { url: `http://127.0.0.1:${upstreamPort}`, name: 'originate' } },
++      authenticateToken,
++      log: () => {},
++    } as unknown as Parameters<typeof createProxyRoutes>[0]),
++  );
++  return app;
++}
++
++async function drive(user: object, method: 'POST' | 'GET', path: string, query: QueryMock): Promise<number> {
++  const server = buildApp(user, query).listen(0, '127.0.0.1');
++  await new Promise<void>((r) => server.once('listening', () => r()));
++  const port = (server.address() as AddressInfo).port;
++  const status = await new Promise<number>((resolve) => {
++    const req = http.request(
++      { host: '127.0.0.1', port, path, method, headers: { 'content-type': 'application/json' } },
++      (res) => { res.resume(); resolve(res.statusCode ?? 0); },
++    );
++    req.on('error', () => resolve(-1));
++    req.end(method === 'POST' ? '{}' : undefined);
++  });
++  await new Promise<void>((r) => server.close(() => r()));
++  return status;
++}
++
++async function pollQueryCalls(query: QueryMock, timeout = 2000): Promise<void> {
++  const start = Date.now();
++  while (Date.now() - start < timeout) {
++    if (query.mock.calls.length > 0) return;
++    await new Promise((r) => setTimeout(r, 50));
++  }
++  throw new Error('query was never called within timeout');
++}
++
++// KS-871 round 2: renamed. The action is derived from the canonical path captured at entry, not the original URL (QA gate F-1011-1..3).
++describe('KS-871 — audit action derived from the canonical path captured at entry', () => {
++  it('🔴 KS-871 B — a refused erasure is audited as gdpr.create, not unknown.create', async () => {
++    process.env[FLAG] = 'true';
++    try {
++      const query = makeQuery();
++      const status = await drive(ROLE_ONLY, 'POST', '/api/gdpr/erasures', query);
++      expect(status).toBe(403);
++      await pollQueryCalls(query);
++      const params = query.mock.calls[0][1] as unknown[];
++      expect(params[3]).toBe('gdpr.create');
++      expect(params[4]).toBe('gdpr');
++    } finally {
++      delete process.env[FLAG];
++    }
++  });
++
++  it('🔴 KS-871 B — a refused erasure with a trailing slash derives its section too', async () => {
++    process.env[FLAG] = 'true';
++    try {
++      const query = makeQuery();
++      const status = await drive(ROLE_ONLY, 'POST', '/api/gdpr/erasures/', query);
++      expect(status).toBe(403);
++      await pollQueryCalls(query);
++      const params = query.mock.calls[0][1] as unknown[];
++      expect(params[3]).toBe('gdpr.create');
++      expect(params[4]).toBe('gdpr');
++    } finally {
++      delete process.env[FLAG];
++    }
++  });
++
++  it('KS-871 B control — an admitted erasure is gdpr.create before and after', async () => {
++    process.env[FLAG] = 'true';
++    try {
++      const query = makeQuery();
++      const status = await drive(WITH_SCOPE, 'POST', '/api/gdpr/erasures', query);
++      expect(status).toBe(200);
++      await pollQueryCalls(query);
++      const params = query.mock.calls[0][1] as unknown[];
++      expect(params[3]).toBe('gdpr.create');
++      expect(params[4]).toBe('gdpr');
++    } finally {
++      delete process.env[FLAG];
++    }
++  });
++});
+diff --git a/Blockchain/Dev/services/api-gateway/src/middleware/audit.ts b/Blockchain/Dev/services/api-gateway/src/middleware/audit.ts
+index a7be8626f..052131de0 100644
+--- a/Blockchain/Dev/services/api-gateway/src/middleware/audit.ts
++++ b/Blockchain/Dev/services/api-gateway/src/middleware/audit.ts
+@@ -92,7 +92,7 @@ const EXCLUDED_PREFIXES = [
+  * segments + the HTTP method. That gives a sensible default for the long
+  * tail without needing to enumerate every route.
+  */
+-function deriveAction(req: Request): {
++function deriveAction(req: Request, path: string): {
+   action: string;
+   resourceType: string;
+   resourceId: string | null;
+@@ -105,7 +105,11 @@ function deriveAction(req: Request): {
+     : method.toLowerCase();
+ 
+   // Trim trailing slashes and pull the first 3-4 segments after /api.
+-  const segments = req.path.replace(/\/+$/, '').split('/').filter(Boolean);
++  // KS-871: derive from `path`, the canonical path captured when the middleware ran
++  // (see createAuditMiddleware), not from req.path at call time (the prior read).
++  // This runs inside 'finish', where a responding router.use gate has left req.path
++  // mount-relative, so a refused POST /api/gdpr/erasures derived 'unknown.create'.
++  const segments = path.replace(/\/+$/, '').split('/').filter(Boolean);
+   // segments[0] === 'api' for everything we audit
+   const section = segments[1] || 'unknown';
+   const subResource = segments[2];
+@@ -209,6 +213,16 @@ export function createAuditMiddleware(deps: AuditMiddlewareDeps): RequestHandler
+ 
+     const start = Date.now();
+ 
++    // KS-871: capture the path once, at entry. A responding router.use gate (the
++    // KS-843 erasure door) leaves req.path mount-relative, and 'finish' fires before
++    // anything restores it, so a refused POST /api/gdpr/erasures was audited as '/'.
++    // The source is req.path HERE, where this middleware is mounted at the app root
++    // after index.ts's /api/v1 strip: the canonical path the entry gates above read.
++    // Round 1 read req.originalUrl, which express never rewrites, so it kept the
++    // /api/v1 spelling (every production write after the 307), an absolute-form host,
++    // a #fragment and repeated slashes (QA gate on #1011, F-1011-1..3).
++    const auditPath = req.path;
++
+     // Wrap res.json so the login-success path can extract the userId from the
+     // response body. Without this, /api/auth/login audit entries have a null
+     // actor — defeating the whole point of the audit log for the most
+@@ -227,7 +241,7 @@ export function createAuditMiddleware(deps: AuditMiddlewareDeps): RequestHandler
+       void (async () => {
+         try {
+           if (!deps.isDbAvailable()) return;
+-          const { action, resourceType, resourceId: routeResourceId } = deriveAction(req);
++          const { action, resourceType, resourceId: routeResourceId } = deriveAction(req, auditPath);
+ 
+           const u = (req as Request & { user?: { userId?: string; organizationId?: string; tenantId?: string } }).user;
+           let userId: string | null = u?.userId || null;
+@@ -277,7 +291,7 @@ export function createAuditMiddleware(deps: AuditMiddlewareDeps): RequestHandler
+           }
+           const details = JSON.stringify({
+             method: req.method,
+-            path: req.path,
++            path: auditPath, // KS-871: was req.path, the trimmed remainder for a refused request
+             status: res.statusCode,
+             durationMs: Date.now() - start,
+             tenantId: u?.tenantId || null,
+diff --git a/Blockchain/Dev/services/api-gateway/src/routes/verification.ts b/Blockchain/Dev/services/api-gateway/src/routes/verification.ts
+index 04b3d980f..a7a6d4605 100644
+--- a/Blockchain/Dev/services/api-gateway/src/routes/verification.ts
++++ b/Blockchain/Dev/services/api-gateway/src/routes/verification.ts
+@@ -298,8 +298,13 @@ function makeFetchDocFromAnchorStore(services: Record<string, ServiceConfig>) {
+               const anchors = data?.data?.anchors;
+               if (!Array.isArray(anchors) || anchors.length === 0) { resolve(null); return; }
+               // Latest = highest blockNumber, fall back to most-recent confirmedAt.
+-              const latest = anchors.slice().sort((a: any, b: any) =>
+-                (b.blockNumber || 0) - (a.blockNumber || 0))[0];
++              // KS-1072: implement the tiebreak the line above promises. Before this, equal blockNumbers kept
++              // anchoring's response order, and since KS-1057 the selected anchor's status decides the verdict.
++              const latest = anchors.slice().sort((a: any, b: any) => {
++                const byBlock = (b.blockNumber || 0) - (a.blockNumber || 0);
++                if (byBlock !== 0) return byBlock;
++                return (Date.parse(b.confirmedAt) || 0) - (Date.parse(a.confirmedAt) || 0);
++              })[0];
+               resolve({
+                 id: docId,
+                 // We can't know revocation status without the doc record;

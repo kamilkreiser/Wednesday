@@ -1,0 +1,50 @@
+controls_check 2026-09-17 08:13:48 AEST
+replacements: {'nosubject': 1, 'notier': 3, 'nosha': 4, 'nomail': 1, 'nofarm': 1, 'nor1report': 1, 'nodisposition': 6, 'noround2': 4}
+verification.ts fixtures (git blob): {'INTO the #1014 hunk region': '079b2457e', 'INTO the verify gate': '66531f490', 'OUTSIDE both regions': '1fce49ab3'}
+N1 missing subject: prompt without the exact ROUND 2 verdict subject | stderr: REFUSING: prompt does not carry the exact ROUND 2 verdict subject, the coagent@ sender and the wednesday-agent@ recipient
+rc=23
+expected 23: OK
+N2 missing tier: brief without TIER 1 | stderr: REFUSING: brief and prompt disagree about the tier
+rc=7
+expected 7: OK
+N3 missing SHA: brief without the head SHA | stderr: REFUSING: brief or prompt does not name the head SHA 9ba0caf78b8ddb737541df38303b776c982521d2 — a gate about another SHA is another gate
+rc=20
+expected 20: OK
+N4 missing mail step: prompt without MAIL YOUR VERDICT | stderr: REFUSING: prompt does not tell the agent to MAIL its verdict
+rc=12
+expected 12: OK
+N5 missing per-entry farm: prompt without node_modules per ENTRY | stderr: REFUSING: prompt does not require node_modules farmed per ENTRY (a wholesale link can write through to the checkout .vite cache)
+rc=22
+expected 22: OK
+N6 head override = the round-1 head 616c766a5 | stderr: REFUSING: #1014 ROUND 2 — 616c766a57a51238450c99bbf1d59bb109e3841c is not at refs/heads/feature/ks-1176-connector-key-level-ranks-as-none on origin — the head moved; the brief is about a different SHA
+rc=6
+expected 6: OK
+N7 develop = the #1014 round-2 head (enforcement.ts be466fbf4 LANDED) | stderr: REFUSING: develop services/api-gateway/src/services/enforcement.ts blob be466fbf4 = #1014 round-2 own — #1014 (round 1 or round 2) has landed; this brief is stale (develop 9ba0caf78b8ddb737541df38303b776c982521d2) — re-pin deliberately: a different brief
+rc=19
+expected 19 + text 'has landed': OK
+N8 develop = eb1051fd3, the pre-#1016 pin (verification.ts 04b3d980f CLEARED by region; the ks1072 test ABSENT refuses) | stderr: REFUSING: origin develop is at eb1051fd39fe3edab4e0b1d1967515b758d4ba3f (pinned 7e89318bcedbc9a35757d4298ace54a6a23020bd) and the move is not provably disjoint: GUARDED develop services/api-gateway/src/__tests__/ks1072-the-latest-anchor-selector-documents-a.test.ts blob ABSENT — a version nobody pinned — confirm the delta, then re-pin deliberately (launcher DEVELOP_SHA / JUDGED blobs / DEV_CONTENT_ALLOWED + brief TAR
+rc=18
+expected 18 + text 'ks1072': OK
+N9 develop = a226d94fe, #1016 branch head (every blob pinned; the compare pinned...develop is not ahead) | stderr: REFUSING: origin develop is at a226d94fe8c6fbfecb81de415feb645302cdd166 (pinned 7e89318bcedbc9a35757d4298ace54a6a23020bd) and the move is not provably disjoint: UNJUDGEABLE status=diverged files=2 — confirm the delta, then re-pin deliberately (launcher DEVELOP_SHA / JUDGED blobs / DEV_CONTENT_ALLOWED + brief TARGET + prompt)
+rc=18
+expected 18 + text 'UNJUDGEABLE': OK
+N10 develop verification.ts moved INTO the #1014 hunk region (fixture) | stderr: REFUSING: origin develop is at 7e89318bcedbc9a35757d4298ace54a6a23020bd (pinned 7e89318bcedbc9a35757d4298ace54a6a23020bd) and the move is not provably disjoint: GUARDED develop services/api-gateway/src/routes/verification.ts blob 079b2457e — the #1014 hunk region or the verify gate changed: region 8b64d62417738d62 vs pinned 70426094413b2ca8 — confirm the delta, then re-pin deliberately (launcher DEVELOP_SHA / JUDGED 
+rc=18
+expected 18 + text 'hunk region': OK
+N11 develop verification.ts moved INTO the verify gate (fixture) | stderr: REFUSING: origin develop is at 7e89318bcedbc9a35757d4298ace54a6a23020bd (pinned 7e89318bcedbc9a35757d4298ace54a6a23020bd) and the move is not provably disjoint: GUARDED develop services/api-gateway/src/routes/verification.ts blob 66531f490 — the #1014 hunk region or the verify gate changed: region 5b1051af81b85080 vs pinned 70426094413b2ca8 — confirm the delta, then re-pin deliberately (launcher DEVELOP_SHA / JUDGED 
+rc=18
+expected 18 + text 'hunk region': OK
+P12 POSITIVE: develop verification.ts moved OUTSIDE both regions (fixture) must PASS | stdout:   enforcement.ts 533cd309c = base; ks1176-connector-key-level-ranks-as-none.test.ts ABSENT = base; verification.ts 1fce49ab3 = moved OUTSIDE the #1014 hunk region and the verify gate, judged by content: region 70426094413b; ks1072-the-latest-anchor-selector-documents-a.test.ts 4ad1cdcd1 = #1016 squash; auth.ts 20311010d = base; admin.ts f47dd6a65 = base; redis.ts 47659ee9c = base; index.ts 6f38c819e = base; rateLimit
+rc=0
+expected 0 + text 'moved OUTSIDE': OK
+N13 prompt without the round-1 report path | stderr: REFUSING: brief or prompt does not name the prior round REPORT path /Volumes/DevMASTER/!CODING/Testing Agent MAIN/projects/secuura/reports/2026-09-17-ks1176-1014-616c766a5-tier1-r1/ — the QA agent has no inbox; a carry-forward with no pointer can only be answered with I could not
+rc=24
+expected 24: OK
+N14 brief without CLOSED / STILL OPEN / NEW | stderr: REFUSING: brief or prompt does not require the per-finding CLOSED / STILL OPEN / NEW disposition — round 2 of 2: closed instances ship and residue is ticketed
+rc=25
+expected 25: OK
+N15 brief without ROUND 2 | stderr: REFUSING: brief and prompt disagree about the round (ROUND 2)
+rc=15
+expected 15: OK
+unexpected rows 0
+end 08:17:27 AEST

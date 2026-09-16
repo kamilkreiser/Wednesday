@@ -1,0 +1,23 @@
+drafter_spell_counts: V1 split by allow-list kind (array vs STRING config)
+base V1 array 0 {} | V1 STRING 0 | V3 by principal {'sk_restricted_DOCUMENT': 1, 'sk_restricted_SSD': 8, 'sk_restricted_lowercase_document': 1, 'sk_restricted_STRING_misconfig': 8}
+r1 V1 array 32 {'sk_restricted_DOCUMENT': 12, 'sk_restricted_SSD': 8, 'sk_restricted_lowercase_document': 12} | V1 STRING 14 | V3 by principal {'sk_restricted_DOCUMENT': 12, 'sk_restricted_SSD': 16, 'sk_restricted_lowercase_document': 11, 'sk_restricted_STRING_misconfig': 21}
+head V1 array 0 {} | V1 STRING 10 | V3 by principal {'sk_restricted_DOCUMENT': 3, 'sk_restricted_SSD': 8, 'sk_restricted_lowercase_document': 1, 'sk_restricted_STRING_misconfig': 17}
+merged V1 array 0 {} | V1 STRING 10 | V3 by principal {'sk_restricted_DOCUMENT': 3, 'sk_restricted_SSD': 8, 'sk_restricted_lowercase_document': 1, 'sk_restricted_STRING_misconfig': 17}
+headTF V1 array 32 {'sk_restricted_DOCUMENT': 12, 'sk_restricted_SSD': 8, 'sk_restricted_lowercase_document': 12} | V1 STRING 14 | V3 by principal {'sk_restricted_DOCUMENT': 12, 'sk_restricted_SSD': 16, 'sk_restricted_lowercase_document': 11, 'sk_restricted_STRING_misconfig': 21}
+headG-REV V1 array 4 {'sk_restricted_DOCUMENT': 2, 'sk_restricted_SSD': 2} | V1 STRING 10 | V3 by principal {'sk_restricted_DOCUMENT': 5, 'sk_restricted_SSD': 10, 'sk_restricted_lowercase_document': 1, 'sk_restricted_STRING_misconfig': 17}
+headG-BOTH V1 array 47 {'sk_restricted_DOCUMENT': 17, 'sk_restricted_SSD': 13, 'sk_restricted_lowercase_document': 17} | V1 STRING 16 | V3 by principal {'sk_restricted_DOCUMENT': 17, 'sk_restricted_SSD': 21, 'sk_restricted_lowercase_document': 17, 'sk_restricted_STRING_misconfig': 24}
+sk_restricted_DOCUMENT r1 201 -> head 403: 14 | forwarded at r1 13 | workflow-gated (201 not forwarded) at r1 1
+    ty:SSD r1 fwd True r1 gw SSD_DOCUMENT -> head 403 FORBIDDEN e 0 w 0 f False
+    ty:PROPERTY_DEED r1 fwd True r1 gw PROPERTY_DEED -> head 403 FORBIDDEN e 0 w 0 f False
+    ty:QA_NONE_APPROVAL r1 fwd False r1 gw QA_NONE_APPROVAL -> head 403 FORBIDDEN e 0 w 0 f False
+    dt:'' ty:SSD r1 fwd True r1 gw SSD_DOCUMENT -> head 403 FORBIDDEN e 0 w 0 f False
+    dt:null ty:SSD r1 fwd True r1 gw SSD_DOCUMENT -> head 403 FORBIDDEN e 0 w 0 f False
+    dt:false ty:SSD r1 fwd True r1 gw SSD_DOCUMENT -> head 403 FORBIDDEN e 0 w 0 f False
+    dt:0 ty:SSD r1 fwd True r1 gw SSD_DOCUMENT -> head 403 FORBIDDEN e 0 w 0 f False
+    ty:ssd_document r1 fwd True r1 gw SSD_DOCUMENT -> head 403 FORBIDDEN e 0 w 0 f False
+    ty:document r1 fwd True r1 gw DOCUMENT -> head 403 FORBIDDEN e 0 w 0 f False
+    ty:Ssd_Document r1 fwd True r1 gw SSD_DOCUMENT -> head 403 FORBIDDEN e 0 w 0 f False
+    ty:<SSD id> r1 fwd True r1 gw SSD_DOCUMENT -> head 403 FORBIDDEN e 0 w 0 f False
+    ty:<DOCUMENT id> r1 fwd True r1 gw DOCUMENT -> head 403 FORBIDDEN e 0 w 0 f False
+    dup ty DOC then SSD (raw) r1 fwd True r1 gw SSD_DOCUMENT -> head 403 FORBIDDEN e 0 w 0 f False
+    escaped key typ\u0065:SSD (raw) r1 fwd True r1 gw SSD_DOCUMENT -> head 403 FORBIDDEN e 0 w 0 f False

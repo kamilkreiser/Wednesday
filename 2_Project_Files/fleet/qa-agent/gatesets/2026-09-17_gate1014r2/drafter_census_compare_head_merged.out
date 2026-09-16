@@ -1,0 +1,56 @@
+compare head_vs_merged rows 2345 2345 verify 1085 1085
+CREATE diffs 0 PERMITTED 0 VIOLATION 0
+  by (claim_class,type_class,verdict): {}
+  by transition: {}
+  principals with diffs: {}
+  types with diffs: {}
+VERIFY diffs 0
+PURE rows 1716 flips 0 flips outside (unknown user x none-rank required, false->true): 0
+  flip users: []
+  flip required: []
+ORACLE(head) on census_head: mismatches 0; non-string user results {'throw:TypeError': 117}
+ORACLE(head) on census_merged: mismatches 0; non-string user results {'throw:TypeError': 117}
+PARITY census_head sk_write vs jwt_NONE: create rows 67 differing 2; verify rows 31 differing 0
+     (('documentType', 'QA_NONE_APIKEY_PROVIDER'), (201, None, True), (403, 'AUTH_PROVIDER_NOT_ALLOWED', False))
+     (('type', 'QA_NONE_APIKEY_PROVIDER'), (201, None, True), (403, 'AUTH_PROVIDER_NOT_ALLOWED', False))
+PARITY census_head jwt_connector_noscope vs jwt_NONE: create rows 67 differing 0; verify rows 31 differing 0
+PARITY census_head sk_bypass_workflow vs jwt_NONE: create rows 67 differing 4; verify rows 31 differing 0
+     (('documentType', 'QA_NONE_APIKEY_PROVIDER'), (201, None, True), (403, 'AUTH_PROVIDER_NOT_ALLOWED', False))
+     (('documentType', 'QA_NONE_APPROVAL'), (201, None, True), (201, None, False))
+     (('type', 'QA_NONE_APIKEY_PROVIDER'), (201, None, True), (403, 'AUTH_PROVIDER_NOT_ALLOWED', False))
+     (('type', 'QA_NONE_APPROVAL'), (201, None, True), (201, None, False))
+PARITY census_head jwt_connector_noscope vs sk_noscope: create rows 67 differing 67; verify rows 31 differing 0
+     (('documentType', None), (201, None, True), (403, 'FORBIDDEN', False))
+     (('documentType', 'QA_UNREGISTERED'), (400, 'UNKNOWN_DOCUMENT_TYPE', False), (403, 'FORBIDDEN', False))
+     (('documentType', 'DEGREE'), (403, 'INSUFFICIENT_VERIFICATION_LEVEL', False), (403, 'FORBIDDEN', False))
+     (('documentType', 'DOCUMENT'), (201, None, True), (403, 'FORBIDDEN', False))
+     (('documentType', 'LICENSE'), (403, 'INSUFFICIENT_VERIFICATION_LEVEL', False), (403, 'FORBIDDEN', False))
+     (('documentType', 'PROPERTY_DEED'), (201, None, True), (403, 'FORBIDDEN', False))
+     (('documentType', 'QA_ABSENT'), (201, None, True), (403, 'FORBIDDEN', False))
+     (('documentType', 'QA_BASIC'), (403, 'INSUFFICIENT_VERIFICATION_LEVEL', False), (403, 'FORBIDDEN', False))
+     (('documentType', 'QA_EMPTY'), (201, None, True), (403, 'FORBIDDEN', False))
+     (('documentType', 'QA_GOV'), (403, 'INSUFFICIENT_VERIFICATION_LEVEL', False), (403, 'FORBIDDEN', False))
+     (('documentType', 'QA_NONE_APIKEY_PROVIDER'), (403, 'AUTH_PROVIDER_NOT_ALLOWED', False), (403, 'FORBIDDEN', False))
+     (('documentType', 'QA_NONE_APPROVAL'), (201, None, False), (403, 'FORBIDDEN', False))
+PARITY census_merged sk_write vs jwt_NONE: create rows 67 differing 2; verify rows 31 differing 0
+     (('documentType', 'QA_NONE_APIKEY_PROVIDER'), (201, None, True), (403, 'AUTH_PROVIDER_NOT_ALLOWED', False))
+     (('type', 'QA_NONE_APIKEY_PROVIDER'), (201, None, True), (403, 'AUTH_PROVIDER_NOT_ALLOWED', False))
+PARITY census_merged jwt_connector_noscope vs jwt_NONE: create rows 67 differing 0; verify rows 31 differing 0
+PARITY census_merged sk_bypass_workflow vs jwt_NONE: create rows 67 differing 4; verify rows 31 differing 0
+     (('documentType', 'QA_NONE_APIKEY_PROVIDER'), (201, None, True), (403, 'AUTH_PROVIDER_NOT_ALLOWED', False))
+     (('documentType', 'QA_NONE_APPROVAL'), (201, None, True), (201, None, False))
+     (('type', 'QA_NONE_APIKEY_PROVIDER'), (201, None, True), (403, 'AUTH_PROVIDER_NOT_ALLOWED', False))
+     (('type', 'QA_NONE_APPROVAL'), (201, None, True), (201, None, False))
+PARITY census_merged jwt_connector_noscope vs sk_noscope: create rows 67 differing 67; verify rows 31 differing 0
+     (('documentType', None), (201, None, True), (403, 'FORBIDDEN', False))
+     (('documentType', 'QA_UNREGISTERED'), (400, 'UNKNOWN_DOCUMENT_TYPE', False), (403, 'FORBIDDEN', False))
+     (('documentType', 'DEGREE'), (403, 'INSUFFICIENT_VERIFICATION_LEVEL', False), (403, 'FORBIDDEN', False))
+     (('documentType', 'DOCUMENT'), (201, None, True), (403, 'FORBIDDEN', False))
+     (('documentType', 'LICENSE'), (403, 'INSUFFICIENT_VERIFICATION_LEVEL', False), (403, 'FORBIDDEN', False))
+     (('documentType', 'PROPERTY_DEED'), (201, None, True), (403, 'FORBIDDEN', False))
+     (('documentType', 'QA_ABSENT'), (201, None, True), (403, 'FORBIDDEN', False))
+     (('documentType', 'QA_BASIC'), (403, 'INSUFFICIENT_VERIFICATION_LEVEL', False), (403, 'FORBIDDEN', False))
+     (('documentType', 'QA_EMPTY'), (201, None, True), (403, 'FORBIDDEN', False))
+     (('documentType', 'QA_GOV'), (403, 'INSUFFICIENT_VERIFICATION_LEVEL', False), (403, 'FORBIDDEN', False))
+     (('documentType', 'QA_NONE_APIKEY_PROVIDER'), (403, 'AUTH_PROVIDER_NOT_ALLOWED', False), (403, 'FORBIDDEN', False))
+     (('documentType', 'QA_NONE_APPROVAL'), (201, None, False), (403, 'FORBIDDEN', False))
