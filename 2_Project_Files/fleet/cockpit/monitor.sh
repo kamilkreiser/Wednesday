@@ -69,6 +69,45 @@ pane_is_booting() {
   /bin/ps -t "${tty#/dev/}" -o args= 2>/dev/null \
     | /usr/bin/grep -qE '^(/bin/)?(ba)?sh .*/Launch_[A-Za-z_]*\.command'
 }
+# boot_bound_check <name> <pane_id> — a pane may BOOT quietly, but not forever.
+#
+# Wednesday's F2 against 56f0a020d (2026-09-16), and she is right. Before that commit a pane
+# stuck at the launcher's preflight prompt was declared DEAD — wrong, because the alert
+# INJECTED and answered the prompt. After it, pane_is_booting suppresses DEATH entirely and the
+# coordinator wake is logged to alerts.log only. That fixed the injection and created a silence:
+# unattended, wednesday_rotate.sh --self respawns the launcher, doctor hard-fails, the rotate log
+# says "respawned OK", and the pane waits at "Type yes" with nobody told. A refusal nobody reads
+# (learnings/2026-09-10) is the same failure wearing the opposite costume.
+#
+# So the rule is: never inject, but always BOUND. Past BOOT_BOUND_MIN minutes still booting, post
+# exactly ONE line to Kam's panel — the surface he actually reads — and one to alerts.log. Rate
+# limited by a marker per boot episode, cleared the moment the pane stops booting, so a normal
+# boot is silent and a stuck one is loud exactly once.
+BOOT_BOUND_MIN="${BOOT_BOUND_MIN:-5}"
+boot_bound_check() {
+  local name="$1" pid="$2" key since now mins
+  key="${name//[^a-zA-Z0-9]/_}"
+  local sincef="$STATE_DIR/.booting_$key" alertedf="$STATE_DIR/.booting_alerted_$key"
+  now=$(date +%s)
+  if [ ! -f "$sincef" ]; then printf '%s\n' "$now" > "$sincef"; return 0; fi
+  since=$(cat "$sincef" 2>/dev/null); case "$since" in ''|*[!0-9]*) return 0;; esac
+  mins=$(( (now - since) / 60 ))
+  [ "$mins" -ge "$BOOT_BOUND_MIN" ] || return 0
+  [ -f "$alertedf" ] && return 0
+  : > "$alertedf"
+  local msg="Fleet: the '$name' pane ($pid) has been in its LAUNCHER for ${mins} minutes and has not started Claude. That usually means its preflight is waiting on an answer — it will sit there until someone types into that pane. Nothing has been injected into it, by design."
+  echo "$(date '+%Y-%m-%d %H:%M:%S') [monitor] BOOT-STALL $name ($pid) booting ${mins}m >= ${BOOT_BOUND_MIN}m — panel line posted, nothing injected" >> "$ALERTS"
+  if [ -x "$PROJECT_DIR/2_Project_Files/tools/chat_reply.sh" ]; then
+    bash "$PROJECT_DIR/2_Project_Files/tools/chat_reply.sh" "$msg" >/dev/null 2>&1 \
+      || echo "$(date '+%Y-%m-%d %H:%M:%S') [monitor] BOOT-STALL $name — chat_reply FAILED, alert is in this log only" >> "$ALERTS"
+  fi
+}
+boot_bound_clear() {
+  local key="${1//[^a-zA-Z0-9]/_}"
+  [ -f "$STATE_DIR/.booting_$key" ] && mv "$STATE_DIR/.booting_$key" "$STATE_DIR/.booting_cleared" 2>/dev/null
+  [ -f "$STATE_DIR/.booting_alerted_$key" ] && mv "$STATE_DIR/.booting_alerted_$key" "$STATE_DIR/.booting_alerted_cleared" 2>/dev/null
+  return 0
+}
 # wake_coordinator <msg> — type one WAKE line into the coordinator's pane, the way the
 # wake runner does (send-keys -l + Enter), unless text already sits at its prompt
 # (then log-only; the runner's held-tap rule). Never taps a non-coordinator pane.
@@ -136,12 +175,20 @@ check() {
     local revfile="$STATE_DIR/.rev_${name//[^a-zA-Z0-9]/_}"
     if [ "$dead" = "1" ]; then
       alert DEATH "$name" "process exited (pane_dead=1)"; continue
-    elif [ "$name" != "fleet-monitor" ] && [ -n "$host" ] && [ "$title" = "$host" ] && ! pane_is_booting "$tty"; then
+    elif [ "$name" != "fleet-monitor" ] && [ -n "$host" ] && [ "$title" = "$host" ]; then
+      # The title is the hostname. Two very different states look identical here, so ask the
+      # process table which one this is before doing anything irreversible.
+      if pane_is_booting "$tty"; then
+        boot_bound_check "$name" "$id"   # never inject, never call it dead — but bound the wait
+        continue
+      fi
+      boot_bound_clear "$name"
       if [ -f "$revfile" ]; then
         alert DEATH "$name" "process exited (title reverted to the hostname on two consecutive checks)"; continue
       fi
       touch "$revfile"; continue
     else
+      boot_bound_clear "$name"
       [ -f "$revfile" ] && mv "$revfile" "$STATE_DIR/.rev_cleared" 2>&1
     fi
     clear_flag DEATH "$name"

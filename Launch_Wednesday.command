@@ -297,15 +297,31 @@ fi
 if [ -x "$PROJECT_DIR/2_Project_Files/doctor.sh" ]; then
   if ! "$PROJECT_DIR/2_Project_Files/doctor.sh" --quiet; then
     echo ""
-    echo "Preflight found HARD failures (above). Continue anyway? Type  yes  and press Enter:"
-    # A one-character read is answerable by ANYTHING that reaches this pane, and on
-    # 2026-09-16 something did: fleet/cockpit/monitor.sh saw a pane whose title was still
-    # the hostname — which is exactly what this prompt looks like, because Claude has not
-    # started yet — declared it DEAD, and send-keys'd its wake text into it. `read -r -n 1`
-    # took the "1" of "19:43" as the answer and the launcher exited 1. So: drain whatever is
-    # already buffered, then require a whole typed word. A stray character now DECLINES
-    # (fail-safe) instead of silently continuing, and no single keystroke can answer it.
-    while read -r -t 0.1 -n 1000 _DRAIN 2>/dev/null; do :; done
+    echo "Preflight found HARD failures (above)."
+    # DRAIN FIRST, THEN INVITE. A one-character read is answerable by anything that reaches
+    # this pane, and on 2026-09-16 something did: fleet/cockpit/monitor.sh saw a pane whose
+    # title was still the hostname — which is exactly this window, because Claude has not
+    # started yet — declared it DEAD, and send-keys'd its wake text in. `read -r -n 1` took
+    # the "1" of "19:43" as the answer and the launcher exited 1.
+    #
+    # -t 1, not -t 0.1: this file is #!/bin/bash, which on macOS is GNU bash 3.2.57, and 3.2
+    # accepts only INTEGER read timeouts. `-t 0.1` fails with "invalid timeout specification"
+    # on its first iteration, so the loop drains NOTHING — and a `2>/dev/null` on it would
+    # hide exactly that. Measured on this machine, bash 3.2.57: as written with 0.1 the next
+    # read still returned the buffered LINE1; with -t 1 it returned empty. stderr stays
+    # visible here on purpose. (Wednesday's F1 against 56f0a020d, 2026-09-16 — correct.)
+    #
+    # The drain runs BEFORE the question is printed, so no keystroke a human makes in answer
+    # can be eaten by it, and nothing already in the buffer can answer it.
+    # ...and only on a TTY. A timed drain on a PIPE swallows the whole of stdin, answer
+    # included: measured here, `printf 'yes\n' | launcher` declined, because the drain ate the
+    # "yes" before the question was asked. On a terminal that cannot happen — the human has not
+    # typed yet when this runs, which is the entire point of draining before inviting. So the
+    # drain is for the terminal case it was written for, and a piped stdin is left intact.
+    if [ -t 0 ]; then
+      while read -r -t 1 -n 1000 _DRAIN; do :; done
+    fi
+    echo "Continue anyway? Type  yes  and press Enter:"
     read -r REPLY; echo
     if [ "$REPLY" != "yes" ]; then
       echo "Not 'yes' — stopping. Fix the failures above, or re-run and type yes."
