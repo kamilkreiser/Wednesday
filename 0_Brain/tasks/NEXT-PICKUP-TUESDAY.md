@@ -209,23 +209,47 @@ treats a symptom. The durable fix is a pre-commit check that refuses a `*.sh` wi
 staged at 100644 — `2_Project_Files/fleet/hooks/pre-commit` already exists and is the natural
 home. **It is shared tooling, so propose it to Wednesday rather than adding it unilaterally.**
 
-## ⏳ AWAITING AN ANSWER THAT MAY NEED KAM WOKEN — RD-461
+## 🔴 TWO FINDINGS FOR KAM, both carded/boarded 2026-09-16 ~23:45. Neither woke him; reasons recorded.
 
-NexusAI found that the mail-triage drafted reply links a **retired demo VM** (`https://4.198.168.215`)
-and signs **"— Datasec Solutions"**, and **in LIVE + auto-send mode it SENDS that from the CUSTOMER's
-inbox.** That is not a self-containment defect — it is mail under our name, from someone else's
-mailbox, pointing at a dead host.
+### F-1 — an anonymous stranger can permanently lock the owner out. **Pre-existing, so LIVE in 2.1.1.**
+On a freshly deployed instance that has not finished setup, anyone who can reach the hostname sends
+two requests — create an admin user, then mark first-run complete — and afterwards auth is
+**"enforced" while no identity provider can sign anyone in**: local login 401, Entra unconfigured,
+admin-reset unusable because the template never sets `ADMIN_RESET_KEY`. Survives restart. **Only
+recovery is hand-editing settings on the customer's Azure Files share, and nothing shipped says so.**
+Measured by the gate 3× on the release head, 1× on `main`.
 
-**Asked them one yes/no ahead of all other work: is any running instance (demo, dev, staging, a
-customer's) actually in LIVE + auto-send right now?**
-- **If YES** — establish how we would know whether mail has gone out and roughly how much, changing
-  NOTHING, and **this goes to Kam tonight.** External comms are his signature class and a customer's
-  mailbox is his twice over; **the decision to stop it is his, not this seat's.**
-- **If NO** — it stays a normal fix in the candidate and is reported with everything else in the
-  morning.
+**Why he was not woken** — state these if challenged, and re-test them if anything changes: no
+customers on the listing *by his own word*; a deployment still needs a token we hand over, so the
+exposed population is one we control; and the harm is **denial of service to the owner, not
+disclosure**. NexusAI is told to report immediately if it finds a deployment that is neither ours nor
+accounted for — **that would change the answer.**
 
-**Do not act on the setting either way.** The seat's job here is an accurate picture in front of him
-quickly, not a remedy.
+**Fix AUTHORISED and running in the candidate** (not a signature class), with the regression test
+required to go **RED on today's code first** — a test written against a fix proves the fix compiles,
+not that the bug existed. Documenting the recovery path is part of it.
+**Card for him: `nexusai-live-listing-lockout-warn-now`** — only the part that is his, whether the
+LIVE listing needs a warning before the fixed package lands. Recommended: no change.
+
+### F-3 — the check that has never once run. **This is the night's real finding.**
+`session-tools/marketplace-package-build.sh` **exits 141 on EVERY build** (SIGPIPE inside a pipefail
+pipe, line 98). **Both submitted MANIFESTs are truncated.** A build with a nonexistent tag, the wrong
+registry or a missing element is **indistinguishable from a good one**.
+
+So the dev-registry default did not slip past a check — **it slipped past a check that never completed**,
+which is exactly why the manifest recorded `wizard default containerImage = nexusaidevacrfa39…` and
+nothing acted on it.
+
+**Three instances tonight, three places:** a manifest that records and never asserts; a preflight that
+passes `apiVersion 2099-01-01`; a build script that reports success by exiting 141. NexusAI is told to
+make this the **headline** of the certification paper. **The resubmission question is not "is this
+package right" but "what would have told us if it weren't".**
+
+### RD-461 — CLOSED, theoretical, on real evidence
+697 ticks at `sent=0`, 18 start lines all DRAFT, live mode gated on env vars that are not set, 0
+references in the submitted template. A negative proved rather than assumed. Fix stays in the
+candidate; its side effect (288 false ERRORs/day polluting the demo's failure signal) is worth fixing
+on its own merits.
 
 ## 🔴 FIRST THING FOR KAM: "anyone who pays" is impossible on the CURRENT offer type
 
