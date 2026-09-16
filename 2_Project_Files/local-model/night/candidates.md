@@ -1,4 +1,4 @@
-# Ornith candidates — derived 2026-09-16 07:50 from 310 KS Backlog/Todo tickets (read-only, unpaginated)
+# Ornith candidates — derived 2026-09-16 14:09 from 310 KS Backlog/Todo tickets (read-only, unpaginated)
 
 A CENSUS for the coordinator to brief from, easy → hard (Kam 2026-09-15 16:40 / 18:19). A ticket here is a candidate, not a task: read it, read the file at the tip, write `night/briefs/<id>.md`, then queue it. Auth-shaped titles are excluded (LAST); Peter/Stuart tickets and PR-attached tickets are excluded outright.
 
@@ -20,12 +20,11 @@ A CENSUS for the coordinator to brief from, easy → hard (Kam 2026-09-15 16:40 
 
 ## T2 tooling (systemTest/*, one file) — 0
 
-## T2b bash (bash_patch — one script + a *.test.sh beside the reference) — 12
+## T2b bash (bash_patch — one script + a *.test.sh beside the reference) — 11
 - KS-1031 (P2) KS-754 gate F-4: DEPLOY CONDITION — apply 048 BEFORE rolling the originate image — `scripts/run-migrations.sh`
 - KS-1081 (P2) CONFIG DRIFT: two tracked env templates disagree by ~39 vars — bootstrap-env.sh  — `scripts/bootstrap-env.sh`
 - KS-1148 (P2) CI-runner environment gaps (one class, two jobs): `Security Scanning` runs `audi — `scripts/run-shell-suites.sh`
 - KS-998 (P2) KS-989 gate residue: the formatting gate fails OPEN on missing deps and reads th — `.githooks/pre-push`
-- KS-1011 (P3) KS-666 stack marker reads "unknown" for owner/branch/commit/started_at whenever  — `Start_Up/start-secuura.sh`
 - KS-1033 (P3) KS-926 residue: the three guards that could NOT be wired, and what each needs fi — `scripts/run-code-guards.sh`
 - KS-1163 (P3) start-secuura.sh never waits for five default-profile, healthchecked services —  — `Start_Up/start-secuura.sh`
 - KS-630 (P3) Wire the status-page XSS probe into preflight (or decide not to) — it runs today — `scripts/preflight/preflight.sh`
@@ -65,7 +64,8 @@ A CENSUS for the coordinator to brief from, easy → hard (Kam 2026-09-15 16:40 
 - KS-1153 (P4) L7 gate records (#918/#924/#925): run-code-guards.sh --check-unreached advisory  — `.githooks/pre-push`, `scripts/run-code-guards.sh`, `scripts/preflight/preflight.sh`
 - KS-1083 (P0) GATEWAY_VOUCH_SECRET: nothing provisions it and no deploy order or rotation is w — `services/api-gateway/src/routes/verification.ts`, `packages/shared/src/db/tenant-context.ts`, `scripts/bootstrap-env.sh`
 
-## HELD (READY_* or done.md PASS) — 51
+## HELD (READY_* or done.md PASS) — 52
+- KS-1011 KS-666 stack marker reads "unknown" for owner/branch/commit/started_at whenever 
 - KS-1018 Security/correctness: three verification-store reads swallow EVERY DB error with
 - KS-1028 KS-754 gate F-1 (MAJOR): a step-12 throw skips the USER_ERASED fan-out AFTER the
 - KS-1035 The merge gate cannot see a WITHDRAWN approval — #813 reads approved+clean again

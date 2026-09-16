@@ -475,12 +475,32 @@ fi
 # The checker's FIRE path leaves state/ROTATE_LOSS_<ts>.txt (before + after pane lists).
 # LOUD until a seat reads it: never deleted here — the seat quarantines it (move, never
 # rm; learnings/2026-08-26_never-delete-cleanup-means-quarantine) once the loss is handled.
-ROTATE_LOSS_FILES="$(find "$PROJECT_DIR/2_Project_Files/fleet/cockpit/state" -maxdepth 1 -name 'ROTATE_LOSS_*.txt' 2>/dev/null | sort)"
-if [ -n "$ROTATE_LOSS_FILES" ]; then
-  warn "!!! FLEET LOSS ALARM from a rotation: $(printf '%s\n' "$ROTATE_LOSS_FILES" | xargs -n1 basename | tr '\n' ' ')" \
+# 2026-09-16 — the alarm now distinguishes a REAL loss from a TEST one. rotate_liveness.sh is
+# deliberately runnable against a scratch session (the rotate arms use `rtest` / `wedtest_*`), and
+# its FIRE path writes the same alarm file when that scratch session ends — which is the expected
+# end of a test, not an incident. One such file from 06:58 on 09-14 had been warning at EVERY
+# launch for two days. A warning that cannot be acted on is how a real one gets ignored, so a file
+# whose own first line names a session other than `fleet` is counted and reported, never warned on.
+ROTATE_LOSS_ALL="$(find "$PROJECT_DIR/2_Project_Files/fleet/cockpit/state" -maxdepth 1 -name 'ROTATE_LOSS_*.txt' 2>/dev/null | sort)"
+ROTATE_LOSS_FILES=""; ROTATE_LOSS_TEST=0
+for _rl in $ROTATE_LOSS_ALL; do
+  if head -1 "$_rl" 2>/dev/null | /usr/bin/grep -q -i -- "session 'fleet'"; then
+    ROTATE_LOSS_FILES="$ROTATE_LOSS_FILES $_rl"
+  else
+    ROTATE_LOSS_TEST=$((ROTATE_LOSS_TEST + 1))
+  fi
+done
+if [ -n "${ROTATE_LOSS_FILES// /}" ]; then
+  warn "!!! FLEET LOSS ALARM from a rotation: $(printf '%s\n' $ROTATE_LOSS_FILES | xargs -n1 basename | tr '\n' ' ')" \
        "a rotation lost the fleet session or an agent pane — READ the file(s) (before/after pane lists), relaunch what is missing, then QUARANTINE the file (move it under 0_Brain/reference/<date>_fleet-loss/; never rm)"
 else
-  ok "no ROTATE_LOSS alarm files in cockpit/state"
+  # `${VAR:+...}` expands on the STRING "0", which is non-empty — so the suffix needs a numeric test,
+  # not a set-test, or a clean floor reports "(0 ... ignored)".
+  if [ "$ROTATE_LOSS_TEST" -gt 0 ]; then
+    ok "no ROTATE_LOSS alarm files for the fleet session ($ROTATE_LOSS_TEST from a scratch/test session, ignored)"
+  else
+    ok "no ROTATE_LOSS alarm files in cockpit/state"
+  fi
 fi
 
 # --- panel_sync loop alive (2026-09-13): Kam's ONE chat page is kept current by

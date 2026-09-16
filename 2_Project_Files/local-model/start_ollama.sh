@@ -20,7 +20,17 @@
 set -u
 LM_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 BIN="$LM_DIR/../tools/ollama/ollama"
-export OLLAMA_MODELS="$LM_DIR/models"
+# 2026-09-16 14:1x — ONE store, at the drive root (Kam 13:40: "Create a new folder at root for system
+# files and put things there"; 14:11: "As ollama is running programmatically, can you deal with this?
+# Quit it and restart it."). A server serves exactly ONE models dir, and after his 141 GB moved to
+# DevMASTER there were two on the drive: his and the fleet's. Serving either one alone leaves the
+# other's models invisible, so the fleet's ornith + gpt-oss were copied INTO the system store
+# (additive; the fleet copy is still on disk and is the fallback below).
+# The cost, recorded rather than discovered: the fleet's weights now live OUTSIDE the WEDNESDAY
+# folder, so that folder is no longer self-contained on another machine — PORTABILITY item.
+OLLAMA_STORE_DEFAULT="/Volumes/DevMASTER/SYSTEM/ollama/models"
+[ -d "$OLLAMA_STORE_DEFAULT/manifests" ] || OLLAMA_STORE_DEFAULT="$LM_DIR/models"   # fallback: the in-tree copy
+export OLLAMA_MODELS="${OLLAMA_STORE_OVERRIDE:-$OLLAMA_STORE_DEFAULT}"
 URL="${OLLAMA_URL:-http://127.0.0.1:11434}"
 LOG="$LM_DIR/logs/ollama_serve.log"
 WANT="${NIGHT_MODEL:-ornith:35b}"

@@ -445,3 +445,23 @@ built from nothing:
     - **Degrades to:** nothing — the runner refuses with a named gate (rc 3) or an empty queue (rc 4) and
       writes one log line; no seat, brief, or gate depends on it. A PASS is evidence for a Secuura seat's
       morning sweep, never a push.
+
+## 21. The fleet's model weights live OUTSIDE this folder (2026-09-16)
+
+Kam moved his personal 141 GB ollama store onto DevMASTER (`/Volumes/DevMASTER/SYSTEM/ollama`,
+his instruction 13:40 + 13:46) and asked for one server, run programmatically (14:11). A server
+serves exactly ONE models dir, so the fleet's `ornith` + `gpt-oss` were copied INTO that store and
+everything is served from there.
+
+**What this costs:** `2_Project_Files/local-model/models` is no longer the store in use, so this
+folder is not self-contained on another machine. On a machine without `/Volumes/DevMASTER/SYSTEM`,
+`start_ollama.sh` falls back to the in-tree copy automatically — the fallback is in the script and
+is exercised by the `[ -d ... ]` test, not by hope. `OLLAMA_STORE_OVERRIDE` forces either one.
+
+**On a new machine:** bring DevMASTER, or accept the in-tree fallback (which still holds ornith and
+gpt-oss — that copy was NOT removed). Kam's own nine models exist only in the SYSTEM store.
+
+**Kam's personal pointers**, set by `local-model/set_ollama_pointers.sh` and machine-local: a line
+in `~/.zshrc`, a `launchctl setenv`, and `~/Library/LaunchAgents/com.kam.ollama-models.plist`.
+Re-run that script on a new machine. `night_run.sh` deliberately does NOT follow that global — it
+pins its own path via `NIGHT_OLLAMA_MODELS`, so a re-pointed global cannot redirect the fleet.
