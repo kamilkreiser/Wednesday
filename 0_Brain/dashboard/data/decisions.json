@@ -10643,7 +10643,7 @@
   "id": "secuura-erasure-door-absolute-form-bypass",
   "client_project": "Secuura/Blockchain",
   "title": "A pre-existing bypass: an absolute-form request target skips the GDPR erasure door's scope check",
-  "bluf": "OVERRIDE of the prior-ruling gate, reason (read, not assumed): its matches are your A on WHICH scope gates erasure (subjects:erase, which this finding shows can be skipped, not changed) and your 'wait' on the double-slash login-limiter bypass, whose shape this card follows as its default. No action needed tonight. The #1011 QA gate (04:49, on develop and on the PR, test and production modes, replicated twice) found that POST http://<any host>/api/gdpr/erasures, and the /api/v1/ form in production, reaches originate with 200 for a connector WITHOUT subjects:erase; the normal request is refused 403. A valid credential is still required. It is in develop today, not caused by a PR. Severity depends on two reads not done yet: whether nginx or Container Apps forward that request form, and whether originate re-checks the scope. Seat A files an Urgent ticket and does both reads now. Nothing deployed; nobody outside told.",
+  "bluf": "No action needed tonight. The #1011 QA gate (04:49, on develop and on the PR, test and production modes, replicated twice) MEASURED that POST http://<any host>/api/gdpr/erasures, and the /api/v1/ form in production, reaches originate with 200 for a connector WITHOUT subjects:erase; the normal request is refused 403. A valid credential is still required. It is in develop today, not caused by a PR. Now ticketed as KS-1187 (Urgent, ours, not built, nobody outside told). UPDATE 04:5x — the two severity reads: (1) originate does NOT re-check the scope (READ at source by seat A: services/originate/src/routes/gdpr.ts POST /erasures and GET /erasures/:externalRef are connector-role only; 'subjects:erase' appears nowhere in originate), so a request that gets past the gateway erases. (2) Whether the edge passes that request form is still UNMEASURED: every nginx front proxies /api/ with $request_uri, the VM demo's Caddy sits in front of nginx, and the Container Apps template exposes the gateway directly (services.bicep:576-585, external: true); kintsugi's front end is outside the repo. Override of the prior-ruling gate at filing: its matches were your A on which scope gates erasure and your 'wait' on the double-slash login-limiter bypass, whose shape the default follows.",
   "default_action": "HOLD: seat A files the Urgent ticket and does the two severity reads; nothing goes to Peter or Stuart; this card is re-raised with the reads before any fix or message.",
   "options": [
    {
@@ -10674,6 +10674,19 @@
    "CARD nexusai-erasure-deletes-backups",
    "CARD nexusai-erasure-deploy-after-regate8-2026-09-05",
    "CARD secuura-f5-login-limiter-bypass"
-  ]
+  ],
+  "amendments": [
+   {
+    "ts": "2026-09-17T04:56:32.428616+10:00",
+    "reason": "seat A's KS-1187 filing 18:55Z closed one of the two severity reads (originate does NOT re-check the scope, read at source) and narrowed the other",
+    "changed": [
+     "bluf"
+    ],
+    "before": {
+     "bluf": "OVERRIDE of the prior-ruling gate, reason (read, not assumed): its matches are your A on WHICH scope gates erasure (subjects:erase, which this finding shows can be skipped, not changed) and your 'wait' on the double-slash login-limiter bypass, whose shape this card follows as its default. No action needed tonight. The #1011 QA gate (04:49, on develop and on the PR, test and production modes, replicated twice) found that POST http://<any host>/api/gdpr/erasures, and the /api/v1/ form in production, reaches originate with 200 for a connector WITHOUT subjects:erase; the normal request is refused 403. A valid credential is still required. It is in develop today, not caused by a PR. Severity depends on two reads not done yet: whether nginx or Container Apps forward that request form, and whether originate re-checks the scope. Seat A files an Urgent ticket and does both reads now. Nothing deployed; nobody outside told."
+    }
+   }
+  ],
+  "amended_ts": "2026-09-17T04:56:32.428627+10:00"
  }
 ]
