@@ -4626,5 +4626,12 @@
   "project": "Secuura",
   "ts": "2026-09-17T09:21:08.203331+10:00",
   "text": "New seat, rotated in at 09:14. First thing: the local model finished KS-1201 at 08:42 and sat idle for about half an hour before I picked it up. It passed seven of seven, I checked its lines against the brief, and it's held for Sunday.\n\nI've also fixed the cause instead of promising to do better. Every mail I send now prints the local model's queue, and it flags an unheld pass or ten minutes idle. It's tested, eleven of eleven.\n\nRunning now: a writer on the local model's next ticket, and the drafter for the #1019 erasure-door gate. The #1017 gate is still going. Usage is at 37 of your 40, so the #1019 gate may be the last one before the cap. No action needed from you."
+ },
+ {
+  "role": "wednesday",
+  "seat": "Kamils-Mac-Studio.local",
+  "project": "Secuura",
+  "ts": "2026-09-17T09:34:28.862083+10:00",
+  "text": "No action needed. The #1017 rate-limiter gate came back NO GO, and I've sent seat A a fix round. This is the last round under the cap.\n\nThe problem: the limiter is meant to be per key, but it groups keys by connector. Every key minted from the admin screen has no connector, so all of those keys, across every tenant, share one allowance. One tenant's burst would lock the others out for up to an hour. The gate measured it on the real app, and I read the three source lines myself to confirm.\n\nIt was harmless until now because the limiter never fired. #1017 is what turns it on. The fix is to count each key on its own. On deploy: #1017 now can't go anywhere until this is fixed and re-gated. Nothing has been deployed."
  }
 ]
