@@ -7,7 +7,7 @@ status: live
 
 # Boot digest — headline + rules of every lesson (open the file when it fires)
 
-Generated 2026-09-16 22:08 from 176 lesson files (886,320 B). Each block = the lesson's retrieval handle (H1), its frontmatter, the operative paragraph, its section index, and every RULES section verbatim. 9 files carry no rules-shaped section and are included whole. The CASES behind a rule live only in the file: open it the moment the rule fires, or when a diagnosis needs the evidence. `_ledger.md` is read whole beside this digest; `_ledger_archive.md` on demand.
+Generated 2026-09-16 22:10 from 177 lesson files (890,064 B). Each block = the lesson's retrieval handle (H1), its frontmatter, the operative paragraph, its section index, and every RULES section verbatim. 9 files carry no rules-shaped section and are included whole. The CASES behind a rule live only in the file: open it the moment the rule fires, or when a diagnosis needs the evidence. `_ledger.md` is read whole beside this digest; `_ledger_archive.md` on demand.
 
 ## The T9 SSD is the master — Wednesday must be fully portable
 `2026-07-31_fully-portable-drive.md` · principle · 2026-07-31 · status: superseded — the "T9 is the master" half by [[2026-08-25_one-drive-devmaster-is-master]] (2026-08-25); the portability principle itself still lives
@@ -6291,6 +6291,42 @@ still expires on Sunday — THIS file does not) · [[2026-09-14_at-90pct-weekly-
 every grant recorded, so the boundary is written down and never vibes) ·
 [[2026-09-15_ornith-every-issue-gets-a-tooling-or-instruction-fix]] (why a brief defect must not be
 laundered as a model failure).
+
+
+## "Can this be done?" is answered by the whole interface, not by the part you suspected
+`2026-09-16_measure-the-whole-interface-before-answering-can-it-be-done.md` · correction · 2026-09-16 · status: live
+
+**The lesson:** Kam asked whether a third party could deploy the live Azure Marketplace offer. There
+was an existing card pointing at the container image, so the image is what got measured — thoroughly,
+and correctly. `createUiDefinition.json` line 59 defaults customers to a dev registry; line 71 names
+that registry; an unauthenticated token request to it returns `UNAUTHORIZED`, with a positive control
+proving the method. Every one of those facts was true, and the conclusion drawn from them —
+"no third party can deploy it" — was **wrong**.
+
+**How to apply:**
+
+1. **When the question is "can someone do X", enumerate the entire interface first** — every field,
+   every required input, every default — and only then look at the item you suspect. For a wizard,
+   a form, an API or a CLI, that is one pass over the schema and it is cheap. Enumerating the
+   submitted package's fields took one command and would have prevented the whole error.
+2. **Treat an inherited card or ticket as a pointer, never as a scope.** It tells you where someone
+   previously looked. It is silent about everything they did not.
+3. **A measurement with a positive control is still only a measurement of what it measured.** The
+   control proved the registry genuinely refuses anonymous clients. It could not tell anyone that the
+   wizard supplies credentials. Rigour about a fact does not extend the fact's reach, and confidence
+   earned on the part transfers to the whole only if the whole was enumerated.
+4. **Say the corrected shape, not just "I was wrong".** Here: the offer *is* deployable with a token
+   Datasec hands over; it is *not* self-service; nothing in the listing or the wizard tells a customer
+   where to get the token. The person acting on it needs the new true statement, and in this case it
+   changed what would happen in a test the next morning.
+5. **When another agent corrects you, take it to the principal as your own error and credit them.**
+   Kam had been told something false by this seat, and he was going to act on it.
+
+**The shape this belongs to:** the same evening produced three defects that were each *correct where
+they were authored and wrong where they were read* — a log path valid on one machine, a usage cap
+valid for one account, a check reading a file instead of the running system. This is that family
+turned inward: a fact measured correctly in one place, then asked to carry a conclusion about a place
+it never covered.
 
 
 ## Never edit a bash script that is currently running — it reads by byte offset

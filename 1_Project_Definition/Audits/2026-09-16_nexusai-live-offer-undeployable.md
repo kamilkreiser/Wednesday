@@ -2,12 +2,31 @@
 date: 2026-09-16
 type: audit
 subject: Is the LIVE NexusAI marketplace offer deployable by a third party?
-answer: NO — measured end to end, no inference
+answer: CORRECTED 2026-09-16 22:3x — NOT unaided; it deploys with a Datasec-supplied pull token
 ---
 
-# The live offer cannot be deployed by any customer
+# The live offer cannot be deployed UNAIDED
 
-**Answer: no.** Every link in the chain was read directly. Nothing below is inferred.
+> ## ⚠ CORRECTION, 2026-09-16 22:3x — this file's original conclusion was WRONG
+>
+> It said no third party can deploy the live offer. **The accurate statement: no third party can
+> deploy it UNAIDED.** The submitted wizard has two REQUIRED fields this audit never read —
+> `acrUsername` (TextBox, required, no default, *"Datasec-supplied scope-map token name with pull
+> access"*) and `acrPassword` (PasswordBox, required, no default) — which mainTemplate passes to the
+> Container App as registry credentials. The registry is private **by design**, with an enabled
+> pull-only customer token (`nexusai-customer`) scoped to that one repository; a customer-path pull
+> with it returns **HTTP 200** on the 2.1.0 manifest. Caught by the NexusAI agent, verified here by
+> enumerating every field in the submitted `createUiDefinition.json`.
+>
+> **The error was method, not data:** two registry default lines were measured carefully and a
+> conclusion drawn about the whole wizard, when the fields that decided it sat four lines below.
+> Everything else below is accurate; read the conclusion as "not self-service" rather than "broken".
+>
+> **What survives:** the offer is publicly listed and **not self-service**. A customer who finds it,
+> clicks deploy and has no token cannot proceed, and nothing in the listing or the wizard says where
+> to get one. That is a commercial defect, and a smaller and far more fixable one.
+
+**Original answer, as written and now qualified above: no.** Every link in the chain was read directly. Nothing below is inferred.
 
 ## The chain, each link measured
 
