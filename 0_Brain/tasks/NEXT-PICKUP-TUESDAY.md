@@ -229,31 +229,36 @@ default customers to `nexusaidevacrfa39.azurecr.io/nexusai:2.0.0` (a May image w
 and changing nothing. **If it is still there, it goes straight to Kam — a registry push is his
 signature class and he has never named the registry.**
 
-## 🔴 KAM DEPLOYS THE NEXUSAI MARKETPLACE APP **TOMORROW** for a full test
+## 🔴 NEXUSAI — MEASURED: the submitted offer CANNOT be deployed by a customer
 
-Kam, 2026-09-16 ~21:40: *"tomorrow I will deploy the nexus marketplace app to do a full test so we
-will be able to make sure everything is working."*
+**Answered, do not re-derive.** `marketplace-submission-2026-09-15/NexusAI_plan-managed-ai_2.1.0_8f50eeb.zip`
+defaults every customer to `nexusaidevacrfa39.azurecr.io/nexusai:2.1.0` (tooltip: "leave the default").
+That registry **refuses anonymous clients**: an `oauth2/token` request scoped `repository:nexusai:pull`
+with no credentials returns `UNAUTHORIZED — authentication required`. **Positive control:** the same
+method against `mcr.microsoft.com` returns HTTP 200. So the deployment dies at image pull in any
+customer tenant. **Kam's customer-path test tomorrow will fail at exactly that point** — now a
+confirmation, not a discovery.
 
-**This makes the image question time-critical, and it is the first thing to chase at the next boot.**
-If the SUBMITTED package still defaults to `nexusaidevacrfa39.azurecr.io/nexusai:2.0.0` (a May build
-with none of rounds 2-4), his full test exercises the wrong artefact — and will probably PASS, because
-that build is a coherent older product. He would come away believing he had tested the current one.
-**A green test against the wrong artefact spends his confidence, not his time.**
+**Two of this seat's own earlier claims were WRONG and are corrected:** the "May 2.0.0 build with none
+of rounds 2-4" is out of date (the package ships 2.1.0 at its own commit), and
+`myregistry.azurecr.io/nexusai:1.3.0` in mainTemplate is an EXAMPLE inside a `metadata.description`,
+not a defect. **The content was fine; the packaging was not.**
 
-**He is deploying as a CUSTOMER would** (Kam, ~21:45: *"by deploy I mean use the submitted
-marketplace app and deploy it in an azure instance like a client would"*), which is the real
-end-to-end path — so there are exactly two outcomes and they need different responses:
-**(a) the dev ACR is private** → the deploy fails at image pull → ugly but honest, and it means **no
-customer could ever deploy the offer at all**, a bigger finding than the stale image;
-**(b) the dev ACR allows anonymous pull** → the deploy SUCCEEDS on the May build → it will probably
-look like a pass, and he spends a day confirming a build he is not shipping.
+**THE ONE BLOCKER, with Kam:** which registry a customer pulls from. His 09-12 ruling makes it his to
+name and the push his signature class; he has never named it. **Nothing becomes client-ready until he does.**
 
-NexusAI is measuring both ahead of everything else and mailing one line:
-`[Datasec/NexusAI -> Tuesday] MEASURED: submitted image + registry pullability` — the image reference
-verbatim AND `anonymousPullEnabled` on `nexusaidevacrfa39`. **Chase that mail first.** If the submitted
-package points somewhere other than the dev ACR, the concern evaporates — a welcome answer.
-Told explicitly NOT to fix it: the registry is Kam's to name, the push is his signature class, and
-changing the submitted package the night before he tests it would destroy the thing under test.
+**MANDATE WIDENED (Kam ~21:50):** *"review the whole project and fix everything that needs fixing to
+make the product as good as possible"*; a second submission only *"when it is 100% ready"*. This
+SUPERSEDES the earlier "review and STOP". Bar given to the agent: **would a customer who has never met
+us succeed, unaided, from the listing alone.** Told NOT to submit and NOT to modify the submitted
+package — Kam deploys that exact artefact tomorrow and it is evidence now.
+
+**INTENDED, NOT A BUG (Kam ~21:58):** *"the deployed site should work until the client finishes setting
+up the entra group to authenticate against. until then, anyone can access the site."* **Do not let any
+agent gate, password or IP-restrict that window** — access policy is Kam's. NexusAI is measuring how
+long it stays open, how guessable the hostname is, what is reachable while it is open, and whether the
+UI and docs SAY so; reporting, not acting. If they find reachable customer data, an exposed key or a
+pre-setup admin action, that stops and comes to Kam.
 
 ## USAGE — this seat has NO 40% cap; that was Wednesday's
 
