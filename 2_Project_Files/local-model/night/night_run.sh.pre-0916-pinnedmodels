@@ -72,14 +72,7 @@ NIGHT_TMUX_SOCKET="${NIGHT_TMUX_SOCKET:-}"
 NIGHT_HOUR_OVERRIDE="${NIGHT_HOUR_OVERRIDE:-}"
 NIGHT_QA_PGREP="${NIGHT_QA_PGREP:-launch_qa_}"
 OLLAMA_URL="${OLLAMA_URL:-http://127.0.0.1:11434}"
-# 2026-09-16 13:5x — PINNED, not defaulted. Kam is moving his personal 141 GB ollama store to
-# /Volumes/DevMASTER/SYSTEM/ollama and a global OLLAMA_MODELS is about to exist. With the old
-# `${OLLAMA_MODELS:-...}` form this runner would INHERIT it and look for ornith:35b in Kam's
-# personal store, where it is not — G5 would refuse forever, and now self-heal into the wrong
-# store. A global env var is a floating pointer (2026-08-05_identities-float-verify-always);
-# the fleet's model path is a property of this tree, so it is set here unconditionally.
-# NIGHT_OLLAMA_MODELS is the deliberate override, named so it cannot be set by accident.
-export OLLAMA_MODELS="${NIGHT_OLLAMA_MODELS:-$LM_DIR/models}"
+export OLLAMA_MODELS="${OLLAMA_MODELS:-$LM_DIR/models}"
 export PATH="/opt/homebrew/bin:/usr/local/bin:/usr/bin:/bin:/usr/sbin:/sbin:$PATH"   # launchd hands a minimal env
 SRC="${NIGHT_SOURCE_CHECKOUT:-/Volumes/DevMASTER/!CODING/Secuura/Blockchain/2_Project_Files}"
 export NIGHT_SOURCE_CHECKOUT="$SRC"

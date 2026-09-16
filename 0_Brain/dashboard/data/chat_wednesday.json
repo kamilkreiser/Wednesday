@@ -4017,5 +4017,26 @@
   "project": "Secuura",
   "ts": "2026-09-16T13:45:25.285130+10:00",
   "text": "Storage measured. You are right, and it is worse than you probably think: the internal data volume is ninety five percent full — 849 gigabytes used, 50 free. DevMASTER has 1.4 terabytes free.\n\nTwo things I need from you.\n\nFirst, say yes and I will create the folder and move ollama. That is 141 gigabytes, and it is the easy one: all nine models sitting on the internal disk are ones the fleet never touches — our two, Ornith and gpt-oss, already live on DevMASTER. I would make a system folder at the DevMASTER root, move the store there, and point ollama at it. Reversible, and nothing running depends on it. I am asking rather than doing because that folder is outside my own project folder.\n\nSecond, Docker needs your hands, and it is the big one. Docker Desktop's disk image is taking 231 gigabytes on the internal disk — more than ollama and everything else combined — and the daemon is not even running. The move is in Docker Desktop, under Settings, Resources, Advanced, where there is a disk image location you can point at DevMASTER. Worth asking yourself first whether you still need 231 gigabytes of images and volumes at all, because if a lot of that is dead you would reclaim it rather than relocate it. I will not run a prune — that deletes, and deletes are yours.\n\nAfter those two the internal disk goes from 50 gigabytes free to roughly 420. The rest is small by comparison: the Android SDK is 31 gigabytes across two places, the npm cache 15, the unison archives 11. Say the word and I will do those too.\n\nOne honest caveat on the ollama move: loading a 20 gigabyte model off the external drive will be slower than off the internal one. I have not measured how much. If you want, I will measure it before and after and tell you the real number rather than guessing."
+ },
+ {
+  "role": "wednesday",
+  "seat": "Kamils-Mac-Studio.local",
+  "project": "Secuura",
+  "ts": "2026-09-16T13:54:31.022120+10:00",
+  "text": "Received both. Checking the Docker move now, and I will do ollama straight after — folder created, store moved, every pointer changed."
+ },
+ {
+  "role": "wednesday",
+  "seat": "Kamils-Mac-Studio.local",
+  "project": "Secuura",
+  "ts": "2026-09-16T13:57:55.583520+10:00",
+  "text": "Checked, and there is nothing for you to delete — but there is something you need to know first, so I am leading with it.\n\nDo not spend time looking for the old Docker image. It is already gone. The old folder went from 231 gigabytes to 62 megabytes, and there is no image file left in it.\n\nThe thing you need to know: the move did not carry your data across. The new disk image on DevMASTER is 1.3 gigabytes and growing slowly from empty. A copy of 231 gigabytes cannot be 1.3 gigabytes. Docker also reports zero images and zero containers, though I trust that less because the daemon is still returning errors while it comes up. So on the evidence I have, Docker Desktop created a fresh empty image at the new location rather than moving the old one, and your images, containers and volumes are not there. I cannot undo that — the old image is deleted. I am sorry to be the one telling you after you clicked it.\n\nAnd the space has not come back yet, which is not a mystery either. The internal disk still reads 95 percent full because macOS is holding those blocks in Time Machine local snapshots — there are ten of them, most from yesterday. They release on their own as macOS thins them. If you want them gone sooner that is a delete of your local restore points, so it is yours to decide, not mine to run.\n\nNext from me, unless you say otherwise: I move ollama to DevMASTER and change every pointer. That one I can do cleanly, and it is 141 gigabytes."
+ },
+ {
+  "role": "wednesday",
+  "seat": "Kamils-Mac-Studio.local",
+  "project": "Secuura",
+  "ts": "2026-09-16T13:58:50.908994+10:00",
+  "text": "Understood, and thank you — I will not chase it further. The ollama copy is running now, 141 gigabytes onto DevMASTER under a new SYSTEM folder at the drive root. I am copying rather than moving: the source stays until I have verified the destination by file count and by hashing the three largest blobs at both ends, and then I will come back for one word before anything is reclaimed. Ornith is going back on the KS-1011 ticket meanwhile."
  }
 ]

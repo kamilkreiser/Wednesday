@@ -121,3 +121,7 @@
 # ─── 2026-09-16 13:32 — re-queued by the 13:2x seat after the ollama outage (G5 refused 12:24→13:24, model idle 09:58→13:3x).
 # 13:3x — Part B FAILED B4 on a PRE-EXISTING load error in start_secuura_slot_names.test.sh (`prefix_of: command not found` at :212 — the suite does not run standalone; Wednesday's 10:01 brief picked a test file the checker cannot run). Part A's input re-queued: its two failures (B3 touched-set, B5 apply) are exactly what the uncommitted harness edits fixed, so this run is also the arm for them.
 # 13:48 — KS-1011 (Kam ruled b, 09:53). Start_Up/ is untouched by Peter's #997 (all 36 files under systemTest/), so this is safe at the override tip.
+# 13:50 — KS-1011 r2: the brief's fenced block now holds ONLY '+' lines (r1 marked the brief's context line as an addition — the A3d dialect, B3b in the bash tier), and B3b/B3c are now in the RETRY-ONCE trigger.
+# 13:52 — KS-1011 r3: the docker inspect is ONE line now (r2's retry dropped the backslash-continued --format line — the continuation dialect). 14 '+' lines.
+# 13:58 — KS-1011 r4: the test cells are now LITERAL shell in the brief (r3's model invented an 'expect' helper whose third argument was a mutation, so every cell reported FAIL and B5 read green-after as still red — the product hunk was fine).
+KS-1011 input=/Volumes/DevMASTER/WEDNESDAY/2_Project_Files/local-model/night/inputs/bash_1011.json task=/Volumes/DevMASTER/WEDNESDAY/2_Project_Files/local-model/tasks/bash_patch/task.md ctx=49152
