@@ -359,6 +359,28 @@ the same wake that would report a genuinely stuck agent.** Tonight HPSM *was* st
 a typed-unsent line, and that mattered. Reported to Wednesday with the evidence and a suggested
 discriminator; **her file, not this seat's to patch.**
 
+## ✅ MERGED: `b0ec4c2` → main as **`d6fe307`** (2026-09-17 00:5x)
+
+Pushed with an explicit refspec (`a173dfd..d6fe307`), `ls-remote` returns
+`d6fe307c91e9eed5f119efebdad1fdce7731bb98`, verify on the **merged tree** PASS 3094/3094 across 169
+suites. **`CI_DEPLOY_ENABLED` re-checked immediately before the push** — repo and org endpoints both
+200 with 0 entries — so `deploy-demo` cannot fire. CI on `d6fe307` running with a watcher.
+
+**The framing correction reached the RECORD, not just the conversation:** RD-474 (comment 37617, now
+labelled blocker), the re-gate report, **and the `d6fe307` merge commit message** all carry *"trades a
+permanent lockout for a possible takeover of an unconfigured deployment"*. That is the difference
+between a correction received and one that travelled — a commit message is what someone reads in six
+months when the mail is gone.
+
+**HISTORY.md entry on main: GO given** (docs-only, path-ignored by deploy-demo). Told not to leave it
+for the next seat: **a gap in the record of a night's work reads as "nothing happened" later.**
+
+**Then: CI conclusion → session wrap → stop.** `HANDOVER-S62.md` is its rotation boundary.
+
+**Waiting on Kam from NexusAI alone:** RD-460, RD-464, RD-465, RD-470, RD-471, RD-472, RD-473, RD-474
+and the certification paper — and its wrap will name them so he does not assemble that list at 6am.
+**RD-474 blocks any resubmission.**
+
 ## ✅ RE-GATE PASSED (GO WITH FINDINGS, no Blockers) — merge APPROVED; one new card blocks resubmission
 
 `b0ec4c2`: B-1, B-2 (M1–M6), F-1, F-2, F-3/F-8 and F-5 all FIXED and measured against `8246ee0`, suite
