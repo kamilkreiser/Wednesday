@@ -328,6 +328,32 @@ the same wake that would report a genuinely stuck agent.** Tonight HPSM *was* st
 a typed-unsent line, and that mattered. Reported to Wednesday with the evidence and a suggested
 discriminator; **her file, not this seat's to patch.**
 
+## 🟢 REWORK: B-1 and F-1 CLOSED, proven red-first (2026-09-16 23:4x). RD-463 still with a builder.
+
+**RD-462 rework done and proven.** One resolver `resolveEntraConfig` (env `AZURE_AD_*` first, then
+settings) now used by the self-heal, `getMsalConfig`, the callback group check, `POST /api/auth/enforce`
+and `getEntraIdConfig` — the five sites that disagreed. `adminGateRefuses` replaces 8 inline gates and
+deliberately does **not** refuse while no sign-in is configured, which is Kam's "open until the admin
+sets Entra" preserved rather than quietly fixed away.
+
+**Red first, as required: 12 of 17 cells fail on `8246ee0`**, green after, 134/134 across the auth
+suites, **with the env-only and mixed-config regression cells in.** End to end both directions:
+env-configured + the two POSTs → `authEnforced true`, anonymous 401 (**B-1 closed**); no IdP + the two
+POSTs → open, anonymous `POST /api/auth/entra-config` 200, state immediately enforced, anonymous 401
+(**F-1 closed — the site is securable from inside**).
+
+⚠ **CARRY THIS TO KAM: the DEPLOYMENT_GUIDE now has an F-8 upgrade note — "a 2.1.1 lockout OPENS on
+upgrade; finish User Access at once."** So a customer upgrading off the live 2.1.1 has their lockout
+released, and the open window reopens with it. Good news and a new sharp edge in the same sentence.
+
+**Honestly parked rather than silently skipped:** the settings view near `server.js:13968` reads
+settings-first, plus Graph provisioning and health. Not sign-in decisions; being ticketed as follow-up.
+
+**Main CI on `a173dfd`: Gitleaks success, npm-audit success, Deploy demo SKIPPED — exactly as NexusAI
+predicted before pushing.** Build still running.
+
+**HPSM's session wrap arrived 13:42:50Z.** It is done for the night.
+
 ## 🔴 GATE VERDICT: **NO GO** on candidate `8246ee0` — two Blockers in work this seat authorised
 
 **Not merged.** `main` is unaffected and holds 1470e18 via **`a173dfd`** (verify PASS 3017/3017 across
