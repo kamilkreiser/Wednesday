@@ -143,6 +143,33 @@ pgrep → stop → edit → run once → re-arm.
   would put a seat past 50% before it does anything. Raised as a structural question, not worked
   around — see the daily note.
 
+## The daily-note split — census DONE, waiting on Wednesday's commit
+
+Both seats write the same `0_Brain/daily/<date>.md` and it conflicted on rebase tonight. A claim
+split is agreed (her: `note_entry.sh` seat-aware; me: boot step 5 in the launcher). **Sequencing is
+one-directional and it is the whole risk: she lands hers first and tells me the hash, THEN I change
+boot step 5.** Pointing boot step 5 at a directory the resolver does not yet produce creates a stray
+note at my next boot.
+
+**The census, measured 2026-09-16 20:2x — do not re-derive it, and note two of her four guesses were
+wrong in each direction.** The first sweep is dominated by ~60 hits of *prose inside staged briefs*
+quoting daily-note paths as provenance; those are history, not readers. The real code paths are four:
+
+| path | role |
+|---|---|
+| `tools/note_entry.sh:13` | the only writer of note lines; already fronted by `WED_NOTE_OVERRIDE` |
+| `voice/speak.sh:39` | **writes the speech log into that directory** — not on her list |
+| `scheduler/close_wednesday.sh:158,241,256` | heaviest: reads, creates from `_template.md`, and at **:241 git-checks a HARDCODED literal path** that will not follow a variable change; fronted by `WEDNESDAY_TEST_NOTE` |
+| `fleet/hooks/session_start_compact.sh:13` | prose that re-grounds a COMPACTED seat on "today's `0_Brain/daily/` note" — would send this seat to the Secuura note; not on her list, and new here tonight |
+| `Launch_Wednesday.command:555` | boot step 5 — **mine** |
+
+**Do NOT touch:** `daily_receipt.sh`, `shift_change.sh` (contains "daily" zero times),
+`dashboard/generate.py` (zero), `dashboard/collect.py` (its only hit is `FREQ=DAILY` in calendar
+RRULE expansion). All four were named as readers and none of them is one.
+
+**The cheap seam:** two override variables already sit in front of the default, so a seat-aware
+resolver only changes what the default expands to — no call site moves.
+
 ## A recurring mechanism worth a guard — raise it with Wednesday
 
 The exec-bit warning came back within the hour, on a file that arrived in a pull:
