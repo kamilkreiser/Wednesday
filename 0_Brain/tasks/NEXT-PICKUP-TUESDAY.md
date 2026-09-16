@@ -197,6 +197,32 @@ treats a symptom. The durable fix is a pre-commit check that refuses a `*.sh` wi
 staged at 100644 — `2_Project_Files/fleet/hooks/pre-commit` already exists and is the natural
 home. **It is shared tooling, so propose it to Wednesday rather than adding it unilaterally.**
 
+## TOMORROW'S DATASEC PICTURE — assembled 2026-09-16 20:4x so it is not re-derived
+
+Nothing is running on this machine: `tmux list-panes -a` = this seat and the fleet monitor, no agent
+sessions. Nothing was launched tonight and that was deliberate — Kam's autostart grant
+(2026-08-12) is for the **morning** sweep, and his 20:23 note said *"i will comment on this
+tomorrow. we have new actions and work to do"*. Launching at 20:45 would have been scope nobody gave.
+
+- **All Datasec projects are reachable** at `/Volumes/KK_T9_External_HDD/!CODING/Datasec/` — ATTIO,
+  Commercial Readiness, CypherKey, Feedback_System, HPAM, HPSM, Lead_Bot, Marketing_Collateral,
+  myPKI, NexusAI, RESEARCH. DevMASTER is not mounted here and its absence is not a missing project.
+- **HPSM is the live one and the only open Datasec card.** `hpsm-composer-monday-review-scope`
+  is still `open`, and Kam said at 20:23 he comments on it tomorrow — **do not re-ask it, and do not
+  rule it.** Its own default already records his 15:24:26 supersede: *"build the full website and
+  fully functioning engine"*, read as the remaining MVP A build (architecture 6.1-6.3 — WP3 rules
+  engine, WP4 API, WP5 web UI screens 1-10, WP6 manifest + renderers), each through its tier-1 gate,
+  local-first, nothing HP-facing, no deploys; commissioned to HPSM session 39.
+- **HPSM's newest history entry is session 47 (2026-09-14)**: the full release — Composer `main` at
+  `7a477400f9b315f485b7257f5cb8bde78403943d`, 16 merges from `b9c6464`, both live stacks purged.
+  Sessions 39 and 47 are both referenced; **reconcile which is current before briefing anyone.**
+- NexusAI and HPAM have no `5_Project_History/history.md` on this drive — unmeasured rather than
+  inactive. Check their boards before assuming either way.
+
+**The morning grant applies at the next MORNING boot:** sweep Secuura/Blockchain · Datasec/NexusAI ·
+Datasec/Vision read-only (skip myPKI, CypherKey, Lead_Bot), launch and brief where there are
+agent-actionable tickets, no per-morning confirmation needed. Signature classes still pause for Kam.
+
 ## SCOPE — unchanged
 
 Datasec only (Kam, 2026-09-09: *"you will work on ONLY datasec projects unless otherwise
