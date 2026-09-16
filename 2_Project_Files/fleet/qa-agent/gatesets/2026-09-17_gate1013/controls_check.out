@@ -1,0 +1,28 @@
+controls_check 2026-09-17 04:56:59 AEST
+counts: MAIL YOUR VERDICT 1 | head SHA in brief 4 | TIER 1 in brief 3 | node_modules per ENTRY in prompt 3
+N1 head override (#1010 head c3213b04e) | stderr: REFUSING: #1013 — c3213b04e3ad96068c367f7e0ba426822d32cda9 is not at refs/heads/feature/ks-999-ornith-getuserbyid-awaits-fromrow on origin — the head moved; the brief is about a different SHA
+rc=6
+expected 6: OK
+N2 prompt without the mail step | stderr: REFUSING: prompt does not tell the agent to MAIL its verdict
+rc=12
+expected 12: OK
+N3 brief without the head SHA | stderr: REFUSING: brief or prompt does not name the head SHA 5fbfb66a927ea50a8ad0531f344b58a33f7bd9c2 — a gate about another SHA is another gate
+rc=20
+expected 20: OK
+N4 brief without TIER 1 | stderr: REFUSING: brief and prompt disagree about the tier
+rc=7
+expected 7: OK
+N5 prompt without per-ENTRY farm | stderr: REFUSING: prompt does not require node_modules farmed per ENTRY (a wholesale link can write through to the checkout .vite cache)
+rc=22
+expected 22: OK
+N6 prompt without the exact verdict subject | stderr: REFUSING: prompt does not carry the exact verdict subject, the coagent@ sender and the wednesday-agent@ recipient
+rc=23
+expected 23: OK
+N7 develop = the #1013 head (all three #1013 blobs LANDED on develop) | stderr: REFUSING: develop services/auth/src/repositories/userRepo.ts blob 9060b308e = #1013 own — #1013 has landed; this brief is stale (develop 5fbfb66a927ea50a8ad0531f344b58a33f7bd9c2) — re-pin deliberately: a different brief
+rc=19
+expected 19: OK
+N8 develop = d067725ff (pre-#1010: a develop whose files nobody pinned or ABSENT-judged, GUARDED/UNJUDGEABLE) | stderr: REFUSING: origin develop is at d067725ff1c7f036dbf0f726b9bf12f4daefebe7 (pinned 1125607e978d6ad637720c985e43e3d79fecdf88) and the move is not provably disjoint: UNJUDGEABLE status=behind files=0 — confirm the delta, then re-pin deliberately (launcher DEVELOP_S
+rc=18
+expected 18: OK
+unexpected rows 0
+end 04:58:36 AEST

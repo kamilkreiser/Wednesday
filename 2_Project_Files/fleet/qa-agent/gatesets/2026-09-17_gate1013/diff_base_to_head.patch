@@ -1,0 +1,200 @@
+diff --git a/Blockchain/Dev/services/auth/src/__tests__/ks949-platform-admin-seed-identity.test.ts b/Blockchain/Dev/services/auth/src/__tests__/ks949-platform-admin-seed-identity.test.ts
+index 67316e5da..4f03e6f4f 100644
+--- a/Blockchain/Dev/services/auth/src/__tests__/ks949-platform-admin-seed-identity.test.ts
++++ b/Blockchain/Dev/services/auth/src/__tests__/ks949-platform-admin-seed-identity.test.ts
+@@ -61,7 +61,9 @@ vi.mock('../utils/logger', () => ({
+   logger: {
+     info: (msg: string, meta: Record<string, unknown>) => { logCalls.push({ level: 'info', msg, meta }); },
+     warn: (msg: string, meta: Record<string, unknown>) => { logCalls.push({ level: 'warn', msg, meta }); },
+-    error: () => {},
++    // KS-999 item 4: captured like info/warn. Was `() => {}`, which discarded the operator half of
++    // KS-253's contract (a classified error for the caller AND a log for the operator).
++    error: (msg: string, meta: Record<string, unknown>) => { logCalls.push({ level: 'error', msg, meta }); },
+     debug: () => {},
+   },
+ }));
+@@ -581,6 +583,11 @@ describe('KS-966 F1 — no .env.example ships an admin password value', () => {
+ // that discriminates between the fixed and unfixed function. The decrypt cells
+ // are CHARACTERISATION: they record behaviour that did not change, so the next
+ // reader does not re-derive the ticket's chain and reach the wrong conclusion.
++//
++// KS-999 (2026-09-17): getUserById now AWAITS fromRow, so the unawaited return quoted above
++// is history. A decrypt failure still propagates (rethrown as-is), now through the catch and
++// its log. A fromRow-side infrastructure failure is classified, and that is pinned in
++// ks999-getuserbyid-awaits-fromrow.test.ts.
+ // =============================================================================
+ 
+ async function loadRepo(env: Record<string, string | undefined>) {
+@@ -595,7 +602,7 @@ async function loadRepo(env: Record<string, string | undefined>) {
+ 
+ describe('KS-963: a DB failure must not be answered as "user not found"', () => {
+   const ID = 'ks963-row';
+-  beforeEach(() => { vi.clearAllMocks(); seededIds.add(ID); });
++  beforeEach(() => { vi.clearAllMocks(); seededIds.add(ID); logCalls.length = 0; });
+   afterEach(() => { seededIds.delete(ID); vi.resetModules(); });
+ 
+   // ---- THE DISCRIMINATOR -----------------------------------------------------
+@@ -611,6 +618,11 @@ describe('KS-963: a DB failure must not be answered as "user not found"', () =>
+       // cell that fails on correct behaviour is a cell about to be weakened.
+       vi.mocked(db.query).mockRejectedValueOnce(new Error('connection terminated unexpectedly'));
+       await expect(repo.getUserById(ID)).rejects.toThrow(/temporarily unavailable/);
++      // KS-999 item 4: the operator half of KS-253. The catch logged the failure it classified.
++      expect(
++        logCalls.some((c) => c.level === 'error' && c.msg === 'DB getUserById failed'),
++        'the classifier logged the failure',
++      ).toBe(true);
+     } finally { restore(); }
+   });
+ 
+@@ -648,7 +660,10 @@ describe('KS-963: a DB failure must not be answered as "user not found"', () =>
+     } finally { restore(); }
+   });
+ 
+-  it('CHARACTERISATION: and it is the UNAWAITED fromRow that lets it escape — the same row in a non-prod env resolves, so the escape is the cutoff firing and not a broken fixture', async () => {
++  // KS-999 item 3: renamed. It was titled "…and it is the UNAWAITED fromRow that lets it escape…",
++  // but its assertion (the row resolves outside production) could never establish that claim,
++  // and since KS-999 fromRow is awaited. What the cell does prove is the control below.
++  it('CONTROL: the same row in a non-prod env resolves, so the production rejection above is the plaintext cutoff firing and not a broken fixture', async () => {
+     const { repo, restore } = await loadRepo({ NODE_ENV: 'development' });
+     try {
+       await expect(repo.getUserById(ID)).resolves.toBeTruthy();
+diff --git a/Blockchain/Dev/services/auth/src/__tests__/ks999-getuserbyid-awaits-fromrow.test.ts b/Blockchain/Dev/services/auth/src/__tests__/ks999-getuserbyid-awaits-fromrow.test.ts
+new file mode 100644
+index 000000000..04ce4e156
+--- /dev/null
++++ b/Blockchain/Dev/services/auth/src/__tests__/ks999-getuserbyid-awaits-fromrow.test.ts
+@@ -0,0 +1,97 @@
++import { describe, it, expect, beforeEach, vi } from 'vitest';
++
++vi.mock('@secuura/shared', async (importOriginal) => {
++  const actual = await importOriginal<Record<string, unknown>>();
++  return {
++    ...actual,
++    encryptField: async (v: string) => v,
++    decryptField: async (v: string) => v,
++    encryptFieldWithDek: async (v: string) => v,
++    decryptFieldWithDek: async (v: string) => v,
++    isSubjectDekCiphertext: (v: unknown) => typeof v === 'string' && v.startsWith('sdek:'),
++    isEncryptedPii: () => false,
++    lookupHash: (v: string) => `hash:${v}`,
++  };
++});
++
++vi.mock('../services/subjectDeks', () => ({
++  subjectDeks: {
++    getDek: vi.fn(async () => 'test-dek'),
++    getOrCreateDek: vi.fn(async () => 'test-dek'),
++  },
++}));
++
++vi.mock('../utils/logger', () => ({
++  logger: { info: vi.fn(), warn: vi.fn(), error: vi.fn(), debug: vi.fn() },
++}));
++
++vi.mock('../db', () => ({
++  query: vi.fn(async (sql: string, params: unknown[] = []) => {
++    if (/select/i.test(String(sql)) && /from\s+users/i.test(String(sql))) {
++      const id = String((params || [])[0] ?? '');
++      if (id === 'ks999-encrypted-row') {
++        return { rows: [{ id, email: 'sdek:ciphertext', status: 'active', role: 'user', created_at: '2026-01-01T00:00:00.000Z', updated_at: '2026-01-01T00:00:00.000Z' }], rowCount: 1 };
++      }
++      return { rows: [], rowCount: 0 };
++    }
++    return { rows: [], rowCount: 0 };
++  }),
++}));
++
++async function loadRepo(env: Record<string, string | undefined>) {
++  const saved = { ...process.env };
++  Object.assign(process.env, { NODE_ENV: 'development', ...env });
++  vi.resetModules();
++  const repo = await import('../repositories/userRepo');
++  const db = await import('../db');
++  const deks = await import('../services/subjectDeks');
++  const log = await import('../utils/logger');
++  return { repo, db, deks, log, restore: () => { process.env = saved; } };
++}
++const ID = 'ks999-encrypted-row';
++
++describe('KS-999 — getUserById awaits fromRow, so a fromRow-side DB failure is classified', () => {
++  beforeEach(() => { vi.clearAllMocks(); });
++
++  it('🔴 KS-999 — an INFRASTRUCTURE failure inside fromRow (the getDek read) becomes ServiceUnavailable, not a raw error', async () => {
++    const { repo, deks, restore } = await loadRepo({});
++    try {
++      vi.mocked(deks.subjectDeks.getDek).mockRejectedValueOnce(new Error('connection terminated unexpectedly'));
++      await expect(repo.getUserById(ID)).rejects.toThrow(/temporarily unavailable/);
++    } finally { restore(); }
++  });
++
++  it('🔴 KS-999 — the fromRow-side failure is LOGGED by the classifier (the catch now runs)', async () => {
++    const { repo, deks, log, restore } = await loadRepo({});
++    try {
++      vi.mocked(deks.subjectDeks.getDek).mockRejectedValueOnce(new Error('connection terminated unexpectedly'));
++      await repo.getUserById(ID).catch(() => undefined);
++      expect(log.logger.error).toHaveBeenCalledWith('DB getUserById failed', expect.objectContaining({ error: 'connection terminated unexpectedly' }));
++    } finally { restore(); }
++  });
++
++  it('KS-999 control — a NON-infrastructure failure inside fromRow is rethrown as-is, before and after', async () => {
++    const { repo, deks, restore } = await loadRepo({});
++    try {
++      vi.mocked(deks.subjectDeks.getDek).mockRejectedValueOnce(new Error('ks999-not-an-infrastructure-fault'));
++      await expect(repo.getUserById(ID)).rejects.toThrow(/ks999-not-an-infrastructure-fault/);
++    } finally { restore(); }
++  });
++
++  it('KS-999 control — a query()-side infrastructure failure was already classified (KS-963)', async () => {
++    const { repo, db, restore } = await loadRepo({});
++    try {
++      vi.mocked(db.query).mockRejectedValueOnce(new Error('connection terminated unexpectedly'));
++      await expect(repo.getUserById(ID)).rejects.toThrow(/temporarily unavailable/);
++    } finally { restore(); }
++  });
++
++  it('KS-999 control — with nothing rejecting the encrypted row resolves, so the reds above fail on the rejection and not on the fixture', async () => {
++    const { repo, deks, restore } = await loadRepo({});
++    try {
++      const user = await repo.getUserById(ID);
++      expect(user?.id).toBe(ID);
++      expect(deks.subjectDeks.getDek).toHaveBeenCalledWith(ID);
++    } finally { restore(); }
++  });
++});
+diff --git a/Blockchain/Dev/services/auth/src/repositories/userRepo.ts b/Blockchain/Dev/services/auth/src/repositories/userRepo.ts
+index 822b3fcd8..9060b308e 100644
+--- a/Blockchain/Dev/services/auth/src/repositories/userRepo.ts
++++ b/Blockchain/Dev/services/auth/src/repositories/userRepo.ts
+@@ -360,13 +360,17 @@ const USER_COLS = 'id, email, first_name, last_name, display_name, role, status,
+  * commissioned it claims otherwise and a future reader will grep this comment
+  * rather than the ticket:
+  *
+- * 1. It does not change the DECRYPT path. `fromRow` is `async` and is returned
++ * 1. It did not change the DECRYPT path. `fromRow` is `async` and was returned
+  *    WITHOUT `await` from inside the try below, so its rejection was never
+- *    caught here — a decrypt failure has always propagated, before and after
+- *    this change. KS-963's "getUserById catches and returns null" is false.
+- *    (Making it `return await fromRow(...)` is a real improvement and is
+- *    deliberately NOT done here — it is a behaviour change on the normal
+- *    production path, so it needs its own gate. Tracked separately.)
++ *    caught here — a decrypt failure always propagated, before and after
++ *    KS-963. KS-963's "getUserById catches and returns null" was false.
++ *    KS-999 (2026-09-17) made it `return await fromRow(...)`, previously kept
++ *    out of KS-963 as a behaviour change on the normal production path: a
++ *    failure inside `fromRow`, the subject-DEK read included, now reaches the
++ *    catch. An infrastructure fault becomes ServiceUnavailable (503) instead of
++ *    a raw 500; anything else, a decrypt failure included, is rethrown as-is
++ *    and is now logged. The five sibling reads below still return `fromRow`
++ *    unawaited: KS-1186.
+  *
+  * 2. It does not un-silence the platform-admin remediation chain. The throw is
+  *    caught two frames up by `seedDemoUsersInner`'s per-account handler, which
+@@ -403,7 +407,7 @@ const USER_COLS = 'id, email, first_name, last_name, display_name, role, status,
+ export async function getUserById(id: string, tenantId?: string): Promise<User | null> {
+   try {
+     const result = await query(`SELECT ${USER_COLS} FROM users WHERE id = $1 LIMIT 1`, [id], tenantId);
+-    if (result.rows.length > 0) return fromRow(result.rows[0]);
++    if (result.rows.length > 0) return await fromRow(result.rows[0]); // KS-999: await so the catch classifies infra failures inside fromRow
+     return null;
+   } catch (err: any) {
+     logger.error('DB getUserById failed', { error: err?.message, code: err?.code });

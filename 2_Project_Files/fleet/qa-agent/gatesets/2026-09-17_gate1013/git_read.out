@@ -1,0 +1,170 @@
+git_read 2026-09-17 04:44:23 AEST
+1125607e978d6ad637720c985e43e3d79fecdf88	refs/heads/develop
+5fbfb66a927ea50a8ad0531f344b58a33f7bd9c2	refs/pull/1013/head
+branch for head:
+5fbfb66a927ea50a8ad0531f344b58a33f7bd9c2	refs/heads/feature/ks-999-ornith-getuserbyid-awaits-fromrow
+5fbfb66a927ea50a8ad0531f344b58a33f7bd9c2	refs/pull/1013/head
+merge-base head develop: 1125607e978d6ad637720c985e43e3d79fecdf88
+rev-list develop..head: 1  head..develop: 0
+--- base->head numstat/raw
+18	3	Blockchain/Dev/services/auth/src/__tests__/ks949-platform-admin-seed-identity.test.ts
+97	0	Blockchain/Dev/services/auth/src/__tests__/ks999-getuserbyid-awaits-fromrow.test.ts
+11	7	Blockchain/Dev/services/auth/src/repositories/userRepo.ts
+:100644 100644 67316e5da 4f03e6f4f M	Blockchain/Dev/services/auth/src/__tests__/ks949-platform-admin-seed-identity.test.ts
+:000000 100644 000000000 04ce4e156 A	Blockchain/Dev/services/auth/src/__tests__/ks999-getuserbyid-awaits-fromrow.test.ts
+:100644 100644 822b3fcd8 9060b308e M	Blockchain/Dev/services/auth/src/repositories/userRepo.ts
+patch lines      200
+--- commit message head
+KS-999: getUserById awaits fromRow, so a failure inside fromRow reaches the KS-253 classifier (503, not a raw 500)
+
+AUTH SERVICE, not auth logic. getUserById returned fromRow(...) unawaited
+from inside its try. fromRow is async and reads the subject DEK, itself a DB
+read, so a rejection inside it was never caught: on an encrypted row, the
+normal production path, pool starvation there surfaced as a raw error (500)
+instead of ServiceUnavailable (503). The one-word fix is
+return await fromRow(...). A non-infrastructure failure, a decrypt failure
+included, is still rethrown as-is, and is now logged by the catch.
+
+- New ks999-getuserbyid-awaits-fromrow.test.ts (renamed from the READY's
+  auto-name): an sdek: row so fromRow takes its getDek read; a getDek
+  infrastructure rejection becomes "temporarily unavailable", and the
+  classifier logs it; controls for a non-infrastructure rejection, the
+  query()-side path (KS-963) and an untouched row.
+- ks949-platform-admin-seed-identity.test.ts, ticket items 3 and 4:
+  - the logger mock captures error like info/warn;
+  - the KS-963 infrastructure cell also asserts the operator log;
+  - the cell titled "it is the UNAWAITED fromRow that lets it escape" is
+    renamed to what its assertion proves (a non-prod control);
+  - the KS-963 header notes KS-999.
+- userRepo.ts's KS-963 doc comment no longer says the await is
+  "deliberately NOT done here"; it states what KS-999 changed.
+
+Part of KS-999. Item 2 (the four calling route families) is the QA gate's.
+The five sibling unawaited returns (:442, :508, :581, :590, :623) are
+KS-1186, not this PR. KS-1168's :1017/:1061 are untouched.
+
+Product line and ks999 cells authored by the local model (Ornith) from a
+Wednesday-written brief; source-read by Wednesday; applied and re-run by the
+seat A successor, who made the test-file and comment edits.
+
+Co-Authored-By: Claude Opus 5 <noreply@anthropic.com>
+
+--- auth tree listing (src top)
+Blockchain/Dev/services/auth/.env.example
+Blockchain/Dev/services/auth/Dockerfile
+Blockchain/Dev/services/auth/package-lock.json
+Blockchain/Dev/services/auth/package.json
+Blockchain/Dev/services/auth/scripts
+Blockchain/Dev/services/auth/src/__tests__
+Blockchain/Dev/services/auth/src/auth.openapi.ts
+Blockchain/Dev/services/auth/src/db.ts
+Blockchain/Dev/services/auth/src/events.ts
+Blockchain/Dev/services/auth/src/index.ts
+Blockchain/Dev/services/auth/src/middleware
+Blockchain/Dev/services/auth/src/providers
+Blockchain/Dev/services/auth/src/repositories
+Blockchain/Dev/services/auth/src/routes/auth.ts
+Blockchain/Dev/services/auth/src/routes/health.ts
+Blockchain/Dev/services/auth/src/routes/internal.ts
+Blockchain/Dev/services/auth/src/routes/issuerCerts.ts
+Blockchain/Dev/services/auth/src/routes/jwks.ts
+Blockchain/Dev/services/auth/src/routes/mfa.ts
+Blockchain/Dev/services/auth/src/routes/oauth.ts
+Blockchain/Dev/services/auth/src/routes/sessions.ts
+Blockchain/Dev/services/auth/src/routes/users.ts
+Blockchain/Dev/services/auth/src/routes/wallet.ts
+Blockchain/Dev/services/auth/src/services
+Blockchain/Dev/services/auth/src/types
+Blockchain/Dev/services/auth/src/utils
+Blockchain/Dev/services/auth/tsconfig.json
+Blockchain/Dev/services/auth/vitest.config.ts
+Blockchain/Dev/services/auth/vitest.setup.ts
+--- getUserById callers at head (auth src)
+5fbfb66a927ea50a8ad0531f344b58a33f7bd9c2:Blockchain/Dev/services/auth/src/repositories/userRepo.ts:366: *    KS-963. KS-963's "getUserById catches and returns null" was false.
+5fbfb66a927ea50a8ad0531f344b58a33f7bd9c2:Blockchain/Dev/services/auth/src/repositories/userRepo.ts:407:export async function getUserById(id: string, tenantId?: string): Promise<User | null> {
+5fbfb66a927ea50a8ad0531f344b58a33f7bd9c2:Blockchain/Dev/services/auth/src/repositories/userRepo.ts:413:    logger.error('DB getUserById failed', { error: err?.message, code: err?.code });
+5fbfb66a927ea50a8ad0531f344b58a33f7bd9c2:Blockchain/Dev/services/auth/src/repositories/userRepo.ts:425: * `getUserById` returns a User whose `passwordHash` is always undefined. Any
+5fbfb66a927ea50a8ad0531f344b58a33f7bd9c2:Blockchain/Dev/services/auth/src/repositories/userRepo.ts:436: * Error behaviour matches getUserById (KS-963): infrastructure failures are
+5fbfb66a927ea50a8ad0531f344b58a33f7bd9c2:Blockchain/Dev/services/auth/src/repositories/userRepo.ts:440:export async function getUserByIdWithPasswordHash(id: string): Promise<User | null> {
+5fbfb66a927ea50a8ad0531f344b58a33f7bd9c2:Blockchain/Dev/services/auth/src/repositories/userRepo.ts:449:    logger.error('DB getUserByIdWithPasswordHash failed', { error: err?.message, code: err?.code });
+5fbfb66a927ea50a8ad0531f344b58a33f7bd9c2:Blockchain/Dev/services/auth/src/repositories/userRepo.ts:462: * (migration 039). Post-auth callers should keep using getUserById.
+5fbfb66a927ea50a8ad0531f344b58a33f7bd9c2:Blockchain/Dev/services/auth/src/repositories/userRepo.ts:464: * KS-963 (widened 2026-09-09): this carried the IDENTICAL swallow `getUserById`
+5fbfb66a927ea50a8ad0531f344b58a33f7bd9c2:Blockchain/Dev/services/auth/src/repositories/userRepo.ts:467: * `include` on 2026-09-09 07:08: *"Widen #907 to getUserByIdPreAuth now — two
+5fbfb66a927ea50a8ad0531f344b58a33f7bd9c2:Blockchain/Dev/services/auth/src/repositories/userRepo.ts:509:export async function getUserByIdPreAuth(id: string): Promise<User | null> {
+5fbfb66a927ea50a8ad0531f344b58a33f7bd9c2:Blockchain/Dev/services/auth/src/repositories/userRepo.ts:515:    logger.error('DB getUserByIdPreAuth failed', { error: err?.message, code: err?.code });
+5fbfb66a927ea50a8ad0531f344b58a33f7bd9c2:Blockchain/Dev/services/auth/src/repositories/userRepo.ts:525: * getUserById runs under the request's tenant GUC (fail-closed RLS since
+5fbfb66a927ea50a8ad0531f344b58a33f7bd9c2:Blockchain/Dev/services/auth/src/repositories/userRepo.ts:530:export async function getUserByIdPlatformScope(id: string): Promise<User | null> {
+5fbfb66a927ea50a8ad0531f344b58a33f7bd9c2:Blockchain/Dev/services/auth/src/repositories/userRepo.ts:531:  return runWithPlatformScope(() => getUserById(id));
+5fbfb66a927ea50a8ad0531f344b58a33f7bd9c2:Blockchain/Dev/services/auth/src/repositories/userRepo.ts:534:/** KS-467: updateUser for platform-admin callers — see getUserByIdPlatformScope. */
+5fbfb66a927ea50a8ad0531f344b58a33f7bd9c2:Blockchain/Dev/services/auth/src/repositories/userRepo.ts:883:    : (await getUserByIdPreAuth(id))?.tenantId ?? undefined;
+5fbfb66a927ea50a8ad0531f344b58a33f7bd9c2:Blockchain/Dev/services/auth/src/repositories/userRepo.ts:896:    // The statement was issued and its result DISCARDED, then `getUserById(id)`
+5fbfb66a927ea50a8ad0531f344b58a33f7bd9c2:Blockchain/Dev/services/auth/src/repositories/userRepo.ts:926:  return getUserById(id, tenantForRls);
+5fbfb66a927ea50a8ad0531f344b58a33f7bd9c2:Blockchain/Dev/services/auth/src/repositories/userRepo.ts:1584:        // The remediation was keyed on getUserById(account.id) alone, so a row
+5fbfb66a927ea50a8ad0531f344b58a33f7bd9c2:Blockchain/Dev/services/auth/src/repositories/userRepo.ts:1589:        const byId = await getUserById(account.id);
+5fbfb66a927ea50a8ad0531f344b58a33f7bd9c2:Blockchain/Dev/services/auth/src/repositories/userRepo.ts:1677:      const idCollision = await getUserById(account.id);
+5fbfb66a927ea50a8ad0531f344b58a33f7bd9c2:Blockchain/Dev/services/auth/src/routes/auth.ts:706:    const user = await userRepo.getUserByIdPreAuth(payload.userId);
+5fbfb66a927ea50a8ad0531f344b58a33f7bd9c2:Blockchain/Dev/services/auth/src/routes/auth.ts:836:    const user = await userRepo.getUserByIdPreAuth(stored.userId);
+5fbfb66a927ea50a8ad0531f344b58a33f7bd9c2:Blockchain/Dev/services/auth/src/routes/auth.ts:882:    const user = await userRepo.getUserByIdPreAuth(stored.userId);
+5fbfb66a927ea50a8ad0531f344b58a33f7bd9c2:Blockchain/Dev/services/auth/src/routes/auth.ts:1315:    const user = await userRepo.getUserById(req.user!.userId);
+5fbfb66a927ea50a8ad0531f344b58a33f7bd9c2:Blockchain/Dev/services/auth/src/routes/mfa.ts:143:    const user = await userRepo.getUserById(userId);
+5fbfb66a927ea50a8ad0531f344b58a33f7bd9c2:Blockchain/Dev/services/auth/src/routes/mfa.ts:166:    const user = await userRepo.getUserById(userId);
+5fbfb66a927ea50a8ad0531f344b58a33f7bd9c2:Blockchain/Dev/services/auth/src/routes/mfa.ts:313:    // KS-732 (#872 review): NOT getUserById. That selects USER_COLS, which
+5fbfb66a927ea50a8ad0531f344b58a33f7bd9c2:Blockchain/Dev/services/auth/src/routes/mfa.ts:320:    const user = await userRepo.getUserByIdWithPasswordHash(userId);
+5fbfb66a927ea50a8ad0531f344b58a33f7bd9c2:Blockchain/Dev/services/auth/src/routes/mfa.ts:397:    const user = await userRepo.getUserById(userId);
+5fbfb66a927ea50a8ad0531f344b58a33f7bd9c2:Blockchain/Dev/services/auth/src/routes/oauth.ts:948:      // `getUserById` answers nothing here under fail-closed RLS and the grant
+5fbfb66a927ea50a8ad0531f344b58a33f7bd9c2:Blockchain/Dev/services/auth/src/routes/oauth.ts:952:      const user = await userRepo.getUserByIdPreAuth(result.userId);
+5fbfb66a927ea50a8ad0531f344b58a33f7bd9c2:Blockchain/Dev/services/auth/src/routes/oauth.ts:1066:      const user = await userRepo.getUserByIdPreAuth(decoded.userId);
+5fbfb66a927ea50a8ad0531f344b58a33f7bd9c2:Blockchain/Dev/services/auth/src/routes/users.ts:774:    const target = await userRepo.getUserByIdPlatformScope(id);
+5fbfb66a927ea50a8ad0531f344b58a33f7bd9c2:Blockchain/Dev/services/auth/src/routes/users.ts:852:    const user = await userRepo.getUserById(req.user!.userId);
+5fbfb66a927ea50a8ad0531f344b58a33f7bd9c2:Blockchain/Dev/services/auth/src/routes/users.ts:921:    const user = await userRepo.getUserById(req.user!.userId);
+5fbfb66a927ea50a8ad0531f344b58a33f7bd9c2:Blockchain/Dev/services/auth/src/routes/users.ts:960:    const user = await userRepo.getUserById(req.user!.userId);
+5fbfb66a927ea50a8ad0531f344b58a33f7bd9c2:Blockchain/Dev/services/auth/src/routes/users.ts:1034:    const user = await userRepo.getUserById(req.user!.userId);
+5fbfb66a927ea50a8ad0531f344b58a33f7bd9c2:Blockchain/Dev/services/auth/src/routes/users.ts:1063:    const user = await userRepo.getUserById(req.user!.userId);
+5fbfb66a927ea50a8ad0531f344b58a33f7bd9c2:Blockchain/Dev/services/auth/src/routes/users.ts:1094:    const user = await userRepo.getUserById(req.user!.userId);
+5fbfb66a927ea50a8ad0531f344b58a33f7bd9c2:Blockchain/Dev/services/auth/src/routes/users.ts:1237:    const user = await userRepo.getUserById(req.user!.userId);
+5fbfb66a927ea50a8ad0531f344b58a33f7bd9c2:Blockchain/Dev/services/auth/src/routes/users.ts:1289:    const user = await userRepo.getUserById(req.user!.userId);
+5fbfb66a927ea50a8ad0531f344b58a33f7bd9c2:Blockchain/Dev/services/auth/src/routes/users.ts:1321:      const subject = await userRepo.getUserByIdPlatformScope(request.userId);
+5fbfb66a927ea50a8ad0531f344b58a33f7bd9c2:Blockchain/Dev/services/auth/src/routes/wallet.ts:193:    const existing = await userRepo.getUserByIdPreAuth(result.rows[0].id);
+5fbfb66a927ea50a8ad0531f344b58a33f7bd9c2:Blockchain/Dev/services/auth/src/routes/wallet.ts:523:    const user = await userRepo.getUserById(req.user.userId);
+--- openapi specs
+Blockchain/Dev/MCP Deployment/openapi.yaml
+Blockchain/Dev/docs/openapi/secuura-api.yaml
+Blockchain/Dev/scripts/openapi-examples/docker-compose.capture.override.yml
+Blockchain/Dev/services/mcp-server/openapi.yaml
+Blockchain/Dev/test-swagger-server.js
+systemTest/akto/tests/unit/fixtures/openapi-sample.yaml
+--- checkout
+checkout HEAD 355d82c8b porcelain 0 config_sha256 d7e7298b02c45f5267520f79985ae97abe51ac3d8b82a7e8cb35c50059a09f66 refs 899 worktrees_dir 110
+total 0
+drwxr-xr-x@  3 kam_code  staff   96 17 Aug 14:52 .
+drwxr-xr-x@ 12 kam_code  staff  384 17 Aug 14:53 ..
+drwxr-xr-x@  3 kam_code  staff   96 17 Aug 14:52 vitest
+
+/Volumes/DevMASTER/!CODING/Secuura/Blockchain/2_Project_Files/Blockchain/Dev/services/auth/node_modules/.vite/vitest:
+total 0
+drwxr-xr-x@ 3 kam_code  staff  96 17 Aug 14:52 .
+drwxr-xr-x@ 3 kam_code  staff  96 17 Aug 14:52 ..
+drwxr-xr-x@ 3 kam_code  staff  96 17 Aug 14:52 da39a3ee5e6b4b0d3255bfef95601890afd80709
+
+/Volumes/DevMASTER/!CODING/Secuura/Blockchain/2_Project_Files/Blockchain/Dev/services/auth/node_modules/.vite/vitest/da39a3ee5e6b4b0d3255bfef95601890afd80709:
+total 16
+drwxr-xr-x@ 3 kam_code  staff    96 17 Aug 14:52 .
+drwxr-xr-x@ 3 kam_code  staff    96 17 Aug 14:52 ..
+-rw-r--r--@ 1 kam_code  staff  6697  9 Sep 08:58 results.json
+total 0
+drwxr-xr-x@  3 kam_code  staff   96 17 Aug 20:54 .
+drwxr-xr-x@ 11 kam_code  staff  352 17 Aug 20:54 ..
+drwxr-xr-x@  3 kam_code  staff   96 17 Aug 20:54 vitest
+
+/Volumes/DevMASTER/!CODING/Secuura/Blockchain/2_Project_Files/Blockchain/Dev/services/api-gateway/node_modules/.vite/vitest:
+total 0
+drwxr-xr-x@ 3 kam_code  staff  96 17 Aug 20:54 .
+drwxr-xr-x@ 3 kam_code  staff  96 17 Aug 20:54 ..
+drwxr-xr-x@ 3 kam_code  staff  96 17 Aug 20:54 da39a3ee5e6b4b0d3255bfef95601890afd80709
+
+/Volumes/DevMASTER/!CODING/Secuura/Blockchain/2_Project_Files/Blockchain/Dev/services/api-gateway/node_modules/.vite/vitest/da39a3ee5e6b4b0d3255bfef95601890afd80709:
+total 16
+drwxr-xr-x@ 3 kam_code  staff    96 17 Aug 20:54 .
+drwxr-xr-x@ 3 kam_code  staff    96 17 Aug 20:54 ..
+-rw-r--r--@ 1 kam_code  staff  5907 17 Sep 01:02 results.json
+end 04:44:33 AEST

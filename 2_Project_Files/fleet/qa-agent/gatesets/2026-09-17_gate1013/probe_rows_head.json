@@ -1,0 +1,455 @@
+[
+ {
+  "cond": "a",
+  "route": "GET /api/users/me",
+  "status": 200,
+  "retryAfter": null,
+  "body": "{\"success\":true,\"data\":{\"id\":\"aaaaaaaa-1111-4111-8111-aaaaaaaaaaaa\",\"email\":\"enc@example.invalid\",\"emailVerified\":false,\"phoneVerified\":false,\"mfaEnabled\":false,\"role\":\"OWNER\",\"verificationLevel\":\"BASIC\",\"status\":\"ACTIVE\",\"createdAt\":\"2026-",
+  "hits": {
+   "query": 1,
+   "getDek": 1
+  },
+  "errorLogs": [],
+  "bodyHasUid": true,
+  "logsHaveUid": false,
+  "logsHaveStack": false
+ },
+ {
+  "cond": "a",
+  "route": "GET /api/auth/mfa/status",
+  "status": 200,
+  "retryAfter": null,
+  "body": "{\"success\":true,\"data\":{\"mfaEnabled\":false,\"mfaType\":null,\"backupCodesRemaining\":0}}",
+  "hits": {
+   "query": 1,
+   "getDek": 1
+  },
+  "errorLogs": [],
+  "bodyHasUid": false,
+  "logsHaveUid": false,
+  "logsHaveStack": false
+ },
+ {
+  "cond": "a",
+  "route": "DELETE /api/auth/wallet/unlink",
+  "status": 500,
+  "retryAfter": null,
+  "body": "{\"success\":false,\"error\":{\"code\":\"WALLET_UNLINK_NOT_PERSISTED\",\"message\":\"Wallet unlink did not persist — the update matched no row\"}}",
+  "hits": {
+   "query": 3,
+   "getDek": 2
+  },
+  "errorLogs": [
+   {
+    "msg": "Error occurred",
+    "meta": "{\"error\":\"Wallet unlink did not persist — the update matched no row\",\"stack\":\"Error: Wallet unlink did not persist — the update matched no row\\n    at /private/tmp/claude-501/-Volumes-DevMASTER-WEDNESDAY/8cbf758d-cbd5-4880-9064-4f71c8077706/scratchpad/gate1013_draft_hah47ehc/wt_head/Blockchain/Dev/services/auth/src/routes/wallet.ts:545:13\\n    at processTicksAndRejections (node:internal/process/ta"
+   }
+  ],
+  "bodyHasUid": false,
+  "logsHaveUid": true,
+  "logsHaveStack": true
+ },
+ {
+  "cond": "a",
+  "route": "POST /api/auth/mfa/backup-codes/regenerate",
+  "status": 400,
+  "retryAfter": null,
+  "body": "{\"success\":false,\"error\":{\"code\":\"BAD_REQUEST\",\"message\":\"MFA is not enabled\"}}",
+  "hits": {
+   "query": 1,
+   "getDek": 1
+  },
+  "errorLogs": [
+   {
+    "msg": "Error occurred",
+    "meta": "{\"error\":\"MFA is not enabled\",\"stack\":\"Error: MFA is not enabled\\n    at /private/tmp/claude-501/-Volumes-DevMASTER-WEDNESDAY/8cbf758d-cbd5-4880-9064-4f71c8077706/scratchpad/gate1013_draft_hah47ehc/wt_head/Blockchain/Dev/services/auth/src/routes/mfa.ts:399:13\\n    at processTicksAndRejections (node:internal/process/task_queues:105:5)\",\"path\":\"/api/auth/mfa/backup-codes/regenerate\",\"method\":\"POST\"}"
+   }
+  ],
+  "bodyHasUid": false,
+  "logsHaveUid": false,
+  "logsHaveStack": true
+ },
+ {
+  "cond": "b",
+  "route": "GET /api/users/me",
+  "status": 503,
+  "retryAfter": null,
+  "body": "{\"success\":false,\"error\":{\"code\":\"SERVICE_UNAVAILABLE\",\"message\":\"Authentication service temporarily unavailable, please retry\"}}",
+  "hits": {
+   "query": 1,
+   "getDek": 1
+  },
+  "errorLogs": [
+   {
+    "msg": "DB getUserById failed",
+    "meta": "{\"error\":\"connection terminated unexpectedly\"}"
+   },
+   {
+    "msg": "Error occurred",
+    "meta": "{\"error\":\"Authentication service temporarily unavailable, please retry\",\"stack\":\"Error: Authentication service temporarily unavailable, please retry\\n    at Module.getUserById (/private/tmp/claude-501/-Volumes-DevMASTER-WEDNESDAY/8cbf758d-cbd5-4880-9064-4f71c8077706/scratchpad/gate1013_draft_hah47ehc/wt_head/Blockchain/Dev/services/auth/src/repositories/userRepo.ts:415:13)\\n    at processTicksAndR"
+   }
+  ],
+  "bodyHasUid": false,
+  "logsHaveUid": false,
+  "logsHaveStack": true
+ },
+ {
+  "cond": "b",
+  "route": "GET /api/auth/mfa/status",
+  "status": 503,
+  "retryAfter": null,
+  "body": "{\"success\":false,\"error\":{\"code\":\"SERVICE_UNAVAILABLE\",\"message\":\"Authentication service temporarily unavailable, please retry\"}}",
+  "hits": {
+   "query": 1,
+   "getDek": 1
+  },
+  "errorLogs": [
+   {
+    "msg": "DB getUserById failed",
+    "meta": "{\"error\":\"connection terminated unexpectedly\"}"
+   },
+   {
+    "msg": "Error occurred",
+    "meta": "{\"error\":\"Authentication service temporarily unavailable, please retry\",\"stack\":\"Error: Authentication service temporarily unavailable, please retry\\n    at Module.getUserById (/private/tmp/claude-501/-Volumes-DevMASTER-WEDNESDAY/8cbf758d-cbd5-4880-9064-4f71c8077706/scratchpad/gate1013_draft_hah47ehc/wt_head/Blockchain/Dev/services/auth/src/repositories/userRepo.ts:415:13)\\n    at processTicksAndR"
+   }
+  ],
+  "bodyHasUid": false,
+  "logsHaveUid": false,
+  "logsHaveStack": true
+ },
+ {
+  "cond": "b",
+  "route": "DELETE /api/auth/wallet/unlink",
+  "status": 503,
+  "retryAfter": null,
+  "body": "{\"success\":false,\"error\":{\"code\":\"SERVICE_UNAVAILABLE\",\"message\":\"Authentication service temporarily unavailable, please retry\"}}",
+  "hits": {
+   "query": 1,
+   "getDek": 1
+  },
+  "errorLogs": [
+   {
+    "msg": "DB getUserById failed",
+    "meta": "{\"error\":\"connection terminated unexpectedly\"}"
+   },
+   {
+    "msg": "Error occurred",
+    "meta": "{\"error\":\"Authentication service temporarily unavailable, please retry\",\"stack\":\"Error: Authentication service temporarily unavailable, please retry\\n    at Module.getUserById (/private/tmp/claude-501/-Volumes-DevMASTER-WEDNESDAY/8cbf758d-cbd5-4880-9064-4f71c8077706/scratchpad/gate1013_draft_hah47ehc/wt_head/Blockchain/Dev/services/auth/src/repositories/userRepo.ts:415:13)\\n    at processTicksAndR"
+   }
+  ],
+  "bodyHasUid": false,
+  "logsHaveUid": false,
+  "logsHaveStack": true
+ },
+ {
+  "cond": "b",
+  "route": "POST /api/auth/mfa/backup-codes/regenerate",
+  "status": 503,
+  "retryAfter": null,
+  "body": "{\"success\":false,\"error\":{\"code\":\"SERVICE_UNAVAILABLE\",\"message\":\"Authentication service temporarily unavailable, please retry\"}}",
+  "hits": {
+   "query": 1,
+   "getDek": 1
+  },
+  "errorLogs": [
+   {
+    "msg": "DB getUserById failed",
+    "meta": "{\"error\":\"connection terminated unexpectedly\"}"
+   },
+   {
+    "msg": "Error occurred",
+    "meta": "{\"error\":\"Authentication service temporarily unavailable, please retry\",\"stack\":\"Error: Authentication service temporarily unavailable, please retry\\n    at Module.getUserById (/private/tmp/claude-501/-Volumes-DevMASTER-WEDNESDAY/8cbf758d-cbd5-4880-9064-4f71c8077706/scratchpad/gate1013_draft_hah47ehc/wt_head/Blockchain/Dev/services/auth/src/repositories/userRepo.ts:415:13)\\n    at processTicksAndR"
+   }
+  ],
+  "bodyHasUid": false,
+  "logsHaveUid": false,
+  "logsHaveStack": true
+ },
+ {
+  "cond": "c",
+  "route": "GET /api/users/me",
+  "status": 500,
+  "retryAfter": null,
+  "body": "{\"success\":false,\"error\":{\"code\":\"INTERNAL_ERROR\",\"message\":\"An unexpected error occurred\"}}",
+  "hits": {
+   "query": 1,
+   "getDek": 0
+  },
+  "errorLogs": [
+   {
+    "msg": "DB getUserById failed",
+    "meta": "{\"error\":\"[piiCrypto] plaintext email present after PII_PLAINTEXT_CUTOFF (2026-06-01T00:00:00.000Z) — encryption migration incomplete\"}"
+   },
+   {
+    "msg": "Error occurred",
+    "meta": "{\"error\":\"[piiCrypto] plaintext email present after PII_PLAINTEXT_CUTOFF (2026-06-01T00:00:00.000Z) — encryption migration incomplete\",\"stack\":\"Error: [piiCrypto] plaintext email present after PII_PLAINTEXT_CUTOFF (2026-06-01T00:00:00.000Z) — encryption migration incomplete\\n    at decryptEmail (/private/tmp/claude-501/-Volumes-DevMASTER-WEDNESDAY/8cbf758d-cbd5-4880-9064-4f71c8077706/scratchpad/ga"
+   }
+  ],
+  "bodyHasUid": false,
+  "logsHaveUid": false,
+  "logsHaveStack": true
+ },
+ {
+  "cond": "c",
+  "route": "GET /api/auth/mfa/status",
+  "status": 500,
+  "retryAfter": null,
+  "body": "{\"success\":false,\"error\":{\"code\":\"INTERNAL_ERROR\",\"message\":\"An unexpected error occurred\"}}",
+  "hits": {
+   "query": 1,
+   "getDek": 0
+  },
+  "errorLogs": [
+   {
+    "msg": "DB getUserById failed",
+    "meta": "{\"error\":\"[piiCrypto] plaintext email present after PII_PLAINTEXT_CUTOFF (2026-06-01T00:00:00.000Z) — encryption migration incomplete\"}"
+   },
+   {
+    "msg": "Error occurred",
+    "meta": "{\"error\":\"[piiCrypto] plaintext email present after PII_PLAINTEXT_CUTOFF (2026-06-01T00:00:00.000Z) — encryption migration incomplete\",\"stack\":\"Error: [piiCrypto] plaintext email present after PII_PLAINTEXT_CUTOFF (2026-06-01T00:00:00.000Z) — encryption migration incomplete\\n    at decryptEmail (/private/tmp/claude-501/-Volumes-DevMASTER-WEDNESDAY/8cbf758d-cbd5-4880-9064-4f71c8077706/scratchpad/ga"
+   }
+  ],
+  "bodyHasUid": false,
+  "logsHaveUid": false,
+  "logsHaveStack": true
+ },
+ {
+  "cond": "c",
+  "route": "DELETE /api/auth/wallet/unlink",
+  "status": 500,
+  "retryAfter": null,
+  "body": "{\"success\":false,\"error\":{\"code\":\"INTERNAL_ERROR\",\"message\":\"An unexpected error occurred\"}}",
+  "hits": {
+   "query": 1,
+   "getDek": 0
+  },
+  "errorLogs": [
+   {
+    "msg": "DB getUserById failed",
+    "meta": "{\"error\":\"[piiCrypto] plaintext email present after PII_PLAINTEXT_CUTOFF (2026-06-01T00:00:00.000Z) — encryption migration incomplete\"}"
+   },
+   {
+    "msg": "Error occurred",
+    "meta": "{\"error\":\"[piiCrypto] plaintext email present after PII_PLAINTEXT_CUTOFF (2026-06-01T00:00:00.000Z) — encryption migration incomplete\",\"stack\":\"Error: [piiCrypto] plaintext email present after PII_PLAINTEXT_CUTOFF (2026-06-01T00:00:00.000Z) — encryption migration incomplete\\n    at decryptEmail (/private/tmp/claude-501/-Volumes-DevMASTER-WEDNESDAY/8cbf758d-cbd5-4880-9064-4f71c8077706/scratchpad/ga"
+   }
+  ],
+  "bodyHasUid": false,
+  "logsHaveUid": false,
+  "logsHaveStack": true
+ },
+ {
+  "cond": "c",
+  "route": "POST /api/auth/mfa/backup-codes/regenerate",
+  "status": 500,
+  "retryAfter": null,
+  "body": "{\"success\":false,\"error\":{\"code\":\"INTERNAL_ERROR\",\"message\":\"An unexpected error occurred\"}}",
+  "hits": {
+   "query": 1,
+   "getDek": 0
+  },
+  "errorLogs": [
+   {
+    "msg": "DB getUserById failed",
+    "meta": "{\"error\":\"[piiCrypto] plaintext email present after PII_PLAINTEXT_CUTOFF (2026-06-01T00:00:00.000Z) — encryption migration incomplete\"}"
+   },
+   {
+    "msg": "Error occurred",
+    "meta": "{\"error\":\"[piiCrypto] plaintext email present after PII_PLAINTEXT_CUTOFF (2026-06-01T00:00:00.000Z) — encryption migration incomplete\",\"stack\":\"Error: [piiCrypto] plaintext email present after PII_PLAINTEXT_CUTOFF (2026-06-01T00:00:00.000Z) — encryption migration incomplete\\n    at decryptEmail (/private/tmp/claude-501/-Volumes-DevMASTER-WEDNESDAY/8cbf758d-cbd5-4880-9064-4f71c8077706/scratchpad/ga"
+   }
+  ],
+  "bodyHasUid": false,
+  "logsHaveUid": false,
+  "logsHaveStack": true
+ },
+ {
+  "cond": "d",
+  "route": "GET /api/users/me",
+  "status": 404,
+  "retryAfter": null,
+  "body": "{\"success\":false,\"error\":{\"code\":\"NOT_FOUND\",\"message\":\"User not found\"}}",
+  "hits": {
+   "query": 1,
+   "getDek": 0
+  },
+  "errorLogs": [
+   {
+    "msg": "Error occurred",
+    "meta": "{\"error\":\"User not found\",\"stack\":\"Error: User not found\\n    at meHandler (/private/tmp/claude-501/-Volumes-DevMASTER-WEDNESDAY/8cbf758d-cbd5-4880-9064-4f71c8077706/scratchpad/gate1013_draft_hah47ehc/wt_head/Blockchain/Dev/services/auth/src/routes/users.ts:853:22)\\n    at processTicksAndRejections (node:internal/process/task_queues:105:5)\",\"path\":\"/api/users/me\",\"method\":\"GET\"}"
+   }
+  ],
+  "bodyHasUid": false,
+  "logsHaveUid": false,
+  "logsHaveStack": true
+ },
+ {
+  "cond": "d",
+  "route": "GET /api/auth/mfa/status",
+  "status": 200,
+  "retryAfter": null,
+  "body": "{\"success\":true,\"data\":{\"mfaEnabled\":false,\"mfaType\":null,\"backupCodesRemaining\":0}}",
+  "hits": {
+   "query": 1,
+   "getDek": 0
+  },
+  "errorLogs": [],
+  "bodyHasUid": false,
+  "logsHaveUid": false,
+  "logsHaveStack": false
+ },
+ {
+  "cond": "d",
+  "route": "DELETE /api/auth/wallet/unlink",
+  "status": 400,
+  "retryAfter": null,
+  "body": "{\"success\":false,\"error\":{\"code\":\"BAD_REQUEST\",\"message\":\"No wallet linked to this account\"}}",
+  "hits": {
+   "query": 1,
+   "getDek": 0
+  },
+  "errorLogs": [
+   {
+    "msg": "Error occurred",
+    "meta": "{\"error\":\"No wallet linked to this account\",\"stack\":\"Error: No wallet linked to this account\\n    at /private/tmp/claude-501/-Volumes-DevMASTER-WEDNESDAY/8cbf758d-cbd5-4880-9064-4f71c8077706/scratchpad/gate1013_draft_hah47ehc/wt_head/Blockchain/Dev/services/auth/src/routes/wallet.ts:525:13\\n    at processTicksAndRejections (node:internal/process/task_queues:105:5)\",\"path\":\"/api/auth/wallet/unlink\""
+   }
+  ],
+  "bodyHasUid": false,
+  "logsHaveUid": false,
+  "logsHaveStack": true
+ },
+ {
+  "cond": "d",
+  "route": "POST /api/auth/mfa/backup-codes/regenerate",
+  "status": 400,
+  "retryAfter": null,
+  "body": "{\"success\":false,\"error\":{\"code\":\"BAD_REQUEST\",\"message\":\"MFA is not enabled\"}}",
+  "hits": {
+   "query": 1,
+   "getDek": 0
+  },
+  "errorLogs": [
+   {
+    "msg": "Error occurred",
+    "meta": "{\"error\":\"MFA is not enabled\",\"stack\":\"Error: MFA is not enabled\\n    at /private/tmp/claude-501/-Volumes-DevMASTER-WEDNESDAY/8cbf758d-cbd5-4880-9064-4f71c8077706/scratchpad/gate1013_draft_hah47ehc/wt_head/Blockchain/Dev/services/auth/src/routes/mfa.ts:399:13\\n    at processTicksAndRejections (node:internal/process/task_queues:105:5)\",\"path\":\"/api/auth/mfa/backup-codes/regenerate\",\"method\":\"POST\"}"
+   }
+  ],
+  "bodyHasUid": false,
+  "logsHaveUid": false,
+  "logsHaveStack": true
+ },
+ {
+  "cond": "e",
+  "route": "GET /api/users/me",
+  "status": 503,
+  "retryAfter": null,
+  "body": "{\"success\":false,\"error\":{\"code\":\"SERVICE_UNAVAILABLE\",\"message\":\"Authentication service temporarily unavailable, please retry\"}}",
+  "hits": {
+   "query": 1,
+   "getDek": 0
+  },
+  "errorLogs": [
+   {
+    "msg": "DB getUserById failed",
+    "meta": "{\"error\":\"connection terminated unexpectedly\"}"
+   },
+   {
+    "msg": "Error occurred",
+    "meta": "{\"error\":\"Authentication service temporarily unavailable, please retry\",\"stack\":\"Error: Authentication service temporarily unavailable, please retry\\n    at Module.getUserById (/private/tmp/claude-501/-Volumes-DevMASTER-WEDNESDAY/8cbf758d-cbd5-4880-9064-4f71c8077706/scratchpad/gate1013_draft_hah47ehc/wt_head/Blockchain/Dev/services/auth/src/repositories/userRepo.ts:415:13)\\n    at processTicksAndR"
+   }
+  ],
+  "bodyHasUid": false,
+  "logsHaveUid": false,
+  "logsHaveStack": true
+ },
+ {
+  "cond": "e",
+  "route": "GET /api/auth/mfa/status",
+  "status": 503,
+  "retryAfter": null,
+  "body": "{\"success\":false,\"error\":{\"code\":\"SERVICE_UNAVAILABLE\",\"message\":\"Authentication service temporarily unavailable, please retry\"}}",
+  "hits": {
+   "query": 1,
+   "getDek": 0
+  },
+  "errorLogs": [
+   {
+    "msg": "DB getUserById failed",
+    "meta": "{\"error\":\"connection terminated unexpectedly\"}"
+   },
+   {
+    "msg": "Error occurred",
+    "meta": "{\"error\":\"Authentication service temporarily unavailable, please retry\",\"stack\":\"Error: Authentication service temporarily unavailable, please retry\\n    at Module.getUserById (/private/tmp/claude-501/-Volumes-DevMASTER-WEDNESDAY/8cbf758d-cbd5-4880-9064-4f71c8077706/scratchpad/gate1013_draft_hah47ehc/wt_head/Blockchain/Dev/services/auth/src/repositories/userRepo.ts:415:13)\\n    at processTicksAndR"
+   }
+  ],
+  "bodyHasUid": false,
+  "logsHaveUid": false,
+  "logsHaveStack": true
+ },
+ {
+  "cond": "e",
+  "route": "DELETE /api/auth/wallet/unlink",
+  "status": 503,
+  "retryAfter": null,
+  "body": "{\"success\":false,\"error\":{\"code\":\"SERVICE_UNAVAILABLE\",\"message\":\"Authentication service temporarily unavailable, please retry\"}}",
+  "hits": {
+   "query": 1,
+   "getDek": 0
+  },
+  "errorLogs": [
+   {
+    "msg": "DB getUserById failed",
+    "meta": "{\"error\":\"connection terminated unexpectedly\"}"
+   },
+   {
+    "msg": "Error occurred",
+    "meta": "{\"error\":\"Authentication service temporarily unavailable, please retry\",\"stack\":\"Error: Authentication service temporarily unavailable, please retry\\n    at Module.getUserById (/private/tmp/claude-501/-Volumes-DevMASTER-WEDNESDAY/8cbf758d-cbd5-4880-9064-4f71c8077706/scratchpad/gate1013_draft_hah47ehc/wt_head/Blockchain/Dev/services/auth/src/repositories/userRepo.ts:415:13)\\n    at processTicksAndR"
+   }
+  ],
+  "bodyHasUid": false,
+  "logsHaveUid": false,
+  "logsHaveStack": true
+ },
+ {
+  "cond": "e",
+  "route": "POST /api/auth/mfa/backup-codes/regenerate",
+  "status": 503,
+  "retryAfter": null,
+  "body": "{\"success\":false,\"error\":{\"code\":\"SERVICE_UNAVAILABLE\",\"message\":\"Authentication service temporarily unavailable, please retry\"}}",
+  "hits": {
+   "query": 1,
+   "getDek": 0
+  },
+  "errorLogs": [
+   {
+    "msg": "DB getUserById failed",
+    "meta": "{\"error\":\"connection terminated unexpectedly\"}"
+   },
+   {
+    "msg": "Error occurred",
+    "meta": "{\"error\":\"Authentication service temporarily unavailable, please retry\",\"stack\":\"Error: Authentication service temporarily unavailable, please retry\\n    at Module.getUserById (/private/tmp/claude-501/-Volumes-DevMASTER-WEDNESDAY/8cbf758d-cbd5-4880-9064-4f71c8077706/scratchpad/gate1013_draft_hah47ehc/wt_head/Blockchain/Dev/services/auth/src/repositories/userRepo.ts:415:13)\\n    at processTicksAndR"
+   }
+  ],
+  "bodyHasUid": false,
+  "logsHaveUid": false,
+  "logsHaveStack": true
+ },
+ {
+  "cond": "b-direct",
+  "route": "getUserByIdWithPasswordHash",
+  "outcome": "Error - connection terminated unexpectedly",
+  "errorLogs": []
+ },
+ {
+  "cond": "b-direct",
+  "route": "getUserByIdPreAuth",
+  "outcome": "Error - connection terminated unexpectedly",
+  "errorLogs": []
+ },
+ {
+  "cond": "b-direct",
+  "route": "getUserById",
+  "outcome": "AppError 503 Authentication service temporarily unavailable, please retry",
+  "errorLogs": [
+   "DB getUserById failed"
+  ]
+ }
+]
