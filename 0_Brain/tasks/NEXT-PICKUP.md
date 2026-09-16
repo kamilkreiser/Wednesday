@@ -1,138 +1,41 @@
 ---
 date: 2026-09-16
 type: pickup
-scope: SECUURA + all general/generic work. Datasec is TUESDAY's — but Kam STOPPED her seat 2026-09-14 and on 2026-09-16 commissioned Wednesday to FIX her structure ("do everything possible to make Tuesday work properly", 15:06). He added 14:02 "Feel free to read the Datasec content." So Datasec content is readable for THAT task; Datasec client WORK is still not Wednesday's.
-source: replaced WHOLESALE at 15:08 by the 13:2x seat before rotating at the band. Previous copy: .pre-1508-wholesale.
+scope: SECUURA + all general/generic work. Datasec is TUESDAY's (live again on the Mac mini since 19:43). Kam 14:02 "Feel free to read the Datasec content" was for fixing her STRUCTURE; Datasec client WORK is still not Wednesday's.
+source: replaced WHOLESALE at 20:2x by the 20:0x seat (Studio relaunch after the 19:47 wrong-tree boot). Previous copy: NEXT-PICKUP.md.pre-2024-wholesale.
 status: live
 supersede: replace wholesale at the next pickup; do not append
 ---
 
-# NEXT PICKUP — ⚡ **Kam's standing words today:** 13:32 the allowance ran out ~12:00; he is on a **DATASEC sign-in**, *"minimal or limited Secuura work on this account… until Sunday when we'll switch over to my account"* · 13:35 *"analyzing what's working properly and address anything and fix anything… continue working with the local LLM on backlog and to-do tickets"* · 14:23 *"go ahead and, if there's anything else that you can do to improve things for both yourself and Tuesday, do that too"* · 15:06 *"do everything possible to make Tuesday work properly. If you need anything for this, put it on a fleet activity tile for me."* · 09:53 *"If something's blocking, move on to the next"* · **he leaves MONDAY NIGHT 2026-09-21.** First person on the panel. **A seat may END ITS TURN only with the model RUNNING or a batch QUEUED.**
+# NEXT PICKUP — ⚡ **Kam's standing words:** 19:34 *"keep working through the night on the backlog and todos using the local agent"* · 20:07 *"let me know if the mail comes in. when it does, work with Tuesday and get the structure working"* · 13:32/13:35 limited Secuura work on this (Datasec) account until SUNDAY, local LLM on backlog · 09:53 *"If something's blocking, move on to the next"* · 07:45/07:57 (email) local model PERMANENT; failed ticket = original + ONE rebrief, then a Claude agent · **he leaves MONDAY NIGHT 2026-09-21.** First person on the panel. **A seat may END ITS TURN only with the model RUNNING or a batch QUEUED.**
 
 ## 🔴 FIRST ACTS
-1. `kam_rulings_today.sh` — every line — then `reconcile_rulings.py`, before any card or brief.
-2. **Read the model's state before anything else.** `night/queue.md` pending count · the ornith-loop
-   launchd job · `uptime` load against the gate of 14. If the queue is empty AND the load is under the
-   gate, the first work of the session is a brief.
-3. ⚠ **KS-998 is NOT queued any more — it was REALLOCATED to Claude under Kam's counter** (2 rounds).
-   Do not re-queue it at the local model. Same for KS-1168 and KS-1163. They are batch work for a
-   Secuura seat or the Sunday pass; their specs are complete and their `done.md` rows say so.
-4. **The KK_DEV_Local sync leg is CHAINED** behind the T9 leg by `fleet/chain_ssd_leg.sh` (log
-   `/private/tmp/chain_ssd_leg.out`). It is ADDITIVE BY CONSTRUCTION — `-nodeletion` on both roots,
-   because `ssd-ssd.prf` ships `confirmbigdel = false` — and it REFUSES to chain if the T9 leg reported
-   any deletion. Do not re-run it by hand without reading that log first.
-5. Feed Ornith. If nothing is briefable, commission one (see COMMISSIONING).
+1. `kam_rulings_today.sh` (read the `view=` of each; `kam_msgs.sh` shows it) → `reconcile_rulings.py`. Taps in `view=tuesday` on `Datasec/Tuesday` cards are HERS: route verbatim by mail (`send_brief.sh --to "Tuesday" --kind answer`), never rule them — the reconciler SKIPs them by scope, correctly.
+2. **Ornith state:** `night/queue.md` pending lines · `night/log/.night_run.lock` · `tail night/log/night_$(date +%F).log`. The loop (`com.wednesday.ornith-loop`, every 15 min, last-exit 4 = queue empty) takes queue lines by itself — append a line, do not launch by hand into its settle.
+3. **The 20:07 commission's report:** `…/scratchpad/commission_2007_report.md` of the 20:0x session is SESSION-LOCAL. If this seat is a successor, the durable results are the brief FILES it wrote: `night/briefs/KS-789.md` (JOB 1: premise corrected from measurement — CHECK its `## Premises (measured)` section before queuing) and any NEW `night/briefs/KS-*.md` newer than 20:17 (JOB 3 search). Every brief from it: read its premises against the tip + live system BEFORE queuing (tonight's rule, below).
+4. **Tuesday loop (Kam 20:07):** read `wednesday-agent@` for `[Tuesday -> Wednesday]`. OPEN with her: (a) the DAILY-NOTE SPLIT proposal (both seats write `0_Brain/daily/<date>.md`; Wednesday proposed: Wednesday makes `note_entry.sh` seat-aware; Tuesday owns launcher step 5; readers of `0_Brain/daily/` censused FIRST) — **nothing started until she answers**; (b) FDA re-measure on the mini (Kam's 20:22 "done, please check"); (c) her next-boot preflight verbatim, owed when she rotates.
 
-## ✅ WHAT LANDED THIS SEAT (15:1x → 18:0x)
-- 🔴 **KAM'S NEW STANDING RULE, and it is a COUNTER — learn it before you brief anything.**
-  Email 07:45Z: the local model is PERMANENT, Wednesday routes, and *"If local fails, the task is
-  allocated to a Claude agent. Not urgently but when it makes sense."* Then 07:57Z, when asked:
-  *"Rebriefing once is ok and might generate positive results. Doing it more would be a waste with
-  diminishing results."* → **original brief + ONE rebrief, then Claude. No third round, whatever the
-  diagnosis says.** Filed `learnings/2026-09-16_local-model-is-long-term-and-claude-takes-what-it-cannot-do.md`.
-  🔑 He replaced Wednesday's judgement call (brief-defect vs model-limit) with a counter —
-  **where a countable rule and a judgement rule agree, prefer the countable one.**
-- **REALLOCATED to Claude under that counter (recorded on their `done.md` rows, spec carries over —
-  batch them, do not open a seat per ticket):** **KS-1168** (Kam-ruled; round 3 the model emitted a
-  literal `\n` inside a CONTEXT line and corrupted the patch) · **KS-1163** (4 rounds, all pre-rule;
-  needs one change across a script AND two suites, which `bash_patch` cannot express) · **KS-998**
-  (Kam-ruled; 2 rounds = the counter's limit).
-- **KS-692 HELD 7/7** — the 15:13 FAIL was the brief, not the model. Re-checked the SAME output, no
-  second round spent. READY written after a source read; Kam's ruling is quoted IN the source comment.
-- **THREE GATES BUILT, all red-proofed with OVER-FIRE CONTROLS:** `build_input.sh` UNDECLARED-RED GATE
-  (arms 6/6) · CONTEXT-AS-ADDITION on **both** builders (`tests/context_as_addition_gate_arms.sh` 5/5
-  bash, `..._vitest_arms.sh` 6/6) — **it was bash-only at first, and that hole cost KS-1168 two rounds;
-  one arm now asserts the gate exists on BOTH.**
-- 🔴 **AN ARM'S RED FIXTURE MUST BE SOMETHING NOBODY IS TRYING TO FIX.** ARM 1 pointed at the live
-  KS-1168 brief; the repair landed, the brief stopped being defective, and the arm went red — which looks
-  exactly like the gate breaking. Fixture FROZEN at `tests/fixtures/briefs/KS-1168.md` (reached via
-  `NIGHT_BRIEFS_DIR`); ARM 0 now proves the fixture IS defective before ARM 1 claims anything, and ARM 3
-  is a DISCRIMINATING PAIR (frozen vs live repaired, opposite verdicts).
-- **Kam's dashboard change is BUILT and he RATIFIED THE SCOPE** (07:41Z "the scope looks good"): the right
-  panel is split, `#needscroll` pinned `flex:none` max-height 46%, so what needs him cannot scroll away.
-  ⚠ **NOT visually verified — the Chrome extension is not connected.** Anything beyond that shape (a third
-  column, removing ruled rows) is NOT covered by his ratification.
-- **Spotlight, not unison, pins the machine** (~270% CPU vs unison's one core). His 09-14 exclusion covered
-  `!CODING`; the drives a SYNC WRITES were never in scope. Carded, default HOLD.
+## ✅ THIS SEAT (20:0x → 20:2x)
+- **Ornith:** KS-1033 item 1 PASS 7/7 first sample → HELD (`READY_KS-1033-item1_…`; the guard's fallback base `origin/main` → `origin/develop`; ticket stays OPEN — items 2/3 are not this diff). **KS-866 PASS 8/8 first sample → NOT HELD**: its prose documents `git merge --no-ff` + `push origin HEAD:develop`, which contradicts CONTRIBUTING.md:107 ("Feature PRs into develop stay squash") and :481 ("Never push straight to develop"); develop's last 30 commits show our merges as 1-parent squashes → REALLOCATED to a Claude seat (Sunday), reason on its `done.md` row. **KS-789 PULLED before it ran** (brief said "There is no CI" — Actions API: 23 workflows active, PR/develop runs through 09-15 concluding failure). **KS-910 (Kam ruled a) QUEUED 20:2x** (the leg-12 comment in `pre_push_hook_base.test.sh:49`; premise re-read: `preflight.sh:544` leg 14 runs `run-shell-suites.sh` at `:631`).
+- 🔑 **RULE FROM TONIGHT (ledger w=2 in one evening): a brief's PROSE PREMISES are claims about the live repo/process and get an instrument before queuing.** The builders gate `-` lines at the tip; nothing gates "no CI", "in force on both seats", "leg 14 runs it". Read the premise against the file's own standing lines and the live system (GitHub API with Secuura's `GH_TOKEN`, read-only).
+- ⚠ **"CI runs the suites" in Kam's 09:53 KS-910 tap is WEDNESDAY'S card option text, not his observation** — a tap on my wording is not independent evidence (rung 9). preflight.sh:544-552 says the Actions shell-suite steps are dormant; the Actions API says workflows still RUN on PRs (failing). Whether any run executes the shell suites is UNMEASURED — the commission was told to measure it (jobs/steps API) or refuse KS-789.
+- **Tuesday (Kam 14:00/15:06/20:07):** her STATUS 20:08 + ANSWER 20:18 (spf/dkim/dmarc pass). DONE and verified by Wednesday: both boot bugs `56f0a020d` + F1/F2 `316ed56e5` (drain guarded by `[ -t 0 ]`; 5-min boot BOUND posts one panel line, never injects); nine plist templates' hardcoded `/Users/kam_code` logs → a HOME placeholder `8ff4620c5` (Studio `install_all_jobs.sh --check` 9/9 matching); 83 exec bits fixed in the INDEX. **Wednesday DONE:** doctor 126 (TCC/FDA) vs 78 (EX_CONFIG) split in both places, arms `2_Project_Files/fleet/tests/doctor_exithint_arms.sh` 13/13 (two negatives on `doctor.sh.pre-0916-exithint`). **The Studio's fleet-monitor was re-armed on her fixed `monitor.sh`** (it had run pre-fix code since 19:59): `bash -n` → `--once` → `tmux respawn-pane -k -t <fleet-monitor pane> "\"…/monitor.sh\" --interval 60 --stall-min 10; echo; echo '[cockpit] fleet-monitor exited — pane stays for inspection'; exec bash"` — the string goes to the pane's shell DIRECTLY; wrapping it in another `zsh -c` drops the args.
+- **Kam's 09-11 FDA grant for the mini: MEASURED NOT APPLIED by Tuesday 20:0x** (chat_sync exit 126 EPERM from launchd). Kam 20:22 on the one-launch card: "done, please check" → Tuesday re-measures. Wednesday's card `tuesday-mac-mini-scheduler-full-disk-access` stays UNDELIVERED until her number says 0.
+- **Kam 18:51 "what's the available space"** answered 20:04: internal 615 Gi available, DevMASTER 927 Gi (df). The 128 GB duplicate ollama store at `2_Project_Files/local-model/models` is still there — his to say if "please reclaim" meant it (he ran the Time Machine snapshot deletion himself at 18:52); Wednesday cannot `rm` it (hook) and hands him the command only on his word.
 
-## 🔭 TUESDAY — ONE LAUNCH BY KAM, AND A SECOND THING ON THAT MACHINE MAY ALSO BE OPEN
-**CARDED at 15:5x: `tuesday-one-launch-on-the-mini`** (action-first, default HOLD). Her tree is CLEAN,
-HEAD `08353b963` vs live remote `77675569d`, and her cached `origin/main` equals her HEAD — a FALSE
-ZERO, so she cannot see the gap; a clean tree means the new boot pull runs and closes it, applying all
-four repairs in one launch.
-⚠ **TWO CORRECTIONS TO THE PREVIOUS PICKUP, both measured this seat:**
-1. **The "fleet activity" tile EXISTS** — `dashboard/cockpit.html:264-268`, heading `Fleet activity`.
-   The previous pickup said it could not be found; that was a FALSE ABSENCE from its own search, and it
-   left Kam's 15:06 instruction unexecuted for two hours. **But it is not a noticeboard:** it renders
-   AGENT MAIL SUBJECTS (`cockpit.html:820`, `[A -> B] rest`), so nothing can be "put on" it except
-   agent-to-agent mail. ⚠ **CORRECTED 19:4x — the rest of this bullet was WRONG when written.**
-   `send_brief.sh` refused `Datasec/Tuesday` because that is **not a key**; the route existed all along
-   (`Tuesday|tuesday-agent@agentmail.to|yes` in `fleet/inbox_routing.conf`, inbox live). **Wednesday
-   reported its own wrong lookup to Kam as a fact about the system.** At 19:41 he asked for exactly that
-   mail; `--to "Tuesday"` sent first try, verified at the destination with a non-empty body. His 09-14
-   "do not message Tuesday" is read as WITHDRAWN for first-run coordination only, narrowly, until wider.
-2. **Kam RULED `grant` on `tuesday-mac-mini-scheduler-full-disk-access` (2026-09-11 15:25) and the card
-   carries NO delivery mark.** That is a fact about our paperwork, NOT about his machine. **UNKNOWN from
-   this seat, and the instrument that closes it is on the MINI** (`launchctl list`; `~/Library/Logs/
-   tuesday_*.err` showing exit 126). If it was never granted, the launch fixes her CODE and her
-   scheduled rituals still will not fire. Do not assert either way.
+## ⚠ TRAPS (new tonight — read before touching git)
+- **Push Wednesday's repo ONLY with `2_Project_Files/tools/safe_push.sh "<msg>" <paths>`.** Tonight two hand-rolled `pull --rebase --autostash` runs displaced three panel entries from the chat stream files (recovered by `python3 2_Project_Files/tools/chat_streams.py --harvest`, then verify it prints the entry total with no orphans). `rebase --continue` refuses on ANY unstaged tracked change and the dashboard writers change `0_Brain/dashboard/data/*` every minute — its message ("You must edit all merge conflicts") misleads. Never `rebase --quit` with an autostash present.
+- **panel_sync SKIPs its rebase while ANY path outside `dashboard/data` is dirty — untracked Ornith inputs and `.pre-*` backups included.** Commit artefacts as you make them or your commits never reach origin (the rotation will then refuse).
+- **Tuesday's seat writes into `0_Brain/daily/<today>.md` too** (same repo). A rebase conflict there is two appends: keep both, hers first. Never drop either.
+- **`/bin/bash` is 3.2: `read -t` takes INTEGERS only** (0.1 is "invalid timeout specification", rc 1). **`send_brief.sh` refuses any `@WORD@` in a body** as an unfilled placeholder — reword literal mentions.
+- The older traps still hold: `git -C $VAR <write verb>` refused (literal paths) · `rm` outside the scratchpad refused · never edit `night/*.sh` or a checker while a runner is live (`.new` + `mv`) · **never edit a running bash script in place** (Tuesday's 20:18 lesson: bash reads by byte offset) · macOS has no `timeout`/`setsid` · `chat_reply.sh` refuses a repeated sentence (`CHAT_DRY=1` to test) · the prior-ruling gate: never `--override-prior-rulings` on the first run.
 
-## 📋 COMMISSIONING — the shape that works, and it is the week's answer
-**Brief-writing is no longer human-shaped.** A subagent given the rules VERBATIM wrote KS-1081 (7/7 first sample) where a coordinator-written brief took four rounds. **The KS-692 prompt is the template — keep its rules list intact, each line is a paid-for round.** Three of five commissions came back as measured REFUSALS (KS-953, KS-683, KS-692-first-pass) and every one was right and produced a card. **A refusal is a complete answer; say so in the prompt.**
-**BRIEF RULES** — 🔴 **a vitest brief DECLARES its reds**: either 🔴 in every red cell's `it(` title, or a `## Red cells` section with one `- ` line per title. A4 recognises no third way, and with both empty it reads every genuine assertion-red as a CONTROL red and refuses a CORRECT output (KS-692, 15:13 today — cost one round). `build_input.sh` now REFUSES that shape (`ALLOW_UNDECLARED_REDS=1` overrides; arms `local-model/tests/undeclared_red_gate_arms.sh` 6/6 incl. an over-fire control) · no CONTEXT lines inside the `## The exact change` fence · every `-` line byte-for-byte and UNIQUE at the tip · no backslash continuations · no `\$`/`\u` in a `+` line · one hunk per function when a line repeats · 🔴 **NEVER disambiguate two identical blocks by removing and RE-ADDING unchanged lines as an anchor** — a `+` line is a claim that the line is not at the tip, the model rightly emits the honest minimal hunk, and A3c then refuses a correct output (KS-1168 ×2 today, 15/46 then 18/46 absent; KS-1089 this morning is the same collision, w=2). Use unprefixed CONTEXT lines, or split on genuinely unique nearby text, or take one site per round · cells are LITERAL code with pass/fail counters, declarations first · every 🔴 red at the tip BY ASSERTION · one 🟢 control · 🔴 **test body under ~110 lines** (above it the model emits a placeholder comment and the one-line file asserts nothing and exits 0) · 🔴 **carry the completeness arm** (cells-run == `EXPECTED_CELLS`, proven to fire).
+## 📋 COMMISSIONING — the shape that works
+One subagent, the BRIEF RULES verbatim (below), "commission the SEARCH, not the ticket", "a measured REFUSAL is a complete answer", **and now: a `## Premises (measured)` section in every brief.** Report to a FILE; the agent never queues. Exemplars: bash `night/briefs/KS-1047.md` (comment fix 7/7), `KS-1081.md`; tamper vitest `KS-960.md`; docs `KS-866.md` (shape good, premise stale).
+**BRIEF RULES** — a vitest brief DECLARES its reds (🔴 in each red `it(` title, or `## Red cells`) · no CONTEXT lines inside `## The exact change` fence · every `-` line byte-for-byte and UNIQUE at the tip · no backslash continuations · no `\$`/`\u` in a `+` line · one hunk per function when a line repeats · NEVER re-add unchanged lines as an anchor · `+` lines only lines absent at the tip · cells LITERAL, declarations first, nothing a cell reads in prose · every 🔴 red BY ASSERTION at the tip + one 🟢 control · test body under ~110 lines + the completeness arm · insert-after: name the anchor line's text, mark "(correct) … stays" · mid-statement tamper needs `statement_ok:` · **every premise measured.**
 
-## 🔴 THE SYNC AS I LEAVE IT — read this before touching it
-- Running in tmux `syncleg`, log `/private/tmp/sync_t9d.out`. **Third attempt.** #1 died instantly (`nohup`, no PTY). #2 ran 28 min walking `qa-worktrees` before Kam ruled them excluded. #3 is this one, with `ignore = Name qa-worktrees*` in force — **verified: 0 worktree paths scanned, against a control showing the scan IS producing paths.**
-- ⚠ **CORRECTED 15:2x — THE SYNC IS ALIVE AND WORKING. Do NOT kill it.** The previous line read `S+` at
-  0.0% CPU from a SNAPSHOT and concluded it was stalled. A DELTA settles it and a snapshot cannot: two
-  `ps -o time=` reads 10 s apart showed 11.9 s of CPU burned, i.e. ~99% of one core, and it has since
-  passed 43 minutes of CPU. **The log is quiet because unison buffers during reconciliation, not because
-  it is stuck.** Still 0 `Deleting` and 0 real conflicts (`<-?->`, never the English word — that matches
-  old conflict-copy FILENAMES).
-- **The real load source is NOT unison.** `ps -Ao pcpu,pid,comm -r` at 15:37: Spotlight at ~270% combined
-  (mds_stores 132, spotlightknowledged 53, mds 47, knowledgeconstructiond 22, mdworker_shared 19) against
-  unison's 99% of one core. That is what holds the 1-min load over the model's gate of 14. Carded:
-  `wed-spotlight-indexes-the-sync-target-drives`.
-- ⚠ **Do NOT conclude the drives are dead.** I checked with `timeout 10 ls` and got "NOT responding" for BOTH — **macOS has no `timeout`**, so the COMMAND failed, not the drives. Re-checked without it: both respond, T9 800 GiB free, DevMASTER 1.0 TiB free. That trap is already in this file's list and I walked into it anyway.
-- **The KK_DEV_Local leg (Kam 15:05) is CHAINED, not owed** — `fleet/chain_ssd_leg.sh` waits on the T9
-  pid, reads that leg's log for deletions/conflicts, and **REFUSES to chain if the T9 leg deleted
-  anything** (that is Kam's call, not a seat's). It runs `unison ssd-ssd` with `-nodeletion` on BOTH
-  roots — **because `~/.unison/ssd-ssd.prf` ships `confirmbigdel = false`**, unlike `devnas.prf` which has
-  it true — and with `-ignore 'Name qa-worktrees*'`, Kam's own 15:00 ruling applied to the second leg.
-  The profile itself is NOT edited; both guards are command-line only. Log: `/private/tmp/chain_ssd_leg.out`.
-
-## ⏳ BLOCKED / OPEN
-- ⚠ **CORRECTED 15:3x — "every `systemTest/` ticket is blocked" was a TIER VERDICT and it is WRONG.**
-  The stale object store is real, but it only blocks a ticket whose FILES actually moved. Measured via
-  the GitHub compare API (`48e65c435...0b25f823f`, repo `Secuura/Distributed_Secuura`): 36 files, and
-  **neither of KS-998's two is among them** — so its `-` lines are byte-identical at the real tip and it
-  was never blocked. **Run that compare per ticket before inheriting this.** (Also corrected: the G6
-  override note says the 36 are "all-under-systemTest/"; one is not — `Projects Documents/…html`. Its
-  operative claim, nothing under `Blockchain/Dev`, still holds.)
-- **KS-910 and the other `systemTest/` tickets: UNMEASURED, not blocked.** Run the same compare.
-- **KS-1163** needs one change across a script and TWO suites; `bash_patch` expresses product + ONE test. Not started.
-- **The POOL is the week's real risk**, not the machinery. Three of four commissions this afternoon came
-  back as CORRECT refusals (KS-1173 already a passing READY · KS-1125 already fixed at the tip with no
-  copyable `pg`-mock shape · plus KS-953/KS-683 earlier). Every refusal was right and each saved a round.
-- 🟢 **BUT THE POOL IS WIDER THAN THE QUEUE HEADER CLAIMS.** That header says coverage-only tickets
-  "cannot pass RED-FIRST" — **true when written, false now.** `build_input.sh` grew a `## Tamper` block on
-  2026-09-15 (test-only mode: A3 test file only, A4 red UNDER THE TAMPER, A5 green at the tip) and **19
-  held READYs already use it.** The header is corrected in place. Coverage-only tickets — which the
-  backlog is dominated by — ARE briefable on the vitest tier. Exemplars: `night/briefs/KS-1120.md`,
-  `KS-1123.md`, `KS-1118.md`. **This is the widening Kam asked for on 09-15 18:19, and it was already
-  built; nobody had pointed the candidate list at it.**
-- ⚠ **Trap on `api-gateway/src/startup-migrations.ts`, measured 2026-09-16 so nobody re-derives it:**
-  `migrateDatabase` is NOT exported, and `runStartupMigrations` uses a bare CJS `require('pg')` which
-  `vi.mock('pg', …)` does NOT intercept (that works elsewhere only because `src/db.ts` uses a static ESM
-  import). No suite currently mocks that path. Pick a target reachable from an exported symbol.
-
-## ⚠ TRAPS
-- **`git -C $VAR <write verb>` is REFUSED by the hook** — use the LITERAL path. Sixth consecutive seat.
-- **`rm` outside the scratchpad is REFUSED**, including via a variable. Quarantine by `mv` — and that applies to code you WRITE.
-- **Never edit `night/*.sh` or a `checker.sh` while a runner is live** — check the lock, write `<file>.new` and `mv`. The Edit tool rewrites in place and is the wrong tool for a live script.
-- **`devnas-sync.sh` needs a PTY** (`script -q /dev/null`): launched with `nohup` it dies in under a second and does nothing. Run it from a tmux session.
-- **Its log is CARRIAGE-RETURN separated** — 148 KB in six "lines". `tr '\r' '\n'` FIRST, and grep unison's own marker `<-?->` for conflicts, never the English word (the word matches the FILENAMES of old conflict copies).
-- **`ignore = Name foo` is an EXACT match** — the QA worktrees are `qa-worktrees-<seat>-<sha>`, so it needed `qa-worktrees*`. My check for it was wrong the same way.
-- **`chat_reply.sh` now REFUSES a repeated sentence** (rc 3). `CHAT_ALLOW_REPEAT=1` overrides. **Use `CHAT_DRY=1` to test anything** — arming it sent three junk messages to Kam's panel.
-- **`pgrep -fl` on a `bash -c` body prints the whole script.** `ls -1` hides dotfiles. Both produced false readings today.
-- **The prior-ruling gate caught me FOUR times today** — Blockfrost, the ownership model, and twice more. **Never `--override-prior-rulings` on the first run.** Read the refusal, open what it names, and put the measurement in the BLUF.
+## ⏳ OPEN / BLOCKED
+- **Reallocated to Claude (Sunday batch, do NOT re-queue at the local model):** KS-1168, KS-1163, KS-998 (counter), **KS-866** (stale merge-shape premise).
+- **Pool:** `night/candidates.md` T1 is exhausted (rejection table in its comment block); T2b mostly held/reallocated/Kam-class; the widening is T5 splittable + tamper-graded coverage tickets. The 20:07 commission's JOB 3 rejection table goes INTO `candidates.md` when it lands.
+- **Tuesday's 20:10 retro raised the digest size** (465 KB by-tier; "past 50% before it does anything" on her seat) — a CONSOLIDATION item for Kam. Wednesday's data point: whole digest + whole ledger = ctx 31% on the Studio.
+- **Sync:** the KK_DEV_Local chained leg and the unison scans were stopped at 18:5x when Kam's four copies replaced them (verified at the destinations 19:40). Nothing sync-related is running or owed.
