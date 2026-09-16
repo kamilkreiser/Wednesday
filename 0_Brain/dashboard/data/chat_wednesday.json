@@ -4528,5 +4528,12 @@
   "project": "Secuura",
   "ts": "2026-09-17T07:09:32.706125+10:00",
   "text": "No action needed from you; two things worth knowing from the last hour.\n\nFirst, Peter's connector-key fix, KS-1176, passed its gate on the part it was meant to change: nothing above the no-verification level opens. But the gate found that a connector limited to certain document types can slip past that limit by naming the type in a different field, and this fix makes three more types reachable that way. I've held the merge and sent it back for that one-line fix first, rather than merge a widening and repair it later.\n\nSecond, an older problem, not caused by tonight's work: the per-key rate limit on API keys never actually fires, because it runs before the key is checked. It's being ticketed. I'll bring it to you as a card with a recommendation, since it's a security control that isn't working."
+ },
+ {
+  "role": "wednesday",
+  "seat": "Kamils-Mac-Studio.local",
+  "project": "Secuura",
+  "ts": "2026-09-17T07:21:02.421130+10:00",
+  "text": "No action needed now — two cards are on your board, each with a safe default.\n\n1. Per-key API rate limits never fire (pre-existing, found by last night's gate). I recommend fixing it now; by default the Secuura seat builds it after the next merge, and it goes through a gate.\n\n2. KS-1194: when a save fails, the app still answers OK — an approval can raise a user's level while the request stays pending. I recommend it fails closed; by default the seat builds it, but the merge waits for your tap.\n\nAlso: #1015 merged and verified, the #1016 gate is running, and one more local-model fix is held. Nothing deployed, nothing sent to Peter or Stuart."
  }
 ]

@@ -10698,5 +10698,74 @@
    }
   ],
   "amended_ts": "2026-09-17T06:09:07.586016+10:00"
+ },
+ {
+  "id": "secuura-apikey-rate-limiter-never-fires",
+  "client_project": "Secuura/Blockchain",
+  "title": "Per-key API rate limits never fire (pre-existing Major, found by the #1014 gate)",
+  "bluf": "Secuura/Blockchain. OVERRIDE of the prior-ruling gate, reason read: its nearest match, secuura-f5-login-limiter-bypass (ruled wait, 2026-09-07), ruled WHEN to tell Peter and Stuart about the double-slash LOGIN limiter bypass; this card asks whether to FIX a different limiter now, and tells nobody outside. The other four matches share only the words rate/never (ATTIO pricing, CI triggers, the NAS leg, ticket closes). THE FINDING: the per-key API rate limiter is mounted before route auth (index.ts:524), so it never sees the key. A key limited to 2 per minute answered 5 of 5 with no 429 and no rate-limit header; the same limiter mounted after auth on a bare app gives 200, 200, 429, 429, 429 (the gate's control). Pre-existing, base = head; #1014's new connector surface is covered only by the per-IP global limiter. Nothing deployed. Measured by the #1014 tier-1 gate (Testing Agent MAIN/projects/secuura/reports/2026-09-17-ks1176-1014-616c766a5-tier1-r1). Seat A files the ticket in its #1014 fix round; Wednesday adds the id when it lands.",
+  "default_action": "Seat A builds the fix after #1016 merges; tier-1 gate; merged on Wednesday's GO. Nothing goes to Peter or Stuart without your word.",
+  "options": [
+   {
+    "key": "fix-now",
+    "label": "Seat A builds the fix as its next PR, tier-1 gate, merged under the TESTED grant",
+    "detail": "limiter moved to where req.user is set; red cells from the gate's repro and control"
+   },
+   {
+    "key": "sunday",
+    "label": "Ticket only; fold into Sunday's QA pass",
+    "detail": ""
+   },
+   {
+    "key": "leave",
+    "label": "Ticket only, no priority change",
+    "detail": ""
+   }
+  ],
+  "recommended": "fix-now",
+  "ts": "2026-09-17T07:19:04.014504+10:00",
+  "status": "open",
+  "ruled_choice": null,
+  "ruled_ts": null,
+  "prior_rulings_overridden": [
+   "CARD attio-rate-card",
+   "CARD secuura-f5-login-limiter-bypass",
+   "CARD secuura-workspace-suites-never-run-on-a-pr",
+   "CARD wed-nas-nightly-leg-has-never-completed",
+   "CARD secuura-fourteen-merged-own-pr-tickets-never-moved"
+  ]
+ },
+ {
+  "id": "secuura-ks1194-failed-save-answers-200",
+  "client_project": "Secuura/Blockchain",
+  "title": "KS-1194: a failed save still answers 200 — an approval can raise a user's level while the request stays PENDING",
+  "bluf": "Secuura/Blockchain. OVERRIDE of the prior-ruling gate, reason read: its two matches are a relayed 2026-08-21 Stuart message about anchor credits and the 2026-09-10 raise-required-approvals-to-1 ruling — neither is about how a failed save answers. Ticket KS-1194 (High, Backlog, ours — filed by seat A 21:14Z, verified at source 07:17). Measured by the #1015 tier-1 gate, base = head (pre-existing, not introduced by #1015): (1) a NEW upgrade request whose INSERT fails answers 200 PENDING, the request then vanishes, and a re-POST creates a duplicate; (2) an admin review APPROVE whose save fails answers 200 approved AND raises the user's verification level while the request row stays PENDING. #1015 fixed the READ side (503 on infra faults, 0 writes) and did not touch the save side. The decision: should a failed save refuse (503) instead of acknowledging, and should approve raise the level only after the request row is persisted? Nothing deployed; nothing told to Peter or Stuart.",
+  "default_action": "Seat A builds fail-closed as a PR after #1014 round 2 and A16; the gate runs; the merge WAITS for your tap. Nothing to Peter or Stuart.",
+  "options": [
+   {
+    "key": "fail-closed",
+    "label": "Seat A builds it",
+    "detail": "failed save answers 503; approve raises the level only after the row persists; tier-1 gate; merge held for your tap:the same 503 contract #1015 gave the reads"
+   },
+   {
+    "key": "ticket-sunday",
+    "label": "Leave it as KS-1194 and fold into Sunday's QA pass",
+    "detail": ""
+   },
+   {
+    "key": "leave",
+    "label": "Leave it on the board, no priority",
+    "detail": ""
+   }
+  ],
+  "recommended": "fail-closed",
+  "ts": "2026-09-17T07:19:25.076689+10:00",
+  "status": "open",
+  "ruled_choice": null,
+  "ruled_ts": null,
+  "prior_rulings_overridden": [
+   "2026-08-21 20:06",
+   "2026-09-10 10:32"
+  ]
  }
 ]
