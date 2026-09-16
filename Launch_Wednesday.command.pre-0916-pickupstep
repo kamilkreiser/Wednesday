@@ -75,24 +75,6 @@ if [ "$AGENT" = "tuesday" ]; then
   mkdir -p "$CLAUDE_CONFIG_DIR"
 fi
 
-# PER-SEAT STATE FILES (2026-09-16). Boot step 4 reads these by NAME, so the name has
-# to be the seat's own or one seat boots on the other's handover. Two separate defects
-# this closes, both measured today:
-#   - the pickup was named in NO boot step for EITHER seat. Wednesday read hers by
-#     habit; Tuesday did not, so an ongoing instruction to her died at every rotation.
-#   - WEEK-INSTRUCTION.md was ONE file serving both seats, so a week's standing order
-#     about Secuura would have become Tuesday's Datasec marching orders verbatim.
-# A per-seat file that does not exist yet is created empty-but-valid below rather than
-# left to fail at boot: an absent file reads as "no instruction", which is the correct
-# default, but only if the seat can tell absent from unreadable.
-if [ "$AGENT" = "tuesday" ]; then
-  PICKUP_FILE="$BRAIN_DIR/tasks/NEXT-PICKUP-TUESDAY.md"
-  WEEK_INSTRUCTION_FILE="$BRAIN_DIR/tasks/WEEK-INSTRUCTION-TUESDAY.md"
-else
-  PICKUP_FILE="$BRAIN_DIR/tasks/NEXT-PICKUP.md"
-  WEEK_INSTRUCTION_FILE="$BRAIN_DIR/tasks/WEEK-INSTRUCTION.md"
-fi
-
 # DevMASTER workspace (read-only context) — may or may not be mounted.
 DEVMASTER="/Volumes/DevMASTER"
 DEVMASTER_VAULT="$DEVMASTER/Notes (MASTER)"
@@ -279,17 +261,6 @@ fi
 if [ -x "$PROJECT_DIR/2_Project_Files/fleet/cockpit/arm_wake_watch.sh" ]; then
   "$PROJECT_DIR/2_Project_Files/fleet/cockpit/arm_wake_watch.sh" || \
     echo "WARNING: wake_watch failed to arm — report this in the session (no-skip)."
-fi
-
-# ── Claude Code hooks + permission guards: RENDER them, never rely on the copy ──
-# .claude/settings.local.json is gitignored, so the hooks and permission rules never
-# travelled between seats. Measured 2026-09-16: Wednesday's was 1775 bytes with six hooks;
-# Tuesday's was 169 — a statusline and nothing else, so she ran with no PreCompact block and
-# no PreToolUse guards, and nothing in PORTABILITY.md or doctor.sh said so. The template is
-# TRACKED; this renders it at every boot, preserving each seat's own theme and statusLine.
-if [ -f "$PROJECT_DIR/2_Project_Files/tools/render_claude_settings.py" ]; then
-  CLAUDE_PROJECT_DIR="$PROJECT_DIR" python3 "$PROJECT_DIR/2_Project_Files/tools/render_claude_settings.py" || \
-    echo "WARNING: could not render .claude/settings.local.json — this seat may be running WITHOUT its hooks. Report it in the session (no-skip)."
 fi
 
 # ── Per-project az / gh isolation (same pattern as all other launchers) ──
@@ -488,18 +459,9 @@ FIRST ACTIONS (token cost is accepted — do the full reads, don't skim):
    newest ~15 rows), and INDEX.md's dated 'Refreshed' history only back to the
    newest two blocks. Two seats on 2026-09-01 booted at 51–57% ctx by reading
    all three whole — a seat that boots past 50% has ~20 minutes of useful life.
-4. 🔴 READ YOUR SEAT'S PICKUP FILE — ${PICKUP_FILE} — WHOLE, and
-   ${BRAIN_DIR}/tasks/EXPIRING-GRANTS.md whole. **This is the step that makes an
-   ongoing task survive a rotation, and until 2026-09-16 NO boot step named it for
-   either seat**: Wednesday read hers out of habit, Tuesday did not, and an
-   instruction given to Tuesday therefore died at her next rotation. A habit is not
-   a mechanism. The pickup's OWED and NEXT-PICKUP sections are the first work of the
-   session, ahead of anything you would otherwise choose; a grant past its date in
-   EXPIRING-GRANTS is DEAD and is re-asked, never assumed.
-   Then ${BRAIN_DIR}/tasks/TASKS.md and ${BRAIN_DIR}/projects_index/INDEX.md
+4. Read ${BRAIN_DIR}/tasks/TASKS.md and ${BRAIN_DIR}/projects_index/INDEX.md
    (+ every file in projects_index/entries/ if it exists). ALSO read
-   ${BRAIN_DIR}/tasks/WEEK-INSTRUCTION.md — **your seat's copy is
-   ${WEEK_INSTRUCTION_FILE}**: if its status is live and valid_until is
+   ${BRAIN_DIR}/tasks/WEEK-INSTRUCTION.md: if its status is live and valid_until is
    today or later, Kam is AWAY and its words are the week's standing instruction —
    your first act is to brief the next K candidates from night/candidates.md and
    keep Ornith running; if it is lapsed or not live, do not act on it — card Kam

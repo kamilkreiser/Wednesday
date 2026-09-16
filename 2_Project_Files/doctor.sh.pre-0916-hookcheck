@@ -791,6 +791,17 @@ else
   warn "ledger rows past rule 3c's cadence:$LEDGER_STALE" "move them to _ledger_archive.md VERBATIM, newest-first, and ASSERT CONSERVATION (rows before == rows after). Never edit, never delete — 3c is a move."
 fi
 
+echo
+if [ "$HARD_FAIL" = "1" ]; then
+
+  echo "PREFLIGHT: HARD FAILURES above — fix before relying on this machine."
+  exit 1
+elif [ "$WARNS" -gt 0 ]; then
+  echo "PREFLIGHT: OK with $WARNS warning(s) — degraded features listed above."
+else
+  echo "PREFLIGHT: all clear."
+fi
+exit 0
 
 # --- Claude Code hooks + permission guards (2026-09-16) -----------------------
 # FAILS, not warns. .claude/settings.local.json is gitignored, so on 2026-09-16 Tuesday's
@@ -825,15 +836,3 @@ print(n)' "$SETTINGS_LOCAL" 2>/dev/null || echo -1)"
     ok "Claude Code hooks wired ($HOOK_N) and matching the tracked template"
   fi
 fi
-
-echo
-if [ "$HARD_FAIL" = "1" ]; then
-
-  echo "PREFLIGHT: HARD FAILURES above — fix before relying on this machine."
-  exit 1
-elif [ "$WARNS" -gt 0 ]; then
-  echo "PREFLIGHT: OK with $WARNS warning(s) — degraded features listed above."
-else
-  echo "PREFLIGHT: all clear."
-fi
-exit 0

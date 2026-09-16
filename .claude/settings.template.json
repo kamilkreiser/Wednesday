@@ -1,0 +1,64 @@
+{
+  "_comment": "TRACKED TEMPLATE — the source of truth for every seat's Claude Code hooks and permission guards. Rendered into .claude/settings.local.json by 2_Project_Files/tools/render_claude_settings.py, which the launcher runs at every boot. WHY THIS FILE EXISTS: settings.local.json is gitignored (.gitignore:8), so on 2026-09-16 Tuesday's copy was 169 bytes of statusline against Wednesday's 1775 — she ran with ZERO of these hooks, including the PreCompact block, and zero permission guards. Nothing in PORTABILITY.md or doctor.sh mentioned it. A guard that cannot travel is a guard one seat has. Edit THIS file, never the rendered one; the renderer preserves each seat's own theme and statusLine and replaces only hooks + permissions. @WORKSPACE@ is substituted with the volume root of the seat's own tree.",
+  "hooks": {
+    "PreCompact": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "bash \"$CLAUDE_PROJECT_DIR/2_Project_Files/fleet/hooks/precompact_block.sh\""
+          }
+        ]
+      }
+    ],
+    "SessionStart": [
+      {
+        "matcher": "compact",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "bash \"$CLAUDE_PROJECT_DIR/2_Project_Files/fleet/hooks/session_start_compact.sh\""
+          }
+        ]
+      }
+    ],
+    "PreToolUse": [
+      {
+        "matcher": "Bash",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "bash \"$CLAUDE_PROJECT_DIR/2_Project_Files/fleet/hooks/pretooluse_no_cd.sh\""
+          },
+          {
+            "type": "command",
+            "command": "bash \"$CLAUDE_PROJECT_DIR/2_Project_Files/fleet/hooks/pretooluse_seat_scoped_chat.sh\""
+          },
+          {
+            "type": "command",
+            "command": "bash \"$CLAUDE_PROJECT_DIR/2_Project_Files/fleet/hooks/pretooluse_grep_case.sh\""
+          },
+          {
+            "type": "command",
+            "command": "bash \"$CLAUDE_PROJECT_DIR/2_Project_Files/fleet/hooks/pretooluse_no_rm.sh\""
+          }
+        ]
+      }
+    ]
+  },
+  "permissions": {
+    "defaultMode": "default",
+    "ask": [
+      "Edit(//Volumes/DevMASTER/!CODING/**)",
+      "Write(//Volumes/DevMASTER/!CODING/**)",
+      "Edit(//Volumes/DevMASTER/Notes (MASTER)/**)",
+      "Write(//Volumes/DevMASTER/Notes (MASTER)/**)",
+      "Edit(@WORKSPACE@/!CODING/**)",
+      "Write(@WORKSPACE@/!CODING/**)",
+      "Edit(@WORKSPACE@/Notes (MASTER)/**)",
+      "Write(@WORKSPACE@/Notes (MASTER)/**)",
+      "Bash(git push --force*)",
+      "Bash(git push -f*)"
+    ]
+  }
+}

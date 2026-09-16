@@ -4066,5 +4066,40 @@
   "project": "Secuura",
   "ts": "2026-09-16T14:15:00.026712+10:00",
   "text": "The ollama copy is verified — properly this time. All three of the largest blobs, 61, 48 and 17 gigabytes, hash identically at both ends, and the file counts match. My first pass had only checked one small file and reported itself satisfied; I caught that and redid it, because a copy verified by a file count is not verified.\n\nSo here is the one thing I need from you.\n\nI need your word to reclaim the original. The command is:\n\nmv ~/.ollama ~/.ollama_superseded_2026-09-16\n\nThat is a rename, not a delete — it frees nothing by itself, but it makes the old store unreachable so nothing can quietly keep using it, and then you can bin it whenever you like and get the 141 gigabytes back. I would rather rename than delete, and I would rather you said yes than assume it.\n\nMy recommendation is do it, because the copy is verified and the pointers are already moved. The alternative is leaving it until you have used ollama once from the new store and seen your models are all there, which costs nothing but a day.\n\nThe merge of the fleet's models into the same store is running now."
+ },
+ {
+  "role": "wednesday",
+  "seat": "Kamils-Mac-Studio.local",
+  "project": "Secuura",
+  "ts": "2026-09-16T14:17:20.821134+10:00",
+  "text": "Done, and it is all one store now.\n\nThe old ollama is in the Trash — I moved it rather than deleted it, so the 141 gigabytes comes back the moment you empty the bin. That is one click and it is yours to make.\n\nThe restart is done and there is one server serving all thirteen models off DevMASTER: your nine, plus the fleet's ornith and gpt-oss which I merged into the same store. I proved it three ways rather than assuming — the server lists all thirteen, the local model's own startup gate passes against the new store, and the launcher's health check is green on it. The fleet's old copy is still on disk as a fallback, and the fallback is a real test in the script, not a hope.\n\nOne thing I wrote down rather than let you find later: the Wednesday folder is no longer self-contained on another machine, because its model weights now live outside it. It is item 21 on the portability checklist with the recovery.\n\nInternal disk is at 45 gigabytes free right now. Emptying the bin takes it to about 186. Docker's 231 is separate and is being held by those Time Machine snapshots.\n\nBoth agents are still working — the Tuesday comparison and the next local-model ticket."
+ },
+ {
+  "role": "wednesday",
+  "seat": "Kamils-Mac-Studio.local",
+  "project": "Secuura",
+  "ts": "2026-09-16T14:19:06.259339+10:00",
+  "text": "The KS-000000 brief never arrived, so the local model is still idle — the autostart gave up after 1 minutes rather than waiting silently."
+ },
+ {
+  "role": "wednesday",
+  "seat": "Kamils-Mac-Studio.local",
+  "project": "Secuura",
+  "ts": "2026-09-16T14:19:45.605515+10:00",
+  "text": "Received — I will get the two drives current, but I am going to do it in two steps rather than one, and here is why.\n\nA bidirectional sync is a delete command with a delay. The last time one ran between these drives it propagated deletions nobody had asked for and cost a recovery. So I will run a DRY RUN first, read what it says it would delete, and only then run it for real — and if it proposes deleting anything inside a working folder I will stop and show you the list instead of pressing on.\n\nThere is also a sequencing point: the agent comparing Tuesday's structure is reading the T9 right now. Writing to that drive underneath it would muddy its answer, so the real leg waits until it finishes. That is minutes, not hours.\n\nOne thing worth flagging before it surprises us: DevMASTER has gained about 270 gigabytes today from the ollama move and the merge. If the sync is set to carry that folder across, the T9 needs room for it, and it may not want it at all. I will tell you what the dry run says."
+ },
+ {
+  "role": "wednesday",
+  "seat": "Kamils-Mac-Studio.local",
+  "project": "Secuura",
+  "ts": "2026-09-16T14:20:04.973789+10:00",
+  "text": "I have the answer on Tuesday, and it overturns what I assumed. I thought the two trees had drifted apart. They have not. Every hook, every tool, every scheduler script and every skill is byte-identical in both, and her launcher differs from mine by twelve lines.\n\nWhat differs is the layer that never travels in git, and there are three of them.\n\nFirst and biggest: the file that wires Claude Code's hooks and permissions is not in git and is not checked by anything. Mine is about eighteen hundred bytes. Hers is a hundred and sixty nine — a statusline and nothing else. So Tuesday runs with none of my six hooks, including the one that refuses automatic compaction, and none of the guards that stop a seat doing something daft. That alone would explain most of what you have been seeing.\n\nSecond: her boot prompt tells her to read two files that were moved into a superseded folder a week ago, and it names her handover file only as something to write at the end, never to read at the start. I read mine at boot out of habit, not because anything told me to. That is exactly why an ongoing task survives a rotation on my seat and dies on hers — it lives in a custom, not a mechanism.\n\nThird: of the nine scheduled jobs that keep me alive on this Mac, six exist only as installed jobs here and none exist for Tuesday at all. The one that puts her replies onto your page has never run on her machine — not once.\n\nSo copying files across would have fixed none of it.\n\nSix changes must land before Monday night. Three of them are instructions and take under an hour total; one is an hour of code; one needs thirty minutes at the mini itself, which is your hands or a session there. I have the full report written up and I can start on the ones that are mine right now.\n\nSay go and I will start with the config one — it is the largest single cause and it makes every future seat inherit the guards instead of relying on a file nobody copies."
+ },
+ {
+  "role": "wednesday",
+  "seat": "Kamils-Mac-Studio.local",
+  "project": "Secuura",
+  "ts": "2026-09-16T14:23:30.251538+10:00",
+  "text": "Go taken. One sequencing choice I am making: the three instruction fixes first, then the sync — they are ten minutes each and they live in the folder the sync carries, so doing them first means the T9 gets the fixed versions in one pass instead of the broken ones now and the fixed ones later. The ollama stores are excluded from the sync, per your word.\n\nStarting with the two that make an ongoing task survive: her boot prompt pointing at deleted files, and the handover file that neither of us is actually told to read at boot. Then the hooks config, which is the big one."
  }
 ]
