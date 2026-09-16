@@ -229,12 +229,28 @@ default customers to `nexusaidevacrfa39.azurecr.io/nexusai:2.0.0` (a May image w
 and changing nothing. **If it is still there, it goes straight to Kam — a registry push is his
 signature class and he has never named the registry.**
 
+## 🔴 KAM DEPLOYS THE NEXUSAI MARKETPLACE APP **TOMORROW** for a full test
+
+Kam, 2026-09-16 ~21:40: *"tomorrow I will deploy the nexus marketplace app to do a full test so we
+will be able to make sure everything is working."*
+
+**This makes the image question time-critical, and it is the first thing to chase at the next boot.**
+If the SUBMITTED package still defaults to `nexusaidevacrfa39.azurecr.io/nexusai:2.0.0` (a May build
+with none of rounds 2-4), his full test exercises the wrong artefact — and will probably PASS, because
+that build is a coherent older product. He would come away believing he had tested the current one.
+**A green test against the wrong artefact spends his confidence, not his time.**
+
+NexusAI is measuring it ahead of everything else and mailing one line:
+`[Datasec/NexusAI -> Tuesday] MEASURED: submitted package image reference`. **Chase that mail first.**
+Told explicitly NOT to fix it: the registry is Kam's to name, the push is his signature class, and
+changing the submitted package the night before he tests it would destroy the thing under test.
+
 ## USAGE — this seat has NO 40% cap; that was Wednesday's
 
 Kam, 2026-09-16 21:3x: *"the 40% was only for wednesday and Secuura projects. you are on a different
 account and do not have that constraint."* and *"the message was on the wednesday chat board not
-yours."* `fleet/USAGE_STOP` (40) is hers. This seat reads `fleet/USAGE_STOP.tuesday` = 90, which is
-the fleet default and his own 2026-09-14 line, not a limit invented here. **The seats are on separate
+yours."* `fleet/USAGE_STOP` (40) is hers. This seat reads `fleet/USAGE_STOP.tuesday` = **95**, on his 2026-09-16 21:40 instruction
+*"bump yours to 95%"* (it was briefly 90, the fleet default, before he said so). **The seats are on separate
 accounts; usage is never shared** — measured at the time: Wednesday 7%, Tuesday 70%.
 
 ## TOMORROW'S DATASEC PICTURE — assembled 2026-09-16 20:4x so it is not re-derived
