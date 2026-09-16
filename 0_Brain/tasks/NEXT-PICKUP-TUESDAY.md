@@ -359,6 +359,42 @@ the same wake that would report a genuinely stuck agent.** Tonight HPSM *was* st
 a typed-unsent line, and that mattered. Reported to Wednesday with the evidence and a suggested
 discriminator; **her file, not this seat's to patch.**
 
+## ✅ RE-GATE PASSED (GO WITH FINDINGS, no Blockers) — merge APPROVED; one new card blocks resubmission
+
+`b0ec4c2`: B-1, B-2 (M1–M6), F-1, F-2, F-3/F-8 and F-5 all FIXED and measured against `8246ee0`, suite
+**PASS 3094/3094 on a clean clone.** Merge to main approved by this seat (publishes nothing; the
+Partner Center upload stays Kam's and manual). Recipe required: fresh detached worktree at
+`origin/main a173dfd`, `--no-ff`, **verify on the merged tree** (main is not an ancestor), re-check
+`CI_DEPLOY_ENABLED` unset immediately before pushing, explicit refspec, `ls-remote`, CI.
+
+### 🔴 NEW CARD: `nexusai-setup-mode-stranger-takeover` (RD-474) — the only non-registry resubmission blocker
+
+The gate measured what an anonymous visitor can DO in Kam's intended open window, and it is more than
+look: **save THEIR OWN Entra tenant and group — which enforces sign-in through THEIR IdP and locks the
+real owner out** — plus export the config ZIP and start an erasure request.
+
+**THE COMPARISON, and it is easy to state backwards:** live 2.1.1 = the same two requests cause a
+**permanent lockout**, nothing taken, the stranger gains nothing. Candidate = **the owner can lose the
+deployment to someone else.** **Recoverability improved; the worst case got worse.** A trade between
+denial of service and takeover, not a strict improvement.
+
+⚠ **A FRAMING CORRECTION WAS ISSUED AND MUST NOT BE LOST:** NexusAI wrote *"strictly more
+recoverable"*. It is not. Earlier tonight the lockout-vs-takeover distinction was the stated reason Kam
+was not woken — **RD-474 is the takeover.** Always describe it as *"trades a permanent lockout for a
+possible takeover of an unconfigured deployment."*
+
+Recommended option **(b) one-time setup token** from the deployment output: keeps the open window for
+READING while making IdP configuration something only the deployer can do. (a) accepts a takeover path
+on a paid product; (c) matches Kam's literal words but re-introduces a lockout at first-run completion.
+
+### Filed, not blocking
+**RD-471 (High) is B-2's class, THIRD instance:** a DropDown/OptionsGroup makes `defaultValue` a
+**label** while the output is the item **value**, so the check records a false PASS. It cannot bite
+while no release registry is named — **so it must be fixed BEFORE Kam names one**, because naming one
+is the moment that check starts being trusted. Also RD-472 (nested deployments, jobs, case-variant
+keys) and RD-473 (UI-saved Entra values silently ignored when `AZURE_AD_*` env is set — matters because
+the new guide advertises the env route).
+
 ## 🔵 RE-GATE RUNNING on `b0ec4c2` (GO given 2026-09-17 00:1x) — verdict is the next thing owed
 
 Rework pushed, combined head verifies **PASS 3094/3094 across 169 suites**. Nothing merged.
