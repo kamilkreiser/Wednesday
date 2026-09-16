@@ -57,12 +57,6 @@ main { flex:1; display:flex; min-height:0; width:100%; }
   text-transform:uppercase; color:var(--text-muted);
   padding:10px 18px 8px; border-bottom:1px solid var(--line); }
 .scroll { flex:1; overflow-y:auto; scrollbar-width:thin; padding:14px 18px; }
-/* The attention region (2026-09-16). flex:none so Updates can never push it off the panel, and a
-   max-height so a long run of open cards still leaves the feed visible — it scrolls within itself
-   rather than growing without bound. It is PINNED, not merely first. */
-#needscroll { flex:none; max-height:46%; overflow-y:auto; padding-bottom:8px;
-  border-bottom:1px solid var(--line); background:var(--bg); }
-#needscroll:has(.sechead.needs.quiet) { max-height:none; }
 .empty { color:var(--text-muted); font-size:13px; padding:10px 0; }
 
 /* ── LEFT: conversation (same bubble grammar as /chat) ── */
@@ -271,13 +265,6 @@ body.view-tuesday header h1::after { content:" · TUESDAY (Datasec)"; color:#e08
   <h2>Fleet activity</h2>
   <div id="tally"></div>
   <div id="filters"></div>
-  <!-- SPLIT 2026-09-16 (Kam, email 07:30Z): "Important points get lost on the left as there is an
-       ongoing feed and conversation… maybe split that side and from the middle list important things
-       for my attention. This is more important than already actioned items (which I do not need)."
-       Needs-you and Updates were already two SECTIONS, but they shared ONE scroller — so a busy
-       afternoon of updates carried the things waiting on him off the top of the panel. Two scrollers:
-       the upper one is capped and never scrolls the lower one's traffic through it. -->
-  <div class="scroll" id="needscroll"><div id="needs"></div></div>
   <div class="scroll" id="feedscroll"><div id="feed"><p class="empty" id="feed-empty">no fleet events yet</p></div></div>
   <div id="feed-note"></div>
  </section>
@@ -769,8 +756,6 @@ textEl.addEventListener("keydown", e => { if (e.key === "Enter") doSend(); });
    collected and never rendered. */
 const feedEl = document.getElementById("feed");
 const feedScroll = document.getElementById("feedscroll");
-const needsEl = document.getElementById("needs");
-const needsScroll = document.getElementById("needscroll");
 const feedNote = document.getElementById("feed-note");
 const tallyEl = document.getElementById("tally");
 const filtersEl = document.getElementById("filters");
@@ -1297,24 +1282,22 @@ function renderFeed(opts) {
   const prevTop = feedScroll.scrollTop;
   const prevH = feedScroll.scrollHeight;
   feedEl.innerHTML = "";
-  needsEl.innerHTML = "";
   const nh = document.createElement("div"); nh.className = "sechead needs";
-  if (!needDecs.length && !needQs.length && !decisionsErr) nh.classList.add("quiet");
   nh.textContent = "Needs you (" + (needDecs.length + needQs.length) + ")";
-  needsEl.appendChild(nh);
+  feedEl.appendChild(nh);
   if (decisionsErr) {
     // a broken decisions.json is REPORTED, never a silently empty section
     const p = document.createElement("p"); p.className = "qerr";
     p.textContent = "⚠ decision queue unreadable — showing the rest without it (" + decisionsErr + ")";
-    needsEl.appendChild(p);
+    feedEl.appendChild(p);
   }
   if (!needDecs.length && !needQs.length && !decisionsErr) {
     const p = document.createElement("p"); p.className = "empty";
     p.textContent = "nothing needs you right now";
-    needsEl.appendChild(p);
+    feedEl.appendChild(p);
   }
-  for (const d of needDecs) needsEl.appendChild(decisionCard(d));
-  for (const ev of needQs) needsEl.appendChild(eventRow(ev));
+  for (const d of needDecs) feedEl.appendChild(decisionCard(d));
+  for (const ev of needQs) feedEl.appendChild(eventRow(ev));
   const uh = document.createElement("div"); uh.className = "sechead";
   uh.textContent = "Updates";
   feedEl.appendChild(uh);
