@@ -240,6 +240,32 @@ treats a symptom. The durable fix is a pre-commit check that refuses a `*.sh` wi
 staged at 100644 — `2_Project_Files/fleet/hooks/pre-commit` already exists and is the natural
 home. **It is shared tooling, so propose it to Wednesday rather than adding it unilaterally.**
 
+## ⚠ CAVEAT ON THE "UNSENT LINE" RULE — `capture-pane` cannot tell typed text from a placeholder
+
+Written at 23:2x, correcting this seat's own confident rule from an hour earlier.
+
+**The 21:59 case was real:** the prompt held `yes, start it now with subagents`, Ctrl-U cleared it, and
+the pane visibly unblocked. That instance stands.
+
+**The 23:2x case probably was not.** The prompt appeared to hold `check mail`; **Ctrl-U did NOT change
+it** (identical before and after), yet `cockpit.sh say` reported *"prompt clear"* and delivered
+successfully, and the agent immediately began working. The most likely reading is that ` check mail`
+was **Claude Code's own placeholder/hint text, not typed input** — and a generic phrase like that is
+exactly what a hint looks like.
+
+**So: `tmux capture-pane` alone CANNOT distinguish typed input from placeholder text.** Do not build a
+verdict on it.
+
+**The safe procedure, in this order:**
+1. **Try the tap first.** `cockpit.sh say … --mail …` refuses a genuinely occupied prompt and verifies
+   delivery — it is a better instrument than reading the pane, and it is non-destructive.
+2. **Only if the tap is REFUSED** is the prompt genuinely occupied. Then consider clearing.
+3. **Never Ctrl-U on a pane reading alone**, and never on text that could be someone's real input
+   without saying so afterwards to whoever might have typed it.
+
+The earlier entry below has the reasoning for clearing when it IS occupied; this caveat governs
+*whether it is occupied at all*.
+
 ## 🔇 KNOWN FALSE WAKE — do not spend turns on it
 
 `monitor.sh` reads **"waiting on background subagents" as idle** and wakes the coordinator with
