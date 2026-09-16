@@ -209,6 +209,23 @@ treats a symptom. The durable fix is a pre-commit check that refuses a `*.sh` wi
 staged at 100644 — `2_Project_Files/fleet/hooks/pre-commit` already exists and is the natural
 home. **It is shared tooling, so propose it to Wednesday rather than adding it unilaterally.**
 
+## 📌 OWNED BY THIS SEAT, DEADLINE 24 SEPTEMBER — download the published Marketplace packages
+
+**Partner Center stops serving previously published packages after 2026-09-24.** NexusAI has local
+copies in `evidence-s62-published-packages/`, but the PUBLISHED ones can only be fetched through
+Partner Center — **which this seat can reach and no agent can.** Chrome on this machine is signed into
+an account with access, and *Allow JavaScript from Apple Events* is ON (Kam enabled it 2026-09-16), so
+the offer and its plan pages are readable from here.
+
+**Route:** offer `c8c0cb53-f392-4340-9fd8-204ca38cb25f` → plan `57be7273-1e64-40e0-a486-443d11e7ff11`
+→ Technical configuration → *Previously published packages*.
+
+**Deliberately NOT done overnight**, and the reasoning should survive: eight days of margin, browser
+automation against a live publishing console is a poor trade unattended, and if any step needs Kam's
+click it is better to ask once while he is awake. **Do it in daylight — and do not let the margin
+erode into an emergency; it is a task with a date, not a someday.** NexusAI has been told explicitly
+not to spend context on it.
+
 ## 🔴 TWO FINDINGS FOR KAM, both carded/boarded 2026-09-16 ~23:45. Neither woke him; reasons recorded.
 
 ### F-1 — an anonymous stranger can permanently lock the owner out. **Pre-existing, so LIVE in 2.1.1.**
