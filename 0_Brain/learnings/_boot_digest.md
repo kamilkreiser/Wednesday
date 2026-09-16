@@ -7,7 +7,7 @@ status: live
 
 # Boot digest — headline + rules of every lesson (open the file when it fires)
 
-Generated 2026-09-17 07:21 from 177 lesson files (890,064 B). Each block = the lesson's retrieval handle (H1), its frontmatter, the operative paragraph, its section index, and every RULES section verbatim. 9 files carry no rules-shaped section and are included whole. The CASES behind a rule live only in the file: open it the moment the rule fires, or when a diagnosis needs the evidence. `_ledger.md` is read whole beside this digest; `_ledger_archive.md` on demand.
+Generated 2026-09-17 08:28 from 178 lesson files (893,134 B). Each block = the lesson's retrieval handle (H1), its frontmatter, the operative paragraph, its section index, and every RULES section verbatim. 9 files carry no rules-shaped section and are included whole. The CASES behind a rule live only in the file: open it the moment the rule fires, or when a diagnosis needs the evidence. `_ledger.md` is read whole beside this digest; `_ledger_archive.md` on demand.
 
 ## The T9 SSD is the master — Wednesday must be fully portable
 `2026-07-31_fully-portable-drive.md` · principle · 2026-07-31 · status: superseded — the "T9 is the master" half by [[2026-08-25_one-drive-devmaster-is-master]] (2026-08-25); the portability principle itself still lives
@@ -6442,4 +6442,21 @@ never travels) · [[2026-08-25_travel-drive-stale-pointers]] (a sync copies file
 is: git carries tracked files, not configuration) · [[2026-08-07_a-promise-is-not-a-mechanism]] (a
 habit is a promise a seat makes to itself) · [[2026-09-09_the-seat-resolver-is-the-layer-above-every-agent-aware-fix]]
 (the layer above the thing you fixed) · [[2026-09-14_the-coordinator-adds-value-or-it-is-waste-three-duties-not-watching]].
+
+
+## Tuesday is the guard against reinventing the wheel: every brief carries a PRIOR-WORK CHECK, and a READY FOR QA without a PRIOR WORK section goes back
+`2026-09-17_guard-against-reinventing-prior-work-check.md` · preference · 2026-09-17 · status: live
+
+**The operative case, so the headline matches it:** Tuesday is writing a brief, reviewing a READY FOR QA, or commissioning a gate for any Datasec project, and the work rebuilds, replaces, removes or redesigns something that already exists. **Before it is accepted, the agent must have shown what was built before and why.**
+
+sections (open the file for these): How to apply
+
+## How to apply
+1. **Every Datasec brief carries the PRIOR-WORK CHECK standing line:** before rebuilding, replacing, removing or redesigning anything, look (git log -S / --follow / blame, the project's CLARIFICATIONS, history and handovers, the tickets, earlier versions or packages), write down what existed and WHY with its source, then keep what works and is logical, improve what needs work, remove only with a stated reason.
+2. **Every READY FOR QA must carry a PRIOR WORK section** (or "nothing replaced"). Tuesday returns a handover without it; this is the in-path check, not a hope.
+3. **Every gate brief asks the tester to verify the PRIOR WORK section against the history** for anything replaced or removed.
+4. **Tuesday's own briefs obey it too:** before commissioning a rebuild, Tuesday asks the agent what exists rather than specifying from scratch (the 2026-09-16 SME rule: the agent holds the history).
+5. **Scope:** Tuesday's seat and the Datasec projects, as he addressed it on the Tuesday tab. Whether Wednesday adopts it is hers and Kam's (a board message is not a fleet rule).
+
+**Family:** [[2026-08-13_establish-authority-before-reconciling]] (reconciliation destroys evidence) · [[2026-09-07_a-rule-for-creation-is-not-a-mandate-to-retrofit]] (enumerate what already occupies the slot) · [[2026-09-16_what-keeps-a-seat-correct-is-not-all-in-git]] · [[2026-09-14_the-coordinator-adds-value-or-it-is-waste-three-duties-not-watching]] (duty 2: check the output as a manager).
 
