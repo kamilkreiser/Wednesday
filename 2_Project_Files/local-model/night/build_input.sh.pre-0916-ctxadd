@@ -404,25 +404,6 @@ if _brief_for_sites:
                 if ln.startswith("+") and not ln.startswith("+++") and ln[1:].strip():
                     expected_plus.append(ln[1:].strip())
     print(f"  expected '+' lines from the brief's edit blocks: {len(expected_plus)} (A3c)")
-    # ------------------------------------------------ CONTEXT-AS-ADDITION GATE (2026-09-16 17:4x)
-    # The VITEST twin of the gate added to tasks/bash_patch/build_bash_input.sh the same afternoon.
-    # A '+' line is a CLAIM that the line is not in the file. When a brief's '+' set repeats a line it
-    # also removes, that line is CONTEXT: the model emits the honest minimal hunk and A3c then refuses a
-    # CORRECT output as "a dropped addition". Four instances on 2026-09-16 (KS-1089, KS-1168 twice,
-    # KS-998) and the gate existed only on the bash tier, so KS-1168 - a vitest ticket Kam had ruled that
-    # morning - burned two rounds against a defect already gated one tier over.
-    _minus = []
-    for blk in re.findall(r"^```[^\n]*\n(.*?)^```", _mx.group(1), re.M | re.S) if _mx else []:
-        for ln in blk.split("\n"):
-            if ln.startswith("-") and not ln.startswith("---") and ln[1:].strip():
-                _minus.append(ln[1:].strip())
-    _dup = [a for a in expected_plus if a in set(_minus)]
-    if _dup and os.environ.get("ALLOW_CONTEXT_AS_ADDITION") != "1":
-        refuse("%d '+' line(s) in `## The exact change` are byte-identical to a '-' line in the same edit "
-               "block, so they are CONTEXT, not additions. The model will keep them as context and A3c will "
-               "refuse the correct output as a dropped addition. Rewrite the hunk minimally: a line that "
-               "survives the edit gets a single leading SPACE, never a '+'. Offending: %r "
-               "(ALLOW_CONTEXT_AS_ADDITION=1 overrides)" % (len(_dup), _dup[:3]))
 
 # ---------------------------------------------------------------- 5b2. TEST-ONLY TAMPER (2026-09-15 12:xx)
 # A coverage-only ticket (the code is right at the tip; a PIN is owed — KS-1073, KS-1123-F3, KS-1130, KS-1120) cannot

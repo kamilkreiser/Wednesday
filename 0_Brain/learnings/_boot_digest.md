@@ -7,7 +7,7 @@ status: live
 
 # Boot digest — headline + rules of every lesson (open the file when it fires)
 
-Generated 2026-09-16 15:13 from 172 lesson files (868,355 B). Each block = the lesson's retrieval handle (H1), its frontmatter, the operative paragraph, its section index, and every RULES section verbatim. 8 files carry no rules-shaped section and are included whole. The CASES behind a rule live only in the file: open it the moment the rule fires, or when a diagnosis needs the evidence. `_ledger.md` is read whole beside this digest; `_ledger_archive.md` on demand.
+Generated 2026-09-16 17:47 from 173 lesson files (873,935 B). Each block = the lesson's retrieval handle (H1), its frontmatter, the operative paragraph, its section index, and every RULES section verbatim. 8 files carry no rules-shaped section and are included whole. The CASES behind a rule live only in the file: open it the moment the rule fires, or when a diagnosis needs the evidence. `_ledger.md` is read whole beside this digest; `_ledger_archive.md` on demand.
 
 ## The T9 SSD is the master — Wednesday must be fully portable
 `2026-07-31_fully-portable-drive.md` · principle · 2026-07-31 · status: superseded — the "T9 is the master" half by [[2026-08-25_one-drive-devmaster-is-master]] (2026-08-25); the portability principle itself still lives
@@ -6168,6 +6168,65 @@ sections (open the file for these): The case · Why the 09-15 lesson did not hol
 5. **Next week this is the whole job:** the WEEK-INSTRUCTION file's scope carries this rule verbatim, and the daily receipt names skipped tickets and their cards so he can rule them from anywhere.
 
 **Family:** [[2026-09-15_never-idle-the-gatekeeper-widens-the-harness-when-the-pool-runs-dry]] (the parent — this is its second instance, the "decision-shaped pool" costume) · [[2026-09-14_the-coordinator-adds-value-or-it-is-waste-three-duties-not-watching]] · [[2026-09-07_a-classification-list-is-a-representation-not-an-instruction]] (a tier is a list) · [[2026-08-16_an-ask-without-a-default-is-an-indefinite-hold]] (the default fires now, not on Monday) · [[2026-09-02_coo-actionable-tickets-never-wait-for-kam]].
+
+
+## The local model is PERMANENT and it is the first router stop — Claude agents take what it cannot do, and a task the local model FAILS is reallocated to Claude, not re-briefed at it forever
+`2026-09-16_local-model-is-long-term-and-claude-takes-what-it-cannot-do.md` · grant · 2026-09-16 · status: live
+
+**His words, verbatim:**
+> *"On actions and tickets*
+>
+> *Working with a local model is proving productive. Let's keep that going for the long term. The local
+> agent gets tasks you think it can handle and normal Claude agents get everything else. If local fails,
+> the task is allocated to a Claude agent. Not urgently but when it makes sense.*
+>
+> *Please save this as an operational rule."*
+
+sections (open the file for these): The rule, in three clauses · The distinction Wednesday stated back to him rather than assuming · How to apply
+
+## The rule, in three clauses
+
+1. **The local model is a PERMANENT part of the workflow, not a pilot.** This retires the trial framing
+   carried by [[2026-09-14_local-model-pilot-grant-qwen3-30b-simple-checked-tasks-only]] and
+   [[2026-09-14_ornith-runs-at-night-in-the-downtime-a-standing-rule]] — the *mechanisms* in both stand;
+   what lapses is the language of a pilot awaiting a verdict. He has given the verdict.
+
+2. **Wednesday ROUTES, and the judgement is Wednesday's.** *"The local agent gets tasks you think it can
+   handle and normal Claude agents get everything else."* This is a delegation of the routing decision,
+   not a rule about which tickets qualify — so the misroutes are Wednesday's to own and to learn from,
+   and the routing predicate belongs in the ledger when it is wrong.
+
+3. **A FAILED local task is REALLOCATED to a Claude agent — "not urgently but when it makes sense."**
+   Failure is a routing signal, not a prompt to try the same ticket at the same model again. There is no
+   deadline attached: the reallocation waits for a sensible moment (a Claude seat already open on that
+   project, a lane that owns those files, the Sunday QA pass), and it is never a reason to leave the
+   local model idle in the meantime.
+
+## How to apply
+
+1. **Every routing decision names which side it fell on and why**, in one clause, in the brief or the
+   receipt: *"local — one file, a fix shape the ticket spells out, an in-process test to copy"* or
+   *"Claude — needs a real PostgreSQL and a judgement about what to pin"*.
+2. **Keep a FAILURE COUNT per ticket at the local model.** The second genuine model failure on one
+   ticket — after any brief defect has been ruled out and fixed — is the trigger for clause 3, not a
+   third brief. Record the reallocation and its reason on the ticket's row in `night/done.md`.
+3. **"When it makes sense" is a real constraint, not a hedge.** Batch reallocated tickets for a Claude
+   seat that is already open on that project, or for the Sunday raising pass. Do not open a seat per
+   escalated ticket — that is the cost this rule exists to avoid.
+4. **Reallocation never idles the local model.** The moment a ticket leaves for Claude, the next
+   candidate is briefed ([[2026-09-15_never-idle-the-gatekeeper-widens-the-harness-when-the-pool-runs-dry]],
+   [[2026-09-16_if-something-blocks-move-on-to-the-next]]).
+5. **The routing predicate is a claim and it gets measured.** At the weekly consolidation: how many
+   local tasks passed, how many were reallocated, and — the number that says whether the routing is
+   any good — how many reallocations turned out to be brief defects rather than model limits.
+
+**Family:** [[2026-09-14_ornith-runs-at-night-in-the-downtime-a-standing-rule]] (the night mechanism this
+makes permanent) · [[2026-09-15_ornith-q4-only-volume-week-qa-sunday-merge-once]] (the week's shape, which
+still expires on Sunday — THIS file does not) · [[2026-09-14_at-90pct-weekly-usage-no-new-agents-wednesday-plus-local-model]]
+(the usage cut that makes local the only option above 90%) · [[2026-08-03_go-slow-earn-autonomy]] (rule 5:
+every grant recorded, so the boundary is written down and never vibes) ·
+[[2026-09-15_ornith-every-issue-gets-a-tooling-or-instruction-fix]] (why a brief defect must not be
+laundered as a model failure).
 
 
 ## What keeps a seat CORRECT is not all in git — and every mechanism that checks a tree checks only the part that is
