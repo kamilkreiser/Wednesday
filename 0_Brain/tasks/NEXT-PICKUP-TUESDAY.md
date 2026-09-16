@@ -240,8 +240,18 @@ with none of rounds 2-4), his full test exercises the wrong artefact — and wil
 that build is a coherent older product. He would come away believing he had tested the current one.
 **A green test against the wrong artefact spends his confidence, not his time.**
 
-NexusAI is measuring it ahead of everything else and mailing one line:
-`[Datasec/NexusAI -> Tuesday] MEASURED: submitted package image reference`. **Chase that mail first.**
+**He is deploying as a CUSTOMER would** (Kam, ~21:45: *"by deploy I mean use the submitted
+marketplace app and deploy it in an azure instance like a client would"*), which is the real
+end-to-end path — so there are exactly two outcomes and they need different responses:
+**(a) the dev ACR is private** → the deploy fails at image pull → ugly but honest, and it means **no
+customer could ever deploy the offer at all**, a bigger finding than the stale image;
+**(b) the dev ACR allows anonymous pull** → the deploy SUCCEEDS on the May build → it will probably
+look like a pass, and he spends a day confirming a build he is not shipping.
+
+NexusAI is measuring both ahead of everything else and mailing one line:
+`[Datasec/NexusAI -> Tuesday] MEASURED: submitted image + registry pullability` — the image reference
+verbatim AND `anonymousPullEnabled` on `nexusaidevacrfa39`. **Chase that mail first.** If the submitted
+package points somewhere other than the dev ACR, the concern evaporates — a welcome answer.
 Told explicitly NOT to fix it: the registry is Kam's to name, the push is his signature class, and
 changing the submitted package the night before he tests it would destroy the thing under test.
 
