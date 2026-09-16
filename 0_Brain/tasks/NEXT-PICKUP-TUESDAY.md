@@ -266,7 +266,7 @@ verdict on it.
 The earlier entry below has the reasoning for clearing when it IS occupied; this caveat governs
 *whether it is occupied at all*.
 
-## 🔇 KNOWN FALSE WAKE — do not spend turns on it
+## ✅ FALSE WAKE FIXED at origin `d59cea765` — the signal is TRUSTWORTHY again, do not keep ignoring it
 
 `monitor.sh` reads **"waiting on background subagents" as idle** and wakes the coordinator with
 *"likely waiting on Wednesday — check the pane now"*. It fired **three times tonight** on
@@ -281,9 +281,20 @@ over a frozen screen. Both legs are being fixed with arms built from real pane c
 `monitor.sh` is being checked for the same predicate in the same commit. **She mails the hash; this
 seat picks it up at its next pull and needs no restart** (the runner re-arms every ~2 min).
 
-**Until then: look once, and if the pane shows `✻ Waiting for N background agents` or a spinner, do
-nothing and move on.** Do not re-verify every three minutes — that is the exact activity Kam stopped
-this seat for on 2026-09-14.
+**LANDED AND VERIFIED ON THIS TREE, 2026-09-16 23:2x** — not taken from the hash: `d59cea765` is an
+ancestor of HEAD, `wake_watch.sh` carries `WAKE_WATCH_SUBAGENT_WAIT_MIN`, its predicate names the exact
+`✻ Waiting for N background agents to finish` shape, and the runner is live and re-arms every ~2 min,
+so no restart was needed.
+
+⚠ **THE "ABSORB THESE WAKES" INSTRUCTION IS NOW WITHDRAWN. Treat an idle-at-prompt wake as REAL
+again.** A bound of 60 minutes preserves the genuinely-stuck case, which is the half worth keeping —
+HPSM sat stuck for an hour tonight and that mattered. **An instruction to ignore a signal is far more
+dangerous once the signal is fixed than the false wakes ever were**, which is why this was rewritten
+the moment the fix landed rather than left to decay.
+
+Wednesday also corrected her own first hash: `15930f3af` never reached origin — that push was refused
+because a panel_sync commit was ahead, and the mail went out from the same command without the refusal
+being read. Same family as *never end a turn on "launched"*.
 
 **The second-order risk is the one to care about: a detector that cries wolf gets ignored, and this is
 the same wake that would report a genuinely stuck agent.** Tonight HPSM *was* stuck for an hour behind
