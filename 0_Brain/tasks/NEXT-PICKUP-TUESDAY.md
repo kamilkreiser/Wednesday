@@ -209,6 +209,22 @@ treats a symptom. The durable fix is a pre-commit check that refuses a `*.sh` wi
 staged at 100644 — `2_Project_Files/fleet/hooks/pre-commit` already exists and is the natural
 home. **It is shared tooling, so propose it to Wednesday rather than adding it unilaterally.**
 
+## 🔇 KNOWN FALSE WAKE — do not spend turns on it
+
+`monitor.sh` reads **"waiting on background subagents" as idle** and wakes the coordinator with
+*"likely waiting on Wednesday — check the pane now"*. It fired **three times tonight** on
+`Datasec/HPSM` while that agent was running four subagents. An agent whose work is in subagents has an
+empty prompt and unchanging pane text — **which is what a productive agent looks like from outside.**
+
+**When this wake lands: look once, and if the pane shows `✻ Waiting for N background agents` or a
+spinner, do nothing and move on.** Do not re-verify it every three minutes — that is the exact
+activity Kam stopped this seat for on 2026-09-14.
+
+**The second-order risk is the one to care about: a detector that cries wolf gets ignored, and this is
+the same wake that would report a genuinely stuck agent.** Tonight HPSM *was* stuck for an hour behind
+a typed-unsent line, and that mattered. Reported to Wednesday with the evidence and a suggested
+discriminator; **her file, not this seat's to patch.**
+
 ## 📌 OWNED BY THIS SEAT, DEADLINE 24 SEPTEMBER — download the published Marketplace packages
 
 **Partner Center stops serving previously published packages after 2026-09-24.** NexusAI has local
