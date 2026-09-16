@@ -322,3 +322,38 @@ correctly. **This third one is the model on a correct brief, so the ticket is RE
 agent** — batched for a Secuura seat or the Sunday raising pass, not a seat opened for it. Kam's ruling
 (`secuura-ks1168-ilike-search-on-encrypted-pii`, option a, EXACT-only search) and the repaired brief carry
 over as the spec; the work is small and fully specified.
+
+## 2026-09-16 18:12 — KS-960: the tamper tier's first deliberate brief, 7/7 first sample — and the SEARCH shape that found it
+
+**Classification: neither model nor harness — a ROUTING and SEARCH improvement.**
+
+**What was wrong with the day's method.** Four commissions, four correct refusals (KS-1173, KS-1125,
+KS-1145, plus KS-953/KS-683 earlier). Every refusal was right and each saved a wasted round — but the
+*method* was wrong: Wednesday picked one ticket from a list of titles, commissioned a full analysis, and
+learned only that that one ticket did not fit. **Title-level guessing, one paid commission at a time.**
+
+**The fix: commission the SEARCH, not the ticket.** One agent given the candidate list, the disqualifiers,
+and an instruction to read tickets cheaply in order and STOP AT THE FIRST THAT FITS. It returned a fitting
+ticket **plus a one-line rejection table for the other six**, so the next seat never re-derives them:
+KS-746 (its own words: "a design sketch, not an agreed plan") · KS-839 (behaviour unruled) · KS-915
+(needs a decision plus docs) · KS-579 (identity-model feature, three services) · KS-581 (feature work) ·
+KS-627 (its own BLUF: "It is not a patch").
+
+**The result.** KS-960, test-only tamper-graded, **PASS 7/7 on its first sample.** This is the first brief
+written deliberately for the tamper tier after the finding that the queue header's "coverage-only tickets
+cannot pass RED-FIRST" had been false since 2026-09-15. **The class the header excluded — which the
+backlog is dominated by — is live.**
+
+**The cell worth carrying to other briefs.** Cell 2 asserts the statement does NOT contain
+`ON CONFLICT (email)`. At the tip the text is `ON CONFLICT (email_lookup_hash)`, where the byte after
+`(email` is `_` and not `)` — so it is green at the tip and red the instant the tamper narrows the target.
+**A negative assertion whose truth turns on one byte is a sharper pin than any positive one**, and it
+names the exact defect shape (KS-949 F1's 42P10 on every boot, under a green suite).
+
+**Verified by Wednesday independently, not accepted on report:** builder rc 0 with the stated pins; line
+688 byte-for-byte and occurring exactly once in 1875 lines; three reds by assertion with both controls
+green under the tamper; 6/6 at the tip; no new red in a `services/auth` baseline that is itself red.
+
+**The rule this earns:** *when two consecutive single-ticket commissions come back as refusals, stop
+picking tickets and commission the search.* The rejection table is worth as much as the brief — it is the
+only artefact that stops the pool being re-searched from scratch.

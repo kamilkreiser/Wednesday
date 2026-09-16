@@ -141,3 +141,4 @@
 # 15:40 — KS-998 queued by autostart_on_brief.sh the moment its brief landed.
 # 15:46 — KS-998 queued by autostart_on_brief.sh the moment its brief landed.
 # 17:52 — KS-1168 queued by autostart_on_brief.sh the moment its brief landed.
+# 18:08 — KS-960 queued by autostart_on_brief.sh the moment its brief landed.

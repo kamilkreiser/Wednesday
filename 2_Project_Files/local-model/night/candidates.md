@@ -3,6 +3,18 @@
 A CENSUS for the coordinator to brief from, easy → hard (Kam 2026-09-15 16:40 / 18:19). A ticket here is a candidate, not a task: read it, read the file at the tip, write `night/briefs/<id>.md`, then queue it. Auth-shaped titles are excluded (LAST); Peter/Stuart tickets and PR-attached tickets are excluded outright.
 
 ## T1 services (vitest, one file) — 14
+<!-- REJECTION TABLE, measured 2026-09-16 18:0x by a search commission — do NOT re-derive these:
+     KS-746  decision-class: its own words call points 1-3 "a design sketch, not an agreed plan"; spans index.ts + a SQL migration
+     KS-839  behaviour UNRULED ("pins whatever behaviour is then ruled correct") + an OAuth scope-authorisation decision surface
+     KS-915  needs a ruling plus docs ("What would close it: One of: ..."), no product fix
+     KS-579  identity-model FEATURE across auth + gateway + seed; gates KS-582; not one file
+     KS-581  feature work (alerting, rate limit, correlation) + a GUID-shape requirement that would redden existing fixtures
+     KS-627  its own BLUF: "It is not a patch" — breaking contract change, new crypto deps, WASM/ARM64
+     KS-1125 already FIXED at the tip; no red possible; and no vitest mock reaches the bare CJS require('pg')
+     KS-1145 needs a real PostgreSQL bash suite; not vitest-gradeable
+     KS-960  FITS — briefed as TAMPER-GRADED, PASS 7/7 first sample, READY written
+     KS-1173 already exists as a passing READY (READY_KS-1172-B3 covers it)
+-->
 - KS-1173 (P2) Flow verbs: add `note`, `certified` and `verified` to the lifecycle vocabulary ( — `services/anchoring/src/anchorSchema.ts`
 - KS-683 (P2) Anchor-status standoff: a consumer repolls anchors K reports as terminally faile — `services/anchoring/src/index.ts`
 - KS-692 (P2) Security: /api/status revoke/unrevoke has no tenant ownership check — an ISSUER_ — `services/vc-issuer/src/routes/status.ts`
