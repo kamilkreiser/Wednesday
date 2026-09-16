@@ -33,18 +33,7 @@ FILE="${USAGE_GATE_FILE:-$PROJECT_DIR/0_Brain/dashboard/data/usage_${SEAT}.json}
 # USAGE_STOP FILE (2026-09-16 21:1x, Kam panel: "try not to go beyond 40% token allocation"): a tracked
 # fleet/USAGE_STOP whose first line is the cut (digits) sets the default for every launcher, which carry no
 # env. WED_USAGE_STOP still wins; no file (or no digits) = 90 as before. Line 2 = the reason, for the record.
-# SEAT-SCOPED (2026-09-16 21:3x, Kam to the Tuesday seat, verbatim: "the 40% was only for
-# wednesday and Secuura projects.  you are on a different account and do not have that
-# constraint.  no token constraint for you."). The shared USAGE_STOP was fleet-wide, so a cut
-# written for ONE account refused launches on the OTHER — and measurably the wrong way round:
-# at the time of his correction Wednesday's gauge read 7% (nowhere near the 40 written for her)
-# while this seat's read 70%, so the only thing the shared file ever actually blocked was the
-# account it was not written for. A per-account limit in a fleet-wide file is the same
-# travel-pointer shape as a hardcoded path: correct where it was authored, wrong everywhere else.
-# USAGE_STOP.<seat> wins over USAGE_STOP; env still wins over both.
-_USF_DIR="$(cd -P "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
-_USF="${USAGE_STOP_FILE:-$_USF_DIR/USAGE_STOP}"
-[ -f "$_USF_DIR/USAGE_STOP.$SEAT" ] && _USF="$_USF_DIR/USAGE_STOP.$SEAT"
+_USF="${USAGE_STOP_FILE:-$(cd -P "$(dirname "${BASH_SOURCE[0]}")" && pwd)/USAGE_STOP}"
 _USF_CUT="$( [ -f "$_USF" ] && sed -n 1p "$_USF" | tr -dc '0-9' )"
 STOP="${WED_USAGE_STOP:-${_USF_CUT:-90}}"
 MAX_AGE_MIN="${USAGE_GATE_MAX_AGE_MIN:-30}"

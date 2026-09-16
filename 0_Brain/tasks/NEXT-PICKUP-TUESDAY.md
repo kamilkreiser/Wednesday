@@ -209,28 +209,33 @@ treats a symptom. The durable fix is a pre-commit check that refuses a `*.sh` wi
 staged at 100644 — `2_Project_Files/fleet/hooks/pre-commit` already exists and is the natural
 home. **It is shared tooling, so propose it to Wednesday rather than adding it unilaterally.**
 
-## OWED — the two un-pause briefs are SENT; the LAUNCHES are blocked by Kam's 40% cap
+## LIVE — two Datasec agents running, both owe this seat a STATUS
 
-Kam, 2026-09-16 ~21:00: *"yes please.  go ahead and brief them both now"*. Both briefs went out and
-are delivered (datasec-hpsm@ + an addendum, datasec-nexusai@). **They will be read at each project's
-next boot, so nothing is lost.**
+Launched 2026-09-16 21:3x after Kam lifted the block. Panes `%6` Datasec/NexusAI and `%7` Datasec/HPSM.
 
-**The launches were REFUSED and must not be worked around.** `cockpit.sh launch` returned
-`usage_gate: REFUSED (rc 3) — weekly usage 70% >= 40%`. The 40 comes from
-`2_Project_Files/fleet/USAGE_STOP`, written 21:09 from Kam's panel line *"dont go overboard. try not
-to go beyond 40% token allocation"* — **nine minutes AFTER he told this seat to brief them.** The
-newer instruction governs. At 70% against a 40% cut nothing launches until the gauge resets
-(~3d 6h from 2026-09-16 21:1x). Asked him at 21:1x: lift it for these two, or let the briefs wait.
+- **NexusAI** — the main job is **Kam's review**: *"get the agent to review things and see what
+  remains to be done on Nexus"*. Wants the RD board counted without silent truncation, in-flight work
+  with no owner, what the submission closes/opens, where the two remaining rulings stand, and a
+  reasoned next-step list. Saved as `pending_plan_<date>.md`. **Told to review and STOP, not execute.**
+  Plus the un-pause merge and the superseded screenshot ruling.
+- **HPSM** — remove the pause banner (KEEPING the subagent standing rule inside it), fix the two
+  `wednesday-agent@` lines, accept both `[Wednesday -> ...]` and `[Tuesday -> ...]` tags.
 
-**What each project owes back:** a STATUS mail to `tuesday-agent@` with the verification outputs,
-the commit hash, and any disagreement led with. Score the delegation when they arrive.
+**Score the delegation when their STATUS mails land**, and bring Kam the NexusAI review.
 
-**Carried in the NexusAI brief — three of Kam's rulings undelivered 4-6 days**, because the project
-ran with no coordinator to land them: `nexusai-main-tree-is-a-stale-snapshot` (investigate, 09-10;
-**do not restore that tree until the mechanism is explained** — his ruling says the evidence is the
-irreplaceable half), `nexusai-ai-screenshot-local-model` (install-ollama, 09-11), and
-`nexusai-marketplace-b2-registry-after-round4` (publish-image, 09-12 — ⚠ **his ruling's own condition
-is that the registry is one HE NAMES and the push is his signature class; he has not named it**).
+⚠ **The live question inside the NexusAI review:** does the SUBMITTED marketplace package still
+default customers to `nexusaidevacrfa39.azurecr.io/nexusai:2.0.0` (a May image with none of rounds
+2-4)? Pre-submission that was a defect; post-submission it is customer-facing. NexusAI is measuring it
+and changing nothing. **If it is still there, it goes straight to Kam — a registry push is his
+signature class and he has never named the registry.**
+
+## USAGE — this seat has NO 40% cap; that was Wednesday's
+
+Kam, 2026-09-16 21:3x: *"the 40% was only for wednesday and Secuura projects. you are on a different
+account and do not have that constraint."* and *"the message was on the wednesday chat board not
+yours."* `fleet/USAGE_STOP` (40) is hers. This seat reads `fleet/USAGE_STOP.tuesday` = 90, which is
+the fleet default and his own 2026-09-14 line, not a limit invented here. **The seats are on separate
+accounts; usage is never shared** — measured at the time: Wednesday 7%, Tuesday 70%.
 
 ## TOMORROW'S DATASEC PICTURE — assembled 2026-09-16 20:4x so it is not re-derived
 
