@@ -282,7 +282,14 @@ marketplace zip and got a worse answer than the agent did, then had to correct K
 
 ## LIVE STATE at 2026-09-16 22:2x — both agents delivered; here is what is open
 
-**HPSM (pane %7)** — DONE and verified: pause banner removed with the subagent standing rule kept,
+**HPSM (pane %7)** — ALL ASSIGNED WORK DONE. The `:441` edit landed at `543dc4e`
+(*"flag to Tuesday/Kam BEFORE creating"*), with `:442` kept as history exactly as ruled, and counts
+carrying a negative control (`Wednesday/Kam` = 0). It is now seeding its clarification file with
+subagents, bounded, and will send the path and entry count when it stops. **Nothing is owed to it by
+this seat.** Its own backlog — 26 open Jira tickets, none touched in 3 days — is folded into its next
+plan, not tonight's work.
+
+Earlier the same session, also done and verified: pause banner removed with the subagent standing rule kept,
 both `wednesday-agent@` lines fixed, both routing tags accepted, commit `fa73832`. It caught two of
 this seat's errors (line 219 was 220; the addendum asserted a fact about ITS launcher taken from a
 file in OUR tree). **Owes:** the `:441` edit (Wednesday→Tuesday on the live billing-flag line; `:442`
