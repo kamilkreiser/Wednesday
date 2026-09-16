@@ -266,6 +266,17 @@ verdict on it.
 The earlier entry below has the reasoning for clearing when it IS occupied; this caveat governs
 *whether it is occupied at all*.
 
+**CONFIRMED BY A THIRD CASE, 23:3x — the corrected procedure works and the old one would have been
+wrong.** HPSM's prompt appeared to hold `good night` — which is **Kam's own wrap-trigger phrase**, so
+under the old rule this seat would have faced either enacting a session-end it could not attribute, or
+destroying what might have been his typing. Instead the tap was tried first: it **delivered, "prompt
+clear"**, proving the text was a placeholder and the prompt was never occupied. Nothing was enacted and
+nothing was destroyed.
+
+**Three cases now: one genuinely occupied (`yes, start it now with subagents`, 21:59, Ctrl-U cleared
+it and the pane unblocked) and two placeholders (`check mail`, `good night`).** The tap is the
+instrument; the pane reading is not.
+
 ## ✅ FALSE WAKE FIXED at origin `d59cea765` — the signal is TRUSTWORTHY again, do not keep ignoring it
 
 `monitor.sh` reads **"waiting on background subagents" as idle** and wakes the coordinator with
