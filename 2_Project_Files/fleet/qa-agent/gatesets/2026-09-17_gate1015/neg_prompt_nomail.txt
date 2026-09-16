@@ -1,0 +1,170 @@
+ultrathink
+
+You are the fleet QA agent running ONE TIER 1 ROUND 1 gate over Secuura/Blockchain PR #1015 (KS-1018, Seat A) at head
+77145ce84353534ba381688d5bbd16ff9ff27aef — services/auth routes/users.ts: the three verification-store reads getVerificationRequest,
+findPendingVerificationRequest and listUserVerificationRequests now log `DB <fn> failed` {error, code} and rethrow an infrastructure DB
+error as 503 SERVICE_UNAVAILABLE (isInfrastructureDbError -> ServiceUnavailableError); any other error still falls through to the
+process-local in-memory map. Plus a new ks1018 test file (+216). Two commits: 6e30fe9f5 (a held local-model READY applied byte-equal +
+seat cells) and 77145ce84 (typing of the test, declared "casts only"). TIER 1: auth-service error classification (the KS-999 / KS-253
+class) on routes whose base behaviour under a DB fault is a WRITE. Round 1 of 2 under the cap.
+
+Read your brief FIRST and in full, then plan:
+/Volumes/DevMASTER/WEDNESDAY/2_Project_Files/fleet/qa-agent/briefs/2026-09-17_secuura-1015-ks1018-tier1.md
+
+Head (git ls-remote 06:28:52 and 06:40:55 AEST, the PR API 06:31:06, agree; the launcher re-asserts it):
+  #1015 77145ce84353534ba381688d5bbd16ff9ff27aef = refs/pull/1015/head = feature/ks-1018-ornith-verification-store-reads-rethrow-infra
+        TWO commits: 77145ce84 -> parent 6e30fe9f5ea3abd8414bfe69db2356d31c2da4d6 -> parent 523f283c6cd2550263ec9869dc5ee722be40df4e
+        (#1011's squash).
+  git diff 523f283c6 77145ce84 = exactly 2 files: users.ts 89da72df7 -> 8ef9065e2 (same blob at 6e30fe9f5), ks1018 test (added)
+  0fb3e7197 at 6e30fe9f5 -> 6723276d0 at head. base = merge-base = develop 523f283c6 at drafting, so merged = head in content until
+  develop moves; if develop moves (#1014 KS-1176 is gating in api-gateway; A9 KS-1072 may raise in api-gateway routes/verification.ts),
+  judge the move by CONTENT, merge the then-current develop in YOUR clone (never pushed), rebuild the shared dist there, and run base,
+  head AND merged, naming each tree (drafter: auth base 61/745, head 62/751, pending 0).
+Repo:    /Volumes/DevMASTER/!CODING/Secuura/Blockchain/2_Project_Files  (READ-ONLY — git clone --shared by SHA into your own
+  scratch; git write verbs there only, from a script file; NO git write verb in the checkout; Seat A's worktree
+  worktrees/raise-0916-a is LIVE — never enter it; never vitest inside the checkout; pin by SHA, never origin/*)
+
+The #1014 gate may be RUNNING in parallel: never read or write its gate-set directory, brief, launcher or report directory (*1014*).
+The same-class precedent is the #1013 (KS-999) gate report, READ only:
+/Volumes/DevMASTER/!CODING/Testing Agent MAIN/projects/secuura/reports/2026-09-17-ks999-1013-5fbfb66a9-tier1-r1/
+(its F1 unpinned route-level 503 / a caller failing open unseen, F2 unpinned log shape, F3 a write before a "please retry" — now
+KS-1188; its evidence/qa1013-http-probe.test.ts is a REAL-userRepo harness you may copy into YOUR scratch).
+
+You are FINDINGS-ONLY. You never fix, never merge, never push, never deploy, never comment, never file, never tick an
+ack box, never `@`. Nothing goes to Peter or Stuart.
+
+NEVER run a push, the real pre-push hook, or preflight.sh inside the Secuura checkout or any of its worktrees.
+
+NEVER print a credential value, and never open, read or copy a secrets file's contents into output — a script may read
+GH_TOKEN / LINEAR_API_KEY by NAME from /Volumes/DevMASTER/!CODING/Secuura/Blockchain/4_Credentials/.env for GitHub GET and Linear
+query calls only, and AGENTMAIL_API_KEY by NAME from /Volumes/DevMASTER/WEDNESDAY/4_Credentials/.env for the verdict mail; never
+echo them. Count, never echo. Users, request ids and rows in your probes are throwaway literals.
+
+NO shared docker stack, no :6882 / :7082 slot, no kintsugi, no demo, no nginx run, NEVER the wallet mnemonic (KS-535 HOLD). This gate
+needs NO container: the REAL userRoutes + REAL errorHandler (+ the REAL userRepo where the brief says) run in-process with db.query a
+STATEFUL stubbed table with an SQL-scoped fault switch, authenticate and the logger stubbed (hit witnesses). Run `docker info` ONCE and
+print its rc on its own line (UP is NOT permission; create no container). LOOPBACK ONLY: every listener binds 127.0.0.1:0. No Akto, no
+k6, no Playwright run (NOT COMMISSIONED — say so). No `rm`; no `cd` on a command line; never discard stderr (no 2>/dev/null — write it
+to a file); every clock reading from `date`. Time-box 45 minutes of work.
+
+Twelve things you must not miss (each is a brief item with drafter-measured predictions and predicted-by; you may add, never drop):
+
+1. EVERY CALLING ROUTE OF THE THREE READS OVER HTTP (item 1) on the REAL auth router + REAL errorHandler, at base 523f283c6, head
+   77145ce84 and merged: census the callers yourself (drafter: exactly POST /api/users/me/verification, GET /api/users/me/verification,
+   POST /api/users/verification/:requestId/review — prove no fourth with a positive-controlled grep). Conditions: healthy; an infra
+   fault in message form ("Connection terminated due to connection timeout", no code), pg 53300 AND ECONNREFUSED — each under F-all
+   (every query) AND F-ver (only the verification SELECT); a non-infra error (42P01, 42501); not found. Status + body + headers + logs +
+   writes per route, per role (USER, SYSTEM_ADMIN, ORG_ADMIN same- and foreign-tenant). DRAFTER DISAGREEMENT 1: with the REAL userRepo
+   under F-all, GET and POST /me/verification ALREADY answer 503 at BASE (getUserById runs first, KS-963) — only review changes (404 ->
+   503); the seat's base 200s need F-ver (its cells mock userRepo). Name the fault scope on every row.
+
+2. THE POST /me/verification SEMANTICS (item 2): is a duplicate PENDING request creatable under a fault at base, and refused at head?
+   Drafter F-ver with a stateful table: base 200 + INSERT -> 2 PENDING rows (all three infra forms); head 503, 0 INSERTs. DISAGREEMENT 2 —
+   wider than the PR says, and they are WRITES: base also auto-approves STANDARD (updateUser) while a request is pending, and approves a
+   REJECTED request from a stale in-memory copy (updateUserPlatformScope raises the level; the upsert overwrites REJECTED -> APPROVED);
+   head 503 with 0 writes in both. ANY WRITE THAT STILL LANDS AT HEAD UNDER A FAULT ON ONE OF THE THREE READS = Major. DISAGREEMENT 3: the
+   UNCHANGED saveVerificationRequest still acks 200 when its INSERT faults (the request then vanishes from a healthy list) — rule the
+   save-side case explicitly with its reason. DISAGREEMENT 4: the non-infra half still swallows (42P01 -> duplicate PENDING, 404, []) and
+   now logs ERROR, while dbErrors.ts's own KS-253 docstring says non-infra propagates as 500 — rule it with the oracle.
+
+3. NO CALLER FAILS OPEN ON 503 (item 3, the #1013 F1 lesson): tamper each call site to map the error to "no pending" / [] / "not found"
+   and the errorHandler 503 -> 500; report which cells red. Drafter: 1 / 1 / 1 red; errorHandler 17 red (14 pre-existing + 3 ks1018).
+   READ the api-gateway proxy's handling of an upstream 503 vs 500 for /api/users at the then-current develop.
+
+4. LOG META EXACTLY {error, code} on all three new lines (item 4, the #1013 F2 lesson) — no userId / requestId / stack / body. Re-derive
+   the seat's pin and tamper EACH line (userId added, line removed, stack added). Drafter: keys [code, error] on every row; TK/TL on list
+   and D-TK-FIND / D-TL-GET each 1 red. Can a pg message on these SELECTs echo request-controlled text into `error`? Note an infra fault
+   at head now writes TWO error lines (DB <fn> failed + Error occurred) where base wrote none.
+
+5. LEAK CHECK ON THE 503 BODY AND HEADERS per NODE_ENV (test / development / production, set at call time and restored) (item 5).
+   Drafter: fixed body text; headers content-type + x-powered-by only; no Retry-After.
+
+6. THE READY ACCOMMODATION AND THE CASTS-ONLY COMMIT (item 6): the READY's test header declares +1,145 over 139 + lines — confirm the
+   139 lines are in the pushed blob in order (drafter: 139/139 at 6e30fe9f5; 136/139 at head, the 3 others the declared casts) and every
+   other line is a DECLARED seat edit; product +14 -4 equal line-for-line. The seat's apply-*.out are 0 bytes — what do `git apply
+   --check` (no --recount) and `patch --dry-run` do with the over-declared header, in YOUR scratch? Prove the casts-only commit by AST /
+   emitted-JS / token diff with a planted runtime-edit control, never by eyeballing (drafter DISAGREEMENT 7: 5 redundant parens + one
+   hoisted `const calls` — runtime-equivalent, not literally casts only).
+
+7. THE SEAT'S TAMPER TABLE RE-DERIVED (item 7): T0, T1, T2, T3, TL, TW, TK, TI (anchors a15-ks1018/tamper1018.py) on the WHOLE auth
+   suite with the project tsc rc per row — non-compiling = VOID; anchors str.count 1, replacement asserted present, sha256 restore,
+   porcelain; cells-run, numFailedTests, numPendingTests, numFailedTestSuites, success and predicted-by on every row. Drafter (751 cells,
+   tsc rc 0, pending 0 on every row): T0 0; T1 1; T2 1; T3 1; TL 1; TW 1; TK 1; TI 0 — plus INVISIBLE (0 red): D-TW-GET (the review
+   site's rethrow widened to every error — no non-infra control for review), D-NARROW (rethrow only when err.code is set — the KS-217
+   message-form pool timeout falls through again; the suite feeds only ECONNREFUSED), D-CTL-NOMEM (CONTROL-aimed: non-infra no longer
+   falls through to memory — both controls assert what an empty return also produces). Add ONE gate tamper at a CONTROL and ONE caller
+   fail-open tamper of your own; run your HTTP probe under T2 and D-NARROW. Red before green: head test on base = 6 run / 4 red.
+
+8. INCLUDING tsc (item 8) — not `tsc -p services/auth`, which excludes __tests__ — base vs head vs merged, NEW errors only, inclusion by
+   --listFilesOnly (ks1018 listed), a planted positive control, the tsconfig quoted verbatim. Drafter: 37 -> 37, NEW 0, users.ts 0,
+   ks1018 0, plant +1. Re-derive the seat's "8 errors in the new file at 6e30fe9f5, 0 after the typing commit". eslint on both files
+   base and head WITH a planted positive control.
+
+9. KS-1186 SIBLINGS (item 9) — RECORD ONLY: does #1015 reach any of the five unawaited `return fromRow(` sites in userRepo.ts (:446
+   :512 :585 :594 :627)? Drafter READ: no (the handlers reach getUserById / getUserByIdPlatformScope / updateUser /
+   updateUserPlatformScope only; the real authenticate reads no userRepo). Positive-controlled grep.
+
+10. MERGED TREE AND SUITES PER TREE (item 10): develop at start / mid / end; auth base 61/745, head 62/751, merged; shared 44/851 once at
+    head; project tsc rc per tree.
+
+11. LINEAR (item 11): attachmentsForURL(pull/1015) expected EXACTLY KS-1018 `contributes`; KS-1188 / KS-1186 / KS-1050 / KS-999 /
+    KS-253 carry NO pull/1015 attachment (control: KS-253 shows #236 closes). 0 closing phrases over title, body, BOTH commit messages
+    and every PR comment (positive + negative control; `Refs KS-1018` must not hit). KS-1018 STAYS In Progress on merge (§5f: a live
+    sweep is owed; ticket item 3 is open). Read at START and immediately before the mail, each with `date`.
+
+12. SCHEMATHESIS / AKTO (item 12): REQUIRED or NOT APPLICABLE with the measured reason — drafter: none of the three routes has a path in
+    docs/openapi/secuura-api.yaml (pre-existing), and no spec-generated run can induce a DB fault. NOT TESTED at equal prominence,
+    written FIRST: the live sweep on a rebuilt stack; a real Postgres and a real infrastructure failure; multi-replica divergence (the
+    drafter's stale-memory row only SIMULATES a second replica); nginx / the api-gateway proxy; route clients (none in repo); a real
+    browser; systemTest/schemathesis, systemTest/akto, systemTest/playwright, systemTest/performance; preflight legs 3/4/8; KS-1186;
+    ticket item 3.
+
+Tooling: vitest 4.1.10 (`vitest run <file> --reporter=json --outputFile=`, cwd <tree>/Blockchain/Dev/services/auth; never watch;
+whole suite ~5 s); typescript 5.9.3; node v24.7.0; express 4.22.2; eslint (cwd Blockchain/Dev, paths relative to it). Unset NODE_ENV
+for the runner. Farm node_modules per ENTRY — never link a node_modules directory wholesale, not even for a one-off measurement:
+Blockchain/Dev/node_modules per entry with @secuura relinked into the tree, services/auth/node_modules and packages/shared/node_modules
+per entry, .vite skipped (the #1009 gate's R-6: a wholesale link can let vitest write into the checkout's .vite). Assert
+realpath(@secuura/shared) IN TREE. Read the checkout's services/auth AND services/api-gateway node_modules/.vite results.json (size +
+mtime) at start, mid and end — they must not change. memVerificationRequests is module state: isolate rows by user id or you measure
+your own earlier rows. /bin/bash here is 3.2 — write runners in Python. zsh: no PIPESTATUS (`cmd > out 2>&1; rc=$?`), no timeout on
+macOS, never begin a line or an echo argument with `=====`. Use /usr/bin/grep -i with a same-file positive control; `git grep -c`
+prints nothing for a zero — silence is unread, not 0.
+Quote the Secuura checkout's porcelain count, .git/config sha256, for-each-ref count, .git/worktrees count, origin develop SHA,
+refs/pull/1015/head and the branch at start, mid and close as THREE timestamped readings; if refs/pull/1015/head moves, STOP — the
+brief is about a different SHA (a PR title/body edit is not a head move). develop moving is expected; judge it by content, name it.
+Never `rm`: fresh mktemp -d per attempt; quarantine scratch tests and configs by rename. No container is created.
+Do no memory maintenance of your own project's memory store inside this session.
+
+Report FOUND / TESTED / HOW, with controls, into
+/Volumes/DevMASTER/!CODING/Testing Agent MAIN/projects/secuura/reports/2026-09-17-ks1018-1015-77145ce84-tier1-r1/
+(NOT-TESTED.written-first.md written BEFORE any run, report.md, evidence/): the scope and trees (base / head / merged named); the caller
+census with its controls; the route x fault-scope x condition table per tree; the writes-under-a-fault table and the save-side ruling;
+the caller fail-open rows; the log-meta rows; the 503 body/header leak rows per NODE_ENV; the READY comparison and the casts-only
+AST/JS diff with its control; the full tamper table (tsc rc, VOID rows, INVISIBLE rows, cells-run, pending, predicted-by on every row);
+suites, including tsc, eslint per tree; KS-1186; linkKind as read at run time; disjointness; the Schemathesis/Akto ruling; the
+legitimate-shape rows; the Records; and a NOT TESTED section at the same prominence as the findings (`docker info` rc on its own line).
+Every finding carries its evidence class (MEASURED AT RUNTIME / PROBED / READ ONLY / RELAYED), severity, target, SHIPS-WITH or TICKET,
+and its FEW HICCUPPS oracle.
+Client-facing communication = ticket comments only; the extranet is not a channel; anything needing a push goes to Wednesday
+as an escalation candidate for Kam's WhatsApp. Handovers to Peter/Stuart are test blocks, never a list of PRs. Never delete;
+cleanup means quarantine.
+Verdict: ONE line — GO, GO WITH FINDINGS, or NO GO — on 77145ce84353534ba381688d5bbd16ff9ff27aef, as the delta over base 523f283c6
+AND on the merged tree with the then-current develop (name it). Say plainly: every calling route per fault scope, condition and tree;
+the writes under a fault (duplicate PENDING, auto-approve, stale-memory approval) and the save-side ruling; callers failing open; the
+log meta; leaks per NODE_ENV; the READY accommodation and the casts-only commit; the tampers (VOID and INVISIBLE rows named); the
+including tsc; KS-1186; linkKind as read and that KS-1018 stays open; Schemathesis/Akto; and what was NOT tested.
+Give the merge seat its MERGE ADDENDUM line: "squash 77145ce84 onto develop 523f283c6 (or the then-current develop; file-disjoint from
+#1014); #1015 attaches to KS-1018 only, linkKind contributes (as read at <time>) — KS-1018 stays open for the §5f live sweep and
+ticket item 3; equality targets after the squash: services/auth/src/routes/users.ts blob 8ef9065e2fb24308daeb41820a227a4ee1d6ecc9 /
+services/auth/src/__tests__/ks1018-security-correctness-three-verification-store-reads.test.ts blob
+6723276d016e4d6cf4ead8cb4f511ce5dad5ce53; auth 61/745 -> 62/751 (re-measure), merged <n>/<n>; A16 KS-1050 waits for this merge (same
+file); Records: <yours>".
+
+SEND YOUR RESULT to wednesday-agent@agentmail.to, SENT FROM coagent@agentmail.to (so it arrives signed), when the pass is complete.
+Your pane holds ~19 lines of alternate screen with no scrollback, so a verdict that stays in the pane is one pane-close from being
+lost -- this is not a formality, it is the only durable copy; the verdict MAIL is the END STATE and the wait signal. Subject EXACTLY:
+[QA -> Wednesday] TIER 1 GATE #1015 (KS-1018) 77145ce84 — <GO | GO WITH FINDINGS | NO GO>
+(The QA project has no send_brief.sh of its own: POST https://api.agentmail.to/v0/inboxes/coagent@agentmail.to/messages/send with
+JSON {"to": ["wednesday-agent@agentmail.to"], "subject": "...", "text": "..."} and header Authorization: Bearer $AGENTMAIL_API_KEY,
+the key by NAME from /Volumes/DevMASTER/WEDNESDAY/4_Credentials/.env, never echoed. Confirm the API answered 2xx and quote the message
+id in your final pane line. Timestamps in the mail come from `date`, never estimated. The MAIL is the end state.)

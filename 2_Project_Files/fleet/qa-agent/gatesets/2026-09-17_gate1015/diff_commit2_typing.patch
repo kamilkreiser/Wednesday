@@ -1,0 +1,63 @@
+diff --git a/Blockchain/Dev/services/auth/src/__tests__/ks1018-security-correctness-three-verification-store-reads.test.ts b/Blockchain/Dev/services/auth/src/__tests__/ks1018-security-correctness-three-verification-store-reads.test.ts
+index 0fb3e7197..6723276d0 100644
+--- a/Blockchain/Dev/services/auth/src/__tests__/ks1018-security-correctness-three-verification-store-reads.test.ts
++++ b/Blockchain/Dev/services/auth/src/__tests__/ks1018-security-correctness-three-verification-store-reads.test.ts
+@@ -80,9 +80,11 @@ const POST_CONTROL_USER_ID = 'cccccccc-2222-4222-8222-cccccccccccc';
+ 
+ /** The single `DB <fn> failed` error line, asserted to carry exactly {error, code} (no user id, no stack). */
+ function expectOneInfraLog(fn: string): void {
+-  const lines = vi.mocked(logger.error).mock.calls.filter(([msg]) => msg === `DB ${fn} failed`);
++  // The logger's overloads type a call as [object]; the route calls it as (message, meta).
++  const calls = vi.mocked(logger.error).mock.calls as unknown as Array<[string, Record<string, unknown>]>;
++  const lines = calls.filter(([msg]) => msg === `DB ${fn} failed`);
+   expect(lines).toHaveLength(1);
+-  expect(Object.keys(lines[0][1] as Record<string, unknown>).sort()).toEqual(['code', 'error']);
++  expect(Object.keys(lines[0][1]).sort()).toEqual(['code', 'error']);
+ }
+ 
+ let server: Server;
+@@ -130,7 +132,7 @@ describe('KS-1018 — three verification-store reads must rethrow infrastructure
+     dbQuery.mockRejectedValue(INFRA_ERROR);
+     const res = await fetch(`${baseUrl}/me/verification`);
+     expect(res.status).toBe(503);
+-    const body = await res.json();
++    const body = (await res.json()) as { error: { code: string } }; // KS-1018 (seat A): typed for an including tsc
+     expect(body.error.code).toBe('SERVICE_UNAVAILABLE');
+   });
+ 
+@@ -143,7 +145,7 @@ describe('KS-1018 — three verification-store reads must rethrow infrastructure
+       body: JSON.stringify({ action: 'approve' }),
+     });
+     expect(res.status).toBe(503);
+-    const body = await res.json();
++    const body = (await res.json()) as { error: { code: string } }; // KS-1018 (seat A): typed for an including tsc
+     expect(body.error.code).toBe('SERVICE_UNAVAILABLE');
+   });
+ 
+@@ -152,7 +154,7 @@ describe('KS-1018 — three verification-store reads must rethrow infrastructure
+     dbQuery.mockRejectedValue(Object.assign(new Error('relation does not exist'), { code: '42P01' }));
+     const res = await fetch(`${baseUrl}/me/verification`);
+     expect(res.status).toBe(200);
+-    const body = await res.json();
++    const body = (await res.json()) as { data: { requests: unknown[] } }; // KS-1018 (seat A): typed for an including tsc
+     expect(body.data.requests).toEqual([]);
+   });
+ 
+@@ -172,7 +174,7 @@ describe('KS-1018 — three verification-store reads must rethrow infrastructure
+       body: JSON.stringify({ targetLevel: 'ENHANCED' }),
+     });
+     expect(res.status).toBe(503);
+-    const body = await res.json();
++    const body = (await res.json()) as { error: { code: string } }; // KS-1018 (seat A): typed for an including tsc
+     expect(body.error.code).toBe('SERVICE_UNAVAILABLE');
+     const inserts = dbQuery.mock.calls.filter(([sql]) => /INSERT INTO verification_upgrade_requests/.test(sql as string));
+     expect(inserts).toHaveLength(0);
+@@ -192,7 +194,7 @@ describe('KS-1018 — three verification-store reads must rethrow infrastructure
+       body: JSON.stringify({ targetLevel: 'ENHANCED' }),
+     });
+     expect(res.status).toBe(200);
+-    const body = await res.json();
++    const body = (await res.json()) as { data: { status: string } }; // KS-1018 (seat A): typed for an including tsc
+     expect(body.data.status).toBe('PENDING');
+   });
+ 

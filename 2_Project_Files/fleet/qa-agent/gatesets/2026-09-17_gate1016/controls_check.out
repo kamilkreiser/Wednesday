@@ -1,0 +1,34 @@
+controls_check 2026-09-17 07:05:11 AEST
+replacements: {'nosubject': 1, 'notier': 3, 'nosha': 4, 'nomail': 1, 'nofarm': 1, 'noround1': 1}
+N1 missing subject: prompt without the exact verdict subject | stderr: REFUSING: prompt does not carry the exact verdict subject, the coagent@ sender and the wednesday-agent@ recipient
+rc=23
+expected 23: OK
+N2 missing tier: brief without TIER 1 | stderr: REFUSING: brief and prompt disagree about the tier
+rc=7
+expected 7: OK
+N3 missing SHA: brief without the head SHA | stderr: REFUSING: brief or prompt does not name the head SHA a226d94fe8c6fbfecb81de415feb645302cdd166 — a gate about another SHA is another gate
+rc=20
+expected 20: OK
+N4 missing mail step: prompt without MAIL YOUR VERDICT | stderr: REFUSING: prompt does not tell the agent to MAIL its verdict
+rc=12
+expected 12: OK
+N5 missing per-entry farm: prompt without node_modules per ENTRY | stderr: REFUSING: prompt does not require node_modules farmed per ENTRY (a wholesale link can write through to the checkout .vite cache)
+rc=22
+expected 22: OK
+N6 head override = the PR parent 523f283c6 | stderr: REFUSING: #1016 — 523f283c6cd2550263ec9869dc5ee722be40df4e is not at refs/heads/feature/ks-1072-ornith-latest-anchor-confirmedat-tiebreak on origin — the head moved; the brief is about a different SHA
+rc=6
+expected 6: OK
+N7 develop = the #1016 head (verification.ts a7a6d4605 LANDED) | stderr: REFUSING: develop services/api-gateway/src/routes/verification.ts blob a7a6d4605 = #1016 own — #1016 has landed; this brief is stale (develop a226d94fe8c6fbfecb81de415feb645302cdd166) — re-pin deliberately: a different brief
+rc=19
+expected 19: OK
+N8 develop = dd66863dd (routes/verification.ts c83a2ae27, a blob nobody pinned) | stderr: REFUSING: origin develop is at dd66863dd2858e97344652c1106d38f5e352a41b (pinned 523f283c6cd2550263ec9869dc5ee722be40df4e) and the move is not provably disjoint: GUARDED develop services/api-gateway/src/routes/verification.ts blob c83a2ae27 — a version nobody p
+rc=18
+expected 18: OK
+N9 develop = e0f41a8fa (every judged blob pinned, but behind the pin: the compare is not ahead) | stderr: REFUSING: origin develop is at e0f41a8fafd64fa31524390cfeab320e822f3d15 (pinned 523f283c6cd2550263ec9869dc5ee722be40df4e) and the move is not provably disjoint: UNJUDGEABLE status=behind files=0 — confirm the delta, then re-pin deliberately (launcher DEVELOP_S
+rc=18
+expected 18: OK
+N10 brief without ROUND 1 | stderr: REFUSING: brief and prompt disagree about the round (ROUND 1)
+rc=15
+expected 15: OK
+unexpected rows 0
+end 07:06:39 AEST

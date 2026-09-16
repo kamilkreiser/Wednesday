@@ -1,0 +1,31 @@
+controls_check 2026-09-17 06:47:49 AEST
+counts: MAIL YOUR VERDICT 1 | head SHA in brief 4 | TIER 1 in brief 3 | node_modules per ENTRY in prompt 2
+N1 head override (#1013 head 5fbfb66a9) | stderr: REFUSING: #1015 — 5fbfb66a927ea50a8ad0531f344b58a33f7bd9c2 is not at refs/heads/feature/ks-1018-ornith-verification-store-reads-rethrow-infra on origin — the head moved; the brief is about a different SHA
+rc=6
+expected 6: OK
+N2 prompt without the mail step | stderr: REFUSING: prompt does not tell the agent to MAIL its verdict
+rc=12
+expected 12: OK
+N3 brief without the head SHA | stderr: REFUSING: brief or prompt does not name the head SHA 77145ce84353534ba381688d5bbd16ff9ff27aef — a gate about another SHA is another gate
+rc=20
+expected 20: OK
+N4 brief without TIER 1 | stderr: REFUSING: brief and prompt disagree about the tier
+rc=7
+expected 7: OK
+N5 prompt without per-ENTRY farm | stderr: REFUSING: prompt does not require node_modules farmed per ENTRY (a wholesale link can write through to the checkout .vite cache)
+rc=22
+expected 22: OK
+N6 prompt without the exact verdict subject | stderr: REFUSING: prompt does not carry the exact verdict subject, the coagent@ sender and the wednesday-agent@ recipient
+rc=23
+expected 23: OK
+N7 develop = the #1015 head (users.ts 8ef9065e2 LANDED on develop) | stderr: REFUSING: develop services/auth/src/routes/users.ts blob 8ef9065e2 = #1015 own — #1015 has landed; this brief is stale (develop 77145ce84353534ba381688d5bbd16ff9ff27aef) — re-pin deliberately: a different brief
+rc=19
+expected 19: OK
+N8 develop = commit-1 6e30fe9f5 (users.ts LANDED — the commit-1 test blob is judged LANDED too) | stderr: REFUSING: develop services/auth/src/routes/users.ts blob 8ef9065e2 = #1015 own — #1015 has landed; this brief is stale (develop 6e30fe9f5ea3abd8414bfe69db2356d31c2da4d6) — re-pin deliberately: a different brief
+rc=19
+expected 19: OK
+N9 develop = 1125607e9 (pre-#1013: userRepo.ts blob 822b3fcd8 nobody pinned -> GUARDED, the blob arm) | stderr: REFUSING: origin develop is at 1125607e978d6ad637720c985e43e3d79fecdf88 (pinned 523f283c6cd2550263ec9869dc5ee722be40df4e) and the move is not provably disjoint: GUARDED develop services/auth/src/repositories/userRepo.ts blob 822b3fcd8 — a version nobody pinned
+rc=18
+expected 18: OK
+unexpected rows 0
+end 06:49:10 AEST

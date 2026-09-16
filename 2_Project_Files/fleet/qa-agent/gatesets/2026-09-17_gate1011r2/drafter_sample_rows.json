@@ -1,0 +1,136 @@
+[
+ {
+  "row": "T0_whole_suite",
+  "tsc_rc": 0,
+  "files": 50,
+  "tests": 417,
+  "failed": 0,
+  "pending": 0,
+  "predicted": "seat: 50 files / 417 pass",
+  "reds": []
+ },
+ {
+  "row": "F0_realapp",
+  "tsc_rc": 0,
+  "files": 1,
+  "tests": 3,
+  "failed": 0,
+  "pending": 0,
+  "predicted": "seat: 3/3 green",
+  "reds": []
+ },
+ {
+  "row": "R1_round1_source",
+  "tsc_rc": 0,
+  "files": 1,
+  "tests": 3,
+  "failed": 2,
+  "pending": 0,
+  "predicted": "seat R1: 2 red (v1 logs, production erasure)",
+  "reds": [
+   [
+    "KS-871 real app, NODE_ENV=test \u2014 an admitted non-gdpr row is canonical in every spelling \ud83d\udd34",
+    "AssertionError: the audit row for POST /api/v1/logs: action: expected 'v1.create' to be 'logs.create' // Object.is equality"
+   ],
+   [
+    "KS-871 real app, NODE_ENV=production \u2014 a refused erasure after the 307 is audited canonica",
+    "AssertionError: the audit row for the refused erasure: action: expected 'v1.erasures' to be 'gdpr.create' // Object.is equality"
+   ]
+  ]
+ },
+ {
+  "row": "NORESET_realapp",
+  "tsc_rc": 0,
+  "files": 1,
+  "tests": 3,
+  "failed": 0,
+  "pending": 0,
+  "predicted": "drafter: 0 red \u2014 the 307 is request-time (versioning.ts:47) so nothing pins that index.ts re-evaluated under production",
+  "reds": []
+ },
+ {
+  "row": "NOPRODENV_realapp",
+  "tsc_rc": 0,
+  "files": 1,
+  "tests": 3,
+  "failed": 1,
+  "pending": 0,
+  "predicted": "drafter: 1 red (the 307 assertion)",
+  "reds": [
+   [
+    "KS-871 real app, NODE_ENV=production \u2014 a refused erasure after the 307 is audited canonica",
+    "AssertionError: production redirects the unversioned path: expected 403 to be 307 // Object.is equality"
+   ]
+  ]
+ },
+ {
+  "row": "WITNESS_reset",
+  "failed": 0,
+  "tests": 3,
+  "responses": [
+   {
+    "path": "/api/logs",
+    "ua": "ks871-real-app-logs",
+    "status": 204,
+    "csrfHeader": false,
+    "nodeEnvAtRequest": "test"
+   },
+   {
+    "path": "/api/v1/logs",
+    "ua": "ks871-real-app-v1-logs",
+    "status": 204,
+    "csrfHeader": false,
+    "nodeEnvAtRequest": "test"
+   },
+   {
+    "path": "/api/gdpr/erasures",
+    "ua": "ks871-prod-307",
+    "status": 307,
+    "csrfHeader": true,
+    "nodeEnvAtRequest": "production"
+   },
+   {
+    "path": "/api/v1/gdpr/erasures",
+    "ua": "ks871-prod-erasure-refused",
+    "status": 403,
+    "csrfHeader": true,
+    "nodeEnvAtRequest": "production"
+   }
+  ]
+ },
+ {
+  "row": "WITNESS_noreset",
+  "failed": 0,
+  "tests": 3,
+  "responses": [
+   {
+    "path": "/api/logs",
+    "ua": "ks871-real-app-logs",
+    "status": 204,
+    "csrfHeader": false,
+    "nodeEnvAtRequest": "test"
+   },
+   {
+    "path": "/api/v1/logs",
+    "ua": "ks871-real-app-v1-logs",
+    "status": 204,
+    "csrfHeader": false,
+    "nodeEnvAtRequest": "test"
+   },
+   {
+    "path": "/api/gdpr/erasures",
+    "ua": "ks871-prod-307",
+    "status": 307,
+    "csrfHeader": false,
+    "nodeEnvAtRequest": "production"
+   },
+   {
+    "path": "/api/v1/gdpr/erasures",
+    "ua": "ks871-prod-erasure-refused",
+    "status": 403,
+    "csrfHeader": false,
+    "nodeEnvAtRequest": "production"
+   }
+  ]
+ }
+]

@@ -1,0 +1,200 @@
+ready_compare 06:35:01 AEST
+READY sections 2 ['+++ b/Blockchain/Dev/services/auth/src/routes/users.ts', '+++ b/Blockchain/Dev/services/auth/src/__tests__/ks1018-security-correctness-three-verification-store-reads.test.ts']
+test section hunk headers ['@@ -0,0 +1,145 @@']
+test section + lines 139
+  commit1 blob lines 214 | READY + lines matched in order 139 of 139
+    insert READY[10:10] -> commit1[10:14]
+      + commit1 |  * Added by seat A (KS-1018; the READY covered two of the three sites and no log line):
+      + commit1 |  *   🔴 REPRO POST /me/verification — ECONNREFUSED on the pending-request read → 503, nothing saved (was 200 + a new PENDING row)
+      + commit1 |  *   CONTROL POST /me/verification — a non-infra error on that read still falls through (200 PENDING)
+      + commit1 |  *   🔴 each rethrow logs exactly one `DB <fn> failed` line whose meta is exactly {error, code} (was no log at all)
+    insert READY[67:67] -> commit1[71:86]
+      + commit1 | // KS-1018 (seat A): the logger mock is read back so each rethrow's log line is pinned, not just the status.
+      + commit1 | import { logger } from '../utils/logger';
+      + commit1 | 
+      + commit1 | // KS-1018 (seat A): POST /me/verification falls through to saveVerificationRequest at base, which writes
+      + commit1 | // a PENDING row into the route module's in-memory map. Its cells use their own users so that state can
+      + commit1 | // never reach the GET cells above, which read the map for SEED_USER_ID.
+      + commit1 | const POST_INFRA_USER_ID = 'bbbbbbbb-2222-4222-8222-bbbbbbbbbbbb';
+      + commit1 | const POST_CONTROL_USER_ID = 'cccccccc-2222-4222-8222-cccccccccccc';
+      + commit1 | 
+      + commit1 | /** The single `DB <fn> failed` error line, asserted to carry exactly {error, code} (no user id, no stack). */
+      + commit1 | function expectOneInfraLog(fn: string): void {
+      + commit1 |   const lines = vi.mocked(logger.error).mock.calls.filter(([msg]) => msg === `DB ${fn} failed`);
+      + commit1 |   expect(lines).toHaveLength(1);
+      + commit1 |   expect(Object.keys(lines[0][1] as Record<string, unknown>).sort()).toEqual(['code', 'error']);
+      + commit1 | }
+    insert READY[138:138] -> commit1[157:213]
+      + commit1 | 
+      + commit1 |   // KS-1018 (seat A): the third site, findPendingVerificationRequest, had no cell in the READY. Only its
+      + commit1 |   // SELECT fails, so the fall-through at base is observable: base answered 200 and saved a new PENDING
+      + commit1 |   // request as if none existed; the fix refuses with 503 before anything is written.
+      + commit1 |   it('🔴 KS-1018 — POST /me/verification: a refused DB connection on the pending-request read answers 503 and saves nothing', async () => {
+      + commit1 |     state.users.set(POST_INFRA_USER_ID, { id: POST_INFRA_USER_ID, email: 'b@tenant-a.example', role: 'USER', status: 'ACTIVE', verificationLevel: 'BAS
+      + commit1 |     state.caller = { userId: POST_INFRA_USER_ID, role: 'USER', tenantId: 'tenant-default' };
+      + commit1 |     dbQuery.mockImplementation(async (sql: string) => {
+      + commit1 |       if (/SELECT[\s\S]*status = 'PENDING'/.test(sql)) throw INFRA_ERROR;
+      + commit1 |       return { rows: [] };
+      + commit1 |     });
+      + commit1 |     const res = await fetch(`${baseUrl}/me/verification`, {
+      + commit1 |       method: 'POST',
+      + commit1 |       headers: { 'Content-Type': 'application/json' },
+      + commit1 |       body: JSON.stringify({ targetLevel: 'ENHANCED' }),
+      + commit1 |     });
+      + commit1 |     expect(res.status).toBe(503);
+      + commit1 |     const body = await res.json();
+      + commit1 |     expect(body.error.code).toBe('SERVICE_UNAVAILABLE');
+      + commit1 |     const inserts = dbQuery.mock.calls.filter(([sql]) => /INSERT INTO verification_upgrade_requests/.test(sql as string));
+      + commit1 |     expect(inserts).toHaveLength(0);
+      + commit1 |     expectOneInfraLog('findPendingVerificationRequest');
+      + commit1 |   });
+      + commit1 | 
+      + commit1 |   it('KS-1018 control — POST /me/verification: a non-infrastructure error on the pending-request read still falls through', async () => {
+      + commit1 |     state.users.set(POST_CONTROL_USER_ID, { id: POST_CONTROL_USER_ID, email: 'c@tenant-a.example', role: 'USER', status: 'ACTIVE', verificationLevel: 
+      + commit1 |     state.caller = { userId: POST_CONTROL_USER_ID, role: 'USER', tenantId: 'tenant-default' };
+      + commit1 |     dbQuery.mockImplementation(async (sql: string) => {
+      + commit1 |       if (/SELECT[\s\S]*status = 'PENDING'/.test(sql)) throw Object.assign(new Error('relation does not exist'), { code: '42P01' });
+      + commit1 |       return { rows: [] };
+      + commit1 |     });
+      + commit1 |     const res = await fetch(`${baseUrl}/me/verification`, {
+      + commit1 |       method: 'POST',
+      + commit1 |       headers: { 'Content-Type': 'application/json' },
+      + commit1 |       body: JSON.stringify({ targetLevel: 'ENHANCED' }),
+      + commit1 |     });
+      + commit1 |     expect(res.status).toBe(200);
+      + commit1 |     const body = await res.json();
+      + commit1 |     expect(body.data.status).toBe('PENDING');
+      + commit1 |   });
+      + commit1 | 
+      + commit1 |   // KS-1018 (seat A): each rethrow logs one line whose meta is exactly {error, code}; the READY cells asserted
+      + commit1 |   // only the status, so a missing log line or a user id / stack added to it would have gone unseen.
+      + commit1 |   it('KS-1018 — each infrastructure rethrow logs exactly one line carrying only {error, code}', async () => {
+      + commit1 |     dbQuery.mockRejectedValue(INFRA_ERROR);
+      + commit1 |     await fetch(`${baseUrl}/me/verification`);
+      + commit1 |     expectOneInfraLog('listUserVerificationRequests');
+      + commit1 |     vi.mocked(logger.error).mockClear();
+      + commit1 |     state.caller = { userId: SEED_USER_ID, role: 'SYSTEM_ADMIN', tenantId: 'tenant-default' };
+      + commit1 |     await fetch(`${baseUrl}/verification/some-id/review`, {
+      + commit1 |       method: 'POST',
+      + commit1 |       headers: { 'Content-Type': 'application/json' },
+      + commit1 |       body: JSON.stringify({ action: 'approve' }),
+      + commit1 |     });
+      + commit1 |     expectOneInfraLog('getVerificationRequest');
+      + commit1 |   });
+  head blob lines 216 | READY + lines matched in order 136 of 139
+    insert READY[10:10] -> head[10:14]
+      + head   |  * Added by seat A (KS-1018; the READY covered two of the three sites and no log line):
+      + head   |  *   🔴 REPRO POST /me/verification — ECONNREFUSED on the pending-request read → 503, nothing saved (was 200 + a new PENDING row)
+      + head   |  *   CONTROL POST /me/verification — a non-infra error on that read still falls through (200 PENDING)
+      + head   |  *   🔴 each rethrow logs exactly one `DB <fn> failed` line whose meta is exactly {error, code} (was no log at all)
+    insert READY[67:67] -> head[71:88]
+      + head   | // KS-1018 (seat A): the logger mock is read back so each rethrow's log line is pinned, not just the status.
+      + head   | import { logger } from '../utils/logger';
+      + head   | 
+      + head   | // KS-1018 (seat A): POST /me/verification falls through to saveVerificationRequest at base, which writes
+      + head   | // a PENDING row into the route module's in-memory map. Its cells use their own users so that state can
+      + head   | // never reach the GET cells above, which read the map for SEED_USER_ID.
+      + head   | const POST_INFRA_USER_ID = 'bbbbbbbb-2222-4222-8222-bbbbbbbbbbbb';
+      + head   | const POST_CONTROL_USER_ID = 'cccccccc-2222-4222-8222-cccccccccccc';
+      + head   | 
+      + head   | /** The single `DB <fn> failed` error line, asserted to carry exactly {error, code} (no user id, no stack). */
+      + head   | function expectOneInfraLog(fn: string): void {
+      + head   |   // The logger's overloads type a call as [object]; the route calls it as (message, meta).
+      + head   |   const calls = vi.mocked(logger.error).mock.calls as unknown as Array<[string, Record<string, unknown>]>;
+      + head   |   const lines = calls.filter(([msg]) => msg === `DB ${fn} failed`);
+      + head   |   expect(lines).toHaveLength(1);
+      + head   |   expect(Object.keys(lines[0][1]).sort()).toEqual(['code', 'error']);
+      + head   | }
+    replace READY[113:114] -> head[134:135]
+      - READY  |     const body = await res.json();
+      + head   |     const body = (await res.json()) as { error: { code: string } }; // KS-1018 (seat A): typed for an including tsc
+    replace READY[126:127] -> head[147:148]
+      - READY  |     const body = await res.json();
+      + head   |     const body = (await res.json()) as { error: { code: string } }; // KS-1018 (seat A): typed for an including tsc
+    replace READY[135:136] -> head[156:157]
+      - READY  |     const body = await res.json();
+      + head   |     const body = (await res.json()) as { data: { requests: unknown[] } }; // KS-1018 (seat A): typed for an including tsc
+    insert READY[138:138] -> head[159:215]
+      + head   | 
+      + head   |   // KS-1018 (seat A): the third site, findPendingVerificationRequest, had no cell in the READY. Only its
+      + head   |   // SELECT fails, so the fall-through at base is observable: base answered 200 and saved a new PENDING
+      + head   |   // request as if none existed; the fix refuses with 503 before anything is written.
+      + head   |   it('🔴 KS-1018 — POST /me/verification: a refused DB connection on the pending-request read answers 503 and saves nothing', async () => {
+      + head   |     state.users.set(POST_INFRA_USER_ID, { id: POST_INFRA_USER_ID, email: 'b@tenant-a.example', role: 'USER', status: 'ACTIVE', verificationLevel: 'BAS
+      + head   |     state.caller = { userId: POST_INFRA_USER_ID, role: 'USER', tenantId: 'tenant-default' };
+      + head   |     dbQuery.mockImplementation(async (sql: string) => {
+      + head   |       if (/SELECT[\s\S]*status = 'PENDING'/.test(sql)) throw INFRA_ERROR;
+      + head   |       return { rows: [] };
+      + head   |     });
+      + head   |     const res = await fetch(`${baseUrl}/me/verification`, {
+      + head   |       method: 'POST',
+      + head   |       headers: { 'Content-Type': 'application/json' },
+      + head   |       body: JSON.stringify({ targetLevel: 'ENHANCED' }),
+      + head   |     });
+      + head   |     expect(res.status).toBe(503);
+      + head   |     const body = (await res.json()) as { error: { code: string } }; // KS-1018 (seat A): typed for an including tsc
+      + head   |     expect(body.error.code).toBe('SERVICE_UNAVAILABLE');
+      + head   |     const inserts = dbQuery.mock.calls.filter(([sql]) => /INSERT INTO verification_upgrade_requests/.test(sql as string));
+      + head   |     expect(inserts).toHaveLength(0);
+      + head   |     expectOneInfraLog('findPendingVerificationRequest');
+      + head   |   });
+      + head   | 
+      + head   |   it('KS-1018 control — POST /me/verification: a non-infrastructure error on the pending-request read still falls through', async () => {
+      + head   |     state.users.set(POST_CONTROL_USER_ID, { id: POST_CONTROL_USER_ID, email: 'c@tenant-a.example', role: 'USER', status: 'ACTIVE', verificationLevel: 
+      + head   |     state.caller = { userId: POST_CONTROL_USER_ID, role: 'USER', tenantId: 'tenant-default' };
+      + head   |     dbQuery.mockImplementation(async (sql: string) => {
+      + head   |       if (/SELECT[\s\S]*status = 'PENDING'/.test(sql)) throw Object.assign(new Error('relation does not exist'), { code: '42P01' });
+      + head   |       return { rows: [] };
+      + head   |     });
+      + head   |     const res = await fetch(`${baseUrl}/me/verification`, {
+      + head   |       method: 'POST',
+      + head   |       headers: { 'Content-Type': 'application/json' },
+      + head   |       body: JSON.stringify({ targetLevel: 'ENHANCED' }),
+      + head   |     });
+      + head   |     expect(res.status).toBe(200);
+      + head   |     const body = (await res.json()) as { data: { status: string } }; // KS-1018 (seat A): typed for an including tsc
+      + head   |     expect(body.data.status).toBe('PENDING');
+      + head   |   });
+      + head   | 
+      + head   |   // KS-1018 (seat A): each rethrow logs one line whose meta is exactly {error, code}; the READY cells asserted
+      + head   |   // only the status, so a missing log line or a user id / stack added to it would have gone unseen.
+      + head   |   it('KS-1018 — each infrastructure rethrow logs exactly one line carrying only {error, code}', async () => {
+      + head   |     dbQuery.mockRejectedValue(INFRA_ERROR);
+      + head   |     await fetch(`${baseUrl}/me/verification`);
+      + head   |     expectOneInfraLog('listUserVerificationRequests');
+      + head   |     vi.mocked(logger.error).mockClear();
+      + head   |     state.caller = { userId: SEED_USER_ID, role: 'SYSTEM_ADMIN', tenantId: 'tenant-default' };
+      + head   |     await fetch(`${baseUrl}/verification/some-id/review`, {
+      + head   |       method: 'POST',
+      + head   |       headers: { 'Content-Type': 'application/json' },
+      + head   |       body: JSON.stringify({ action: 'approve' }),
+      + head   |     });
+      + head   |     expectOneInfraLog('getVerificationRequest');
+      + head   |   });
+product READY +14 -4 | pushed diff base..head +14 -4 | + equal in order: True | - equal in order: True
+users.ts blob c1 == head: True
+transpile rc 0 
+emitted-JS diff lines (types erased, comments removed): 21
+    --- c1.js
+    +++ head.js
+    @@ -48 +48,2 @@
+    -    const lines = vi.mocked(logger.error).mock.calls.filter(([msg]) => msg === `DB ${fn} failed`);
+    +    const calls = vi.mocked(logger.error).mock.calls;
+    +    const lines = calls.filter(([msg]) => msg === `DB ${fn} failed`);
+    @@ -90 +91 @@
+    -        const body = await res.json();
+    +        const body = (await res.json());
+    @@ -102 +103 @@
+    -        const body = await res.json();
+    +        const body = (await res.json());
+    @@ -109 +110 @@
+    -        const body = await res.json();
+    +        const body = (await res.json());
+    @@ -126 +127 @@
+    -        const body = await res.json();
+    +        const body = (await res.json());
+    @@ -146 +147 @@
+    -        const body = await res.json();
+    +        const body = (await res.json());
+CONTROL (a planted runtime edit toHaveLength(1)->(2)) emitted-JS diff lines: 5
+end 06:35:01 AEST

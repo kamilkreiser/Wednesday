@@ -1,0 +1,14 @@
+misc_read 2026-09-17 06:58:00 AEST
+Blockchain/Dev/services/api-gateway/src/index.ts:562:  if (req.path.startsWith('/api/v1/')) req.url = req.url.replace('/api/v1/', '/api/');
+Blockchain/Dev/services/api-gateway/src/routes/proxy.ts:594:  router.use('/api/v2/verification',
+Blockchain/Dev/services/api-gateway/src/routes/proxy.ts:589:  router.use('/api/verification',
+sha256 verification.ts head 5bbb967cf6e435e1ecb8852276e1ba93aa3b99ae49a3a6076fbffb44420efc89 base 72ff7db4f4c017ef61f6f11d678890228bfeffa8b875e342dd45c592ffc8c797 ks1072 head 2fc81209cf7ee5e018bc1872fbce54c041835776ec2f0aab218006dd631baab0
+--- docker/init + migrations: unique on anchor_store document_id (READ; -i; control: CREATE TABLE count above = 10)
+Blockchain/Dev/migrations/007_anchor_store_unique_document.sql:2:-- 007: anchor_store.document_id unique constraint (F-03 LIVE follow-on)
+Blockchain/Dev/migrations/007_anchor_store_unique_document.sql:5:-- on `document_id`. The schema only had a non-unique btree index, which made
+Blockchain/Dev/migrations/007_anchor_store_unique_document.sql:20:CREATE UNIQUE INDEX IF NOT EXISTS anchor_store_document_id_uniq
+Blockchain/Dev/migrations/031_anchor_store_network_unique.sql:2:-- 031: anchor_store unique key (document_id) -> (document_id, network)  [KS-281]
+Blockchain/Dev/migrations/031_anchor_store_network_unique.sql:25:--    Today there is at most one row per document_id (the 007 unique enforced it),
+Blockchain/Dev/migrations/031_anchor_store_network_unique.sql:39:CREATE UNIQUE INDEX IF NOT EXISTS anchor_store_document_network_uniq
+Blockchain/Dev/migrations/031_anchor_store_network_unique.sql:47:CREATE UNIQUE INDEX IF NOT EXISTS anchor_store_document_id_uniq
+Blockchain/Dev/services/anchoring/src/index.ts:209:    await query(`CREATE UNIQUE INDEX IF NOT EXISTS anchor_store_document_network_uniq ON anchor_store(document_id, network)`);

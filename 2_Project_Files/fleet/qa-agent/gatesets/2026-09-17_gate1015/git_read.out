@@ -1,0 +1,91 @@
+git_read 2026-09-17 06:28:52 AEST
+523f283c6cd2550263ec9869dc5ee722be40df4e	refs/heads/develop
+77145ce84353534ba381688d5bbd16ff9ff27aef	refs/pull/1015/head
+branch for head:
+77145ce84353534ba381688d5bbd16ff9ff27aef	refs/heads/feature/ks-1018-ornith-verification-store-reads-rethrow-infra
+77145ce84353534ba381688d5bbd16ff9ff27aef	refs/pull/1015/head
+develop now 523f283c6cd2550263ec9869dc5ee722be40df4e
+cat-file head: commit
+log head (parents):
+77145ce84353534ba381688d5bbd16ff9ff27aef 6e30fe9f5ea3abd8414bfe69db2356d31c2da4d6 KS-1018: type the ks1018 test's JSON bodies and log-call tuples for an including tsc
+6e30fe9f5ea3abd8414bfe69db2356d31c2da4d6 523f283c6cd2550263ec9869dc5ee722be40df4e KS-1018: the three verification-store reads rethrow infrastructure DB errors as 503 instead of answering from the in-memory map
+523f283c6cd2550263ec9869dc5ee722be40df4e e0f41a8fafd64fa31524390cfeab320e822f3d15 KS-871: the audit row records the canonical path captured at entry, so a refused erasure is audited as /api/gdpr/erasures and gdpr.create (#1011)
+merge-base head develop: 523f283c6cd2550263ec9869dc5ee722be40df4e
+rev-list develop..head: 2  head..develop: 0
+--- base->head numstat/raw
+216	0	Blockchain/Dev/services/auth/src/__tests__/ks1018-security-correctness-three-verification-store-reads.test.ts
+14	4	Blockchain/Dev/services/auth/src/routes/users.ts
+:000000 100644 0000000000000000000000000000000000000000 6723276d016e4d6cf4ead8cb4f511ce5dad5ce53 A	Blockchain/Dev/services/auth/src/__tests__/ks1018-security-correctness-three-verification-store-reads.test.ts
+:100644 100644 89da72df7bfab2275550de0868288b7958ea059c 8ef9065e2fb24308daeb41820a227a4ee1d6ecc9 M	Blockchain/Dev/services/auth/src/routes/users.ts
+patch lines      272
+--- commit 1 6e30fe9f5ea3abd8414bfe69db2356d31c2da4d6 numstat
+214	0	Blockchain/Dev/services/auth/src/__tests__/ks1018-security-correctness-three-verification-store-reads.test.ts
+14	4	Blockchain/Dev/services/auth/src/routes/users.ts
+--- commit 2 77145ce84353534ba381688d5bbd16ff9ff27aef vs 6e30fe9f5ea3abd8414bfe69db2356d31c2da4d6 numstat
+9	7	Blockchain/Dev/services/auth/src/__tests__/ks1018-security-correctness-three-verification-store-reads.test.ts
+commit2 patch lines       63
+--- commit messages
+=== 77145ce84353534ba381688d5bbd16ff9ff27aef
+KS-1018: type the ks1018 test's JSON bodies and log-call tuples for an including tsc
+
+The project tsc excludes src/__tests__ (KS-1000), so these did not gate;
+an including program reported 8 errors in the new file (TS18046 untyped
+res.json() bodies, and the logger mock's [object] overload). Casts only;
+no runtime change.
+
+Refs KS-1018
+
+Co-Authored-By: Claude Opus 5 <noreply@anthropic.com>
+
+=== 6e30fe9f5ea3abd8414bfe69db2356d31c2da4d6
+KS-1018: the three verification-store reads rethrow infrastructure DB errors as 503 instead of answering from the in-memory map
+
+getVerificationRequest, findPendingVerificationRequest and
+listUserVerificationRequests (auth routes/users.ts) caught every DB error with
+an empty `catch {}` and answered from the process-local in-memory map, so a DB
+outage read as "no such request" (review: 404; list: 200 with no requests;
+new request: accepted as if none were pending). Each catch now logs
+`DB <fn> failed` with {error, code} and rethrows an infrastructure error as
+ServiceUnavailableError (503); any other error falls through as before.
+
+New ks1018-security-correctness-three-verification-store-reads.test.ts: the
+READY's two repro cells and control, plus the third site (POST
+/me/verification), its non-infra control, and a pin on the log line's meta.
+
+Product lines and the first three cells authored by the local model (Ornith)
+from a Wednesday-written brief; source-read by Wednesday; applied, extended
+and re-run by seat A.
+
+Refs KS-1018
+
+Co-Authored-By: Claude Opus 5 <noreply@anthropic.com>
+
+--- touched test files at head
+Blockchain/Dev/services/auth/src/__tests__/ks1018-security-correctness-three-verification-store-reads.test.ts
+Blockchain/Dev/services/auth/src/routes/users.ts
+--- callers of the three reads at head (auth src, non-test)
+77145ce84353534ba381688d5bbd16ff9ff27aef:Blockchain/Dev/services/auth/src/routes/users.ts:1147:async function saveVerificationRequest(req: VerificationRequest): Promise<void> {
+77145ce84353534ba381688d5bbd16ff9ff27aef:Blockchain/Dev/services/auth/src/routes/users.ts:1162:      logger.warn('DB saveVerificationRequest failed — in-memory only', { error: err?.message });
+77145ce84353534ba381688d5bbd16ff9ff27aef:Blockchain/Dev/services/auth/src/routes/users.ts:1167:async function getVerificationRequest(id: string): Promise<VerificationRequest | null> {
+77145ce84353534ba381688d5bbd16ff9ff27aef:Blockchain/Dev/services/auth/src/routes/users.ts:1185:      logger.error('DB getVerificationRequest failed', { error: err?.message, code: err?.code });
+77145ce84353534ba381688d5bbd16ff9ff27aef:Blockchain/Dev/services/auth/src/routes/users.ts:1192:async function findPendingVerificationRequest(userId: string): Promise<VerificationRequest | null> {
+77145ce84353534ba381688d5bbd16ff9ff27aef:Blockchain/Dev/services/auth/src/routes/users.ts:1209:      logger.error('DB findPendingVerificationRequest failed', { error: err?.message, code: err?.code });
+77145ce84353534ba381688d5bbd16ff9ff27aef:Blockchain/Dev/services/auth/src/routes/users.ts:1218:async function listUserVerificationRequests(userId: string): Promise<VerificationRequest[]> {
+77145ce84353534ba381688d5bbd16ff9ff27aef:Blockchain/Dev/services/auth/src/routes/users.ts:1234:      logger.error('DB listUserVerificationRequests failed', { error: err?.message, code: err?.code });
+77145ce84353534ba381688d5bbd16ff9ff27aef:Blockchain/Dev/services/auth/src/routes/users.ts:1260:    const existingRequest = await findPendingVerificationRequest(user.id);
+77145ce84353534ba381688d5bbd16ff9ff27aef:Blockchain/Dev/services/auth/src/routes/users.ts:1283:    await saveVerificationRequest(request);
+77145ce84353534ba381688d5bbd16ff9ff27aef:Blockchain/Dev/services/auth/src/routes/users.ts:1302:    const requests = await listUserVerificationRequests(user.id);
+77145ce84353534ba381688d5bbd16ff9ff27aef:Blockchain/Dev/services/auth/src/routes/users.ts:1319:    const request = await getVerificationRequest(requestId);
+77145ce84353534ba381688d5bbd16ff9ff27aef:Blockchain/Dev/services/auth/src/routes/users.ts:1348:      await saveVerificationRequest(request);
+77145ce84353534ba381688d5bbd16ff9ff27aef:Blockchain/Dev/services/auth/src/routes/users.ts:1356:      await saveVerificationRequest(request);
+--- positive control: grep for isInfrastructureDbError in auth src at head
+77145ce84353534ba381688d5bbd16ff9ff27aef:Blockchain/Dev/services/auth/src/__tests__/dbErrors.test.ts:7
+77145ce84353534ba381688d5bbd16ff9ff27aef:Blockchain/Dev/services/auth/src/__tests__/ks949-platform-admin-seed-identity.test.ts:1
+77145ce84353534ba381688d5bbd16ff9ff27aef:Blockchain/Dev/services/auth/src/repositories/dbErrors.ts:2
+77145ce84353534ba381688d5bbd16ff9ff27aef:Blockchain/Dev/services/auth/src/repositories/userRepo.ts:7
+77145ce84353534ba381688d5bbd16ff9ff27aef:Blockchain/Dev/services/auth/src/routes/users.ts:4
+--- checkout
+checkout HEAD 355d82c8b porcelain 0 config_sha256 d7e7298b02c45f5267520f79985ae97abe51ac3d8b82a7e8cb35c50059a09f66 refs 904 worktrees_dir 110
+-rw-r--r--@ 1 kam_code  staff  5907 17 Sep 01:02 /Volumes/DevMASTER/!CODING/Secuura/Blockchain/2_Project_Files/Blockchain/Dev/services/api-gateway/node_modules/.vite/vitest/da39a3ee5e6b4b0d3255bfef95601890afd80709/results.json
+-rw-r--r--@ 1 kam_code  staff  6697  9 Sep 08:58 /Volumes/DevMASTER/!CODING/Secuura/Blockchain/2_Project_Files/Blockchain/Dev/services/auth/node_modules/.vite/vitest/da39a3ee5e6b4b0d3255bfef95601890afd80709/results.json
+end 06:29:08 AEST

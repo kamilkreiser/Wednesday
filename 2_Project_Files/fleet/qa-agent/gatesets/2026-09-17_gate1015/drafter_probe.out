@@ -1,0 +1,75 @@
+drafter_probe start 06:38:40 AEST
+base vitest rc 0 [' Test Files  1 passed (1)', '      Tests  1 passed (1)', '   Start at  06:38:44', '   Duration  6.48s (transform 144ms, setup 79ms, import 5.11s, tests 140ms, environment 0ms)']
+head vitest rc 0 [' Test Files  1 passed (1)', '      Tests  1 passed (1)', '   Start at  06:38:51', '   Duration  472ms (transform 90ms, setup 60ms, import 278ms, tests 44ms, environment 0ms)']
+
+S1 POST dup while PENDING exists, fault pending-read ECONNREFUSED
+  base 200 {"success":true,"message":"Verification request submitted for review","data":{"requestId":"vr-a469fc99-fad0-40c2-9ae9-88 | inserts [['vr-a469fc99-fad0-40c2-9ae9-88eece75ebc5', 's11269-aaaa-4aaa-8aaa-aaaaaaaaaaaa', 'PENDING']] | userWrites [] | errorLogs [] | warn [] | pendingRowsForCaller 2 | retry-after None
+  head 503 {"success":false,"error":{"code":"SERVICE_UNAVAILABLE","message":"Authentication service temporarily unavailable, please | inserts [] | userWrites [] | errorLogs [['DB findPendingVerificationRequest failed', ['code', 'error']], ['Error occurred', ['error', 'method', 'path', 'stack']]] | warn [] | pendingRowsForCaller 1 | retry-after None
+
+S1 POST dup while PENDING exists, fault pending-read message-form
+  base 200 {"success":true,"message":"Verification request submitted for review","data":{"requestId":"vr-fbfbd345-da9e-443c-a710-a7 | inserts [['vr-fbfbd345-da9e-443c-a710-a79585ae98b4', 's112109-aaaa-4aaa-8aaa-aaaaaaaaaaaa', 'PENDING']] | userWrites [] | errorLogs [] | warn [] | pendingRowsForCaller 2 | retry-after None
+  head 503 {"success":false,"error":{"code":"SERVICE_UNAVAILABLE","message":"Authentication service temporarily unavailable, please | inserts [] | userWrites [] | errorLogs [['DB findPendingVerificationRequest failed', ['code', 'error']], ['Error occurred', ['error', 'method', 'path', 'stack']]] | warn [] | pendingRowsForCaller 1 | retry-after None
+
+S1 POST dup while PENDING exists, fault pending-read pg-53300
+  base 200 {"success":true,"message":"Verification request submitted for review","data":{"requestId":"vr-94f40416-9dad-4543-86e5-b8 | inserts [['vr-94f40416-9dad-4543-86e5-b83d5660a680', 's18112-aaaa-4aaa-8aaa-aaaaaaaaaaaa', 'PENDING']] | userWrites [] | errorLogs [] | warn [] | pendingRowsForCaller 2 | retry-after None
+  head 503 {"success":false,"error":{"code":"SERVICE_UNAVAILABLE","message":"Authentication service temporarily unavailable, please | inserts [] | userWrites [] | errorLogs [['DB findPendingVerificationRequest failed', ['code', 'error']], ['Error occurred', ['error', 'method', 'path', 'stack']]] | warn [] | pendingRowsForCaller 1 | retry-after None
+
+S1 POST dup while PENDING exists, fault pending-read non-infra-42P01
+  base 200 {"success":true,"message":"Verification request submitted for review","data":{"requestId":"vr-535d068e-915b-4b82-9a4b-2b | inserts [['vr-535d068e-915b-4b82-9a4b-2b9c8c4c8e73', 's115110-aaaa-4aaa-8aaa-aaaaaaaaaaaa', 'PENDING']] | userWrites [] | errorLogs [] | warn [] | pendingRowsForCaller 2 | retry-after None
+  head 200 {"success":true,"message":"Verification request submitted for review","data":{"requestId":"vr-5a3b99b4-3b27-49f7-a48d-ea | inserts [['vr-5a3b99b4-3b27-49f7-a48d-eabd90c10e54', 's115110-aaaa-4aaa-8aaa-aaaaaaaaaaaa', 'PENDING']] | userWrites [] | errorLogs [['DB findPendingVerificationRequest failed', ['code', 'error']]] | warn [] | pendingRowsForCaller 2 | retry-after None
+
+S1 control healthy POST while PENDING exists
+  base 400 {"success":false,"error":{"code":"BAD_REQUEST","message":"A verification request is already pending"}} | inserts [] | userWrites [] | errorLogs [['Error occurred', ['error', 'method', 'path', 'stack']]] | warn [] | pendingRowsForCaller 1 | retry-after None
+  head 400 {"success":false,"error":{"code":"BAD_REQUEST","message":"A verification request is already pending"}} | inserts [] | userWrites [] | errorLogs [['Error occurred', ['error', 'method', 'path', 'stack']]] | warn [] | pendingRowsForCaller 1 | retry-after None
+
+S2 POST STANDARD auto-approve while PENDING exists, fault pending-read ECONNREFUSED
+  base 200 {"success":true,"message":"Verification level upgraded to STANDARD (MFA already enabled)","data":{"currentLevel":"STANDA | inserts [] | userWrites [['updateUser', 's2aa-aaaa-4aaa-8aaa-aaaaaaaaaaaa', {'verificationLevel': 'STANDARD'}]] | errorLogs [] | warn [] | pendingRowsForCaller 1 | retry-after None
+  head 503 {"success":false,"error":{"code":"SERVICE_UNAVAILABLE","message":"Authentication service temporarily unavailable, please | inserts [] | userWrites [] | errorLogs [['DB findPendingVerificationRequest failed', ['code', 'error']], ['Error occurred', ['error', 'method', 'path', 'stack']]] | warn [] | pendingRowsForCaller 1 | retry-after None
+
+S3 setup healthy POST
+  base 200 {"success":true,"message":"Verification request submitted for review","data":{"requestId":"vr-152018b9-389e-4625-90f7-80 | inserts [['vr-152018b9-389e-4625-90f7-80e088030b38', 's3aa-aaaa-4aaa-8aaa-aaaaaaaaaaaa', 'PENDING']] | userWrites [] | errorLogs [] | warn [] | pendingRowsForCaller 1 | retry-after None
+  head 200 {"success":true,"message":"Verification request submitted for review","data":{"requestId":"vr-81a89ad5-b04d-4679-a04c-f7 | inserts [['vr-81a89ad5-b04d-4679-a04c-f71958e1f6e4', 's3aa-aaaa-4aaa-8aaa-aaaaaaaaaaaa', 'PENDING']] | userWrites [] | errorLogs [] | warn [] | pendingRowsForCaller 1 | retry-after None
+
+S3 control healthy review of the REJECTED request
+  base 400 {"success":false,"error":{"code":"BAD_REQUEST","message":"Request already REJECTED"}} | inserts [] | userWrites [] | errorLogs [['Error occurred', ['error', 'method', 'path', 'stack']]] | warn [] | pendingRowsForCaller 0 | retry-after None
+  head 400 {"success":false,"error":{"code":"BAD_REQUEST","message":"Request already REJECTED"}} | inserts [] | userWrites [] | errorLogs [['Error occurred', ['error', 'method', 'path', 'stack']]] | warn [] | pendingRowsForCaller 0 | retry-after None
+
+S3 review approve, by-id read faults ECONNREFUSED, memory holds a stale PENDING copy
+  base 200 {"success":true,"message":"Verification approved","data":{"id":"vr-152018b9-389e-4625-90f7-80e088030b38","userId":"s3aa- | inserts [['vr-152018b9-389e-4625-90f7-80e088030b38', 's3aa-aaaa-4aaa-8aaa-aaaaaaaaaaaa', 'APPROVED']] | userWrites [['updateUserPlatformScope', 's3aa-aaaa-4aaa-8aaa-aaaaaaaaaaaa', {'verificationLevel': 'ENHANCED'}]] | errorLogs [] | warn [] | pendingRowsForCaller 0 | retry-after None | tableStatusAfter APPROVED
+  head 503 {"success":false,"error":{"code":"SERVICE_UNAVAILABLE","message":"Authentication service temporarily unavailable, please | inserts [] | userWrites [] | errorLogs [['DB getVerificationRequest failed', ['code', 'error']], ['Error occurred', ['error', 'method', 'path', 'stack']]] | warn [] | pendingRowsForCaller 0 | retry-after None | tableStatusAfter REJECTED
+
+S4 GET list healthy
+  base 200 {"success":true,"data":{"currentLevel":"BASIC","requests":[{"id":"vr-s4","userId":"s4aa-aaaa-4aaa-8aaa-aaaaaaaaaaaa","cu | inserts [] | userWrites [] | errorLogs [] | warn [] | pendingRowsForCaller 1 | retry-after None
+  head 200 {"success":true,"data":{"currentLevel":"BASIC","requests":[{"id":"vr-s4","userId":"s4aa-aaaa-4aaa-8aaa-aaaaaaaaaaaa","cu | inserts [] | userWrites [] | errorLogs [] | warn [] | pendingRowsForCaller 1 | retry-after None
+
+S4 GET list, fault ECONNREFUSED
+  base 200 {"success":true,"data":{"currentLevel":"BASIC","requests":[]}} | inserts [] | userWrites [] | errorLogs [] | warn [] | pendingRowsForCaller 1 | retry-after None
+  head 503 {"success":false,"error":{"code":"SERVICE_UNAVAILABLE","message":"Authentication service temporarily unavailable, please | inserts [] | userWrites [] | errorLogs [['DB listUserVerificationRequests failed', ['code', 'error']], ['Error occurred', ['error', 'method', 'path', 'stack']]] | warn [] | pendingRowsForCaller 1 | retry-after None
+
+S4 GET list, fault non-infra 42P01
+  base 200 {"success":true,"data":{"currentLevel":"BASIC","requests":[]}} | inserts [] | userWrites [] | errorLogs [] | warn [] | pendingRowsForCaller 1 | retry-after None
+  head 200 {"success":true,"data":{"currentLevel":"BASIC","requests":[]}} | inserts [] | userWrites [] | errorLogs [['DB listUserVerificationRequests failed', ['code', 'error']]] | warn [] | pendingRowsForCaller 1 | retry-after None
+
+S5 review unknown id healthy
+  base 404 {"success":false,"error":{"code":"NOT_FOUND","message":"Verification request not found"}} | inserts [] | userWrites [] | errorLogs [['Error occurred', ['error', 'method', 'path', 'stack']]] | warn [] | pendingRowsForCaller 0 | retry-after None
+  head 404 {"success":false,"error":{"code":"NOT_FOUND","message":"Verification request not found"}} | inserts [] | userWrites [] | errorLogs [['Error occurred', ['error', 'method', 'path', 'stack']]] | warn [] | pendingRowsForCaller 0 | retry-after None
+
+S5 review unknown id, non-infra 42P01
+  base 404 {"success":false,"error":{"code":"NOT_FOUND","message":"Verification request not found"}} | inserts [] | userWrites [] | errorLogs [['Error occurred', ['error', 'method', 'path', 'stack']]] | warn [] | pendingRowsForCaller 0 | retry-after None
+  head 404 {"success":false,"error":{"code":"NOT_FOUND","message":"Verification request not found"}} | inserts [] | userWrites [] | errorLogs [['DB getVerificationRequest failed', ['code', 'error']], ['Error occurred', ['error', 'method', 'path', 'stack']]] | warn [] | pendingRowsForCaller 0 | retry-after None
+
+S5 review unknown id, message-form infra
+  base 404 {"success":false,"error":{"code":"NOT_FOUND","message":"Verification request not found"}} | inserts [] | userWrites [] | errorLogs [['Error occurred', ['error', 'method', 'path', 'stack']]] | warn [] | pendingRowsForCaller 0 | retry-after None
+  head 503 {"success":false,"error":{"code":"SERVICE_UNAVAILABLE","message":"Authentication service temporarily unavailable, please | inserts [] | userWrites [] | errorLogs [['DB getVerificationRequest failed', ['code', 'error']], ['Error occurred', ['error', 'method', 'path', 'stack']]] | warn [] | pendingRowsForCaller 0 | retry-after None
+
+S6 POST, INSERT faults ECONNREFUSED (saveVerificationRequest unchanged)
+  base 200 {"success":true,"message":"Verification request submitted for review","data":{"requestId":"vr-3351828c-68f5-4334-9e9d-87 | inserts [] | userWrites [] | errorLogs [] | warn ['DB saveVerificationRequest failed — in-memory only'] | pendingRowsForCaller 0 | retry-after None
+  head 200 {"success":true,"message":"Verification request submitted for review","data":{"requestId":"vr-2533f5cd-da25-491d-925b-0c | inserts [] | userWrites [] | errorLogs [] | warn ['DB saveVerificationRequest failed — in-memory only'] | pendingRowsForCaller 0 | retry-after None
+
+S6 then healthy GET list
+  base 200 {"success":true,"data":{"currentLevel":"BASIC","requests":[]}} | inserts [] | userWrites [] | errorLogs [] | warn [] | pendingRowsForCaller 0 | retry-after None
+  head 200 {"success":true,"data":{"currentLevel":"BASIC","requests":[]}} | inserts [] | userWrites [] | errorLogs [] | warn [] | pendingRowsForCaller 0 | retry-after None
+
+headers on a head 503 row: [{'content-type': 'application/json; charset=utf-8', 'x-powered-by': 'Express'}]
+porcelain base [] head []
+drafter_probe end 06:38:52 AEST

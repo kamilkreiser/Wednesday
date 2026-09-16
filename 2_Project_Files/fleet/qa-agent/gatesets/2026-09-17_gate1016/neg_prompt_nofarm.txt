@@ -1,0 +1,156 @@
+ultrathink
+
+You are the fleet QA agent running ONE TIER 1 ROUND 1 gate (round 1 of 2 under the cap) over Secuura/Blockchain PR #1016 (KS-1072, Seat A) at
+head a226d94fe8c6fbfecb81de415feb645302cdd166. The change: in services/api-gateway/src/routes/verification.ts makeFetchDocFromAnchorStore, the
+latest-anchor selector now breaks EQUAL blockNumbers on the most recent confirmedAt (:301-307:
+`const byBlock = (b.blockNumber || 0) - (a.blockNumber || 0); if (byBlock !== 0) return byBlock;
+return (Date.parse(b.confirmedAt) || 0) - (Date.parse(a.confirmedAt) || 0);`), from a HELD local-model READY applied at an offset with
+--recount (its test hunk header miscounted — the R6 class), plus declared seat edits: a null/0 cell; a newer-listed-first discrimination
+control; a "tier-2 source guard" in the test helper; removal of the READY's dead `tier1Absent` flag; comments. A NEW 5-cell test file.
+TIER 1 (Wednesday's ruling): the selected anchor sets a TIER-2 VERIFY VERDICT on the public verification path (POST /api/documents/:id/verify,
+authenticated but not ownership-gated). No rendered surface changes: say whether the real-browser half of tier 1 applies.
+
+Read your brief FIRST and in full, then plan:
+/Volumes/DevMASTER/WEDNESDAY/2_Project_Files/fleet/qa-agent/briefs/2026-09-17_secuura-1016-ks1072-tier1.md
+Then the charter it names, the READY mail (gatesets/2026-09-17_gate1016/mail_1016_ready.md), the held READY
+(/Volumes/DevMASTER/WEDNESDAY/2_Project_Files/local-model/night/READY_KS-1072_ornith35b-q4_PASS-7of7_2026-09-15.diff.md) and the #1005 gate's
+report the brief names (same file, same predicate family: its P-1005-1 and P-1005-4 recur here). No prior round exists on any #1016 SHA.
+
+Head (git ls-remote 06:42:47 and 06:55:00 AEST, the PR API 06:52:48, Wednesday's ls-remote 06:41, agree; the launcher re-asserts it):
+  #1016 a226d94fe8c6fbfecb81de415feb645302cdd166 = refs/pull/1016/head = feature/ks-1072-ornith-latest-anchor-confirmedat-tiebreak
+  ONE commit, only parent 523f283c6cd2550263ec9869dc5ee722be40df4e (#1011's squash) = base = merge-base = develop at draft close.
+  2 files: verification.ts 04b3d980f -> a7a6d4605 (+7 -2); NEW ks1072-the-latest-anchor-selector-documents-a.test.ts 4ad1cdcd1 (+177).
+  compare develop...head = ahead 1, behind 0, files 2: while develop stays at 523f283c6 the merged tree IS the head tree (root eecd5f087).
+  DEVELOP IS EXPECTED TO MOVE: #1014 (KS-1176, api-gateway enforcement.ts + a ks1176 test) and #1015 (KS-1018, services/auth) are gating. Judge
+  every move by CONTENT; merge the then-current develop in your clone (never pushed), NAME the merged-tree OID, re-derive items 1, 8 and 9 on it.
+Repo:    /Volumes/DevMASTER/!CODING/Secuura/Blockchain/2_Project_Files  (READ-ONLY — git clone --shared --no-checkout by SHA into your own
+  fresh mktemp -d; git write verbs there only (clone, worktree, merge, apply, checkout), from a script file; never merge-tree --write-tree or
+  git apply in the checkout; never enter any seat's worktree or another gate's clone (a gate is running on #1014; drafters are on *1015*);
+  never vitest inside the checkout; pin by SHA, never origin/*)
+Farm node_modules as needed in your clone (R-6 from the #1009 gate): Blockchain/Dev/node_modules (987), services/api-gateway/node_modules (8)
+  and packages/shared/node_modules (8), each per entry, .vite/.vitest/.cache skipped, @secuura/* relinked into your tree. NEVER link a
+  node_modules tree wholesale — not for any package; create no node_modules where nothing runs. Build the shared dist per tree and assert
+  realpath(@secuura/shared) IN TREE.
+
+You are FINDINGS-ONLY. You never fix, never merge, never push, never deploy, never comment, never file, never tick an
+ack box, never `@`, never write to Linear or GitHub, and nothing goes to Peter or Stuart.
+
+NEVER run a push, the real pre-push hook, or preflight.sh inside the Secuura checkout or any of its worktrees.
+
+NEVER print a credential value, and never open, read or copy a secrets file into output — a script may read GH_TOKEN / LINEAR_API_KEY by
+NAME from /Volumes/DevMASTER/!CODING/Secuura/Blockchain/4_Credentials/.env and AGENTMAIL_API_KEY by NAME from
+/Volumes/DevMASTER/WEDNESDAY/4_Credentials/.env for the calls the brief allows (GitHub GET, Linear query, the one verdict mail), and never
+echoes them. Count, never echo.
+
+NO shared docker stack, no :6882 / :7082 slot, no kintsugi, no demo, no az, NEVER the wallet mnemonic (KS-535 HOLD). This gate needs NO
+container: the REAL createVerificationRoutes (and the REAL index.ts app for the v1/v2 route rows) in-process, originate and anchoring as loopback
+stubs, ANCHORING_SERVICE_URL pointed at a loopback MISS (the live chain scan, read per request, would otherwise answer cardano-live and mask the
+selector). Run `docker info` ONCE and print its rc on its own line (UP is NOT permission; create no container). LOOPBACK ONLY: every listener
+binds 127.0.0.1:0. No Akto, no k6, no Playwright, no Schemathesis run (Kam's 40% cap; NOT COMMISSIONED) — YOU rule whether Schemathesis/Akto
+are REQUIRED, with the measured reason. Time-box 45 minutes of work.
+
+Eleven things Wednesday requires (brief items 1-11; items 12-14 are added; each carries drafter predictions with predicted-by):
+
+1. EVERY VERDICT THE SELECTOR CAN CHANGE, over the REAL verify handlers with an anchor-store HIT COUNTER as the tier witness (hits === 1 tier 2,
+   === 0 tier 1, asserted BEFORE any verdict; a failed witness is VOID, never a colour) — equal blockNumbers x differing confirmedAt / status /
+   contentHash (request hash) / txHash (real vs tx_sim_) / simulated, BOTH list orders, base 523f283c6 vs head vs merged; which verdicts flip
+   and is EVERY flip toward the anchor KS-1072's own words select (highest blockNumber; then most recent confirmedAt; a missing date loses)?
+   Any flip that verifies a document that should fail, or fails one that should verify = Blocker; any change on a non-tie, single-row or tier-1
+   row = Blocker. The v1/v2 routes: /api/documents/:id/verify and /api/v1/documents/:id/verify (index.ts:562 rewrite) on the REAL index.ts app;
+   /api/v2/ carries only /api/v2/verification/* (proxied to originate) — show by hit counter which paths reach the selector, with a control.
+   Drafter (measured, router only, 30 rows): 12 VERDICT flips (S03 S04 S05 S06 S07 S08 S09 S10 S11 S12 S14 S29) + 6 txHash-only; each flip
+   selects the later-confirmed row; tier-1 row hits 0.
+2. NULL / 0 / MISSING / STRING confirmedAt and blockNumber (pairwise, both list orders), the newer-listed-first control re-derived (green base,
+   green head, red under an oldest-wins comparator), a TIE ON BOTH fields (drafter: order-dependent at base and head — rule the seat's open
+   question), and the date rows under TZ=UTC AND TZ=Australia/Sydney (drafter: an offset-LESS ISO string selects differently by TZ at head only).
+   Drafter also: 'abc' blockNumber -> NaN comparator skips the tiebreak; snake_case block_number/confirmed_at rows are invisible to the selector
+   (a snake_case HIGHER block listed second still loses, base = head); epoch-ms number and pre-1970 dates lose to a missing date. Say which of
+   these a real producer can emit (anchoring's rowToAnchor/formatAnchorResponse: camelCase, Number(), Date -> ISO Z).
+3. THE SEAT'S "TIER-2 SOURCE GUARD IN THE HELPER" — `expect(body.blockchain.source).toBe('persisted')` in the TEST helper postTier2 (:124): what
+   it changes (product: nothing — prove by parser), for which callers (the file's 5 cells), base vs head. source is keyed on the HASH (:774), so
+   it is NOT a tier witness — the #1005 gate's P-1005-1, recurring in the same seat's next PR. Drafter (measured): with the originate stub
+   answering a confirmed tier-1 blob, 5/5 red at the txHash assertion, the guard GREEN on all five. Measure that and a GT2 (tier 1 answers with
+   the txHash the cell expects: predicted false GREEN). Rule the PR body's "a txHash assertion can never be about another tier". Any product
+   change beyond the selector = a scope finding.
+4. THE REMOVED tier1Absent FLAG: prove it was dead (the READY declares it :36 and assigns it :116, no reader; the stub originate 404s every
+   request) and that its removal (plus the originate hoist and afterAll close) changes nothing: the READY's verbatim 150-line file vs the pushed
+   file, SOLO, base and head (drafter: READY 3/3 head, 2 red base; pushed 5/5 head, 3 red base; eslint no-unused-vars on the READY's flag).
+   The ten sibling files' tier1Absent are different module-scoped variables WITH readers — confirm no coupling.
+5. TIER-1 PATH UNAFFECTED (hits 0, base = head) and the #1005 carve-out `_source !== 'anchor_store'` byte-identical (base :717 -> head :722) —
+   PARSER proof: transpileModule removeComments + an AST leaf walk, base vs head-with-only-the-comparator-restored identical, with controls
+   incl. a type-only edit. KS-1123 cells (ks1123-f2, ks1123-f3) green on every tree and tamper row. KS-1180: the drafter found NO KS-1180 cell in
+   api-gateway src and no KS-1180 commit on develop (controls found) — locate them or record NOT LOCATED / NOT LANDED, never assume.
+6. THE READY ACCOMMODATION: the READY test header `@@ -0,0 +1,132 @@` over 150 `+` lines — the pushed blob 4ad1cdcd1 is 177 lines = the READY's
+   150 + the declared seat edits (+33 -6): assign every hunk to a declared edit; an undeclared hunk is a finding. WITHOUT --recount the split
+   test-file apply succeeds and takes only 132 lines (drafter: numstat 132 vs 150) — a silent truncation (the READY pipeline's, Wednesday's).
+   The product hunk: git reports `Hunk #1 succeeded at 298 (offset 13 lines)` with --recount (corrupt patch without); its 5 `+` lines byte-equal
+   and contiguous at head :303-307; the PR body's "15 lines lower (:300, not :285)" compares two different anchors. git apply ONLY in your clone.
+7. TAMPERS, WHOLE api-gateway suite per row (denominator asserted 52 / 424 on head, or the merged count — name it), project tsc rc per row (a
+   non-compiling tamper is VOID), text anchors by Python str.count = 1, marker asserted, porcelain asserted, cells-run / failed / pending /
+   decisive assertion / predicted-by, your gate file SOLO under each row, sha256-asserted restore (5bbb967cf6e435e1...), T0 before and after.
+   The seat's six re-derived: T0 0 · TA tiebreak removed 3 · TV inverted 4 · TB block order inverted 1 · TN `|| 0` dropped 1 · TI inert 0
+   (drafter measured all six exactly; TA's probe rows equal BASE on all 30). PLUS the gate's own: G-CTRL aimed at a CONTROL — the Date line ->
+   `return -1;` (a tie prefers the LATER-listed row): drafter exactly 1 red, the newer-listed-first control, the three red-proof cells GREEN;
+   G-OLDEST reversing the tiebreak with missing still last — `(Date.parse(a.confirmedAt) || Infinity) - (Date.parse(b.confirmedAt) || Infinity)`:
+   drafter 3 red (equal-block, null/0, the newer-first control) with the missing-date cell GREEN. Add a status-keyed tie tamper (predicted 0
+   reds: every fixture is confirmed) and the guard edits of item 3. Say which controls can and cannot see what.
+8. INCLUDING TSC (not tsc -p, which type-checks 0 __tests__ files) base / head / merged, --listFilesOnly proof the ks1072 test is in the program,
+   a planted positive control, NEW only (line-number-free). Drafter: exactly 1 NEW — ks1072…test.ts(124,10) TS18046 'body' is of type 'unknown',
+   the seat's guard line (P-1005-4's class). eslint with a firing control: verification.ts 5 warnings base = 5 head, the test file 0.
+9. MERGED TREE with the then-current develop, suites per tree: drafter base 51 / 419, head 52 / 424 (all pass, pending 0, tsc rc 0), merged =
+   head while develop is 523f283c6; PREDICTED 53 / 437 if #1014 lands first. Name the OID.
+10. LINEAR: attachmentsForURL(pull/1016) exactly KS-1072 linkKind 'contributes' (control pull/1011 -> KS-871 contributes); 0 closing phrases in
+   title, body, commit message and comments (planted controls). KS-1072 must NOT go Done on merge — it stays In Progress (§5f: a live sweep
+   against a real anchoring service is owed). Re-read linkKind immediately before the mail.
+11. SCHEMATHESIS / AKTO: REQUIRED or NOT APPLICABLE with the measured reason (drafter predicts NOT APPLICABLE: no status/header/field/schema
+   change by parser; the only value-changing input is >= 2 equal-blockNumber anchor rows for one document, which no spec-driven fuzzer can create
+   and a KS-535 stack's anchoring runs mock; the #1005 gate's ruling on this route). NOT TESTED at equal prominence: a real anchor_store /
+   Postgres (row order, the unique index, pg serialisation), the live §5f sweep, a multi-network environment, the production 307 rewrite.
+12. (added) REACHABILITY: anchoring keeps ONE row per (document_id, network) (ensureTables :209, migration 031, both upserts) and lists
+   `ORDER BY created_at DESC` (:1491); its own verify-by-hash orders `confirmed_at DESC NULLS LAST, created_at DESC` (:676). Say which item-1
+   flips a single-network deployment can produce (drafter: none that changes `verified`; a 0/null tie can never be on-chain — KS-1069 height),
+   whether every schema source carries the unique (a disagreement is a finding — do not reconcile), and what a CARDANO_NETWORK switch opens.
+13. (added) THE CLASS: other code that picks one anchor from a list (drafter: the comparator text exists only at verification.ts:303-306) — census
+   with -i and a same-instrument control; record siblings, do not grade them.
+14. (added) Disjointness by the PR files API across every open PR (drafter 0 of 20 exact; #995 touches anchoring src/index.ts — the producer),
+   and every develop move judged by content.
+
+Hygiene: /bin/bash here is 3.2 — write runners in Python. zsh: no PIPESTATUS (`cmd > out 2>&1; rc=$?`), no timeout on macOS, never begin a
+line with `=====`. Your tool shell's grep may be a function: /usr/bin/grep -i with a same-file positive control; `git grep -c` prints
+nothing for a zero — silence is unread, not 0. Never `cd` in your own tool calls; absolute paths; git write verbs only inside script files.
+stderr is never discarded. Clocks from `date`, never estimated. Every scripted edit asserts its anchor count = 1 and a marker. Node reads TZ at
+process start — set it in the vitest process env.
+Quote the Secuura checkout's porcelain count, .git/config sha256, for-each-ref count, .git/worktrees count, origin develop SHA,
+refs/pull/1016/head and the checkout branch at start, mid and close as THREE timestamped readings, plus the checkout's .vite readings; if
+refs/pull/1016/head moves, STOP — the brief is about a different SHA. develop moving is expected; judge it by content, name it.
+Never `rm`: fresh mktemp -d per attempt; quarantine scratch tests and configs by rename. No container is created; never touch a
+secuura-* container.
+Do no memory maintenance of your own project's memory store inside this session.
+
+Report FOUND / TESTED / HOW, with controls, into
+/Volumes/DevMASTER/!CODING/Testing Agent MAIN/projects/secuura/reports/2026-09-17-ks1072-1016-a226d94fe-tier1-r1/
+(NOT-TESTED.written-first.md written FIRST, BEFORE any run; then report.md and evidence/): the trees with OIDs; the verdict-flip table per tree
+with hit counts, the oracle and each flip's direction; the v1/v2 route reach; the null/0/string/date/TZ cells and the tie on both; the source
+guard ruling (GT-T1 / GT2); tier1Absent dead + inert; tier 1, the carve-out parser proof, KS-1123 / KS-1180; the READY accommodation (150 / 132 /
+177, offset 13); the full tamper table; including tsc and eslint; merged tree and suites; Linear; the Schemathesis/Akto ruling; reachability;
+the class; and what you did NOT test at the same prominence as the findings. Every finding carries its evidence class (MEASURED AT RUNTIME /
+PROBED / READ ONLY / RELAYED), severity, target (PR or TICKET), SHIPS-WITH or TICKET, and its oracle. Name every prediction slip against its
+predictor (the READY, the seat, the drafter, Wednesday).
+Client-facing communication = ticket comments only, and not from you; anything needing a push goes to Wednesday as an escalation candidate.
+Never delete; cleanup means quarantine.
+Verdict: ONE line — GO, GO WITH FINDINGS, or NO GO — on a226d94fe8c6fbfecb81de415feb645302cdd166, as the delta over base 523f283c6 AND on the
+merged tree (name the develop and the merged-tree OID). Then plain statements on items 1-14.
+Give the merge seat its MERGE ADDENDUM line: "squash a226d94fe onto develop <then-current develop; 523f283c6 at draft close> (merged tree <OID>;
+file-disjoint from #1014's and #1015's squashes by content); #1016 attaches to KS-1072 only, linkKind contributes — KS-1072 stays In Progress on
+merge (§5f: a live sweep against a real anchoring service is owed); equality targets verification.ts blob a7a6d4605 /
+ks1072-the-latest-anchor-selector-documents-a.test.ts blob 4ad1cdcd1; api-gateway 51/419 at 523f283c6 -> 52/424 at head -> <merged n/n>
+(re-measure); Records: <yours>" — plus any finding with its target.
+
+MAIL YOUR VERDICT to wednesday-agent@agentmail.to when the pass is complete. Your pane holds ~19 lines of alternate screen with no
+scrollback, so a verdict that stays in the pane is one pane-close from being lost -- this is not a formality, it is the only durable
+copy; the verdict MAIL is the END STATE and the wait signal. Send it FROM coagent@agentmail.to. Subject, EXACTLY:
+[QA -> Wednesday] TIER 1 GATE #1016 (KS-1072) a226d94fe — <GO | GO WITH FINDINGS | NO GO>
+(The QA project has no send_brief.sh of its own: POST https://api.agentmail.to/v0/inboxes/coagent@agentmail.to/messages/send with JSON
+{"to": ["wednesday-agent@agentmail.to"], "subject": "...", "text": "..."} and Authorization: Bearer $AGENTMAIL_API_KEY, the key by NAME
+from Wednesday's .env, never echoed. Confirm the API answered 2xx and quote the message id in your final pane line. Timestamps in the mail
+come from `date`, never estimated. The MAIL is the end state.)

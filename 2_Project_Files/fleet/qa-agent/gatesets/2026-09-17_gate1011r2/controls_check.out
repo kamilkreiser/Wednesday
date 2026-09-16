@@ -1,0 +1,37 @@
+controls_check 2026-09-17 05:38:49 AEST
+replacements: {'nosubject': 1, 'notier': 3, 'nosha': 2, 'nomail': 1, 'nofarm': 1, 'nor1report': 1, 'nodisposition': 5, 'noround2': 2}
+N1 missing subject: prompt without the exact ROUND 2 verdict subject | stderr: REFUSING: prompt does not carry the exact ROUND 2 verdict subject, the coagent@ sender and the wednesday-agent@ recipient
+rc=23
+expected 23: OK
+N2 missing tier: brief without TIER 1 | stderr: REFUSING: brief and prompt disagree about the tier
+rc=7
+expected 7: OK
+N3 missing SHA: brief without the head SHA | stderr: REFUSING: brief or prompt does not name the head SHA 6dc8256448b50de6a15519001a4f7032ace1ae19 — a gate about another SHA is another gate
+rc=20
+expected 20: OK
+N4 missing mail step: prompt without MAIL YOUR VERDICT | stderr: REFUSING: prompt does not tell the agent to MAIL its verdict
+rc=12
+expected 12: OK
+N5 missing per-entry farm: prompt without node_modules per ENTRY | stderr: REFUSING: prompt does not require node_modules farmed per ENTRY (a wholesale link can write through to the checkout .vite cache)
+rc=22
+expected 22: OK
+N6 head override = the round-1 head 0a1f8900c | stderr: REFUSING: #1011 — 0a1f8900c7094fbdaed1099799c029e351296b39 is not at refs/heads/feature/ks-871-ornith-audit-path-captured-at-entry on origin — the head moved; the brief is about a different SHA
+rc=6
+expected 6: OK
+N7 develop = the round-2 head (audit.ts 052131de0 LANDED) | stderr: REFUSING: develop services/api-gateway/src/middleware/audit.ts blob 052131de0 = #1011 round-2 own — #1011 has landed; this brief is stale (develop 6dc8256448b50de6a15519001a4f7032ace1ae19) — re-pin deliberately: a different brief
+rc=19
+expected 19: OK
+N8 develop = 0f489b7da (audit.ts a blob nobody pinned) | stderr: REFUSING: origin develop is at 0f489b7da4e699e852a126bb41a922b8ca1b4462 (pinned 79432c797cfb6e647acdd8798dace000a0b35d75) and the move is not provably disjoint: GUARDED develop services/api-gateway/src/middleware/audit.ts blob 1a5
+rc=18
+expected 18: OK
+N9 prompt without the round-1 report path | stderr: REFUSING: brief or prompt does not name the prior round REPORT path /Volumes/DevMASTER/!CODING/Testing Agent MAIN/projects/secuura/reports/2026-09-17-ks871-1011-0a1f8900c-tier1-r1/ — the QA agent has no inbox; a carry-forward with
+rc=24
+expected 24: OK
+N10 brief without CLOSED / STILL OPEN / NEW | stderr: REFUSING: brief or prompt does not require the per-finding CLOSED / STILL OPEN / NEW disposition — round 2 of 2: closed instances ship and residue is ticketed
+rc=25
+expected 25: OK
+N11 brief without ROUND 2 | stderr: REFUSING: brief and prompt disagree about the round (ROUND 2)
+rc=15
+expected 15: OK
+unexpected rows 0
+end 05:42:37 AEST

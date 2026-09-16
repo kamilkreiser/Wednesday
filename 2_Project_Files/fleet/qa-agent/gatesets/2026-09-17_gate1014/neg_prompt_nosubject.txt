@@ -1,0 +1,142 @@
+ultrathink
+
+You are the fleet QA agent running ONE TIER 1 ROUND 1 gate (round 1 of 2 under the cap) over Secuura/Blockchain PR #1014 (KS-1176, Seat A) at
+head 616c766a57a51238450c99bbf1d59bb109e3841c. The change: in services/api-gateway/src/services/enforcement.ts meetsVerificationLevel, an
+UNRECOGNISED user verification level now ranks as 'none' (`const userRank = userIdx === -1 ? 0 : userIdx; return userRank >= reqIdx;`), so a
+connector key (verificationLevel 'api_key') satisfies a 'none' creator requirement (Platform-S SSD_DOCUMENT, which 403'd) and nothing higher.
+Known levels unchanged; the order array unchanged; the unknown-REQUIRED-level fail-open deliberately UNCHANGED (pinned; filed as KS-1190). Plus a
+NEW 13-cell test file. TIER 1 (Wednesday's ruling): it changes an AUTHORISATION decision on the gateway's document-creation path
+(POST /api/documents -> enforceDocumentTypeRules) and the same helper decides the verifier gate of POST /api/documents/:id/verify
+(routes/verification.ts:557). No rendered surface changes: say whether the real-browser half of tier 1 applies.
+
+Read your brief FIRST and in full, then plan:
+/Volumes/DevMASTER/WEDNESDAY/2_Project_Files/fleet/qa-agent/briefs/2026-09-17_secuura-1014-ks1176-tier1.md
+Then the charter it names, the READY mail (gatesets/2026-09-17_gate1014/mail_1014_ready.md) and Wednesday's ruling
+(gatesets/2026-09-17_ks1176/answer_shape_scope.md). No prior round exists on any #1014 SHA.
+
+Head (git ls-remote 06:11:56 and 06:22:44 AEST, the PR API 06:19:49, Wednesday's ls-remote 06:09, agree; the launcher re-asserts it):
+  #1014 616c766a57a51238450c99bbf1d59bb109e3841c = refs/pull/1014/head = feature/ks-1176-connector-key-level-ranks-as-none
+  ONE commit, only parent e0f41a8fafd64fa31524390cfeab320e822f3d15 (#1013's squash) = base = merge-base.
+  2 files: enforcement.ts 533cd309c -> 3e314ba11 (+8 -1); NEW ks1176-connector-key-level-ranks-as-none.test.ts 5820520ae (+363).
+  DEVELOP MOVED during drafting: develop = 523f283c6cd2550263ec9869dc5ee722be40df4e = #1011's squash (KS-871: middleware/audit.ts a7be8626f ->
+  052131de0 + three ks871 tests), file-disjoint from #1014; compare develop...head = merge_base e0f41a8fa, diverged, ahead 1, behind 1, files 2.
+  Trees you run: base = e0f41a8fa, head = 616c766a5, merged = head + a local --no-ff merge of the then-current develop (never pushed), dev = the
+  then-current develop. Drafter merged-tree OID (git merge-tree --write-tree in its OWN clone, = its local merge commit's tree):
+  8589933267963afda8fc352279c4b694ed5bb3de for develop 523f283c6 — name yours. If develop moves again, judge the move by content, name every tree.
+Repo:    /Volumes/DevMASTER/!CODING/Secuura/Blockchain/2_Project_Files  (READ-ONLY — git clone --shared --no-checkout by SHA into your own
+  fresh mktemp -d; git write verbs there only, from a script file; never merge-tree --write-tree in the checkout (it writes objects); never enter
+  any seat's worktree or another gate's clone; never vitest inside the checkout; pin by SHA, never origin/*)
+Farm node_modules per ENTRY in your clone (R-6 from the #1009 gate): Blockchain/Dev/node_modules, services/api-gateway/node_modules and
+  packages/shared/node_modules, each per entry, .vite/.vitest/.cache skipped, @secuura/* relinked into your tree. NEVER link a node_modules tree
+  wholesale — not for any package, not even one vitest never runs in (the #1011 round-2 drafter did, and recorded it as a slip); create no
+  node_modules where nothing runs.
+
+You are FINDINGS-ONLY. You never fix, never merge, never push, never deploy, never comment, never file, never tick an
+ack box, never `@`, never write to Linear or GitHub, and nothing goes to Peter or Stuart.
+
+NEVER run a push, the real pre-push hook, or preflight.sh inside the Secuura checkout or any of its worktrees.
+
+NEVER print a credential value, and never open, read or copy a secrets file into output — a script may read GH_TOKEN / LINEAR_API_KEY by
+NAME from /Volumes/DevMASTER/!CODING/Secuura/Blockchain/4_Credentials/.env and AGENTMAIL_API_KEY by NAME from
+/Volumes/DevMASTER/WEDNESDAY/4_Credentials/.env for the calls the brief allows (GitHub GET, Linear query, the one verdict mail), and never
+echoes them. Count, never echo. RSA keys, sk_ strings and JWTs in your probe are THROWAWAY, generated per run.
+
+NO shared docker stack, no :6882 / :7082 slot, no kintsugi, no demo, no az, NEVER the wallet mnemonic (KS-535 HOLD). This gate
+needs NO container: the REAL authenticateToken + createVerificationRoutes + enforceDocumentTypeRules + SEED_DOCUMENT_TYPES in-process, the Redis
+catalogue stubbed in memory, security / auth / originate / anchoring as loopback stubs. Run `docker info` ONCE and print its rc on its own line
+(UP is NOT permission; create no container). LOOPBACK ONLY: every listener binds 127.0.0.1:0. No Akto, no k6, no Playwright, no Schemathesis
+run (Kam's 40% cap; NOT COMMISSIONED) — YOU rule whether Schemathesis/Akto are REQUIRED, with the measured reason. Time-box 45 minutes of work.
+
+Twelve things Wednesday requires (brief items 1-12; item 13 is added; each carries drafter predictions with predicted-by):
+
+1. EVERY PRINCIPAL THAT CAN REACH meetsVerificationLevel WITH AN UNRECOGNISED LEVEL — census the producers from source yourself (gateway
+   middleware/auth.ts:271-307 sk_ keys; auth services/jwt.ts:264-300 connector JWTs minted at /internal/connector-token; oauth_app; the TEST-TOKEN
+   default 'BASIC' at auth.ts:146 — not a JWT default; any header/body path; case/whitespace/unicode spellings) — and for each principal x each
+   catalogue type, over HTTP through the REAL router, the REAL authenticateToken and the REAL enforceDocumentTypeRules, base / head / merged:
+   status, code, forwarded to originate?, workflow created? The fix must open ONLY none-rank types. ANY admission above none, or any change for a
+   KNOWN-level principal = Blocker. Oracle from the RULING's words, with planted controls. Drafter (measured): 26 principals x 21 create codes /
+   19 verify types; base vs head 118 DIFF, all create, all (unknown-level principal) x (the 9 none-rank types) + sk_restricted on DOCUMENT;
+   0 above none; 0 known-level; head vs merged 0. Its harness stubs ../services/redis and does not mount index.ts — re-run connector rows on the
+   REAL index.ts app.
+2. KNOWN-LEVEL PARITY: every known user level (and case / '' spellings) x every required level, base == head; the seat's 15x15 re-derived with
+   YOUR independent oracle, and widened. Drafter: 33x33 = 1089 rows/tree, oracle mismatch 0, 51 flips all unknown-user x {'', none, NONE}.
+3. THE VERIFIER GATE routes/verification.ts:557 (POST /api/documents/:id/verify) unchanged for every principal and every verifier level, base vs
+   head. Drafter: 0 of 494 verify rows differ (the level is lower-cased, || 'none', skipped when 'none'); an off-canonical VERIFIER level passes
+   every authenticated principal at base and head — KS-1190's twin at :557 (record; does KS-1190 name it?).
+4. ANONYMOUS vs CONNECTOR PARITY ON none TYPES — the ruling's premise (enforcement.ts:136-141 at base) measured. Both routes mount
+   authenticateToken(true): anonymous is 401 before enforcement (drafter), so the no-user branch has no production caller — compare a connector
+   with the LOWEST AUTHENTICATED HUMAN (RS256 NONE): drafter head 0 differing rows of 40, base 9. Measure also: RATE LIMITS on the real index.ts
+   app (enforceClientRateLimit is app.use'd at index.ts:524 before the route-level authenticateToken — is req.user even set there?); TENANT / ORG
+   scoping of the forward; WHAT THE CREATED DOCUMENT RECORDS (the forward carries no level; READ originate's POST /api/documents persistence —
+   does a connector-created none document carry a creator/level/trust marker a human-created one would not?); the workflowPolicy 'bypass' row
+   (a bypass connector is forwarded on an approval-requiring none type where a NONE human is workflow-gated); and THE CONNECTOR JWT AS BEARER:
+   the gateway's RS256 path does not check type:'connector', sets no connectorMeta, so a SCOPE-LESS connector JWT skips the documents:write scope
+   check, allowedDocumentTypes and the per-key limiter's MACHINE_AUTH_METHODS — drafter measured base 201 untyped / 403 typed, head 201 on all 9
+   none-rank types too. Is the JWT client-obtainable anywhere? Grade it (drafter: pre-existing scope-gate gap whose reach #1014 widens; TICKET-class
+   Major candidate; escalation candidate) — if you find it client-obtainable, say so first.
+5. THE UNKNOWN-REQUIRED FAIL-OPEN (KS-1190): prove it byte-for-byte unchanged base vs head, and RECORD (READ + a cheap probe) how the Redis
+   catalogue is filled — services/redis.ts:511 setDocumentType (callers routes/admin.ts:633 seed, :691 admin POST, :706/:732), platform.ts:880-894
+   cloning templates into Postgres document_type_configs, which the gateway enforcement never reads: is there any path into Redis? Two catalogue
+   sources that may disagree is a RECORD. Record only — not this PR's scope.
+6. THE OTHER LEVEL-ORDER COPIES (auth requireVerificationLevel authenticate.ts:193, shared requireVerificationLevel middleware/index.ts:159,
+   shared policy-engine.ts:22 / requirePolicy, frontend DocumentUpload.tsx:74-80): confirm the seat's 0-production-callers census with a
+   positive control per grep; record any live consumer.
+7. THE SEAT'S TAMPER TABLE RE-DERIVED — T0, TA, TW, TK, TR, TI (READY: 0/3/4/8/1/0) — whole api-gateway suite, denominator asserted (drafter head
+   49 / 423), project tsc rc per row (a tamper that does not compile is VOID), cells-run / failed / pending / decisive assertion / predicted-by,
+   restore sha256-identical; PLUS the gate's own: G-ROUTE (the enforcement call skipped, aimed at the ROUTE cells; drafter 5 red, tsc 0 — its
+   first literal form was VOID at tsc rc 2) and G-CTRL (registered.length > 999999, aimed at D's "unregistered answers 400" CONTROL; drafter 2 red,
+   tsc 0); plus one aimed at the E controls (:555 skip removed — drafter predicts 0 red: say what that control can see) and one that opens a KNOWN
+   level. Run your item-1 HTTP census under TA and TW. Red before green: the ks1176 file on base (seat 13 run / 3 red).
+8. INCLUDING TSC (not tsc -p, which excludes __tests__) on enforcement.ts and the ks1176 test, base / head / merged, --listFilesOnly proof, a
+   planted control, NEW only. Drafter: 30 lines / 10 files on all three, 0 in the PR files, NEW 0. eslint on both files with a firing control.
+9. MERGED TREE with the then-current develop (523f283c6 at draft close = after #1011's squash): NAME the OID (drafter
+   8589933267963afda8fc352279c4b694ed5bb3de); suites per tree — drafter base 48/410, head 49/423, merged 52/432; dev predicted 51/419 (measure).
+10. LINEAR: attachmentsForURL(pull/1014) exactly KS-1176 contributes; KS-1190 / KS-1187 carry no #1014; 0 closing phrases in title, body, the
+   commit message and comments (planted controls). KS-1176 must NOT go Done on merge — it stays In Progress (§5f: runtime behaviour, the live
+   Platform-S sweep is owed). Re-read linkKind immediately before the mail.
+11. SCHEMATHESIS / AKTO: REQUIRED or NOT APPLICABLE with the measured reason. Drafter: POST /api/documents already declares 403 and names
+   INSUFFICIENT_VERIFICATION_LEVEL, MFA_REQUIRED and AUTH_PROVIDER_NOT_ALLOWED; security bearerAuth only (the x-api-key scheme is not declared on
+   the operation — record); no new status or field — predicted NOT APPLICABLE.
+12. NOT TESTED, at the same prominence as the findings: the live Platform-S upload under a connector key against a seeded K and
+   POST /api/verification/verify (the §5f sweep, Sunday); real Redis catalogue population; the gateway behind nginx / the edge; originate's
+   persistence (READ at most); the real security validate and the real connector-token mint; whether a connector JWT is client-obtainable in any
+   deployment; Schemathesis / Akto / Playwright / k6; preflight legs 3/4/8; the frontend copy; KS-1190's two measurements; `docker info` rc.
+13. (added) Disjointness by the PR files API across every open PR (drafter 0 of 18), and every develop move judged by content.
+
+Hygiene: /bin/bash here is 3.2 — write runners in Python. zsh: no PIPESTATUS (`cmd > out 2>&1; rc=$?`), no timeout on macOS, never begin a
+line with `=====`. Your tool shell's grep may be a function: /usr/bin/grep -i with a same-file positive control; `git grep -c` prints
+nothing for a zero — silence is unread, not 0. Never `cd` in your own tool calls; absolute paths; git write verbs only inside script files.
+stderr is never discarded. Clocks from `date`, never estimated. Every scripted edit asserts its anchor count = 1 and a marker.
+Quote the Secuura checkout's porcelain count, .git/config sha256, for-each-ref count, .git/worktrees count, origin develop SHA,
+refs/pull/1014/head and the checkout branch at start, mid and close as THREE timestamped readings, plus the checkout's .vite readings; if
+refs/pull/1014/head moves, STOP — the brief is about a different SHA. develop moving is expected; judge it by content, name it.
+Never `rm`: fresh mktemp -d per attempt; quarantine scratch tests and configs by rename. No container is created; never touch a
+secuura-* container.
+Do no memory maintenance of your own project's memory store inside this session.
+
+Report FOUND / TESTED / HOW, with controls, into
+/Volumes/DevMASTER/!CODING/Testing Agent MAIN/projects/secuura/reports/2026-09-17-ks1176-1014-616c766a5-tier1-r1/
+(NOT-TESTED.written-first.md written FIRST, BEFORE any run; then report.md and evidence/): the trees with OIDs; the principal census per tree
+with the oracle and its planted controls; known-level parity; the :557 rows; anonymous / lowest-human / connector parity, rate limits, tenant
+scoping, what the created document records, the connector-JWT Bearer rows and the bypass row; KS-1190 unchanged and the catalogue-fill record;
+the level-copy census; the full tamper table; including tsc; merged tree and suites; Linear; the Schemathesis/Akto ruling; and what you did NOT
+test at the same prominence as the findings. Every finding carries its evidence class (MEASURED AT RUNTIME / PROBED / READ ONLY / RELAYED),
+severity, target (PR or TICKET), SHIPS-WITH or TICKET, and its oracle. Name every prediction slip against its predictor (the READY, the
+drafter, Wednesday's ruling).
+Client-facing communication = ticket comments only, and not from you; anything needing a push goes to Wednesday as an escalation candidate.
+Never delete; cleanup means quarantine.
+Verdict: ONE line — GO, GO WITH FINDINGS, or NO GO — on 616c766a57a51238450c99bbf1d59bb109e3841c, as the delta over base e0f41a8fa AND on the
+merged tree (name the develop and the merged-tree OID). Then plain statements on items 1-13.
+Give the merge seat its MERGE ADDENDUM line: "squash 616c766a5 onto develop <then-current develop; 523f283c6 at draft close> (merged tree <OID>);
+#1014 attaches to KS-1176 only, linkKind contributes — KS-1176 stays In Progress on merge (§5f: runtime behaviour — connector keys now create
+none-rank document types; the live Platform-S sweep is owed); equality targets enforcement.ts blob 3e314ba11 / ks1176 test blob 5820520ae;
+api-gateway 48/410 at e0f41a8fa -> 49/423 at head, <dev n/n> -> 52/432 merged (re-measure); Records: <yours>" — plus any finding with its target.
+
+MAIL YOUR VERDICT to wednesday-agent@agentmail.to when the pass is complete. Your pane holds ~19 lines of alternate screen with no
+scrollback, so a verdict that stays in the pane is one pane-close from being lost -- this is not a formality, it is the only durable
+copy; the verdict MAIL is the END STATE and the wait signal. Send it FROM coagent@agentmail.to. Subject, EXACTLY:
+[QA -> Wednesday] GATE #1014 616c766a5 — <GO | GO WITH FINDINGS | NO GO>
+(The QA project has no send_brief.sh of its own: POST https://api.agentmail.to/v0/inboxes/coagent@agentmail.to/messages/send with JSON
+{"to": ["wednesday-agent@agentmail.to"], "subject": "...", "text": "..."} and Authorization: Bearer $AGENTMAIL_API_KEY, the key by NAME
+from Wednesday's .env, never echoed. Confirm the API answered 2xx and quote the message id in your final pane line. Timestamps in the mail
+come from `date`, never estimated. The MAIL is the end state.)

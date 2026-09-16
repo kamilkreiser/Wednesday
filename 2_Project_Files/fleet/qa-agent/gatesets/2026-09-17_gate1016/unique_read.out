@@ -1,0 +1,32 @@
+unique_read 2026-09-17 06:46:41 AEST at a226d94fe8c6fbfecb81de415feb645302cdd166
+--- -i 'document_id, network' (the upsert key)
+Blockchain/Dev/migrations/031_anchor_store_network_unique.sql:2:-- 031: anchor_store unique key (document_id) -> (document_id, network)  [KS-281]
+Blockchain/Dev/migrations/031_anchor_store_network_unique.sql:14:-- The decision (Kam, 2026-06-16) is one anchor per (document_id, network). Both
+Blockchain/Dev/migrations/031_anchor_store_network_unique.sql:16:-- ON CONFLICT (document_id, network) in lockstep with this index.
+Blockchain/Dev/migrations/031_anchor_store_network_unique.sql:24:-- 1. De-dupe any rows colliding on (document_id, network), keeping the newest.
+Blockchain/Dev/migrations/031_anchor_store_network_unique.sql:38:-- 3. Composite unique: one anchor per (document_id, network).
+Blockchain/Dev/migrations/031_anchor_store_network_unique.sql:40:  ON anchor_store (document_id, network);
+Blockchain/Dev/services/anchoring/src/index.ts:209:    await query(`CREATE UNIQUE INDEX IF NOT EXISTS anchor_store_document_network_uniq ON anchor_store(document_id, network)`);
+Blockchain/Dev/services/anchoring/src/index.ts:1377:  // (document_id, network) — the unique key after migration 031.
+Blockchain/Dev/services/anchoring/src/index.ts:1386:  // Now: ON CONFLICT (document_id, network) DO UPDATE ... RETURNING id. On a
+Blockchain/Dev/services/anchoring/src/index.ts:1400:       ON CONFLICT (document_id, network) DO UPDATE SET
+Blockchain/Dev/services/originate/src/routes/anchors.ts:121:      ON CONFLICT (document_id, network) DO UPDATE SET
+Blockchain/Dev/services/originate/src/routes/documents.ts:1216: * (document_id, network): re-anchoring an already-anchored document returns its
+--- -i 'CREATE TABLE IF NOT EXISTS anchor_store' / 'CREATE TABLE anchor_store' (positive control: the table is declared somewhere)
+Blockchain/Dev/deployment/azure/migrate/init.sql:150:CREATE TABLE IF NOT EXISTS anchor_store (
+Blockchain/Dev/deployment/azure/migrate/init.sql:733:CREATE TABLE IF NOT EXISTS anchor_store (
+Blockchain/Dev/deployment/azure/migrate/init.sql:2045:CREATE TABLE IF NOT EXISTS anchor_store (
+Blockchain/Dev/docker/init/01-schema.sql:188:CREATE TABLE IF NOT EXISTS anchor_store (
+Blockchain/Dev/docker/init/03-service-tables.sql:89:CREATE TABLE IF NOT EXISTS anchor_store (
+Blockchain/Dev/docker/init/06-consolidate-anchors.sql:26:CREATE TABLE IF NOT EXISTS anchor_store (
+Blockchain/Dev/migrations/001_initial-schema.sql:704:CREATE TABLE IF NOT EXISTS anchor_store (
+Blockchain/Dev/migrations/003_consolidate-anchors.sql:16:CREATE TABLE IF NOT EXISTS anchor_store (
+Blockchain/Dev/services/anchoring/src/index.ts:177:      CREATE TABLE IF NOT EXISTS anchor_store (
+Blockchain/Dev/services/api-gateway/src/startup-migrations.ts:316:  `CREATE TABLE IF NOT EXISTS anchor_store (
+--- dbPersistAnchor ON CONFLICT
+Blockchain/Dev/services/anchoring/src/index.ts:205:    // KS-281: composite unique so dbPersistAnchor's ON CONFLICT (document_id,
+Blockchain/Dev/services/anchoring/src/index.ts:1379:  // The old code used ON CONFLICT (id) and swallowed any error. Migration 007's
+Blockchain/Dev/services/anchoring/src/index.ts:1381:  // raised 23505 ("duplicate key ... anchor_store_document_id_uniq"); ON CONFLICT
+Blockchain/Dev/services/anchoring/src/index.ts:1386:  // Now: ON CONFLICT (document_id, network) DO UPDATE ... RETURNING id. On a
+Blockchain/Dev/services/anchoring/src/index.ts:1400:       ON CONFLICT (document_id, network) DO UPDATE SET
+Blockchain/Dev/services/anchoring/src/index.ts:1456:       ON CONFLICT (id) DO UPDATE SET

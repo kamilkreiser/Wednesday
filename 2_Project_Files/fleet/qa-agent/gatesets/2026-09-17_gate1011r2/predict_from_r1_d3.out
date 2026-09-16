@@ -1,0 +1,35 @@
+predict_from_r1_d3 2026-09-17 05:19:22 AEST
+oracle controls: 4/4 planted targets canonicalise as expected
+
+== test: base d067725ff vs D3 (predicted head 6dc825644 rows) ==
+  DIFF/gdpr/adm/path:base-noncanon->d3-canon                   3
+  DIFF/gdpr/ref/path:base-noncanon->d3-canon                   23
+  DIFF/non-gdpr/adm/path:base-noncanon->d3-canon               139
+  DIFF/non-gdpr/ref/path:base-noncanon->d3-canon               91
+  SAME/gdpr                                                    22
+  SAME/non-gdpr                                                837
+  rows d3 path==canon True                                     1108
+
+== production: base d067725ff vs D3 (predicted head 6dc825644 rows) ==
+  DIFF/gdpr/adm/path:base-noncanon->d3-canon                   11
+  DIFF/gdpr/ref/path:base-noncanon->d3-canon                   27
+  DIFF/non-gdpr/adm/path:base-noncanon->d3-canon               445
+  DIFF/non-gdpr/ref/path:base-noncanon->d3-canon               91
+  SAME/gdpr                                                    10
+  SAME/non-gdpr                                                531
+  rows d3 path==canon True                                     1101
+spelling invariance test       base  routes 119, one (action,resource_type) across the 7 user spellings: 65, split: 54
+spelling invariance test       d3    routes 119, one (action,resource_type) across the 7 user spellings: 118, split: 1
+   split POST /api/documents [routes/proxy.ts:565] [(), (('documents.create', 'document'),)]
+spelling invariance production base  routes 119, one (action,resource_type) across the 7 user spellings: 109, split: 10
+spelling invariance production d3    routes 119, one (action,resource_type) across the 7 user spellings: 119, split: 0
+
+D3 test-vs-production (action, resource_type, path) per request: same 1108, differ 7
+    ('c-user POST /api/documents [routes/proxy.ts:565]', [('documents.create', 'document', '/api/documents')], [], [200], [307, -3])
+    ('c-admin POST /api/documents [routes/proxy.ts:565]', [('documents.create', 'document', '/api/documents')], [], [200], [307, -3])
+    ('dbl-user POST /api/documents [routes/proxy.ts:565]', [('documents.create', 'document', '/api/documents')], [], [200], [307, -3])
+    ('q-user POST /api/documents [routes/proxy.ts:565]', [('documents.create', 'document', '/api/documents')], [], [200], [307, -3])
+    ('frag-user POST /api/documents [routes/proxy.ts:565]', [('documents.create', 'document', '/api/documents')], [], [200], [307, -3])
+    ('abs-user POST /api/documents [routes/proxy.ts:565]', [('documents.create', 'document', '/api/documents')], [], [200], [307, -3])
+    ('trail-user POST /api/documents [routes/proxy.ts:565]', [('documents.create', 'document', '/api/documents/')], [], [200], [307, -3])
+end 05:19:22 AEST

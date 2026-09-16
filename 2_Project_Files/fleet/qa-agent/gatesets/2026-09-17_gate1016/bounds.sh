@@ -1,0 +1,7 @@
+#!/bin/zsh
+# bounds.sh — READ-ONLY checkout bounds reading (label as $1): porcelain, config sha, refs, worktrees, origin develop / pull/1016 head / branch, checkout branch, .vite readings.
+R='/Volumes/DevMASTER/!CODING/Secuura/Blockchain/2_Project_Files'
+echo "bounds $1 $(date '+%Y-%m-%d %H:%M:%S %Z')"
+git -C "$R" ls-remote origin refs/heads/develop refs/pull/1016/head refs/heads/feature/ks-1072-ornith-latest-anchor-confirmedat-tiebreak
+echo "checkout HEAD $(git -C "$R" rev-parse --short HEAD) branch $(git -C "$R" rev-parse --abbrev-ref HEAD) porcelain $(git -C "$R" --no-optional-locks status --porcelain | wc -l | tr -d ' ') config_sha256 $(shasum -a 256 "$R/.git/config" | cut -d' ' -f1) refs $(git -C "$R" for-each-ref | wc -l | tr -d ' ') worktrees_dir $(ls "$R/.git/worktrees" | wc -l | tr -d ' ') worktree_list $(git -C "$R" worktree list | wc -l | tr -d ' ')"
+echo "vite api-gateway results.json $(stat -f '%z %Sm' "$R/Blockchain/Dev/services/api-gateway/node_modules/.vite/vitest/"*/results.json) | shared .vite entries $(ls -laR "$R/Blockchain/Dev/packages/shared/node_modules/.vite" | wc -l | tr -d ' ') | Dev .vite entries $(ls -laR "$R/Blockchain/Dev/node_modules/.vite" | wc -l | tr -d ' ') | checkout .vite/.vitest/.cache entries newer than the drafter setup: $(find "$R/Blockchain/Dev/node_modules/.vite" "$R/Blockchain/Dev/services/api-gateway/node_modules/.vite" "$R/Blockchain/Dev/packages/shared/node_modules/.vite" -newer /Volumes/DevMASTER/WEDNESDAY/2_Project_Files/fleet/qa-agent/gatesets/2026-09-17_gate1016/drafter_setup.py | wc -l | tr -d ' ')"

@@ -1,0 +1,60 @@
+drafter_targets start 05:24:22 AEST
+05:24:29 AEST suite_base                         tree base  pkg gw     rc 0 FILES 47 TESTS 408 passed 408 failed 0 pending 0 failed_suites 0 success True secs 7.1 suite_msgs 0
+05:24:36 AEST suite_merged                       tree merged pkg gw     rc 0 FILES 51 TESTS 419 passed 419 failed 0 pending 0 failed_suites 0 success True secs 7.1 suite_msgs 0
+05:24:39 AEST test base vitest rc 0 meta {'nodeEnv': 'test', 'mockLoaded': True, 'queryCalls': 22, 'inserts': 22, 'requests': 25}
+05:24:43 AEST test head vitest rc 0 meta {'nodeEnv': 'test', 'mockLoaded': True, 'queryCalls': 22, 'inserts': 22, 'requests': 25}
+== test ==
+  CONTROL POST /api/logs                       hops [204]        | base [('logs.create', 'log', '/api/logs')] | head [('logs.create', 'log', '/api/logs')] | up 0
+  T /api/LOGS                                  hops [204]        | base [('LOGS.create', 'LOGS', '/api/LOGS')] | head [('LOGS.create', 'LOGS', '/api/LOGS')] | up 0
+  T /API/logs                                  hops [204]        | base [] | head [] | up 0
+  T /api/%6cogs                                hops [404]        | base [('%6cogs.create', '%6cog', '/api/%6cogs')] | head [('%6cogs.create', '%6cog', '/api/%6cogs')] | up 0
+  T /api/logs%2f                               hops [404]        | base [('logs%2f.create', 'logs%2f', '/api/logs%2f')] | head [('logs%2f.create', 'logs%2f', '/api/logs%2f')] | up 0
+  T /api/v1//logs                              hops [204]        | base [('logs.create', 'log', '/api/logs')] | head [('logs.create', 'log', '/api/logs')] | up 0
+  T /API/V1/logs                               hops [404]        | base [] | head [] | up 0
+  T /api/V1/logs                               hops [404]        | base [('V1.create', 'V1', '/api/V1/logs')] | head [('V1.create', 'V1', '/api/V1/logs')] | up 0
+  T /api/v1/v1/logs                            hops [404]        | base [('v1.create', 'v1', '/api/v1/logs')] | head [('v1.create', 'v1', '/api/v1/logs')] | up 0
+  T /api/x/../logs                             hops [400]        | base [] | head [] | up 0
+  T /api/./logs                                hops [404]        | base [('..create', '.', '/api/./logs')] | head [('..create', '.', '/api/./logs')] | up 0
+  T /api/logs;x=1                              hops [404]        | base [('logs;x=1.create', 'logs;x=1', '/api/logs;x=1')] | head [('logs;x=1.create', 'logs;x=1', '/api/logs;x=1')] | up 0
+  T /api/logs?next=/api/v1/qa                  hops [204]        | base [('logs.create', 'log', '/api/logs')] | head [('logs.create', 'log', '/api/logs')] | up 0
+  T http://h/api/v1/logs                       hops [204]        | base [('logs.create', 'log', '/api/logs')] | head [('logs.create', 'log', '/api/logs')] | up 0
+  T HTTP://h/api/logs                          hops [204]        | base [('logs.create', 'log', '/api/logs')] | head [('logs.create', 'log', '/api/logs')] | up 0
+  T /api/qa-attacker-chosen/x                  hops [404]        | base [('qa-attacker-chosen.create', 'qa-attacker-chosen', '/api/qa-attacker-chosen/x')] | head [('qa-attacker-chosen.create', 'qa-attacker-chosen', '/api/qa-attacker-chosen/x')] | up 0
+  T /api/v1                                    hops [404]        | base [('v1.create', 'v1', '/api/v1')] | head [('v1.create', 'v1', '/api/v1')] | up 0
+  G /api/gdpr/erasures                         hops [403]        | base [('unknown.create', 'unknown', '/')] | head [('gdpr.create', 'gdpr', '/api/gdpr/erasures')] | up 0
+  G /api/GDPR/erasures                         hops [403]        | base [('unknown.create', 'unknown', '/')] | head [('GDPR.create', 'GDPR', '/api/GDPR/erasures')] | up 0
+  G /api/gdpr/%65rasures                       hops [200]        | base [('gdpr.create', 'gdpr', '/api/gdpr/%65rasures')] | head [('gdpr.create', 'gdpr', '/api/gdpr/%65rasures')] | up 1
+  G /api/v1/GDPR/erasures                      hops [403]        | base [('unknown.create', 'unknown', '/')] | head [('GDPR.create', 'GDPR', '/api/GDPR/erasures')] | up 0
+  G http://h/api/v1/gdpr/erasures              hops [200]        | base [('v1.erasures', 'v1', '/api/v1/gdpr/erasures')] | head [('gdpr.create', 'gdpr', '/api/gdpr/erasures')] | up 1
+  G /api/gdpr/erasures/.                       hops [405]        | base [('gdpr..', 'gdpr', '/api/gdpr/erasures/.')] | head [('gdpr..', 'gdpr', '/api/gdpr/erasures/.')] | up 0
+  G /api/gdpr/x/../erasures                    hops [200]        | base [('gdpr...', 'gdpr', '/api/gdpr/x/../erasures')] | head [('gdpr...', 'gdpr', '/api/gdpr/x/../erasures')] | up 1
+  G connscope admitted /api/gdpr/erasures      hops [200]        | base [('gdpr.create', 'gdpr', '/api/gdpr/erasures')] | head [('gdpr.create', 'gdpr', '/api/gdpr/erasures')] | up 1
+05:24:46 AEST production base vitest rc 0 meta {'nodeEnv': 'production', 'mockLoaded': True, 'queryCalls': 21, 'inserts': 21, 'requests': 25}
+05:24:49 AEST production head vitest rc 0 meta {'nodeEnv': 'production', 'mockLoaded': True, 'queryCalls': 21, 'inserts': 21, 'requests': 25}
+== production ==
+  CONTROL POST /api/logs                       hops [307, 204]   | base [('logs.create', 'log', '/api/logs')] | head [('logs.create', 'log', '/api/logs')] | up 0
+  T /api/LOGS                                  hops [307, 204]   | base [('LOGS.create', 'LOGS', '/api/LOGS')] | head [('LOGS.create', 'LOGS', '/api/LOGS')] | up 0
+  T /API/logs                                  hops [204]        | base [] | head [] | up 0
+  T /api/%6cogs                                hops [307, 404]   | base [('%6cogs.create', '%6cog', '/api/%6cogs')] | head [('%6cogs.create', '%6cog', '/api/%6cogs')] | up 0
+  T /api/logs%2f                               hops [307, 404]   | base [('logs%2f.create', 'logs%2f', '/api/logs%2f')] | head [('logs%2f.create', 'logs%2f', '/api/logs%2f')] | up 0
+  T /api/v1//logs                              hops [204]        | base [('logs.create', 'log', '/api/logs')] | head [('logs.create', 'log', '/api/logs')] | up 0
+  T /API/V1/logs                               hops [404]        | base [] | head [] | up 0
+  T /api/V1/logs                               hops [307, 404]   | base [('V1.create', 'V1', '/api/V1/logs')] | head [('V1.create', 'V1', '/api/V1/logs')] | up 0
+  T /api/v1/v1/logs                            hops [404]        | base [('v1.create', 'v1', '/api/v1/logs')] | head [('v1.create', 'v1', '/api/v1/logs')] | up 0
+  T /api/x/../logs                             hops [400]        | base [] | head [] | up 0
+  T /api/./logs                                hops [307, 404]   | base [('..create', '.', '/api/./logs')] | head [('..create', '.', '/api/./logs')] | up 0
+  T /api/logs;x=1                              hops [307, 404]   | base [('logs;x=1.create', 'logs;x=1', '/api/logs;x=1')] | head [('logs;x=1.create', 'logs;x=1', '/api/logs;x=1')] | up 0
+  T /api/logs?next=/api/v1/qa                  hops [307, 204]   | base [('logs.create', 'log', '/api/logs')] | head [('logs.create', 'log', '/api/logs')] | up 0
+  T http://h/api/v1/logs                       hops [204]        | base [('logs.create', 'log', '/api/logs')] | head [('logs.create', 'log', '/api/logs')] | up 0
+  T HTTP://h/api/logs                          hops [307, 204]   | base [('logs.create', 'log', '/api/logs')] | head [('logs.create', 'log', '/api/logs')] | up 0
+  T /api/qa-attacker-chosen/x                  hops [307, 404]   | base [('qa-attacker-chosen.create', 'qa-attacker-chosen', '/api/qa-attacker-chosen/x')] | head [('qa-attacker-chosen.create', 'qa-attacker-chosen', '/api/qa-attacker-chosen/x')] | up 0
+  T /api/v1                                    hops [307, 404]   | base [('v1.create', 'v1', '/api/v1')] | head [('v1.create', 'v1', '/api/v1')] | up 0
+  G /api/gdpr/erasures                         hops [307, 403]   | base [('unknown.create', 'unknown', '/')] | head [('gdpr.create', 'gdpr', '/api/gdpr/erasures')] | up 0
+  G /api/GDPR/erasures                         hops [307, 403]   | base [('unknown.create', 'unknown', '/')] | head [('GDPR.create', 'GDPR', '/api/GDPR/erasures')] | up 0
+  G /api/gdpr/%65rasures                       hops [307, 200]   | base [('v1.%65rasures', 'v1', '/api/v1/gdpr/%65rasures')] | head [('gdpr.create', 'gdpr', '/api/gdpr/%65rasures')] | up 1
+  G /api/v1/GDPR/erasures                      hops [403]        | base [('unknown.create', 'unknown', '/')] | head [('GDPR.create', 'GDPR', '/api/GDPR/erasures')] | up 0
+  G http://h/api/v1/gdpr/erasures              hops [200]        | base [('v1.erasures', 'v1', '/api/v1/gdpr/erasures')] | head [('gdpr.create', 'gdpr', '/api/gdpr/erasures')] | up 1
+  G /api/gdpr/erasures/.                       hops [307, 405]   | base [('gdpr..', 'gdpr', '/api/gdpr/erasures/.')] | head [('gdpr..', 'gdpr', '/api/gdpr/erasures/.')] | up 0
+  G /api/gdpr/x/../erasures                    hops [307, 400]   | base [] | head [] | up 0
+  G connscope admitted /api/gdpr/erasures      hops [307, 200]   | base [('v1.erasures', 'v1', '/api/v1/gdpr/erasures')] | head [('gdpr.create', 'gdpr', '/api/gdpr/erasures')] | up 1
+drafter_targets end 05:24:49 AEST

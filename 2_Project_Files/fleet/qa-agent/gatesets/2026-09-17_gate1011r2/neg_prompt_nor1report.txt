@@ -1,0 +1,147 @@
+ultrathink
+
+You are the fleet QA agent running ONE TIER 1 ROUND 2 gate (round 2 of 2 under the cap) over Secuura/Blockchain PR #1011 (KS-871, Seat A
+successor item A12) at head 6dc8256448b50de6a15519001a4f7032ace1ae19. Round 1 at 0a1f8900c was NO GO with three Majors, all from deriving the
+audit row's path/action from req.originalUrl instead of the canonical path. Round 2 implements the round-1 gate's counterfactual D3:
+services/api-gateway/src/middleware/audit.ts captures `const auditPath = req.path` at entry (after index.ts's /api/v1 strip) and uses it for
+details.path AND deriveAction(req, path); plus F-1011-5's three real-app cells (new ks871-real-app-canonical-audit-rows.test.ts, one of them
+under NODE_ENV=production). TIER 1 (Wednesday's ruling): the audit middleware writes the audit trail for EVERY audited request, and the audit
+trail is a security control. No rendered surface: the real-browser half of tier 1 does not apply; say so.
+
+THE CAP: a second NO GO does not buy round 3 — the closed instances SHIP and the residue is TICKETED. So your verdict must state, for every
+round-1 finding F-1011-1..5 (and the Records it touches), CLOSED / STILL OPEN / NEW, instance by instance, and name the ticket each residue
+instance would become.
+
+Read your brief FIRST and in full, then plan:
+/Volumes/DevMASTER/WEDNESDAY/2_Project_Files/fleet/qa-agent/briefs/2026-09-17_secuura-1011r2-ks871-tier1.md
+
+PRIOR ROUND — round 1 gated 0a1f8900c7094fbdaed1099799c029e351296b39, verdict NO GO. ITS REPORT AND ITS INSTRUMENTS ARE ON DISK AT:
+<the round-1 report>
+(report.md; evidence/enumerate.py + enumerate_routes.js, census_run.py, qa1011-census.test.ts, compare.py, classify.py, bypass_run.py,
+qa1011-timing.test.ts, lib.py, and census_{test,production}_{base,head,merged,base2,merged2,d3}.json). Re-use the instruments; re-run, never assume.
+
+Head (git ls-remote 05:15:30 and 05:26:47 AEST, the PR API 05:16:42, Wednesday's ls-remote 05:13, agree; the launcher re-asserts it):
+  #1011 6dc8256448b50de6a15519001a4f7032ace1ae19 = refs/pull/1011/head = feature/ks-871-ornith-audit-path-captured-at-entry
+  3 commits: 0a1f8900c (round 1) -> 22c0a51a8 (--no-ff merge of develop 1125607e9, #1010's squash) -> 6dc825644 (round 2).
+  merge-base with develop = 1125607e978d6ad637720c985e43e3d79fecdf88. Develop is NOW 79432c797cfb6e647acdd8798dace000a0b35d75 (#1012 KS-745:
+  routes/audit-export.ts + a new ks745 test) — NOT an ancestor of the head: compare develop...head diverged, ahead 3, behind 1, files 4.
+  PR delta over 1125607e9: audit.ts a7be8626f -> 052131de0 (+18 -4); ks871 Part A 8d66dfaf7; Part B f6bf4f9d4; NEW real-app ef19446f2.
+  Trees you run: base = 1125607e9, head = 6dc825644, merged = head + a local --no-ff merge of the then-current develop (never pushed), dev = the
+  then-current develop. Drafter merged-tree OIDs (git merge-tree --write-tree): develop 79432c797 -> 1429bc93fad4f5892b816e991ec4373b85046053;
+  develop MOVED at 05:36 to e0f41a8fafd64fa31524390cfeab320e822f3d15 (#1013 KS-999, services/auth only) -> 839294c16de1ec6392964daddd5d967132465abc,
+  api-gateway subtree 0e7c4b535 in both — name yours. If develop moves again, judge the move by content and name every tree.
+Repo:    /Volumes/DevMASTER/!CODING/Secuura/Blockchain/2_Project_Files  (READ-ONLY — git clone --shared by SHA into your own scratch;
+  write verbs there only, from a script file; never enter any seat's worktree or another gate's clone; never vitest inside the checkout; pin by
+  SHA, never origin/*)
+Farm node_modules per ENTRY in your clone (R-6 from the #1009 gate) for EVERY package dir, as round 1's gate did: never link a node_modules
+  tree wholesale — a wholesale link can write through into the checkout's .vite cache; skip .vite/.vitest/.cache.
+
+You are FINDINGS-ONLY. You never fix, never merge, never push, never deploy, never comment, never file, never tick an
+ack box, never `@`, never write to Linear or GitHub, and nothing goes to Peter or Stuart.
+
+NEVER run a push, the real pre-push hook, or preflight.sh inside the Secuura checkout or any of its worktrees.
+
+NEVER print a credential value, and never open, read or copy a secrets file into output — a script may read GH_TOKEN / LINEAR_API_KEY by
+NAME from /Volumes/DevMASTER/!CODING/Secuura/Blockchain/4_Credentials/.env and AGENTMAIL_API_KEY by NAME from
+/Volumes/DevMASTER/WEDNESDAY/4_Credentials/.env for the calls the brief allows (GitHub GET, Linear query, the one verdict mail), and never
+echoes them. Count, never echo.
+
+NO shared docker stack, no :6882 / :7082 slot, no kintsugi, no demo, no az, NEVER the wallet mnemonic (KS-535 HOLD). This gate
+needs NO container: the audit sink is an in-memory recorder (../db mocked, with a hit witness), upstreams are loopback recorders.
+Run `docker info` ONCE and print its rc on its own line (UP is NOT permission; create no container). LOOPBACK ONLY: every listener binds
+127.0.0.1:0. No Akto, no k6, no Playwright, no Schemathesis run (Kam's 40% cap; NOT COMMISSIONED) — YOU rule whether Schemathesis/Akto
+are REQUIRED, with the measured reason. Time-box 45 minutes of work.
+
+Ten things Wednesday requires (brief items 1-10; items 11-13 are added; each carries drafter predictions with predicted-by):
+
+1. THE CENSUS, RE-RUN ON THE ROUND-2 HEAD (the seat did NOT): round 1's 1115-request / 119-route census, enumerator re-run on head AND
+   merged with its planted-mount control, NODE_ENV=test AND NODE_ENV=production, base vs head, dev vs merged, head vs merged, and head vs
+   round 1's census_*_d3.json. Every written field per request. Wednesday's FAIL criterion: any row that differs from base outside the gdpr
+   refusal classes. Round 2's head IS D3, so D3 can no longer be the oracle: class every DIFF against an oracle from the REQUEST TARGET
+   ALONE (canonical = drop absolute-form scheme://host, #frag, ?query; collapse //; /api/v1/ -> /api/) plus spelling invariance, with
+   planted oracle controls; report the literal count AND the oracle-classed count (FIX / REGRESSION / CHANGED-BOTH-WRONG / SAME).
+   Drafter PREDICTION (from round 1's D3 JSONs, 4/4 oracle controls): DIFF 256 test / 574 production (445 of them ADMITTED non-gdpr rows in
+   production — R-5's v1.* rows going canonical), REGRESSION 0 in both envs, every inserted row's details.path == canonical(target),
+   head spelling-invariant 118/119 test and 119/119 production (base 65 and 109), merged == head, head == round-1 D3.
+2. EVERY GDPR REFUSAL CLASS from round 1 (round 1's item-2 table), base/head/merged, BOTH envs, each CLOSED / STILL OPEN / NEW — name the
+   no-credential production regression of F-1011-1 explicitly (predicted gdpr.create on head in production). Predicted pre-existing residue:
+   /api/GDPR/erasures -> GDPR.create, /API/GDPR/ERASURES unaudited (R-4).
+3. req.path AT ENTRY IS THE CANONICAL PATH under every mount shape: root mount, nested routers (round 1's /gw fixture), the /api/v1 strip,
+   the production 307, //api//logs, #frag, absolute-form — probe req.url / req.path / req.originalUrl at entry, in the door and in finish.
+   Then: can any request target STILL set the action/resource_type string? Split requests that REACH a handler or the upstream from
+   unrouted 404s. Try case, percent-encoding, ;params, dot-segments, /api/v1/v1/, bare /api/v1, a /api/v1/ in the query. Drafter (MEASURED,
+   base == head): /api/LOGS -> 204 audited LOGS.create; /API/logs -> 204 and NO audit row; unrouted 404s carry caller text; head removes
+   the host / fragment / v1 / // steering (F-1011-3 predicted CLOSED for its instances).
+4. THE THREE F-1011-5 CELLS reach the REAL index.ts app (hit witness), and the production cell really runs under production mode — prove the
+   vi.stubEnv in beforeAll takes effect BEFORE the app module loads with a witness keyed to MODULE LOAD, not the request-time 307
+   (versioning.ts:47 reads NODE_ENV per request; index.ts:109/:387 at load). Drafter (MEASURED): X-CSRF-Token (csrf mounted only when index.ts
+   evaluates with NODE_ENV != test) is present on both production responses as committed; with vi.resetModules() removed the header is absent
+   AND the file stays 3/3 GREEN (NORESET 0 red) — the cell does not pin its own premise; NOPRODENV 1 red. Also: is the production 403 the
+   door or CSRF? (control: connector WITH subjects:erase in the same boot; refusal code INSUFFICIENT_SCOPE predicted).
+5. THE SEAT'S TAMPER TABLE RE-DERIVED — T0, R1, R1P, R1D, TA, TB, G-NONGDPR, TG, TI, T0-after (READY: 0/2/2/2/2/3/2/1/0/0) — whole
+   api-gateway suite, denominator asserted (drafter head 50 / 417), project tsc rc per row, cells-run / failed / pending / decisive assertion
+   / predicted-by per row; PLUS ONE gate tamper aimed at a CONTROL: G-CTRL (admitted details.path -> '/qa-tampered'), drafter MEASURED 3 red.
+   A non-compiling tamper is VOID; restore sha256-identical. TE and G-D3 are identities on this head — say so, do not run them as tampers.
+6. THE --no-ff MERGE of develop 1125607e9 (22c0a51a8): parents, that it adds nothing beyond #1010's content, the READY's "tree = e073733d1".
+   Measure the PR's DELTA over the CURRENT develop and the squash tree it would produce; NAME the merged-tree OID.
+7. INCLUDING TSC (not tsc -p, which excludes __tests__) on audit.ts and the three ks871 files, base/head/merged, --listFilesOnly, a planted
+   control, NEW only. Drafter: 30 lines / 10 files on all three, 0 in the PR files, NEW 0.
+8. LINEAR: attachmentsForURL(pull/1011) exactly KS-871 contributes; KS-843 / KS-858 / KS-1187 carry no #1011; 0 closing phrases in title,
+   body, all three commit messages (incl. the merge) and comments (planted controls). KS-871 must NOT go Done on merge — it stays In Progress
+   (§5f: runtime behaviour). Re-read linkKind immediately before the mail.
+9. KS-1187 (the absolute-form erasure-door bypass) is PRE-EXISTING and NOT this PR's scope: re-run round 1's bypass matrix and record ONLY
+   whether round 2 changes its reachability (predicted: unchanged) and what the bypassing request's audit row now reads. Also replicate the
+   drafter's D6 (base == head): POST /api/gdpr/%65rasures and /api/gdpr/x/../erasures reach the upstream past the door for a connector
+   without subjects:erase — record the exact upstream line; whether originate would route it is UNMEASURED. Record only; nothing to Peter or
+   Stuart; no ticket, no comment.
+10. SCHEMATHESIS / AKTO: full response status, non-volatile headers and body, base vs head and dev vs merged, both envs, with a noise pair;
+   identical -> NOT APPLICABLE with the measured reason; any product-caused difference -> REQUIRED, say which.
+11. Suites per tree (drafter: base 47/408, head 50/417, merged 51/419), eslint on the four PR files, disjointness by the PR files API.
+12. Seat-claim dispositions C1-C9 and round-1 Records R-1..R-9 CLOSED / UNCHANGED / MOVED.
+13. NOT TESTED, at the same prominence as the findings: the §5f live sweep on a rebuilt stack (Sunday); a real Postgres audit_logs write;
+   deployed NODE_ENV and client /api/v1 usage; nginx / Container Apps / Caddy request-target rewriting; whether originate routes encoded /
+   dot-segment paths; out-of-repo audit consumers (SIEM, dashboards) — the blast radius of the production action changes; Playwright / k6;
+   preflight legs 3/4/8; H29 attemptedEmail; `docker info` rc on its own line.
+
+Hygiene: /bin/bash here is 3.2 — write runners in Python. zsh: no PIPESTATUS (`cmd > out 2>&1; rc=$?`), no timeout on macOS, never begin a
+line with `=====`. Your tool shell's grep may be a function: /usr/bin/grep -i with a same-file positive control; `git grep -c` prints
+nothing for a zero — silence is unread, not 0. Never `cd` in your own tool calls; absolute paths; git write verbs only inside script files.
+stderr is never discarded. Clocks from `date`, never estimated. Every scripted edit asserts its anchor count = 1 and a marker.
+Quote the Secuura checkout's porcelain count, .git/config sha256, for-each-ref count, .git/worktrees count, origin develop SHA,
+refs/pull/1011/head and the checkout branch at start, mid and close as THREE timestamped readings; if refs/pull/1011/head moves, STOP — the
+brief is about a different SHA. develop moving is expected; judge it by content, name it.
+Never `rm`: fresh mktemp -d per attempt; quarantine scratch tests and configs by rename. No container is created; never touch a
+secuura-* container.
+Do no memory maintenance of your own project's memory store inside this session.
+
+Report FOUND / TESTED / HOW, with controls, into
+/Volumes/DevMASTER/!CODING/Testing Agent MAIN/projects/secuura/reports/2026-09-17-ks871-1011-6dc825644-tier1-r2/
+(report.md, evidence/, NOT-TESTED.written-first.md written BEFORE any run): the round-1 carry-forward table FIRST (F-1011-1..5 and R-1..R-9,
+CLOSED / STILL OPEN / NEW by instance); the trees with OIDs; the census tables per comparison and env with the enumerator control, the oracle
+controls, literal and oracle-classed counts; the refusal-class table; the canonical-path probe and the request-target table; the real-app cell
+witness and the production-mode proof; the full tamper table; the merge accounting and merged-tree OID; suites per tree and the including tsc;
+Linear; KS-1187 and D6 reachability; the Schemathesis/Akto ruling; seat-claim dispositions; the Records; and what you did NOT test at the same
+prominence as the findings. Every finding carries its evidence class (MEASURED AT RUNTIME / PROBED / READ ONLY / RELAYED), severity,
+target (PR or TICKET), SHIPS-WITH or TICKET, and its oracle. Name every prediction slip against its predictor (the READY, the drafter, Wednesday).
+Client-facing communication = ticket comments only, and not from you; anything needing a push goes to Wednesday as an escalation candidate.
+Never delete; cleanup means quarantine.
+Verdict: ONE line — GO, GO WITH FINDINGS, or NO GO — on 6dc8256448b50de6a15519001a4f7032ace1ae19, as the delta over base 1125607e9 AND on the
+merged tree (name the develop and the merged-tree OID). Say plainly, per round-1 finding, CLOSED / STILL OPEN / NEW with instances; if NO GO,
+which closed instances ship and which residue becomes which ticket. Then: admitted and refused non-gdpr rows per route class under test and
+production (literal and oracle-classed); the gdpr refusal classes; the canonical-path ruling and what request targets can still steer the
+action; the real-app cells and the production-mode proof; the tampers; the merge and merged tree; suites and including tsc; Linear; KS-1187 /
+D6 reachability; your Schemathesis/Akto ruling; and what was NOT tested.
+Give the merge seat its ADDENDUM line: "squash 6dc825644 onto develop <then-current develop; e0f41a8fa at draft close> (merged tree <OID>); #1011
+attaches to KS-871 only, linkKind contributes — KS-871 stays In Progress on merge (§5f: runtime behaviour — the audit trail's action /
+details.path change for <n> test / <n> production census rows); equality targets audit.ts 052131de0 / ks871 Part A 8d66dfaf7 / Part B
+f6bf4f9d4 / real-app ef19446f2; api-gateway 47/408 -> 50/417 at 1125607e9, <dev> -> 51/419 merged (re-measure); Records: <yours>" — plus any
+test-quality finding with its target.
+
+MAIL YOUR VERDICT to wednesday-agent@agentmail.to when the pass is complete. Your pane holds ~19 lines of alternate screen with no
+scrollback, so a verdict that stays in the pane is one pane-close from being lost -- this is not a formality, it is the only durable
+copy; the verdict MAIL is the END STATE and the wait signal. Send it FROM coagent@agentmail.to. Subject, EXACTLY:
+[QA -> Wednesday] TIER 1 GATE #1011 ROUND 2 (KS-871) 6dc825644 — <GO | GO WITH FINDINGS | NO GO>
+(The QA project has no send_brief.sh of its own: POST https://api.agentmail.to/v0/inboxes/coagent@agentmail.to/messages/send with JSON
+{"to": ["wednesday-agent@agentmail.to"], "subject": "...", "text": "..."} and Authorization: Bearer $AGENTMAIL_API_KEY, the key by NAME
+from Wednesday's .env, never echoed. Confirm the API answered 2xx and quote the message id in your final pane line. Timestamps in the mail
+come from `date`, never estimated. The MAIL is the end state.)

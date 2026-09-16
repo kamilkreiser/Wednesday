@@ -1,0 +1,53 @@
+diff --git a/Blockchain/Dev/services/api-gateway/src/middleware/audit.ts b/Blockchain/Dev/services/api-gateway/src/middleware/audit.ts
+index f5a83ba2c..052131de0 100644
+--- a/Blockchain/Dev/services/api-gateway/src/middleware/audit.ts
++++ b/Blockchain/Dev/services/api-gateway/src/middleware/audit.ts
+@@ -92,7 +92,7 @@ const EXCLUDED_PREFIXES = [
+  * segments + the HTTP method. That gives a sensible default for the long
+  * tail without needing to enumerate every route.
+  */
+-function deriveAction(req: Request): {
++function deriveAction(req: Request, path: string): {
+   action: string;
+   resourceType: string;
+   resourceId: string | null;
+@@ -105,10 +105,11 @@ function deriveAction(req: Request): {
+     : method.toLowerCase();
+ 
+   // Trim trailing slashes and pull the first 3-4 segments after /api.
+-  // KS-871: read req.originalUrl, not req.path (the prior read). This runs inside
+-  // 'finish', where a responding router.use gate has left req.path mount-relative,
+-  // so a refused POST /api/gdpr/erasures derived 'unknown.create'.
+-  const segments = req.originalUrl.split('?')[0].replace(/\/+$/, '').split('/').filter(Boolean);
++  // KS-871: derive from `path`, the canonical path captured when the middleware ran
++  // (see createAuditMiddleware), not from req.path at call time (the prior read).
++  // This runs inside 'finish', where a responding router.use gate has left req.path
++  // mount-relative, so a refused POST /api/gdpr/erasures derived 'unknown.create'.
++  const segments = path.replace(/\/+$/, '').split('/').filter(Boolean);
+   // segments[0] === 'api' for everything we audit
+   const section = segments[1] || 'unknown';
+   const subResource = segments[2];
+@@ -215,8 +216,12 @@ export function createAuditMiddleware(deps: AuditMiddlewareDeps): RequestHandler
+     // KS-871: capture the path once, at entry. A responding router.use gate (the
+     // KS-843 erasure door) leaves req.path mount-relative, and 'finish' fires before
+     // anything restores it, so a refused POST /api/gdpr/erasures was audited as '/'.
+-    // req.originalUrl is never rewritten by express.
+-    const auditPath = req.originalUrl.split('?')[0];
++    // The source is req.path HERE, where this middleware is mounted at the app root
++    // after index.ts's /api/v1 strip: the canonical path the entry gates above read.
++    // Round 1 read req.originalUrl, which express never rewrites, so it kept the
++    // /api/v1 spelling (every production write after the 307), an absolute-form host,
++    // a #fragment and repeated slashes (QA gate on #1011, F-1011-1..3).
++    const auditPath = req.path;
+ 
+     // Wrap res.json so the login-success path can extract the userId from the
+     // response body. Without this, /api/auth/login audit entries have a null
+@@ -236,7 +241,7 @@ export function createAuditMiddleware(deps: AuditMiddlewareDeps): RequestHandler
+       void (async () => {
+         try {
+           if (!deps.isDbAvailable()) return;
+-          const { action, resourceType, resourceId: routeResourceId } = deriveAction(req);
++          const { action, resourceType, resourceId: routeResourceId } = deriveAction(req, auditPath);
+ 
+           const u = (req as Request & { user?: { userId?: string; organizationId?: string; tenantId?: string } }).user;
+           let userId: string | null = u?.userId || null;

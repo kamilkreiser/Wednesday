@@ -1,0 +1,31 @@
+cells_read (labelled) 2026-09-17 07:01:50 AEST at a226d94fe8c6fbfecb81de415feb645302cdd166
+--- git grep -n -F 'KS-1180' api-gateway src
+(end KS-1180)
+--- git grep -n -F 'KS-1073' api-gateway src
+Blockchain/Dev/services/api-gateway/src/__tests__/ks1073-tier-2-verify-has-no-statusless.test.ts:2:// KS-1073 — the verify handler's legacy statusless-blob carve-out must NOT appl
+Blockchain/Dev/services/api-gateway/src/__tests__/ks1073-tier-2-verify-has-no-statusless.test.ts:161:describe('KS-1073 — a statusless tier-2 row is NOT anchored (carve-out is tier
+Blockchain/Dev/services/api-gateway/src/__tests__/ks1073-tier-2-verify-has-no-statusless.test.ts:162:  it('🔴 KS-1073 — a tier-2 anchor-store row with NO status is not anchored', a
+Blockchain/Dev/services/api-gateway/src/__tests__/ks1073-tier-2-verify-has-no-statusless.test.ts:168:  it('🔴 KS-1073 — the same statusless tier-2 row reports blockchain.anchored f
+Blockchain/Dev/services/api-gateway/src/__tests__/ks1073-tier-2-verify-has-no-statusless.test.ts:173:  it('KS-1073 control — a tier-1 legacy statusless blob still reports on-chain
+Blockchain/Dev/services/api-gateway/src/routes/verification.ts:367:                  // excludes `_source: 'anchor_store'` (KS-1073), so a real
+Blockchain/Dev/services/api-gateway/src/routes/verification.ts:704:    // ⚠ IT IS TIER 1 ONLY, and since KS-1073 the predicate enforces that: the
+Blockchain/Dev/services/api-gateway/src/routes/verification.ts:715:    // Measured before KS-1073 (#1002's QA gate, G4): deleting this carve-out
+Blockchain/Dev/services/api-gateway/src/routes/verification.ts:722:      (persistedStatus === 'confirmed' || (persistedStatus == null && (doc as any)._source !== 'anchor_store')),
+(end KS-1073)
+--- git grep -n -F 'KS-1123' api-gateway src
+Blockchain/Dev/services/api-gateway/src/__tests__/ks1123-f2-anchor-failed-stale-confidence.test.ts:2:// KS-1123 F2 — TEST ONLY MODE (no product hunk)
+Blockchain/Dev/services/api-gateway/src/__tests__/ks1123-f2-anchor-failed-stale-confidence.test.ts:142:describe('KS-1123 F2 — stale confidence cannot upgrade a status', () => {
+Blockchain/Dev/services/api-gateway/src/__tests__/ks1123-f2-anchor-failed-stale-confidence.test.ts:143:  it('🔴 KS-1123 F2 — a failed anchor with a stale confidence field stays off
+Blockchain/Dev/services/api-gateway/src/__tests__/ks1123-f2-anchor-failed-stale-confidence.test.ts:153:  it('🔴 KS-1123 F2 — a confirmed-status blob with no hash and a stale confid
+Blockchain/Dev/services/api-gateway/src/__tests__/ks1123-f2-anchor-failed-stale-confidence.test.ts:163:  it('KS-1123 control — a pending-status blob is pending-onchain, before and
+Blockchain/Dev/services/api-gateway/src/__tests__/ks1123-f3-empty-status-is-off-chain.test.ts:2:// KS-1123 F3 — an empty-string (or falsy) anchor status must NOT collapse to
+Blockchain/Dev/services/api-gateway/src/__tests__/ks1123-f3-empty-status-is-off-chain.test.ts:146:describe('KS-1123 F3 — an empty-string / falsy status must stay off-chain-only (n
+Blockchain/Dev/services/api-gateway/src/__tests__/ks1123-f3-empty-status-is-off-chain.test.ts:147:  it('🔴 KS-1123 F3 — tier 1: an EMPTY-STRING status with a real hash and height i
+Blockchain/Dev/services/api-gateway/src/__tests__/ks1123-f3-empty-status-is-off-chain.test.ts:155:  it('🔴 KS-1123 F3 — tier 2: the empty-string twin is off-chain-only too', async 
+Blockchain/Dev/services/api-gateway/src/__tests__/ks1123-f3-empty-status-is-off-chain.test.ts:163:  it('KS-1123 control — a confirmed tier-1 blob still reports on-chain', async ()
+(end KS-1123)
+--- git log --grep KS-1180 on develop 523f283c6 (oneline)
+(end log)
+--- control: git log --grep KS-1073 on develop
+93629700c KS-1073: the statusless on-chain carve-out is tier-1 only (verify predicate) (#1005)
+dd66863dd KS-1123: pin the empty-string status (F3) and the stale-confidence guard (F2); comment items F1/P1/P2 (#1002)

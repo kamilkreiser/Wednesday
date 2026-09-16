@@ -1,0 +1,38 @@
+drafter_probe r2 start 05:22:54 AEST
+05:23:03 AEST probe_base                         tree base  pkg gw     rc 0 FILES 1 TESTS 2 passed 2 failed 0 pending 0 failed_suites 0 success True secs 9.2 suite_msgs 0
+05:23:13 AEST probe_head                         tree head  pkg gw     rc 0 FILES 1 TESTS 2 passed 2 failed 0 pending 0 failed_suites 0 success True secs 9.1 suite_msgs 0
+05:23:22 AEST probe_merged                       tree merged pkg gw     rc 0 FILES 1 TESTS 2 passed 2 failed 0 pending 0 failed_suites 0 success True secs 9.2 suite_msgs 0
+-- base 1125607e9 vs head 6dc825644
+  DIFF  gdpr POST garbage bearer                           status 401/401
+        base      action=unknown.create rtype=unknown path=/
+        head      action=gdpr.create rtype=gdpr path=/api/gdpr/erasures
+  DIFF  gdpr POST connector no scope ENFORCED              status 403/403
+        base      action=unknown.create rtype=unknown path=/
+        head      action=gdpr.create rtype=gdpr path=/api/gdpr/erasures
+  DIFF  gdpr POST user jwt ENFORCED                        status 403/403
+        base      action=unknown.create rtype=unknown path=/
+        head      action=gdpr.create rtype=gdpr path=/api/gdpr/erasures
+  DIFF  gdpr POST trailing slash connector ENFORCED        status 403/403
+        base      action=unknown.create rtype=unknown path=/
+        head      action=gdpr.create rtype=gdpr path=/api/gdpr/erasures/
+  DIFF  gdpr POST //erasures connector ENFORCED            status 403/403
+        base      action=unknown.create rtype=unknown path=/
+        head      action=gdpr.create rtype=gdpr path=/api/gdpr/erasures
+  DIFF  batch POST (app.use prefix mount)                  status 401/401
+        base      action=unknown.create rtype=unknown path=/verify
+        head      action=batch.verify rtype=batch path=/api/batch/verify
+  DIFF  auth login v1 proxied                              status 200/200
+        base      action=v1.login rtype=v1 path=/api/v1/auth/login
+        head      action=auth.login rtype=session path=/api/auth/login
+  NESTED base [{"path": "/gw/api/gate/x", "st": 403, "audits": [{"action": "unknown.create", "resourceType": "unknown", "details": {"method": "POST", "path": "/x", "status": 403, "durationMs": 1, "tenantId": null}}]}, {"path": "/gw/api/ok", "st": 201, "audits": [{"action": "ok.create", "resourceType": "ok", "details": {"method": "POST", "path": "/api/ok", "status": 201, "durationMs": 1, "tenantId": null}}]}]
+  NESTED head [{"path": "/gw/api/gate/x", "st": 403, "audits": [{"action": "gate.create", "resourceType": "gate", "details": {"method": "POST", "path": "/api/gate/x", "status": 403, "durationMs": 2, "tenantId": null}}]}, {"path": "/gw/api/ok", "st": 201, "audits": [{"action": "ok.create", "resourceType": "ok", "details": {"method": "POST", "path": "/api/ok", "status": 201, "durationMs": 1, "tenantId": null}}]}]
+  == base vs head: rows 30/30 SAME 22 DIFF 7
+-- head vs merged (noise pair + develop 79432c797 move)
+  NESTED head [{"path": "/gw/api/gate/x", "st": 403, "audits": [{"action": "gate.create", "resourceType": "gate", "details": {"method": "POST", "path": "/api/gate/x", "status": 403, "durationMs": 2, "tenantId": null}}]}, {"path": "/gw/api/ok", "st": 201, "audits": [{"action": "ok.create", "resourceType": "ok", "details": {"method": "POST", "path": "/api/ok", "status": 201, "durationMs": 1, "tenantId": null}}]}]
+  NESTED merged [{"path": "/gw/api/gate/x", "st": 403, "audits": [{"action": "gate.create", "resourceType": "gate", "details": {"method": "POST", "path": "/api/gate/x", "status": 403, "durationMs": 1, "tenantId": null}}]}, {"path": "/gw/api/ok", "st": 201, "audits": [{"action": "ok.create", "resourceType": "ok", "details": {"method": "POST", "path": "/api/ok", "status": 201, "durationMs": 0, "tenantId": null}}]}]
+  == head vs merged: rows 30/30 SAME 29 DIFF 0
+-- head vs ROUND-1 drafter entry-path counterfactual (0a1f8900c + D3)
+  NESTED head [{"path": "/gw/api/gate/x", "st": 403, "audits": [{"action": "gate.create", "resourceType": "gate", "details": {"method": "POST", "path": "/api/gate/x", "status": 403, "durationMs": 2, "tenantId": null}}]}, {"path": "/gw/api/ok", "st": 201, "audits": [{"action": "ok.create", "resourceType": "ok", "details": {"method": "POST", "path": "/api/ok", "status": 201, "durationMs": 1, "tenantId": null}}]}]
+  NESTED r1-D3 [{"path": "/gw/api/gate/x", "st": 403, "audits": [{"action": "gate.create", "resourceType": "gate", "details": {"method": "POST", "path": "/api/gate/x", "status": 403, "durationMs": 0, "tenantId": null}}]}, {"path": "/gw/api/ok", "st": 201, "audits": [{"action": "ok.create", "resourceType": "ok", "details": {"method": "POST", "path": "/api/ok", "status": 201, "durationMs": 0, "tenantId": null}}]}]
+  == head vs r1-D3: rows 30/30 SAME 29 DIFF 0
+drafter_probe r2 end 05:23:22 AEST

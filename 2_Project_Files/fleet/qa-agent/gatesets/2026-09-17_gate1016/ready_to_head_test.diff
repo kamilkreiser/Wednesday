@@ -1,0 +1,48 @@
+--- READY-test
++++ head-test
+@@ -31,2 +31,3 @@
+-/** When true the stub originate 404s tier 1, forcing tier 2 path. */
+-let tier1Absent = false;
++// KS-1072 (seat A): the READY's `tier1Absent` flag was assigned but never read (the stub originate below 404s
++// every request, which is what forces tier 2), so it is removed; the originate stub is now closed in afterAll.
++let originate: Server;
+@@ -56 +57 @@
+-  const originate = http.createServer((_req, res) => {
++  originate = http.createServer((_req, res) => {
+@@ -108,0 +110 @@
++  await new Promise<void>((r) => originate.close(() => r()));
+@@ -112 +113,0 @@
+-  tier1Absent = true;
+@@ -120 +121,5 @@
+-  return res.json();
++  const body = await res.json();
++  // KS-1072 (seat A): guard the whole family — if tier 2 were not the tier that answered, every txHash below
++  // would be about the wrong code path.
++  expect(body.blockchain.source).toBe('persisted');
++  return body;
+@@ -134 +139,3 @@
+-    // Base: undefined sorts before Date.parse(undefined)||0=0 in descending order? No - both are 0. But dated one listed second... actually with `||0` both become 0 and stable sort keeps first (missing). So this tests that missing comes LAST not first. Let me re-read ticket: "one anchor without confirmedAt listed first, one with a date second; assert the dated one wins." With current buggy code both have byBlock=0 then both get 0 from ||0 so stable sort keeps FIRST which is MISSING. After fix: Date.parse(dated)>0 > Date.parse(missing)=0 so dated wins. Correct.
++    // A dated anchor beats an undated one on equal blockNumber: Date.parse(undefined) || 0 is 0. At base the
++    // comparator returned 0 for the pair, so the stable sort kept the undated anchor listed first.
++    // (KS-1072, seat A: replaces the READY's working-out comment; the cell is unchanged.)
+@@ -139,0 +147,20 @@
++  });
++
++  // KS-1072 (seat A): the ticket names the common 0/null blockNumber case, which `|| 0` collapses to a tie.
++  it('\u{1F534} KS-1072 \u2014 a null and a 0 blockNumber tie, and the most recent confirmedAt wins', async () => {
++    const body = await postTier2([
++      { blockNumber: null, confirmedAt: '2026-02-01T00:00:00Z', transaction_hash: '1'.repeat(64), status: 'confirmed' },
++      { blockNumber: 0, confirmedAt: '2026-07-01T00:00:00Z', transaction_hash: '2'.repeat(64), status: 'confirmed' },
++    ]);
++    expect(body.blockchain.txHash).toBe('2'.repeat(64));
++  });
++
++  // KS-1072 (seat A): every tie above lists the OLDER anchor first, so a comparator that picked the oldest would
++  // red them exactly as a missing tiebreak does. Listing the newer anchor first separates the two: this cell is
++  // green at base (the stable sort keeps the first row) and reds only if recency is ordered the wrong way.
++  it('KS-1072 control \u2014 equal blockNumber with the newer anchor listed first: the newer still wins', async () => {
++    const body = await postTier2([
++      { blockNumber: 100, confirmedAt: '2026-08-01T00:00:00Z', transaction_hash: '3'.repeat(64), status: 'confirmed' },
++      { blockNumber: 100, confirmedAt: '2026-03-01T00:00:00Z', transaction_hash: '4'.repeat(64), status: 'confirmed' },
++    ]);
++    expect(body.blockchain.txHash).toBe('3'.repeat(64));
