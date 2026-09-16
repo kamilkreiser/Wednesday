@@ -1,0 +1,57 @@
+ultrathink
+
+You are the fleet QA agent running a TIER 2 (through code) gate, ROUND 1, on Secuura/Blockchain -- TWO test-only PRs in ONE pass, with ONE verdict PER PR.
+
+Read your brief FIRST and in full, then plan:
+/Volumes/DevMASTER/WEDNESDAY/2_Project_Files/fleet/qa-agent/briefs/2026-09-16_secuura-999-1000-ks1130-ks960-tier2.md
+
+Subject 1: PR #999 (KS-1130) @ 91793e5d4f4d4b70eec93662c45555472e2bb8a6 -- three tier-2 twin cells (E1/E7/E3) plus comment-only edits in api-gateway routes/verification.ts and one test header; 5 files, one commit, "Closes KS-1130"
+Subject 2: PR #1000 (KS-960) @ ab4a35d75 -- one new auth test pinning createUser's conflict target on email_lookup_hash; 1 file, one commit, does NOT close KS-960
+Merge-base (both): 0b25f823f6660ac52b665f14055799ff0c3b616d (develop's tip when drafted)
+Repo:    /Volumes/DevMASTER/!CODING/Secuura/Blockchain/2_Project_Files  (READ-ONLY -- clone by SHA into your own scratch; never work in that checkout)
+
+A PR is gated at a SHA, not a name: FIRST verify both heads at origin. A moved head means STOP for that PR and say so in the mail.
+
+You are FINDINGS-ONLY. You never fix, never merge, never push, never deploy, and never comment on GitHub or Linear (Linear and GitHub are READ-ONLY to you).
+
+NEVER run a push, the real pre-push hook, or preflight.sh inside the Secuura checkout or any of its worktrees.
+
+NEVER print a credential value. GH_TOKEN and LINEAR_API_KEY are read by NAME from the Secuura 4_Credentials/.env and never echoed or written anywhere.
+
+Scope is MODEST: Kam capped this account at 40% weekly usage tonight. Not required legs: Schemathesis, Akto, Playwright, k6, docker/local stack. Run the brief's minimum set and stop.
+
+Five things you must not miss:
+
+1. Scope: #999 touches ONLY the 5 api-gateway files and #1000 ONLY the one auth test file; prove #999's two
+   modified files are comment-only with a PARSER (e.g. transpile with removeComments and compare), not a regex.
+
+2. Measure the tamper tables, do not relay them: re-run at least the brief's minimum rows yourself, assert each
+   tamper landed before reading a result, restore sha-identical, and quote cells run. Place tampers by TEXT
+   anchor -- the seat's line numbers are develop 0b25f823f numbering, not head numbering.
+
+3. #999: weigh the SEAT-CONSTRUCTED E7 tamper against Wednesday's original ternary (path in the brief, D4), the
+   4 removed dead lines, the kept typeof clause (delete it alone: 0 reds is the comment's own claim), and run ONE
+   tier-2 SYNTHESIS tamper with the whole api-gateway suite -- that site is what KS-1130 item 1 exists for and no
+   seat row targets it.
+
+4. #1000: confirm cell 3's predicate pin bites (predicate dropped -> cell 3 alone red); run one tamper of your own
+   design; the cells pin statement TEXT, not validity -- do NOT reconcile the two schema sources. Resolve the
+   "3 pre-existing failures at M55" discrepancy (brief D7) with the auth suite at 0b25f823f.
+
+5. Linear linkage (brief D6): #999 is attached to KS-1129 as well as KS-1130. Confirm read-only and weigh what a
+   merge is predicted to do; never write.
+
+Your tool shell's grep may be a function: use /usr/bin/grep, case-insensitive, with a same-file control.
+Quote the Secuura checkout's porcelain count, .git/config sha256 and for-each-ref count at start and close; they must match.
+Never rm; a fresh mktemp -d per attempt.
+Do no memory maintenance of your own project's memory store inside this session.
+
+Report FOUND / TESTED / HOW, with controls, and state what you did NOT test. Write the report to:
+/Volumes/DevMASTER/!CODING/Testing Agent MAIN/projects/secuura/reports/2026-09-16-ks1130-999-91793e5d4-ks960-1000-ab4a35d75-tier2-r1/
+Verdict PER PR: GO, GO WITH FINDINGS, or NO GO.
+
+MAIL YOUR VERDICT to wednesday-agent@agentmail.to when the pass is complete, using
+the project's send_brief.sh. Your pane holds ~19 lines of alternate screen with no
+scrollback, so a verdict that stays in the pane is one pane-close from being lost --
+this is not a formality, it is the only durable copy. ONE mail, BOTH verdicts. Subject:
+[QA -> Wednesday] TIER 2 GATE #999 #1000 ROUND 1 (KS-1130 KS-960) 91793e5d4 ab4a35d75 -- <VERDICT999> <VERDICT1000>

@@ -1,0 +1,30 @@
+read at 2026-09-16 21:49:00 AEST
+tree truncated: False
+  src/middleware/errorHandler.ts:211: * `ON CONFLICT (email_lookup_hash) DO UPDATE` collapses them onto one row while
+  src/repositories/issuerCertRepo.ts:179: ON CONFLICT (tenant_id, fingerprint_sha256) DO UPDATE
+  src/repositories/userRepo.ts:668: // wouldn't block duplicates any more — we ON CONFLICT against the
+  src/repositories/userRepo.ts:688: ON CONFLICT (email_lookup_hash) WHERE email_lookup_hash IS NOT NULL DO UPDATE SET
+  src/repositories/userRepo.ts:1383: // The api-gateway migration still says `ON CONFLICT (email)`, which is
+  src/routes/auth.ts:245: // createUser is idempotent via ON CONFLICT (email_lookup_hash) — for the
+  src/routes/auth.ts:247: // status to 'active' via the ON CONFLICT clause's COALESCE-and-update
+  src/routes/auth.ts:252: // ON CONFLICT in createUser doesn't update status (the SET list is
+  src/routes/auth.ts:1054: // `ON CONFLICT (email_lookup_hash) DO UPDATE` and mint a token pair for a
+  src/routes/auth.ts:1071: // collapsed onto one row via `ON CONFLICT (email_lookup_hash) DO UPDATE` and
+  src/routes/mfa.ts:59: ON CONFLICT (user_id) DO UPDATE SET secret = $2, expires_at = $3`,
+  src/routes/users.ts:1154: ON CONFLICT (id) DO UPDATE SET
+  src/routes/wallet.ts:57: ON CONFLICT (id) DO NOTHING`,
+auth non-test .ts files scanned: 50 ON CONFLICT lines: 13
+schema source Blockchain/Dev/docker/init/01-schema.sql
+   :19: -- Lookups go via the deterministic email_lookup_hash (HMAC-SHA256)
+   :26: -- email_lookup_hash, as getUserByEmail does
+   :37: email                 TEXT NOT NULL,
+   :38: email_lookup_hash     VARCHAR(64),
+   :67: -- Required for the auth seeder's `ON CONFLICT (email_lookup_hash) WHERE …` clause.
+   :68: CREATE UNIQUE INDEX users_email_lookup_hash_uniq
+   :69: ON users(email_lookup_hash) WHERE email_lookup_hash IS NOT NULL;
+   :70: CREATE INDEX users_email_lookup_hash_idx
+   :71: ON users(email_lookup_hash);
+   :504: email VARCHAR(255) NOT NULL,
+schema source Blockchain/Dev/migrations/001_initial-schema.sql
+   :20: email VARCHAR(255) UNIQUE NOT NULL,
+   :461: email VARCHAR(255) NOT NULL,

@@ -1,0 +1,34 @@
+read at 2026-09-16 21:49:37 AEST
+sql files scanned: 64
+  Blockchain/Dev/docker/init/01-schema.sql:19: -- Lookups go via the deterministic email_lookup_hash (HMAC-SHA256)
+  Blockchain/Dev/docker/init/01-schema.sql:26: -- email_lookup_hash, as getUserByEmail does
+  Blockchain/Dev/docker/init/01-schema.sql:38: email_lookup_hash     VARCHAR(64),
+  Blockchain/Dev/docker/init/01-schema.sql:67: -- Required for the auth seeder's `ON CONFLICT (email_lookup_hash) WHERE …` clause.
+  Blockchain/Dev/docker/init/01-schema.sql:68: CREATE UNIQUE INDEX users_email_lookup_hash_uniq
+  Blockchain/Dev/docker/init/01-schema.sql:69: ON users(email_lookup_hash) WHERE email_lookup_hash IS NOT NULL;
+  Blockchain/Dev/docker/init/01-schema.sql:70: CREATE INDEX users_email_lookup_hash_idx
+  Blockchain/Dev/docker/init/01-schema.sql:71: ON users(email_lookup_hash);
+  Blockchain/Dev/migrations/030_auth_user_columns.sql:39: -- + lookups move to the deterministic email_lookup_hash column.
+  Blockchain/Dev/migrations/030_auth_user_columns.sql:40: ALTER TABLE users ADD COLUMN IF NOT EXISTS email_lookup_hash VARCHAR(64);
+  Blockchain/Dev/migrations/030_auth_user_columns.sql:43: CREATE UNIQUE INDEX IF NOT EXISTS users_email_lookup_hash_uniq ON users(email_lookup_hash) WHERE email_lookup_hash IS NOT NULL;
+  Blockchain/Dev/migrations/030_auth_user_columns.sql:44: CREATE INDEX IF NOT EXISTS users_email_lookup_hash_idx ON users(email_lookup_hash);
+  Blockchain/Dev/migrations/039_rls_fail_closed.sql:188: SELECT * FROM users WHERE email_lookup_hash = p_hash LIMIT 1;
+  Blockchain/Dev/migrations/041_action_provenance.sql:15: --     users.email_lookup_hash) so GDPR erasure can find a subject's rows
+  userRepo.ts:1375:       // KS-949 F1 correction: this used to end "and the two files MUST agree
+  userRepo.ts:1376:       // because the seeder and the migration key on the email". Neither keys on
+  userRepo.ts:1377:       // email, and one of them never could.
+  userRepo.ts:1378:       //
+  userRepo.ts:1379:       // This seeder keys on `email_lookup_hash` — the deterministic column, for
+  userRepo.ts:1380:       // the reason createUser states: the encryption is non-deterministic, so a
+  userRepo.ts:1381:       // UNIQUE on the ciphertext could not block duplicates.
+  userRepo.ts:1382:       //
+  userRepo.ts:1383:       // The api-gateway migration still says `ON CONFLICT (email)`, which is
+  userRepo.ts:1384:       // INVALID on the deployed schema — measured 42P10, because
+  userRepo.ts:1385:       // `docker/init/01-schema.sql` declares email TEXT with no unique index. So
+  userRepo.ts:1386:       // that statement throws on every boot and has never seeded anything. A fix
+  userRepo.ts:1387:       // was written and REVERTED out of this PR (Kam, 2026-09-07 `split`): moving
+  userRepo.ts:1388:       // it to the primary key made the statement run, and running it wrote
+  userRepo.ts:1389:       // PLAINTEXT into this encrypted column without setting
+  userRepo.ts:1390:       // `email_lookup_hash`. The bug was preventing the corruption; fixing it
+  userRepo.ts:1391:       // released it. The migration is being repaired in its own round, where the
+  userRepo.ts:1392:       // ratified shape is that it stops inserting these rows entirely — this
