@@ -105,7 +105,20 @@ four repairs in one launch.
   operative claim, nothing under `Blockchain/Dev`, still holds.)
 - **KS-910 and the other `systemTest/` tickets: UNMEASURED, not blocked.** Run the same compare.
 - **KS-1163** needs one change across a script and TWO suites; `bash_patch` expresses product + ONE test. Not started.
-- **The POOL is the week's real risk**, not the machinery. Most of what remains needs a decision, a design, or the stale checkout.
+- **The POOL is the week's real risk**, not the machinery. Three of four commissions this afternoon came
+  back as CORRECT refusals (KS-1173 already a passing READY · KS-1125 already fixed at the tip with no
+  copyable `pg`-mock shape · plus KS-953/KS-683 earlier). Every refusal was right and each saved a round.
+- 🟢 **BUT THE POOL IS WIDER THAN THE QUEUE HEADER CLAIMS.** That header says coverage-only tickets
+  "cannot pass RED-FIRST" — **true when written, false now.** `build_input.sh` grew a `## Tamper` block on
+  2026-09-15 (test-only mode: A3 test file only, A4 red UNDER THE TAMPER, A5 green at the tip) and **19
+  held READYs already use it.** The header is corrected in place. Coverage-only tickets — which the
+  backlog is dominated by — ARE briefable on the vitest tier. Exemplars: `night/briefs/KS-1120.md`,
+  `KS-1123.md`, `KS-1118.md`. **This is the widening Kam asked for on 09-15 18:19, and it was already
+  built; nobody had pointed the candidate list at it.**
+- ⚠ **Trap on `api-gateway/src/startup-migrations.ts`, measured 2026-09-16 so nobody re-derives it:**
+  `migrateDatabase` is NOT exported, and `runStartupMigrations` uses a bare CJS `require('pg')` which
+  `vi.mock('pg', …)` does NOT intercept (that works elsewhere only because `src/db.ts` uses a static ESM
+  import). No suite currently mocks that path. Pick a target reachable from an exported symbol.
 
 ## ⚠ TRAPS
 - **`git -C $VAR <write verb>` is REFUSED by the hook** — use the LITERAL path. Sixth consecutive seat.

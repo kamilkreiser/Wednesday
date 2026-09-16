@@ -15,6 +15,13 @@
 # Re-derive at source before the night (a ticket can close, be archived by cascade, or be taken by a lane).
 #
 # ─────────────────────────────────────────────────────────────────────────────────────────────────────
+# ⚠ CORRECTED 2026-09-16 17:4x: the line below says coverage-only tickets cannot pass RED-FIRST. That was
+# true when this header was written and it is NOT true now. `build_input.sh` grew a `## Tamper` block on
+# 2026-09-15 (test-only mode: A3 test file only, A4 red UNDER THE TAMPER, A5 green at the tip), and 19 held
+# READYs already use that shape. **Coverage-only tickets ARE briefable on the vitest tier** — the pool is
+# wider than this header claims, and that matters because the POOL, not the machinery, is the week's risk.
+# Exemplars with a working Tamper block: night/briefs/KS-1120.md, KS-1123.md, KS-1118.md.
+#
 # FITS (3) — the honest count. The KS Backlog/Todo set is dominated by coverage-only tickets (the code
 # is right, a test is owed — the contract's RED-FIRST assertion cannot pass on those), decision/ruling
 # tickets, security surfaces, multi-service chains, and originate (jest). Rejections are listed below
