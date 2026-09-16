@@ -1874,5 +1874,12 @@
   "project": "Datasec",
   "ts": "2026-09-17T08:45:04.712127+10:00",
   "text": "Recorded as NexusAI entry C-51. The agent found in the project history that '5.3 medium' was the Phi-3 medium model running locally through Ollama. One correction to its earlier comparison: the 2.0.0 version it compared against was a VM, but it used Azure OpenAI GPT-4.1, not the local model. So its AI model check and its Key Vault check still apply to the container version; only the VM setup machinery drops out. Corrected counts are coming."
+ },
+ {
+  "role": "wednesday",
+  "seat": "Kamils-Mac-mini.localdomain",
+  "project": "Datasec",
+  "ts": "2026-09-17T08:59:55.164333+10:00",
+  "text": "NexusAI: the corrected comparison is back. Of the 22 'lost' items, only 4 matter for the container version:\n1. The deploy-time check that the customer's AI deployment answers. RD-464 has restored the in-app half; it's in testing.\n2. The Key Vault read-back check.\n3. Redis. The package deploys a Redis cache that nothing uses. The agent will either connect it or remove it, and give the reason.\n4. The 'what to do next' guidance shown after deploy.\nNearly all of the rest were VM-only or already removed on purpose. The 3 items that would set Entra at deploy time stay out, per your rulings.\n\nOther way round: 60 pieces of VM and local-model code are still in today's product. Some of them ship to customers, including a local-model test page, local start scripts, a retired VM address, and local-model entries in the browser security rules. Those are ticketed to come out before any resubmission. The remaining clean-up (docs, config and about 18 test suites) is a separate later ticket."
  }
 ]
