@@ -10498,5 +10498,39 @@
    "CARD secuura-ks1116-presentation-credential-ownership-model",
    "CARD secuura-ks1102-public-status-what-may-show"
   ]
+ },
+ {
+  "id": "nexusai-live-listing-lockout-warn-now",
+  "client_project": "Datasec/NexusAI",
+  "title": "A stranger can permanently lock the owner out of a fresh deployment — does the LIVE listing need to say so now?",
+  "bluf": "OVERRIDE, matches read first: the gate matches earlier cards on the words \"public\"/\"model\"/\"registry\"; none of them ruled on a live-listing warning or on this defect, which was found tonight. RECOMMENDATION: no emergency action tonight, warn on the listing only if you expect anyone to deploy before the resubmission. THE DEFECT, measured by the tier-1 gate 3x on the release head and once on main, so it is pre-existing and PRESENT IN THE LIVE 2.1.1: on a freshly deployed instance that has not finished setup, any anonymous visitor who can reach the hostname can send two requests — create an admin user, then mark first-run complete — and afterwards authentication is \"enforced\" while NO identity provider can sign anyone in. Local login returns 401, Entra is unconfigured, admin-reset is unavailable because the template never sets ADMIN_RESET_KEY. It survives a restart. The ONLY recovery is hand-editing settings on the customer Azure Files share, and no shipped document says so. WHY I DID NOT WAKE YOU: you have said the listing has no customers, a deployment still needs a token we hand over, so the population at risk is one we control; and the harm is denial of service to the owner, not disclosure — nothing leaks. THE FIX IS ALREADY AUTHORISED AND UNDERWAY in the resubmission candidate, with a regression test that must go red on todays code first; that needed no decision from you. WHAT IS YOURS: whether the LIVE listing or its first-run text should carry a warning before the resubmission lands, since changing a live listing is your signature class.",
+  "default_action": "Nothing changes on the live listing. The fix lands in the resubmission candidate and you see it before anything is submitted.",
+  "options": [
+   {
+    "key": "no-change",
+    "label": "Leave the live listing alone until the resubmission",
+    "detail": "Simplest. Rests on there being no customers, which is your knowledge not mine."
+   },
+   {
+    "key": "warn-now",
+    "label": "Add a warning to the live listing or first-run text now",
+    "detail": "Safer if anyone might deploy in the meantime. A live-listing change, and yours."
+   },
+   {
+    "key": "pull-listing",
+    "label": "Stop distribution until the fixed package is ready",
+    "detail": "Most conservative. Costs the listing being live, and certification time to restore."
+   }
+  ],
+  "recommended": "no-change",
+  "ts": "2026-09-16T22:39:48.809194+10:00",
+  "status": "open",
+  "ruled_choice": null,
+  "ruled_ts": null,
+  "prior_rulings_overridden": [
+   "CARD nexusai-scim-deploy-live-ab",
+   "CARD secrev-live-pass-blocked-on-tenant",
+   "CARD hpsm-composer-live-demo-upgrade-after-c12"
+  ]
  }
 ]
