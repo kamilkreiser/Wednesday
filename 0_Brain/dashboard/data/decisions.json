@@ -10232,9 +10232,9 @@
   ],
   "recommended": "a",
   "ts": "2026-09-16T14:53:34.246276+10:00",
-  "status": "open",
-  "ruled_choice": null,
-  "ruled_ts": null,
+  "status": "ruled",
+  "ruled_choice": "a",
+  "ruled_ts": "2026-09-16T15:04:04.298265+10:00",
   "prior_rulings_overridden": [
    "CARD nexusai-rd135-scim-route",
    "CARD secuura-ks953-shared-pins-anchor-by-marker"
@@ -10260,12 +10260,48 @@
   ],
   "recommended": "a",
   "ts": "2026-09-16T14:57:19.265771+10:00",
-  "status": "open",
-  "ruled_choice": null,
-  "ruled_ts": null,
+  "status": "ruled",
+  "ruled_choice": "a",
+  "ruled_ts": "2026-09-16T15:04:01.669070+10:00",
   "prior_rulings_overridden": [
    "2026-08-21 20:06",
    "CARD secuura-ks670-blockfrost-plan"
+  ]
+ },
+ {
+  "id": "secuura-ks692-status-revoke-interim-posture",
+  "client_project": "Secuura/Blockchain",
+  "title": "KS-692: you already ruled the ownership MODEL — this only asks what happens in the meantime",
+  "bluf": "OVERRIDE, and the gate was right to stop me twice. It named secuura-ks1116-presentation-credential-ownership-model, ALREADY RULED 'bind-creator' on 2026-09-13 — owner is the authenticated principal that created it, existing NULL rows readable by the tenant OWNER role only — and that card's own BLUF names this exact sibling: 'the same shape sits under POST /api/credentials/:id/revoke'. So I am NOT asking you to choose an ownership model. You chose it. My first draft of this card offered it as an open question and that was wrong. What is left is only the interim. The hole is live and measured at 48e65c435: status.ts:42-53 gates revoke on ROLE only, STATUS_WRITE_ROLES includes ISSUER_ADMIN, no tenant comparison exists, and credential_status_lists has no owner column, so bind-creator needs a migration before it can be applied here. The measurement that makes the interim cheap: ZERO product callers of the /api/status write surface exist outside the route, its own test, the gateway mount and deploy config — positive controls on the same scan found 32 files for /api/keys and 17 for /api/credentials, so the scan can see real callers.",
+  "default_action": "If you do not rule it, nothing changes and the hole stays open — narrowing who may revoke is not mine to do on my own word. Either way KS-692 gets a comment repointing status.ts:36 away from the closed KS-586, which already cost one bad round trip on Peter's PR #730 review.",
+  "options": [
+   {
+    "key": "a",
+    "label": "Narrow now, bind-creator later",
+    "detail": "Drop ISSUER_ADMIN from STATUS_WRITE_ROLES today — one file, one test, closes the hole immediately, breaks none of the zero measured callers — then apply your bind-creator ruling properly when the migration lands. Same precedent as KS-743."
+   },
+   {
+    "key": "b",
+    "label": "Leave it until bind-creator lands",
+    "detail": "No interim change. The hole stays open for however long the migration and repository take, but who may revoke is decided once, by your ruling, rather than twice."
+   }
+  ],
+  "recommended": "a",
+  "ts": "2026-09-16T15:03:47.640562+10:00",
+  "status": "ruled",
+  "ruled_choice": "a",
+  "ruled_ts": "2026-09-16T15:04:06.848672+10:00",
+  "prior_rulings_overridden": [
+   "2026-08-17 20:10",
+   "2026-08-17 20:15",
+   "2026-09-10 10:32",
+   "2026-09-13 16:55",
+   "2026-09-15 10:51",
+   "CARD secuura-ks686-501-posture",
+   "CARD secuura-ks566-revoke-gate",
+   "CARD secuura-ks764-key-revoke-org-scope",
+   "CARD secuura-f5-demo-interim-mitigation",
+   "CARD secuura-ks1102-public-status-what-may-show"
   ]
  }
 ]
