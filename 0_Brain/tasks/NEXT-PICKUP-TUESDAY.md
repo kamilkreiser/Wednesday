@@ -143,6 +143,16 @@ pgrep → stop → edit → run once → re-arm.
   would put a seat past 50% before it does anything. Raised as a structural question, not worked
   around — see the daily note.
 
+## A recurring mechanism worth a guard — raise it with Wednesday
+
+The exec-bit warning came back within the hour, on a file that arrived in a pull:
+`2_Project_Files/fleet/tests/doctor_exithint_arms.sh`, tracked at **100644**. That is the same
+root cause as the 84 files earlier tonight, with a fresh example: scripts are being **committed**
+without the executable bit, so every seat re-fixes it forever and doctor's advice ("chmod +x")
+treats a symptom. The durable fix is a pre-commit check that refuses a `*.sh` with a shebang
+staged at 100644 — `2_Project_Files/fleet/hooks/pre-commit` already exists and is the natural
+home. **It is shared tooling, so propose it to Wednesday rather than adding it unilaterally.**
+
 ## SCOPE — unchanged
 
 Datasec only (Kam, 2026-09-09: *"you will work on ONLY datasec projects unless otherwise
