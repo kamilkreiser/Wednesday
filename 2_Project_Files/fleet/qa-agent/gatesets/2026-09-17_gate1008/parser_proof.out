@@ -1,0 +1,47 @@
+parser_proof Thu Sep 17 2026 01:03:12 GMT+1000 (Australian Eastern Standard Time) typescript 5.9.3
+  994   8         const forwardStatus: number = await new Promise<number>((resolveStatus) => {
+  995  10           const proxyReq = http.request(
+  996  10           { hostname: url.hostname, port: url.port, path: url.pathname, method: 'POST', headers: forwardHeaders },
+  997  10           (proxyRes: any) => {
+  998  12             let body = '';
+  999  12             proxyRes.on('data', (chunk: string) => { body += chunk; });
+ 1000  12             proxyRes.on('end', () => {
+ 1001  14               log('info', 'Workflow approved — document forwarded to originate', { documentId });
+ 1002  12             });
+ 1003  14               resolveStatus(proxyRes.statusCode || 0);
+ 1004  10           },
+ 1005   8         );
+ 1006   8         proxyReq.on('error', (err: Error) => {
+ 1007  10           log('error', 'Failed to forward approved document to originate', { error: err.message });
+ 1008  10           resolveStatus(0);
+ 1009   8         });
+ 1010   8         proxyReq.write(payload);
+ 1011   8         proxyReq.end();
+ 1012   8         });
+RE994   8         const forwardStatus: number = await new Promise<number>((resolveStatus) => {
+RE995  10           const proxyReq = http.request(
+RE996  12             { hostname: url.hostname, port: url.port, path: url.pathname, method: 'POST', headers: forwardHeaders },
+RE997  12             (proxyRes: any) => {
+RE998  14               let body = '';
+RE999  14               proxyRes.on('data', (chunk: string) => { body += chunk; });
+RE1000  14               proxyRes.on('end', () => {
+RE1001  16                 log('info', 'Workflow approved — document forwarded to originate', { documentId });
+RE1002  14               });
+RE1003  12             resolveStatus(proxyRes.statusCode || 0);
+RE1004  12             },
+RE1005  10           );
+RE1006  10           proxyReq.on('error', (err: Error) => {
+RE1007  12             log('error', 'Failed to forward approved document to originate', { error: err.message });
+RE1008  12             resolveStatus(0);
+RE1009  10           });
+RE1010  10           proxyReq.write(payload);
+RE1011  10           proxyReq.end();
+RE1012   8         });
+P1/C1 head vs re-indented copy (whitespace only)           transpile IDENTICAL | AST IDENTICAL 7041/7041 | diags 0/0 | expected T=A= OK
+C2 resolveStatus moved inside the end listener             transpile DIFFERS | AST DIFFERS 7041/7041 | diags 0/0 | expected T!A! OK
+C3 type-only: `: number` removed                           transpile IDENTICAL | AST DIFFERS 7041/7039 | diags 0/0 | expected T=A! OK
+C4 502 body `status` key removed                           transpile DIFFERS | AST DIFFERS 7041/7037 | diags 0/0 | expected T!A! OK
+READY verification.ts hunk: -2 +10 | applied (git diff -U0 develop..head): -1 +9
+READY lines both removed and re-added (cancel as context): ["        await redisService.deletePendingDocument(documentId);"]
+READY minus cancelled vs applied: minus multiset EQUAL | plus multiset EQUAL | plus in order EQUAL
+P2 control (one trailing space on the first applied + line): DIFFERS (OK)

@@ -1,0 +1,52 @@
+git_read 2026-09-17 00:55:40 AEST
+93629700c3d219c1d8ca61d69150bb9b623fc1be	refs/heads/develop
+dd7086d5aa574285beffc515f9371a438621f25d	refs/heads/feature/ks-1087-ornith-workflow-approve-keeps-pending
+86fe59e6bf07108142fb3dbd06bef8747d2a4687	refs/pull/1006/head
+b28ed490ada70df2056763f4512c98443285a694	refs/pull/1007/head
+dd7086d5aa574285beffc515f9371a438621f25d	refs/pull/1008/head
+cat-file head: commit | develop: commit
+--- log head -3
+dd7086d5aa574285beffc515f9371a438621f25d | parents 93629700c3d219c1d8ca61d69150bb9b623fc1be | tree 2c33b4f8df44a5fb9d1278af0abafe621ef24828 | Kam Kreiser | Thu Sep 17 00:46:38 2026 +1000 | KS-1087 (item 1): workflow-approve keeps the pending document when originate refuses the forward
+93629700c3d219c1d8ca61d69150bb9b623fc1be | parents 40fe4db6963cd11dba06bd46e0b00af39e68ef3a | tree 84b4d0daeae67277f95760bfed5b911886b98bab | kksecura | Thu Sep 17 00:41:30 2026 +1000 | KS-1073: the statusless on-chain carve-out is tier-1 only (verify predicate) (#1005)
+40fe4db6963cd11dba06bd46e0b00af39e68ef3a | parents dd66863dd2858e97344652c1106d38f5e352a41b | tree efff26ddf774a345a669fdf31be0d1aef1f174d3 | kksecura | Wed Sep 16 23:49:30 2026 +1000 | KS-932: bound DNS resolution by safeOutboundRequest's timeoutMs (#1004)
+merge-base head develop: 93629700c3d219c1d8ca61d69150bb9b623fc1be
+rev-list count develop..head: 1
+rev-list count head..develop: 0
+--- numstat develop..head
+174	0	Blockchain/Dev/services/api-gateway/src/__tests__/ks1087-workflow-approve-deletes-the-pending-document.test.ts
+9	1	Blockchain/Dev/services/api-gateway/src/routes/verification.ts
+:000000 100644 0000000000000000000000000000000000000000 7832724f3f5f97fa1260e3525dee8c68bda21ba4 A	Blockchain/Dev/services/api-gateway/src/__tests__/ks1087-workflow-approve-deletes-the-pending-document.test.ts
+:100644 100644 de34b2de7372873d60987f8bc742df3a13140265 d0585dc34ceb5e3580ade38633250a6ffeaebd69 M	Blockchain/Dev/services/api-gateway/src/routes/verification.ts
+--- commit message
+=== dd7086d5aa574285beffc515f9371a438621f25d
+KS-1087 (item 1): workflow-approve keeps the pending document when originate refuses the forward
+
+POST /api/workflow-instances/:id/approve used to fire the forward to
+originate, delete the pending document straight away and answer 200
+"Document has been created" without reading originate's response. A refused
+forward (401, measured) lost the document.
+
+routes/verification.ts: the forward is awaited for its status code.
+- Non-2xx, or a transport error: 502 ORIGINATE_FORWARD_FAILED ("Approved,
+  but the document could not be created in originate; the pending document
+  was kept"), and the pending document is NOT deleted.
+- 2xx: the pending document is deleted and the route answers as before.
+
+Only the ticket's recommendation item 1. Item 2 (forward a credential
+originate accepts) is a design call and is not touched; the ticket stays
+open for it. The route is not in the published OpenAPI spec.
+
+New ks1087-workflow-approve-deletes-the-pending-document.test.ts: the READY
+cells, plus two assertions the READY's cells named but did not make.
+- The 401 cell checks the pending document survives (deleteCount
+  unchanged). Its counter was local to beforeAll and never read.
+- The control checks exactly one deletion on 201.
+Two dead locals are underscore-prefixed (eslint no-unused-vars).
+
+Product hunk and cells authored by the local model (Ornith) from a
+Wednesday-written brief; source-read by Wednesday; re-run by seat A.
+
+Co-Authored-By: Claude Opus 5 <noreply@anthropic.com>
+
+--- checkout
+checkout HEAD 355d82c8b feature/ks-597-b-caller-scoped-externalref porcelain 0 config_sha256 e0fa706f4bdae277 refs 889 worktrees 110

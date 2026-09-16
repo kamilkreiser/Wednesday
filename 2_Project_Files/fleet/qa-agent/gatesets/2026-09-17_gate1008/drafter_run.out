@@ -1,0 +1,69 @@
+drafter_run 01:03:41 AEST verification.ts head sha256 98cbe16eccd84fda7a98570a8ea7c02797c1f25954c250a33980b633078b3877
+porcelain baseline 25
+== T0 01:03:41 AEST
+01:03:44 AEST t_T0                               tree head  pkg gw     rc 0 FILES 44 TESTS 388 passed 388 failed 0 pending 0 failed_suites 0 success True secs 2.3 suite_msgs 0
+== S1_status_check_removed 01:03:44 AEST
+   landed: anchor count 1, sha 98cbe16eccd8 -> 4e061c4ac89f, markers [('ORIGINATE_FORWARD_FAILED', 0)]
+01:03:46 AEST t_S1_status_check_removed          tree head  pkg gw     rc 1 FILES 44 TESTS 388 passed 386 failed 2 pending 0 failed_suites 2 success False secs 2.3 suite_msgs 0
+    NOT-PASSED failed __tests__/ks1087-workflow-approve-deletes-the-pending-document.test.ts :: KS-1087 — workflow approve keeps pending doc on originate failure 🔴 KS-1087 — originate 401: no 200 approved, and the pending document survives | AssertionError: expected 200 not to be 200 // Object.is equality
+    NOT-PASSED failed __tests__/ks1087-workflow-approve-deletes-the-pending-document.test.ts :: KS-1087 — workflow approve keeps pending doc on originate failure 🔴 KS-1087 — originate unreachable: the pending document survives | AssertionError: expected 200 not to be 200 // Object.is equality
+   restored sha-identical 98cbe16eccd8
+== S2_delete_moved_before_check 01:03:46 AEST
+   landed: anchor count 1, sha 98cbe16eccd8 -> 46757cee5304, markers [('ORIGINATE_FORWARD_FAILED', 1)]
+01:03:48 AEST t_S2_delete_moved_before_check     tree head  pkg gw     rc 1 FILES 44 TESTS 388 passed 386 failed 2 pending 0 failed_suites 2 success False secs 2.3 suite_msgs 0
+    NOT-PASSED failed __tests__/ks1087-workflow-approve-deletes-the-pending-document.test.ts :: KS-1087 — workflow approve keeps pending doc on originate failure 🔴 KS-1087 — originate 401: no 200 approved, and the pending document survives | AssertionError: the pending document survives a refused forward: expected 1 to be +0 // Object.is equality
+    NOT-PASSED failed __tests__/ks1087-workflow-approve-deletes-the-pending-document.test.ts :: KS-1087 — workflow approve keeps pending doc on originate failure 🔴 KS-1087 — originate unreachable: the pending document survives | AssertionError: expected 1 to be +0 // Object.is equality
+   restored sha-identical 98cbe16eccd8
+== S3_delete_removed 01:03:48 AEST
+   landed: anchor count 1, sha 98cbe16eccd8 -> e9497a2d3523, markers [('deletePendingDocument(documentId);', 1)]
+01:03:51 AEST t_S3_delete_removed                tree head  pkg gw     rc 1 FILES 44 TESTS 388 passed 387 failed 1 pending 0 failed_suites 2 success False secs 2.4 suite_msgs 0
+    NOT-PASSED failed __tests__/ks1087-workflow-approve-deletes-the-pending-document.test.ts :: KS-1087 — workflow approve keeps pending doc on originate failure KS-1087 control — originate 201: approved and the pending document is deleted | AssertionError: the pending document is deleted once originate accepts: expected +0 to be 1 // Object.is equality
+   restored sha-identical 98cbe16eccd8
+== G1_CONTROL_AIM_4xx_counts_as_success 01:03:51 AEST
+   landed: anchor count 1, sha 98cbe16eccd8 -> a302cd765c8c, markers [('forwardStatus >= 500', 1)]
+01:03:53 AEST t_G1_CONTROL_AIM_4xx_counts_as_success tree head  pkg gw     rc 1 FILES 44 TESTS 388 passed 387 failed 1 pending 0 failed_suites 2 success False secs 2.2 suite_msgs 0
+    NOT-PASSED failed __tests__/ks1087-workflow-approve-deletes-the-pending-document.test.ts :: KS-1087 — workflow approve keeps pending doc on originate failure 🔴 KS-1087 — originate 401: no 200 approved, and the pending document survives | AssertionError: expected 200 not to be 200 // Object.is equality
+   restored sha-identical 98cbe16eccd8
+== G2_CONTROL_AIM_every_response_is_failure 01:03:53 AEST
+   landed: anchor count 1, sha 98cbe16eccd8 -> abfcef4d4594, markers [('resolveStatus(0);', 2)]
+01:03:56 AEST t_G2_CONTROL_AIM_every_response_is_failure tree head  pkg gw     rc 1 FILES 44 TESTS 388 passed 387 failed 1 pending 0 failed_suites 2 success False secs 2.3 suite_msgs 0
+    NOT-PASSED failed __tests__/ks1087-workflow-approve-deletes-the-pending-document.test.ts :: KS-1087 — workflow approve keeps pending doc on originate failure KS-1087 control — originate 201: approved and the pending document is deleted | AssertionError: expected 502 to be 200 // Object.is equality
+   restored sha-identical 98cbe16eccd8
+== G3_transport_error_counts_as_success 01:03:56 AEST
+   landed: anchor count 1, sha 98cbe16eccd8 -> bb31e7cfe8e5, markers [('resolveStatus(201);', 1)]
+01:03:58 AEST t_G3_transport_error_counts_as_success tree head  pkg gw     rc 1 FILES 44 TESTS 388 passed 387 failed 1 pending 0 failed_suites 2 success False secs 2.2 suite_msgs 0
+    NOT-PASSED failed __tests__/ks1087-workflow-approve-deletes-the-pending-document.test.ts :: KS-1087 — workflow approve keeps pending doc on originate failure 🔴 KS-1087 — originate unreachable: the pending document survives | AssertionError: expected 200 not to be 200 // Object.is equality
+   restored sha-identical 98cbe16eccd8
+== G4_3xx_counts_as_success 01:03:58 AEST
+   landed: anchor count 1, sha 98cbe16eccd8 -> 0ddc3a225ed6, markers [('forwardStatus >= 400', 1)]
+01:04:00 AEST t_G4_3xx_counts_as_success         tree head  pkg gw     rc 0 FILES 44 TESTS 388 passed 388 failed 0 pending 0 failed_suites 0 success True secs 2.2 suite_msgs 0
+   restored sha-identical 98cbe16eccd8
+== G5_resolve_on_end_not_headers 01:04:00 AEST
+   landed: anchor count 1, sha 98cbe16eccd8 -> dd971be04fe3, markers []
+   landed: anchor count 1, sha dd971be04fe3 -> 87bd1747bc22, markers [('resolveStatus(proxyRes.statusCode || 0);', 1)]
+01:04:03 AEST t_G5_resolve_on_end_not_headers    tree head  pkg gw     rc 0 FILES 44 TESTS 388 passed 388 failed 0 pending 0 failed_suites 0 success True secs 2.3 suite_msgs 0
+   restored sha-identical 98cbe16eccd8
+== G6_502_body_echoes_originate_body 01:04:03 AEST
+   landed: anchor count 1, sha 98cbe16eccd8 -> 2f81e73003d2, markers []
+   landed: anchor count 1, sha 2f81e73003d2 -> ffe033cd8893, markers [('upstream:', 1)]
+01:04:05 AEST t_G6_502_body_echoes_originate_body tree head  pkg gw     rc 0 FILES 44 TESTS 388 passed 388 failed 0 pending 0 failed_suites 0 success True secs 2.3 suite_msgs 0
+   restored sha-identical 98cbe16eccd8
+== G7_inert_comment 01:04:05 AEST
+   landed: anchor count 1, sha 98cbe16eccd8 -> 074c811bfda3, markers [('// qa inert comment', 1)]
+01:04:07 AEST t_G7_inert_comment                 tree head  pkg gw     rc 0 FILES 44 TESTS 388 passed 388 failed 0 pending 0 failed_suites 0 success True secs 2.3 suite_msgs 0
+   restored sha-identical 98cbe16eccd8
+== T0_after 01:04:07 AEST
+01:04:10 AEST t_T0_after                         tree head  pkg gw     rc 0 FILES 44 TESTS 388 passed 388 failed 0 pending 0 failed_suites 0 success True secs 2.3 suite_msgs 0
+SUMMARY T0 rc 0 tests 388 passed 388 failed 0 pending 0 failed_suites 0 success True | reds [] | msgs []
+SUMMARY S1_status_check_removed rc 1 tests 388 passed 386 failed 2 pending 0 failed_suites 2 success False | reds ['KS-1087 — workflow approve keeps pending doc on originate failure 🔴 KS-1087 — originate 40', 'KS-1087 — workflow approve keeps pending doc on originate failure 🔴 KS-1087 — originate un'] | msgs ['AssertionError: expected 200 not to be 200 // Object.is equality', 'AssertionError: expected 200 not to be 200 // Object.is equality']
+SUMMARY S2_delete_moved_before_check rc 1 tests 388 passed 386 failed 2 pending 0 failed_suites 2 success False | reds ['KS-1087 — workflow approve keeps pending doc on originate failure 🔴 KS-1087 — originate 40', 'KS-1087 — workflow approve keeps pending doc on originate failure 🔴 KS-1087 — originate un'] | msgs ['AssertionError: the pending document survives a refused forward: expected 1 to be +0 // Object.is equality', 'AssertionError: expected 1 to be +0 // Object.is equality']
+SUMMARY S3_delete_removed rc 1 tests 388 passed 387 failed 1 pending 0 failed_suites 2 success False | reds ['KS-1087 — workflow approve keeps pending doc on originate failure KS-1087 control — origin'] | msgs ['AssertionError: the pending document is deleted once originate accepts: expected +0 to be 1 // Object.is equality']
+SUMMARY G1_CONTROL_AIM_4xx_counts_as_success rc 1 tests 388 passed 387 failed 1 pending 0 failed_suites 2 success False | reds ['KS-1087 — workflow approve keeps pending doc on originate failure 🔴 KS-1087 — originate 40'] | msgs ['AssertionError: expected 200 not to be 200 // Object.is equality']
+SUMMARY G2_CONTROL_AIM_every_response_is_failure rc 1 tests 388 passed 387 failed 1 pending 0 failed_suites 2 success False | reds ['KS-1087 — workflow approve keeps pending doc on originate failure KS-1087 control — origin'] | msgs ['AssertionError: expected 502 to be 200 // Object.is equality']
+SUMMARY G3_transport_error_counts_as_success rc 1 tests 388 passed 387 failed 1 pending 0 failed_suites 2 success False | reds ['KS-1087 — workflow approve keeps pending doc on originate failure 🔴 KS-1087 — originate un'] | msgs ['AssertionError: expected 200 not to be 200 // Object.is equality']
+SUMMARY G4_3xx_counts_as_success rc 0 tests 388 passed 388 failed 0 pending 0 failed_suites 0 success True | reds [] | msgs []
+SUMMARY G5_resolve_on_end_not_headers rc 0 tests 388 passed 388 failed 0 pending 0 failed_suites 0 success True | reds [] | msgs []
+SUMMARY G6_502_body_echoes_originate_body rc 0 tests 388 passed 388 failed 0 pending 0 failed_suites 0 success True | reds [] | msgs []
+SUMMARY G7_inert_comment rc 0 tests 388 passed 388 failed 0 pending 0 failed_suites 0 success True | reds [] | msgs []
+SUMMARY T0_after rc 0 tests 388 passed 388 failed 0 pending 0 failed_suites 0 success True | reds [] | msgs []
+end 01:04:10 AEST

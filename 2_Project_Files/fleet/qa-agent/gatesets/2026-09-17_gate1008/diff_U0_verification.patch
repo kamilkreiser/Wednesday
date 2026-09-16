@@ -1,0 +1,18 @@
+diff --git a/Blockchain/Dev/services/api-gateway/src/routes/verification.ts b/Blockchain/Dev/services/api-gateway/src/routes/verification.ts
+index de34b2de7..d0585dc34 100644
+--- a/Blockchain/Dev/services/api-gateway/src/routes/verification.ts
++++ b/Blockchain/Dev/services/api-gateway/src/routes/verification.ts
+@@ -994 +994,2 @@ export function createVerificationRoutes(deps: VerificationRouteDeps): Router {
+-        const proxyReq = http.request(
++        const forwardStatus: number = await new Promise<number>((resolveStatus) => {
++          const proxyReq = http.request(
+@@ -1001,0 +1003 @@ export function createVerificationRoutes(deps: VerificationRouteDeps): Router {
++              resolveStatus(proxyRes.statusCode || 0);
+@@ -1005,0 +1008 @@ export function createVerificationRoutes(deps: VerificationRouteDeps): Router {
++          resolveStatus(0);
+@@ -1008,0 +1012,5 @@ export function createVerificationRoutes(deps: VerificationRouteDeps): Router {
++        });
++        if (forwardStatus < 200 || forwardStatus >= 300) {
++          res.status(502).json({ success: false, error: { code: 'ORIGINATE_FORWARD_FAILED', message: 'Approved, but the document could not be created in originate; the pending document was kept', status: forwardStatus } });
++          return;
++        }

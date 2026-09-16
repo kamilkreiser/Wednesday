@@ -1,0 +1,28 @@
+nginx_read 2026-09-17 01:06:40 AEST (git show at head; /usr/bin/grep -i)
+--- nginx.conf
+126:    proxy_connect_timeout 120s;
+128:    proxy_read_timeout    120s;
+170:        proxy_pass http://api_gateway_pool$request_uri;
+173:        proxy_pass http://api_gateway_pool$request_uri;
+184:    location /api/ {
+185:        proxy_pass http://api_gateway_pool$request_uri;
+189:        proxy_pass http://api_gateway_pool$request_uri;
+194:        proxy_pass http://api_gateway_pool$request_uri;
+202:        proxy_pass http://api_gateway_pool$request_uri;
+control location count: 39
+--- nginx-demo.conf
+327:    proxy_connect_timeout 30s;
+329:    proxy_read_timeout    60s;
+401:        proxy_pass http://api_gateway_pool$request_uri;
+404:        proxy_pass http://api_gateway_pool$request_uri;
+410:    location /api/ {
+418:        proxy_pass http://api_gateway_pool$request_uri;
+422:        proxy_pass http://api_gateway_pool$request_uri;
+427:        proxy_pass http://api_gateway_pool$request_uri;
+435:        proxy_pass http://api_gateway_pool$request_uri;
+control location count: 45
+--- nginx.conf location /api/ block
+    location /api/ {
+        proxy_pass http://api_gateway_pool$request_uri;
+    }
+

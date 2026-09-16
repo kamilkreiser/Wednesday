@@ -1,0 +1,87 @@
+consumer_read 2026-09-17 00:58:31 AEST
+--- 1. every line naming workflow-instances at head (whole repo, not only Dev)
+Blockchain/Dev/frontend/issuer/src/components/DocumentList.tsx:153:        api.get('/workflow-instances').catch(() => ({ data: [] })),
+Blockchain/Dev/services/api-gateway/src/__tests__/ks1087-workflow-approve-deletes-the-pending-document.test.ts:70:  return fetch(`http://127.0.0.1:${gatewayPort}/api/workflow-instances/${WFI_ID}/approve`, { method: 'POST' });
+Blockchain/Dev/services/api-gateway/src/__tests__/ks1087-workflow-approve-deletes-the-pending-document.test.ts:155:      const res = await fetch(`http://127.0.0.1:${reachablePort}/api/workflow-instances/${WFI_ID}/approve`, { method: 'POST' });
+Blockchain/Dev/services/api-gateway/src/__tests__/ks815-verification-router-guards-its-own-body.test.ts:27:// The four under `/api/workflows` and `/api/workflow-instances` are NOT on
+Blockchain/Dev/services/api-gateway/src/routes/verification.ts:895:  router.get('/api/workflow-instances/:id', authenticateToken(true), async (req: Request, res: Response) => {
+Blockchain/Dev/services/api-gateway/src/routes/verification.ts:904:  router.get('/api/workflow-instances', authenticateToken(true), async (_req: Request, res: Response) => {
+Blockchain/Dev/services/api-gateway/src/routes/verification.ts:909:  router.post('/api/workflow-instances/:id/approve', authenticateToken(true), mockBodyParser, async (req: Request, res: Response) => {
+Blockchain/Dev/services/api-gateway/src/routes/verification.ts:1032:  router.post('/api/workflow-instances/:id/reject', authenticateToken(true), mockBodyParser, async (req: Request, res: Response) => {
+Blockchain/Dev/services/mcp-server/src/api-client.ts:106:  }>(`/api/workflow-instances/${encodeURIComponent(instanceId)}`);
+--- 1b. 'approve' near a workflow call in frontends / mcp (grep -n approve in the two consumers)
+--- 2. spec: workflow-instances in docs/openapi/*.yaml (count) + control 'paths:'
+  Blockchain/Dev/docs/openapi/secuura-api.yaml workflow-instances=0 control(^paths:)=1
+--- 3. mount of createVerificationRoutes + authenticateToken definition in api-gateway src (non-test)
+Blockchain/Dev/services/api-gateway/src/index.ts:39:import { createVerificationRoutes } from './routes/verification';
+Blockchain/Dev/services/api-gateway/src/index.ts:891:  app.use(createVerificationRoutes({
+Blockchain/Dev/services/api-gateway/src/index.ts:929:// was mounted after createVerificationRoutes() so it never executed — removed to drop
+Blockchain/Dev/services/api-gateway/src/middleware/auth.ts:257:export function authenticateToken(required: boolean = true): RequestHandler {
+Blockchain/Dev/services/api-gateway/src/routes/verification.ts:396:export function createVerificationRoutes(deps: VerificationRouteDeps): Router {
+--- 4. originate POST /api/documents handler location
+Blockchain/Dev/services/originate/src/routes/webhooks.ts:205:webhooksRouter.post('/', async (req: Request, res: Response) => {
+--- 5. tests that import verification routes (who else constructs the router)
+Blockchain/Dev/services/api-gateway/src/__tests__/ks1057-verify-confidence-is-status-aware.test.ts
+Blockchain/Dev/services/api-gateway/src/__tests__/ks1069-persisted-anchored-input-shape.test.ts
+Blockchain/Dev/services/api-gateway/src/__tests__/ks1070-tier2-carries-simulated.test.ts
+Blockchain/Dev/services/api-gateway/src/__tests__/ks1071-verify-confidence-one-mapping.test.ts
+Blockchain/Dev/services/api-gateway/src/__tests__/ks1073-tier-2-verify-has-no-statusless.test.ts
+Blockchain/Dev/services/api-gateway/src/__tests__/ks1087-workflow-approve-deletes-the-pending-document.test.ts
+Blockchain/Dev/services/api-gateway/src/__tests__/ks1123-f2-anchor-failed-stale-confidence.test.ts
+Blockchain/Dev/services/api-gateway/src/__tests__/ks1123-f3-empty-status-is-off-chain.test.ts
+Blockchain/Dev/services/api-gateway/src/__tests__/ks1130-tier2-e1-twin.test.ts
+Blockchain/Dev/services/api-gateway/src/__tests__/ks1130-tier2-e3-twin.test.ts
+Blockchain/Dev/services/api-gateway/src/__tests__/ks1130-tier2-e7-twin.test.ts
+Blockchain/Dev/services/api-gateway/src/__tests__/ks466-documents-enforcement-envelope.test.ts
+Blockchain/Dev/services/api-gateway/src/__tests__/ks529-non-object-body-guard.test.ts
+Blockchain/Dev/services/api-gateway/src/__tests__/ks815-verification-router-guards-its-own-body.test.ts
+Blockchain/Dev/services/api-gateway/src/__tests__/notifications.test.ts
+--- 6. nginx /api/ location to api-gateway (count) + control (location count)
+  docker/nginx-gateway/nginx.conf location /api/ =1 control(location)=37
+  docker/nginx-gateway/nginx-demo.conf location /api/ =1 control(location)=43
+--- 7. http.request timeouts in verification.ts at head: 'timeout' count, control 'http.request' count
+  timeout=8 http.request=2
+--- 8. setWorkflowInstance before the forward (line numbers at head)
+917:      res.status(400).json({ success: false, error: { code: 'BAD_REQUEST', message: 'Workflow already completed' } });
+959:      await redisService.setWorkflowInstance(req.params.id, instance);
+970:      instance.status = 'approved';
+972:      await redisService.setWorkflowInstance(req.params.id, instance);
+994:        const forwardStatus: number = await new Promise<number>((resolveStatus) => {
+1003:              resolveStatus(proxyRes.statusCode || 0);
+1008:          resolveStatus(0);
+1014:          res.status(502).json({ success: false, error: { code: 'ORIGINATE_FORWARD_FAILED', message: 'Approved, but the document could not be created in originate; the pending document was kept', status: forwardStatus } });
+1017:        await redisService.deletePendingDocument(documentId);
+1040:      res.status(400).json({ success: false, error: { code: 'BAD_REQUEST', message: 'Workflow already completed and cannot be rejected' } });
+1053:    await redisService.setWorkflowInstance(req.params.id, instance);
+1063:      await redisService.deletePendingDocument(documentId);
+--- 9. vitest config / tsconfig of api-gateway (exclude)
+{
+  "compilerOptions": {
+    "target": "ES2022",
+    "module": "commonjs",
+    "lib": ["ES2022"],
+    "outDir": "./dist",
+    "rootDir": "./src",
+    "strict": true,
+    "noUnusedLocals": true,
+    "noUnusedParameters": true,
+    "esModuleInterop": true,
+    "skipLibCheck": true,
+    "forceConsistentCasingInFileNames": true,
+    "resolveJsonModule": true,
+    "declaration": true,
+    "declarationMap": true,
+    "sourceMap": true
+  },
+  "include": ["src/**/*"],
+  "exclude": ["node_modules", "dist", "src/__tests__"]
+}
+.env.example
+Dockerfile
+downloads
+package-lock.json
+package.json
+src
+tsconfig.json
+vitest.config.ts
+vitest.setup.ts

@@ -1,0 +1,122 @@
+mount_read 2026-09-17 00:58:45 AEST
+--- api-gateway index.ts: app.use lines with /api paths before :891 (proxy mounts that could shadow /api/workflow-instances)
+232:// 4.22.2: `app.use('/api', fn)` does not run for `//api/auth/login`, so a
+235:app.use(normaliseRepeatedSlashes());
+253:app.use(helmet({
+274:app.use((_req, res, next) => {
+292:app.use((req: Request, res: Response, next: NextFunction) => {
+326:app.use((req, _res, next) => {
+345:app.use((req, _res, next) => {
+370:app.use(cors({
+381:app.use(cookieParser());
+388:  app.use(csrfMiddleware.generateToken);
+389:  app.use(csrfMiddleware.protect);
+397:app.use(enforceJsonContentType);
+416:app.use((req, res, next) => { if (shouldParseBody(req)) express.json({ limit: '1mb' })(req, res, next); else next(); });
+417:app.use((req, res, next) => { if (shouldParseBody(req)) express.urlencoded({ extended: true, limit: '1mb' })(req, res, next); else next(); });
+421:app.use('/api/documents/upload', uploadBodyParser);
+422:app.use('/api/nft/upload', uploadBodyParser);
+452:app.use(rejectNulBytes());
+458:app.use((req, res, next) => { if (shouldParseBody(req)) sanitizeInput(req, res, next); else next(); });
+459:app.use((req, res, next) => { if (shouldParseBody(req)) detectSuspiciousRequests(req, res, next); else next(); });
+460:app.use(requestFingerprint);
+461:app.use(bruteForceProtection);
+464:app.use((req: Request, res, next) => {
+472:app.use((req: Request, res, next) => {
+490:app.use(rateLimit({
+509:app.use(
+524:app.use(enforceClientRateLimit());
+530:app.use(versioningMiddleware());
+537:app.use((req: Request, res, next) => {
+561:app.use((req, _res, next) => {
+570:app.use(createAuditMiddleware({
+781:  app.use('/api/docs', apiDocsGuard, swaggerUi.serve, swaggerUi.setup(openApiSpec, swaggerUiOpts));
+786:  app.use('/api/docs', apiDocsGuard, swaggerUi.serve, (_req: Request, res: Response) => {
+791:app.use('/system', systemStatusRouter);
+792:app.use('/api/system/health', healthDashboardRouter);
+798:app.use('/api/system', systemStatusRouter);
+799:app.use('/api/batch', batchRouter);
+800:app.use('/api/notifications', notificationsRouter);
+801:app.use('/api/admin/audit', auditExportRouter);
+827:app.use(createHealthRoutes(services, redisService));
+846:  app.post('/api/auth/wallet/challenge', mockBodyParser, (req: Request, res: Response) => {
+859:  app.post('/api/auth/wallet/authenticate', mockBodyParser, (req: Request, res: Response) => {
+886:  app.use(createAdminRoutes({
+891:  app.use(createVerificationRoutes({
+899:app.all('/api/integrations', authenticateToken(true), (_req: Request, res: Response) => {
+902:app.all('/api/integrations/*', authenticateToken(true), (_req: Request, res: Response) => {
+914:app.post('/api/logs', (req: Request, res: Response) => {
+--- index.ts 885-930
+  const ADMIN_ROLES = ['admin', 'ADMIN', 'SYSTEM_ADMIN', 'system_admin', 'super_admin', 'SUPER_ADMIN'];
+  app.use(createAdminRoutes({
+    authenticateToken, query: query as any, redisService, log,
+    verifyToken: verifyRs256, parseTestToken, isDbAvailable,
+    services: services as any,
+  }));
+  app.use(createVerificationRoutes({
+    authenticateToken, mockBodyParser, query, isDbAvailable, redisService, services, log,
+    memWorkflowToDocumentMap, memRejectedDocuments, dbSaveRejection, ADMIN_ROLES,
+    enforceDocumentTypeRules, createWorkflowInstanceIfRequired, meetsVerificationLevel,
+  }));
+}
+
+// Placeholder endpoints for features not yet deployed
+app.all('/api/integrations', authenticateToken(true), (_req: Request, res: Response) => {
+  res.json({ success: true, integrations: [], message: 'Integrations management coming soon. Configure M365 via the admin portal.' });
+});
+app.all('/api/integrations/*', authenticateToken(true), (_req: Request, res: Response) => {
+  res.json({ success: true, integrations: [], message: 'Integrations management coming soon.' });
+});
+
+// Client-side logger sink. The issuer SPA's logger (`frontend/issuer/src/utils/logger.ts`)
+// ships warn/error events as sendBeacon batches to /api/logs in production.
+// Before this route existed, every batch 404'd and polluted the console.
+// We don't yet ship these to a real log store (Sentry / OpenTelemetry); for
+// now we accept them, log a compact summary into container stdout, and
+// 204 back. Body shape is `{ logs: [{ level, message, data?, ts }] }`.
+// No auth — the SPA's beacon fires regardless of session, and the data is
+// already redacted by the client-side sanitizer.
+app.post('/api/logs', (req: Request, res: Response) => {
+  try {
+    const body = req.body as { logs?: Array<{ level?: string; message?: string }> };
+    const logs = Array.isArray(body?.logs) ? body.logs : [];
+    for (const entry of logs.slice(0, 20)) {
+      // eslint-disable-next-line no-console
+      console.log(`[client-log] [${entry?.level ?? 'info'}] ${entry?.message ?? ''}`);
+    }
+  } catch { /* never block the SPA on logger ingest */ }
+  res.status(204).end();
+});
+
+// GET /api/document-types is served by the public handler in routes/verification.ts
+// (intended-public reference data — KS-144 marks it security:[]; getAllDocumentTypes
+// is a global catalog, not tenant-scoped). A role-gated copy used to sit here, but it
+// was mounted after createVerificationRoutes() so it never executed — removed to drop
+// the shadowed duplicate (KS-357 review). Admin write paths stay behind
+--- originate: routers mounted at /api/documents + post('/' in documents router
+Blockchain/Dev/services/originate/src/index.ts:135:        'POST /api/documents': 'Create new document',
+Blockchain/Dev/services/originate/src/index.ts:136:        'GET /api/documents/:id': 'Get document details',
+Blockchain/Dev/services/originate/src/index.ts:137:        'POST /api/documents/:id/sign': 'Add digital signature',
+Blockchain/Dev/services/originate/src/index.ts:138:        'POST /api/documents/:id/anchor': 'Anchor document on blockchain',
+Blockchain/Dev/services/originate/src/index.ts:139:        'GET /api/documents/:id/qr': 'Generate QR code for verification',
+Blockchain/Dev/services/originate/src/index.ts:268:// every other /api/documents/* route.
+Blockchain/Dev/services/originate/src/index.ts:269:app.use('/api/documents', publicDocumentsRouter);
+Blockchain/Dev/services/originate/src/index.ts:270:app.use('/api/documents', documentsRouter);
+Blockchain/Dev/services/originate/src/lifecycleActions.ts:6: * route through the generic POST /api/documents/{id}/lifecycle-events. Verbs
+Blockchain/Dev/services/originate/src/originate.openapi.ts:8: *   - /api/documents/* (list, get, create, anchor, verify, revoke)
+Blockchain/Dev/services/originate/src/originate.openapi.ts:331:// KS-440: POST /api/documents returns a FLAT body, not a `{ document: … }`
+Blockchain/Dev/services/originate/src/originate.openapi.ts:346:      // Both resolve via GET /api/documents/{id}.
+Blockchain/Dev/services/originate/src/originate.openapi.ts:598:          + 'carried one, else the platform pkey UUID. Resolvable via GET /api/documents/{id}.',
+Blockchain/Dev/services/originate/src/originate.openapi.ts:832:// ROUTES — /api/documents
+Blockchain/Dev/services/originate/src/originate.openapi.ts:837:  path: '/api/documents',
+Blockchain/Dev/services/originate/src/originate.openapi.ts:862:  path: '/api/documents',
+Blockchain/Dev/services/originate/src/originate.openapi.ts:889:          description: 'Canonical URL of the created document, e.g. `/api/documents/{id}`.',
+Blockchain/Dev/services/originate/src/originate.openapi.ts:951:  path: '/api/documents/{id}',
+Blockchain/Dev/services/originate/src/originate.openapi.ts:978:  path: '/api/documents/{id}/anchor',
+Blockchain/Dev/services/originate/src/originate.openapi.ts:993:      // poll GET /api/documents/{id} or the verification endpoint to
+--- whole-repo: approve callers by other spellings ('workflowInstance' + approve, 'instances/' + approve)
+Blockchain/Dev/services/api-gateway/src/__tests__/ks1087-workflow-approve-deletes-the-pending-document.test.ts:70:  return fetch(`http://127.0.0.1:${gatewayPort}/api/workflow-instances/${WFI_ID}/approve`, { method: 'POST' });
+Blockchain/Dev/services/api-gateway/src/__tests__/ks1087-workflow-approve-deletes-the-pending-document.test.ts:155:      const res = await fetch(`http://127.0.0.1:${reachablePort}/api/workflow-instances/${WFI_ID}/approve`, { method: 'POST' });
+Blockchain/Dev/services/api-gateway/src/routes/verification.ts:909:  router.post('/api/workflow-instances/:id/approve', authenticateToken(true), mockBodyParser, async (req: Request, res: Response) => {
+--- control for the above: 'workflows/.*approve' (legacy route, expect >=1 in verification.ts)
+Blockchain/Dev/services/api-gateway/src/routes/verification.ts:1

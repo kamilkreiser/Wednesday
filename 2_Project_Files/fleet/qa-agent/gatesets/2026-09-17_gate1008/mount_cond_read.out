@@ -1,0 +1,34 @@
+mount_cond_read 2026-09-17 00:58:54 AEST
+
+// =============================================================================
+// MOCK / DEV-ONLY ENDPOINTS (admin, verification, wallet mocks)
+// =============================================================================
+
+// Pen-test H1 fix: defence-in-depth — even if a guard bypass lets
+// ENABLE_MOCK_ENDPOINTS=true through enforceProductionConfig in production,
+// the second NODE_ENV check below ensures these mock auth/admin/verification
+// routes are never wired into a production app. The mock wallet
+// authenticate route returns a forgeable JWT (`mock_jwt_…`) — exposing it
+// in production would let any caller mint admin tokens.
+const ENABLE_MOCK_ENDPOINTS =
+  NODE_ENV !== 'production' && process.env.ENABLE_MOCK_ENDPOINTS === 'true';
+if (ENABLE_MOCK_ENDPOINTS) {
+  log('warn', 'Mock endpoints enabled — disable in production by removing ENABLE_MOCK_ENDPOINTS');
+  const mockBodyParser = express.json({ limit: '1mb' });
+
+  // Mock wallet challenge
+--- where pending documents get created (setPendingDocument callers)
+Blockchain/Dev/services/api-gateway/src/services/enforcement.ts:201:export async function createWorkflowInstanceIfRequired(
+Blockchain/Dev/services/api-gateway/src/services/enforcement.ts:243:  await redisService.setPendingDocument(documentId, {
+Blockchain/Dev/services/api-gateway/src/services/redis.ts:600:export async function setPendingDocument(id: string, data: object): Promise<void> {
+--- originate documentsRouter.post root + auth middleware on it
+Blockchain/Dev/services/originate/src/routes/documents.ts:146:documentsRouter.use(authenticate());
+Blockchain/Dev/services/originate/src/routes/documents.ts:344:documentsRouter.post(
+Blockchain/Dev/services/originate/src/routes/documents.ts:1088:documentsRouter.post(
+Blockchain/Dev/services/originate/src/routes/documents.ts:1136:documentsRouter.post(
+Blockchain/Dev/services/originate/src/routes/documents.ts:1284:documentsRouter.post(
+Blockchain/Dev/services/originate/src/routes/documents.ts:1433:documentsRouter.post(
+Blockchain/Dev/services/originate/src/routes/documents.ts:1552:documentsRouter.post(
+Blockchain/Dev/services/originate/src/routes/documents.ts:1905:documentsRouter.post(
+Blockchain/Dev/services/originate/src/routes/documents.ts:2087:documentsRouter.post(
+Blockchain/Dev/services/originate/src/routes/documents.ts:2251:documentsRouter.post(

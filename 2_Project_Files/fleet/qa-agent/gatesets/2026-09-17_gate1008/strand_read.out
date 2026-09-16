@@ -1,0 +1,97 @@
+strand_read 2026-09-17 01:02:21 AEST
+// =============================================================================
+// PENDING DOCUMENTS (held during workflow approval)
+// =============================================================================
+
+const pendingDocumentsStore = new Map<string, object>();
+
+export async function getPendingDocument(id: string): Promise<object | null> {
+  const fullKey = `${REDIS_PREFIX}pendoc:${id}`;
+  if (isRedisAvailable()) {
+    const data = await redisClient!.get(fullKey);
+    return data ? JSON.parse(data) : null;
+  }
+  return pendingDocumentsStore.get(id) || null;
+}
+
+export async function setPendingDocument(id: string, data: object): Promise<void> {
+  const fullKey = `${REDIS_PREFIX}pendoc:${id}`;
+  if (isRedisAvailable()) {
+    await redisClient!.setex(fullKey, TTL.workflow * 24, JSON.stringify(data));
+  } else {
+    pendingDocumentsStore.set(id, data);
+  }
+}
+
+export async function deletePendingDocument(id: string): Promise<boolean> {
+  const fullKey = `${REDIS_PREFIX}pendoc:${id}`;
+  if (isRedisAvailable()) {
+    const deleted = await redisClient!.del(fullKey);
+    return deleted > 0;
+  }
+  return pendingDocumentsStore.delete(id);
+}
+
+// =============================================================================
+// VERIFICATION POLICIES STORAGE
+// =============================================================================
+
+const verificationPoliciesStore = new Map<string, object>();
+
+export async function getVerificationPolicy(id: string): Promise<object | null> {
+  const fullKey = `${REDIS_PREFIX}vpol:${id}`;
+  if (isRedisAvailable()) {
+    const data = await redisClient!.get(fullKey);
+    return data ? JSON.parse(data) : null;
+  }
+  return verificationPoliciesStore.get(id) || null;
+--- verification.ts 1288-1310 (GET /api/documents/:id pending branch)
+  // Handles documents in pending_approval or rejected state.
+  // =========================================================================
+
+  router.get('/api/documents/:id', authenticateToken(true), async (req: Request, res: Response, next: NextFunction) => {
+    const { id } = req.params;
+
+    // Check for pending_approval documents (held by workflow gate)
+    const pendingDoc = await redisService.getPendingDocument(id) as Record<string, unknown> | null;
+    if (pendingDoc) {
+      const wfiId = pendingDoc.workflowInstanceId as string;
+      const wfi = wfiId ? await redisService.getWorkflowInstance(wfiId) as Record<string, unknown> | null : null;
+      res.json({
+        id,
+        title: pendingDoc.title,
+        status: 'pending_approval',
+        documentType: pendingDoc.documentType || pendingDoc.type,
+        contentHash: pendingDoc.contentHash,
+        createdBy: pendingDoc.createdBy,
+        createdAt: pendingDoc.createdAt,
+        workflowInstance: wfi ? {
+          id: wfiId,
+          status: wfi.status,
+          currentStepIndex: wfi.currentStepIndex,
+--- verification.ts 370-392 (makeBlockPendingApproval)
+// Middleware: block sign/anchor/share on documents pending workflow approval
+// ---------------------------------------------------------------------------
+
+function makeBlockPendingApproval(deps: Pick<VerificationRouteDeps, 'redisService'>): RequestHandler {
+  return async (req: Request, res: Response, next: NextFunction) => {
+    const docId = req.params.id;
+    if (docId) {
+      const pending = await deps.redisService.getPendingDocument(docId);
+      if (pending) {
+        res.status(403).json({
+          success: false,
+          error: {
+            code: 'PENDING_APPROVAL',
+            message: 'Document is pending workflow approval and cannot be modified until approved',
+            details: { documentId: docId },
+          },
+        });
+        return;
+      }
+    }
+    next();
+  };
+}
+
+// ---------------------------------------------------------------------------
