@@ -209,6 +209,29 @@ treats a symptom. The durable fix is a pre-commit check that refuses a `*.sh` wi
 staged at 100644 — `2_Project_Files/fleet/hooks/pre-commit` already exists and is the natural
 home. **It is shared tooling, so propose it to Wednesday rather than adding it unilaterally.**
 
+## OWED — the two un-pause briefs are SENT; the LAUNCHES are blocked by Kam's 40% cap
+
+Kam, 2026-09-16 ~21:00: *"yes please.  go ahead and brief them both now"*. Both briefs went out and
+are delivered (datasec-hpsm@ + an addendum, datasec-nexusai@). **They will be read at each project's
+next boot, so nothing is lost.**
+
+**The launches were REFUSED and must not be worked around.** `cockpit.sh launch` returned
+`usage_gate: REFUSED (rc 3) — weekly usage 70% >= 40%`. The 40 comes from
+`2_Project_Files/fleet/USAGE_STOP`, written 21:09 from Kam's panel line *"dont go overboard. try not
+to go beyond 40% token allocation"* — **nine minutes AFTER he told this seat to brief them.** The
+newer instruction governs. At 70% against a 40% cut nothing launches until the gauge resets
+(~3d 6h from 2026-09-16 21:1x). Asked him at 21:1x: lift it for these two, or let the briefs wait.
+
+**What each project owes back:** a STATUS mail to `tuesday-agent@` with the verification outputs,
+the commit hash, and any disagreement led with. Score the delegation when they arrive.
+
+**Carried in the NexusAI brief — three of Kam's rulings undelivered 4-6 days**, because the project
+ran with no coordinator to land them: `nexusai-main-tree-is-a-stale-snapshot` (investigate, 09-10;
+**do not restore that tree until the mechanism is explained** — his ruling says the evidence is the
+irreplaceable half), `nexusai-ai-screenshot-local-model` (install-ollama, 09-11), and
+`nexusai-marketplace-b2-registry-after-round4` (publish-image, 09-12 — ⚠ **his ruling's own condition
+is that the registry is one HE NAMES and the push is his signature class; he has not named it**).
+
 ## TOMORROW'S DATASEC PICTURE — assembled 2026-09-16 20:4x so it is not re-derived
 
 Nothing is running on this machine: `tmux list-panes -a` = this seat and the fleet monitor, no agent
