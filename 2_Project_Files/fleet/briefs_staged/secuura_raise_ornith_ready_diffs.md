@@ -86,3 +86,32 @@ ITEM 0: plan confirmation (this list re-derived at the tip; any diff that no lon
 **KS-683 → `a`, "Leave it as it is".** No separate Blockfrost key per environment. The quota pressure that motivated it is gone: Kam upgraded to HOBBY, 300,000 calls/day, on 2026-08-31 (KS-670, delivered as comment c1e479a7). **KS-683 has no K-side work left at all** — layer 1 shipped on Platform S (PS-644, PR #581, merged), layer 2 is verified done in K and already pinned by `ks587-honest-anchor.test.ts` (6 cases), layer 3 is Stuart's estate call. **Recommend closing KS-683 as Done with no K change**, which is a board write and therefore a seat's act, not Wednesday's. ⚠ **One thing to carry onto the ticket before it closes:** its terminal-state argument is dated 2026-08-21 and reasons over `confirmed`/`failed` only. The pinned tip IS KS-726, which added `submitting` and `submitted` to the published contract (`status: z.enum(['pending','submitting','submitted','confirmed','failed'])`). A consumer writing a terminal-state table from that ticket today would be missing two live states.
 
 **KS-910 → `a`** (ruled 09:54, still undelivered): keep preflight leg 12 as a reachability check — CI runs the suites — and correct the false comment. Closes on the comment fix. ⚠ It is under `systemTest/`, which is **blocked at this checkout**: Peter's #997 merged 36 files, all under `systemTest/`, and `0b25f823f` is not in the local object store. Do this one only from a seat that can fetch.
+
+### KS-692 — TWO THINGS THE PR DESCRIPTION MUST SAY (from the brief author, 2026-09-16 15:1x)
+
+The brief's own run is in flight as this is written; these two points survive whatever its verdict is.
+
+1. **The sibling suite's test count DROPS 14 → 13, and that is correct, not a deletion.**
+   `ks586-status-write-authorization.test.ts` uses `it.each(STATUS_WRITE_ROLES…)`, so it generates one
+   case per role — removing `ISSUER_ADMIN` removes its generated case. **Zero failures either way**
+   (14 passed before, 13 passed after; whole vc-issuer suite 111→113 passing, `tsc` clean). **Say this
+   in the PR body.** A reviewer who sees a test count fall on a SECURITY pull request will assume
+   coverage was deleted, and on this team that costs a round trip.
+
+2. **The stale-pointer fix is folded in deliberately, not scope creep.** `status.ts:36` pointed at the
+   closed KS-586; KS-692's own comment records that costing a bad round trip on Peter's PR #730. It is
+   load-bearing here for a second reason: with `ISSUER_ADMIN` now silently ABSENT from an admin-class
+   role array, that comment is the only thing telling the next reader not to put it back.
+
+**The control worth keeping in mind when reviewing:** the usual "the legitimate caller still succeeds"
+green was unavailable, because the caller being removed IS the one in question — that control would
+have asserted the very thing the ticket deletes. It was replaced by two that can genuinely fail: a
+platform admin still succeeding across all three JWT casings (`SYSTEM_ADMIN`, `SUPER_ADMIN`,
+`super_admin` — narrowing a role array is one typo from locking everyone out), and the surface still
+being mounted with anonymous still `401` rather than `403` or `404`, so a suite cannot pass by the
+router having vanished.
+
+**Also stale in the ticket, corrected here:** KS-643 is `Done` and archived (2026-09-13, PR #744) — its
+ruled `decideTenantAccess` helper is what the `bind-creator` follow-up should reuse, not a live hold.
+KS-539 is `Deployed to UAT` and archived (2026-09-14). KS-621 remains `Backlog` and unruled; **this
+narrowing does not resolve it.**
