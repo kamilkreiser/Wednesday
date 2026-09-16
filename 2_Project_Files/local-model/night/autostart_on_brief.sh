@@ -10,23 +10,44 @@
 # It is also the shape the unattended-week loop needs, exercised on a real ticket rather than designed
 # on paper.
 #
-# Usage: autostart_on_brief.sh <KS-id> <product path> <ref *.test.sh> [test_file=<path>] [ctx=N]
+# Usage: autostart_on_brief.sh [--tier bash|vitest] <KS-id> <product path> <ref> [pins…]
 #        (run detached: nohup bash autostart_on_brief.sh ... &)
+#
+# TIER, added 2026-09-16 14:4x before this ever fired on a TypeScript ticket: the two tiers have
+# DIFFERENT builders and DIFFERENT task files, and this script hardcoded the bash one. Armed for
+# KS-953 (`api-gateway/src/index.ts`) it would have built a bash_patch input for a vitest ticket and
+# the failure would have arrived as a confusing checker verdict rather than as "wrong tier".
+# Default is bash because that is the tier it was written against; --tier vitest selects
+# `night/build_input.sh` + `tasks/code_patch/task.md`. Caught by reading the tool before arming it,
+# which is the only reason it is a comment here and not an incident.
 # Gives up after NIGHT_AUTOSTART_WAIT_MIN minutes (default 30) and says so — a wait with no end is a
 # stall wearing a mechanism's clothes.
 set -u
 LM="$(cd -P "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
-ID="${1:?usage: autostart_on_brief.sh <KS-id> <product> <ref> [pins...]}"
+TIER=bash
+if [ "${1:-}" = "--tier" ]; then TIER="${2:?--tier needs bash or vitest}"; shift 2; fi
+case "$TIER" in
+  bash)   BUILDER="$LM/tasks/bash_patch/build_bash_input.sh"; TASKMD="$LM/tasks/bash_patch/task.md" ;;
+  vitest) BUILDER="$LM/night/build_input.sh";                 TASKMD="$LM/tasks/code_patch/task.md" ;;
+  *) echo "REFUSED — --tier must be bash or vitest, got '$TIER'" >&2; exit 2 ;;
+esac
+[ -f "$BUILDER" ] || { echo "REFUSED — no builder for tier '$TIER' at $BUILDER" >&2; exit 2; }
+[ -f "$TASKMD" ]  || { echo "REFUSED — no task file for tier '$TIER' at $TASKMD" >&2; exit 2; }
+ID="${1:?usage: autostart_on_brief.sh [--tier bash|vitest] <KS-id> <product> <ref> [pins...]}"
 PRODUCT="${2:?product path required}"
 REF="${3:?reference *.test.sh required}"
 shift 3
 BRIEF="$LM/night/briefs/$ID.md"
-INPUT="$LM/night/inputs/bash_${ID#KS-}.json"
+# The input's NAME carries its tier — `bash_1031.json`, `doc_1049.json`. Hardcoding `bash_` here
+# would have written a vitest input under a bash name, which reads as the wrong thing to every
+# later reader and to the re-check path (2026-09-07: a mechanism is recorded by what it IS).
+case "$TIER" in bash) PFX=bash ;; vitest) PFX=code ;; *) PFX="$TIER" ;; esac
+INPUT="$LM/night/inputs/${PFX}_${ID#KS-}.json"
 LOG="$LM/night/log/autostart_${ID}_$(date +%H%M).log"
 DEADLINE=$(( $(date +%s) + 60 * ${NIGHT_AUTOSTART_WAIT_MIN:-30} ))
 
 say() { echo "$(date '+%F %T') $*" | tee -a "$LOG"; }
-say "waiting for $BRIEF (deadline $(date -r $DEADLINE '+%H:%M'))"
+say "tier=$TIER builder=$(basename "$BUILDER"); waiting for $BRIEF (deadline $(date -r $DEADLINE '+%H:%M'))"
 
 while [ ! -s "$BRIEF" ]; do
   if [ "$(date +%s)" -ge "$DEADLINE" ]; then
@@ -41,7 +62,7 @@ A=$(wc -c < "$BRIEF"); sleep 10; B=$(wc -c < "$BRIEF")
 while [ "$A" != "$B" ]; do A=$B; sleep 10; B=$(wc -c < "$BRIEF"); done
 say "brief present and settled ($B bytes)"
 
-if ! bash "$LM/tasks/bash_patch/build_bash_input.sh" "$ID" "$INPUT" "$BRIEF" \
+if ! bash "$BUILDER" "$ID" "$INPUT" "$BRIEF" \
      product="$PRODUCT" ref="$REF" "$@" >> "$LOG" 2>&1; then
   say "BUILD REFUSED — see $LOG. Nothing queued; the brief needs a fix (this is the usual first failure)."
   bash "$LM/../tools/chat_reply.sh" "The $ID brief was written but the input builder refused it, so nothing is queued — I will read the refusal and fix the brief." > /dev/null 2>&1
@@ -61,7 +82,7 @@ CTX_PIN=""
 for a in "$@"; do
   case "$a" in ctx=*) CTX_PIN="$a" ;; esac
 done
-printf '%s\n' "$ID input=$INPUT task=$LM/tasks/bash_patch/task.md $CTX_PIN" >> "$LM/night/queue.md"
+printf '%s\n' "$ID input=$INPUT task=$TASKMD $CTX_PIN" >> "$LM/night/queue.md"
 say "queued"
 
 # The lock GATES the launch — never print-and-continue (the pickup's trap).
