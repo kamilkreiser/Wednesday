@@ -333,6 +333,32 @@ click it is better to ask once while he is awake. **Do it in daylight — and do
 erode into an emergency; it is a task with a date, not a someday.** NexusAI has been told explicitly
 not to spend context on it.
 
+## ⚠ SINGLE POINT OF FAILURE ON IRREPLACEABLE EVIDENCE — raise with Kam, cheap now, impossible later
+
+From HPSM's rebuild plan (`qa-s48/2026-09-16_toolkit-rebuild-plan-FOR-KAM.md`, commit `79bc33c`):
+**the pc-lane-a backup is also gone, so the Azure VM backup is the ONLY 2026-09-14 recovery point.**
+
+Two things follow, and neither is urgent tonight but both get worse with time:
+
+1. **Do not let anyone clean up that VM.** It is no longer a dev box, it is the sole surviving copy of
+   a recovery point. Kam should know that before anyone tidies Azure.
+2. **The recovered archive lives in HPSM's LOCAL-ONLY analysis repo** (`qa-s48/vm-recovery/`) — HPSM
+   has stated that repo has no remote until HPSM-40. So the recovered evidence currently exists on the
+   VM and on this drive, **and nowhere with a remote.** Two copies, one of them a machine someone
+   might reasonably delete.
+
+**Also from the plan, and it is the honest part:** the upgrade half can be *reconstructed* from the
+TKF report's file:line spec, but **never proven byte-identical — no post-TKF hash was ever recorded.**
+The D-S47-89 fix and p2b.sh would be re-creations from prose and **are not evidence.** Its
+recommendation is to treat any rebuild as a NEW revision with its manifest archived. That is right.
+
+**One operational trap recorded there: `walk-fresh` must NOT be re-run — it creates engagements.**
+Confirm the existing A2/B2 instead. And every rerun needs the P1-P3 fixes first, or it reproduces the
+blind spots it is meant to test.
+
+**Fix order when Kam rules: P1 is V6**, because it manufactures a false PASS and writes it into the
+evidence, and it is present in the recovered live copy.
+
 ## 🟠 HPSM: the Azure purge IS re-verified; only the upgrade half stays unverifiable (card AMENDED)
 
 Card `hpsm-live-release-verification-unprovable`. **This is a claim about our EVIDENCE, not about the
