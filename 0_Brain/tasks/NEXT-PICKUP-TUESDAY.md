@@ -143,6 +143,23 @@ pgrep → stop → edit → run once → re-arm.
   would put a seat past 50% before it does anything. Raised as a structural question, not worked
   around — see the daily note.
 
+## Kam's 20:22 rulings — one applied, one NOT carried out on purpose
+
+Both taps reached this seat only because Wednesday forwarded them by mail; `chat_sync` was dead, so
+`reconcile_rulings.py --apply` found nothing and both cards read `open` locally. Ruled by hand from
+her verbatim forward.
+
+- `tuesday-one-launch-on-the-mini` → **launch**. Done; that is this session.
+- `tuesday-seat-self-rotate-with-liveness-check` → **rotate-after-verdicts**. **NOT carried out, and
+  that is deliberate — do not "finish" it at your next boot.** The card was written before Kam
+  stopped this seat on 09-14 and every fact in it has expired. Measured 2026-09-16 20:3x: the three
+  HPSM gates are not running (`tmux list-panes -a` = two panes, this seat and the fleet monitor, no
+  claude agent processes), session 42 is not running, no GATE VERDICT mail since 2026-09-14 in either
+  inbox, and the card's "this seat has been past its context ceiling for hours" described the seat he
+  stopped, not this one. Kam was told in one message with all four measurements and an explicit offer
+  to restart anyway if he still wants it. **If he says restart, restart; otherwise this ruling is
+  answered by events.**
+
 ## The daily-note split — census DONE, waiting on Wednesday's commit
 
 Both seats write the same `0_Brain/daily/<date>.md` and it conflicted on rebase tonight. A claim
