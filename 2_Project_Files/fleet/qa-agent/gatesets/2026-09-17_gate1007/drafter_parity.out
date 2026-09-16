@@ -1,0 +1,83 @@
+drafter_parity start 00:37:21 AEST
+00:37:36 AEST parity_base                        tree base   rc 0 FILES 1 TESTS 60 passed 60 failed 0 secs 13.4 suite_msgs 0
+  tree base: probe cells 60 (vitest 60/60 passed), rows 60
+00:37:50 AEST parity_head                        tree head   rc 0 FILES 1 TESTS 60 passed 60 failed 0 secs 13.4 suite_msgs 0
+  tree head: probe cells 60 (vitest 60/60 passed), rows 60
+00:38:09 AEST parity_merged                      tree merged rc 0 FILES 1 TESTS 60 passed 60 failed 0 secs 14.3 suite_msgs 0
+  tree merged: probe cells 60 (vitest 60/60 passed), rows 60
+== agreement per NODE_ENV (cells = 6 configs x 2 fetch modes; each cell compares /system/status, /api/system/status, /status/simple normalised hashes + status codes + fetched URL list)
+  NODE_ENV=development base-vs-head identical 12/12 | head-vs-merged identical 12/12 | mounts agree (head) 12/12 | env seen in body (head) ['development'] | fetch hits per /status (head) [21]
+  NODE_ENV=test        base-vs-head identical 12/12 | head-vs-merged identical 12/12 | mounts agree (head) 12/12 | env seen in body (head) ['test'] | fetch hits per /status (head) [21]
+  NODE_ENV=production  base-vs-head identical 12/12 | head-vs-merged identical 12/12 | mounts agree (head) 12/12 | env seen in body (head) ['production'] | fetch hits per /status (head) [21]
+  NODE_ENV=UNSET       base-vs-head identical 12/12 | head-vs-merged identical 12/12 | mounts agree (head) 12/12 | env seen in body (head) ['development'] | fetch hits per /status (head) [21]
+  NODE_ENV=staging     base-vs-head identical 0/12 | head-vs-merged identical 12/12 | mounts agree (head) 12/12 | env seen in body (head) ['staging'] | fetch hits per /status (head) [21]
+    DIFF staging|all|healthy          urls changed 3 | overall degraded->degraded healthy 21->21 simple 200->200 | dead: base urls 3 trouble 0 total 9 -> head urls 0 trouble 0 total 0
+    DIFF staging|all|offline          urls changed 3 | overall degraded->degraded healthy 0->0 simple 503->503 | dead: base urls 3 trouble 8 total 25 -> head urls 0 trouble 8 total 16
+    DIFF staging|alternate|healthy    urls changed 12 | overall degraded->degraded healthy 21->21 simple 200->200 | dead: base urls 12 trouble 0 total 36 -> head urls 0 trouble 0 total 0
+    DIFF staging|alternate|offline    urls changed 12 | overall degraded->degraded healthy 0->0 simple 503->503 | dead: base urls 12 trouble 8 total 52 -> head urls 0 trouble 8 total 16
+    DIFF staging|empty|healthy        urls changed 20 | overall degraded->degraded healthy 21->21 simple 200->200 | dead: base urls 20 trouble 0 total 60 -> head urls 0 trouble 0 total 0
+    DIFF staging|empty|offline        urls changed 20 | overall degraded->degraded healthy 0->0 simple 503->503 | dead: base urls 20 trouble 8 total 76 -> head urls 0 trouble 8 total 16
+    DIFF staging|none|healthy         urls changed 20 | overall degraded->degraded healthy 21->21 simple 200->200 | dead: base urls 20 trouble 0 total 60 -> head urls 0 trouble 0 total 0
+    DIFF staging|none|offline         urls changed 20 | overall degraded->degraded healthy 0->0 simple 503->503 | dead: base urls 20 trouble 8 total 76 -> head urls 0 trouble 8 total 16
+    DIFF staging|portals|healthy      urls changed 20 | overall degraded->degraded healthy 21->21 simple 200->200 | dead: base urls 20 trouble 0 total 60 -> head urls 0 trouble 0 total 0
+    DIFF staging|portals|offline      urls changed 20 | overall degraded->degraded healthy 0->0 simple 503->503 | dead: base urls 20 trouble 8 total 76 -> head urls 0 trouble 8 total 16
+    DIFF staging|services|healthy     urls changed 3 | overall degraded->degraded healthy 21->21 simple 200->200 | dead: base urls 3 trouble 0 total 9 -> head urls 0 trouble 0 total 0
+    DIFF staging|services|offline     urls changed 3 | overall degraded->degraded healthy 0->0 simple 503->503 | dead: base urls 3 trouble 8 total 25 -> head urls 0 trouble 8 total 16
+== staging|none|offline URL map, base -> head
+   api-gateway       https://secuura-staging-api.internal.ashypond-b460d1a1.westeurope.azurecontainerapps.io         -> http://localhost:8080
+   auth              https://secuura-staging-auth.internal.ashypond-b460d1a1.westeurope.azurecontainerapps.io        -> http://localhost:4003
+   originate         https://secuura-staging-originate.internal.ashypond-b460d1a1.westeurope.azurecontainerapps.io   -> http://localhost:4000
+   security          https://secuura-staging-security.internal.ashypond-b460d1a1.westeurope.azurecontainerapps.io    -> http://localhost:4008
+   anchoring         https://secuura-staging-anchoring.internal.ashypond-b460d1a1.westeurope.azurecontainerapps.io   -> http://localhost:4005
+   prism             https://secuura-staging-prism.internal.ashypond-b460d1a1.westeurope.azurecontainerapps.io       -> http://localhost:4001
+   timestamping      https://secuura-staging-timestamp.internal.ashypond-b460d1a1.westeurope.azurecontainerapps.io   -> http://localhost:4004
+   wallet-connector  https://secuura-staging-wallet.internal.ashypond-b460d1a1.westeurope.azurecontainerapps.io      -> http://localhost:4002
+   vc-issuer         http://localhost:4014                                                                           -> http://localhost:4014
+   billing           https://secuura-staging-billing.internal.ashypond-b460d1a1.westeurope.azurecontainerapps.io     -> http://localhost:4019
+   analytics         https://secuura-staging-analytics.internal.ashypond-b460d1a1.westeurope.azurecontainerapps.io   -> http://localhost:4010
+   staking           https://secuura-staging-staking.internal.ashypond-b460d1a1.westeurope.azurecontainerapps.io     -> http://localhost:4015
+   referral          https://secuura-staging-referral.internal.ashypond-b460d1a1.westeurope.azurecontainerapps.io    -> http://localhost:4016
+   governance        https://secuura-staging-governance.internal.ashypond-b460d1a1.westeurope.azurecontainerapps.io  -> http://localhost:4017
+   kyc               https://secuura-staging-kyc.internal.ashypond-b460d1a1.westeurope.azurecontainerapps.io         -> http://localhost:4011
+   nft-certificate   https://secuura-staging-nft.internal.ashypond-b460d1a1.westeurope.azurecontainerapps.io         -> http://localhost:4018
+   m365-integration  https://secuura-staging-m365.internal.ashypond-b460d1a1.westeurope.azurecontainerapps.io        -> http://localhost:4013
+   transfer          https://secuura-staging-transfer.internal.ashypond-b460d1a1.westeurope.azurecontainerapps.io    -> http://localhost:4020
+   issuer-portal     https://secuura-staging-issuer.ashypond-b460d1a1.westeurope.azurecontainerapps.io               -> http://issuer-frontend:80
+   verifier-portal   https://secuura-staging-verifier.ashypond-b460d1a1.westeurope.azurecontainerapps.io             -> http://verifier-frontend:80
+   admin-portal      https://secuura-staging-admin.ashypond-b460d1a1.westeurope.azurecontainerapps.io                -> http://admin-frontend:80
+== staging|all|offline URL map changes, base -> head
+   issuer-portal     https://secuura-staging-issuer.ashypond-b460d1a1.westeurope.azurecontainerapps.io -> http://qa-issuer_portal_url.example:1
+   verifier-portal   https://secuura-staging-verifier.ashypond-b460d1a1.westeurope.azurecontainerapps.io -> http://qa-verifier_portal_url.example:1
+   admin-portal      https://secuura-staging-admin.ashypond-b460d1a1.westeurope.azurecontainerapps.io -> http://qa-admin_portal_url.example:1
+== dead-estate strings in the /system/status BODY, head, every cell (count, in urls, in troubleshooting)
+   UNSET|all|offline            total 16 urls 0 troubleshooting 8 sample ['api-gateway: az containerapp revision restart --name secuura-staging-api-gateway --resource-group secuura-staging-rg']
+   UNSET|alternate|offline      total 16 urls 0 troubleshooting 8 sample ['api-gateway: az containerapp revision restart --name secuura-staging-api-gateway --resource-group secuura-staging-rg']
+   UNSET|empty|offline          total 16 urls 0 troubleshooting 8 sample ['api-gateway: az containerapp revision restart --name secuura-staging-api-gateway --resource-group secuura-staging-rg']
+   UNSET|none|offline           total 16 urls 0 troubleshooting 8 sample ['api-gateway: az containerapp revision restart --name secuura-staging-api-gateway --resource-group secuura-staging-rg']
+   UNSET|portals|offline        total 16 urls 0 troubleshooting 8 sample ['api-gateway: az containerapp revision restart --name secuura-staging-api-gateway --resource-group secuura-staging-rg']
+   UNSET|services|offline       total 16 urls 0 troubleshooting 8 sample ['api-gateway: az containerapp revision restart --name secuura-staging-api-gateway --resource-group secuura-staging-rg']
+   development|all|offline      total 16 urls 0 troubleshooting 8 sample ['api-gateway: az containerapp revision restart --name secuura-staging-api-gateway --resource-group secuura-staging-rg']
+   development|alternate|offline total 16 urls 0 troubleshooting 8 sample ['api-gateway: az containerapp revision restart --name secuura-staging-api-gateway --resource-group secuura-staging-rg']
+   development|empty|offline    total 16 urls 0 troubleshooting 8 sample ['api-gateway: az containerapp revision restart --name secuura-staging-api-gateway --resource-group secuura-staging-rg']
+   development|none|offline     total 16 urls 0 troubleshooting 8 sample ['api-gateway: az containerapp revision restart --name secuura-staging-api-gateway --resource-group secuura-staging-rg']
+   development|portals|offline  total 16 urls 0 troubleshooting 8 sample ['api-gateway: az containerapp revision restart --name secuura-staging-api-gateway --resource-group secuura-staging-rg']
+   development|services|offline total 16 urls 0 troubleshooting 8 sample ['api-gateway: az containerapp revision restart --name secuura-staging-api-gateway --resource-group secuura-staging-rg']
+   production|all|offline       total 16 urls 0 troubleshooting 8 sample ['api-gateway: az containerapp revision restart --name secuura-staging-api-gateway --resource-group secuura-staging-rg']
+   production|alternate|offline total 16 urls 0 troubleshooting 8 sample ['api-gateway: az containerapp revision restart --name secuura-staging-api-gateway --resource-group secuura-staging-rg']
+   production|empty|offline     total 16 urls 0 troubleshooting 8 sample ['api-gateway: az containerapp revision restart --name secuura-staging-api-gateway --resource-group secuura-staging-rg']
+   production|none|offline      total 16 urls 0 troubleshooting 8 sample ['api-gateway: az containerapp revision restart --name secuura-staging-api-gateway --resource-group secuura-staging-rg']
+   production|portals|offline   total 16 urls 0 troubleshooting 8 sample ['api-gateway: az containerapp revision restart --name secuura-staging-api-gateway --resource-group secuura-staging-rg']
+   production|services|offline  total 16 urls 0 troubleshooting 8 sample ['api-gateway: az containerapp revision restart --name secuura-staging-api-gateway --resource-group secuura-staging-rg']
+   staging|all|offline          total 16 urls 0 troubleshooting 8 sample ['api-gateway: az containerapp revision restart --name secuura-staging-api-gateway --resource-group secuura-staging-rg']
+   staging|alternate|offline    total 16 urls 0 troubleshooting 8 sample ['api-gateway: az containerapp revision restart --name secuura-staging-api-gateway --resource-group secuura-staging-rg']
+   staging|empty|offline        total 16 urls 0 troubleshooting 8 sample ['api-gateway: az containerapp revision restart --name secuura-staging-api-gateway --resource-group secuura-staging-rg']
+   staging|none|offline         total 16 urls 0 troubleshooting 8 sample ['api-gateway: az containerapp revision restart --name secuura-staging-api-gateway --resource-group secuura-staging-rg']
+   staging|portals|offline      total 16 urls 0 troubleshooting 8 sample ['api-gateway: az containerapp revision restart --name secuura-staging-api-gateway --resource-group secuura-staging-rg']
+   staging|services|offline     total 16 urls 0 troubleshooting 8 sample ['api-gateway: az containerapp revision restart --name secuura-staging-api-gateway --resource-group secuura-staging-rg']
+   test|all|offline             total 16 urls 0 troubleshooting 8 sample ['api-gateway: az containerapp revision restart --name secuura-staging-api-gateway --resource-group secuura-staging-rg']
+   test|alternate|offline       total 16 urls 0 troubleshooting 8 sample ['api-gateway: az containerapp revision restart --name secuura-staging-api-gateway --resource-group secuura-staging-rg']
+   test|empty|offline           total 16 urls 0 troubleshooting 8 sample ['api-gateway: az containerapp revision restart --name secuura-staging-api-gateway --resource-group secuura-staging-rg']
+   test|none|offline            total 16 urls 0 troubleshooting 8 sample ['api-gateway: az containerapp revision restart --name secuura-staging-api-gateway --resource-group secuura-staging-rg']
+   test|portals|offline         total 16 urls 0 troubleshooting 8 sample ['api-gateway: az containerapp revision restart --name secuura-staging-api-gateway --resource-group secuura-staging-rg']
+   test|services|offline        total 16 urls 0 troubleshooting 8 sample ['api-gateway: az containerapp revision restart --name secuura-staging-api-gateway --resource-group secuura-staging-rg']
+drafter_parity end 00:38:10 AEST

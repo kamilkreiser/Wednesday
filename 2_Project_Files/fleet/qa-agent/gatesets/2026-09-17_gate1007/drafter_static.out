@@ -1,0 +1,37 @@
+drafter_static start 00:39:24 AEST
+tsc -p . tree base rc 0 error lines 0
+   service program __tests__ files 0 | system-status.ts listed True
+   including program __tests__ files 42 | ks864a listed False | ks864b listed False
+   including program rc 2 error lines 29 distinct (line-normalised) 12
+tsc -p . tree head rc 0 error lines 0
+   service program __tests__ files 0 | system-status.ts listed True
+   including program __tests__ files 44 | ks864a listed True | ks864b listed True
+   including program rc 2 error lines 33 distinct (line-normalised) 16
+NEW distinct errors base -> head: 4
+   + src/__tests__/ks864a-dead-estate-helper.test.ts(L,C): error TS1378: Top-level 'await' expressions are only allowed when the 'module' option is set to 'es2022', 'esnext', 'system', 'node16', 'node18', 'node20', 'nodenext', or 'preserve', and the 'target' option is set to 'es2017' or higher.
+   + src/__tests__/ks864a-dead-estate-helper.test.ts(L,C): error TS2554: Expected 1 arguments, but got 2.
+   + src/__tests__/ks864b-dead-estate-portals.test.ts(L,C): error TS1378: Top-level 'await' expressions are only allowed when the 'module' option is set to 'es2022', 'esnext', 'system', 'node16', 'node18', 'node20', 'nodenext', or 'preserve', and the 'target' option is set to 'es2017' or higher.
+   + src/__tests__/ks864b-dead-estate-portals.test.ts(L,C): error TS2554: Expected 1 arguments, but got 2.
+disappeared: 0
+head raw error lines in the ks864 files:
+    src/__tests__/ks864a-dead-estate-helper.test.ts(13,17): error TS1378: Top-level 'await' expressions are only allowed when the 'module' option is set to 'es2022', 'esnext', 'system', 'node16', 'node18', 'node20', 'nodenext', or 'preserve', and the 'target' option is set to 'es2017' or higher.
+    src/__tests__/ks864a-dead-estate-helper.test.ts(18,131): error TS2554: Expected 1 arguments, but got 2.
+    src/__tests__/ks864b-dead-estate-portals.test.ts(13,17): error TS1378: Top-level 'await' expressions are only allowed when the 'module' option is set to 'es2022', 'esnext', 'system', 'node16', 'node18', 'node20', 'nodenext', or 'preserve', and the 'target' option is set to 'es2017' or higher.
+    src/__tests__/ks864b-dead-estate-portals.test.ts(18,131): error TS2554: Expected 1 arguments, but got 2.
+head raw error lines in system-status.ts: 0
+eslint head __tests__/ks864a-dead-estate-helper.test.ts errors 0 warnings 0 []
+eslint head __tests__/ks864b-dead-estate-portals.test.ts errors 0 warnings 0 []
+eslint head routes/system-status.ts errors 0 warnings 0 []
+eslint base routes/system-status.ts errors 0 warnings 0 []
+== control 1: rename the parameter BACK (unused azureServiceName) at head; tsc -p . must report TS6133
+   landed: anchor count 1, sha 12a3287b86a1 -> 7b98f7d341c1, markers [('_azureServiceName', 0)]
+   tsc -p . rc 2 | TS6133 azureServiceName reported: True | ["src/routes/system-status.ts(41,59): error TS6133: 'azureServiceName' is declared but its value is never read."]
+   restored sha-identical 12a3287b86a1
+   after restore tsc -p . rc 0
+== control 2: plant an unused const in ks864a (head); the including tsc and eslint must both see it
+   landed: anchor count 1, sha 64453d4ff912 -> 03386b03b0de, markers [('QA_UNUSED_PLANT', 1)]
+   including tsc sees plant (TS6133): True
+eslint head __tests__/ks864a-dead-estate-helper.test.ts errors 0 warnings 1 ['@typescript-eslint/no-unused-vars']
+   restored sha-identical 64453d4ff912
+porcelain head ['?? Blockchain/Dev/packages/shared/node_modules', '?? Blockchain/Dev/services/api-gateway/node_modules', '?? node_modules']
+drafter_static end 00:39:48 AEST

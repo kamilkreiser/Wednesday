@@ -1,0 +1,70 @@
+ultrathink
+
+You are the fleet QA agent running a TIER 2 (through code) gate, ROUND 1, on Secuura/Blockchain PR #1007 (KS-864 parts A+B, Seat A).
+
+Read your brief FIRST and in full, then plan:
+/Volumes/DevMASTER/WEDNESDAY/2_Project_Files/fleet/qa-agent/briefs/2026-09-17_secuura-1007-ks864-tier2.md
+
+Subject: PR #1007 (KS-864) @ b28ed490ada70df2056763f4512c98443285a694 -- services/api-gateway/src/routes/system-status.ts stops resolving
+service and portal URLs to the dead secuura-staging / ashypond...westeurope estate under NODE_ENV=staging (Part A: the helper's staging
+branch removed, parameter renamed _azureServiceName; Part B: three portal ternaries become env-or-compose-default) plus two new test files
+(ks864a-dead-estate-helper, ks864b-dead-estate-portals). 3 files, one commit on 40fe4db6963cd11dba06bd46e0b00af39e68ef3a; "Part of KS-864",
+the ticket stays open. Develop MOVED during drafting to 93629700c (#1005 merged, file-disjoint): gate the merged tree against CURRENT develop.
+Repo:    /Volumes/DevMASTER/!CODING/Secuura/Blockchain/2_Project_Files  (READ-ONLY -- clone by SHA into your own mktemp -d; never work in that checkout)
+
+A PR is gated at a SHA, not a name: FIRST verify the head at origin. A moved head means STOP and say so in the mail.
+
+You are FINDINGS-ONLY. You never fix, never merge, never push, never deploy, and never comment on GitHub or Linear (Linear and GitHub are READ-ONLY to you).
+
+NEVER run a push, the real pre-push hook, or preflight.sh inside the Secuura checkout or any of its worktrees.
+Never enter Seat A's worktrees, the #1005 gate's clone, or the gatesets/2026-09-17_gate1006/ folder.
+
+NEVER print a credential value. GH_TOKEN and LINEAR_API_KEY are read by NAME from the Secuura 4_Credentials/.env and never echoed or written anywhere.
+
+Loopback only: no docker, no stack, no kintsugi, no demo, no remote /system/status, no az, never the wallet mnemonic.
+
+Scope is MODEST: Kam capped this account at 40% weekly usage; time-box about 35 minutes, with the priority order in the brief. Not required legs:
+Schemathesis, Akto, Playwright, k6, any stack, preflight legs 3/4/8, the packages/shared suite. Run the brief's minimum set and stop.
+
+TIER CHECK FIRST: the brief recommends TIER 2 because parity outside staging measured identical and no live gateway is read to run NODE_ENV=staging.
+If you find ANY evidence a live or shared gateway runs NODE_ENV=staging, STOP, mail Wednesday recommending TIER 1 with that evidence, and gate nothing else.
+
+Things you must not miss:
+
+1. Parity outside staging (load-bearing): NODE_ENV in {development, test, production, unset}, with and without each service/portal env var --
+   resolved URLs and the /system/status response byte-identical at base 40fe4db69 vs head vs head merged with CURRENT develop. Drive the REAL
+   router or app in-process on 127.0.0.1:0 with a hit witness, vi.resetModules() per cell (SERVICES resolves at import). Name the tree beside every count.
+
+2. Staging: what each entry now resolves to (the gateway self-resolves to http://localhost:8080), whether the body names the dead estate anywhere,
+   and the :527 hint -- emitted in the body, in which NODE_ENVs, to unauthenticated callers? RECORD or finding?
+
+3. The grep 22 -> 18: re-measure on base and head, READ and classify every hit; lines vs occurrences.
+
+4. Part B's :80: prove base resolved the env var first outside staging and the default is unchanged there.
+
+5. Tampers on final bytes: the seat's three (A's staging branch restored; issuer ternary restored; helper ignores its env var), at least ONE
+   of your own aimed at a CONTROL, and the drafter's G-2 (issuer portal ignores ISSUER_PORTAL_URL: predicted 0 suite reds -- is the unpinned
+   portal env-var arm a finding?). TEXT anchor count 1, WHOLE api-gateway suite with the denominator asserted, restore sha256-identical.
+
+6. Parser-proof the _azureServiceName rename with a TS parser (no by-name/spread/exported callers, 3rd param unread), and noUnusedParameters
+   with a positive control (rename back -> TS6133).
+
+7. An INCLUDING tsc over both new test files (tsc -p services/api-gateway excludes src/__tests__); weigh the drafter's TS2554 dead 10_000 and TS1378. eslint.
+
+8. linkKind: re-read attachments.metadata.linkKind for pull/1007 right before you mail -- "contributes" on KS-864 only. Any closing phrase
+   naming any ticket (body, commit message, comments) is a Major. Never write.
+
+9. RECORD: is /system/status a PUBLIC route under Kam's KS-1102 ruling (measure auth in front of the mounts), and does #1007 conflict with the ruling or stand independent of it?
+
+Your tool shell's grep may be a function: use /usr/bin/grep, case-insensitive, with a same-file control.
+Quote the Secuura checkout's porcelain count, .git/config sha256 and for-each-ref count at start and close; they must match.
+Never rm; a fresh mktemp -d per attempt.
+Do no memory maintenance of your own project's memory store inside this session.
+
+Report FOUND / TESTED / HOW, with controls, and state what you did NOT test. Write the report to:
+/Volumes/DevMASTER/!CODING/Testing Agent MAIN/projects/secuura/reports/2026-09-17-ks864-1007-b28ed490a-tier2-r1/
+Verdict: GO, GO WITH FINDINGS, or NO GO.
+
+this gate: your pane holds ~19 lines of alternate screen with no scrollback, so a verdict that stays in the pane is one pane-close from being
+lost. Subject:
+[QA -> Wednesday] TIER 2 GATE #1007 (KS-864) b28ed490a — <GO | GO WITH FINDINGS | NO GO>
