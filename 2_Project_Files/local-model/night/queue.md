@@ -127,3 +127,5 @@
 # 14:19 — KS-1081 (Kam ruled a, 09:53: env.example is canonical). Brief pre-measured in a scratch clone: the new suite alone reads 2 passed / 4 failed at the tip, 6/6 with the three edits, and the sibling bootstrap_env_slot_ports stays 51/51.
 # 14:38 — KS-1031 queued by autostart_on_brief.sh the moment its brief landed.
 # 14:38 — KS-1031 queued by hand: autostart_on_brief.sh built the input then died on its own parse error (a case inside a command substitution). Brief pre-measured: 3 passed/3 failed at the tip, 6/6 after.
+# 14:44 — KS-1031 r2: the r1 test section was ONE COMMENT — the model refused to transcribe a 179-line test body and wrote a placeholder instead. Body cut to 105 lines, an explicit do-not-summarise block added, and CELL 5 asserts PASS+FAIL == EXPECTED_CELLS (proven to fire).
+KS-1031 input=/Volumes/DevMASTER/WEDNESDAY/2_Project_Files/local-model/night/inputs/bash_1031.json task=/Volumes/DevMASTER/WEDNESDAY/2_Project_Files/local-model/tasks/bash_patch/task.md ctx=49152

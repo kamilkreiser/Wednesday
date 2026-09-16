@@ -51,6 +51,7 @@ supersede: replace this file wholesale at the next pickup; do not append
 - **KS-1163** needs ONE change across `Start_Up/start-secuura.sh` and TWO suites (`start_secuura_expected_services` + `start_secuura_slot_names`). `bash_patch` expresses product + ONE test file. Part A passes B2/B3/B3b/B4-red/B5-green and stops at B6 (the sibling goes 0→8); Part B's model hunk landed on the `prefix_of` definition at :45. The harness extension is Wednesday's and is NOT started.
 
 ## 📋 BRIEF RULES — every one of these cost a model round. Break them and you pay again.
+- 🔴 **KEEP A TEST BODY UNDER ~110 LINES.** Above that the model does not transcribe it — it writes a PLACEHOLDER COMMENT saying the content is too long and emits a one-line file, which runs, asserts nothing and exits 0 (KS-1031 r1: a 179-line body; KS-1081, first-sample pass, was ~90). **And carry the arm that makes it detectable: a final cell asserting `PASS+FAIL == EXPECTED_CELLS`** — without it a suite that skipped everything reports success.
 - **Nothing a cell READS lives in prose** — every declaration is the FIRST line of the fenced block.
 - **NEVER show a CONTEXT line inside the `## The exact change` fence.** Name context lines in prose above it. Every line in the fence carries `+` or `-` and is a change. (KS-1011 r1.)
 - **No backslash continuations in a `+` block** — the model drops them. One long line instead. (KS-1011 r2.)
