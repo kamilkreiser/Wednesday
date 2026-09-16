@@ -40,3 +40,4 @@ sees the claim rather than discovering it in a conflict.
 | 2026-09-17 00:32 | Kamils-Mac-Studio | Ornith night_run.sh G7 BUSY leg: 20-min empty-queue tap to the coordinator pane while night/ALLOW_SEATS is live (ledger w=3 idle regression 2026-09-16 21:2x) | CLOSED |  2026-09-17 00:34 built + armed 8/8; swapped 00:4x |
 | 2026-09-17 01:01 | Kamils-Mac-Studio | pre-commit refusal: shebang *.sh staged at mode 100644 (Tuesday's 09-17 preflight proposal) | OPEN | |
 | 2026-09-17 01:02 | Kamils-Mac-Studio | wednesday_rotate.sh liveness verdict never lands in rotate_wednesday.log (mini 00:56:07, checker pid gone) | OPEN | |
+| 2026-09-17 03:29 | Kamils-Mac-Studio | safe_push.sh: a failed pull with no conflicted file must PRINT git's text and exit non-zero (rc 24) instead of breaking silently and warning HEAD != origin — the 2026-09-17 00:44 orphaned rebase-merge case; arms in fleet/tests/safe_push_silent_pull_arms.sh | OPEN | |
