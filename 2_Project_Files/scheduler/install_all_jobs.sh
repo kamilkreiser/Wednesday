@@ -68,7 +68,11 @@ for t in "$JOBS"/*.plist.template; do
   job="$(basename "$t" .plist.template)"
   label="com.$SEAT.$job"
   target="$AGENTS/$label.plist"
-  rendered="$(sed -e "s|@PROJECT_DIR@|$PROJECT_DIR|g" -e "s|@SEAT@|$SEAT|g" "$t")"
+  # @HOME@ is a placeholder for the SAME reason as @PROJECT_DIR@ (2026-09-16, Tuesday's first run):
+  # the templates hardcoded /Users/kam_code/Library/Logs/wednesday_*, which is the Studio's home and
+  # does not exist on the mini. All nine jobs loaded and died with EX_CONFIG(78) before running a line,
+  # writing no log — so the FDA failure underneath them was invisible. A log path is a travel pointer too.
+  rendered="$(sed -e "s|@PROJECT_DIR@|$PROJECT_DIR|g" -e "s|@SEAT@|$SEAT|g" -e "s|@HOME@|$HOME|g" "$t")"
 
   loaded=0
   launchctl list 2>/dev/null | /usr/bin/grep -q "	$label\$" && loaded=1
