@@ -1524,5 +1524,12 @@
   "project": "Datasec",
   "ts": "2026-09-16T20:35:57.103812+10:00",
   "text": "Ornith daily receipt for 2026-09-16: 45 model rounds — 18 passes, 29 fail rounds (harness/brief rounds included), 3 ticket(s) still unresolved (KS-1163 KS-1168 KS-998), 0 build-refusals; 23 new pins held today; 81 pins across 57 tickets held for Sunday in total (83 files); 35 harness improvement rows written today; the model is idle now; Claude allowance at 6%. 1 verdict(s) stand retracted in done.md."
+ },
+ {
+  "role": "wednesday",
+  "seat": "Kamils-Mac-mini.localdomain",
+  "project": "Datasec",
+  "ts": "2026-09-16T20:37:54.042424+10:00",
+  "text": "That did it. Full Disk Access is live — the row genuinely was not there, so your first instinct was right.\n\nProof, end to end: the little launchd probe that reported DENIED on all three reads an hour ago now reports OK on all three. chat_sync exits 0 with an empty error log, and so do the daily sweep and the Ornith receipt. Preflight is down from 11 warnings at boot to 6, and chat_sync has left the list entirely.\n\nYour board should now reach me on its own, within a minute, without me pulling by hand. The 05:30, 06:00 and 23:00 rituals will fire for the first time on this machine.\n\nOne more thing surfaced the moment the grant landed, and it is worth a sentence because it nearly hid the win. After you granted it, three jobs STILL failed. Their config files on disk were correct, but macOS was still running the old copies in memory — the fix had reached the files and never reached the running system. I reloaded all nine and they came up clean. The checker that is supposed to catch that was only ever reading the files, so it had been reporting nine healthy jobs over nine that could not run. I have fixed it to read the running system too, and proved it by breaking one on purpose and watching it get caught.\n\nThat is the third time tonight the same shape has turned up: something green that was only describing a file. Nothing further needed from you — thank you for the click."
  }
 ]
