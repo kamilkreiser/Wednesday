@@ -25,8 +25,7 @@
 #   chat_log.json and decisions.json are always staged BY NAME. Never `add -A`.
 # Exit: 0 pushed · 1 no commit message (bash's ${1:?}) · 2 usage/env, incl. a
 #       missing union helper · 3 pushed but HEAD != origin · 20/21 a union script
-#       failed · 22 a conflict with no merge rule (hand it back, never guess) ·
-#       24 the pull FAILED with no conflicted file (git's own text printed; nothing pushed)
+#       failed · 22 a conflict with no merge rule (hand it back, never guess)
 # Exit codes MEASURED, not assumed: the first draft documented the no-message
 # case as 2 and it is 1, because ${1:?} exits 1. Read through a pipe they all
 # looked like 0 — zsh has no PIPESTATUS, so the rc is captured on its own line
@@ -103,27 +102,7 @@ for round in 1 2 3 4 5 6 7 8; do
     *"Successfully rebased"*|*"up to date"*|*"Fast-forward"*) break ;;
   esac
   CONF="$(git -C "$W" diff --name-only --diff-filter=U)"
-  # Key on the CONDITION, not git's wording (learnings/2026-09-10_a-detector-keyed-on-remedy-text):
-  # no rebase in progress AND HEAD contains origin/main = the pull succeeded in words this
-  # case list does not know; anything else with no conflicted file is a failure.
-  GD="$(git -C "$W" rev-parse --absolute-git-dir)"
-  if [ -z "$CONF" ] && [ ! -d "$GD/rebase-merge" ] && [ ! -d "$GD/rebase-apply" ] \
-     && git -C "$W" merge-base --is-ancestor origin/main HEAD; then
-    break
-  fi
-  if [ -z "$CONF" ]; then
-    # 2026-09-17 (ledger: a-refusal-nobody-reads, the push-tool costume). This line was
-    # `[ -n "$CONF" ] || break`: a pull that was neither a success nor a conflict broke
-    # out SILENTLY, the push then went nowhere, and the only output was "WARNING HEAD !=
-    # origin" rc 3 - twice at 00:44 with the cause (an orphaned .git/rebase-merge/ holding
-    # only an autostash) findable only by bash -x. A failure the tool swallows makes the
-    # one mandated push path undiagnosable. Print git's own words and stop.
-    echo "safe_push: PULL FAILED (round $round) with no conflicted file - nothing pushed. git said:" >&2
-    printf '%s\n' "$OUT" >&2
-    [ -d "$GD/rebase-merge" ] || [ -d "$GD/rebase-apply" ] && \
-      echo "safe_push: a rebase directory exists - READ what it holds (autostash?) before any rebase --quit/--abort" >&2
-    exit 24
-  fi
+  [ -n "$CONF" ] || break
   echo "safe_push: resolving round $round"
   while IFS= read -r f; do
     [ -n "$f" ] || continue
