@@ -277,40 +277,12 @@ arm_panel_sync() {
 }
 arm_panel_sync || echo "WARNING: panel_sync failed to arm — Kam's page will go stale; report this in the session (no-skip)."
 
-# ── Claude Code hooks + permission guards: RENDER them, never rely on the copy ──
-# .claude/settings.local.json is gitignored, so the hooks and permission rules never
-# travelled between seats. Measured 2026-09-16: Wednesday's was 1775 bytes with six hooks;
-# Tuesday's was 169 — a statusline and nothing else, so she ran with no PreCompact block and
-# no PreToolUse guards, and nothing in PORTABILITY.md or doctor.sh said so. The template is
-# TRACKED; this renders it at every boot, preserving each seat's own theme and statusLine.
-if [ -f "$PROJECT_DIR/2_Project_Files/tools/render_claude_settings.py" ]; then
-  CLAUDE_PROJECT_DIR="$PROJECT_DIR" python3 "$PROJECT_DIR/2_Project_Files/tools/render_claude_settings.py" || \
-    echo "WARNING: could not render .claude/settings.local.json — this seat may be running WITHOUT its hooks. Report it in the session (no-skip)."
-fi
-
-# ── Preflight gate ──
-# ORDER MATTERS AND IT WAS WRONG (fixed 2026-09-16, Tuesday's first run on the mini).
-# doctor.sh FAILS HARD under six Claude Code hooks, and the render above is what puts them
-# there. With the render below this gate, a fresh seat hard-failed one step before the fix
-# that would have passed it — every time, by construction. Tuesday's hooks existed on this
-# boot only because Kam ran the renderer by hand. A gate must run AFTER the repair it gates on.
 if [ -x "$PROJECT_DIR/2_Project_Files/doctor.sh" ]; then
   if ! "$PROJECT_DIR/2_Project_Files/doctor.sh" --quiet; then
     echo ""
-    echo "Preflight found HARD failures (above). Continue anyway? Type  yes  and press Enter:"
-    # A one-character read is answerable by ANYTHING that reaches this pane, and on
-    # 2026-09-16 something did: fleet/cockpit/monitor.sh saw a pane whose title was still
-    # the hostname — which is exactly what this prompt looks like, because Claude has not
-    # started yet — declared it DEAD, and send-keys'd its wake text into it. `read -r -n 1`
-    # took the "1" of "19:43" as the answer and the launcher exited 1. So: drain whatever is
-    # already buffered, then require a whole typed word. A stray character now DECLINES
-    # (fail-safe) instead of silently continuing, and no single keystroke can answer it.
-    while read -r -t 0.1 -n 1000 _DRAIN 2>/dev/null; do :; done
-    read -r REPLY; echo
-    if [ "$REPLY" != "yes" ]; then
-      echo "Not 'yes' — stopping. Fix the failures above, or re-run and type yes."
-      exit 1
-    fi
+    echo "Preflight found HARD failures (above). Continue anyway? [y/N]"
+    read -r -n 1 REPLY; echo
+    [[ "$REPLY" =~ ^[Yy]$ ]] || exit 1
   fi
 fi
 
@@ -323,6 +295,16 @@ if [ -x "$PROJECT_DIR/2_Project_Files/fleet/cockpit/arm_wake_watch.sh" ]; then
     echo "WARNING: wake_watch failed to arm — report this in the session (no-skip)."
 fi
 
+# ── Claude Code hooks + permission guards: RENDER them, never rely on the copy ──
+# .claude/settings.local.json is gitignored, so the hooks and permission rules never
+# travelled between seats. Measured 2026-09-16: Wednesday's was 1775 bytes with six hooks;
+# Tuesday's was 169 — a statusline and nothing else, so she ran with no PreCompact block and
+# no PreToolUse guards, and nothing in PORTABILITY.md or doctor.sh said so. The template is
+# TRACKED; this renders it at every boot, preserving each seat's own theme and statusLine.
+if [ -f "$PROJECT_DIR/2_Project_Files/tools/render_claude_settings.py" ]; then
+  CLAUDE_PROJECT_DIR="$PROJECT_DIR" python3 "$PROJECT_DIR/2_Project_Files/tools/render_claude_settings.py" || \
+    echo "WARNING: could not render .claude/settings.local.json — this seat may be running WITHOUT its hooks. Report it in the session (no-skip)."
+fi
 
 # ── Per-project az / gh isolation (same pattern as all other launchers) ──
 mkdir -p "$PROJECT_DIR/4_Credentials/.azure" "$PROJECT_DIR/4_Credentials/.gh-config"

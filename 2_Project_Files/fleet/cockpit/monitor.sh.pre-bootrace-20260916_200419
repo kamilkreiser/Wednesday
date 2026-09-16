@@ -50,25 +50,6 @@ alert() { # class, name, detail  — dedupe: one alert per (class,name) episode
     wake_coordinator "$(date '+%H:%M') [fleet-monitor] WAKE: pane '$name' DEAD — $detail. A dead fleet pane is not the context banner: read it (tmux capture-pane), relaunch or close it, and record it."
   fi
 }
-# pane_is_booting <tty> — true while the LAUNCHER still owns the pane.
-#
-# 2026-09-16, Tuesday's first run on the mini. The launcher stopped at doctor's
-# "Continue anyway?" prompt. Claude had not started, so the pane title was still the
-# hostname — which is this file's DEATH signature. Two checks later the monitor declared
-# the pane DEAD and send-keys'd its wake text into it; `read -r -n 1` took the "1" of
-# "19:43" as the answer and the launcher exited 1. The monitor answered a preflight prompt
-# on Kam's behalf and killed the boot it was supposed to be watching.
-#
-# The title is a fact about what has PAINTED the pane, not about whether anything is
-# running in it. The process table is the fact we actually need: while the launcher runs,
-# `bash .../Launch_*.command` sits on the pane's tty. It exec's into `claude`, so the match
-# disappears exactly when Claude takes over, and a genuinely dead pane has neither.
-pane_is_booting() {
-  local tty="$1"
-  [ -n "$tty" ] || return 1
-  /bin/ps -t "${tty#/dev/}" -o args= 2>/dev/null \
-    | /usr/bin/grep -qE '^(/bin/)?(ba)?sh .*/Launch_[A-Za-z_]*\.command'
-}
 # wake_coordinator <msg> — type one WAKE line into the coordinator's pane, the way the
 # wake runner does (send-keys -l + Enter), unless text already sits at its prompt
 # (then log-only; the runner's held-tap rule). Never taps a non-coordinator pane.
@@ -96,14 +77,6 @@ wake_coordinator() {
       fi
       sleep 30
     done
-    # Never type into a pane the LAUNCHER still owns. Claude has not started yet, so there
-    # is no prompt to hold this tap — and what looks like an empty prompt is often a
-    # preflight question waiting on a keystroke. Injecting there ANSWERS it (2026-09-16).
-    local wtty; wtty=$("$TMUX_BIN" display-message -p -t "$wpane" '#{pane_tty}' 2>/dev/null)
-    if pane_is_booting "$wtty"; then
-      echo "$(date '+%Y-%m-%d %H:%M:%S') [monitor] coordinator pane $wpane is still BOOTING (launcher owns it) — WAKE logged only, NOT injected: $msg" >> "$ALERTS"
-      exit 0
-    fi
     if "$TMUX_BIN" send-keys -t "$wpane" -l "$msg" && "$TMUX_BIN" send-keys -t "$wpane" Enter; then
       echo "$(date '+%Y-%m-%d %H:%M:%S') [monitor] tapped coordinator pane $wpane (after $tries held tries): $msg" >> "$ALERTS"
     else
@@ -116,8 +89,8 @@ clear_flag() { rm -f "$STATE_DIR/.flag_${1}_${2//[^a-zA-Z0-9]/_}" 2>/dev/null; }
 check() {
   "$TMUX_BIN" has-session -t "$SESSION" 2>/dev/null || { echo "no fleet session"; return 1; }
   local now; now=$(date +%s)
-  "$TMUX_BIN" list-panes -t "$SESSION:0" -F '#{@cockpit_name}|#{pane_id}|#{pane_dead}|#{pane_title}|#{host}|#{pane_tty}' | \
-  while IFS='|' read -r name id dead title host tty; do
+  "$TMUX_BIN" list-panes -t "$SESSION:0" -F '#{@cockpit_name}|#{pane_id}|#{pane_dead}|#{pane_title}|#{host}' | \
+  while IFS='|' read -r name id dead title host; do
     name="${name:-$id}"
     local content hash hashfile timefile prev prevtime
     content=$("$TMUX_BIN" capture-pane -p -t "$id" -S -40 2>/dev/null | tail -40)
@@ -136,7 +109,7 @@ check() {
     local revfile="$STATE_DIR/.rev_${name//[^a-zA-Z0-9]/_}"
     if [ "$dead" = "1" ]; then
       alert DEATH "$name" "process exited (pane_dead=1)"; continue
-    elif [ "$name" != "fleet-monitor" ] && [ -n "$host" ] && [ "$title" = "$host" ] && ! pane_is_booting "$tty"; then
+    elif [ "$name" != "fleet-monitor" ] && [ -n "$host" ] && [ "$title" = "$host" ]; then
       if [ -f "$revfile" ]; then
         alert DEATH "$name" "process exited (title reverted to the hostname on two consecutive checks)"; continue
       fi
