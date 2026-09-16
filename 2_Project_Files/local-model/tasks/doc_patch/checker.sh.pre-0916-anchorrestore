@@ -1,7 +1,6 @@
 #!/bin/bash
 # checker.sh <input.json> <out.md> <clone-dir> — doc_patch
 #   D1 output is exactly one ```diff block          D2 diff applies at the tip (strict; --recount named as an accommodation)
-#   D2 ANCHOR RESTORED (anchor_restore.py): an insert-after anchor the model marked '-' is restored as context, named
 #   D3 touched-file set == { product_file }         D4 BEFORE: every required token ABSENT in its section (else nothing to prove)
 #   D5 AFTER: every required token PRESENT in its section
 #   D6 every hunk lies inside a required section (nothing outside the brief's sections changed)
@@ -38,28 +37,7 @@ if len(blocks)!=1: print(f"FAIL D1 expected exactly one ```diff block, found {le
 open(sys.argv[2],"w",encoding="utf-8").write(blocks[0].rstrip("\n")+"\n"); print("PASS D1 output is exactly one fenced ```diff block")
 PY
 # D2
-# D2 ANCHOR RESTORE (2026-09-16 22:2x, KS-890 r2 — the doc twin of bash_patch's B3c): an insert-only brief names the line the
-# block goes AFTER; the model's stable dialect marks that anchor '-' (KS-890 r2: `- Ops notes:`, one extra leading space).
-# anchor_restore.py rewrites exactly that one line as context with the tip's bytes, under the refusals it lists; the restored
-# hunk must apply strict or with --recount ONLY, and the verdict names it. Tried FIRST: a byte-exact '-anchor' would otherwise
-# apply strict and delete the anchor. Refused / not applying → the patch as written goes through the unchanged chain below.
-APPLY_OPTS=""; D2_DONE=0; AR_NOTE=""
-python3 "$(dirname "$0")/anchor_restore.py" "$INPUT" "$REP/patch.diff" "$CLONE/$PRODUCT" "$REP/patch.anchor_restored.diff" > "$REP/anchor_restore.out" 2>&1; AR_RC=$?
-if [ "$AR_RC" -eq 0 ]; then
-  AR_OPTS="FAIL"
-  if git -C "$CLONE" apply --check -p1 "$REP/patch.anchor_restored.diff" > "$REP/apply_check_ar.out" 2>&1; then AR_OPTS=""
-  elif git -C "$CLONE" apply --check -p1 --recount "$REP/patch.anchor_restored.diff" > "$REP/apply_check_ar.out" 2>&1; then AR_OPTS="--recount"; fi
-  if [ "$AR_OPTS" != "FAIL" ]; then
-    cp "$REP/patch.diff" "$REP/patch.as-written.diff"; cp "$REP/patch.anchor_restored.diff" "$REP/patch.diff"; APPLY_OPTS="$AR_OPTS"; D2_DONE=1
-    pass "D2 diff applies at the tip — ANCHOR RESTORED (an accommodation the verdict names): $(head -1 "$REP/anchor_restore.out" | sed 's/^RESTORED: //' | cut -c1-220); applied ${AR_OPTS:-strict}"
-  else
-    AR_NOTE="anchor restore: the restored hunk does not apply strict or with --recount ($(head -1 "$REP/apply_check_ar.out" | cut -c1-120)) — the patch as written is checked"; echo "INFO D2 $AR_NOTE"
-  fi
-elif [ "$AR_RC" -eq 4 ]; then AR_NOTE="anchor restore $(head -1 "$REP/anchor_restore.out" | cut -c1-220)"; echo "INFO D2 $AR_NOTE"
-elif [ "$AR_RC" -ne 3 ]; then AR_NOTE="anchor restore instrument error rc=$AR_RC: $(head -1 "$REP/anchor_restore.out" | cut -c1-160)"; echo "INFO D2 $AR_NOTE"
-fi
-if [ "$D2_DONE" -eq 1 ]; then :
-elif git -C "$CLONE" apply --check -p1 "$REP/patch.diff" > "$REP/apply_check.out" 2>&1; then APPLY_OPTS=""; pass "D2 diff applies at the tip (strict)"
+if git -C "$CLONE" apply --check -p1 "$REP/patch.diff" > "$REP/apply_check.out" 2>&1; then APPLY_OPTS=""; pass "D2 diff applies at the tip (strict)"
 elif git -C "$CLONE" apply --check -p1 --recount --ignore-whitespace "$REP/patch.diff" > "$REP/apply_check_lenient.out" 2>&1; then APPLY_OPTS="--recount --ignore-whitespace"; pass "D2 diff applies at the tip — with an accommodation: --recount --ignore-whitespace (miscounted hunk headers)"
 else
   # third mode (same as code_patch's A2 REANCHORED): hunks rebuilt from the model's -/+ lines at the file's real
@@ -68,7 +46,7 @@ else
   python3 -c 'import json,sys; [print(l) for l in json.load(open(sys.argv[1]))["defect_line"].get("must_remove",[])]' "$INPUT" > "$REP/must_remove.txt" 2>/dev/null
   if REANCHOR_REFLOW=1 REANCHOR_MUST_REMOVE="$REP/must_remove.txt" python3 "$SRC_DIR/reanchor.py" "$REP/patch.diff" "$CLONE/$PRODUCT" "$REAN" > "$REP/reanchor.out" 2>&1 && git -C "$CLONE" apply --check -p1 "$REAN" > "$REP/apply_check_rean.out" 2>&1; then
     cp "$REAN" "$REP/patch.diff"; APPLY_OPTS=""; pass "D2 diff applies at the tip — ONLY REANCHORED (an accommodation the verdict names): $(tr '\n' ';' < "$REP/reanchor.out" | cut -c1-200)"
-  else fail "D2 diff does NOT apply at the tip: strict: $(head -2 "$REP/apply_check.out" | tr '\n' ' ') | reanchored: $(head -2 "$REP/reanchor.out" 2>/dev/null | tr '\n' ' ') $(head -1 "$REP/apply_check_rean.out" 2>/dev/null)${AR_NOTE:+ | $AR_NOTE}"; echo "RESULT: FAIL ($FAILS failed) — stopped at D2"; exit 1; fi
+  else fail "D2 diff does NOT apply at the tip: strict: $(head -2 "$REP/apply_check.out" | tr '\n' ' ') | reanchored: $(head -2 "$REP/reanchor.out" 2>/dev/null | tr '\n' ' ') $(head -1 "$REP/apply_check_rean.out" 2>/dev/null)"; echo "RESULT: FAIL ($FAILS failed) — stopped at D2"; exit 1; fi
 fi
 # D3
 TOUCHED="$(git -C "$CLONE" apply --numstat -p1 $APPLY_OPTS "$REP/patch.diff" 2>/dev/null | awk '{print $3}' | sort -u)"
