@@ -7,7 +7,7 @@ status: live
 
 # Boot digest BY TIER — W whole, M rules-only, every project case a handle
 
-Generated 2026-09-16 20:18 from 175 lesson files (884,264 B). M 33 · MIXED 5 · W 137. 28 project CASE sections inside MIXED files are reduced to one line each: the heading and the path to read it at. W blocks are exactly what the default digest carries; M blocks drop the section index and keep the rules; a P file is a single handle. The CASES behind every rule live only in the lesson files — open one the moment its rule fires.
+Generated 2026-09-16 21:34 from 176 lesson files (887,286 B). M 33 · MIXED 5 · W 138. 28 project CASE sections inside MIXED files are reduced to one line each: the heading and the path to read it at. W blocks are exactly what the default digest carries; M blocks drop the section index and keep the rules; a P file is a single handle. The CASES behind every rule live only in the lesson files — open one the moment its rule fires.
 
 ## The T9 SSD is the master — Wednesday must be fully portable
 `2026-07-31_fully-portable-drive.md` · principle · 2026-07-31 · status: superseded — the "T9 is the master" half by [[2026-08-25_one-drive-devmaster-is-master]] (2026-08-25); the portability principle itself still lives · tier: W
@@ -5967,6 +5967,36 @@ before writing a line of log, and argued in another lesson that a green check ov
 mechanism is worse than a red one. This is that argument turned on its author: I removed the fleet's
 own detector for several minutes and only discovered it by accident, because nothing watches the
 watcher.
+
+
+## Grant: on the new account, spin up agents to test, approve, merge and move things forward — while the local model keeps going
+`2026-09-16_new-account-spin-up-agents-to-test-approve-merge.md` · grant · 2026-09-16 · status: live · tier: W
+
+(no rules-shaped section — file included WHOLE)
+
+# Grant: on the new account, spin up agents to test, approve, merge and move things forward — while the local model keeps going
+
+**The operative case, so the headline matches it:** Wednesday has held Ornith diffs (READY files) and a staged raise brief, and is deciding whether to wait for Sunday. **On this account, it does not wait.** A Secuura seat raises the held fixes as PRs in bundles; a QA gate tests each one; Wednesday approves and merges what passes under the TESTED grant, one at a time. The local model keeps working the backlog in parallel.
+
+**His words, verbatim (20:40:59):**
+> *"while that happens, keep working with the local model.  also, as I have signed you into a new account we have context.  you have the approval to spin up other local agents to test, approve, merge and move things forward"*
+
+**Wednesday's reading, stated to him on the panel within the minute (20:4x), with a default of "starting now unless you narrow it":**
+**CONFIRMED by Kam 20:41:47 (panel, verbatim): *"yes.  claude agents"* — reading 1 is his word, not an assumption.**
+1. "Local agents" means **Claude agent seats on this Studio** (the fleet), not the local model. The local model cannot raise a PR, run a gate, or merge.
+2. It **brings forward** the 2026-09-15 16:36 "QA on Sunday night, merge all at once" shape for the held Ornith diffs. It does not cancel it; the grant row in EXPIRING-GRANTS still names Sunday as that grant's end.
+3. **Not covered, because he did not name it:** deploys (kintsugi or demo), anything demo/UAT (Peter's nod), external communication to Peter or Stuart, `.github/workflows` PRs (his `kam-merges` card), and other authors' PRs. The v1.3 signature classes are unchanged.
+4. **Approval = Wednesday's GO naming the head SHA** after a QA gate verdict at that head plus a Test Evidence block (the 2026-09-11 TESTED grant, which is still open-ended).
+
+**Constraints that still bind:**
+- The usage gate (`fleet/usage_gate.sh`, 90% cut) applies to every seat and gate launch. The gauge read 6% at 20:32.
+- The 2026-09-13 standing rule: as many agents as the code partition allows, and no two seats on the same files.
+- Kam's 13:32 "minimal or limited Secuura work on this account … until Sunday" is **superseded by this line for this purpose**, because he said "we have context". Wednesday's reading; his word corrects it.
+- Kam's 09-16 counter on local-model failures is unchanged.
+
+**Expiry:** none stated. It is tied to "this account" having context. When the usage gate trips, or he switches accounts, re-read before relying on it.
+
+**Family:** [[2026-09-11_secuura-we-approve-and-merge-our-own-tested-work]] · [[2026-09-13_as-many-agents-as-possible-partitioned-by-code]] · [[2026-09-15_ornith-q4-only-volume-week-qa-sunday-merge-once]] · [[2026-09-14_at-90pct-weekly-usage-no-new-agents-wednesday-plus-local-model]] · [[2026-08-03_go-slow-earn-autonomy]] (rule 5).
 
 
 ## What keeps a seat CORRECT is not all in git — and every mechanism that checks a tree checks only the part that is
