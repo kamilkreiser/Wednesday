@@ -10,6 +10,17 @@ supersedes: the 2026-09-14 pickup, kept verbatim at NEXT-PICKUP-TUESDAY.md.pre-s
 
 ---
 
+## 🔵 HANDOVER BLOCK — 2026-09-17 08:2x checkpoint (ctx 51%). READ THIS FIRST; the 03:05 block below is superseded.
+
+**Live agents (brief mails are the authority, all spf/dkim/dmarc pass):**
+- `%10` **Datasec/NexusAI S63** — brief 21:40:51Z + ADDENDA 1-8 (21:54Z → 22:18Z) + ANSWERs. Queue it reported 22:19Z: RD-465 tier-2 GATE RUNNING on `afc65e47c963dec804b5dff2e22ad40c84de95c4` (round 1 of 2; three checks added) → RD-464 (red-first, in progress) → RD-470 remove route (tier 1) → RD-476 AI-assistant prompt (Kam 08:13:58 + "Correct." 08:17:37; side-by-side OWED TO KAM before merge) → package branch (registry-independent: remove 4 fields, restore the 22 LOST setup items incl. AOAI one-token check, Key Vault read-back, Redis wiring, post-deploy hints; NOT the Entra-group-at-deploy item without Kam; image ref a failing placeholder; before/after enumeration + red-proofed checks) → sort RD-471/472/473/475. **Wakes this seat:** its GATE VERDICT / READY FOR QA / QUESTION mails.
+- `%11` **Datasec/HPSM S49** — brief 21:42:08Z, GO 21:46Z. Doing P1 → P2 → P3 (toolkit rebuild as NEW revision, in-project manifest), then READY FOR QA and STOP. **This seat then commissions a TIER-1 gate on the rebuilt toolkit**; no live/VM/tunnel command before that GO. C-62/63/64 recorded (`bb5e77b`).
+
+**Kam this morning (all recorded; cards ruled/withdrawn and delivered where artefacts exist):** RD-474 accept-and-warn · HPSM re-verify · live listing no warning · Composer Monday card withdrawn · demo order = work in flight · RD-454 group optional (whole tenant if unset) · RD-470 remove · monetisation card withdrawn "old ticket" (offer free now; MS billing later as a new offer; NexusAI free & downloadable by anyone; infra client-paid) · keep all deploy-time config + checks · "see what was built before" → lineage table DELIVERED to him 08:22.
+**Open with Kam:** the REGISTRY (A dedicated Standard ACR ~US$20/mo vs C public GHCR) — lineage showed no earlier offer was keyless, so it is genuinely open; do NOT nag, raise once when the package branch needs it. Open Datasec cards: none.
+**Owed by this seat:** tier-1 gate for HPSM toolkit on READY; RD-465 verdict → merge ruling; RD-476 side-by-side to Kam; Partner Center published-package download before 24 Sep (daylight task, NOT yet done); ledger 3c move at wrap.
+**Ledger today:** the 06:00 sweep promise with no mechanism (w=1).
+
 ## 🟢 03:05 2026-09-17 — FLOOR EMPTY. NexusAI S62 WRAPPED, scored 0.90, pane closed.
 
 main = `4148f76` (ls-remote read by this seat), CI green on `d6fe307` + `4148f76` per its run ids (relayed).
