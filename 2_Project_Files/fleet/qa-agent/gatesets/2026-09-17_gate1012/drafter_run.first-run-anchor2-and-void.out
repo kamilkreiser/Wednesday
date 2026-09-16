@@ -1,0 +1,41 @@
+drafter_run 04:17:57 AEST
+project tsc base rc 0
+04:18:01 AEST gw_suite_base                      tree base  pkg gw     rc 0 FILES 47 TESTS 400 passed 400 failed 0 pending 0 failed_suites 0 success True secs 2.5 suite_msgs 0
+project tsc head rc 0
+04:18:06 AEST gw_suite_head                      tree head  pkg gw     rc 0 FILES 48 TESTS 402 passed 402 failed 0 pending 0 failed_suites 0 success True secs 2.5 suite_msgs 0
+04:18:10 AEST t_Q_T0                             tree head  pkg gw     rc 0 FILES 48 TESTS 402 passed 402 failed 0 pending 0 failed_suites 0 success True secs 2.3 suite_msgs 0
+ROW Q_T0 tsc rc 0  tests 402 failed 0 pending 0
+   landed: anchor count 1, sha d06390a15c53 -> 6b6eba84a3c6, markers [('`${SECURITY_SERVICE_URL}/api/audit/logs?${queryPar', 1)]
+04:18:14 AEST t_Q_TU_url_back                    tree head  pkg gw     rc 1 FILES 48 TESTS 402 passed 401 failed 1 pending 0 failed_suites 2 success False secs 2.4 suite_msgs 0
+    NOT-PASSED failed __tests__/ks745-audit-export-calls-the-list-route.test.ts :: KS-745 - the audit export calls the security list route 🔴 KS-745 - the export fetches /api/audit (the list), not /api/audit/logs, and returns the listed entry | AssertionError: the url the export fetched: expected 'http://security.test:1/api/audit/logs…' to match /^http:\/\/security\.test:1\/api\/aud…/\
+   restored sha-identical d06390a15c53
+ROW Q_TU_url_back tsc rc 0  tests 402 failed 1 pending 0
+     RED KS-745 - the audit export calls the security list route 🔴 KS-745 - the export fetches /api/audit (the list), not /api/au | AssertionError: the url the export fetched: expected 'http://security.test:1/api/audit/logs…' to match /^http:\/\/security\.test:1\/api\/aud…/\
+   landed: anchor count 1, sha d06390a15c53 -> 8a479ba366cf, markers [('entries = (data as any)?.data || (data as any)?.lo', 1)]
+04:18:18 AEST t_Q_TR_read_back                   tree head  pkg gw     rc 1 FILES 48 TESTS 402 passed 401 failed 1 pending 0 failed_suites 2 success False secs 2.2 suite_msgs 0
+    NOT-PASSED failed __tests__/ks745-audit-export-calls-the-list-route.test.ts :: KS-745 - the audit export calls the security list route 🔴 KS-745 - the export fetches /api/audit (the list), not /api/audit/logs, and returns the listed entry | AssertionError: the exported data is the entries array: expected false to be true // Object.is equality
+   restored sha-identical d06390a15c53
+ROW Q_TR_read_back tsc rc 0  tests 402 failed 1 pending 0
+     RED KS-745 - the audit export calls the security list route 🔴 KS-745 - the export fetches /api/audit (the list), not /api/au | AssertionError: the exported data is the entries array: expected false to be true // Object.is equality
+   landed: anchor count 1, sha d06390a15c53 -> 4a829c1f35cb, markers [('      res.status(503).json({', 1)]
+04:18:22 AEST t_Q_CTL_catch_503                  tree head  pkg gw     rc 1 FILES 48 TESTS 402 passed 401 failed 1 pending 0 failed_suites 2 success False secs 2.3 suite_msgs 0
+    NOT-PASSED failed __tests__/ks745-audit-export-calls-the-list-route.test.ts :: KS-745 - the audit export calls the security list route KS-745 control - an unreachable security service still answers 502 BAD_GATEWAY | AssertionError: expected 503 to be 502 // Object.is equality
+   restored sha-identical d06390a15c53
+ROW Q_CTL_catch_503 tsc rc 0  tests 402 failed 1 pending 0
+     RED KS-745 - the audit export calls the security list route KS-745 control - an unreachable security service still answers 5 | AssertionError: expected 503 to be 502 // Object.is equality
+   landed: anchor count 1, sha d06390a15c53 -> faa492ab3e88, markers [("headers['Authorization'] = 'Bearer qa-service-iden", 1)]
+04:18:26 AEST t_Q_SVC_forwards_a_service_token   tree head  pkg gw     rc 0 FILES 48 TESTS 402 passed 402 failed 0 pending 0 failed_suites 0 success True secs 2.4 suite_msgs 0
+   restored sha-identical d06390a15c53
+ROW Q_SVC_forwards_a_service_token tsc rc 2 VOID tests 402 failed 0 pending 0
+   landed: anchor count 1, sha d06390a15c53 -> 74acd715e96c, markers [('void authHeader;', 1)]
+04:18:30 AEST t_Q_NO_AUTH_forwarded              tree head  pkg gw     rc 0 FILES 48 TESTS 402 passed 402 failed 0 pending 0 failed_suites 0 success True secs 2.2 suite_msgs 0
+   restored sha-identical d06390a15c53
+ROW Q_NO_AUTH_forwarded tsc rc 0  tests 402 failed 0 pending 0
+Traceback (most recent call last):
+  File "/Volumes/DevMASTER/WEDNESDAY/2_Project_Files/fleet/qa-agent/gatesets/2026-09-17_gate1012/drafter_run.py", line 31, in <module>
+    for old, new in edits: edit(ap, old, new, markers=[(new, 1)])
+                           ~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/Volumes/DevMASTER/WEDNESDAY/2_Project_Files/fleet/qa-agent/gatesets/2026-09-17_gate1012/drafterlib.py", line 33, in edit
+    assert n == 1, 'ANCHOR COUNT %d != 1 for %r' % (n, old[:90])
+           ^^^^^^
+AssertionError: ANCHOR COUNT 2 != 1 for '      to: formattedTo,\n'

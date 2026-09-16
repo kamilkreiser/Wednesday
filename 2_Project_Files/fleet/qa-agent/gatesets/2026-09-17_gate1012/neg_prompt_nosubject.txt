@@ -1,0 +1,165 @@
+ultrathink
+
+You are the fleet QA agent running ONE TIER 1 ROUND 1 gate over Secuura/Blockchain PR #1012 (KS-745, Seat A successor) at head
+e225a49480e16bb77251a5d7cbd16afdf2929550 — the admin audit export (services/api-gateway/src/routes/audit-export.ts +4 -2, mounted
+index.ts:801 at /api/admin/audit) now fetches the security service's LIST route GET /api/audit (was /api/audit/logs, which matched
+/api/audit/:id and 404'd) and reads data.data.logs, plus one new test ks745-audit-export-calls-the-list-route.test.ts (+69). TIER 1 by
+Wednesday's ruling (the seat proposed tier 2): before the PR the export returned nothing; after it the export returns security audit-log
+entries — a NEW data path out of the audit store. WHO CAN READ WHICH TENANT'S AUDIT ENTRIES is the lead question. No rendered surface and no
+in-repo frontend caller — the real-browser half of tier 1 does not apply; say so. Round 1 of 2 for the KS-745 class under the cap.
+
+Read your brief FIRST and in full, then plan:
+/Volumes/DevMASTER/WEDNESDAY/2_Project_Files/fleet/qa-agent/briefs/2026-09-17_secuura-1012-ks745-tier1.md
+
+Head (git ls-remote 04:13:27 AEST, the PR API 04:19:32, agree; the launcher re-asserts it):
+  #1012 e225a49480e16bb77251a5d7cbd16afdf2929550 = refs/pull/1012/head = feature/ks-745-ornith-audit-export-list-route
+        ONE commit, only parent d067725ff1c7f036dbf0f726b9bf12f4daefebe7 (#1009's squash).
+  git diff d067725ff e225a4948 = exactly 2 files: audit-export.ts a301f5e22 -> d87c04979, ks745 test ABSENT -> fb6a33957.
+  base = the merge-base d067725ff (compare ahead 1, behind 0, files 2). DEVELOP MOVED during drafting to 1125607e978d6ad637720c985e43e3d79fecdf88
+  (#1010's squash, 04:28:14, verification.ts + ks1087 test — file-disjoint). Merge the then-current develop in YOUR clone (never pushed),
+  rebuild the shared dist, and run base, head AND merged, naming each tree (drafter: api-gateway base 47/400, head 48/402, merged 48/410,
+  pending 0).
+Repo:    /Volumes/DevMASTER/!CODING/Secuura/Blockchain/2_Project_Files  (READ-ONLY — git clone --shared by SHA into your own
+  scratch; write verbs there only, from a script file; NO git write verb in the checkout; Seat A successor's worktree
+  worktrees/raise-0916-a is LIVE — never enter it; never vitest inside the checkout; pin by SHA, never origin/*)
+Sibling tier-1 gates #1010 (KS-1183) and #1011 (KS-871) are drafting/running tonight: never read or write their gate-set directories,
+briefs, launchers or report directories.
+
+You are FINDINGS-ONLY. You never fix, never merge, never push, never deploy, never comment, never file, never tick an
+ack box, never `@`. Nothing goes to Peter or Stuart.
+
+NEVER run a push, the real pre-push hook, or preflight.sh inside the Secuura checkout or any of its worktrees.
+
+NEVER print a credential value, and never open, read or copy a secrets file's contents into output — a script may read
+GH_TOKEN / LINEAR_API_KEY by NAME from /Volumes/DevMASTER/!CODING/Secuura/Blockchain/4_Credentials/.env for GitHub GET and Linear
+query calls only, and AGENTMAIL_API_KEY by NAME from /Volumes/DevMASTER/WEDNESDAY/4_Credentials/.env for the verdict mail; never
+echo them. Count, never echo. The real authenticateToken runs on vitest.setup.ts's throwaway in-process keypair only; the security app
+on a throwaway key your probe generates (give both sides the SAME public key when one process drives both).
+
+NO shared docker stack, no :6882 / :7082 slot, no kintsugi, no demo, no nginx run, NEVER the wallet mnemonic (KS-535 HOLD). This gate
+needs NO container and NO real Postgres: the security app runs in-process with SECURITY_DISABLE_BOOT=1 (the ks742/ks743 harness), the
+gateway app and the export router in-process, all on loopback. Run `docker info` ONCE and print its rc on its own line (UP is NOT
+permission; create no container). LOOPBACK ONLY: every listener binds 127.0.0.1:0. No Akto, no k6, no Playwright tonight (Kam's 40% cap;
+NOT COMMISSIONED — say so). No `rm`; no `cd` on a command line; never discard stderr (no 2>/dev/null — write it to a file); every clock
+reading from `date`. Time-box 45 minutes of work.
+
+Write NOT-TESTED.written-first.md BEFORE any run (brief section 6).
+
+Fourteen things you must not miss (each is a brief item with drafter-measured predictions and predicted-by):
+
+1. TENANT ISOLATION — THE LEAD ITEM (item 1). Drive the REAL security app (stateful in-memory store seeded through the REAL POST /api/audit:
+   TWO tenants + a platform-level row + >= 51 rows for one tenant, behind a hit AND header witness) and the REAL gateway export with the REAL
+   authenticateToken on throwaway keys. Per caller (ORG_ADMIN+A, ORG_ADMIN+B, SUPER_ADMIN no tenant, SYSTEM_ADMIN+A, platform_admin no tenant,
+   platform_admin+B, ORG_ADMIN no tenant): which tenantIds come back and how many, base / head / merged. Does the forwarded token carry the
+   caller's tenant or a service identity? ANY CROSS-TENANT ROW FOR A TENANT-CLAIMED CALLER IS A BLOCKER. DRAFTER DISAGREEMENT 1 — ESTABLISH
+   REACHABILITY FIRST: the drafter imported the REAL index.ts app (ks1165 pattern) and every caller — super_admin+A, SYSTEM_ADMIN, ORG_ADMIN+A,
+   no token — got 401 "Authentication required" with 0 upstream hits on /api/admin/audit/export and /api/v1/admin/audit/export, at head AND
+   base, while the same tokens got 200 on GET /api/admin/audit-logs. index.ts:801 mounts the router with NO authenticateToken and nothing
+   before it sets req.user. If that holds, the PR changes no reachable behaviour and KS-745's goal is unmet for every caller; the seat's cell
+   injects req.user itself. Prove WHICH layer answered the 401 (the export's body equals the spec-aware gate's at index.ts:1071). Drafter,
+   decoded-claims req.user (not the real authenticateToken): head tenant-claimed callers see only their tenant; tenantless SUPER_ADMIN /
+   SYSTEM_ADMIN see cross-tenant (KS-743 contract) but only the first 50 (all tenant C); tenantless platform_admin (the seat's own cell
+   principal) and ORG_ADMIN get security's 403 echoed; base 404 for every hitting row.
+
+2. AUTHZ ON THE EXPORT (item 2): USER, ISSUER_ADMIN (a tenant admin role not in the gateway list), another admin role, no token, expired,
+   malformed, sk_ key — status and upstream hits, base vs head, through index.ts:801 AND a harness mount with the real authenticateToken.
+
+3. SHADOWING / ROUTE MATCHING (item 3): enumerate the security app's mounts (GET /api/audit :732 before /api/audit/:id :787) and the gateway
+   layers up to and after :801 (the /api/v1 rewrite :561, the spec-aware gate, createProxyRoutes). Does /api/audit match exactly the list
+   handler at head and merged? Trailing slash, case.
+
+4. WHAT THE EXPORT RETURNS (item 4), MEASURED with a stateful fixture: (a) type ignored (drafter: auth/billing/all identical); (b) the silent
+   50 cap (drafter: 60 seeded -> 50 exported, meta.totalEntries 50, list total 60); (c) the to day excluded (drafter: to=today UTC -> 0,
+   to=tomorrow -> 2); (d) shape — the list's AuditLog vs the export's AuditEntry: CSV timestamp/type/outcome blank, details [object Object];
+   plaintext details in JSON; (e) the spec's required `entries` vs the route's `data`. A silently truncated or wrong-range AUDIT export is a
+   correctness defect in a compliance surface: rule each (severity + SHIPS-WITH/TICKET, or Record) with reasoning, and say whether
+   unreachability changes the grade.
+
+5. UPSTREAM FAILURE PATHS (item 5): 401/403/404/500/network refusal/never answers/malformed 2xx/unexpected 2xx shape, a marker in each
+   upstream body. Drafter (head = base): status echoed, not 502; 401/403 upstream error bodies leak through `message`; malformed 2xx -> 502
+   "Failed to reach security service"; never answers -> NO RESPONSE at 4 s (fetch has no timeout).
+
+6. THE READY ACCOMMODATIONS + SEAT EDITS (item 6): diff head vs the READY `-`/`+` lines (seat a13-ks745/patches); every other change accounted
+   for by the declared edits — body assertions, the URL assertion, TS1378 / TS2741 / TS2554 fixes. Name anything undeclared or weakened.
+
+7. THE TEST'S DISCRIMINATION (item 7): re-run the seat's T0 / TU / TR / TUR / TI / T0-after on the WHOLE api-gateway suite with project tsc rc
+   per row (a non-compiling tamper is VOID), plus YOUR OWN: one CONTROL-aimed row, one that drops the tenant filter / forwards a service
+   token, one that sends `limit`. Drafter (head, 402 cells, tsc rc 0): TU 1 red, TR 1 red, Q-CTL (catch 502 -> 503) 1 red; Q-SVC (service
+   token forwarded) 0 red, Q-NOAUTH 0 red, Q-LIMIT 0 red, Q-ADMIN-OPEN (role gate disabled) 0 red — COVERAGE FINDINGS: nothing pins the
+   forwarded identity, the role gate or the query. Also the tenant-filter tamper against the security ks743 suite. Anchors by Python
+   str.count = 1, markers asserted, sha256 restore, porcelain asserted; read numFailedTests, numPendingTests, numFailedTestSuites
+   (double-counts), success and cells-run beside every colour. Red before green: the new test on base d067725ff (seat: 2 run, 1 red).
+
+8. INCLUDING tsc (item 8) base vs head vs merged, NEW errors only, inclusion by --listFilesOnly, a planted positive control, the tsconfig
+   quoted verbatim. Re-derive the seat's "READY test 3 -> 0" (TS1378 / TS2741 / TS2554) with the READY's test bytes. eslint both files.
+
+9. LINKKIND (item 9 — read at RUN TIME, report whatever you find): attachmentsForURL(pull/1012) expected = exactly KS-745 contributes;
+   KS-743 and KS-28 UNLINKED; 0 closing phrases in title, body, commit message and every PR comment (positive and negative controls). Read at
+   the START and immediately before the mail, each with `date`. Runtime behaviour -> KS-745 must NOT go Done on merge (Wednesday's 03:5x §5f
+   ruling: a live sweep is owed). A closes on ANY ticket is a finding. Drafter 04:20: KS-745 contributes, 0 closing phrases.
+
+10. DISJOINTNESS (item 10): the PR files API for #1012 vs #1010, #1011 and every open PR — 0 shared files (drafter 0 of 21). #1011 is
+    content-adjacent: middleware/audit.ts excludes /api/admin/audit from audit rows — read #1011's change and say whether it alters that.
+    Re-read develop at start / mid / end; judge any move by CONTENT, merge the then-current develop, re-derive.
+
+11. SCHEMATHESIS (item 11): Blockchain/Dev/docs/openapi/secuura-api.yaml — /api/admin/audit/export IS PRESENT (:15234; from/to required:false
+    while the route 400s; 200 JSON required [entries] while the route answers data); the security list /api/audit is ABSENT (control ^paths: 1).
+    Rule the export REQUIRED and NOT RUN (stack HOLD; unreachable per item 1), the list NOT APPLICABLE with the measured reason.
+
+12. NOT TESTED (item 12): the §5f live sweep on a rebuilt stack (Sunday QA pass); a real Postgres audit store; an end-to-end export through
+    nginx.
+
+13. CALLERS (item 13): no in-repo frontend/e2e caller of the export (drafter census); name what the census cannot see.
+
+14. SUITES per tree (item 14): api-gateway base 47/400, head 48/402, merged 48/410 (drafter), pending read; project tsc rc per tree; security whole suite
+    base and head.
+
+Tooling: vitest 4.1.10 (`vitest run <file> --reporter=json --outputFile=`, cwd <tree>/Blockchain/Dev/services/api-gateway or
+services/security; never watch; api-gateway whole suite ~3 s); typescript 5.9.3; node v24.7.0; eslint (cwd Blockchain/Dev).
+Farm node_modules per ENTRY — never link a node_modules directory wholesale: Blockchain/Dev/node_modules per entry with @secuura relinked into
+the tree, services/api-gateway/node_modules, services/security/node_modules and packages/shared/node_modules per entry, .vite skipped (the
+#1009 gate's R-6: a wholesale link can let vitest write into the checkout's .vite). Assert realpath(@secuura/shared) IN TREE from both
+api-gateway/src and security/src. List the checkout's api-gateway/node_modules/.vite at start and end — it must not change.
+SECURITY_SERVICE_URL is read at module load in audit-export.ts: set it before the import and vi.resetModules() between upstreams.
+SECURITY_DISABLE_BOOT='1' before importing the security app. The export's 401 body equals the spec gate's — a 401 alone names no layer.
+/bin/bash here is 3.2 — write runners in Python. zsh: no PIPESTATUS (`cmd > out 2>&1; rc=$?`), no timeout on macOS, never begin a
+line with `=====`. Use /usr/bin/grep -i with a same-file positive control; `git grep -c` prints nothing for a zero — silence is
+unread, not 0.
+Quote the Secuura checkout's porcelain count, .git/config sha256, for-each-ref count, .git/worktrees count, origin develop SHA,
+refs/pull/1012/head and the branch at start, mid and close as THREE timestamped readings; if refs/pull/1012/head moves, STOP — the
+brief is about a different SHA (a PR title/body edit is not a head move). develop moving is expected; judge it by content, name it.
+Never `rm`: fresh mktemp -d per attempt; quarantine scratch tests and configs by rename. No container is created.
+Do no memory maintenance of your own project's memory store inside this session.
+
+Report FOUND / TESTED / HOW, with controls, into
+/Volumes/DevMASTER/!CODING/Testing Agent MAIN/projects/secuura/reports/2026-09-17-ks745-1012-e225a4948-tier1-r1/
+(NOT-TESTED.written-first.md written BEFORE any run, report.md, evidence/): the scope and trees (base / head / merged named); reachability
+through index.ts:801 with the layer proof; the per-caller tenant table per tree; authz rows; the mount enumerations; the residual and shape
+rows, each ruled; upstream-failure rows; the READY diff; the full tamper table (tsc rc, VOID rows, cells-run, pending, predicted-by on every
+row); suites, including tsc, eslint per tree; linkKind as read at run time; disjointness; the Schemathesis ruling; callers; the Records; and
+a NOT TESTED section at the same prominence as the findings (`docker info` rc on its own line; no live sweep on a rebuilt stack (§5f) — out
+of scope for the gate, owed at the Sunday QA pass; a real Postgres audit store; an end-to-end export through nginx; a real auth-service
+token; out-of-repo callers; a real browser; the four platform suites by path — systemTest/schemathesis, systemTest/akto,
+systemTest/playwright, systemTest/performance; preflight legs 3/4/8). Every finding carries its evidence class (MEASURED AT RUNTIME /
+PROBED / READ ONLY / RELAYED), severity, target (the PR or a TICKET), SHIPS-WITH or TICKET, and its FEW HICCUPPS oracle.
+Client-facing communication = ticket comments only; the extranet is not a channel; anything needing a push goes to Wednesday
+as an escalation candidate for Kam's WhatsApp. Handovers to Peter/Stuart are test blocks, never a list of PRs. Never delete;
+cleanup means quarantine.
+Verdict: ONE line — GO, GO WITH FINDINGS, or NO GO — on e225a49480e16bb77251a5d7cbd16afdf2929550, as the delta over base d067725ff
+AND on the merged tree with develop 1125607e9 (or the then-current develop — name both). Say plainly: tenant isolation
+per caller and reachability through index.ts:801; authz; route matching; what the export returns (type, the 50 cap, the to day, shape,
+spec), each ruled; upstream failures and leaks; the READY accommodations; the tampers (VOID and 0-red rows named); the including tsc and
+READY test 3 -> 0; linkKind as read; disjointness incl. #1011; Schemathesis; and what was NOT tested.
+Give the merge seat its ADDENDUM line: "squash e225a4948 onto develop 1125607e9 (or the then-current develop; file-disjoint from #1010's squash
+and #1011); #1012 attaches to KS-745 only, linkKind contributes (as read at <time>), KS-743 / KS-28 unlinked — KS-745 stays open (§5f live
+sweep; reachability at index.ts:801 per this gate); equality targets audit-export.ts d87c04979 / ks745 test fb6a33957; api-gateway 47/400
+-> 48/402, merged 48/410 (re-measure); Records: <yours>".
+
+MAIL YOUR VERDICT to wednesday-agent@agentmail.to, SENT FROM coagent@agentmail.to (so it arrives signed), when the pass is complete.
+Your pane holds ~19 lines of alternate screen with no scrollback, so a verdict that stays in the pane is one pane-close from being
+lost -- this is not a formality, it is the only durable copy; the verdict MAIL is the END STATE and the wait signal. Subject EXACTLY:
+[QA] verdict #1012 — <GO | GO WITH FINDINGS | NO GO>
+(The QA project has no send_brief.sh of its own: POST https://api.agentmail.to/v0/inboxes/coagent@agentmail.to/messages/send with
+JSON {"to": ["wednesday-agent@agentmail.to"], "subject": "...", "text": "..."} and header Authorization: Bearer $AGENTMAIL_API_KEY,
+the key by NAME from /Volumes/DevMASTER/WEDNESDAY/4_Credentials/.env, never echoed. Confirm the API answered 2xx and quote the message
+id in your final pane line. Timestamps in the mail come from `date`, never estimated. The MAIL is the end state.)

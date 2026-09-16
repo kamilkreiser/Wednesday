@@ -1,0 +1,34 @@
+controls_check 2026-09-17 04:27:38 AEST
+counts: MAIL YOUR VERDICT (ci) 1 | head SHA in brief 4 | TIER 1 in brief 4 | node_modules per ENTRY (ci) in prompt 3
+N1 head override (#1010 head c3213b04e) | stderr: REFUSING: #1012 — c3213b04e3ad96068c367f7e0ba426822d32cda9 is not at refs/heads/feature/ks-745-ornith-audit-export-list-route on origin — the head moved; the brief is about a different SHA
+rc=6
+expected 6: OK
+N2 prompt without the mail step | stderr: REFUSING: prompt does not tell the agent to MAIL its verdict
+rc=12
+expected 12: OK
+N3 brief without the head SHA | stderr: REFUSING: brief or prompt does not name the head SHA e225a49480e16bb77251a5d7cbd16afdf2929550 — a gate about another SHA is another gate
+rc=20
+expected 20: OK
+N4 brief without TIER 1 | stderr: REFUSING: brief and prompt disagree about the tier
+rc=7
+expected 7: OK
+N5 prompt without per-ENTRY farm | stderr: REFUSING: prompt does not require node_modules farmed per ENTRY (a wholesale link can write through to the checkout .vite cache)
+rc=22
+expected 22: OK
+N6 prompt without the exact verdict subject | stderr: REFUSING: prompt does not carry the exact verdict subject, the coagent@ sender and the wednesday-agent@ recipient
+rc=23
+expected 23: OK
+N7 develop = the #1012 head (both #1012 blobs LANDED on develop) | stderr: REFUSING: develop services/api-gateway/src/routes/audit-export.ts blob d87c04979 = #1012 own — #1012 has landed; this brief is stale (develop e225a49480e16bb77251a5d7cbd16afdf2929550) — re-pin deliberately: a different brief
+rc=19
+expected 19: OK
+N8 develop = 58f9e0571 (security index.ts blob 1bb567a09 nobody pinned, GUARDED) | stderr: REFUSING: origin develop is at 58f9e0571c49a78891c8f393323f5562552b5a00 (pinned d067725ff1c7f036dbf0f726b9bf12f4daefebe7) and the move is not provably disjoint: GUARDED develop services/security/src/index.ts blob 1bb567a09 — a version nobod
+rc=18
+expected 18: OK
+N9 develop = the #1010 head c3213b04e (diverged from d067725ff: unjudgeable) | stderr: REFUSING: origin develop is at c3213b04e3ad96068c367f7e0ba426822d32cda9 (pinned d067725ff1c7f036dbf0f726b9bf12f4daefebe7) and the move is not provably disjoint: UNJUDGEABLE status=diverged files=2 — confirm the delta, then re-pin deliberate
+rc=18
+expected 18: OK
+P1 POSITIVE: develop = the #1011 head 0a1f8900c (audit.ts f5a83ba2c cleared by blob) | stdout:   (develop read from the QA1012_CUR_DEV test override, not ls-remote)
+rc=0
+expected 0: OK
+unexpected rows 0
+end 04:30:19 AEST

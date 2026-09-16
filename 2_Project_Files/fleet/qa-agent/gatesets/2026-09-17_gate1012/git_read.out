@@ -1,0 +1,52 @@
+git_read 2026-09-17 04:13:27 AEST
+d067725ff1c7f036dbf0f726b9bf12f4daefebe7	refs/heads/develop
+e225a49480e16bb77251a5d7cbd16afdf2929550	refs/heads/feature/ks-745-ornith-audit-export-list-route
+e225a49480e16bb77251a5d7cbd16afdf2929550	refs/pull/1012/head
+current develop (ls-remote) d067725ff1c7f036dbf0f726b9bf12f4daefebe7
+cat-file head: commit develop: commit
+e225a49480e16bb77251a5d7cbd16afdf2929550 d067725ff1c7f036dbf0f726b9bf12f4daefebe7 Kam Kreiser Thu Sep 17 04:03:49 2026 +1000 KS-745: the audit export fetches the security service's list route /api/audit and reads data.data.logs
+d067725ff1c7f036dbf0f726b9bf12f4daefebe7 f7c2f4acb28875e3665a61c8eaaad5c54bd3aa55 kksecura Thu Sep 17 03:34:39 2026 +1000 KS-864: pin each portal's env-var arm in and out of staging (QA gate F-1007-1); P-1007-1 type fixes (#1009)
+f7c2f4acb28875e3665a61c8eaaad5c54bd3aa55 73d3fcb902d2a78fe68a4349903ff6c6bd24d4d5 kksecura Thu Sep 17 03:17:00 2026 +1000 KS-1087 (item 1): workflow-approve keeps the pending document when originate refuses the forward (#1008)
+merge-base head develop: d067725ff1c7f036dbf0f726b9bf12f4daefebe7
+rev-list develop..head: 1  head..develop: 0
+--- base->head numstat/raw
+69	0	Blockchain/Dev/services/api-gateway/src/__tests__/ks745-audit-export-calls-the-list-route.test.ts
+4	2	Blockchain/Dev/services/api-gateway/src/routes/audit-export.ts
+:000000 100644 000000000 fb6a33957 A	Blockchain/Dev/services/api-gateway/src/__tests__/ks745-audit-export-calls-the-list-route.test.ts
+:100644 100644 a301f5e22 d87c04979 M	Blockchain/Dev/services/api-gateway/src/routes/audit-export.ts
+patch lines       97
+--- commit message head
+KS-745: the audit export fetches the security service's list route /api/audit and reads data.data.logs
+
+routes/audit-export.ts fetched GET ${SECURITY_SERVICE_URL}/api/audit/logs.
+The security service publishes no /logs route, so the path matched
+GET /api/audit/:id with id "logs" and answered 404, and the export surfaced
+that as a 404 carrying BAD_GATEWAY. It now fetches the list route
+/api/audit and reads the list's array, data.data.logs. The old read,
+data.data, would have exported the list's wrapper object.
+
+New ks745-audit-export-calls-the-list-route.test.ts: an admin req.user
+before the router, fetch stubbed with the list shape. The cell reads the
+URL it was asked for and the exported body; the control checks a thrown
+fetch still answers 502 BAD_GATEWAY.
+
+Seat edits beyond the READY lines:
+- the cell parses the exported body (entries array, totalEntries 1), because
+  the READY's substring check passed with the old :144 read;
+- a readable URL assertion;
+- the file type-checks: the router imported in beforeAll (not a top-level
+  await), express's listen type for the server, and a stray second argument
+  to the Promise constructor removed.
+
+End-to-end reachability stays UNMEASURED (the ticket's own words): no stack,
+and the gateway path /api/admin/audit/export was read, not driven.
+
+Product hunk and cells authored by the local model (Ornith) from a
+Wednesday-written brief; source-read by Wednesday; applied and re-run by the
+seat A successor.
+
+Co-Authored-By: Claude Opus 5 <noreply@anthropic.com>
+
+--- checkout
+checkout HEAD 355d82c8b porcelain 0 config_sha256 bb55e140e629a5f9c695251613c8dfa343f81be5e429cd169a4061ab54bd2c55 refs 897 worktrees_dir 110
+end 04:13:37 AEST
