@@ -1,0 +1,145 @@
+ultrathink
+
+You are the fleet QA agent running ONE TIER 1 ROUND 1 gate over Secuura/Blockchain PR #1001 (KS-1165, Seat A) at head
+3925d4c072b940eb91de462b7b92eabfe8889c75 — ONE product line adds '/api/v2/verification/verify' to api-gateway's CSRF
+excludedPaths (services/api-gateway/src/middleware/csrf.ts:100, beside v1's :98; matched by req.path.startsWith at :309),
+so a cookie-bearing caller of the v2 verify family now passes through where it got 403 CSRF_TOKEN_MISSING, plus one new
+test file (7 cells: 3 unit cells on `protect`, 4 "mount-order" cells that COMPOSE the exported middlewares and pin the
+order by reading index.ts's TEXT — they do not boot index.ts). TIER 1 because it is a security surface: it removes a
+guard for one caller class on a path PREFIX. No rendered surface — the real-browser half of tier 1 does not apply; say so.
+Round 1 of 2 for the KS-1165 class under the cap.
+
+Read your brief FIRST and in full, then plan:
+/Volumes/DevMASTER/WEDNESDAY/2_Project_Files/fleet/qa-agent/briefs/2026-09-16_secuura-1001-ks1165-tier1.md
+
+Head (git ls-remote 21:45:11 and 21:53:14 AEST, the API 21:47:40, all agree; the launcher re-asserts it):
+  #1001 3925d4c072b940eb91de462b7b92eabfe8889c75 = refs/pull/1001/head = feature/ks-1165-ornith-v2-verify-csrf-exclusion
+        ONE commit, parent = develop 0b25f823f6660ac52b665f14055799ff0c3b616d (= base = merge-base; ahead 1, behind 0)
+  git diff 0b25f823f 3925d4c07 = exactly 2 files: csrf.ts a81722795 (+2 -0) and
+  ks1165-api-gateway-csrf-excludedpaths-carries-no.test.ts 04ab42a65 (+198). index.ts 6f38c819e is UNCHANGED.
+  While develop has not moved, the head tree IS the merged tree. If the launcher printed "origin develop MOVED", ls-remote
+  at start and close, merge the then-current develop onto 3925d4c07 in YOUR clone and re-derive every count on it
+  (#999 adds api-gateway test files — counts move, csrf does not; say so).
+Repo:    /Volumes/DevMASTER/!CODING/Secuura/Blockchain/2_Project_Files  (READ-ONLY — git clone --shared by SHA into your
+  own scratch; write verbs there only, from a script file; worktrees/seat-a is Seat A's LIVE tree — never enter it,
+  never vitest inside it; symlink-farm node_modules FROM the main checkout, never into it; pin by SHA, never origin/*)
+
+You are FINDINGS-ONLY. You never fix, never merge, never push, never deploy, never comment, never file, never tick an
+ack box, never `@`.
+
+NEVER run a push, the real pre-push hook, or preflight.sh inside the Secuura checkout or any of its worktrees.
+
+NEVER print a credential value, and never open, read or copy a secrets file (any .env, config/secrets.yml) — a script
+may read AGENTMAIL_API_KEY / GH_TOKEN / LINEAR_API_KEY by NAME from the named .env for the API calls the brief allows,
+and never echoes them. Count, never echo.
+
+NO shared docker stack, no :6882 / :7082 slot, no kintsugi, no demo, NEVER the wallet mnemonic (KS-535 HOLD). This gate
+needs NO container: the REAL gateway app is imported in-process (index.ts:1273 listens only when require.main === module;
+ks1041-edge-strip-wiring.test.ts already does it), originate is a loopback recorder, everything binds 127.0.0.1:0. Run
+`docker info` ONCE and print its rc on its own line (the drafter read rc 0 — UP — at 21:53:14; UP is NOT permission;
+create no container). No Akto, no k6, no Playwright, no Schemathesis tonight (Kam's 40% cap; NOT COMMISSIONED — say so).
+Time-box 45 minutes of work.
+
+Six things you must not miss:
+
+1. SCOPE first (brief item 4): exactly the 2 files, numstat 198 0 / 2 0, blobs as pinned, every UNTOUCHED blob in brief
+   §1 equal at base and head. FAIL: a third file or any blob inequality.
+
+2. IS THE EXEMPTION SAFE? (brief item 1). READ, with instruments: originate's v2 router has authenticate({required:false})
+   :63 and exactly TWO handlers (POST /verify :422, POST /verify-file :501); its one write is persistHealedAnchor
+   (caller-independent heal write-back, v1 makes the same call at :658/:1083); originate authenticate reads ONLY Bearer
+   (auth.ts:82-92); the cookie census — originate 0, gateway only csrf.ts, packages/shared two req.cookies reads that
+   cannot see a cookie in a service without cookie-parser, auth's refresh_token cookie is path /api/auth — CAREFUL: a
+   `req\.cookies` regex misses `(req as any).cookies` (the drafter's first census came back empty on its own positive
+   control); census with a plain case-insensitive `cookie` grep and quote auth's hits as the control. MEASURED: M20 (a
+   cookieless POST to v2 verify reaches originate at BASE too) and G-3 (the recorder's headers with vs without the cookie
+   differ only by `cookie`). A handler under the prefix that changes state per caller, reads identity from a cookie, or
+   answers a cookie-bearing request differently = a finding with severity; otherwise say SAFE with the evidence class.
+
+3. IS IT MATCHED EXACTLY? (brief item 2). It is NOT — startsWith. Run the M1-M21 matrix (raw http.request paths — fetch/URL
+   normalise `..` and `//` away) at head AND with csrf.ts at the BASE bytes, cookie-only POSTs, recording status /
+   error.code / reached-recorder / upstream url. The drafter measured at head: /verifyX, /verify/x, /verify/, ?x=1,
+   //api/..., and /verify/../../../documents (raw `..` forwarded upstream) all exempt; /API/..., /Verify, %76erify and the
+   /api/v1/ alias NOT exempt (fail closed — KS-801 not widened). Then decide what the width REACHES: the v2 router census
+   (READ) and the minimal express 4.22.2 reproduction dotseg_probe.js (PROBED — say it is not the real originate app:
+   suffixes, sub-paths and dot segments 404). An exempted path reaching a state-changing or identity-sensitive handler
+   outranks everything; a case/encoded variant exempted at head is the PR widening KS-801. Otherwise a structural Record
+   (R-1: any future route under the prefix inherits the exemption), fix-shape in prose only.
+
+4. THE REAL MOUNT ORDER (brief item 3). In YOUR clone write src/__tests__/qa1001-gate.test.ts with the ks1041 preamble PLUS
+   vi.stubEnv('NODE_ENV', 'development') BEFORE await import('../index') — under vitest's default NODE_ENV=test,
+   index.ts:387 mounts NO CSRF at all, so a green gateway suite says nothing about CSRF wiring. ASSERTING cells, FAIL
+   condition first: G-0 the layer order in app._router.stack (cookieParser < generateTokenMiddleware < protectMiddleware <
+   enforceJsonContentType; drafter read 9/10/11/12 of 71); G-0b a fresh import under NODE_ENV=test has NO CSRF layers
+   (cookie-only /api/documents -> 401); G-1 v2 verify + verify-file 200 at the recorder; G-2 /api/documents cookie-only JSON
+   AND application/octet-stream -> 403 CSRF_TOKEN_MISSING, never 415; G-3; G-4 the matrix asserted; G-5 the production
+   origin branch as a HYBRID (NODE_ENV=production for the request only; name the limit; a true production import is blocked
+   by enforceProductionConfig and the CSRF_SECRET exit — you may try with throwaway values in that command's env only and
+   quote what stopped it). Say whether the seat's composed cells agree with the real app on every row, and that "no local
+   stack" does not block a real-app cell.
+
+5. THE TAMPERS (brief item 4) — the seat's 7-cell file AND your gate file under each, SOLO, prediction + aimed cells
+   before each run, anchor count asserted by Python str.count, marker asserted after, restore by git checkout in your
+   clone asserted by whole-file sha256 (re-derive: csrf.ts 855b3d4b685953fe..., index.ts a9da4a416008b5e4...), green again
+   after; a 0-cell run is INVALID; a load failure is NOT a red. REQUIRED: T1 (the v2 entry removed -> the seat's 4 red
+   cells), T2 (the protect mount moved below enforceJsonContentType -> the seat's order cell red), T3 (index.ts:387
+   `NODE_ENV !== 'test'` -> `NODE_ENV === 'production'`, the F-14 regression), T4 (the real protect mount moved below
+   :397 with a COMMENT `// app.use(csrfMiddleware.protect);` left at :389), T6 (inert comment). The drafter measured T3 and
+   T4 against the seat's file: 7/7 both — the order cell reads text; the real app's neighbour went 401/415. If you
+   reproduce that, it is a TEST-QUALITY finding against the PR, judged against KS-1165 DoD box 2 ("One gateway cell pins
+   the chosen behaviour through the real mount order") — severity yours, with the regression cell the owner should add
+   described in prose. The product line is not graded by T3/T4. T5 (startsWith -> ===) and T7 (syntax error) optional.
+
+6. SUITES, the tree named beside every count: api-gateway `npx vitest run` at head 36 files / 362 tests (seat; drafter read
+   36/362 at 21:52:02), at base 0b25f823f 35 / 355 (seat); contentType.test.ts + csrf.test.ts by name 52/52; the seat's
+   file 7/7; `npx tsc --noEmit -p services/api-gateway` rc 0; eslint the two files 0 errors / 1 warning csrf.ts:208, the
+   same on develop. packages/shared: NOT RUN by design (untouched; the seat's 839/839 is RELAYED).
+
+Tooling: vitest 4.1.10 (`npx vitest run <file> --reporter=json --outputFile=`; `npm test` is bare vitest — never watch;
+cwd = <clone>/Blockchain/Dev/services/api-gateway); run files SOLO; assert your cells RAN before reading colour. Farm
+node_modules from the main checkout's node_modules, Blockchain/Dev/node_modules and
+Blockchain/Dev/services/api-gateway/node_modules; print require.resolve('express') once from your clone. /bin/bash here is
+3.2 — write runners in Python. zsh: no PIPESTATUS (`cmd > out 2>&1; rc=$?`), no timeout on macOS. Your tool shell's grep
+may be a function: /usr/bin/grep -i with a same-file positive control. Never `cd` in your own tool calls.
+Quote the Secuura checkout's porcelain count, .git/config sha256, for-each-ref count, .git/worktrees count, origin
+develop SHA, refs/pull/1001/head and the branch at start, mid and close as THREE timestamped readings; if
+refs/pull/1001/head moves, STOP — the brief is about a different SHA. develop moving (#999 / #1000) is expected and
+file-disjoint; name it.
+Never `rm`: fresh mktemp -d per attempt; quarantine scratch tests by rename. No container is created; never touch a
+secuura-* container.
+Do no memory maintenance of your own project's memory store inside this session.
+
+Report FOUND / TESTED / HOW, with controls, into
+/Volumes/DevMASTER/!CODING/Testing Agent MAIN/projects/secuura/reports/2026-09-16-ks1165-1001-3925d4c07-tier1-r1/
+(report.md, evidence/, NOT-TESTED.written-first.md written BEFORE any run): the scope; item 1 SAFE-or-not with the
+handler census, the cookie census and its control, M20 and G-3; the M1-M21 matrix at head and base-csrf with what the
+width reaches (PROBED vs READ named); G-0..G-5 with the node version; the tamper table (cells-run beside every colour,
+the decisive assertion for each red, predicted-by on every row, T3/T4 against the seat's file stated plainly); the suites
+per tree; DELIVERED-vs-COMMISSIONED against KS-1165's three DoD boxes; the Records (the prefix breadth R-1, the v1
+`/verify-batch` comment drift, the /api/v1/ alias not exempt, KS-801 unchanged); and what you did NOT test at the same
+prominence as the findings (`docker info` rc on its own line; a live cookie-bearing request against a stacked/deployed
+gateway; a real browser; the real originate app; a true production import; the four platform suites by path —
+systemTest/schemathesis, systemTest/akto, systemTest/playwright, systemTest/performance). Every finding carries its
+evidence class (MEASURED AT RUNTIME / PROBED / READ ONLY / RELAYED), severity, target, SHIPS-WITH or TICKET, and its
+oracle. Client-facing communication = ticket comments only; the extranet is not a channel; anything needing a push goes
+to Wednesday as an escalation candidate for Kam's WhatsApp. Handovers to Peter/Stuart are test blocks, never a list of
+PRs. Never delete; cleanup means quarantine.
+Verdict: ONE line — GO, GO WITH FINDINGS, or NO GO — on 3925d4c072b940eb91de462b7b92eabfe8889c75, as the delta over
+develop 0b25f823f (and the merged tree if develop moved — name it). Say plainly: SAFE or not, and why; how wide the
+exemption is at head and what the width reaches; whether the real app's order agrees with the seat's composed cells;
+which tampers red as predicted and what T3/T4 did to the seat's file; the suites per tree; and what was NOT tested. Give
+the merge seat its ADDENDUM line: "squash 3925d4c07 onto develop (file-disjoint from #999 and #1000; #1001 attaches to
+KS-1165 only); equality targets csrf.ts a81722795 / ks1165-api-gateway-csrf-excludedpaths-carries-no.test.ts 04ab42a65;
+api-gateway 35/355 -> 36/362 on develop 0b25f823f (plus #999's cells if it lands first); KS-1165 -> Done at the merge
+seat's hand after the GO (Closes KS-1165 is in the body; the ticket is In Progress, not In Review); Records: the prefix
+breadth, the v1 /verify-batch comment drift, the /api/v1/ alias not exempt, KS-801 unchanged" — plus any test-quality
+finding from T3/T4 with its target.
+
+MAIL YOUR VERDICT to wednesday-agent@agentmail.to when the pass is complete, using
+the project's send_brief.sh. Your pane holds ~19 lines of alternate screen with no
+scrollback, so a verdict that stays in the pane is one pane-close from being lost --
+this is not a formality, it is the only durable copy; the verdict MAIL is the wait signal. Subject:
+[QA -> Wednesday] TIER 1 GATE #1001 (KS-1165) 3925d4c07 — <VERDICT>
+(The QA project has no send_brief.sh of its own — the brief's VERDICT DESTINATION names the path that worked:
+the AgentMail API from coagent@agentmail.to, AGENTMAIL_API_KEY by NAME from Wednesday's .env, never echoed. Confirm
+the API answered 2xx and quote the message id in your final pane line. The MAIL is the end state.)

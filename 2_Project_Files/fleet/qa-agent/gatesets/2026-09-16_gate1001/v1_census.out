@@ -1,0 +1,77 @@
+v1_census 21:47:15 AEST
+## originate index.ts: verification mounts
+6: * and verification workflows
+22:import { verificationRouter } from './routes/verification';
+23:import { verificationV2Router } from './routes/verificationV2';
+130:        'POST /api/certifications/:id/recertify': 'Issue verification certificate (Verifier → Certifier)',
+139:        'GET /api/documents/:id/qr': 'Generate QR code for verification',
+141:      verification: {
+142:        'POST /api/verification/verify': 'Verify document integrity',
+143:        'POST /api/verification/hash': 'Generate document hash',
+183:        'POST /api/third-party-verifiers/verify': 'Perform third-party verification (API key auth)',
+184:        'GET /api/third-party-verifiers/:id/records': 'Get verification records',
+272:// Verification routes
+273:app.use('/api/verification', verificationRouter);
+277:app.use('/api/v2/verification', verificationV2Router);
+489:          ('verification_requests', 365,   'GDPR Art 5(1)(e) data minimisation', 'hard',      true,
+490:              'Closed verification requests retained 1 year for dispute window, then deleted.'),
+## originate routes/verification.ts: router verbs
+511:verificationRouter.post('/verify-file', async (req: Request, res: Response) => {
+695:verificationRouter.post(
+1269:verificationRouter.post(
+1298:verificationRouter.get(
+## persistHealedAnchor definition + callers
+3925d4c072b940eb91de462b7b92eabfe8889c75:Blockchain/Dev/services/originate/src/routes/verification.ts:359:export function persistHealedAnchor(row: any, before: Record<string, unknown> | null, healed: Record<string, unknown> | null): void {
+3925d4c072b940eb91de462b7b92eabfe8889c75:Blockchain/Dev/services/originate/src/routes/verification.ts:658:    persistHealedAnchor(doc, preHealBlob, healedBlob);
+3925d4c072b940eb91de462b7b92eabfe8889c75:Blockchain/Dev/services/originate/src/routes/verification.ts:1083:            persistHealedAnchor(docRow, preHeal, healedChain);
+3925d4c072b940eb91de462b7b92eabfe8889c75:Blockchain/Dev/services/originate/src/routes/verificationV2.ts:52:  persistHealedAnchor,
+3925d4c072b940eb91de462b7b92eabfe8889c75:Blockchain/Dev/services/originate/src/routes/verificationV2.ts:191:  persistHealedAnchor(row, preHeal, healed);
+## openapi security for the v2 verify ops
+
+// KS-584 P3 — the versioned verify-list contract. v1 above is UNTOUCHED until
+// the coordinated cutover (Kam's word alone).
+sharedRegistry.registerPath({
+  method: 'post',
+  path: '/api/v2/verification/verify',
+  security: [],
+  tags: ['Verification'],
+  summary: 'Verify a document — list contract (v2)',
+  description:
+    'KS-584 P3. v1 collapses the same-hash registration set to one row; v2 returns EVERY ' +
+    'registration of the supplied bytes as its own match (the certify flow legitimately ' +
+    'creates original + signed_document rows; templates are registered by many parties), so ' +
+    'the row-selection problem dissolves. Each match passes the same honesty rules as v1 ' +
+    '(KS-522 simulated labelling, KS-563 narrow certification claim, KS-584 tenant scoping ' +
+    'with an explicit fieldsWithheld marker). Anchor truth is CALLER-INDEPENDENT: the chain ' +
+    'fact is read pre-auth with no bearer forwarded, so anonymous and authenticated callers ' +
+    'get identical answers. Auth posture: no Authorization header → anonymous 200; a PRESENT ' +
+    'but invalid bearer → 401 (re-auth signal). Matches are ordered certified → confirmed ' +
+    'on-chain → in-flight → oldest, so matches[0] equals v1’s answer for the same hash.',
+  ...rateLimit('verification'),
+  ...sla('read'),
+  request: {
+    body: {
+      content: {
+        'application/json': { schema: V2VerifyRequestSchema },
+
+sharedRegistry.registerPath({
+  method: 'post',
+  path: '/api/v2/verification/verify-file',
+  security: [],
+  tags: ['Verification'],
+  summary: 'Verify an uploaded file — list contract (v2)',
+  description:
+    'Raw file bytes as the request body; the server computes the hash. Same list contract as '
+    + 'POST /api/v2/verification/verify — EVERY registration of those bytes is returned as its '
+    + 'own match, rather than collapsing the same-hash set to one row. Unlike v1, the empty-body '
+    + '400 uses the canonical error envelope.',
+  ...rateLimit('verification'),
+  ...sla('read'),
+  request: {
+    body: {
+      required: true,
+      content: {
+        'application/octet-stream': {
+          schema: z.string().min(1).openapi({ type: 'string', format: 'binary', minLength: 1, description: 'The document file, as raw bytes.' }),
+        },
+## all excluded-path prefixes: every route that starts with /api/v2/verification/verify in ANY router (originate v2 router mounts at /api/v2/verification; its verbs listed above)

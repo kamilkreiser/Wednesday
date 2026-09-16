@@ -1,0 +1,14 @@
+negative controls 22:02:27 AEST
+## N1 head override = the develop SHA (expect exit 6)
+REFUSING: #1001 — 0b25f823f6660ac52b665f14055799ff0c3b616d is not at refs/heads/feature/ks-1165-ornith-v2-verify-csrf-exclusion on origin — the head moved; the brief is about a different SHA
+3925d4c072b940eb91de462b7b92eabfe8889c75	refs/heads/feature/ks-1165-ornith-v2-verify-csrf-exclusion
+rc 6
+## N2 prompt override says ROUND 2 (expect exit 15)
+REFUSING: brief and prompt disagree about the round (ROUND 1)
+rc 15
+## N3 brief override without the full head SHA (expect exit 20)
+REFUSING: brief or prompt does not name the head SHA 3925d4c072b940eb91de462b7b92eabfe8889c75 — a gate about another SHA is another gate
+rc 20
+## N4 a LAUNCH (no --check) from this non-TTY Bash tool (expect exit 21, nothing launched)
+REFUSING: stdin is not a TTY — this launcher execs an interactive agent; run it in a cockpit pane, never inside a Bash tool (a headless gate is invisible and dies with the caller's shell)
+rc(pipeline tail) — see line above

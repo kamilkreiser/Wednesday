@@ -1,0 +1,52 @@
+callerTenant_read 21:58:01 AEST
+vices/originate/src/routes/verification.ts:250:function callerTenantOf(req: Request): string | null {
+vices/originate/src/routes/verification.ts-251-  const user = (req as any).user as Record<string, unknown> | undefined;
+vices/originate/src/routes/verification.ts-252-  const fromUser = user?.tenantId;
+vices/originate/src/routes/verification.ts-253-  const fromReq = (req as any).tenantId;
+vices/originate/src/routes/verification.ts-254-  const v = (typeof fromUser === 'string' && fromUser) || (typeof fromReq === 'string' && fromReq) || null;
+vices/originate/src/routes/verification.ts-255-  return v ? String(v).toLowerCase() : null;
+vices/originate/src/routes/verification.ts-256-}
+vices/originate/src/routes/verification.ts-257-
+vices/originate/src/routes/verification.ts-258-export function isCrossTenantResponse(req: Request, row: any): boolean {
+vices/originate/src/routes/verification.ts-259-  const rowTenant = row?._tenantId ?? row?.tenant_id ?? null;
+vices/originate/src/routes/verification.ts-260-  if (!rowTenant) return false; // no tenancy info on the row — nothing to scope by
+vices/originate/src/routes/verification.ts-261-  const caller = callerTenantOf(req);
+vices/originate/src/routes/verification.ts-262-  return !caller || String(rowTenant).toLowerCase() !== caller;
+vices/originate/src/routes/verification.ts-263-}
+vices/originate/src/routes/verification.ts-264-
+## originate KS-458 tenant context: where req.tenantId comes from (index.ts 236-270)
+// =============================================================================
+// KS-458: request tenant context for fail-closed RLS (migration 039)
+// =============================================================================
+// UNCONDITIONAL — runs in single-tenant mode too (the live config), where the
+// extractTenantContext block above never mounts and req.tenantId would stay
+// undefined. Resolution mirrors getReqTenantId in the routes: an upstream
+// middleware's req.tenantId wins (multi-tenant mode / X-Tenant-Override),
+// else the gateway-derived `x-tenant-id` header, else the same default
+// tenant the single-tenant migration backfills all rows into. The follow-up
+// tenantGucContext() seeds AsyncLocalStorage from req.tenantId so the db.ts
+// chokepoints bundle the RLS GUC into every statement's transaction.
+const DEFAULT_TENANT_ID = 'a0000000-0000-4000-8000-000000000001';
+app.use((req: Request, _res: Response, next: NextFunction) => {
+  const attached = (req as any).tenantId;
+  const header = req.headers['x-tenant-id'];
+  (req as any).tenantId =
+    (typeof attached === 'string' && attached.length > 0 ? attached : undefined) ||
+    (typeof header === 'string' && header.length > 0 ? header : undefined) ||
+    DEFAULT_TENANT_ID;
+  next();
+});
+app.use(tenantGucContext());
+
+// Certification routes
+app.use('/api/certifications', certificationsRouter);
+
+// Document routes
+//
+// KS-87: publicDocumentsRouter handles the no-auth subset (currently only
+// GET /:id/sig-json). Must be mounted BEFORE the auth-gated documentsRouter
+// so Express matches the specific public route first; anything not matched
+// here falls through to documentsRouter, which enforces a Bearer JWT for
+// every other /api/documents/* route.
+app.use('/api/documents', publicDocumentsRouter);
+app.use('/api/documents', documentsRouter);

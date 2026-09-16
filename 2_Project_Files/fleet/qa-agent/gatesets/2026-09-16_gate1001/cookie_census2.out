@@ -1,0 +1,67 @@
+cookie_census2 21:47:01 AEST
+## auth src: any "cookie" token (case-insensitive), non-test — the positive control for the regex family
+3925d4c072b940eb91de462b7b92eabfe8889c75:Blockchain/Dev/services/auth/src/auth.openapi.ts:151:      // httpOnly cookie); `native` clients (mobile/desktop/CLI/automation)
+3925d4c072b940eb91de462b7b92eabfe8889c75:Blockchain/Dev/services/auth/src/auth.openapi.ts:200:// body when clientType='browser' (set as httpOnly cookie instead).
+3925d4c072b940eb91de462b7b92eabfe8889c75:Blockchain/Dev/services/auth/src/auth.openapi.ts:615:    'is set as an httpOnly cookie and omitted from the response body. ' +
+3925d4c072b940eb91de462b7b92eabfe8889c75:Blockchain/Dev/services/auth/src/auth.openapi.ts:674:  // (httpOnly cookie for web, body for native). Declaring bearerAuth here
+3925d4c072b940eb91de462b7b92eabfe8889c75:Blockchain/Dev/services/auth/src/auth.openapi.ts:675:  // made the gateway's spec-auth gate 401 every cookie-only silent refresh.
+3925d4c072b940eb91de462b7b92eabfe8889c75:Blockchain/Dev/services/auth/src/auth.openapi.ts:680:    'For web clients, the refresh token is read from the httpOnly cookie ' +
+3925d4c072b940eb91de462b7b92eabfe8889c75:Blockchain/Dev/services/auth/src/index.ts:16:import cookieParser from 'cookie-parser';
+3925d4c072b940eb91de462b7b92eabfe8889c75:Blockchain/Dev/services/auth/src/index.ts:81:// Cookie parsing (for httpOnly refresh token cookies)
+3925d4c072b940eb91de462b7b92eabfe8889c75:Blockchain/Dev/services/auth/src/index.ts:82:app.use(cookieParser());
+3925d4c072b940eb91de462b7b92eabfe8889c75:Blockchain/Dev/services/auth/src/routes/auth.ts:113:  // Pen-test F-10 + KS-43: refresh token is set as an httpOnly cookie by
+3925d4c072b940eb91de462b7b92eabfe8889c75:Blockchain/Dev/services/auth/src/routes/auth.ts:114:  // default. Mobile / non-browser clients that can't use cookies should
+3925d4c072b940eb91de462b7b92eabfe8889c75:Blockchain/Dev/services/auth/src/routes/auth.ts:116:  // or `'api'`. Browser clients leave this unset and only get the cookie
+3925d4c072b940eb91de462b7b92eabfe8889c75:Blockchain/Dev/services/auth/src/routes/auth.ts:126: * refresh token in the JSON body (in addition to the httpOnly cookie).
+3925d4c072b940eb91de462b7b92eabfe8889c75:Blockchain/Dev/services/auth/src/routes/auth.ts:455:      res.cookie('refresh_token', tokens.refreshToken, {
+3925d4c072b940eb91de462b7b92eabfe8889c75:Blockchain/Dev/services/auth/src/routes/auth.ts:609:    // Set refresh token as httpOnly cookie
+3925d4c072b940eb91de462b7b92eabfe8889c75:Blockchain/Dev/services/auth/src/routes/auth.ts:610:    res.cookie('refresh_token', tokens.refreshToken, {
+3925d4c072b940eb91de462b7b92eabfe8889c75:Blockchain/Dev/services/auth/src/routes/auth.ts:661:      (req as any).cookies?.refresh_token || req.body?.refreshToken;
+3925d4c072b940eb91de462b7b92eabfe8889c75:Blockchain/Dev/services/auth/src/routes/auth.ts:700:      res.clearCookie('refresh_token', { path: '/api/auth' });
+3925d4c072b940eb91de462b7b92eabfe8889c75:Blockchain/Dev/services/auth/src/routes/auth.ts:723:    res.cookie('refresh_token', tokens.refreshToken, {
+3925d4c072b940eb91de462b7b92eabfe8889c75:Blockchain/Dev/services/auth/src/routes/auth.ts:757:    const refreshCookie = (req as any).cookies?.refresh_token;
+## originate src: any "cookie" token, non-test
+3925d4c072b940eb91de462b7b92eabfe8889c75:Blockchain/Dev/services/originate/src/originate.openapi.ts:2516:  'cookies',
+3925d4c072b940eb91de462b7b92eabfe8889c75:Blockchain/Dev/services/originate/src/routes/gdpr.ts:47:  'third_party_sharing', 'cookies', 'communications', 'document_signing',
+## gateway src: any "cookie" token, non-test, excluding csrf.ts
+3925d4c072b940eb91de462b7b92eabfe8889c75:Blockchain/Dev/services/api-gateway/src/index.ts:17:import cookieParser from 'cookie-parser';
+3925d4c072b940eb91de462b7b92eabfe8889c75:Blockchain/Dev/services/api-gateway/src/index.ts:380:// Cookie parsing & CSRF
+3925d4c072b940eb91de462b7b92eabfe8889c75:Blockchain/Dev/services/api-gateway/src/index.ts:381:app.use(cookieParser());
+3925d4c072b940eb91de462b7b92eabfe8889c75:Blockchain/Dev/services/api-gateway/src/middleware/contentType.ts:45: * enforced BEFORE csrf.ts's no-cookie bail-out, and it is its own ticket and
+## originate index.ts :215-235 (req.db)
+// before any trust header is honoured
+// =============================================================================
+// Mounted ahead of extractTenantContext and the KS-458 tenant block, both of
+// which read `x-tenant-id`, and ahead of routes/metering.ts:42, which promotes
+// `x-user-role: connector` into req.user without consulting a JWT. The full
+// rationale — including why this STRIPS rather than REFUSES, and why an unset
+// secret is fail-open but loud — lives in utils/gatewayProvenance.ts.
+const GATEWAY_VOUCH_SECRET = process.env.GATEWAY_VOUCH_SECRET || '';
+const provenanceState = describeState(GATEWAY_VOUCH_SECRET);
+logger[provenanceState.level](provenanceState.message);
+app.use(createGatewayProvenanceMiddleware(GATEWAY_VOUCH_SECRET));
+
+// Multi-tenancy: attach tenant database pool + Prisma-compatible db to each request
+if (process.env.MULTI_TENANCY_ENABLED === 'true') {
+  app.use((req, res, next) => {
+    const mgr = getTenantManager();
+    if (mgr) {
+      extractTenantContext(mgr)(req, res, () => {
+        // Also create a Prisma-compatible client from the tenant pool
+        if (req.tenantPool) {
+          (req as any).db = getRequestPrisma(req);
+        }
+        next();
+      });
+      return;
+    }
+    next();
+  });
+  logger.info('Multi-tenancy middleware registered — will activate after initDb()');
+}
+
+// =============================================================================
+// KS-458: request tenant context for fail-closed RLS (migration 039)
+// =============================================================================
+// UNCONDITIONAL — runs in single-tenant mode too (the live config), where the
+// extractTenantContext block above never mounts and req.tenantId would stay
