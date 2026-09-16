@@ -106,7 +106,7 @@ in a shared repo where both files exist. Flagged to her in the 20:0x STATUS mail
 4. **KAM — two installs only he can do on this machine:** Matilda Premium (Spoken Content) and
    Tailscale.app. Listed to him 20:06, explicitly not urgent.
 
-5. **WEDNESDAY — the next-boot preflight output.** Her 2026-09-16 mail asks for every warning from
+5. ~~**WEDNESDAY — the next-boot preflight output.**~~ **CLOSED 2026-09-17 01:00 by the successor seat: sent `[Tuesday -> Wednesday] PREFLIGHT PROOF` at 15:00:07Z, read back with content. 11 warnings -> 7, none of her repaired items recur.** *Original entry:* Her 2026-09-16 mail asks for every warning from
    the NEXT boot, verbatim, as the proof that the repairs hold. That boot has not happened yet. Send
    it when you rotate. It was flagged as outstanding in the STATUS mail rather than quietly dropped.
 
