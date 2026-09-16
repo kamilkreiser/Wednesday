@@ -1,0 +1,235 @@
+diff --git a/Blockchain/Dev/packages/shared/src/__tests__/ks727-errorhandler-class-guard.test.ts b/Blockchain/Dev/packages/shared/src/__tests__/ks727-errorhandler-class-guard.test.ts
+index 2274c71ac..512729715 100644
+--- a/Blockchain/Dev/packages/shared/src/__tests__/ks727-errorhandler-class-guard.test.ts
++++ b/Blockchain/Dev/packages/shared/src/__tests__/ks727-errorhandler-class-guard.test.ts
+@@ -29,13 +29,13 @@
+ //          real socket, across all six NODE_ENV values, asserting a per-run
+ //          canary never reaches the caller — on `message`, on `details`, and
+ //          on the payload-size path a filter answers itself.
+-//   Count today: 8 modules contributing 9 handlers. Both are exact sets
++//   Count today: 9 modules contributing 10 handlers. Both are exact sets
+ //          (`EXPECTED_CORPUS`, `EXPECTED_HANDLERS`): a member that vanishes
+-//          fails by name, and so does one that is added. The 9th handler is
++//          fails by name, and so does one that is added. The 10th handler is
+ //          api-gateway's `payloadTooLargeErrorHandler` — one module can
+ //          contribute more than one handler, which is why the handler set is
+ //          (file, export) pairs and not a count.
+-//   Of those 9, exactly 1 is a FILTER that forwards a typed 4xx rather than
++//   Of those 10, exactly 1 is a FILTER that forwards a typed 4xx rather than
+ //          answering it (`FORWARDING_HANDLERS`, also an exact set). A handler
+ //          that silently starts or stops forwarding is a red.
+ //
+@@ -576,6 +576,7 @@ describe('KS-727 class guard — no exported errorHandler leaks a thrown message
+       'packages/shared/src/errors/index.ts',
+       'services/api-gateway/src/middleware/errorHandler.ts',
+       'services/auth/src/middleware/errorHandler.ts',
++      'services/demo-service/src/middleware/errorHandler.ts',
+       'services/originate/src/middleware/errorHandler.ts',
+       'services/referral/src/middleware/errorHandler.ts',
+       'services/staking/src/middleware/errorHandler.ts',
+@@ -596,6 +597,7 @@ describe('KS-727 class guard — no exported errorHandler leaks a thrown message
+       'services/api-gateway/src/middleware/errorHandler.ts → errorHandler',
+       'services/api-gateway/src/middleware/errorHandler.ts → payloadTooLargeErrorHandler',
+       'services/auth/src/middleware/errorHandler.ts → errorHandler',
++      'services/demo-service/src/middleware/errorHandler.ts → errorHandler',
+       'services/originate/src/middleware/errorHandler.ts → errorHandler',
+       'services/referral/src/middleware/errorHandler.ts → errorHandler',
+       'services/staking/src/middleware/errorHandler.ts → errorHandler',
+diff --git a/Blockchain/Dev/packages/shared/src/__tests__/ks781-p3-3-body-parser-order.test.ts b/Blockchain/Dev/packages/shared/src/__tests__/ks781-p3-3-body-parser-order.test.ts
+index 9bcdb4259..ca1fe34a7 100644
+--- a/Blockchain/Dev/packages/shared/src/__tests__/ks781-p3-3-body-parser-order.test.ts
++++ b/Blockchain/Dev/packages/shared/src/__tests__/ks781-p3-3-body-parser-order.test.ts
+@@ -5320,10 +5320,13 @@ describe('KS-832 ACCEPTANCE BAR — a REAL corpus service, booted, driven over a
+     //
+     // `err.type` is body-parser's own documented, machine-readable marker:
+     // `entity.parse.failed` for a body it could not parse. It does not move
+-    // with V8's phrasing or with NODE_ENV. Mounted FIRST among error handlers
+-    // (demo-service mounts none of its own — the production response is
+-    // express's bare default), it sets a header and delegates with `next(err)`,
+-    // so the status and body the other cells assert on are unchanged.
++    // with V8's phrasing or with NODE_ENV. It must run FIRST among error
++    // handlers. Since KS-844, demo-service mounts its own terminal JSON
++    // `errorHandler` last in `createApp()`, so a marker appended after it would
++    // never run: the marker's layer is spliced into the router stack
++    // immediately BEFORE demo-service's error handler. It sets a header and
++    // delegates with `next(err)`, so the status and body the other cells
++    // assert on are demo-service's own.
+     const markErrType: express.ErrorRequestHandler = (err, _req, res, next) => {
+       const e = err as { type?: unknown; statusCode?: unknown };
+       if (typeof e?.type === 'string') res.setHeader('x-test-err-type', e.type);
+@@ -5333,6 +5336,13 @@ describe('KS-832 ACCEPTANCE BAR — a REAL corpus service, booted, driven over a
+       next(err);
+     };
+     app.use(markErrType);
++    // KS-844: move the marker ahead of demo-service's own terminal errorHandler.
++    const routerStack = (app as unknown as { _router: { stack: Array<{ name: string }> } })._router.stack;
++    const markerLayer = routerStack.pop();
++    expect(markerLayer?.name, 'the layer just mounted is the marker').toBe('markErrType');
++    const handlerAt = routerStack.findIndex((layer) => layer.name === 'errorHandler');
++    expect(handlerAt, "demo-service's errorHandler layer is mounted").toBeGreaterThan(-1);
++    routerStack.splice(handlerAt, 0, markerLayer!);
+     const listening = await listen(app);
+     server = listening.server;
+     port = Number(listening.base.split(':').pop());
+diff --git a/Blockchain/Dev/services/demo-service/src/__tests__/ks844-demo-service-mounts-no-error-handler.test.ts b/Blockchain/Dev/services/demo-service/src/__tests__/ks844-demo-service-mounts-no-error-handler.test.ts
+new file mode 100644
+index 000000000..acf6b84e4
+--- /dev/null
++++ b/Blockchain/Dev/services/demo-service/src/__tests__/ks844-demo-service-mounts-no-error-handler.test.ts
+@@ -0,0 +1,89 @@
++vi.mock('../utils/logger', () => ({
++  logger: { debug: vi.fn(), info: vi.fn(), warn: vi.fn(), error: vi.fn() },
++  createLogger: () => ({ debug: vi.fn(), info: vi.fn(), warn: vi.fn(), error: vi.fn() }),
++}));
++
++vi.mock('../services/authClient', () => ({
++  authenticatePersona: vi.fn(),
++}));
++
++import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
++
++import { createApp } from '../app';
++
++async function startServer(app: ReturnType<typeof createApp>): Promise<{ url: string; close: () => void }> {
++  return new Promise((resolve_) => {
++    const server = app.listen(0, '127.0.0.1', () => {
++      const addr = server.address();
++      const port = typeof addr === 'object' && addr ? addr.port : 0;
++      resolve_({ url: `http://127.0.0.1:${port}`, close: () => server.close() });
++    });
++  });
++}
++
++const ORIGINAL_ENV = { ...process.env };
++
++beforeEach(() => {
++  process.env.NODE_ENV = 'development';
++  process.env.DEMO_SERVICE_ENABLED = 'true';
++});
++
++afterEach(() => {
++  process.env = { ...ORIGINAL_ENV };
++});
++
++describe('KS-844: demo-service mounts an error handler that answers JSON', () => {
++  it('🔴 KS-844 — an unparseable JSON body answers JSON 400, not an HTML page', async () => {
++    const { url, close } = await startServer(createApp());
++
++    try {
++      const response = await fetch(`${url}/demo-api/health`, {
++        method: 'POST',
++        headers: { 'content-type': 'application/json' },
++        body: '{not json',
++      });
++
++      expect(response.status).toBe(400);
++      expect(response.headers.get('content-type')).toContain('application/json');
++      const body = (await response.json()) as { success: boolean; error: { code: string; message: unknown } };
++      expect(body.success).toBe(false);
++      expect(body.error.code).toBe('BAD_REQUEST');
++      expect(typeof body.error.message).toBe('string');
++    } finally {
++      close();
++    }
++  });
++
++  it('🔴 KS-844 — the response never carries a stack trace or an absolute path', async () => {
++    const { url, close } = await startServer(createApp());
++
++    try {
++      const response = await fetch(`${url}/demo-api/health`, {
++        method: 'POST',
++        headers: { 'content-type': 'application/json' },
++        body: '{not json',
++      });
++
++      const text = await response.text();
++      expect(text).not.toContain('<html');
++      expect(text).not.toContain('    at ');
++      expect(text).not.toContain('/Volumes/');
++      expect(text).not.toContain('/app/');
++    } finally {
++      close();
++    }
++  });
++
++  it('KS-844 control — a well-formed request to /demo-api/health still answers 200 JSON', async () => {
++    const { url, close } = await startServer(createApp());
++
++    try {
++      const response = await fetch(`${url}/demo-api/health`);
++      expect(response.status).toBe(200);
++      const body = await response.json();
++      expect(body).toBeDefined();
++    } finally {
++      close();
++    }
++  });
++});
+diff --git a/Blockchain/Dev/services/demo-service/src/app.ts b/Blockchain/Dev/services/demo-service/src/app.ts
+index 81bc26cb3..dd714042d 100644
+--- a/Blockchain/Dev/services/demo-service/src/app.ts
++++ b/Blockchain/Dev/services/demo-service/src/app.ts
+@@ -19,6 +19,7 @@ import { rejectNulBytes } from '@secuura/shared';
+ 
+ import { createLogger } from './utils/logger';
+ import { requireDemoKey } from './middleware/demoGuard';
++import { errorHandler } from './middleware/errorHandler';
+ import { healthRouter } from './routes/health';
+ import { personaRouter } from './routes/persona';
+ import { stateRouter } from './routes/state';
+@@ -83,5 +84,9 @@ export function createApp() {
+     });
+   });
+ 
++  // KS-844: JSON error envelope, never express's default HTML page (stack
++  // trace + absolute paths). Exported module, not inline — see errorHandler.ts.
++  app.use(errorHandler);
++
+   return app;
+ }
+diff --git a/Blockchain/Dev/services/demo-service/src/middleware/errorHandler.ts b/Blockchain/Dev/services/demo-service/src/middleware/errorHandler.ts
+new file mode 100644
+index 000000000..10528c5be
+--- /dev/null
++++ b/Blockchain/Dev/services/demo-service/src/middleware/errorHandler.ts
+@@ -0,0 +1,39 @@
++/**
++ * =============================================================================
++ * ERROR HANDLER — DEMO SERVICE (KS-844)
++ * =============================================================================
++ * demo-service mounted no error middleware, so any error reaching express (a
++ * raw 0x00 body the JSON parser refuses, a thrown route) was answered by
++ * express's default handler: an HTML page carrying the stack trace and absolute
++ * file paths.
++ *
++ * This answers JSON in the platform's error envelope instead. A 5xx never
++ * carries the thrown message; a 4xx carries the parser's or route's own
++ * message. It is an EXPORTED module rather than an inline `app.use((err, …))`
++ * in app.ts on purpose: the KS-727 class guard (packages/shared
++ * ks727-errorhandler-class-guard.test.ts) forbids a terminal inline handler in
++ * a service entrypoint, and an exported one lands in its corpus 1, where it is
++ * driven across every NODE_ENV with a leak canary.
++ * =============================================================================
++ */
++
++import type { NextFunction, Request, Response } from 'express';
++
++/**
++ * Terminal JSON error middleware. Mounted last in `createApp()`, after the 404
++ * handler. Express recognises error middleware by its four declared
++ * parameters, so the unused `_next` must stay.
++ */
++export function errorHandler(
++  err: Error & { status?: number; statusCode?: number },
++  _req: Request,
++  res: Response,
++  _next: NextFunction,
++): void {
++  const status = err.status ?? err.statusCode ?? 500;
++  const code = status === 400 ? 'BAD_REQUEST' : status === 413 ? 'PAYLOAD_TOO_LARGE' : status >= 500 ? 'INTERNAL_ERROR' : 'REQUEST_ERROR';
++  res.status(status).json({
++    success: false,
++    error: { code, message: status >= 500 ? 'Internal server error' : err.message },
++  });
++}
