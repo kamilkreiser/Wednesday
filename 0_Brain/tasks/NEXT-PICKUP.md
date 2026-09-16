@@ -65,9 +65,12 @@ four repairs in one launch.
    The previous pickup said it could not be found; that was a FALSE ABSENCE from its own search, and it
    left Kam's 15:06 instruction unexecuted for two hours. **But it is not a noticeboard:** it renders
    AGENT MAIL SUBJECTS (`cockpit.html:820`, `[A -> B] rest`), so nothing can be "put on" it except
-   agent-to-agent mail. `send_brief.sh` correctly REFUSED `Datasec/Tuesday` — no such inbox in
-   `fleet/inbox_routing.conf`. Opening one would reverse Kam's 09-14 "do not message Tuesday" and is
-   his call; it is option `channel` on the card.
+   agent-to-agent mail. ⚠ **CORRECTED 19:4x — the rest of this bullet was WRONG when written.**
+   `send_brief.sh` refused `Datasec/Tuesday` because that is **not a key**; the route existed all along
+   (`Tuesday|tuesday-agent@agentmail.to|yes` in `fleet/inbox_routing.conf`, inbox live). **Wednesday
+   reported its own wrong lookup to Kam as a fact about the system.** At 19:41 he asked for exactly that
+   mail; `--to "Tuesday"` sent first try, verified at the destination with a non-empty body. His 09-14
+   "do not message Tuesday" is read as WITHDRAWN for first-run coordination only, narrowly, until wider.
 2. **Kam RULED `grant` on `tuesday-mac-mini-scheduler-full-disk-access` (2026-09-11 15:25) and the card
    carries NO delivery mark.** That is a fact about our paperwork, NOT about his machine. **UNKNOWN from
    this seat, and the instrument that closes it is on the MINI** (`launchctl list`; `~/Library/Logs/
