@@ -277,6 +277,22 @@ nothing was destroyed.
 it and the pane unblocked) and two placeholders (`check mail`, `good night`).** The tap is the
 instrument; the pane reading is not.
 
+## 🛏 HPSM ASKED TO WRAP AND EXIT (2026-09-16 23:4x) — and why it was asked, not killed
+
+HPSM finished everything assigned: pause banner and `:441`, clarification file (57 entries,
+every quote script-checked), the no-fail audit, the VM recovery, and the rebuild plan with its four
+questions — all committed, handover at `5_Project_History/HANDOVER-S48.md`, `79bc33c`. It then sat
+idle, which made `wake_watch` fire correctly every ~3 minutes all night for an agent with nothing to do.
+
+**It was asked to complete any outstanding wrap and EXIT, rather than having its pane killed from
+here.** The pane read was ambiguous about whether anything was still in flight — and a grep meant to
+settle that is exactly the kind whose count this seat's own hook warns about. **The agent knows
+whether it has finished; this seat does not.** That is Kam's SME rule applied to the one decision where
+getting it wrong truncates work.
+
+**If the pane is still open at the next boot, that is fine** — check for a mail saying something was
+unfinished before assuming it ignored the instruction.
+
 ## ✅ FALSE WAKE FIXED at origin `d59cea765` — the signal is TRUSTWORTHY again, do not keep ignoring it
 
 `monitor.sh` reads **"waiting on background subagents" as idle** and wakes the coordinator with
