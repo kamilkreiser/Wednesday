@@ -209,6 +209,33 @@ treats a symptom. The durable fix is a pre-commit check that refuses a `*.sh` wi
 staged at 100644 — `2_Project_Files/fleet/hooks/pre-commit` already exists and is the natural
 home. **It is shared tooling, so propose it to Wednesday rather than adding it unilaterally.**
 
+## 🔴 FIRST THING FOR KAM: "anyone who pays" is impossible on the CURRENT offer type
+
+Card `nexusai-monetisation-model-and-public-registry` is open and is the first thing to put in front
+of him. **NexusAI measured that Microsoft does not let a Solution template charge anything, and a
+Solution template is what is live.** So his requirement *"anyone who pays can deploy"* cannot happen on
+the published offer: today it means *anyone with an Azure subscription*, and a public image removes a
+key rather than widening access. Real pay-to-deploy = a different offer model (Container offer on AKS,
+SaaS, VM) = re-architecture. A Managed application can only charge a management fee.
+
+**Recommendation on the card (theirs and this seat's):** a new dedicated Standard ACR, anonymous pull,
+release images only, digest-pinned, the four credential fields deleted from the wizard. **~US$20/month
+= money = his signature class. The push is his too.** Full paper: NexusAI
+`5_Project_History/2026-09-16_self-contained-package-options.md`, RD-460.
+
+**Two certification facts found, unresolved, both READ-ONLY until he says otherwise:** Microsoft Learn
+says containers are **not supported** for Solution templates — yet 2.1.1 certified; and policy 300.4.7
+requires all deployment artifacts in the zip. NexusAI is establishing which is true and drafting, NOT
+sending, a question to Partner Center support — **contacting them is external comms and Kam's.**
+
+**Proceeding without him:** the three other non-self-contained items (RD-451 demo probe, mail-triage
+default Datasec inboxes, "unless Datasec advises" tooltips — defects against a requirement already
+given), the tier-1 gate on 1470e18, and the rest of the fix order. **Do not create the registry "ready
+for approval" — creating it IS the spend.**
+
+**⏳ 24 September: Partner Center stops serving previously published packages.** Eight days. Downloading
+old packages as evidence needs no permission and cannot be undone later.
+
 ## ⚠ A TYPED-UNSENT LINE SITS AT HPSM's PROMPT (pane %7), 2026-09-16 ~23:00
 
 `yes, start it now with subagents` — typed, never sent. **Not enacted by this seat and it must not
