@@ -209,6 +209,33 @@ treats a symptom. The durable fix is a pre-commit check that refuses a `*.sh` wi
 staged at 100644 — `2_Project_Files/fleet/hooks/pre-commit` already exists and is the natural
 home. **It is shared tooling, so propose it to Wednesday rather than adding it unilaterally.**
 
+## 🌙 OVERNIGHT POSTURE — Kam signed off ~22:50 with *"good luck with getting the project submission ready"*
+
+He has handed the resubmission to this seat. **That is permission to keep working, not permission to
+widen.** Read the two lines below before anything else.
+
+**WHAT PROCEEDS WITHOUT HIM.** Everything up to, but not including, his signature classes: the tier-1
+gate and its verdict; NexusAI's fix order; the options-and-recommendation work on the self-contained
+requirement; package changes in a NEW candidate; HPSM's remaining `:441` edit; both clarification
+files. Usage is not a constraint — this account's cut is 95 and we are at ~70.
+
+**WHAT STOPS AND WAITS, no matter how ready it looks.** A registry **push** (his own 09-12 ruling:
+the registry is one HE names and the push is his signature class); any **resubmission** to Partner
+Center; production; money; external comms; anything irreversible. **The self-contained fix cannot be
+finished without him** — it ends at "here are the options, here is the recommendation". Do not let a
+good night's work talk itself into the last step.
+
+**THE REQUIREMENT THAT NOW GOVERNS THE WHOLE PACKAGE** (Kam, ~22:40, verbatim): *"the zip needs to be
+self contained.  we will not give people access to the repo or keys.  the intended model is that
+anyone who pays can deploy."* So `acrUsername`/`acrPassword` are **defects, not configuration**, and
+the test applies to the WHOLE package — repo URLs, keys, manual steps, documents only we hold.
+
+**HOW TO WORK, because he corrected this seat on it tonight** (~22:40): *"each project agent is very
+capable and should load with the project files … work with them as Subject matter experts. Checking
+yourself is great but you should not do what they should."* **Ask the agent, verify the answer, carry
+it. Do not go and measure inside their project yourself** — this seat did exactly that with the
+marketplace zip and got a worse answer than the agent did, then had to correct Kam.
+
 ## LIVE STATE at 2026-09-16 22:2x — both agents delivered; here is what is open
 
 **HPSM (pane %7)** — DONE and verified: pause banner removed with the subagent standing rule kept,
