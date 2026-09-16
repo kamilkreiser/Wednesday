@@ -30,12 +30,7 @@ SELF_DIR=$(CDPATH= cd -- "$(dirname -- "$0")" && pwd -P)
 PROJECT_DIR=$(CDPATH= cd -- "$SELF_DIR/../.." && pwd -P)
 SEAT="${WED_AGENT:-wednesday}"
 FILE="${USAGE_GATE_FILE:-$PROJECT_DIR/0_Brain/dashboard/data/usage_${SEAT}.json}"
-# USAGE_STOP FILE (2026-09-16 21:1x, Kam panel: "try not to go beyond 40% token allocation"): a tracked
-# fleet/USAGE_STOP whose first line is the cut (digits) sets the default for every launcher, which carry no
-# env. WED_USAGE_STOP still wins; no file (or no digits) = 90 as before. Line 2 = the reason, for the record.
-_USF="${USAGE_STOP_FILE:-$(cd -P "$(dirname "${BASH_SOURCE[0]}")" && pwd)/USAGE_STOP}"
-_USF_CUT="$( [ -f "$_USF" ] && sed -n 1p "$_USF" | tr -dc '0-9' )"
-STOP="${WED_USAGE_STOP:-${_USF_CUT:-90}}"
+STOP="${WED_USAGE_STOP:-90}"
 MAX_AGE_MIN="${USAGE_GATE_MAX_AGE_MIN:-30}"
 MODE="${1:-gate}"
 case "$MODE" in gate|--check) ;; *) echo "usage: usage_gate.sh [--check]" >&2; exit 2 ;; esac

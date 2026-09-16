@@ -91,21 +91,6 @@ STATE="$NIGHT_LOG_DIR/last_run.json"
 RUN_START="$(date '+%F %T')"
 log() { echo "$(date '+%F %T') $*" | tee -a "$LOG"; }
 TMUX_BIN="$(command -v tmux || echo /opt/homebrew/bin/tmux)"
-# G2 SEATS ALLOWANCE (2026-09-16 20:5x, Kam panel 20:40: "while that happens, keep working with the local
-# model ... spin up other local agents"). His 09-14 rule ran Ornith only "when no other agents run"; his
-# newer word runs both at once. A launchd job carries no env, so the allowance is a FILE, and a scoped
-# override carries its own expiry (learnings/2026-09-06): line 1 = expiry as epoch seconds, line 2 = the
-# reason. Past its expiry, missing, or unparseable -> G2 refuses exactly as before. G4 (load) and G5 (memory)
-# still gate every run. Arms: local-model/tests/g2_allow_seats_arms.sh.
-NIGHT_ALLOW_SEATS_FILE="${NIGHT_ALLOW_SEATS_FILE:-$SELF_DIR/ALLOW_SEATS}"
-_g2_allow_seats() {
-  [ -f "$NIGHT_ALLOW_SEATS_FILE" ] || return 1
-  local exp now
-  exp="$(sed -n 1p "$NIGHT_ALLOW_SEATS_FILE" | tr -dc '0-9')"
-  G2_ALLOW_NOTE="$(sed -n 2p "$NIGHT_ALLOW_SEATS_FILE" | cut -c1-160)"
-  now="$(date +%s)"
-  [ -n "$exp" ] && [ "$exp" -gt "$now" ]
-}
 tmuxc() { if [ -n "$NIGHT_TMUX_SOCKET" ]; then "$TMUX_BIN" -L "$NIGHT_TMUX_SOCKET" "$@"; else "$TMUX_BIN" "$@"; fi; }
 
 TICKETS_RUN=0; TICKETS_ATTEMPTED=0; VERDICTS=""
@@ -162,8 +147,6 @@ gates() {
     n="$(echo "$census" | /usr/bin/grep -c . )"
     if [ -z "$foreign" ]; then
       log "GATE G2 panes: $n live pane(s) [$(echo "$census" | cut -d'|' -f1 | tr '\n' ' ')] none foreign — pass"
-    elif _g2_allow_seats; then
-      log "GATE G2 panes: foreign live pane(s): $foreign — ALLOWED by $NIGHT_ALLOW_SEATS_FILE ($G2_ALLOW_NOTE) — pass"
     else
       log "GATE G2 panes: foreign live pane(s): $foreign — REFUSE (other agents run)"; GATE_FAIL="G2-panes"; return 1
     fi
