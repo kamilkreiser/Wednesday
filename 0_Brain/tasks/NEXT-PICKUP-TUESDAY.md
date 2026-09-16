@@ -10,6 +10,15 @@ supersedes: the 2026-09-14 pickup, kept verbatim at NEXT-PICKUP-TUESDAY.md.pre-s
 
 ---
 
+## 🟢 03:05 2026-09-17 — FLOOR EMPTY. NexusAI S62 WRAPPED, scored 0.90, pane closed.
+
+main = `4148f76` (ls-remote read by this seat), CI green on `d6fe307` + `4148f76` per its run ids (relayed).
+Its last turn died on a network error at 02:55; a RESUME mail + tap got the wrap out at 03:04.
+**No Datasec agent is running. Nothing is owed by this seat before morning.** The morning boot does the
+06:00 sweep, then puts the SIX cards below in front of Kam (RD-474 and the registry/monetisation card first),
+and schedules the Partner Center package download (deadline 24 Sep) in daylight.
+Owed to nobody: Wednesday claimed the pre-commit exec-bit guard and the missing rotate liveness verdict (her 15:02Z ANSWER).
+
 ## ⏱️ START HERE — the whole night in twelve lines (written at the 70% checkpoint, 2026-09-16 ~23:2x)
 
 **Kam handed this seat the NexusAI marketplace resubmission and went to bed.** Two Datasec agents are
