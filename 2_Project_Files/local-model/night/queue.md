@@ -124,4 +124,3 @@
 # 13:50 — KS-1011 r2: the brief's fenced block now holds ONLY '+' lines (r1 marked the brief's context line as an addition — the A3d dialect, B3b in the bash tier), and B3b/B3c are now in the RETRY-ONCE trigger.
 # 13:52 — KS-1011 r3: the docker inspect is ONE line now (r2's retry dropped the backslash-continued --format line — the continuation dialect). 14 '+' lines.
 # 13:58 — KS-1011 r4: the test cells are now LITERAL shell in the brief (r3's model invented an 'expect' helper whose third argument was a mutation, so every cell reported FAIL and B5 read green-after as still red — the product hunk was fine).
-KS-1011 input=/Volumes/DevMASTER/WEDNESDAY/2_Project_Files/local-model/night/inputs/bash_1011.json task=/Volumes/DevMASTER/WEDNESDAY/2_Project_Files/local-model/tasks/bash_patch/task.md ctx=49152
