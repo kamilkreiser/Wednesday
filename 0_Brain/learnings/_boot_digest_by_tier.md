@@ -7,7 +7,7 @@ status: live
 
 # Boot digest BY TIER — W whole, M rules-only, every project case a handle
 
-Generated 2026-09-16 20:08 from 173 lesson files (876,529 B). M 33 · MIXED 5 · W 135. 28 project CASE sections inside MIXED files are reduced to one line each: the heading and the path to read it at. W blocks are exactly what the default digest carries; M blocks drop the section index and keep the rules; a P file is a single handle. The CASES behind every rule live only in the lesson files — open one the moment its rule fires.
+Generated 2026-09-16 20:12 from 174 lesson files (881,291 B). M 33 · MIXED 5 · W 136. 28 project CASE sections inside MIXED files are reduced to one line each: the heading and the path to read it at. W blocks are exactly what the default digest carries; M blocks drop the section index and keep the rules; a P file is a single handle. The CASES behind every rule live only in the lesson files — open one the moment its rule fires.
 
 ## The T9 SSD is the master — Wednesday must be fully portable
 `2026-07-31_fully-portable-drive.md` · principle · 2026-07-31 · status: superseded — the "T9 is the master" half by [[2026-08-25_one-drive-devmaster-is-master]] (2026-08-25); the portability principle itself still lives · tier: W
@@ -5790,6 +5790,48 @@ the verb: "going forward" — and here he also named today's set explicitly).
 4. **Expiry:** recorded in [[../tasks/EXPIRING-GRANTS]]; after Sunday the 09-14 night rule and contract return unless he renews.
 
 **Family:** [[2026-09-14_ornith-runs-at-night-in-the-downtime-a-standing-rule]] · [[2026-09-15_ornith-every-issue-gets-a-tooling-or-instruction-fix]] · [[2026-09-14_at-90pct-weekly-usage-no-new-agents-wednesday-plus-local-model]] · [[2026-09-06_a-scoped-override-carries-its-own-expiry]] · [[2026-08-03_go-slow-earn-autonomy]] (rule 5).
+
+
+## A fix authored on one machine is a claim until the other machine runs it
+`2026-09-16_a-fix-authored-on-one-machine-is-a-claim-until-the-other-machine-runs-it.md` · correction · 2026-09-16 · status: live · tier: W
+
+**The lesson:** On 2026-09-16 Wednesday spent a day repairing Tuesday's seat so it would work on the
+Mac mini, and did it well — she found that the two trees had not diverged at all, and correctly
+identified three layers that never travel in git. Every repair was sound *as written*. Within twenty
+minutes of Tuesday actually booting on the mini, four defects surfaced in that same day's work, and
+three of them could only ever have been found by running it on the target machine:
+
+**How to apply:**
+
+1. **Treat "I fixed it for the other seat" as a hypothesis with a named experiment**, not as done. The
+   experiment is: run it on that machine, in that machine's context, and read the output. Until then
+   the correct status is *written and untested*, and saying so is not pessimism — it is the honest
+   state.
+2. **Every literal in a config that names a place is suspect: paths, homes, users, volumes, hostnames,
+   tty and log destinations.** Ask of each one, "is this true on the machine that will run it?" A
+   codebase that has already learned to parameterise one class of pointer is *more* likely to have a
+   straggler in another class, not less — the fix proved the author knew the failure mode, which is
+   why the remaining literal reads as deliberate.
+3. **A green check over an untested mechanism is worse than a red one.** `install_all_jobs.sh --check`
+   said "9 current, 0 missing" across nine jobs that could not run, because it compared the live plist
+   to the template and had no opinion about whether anything executed. When a checker and reality
+   disagree, find out which one is measuring the thing you care about — and prefer a check that
+   observes the mechanism doing its job over one that observes its configuration.
+4. **Fix the layer that hides the diagnosis first.** The Full Disk Access failure (exit 126) had been
+   real since at least 2026-09-14, and was unreadable because the jobs were dying one step earlier at
+   78 with their stderr pointed at a directory that did not exist. Repairing the log path is what made
+   the real failure appear. *Never discard stderr* applies to the path stderr is written to, not only
+   to the `2>/dev/null` at the end of a command.
+5. **When a seat reports back on another seat's work, the disagreements are the payload.** Lead with
+   them. Three of the four above were defects in work shipped hours earlier by a colleague who had
+   asked for exactly this check; reporting them plainly, with the measurement and a positive control
+   beside each, is the deliverable — softening them would have left nine dead jobs behind a green tick.
+
+**The generalisation, and why this is W-tier rather than a project case:** this project keeps
+rediscovering one shape — *a representation preferred over the record*. A tracked tree is a
+representation of a machine. A `--check` is a representation of a mechanism. A config literal is a
+representation of a place. Each is cheap to read and each is right most of the time, which is exactly
+what makes the exceptions expensive. The record is on the machine, and getting to it costs one boot.
 
 
 ## "If something's blocking, move on to the next" — a decision-shaped pool is not an empty pool; a blocked item is skipped, never waited on
