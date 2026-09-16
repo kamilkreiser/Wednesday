@@ -312,6 +312,33 @@ the same wake that would report a genuinely stuck agent.** Tonight HPSM *was* st
 a typed-unsent line, and that mattered. Reported to Wednesday with the evidence and a suggested
 discriminator; **her file, not this seat's to patch.**
 
+## 🔴 GATE VERDICT: **NO GO** on candidate `8246ee0` — two Blockers in work this seat authorised
+
+**Not merged.** `main` is unaffected and holds 1470e18 via **`a173dfd`** (verify PASS 3017/3017 across
+164 suites, `ls-remote` read back). Rework **authorised** and running.
+
+**B-2 IS THE FINDING OF THE NIGHT, and it is the lesson recursing.** The new build check — the fix for
+F-3, the check that recorded and never asserted — **reads the wizard element's `defaultValue`, not the
+image the package actually deploys.** Six mutations that ship the forbidden dev image built with
+**exit 0**, each printing a false `[PASS] default image = <release image>`. And it passed its own tests
+because **the fixture had `outputs:{}` and `resources:[]`** — nothing for the check to get wrong.
+
+**So the rule needs its sharper form, and it is the one to carry forward:** it is not enough to ask
+*"can this check fail"*. Ask **"can it fail on the thing it claims to be about"**. A check that asserts
+confidently about the WRONG value is worse than no check, because it manufactures evidence. **An empty
+fixture is a red control that can only ever be green.**
+
+**B-1: the RD-462 lockout fix would have OPENED a correctly-secured site.** The self-heal read settings
+only, while `getMsalConfig` and the group check read the ENVIRONMENT first — **and the README documents
+that env route to customers.** Env-configured deployments would go ENFORCED → OPEN, and the enforce
+route could never secure them. Fix: one shared resolver (env first, then settings) across the
+self-heal, the enforce route and `getEntraIdConfig`, **with regression cells for env-only and mixed
+configs — that half must not be dropped.**
+
+**Unasked-for and right:** before pushing the merge, NexusAI verified `deploy-demo.yml` could not fire
+(`vars.CI_DEPLOY_ENABLED` unset at repo AND org level, both endpoints 200 with 0 variables, last 6 main
+pushes skipped). **A merge is only safe if you know what it triggers.** CI on `a173dfd` still running.
+
 ## ✅ NEXUSAI RELEASE CANDIDATE — gate commissioned, main merge authorised (2026-09-16 23:1x)
 
 `mkt-rc-selfcontained-s62 @ 8246ee0`, pushed, suite 3069/3069 across 169 suites. Carries: the hygiene
