@@ -1,0 +1,64 @@
+git_read 2026-09-17 01:28:30 AEST
+73d3fcb902d2a78fe68a4349903ff6c6bd24d4d5	refs/heads/develop
+6ec0cb19834407887daa7bf5994f2da169abd30e	refs/heads/feature/ks-864-f1-portal-env-var-cells
+dd7086d5aa574285beffc515f9371a438621f25d	refs/pull/1008/head
+6ec0cb19834407887daa7bf5994f2da169abd30e	refs/pull/1009/head
+cat-file head: commit develop: commit
+6ec0cb19834407887daa7bf5994f2da169abd30e 0308b7a0447a2c01c12aad358c9b4d04a5178210 Kam Kreiser Thu Sep 17 01:20:01 2026 +1000 KS-864: pin each portal's env-var arm in and out of staging (QA gate F-1007-1); P-1007-1 type fixes
+0308b7a0447a2c01c12aad358c9b4d04a5178210 93629700c3d219c1d8ca61d69150bb9b623fc1be kksecura Thu Sep 17 01:12:53 2026 +1000 KS-864 (parts A+B): drop the dead secuura-staging estate from system-status.ts's URL resolution (#1007)
+93629700c3d219c1d8ca61d69150bb9b623fc1be 40fe4db6963cd11dba06bd46e0b00af39e68ef3a kksecura Thu Sep 17 00:41:30 2026 +1000 KS-1073: the statusless on-chain carve-out is tier-1 only (verify predicate) (#1005)
+73d3fcb902d2a78fe68a4349903ff6c6bd24d4d5 0308b7a0447a2c01c12aad358c9b4d04a5178210 kksecura Thu Sep 17 01:15:36 2026 +1000 KS-844: demo-service answers errors as JSON through an exported errorHandler (TIER 1: registers it in the KS-727 guard, moves the KS-832 marker) (#1006)
+0308b7a0447a2c01c12aad358c9b4d04a5178210 93629700c3d219c1d8ca61d69150bb9b623fc1be kksecura Thu Sep 17 01:12:53 2026 +1000 KS-864 (parts A+B): drop the dead secuura-staging estate from system-status.ts's URL resolution (#1007)
+93629700c3d219c1d8ca61d69150bb9b623fc1be 40fe4db6963cd11dba06bd46e0b00af39e68ef3a kksecura Thu Sep 17 00:41:30 2026 +1000 KS-1073: the statusless on-chain carve-out is tier-1 only (verify predicate) (#1005)
+merge-base head develop: 0308b7a0447a2c01c12aad358c9b4d04a5178210
+rev-list develop..head: 1  head..develop: 1
+--- head diff base->head (numstat, raw, no-renames)
+3	4	Blockchain/Dev/services/api-gateway/src/__tests__/ks864a-dead-estate-helper.test.ts
+3	4	Blockchain/Dev/services/api-gateway/src/__tests__/ks864b-dead-estate-portals.test.ts
+80	0	Blockchain/Dev/services/api-gateway/src/__tests__/ks864c-portal-env-vars.test.ts
+:100644 100644 eb6ea8c22 6d119d23d M	Blockchain/Dev/services/api-gateway/src/__tests__/ks864a-dead-estate-helper.test.ts
+:100644 100644 a073703d2 3cfb1da89 M	Blockchain/Dev/services/api-gateway/src/__tests__/ks864b-dead-estate-portals.test.ts
+:000000 100644 000000000 f886bdadf A	Blockchain/Dev/services/api-gateway/src/__tests__/ks864c-portal-env-vars.test.ts
+patch lines      126
+--- develop delta base->develop (numstat)
+5	3	Blockchain/Dev/packages/shared/src/__tests__/ks727-errorhandler-class-guard.test.ts
+14	4	Blockchain/Dev/packages/shared/src/__tests__/ks781-p3-3-body-parser-order.test.ts
+89	0	Blockchain/Dev/services/demo-service/src/__tests__/ks844-demo-service-mounts-no-error-handler.test.ts
+5	0	Blockchain/Dev/services/demo-service/src/app.ts
+39	0	Blockchain/Dev/services/demo-service/src/middleware/errorHandler.ts
+--- commit message head
+KS-864: pin each portal's env-var arm in and out of staging (QA gate F-1007-1); P-1007-1 type fixes
+
+Test only; no product change.
+
+New ks864c-portal-env-vars.test.ts. For NODE_ENV=staging and
+NODE_ENV=development, it sets ISSUER_/VERIFIER_/ADMIN_PORTAL_URL, imports a
+fresh routes/system-status (vi.resetModules in beforeAll), and asserts that
+each portal reports its own var. That is 6 cells. The gate's tamper G-2 (a
+portal url hard-coded to its compose default) compiled and reddened 0 of
+388; each portal's G-2 now reddens exactly that portal's two cells, with
+tsc rc 0 on every tamper row.
+
+P-1007-1 (the #1007 gate's Polish), in ks864a and ks864b:
+- The dead `10_000` second argument to `new Promise` (TS2554) is dropped.
+- The column-0 top-level `await import` (TS1378) moves into beforeAll.
+- The server is typed as express's own listen() return (TS2741).
+Under a type-check that includes tests, the KS-864 files go from 6 errors
+to 0, and the new file adds none.
+
+Co-Authored-By: Claude Opus 5 <noreply@anthropic.com>
+
+--- blobs
+ks864c show rc 0
+100644 blob 6d119d23d71f2e97fd3d48419e46a0a4296d3dd7	Blockchain/Dev/services/api-gateway/src/__tests__/ks864a-dead-estate-helper.test.ts
+100644 blob 3cfb1da89406f67fcd4d1a4e7499adb7b46fd456	Blockchain/Dev/services/api-gateway/src/__tests__/ks864b-dead-estate-portals.test.ts
+100644 blob f886bdadf7065b4a40d7d54b13fa3f70f9cc35cf	Blockchain/Dev/services/api-gateway/src/__tests__/ks864c-portal-env-vars.test.ts
+system-status blob base 956083916a7a1a0bbf16252017cbe8f5f90f6436 head 956083916a7a1a0bbf16252017cbe8f5f90f6436 develop 956083916a7a1a0bbf16252017cbe8f5f90f6436
+api-gateway tree base fc77cc4ac2b28d8286bae7a401bd2c7bfb7af44d develop fc77cc4ac2b28d8286bae7a401bd2c7bfb7af44d
+shared tree base 6028239569407407c2e4a4b107fb97c4d4860f7b develop 89afd4b9d23b3218dfa4eed960bf66c8d0b21c3a
+--- test-file counts
+0308b7a0447a2c01c12aad358c9b4d04a5178210 45
+6ec0cb19834407887daa7bf5994f2da169abd30e 46
+73d3fcb902d2a78fe68a4349903ff6c6bd24d4d5 45
+--- checkout
+checkout HEAD 355d82c8b porcelain 0 config_sha256 e0fa706f4bdae2778a5fe5975676f24459c5a3c6455de4ae85aa286f67632d1a refs 891 worktrees 111

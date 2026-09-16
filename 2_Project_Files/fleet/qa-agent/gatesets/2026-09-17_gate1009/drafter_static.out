@@ -1,0 +1,43 @@
+drafter_static start 03:04:23 AEST
+tsc -p . tree base rc 0 error lines 0
+   including program __tests__ files 45 | ks864a/b/c listed [True, True, False]
+   including rc 2 raw error lines 34 | in ks864 files 4 | distinct by code+file 17
+       src/__tests__/ks864a-dead-estate-helper.test.ts(13,17): error TS1378: Top-level 'await' expressions are only allowed when the 'module' option is set to 'es2022', 'esnext'
+       src/__tests__/ks864a-dead-estate-helper.test.ts(18,131): error TS2554: Expected 1 arguments, but got 2.
+       src/__tests__/ks864b-dead-estate-portals.test.ts(13,17): error TS1378: Top-level 'await' expressions are only allowed when the 'module' option is set to 'es2022', 'esnext
+       src/__tests__/ks864b-dead-estate-portals.test.ts(18,131): error TS2554: Expected 1 arguments, but got 2.
+tsc -p . tree head rc 0 error lines 0
+   including program __tests__ files 46 | ks864a/b/c listed [True, True, True]
+   including rc 2 raw error lines 30 | in ks864 files 0 | distinct by code+file 13
+tsc -p . tree merged rc 0 error lines 0
+   including program __tests__ files 46 | ks864a/b/c listed [True, True, True]
+   including rc 2 raw error lines 30 | in ks864 files 0 | distinct by code+file 13
+base -> head: NEW 0, GONE 4
+   - src/__tests__/ks864a-dead-estate-helper.test.ts(13,17): error TS1378: Top-level 'await' expressions are only allowed when the 'module' option is set to 'es2022', 'esnext'
+   - src/__tests__/ks864a-dead-estate-helper.test.ts(18,131): error TS2554: Expected 1 arguments, but got 2.
+   - src/__tests__/ks864b-dead-estate-portals.test.ts(13,17): error TS1378: Top-level 'await' expressions are only allowed when the 'module' option is set to 'es2022', 'esnext
+   - src/__tests__/ks864b-dead-estate-portals.test.ts(18,131): error TS2554: Expected 1 arguments, but got 2.
+head -> merged: NEW 0, GONE 0
+error codes per tree: {'base': {'TS1378': 2, 'TS18046': 6, 'TS2345': 20, 'TS2554': 2, 'TS2571': 1, 'TS7006': 3}, 'head': {'TS18046': 6, 'TS2345': 20, 'TS2571': 1, 'TS7006': 3}, 'merged': {'TS18046': 6, 'TS2345': 20, 'TS2571': 1, 'TS7006': 3}}
+== positive control: plant `const qaPlanted: number = 'qa';` in ks864c at head; the including program must report TS2322 + TS6133 on ks864c
+   landed: anchor count 1, sha c6394f7de500 -> 1c5041a293f9, markers [('qaPlanted', 1)]
+   rc 2 | ks864c lines ["error TS2322: Type 'string' is not assig", "error TS6133: 'qaPlanted' is declared bu"]
+   restored sha-identical c6394f7de500
+== parser_proof.cjs rc 0
+ks864a-dead-estate-helper.test.ts | it() calls base/head 3 3 identical true | expect() calls 3 3 identical true
+  type-only edit applied to base: transpile identical to base true | source differs true
+  CONTROL runtime edit (port = 1): transpile identical false (must be false)
+  JS lines only in base: ["const router = (await import('../routes/system-status')).default;","    await new Promise((r) => { server = app.listen(0, '127.0.0.1', () => { port = server.address().port; r(); }); }, 10_000);"]
+  JS lines only in head: ["    const router = (await import('../routes/system-status')).default;","    await new Promise((r) => { server = app.listen(0, '127.0.0.1', () => { port = server.address().port; r(); }); });"]
+  base + (type edit, import moved into beforeAll, dead arg dropped) === head source true | transpile equal true
+ks864b-dead-estate-portals.test.ts | it() calls base/head 3 3 identical true | expect() calls 3 3 identical true
+  type-only edit applied to base: transpile identical to base true | source differs true
+  CONTROL runtime edit (port = 1): transpile identical false (must be false)
+  JS lines only in base: ["const router = (await import('../routes/system-status')).default;","    await new Promise((r) => { server = app.listen(0, '127.0.0.1', () => { port = server.address().port; r(); }); }, 10_000);"]
+  JS lines only in head: ["    const router = (await import('../routes/system-status')).default;","    await new Promise((r) => { server = app.listen(0, '127.0.0.1', () => { port = server.address().port; r(); }); });"]
+  base + (type edit, import moved into beforeAll, dead arg dropped) === head source true | transpile equal true 
+eslint head __tests__/ks864a-dead-estate-helper.test.ts errors 0 warnings 0
+eslint head __tests__/ks864b-dead-estate-portals.test.ts errors 0 warnings 0
+eslint head __tests__/ks864c-portal-env-vars.test.ts errors 0 warnings 0
+porcelain head []
+drafter_static end 03:04:41 AEST

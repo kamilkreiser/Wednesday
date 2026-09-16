@@ -1,0 +1,126 @@
+diff --git a/Blockchain/Dev/services/api-gateway/src/__tests__/ks864a-dead-estate-helper.test.ts b/Blockchain/Dev/services/api-gateway/src/__tests__/ks864a-dead-estate-helper.test.ts
+index eb6ea8c22..6d119d23d 100644
+--- a/Blockchain/Dev/services/api-gateway/src/__tests__/ks864a-dead-estate-helper.test.ts
++++ b/Blockchain/Dev/services/api-gateway/src/__tests__/ks864a-dead-estate-helper.test.ts
+@@ -10,12 +10,11 @@ delete process.env.API_GATEWAY_URL;
+ vi.mock('../services/redis', () => ({ getRedisHealth: vi.fn(async () => ({ status: 'healthy' })) }));
+ vi.stubGlobal('fetch', vi.fn(async () => { throw new Error('offline in test'); }));
+ 
+-const router = (await import('../routes/system-status')).default;
+-
+-let server: http.Server; let port = 0;
++let server: ReturnType<ReturnType<typeof express>['listen']>; let port = 0;
+ beforeAll(async () => {
++  const router = (await import('../routes/system-status')).default;
+   const app = express(); app.use('/api/system', router);
+-  await new Promise<void>((r) => { server = app.listen(0, '127.0.0.1', () => { port = (server.address() as any).port; r(); }); }, 10_000);
++  await new Promise<void>((r) => { server = app.listen(0, '127.0.0.1', () => { port = (server.address() as any).port; r(); }); });
+ }, 10_000);
+ afterAll(async () => {
+   await new Promise<void>((r) => server.close(() => r()));
+diff --git a/Blockchain/Dev/services/api-gateway/src/__tests__/ks864b-dead-estate-portals.test.ts b/Blockchain/Dev/services/api-gateway/src/__tests__/ks864b-dead-estate-portals.test.ts
+index a073703d2..3cfb1da89 100644
+--- a/Blockchain/Dev/services/api-gateway/src/__tests__/ks864b-dead-estate-portals.test.ts
++++ b/Blockchain/Dev/services/api-gateway/src/__tests__/ks864b-dead-estate-portals.test.ts
+@@ -10,12 +10,11 @@ delete process.env.ISSUER_PORTAL_URL; delete process.env.VERIFIER_PORTAL_URL; de
+ vi.mock('../services/redis', () => ({ getRedisHealth: vi.fn(async () => ({ status: 'healthy' })) }));
+ vi.stubGlobal('fetch', vi.fn(async () => { throw new Error('offline in test'); }));
+ 
+-const router = (await import('../routes/system-status')).default;
+-
+-let server: http.Server; let port = 0;
++let server: ReturnType<ReturnType<typeof express>['listen']>; let port = 0;
+ beforeAll(async () => {
++  const router = (await import('../routes/system-status')).default;
+   const app = express(); app.use('/api/system', router);
+-  await new Promise<void>((r) => { server = app.listen(0, '127.0.0.1', () => { port = (server.address() as any).port; r(); }); }, 10_000);
++  await new Promise<void>((r) => { server = app.listen(0, '127.0.0.1', () => { port = (server.address() as any).port; r(); }); });
+ }, 10_000);
+ afterAll(async () => {
+   await new Promise<void>((r) => server.close(() => r()));
+diff --git a/Blockchain/Dev/services/api-gateway/src/__tests__/ks864c-portal-env-vars.test.ts b/Blockchain/Dev/services/api-gateway/src/__tests__/ks864c-portal-env-vars.test.ts
+new file mode 100644
+index 000000000..f886bdadf
+--- /dev/null
++++ b/Blockchain/Dev/services/api-gateway/src/__tests__/ks864c-portal-env-vars.test.ts
+@@ -0,0 +1,80 @@
++/**
++ * =============================================================================
++ * KS-864 (QA gate F-1007-1 on PR #1007) — each portal's env var wins, in and
++ * out of NODE_ENV=staging
++ * =============================================================================
++ * #1007 rewrote the issuer, verifier and admin portal URLs in
++ * routes/system-status.ts to `process.env.<X>_PORTAL_URL || '<compose default>'`.
++ * ks864b pins the DEFAULT arm (it deletes all three vars). Nothing pinned the
++ * ENV-VAR arm: the gate's tamper G-2 (issuer url hard-coded to its default)
++ * compiled and reddened 0 of 388 cells.
++ *
++ * The URLs are computed when the module loads, so each block sets the env and
++ * imports a FRESH module (vi.resetModules) inside its beforeAll: once under
++ * NODE_ENV=staging (the arm #1007 added) and once under NODE_ENV=development
++ * (the arm that existed before).
++ * =============================================================================
++ */
++import { describe, it, expect, vi, beforeAll, afterAll } from 'vitest';
++import http from 'node:http';
++import express from 'express';
++
++vi.mock('../services/redis', () => ({ getRedisHealth: vi.fn(async () => ({ status: 'healthy' })) }));
++
++const PORTALS = [
++  { name: 'issuer-portal', envVar: 'ISSUER_PORTAL_URL', value: 'http://issuer.ks864c.example:7001' },
++  { name: 'verifier-portal', envVar: 'VERIFIER_PORTAL_URL', value: 'http://verifier.ks864c.example:7002' },
++  { name: 'admin-portal', envVar: 'ADMIN_PORTAL_URL', value: 'http://admin.ks864c.example:7003' },
++] as const;
++
++const savedEnv = { ...process.env };
++
++function getJson(port: number, path: string): Promise<any> {
++  return new Promise((resolve, reject) => {
++    http.get({ hostname: '127.0.0.1', port, path }, (res) => {
++      let data = '';
++      res.on('data', (c) => (data += c));
++      res.on('end', () => { try { resolve(JSON.parse(data)); } catch (e) { reject(e); } });
++    }).on('error', reject);
++  });
++}
++
++async function portalUrls(port: number): Promise<Record<string, string | undefined>> {
++  const body = await getJson(port, '/api/system/status');
++  const services = Object.values(body.services).flat() as Array<{ name?: string; url?: string }>;
++  return Object.fromEntries(PORTALS.map((p) => [p.name, services.find((s) => s.name === p.name)?.url]));
++}
++
++function describeUnder(nodeEnv: 'staging' | 'development') {
++  describe(`KS-864 — portal env vars win under NODE_ENV=${nodeEnv}`, () => {
++    let server: ReturnType<ReturnType<typeof express>['listen']>;
++    let port = 0;
++
++    beforeAll(async () => {
++      vi.resetModules();
++      vi.stubGlobal('fetch', vi.fn(async () => { throw new Error('offline in test'); }));
++      process.env.NODE_ENV = nodeEnv;
++      for (const p of PORTALS) process.env[p.envVar] = p.value;
++      const router = (await import('../routes/system-status')).default;
++      const app = express();
++      app.use('/api/system', router);
++      await new Promise<void>((r) => { server = app.listen(0, '127.0.0.1', () => { port = (server.address() as any).port; r(); }); });
++    }, 10_000);
++
++    afterAll(async () => {
++      await new Promise<void>((r) => server.close(() => r()));
++      for (const k of Object.keys(process.env)) if (!(k in savedEnv)) delete process.env[k];
++      Object.assign(process.env, savedEnv);
++      vi.unstubAllGlobals();
++    });
++
++    for (const p of PORTALS) {
++      it(`🔴 KS-864 — ${p.name} reports ${p.envVar} under NODE_ENV=${nodeEnv}`, async () => {
++        expect((await portalUrls(port))[p.name]).toBe(p.value);
++      });
++    }
++  });
++}
++
++describeUnder('staging');
++describeUnder('development');

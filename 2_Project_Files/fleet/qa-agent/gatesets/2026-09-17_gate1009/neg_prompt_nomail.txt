@@ -1,0 +1,73 @@
+ultrathink
+
+You are the fleet QA agent running a TIER 2 (through code) gate, ROUND 1, on Secuura/Blockchain PR #1009 (KS-864, Seat A). This PR is the #1007 gate's F-1007-1 follow-up and is test only.
+
+Read your brief FIRST and in full, then plan:
+/Volumes/DevMASTER/WEDNESDAY/2_Project_Files/fleet/qa-agent/briefs/2026-09-17_secuura-1009-ks864-tier2.md
+
+Subject: PR #1009 (KS-864) @ 6ec0cb19834407887daa7bf5994f2da169abd30e. There are 3 files, all in services/api-gateway/src/__tests__:
+- a new ks864c-portal-env-vars.test.ts: 6 cells, one per portal per NODE_ENV (staging, development), each with vi.resetModules and a fresh import;
+- P-1007-1 in ks864a/b: the top-level await import moves into beforeAll, the dead 10_000 Promise argument is dropped, and the server gets express's listen() type.
+
+It is one commit on 0308b7a0447a2c01c12aad358c9b4d04a5178210 (#1007's squash). Develop is 73d3fcb902d2a78fe68a4349903ff6c6bd24d4d5 (#1006's squash; the drafter found 0 api-gateway files). "Part of KS-864": the ticket stays open.
+The #1007 gate report (read F-1007-1, P-1007-1, C-1 and its tamper method):
+/Volumes/DevMASTER/!CODING/Testing Agent MAIN/projects/secuura/reports/2026-09-17-ks864-1007-b28ed490a-tier2-r1/report.md
+Repo:    /Volumes/DevMASTER/!CODING/Secuura/Blockchain/2_Project_Files  (READ-ONLY: git clone --shared by SHA into your own mktemp -d; write verbs there only, from a script file)
+
+A PR is gated at a SHA, not a name. FIRST verify the head at origin (git ls-remote refs/pull/1009/head plus the PR API). If the head moved, STOP and say so in the mail.
+
+You are FINDINGS-ONLY. You never fix, merge, push, deploy, comment, file, tick an ack box or `@` anyone. Linear and GitHub are READ-ONLY to you.
+
+NEVER run a push, the real pre-push hook, or preflight.sh inside the Secuura checkout or any of its worktrees.
+Never enter Seat A's worktree or the #1008 gate's clone (live, pane QA/Secuura-1008). Never touch gatesets/2026-09-17_gate1008/.
+
+NEVER print a credential value. GH_TOKEN and LINEAR_API_KEY are read by NAME inside a script from the Secuura 4_Credentials/.env. They are never echoed or written anywhere.
+
+Loopback only: no docker, no stack, no kintsugi, no demo, no az, never the wallet mnemonic.
+
+Scope is PROPORTIONATE. Kam capped this account at 40% weekly usage and #1007 is already gated. Time-box about 30 minutes, using the brief's priority order.
+Not required: the parity grid, the real-app probe, Schemathesis, Akto, Playwright, k6, any stack, preflight legs 3/4/8, and the packages/shared suite. Say so under NOT TESTED.
+
+Eight things you must not miss (the brief has drafter-measured predictions for each):
+
+1. F-1007-1's red-proof, re-derived: G-2 issuer, verifier and admin, each on the WHOLE api-gateway suite. On every row: project tsc rc (C-1), text anchor count 1, sha256 restore, numFailedTests AND numPendingTests read.
+   Each must red exactly its portal's two ks864c cells (staging + development) and nothing else.
+   Add at least ONE tamper of your own aimed at the cells' SETUP (env set after import, or vi.resetModules removed, alone and together with a development-only regression) and rule whether the cells observe a fresh module or are vacuous.
+   Drafter: removing vi.resetModules hides a development-only regression (0 reds vs 1).
+
+2. Coverage honesty: the cells pin the env-var arm under staging and development only. State the residual for production / test / unset / dev / demo (drafter: a production-only regression reds 0), the empty-string arm (|| -> ?? reds 0), and the default arm outside staging. A residual is not necessarily a finding.
+
+3. P-1007-1 is behaviour-neutral for the cells:
+   - by parser: a transpile compare with a control, and it()/expect() identity base vs head;
+   - by the whole-suite counts;
+   - by showing the ks864a/b cells are still live (re-run #1007's S-A -> 2 reds).
+   The typing change must be shown type-only.
+
+4. Including tsc: prove inclusion with --listFilesOnly and plant a positive control. The seat claims 53 -> 47 overall, KS-864 files 6 -> 0 (with TS2741 x2), and the new file adds 0.
+   The drafter measured 34 -> 30, 4 -> 0, and 0 TS2741. Find which program is right and state yours verbatim.
+
+5. Env leakage: are NODE_ENV and the three *_PORTAL_URL vars restored in afterAll? Use a probe WITH a control that removes the restore. Does a whole-suite run as configured (read the effective pool and isolate settings) show any cross-file leak?
+
+6. Merged tree: head merged with CURRENT develop (73d3fcb90 or the then-current develop, judged by content) in your own clone. Run the suites on base 0308b7a04, head and merged, naming each tree (drafter: 45/391, 46/397, 46/397).
+
+7. linkKind: attachmentsForURL(pull/1009) must be exactly KS-864 "contributes". Re-read it immediately before the mail. Any closing phrase naming any ticket (body, title, commit message, comments) is a Major. Never write.
+
+8. File-disjointness from #1008 and every other open PR, by the PR files API.
+
+Your tool shell's grep may be a function: use /usr/bin/grep -i with a same-file positive control.
+zsh: no PIPESTATUS (write rc=$? on its own line), and never begin a line with `====`.
+Never `cd` in your own tool calls.
+Quote the Secuura checkout's porcelain count, .git/config sha256, for-each-ref count and worktree count at start and at close.
+Never rm. Use a fresh mktemp -d per attempt and quarantine scratch files by rename.
+Do no memory maintenance of your own project's memory store inside this session.
+
+Report FOUND / TESTED / HOW, with controls, and state what you did NOT test at the same prominence. Write the report to:
+/Volumes/DevMASTER/!CODING/Testing Agent MAIN/projects/secuura/reports/2026-09-17-ks864-1009-6ec0cb198-tier2-r1/
+Verdict: GO, GO WITH FINDINGS, or NO GO, on 6ec0cb19834407887daa7bf5994f2da169abd30e and on the merged tree (name the develop SHA).
+
+REPORT YOUR VERDICT to wednesday-agent@agentmail.to when the pass is complete. Your pane holds ~19 lines of alternate screen with no scrollback, so a verdict that stays in the pane is one pane-close from being lost. The verdict MAIL is the END STATE and the wait signal.
+Subject:
+[QA -> Wednesday] TIER 2 GATE #1009 (KS-864) 6ec0cb198 — <GO | GO WITH FINDINGS | NO GO>
+
+Sending: the QA project has no send_brief.sh of its own. The brief's VERDICT DESTINATION names the path that worked: the AgentMail API from coagent@agentmail.to (POST https://api.agentmail.to/v0/inboxes/coagent@agentmail.to/messages/send), with AGENTMAIL_API_KEY read by NAME from /Volumes/DevMASTER/WEDNESDAY/4_Credentials/.env and never echoed.
+Confirm the API answered 2xx and quote the message id in your final pane line. Timestamps in the mail come from `date`, never estimated.

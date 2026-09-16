@@ -1,0 +1,33 @@
+drafter_run start 01:33:44 AEST
+01:33:46 AEST suite_base                         tree base  pkg gw     rc 0 FILES 45 TESTS 391 passed 391 failed 0 pending 0 failed_suites 0 success True secs 2.2 suite_msgs 0
+01:33:49 AEST suite_head                         tree head  pkg gw     rc 0 FILES 46 TESTS 397 passed 397 failed 0 pending 0 failed_suites 0 success True secs 2.2 suite_msgs 0
+01:33:51 AEST suite_merged                       tree merged pkg gw     rc 0 FILES 46 TESTS 397 passed 397 failed 0 pending 0 failed_suites 0 success True secs 2.2 suite_msgs 0
+denominator asserted for tamper rows: (46, 397)
+ks864 cells at head: {'ks864a api-gateway falls back to its localhost default under NODE_ENV=staging': 'passed', 'ks864a no served URL names the internal dead estate': 'passed', 'ks864a an explicit env var still wins': 'passed', 'ks864b the issuer portal falls back to its compose default under NODE_ENV=sta': 'passed', 'ks864b no portal URL names the dead estate': 'passed', 'ks864b an explicit env var still wins for a helper-built service': 'passed', 'ks864c issuer-portal reports ISSUER_PORTAL_URL under NODE_ENV=staging': 'passed', 'ks864c verifier-portal reports VERIFIER_PORTAL_URL under NODE_ENV=staging': 'passed', 'ks864c admin-portal reports ADMIN_PORTAL_URL under NODE_ENV=staging': 'passed', 'ks864c issuer-portal reports ISSUER_PORTAL_URL under NODE_ENV=development': 'passed', 'ks864c verifier-portal reports VERIFIER_PORTAL_URL under NODE_ENV=development': 'passed', 'ks864c admin-portal reports ADMIN_PORTAL_URL under NODE_ENV=development': 'passed'}
+pristine sha {'system-status.ts': '12a3287b86a1', 'ks864c-portal-env-vars.test.ts': 'c6394f7de500'}
+head untampered: tsc -p . rc 0 | including-program error lines in ks864 files 0 []
+== ROW Q_setup_resetModules_removed_PLUS_devonly 01:33:54 AEST | PREDICTED reds 0: []
+   landed: anchor count 1, sha 12a3287b86a1 -> 02a89360255f, markers [("=== 'development'", 1)]
+   landed: anchor count 1, sha c6394f7de500 -> 0beab56025c7, markers [('vi.resetModules();', 0)]
+01:34:00 AEST t_Q_setup_resetModules_removed_PLUS_devonly tree head  pkg gw     rc 0 FILES 46 TESTS 397 passed 397 failed 0 pending 0 failed_suites 0 success True secs 2.4 suite_msgs 0
+   tsc -p . rc 0 | including ks864 error lines 0 []
+   denominator (46, 397) asserted True | failed 0 pending 0 | reds 0 | MATCHES PREDICTION True | kinds []
+   restored sha-identical c6394f7de500
+   restored sha-identical 12a3287b86a1
+== ROW Q_setup_resetModules_removed_alone 01:34:00 AEST | PREDICTED reds 0: []
+   landed: anchor count 1, sha c6394f7de500 -> 0beab56025c7, markers [('vi.resetModules();', 0)]
+01:34:07 AEST t_Q_setup_resetModules_removed_alone tree head  pkg gw     rc 0 FILES 46 TESTS 397 passed 397 failed 0 pending 0 failed_suites 0 success True secs 2.3 suite_msgs 0
+   tsc -p . rc 0 | including ks864 error lines 0 []
+   denominator (46, 397) asserted True | failed 0 pending 0 | reds 0 | MATCHES PREDICTION True | kinds []
+   restored sha-identical c6394f7de500
+01:34:09 AEST t_T0_after                         tree head  pkg gw     rc 0 FILES 46 TESTS 397 passed 397 failed 0 pending 0 failed_suites 0 success True secs 2.5 suite_msgs 0
+== RED-BEFORE-GREEN: ks864c alone on head with system-status.ts = the pre-#1007 blob 5b39da2ee (93629700c); PREDICTED 3 staging reds, 3 development green
+   landed pre-#1007 blob, sha ea11a6e37a82
+01:34:10 AEST rbg_ks864c_on_pre1007              tree head  pkg gw     rc 1 FILES 1 TESTS 6 passed 3 failed 3 pending 0 failed_suites 2 success False secs 1.1 suite_msgs 0
+    NOT-PASSED failed __tests__/ks864c-portal-env-vars.test.ts :: KS-864 — portal env vars win under NODE_ENV=staging 🔴 KS-864 — issuer-portal reports ISSUER_PORTAL_URL under NODE_ENV=staging | AssertionError: expected 'https://secuura-staging-issuer.ashypo…' to be 'http://issuer.ks864c.example:7001' // Object.is equality
+    NOT-PASSED failed __tests__/ks864c-portal-env-vars.test.ts :: KS-864 — portal env vars win under NODE_ENV=staging 🔴 KS-864 — verifier-portal reports VERIFIER_PORTAL_URL under NODE_ENV=staging | AssertionError: expected 'https://secuura-staging-verifier.ashy…' to be 'http://verifier.ks864c.example:7002' // Object.is equality
+    NOT-PASSED failed __tests__/ks864c-portal-env-vars.test.ts :: KS-864 — portal env vars win under NODE_ENV=staging 🔴 KS-864 — admin-portal reports ADMIN_PORTAL_URL under NODE_ENV=staging | AssertionError: expected 'https://secuura-staging-admin.ashypon…' to be 'http://admin.ks864c.example:7003' // Object.is equality
+   reds ['admin-portal reports ADMIN_PORTAL_URL under NODE_ENV=staging', 'issuer-portal reports ISSUER_PORTAL_URL under NODE_ENV=staging', 'verifier-portal reports VERIFIER_PORTAL_URL under NODE_ENV=staging']
+   restored sha-identical 12a3287b86a1
+porcelain head (farm lines excluded) []
+drafter_run end 01:34:10 AEST
