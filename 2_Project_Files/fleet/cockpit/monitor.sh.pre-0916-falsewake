@@ -30,10 +30,6 @@ SPEAK="$PROJECT_DIR/2_Project_Files/voice/speak.sh"
 TMUX_BIN="$(command -v tmux || echo /opt/homebrew/bin/tmux)"
 SESSION="fleet"
 INTERVAL=60; STALL_MIN=10; ONCE=0; TEST_DEATH=""
-# Waiting-on-subagents (2026-09-16, same fix as wake_watch.sh leg (b); keep WAIT_RE in step).
-SUBAGENT_WAIT_MIN="${WAKE_WATCH_SUBAGENT_WAIT_MIN:-60}"
-WAIT_RE='^[^[:alnum:]]*waiting[[:space:]]+(for|on)[[:space:]]+[0-9]+[[:space:]]+(background[[:space:]]+)?(sub-?)?agents?[[:space:]]+to[[:space:]]+finish'
-TURN_RE='^[^[:alnum:]]*[A-Z][^[:space:]]*ed for [0-9]+(\.[0-9]+)?[hms]|· done [0-9]{1,2}:[0-9]{2}|…[[:space:]]*\([0-9]'
 
 while [ $# -gt 0 ]; do case "$1" in
   --interval) INTERVAL="$2"; shift 2;;
@@ -215,21 +211,7 @@ check() {
       # (status bar shows "N shell(s)") are healthy holding patterns, not
       # input-waits — e.g. a CI watcher (false-fired 2026-08-05 07:27).
       # STALL still applies: a dead bg shell eventually stops changing output.
-      # WAITING ON SUBAGENTS (2026-09-16): "✻ Waiting for N background agents to finish"
-      # as the LAST turn-status line = the turn is parked behind working subagents, and
-      # the pane text legitimately does not change — so the INPUT predicate below read it
-      # as "waiting on input" (the same defect wake_watch.sh's idle leg had). Not INPUT;
-      # but bounded: unchanged past SUBAGENT_WAIT_MIN it is a STALL worth a look.
-      local wtail wln tln
-      wtail=$(printf '%s\n' "$content" | grep -v '^$' | tail -20)
-      wln=$(printf '%s\n' "$wtail" | LC_ALL=C grep -naiE "$WAIT_RE" | tail -1 | cut -d: -f1)
-      tln=$(printf '%s\n' "$wtail" | LC_ALL=C grep -naE "$TURN_RE" | tail -1 | cut -d: -f1)
-      if [ -n "$wln" ] && [ "$wln" -gt "${tln:-0}" ]; then
-        clear_flag INPUT "$name"
-        if [ "$quiet" -ge "$SUBAGENT_WAIT_MIN" ]; then
-          alert STALL "$name" "waiting on background subagents with no change for ${quiet}m — check the pane (a subagent or the lock it queues on may be hung)"
-        fi
-      elif printf '%s' "$content" | grep -qE '[0-9]+ shells? (still running)?|· [0-9]+ shell'; then
+      if printf '%s' "$content" | grep -qE '[0-9]+ shells? (still running)?|· [0-9]+ shell'; then
         clear_flag INPUT "$name"
       # INPUT: quiet AND showing an interactive prompt pattern
       elif printf '%s' "$content" | grep -qE 'esc to interrupt|Do you want|y/n\)|❯|permission|(A|a)llow.*\?' && [ "$quiet" -ge 2 ]; then

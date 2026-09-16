@@ -8,10 +8,6 @@
 #   (a) MAIL: a new message lands in wednesday-agent@ (timestamp > baseline), or
 #   (b) PANE: an agent pane (not wednesday/fleet-monitor) sits idle at a
 #       prompt with unchanged content for STABLE_N consecutive samples, or
-#       (2026-09-16) waits on background subagents with unchanged content past
-#       WAKE_WATCH_SUBAGENT_WAIT_MIN (default 60) — a wait is WORKING, not idle,
-#       and a turn-ended pane whose only busy marker is a monitor/shell footer is
-#       HOLDING, not frozen-busy (both were false wakes; see the leg below), or
 #   (c) CTX: any Claude pane's statusline ctx% crosses a working-rhythm §2
 #       threshold — 50% admission gate + checkpoint, 65% mechanical tails
 #       only (added 2026-08-10, WED-84 rotation build; taps are questions
@@ -40,7 +36,7 @@ FLEET="${WAKE_WATCH_TMUX_SESSION:-fleet}:0"
 CTX_STATE="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)/state"
 mkdir -p "$CTX_STATE"
 # markers older than 3 days belong to dead pane generations — prune quietly
-find "$CTX_STATE" \( -name 'ctx_fired_*' -o -name 'idle_ack_*' -o -name 'wait_since_*' \) -mtime +3 -delete 2>/dev/null
+find "$CTX_STATE" \( -name 'ctx_fired_*' -o -name 'idle_ack_*' \) -mtime +3 -delete 2>/dev/null
 # ── SEAT RESOLUTION (hoisted above the loop 2026-09-10, Kam's ruling
 # "parameterise — make it agent-aware, Wednesday's behaviour byte-identical",
 # card wed-wakewatch-hardcodes-wednesday-inbox-and-pane).
@@ -211,85 +207,7 @@ except Exception: print('')" 2>/dev/null)
     # ("ctx:NN%…") and the footer ("← N agents"), so no always-busy hazard.
     ff="$STATE_DIR/f_$key"
     fcnt=$(cat "$ff" 2>/dev/null || echo 0)
-    # IDLE-ACK read hoisted above the branches (2026-09-16) so the subagent-wait
-    # bound below honours the same ack (see the IDLE-ACK block further down).
-    ackf="$CTX_STATE/idle_ack_$key"
-    ack=$(cat "$ackf" 2>/dev/null || echo none)
-    # ── TURN-STATUS DISCRIMINATORS (2026-09-16, falsewake fix; arms:
-    # fleet/tests/wake_watch_falsewake_arms.sh). Two measured false-wake classes:
-    #  A. WAITING ON SUBAGENTS. The turn parks at an EMPTY prompt showing
-    #     "✻ Waiting for 4 background agents to finish" and the text does not
-    #     change while the subagents work — so the idle leg read it as idle
-    #     (Tuesday, three false wakes on one pane), and with a "· N shells" footer
-    #     the frozen leg read it as a fossil (HPSM-S42 %25, 2026-09-13 15:57).
-    #     Tuesday's discriminator: empty prompt AND no spinner AND no waiting line
-    #     = idle; any one present = working. A wait is WORKING — but not forever:
-    #     unchanged past WAIT_MIN it fires its OWN wake (below).
-    #  B. HOLDING BY DESIGN. Turn ended ("✻ Baked for 10s · done 9:59 pm · 1 monitor
-    #     still running"), empty prompt, an inbox Monitor alive — the footer
-    #     "· 1 monitor ·" matched the busy regex and the frozen leg fired on a pane
-    #     that was simply waiting for a GO (four triages on 2026-09-16). Routed to
-    #     the idle path, where the IDLE-ACK can silence a state already judged.
-    # The LAST turn-status line in the tail is what the turn is doing NOW; an older
-    # one above it is history (a wait that finished, then a reply and a done line,
-    # is idle again). Keep WAIT_RE in step with monitor.sh.
-    WAIT_RE='^[^[:alnum:]]*waiting[[:space:]]+(for|on)[[:space:]]+[0-9]+[[:space:]]+(background[[:space:]]+)?(sub-?)?agents?[[:space:]]+to[[:space:]]+finish'
-    ENDED_RE='^[^[:alnum:]]*[A-Z][^[:space:]]*ed for [0-9]+(\.[0-9]+)?[hms]|· done [0-9]{1,2}:[0-9]{2}'
-    SPIN_RE='…[[:space:]]*\([0-9]'
-    # Markers that render ONLY while a turn is genuinely in flight — any one of
-    # these keeps the pane on the frozen-busy leg exactly as before.
-    STRONG_RE='↓ [0-9.]+k? tokens|to run in background|esc to interrupt|…[[:space:]]*\([0-9]'
-    wl=$(printf '%s\n' "$tail" | LC_ALL=C grep -naiE "$WAIT_RE" | tail -1 | cut -d: -f1)
-    dl=$(printf '%s\n' "$tail" | LC_ALL=C grep -naE "$ENDED_RE" | tail -1 | cut -d: -f1)
-    sl=$(printf '%s\n' "$tail" | LC_ALL=C grep -naE "$SPIN_RE" | tail -1 | cut -d: -f1)
-    wl=${wl:-0}; dl=${dl:-0}; sl=${sl:-0}
-    empty_prompt=0
-    printf '%s\n' "$pline" | grep -qE '^❯[[:space:]]*$' && empty_prompt=1
-    waiting=0
-    [ "$wl" -gt 0 ] && [ "$wl" -gt "$dl" ] && [ "$wl" -gt "$sl" ] && waiting=1
-    holding=0
-    # holding = a background-work FOOTER is the only busy marker (without one the pane
-    # is plain idle and never reaches the frozen leg anyway), empty prompt, and the
-    # last turn-status line is an ENDED line.
-    if [ "$waiting" = 0 ] && [ "$empty_prompt" = 1 ] && [ "$dl" -gt 0 ] && [ "$dl" -gt "$sl" ] \
-       && printf '%s' "$tail" | grep -qE 'shell still running|monitor still running|· [0-9]+ (shell|monitor|task)s?([^A-Za-z]|$)' \
-       && ! printf '%s' "$tail" | LC_ALL=C grep -qE "$STRONG_RE"; then
-      holding=1
-    fi
-    wsf="$CTX_STATE/wait_since_$key"
-    if [ "$waiting" = 1 ]; then
-      cnt=0; fcnt=0
-      # SUBAGENT-WAIT BOUND. The clock lives in CTX_STATE as "<hash> <since> <lastfired>"
-      # because STATE_DIR is erased at every re-arm (~2 min) and could never count
-      # to an hour. Default 60 min: the longest LEGITIMATE silent wait measured in
-      # this fleet is a lane queued on a shared docker.lock taken with
-      # `lockf -t 3600` (HPSM-S42, 2026-09-13) — past 60 min unchanged even that
-      # waiter has timed out and repainted, so the frozen wait is no longer
-      # explained by work. Any subagent finishing changes "Waiting for N" and resets
-      # the clock by itself. Rate limit: re-fires at most once per WAIT_MIN for the
-      # same content, and never for a content hash acked with wake_ack.sh.
-      WAIT_MIN="${WAKE_WATCH_SUBAGENT_WAIT_MIN:-60}"
-      wn=$(printf '%s\n' "$tail" | sed -n "${wl}p" | LC_ALL=C grep -oE '[0-9]+' | head -1)
-      now=$(date +%s)
-      wrec=$(cat "$wsf" 2>/dev/null || true)
-      read -r wh wsince wlast <<< "$wrec"
-      case "${wsince:-}" in ''|*[!0-9]*) wh=none ;; esac
-      case "${wlast:-}" in ''|*[!0-9]*) wlast=0 ;; esac
-      if [ "${wh:-none}" != "$h" ]; then
-        wsince=$now; wlast=0
-        printf '%s %s %s' "$h" "$now" 0 > "$wsf"
-      fi
-      wage=$(( (now - wsince) / 60 ))
-      if [ "$wage" -ge "$WAIT_MIN" ] && [ $((now - wlast)) -ge $((WAIT_MIN * 60)) ] && [ "$ack" != "$h" ]; then
-        # Worded to contain "idle at prompt" ON PURPOSE: the live runner taps only
-        # wake shapes its case statement knows, and a runner re-arm does not reload
-        # that case list. It also has its own case line (arm_wake_watch.sh) from the
-        # next runner start.
-        echo "WAKE: pane '$name' ($pid) waiting on ${wn:-?} subagents with no change for ~$wage min — check the pane: a subagent or the lock it queues on may be hung (the turn is parked idle at prompt behind the wait; re-fires every ~$WAIT_MIN min while this exact content holds; wake_ack.sh $pid silences it)" > "$STATE_DIR/fired"
-        # the lastfired stamp is committed only if THIS wake is the one delivered (see the emit below)
-        printf '%s|%s %s %s|(%s)' "$wsf" "$h" "$wsince" "$now" "$pid" > "$STATE_DIR/wait_commit"
-      fi
-    elif [ "$holding" = 0 ] && printf '%s' "$tail" | grep -qE 'shell still running|· [0-9]+ (shell|monitor|task)s?([^A-Za-z]|$)|↓ [0-9.]+k? tokens|to run in background|esc to interrupt'; then
+    if printf '%s' "$tail" | grep -qE 'shell still running|· [0-9]+ (shell|monitor|task)s?([^A-Za-z]|$)|↓ [0-9.]+k? tokens|to run in background|esc to interrupt'; then
       cnt=0
       # FROZEN-BUSY discriminator (consolidation 2026-08-23; class evidence
       # 2026-08-21/22: turn-end stalls at 10+ instances, several wearing the
@@ -305,7 +223,7 @@ except Exception: print('')" 2>/dev/null)
       if [ "$fcnt" -ge "$FROZEN_N" ]; then
         echo "WAKE: pane '$name' ($pid) shows BUSY indicators but content FROZEN ~$((FROZEN_N * INTERVAL / 60)) min — turn likely ENDED (mailed-report/turn-end stall class); check inbox FIRST, then transcript mtime, then detector at the pane" > "$STATE_DIR/fired"
       fi
-    elif [ "$holding" = 1 ] || [ "$empty_prompt" = 1 ] || printf '%s' "$tail" | grep -qE 'Pick or adjust'; then
+    elif printf '%s\n' "$pline" | grep -qE '^❯[[:space:]]*$' || printf '%s' "$tail" | grep -qE 'Pick or adjust'; then
       if [ "$prev" = "$h" ]; then cnt=$((cnt + 1)); else cnt=1; fi
       fcnt=0
     else
@@ -313,10 +231,6 @@ except Exception: print('')" 2>/dev/null)
       fcnt=0
     fi
     printf '%s' "$h" > "$hf"; printf '%s' "$cnt" > "$cf"; printf '%s' "$fcnt" > "$ff"
-    # not waiting now: retire any wait clock, so the next wait starts its own
-    if [ "$waiting" = 0 ] && [ -f "$wsf" ] && [ "$(cat "$wsf" 2>/dev/null)" != "none 0 0" ]; then
-      printf 'none 0 0' > "$wsf"
-    fi
     # IDLE-ACK (2026-09-07): an idle pane that Wednesday has ALREADY adjudicated
     # must not re-fire forever. STATE_DIR is a fresh mktemp -d per invocation and
     # the runner re-arms every ~2 min, so cnt restarts from zero every cycle — a
@@ -329,27 +243,13 @@ except Exception: print('')" 2>/dev/null)
     # ack by itself, so this can never silence a pane that has something to say;
     # it silences only a repeat of a state already judged. Mail and ctx wakes are
     # separate legs and are untouched.
-    # (ackf/ack are read above the branches since 2026-09-16)
+    ackf="$CTX_STATE/idle_ack_$key"
+    ack=$(cat "$ackf" 2>/dev/null || echo none)
     if [ "$cnt" -ge "$STABLE_N" ] && [ "$ack" != "$h" ]; then
-      if [ "$holding" = 1 ]; then
-        echo "WAKE: pane '$name' ($pid) idle at prompt ~$((STABLE_N * INTERVAL / 60)) min — likely waiting on Wednesday (HOLDING: turn ended, only a background monitor/shell is live — check its inbox first; if it is holding by design, wake_ack.sh $pid silences this exact state)" > "$STATE_DIR/fired"
-      else
-        echo "WAKE: pane '$name' ($pid) idle at prompt ~$((STABLE_N * INTERVAL / 60)) min — likely waiting on Wednesday" > "$STATE_DIR/fired"
-      fi
+      echo "WAKE: pane '$name' ($pid) idle at prompt ~$((STABLE_N * INTERVAL / 60)) min — likely waiting on Wednesday" > "$STATE_DIR/fired"
     fi
   done
-  if [ -f "$STATE_DIR/fired" ]; then
-    # Subagent-wait rate limit: stamp lastfired ONLY when that wake is the one
-    # being delivered — a later pane in the same cycle overwrites "fired", and a
-    # stamp for an undelivered wake would silence it for a whole WAIT_MIN.
-    if [ -f "$STATE_DIR/wait_commit" ]; then
-      wcm=$(cat "$STATE_DIR/wait_commit"); wcf=${wcm%%|*}; wcr=${wcm#*|}; wcv=${wcr%|*}; wcp=${wcr##*|}
-      if grep -qF "$wcp" "$STATE_DIR/fired" && grep -qF 'subagents with no change' "$STATE_DIR/fired"; then
-        printf '%s' "$wcv" > "$wcf"
-      fi
-    fi
-    cat "$STATE_DIR/fired"; exit 0
-  fi
+  if [ -f "$STATE_DIR/fired" ]; then cat "$STATE_DIR/fired"; exit 0; fi
   # (c) context-saturation tripwire (working-rhythm §2 — Kam's numbers,
   # adopted 2026-08-10): parse each pane's Claude statusline "ctx:NN%" from a
   # read-only capture; the LAST match in the visible pane is the statusline
