@@ -11,7 +11,8 @@ supersede: replace wholesale at the next pickup; do not append
 
 ## 🔴 FIRST ACTS
 1. `kam_rulings_today.sh` — every line, before any card or brief.
-2. **Check the KS-692 brief** (`night/briefs/KS-692.md`). An agent is writing it; `autostart_on_brief.sh --tier vitest` is ARMED on it and will build, queue and launch by itself. If it landed and ran, read the verdict and write the READY. If the agent refused instead, card it.
+2. ✅ **KS-692 IS ALREADY RUNNING — the autostart did it unattended.** At 15:12 it detected the brief, waited for it to settle (22,023 B), built `code_692.json` on the VITEST tier, queued it and launched the runner with no seat involved. **That is the end-to-end unattended cycle the week's design says this script owes before Monday, completed on a real ticket rather than a fixture.** Read the verdict, source-read the applied diff, write the READY. Kam ruled the change INTERIM — say so in the READY; his `bind-creator` model (card `secuura-ks1116-…`, 09-13) is what eventually applies.
+2b. **The old step 2, if that run failed:** check (`night/briefs/KS-692.md`). An agent is writing it; `autostart_on_brief.sh --tier vitest` is ARMED on it and will build, queue and launch by itself. If it landed and ran, read the verdict and write the READY. If the agent refused instead, card it.
 3. **Read the sync** (tmux `syncleg`, log `/private/tmp/sync_t9d.out`). Then run the **KK_DEV_Local** leg — Kam asked for it at 15:05 and it waits for the T9 leg to finish. Case check already done: no clashes, nothing on that drive that is not on DevMASTER.
 4. Feed Ornith. If nothing is briefable, commission one (see COMMISSIONING).
 
