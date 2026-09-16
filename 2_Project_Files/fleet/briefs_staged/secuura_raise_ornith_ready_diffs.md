@@ -115,3 +115,41 @@ router having vanished.
 ruled `decideTenantAccess` helper is what the `bind-creator` follow-up should reuse, not a live hold.
 KS-539 is `Deployed to UAT` and archived (2026-09-14). KS-621 remains `Backlog` and unruled; **this
 narrowing does not resolve it.**
+
+---
+
+## ⚠ FOUND 2026-09-16 15:3x — TWO READY DIFFS WILL NOT APPLY WITH `patch(1)` AS STORED (formatting, not content)
+
+**Measured, and the frame is stated: over all 81 READY files carrying a ```diff fence, exactly TWO are
+affected.** This is a bounded defect, not a class.
+
+- `READY_KS-1172-A3_ornith35b-q4_JEST-MODIFYINPLACE-THREE-VERBS-PASS-7of7_2026-09-15.diff.md` — line 16
+- `READY_KS-1172-B3_ornith35b-q4_MODIFYINPLACE-THREE-VERBS-PASS-7of7_2026-09-15.diff.md` — line 15
+
+**The shape:** the SECOND file's `--- a/…` header is indented by one space, so it is a *context line
+inside the first hunk* rather than a new file header — and the first hunk's `@@` count includes it.
+De-indenting the header alone therefore breaks the hunk's line count; the fix is to split on the file
+boundary and make both counts consistent.
+
+**Why this matters to whoever raises these:** `patch` fails with a malformed-patch error, which reads
+as a content problem. It is not. The diffs' content passed 7/7 and is correct.
+
+`READY_KS-1172-D3_…` (VOCABULARY.md) is clean and applies.
+
+**Instrument:** a Python scan for `^[ ]--- a/` over the extracted fences of every `READY_*.md` on disk,
+with `^--- a/` as the positive control (every file has ≥1, so the extraction demonstrably works).
+
+## KS-1173 — already produced, and TWO decision-class questions ride with it
+
+The three READY artefacts above ARE KS-1173: B3's own headline reads *"KS-1172 + KS-1173 PART B"*, and
+Kam's 2026-09-15 comment on the ticket says the code and docs halves are written and passing locally
+and that it closes KS-1172 as well. **Do not commission a fresh brief for KS-1173** — a second pass on
+the same three lines is a collision, not a round. Both tickets are still `Todo`: produced, unmerged.
+
+Two questions on KS-1173 are in NONE of the three artefacts and cannot be given to the local model,
+because they need a human ruling rather than a fix:
+1. Does K want a named field for a list of verifiable-credential references on a lifecycle event, or
+   should they ride the existing allow-listed payload keys?
+2. S would anchor `verified` against the **certifier's** K document id with the **verifying** org as
+   issuer org. Is that acceptable to K's ownership model (PS-319 / KS-480), or must a verifier anchor
+   only against a document it owns? **PS-845 is blocked on this one.**

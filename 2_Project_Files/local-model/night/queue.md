@@ -130,3 +130,6 @@
 # 14:44 — KS-1031 r2: the r1 test section was ONE COMMENT — the model refused to transcribe a 179-line test body and wrote a placeholder instead. Body cut to 105 lines, an explicit do-not-summarise block added, and CELL 5 asserts PASS+FAIL == EXPECTED_CELLS (proven to fire).
 # 15:12 — KS-692 queued by autostart_on_brief.sh the moment its brief landed.
 # 15:12 — KS-692 queued by autostart_on_brief.sh the moment its brief landed.
+# 15:32 — KS-1168 queued by autostart_on_brief.sh the moment its brief landed.
+# 15:40 — KS-998 queued by autostart_on_brief.sh the moment its brief landed.
+KS-998 input=/Volumes/DevMASTER/WEDNESDAY/2_Project_Files/local-model/night/inputs/bash_998.json task=/Volumes/DevMASTER/WEDNESDAY/2_Project_Files/local-model/tasks/bash_patch/task.md ctx=49152
