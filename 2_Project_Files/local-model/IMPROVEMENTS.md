@@ -286,3 +286,39 @@ The fixture is now frozen at `tests/fixtures/briefs/KS-1168.md` and reached thro
 - **ARM 3 is a DISCRIMINATING PAIR**: the frozen copy and the live repaired copy, same ticket, same pins,
   **opposite verdicts**. That is stronger than either arm alone — it shows the gate keys on the brief's
   shape and on nothing else about the ticket.
+
+## 2026-09-16 17:57 — KS-1168 round 3: the model emitted a LITERAL `\n` inside a context line (MODEL dialect, w=1)
+
+**Classification: MODEL.** The brief is now correct — the gate passes it, and the repairing agent proved
+all three hunks apply cleanly to the tip exactly once. This failure is the model's own.
+
+**What it emitted**, read from `out.md.checker/patch.diff` at the corrupt position:
+
+```
+     idx++;\n   }
+```
+
+A **literal backslash-n** where a newline belongs, collapsing two context lines into one. `git apply`
+reports `corrupt patch at line 49` — the declared hunk header then counts one line too few and the
+apply fails. The verdict reads as a content failure; it is a transcription one.
+
+**Family:** the escape-literal dialect already in the brief rules — *no `\$` and no `\u` in a `+` line,
+the model doubles the backslash* (KS-887, KS-1133). **New costume:** previously the escape sat in a line
+the BRIEF asked the model to reproduce; here it is in a CONTEXT line the model had to copy through, which
+no brief rule can prevent.
+
+**⚠ The class is NOT established, and the attempt to establish it failed.** A sweep of today's 41
+`patch.diff` files for `\n` was a bad instrument: it matches every legitimate `\n` inside a TypeScript or
+shell string literal (`split('\n')`, `printf '%s\n'`), and the loop also mis-read its own `grep -c`
+output. **So: one confirmed instance, read at source. Nothing is built on this.** If it recurs, the
+accommodation is mechanical and belongs beside the existing dialect handlers (RECOUNT, SPLIT-GROUPS, the
+EOF clamp): split a diff line on a literal `\n` that is not inside a quoted string, then re-count. The
+correct instrument for the class is a scan for `\n` **at a position that breaks the hunk's line count**,
+not anywhere in the body.
+
+**Disposition under Kam's 07:45 rule** (*"If local fails, the task is allocated to a Claude agent. Not
+urgently but when it makes sense"*): KS-1168's first two failures were brief defects and stayed local,
+correctly. **This third one is the model on a correct brief, so the ticket is REALLOCATED to a Claude
+agent** — batched for a Secuura seat or the Sunday raising pass, not a seat opened for it. Kam's ruling
+(`secuura-ks1168-ilike-search-on-encrypted-pii`, option a, EXACT-only search) and the repaired brief carry
+over as the spec; the work is small and fully specified.
