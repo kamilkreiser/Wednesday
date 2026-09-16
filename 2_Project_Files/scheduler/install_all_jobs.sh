@@ -80,10 +80,26 @@ for t in "$JOBS"/*.plist.template; do
   [ -f "$target" ] && [ "$rendered" = "$(cat "$target")" ] && same=1
 
   if [ "$check" = "--check" ]; then
-    if [ "$same" = 1 ] && [ "$loaded" = 1 ]; then
+    # DRIFT: the on-disk plist and what launchd actually LOADED are two different facts, and
+    # until 2026-09-16 this only ever compared the first one. That night all nine of Tuesday's
+    # jobs had correct plists on disk and a STALE in-memory copy, because the fix reached the
+    # files without an unload/load — so this printed "9 current, 0 missing" over jobs still
+    # running the old config and failing EX_CONFIG(78). A check that reads the file instead of
+    # the running system is a check that cannot see the failure it exists for.
+    drift=""
+    if [ "$loaded" = 1 ]; then
+      # plutil, not a grep over XML: the key and its string share a line in these templates,
+      # and a hand-rolled extractor that returns empty would report DRIFT on a healthy job.
+      want_err="$(/usr/bin/plutil -extract StandardErrorPath raw "$target" 2>/dev/null)"
+      have_err="$(launchctl print "gui/$(id -u)/$label" 2>/dev/null | /usr/bin/grep -i 'stderr path' | /usr/bin/sed 's/.*= //' | tr -d ' \t')"
+      if [ -n "$want_err" ] && [ -n "$have_err" ] && [ "$want_err" != "$have_err" ]; then
+        drift=" LOADED-DRIFT(launchd has: $have_err)"
+      fi
+    fi
+    if [ "$same" = 1 ] && [ "$loaded" = 1 ] && [ -z "$drift" ]; then
       printf "  ok       %-16s loaded and matching the template\n" "$job"; current=$((current+1))
     else
-      printf "  MISSING  %-16s on-disk-matches=%s loaded=%s\n" "$job" "$same" "$loaded"; missing=$((missing+1))
+      printf "  MISSING  %-16s on-disk-matches=%s loaded=%s%s\n" "$job" "$same" "$loaded" "$drift"; missing=$((missing+1))
     fi
     continue
   fi
