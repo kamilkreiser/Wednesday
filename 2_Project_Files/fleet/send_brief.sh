@@ -93,6 +93,17 @@ if [ -z "$INBOX" ]; then
   exit 2
 fi
 
+# ── ORNITH STATUS ON EVERY SEND (2026-09-17, ledger w=5 idle-on-a-verdict-turn) ──
+# Five times in one day the local model finished its queue while this seat worked
+# verdicts and GOs, twice with a PASS nobody held. Every such turn sends a mail through
+# this script, so the queue read rides the send. Wednesday's seat only (the queue lives
+# in Wednesday's tree); printed to stderr before any refusal so even a refused send shows
+# it; the status script can never block a send (it always exits 0). Arms:
+# fleet/tests/ornith_status_arms.sh.
+if [ "$SEAT_KEY" = "Wednesday" ] && [ -f "$SELF_DIR/ornith_status.py" ]; then
+  python3 "$SELF_DIR/ornith_status.py" >&2
+fi
+
 TO=""; SUBJECT=""; SUBJECT_FILE=""; BODY_FILE=""; KIND="brief"
 while [ $# -gt 0 ]; do
   case "$1" in
