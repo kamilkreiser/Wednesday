@@ -357,3 +357,8 @@ green under the tamper; 6/6 at the tip; no new red in a `services/auth` baseline
 **The rule this earns:** *when two consecutive single-ticket commissions come back as refusals, stop
 picking tickets and commission the search.* The rejection table is worth as much as the brief — it is the
 only artefact that stops the pool being re-searched from scratch.
+
+### 20:31 — KS-910 r1 + retry FAIL B3b: a one-line edit inside a hard-wrapped COMMENT run lands one line off (bash tier)
+**Cause: BRIEF (a known rule not carried to the bash tier).** The brief asked for ONE `-`/`+` on `:49`, the first line of a three-line wrapped comment sentence (`:49`–`:51`). Both samples wrote the correct `+` line and marked `:50` as `-` instead, the same dialect the 09-15 DOC rule names ("any edit inside a hard-wrapped run is briefed as a whole-run replacement"), meeting the bash tier for the first time. B3b caught it correctly both times; no harness change needed.
+**Fix, where it lives:** brief rewritten as a WHOLE-RUN replacement (3 `-`, 3 `+`, re-wrapped so no `+` line equals a tip line, since B3b refuses re-added tip lines), and the test's CONTROL anchor moved off the edited run to untouched `:47`. Pre-measured before the round: the minus run is unique at the tip, the plus lines are absent at the tip, the brief's own suite reads 2 red / 2 control green at the tip (rc 1) and 4/4 on the hand-fixed copy (rc 0). Queued as r2 = THE ONE REBRIEF under Kam's 09-16 counter; if r2 fails, the ticket goes to Claude.
+**Rule for every brief, all tiers:** a comment or prose edit on any line of a wrapped run replaces the WHOLE run, re-wrapped; a CONTROL cell never anchors on a line inside the run being edited.
