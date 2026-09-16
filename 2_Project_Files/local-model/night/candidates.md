@@ -187,6 +187,61 @@ A CENSUS for the coordinator to brief from, easy → hard (Kam 2026-09-15 16:40 
 - KS-981 — lives only on the frozen #892 branch (updated 2026-09-07)
 
 ## EXCLUDED by predicate — 180
+<!-- REJECTION TABLE (EXCLUDED "names no product file" pool + SET ASIDE re-read), measured 2026-09-16 21:0x–21:31 by the 21:20 search commission — do NOT re-derive these.
+     FITS from that search, all DOCS tier (insert-only), queued 21:31: KS-987 (item 1, DEPLOYMENT-ARCHITECTURE.md after :73), KS-890 (same file after :96), KS-1036 (item 3, DEV-PROCESS.md after :227).
+     No vitest TAMPER-tier fit exists in this pool: every coverage-only ticket in it pins a file in seat A's partition (packages/shared, api-gateway, auth), a jest/python/e2e suite, or a test file as the subject.
+     KS-811   coverage ask spans originate (jest) + api-gateway/src/services/enforcement.ts (seat A) + the social-callback 403s (OAuth surface)
+     KS-812   connectors/whatsapp-bot has no test runner at tip (package.json scripts: build/start/dev only; no node_modules) — no tier grades it; fix shape is a two-way choice
+     KS-1110  fix edits TWO existing test files (systemTest/performance sheddingCeiling.test.ts:29, package_scripts.test.ts:21) + adds a guard; no product line to tamper
+     KS-1115  fix is a new SQL migration (CHECK on anchor_store.status) gated on a live-row census per environment — not gradeable by any tier
+     KS-934   three alternative fix shapes (LIMIT/paging, aggregate deadline, move off the request path) — decision-class
+     KS-896   the subject IS a test file (scripts/__tests__/pre_push_hook_base.test.sh CONTROL) — KS-897 class
+     KS-1140  packages/shared/src/__tests__/ks879-… — raise seat A partition
+     KS-1147  packages/shared/src/__tests__/ks860-… — raise seat A partition
+     KS-1137  both items edit an existing .test.sh; F-4's red needs a host with no /usr/bin/jq — measured /usr/bin/jq present on this host, so no red is producible
+     KS-1134  subject is orchestrate_jobs.test.sh (tamper lives in Blockchain/Testing/ci/orchestrate.sh:119) — KS-897 class
+     KS-1048  the rule text is only in the project-root CLAUDE.md outside the repo (git grep "rebuild local so it stays current" 48e65c435 → 0; project CLAUDE.md:176 → 1); ticket requires both copies
+     KS-1106  frontend verifier UX — no frontend/Playwright checker
+     KS-1131  services/auth test cells — auth surface + seat A partition
+     KS-902   premise contested at tip: action-pins-labelled.sh:55 / bare-path-scripts-executable.sh:56 `cd "$(dirname "$0")/../.."` BEFORE `REPO_ROOT="$(cd ../.. && pwd)"`, so the root IS script-derived; the remaining difference (unchecked cd) needs a wording ruling
+     KS-1010  Playwright e2e + the ticket's own "OPEN QUESTION — do not change any route until this is answered"
+     KS-1039  Playwright e2e (auth-exhaustive.spec.ts registration) — no checker; auth surface
+     KS-982   not on develop — the suite exists only on the frozen #892 branch (the ticket's own ls-tree scope note)
+     KS-1030  needs a real Postgres + a test:migrations redesign
+     KS-990   item 2 already FIXED at tip (PUBLIC_BY_DESIGN_TEMPLATE_IDS gone; PublicByDesignTemplateId is a non-exported type at endpointFalsePositives.ts:80); item 1 blocked on KS-994
+     KS-957   three findings the ticket says are ONE pass over check-shared-relink.sh + its suite (KS-958's file): red-proof cells + a dead clause + prose figures
+     KS-784   cause NOT diagnosed ("Why it fails" not established) + a design requirement in Peter's comment
+     KS-1085  Launch_Claude.command — outside the repo
+     KS-939   launcher boot prompt — outside the repo
+     KS-940   launcher suite — outside the repo
+     KS-655   launcher drift check — outside the repo
+     KS-1136  two design-level items across Blockchain/Testing/jobs 04 + 09 ("the owner's call")
+     KS-738   python (schemathesis run.py) — no python tier; a fix-options list
+     KS-752   python (schemathesis run.py control flow) — no python tier
+     KS-595   a platform-semantics question ("are the defects still live?"), python catalogue
+     KS-699   schema-wide FK design (52 columns) — decision + migrations
+     KS-562   npm install-layout duplicate-instance — environment, not a patch
+     KS-1014  ops recommendation with two alternative shapes — design
+     KS-965   87 sites / 55 files — not one file
+     KS-986   credential docs + demo seeding env decision
+     KS-955   env/bootstrap chain across .env.example + compose + lockout — multi-file, seeding-credential surface
+     KS-1054  api-gateway startup-migrations ordering — seat A partition; needs real Postgres
+     KS-1023  "Filed rather than fixed, deliberately" — schema-authority question across three files
+     KS-1079  demo env flag, "a one-line decision with no owner"
+     KS-956   the gate's fix shape was withdrawn by measurement; decision on numbers
+     KS-761   akto design decision (staleness detection)
+     KS-851   four residues across init.sql / docker init / kyc — multi-file; fix shapes optional
+     KS-947   api-gateway limiter mounts + spec binding — seat A partition
+     KS-766   refactor of the inline single-quoted python block at base-image-watch.sh:795-831 (QA F-14 apostrophe hazard) into a callable + in-script self-test cases; no __tests__ reference for the script
+     KS-1143  packages/shared ks781 guard — seat A partition
+     KS-1144  packages/shared ks781 guard — seat A partition
+     KS-765   a new committed merge-helper feature (four requirements) on the merge gate
+     KS-1138  .github/workflows comment + an ubuntu-only CI red — workflows excluded; red not reproducible on macOS
+     KS-607   an investigation with a semantics ruling in its comments; no fix shape
+     KS-598   decision (re-key vs remove the upsert) in originate routes/verification.ts (jest)
+     set-aside re-read (reason looked stale): KS-849 fix shape "not chosen … wants its own gate" (concurrency); KS-1142 packages/shared tests (seat A); KS-1128 api-gateway startup-migrations (seat A) + real PostgreSQL. All 28 SET ASIDE rows: updatedAt unchanged since recorded (Linear 21:2x).
+     title-level only (ops/decision/feature/security/frontend/systemTest/seat-A, not read in full): KS-263 KS-305 KS-339 KS-528 KS-530 KS-582 KS-583 KS-591 KS-602 KS-603 KS-604 KS-605 KS-636 KS-638 KS-648 KS-651 KS-678 KS-696 KS-709 KS-716 KS-723 KS-725 KS-735 KS-748 KS-758 KS-760 KS-767 KS-768 KS-769 KS-770 KS-772 KS-783 KS-785 KS-829 KS-837 KS-838 KS-846 KS-872 KS-903 KS-919 KS-959 KS-995 KS-996 KS-997 KS-1012 KS-1022 KS-1025 KS-1044 KS-1080 KS-1090 KS-1100 KS-1102 KS-1104 KS-1116 KS-1141 KS-1154 KS-1155 KS-1161
+-->
 - KS-1000 — has a PR attached
 - KS-1003 — auth-shaped title (LAST, Kam 16:40)
 - KS-1005 — auth-shaped title (LAST, Kam 16:40)
