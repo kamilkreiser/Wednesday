@@ -209,25 +209,34 @@ treats a symptom. The durable fix is a pre-commit check that refuses a `*.sh` wi
 staged at 100644 — `2_Project_Files/fleet/hooks/pre-commit` already exists and is the natural
 home. **It is shared tooling, so propose it to Wednesday rather than adding it unilaterally.**
 
-## LIVE — two Datasec agents running, both owe this seat a STATUS
+## LIVE STATE at 2026-09-16 22:2x — both agents delivered; here is what is open
 
-Launched 2026-09-16 21:3x after Kam lifted the block. Panes `%6` Datasec/NexusAI and `%7` Datasec/HPSM.
+**HPSM (pane %7)** — DONE and verified: pause banner removed with the subagent standing rule kept,
+both `wednesday-agent@` lines fixed, both routing tags accepted, commit `fa73832`. It caught two of
+this seat's errors (line 219 was 220; the addendum asserted a fact about ITS launcher taken from a
+file in OUR tree). **Owes:** the `:441` edit (Wednesday→Tuesday on the live billing-flag line; `:442`
+stays as history) and its hash. Rule given for its clarification file: **change instructions, preserve
+history.**
 
-- **NexusAI** — the main job is **Kam's review**: *"get the agent to review things and see what
-  remains to be done on Nexus"*. Wants the RD board counted without silent truncation, in-flight work
-  with no owner, what the submission closes/opens, where the two remaining rulings stand, and a
-  reasoned next-step list. Saved as `pending_plan_<date>.md`. **Told to review and STOP, not execute.**
-  Plus the un-pause merge and the superseded screenshot ruling.
-- **HPSM** — remove the pause banner (KEEPING the subagent standing rule inside it), fix the two
-  `wednesday-agent@` lines, accept both `[Wednesday -> ...]` and `[Tuesday -> ...]` tags.
+**NexusAI (pane %6)** — DONE: RD-399 unpaused, `CLARIFICATIONS.md` created with 37 entries and wired
+into its boot (RD-459), and it answered **"not blocked"** on the HPSM merge-queue note while correctly
+declining to assert HPSM's queue state, which is outside its scope. **GO given** on the tier-1 gate for
+`mkt-round4-onto-main-s60 @ 1470e18`. **Owes:** that gate's verdict and Kam's review of what remains.
 
-**Score the delegation when their STATUS mails land**, and bring Kam the NexusAI review.
+**The gate item added, and it is the lesson of the whole evening:** the 09-15 build manifest RECORDED
+`wizard default containerImage = nexusaidevacrfa39...` at build time. The defect that made the offer
+undeployable was in our own evidence and shipped anyway. **A fact written into evidence that nothing
+asserts on is not a check.** Also flagged: the 2.1.1 package ships a 2.1.0 image tag, and nothing
+checks that either.
 
-⚠ **The live question inside the NexusAI review:** does the SUBMITTED marketplace package still
-default customers to `nexusaidevacrfa39.azurecr.io/nexusai:2.0.0` (a May image with none of rounds
-2-4)? Pre-submission that was a defect; post-submission it is customer-facing. NexusAI is measuring it
-and changing nothing. **If it is still there, it goes straight to Kam — a registry push is his
-signature class and he has never named the registry.**
+**KAM SUBMITTED 2.1.1** (his words to NexusAI, their C-24). That package was already among the ten
+checked — it points at the same closed dev registry. **So the answer is confirmed against the real
+submission, not inferred, and Partner Center is no longer needed for it.**
+
+**PENDING KAM:** (1) the registry name — still the only blocker on a correct package; (2) Azure
+device-code login `P66F33WMH` as `kreiser.org@me.com`, still waiting, for the customer-path deploy;
+(3) Chrome's *Allow JavaScript from Apple Events* still reports OFF, so page content is unreadable
+from this seat; Screen Recording needs a restart and he cannot do it yet.
 
 ## 🔴 NEXUSAI — MEASURED: the submitted offer CANNOT be deployed by a customer
 
