@@ -233,6 +233,32 @@ the same wake that would report a genuinely stuck agent.** Tonight HPSM *was* st
 a typed-unsent line, and that mattered. Reported to Wednesday with the evidence and a suggested
 discriminator; **her file, not this seat's to patch.**
 
+## ✅ NEXUSAI RELEASE CANDIDATE — gate commissioned, main merge authorised (2026-09-16 23:1x)
+
+`mkt-rc-selfcontained-s62 @ 8246ee0`, pushed, suite 3069/3069 across 169 suites. Carries: the hygiene
+merge, RD-461 (no publisher inboxes/signature/tooltip), RD-453 (arm-ttk 32/32), **RD-462 = the F-1
+lockout fix** (red first: 6/9 failing unpatched, green on the fix, lockout reproduced and cleared end
+to end on a local server, recovery documented), and **RD-463 = the F-3 build-script fix.**
+
+**The F-3 control is the thing to remember from tonight:** the NEW build check run against the package
+that actually shipped **exits 1 with 29 checks and 4 failed** — tag 2.1.0 ≠ 2.1.1, no policy at that
+commit, no release registry, and **a live anonymous pull returning HTTP 401.** The OLD script on the
+same commit exits 141 with a truncated manifest. So it is not "the fix works", it is **"the fix would
+have caught this"**, with the control that makes the claim mean something. Including a live pull in a
+build check tests the property a customer depends on rather than our belief about the registry.
+
+**AUTHORISED by this seat under protocol v1.3** (merges sit with the coordinator; production, money,
+external comms and irreversible actions stay Kam's): merge `1470e18 → main`. It publishes nothing —
+the Partner Center upload is a separate manual act and is Kam's. **The candidate merge waits for its
+own gate verdict; the two are not chained.**
+
+**Correction given, and worth repeating to any agent:** NexusAI wrote *"I'm treating that merge as
+covered unless you say otherwise."* Told not to — **an assumption presented as covered is the exact
+shape that put a dev registry into a live listing.** Ask; the answer is one line.
+
+**Still flagged UNPROVEN in everything Kam reads:** the apiVersions. Preflight cannot see them (the
+2099 control passed), so his Marketplace preview test is their first real exercise.
+
 ## 📌 OWNED BY THIS SEAT, DEADLINE 24 SEPTEMBER — download the published Marketplace packages
 
 **Partner Center stops serving previously published packages after 2026-09-24.** NexusAI has local
