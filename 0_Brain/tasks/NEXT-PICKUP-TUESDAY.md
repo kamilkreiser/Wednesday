@@ -260,6 +260,23 @@ long it stays open, how guessable the hostname is, what is reachable while it is
 UI and docs SAY so; reporting, not acting. If they find reachable customer data, an exposed key or a
 pre-setup admin action, that stops and comes to Kam.
 
+## STANDING, fleet-wide (Kam, 2026-09-16 ~22:00) — settled decisions get WRITTEN DOWN by the agent
+
+*"the agent knows. get the agent to make these kinds of notes so its not something we keep coming back
+to. Maybe an agent generated project definition / clarification file"* — said after this seat briefed
+NexusAI on a fact it already held.
+
+Both Datasec agents now carry it as a standing duty: an agent-written clarification file in their own
+tree (`1_Project_Definition/CLARIFICATIONS.md` suggested, path theirs). **The coordinator does not
+write or edit it** — it has to live in their tree to be read at their boot. Contents: intended-but-
+looks-like-a-bug first, settled decisions including what was decided against, Kam's rulings with date
+and words, deliberate limitations, and already-answered questions. Provenance on every entry;
+supersede rather than delete; keep it pruned. Open questions stay tickets; no secrets.
+
+**The coordinator half of this rule:** check what an agent already knows before briefing it, and when
+a question surfaces a second time, get it written down rather than answering it again. Ask for the
+file and the entry, not for the answer.
+
 ## USAGE — this seat has NO 40% cap; that was Wednesday's
 
 Kam, 2026-09-16 21:3x: *"the 40% was only for wednesday and Secuura projects. you are on a different
