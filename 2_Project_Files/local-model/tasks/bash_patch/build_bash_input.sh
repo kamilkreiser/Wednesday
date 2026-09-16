@@ -31,6 +31,12 @@ def show(p):
     r = subprocess.run(["git","-C",src,"show",f"{tip}:{p}"],capture_output=True,text=True)
     if r.returncode: sys.stderr.write(f"build_bash_input: REFUSED — {p} not at {tip}\n"); sys.exit(2)
     return r.stdout
+def try_show(p):
+    """Read p at the tip, or None if it is not there. For OPTIONAL reads only —
+    a path whose absence is a legitimate state (a test file the model will create)."""
+    if not p: return None
+    r = subprocess.run(["git","-C",src,"show",f"{tip}:{p}"],capture_output=True,text=True)
+    return None if r.returncode else r.stdout
 ptext = show(prod); rtext = show(ref)
 if not ref.endswith(".test.sh"): sys.stderr.write("build_bash_input: REFUSED — ref= must be a *.test.sh\n"); sys.exit(2)
 text = open(brief,encoding="utf-8").read()
@@ -68,7 +74,10 @@ inp = {"ticket": {"identifier": ident, "title": text.splitlines()[0].lstrip("# "
        "files": {prod: ptext, ref: rtext}, "tip": tip}
 # 2026-09-16 (KS-1163): a test_file= that EXISTS at the tip is a MODIFY-IN-PLACE test (the vitest tier's shape) —
 # its full content goes into files[] so the model copies context byte-for-byte, and the checker's B3 accepts it.
-ttext = show(tf)
+# 2026-09-16 13:5x — this MUST be the optional read: `show()` EXITS on a missing path, and the whole point of the
+# default (NEW test) mode is a test_file that is NOT at the tip. Written as `show(tf)` it made the new-test path
+# unreachable — build_bash_input refused KS-1011 with "not at <tip>" for a file it was being asked to create.
+ttext = try_show(tf)
 if ttext is not None:
     inp["files"][tf] = ttext; inp["test_mode"] = "modify"
     sys.stderr.write(f"build_bash_input: test_file EXISTS at the tip — MODIFY-IN-PLACE ({len(ttext)} B in files[])\n")
