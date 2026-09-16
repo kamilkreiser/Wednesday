@@ -14,6 +14,7 @@ tier: W
 > *"while that happens, keep working with the local model.  also, as I have signed you into a new account we have context.  you have the approval to spin up other local agents to test, approve, merge and move things forward"*
 
 **Wednesday's reading, stated to him on the panel within the minute (20:4x), with a default of "starting now unless you narrow it":**
+**CONFIRMED by Kam 20:41:47 (panel, verbatim): *"yes.  claude agents"* — reading 1 is his word, not an assumption.**
 1. "Local agents" means **Claude agent seats on this Studio** (the fleet), not the local model. The local model cannot raise a PR, run a gate, or merge.
 2. It **brings forward** the 2026-09-15 16:36 "QA on Sunday night, merge all at once" shape for the held Ornith diffs. It does not cancel it; the grant row in EXPIRING-GRANTS still names Sunday as that grant's end.
 3. **Not covered, because he did not name it:** deploys (kintsugi or demo), anything demo/UAT (Peter's nod), external communication to Peter or Stuart, `.github/workflows` PRs (his `kam-merges` card), and other authors' PRs. The v1.3 signature classes are unchanged.
