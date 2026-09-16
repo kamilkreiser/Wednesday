@@ -303,6 +303,27 @@ nothing was in the pane alone.
 
 **To restart it:** `bash 2_Project_Files/fleet/cockpit/cockpit.sh launch Datasec/HPSM`.
 
+## 🔕 USE `wake_ack.sh` FOR A BY-DESIGN HOLD — do not absorb the wake, and do not ignore it either
+
+`bash 2_Project_Files/fleet/cockpit/wake_ack.sh %pane` (also `--list`, `--clear %pane`). Landed with
+Wednesday's fix; the wake text now names it.
+
+**It acks at a CONTENT HASH**, so it suppresses exactly the state you looked at and **re-fires the
+moment that pane's output changes.** That is the important property: it silences a known hold without
+disabling the signal — the opposite of the "absorb these wakes" instruction this seat had to withdraw
+earlier tonight.
+
+**Used 2026-09-17 00:0x on `%6`** (NexusAI holding while its own suite ran on the combined branch —
+`1 shell still running`, and it had already said it would report when the suite finished). Acked at
+hash `98122d5fb0ae`.
+
+**The test for using it: is the agent waiting on ITSELF (a suite, a builder, a background shell), or
+waiting on YOU?** Ack the first. Answer the second. Check its inbox before deciding, as the wake text
+now tells you to.
+
+*(`--list` currently shows stale entries for panes that no longer exist, e.g. `%7` after HPSM closed.
+Harmless.)*
+
 ## ✅ FALSE WAKE FIXED at origin `d59cea765` — the signal is TRUSTWORTHY again, do not keep ignoring it
 
 `monitor.sh` reads **"waiting on background subagents" as idle** and wakes the coordinator with
