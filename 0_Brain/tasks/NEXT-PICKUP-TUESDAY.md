@@ -359,6 +359,36 @@ the same wake that would report a genuinely stuck agent.** Tonight HPSM *was* st
 a typed-unsent line, and that mattered. Reported to Wednesday with the evidence and a suggested
 discriminator; **her file, not this seat's to patch.**
 
+## 🔵 RE-GATE RUNNING on `b0ec4c2` (GO given 2026-09-17 00:1x) — verdict is the next thing owed
+
+Rework pushed, combined head verifies **PASS 3094/3094 across 169 suites**. Nothing merged.
+
+- **RD-462 (`53ad418`)**: one resolver behind sign-in, group check, enforce, `getEntraIdConfig` and the
+  self-heal; `adminGateRefuses` in setup mode until sign-in exists. **12/17 cells red on `8246ee0`.**
+  B-1 and F-1 closed, F-2 back to ENFORCED.
+- **RD-463 (`b0ec4c2`)**: outputs resolved the way ARM does, every container image and registry server
+  checked, empty/incomplete listings fail. **18/30 cells red on the old script including all of M1–M6**,
+  30/30 green now, M1–M6 kept as permanent cells. **Real 2.1.1 package: exit 1, 37 checks, 6 failed —
+  and the manifest now NAMES WHERE THE IMAGE VALUE CAME FROM**, which is the actual repair of F-3: the
+  old one recorded a value with no provenance, so nothing could act on it.
+
+**Three behaviours to hold agents to, all from this rework:**
+1. **It named what its own fix still cannot see** — dotted section paths, concat/if outputs, second
+   apps, initContainers. Told to carry those as **known limits** in the certification paper, not a
+   to-do list. A fix that ships with its blind spots written down can be reasoned about.
+2. **It re-ran the new check against the REAL shipped package**, not a fixture.
+3. **It did not force-push to tidy a number.** The commit message quotes the builder branch's
+   3086/3086 while the combined head measures 3094/3094; it stated the discrepancy and left history
+   alone. **Never rewrite a record to make a number look tidy** — a commit message made consistent
+   after the fact stops being evidence.
+
+**After the verdict:** PASS → it reports, **this seat rules on the merge; it does not merge on a pass
+alone.** Any Blocker → stop, report, rework (that loop cost ~1h tonight and caught two real defects).
+Then it **stops for the night**; RD-464/RD-465 wait for Kam.
+
+**Main `a173dfd` CI:** Gitleaks success, npm-audit success, deploy-demo skipped (both jobs), Build was
+on its test step at 14:04Z (~55-min run) — conclusion still owed.
+
 ## 🟢 REWORK: B-1 and F-1 CLOSED, proven red-first (2026-09-16 23:4x). RD-463 still with a builder.
 
 **RD-462 rework done and proven.** One resolver `resolveEntraConfig` (env `AZURE_AD_*` first, then
