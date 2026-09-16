@@ -7,7 +7,7 @@ tier: W
 expires: none stated — his words are "for the long term"
 ---
 
-# The local model is PERMANENT and it is the first router stop — Claude agents take what it cannot do, and a task the local model FAILS is reallocated to Claude, not re-briefed at it forever
+# The local model is PERMANENT and it is the first router stop — Claude agents take what it cannot do, and a failed ticket gets ONE rebrief and then goes to Claude (Kam's counter, not Wednesday's judgement call)
 
 **His words, verbatim:**
 > *"On actions and tickets*
@@ -40,6 +40,24 @@ one that changes today's behaviour most.**
    project, a lane that owns those files, the Sunday QA pass), and it is never a reason to leave the
    local model idle in the meantime.
 
+   **THE COUNT, ruled by Kam 2026-09-16 07:57:59Z when asked (verbatim):**
+   > *"Rebriefing once is ok and might generate positive results. Doing it more would be a waste with
+   > diminishing results."*
+
+   **So: original brief + ONE rebrief. A second rebrief is not attempted — the ticket goes to Claude.**
+
+   This SUPERSEDES the reading below (brief-defect-stays-local / model-limit-escalates), which is kept
+   because the reasoning is still useful for diagnosing *why* a round failed — but it is no longer what
+   decides the routing. **His rule is a COUNTER; mine was a judgement call.** A counter cannot drift and
+   needs no diagnosis; a judgement call needs Wednesday to correctly classify every failure, and today
+   proved Wednesday misclassifies them (the KS-1168 hypothesis "interleaved context is hard" was wrong on
+   reading the artefact). **Where a countable rule and a judgement rule give the same answer, prefer the
+   countable one** — that is the transferable half of this exchange.
+
+   **The cost he priced and accepted:** the counter will sometimes escalate a ticket whose second rebrief
+   would have worked. His words are *"diminishing results"* — the coordinator's time reading a third
+   failure costs more than the occasional ticket that would have landed.
+
 ## The distinction Wednesday stated back to him rather than assuming
 
 **Most of today's local "failures" were Wednesday's briefs, not the model.** KS-692 produced a correct
@@ -62,9 +80,13 @@ such — not his word ([[2026-08-16_classification-is-the-field-that-grants-auth
 1. **Every routing decision names which side it fell on and why**, in one clause, in the brief or the
    receipt: *"local — one file, a fix shape the ticket spells out, an in-process test to copy"* or
    *"Claude — needs a real PostgreSQL and a judgement about what to pin"*.
-2. **Keep a FAILURE COUNT per ticket at the local model.** The second genuine model failure on one
-   ticket — after any brief defect has been ruled out and fixed — is the trigger for clause 3, not a
-   third brief. Record the reallocation and its reason on the ticket's row in `night/done.md`.
+2. **COUNT THE ROUNDS, and the count is the whole rule.** Original brief + ONE rebrief. **A third round
+   at the local model is not attempted, whatever the diagnosis says** — the ticket is reallocated and the
+   reason recorded on its row in `night/done.md`. Do not reason your way past the counter: the reasoning
+   is exactly what Kam replaced.
+   *Compliance on the day it was given, measured: KS-1168 original + one repair-rebrief → escalated ✓.
+   KS-1163 (four rounds) and KS-1011 (four rounds) ran that morning, BEFORE the rule — not compliant, and
+   not to be presented as though they were.*
 3. **"When it makes sense" is a real constraint, not a hedge.** Batch reallocated tickets for a Claude
    seat that is already open on that project, or for the Sunday raising pass. Do not open a seat per
    escalated ticket — that is the cost this rule exists to avoid.

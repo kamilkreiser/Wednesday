@@ -7,7 +7,7 @@ status: live
 
 # Boot digest — headline + rules of every lesson (open the file when it fires)
 
-Generated 2026-09-16 17:47 from 173 lesson files (873,935 B). Each block = the lesson's retrieval handle (H1), its frontmatter, the operative paragraph, its section index, and every RULES section verbatim. 8 files carry no rules-shaped section and are included whole. The CASES behind a rule live only in the file: open it the moment the rule fires, or when a diagnosis needs the evidence. `_ledger.md` is read whole beside this digest; `_ledger_archive.md` on demand.
+Generated 2026-09-16 17:59 from 173 lesson files (875,563 B). Each block = the lesson's retrieval handle (H1), its frontmatter, the operative paragraph, its section index, and every RULES section verbatim. 8 files carry no rules-shaped section and are included whole. The CASES behind a rule live only in the file: open it the moment the rule fires, or when a diagnosis needs the evidence. `_ledger.md` is read whole beside this digest; `_ledger_archive.md` on demand.
 
 ## The T9 SSD is the master — Wednesday must be fully portable
 `2026-07-31_fully-portable-drive.md` · principle · 2026-07-31 · status: superseded — the "T9 is the master" half by [[2026-08-25_one-drive-devmaster-is-master]] (2026-08-25); the portability principle itself still lives
@@ -6170,7 +6170,7 @@ sections (open the file for these): The case · Why the 09-15 lesson did not hol
 **Family:** [[2026-09-15_never-idle-the-gatekeeper-widens-the-harness-when-the-pool-runs-dry]] (the parent — this is its second instance, the "decision-shaped pool" costume) · [[2026-09-14_the-coordinator-adds-value-or-it-is-waste-three-duties-not-watching]] · [[2026-09-07_a-classification-list-is-a-representation-not-an-instruction]] (a tier is a list) · [[2026-08-16_an-ask-without-a-default-is-an-indefinite-hold]] (the default fires now, not on Monday) · [[2026-09-02_coo-actionable-tickets-never-wait-for-kam]].
 
 
-## The local model is PERMANENT and it is the first router stop — Claude agents take what it cannot do, and a task the local model FAILS is reallocated to Claude, not re-briefed at it forever
+## The local model is PERMANENT and it is the first router stop — Claude agents take what it cannot do, and a failed ticket gets ONE rebrief and then goes to Claude (Kam's counter, not Wednesday's judgement call)
 `2026-09-16_local-model-is-long-term-and-claude-takes-what-it-cannot-do.md` · grant · 2026-09-16 · status: live
 
 **His words, verbatim:**
@@ -6202,14 +6202,36 @@ sections (open the file for these): The rule, in three clauses · The distinctio
    project, a lane that owns those files, the Sunday QA pass), and it is never a reason to leave the
    local model idle in the meantime.
 
+   **THE COUNT, ruled by Kam 2026-09-16 07:57:59Z when asked (verbatim):**
+   > *"Rebriefing once is ok and might generate positive results. Doing it more would be a waste with
+   > diminishing results."*
+
+   **So: original brief + ONE rebrief. A second rebrief is not attempted — the ticket goes to Claude.**
+
+   This SUPERSEDES the reading below (brief-defect-stays-local / model-limit-escalates), which is kept
+   because the reasoning is still useful for diagnosing *why* a round failed — but it is no longer what
+   decides the routing. **His rule is a COUNTER; mine was a judgement call.** A counter cannot drift and
+   needs no diagnosis; a judgement call needs Wednesday to correctly classify every failure, and today
+   proved Wednesday misclassifies them (the KS-1168 hypothesis "interleaved context is hard" was wrong on
+   reading the artefact). **Where a countable rule and a judgement rule give the same answer, prefer the
+   countable one** — that is the transferable half of this exchange.
+
+   **The cost he priced and accepted:** the counter will sometimes escalate a ticket whose second rebrief
+   would have worked. His words are *"diminishing results"* — the coordinator's time reading a third
+   failure costs more than the occasional ticket that would have landed.
+
 ## How to apply
 
 1. **Every routing decision names which side it fell on and why**, in one clause, in the brief or the
    receipt: *"local — one file, a fix shape the ticket spells out, an in-process test to copy"* or
    *"Claude — needs a real PostgreSQL and a judgement about what to pin"*.
-2. **Keep a FAILURE COUNT per ticket at the local model.** The second genuine model failure on one
-   ticket — after any brief defect has been ruled out and fixed — is the trigger for clause 3, not a
-   third brief. Record the reallocation and its reason on the ticket's row in `night/done.md`.
+2. **COUNT THE ROUNDS, and the count is the whole rule.** Original brief + ONE rebrief. **A third round
+   at the local model is not attempted, whatever the diagnosis says** — the ticket is reallocated and the
+   reason recorded on its row in `night/done.md`. Do not reason your way past the counter: the reasoning
+   is exactly what Kam replaced.
+   *Compliance on the day it was given, measured: KS-1168 original + one repair-rebrief → escalated ✓.
+   KS-1163 (four rounds) and KS-1011 (four rounds) ran that morning, BEFORE the rule — not compliant, and
+   not to be presented as though they were.*
 3. **"When it makes sense" is a real constraint, not a hedge.** Batch reallocated tickets for a Claude
    seat that is already open on that project, or for the Sunday raising pass. Do not open a seat per
    escalated ticket — that is the cost this rule exists to avoid.
