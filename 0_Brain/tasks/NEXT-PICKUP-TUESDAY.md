@@ -21,7 +21,19 @@ in a shared repo where both files exist. Flagged to her in the 20:0x STATUS mail
 
 ## OWED — actions with a named owner, carried until done or withdrawn
 
-1. **KAM — Full Disk Access for `/bin/bash` on this Mac mini. This is the live blocker.**
+1. ~~**KAM — Full Disk Access**~~ — **CLOSED 2026-09-16 20:45. Granted, measured, card marked
+   delivered.** Kam added the row at 20:33: *"it was not there. now added"* — it had been ABSENT,
+   not switched off, which is why six days of "ruled grant" never took effect. Measured, not
+   assumed: the isolated launchd probe went DENIED → **OK** on all three reads, `chatsync` exits 0
+   with 0-byte stderr, and his board reached this seat unaided inside one 60-second cycle.
+   **The trap it hid, in case anything like it recurs:** three jobs still returned EX_CONFIG(78)
+   *after* the grant, because launchd was holding a STALE in-memory plist while the files on disk
+   were already correct — `install_all_jobs.sh` had said "unchanged" and so never reloaded them.
+   Booting all nine out and back in fixed it, and `--check` now reports `LOADED-DRIFT` (559090e08).
+   *Kept here rather than deleted because the failure mode — a fix that reaches the files and never
+   reaches the running system — is the one this seat met three times in one evening.*
+
+1b. **KAM — Full Disk Access for `/bin/bash` on this Mac mini (HISTORICAL — the original entry).**
    He ruled `grant` on card `tuesday-mac-mini-scheduler-full-disk-access` on **2026-09-11 15:25** and
    it was never applied. Do **not** re-card it: the decision is made, the gap is delivery. Asked on
    the panel 2026-09-16 20:06, verified at origin.
