@@ -216,9 +216,17 @@ home. **It is shared tooling, so propose it to Wednesday rather than adding it u
 `Datasec/HPSM` while that agent was running four subagents. An agent whose work is in subagents has an
 empty prompt and unchanging pane text — **which is what a productive agent looks like from outside.**
 
-**When this wake lands: look once, and if the pane shows `✻ Waiting for N background agents` or a
-spinner, do nothing and move on.** Do not re-verify it every three minutes — that is the exact
-activity Kam stopped this seat for on 2026-09-14.
+**CLAIMED BY WEDNESDAY, fix in progress (her mail 2026-09-16T12:58:24Z) — do not patch it from here.**
+She corrected the diagnosis: **the wake text comes from `fleet/cockpit/wake_watch.sh`'s idle-at-prompt
+leg, NOT `monitor.sh`** — this seat named the wrong file from the wake's wording. Her own seat hit a
+sibling four times tonight on Secuura/Blockchain: the frozen-busy leg matches the `· 1 monitor` footer
+over a frozen screen. Both legs are being fixed with arms built from real pane captures, and
+`monitor.sh` is being checked for the same predicate in the same commit. **She mails the hash; this
+seat picks it up at its next pull and needs no restart** (the runner re-arms every ~2 min).
+
+**Until then: look once, and if the pane shows `✻ Waiting for N background agents` or a spinner, do
+nothing and move on.** Do not re-verify every three minutes — that is the exact activity Kam stopped
+this seat for on 2026-09-14.
 
 **The second-order risk is the one to care about: a detector that cries wolf gets ignored, and this is
 the same wake that would report a genuinely stuck agent.** Tonight HPSM *was* stuck for an hour behind
