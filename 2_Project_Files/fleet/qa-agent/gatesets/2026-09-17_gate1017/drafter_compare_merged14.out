@@ -1,0 +1,49 @@
+=== merged14 {"stubUrl": "loopback", "redisAvailable": false, "fakeRedis": false, "audit": false, "scopes": 13, "stages": ["census", "principals", "a4", "keyscope", "erasure", "bare"], "at": "2026-09-16T22:48:32.337Z", "routes": 189, "logged_headers_sent": 0, "logged_degraded": 1, "logged_no_ratelimit_warn": 12, "rejections": ["qa1017 async reject downstream"], "fakeRedisCalls": 0, "bareHits": {"sync": 2, "async": 1, "tenant": 14}, "auditRows": 0}
+routes 189 | classes [(('admin.ts', 'counted-once'), 4), (('admin.ts', 'limiter-absent'), 40), (('audit-export.ts', 'counted-once'), 1), (('audit-export.ts', 'limiter-absent'), 1), (('batch.ts', 'limiter-absent'), 4), (('health.ts', 'counted-once'), 1), (('health.ts', 'limiter-absent'), 4), (('index.ts', 'counted-once'), 7), (('index.ts', 'limiter-absent'), 25), (('notifications.ts', 'counted-once'), 7), (('platform.ts', 'counted-once'), 14), (('platform.ts', 'limiter-absent'), 1), (('proxy.ts', 'counted-once'), 45), (('proxy.ts', 'limiter-absent'), 20), (('verification.ts', 'counted-once'), 13), (('verification.ts', 'limiter-absent'), 2)]
+limited K status triples [((200, 200, 429), 52), ((403, 403, 429), 20), ((201, 201, 429), 8), ((404, 404, 429), 7), ((502, 502, 429), 3), ((400, 400, 429), 2)]
+counted-twice 0
+J/N/I carrying X-RateLimit-Limit 0 []
+forwarded x-tenant-id == key tenant (routes with forwards): {True: 42, False: 19}
+limited routes with request 3 = 429: upstream hits distribution {2: 45, 0: 46, 6: 1}
+   principals {"name": "jwt_email", "statuses": [200, 200, 200, 200], "xrlLimit": [null, null, null, null], "remaining": [null, null, null, null], "fwd": 4}
+   principals {"name": "jwt_wallet", "statuses": [200, 200, 200, 200], "xrlLimit": [null, null, null, null], "remaining": [null, null, null, null], "fwd": 4}
+   principals {"name": "jwt_federated", "statuses": [200, 200, 200, 200], "xrlLimit": [null, null, null, null], "remaining": [null, null, null, null], "fwd": 4}
+   principals {"name": "jwt_social", "statuses": [200, 200, 200, 200], "xrlLimit": [null, null, null, null], "remaining": [null, null, null, null], "fwd": 4}
+   principals {"name": "jwt_jwt", "statuses": [200, 200, 200, 200], "xrlLimit": [null, null, null, null], "remaining": [null, null, null, null], "fwd": 4}
+   principals {"name": "jwt_oauth", "statuses": [200, 200, 200, 200], "xrlLimit": [null, null, null, null], "remaining": [null, null, null, null], "fwd": 4}
+   principals {"name": "jwt_api_key", "statuses": [200, 200, 200, 200], "xrlLimit": ["100", "100", "100", "100"], "remaining": ["99", "98", "97", "96"], "fwd": 4}
+   principals {"name": "jwt_oauth_app", "statuses": [200, 200, 200, 200], "xrlLimit": ["100", "100", "100", "100"], "remaining": ["95", "94", "93", "92"], "fwd": 4}
+   principals {"name": "jwt_API_KEY", "statuses": [200, 200, 200, 200], "xrlLimit": [null, null, null, null], "remaining": [null, null, null, null], "fwd": 4}
+   principals {"name": "jwt_no_authMethod", "statuses": [200, 200, 200, 200], "xrlLimit": [null, null, null, null], "remaining": [null, null, null, null], "fwd": 4}
+   principals {"name": "connector_jwt_as_bearer", "statuses": [200, 200, 200, 200], "xrlLimit": [null, null, null, null], "remaining": [null, null, null, null], "fwd": 4}
+   principals {"name": "test_token_email", "statuses": [200, 200, 200, 200], "xrlLimit": [null, null, null, null], "remaining": [null, null, null, null], "fwd": 4}
+   principals {"name": "test_token_api_key", "statuses": [200, 200, 200, 200], "xrlLimit": ["100", "100", "100", "100"], "remaining": ["99", "98", "97", "96"], "fwd": 4}
+   principals {"name": "api_key_limit2", "statuses": [200, 200, 429, 429], "xrlLimit": ["2", "2", "2", "2"], "remaining": ["1", "0", "0", "0"], "fwd": 2}
+   principals {"name": "unknown_sk_key", "statuses": [401, 401, 401, 401], "xrlLimit": [null, null, null, null], "remaining": [null, null, null, null], "fwd": 0}
+   principals {"name": "non_sk_key_with_jwt_email", "statuses": [200, 200, 200, 200], "xrlLimit": [null, null, null, null], "remaining": [null, null, null, null], "fwd": 4}
+   principals {"name": "no_credential", "statuses": [401, 401, 401, 401], "xrlLimit": [null, null, null, null], "remaining": [null, null, null, null], "fwd": 0}
+   a4 {"name": "rl_absent_w_absent", "spec": {}, "statuses": [200, 200, 200, 200], "xrlLimit": ["100", "100", "100", "100"], "remaining": ["99", "98", "97", "96"], "retryAfter": [null, null, null, null], "fwd": 4}
+   a4 {"name": "rl_null", "spec": {"rateLimit": null, "rateLimitWindow": 60}, "statuses": [200, 200, 200, 200], "xrlLimit": ["100", "100", "100", "100"], "remaining": ["99", "98", "97", "96"], "retryAfter": [null, null, null, null], "fwd": 4}
+   a4 {"name": "rl_0_column_null_via_Number", "spec": {"rateLimit": 0, "rateLimitWindow": 0}, "statuses": [200, 200, 200, 200], "xrlLimit": ["100", "100", "100", "100"], "remaining": ["99", "98", "97", "96"], "retryAfter": [null, null, null, null], "fwd": 4}
+   a4 {"name": "rl_2_w60", "spec": {"rateLimit": 2, "rateLimitWindow": 60}, "statuses": [200, 200, 429, 429], "xrlLimit": ["2", "2", "2", "2"], "remaining": ["1", "0", "0", "0"], "retryAfter": [null, null, "60", "60"], "fwd": 2}
+   a4 {"name": "rl_1000_w3600_column_default", "spec": {"rateLimit": 1000, "rateLimitWindow": 3600}, "statuses": [200, 200, 200, 200], "xrlLimit": ["1000", "1000", "1000", "1000"], "remaining": ["999", "998", "997", "996"], "retryAfter": [null, null, null, null], "fwd": 4}
+   a4 {"name": "rl_neg1", "spec": {"rateLimit": -1, "rateLimitWindow": 60}, "statuses": [429, 429, 429, 429], "xrlLimit": ["-1", "-1", "-1", "-1"], "remaining": ["0", "0", "0", "0"], "retryAfter": ["60", "60", "60", "60"], "fwd": 0}
+   a4 {"name": "rl_1.5", "spec": {"rateLimit": 1.5, "rateLimitWindow": 60}, "statuses": [200, 429, 429, 429], "xrlLimit": ["1.5", "1.5", "1.5", "1.5"], "remaining": ["0.5", "0", "0", "0"], "retryAfter": [null, "60", "60", "60"], "fwd": 1}
+   a4 {"name": "rl_string_2", "spec": {"rateLimit": "2", "rateLimitWindow": 60}, "statuses": [200, 200, 429, 429], "xrlLimit": ["2", "2", "2", "2"], "remaining": ["1", "0", "0", "0"], "retryAfter": [null, null, "60", "60"], "fwd": 2}
+   a4 {"name": "rl_string_abc", "spec": {"rateLimit": "abc", "rateLimitWindow": 60}, "statuses": [200, 200, 200, 200], "xrlLimit": ["abc", "abc", "abc", "abc"], "remaining": ["NaN", "NaN", "NaN", "NaN"], "retryAfter": [null, null, null, null], "fwd": 4}
+   a4 {"name": "rl_true", "spec": {"rateLimit": true, "rateLimitWindow": 60}, "statuses": [200, 429, 429, 429], "xrlLimit": ["true", "true", "true", "true"], "remaining": ["0", "0", "0", "0"], "retryAfter": [null, "60", "60", "60"], "fwd": 1}
+   a4 {"name": "rl_2_w_null", "spec": {"rateLimit": 2, "rateLimitWindow": null}, "statuses": [200, 200, 429, 429], "xrlLimit": ["2", "2", "2", "2"], "remaining": ["1", "0", "0", "0"], "retryAfter": [null, null, "60", "60"], "fwd": 2}
+   a4 {"name": "rl_2_w_neg5", "spec": {"rateLimit": 2, "rateLimitWindow": -5}, "statuses": [200, 200, 200, 200], "xrlLimit": ["2", "2", "2", "2"], "remaining": ["1", "1", "1", "1"], "retryAfter": [null, null, null, null], "fwd": 4}
+   a4 {"name": "rl_2_w_string_abc", "spec": {"rateLimit": 2, "rateLimitWindow": "abc"}, "statuses": [200, 200, 429, 429], "xrlLimit": ["2", "2", "2", "2"], "remaining": ["1", "0", "0", "0"], "retryAfter": [null, null, "NaN", "NaN"], "fwd": 2}
+   a4 {"name": "rl_1_w_0.001s", "spec": {"rateLimit": 1, "rateLimitWindow": 0.001}, "statuses": [200, 200, 200, 200], "xrlLimit": ["1", "1", "1", "1"], "remaining": ["0", "0", "0", "0"], "retryAfter": [null, null, null, null], "fwd": 4}
+   keyscope {"label": "KS1_two_keys_one_connectorId_limits_2_and_5", "steps": [["A", 200, "2", "1"], ["A", 200, "2", "0"], ["A", 429, "2", "0"], ["B", 200, "5", "1"], ["B", 200, "5", "0"], ["B", 429, "5", "0"]]}
+   keyscope {"label": "KS2_keys_without_connectorId_in_different_tenants", "steps": [["X", 200, "2", "1"], ["X", 200, "2", "0"], ["Y", 429, "2", "0"], ["Z1000", 200, "1000", "996"], ["W", 429, "2", "0"]]}
+   keyscope {"label": "KS3_control_distinct_connectorIds_same_ip", "steps": [["P", 200, "2", "1"], ["P", 200, "2", "0"], ["P", 429, "2", "0"], ["Q", 200, "2", "1"], ["Q", 200, "2", "0"]]}
+   erasure {"label": "limit2", "statuses": [201, 201, 429, 429], "codes": [null, null, "RATE_LIMIT_EXCEEDED", "RATE_LIMIT_EXCEEDED"], "xrlLimit": ["2", "2", "2", "2"], "remaining": ["1", "0", "0", "0"], "fwd": 2, "noScopeGraceRole": [201, null, "1", 1]}
+   erasure {"label": "limit1000", "statuses": [201, 201, 201, 201], "codes": [null, null, null, null], "xrlLimit": ["1000", "1000", "1000", "1000"], "remaining": ["999", "998", "997", "996"], "fwd": 4, "noScopeGraceRole": [201, null, "999", 1]}
+   bare {"cell": "A1_sync_throw_limit1", "statuses": [500, 429], "xrl": ["0", "0"], "handlerHits": 1}
+   bare {"cell": "A1_sync_throw_jwt", "statuses": [500], "handlerHitsAfter": 2}
+   bare {"cell": "A1_async_reject_limit1", "statuses": [-1, 429], "codes": ["CLIENT_TIMEOUT", "RATE_LIMIT_EXCEEDED"], "handlerHits": 1, "rejections": 1}
+   bare {"cell": "A2_tenant_key_and_jwt", "key": [200, {"tenant": "t-bare-als", "user": "connector:qa1017-bare-tenant"}], "jwt": [200, {"tenant": "t-bare-jwt", "user": "u-qa1017"}]}
+   bare {"cell": "A2_interleaved_parallel_16", "statusByKey": {"t-il-3": [200, 200, 429, 429, 429, 429, 429, 429], "t-il-100": [200, 200, 200, 200, 200, 200, 200, 200]}, "tenantMismatch": 0, "allowed": 10}
+   bare {"cell": "R3_twice_required_then_optional", "statuses": [200, 200, 429], "remaining": ["1", "0", "0"]}

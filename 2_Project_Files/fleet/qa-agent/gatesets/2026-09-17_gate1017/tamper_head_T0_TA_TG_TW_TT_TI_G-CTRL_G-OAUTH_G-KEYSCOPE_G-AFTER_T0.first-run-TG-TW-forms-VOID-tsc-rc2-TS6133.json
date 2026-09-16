@@ -1,0 +1,216 @@
+[
+ {
+  "row": "T0",
+  "tsc_rc": 0,
+  "void": false,
+  "files": 53,
+  "tests": 432,
+  "failed": 0,
+  "pending": 0,
+  "failed_suites": 0,
+  "reds": [],
+  "decisive": [],
+  "predicted_by": "READY 0",
+  "denominator_ok": true
+ },
+ {
+  "row": "TA",
+  "tsc_rc": 0,
+  "void": false,
+  "files": 53,
+  "tests": 432,
+  "failed": 4,
+  "pending": 0,
+  "failed_suites": 3,
+  "reds": [
+   "ks1195-per-key-rate-limiter-runs-after-authentication.test.ts :: KS-1195: the per-key limiter in the REAL app R1 / A3: a key at 2 per 60 s creating documents is refused 429 from request 3, with Redis unavailable",
+   "ks1195-per-key-rate-limiter-runs-after-authentication.test.ts :: KS-1195: the per-key limiter in the REAL app A1: a refused create answers once and never reaches the handler (2 upstream creates, no double send)",
+   "ks1195-per-key-rate-limiter-runs-after-authentication.test.ts :: KS-1195: the per-key limiter in the REAL app R2: the same ceiling holds on a proxied family (GET /api/anchors), and a refused read is not forwarded",
+   "ks1195-per-key-rate-limiter-runs-after-authentication.test.ts :: KS-1195: placement inside the real authenticateToken R3: a chain that authenticates twice counts the request once (2 allowed, then 429)"
+  ],
+  "decisive": [
+   "AssertionError: expected [ 201, 201, 201, 201, 201 ] to deeply equal [ 201, 201, 429, 429, 429 ]",
+   "AssertionError: expected 5 to be 2 // Object.is equality",
+   "AssertionError: expected [ 200, 200, 200, 200, 200 ] to deeply equal [ 200, 200, 429, 429, 429 ]",
+   "AssertionError: expected [ 200, 200, 200 ] to deeply equal [ 200, 200, 429 ]"
+  ],
+  "predicted_by": "READY 4 (R1/A3, A1, R2, R3)",
+  "denominator_ok": true
+ },
+ {
+  "row": "TG",
+  "tsc_rc": 2,
+  "void": true,
+  "files": 53,
+  "tests": 432,
+  "failed": 1,
+  "pending": 0,
+  "failed_suites": 2,
+  "reds": [
+   "ks1195-per-key-rate-limiter-runs-after-authentication.test.ts :: KS-1195: placement inside the real authenticateToken R3: a chain that authenticates twice counts the request once (2 allowed, then 429)"
+  ],
+  "decisive": [
+   "AssertionError: expected [ 200, 429, 429 ] to deeply equal [ 200, 200, 429 ]"
+  ],
+  "predicted_by": "READY 1 (R3); = G-ERASE on the whole suite",
+  "denominator_ok": true
+ },
+ {
+  "row": "TW",
+  "tsc_rc": 2,
+  "void": true,
+  "files": 53,
+  "tests": 432,
+  "failed": 6,
+  "pending": 0,
+  "failed_suites": 4,
+  "reds": [
+   "ks1195-per-key-rate-limiter-runs-after-authentication.test.ts :: KS-1195: the per-key limiter in the REAL app control: a JWT caller is not governed by the per-key limiter (5 of 5 forwarded, no X-RateLimit-Limit)",
+   "rateLimitEnforce.test.ts :: enforceClientRateLimit (KS-164) does NOT enforce the per-client limiter on interactive method \"email\"",
+   "rateLimitEnforce.test.ts :: enforceClientRateLimit (KS-164) does NOT enforce the per-client limiter on interactive method \"wallet\"",
+   "rateLimitEnforce.test.ts :: enforceClientRateLimit (KS-164) does NOT enforce the per-client limiter on interactive method \"federated\"",
+   "rateLimitEnforce.test.ts :: enforceClientRateLimit (KS-164) does NOT enforce the per-client limiter on interactive method \"social\"",
+   "rateLimitEnforce.test.ts :: enforceClientRateLimit (KS-164) does NOT enforce the per-client limiter on interactive method \"jwt\""
+  ],
+  "decisive": [
+   "AssertionError: expected [ '100', '100', '100', '100', '100' ] to deeply equal [ null, null, null, null, null ]",
+   "AssertionError: expected \"vi.fn()\" to not be called at all, but actually been called 3 times",
+   "AssertionError: expected \"vi.fn()\" to not be called at all, but actually been called 3 times",
+   "AssertionError: expected \"vi.fn()\" to not be called at all, but actually been called 3 times",
+   "AssertionError: expected \"vi.fn()\" to not be called at all, but actually been called 3 times",
+   "AssertionError: expected \"vi.fn()\" to not be called at all, but actually been called 3 times"
+  ],
+  "predicted_by": "READY 6 (JWT control + 5 rateLimitEnforce interactive-method cells; seat predicted 1)",
+  "denominator_ok": true
+ },
+ {
+  "row": "TT",
+  "tsc_rc": 0,
+  "void": false,
+  "files": 53,
+  "tests": 432,
+  "failed": 1,
+  "pending": 0,
+  "failed_suites": 2,
+  "reds": [
+   "ks1195-per-key-rate-limiter-runs-after-authentication.test.ts :: KS-1195: placement inside the real authenticateToken A2: the handler after the limiter still runs inside the key's tenant context"
+  ],
+  "decisive": [
+   "AssertionError: expected { tenant: null } to deeply equal { tenant: 't-ks1195-als' }"
+  ],
+  "predicted_by": "READY 1 (A2-context)",
+  "denominator_ok": true
+ },
+ {
+  "row": "TI",
+  "tsc_rc": 0,
+  "void": false,
+  "files": 53,
+  "tests": 432,
+  "failed": 0,
+  "pending": 0,
+  "failed_suites": 0,
+  "reds": [],
+  "decisive": [],
+  "predicted_by": "READY 0",
+  "denominator_ok": true
+ },
+ {
+  "row": "G-CTRL",
+  "tsc_rc": 0,
+  "void": false,
+  "files": 53,
+  "tests": 432,
+  "failed": 2,
+  "pending": 0,
+  "failed_suites": 4,
+  "reds": [
+   "ks1195-per-key-rate-limiter-runs-after-authentication.test.ts :: KS-1195: the per-key limiter in the REAL app control: a JWT caller is not governed by the per-key limiter (5 of 5 forwarded, no X-RateLimit-Limit)",
+   "rateLimitEnforce.test.ts :: enforceClientRateLimit (KS-164) does NOT enforce the per-client limiter on interactive method \"email\""
+  ],
+  "decisive": [
+   "AssertionError: expected [ '100', '100', '100', '100', '100' ] to deeply equal [ null, null, null, null, null ]",
+   "AssertionError: expected \"vi.fn()\" to not be called at all, but actually been called 3 times"
+  ],
+  "predicted_by": "drafter: aimed at the JWT control (authMethod email)",
+  "denominator_ok": true
+ },
+ {
+  "row": "G-OAUTH",
+  "tsc_rc": 0,
+  "void": false,
+  "files": 53,
+  "tests": 432,
+  "failed": 0,
+  "pending": 0,
+  "failed_suites": 0,
+  "reds": [],
+  "decisive": [],
+  "predicted_by": "drafter: auth signs authMethod 'oauth' (READ); no cell pins it",
+  "denominator_ok": true
+ },
+ {
+  "row": "G-KEYSCOPE",
+  "tsc_rc": 0,
+  "void": false,
+  "files": 53,
+  "tests": 432,
+  "failed": 6,
+  "pending": 0,
+  "failed_suites": 6,
+  "reds": [
+   "ks1195-per-key-rate-limiter-runs-after-authentication.test.ts :: KS-1195: the per-key limiter in the REAL app R2: the same ceiling holds on a proxied family (GET /api/anchors), and a refused read is not forwarded",
+   "ks1195-per-key-rate-limiter-runs-after-authentication.test.ts :: KS-1195: the per-key limiter in the REAL app A2: an allowed proxied request still carries the key's tenant to the upstream",
+   "ks1195-per-key-rate-limiter-runs-after-authentication.test.ts :: KS-1195: placement inside the real authenticateToken R3: a chain that authenticates twice counts the request once (2 allowed, then 429)",
+   "rateLimitEnforce.test.ts :: enforceClientRateLimit \u2014 shared Redis counter (KS-170) uses the ioredis distributed counter (incr/pexpire/pttl) and 429s over the limit",
+   "rateLimitEnforce.test.ts :: enforceClientRateLimit \u2014 degraded ceiling on Redis error (KS-616) still enforces the limit when the Redis counter throws (degrades, does not disable)",
+   "rateLimitEnforce.test.ts :: enforceClientRateLimit \u2014 degraded ceiling on Redis error (KS-616) still reports rate-limit headers while degraded"
+  ],
+  "decisive": [
+   "AssertionError: expected [ 429, 429, 429, 429, 429 ] to deeply equal [ 200, 200, 429, 429, 429 ]",
+   "AssertionError: R2 ran first and forwarded at least one read: expected 0 to be greater than 0",
+   "AssertionError: expected [ 429, 429, 429 ] to deeply equal [ 200, 200, 429 ]",
+   "AssertionError: expected \"vi.fn()\" to be called with arguments: [ 'ratelimit:ks170-redis' ]",
+   "AssertionError: expected \"vi.fn()\" to be called once, but got 0 times",
+   "AssertionError: expected \"vi.fn()\" to be called with arguments: [ 'X-RateLimit-Remaining', '8' ]"
+  ],
+  "predicted_by": "drafter: counter keyed per IP instead of per key",
+  "denominator_ok": true
+ },
+ {
+  "row": "G-AFTER",
+  "tsc_rc": 0,
+  "void": false,
+  "files": 53,
+  "tests": 432,
+  "failed": 3,
+  "pending": 0,
+  "failed_suites": 3,
+  "reds": [
+   "ks1195-per-key-rate-limiter-runs-after-authentication.test.ts :: KS-1195: the per-key limiter in the REAL app A1: a refused create answers once and never reaches the handler (2 upstream creates, no double send)",
+   "ks1195-per-key-rate-limiter-runs-after-authentication.test.ts :: KS-1195: the per-key limiter in the REAL app R2: the same ceiling holds on a proxied family (GET /api/anchors), and a refused read is not forwarded",
+   "ks1195-per-key-rate-limiter-runs-after-authentication.test.ts :: KS-1195: placement inside the real authenticateToken R3: a chain that authenticates twice counts the request once (2 allowed, then 429)"
+  ],
+  "decisive": [
+   "AssertionError: expected 4 to be 2 // Object.is equality",
+   "AssertionError: expected 4 to be 2 // Object.is equality",
+   "AssertionError: expected 3 to be 2 // Object.is equality"
+  ],
+  "predicted_by": "drafter: limiter moved after next() (item 8)",
+  "denominator_ok": true
+ },
+ {
+  "row": "T0",
+  "tsc_rc": 0,
+  "void": false,
+  "files": 53,
+  "tests": 432,
+  "failed": 0,
+  "pending": 0,
+  "failed_suites": 0,
+  "reds": [],
+  "decisive": [],
+  "predicted_by": "READY 0",
+  "denominator_ok": true
+ }
+]

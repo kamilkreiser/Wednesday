@@ -1,0 +1,79 @@
+=== tamper_TG {"stubUrl": "loopback", "redisAvailable": false, "fakeRedis": false, "audit": false, "scopes": 13, "stages": ["census", "erasure", "bare"], "at": "2026-09-16T22:46:32.641Z", "routes": 189, "logged_headers_sent": 0, "logged_degraded": 1, "logged_no_ratelimit_warn": 0, "rejections": ["qa1017 async reject downstream"], "fakeRedisCalls": 0, "bareHits": {"sync": 2, "async": 1, "tenant": 14}, "auditRows": 0}
+routes 189 | classes [(('admin.ts', 'counted-once'), 4), (('admin.ts', 'limiter-absent'), 40), (('audit-export.ts', 'counted-once'), 1), (('audit-export.ts', 'limiter-absent'), 1), (('batch.ts', 'limiter-absent'), 4), (('health.ts', 'counted-once'), 1), (('health.ts', 'limiter-absent'), 4), (('index.ts', 'COUNTED-TWICE'), 1), (('index.ts', 'counted-once'), 6), (('index.ts', 'limiter-absent'), 25), (('notifications.ts', 'counted-once'), 7), (('platform.ts', 'counted-once'), 14), (('platform.ts', 'limiter-absent'), 1), (('proxy.ts', 'COUNTED-TWICE'), 2), (('proxy.ts', 'counted-once'), 43), (('proxy.ts', 'limiter-absent'), 20), (('verification.ts', 'COUNTED-TWICE'), 5), (('verification.ts', 'counted-once'), 8), (('verification.ts', 'limiter-absent'), 2)]
+limited K status triples [((200, 200, 429), 49), ((403, 403, 429), 20), ((404, 404, 429), 7), ((201, 429, 429), 5), ((200, 429, 429), 3), ((201, 201, 429), 3), ((502, 502, 429), 3), ((400, 400, 429), 2)]
+counted-twice 8
+    ('index.ts', 421, 'GET', '/api/documents/upload', [200, 429, 429], 1)
+    ('proxy.ts', 675, 'POST', '/api/gdpr/erasures', [201, 429, 429], 1)
+    ('proxy.ts', 676, 'GET', '/api/gdpr/erasures/:externalRef', [200, 429, 429], 1)
+    ('verification.ts', 1323, 'GET', '/api/documents/:id', [200, 429, 429], 1)
+    ('verification.ts', 1419, 'POST', '/api/documents/:id/sign', [201, 429, 429], 1)
+    ('verification.ts', 1420, 'POST', '/api/documents/:id/sign/request', [201, 429, 429], 1)
+    ('verification.ts', 1421, 'POST', '/api/documents/:id/anchor', [201, 429, 429], 1)
+    ('verification.ts', 1422, 'POST', '/api/documents/:id/share', [201, 429, 429], 1)
+J/N/I carrying X-RateLimit-Limit 0 []
+forwarded x-tenant-id == key tenant (routes with forwards): {True: 42, False: 19}
+limited routes with request 3 = 429: upstream hits distribution {1: 8, 2: 37, 0: 46, 6: 1}
+   erasure {"label": "limit2", "statuses": [201, 429, 429, 429], "codes": [null, "RATE_LIMIT_EXCEEDED", "RATE_LIMIT_EXCEEDED", "RATE_LIMIT_EXCEEDED"], "xrlLimit": ["2", "2", "2", "2"], "remaining": ["0", "0", "0", "0"], "fwd": 1, "noScopeGraceRole": [201, null, "0", 1]}
+   erasure {"label": "limit1000", "statuses": [201, 201, 201, 201], "codes": [null, null, null, null], "xrlLimit": ["1000", "1000", "1000", "1000"], "remaining": ["998", "996", "994", "992"], "fwd": 4, "noScopeGraceRole": [201, null, "998", 1]}
+   bare {"cell": "A1_sync_throw_limit1", "statuses": [500, 429], "xrl": ["0", "0"], "handlerHits": 1}
+   bare {"cell": "A1_sync_throw_jwt", "statuses": [500], "handlerHitsAfter": 2}
+   bare {"cell": "A1_async_reject_limit1", "statuses": [-1, 429], "codes": ["CLIENT_TIMEOUT", "RATE_LIMIT_EXCEEDED"], "handlerHits": 1, "rejections": 1}
+   bare {"cell": "A2_tenant_key_and_jwt", "key": [200, {"tenant": "t-bare-als", "user": "connector:qa1017-bare-tenant"}], "jwt": [200, {"tenant": "t-bare-jwt", "user": "u-qa1017"}]}
+   bare {"cell": "A2_interleaved_parallel_16", "statusByKey": {"t-il-3": [200, 200, 429, 429, 429, 429, 429, 429], "t-il-100": [200, 200, 200, 200, 200, 200, 200, 200]}, "tenantMismatch": 0, "allowed": 10}
+   bare {"cell": "R3_twice_required_then_optional", "statuses": [200, 429, 429], "remaining": ["0", "0", "0"]}
+=== tamper_G-KEYSCOPE {"stubUrl": "loopback", "redisAvailable": false, "fakeRedis": false, "audit": false, "scopes": 13, "stages": ["keyscope", "principals"], "at": "2026-09-16T22:45:27.454Z", "logged_headers_sent": 0, "logged_degraded": 1, "logged_no_ratelimit_warn": 12, "rejections": [], "fakeRedisCalls": 0, "bareHits": {"sync": 0, "async": 0, "tenant": 0}, "auditRows": 0}
+   principals {"name": "jwt_email", "statuses": [200, 200, 200, 200], "xrlLimit": [null, null, null, null], "remaining": [null, null, null, null], "fwd": 4}
+   principals {"name": "jwt_wallet", "statuses": [200, 200, 200, 200], "xrlLimit": [null, null, null, null], "remaining": [null, null, null, null], "fwd": 4}
+   principals {"name": "jwt_federated", "statuses": [200, 200, 200, 200], "xrlLimit": [null, null, null, null], "remaining": [null, null, null, null], "fwd": 4}
+   principals {"name": "jwt_social", "statuses": [200, 200, 200, 200], "xrlLimit": [null, null, null, null], "remaining": [null, null, null, null], "fwd": 4}
+   principals {"name": "jwt_jwt", "statuses": [200, 200, 200, 200], "xrlLimit": [null, null, null, null], "remaining": [null, null, null, null], "fwd": 4}
+   principals {"name": "jwt_oauth", "statuses": [200, 200, 200, 200], "xrlLimit": [null, null, null, null], "remaining": [null, null, null, null], "fwd": 4}
+   principals {"name": "jwt_api_key", "statuses": [200, 200, 200, 200], "xrlLimit": ["100", "100", "100", "100"], "remaining": ["99", "98", "97", "96"], "fwd": 4}
+   principals {"name": "jwt_oauth_app", "statuses": [200, 200, 200, 200], "xrlLimit": ["100", "100", "100", "100"], "remaining": ["95", "94", "93", "92"], "fwd": 4}
+   principals {"name": "jwt_API_KEY", "statuses": [200, 200, 200, 200], "xrlLimit": [null, null, null, null], "remaining": [null, null, null, null], "fwd": 4}
+   principals {"name": "jwt_no_authMethod", "statuses": [200, 200, 200, 200], "xrlLimit": [null, null, null, null], "remaining": [null, null, null, null], "fwd": 4}
+   principals {"name": "connector_jwt_as_bearer", "statuses": [200, 200, 200, 200], "xrlLimit": [null, null, null, null], "remaining": [null, null, null, null], "fwd": 4}
+   principals {"name": "test_token_email", "statuses": [200, 200, 200, 200], "xrlLimit": [null, null, null, null], "remaining": [null, null, null, null], "fwd": 4}
+   principals {"name": "test_token_api_key", "statuses": [200, 200, 200, 200], "xrlLimit": ["100", "100", "100", "100"], "remaining": ["91", "90", "89", "88"], "fwd": 4}
+   principals {"name": "api_key_limit2", "statuses": [429, 429, 429, 429], "xrlLimit": ["2", "2", "2", "2"], "remaining": ["0", "0", "0", "0"], "fwd": 0}
+   principals {"name": "unknown_sk_key", "statuses": [401, 401, 401, 401], "xrlLimit": [null, null, null, null], "remaining": [null, null, null, null], "fwd": 0}
+   principals {"name": "non_sk_key_with_jwt_email", "statuses": [200, 200, 200, 200], "xrlLimit": [null, null, null, null], "remaining": [null, null, null, null], "fwd": 4}
+   principals {"name": "no_credential", "statuses": [401, 401, 401, 401], "xrlLimit": [null, null, null, null], "remaining": [null, null, null, null], "fwd": 0}
+   keyscope {"label": "KS1_two_keys_one_connectorId_limits_2_and_5", "steps": [["A", 429, "2", "0"], ["A", 429, "2", "0"], ["A", 429, "2", "0"], ["B", 429, "5", "0"], ["B", 429, "5", "0"], ["B", 429, "5", "0"]]}
+   keyscope {"label": "KS2_keys_without_connectorId_in_different_tenants", "steps": [["X", 429, "2", "0"], ["X", 429, "2", "0"], ["Y", 429, "2", "0"], ["Z1000", 200, "1000", "974"], ["W", 429, "2", "0"]]}
+   keyscope {"label": "KS3_control_distinct_connectorIds_same_ip", "steps": [["P", 429, "2", "0"], ["P", 429, "2", "0"], ["P", 429, "2", "0"], ["Q", 429, "2", "0"], ["Q", 429, "2", "0"]]}
+=== tamper_G-AFTER {"stubUrl": "loopback", "redisAvailable": false, "fakeRedis": false, "audit": true, "scopes": 13, "stages": ["order", "erasure"], "at": "2026-09-16T22:45:37.309Z", "logged_headers_sent": 0, "logged_degraded": 1, "logged_no_ratelimit_warn": 0, "rejections": ["process.exit unexpectedly called with \"0\""], "fakeRedisCalls": 0, "bareHits": {"sync": 0, "async": 0, "tenant": 0}, "auditRows": 13}
+   erasure {"label": "limit2", "statuses": [201, 201, 429, 429], "codes": [null, null, "RATE_LIMIT_EXCEEDED", "RATE_LIMIT_EXCEEDED"], "xrlLimit": ["2", "2", "2", "2"], "remaining": ["1", "0", "0", "0"], "fwd": 2, "noScopeGraceRole": [201, null, "1", 1]}
+   erasure {"label": "limit1000", "statuses": [201, 201, 201, 201], "codes": [null, null, null, null], "xrlLimit": ["1000", "1000", "1000", "1000"], "remaining": ["999", "998", "997", "996"], "fwd": 4, "noScopeGraceRole": [201, null, "999", 1]}
+   order {"label": "qaord-A-post-1", "status": 201, "code": null, "validateCalls": 1, "exchangeCalls": 1, "forwarded": 1, "auditRowsAdded": 1, "auditLast": "true"}
+   order {"label": "qaord-A-post-2", "status": 429, "code": "RATE_LIMIT_EXCEEDED", "validateCalls": 0, "exchangeCalls": 0, "forwarded": 1, "auditRowsAdded": 1, "auditLast": "false"}
+   order {"label": "qaord-B-post-1-fresh-key-same-connector", "status": 429, "code": "RATE_LIMIT_EXCEEDED", "validateCalls": 1, "exchangeCalls": 1, "forwarded": 1, "auditRowsAdded": 1, "auditLast": "false"}
+   order {"label": "qaord-A-get-anchors", "status": 429, "code": "RATE_LIMIT_EXCEEDED", "validateCalls": 0, "exchangeCalls": 0, "forwarded": 1, "auditRowsAdded": 0, "auditLast": null}
+=== tamper_G-OAUTH {"stubUrl": "loopback", "redisAvailable": false, "fakeRedis": false, "audit": false, "scopes": 13, "stages": ["principals"], "at": "2026-09-16T22:45:17.470Z", "logged_headers_sent": 0, "logged_degraded": 1, "logged_no_ratelimit_warn": 16, "rejections": [], "fakeRedisCalls": 0, "bareHits": {"sync": 0, "async": 0, "tenant": 0}, "auditRows": 0}
+   principals {"name": "jwt_email", "statuses": [200, 200, 200, 200], "xrlLimit": [null, null, null, null], "remaining": [null, null, null, null], "fwd": 4}
+   principals {"name": "jwt_wallet", "statuses": [200, 200, 200, 200], "xrlLimit": [null, null, null, null], "remaining": [null, null, null, null], "fwd": 4}
+   principals {"name": "jwt_federated", "statuses": [200, 200, 200, 200], "xrlLimit": [null, null, null, null], "remaining": [null, null, null, null], "fwd": 4}
+   principals {"name": "jwt_social", "statuses": [200, 200, 200, 200], "xrlLimit": [null, null, null, null], "remaining": [null, null, null, null], "fwd": 4}
+   principals {"name": "jwt_jwt", "statuses": [200, 200, 200, 200], "xrlLimit": [null, null, null, null], "remaining": [null, null, null, null], "fwd": 4}
+   principals {"name": "jwt_oauth", "statuses": [200, 200, 200, 200], "xrlLimit": ["100", "100", "100", "100"], "remaining": ["99", "98", "97", "96"], "fwd": 4}
+   principals {"name": "jwt_api_key", "statuses": [200, 200, 200, 200], "xrlLimit": ["100", "100", "100", "100"], "remaining": ["95", "94", "93", "92"], "fwd": 4}
+   principals {"name": "jwt_oauth_app", "statuses": [200, 200, 200, 200], "xrlLimit": ["100", "100", "100", "100"], "remaining": ["91", "90", "89", "88"], "fwd": 4}
+   principals {"name": "jwt_API_KEY", "statuses": [200, 200, 200, 200], "xrlLimit": [null, null, null, null], "remaining": [null, null, null, null], "fwd": 4}
+   principals {"name": "jwt_no_authMethod", "statuses": [200, 200, 200, 200], "xrlLimit": [null, null, null, null], "remaining": [null, null, null, null], "fwd": 4}
+   principals {"name": "connector_jwt_as_bearer", "statuses": [200, 200, 200, 200], "xrlLimit": [null, null, null, null], "remaining": [null, null, null, null], "fwd": 4}
+   principals {"name": "test_token_email", "statuses": [200, 200, 200, 200], "xrlLimit": [null, null, null, null], "remaining": [null, null, null, null], "fwd": 4}
+   principals {"name": "test_token_api_key", "statuses": [200, 200, 200, 200], "xrlLimit": ["100", "100", "100", "100"], "remaining": ["99", "98", "97", "96"], "fwd": 4}
+   principals {"name": "api_key_limit2", "statuses": [200, 200, 429, 429], "xrlLimit": ["2", "2", "2", "2"], "remaining": ["1", "0", "0", "0"], "fwd": 2}
+   principals {"name": "unknown_sk_key", "statuses": [401, 401, 401, 401], "xrlLimit": [null, null, null, null], "remaining": [null, null, null, null], "fwd": 0}
+   principals {"name": "non_sk_key_with_jwt_email", "statuses": [200, 200, 200, 200], "xrlLimit": [null, null, null, null], "remaining": [null, null, null, null], "fwd": 4}
+   principals {"name": "no_credential", "statuses": [401, 401, 401, 401], "xrlLimit": [null, null, null, null], "remaining": [null, null, null, null], "fwd": 0}
+=== tamper_TT {"stubUrl": "loopback", "redisAvailable": false, "fakeRedis": false, "audit": false, "scopes": 13, "stages": ["bare"], "at": "2026-09-16T22:44:48.076Z", "logged_headers_sent": 0, "logged_degraded": 1, "logged_no_ratelimit_warn": 0, "rejections": ["qa1017 async reject downstream"], "fakeRedisCalls": 0, "bareHits": {"sync": 2, "async": 1, "tenant": 14}, "auditRows": 0}
+   bare {"cell": "A1_sync_throw_limit1", "statuses": [500, 429], "xrl": ["0", "0"], "handlerHits": 1}
+   bare {"cell": "A1_sync_throw_jwt", "statuses": [500], "handlerHitsAfter": 2}
+   bare {"cell": "A1_async_reject_limit1", "statuses": [-1, 429], "codes": ["CLIENT_TIMEOUT", "RATE_LIMIT_EXCEEDED"], "handlerHits": 1, "rejections": 1}
+   bare {"cell": "A2_tenant_key_and_jwt", "key": [200, {"tenant": null, "user": "connector:qa1017-bare-tenant"}], "jwt": [200, {"tenant": "t-bare-jwt", "user": "u-qa1017"}]}
+   bare {"cell": "A2_interleaved_parallel_16", "statusByKey": {"t-il-3": [200, 200, 429, 429, 429, 429, 429, 429], "t-il-100": [200, 200, 200, 200, 200, 200, 200, 200]}, "tenantMismatch": 10, "allowed": 10}
+   bare {"cell": "R3_twice_required_then_optional", "statuses": [200, 200, 429], "remaining": ["1", "0", "0"]}
+=== tamper_TA {"stubUrl": "loopback", "redisAvailable": false, "fakeRedis": false, "audit": false, "scopes": 13, "stages": ["erasure"], "at": "2026-09-16T22:44:14.765Z", "logged_headers_sent": 0, "logged_degraded": 0, "logged_no_ratelimit_warn": 0, "rejections": [], "fakeRedisCalls": 0, "bareHits": {"sync": 0, "async": 0, "tenant": 0}, "auditRows": 0}
+   erasure {"label": "limit2", "statuses": [201, 201, 201, 201], "codes": [null, null, null, null], "xrlLimit": [null, null, null, null], "remaining": [null, null, null, null], "fwd": 4, "noScopeGraceRole": [201, null, null, 1]}
+   erasure {"label": "limit1000", "statuses": [201, 201, 201, 201], "codes": [null, null, null, null], "xrlLimit": [null, null, null, null], "remaining": [null, null, null, null], "fwd": 4, "noScopeGraceRole": [201, null, null, 1]}

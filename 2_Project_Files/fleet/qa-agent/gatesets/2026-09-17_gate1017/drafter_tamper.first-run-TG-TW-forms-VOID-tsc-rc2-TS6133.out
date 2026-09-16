@@ -1,0 +1,137 @@
+ROW-START T0 head 08:43:50 AEST predicted-by READY 0
+tracked porcelain before 0
+08:43:57 AEST project tsc --noEmit -p . tree head rc 0 lines 0 
+08:44:04 AEST {"label": "tamper_T0", "tree": "head", "rc": 0, "files": 53, "tests": 432, "passed": 432, "failed": 0, "pending": 0, "todo": 0, "failed_suites": 0, "success": true, "secs": 7.3}
+git diff --quiet rc 0
+DENOMINATOR (53, 432) expected (53, 432) pending 0 OK
+ROW-START TA head 08:44:04 AEST predicted-by READY 4 (R1/A3, A1, R2, R3)
+tracked porcelain before 0
+anchor count 1
+marker QA-TAMPER-TA count 1
+08:44:06 AEST project tsc --noEmit -p . tree head rc 0 lines 0 
+08:44:13 AEST {"label": "tamper_TA", "tree": "head", "rc": 1, "files": 53, "tests": 432, "passed": 428, "failed": 4, "pending": 0, "todo": 0, "failed_suites": 3, "success": false, "secs": 7.3}
+   NOT-PASSED ('__tests__/ks1195-per-key-rate-limiter-runs-after-authentication.test.ts', 'KS-1195: the per-key limiter in the REAL app R1 / A3: a key at 2 per 60 s creating documents is refused 429 from request 3, with Redis unavailable', 'failed', 'AssertionError: expected [ 201, 201, 201, 201, 201 ] to deeply equal [ 201, 201, 429, 429, 429 ]\n    at /private/tmp/claude-501/-Volumes-DevMASTER-WEDNESDAY/1e211184-c0a0-4757-a7c5-e9b4a44dcab4/scratchpad/gate1017_draft_470v81bj/wt_head/Blockchain/Dev/services/api-gateway/src/__tests__/ks1195-per-key-rate-limiter-runs-after-authentication.test.ts:153:37\n    at processTicksAndRejections (node:inter')
+   NOT-PASSED ('__tests__/ks1195-per-key-rate-limiter-runs-after-authentication.test.ts', 'KS-1195: the per-key limiter in the REAL app A1: a refused create answers once and never reaches the handler (2 upstream creates, no double send)', 'failed', 'AssertionError: expected 5 to be 2 // Object.is equality\n    at /private/tmp/claude-501/-Volumes-DevMASTER-WEDNESDAY/1e211184-c0a0-4757-a7c5-e9b4a44dcab4/scratchpad/gate1017_draft_470v81bj/wt_head/Blockchain/Dev/services/api-gateway/src/__tests__/ks1195-per-key-rate-limiter-runs-after-authentication.test.ts:162:38\n    at file:///Volumes/DevMASTER/!CODING/Secuura/Blockchain/2_Project_Files/Blockcha')
+   NOT-PASSED ('__tests__/ks1195-per-key-rate-limiter-runs-after-authentication.test.ts', 'KS-1195: the per-key limiter in the REAL app R2: the same ceiling holds on a proxied family (GET /api/anchors), and a refused read is not forwarded', 'failed', 'AssertionError: expected [ 200, 200, 200, 200, 200 ] to deeply equal [ 200, 200, 429, 429, 429 ]\n    at /private/tmp/claude-501/-Volumes-DevMASTER-WEDNESDAY/1e211184-c0a0-4757-a7c5-e9b4a44dcab4/scratchpad/gate1017_draft_470v81bj/wt_head/Blockchain/Dev/services/api-gateway/src/__tests__/ks1195-per-key-rate-limiter-runs-after-authentication.test.ts:170:37\n    at processTicksAndRejections (node:inter')
+   NOT-PASSED ('__tests__/ks1195-per-key-rate-limiter-runs-after-authentication.test.ts', 'KS-1195: placement inside the real authenticateToken R3: a chain that authenticates twice counts the request once (2 allowed, then 429)', 'failed', 'AssertionError: expected [ 200, 200, 200 ] to deeply equal [ 200, 200, 429 ]\n    at /private/tmp/claude-501/-Volumes-DevMASTER-WEDNESDAY/1e211184-c0a0-4757-a7c5-e9b4a44dcab4/scratchpad/gate1017_draft_470v81bj/wt_head/Blockchain/Dev/services/api-gateway/src/__tests__/ks1195-per-key-rate-limiter-runs-after-authentication.test.ts:204:37\n    at processTicksAndRejections (node:internal/process/task_que')
+copied qa1017-drafter-probe.test.ts sha ca8c56b83a4c into head label probe_tamper_TA
+08:44:14 AEST {"label": "probe_tamper_TA", "tree": "head", "rc": 0, "files": 1, "tests": 7, "passed": 7, "failed": 0, "pending": 0, "todo": 0, "failed_suites": 0, "success": true, "secs": 1.1}
+quarantined __tests__/qa1017-drafter-probe.test.ts -> 084414836304.-a7c5-e9b4a44dcab4__scratchpad__gate1017_draft_470v81bj__wt_head__Blockchain__Dev__services__api-gateway__src____tests____qa1017-drafter-probe.test.ts
+restore sha256 identical True HEAD blob 8fbe102eb worktree 8fbe102eb True
+git diff --quiet rc 0
+DENOMINATOR (53, 432) expected (53, 432) pending 0 OK
+ROW-START TG head 08:44:14 AEST predicted-by READY 1 (R3); = G-ERASE on the whole suite
+tracked porcelain before 0
+anchor count 1
+marker QA-TAMPER-TG count 1
+08:44:16 AEST project tsc --noEmit -p . tree head rc 2 lines 1 src/middleware/rateLimitEnforce.ts(73,7): error TS6133: 'countedRequests' is declared but its value is never read.
+
+08:44:23 AEST {"label": "tamper_TG", "tree": "head", "rc": 1, "files": 53, "tests": 432, "passed": 431, "failed": 1, "pending": 0, "todo": 0, "failed_suites": 2, "success": false, "secs": 6.9}
+   NOT-PASSED ('__tests__/ks1195-per-key-rate-limiter-runs-after-authentication.test.ts', 'KS-1195: placement inside the real authenticateToken R3: a chain that authenticates twice counts the request once (2 allowed, then 429)', 'failed', 'AssertionError: expected [ 200, 429, 429 ] to deeply equal [ 200, 200, 429 ]\n    at /private/tmp/claude-501/-Volumes-DevMASTER-WEDNESDAY/1e211184-c0a0-4757-a7c5-e9b4a44dcab4/scratchpad/gate1017_draft_470v81bj/wt_head/Blockchain/Dev/services/api-gateway/src/__tests__/ks1195-per-key-rate-limiter-runs-after-authentication.test.ts:204:37\n    at processTicksAndRejections (node:internal/process/task_que')
+copied qa1017-drafter-probe.test.ts sha ca8c56b83a4c into head label probe_tamper_TG
+08:44:29 AEST {"label": "probe_tamper_TG", "tree": "head", "rc": 0, "files": 1, "tests": 7, "passed": 7, "failed": 0, "pending": 0, "todo": 0, "failed_suites": 0, "success": true, "secs": 6.0}
+quarantined __tests__/qa1017-drafter-probe.test.ts -> 084429525920.-a7c5-e9b4a44dcab4__scratchpad__gate1017_draft_470v81bj__wt_head__Blockchain__Dev__services__api-gateway__src____tests____qa1017-drafter-probe.test.ts
+restore sha256 identical True HEAD blob f4b66aa1a worktree f4b66aa1a True
+git diff --quiet rc 0
+DENOMINATOR (53, 432) expected (53, 432) pending 0 OK
+ROW-START TW head 08:44:29 AEST predicted-by READY 6 (JWT control + 5 rateLimitEnforce interactive-method cells; seat predicted 1)
+tracked porcelain before 0
+anchor count 1
+marker QA-TAMPER-TW count 1
+08:44:31 AEST project tsc --noEmit -p . tree head rc 2 lines 1 src/middleware/rateLimitEnforce.ts(61,7): error TS6133: 'MACHINE_AUTH_METHODS' is declared but its value is never read.
+
+08:44:38 AEST {"label": "tamper_TW", "tree": "head", "rc": 1, "files": 53, "tests": 432, "passed": 426, "failed": 6, "pending": 0, "todo": 0, "failed_suites": 4, "success": false, "secs": 7.0}
+   NOT-PASSED ('__tests__/ks1195-per-key-rate-limiter-runs-after-authentication.test.ts', 'KS-1195: the per-key limiter in the REAL app control: a JWT caller is not governed by the per-key limiter (5 of 5 forwarded, no X-RateLimit-Limit)', 'failed', "AssertionError: expected [ '100', '100', '100', '100', '100' ] to deeply equal [ null, null, null, null, null ]\n    at /private/tmp/claude-501/-Volumes-DevMASTER-WEDNESDAY/1e211184-c0a0-4757-a7c5-e9b4a44dcab4/scratchpad/gate1017_draft_470v81bj/wt_head/Blockchain/Dev/services/api-gateway/src/__tests__/ks1195-per-key-rate-limiter-runs-after-authentication.test.ts:188:67\n    at processTicksAndRejecti")
+   NOT-PASSED ('__tests__/rateLimitEnforce.test.ts', 'enforceClientRateLimit (KS-164) does NOT enforce the per-client limiter on interactive method "email"', 'failed', 'AssertionError: expected "vi.fn()" to not be called at all, but actually been called 3 times\n\nReceived:\n\n  1st vi.fn() call:\n\n    Array [\n      "X-RateLimit-Limit",\n      "1",\n    ]\n\n  2nd vi.fn() call:\n\n    Array [\n      "X-RateLimit-Remaining",\n      "0",\n    ]\n\n  3rd vi.fn() call:\n\n    Array [\n      "X-RateLimit-Reset",\n      "1789598734",\n    ]\n\n\nNumber of calls: 3\n\n    at Proxy.<anonymous> (f')
+   NOT-PASSED ('__tests__/rateLimitEnforce.test.ts', 'enforceClientRateLimit (KS-164) does NOT enforce the per-client limiter on interactive method "wallet"', 'failed', 'AssertionError: expected "vi.fn()" to not be called at all, but actually been called 3 times\n\nReceived:\n\n  1st vi.fn() call:\n\n    Array [\n      "X-RateLimit-Limit",\n      "1",\n    ]\n\n  2nd vi.fn() call:\n\n    Array [\n      "X-RateLimit-Remaining",\n      "0",\n    ]\n\n  3rd vi.fn() call:\n\n    Array [\n      "X-RateLimit-Reset",\n      "1789598734",\n    ]\n\n\nNumber of calls: 3\n\n    at Proxy.<anonymous> (f')
+   NOT-PASSED ('__tests__/rateLimitEnforce.test.ts', 'enforceClientRateLimit (KS-164) does NOT enforce the per-client limiter on interactive method "federated"', 'failed', 'AssertionError: expected "vi.fn()" to not be called at all, but actually been called 3 times\n\nReceived:\n\n  1st vi.fn() call:\n\n    Array [\n      "X-RateLimit-Limit",\n      "1",\n    ]\n\n  2nd vi.fn() call:\n\n    Array [\n      "X-RateLimit-Remaining",\n      "0",\n    ]\n\n  3rd vi.fn() call:\n\n    Array [\n      "X-RateLimit-Reset",\n      "1789598734",\n    ]\n\n\nNumber of calls: 3\n\n    at Proxy.<anonymous> (f')
+   NOT-PASSED ('__tests__/rateLimitEnforce.test.ts', 'enforceClientRateLimit (KS-164) does NOT enforce the per-client limiter on interactive method "social"', 'failed', 'AssertionError: expected "vi.fn()" to not be called at all, but actually been called 3 times\n\nReceived:\n\n  1st vi.fn() call:\n\n    Array [\n      "X-RateLimit-Limit",\n      "1",\n    ]\n\n  2nd vi.fn() call:\n\n    Array [\n      "X-RateLimit-Remaining",\n      "0",\n    ]\n\n  3rd vi.fn() call:\n\n    Array [\n      "X-RateLimit-Reset",\n      "1789598734",\n    ]\n\n\nNumber of calls: 3\n\n    at Proxy.<anonymous> (f')
+   NOT-PASSED ('__tests__/rateLimitEnforce.test.ts', 'enforceClientRateLimit (KS-164) does NOT enforce the per-client limiter on interactive method "jwt"', 'failed', 'AssertionError: expected "vi.fn()" to not be called at all, but actually been called 3 times\n\nReceived:\n\n  1st vi.fn() call:\n\n    Array [\n      "X-RateLimit-Limit",\n      "1",\n    ]\n\n  2nd vi.fn() call:\n\n    Array [\n      "X-RateLimit-Remaining",\n      "0",\n    ]\n\n  3rd vi.fn() call:\n\n    Array [\n      "X-RateLimit-Reset",\n      "1789598734",\n    ]\n\n\nNumber of calls: 3\n\n    at Proxy.<anonymous> (f')
+restore sha256 identical True HEAD blob f4b66aa1a worktree f4b66aa1a True
+git diff --quiet rc 0
+DENOMINATOR (53, 432) expected (53, 432) pending 0 OK
+ROW-START TT head 08:44:38 AEST predicted-by READY 1 (A2-context)
+tracked porcelain before 0
+anchor count 1
+marker QA-TAMPER-TT count 1
+08:44:40 AEST project tsc --noEmit -p . tree head rc 0 lines 0 
+08:44:47 AEST {"label": "tamper_TT", "tree": "head", "rc": 1, "files": 53, "tests": 432, "passed": 431, "failed": 1, "pending": 0, "todo": 0, "failed_suites": 2, "success": false, "secs": 7.0}
+   NOT-PASSED ('__tests__/ks1195-per-key-rate-limiter-runs-after-authentication.test.ts', "KS-1195: placement inside the real authenticateToken A2: the handler after the limiter still runs inside the key's tenant context", 'failed', "AssertionError: expected { tenant: null } to deeply equal { tenant: 't-ks1195-als' }\n    at /private/tmp/claude-501/-Volumes-DevMASTER-WEDNESDAY/1e211184-c0a0-4757-a7c5-e9b4a44dcab4/scratchpad/gate1017_draft_470v81bj/wt_head/Blockchain/Dev/services/api-gateway/src/__tests__/ks1195-per-key-rate-limiter-runs-after-authentication.test.ts:211:20\n    at processTicksAndRejections (node:internal/process/")
+copied qa1017-drafter-probe.test.ts sha ca8c56b83a4c into head label probe_tamper_TT
+08:44:49 AEST {"label": "probe_tamper_TT", "tree": "head", "rc": 0, "files": 1, "tests": 7, "passed": 7, "failed": 0, "pending": 0, "todo": 0, "failed_suites": 0, "success": true, "secs": 2.8}
+quarantined __tests__/qa1017-drafter-probe.test.ts -> 084449795459.-a7c5-e9b4a44dcab4__scratchpad__gate1017_draft_470v81bj__wt_head__Blockchain__Dev__services__api-gateway__src____tests____qa1017-drafter-probe.test.ts
+restore sha256 identical True HEAD blob 8fbe102eb worktree 8fbe102eb True
+git diff --quiet rc 0
+DENOMINATOR (53, 432) expected (53, 432) pending 0 OK
+ROW-START TI head 08:44:49 AEST predicted-by READY 0
+tracked porcelain before 0
+anchor count 1
+marker QA-TAMPER-TI count 1
+08:44:51 AEST project tsc --noEmit -p . tree head rc 0 lines 0 
+08:44:59 AEST {"label": "tamper_TI", "tree": "head", "rc": 0, "files": 53, "tests": 432, "passed": 432, "failed": 0, "pending": 0, "todo": 0, "failed_suites": 0, "success": true, "secs": 7.5}
+restore sha256 identical True HEAD blob f4b66aa1a worktree f4b66aa1a True
+git diff --quiet rc 0
+DENOMINATOR (53, 432) expected (53, 432) pending 0 OK
+ROW-START G-CTRL head 08:44:59 AEST predicted-by drafter: aimed at the JWT control (authMethod email)
+tracked porcelain before 0
+anchor count 1
+marker QA-TAMPER-GCTRL count 1
+08:45:00 AEST project tsc --noEmit -p . tree head rc 0 lines 0 
+08:45:07 AEST {"label": "tamper_G-CTRL", "tree": "head", "rc": 1, "files": 53, "tests": 432, "passed": 430, "failed": 2, "pending": 0, "todo": 0, "failed_suites": 4, "success": false, "secs": 6.9}
+   NOT-PASSED ('__tests__/ks1195-per-key-rate-limiter-runs-after-authentication.test.ts', 'KS-1195: the per-key limiter in the REAL app control: a JWT caller is not governed by the per-key limiter (5 of 5 forwarded, no X-RateLimit-Limit)', 'failed', "AssertionError: expected [ '100', '100', '100', '100', '100' ] to deeply equal [ null, null, null, null, null ]\n    at /private/tmp/claude-501/-Volumes-DevMASTER-WEDNESDAY/1e211184-c0a0-4757-a7c5-e9b4a44dcab4/scratchpad/gate1017_draft_470v81bj/wt_head/Blockchain/Dev/services/api-gateway/src/__tests__/ks1195-per-key-rate-limiter-runs-after-authentication.test.ts:188:67\n    at processTicksAndRejecti")
+   NOT-PASSED ('__tests__/rateLimitEnforce.test.ts', 'enforceClientRateLimit (KS-164) does NOT enforce the per-client limiter on interactive method "email"', 'failed', 'AssertionError: expected "vi.fn()" to not be called at all, but actually been called 3 times\n\nReceived:\n\n  1st vi.fn() call:\n\n    Array [\n      "X-RateLimit-Limit",\n      "1",\n    ]\n\n  2nd vi.fn() call:\n\n    Array [\n      "X-RateLimit-Remaining",\n      "0",\n    ]\n\n  3rd vi.fn() call:\n\n    Array [\n      "X-RateLimit-Reset",\n      "1789598763",\n    ]\n\n\nNumber of calls: 3\n\n    at Proxy.<anonymous> (f')
+restore sha256 identical True HEAD blob f4b66aa1a worktree f4b66aa1a True
+git diff --quiet rc 0
+DENOMINATOR (53, 432) expected (53, 432) pending 0 OK
+ROW-START G-OAUTH head 08:45:07 AEST predicted-by drafter: auth signs authMethod 'oauth' (READ); no cell pins it
+tracked porcelain before 0
+anchor count 1
+marker QA-TAMPER-GOAUTH count 1
+08:45:09 AEST project tsc --noEmit -p . tree head rc 0 lines 0 
+08:45:16 AEST {"label": "tamper_G-OAUTH", "tree": "head", "rc": 0, "files": 53, "tests": 432, "passed": 432, "failed": 0, "pending": 0, "todo": 0, "failed_suites": 0, "success": true, "secs": 6.9}
+copied qa1017-drafter-probe.test.ts sha ca8c56b83a4c into head label probe_tamper_G-OAUTH
+08:45:17 AEST {"label": "probe_tamper_G-OAUTH", "tree": "head", "rc": 0, "files": 1, "tests": 7, "passed": 7, "failed": 0, "pending": 0, "todo": 0, "failed_suites": 0, "success": true, "secs": 1.2}
+quarantined __tests__/qa1017-drafter-probe.test.ts -> 084517610019.-a7c5-e9b4a44dcab4__scratchpad__gate1017_draft_470v81bj__wt_head__Blockchain__Dev__services__api-gateway__src____tests____qa1017-drafter-probe.test.ts
+restore sha256 identical True HEAD blob f4b66aa1a worktree f4b66aa1a True
+git diff --quiet rc 0
+DENOMINATOR (53, 432) expected (53, 432) pending 0 OK
+ROW-START G-KEYSCOPE head 08:45:17 AEST predicted-by drafter: counter keyed per IP instead of per key
+tracked porcelain before 0
+anchor count 1
+marker QA-TAMPER-GKEYSCOPE count 1
+08:45:19 AEST project tsc --noEmit -p . tree head rc 0 lines 0 
+08:45:26 AEST {"label": "tamper_G-KEYSCOPE", "tree": "head", "rc": 1, "files": 53, "tests": 432, "passed": 426, "failed": 6, "pending": 0, "todo": 0, "failed_suites": 6, "success": false, "secs": 6.9}
+   NOT-PASSED ('__tests__/ks1195-per-key-rate-limiter-runs-after-authentication.test.ts', 'KS-1195: the per-key limiter in the REAL app R2: the same ceiling holds on a proxied family (GET /api/anchors), and a refused read is not forwarded', 'failed', 'AssertionError: expected [ 429, 429, 429, 429, 429 ] to deeply equal [ 200, 200, 429, 429, 429 ]\n    at /private/tmp/claude-501/-Volumes-DevMASTER-WEDNESDAY/1e211184-c0a0-4757-a7c5-e9b4a44dcab4/scratchpad/gate1017_draft_470v81bj/wt_head/Blockchain/Dev/services/api-gateway/src/__tests__/ks1195-per-key-rate-limiter-runs-after-authentication.test.ts:170:37\n    at processTicksAndRejections (node:inter')
+   NOT-PASSED ('__tests__/ks1195-per-key-rate-limiter-runs-after-authentication.test.ts', "KS-1195: the per-key limiter in the REAL app A2: an allowed proxied request still carries the key's tenant to the upstream", 'failed', 'AssertionError: R2 ran first and forwarded at least one read: expected 0 to be greater than 0\n    at /private/tmp/claude-501/-Volumes-DevMASTER-WEDNESDAY/1e211184-c0a0-4757-a7c5-e9b4a44dcab4/scratchpad/gate1017_draft_470v81bj/wt_head/Blockchain/Dev/services/api-gateway/src/__tests__/ks1195-per-key-rate-limiter-runs-after-authentication.test.ts:179:78\n    at file:///Volumes/DevMASTER/!CODING/Secuur')
+   NOT-PASSED ('__tests__/ks1195-per-key-rate-limiter-runs-after-authentication.test.ts', 'KS-1195: placement inside the real authenticateToken R3: a chain that authenticates twice counts the request once (2 allowed, then 429)', 'failed', 'AssertionError: expected [ 429, 429, 429 ] to deeply equal [ 200, 200, 429 ]\n    at /private/tmp/claude-501/-Volumes-DevMASTER-WEDNESDAY/1e211184-c0a0-4757-a7c5-e9b4a44dcab4/scratchpad/gate1017_draft_470v81bj/wt_head/Blockchain/Dev/services/api-gateway/src/__tests__/ks1195-per-key-rate-limiter-runs-after-authentication.test.ts:204:37\n    at processTicksAndRejections (node:internal/process/task_que')
+   NOT-PASSED ('__tests__/rateLimitEnforce.test.ts', 'enforceClientRateLimit — shared Redis counter (KS-170) uses the ioredis distributed counter (incr/pexpire/pttl) and 429s over the limit', 'failed', 'AssertionError: expected "vi.fn()" to be called with arguments: [ \'ratelimit:ks170-redis\' ]\n\nReceived:\n\n  1st vi.fn() call:\n\n  [\n-   "ratelimit:ks170-redis",\n+   "ratelimit:unknown",\n  ]\n\n\nNumber of calls: 1\n\n    at Proxy.<anonymous> (file:///Volumes/DevMASTER/!CODING/Secuura/Blockchain/2_Project_Files/Blockchain/Dev/node_modules/@vitest/expect/dist/index.js:1487:10)\n    at Proxy.<anonymous> (file')
+   NOT-PASSED ('__tests__/rateLimitEnforce.test.ts', 'enforceClientRateLimit — degraded ceiling on Redis error (KS-616) still enforces the limit when the Redis counter throws (degrades, does not disable)', 'failed', 'AssertionError: expected "vi.fn()" to be called once, but got 0 times\n    at /private/tmp/claude-501/-Volumes-DevMASTER-WEDNESDAY/1e211184-c0a0-4757-a7c5-e9b4a44dcab4/scratchpad/gate1017_draft_470v81bj/wt_head/Blockchain/Dev/services/api-gateway/src/__tests__/rateLimitEnforce.test.ts:188:24\n    at processTicksAndRejections (node:internal/process/task_queues:105:5)\n    at file:///Volumes/DevMASTER/')
+   NOT-PASSED ('__tests__/rateLimitEnforce.test.ts', 'enforceClientRateLimit — degraded ceiling on Redis error (KS-616) still reports rate-limit headers while degraded', 'failed', 'AssertionError: expected "vi.fn()" to be called with arguments: [ \'X-RateLimit-Remaining\', \'8\' ]\n\nReceived:\n\n  1st vi.fn() call:\n\n  [\n-   "X-RateLimit-Remaining",\n-   "8",\n+   "X-RateLimit-Limit",\n+   "9",\n  ]\n\n  2nd vi.fn() call:\n\n  [\n    "X-RateLimit-Remaining",\n-   "8",\n+   "2",\n  ]\n\n  3rd vi.fn() call:\n\n  [\n-   "X-RateLimit-Remaining",\n-   "8",\n+   "X-RateLimit-Reset",\n+   "1789598782",\n  ]\n\n\n')
+copied qa1017-drafter-probe.test.ts sha ca8c56b83a4c into head label probe_tamper_G-KEYSCOPE
+08:45:27 AEST {"label": "probe_tamper_G-KEYSCOPE", "tree": "head", "rc": 0, "files": 1, "tests": 7, "passed": 7, "failed": 0, "pending": 0, "todo": 0, "failed_suites": 0, "success": true, "secs": 1.3}
+quarantined __tests__/qa1017-drafter-probe.test.ts -> 084527608384.-a7c5-e9b4a44dcab4__scratchpad__gate1017_draft_470v81bj__wt_head__Blockchain__Dev__services__api-gateway__src____tests____qa1017-drafter-probe.test.ts
+restore sha256 identical True HEAD blob f4b66aa1a worktree f4b66aa1a True
+git diff --quiet rc 0
+DENOMINATOR (53, 432) expected (53, 432) pending 0 OK
+ROW-START G-AFTER head 08:45:27 AEST predicted-by drafter: limiter moved after next() (item 8)
+tracked porcelain before 0
+anchor count 1
+marker QA-TAMPER-GAFTER count 1
+08:45:29 AEST project tsc --noEmit -p . tree head rc 0 lines 0 
+08:45:36 AEST {"label": "tamper_G-AFTER", "tree": "head", "rc": 1, "files": 53, "tests": 432, "passed": 429, "failed": 3, "pending": 0, "todo": 0, "failed_suites": 3, "success": false, "secs": 6.9}
+   NOT-PASSED ('__tests__/ks1195-per-key-rate-limiter-runs-after-authentication.test.ts', 'KS-1195: the per-key limiter in the REAL app A1: a refused create answers once and never reaches the handler (2 upstream creates, no double send)', 'failed', 'AssertionError: expected 4 to be 2 // Object.is equality\n    at /private/tmp/claude-501/-Volumes-DevMASTER-WEDNESDAY/1e211184-c0a0-4757-a7c5-e9b4a44dcab4/scratchpad/gate1017_draft_470v81bj/wt_head/Blockchain/Dev/services/api-gateway/src/__tests__/ks1195-per-key-rate-limiter-runs-after-authentication.test.ts:162:38\n    at file:///Volumes/DevMASTER/!CODING/Secuura/Blockchain/2_Project_Files/Blockcha')
+   NOT-PASSED ('__tests__/ks1195-per-key-rate-limiter-runs-after-authentication.test.ts', 'KS-1195: the per-key limiter in the REAL app R2: the same ceiling holds on a proxied family (GET /api/anchors), and a refused read is not forwarded', 'failed', 'AssertionError: expected 4 to be 2 // Object.is equality\n    at /private/tmp/claude-501/-Volumes-DevMASTER-WEDNESDAY/1e211184-c0a0-4757-a7c5-e9b4a44dcab4/scratchpad/gate1017_draft_470v81bj/wt_head/Blockchain/Dev/services/api-gateway/src/__tests__/ks1195-per-key-rate-limiter-runs-after-authentication.test.ts:172:42\n    at processTicksAndRejections (node:internal/process/task_queues:105:5)\n    at fi')
+   NOT-PASSED ('__tests__/ks1195-per-key-rate-limiter-runs-after-authentication.test.ts', 'KS-1195: placement inside the real authenticateToken R3: a chain that authenticates twice counts the request once (2 allowed, then 429)', 'failed', 'AssertionError: expected 3 to be 2 // Object.is equality\n    at /private/tmp/claude-501/-Volumes-DevMASTER-WEDNESDAY/1e211184-c0a0-4757-a7c5-e9b4a44dcab4/scratchpad/gate1017_draft_470v81bj/wt_head/Blockchain/Dev/services/api-gateway/src/__tests__/ks1195-per-key-rate-limiter-runs-after-authentication.test.ts:205:31\n    at processTicksAndRejections (node:internal/process/task_queues:105:5)\n    at fi')
+copied qa1017-drafter-probe.test.ts sha ca8c56b83a4c into head label probe_tamper_G-AFTER
+08:45:38 AEST {"label": "probe_tamper_G-AFTER", "tree": "head", "rc": 0, "files": 1, "tests": 7, "passed": 7, "failed": 0, "pending": 0, "todo": 0, "failed_suites": 0, "success": true, "secs": 1.9}
+quarantined __tests__/qa1017-drafter-probe.test.ts -> 084538178730.-a7c5-e9b4a44dcab4__scratchpad__gate1017_draft_470v81bj__wt_head__Blockchain__Dev__services__api-gateway__src____tests____qa1017-drafter-probe.test.ts
+restore sha256 identical True HEAD blob 8fbe102eb worktree 8fbe102eb True
+git diff --quiet rc 0
+DENOMINATOR (53, 432) expected (53, 432) pending 0 OK
+ROW-START T0 head 08:45:38 AEST predicted-by READY 0
+tracked porcelain before 0
+08:45:39 AEST project tsc --noEmit -p . tree head rc 0 lines 0 
+08:45:46 AEST {"label": "tamper_T0", "tree": "head", "rc": 0, "files": 53, "tests": 432, "passed": 432, "failed": 0, "pending": 0, "todo": 0, "failed_suites": 0, "success": true, "secs": 6.9}
+git diff --quiet rc 0
+DENOMINATOR (53, 432) expected (53, 432) pending 0 OK
+tamper end 08:45:46 AEST

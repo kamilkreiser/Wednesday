@@ -1,0 +1,60 @@
+gh_read 2026-09-17 08:49:54 AEST | closing regex controls {'Fixes KS-1195': 1, 'closes #12': 1, 'Refs KS-1195': 0}
+PR #1017 open draft False merged False | head cbe29597d11e59f2e1a14519e9ba3dbf6de9a756 feature/ks-1195-api-gateway-per-key-rate-limiter-never-fires | base develop 7e89318bcedbc9a35757d4298ace54a6a23020bd
+  head == pin: True | title: KS-1195: the per-key rate limiter runs after authentication, so a key's ceiling is enforced | title closing []
+  mergeable None unknown | commits 2 files 5 +254 -13 | review_comments 0 comments 1 | user kksecura
+  body chars 12654 at-signs 0 closing [] KS ids {'KS-1195': 3, 'KS-1198': 1, 'KS-1201': 1, 'KS-164': 2, 'KS-170': 1, 'KS-256': 1, 'KS-953': 1} | Refs KS-1195 1 | KS-1187 0
+  deploy-precondition lines (deploy AND unmeasured, case-insensitive): 2
+    > Gate at this head. **Before any DEPLOY of this change, measure real keys' configured allowances and real connector traffic rates.** Both are UNMEASURED here: no demo or DB read was made. Once merged, any API-key caller a
+    > - **Real keys' configured allowances and real connector traffic rates are UNMEASURED; measuring them is a precondition for any deploy of this change.**
+  file modified +16 -7 bc4815c4ec9cae2f065e29dec6b938cdf49f2d23 Blockchain/Dev/packages/shared/src/__tests__/ks781-p3-3-body-parser-order.test.ts
+  file added +213 -0 ade08ac1ebd2a7305a7e253a79a78c63099bf5c0 Blockchain/Dev/services/api-gateway/src/__tests__/ks1195-per-key-rate-limiter-runs-after-authentication.test.ts
+  file modified +2 -3 db127dbfa5dd899b0a8e0d844690890d91e27f10 Blockchain/Dev/services/api-gateway/src/index.ts
+  file modified +11 -3 8fbe102eb58cc1cb7c39c242c88fad1f2d489841 Blockchain/Dev/services/api-gateway/src/middleware/auth.ts
+  file modified +12 -0 f4b66aa1abb8b337e3fa00aaf6ebba97ffb5745d Blockchain/Dev/services/api-gateway/src/middleware/rateLimitEnforce.ts
+  commit 973eb49ef602ceee4bf2134ddb9405e00663e86f parents ['7e89318bc'] closing [] KS ids ['KS-1195', 'KS-164'] KS-1187 0 | KS-1195: the per-key rate limiter runs after authentication, so a key's ceiling is enforced
+  commit cbe29597d11e59f2e1a14519e9ba3dbf6de9a756 parents ['973eb49ef'] closing [] KS ids ['KS-1195', 'KS-953'] KS-1187 0 | KS-1195: re-measure the ks781 body-parser sites after index.ts moved them by -1
+  compare develop...head: merge_base 7e89318bcedbc9a35757d4298ace54a6a23020bd status diverged ahead 2 behind 1 files 5
+  reviews 0 | review comments 0
+  issue comment 5705457578 linear[bot] 2026-09-16T22:26:51Z chars 3404 closing [] KS ids ['KS-1176', 'KS-1190', 'KS-1195', 'KS-164', 'KS-170', 'KS-695', 'KS-744', 'KS-947'] KS-1187 0
+  develop (branches API) fa887f382b212b8da4a0a4a556bacb05ea34daaa
+  blob services/api-gateway/src/middleware/auth.ts                                      develop 20311010db0eb8ba097644ce105cf8df966ce456 head 8fbe102eb58cc1cb7c39c242c88fad1f2d489841 pr1014 20311010db0eb8ba097644ce105cf8df966ce456
+  blob services/api-gateway/src/middleware/rateLimitEnforce.ts                          develop fc5c5a4d934384745565e730cd12c0a0fcfcaa70 head f4b66aa1abb8b337e3fa00aaf6ebba97ffb5745d pr1014 fc5c5a4d934384745565e730cd12c0a0fcfcaa70
+  blob services/api-gateway/src/index.ts                                                develop 6f38c819e48162e3179aaf557085766f91beecc1 head db127dbfa5dd899b0a8e0d844690890d91e27f10 pr1014 6f38c819e48162e3179aaf557085766f91beecc1
+  blob services/api-gateway/src/__tests__/ks1195-per-key-rate-limiter-runs-after-authentication.test.ts develop ABSENT head ade08ac1ebd2a7305a7e253a79a78c63099bf5c0 pr1014 ABSENT
+  blob packages/shared/src/__tests__/ks781-p3-3-body-parser-order.test.ts               develop ca1fe34a74880305cebf87e034d9d9ffa9c94f3c head bc4815c4ec9cae2f065e29dec6b938cdf49f2d23 pr1014 ca1fe34a74880305cebf87e034d9d9ffa9c94f3c
+  blob services/api-gateway/src/services/redis.ts                                       develop 47659ee9c9f06acf9ac64e09b2dc207113ba92ea head 47659ee9c9f06acf9ac64e09b2dc207113ba92ea pr1014 47659ee9c9f06acf9ac64e09b2dc207113ba92ea
+  blob services/api-gateway/src/routes/proxy.ts                                         develop b99f45a4c9c89088a7809de5f26c4f56fc94819c head b99f45a4c9c89088a7809de5f26c4f56fc94819c pr1014 b99f45a4c9c89088a7809de5f26c4f56fc94819c
+  blob services/api-gateway/src/routes/verification.ts                                  develop 28fb5834308a502f5f7b806e3b49a77627601eff head a7a6d46057a18b3460e7d08bbec5df12ab763a81 pr1014 6bd095f621183b2aaf7a3611222815b5bf1026a3
+  blob services/api-gateway/src/services/enforcement.ts                                 develop be466fbf444178bbb41293fb1d811957e55e1d2d head 533cd309c56b8167ebe00b620744259b3cc186cc pr1014 be466fbf444178bbb41293fb1d811957e55e1d2d
+  blob services/api-gateway/src/__tests__/ks1176-connector-key-level-ranks-as-none.test.ts develop 43cebf8d75376f5a40252c5096fd02747c4f0a9e head ABSENT pr1014 43cebf8d75376f5a40252c5096fd02747c4f0a9e
+  blob services/api-gateway/src/middleware/audit.ts                                     develop 052131de06c3f510e4bcaadc9b6831d0cca617c2 head 052131de06c3f510e4bcaadc9b6831d0cca617c2 pr1014 a7be8626ff1d79a0887fb8d31c44286472157644
+  blob services/api-gateway/src/__tests__/rateLimitEnforce.test.ts                      develop b5fa8a17b981d8bd0470c74ad880f45f48551de4 head b5fa8a17b981d8bd0470c74ad880f45f48551de4 pr1014 b5fa8a17b981d8bd0470c74ad880f45f48551de4
+  blob services/api-gateway/package.json                                                develop 841d8c6adcd71e885c01e65c22da9418daff276a head 841d8c6adcd71e885c01e65c22da9418daff276a pr1014 841d8c6adcd71e885c01e65c22da9418daff276a
+  blob services/api-gateway/vitest.config.ts                                            develop 5888e0b320d934f6f434e0e5ca3c74a995cecc02 head 5888e0b320d934f6f434e0e5ca3c74a995cecc02 pr1014 5888e0b320d934f6f434e0e5ca3c74a995cecc02
+  blob services/api-gateway/vitest.setup.ts                                             develop 22c1107683b8192df3bfd3e929aa94aff3dc7d45 head 22c1107683b8192df3bfd3e929aa94aff3dc7d45 pr1014 22c1107683b8192df3bfd3e929aa94aff3dc7d45
+  blob services/api-gateway/tsconfig.json                                               develop c981e6a92fdd2417fa35070eb979c5f1c77ffbcd head c981e6a92fdd2417fa35070eb979c5f1c77ffbcd pr1014 c981e6a92fdd2417fa35070eb979c5f1c77ffbcd
+  blob eslint.config.mjs                                                                develop 8c5374c6022eb0a3f449f41a570db61294aa63f1 head 8c5374c6022eb0a3f449f41a570db61294aa63f1 pr1014 8c5374c6022eb0a3f449f41a570db61294aa63f1
+  blob packages/shared/src/db/tenant-guc.ts                                             develop 86953b978062eb1d124abf3154fa1da324c6e110 head 86953b978062eb1d124abf3154fa1da324c6e110 pr1014 86953b978062eb1d124abf3154fa1da324c6e110
+  blob services/security/src/index.ts                                                   develop 0903ce4380f219765ac63f5f9399d1bf0b4f230a head 0903ce4380f219765ac63f5f9399d1bf0b4f230a pr1014 0903ce4380f219765ac63f5f9399d1bf0b4f230a
+  blob docs/openapi/secuura-api.yaml                                                    develop 122d3a2f84cf77bf2b7e2dc51489a0d5f823db1f head 122d3a2f84cf77bf2b7e2dc51489a0d5f823db1f pr1014 122d3a2f84cf77bf2b7e2dc51489a0d5f823db1f
+  open PRs: 20
+  open #1018 head 267bd8624 files 2 | exact shared with #1017 [] | guarded-path overlap [] | KS-1050: a profile update that matched no row answers 500 PR
+  open #995 head b8155636e files 5 | exact shared with #1017 [] | guarded-path overlap ['services/api-gateway/src/utils/trustHeaders.ts'] | KS-741: strip `x-emitter-internal` at originate's own inboun
+  open #989 head e62fd23cd files 5 | exact shared with #1017 [] | guarded-path overlap [] | KS-973: the pre-suite step redacts the generated password, p
+  open #949 head 7ee1a26e6 files 2 | exact shared with #1017 [] | guarded-path overlap ['package-lock.json'] | chore(deps-dev): bump prisma from 7.8.0 to 7.10.0 in /Blockc
+  open #948 head 0e8221a8c files 10 | exact shared with #1017 [] | guarded-path overlap ['package-lock.json'] | chore(deps): bump vite from 6.4.3 to 8.2.2 in /Blockchain/De
+  open #947 head d68b9d79e files 2 | exact shared with #1017 [] | guarded-path overlap ['package-lock.json'] | chore(deps-dev): bump @testing-library/jest-dom from 6.9.1 t
+  open #946 head 41cc5209a files 2 | exact shared with #1017 [] | guarded-path overlap ['package-lock.json'] | chore(deps): bump @fluentui/react-icons from 2.0.331 to 2.0.
+  open #945 head 264098fce files 2 | exact shared with #1017 [] | guarded-path overlap ['package-lock.json'] | chore(deps-dev): bump @axe-core/playwright from 4.11.3 to 4.
+  open #927 head 1041d2d32 files 2 | exact shared with #1017 [] | guarded-path overlap [] | KS-1027: close Peter's four #904 follow-ups — the OTHER cp, 
+  open #923 head d127dc7d4 files 1 | exact shared with #1017 [] | guarded-path overlap ['services/api-gateway/src/__tests__/ks570-proxy-mount-auth.test.ts'] | KS-736: the mount-auth check scored authenticateToken(false)
+  open #922 head e60a24c50 files 5 | exact shared with #1017 [] | guarded-path overlap ['docs/openapi/secuura-api.yaml', 'packages/shared/src/__tests__/ks256-spec-example-contract.test.ts', 'packages/shared/src/openapi/examples/fixtures.ts'] | KS-679: publish the anchor id shape the service actually min
+  open #920 head 2112a99e3 files 7 | exact shared with #1017 [] | guarded-path overlap [] | KS-734: make tests/e2e runnable from a clean checkout, and b
+  open #887 head 3aee3deed files 2 | exact shared with #1017 [] | guarded-path overlap [] | KS-961: run the workspace suites on the PR, advisory and non
+  open #809 head aa2270fe1 files 2 | exact shared with #1017 [] | guarded-path overlap [] | KS-693 (interim): guard the 8 M365/OneDrive/Teams unconfigur
+  open #649 head 1d9198ac7 files 22 | exact shared with #1017 [] | guarded-path overlap ['package-lock.json', 'services/api-gateway/package.json'] | chore(deps): bump pg and @types/pg in /Blockchain/Dev
+  open #639 head 2069d852e files 3 | exact shared with #1017 [] | guarded-path overlap ['package-lock.json'] | chore(deps): bump @radix-ui/react-dropdown-menu from 2.1.16 
+  open #635 head 6cbc298f4 files 2 | exact shared with #1017 [] | guarded-path overlap ['package-lock.json'] | chore(deps): bump cbor from 9.0.2 to 10.0.12 in /Blockchain/
+  open #575 head 7d32d8ae4 files 21 | exact shared with #1017 [] | guarded-path overlap ['package-lock.json', 'services/api-gateway/package.json'] | chore(deps): bump dotenv from 16.6.1 to 17.4.2 in /Blockchai
+  open #572 head 72396fa21 files 2 | exact shared with #1017 [] | guarded-path overlap ['package-lock.json'] | chore(deps-dev): bump @types/office-js from 1.0.599 to 1.0.6
+gh_read end 08:51:24 AEST

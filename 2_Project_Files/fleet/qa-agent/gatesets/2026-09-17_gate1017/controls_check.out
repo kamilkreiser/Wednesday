@@ -1,0 +1,66 @@
+controls_check 2026-09-17 09:06:30 AEST | launcher sha256 91f778447ea03752
+brief/prompt replacements: {'nosubject': 1, 'notier': 3, 'nosha': 4, 'nomail': 1, 'nofarm': 1, 'noreportdir': 1, 'nonottested': 1, 'noaddendum': 1, 'noround1': 1}
+product-file fixtures (git blob): {'auth INTO region (API-key branch continuation)': 'af32ca78c', 'auth OUTSIDE region (header doc comment)': '62891058f', 'rle INTO region (machine set)': '26091777f', 'rle OUTSIDE region (header doc comment)': 'd1a1721ca', 'index INTO region (global limiter max)': 'd720b074f', 'index ABOVE the pins, outside region (one import-area line)': '07d0fc444'}
+index OUTSIDE region, after the pins (appended line) git blob 576be78b9
+N1 missing subject: prompt without the exact verdict subject | stderr: REFUSING: prompt does not carry the exact verdict subject, the coagent@ sender and the wednesday-agent@ recipient
+rc=23
+expected 23: OK
+N2 missing tier: brief without TIER 1 | stderr: REFUSING: brief and prompt disagree about the tier
+rc=7
+expected 7: OK
+N3 missing SHA: brief without the head SHA | stderr: REFUSING: brief or prompt does not name the head SHA cbe29597d11e59f2e1a14519e9ba3dbf6de9a756 — a gate about another SHA is another gate
+rc=20
+expected 20: OK
+N4 missing mail step: prompt without MAIL YOUR VERDICT | stderr: REFUSING: prompt does not tell the agent to MAIL its verdict
+rc=12
+expected 12: OK
+N5 missing per-entry farm: prompt without node_modules per ENTRY | stderr: REFUSING: prompt does not require node_modules farmed per ENTRY (a wholesale link can write through to the checkout .vite cache)
+rc=22
+expected 22: OK
+N6 head override = 973eb49ef (the product commit, not the head) | stderr: REFUSING: #1017 — 973eb49ef602ceee4bf2134ddb9405e00663e86f is not at refs/heads/feature/ks-1195-api-gateway-per-key-rate-limiter-never-fires on origin — the head moved; the brief is about a different SHA
+rc=6
+expected 6: OK
+N7 develop = the #1017 head itself (auth.ts 8fbe102eb LANDED) | stderr: REFUSING: develop services/api-gateway/src/middleware/auth.ts blob 8fbe102eb = #1017 own — #1017 has landed; this brief is stale (develop cbe29597d11e59f2e1a14519e9ba3dbf6de9a756) — re-pin deliberately: a different brief
+rc=19
+expected 19 + text 'has landed': OK
+N8 develop = 7e89318bc, the pre-#1014 develop (verification.ts a7a6d4605 nobody pinned) | stderr: REFUSING: origin develop is at 7e89318bcedbc9a35757d4298ace54a6a23020bd (pinned fa887f382b212b8da4a0a4a556bacb05ea34daaa) and the move is not provably disjoint: GUARDED develop services/api-gateway/src/routes/verification.ts blob a7a6d4605 — a version nobody pinned — confirm the delta, then re-pin deliberately (launcher DEVELOP_SHA / JUDGED blobs / DEV_CONTENT_ALLOWED + brief TARGET + prompt)
+rc=18
+expected 18 + text 'verification.ts': OK
+N9 develop = 9ba0caf78, #1014 branch head (audit.ts a7be8626f / verification.ts 6bd095f62 nobody pinned) | stderr: REFUSING: origin develop is at 9ba0caf78b8ddb737541df38303b776c982521d2 (pinned fa887f382b212b8da4a0a4a556bacb05ea34daaa) and the move is not provably disjoint: GUARDED develop services/api-gateway/src/routes/verification.ts blob 6bd095f62 — a version nobody pinned — confirm the delta, then re-pin deliberately (launcher DEVELOP_SHA / JUDGED blobs / DEV_CONTENT_ALLOWED + brief TARGET + prompt)
+rc=18
+expected 18 + text 'nobody pinned': OK
+N10 develop auth.ts moved INTO its region (fixture) | stderr: REFUSING: origin develop is at fa887f382b212b8da4a0a4a556bacb05ea34daaa (pinned fa887f382b212b8da4a0a4a556bacb05ea34daaa) and the move is not provably disjoint: GUARDED develop services/api-gateway/src/middleware/auth.ts blob af32ca78c — the #1017 region changed: region 88392bbe0e87d3e4 vs pinned 2f397badf55601f7 — confirm the delta, then re-pin deliberately (launcher DEVELOP_SHA / JUDGED blobs / DEV_CONTENT_ALLOWED 
+rc=18
+expected 18 + text 'region changed': OK
+N11 develop rateLimitEnforce.ts moved INTO its region (fixture) | stderr: REFUSING: origin develop is at fa887f382b212b8da4a0a4a556bacb05ea34daaa (pinned fa887f382b212b8da4a0a4a556bacb05ea34daaa) and the move is not provably disjoint: GUARDED develop services/api-gateway/src/middleware/rateLimitEnforce.ts blob 26091777f — the #1017 region changed: region 692a82d096faa372 vs pinned a8b72dd55b760aee — confirm the delta, then re-pin deliberately (launcher DEVELOP_SHA / JUDGED blobs / DEV_CONT
+rc=18
+expected 18 + text 'region changed': OK
+N12 develop index.ts moved INTO the limiter region (fixture) | stderr: REFUSING: origin develop is at fa887f382b212b8da4a0a4a556bacb05ea34daaa (pinned fa887f382b212b8da4a0a4a556bacb05ea34daaa) and the move is not provably disjoint: GUARDED develop services/api-gateway/src/index.ts blob d720b074f — the #1017 region changed: region 88788a5f1c6a0770 vs pinned 451630676f0ea135 — confirm the delta, then re-pin deliberately (launcher DEVELOP_SHA / JUDGED blobs / DEV_CONTENT_ALLOWED + brief TA
+rc=18
+expected 18 + text 'region changed': OK
+N13 develop index.ts gained one line ABOVE the ks781 pins, outside the region (fixture) | stderr: REFUSING: origin develop is at fa887f382b212b8da4a0a4a556bacb05ea34daaa (pinned fa887f382b212b8da4a0a4a556bacb05ea34daaa) and the move is not provably disjoint: GUARDED develop services/api-gateway/src/index.ts blob 07d0fc444 — the ks781 body-parser pin lines moved: line 846,859,892 no longer holds its site, so the merged packages/shared suite would go red — the KS-953 class — confirm the delta, then re-pin deliberat
+rc=18
+expected 18 + text 'pin lines moved': OK
+P14 POSITIVE: develop auth.ts moved OUTSIDE its region (fixture) must PASS | stdout:   auth.ts 62891058f = moved OUTSIDE the #1017 region, judged by content: region 2f397badf556
+rc=0
+expected 0 + text 'moved OUTSIDE': OK
+P15 POSITIVE: develop rateLimitEnforce.ts moved OUTSIDE its region (fixture) must PASS | stdout: rateLimitEnforce.ts d1a1721ca = moved OUTSIDE the #1017 region, judged by content: region a8b72dd55b76
+rc=0
+expected 0 + text 'moved OUTSIDE': OK
+P16 POSITIVE: develop index.ts moved OUTSIDE the region AFTER the pins (fixture) must PASS | stdout: index.ts 576be78b9 = moved OUTSIDE the #1017 region, judged by content: region 451630676f0e ... pins 846/859/892 hold
+rc=0
+expected 0 + text 'pins 846/859/892 hold': OK
+N17 prompt without the report directory | stderr: REFUSING: brief or prompt does not name the report directory /Volumes/DevMASTER/!CODING/Testing Agent MAIN/projects/secuura/reports/2026-09-17-ks1195-1017-cbe29597d-tier1-r1/, or the prompt does not name NOT-TESTED.written-first.md — the report must land where Wednesday reads it, NOT-TESTED first
+rc=24
+expected 24: OK
+N18 prompt without NOT-TESTED.written-first.md | stderr: REFUSING: brief or prompt does not name the report directory /Volumes/DevMASTER/!CODING/Testing Agent MAIN/projects/secuura/reports/2026-09-17-ks1195-1017-cbe29597d-tier1-r1/, or the prompt does not name NOT-TESTED.written-first.md — the report must land where Wednesday reads it, NOT-TESTED first
+rc=24
+expected 24: OK
+N19 brief without the MERGE ADDENDUM | stderr: REFUSING: brief or prompt does not carry the MERGE ADDENDUM — the merge seat's equality targets and the deploy precondition ride on it
+rc=25
+expected 25: OK
+N20 brief without ROUND 1 | stderr: REFUSING: brief and prompt disagree about the round (ROUND 1)
+rc=15
+expected 15: OK
+unexpected rows 0 of 20
+end 09:07:27 AEST

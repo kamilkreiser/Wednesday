@@ -1,0 +1,169 @@
+ultrathink
+
+You are the fleet QA agent running ONE TIER 1 ROUND 1 gate (round 1 of 2 under the cap) over Secuura/Blockchain PR #1017 (KS-1195, Seat A) at
+head cbe29597d11e59f2e1a14519e9ba3dbf6de9a756. The defect (the #1014 round-1 gate's F-2): the per-key API rate limiter `enforceClientRateLimit`
+(KS-164/170/616) was app.use()d at index.ts:524, before any `authenticateToken`, so it never saw `req.user` and never fired. The fix: in
+services/api-gateway/src/middleware/auth.ts each `req.user`-setting branch (API key :319, test token :349, JWT :400) now ends with
+`runWithTenantId(<tenant>, () => clientRateLimit(req, res, next))`; middleware/rateLimitEnforce.ts adds a once-per-request WeakSet guard (:73, :94-98);
+the dead index.ts mount is removed (+2 -3); a NEW 8-cell test (ks1195-per-key-rate-limiter-runs-after-authentication.test.ts); a second, test-only commit
+re-pins the packages/shared ks781 body-parser line numbers by -1 (the KS-953 class). TIER 1 (Wednesday's ruling): auth middleware on every authenticated
+route. No rendered surface changes: say whether the real-browser half of tier 1 applies.
+
+Read your brief FIRST and in full, then plan:
+/Volumes/DevMASTER/WEDNESDAY/2_Project_Files/fleet/qa-agent/briefs/2026-09-17_secuura-1017-ks1195-tier1.md
+Then the charter it names, the seat's READY (gatesets/2026-09-17_gate1017/mail_1017_ready.md), Wednesday's shape ANSWER with A1-A4
+(gatesets/2026-09-17_ks1195/answer_shape_census.md), the built STATUS (gatesets/2026-09-17_ks1195/status_built.md) and the #1014 round-1 gate's
+report that found the defect (its F-2 and evidence/qa1014-gate-census.test.ts):
+/Volumes/DevMASTER/!CODING/Testing Agent MAIN/projects/secuura/reports/2026-09-17-ks1176-1014-616c766a5-tier1-r1/
+No prior round exists on any #1017 SHA.
+
+Head (git ls-remote 08:30:19 and 08:52:38 AEST, the PR API 08:49:54, Wednesday's ls-remote at receipt, agree; the launcher re-asserts it):
+  #1017 cbe29597d11e59f2e1a14519e9ba3dbf6de9a756 = refs/pull/1017/head = feature/ks-1195-api-gateway-per-key-rate-limiter-never-fires
+  two commits: 973eb49ef (product + test) then cbe29597d (packages/shared ks781 pins only). base = merge-base = 7e89318bcedbc9a35757d4298ace54a6a23020bd.
+  5 files: auth.ts 20311010d -> 8fbe102eb; rateLimitEnforce.ts fc5c5a4d9 -> f4b66aa1a; index.ts 6f38c819e -> db127dbfa; NEW ks1195 test ade08ac1e;
+  shared ks781 test ca1fe34a7 -> bc4815c4e.
+  DEVELOP MOVED DURING DRAFTING: #1014 (KS-1176) MERGED 08:44:35 AEST as fa887f382b212b8da4a0a4a556bacb05ea34daaa (tree 5748a1d68; verification.ts,
+  enforcement.ts, a ks1176 test — file-disjoint from #1017). compare develop...head = merge_base 7e89318bc, diverged, ahead 2, behind 1, files 5.
+  Trees you run: base 7e89318bc, head cbe29597d, merged = head + a local --no-ff merge of the then-current develop (never pushed). Drafter merged-tree
+  OID (merge-tree --write-tree in its OWN clone = its local merge commit's tree): 135b07468c0f12279836c43051e16d5ff1053398 for develop fa887f382 — name
+  yours. If develop moves again, judge by content, name every tree, and re-run items 1, 2, 3 on the merged tree.
+Repo:    /Volumes/DevMASTER/!CODING/Secuura/Blockchain/2_Project_Files  (READ-ONLY — git clone --shared --no-checkout by SHA into your own
+  fresh mktemp -d; git write verbs there only, from a script file; never merge-tree --write-tree or git apply in the checkout (both write); never enter
+  any seat's worktree (Seat A is live on KS-1187 read 2) or another gate's clone; never vitest inside the checkout; pin by SHA, never origin/*)
+Farm node_modules per ENTRY in your clone (R-6 from the #1009 gate): Blockchain/Dev/node_modules (987), services/api-gateway/node_modules (8) and
+  packages/shared/node_modules (8), each per entry, .vite/.vitest/.cache skipped, @secuura/* relinked into your tree; shared dist built per tree,
+  IN TREE asserted. NEVER link a node_modules tree wholesale — not for any package; create no node_modules where nothing runs.
+  Node runs only with cwd inside your clone (a node run from another root drops a stray logs/ there).
+
+You are FINDINGS-ONLY. You never fix, never merge, never push, never deploy, never comment, never file, never tick an
+ack box, never `@`, never write to Linear or GitHub, and nothing goes to Peter or Stuart.
+
+NEVER run a push, the real pre-push hook, or preflight.sh inside the Secuura checkout or any of its worktrees.
+
+NEVER print a credential value, and never open, read or copy a secrets file into output — a script may read GH_TOKEN / LINEAR_API_KEY by
+NAME from /Volumes/DevMASTER/!CODING/Secuura/Blockchain/4_Credentials/.env and AGENTMAIL_API_KEY by NAME from
+/Volumes/DevMASTER/WEDNESDAY/4_Credentials/.env for the calls the brief allows (GitHub GET, Linear query, the one verdict mail), and never
+echoes them. Count, never echo. RSA keys, sk_ strings and JWTs in your probe are THROWAWAY, generated per run.
+
+NO shared docker stack, no :6882 / :7082 slot, no kintsugi, no demo, no az, NEVER the wallet mnemonic (KS-535 HOLD). This gate needs NO
+container: the REAL index.ts app in-process (real authenticateToken, real enforceClientRateLimit, real audit middleware, real redis.ts in-memory
+fallback) with security / auth / originate / anchoring and every other *_SERVICE_URL as ONE loopback recording stub. NO real Redis, not even
+in-process: the real redis.ts client against a loopback fake only if one exists in the repo (the drafter found none — then NOT TESTED); a vi.mock'd
+getRedisClient returning an in-process async fake is allowed as a LABELLED substitute. Run `docker info` ONCE and print its rc on its own line (UP is
+NOT permission; create no container). LOOPBACK ONLY: every listener binds 127.0.0.1:0. ANY LISTENER YOUR RUNS START, YOU END: identify it by port +
+cwd, SIGTERM that pid, never a pattern kill, and recount after (KS-1201's preflight leak exists; do not add to it); quote an lsof TCP LISTEN census at
+start and close. Do NOT probe absolute-form request targets (KS-1187 is a Kam-held card). Set UNHANDLED_REJECTION_MODE=survive before importing the
+app (index.ts's default `exit` handler calls gracefulShutdown). No Akto, no k6, no Playwright, no Schemathesis run (Kam's 40% cap; NOT COMMISSIONED)
+— YOU rule whether Schemathesis/Akto are REQUIRED, with the measured reason. Time-box 50 minutes of work.
+
+What Wednesday requires (brief items 1-13; each carries drafter predictions marked predicted-by: drafter):
+
+1. THE LIMITER FIRES on the REAL index.ts app for an api_key principal on EVERY authenticated route family: routes enumerated from the SOURCE
+   (index.ts, routes/*.ts, services/health.ts, with mount prefixes; a real method and sub-path for every router.use prefix — GET-on-prefix answered
+   405 at the spec method map on 7 prefixes in the drafter's run), a FRESH key per route (own connectorId, N = 2) x N+1: request N+1 -> 429 with
+   X-RateLimit-* and Retry-After, and an upstream/handler HIT COUNTER = the allowance. /api/documents, every proxied family (proxy.ts, 54 sites),
+   verification (13), admin (6), platform (14), notifications, health (/api/connector/info), /api/integrations. A family that admits a key and stays
+   unlimited = Major. Base vs head vs merged. Drafter (measured): 189 literal routes; head 92 routes limited, each counted ONCE (triples 200/200/429
+   x52, 403/403/429 x20, 201/201/429 x8, 404 x7, 502 x3, 400 x2; upstream hits 2 on 45 routes, 0 on 46 gateway-answered, 6 on /api/documents/:id/verify);
+   base 0 of 189 carry X-RateLimit-*; merged = head, 0 row diffs.
+2. COUNTED ONCE: census every chain that runs authenticateToken more than once (one request per route at allowance 1000, Remaining 999 vs 998, at head
+   AND under G-ERASE), READ both mount sites per chain. KS-870 on the REAL gdpr route is mandatory (POST /api/gdpr/erasures and GET …/:externalRef,
+   a subjects:erase key AND a connector-grace-role key). G-ERASE = the guard disabled IN A FORM THAT COMPILES, run against the real erasure route.
+   Double counting on any real route at head = Major. Drafter (measured): under the guard-off tamper 8 census rows = 7 real routes count twice —
+   both erasure routes, GET /api/documents/:id, POST /api/documents/:id/{sign, sign/request, anchor, share} — limit 2 -> [201, 429, 429]; at head
+   Remaining 1 on all; the whole suite under the tamper sees only R3 (a bare app): no cell covers any real double-authenticating route.
+3. NOT WIDENED: JWT principals authMethod email / wallet / federated / social / jwt / oauth / absent, a connector JWT as Bearer (KS-1198), a test token,
+   a non-sk x-api-key beside a JWT -> never per-key limited, no X-RateLimit-* from this limiter; machine spellings (api_key, oauth_app on JWT and test
+   token; API_KEY) as controls. Unauthenticated traffic unchanged: no credential -> 401 (required) or pass-through (optional: proxy.ts :573 :859 :942
+   :1031 :1048 :1097 — confirm), unknown key -> 401 / pass-through, both BEFORE any count. The per-IP limiters (index.ts :490-506 global, :509-520
+   verification) byte-identical and behaviourally unchanged at their DEFAULT maxima. A refusal of a non-machine principal = Blocker. Drafter
+   (measured): 0 of 189 routes carry X-RateLimit-Limit for an email JWT, none or an unknown key; JWT api_key / oauth_app and test-token api_key ARE
+   limited at the default 100 (the READY says "no producer": re-read every signer); oauth not limited, and the G-OAUTH tamper (oauth added) = 0 reds.
+4. A1: ONE RESPONSE ONLY on the 429 path — no double next, no ERR_HTTP_HEADERS_SENT (capture logger, console.error AND uncaughtException), hit
+   counters exact; a downstream handler that throws synchronously and one that rejects asynchronously, through the continuation, API-key and JWT
+   branches, in-memory and fake-Redis (an await before next()); plant a next() that throws inside the limiter's try (:178 -> the catch counts AGAIN and
+   may call next() twice) and measure. Drafter (measured): sync throw 500 once then 429, hits 1; async reject hangs (pre-existing), 1 unhandled
+   rejection, then 429; headers-sent lines 0; the next()-throws plant NOT measured.
+5. A2: tenant context intact — currentTenantId() in handlers after the continuation (key, test token, JWT, super-admin override), x-tenant-id to
+   upstream, base = head for allowed requests, in-memory and fake-Redis; interleaved concurrent requests of two tenants' keys while one is being
+   refused (no bleed; the refused request's audit row carries its own tenant). TT must go red. Drafter (measured): 16 parallel alternating keys, 0
+   mismatches at head; under TT tenant null and 10 mismatches; x-tenant-id forwarded == key tenant on 42 routes, base = head.
+6. A3: the Redis-available path (REAL redis.ts client against a loopback fake from the repo — drafter found none: re-run the search with controls and
+   say NOT TESTED at equal prominence; the vi.mock'd async fake as a LABELLED substitute, incl. KS-616's mid-command throw) and the degrade path, base vs
+   head. Drafter (measured, substitute): head 929 fake-client calls, 0 DEGRADED, every class identical to in-memory; base 0 calls.
+7. A4: which allowance a key gets — the validate response's rateLimit / rateLimitWindow vs the gateway's || 100 / || 60 for 0 / NaN / null, and the
+   edges; READ every writer of svc_api_keys.rate_limit and rule what a real producer emits (the create schema clamps int 1..10000 / 60..86400).
+   Drafter (measured): absent/null/0 -> 100 (window 0 -> 60); 1000/3600 -> 1000; -1 -> 429 on EVERY request; 1.5 -> 1; 'abc' -> never limited,
+   X-RateLimit-Limit abc / Remaining NaN; true -> 1; window -5 -> never limited; window 'abc' -> Retry-After NaN; window 0.001 -> unlimited.
+8. ORDER AND STATE: where the count sits relative to key validation (cache), the cached bearer exchange, the audit middleware and the workflow /
+   originate forward; for an allowed and a refused request, cached and uncached key (two keys, one connectorId): validate calls, exchange calls, audit
+   rows (mock ../db isDbAvailable true and capture the INSERT), forwards; the same under the gate's G-AFTER tamper (the limiter after next()). Drafter
+   (measured): a refused POST still writes an audit row (success false); a fresh key's refused request still costs validate 1 + exchange 1, forwarded
+   0; under G-AFTER refused requests are forwarded, 3 whole-suite reds, and `process.exit unexpectedly called with "0"` was captured.
+9. THE SEAT'S 6 TAMPERS RE-DERIVED EXACTLY — T0 0 · TA 4 · TG 1 · TW 6 · TT 1 · TI 0 — each on the WHOLE api-gateway suite, denominator asserted
+   53 / 432, pending 0, project tsc rc per row (a tamper that does not compile is VOID: deleting the guard or the filter wholesale is TS6133 rc 2 —
+   keep a read; state every form), sha-restored; PLUS the gate's own: G-CTRL aimed at the JWT control (drafter: exactly 2 — the JWT control + the
+   existing "email" interactive-method cell), G-KEYSCOPE the counter keyed per IP instead of per key (drafter: 6; do two keys from one IP share a
+   bucket? yes under the tamper), G-ERASE the guard removed run against the KS-870 route (drafter: 1 whole-suite red; real route [201, 429, 429, 429]),
+   G-OAUTH and G-AFTER as in items 3 and 8, and your own aimed at the unauthenticated legs and the JWT branch's catch.
+10. INCLUDING tsc (not tsc -p) base / head / merged, NEW only, planted control; eslint by rule AND message with a firing control. packages/shared
+   851/851 at head given the ks781 line-pin commit (the KS-953 class): prove the pins match head's index.ts lines 845/858/891, with a control (head pins
+   over base index.ts bytes -> red; 973eb49ef -> 849/851). Drafter (measured): including tsc 31 lines / 11 files on all three trees, NEW 0, plant +1;
+   eslint 1 / 0 / 2 base = head by rule+message, test file 0, controls fire; pins head 231/231, over base index 229/231, 973eb49ef 849/851.
+11. MERGED TREE with the then-current develop (fa887f382 at draft close = #1014's squash; #1014 edits verification.ts and enforcement.ts, disjoint by
+   file). NAME the OID. Run items 1-3 on it. Drafter (measured): merged 135b07468, suites base 52/424, head 53/432, merged 54/450, tsc rc 0; census and
+   every stage identical to head; shared tree dbd72dea0 identical on head and merged.
+12. LINEAR: attachmentsForURL(pull/1017) exactly KS-1195 linkKind contributes (controls pull/1014 -> KS-1176 contributes; pull/99999 -> 0); 0 closing
+   phrases (planted controls); KS-1195 stays In Progress on merge (§5f); KS-1187 NOT named (count with a positive control); the deploy precondition
+   present on the PR body AND on KS-1195 comment 6e25f648. Re-read linkKind immediately before the mail. Drafter 08:49-08:53: all as expected.
+13. SCHEMATHESIS / AKTO: REQUIRED or NOT APPLICABLE with the measured reason (drafter predicts NOT APPLICABLE: 343 spec operations already declare 429
+   with X-RateLimit / Retry-After; no status, header, field or schema change; what changed is when a documented 429 is reachable) plus a Record for the
+   platform suites (READ systemTest/schemathesis/scripts/setup_api_key.py's mint: its allowance, and whether it sets a connectorId). NOT TESTED at equal
+   prominence: real keys' allowances, real connector traffic (Platform S), a real Redis, multi-replica counting, the deployed gateway.
+
+LEAD WITH the drafter's disagreement 1 (brief §2): "per-key" is per-CONNECTOR, and every key whose validate response carries no connectorId shares ONE
+bucket (`connector:api-key`) ACROSS TENANTS — drafter (measured): tenant X's key 200, 200, then tenant Y's key's FIRST request 429, and a third tenant's
+limit-1000 key shows Remaining 996; base never limits. The seat's harness gives every key its own connectorId, so no cell can see it. Rule it
+(predicted Major, NEW, widened by #1017), with where real keys lack a connector_id (READ: create schema optional; KS-869's pre-backfill rows).
+
+Hygiene: /bin/bash here is 3.2 — write runners in Python. zsh: no PIPESTATUS (`cmd > out 2>&1; rc=$?`), no timeout on macOS, `set -- $var`
+does not word-split, `"$VAR:path"` applies history modifiers (write `"${VAR}:path"`), never begin a line with `=====`. Your tool shell's grep may be a
+function: /usr/bin/grep -i with a same-file positive control; `git grep -c` prints nothing for a zero — silence is unread, not 0. Never `cd` in your
+own tool calls; absolute paths; git write verbs only inside script files. stderr is never discarded. Clocks from `date`, never estimated. Every
+scripted edit asserts its anchor count = 1 and a marker. Never edit index.ts for a probe (its line numbers are pinned by packages/shared); mount probes
+on a bare app. Quote the Secuura checkout's porcelain count, .git/config sha256, for-each-ref count, .git/worktrees count, origin develop SHA,
+refs/pull/1017/head and the checkout branch at start, mid and close as THREE timestamped readings, plus the checkout's .vite readings; if
+refs/pull/1017/head moves, STOP — the brief is about a different SHA. develop moving is expected; judge it by content, name it.
+Never `rm`: fresh mktemp -d per attempt; quarantine scratch tests and configs by rename. No container is created; never touch a
+secuura-* container.
+Do no memory maintenance of your own project's memory store inside this session.
+
+Report FOUND / TESTED / HOW, with controls, into
+/Volumes/DevMASTER/!CODING/Testing Agent MAIN/projects/secuura/reports/2026-09-17-ks1195-1017-cbe29597d-tier1-r1/
+(a NOT-TESTED file written FIRST, BEFORE any run; then report.md and evidence/): the trees with OIDs; the route-family census per tree with
+hit counters and its oracle; the double-count census with G-ERASE on the real erasure route; the principals table and the per-IP limiters; A1 / A2 /
+A3 / A4 / order-and-state with their controls; the full tamper table with forms, tsc rc and VOID rows; including tsc, eslint and the shared pins;
+merged tree and suites; Linear; the Schemathesis/Akto ruling; the listener census start / close; and what you did NOT test at the same prominence as
+the findings. Every finding carries its evidence class (MEASURED AT RUNTIME / PROBED / READ ONLY / RELAYED), severity, target (PR or TICKET),
+SHIPS-WITH or TICKET, and its oracle. Name every prediction slip against its predictor (the READY, the seat, the drafter, Wednesday).
+Client-facing communication = ticket comments only, and not from you; anything needing a push goes to Wednesday as an escalation candidate.
+Never delete; cleanup means quarantine.
+Verdict: ONE line — GO, GO WITH FINDINGS, or NO GO — on cbe29597d11e59f2e1a14519e9ba3dbf6de9a756, as the delta over base 7e89318bc AND on the
+merged tree (name the develop and the merged-tree OID). Then plain statements on items 1-13.
+Give the merge seat its MERGE ADDENDUM line: "squash cbe29597d onto develop <then-current develop; fa887f382 at draft close = #1014's squash> (merged
+tree <OID>; drafter 135b07468; file-disjoint from #1014's squash by content); #1017 attaches to KS-1195 only, linkKind contributes — KS-1195 stays In
+Progress on merge (§5f: a live sweep is owed); the deploy precondition stands: real keys' configured allowances and real connector traffic rates are
+UNMEASURED and must be measured before any deploy (PR body + KS-1195 comment 6e25f648); KS-1187 not named; equality targets after the squash:
+auth.ts blob 8fbe102eb / rateLimitEnforce.ts f4b66aa1a / index.ts db127dbfa / ks1195 test ade08ac1e / ks781 test bc4815c4e; api-gateway 52/424 at
+7e89318bc -> 53/432 at head -> <merged n/n> (re-measure; drafter 54/450); packages/shared 44/851 at head; Records: <yours>" — plus any finding
+with its target.
+
+MAIL YOUR VERDICT to wednesday-agent@agentmail.to when the pass is complete. Your pane holds ~19 lines of alternate screen with no
+scrollback, so a verdict that stays in the pane is one pane-close from being lost -- this is not a formality, it is the only durable
+copy; the verdict MAIL is the END STATE and the wait signal. Send it FROM coagent@agentmail.to. Subject, EXACTLY:
+[QA -> Wednesday] TIER 1 GATE #1017 (KS-1195) cbe29597d — <GO | GO WITH FINDINGS | NO GO>
+(The QA project has no send_brief.sh of its own: POST https://api.agentmail.to/v0/inboxes/coagent@agentmail.to/messages/send with JSON
+{"to": ["wednesday-agent@agentmail.to"], "subject": "...", "text": "..."} and Authorization: Bearer $AGENTMAIL_API_KEY, the key by NAME
+from Wednesday's .env, never echoed. Build the body from a template file with no shell interpolation and assert the backtick spans survived.
+Confirm the API answered 2xx and quote the message id in your final pane line. Timestamps in the mail come from `date`, never estimated.
+The MAIL is the end state.)

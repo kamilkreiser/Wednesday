@@ -1,0 +1,52 @@
+{
+ "label": "tamper_G-KEYSCOPE",
+ "tree": "head",
+ "rc": 1,
+ "files": 53,
+ "tests": 432,
+ "passed": 426,
+ "failed": 6,
+ "pending": 0,
+ "todo": 0,
+ "failed_suites": 6,
+ "success": false,
+ "secs": 7.0,
+ "notpassed": [
+  [
+   "__tests__/ks1195-per-key-rate-limiter-runs-after-authentication.test.ts",
+   "KS-1195: the per-key limiter in the REAL app R2: the same ceiling holds on a proxied family (GET /api/anchors), and a refused read is not forwarded",
+   "failed",
+   "AssertionError: expected [ 429, 429, 429, 429, 429 ] to deeply equal [ 200, 200, 429, 429, 429 ]\n    at /private/tmp/claude-501/-Volumes-DevMASTER-WEDNESDAY/1e211184-c0a0-4757-a7c5-e9b4a44dcab4/scratchpad/gate1017_draft_470v81bj/wt_head/Blockchain/Dev/services/api-gateway/src/__tests__/ks1195-per-key-rate-limiter-runs-after-authentication.test.ts:170:37\n    at processTicksAndRejections (node:inter"
+  ],
+  [
+   "__tests__/ks1195-per-key-rate-limiter-runs-after-authentication.test.ts",
+   "KS-1195: the per-key limiter in the REAL app A2: an allowed proxied request still carries the key's tenant to the upstream",
+   "failed",
+   "AssertionError: R2 ran first and forwarded at least one read: expected 0 to be greater than 0\n    at /private/tmp/claude-501/-Volumes-DevMASTER-WEDNESDAY/1e211184-c0a0-4757-a7c5-e9b4a44dcab4/scratchpad/gate1017_draft_470v81bj/wt_head/Blockchain/Dev/services/api-gateway/src/__tests__/ks1195-per-key-rate-limiter-runs-after-authentication.test.ts:179:78\n    at file:///Volumes/DevMASTER/!CODING/Secuur"
+  ],
+  [
+   "__tests__/ks1195-per-key-rate-limiter-runs-after-authentication.test.ts",
+   "KS-1195: placement inside the real authenticateToken R3: a chain that authenticates twice counts the request once (2 allowed, then 429)",
+   "failed",
+   "AssertionError: expected [ 429, 429, 429 ] to deeply equal [ 200, 200, 429 ]\n    at /private/tmp/claude-501/-Volumes-DevMASTER-WEDNESDAY/1e211184-c0a0-4757-a7c5-e9b4a44dcab4/scratchpad/gate1017_draft_470v81bj/wt_head/Blockchain/Dev/services/api-gateway/src/__tests__/ks1195-per-key-rate-limiter-runs-after-authentication.test.ts:204:37\n    at processTicksAndRejections (node:internal/process/task_que"
+  ],
+  [
+   "__tests__/rateLimitEnforce.test.ts",
+   "enforceClientRateLimit \u2014 shared Redis counter (KS-170) uses the ioredis distributed counter (incr/pexpire/pttl) and 429s over the limit",
+   "failed",
+   "AssertionError: expected \"vi.fn()\" to be called with arguments: [ 'ratelimit:ks170-redis' ]\n\nReceived:\n\n  1st vi.fn() call:\n\n  [\n-   \"ratelimit:ks170-redis\",\n+   \"ratelimit:unknown\",\n  ]\n\n\nNumber of calls: 1\n\n    at Proxy.<anonymous> (file:///Volumes/DevMASTER/!CODING/Secuura/Blockchain/2_Project_Files/Blockchain/Dev/node_modules/@vitest/expect/dist/index.js:1487:10)\n    at Proxy.<anonymous> (file"
+  ],
+  [
+   "__tests__/rateLimitEnforce.test.ts",
+   "enforceClientRateLimit \u2014 degraded ceiling on Redis error (KS-616) still enforces the limit when the Redis counter throws (degrades, does not disable)",
+   "failed",
+   "AssertionError: expected \"vi.fn()\" to be called once, but got 0 times\n    at /private/tmp/claude-501/-Volumes-DevMASTER-WEDNESDAY/1e211184-c0a0-4757-a7c5-e9b4a44dcab4/scratchpad/gate1017_draft_470v81bj/wt_head/Blockchain/Dev/services/api-gateway/src/__tests__/rateLimitEnforce.test.ts:188:24\n    at processTicksAndRejections (node:internal/process/task_queues:105:5)\n    at file:///Volumes/DevMASTER/"
+  ],
+  [
+   "__tests__/rateLimitEnforce.test.ts",
+   "enforceClientRateLimit \u2014 degraded ceiling on Redis error (KS-616) still reports rate-limit headers while degraded",
+   "failed",
+   "AssertionError: expected \"vi.fn()\" to be called with arguments: [ 'X-RateLimit-Remaining', '8' ]\n\nReceived:\n\n  1st vi.fn() call:\n\n  [\n-   \"X-RateLimit-Remaining\",\n-   \"8\",\n+   \"X-RateLimit-Limit\",\n+   \"9\",\n  ]\n\n  2nd vi.fn() call:\n\n  [\n    \"X-RateLimit-Remaining\",\n-   \"8\",\n+   \"2\",\n  ]\n\n  3rd vi.fn() call:\n\n  [\n-   \"X-RateLimit-Remaining\",\n-   \"8\",\n+   \"X-RateLimit-Reset\",\n+   \"1789598905\",\n  ]\n\n\n"
+  ]
+ ]
+}

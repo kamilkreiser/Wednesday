@@ -1,0 +1,48 @@
+diff --git a/Blockchain/Dev/packages/shared/src/__tests__/ks781-p3-3-body-parser-order.test.ts b/Blockchain/Dev/packages/shared/src/__tests__/ks781-p3-3-body-parser-order.test.ts
+index ca1fe34a7..bc4815c4e 100644
+--- a/Blockchain/Dev/packages/shared/src/__tests__/ks781-p3-3-body-parser-order.test.ts
++++ b/Blockchain/Dev/packages/shared/src/__tests__/ks781-p3-3-body-parser-order.test.ts
+@@ -2012,27 +2012,36 @@ describe('KS-781 P3-3 LEG D — route-scoped parsers after the guard are a decla
+     // moves them is the author least likely to notice. The single-file run is
+     // what caught it every time — so run THIS file after touching
+     // api-gateway's index.ts.
++    //
++    // KS-1195 (the fifth instance): removing the dead app-level
++    // enforceClientRateLimit mount above these routes (index.ts 522-524, +2 -3)
++    // moved all three by exactly -1. Each new line was read back out of the
++    // file: 846 -> 845 (`…/wallet/challenge…`), 859 -> 858
++    // (`…/wallet/authenticate…`), 892 -> 891 (the createVerificationRoutes
++    // factory argument). Caught by the author's packages/shared run before the
++    // push.
+     expect(sites).toEqual([
+-      'services/api-gateway/src/index.ts:846 express.json (via mockBodyParser)',
+-      'services/api-gateway/src/index.ts:859 express.json (via mockBodyParser)',
+-      'services/api-gateway/src/index.ts:892 express.json (via mockBodyParser)',
++      'services/api-gateway/src/index.ts:845 express.json (via mockBodyParser)',
++      'services/api-gateway/src/index.ts:858 express.json (via mockBodyParser)',
++      'services/api-gateway/src/index.ts:891 express.json (via mockBodyParser)',
+     ]);
+   });
+ 
+   it('CONTROL — the three declared sites include the one that is NOT mock-gated', () => {
+-    // 846 and 859 sit behind ENABLE_MOCK_ENDPOINTS; 892 is the
++    // 845 and 858 sit behind ENABLE_MOCK_ENDPOINTS; 891 is the
+     // createVerificationRoutes factory argument, live wherever the gateway
+     // runs. (Before KS-858's +14 shift these read 840, 853 and 886; after it
+     // 854, 867 and 900; KS-1126 re-measured them at 846, 859 and 892 after
+-    // #951's -8.) An earlier
++    // #951's -8; KS-1195 moved them to 845, 858 and 891.) An earlier
+     // draft of the positional rule counted only `app.<method>(...)` arguments
+     // and silently dropped the factory one — narrowing the leg to 2 while
+     // looking like a clean 3 -> 2 improvement. A parser handed to a router
+     // FACTORY is reachable exactly as one handed to a route.
+     const live = SCANS.find((s) => s.rel === 'services/api-gateway/src/index.ts')
+       ?.postGuardParserSites.map((x) => x.line);
+-    // KS-1126: 900 -> 892 (the same factory-argument statement, read back).
+-    expect(live).toContain(892);
++    // KS-1126: 900 -> 892; KS-1195: 892 -> 891 (the same factory-argument
++    // statement, read back).
++    expect(live).toContain(891);
+   });
+ });
+ 
