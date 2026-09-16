@@ -372,6 +372,12 @@ Rework pushed, combined head verifies **PASS 3094/3094 across 169 suites**. Noth
   and the manifest now NAMES WHERE THE IMAGE VALUE CAME FROM**, which is the actual repair of F-3: the
   old one recorded a value with no provenance, so nothing could act on it.
 
+**A principle worth reusing, from how it wrote up its own blind spots (C-40):** *computed outputs
+(`concat`/`if`) must resolve to **FAIL, never PASS**.* **When a check cannot determine a value, it fails
+closed.** That is the general answer to everything tonight was about — a check that cannot tell should
+say so loudly, not quietly return green. Apply it to any gate, any guard, any verifier: **the
+undetermined case belongs with the failures, not the passes.**
+
 **Three behaviours to hold agents to, all from this rework:**
 1. **It named what its own fix still cannot see** — dotted section paths, concat/if outputs, second
    apps, initContainers. Told to carry those as **known limits** in the certification paper, not a
