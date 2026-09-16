@@ -1,0 +1,27 @@
+controls_check 2026-09-17 04:02:24 AEST
+N1 head override (#1008 head dd7086d5a) | stderr: REFUSING: #1010 — dd7086d5aa574285beffc515f9371a438621f25d is not at refs/heads/feature/ks-1183-workflow-approve-the-forward-to-originate-has-no-timeout-so on origin — the head moved; the brief is abo
+rc=6
+expected 6: OK
+N2 prompt without the mail step | stderr: REFUSING: prompt does not tell the agent to MAIL its verdict
+rc=12
+expected 12: OK
+N3 brief without the head SHA | stderr: REFUSING: brief or prompt does not name the head SHA c3213b04e3ad96068c367f7e0ba426822d32cda9 — a gate about another SHA is another gate
+rc=20
+expected 20: OK
+N4 brief without TIER 1 | stderr: REFUSING: brief and prompt disagree about the tier
+rc=7
+expected 7: OK
+N5 prompt without per-ENTRY farm | stderr: REFUSING: prompt does not require node_modules farmed per ENTRY (a wholesale link can write through to the checkout .vite cache)
+rc=22
+expected 22: OK
+N6 prompt without the exact verdict subject | stderr: REFUSING: prompt does not carry the exact verdict subject, the coagent@ sender and the wednesday-agent@ recipient
+rc=23
+expected 23: OK
+N7 develop = the #1010 head (both #1010 blobs LANDED on develop) | stderr: REFUSING: develop services/api-gateway/src/routes/verification.ts blob 04b3d980f = #1010 own — #1010 has landed; this brief is stale (develop c3213b04e3ad96068c367f7e0ba426822d32cda9) — re-pin deliber
+rc=19
+expected 19: OK
+N8 develop = 73d3fcb90 (pre-#1008: verification.ts de34b2de7 nobody pinned) | stderr: REFUSING: origin develop is at 73d3fcb902d2a78fe68a4349903ff6c6bd24d4d5 (pinned d067725ff1c7f036dbf0f726b9bf12f4daefebe7) and the move is not provably disjoint: GUARDED develop services/api-gateway/sr
+rc=18
+expected 18: OK
+unexpected rows 0
+end 04:03:38 AEST

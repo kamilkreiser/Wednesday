@@ -1,0 +1,241 @@
+# QA Agent Invocation Brief — Secuura/Blockchain **TIER 1** **ROUND 1** gate: PR #1010 (KS-1183, Seat A successor) @ `HEAD-SHA-REMOVED` — `POST /api/workflow-instances/:id/approve` bounds its forward to originate: `proxyReq.setTimeout(originateForwardTimeoutMs)` (default `ORIGINATE_FORWARD_TIMEOUT_MS = 15_000`, optional `deps.originateForwardTimeoutMs`), at the bound **502 `ORIGINATE_FORWARD_FAILED` `status: 0`**, pending document kept; `proxyRes` `error`/`aborted`/`close` settle as 0; the ks1087 test file rebuilt (+241 −129).
+
+**TIER 1, and why:** a new failure mode (a 502 at a time bound) on an authenticated workflow route mounted in EVERY environment (`createVerificationRoutes` outside `if (ENABLE_MOCK_ENDPOINTS)`, proven by parser at the #1008 gate; `index.ts` blob `6f38c819e` unchanged since), and the change decides whether a pending document is DELETED or KEPT when originate is slow. The tier rule is `0_Brain/learnings/2026-09-05_qa-gate-tiers-and-the-two-nogo-cap.md`. No rendered surface and no in-repo caller of POST approve (census below), so the real-browser half of tier 1 does not apply — say so. **Round 1 of 2 for the KS-1183 class under the cap.**
+
+**Drafted** 2026-09-17 03:46–04:1x AEST by Wednesday's drafting subagent. Gate set: `2_Project_Files/fleet/qa-agent/gatesets/2026-09-17_gate1010/`. Every SHA, blob, line and count below was READ in the step that states it; the `.out`/`.json` beside each fact is the instrument. The seat's claims (READY mail 2026-09-16T17:44:36Z, spf/dkim/dmarc pass, `mail_1010_ready.md`; PR body `gh/pr1010_body.md`; records `/Volumes/DevMASTER/!CODING/Secuura/Blockchain/5_Project_History/2026-09-17_seatA-successor/b1-ks1183/`) appear as **"the seat reports X; measure it"** — inputs to falsify, never evidence. **Rows marked `drafter (measured HH:MM, <file>)` were run once by the drafter in a `--shared` scratch clone to prove the harness is feasible. They are still PREDICTIONS: re-measure every one.** A missed prediction is the drafter's slip, not a finding against the PR.
+
+## Charter (read first, in full)
+`/Volumes/DevMASTER/WEDNESDAY/2_Project_Files/fleet/qa-agent/QA_AGENT_CHARTER.md`. You are FINDINGS-ONLY. You never fix, merge, push, deploy, comment on Linear or GitHub, file, tick an ack box, or `@` anyone. You mail ONE verdict to Wednesday.
+
+## PRIOR REPORT ON DISK (the gate that FOUND the defect KS-1183 fixes — not a round N-1 of this PR)
+`/Volumes/DevMASTER/!CODING/Testing Agent MAIN/projects/secuura/reports/2026-09-17-ks1087-1008-dd7086d5a-tier1-r1/report.md` — #1008's GO WITH FINDINGS: **F1** (the forward has no timeout: NO RESPONSE at 6 s and 15 s; a late 201 created the document after the client left) is this PR's origin; **F3–F6** (stateless stub, invisible G4/G5/G6, 5 including-tsc lines, dead `deadApp` scaffolding) are folded in; **F2 = KS-1184** (the strand: `approved` persisted before the forward) is **OUT OF SCOPE** here — record, never re-litigate. No prior verdict exists on any #1010 SHA.
+
+## HOLDS (verbatim — they bind you)
+- Client-facing communication = ticket comments only; the extranet is not a channel; anything needing a push goes to Wednesday as an escalation candidate for Kam's WhatsApp. Handovers to Peter/Stuart are test blocks, never a list of PRs. **Nobody messages Peter or Stuart.**
+- never delete; cleanup means quarantine. Fresh `mktemp -d` per attempt. NEVER `rm`.
+- **KS-535: the local stack stays HOLD.** No shared docker stack, no `:6882`/`:7082` slot, no kintsugi, no demo, no deploy. NEVER touch a wallet mnemonic, a `.env`'s contents, or `config/secrets.yml`. **This gate needs NO container.** Everything runs in-process: vitest cells against the REAL `createVerificationRoutes` on loopback, originate stubbed at the HTTP seam with a hit counter. Run `docker info` ONCE and print its rc on its own line (**the drafter did NOT run it**). Up is NOT permission. Create no container; touch no `secuura-*` container.
+- **Network: loopback only.** Every listener binds `127.0.0.1:0`. The closed-port cell dials `127.0.0.1:1`.
+- **The Secuura checkout is READ-ONLY:** `/Volumes/DevMASTER/!CODING/Secuura/Blockchain/2_Project_Files`. You work in your OWN clone (`git clone --shared` by SHA into your scratch); write verbs there only, from a script file. **No git write verb in the checkout** (no fetch, checkout, worktree add, merge, reset, push). Quote the checkout's porcelain count, `.git/config` sha256, `for-each-ref | wc -l`, `.git/worktrees` entry count at START and at END (and mid).
+- NEVER run a push, the real pre-push hook, or preflight.sh inside the Secuura checkout or any of its worktrees. Never `cd` on a command line (hooks refuse it); absolute paths only.
+- **Keys by NAME only** from `/Volumes/DevMASTER/!CODING/Secuura/Blockchain/4_Credentials/.env` (`GH_TOKEN`, `LINEAR_API_KEY`), read by a script, never printed. **GitHub: GET only. Linear: query only.** No comments, no state changes, no merges, no deploys.
+- **Live neighbours:** Seat A successor's worktree `/Volumes/DevMASTER/!CODING/Secuura/Blockchain/worktrees/raise-0916-a` is LIVE (its next lane is A12 KS-871) — never enter it. Never read or write another gate set's directory except the #1008 / #1009 sets named as exemplars (read-only). Never run vitest inside the checkout.
+- **Scope cap tonight (Kam's 40% weekly-usage cap): no Akto, no k6, no Playwright** — NOT COMMISSIONED. Schemathesis: rule REQUIRED-or-not (item 12) and record it; not run tonight either way. **Time-box: 45 minutes of work.** A leg that would blow it is NOT RUN with its blocker named.
+- NEVER print a credential value. Count, never echo. Do no memory maintenance of your own store inside this session.
+- No `rm`; stderr is never discarded (`2>/dev/null` is forbidden — write it to a file); every clock reading comes from `date`, never estimated.
+
+## 1. Target (read 03:47–03:55 AEST — `git_read.out`, `gh_read.out`, `linear_read.out`, `nginx_read.out`, `nginx_read2.out`, `spec_read.out`)
+
+| item | value |
+|---|---|
+| PR / ticket | **#1010 / KS-1183** (Linear: In Progress, prio 3, relations related KS-1184 / KS-1087). Branch `feature/ks-1183-workflow-approve-the-forward-to-originate-has-no-timeout-so`. Author `kksecura`. Open, not draft, `mergeable true / unstable`. **1 commit, 2 files, +283 −144.** Title (03:55:15, already REWORDED since the READY): "KS-1183: workflow-approve bounds the forward to originate at 15 s (502 ORIGINATE_FORWARD_FAILED, pending document kept) + the #1008 gate's F3-F6 cells". Body 11,525 chars, `## Test Evidence` ×1, **closing phrases `[]`** (regex with a positive control), KS ids {KS-1087, KS-1183, KS-1184}, 0 at-signs. 0 reviews; 2 issue comments (linear[bot] `5701921971`; kksecura `5701983780` 17:48:07Z). `gh_read.out`, raw `gh/` |
+| head | **`HEAD-SHA-REMOVED`** = the branch = `refs/pull/1010/head` (ls-remote 03:47:16; PR API 03:55:15). **Only parent `f7c2f4acb28875e3665a61c8eaaad5c54bd3aa55`** (#1008's squash). |
+| base / develop | **base = merge-base = `f7c2f4acb`.** **develop = `d067725ff1c7f036dbf0f726b9bf12f4daefebe7`** (#1009's squash, 03:34:39 +1000) at 03:47:16 (ls-remote) and 03:55:15 (branches API) — NOT an ancestor of the head: `develop..head` 1, `head..develop` 1; compare `develop...head` = merge_base `f7c2f4acb`, **diverged, ahead 1, behind 1, files 2**. `f7c2f4acb..d067725ff` touches 3 files, all api-gateway tests: `ks864a` (3 4), `ks864b` (3 4), `ks864c` (80 0, added) — **file-disjoint from #1010**. Both #1010 blobs are UNCHANGED on develop (verification.ts `d0585dc34`, ks1087 test `7832724f3`). **The merged tree is NOT the head tree:** build head + a local merge of the then-current develop in YOUR clone (never pushed). The drafter's merge was clean (`drafter_setup.out` 03:50). |
+| the 2 files (base → head blobs) | `services/api-gateway/src/routes/verification.ts` `d0585dc34` → **`04b3d980f`** (+42 −15) · `services/api-gateway/src/__tests__/ks1087-workflow-approve-deletes-the-pending-document.test.ts` `7832724f3` → **`4450587dc`** (+241 −129). All under `Blockchain/Dev/`. `diff_base_to_head.patch`, copies in `src/` |
+| UNTOUCHED (blob identical at base, head and develop; `git_read.out`) | api-gateway `src/index.ts` `6f38c819e` · `src/middleware/auth.ts` `20311010d` · `src/services/redis.ts` `47659ee9c` · `src/services/enforcement.ts` `533cd309c` · `package.json` `841d8c6ad` · `vitest.config.ts` `5888e0b32` · `vitest.setup.ts` `22c110768` · `tsconfig.json` `c981e6a92` · originate `src/routes/documents.ts` `c3a818ac8` · Dev `eslint.config.mjs` `8c5374c60` · Dev `package-lock.json` `17d2061b3` · `docker/nginx-gateway/nginx.conf` `3c5576ada` · `nginx-demo.conf` `005a4bc27` · `nginx-production.conf` `562891b4c` · `deployment/caddy/Caddyfile` `df6485917` · issuer `nginx.conf` `279b510d6` |
+| Linear (03:55:28) | **attachmentsForURL(pull/1010) = 2 nodes: KS-1183 `contributes` (open) and KS-1087 `contributes` (open).** The READY mail said KS-1183 `closes`; the seat's own `links-after-pr.txt` recorded `closes`; **Wednesday ruled ~03:5x that a runtime-behaviour ticket does not go Done on merge (secuura-test-discipline §5f: a live sweep is owed) and had the seat reword the body — the reword had LANDED by 03:55.** KS-1183 has 2 comments (`a3eecf0c` 17:43:56Z, `4628db7c` 17:53:14Z, 0 at-signs). KS-1087 In Progress (#1008 merged + #1010 open, both `contributes`). KS-1184 Backlog, 0 attachments. `linear_read.out`, raw `linear/` |
+| siblings (PR files API, 03:55:15) | 19 open PRs besides #1010. **None touches verification.ts, the ks1087 test, originate documents.ts, a proxy config or a route consumer.** #995 touches `api-gateway/src/utils/trustHeaders.ts`; #923 `api-gateway/src/__tests__/ks570-proxy-mount-auth.test.ts` (same suite, different file); dependabot #649/#575 touch `services/api-gateway/package.json` + the Dev lockfile (GUARDED: the launcher refuses if one lands); 8 more dependabot PRs touch the Dev lockfile. |
+| the Secuura checkout (read only) | HEAD `355d82c8b`, porcelain 0, `.git/config` sha256 **`65bbf7b2996b3395…`** (the #1008/#1009 gates read `e0fa706f…` at 01:20–03:23 — it CHANGED before this drafter's first reading; the seat's first push at 17:42Z added a tracking ref; not this drafter's doing — record it), **894 refs**, **110** `.git/worktrees` entries (111 incl. main before and after the drafter's clone) at 03:47:26. |
+| toolchain | vitest **4.1.10**, typescript **5.9.3**, node **v24.7.0**, express **4.22.2**; `http.globalAgent.options` = `{"keepAlive":true,"scheduling":"lifo","timeout":5000,…}` (drafter, node v24.7.0) — the forward uses the global agent (no `agent` option). |
+
+## 2. Spec / DoD — what this gate must establish
+
+**KS-1183 (from `linear/KS-1183.json`; read it):** the #1008 gate's F1 — bound the forward so an originate that never answers cannot hold the approve open, and a late 201 cannot delete after the caller was told nothing.
+
+**The change, READ at `c3213b04e` (`src/verification_head.ts`, `diff_base_to_head.patch`):**
+- `:114-115` `originateForwardTimeoutMs?: number` on `VerificationRouteDeps`; `:117-127` `export const ORIGINATE_FORWARD_TIMEOUT_MS = 15_000` (comment cites `proxy_read_timeout 30s` in nginx-production.conf); `:426` destructure default `originateForwardTimeoutMs = ORIGINATE_FORWARD_TIMEOUT_MS` — **a default for `undefined` ONLY; `null`, `0`, a string or `NaN` pass through**.
+- `:923` the route; `:984-986` `instance.status = 'approved'` PERSISTED before the forward (unchanged — KS-1184).
+- `:1011-1039` the forward promise: `proxyRes` `'data'`/`'end'` (log info on end), **`'error'`/`'aborted'`/`'close'` → `resolveStatus(0)`**, then `resolveStatus(proxyRes.statusCode || 0)` on the status line; **`proxyReq.setTimeout(originateForwardTimeoutMs, () => proxyReq.destroy(new Error(...)))`**; `proxyReq.on('error')` logs `'Failed to forward approved document to originate'` and resolves 0. **The handler has NO try/catch** (Express 4: an async throw is an unhandled rejection).
+- `:1040-1044` `< 200 || >= 300` → 502 body `{success:false, error:{code, message, status}}`; else delete.
+
+**The seat reports (READY + PR body; measure every number):**
+> - 15 s default against `nginx-production.conf:292` `proxy_read_timeout 30s`; the #1008 gate read only nginx.conf 120 s / nginx-demo.conf 60 s; index.ts passes nothing and gets the default.
+> - The `proxyRes` listeners do nothing today (T4 0 red); they matter only if the resolve moves to `'end'` (T2 502 in 59 ms with them, T3 hang to 5 s without).
+> - Residual (not measured against a real originate): originate persists, its 201 is lost at the bound → caller 502 while originate's copy exists; relevant to KS-1184.
+> - The completed-forward cell is "a watch, not a red-proof": T9 (socket-level timeout) 0 red; T11 shows the log-spy fires.
+> - Test file rebuilt: the three original cells keep their assertions and gain store-state checks.
+> - Baselines at f7c2f4acb: api-gateway 46/394, shared 44/851, auth 60/740; red-before-green 10 run / 3 red; head 11/11; api-gateway head 46/402; tamper table T0–T11 (+T1b) whole suite, 402 cells per row, tsc rc per row (T1 VOID, tsc rc 2).
+> - Including tsc (scratch tsconfig `include src/**/*.ts`, `exclude []`): **60 → 53** lines, ks1087 file 7 → 0, 34 distinct others identical, **including `:59` TS2741** ("http" vs "node:http" Server).
+> - eslint 0 errors; verification.ts 5 warnings = base's, shifted; test file 0.
+> - Preflight 12/15 legs, 3 SKIPPED (3/4/8, no stack) — not a pass of those legs.
+> - Schemathesis not run: the route is absent from `docs/openapi/secuura-api.yaml` (0 hits, control `^paths:` 1).
+
+### WHERE THE READY AND THE DRAFTER'S MEASUREMENTS DISAGREE, OR WHERE THE SEAT'S CELLS CANNOT SEE (lead with these; each is a PREDICTION)
+1. **The bound is an IDLE timeout, not a wall-clock bound.** `ClientRequest.setTimeout` is the socket's inactivity timer: any byte from originate resets it. Drafter row `O-drip-102-then-201-at-2500` (originate writes `102 Processing` every 300 ms, then 201 at 2.5 s; bound 800 ms): **head answered 200 at 2508 ms and deleted** — the bound never fired (`probe_rows_head.json`, `drafter_probe.out` 03:52). So "answers within 15 s" is "at most 15 s of SILENCE from originate". Nothing in the seat's cells can see this. Grade it (the real originate is Express and sends no 1xx today, READ — Record or Polish; say which with the oracle).
+2. **The optional override is unvalidated.** Drafter rows at head (and merged), never-answering originate: `0` → **NO RESPONSE** (timer disabled — a silent "never"); `-1` / `NaN` → `ERR_OUT_OF_RANGE`, `'800'` / `null` → `ERR_INVALID_ARG_TYPE`, each thrown **synchronously inside the promise executor** → unhandled rejection, **NO RESPONSE, originate hits 0** (the request was created but never ended), instance already `approved`, **and a `TCPSocketWrap` left open per row** (active-resource census 1→2→3→4). `null` is NOT defaulted (destructure defaults only `undefined`). Reachable only through `deps` (index.ts passes nothing — READ; re-prove). Grade it.
+3. **A 201 whose body never ends is approved on the status line and deleted — then, one bound later, the route logs `error 'Failed to forward approved document to originate' {error: 'originate did not answer within 800 ms'}`** (head row `O-201-body-never-ends`: 200 at 6 ms, delete 1, error log at 806 ms). The seat's completed-forward "watch" cell only covers a body that ENDS. A misleading error log after a success: Polish or Record.
+4. **The DEFAULT taken when index.ts passes nothing is unpinned.** Drafter measured it directly (deps absent, never-answering originate): **502 at 15,008 ms**, error log at 15,007 ms (`BOUND-deps-absent-default`). But tamper `Q_DEFAULT_destructure_0` (`originateForwardTimeoutMs = 0` in the destructure — production would never time out) reds **0 of 402**, and `Q_LATE_default_16s` / `Q_LATE_default_29999` red 0: the "default bound" cell reads only the exported constant `< 30_000`, and every other cell passes an override of 1,000 ms (`drafter_run.out` 03:55–03:56).
+5. **The cells tolerate a bound that fires up to ~1.5 s late** (1.5 × their 1 s bound): `+1_400` reds 0, `+1_600` reds 2 (`expected 2605 to be less than 2500`; late 201 `expected 200 to be 502`). A Record on cell tightness, not a defect.
+6. **Including tsc does not reproduce the seat's 60 → 53 or its TS2741.** Drafter's program (`extends ./tsconfig.json`, `include ["src/**/*.ts"]`, `exclude []`, noEmit; inclusion by `--listFilesOnly`: 46 `__tests__` files listed incl. ks1087 at base and head, 47 merged): **base 39 → head 34 → merged 30; ks1087 5 → 0; NEW 0; 0 TS2741 in any tree**; planted `qaPlant`/`QA_UNUSED_PLANT` → +2 TS6133 (`tsc_including_*.out`). Same direction as the seat, different counts — the #1009 gate's R-4 (seat's worktree type resolution, two `@types/node` copies) is the drafter's hypothesis, unproven. RECORD.
+7. **Linear moved after the READY** (Target table): KS-1183 now `contributes`. Read it at run time; report what you find.
+8. **Seat claims that held (re-measure, don't re-litigate):** api-gateway base 46/394, head 46/402 (pending 0 both); every outcome row in item 1 behaves as the READY says at head and merged; the listeners are inert (`Q_ERROR_listener_resolves_201` 0 red, like the seat's T4); T1b/T8 shapes (the cells do run on the override); body closing phrases 0; the route is absent from the spec (0 hits, control 1).
+
+### MUST ESTABLISH — each a question to MEASURE. Name the tree beside every count. (W = Wednesday's; D = added by the drafter.)
+
+**1 (W). EVERY FORWARD OUTCOME, on the REAL `createVerificationRoutes`, a real `http` originate stub with a hit counter, a STATEFUL store, a log spy — at head `c3213b04e`, base `f7c2f4acb`, and merged (head + the then-current develop; `d067725ff` at drafting).** Per row state: **status code, body (502 body verbatim), pending document kept/deleted, workflow instance state, originate hit count, error-log lines with their time from the call.** Include a 0-hit negative control (non-final step or no pending document). Drafter harness `qa1010-drafter-probe.test.ts` (recording, not pass/fail; override 800 ms; `probe_rows_{head,base,merged}.json`, measured 03:51–03:54 — rerun your own):
+
+| outcome at originate | base `f7c2f4acb` | head `c3213b04e` | merged (+`d067725ff`) | predicted-by |
+|---|---|---|---|---|
+| 200 / 201 / 204 | 200, delete 1, hits 1 | **200, delete 1, hits 1** | = head | drafter (measured) |
+| 302 | 502 `status:302`, kept | **502 `status:302`, kept** | = head | drafter (measured) |
+| 401 (body carries a marker) | 502, kept | **502 `status:401`, kept, marker absent** | = head | drafter (measured) |
+| 500 | 502, kept | **502, kept** | = head | drafter (measured) |
+| closed port `127.0.0.1:1` (network refusal) | 502 `status:0`, hits 0, kept | **502 `status:0`, hits 0, kept**, error log ECONNREFUSED | = head | drafter (measured) |
+| socket destroyed before headers | 502, kept | **502, kept**, error log `socket hang up` | = head | drafter (measured) |
+| accepts, never answers | **NO RESPONSE at 3 s** (client wait), kept | **502 `status:0` at 812 ms**, kept, hits 1, error log at 810 ms | 502 at 816 ms | drafter (measured) |
+| **late 201** at bound + 700 ms | **200 at 1505 ms + delete** | **502 at 806 ms; nothing deleted after the 201 time; kept** | = head | drafter (measured) |
+| 201 headers, mid-body reset | 200, delete 1 | **200, delete 1** | = head | drafter (measured) |
+| 201 headers, body never ends (**aborted body**) | 200, delete 1 | **200, delete 1; error log at ~bound** (disagreement 3) | = head | drafter (measured) |
+| 102 drip every 300 ms, 201 at 2.5 s | 200 at 2505 ms | **200 at 2508 ms — bound never fires** (disagreement 1) | = head | drafter (measured) |
+| deps absent (index.ts shape), never answers | NO RESPONSE | **502 at 15,008 ms** | not run | drafter (measured, head) |
+| instance after every row | `approved` | `approved` | `approved` | drafter (measured) |
+
+State for every row: **any delete without a completed 2xx; any keep after a real success; any row where the route never answers.** Also add an "aborted body" row where the CALLER aborts mid-request (client disconnect before the gateway answers) — does the forward still run, delete and log? (Not measured by the drafter.)
+
+**2 (W). THE 15 s DEFAULT AGAINST EVERY FRONT END — enumerate, read, rule.** Enumerate every proxy / ingress config in the repo that can front this route (drafter's census `nginx_read.out` 03:48:57, name match + timeout-directive grep over all tracked non-code files, `nginx_read2.out` 03:49:20):
+
+| front end | file (blob) | bound on the gateway | who runs it | predicted-by |
+|---|---|---|---|---|
+| nginx-gateway, production compose | `docker/nginx-gateway/nginx-production.conf` `562891b4c` | server-level `proxy_read_timeout 30s` (`:292`), `proxy_send_timeout 30s`, `proxy_connect_timeout 15s`; `location /api/` (`:347-350`) sets none | `docker-compose.production.yml:395` | drafter (READ) |
+| nginx-gateway, compose / demo | `nginx-demo.conf` `005a4bc27` | `proxy_read_timeout 60s` (`:329`), send 60, connect 30; `location /api/` (`:410-419`) sets none | `docker-compose.yml:2278` | drafter (READ) |
+| nginx-gateway, e2e | `nginx.conf` `3c5576ada` | `proxy_read_timeout 120s` (`:128`); `location /api/` (`:184-186`) sets none | `docker-compose.e2e.override.yml:28` | drafter (READ) |
+| portal nginx (admin, issuer, outlook-addin, verifier) | `frontend/*/nginx.conf` | **no timeout directive** (0 `timeout` lines) → nginx default `proxy_read_timeout 60s`; `location /api/` → `$API_UPSTREAM` | portal containers | drafter (READ; nginx default is RELAYED from nginx docs) |
+| Caddy (TLS edge) | `deployment/caddy/Caddyfile` `df6485917` | `reverse_proxy localhost:6882`, comment `:27` "NO timeout tuning" → Caddy default (no response-header timeout) | host | drafter (READ; default RELAYED) |
+| Azure Container Apps ingress | `deployment/azure/*.bicep` | no timeout in the repo; platform default NOT in repo | Azure | NOT READ in full — read it |
+
+PREDICTION: **no front end in the repo has a read bound shorter than 15 s** (tightest 30 s). Say whether any is SHORTER than 15 s (the caller would see the proxy's 504 before the gateway's 502). Also rule: nginx's `proxy_read_timeout` is ALSO an idle timer and the gateway sends nothing until it answers — with disagreement 1 (a dripping originate), can nginx's 30 s fire while the gateway still waits? Is 15 s "half the tightest proxy" a sound margin once `proxy_connect_timeout 15s` and upstream queueing are counted? READ only — no nginx is run.
+
+**3 (W). THE OPTIONAL OVERRIDE `deps.originateForwardTimeoutMs`.** (a) Re-prove by READ (and a parser if you like) that `index.ts` passes no `originateForwardTimeoutMs` → the default is taken; measure the default row (drafter: 502 at 15,008 ms). (b) For `0`, a negative number, `NaN`, a non-number (`'800'`), `null`: what happens? Drafter (disagreement 2): 0 = never (NO RESPONSE); the rest = synchronous `ERR_OUT_OF_RANGE` / `ERR_INVALID_ARG_TYPE` in the executor → unhandled rejection, NO RESPONSE, hits 0, a socket left open, instance `approved`. **A timeout of 0 must not mean "never" or "immediate 502" silently** — rule whether it does, severity (reachable only through deps today), target, SHIPS-WITH or TICKET. Also: a closed port with an invalid override — does the never-ended request, which has no `'error'` listener attached (the throw happens before `proxyReq.on('error')`), crash the process? (Drafter: no crash observed in-process, 1 row; say what you see.)
+
+**4 (W). THE `proxyRes` LISTENERS — inert, Polish or hazard; double settle; leaks.** (a) Measure inertness: seat T4 (listeners removed) → 0 red; drafter `Q_ERROR_listener_resolves_201` (`'error'` → `resolveStatus(201)`) → 0 red. (b) If inert, is shipping them a Polish or a hazard? Check for a **double settle** (the promise settles once — prove it cannot answer twice), a **double response / "headers already sent"** path (the response is written once after the await — prove it with a row that forces `'close'` after the status line and one where the timeout fires after headers), an **unhandled `'error'`** (with and without the listeners). (c) **Leak check after EVERY outcome row:** `process.getActiveResourcesInfo()` (or handles) after closing both servers + a settle, timers left by `setTimeout`, sockets in `http.globalAgent.sockets`/`freeSockets`. Drafter: 0 extra handles after every normal row at head/base/merged; `TCPSocketWrap` accumulates only after the invalid-override rows. (d) After a completed 201 on the keep-alive global agent (timeout 5 s), does the request's 15 s timer stay armed on the pooled socket and fire on a LATER request's socket? (The seat's T9 / completed-forward cell watch this; drafter row `O-201-body-never-ends` shows the timer does fire after a success when the body never ends.)
+
+**5 (W). THE LOST-201 RESIDUAL — a RECORD for KS-1184 unless the PR makes it worse than base.** Originate persists, then answers 201 after the bound. Drafter row `O-late-201-persist-then-lost+retry` (head): **502 at 806 ms, pending kept, originate created 1; a caller retry → 400 "Workflow already completed", originate hits unchanged (1)** — no duplicate by retry, because the instance is stranded. Base: 200 + delete at 1505 ms (no residual, but the hang). Measure both trees; record whether a caller retry can create a duplicate (drafter: no — there is no re-forward path) and what a future re-forward path (KS-1184) must be idempotent against (originate's `contentHash` duplicate handling — READ `documents.ts`). Is it worse than base? (Base had no bound: the same slow 201 produced 200 + delete; the new residual is a 502 with originate's copy existing.) Rule it with FEW HICCUPPS.
+
+**6 (W). AUTHORIZATION AND APPROVAL SEMANTICS BYTE-IDENTICAL TO BASE apart from the forward bound.** By parser: the route's arguments (`authenticateToken(true), mockBodyParser`) and every handler statement outside the forward span (`:1011-1039` at head) identical base vs head (AST walk with the span masked; a control edit inside the authz span must DIFFER). At runtime with the REAL `authenticateToken` (vitest.setup.ts's throwaway keypair): no token → 401; wrong role → 403; wrong user → 403; already approved/completed → **400 "Workflow already completed"**; rejected → 400; unknown instance → **404**; each with originate hits 0 and deletes 0, base and head.
+
+**7 (W). THE TEST FILE REBUILD (+241 −129).** (a) **Diff the three original cells' assertions** base `7832724f3` vs head `4450587dc`: every original `expect` must survive (the drafter READ: 401 → `not.toBe(200)`, `toBe(502)`, deletes unchanged — now `store.deletes` 0 — plus `toMatchObject` and `pendingDocs.has`; unreachable → `not.toBe(200)`, deletes 0, now also 502 + status 0; control → 200, deletes 1, `success` true, `message` contains `created`). Name any assertion that weakened (the 401 cell's `deleteCount - deletesBefore` became an absolute `store.deletes` on a fresh store — equivalent or not?). (b) **The completed-forward "watch" cell** (seat: T9 0 red, T11 fires): is it a real check or decoration? Build a tamper under which the pooled-socket risk it names DOES show (e.g. the request timer left armed on the socket after `'end'`) and see whether it reds; if no tamper that compiles reds it except T11's direct log, rule it decoration (Polish) or a legitimate watch (nothing). (c) Record the cells' tolerance: late by up to 1.5 s is invisible (disagreement 5); the default is pinned only as `< 30_000` (disagreement 4).
+
+**8 (W). TAMPERS.** Re-run the seat's **T0–T11 (+T1b, T0-after)** on the WHOLE api-gateway suite (402 cells at head) with the **project `tsc --noEmit -p services/api-gateway` rc on every row — a non-compiling tamper is VOID** (the seat's T1 was VOID, tsc rc 2). Text anchors counted by Python `str.count` = 1, markers asserted, sha256-asserted restore, porcelain asserted. Read `numFailedTests`, `numPendingTests`, `numFailedTestSuites` (double-counts file + describe), `success`, cells-run beside every colour. Seat's anchors: `b1-ks1183/tamper.py`. Plus the gate's own — the drafter measured these on head (402 cells, pending 0, tsc rc 0 on every row; `drafter_run.out` 03:55:12–03:56:34):
+
+| id | tamper (anchor count 1) | api-gateway (402) | predicted-by |
+|---|---|---|---|
+| Q-T0 | — | 402/402 | drafter (measured) |
+| **Q-CTL** (CONTROL-aimed) | `forwardStatus >= 300` → `>= 201` (201 counts as failure) | **4 red: the KS-1087 201 control, completed-forward, body-never-ends, mid-body reset** (`expected 502 to be 200`) | drafter (measured) |
+| **Q-LATE-1400** (bound fires late) | `setTimeout(originateForwardTimeoutMs + 1_400` | **0 red — invisible** | drafter (measured) |
+| **Q-LATE-1600** | `+ 1_600` | 2 red: never-answers (`expected 2605 to be less than 2500`), late 201 (`expected 200 to be 502`) | drafter (measured) |
+| **Q-LATE-16s** (the brief's "16 s") | `ORIGINATE_FORWARD_TIMEOUT_MS = 16_000` | **0 red — invisible** (the default cell reads `< 30_000` only) | drafter (measured) |
+| Q-LATE-29999 | `= 29_999` | **0 red — invisible** | drafter (measured) |
+| **Q-DEFAULT-0** | destructure `originateForwardTimeoutMs = 0` (production never times out) | **0 red — invisible** (disagreement 4) | drafter (measured) |
+| **Q-DELETE** (deletes on timeout) | `void redisService.deletePendingDocument(documentId);` inside the timeout callback | 2 red: never-answers (`expected 1 to be +0`), late 201 (`nothing is deleted after…: expected 1 to be +0`) | drafter (measured) |
+| Q-ERR-201 | `proxyRes.on('error', () => resolveStatus(201))` | 0 red (inert, as T4) | drafter (measured) |
+| Q-T0-after | — | 402/402 | drafter (measured) |
+
+Add at least one more CONTROL-aimed row of your own (e.g. aimed at the 0-hit negative control or at the "default bound" cell's `typeof` check) and the item-7(b) tamper. **Red before green:** the new cells on base `f7c2f4acb` (seat: 10 run / 3 red) — copy the head test into your base tree, name the tree.
+
+**9 (W). INCLUDING tsc — base vs head vs merged, NEW errors only.** A program including `src/**` (inclusion proven by `--listFilesOnly`, ks1087 listed), a planted positive control, config placed for the run and moved out by rename. Drafter (disagreement 6): base 39 / head 34 / merged 30 error lines; ks1087 5 → 0; NEW 0; 0 TS2741; plant +2 TS6133. **Re-derive the seat's 60 → 53 and its `:59` TS2741** — say whether you reproduce either, and with what program (quote the tsconfig verbatim). Also: project `tsc --noEmit -p services/api-gateway` rc per tree (it excludes `src/__tests__` — vacuous for the test file); eslint on both files, base and head (seat: 0 errors; verification.ts 5 warnings = base's, shifted; test 0).
+
+**10 (W — SUPERSEDED BY WEDNESDAY AT ~03:5x; this text binds). LINKKIND — read at RUN TIME, report whatever you find.** Query `attachmentsForURL("https://github.com/Secuura/Distributed_Secuura/pull/1010")` and each node's `metadata.linkKind` at the START of your run AND immediately before the mail. **Expected: exactly 2 nodes — KS-1183 `contributes` and KS-1087 `contributes`.** KS-1183 must NOT be `closes`: a runtime-behaviour ticket does not go Done on merge (secuura-test-discipline §5f — a live sweep is owed); Wednesday had seat A reword the body BEFORE the GO (a body edit; the head stays `c3213b04e`). **A `closes` on ANY ticket is a finding** (Major if on KS-1087, whose item 2 is open; a finding against the PR's linkage if on KS-1183). Run a closing-phrase regex (`close[sd]?|closing|fix(e[sd])?|fixing|resolve[sd]?|resolving|complete[sd]?` followed by a KS id) over **title, body, commit message, and every PR comment**, with a positive control (a string that must hit) and a negative control (`Part of KS-…` must not). Drafter at 03:55: both `contributes`; closing phrases 0 in title/body/commit/2 comments; control hit 2 of 3. The reword may land or change DURING your run — report each reading with its `date`.
+
+**11 (W). DISJOINTNESS AND DEVELOP MOVES, BY CONTENT.** PR files API for #1010 and every open PR: 0 shared files (drafter: 0 of 19 open; #995/#923 share the api-gateway package, not a file). Re-read develop at start / mid / end; for any move past `d067725ff`, name the delta files and judge by CONTENT (blobs of the two #1010 files and the UNTOUCHED list) — then merge the then-current develop and re-derive the merged counts.
+
+**12 (W). SCHEMATHESIS — REQUIRED or NOT APPLICABLE, with a control.** The spec is `Blockchain/Dev/docs/openapi/secuura-api.yaml` (NOT repo-root `docs/openapi/…` — the drafter's first path read failed, `git_read.out`): `workflow-instances` **0**, control `^paths:` **1**, control `/api/documents` 28 (39,732 lines); the two other openapi yamls (`MCP Deployment/openapi.yaml`, `services/mcp-server/openapi.yaml`) also 0 with `^paths:` 1 (`spec_read.out` 03:55:40). If absent: record **NOT APPLICABLE — measured reason** (a spec-generated run cannot reach an unpublished route). Record R: the route and its new 502 remain undocumented (pre-existing, #1008 gate R2).
+
+**13 (D). SUITES PER TREE.** api-gateway whole suite, JSON reporter, pending read: drafter **base 46/394, head 46/402, merged 47/408**, pending 0, success true (`drafter_suites.out` 03:50:48–03:51:07). packages/shared: seat 44/851 (not re-measured by the drafter; #1010 touches no shared file).
+
+**14 (D). CALLERS.** `git grep -i workflow-instances` at head (`spec_read.out`): issuer `DocumentList.tsx:153` GET only; mcp-server `api-client.ts:106` GET only; the route file; two tests. PREDICTION: no in-repo caller of POST approve. Name what the census cannot see.
+
+## 2a. LEGITIMATE SHAPES — the bound IS a checker (required)
+
+The timeout decides 502-and-keep versus waiting. A bound that fires on a legitimate slow success makes the caller see a failure while originate created the document (the lost-201 residual); a bound that never fires is F1 again.
+
+| id | shape | expected verdict at head | the clause | predicted-by |
+|---|---|---|---|---|
+| L1 | originate 201 within ms (the real create) | 200, delete once, no error log | status line 2xx | drafter (measured) |
+| L2 | originate 4xx/5xx (incl. today's real 401 — KS-1087 item 2) | 502 `status:<code>`, keep | `< 200 \|\| >= 300` | drafter (measured) |
+| L3 | originate down / restarting (refused) | 502 `status:0`, keep | `'error'` | drafter (measured) |
+| L4 | originate slow but answering in < 15 s of silence | answer when originate answers | idle timer not reached | PREDICTION (the drafter used 800 ms bounds) |
+| L5 | originate hung (accepts, never writes) | 502 `status:0` at 15 s, keep | `setTimeout` → destroy | drafter (measured at 15,008 ms) |
+| L6 | originate slow > 15 s then 201 (persisted) | **502, keep — originate's copy exists** (item 5 residual) | the bound | drafter (measured, 800 ms scale) |
+| L7 | HTTPS originate (`require('https')`) | same classification | same code path | READ only — NOT measured |
+| L8 | originate trickles bytes / 1xx | **no bound** (idle timer) | disagreement 1 | drafter (measured) |
+
+**A row that answers wrong for L1–L3 or L5 is a Blocker against #1010.** L6 and L8 are findings/records to grade.
+
+## 3. Scope
+- **Charter:** explore the approve route's forward bound with the REAL router on loopback, a stateful store, a counting originate stub with controllable timing, a log spy, a resource census, a parser, and aimed text-anchored tampers — including tampers aimed at the controls — looking for (a) any outcome that deletes without a completed 2xx or keeps after a real success, (b) a hang, a double response or a leak the new timer or listeners introduce, (c) an unvalidated or silently-disabled bound, (d) a front end whose timeout is shorter than the bound, (e) an authz or approval-semantics change, (f) a cell that cannot fail, (g) linkage, disjointness, spec.
+- **In scope:** the 2 files; the approve route; originate `POST /api/documents` (READ); every proxy config (READ); the api-gateway suite on base / head / merged; including tsc / eslint; Linear; GitHub (GET); the spec + caller census.
+- **Out of scope / do NOT touch:** KS-1184 (the strand) and KS-1087 item 2 (the forward credential) — record, never fix or re-rule; any stack, container, nginx, demo, kintsugi; `GATEWAY_VOUCH_SECRET`; fixing anything; #1008/#1009 and their gates beyond reading the named exemplars; Seat A successor's worktree.
+
+## 4. Credentials (POINTER ONLY — never values)
+None needed for the measurements. Read-only API calls: `GH_TOKEN`, `LINEAR_API_KEY` by NAME from `/Volumes/DevMASTER/!CODING/Secuura/Blockchain/4_Credentials/.env` (provenance: this set's `gh_read.py` / `linear_read.py`). Verdict mail: `AGENTMAIL_API_KEY` by NAME from `/Volumes/DevMASTER/WEDNESDAY/4_Credentials/.env`. The real `authenticateToken` runs on vitest.setup.ts's in-process throwaway RS256 keypair; never read a real key. No wallet.
+
+## 5. State-mutation & cleanup
+- Nothing outside your scratch and the report directory. Create no container.
+- Quarantine scratch tests and configs by rename; never `rm`. Fresh `mktemp -d` per attempt.
+- **node_modules farm — PER ENTRY, never wholesale (the #1009 gate's R-6: its #1007 gate linked `api-gateway/node_modules` wholesale, and the checkout's `.vite` results.json mtime fell inside that run — a write-through was possible).** Build `Blockchain/Dev/node_modules` per ENTRY from the checkout (987 entries, `.vite` skipped) with `@secuura/*` relinked INTO each tree; **`services/api-gateway/node_modules` (8 entries) and `packages/shared/node_modules` (8 entries) per entry, `.vite` skipped**; the other 24 package node_modules may be directory links (vitest never runs there). Build the shared dist in each tree (`tsc -p .`, rc 0) and assert `realpath(require.resolve('@secuura/shared'))` from `api-gateway/src` is IN TREE. Drafter substrate: `drafter_setup.py`/`.out` (03:50:02–29). **Read the checkout's `Blockchain/Dev/services/api-gateway/node_modules/.vite` listing (and any `results.json` mtime) at start and end: it must not change** (drafter 03:50: `.vite/vitest/` dir dated 17 Aug, no `results.json`).
+- **Porcelain:** the farm's symlinks show as `??` lines per tree — baseline them; assert nothing else appears.
+
+## 6. Output boundary
+Report directory (you create it): `/Volumes/DevMASTER/!CODING/Testing Agent MAIN/projects/secuura/reports/2026-09-17-ks1183-1010-c3213b04e-tier1-r1/`:
+- `report.md`
+- `evidence/`: the probe test file(s) and outcome rows per tree (status, body, kept/deleted, instance, hits, error logs, resource census), the override rows, the front-end census with controls, the auth parser proof + runtime rows, the original-cell assertion diff, the tamper JSON per row with tsc rc, the including tsc outputs + `--listFilesOnly`, eslint JSON, the Linear readings (start + pre-mail), the GitHub files census, the spec census, `docker_info.rc`, the checkout readings, the `.vite` readings.
+- `NOT-TESTED.written-first.md`, written BEFORE any run. It lists at least:
+  - a live approve against a running originate; KS-1087 item 2 (the forward credential); **KS-1184 (the strand) — out of scope**;
+  - **no live sweep on a rebuilt stack (secuura-test-discipline §5f) — out of scope for the gate, owed at the Sunday QA pass**;
+  - nginx / Caddy / portal / Azure ingress bounds — READ, not measured; the real behaviour of an nginx idle timer in front of a dripping upstream;
+  - an HTTPS originate (L7); whether any environment has workflow-gated document types; a real Redis;
+  - out-of-repo callers; a real browser (no rendered surface);
+  - the four platform suites by path — `systemTest/schemathesis` (NOT APPLICABLE or REQUIRED per item 12) · `systemTest/akto` · `systemTest/playwright` · `systemTest/performance` (NOT COMMISSIONED: 40% cap, stack HOLD);
+  - preflight legs 3/4/8 (the seat's SKIPPED legs — not a pass).
+
+Every finding carries its evidence class (MEASURED AT RUNTIME / PROBED / READ ONLY / RELAYED), severity, target (the PR or a TICKET), SHIPS-WITH or TICKET, and its FEW HICCUPPS oracle.
+
+## 7. Known-fragile / known-changed
+- **`setTimeout` on a ClientRequest is an idle timer** (disagreement 1), and the global agent (keepAlive, `timeout: 5000`) already arms a 5 s socket timeout that emits `'timeout'` with no listener at base — do not mistake the agent's 5 s for the route's bound.
+- **An unhandled rejection in a probe makes vitest exit rc 1 with `success: true`** (drafter probe rows) — read `unhandledErrors`, rc and `success` together; capture `unhandledRejection` in the probe.
+- **A never-answering cell needs `closeAllConnections()` before `close()`** and a per-test timeout above the client wait; the default-bound row needs a client wait above 15 s (~16 s of wall clock — budget it once).
+- **`numFailedTestSuites` double-counts** (file + describe).
+- **`tsc -p services/api-gateway` type-checks 0 `__tests__` files.**
+- **The seat's tamper runner used `npx` from its own worktree** — your rows run from your clone's farmed `node_modules/.bin`.
+- The checkout's `.git/config` sha changed between the #1009 gate's close (03:23) and this drafter's first reading (03:47) — a known neighbour write (the seat's push), not the gate's to explain; quote yours.
+- `/bin/bash` is 3.2 — write runners in Python. zsh: no `PIPESTATUS` (`cmd > out 2>&1; rc=$?`), no `timeout`; never start a line with `=====`. `/usr/bin/grep -i` with a same-file positive control; `git grep -c` prints nothing for a 0 — silence is unread, not 0.
+- **Recent changes — do NOT flag as new:** #1008 (the 502 itself, F2 strand = KS-1184, R1 status-integer echo, R3 no-pending-document approve), #1009 (ks864a/b/c test files on develop), KS-1073, KS-815, the two 403 body shapes, `let body` unused (eslint warning at base).
+
+## 8. Logistics / BOUNDS
+- **Session time-box:** 45 minutes of work.
+- **Read verbs only in the checkout.** Quote at start, mid and close: porcelain count, `.git/config` sha256, `for-each-ref | wc -l`, `.git/worktrees` count, origin develop, `refs/pull/1010/head` and the branch — each with a `date` timestamp.
+- **If `refs/pull/1010/head` moves, STOP: this brief is about `HEAD-SHA-REMOVED`.** A body/title edit (the linkKind reword) is NOT a head move. develop moving is expected: judge by content, name it.
+- **The launcher's develop arm** judges FIFTEEN files by blob at the current develop (the two #1010 files — their #1010 blobs → exit 19 LANDED — plus the UNTOUCHED list's api-gateway / originate / eslint / three nginx-gateway files) and, past `d067725ff`, refuses (exit 18) on a delta touching a GUARDED path (those files, `docs/openapi/`, `docker/nginx-gateway/`, `deployment/caddy/`, any `*/nginx.conf`, the Dev lockfile, the two consumers). Its `--check` at drafting read develop `d067725ff` unchanged (`check.out`).
+- **Escalation:** none mid-run. Anything the brief does not answer → record your interpretation in the report and the mail.
+
+## VERDICT DESTINATION
+ONE mail **to `wednesday-agent@agentmail.to`, SENT FROM `coagent@agentmail.to`** (so it arrives signed), subject EXACTLY:
+`[QA -> Wednesday] TIER 1 GATE #1010 (KS-1183) c3213b04e — <GO | GO WITH FINDINGS | NO GO>`
+
+`<VERDICT>` is on `HEAD-SHA-REMOVED` as the delta over base `f7c2f4acb` AND on the merged tree with develop `d067725ff` (or the then-current develop — name both). Say plainly:
+1. **Every forward outcome** per tree: status, body, kept/deleted, instance, hits (item 1); any delete without a completed 2xx; any keep after a real success; any row that never answers.
+2. **The 15 s default** against every front end, and whether any is shorter (item 2); idle-vs-total.
+3. **The override** — default taken; 0 / negative / NaN / non-number / null (item 3).
+4. **The listeners** — inert or not; double settle / double response / leaks (item 4).
+5. **The lost-201 residual** — Record for KS-1184 or worse than base (item 5).
+6. **Auth and approval semantics** unchanged or not (item 6).
+7. **The test rebuild** — original assertions kept; the watch cell real or decoration (item 7).
+8. **Tampers** — every row with cells-run, pending and tsc rc; VOID rows; invisible rows (item 8); **including tsc** base/head/merged and the seat's 60 → 53 / TS2741 (item 9); **linkKind** as read at run time (item 10); disjointness (item 11); **Schemathesis** ruling (item 12); what was NOT tested (`docker info` rc on its own line).
+
+Give the merge seat its ADDENDUM line: "squash `c3213b04e` onto develop `d067725ff` (or the then-current develop; file-disjoint from #1009's squash); #1010 attaches to KS-1183 and KS-1087, both linkKind `contributes` (as read at <time>) — KS-1183 stays open for the §5f live sweep, KS-1087 for item 2; equality targets after the squash: verification.ts `04b3d980f` / ks1087 test `4450587dc`; api-gateway 46/394 → 46/402 at base, 47/408 merged (re-measure); Records: <yours>".
+
+**Mechanism.** The QA project has no `send_brief.sh` of its own:
+- `POST https://api.agentmail.to/v0/inboxes/coagent@agentmail.to/messages/send`
+- JSON `{"to": ["wednesday-agent@agentmail.to"], "subject": "...", "text": "..."}`
+- header `Authorization: Bearer $AGENTMAIL_API_KEY`, key by NAME from `/Volumes/DevMASTER/WEDNESDAY/4_Credentials/.env`, read by your script, never echoed.
+
+Confirm the API answered 2xx and quote the message id. The body = the report's BLUF + the eight plain statements + the ADDENDUM + the NOT-TESTED block + the report path. Timestamps from `date`. **The MAIL is the end state.**
+
+## NOT COMMISSIONED (say so if asked)
+Akto / Playwright / k6 (40% cap, stack HOLD); any deployed environment, nginx run, demo box or kintsugi; a real originate; KS-1087 item 2; KS-1184; the §5f live sweep (owed at the Sunday QA pass); a real browser; #1008/#1009 and their gates; the ack boxes; any fix (validating the override, a wall-clock bound, silencing the post-success error log, tightening the cells, dropping the listeners: the owner's).
+
+## PROVENANCE
+All in `2_Project_Files/fleet/qa-agent/gatesets/2026-09-17_gate1010/`:
+- **The seat's mail:** `mail_1010_ready.md` (2026-09-16T17:44:36Z, spf/dkim/dmarc pass), Wednesday's receipt `answer_1010_receipt.md`. PR body `gh/pr1010_body.md`. The seat's records (read only): `/Volumes/DevMASTER/!CODING/Secuura/Blockchain/5_Project_History/2026-09-17_seatA-successor/b1-ks1183/` (`tamper.py`, `tamper2.py`, `tamper-summary.json`, `tamper2-summary.json`, `tsconfig.including.json`, `including-tsc-{base,after}.out`, `links-after-pr.txt`).
+- **Reads:** `git_read.sh`/`.out` (03:47:16) + `src/` + `diff_base_to_head.patch`; `nginx_read.sh`/`.out` (03:48:57), `nginx_read2.sh`/`.out` (03:49:20); `gh_read.py`/`.out` (03:55:15, raw `gh/`); `linear_read.py`/`.out` (03:55:28, raw `linear/`); `spec_read.out` (03:55:40).
+- **Drafter probes, `--shared` scratch clone** (`scratchpad/gate1010_draft_z44qpfkt/`; worktrees base `f7c2f4acb` / head `c3213b04e` / merged `b6f5322b7` = head + `d067725ff`; source checkout worktree count 111 before and after): `drafter_setup.py`/`.out` + `drafter_paths.json` + `drafterlib.py`; `drafter_suites.py`/`.out` + `vt_gw_suite_{base,head,merged}.json`; `qa1010-drafter-probe.test.ts` + `drafter_probe.py`/`.out` + `probe_rows_{head,base,merged}.json` + `probe_table.py`/`.out`; `drafter_run.py`/`.out` + `drafter_run_summary.json` + `vt_t_Q_*.json` + `tsc_including_{base,head,merged,head_planted}.out`.
+- **Launcher:** `launchers/launch_qa_secuura_ks1183_1010.sh`, generated by `gen_launcher_1010.py` from `launch_qa_secuura_ks1087_1008.sh` (`gen_launcher.enumerate-to-scratch.out`, `gen_launcher.out`); `--check` in `check.out`; negative controls (`--check` only) in `controls_check.out`.

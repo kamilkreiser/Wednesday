@@ -1,0 +1,170 @@
+nginx_read2 2026-09-17 03:49:20 AEST
+## nginx.conf 176-205
+  +175      1	    # =========================================================================
+  +175      2	    # API GATEWAY (highest priority path match)
+  +175      3	    # =========================================================================
+  +175      4	    # NOTE: when proxy_pass has a variable in the host, nginx does NOT
+  +175      5	    # do its usual location-prefix-replacement on the URI. Two patterns
+  +175      6	    # below:
+  +175      7	    #   - "preserve URI" → use $request_uri (or omit URI entirely)
+  +175      8	    #   - "strip prefix" → use `rewrite ... break;` then variable host
+  +175      9	    location /api/ {
+  +175     10	        proxy_pass http://api_gateway_pool$request_uri;
+  +175     11	    }
+  +175     12	
+  +175     13	    location = /api/docs {
+  +175     14	        proxy_pass http://api_gateway_pool$request_uri;
+  +175     15	    }
+  +175     16	
+  +175     17	    # System status endpoint (mounted outside /api/ on the gateway)
+  +175     18	    location /system/ {
+  +175     19	        proxy_pass http://api_gateway_pool$request_uri;
+  +175     20	    }
+  +175     21	
+  +175     22	    # Stripe webhooks (mounted outside /api/ on the gateway — Stripe posts to a
+  +175     23	    # fixed URL, signature-verified, no Bearer). KS-118: the edge previously
+  +175     24	    # had no /webhooks/ location, so /webhooks/stripe 405'd at nginx instead of
+  +175     25	    # reaching the gateway -> billing proxy. Preserve the raw body (no parsing).
+  +175     26	    location /webhooks/ {
+  +175     27	        proxy_pass http://api_gateway_pool$request_uri;
+  +175     28	    }
+  +175     29	
+  +175     30	    # =========================================================================
+## nginx-demo.conf 214-232
+    # value deliberately rather than removing the cap.
+    client_max_body_size 12m;
+
+    # Slow-loris bound. The 408 JSON error page already existed below and was
+    # unreachable until these were set.
+    client_body_timeout   15s;
+    client_header_timeout 15s;
+
+    # Per-client concurrent connections. Empty key (no XFF) is skipped, so
+    # local dev and the test suites are unaffected.
+    limit_conn secuura_conn 50;
+
+    # Aggregate ceiling for every location that does not set its own; /api/
+    # redefines both zones below (a limit_req at a deeper level replaces the
+    # inherited one rather than adding to it).
+    limit_req zone=secuura_api burst=100 nodelay;
+
+    # =========================================================================
+    # KS-613 — security headers emitted BY THE GATEWAY
+## nginx-demo.conf 405-420
+    }
+
+    # =========================================================================
+    # API GATEWAY (highest priority path match)
+    # =========================================================================
+    location /api/ {
+        # KS-613: both zones are declared here because a limit_req at this
+        # level REPLACES the server-level one rather than adding to it — omit
+        # secuura_api and /api/ would lose the aggregate ceiling entirely.
+        # secuura_auth's key is empty for non-auth URIs, so it is a no-op
+        # except on /api/auth/* and /api/v1/auth/*.
+        limit_req zone=secuura_auth burst=10  nodelay;
+        limit_req zone=secuura_api  burst=100 nodelay;
+        proxy_pass http://api_gateway_pool$request_uri;
+    }
+
+## nginx-production.conf 340-352
+        proxy_pass http://api_gateway_pool$request_uri;
+    }
+
+    # -------------------------------------------------------------------------
+    # API GATEWAY
+    # -------------------------------------------------------------------------
+
+    location /api/ {
+        limit_req zone=api_limit burst=20 nodelay;
+        proxy_pass http://api_gateway_pool$request_uri;
+    }
+
+    location = /api/docs {
+## issuer nginx.conf 118-140
+        add_header Content-Type text/plain;
+    }
+
+    # API proxy - forward /api/* requests to the API gateway
+    location /api/ {
+        resolver 168.63.129.16 127.0.0.11 valid=30s;
+        set $api_upstream "${API_UPSTREAM}";
+        proxy_pass $api_upstream$request_uri;
+        proxy_set_header Host $proxy_host;
+        proxy_set_header X-Real-IP $remote_addr;
+        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+        proxy_set_header X-Forwarded-Proto $scheme;
+        proxy_http_version 1.1;
+        proxy_set_header Connection "";
+        proxy_ssl_server_name on;
+        proxy_ssl_verify off;
+    }
+
+    # SPA routing - serve index.html for all routes
+    location / {
+        try_files $uri $uri/ /index.html;
+        
+        add_header Cache-Control "no-store, no-cache, must-revalidate, proxy-revalidate" always;
+## bicep: ingress / timeout / targetPort / api-gateway
+  (main.bicep)
+50:// KS-109: the gateway runs all migrations/DDL and provisions the least-privilege
+55:@description('Admin/owner DB URL the gateway uses for migrations + secuura_app provisioning (KS-109). Empty => databaseUrl.')
+59:@description('Admin/owner platform DB URL the gateway uses for migrations (KS-109). Empty => platformDatabaseUrl.')
+63:@description('Password for the least-privilege secuura_app role, provisioned by the gateway (KS-109). Empty => provisioning skipped.')
+89:@description('RS256 JWT signing PUBLIC key (base64-encoded PEM), sourced from Key Vault by deploy.sh. KS-167/184/302: RS256-only. Injected on every JWT-verifying service — via commonEnvVars, plus the explicit-env api-gateway block which sets it directly. Not secret (public key); empty until KS-180 provisions it — verifiers fail closed without it.')
+113:// GATEWAY VOUCH — KS-1041 Step 2 (gateway provenance)
+115:// Proves to `originate` that a request arrived through `api-gateway`. originate
+119:// ⚠ WIRED PER-SERVICE, ON api-gateway AND originate ONLY — deliberately NOT in
+127:// consequence, and the gateway omits the header. Fail-closed would mean an
+128:// unconfigured deploy loses every gateway-set identity at once.
+129:@description('KS-1041: shared secret proving a request came through api-gateway (32 random bytes hex-encoded). Empty => provenance check inert, and originate warns at boot.')
+131:param gatewayVouchSecret string = ''
+164:@description('External base URL of the API gateway, used for OAuth redirect URIs')
+265:  // KS-109: admin/owner connection used by the gateway's migration + secuura_app
+268:  // gateway's provisionAppRole step (sentinel => provisioning skipped).
+338:// it (api-gateway mints the header, originate verifies it), not in
+340:// and authSecrets / gatewayVouchSecrets extend it — so declaring the vouch there
+346:var gatewayVouchSecrets = concat(commonSecrets, [
+353:  // received the same literal, the gateway would SEND it and originate would
+356:  // placeholders would fail-closed on genuine gateway traffic, i.e. an outage.
+359:    name: 'gateway-vouch-secret'
+360:    value: empty(gatewayVouchSecret) ? 'placeholder-never-referenced' : gatewayVouchSecret
+381:  // gets the PRIVATE key (authSecrets). The explicit-env api-gateway block
+399:// PGBOUNCER (KS-207) — single bounded transaction-pooling gateway to Postgres.
+400:// Internal TCP ingress on 6432. minReplicas=maxReplicas=1 is REQUIRED: each
+414:      ingress: {
+415:        external: false
+417:        targetPort: 6432
+457:            { name: 'PGBOUNCER_RESERVE_POOL_TIMEOUT', value: '3' }
+493:// no classic Redis path left to keep. Internal TCP ingress on 6379, no auth
+  (services.bicep)
+## docker-compose files naming nginx-production / nginx-demo / nginx.conf (which conf runs where)
+c3213b04e3ad96068c367f7e0ba426822d32cda9:Blockchain/Dev/docker-compose.e2e.override.yml:28:      - ./docker/nginx-gateway/nginx.conf:/etc/nginx/conf.d/default.conf:ro
+c3213b04e3ad96068c367f7e0ba426822d32cda9:Blockchain/Dev/docker-compose.production.yml:395:      - ./docker/nginx-gateway/nginx-production.conf:/etc/nginx/conf.d/default.conf:ro
+c3213b04e3ad96068c367f7e0ba426822d32cda9:Blockchain/Dev/docker-compose.yml:2238:  # removed in nginx-demo.conf:363-379 ("no functional value"), the URL 404s,
+c3213b04e3ad96068c367f7e0ba426822d32cda9:Blockchain/Dev/docker-compose.yml:2278:      - ./docker/nginx-gateway/nginx-demo.conf:/etc/nginx/conf.d/default.conf:ro
+c3213b04e3ad96068c367f7e0ba426822d32cda9:Blockchain/Dev/docker-compose.yml:2282:      # nginx-demo.conf (see :363-379), /demo-overlay/demo-overlay.js returns
+c3213b04e3ad96068c367f7e0ba426822d32cda9:Blockchain/Dev/docker/nginx-gateway/Dockerfile:10:# nginx-production.conf's `ssl_ecdh_curve`. 1.28 is the current nginx STABLE
+c3213b04e3ad96068c367f7e0ba426822d32cda9:Blockchain/Dev/frontend/demo-overlay/Dockerfile:52:# nginx-demo.conf:363-379 on the stated grounds of "no functional value";
+c3213b04e3ad96068c367f7e0ba426822d32cda9:Blockchain/Dev/scripts/__tests__/preflight_deps.test.sh:160:# nginx-demo.conf is bind-mounted read-only into EVERY slot, so a literal port in
+c3213b04e3ad96068c367f7e0ba426822d32cda9:Blockchain/Dev/scripts/__tests__/preflight_deps.test.sh:163:HEALTH_BLOCK="$(awk '/location = \/health \{/,/^    \}/' "$DEV_ROOT/docker/nginx-gateway/nginx-demo.conf")"
+c3213b04e3ad96068c367f7e0ba426822d32cda9:Blockchain/Dev/scripts/__tests__/preflight_deps.test.sh:175:NGINX_CONF="$DEV_ROOT/docker/nginx-gateway/nginx-demo.conf"
+c3213b04e3ad96068c367f7e0ba426822d32cda9:observability/docker-compose.yml:323:    # (nginx-demo.conf, restricted to private Docker ranges). Container-to-container
+c3213b04e3ad96068c367f7e0ba426822d32cda9:observability/prometheus/prometheus.yml:53:    #   - nginx serves `/stub_status`, not `/metrics` (docker/nginx-gateway/nginx-demo.conf:272);
+## originate stub: express server.timeout / requestTimeout / keepAliveTimeout in originate index (READ)
+c3213b04e3ad96068c367f7e0ba426822d32cda9:Blockchain/Dev/services/originate/src/index.ts:84:  setTimeout(() => process.exit(1), 100).unref();
+c3213b04e3ad96068c367f7e0ba426822d32cda9:Blockchain/Dev/services/originate/src/index.ts:342:  setTimeout(() => {
+c3213b04e3ad96068c367f7e0ba426822d32cda9:Blockchain/Dev/services/originate/src/index.ts:517:// 19-29 s stalls under load). headersTimeout must exceed keepAliveTimeout.
+c3213b04e3ad96068c367f7e0ba426822d32cda9:Blockchain/Dev/services/originate/src/index.ts:518:server.keepAliveTimeout = 65_000;
+c3213b04e3ad96068c367f7e0ba426822d32cda9:Blockchain/Dev/services/originate/src/index.ts:519:server.headersTimeout = 66_000;
+## api-gateway: server timeouts in index.ts
+c3213b04e3ad96068c367f7e0ba426822d32cda9:Blockchain/Dev/services/api-gateway/src/index.ts:1245:  // 19-29 s stalls under load). headersTimeout must exceed keepAliveTimeout.
+c3213b04e3ad96068c367f7e0ba426822d32cda9:Blockchain/Dev/services/api-gateway/src/index.ts:1246:  server.keepAliveTimeout = 65_000;
+c3213b04e3ad96068c367f7e0ba426822d32cda9:Blockchain/Dev/services/api-gateway/src/index.ts:1247:  server.headersTimeout = 66_000;
+## openapi spec location + census (control ^paths:)
+Blockchain/Dev/MCP Deployment/openapi.yaml
+Blockchain/Dev/docs/openapi/secuura-api.yaml
+Blockchain/Dev/scripts/openapi-examples/docker-compose.capture.override.yml
+Blockchain/Dev/services/mcp-server/openapi.yaml
+systemTest/akto/tests/unit/fixtures/openapi-sample.yaml
+end 03:49:21 AEST

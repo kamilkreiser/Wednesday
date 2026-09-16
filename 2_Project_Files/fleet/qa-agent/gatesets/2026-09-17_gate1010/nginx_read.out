@@ -1,0 +1,311 @@
+nginx_read 2026-09-17 03:48:57 AEST
+--- A. timeout directives in any tracked file (case-insensitive), excluding node_modules/lockfiles/tests/.ts/.js/.py/.md
+c3213b04e3ad96068c367f7e0ba426822d32cda9:Blockchain/Dev/docker/nginx-gateway/nginx-demo.conf:72:    keepalive_timeout 60s;
+c3213b04e3ad96068c367f7e0ba426822d32cda9:Blockchain/Dev/docker/nginx-gateway/nginx-demo.conf:219:    client_body_timeout   15s;
+c3213b04e3ad96068c367f7e0ba426822d32cda9:Blockchain/Dev/docker/nginx-gateway/nginx-demo.conf:327:    proxy_connect_timeout 30s;
+c3213b04e3ad96068c367f7e0ba426822d32cda9:Blockchain/Dev/docker/nginx-gateway/nginx-demo.conf:328:    proxy_send_timeout    60s;
+c3213b04e3ad96068c367f7e0ba426822d32cda9:Blockchain/Dev/docker/nginx-gateway/nginx-demo.conf:329:    proxy_read_timeout    60s;
+c3213b04e3ad96068c367f7e0ba426822d32cda9:Blockchain/Dev/docker/nginx-gateway/nginx-production.conf:119:    keepalive_timeout 60s;
+c3213b04e3ad96068c367f7e0ba426822d32cda9:Blockchain/Dev/docker/nginx-gateway/nginx-production.conf:290:    proxy_connect_timeout 15s;
+c3213b04e3ad96068c367f7e0ba426822d32cda9:Blockchain/Dev/docker/nginx-gateway/nginx-production.conf:291:    proxy_send_timeout    30s;
+c3213b04e3ad96068c367f7e0ba426822d32cda9:Blockchain/Dev/docker/nginx-gateway/nginx-production.conf:292:    proxy_read_timeout    30s;
+c3213b04e3ad96068c367f7e0ba426822d32cda9:Blockchain/Dev/docker/nginx-gateway/nginx.conf:60:    keepalive_timeout 60s;
+c3213b04e3ad96068c367f7e0ba426822d32cda9:Blockchain/Dev/docker/nginx-gateway/nginx.conf:126:    proxy_connect_timeout 120s;
+c3213b04e3ad96068c367f7e0ba426822d32cda9:Blockchain/Dev/docker/nginx-gateway/nginx.conf:127:    proxy_send_timeout    120s;
+c3213b04e3ad96068c367f7e0ba426822d32cda9:Blockchain/Dev/docker/nginx-gateway/nginx.conf:128:    proxy_read_timeout    120s;
+c3213b04e3ad96068c367f7e0ba426822d32cda9:Blockchain/Dev/docker/pgbouncer/pgbouncer.ini:92:server_idle_timeout = 600
+c3213b04e3ad96068c367f7e0ba426822d32cda9:Blockchain/Dev/docker/pgbouncer/pgbouncer.ini:107:client_idle_timeout = 0
+rc A 0
+--- B. who proxies to the gateway: upstream / proxy_pass / reverse_proxy naming gateway or 3000/api
+c3213b04e3ad96068c367f7e0ba426822d32cda9:Blockchain/Dev/deployment/caddy/Caddyfile:34:    reverse_proxy localhost:6882
+c3213b04e3ad96068c367f7e0ba426822d32cda9:Blockchain/Dev/docker/nginx-gateway/nginx-demo.conf:12:#   - demo-service upstream and proxy routing at /demo-api/
+c3213b04e3ad96068c367f7e0ba426822d32cda9:Blockchain/Dev/docker/nginx-gateway/nginx-demo.conf:30:# KS-20: static `upstream { server host:port }` blocks resolved each
+c3213b04e3ad96068c367f7e0ba426822d32cda9:Blockchain/Dev/docker/nginx-gateway/nginx-demo.conf:31:# upstream IP once at nginx boot and cached it forever — so a restarted
+c3213b04e3ad96068c367f7e0ba426822d32cda9:Blockchain/Dev/docker/nginx-gateway/nginx-demo.conf:32:# upstream container (new IP) caused permanent 502s until a manual nginx
+c3213b04e3ad96068c367f7e0ba426822d32cda9:Blockchain/Dev/docker/nginx-gateway/nginx-demo.conf:33:# restart, and nginx refused to start at all if any upstream wasn't yet
+c3213b04e3ad96068c367f7e0ba426822d32cda9:Blockchain/Dev/docker/nginx-gateway/nginx-demo.conf:35:# "host:port"` + a variable `proxy_pass http://$svc_X` and a short-TTL
+c3213b04e3ad96068c367f7e0ba426822d32cda9:Blockchain/Dev/docker/nginx-gateway/nginx-demo.conf:51:#      impossible with the variable-`proxy_pass` form the other services use;
+c3213b04e3ad96068c367f7e0ba426822d32cda9:Blockchain/Dev/docker/nginx-gateway/nginx-demo.conf:62:# server block serves the variable-`proxy_pass` locations and stays.
+c3213b04e3ad96068c367f7e0ba426822d32cda9:Blockchain/Dev/docker/nginx-gateway/nginx-demo.conf:65:upstream api_gateway_pool {
+c3213b04e3ad96068c367f7e0ba426822d32cda9:Blockchain/Dev/docker/nginx-gateway/nginx-demo.conf:255:    # TLS is terminated upstream by Caddy; this header is forwarded to the
+c3213b04e3ad96068c367f7e0ba426822d32cda9:Blockchain/Dev/docker/nginx-gateway/nginx-demo.conf:260:    # Docker-embedded DNS, short cache so a restarted upstream is picked up
+c3213b04e3ad96068c367f7e0ba426822d32cda9:Blockchain/Dev/docker/nginx-gateway/nginx-demo.conf:290:    # Upstream responses pass through untouched — proxy_intercept_errors
+c3213b04e3ad96068c367f7e0ba426822d32cda9:Blockchain/Dev/docker/nginx-gateway/nginx-demo.conf:313:    location = /_gw_err_502 { internal; default_type application/json; return 502 '{"success":false,"error":{"code":"BAD_GATEWAY","message":"The upstream service is not reachable right now."}}'; }
+c3213b04e3ad96068c367f7e0ba426822d32cda9:Blockchain/Dev/docker/nginx-gateway/nginx-demo.conf:315:    location = /_gw_err_504 { internal; default_type application/json; return 504 '{"success":false,"error":{"code":"GATEWAY_TIMEOUT","message":"The upstream service did not respond in time."}}'; }
+c3213b04e3ad96068c367f7e0ba426822d32cda9:Blockchain/Dev/docker/nginx-gateway/nginx-demo.conf:401:        proxy_pass http://api_gateway_pool$request_uri;
+c3213b04e3ad96068c367f7e0ba426822d32cda9:Blockchain/Dev/docker/nginx-gateway/nginx-demo.conf:404:        proxy_pass http://api_gateway_pool$request_uri;
+c3213b04e3ad96068c367f7e0ba426822d32cda9:Blockchain/Dev/docker/nginx-gateway/nginx-demo.conf:418:        proxy_pass http://api_gateway_pool$request_uri;
+c3213b04e3ad96068c367f7e0ba426822d32cda9:Blockchain/Dev/docker/nginx-gateway/nginx-demo.conf:422:        proxy_pass http://api_gateway_pool$request_uri;
+c3213b04e3ad96068c367f7e0ba426822d32cda9:Blockchain/Dev/docker/nginx-gateway/nginx-demo.conf:427:        proxy_pass http://api_gateway_pool$request_uri;
+c3213b04e3ad96068c367f7e0ba426822d32cda9:Blockchain/Dev/docker/nginx-gateway/nginx-demo.conf:435:        proxy_pass http://api_gateway_pool$request_uri;
+c3213b04e3ad96068c367f7e0ba426822d32cda9:Blockchain/Dev/docker/nginx-gateway/nginx-demo.conf:468:        proxy_pass http://$svc_analytics;
+c3213b04e3ad96068c367f7e0ba426822d32cda9:Blockchain/Dev/docker/nginx-gateway/nginx-demo.conf:476:        proxy_pass http://$svc_verifier$request_uri;
+c3213b04e3ad96068c367f7e0ba426822d32cda9:Blockchain/Dev/docker/nginx-gateway/nginx-demo.conf:489:        proxy_pass http://$svc_admin$request_uri;
+c3213b04e3ad96068c367f7e0ba426822d32cda9:Blockchain/Dev/docker/nginx-gateway/nginx-demo.conf:502:        proxy_pass http://$svc_status$request_uri;
+c3213b04e3ad96068c367f7e0ba426822d32cda9:Blockchain/Dev/docker/nginx-gateway/nginx-demo.conf:516:        proxy_pass http://$svc_website;
+c3213b04e3ad96068c367f7e0ba426822d32cda9:Blockchain/Dev/docker/nginx-gateway/nginx-demo.conf:558:        proxy_pass http://$svc_issuer$request_uri;
+c3213b04e3ad96068c367f7e0ba426822d32cda9:Blockchain/Dev/docker/nginx-gateway/nginx-demo.conf:566:    # proxied request tells the upstream to tear the connection down after one
+c3213b04e3ad96068c367f7e0ba426822d32cda9:Blockchain/Dev/docker/nginx-gateway/nginx-demo.conf:567:    # response, defeating upstream keepalive entirely — this was half the
+c3213b04e3ad96068c367f7e0ba426822d32cda9:Blockchain/Dev/docker/nginx-gateway/nginx-production.conf:56:    # proxied request tells the upstream to tear the connection down after one
+c3213b04e3ad96068c367f7e0ba426822d32cda9:Blockchain/Dev/docker/nginx-gateway/nginx-production.conf:57:    # response, defeating upstream keepalive entirely — this was half the
+c3213b04e3ad96068c367f7e0ba426822d32cda9:Blockchain/Dev/docker/nginx-gateway/nginx-production.conf:63:# Upstreams — KS-20: static `upstream { server host:port }` blocks resolved
+c3213b04e3ad96068c367f7e0ba426822d32cda9:Blockchain/Dev/docker/nginx-gateway/nginx-production.conf:64:# each upstream IP once at nginx boot and cached it forever, so a restarted
+c3213b04e3ad96068c367f7e0ba426822d32cda9:Blockchain/Dev/docker/nginx-gateway/nginx-production.conf:65:# upstream container (which gets a new IP on the docker network) caused
+c3213b04e3ad96068c367f7e0ba426822d32cda9:Blockchain/Dev/docker/nginx-gateway/nginx-production.conf:67:# start at all if any upstream wasn't yet DNS-resolvable. These are now
+c3213b04e3ad96068c367f7e0ba426822d32cda9:Blockchain/Dev/docker/nginx-gateway/nginx-production.conf:69:# `proxy_pass http://$svc_X` and a short-TTL `resolver` in the server
+c3213b04e3ad96068c367f7e0ba426822d32cda9:Blockchain/Dev/docker/nginx-gateway/nginx-production.conf:98:#      impossible with the variable-`proxy_pass` form the other services use;
+c3213b04e3ad96068c367f7e0ba426822d32cda9:Blockchain/Dev/docker/nginx-gateway/nginx-production.conf:109:# server block serves the variable-`proxy_pass` locations and stays.
+c3213b04e3ad96068c367f7e0ba426822d32cda9:Blockchain/Dev/docker/nginx-gateway/nginx-production.conf:112:upstream api_gateway_pool {
+c3213b04e3ad96068c367f7e0ba426822d32cda9:Blockchain/Dev/docker/nginx-gateway/nginx-production.conf:212:    # Short `valid=` so a restarted upstream container is picked up within
+c3213b04e3ad96068c367f7e0ba426822d32cda9:Blockchain/Dev/docker/nginx-gateway/nginx-production.conf:224:    # Upstream responses pass through untouched — proxy_intercept_errors
+c3213b04e3ad96068c367f7e0ba426822d32cda9:Blockchain/Dev/docker/nginx-gateway/nginx-production.conf:255:    location = /_gw_err_502 { internal; default_type application/json; return 502 '{"success":false,"error":{"code":"BAD_GATEWAY","message":"The upstream service is not reachable right now."}}'; }
+c3213b04e3ad96068c367f7e0ba426822d32cda9:Blockchain/Dev/docker/nginx-gateway/nginx-production.conf:257:    location = /_gw_err_504 { internal; default_type application/json; return 504 '{"success":false,"error":{"code":"GATEWAY_TIMEOUT","message":"The upstream service did not respond in time."}}'; }
+c3213b04e3ad96068c367f7e0ba426822d32cda9:Blockchain/Dev/docker/nginx-gateway/nginx-production.conf:337:        proxy_pass http://api_gateway_pool$request_uri;
+c3213b04e3ad96068c367f7e0ba426822d32cda9:Blockchain/Dev/docker/nginx-gateway/nginx-production.conf:340:        proxy_pass http://api_gateway_pool$request_uri;
+c3213b04e3ad96068c367f7e0ba426822d32cda9:Blockchain/Dev/docker/nginx-gateway/nginx-production.conf:349:        proxy_pass http://api_gateway_pool$request_uri;
+c3213b04e3ad96068c367f7e0ba426822d32cda9:Blockchain/Dev/docker/nginx-gateway/nginx-production.conf:353:        proxy_pass http://api_gateway_pool$request_uri;
+c3213b04e3ad96068c367f7e0ba426822d32cda9:Blockchain/Dev/docker/nginx-gateway/nginx-production.conf:358:        proxy_pass http://api_gateway_pool$request_uri;
+c3213b04e3ad96068c367f7e0ba426822d32cda9:Blockchain/Dev/docker/nginx-gateway/nginx-production.conf:362:        proxy_pass http://api_gateway_pool$request_uri;
+c3213b04e3ad96068c367f7e0ba426822d32cda9:Blockchain/Dev/docker/nginx-gateway/nginx-production.conf:393:        proxy_pass http://$svc_analytics;
+c3213b04e3ad96068c367f7e0ba426822d32cda9:Blockchain/Dev/docker/nginx-gateway/nginx-production.conf:403:        proxy_pass http://$svc_verifier$request_uri;
+c3213b04e3ad96068c367f7e0ba426822d32cda9:Blockchain/Dev/docker/nginx-gateway/nginx-production.conf:411:        proxy_pass http://$svc_admin$request_uri;
+c3213b04e3ad96068c367f7e0ba426822d32cda9:Blockchain/Dev/docker/nginx-gateway/nginx-production.conf:418:        proxy_pass http://$svc_status$request_uri;
+c3213b04e3ad96068c367f7e0ba426822d32cda9:Blockchain/Dev/docker/nginx-gateway/nginx-production.conf:427:        proxy_pass http://$svc_website;
+c3213b04e3ad96068c367f7e0ba426822d32cda9:Blockchain/Dev/docker/nginx-gateway/nginx-production.conf:435:        proxy_pass http://$svc_issuer$request_uri;
+c3213b04e3ad96068c367f7e0ba426822d32cda9:Blockchain/Dev/docker/nginx-gateway/nginx.conf:38:#      impossible with the variable-`proxy_pass` form used below for the other
+c3213b04e3ad96068c367f7e0ba426822d32cda9:Blockchain/Dev/docker/nginx-gateway/nginx.conf:50:# server block only serves the variable-`proxy_pass` locations).
+c3213b04e3ad96068c367f7e0ba426822d32cda9:Blockchain/Dev/docker/nginx-gateway/nginx.conf:53:upstream api_gateway_pool {
+c3213b04e3ad96068c367f7e0ba426822d32cda9:Blockchain/Dev/docker/nginx-gateway/nginx.conf:67:# variable-based `proxy_pass http://$var` makes nginx call the resolver
+c3213b04e3ad96068c367f7e0ba426822d32cda9:Blockchain/Dev/docker/nginx-gateway/nginx.conf:85:    # Docker-embedded DNS, short cache so a restarted upstream is picked
+c3213b04e3ad96068c367f7e0ba426822d32cda9:Blockchain/Dev/docker/nginx-gateway/nginx.conf:100:    # Upstream responses pass through untouched — proxy_intercept_errors
+c3213b04e3ad96068c367f7e0ba426822d32cda9:Blockchain/Dev/docker/nginx-gateway/nginx.conf:121:    location = /_gw_err_502 { internal; default_type application/json; return 502 '{"success":false,"error":{"code":"BAD_GATEWAY","message":"The upstream service is not reachable right now."}}'; }
+c3213b04e3ad96068c367f7e0ba426822d32cda9:Blockchain/Dev/docker/nginx-gateway/nginx.conf:123:    location = /_gw_err_504 { internal; default_type application/json; return 504 '{"success":false,"error":{"code":"GATEWAY_TIMEOUT","message":"The upstream service did not respond in time."}}'; }
+c3213b04e3ad96068c367f7e0ba426822d32cda9:Blockchain/Dev/docker/nginx-gateway/nginx.conf:141:    # Hide upstream server version headers
+c3213b04e3ad96068c367f7e0ba426822d32cda9:Blockchain/Dev/docker/nginx-gateway/nginx.conf:149:    # nginx's add_header APPENDS to upstream values rather than replacing.
+c3213b04e3ad96068c367f7e0ba426822d32cda9:Blockchain/Dev/docker/nginx-gateway/nginx.conf:170:        proxy_pass http://api_gateway_pool$request_uri;
+c3213b04e3ad96068c367f7e0ba426822d32cda9:Blockchain/Dev/docker/nginx-gateway/nginx.conf:173:        proxy_pass http://api_gateway_pool$request_uri;
+c3213b04e3ad96068c367f7e0ba426822d32cda9:Blockchain/Dev/docker/nginx-gateway/nginx.conf:179:    # NOTE: when proxy_pass has a variable in the host, nginx does NOT
+c3213b04e3ad96068c367f7e0ba426822d32cda9:Blockchain/Dev/docker/nginx-gateway/nginx.conf:185:        proxy_pass http://api_gateway_pool$request_uri;
+c3213b04e3ad96068c367f7e0ba426822d32cda9:Blockchain/Dev/docker/nginx-gateway/nginx.conf:189:        proxy_pass http://api_gateway_pool$request_uri;
+c3213b04e3ad96068c367f7e0ba426822d32cda9:Blockchain/Dev/docker/nginx-gateway/nginx.conf:194:        proxy_pass http://api_gateway_pool$request_uri;
+c3213b04e3ad96068c367f7e0ba426822d32cda9:Blockchain/Dev/docker/nginx-gateway/nginx.conf:202:        proxy_pass http://api_gateway_pool$request_uri;
+c3213b04e3ad96068c367f7e0ba426822d32cda9:Blockchain/Dev/docker/nginx-gateway/nginx.conf:235:        proxy_pass http://$svc_analytics;
+c3213b04e3ad96068c367f7e0ba426822d32cda9:Blockchain/Dev/docker/nginx-gateway/nginx.conf:243:        proxy_pass http://$svc_verifier$request_uri;
+c3213b04e3ad96068c367f7e0ba426822d32cda9:Blockchain/Dev/docker/nginx-gateway/nginx.conf:256:        proxy_pass http://$svc_admin$request_uri;
+c3213b04e3ad96068c367f7e0ba426822d32cda9:Blockchain/Dev/docker/nginx-gateway/nginx.conf:269:        proxy_pass http://$svc_status$request_uri;
+c3213b04e3ad96068c367f7e0ba426822d32cda9:Blockchain/Dev/docker/nginx-gateway/nginx.conf:283:        proxy_pass http://$svc_website;
+c3213b04e3ad96068c367f7e0ba426822d32cda9:Blockchain/Dev/docker/nginx-gateway/nginx.conf:325:        proxy_pass http://$svc_issuer$request_uri;
+c3213b04e3ad96068c367f7e0ba426822d32cda9:Blockchain/Dev/docker/nginx-gateway/nginx.conf:333:    # proxied request tells the upstream to tear the connection down after one
+c3213b04e3ad96068c367f7e0ba426822d32cda9:Blockchain/Dev/docker/nginx-gateway/nginx.conf:334:    # response, which defeats upstream keepalive entirely (this was half the
+c3213b04e3ad96068c367f7e0ba426822d32cda9:Blockchain/Dev/frontend/admin/nginx.conf:65:        set $api_upstream "${API_UPSTREAM}";
+c3213b04e3ad96068c367f7e0ba426822d32cda9:Blockchain/Dev/frontend/admin/nginx.conf:66:        proxy_pass $api_upstream$request_uri;
+c3213b04e3ad96068c367f7e0ba426822d32cda9:Blockchain/Dev/frontend/issuer/nginx.conf:124:        set $api_upstream "${API_UPSTREAM}";
+c3213b04e3ad96068c367f7e0ba426822d32cda9:Blockchain/Dev/frontend/issuer/nginx.conf:125:        proxy_pass $api_upstream$request_uri;
+c3213b04e3ad96068c367f7e0ba426822d32cda9:Blockchain/Dev/frontend/outlook-addin/nginx.conf:56:        set $api_upstream "${API_UPSTREAM}";
+c3213b04e3ad96068c367f7e0ba426822d32cda9:Blockchain/Dev/frontend/outlook-addin/nginx.conf:57:        proxy_pass $api_upstream$request_uri;
+c3213b04e3ad96068c367f7e0ba426822d32cda9:Blockchain/Dev/frontend/verifier/nginx.conf:100:        set $api_upstream "${API_UPSTREAM}";
+c3213b04e3ad96068c367f7e0ba426822d32cda9:Blockchain/Dev/frontend/verifier/nginx.conf:101:        proxy_pass $api_upstream$request_uri;
+c3213b04e3ad96068c367f7e0ba426822d32cda9:observability/docker-compose.yml:21:#   nginx-exporter    — gateway request rate / upstream errors / connections
+c3213b04e3ad96068c367f7e0ba426822d32cda9:observability/docker-compose.yml:320:    # Nginx exporter — gateway request rate, upstream errors, active connections
+c3213b04e3ad96068c367f7e0ba426822d32cda9:observability/prometheus/prometheus.yml:131:    # Nginx gateway — request rate, upstream errors, active connections
+c3213b04e3ad96068c367f7e0ba426822d32cda9:systemTest/akto/docker-compose.yml:54:    # pinned to 6.0 until Akto upgrades its driver (tracked upstream — see issue below).
+c3213b04e3ad96068c367f7e0ba426822d32cda9:systemTest/akto/docker-compose.yml:55:    #   Upstream tracking issue: akto#5473
+c3213b04e3ad96068c367f7e0ba426822d32cda9:systemTest/akto/docker-compose.yml:65:        # SUPPORTED pairing (upstream akto#5473). mongo:8.0.26 was exercised on 2026-06-22 and core
+c3213b04e3ad96068c367f7e0ba426822d32cda9:systemTest/akto/docker-compose.yml:73:        # restart on-failure (not unless-stopped) matches the canonical upstream compose.
+c3213b04e3ad96068c367f7e0ba426822d32cda9:systemTest/akto/docker-compose.yml:323:    # Only a rolling :latest tag is published upstream (no versioned releases).
+c3213b04e3ad96068c367f7e0ba426822d32cda9:systemTest/schemathesis/config/schemathesis_tests.yaml:152:        Audited the real upstream changelog (docs/changelog.md via `gh api repos/schemathesis/schemathesis`,
+--- C. location blocks for /api in the nginx confs
+## Blockchain/Dev/docker/nginx-gateway/nginx.conf lines 389 location-lines 37 timeout-lines 10
+38:#      impossible with the variable-`proxy_pass` form used below for the other
+50:# server block only serves the variable-`proxy_pass` locations).
+53:upstream api_gateway_pool {
+67:# variable-based `proxy_pass http://$var` makes nginx call the resolver
+73:    listen 80;
+74:    server_name localhost;
+78:    # absolute URL from the internal listen port (80) + $scheme, stripping the
+85:    # Docker-embedded DNS, short cache so a restarted upstream is picked
+100:    # Upstream responses pass through untouched — proxy_intercept_errors
+121:    location = /_gw_err_502 { internal; default_type application/json; return 502 '{"success":false,"error":{"code":"BAD_GATEWAY","message":"The upstream service is not reachable right now."}}'; }
+123:    location = /_gw_err_504 { internal; default_type application/json; return 504 '{"success":false,"error":{"code":"GATEWAY_TIMEOUT","message":"The upstream service did not respond in time."}}'; }
+126:    proxy_connect_timeout 120s;
+127:    proxy_send_timeout    120s;
+128:    proxy_read_timeout    120s;
+141:    # Hide upstream server version headers
+149:    # nginx's add_header APPENDS to upstream values rather than replacing.
+170:        proxy_pass http://api_gateway_pool$request_uri;
+173:        proxy_pass http://api_gateway_pool$request_uri;
+179:    # NOTE: when proxy_pass has a variable in the host, nginx does NOT
+184:    location /api/ {
+185:        proxy_pass http://api_gateway_pool$request_uri;
+188:    location = /api/docs {
+189:        proxy_pass http://api_gateway_pool$request_uri;
+194:        proxy_pass http://api_gateway_pool$request_uri;
+202:        proxy_pass http://api_gateway_pool$request_uri;
+235:        proxy_pass http://$svc_analytics;
+243:        proxy_pass http://$svc_verifier$request_uri;
+256:        proxy_pass http://$svc_admin$request_uri;
+269:        proxy_pass http://$svc_status$request_uri;
+283:        proxy_pass http://$svc_website;
+325:        proxy_pass http://$svc_issuer$request_uri;
+333:    # proxied request tells the upstream to tear the connection down after one
+334:    # response, which defeats upstream keepalive entirely (this was half the
+356:#     listen 80;
+357:#     server_name _;
+362:#     listen 443 ssl http2;
+363:#     server_name _;
+## Blockchain/Dev/docker/nginx-gateway/nginx-demo.conf lines 620 location-lines 43 timeout-lines 12
+12:#   - demo-service upstream and proxy routing at /demo-api/
+30:# KS-20: static `upstream { server host:port }` blocks resolved each
+31:# upstream IP once at nginx boot and cached it forever — so a restarted
+32:# upstream container (new IP) caused permanent 502s until a manual nginx
+33:# restart, and nginx refused to start at all if any upstream wasn't yet
+35:# "host:port"` + a variable `proxy_pass http://$svc_X` and a short-TTL
+51:#      impossible with the variable-`proxy_pass` form the other services use;
+62:# server block serves the variable-`proxy_pass` locations and stays.
+65:upstream api_gateway_pool {
+182:    listen 80;
+183:    server_name localhost;
+187:    # absolute URL from the internal listen port (80), stripping the host-side
+226:    # Aggregate ceiling for every location that does not set its own; /api/
+255:    # TLS is terminated upstream by Caddy; this header is forwarded to the
+260:    # Docker-embedded DNS, short cache so a restarted upstream is picked up
+290:    # Upstream responses pass through untouched — proxy_intercept_errors
+313:    location = /_gw_err_502 { internal; default_type application/json; return 502 '{"success":false,"error":{"code":"BAD_GATEWAY","message":"The upstream service is not reachable right now."}}'; }
+315:    location = /_gw_err_504 { internal; default_type application/json; return 504 '{"success":false,"error":{"code":"GATEWAY_TIMEOUT","message":"The upstream service did not respond in time."}}'; }
+327:    proxy_connect_timeout 30s;
+328:    proxy_send_timeout    60s;
+329:    proxy_read_timeout    60s;
+377:    # The previous sub_filter / location /demo-overlay/ / location /demo-api/
+401:        proxy_pass http://api_gateway_pool$request_uri;
+404:        proxy_pass http://api_gateway_pool$request_uri;
+410:    location /api/ {
+418:        proxy_pass http://api_gateway_pool$request_uri;
+421:    location = /api/docs {
+422:        proxy_pass http://api_gateway_pool$request_uri;
+427:        proxy_pass http://api_gateway_pool$request_uri;
+435:        proxy_pass http://api_gateway_pool$request_uri;
+468:        proxy_pass http://$svc_analytics;
+476:        proxy_pass http://$svc_verifier$request_uri;
+489:        proxy_pass http://$svc_admin$request_uri;
+502:        proxy_pass http://$svc_status$request_uri;
+516:        proxy_pass http://$svc_website;
+558:        proxy_pass http://$svc_issuer$request_uri;
+566:    # proxied request tells the upstream to tear the connection down after one
+567:    # response, defeating upstream keepalive entirely — this was half the
+589:#     listen 80;
+590:#     server_name _;
+## Blockchain/Dev/docker/nginx-gateway/nginx-production.conf lines 437 location-lines 36 timeout-lines 11
+56:    # proxied request tells the upstream to tear the connection down after one
+57:    # response, defeating upstream keepalive entirely — this was half the
+63:# Upstreams — KS-20: static `upstream { server host:port }` blocks resolved
+64:# each upstream IP once at nginx boot and cached it forever, so a restarted
+65:# upstream container (which gets a new IP on the docker network) caused
+67:# start at all if any upstream wasn't yet DNS-resolvable. These are now
+69:# `proxy_pass http://$svc_X` and a short-TTL `resolver` in the server
+98:#      impossible with the variable-`proxy_pass` form the other services use;
+109:# server block serves the variable-`proxy_pass` locations and stays.
+112:upstream api_gateway_pool {
+125:    listen 80;
+126:    server_name _;
+151:    listen 443 ssl http2;
+152:    server_name _;
+156:    # absolute URL from the internal listen port + $scheme, which behind a
+212:    # Short `valid=` so a restarted upstream container is picked up within
+224:    # Upstream responses pass through untouched — proxy_intercept_errors
+255:    location = /_gw_err_502 { internal; default_type application/json; return 502 '{"success":false,"error":{"code":"BAD_GATEWAY","message":"The upstream service is not reachable right now."}}'; }
+257:    location = /_gw_err_504 { internal; default_type application/json; return 504 '{"success":false,"error":{"code":"GATEWAY_TIMEOUT","message":"The upstream service did not respond in time."}}'; }
+290:    proxy_connect_timeout 15s;
+291:    proxy_send_timeout    30s;
+292:    proxy_read_timeout    30s;
+337:        proxy_pass http://api_gateway_pool$request_uri;
+340:        proxy_pass http://api_gateway_pool$request_uri;
+347:    location /api/ {
+349:        proxy_pass http://api_gateway_pool$request_uri;
+352:    location = /api/docs {
+353:        proxy_pass http://api_gateway_pool$request_uri;
+356:    location /api/auth/ {
+358:        proxy_pass http://api_gateway_pool$request_uri;
+362:        proxy_pass http://api_gateway_pool$request_uri;
+393:        proxy_pass http://$svc_analytics;
+403:        proxy_pass http://$svc_verifier$request_uri;
+411:        proxy_pass http://$svc_admin$request_uri;
+418:        proxy_pass http://$svc_status$request_uri;
+427:        proxy_pass http://$svc_website;
+435:        proxy_pass http://$svc_issuer$request_uri;
+## Blockchain/Dev/frontend/admin/nginx.conf lines 127 location-lines 13 timeout-lines 0
+2:    listen 8080;
+3:    server_name localhost;
+6:    # otherwise builds an absolute Location from the internal listen port (8080)
+63:    location /api/ {
+65:        set $api_upstream "${API_UPSTREAM}";
+66:        proxy_pass $api_upstream$request_uri;
+73:        proxy_ssl_server_name on;
+## Blockchain/Dev/frontend/issuer/nginx.conf lines 177 location-lines 10 timeout-lines 0
+2:    listen 8080;
+3:    server_name localhost;
+6:    # otherwise builds an absolute Location from the internal listen port (8080)
+122:    location /api/ {
+124:        set $api_upstream "${API_UPSTREAM}";
+125:        proxy_pass $api_upstream$request_uri;
+132:        proxy_ssl_server_name on;
+## Blockchain/Dev/frontend/outlook-addin/nginx.conf lines 104 location-lines 13 timeout-lines 0
+2:    listen 8080;
+3:    server_name localhost;
+6:    # otherwise builds an absolute Location from the internal listen port (8080)
+54:    location /api/ {
+56:        set $api_upstream "${API_UPSTREAM}";
+57:        proxy_pass $api_upstream$request_uri;
+64:        proxy_ssl_server_name on;
+## Blockchain/Dev/frontend/status/nginx.conf lines 26 location-lines 2 timeout-lines 0
+2:    listen 80;
+3:    server_name localhost;
+## Blockchain/Dev/frontend/verifier/nginx.conf lines 165 location-lines 13 timeout-lines 0
+2:    listen 8080;
+3:    server_name localhost;
+6:    # otherwise builds an absolute Location from the internal listen port (8080)
+98:    location /api/ {
+100:        set $api_upstream "${API_UPSTREAM}";
+101:        proxy_pass $api_upstream$request_uri;
+108:        proxy_ssl_server_name on;
+## Blockchain/Dev/frontend/website/nginx.conf lines 68 location-lines 5 timeout-lines 0
+2:    listen 80;
+3:    server_name localhost;
+## Tokenomics/nginx.conf lines 37 location-lines 4 timeout-lines 0
+2:    listen 80;
+3:    server_name localhost;
+--- D. Caddyfile
+10:# and reverse-proxies to the compose nginx gateway published on localhost:6882.
+12:# Request path:  client -> Caddy (host, :443) -> nginx-gateway (:6882) -> api-gateway
+14:# and the gateway's `trust proxy` must match — see KS-618.
+27:# Caddy adds NO rate limiting, NO body cap and NO timeout tuning here. Every
+34:    reverse_proxy localhost:6882
+--- E. k8s / helm / ingress manifests (names)
+Blockchain/Dev/deployment/azure/env.demo.json
+Blockchain/Dev/deployment/azure/env.dev.json
+Blockchain/Dev/deployment/azure/main.bicep
+Blockchain/Dev/deployment/azure/main.parameters.json
+Blockchain/Dev/deployment/azure/services.bicep
+Blockchain/Dev/deployment/azure/services.parameters.json
+--- F. positive control: the seat's cited line
+    #     attacker from injecting a runtime-loaded inline <style> block.
+    add_header Content-Security-Policy "default-src 'self'; script-src 'self'; style-src-elem 'self' fonts.googleapis.com; style-src-attr 'unsafe-inline'; font-src 'self' fonts.gstatic.com; img-src 'self' data: https:; connect-src 'self' https://*.blockfrost.io https://*.cardanoscan.io wss:; frame-ancestors 'self'; base-uri 'self'; form-action 'self';" always;
+
+    # -------------------------------------------------------------------------
+    # GENERAL SETTINGS
+    # -------------------------------------------------------------------------
+
+    client_max_body_size 10m;
+    server_tokens off;
+
+    proxy_connect_timeout 15s;
+    proxy_send_timeout    30s;
+    proxy_read_timeout    30s;
+
+    proxy_set_header Host              $host;
+    proxy_set_header X-Real-IP         $remote_addr;
+    proxy_set_header X-Forwarded-For   $proxy_add_x_forwarded_for;
+    proxy_set_header X-Forwarded-Proto $scheme;
+
+    proxy_http_version 1.1;
+    proxy_set_header Upgrade    $http_upgrade;
+end 03:49:04 AEST

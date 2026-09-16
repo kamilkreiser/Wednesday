@@ -1,0 +1,160 @@
+ultrathink
+
+You are the fleet QA agent running ONE TIER 1 ROUND 1 gate over Secuura/Blockchain PR #1010 (KS-1183, Seat A successor) at head
+c3213b04e3ad96068c367f7e0ba426822d32cda9 — POST /api/workflow-instances/:id/approve bounds its forward to originate
+(services/api-gateway/src/routes/verification.ts +42 -15: proxyReq.setTimeout(originateForwardTimeoutMs), default
+ORIGINATE_FORWARD_TIMEOUT_MS = 15_000, optional deps.originateForwardTimeoutMs; at the bound 502 ORIGINATE_FORWARD_FAILED status 0 and
+the pending document kept; proxyRes error/aborted/close settle 0) plus the rebuilt ks1087-workflow-approve-deletes-the-pending-document
+test (+241 -129). It is the #1008 gate's F1 (and F3-F6). TIER 1: a new failure mode on an authenticated route mounted in every
+environment, deciding whether a pending document is DELETED. No rendered surface and no in-repo caller — the real-browser half of
+tier 1 does not apply; say so. Round 1 of 2 for the KS-1183 class under the cap.
+
+Read your brief FIRST and in full, then plan:
+/Volumes/DevMASTER/WEDNESDAY/2_Project_Files/fleet/qa-agent/briefs/2026-09-17_secuura-1010-ks1183-tier1.md
+
+Head (git ls-remote 03:47:16 AEST, the PR API 03:55:15, agree; the launcher re-asserts it):
+  #1010 c3213b04e3ad96068c367f7e0ba426822d32cda9 = refs/pull/1010/head = feature/ks-1183-workflow-approve-the-forward-to-originate-has-no-timeout-so
+        ONE commit, only parent f7c2f4acb28875e3665a61c8eaaad5c54bd3aa55 (#1008's squash).
+  git diff f7c2f4acb c3213b04e = exactly 2 files: verification.ts d0585dc34 -> 04b3d980f, ks1087 test 7832724f3 -> 4450587dc.
+  base = the merge-base f7c2f4acb. develop = d067725ff1c7f036dbf0f726b9bf12f4daefebe7 (#1009's squash: ks864a/b/c test files,
+  file-disjoint) — NOT an ancestor of the head (compare diverged, ahead 1, behind 1, files 2). Merge the then-current develop in YOUR
+  clone (never pushed), rebuild the shared dist there, and run base, head AND merged, naming each tree (drafter: api-gateway base
+  46/394, head 46/402, merged 47/408, pending 0).
+Repo:    /Volumes/DevMASTER/!CODING/Secuura/Blockchain/2_Project_Files  (READ-ONLY — git clone --shared by SHA into your own
+  scratch; write verbs there only, from a script file; NO git write verb in the checkout; Seat A successor's worktree
+  worktrees/raise-0916-a is LIVE — never enter it; never vitest inside the checkout; pin by SHA, never origin/*)
+
+You are FINDINGS-ONLY. You never fix, never merge, never push, never deploy, never comment, never file, never tick an
+ack box, never `@`. Nothing goes to Peter or Stuart.
+
+NEVER run a push, the real pre-push hook, or preflight.sh inside the Secuura checkout or any of its worktrees.
+
+NEVER print a credential value, and never open, read or copy a secrets file's contents into output — a script may read
+GH_TOKEN / LINEAR_API_KEY by NAME from /Volumes/DevMASTER/!CODING/Secuura/Blockchain/4_Credentials/.env for GitHub GET and Linear
+query calls only, and AGENTMAIL_API_KEY by NAME from /Volumes/DevMASTER/WEDNESDAY/4_Credentials/.env for the verdict mail; never
+echo them. Count, never echo. The real authenticateToken runs on vitest.setup.ts's throwaway in-process keypair only.
+
+NO shared docker stack, no :6882 / :7082 slot, no kintsugi, no demo, no nginx run, NEVER the wallet mnemonic (KS-535 HOLD). This gate
+needs NO container and NO real originate: originate is a counting stub on loopback with controllable timing. Run `docker info` ONCE
+and print its rc on its own line (UP is NOT permission; create no container). LOOPBACK ONLY: every listener binds 127.0.0.1:0.
+No Akto, no k6, no Playwright tonight (Kam's 40% cap; NOT COMMISSIONED — say so). No `rm`; no `cd` on a command line; never discard
+stderr (no 2>/dev/null — write it to a file); every clock reading from `date`. Time-box 45 minutes of work.
+
+Fourteen things you must not miss (each is a brief item with drafter-measured predictions and predicted-by):
+
+1. EVERY FORWARD OUTCOME (item 1) on the REAL createVerificationRoutes, a real http originate stub with a hit counter, a STATEFUL
+   store and a log spy, at head, base f7c2f4acb AND merged: 2xx, 302, 4xx, 5xx, network refusal (closed port), destroyed before
+   headers, accepts-and-never-answers (the bound), a LATE 201 after the bound (nothing deleted, document kept), mid-body reset,
+   aborted body (201 whose body never ends), a caller that aborts mid-request, and the deps-absent default (drafter: 502 at 15,008 ms).
+   Per row: status, body, pending kept/deleted, instance state, originate hits, error logs with time. Base answers NO RESPONSE for the
+   hang and 200 + delete for the late 201. Name every delete without a completed 2xx, every keep after a real success, every row
+   that never answers. A 0-hit negative control.
+
+2. THE 15 s DEFAULT (item 2): enumerate EVERY proxy/ingress config in the repo that fronts the route and read its bound —
+   nginx-production.conf 30 s (:292), nginx-demo.conf 60 s (:329), nginx.conf 120 s (:128), the four portal nginx.conf files (no
+   directive -> nginx default), Caddy (no timeout tuning), the Azure bicep (read it). Say whether ANY is SHORTER than 15 s (the caller
+   would see the proxy's 504 first). DRAFTER DISAGREEMENT 1: setTimeout on a ClientRequest is an IDLE timer — an originate that
+   drips 102 Processing every 300 ms made head answer 200 at 2508 ms with an 800 ms bound. The bound is "15 s of silence", not
+   "15 s". Grade it, and reason about nginx's idle proxy_read_timeout in front of that shape (READ only).
+
+3. THE OVERRIDE (item 3): index.ts passes nothing (READ, re-prove) -> default. DRAFTER DISAGREEMENT 2: 0 -> NO RESPONSE (a silent
+   "never"); -1 / NaN -> ERR_OUT_OF_RANGE, '800' / null -> ERR_INVALID_ARG_TYPE thrown synchronously in the promise executor ->
+   unhandled rejection, NO RESPONSE, originate hits 0, a TCPSocketWrap left open per row, instance approved. A timeout of 0 must
+   not mean "never" or "immediate 502" silently: rule it (severity, target, SHIPS-WITH or TICKET).
+
+4. THE proxyRes LISTENERS (item 4): inert (seat T4 0 red; drafter 'error' -> resolveStatus(201) 0 red)? If inert: Polish or hazard?
+   Prove no double settle, no double response / "headers already sent", no unhandled 'error' with and without them. LEAK CHECK after
+   every outcome row: active resources / handles, timers, globalAgent sockets. DRAFTER DISAGREEMENT 3: a 201 whose body never ends
+   is approved and deleted, then ONE BOUND LATER the route logs error 'Failed to forward approved document to originate'
+   ('originate did not answer within 800 ms') — a misleading error after a success.
+
+5. THE LOST-201 RESIDUAL (item 5) — a RECORD for KS-1184 unless the PR makes it worse than base: originate persists, answers 201
+   after the bound -> 502, kept, originate's copy exists; a caller retry -> 400 "Workflow already completed", hits unchanged (drafter).
+   Does a retry create a duplicate? Is it worse than base?
+
+6. AUTH AND APPROVAL SEMANTICS (item 6) byte-identical to base apart from the forward bound: parser (forward span masked, control edit
+   differs) and runtime with the REAL authenticateToken — 401, 403 role, 403 user, 400 "already completed", 400 rejected, 404 —
+   each with hits 0, deletes 0, base and head.
+
+7. THE TEST REBUILD (item 7): diff the three original cells' assertions base 7832724f3 vs head 4450587dc — every original expect
+   kept or strictly stronger? The completed-forward "watch" cell (seat: T9 0 red, T11 fires): real check or decoration — build a
+   compiling tamper for the risk it names and see.
+
+8. TAMPERS (item 8): re-run the seat's T0-T11 (+T1b, T0-after) on the WHOLE api-gateway suite with project tsc rc per row (a
+   non-compiling tamper is VOID — the seat's T1 was, tsc rc 2), plus the drafter's rows: Q-CTL (201 as failure, CONTROL-aimed) 4
+   red; Q-LATE +1400 ms 0 red (invisible), +1600 ms 2 red; Q-LATE default 16_000 0 red and 29_999 0 red (invisible — the default cell
+   reads < 30_000 only); Q-DEFAULT destructure = 0 0 red (invisible: the default taken in production is unpinned — DISAGREEMENT 4);
+   Q-DELETE on timeout 2 red; Q-ERR-201 0 red. Add one more CONTROL-aimed row of your own. Anchors by Python str.count = 1, markers
+   asserted, sha256 restore, porcelain asserted; read numFailedTests, numPendingTests, numFailedTestSuites (double-counts), success
+   and cells-run beside every colour. Red before green: the new cells on base f7c2f4acb (seat 10 run / 3 red).
+
+9. INCLUDING tsc (item 9) base vs head vs merged, NEW errors only, inclusion by --listFilesOnly, a planted positive control, the
+   tsconfig quoted verbatim. DRAFTER DISAGREEMENT 6: base 39 -> head 34 -> merged 30, ks1087 5 -> 0, NEW 0, 0 TS2741. Re-derive the
+   seat's 60 -> 53 and its :59 TS2741 — reproduced or not, and with what program. eslint both files base and head.
+
+10. LINKKIND (item 10 — SUPERSEDED by Wednesday ~03:5x; read at RUN TIME, report whatever you find): attachmentsForURL(pull/1010)
+    expected = KS-1183 contributes AND KS-1087 contributes. KS-1183 must NOT be closes (a runtime-behaviour ticket does not go Done on
+    merge — secuura-test-discipline §5f, a live sweep is owed); the seat was told to reword the body before the GO (a body edit, the
+    head stays c3213b04e). A closes on ANY ticket is a finding. Closing-phrase regex over title, body, commit message and every PR
+    comment, with a positive and a negative control. Read at the START and immediately before the mail, each with `date`. Drafter
+    03:55: both contributes, 0 closing phrases.
+
+11. DISJOINTNESS (item 11): the PR files API for #1010 vs every open PR — 0 shared files (drafter 0 of 19). Re-read develop at start /
+    mid / end; judge any move by CONTENT, merge the then-current develop, re-derive.
+
+12. SCHEMATHESIS (item 12): the spec is Blockchain/Dev/docs/openapi/secuura-api.yaml — workflow-instances 0, control ^paths: 1,
+    control /api/documents 28. If absent: NOT APPLICABLE with that measured reason. Record the undocumented route + 502.
+
+13. SUITES per tree (item 13): api-gateway base 46/394, head 46/402, merged 47/408 (drafter), pending read; project tsc rc per tree.
+
+14. CALLERS (item 14): no in-repo caller of POST approve (issuer DocumentList.tsx and mcp-server api-client.ts are GET only).
+
+Tooling: vitest 4.1.10 (`vitest run <file> --reporter=json --outputFile=`, cwd <tree>/Blockchain/Dev/services/api-gateway; never
+watch; whole suite ~7 s at head); typescript 5.9.3; node v24.7.0; express 4.22.2; eslint (cwd Blockchain/Dev, paths relative to it).
+Farm node_modules per ENTRY — never link a node_modules directory wholesale: Blockchain/Dev/node_modules per entry with @secuura
+relinked into the tree, services/api-gateway/node_modules and packages/shared/node_modules per entry, .vite skipped (the #1009 gate's
+R-6: a wholesale link can let vitest write into the checkout's .vite). Assert realpath(@secuura/shared) IN TREE. List the checkout's
+api-gateway/node_modules/.vite at start and end — it must not change. A hanging-originate cell needs closeAllConnections() before
+close() and a test timeout above the client wait; an unhandled rejection makes vitest rc 1 with success true — read both.
+/bin/bash here is 3.2 — write runners in Python. zsh: no PIPESTATUS (`cmd > out 2>&1; rc=$?`), no timeout on macOS, never begin a
+line with `=====`. Use /usr/bin/grep -i with a same-file positive control; `git grep -c` prints nothing for a zero — silence is
+unread, not 0.
+Quote the Secuura checkout's porcelain count, .git/config sha256, for-each-ref count, .git/worktrees count, origin develop SHA,
+refs/pull/1010/head and the branch at start, mid and close as THREE timestamped readings; if refs/pull/1010/head moves, STOP — the
+brief is about a different SHA (a PR title/body edit is not a head move). develop moving is expected; judge it by content, name it.
+Never `rm`: fresh mktemp -d per attempt; quarantine scratch tests and configs by rename. No container is created.
+Do no memory maintenance of your own project's memory store inside this session.
+
+Report FOUND / TESTED / HOW, with controls, into
+/Volumes/DevMASTER/!CODING/Testing Agent MAIN/projects/secuura/reports/2026-09-17-ks1183-1010-c3213b04e-tier1-r1/
+(report.md, evidence/, NOT-TESTED.written-first.md written BEFORE any run): the scope and trees (base / head / merged named); the
+outcome table per tree; the front-end census and the 15 s ruling; the override rows and ruling; listeners / double response / leak
+rows; the lost-201 record; the auth parser proof and runtime rows; the original-assertion diff and the watch-cell ruling; the full
+tamper table (tsc rc, VOID rows, cells-run, pending, predicted-by on every row); suites, including tsc, eslint per tree; linkKind as
+read at run time; disjointness; the Schemathesis ruling; callers; the Records; and a NOT TESTED section at the same prominence as the
+findings (`docker info` rc on its own line; a live originate; KS-1087 item 2; KS-1184; no live sweep on a rebuilt stack (§5f) — out
+of scope for the gate, owed at the Sunday QA pass; nginx/Caddy/portal/Azure bounds READ not measured; an HTTPS originate; out-of-repo
+callers; a real browser; the four platform suites by path — systemTest/schemathesis, systemTest/akto, systemTest/playwright,
+systemTest/performance; preflight legs 3/4/8). Every finding carries its evidence class (MEASURED AT RUNTIME / PROBED / READ ONLY /
+RELAYED), severity, target, SHIPS-WITH or TICKET, and its FEW HICCUPPS oracle.
+Client-facing communication = ticket comments only; the extranet is not a channel; anything needing a push goes to Wednesday
+as an escalation candidate for Kam's WhatsApp. Handovers to Peter/Stuart are test blocks, never a list of PRs. Never delete;
+cleanup means quarantine.
+Verdict: ONE line — GO, GO WITH FINDINGS, or NO GO — on c3213b04e3ad96068c367f7e0ba426822d32cda9, as the delta over base f7c2f4acb
+AND on the merged tree with develop d067725ff (or the then-current develop — name both). Say plainly: every forward outcome per tree;
+the 15 s default against every front end and idle-vs-total; the override; the listeners, double response and leaks; the lost-201
+record; auth unchanged or not; the rebuild's assertions and the watch cell; the tampers (VOID and invisible rows named); the
+including tsc; linkKind as read; disjointness; Schemathesis; and what was NOT tested.
+Give the merge seat its ADDENDUM line: "squash c3213b04e onto develop d067725ff (or the then-current develop; file-disjoint from
+#1009's squash); #1010 attaches to KS-1183 and KS-1087, both linkKind contributes (as read at <time>) — KS-1183 stays open for the
+§5f live sweep, KS-1087 for item 2; equality targets verification.ts 04b3d980f / ks1087 test 4450587dc; api-gateway 46/394 -> 46/402,
+merged 47/408 (re-measure); Records: <yours>".
+
+SEND YOUR RESULT to wednesday-agent@agentmail.to, SENT FROM coagent@agentmail.to (so it arrives signed), when the pass is complete.
+Your pane holds ~19 lines of alternate screen with no scrollback, so a verdict that stays in the pane is one pane-close from being
+lost -- this is not a formality, it is the only durable copy; the verdict MAIL is the END STATE and the wait signal. Subject EXACTLY:
+[QA -> Wednesday] TIER 1 GATE #1010 (KS-1183) c3213b04e — <GO | GO WITH FINDINGS | NO GO>
+(The QA project has no send_brief.sh of its own: POST https://api.agentmail.to/v0/inboxes/coagent@agentmail.to/messages/send with
+JSON {"to": ["wednesday-agent@agentmail.to"], "subject": "...", "text": "..."} and header Authorization: Bearer $AGENTMAIL_API_KEY,
+the key by NAME from /Volumes/DevMASTER/WEDNESDAY/4_Credentials/.env, never echoed. Confirm the API answered 2xx and quote the message
+id in your final pane line. Timestamps in the mail come from `date`, never estimated. The MAIL is the end state.)
