@@ -826,6 +826,23 @@ print(n)' "$SETTINGS_LOCAL" 2>/dev/null || echo -1)"
   fi
 fi
 
+# --- every scheduled job this seat needs (2026-09-16) -------------------------
+# install_scheduler.command armed THREE of the nine launchd jobs that keep a coordinator
+# alive; the other six existed only as loaded jobs on Wednesday's Mac with no plist on the
+# drive, so a new machine got three of nine and Tuesday's got none — the job that puts her
+# replies on Kam's page had never run there. The plists are now tracked templates under
+# scheduler/jobs/ and scheduler/install_all_jobs.sh renders them for whichever seat runs it.
+JOBS_INSTALLER="$PROJECT_DIR/2_Project_Files/scheduler/install_all_jobs.sh"
+if [ ! -x "$JOBS_INSTALLER" ]; then
+  warn "scheduler/install_all_jobs.sh missing or not executable" \
+       "restore it from git — without it only three of this seat's nine launchd jobs are armed by any installer"
+elif JOBS_OUT="$(env -u WED_AGENT bash "$JOBS_INSTALLER" --check 2>&1)"; then
+  ok "scheduled jobs: $(printf '%s' "$JOBS_OUT" | tail -1)"
+else
+  warn "scheduled jobs MISSING for this seat: $(printf '%s' "$JOBS_OUT" | tail -1)" \
+       "bash 2_Project_Files/scheduler/install_all_jobs.sh (from this seat's own tree, WED_AGENT unset) — a missing job is a mechanism that silently never fires"
+fi
+
 echo
 if [ "$HARD_FAIL" = "1" ]; then
 

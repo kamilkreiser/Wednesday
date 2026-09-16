@@ -125,3 +125,5 @@
 # 13:52 — KS-1011 r3: the docker inspect is ONE line now (r2's retry dropped the backslash-continued --format line — the continuation dialect). 14 '+' lines.
 # 13:58 — KS-1011 r4: the test cells are now LITERAL shell in the brief (r3's model invented an 'expect' helper whose third argument was a mutation, so every cell reported FAIL and B5 read green-after as still red — the product hunk was fine).
 # 14:19 — KS-1081 (Kam ruled a, 09:53: env.example is canonical). Brief pre-measured in a scratch clone: the new suite alone reads 2 passed / 4 failed at the tip, 6/6 with the three edits, and the sibling bootstrap_env_slot_ports stays 51/51.
+# 14:38 — KS-1031 queued by autostart_on_brief.sh the moment its brief landed.
+# 14:38 — KS-1031 queued by hand: autostart_on_brief.sh built the input then died on its own parse error (a case inside a command substitution). Brief pre-measured: 3 passed/3 failed at the tip, 6/6 after.

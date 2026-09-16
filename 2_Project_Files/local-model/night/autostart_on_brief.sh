@@ -50,7 +50,18 @@ fi
 say "input built: $INPUT"
 
 printf '%s\n' "# $(date +%H:%M) — $ID queued by autostart_on_brief.sh the moment its brief landed." >> "$LM/night/queue.md"
-printf '%s\n' "$ID input=$INPUT task=$LM/tasks/bash_patch/task.md $(for a in "$@"; do case "$a" in ctx=*) echo -n "$a";; esac; done)" >> "$LM/night/queue.md"
+# 2026-09-16 14:38, FIRST REAL USE, FIRST EXCEPTION: this line was a `for`+`case` INSIDE a
+# command substitution. Bash parses the `)` that closes a case pattern as the end of the
+# substitution, so it died with "syntax error near unexpected token" AFTER building the input
+# and BEFORE writing the queue line — the model sat idle and the give-up path could not fire,
+# because the wait had already succeeded. `bash -n` passed on it, exactly as it did for the
+# 2026-09-02 launcher-quote defect: a parse that is only wrong INSIDE a substitution.
+# Build the pin in a plain loop first; never put `case` inside `$( )`.
+CTX_PIN=""
+for a in "$@"; do
+  case "$a" in ctx=*) CTX_PIN="$a" ;; esac
+done
+printf '%s\n' "$ID input=$INPUT task=$LM/tasks/bash_patch/task.md $CTX_PIN" >> "$LM/night/queue.md"
 say "queued"
 
 # The lock GATES the launch — never print-and-continue (the pickup's trap).
