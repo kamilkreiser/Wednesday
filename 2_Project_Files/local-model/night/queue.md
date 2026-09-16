@@ -142,3 +142,8 @@
 # 15:46 — KS-998 queued by autostart_on_brief.sh the moment its brief landed.
 # 17:52 — KS-1168 queued by autostart_on_brief.sh the moment its brief landed.
 # 18:08 — KS-960 queued by autostart_on_brief.sh the moment its brief landed.
+# 20:02 — three briefs written 19:43-19:46 by the 19:3x seat's commission and never queued (the seat rotated); inputs built by the 20:0x seat, rc 0 each, G6 override still matches origin 0b25f823f. KS-1033 item 1 only (bash); KS-789 + KS-866 docs, same file, disjoint regions (:384-386 vs an insertion after :481).
+KS-1033 input=/Volumes/DevMASTER/WEDNESDAY/2_Project_Files/local-model/night/inputs/bash_1033.json task=/Volumes/DevMASTER/WEDNESDAY/2_Project_Files/local-model/tasks/bash_patch/task.md ctx=49152
+# 20:06 — PULLED before it ran: its brief asserts "There is no CI. GitHub Actions is retired" — measured FALSE at source 20:05 (Actions API: 23 workflows active, PR + develop-push runs through 2026-09-15, all concluding failure) and it contradicts Kam's own 09:53 KS-910 ruling ("CI runs the suites"). Brief to be corrected, then re-queued. Original line:
+# KS-789 input=/Volumes/DevMASTER/WEDNESDAY/2_Project_Files/local-model/night/inputs/doc_789.json task=/Volumes/DevMASTER/WEDNESDAY/2_Project_Files/local-model/tasks/doc_patch/task.md ctx=32768
+KS-866 input=/Volumes/DevMASTER/WEDNESDAY/2_Project_Files/local-model/night/inputs/doc_866.json task=/Volumes/DevMASTER/WEDNESDAY/2_Project_Files/local-model/tasks/doc_patch/task.md ctx=32768
