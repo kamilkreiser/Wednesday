@@ -244,6 +244,20 @@ of rounds 2-4" is out of date (the package ships 2.1.0 at its own commit), and
 `myregistry.azurecr.io/nexusai:1.3.0` in mainTemplate is an EXAMPLE inside a `metadata.description`,
 not a defect. **The content was fine; the packaging was not.**
 
+**CONFIRMED ACROSS ALL TEN PACKAGES (2026-09-16 22:0x), not just the submitted one:** every NexusAI
+plan zip on this drive — every commit, 2.0.0 through 2.1.1 — defaults the wizard to
+`nexusaidevacrfa39.azurecr.io`. Not one points elsewhere. **A third party cannot deploy any of them.**
+No self-service workaround: a customer can retype the image field but has no access to the registry
+and no copy of the image. **Limit on the claim, stated to Kam:** Partner Center is unreadable from
+this seat, so the LIVE listing was not read — the answer only changes if the listing carries a package
+absent from this drive, and the 09-15 manifest (which records the dev default at build time and says
+nothing had been uploaded) makes that unlikely. **Asked Kam for Partner Center access to close that
+gap properly rather than by inference.**
+
+**PROCESS FINDING for the resubmission:** the build manifest RECORDED `wizard default containerImage =
+nexusaidevacrfa39...` at build time. It was visible in our own evidence and shipped anyway — a gate we
+did not have. It belongs in the pre-submission checks.
+
 **THE ONE BLOCKER, with Kam:** which registry a customer pulls from. His 09-12 ruling makes it his to
 name and the push his signature class; he has never named it. **Nothing becomes client-ready until he does.**
 
