@@ -1,0 +1,55 @@
+spec_read 2026-09-17 00:13:28 AEST at e5e7ff99dbc4881784ce0beacefb4e7e36c55cf9
+27723	  /api/documents/{id}/verify:
+27724	    post:
+27725	      tags:
+27726	        - Documents
+27727	        - Verification
+27728	      summary: "[DEPRECATED] Verify a specific document by id — use /api/verification/verify"
+27729	      deprecated: true
+27730	      description: "KS-48: **DEPRECATED**. Use `POST /api/verification/verify` instead — it resolves
+27731	        cross-tenant via the platform document registry and is the canonical verify path used by the
+27732	        verifier portal, the SSD connector, and any cross-environment workflow. This endpoint is
+27733	        owner-scoped (the doc must be in the caller's tenant) and a verifier role calling it gets a
+27734	        confusing 404 for docs it doesn't own.\\n\\nEvery response carries RFC 8594 headers:\\n-
+27735	        `Deprecation: true`\\n- `Sunset: Thu, 14 Aug 2026 00:00:00 GMT`\\n- `Link:
+27736	        </api/verification/verify>; rel=\"successor-version\"`\\n\\nRemoval: after 2026-08-14 (or
+27737	        earlier if telemetry shows usage has dropped)."
+27738	      security:
+27739	        - bearerAuth: []
+27740	      x-ratelimit-policy: global
+27741	      x-ratelimit-window-ms: 60000
+27742	      x-ratelimit-max: 300
+27743	      x-ratelimit-scope: ip
+27744	      x-sla: *a20
+27745	      parameters:
+27746	        - schema:
+27747	            type: string
+27748	            pattern: ^[A-Za-z0-9][A-Za-z0-9._-]{0,127}$
+27749	            description: "Document id (1-128 chars: alphanumeric plus `.`, `_`, `-`; must start alphanumeric)"
+27750	            example: doc-0000000000000-5eeded0c
+27751	          required: true
+27752	          name: id
+27753	          in: path
+27754	      responses:
+27755	        "200":
+27756	          description: Verification result
+27757	          content:
+27758	            application/json:
+27759	              schema:
+27760	                $ref: "#/components/schemas/VerifyResponse"
+--- Deprecation/Sunset headers set on the gateway document verify route? (-i, whole api-gateway src, non-test)
+--- VerifyResponse schema: blockchain.source / verificationConfidence enums (values the fuzzer could check)
+6280:    VerifyResponse:
+6309:        verificationConfidence:
+6340:        verificationConfidence: high
+--- systemTest/schemathesis: any check keyed on verificationConfidence/anchored VALUES (not shape)?
+systemTest/schemathesis/config/checks.py:307:        f"downstream consumers (C-string/export/on-chain artefacts) and round-trips back out intact. "
+systemTest/schemathesis/docs/known-issues-and-baseline.md:162:worked example — it asserts on a real on-chain anchor, and local anchoring is mock **by design**
+systemTest/schemathesis/docs/running-tests.md:190:on-chain anchor, and local anchoring is mock **by design** since KS-535. It is excluded from the
+systemTest/schemathesis/scripts/runner/suite_gates.py:26:  environment cannot contain — e.g. a scenario needing a real on-chain anchor run against a stack
+systemTest/schemathesis/scripts/runner/suite_gates.py:205:    ``test_revoked_document_does_not_verify`` needs a real on-chain anchor and local anchoring is
+systemTest/schemathesis/src/constants.py:85:# has been mock mode BY DESIGN since KS-535, so a test requiring a real on-chain anchor is not an
+systemTest/schemathesis/src/html_report/templates/panels/anchoring_scenarios.html.j2:21:                        on-chain anchor, run against a stack that anchors in mock mode by design (KS-535). Repor
+systemTest/schemathesis/tests/integration/fixtures/anchoring_mode.py:1:"""Mode gate for anchoring scenarios that require a REAL on-chain anchor (KS-519).
+systemTest/schemathesis/tests/integration/fixtures/anchoring_mode.py:57:    f"{OUT_OF_SCOPE_SKIP_PREFIX} this scenario asserts on a REAL on-chain anchor, and this target "
+systemTest/schemathesis/tests/integration/fixtures/anchoring_mode.py:65:    """Exclude a scenario when the target cannot produce a real on-chain anchor (KS-519).

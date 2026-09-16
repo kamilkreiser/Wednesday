@@ -1,0 +1,105 @@
+drafter_run start 00:11:00 AEST
+00:11:01 AEST probe_base                   tree base   rc 0 FILES 1 TESTS 24 passed 24 failed 0 secs 0.7 suite_msgs 0
+00:11:02 AEST probe_head                   tree head   rc 0 FILES 1 TESTS 24 passed 24 failed 0 secs 0.6 suite_msgs 0
+== PROBE head vs base (confidence, anchorStoreHits, source)
+  A1   tier 2 | base on-chain        hits 1 | head off-chain-only  hits 1 source persisted | CHANGED
+  A2   tier 2 | base off-chain-only  hits 1 | head off-chain-only  hits 1 source none      | same
+  A3   tier 2 | base off-chain-only  hits 1 | head off-chain-only  hits 1 source persisted | same
+  A4   tier 2 | base on-chain        hits 1 | head off-chain-only  hits 1 source persisted | CHANGED
+  A5   tier 2 | base off-chain-only  hits 1 | head off-chain-only  hits 1 source persisted | same
+  A6   tier 2 | base on-chain        hits 1 | head on-chain        hits 1 source persisted | same
+  A7   tier 2 | base pending-onchain hits 1 | head pending-onchain hits 1 source persisted | same
+  A8   tier 2 | base pending-onchain hits 1 | head pending-onchain hits 1 source none      | same
+  A9   tier 2 | base off-chain-only  hits 1 | head off-chain-only  hits 1 source persisted | same
+  A10  tier 2 | base on-chain        hits 1 | head off-chain-only  hits 1 source persisted | CHANGED
+  A11  tier 2 | base off-chain-only  hits 1 | head off-chain-only  hits 1 source persisted | same
+  A12  tier 2 | base on-chain        hits 1 | head on-chain        hits 1 source cardano-live | same
+  B1   tier 1 | base on-chain        hits 0 | head on-chain        hits 0 source persisted | same
+  B2   tier 1 | base on-chain        hits 0 | head on-chain        hits 0 source persisted | same
+  B3   tier 1 | base off-chain-only  hits 0 | head off-chain-only  hits 0 source persisted | same
+  B4   tier 1 | base off-chain-only  hits 0 | head off-chain-only  hits 0 source persisted | same
+  B5   tier 1 | base on-chain        hits 0 | head on-chain        hits 0 source persisted | same
+  B6   tier 1 | base on-chain        hits 0 | head off-chain-only  hits 0 source persisted | CHANGED
+  B7   tier 1 | base on-chain        hits 0 | head on-chain        hits 0 source persisted | same
+  B8   tier 1 | base on-chain        hits 0 | head on-chain        hits 0 source persisted | same
+  B9   tier 1 | base on-chain        hits 0 | head on-chain        hits 0 source persisted | same
+  B10  tier 1 | base on-chain        hits 0 | head on-chain        hits 0 source persisted | same
+  B11  tier 1 | base on-chain        hits 0 | head on-chain        hits 0 source persisted | same
+  B12  tier 1 | base on-chain        hits 0 | head on-chain        hits 0 source persisted | same
+verification.ts pristine sha 7fd7f79a36d288fe
+== ROW S1_fix_reverted 00:11:02 AEST | PREDICTED suite: ks1073 🔴x2 only | PREDICTED probe: {'A1': 'on-chain', 'A4': 'on-chain', 'A10': 'on-chain'}
+   landed: anchor count 1, sha 7fd7f79a36d2 -> 886ca2091ec7, markers [("_source !== 'anchor_store')),", 0)]
+00:11:04 AEST t_S1_fix_reverted            tree head   rc 1 FILES 43 TESTS 385 passed 383 failed 2 secs 2.3 suite_msgs 0
+    RED __tests__/ks1073-tier-2-verify-has-no-statusless.test.ts :: KS-1073 — a statusless tier-2 row is NOT anchored (carve-out is tier-1 only) 🔴 KS-1073 — a tier-2 anchor-store row with NO status is not anchored | AssertionError: expected true to be false // Object.is equality
+    RED __tests__/ks1073-tier-2-verify-has-no-statusless.test.ts :: KS-1073 — a statusless tier-2 row is NOT anchored (carve-out is tier-1 only) 🔴 KS-1073 — the same statusless tier-2 row reports blockchain.anchored false | AssertionError: expected true to be false // Object.is equality
+00:11:05 AEST probe_t_S1_fix_reverted      tree head   rc 0 FILES 1 TESTS 24 passed 24 failed 0 secs 0.6 suite_msgs 0
+   suite reds 2 denominator (43, 385)
+   probe flips vs head T0 {'A1': ('off-chain-only', 'on-chain'), 'A4': ('off-chain-only', 'on-chain'), 'A10': ('off-chain-only', 'on-chain'), 'B6': ('off-chain-only', 'on-chain')} | probe prediction misses {}
+   restored sha-identical 7fd7f79a36d2
+== ROW S2_carveout_deleted 00:11:05 AEST | PREDICTED suite: ks1073 control + ks1057 REGRESSION | PREDICTED probe: {'B1': 'off-chain-only', 'B2': 'off-chain-only', 'B8': 'off-chain-only', 'B9': 'off-chain-only', 'B10': 'off-chain-only'}
+   landed: anchor count 1, sha 7fd7f79a36d2 -> d2c60f5a50a9, markers [('persistedStatus == null && (doc as any)._source', 0)]
+00:11:07 AEST t_S2_carveout_deleted        tree head   rc 1 FILES 43 TESTS 385 passed 383 failed 2 secs 2.3 suite_msgs 0
+    RED __tests__/ks1057-verify-confidence-is-status-aware.test.ts :: KS-1057 — verify confidence must read blockchain.status, not just presence REGRESSION: a legacy statusless blob keeps reporting on-chain (the seeded demo documents) | AssertionError: expected false to be true // Object.is equality
+    RED __tests__/ks1073-tier-2-verify-has-no-statusless.test.ts :: KS-1073 — a statusless tier-2 row is NOT anchored (carve-out is tier-1 only) KS-1073 control — a tier-1 legacy statusless blob still reports on-chain, and a CONFIRMED tier-2 row still does | AssertionError: expected false to be true // Object.is equality
+00:11:07 AEST probe_t_S2_carveout_deleted  tree head   rc 0 FILES 1 TESTS 24 passed 24 failed 0 secs 0.5 suite_msgs 0
+   suite reds 2 denominator (43, 385)
+   probe flips vs head T0 {'B1': ('on-chain', 'off-chain-only'), 'B2': ('on-chain', 'off-chain-only'), 'B8': ('on-chain', 'off-chain-only'), 'B9': ('on-chain', 'off-chain-only'), 'B10': ('on-chain', 'off-chain-only'), 'B11': ('on-chain', 'off-chain-only'), 'B12': ('on-chain', 'off-chain-only')} | probe prediction misses {}
+   restored sha-identical 7fd7f79a36d2
+== ROW GA_predicate_inverted 00:11:07 AEST | PREDICTED suite: ks1073 🔴x2 + ks1073 control + ks1057 REGRESSION (+ any other tier-1 statusless on-chain control) | PREDICTED probe: {'A1': 'on-chain', 'B1': 'off-chain-only', 'B6': 'on-chain'}
+   landed: anchor count 1, sha 7fd7f79a36d2 -> 919ff50c7fa0, markers [("(doc as any)._source === 'anchor_store'", 1)]
+00:11:10 AEST t_GA_predicate_inverted      tree head   rc 1 FILES 43 TESTS 385 passed 381 failed 4 secs 2.4 suite_msgs 0
+    RED __tests__/ks1057-verify-confidence-is-status-aware.test.ts :: KS-1057 — verify confidence must read blockchain.status, not just presence REGRESSION: a legacy statusless blob keeps reporting on-chain (the seeded demo documents) | AssertionError: expected false to be true // Object.is equality
+    RED __tests__/ks1073-tier-2-verify-has-no-statusless.test.ts :: KS-1073 — a statusless tier-2 row is NOT anchored (carve-out is tier-1 only) 🔴 KS-1073 — a tier-2 anchor-store row with NO status is not anchored | AssertionError: expected true to be false // Object.is equality
+    RED __tests__/ks1073-tier-2-verify-has-no-statusless.test.ts :: KS-1073 — a statusless tier-2 row is NOT anchored (carve-out is tier-1 only) 🔴 KS-1073 — the same statusless tier-2 row reports blockchain.anchored false | AssertionError: expected true to be false // Object.is equality
+    RED __tests__/ks1073-tier-2-verify-has-no-statusless.test.ts :: KS-1073 — a statusless tier-2 row is NOT anchored (carve-out is tier-1 only) KS-1073 control — a tier-1 legacy statusless blob still reports on-chain, and a CONFIRMED tier-2 row still does | AssertionError: expected false to be true // Object.is equality
+00:11:10 AEST probe_t_GA_predicate_inverted tree head   rc 0 FILES 1 TESTS 24 passed 24 failed 0 secs 0.5 suite_msgs 0
+   suite reds 4 denominator (43, 385)
+   probe flips vs head T0 {'A1': ('off-chain-only', 'on-chain'), 'A4': ('off-chain-only', 'on-chain'), 'A10': ('off-chain-only', 'on-chain'), 'B1': ('on-chain', 'off-chain-only'), 'B2': ('on-chain', 'off-chain-only'), 'B6': ('off-chain-only', 'on-chain'), 'B8': ('on-chain', 'off-chain-only'), 'B9': ('on-chain', 'off-chain-only'), 'B10': ('on-chain', 'off-chain-only'), 'B11': ('on-chain', 'off-chain-only'), 'B12': ('on-chain', 'off-chain-only')} | probe prediction misses {}
+   restored sha-identical 7fd7f79a36d2
+== ROW GL_predicate_loosened_truthy 00:11:10 AEST | PREDICTED suite: 0 reds (equivalent for every shape the suite drives) | PREDICTED probe: {'B8': 'off-chain-only', 'B11': 'off-chain-only'}
+   landed: anchor count 1, sha 7fd7f79a36d2 -> 33121bd4900b, markers [('!(doc as any)._source', 1)]
+00:11:13 AEST t_GL_predicate_loosened_truthy tree head   rc 0 FILES 43 TESTS 385 passed 385 failed 0 secs 2.3 suite_msgs 0
+00:11:13 AEST probe_t_GL_predicate_loosened_truthy tree head   rc 0 FILES 1 TESTS 24 passed 24 failed 0 secs 0.5 suite_msgs 0
+   suite reds 0 denominator (43, 385)
+   probe flips vs head T0 {'B8': ('on-chain', 'off-chain-only'), 'B11': ('on-chain', 'off-chain-only')} | probe prediction misses {}
+   restored sha-identical 7fd7f79a36d2
+== ROW GB_tier1_mistagged 00:11:13 AEST | PREDICTED suite: every tier-1 statusless on-chain cell: ks1073 control + ks1057 REGRESSION at least | PREDICTED probe: {'B1': 'off-chain-only', 'B2': 'off-chain-only', 'B5': 'on-chain'}
+   landed: anchor count 1, sha 7fd7f79a36d2 -> 91c620813bba, markers [("_source: 'anchor_store' } : null", 1)]
+00:11:16 AEST t_GB_tier1_mistagged         tree head   rc 1 FILES 43 TESTS 385 passed 383 failed 2 secs 2.3 suite_msgs 0
+    RED __tests__/ks1057-verify-confidence-is-status-aware.test.ts :: KS-1057 — verify confidence must read blockchain.status, not just presence REGRESSION: a legacy statusless blob keeps reporting on-chain (the seeded demo documents) | AssertionError: expected false to be true // Object.is equality
+    RED __tests__/ks1073-tier-2-verify-has-no-statusless.test.ts :: KS-1073 — a statusless tier-2 row is NOT anchored (carve-out is tier-1 only) KS-1073 control — a tier-1 legacy statusless blob still reports on-chain, and a CONFIRMED tier-2 row still does | AssertionError: expected false to be true // Object.is equality
+00:11:16 AEST probe_t_GB_tier1_mistagged   tree head   rc 0 FILES 1 TESTS 24 passed 24 failed 0 secs 0.5 suite_msgs 0
+   suite reds 2 denominator (43, 385)
+   probe flips vs head T0 {'B1': ('on-chain', 'off-chain-only'), 'B2': ('on-chain', 'off-chain-only'), 'B8': ('on-chain', 'off-chain-only'), 'B9': ('on-chain', 'off-chain-only'), 'B10': ('on-chain', 'off-chain-only'), 'B11': ('on-chain', 'off-chain-only'), 'B12': ('on-chain', 'off-chain-only')} | probe prediction misses {}
+   restored sha-identical 7fd7f79a36d2
+== ROW GM_marker_deleted 00:11:16 AEST | PREDICTED suite: ks1073 🔴x2 only | PREDICTED probe: {'A1': 'on-chain', 'A4': 'on-chain', 'A10': 'on-chain'}
+   landed: anchor count 1, sha 7fd7f79a36d2 -> 2cad05c7a3ac, markers [('marker for downstream telemetry', 0)]
+00:11:19 AEST t_GM_marker_deleted          tree head   rc 1 FILES 43 TESTS 385 passed 383 failed 2 secs 2.4 suite_msgs 0
+    RED __tests__/ks1073-tier-2-verify-has-no-statusless.test.ts :: KS-1073 — a statusless tier-2 row is NOT anchored (carve-out is tier-1 only) 🔴 KS-1073 — a tier-2 anchor-store row with NO status is not anchored | AssertionError: expected true to be false // Object.is equality
+    RED __tests__/ks1073-tier-2-verify-has-no-statusless.test.ts :: KS-1073 — a statusless tier-2 row is NOT anchored (carve-out is tier-1 only) 🔴 KS-1073 — the same statusless tier-2 row reports blockchain.anchored false | AssertionError: expected true to be false // Object.is equality
+00:11:19 AEST probe_t_GM_marker_deleted    tree head   rc 0 FILES 1 TESTS 24 passed 24 failed 0 secs 0.6 suite_msgs 0
+   suite reds 2 denominator (43, 385)
+   probe flips vs head T0 {'A1': ('off-chain-only', 'on-chain'), 'A4': ('off-chain-only', 'on-chain'), 'A10': ('off-chain-only', 'on-chain')} | probe prediction misses {}
+   restored sha-identical 7fd7f79a36d2
+== ROW GC_aimed_at_control_tier2_confirmed_excluded 00:11:19 AEST | PREDICTED suite: ks1073 control + every tier-2 confirmed on-chain cell (ks1057/ks1070/ks1071/ks1130 twins) | PREDICTED probe: {'A6': 'off-chain-only', 'B5': 'on-chain'}
+   landed: anchor count 1, sha 7fd7f79a36d2 -> 2aa24af3d6d0, markers [("((persistedStatus === 'confirmed' && (doc", 1)]
+00:11:22 AEST t_GC_aimed_at_control_tier2_confirmed_excluded tree head   rc 1 FILES 43 TESTS 385 passed 379 failed 6 secs 2.4 suite_msgs 0
+    RED __tests__/ks1057-verify-confidence-is-status-aware.test.ts :: KS-1057 — verify confidence must read blockchain.status, not just presence F1 CONTROL (non-zero): a CONFIRMED anchor reached via tier 2 enters the `=== 'confirmed'` arm and still reports on-chain | AssertionError: expected false to be true // Object.is equality
+    RED __tests__/ks1070-tier2-carries-simulated.test.ts :: KS-1070 — the tier-2 blob must carry `simulated` so the simulated guard can bite on that tier D2 CONTROL (non-zero, tier 2): the same row WITHOUT simulated still reports on-chain | AssertionError: expected false to be true // Object.is equality
+    RED __tests__/ks1073-tier-2-verify-has-no-statusless.test.ts :: KS-1073 — a statusless tier-2 row is NOT anchored (carve-out is tier-1 only) KS-1073 control — a tier-1 legacy statusless blob still reports on-chain, and a CONFIRMED tier-2 row still does | AssertionError: expected false to be true // Object.is equality
+    RED __tests__/ks1130-tier2-e1-twin.test.ts :: KS-1130 — tier-2 E1 twin cells for the placeholder-hash guard KS-1130 control — a well-shaped confirmed tier-2 row still reports on-chain | AssertionError: expected false to be true // Object.is equality
+    RED __tests__/ks1130-tier2-e3-twin.test.ts :: KS-1130 — E3 tier-2 twin cells for simulated shape guards KS-1130 control — a confirmed tier-2 row with simulated false still reports on-chain | AssertionError: expected false to be true // Object.is equality
+    RED __tests__/ks1130-tier2-e7-twin.test.ts :: KS-1130 — E7 twin for tier-2 blockNumber-as-string guard KS-1130 control — a well-shaped confirmed tier-2 row still reports on-chain | AssertionError: expected false to be true // Object.is equality
+00:11:22 AEST probe_t_GC_aimed_at_control_tier2_confirmed_excluded tree head   rc 0 FILES 1 TESTS 24 passed 24 failed 0 secs 0.6 suite_msgs 0
+   suite reds 6 denominator (43, 385)
+   probe flips vs head T0 {'A6': ('on-chain', 'off-chain-only'), 'B7': ('on-chain', 'off-chain-only')} | probe prediction misses {}
+   restored sha-identical 7fd7f79a36d2
+== ROW T6_inert_comment 00:11:22 AEST | PREDICTED suite: 0 reds | PREDICTED probe: {}
+   landed: anchor count 1, sha 7fd7f79a36d2 -> 97700ff01245, markers [('// qa inert comment', 1)]
+00:11:25 AEST t_T6_inert_comment           tree head   rc 0 FILES 43 TESTS 385 passed 385 failed 0 secs 2.3 suite_msgs 0
+00:11:25 AEST probe_t_T6_inert_comment     tree head   rc 0 FILES 1 TESTS 24 passed 24 failed 0 secs 0.5 suite_msgs 0
+   suite reds 0 denominator (43, 385)
+   probe flips vs head T0 {} | probe prediction misses {}
+   restored sha-identical 7fd7f79a36d2
+00:11:28 AEST t_T0_after                   tree head   rc 0 FILES 43 TESTS 385 passed 385 failed 0 secs 2.5 suite_msgs 0
+drafter_run end 00:11:28 AEST

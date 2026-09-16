@@ -1,0 +1,68 @@
+citation_read 2026-09-17 00:13:00 AEST at e5e7ff99dbc4881784ce0beacefb4e7e36c55cf9
+--- anchoring/src/index.ts:1590-1598 (formatAnchorResponse; comment cites :1596 status: anchor.status)
+1573	function formatAnchorResponse(anchor: Anchor) {
+1574	  // KS-587: honest labelling on the listing path too — a placeholder hash is
+1575	  // surfaced as `simulatedTxRef` with `simulated: true`, never as
+1592	    blockNumber: anchor.blockNumber ?? null,
+1593	    slot: anchor.slot,
+1594	    network: anchor.network,
+1595	    metadataLabel: anchor.metadataLabel,
+1596	    status: anchor.status,
+1597	    confirmations: anchor.confirmations,
+1598	    confirmedAt: anchor.confirmedAt ?? null,
+--- migrations 001:714 and 003:26
+001:714	    status TEXT NOT NULL DEFAULT 'pending',
+003:26	    status TEXT NOT NULL DEFAULT 'pending',
+--- the status column in the schema the containers build (docker/init) and azure init.sql — does any declare status NULLABLE?
+docker/init/01-schema.sql:198	    status TEXT NOT NULL DEFAULT 'pending',
+docker/init/03-service-tables.sql:99	    status TEXT NOT NULL DEFAULT 'pending',
+docker/init/06-consolidate-anchors.sql:36	    status TEXT NOT NULL DEFAULT 'pending',
+deployment/azure/migrate/init.sql:160	    status TEXT NOT NULL DEFAULT 'pending',
+deployment/azure/migrate/init.sql:743	    status TEXT NOT NULL DEFAULT 'pending',
+deployment/azure/migrate/init.sql:2055	    status TEXT NOT NULL DEFAULT 'pending',
+--- the statusless producers the block counts: documentRepo.ts seeded demo docs :790/:818/:846/:886 (blockchain blobs) and the retry route documents.ts:1313-1322
+documentRepo path: Blockchain/Dev/services/originate/src/repositories/documentRepo.ts
+788	    }
+789	  }
+790	  return lineage;
+791	}
+792	
+816	  // Seed documents belong to the default tenant (the same id that
+817	  // extractTenantContext falls back to in non-prod when no x-tenant-id
+818	  // header is present). Keep these in sync.
+819	  const SEED_TENANT_ID = 'a0000000-0000-4000-8000-000000000001';
+820	
+844	          signerId: demoOwner.id,
+845	          walletAddress: 'addr_test1qz2fxv2umyhttkxyxp8x0dlpdt3k6cwng5pxj3jhsydzer3jcu5d8ps7zex2k2xt3uqxgjqnnj83ws8lhrn648jjxtwq2ytjqp',
+846	          signature: 'ed25519_sig_demo_1',
+847	          signedAt: pastDate(5),
+848	        },
+884	      updatedAt: pastDate(2),
+885	    },
+886	    {
+887	      id: 'doc-demo-certificate-003',
+888	      type: 'certificate',
+documents.ts:1311	
+documents.ts:1312	      // Attempt to call the real anchoring service.
+documents.ts:1313	      // F-CHAIN-VERIFY-AUTH-01 / -02: forward bearer to anchoring's
+documents.ts:1314	      // authenticate() middleware (else 500 "No token provided"). Use
+documents.ts:1315	      // ANCHORING_SERVICE_URL when set (services.bicep injects the
+documents.ts:1316	      // internal Container Apps URL); the hard-coded service-name URL is
+documents.ts:1317	      // a Docker Compose fallback for local dev.
+documents.ts:1318	      try {
+documents.ts:1319	        const anchoringBase = process.env.ANCHORING_SERVICE_URL || 'http://anchoring:4005';
+documents.ts:1320	        const anchoringAuth = (req.headers.authorization as string) || '';
+documents.ts:1321	        const anchorResp = await fetch(`${anchoringBase}/api/anchors`, {
+documents.ts:1322	          method: 'POST',
+documents.ts:1323	          headers: {
+documents.ts:1324	            'Content-Type': 'application/json',
+--- gateway response: source expression line at head (I-1 cited :752 on #1002's head)
+verification.ts:755	        source: liveTxHash ? 'cardano-live' : (persistedTxHash ? 'persisted' : 'none'),
+--- does the verify response expose _source or _lookupSource? (control: the same awk finds verificationConfidence)
+control found: 757
+--- every reader of _lookupSource (handler-owned tier marker)
+Blockchain/Dev/services/api-gateway/src/routes/verification.ts:529:    (doc as any)._lookupSource = lookupSource;
+--- composeHonestBlockchainBlob: does originate's blockchain blob ever gain a doc-level key? (it is spread INSIDE blockchain: {...})
+Blockchain/Dev/services/originate/src/routes/documents.ts:43:import { simulatedFieldsFromAnchor, composeHonestBlockchainBlob } from '../services/anchorHonesty';
+Blockchain/Dev/services/originate/src/routes/documents.ts:1071:          ...(composeHonestBlockchainBlob(document.blockchain as Record<string, unknown> | null | undefined) || {}),
+Blockchain/Dev/services/originate/src/services/anchorHonesty.ts:92:export function composeHonestBlockchainBlob(

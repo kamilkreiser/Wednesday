@@ -1,0 +1,14 @@
+parser_proof Thu Sep 17 2026 00:12:06 GMT+1000 (Australian Eastern Standard Time) typescript 5.9.3
+product line: head count 1 | base line in base count 1
+== SUBJECTS
+S0 base vs head (the product line is present: must differ) | transpile identical false | AST leaves identical false (6935/6947) | parse diags 0/0 | raw identical false | expected tr=false ast=false -> OK
+S1 base vs head-with-product-line-reverted (every other delta comment-only: must be identical) | transpile identical true | AST leaves identical true (6935/6935) | parse diags 0/0 | raw identical false | expected tr=true ast=true -> OK
+== CONTROLS (on head)
+C1 code: predicate conjunct !== -> === | transpile identical false | AST leaves identical false (6947/6947) | parse diags 0/0 | raw identical false | expected tr=false ast=false -> OK
+C2 added line comment | transpile identical true | AST leaves identical true (6947/6947) | parse diags 0/0 | raw identical false | expected tr=true ast=true -> OK
+C3 type-only: (doc as any) -> (doc as unknown as any) in the product line (transpile blind spot) | transpile identical true | AST leaves identical false (6947/6949) | parse diags 0/0 | raw identical false | expected tr=true ast=false -> OK
+C4 string literal edit in code | transpile identical false | AST leaves identical false (6947/6947) | parse diags 0/0 | raw identical false | expected tr=false ast=false -> OK
+C5 code smuggled after // on a new line | transpile identical false | AST leaves identical false (6947/6950) | parse diags 0/4 | raw identical false | expected tr=false ast=false -> OK
+C6 comment text edit inside the rewritten tier-2 blob comment | transpile identical true | AST leaves identical true (6947/6947) | parse diags 0/0 | raw identical false | expected tr=true ast=true -> OK
+C7 a string edited INSIDE a comment-looking line that is code (the trailing // after the product line is comment: edit it) | transpile identical true | AST leaves identical true (6947/6947) | parse diags 0/0 | raw identical false | expected tr=true ast=true -> OK
+ALL CONTROLS AND SUBJECTS AS EXPECTED: true

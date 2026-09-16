@@ -1,0 +1,502 @@
+census_read 2026-09-17 00:06:36 AEST at e5e7ff99dbc4881784ce0beacefb4e7e36c55cf9
+=== C1: every occurrence of the token _source (whole repo tree at head; git grep -w -F: word-bounded both sides; first run used ERE , which git grep ignores here — its positive control read 0, kept as census_read.first-run-control-0-broken-regex.out) — writers AND readers
+Blockchain/Dev/services/api-gateway/src/__tests__/ks1073-tier-2-verify-has-no-statusless.test.ts:6:// `makeFetchDocFromAnchorStore`. Every such blob carries `_source: 'anchor_store'` at doc-level.
+Blockchain/Dev/services/api-gateway/src/routes/verification.ts:349:                  // excludes `_source: 'anchor_store'` (KS-1073), so a real
+Blockchain/Dev/services/api-gateway/src/routes/verification.ts:353:                _source: 'anchor_store',  // marker for downstream telemetry
+Blockchain/Dev/services/api-gateway/src/routes/verification.ts:686:    // `_source !== 'anchor_store'` conjunct keeps a statusless tier-2 blob out
+Blockchain/Dev/services/api-gateway/src/routes/verification.ts:703:      (persistedStatus === 'confirmed' || (persistedStatus == null && (doc as any)._source !== 'anchor_store')), // KS-1073: carve-out tier-1 only; anchor-store rows are never statusless
+Tokenomics/assets/index-BfknWhdy.js:40:`+s.stack}return{value:e,source:t,stack:i,digest:null}}function co(e,t,n){return{value:e,source:null,stack:n??null,digest:t??null}}function ll(e,t){try{console.error(t.value)}catch(n){setTimeout(function(){throw n})}}var 
+secuura-website-package/website/assets/index-B00sdc4u.js:40:`+s.stack}return{value:e,source:t,stack:i,digest:null}}function co(e,t,n){return{value:e,source:null,stack:n??null,digest:t??null}}function ll(e,t){try{console.error(t.value)}catch(n){setTimeout(funct
+systemTest/schemathesis/tests/unit/runner/test_slot_rule_executes_like_the_shell.py:33:def _source(slot_value: str) -> subprocess.CompletedProcess[str]:
+systemTest/schemathesis/tests/unit/runner/test_slot_rule_executes_like_the_shell.py:62:    result = _source(str(slot))
+systemTest/schemathesis/tests/unit/runner/test_slot_rule_executes_like_the_shell.py:88:    assert _source(bad).returncode == 2
+systemTest/schemathesis/tests/unit/runner/test_slot_rule_executes_like_the_shell.py:100:    result = _source("")
+=== C1 count: 11
+=== C1 positive control (same instrument must find the tier-2 writer and the predicate in verification.ts): 4
+=== C1b: the string anchor_store anywhere (quoted value form)
+5_Project_History/history.md:23:- **The orphan-population fixture timeout** (Kamil's find: `psql timed out after 30.0s` at 93,872 documents / 61,095 `anchor_store` rows). His dual-`NOT EXISTS` rewrite is `NOT (A OR B)` ≡ `NOT A AND NOT B` — equivalence-preserv
+Blockchain/Dev/BACKLOG.md:124:- ✅ **Verify endpoint reads document.data.blockchain stub instead of anchor_store row** — Two-part fix in `services/api-gateway/src/routes/verification.ts`: (1) forward the caller's bearer token to anchoring's `/api/anchors/verify
+Blockchain/Dev/BACKLOG.md:129:- ✅ **anchor_store.simulated=false for mock-provider rows** — Same root cause as above. With real provider, simulated=false is correct.
+Blockchain/Dev/deployment/DEPLOYMENT-ARCHITECTURE.md:111:  UPDATE anchor_store SET simulated = true, updated_at = now()
+Blockchain/Dev/deployment/DEPLOYMENT-ARCHITECTURE.md:119:  that queries `anchor_store` directly, so reconcile it anyway. Whether to re-anchor the
+Blockchain/Dev/deployment/DEPLOYMENT-ARCHITECTURE.md:135:  irreplaceable asset is the **anchor index** — `anchor_store`/`anchor_batches`
+Blockchain/Dev/deployment/azure/migrate/init.sql:147:-- BLOCKCHAIN ANCHORING (anchor_store)
+Blockchain/Dev/deployment/azure/migrate/init.sql:150:CREATE TABLE IF NOT EXISTS anchor_store (
+Blockchain/Dev/deployment/azure/migrate/init.sql:180:    anchor_id TEXT REFERENCES anchor_store(id),
+Blockchain/Dev/deployment/azure/migrate/init.sql:204:    blockchain_anchor_id TEXT REFERENCES anchor_store(id),
+Blockchain/Dev/deployment/azure/migrate/init.sql:587:-- anchor_store indexes (created by anchoring service via ensureTables / 03-service-tables.sql)
+Blockchain/Dev/deployment/azure/migrate/init.sql:588:-- idx_anchor_store_document, idx_anchor_store_tx, idx_anchor_store_status
+Blockchain/Dev/deployment/azure/migrate/init.sql:730:-- ANCHORING SERVICE — anchor_store + anchor_batch_store
+Blockchain/Dev/deployment/azure/migrate/init.sql:733:CREATE TABLE IF NOT EXISTS anchor_store (
+Blockchain/Dev/deployment/azure/migrate/init.sql:758:CREATE INDEX IF NOT EXISTS idx_anchor_store_document ON anchor_store(document_id);
+Blockchain/Dev/deployment/azure/migrate/init.sql:759:CREATE INDEX IF NOT EXISTS idx_anchor_store_tx ON anchor_store(transaction_hash);
+Blockchain/Dev/deployment/azure/migrate/init.sql:760:CREATE INDEX IF NOT EXISTS idx_anchor_store_status ON anchor_store(status);
+Blockchain/Dev/deployment/azure/migrate/init.sql:767:    anchor_id TEXT REFERENCES anchor_store(id),
+Blockchain/Dev/deployment/azure/migrate/init.sql:2021:-- MIGRATION: Consolidate blockchain_anchors into anchor_store
+Blockchain/Dev/deployment/azure/migrate/init.sql:2027:--   uses `anchor_store` (TEXT primary keys, richer column set) which is now
+Blockchain/Dev/deployment/azure/migrate/init.sql:2030:--   All runtime application code already uses `anchor_store`.
+Blockchain/Dev/deployment/azure/migrate/init.sql:2033:--     1. Ensuring `anchor_store` exists (idempotent)
+Blockchain/Dev/deployment/azure/migrate/init.sql:2034:--     2. Copying any remaining rows from `blockchain_anchors` -> `anchor_store`
+Blockchain/Dev/deployment/azure/migrate/init.sql:2035:--     3. Re-pointing FK constraints to `anchor_store`
+Blockchain/Dev/deployment/azure/migrate/init.sql:2042:-- 1. Ensure anchor_store exists (should already be created by 01-schema.sql
+Blockchain/Dev/deployment/azure/migrate/init.sql:2045:CREATE TABLE IF NOT EXISTS anchor_store (
+Blockchain/Dev/deployment/azure/migrate/init.sql:2071:-- 2. Copy data from blockchain_anchors -> anchor_store (skip duplicates)
+Blockchain/Dev/deployment/azure/migrate/init.sql:2081:        INSERT INTO anchor_store (
+Blockchain/Dev/deployment/azure/migrate/init.sql:2104:            SELECT 1 FROM anchor_store ast WHERE ast.id = ba.id::TEXT
+Blockchain/Dev/deployment/azure/migrate/init.sql:2111:-- 3a. Re-point merkle_batches.anchor_id  FK  ->  anchor_store(id)
+Blockchain/Dev/deployment/azure/migrate/init.sql:2131:    FOREIGN KEY (anchor_id) REFERENCES anchor_store(id);
+Blockchain/Dev/deployment/azure/migrate/init.sql:2134:-- 3b. Re-point certification_events.blockchain_anchor_id FK -> anchor_store(id)
+Blockchain/Dev/deployment/azure/migrate/init.sql:2154:    FOREIGN KEY (blockchain_anchor_id) REFERENCES anchor_store(id);
+Blockchain/Dev/docker/init/01-schema.sql:185:-- BLOCKCHAIN ANCHORING (anchor_store)
+Blockchain/Dev/docker/init/01-schema.sql:188:CREATE TABLE IF NOT EXISTS anchor_store (
+Blockchain/Dev/docker/init/01-schema.sql:218:    anchor_id TEXT REFERENCES anchor_store(id),
+Blockchain/Dev/docker/init/01-schema.sql:242:    blockchain_anchor_id TEXT REFERENCES anchor_store(id),
+Blockchain/Dev/docker/init/02-indexes.sql:38:-- anchor_store indexes (created by anchoring service via ensureTables / 03-service-tables.sql)
+Blockchain/Dev/docker/init/02-indexes.sql:39:-- idx_anchor_store_document, idx_anchor_store_tx, idx_anchor_store_status
+Blockchain/Dev/docker/init/03-service-tables.sql:86:-- ANCHORING SERVICE — anchor_store + anchor_batch_store
+Blockchain/Dev/docker/init/03-service-tables.sql:89:CREATE TABLE IF NOT EXISTS anchor_store (
+Blockchain/Dev/docker/init/03-service-tables.sql:114:CREATE INDEX IF NOT EXISTS idx_anchor_store_document ON anchor_store(document_id);
+Blockchain/Dev/docker/init/03-service-tables.sql:115:CREATE INDEX IF NOT EXISTS idx_anchor_store_tx ON anchor_store(transaction_hash);
+Blockchain/Dev/docker/init/03-service-tables.sql:116:CREATE INDEX IF NOT EXISTS idx_anchor_store_status ON anchor_store(status);
+Blockchain/Dev/docker/init/03-service-tables.sql:123:    anchor_id TEXT REFERENCES anchor_store(id),
+Blockchain/Dev/docker/init/06-consolidate-anchors.sql:2:-- MIGRATION: Consolidate blockchain_anchors into anchor_store
+Blockchain/Dev/docker/init/06-consolidate-anchors.sql:8:--   uses `anchor_store` (TEXT primary keys, richer column set) which is now
+Blockchain/Dev/docker/init/06-consolidate-anchors.sql:11:--   All runtime application code already uses `anchor_store`.
+Blockchain/Dev/docker/init/06-consolidate-anchors.sql:14:--     1. Ensuring `anchor_store` exists (idempotent)
+Blockchain/Dev/docker/init/06-consolidate-anchors.sql:15:--     2. Copying any remaining rows from `blockchain_anchors` -> `anchor_store`
+Blockchain/Dev/docker/init/06-consolidate-anchors.sql:16:--     3. Re-pointing FK constraints to `anchor_store`
+Blockchain/Dev/docker/init/06-consolidate-anchors.sql:23:-- 1. Ensure anchor_store exists (should already be created by 01-schema.sql
+Blockchain/Dev/docker/init/06-consolidate-anchors.sql:26:CREATE TABLE IF NOT EXISTS anchor_store (
+Blockchain/Dev/docker/init/06-consolidate-anchors.sql:52:-- 2. Copy data from blockchain_anchors -> anchor_store (skip duplicates)
+Blockchain/Dev/docker/init/06-consolidate-anchors.sql:62:        INSERT INTO anchor_store (
+Blockchain/Dev/docker/init/06-consolidate-anchors.sql:85:            SELECT 1 FROM anchor_store ast WHERE ast.id = ba.id::TEXT
+Blockchain/Dev/docker/init/06-consolidate-anchors.sql:92:-- 3a. Re-point merkle_batches.anchor_id  FK  ->  anchor_store(id)
+Blockchain/Dev/docker/init/06-consolidate-anchors.sql:112:    FOREIGN KEY (anchor_id) REFERENCES anchor_store(id);
+Blockchain/Dev/docker/init/06-consolidate-anchors.sql:115:-- 3b. Re-point certification_events.blockchain_anchor_id FK -> anchor_store(id)
+Blockchain/Dev/docker/init/06-consolidate-anchors.sql:135:    FOREIGN KEY (blockchain_anchor_id) REFERENCES anchor_store(id);
+Blockchain/Dev/docs/DATABASE-SCHEMA.md:351:### anchor_store / anchor_batch_store
+Blockchain/Dev/docs/DR-RESTORE-RUNBOOK.md:133:- [ ] **`anchor_store` + `anchor_batches` (the anchor index)** — the on-chain
+Blockchain/Dev/docs/VERIFICATION.md:40:   - Anchoring queries its local `anchor_store` index (fast path, `source: "blockchain-indexed"`).
+Blockchain/Dev/docs/design/2026-08-11_p3-verify-list-design.md:14:- **Anchoring-side reconciler** (the load-bearing piece): anchoring owns the chain index (Blockfrost + its own anchor_store). A periodic + on-read reconciliation marks settled anchors confirmed 
+Blockchain/Dev/migrations/001_initial-schema.sql:704:CREATE TABLE IF NOT EXISTS anchor_store (
+Blockchain/Dev/migrations/001_initial-schema.sql:728:CREATE INDEX IF NOT EXISTS idx_anchor_store_document ON anchor_store(document_id);
+Blockchain/Dev/migrations/001_initial-schema.sql:729:CREATE INDEX IF NOT EXISTS idx_anchor_store_tx ON anchor_store(transaction_hash);
+Blockchain/Dev/migrations/001_initial-schema.sql:730:CREATE INDEX IF NOT EXISTS idx_anchor_store_status ON anchor_store(status);
+Blockchain/Dev/migrations/001_initial-schema.sql:737:    anchor_id TEXT REFERENCES anchor_store(id),
+Blockchain/Dev/migrations/003_consolidate-anchors.sql:2:-- MIGRATION 003: Consolidate blockchain_anchors into anchor_store
+Blockchain/Dev/migrations/003_consolidate-anchors.sql:7:-- service uses `anchor_store` (TEXT PKs, richer columns). This migration
+Blockchain/Dev/migrations/003_consolidate-anchors.sql:15:-- 1. Ensure anchor_store exists (should already exist from migration 001)
+Blockchain/Dev/migrations/003_consolidate-anchors.sql:16:CREATE TABLE IF NOT EXISTS anchor_store (
+Blockchain/Dev/migrations/003_consolidate-anchors.sql:41:-- 2. Copy data from blockchain_anchors -> anchor_store (skip if table gone)
+Blockchain/Dev/migrations/003_consolidate-anchors.sql:45:    INSERT INTO anchor_store (
+Blockchain/Dev/migrations/003_consolidate-anchors.sql:68:        SELECT 1 FROM anchor_store ast WHERE ast.id = ba.id::TEXT
+Blockchain/Dev/migrations/003_consolidate-anchors.sql:73:-- 3a. Re-point merkle_batches.anchor_id FK -> anchor_store(id)
+Blockchain/Dev/migrations/003_consolidate-anchors.sql:82:    FOREIGN KEY (anchor_id) REFERENCES anchor_store(id);
+Blockchain/Dev/migrations/003_consolidate-anchors.sql:84:-- 3b. Re-point certification_events.blockchain_anchor_id FK -> anchor_store(id)
+Blockchain/Dev/migrations/003_consolidate-anchors.sql:93:    FOREIGN KEY (blockchain_anchor_id) REFERENCES anchor_store(id);
+Blockchain/Dev/migrations/007_anchor_store_unique_document.sql:2:-- 007: anchor_store.document_id unique constraint (F-03 LIVE follow-on)
+Blockchain/Dev/migrations/007_anchor_store_unique_document.sql:16:DELETE FROM anchor_store a
+Blockchain/Dev/migrations/007_anchor_store_unique_document.sql:17:USING anchor_store b
+Blockchain/Dev/migrations/007_anchor_store_unique_document.sql:20:CREATE UNIQUE INDEX IF NOT EXISTS anchor_store_document_id_uniq
+Blockchain/Dev/migrations/007_anchor_store_unique_document.sql:21:  ON anchor_store (document_id);
+Blockchain/Dev/migrations/007_anchor_store_unique_document.sql:30:DROP INDEX IF EXISTS anchor_store_document_id_uniq;
+Blockchain/Dev/migrations/031_anchor_store_network_unique.sql:2:-- 031: anchor_store unique key (document_id) -> (document_id, network)  [KS-281]
+Blockchain/Dev/migrations/031_anchor_store_network_unique.sql:7:-- (anchor_store_document_id_uniq) allowed only ONE anchor row per document. That
+Blockchain/Dev/migrations/031_anchor_store_network_unique.sql:10:-- document raised 23505 ("duplicate key ... anchor_store_document_id_uniq"),
+Blockchain/Dev/migrations/031_anchor_store_network_unique.sql:28:DELETE FROM anchor_store a
+Blockchain/Dev/migrations/031_anchor_store_network_unique.sql:29:USING anchor_store b
+Blockchain/Dev/migrations/031_anchor_store_network_unique.sql:36:DROP INDEX IF EXISTS anchor_store_document_id_uniq;
+Blockchain/Dev/migrations/031_anchor_store_network_unique.sql:39:CREATE UNIQUE INDEX IF NOT EXISTS anchor_store_document_network_uniq
+Blockchain/Dev/migrations/031_anchor_store_network_unique.sql:40:  ON anchor_store (document_id, network);
+Blockchain/Dev/migrations/031_anchor_store_network_unique.sql:46:DROP INDEX IF EXISTS anchor_store_document_network_uniq;
+Blockchain/Dev/migrations/031_anchor_store_network_unique.sql:47:CREATE UNIQUE INDEX IF NOT EXISTS anchor_store_document_id_uniq
+Blockchain/Dev/migrations/031_anchor_store_network_unique.sql:48:  ON anchor_store (document_id);
+Blockchain/Dev/services/anchoring/src/__tests__/ks705-submission-idempotency.test.ts:9: * each). `anchor_store` kept only the second; the first is confirmed on chain
+Blockchain/Dev/services/anchoring/src/__tests__/ks705-submission-idempotency.test.ts:53: * A fake anchor_store + chain. `submit` mints a new hash each call so a second
+Blockchain/Dev/services/anchoring/src/__tests__/ks705-submission-idempotency.test.ts:159:      if (writeAttempts === 1) throw new Error('deadlock detected on anchor_store');
+Blockchain/Dev/services/anchoring/src/__tests__/ks705-submission-idempotency.test.ts:196:      if (writeAttempts === 1) throw new Error('deadlock detected on anchor_store');
+Blockchain/Dev/services/anchoring/src/__tests__/ks726-write-ahead-tx-hash.test.ts:64: * A fake anchor_store + chain whose `submit` honours the write-ahead contract:
+Blockchain/Dev/services/anchoring/src/anchorSubmission.ts:15: * lovelace each. `anchor_store` kept only the second. The first is on chain,
+Blockchain/Dev/services/anchoring/src/index.ts:150:// STORAGE: All data is persisted in PostgreSQL (anchor_store, anchor_batches)
+Blockchain/Dev/services/anchoring/src/index.ts:163:    // KS-92: anchor_store + anchor_batches are owned by the superuser migration
+Blockchain/Dev/services/anchoring/src/index.ts:169:      `SELECT to_regclass('public.anchor_store') AS s, to_regclass('public.anchor_batches') AS b`
+Blockchain/Dev/services/anchoring/src/index.ts:177:      CREATE TABLE IF NOT EXISTS anchor_store (
+Blockchain/Dev/services/anchoring/src/index.ts:202:    await query(`CREATE INDEX IF NOT EXISTS idx_anchor_store_document ON anchor_store(document_id)`);
+Blockchain/Dev/services/anchoring/src/index.ts:203:    await query(`CREATE INDEX IF NOT EXISTS idx_anchor_store_tx ON anchor_store(transaction_hash)`);
+Blockchain/Dev/services/anchoring/src/index.ts:204:    await query(`CREATE INDEX IF NOT EXISTS idx_anchor_store_status ON anchor_store(status)`);
+Blockchain/Dev/services/anchoring/src/index.ts:209:    await query(`CREATE UNIQUE INDEX IF NOT EXISTS anchor_store_document_network_uniq ON anchor_store(document_id, network)`);
+Blockchain/Dev/services/anchoring/src/index.ts:338:      const result = await query("SELECT COUNT(*) AS cnt FROM anchor_store WHERE status = 'pending'");
+Blockchain/Dev/services/anchoring/src/index.ts:563: *   1. Local anchor_store DB (fast path — same-environment hit)
+Blockchain/Dev/services/anchoring/src/index.ts:654:           FROM anchor_store
+Blockchain/Dev/services/anchoring/src/index.ts:1158:          "SELECT * FROM anchor_store WHERE content_hash = $1 AND status = 'confirmed' LIMIT 1",
+Blockchain/Dev/services/anchoring/src/index.ts:1280:        "SELECT status, COUNT(*) AS cnt FROM anchor_store GROUP BY status"
+Blockchain/Dev/services/anchoring/src/index.ts:1314:// `anchor_store` / `anchor_batches` are migrated, cannot create them itself
+Blockchain/Dev/services/anchoring/src/index.ts:1327:    const anchorCount = await query('SELECT COUNT(*) AS cnt FROM anchor_store');
+Blockchain/Dev/services/anchoring/src/index.ts:1381:  // raised 23505 ("duplicate key ... anchor_store_document_id_uniq"); ON CONFLICT
+Blockchain/Dev/services/anchoring/src/index.ts:1394:      `INSERT INTO anchor_store
+Blockchain/Dev/services/anchoring/src/index.ts:1478:    const result = await query('SELECT * FROM anchor_store WHERE id = $1', [id]);
+Blockchain/Dev/services/anchoring/src/index.ts:1491:    const result = await query('SELECT * FROM anchor_store WHERE document_id = $1 ORDER BY created_at DESC', [documentId]);
+Blockchain/Dev/services/anchoring/src/index.ts:1503:    const result = await query('SELECT * FROM anchor_store WHERE transaction_hash = $1 LIMIT 1', [txHash]);
+Blockchain/Dev/services/anchoring/src/index.ts:1552:      await query(`UPDATE anchor_store SET ${setClauses.join(', ')} WHERE id = $${idx}`, params);
+Blockchain/Dev/services/anchoring/src/index.ts:1710:      await query('UPDATE anchor_store SET retry_count = retry_count + 1 WHERE id = $1', [anchorId]);
+Blockchain/Dev/services/anchoring/src/index.ts:1887:      // reconciliation path — the reconciler only ever selects `anchor_store`
+Blockchain/Dev/services/anchoring/src/reconciler.ts:6: * 30-attempt window is shorter than a congested chain, so anchor_store rows
+Blockchain/Dev/services/anchoring/src/reconciler.ts:66:        `SELECT id, transaction_hash, created_at, updated_at FROM anchor_store
+Blockchain/Dev/services/anchoring/src/verifyAnchorStatus.ts:32: * @param rowStatus the anchor_store row's status, when the answer came from the DB.
+Blockchain/Dev/services/api-gateway/src/__tests__/ks1071-verify-confidence-one-mapping.test.ts:26://         verifier, with nothing red. `anchor_store.status` is `TEXT NOT NULL
+Blockchain/Dev/services/api-gateway/src/__tests__/ks1073-tier-2-verify-has-no-statusless.test.ts:6:// `makeFetchDocFromAnchorStore`. Every such blob carries `_source: 'anchor_store'` at doc-level.
+Blockchain/Dev/services/api-gateway/src/routes/verification.ts:214: * `anchor_store.status` is `TEXT NOT NULL DEFAULT 'pending'` with no CHECK
+Blockchain/Dev/services/api-gateway/src/routes/verification.ts:349:                  // excludes `_source: 'anchor_store'` (KS-1073), so a real
+Blockchain/Dev/services/api-gateway/src/routes/verification.ts:353:                _source: 'anchor_store',  // marker for downstream telemetry
+Blockchain/Dev/services/api-gateway/src/routes/verification.ts:499:    let lookupSource: 'originate' | 'anchor_store' | 'mock' | null = doc ? 'originate' : null;
+Blockchain/Dev/services/api-gateway/src/routes/verification.ts:503:      if (doc) lookupSource = 'anchor_store';
+Blockchain/Dev/services/api-gateway/src/routes/verification.ts:686:    // `_source !== 'anchor_store'` conjunct keeps a statusless tier-2 blob out
+Blockchain/Dev/services/api-gateway/src/routes/verification.ts:703:      (persistedStatus === 'confirmed' || (persistedStatus == null && (doc as any)._source !== 'anchor_store')), // KS-1073: carve-out tier-1 only; anchor-store rows are never statusless
+Blockchain/Dev/services/api-gateway/src/routes/verification.ts:836:  // lookup including anchor_store fallback).
+Blockchain/Dev/services/api-gateway/src/startup-migrations.ts:316:  `CREATE TABLE IF NOT EXISTS anchor_store (
+Blockchain/Dev/services/demo-service/src/seed/generators/anchors.ts:5: * Generates anchor_store rows for all certified documents with realistic
+Blockchain/Dev/services/demo-service/src/seed/index.ts:80:  'anchor_store',
+Blockchain/Dev/services/demo-service/src/seed/index.ts:162:    await batchInsert(pool, 'anchor_store', [
+Blockchain/Dev/services/originate/src/routes/adminConfig.ts:545:    // path if rows exist; fall back to anchor_store as a coarse approximation.
+Blockchain/Dev/services/originate/src/routes/adminConfig.ts:582:      // anchor_store doesn't have tenant_id directly — go via document_id → documents → users.
+Blockchain/Dev/services/originate/src/routes/adminConfig.ts:589:            FROM anchor_store a
+Blockchain/Dev/services/originate/src/routes/adminConfig.ts:594:        : db.$queryRaw`SELECT COUNT(*)::int AS count FROM anchor_store`)) as any[];
+Blockchain/Dev/services/originate/src/routes/anchors.ts:85:      SELECT * FROM anchor_store WHERE document_id = ${documentId} LIMIT 1
+Blockchain/Dev/services/originate/src/routes/anchors.ts:108:      INSERT INTO anchor_store (id, document_id, transaction_hash, block_number, network, content_hash, simulated, confirmed_at, created_at, updated_at)
+Blockchain/Dev/services/originate/src/routes/anchors.ts:138:      SELECT 1 FROM anchor_store WHERE document_id = ${documentId} LIMIT 1
+Blockchain/Dev/services/originate/src/routes/documents.ts:1030:      // an in-flight (or failed) anchor state that anchor_store has long since
+Blockchain/Dev/services/originate/src/routes/documents.ts:1031:      // resolved. Re-check stale rows against anchor_store and serve the truth.
+Blockchain/Dev/services/originate/src/services/anchorStateSync.ts:6: * service's `anchor_store` — the authoritative record of what actually
+Blockchain/Dev/services/originate/src/services/anchorStateSync.ts:38: * `anchor_store.status = 'failed'` is TERMINAL. During a scheduled retry the
+Blockchain/Dev/services/originate/src/services/anchorStateSync.ts:292: * re-checks it against anchor_store. Longer than the poller's 10-minute
+Blockchain/Dev/services/originate/src/services/anchorStateSync.ts:299: * outcome is stale/unresolved, re-check anchor_store and persist the truth.
+Blockchain/Testing/baselines/06-tenant-isolation.txt:20:# anchor_store.metadata_payload, this baseline must be re-evaluated and
+Projects Documents/API_Security_Functional_Testing_Architecture_Flow_Diagrams.html:200:      Integration (anchoring integrity) ⏳ Local · pre-merge + nightly — <strong>an integration mode of Schemathesis, co-located in <code>systemTest/schemathesis</code> (not 
+Projects Documents/API_Security_Functional_Testing_Architecture_Flow_Diagrams.html:375:    INT -.->|read-only SQL<br/>STACK_PREFIX-resolved| PG[("Postgres<br/>anchor_store · documents<br/>stored-state invariants KS-589")]
+Projects Documents/API_Security_Functional_Testing_Architecture_Flow_Diagrams.html:998:        <code>anchor_store</code>. Nothing refused the connection, because every slot ships the same
+Projects Documents/QA_Tool_Cheat_Sheet_Secuura_API_Testing.html:649:<span class="cm"># tests (Known Failure = a pytest xfail — a documented, tolerated gap; auto-flips to an Unexpected Pass / xpass on fix): test_anchoring_fail_closed.py (PASS) · test_anchoring_
+systemTest/CLAUDE.md:2639:  anchor_store flag-consistency sweep, `test_anchor_honesty_consistency.py` — the KS-589 hash ⇄ flag
+systemTest/CLAUDE.md:2664:that cost a wrong query once: `anchor_store.document_id` holds **both** the `doc-…` external id and
+systemTest/docs/how-to-test-secuura.md:220:  asserts no `anchor_store` row pairs a mock/sim hash with `simulated = false` — the stored
+systemTest/schemathesis/tests/integration/fixtures/stack_db.py:5:established the route in KS-587 (PR #659: "the DB-level ``anchor_store`` flag-consistency sweep
+systemTest/schemathesis/tests/integration/test_anchor_honesty_consistency.py:33:* ``GET /api/documents/:id`` **self-heals** stale anchor claims against ``anchor_store`` "in both
+systemTest/schemathesis/tests/integration/test_anchor_honesty_consistency.py:56:DB-read route in KS-587 (PR #659: "the DB-level ``anchor_store`` flag-consistency sweep Peter
+systemTest/schemathesis/tests/integration/test_anchor_orphan_references.py:27:measurements): ``anchor_store.document_id`` holds BOTH the ``doc-…`` external id and the raw
+systemTest/schemathesis/tests/integration/test_anchor_orphan_references.py:78:    rec.add_assertion(f"document {document_id} has {anchor_rows} anchor row(s) in anchor_store")
+systemTest/schemathesis/tests/integration/test_anchor_orphan_references.py:83:        f"document {document_id} produced no anchor_store row, so the reference invariant had "
+systemTest/schemathesis/tests/integration/test_anchor_orphan_references.py:100:def test_the_anchor_store_orphan_population_is_reported(
+systemTest/schemathesis/tests/integration/test_anchor_orphan_references.py:112:    What IS asserted is that the sweep had subjects at all: a query over an empty ``anchor_store``
+systemTest/schemathesis/tests/integration/test_anchor_orphan_references.py:117:        title="The anchor_store orphan population is measured and reported",
+systemTest/schemathesis/tests/integration/test_anchor_orphan_references.py:125:    rec.add_assertion(f"anchor_store holds {total} row(s); {orphans} reference no stored document")
+systemTest/schemathesis/tests/integration/test_anchor_orphan_references.py:128:        "anchor_store is empty, so the orphan sweep judged nothing — a count of 0 orphans here is "
+systemTest/schemathesis/tests/integration/test_anchor_orphan_references.py:141:            f"Note: {orphans} of {total} anchor_store rows reference a document that is not stored. "
+systemTest/schemathesis/tests/integration/test_anchor_read_honesty.py:3:The 07-31→08-02 mock-mode incident left demo ``anchor_store`` rows whose ``mock_tx_`` hashes were
+systemTest/schemathesis/tests/integration/test_anchor_read_honesty.py:102:def test_anchor_store_never_pairs_mock_hash_with_simulated_false(
+systemTest/schemathesis/tests/integration/test_anchor_read_honesty.py:107:    """DB-level sweep: no anchor_store row pairs a mock/sim hash with simulated=false.
+systemTest/schemathesis/tests/integration/test_anchor_read_honesty.py:116:        "anchor_store_flag_consistency",
+systemTest/schemathesis/tests/integration/test_anchor_read_honesty.py:117:        title="anchor_store: mock/sim hash never carries simulated=false (KS-587 DB invariant)",
+systemTest/schemathesis/tests/integration/test_anchor_read_honesty.py:132:    rec.add_assertion("anchor_store contradiction sweep → 0 rows")
+systemTest/schemathesis/tests/integration/test_anchor_read_honesty.py:134:        f"{contradictions} anchor_store row(s) pair a mock/sim hash with simulated=false — "
+systemTest/schemathesis/tests/integration/test_anchor_surface_agreement.py:106:    against ``anchor_store`` in both directions (Kamil, KS-535 / PR #622), so a re-read taken
+systemTest/schemathesis/tests/support/anchoring/anchor_integrity.py:33:  KS-240's on-chain minimisation whitelist drops it before persistence — demo's ``anchor_store``
+systemTest/schemathesis/tests/support/anchoring/anchor_integrity.py:54:  it reconciles the document against ``anchor_store`` "in both directions". So a read used to
+systemTest/schemathesis/tests/support/anchoring/anchor_integrity.py:234:    KS-587 class: the 07-31→08-02 mock-mode incident left ``anchor_store`` rows whose ``mock_tx_``
+systemTest/schemathesis/tests/support/anchoring/anchor_sql.py:11:1. **``anchor_store.document_id`` holds two different id conventions.** It is ``TEXT NOT NULL``
+systemTest/schemathesis/tests/support/anchoring/anchor_sql.py:26:    "this stack is at 93,872 ``documents`` / 61,095 ``anchor_store`` rows (every sweep run grows
+systemTest/schemathesis/tests/support/anchoring/anchor_sql.py:45:ANCHOR_ROW_TOTAL_SQL = "SELECT count(*) FROM anchor_store"
+systemTest/schemathesis/tests/support/anchoring/anchor_sql.py:57:SELECT count(*) FROM anchor_store a
+systemTest/schemathesis/tests/support/anchoring/anchor_sql.py:65:FROM anchor_store a
+systemTest/schemathesis/tests/support/anchoring/anchor_sql.py:81:SELECT count(*) FROM anchor_store a
+systemTest/schemathesis/tests/support/anchoring/anchor_sql.py:89:ANCHOR_COUNT_FOR_DOCUMENT_SQL = "SELECT count(*) FROM anchor_store WHERE document_id = :'document_id'"
+systemTest/schemathesis/tests/support/anchoring/anchor_sql.py:96:SELECT count(*) FROM anchor_store
+systemTest/schemathesis/tests/unit/anchoring/test_anchor_sql.py:87:    """``anchor_store.document_id`` holds both an external id and a raw UUID."""
+systemTest/schemathesis/tests/unit/anchoring/test_anchor_sql.py:112:            "this stack is at 93,872 ``documents`` / 61,095 ``anchor_store`` rows (every sweep run
+systemTest/schemathesis/tests/unit/anchoring/test_stack_db.py:240:        and then count contradictory rows in slot 1's ``anchor_store``. Nothing refused the
+systemTest/schemathesis/tests/unit/anchoring/test_stack_db.py:455:            lambda *_a, **_k: _Completed(returncode=1, stderr='relation "anchor_store" does not exist'),
+=== C1c: generic source-marker keys that could collide ('_source' as a quoted key, ["_source"], _source:)
+=== C2: callers of the document verify route (/api/documents/<id>/verify) outside api-gateway routes
+.planning/codebase/TESTING.md:312:| `verifier` | `*.verifier.spec.ts` | `GATEWAY_URL/verify` |
+BACKLOG.md:296:  - Symptom: `POST /api/verification/verify` on a `status='certified'` document returns
+BACKLOG.md:321:    **Control:** a JSON `POST /api/verification/verify` on the same gateway returns **200**, so
+BACKLOG.md:593:  - Symptom: the spec declares the 200 body as `{ valid, revoked?, expired?, reason? }`, but the handler returns `{ verified, result }` (and always has). A response_schema_conformance check on this op would flag the missing required `valid`. Sam
+BACKLOG.md:596:  - DECIDED 2026-07-16 (Kam): align the spec to the runtime (`{verified, result}`) — zero consumer breakage. Applies to both `POST /api/credentials/verify` and `POST /api/presentations/verify` (shared schema). Implementation pending (spec change
+BACKLOG.md:919:  - Symptom: both tests aimed at `POST /api/auth/mfa/verify`, which KS-622 retired to
+Blockchain/Dev/.cursor/rules/secuura-architecture.mdc:42:| Verifier | `/verify/` | `/verify` | `/usr/share/nginx/html/verify/` | `/verify/` |
+Blockchain/Dev/BACKLOG.md:124:- ✅ **Verify endpoint reads document.data.blockchain stub instead of anchor_store row** — Two-part fix in `services/api-gateway/src/routes/verification.ts`: (1) forward the caller's bearer token to anchoring's `/api/anchors/verify
+Blockchain/Dev/CHANGELOG.md:124:- **Verify endpoint surfaces shielded status.** `POST /api/verification/verify` and `/verify-file` responses now include `shielded: boolean` and an optional `midnight: {...}` block drawn from on-chain metadata.
+Blockchain/Dev/CHANGELOG.md:204:- `POST /api/verification/verify` (originate) is now chain-first: queries the anchoring verify endpoint before falling back to the tenant DB or platform registry. Resolves the cross-environment verification bug — dev-issued cert
+Blockchain/Dev/CLI-AGENT-INSTRUCTIONS.md:38:- ❌ **PRIORITY 3 CONFIRMED**: `POST /api/verification/verify` always returns `verified: false` on both envs. DEV returns 400 "Insufficient data for verification. Provide a hash to compare against." even when document
+Blockchain/Dev/CLI-AGENT-INSTRUCTIONS.md:148:`POST /api/verification/verify` returns `{"verified": false}` on all environments. This is a critical feature — users must be able to verify documents.
+Blockchain/Dev/CLI-AGENT-INSTRUCTIONS.md:420:- GET /api/documents/:id/verify
+Blockchain/Dev/CLI-AGENT-INSTRUCTIONS.md:503:- [ ] `POST /api/verification/verify` returns `verified: true` for a freshly issued + anchored doc
+Blockchain/Dev/DEVELOPMENT.md:130:| ~~H11~~ (was F-VER-02) | — | `/api/verification/verify` reason text | ✅ FIXED | Both the in-memory `matched` branch and the database fallback now distinguish "matched-but-couldn't-verify" from "no match at all". For a draft 
+Blockchain/Dev/INSURANCE-TEST-HARNESS.md:104:| 9 | Document Verification | `/api/verification/verify` | POST | Verify blockchain hash |
+Blockchain/Dev/INSURANCE-TEST-HARNESS.md:105:| 10 | Tamper Detection | `/api/verification/verify` | POST | Reject forged/modified docs |
+Blockchain/Dev/MCP Deployment/README.md:107:| `POST` | `/verify` | Verify a single document |
+Blockchain/Dev/MCP Deployment/chatgpt-actions.md:127:The GPT should call the `/verify` endpoint with the document ID.
+Blockchain/Dev/MCP Deployment/chatgpt-actions.md:139:| Verify Document | POST | `/verify` | No |
+Blockchain/Dev/MCP Deployment/generic-http-agent.md:229:        f"{SECUURA_URL}/verify",
+Blockchain/Dev/MCP Deployment/generic-http-agent.md:245:2. Set Method to `POST`, URL to `http://your-server:7890/verify`
+Blockchain/Dev/MCP Deployment/generic-http-agent.md:278:- File paths in `/hash` and `/verify` requests are resolved on the server machine. Do not expose the HTTP server to untrusted networks without additional access controls.
+Blockchain/Dev/MCP Deployment/openai-assistants.md:149:        "secuura_verify_document": ("POST", "/verify"),
+Blockchain/Dev/SERVICES.md:205:- `POST /api/proofs/verify` - Verify ZKP proof
+Blockchain/Dev/SERVICES.md:209:- `POST /api/documents/:id/verify` - Verify document authenticity
+Blockchain/Dev/SERVICES.md:210:- `POST /api/certifications/:id/verify` - Verify certification
+Blockchain/Dev/SERVICES.md:211:- `POST /api/verification/verify` - Hash verification (tamper detection)
+Blockchain/Dev/connectors/README.md:26:2. **Verify via API** — The hash is sent to `POST /api/verification/verify` (public, no auth needed for verification).
+Blockchain/Dev/connectors/euro-office-plugin/DEVELOPMENT-MAP.md:210:    const res = await fetch(`${API_URL}/api/verification/verify`, {
+Blockchain/Dev/connectors/euro-office-plugin/README.md:43:- **Verify:** `POST /api/verification/verify` (public, no auth required)
+Blockchain/Dev/connectors/euro-office-plugin/scripts/api.js:20:    var url = getApiUrl() + '/api/verification/verify';
+Blockchain/Dev/connectors/flutter-verify-app/README.md:13:3. Hash is checked against `POST /api/verification/verify`
+Blockchain/Dev/connectors/flutter-verify-app/lib/services/verify_service.dart:19:        Uri.parse('$apiUrl/api/verification/verify'),
+Blockchain/Dev/connectors/libreoffice-extension/src/secuura/verifier.py:70:    endpoint = f"{url}/api/verification/verify"
+Blockchain/Dev/connectors/nextcloud-app/secuura/lib/Service/SecuuraClient.php:59:        $url = $this->getApiUrl() . '/api/verification/verify';
+Blockchain/Dev/connectors/whatsapp-bot/README.md:14:4. Hash is verified against `POST /api/verification/verify`
+Blockchain/Dev/connectors/whatsapp-bot/src/verify.ts:17:  const url = `${SECUURA_API_URL}/api/verification/verify`;
+Blockchain/Dev/connectors/whatsapp-bot/src/webhook.ts:3:import { hashBuffer, base64ToContentHash, verifyHash } from './verify';
+Blockchain/Dev/deployment/DEPLOYMENT-ARCHITECTURE.md:116:  `POST /api/verification/verify` (must NOT report `isAnchored: true`). Since KS-587 the read
+Blockchain/Dev/deployment/azure/RUNBOOK.md:263:| Verify endpoint returns "Document not found" | Bearer token not forwarded to originate (BACKLOG-resolved 2026-04-27, but if recurs) | Check api-gateway logs for `[CSRF]` 403, `ECONNRESET`, or any 500 from `/api/
+Blockchain/Dev/deployment/azure/deploy-all.sh:311:VERIFY_CODE=$(curl -s --max-time 10 -o /dev/null -w "%{http_code}" -X POST "$API/api/verification/verify" \
+Blockchain/Dev/docs/KS-926-CHECKS-THAT-CANNOT-FAIL.md:54:`/challenge`, `/verify`, `/authenticate` and `/status/{walletAddress}` as `security: []`, and
+Blockchain/Dev/docs/PLAN-stuart-peter-2026-05-14.md:250:| KS-48 | [KS-48](https://linear.app/secuura/issue/KS-48) | ✅ Done — PR #48 | `/api/documents/{id}/verify` deprecated with RFC 8594 headers; sunset 2026-08-14. |
+Blockchain/Dev/docs/QUICK-REFERENCE.md:129:| `/api/documents/:id/verify` | POST | Verify document |
+Blockchain/Dev/docs/QUICK-REFERENCE.md:133:| `/api/certifications/:id/verify` | POST | Verify certification |
+Blockchain/Dev/docs/QUICK-REFERENCE.md:135:| `/api/verification/verify` | POST | Public document verification (by hash or ID) |
+Blockchain/Dev/docs/SCOPES.md:53:| `verification:read` | Tenant-private "verify within my org" if/when built. **Note:** the public verifier (`POST /api/verification/verify`) is no-auth and does not require a scope. |
+Blockchain/Dev/docs/STAKEHOLDER-GUIDES.md:830:| `/v1/verify` | POST | Verify by hash |
+Blockchain/Dev/docs/TEST_IMPROVEMENTS.md:67:- ✅ `/api/documents/:id/verify` - Document verification
+Blockchain/Dev/docs/TEST_IMPROVEMENTS.md:68:- ✅ `/api/certifications/:id/verify` - Certification verification
+Blockchain/Dev/docs/VERIFICATION.md:37:When `POST /api/verification/verify` receives a content hash, originate does:
+Blockchain/Dev/docs/VERIFICATION.md:80:### `POST /api/verification/verify` (originate, proxied by api-gateway)
+Blockchain/Dev/docs/diagrams/api-sequence-document-lifecycle.mmd:125:    Note right of Verifier: KS-48 /api/documents/id/verify deprecated 2026-08-14. Use this endpoint.
+Blockchain/Dev/docs/diagrams/api-sequence-document-lifecycle.svg:1:<svg id="my-svg" width="100%" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" style="max-width: 3986px; background-color: white;" viewBox="-242.5 -10 3986 4737" ro
+Blockchain/Dev/docs/openapi/WORKFLOWS.md:81:6. **`POST /api/verification/verify`** → independent verify (optional)
+Blockchain/Dev/docs/openapi/WORKFLOWS.md:167:1. **`POST /api/verification/verify`** — public, no auth needed.
+Blockchain/Dev/docs/openapi/secuura-api.yaml:27723:  /api/documents/{id}/verify:
+Blockchain/Dev/docs/openapi/secuura-api.yaml:27728:      summary: "[DEPRECATED] Verify a specific document by id — use /api/verification/verify"
+Blockchain/Dev/docs/openapi/secuura-api.yaml:27730:      description: "KS-48: **DEPRECATED**. Use `POST /api/verification/verify` instead — it resolves
+Blockchain/Dev/frontend/gmail-addon/Code.gs:163:    var response = UrlFetchApp.fetch(SECUURA_API + '/api/verification/verify', {
+Blockchain/Dev/frontend/issuer/src/services/api.ts:360:      api.post('/verification/verify', formData, {
+Blockchain/Dev/frontend/issuer/src/services/api.ts:481:      api.post(`/certifications/${id}/verify`, { providedHash })
+Blockchain/Dev/frontend/issuer/src/utils/rateLimiter.ts:122:  if (lowerEndpoint.includes('/verification') || lowerEndpoint.includes('/verify')) {
+Blockchain/Dev/frontend/outlook-addin/README.md:169:| `/api/documents/verify` | POST | Verify a document hash |
+Blockchain/Dev/frontend/outlook-addin/src/utils/api.ts:74:    const response = await fetch(`${API_BASE}/verification/verify`, {
+Blockchain/Dev/frontend/shared/src/schemas/index.ts:2:export * from './verify';
+Blockchain/Dev/frontend/shared/src/schemas/verify.ts:3: * Verify schemas — shape of /api/verification/verify and /api/documents/:id/verify
+Blockchain/Dev/frontend/verifier/src/App.tsx:34:      <BrowserRouter basename="/verify">
+Blockchain/Dev/frontend/verifier/src/components/ResultPage.tsx:35:import { VerifyResponseSchema, type VerifyResponse } from '@shared/schemas/verify';
+Blockchain/Dev/frontend/verifier/src/components/ResultPage.tsx:105:      `${API_URL}/verification/verify`,
+Blockchain/Dev/frontend/verifier/src/components/VerifyPage.tsx:34:import { VerifyResponseSchema } from '@shared/schemas/verify';
+Blockchain/Dev/frontend/verifier/src/components/VerifyPage.tsx:80:      `${API_URL}/verification/verify`,
+Blockchain/Dev/frontend/verifier/src/components/VerifyPage.tsx:123:      `${API_URL}/verification/verify`,
+Blockchain/Dev/insurance-test-runner.js:401:  const r = await api('POST', '/api/verification/verify', { documentId: id }, S.token.admin);
+Blockchain/Dev/insurance-test-runner.js:419:  const r = await api('POST', '/api/verification/verify', { documentId: fakeId }, S.token.admin);
+Blockchain/Dev/mobile/secuura-app/src/services/api.ts:158:    return this.post<ApiResponse<VerificationResult>>('/verification/verify', { hash });
+Blockchain/Dev/scripts/generate-openapi.ts:186:            { method: 'POST', path: '/api/verification/verify', purpose: 'Independent verifier — by id, hash, or title' },
+Blockchain/Dev/scripts/generate-openapi.ts:219:            { method: 'POST', path: '/api/verification/verify', purpose: 'Submit hash, documentId, or title — no auth needed' },
+Blockchain/Dev/scripts/smoke-test.sh:214:    check_api "Verify document" "POST" "$GATEWAY/api/verification/verify" \
+Blockchain/Dev/scripts/spec-examples/verify-spec-examples.mjs:81: * `VerifyResponse` is returned by both `/api/documents/{id}/verify` and
+Blockchain/Dev/scripts/spec-examples/verify-spec-examples.mjs:82: * `/api/verification/verify`, so its single example has to be consistent with
+Blockchain/Dev/scripts/spec-examples/verify/spec-map.mjs:14: * used by both `/api/documents/{id}/verify` and `/api/verification/verify` —
+Blockchain/Dev/scripts/verify/ks584-p3-parity-sweep.mjs:74:    const v1 = await post('/api/verification/verify', { contentHash: hash }, TOKEN);
+Blockchain/Dev/scripts/verify/ks584-p3-parity-sweep.mjs:75:    const v2anon = await post('/api/v2/verification/verify', { contentHash: hash });
+Blockchain/Dev/scripts/verify/ks584-p3-parity-sweep.mjs:76:    const v2auth = TOKEN ? await post('/api/v2/verification/verify', { contentHash: hash }, TOKEN) : null;
+Blockchain/Dev/sdk/javascript/src/modules/certifications.ts:129:    return this.http.post(`/api/certifications/${id}/verify`);
+Blockchain/Dev/sdk/python/secuura/client.py:102:        data = self._request("POST", "/api/verification/verify",
+Blockchain/Dev/services/anchoring/src/index.ts:426:      'POST /api/anchors/verify': 'Verify an anchor',
+Blockchain/Dev/services/anchoring/src/index.ts:1148:app.post('/api/anchors/verify', async (req: Request, res: Response, next: NextFunction) => {
+Blockchain/Dev/services/api-gateway/src/api-gateway.openapi.ts:374:  path: '/api/batch/verify',
+Blockchain/Dev/services/api-gateway/src/index.ts:431:// sit on a `proxyPaths` prefix: `POST /api/documents/:id/verify` and
+Blockchain/Dev/services/api-gateway/src/index.ts:432:// `POST /api/certifications/:id/verify` have NO target service — they are
+Blockchain/Dev/services/api-gateway/src/index.ts:813:      documents: { 'POST /api/documents': 'Create document (requires auth)', 'GET /api/documents': 'List documents (requires auth)', 'GET /api/documents/:id': 'Get document by ID (requires auth)', 'POST /api
+Blockchain/Dev/services/api-gateway/src/middleware/audit.ts:115:  // wrong (e.g. POST /api/documents/:id/verify is a 'verify', not a 'create').
+Blockchain/Dev/services/api-gateway/src/middleware/csrf.ts:98:    '/api/verification/verify',
+Blockchain/Dev/services/api-gateway/src/middleware/csrf.ts:100:    '/api/v2/verification/verify',
+Blockchain/Dev/services/api-gateway/src/routes/batch.ts:174:router.post('/verify', async (req: Request, res: Response) => {
+Blockchain/Dev/services/api-gateway/src/routes/batch.ts:195:          '/api/verify',
+Blockchain/Dev/services/api-gateway/src/routes/proxy.ts:881:  router.post('/api/presentations/verify',
+Blockchain/Dev/services/api-gateway/src/routes/verification.ts:428:  // POST /api/documents/:id/verify and POST /api/certifications/:id/verify
+Blockchain/Dev/services/api-gateway/src/routes/verification.ts:469:  router.post('/api/documents/:id/verify', authenticateToken(true), mockBodyParser, async (req: Request, res: Response) => {
+Blockchain/Dev/services/api-gateway/src/routes/verification.ts:765:  router.post('/api/certifications/:id/verify', mockBodyParser, async (req: Request, res: Response) => {
+Blockchain/Dev/services/api-gateway/src/routes/verification.ts:833:  // The /api/documents/:id/verify and /api/certifications/:id/verify mock
+Blockchain/Dev/services/auth/src/auth.openapi.ts:1334:  path: '/api/auth/wallet/verify',
+Blockchain/Dev/services/auth/src/auth.openapi.ts:1374:  path: '/api/auth/mfa/verify',
+Blockchain/Dev/services/auth/src/auth.openapi.ts:1709:  path: '/api/auth/mfa/setup/verify',
+Blockchain/Dev/services/auth/src/auth.openapi.ts:2180:  path: '/api/users/me/mfa/verify',
+Blockchain/Dev/services/auth/src/index.ts:137:        'POST /api/auth/wallet/verify': 'Verify wallet signature and get tokens',
+Blockchain/Dev/services/auth/src/index.ts:145:        'POST /api/auth/mfa/setup/verify': 'Verify TOTP code and enable MFA',
+Blockchain/Dev/services/auth/src/index.ts:146:        'POST /api/auth/mfa/verify': 'RETIRED (KS-622) — always 410; send mfaCode on /api/auth/login',
+Blockchain/Dev/services/auth/src/routes/auth.ts:101:  // KS-622: WIDENED to accept a backup code here. `/api/auth/mfa/verify` used
+Blockchain/Dev/services/auth/src/routes/mfa.ts:194:mfaRoutes.post('/setup/verify', authenticate(), async (req: AuthenticatedRequest, res: Response, next) => {
+Blockchain/Dev/services/auth/src/routes/mfa.ts:292:mfaRoutes.post('/verify', (_req: AuthenticatedRequest, res: Response) => {
+Blockchain/Dev/services/auth/src/routes/users.ts:1056:userRoutes.post('/me/mfa/verify', authenticate(), async (req: AuthenticatedRequest, res: Response, next) => {
+Blockchain/Dev/services/auth/src/routes/wallet.ts:351:      route: 'POST /api/auth/wallet/verify',
+Blockchain/Dev/services/auth/src/routes/wallet.ts:396:walletRoutes.post('/verify', handleWalletVerify);
+Blockchain/Dev/services/auth/src/services/passwordLoginGate.ts:25: * account-linking branch, and `POST /api/auth/wallet/verify`. The ticket was
+Blockchain/Dev/services/m365-integration/src/index.ts:1360:      const verifyResp = await fetch(`${originateUrl}/api/verification/verify`, {
+Blockchain/Dev/services/mcp-server/src/api-client.ts:77:  }>('/api/verification/verify', { method: 'POST', body: payload, requiresAuth: false });
+=== C2 count (non-test): 362
+=== C3: readers of verificationConfidence / blockchain.anchored / blockchainAnchored outside api-gateway (response consumers)
+Blockchain/Dev/BACKLOG.md:124:- ✅ **Verify endpoint reads document.data.blockchain stub instead of anchor_store row** — Two-part fix in `services/api-gateway/src/routes/verification.ts`: (1) forward the caller's bearer token to anchoring's `/api/anchors/verify
+Blockchain/Dev/DEVELOPMENT.md:110:| G6 | ~~Verifier role can't actually verify~~ — ✅ fixed 2026-04-27 (option b). Gateway verify handler now does a 3-tier lookup: originate (owners get full record incl. revocation), then anchoring's `/api/anchors/document/:id`
+Blockchain/Dev/MCP Deployment/generic-http-agent.md:175:    "blockchainAnchored": true
+Blockchain/Dev/deployment/azure/RUNBOOK.md:161:| 4 | (separate browser) verifier@secuura.com | Verify the same document by id | `verified: true`, `blockchainAnchored: true`, `source: cardano-live` |
+Blockchain/Dev/docs/openapi/secuura-api.yaml:6231:        blockchainAnchored:
+Blockchain/Dev/docs/openapi/secuura-api.yaml:6242:        blockchainAnchored: true
+Blockchain/Dev/docs/openapi/secuura-api.yaml:6309:        verificationConfidence:
+Blockchain/Dev/docs/openapi/secuura-api.yaml:6340:        verificationConfidence: high
+Blockchain/Dev/frontend/issuer/src/components/DocumentDetail.tsx:185:      const anchors = raw.anchors || (raw.blockchain?.anchored
+Blockchain/Dev/frontend/issuer/src/components/DocumentDetail.tsx:191:            anchoredAt: raw.blockchain.anchoredAt,
+Blockchain/Dev/frontend/shared/src/schemas/verify.ts:26:// hasSignatures, blockchainAnchored} fields are kept here so:
+Blockchain/Dev/frontend/shared/src/schemas/verify.ts:49:  blockchainAnchored: z.boolean(),
+Blockchain/Dev/frontend/shared/src/schemas/verify.ts:133:  verificationConfidence: z.string().nullable().optional(),
+Blockchain/Dev/scripts/openapi-examples/traffic-fields.ts:287:    { path: 'response.blockchain.anchored', reviewedBy: 'peter', reviewedAt: '2026-07-20T00:00:00Z', reason: 'Boolean anchoring flag; no PII.' },
+Blockchain/Dev/sdk/javascript/README.md:60:console.log(verification.blockchain.anchored); // true
+Blockchain/Dev/services/_PLANS/T2-F-zod-response-validation.md:97:    blockchainAnchored: z.boolean(),
+Blockchain/Dev/services/originate/src/originate.openapi.ts:416:      blockchainAnchored: z.boolean(),
+Blockchain/Dev/services/originate/src/originate.openapi.ts:430:    blockchainAnchored: true,
+Blockchain/Dev/services/originate/src/originate.openapi.ts:474:      verificationConfidence: z.string().optional(),
+Blockchain/Dev/services/originate/src/originate.openapi.ts:508:        verificationConfidence: 'high',
+Blockchain/Dev/services/originate/src/routes/certifications.ts:960:          blockchainAnchored: !!certification.blockchain,
+Blockchain/Dev/services/originate/src/routes/documents.ts:1472:            blockchainAnchored: !!document.blockchain,
+Blockchain/Dev/services/originate/src/routes/documents.ts:1490:          blockchainAnchored: !!document.blockchain,
+Blockchain/Dev/systemTest/inline-runner/runner.js:29:async function p7(){const P='07.Verification';if(!ctx.docHash){rec(P,'no doc-hash','SKIP');return}let v=await H('POST','/api/verification/verify',{providedHash:ctx.docHash});const vo=U(v.json||{});const veri
+Blockchain/Dev/tests/e2e/tests/integration/full-certification-flow.api.spec.ts:72:      expect(result.blockchain.anchored).toBe(true);
+Blockchain/Dev/tests/e2e/tests/recruitment/happy-path-web.spec.ts:79:      expect(blockchainVerification.blockchain.anchored).toBe(true);
+Blockchain/Dev/tests/e2e/tests/recruitment/happy-path-web.spec.ts:130:      expect(verification.blockchain.anchored).toBe(true);
+Blockchain/Testing/USER SIMULATED TEST/01-issuer.md:62:- Try the "verify" button if present. As the owner, the result should be `verified: true, blockchainAnchored: true, source: cardano-live`.
+Blockchain/Testing/USER SIMULATED TEST/runs/2026-04-28_CLI_AGENT_INSTRUCTIONS.md:87:- Local: `{ exists, hashValid, notRevoked, hasSignatures, blockchainAnchored }`
+Blockchain/Testing/USER SIMULATED TEST/runs/2026-04-28_cross-env_handoff.md:15:1. **F-DEMO-VERIFY-01 (CRITICAL, Demo only)** — verifier returns `verified:true` for `status:draft` documents that were never anchored or signed. Different `checks` schema from Loca
+Blockchain/Testing/USER SIMULATED TEST/runs/2026-04-28_cross-env_summary.md:32:| H11 verify checks shape | ✅ verified (`{exists, hashValid, notRevoked, hasSignatures, blockchainAnchored}`) | ❌ different shape | ❌ **DIFFERENT shape AND draft doc returns `verifi
+Blockchain/Testing/USER SIMULATED TEST/runs/2026-04-28_cross-env_summary.md:83:- Local: `exists, hashValid, notRevoked, hasSignatures, blockchainAnchored`
+Blockchain/Testing/USER SIMULATED TEST/runs/2026-04-28_handoff.md:52:| H11 verify reason granularity | ✅ verified | Response now has `checks:{ exists, hashValid, notRevoked, hasSignatures, blockchainAnchored }`. *Nit:* human reason still says "could not be com
+Blockchain/Testing/USER SIMULATED TEST/runs/2026-04-28_summary.md:47:| **H11** — verify reason text distinguishes "registered but not certified" from "not registered" | ✅ **Verified** (different wording than the brief described, but functionally correct) | Res
+Blockchain/Testing/USER SIMULATED TEST/runs/2026-04-28_summary.md:173:**Saw:** 200, `verified:false, checks:{ exists:true, hashValid:true, notRevoked:true, hasSignatures:false, blockchainAnchored:true }, reason:"Document found ... but verification could not be
+Blockchain/Testing/USER SIMULATED TEST/runs/2026-04-28_summary.md:201:**Saw:** 200, full check breakdown — `exists`, `hashValid`, `notRevoked`, `hasSignatures`, `blockchainAnchored`.
+Projects Documents/Secuura-E2E-Browser-Test-Report-Feb16.md:138:| 6 | Verify document integrity | **PASS** | verified=True, exists=True, hashValid=True, blockchainAnchored=True |
+Projects Documents/Secuura-E2E-Browser-Test-Report-Feb16.md:208:| 1 | Verify document by ID | **PASS** | verified=True, exists=True, notRevoked=True, hashValid=True, hasSignatures=True, blockchainAnchored=True |
+Projects Documents/Secuura-E2E-Test-Report-Feb16.md:115:| S3-T05 | Verify Document Integrity | **PASS** | verified=True, checks: exists=True, hashValid=True, blockchainAnchored=True, notRevoked=True, hasSignatures=True |
+Projects Documents/Secuura-Test-Findings-and-Fixes-Feb17.md:299:  - Updated `GET /:id` response to include title, documentType, description, blockchain.anchored
+Projects Documents/Stakeholder-Guide-Verifier.md:260:    "blockchainAnchored": true
+USER_TESTING/07-Test-Results-Log.md:214:| C.4.1 | POST /api/verification/verify — valid doc | PASS | Returns 200, `{verified: true}`, checks: exists, notRevoked, hashValid, hasSignatures, blockchainAnchored. Public endpoint — no auth required. | 2026-03-25 |
+USER_TESTING/07-Test-Results-Log.md:277:| D.5.5 | Document detail — PII exposure check | PASS | GET /api/documents/{id} returns: id, type, title, documentType, description, status, owner.id, data (title/type/description mirror), contentHash, signatures[], bloc
+USER_TESTING/TESTING-AGENT-INSTRUCTIONS.md:69:| 3 | Click "Verify" on the same doc as the issuer. | `verified: true`, `blockchainAnchored: true`, real Cardano txHash. | Cardanoscan link opens the real tx (Preview network). |
+systemTest/schemathesis/tests/integration/test_verify_local_override.py:98:    ``verified: !isRevoked && hashValid && blockchainAnchored``
+=== C4: top-level directories (to name what the census covered)
+.claude
+.cursor
+.githooks
+.github
+.gitignore
+.planning
+5_Project_History
+BACKLOG.md
+Blockchain
+CHANGELOG.md
+CLAUDE.md
+PRICING
+Projects Documents
+README.md
+Reference Documents
+Secuura-Blockchain.code-workspace
+Start_Up
+Tokenomics
+USER_TESTING
+ci
+docker-compose.cache.yml
+docker-compose.ci.yml
+docker-compose.isolation.yml
+docker-compose.local.yml
+docker-compose.tokenomics.yml
+monitor-log.md
+observability
+renovate.json
+secuura-website-package
+systemTest
+Blockchain/Dev/.cursor
+Blockchain/Dev/.dockerignore
+Blockchain/Dev/.env.example
+Blockchain/Dev/.env.local.example
+Blockchain/Dev/.gitignore
+Blockchain/Dev/.npmrc
+Blockchain/Dev/.security
+Blockchain/Dev/.trivyignore
+Blockchain/Dev/BACKLOG.md
+Blockchain/Dev/CHANGELOG.md
+Blockchain/Dev/CLI-AGENT-INSTRUCTIONS.md
+Blockchain/Dev/CONNECTORS.md
+Blockchain/Dev/CONTRIBUTING.md
+Blockchain/Dev/DEFERRED-SERVICES.md
+Blockchain/Dev/DEVELOPMENT.md
+Blockchain/Dev/E2E-TEST-REPORT-26-March-2026.md
+Blockchain/Dev/INSURANCE-TEST-HARNESS.md
+Blockchain/Dev/INSURANCE-TEST-REPORT-26-March-2026.md
+Blockchain/Dev/ISSUER-PORTAL-TEST-REPORT.md
+Blockchain/Dev/MCP Deployment
+Blockchain/Dev/Makefile
+Blockchain/Dev/PROJECT_OVERVIEW.md
+Blockchain/Dev/README.md
+Blockchain/Dev/SERVICES.md
+Blockchain/Dev/USER_TESTING
+Blockchain/Dev/config
+Blockchain/Dev/connectors
+Blockchain/Dev/contracts
+Blockchain/Dev/deploy
+Blockchain/Dev/deployment
+Blockchain/Dev/deployments
+Blockchain/Dev/docker-compose.dev-debug.override.yml
+Blockchain/Dev/docker-compose.e2e.override.yml
+Blockchain/Dev/docker-compose.production.yml
+Blockchain/Dev/docker-compose.yml
+Blockchain/Dev/docker
+Blockchain/Dev/docs
+Blockchain/Dev/env.example
+Blockchain/Dev/env.local.example
+Blockchain/Dev/eslint.config.mjs
+Blockchain/Dev/frontend
+Blockchain/Dev/insurance-test-runner.js
+Blockchain/Dev/migrations
+Blockchain/Dev/mobile
+Blockchain/Dev/package-lock.json
+Blockchain/Dev/package.json
+Blockchain/Dev/packages
+Blockchain/Dev/prisma
+Blockchain/Dev/public
+Blockchain/Dev/screenshots
+Blockchain/Dev/scripts
+Blockchain/Dev/sdk
+Blockchain/Dev/services/_PLANS
+Blockchain/Dev/services/analytics
+Blockchain/Dev/services/anchoring
+Blockchain/Dev/services/api-gateway
+Blockchain/Dev/services/auth
+Blockchain/Dev/services/billing
+Blockchain/Dev/services/blockchain
+Blockchain/Dev/services/demo-service
+Blockchain/Dev/services/governance
+Blockchain/Dev/services/guardian
+Blockchain/Dev/services/kyc
+Blockchain/Dev/services/m365-integration
+Blockchain/Dev/services/mcp-server
+Blockchain/Dev/services/nft-certificate
+Blockchain/Dev/services/originate
+Blockchain/Dev/services/prism
+Blockchain/Dev/services/queue
+Blockchain/Dev/services/referral
+Blockchain/Dev/services/security
+Blockchain/Dev/services/shared
+Blockchain/Dev/services/staking
+Blockchain/Dev/services/tenant-provisioning
+Blockchain/Dev/services/timestamping
+Blockchain/Dev/services/tokenisation
+Blockchain/Dev/services/transfer
+Blockchain/Dev/services/vc-issuer
+Blockchain/Dev/services/wallet-connector
+Blockchain/Dev/shared
+Blockchain/Dev/stop-secuura.sh
+Blockchain/Dev/systemTest
+Blockchain/Dev/test-swagger-server.js
+Blockchain/Dev/tests
+Blockchain/Reference
+Blockchain/Testing
+Blockchain/docs

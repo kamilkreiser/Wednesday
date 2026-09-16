@@ -1,0 +1,24 @@
+drafter_static start 00:12:27 AEST
+tsc -p . tree base rc 0 error lines 0
+   service program __tests__ files 0
+   including program __tests__ files 42 | ks1073 file listed False
+   including program rc 2 distinct errors (line-normalised) 12
+tsc -p . tree head rc 0 error lines 0
+   service program __tests__ files 0
+   including program __tests__ files 43 | ks1073 file listed True
+   including program rc 2 distinct errors (line-normalised) 13
+NEW errors base -> head: 1
+   + src/__tests__/ks1073-tier-2-verify-has-no-statusless.test.ts(L,C): error TS18046: 'body' is of type 'unknown'.
+disappeared: 0
+head errors in the ks1073 file (raw lines):
+    src/__tests__/ks1073-tier-2-verify-has-no-statusless.test.ts(157,10): error TS18046: 'body' is of type 'unknown'.
+eslint head __tests__/ks1073-tier-2-verify-has-no-statusless.test.ts errors 0 warnings 0 []
+eslint head routes/verification.ts errors 0 warnings 5 ['@typescript-eslint/no-unused-vars', 'no-useless-assignment']
+eslint base routes/verification.ts errors 0 warnings 5 ['@typescript-eslint/no-unused-vars', 'no-useless-assignment']
+== positive control: plant an unused const in the new test file (head), both tools must see it
+   landed: anchor count 1, sha 402632a98686 -> b4793db9d08c, markers [('QA_UNUSED_PLANT', 1)]
+   including tsc --noUnusedLocals sees plant: True
+eslint head __tests__/ks1073-tier-2-verify-has-no-statusless.test.ts errors 0 warnings 1 ['@typescript-eslint/no-unused-vars']
+   restored sha-identical 402632a98686
+porcelain head ['?? Blockchain/Dev/packages/shared/node_modules', '?? Blockchain/Dev/services/api-gateway/node_modules', '?? node_modules']
+drafter_static end 00:12:42 AEST

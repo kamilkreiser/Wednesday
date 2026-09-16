@@ -1,0 +1,269 @@
+# QA Agent Invocation Brief — Secuura/Blockchain **TIER 1** **ROUND 1** gate: PR #1005 (KS-1073) @ `<head sha removed for the negative control>` — the gateway verify predicate's statusless on-chain carve-out made TIER-1 ONLY (`persistedStatus == null && (doc as any)._source !== 'anchor_store'`), plus two rewritten comment blocks and a new 3-cell test file.
+
+**TIER 1, and why:** it is a product change on the verification path, in the one predicate (`persistedAnchored`, `services/api-gateway/src/routes/verification.ts:699-704`) that decides what a verifier is told is on-chain (`verified`, `blockchain.anchored`, `verificationConfidence`). The tier rule is `0_Brain/learnings/2026-09-05_qa-gate-tiers-and-the-two-nogo-cap.md`. There is no rendered surface, so the real-browser half of tier 1 does not apply. Say so. **Round 1 of 2 for the KS-1073 class under the cap.**
+
+**Drafted** 2026-09-17 00:04–00:2x AEST by Wednesday's drafting subagent. The gate set is `2_Project_Files/fleet/qa-agent/gatesets/2026-09-17_gate1005/`. Every SHA, blob, line number and count below was READ in the same step as the sentence that states it; the `.out`/`.json` named beside each fact is the instrument, and the time is inside it. The seat's claims (Seat A, READY mail 2026-09-16T14:03:08Z, spf/dkim/dmarc pass, `ready_1005.md`) appear as **"the seat reports X; measure it"**. They are inputs to falsify, never evidence. Every prediction carries `predicted-by`. **Rows marked `drafter (measured HH:MM, <file>)` were run once by the drafter in a `--shared` scratch clone to prove the harness is feasible. They are still predictions for you: re-measure every one.** A prediction that misses is the drafter's slip to name, not a finding against the PR.
+
+## Charter (read first, in full)
+`/Volumes/DevMASTER/WEDNESDAY/2_Project_Files/fleet/qa-agent/QA_AGENT_CHARTER.md`. You are FINDINGS-ONLY. You never fix, merge, push, deploy, comment on Linear or GitHub, file, tick an ack box, or `@` anyone. You mail ONE verdict to Wednesday.
+
+## PRIOR REPORT ON DISK (not a round N-1 of this PR — the gate that produced this PR's fix shape; read §2b, §5a G4 and §7 I-1)
+`/Volumes/DevMASTER/!CODING/Testing Agent MAIN/projects/secuura/reports/2026-09-16-ks1123-1002-a376756ab-ks1165-1003-c5488a689-tier2-r1/report.md`. Its I-1 is the reason this PR is a product change and not a test-only cell: the null-hash F1 shape cannot discriminate the carve-out, and `blockchain.source` is keyed on the persisted HASH (`verification.ts:752` on #1002's head; **`:755` at this head**, `citation_read.out`), so a `source === 'persisted'` guard is not a tier witness — **prove the tier with an anchor-store hit counter and a 0-hit negative control.** Do not re-derive #1002's findings; KS-1123's F-1002-1 (`0`/`false`) stays owed there.
+
+## HOLDS (verbatim — they bind you)
+- Client-facing communication = ticket comments only; the extranet is not a channel; anything needing a push goes to Wednesday as an escalation candidate for Kam's WhatsApp. Handovers to Peter/Stuart are test blocks, never a list of PRs. Nobody messages Peter or Stuart.
+- never delete; cleanup means quarantine. Fresh `mktemp -d` per attempt. NEVER `rm`.
+- **KS-535: the local stack stays HOLD.** No shared docker stack, no `:6882`/`:7082` slot, no kintsugi, no demo. NEVER touch a wallet mnemonic, a `.env`, or `config/secrets.yml`. **This gate needs NO container.** Everything runs in-process: vitest cells against the REAL `createVerificationRoutes` behind loopback stub servers. Run `docker info` ONCE and print its rc on its own line. The drafter read **rc 0 (UP) at 00:13:53** (`blobs_read.out`). **Up is NOT permission.** Create no container and touch no `secuura-*` container.
+- **Network: loopback only.** Every listener binds `127.0.0.1:0` (KS-860). The seat's harness replaces `globalThis.fetch` (the live chain scan) with a stub; the tier-1/tier-2 lookups use `http.get` to the stub server. No off-host traffic.
+- The gate never merges. **Scope cap tonight (Kam's 40% weekly-usage cap): no Akto, no k6, no Playwright.** Schemathesis: **not run: measured reason** (0 docker images on this host; the only venv is 4.25.2 vs the pinned 4.27.1) per Wednesday's 2026-09-16 13:53Z ruling — **you decide whether the leg is REQUIRED for this change (item 6)**. Time-box: **45 minutes** of work. If a leg would blow it, record it NOT RUN with its blocker named.
+- NEVER run a push, the real pre-push hook, or preflight.sh inside the Secuura checkout or any of its worktrees. Never `cd` in your own tool calls. Clone by SHA into your scratch (`git clone --shared`), and run write verbs THERE only, from a script file.
+- NEVER print a credential value, and never open a secrets file. Count, never echo. Do no memory maintenance of your own store inside this session.
+
+## 1. Target (read 00:05–00:14 AEST by `git ls-remote`, `git`, the GitHub API and the Linear API — `git_read.out`, `gh_read.out`, `linear_read.out`, `blobs_read.out`, `census_read.out`, `consumer_read.out`, `citation_read.out`)
+
+| item | value |
+|---|---|
+| PR / ticket | **#1005 / KS-1073**. Branch `feature/ks-1073-ornith-tier2-statusless-carveout`. Author `kksecura`. Open, not draft, `mergeable true / unstable` (no checks; not "tested"). **1 commit, 2 files, +203 −12.** Title "KS-1073: the statusless on-chain carve-out is tier-1 only (verify predicate)". Body 5,908 chars: `## Test Evidence` ×1, `Closes KS-1073` ×2, KS ids {KS-1057, KS-1073, KS-1123}, **0 at-signs**, 0 ack markers. 0 reviews, 0 review comments, 1 issue comment (linear[bot] `5698759772`). Authored by the local model (Ornith) from a Wednesday brief, source-read by Wednesday, re-run by Seat A (body). `gh_read.out`, raw `gh/` |
+| head | **`<head sha removed for the negative control>`** = `refs/heads/feature/ks-1073-ornith-tier2-statusless-carveout` = `refs/pull/1005/head` (ls-remote 00:05:37; PR API 00:07:38). Tree `6dc63e909`. Parent **`dd66863dd2858e97344652c1106d38f5e352a41b`** (#1002's squash). Author date 2026-09-16 23:52:05 +1000. |
+| base / develop | **Base = merge-base = `dd66863dd`.** **develop = `40fe4db6963cd11dba06bd46e0b00af39e68ef3a`** (#1004's squash, parent `dd66863dd`). The compare `develop...head` reads merge_base `dd66863dd`, **status `diverged`, ahead 1, behind 1, files 2**. The develop delta `dd66863dd..40fe4db69` is exactly `packages/shared/src/security/ssrf-guard.ts` (12 3) + `packages/shared/src/__tests__/ks932-timeout-bounds-dns.test.ts` (75 0): **file-disjoint from #1005** (`git_read.out`). **So the head tree is NOT the merged tree:** build the merged tree in your clone (a local merge of `40fe4db69` onto `e5e7ff99d`, never pushed). The drafter's merge was clean (rc 0); its api-gateway tree hash equals the head's (`41aa21d06`) while its `packages/shared` tree differs (`6028239` vs `3f48ac1`) — rebuild the shared dist THERE (`drafter_setup.out`). |
+| the 2 files | `Blockchain/Dev/services/api-gateway/src/routes/verification.ts`: **blob `de34b2de7372873d60987f8bc742df3a13140265`**, sha256 `7fd7f79a36d288fe…`, 1,435 lines ← base **`c83a2ae27d7ef03a3c1b0c02246154894064f372`** (sha256 `c01a1a0e2a19…` = the #1002 gate's pristine reading), 1,432 lines. numstat **15 12**. `…/src/__tests__/ks1073-tier-2-verify-has-no-statusless.test.ts`: **blob `26f521ebd2e8aeb6d8884f4245e32235d9c8b1fc`** (added), sha256 `402632a98686…`, 188 lines, numstat **188 0**. |
+| UNTOUCHED (blob identical at base, head and develop) | api-gateway `src/index.ts` `6f38c819e` · `vitest.config.ts` `5888e0b32` · `package.json` `841d8c6ad` · `tsconfig.json` `c981e6a92` · `__tests__/ks1057-verify-confidence-is-status-aware.test.ts` `aceaef1fa` · originate `src/routes/documents.ts` `c3a818ac8` · anchoring `src/index.ts` `da4abd432` · `Blockchain/Dev/eslint.config.mjs` `8c5374c60` · `Blockchain/Dev/package-lock.json` `17d2061b3` (`blobs_read.out`) |
+| Linear (00:07:53) | **KS-1073 In Progress**, priority 4, no assignee, 3 comments (`c90b46a5` the #912 r2 Record; `488c1757` the #1002 gate's I-1, "decides this ticket's fix shape"; `12222e6a` the seat's PR note). Inverse relation `related:KS-1124`. **Attachments: #1005 only, `metadata.linkKind = 'closes'`**; `attachmentsForURL(pull/1005)` = 1 node (KS-1073, closes). **KS-1123 is Backlog** (not closed); its only attachment is #1002 `contributes` (merged); its comment `56931919` says "Do not close this ticket on #1005's merge". `linear_read.out`, raw `linear/` |
+| siblings (00:07:38) | 19 other open PRs. **None touches `routes/verification.ts`.** #995 touches `api-gateway/src/utils/trustHeaders.ts`; #923 touches `api-gateway/src/__tests__/ks570-proxy-mount-auth.test.ts` (the api-gateway COUNT moves if it lands); dependabot #649/#575 touch `api-gateway/package.json` (a GUARDED path: the launcher refuses if one lands). `gh_read.out` |
+| the Secuura checkout (read only) | `/Volumes/DevMASTER/!CODING/Secuura/Blockchain/2_Project_Files`: HEAD `355d82c8b` on `feature/ks-597-b-caller-scoped-externalref`, porcelain 0, `.git/config` sha256 `e0fa706f4bdae277`, **884 refs**, 110 `.git/worktrees` entries (00:05:37). Seat A is LIVE (next: A6 KS-844). Never enter its worktree; never run vitest in it. **Quote all of these at start, mid and close.** |
+| toolchain | vitest **4.1.10**, typescript **5.9.3**, node **v24.7.0**, from the checkout's `Blockchain/Dev/node_modules` (`drafter_setup.out`) |
+
+## 2. Spec / DoD — what this gate must establish
+
+**KS-1073 (verbatim, `linear/KS-1073.json`)** — title "Tier-2 verify has no statusless-blob cell — the carve-out is unguarded on the tier a third party reaches". No checkboxes. Its scope sentence: *"**Fix shape:** one cell driving a tier-2 anchor whose synthesised blob has no `status`, asserting the carve-out is NOT taken on that tier."* and *"**Where:** `Blockchain/Dev/services/api-gateway/src/__tests__/ks1057-verify-confidence-is-status-aware.test.ts`."* Its why: tier 2's unreachability "is a **property of two services agreeing**, not a guard". **The product narrowing is NOT in the description**; it enters through comment `488c1757` (the #1002 gate's I-1: "A test-only cell cannot land this ticket … ship the product narrowing and a real-hash-and-height statusless tier-2 cell together. Prove the tier with something other than `blockchain.source`, for example the stub's anchor-store hit count, with a 0-hit negative control.").
+
+**The change, READ at `e5e7ff99d` (`src/verification_head.ts`, `diff_base_to_head.patch`).**
+- **The ONE product line** `:703`: `(persistedStatus === 'confirmed' || persistedStatus == null),` → `(persistedStatus === 'confirmed' || (persistedStatus == null && (doc as any)._source !== 'anchor_store')), // KS-1073: carve-out tier-1 only; anchor-store rows are never statusless`.
+- **Comment block A** (tier-2 blob comment, `:335-350`, from #1002): "…a real hash and height, which the statusless on-chain carve-out still admits (KS-1073)" → "the handler answers off-chain-only (closed): the statusless `confidence` fallback finds nothing to read, and the statusless on-chain carve-out is tier-1 only — it excludes `_source: 'anchor_store'` (KS-1073), so a real hash and height do not earn the claim on this tier."
+- **Comment block B** ("⚠ IT IS TIER 1 ONLY", `:685-698`): now "…and since KS-1073 the predicate enforces that: the `_source !== 'anchor_store'` conjunct keeps a statusless tier-2 blob out even if one were produced"; "ALWAYS carries a status" → "ALWAYS carries a status today and does not reach `== null`"; the measurement line → "Measured before KS-1073 (#1002's QA gate, G4): deleting this carve-out reddened exactly ONE cell — the tier-1 `REGRESSION: a legacy statusless blob`. Its only producers are the two counted above, and both are tier 1."
+- **What the predicate reads.** `_source` is set ONLY by `makeFetchDocFromAnchorStore` `:353` (`_source: 'anchor_store',  // marker for downstream telemetry` — **that comment is unchanged**). Tier 1's `doc` is originate's `GET /api/documents/:id` body VERBATIM (`makeFetchDocument` `:185`, `resolve(data && data.id ? data : null)`). The handler ALSO owns a tier marker it computes itself: `lookupSource` `:499/:503`, written to `(doc as any)._lookupSource` at `:529` AFTER the fetch (so it overwrites anything a body carried) — **the predicate does not use it**.
+- **The response** `:732-761` (unchanged keys): `verified`, `checks.blockchainAnchored`, `blockchain.{anchored, txHash, blockHeight, confidence, confirmedAt, source}`, `verificationConfidence`. Neither `_source` nor `_lookupSource` is exposed (control: the same read finds `verificationConfidence` at `:757`).
+
+**The seat's 3 cells, READ (`src/ks1073-tier-2-verify-has-no-statusless_head.test.ts`).** Harness = the ks1057 stub shape (header `:11-13`). `verify(blob)` `:129` (tier 1), `verifyViaAnchorStore(row)` `:144` (tier 1 404s, tier 2 serves `[{contentHash, ...row}]`) with the tier guard **`expect(body.blockchain.source).toBe('persisted')` `:157`**, commented "if tier 2 were not the tier that answered, every assertion below would be about the wrong code path" `:156`. Cells: `:162` 🔴 T2 `{transactionHash: REAL_TX, blockNumber: 4242}` → `verified false`, `off-chain-only`; `:168` 🔴 same row → `blockchain.anchored false`; `:173` control: T1 legacy `{txHash '8f3b…5678', blockHeight 1024576, anchoredAt}` (the seeded demo document's own hash, `documentRepo.ts:851-852`) → on-chain, THEN T2 `{…, status:'confirmed'}` → on-chain.
+
+**The seat reports (READY mail + PR body; measure every number):**
+> - Red before green: test section alone on the untouched product → 2/3 red (`expected true to be false` ×2), control green; after the product line 3/3.
+> - Tampers (ks1073 + ks1057 files each row; verification.ts restored to its sha; AssertionErrors only): **fix reverted → exactly the 2 🔴 cells; carve-out deleted → KS-1073 control + ks1057 "REGRESSION: a legacy statusless blob keeps reporting on-chain"**; T0 and T0-after green.
+> - Comments made false, updated (comment lines only): block A and block B. "1 product line changed, plus 25 changed comment lines".
+> - api-gateway **43 files / 385** (baseline 42 / 382). shared 839/839. tsc rc 0 ("excludes `__tests__`"). eslint: new file clean, verification.ts 5 warnings = develop's.
+> - **"The tier guard here (`blockchain.source === 'persisted'`) is sound, because every row carries a real hash; I-1's mis-fire applies only to null-hash rows."** (PR body)
+> - NOT covered: Schemathesis (measured reason), Akto, Playwright, k6; a type-check including the new file; **"Callers that consume `persistedAnchored` indirectly (verifier portal, Outlook add-in) were not exercised end-to-end"**; preflight legs 3/4/8.
+> - Asks the gate to weigh: **the predicate reads the doc-level `_source`; a tier-1 document carrying `_source: 'anchor_store'` would also lose the carve-out.**
+
+### The seven questions, each with its measurement. Name the tree beside every count.
+
+**1. IS THE PREDICATE RIGHT ON BOTH TIERS? (MEASURED AT RUNTIME, the REAL handler, tier PROVEN by an anchor-store hit counter.)**
+
+Write `src/__tests__/qa1005-gate.test.ts` in YOUR clone's api-gateway: the seat's harness `:16-126` verbatim, plus (a) `let anchorHits = 0` incremented at the top of the stub's `/api/anchors/document/` branch, (b) `let tier1DocExtra: Record<string, unknown> = {}` spread into the tier-1 document AFTER `blockchain`. Every cell asserts HTTP 200 AND **hits === 1 for a tier-2 row, hits === 0 for a tier-1 row (the negative control)** BEFORE it reads a verdict; a cell whose witness fails is VOID, never a colour. The drafter's RECORDING version is `gatesets/2026-09-17_gate1005/qa1005-drafter-probe.test.ts` (24 rows); **your cells ASSERT, FAIL condition stated first.** Run it at head AND at base (a worktree at `dd66863dd` in your clone), and on the merged tree.
+
+## 2a. LEGITIMATE SHAPES — the verify predicate IS a checker (required)
+REAL = `'a'.repeat(64)`. T2 = `verifyViaAnchorStore` (anchoring's row keys); T1 = `verify` (originate's blob keys). "doc-level" = a top-level key of the tier-1 document body.
+
+| id | tier | status | hash | height | simulated | `_source` (doc-level) | base `dd66863dd` | **head (expected)** | hits | clause | predicted-by |
+|---|---|---|---|---|---|---|---|---|---|---|---|
+| A1 | T2 | absent | REAL | 4242 | — | anchor_store (writer) | on-chain | **off-chain-only** | 1 | `:703` new conjunct | drafter (measured 00:11:01–02, `probe_{base,head}_rows.json`) |
+| A2 | T2 | absent | null | null | — | anchor_store | off-chain-only | off-chain-only (`source 'none'`) | 1 | `:700` hash | drafter (measured) |
+| A3 | T2 | absent | `tx_sim_…` | 4242 | — | anchor_store | off-chain-only | off-chain-only | 1 | `:622-625` | drafter (measured) |
+| A4 | T2 | **`null` explicit** | REAL | 4242 | — | anchor_store | on-chain | **off-chain-only** | 1 | `:605` `?? null` + `:703` | drafter (measured) |
+| A5 | T2 | absent | REAL | 4242 | `true` | anchor_store | off-chain-only | off-chain-only | 1 | `:642` | drafter (measured) |
+| A6 | T2 | `confirmed` | REAL | 4242 | — | anchor_store | on-chain | **on-chain (unchanged)** | 1 | `:703` confirmed arm | drafter (measured) |
+| A7 | T2 | `submitted` | REAL | 4242 | — | anchor_store | pending-onchain | pending-onchain | 1 | `:725` | drafter (measured) |
+| A8 | T2 | `pending` | null | null | — | anchor_store | pending-onchain | pending-onchain | 1 | `:725` | drafter (measured) |
+| A9 | T2 | `failed` | REAL | 4242 | — | anchor_store | off-chain-only | off-chain-only | 1 | mapping | drafter (measured) |
+| A10 | T2 | absent | REAL (`transaction_hash`) | 4242 (`block_number`) | — | anchor_store | on-chain | **off-chain-only** | 1 | `:301-302` snake_case | drafter (measured) |
+| A11 | T2 | absent | REAL | 0 | — | anchor_store | off-chain-only | off-chain-only | 1 | `:637-640` | drafter (measured) |
+| A12 | T2 | absent | REAL | 4242 | — | anchor_store — **plus a LIVE chain hit** | on-chain (`cardano-live`) | **on-chain** (live evidence is authoritative, `:655-660`) | 1 | `:660` | drafter (measured) |
+| B1 | T1 | absent (legacy `{txHash, blockHeight, anchoredAt}`) | REAL | 4242 | — | absent | on-chain | **on-chain (the ks1057 REGRESSION shape)** | 0 | `:703` carve-out | drafter (measured) |
+| B2 | T1 | `null` explicit | REAL | 4242 | — | absent | on-chain | on-chain | 0 | `:605` | drafter (measured) |
+| B3 | T1 | absent | REAL | 4242 | `true` | absent | off-chain-only | off-chain-only | 0 | `:642` | drafter (measured) |
+| B4 | T1 | absent | `tx_sim_…` | 4242 | — | absent | off-chain-only | off-chain-only | 0 | `:622-625` | drafter (measured) |
+| B5 | T1 | `confirmed` | REAL | 4242 | — | absent | on-chain | on-chain | 0 | confirmed arm | drafter (measured) |
+| **B6** | T1 | absent | REAL | 4242 | — | **`'anchor_store'`** | on-chain | **off-chain-only — THE SEAT'S FLAG** | 0 | `:703` reads doc-level | drafter (measured) |
+| B7 | T1 | `confirmed` | REAL | 4242 | — | `'anchor_store'` | on-chain | on-chain | 0 | confirmed arm unaffected | drafter (measured) |
+| B8 | T1 | absent | REAL | 4242 | — | `'originate'` | on-chain | on-chain | 0 | exact string | drafter (measured) |
+| B9 | T1 | absent | REAL | 4242 | — | absent; `blockchain._source: 'anchor_store'` (NESTED) | on-chain | on-chain | 0 | doc-level only | drafter (measured) |
+| B10 | T1 | absent | REAL | 4242 | — | absent; **`data._source: 'anchor_store'` (user data)** | on-chain | on-chain | 0 | doc-level only | drafter (measured) |
+| B11 | T1 | absent | REAL | 4242 | — | `'ANCHOR_STORE'` | on-chain | on-chain | 0 | case-sensitive | drafter (measured) |
+| B12 | T1 | absent | REAL | 4242 | — | `_lookupSource: 'anchor_store'` in the body | on-chain | on-chain (the handler overwrites it at `:529`) | 0 | `:529` | drafter (measured) |
+
+**Every T2 row read hits 1 and every T1 row hits 0 at both trees** — the witness is live and its negative control holds. **And every T1 row with a REAL hash reads `source: 'persisted'`, exactly as T2 does** (B1–B12): `source` is not a tier witness (item 3c). The checker's failure path is non-destructive (a returned verdict); no STOP rule applies. **A statusless tier-2 row that answers on-chain at head is a Blocker (the fix is absent); a legitimate shape that answered on-chain at base and answers off-chain-only at head is the behaviour change you grade in item 3** — A1/A4/A10 are the intended ones, B6 is the seat's flag.
+
+**2. THE SEAT'S FLAG — can a REAL tier-1 path carry doc-level `_source: 'anchor_store'`, and what would a verifier be told? (READ census with a positive control + the MEASURED effect, B6.)**
+- **Census (READ, `census_read.out` 00:06:29; re-run it).** `git grep -n -I -w -F '_source' <head>` over the whole tree minus `node_modules`/`dist`/`build`/`deploy/assets`: **11 occurrences, and exactly ONE writer of the value: `verification.ts:353`**. The rest: `:349`/`:686` (comments), `:703` (the predicate), the ks1073 test header `:6`, two vendored minified bundles (`Tokenomics/assets/index-*.js`, `secuura-website-package/website/assets/index-*.js` — React internals), and four `_source(...)` calls in `systemTest/schemathesis/tests/unit/runner/test_slot_rule_executes_like_the_shell.py` (a Python helper). **0 in originate, 0 in anchoring.** **Positive control:** the same instrument counts 4 in `verification.ts`. **Instrument audit, kept on disk:** the drafter's FIRST census used ERE `\b`, which git grep ignored here — **its positive control read 0** (`census_read.first-run-control-0-broken-regex.out`); the second matched minified bundles uncut (`census_read.second-run-minified-bundles-uncut.out`). Use `-w -F` and keep the control.
+- **Tier 1's document body (READ, `orig documents.ts:943-1082` at head).** originate `GET /:id` answers `res.json({ id, documentUuid, type, title, documentType, description, status, owner, data, contentHash, signatures, walletSignature, blockchain: { anchored, ...composeHonestBlockchainBlob(document.blockchain) }, createdAt, updatedAt, ...(createdOnBehalfOf ? {createdOnBehalfOf} : {}) })` (`:1047-1076`): **a fixed object literal with no `_source` key; user-controlled content lives under `data` (nested) and the stored blob under `blockchain` (nested).** B9/B10 MEASURE that nested `_source` has no effect.
+- **The effect if one arrived (MEASURED, B6):** a statusless tier-1 record with a REAL hash answers **`off-chain-only`, `verified: false`** (base: on-chain). **The direction is fail-CLOSED** (an under-claim on a legitimate legacy record), never an unearned on-chain. B7: a `confirmed` record is unaffected.
+- **Decide** (FEW HICCUPPS: *Purpose* — the verify path must never over-claim; *Product* — two tier markers exist, one handler-owned): is reading the body-carried `_source` instead of the handler-owned `lookupSource` (`:499/:503`, B12 shows the handler's own write wins) a finding? The drafter's reading: unreachable today (READ ONLY), fail-closed if reached (MEASURED), and GL (item 5) shows the suite cannot tell `!== 'anchor_store'` from any truthy `_source`. Severity ceiling is **Polish or a Record**, unless you find a tier-1 producer the census missed (e.g. another deployment's `fetchDocument` target, or a proxy that decorates bodies). Describe the fix-shape in prose (key the conjunct on `lookupSource !== 'anchor_store'`), and do not choose it for the owner.
+
+**3. WHAT CHANGES FOR REAL CONSUMERS; IS IT WHAT KS-1073 ASKED FOR? (READ ONLY census with a positive control.)**
+- **a. Callers of THIS route (READ, `consumer_read.out` 00:07:05; re-run it).** Pattern: `documents/${…}/verify`, `documents/:id/verify`, `documents/{id}/verify`, string concatenation. **55 hits; positive control: the route definition `verification.ts:469` is found (3 in that file).** Every CODE hit is a test (the api-gateway `ks10xx`/`ks11xx`/`ks815`/`notifications` cells; `tests/e2e/tests/{holder,verifier}-exhaustive.prelaunch.spec.ts`, `tests/e2e/tests/integration/full-certification-flow.api.spec.ts`, `tests/e2e/tests/{fixtures/test-data.ts,recruitment/fixtures/recruitment-data.ts}`; `systemTest/playwright/clients/documents.client.ts:99`), a comment, or docs. **No product frontend, SDK, connector or service calls it.** Two non-caller hits to name: originate REGISTERS the same path in its own spec (`originate.openapi.ts:1012`) and carries its own deprecated handler (`routes/documents.ts:1414-1424`, "RFC 8594 `Deprecation` + `Sunset` … headers are set on every response"), but **the gateway answers this path itself and never proxies it** (`api-gateway/src/index.ts:431-433`: "have NO target service — they are answered here, by `verification.ts`") — READ, `spec_read2.out` 00:17:52.
+- **b. The seat's named consumers call a DIFFERENT route (READ).** The verifier portal (`frontend/verifier/src/components/VerifyPage.tsx:80/:123`, `ResultPage.tsx:105`) and the Outlook add-in (`frontend/outlook-addin/src/utils/api.ts:74`) call **`${API_URL}/verification/verify`**, which the gateway PROXIES to originate (`api-gateway/src/routes/proxy.ts:589-590`; `index.ts:408` `proxyPaths`). **They never reach `persistedAnchored`.** The seat's NOT-covered line names the wrong consumers — a disagreement to record, not a defect.
+- **c. The spec (READ, `spec_read.out` 00:13:28).** `docs/openapi/secuura-api.yaml:27723-27760`: `POST /api/documents/{id}/verify` is **`deprecated: true`** (KS-48; "Use `POST /api/verification/verify` instead … the canonical verify path used by the verifier portal"; "Sunset: Thu, 14 Aug 2026", "Every response carries RFC 8594 headers"). The drafter's grep for `sunset|deprecation` in api-gateway `src` (non-test) read **0 — with NO positive control, so it proves nothing**; if you want it, read the `Deprecation` header off one response in your gate file (optional; pre-existing either way, never #1005's).
+- **d. The behaviour change, plainly.** A statusless (or `status: null`) tier-2 anchor-store row with a REAL hash and a positive-integer height, and no live chain hit, **previously answered `verified: true`, `on-chain`; it now answers `verified: false`, `off-chain-only`** (A1/A4/A10). **Reachability (READ):** anchoring's `formatAnchorResponse` emits `status: anchor.status` unconditionally (`anchoring/src/index.ts:1596`), over `status TEXT NOT NULL DEFAULT 'pending'` in **all four schema sources the product builds from**: `migrations/001:714`, `migrations/003:26`, `docker/init/01-schema.sql:198`, `03-service-tables.sql:99`, `06-consolidate-anchors.sql:36`, `deployment/azure/migrate/init.sql:160/:743/:2055` (`citation_read.out`) — **they agree, so no producible record changes its answer today.** A live chain hit still answers on-chain (A12).
+- **e. Delivered vs commissioned.** Quote KS-1073's fix-shape and Where sentences (above). The PR (i) ships a product change the description does not name but comment `488c1757` makes the fix shape, (ii) puts the cells in a NEW file, not `ks1057-…test.ts`. Rule whether "Closes KS-1073" is earned (the drafter reads: yes — the cell exists, discriminates, and is guarded by the product line; the location is cosmetic). **Is the product change intended by KS-1073's text?** Say plainly: the description asks for a cell; the ticket's own comment trail makes the narrowing the fix.
+- **f. KS-1123 (item 7).**
+
+**3c. THE SEAT'S TIER GUARD — "sound"? (MEASURED AT RUNTIME, drafter rows GT1/GT2 + probe B-rows.)**
+
+| id | harness edit in the seat's file (anchor: the 4-line body of `verifyViaAnchorStore` `:145-148`, count 1) | seat's file, SOLO | predicted-by |
+|---|---|---|---|
+| GT1 | `tier1Absent = true` → `false` (tier 1 answers, with no blob) | **3/3 RED at the guard: `expected 'none' to be 'persisted'`** — the guard catches THIS slip | drafter (measured 00:14:31, `drafter_guard.out`) |
+| **GT2** | tier 1 answers with the SAME row as its blob (`currentBlob = {txHash: row.transactionHash, blockHeight: row.blockNumber, …status}`, `tier1Absent = false`) | **guard GREEN; the 2 🔴 cells red on the VERDICT (`expected true to be false`) — a red for the wrong reason; the CONTROL stays GREEN, so its "a CONFIRMED tier-2 row still does" half passes while tier 1 answered** | drafter (measured 00:14:32) |
+
+Rule on the PR body's claim "the tier guard is sound, because every row carries a real hash": it is sound against I-1's MIS-FIRE (a false red on null-hash rows) and it is **not a tier witness** (B1–B12 at tier 1 read `persisted` too; GT2). The comment `:156` claims the witness property. Graded by you (FEW HICCUPPS: *Claims* — the comment; *History* — I-1 asked for the hit counter). Mitigation to weigh: the confirmed-tier-2 claim is also pinned elsewhere (GC in item 5 reds 5 other tier-2 control cells).
+
+**4. COMMENT TRUTH — both rewritten blocks true at head? Non-product edits comment-only? (PARSER + MEASURED.)**
+- **Parser proof (MEASURED, `parser_proof.cjs`/`.out` 00:12:06, TypeScript 5.9.3; re-run your own).** Two instruments: `transpileModule(removeComments)` byte compare + an AST leaf walk (childless nodes, kind+text, JSDoc and EOF excluded).
+  - **S0** base vs head: transpile differs, AST differs (6935 vs 6947 leaves) — the product line is present.
+  - **S1** base vs head-with-ONLY-the-product-line-restored-to-base (anchor count 1 each side): **transpile identical, AST identical 6935/6935, parse diagnostics 0/0** — every other delta in the file is comment. The product line's trailing `// KS-1073: …` is comment by the same instrument (C7).
+  - Controls: C1 `!==`→`===` both differ ✅ · C2 an added line comment both identical ✅ · **C3 type-only `(doc as any)`→`(doc as unknown as any)`: transpile identical, AST differs** (the transpile blind spot, covered by the leaf walk) ✅ · C4 a string literal in code both differ ✅ · C5 code after `//` on a new line both differ ✅ **(but it lands inside `Boolean(…)`'s argument list: parse diags 0/4 — place YOUR C5 at statement level so the control is not a syntax error)** · C6 a comment-text edit in block A both identical ✅ · C7 the trailing-comment text both identical ✅.
+  - numstat 15/12 = 27 changed lines − the product pair = **25 comment lines**: the seat's "25" holds (READ).
+- **Block A (`:345-350`) — MEASURED TRUE** for the shape it names (A1: off-chain-only at head, on-chain at base). Nuances to weigh: "If one arrives, the handler answers off-chain-only (closed)" omits the live-chain exception (A12: on-chain) — the #1002 gate ruled the same class "incomplete, not false".
+- **Block B (`:685-698`).** "the predicate enforces that: the conjunct keeps a statusless tier-2 blob out even if one were produced" — **MEASURED TRUE** (A1/A4/A10). "Measured before KS-1073 (#1002's QA gate, G4): deleting this carve-out reddened exactly ONE cell" — TRUE as dated (the #1002 report §5a G4, 40/370); **at head the same deletion reds TWO (S2 below)**. Decide Polish or nothing for a dated count in a live comment. "Its only producers are the two counted above, and both are tier 1" — the producer list `:671-679` is UNCHANGED by #1005 (diff `documentRepo` hits: 0) and its **pointers are stale at head**: `documentRepo.ts:790/818/846/886` → the seeded blobs sit at `:851/:879/:907/:947`; at `documents.ts:1313-1322` the head reads the anchoring fetch's comment and `fetch(...)` call, while the statusless `blockchainData` it writes is typed at `:1310` and assigned at `:1346` (`producer_pointer_read.out` 00:13:10; the route's identity was not re-derived by the drafter). **A pre-existing Record, not #1005's**; the PR's new sentence leans on it.
+- **The UNCHANGED `:353` comment `// marker for downstream telemetry`** — at head the marker is **load-bearing for the on-chain claim**: GM (item 5) deletes that one line and exactly the two 🔴 cells red. Weigh whether the PR left a comment that now under-describes the line (Polish class) — the ks1073 cells DO guard its deletion.
+- **The trailing product-line comment** "anchor-store rows are never statusless" is a claim about data, true by the four schema sources (READ) — consistent with block B's "today". Probably nothing; say so.
+- **The new test file's header** `:5-9` ("Every such blob carries `_source: 'anchor_store'` at doc-level") — TRUE (census). `:11-13` "reuses the stub … from ks1057" — READ.
+
+**5. TAMPERS — text anchors (Python `str.count` = 1), markers asserted after, WHOLE api-gateway suite, sha256-asserted restore (`git checkout -- <file>`; re-derive `7fd7f79a36d288fe…`), green again after; your gate file SOLO under each row too. A 0-cell run is INVALID; a load failure is NOT a red. Assert porcelain before every whole-suite row (your scratch files must not enter the denominator).**
+
+All rows below: drafter (measured 00:11:02–00:11:28, `drafter_run.out`, `vt_t_*.json`, `probe_t_*_rows.json`), whole suite on the head tree, denominator **43 / 385** every row; every red an `AssertionError`; every restore sha-identical.
+
+| id | tamper (at head, anchor count 1) | predicted whole-suite reds | probe flips vs head | predicted-by |
+|---|---|---|---|---|
+| T0 | — | **0** (385/385) | — | drafter (measured) |
+| **S1** (seat: fix reverted) | the product line → `      (persistedStatus === 'confirmed' \|\| persistedStatus == null),` | **exactly 2: ks1073 `:162` and `:168`** (`expected true to be false`) | A1, A4, A10 → on-chain; B6 → on-chain | seat / drafter (measured) |
+| **S2** (seat: carve-out deleted) | the product line → `      (persistedStatus === 'confirmed'),` | **exactly 2: ks1073 control `:173` + ks1057 `REGRESSION: a legacy statusless blob keeps reporting on-chain (the seeded demo documents)`** (`expected false to be true`) | B1, B2, B8–B12 → off-chain-only | seat / drafter (measured) |
+| **GA** (gate: predicate INVERTED) | `(doc as any)._source !== 'anchor_store'` → `=== 'anchor_store'` | **4: ks1073 `:162`, `:168`, `:173` + ks1057 REGRESSION** | A1/A4/A10/B6 → on-chain; B1/B2/B8–B12 → off-chain-only | drafter (measured) |
+| **GL** (gate: predicate LOOSENED to `_source` truthy) | → `!(doc as any)._source` | **0 (385/385) — invisible to the suite** | B8 (`'originate'`), B11 (`'ANCHOR_STORE'`) → off-chain-only | drafter (measured) |
+| **GB** (gate: the TIER-1 path mistagged) | `makeFetchDocument` `:185` `resolve(data && data.id ? data : null);` → `resolve(data && data.id ? { ...data, _source: 'anchor_store' } : null);` (count 1 — re-assert) | **exactly 2: ks1073 control + ks1057 REGRESSION** — the suite DOES see a mistagged tier 1 | B1, B2, B8–B12 → off-chain-only; B5 stays on-chain | drafter (measured) |
+| **GM** (gate: the tier-2 MARKER deleted) | the line `                _source: 'anchor_store',  // marker for downstream telemetry\n` → removed | **exactly 2: ks1073 `:162`, `:168`** — the "telemetry" marker is load-bearing | A1, A4, A10 → on-chain | drafter (measured) |
+| **GC** (gate: aimed at a CONTROL — the confirmed arm excludes tier 2) | `(persistedStatus === 'confirmed' \|\|` → `((persistedStatus === 'confirmed' && (doc as any)._source !== 'anchor_store') \|\|` | **6: ks1073 control `:173`; ks1057 `F1 CONTROL (non-zero)`; ks1070 `D2 CONTROL`; ks1130 e1/e3/e7 controls** (`expected false to be true`) — the controls CAN fail | A6, B7 → off-chain-only | drafter (measured) |
+| T6 (inert) | a `// qa inert comment` line above `const persistedAnchored = Boolean(` | 0 | none | drafter (measured) |
+| T0-after | — | 0 (385/385) | — | drafter (measured) |
+
+- **What GL means if it reads as predicted:** no cell drives a tier-1 document whose doc-level `_source` is a value other than absent/`anchor_store`, so the exact comparison is unpinned. Coverage note or Polish — your call; it matters only if a second writer of `_source` ever appears (item 2).
+- **GB vs B6:** GB is the product-side version of the seat's flag and the suite catches it; B6 is the data-side version and nothing in the suite drives it. Say which half is pinned.
+
+**6. SUITES, TYPES, LINT, SCHEMATHESIS**
+
+| suite | tree | predicted | predicted-by |
+|---|---|---|---|
+| api-gateway `npx vitest run` (cwd `<tree>/Blockchain/Dev/services/api-gateway`) | base `dd66863dd` | **42 files / 382 passed** | seat / drafter (measured 00:10:02, `vt_suite_base.json`) |
+| the same | head `e5e7ff99d` | **43 / 385** | seat / drafter (measured 00:10:05) |
+| the same | **merged** (head + local merge of develop `40fe4db69`) | **43 / 385** (api-gateway tree identical to head's) | drafter (measured 00:10:08) |
+| `npx tsc --noEmit -p .` (api-gateway) | base / head | rc 0 / rc 0 — **0 `__tests__` files in the program** (vacuous for the new file) | drafter (measured 00:12:27, `drafter_static.out`) |
+| **an INCLUDING program** (`tsconfig.qa-including.json`: `extends ./tsconfig.json`, `include ["src/**/*"]`; placed for the run, moved out by rename; `--listFilesOnly` proves inclusion: 42 test files at base, 43 at head, ks1073 listed) | base → head | **exactly 1 NEW error: `ks1073-tier-2-verify-has-no-statusless.test.ts(157,10): error TS18046: 'body' is of type 'unknown'`**; 0 disappeared; 12 pre-existing (line-normalised) | drafter (measured 00:12:27–42, `tsc_including.out`) |
+| positive control for both tools | head | a planted `const QA_UNUSED_PLANT = 'a'.repeat(64);` in the new file: the including tsc (`--noUnusedLocals`) reports it; eslint reports `@typescript-eslint/no-unused-vars`; restore sha-identical | drafter (measured) |
+| eslint (flat config `Blockchain/Dev/eslint.config.mjs`) | head / base | new file 0/0; `verification.ts` 0 errors, **5 warnings at head = 5 at base** (`no-unused-vars`, `no-useless-assignment`) | seat / drafter (measured) |
+| `packages/shared` suite | merged | optional: not touched by #1005; develop's delta is shared-only, so run it on the MERGED tree if budget allows (the #1004 gate measured 44/842 on its own head) | drafter (NOT measured) |
+
+- **TS18046 at `:157`** is the same class as the #1002 gate's P-1002-2 (the harness copied from ks1123-f3). Grade it; it is not a runtime defect.
+- **SCHEMATHESIS — REQUIRED or not? Decide with evidence.** The drafter's reading is **NOT REQUIRED**, because:
+  (i) the response SHAPE is unchanged: by parser (item 4, S1), the only code delta sits inside the boolean `persistedAnchored`; the `res.json({...})` literal `:732-761` is byte-identical in AST;
+  (ii) the spec's `VerifyResponse` types `verificationConfidence` as a free `type: string` (`secuura-api.yaml:6309-6310`, example `high` at `:6340`) and requires only `verified` (`:6324-6325`), so a conformance fuzzer cannot tell `on-chain` from `off-chain-only` (`spec_read2.out`);
+  (iii) the only shapes whose VALUE changes (A1/A4/A10) need an anchor row with no status, which no schema source can store, and a stack's anchoring runs mock by design (KS-535), so a fuzzer against a stack could not produce one;
+  (iv) the route is `deprecated: true`.
+  Weigh the counter-argument ("a response change on a published route") and rule. Either way it stays **not run: measured reason** tonight.
+
+**7. LINEAR — re-read immediately before the mail.** `attachmentsForURL("https://github.com/Secuura/Distributed_Secuura/pull/1005")` and each ticket's `attachments.metadata.linkKind`: expected **exactly 1 node, KS-1073, `closes`**. Any other ticket's `closes` for #1005 is a finding. **Confirm KS-1123 is NOT linked by #1005 and NOT closed** (drafter: Backlog, only #1002 `contributes`/merged; the body names KS-1123 as "not closed by this PR", and a bare mention is not a magic word — PREDICTED, not measurable without a merge). The seat's KS-1123 comment `56931919` says these cells stand in for F1 and `0`/`false` stay owed; check that nothing in #1005 claims otherwise. Merge prediction: merging #1005 walks KS-1073 to Done (`closes`, In Progress now); KS-1123 stays open.
+
+## 3. Scope
+- **Charter:** explore the verify predicate's statusless carve-out after it was made tier-1 only, with the REAL handler behind loopback stubs, an anchor-store hit counter with a 0-hit negative control, a parser, and aimed text-anchored tampers, looking for (a) any statusless tier-2 shape that still earns on-chain, (b) any legitimate tier-1 shape that lost it, above all through the doc-level `_source` read, (c) comments made false or left under-describing, (d) test cells that cannot fail or controls that do not control, including the seat's tier guard, (e) consumer reach and ticket linkage.
+- **In scope:** the 2 files; `makeFetchDocument`/`makeFetchDocFromAnchorStore`/the verify handler (read + probe); originate's `GET /api/documents/:id` body (READ); the api-gateway suite on three trees; tsc/eslint; the census; Linear.
+- **Out of scope / do NOT touch:** any stack, container or deployed environment; originate's `/api/verification/verify` (the portal's route — a different handler); fixing anything; KS-1123's F-1002-1 (owned there); #1004 (its own gate).
+
+## 4. Credentials (POINTER ONLY — never values)
+None are needed for the measurements. For read-only API calls, `GH_TOKEN` and `LINEAR_API_KEY` by NAME from `/Volumes/DevMASTER/!CODING/Secuura/Blockchain/4_Credentials/.env` (the provenance of this set's `gh_read.py` / `linear_read.py`). `AGENTMAIL_API_KEY` by NAME from `/Volumes/DevMASTER/WEDNESDAY/4_Credentials/.env` for the verdict mail. No test key, no token value, no wallet.
+
+## 5. State-mutation & cleanup
+- Nothing outside your scratch and the report directory. Create no container.
+- Quarantine scratch tests and scratch configs by rename; never `rm`. Fresh `mktemp -d` per attempt.
+- Build `node_modules` per ENTRY from the checkout's `Blockchain/Dev/node_modules` with `@secuura/` relinked INTO each tree, plus symlinks to the checkout's root, api-gateway and shared `node_modules`; never link INTO them. **Build the shared dist in each tree** (`tsc -p .` in `packages/shared`, rc 0, 1–3 s) and assert `realpath(require.resolve('@secuura/shared'))` is IN TREE before each suite (`drafter_setup.py`/`.out`: IN TREE ×3). The checkout's own `@secuura/shared` link is relative and resolves to the checkout's stale dist on a whole-dir farm.
+- **Porcelain note (measured):** the farm's three `node_modules` symlinks show as `??` in porcelain (`.gitignore`'s directory pattern does not match a symlink). Baseline that 3-line porcelain; assert nothing else appears.
+
+## 6. Output boundary
+Report directory (you create it): `/Volumes/DevMASTER/!CODING/Testing Agent MAIN/projects/secuura/reports/2026-09-17-ks1073-1005-e5e7ff99d-tier1-r1/`. It holds:
+- `report.md`
+- `evidence/`: the gate test file, the row JSON per tree (base / head / merged / each tamper), the suite tallies per tree, the census outputs with controls, the parser proof, `tsc_including.out`, the eslint JSON, the Linear re-read, `docker_info.rc`.
+- `NOT-TESTED.written-first.md`, written BEFORE any run. It lists:
+  - any deployed or stacked gateway/originate/anchoring;
+  - a REAL anchor row without a status (unproducible from every schema source — READ);
+  - a second deployment whose `fetchDocument` target could decorate bodies (not sought beyond the repo census);
+  - the verifier portal and Outlook add-in (they call `/api/verification/verify`, a different handler — READ);
+  - the `Deprecation`/`Sunset` header claim (optional one-response read);
+  - a real browser (no rendered surface);
+  - the four platform suites by path — `systemTest/schemathesis` (not run: measured reason; required-or-not ruled in item 6) · `systemTest/akto` · `systemTest/playwright` · `systemTest/performance` (NOT COMMISSIONED, 40% cap, stack HOLD);
+  - preflight legs 3/4/8 (the seat's SKIPPED legs, not a pass);
+  - the `packages/shared` suite if you skip it.
+
+Every finding carries its evidence class (MEASURED AT RUNTIME / PROBED / READ ONLY / RELAYED), its severity, its target (the PR or a TICKET), and SHIPS-WITH or TICKET. Every "is this a bug?" call names its FEW HICCUPPS oracle.
+
+## 7. Known-fragile / known-changed
+- **`blockchain.source` is NOT a tier witness** (I-1; B-rows; GT2). Use the hit counter; assert its 0-hit control.
+- **`tsc -p .` type-checks 0 `__tests__` files**: use an including program with inclusion proven by `--listFilesOnly`.
+- **Census instruments here have failed twice tonight** (ERE `\b` ignored → a false 0; minified bundles swamping output). Pair every count with a positive control from the same file.
+- **Tonight's other lessons, applied here:** text-anchored tampers with the count asserted, a sha-asserted restore and whole-suite runs; a parser proof for the comment-only claim; re-read Linear `linkKind`; build and name the merged tree (develop is NOT an ancestor of the head).
+- vitest 4.1.10: `npx vitest run <file> --reporter=json --outputFile=<path>`, SOLO, never watch. Assert the cells RAN before reading colour. The whole suite takes ~2.5 s.
+- `/bin/bash` here is 3.2: write runners in Python. zsh: no `PIPESTATUS` (`cmd > out 2>&1; rc=$?`), no `timeout`. Your shell's grep may be a function: use `/usr/bin/grep -i` with a same-file positive control. Take multi-line anchors by Python `str.count`.
+- **Recent changes — do NOT flag as new:** KS-1057 (the status-aware predicate and the carve-out itself), KS-1069 (validated hash/height/simulated), KS-1070 (tier-2 `simulated`), KS-1071 (one mapping), KS-1130 (tier-2 twins), #1002/KS-1123 (F2/F3 pins, the block-A comment), #1004/KS-932 (packages/shared only).
+- **Known open gaps:** KS-1123 F-1002-1 (`0`/`false` statuses unpinned); the producer pointers `:672-679` stale (item 4, pre-existing); the #912 r2 Record on KS-1073 (the carve-out is fail-OPEN by construction for tier-1 statusless writers — #1005 narrows the tier, not that).
+- BUILD THE SCHEMA THE PRODUCT DEPLOYS: no database is built in this gate. The reachability argument in item 3d rests on FOUR schema sources that AGREE (READ) — name them in the report; if you find one that declares `status` nullable, that disagreement is a finding.
+
+## 8. Logistics / BOUNDS
+- **Session time-box:** 45 minutes of work (§HOLDS).
+- **Read verbs only in the checkout.** Quote at start, mid and close: the checkout's porcelain count, `.git/config` sha256, `for-each-ref | wc -l`, the `.git/worktrees` count, origin develop, `refs/pull/1005/head` and the branch.
+- **The head is a MOVING reading** while Seat A is live: THREE timestamped readings (start / mid / end), each with the branch name beside its SHA. **If `refs/pull/1005/head` moves, STOP: this brief is about `<head sha removed for the negative control>`.** develop moving is expected.
+- **The launcher's develop arm.** At the CURRENT develop it judges by blob: `verification.ts` (base `c83a2ae27`; the PR's own `de34b2de7` → exit 19 LANDED), api-gateway `src/index.ts` `6f38c819e`, `vitest.config.ts` `5888e0b32`, `package.json` `841d8c6ad`, `tsconfig.json` `c981e6a92`, `ks1057-…test.ts` `aceaef1fa`, originate `routes/documents.ts` `c3a818ac8`, anchoring `src/index.ts` `da4abd432`. If develop moved past `40fe4db69`, it REFUSES (exit 18) when the delta touches `services/api-gateway/src/routes/`, api-gateway `src/index.ts` or its config trio, the ks1057 test, originate `routes/documents.ts`, anchoring `src/index.ts`, `eslint.config.mjs`, or the Dev lockfile. A move elsewhere (e.g. #923's ks570 test, #995's `utils/trustHeaders.ts`, packages/shared) proceeds; re-derive counts on the merged tree.
+- **Escalation:** none mid-run (you have no inbox). Anything the brief does not answer → record your interpretation in the report and in the verdict mail.
+
+## VERDICT DESTINATION
+ONE mail to `wednesday-agent@agentmail.to`, subject EXACTLY:
+`[QA -> Wednesday] TIER 1 GATE #1005 (KS-1073) e5e7ff99d — <VERDICT>`
+
+`<VERDICT>` is GO / GO WITH FINDINGS / NO GO on `<head sha removed for the negative control>`, as the delta over base `dd66863dd` AND on the merged tree with develop `40fe4db69` (name both). Say plainly:
+1. **The predicate on both tiers** (item 1): the LEGITIMATE SHAPES table per tree with hit counts; any statusless tier-2 shape still on-chain: yes or no.
+2. **The seat's flag** (item 2): the `_source` census with its control, whether a real tier-1 path can carry doc-level `_source: 'anchor_store'`, what a verifier is then told (B6), and your severity.
+3. **Consumers** (item 3): who calls this route, that the portal/add-in call a different one, the behaviour change in one sentence, and DELIVERED-vs-COMMISSIONED against KS-1073's scope sentence (quoted).
+4. **The tier guard** (3c): GT1/GT2 and your ruling on "sound".
+5. **Comment truth** (item 4): the parser proof with controls; blocks A and B; the `:353` marker comment.
+6. **Tampers** (item 5): S1/S2 as the seat reported; GA, GL, GB, GM, GC, T6 — each with whole-suite reds.
+7. **Suites/types/lint/Schemathesis** (item 6), per tree, and your REQUIRED-or-not ruling with its evidence.
+8. **Linear** (item 7) and what was NOT tested (`docker info` rc on its own line).
+
+Give the merge seat its ADDENDUM: "squash `e5e7ff99d` onto develop `40fe4db69` (file-disjoint from #1004's squash and from every open lane PR; #1005 attaches to KS-1073 only, linkKind closes); equality targets after the squash `verification.ts` `de34b2de7` / `ks1073-tier-2-verify-has-no-statusless.test.ts` `26f521ebd`; api-gateway 42/382 → 43/385 (plus #923's cells if it lands first); KS-1073 → Done at the merge seat's hand after the GO (`Closes KS-1073` ×2 in the body; In Progress now); **KS-1123 stays open** (F-1002-1); Records: <yours>". Add any test-quality finding (the tier guard, GL, TS18046, the `:353` comment) with its target.
+
+**Mechanism note.** The QA project has no `send_brief.sh` of its own. The verdict mails that have reached Wednesday were sent from `coagent@agentmail.to` through the AgentMail API:
+- `POST https://api.agentmail.to/v0/inboxes/coagent@agentmail.to/messages/send`
+- JSON body `{"to": ["wednesday-agent@agentmail.to"], "subject": "...", "text": "..."}`
+- header `Authorization: Bearer $AGENTMAIL_API_KEY`, with the key by NAME from `/Volumes/DevMASTER/WEDNESDAY/4_Credentials/.env`, read by your script and never echoed
+
+Use whichever path exists. The MAIL is the end state either way: confirm the API answered 2xx and quote the message id. The body = the report's BLUF + the eight plain statements + the ADDENDUM + the NOT-TESTED block + the report path. Timestamps in the mail come from `date`, never estimated.
+
+## NOT COMMISSIONED (say so if asked)
+Akto / Playwright / k6 (40% cap, stack HOLD); Schemathesis beyond the REQUIRED-or-not ruling; any deployed environment; a real browser; originate's `/api/verification/verify`; #1004 itself; KS-1123's `0`/`false`; the ack boxes; any fix (keying the conjunct on `lookupSource`, the tier witness in the seat's harness, the `:353` comment, the TS18046, the stale producer pointers: the owner's).
+
+## PROVENANCE
+All files are in `2_Project_Files/fleet/qa-agent/gatesets/2026-09-17_gate1005/`:
+- **The READY mail:** `ready_1005.md` (copied verbatim from the drafting session's scratchpad; 2026-09-16T14:03:08Z, spf/dkim/dmarc pass).
+- **git and API reads:**
+  - `git_read.sh`/`.out` (00:05:37)
+  - `diff_base_to_head.patch`, `src/verification_{base,head}.ts`, `src/ks1073-tier-2-verify-has-no-statusless_head.test.ts`
+  - `census_read.sh`/`.out` (00:06:29) + `census_read.first-run-control-0-broken-regex.out` + `census_read.second-run-minified-bundles-uncut.out`
+  - `consumer_read.sh`/`.out` (00:07:05)
+  - `gh_read.py`/`.out` (00:07:38; raw in `gh/`), `linear_read.py`/`.out` (00:07:53; raw in `linear/`)
+  - `citation_read.sh`/`.out` (00:13:00), `producer_pointer_read.out` (00:13:10), `spec_read.out` (00:13:28), `spec_read2.out` (00:17:52), `blobs_read.out` (00:13:53, including `docker info` rc)
+  - originate `GET /:id` read from `git show e5e7ff99d:…/originate/src/routes/documents.ts` lines 943–1082 (00:08; the drafter's copy stayed in its scratchpad)
+- **Drafter probes, run in a `--shared` scratch clone** (`scratchpad/gate1005_draft_u46mqcl2/`; three worktrees base/head/merged; source checkout worktree count 111 before and after):
+  - `drafter_setup.py`/`.out` (00:09:06), `drafter_paths.json`, `drafterlib.py`
+  - `drafter_suites.py`/`.out` + `vt_suite_{base,head,merged}.json` (00:09:58–00:10:08)
+  - `drafter_run.py`/`.out` + `probe_{base,head}_rows.json` + `probe_t_*_rows.json` + `vt_t_*.json` + `drafter_run_summary.json` (00:11:00–28)
+  - `parser_proof.cjs`/`.out` (00:12:06)
+  - `drafter_static.py`/`.out` + `tsc_including.out` (00:12:27–42)
+  - `drafter_guard.py`/`.out` + `vt_g_*.json` (00:14:30–32)
+  - the harness `qa1005-drafter-probe.test.ts`
+- **Tier rule:** `0_Brain/learnings/2026-09-05_qa-gate-tiers-and-the-two-nogo-cap.md`. **The gate that produced the fix shape:** `/Volumes/DevMASTER/!CODING/Testing Agent MAIN/projects/secuura/reports/2026-09-16-ks1123-1002-a376756ab-ks1165-1003-c5488a689-tier2-r1/`.
+- **Launcher:** `launchers/launch_qa_secuura_ks1073_1005.sh`, generated by `gen_launcher_1005.py` from `launch_qa_secuura_ks932_1004.sh` (asserted substitutions + residual guard + output controls + bash -n). `--check` in `check.out`; negative controls in `controls_check.out`.
