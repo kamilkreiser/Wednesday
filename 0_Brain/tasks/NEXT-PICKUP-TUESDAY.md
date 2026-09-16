@@ -277,7 +277,7 @@ nothing was destroyed.
 it and the pane unblocked) and two placeholders (`check mail`, `good night`).** The tap is the
 instrument; the pane reading is not.
 
-## 🛏 HPSM ASKED TO WRAP AND EXIT (2026-09-16 23:4x) — and why it was asked, not killed
+## 🛏 HPSM WRAPPED AND ITS PANE IS CLOSED (2026-09-16 23:4x) — asked first, closed only on its own confirmation
 
 HPSM finished everything assigned: pause banner and `:441`, clarification file (57 entries,
 every quote script-checked), the no-fail audit, the VM recovery, and the rebuild plan with its four
@@ -290,8 +290,18 @@ settle that is exactly the kind whose count this seat's own hook warns about. **
 whether it has finished; this seat does not.** That is Kam's SME rule applied to the one decision where
 getting it wrong truncates work.
 
-**If the pane is still open at the next boot, that is fine** — check for a mail saying something was
-unfinished before assuming it ignored the instruction.
+**CLOSED at 23:4x, and only after it confirmed for itself.** It wrapped and mailed
+`[Datasec/HPSM -> Tuesday] Session wrap 2026-09-16` (13:42:50Z) but did not exit the process, so the
+pane kept firing a correct idle wake every ~3 minutes. Its own wrap mail, with **no "unfinished" mail
+after it**, is the confirmation this seat lacked twenty minutes earlier — so `tmux kill-pane -t %7`
+was then safe rather than a guess.
+
+**The sequence is the point, and it is reusable: ask the agent → wait for ITS confirmation → act.**
+Twenty minutes apart, the same action went from unsafe to obviously fine, and nothing changed except
+that the agent said so. Its content survives in the wrap mail, `HANDOVER-S48.md` and its commits;
+nothing was in the pane alone.
+
+**To restart it:** `bash 2_Project_Files/fleet/cockpit/cockpit.sh launch Datasec/HPSM`.
 
 ## ✅ FALSE WAKE FIXED at origin `d59cea765` — the signal is TRUSTWORTHY again, do not keep ignoring it
 
