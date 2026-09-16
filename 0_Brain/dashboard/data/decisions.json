@@ -10784,5 +10784,136 @@
    "2026-08-21 20:06",
    "2026-09-10 10:32"
   ]
+ },
+ {
+  "id": "nexusai-rd470-break-glass-remove",
+  "client_project": "Datasec/NexusAI",
+  "title": "RD-470: remove the ADMIN_RESET_KEY break-glass route, or move it outside the sign-in gate?",
+  "bluf": "The emergency admin-reset route answers 401 in exactly the lockout it exists for, and Marketplace deployments never set its key, so today it is dead code (NexusAI CLARIFICATIONS C-18). Moving it outside the gate would add a key-guessable public route to every customer deployment. The documented recovery (settings on the customer's Azure Files share) already exists. (Prior-ruling gate override: its two hits were the word 'remove' in the Secuura transcript-redaction and Authorized_Users.md cards, neither about this route.)",
+  "default_action": "Until Kam rules, RD-470 stays parked. Nothing is removed without his word; the NexusAI agent works RD-471/472/473 first.",
+  "options": [
+   {
+    "key": "remove",
+    "label": "Remove the route (Recommended)",
+    "detail": "Delete it and keep the documented file-share recovery. No public reset route on any deployment."
+   },
+   {
+    "key": "move-outside",
+    "label": "Move it outside the sign-in gate",
+    "detail": "It works in a lockout, but every deployment gets a public route guarded only by a key the customer must set."
+   },
+   {
+    "key": "leave",
+    "label": "Leave as is",
+    "detail": "Dead code stays; RD-470 closes as won't-fix."
+   }
+  ],
+  "recommended": "remove",
+  "ts": "2026-09-17T07:47:01.665333+10:00",
+  "status": "open",
+  "ruled_choice": null,
+  "ruled_ts": null,
+  "prior_rulings_overridden": [
+   "2026-09-07 07:38",
+   "CARD nexusai-authorized-users-md-remove"
+  ]
+ },
+ {
+  "id": "nexusai-rd454-enforced-without-group",
+  "client_project": "Datasec/NexusAI",
+  "title": "RD-454: with Entra sign-in enforced but no security group set, should sign-in be refused?",
+  "bluf": "Today, once Entra is enforced without a security group, anyone in the customer's tenant can sign in. The NexusAI agent recommends refusing sign-in and telling the admin to set the group (fail safely and explain, CLARIFICATIONS C-15). The answer also sets the wording of the new RD-465 setup warning for that state. (Prior-ruling gate override: its hits were the word 'without' in a Secuura merge card and a Purview note, neither about sign-in.)",
+  "default_action": "Until Kam rules, the RD-465 warning describes today's behaviour (whole tenant can sign in) and the sign-in logic is not changed.",
+  "options": [
+   {
+    "key": "refuse",
+    "label": "Refuse and tell the admin (Recommended)",
+    "detail": "No sign-in until a group is set; a clear message names the missing setting."
+   },
+   {
+    "key": "allow-tenant",
+    "label": "Allow the whole tenant",
+    "detail": "Anyone in the customer's tenant can sign in until a group is set; the warning says so."
+   }
+  ],
+  "recommended": "refuse",
+  "ts": "2026-09-17T07:47:04.209205+10:00",
+  "status": "open",
+  "ruled_choice": null,
+  "ruled_ts": null,
+  "prior_rulings_overridden": [
+   "2026-08-17 20:15",
+   "CARD secuura-merge-914-without-reviewer-approval"
+  ]
+ },
+ {
+  "id": "nexusai-demo-deploy-finish-scope",
+  "client_project": "Datasec/NexusAI",
+  "title": "NexusAI order of work: 'finish the tickets, then update the demo' - the work in flight, or the whole board?",
+  "bluf": "On 2026-09-14 you set NexusAI's order as: finish the tickets, then update the demo and the Marketplace code, and merge the vault last (NexusAI CLARIFICATIONS C-29, recorded from the agent's session memory, not your verbatim words). Read as the whole board, that is 373 open tickets and no demo update for a long time, with 72 Release Ready tickets waiting behind it. The agent asked on 2026-09-15 and it is unanswered. Recommendation: the work in flight. (Prior-ruling gate override: its hits matched the words demo, scope and deploy in unrelated Secuura/HPSM cards and panel notes; none answers this.)",
+  "default_action": "Until Kam rules, no demo deploy happens (demo stays his signature class); the ticket work itself is not blocked.",
+  "options": [
+   {
+    "key": "in-flight",
+    "label": "The work in flight (Recommended)",
+    "detail": "Update the demo once the current gated work is merged; the rest of the board continues normally."
+   },
+   {
+    "key": "whole-board",
+    "label": "The whole board",
+    "detail": "No demo update until the board is cleared."
+   }
+  ],
+  "recommended": "in-flight",
+  "ts": "2026-09-17T07:47:36.172393+10:00",
+  "status": "open",
+  "ruled_choice": null,
+  "ruled_ts": null,
+  "prior_rulings_overridden": [
+   "2026-08-17 20:01",
+   "2026-08-21 10:02",
+   "2026-08-21 10:04",
+   "2026-08-21 10:55",
+   "2026-09-01 17:25",
+   "2026-09-02 16:08",
+   "2026-09-03 09:56",
+   "2026-09-08 15:36",
+   "2026-09-10 09:01",
+   "2026-09-10 09:08",
+   "2026-09-10 09:08",
+   "2026-09-14 21:56",
+   "CARD secuura-ks662-scope",
+   "CARD secuura-ks697-demo-probe",
+   "CARD nexusai-scim-deploy-live-ab",
+   "CARD secuura-ks739-lookup-role-scope",
+   "CARD nexusai-rd167-dark-mode-scope",
+   "CARD secuura-erasure-scope-gate",
+   "CARD secuura-ks764-key-revoke-org-scope",
+   "CARD secuura-demo-deploy-scope-2026-09-03",
+   "CARD secuura-demo-service-persona-switch-2026-09-03",
+   "CARD nexusai-rd296-deploy-timing",
+   "CARD secuura-demo-service-crash-loop",
+   "CARD secuura-demo-stop-needs-kams-own-word",
+   "CARD secuura-demo-admin-image-rebuild-2026-09-05",
+   "CARD nexusai-erasure-deploy-after-regate8-2026-09-05",
+   "CARD secuura-demo-vm-prune",
+   "CARD secuura-demo-kam-admin-default-password",
+   "CARD secuura-f5-demo-exposure-probe",
+   "CARD secuura-f5-demo-interim-mitigation",
+   "CARD secuura-demo-admin-transcripts",
+   "CARD secuura-demo-admin-mfa",
+   "CARD secuura-demo-row-060-remediation",
+   "CARD secuura-ks968-demo-hash-probe",
+   "CARD secuura-891-workflow-scope-merge",
+   "CARD nexusai-three-lineages-in-scope-or-parked",
+   "CARD secuura-ks1041-fix-shape-demo-exposed",
+   "CARD secuura-ks1041-step1-demo-verify-now",
+   "CARD secuura-ks1041-demo-container-recreate",
+   "CARD hpsm-phase1-imagepng-out-of-scope",
+   "CARD hpsm-composer-synthetic-demo-content-for-monday",
+   "CARD hpsm-composer-demo-release-unreachable-c12",
+   "CARD hpsm-composer-demo-release-with-device-groups",
+   "CARD hpsm-composer-live-demo-upgrade-after-c12"
+  ]
  }
 ]
