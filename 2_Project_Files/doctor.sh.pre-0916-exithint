@@ -93,14 +93,7 @@ if launchctl print "gui/$(id -u)/com.${_DOC_AGENT}.chatsync" >/dev/null 2>&1; th
   _cs_rc=$(launchctl print "gui/$(id -u)/com.${_DOC_AGENT}.chatsync" 2>/dev/null | awk -F'= ' '/last exit code/{print $2}')
   case "${_cs_rc:-unknown}" in
     0|"(never exited)") ok "chat_sync loaded, last launchd exit clean (agent: $_DOC_AGENT)" ;;
-    # 126 and 78 are DIFFERENT failures with DIFFERENT fixes (Tuesday, 2026-09-16 STATUS,
-    # disagreement 4: this line used to print the 78 hint for a 126). 126 = the script could not
-    # be executed — on these Macs that is TCC: /bin/bash lacks Full Disk Access, so launchd gets
-    # EPERM on a file that runs fine from Terminal. 78 = EX_CONFIG — launchd refused the plist
-    # before running a line, usually an out/err path it cannot open.
-    126) warn "chat_sync loaded but launchd's last exit was: 126 (not permitted)" "TCC: /bin/bash needs Full Disk Access on THIS machine — Kam's hands, System Settings → Privacy & Security → Full Disk Access → add /bin/bash (PORTABILITY 15). Kam's page will not show the other agent until then." ;;
-    78)  warn "chat_sync loaded but launchd's last exit was: 78 (EX_CONFIG)" "the plist points its out/err somewhere launchd cannot open (/Volumes, or a home that does not exist) — they must live in ~/Library/Logs (PORTABILITY 22). Kam's page will not show the other agent." ;;
-    *) warn "chat_sync loaded but launchd's last exit was: ${_cs_rc}" "read ~/Library/Logs/${_DOC_AGENT}_chatsync.err for the cause (126 = TCC/Full Disk Access, 78 = plist out/err path, 127 = script not found). Kam's page will not show the other agent." ;;
+    *) warn "chat_sync loaded but launchd's last exit was: ${_cs_rc}" "78/EX_CONFIG means the plist points its out/err at /Volumes — they must live in ~/Library/Logs (PORTABILITY 22). Kam's page will not show the other agent." ;;
   esac
 else
   warn "chat_sync not loaded (agent: $_DOC_AGENT)" "launchctl load ~/Library/LaunchAgents/com.${_DOC_AGENT}.chatsync.plist (PORTABILITY 22) — without it Kam's page will not show the other agent"
@@ -322,8 +315,7 @@ for job in "com.${_DOC_AGENT}.shiftchange" "com.${_DOC_AGENT}.wake" "com.${_DOC_
       warn "scheduler $job points off-drive" "$prog missing — re-run scheduler/install_scheduler.command from this drive"
     else
       case "$lec" in
-        126) warn "scheduler $job last exit 126" "TCC: /bin/bash lacks Full Disk Access on this machine — Kam's hands (PORTABILITY 15)";;
-        78:*|78) warn "scheduler $job last exit $lec" "EX_CONFIG: launchd refused the plist — usually an out/err path it cannot open; logs must live in ~/Library/Logs (PORTABILITY 22)";;
+        126|78:*|78) warn "scheduler $job last exit $lec" "TCC/stdio blocked (PORTABILITY 15)";;
         127) warn "scheduler $job last exit 127" "its script was not found at fire time — re-run scheduler/install_scheduler.command";;
         *) ok "scheduler $job loaded (last exit ${lec:-never})";;
       esac
