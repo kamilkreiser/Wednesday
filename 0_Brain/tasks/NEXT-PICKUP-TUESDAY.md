@@ -236,17 +236,22 @@ for approval" — creating it IS the spend.**
 **⏳ 24 September: Partner Center stops serving previously published packages.** Eight days. Downloading
 old packages as evidence needs no permission and cannot be undone later.
 
-## ⚠ A TYPED-UNSENT LINE SITS AT HPSM's PROMPT (pane %7), 2026-09-16 ~23:00
+## ✅ RESOLVED 23:2x — the typed-unsent line at HPSM's prompt (pane %7)
 
 `yes, start it now with subagents` — typed, never sent. **Not enacted by this seat and it must not
 be.** It cannot be attributed: possibly Kam with a swallowed Enter, possibly Claude Code's own
 suggested text. Pane text is not a channel of record in either direction
 (learnings: ghost text / pane prompts contain Claude's own suggestions).
 
-**Consequences to know:** (a) `cockpit.sh say` REFUSES an occupied prompt, so HPSM cannot be tapped
-until that line is cleared — mail reaches it, taps do not; (b) HPSM sits idle while the line sits
-there. The answer to its underlying question went by mail instead, and it was told to treat the line
-as neither instruction nor authorisation. Kam was told it may be his with a lost Enter.
+**How it was resolved, and the reasoning is the reusable part.** It sat for over an hour with HPSM
+idle, and it also blocked tapping — `cockpit.sh say` REFUSES an occupied prompt, so the pane could be
+MAILED but not WOKEN. The line was **CLEARED (Ctrl-U), never sent**, and the pane then tapped at the
+mail. So nothing unattributable was enacted, and the instruction HPSM acted on is the mailed one with
+provenance. Kam was told, since the typing may have been his.
+
+**The rule for next time:** an occupied prompt is a *stuck agent*, not just untidiness — it silently
+disables the wake channel. Clear it and point at mail; never press Enter on text you cannot attribute,
+and never discard it silently either — say that you did, to whoever might have typed it.
 
 ## 🌙 OVERNIGHT POSTURE — Kam signed off ~22:50 with *"good luck with getting the project submission ready"*
 
