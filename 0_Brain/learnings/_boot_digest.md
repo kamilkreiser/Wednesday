@@ -7,7 +7,7 @@ status: live
 
 # Boot digest — headline + rules of every lesson (open the file when it fires)
 
-Generated 2026-09-16 07:51 from 170 lesson files (857,699 B). Each block = the lesson's retrieval handle (H1), its frontmatter, the operative paragraph, its section index, and every RULES section verbatim. 8 files carry no rules-shaped section and are included whole. The CASES behind a rule live only in the file: open it the moment the rule fires, or when a diagnosis needs the evidence. `_ledger.md` is read whole beside this digest; `_ledger_archive.md` on demand.
+Generated 2026-09-16 13:24 from 171 lesson files (862,693 B). Each block = the lesson's retrieval handle (H1), its frontmatter, the operative paragraph, its section index, and every RULES section verbatim. 8 files carry no rules-shaped section and are included whole. The CASES behind a rule live only in the file: open it the moment the rule fires, or when a diagnosis needs the evidence. `_ledger.md` is read whole beside this digest; `_ledger_archive.md` on demand.
 
 ## The T9 SSD is the master — Wednesday must be fully portable
 `2026-07-31_fully-portable-drive.md` · principle · 2026-07-31 · status: superseded — the "T9 is the master" half by [[2026-08-25_one-drive-devmaster-is-master]] (2026-08-25); the portability principle itself still lives
@@ -6151,4 +6151,21 @@ the verb: "going forward" — and here he also named today's set explicitly).
 4. **Expiry:** recorded in [[../tasks/EXPIRING-GRANTS]]; after Sunday the 09-14 night rule and contract return unless he renews.
 
 **Family:** [[2026-09-14_ornith-runs-at-night-in-the-downtime-a-standing-rule]] · [[2026-09-15_ornith-every-issue-gets-a-tooling-or-instruction-fix]] · [[2026-09-14_at-90pct-weekly-usage-no-new-agents-wednesday-plus-local-model]] · [[2026-09-06_a-scoped-override-carries-its-own-expiry]] · [[2026-08-03_go-slow-earn-autonomy]] (rule 5).
+
+
+## "If something's blocking, move on to the next" — a decision-shaped pool is not an empty pool; a blocked item is skipped, never waited on
+`2026-09-16_if-something-blocks-move-on-to-the-next.md` · correction · 2026-09-16 · status: live
+
+**The operative case, so the headline matches it:** Wednesday has read the next candidates and each one "needs a decision", "needs a design read", "is Kam-class", or "is 200+ lines". **That is not permission to stop.** The queue has 300 tickets; the instruction is to SKIP the blocked one and take the next, down the whole list, easy to hard — and to say which were skipped and why in the receipt. Waiting on a card is a stall the size of the whole fleet; Kam will not be there next week to tap it.
+
+sections (open the file for these): The case · Why the 09-15 lesson did not hold (the w=2 diagnosis) · How to apply
+
+## How to apply
+1. **A blocked item is SKIPPED, not waited on.** Card it (with a default), say so in one line, take the next. The receipt names the skipped ones and why; the cards carry the defaults so Monday fires without him.
+2. **"Decision-shaped" is a verdict on ONE ticket after reading it, never on a tier.** Keep reading down the list — easy to hard means the hard ones too — until a briefable one is found or the list is genuinely exhausted at the tip; "exhausted" is a claim with a count in it ("all 14 T2b rows read; 0 briefable; cards: N").
+3. **The DEFAULT on a card is briefable NOW as a held diff.** A held diff is reversible and merges only on Sunday's QA; a wasted model round costs three minutes. Waiting for the tap costs the fleet a day. Brief the default, name the card in the READY, and let his tap redirect.
+4. **The model idle for more than one brief-writing interval (~10 min) during 06–23 is a failure to report, not a state to describe.** G7 wakes Kam at 2 h; the seat must not need it. The seat's own trigger: every hold → the next brief in the same action; every "nothing briefable" → the next tier in the same action.
+5. **Next week this is the whole job:** the WEEK-INSTRUCTION file's scope carries this rule verbatim, and the daily receipt names skipped tickets and their cards so he can rule them from anywhere.
+
+**Family:** [[2026-09-15_never-idle-the-gatekeeper-widens-the-harness-when-the-pool-runs-dry]] (the parent — this is its second instance, the "decision-shaped pool" costume) · [[2026-09-14_the-coordinator-adds-value-or-it-is-waste-three-duties-not-watching]] · [[2026-09-07_a-classification-list-is-a-representation-not-an-instruction]] (a tier is a list) · [[2026-08-16_an-ask-without-a-default-is-an-indefinite-hold]] (the default fires now, not on Monday) · [[2026-09-02_coo-actionable-tickets-never-wait-for-kam]].
 

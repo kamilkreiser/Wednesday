@@ -66,12 +66,6 @@ inp = {"ticket": {"identifier": ident, "title": text.splitlines()[0].lstrip("# "
        "product_file": prod, "reference_test_file": ref, "suggested_test_file": tf, "test_dir": test_dir,
        "defect_line": {"sites": sites, "expected_plus": expected_plus, "must_remove": must_remove},
        "files": {prod: ptext, ref: rtext}, "tip": tip}
-# 2026-09-16 (KS-1163): a test_file= that EXISTS at the tip is a MODIFY-IN-PLACE test (the vitest tier's shape) —
-# its full content goes into files[] so the model copies context byte-for-byte, and the checker's B3 accepts it.
-ttext = show(tf)
-if ttext is not None:
-    inp["files"][tf] = ttext; inp["test_mode"] = "modify"
-    sys.stderr.write(f"build_bash_input: test_file EXISTS at the tip — MODIFY-IN-PLACE ({len(ttext)} B in files[])\n")
 if "ctx" in pins: inp["_night_num_ctx"] = int(pins["ctx"])
 json.dump(inp, open(out,"w",encoding="utf-8"), indent=1, ensure_ascii=False)
 print(f"wrote {out}: {prod} ({len(ptext)} B) + ref {ref} ({len(rtext)} B) at {tip[:9]}; sites {len(sites)} ({sum(1 for s in sites if s['must_change'])} must_change); expected '+' {len(expected_plus)}; must_remove {len(must_remove)}; new test {tf}")
