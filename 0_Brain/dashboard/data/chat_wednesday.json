@@ -3996,5 +3996,19 @@
   "project": "Secuura",
   "ts": "2026-09-16T13:35:31.225379+10:00",
   "text": "Received — two things, and I have them. First: audit what is actually working, fix what is not, before anything else. Second: keep the local model running on backlog and to-do tickets on this account until Sunday, then we move to your account for the heavier work.\n\nI read 'until Sunday' as through the end of Sunday the twentieth — I derived the weekday from the date rather than assuming it. Correct me if you meant Saturday night.\n\nStarting the audit now: the launcher's own doctor, the sync loop, the wake watcher, the runner's gates and the uncommitted harness work the morning seat left behind. I will come back with what is green, what is broken, and what I have fixed — not a list of everything I looked at."
+ },
+ {
+  "role": "wednesday",
+  "seat": "Kamils-Mac-Studio.local",
+  "project": "Secuura",
+  "ts": "2026-09-16T13:43:18.957592+10:00",
+  "text": "Audit done, and the things that were broken are fixed and proven. Here is what I found.\n\nBroken, now fixed. The local model's gate refused six cycles in a row this morning because the ollama server had died, and that refusal only ever reached a log file. Two structural fixes, not a firmer promise. The gate now restarts the server itself — a dead local server is not a safety boundary, so detecting it and refusing was the wrong response. And any gate that keeps refusing for half an hour now posts one line to your panel naming the gate and the remedy, rate limited so it cannot nag. Six arms, all passing, including the control that proves the first one measured the fix rather than the weather. Committed and pushed.\n\nAlso fixed: five scripts had lost their executable bit, which the drive sync does every time. The two harness changes the morning seat left uncommitted turned out to be correct — a real run at half past one proved them — so those are committed with the evidence.\n\nWorking properly: the sync loop, the wake watcher, the launchd jobs, the mail, the board credentials, and git is clean and level with origin.\n\nTwo things I could not fix myself. Peter merged thirty-six files under systemTest overnight and our local checkout does not hold that commit, so every systemTest ticket — which is most of what you ruled this morning — can only be briefed against a stale copy. Fetching is a Secuura seat's job, and that costs the account you want kept light. Second, KS-1163 needs one change across a script and two test suites, and the bash harness can only express one test file; that is mine to extend and I will.\n\nThe model is idle for the minute and that is on me to fix next. I am writing the KS-1011 brief now — the one you ruled b this morning — because it touches start-secuura.sh, which Peter's merge did not."
+ },
+ {
+  "role": "wednesday",
+  "seat": "Kamils-Mac-Studio.local",
+  "project": "Secuura",
+  "ts": "2026-09-16T13:43:39.519440+10:00",
+  "text": "Received, three things.\n\nA system update explains it — that closes the diagnosis and I will stop there. Worth saying: the fix I just built is exactly right for that cause. A system update that stops the server is now recovered automatically by the gate, and if it ever cannot recover, you get one line on this panel instead of six silent refusals.\n\nReceived on the storage: I am measuring now — where ollama and the model weights actually live, and what else on the internal disk is large enough to matter. I will come back with the numbers and a proposed move before I move anything, since a new folder at the DevMASTER root is outside my own project folder and I would rather you see the plan first.\n\nAnd received on the spelling — ollama."
  }
 ]
