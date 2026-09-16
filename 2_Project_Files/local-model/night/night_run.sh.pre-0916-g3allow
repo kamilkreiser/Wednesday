@@ -177,11 +177,6 @@ gates() {
   local qanote=""; [ "$NIGHT_QA_PGREP" != "launch_qa_" ] && qanote=" (TEST OVERRIDE pattern)"
   if [ "$nqa" -eq 0 ]; then
     log "GATE G3 qa-procs: pgrep -f $NIGHT_QA_PGREP = 0$qanote (claude processes: $nclaude, informational) — pass"
-  elif _g2_allow_seats; then
-    # 2026-09-16 22:1x (Wednesday): the SEATS ALLOWANCE covers QA gates too. Kam 20:40 — Claude agents
-    # (seats AND the gates that test their PRs) run alongside the local model; G2 honoured it, G3 did not,
-    # so two live gates would have idled a four-ticket queue. G4 load + G5 memory still gate.
-    log "GATE G3 qa-procs: pgrep -f $NIGHT_QA_PGREP = $nqa$qanote — ALLOWED by $NIGHT_ALLOW_SEATS_FILE ($G2_ALLOW_NOTE) — pass"
   else
     log "GATE G3 qa-procs: pgrep -f $NIGHT_QA_PGREP = $nqa$qanote — REFUSE"; GATE_FAIL="G3-qa-procs"; return 1
   fi
