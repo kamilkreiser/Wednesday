@@ -128,4 +128,3 @@
 # 14:38 — KS-1031 queued by autostart_on_brief.sh the moment its brief landed.
 # 14:38 — KS-1031 queued by hand: autostart_on_brief.sh built the input then died on its own parse error (a case inside a command substitution). Brief pre-measured: 3 passed/3 failed at the tip, 6/6 after.
 # 14:44 — KS-1031 r2: the r1 test section was ONE COMMENT — the model refused to transcribe a 179-line test body and wrote a placeholder instead. Body cut to 105 lines, an explicit do-not-summarise block added, and CELL 5 asserts PASS+FAIL == EXPECTED_CELLS (proven to fire).
-KS-1031 input=/Volumes/DevMASTER/WEDNESDAY/2_Project_Files/local-model/night/inputs/bash_1031.json task=/Volumes/DevMASTER/WEDNESDAY/2_Project_Files/local-model/tasks/bash_patch/task.md ctx=49152
