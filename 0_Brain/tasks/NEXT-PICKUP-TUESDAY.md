@@ -209,6 +209,18 @@ treats a symptom. The durable fix is a pre-commit check that refuses a `*.sh` wi
 staged at 100644 — `2_Project_Files/fleet/hooks/pre-commit` already exists and is the natural
 home. **It is shared tooling, so propose it to Wednesday rather than adding it unilaterally.**
 
+## ⚠ A TYPED-UNSENT LINE SITS AT HPSM's PROMPT (pane %7), 2026-09-16 ~23:00
+
+`yes, start it now with subagents` — typed, never sent. **Not enacted by this seat and it must not
+be.** It cannot be attributed: possibly Kam with a swallowed Enter, possibly Claude Code's own
+suggested text. Pane text is not a channel of record in either direction
+(learnings: ghost text / pane prompts contain Claude's own suggestions).
+
+**Consequences to know:** (a) `cockpit.sh say` REFUSES an occupied prompt, so HPSM cannot be tapped
+until that line is cleared — mail reaches it, taps do not; (b) HPSM sits idle while the line sits
+there. The answer to its underlying question went by mail instead, and it was told to treat the line
+as neither instruction nor authorisation. Kam was told it may be his with a lost Enter.
+
 ## 🌙 OVERNIGHT POSTURE — Kam signed off ~22:50 with *"good luck with getting the project submission ready"*
 
 He has handed the resubmission to this seat. **That is permission to keep working, not permission to
