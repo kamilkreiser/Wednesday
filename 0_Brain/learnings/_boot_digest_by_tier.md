@@ -7,7 +7,7 @@ status: live
 
 # Boot digest BY TIER — W whole, M rules-only, every project case a handle
 
-Generated 2026-09-16 20:12 from 174 lesson files (881,291 B). M 33 · MIXED 5 · W 136. 28 project CASE sections inside MIXED files are reduced to one line each: the heading and the path to read it at. W blocks are exactly what the default digest carries; M blocks drop the section index and keep the rules; a P file is a single handle. The CASES behind every rule live only in the lesson files — open one the moment its rule fires.
+Generated 2026-09-16 20:18 from 175 lesson files (884,264 B). M 33 · MIXED 5 · W 137. 28 project CASE sections inside MIXED files are reduced to one line each: the heading and the path to read it at. W blocks are exactly what the default digest carries; M blocks drop the section index and keep the rules; a P file is a single handle. The CASES behind every rule live only in the lesson files — open one the moment its rule fires.
 
 ## The T9 SSD is the master — Wednesday must be fully portable
 `2026-07-31_fully-portable-drive.md` · principle · 2026-07-31 · status: superseded — the "T9 is the master" half by [[2026-08-25_one-drive-devmaster-is-master]] (2026-08-25); the portability principle itself still lives · tier: W
@@ -5930,6 +5930,43 @@ still expires on Sunday — THIS file does not) · [[2026-09-14_at-90pct-weekly-
 every grant recorded, so the boundary is written down and never vibes) ·
 [[2026-09-15_ornith-every-issue-gets-a-tooling-or-instruction-fix]] (why a brief defect must not be
 laundered as a model failure).
+
+
+## Never edit a bash script that is currently running — it reads by byte offset
+`2026-09-16_never-edit-a-bash-script-that-is-currently-running.md` · correction · 2026-09-16 · status: live · tier: W
+
+**The lesson:** While fixing `fleet/cockpit/monitor.sh` I edited it in place, inserting about
+twenty-five lines of a new helper near the top. The fleet monitor was running from that exact file
+at the time, sitting in its `sleep 60`. Bash does not load a script into memory; it reads it
+**lazily, by byte offset**, returning to the file between commands. When it resumed, its saved
+offset pointed into the middle of text that had shifted underneath it. The process died and took
+its tmux pane with it, so the fleet lost its watchdog and nothing announced that it had.
+
+**How to apply:**
+
+1. **Before editing any script, ask whether an instance of it is running.** `pgrep -fl <name>` is
+   one command and answers it. Long-lived loops — monitors, watchers, schedulers, anything armed by
+   a launcher or launchd — are the ones that will be running, and they are also the ones whose
+   death is quietest.
+2. **If it is running, stop it first, edit, run the new code once, then re-arm.** In that order.
+   Stopping first is what makes the edit safe; running `--once` (or the script's own dry-run) before
+   re-arming is what stops a syntax error becoming a silently disarmed mechanism. Both halves, every
+   time.
+3. **Append-only edits are not a loophole.** It is tempting to think that adding lines at the end is
+   safe. The offset hazard is about where the running interpreter *is*, not where you typed, and a
+   function defined later can still be read at a shifted offset. Treat any in-place edit of a
+   running script as unsafe.
+4. **After any edit that might have disturbed a background mechanism, verify the mechanism is still
+   alive** before moving on — `pgrep`, the tmux pane list, `launchctl list`. A watchdog that has
+   stopped watching looks exactly like a quiet night.
+
+**The shape underneath, which this project keeps meeting:** a mechanism that fails silently is worse
+than one that fails loudly, and the mechanisms most likely to fail silently are the ones whose whole
+job is to notice things. The same day this happened I found nine launchd jobs that had been dying
+before writing a line of log, and argued in another lesson that a green check over an untested
+mechanism is worse than a red one. This is that argument turned on its author: I removed the fleet's
+own detector for several minutes and only discovered it by accident, because nothing watches the
+watcher.
 
 
 ## What keeps a seat CORRECT is not all in git — and every mechanism that checks a tree checks only the part that is
