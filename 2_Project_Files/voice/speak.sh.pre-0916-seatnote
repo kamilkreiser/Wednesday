@@ -37,18 +37,6 @@ fi
 
 # Log everything spoken (ear-channel audit trail, useful for tuning).
 LOG_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")/../.." && pwd)/0_Brain/daily"
-# SEAT NOTES (2026-09-16): log beside the SEAT's own note — the same directory note_entry.sh
-# resolves, via tools/seat_note.sh (TUESDAY tree -> 0_Brain/daily_tuesday). This script is the
-# ALERTING channel, so seat resolution may never fail it: the resolver runs in a SUBSHELL (an
-# unbound variable or a bad source there cannot exit this script), and if it is missing,
-# unreadable or refuses, the log stays in the SHARED 0_Brain/daily/ with one stderr line.
-SEAT_LOG_DIR="$( SN="${LOG_DIR%/0_Brain/daily}/2_Project_Files/tools/seat_note.sh"
-  [ -r "$SN" ] && . "$SN" && seat_note_dir "${LOG_DIR%/0_Brain/daily}" speak && mkdir -p "$SEAT_NOTE_DIR" && printf '%s' "$SEAT_NOTE_DIR" )"
-if [ -n "$SEAT_LOG_DIR" ]; then
-  LOG_DIR="$SEAT_LOG_DIR"
-else
-  echo "speak: seat note directory not resolved — fell back to logging in the shared $LOG_DIR" >&2
-fi
 printf '%s [spoken] %s\n' "$(date '+%Y-%m-%d %H:%M:%S')" "$MSG" >> "$LOG_DIR/.spoken.log" 2>/dev/null || true
 
 if [ "${WEDNESDAY_MUTE:-0}" = "1" ]; then

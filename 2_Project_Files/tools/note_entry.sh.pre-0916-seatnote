@@ -6,25 +6,11 @@
 # This script reads it. Usage:
 #   note_entry.sh --stdin <<'EOF'   → "- HH:MM — text" appended under the LAST heading of the note
 #   note_entry.sh --h3 --stdin <<'EOF' → "### HH:MM — title" appended (a new block)
-#   note_entry.sh --where              → print the note path this call WOULD write; writes nothing
 #   (bare-argument forms RETIRED 2026-09-02, ledger w=5 — see the refusal below)
 # Refuses empty text. Never discards stderr. The note must already exist (created at boot).
-# SEAT NOTES (2026-09-16, Tuesday's census 20:23): the default note is the SEAT's own —
-# WEDNESDAY tree -> 0_Brain/daily/, TUESDAY tree -> 0_Brain/daily_tuesday/ — via the ONE mapping in
-# tools/seat_note.sh. Unrecognised tree, or WED_AGENT disagreeing with the tree: REFUSED, exit 2.
-# WED_NOTE_OVERRIDE is a pure path seam and still wins outright (no seat resolution at all).
 set -uo pipefail
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"; PROJECT_DIR="$(cd "$SCRIPT_DIR/../.." && pwd)"
-if [ -n "${WED_NOTE_OVERRIDE:-}" ]; then
-  NOTE="$WED_NOTE_OVERRIDE"
-else
-  # shellcheck disable=SC1091
-  . "$SCRIPT_DIR/seat_note.sh" || { echo "note_entry: REFUSED — cannot load $SCRIPT_DIR/seat_note.sh" >&2; exit 2; }
-  seat_note_dir "$PROJECT_DIR" note_entry || exit 2
-  NOTE="$SEAT_NOTE_DIR/$(date +%F).md"
-fi
-[ "${1:-}" = "--where" ] && { echo "$NOTE"; exit 0; }
-[ -n "${WED_NOTE_OVERRIDE:-}" ] || mkdir -p "$SEAT_NOTE_DIR" || { echo "note_entry: cannot create $SEAT_NOTE_DIR" >&2; exit 2; }
+NOTE="${WED_NOTE_OVERRIDE:-$PROJECT_DIR/0_Brain/daily/$(date +%F).md}"
 [ -f "$NOTE" ] || { echo "note_entry: no note at $NOTE — create it from _template.md first" >&2; exit 2; }
 # --stdin (added 2026-09-01, ledger w=4 in the unquoted-heredoc/backtick family): text passed as an
 # ARGUMENT goes through the calling shell first — a backtick or $(…) inside a double-quoted

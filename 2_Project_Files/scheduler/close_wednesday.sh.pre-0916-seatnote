@@ -21,22 +21,6 @@ LOG="$LOG_DIR/close_$(date +%F).log"
 log() { echo "$(date '+%F %T') $*" >> "$LOG"; }
 
 TODAY="$(date +%F)"
-# SEAT NOTES (2026-09-16, Tuesday's census 20:23): the note this bell checks, git-checks and stamps is
-# the SEAT's own — WEDNESDAY tree -> 0_Brain/daily/, TUESDAY tree -> 0_Brain/daily_tuesday/ — from
-# the ONE mapping in tools/seat_note.sh, the same one note_entry.sh (the writer) uses, so writer and
-# bell agree by construction. Unrecognised tree, or WED_AGENT disagreeing with the tree: REFUSED,
-# exit 2, logged — before anything seat-specific (inbox read, stamp) happens.
-# shellcheck disable=SC1091
-if ! . "$PROJECT_DIR/2_Project_Files/tools/seat_note.sh"; then
-  echo "close: REFUSED — cannot load $PROJECT_DIR/2_Project_Files/tools/seat_note.sh" >&2
-  log "REFUSED — cannot load $PROJECT_DIR/2_Project_Files/tools/seat_note.sh"
-  exit 2
-fi
-if ! seat_note_dir "$PROJECT_DIR" close_wednesday; then
-  log "$SEAT_NOTE_ERR"
-  exit 2
-fi
-NOTE_REL="$SEAT_NOTE_REL/$TODAY.md"
 # WEDNESDAY_TEST_HOUR lets the window guard be exercised outside 22:30-23:59 so
 # a change to the close ritual can be proven in its real environment rather than
 # only in extracted form. Same pattern as shift_change.sh. It only overrides the
@@ -171,7 +155,7 @@ fi
 # Dashboard data JSONs are collector churn (rewritten every few minutes) and are
 # excluded — an alarm that fires every night is a check that cannot pass, which
 # is as useless as one that cannot fail.
-NOTE="${WEDNESDAY_TEST_NOTE:-$PROJECT_DIR/$NOTE_REL}"
+NOTE="${WEDNESDAY_TEST_NOTE:-$BRAIN_DIR/daily/$TODAY.md}"
 WRAP_ISSUES=""
 # 2026-09-14 (consolidation item 4, Wednesday chose option a): the check reads the LAST retro
 # block of the day, not the template's. It failed 10 nights in 12 on "template placeholder"
@@ -254,10 +238,7 @@ fi
 # Untracked is worse than uncommitted (the 08-09 note was never git-added at
 # all — invisible to every habit). Name it separately even though it also
 # appears in the dirty count.
-# 2026-09-16: the pathspec is the seat's RESOLVED note (NOTE_REL), not the literal 0_Brain/daily/ —
-# on a TUESDAY tree the literal named a file that seat no longer writes. (Under WEDNESDAY_TEST_NOTE
-# it still checks the seat's real note, exactly as the literal did.)
-if [ -f "$NOTE" ] && ! (cd "$PROJECT_DIR" && /usr/bin/git ls-files --error-unmatch "$NOTE_REL" >/dev/null 2>&1); then
+if [ -f "$NOTE" ] && ! (cd "$PROJECT_DIR" && /usr/bin/git ls-files --error-unmatch "0_Brain/daily/$TODAY.md" >/dev/null 2>&1); then
   WRAP_ISSUES="${WRAP_ISSUES:+$WRAP_ISSUES · }today's daily note is NOT tracked by git"
 fi
 if [ -n "$WRAP_ISSUES" ]; then
@@ -272,7 +253,6 @@ if [ "$DRYRUN" = "1" ]; then
   exit 0
 fi
 if [ ! -f "$NOTE" ]; then
-  mkdir -p "$(dirname "$NOTE")"   # 0_Brain/daily_tuesday/ may not exist yet; the template stays shared in daily/
   sed "s/{{date}}/$TODAY/" "$BRAIN_DIR/daily/_template.md" > "$NOTE"
   log "daily note was missing — created from template (no session ran today?)"
 fi
