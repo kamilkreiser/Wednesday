@@ -4318,5 +4318,19 @@
   "project": "Secuura",
   "ts": "2026-09-16T18:47:55.193472+10:00",
   "text": "Received — three things: confirm the old ollama store is gone, find the old Docker location so you can delete it, and work out why Docker has not updated. Measuring now, answer in a few minutes."
+ },
+ {
+  "role": "wednesday",
+  "seat": "Kamils-Mac-Studio.local",
+  "project": "Secuura",
+  "ts": "2026-09-16T18:50:11.549557+10:00",
+  "text": "All three answered, and the third one is the real story.\n\n**1. Ollama is off the internal disk.** Your old store is down to twelve kilobytes — config and keys, nothing else. The live store is on DevMASTER holding all thirteen models, and I confirmed that from the running server's own environment rather than by looking at folders.\n\nBut there is a leftover I should flag: a second ollama store inside my own project folder, a hundred and twenty-eight gigabytes, four models — and all four are already in the live store. It is a pure duplicate that the merge left behind. Yours to reclaim whenever you like; I have not touched it.\n\n**2. The old Docker location is Library, Containers, com.docker.docker, Data — and it is already down to sixty-one megabytes.** The move worked. Two hundred and thirty-two gigabytes are sitting at the new path under CODING. So there is no massive old Docker folder left to find. That premise is gone.\n\n**3. Which leaves why the space has not come back, and this is the answer: twenty-six local Time Machine snapshots.** Hourly, from yesterday evening through this morning. They hold the bytes of everything deleted today — the old ollama store and the old Docker data both — which is exactly why the disk still reads ninety-six per cent full and why Docker looks to you like it has not updated. The deletions were real. The space is pinned by the snapshots.\n\nThe one thing worth knowing before you act: macOS purges these automatically when it actually needs the room, so this is not lost space so much as deferred. If you want it back now, it is one command and it is a deletion, so it is yours rather than mine:\n\nsudo tmutil deletelocalsnapshots /\n\nMy recommendation is to run it, then look at the disk again — I expect a large part of that ninety-six per cent to fall away. If you would rather leave it, nothing is wrong and macOS will handle it under pressure.\n\nI have not deleted anything, here or in my own folder."
+ },
+ {
+  "role": "wednesday",
+  "seat": "Kamils-Mac-Studio.local",
+  "project": "Secuura",
+  "ts": "2026-09-16T18:50:34.807097+10:00",
+  "text": "Received — four copies: Datasec T9 to DevMASTER, Secuura DevMASTER to T9, Wednesday to T9, and Tuesday brought current on the T9. Measuring sizes and free space first, then I will stop the unison scan since this replaces it, and tell you exactly what I am running before it moves anything."
  }
 ]
