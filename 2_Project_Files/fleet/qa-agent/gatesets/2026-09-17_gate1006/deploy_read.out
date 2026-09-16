@@ -1,0 +1,116 @@
+deploy_read 2026-09-17 00:31:02 AEST at head 86fe59e6bf07108142fb3dbd06bef8747d2a4687
+--- A. config/deploy files naming demo-service (compose, deployment/, workflows, nginx, bicep, k8s, scripts) — excluding src/ and docs/
+A count 41
+86fe59e6bf07108142fb3dbd06bef8747d2a4687:Blockchain/Dev/.env.example:112:# demo-service (KS-641) — BOTH are required; it refuses to start without them.
+86fe59e6bf07108142fb3dbd06bef8747d2a4687:Blockchain/Dev/.env.example:115:# supplies NO default for either, so an unset key means demo-service stays down
+86fe59e6bf07108142fb3dbd06bef8747d2a4687:Blockchain/Dev/connectors/whatsapp-bot/Dockerfile:13:# The shape below matches services/demo-service/Dockerfile so @secuura/shared
+86fe59e6bf07108142fb3dbd06bef8747d2a4687:Blockchain/Dev/docker-compose.e2e.override.yml:25:  # E2E: skip demo-service dependency by using the non-demo nginx conf
+86fe59e6bf07108142fb3dbd06bef8747d2a4687:Blockchain/Dev/docker-compose.yml:2158:  demo-service:
+86fe59e6bf07108142fb3dbd06bef8747d2a4687:Blockchain/Dev/docker-compose.yml:2163:      dockerfile: services/demo-service/Dockerfile
+86fe59e6bf07108142fb3dbd06bef8747d2a4687:Blockchain/Dev/docker-compose.yml:2166:    container_name: ${STACK_PREFIX:-secuura}-demo-service
+86fe59e6bf07108142fb3dbd06bef8747d2a4687:Blockchain/Dev/docker-compose.yml:2181:      # KS-641: demo-service refuses to start without BOTH of these. It mints
+86fe59e6bf07108142fb3dbd06bef8747d2a4687:Blockchain/Dev/docker-compose.yml:2294:      - demo-service
+86fe59e6bf07108142fb3dbd06bef8747d2a4687:Blockchain/Dev/docker/nginx-gateway/nginx-demo.conf:12:#   - demo-service upstream and proxy routing at /demo-api/
+86fe59e6bf07108142fb3dbd06bef8747d2a4687:Blockchain/Dev/docker/nginx-gateway/nginx-demo.conf:25:#   /demo-api/     -> Demo Service     (demo-service:4030)
+86fe59e6bf07108142fb3dbd06bef8747d2a4687:Blockchain/Dev/docker/nginx-gateway/nginx-demo.conf:353:    # persona-switch backend (demo-service /demo-api/persona/switch) calls
+86fe59e6bf07108142fb3dbd06bef8747d2a4687:Blockchain/Dev/docker/nginx-gateway/nginx-demo.conf:356:    # services/demo-service/src/config/personas.ts. Those users only exist
+86fe59e6bf07108142fb3dbd06bef8747d2a4687:Blockchain/Dev/docker/nginx-gateway/nginx-demo.conf:357:    # in the database after the demo seed runs (services/demo-service/src/
+86fe59e6bf07108142fb3dbd06bef8747d2a4687:Blockchain/Dev/docker/nginx-gateway/nginx-demo.conf:373:    # If sales demos eventually need it: deploy the demo-service +
+86fe59e6bf07108142fb3dbd06bef8747d2a4687:Blockchain/Dev/env.example:397:# demo-service mints REAL platform tokens without asking the caller for a
+86fe59e6bf07108142fb3dbd06bef8747d2a4687:Blockchain/Dev/scripts/__tests__/start_secuura_expected_services.test.sh:51:  demo-service          # KS-1163: never in the KS-312 list of 27; wait-or-not is Kamil's call — remove this line when KS-1163 decides
+86fe59e6bf07108142fb3dbd06bef8747d2a4687:Blockchain/Dev/scripts/bootstrap-env.sh:238:# KS-641 (#737 review): demo-service refuses to start without both of these, and
+86fe59e6bf07108142fb3dbd06bef8747d2a4687:Blockchain/Dev/scripts/bootstrap-env.sh:240:# comes up with demo-service down. It mints Platform Admin tokens with no caller
+86fe59e6bf07108142fb3dbd06bef8747d2a4687:Blockchain/Dev/scripts/bootstrap-env.sh:242:print_info "Checking demo-service opt-in in .env..."
+86fe59e6bf07108142fb3dbd06bef8747d2a4687:Blockchain/Dev/scripts/check-no-math-random.sh:6:# Acceptable in: analytics sampling, load tests, demo-service backfill,
+86fe59e6bf07108142fb3dbd06bef8747d2a4687:Blockchain/Dev/scripts/check-no-math-random.sh:12:# Allow-list: services/demo-service, services/analytics (sampling),
+86fe59e6bf07108142fb3dbd06bef8747d2a4687:Blockchain/Dev/scripts/check-no-math-random.sh:27:       --exclude-dir=demo-service --exclude-dir=analytics \
+86fe59e6bf07108142fb3dbd06bef8747d2a4687:Blockchain/Dev/scripts/check-production-guard.sh:30:#   - demo-service:  intentionally dev-only; must NOT call enforceProductionConfig
+86fe59e6bf07108142fb3dbd06bef8747d2a4687:Blockchain/Dev/scripts/check-production-guard.sh:31:EXCLUDE_REGEX='^(shared|demo-service)$'
+86fe59e6bf07108142fb3dbd06bef8747d2a4687:Blockchain/Dev/scripts/docker-build.sh:59:demo-service	services/demo-service/Dockerfile
+86fe59e6bf07108142fb3dbd06bef8747d2a4687:Blockchain/Dev/scripts/generate-openapi.ts:40:// /api/mcp/generate-package is gateway-routed; demo-service has no /api/demo*
+86fe59e6bf07108142fb3dbd06bef8747d2a4687:Blockchain/Dev/scripts/generate-openapi.ts:47:const EXCLUDED_SERVICES = new Set<string>(['mcp-server', 'demo-service', 'tokenisation']);
+86fe59e6bf07108142fb3dbd06bef8747d2a4687:Blockchain/Dev/scripts/openapi-examples/config.ts:75:    /** Demo-service computed seed ids; the first remedy when an id param cannot resolve (R7). */
+86fe59e6bf07108142fb3dbd06bef8747d2a4687:Blockchain/Dev/scripts/openapi-examples/fixtures.ts:78:/** Deterministic demo-service id (services/demo-service/src/seed/utils/deterministicId.ts). */
+86fe59e6bf07108142fb3dbd06bef8747d2a4687:Blockchain/Dev/scripts/security-audit.sh:95:# Exclude: demo-service, webhooks (signature-verified), files where auth is at gateway level
+86fe59e6bf07108142fb3dbd06bef8747d2a4687:Blockchain/Dev/scripts/security-audit.sh:97:  | grep -v node_modules | grep -v demo-service | grep -v webhooks \
+86fe59e6bf07108142fb3dbd06bef8747d2a4687:Blockchain/Dev/services/demo-service/Dockerfile:2:# DEMO-SERVICE DOCKERFILE
+86fe59e6bf07108142fb3dbd06bef8747d2a4687:Blockchain/Dev/services/demo-service/Dockerfile:23:# Copy demo-service package files and install
+86fe59e6bf07108142fb3dbd06bef8747d2a4687:Blockchain/Dev/services/demo-service/Dockerfile:24:COPY services/demo-service/package*.json ./
+86fe59e6bf07108142fb3dbd06bef8747d2a4687:Blockchain/Dev/services/demo-service/Dockerfile:30:# Copy demo-service source and build
+86fe59e6bf07108142fb3dbd06bef8747d2a4687:Blockchain/Dev/services/demo-service/Dockerfile:31:COPY services/demo-service/ ./
+86fe59e6bf07108142fb3dbd06bef8747d2a4687:Blockchain/Dev/services/demo-service/Dockerfile:43:COPY services/demo-service/package*.json ./
+86fe59e6bf07108142fb3dbd06bef8747d2a4687:Blockchain/Dev/services/demo-service/package.json:2:  "name": "@secuura/demo-service",
+86fe59e6bf07108142fb3dbd06bef8747d2a4687:Blockchain/Testing/baselines/01-dependency-audit.txt:63:01-deps:high:demo-service/path-to-regexp  # transitive via express; static routes only  2026-04-27
+86fe59e6bf07108142fb3dbd06bef8747d2a4687:Blockchain/Testing/baselines/01-dependency-audit.txt:97:01-deps:high:demo-service/vite   # vitest dev tool, --omit=dev in prod Dockerfile  2026-04-27
+--- A positive control: the same instrument finds the demo-service Dockerfile's own directory name in its package.json (expect >=1)
+86fe59e6bf07108142fb3dbd06bef8747d2a4687:Blockchain/Dev/services/demo-service/package.json:1
+--- B. port 4030 / demo-api in compose + deploy + gateway + nginx (non-test)
+86fe59e6bf07108142fb3dbd06bef8747d2a4687:Blockchain/Dev/docker-compose.yml:2170:    # to re-enable for local debugging.  Was: - "6030:4030"
+86fe59e6bf07108142fb3dbd06bef8747d2a4687:Blockchain/Dev/docker-compose.yml:2175:      - PORT=4030
+86fe59e6bf07108142fb3dbd06bef8747d2a4687:Blockchain/Dev/docker-compose.yml:2207:      test: ["CMD", "wget", "-q", "--spider", "http://localhost:4030/demo-api/health"]
+86fe59e6bf07108142fb3dbd06bef8747d2a4687:Blockchain/Dev/docker/nginx-gateway/nginx-demo.conf:12:#   - demo-service upstream and proxy routing at /demo-api/
+86fe59e6bf07108142fb3dbd06bef8747d2a4687:Blockchain/Dev/docker/nginx-gateway/nginx-demo.conf:25:#   /demo-api/     -> Demo Service     (demo-service:4030)
+86fe59e6bf07108142fb3dbd06bef8747d2a4687:Blockchain/Dev/docker/nginx-gateway/nginx-demo.conf:353:    # persona-switch backend (demo-service /demo-api/persona/switch) calls
+86fe59e6bf07108142fb3dbd06bef8747d2a4687:Blockchain/Dev/docker/nginx-gateway/nginx-demo.conf:375:    # with the demo seed loaded (POST /demo-api/reset on first boot).
+86fe59e6bf07108142fb3dbd06bef8747d2a4687:Blockchain/Dev/docker/nginx-gateway/nginx-demo.conf:377:    # The previous sub_filter / location /demo-overlay/ / location /demo-api/
+86fe59e6bf07108142fb3dbd06bef8747d2a4687:Blockchain/Dev/services/api-gateway/src/index.ts:1042:// that aren't in the spec (`/api/downloads/*`, `/demo-api/*`, etc.) fall
+--- B positive control: app.ts's own health comment names 4030 (expect 1)
+86fe59e6bf07108142fb3dbd06bef8747d2a4687:Blockchain/Dev/services/demo-service/src/app.ts:1
+--- C. NODE_ENV set for demo-service in compose/deploy (KS-658: the demo VM runs development)
+--- D. frontend callers of /demo-api (who reads the response)
+86fe59e6bf07108142fb3dbd06bef8747d2a4687:Blockchain/Dev/frontend/demo-overlay/src/api/demoApi.ts:6: * /demo-api/*. Uses native fetch (no axios) since the overlay is a
+86fe59e6bf07108142fb3dbd06bef8747d2a4687:Blockchain/Dev/frontend/demo-overlay/src/api/demoApi.ts:17:const BASE = '/demo-api';
+86fe59e6bf07108142fb3dbd06bef8747d2a4687:Blockchain/Dev/frontend/demo-overlay/src/api/demoApi.ts:24: * Switch to a demo persona. Calls POST /demo-api/persona/switch which
+86fe59e6bf07108142fb3dbd06bef8747d2a4687:Blockchain/Dev/frontend/demo-overlay/src/api/demoApi.ts:93:      // KS-641 (#737 review): every mutating /demo-api route now also requires
+86fe59e6bf07108142fb3dbd06bef8747d2a4687:Blockchain/Dev/frontend/demo-overlay/src/interceptor.ts:11: * Important: Requests to /demo-api/ are NOT intercepted -- those are the
+86fe59e6bf07108142fb3dbd06bef8747d2a4687:Blockchain/Dev/frontend/demo-overlay/src/interceptor.ts:66:    if (token && url.includes('/api/') && !url.includes('/demo-api/')) {
+86fe59e6bf07108142fb3dbd06bef8747d2a4687:Blockchain/Dev/frontend/demo-overlay/src/interceptor.ts:147:    if (token && !self._hasAuthHeader && url.includes('/api/') && !url.includes('/demo-api/')) {
+86fe59e6bf07108142fb3dbd06bef8747d2a4687:Blockchain/Dev/frontend/demo-overlay/src/types/persona.ts:50:/** Response shape from POST /demo-api/reset. */
+86fe59e6bf07108142fb3dbd06bef8747d2a4687:Blockchain/Dev/frontend/demo-overlay/src/types/persona.ts:62:/** Response shape from POST /demo-api/persona/switch. */
+--- E. rejectControlBytes body (does it answer or next(err)?)
+608: export function rejectControlBytes() {
+609:   return (req: Request, res: Response, next: NextFunction) => {
+610:     if (req.body !== undefined && req.body !== null) {
+611:       const hit = findControlBytePath(req.body);
+612:       if (hit) {
+613:         const message = `Must not contain ${describeControlByte(hit.char)}`;
+614:         res.status(400).json({
+615:           success: false,
+616:           error: {
+617:             code: 'VALIDATION_ERROR',
+618:             message,
+619:             details: [{ path: hit.path, message }],
+620:           },
+621:         });
+622:         return;
+623:       }
+624:     }
+625:     next();
+626:   };
+627: }
+628: 
+629: /**
+630:  * KS-800: mount the body parsers AND the control-byte guard in the one order
+631:  * that works, so no service has to remember it.
+632:  *
+633:  * The order is load-bearing and the failure is silent. `rejectControlBytes()`
+634:  * inspects `req.body`; mounted between `express.json()` and
+635:  * `express.urlencoded()` it walks `{}` on every form request and passes
+636:  * everything. Five services shipped exactly that, and the same NUL byte was
+637:  * 400 as JSON and 200 as a form — on `/api/oauth/authorize` it reached the
+638:  * authorization-code minter (KS-781 P3-3).
+639:  *
+640:  * The doc comment on the guard used to say "mount immediately after
+641:  * `express.json()`", which TOLD people to get it wrong. A per-service
+642:  * convention is the class of guard that eventually fails; this is the fix that
+643:  * removes the convention.
+644:  *
+645:  * @param app - the express application
+646:  * @param opts.limit - body size limit passed to both parsers (default '1mb')
+647:  * @param opts.urlencoded - mount `express.urlencoded` too (default true)
+648:  *
+649:  * @example
+650:  * const app = express();
+651:  * mountBodyParsers(app);   // json + urlencoded + guard, correctly ordered
+652:  */
+653: export function mountBodyParsers(

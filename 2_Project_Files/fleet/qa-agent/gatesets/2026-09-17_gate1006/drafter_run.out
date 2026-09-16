@@ -1,0 +1,137 @@
+drafter_run start 00:38:50 AEST | pristine {'app.ts': '58ccccc2249d', 'errorHandler.ts': '4399e6dec116', 'ks781-p3-3-body-parser-order.test.ts': '26b5da74a575', 'ks727-errorhandler-class-guard.test.ts': 'edbef941ae3d'}
+
+== ROW T0 00:38:50 AEST
+00:38:54 AEST t_T0_shared                        tree head  pkg shared rc 0 FILES 44 TESTS 851 passed 851 failed 0 secs 3.9 suite_msgs 0
+00:38:56 AEST t_T0_demo                          tree head  pkg demo   rc 0 FILES 8 TESTS 72 passed 72 failed 0 secs 2.4 suite_msgs 0
+   ROW RESULT T0 | shared 851/851 not-passed 0 | demo 72/72 not-passed 0
+
+== ROW S1_errorHandler_unmounted 00:38:56 AEST
+   landed: anchor count 1, sha 58ccccc2249d -> f4696e20c9e8, markers [('app.use(errorHandler)', 0)]
+00:39:00 AEST t_S1_errorHandler_unmounted_shared tree head  pkg shared rc 1 FILES 44 TESTS 851 passed 847 failed 0 secs 3.8 suite_msgs 0
+    NOT-PASSED skipped __tests__/ks781-p3-3-body-parser-order.test.ts :: KS-832 ACCEPTANCE BAR — a REAL corpus service, booted, driven over a raw socket the scanner reads this REAL service as late=0 - parser first, guard after | 
+    NOT-PASSED skipped __tests__/ks781-p3-3-body-parser-order.test.ts :: KS-832 ACCEPTANCE BAR — a REAL corpus service, booted, driven over a raw socket 🔴 an ESCAPED NUL in the body is refused BY NAME - the guard ran on a parsed body | 
+    NOT-PASSED skipped __tests__/ks781-p3-3-body-parser-order.test.ts :: KS-832 ACCEPTANCE BAR — a REAL corpus service, booted, driven over a raw socket CONTROL - a CLEAN body reaches routing and 404s, so the 400 above is the NUL and not the request sha | 
+    NOT-PASSED skipped __tests__/ks781-p3-3-body-parser-order.test.ts :: KS-832 ACCEPTANCE BAR — a REAL corpus service, booted, driven over a raw socket CONTROL - a RAW 0x00 byte is refused by the JSON PARSER, a different mechanism, and is labelled as s | 
+00:39:01 AEST t_S1_errorHandler_unmounted_demo   tree head  pkg demo   rc 1 FILES 8 TESTS 72 passed 70 failed 2 secs 1.0 suite_msgs 0
+    NOT-PASSED failed __tests__/ks844-demo-service-mounts-no-error-handler.test.ts :: KS-844: demo-service mounts an error handler that answers JSON 🔴 KS-844 — an unparseable JSON body answers JSON 400, not an HTML page | AssertionError: expected 'text/html; charset=utf-8' to contain 'application/json'
+    NOT-PASSED failed __tests__/ks844-demo-service-mounts-no-error-handler.test.ts :: KS-844: demo-service mounts an error handler that answers JSON 🔴 KS-844 — the response never carries a stack trace or an absolute path | AssertionError: expected '<!DOCTYPE html>\n<html lang="en">\n<h…' not to contain '<html'
+   restored sha-identical 58ccccc2249d
+   ROW RESULT S1_errorHandler_unmounted | shared 847/851 not-passed 4 | demo 70/72 not-passed 2
+
+== ROW S2_express_json_removed 00:39:01 AEST
+   landed: anchor count 1, sha 58ccccc2249d -> fa382249b875, markers [('express.json()', 0)]
+00:39:05 AEST t_S2_express_json_removed_shared   tree head  pkg shared rc 1 FILES 44 TESTS 851 passed 848 failed 3 secs 3.8 suite_msgs 0
+    NOT-PASSED failed __tests__/ks781-p3-3-body-parser-order.test.ts :: KS-800 LEG E — a service that parses bodies must mount the guard (absence is a failure, not a silence) the scan is not vacuous — the set of parsing units is EXACT, not a floor | AssertionError: expected [ 'analytics', 'anchoring', …(22) ] to deeply equal [ 'analytics', 'anchoring', …(23) ]
+    NOT-PASSED failed __tests__/ks781-p3-3-body-parser-order.test.ts :: KS-832 ACCEPTANCE BAR — a REAL corpus service, booted, driven over a raw socket 🔴 an ESCAPED NUL in the body is refused BY NAME - the guard ran on a parsed body | AssertionError: the guard refuses it: expected 404 to be 400 // Object.is equality
+    NOT-PASSED failed __tests__/ks781-p3-3-body-parser-order.test.ts :: KS-832 ACCEPTANCE BAR — a REAL corpus service, booted, driven over a raw socket CONTROL - a RAW 0x00 byte is refused by the JSON PARSER, a different mechanism, and is labelled as s | AssertionError: still refused: expected 404 to be 400 // Object.is equality
+00:39:06 AEST t_S2_express_json_removed_demo     tree head  pkg demo   rc 1 FILES 8 TESTS 72 passed 70 failed 2 secs 1.0 suite_msgs 0
+    NOT-PASSED failed __tests__/demoGuard.test.ts :: KS-641: demo-service inbound auth POST /demo-api/persona/switch — the admin-token mint POSITIVE CONTROL: an authorised caller still switches persona | AssertionError: expected 400 to be 200 // Object.is equality
+    NOT-PASSED failed __tests__/ks844-demo-service-mounts-no-error-handler.test.ts :: KS-844: demo-service mounts an error handler that answers JSON 🔴 KS-844 — an unparseable JSON body answers JSON 400, not an HTML page | AssertionError: expected 401 to be 400 // Object.is equality
+   restored sha-identical 58ccccc2249d
+   ROW RESULT S2_express_json_removed | shared 848/851 not-passed 3 | demo 70/72 not-passed 2
+
+== ROW S3_inline_terminal_handler_planted 00:39:06 AEST
+   landed: anchor count 1, sha 58ccccc2249d -> 7249324a121b, markers [('app.use((err: any', 1)]
+00:39:10 AEST t_S3_inline_terminal_handler_planted_shared tree head  pkg shared rc 1 FILES 44 TESTS 851 passed 849 failed 2 secs 3.9 suite_msgs 0
+    NOT-PASSED failed __tests__/ks727-errorhandler-class-guard.test.ts :: KS-727 class guard (corpus 2) — no service entrypoint answers errors from an inline handler the entrypoint inline-site corpus is exactly the declared set | AssertionError: expected [ Array(1) ] to deeply equal []
+    NOT-PASSED failed __tests__/ks727-errorhandler-class-guard.test.ts :: KS-727 class guard (corpus 2) — no service entrypoint answers errors from an inline handler every inline error handler in a service entrypoint is a pure forwarder — terminal-on-a | AssertionError: expected [ Array(1) ] to deeply equal []
+00:39:11 AEST t_S3_inline_terminal_handler_planted_demo tree head  pkg demo   rc 0 FILES 8 TESTS 72 passed 72 failed 0 secs 1.1 suite_msgs 0
+   restored sha-identical 58ccccc2249d
+   ROW RESULT S3_inline_terminal_handler_planted | shared 849/851 not-passed 2 | demo 72/72 not-passed 0
+
+== ROW S4_second_unregistered_leaky_handler 00:39:11 AEST
+   landed: anchor count 1, sha 4399e6dec116 -> bfd7ffd724bc, markers [('export function leakyErrorHandler', 1)]
+00:39:15 AEST t_S4_second_unregistered_leaky_handler_shared tree head  pkg shared rc 1 FILES 44 TESTS 860 passed 851 failed 9 secs 4.0 suite_msgs 0
+    NOT-PASSED failed __tests__/ks727-errorhandler-class-guard.test.ts :: KS-727 class guard — no exported errorHandler leaks a thrown message on a 5xx CONTROL — the discovery finds EXACTLY the known corpus, so half of it cannot vanish silently | AssertionError: expected [ …(11) ] to deeply equal [ …(10) ]
+    NOT-PASSED failed __tests__/ks727-errorhandler-class-guard.test.ts :: KS-727 class guard — no exported errorHandler leaks a thrown message on a 5xx services/demo-service/src/middleware/errorHandler.ts → leakyErrorHandler does not return the thrown  | AssertionError: expected '{"message":"CANARY-0ed98002-d403-4462…' not to contain 'CANARY-0ed98002-d403-4462-9466-ddbb51…'
+    NOT-PASSED failed __tests__/ks727-errorhandler-class-guard.test.ts :: KS-727 class guard — no exported errorHandler leaks a thrown message on a 5xx services/demo-service/src/middleware/errorHandler.ts → leakyErrorHandler does not return the thrown  | AssertionError: expected '{"message":"CANARY-0ed98002-d403-4462…' not to contain 'CANARY-0ed98002-d403-4462-9466-ddbb51…'
+    NOT-PASSED failed __tests__/ks727-errorhandler-class-guard.test.ts :: KS-727 class guard — no exported errorHandler leaks a thrown message on a 5xx services/demo-service/src/middleware/errorHandler.ts → leakyErrorHandler does not return the thrown  | AssertionError: expected '{"message":"CANARY-0ed98002-d403-4462…' not to contain 'CANARY-0ed98002-d403-4462-9466-ddbb51…'
+    NOT-PASSED failed __tests__/ks727-errorhandler-class-guard.test.ts :: KS-727 class guard — no exported errorHandler leaks a thrown message on a 5xx services/demo-service/src/middleware/errorHandler.ts → leakyErrorHandler does not return the thrown  | AssertionError: expected '{"message":"CANARY-0ed98002-d403-4462…' not to contain 'CANARY-0ed98002-d403-4462-9466-ddbb51…'
+    NOT-PASSED failed __tests__/ks727-errorhandler-class-guard.test.ts :: KS-727 class guard — no exported errorHandler leaks a thrown message on a 5xx services/demo-service/src/middleware/errorHandler.ts → leakyErrorHandler does not return the thrown  | AssertionError: expected '{"message":"CANARY-0ed98002-d403-4462…' not to contain 'CANARY-0ed98002-d403-4462-9466-ddbb51…'
+    NOT-PASSED failed __tests__/ks727-errorhandler-class-guard.test.ts :: KS-727 class guard — no exported errorHandler leaks a thrown message on a 5xx services/demo-service/src/middleware/errorHandler.ts → leakyErrorHandler does not return the thrown  | AssertionError: expected '{"message":"CANARY-0ed98002-d403-4462…' not to contain 'CANARY-0ed98002-d403-4462-9466-ddbb51…'
+    NOT-PASSED failed __tests__/ks727-errorhandler-class-guard.test.ts :: KS-727 class guard — no exported errorHandler leaks a thrown message on a 5xx services/demo-service/src/middleware/errorHandler.ts → leakyErrorHandler does not return the thrown  | AssertionError: expected '{"message":"CANARY-0ed98002-d403-4462…' not to contain 'CANARY-0ed98002-d403-4462-9466-ddbb51…'
+    NOT-PASSED failed __tests__/ks727-errorhandler-class-guard.test.ts :: KS-727 class guard — no exported errorHandler leaks a thrown message on a 5xx services/demo-service/src/middleware/errorHandler.ts → leakyErrorHandler CONTROL — an authored clien | AssertionError: expected 500 to be 400 // Object.is equality
+00:39:16 AEST t_S4_second_unregistered_leaky_handler_demo tree head  pkg demo   rc 0 FILES 8 TESTS 72 passed 72 failed 0 secs 1.0 suite_msgs 0
+   restored sha-identical 4399e6dec116
+   ROW RESULT S4_second_unregistered_leaky_handler | shared 851/860 not-passed 9 | demo 72/72 not-passed 0
+
+== ROW G1_CONTROL_AIM_splice_deleted_marker_appended_after_handler 00:39:16 AEST
+   landed: anchor count 1, sha 26b5da74a575 -> 546bc22e1e3b, markers [('routerStack', 0), ('app.use(markErrType);', 1)]
+00:39:20 AEST t_G1_CONTROL_AIM_splice_deleted_marker_appended_after_handler_shared tree head  pkg shared rc 1 FILES 44 TESTS 851 passed 850 failed 1 secs 4.0 suite_msgs 0
+    NOT-PASSED failed __tests__/ks781-p3-3-body-parser-order.test.ts :: KS-832 ACCEPTANCE BAR — a REAL corpus service, booted, driven over a raw socket CONTROL - a RAW 0x00 byte is refused by the JSON PARSER, a different mechanism, and is labelled as s | AssertionError: the refusal must come from the JSON parser BY NAME - "not the guard" is not the same claim as "the parser": expected 'HTTP/1.1 400 Bad Request\r\nContent-S…' to contain 'x-test-err-type: entity.parse.fail
+00:39:22 AEST t_G1_CONTROL_AIM_splice_deleted_marker_appended_after_handler_demo tree head  pkg demo   rc 0 FILES 8 TESTS 72 passed 72 failed 0 secs 1.1 suite_msgs 0
+   restored sha-identical 26b5da74a575
+   ROW RESULT G1_CONTROL_AIM_splice_deleted_marker_appended_after_handler | shared 850/851 not-passed 1 | demo 72/72 not-passed 0
+
+== ROW G2_CONTROL_AIM_marker_spliced_one_AFTER_the_handler 00:39:22 AEST
+   landed: anchor count 1, sha 26b5da74a575 -> 2aa9de1fe1f9, markers [('handlerAt + 1', 1)]
+00:39:27 AEST t_G2_CONTROL_AIM_marker_spliced_one_AFTER_the_handler_shared tree head  pkg shared rc 1 FILES 44 TESTS 851 passed 850 failed 1 secs 5.0 suite_msgs 0
+    NOT-PASSED failed __tests__/ks781-p3-3-body-parser-order.test.ts :: KS-832 ACCEPTANCE BAR — a REAL corpus service, booted, driven over a raw socket CONTROL - a RAW 0x00 byte is refused by the JSON PARSER, a different mechanism, and is labelled as s | AssertionError: the refusal must come from the JSON parser BY NAME - "not the guard" is not the same claim as "the parser": expected 'HTTP/1.1 400 Bad Request\r\nContent-S…' to contain 'x-test-err-type: entity.parse.fail
+00:39:28 AEST t_G2_CONTROL_AIM_marker_spliced_one_AFTER_the_handler_demo tree head  pkg demo   rc 0 FILES 8 TESTS 72 passed 72 failed 0 secs 1.1 suite_msgs 0
+   restored sha-identical 26b5da74a575
+   ROW RESULT G2_CONTROL_AIM_marker_spliced_one_AFTER_the_handler | shared 850/851 not-passed 1 | demo 72/72 not-passed 0
+
+== ROW G3_parser_present_but_refuses_nothing 00:39:28 AEST
+   landed: anchor count 1, sha 58ccccc2249d -> 3bba32f288b9, markers [('type: () => false', 1)]
+00:39:32 AEST t_G3_parser_present_but_refuses_nothing_shared tree head  pkg shared rc 1 FILES 44 TESTS 851 passed 849 failed 2 secs 4.2 suite_msgs 0
+    NOT-PASSED failed __tests__/ks781-p3-3-body-parser-order.test.ts :: KS-832 ACCEPTANCE BAR — a REAL corpus service, booted, driven over a raw socket 🔴 an ESCAPED NUL in the body is refused BY NAME - the guard ran on a parsed body | AssertionError: the guard refuses it: expected 404 to be 400 // Object.is equality
+    NOT-PASSED failed __tests__/ks781-p3-3-body-parser-order.test.ts :: KS-832 ACCEPTANCE BAR — a REAL corpus service, booted, driven over a raw socket CONTROL - a RAW 0x00 byte is refused by the JSON PARSER, a different mechanism, and is labelled as s | AssertionError: still refused: expected 404 to be 400 // Object.is equality
+00:39:34 AEST t_G3_parser_present_but_refuses_nothing_demo tree head  pkg demo   rc 1 FILES 8 TESTS 72 passed 70 failed 2 secs 1.3 suite_msgs 0
+    NOT-PASSED failed __tests__/demoGuard.test.ts :: KS-641: demo-service inbound auth POST /demo-api/persona/switch — the admin-token mint POSITIVE CONTROL: an authorised caller still switches persona | AssertionError: expected 400 to be 200 // Object.is equality
+    NOT-PASSED failed __tests__/ks844-demo-service-mounts-no-error-handler.test.ts :: KS-844: demo-service mounts an error handler that answers JSON 🔴 KS-844 — an unparseable JSON body answers JSON 400, not an HTML page | AssertionError: expected 401 to be 400 // Object.is equality
+   restored sha-identical 58ccccc2249d
+   ROW RESULT G3_parser_present_but_refuses_nothing | shared 849/851 not-passed 2 | demo 70/72 not-passed 2
+
+== ROW G4_5xx_arm_echoes_err_message 00:39:34 AEST
+   landed: anchor count 1, sha 4399e6dec116 -> 90fa535b1c9c, markers [("'Internal server error'", 0)]
+00:39:38 AEST t_G4_5xx_arm_echoes_err_message_shared tree head  pkg shared rc 1 FILES 44 TESTS 851 passed 844 failed 7 secs 4.1 suite_msgs 0
+    NOT-PASSED failed __tests__/ks727-errorhandler-class-guard.test.ts :: KS-727 class guard — no exported errorHandler leaks a thrown message on a 5xx services/demo-service/src/middleware/errorHandler.ts → errorHandler does not return the thrown messa | AssertionError: expected '{"success":false,"error":{"code":"INT…' not to contain 'CANARY-ff44e8a8-a1fa-46f5-9aa3-28f915…'
+    NOT-PASSED failed __tests__/ks727-errorhandler-class-guard.test.ts :: KS-727 class guard — no exported errorHandler leaks a thrown message on a 5xx services/demo-service/src/middleware/errorHandler.ts → errorHandler does not return the thrown messa | AssertionError: expected '{"success":false,"error":{"code":"INT…' not to contain 'CANARY-ff44e8a8-a1fa-46f5-9aa3-28f915…'
+    NOT-PASSED failed __tests__/ks727-errorhandler-class-guard.test.ts :: KS-727 class guard — no exported errorHandler leaks a thrown message on a 5xx services/demo-service/src/middleware/errorHandler.ts → errorHandler does not return the thrown messa | AssertionError: expected '{"success":false,"error":{"code":"INT…' not to contain 'CANARY-ff44e8a8-a1fa-46f5-9aa3-28f915…'
+    NOT-PASSED failed __tests__/ks727-errorhandler-class-guard.test.ts :: KS-727 class guard — no exported errorHandler leaks a thrown message on a 5xx services/demo-service/src/middleware/errorHandler.ts → errorHandler does not return the thrown messa | AssertionError: expected '{"success":false,"error":{"code":"INT…' not to contain 'CANARY-ff44e8a8-a1fa-46f5-9aa3-28f915…'
+    NOT-PASSED failed __tests__/ks727-errorhandler-class-guard.test.ts :: KS-727 class guard — no exported errorHandler leaks a thrown message on a 5xx services/demo-service/src/middleware/errorHandler.ts → errorHandler does not return the thrown messa | AssertionError: expected '{"success":false,"error":{"code":"INT…' not to contain 'CANARY-ff44e8a8-a1fa-46f5-9aa3-28f915…'
+    NOT-PASSED failed __tests__/ks727-errorhandler-class-guard.test.ts :: KS-727 class guard — no exported errorHandler leaks a thrown message on a 5xx services/demo-service/src/middleware/errorHandler.ts → errorHandler does not return the thrown messa | AssertionError: expected '{"success":false,"error":{"code":"INT…' not to contain 'CANARY-ff44e8a8-a1fa-46f5-9aa3-28f915…'
+    NOT-PASSED failed __tests__/ks727-errorhandler-class-guard.test.ts :: KS-727 class guard — no exported errorHandler leaks a thrown message on a 5xx services/demo-service/src/middleware/errorHandler.ts → errorHandler does not return the thrown messa | AssertionError: expected '{"success":false,"error":{"code":"INT…' not to contain 'CANARY-ff44e8a8-a1fa-46f5-9aa3-28f915…'
+00:39:39 AEST t_G4_5xx_arm_echoes_err_message_demo tree head  pkg demo   rc 0 FILES 8 TESTS 72 passed 72 failed 0 secs 1.1 suite_msgs 0
+   restored sha-identical 4399e6dec116
+   ROW RESULT G4_5xx_arm_echoes_err_message | shared 844/851 not-passed 7 | demo 72/72 not-passed 0
+
+== ROW G5_handler_throws_before_answering 00:39:39 AEST
+   landed: anchor count 1, sha 4399e6dec116 -> 86880f8e850e, markers [('qa-throw', 1)]
+00:39:43 AEST t_G5_handler_throws_before_answering_shared tree head  pkg shared rc 1 FILES 44 TESTS 851 passed 849 failed 2 secs 4.0 suite_msgs 0
+    NOT-PASSED failed __tests__/ks727-errorhandler-class-guard.test.ts :: KS-727 class guard — no exported errorHandler leaks a thrown message on a 5xx services/demo-service/src/middleware/errorHandler.ts → errorHandler CONTROL — an authored client err | AssertionError: expected true to be false // Object.is equality
+    NOT-PASSED failed __tests__/ks781-p3-3-body-parser-order.test.ts :: KS-832 ACCEPTANCE BAR — a REAL corpus service, booted, driven over a raw socket CONTROL - a RAW 0x00 byte is refused by the JSON PARSER, a different mechanism, and is labelled as s | AssertionError: still refused: expected 500 to be 400 // Object.is equality
+00:39:44 AEST t_G5_handler_throws_before_answering_demo tree head  pkg demo   rc 1 FILES 8 TESTS 72 passed 70 failed 2 secs 1.0 suite_msgs 0
+    NOT-PASSED failed __tests__/ks844-demo-service-mounts-no-error-handler.test.ts :: KS-844: demo-service mounts an error handler that answers JSON 🔴 KS-844 — an unparseable JSON body answers JSON 400, not an HTML page | AssertionError: expected 500 to be 400 // Object.is equality
+    NOT-PASSED failed __tests__/ks844-demo-service-mounts-no-error-handler.test.ts :: KS-844: demo-service mounts an error handler that answers JSON 🔴 KS-844 — the response never carries a stack trace or an absolute path | AssertionError: expected '<!DOCTYPE html>\n<html lang="en">\n<h…' not to contain '<html'
+   restored sha-identical 4399e6dec116
+   ROW RESULT G5_handler_throws_before_answering | shared 849/851 not-passed 2 | demo 70/72 not-passed 2
+
+== ROW G6_4xx_echo_replaced_by_constant 00:39:44 AEST
+   landed: anchor count 1, sha 4399e6dec116 -> cfcaf300c9fd, markers [("'Request error'", 1)]
+00:39:48 AEST t_G6_4xx_echo_replaced_by_constant_shared tree head  pkg shared rc 1 FILES 44 TESTS 851 passed 850 failed 1 secs 4.0 suite_msgs 0
+    NOT-PASSED failed __tests__/ks727-errorhandler-class-guard.test.ts :: KS-727 class guard — no exported errorHandler leaks a thrown message on a 5xx services/demo-service/src/middleware/errorHandler.ts → errorHandler CONTROL — an authored client err | AssertionError: expected '{"success":false,"error":{"code":"BAD…' to contain 'provider and code are required'
+00:39:49 AEST t_G6_4xx_echo_replaced_by_constant_demo tree head  pkg demo   rc 0 FILES 8 TESTS 72 passed 72 failed 0 secs 1.0 suite_msgs 0
+   restored sha-identical 4399e6dec116
+   ROW RESULT G6_4xx_echo_replaced_by_constant | shared 850/851 not-passed 1 | demo 72/72 not-passed 0
+
+== ROW G7_ks727_header_count_reverted_to_8_9 00:39:49 AEST
+   landed: anchor count 1, sha edbef941ae3d -> 3850562fa30f, markers [('8 modules contributing 9 handlers', 1)]
+00:39:53 AEST t_G7_ks727_header_count_reverted_to_8_9_shared tree head  pkg shared rc 0 FILES 44 TESTS 851 passed 851 failed 0 secs 4.0 suite_msgs 0
+00:39:54 AEST t_G7_ks727_header_count_reverted_to_8_9_demo tree head  pkg demo   rc 0 FILES 8 TESTS 72 passed 72 failed 0 secs 1.0 suite_msgs 0
+   restored sha-identical edbef941ae3d
+   ROW RESULT G7_ks727_header_count_reverted_to_8_9 | shared 851/851 not-passed 0 | demo 72/72 not-passed 0
+
+== ROW T6_inert_comment_in_errorHandler 00:39:54 AEST
+   landed: anchor count 1, sha 4399e6dec116 -> 34ee546d7856, markers [('qa inert comment', 1)]
+00:39:58 AEST t_T6_inert_comment_in_errorHandler_shared tree head  pkg shared rc 0 FILES 44 TESTS 851 passed 851 failed 0 secs 3.9 suite_msgs 0
+00:39:59 AEST t_T6_inert_comment_in_errorHandler_demo tree head  pkg demo   rc 0 FILES 8 TESTS 72 passed 72 failed 0 secs 1.0 suite_msgs 0
+   restored sha-identical 4399e6dec116
+   ROW RESULT T6_inert_comment_in_errorHandler | shared 851/851 not-passed 0 | demo 72/72 not-passed 0
+
+== ROW T0_after 00:39:59 AEST
+00:40:03 AEST t_T0_after_shared                  tree head  pkg shared rc 0 FILES 44 TESTS 851 passed 851 failed 0 secs 3.8 suite_msgs 0
+00:40:04 AEST t_T0_after_demo                    tree head  pkg demo   rc 0 FILES 8 TESTS 72 passed 72 failed 0 secs 1.1 suite_msgs 0
+   ROW RESULT T0_after | shared 851/851 not-passed 0 | demo 72/72 not-passed 0
+
+drafter_run end 00:40:04 AEST | final porcelain == baseline True | pristine re-read True

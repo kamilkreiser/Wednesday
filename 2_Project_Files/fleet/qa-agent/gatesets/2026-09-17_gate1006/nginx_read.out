@@ -1,0 +1,32 @@
+nginx_read 2026-09-17 00:31:29 AEST at head 86fe59e6bf07108142fb3dbd06bef8747d2a4687
+== docker/nginx-gateway/nginx-demo.conf
+location-directives total (control, expect >0): 34
+location lines naming demo: 0
+non-comment lines naming demo-service or 4030: 0
+non-comment lines naming api-gateway (control, expect >0): 2
+== docker/nginx-gateway/nginx.conf
+location-directives total (control, expect >0): 32
+location lines naming demo: 0
+non-comment lines naming demo-service or 4030: 0
+non-comment lines naming api-gateway (control, expect >0): 2
+== deployment/ tree naming demo (any case)
+86fe59e6bf07108142fb3dbd06bef8747d2a4687:Blockchain/Dev/deployment/KINTSUGI-REBUILD-RUNBOOK.md:4
+deployment/ control: files naming api-gateway: 9
+== .github workflows naming demo-service
+workflows control naming api-gateway: 7
+== docs mentions (demo VM)
+//      BEFORE the proxy. Without this, unauth requests for authed routes
+//      (where the gateway uses `authenticateToken(false)` for mixed public/
+//      authed proxies) reach the backend and 502/500 because the backend
+//      can't auth without a token.
+//
+// Both checks only apply when the request path matches a spec entry. Paths
+// that aren't in the spec (`/api/downloads/*`, `/demo-api/*`, etc.) fall
+// through unchanged.
+app.use((req: Request, res: Response, next: NextFunction) => {
+  if (!req.path.startsWith('/api/')) return next();
+
+  // Union allowed/authed methods across EVERY spec entry whose regex matches
+  // this path — distinct spec paths can collapse to one regex (e.g.
+  // /api/referrals/{code} GET + /api/referrals/{codeId} DELETE). Gating on the
+  // first match alone 405'd a method a sibling path legitimately allows

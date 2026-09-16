@@ -1,0 +1,23 @@
+parser_proof Thu Sep 17 2026 00:35:58 GMT+1000 (Australian Eastern Standard Time) typescript 5.9.3
+entry lines: head 1 1 | develop 0 0
+== SUBJECTS
+S0 develop vs prev e28c91f9b (the 2 exact-set entries: must differ) | transpile identical false | AST leaves identical false (3451/3455) | parse diags 0/0 | raw identical false | expected tr=false ast=false -> OK
+S1 prev e28c91f9b vs head 86fe59e6b (the header commit: must be identical) | transpile identical true | AST leaves identical true (3455/3455) | parse diags 0/0 | raw identical false | expected tr=true ast=true -> OK
+S2 develop vs head-with-the-2-entries-removed (every other ks727 delta is comment: must be identical) | transpile identical true | AST leaves identical true (3451/3451) | parse diags 0/0 | raw identical false | expected tr=true ast=true -> OK
+== CONTROLS (on head)
+C1 code: an exact-set entry string edited | transpile identical false | AST leaves identical false (3455/3455) | parse diags 0/0 | raw identical false | expected tr=false ast=false -> OK
+C2 added line comment | transpile identical true | AST leaves identical true (3455/3455) | parse diags 0/0 | raw identical false | expected tr=true ast=true -> OK
+C3 type-only edit (transpile blind spot): `as Handler` -> `as unknown as Handler` | transpile identical true | AST leaves identical false (3455/3457) | parse diags 0/0 | raw identical false | expected tr=true ast=false -> OK
+C4 header count edited back to 8/9 (comment text) | transpile identical true | AST leaves identical true (3455/3455) | parse diags 0/0 | raw identical false | expected tr=true ast=true -> OK
+C5 code smuggled after a header comment line, at statement level | transpile identical false | AST leaves identical false (3455/3458) | parse diags 0/0 | raw identical false | expected tr=false ast=false -> OK
+ALL CONTROLS AND SUBJECTS AS EXPECTED: true
+== COUNTS READ FROM THE EXACT SETS (AST: the array literal initialiser of each const; no regex)
+develop 40fe4db69: EXPECTED_CORPUS 8 | EXPECTED_HANDLERS 9 across 8 distinct modules (multi-handler modules: ["services/api-gateway/src/middleware/errorHandler.ts"]) | FORWARDING_HANDLERS 1 | EXPECTED_INLINE_SITES 0 | corpus == handler modules: true | non-literal elements: 0
+develop 40fe4db69: HEADER says modules=8 handlers=9 | "The Nth handler"=9 | "Of those N, exactly M"=9/1 | header==sets: true
+prev    e28c91f9b: EXPECTED_CORPUS 9 | EXPECTED_HANDLERS 10 across 9 distinct modules (multi-handler modules: ["services/api-gateway/src/middleware/errorHandler.ts"]) | FORWARDING_HANDLERS 1 | EXPECTED_INLINE_SITES 0 | corpus == handler modules: true | non-literal elements: 0
+prev    e28c91f9b: HEADER says modules=8 handlers=9 | "The Nth handler"=9 | "Of those N, exactly M"=9/1 | header==sets: false
+head    86fe59e6b: EXPECTED_CORPUS 9 | EXPECTED_HANDLERS 10 across 9 distinct modules (multi-handler modules: ["services/api-gateway/src/middleware/errorHandler.ts"]) | FORWARDING_HANDLERS 1 | EXPECTED_INLINE_SITES 0 | corpus == handler modules: true | non-literal elements: 0
+head    86fe59e6b: HEADER says modules=9 handlers=10 | "The Nth handler"=10 | "Of those N, exactly M"=10/1 | header==sets: true
+control: the same AST reader on a fixture with a known answer
+fixture (expect 2 | 3 across 2 | multi [a.ts] | 1 | 0 | header==sets true): EXPECTED_CORPUS 2 | EXPECTED_HANDLERS 3 across 2 distinct modules (multi-handler modules: ["a.ts"]) | FORWARDING_HANDLERS 1 | EXPECTED_INLINE_SITES 0 | corpus == handler modules: true | non-literal elements: 0
+fixture (expect 2 | 3 across 2 | multi [a.ts] | 1 | 0 | header==sets true): HEADER says modules=2 handlers=3 | "The Nth handler"=3 | "Of those N, exactly M"=3/1 | header==sets: true

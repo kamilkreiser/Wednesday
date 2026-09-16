@@ -1,0 +1,141 @@
+ultrathink
+
+You are the fleet QA agent running ONE TIER 1 ROUND 1 gate over Secuura/Blockchain PR #1006 (KS-844, Seat A) at head
+86fe59e6bf07108142fb3dbd06bef8747d2a4687 — demo-service answers errors as JSON through an exported errorHandler
+(services/demo-service/src/middleware/errorHandler.ts, new; mounted last in app.ts), registered in the KS-727 class guard's
+corpus 1 (ks727-errorhandler-class-guard.test.ts: one entry in EXPECTED_CORPUS + EXPECTED_HANDLERS, plus a comment-only header
+count), with the KS-832 acceptance marker spliced into app._router.stack ahead of it (ks781-p3-3-body-parser-order.test.ts
++14 -4), and a new 3-cell ks844 test. TIER 1 because it edits two packages/shared SECURITY GUARD test files and adds the handler
+that decides what an error response leaks. No rendered surface — the real-browser half of tier 1 does not apply; say so. Round 1
+of 2 for the KS-844 class under the cap.
+
+Read your brief FIRST and in full, then plan:
+/Volumes/DevMASTER/WEDNESDAY/2_Project_Files/fleet/qa-agent/briefs/2026-09-17_secuura-1006-ks844-tier1.md
+
+Head (git ls-remote 00:28:49 AEST, the PR API 00:31:54, agree; the launcher re-asserts it):
+  #1006 86fe59e6bf07108142fb3dbd06bef8747d2a4687 = refs/pull/1006/head = feature/ks-844-demo-service-error-handler
+        TWO commits: e28c91f9b990273ea34036cb88ad6abf0f39e73b (the change; the READY mail's head — NOT the gated SHA) and
+        86fe59e6b (ks727 header count only, 3 comment lines), parent chain 86fe59e6b -> e28c91f9b -> 40fe4db69.
+  git diff 40fe4db69 86fe59e6b = exactly 5 files: app.ts dd714042d (5 0), errorHandler.ts 10528c5be (added), ks844 test
+  acf6b84e4 (added), ks727 512729715 (5 3), ks781-p3-3 ca1fe34a7 (14 4).
+  base = the merge-base 40fe4db6963cd11dba06bd46e0b00af39e68ef3a. develop MOVED during drafting to
+  93629700c3d219c1d8ca61d69150bb9b623fc1be (#1005's squash: 2 api-gateway files, file-disjoint; compare develop...head now
+  diverged, ahead 2, behind 1, files 5). The head tree is NOT the merged tree: merge the then-current develop in YOUR clone
+  (never pushed), rebuild the shared dist there, and run base, head AND merged, naming each tree; re-derive every count, above
+  all KS-727's exact sets and KS-800 LEG E's parsing-unit set (drafter: merged shared/demo-service subtrees = head's; 44/851, 8/72).
+Repo:    /Volumes/DevMASTER/!CODING/Secuura/Blockchain/2_Project_Files  (READ-ONLY — git clone --shared by SHA into your
+  own scratch; write verbs there only, from a script file; Seat A's worktree is LIVE and the #1005 gate may be live — never
+  enter either, never vitest inside the checkout; pin by SHA, never origin/*)
+
+You are FINDINGS-ONLY. You never fix, never merge, never push, never deploy, never comment, never file, never tick an
+ack box, never `@`.
+
+NEVER run a push, the real pre-push hook, or preflight.sh inside the Secuura checkout or any of its worktrees.
+
+NEVER print a credential value, and never open, read or copy a secrets file (any .env, config/secrets.yml) — a script
+may read AGENTMAIL_API_KEY / GH_TOKEN / LINEAR_API_KEY by NAME from the named .env for the API calls the brief allows,
+and never echoes them. Count, never echo. Your probe sets a throwaway DEMO_SERVICE_KEY in-process only.
+
+NO shared docker stack, no :6882 / :7082 slot, no kintsugi, no demo, NEVER the wallet mnemonic (KS-535 HOLD). This gate
+needs NO container, and you never read demo-service's live state on any box. Run `docker info` ONCE and print its rc on its
+own line (the drafter did not run it; UP is NOT permission; create no container). LOOPBACK ONLY: every listener binds
+127.0.0.1:0. No Akto, no k6, no Playwright tonight (Kam's 40% cap; NOT COMMISSIONED — say so). Schemathesis stays "not run:
+measured reason (0 docker images; venv 4.25.2 vs pinned 4.27.1)" per Wednesday's 13:53Z ruling — YOU rule whether it is
+REQUIRED for this change, with evidence. Time-box 45 minutes of work.
+
+Nine things you must not miss (each is a brief item with drafter-measured predictions and predicted-by):
+
+1. THE HEADER COMMIT (item 1): prove 86fe59e6b vs e28c91f9b comment-only by PARSER (transpileModule removeComments + AST leaf
+   walk, with controls incl. a type-only edit), and read 9 modules / 10 handlers / 1 forwarder FROM the exact-set array
+   literals by AST, with a fixture control. Then test the header's own sentence "if a count below is wrong, a test is red":
+   the drafter reverted the header to 8/9 and the whole shared suite stayed 851/851 (G7).
+
+2. THE KS-832 SPLICE (item 2): parser-refusal tampers (express.json removed -> LEG E EXACT + ESCAPED NUL + RAW 0x00 CONTROL;
+   express.json({type: () => false}) -> ESCAPED NUL + RAW 0x00 CONTROL, the static EXACT cell GREEN) and tampers aimed at the
+   CONTROL (splice deleted; spliced one AFTER the handler -> the RAW 0x00 CONTROL alone reds). Prove the static "set of
+   parsing units is EXACT" cell is independent of the runtime splice. Rule on app._router (Express-4 private API).
+
+3. CORPUS 1 (item 3): 94 -> 103 cells; the planted unregistered handler reds the exact-set CONTROL + its 7 canary cells + its
+   authored control; and a HIT WITNESS, not a text match: 5xx arm echoing err.message reds exactly the 7 demo-service canary
+   cells, but a handler that THROWS leaves those canary cells GREEN (the constant backstop answers) and only the
+   authored-client-error control reds. Count hits in YOUR cells with a 0-hit negative control.
+
+4. THE 4xx err.message ECHO (item 4): enumerate every producer that can reach the handler (the drafter's READ: only
+   express.json / raw-body / zlib — every route answers its own errors) and MEASURE the response per class x all six NODE_ENV
+   values x base and head on the REAL createApp(): JSON syntax, raw 0x00, strict first char, 150 KB, charset koi8-r (NOT
+   utf-7 — body-parser accepts utf-7), content-encoding br, gzip header on plain bytes, a long syntax error. Leak or not,
+   with an escaped-frame-aware stack marker and a positive control on a base row. Plus status sanitisation vs express
+   finalhandler: status 200 / 302 / 600 / "400" / NaN (the drafter measured NO RESPONSE and an unhandled RangeError on NaN),
+   err.headers dropped — each with its reachability.
+
+5. PARITY (item 5): base develop 40fe4db69 (express finalhandler — demo-service had NO handler) vs head vs merged, status +
+   body shape + headers (CSP default-src 'none' -> helmet's; nosniff both) per class.
+
+6. TAMPERS (item 6): the seat's table on final bytes plus G1-G7, WHOLE packages/shared AND WHOLE demo-service suites per row,
+   text anchors counted by Python str.count, markers asserted, sha256-asserted restore, porcelain asserted. READ numFailedTests,
+   numPendingTests, numFailedTestSuites and success, and print cells-run beside every colour: the seat's "handler unmounted ->
+   guards 0 red" row measured 4 KS-832 cells SKIPPED (0 failed, run rc 1) — lead with whether that disagreement holds. A skipped
+   cell is not a pass; a load failure is not a red.
+
+7. SUITES / TYPES / LINT / SCHEMATHESIS (item 7): demo-service base 7/69 -> head 8/72; packages/shared 44/842 -> 44/851 (assert
+   realpath(@secuura/shared) IN TREE; farm node_modules per entry, skip .vite so vitest never writes into the checkout).
+   tsc -p . has 0 __tests__ files in either package — an INCLUDING program (inclusion proven by --listFilesOnly): demo-service
+   25 lines, 0 new, 0 in touched files; shared 17 lines / 6 in the guard files per the drafter vs the seat's 20 / 7 — name your
+   config; plant a positive control. eslint on all 5 files. Rule Schemathesis REQUIRED-or-not (demo-service is in
+   EXCLUDED_SERVICES of scripts/generate-openapi.ts:47).
+
+8. LINEAR (item 8), re-read immediately before the mail: attachmentsForURL(pull/1006) = exactly KS-844 linkKind 'closes'. Any
+   other ticket's 'closes' for #1006, or a closing phrase in the body naming another ticket, is a Major (merge consequence).
+
+9. REACH (item 9), READ ONLY from the repo: compose (NODE_ENV=development, no host port, opt-in required), both nginx confs
+   (0 location blocks for demo-service, with controls), the api-gateway (no proxy), deployment/ (a runbook's RELAYED claim that
+   the demo box's container is refusing to start) — who, if anyone, receives these responses.
+
+Tooling: vitest 4.1.10 (`npx vitest run <file> --reporter=json --outputFile=`, cwd <tree>/Blockchain/Dev/packages/shared or
+<tree>/Blockchain/Dev/services/demo-service; never watch; whole shared suite ~4 s, demo-service ~2 s); typescript 5.9.3;
+node v24.7.0; express 4.22.2 as loaded. /bin/bash here is 3.2 — write runners in Python. zsh: no PIPESTATUS
+(`cmd > out 2>&1; rc=$?`), no timeout on macOS, never begin a line with `=====`. Your tool shell's grep may be a function:
+/usr/bin/grep -i with a same-file positive control. Never `cd` in your own tool calls.
+Quote the Secuura checkout's porcelain count, .git/config sha256, for-each-ref count, .git/worktrees count, origin
+develop SHA, refs/pull/1006/head and the branch at start, mid and close as THREE timestamped readings; if
+refs/pull/1006/head moves, STOP — the brief is about a different SHA. develop moving is expected; judge it by content, name it.
+Never `rm`: fresh mktemp -d per attempt; quarantine scratch tests and configs by rename. No container is created; never
+touch a secuura-* container.
+Do no memory maintenance of your own project's memory store inside this session.
+
+Report FOUND / TESTED / HOW, with controls, into
+/Volumes/DevMASTER/!CODING/Testing Agent MAIN/projects/secuura/reports/2026-09-17-ks844-1006-86fe59e6b-tier1-r1/
+(report.md, evidence/, NOT-TESTED.written-first.md written BEFORE any run): the scope and the trees (base / head / merged named);
+the header parser proof and the AST counts; the splice tampers with cells-run; corpus 1 and the hit witness; the error-class
+table per NODE_ENV per tree and the status-sanitisation rows with reachability; parity with headers; the full tamper table
+(decisive assertion for each red, predicted-by on every row); the suites per tree with the realpath asserted, the including tsc
+and eslint; the Schemathesis REQUIRED-or-not ruling; Linear; reach; the Records; and what you did NOT test at the same
+prominence as the findings (`docker info` rc on its own line; any stacked/deployed demo-service; /demo-api/reset and a real auth
+service; the demo-overlay; a real browser; content-length-mismatch / aborted-request classes; the four platform suites by path —
+systemTest/schemathesis, systemTest/akto, systemTest/playwright, systemTest/performance; preflight legs 3/4/8). Every finding
+carries its evidence class (MEASURED AT RUNTIME / PROBED / READ ONLY / RELAYED), severity, target, SHIPS-WITH or TICKET, and its
+oracle.
+Client-facing communication = ticket comments only; the extranet is not a channel; anything needing a push goes to Wednesday
+as an escalation candidate for Kam's WhatsApp. Handovers to Peter/Stuart are test blocks, never a list of PRs. Never delete;
+cleanup means quarantine.
+Verdict: ONE line — GO, GO WITH FINDINGS, or NO GO — on 86fe59e6bf07108142fb3dbd06bef8747d2a4687, as the delta over base
+40fe4db69 AND on the merged tree with develop 93629700c (or the then-current develop — name both). Say plainly: the header commit is comment-only
+or not and whether its counts are asserted; whether the KS-832 splice weakens the control in any shape; whether the corpus-1
+cells witness a hit on the new handler; whether the 4xx echo leaks anything for any class that can reach the handler, per
+NODE_ENV; the status-sanitisation rows and their reachability; parity; which tampers red as predicted (the seat's S1 row stated
+with cells-run); the suites per tree; your Schemathesis ruling; Linear; reach; and what was NOT tested.
+Give the merge seat its ADDENDUM line: "squash 86fe59e6b onto develop 93629700c (file-disjoint from #1005's squash and every
+open lane PR; dependabot #649/#575 touch demo-service package.json); #1006 attaches to KS-844 only, linkKind closes; equality
+targets app.ts dd714042d / errorHandler.ts 10528c5be / ks844 test acf6b84e4 / ks727 512729715 / ks781-p3-3 ca1fe34a7;
+packages/shared 44/842 -> 44/851, demo-service 7/69 -> 8/72; KS-844 -> Done at the merge seat's hand after the GO (Closes KS-844
+is in the body; the ticket is In Progress); Records: <yours>" — plus any test-quality finding (the S1 skipped-cells reading, the
+canary-cell witness gap, the ks727 header sentence, app._router, the status sanitisation) with its target.
+
+the project's send_brief.sh. Your pane holds ~19 lines of alternate screen with no
+scrollback, so a verdict that stays in the pane is one pane-close from being lost --
+this is not a formality, it is the only durable copy; the verdict MAIL is the wait signal. Subject:
+[QA -> Wednesday] TIER 1 GATE #1006 (KS-844) 86fe59e6b — <GO | GO WITH FINDINGS | NO GO>
+(The QA project has no send_brief.sh of its own — the brief's VERDICT DESTINATION names the path that worked:
+the AgentMail API from coagent@agentmail.to, AGENTMAIL_API_KEY by NAME from Wednesday's .env, never echoed. Confirm
+the API answered 2xx and quote the message id in your final pane line. Timestamps in the mail come from `date`, never
+estimated. The MAIL is the end state.)

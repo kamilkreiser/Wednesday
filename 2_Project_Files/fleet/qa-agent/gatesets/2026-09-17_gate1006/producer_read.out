@@ -1,0 +1,76 @@
+producer_read 2026-09-17 00:30:27 AEST at head 86fe59e6bf07108142fb3dbd06bef8747d2a4687
+dumped package.json blob 02aef8bbc26660fc295251f3705ac971f8ff0405 lines 44
+dumped Dockerfile blob 98cb4a2fb688e9855bd76a98943d166c64d96528 lines 70
+dumped src/index.ts blob e1e7fd5a2d8e95e7f689b5426964fbef82bccecf lines 97
+dumped src/middleware/demoGuard.ts blob 0da9a28f75cd17249993d4ca374da54ac2f398c2 lines 147
+dumped src/routes/health.ts blob f07ba67889617d5da0f831febd988074420e9ab0 lines 19
+dumped src/routes/persona.ts blob e0bbd41d1bcc101ed2a181f045cc87f5d648bc4b lines 81
+dumped src/routes/state.ts blob ce3a81162a40fe0f387ddd0881f4acaadf021818 lines 114
+dumped src/routes/reset.ts blob be5becfdab84ffac3dcf9eb7f72f272658356c42 lines 74
+dumped src/routes/scenario.ts blob 0eef9fb9aeb00a3eb8cb98352f215ed93802d125 lines 117
+dumped src/services/authClient.ts blob 191a9356521ca46c868c6d9d887366c0bda58bd9 lines 69
+dumped src/services/resetService.ts blob 59a6f66900f693bf4e6a0d23584b430184055e6e lines 118
+--- package.json deps
+16:    "cookie-parser": "^1.4.7",
+17:    "cors": "^2.8.5",
+20:    "express": "^4.18.2",
+21:    "helmet": "^7.1.0",
+23:    "morgan": "^1.10.0",
+41:    "body-parser": "1.20.6",
+--- lockfile: express / body-parser / finalhandler / raw-body resolved (demo-service package-lock.json)
+  node_modules/body-parser 1.20.6
+  node_modules/cors 2.8.6
+  node_modules/express 4.22.1
+  node_modules/finalhandler 1.3.2
+  node_modules/http-errors 2.0.1
+  node_modules/raw-body 2.5.3
+--- root Dev lockfile: the same (hoisted install the tests actually load)
+  node_modules/body-parser 1.20.6
+  node_modules/express 4.22.2
+  node_modules/finalhandler 1.3.2
+  node_modules/http-errors 2.0.1
+  node_modules/raw-body 2.5.3
+--- next( / throw / status( in demo-service src (non-test) — the producers (git grep -n -I -E, positive control: errorHandler.ts res.status)
+86fe59e6bf07108142fb3dbd06bef8747d2a4687:Blockchain/Dev/services/demo-service/src/app.ts:81:    res.status(404).json({
+86fe59e6bf07108142fb3dbd06bef8747d2a4687:Blockchain/Dev/services/demo-service/src/index.ts:39:} catch (err) {
+86fe59e6bf07108142fb3dbd06bef8747d2a4687:Blockchain/Dev/services/demo-service/src/middleware/demoGuard.ts:64:    throw new Error(
+86fe59e6bf07108142fb3dbd06bef8747d2a4687:Blockchain/Dev/services/demo-service/src/middleware/demoGuard.ts:72:    throw new Error(
+86fe59e6bf07108142fb3dbd06bef8747d2a4687:Blockchain/Dev/services/demo-service/src/middleware/demoGuard.ts:79:    throw new Error(
+86fe59e6bf07108142fb3dbd06bef8747d2a4687:Blockchain/Dev/services/demo-service/src/middleware/demoGuard.ts:88:    throw new Error(
+86fe59e6bf07108142fb3dbd06bef8747d2a4687:Blockchain/Dev/services/demo-service/src/middleware/demoGuard.ts:102:    throw new Error(
+86fe59e6bf07108142fb3dbd06bef8747d2a4687:Blockchain/Dev/services/demo-service/src/middleware/demoGuard.ts:128:    res.status(401).json({
+86fe59e6bf07108142fb3dbd06bef8747d2a4687:Blockchain/Dev/services/demo-service/src/middleware/demoGuard.ts:139:    res.status(403).json({
+86fe59e6bf07108142fb3dbd06bef8747d2a4687:Blockchain/Dev/services/demo-service/src/middleware/demoGuard.ts:146:  next();
+86fe59e6bf07108142fb3dbd06bef8747d2a4687:Blockchain/Dev/services/demo-service/src/middleware/errorHandler.ts:28:  err: Error & { status?: number; statusCode?: number },
+86fe59e6bf07108142fb3dbd06bef8747d2a4687:Blockchain/Dev/services/demo-service/src/middleware/errorHandler.ts:33:  const status = err.status ?? err.statusCode ?? 500;
+86fe59e6bf07108142fb3dbd06bef8747d2a4687:Blockchain/Dev/services/demo-service/src/middleware/errorHandler.ts:35:  res.status(status).json({
+86fe59e6bf07108142fb3dbd06bef8747d2a4687:Blockchain/Dev/services/demo-service/src/routes/persona.ts:42:      return res.status(400).json({
+86fe59e6bf07108142fb3dbd06bef8747d2a4687:Blockchain/Dev/services/demo-service/src/routes/persona.ts:57:      return res.status(502).json({ success: false, error: { code: 'BAD_GATEWAY', message: 'Persona auth failed' } });
+86fe59e6bf07108142fb3dbd06bef8747d2a4687:Blockchain/Dev/services/demo-service/src/routes/persona.ts:76:  } catch (err) {
+86fe59e6bf07108142fb3dbd06bef8747d2a4687:Blockchain/Dev/services/demo-service/src/routes/persona.ts:79:    return res.status(500).json({ success: false, error: { code: 'INTERNAL_ERROR', message: 'Internal server error' } });
+86fe59e6bf07108142fb3dbd06bef8747d2a4687:Blockchain/Dev/services/demo-service/src/routes/reset.ts:35:    return res.status(400).json({
+86fe59e6bf07108142fb3dbd06bef8747d2a4687:Blockchain/Dev/services/demo-service/src/routes/reset.ts:62:  } catch (err: unknown) {
+86fe59e6bf07108142fb3dbd06bef8747d2a4687:Blockchain/Dev/services/demo-service/src/routes/reset.ts:69:    return res.status(500).json({
+86fe59e6bf07108142fb3dbd06bef8747d2a4687:Blockchain/Dev/services/demo-service/src/routes/scenario.ts:112:  } catch (err) {
+86fe59e6bf07108142fb3dbd06bef8747d2a4687:Blockchain/Dev/services/demo-service/src/routes/scenario.ts:115:    return res.status(500).json({ success: false, error: { code: 'INTERNAL_ERROR', message: 'Internal server error' } });
+86fe59e6bf07108142fb3dbd06bef8747d2a4687:Blockchain/Dev/services/demo-service/src/routes/state.ts:80:  } catch (err) {
+86fe59e6bf07108142fb3dbd06bef8747d2a4687:Blockchain/Dev/services/demo-service/src/routes/state.ts:109:  } catch (err) {
+86fe59e6bf07108142fb3dbd06bef8747d2a4687:Blockchain/Dev/services/demo-service/src/routes/state.ts:112:    return res.status(500).json({ success: false, error: { code: 'INTERNAL_ERROR', message: 'Internal server error' } });
+86fe59e6bf07108142fb3dbd06bef8747d2a4687:Blockchain/Dev/services/demo-service/src/seed/generators/access.ts:55:  const certifiedDocs = docs.filter(d => d.status === 'certified');
+86fe59e6bf07108142fb3dbd06bef8747d2a4687:Blockchain/Dev/services/demo-service/src/seed/generators/anchors.ts:40:  const certifiedDocs = docs.filter(d => d.status === 'certified' && d.certified_at);
+86fe59e6bf07108142fb3dbd06bef8747d2a4687:Blockchain/Dev/services/demo-service/src/seed/generators/auditLogs.ts:69:  const activeUsers = users.filter(u => u.status === 'active');
+86fe59e6bf07108142fb3dbd06bef8747d2a4687:Blockchain/Dev/services/demo-service/src/seed/generators/events.ts:81:    if (doc.status === 'certified' && doc.certified_at) {
+86fe59e6bf07108142fb3dbd06bef8747d2a4687:Blockchain/Dev/services/demo-service/src/seed/generators/events.ts:101:    if (doc.status === 'certified' && verifiers.length > 0 && faker.number.float() < 0.3) {
+86fe59e6bf07108142fb3dbd06bef8747d2a4687:Blockchain/Dev/services/demo-service/src/seed/generators/verifications.ts:45:  const certifiedDocs = docs.filter(d => d.status === 'certified' && d.certified_at);
+86fe59e6bf07108142fb3dbd06bef8747d2a4687:Blockchain/Dev/services/demo-service/src/seed/index.ts:201:  } catch (err) {
+86fe59e6bf07108142fb3dbd06bef8747d2a4687:Blockchain/Dev/services/demo-service/src/services/authClient.ts:26: * Returns a structured response object; does NOT throw on failure.
+86fe59e6bf07108142fb3dbd06bef8747d2a4687:Blockchain/Dev/services/demo-service/src/services/authClient.ts:61:  } catch (err) {
+86fe59e6bf07108142fb3dbd06bef8747d2a4687:Blockchain/Dev/services/demo-service/src/services/resetService.ts:38:    throw new Error(`Snapshot file not found or not readable: ${snapshotPath}`);
+86fe59e6bf07108142fb3dbd06bef8747d2a4687:Blockchain/Dev/services/demo-service/src/services/resetService.ts:43:    throw new Error('DATABASE_URL environment variable is not set');
+86fe59e6bf07108142fb3dbd06bef8747d2a4687:Blockchain/Dev/services/demo-service/src/services/resetService.ts:69:  } catch (err: unknown) {
+86fe59e6bf07108142fb3dbd06bef8747d2a4687:Blockchain/Dev/services/demo-service/src/services/resetService.ts:73:    throw new Error(`pg_restore failed: ${message}`);
+86fe59e6bf07108142fb3dbd06bef8747d2a4687:Blockchain/Dev/services/demo-service/src/services/resetService.ts:111:  } catch (err: unknown) {
+86fe59e6bf07108142fb3dbd06bef8747d2a4687:Blockchain/Dev/services/demo-service/src/services/resetService.ts:114:    throw new Error(`Redis flush failed: ${message}`);
+--- rejectNulBytes in packages/shared (the guard between parser and routes)
+86fe59e6bf07108142fb3dbd06bef8747d2a4687:Blockchain/Dev/packages/shared/src/index.ts:183:  rejectNulBytes,
+86fe59e6bf07108142fb3dbd06bef8747d2a4687:Blockchain/Dev/packages/shared/src/middleware/index.ts:673:export function rejectNulBytes() {
