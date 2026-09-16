@@ -37,3 +37,57 @@ The T2b bash tier (14 rows at 06:5x) was read this morning: KS-1093 held; KS-998
 - Merge authority while away: the TESTED grant is open-ended ("for the time being"); the Sunday QA sitting is his — if he wants merges to continue unattended, he says so; default: READYs accumulate, nothing merges.
 - Allowance: a coordinator seat every ~3 h × 7 days ≈ the whole week's Claude allowance on rotations alone unless the by-tier boot holds ~30% — measured this seat: boot 32%, +30% for seven holds and one harness gate. State the number on the card.
 - The four decision tickets (KS-998 item 1, KS-1011, KS-1081, KS-1168) with recommended defaults.
+
+---
+
+## ⚡ UPDATE 2026-09-16 14:5x — the BLUF's premise changed today, and it is the best news in this document
+
+The BLUF says *"what is NOT unattended is the only human-shaped step: writing the brief."* **That is no
+longer true, and it was proven twice this afternoon rather than argued.**
+
+**What happened.** Two briefs were written by SUBAGENTS given the day's brief rules verbatim, not by a
+coordinator seat reading files into its own window:
+
+- **KS-1081** — the agent read the ticket, read the product file at the tip, chose the reference suite,
+  wrote literal test cells, pre-measured in its own scratch clone (2 passed / 4 failed at the tip → 6/6
+  after), and **Ornith passed it 7/7 on its FIRST sample.** KS-1011, written by the coordinator itself
+  before those rules were written down, took four rounds.
+- **KS-1031** — the same shape. It also **refused the half of the ticket that was documentation rather
+  than code**, and found that the ticket's own justification had expired (the `exit 0` workaround
+  outlived the schema-drift problem it apologised for, per `BACKLOG.md:131`) — which is what turned a
+  judgement call into a mechanical change. Its first run then failed at B4 on a suite that asserted
+  nothing, and the repair went back to the same agent with the checker's evidence.
+
+**Why this matters more than any other piece here.** The week's binding constraint was assumed to be a
+coordinator's window: one seat, reading tickets and files, rotating every few hours, each rotation
+paying the boot cost again. It is not. **The coordinator's job in the loop is to CHOOSE the candidate,
+COMMISSION the brief, QUEUE the result and READ the verdict** — all of which are cheap — while the
+expensive reading happens in a window that is thrown away.
+
+### What this changes in the table above
+
+| piece | revised |
+|---|---|
+| **(c) briefs batched ahead** | **Not a batching problem any more — a commissioning problem.** The seat does not need K briefs written before it rotates; it needs to be able to commission one in a single tool call and have the result queued without it. Both halves now exist: the commission is a subagent with the rules prompt (the KS-1081 prompt is the template — keep it verbatim, its rules are each a round someone paid for), and `night/autostart_on_brief.sh` builds, queues and launches the moment a brief file appears, with a give-up that reports rather than sits silent. |
+| **the RULES are the asset** | The brief rules are now written in `0_Brain/tasks/NEXT-PICKUP.md` under BRIEF RULES and must be carried into every commissioning prompt verbatim. Each line is a model round that was paid for: no context lines in the fence · no backslash continuations · literal shell cells · every 🔴 red by assertion at the tip · one 🟢 control · every `-` line copied byte-for-byte from `git show`. **A commissioning prompt without them regresses to four rounds per ticket.** |
+
+### What is still owed, and it is now a shorter list
+
+1. **The commissioning step is not yet a mechanism** — it is a coordinator choosing to make the call.
+   For a week without Kam the seat needs it in its boot rule: *"if the queue is empty and the model is
+   idle, commission the next candidate from `night/candidates.md` before doing anything else."* That is
+   INSTRUCTION, not code, and it belongs in the boot prompt beside the pickup read.
+2. **`autostart_on_brief.sh` has run once and failed once** (a `case` inside `$( )`, which `bash -n`
+   passes — fixed and armed by running it). Under 2026-09-08's rule it is a mechanism with one worked
+   example and no exception met: **it must complete one unattended cycle end to end before Monday**,
+   or the week's loop rests on a script that has never finished its job.
+3. **Nothing yet writes the verdict back to the board.** A week of held pins with no ticket comments
+   means Peter and Stuart see silence. Decide before Monday whether that is acceptable (Kam's 09-15
+   ruling says QA and merge happen Sunday, so silence may be correct) or whether the receipt should
+   also post per-ticket.
+
+**The honest risk, unchanged:** the POOL. Every candidate left for this tip is decision-shaped,
+design-shaped or under `systemTest/` (blocked on a stale object store). A loop that runs perfectly
+through an empty pool produces nothing. **Kam's 09-16 09:53 ruling is the answer — skip the blocked
+one, card it with a default, take the next, down the whole list — and that ruling has to be IN the
+week instruction, not only in a lesson.**
