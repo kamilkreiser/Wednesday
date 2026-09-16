@@ -217,3 +217,39 @@ no section → rc 0) · override passes loudly · restoration proven again.
 empty, and the failure then presents as the subject's defect rather than the instrument's. The arm
 worth keeping is the **over-fire control**: it is what separates "this gate catches the bug" from
 "this gate refuses everything".
+
+## 2026-09-16 15:43 — KS-1168: a brief that DISAMBIGUATES by re-adding unchanged lines collides with A3c (BRIEF, w=2)
+
+**Classification: BRIEF.** Not the model, and — measured — not the machine either.
+
+**The ticket's real difficulty, and the brief-writer saw it:** `listUsersInner` and `countUsersInner`
+contain byte-identical six-line `if (search)` blocks, so a short hunk is ambiguous about which site it
+patches. Its solution was to carry each hunk down through the following role block to the first line
+that differs, **removing and re-adding those role lines unchanged purely as an anchor**.
+
+**Why that cannot pass.** A3c asserts that every `+` line the brief specifies appears in the product
+hunk. The model emitted the honest minimal hunk both times — 4 hunks, the right count — and simply did
+not re-emit unchanged lines as additions. Attempt 1: 15 of 46 `+` lines absent (`}`, `if (role) {`,
+`const roles = …`). Retry: 18 of 46 absent (`if (search) {`, `idx++;`, `}`). **Different lines each
+time, same cause: they were never real additions.**
+
+**This is w=2, and its twin is nine hours old.** The 2026-09-16 06:xx row: *KS-1089's E2 was a six-line
+block replacement whose `+` side repeated four unchanged lines (A3c demanded "additions" that are
+context; the model had emitted the honest minimal hunk)*. Same collision, new costume — there the
+repetition was incidental, here it was a deliberate disambiguation strategy, which is why the earlier
+row's fix ("write the minimal hunk") did not fire for the writer.
+
+**The rule, for the BRIEF RULES:** *never disambiguate a repeated block by removing and re-adding
+unchanged lines.* A `+` line is a claim that the line does not exist at the tip. To pin which of two
+identical sites a hunk belongs to, use **unprefixed context lines** in the diff (which is what context
+is for), or split into separate hunks anchored on genuinely unique nearby text, or take one site per
+round.
+
+**Not fixed in the harness, deliberately.** A3c is doing its job: it refused a diff that did not match
+the brief. Loosening it to tolerate `+` lines that are really context would blind it to the dropped-
+addition class it exists to catch. The defect is upstream, in how the brief was written.
+
+**What the machine cost, stated separately so the two are not confused:** the first retry was refused
+on load (18.53 > 14) and had to be re-run when the machine quietened. That was a scheduling problem and
+it is now handled by `night/retry_when_load_allows.sh`. The verdict itself was never a machine artefact
+— the re-run under good conditions produced the same A3c failure.

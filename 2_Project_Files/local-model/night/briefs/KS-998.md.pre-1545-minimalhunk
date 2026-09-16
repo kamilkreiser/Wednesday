@@ -3,30 +3,32 @@
 ## What is wrong (one paragraph)
 `check-package-format.sh` (the KS-989 formatting gate the pre-push hook runs) prints `SKIP (advisory)` and counts a skip — exit 0 — when a gated package's `node_modules/.bin/prettier` is missing (`:144-148`). In push mode (`MODE` not `all`, `:115-123`) a package is SELECTED only because a changed path in the push lies under it — so a skip there means **a push that touches the package is waved through unchecked**: the path by which instance 6's red could still reach develop. In `--all` mode (the preflight's whole-tree check) a missing-deps package is a genuine environment condition and the advisory skip is right (KS-991's cost: `DEPS MISSING` read as a red five times in one day). **This task: in push mode a selected package with missing deps is a FAILURE (counted in `failed`, a REFUSED line naming the remedy); in `--all` mode the skip stays. The existing suite's CASE 6 (which pinned the skip in push mode) is flipped to pin the refusal, and CASE 9 (`--all` still skips) stays as the control.** Items 2–4 of the ticket are NOT this task.
 
-## The exact change — ONE HUNK in `systemTest/scripts/check-package-format.sh` at lines 142–148: ONE line removed, EIGHT added, the rest context
-**Reproduce this hunk exactly, including the leading spaces on the context lines.** Only ONE line is
-removed (`:143`, the old second comment line). Everything else that already exists at the tip —
-`:142`, the outer `if` at `:144`, and the three skip lines plus the closing `fi` at `:145-:148` —
-stays as CONTEXT with a single leading space, because it is unchanged. Do not re-emit a context line
-as a `+`: a `+` line is a claim that the line is not in the file, and the gate checks that claim.
+## The exact change — ONE REPLACEMENT HUNK in `systemTest/scripts/check-package-format.sh`: lines 142–148 become the block below
+Every line from :142 (`    # Deps absent is an environment condition (see the npm/node note above), and`) through :148 (`    fi`) is a `-` line — copy all 7 from the file byte-for-byte — and the `+` side is EXACTLY this block (14 lines, four-space base indent like its neighbours):
 ```
-     # Deps absent is an environment condition (see the npm/node note above), and
+-    # Deps absent is an environment condition (see the npm/node note above), and
 -    # it is the normal state of a fresh clone. Loud, named, and NOT a failure.
+-    if [ ! -x "$dir/node_modules/.bin/prettier" ]; then
+-        echo "[format-gate] SKIP (advisory) — systemTest/$p deps not installed (npm ci in systemTest/$p)."
+-        skipped=$((skipped + 1))
+-        continue
+-    fi
++    # Deps absent is an environment condition (see the npm/node note above), and
 +    # it is the normal state of a fresh clone — advisory in --all mode. In PUSH mode
 +    # this package was selected because the push TOUCHES it (KS-998 item 1, Kam
 +    # 2026-09-16): missing deps cannot be advisory there, or the red is pushed unseen.
-     if [ ! -x "$dir/node_modules/.bin/prettier" ]; then
++    if [ ! -x "$dir/node_modules/.bin/prettier" ]; then
 +        if [ "$MODE" != "all" ]; then
 +            echo "[format-gate] REFUSED — systemTest/$p deps not installed and this push touches it (npm ci in systemTest/$p, then push again)." >&2
 +            failed=$((failed + 1))
 +            continue
 +        fi
-         echo "[format-gate] SKIP (advisory) — systemTest/$p deps not installed (npm ci in systemTest/$p)."
-         skipped=$((skipped + 1))
-         continue
-     fi
++        echo "[format-gate] SKIP (advisory) — systemTest/$p deps not installed (npm ci in systemTest/$p)."
++        skipped=$((skipped + 1))
++        continue
++    fi
 ```
-(The resulting block is 14 lines: four comment lines, the outer `if`, the inner `if … fi` of five lines, the three original skip lines, the closing `fi` — but only nine of them appear in the hunk as `-`/`+`; the other six are context.) Context: line 141 is blank and line 140 is `    dir="$REPO_ROOT/systemTest/$p"`; line 149 is blank and line 150 is `    out="$(cd "$dir" && npm run --silent format:check 2>&1)"`. The trailer at `:193-194` (`echo "[format-gate] ${checked} package(s) checked, ${skipped} skipped, ${failed} failed"` / `[ "$failed" -eq 0 ]`) is untouched — `failed` already drives the exit code. Touch nothing else.
+(That is 14 lines: four comment lines, the outer `if`, the inner `if … fi` of five lines, the three original skip lines, the closing `fi`.) Context: line 141 is blank and line 140 is `    dir="$REPO_ROOT/systemTest/$p"`; line 149 is blank and line 150 is `    out="$(cd "$dir" && npm run --silent format:check 2>&1)"`. The trailer at `:193-194` (`echo "[format-gate] ${checked} package(s) checked, ${skipped} skipped, ${failed} failed"` / `[ "$failed" -eq 0 ]`) is untouched — `failed` already drives the exit code. Touch nothing else.
 
 ## The test — MODIFY THE EXISTING FILE `systemTest/__tests__/package_format_gate.test.sh` (its FULL content is in files[...]; your test section is `--- a/…` / `+++ b/…` with context lines copied byte-for-byte; do NOT create a new file, do NOT use `--- /dev/null`)
 T1 — REPLACE lines 131–138 (CASE 6: the two comment lines, the `out=`/`rc=` line and its four `check` lines) with the block below (context: line 130 is blank and line 139 is blank; line 140 is `# --- CASE 7: THE COUNTER MUST SURVIVE THE LOOP --------------------------------`):

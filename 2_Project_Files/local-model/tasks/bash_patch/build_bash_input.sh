@@ -67,6 +67,15 @@ tipl=[l.rstrip() for l in lines]
 missing=[m for m in must_remove if m not in tipl]
 if missing: sys.stderr.write(f"build_bash_input: REFUSED — {len(missing)} brief '-' line(s) do not exist at the tip (read the file, not the ticket): {missing[:2]}\n"); sys.exit(2)
 if not expected_plus: sys.stderr.write("build_bash_input: REFUSED — the brief's `## The exact change` has no fenced '+' lines (nothing the checker could hold the script to)\n"); sys.exit(2)
+# ---------------------------------------------------------------- CONTEXT-AS-ADDITION GATE (2026-09-16 15:4x)
+# A '+' line is a CLAIM that the line is not in the file. When a brief's '+' set repeats a line it also
+# removes, that line is CONTEXT, the model rightly emits the honest minimal hunk, and B3b/A3c then refuse
+# a CORRECT output as "a dropped addition". Three instances in one day, the third written by Wednesday's
+# own hand minutes after filing the rule against it: KS-1089 (06:xx), KS-1168 x2, KS-998. w=3 -> in the path.
+_dup = [a for a in expected_plus if a in {m.strip() for m in must_remove}]
+if _dup and os.environ.get("ALLOW_CONTEXT_AS_ADDITION") != "1":
+    sys.stderr.write("build_bash_input: REFUSED — %d '+' line(s) in `## The exact change` are byte-identical to a '-' line in the same hunk, so they are CONTEXT, not additions. The model will keep them as context and B3b will refuse the correct output as a dropped addition. Rewrite the hunk minimally: a line that survives the edit gets a single leading SPACE, not a '+'. Offending: %r (ALLOW_CONTEXT_AS_ADDITION=1 overrides)\n" % (len(_dup), _dup[:3]))
+    sys.exit(2)
 inp = {"ticket": {"identifier": ident, "title": text.splitlines()[0].lstrip("# ").strip()[:200], "description": text},
        "repo": {"source_checkout": src, "tip": tip, "branch": "develop", "test_runner": "bash"},
        "product_file": prod, "reference_test_file": ref, "suggested_test_file": tf, "test_dir": test_dir,

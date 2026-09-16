@@ -47,23 +47,10 @@ while :; do
 done
 
 # The lock GATES the launch — never print and continue (the pickup's trap).
-#
-# FIXED 2026-09-16 15:4x, on this script's FIRST live fire: the original check ABANDONED (exit 4)
-# when a runner held the lock. That is a refusal nobody reads — the retry would simply never happen
-# and the log saying so is not a channel. Worse, the check was check-then-act: at 15:40:51 it saw no
-# lock and went; at 15:40:55, four seconds later, the night runner took KS-998. Two model calls
-# overlapped. It cost nothing (ollama serialises same-model requests — one 23.2 GB instance, 71%
-# memory free, measured) but the window is real. So: WAIT for the runner instead of abandoning, and
-# re-check inside the same bounded loop rather than once.
-while [ -f "$LM/night/log/.night_run.lock/pid" ] && kill -0 "$(cat "$LM/night/log/.night_run.lock/pid" 2>/dev/null)" 2>/dev/null; do
-  if [ "$(date +%s)" -ge "$DEADLINE" ]; then
-    say "GAVE UP — a night runner has held the lock until the deadline. Nothing retried; the first verdict stands."
-    panel "I could not retry KS-1168: the local-model runner was busy with other tickets for the whole window I allowed. Nothing is lost — the ticket keeps its first verdict and goes back in the queue."
-    exit 4
-  fi
-  say "a night runner is live — waiting rather than standing down"
-  sleep 60
-done
+if [ -f "$LM/night/log/.night_run.lock/pid" ] && kill -0 "$(cat "$LM/night/log/.night_run.lock/pid" 2>/dev/null)" 2>/dev/null; then
+  say "a night runner is live — standing down rather than running a second model call beside it"
+  exit 4
+fi
 
 say "running the retry"
 LM_MODEL="${NIGHT_MODEL:-ornith:35b}" LM_THINK=0 LM_NUM_CTX=65536 LM_MAX_LOAD="$GATE" \
