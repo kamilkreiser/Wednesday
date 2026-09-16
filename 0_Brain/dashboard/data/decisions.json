@@ -10537,7 +10537,7 @@
   "id": "hpsm-live-release-verification-unprovable",
   "client_project": "Datasec/HPSM",
   "title": "We cannot currently show that the 2026-09-14 HPSM live release was verified — the toolkit that verified it is lost",
-  "bluf": "OVERRIDE, matches read first: the gate matched earlier cards on shared words only; none of them ruled on release verification or on this, found tonight. RECOMMENDATION: no emergency action. Let HPSM finish the recovery attempt, then decide whether to re-verify. THIS IS A CLAIM ABOUT OUR EVIDENCE, NOT ABOUT THE PRODUCT, and the two need different responses. HPSM audited its own checks tonight on my instruction and found that the hardened toolkit which produced the 2026-09-14 live release results (115/0, 21/0, 11/0) lived only in a session scratchpad under /private/tmp and is GONE. The only surviving copy predates the hardening, and in that copy the live verification can PASS WHILE ITS PROBES FAIL: a failed bucket listing reads as an empty bucket and the backup then records every object as the empty-input hash; empty API output with rc 0 reads as PASS and 26 checks silently vanish; a manifest hash mismatch still reports PASS. So those results cannot be re-examined, and the copy we have would not have caught a failure. The honest position is that the release is UNVERIFIED, not that it is unsafe — nothing suggests the product is wrong. One recovery path is untried and I have HPSM on it tonight: the Azure VM home directory that was never inspected. Every finding in the audit carries a red control that was actually run. Report: HPSM 1_Project_Definition/Architecture/2026-09-10_policy-composer/qa-s48/nofail-audit/REPORT.md, commit 1151c68.",
+  "bluf": "AMENDED after a PARTIAL RECOVERY — the picture is BETTER than when this card was filed, and the title above now OVERSTATES it. RECOMMENDATION: nothing tonight; in the morning decide only about the half that is still unverifiable. WHAT CHANGED: HPSM recovered the PURGE half of the post-TKF toolkit from the Azure VM, read-only, 90 of 90 files matching hashes taken on the VM, TKF markers present — so it is provably the hardened version that ran live. THE AZURE PURGE 115/0 HAS BEEN RE-EXAMINED AND THE PASS IS SUPPORTED: the four checks that CAN silently pass did not fire on that data. The bucket listing really worked (7 keys before, 1 after; the backup hashed 7 objects, zero empty-input hashes), V5 had real output (39 PASS / 0 FAIL), all 15 purged engagements returned 404 while the kept engagement answered 200, and approvals was 0 decisions over 2 exceptions. ONE REAL GAP INSIDE IT: the auditor audit-events read was INFO-only (3 x 404), so that step did not verify. STILL UNVERIFIABLE, because the upgrade half ran from the Mac through a tunnel and exists nowhere: both stacks upgrade verification (postcheck 21/0, kept-stale 11/0, walk-fresh A2/B2, the browser gate, the 26 probes) and the pc-lane-a purge 115/0. Those are UNVERIFIED, not shown unsafe. Either way the toolkit is rebuilt before any NEXT live run. Recovery archived at HPSM qa-s48/vm-recovery/ with provenance. Nothing was run, changed or deleted on the VM, and the database dump holding tester data was deliberately left there. THE OPTIONS BELOW STILL READ CORRECTLY: \"wait for the recovery attempt\" now means \"decide in the morning\" — the attempt is done; \"rebuild and re-verify\" now applies ONLY to the upgrade half; \"accept\" applies only to that same half.",
   "default_action": "Nothing touches the live stacks. HPSM finishes the recovery attempt and fixes nothing until you rule; the toolkit must be recovered or rebuilt before any NEXT live run either way.",
   "options": [
    {
@@ -10580,6 +10580,19 @@
    "CARD hpsm-composer-demo-release-unreachable-c12",
    "CARD hpsm-composer-demo-release-with-device-groups",
    "CARD hpsm-composer-live-demo-upgrade-after-c12"
-  ]
+  ],
+  "amendments": [
+   {
+    "ts": "2026-09-16T23:09:45.224228+10:00",
+    "reason": "The recovery attempt the card recommended waiting for COMPLETED 40 minutes after filing, and it succeeded in part. Leaving the original wording would have had Kam wake to a worse picture than reality: the Azure purge 115/0 has since been re-examined against the recovered post-TKF toolkit and its pass is SUPPORTED. A card that is stale by morning is the failure this amend command exists for.",
+    "changed": [
+     "bluf"
+    ],
+    "before": {
+     "bluf": "OVERRIDE, matches read first: the gate matched earlier cards on shared words only; none of them ruled on release verification or on this, found tonight. RECOMMENDATION: no emergency action. Let HPSM finish the recovery attempt, then decide whether to re-verify. THIS IS A CLAIM ABOUT OUR EVIDENCE, NOT ABOUT THE PRODUCT, and the two need different responses. HPSM audited its own checks tonight on my instruction and found that the hardened toolkit which produced the 2026-09-14 live release results (115/0, 21/0, 11/0) lived only in a session scratchpad under /private/tmp and is GONE. The only surviving copy predates the hardening, and in that copy the live verification can PASS WHILE ITS PROBES FAIL: a failed bucket listing reads as an empty bucket and the backup then records every object as the empty-input hash; empty API output with rc 0 reads as PASS and 26 checks silently vanish; a manifest hash mismatch still reports PASS. So those results cannot be re-examined, and the copy we have would not have caught a failure. The honest position is that the release is UNVERIFIED, not that it is unsafe — nothing suggests the product is wrong. One recovery path is untried and I have HPSM on it tonight: the Azure VM home directory that was never inspected. Every finding in the audit carries a red control that was actually run. Report: HPSM 1_Project_Definition/Architecture/2026-09-10_policy-composer/qa-s48/nofail-audit/REPORT.md, commit 1151c68."
+    }
+   }
+  ],
+  "amended_ts": "2026-09-16T23:09:45.224241+10:00"
  }
 ]

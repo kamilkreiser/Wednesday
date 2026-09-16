@@ -250,7 +250,7 @@ click it is better to ask once while he is awake. **Do it in daylight — and do
 erode into an emergency; it is a task with a date, not a someday.** NexusAI has been told explicitly
 not to spend context on it.
 
-## 🔴 HPSM: the 2026-09-14 live release cannot be shown to have been verified
+## 🟠 HPSM: the Azure purge IS re-verified; only the upgrade half stays unverifiable (card AMENDED)
 
 Card `hpsm-live-release-verification-unprovable`. **This is a claim about our EVIDENCE, not about the
 product — keep them apart in anything written to Kam.** The hardened toolkit that produced the live
@@ -262,10 +262,23 @@ reports PASS.
 
 **Correct wording: the release is UNVERIFIED, not unsafe.** Nothing suggests the product is wrong.
 
-**One untried recovery path, running tonight:** the Azure VM's `~/purge-s47-live`, never inspected.
-HPSM told to **copy, not run, and not tidy** — that directory is evidence now. Found → the gap narrows
-to re-examining results. Not found → whether to rebuild and re-verify is Kam's, because it touches live
-stacks. **Either way the toolkit must be recovered or rebuilt before any NEXT live run.**
+**RECOVERY DONE, PARTIAL SUCCESS (2026-09-16 23:0x).** The Azure VM's `~/purge-s47-live` held the
+**purge half** of the post-TKF toolkit: 90/90 files matching hashes taken on the VM, TKF markers
+present, so provably the hardened version that ran live. Archived at HPSM `qa-s48/vm-recovery/`.
+
+**The Azure purge 115/0 was re-examined against it and the pass is SUPPORTED** — the four checks that
+*can* silently pass did not fire on that data: bucket listing really worked (7 keys → 1, backup hashed
+7 real objects, zero empty-input hashes), V5 had real output (39 PASS / 0 FAIL), all 15 purged
+engagements 404 while the kept one answered 200, approvals 0 decisions over 2 exceptions. **One real
+gap inside it: the auditor audit-events read was INFO-only (3 × 404), so that step did not verify.**
+
+**Still unverifiable and genuinely lost** (that half ran from the Mac through a tunnel): both stacks'
+upgrade verification — postcheck 21/0, kept-stale 11/0, walk-fresh A2/B2, the browser gate, the 26
+probes — and the pc-lane-a purge 115/0. **Unverified, not shown unsafe.** Kam's call, can wait.
+**The toolkit is rebuilt before any NEXT live run regardless.**
+
+**Card AMENDED with the reason recorded** — the original wording would have had him wake to a worse
+picture than reality.
 
 **Nothing is being fixed** — HPSM held correctly. V6 is the one to fix first when Kam rules: it does not
 merely fail to detect, it **manufactures a false success and writes it into the evidence.**
