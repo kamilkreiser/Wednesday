@@ -15,11 +15,16 @@ supersedes: the 2026-09-14 pickup, kept verbatim at NEXT-PICKUP-TUESDAY.md.pre-s
 **Kam handed this seat the NexusAI marketplace resubmission and went to bed.** Two Datasec agents are
 working; nothing is waiting on this seat.
 
-1. **Read Kam's cards first.** Three are open for him:
-   `nexusai-monetisation-model-and-public-registry` (the big one: *"anyone who pays"* is impossible on
-   a Solution template), `nexusai-live-listing-lockout-warn-now`, and
-   `hpsm-live-release-verification-unprovable` (**amended after a partial recovery — read the
-   amendment, not the title**).
+1. **Read Kam's cards first — SIX are open**, five of them Datasec and four written tonight:
+   - `nexusai-monetisation-model-and-public-registry` — **the big one**: *"anyone who pays"* is
+     impossible on a Solution template, and the ~US$20/mo registry decision sits inside it.
+   - `nexusai-setup-mode-stranger-takeover` (RD-474) — **the only non-registry resubmission blocker.**
+   - `nexusai-live-listing-lockout-warn-now` — whether the LIVE listing needs a warning now.
+   - `hpsm-live-release-verification-unprovable` — **amended twice; read the amendment, not the title**,
+     which now overstates it. Carries HPSM's four questions.
+   - `hpsm-composer-monday-review-scope` — **Kam said 2026-09-16 20:23 he comments on it himself
+     tomorrow. Do not re-ask or rule it.**
+   - `wed-spotlight-indexes-the-sync-target-drives` — **Wednesday's, not this seat's.**
 2. **Nothing may be pushed, published, resubmitted, bought or sent.** Registry creation, the ~US$20/mo,
    Partner Center contact, production, money, external comms — all his, all still open.
 3. **The single sentence that governs the package:** *"the zip needs to be self contained. we will not
