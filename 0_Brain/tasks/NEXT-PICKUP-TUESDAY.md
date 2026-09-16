@@ -8,6 +8,37 @@ supersedes: the 2026-09-14 pickup, kept verbatim at NEXT-PICKUP-TUESDAY.md.pre-s
 
 # NEXT PICKUP — Tuesday
 
+---
+
+## ⏱️ START HERE — the whole night in twelve lines (written at the 70% checkpoint, 2026-09-16 ~23:2x)
+
+**Kam handed this seat the NexusAI marketplace resubmission and went to bed.** Two Datasec agents are
+working; nothing is waiting on this seat.
+
+1. **Read Kam's cards first.** Three are open for him:
+   `nexusai-monetisation-model-and-public-registry` (the big one: *"anyone who pays"* is impossible on
+   a Solution template), `nexusai-live-listing-lockout-warn-now`, and
+   `hpsm-live-release-verification-unprovable` (**amended after a partial recovery — read the
+   amendment, not the title**).
+2. **Nothing may be pushed, published, resubmitted, bought or sent.** Registry creation, the ~US$20/mo,
+   Partner Center contact, production, money, external comms — all his, all still open.
+3. **The single sentence that governs the package:** *"the zip needs to be self contained. we will not
+   give people access to the repo or keys. the intended model is that anyone who pays can deploy."*
+4. **Ask the project agents; do not measure inside their projects.** Kam corrected this seat on it
+   tonight. Checking their work is wanted; doing it is not.
+5. **Tonight's theme, and it recurred five times: checks that describe instead of asserting.** A
+   manifest that recorded the defect and never asserted; a preflight that passes `apiVersion
+   2099-01-01`; a build script exiting 141 on every build; a live-verification toolkit that passes
+   while its probes fail; and this seat typing clocks it never read. **When something is green, ask
+   what would make it red.**
+6. **Two live deadlines:** Partner Center stops serving published packages on **24 September** (this
+   seat owns that download), and Kam's Marketplace preview test is the first thing that will ever
+   exercise the bumped apiVersions.
+
+Everything below is the detail, newest first.
+
+---
+
 **Read this first, before anything you would otherwise choose.** Its OWED section is the session's
 first work. Until 2026-09-16 no boot step named a pickup file for this seat, which is exactly why an
 instruction given to Tuesday used to die at her next rotation while the same instruction to Wednesday
