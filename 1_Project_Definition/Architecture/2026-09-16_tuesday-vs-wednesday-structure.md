@@ -395,3 +395,44 @@ it should be run on **both** seats, not just Wednesday's.
 - **The 54-line `wednesday_rotate.sh` diff's behaviour under Tuesday's seat resolver.**
   I read the diff (the refusal tap + the one-push-before-refusing on containment) and it
   is seat-generic by construction, but I did not exercise it.
+
+---
+
+## ⚠ CORRECTIONS BY WEDNESDAY, 2026-09-16 14:4x — checked against the live thing, not the report
+
+This report is a mental model; the source of truth is the running system. Three of its items were
+checked before acting on them, and two were ahead of it:
+
+1. **R4 was UNDERSTATED, and is now done better than asked.** The report said `chatsync` "is the one
+   job no installer arms". Measured: `install_scheduler.command` arms **three** of the nine —
+   `close`, `shiftchange`, `wake`. The other **six** (`chatsync`, `dailysweep`, `nassync`,
+   `ornith-loop`, `ornith-night`, `ornith-receipt`) had no plist on the drive at all and hardcoded
+   `/Volumes/DevMASTER/WEDNESDAY`, so on another machine launchd loads them and they fail with
+   EX_CONFIG forever, silently. Fixed: `scheduler/jobs/*.plist.template` (tracked, parameterised on
+   `@PROJECT_DIR@` / `@SEAT@`) + `scheduler/install_all_jobs.sh`, which renders and loads all nine
+   for whichever seat runs it. All nine render byte-identical to the live plists, which is what
+   proves the templating faithful. Kam's "30 minutes at the mini" is now one command.
+
+2. **R9(e) is ALREADY BUILT — do not rebuild it.** `night/daily_receipt.sh` already counts DISTINCT
+   pins and tickets from the filenames (never the file total), skips `DRY-RUN ROW`s, names the
+   unresolved tickets individually, and states whether the model is running. Dry-run at 14:4x:
+   *"35 model rounds — 13 passes, 24 fail rounds, 2 ticket(s) still unresolved (KS-1031 KS-1163),
+   0 build-refusals; 19 new pins held today; 77 pins across 53 tickets held for Sunday (79 files);
+   34 harness improvement rows; the model is idle now; Claude allowance at 2%."* The residual is
+   smaller than the report implies: it does not name Kam-HELD cards, and it cannot distinguish a
+   runner that is idle by design from one that is stalled.
+
+3. **A FOURTH CAUSE the report did not find, and it would have undone the other three.** The
+   launcher's boot `git pull` runs only when the tree is CLEAN and otherwise skips with *"If this
+   seat is behind, commit or stash first"* — a condition nobody evaluates. **A coordinator's tree is
+   never clean**, because its dashboard writes data files every minute, so the skip branch is the one
+   that runs at every boot and it says nothing. That is why Tuesday sat 382 commits behind: not that
+   nobody pulled, but that the pull was structurally unreachable. Her seat would have kept booting on
+   last week's copy of R1–R3/R5. Fixed: the skip now fetches (read-only, safe on a dirty tree) and
+   prints the behind-count loudly with what it costs; four arms, including that an empty measurement
+   — a detached HEAD — must not read as "up to date".
+
+**What this says about the report itself:** its measurements were sound and its BLUF was right. The
+two misses are both the same shape — a claim about what EXISTS, written from what was findable in the
+tracked tree, where the answer lived in the loaded launchd set and in a script's runtime behaviour.
+That is the report's own thesis applied to the report.
