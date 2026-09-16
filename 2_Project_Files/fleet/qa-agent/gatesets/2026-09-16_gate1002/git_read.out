@@ -1,0 +1,131 @@
+read at 2026-09-16 22:40:06 AEST
+## checkout bounds (read verbs)
+porcelain 0
+config_sha e0fa706f4bdae2778a5fe5975676f24459c5a3c6455de4ae85aa286f67632d1a
+for_each_ref 877
+## ls-remote
+5b4f38a48aeb40c2295895aaa5cd08e273aa7a08	refs/heads/develop
+a376756aba1e1ae32c49ed47ba057fd80c7ed136	refs/heads/feature/ks-1123-ornith-verify-status-pins
+## base..head raw (whole tree, no renames)
+:000000 100644 000000000 afaa781d4 A	Blockchain/Dev/services/api-gateway/src/__tests__/ks1123-f2-anchor-failed-stale-confidence.test.ts
+:000000 100644 000000000 8c413fba6 A	Blockchain/Dev/services/api-gateway/src/__tests__/ks1123-f3-empty-status-is-off-chain.test.ts
+:100644 100644 91eb74102 c83a2ae27 M	Blockchain/Dev/services/api-gateway/src/routes/verification.ts
+170	0	Blockchain/Dev/services/api-gateway/src/__tests__/ks1123-f2-anchor-failed-stale-confidence.test.ts
+169	0	Blockchain/Dev/services/api-gateway/src/__tests__/ks1123-f3-empty-status-is-off-chain.test.ts
+29	22	Blockchain/Dev/services/api-gateway/src/routes/verification.ts
+## head parent
+80686962828197acf305e4010a2ed5b401285743
+80686962828197acf305e4010a2ed5b401285743
+## base..develop raw (the develop move)
+:000000 100644 000000000 04ab42a65 A	Blockchain/Dev/services/api-gateway/src/__tests__/ks1165-api-gateway-csrf-excludedpaths-carries-no.test.ts
+:100644 100644 1f16e2f89 a81722795 M	Blockchain/Dev/services/api-gateway/src/middleware/csrf.ts
+5b4f38a48aeb40c2295895aaa5cd08e273aa7a08 80686962828197acf305e4010a2ed5b401285743 2026-09-16T22:35:36+10:00 KS-1165: exclude the v2 verify paths from CSRF, as v1's are (#1001)
+## merge-base head develop
+80686962828197acf305e4010a2ed5b401285743
+## blob shas of the 3 files at base / head / develop
+91eb7410213324ea5f7ecc6ea9084cce43c6afaf 806869628 Blockchain/Dev/services/api-gateway/src/routes/verification.ts
+c83a2ae27d7ef03a3c1b0c02246154894064f372 a376756ab Blockchain/Dev/services/api-gateway/src/routes/verification.ts
+91eb7410213324ea5f7ecc6ea9084cce43c6afaf 5b4f38a48 Blockchain/Dev/services/api-gateway/src/routes/verification.ts
+80686962828197acf305e4010a2ed5b401285743:Blockchain/Dev/services/api-gateway/src/__tests__/ks1123-f2-anchor-failed-stale-confidence.test.ts
+ABSENT 806869628 Blockchain/Dev/services/api-gateway/src/__tests__/ks1123-f2-anchor-failed-stale-confidence.test.ts
+afaa781d438bb350b7a33446fb41b528e3363077 a376756ab Blockchain/Dev/services/api-gateway/src/__tests__/ks1123-f2-anchor-failed-stale-confidence.test.ts
+5b4f38a48aeb40c2295895aaa5cd08e273aa7a08:Blockchain/Dev/services/api-gateway/src/__tests__/ks1123-f2-anchor-failed-stale-confidence.test.ts
+ABSENT 5b4f38a48 Blockchain/Dev/services/api-gateway/src/__tests__/ks1123-f2-anchor-failed-stale-confidence.test.ts
+80686962828197acf305e4010a2ed5b401285743:Blockchain/Dev/services/api-gateway/src/__tests__/ks1123-f3-empty-status-is-off-chain.test.ts
+ABSENT 806869628 Blockchain/Dev/services/api-gateway/src/__tests__/ks1123-f3-empty-status-is-off-chain.test.ts
+8c413fba6dd2687f7f0a70f5460aa3560e13d45b a376756ab Blockchain/Dev/services/api-gateway/src/__tests__/ks1123-f3-empty-status-is-off-chain.test.ts
+5b4f38a48aeb40c2295895aaa5cd08e273aa7a08:Blockchain/Dev/services/api-gateway/src/__tests__/ks1123-f3-empty-status-is-off-chain.test.ts
+ABSENT 5b4f38a48 Blockchain/Dev/services/api-gateway/src/__tests__/ks1123-f3-empty-status-is-off-chain.test.ts
+## F1/P1 citations at base 80686962: anchoring index.ts :1590-1600, migrations 001:710-716, 003:24-28
+L+1	    // explicit nulls.
+L+2	    transactionHash: txView.txHash,
+L+3	    ...(txView.simulated ? { simulated: true, simulatedTxRef: txView.simulatedTxRef } : {}),
+L+4	    blockHash: anchor.blockHash ?? null,
+L+5	    blockNumber: anchor.blockNumber ?? null,
+L+6	    slot: anchor.slot,
+L+7	    network: anchor.network,
+L+8	    metadataLabel: anchor.metadataLabel,
+L+9	    status: anchor.status,
+L+10	    confirmations: anchor.confirmations,
+L+11	    confirmedAt: anchor.confirmedAt ?? null,
+L+12	    createdAt: anchor.createdAt,
+L+13	  };
+L+14	}
+L+15	
+-- grep status: anchor.status in anchoring index.ts at base
+541:        status: anchor.status,
+925:    status: anchor.status,
+1596:    status: anchor.status,
+-- grep formatAnchorResponse in anchoring index.ts at base
+1573:function formatAnchorResponse(anchor: Anchor) {
+-- migration 001 path(s): Blockchain/Dev/migrations/001_initial-schema.sql 
+-- migration 003 path(s): Blockchain/Dev/migrations/003_consolidate-anchors.sql Blockchain/Dev/migrations/003_platform_tenancy.sql 
+## anchor counts in the head verification.ts (fixed strings)
+head=1 base=1  <const persistedStatus = (doc as any).blockchain?.status ?? null;>
+head=1 base=1  <: persistedStatus == null && persistedConfidence === 'pending-onchain'>
+head=1 base=1  <(persistedStatus === 'confirmed' || persistedStatus == null),>
+head=1 base=1  <status: latest.status,>
+head=1 base=1  <: confidenceForAnchorStatus(persistedStatus) === 'pending-onchain'>
+head=1 base=1  <persistedStatus === 'confirmed' || >
+head=2 base=2  <persistedStatus == null>
+head=0 base=1  <(line 265)>
+head=0 base=1  <index.ts:1503>
+head=2 base=0  <index.ts:1596>
+head=3 base=3  <BACKLOG #G6>
+-- positive control (a known single line): head=1
+## line numbers at head / base of the load-bearing lines
+head: 601 602 604  base: 595 596 598  <?? null;>
+head: 724  base: 717  <persistedStatus == null && persistedConfidence>
+head: 700  base: 693  <|| persistedStatus == null),>
+head: 312  base: 312  <status: latest.status,>
+head: 264  base: 264  <function makeFetchDocFromAnchorStore>
+head: 249 311 489  base: 202 311 483  <BACKLOG #G6>
+## stale line refs inside the new test files (head numbering check)
+ks1123-f2-anchor-failed-stale-confidence: 4:// The guard at verification.ts:709 (`persistedStatus == null &&`) stops a
+ks1123-f2-anchor-failed-stale-confidence: 8:// The checker reddens these 🔴 cells by replacing line 709 with:
+ks1123-f2-anchor-failed-stale-confidence: 144:    // Under the tamper :709 becomes `persistedConfidence === 'pending-onchain'`
+ks1123-f2-anchor-failed-stale-confidence: 145:    // which is TRUE here → `'pending-onchain'`. At the tip line 709 requires
+ks1123-f2-anchor-failed-stale-confidence: 154:    // No hash → not anchored (line 705 false). `'confirmed'` maps to on-chain via
+ks1123-f2-anchor-failed-stale-confidence: 155:    // confidenceForAnchorStatus (line 707 checks for pending-onchain only), so
+ks1123-f2-anchor-failed-stale-confidence: 156:    // line 707 is false. Line 709 at the tip refuses because persistedStatus !== null.
+ks1123-f2-anchor-failed-stale-confidence: 164:    // Decided by line 707 (`confidenceForAnchorStatus('pending') === 'pending-onchain'`)
+ks1123-f2-anchor-failed-stale-confidence: 165:    // and never reaches line 709. Green both sides of the change.
+ks1123-f3-empty-status-is-off-chain: 3:// null via `??`, because doing so would fire the legacy carve-out at line 685
+ks1123-f3-empty-status-is-off-chain: 148:    // Under the tamper `??` → `||` at :597 this collapses '' to null, fires
+ks1123-f3-empty-status-is-off-chain: 157:    // the same line (:597) decides both tiers identically.
+## existing api-gateway cells that name an empty / 0 / false status (census at head)
+a376756aba1e1ae32c49ed47ba057fd80c7ed136:Blockchain/Dev/services/api-gateway/src/__tests__/auth.test.ts:36:    _status: 0,
+a376756aba1e1ae32c49ed47ba057fd80c7ed136:Blockchain/Dev/services/api-gateway/src/__tests__/contentType.test.ts:45:    _status: 0,
+a376756aba1e1ae32c49ed47ba057fd80c7ed136:Blockchain/Dev/services/api-gateway/src/__tests__/csrf.test.ts:43:    _status: 0,
+a376756aba1e1ae32c49ed47ba057fd80c7ed136:Blockchain/Dev/services/api-gateway/src/__tests__/ks1123-f3-empty-status-is-off-chain.test.ts:150:    const body = await verify({ txHash: REAL_TX, blockHeight: 4242, status: '' });
+a376756aba1e1ae32c49ed47ba057fd80c7ed136:Blockchain/Dev/services/api-gateway/src/__tests__/ks1123-f3-empty-status-is-off-chain.test.ts:158:    const body = await verifyViaAnchorStore({ transactionHash: REAL_TX, blockNumber: 4242, status: '' });
+a376756aba1e1ae32c49ed47ba057fd80c7ed136:Blockchain/Dev/services/api-gateway/src/__tests__/ks480-connector-auth.test.ts:36:    _status: 0,
+a376756aba1e1ae32c49ed47ba057fd80c7ed136:Blockchain/Dev/services/api-gateway/src/__tests__/security.test.ts:58:    _status: 0,
+-- control (status: 'confirmed' hits): 8 files
+## tsconfig exclude
+{
+  "compilerOptions": {
+    "target": "ES2022",
+    "module": "commonjs",
+    "lib": ["ES2022"],
+    "outDir": "./dist",
+    "rootDir": "./src",
+    "strict": true,
+    "noUnusedLocals": true,
+    "noUnusedParameters": true,
+    "esModuleInterop": true,
+    "skipLibCheck": true,
+    "forceConsistentCasingInFileNames": true,
+    "resolveJsonModule": true,
+    "declaration": true,
+    "declarationMap": true,
+    "sourceMap": true
+  },
+  "include": ["src/**/*"],
+  "exclude": ["node_modules", "dist", "src/__tests__"]
+}
+## #1001 test cell count at develop
+7
+## bounds again
+porcelain 0 config_sha e0fa706f4bdae2778a5fe5975676f24459c5a3c6455de4ae85aa286f67632d1a for_each_ref 877
+done at 22:40:10 AEST

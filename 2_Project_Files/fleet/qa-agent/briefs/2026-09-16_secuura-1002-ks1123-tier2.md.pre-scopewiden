@@ -1,0 +1,222 @@
+# QA GATE BRIEF — Secuura/Blockchain PR #1002 (KS-1123) — TIER 2 (through code), ROUND 1 — one tests-and-comments PR, ONE verdict
+
+**Charter — read first, in full:** `/Volumes/DevMASTER/WEDNESDAY/2_Project_Files/fleet/qa-agent/QA_AGENT_CHARTER.md`
+
+Drafted 2026-09-16 22:42:31 AEST (from `date`) by a Wednesday drafting subagent. Every fact below carries its instrument inline. **A claim marked "the seat's mail" or "the PR body" is relayed, not re-derived: it is an input to falsify.** A claim marked "drafter-measured" was read by the drafter through the GitHub REST API (GET only), Linear GraphQL (queries only), read-only `git` verbs on the Secuura checkout, or a local parser run, and it is still yours to re-derive.
+
+**Method exemplar, and its lessons are binding here.** Tonight's #999/#1000 tier-2 gate is the model for this pass: `/Volumes/DevMASTER/!CODING/Testing Agent MAIN/projects/secuura/reports/2026-09-16-ks1130-999-91793e5d4-ks960-1000-ab4a35d75-tier2-r1/report.md`. It is **context, not a prior round** (a different PR); this is **ROUND 1**, so there is no PRIOR ROUND section. Four of its lessons are written into the items below:
+1. comment-only is proven with a **PARSER** (transpile `removeComments` byte compare **and** an AST leaf walk, with controls), never a regex;
+2. `tsc -p services/api-gateway` **excludes `src/__tests__`**, so its rc 0 says nothing about a test file; an **including** program is required;
+3. tampers are placed by **TEXT anchor with count asserted = 1**, run against the **whole suite** with the denominator asserted, and restored **sha256-identical**;
+4. Linear's stored **`attachments.metadata.linkKind`** is re-read: a `closes` on any ticket is a merge-consequence finding, whatever the PR body says.
+
+## WHY TIER 2, AND HOW MUCH
+
+- **Tier 2 (through code), per `0_Brain/learnings/2026-09-05_qa-gate-tiers-and-the-two-nogo-cap.md`:** two new test files plus comment edits in one product file (`routes/verification.ts`). The PR body claims no behaviour change; item 1 asks you to prove the product file is comment-only by parser.
+- **Budget: modest, on purpose.** Tonight Kam capped this account at 40% of weekly usage. Wednesday's commission relays that; the drafter did not re-derive it. **Time-box: about 40 minutes.**
+  - Run the minimum set below and stop there.
+  - If a fixture starts costing real budget, report the check as **NOT RUN with the blocker named**. That is a complete answer.
+- **NOT REQUIRED LEGS, said before running:**
+  - Schemathesis, Akto, Playwright and k6/performance;
+  - docker or the local stack, and preflight legs 3, 4 and 8;
+  - the `packages/shared` suite (the seat claims 43/839; optional, only if trivially cheap).
+
+  This PR changes no route, response, spec, UI or runtime path (item 1 proves that). None of these legs is a coverage gap for this gate. List them under NOT TESTED as *not-applicable (why)*.
+
+## TARGET
+
+**Repo READ-ONLY:** `/Volumes/DevMASTER/!CODING/Secuura/Blockchain/2_Project_Files`.
+- **Clone by SHA into your OWN scratch** (a fresh `mktemp -d`, e.g. `git clone --shared --no-checkout`), and run every write verb there: install or farm, tamper, restore, merge, test.
+- **Never work inside `2_Project_Files` of the Secuura project or any worktree of it.**
+- 🔴 **NEVER run a push, the real pre-push hook, or preflight.sh inside the Secuura checkout or any of its worktrees.**
+
+**The PR is gated at a SHA, not a name. First act: verify the head at origin** (`git ls-remote origin <branch>` plus the PR API `head.sha`). If it differs from the pin below, STOP, mail the moved head, and gate nothing.
+
+| | PR #1002 |
+|---|---|
+| ticket | KS-1123 (Medium, In Progress). The body says **"Part of KS-1123. The ticket stays open"** |
+| branch | `feature/ks-1123-ornith-verify-status-pins` |
+| head | **`a376756aba1e1ae32c49ed47ba057fd80c7ed136`** |
+| parent = merge-base | `80686962828197acf305e4010a2ed5b401285743` (the #999 merge commit; `git rev-parse a376756ab^` and `git merge-base`, drafter 22:40:06) |
+| develop at draft | **`5b4f38a48aeb40c2295895aaa5cd08e273aa7a08`**: develop has ALREADY MOVED past the base (see D1) |
+| compare develop...head | `diverged`, ahead 1, behind 1, files 3 (GitHub compare API, 22:37:43) |
+| files (PR files API) | 3, +368 −22 |
+| reviews / comments | 0 reviews; 1 issue comment, `linear[bot]` |
+| API state 22:37:43 | open, not draft, `mergeable=True/unstable`. Check-runs and commit status both **HTTP 403** with the project token (the #999 gate hit the same). Do not read `unstable` as a finding |
+
+**Files** (PR files API and `git diff --raw --no-renames 80686962 a376756ab`, drafter; both agree, all mode 100644, no other path):
+- `Blockchain/Dev/services/api-gateway/src/routes/verification.ts`: modified, +29 −22 (blob `91eb74102` → `c83a2ae27`);
+- `…/src/__tests__/ks1123-f2-anchor-failed-stale-confidence.test.ts`: added, +170 (blob `afaa781d4`);
+- `…/src/__tests__/ks1123-f3-empty-status-is-off-chain.test.ts`: added, +169 (blob `8c413fba6`).
+
+**Tickets: read them on Linear READ-ONLY** (GraphQL queries, `includeArchived: true`; never a mutation, never a comment).
+- **KS-1123** (the drafter's copy of the description is in the gateset, see PROVENANCE). Its Recommendation items:
+  1. **F3:** one cell, both tiers, `status: ''` with a real hash and height → `verified:false`, `off-chain-only`. Red-proof: `??`→`||`. (The ticket's title and Detail name `""`, `0` **and** `false`: six cells measured by the source gate.)
+  2. **F1:** one tier-2 statusless cell `{transactionHash:null, blockNumber:null}` → off-chain-only ("this is also KS-1073's cell — land it once"), **plus** a reword of the tier-2 comment, with a suggested text ending "answers off-chain-only (closed)".
+  3. **F2:** one tier-1 cell `{txHash:null, blockHeight:0, status:'anchor_failed', confidence:'pending-onchain'}` → off-chain-only.
+  4. **P1–P3:** P1 retire the `(line 265)` pointer; P2 move the BACKLOG #G6 JSDoc above `makeFetchDocFromAnchorStore`; P3 "nothing to change in code".
+  - One comment, `f3cca528` (12:35:17Z), the seat's facts comment: "**This ticket stays open.** F1's tier-2 statusless cell is KS-1073's and lands once, with that ticket's PR."
+- **KS-1073** (Low, **Backlog**, no attachments, inverse-related to KS-1124): *"Tier-2 verify has no statusless-blob cell — the carve-out is unguarded on the tier a third party reaches."* Its fix shape: **"one cell driving a tier-2 anchor whose synthesised blob has no `status`, asserting the carve-out is NOT taken on that tier."** One comment `c90b46a5` records the L3a gate's measurement that the carve-out is fail-OPEN by construction.
+
+**The seat's claims, inputs to falsify.** From seat A's READY FOR QA mail (12:35:18Z, spf/dkim/dmarc pass, read whole by the drafter; you cannot read mail, so it is relayed here) and the PR body (PR API, 22:37:43):
+- **Tamper table** (vitest JSON reporter, 6 cells ran in every row, AssertionErrors only, `verification.ts` restored to its sha after each row, run on the final bytes):
+  - T0 green;
+  - F3 `?? null` → `|| null`: **f3 1/2, f2 3/0**;
+  - F2 guard dropped (`persistedStatus == null &&` removed from the confidence chain): **f2 1/2, f3 3/0**;
+  - T0-after green.
+- `verification.ts`: 51 changed lines, all comment lines (JSDoc move plus F1 and P1 rewords), 0 code lines.
+- api-gateway **40 files / 370 tests** pass; baseline at `80686962` **38 / 364**. shared 839/839. `tsc` rc 0 ("it excludes `__tests__`"). eslint: new files clean; `verification.ts` 5 warnings = develop's.
+- Pre-push preflight: 12/15 legs, 3 SKIPPED (3, 4, 8), nothing failed.
+- **The F1 comment decision the seat flags:** it did NOT use the ticket's "answers off-chain-only (closed)", "because a statusless tier-2 record carrying a real hash and height is still admitted on-chain by the statusless carve-out until KS-1073 narrows it. The comment says that."
+- **NOT covered (the seat's list):** 0/false status cells ("the READY pins `""` only"); F1's cell (KS-1073's, bundle A7); platform suites; preflight legs 3/4/8; no type-check that includes the new test files.
+- **Accommodations:** F2/F3 files renamed per the brief; **one unused `const REAL_TX` removed from F2** (eslint); F3 byte-identical to the READY; P1 fixed by naming the function rather than a line number.
+- **Linear:** "Linear link reads contributes, and only KS-1123 is linked."
+
+## DRAFTER-MEASURED INPUTS (re-derive; a wrong one is Wednesday's error, report it as one)
+
+- **D1 — develop moved before this brief was written; the move is file-disjoint.**
+  - `git ls-remote` at 22:36:56 and the branches API at 22:37:43: develop = `5b4f38a48`, *"KS-1165: exclude the v2 verify paths from CSRF, as v1's are (#1001)"*, merged 12:35:36Z. #999 merged 12:25:17Z (merge commit `80686962`), #1000 merged 12:23:59Z.
+  - `80686962..5b4f38a48` is **1 commit, 2 files**: `services/api-gateway/src/middleware/csrf.ts` (M, blob `1f16e2f89` → `a81722795`) and `…/__tests__/ks1165-api-gateway-csrf-excludedpaths-carries-no.test.ts` (A). **Neither is one of #1002's files**; `verification.ts` at develop is still the base blob `91eb74102`.
+  - **So the post-merge tree is NOT the head tree.** Item 3 asks for a merged-tree suite run. Predicted merged counts: **41 files / 377 tests** (40/370 + the ks1165 file's 7 cells, counted by a regex over `it(` at develop). predicted-by: drafter.
+  - **If develop moves again during your pass**, re-read it, confirm the delta is disjoint from #1002's 3 files, merge the then-current develop onto the head in your clone and re-derive. A delta that touches `verification.ts` or either new file moves your anchors: STOP and mail.
+- **D2 — comment-only, by a parser (drafter, `commentonly_parser.cjs`, typescript 5.9.3 required from the checkout's `node_modules` by path, 22:40:47).**
+  - `verification.ts` base `80686962` vs head: `transpileModule(removeComments)` **identical**; AST leaf walk (JSDoc kinds excluded) **identical, 6935/6935 leaves**; 0/0 parse diagnostics; raw bytes differ.
+  - Controls on the same instrument: F3 tamper and F2 tamper → both instruments differ; a type-only edit (`status: unknown`→`any`) → transpile identical (its blind spot), AST differs; an added line comment and a JSDoc-only edit → both identical; code smuggled out of a comment → both differ; a string-literal edit → both differ.
+  - This is the drafter's instrument. **Re-derive it with your own**, and keep your controls in the report.
+- **D3 — READY bytes (drafter, `ready_vs_head.py` over the local READY diffs, 22:41:13).**
+  - F3: the READY `+` lines are **byte-identical** to the head file (169 lines, sha256 `62829316b961a70b…` both).
+  - F2: the READY has 171 `+` lines, the head 170. The **only** difference is READY line 20, `const REAL_TX = 'a'.repeat(64);`, and `REAL_TX` occurs **0** times at the head. So it was declared and never read.
+  - Curio, not the PR's: the READY hunk headers claim `+200` and `+215` lines for 169 and 171 real lines.
+  - READY files: `/Volumes/DevMASTER/WEDNESDAY/2_Project_Files/local-model/night/READY_KS-1123-F{2,3}_ornith35b-q8_TESTONLY-PASS-7of7_2026-09-15.diff.md`.
+- **D4 — line numbering: the tamper line numbers in the seat's material, the ticket and the new test files are NOT head numbering.**
+  - The ticket's `:597` is stack-head `1b7c03a22` numbering; the new test files cite `:597`, "line 685", `:709` and "line 705/707" (M55 `48e65c435` numbering, per the Ornith brief `local-model/night/briefs/KS-1123.md`).
+  - **Head numbering** (drafter, `grep -n -F` over the head blob): `?? null` status read **`:604`** (base `:598`); the carve-out `(persistedStatus === 'confirmed' || persistedStatus == null),` **`:700`** (base `:693`); the confidence chain `:720` anchored arm, **`:722`** the mapping arm, **`:724`** the F2 guard (base `:717`); tier-2 synthesis `status: latest.status,` **`:312`** (base `:312`).
+  - **Place every tamper by a text anchor with count asserted = 1, never by line number.** Anchors confirmed at count 1 in the head file (and at count 1 in the base):
+    - `const persistedStatus = (doc as any).blockchain?.status ?? null;`
+    - `        : persistedStatus == null && persistedConfidence === 'pending-onchain'`
+    - `(persistedStatus === 'confirmed' || persistedStatus == null),`
+    - `: confidenceForAnchorStatus(persistedStatus) === 'pending-onchain'`
+    - `status: latest.status,`
+  - Stale references inside the NEW test files, as a consequence: the F3 header's "line 685" (head `:700`) and its cells' `:597` (head `:604`); the F2 header's `:709` ×4 and "line 705/707" (head `:724`, `:720`, `:722`). **This PR's own P1 retired a stale line pointer by naming the function**; its new files add eight more. Weigh the severity yourself; the drafter predicts Polish (the same class as the #999 gate's P1-999).
+- **D5 — the F1 comment's citations hold at `80686962` (READ ONLY, `git show` on the checkout).**
+  - `anchoring/src/index.ts:1596` is `status: anchor.status,` inside `function formatAnchorResponse` (`:1573`), and `GET /api/anchors/document/:documentId` (`:954`) maps its rows through it (`:959`).
+  - `migrations/001_initial-schema.sql:714` and `003_consolidate-anchors.sql:26` both read `status TEXT NOT NULL DEFAULT 'pending',`.
+  - `(line 265)` occurs 0 times at head (1 at base); `index.ts:1503` 0 at head (1 at base); `index.ts:1596` 2 at head. The G6 JSDoc now ends at `:263`, directly above `function makeFetchDocFromAnchorStore` at `:264`.
+- **D6 — what the F1 comment claims, and the drafter's READ of it (to be MEASURED by you, item 2).** The new comment at head `:341-349` says a statusless tier-2 record "answers off-chain-only (closed) — unless the record also carries a real hash and height, which the statusless on-chain carve-out still admits (KS-1073)".
+  - Reading at head: the synthesis writes `status: latest.status` (`:312`), so an anchor row with no `status` key yields `undefined`; `?? null` (`:604`) makes it `null`; the carve-out `|| persistedStatus == null` (`:700`) then admits it; `persistedAnchored` is true when the hash is a real 64-hex string, the height a positive integer and `simulated` falsy → `'on-chain'`, `verified:true` (hashValid is `true` when the request carries no `contentHash`, `:558`).
+  - So the seat's caveat is **true by reading**, and the ticket's suggested "(closed)" wording would have been **false** for that shape. A read is not a measurement.
+  - **Two nuances for you to weigh:** (a) the comment names "a real hash and height" but not the third conjunct, `simulated` falsy (anchoring's `honestTxView` nulls the hash on a simulated row, so the omitted case may be unproducible: weigh, do not assume); (b) the untouched sentence of the P1-edited block, head `:694-695`, still says "So a tier-2 blob ALWAYS carries a status and can never reach `== null`", and "Measured: deleting this carve-out reds exactly ONE cell". Item 4's row G4 re-measures that count at this head.
+- **D7 — KS-1073's scope against the comment's attribution (READ ONLY).** KS-1073's fix shape asks for a cell "asserting the carve-out is NOT taken on that tier". By D6's reading the carve-out **is** taken on tier 2 for a statusless record with a real hash and height. So a KS-1073 cell that carries a hash and a height would red at head and needs a product change ("narrows", in the comment's word). A cell with a null hash and height (KS-1123's F1 shape) would be green at head but cannot discriminate the carve-out, because the hash conjunct already fails. Which of those KS-1073 is, and whether "(KS-1073)" is the right owner in the comment, is **not decided by this PR**. Report what the measurement supports, as an input to Wednesday, not as a defect of #1002 unless you find the comment false.
+- **D8 — the 0/false gap, sized by reading.**
+  - A census regex over `src/__tests__` at head (`status: ''|""|0|false`) finds exactly the two F3 `''` cells; the other hits are unrelated `_status: 0` mocks. **A regex census is weak**: re-derive it (for example, `it.each` tables would escape it).
+  - The ticket's named hazard is the `??`→`||` edit. Under it `''`, `0` and `false` all collapse to `null` together, so the two `''` cells already catch that edit. **The gap is a type-sensitive normalisation** that keeps `''` but drops a non-string (for example `typeof s === 'string' ? s : null`): a `0`/`false` status with a real hash and height would then read `null` → carve-out → on-chain, and no committed cell would notice.
+  - Reachability (READ ONLY): tier 2 reads `anchor_store.status TEXT`, so a numeric `0` or boolean `false` cannot arrive through tier 2 from that column; tier 1 reads originate's JSON blob, where the ticket says "`0`/`false` are what a loose JSON writer yields". Item 4's row G3 measures the gap.
+- **D9 — Linear linkage (drafter, 22:37:53 AEST).**
+  - KS-1123 carries attachment `pull/1002`, `sourceType=github`, **`metadata.linkKind = "contributes"`**, created `2026-09-16T12:34:40.077Z`; its history shows the integration walking it Backlog → In Progress at the same instant.
+  - `attachmentsForURL(pull/1002)` returns **exactly 1** attachment, on KS-1123. The PR body mentions KS-1071, KS-1073 and KS-1130 as related; **none** carries a link to #1002. The `linear[bot]` linkback on the PR lists KS-1123 only.
+  - Predicted consequence (needs a merge, so unmeasured): a `contributes` link does not walk KS-1123 to Done, which matches "the ticket stays open". **Re-read `linkKind` for every attachment on `pull/1002` immediately before you mail** (a PR body edit can re-link). A `closes` on any ticket is a merge-consequence finding (evidence class READ ONLY / predicted), the class the #999 gate raised as F1-999 and F1-1000.
+- **D10 — type-check prediction for an including program (drafter READ, unmeasured).** The #999 gate found `TS18046 'body' is of type 'unknown'` wherever a twin did `const body = await r.json(); expect(body.blockchain.source)…`. The F3 file's `verifyViaAnchorStore` has that exact pattern (`f3:139-142`); its `verify()` and all of F2 return `r.json()` from a `Promise<any>` function. Prediction: **1 × TS18046 at f3:142, F2 clean**, and the three #999 twin errors still present at the base (pre-existing, not this PR's). The service tsconfig sets `noUnusedLocals: true`, which is why an unused `REAL_TX` would have been reported.
+
+## LEGITIMATE SHAPES (§2a: the cells are pins; this is their input set)
+
+Tier 1 = the originate document blob (`verify(blob)`); tier 2 = the anchor-store row synthesised by `makeFetchDocFromAnchorStore` (`verifyViaAnchorStore(row)`, tier 1 404s). `REAL` = a 64-hex hash. "Suite-wide" means the whole api-gateway suite at the head.
+
+| shape (ordinary form) | expected at head | clause that yields it | predicted-by |
+|---|---|---|---|
+| T1 `{txHash:REAL, blockHeight:4242, status:'confirmed'}` (F3 control) | `verified:true`, `on-chain` | `:696-700` all four conjuncts | the seat's mail; drafter read |
+| T1 and T2 `{REAL, 4242, status:''}` (F3 🔴 cells) | `verified:false`, `off-chain-only` | `''` is not `null` (`:604 ??`), fails `:700`; `confidenceForAnchorStatus('')` default arm → off-chain-only; `:724` guard false | the seat's mail; drafter read |
+| the same two cells under `?? null` → `\|\| null` | **both red** (on-chain, `verified:true`); control green; **suite-wide exactly 2 reds** | `''` collapses to `null`, carve-out admits | the seat (f3 1/2, f2 3/0); drafter (suite-wide 2) |
+| T1 `{txHash:null, blockHeight:0, status:'anchor_failed', confidence:'pending-onchain'}` and `{null, null, 'confirmed', confidence:'pending-onchain'}` (F2 🔴 cells) | `off-chain-only`, `verified:false` | `:722` mapping is not pending for either; `:724` guard needs `persistedStatus == null` | the seat's mail; drafter read |
+| the F2 cells with the `persistedStatus == null && ` guard dropped | **both red** (`pending-onchain`); F2 control green; suite-wide predicted **2** reds (the source gate saw 0/331 before these cells existed) | stale `confidence` wins at `:724` | the seat (f2 1/2, f3 3/0); drafter (suite-wide) |
+| T1 `{null, null, status:'pending', confidence:'pending-onchain'}` (F2 control) | `pending-onchain` | `:722` mapping arm | the seat's mail; drafter read |
+| the F2 control with the `:722-723` mapping arm removed (aimed at a control) | **F2 control red** (falls to `:724`, status present → off-chain-only); both F2 🔴 cells green; other status-aware cells (ks1057/ks1071 pending rows) predicted red | the control is decided by the mapping arm alone | drafter |
+| **T2 row with NO `status` key, `{transactionHash:REAL, blockNumber:4242}`** (the F1 comment's caveat) | **`on-chain`, `verified:true`**: the carve-out admits it | `:312` → `undefined`; `:604` → `null`; `:700 == null` | **the seat's mail (the F1 comment); drafter read (D6)** |
+| the same T2 statusless row, carve-out `\|\| persistedStatus == null` deleted | `off-chain-only`: proves the carve-out is the clause that admits it | `:700` | drafter |
+| T2 statusless `{transactionHash:null, blockNumber:null}` (KS-1123 F1 / KS-1073 shape) | `off-chain-only`, `verified:false` at head AND with the carve-out deleted (does not discriminate the carve-out) | hash conjunct fails; mapping default; `:724` has no `confidence` to read | ticket KS-1123 item 2; drafter read |
+| T2 statusless `{transactionHash:'tx_sim_…', blockNumber:4242}` | `off-chain-only` | `persistedTxHashIsReal` false | drafter |
+| T1 `{REAL, 4242, status:0}` and `{…, status:false}` at head | `off-chain-only` | `0 ?? null` is `0`; mapping default | the ticket (source gate measured all six); drafter read |
+| the same, under a TYPE-SENSITIVE normalisation `typeof status === 'string' ? status : null` | **on-chain, `verified:true`**, while the committed `''` cells stay green and **0 committed cells red** suite-wide | `0`/`false` → `null` → carve-out | drafter (D8) |
+
+## WHAT THIS GATE MUST ESTABLISH (minimum set)
+
+0. **Heads and substrate.**
+   - The head at origin and the PR API, and develop's tip, as three timestamped readings (start, mid, end) with the branch beside each SHA.
+   - Name the substrate: Node version (drafter's shell: v24.7.0; record `engines`), how dependencies were installed or farmed (the #999 gate farmed `node_modules` from the checkout and disclosed the lag), and your clone path.
+   - Checkout readings at start and end (BOUNDS).
+1. **Scope and no product change.**
+   - `80686962..a376756ab` touches exactly the 3 api-gateway files above. No mode change, no other path.
+   - **Prove `verification.ts` is comment-only with a PARSER, with controls** (D2 is the drafter's run; yours must include at least one control that must differ and one that must stay identical, and the type-only blind spot of a transpile compare).
+2. **Read the diff against KS-1123 and KS-1073.**
+   - Does #1002 deliver what it claims as "Part of KS-1123": F3 (`''` only), F2, the F1 **reword** (not its cell), P1 and P2? Is "the ticket stays open" consistent with what remains owed (F1's cell, and F3's `0`/`false`)?
+   - **Is the F1 comment TRUE? Measure it, do not read it.** In your clone only, add an uncommitted scratch test (copy the F3 file's harness: it has both `verify` and `verifyViaAnchorStore` with the tier-2 source guard) that drives the tier-2 rows from the shapes table: statusless with a REAL hash and height; statusless with null hash and height; statusless with a `tx_sim_` hash; and `status: null` explicitly. Run it at the head, then again with the carve-out deleted (row G4). Report exactly which rows answer on-chain.
+   - Weigh D6's two nuances (the omitted `simulated` conjunct; the untouched "ALWAYS carries a status" sentence) and D7 (KS-1073's scope). The scratch file is **never** committed, and is outside every whole-suite denominator unless you say otherwise.
+   - Are the other rewritten comments true at the base (D5: `index.ts:1596`, `formatAnchorResponse`, migrations 001:714 and 003:26; the G6 JSDoc placement)?
+   - Weigh D4's stale references in the new files.
+3. **Suites, with the merged tree.**
+   - api-gateway at the base `80686962` (seat 38/364), at the head (seat 40/370), and **on the merged tree** (the head merged with the then-current develop in your clone; predicted 41/377, D1). Quote files and cells run beside pass/fail.
+   - `tsc --noEmit -p services/api-gateway` (expected rc 0, and vacuous for test files), **plus an including program** (a scratch tsconfig extending the service one that includes both new files; prove inclusion with `--listFilesOnly`). Separate new errors from pre-existing ones at the base. D10 is the prediction.
+   - eslint on the 3 files at head and base (seat: new files clean; 5 warnings in `verification.ts`, all develop's).
+4. **Tampers, RE-RUN BY YOU on the head tree. The seat's table is measured here, not relayed.**
+   - For every row: place by TEXT anchor with count asserted = 1; assert the file sha256 changed; require 0 parse diagnostics; run the **WHOLE api-gateway suite** with the denominator asserted (40/370 on the head tree); restore the pristine bytes and assert sha256-identical; take a green T0-after. A compile or import error is not a red: read WHY each red is red and why each green is green.
+   - **Minimum rows:**
+     - **T0.**
+     - **S1, the seat's F3:** `const persistedStatus = (doc as any).blockchain?.status ?? null;` → `|| null`. Predicted f3 1/2, f2 3/0, suite-wide 2.
+     - **S2, the seat's F2:** `        : persistedStatus == null && persistedConfidence === 'pending-onchain'` → `        : persistedConfidence === 'pending-onchain'`. Predicted f2 1/2, f3 3/0.
+     - **G1, your own, aimed at a control:** remove the mapping arm (`: confidenceForAnchorStatus(persistedStatus) === 'pending-onchain'` plus its `? 'pending-onchain'` line, as one two-line anchor). Predicted: the **F2 control reds**, both F2 🔴 cells stay green. Both seat rows leave every control green; this row shows whether a control can fail at all. Optional, only if cheap: aim one at the F3 control (drop `persistedStatus === 'confirmed' || ` from `:700`).
+     - **G3, the 0/false gap:** replace the `:604` read with a type-sensitive normalisation (for example `const persistedStatus = typeof (doc as any).blockchain?.status === 'string' ? (doc as any).blockchain.status : null;`). Whole suite, predicted **0 reds**. Then run your scratch `status: 0` and `status: false` tier-1 cells under G3 (predicted on-chain) and at T0 (predicted off-chain-only). **Say whether the seat's "0/false not covered" is a gap worth a finding**, with severity and evidence class, weighing D8's reachability.
+     - **G4, the carve-out:** delete `|| persistedStatus == null` from `(persistedStatus === 'confirmed' || persistedStatus == null),`. Whole suite: re-derive the head comment's own claim "reds exactly ONE cell — the tier-1 `REGRESSION: a legacy statusless blob`". Then run the scratch F1 rows under it (item 2).
+     - **T0-after.**
+5. **Weigh the seat's accommodations.**
+   - The removed `REAL_TX` (D3): 0 references remain, the including tsc shows no `TS6133` in F2, and eslint shows no `no-unused-vars`. Plant a positive control (an unused `const` in F2) that both tools catch, then restore sha-identical, so the absence is measured.
+   - The renames, F3 byte-identity (D3), and P1 fixed by naming the function (D5).
+   - Whether the F2 file's retained `liveAnchorReply` machinery (read by its fetch stub, never set non-null by any cell) is a coverage note or nothing.
+6. **Linear linkage (D9), read-only.** Re-read every attachment on `pull/1002` with `metadata.linkKind`, plus KS-1123's and KS-1073's state, immediately before you mail. Say what a merge is predicted to do, with the evidence class. Never write.
+
+## BOUNDS
+
+- **Findings only.** No fix, commit, push, merge to any remote, deploy, GitHub comment, Linear comment or state change, and no ticket. No contact with Peter or Stuart. (A `git merge` inside your own scratch clone for item 3 is a local read of the future tree, not a merge of the PR.)
+- **Never `rm`.** Use a fresh `mktemp -d` per attempt, and guard every expansion `"${X:?unset}"`.
+- **NEVER print a credential value.**
+  - The GitHub token and the Linear key are read BY NAME (`GH_TOKEN`, `LINEAR_API_KEY`) from `/Volumes/DevMASTER/!CODING/Secuura/Blockchain/4_Credentials/.env`, used in a request header, and never echoed, logged or written to a file.
+  - GET and GraphQL queries only.
+- **No memory maintenance inside this gate session.**
+- **Checkout readings at start and at end,** from the Secuura checkout, read verbs only. Start and end must match (drafter at 22:40:06: porcelain 0, `.git/config` sha256 `e0fa706f4bdae2778a5fe5975676f24459c5a3c6455de4ae85aa286f67632d1a`, for-each-ref 877; the ref count moves as seats push, so compare YOUR start with YOUR end).
+  - `git --no-optional-locks status --porcelain | wc -l`;
+  - `shasum -a 256 .git/config`;
+  - `git for-each-ref | wc -l`.
+
+## KNOWN-FRAGILE / KNOWN-CHANGED
+
+- 🔴 **Your tool shell's `grep` may be a SHELL FUNCTION.** Use `/usr/bin/grep`, case-insensitive for prose, with a same-file positive control.
+- **zsh quirks:** there is no `PIPESTATUS`; unquoted list variables do not word-split; an unmatched glob aborts; `echo ======` aborts; `"$VAR:path"` is a modifier.
+- **Develop is live.** It moved once before this brief (D1). Seat A's next items (the seat's mail) are an F-2 ticket, an F-1 follow-up PR for KS-1165 and A5 KS-932. None is expected to touch #1002's files; verify, do not assume.
+- The F3 file's global `fetch` stub is a synchronous function returning a plain object (awaited, so it works); the F2 file's is async. Neither drives the live chain scan to a hit. So every cell here is about PERSISTED evidence; `liveAnchored` is never exercised. State that in coverage; it is not a finding by itself.
+- JSON drops `undefined` keys: to model a statusless tier-2 row, **omit** the `status` key, and model `status: null` as a separate row.
+- Recent changes, do NOT flag as new: #999's twin cells and comment rewrites (gated tonight, GO WITH FINDINGS); #1001's csrf.ts change (gated tonight, GO WITH FINDINGS per Wednesday's commit `36aa7cbe3`, merged).
+
+## REPORT
+
+- **FOUND / TESTED / HOW**, with controls. Every finding that recommends an action carries its evidence class (**MEASURED AT RUNTIME / PROBED / READ ONLY**).
+- **NOT TESTED** at the same prominence, including the not-required legs as *not-applicable (why)*.
+- The head readings, the tamper rows YOU ran (cells run, pass/fail, and why each red is red), the F1 scratch-cell results, and a disposition for every seat claim (re-derived / could not / contradicted).
+- **If a claim in this brief is false, that is Wednesday's error: report it as one.** D1–D10 and the `drafter` rows of the shapes table are the drafter's claims.
+- Write to `/Volumes/DevMASTER/!CODING/Testing Agent MAIN/projects/secuura/reports/2026-09-16-ks1123-1002-a376756ab-tier2-r1/`, and name the absolute path in the mail.
+
+**Verdict:** GO · GO WITH FINDINGS · NO GO. Severity per the charter.
+
+## VERDICT DESTINATION
+
+**Mail your verdict to `wednesday-agent@agentmail.to`.** Send ONE mail, subject:
+`[QA -> Wednesday] TIER 2 GATE #1002 ROUND 1 (KS-1123) a376756ab -- <VERDICT>`.
+Include a CLOSING section naming anything you want acted on. **Your pane has no scrollback and you cannot receive mail: the verdict mail is the only thing that survives your session.**
+
+PROVENANCE:
+- #1002 open, not draft, head equal to the pin, parent and merge-base `80686962`, 1 commit, 3 files +368 −22, 0 reviews, 1 `linear[bot]` comment, `mergeable=True/unstable`, check-runs and status 403; develop `5b4f38a48` = #1001's merge; #999 and #1000 merged | GitHub REST pulls, pull-files, pull-commits, reviews, issue-comments, compare, branches, contents and check endpoints, GET only, run by the drafter (`/Volumes/DevMASTER/WEDNESDAY/2_Project_Files/fleet/qa-agent/gatesets/2026-09-16_gate1002/gh_read.py`, output `gh_read.out` and `gh/` beside it) | read 2026-09-16 22:37:43 AEST
+- D1 develop delta and blobs; D4 head and base line numbers and anchor counts; D5 anchoring and migration citations; D8 census; the tsconfig `exclude`; checkout bounds | read-only `git` verbs on the Secuura checkout (`gatesets/2026-09-16_gate1002/git_read.sh`, output `git_read.out`) and `git ls-remote` | read 2026-09-16 22:36:56 and 22:40:06 AEST
+- D2 comment-only by parser, with controls | `gatesets/2026-09-16_gate1002/commentonly_parser.cjs`, output `commentonly_parser.out` | run 2026-09-16 22:40:47 AEST
+- D3 READY-versus-head bytes | `gatesets/2026-09-16_gate1002/ready_vs_head.py`, output `ready_vs_head.out`, over the local READY diffs | run 2026-09-16 22:41:13 AEST
+- D6, D7, D10 and the shapes table's `drafter` rows | the drafter's read of the head blob (`gatesets/2026-09-16_gate1002/verification.head.ts`) and both new test files; no code executed | read 2026-09-16 22:38–22:42 AEST
+- D9 linkage, KS-1123 and KS-1073 text, comments, state and history | Linear GraphQL `issue` and `attachmentsForURL` queries plus the GitHub `linear[bot]` linkback, run by the drafter (`gatesets/2026-09-16_gate1002/linear_read.py`, output `linear_read.out` and `linear/`) | read 2026-09-16 22:37:53 AEST
+- The seat's claims, tamper table, F1 decision, NOT-covered list and accommodations | seat A READY FOR QA mail 2026-09-16T12:35:18Z, structured spf/dkim/dmarc pass, saved verbatim by Wednesday (copy: `gatesets/2026-09-16_gate1002/ready_1002.md`) and read whole by the drafter; the PR body via the PR API | read 2026-09-16
+- Method lessons (parser, including tsc, anchors + whole suite + sha restore, `linkKind`) | the #999/#1000 tier-2 report named at the top of this brief | read 2026-09-16
+- The 40% usage cap and the ~40-minute time-box | Wednesday's commission to the drafter, relayed, not re-derived | read 2026-09-16

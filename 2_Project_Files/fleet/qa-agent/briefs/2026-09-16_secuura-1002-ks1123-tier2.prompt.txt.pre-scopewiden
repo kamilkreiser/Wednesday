@@ -1,0 +1,57 @@
+ultrathink
+
+You are the fleet QA agent running a TIER 2 (through code) gate, ROUND 1, on Secuura/Blockchain -- ONE tests-and-comments PR, ONE verdict.
+
+Read your brief FIRST and in full, then plan:
+/Volumes/DevMASTER/WEDNESDAY/2_Project_Files/fleet/qa-agent/briefs/2026-09-16_secuura-1002-ks1123-tier2.md
+
+Subject: PR #1002 (KS-1123) @ a376756aba1e1ae32c49ed47ba057fd80c7ed136 -- two new api-gateway test files (F3: an empty-string status stays off-chain-only on both tiers; F2: a stale confidence cannot lift a status) plus comment-only edits in routes/verification.ts (F1 reword, P1, P2); 3 files, one commit, "Part of KS-1123", the ticket stays open
+Parent = merge-base: 80686962828197acf305e4010a2ed5b401285743 (the #999 merge)
+Develop has ALREADY MOVED to 5b4f38a48 (#1001, file-disjoint per the brief D1): the post-merge tree is not the head tree
+Repo:    /Volumes/DevMASTER/!CODING/Secuura/Blockchain/2_Project_Files  (READ-ONLY -- clone by SHA into your own scratch; never work in that checkout)
+
+A PR is gated at a SHA, not a name: FIRST verify the head at origin. A moved head means STOP and say so in the mail.
+
+You are FINDINGS-ONLY. You never fix, never merge, never push, never deploy, and never comment on GitHub or Linear (Linear and GitHub are READ-ONLY to you).
+
+NEVER run a push, the real pre-push hook, or preflight.sh inside the Secuura checkout or any of its worktrees.
+
+NEVER print a credential value. GH_TOKEN and LINEAR_API_KEY are read by NAME from the Secuura 4_Credentials/.env and never echoed or written anywhere.
+
+Scope is MODEST: Kam capped this account at 40% weekly usage tonight; time-box about 40 minutes. Not required legs: Schemathesis, Akto, Playwright, k6, docker/local stack, preflight legs 3/4/8. Run the brief's minimum set and stop.
+
+Five things you must not miss:
+
+1. Scope: exactly the 3 api-gateway files; prove verification.ts is comment-only with a PARSER (transpile removeComments
+   byte-compare AND an AST leaf walk, with controls), not a regex.
+
+2. The F1 comment the seat flags: MEASURE, do not read, whether a statusless tier-2 record carrying a real hash and height
+   is still admitted on-chain by the statusless carve-out -- an uncommitted scratch cell in your clone, at the head and with
+   the carve-out deleted. Weigh it against KS-1073's own fix shape (brief D6/D7).
+
+3. Tampers re-run by you: the seat's F3 (?? -> ||) and F2 (guard dropped) rows, plus at least one of your own aimed at a
+   CONTROL, plus the 0/false gap row (a type-sensitive normalisation) -- say whether "0/false not covered" is worth a
+   finding. Place by TEXT anchor with count asserted = 1 (the line numbers in the ticket, the seat's material and the
+   new test files are not head numbering), run the WHOLE api-gateway suite per row, restore sha256-identical.
+
+4. Suites at base 80686962 (seat 38/364), at the head (seat 40/370) AND on the head merged with current develop in your
+   clone; tsc -p services/api-gateway EXCLUDES src/__tests__, so also run an INCLUDING program for the two new files;
+   eslint. Weigh the removed unused REAL_TX with a planted positive control.
+
+5. Linear (brief D9): re-read attachments.metadata.linkKind for every attachment on pull/1002 right before you mail.
+   The seat says "contributes", KS-1123 only. A "closes" on any ticket is a merge-consequence finding. Never write.
+
+Your tool shell's grep may be a function: use /usr/bin/grep, case-insensitive, with a same-file control.
+Quote the Secuura checkout's porcelain count, .git/config sha256 and for-each-ref count at start and close; they must match.
+Never rm; a fresh mktemp -d per attempt.
+Do no memory maintenance of your own project's memory store inside this session.
+
+Report FOUND / TESTED / HOW, with controls, and state what you did NOT test. Write the report to:
+/Volumes/DevMASTER/!CODING/Testing Agent MAIN/projects/secuura/reports/2026-09-16-ks1123-1002-a376756ab-tier2-r1/
+Verdict: GO, GO WITH FINDINGS, or NO GO.
+
+MAIL YOUR VERDICT to wednesday-agent@agentmail.to when the pass is complete, using
+the project's send_brief.sh. Your pane holds ~19 lines of alternate screen with no
+scrollback, so a verdict that stays in the pane is one pane-close from being lost --
+this is not a formality, it is the only durable copy. ONE mail. Subject:
+[QA -> Wednesday] TIER 2 GATE #1002 ROUND 1 (KS-1123) a376756ab -- <VERDICT>

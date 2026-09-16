@@ -1,0 +1,149 @@
+#!/bin/bash
+# launch_qa_secuura_ks1123_1002.sh — cross-project QA agent, ONE TIER 2 (through code) gate, ROUND 1, over Secuura/Blockchain
+# PR #1002 (KS-1123, Seat A) @ a376756aba1e1ae32c49ed47ba057fd80c7ed136, branch feature/ks-1123-ornith-verify-status-pins —
+# ONE commit on develop 80686962, 3 files under services/api-gateway: two new test files (F3 empty-string status, F2
+# stale confidence) plus comment-only edits in routes/verification.ts (F1 reword, P1, P2). "Part of KS-1123".
+#
+# THE SHAPE, as read 22:36-22:40 AEST 2026-09-16 (git + the compare API agree): the head's parent is 80686962 = its
+# merge-base with develop. Develop had ALREADY moved to 5b4f38a48 (#1001: csrf.ts + one api-gateway test, disjoint from
+# #1002's files). The compare develop...head is asserted as merge_base + ahead + files (exit 10); `behind` is
+# deliberately NOT asserted, so develop moving on does not trip it. A landed PR reads ahead=0 and refuses there.
+#
+# exit 18 (the develop arm): develop MAY move — the brief tells the gate to merge the then-current develop onto the head
+# in its clone and re-derive — but a move that touches one of #1002's 3 files, the api-gateway vitest/tsconfig/package
+# files or the Dev lockfile re-anchors the tampers or changes the substrate, so it refuses (as does an unjudgeable move).
+#
+# Adapted from launch_qa_secuura_ks1130_999_ks960_1000.sh by gen_launcher_1002.py (asserted substitutions, residual
+# guard, positive controls, heredoc check, bash -n): the same guards and exit codes collapsed to ONE head — exit 6 (the
+# head moved), exits 13/10 (compare unreadable / changed), exit 20 (brief or prompt does not name the head SHA),
+# exit 21 (the LAUNCH path refuses a non-TTY stdin), exit 12 (the prompt must name wednesday-agent@agentmail.to) —
+# plus exit 18 above.
+#
+# Written by the generator because it contains a legitimate `cd`.
+#
+# Usage: launch_qa_secuura_ks1123_1002.sh [--check]
+# Exit: 0 launched (or guards passed under --check) · 2..18, 20, 21 a guard refused
+set -u
+
+QA_DIR='/Volumes/DevMASTER/!CODING/Testing Agent MAIN'
+WED='/Volumes/DevMASTER/WEDNESDAY'
+BRIEF="${QA1002_BRIEF:-$WED/2_Project_Files/fleet/qa-agent/briefs/2026-09-16_secuura-1002-ks1123-tier2.md}"
+PROMPT_FILE="${QA1002_PROMPT:-$WED/2_Project_Files/fleet/qa-agent/briefs/2026-09-16_secuura-1002-ks1123-tier2.prompt.txt}"
+REPO='/Volumes/DevMASTER/!CODING/Secuura/Blockchain/2_Project_Files'
+SECUURA_ENV='/Volumes/DevMASTER/!CODING/Secuura/Blockchain/4_Credentials/.env'
+BRANCH='refs/heads/feature/ks-1123-ornith-verify-status-pins'
+HEAD_SHA="${QA1002_HEAD:-a376756aba1e1ae32c49ed47ba057fd80c7ed136}"
+MERGE_BASE='80686962828197acf305e4010a2ed5b401285743'   # the head's parent = its merge-base with develop
+DEVELOP_SHA='5b4f38a48aeb40c2295895aaa5cd08e273aa7a08'   # develop at draft time, #1001 merged (read 22:36:56 and 22:40:06 AEST)
+REAL_BRIEF="$WED/2_Project_Files/fleet/qa-agent/briefs/2026-09-16_secuura-1002-ks1123-tier2.md"
+
+[ -d "$QA_DIR" ]         || { echo "QA project missing: $QA_DIR" >&2; exit 2; }
+[ -s "$BRIEF" ]          || { echo "brief missing or empty: $BRIEF" >&2; exit 3; }
+[ -s "$PROMPT_FILE" ]    || { echo "prompt file missing or empty: $PROMPT_FILE" >&2; exit 4; }
+[ -d "$REPO" ]           || { echo "repo under test missing: $REPO" >&2; exit 5; }
+
+# The head, pinned at its branch on origin (one ls-remote; exit 6).
+LSR="$(git -C "$REPO" ls-remote origin "$BRANCH")"
+if ! printf '%s\n' "$LSR" | grep -q "^${HEAD_SHA}[[:space:]]${BRANCH}\$"; then
+  echo "REFUSING: #1002 head $HEAD_SHA is not at $BRANCH on origin — the head moved; the brief is about a different SHA" >&2
+  printf '%s\n' "$LSR" >&2
+  exit 6
+fi
+
+# The compare develop...head (GitHub compare API), asserted as merge_base + ahead + files; NOT behind (see the header).
+# exit 13 unreadable, exit 10 changed.
+COMPARE="$(
+  set -a; . "$SECUURA_ENV"; set +a
+  HEAD_SHA="$HEAD_SHA" python3 - <<'PY'
+import json, os, urllib.request
+t = os.environ.get("GH_TOKEN", "")
+u = "https://api.github.com/repos/Secuura/Distributed_Secuura/compare/develop..." + os.environ["HEAD_SHA"]
+r = urllib.request.urlopen(urllib.request.Request(u, headers={"Authorization": "Bearer " + t, "Accept": "application/vnd.github+json"}), timeout=60)
+c = json.load(r)
+print("%s ahead=%d files=%d" % (c["merge_base_commit"]["sha"], c["ahead_by"], len(c.get("files") or [])))
+PY
+)"
+[ -n "$COMPARE" ] || { echo "REFUSING: could not read the compare develop...#1002 from the GitHub compare API" >&2; exit 13; }
+[ "$COMPARE" = "$MERGE_BASE ahead=1 files=3" ] || { echo "REFUSING: #1002 develop...head reads '$COMPARE', brief pins '$MERGE_BASE ahead=1 files=3'" >&2; exit 10; }
+
+# The develop arm (exit 18). Develop MAY move; a move touching a GUARDED path, or one that cannot be judged, refuses.
+CUR_DEV="$(git -C "$REPO" ls-remote origin refs/heads/develop | cut -f1)"
+[ -n "$CUR_DEV" ] || { echo "REFUSING: could not read origin develop (git ls-remote)" >&2; exit 18; }
+if [ "$CUR_DEV" = "$DEVELOP_SHA" ]; then
+  DEV_NOTE="origin develop still $DEVELOP_SHA (the draft reading: #1001 merged, file-disjoint from #1002; the gate runs the merged tree)"
+else
+  DEV_JUDGEMENT="$(
+    set -a; . "$SECUURA_ENV"; set +a
+    DEVELOP_SHA="$DEVELOP_SHA" CUR_DEV="$CUR_DEV" python3 - <<'PYJ'
+import json, os, urllib.request
+t = os.environ.get("GH_TOKEN", "")
+u = "https://api.github.com/repos/Secuura/Distributed_Secuura/compare/" + os.environ["DEVELOP_SHA"] + "..." + os.environ["CUR_DEV"]
+try:
+    c = json.load(urllib.request.urlopen(urllib.request.Request(u, headers={"Authorization": "Bearer " + t, "Accept": "application/vnd.github+json"}), timeout=60))
+except Exception as e:
+    print("UNJUDGEABLE compare unreadable: " + type(e).__name__)
+    raise SystemExit(0)
+files = [f["filename"] for f in (c.get("files") or [])]
+if c.get("status") != "ahead" or len(files) >= 300:
+    print("UNJUDGEABLE status=%s files=%d" % (c.get("status"), len(files)))
+    raise SystemExit(0)
+D = "Blockchain/Dev/"
+GUARDED = [D + "services/api-gateway/src/routes/verification.ts",
+           D + "services/api-gateway/src/__tests__/ks1123-f2-anchor-failed-stale-confidence.test.ts",
+           D + "services/api-gateway/src/__tests__/ks1123-f3-empty-status-is-off-chain.test.ts",
+           D + "services/api-gateway/vitest.config.ts",
+           D + "services/api-gateway/vitest.setup.ts",
+           D + "services/api-gateway/tsconfig.json",
+           D + "services/api-gateway/package.json",
+           D + "package-lock.json"]
+hits = sorted(f for f in files if f in GUARDED)
+if hits:
+    print("GUARDED " + " ".join(hits))
+    raise SystemExit(0)
+print("OK origin develop MOVED %s -> %s: commits=%d files=%d, none on the GUARDED list; the gate merges the then-current develop onto the head in its clone and re-derives, brief D1 and item 3" % (os.environ["DEVELOP_SHA"][:9], os.environ["CUR_DEV"][:9], c["ahead_by"], len(files)))
+PYJ
+  )"
+  case "$DEV_JUDGEMENT" in
+    OK*) DEV_NOTE="${DEV_JUDGEMENT#OK }" ;;
+    *) echo "REFUSING: origin develop is at $CUR_DEV (pinned $DEVELOP_SHA) and the move is not provably clear of #1002: ${DEV_JUDGEMENT:-no judgement} — confirm the delta, then re-pin deliberately (launcher DEVELOP_SHA + brief D1 + prompt)" >&2
+       exit 18 ;;
+  esac
+fi
+
+grep -q 'TIER 2' "$BRIEF" && grep -q 'TIER 2' "$PROMPT_FILE" || { echo "REFUSING: brief and prompt disagree about the tier" >&2; exit 7; }
+grep -q 'ROUND 1' "$BRIEF" && grep -q 'ROUND 1' "$PROMPT_FILE" || { echo "REFUSING: brief and prompt disagree about the round" >&2; exit 15; }
+head -1 "$PROMPT_FILE" | grep -q 'ultrathink' || { echo "REFUSING: prompt does not open with the thinking directive" >&2; exit 8; }
+grep -qF "$REAL_BRIEF" "$PROMPT_FILE" || { echo "REFUSING: prompt does not name the brief path" >&2; exit 9; }
+grep -qF "$HEAD_SHA" "$PROMPT_FILE" && grep -qF "$HEAD_SHA" "$BRIEF" \
+  || { echo "REFUSING: brief or prompt does not name the head SHA $HEAD_SHA — a gate about another SHA is another gate" >&2; exit 20; }
+grep -qi 'MAIL YOUR VERDICT' "$PROMPT_FILE" && grep -qF 'wednesday-agent@agentmail.to' "$PROMPT_FILE" \
+  || { echo "REFUSING: prompt does not tell the agent to MAIL its verdict to wednesday-agent@agentmail.to" >&2; exit 12; }
+grep -qi 'NEVER run a push, the real pre-push hook, or preflight.sh inside the Secuura checkout' "$PROMPT_FILE" \
+  || { echo "REFUSING: prompt does not forbid pushing / running the hook in the real checkout" >&2; exit 11; }
+grep -qi 'no memory maintenance' "$PROMPT_FILE" \
+  || { echo "REFUSING: prompt does not forbid memory maintenance inside the gate session" >&2; exit 14; }
+grep -qi 'NEVER print a credential value' "$PROMPT_FILE" \
+  || { echo "REFUSING: prompt does not forbid printing a credential value" >&2; exit 17; }
+
+if [ "${1:-}" = "--check" ]; then
+  echo "all guards pass:"
+  echo "  #1002 head $HEAD_SHA present at $BRANCH on origin"
+  echo "  compare (GitHub API): develop...#1002 = $COMPARE"
+  echo "  $DEV_NOTE"
+  echo "  brief, prompt, QA project and repo all present"
+  echo "  brief and prompt agree on TIER 2 and ROUND 1"
+  echo "  prompt opens with the thinking directive and names the brief"
+  echo "  brief and prompt both name the head SHA"
+  echo "  prompt tells the agent to MAIL its verdict to wednesday-agent@agentmail.to"
+  echo "  prompt forbids pushing / the real hook / preflight in the Secuura checkout"
+  echo "  prompt forbids memory maintenance inside the gate session"
+  echo "  prompt forbids printing a credential value"
+  echo "  a launch (not --check) will refuse unless stdin is a TTY (exit 21)"
+  exit 0
+fi
+
+[ -t 0 ] || { echo "REFUSING: stdin is not a TTY — this launcher execs an interactive agent; run it in a cockpit pane, never inside a Bash tool" >&2; exit 21; }
+[ -z "${QA1002_BRIEF:-}${QA1002_PROMPT:-}${QA1002_HEAD:-}" ] || { echo "REFUSING: a launch with test overrides set" >&2; exit 16; }
+echo "$DEV_NOTE" >&2
+cd "$QA_DIR" || { echo "cannot enter $QA_DIR" >&2; exit 16; }
+exec claude --dangerously-skip-permissions --model opus "$(cat "$PROMPT_FILE")"

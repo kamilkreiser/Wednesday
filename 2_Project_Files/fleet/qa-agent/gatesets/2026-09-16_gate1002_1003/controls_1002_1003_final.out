@@ -1,0 +1,24 @@
+controls at 2026-09-16 22:59:11 AEST scratch /private/tmp/claude-501/-Volumes-DevMASTER-WEDNESDAY/9aed5a67-2729-4892-b685-13ab87142a58/scratchpad/ctl10021003.OTlj6S
+residual-guard positive control on the TEMPLATE: total hits 87 tokens with >=1 hit 17 of 17
+    REFUSING: #1002 head 0000000000000000000000000000000000000000 is not at refs/heads/feature/ks-1123-ornith-verify-status-pins on origin — the head moved; the brief is about a different SHA
+    a376756aba1e1ae32c49ed47ba057fd80c7ed136	refs/heads/feature/ks-1123-ornith-verify-status-pins
+neg1 (QA1002_HEAD wrong) rc=6 expect 6 PASS
+    REFUSING: #1003 head 0000000000000000000000000000000000000000 is not at refs/heads/feature/ks-1165-f1-real-app-mount-cell on origin — the head moved; the brief is about a different SHA
+    c5488a6891e6ac6fe950c101196d8c33ab8e173f	refs/heads/feature/ks-1165-f1-real-app-mount-cell
+neg1b (QA1003_HEAD wrong) rc=6 expect 6 PASS
+    REFUSING: brief or prompt does not name the head SHA c5488a6891e6ac6fe950c101196d8c33ab8e173f — a gate about another SHA is another gate
+neg2 (prompt lacks full #1003 SHA) rc=20 expect 20 PASS
+    REFUSING: prompt does not tell the agent to MAIL its verdict to wednesday-agent@agentmail.to
+neg3 (prompt lacks verdict destination) rc=12 expect 12 PASS
+    REFUSING: prompt does not name the brief path
+neg4 (the #1002-only prompt, pre-scopewiden) rc=9 expect 9 PASS
+    REFUSING: #1002 head c5488a6891e6ac6fe950c101196d8c33ab8e173f is not at refs/heads/feature/ks-1123-ornith-verify-status-pins on origin — the head moved; the brief is about a different SHA
+    a376756aba1e1ae32c49ed47ba057fd80c7ed136	refs/heads/feature/ks-1123-ornith-verify-status-pins
+neg5 (#1003 head pinned as #1002) rc=6 expect 6 PASS
+copy6 DEVELOP_SHA lines: 1
+    REFUSING: origin develop is at 5b4f38a48aeb40c2295895aaa5cd08e273aa7a08 (pinned 80686962828197acf305e4010a2ed5b401285743) and the move is not provably clear of #1002/#1003: GUARDED Blockchain/Dev/services/api-gateway/src/__tests__/ks1165-api-gateway-csrf-excludedpaths-carries-no.test.ts Blockchain/Dev/services/api-gateway/src/middleware/csrf.ts — confirm the delta, then re-pin deliberately (launch
+neg6 (develop moved across csrf.ts) rc=18 expect 18 PASS
+copy7 DEVELOP_SHA lines: 1 CUR_DEV lines: 1
+      origin develop MOVED 0b25f823f -> 4ec051032: commits=1 files=1, none on the GUARDED list; the gate merges the then-current develop onto each head in its clone and re-derives, brief D1 and item 4
+pos7 (develop moved, disjoint) rc=0 expect 0 PASS
+done 23:00:24 AEST

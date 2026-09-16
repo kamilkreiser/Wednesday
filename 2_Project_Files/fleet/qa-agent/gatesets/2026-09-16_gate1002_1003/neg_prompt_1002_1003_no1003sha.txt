@@ -1,0 +1,65 @@
+ultrathink
+
+You are the fleet QA agent running a TIER 2 (through code) gate, ROUND 1, on Secuura/Blockchain -- TWO test-only PRs in ONE pass, with ONE verdict PER PR.
+
+Read your brief FIRST and in full, then plan:
+/Volumes/DevMASTER/WEDNESDAY/2_Project_Files/fleet/qa-agent/briefs/2026-09-16_secuura-1002-1003-ks1123-ks1165-tier2.md
+
+Subject 1: PR #1002 (KS-1123) @ a376756aba1e1ae32c49ed47ba057fd80c7ed136 -- two new api-gateway test files (F3 empty-string status; F2 stale confidence) plus comment-only edits in routes/verification.ts (F1 reword, P1, P2); 3 files, one commit on 80686962828197acf305e4010a2ed5b401285743; "Part of KS-1123", the ticket stays open
+Subject 2: PR #1003 (KS-1165) @ c5488a689 -- a new real-app CSRF mount-order test file plus a comment-only header fix in the merged composed ks1165 test; 2 files, one commit on 5b4f38a48aeb40c2295895aaa5cd08e273aa7a08; "Closes KS-1165"
+The two PRs have DIFFERENT bases and must share no file. Develop is 5b4f38a48 (#1001 merged).
+Repo:    /Volumes/DevMASTER/!CODING/Secuura/Blockchain/2_Project_Files  (READ-ONLY -- clone by SHA into your own scratch; never work in that checkout)
+
+A PR is gated at a SHA, not a name: FIRST verify both heads at origin. A moved head means STOP for that PR and say so in the mail.
+
+You are FINDINGS-ONLY. You never fix, never merge, never push, never deploy, and never comment on GitHub or Linear (Linear and GitHub are READ-ONLY to you).
+
+NEVER run a push, the real pre-push hook, or preflight.sh inside the Secuura checkout or any of its worktrees.
+
+NEVER print a credential value. GH_TOKEN and LINEAR_API_KEY are read by NAME from the Secuura 4_Credentials/.env and never echoed or written anywhere.
+
+Scope is MODEST: Kam capped this account at 40% weekly usage tonight; time-box about 45 minutes for both PRs, with the priority order in the brief. Not required legs: Schemathesis, Akto, Playwright, k6, docker/local stack, preflight legs 3/4/8, a production import. Run the brief's minimum set and stop.
+
+Six things you must not miss:
+
+1. Scope: exactly 3 files for #1002 and 2 for #1003, none shared. Prove #1002's verification.ts AND #1003's composed-test
+   header edit are comment-only with a PARSER (transpile removeComments byte-compare AND an AST leaf walk, with
+   controls), not a regex.
+
+2. #1003 (a)(b)(c): re-run the #1001 gate's T3 (index.ts NODE_ENV !== 'test' -> === 'production') and T4 (real protect
+   moved below enforceJsonContentType, decoy comment left at the old line): the new real-app cells must go RED while the
+   composed file stays 7/7. T1 (v2 entry removed from csrf.ts) must red the real-app v2 cell. The seat's T5 (CSRF mounted
+   unconditionally) must red exactly the two NODE_ENV=test controls -- confirm they really assert 0 CSRF layers and a
+   401. Anchors are the #1001 gate's run_tampers.py pairs (brief E2); two different tampers are both called "T5".
+
+3. #1002's F1 comment: MEASURE, do not read, whether a statusless tier-2 record carrying a real hash and height is
+   still admitted on-chain by the statusless carve-out -- an uncommitted scratch cell in your clone, at the head and
+   with the carve-out deleted. Weigh it against KS-1073's fix shape (brief D7/D8).
+
+4. #1002 tampers: the seat's F3 (?? -> ||) and F2 (guard dropped) rows, one of your own aimed at a CONTROL, and the
+   0/false gap row (a type-sensitive normalisation) -- say whether "0/false not covered" is worth a finding. Every row:
+   TEXT anchor with count asserted = 1 (the line numbers in the tickets, the seats' material and the new test files are
+   not head numbering), the WHOLE api-gateway suite, restore sha256-identical.
+
+5. Suites: each PR on its own base and head, each head merged with current develop, and develop + #1002 + #1003 together
+   in your clone. tsc -p services/api-gateway EXCLUDES src/__tests__, so also run an INCLUDING program for all three new
+   test files; eslint. Weigh #1002's removed unused REAL_TX with a planted positive control.
+
+6. Linear (brief D2): re-read attachments.metadata.linkKind on pull/1002 and pull/1003 right before you mail. #1002
+   should read "contributes" on KS-1123 only; #1003 "closes" on KS-1165 is INTENDED. A "closes" on any OTHER ticket, for
+   either PR, is a merge-consequence finding. Never write.
+
+Your tool shell's grep may be a function: use /usr/bin/grep, case-insensitive, with a same-file control.
+Quote the Secuura checkout's porcelain count, .git/config sha256 and for-each-ref count at start and close; they must match.
+Never rm; a fresh mktemp -d per attempt.
+Do no memory maintenance of your own project's memory store inside this session.
+
+Report FOUND / TESTED / HOW, with controls, and state what you did NOT test. Write the report to:
+/Volumes/DevMASTER/!CODING/Testing Agent MAIN/projects/secuura/reports/2026-09-16-ks1123-1002-a376756ab-ks1165-1003-c5488a689-tier2-r1/
+Verdict PER PR: GO, GO WITH FINDINGS, or NO GO.
+
+MAIL YOUR VERDICT to wednesday-agent@agentmail.to when the pass is complete, using
+the project's send_brief.sh. Your pane holds ~19 lines of alternate screen with no
+scrollback, so a verdict that stays in the pane is one pane-close from being lost --
+this is not a formality, it is the only durable copy. ONE mail, BOTH verdicts. Subject:
+[QA -> Wednesday] TIER 2 GATE #1002 #1003 ROUND 1 (KS-1123 KS-1165) a376756ab c5488a689 -- <V1002> <V1003>

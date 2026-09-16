@@ -1,0 +1,58 @@
+read at 2026-09-16 22:51:05 AEST
+porcelain 0 config_sha e0fa706f4bdae2778a5fe5975676f24459c5a3c6455de4ae85aa286f67632d1a for_each_ref 879
+5b4f38a48aeb40c2295895aaa5cd08e273aa7a08	refs/heads/develop
+a376756aba1e1ae32c49ed47ba057fd80c7ed136	refs/heads/feature/ks-1123-ornith-verify-status-pins
+c5488a6891e6ac6fe950c101196d8c33ab8e173f	refs/heads/feature/ks-1165-f1-real-app-mount-cell
+## #1003 base..head raw + numstat (whole tree)
+:100644 100644 04ab42a65 3c86f0c93 M	Blockchain/Dev/services/api-gateway/src/__tests__/ks1165-api-gateway-csrf-excludedpaths-carries-no.test.ts
+:000000 100644 000000000 5ede750e8 A	Blockchain/Dev/services/api-gateway/src/__tests__/ks1165-real-app-csrf-mount-order.test.ts
+8	3	Blockchain/Dev/services/api-gateway/src/__tests__/ks1165-api-gateway-csrf-excludedpaths-carries-no.test.ts
+165	0	Blockchain/Dev/services/api-gateway/src/__tests__/ks1165-real-app-csrf-mount-order.test.ts
+parents of H3: 5b4f38a48aeb40c2295895aaa5cd08e273aa7a08 
+merge-base H3 develop: 5b4f38a48aeb40c2295895aaa5cd08e273aa7a08
+## #1002 vs #1003 file sets (from their own bases)
+shared: 0  (1002: 3, 1003: 2)
+merge-base H2 H3: 80686962828197acf305e4010a2ed5b401285743
+## blobs: index.ts / csrf.ts / composed / new at B2 H2 B3 H3
+ 806869628=6f38c819e a376756ab=6f38c819e 5b4f38a48=6f38c819e c5488a689=6f38c819e  src/index.ts
+ 806869628=1f16e2f89 a376756ab=1f16e2f89 5b4f38a48=a81722795 c5488a689=a81722795  src/middleware/csrf.ts
+ 806869628=ABSENT a376756ab=ABSENT 5b4f38a48=04ab42a65 c5488a689=3c86f0c93  src/__tests__/ks1165-api-gateway-csrf-excludedpaths-carries-no.test.ts
+ 806869628=ABSENT a376756ab=ABSENT 5b4f38a48=ABSENT c5488a689=5ede750e8  src/__tests__/ks1165-real-app-csrf-mount-order.test.ts
+ 806869628=91eb74102 a376756ab=c83a2ae27 5b4f38a48=91eb74102 c5488a689=91eb74102  src/routes/verification.ts
+## tamper anchors at H3 (fixed strings, multi-line via python)
+index count=1 lines=[387]  <T3/T5s anchor: if (NODE_ENV !== 'test') {\n  app.use(csrfMiddleware.generateToken);>
+index count=1 lines=[387]  <bare: if (NODE_ENV !== 'test') {>
+index count=1 lines=[388]  <T4 pair 1: generateToken + protect + close>
+index count=1 lines=[397]  <T4 pair 2: app.use(enforceJsonContentType);\n>
+index count=1 lines=[389]  <app.use(csrfMiddleware.protect)>
+index count=1 lines=[381]  <app.use(cookieParser>
+csrf  count=1 lines=[99]  <T1: the v2 comment + entry (two lines)>
+csrf  count=1 lines=[100]  <T1 entry line only>
+csrf  count=1 lines=[309]  <gate1001 T5: startsWith>
+-- context index.ts around the CSRF block
+17:import cookieParser from 'cookie-parser';
+36:import { csrfMiddleware, enforceJsonContentType } from './middleware';
+381:app.use(cookieParser());
+387:if (NODE_ENV !== 'test') {
+388:  app.use(csrfMiddleware.generateToken);
+389:  app.use(csrfMiddleware.protect);
+397:app.use(enforceJsonContentType);
+1280:export default app;
+## real-app file: expectations census
+111:  it('🔴 KS-1165 real app — cookieParser, generateToken, protect and enforceJsonContentType are each mounted once, in that order', () => {
+113:    for (const name of CSRF_LAYERS) expect(names.filter((n) => n === name).length, `${name} mounted once`).toBe(1);
+115:    expect(positions, 'layer order').toEqual([...positions].sort((a, b) => a - b));
+118:  it('🔴 KS-1165 real app — a cookie-only POST /api/documents is refused by CSRF (403 CSRF_TOKEN_MISSING), not by content-type (415) or auth (401)', async ()
+121:    expect({ json: [json.status, json.code], octet: [octet.status, octet.code] }).toEqual({
+125:    expect([json.reachedPath, octet.reachedPath]).toEqual([null, null]);
+128:  it('🔴 KS-1165 real app — cookie-only v2 verify (JSON) and verify-file (octet-stream) pass the gateway and reach originate', async () => {
+131:    expect({ verify: [verify.status, verify.reachedPath], verifyFile: [verifyFile.status, verifyFile.reachedPath] }).toEqual({
+155:  it('KS-1165 control — no generateToken or protect layer under NODE_ENV=test, cookieParser still mounted', () => {
+157:    expect(names.filter((n) => n === 'cookieParser').length, 'cookieParser still mounted').toBe(1);
+158:    expect(names.filter((n) => n === 'generateTokenMiddleware' || n === 'protectMiddleware').length).toBe(0);
+161:  it('KS-1165 control — a cookie-only POST /api/documents under NODE_ENV=test reaches auth (401), not CSRF', async () => {
+163:    expect([res.status, res.code]).toEqual([401, 'UNAUTHORIZED']);
+## composed file cell count at H3: 7
+## api-gateway test file counts: B3 39  H3 40  H2 40  B2 38
+porcelain 0 config_sha e0fa706f4bdae2778a5fe5975676f24459c5a3c6455de4ae85aa286f67632d1a for_each_ref 879
+done at 22:51:09 AEST

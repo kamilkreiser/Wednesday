@@ -1,0 +1,18 @@
+controls at 2026-09-16 22:47:32 AEST scratch /private/tmp/claude-501/-Volumes-DevMASTER-WEDNESDAY/9aed5a67-2729-4892-b685-13ab87142a58/scratchpad/ctl1002.At8gkw
+residual-guard positive control on the TEMPLATE: total hits 101 tokens with >=1 hit 20
+    REFUSING: #1002 head 0000000000000000000000000000000000000000 is not at refs/heads/feature/ks-1123-ornith-verify-status-pins on origin — the head moved; the brief is about a different SHA
+    a376756aba1e1ae32c49ed47ba057fd80c7ed136	refs/heads/feature/ks-1123-ornith-verify-status-pins
+neg1 (QA1002_HEAD wrong) rc=6 expect 6 PASS
+    REFUSING: brief or prompt does not name the head SHA a376756aba1e1ae32c49ed47ba057fd80c7ed136 — a gate about another SHA is another gate
+neg2 (prompt lacks full head SHA) rc=20 expect 20 PASS
+    REFUSING: prompt does not tell the agent to MAIL its verdict to wednesday-agent@agentmail.to
+neg3 (prompt lacks verdict destination) rc=12 expect 12 PASS
+    REFUSING: prompt does not name the brief path
+neg4 (exemplar prompt) rc=9 expect 9 PASS
+copy5 DEVELOP_SHA lines: 1
+    REFUSING: origin develop is at 5b4f38a48aeb40c2295895aaa5cd08e273aa7a08 (pinned 0b25f823f6660ac52b665f14055799ff0c3b616d) and the move is not provably clear of #1002: GUARDED Blockchain/Dev/services/api-gateway/src/routes/verification.ts — confirm the delta, then re-pin deliberately (launcher DEVELOP_SHA + brief D1 + prompt)
+neg5 (develop moved across verification.ts) rc=18 expect 18 PASS
+copy6 DEVELOP_SHA lines: 1
+      origin develop MOVED 806869628 -> 5b4f38a48: commits=1 files=2, none on the GUARDED list; the gate merges the then-current develop onto the head in its clone and re-derives, brief D1 and item 3
+pos6 (develop moved, disjoint) rc=0 expect 0 PASS
+done 22:48:11 AEST

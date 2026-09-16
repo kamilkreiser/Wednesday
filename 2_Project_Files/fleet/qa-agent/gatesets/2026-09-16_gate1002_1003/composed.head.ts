@@ -1,0 +1,203 @@
+/**
+ * Regression tests for KS-1165: excludedPaths must carry the
+ * `/api/v2/verification/verify` prefix (a startsWith match, so `/verify` and
+ * `/verify-file`; not the whole `/api/v2/verification/*` family) so
+ * cookie-bearing browser callers to the v2 verify endpoints aren't rejected
+ * with `CSRF_TOKEN_MISSING`.
+ */
+
+import { describe, it, expect, vi, beforeEach, beforeAll, afterAll } from 'vitest';
+import type { Request, Response } from 'express';
+import express from 'express';
+import cookieParser from 'cookie-parser';
+import { readFileSync } from 'node:fs';
+import { join } from 'node:path';
+import type { Server } from 'node:http';
+import type { AddressInfo } from 'node:net';
+import { createCsrfMiddleware, csrfMiddleware } from '../middleware/csrf';
+import { enforceJsonContentType } from '../middleware/contentType';
+
+vi.mock('../utils/logger', () => ({
+  logger: {
+    warn: vi.fn(),
+    error: vi.fn(),
+    info: vi.fn(),
+  },
+}));
+
+// ---------------------------------------------------------------------------
+// Helpers
+// ---------------------------------------------------------------------------
+
+function makeReq(overrides: Partial<Request> = {}): Request {
+  return {
+    headers: {},
+    cookies: {},
+    body: {},
+    query: {},
+    path: '/api/documents',
+    method: 'POST',
+    ip: '127.0.0.1',
+    ...overrides,
+  } as unknown as Request;
+}
+
+function makeRes(): Response & { _status: number; _json: any } {
+  const res: any = {
+    _status: 0,
+    _json: null,
+    status(code: number) {
+      this._status = code;
+      return this;
+    },
+    json(payload: any) {
+      this._json = payload;
+      return this;
+    },
+    cookie: vi.fn(),
+    setHeader: vi.fn(),
+  };
+  return res;
+}
+
+const { protect } = createCsrfMiddleware();
+
+describe('KS-1165 — v2 verification paths are excluded from CSRF', () => {
+  let next: ReturnType<typeof vi.fn>;
+
+  beforeEach(() => {
+    next = vi.fn();
+  });
+
+  it('🔴 KS-1165 — POST /api/v2/verification/verify-file with a cookie is excluded from CSRF', () => {
+    // Cookie-bearing caller of the v2 verify-file endpoint must be excluded
+    // by the same startsWith rule that excludes v1's /api/verification/verify.
+    const req = makeReq({
+      path: '/api/v2/verification/verify-file',
+      headers: { cookie: 'session=ambient', origin: 'http://localhost:6882' },
+      cookies: { session: 'ambient' },
+    });
+    const res = makeRes();
+
+    protect(req, res, next);
+
+    expect(next).toHaveBeenCalledOnce();
+    expect(res._status).toBe(0);
+  });
+
+  it('🔴 KS-1165 — POST /api/v2/verification/verify with a cookie is excluded from CSRF', () => {
+    const req = makeReq({
+      path: '/api/v2/verification/verify',
+      headers: { cookie: 'session=ambient', origin: 'http://localhost:6882' },
+      cookies: { session: 'ambient' },
+    });
+    const res = makeRes();
+
+    protect(req, res, next);
+
+    expect(next).toHaveBeenCalledOnce();
+    expect(res._status).toBe(0);
+  });
+
+  it('KS-1165 control — the v1 path is excluded (before and after) and an unrelated cookie write is still rejected', () => {
+    const reqV1 = makeReq({
+      path: '/api/verification/verify-file',
+      headers: { cookie: 'session=ambient', origin: 'http://localhost:6882' },
+      cookies: { session: 'ambient' },
+    });
+    const resV1 = makeRes();
+    protect(reqV1, resV1, next);
+    expect(next).toHaveBeenCalledOnce();
+    expect(resV1._status).toBe(0);
+
+    next.mockClear();
+    const reqOther = makeReq({
+      path: '/api/documents',
+      headers: { cookie: 'session=ambient', origin: 'http://localhost:6882' },
+      cookies: { session: 'ambient' },
+    });
+    const resOther = makeRes();
+    protect(reqOther, resOther, next);
+    expect(next).not.toHaveBeenCalled();
+    expect(resOther._status).toBe(403);
+    expect(resOther._json.error.code).toBe('CSRF_TOKEN_MISSING');
+  });
+});
+
+// ---------------------------------------------------------------------------
+// KS-1165 DoD — "one gateway cell pins the chosen behaviour through the real
+// mount order (CSRF then content-type)". Added by seat A beside the READY's
+// unit cells, which call `protect` directly and so never meet the order.
+//
+// index.ts mounts cookieParser → csrfMiddleware.generateToken →
+// csrfMiddleware.protect (outside NODE_ENV=test, :381-389) and only THEN
+// enforceJsonContentType (:397). The first cell reads that order from index.ts
+// itself; the others drive a cookie-only request through the same exported
+// middlewares, in that order, to a terminal handler.
+//
+// These cells cannot see a regression in index.ts itself (the #1001 gate's
+// T3 / T4). The real-app cells are in ks1165-real-app-csrf-mount-order.test.ts.
+// ---------------------------------------------------------------------------
+
+const GATEWAY_SRC = readFileSync(join(__dirname, '..', 'index.ts'), 'utf8');
+
+describe('KS-1165 — v2 verify through the gateway mount order (CSRF, then content-type)', () => {
+  let server: Server;
+  let base: string;
+
+  beforeAll(async () => {
+    const app = express();
+    app.use(cookieParser());
+    app.use(csrfMiddleware.generateToken);
+    app.use(csrfMiddleware.protect);
+    app.use(enforceJsonContentType);
+    const reached = (_req: Request, res: Response) => { res.status(200).json({ reached: true }); };
+    app.post('/api/v2/verification/verify-file', reached);
+    app.post('/api/v2/verification/verify', reached);
+    app.post('/api/verification/verify-file', reached);
+    app.post('/api/documents', reached);
+    server = app.listen(0, '127.0.0.1');
+    await new Promise<void>((r) => server.once('listening', () => r()));
+    base = `http://127.0.0.1:${(server.address() as AddressInfo).port}`;
+  });
+
+  afterAll(async () => {
+    await new Promise<void>((r) => server.close(() => r()));
+  });
+
+  const cookieOnly = (path: string, contentType: string, body: string) =>
+    fetch(`${base}${path}`, {
+      method: 'POST',
+      headers: { cookie: 'session=ambient', 'content-type': contentType },
+      body,
+    });
+
+  it('KS-1165 mount order — index.ts mounts csrfMiddleware.protect BEFORE enforceJsonContentType', () => {
+    const csrfAt = GATEWAY_SRC.indexOf('app.use(csrfMiddleware.protect)');
+    const contentTypeAt = GATEWAY_SRC.indexOf('app.use(enforceJsonContentType)');
+    expect(csrfAt).toBeGreaterThan(-1);
+    expect(contentTypeAt).toBeGreaterThan(-1);
+    expect(csrfAt).toBeLessThan(contentTypeAt);
+  });
+
+  it('🔴 KS-1165 mount order — a cookie-only octet-stream POST /api/v2/verification/verify-file reaches the handler', async () => {
+    const r = await cookieOnly('/api/v2/verification/verify-file', 'application/octet-stream', 'raw document bytes');
+    expect(r.status).toBe(200);
+    expect(await r.json()).toEqual({ reached: true });
+  });
+
+  it('🔴 KS-1165 mount order — a cookie-only JSON POST /api/v2/verification/verify reaches the handler', async () => {
+    const r = await cookieOnly('/api/v2/verification/verify', 'application/json', JSON.stringify({ hash: 'a'.repeat(64) }));
+    expect(r.status).toBe(200);
+    expect(await r.json()).toEqual({ reached: true });
+  });
+
+  it('KS-1165 mount order control — v1 verify-file still reaches the handler, and a non-excluded path is refused by CSRF (403) before content-type (415)', async () => {
+    const v1 = await cookieOnly('/api/verification/verify-file', 'application/octet-stream', 'raw document bytes');
+    expect(v1.status).toBe(200);
+
+    const other = await cookieOnly('/api/documents', 'application/octet-stream', 'raw document bytes');
+    expect(other.status).toBe(403);
+    expect((await other.json()).error.code).toBe('CSRF_TOKEN_MISSING');
+  });
+});
