@@ -352,9 +352,8 @@ if [ -z "$(next_ticket)" ]; then
   # (Kam 2026-09-15 18:19) and nothing woke anyone for it. Record when the drought began; after
   # NIGHT_IDLE_ALERT_H hours (default 2) post ONE panel line, then at most one more per NIGHT_IDLE_ALERT_H.
   # Only the DEFAULT queue counts (a split queue going empty is normal). A non-empty run resets the marker.
-  if [ "$NIGHT_QUEUE" = "${NIGHT_IDLE_DEFAULT_QUEUE:-$SELF_DIR/queue.md}" ]; then
-    _idle_dir="${NIGHT_IDLE_MARKER_DIR:-$SELF_DIR/log}"
-    _idle_marker="$_idle_dir/.queue_empty_since"; _idle_alert="$_idle_dir/.queue_empty_alerted"
+  if [ "$NIGHT_QUEUE" = "$SELF_DIR/queue.md" ]; then
+    _idle_marker="$SELF_DIR/log/.queue_empty_since"; _idle_alert="$SELF_DIR/log/.queue_empty_alerted"
     _now=$(date +%s); _hour=$(date +%H | sed 's/^0//'); _alert_h="${NIGHT_IDLE_ALERT_H:-2}"
     [ -f "$_idle_marker" ] || echo "$_now" > "$_idle_marker"
     _since=$(cat "$_idle_marker" 2>/dev/null || echo "$_now"); _last=$(cat "$_idle_alert" 2>/dev/null || echo 0)
@@ -363,29 +362,6 @@ if [ -z "$(next_ticket)" ]; then
       log "G7 IDLE ALERT: queue empty since $_since_hm — posting to the panel"
       echo "$_now" > "$_idle_alert"
       [ "${NIGHT_IDLE_ALERT_DRY:-0}" = 1 ] || bash "$SELF_DIR/../../tools/chat_reply.sh" "Ornith has had nothing queued since $_since_hm — the coordinator owes it a brief or a reason (never-idle, 2026-09-15 18:19)." > /dev/null 2>&1 || log "G7 IDLE ALERT: post FAILED"
-    fi
-    # G7 BUSY leg (2026-09-17, ledger w=3 "idle on a worked day" 2026-09-16 21:2x — REGRESSION → enforcement):
-    # the 2 h panel alert wakes KAM; the failure it missed is a COORDINATOR busy with Claude seats while the
-    # cheaper workstream ran dry (20:50 → 21:20 on 09-16). While night/ALLOW_SEATS is live (= seats run beside
-    # the model), an empty queue for NIGHT_IDLE_BUSY_MIN minutes (default 20) TAPS the coordinator pane with a
-    # bare pointer (cockpit.sh say, no authorising verb), at any hour, at most once per NIGHT_IDLE_BUSY_MIN.
-    # It never posts to the panel (Kam's surface keeps the 2 h leg). Arms: local-model/tests/g7_busy_leg_arms.sh.
-    _tapped="$_idle_dir/.queue_empty_tapped"; _busy_min="${NIGHT_IDLE_BUSY_MIN:-20}"
-    if _g2_allow_seats; then
-      _last_tap=$(cat "$_tapped" 2>/dev/null || echo 0)
-      if [ $((_now - _since)) -ge $((_busy_min * 60)) ] && [ $((_now - _last_tap)) -ge $((_busy_min * 60)) ]; then
-        _since_hm=$(date -r "$_since" +%H:%M 2>/dev/null || echo "?")
-        _ptr="Ornith queue empty since $_since_hm with seats live - check local-model/night/queue.md (G7 busy leg)"
-        _pane="${NIGHT_COORD_PANE:-wednesday}"
-        echo "$_now" > "$_tapped"
-        if [ "${NIGHT_IDLE_ALERT_DRY:-0}" = 1 ]; then
-          log "G7 BUSY TAP: DRY — would tap '$_pane': $_ptr"
-        elif bash "${NIGHT_COCKPIT:-$SELF_DIR/../../fleet/cockpit/cockpit.sh}" say "$_pane" "$_ptr" >> "$NIGHT_LOG_DIR/g7_busy_tap.out" 2>&1; then
-          log "G7 BUSY TAP: tapped '$_pane' (queue empty since $_since_hm; seats allowance live)"
-        else
-          log "G7 BUSY TAP: say to '$_pane' FAILED — see $NIGHT_LOG_DIR/g7_busy_tap.out"
-        fi
-      fi
     fi
   fi
   finish 4 "queue empty"
@@ -404,7 +380,7 @@ while [ "$TICKETS_RUN" -lt "$NIGHT_MAX_TICKETS" ] && [ "$ITER" -lt $((NIGHT_MAX_
   RLOG="$RUN/run.log"
   log "TICKET $TICKET take: '$LINE' → $RUN"
   # G7: a taken ticket ends the drought — clear the empty-queue markers (default queue only).
-  [ "$NIGHT_QUEUE" = "${NIGHT_IDLE_DEFAULT_QUEUE:-$SELF_DIR/queue.md}" ] && { _idle_dir="${NIGHT_IDLE_MARKER_DIR:-$SELF_DIR/log}"; mkdir -p "$_idle_dir/_quarantine_g7" 2>/dev/null; for _m in "$_idle_dir/.queue_empty_since" "$_idle_dir/.queue_empty_alerted" "$_idle_dir/.queue_empty_tapped"; do [ -f "$_m" ] && mv "$_m" "$_idle_dir/_quarantine_g7/$(basename "$_m").$(date +%s)"; done; :; }
+  [ "$NIGHT_QUEUE" = "$SELF_DIR/queue.md" ] && { mkdir -p "$SELF_DIR/log/_quarantine_g7" 2>/dev/null; for _m in "$SELF_DIR/log/.queue_empty_since" "$SELF_DIR/log/.queue_empty_alerted"; do [ -f "$_m" ] && mv "$_m" "$SELF_DIR/log/_quarantine_g7/$(basename "$_m").$(date +%s)"; done; :; }
   echo "== $(date '+%F %T') night_run $TICKET line='$LINE' model=$NIGHT_MODEL think=$NIGHT_THINK" >> "$RLOG"
 
   # build input (or take a pre-built one — the FIRE test uses a hand-made tiny input)
