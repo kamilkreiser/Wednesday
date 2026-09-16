@@ -1,0 +1,125 @@
+ultrathink
+
+You are the fleet QA agent running ONE TIER 1 ROUND 1 gate over Secuura/Blockchain PR #1011 (KS-871, Seat A successor item A12) at head
+0a1f8900c7094fbdaed1099799c029e351296b39 — services/api-gateway/src/middleware/audit.ts +11 -2: `auditPath = req.originalUrl.split('?')[0]`
+captured at entry and written as details.path, and deriveAction's segments read from req.originalUrl instead of req.path; plus two new ks871
+test files. A refused POST /api/gdpr/erasures is now audited as /api/gdpr/erasures and gdpr.create (was / and unknown.create). The product
+lines were authored by the local model (Ornith) and applied by the seat with accommodations (--recount, de-indented headers, :108 BY HAND).
+TIER 1 (Wednesday's ruling; the seat proposed tier 2): the audit middleware writes the audit trail for EVERY audited request, the audit trail
+is a security control, and the seat's "admitted requests unchanged" is a claim about every route the middleware covers — MEASURE it. No
+rendered surface: the real-browser half of tier 1 does not apply; say so. Round 1 for KS-871.
+
+Read your brief FIRST and in full, then plan:
+/Volumes/DevMASTER/WEDNESDAY/2_Project_Files/fleet/qa-agent/briefs/2026-09-17_secuura-1011-ks871-tier1.md
+
+Head (git ls-remote 04:03:06 and 04:13:13 AEST, the PR API 04:07:56, agree; the launcher re-asserts it):
+  #1011 0a1f8900c7094fbdaed1099799c029e351296b39 = refs/pull/1011/head = feature/ks-871-ornith-audit-path-captured-at-entry
+        ONE commit, only parent d067725ff1c7f036dbf0f726b9bf12f4daefebe7 (#1009's squash) = develop at draft time (an ANCESTOR: merged tree = head tree).
+  git diff d067725ff 0a1f8900c = exactly 3 files: audit.ts a7be8626f -> f5a83ba2c (11 2), ks871 Part A 8d66dfaf7 (added, 138), Part B 3171d1eff (added, 139).
+  If develop moves, merge the then-current develop in YOUR clone (never pushed) and run base, head AND merged, naming each tree.
+Repo:    /Volumes/DevMASTER/!CODING/Secuura/Blockchain/2_Project_Files  (READ-ONLY — git clone --shared by SHA into your
+  own scratch; write verbs there only, from a script file; Seat A's worktree is LIVE and the #1010 gate may be live in its own clone —
+  never enter any of them, never touch gatesets/2026-09-17_gate1010/, never vitest inside the checkout; pin by SHA, never origin/*)
+Farm node_modules per ENTRY in your clone (R-6 from the #1009 gate): never link a node_modules tree wholesale — a wholesale link can write
+  through into the checkout's .vite cache; skip .vite/.vitest/.cache; farm services/api-gateway/node_modules and packages/shared/node_modules
+  per entry too. The drafter's GS/drafter_setup.py is a working substrate.
+
+You are FINDINGS-ONLY. You never fix, never merge, never push, never deploy, never comment, never file, never tick an
+ack box, never `@`, never write to Linear or GitHub, and nothing goes to Peter or Stuart.
+
+NEVER run a push, the real pre-push hook, or preflight.sh inside the Secuura checkout or any of its worktrees.
+
+NEVER print a credential value, and never open, read or copy a secrets file into output — a script may read GH_TOKEN / LINEAR_API_KEY by
+NAME from /Volumes/DevMASTER/!CODING/Secuura/Blockchain/4_Credentials/.env and AGENTMAIL_API_KEY by NAME from
+/Volumes/DevMASTER/WEDNESDAY/4_Credentials/.env for the calls the brief allows (GitHub GET, Linear query, the one verdict mail), and never
+echoes them. Count, never echo.
+
+NO shared docker stack, no :6882 / :7082 slot, no kintsugi, no demo, no az, NEVER the wallet mnemonic (KS-535 HOLD). This gate
+needs NO container: the audit sink is an in-memory recorder (../db mocked, with a hit witness), originate and auth are loopback recorders.
+Run `docker info` ONCE and print its rc on its own line (UP is NOT permission; create no container). LOOPBACK ONLY: every listener binds
+127.0.0.1:0. No Akto, no k6, no Playwright, no Schemathesis run (Kam's 40% cap; NOT COMMISSIONED) — YOU rule whether Schemathesis/Akto
+are REQUIRED, with the measured reason (brief item 12). Time-box 45 minutes of work.
+
+Thirteen things you must not miss (each is a brief item with drafter-measured predictions and predicted-by):
+
+1. PARITY FOR EVERY OTHER AUDITED REQUEST (item 1) on the REAL app (index.ts default export) with the real audit middleware and an
+   in-memory sink with a hit witness: a census of audited routes ENUMERATED FROM SOURCE with a planted-mount control, base d067725ff vs head
+   vs merged, every written field byte-identical for admitted AND refused requests on routes other than /api/gdpr/erasures — including
+   /api/v1/ spellings, repeated slashes, a query string, a # fragment and an absolute-form request target. Any difference is a finding.
+   Then the same census under NODE_ENV=production (versioning.ts 307-redirects unversioned /api/* to /api/v1/* above the audit mount).
+   Drafter (MEASURED, NODE_ENV=test, 29 requests: SAME 17 DIFF 12): head writes `v1.create`/`v1` + `/api/v1/logs` where base wrote
+   `logs.create`/`log` + `/api/logs` (index.ts:561-562 strips /api/v1/ above the audit mount; index.ts:566-569 says the audit is wired
+   AFTER the strip "so audit action derives from canonical paths" — req.originalUrl is never stripped); `//api//logs` raw in details.path;
+   `/api/logs#frag` -> `logs#frag.create`; absolute-form `http://127.0.0.1/api/logs` -> `127.0.0.1.logs` / resource_type `127.0.0.1`;
+   prefix-mounted /api/batch/verify `unknown.create` `/verify` -> `batch.verify`. SAME: canonical non-v1 rows and proxied routes.
+2. THE FIX per refusal class (item 2): no credential (the spec auth gate at index.ts:1044 — drafter: ALREADY correct on base), invalid token
+   and scope/role inside the door (drafter: base `unknown.create` `/`, head `gdpr.create` `/api/gdpr/erasures`), `//erasures` and trailing
+   slash (head writes the RAW spelling), case variants (drafter READ: not audited at all — `req.path.startsWith('/api/')`), an originate
+   validation refusal, any rate limit.
+3. THE TIMING CLAIM (item 3): when express trims req.path for a responding router.use gate (entry / inside the gate / in finish), and a
+   NESTED-MOUNT fixture. Drafter: under `app.use('/gw', router-with-audit)` head derives `api.x` / `api.create` for every row. Rule on the
+   drafter's counterfactual D3: entry-time CANONICAL req.path for both details.path and deriveAction carries the fix with base parity
+   elsewhere (SAME 22 DIFF 7, the 7 all fixes) and the whole suite stays 49/406 green — the timing is the fix; the originalUrl SOURCE is
+   what breaks parity.
+4. THE GET CLAUSE (item 4): AUDITED_METHODS has no GET; a refused GET /api/gdpr/erasures/:ref writes no row — a Record for KS-871.
+5. THE OTHER THREE inside-finish req.path reads (item 5): unchanged by the PR? Drafter: proxied /api/auth/login already has its full path on
+   base (http-proxy-middleware v2 resets req.url from originalUrl) but attemptedEmail is NEVER written (index.ts:399-413 skips body parsing
+   for /api/auth) and /api/v1/auth/login derives `v1.login` on base — pre-existing Records unless the PR worsens them.
+6. THE ORNITH-READY ACCOMMODATIONS (item 6): head audit.ts vs SEAT/patches/A0-product.patch + B0-product.patch vs base; the hand-applied
+   line; every other changed line (both test files vs A1-test.patch / B1-test.patch) accounted for by the declared seat edits.
+7. AUDIT WRITE FAILURE PATHS (item 7): isDbAvailable false, sink throws, sink hangs — response and row, base vs head.
+8. TAMPERS (item 8): the seat's T0/TA/TB/TAB/TG/TE/TI/T0-after on the WHOLE api-gateway suite, plus a CONTROL tamper (drafter 1 red), a
+   NON-gdpr action tamper (drafter 0 red: NOTHING in the suite pins a non-gdpr audit row — a coverage finding), an admitted-only path tamper
+   (drafter 1 red), and the D3 entry-path variant (drafter 0 red). Project tsc rc on EVERY row; a non-compiling tamper is VOID; cells-run,
+   failed, pending and predicted-by on every row; restore sha256-identical.
+9. INCLUDING TSC (item 9) base/head/merged, --listFilesOnly, planted control, NEW only. Drafter: 35 lines / 11 files both trees, 0 in the
+   touched files; the seat's program has 54 lines with TS2741 keepAliveTimeoutBuffer — find the program difference.
+10. LINEAR (item 10): attachmentsForURL(pull/1011) exactly KS-871 contributes; KS-843 / KS-858 no #1011; 0 closing phrases (planted
+   controls). KS-871 must NOT go Done on merge (§5f: runtime behaviour). Note: KS-858 is NOT in the PR body (drafter 0), only in the
+   linear[bot] comment — the READY says otherwise. Re-read linkKind immediately before the mail.
+11. DISJOINTNESS (item 11) from #1010 c3213b04e and every open PR by the PR files API; develop moves judged by content.
+12. SCHEMATHESIS / AKTO (item 12): full response status, headers and body base vs head for the gdpr refusals and a sample of others;
+   identical -> NOT APPLICABLE with the measured reason; any difference -> REQUIRED, say which.
+13. NOT TESTED (item 13), at the same prominence as the findings: the §5f live sweep on a rebuilt stack (owed at the Sunday QA pass); a real
+   Postgres audit_logs write; deployed NODE_ENV and client /api/v1 usage; nginx / Container Apps request-target rewriting; out-of-repo
+   audit consumers (SIEM, dashboards, the security-service reader); Playwright / k6; preflight legs 3/4/8; `docker info` rc on its own line.
+
+Hygiene: /bin/bash here is 3.2 — write runners in Python. zsh: no PIPESTATUS (`cmd > out 2>&1; rc=$?`), no timeout on macOS, never begin a
+line with `=====`. Your tool shell's grep may be a function: /usr/bin/grep -i with a same-file positive control; `git grep -c` prints
+nothing for a zero — silence is unread, not 0. Never `cd` in your own tool calls; absolute paths; git write verbs only inside script files.
+stderr is never discarded. Clocks from `date`, never estimated.
+Quote the Secuura checkout's porcelain count, .git/config sha256, for-each-ref count, .git/worktrees count, origin develop SHA,
+refs/pull/1011/head and the branch at start, mid and close as THREE timestamped readings; if refs/pull/1011/head moves, STOP — the brief
+is about a different SHA. develop moving is expected; judge it by content, name it.
+Never `rm`: fresh mktemp -d per attempt; quarantine scratch tests and configs by rename. No container is created; never touch a
+secuura-* container.
+Do no memory maintenance of your own project's memory store inside this session.
+
+Report FOUND / TESTED / HOW, with controls, into
+/Volumes/DevMASTER/!CODING/Testing Agent MAIN/projects/secuura/reports/2026-09-17-ks871-1011-0a1f8900c-tier1-r1/
+(report.md, evidence/, NOT-TESTED.written-first.md written BEFORE any run): the trees (base / head / merged named); the census tables under
+NODE_ENV test and production with the enumerator and its control; the refusal-class table; the timing probe and nested fixture; the READY
+accommodation accounting; the failure-path rows; the full tamper table; the suites per tree, the including tsc and eslint; Linear; the
+disjointness; the Schemathesis/Akto ruling; the seat-claim dispositions C1-C9; the Records; and what you did NOT test at the same
+prominence as the findings. Every finding carries its evidence class (MEASURED AT RUNTIME / PROBED / READ ONLY / RELAYED), severity,
+target (PR or TICKET), SHIPS-WITH or TICKET, and its oracle.
+Client-facing communication = ticket comments only, and not from you; anything needing a push goes to Wednesday as an escalation candidate.
+Never delete; cleanup means quarantine.
+Verdict: ONE line — GO, GO WITH FINDINGS, or NO GO — on 0a1f8900c7094fbdaed1099799c029e351296b39, as the delta over base d067725ff AND on
+the merged tree (name the develop). Say plainly: whether admitted and refused non-gdpr rows are unchanged, per route class, under test and
+production; which gdpr refusal classes were wrong on base and are right on head; the timing ruling and the nested-mount Record; the GET
+clause; the other three req.path reads; the READY accommodation accounting; the failure paths; which tampers red as predicted and which are
+invisible; the suites per tree and the including tsc; Linear; disjointness; your Schemathesis/Akto ruling; and what was NOT tested.
+Give the merge seat its ADDENDUM line: "squash 0a1f8900c onto develop d067725ff (or the then-current develop; file-disjoint from #1010);
+#1011 attaches to KS-871 only, linkKind contributes — KS-871 stays In Progress on merge (§5f: runtime behaviour); equality targets audit.ts
+f5a83ba2c / ks871 Part A 8d66dfaf7 / Part B 3171d1eff; api-gateway 47/400 -> 49/406 (re-measure); Records: <yours>" — plus any test-quality
+finding (the unpinned non-gdpr rows) with its target.
+
+MAIL YOUR VERDICT to wednesday-agent@agentmail.to when the pass is complete. Your pane holds ~19 lines of alternate screen with no
+scrollback, so a verdict that stays in the pane is one pane-close from being lost -- this is not a formality, it is the only durable
+copy; the verdict MAIL is the END STATE and the wait signal. Send it FROM coagent@agentmail.to. Subject, EXACTLY:
+[QA -> Wednesday] GATE #1011 0a1f8900c — <GO | GO WITH FINDINGS | NO GO>
+(The QA project has no send_brief.sh of its own: POST https://api.agentmail.to/v0/inboxes/coagent@agentmail.to/messages/send with JSON
+{"to": ["wednesday-agent@agentmail.to"], "subject": "...", "text": "..."} and Authorization: Bearer $AGENTMAIL_API_KEY, the key by NAME
+from Wednesday's .env, never echoed. Confirm the API answered 2xx and quote the message id in your final pane line. Timestamps in the mail
+come from `date`, never estimated. The MAIL is the end state.)

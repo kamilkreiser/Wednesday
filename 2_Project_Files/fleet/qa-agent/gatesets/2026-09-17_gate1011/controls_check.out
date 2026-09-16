@@ -1,0 +1,28 @@
+controls_check 2026-09-17 04:18:00 AEST
+replacements: {'nomail': 1, 'nosha': 2, 'notier': 3, 'nofarm': 1, 'nosubject': 1}
+N1 head override (#1010 head c3213b04e) | stderr: REFUSING: #1011 — c3213b04e3ad96068c367f7e0ba426822d32cda9 is not at refs/heads/feature/ks-871-ornith-audit-path-captured-at-entry on origin — the head moved; the brief is about a different SHA
+rc=6
+expected 6: OK
+N2 prompt without the mail step | stderr: REFUSING: prompt does not tell the agent to MAIL its verdict
+rc=12
+expected 12: OK
+N3 brief without the head SHA | stderr: REFUSING: brief or prompt does not name the head SHA 0a1f8900c7094fbdaed1099799c029e351296b39 — a gate about another SHA is another gate
+rc=20
+expected 20: OK
+N4 brief without TIER 1 | stderr: REFUSING: brief and prompt disagree about the tier
+rc=7
+expected 7: OK
+N5 prompt without per-ENTRY farm | stderr: REFUSING: prompt does not require node_modules farmed per ENTRY (a wholesale link can write through to the checkout .vite cache)
+rc=22
+expected 22: OK
+N6 prompt without the exact verdict subject | stderr: REFUSING: prompt does not carry the exact verdict subject, the coagent@ sender and the wednesday-agent@ recipient
+rc=23
+expected 23: OK
+N7 develop = the #1011 head (audit.ts f5a83ba2c LANDED) | stderr: REFUSING: develop services/api-gateway/src/middleware/audit.ts blob f5a83ba2c = #1011 own — #1011 has landed; this brief is stale (develop 0a1f8900c7094fbdaed1099799c029e351296b39) — re-pin deliberately: a different brie
+rc=19
+expected 19: OK
+N8 develop = 0f489b7da (KS-28: audit.ts a blob nobody pinned) | stderr: REFUSING: origin develop is at 0f489b7da4e699e852a126bb41a922b8ca1b4462 (pinned d067725ff1c7f036dbf0f726b9bf12f4daefebe7) and the move is not provably disjoint: GUARDED develop services/api-gateway/src/middleware/audit.t
+rc=18
+expected 18: OK
+unexpected rows 0
+end 04:20:02 AEST

@@ -1,0 +1,90 @@
+drafter_probe start 04:06:28 AEST
+04:06:38 AEST probe_base                         tree base  pkg gw     rc 0 FILES 1 TESTS 2 passed 2 failed 0 pending 0 failed_suites 0 success True secs 9.8 suite_msgs 0
+04:06:47 AEST probe_head                         tree head  pkg gw     rc 0 FILES 1 TESTS 2 passed 2 failed 0 pending 0 failed_suites 0 success True secs 9.0 suite_msgs 0
+rows base 30 head 30
+SAME  gdpr POST no auth                                status 401/401 audits 1/1
+      base action=gdpr.create rtype=gdpr rid=None path=/api/gdpr/erasures status=401 success=False email=None
+      head action=gdpr.create rtype=gdpr rid=None path=/api/gdpr/erasures status=401 success=False email=None
+DIFF  gdpr POST garbage bearer                         status 401/401 audits 1/1
+      base action=unknown.create rtype=unknown rid=None path=/ status=401 success=False email=None
+      head action=gdpr.create rtype=gdpr rid=None path=/api/gdpr/erasures status=401 success=False email=None
+DIFF  gdpr POST connector no scope ENFORCED            status 403/403 audits 1/1
+      base action=unknown.create rtype=unknown rid=None path=/ status=403 success=False email=None
+      head action=gdpr.create rtype=gdpr rid=None path=/api/gdpr/erasures status=403 success=False email=None
+DIFF  gdpr POST user jwt ENFORCED                      status 403/403 audits 1/1
+      base action=unknown.create rtype=unknown rid=None path=/ status=403 success=False email=None
+      head action=gdpr.create rtype=gdpr rid=None path=/api/gdpr/erasures status=403 success=False email=None
+DIFF  gdpr POST trailing slash connector ENFORCED      status 403/403 audits 1/1
+      base action=unknown.create rtype=unknown rid=None path=/ status=403 success=False email=None
+      head action=gdpr.create rtype=gdpr rid=None path=/api/gdpr/erasures/ status=403 success=False email=None
+DIFF  gdpr POST //erasures connector ENFORCED          status 403/403 audits 1/1
+      base action=unknown.create rtype=unknown rid=None path=/ status=403 success=False email=None
+      head action=gdpr.create rtype=gdpr rid=None path=/api/gdpr//erasures status=403 success=False email=None
+SAME  gdpr GET ref connector ENFORCED                  status 403/403 audits 0/0
+SAME  logs POST (app.post, admitted 204)               status 204/204 audits 1/1
+      base action=logs.create rtype=log rid=None path=/api/logs status=204 success=True email=None
+      head action=logs.create rtype=log rid=None path=/api/logs status=204 success=True email=None
+DIFF  logs POST v1 (version strip before audit)        status 204/204 audits 1/1
+      base action=logs.create rtype=log rid=None path=/api/logs status=204 success=True email=None
+      head action=v1.create rtype=v1 rid=None path=/api/v1/logs status=204 success=True email=None
+DIFF  logs POST v1 query                               status 204/204 audits 1/1
+      base action=logs.create rtype=log rid=None path=/api/logs status=204 success=True email=None
+      head action=v1.create rtype=v1 rid=None path=/api/v1/logs status=204 success=True email=None
+DIFF  logs POST //api//logs (normaliser)               status 204/204 audits 1/1
+      base action=logs.create rtype=log rid=None path=/api/logs status=204 success=True email=None
+      head action=logs.create rtype=log rid=None path=//api//logs status=204 success=True email=None
+DIFF  logs POST #frag                                  status 204/204 audits 1/1
+      base action=logs.create rtype=log rid=None path=/api/logs status=204 success=True email=None
+      head action=logs#frag.create rtype=logs#frag rid=None path=/api/logs#frag status=204 success=True email=None
+DIFF  logs POST absolute-form                          status 204/204 audits 1/1
+      base action=logs.create rtype=log rid=None path=/api/logs status=204 success=True email=None
+      head action=127.0.0.1.logs rtype=127.0.0.1 rid=None path=http://127.0.0.1/api/logs status=204 success=True email=None
+SAME  documents POST no auth                           status 401/401 audits 1/1
+      base action=documents.create rtype=document rid=None path=/api/documents status=401 success=False email=None
+      head action=documents.create rtype=document rid=None path=/api/documents status=401 success=False email=None
+DIFF  documents POST v1 no auth                        status 401/401 audits 1/1
+      base action=documents.create rtype=document rid=None path=/api/documents status=401 success=False email=None
+      head action=v1.create rtype=v1 rid=None path=/api/v1/documents status=401 success=False email=None
+SAME  v3 POST unsupported version                      status 400/400 audits 0/0
+DIFF  batch POST (app.use prefix mount)                status 401/401 audits 1/1
+      base action=unknown.create rtype=unknown rid=None path=/verify status=401 success=False email=None
+      head action=batch.verify rtype=batch rid=None path=/api/batch/verify status=401 success=False email=None
+SAME  notifications POST (app.use prefix mount)        status 405/405 audits 1/1
+      base action=notifications.create rtype=notification rid=None path=/api/notifications/read-all status=405 success=False email=None
+      head action=notifications.create rtype=notification rid=None path=/api/notifications/read-all status=405 success=False email=None
+SAME  system POST status (prefix mount)                status 404/404 audits 1/1
+      base action=system.create rtype=system rid=None path=/api/system/status status=404 success=False email=None
+      head action=system.create rtype=system rid=None path=/api/system/status status=404 success=False email=None
+SAME  auth login proxied                               status 200/200 audits 1/1
+      base action=auth.login rtype=session rid=None path=/api/auth/login status=200 success=True email=None
+      head action=auth.login rtype=session rid=None path=/api/auth/login status=200 success=True email=None
+SAME  auth login v1 proxied                            status 200/200 audits 1/1
+      base action=v1.login rtype=v1 rid=None path=/api/v1/auth/login status=200 success=True email=None
+      head action=v1.login rtype=v1 rid=None path=/api/v1/auth/login status=200 success=True email=None
+SAME  integrations POST no auth                        status 401/401 audits 1/1
+      base action=integrations.create rtype=integration rid=None path=/api/integrations status=401 success=False email=None
+      head action=integrations.create rtype=integration rid=None path=/api/integrations status=401 success=False email=None
+SAME  users admin PATCH user                           status 403/403 audits 1/1
+      base action=users.admin.update rtype=admin rid=c0000000-0000-4000-8000-00000000000c path=/api/users/admin/c0000000-0000-4000-8000-00000000000c status=403 success=False email=None
+      head action=users.admin.update rtype=admin rid=c0000000-0000-4000-8000-00000000000c path=/api/users/admin/c0000000-0000-4000-8000-00000000000c status=403 success=False email=None
+SAME  workflow approve user                            status 404/404 audits 1/1
+      base action=workflow-instances.approve rtype=workflow-instance rid=c0000000-0000-4000-8000-00000000000c path=/api/workflow-instances/c0000000-0000-4000-8000-00000000000c/approve status=404 success=False email=None
+      head action=workflow-instances.approve rtype=workflow-instance rid=c0000000-0000-4000-8000-00000000000c path=/api/workflow-instances/c0000000-0000-4000-8000-00000000000c/approve status=404 success=False email=None
+SAME  nonexistent POST 404                             status 404/404 audits 1/1
+      base action=qa-nonexistent.create rtype=qa-nonexistent rid=None path=/api/qa-nonexistent/thing status=404 success=False email=None
+      head action=qa-nonexistent.create rtype=qa-nonexistent rid=None path=/api/qa-nonexistent/thing status=404 success=False email=None
+SAME  verification v2 verify                           status 200/200 audits 1/1
+      base action=v2.verify rtype=v2 rid=None path=/api/v2/verification/verify status=200 success=True email=None
+      head action=v2.verify rtype=v2 rid=None path=/api/v2/verification/verify status=200 success=True email=None
+SAME  logs POST isDbAvailable=false                    status 204/204 audits 0/0
+SAME  logs POST sink throws                            status 204/204 audits 1/1
+      base action=logs.create rtype=log rid=None path=/api/logs status=204 success=True email=None
+      head action=logs.create rtype=log rid=None path=/api/logs status=204 success=True email=None
+SAME  gdpr POST no auth sink throws                    status 401/401 audits 1/1
+      base action=gdpr.create rtype=gdpr rid=None path=/api/gdpr/erasures status=401 success=False email=None
+      head action=gdpr.create rtype=gdpr rid=None path=/api/gdpr/erasures status=401 success=False email=None
+NESTED base [{"path": "/gw/api/gate/x", "st": 403, "audits": [{"action": "unknown.create", "resourceType": "unknown", "details": {"method": "POST", "path": "/x", "status": 403, "durationMs": 0, "tenantId": null}}]}, {"path": "/gw/api/ok", "st": 201, "audits": [{"action": "ok.create", "resourceType": "ok", "details": {"method": "POST", "path": "/api/ok", "status": 201, "durationMs": 0, "tenantId": null}}]}]
+NESTED head [{"path": "/gw/api/gate/x", "st": 403, "audits": [{"action": "api.x", "resourceType": "api", "details": {"method": "POST", "path": "/gw/api/gate/x", "status": 403, "durationMs": 0, "tenantId": null}}]}, {"path": "/gw/api/ok", "st": 201, "audits": [{"action": "api.create", "resourceType": "api", "details": {"method": "POST", "path": "/gw/api/ok", "status": 201, "durationMs": 1, "tenantId": null}}]}]
+SAME 17 DIFF 12
+porcelain base [] head []
+drafter_probe end 04:06:51 AEST

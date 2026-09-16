@@ -1,0 +1,31 @@
+drafter_probe_entrypath start 04:11:47 AEST
+   landed: anchor count 1, sha 68aa15724437 -> 36665c2a16d3, markers [('qaAuditPath', 2)]
+   landed: anchor count 1, sha 36665c2a16d3 -> 9240ce27dcb9, markers [('qaAuditPath', 4)]
+04:11:56 AEST probe_head_entrypath               tree head  pkg gw     rc 0 FILES 1 TESTS 2 passed 2 failed 0 pending 0 failed_suites 0 success True secs 9.0 suite_msgs 0
+04:11:58 AEST gw_suite_head_entrypath            tree head  pkg gw     rc 0 FILES 49 TESTS 406 passed 406 failed 0 pending 0 failed_suites 0 success True secs 2.4 suite_msgs 0
+whole suite on the entry-path variant: files 49 tests 406 failed 0 pending 0
+   restored sha-identical 68aa15724437
+DIFF  gdpr POST garbage bearer                        
+      base action=unknown.create rtype=unknown path=/ status=401
+      entry action=gdpr.create rtype=gdpr path=/api/gdpr/erasures status=401
+DIFF  gdpr POST connector no scope ENFORCED           
+      base action=unknown.create rtype=unknown path=/ status=403
+      entry action=gdpr.create rtype=gdpr path=/api/gdpr/erasures status=403
+DIFF  gdpr POST user jwt ENFORCED                     
+      base action=unknown.create rtype=unknown path=/ status=403
+      entry action=gdpr.create rtype=gdpr path=/api/gdpr/erasures status=403
+DIFF  gdpr POST trailing slash connector ENFORCED     
+      base action=unknown.create rtype=unknown path=/ status=403
+      entry action=gdpr.create rtype=gdpr path=/api/gdpr/erasures/ status=403
+DIFF  gdpr POST //erasures connector ENFORCED         
+      base action=unknown.create rtype=unknown path=/ status=403
+      entry action=gdpr.create rtype=gdpr path=/api/gdpr/erasures status=403
+DIFF  batch POST (app.use prefix mount)               
+      base action=unknown.create rtype=unknown path=/verify status=401
+      entry action=batch.verify rtype=batch path=/api/batch/verify status=401
+DIFF  auth login v1 proxied                           
+      base action=v1.login rtype=v1 path=/api/v1/auth/login status=200
+      entry action=auth.login rtype=session path=/api/auth/login status=200
+base vs entry-path variant: SAME 22 DIFF 7
+porcelain head []
+drafter_probe_entrypath end 04:11:58 AEST

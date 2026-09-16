@@ -1,0 +1,10 @@
+drafter_probe_entrypath start 04:11:41 AEST
+   landed: anchor count 1, sha 68aa15724437 -> 36665c2a16d3, markers [('qaAuditPath', 2)]
+Traceback (most recent call last):
+  File "/Volumes/DevMASTER/WEDNESDAY/2_Project_Files/fleet/qa-agent/gatesets/2026-09-17_gate1011/drafter_probe_entrypath.py", line 13, in <module>
+    edit(T['head'] + '/' + AUD, "  const segments = req.originalUrl.split('?')[0].replace(/\\/+$/, '').split('/').filter(Boolean);\n", "  const segments = ((req as unknown as { qaAuditPath?: string }).qaAuditPath ?? req.path).replace(/\\/+$/, '').split('/').filter(Boolean);\n", [('qaAuditPath', 3)])
+    ~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/Volumes/DevMASTER/WEDNESDAY/2_Project_Files/fleet/qa-agent/gatesets/2026-09-17_gate1011/drafterlib.py", line 36, in edit
+    got = open(path).read().count(m); assert got == want, 'MARKER %r %d != %d' % (m[:60], got, want)
+                                             ^^^^^^^^^^^
+AssertionError: MARKER 'qaAuditPath' 4 != 3
