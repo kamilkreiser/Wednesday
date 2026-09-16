@@ -253,3 +253,36 @@ addition class it exists to catch. The defect is upstream, in how the brief was 
 on load (18.53 > 14) and had to be re-run when the machine quietened. That was a scheduling problem and
 it is now handled by `night/retry_when_load_allows.sh`. The verdict itself was never a machine artefact
 — the re-run under good conditions produced the same A3c failure.
+
+## 2026-09-16 17:53 — KS-1168 repaired, and the ARM that broke because the fix landed (BRIEF + ARMS)
+
+**The brief.** Three edit blocks rewrote whole regions, re-listing 19 lines as `+` that they also removed.
+Two model rounds were spent on it: the model emitted the honest minimal hunk both times and A3c refused it
+as incomplete (15/46, then 18/46 `+` lines absent). Repaired by a subagent, one fence at a time — no
+generic transform — with **content-preservation assertions**, not just an absence-of-duplicates check.
+Now 3/14/9, 3/7/9 and 0/6/2 (`-`/`+`/context), zero duplicates, builder rc 0, `expected_plus` 46 → 27,
+4 red cells declared. Wednesday re-measured all of that independently rather than accepting the report.
+**The role block is still the disambiguator between the two byte-identical `if (search)` blocks — it is
+just CONTEXT now, which is what context is for.**
+
+**The gate had a hole.** It was added to `build_bash_input.sh` only. KS-1168 is a VITEST ticket built by a
+*different script*, so the defect the gate exists to catch walked straight past it. Twin added. **The arm
+that would have caught the hole is the one that asserts the gate is present in BOTH builders** — a rule
+promoted to a gate needs a closing check of *which paths can reach this defect*, and the answer is almost
+never one.
+
+**Then the arm broke for the best possible reason, and that is the durable lesson here.** ARM 1 pointed at
+the LIVE KS-1168 brief as its red fixture. The repair landed, the brief stopped being defective, and the
+arm went red — **indistinguishable at a glance from the gate breaking.** The repairing agent reported it
+honestly and refused to edit the arms file to go green, which was exactly right.
+
+**The rule this earns:** *an arm's red fixture must be something nobody is trying to fix.* A fixture that
+is also a live work item has a built-in expiry date, and it expires precisely when the mechanism succeeds.
+The fixture is now frozen at `tests/fixtures/briefs/KS-1168.md` and reached through `NIGHT_BRIEFS_DIR`.
+
+**Arms now 6/6**, and two of them are new kinds:
+- **ARM 0 asserts the FIXTURE IS ACTUALLY DEFECTIVE** (19 duplicates) before ARM 1 claims anything about
+  the gate. An arm pointed at a clean fixture passes for the wrong reason and proves nothing.
+- **ARM 3 is a DISCRIMINATING PAIR**: the frozen copy and the live repaired copy, same ticket, same pins,
+  **opposite verdicts**. That is stronger than either arm alone — it shows the gate keys on the brief's
+  shape and on nothing else about the ticket.
