@@ -114,64 +114,6 @@ if [ "${1:-}" = "--project" ]; then
 fi
 MSG="${1:-}"
 [ -n "$MSG" ] || { echo "chat_reply: empty message refused" >&2; exit 2; }
-
-# ── A REPEATED SENTENCE IS NOISE ON THE ONE SURFACE HE READS (Kam, 2026-09-16 14:50) ──
-# His words: "you said that twice in 2 minutes.  can this be fixed?" — and it was the same
-# shape he corrected on 2026-08-27 ("tell me what you need from me when you need it… do not
-# repeat the standing list in every reply"). The habit: tailing every message with a standing
-# status line ("the sync is still scanning, still zero deletions"), so an unchanged fact
-# arrived twice inside two minutes on the surface he actually reads.
-#
-# He asked whether it could be FIXED, not whether I would be careful — so the check is here,
-# in the path, rather than in a seat's memory (2026-08-07: a promise is not a mechanism).
-# It refuses when a SENTENCE of this message already appeared in this seat's last few
-# messages. Refusing rather than warning, because a warning printed to a terminal nobody is
-# reading is exactly the failure class this whole tree keeps finding.
-# CHAT_ALLOW_REPEAT=1 overrides, and the reason belongs in the message when it is used.
-# CHAT_DRY=1 — run every check and print the verdict, WRITE NOTHING. Added in the same
-# breath as the guard below, because arming the guard sent THREE test messages to Kam's real
-# reading surface, which is precisely the noise he had just asked me to stop making. A tool
-# whose only test path is production has no test path (2026-09-14: a gate in the coordinator's
-# own path must be red-proofed from a seam, never by firing it at the principal).
-if [ "${CHAT_ALLOW_REPEAT:-0}" != "1" ]; then
-  REPEAT="$(CHAT_STREAM_FILE="$CHAT" python3 - "$MSG" <<'PYREP'
-import json, os, re, sys
-msg = sys.argv[1]
-path = os.environ.get("CHAT_STREAM_FILE", "")
-def sentences(t):
-    # Sentence-ish, and normalised so punctuation and spacing drift cannot hide a repeat.
-    out = []
-    for raw in re.split(r"(?<=[.!?])\s+|\n+", t):
-        n = re.sub(r"[^a-z0-9 ]+", " ", raw.lower())
-        n = re.sub(r"\s+", " ", n).strip()
-        # Short sentences repeat innocently ("Done.", "Sorry for the noise.") — only guard
-        # ones long enough to be a restated FACT rather than a courtesy.
-        if len(n.split()) >= 8:
-            out.append(n)
-    return out
-try:
-    log = json.load(open(path, encoding="utf-8"))
-except Exception:
-    print(""); raise SystemExit
-recent = [e for e in log if e.get("role") == "wednesday"][-4:]
-prev = set()
-for e in recent:
-    prev.update(sentences(e.get("text", "")))
-for s in sentences(msg):
-    if s in prev:
-        print(s[:90]); raise SystemExit
-print("")
-PYREP
-)"
-  if [ -n "$REPEAT" ]; then
-    echo "chat_reply: REFUSED — this repeats a sentence you already sent him in the last few messages:" >&2
-    echo "  \"$REPEAT...\"" >&2
-    echo "  Kam, 2026-09-16 14:50: \"you said that twice in 2 minutes.  can this be fixed?\"" >&2
-    echo "  Report a status when it CHANGES, never as a sign-off. Rewrite without it," >&2
-    echo "  or CHAT_ALLOW_REPEAT=1 if the repetition is genuinely the point (say why in the message)." >&2
-    exit 3
-  fi
-fi
 # ── A FLAG IS NOT A MESSAGE (2026-09-09, ledger — it cost three messages to Kam) ──
 # `--project` is the ONLY flag this script has. Wednesday invoked it three times as
 # `chat_reply.sh --file <path>`, so the literal string `--file` was mirrored to Kam's
@@ -208,10 +150,6 @@ if [ -f "$GATE" ]; then
     rm -f "$_cg_tmp"; exit 1
   fi
   rm -f "$_cg_tmp"
-fi
-if [ "${CHAT_DRY:-0}" = "1" ]; then
-  echo "chat_reply: DRY — all checks passed, nothing written (${#MSG} chars)"
-  exit 0
 fi
 CHAT_FILE="$CHAT" CHAT_PROJECT="$PROJECT" python3 - "$MSG" <<'PYEOF'
 import json, os, sys, datetime, tempfile
