@@ -14,43 +14,46 @@ supersede: replace wholesale at the next pickup; do not append
 2. **Read the model's state before anything else.** `night/queue.md` pending count · the ornith-loop
    launchd job · `uptime` load against the gate of 14. If the queue is empty AND the load is under the
    gate, the first work of the session is a brief.
-3. **KS-998 is BUILT AND QUEUED** (`inputs/bash_998.json`). The ornith-loop job takes it when the load
-   falls under 14. Read its verdict, source-read the diff, write the READY.
+3. ⚠ **KS-998 is NOT queued any more — it was REALLOCATED to Claude under Kam's counter** (2 rounds).
+   Do not re-queue it at the local model. Same for KS-1168 and KS-1163. They are batch work for a
+   Secuura seat or the Sunday pass; their specs are complete and their `done.md` rows say so.
 4. **The KK_DEV_Local sync leg is CHAINED** behind the T9 leg by `fleet/chain_ssd_leg.sh` (log
    `/private/tmp/chain_ssd_leg.out`). It is ADDITIVE BY CONSTRUCTION — `-nodeletion` on both roots,
    because `ssd-ssd.prf` ships `confirmbigdel = false` — and it REFUSES to chain if the T9 leg reported
    any deletion. Do not re-run it by hand without reading that log first.
 5. Feed Ornith. If nothing is briefable, commission one (see COMMISSIONING).
 
-## ✅ WHAT LANDED THIS SEAT (15:1x → 15:5x)
-- **KS-692 HELD, 7/7** — the 15:13 A4 FAIL was the BRIEF, not the model (no 🔴 in the cell titles and no
-  `## Red cells` section, so three assertion-reds were classified as controls). Declared, input rebuilt,
-  the SAME `out.md` re-checked → PASS. **No second model round spent.** READY written after a source read
-  of the applied hunk; Kam's ruling is quoted IN the source comment and its two ticket-state claims
-  (KS-586 Done, KS-1116 Backlog) were verified at source.
-- **TWO GATES BUILT, both red-proofed on real briefs, both with OVER-FIRE CONTROLS:**
-  `build_input.sh` **UNDECLARED-RED GATE** (arms `local-model/tests/undeclared_red_gate_arms.sh` 6/6;
-  measured 29 of 30 vitest briefs unaffected) · `build_bash_input.sh` **CONTEXT-AS-ADDITION GATE**
-  (arms `local-model/tests/context_as_addition_gate_arms.sh` 5/5) — a `+` line byte-identical to a `-`
-  line in the same hunk is CONTEXT, and claiming it as an addition makes B3b/A3c refuse a CORRECT output.
-  **w=3 that day: KS-1089, KS-1168 ×2, KS-998 — the last written by this seat's own hand minutes after
-  filing the rule against it.**
-- **KS-998 was never blocked.** The previous pickup's "every `systemTest/` ticket needs a seat that can
-  fetch" was a TIER verdict. Tested: the GitHub compare over Peter's #997 lists 36 files and **neither of
-  KS-998's two is among them**. Brief rewritten as a minimal hunk (1 `-`, 8 `+`, 6 context) and queued.
-- **KS-1168 briefed by a subagent, ran twice, genuinely failed A3c** — the second run under good load is
-  what proved it was the brief and not the machine. See the CONTEXT-AS-ADDITION rule above.
-- **KS-1173 NOT briefed, correctly** — a subagent measured that it already exists as `READY_KS-1172-B3`
-  ("KS-1172 + KS-1173 PART B") and refused. It also found **2 of 81 READY diffs carry a file header
-  buried inside the previous hunk**, so `patch(1)` rejects them as malformed — recorded in
-  `fleet/briefs_staged/secuura_raise_ornith_ready_diffs.md` where the Sunday seat lands.
-- **Spotlight, not unison, is what pins the machine** — measured ~270% combined CPU against unison's 99%
-  of one core. Kam's 09-14 exclusion covered `!CODING`; the drives a SYNC WRITES were never in scope.
-  Carded `wed-spotlight-indexes-the-sync-target-drives`, default HOLD.
-- **`night/retry_when_load_allows.sh`** — the RETRY-ONCE leg is starved when the checker's own load spike
-  trips the gate. It waits, bounded, and reports either way. ⚠ Its first live fire lost a 4-second
-  check-then-act race with the runner (cost nothing — ollama serialises same-model calls); fixed by
-  `.new` + `mv` to a bounded WAIT.
+## ✅ WHAT LANDED THIS SEAT (15:1x → 18:0x)
+- 🔴 **KAM'S NEW STANDING RULE, and it is a COUNTER — learn it before you brief anything.**
+  Email 07:45Z: the local model is PERMANENT, Wednesday routes, and *"If local fails, the task is
+  allocated to a Claude agent. Not urgently but when it makes sense."* Then 07:57Z, when asked:
+  *"Rebriefing once is ok and might generate positive results. Doing it more would be a waste with
+  diminishing results."* → **original brief + ONE rebrief, then Claude. No third round, whatever the
+  diagnosis says.** Filed `learnings/2026-09-16_local-model-is-long-term-and-claude-takes-what-it-cannot-do.md`.
+  🔑 He replaced Wednesday's judgement call (brief-defect vs model-limit) with a counter —
+  **where a countable rule and a judgement rule agree, prefer the countable one.**
+- **REALLOCATED to Claude under that counter (recorded on their `done.md` rows, spec carries over —
+  batch them, do not open a seat per ticket):** **KS-1168** (Kam-ruled; round 3 the model emitted a
+  literal `\n` inside a CONTEXT line and corrupted the patch) · **KS-1163** (4 rounds, all pre-rule;
+  needs one change across a script AND two suites, which `bash_patch` cannot express) · **KS-998**
+  (Kam-ruled; 2 rounds = the counter's limit).
+- **KS-692 HELD 7/7** — the 15:13 FAIL was the brief, not the model. Re-checked the SAME output, no
+  second round spent. READY written after a source read; Kam's ruling is quoted IN the source comment.
+- **THREE GATES BUILT, all red-proofed with OVER-FIRE CONTROLS:** `build_input.sh` UNDECLARED-RED GATE
+  (arms 6/6) · CONTEXT-AS-ADDITION on **both** builders (`tests/context_as_addition_gate_arms.sh` 5/5
+  bash, `..._vitest_arms.sh` 6/6) — **it was bash-only at first, and that hole cost KS-1168 two rounds;
+  one arm now asserts the gate exists on BOTH.**
+- 🔴 **AN ARM'S RED FIXTURE MUST BE SOMETHING NOBODY IS TRYING TO FIX.** ARM 1 pointed at the live
+  KS-1168 brief; the repair landed, the brief stopped being defective, and the arm went red — which looks
+  exactly like the gate breaking. Fixture FROZEN at `tests/fixtures/briefs/KS-1168.md` (reached via
+  `NIGHT_BRIEFS_DIR`); ARM 0 now proves the fixture IS defective before ARM 1 claims anything, and ARM 3
+  is a DISCRIMINATING PAIR (frozen vs live repaired, opposite verdicts).
+- **Kam's dashboard change is BUILT and he RATIFIED THE SCOPE** (07:41Z "the scope looks good"): the right
+  panel is split, `#needscroll` pinned `flex:none` max-height 46%, so what needs him cannot scroll away.
+  ⚠ **NOT visually verified — the Chrome extension is not connected.** Anything beyond that shape (a third
+  column, removing ruled rows) is NOT covered by his ratification.
+- **Spotlight, not unison, pins the machine** (~270% CPU vs unison's one core). His 09-14 exclusion covered
+  `!CODING`; the drives a SYNC WRITES were never in scope. Carded, default HOLD.
 
 ## 🔭 TUESDAY — ONE LAUNCH BY KAM, AND A SECOND THING ON THAT MACHINE MAY ALSO BE OPEN
 **CARDED at 15:5x: `tuesday-one-launch-on-the-mini`** (action-first, default HOLD). Her tree is CLEAN,
