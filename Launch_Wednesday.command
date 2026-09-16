@@ -197,7 +197,21 @@ if command -v git >/dev/null 2>&1 && [ -d "$PROJECT_DIR/.git" ]; then
     # A dirty tree is normal here (the dashboard writes its data files constantly).
     # We do NOT autostash — that is the mechanism that corrupted two files today.
     echo "ℹ tree has local changes — skipping the boot pull (no autostash, by design)."
-    echo "  If this seat is behind, commit or stash first, then: git -C \"$PROJECT_DIR\" pull --rebase"
+    # 2026-09-16 — MEASURE the gap instead of hinting at it. "If this seat is behind" was a
+    # condition nobody evaluated, and a coordinator's tree is ALWAYS dirty, so this branch is
+    # the one that runs every time: Tuesday's tree was found 382 commits behind on a seat Kam
+    # had been calling broken. A skipped pull that says nothing is indistinguishable from a
+    # pull that happened. So: fetch (read-only, safe on a dirty tree) and say the number.
+    git -C "$PROJECT_DIR" fetch -q origin 2>/dev/null
+    BEHIND="$(git -C "$PROJECT_DIR" rev-list --count HEAD..@{upstream} 2>/dev/null || echo "")"
+    if [ -n "$BEHIND" ] && [ "$BEHIND" -gt 0 ] 2>/dev/null; then
+      echo "🔴 THIS SEAT IS $BEHIND COMMIT(S) BEHIND origin AND THE BOOT PULL WAS SKIPPED."
+      echo "   You are reading a stale brain, stale lessons and a stale pickup. Before trusting"
+      echo "   any of them: commit the generated dashboard data, then"
+      echo "   git -C \"$PROJECT_DIR\" pull --rebase   — and say in the session that you did."
+    else
+      echo "  (up to date with origin — the skipped pull cost nothing)"
+    fi
   else
     echo "→ pulling $PROJECT_DIR before the boot reads…"
     if git -C "$PROJECT_DIR" pull --rebase 2>&1; then
