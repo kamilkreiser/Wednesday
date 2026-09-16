@@ -172,7 +172,7 @@ else
     if [ $? -eq 0 ] && echo "$NIGHT_TAGS" | grep -q '"ornith:35b"'; then
       ok "ornith:35b on the drive and served (/api/tags)"
     else
-      warn "ornith:35b on the drive but Ollama not serving it" "OLLAMA_MODELS=2_Project_Files/local-model/models 2_Project_Files/tools/ollama/ollama serve (PORTABILITY 14/15) — night_run gate G5 will refuse"
+      warn "ornith:35b on the drive but Ollama not serving it" "bash 2_Project_Files/local-model/start_ollama.sh (PORTABILITY 14/15) — it uses the drive-local binary + OLLAMA_MODELS, the two things a hand-start gets wrong; night_run's G5 also calls it itself now (2026-09-16)"
     fi
   else
     warn "ornith:35b manifest missing under local-model/models" "OLLAMA_MODELS=<local-model>/models ollama pull ornith:35b (~20 GB; PORTABILITY 15)"

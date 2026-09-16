@@ -165,12 +165,24 @@ gates() {
     log "GATE G4 load: 1-min $load1 >= $NIGHT_MAX_LOAD — REFUSE"; GATE_FAIL="G4-load"; return 1
   fi
   # G5 ollama
-  local tags
-  tags="$(curl -sS -m 10 "$OLLAMA_URL/api/tags" 2>&1)"
-  if [ $? -eq 0 ] && echo "$tags" | /usr/bin/grep -q "\"$NIGHT_MODEL\""; then
+  #
+  # SELF-HEAL, added 2026-09-16 13:4x: on 2026-09-16 the server died before 12:24 and this gate
+  # refused SIX consecutive cycles (12:24 -> 13:24) into this log, which nobody reads — Ornith sat
+  # idle 09:58 -> 13:32 on the day Kam twice said never to idle. A dead LOCAL server is not a safety
+  # boundary, so detecting it and refusing was the wrong response: removing the failure mode beats
+  # detecting it (2026-09-08_a-false-absence-is-usually-my-own-instrument rule 9). start_ollama.sh is
+  # idempotent, uses the drive-local binary + OLLAMA_MODELS, and REFUSES (rc 3) rather than fighting a
+  # server already holding the port — so a foreign listener still reaches the refusal below, which is
+  # the case that genuinely needs a human.
+  local tags rc
+  tags="$(curl -sS -m 10 "$OLLAMA_URL/api/tags" 2>&1)"; rc=$?
+  if [ "$rc" -eq 0 ] && echo "$tags" | /usr/bin/grep -q "\"$NIGHT_MODEL\""; then
     log "GATE G5 ollama: $OLLAMA_URL/api/tags lists $NIGHT_MODEL — pass"
+  elif [ "${NIGHT_G5_SELFHEAL:-1}" = "1" ] && [ -f "$SELF_DIR/../start_ollama.sh" ] \
+       && NIGHT_MODEL="$NIGHT_MODEL" OLLAMA_URL="$OLLAMA_URL" bash "$SELF_DIR/../start_ollama.sh" >> "$LOG" 2>&1; then
+    log "GATE G5 ollama: was down — start_ollama.sh brought it back serving $NIGHT_MODEL — pass (SELF-HEALED)"
   else
-    log "GATE G5 ollama: $OLLAMA_URL/api/tags rc=$? or $NIGHT_MODEL absent: $(echo "$tags" | head -c 200) — REFUSE"; GATE_FAIL="G5-ollama"; return 1
+    log "GATE G5 ollama: curl rc=$rc or $NIGHT_MODEL absent, and the self-heal did not recover it: $(echo "$tags" | head -c 200) — REFUSE"; GATE_FAIL="G5-ollama"; return 1
   fi
   return 0
 }
@@ -254,7 +266,43 @@ pin() { # pin <line> <key>  → value or ""
 }
 
 # ---------------------------------------------------------------- run
-if ! gates; then finish 3 "gate refused: $GATE_FAIL"; fi
+#
+# G8 (2026-09-16 13:4x) — A REFUSAL NOBODY READS IS INDISTINGUISHABLE FROM WORKING.
+# G7 alerts when the QUEUE is empty. Nothing alerted when a GATE refused, so six G5 refusals in an
+# hour reached no surface a human or a seat lands on, and the only reason anyone noticed was a boot.
+# So: the first refusal of a gate stamps a marker; once the SAME gate has been refusing for
+# NIGHT_GATE_ALERT_MIN minutes (default 30), ONE panel line goes out, rate-limited exactly like G7,
+# and the markers are cleared the moment the gates pass. The alert DEGRADES rather than blocks — a
+# failed post is logged and the refusal still happens (2026-09-10_a-refusal-nobody-reads...).
+_gate_marker="$NIGHT_LOG_DIR/.gate_refused_since"; _gate_alerted="$NIGHT_LOG_DIR/.gate_refused_alerted"
+# Clearing a marker is a MOVE, never a delete (Kam 2026-08-26; G7 above does the same with its own
+# two markers) — the quarantined copies are the record of how long each outage actually ran.
+_gate_clear() {
+  mkdir -p "$NIGHT_LOG_DIR/_quarantine_g8" 2>/dev/null
+  for _m in "$_gate_marker" "$_gate_alerted"; do
+    [ -f "$_m" ] && mv "$_m" "$NIGHT_LOG_DIR/_quarantine_g8/$(basename "$_m").$(date +%s)"
+  done
+  :
+}
+if ! gates; then
+  _now="$(date +%s)"
+  if [ -f "$_gate_marker" ] && [ "$(cut -d' ' -f2- "$_gate_marker" 2>/dev/null)" = "$GATE_FAIL" ]; then
+    _since="$(cut -d' ' -f1 "$_gate_marker" 2>/dev/null)"
+  else
+    _gate_clear; _since="$_now"; printf '%s %s\n' "$_now" "$GATE_FAIL" > "$_gate_marker"
+  fi
+  _mins=$(( (_now - ${_since:-$_now}) / 60 ))
+  if [ "$_mins" -ge "${NIGHT_GATE_ALERT_MIN:-30}" ] && [ ! -f "$_gate_alerted" ]; then
+    : > "$_gate_alerted"
+    _remedy="read night/log/$(basename "$LOG") for the refusal line"
+    [ "$GATE_FAIL" = "G5-ollama" ] && _remedy="bash 2_Project_Files/local-model/start_ollama.sh (the self-heal already failed — something else holds port 11434)"
+    log "G8 GATE ALERT: $GATE_FAIL has refused for ${_mins} min — posting to the panel"
+    [ "${NIGHT_GATE_ALERT_DRY:-0}" = 1 ] || bash "$SELF_DIR/../../tools/chat_reply.sh" \
+      "Ornith has been gate-refused for ${_mins} minutes on ${GATE_FAIL} — nothing has run since it started. Remedy: ${_remedy}." > /dev/null 2>&1 || log "G8 GATE ALERT: post FAILED"
+  fi
+  finish 3 "gate refused: $GATE_FAIL"
+fi
+_gate_clear
 if [ -z "$(next_ticket)" ]; then
   log "QUEUE: $NIGHT_QUEUE has no pending ticket"
   # (b) of the 2026-09-16 unattended-week design: an empty DEFAULT queue re-derives the candidate pool when
