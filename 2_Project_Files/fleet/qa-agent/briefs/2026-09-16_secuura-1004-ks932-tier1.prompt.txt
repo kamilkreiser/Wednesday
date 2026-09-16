@@ -1,0 +1,139 @@
+ultrathink
+
+You are the fleet QA agent running ONE TIER 1 ROUND 1 gate over Secuura/Blockchain PR #1004 (KS-932, Seat A) at head
+6d077d3fe35cd5f3c09d394553d320e97b1abe32 — packages/shared/src/security/ssrf-guard.ts (+12 -3): safeOutboundRequest's
+timeoutMs now bounds DNS resolution (resolvePublicAddresses RACES a setTimeout; on timeout the call returns
+{ok:false, reason:'blocked', error:'host "<h>" did not resolve within the <n>ms deadline'}) and DNS shares ONE budget with
+the request (the total deadline is armed with remainingMs = max(1, timeoutMs - elapsed)), plus one new 3-cell test file.
+TIER 1 because it is a security surface: the SSRF guard every product webhook POST goes through (@secuura/shared, consumed
+by every service), edited in the exact expression that classifies each resolved address before a socket opens. No
+rendered surface — the real-browser half of tier 1 does not apply; say so. Round 1 of 2 for the KS-932 class under the cap.
+
+Read your brief FIRST and in full, then plan:
+/Volumes/DevMASTER/WEDNESDAY/2_Project_Files/fleet/qa-agent/briefs/2026-09-16_secuura-1004-ks932-tier1.md
+
+Head (git ls-remote 22:56:13, 22:56:27 and 23:11:38 AEST, the API 22:59:04, all agree; the launcher re-asserts it):
+  #1004 6d077d3fe35cd5f3c09d394553d320e97b1abe32 = refs/pull/1004/head = feature/ks-932-ornith-timeout-bounds-dns
+        ONE commit, parent = develop 5b4f38a48aeb40c2295895aaa5cd08e273aa7a08 (= base = merge-base; ahead 1, behind 0)
+  git diff 5b4f38a48 6d077d3fe = exactly 2 files: ssrf-guard.ts efd880010 (12 3; base 5a838e0d6) and
+  ks932-timeout-bounds-dns.test.ts 5a2188f6f (75 0). While develop has not moved, the head tree IS the merged tree.
+  develop moved three times tonight; if the launcher printed "origin develop MOVED", merge the then-current develop onto
+  6d077d3fe in YOUR clone, REBUILD the shared dist there, and re-derive every count on it, naming the tree.
+Repo:    /Volumes/DevMASTER/!CODING/Secuura/Blockchain/2_Project_Files  (READ-ONLY — git clone --shared by SHA into your
+  own scratch; write verbs there only, from a script file; Seat A's worktree is LIVE — never enter it, never vitest inside
+  it; pin by SHA, never origin/*)
+
+You are FINDINGS-ONLY. You never fix, never merge, never push, never deploy, never comment, never file, never tick an
+ack box, never `@`.
+
+NEVER run a push, the real pre-push hook, or preflight.sh inside the Secuura checkout or any of its worktrees.
+
+NEVER print a credential value, and never open, read or copy a secrets file (any .env, config/secrets.yml) — a script
+may read AGENTMAIL_API_KEY / GH_TOKEN / LINEAR_API_KEY by NAME from the named .env for the API calls the brief allows,
+and never echoes them. Count, never echo.
+
+NO shared docker stack, no :6882 / :7082 slot, no kintsugi, no demo, NEVER the wallet mnemonic (KS-535 HOLD). This gate
+needs NO container. Run `docker info` ONCE and print its rc on its own line (the drafter read rc 0 — UP — at 23:09:00; UP
+is NOT permission; create no container). LOOPBACK ONLY for everything you write: count and REDIRECT every socket the guard
+opens to 127.0.0.1 (net.Socket.prototype.connect wrapper); no real DNS query ever. The one named exception: the product's
+own suite as shipped (the seat's cells 2-3 and ks914-shipped-path.test.ts) SYNs 203.0.113.7 (TEST-NET-3) — run it, say so,
+add nothing else off-host. No Akto, no k6, no Playwright, no Schemathesis tonight (Kam's 40% cap; NOT COMMISSIONED — say
+so). Time-box 45 minutes of work.
+
+Seven things you must not miss (each is a brief item with predicted rows and predicted-by):
+
+1. REFUSALS (item 1) — a fail-OPEN on timeout is a Blocker. In YOUR clone write
+   packages/shared/src/__tests__/qa1004-gate.test.ts (vi.mock('dns/promises') + a counting/redirecting connect wrapper;
+   the drafter's recording harness is gatesets/2026-09-16_gate1004/qa1004-drafter-probe.test.ts — your cells ASSERT, FAIL
+   condition first). R-L (21 literal URLs), R-D (12 resolved private/mixed answers + ENOTFOUND + empty), R-A (allowlist):
+   blocked with 0 connects, identical at head and at BASE bytes; R-C the positive control (a public answer DOES connect,
+   or every 0 is a false zero); R-T1/R-T2 (private / PUBLIC answer arriving AFTER the timer: 0 connects at return AND after
+   the late answer); R-T3; R-T4 (timeoutMs 0/-5/NaN/1); R-R (a 302 to IMDS is returned, not followed — not measured by the
+   drafter).
+
+2. THE UN-CANCELLED LOSER (item 2): L-1 no late connect; L-2/L-3 zero unhandledRejection for a late rejection and a late
+   non-iterable answer; L-4 the DNS timer left ARMED when the race rejects (clearTimeout sits after the await — isolate the
+   cell, getActiveResourcesInfo counts every timer); L-5 a REAL dns/promises lookup made slow with NO network
+   (fifo_probe.js: UV_THREADPOOL_SIZE=1, the only pool thread parked on a FIFO, dist built in your clone): base pending at
+   1509 ms, head blocked at ~308 ms with GetAddrInfoReqWrap still queued after the return. The probe must SIGKILL itself
+   (process.exit hangs joining the parked thread; releasing the FIFO would send a real DNS query) — rc -9 is expected.
+   Rule on the threadpool-occupancy Record (READ ONLY; do not measure with a real resolver).
+
+3. THE REASON CODE (item 3): census safeOutboundRequest with a positive control — exactly two product call sites (originate
+   webhooks.ts:450 timeoutMs 10000; m365 index.ts:1236 default 10000), both branch on reason === 'blocked' for TEXT only
+   (log line; originate persists 'blocked by SSRF guard: <error>'), no retry/disable. api-gateway: 0 call sites. C-1 (jest,
+   originate, REAL @secuura/shared from dist@head, dns hung): the persisted string after ~10 s. ENOTFOUND was already
+   'blocked' at base; what changes is a slow-but-successful resolution. Rule with a FEW HICCUPPS oracle; the docblocks
+   ssrf-guard.ts:421-425 and :519-523 define 'blocked' without resolution failure.
+
+4. ONE BUDGET (item 4): B-0..B-4 with a mocked slow lookup and a SILENT 127.0.0.1 listener (head ~timeoutMs; base dns +
+   timeoutMs; dns 450 of 400 -> blocked at ~403, 0 connects) and B-5 = L-5's real lookup. A real slow lookup that then
+   SUCCEEDS is NOT measurable without network — NOT RUN with that blocker.
+
+5. FLAKE (item 5): the seat's file UNMODIFIED under qa-netredirect.setup.ts/.config.ts. rst (fast RST): cell 3 RED on
+   /deadline/, cell 2 green at ~232 ms AND green under the seat's budget-unshared tamper — vacuous; silent: the tamper reds
+   (614). Whole suite under rst 837/842 — but 3 of those reds (ks914-pinned-address) are a HARNESS ARTEFACT that reds
+   under silent too: say so. Separate the PR's share from ks914's pre-existing share; describe the deterministic shape in
+   prose.
+
+6. CONSUMERS AND THE DIST TRAP (item 6): consumers load @secuura/shared from dist/, and the checkout's
+   node_modules/@secuura/shared is a RELATIVE symlink — a whole-dir farm runs them against the CHECKOUT's stale dist (0
+   Promise.race). Farm per entry, relink @secuura into your clone, build dist at head, and ASSERT realpath inside your clone
+   + Promise.race before every consumer run. Suites per tree: shared 44/842 head (43/839 base); m365 5 files/38; originate
+   62/637 (neither reaches the real guard — C-1 does); tsc -p packages/shared has 0 __tests__ files — an INCLUDING program
+   (ks932 file + ks914-shipped-path as control) shows TS1378 in both (pre-existing class) and TS2345 at ks932:49 (cell 2's
+   mock resolves an array into Promise<{address,family}>) — unique to the PR's file. Name the 23 importing services not run.
+
+7. TAMPERS (item 7), seat's file AND your gate file SOLO, prediction + aimed cells written before each run, anchor count by
+   Python str.count, marker asserted after, restore by git checkout 6d077d3fe -- <file> asserted by whole-file sha256
+   (re-derive b546fc02578c8b1f...), green again after; a 0-cell run is INVALID; a load failure is NOT a red. REQUIRED: T1
+   (race removed -> cell 1 only), T2 (budget unshared -> cell 2 only), TG (the gate's own: the raced branch resolves
+   WITHOUT classifying -> the drafter measured the seat's file 3/3 AND the whole shared suite 842/842 green while private
+   answers reach a socket — run the whole suite under it), T6 inert. Read the prior guard gate's Record (a) before you rule
+   on TG: /Volumes/DevMASTER/!CODING/Testing Agent MAIN/projects/secuura/reports/2026-09-14-ks931-873-c624c9a8d-tier1-r1/report.md
+
+Tooling: vitest 4.1.10 (`npx vitest run <file> --reporter=json --outputFile=`, cwd <clone>/Blockchain/Dev/packages/shared;
+never watch); jest in services/originate; typescript 5.9.3; node v24.7.0. /bin/bash here is 3.2 — write runners in Python.
+zsh: no PIPESTATUS (`cmd > out 2>&1; rc=$?`), no timeout on macOS. Your tool shell's grep may be a function: /usr/bin/grep -i
+with a same-file positive control. Never `cd` in your own tool calls.
+Quote the Secuura checkout's porcelain count, .git/config sha256, for-each-ref count, .git/worktrees count, origin
+develop SHA, refs/pull/1004/head and the branch at start, mid and close as THREE timestamped readings; if
+refs/pull/1004/head moves, STOP — the brief is about a different SHA. develop moving is expected; judge it by content, name it.
+Re-read Linear KS-932 attachments.metadata.linkKind (drafter: #1004 'closes'); any other ticket 'closes' #1004 is a finding.
+Never `rm`: fresh mktemp -d per attempt; quarantine scratch tests and configs by rename. No container is created; never
+touch a secuura-* container. pgrep -fl fifo_probe must be empty at close.
+Do no memory maintenance of your own project's memory store inside this session.
+
+Report FOUND / TESTED / HOW, with controls, into
+/Volumes/DevMASTER/!CODING/Testing Agent MAIN/projects/secuura/reports/2026-09-16-ks932-1004-6d077d3fe-tier1-r1/
+(report.md, evidence/, NOT-TESTED.written-first.md written BEFORE any run): the scope; the refusal matrix per tree with
+connect counts and the live counter control; the loser (L-1..L-5); the reason census with its control, C-1 and your ruling;
+the budget per tree; the flake runs with the harness artefact named; the suites per tree with the dist realpath asserted
+and the including-program tsc; the tamper table (cells-run beside every colour, the decisive assertion for each red,
+predicted-by on every row, TG against the seat's file and the whole suite stated plainly); DELIVERED-vs-COMMISSIONED
+against KS-932's fix shape; the Records; and what you did NOT test at the same prominence as the findings (`docker info` rc
+on its own line; a real slow resolver that then succeeds; threadpool saturation; a live subscriber; any stacked/deployed
+service; the 23 other importing services' suites; the originate integration suite; a real browser; the four platform
+suites by path — systemTest/schemathesis, systemTest/akto, systemTest/playwright, systemTest/performance; preflight legs
+3/4/8). Every finding carries its evidence class (MEASURED AT RUNTIME / PROBED / READ ONLY / RELAYED), severity, target,
+SHIPS-WITH or TICKET, and its oracle. Client-facing communication = ticket comments only; the extranet is not a channel;
+anything needing a push goes to Wednesday as an escalation candidate for Kam's WhatsApp. Handovers to Peter/Stuart are test
+blocks, never a list of PRs. Never delete; cleanup means quarantine.
+Verdict: ONE line — GO, GO WITH FINDINGS, or NO GO — on 6d077d3fe35cd5f3c09d394553d320e97b1abe32, as the delta over
+develop 5b4f38a48 (and the merged tree if develop moved — name it). Say plainly: fail-open or not, and why; what the loser
+can and cannot do; the reason code's reach and your ruling; the budget per tree; the flake/vacuity of cells 2-3; the suites
+per tree; which tampers red as predicted and what TG did to the seat's file and the whole suite; and what was NOT tested.
+Give the merge seat its ADDENDUM line: "squash 6d077d3fe onto develop (file-disjoint from every open lane PR; #1004 attaches
+to KS-932 only, linkKind closes); equality targets ssrf-guard.ts efd880010 / ks932-timeout-bounds-dns.test.ts 5a2188f6f;
+packages/shared 43/839 -> 44/842 on develop 5b4f38a48 (plus #922's cells if it lands first); KS-932 -> Done at the merge
+seat's hand after the GO (Closes KS-932 is in the body; the ticket is In Progress); Records: <yours>" — plus any
+test-quality finding (TG, F-1, TS2345) with its target.
+
+MAIL YOUR VERDICT to wednesday-agent@agentmail.to when the pass is complete, using
+the project's send_brief.sh. Your pane holds ~19 lines of alternate screen with no
+scrollback, so a verdict that stays in the pane is one pane-close from being lost --
+this is not a formality, it is the only durable copy; the verdict MAIL is the wait signal. Subject:
+[QA -> Wednesday] TIER 1 GATE #1004 (KS-932) 6d077d3fe — <VERDICT>
+(The QA project has no send_brief.sh of its own — the brief's VERDICT DESTINATION names the path that worked:
+the AgentMail API from coagent@agentmail.to, AGENTMAIL_API_KEY by NAME from Wednesday's .env, never echoed. Confirm
+the API answered 2xx and quote the message id in your final pane line. The MAIL is the end state.)

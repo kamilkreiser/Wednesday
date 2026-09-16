@@ -1,0 +1,33 @@
+parser_proof 2026-09-16 23:08:34 AEST
+{
+ "ts": "5.9.3",
+ "codeLinesBase": 340,
+ "codeLinesHead": 353,
+ "codeRemoved": [
+  "    const resolved = await resolvePublicAddresses(url.hostname);",
+  "        }, timeoutMs);"
+ ],
+ "codeAdded": [
+  "    const startedAt = Date.now();",
+  "    let dnsTimer: ReturnType<typeof setTimeout> | undefined;",
+  "    const resolved = await Promise.race([",
+  "        resolvePublicAddresses(url.hostname),",
+  "        new Promise<{",
+  "            ok: false;",
+  "            error: string;",
+  "        }>((settle) => {",
+  "            dnsTimer = setTimeout(() => settle({ ok: false, error: `host \"${url.hostname}\" did not resolve within the ${timeoutMs}ms deadline` }), timeoutMs);",
+  "        }),",
+  "    ]);",
+  "    if (dnsTimer)",
+  "        clearTimeout(dnsTimer);",
+  "    const remainingMs = Math.max(1, timeoutMs - (Date.now() - startedAt));",
+  "        }, remainingMs);"
+ ],
+ "commentsBase": 11,
+ "commentsHead": 11,
+ "commentsIdentical": true,
+ "headHasLiveRace": true,
+ "headDeadlineUsesRemaining": true
+}
+rc 0

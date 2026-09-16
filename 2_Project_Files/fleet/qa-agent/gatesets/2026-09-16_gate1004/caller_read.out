@@ -1,0 +1,189 @@
+caller_read 2026-09-16 22:58:29 AEST tree 6d077d3fe35cd5f3c09d394553d320e97b1abe32
+## originate webhooks.ts 425-560
+   425	 * Deliver a payload to a webhook URL with HMAC-SHA256 signature.
+   426	 */
+   427	export async function deliverWebhook(
+   428	  url: string,
+   429	  secret: string,
+   430	  payload: Record<string, unknown>,
+   431	): Promise<{ status: number; success: boolean; duration: number; error?: string }> {
+   432	  const body = JSON.stringify(payload);
+   433	  const signature = createHmac('sha256', secret).update(body).digest('hex');
+   434	  const start = Date.now();
+   435	
+   436	  // KS-487 B-2: re-validate at SEND time, not just at registration.
+   437	  // Registration-time-only validation is defeated without any race — the
+   438	  // attacker registers a public host, then repoints the DNS record. This is
+   439	  // deliberately inside deliverWebhook rather than at its two call sites (the
+   440	  // test-send at /test and the dispatch loop) so that neither can forget it,
+   441	  // and so a third caller added later inherits it.
+   442	  // KS-914: one call that validates AND connects to the address it validated.
+   443	  // The previous shape — assertSafeOutboundUrl(url) then fetch(url) — resolved
+   444	  // twice, and the second resolution is the one that decided where the packets
+   445	  // went. It returns the guard's error rather than throwing, TAGGED with
+   446	  // `reason: 'blocked' | 'request_failed'` — the branch below reads that tag,
+   447	  // so the distinction is carried by the type and not by this sentence.
+   448	  // `timeoutMs` is a total deadline on connect, transfer and drain, not a
+   449	  // socket-idle timer.
+   450	  const result = await safeOutboundRequest(
+   451	    url,
+   452	    {
+   453	      method: 'POST',
+   454	      headers: {
+   455	        'Content-Type': 'application/json',
+   456	        'x-secuura-signature': `sha256=${signature}`,
+   457	        'x-secuura-event': (payload as any).type || 'unknown',
+   458	        'x-secuura-delivery': (payload as any).id || uuidv4(),
+   459	        'User-Agent': 'Secuura-Webhooks/1.0',
+   460	      },
+   461	      body,
+   462	      timeoutMs: 10000,
+   463	    },
+   464	  );
+   465	
+   466	  if (!result.ok) {
+   467	    // KS-914 A-4/A-5: the distinction is carried by `result.reason`, not by a
+   468	    // comment. It reaches the operator on two surfaces — the persisted
+   469	    // svc_webhook_deliveries.error and the /test response's delivery.error —
+   470	    // so an operator can tell "we refused to send" from "their endpoint was
+   471	    // down". The `blocked by SSRF guard:` prefix is the one this replaced; it
+   472	    // is restored verbatim rather than reworded, because it is what anyone
+   473	    // grepping delivery history is already looking for.
+   474	    if (result.reason === 'blocked') {
+   475	      logger.warn('webhook delivery blocked by SSRF guard', { url, reason: result.error });
+   476	      return {
+   477	        status: 0,
+   478	        success: false,
+   479	        duration: Date.now() - start,
+   480	        error: `blocked by SSRF guard: ${result.error}`,
+   481	      };
+   482	    }
+   483	    logger.warn('webhook delivery failed', { url, reason: result.error });
+   484	    return {
+   485	      status: 0,
+   486	      success: false,
+   487	      duration: Date.now() - start,
+   488	      error: result.error,
+   489	    };
+   490	  }
+   491	
+   492	  return {
+   493	    status: result.response.status,
+   494	    success: result.response.ok,
+   495	    duration: Date.now() - start,
+   496	  };
+   497	}
+   498	
+   499	/**
+   500	 * Dispatch an event to all matching webhook subscriptions.
+   501	 * Called by other services when events occur (cert issued, doc created, etc.)
+   502	 */
+   503	export async function dispatchEvent(
+   504	  eventType: string,
+   505	  payload: Record<string, unknown>,
+   506	  db?: any,
+   507	): Promise<number> {
+   508	  try {
+   509	    const client = db || prisma;
+   510	    const webhooks = await client.$queryRaw`
+   511	      SELECT id, url, secret_v2 FROM svc_webhooks
+   512	      WHERE is_active = true AND ${eventType} = ANY(events)
+   513	    `.catch(() => []);
+   514	
+   515	    if (!webhooks || webhooks.length === 0) return 0;
+   516	
+   517	    let delivered = 0;
+   518	    for (const wh of webhooks as any[]) {
+   519	      const event = {
+   520	        id: `evt_${uuidv4()}`,
+   521	        type: eventType,
+   522	        timestamp: new Date().toISOString(),
+   523	        data: payload,
+   524	      };
+   525	
+   526	      // F-18 phase 2: decrypt secret_v2 at HMAC time.
+   527	      const plainSecret = decryptWebhookSecret(wh.secret_v2, wh.id);
+   528	      const result = await deliverWebhook(wh.url, plainSecret, event);
+   529	
+   530	      // Log delivery
+   531	      try {
+   532	        await client.$executeRaw`
+   533	          INSERT INTO svc_webhook_deliveries (webhook_id, event_type, payload, response_status, success, error, duration_ms)
+   534	          VALUES (${wh.id}::uuid, ${eventType}, ${JSON.stringify(event)}::jsonb, ${result.status}, ${result.success}, ${result.error || null}, ${result.duration})
+   535	        `;
+   536	      } catch { /* logging failure shouldn't break delivery */ }
+   537	
+   538	      if (result.success) delivered++;
+   539	    }
+   540	
+   541	    logger.info('Webhook dispatch', { eventType, total: webhooks.length, delivered });
+   542	    return delivered;
+   543	  } catch (err: any) {
+   544	    logger.warn('Webhook dispatch failed', { eventType, error: err.message });
+   545	    return 0;
+   546	  }
+   547	}
+   548	
+   549	export default webhooksRouter;
+## m365 index.ts 1215-1275
+  1215	            ]},
+  1216	          ],
+  1217	          // KS-349: the verify-result page lives on the VERIFIER portal, not admin.
+  1218	          // FRONTEND_URL points at the admin host on demo (KS-344), so use a
+  1219	          // dedicated VERIFIER_URL for this link; fall back to FRONTEND_URL then
+  1220	          // localhost (local dev fronts /verify and /admin on the same gateway).
+  1221	          actions: documentId ? [{ type: 'Action.OpenUrl', title: 'View in Secuura', url: `${process.env.VERIFIER_URL || process.env.FRONTEND_URL || 'http://localhost:6882'}/verify/result/${documentId}` }] : [],
+  1222	        },
+  1223	      }],
+  1224	    };
+  1225	
+  1226	    for (const wh of webhooks) {
+  1227	      try {
+  1228	        // KS-487 B-1: re-check immediately before the request, not only at
+  1229	        // registration. This is the load-bearing half here for two reasons:
+  1230	        // registration is gated behind requireM365 (so it is unreachable
+  1231	        // wherever Entra is unconfigured) while THIS route is not, and every
+  1232	        // row written before this guard existed is still in the table
+  1233	        // unvalidated. Also re-resolves, so a record repointed after
+  1234	        // registration is caught.
+  1235	        // KS-914: validate and connect in one call, against one resolution.
+  1236	        const result = await safeOutboundRequest(wh.webhook_url, {
+  1237	          method: 'POST',
+  1238	          headers: { 'Content-Type': 'application/json' },
+  1239	          body: JSON.stringify(card),
+  1240	        });
+  1241	        if (!result.ok) {
+  1242	          // KS-914 A-4/A-5: blocked and failed are distinguishable again, and
+  1243	          // the distinction is in the type rather than in a comment. This loop
+  1244	          // reports only ids, so the log line is the only surface an operator
+  1245	          // has for WHY a row failed.
+  1246	          log(
+  1247	            'warn',
+  1248	            result.reason === 'blocked'
+  1249	              ? 'Teams webhook delivery blocked by SSRF guard'
+  1250	              : 'Teams webhook delivery failed',
+  1251	            { id: wh.id, reason: result.error },
+  1252	          );
+  1253	          failed.push(wh.id);
+  1254	          continue;
+  1255	        }
+  1256	        const resp = result.response;
+  1257	        if (resp.ok) {
+  1258	          sent.push(wh.id);
+  1259	          await query('UPDATE svc_teams_webhooks SET last_sent_at = NOW() WHERE id = $1', [wh.id]);
+  1260	        } else {
+  1261	          failed.push(wh.id);
+  1262	        }
+  1263	      } catch { failed.push(wh.id); }
+  1264	    }
+  1265	
+  1266	    log('info', 'Teams notifications sent', { event, sent: sent.length, failed: failed.length });
+  1267	    res.json({ success: true, data: { sent: sent.length, failed: failed.length, total: webhooks.length } });
+  1268	  } catch (error) { next(error); }
+  1269	});
+  1270	
+  1271	// =============================================================================
+  1272	// OUTLOOK INTEGRATION ROUTES
+  1273	// =============================================================================
+  1274	
+  1275	const exchangeTokenSchema = z.object({

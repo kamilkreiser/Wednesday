@@ -1,0 +1,47 @@
+23:04:39 head ssrf-guard.ts sha256 b546fc02578c8b1f
+23:04:43 rc 0 4.2s npx vitest run src/__tests__/ks932-timeout-bounds-dns.test.ts --reporter=json --outputFile=/private/tmp/claude-501/-Volumes-DevMASTER-WEDNESDAY/9aed5a
+  seat_head_1: files 1 tests 3 passed 3 failed 0 | unhandled errors in stderr: False
+    passed 308 🔴 KS-932 — a lookup that never calls back: the call settles within the declared bound 
+    passed 444 🔴 KS-932 — the budget is shared: a slow lookup leaves less for the request 
+    passed 306 KS-932 control — a lookup that answers promptly still reaches the request and the deadline 
+23:04:45 rc 0 1.6s npx vitest run src/__tests__/ks932-timeout-bounds-dns.test.ts --reporter=json --outputFile=/private/tmp/claude-501/-Volumes-DevMASTER-WEDNESDAY/9aed5a
+  seat_head_2: files 1 tests 3 passed 3 failed 0 | unhandled errors in stderr: False
+    passed 309 🔴 KS-932 — a lookup that never calls back: the call settles within the declared bound 
+    passed 433 🔴 KS-932 — the budget is shared: a slow lookup leaves less for the request 
+    passed 305 KS-932 control — a lookup that answers promptly still reaches the request and the deadline 
+23:04:46 rc 0 1.6s npx vitest run src/__tests__/ks932-timeout-bounds-dns.test.ts --reporter=json --outputFile=/private/tmp/claude-501/-Volumes-DevMASTER-WEDNESDAY/9aed5a
+  seat_head_3: files 1 tests 3 passed 3 failed 0 | unhandled errors in stderr: False
+    passed 307 🔴 KS-932 — a lookup that never calls back: the call settles within the declared bound 
+    passed 422 🔴 KS-932 — the budget is shared: a slow lookup leaves less for the request 
+    passed 304 KS-932 control — a lookup that answers promptly still reaches the request and the deadline 
+23:04:55 rc 0 8.3s npx vitest run src/__tests__/qa1004-drafter-probe.test.ts --reporter=json --outputFile=/private/tmp/claude-501/-Volumes-DevMASTER-WEDNESDAY/9aed5a67-2
+  probe_head: files 1 tests 56 passed 56 failed 0 | unhandled errors in stderr: False
+  base bytes written; Promise.race count 0
+23:05:05 rc 0 10.0s npx vitest run src/__tests__/qa1004-drafter-probe.test.ts --reporter=json --outputFile=/private/tmp/claude-501/-Volumes-DevMASTER-WEDNESDAY/9aed5a67-2
+  probe_base: files 1 tests 56 passed 56 failed 0 | unhandled errors in stderr: False
+23:05:08 rc 1 3.6s npx vitest run src/__tests__/ks932-timeout-bounds-dns.test.ts --reporter=json --outputFile=/private/tmp/claude-501/-Volumes-DevMASTER-WEDNESDAY/9aed5a
+  seat_base: files 1 tests 3 passed 1 failed 2 | unhandled errors in stderr: False
+    failed 1510 🔴 KS-932 — a lookup that never calls back: the call settles within the declared bound AssertionError: expected false to be true // Object.is equality     at /private/tmp/claude-501/-Volumes-DevMASTER-WEDNESDAY/9aed5a67-2729-4892-b685-13ab87142a58
+    failed 614 🔴 KS-932 — the budget is shared: a slow lookup leaves less for the request AssertionError: expected 613 to be less than 550     at /private/tmp/claude-501/-Volumes-DevMASTER-WEDNESDAY/9aed5a67-2729-4892-b685-13ab87142a58/scratchpad/gat
+    passed 302 KS-932 control — a lookup that answers promptly still reaches the request and the deadline 
+23:05:12 rc 0 3.3s npx tsc -p .
+Traceback (most recent call last):
+  File "/Volumes/DevMASTER/WEDNESDAY/2_Project_Files/fleet/qa-agent/gatesets/2026-09-16_gate1004/drafter_run.py", line 46, in <module>
+    p = run(['node', G + '/fifo_probe.js', SH + '/dist/security/ssrf-guard.js', fifo, 'dist@' + label, '300'], env={'UV_THREADPOOL_SIZE': '1'}, timeout=60)
+  File "/Volumes/DevMASTER/WEDNESDAY/2_Project_Files/fleet/qa-agent/gatesets/2026-09-16_gate1004/drafter_run.py", line 15, in run
+    t = datetime.datetime.now(); p = subprocess.run(cmd, cwd=cwd, env=e, capture_output=True, text=True, timeout=timeout)
+                                     ~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/opt/homebrew/Cellar/python@3.14/3.14.5/Frameworks/Python.framework/Versions/3.14/lib/python3.14/subprocess.py", line 557, in run
+    stdout, stderr = process.communicate(input, timeout=timeout)
+                     ~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/opt/homebrew/Cellar/python@3.14/3.14.5/Frameworks/Python.framework/Versions/3.14/lib/python3.14/subprocess.py", line 1221, in communicate
+    stdout, stderr = self._communicate(input, endtime, timeout)
+                     ~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/opt/homebrew/Cellar/python@3.14/3.14.5/Frameworks/Python.framework/Versions/3.14/lib/python3.14/subprocess.py", line 2154, in _communicate
+    self._check_timeout(endtime, orig_timeout, stdout, stderr)
+    ~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/opt/homebrew/Cellar/python@3.14/3.14.5/Frameworks/Python.framework/Versions/3.14/lib/python3.14/subprocess.py", line 1268, in _check_timeout
+    raise TimeoutExpired(
+    ...<2 lines>...
+            stderr=b''.join(stderr_seq) if stderr_seq else None)
+subprocess.TimeoutExpired: Command '['node', '/Volumes/DevMASTER/WEDNESDAY/2_Project_Files/fleet/qa-agent/gatesets/2026-09-16_gate1004/fifo_probe.js', '/private/tmp/claude-501/-Volumes-DevMASTER-WEDNESDAY/9aed5a67-2729-4892-b685-13ab87142a58/scratchpad/gate1004_draft_mwjyyw51/clone/Blockchain/Dev/packages/shared/dist/security/ssrf-guard.js', '/private/tmp/claude-501/-Volumes-DevMASTER-WEDNESDAY/9aed5a67-2729-4892-b685-13ab87142a58/scratchpad/gate1004_draft_mwjyyw51/fifo_e82wm783/park_base', 'dist@base', '300']' timed out after 60 seconds
