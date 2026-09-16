@@ -86,6 +86,41 @@ facts about this machine (DevMASTER not mounted is expected on the mini and need
   Conservation asserted: 940 rows before, 940 after. 51 KB → 25 KB.
 - Repo pulled and current; `.gitignore` covers the renderer's own backups.
 
+## Later in the same session — Wednesday's two findings against my own commit
+
+She reviewed `56f0a020d` and found two real defects; both are fixed at `316ed56e5`, with the
+lesson at `bd667484c`. Verified on this machine before changing anything rather than taken on her
+word — both held exactly.
+
+- **F1: the drain was dead code.** `/bin/bash` here is GNU bash **3.2.57**, which accepts only
+  INTEGER `read -t` timeouts, so `-t 0.1` failed on its first iteration and drained nothing — and
+  my `2>/dev/null` hid the reason. **Remember this for any script in this tree: `#!/bin/bash` on
+  macOS is bash 3.2, not 4 or 5.** No associative arrays, no `read -t` fractions, no `${var^^}`.
+- **F1's fix needed a second fix, caught by an arm and not by review.** A timed drain on a PIPE
+  swallows stdin including the answer: `printf 'yes\n' | gate` DECLINED. Now guarded by `[ -t 0 ]`.
+- **F2: never inject, but always BOUND.** Suppressing DEATH on a booting pane removed the injection
+  and created a silence — unattended, a pane stuck at "Type yes" waits forever while the rotate log
+  says "respawned OK". `monitor.sh` now posts ONE panel line past `BOOT_BOUND_MIN` (5) minutes.
+  Note while FDA is ungranted: `chat_sync` is dead, so that panel line reaches Kam only when
+  something pushes; the `alerts.log` line always lands.
+
+**The 19:43 event is in this machine's own log, verbatim** — neither seat had cited it, and it
+confirms the reconstruction exactly, including that the occupancy guard put up no resistance at all:
+```
+2026-09-16 19:43:46 [DEATH] wednesday — process exited (title reverted to the hostname on two consecutive checks)
+2026-09-16 19:43:47 [monitor] tapped coordinator pane %0 (after 0 held tries): 19:43 [fleet-monitor] WAKE: pane 'wednesday' DEAD — process e…
+```
+`after 0 held tries` is the part to notice: the guard looks for text at a `❯ ` prompt, a launcher
+prompt has no such line, so it read "nothing is happening here" and injected on the first attempt.
+One second between the verdict and the keystroke. `2_Project_Files/fleet/cockpit/state/alerts.log`.
+
+**And a failure of mine, because the next seat will be tempted by the same thing:** editing
+`monitor.sh` in place while the monitor was running from it **killed the live fleet monitor** and
+took its tmux pane with it. Bash reads a script by byte offset. Restored as pane `%5` with
+`@cockpit_name fleet-monitor` after running `--once` against the new code. Rule:
+pgrep → stop → edit → run once → re-arm.
+`learnings/2026-09-16_never-edit-a-bash-script-that-is-currently-running.md`
+
 ## TRAPS this session paid for — check these before you trust an instrument
 
 - **A green check can sit over a dead mechanism.** `install_all_jobs.sh --check` reported "9 current,
