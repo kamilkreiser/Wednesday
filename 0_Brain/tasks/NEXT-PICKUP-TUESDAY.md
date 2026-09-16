@@ -209,6 +209,24 @@ treats a symptom. The durable fix is a pre-commit check that refuses a `*.sh` wi
 staged at 100644 — `2_Project_Files/fleet/hooks/pre-commit` already exists and is the natural
 home. **It is shared tooling, so propose it to Wednesday rather than adding it unilaterally.**
 
+## ⏳ AWAITING AN ANSWER THAT MAY NEED KAM WOKEN — RD-461
+
+NexusAI found that the mail-triage drafted reply links a **retired demo VM** (`https://4.198.168.215`)
+and signs **"— Datasec Solutions"**, and **in LIVE + auto-send mode it SENDS that from the CUSTOMER's
+inbox.** That is not a self-containment defect — it is mail under our name, from someone else's
+mailbox, pointing at a dead host.
+
+**Asked them one yes/no ahead of all other work: is any running instance (demo, dev, staging, a
+customer's) actually in LIVE + auto-send right now?**
+- **If YES** — establish how we would know whether mail has gone out and roughly how much, changing
+  NOTHING, and **this goes to Kam tonight.** External comms are his signature class and a customer's
+  mailbox is his twice over; **the decision to stop it is his, not this seat's.**
+- **If NO** — it stays a normal fix in the candidate and is reported with everything else in the
+  morning.
+
+**Do not act on the setting either way.** The seat's job here is an accurate picture in front of him
+quickly, not a remedy.
+
 ## 🔴 FIRST THING FOR KAM: "anyone who pays" is impossible on the CURRENT offer type
 
 Card `nexusai-monetisation-model-and-public-registry` is open and is the first thing to put in front
