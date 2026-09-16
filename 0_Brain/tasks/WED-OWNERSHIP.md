@@ -39,3 +39,4 @@ sees the claim rather than discovering it in a conflict.
 | 2026-09-16 17:35 | Kamils-Mac-Studio | cockpit.html: attention card type + split the feed side (Kam email 2026-09-16 07:30Z) | CLOSED |  2026-09-16 17:39 built and pushed 2133ba153; served page verified structurally; NOT visually verified (Chrome extension not connected) |
 | 2026-09-17 00:32 | Kamils-Mac-Studio | Ornith night_run.sh G7 BUSY leg: 20-min empty-queue tap to the coordinator pane while night/ALLOW_SEATS is live (ledger w=3 idle regression 2026-09-16 21:2x) | CLOSED |  2026-09-17 00:34 built + armed 8/8; swapped 00:4x |
 | 2026-09-17 01:01 | Kamils-Mac-Studio | pre-commit refusal: shebang *.sh staged at mode 100644 (Tuesday's 09-17 preflight proposal) | OPEN | |
+| 2026-09-17 01:02 | Kamils-Mac-Studio | wednesday_rotate.sh liveness verdict never lands in rotate_wednesday.log (mini 00:56:07, checker pid gone) | OPEN | |
