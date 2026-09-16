@@ -183,3 +183,37 @@
 | 2026-09-16 14:09 | KS-1011 took FOUR model rounds. All three failures were defects in Wednesday's brief; the model's product hunk was byte-correct from r2 onward. r1: B3b, a context line marked '+'. r2 (retry): B3b, the backslash-continued `docker inspect --format ... \` line dropped. r3: B5 green-after "still red" while the hunk was right — the model had invented an `expect` helper whose third argument was a mutation (`[[ -z "$BLOCK" ]] && BLOCK='empty'`), so every cell reported FAIL. | One cause under all three: the brief left a decision to the model that the brief should have made. Showing context inside the fence invites a copy; a continuation is a shape the model does not reproduce; describing a cell in prose asks the model to design an assertion. | Brief rules, now in NEXT-PICKUP and applied in KS-1011: context lines are named in PROSE above the fence and never shown inside it; no backslash continuations in a `+` block (one long line instead); test cells are written out as literal shell with explicit PASS/FAIL counters. Tooling half: RETRY-ONCE gained `stopped at B3b`/`B3c` — it had listed only the vitest tier's names, so the BASH tier had no retry at all, and r1 died where a retry would have caught it. | r4 PASS 7/7 on the first sample: B4 red-first genuine (4 FAIL lines at the untouched tip), B5 green-after, B6 four sibling suites with no new failure, and the applied `after.sh` block read byte-for-byte against the brief's 14 lines before the READY was written. Retry-trigger arms: 6/6 over all quadrants including three controls (B4 must not fire; the disable flag must kill BOTH legs; a PASS never retries). |
 | 2026-09-16 14:39 | `autostart_on_brief.sh` — built to close the human step between "a brief lands" and "the model starts", the shape the unattended week needs — died at its FIRST real use. It waited correctly, detected the brief, settled it, built the input, and then threw `syntax error near unexpected token` on the line that writes the queue entry. The model sat idle; the give-up path could NOT fire, because the wait had already succeeded. | The queue line embedded `$(for a in "$@"; do case "$a" in ctx=*) … esac; done)`. Bash parses the `)` that closes a case PATTERN as the end of the command substitution. **`bash -n` passed on it** — the same class as the 2026-09-02 launcher-quote defect: a construct that is only wrong inside a substitution, and a syntax check that cannot see it. And it is the 2026-09-08 lesson exactly: a new mechanism is at its most dangerous in the hour it is adopted, with one worked example and no exception met yet. | The pin is built in a plain loop into `CTX_PIN` before the `printf`; `case` never appears inside `$( )`. Comment above the line names the trap so the next writer does not restore it. | Not `bash -n`, which passed both before and after — the check is RUNNING the line's logic: with `ctx=49152 other=1` it renders `… ctx=49152`, and the CONTROL with no ctx argument renders a clean line rather than a ghost `ctx=`. KS-1031 was queued and launched by hand in the same action so the model did not wait on the repair. |
 | 2026-09-16 14:44 | KS-1031 r1 stopped at B4 with `rc=0 fail_lines=0 pass_lines=0 load_error=0` — a suite that ran and asserted NOTHING. Neither hypothesis Wednesday sent with the evidence was right (a broken stub PATH; a `PWD`-relative resolve — both checked and negative). | **The model refused to transcribe the test body and said so in the diff.** `section_2.diff` was 337 bytes and its entire `+++` side was one line: *"This file contains the full test suite content as specified in the brief. Due to length constraints, only the first line is shown here."* A file that is one shell comment runs, asserts nothing and exits 0. **The brief's test body was 179 lines; KS-1081, which passed 7/7 on its first sample, had ~90.** So there is a LENGTH CEILING on what this model will transcribe, and above it the failure is a silent substitution rather than an error. | Body cut 179 → 105 lines (one shared stub dir instead of per-fixture nested heredocs; the `psql` stub 24 → 7 lines; 6 graded cells → 4). A `### READ THIS BEFORE YOU WRITE THE FILE` block quotes the model's own excuse back at it, states the exact line count, and forbids each substitution variant by name. **And the arm that makes the class detectable at all: CELL 5 asserts `PASS+FAIL == EXPECTED_CELLS` before the summary** — every brief in this tier should carry it. | The guard was proven to FIRE, not just written: with all four graded cells deleted the suite prints `FAIL: only 0 of 4 cells ran - a suite that asserts nothing is not a pass` and exits 1 instead of a clean 0. Re-measured from a FOREIGN working directory to kill the PWD hypothesis properly: 3 passed / 2 failed at the untouched tip, 5/0 after the brief's own block, siblings 23/0 and 32/0 identical before and after. |
+
+## 2026-09-16 15:26 — KS-692: a correct model output FAILED because the BRIEF could not declare its reds (BRIEF + TOOLING)
+
+**Classification: BRIEF (the instance) → TOOLING (the fix).** Not the model. Ornith's first sample was
+right: product hunk 4 `-` / 22 `+`, one operative change (`ISSUER_ADMIN` dropped from
+`STATUS_WRITE_ROLES`), a 6-cell new test file, three assertion-reds at the tip, both controls green.
+
+**What broke.** The checker's A4 gate counts a failing cell as a *declared red* only when its title
+carries 🔴 **or** when the brief names it under `## Red cells` (parsed by `build_input.sh` into
+`defect_line.red_cells`). The KS-692 brief titled its cells `RED 1/2/3` — words, no glyph — and had no
+`## Red cells` section. A4 therefore read all three genuine reds as CONTROL reds and refused:
+`FAIL (1 failed) — stopped at A4 (a test-side defect, not a product red)`.
+
+**Measured, not assumed.** Over all 30 vitest-shaped briefs on disk, 29 put 🔴 in their cell titles.
+KS-692 was the single exception — which is why A4 had never been wrong before and why nobody had
+noticed the two declaration paths could both be empty.
+
+**Fixed where it lives, in two places.**
+1. *Instruction:* `## Red cells` added to `night/briefs/KS-692.md`, naming the three titles. Input
+   rebuilt (`red_cells=3`); the SAME `out.md` re-checked → **PASS 7/7**. No second model round spent.
+2. *Tooling:* `build_input.sh` gains the **UNDECLARED-RED GATE** — it REFUSES (rc 2) a brief that
+   declares `it(` cells, none of whose titles carries 🔴, with no `## Red cells` section, and names
+   the remedy in the refusal. `ALLOW_UNDECLARED_REDS=1` overrides and announces itself.
+   Backup: `build_input.sh.pre-0916-redglyphgate`.
+
+**Proof.** `tests/undeclared_red_gate_arms.sh` — **6/6**, every arm running the REAL builder on a REAL
+brief, nothing re-implemented: refuse on the stripped brief with the cause named · restoration proven
+by checksum · pass on the fixed brief with 3 cells parsed · **over-fire control** (KS-975, 🔴 titles,
+no section → rc 0) · override passes loudly · restoration proven again.
+
+**The transferable half.** A gate with two ways to recognise a thing can have both of them silently
+empty, and the failure then presents as the subject's defect rather than the instrument's. The arm
+worth keeping is the **over-fire control**: it is what separates "this gate catches the bug" from
+"this gate refuses everything".

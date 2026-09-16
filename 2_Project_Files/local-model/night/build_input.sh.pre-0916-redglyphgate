@@ -423,27 +423,6 @@ m_rc = re.search(r"^##+\s*Red cells\b.*?$(.*?)(?=^##+\s|\Z)", _rc_src, re.M | re
 if m_rc:
     red_cells = [l.strip()[2:].strip().strip('`') for l in m_rc.group(1).splitlines() if l.strip().startswith("- ")]
     print(f"  red cells declared by the brief: {len(red_cells)} {red_cells}")
-# ---------------------------------------------------------------- 5b3a. UNDECLARED-RED GATE (2026-09-16 15:2x, KS-692)
-# A4 counts a failing cell as a RED only when its title carries 🔴 or when `## Red cells` names it. A brief whose
-# `it(` titles carry NEITHER guarantees that every genuine assertion-red is classified as a CONTROL red — so a
-# CORRECT model output FAILS at A4 and the verdict reads as a model failure. That is exactly what happened to
-# KS-692 at 15:13 today: three assertion-reds, both controls green, and a FAIL. The brief was the defect.
-# The gate fires ONLY on that shape. Measured over all 30 vitest-shaped briefs on disk at 15:2x: 29 put 🔴 in
-# their cell titles and are untouched; KS-692 (pre-fix) was the single hit. A rule the builder cannot refuse on
-# is a hope — this refuses BEFORE a model round is spent, and the remedy is four lines in the brief.
-if _brief_for_sites and not red_cells:
-    _it_titles = [m.group(2) for m in re.finditer(r"""\bit\(\s*(['"])(.*?)\1""", _brief_for_sites, re.S)]
-    if _it_titles and not any("🔴" in t for t in _it_titles):
-        if os.environ.get("ALLOW_UNDECLARED_REDS") == "1":
-            print(f"  ⚠ UNDECLARED-RED GATE overridden (ALLOW_UNDECLARED_REDS=1): {len(_it_titles)} it( titles, none with 🔴, no '## Red cells' section — A4 will treat every red as a CONTROL red")
-        else:
-            refuse(
-                f"the brief declares {len(_it_titles)} `it(` cell(s), NONE of whose titles carries 🔴, and it has no "
-                f"`## Red cells` section — so the checker's A4 gate will classify every genuine assertion-red as a "
-                f"CONTROL red and REFUSE a correct output (KS-692, 2026-09-16 15:13). Fix the brief, not the model: "
-                f"either put 🔴 in each red cell's title, or add a `## Red cells` section with one `- ` line per red "
-                f"cell title. Override with ALLOW_UNDECLARED_REDS=1 only if you have read why A4 will not fire. "
-                f"Titles seen: {[t[:60] for t in _it_titles]}")
 if _brief_for_sites:
     m_t = re.search(r"^##+\s*Tamper\b.*?$(.*?)(?=^##+\s|\Z)", _brief_for_sites, re.M | re.S)
     if m_t:
