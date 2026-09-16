@@ -1,0 +1,75 @@
+# KS-987 — Wednesday's task for Ornith, item 1 only, **DOCUMENTATION (`Blockchain/Dev/deployment/DEPLOYMENT-ARCHITECTURE.md`, no code)** (written 2026-09-16 21:2x from the file at develop M55 `48e65c435`: `deployment/DEPLOYMENT-ARCHITECTURE.md` read whole (186 lines), the `**Redeploy runbook** (until scripted):` block at `:63-73` and the `Ops notes:` list at `:75-156` read in full; `docker-compose.yml` read for the api-gateway service's `volumes:` at `:553`. Pre-measured in a scratch clone at `48e65c435`: the insertion below applied with `git apply`, both Required tokens absent → present inside the section.)
+
+## What to change (one paragraph)
+
+The demo redeploy runbook (`:63-73`) rsyncs `Blockchain/Dev` to the VM and then runs
+`docker compose build <changed services> && docker compose up -d`. It never restarts `api-gateway`.
+The published OpenAPI spec `docs/openapi/secuura-api.yaml` reaches the gateway as a single-FILE bind
+mount (`docker-compose.yml:553`, `:ro`). On the 2026-09-08 deploy (KS-987) that combination left the
+gateway serving the OLD spec after rsync had written the new one, with every signal an operator checks
+reading fine, until `docker compose restart api-gateway` was run. KS-987 item 1 asks for the restart
+as a REQUIRED runbook step, with the mechanism written beside it so it is not dropped as cargo-cult.
+This task adds ONE paragraph directly under the runbook's code block. Nothing existing changes. Items
+2-4 of the ticket (project-notes wording, a post-deploy md5 assertion, a sweep of other file mounts)
+are NOT this task.
+
+## Where
+
+- `:72` — (correct) `  'cd secuura/Dev && sudo docker compose build <changed services> && sudo docker compose up -d'` — the runbook's last command. Stays.
+- `:73` — (correct) the closing code fence of the runbook block. Stays; the new paragraph goes directly after it.
+- `:74` — (correct) the blank line. Stays, and keeps separating the new paragraph from `Ops notes:`.
+- `:75` — (correct) `Ops notes:`. Stays.
+
+## The exact change — ONE INSERT-ONLY hunk, 10 new lines
+
+Insert AFTER line 73 (the closing code fence of the redeploy runbook block, three backticks alone on
+the line) and BEFORE line 74 (a blank line; line 75 is `Ops notes:`). The fence below holds ONLY the
+added lines, each with a leading `+`. The FIRST added line is BLANK (a `+` and nothing else). The
+context the hunk needs is copied VERBATIM from `files[...]`, never retyped from this brief: lines 71-73
+above the insertion and lines 74-76 below it. Copy every `+` line character for character, including
+every backtick; no `+` line contains a dollar sign, a backslash or an em dash.
+
+```
++
++**Then restart the gateway, every time: `sudo docker compose restart api-gateway` (KS-987).**
++The published spec `docs/openapi/secuura-api.yaml` reaches `api-gateway` as a single-FILE bind
++mount (`docker-compose.yml`, read-only), and rsync replaces a changed file by writing a temp file
++and renaming it over the old one, which gives the new spec a new inode. On the 2026-09-08 deploy
++the file on the VM disk was the new spec while the copy inside the running gateway was still the
++old one, and `GET /api/docs/openapi.yaml` served the old bytes; rsync, the file on disk and the
++health check all looked right. Only `restart api-gateway` made the container, and the served spec,
++match the host. Restart it on every redeploy that changes the spec, including when `api-gateway`
++was not in the rebuilt set.
+```
+
+Do NOT touch lines 63-73 or 74-156; do NOT re-flow any existing line; do not add a second blank line.
+
+## Required (the checker's proof — each token ABSENT in the section before, PRESENT after)
+- `## 2. The new demo shape` :: KS-987, inode, restart api-gateway
+
+## Premises (measured)
+
+- **The spec is a single-FILE bind mount into api-gateway, read-only.** Instrument: `grep -n "secuura-api.yaml" docker-compose.yml` in the clone at `48e65c435` → exactly 1 hit, `:553` `      - ./docs/openapi/secuura-api.yaml:/app/docs/openapi/secuura-api.yaml:ro`, inside the `api-gateway` service block (read `:530-560`).
+- **The runbook never restarts api-gateway.** Instrument: read `DEPLOYMENT-ARCHITECTURE.md:63-73` whole; `grep -c -E "KS-987|inode|restart api-gateway"` over the section `:26-157` → 0.
+- **rsync replaces a changed file by rename, giving it a new inode.** Instrument (2026-09-16 21:2x, scratchpad, Homebrew `rsync 3.4.3`): `rsync -a src/ dst/` of v1, open a descriptor on `dst/spec.yaml`, change the source, `rsync -a` again → `ls -i` inode 78683444 → 78683450, the path reads v2 while the held descriptor still reads v1. Control: `rsync -a --inplace` keeps the inode (78683450 → 78683450), so the instrument can tell the two apart.
+- **The container-side observation (host new, container old, served old, restart fixes).** NOT re-measured here: it needs the demo VM, and a Docker Desktop run on this Mac goes through its own file-sharing layer, so it would not be an instrument for a Linux host. The text therefore states it as what happened on the 2026-09-08 deploy, not as a general law. Instrument for THAT: the KS-987 description read through Linear GraphQL at 21:1x — host md5 `7e43a8d89afb…` 1332983 B, container md5 `c014b2fce71c…` 1329831 B, served 1329831 B; after `docker compose restart api-gateway` the container md5 equals the host's and the served bytes are 1332983.
+- **The checker's Required tokens.** Instrument: the insertion applied in the clone with `git apply`, then the section `## 2. The new demo shape` (`:26` to the next `## ` at `:158`) scanned before/after: `KS-987` 0 → 1, `inode` 0 → 1, `restart api-gateway` 0 → 2.
+
+## Output
+
+Exactly ONE ```diff block, ONE file section `--- a/Blockchain/Dev/deployment/DEPLOYMENT-ARCHITECTURE.md` /
+`+++ b/Blockchain/Dev/deployment/DEPLOYMENT-ARCHITECTURE.md`, ONE hunk `@@ -71,6 +71,16 @@` with three
+context lines above (71-73) and three below (74-76) copied verbatim from `files[...]`, and the ten `+`
+lines exactly as above.
+
+## Notes for the raise (not for the model)
+
+- **Partial by design:** item 1 only. Items 2 (project notes), 3 (post-deploy md5 assertion; see the
+  ticket's comment about KS-656's served-spec leg) and 4 (sweep other single-file mounts, e.g. nginx
+  confs) stay open on KS-987.
+- **Same file as KS-890's brief** (queued in the same batch), disjoint regions: KS-987 inserts after
+  `:73`, KS-890 after `:96`. Each patch applies alone at the tip; the second to merge re-anchors by 10
+  lines.
+- The text deliberately does not claim that a rebuild of `api-gateway` fails to pick up the spec (a
+  recreated container re-resolves its mounts); it only says to restart even when the gateway was not
+  rebuilt, which is the case the runbook's `up -d` leaves exposed.

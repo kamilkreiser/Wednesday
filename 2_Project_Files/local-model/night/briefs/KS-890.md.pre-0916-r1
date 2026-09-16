@@ -1,0 +1,74 @@
+# KS-890 — Wednesday's task for Ornith, **DOCUMENTATION (`Blockchain/Dev/deployment/DEPLOYMENT-ARCHITECTURE.md`, no code)** (written 2026-09-16 21:2x from the file at develop M55 `48e65c435`: `deployment/DEPLOYMENT-ARCHITECTURE.md` read whole (186 lines), the `Ops notes:` list at `:75-156` read in full; `docker-compose.yml` read for every `depends_on: migrations` and the `migrations` service (`command: ["sh", "scripts/run-migrations.sh"]`); `scripts/run-migrations.sh` read `:88-157`; `migrations/046_*` and `047_*` grepped. Pre-measured in a scratch clone at `48e65c435`: the insertion below applied with `git apply`, both Required tokens absent → present inside the section.)
+
+## What to change (one paragraph)
+
+On 2026-09-06 a demo deploy ran `docker compose up -d api-gateway` and, because `migrations` is one of
+the gateway's `depends_on`, applied migrations 045-047 about five minutes before `auth`, the service
+they had been ordered after, was rebuilt (KS-890). The ordering had been ruled; a compose edge nobody
+checked defeated it. The ticket's acceptance is that `deployment/DEPLOYMENT-ARCHITECTURE.md` carries
+three lines: a code-first leg uses `up -d --no-deps <svc>`; `migrations` is started explicitly, last,
+as its own step; and the runner's `Summary: applied=N failed=N` is a count, so what was applied is read
+from `_secuura_migrations` and `pg_constraint`. This task adds them as ONE new bullet in the file's
+`Ops notes:` list, between the `--remove-orphans` bullet and the `.env` bullet. Nothing existing
+changes.
+
+## Where
+
+- `:88` — (correct) `- **NEVER pass `--remove-orphans` to `docker compose up` on the VM (2026-08-14).** Compose` — the bullet above the insertion (`:88-96`). Stays.
+- `:96` — (correct) `  phase2`). Absence from that list is not absence from the file.` — its last line. Stays; the new bullet goes directly after it.
+- `:97` — (correct) `- **NEVER rsync `.env`/`.env.local` to the VM — the VM's `.env` is authoritative for demo**` — the bullet below. Stays.
+- `:72` — (correct) the runbook's `docker compose up -d` (whole stack). NOT touched; the new bullet is about a code-first leg that brings up one service.
+
+## The exact change — ONE INSERT-ONLY hunk, 8 new lines
+
+Insert AFTER line 96 (`  phase2`). Absence from that list is not absence from the file.`) and BEFORE
+line 97 (`- **NEVER rsync ...`). There is NO blank line between the bullets in this list, so none is
+added. The fence below holds ONLY the added lines, each with a leading `+`; the first added line is
+`+- **A code-first leg ...` (a `+`, then the bullet's own `- `). Continuation lines are indented two
+spaces, as the file's other bullets are. The context the hunk needs is copied VERBATIM from
+`files[...]`, never retyped from this brief: lines 94-96 above and 97-99 below. Copy every `+` line
+character for character, including every backtick and the `<svc>` placeholder; no `+` line contains a
+dollar sign, a backslash or an em dash.
+
+```
++- **A code-first leg brings up ONE service: `sudo docker compose up -d --no-deps <svc>` (KS-890).**
++  Without `--no-deps`, `up -d <svc>` also starts that service's `depends_on`, and `migrations` is
++  one of them for 21 services in `docker-compose.yml`, `api-gateway` included. On the 2026-09-06
++  demo deploy `up -d api-gateway` applied 045, 046 and 047 (046 and 047 add CHECK constraints)
++  about five minutes before `auth`, the service they were ordered after, was rebuilt. So a
++  code-first leg starts `migrations` explicitly, last, as its own step, and reads what it applied
++  from `_secuura_migrations` and `pg_constraint`: the runner's `Summary: applied=N failed=N` line
++  is a COUNT that includes files it skipped as already applied, not a list of versions.
+```
+
+Do NOT touch lines 88-96 or 97-156; do NOT re-flow any existing line; do NOT add a blank line.
+
+## Required (the checker's proof — each token ABSENT in the section before, PRESENT after)
+- `## 2. The new demo shape` :: KS-890, --no-deps, _secuura_migrations
+
+## Premises (measured)
+
+- **`--no-deps` stops compose starting linked services; without it they start.** Instrument: `docker compose up --help` on this host (Docker server 29.8.0) → `--no-deps  Don't start linked services`. The record that it happened on the demo: KS-890's timeline read through Linear GraphQL at 21:2x (05:55:43Z `up -d api-gateway`; 05:56:47Z 045/046/047 in `_secuura_migrations`; 06:01:41Z `auth` rebuilt and healthy).
+- **`migrations` is a `depends_on` of 21 services, api-gateway among them, with `condition: service_completed_successfully`.** Instrument: a python walk of `docker-compose.yml` at `48e65c435` over every `depends_on:` block → 21 services list `migrations:` (api-gateway `:545`, originate, wallet-connector, auth, m365-integration, security, vc-issuer, staking, referral, prism, timestamping, anchoring, transfer, kyc, analytics, billing, governance, nft-certificate, guardian, queue, demo-service); `:540-550` read for api-gateway's condition.
+- **The `migrations` service runs `scripts/run-migrations.sh`.** Instrument: the `migrations:` service block in `docker-compose.yml` → `command: ["sh", "scripts/run-migrations.sh"]`, `restart: "no"`.
+- **`Summary: applied=N failed=N` counts skipped files as applied.** Instrument: `run-migrations.sh` at `48e65c435` read: `:94-97` returns 0 after `Skipping $fname (already applied)`; `:138-139` increments `applied_count` on any rc 0; `:145` prints `Summary: applied=$applied_count failed=$failed_count`. Tracking table `_secuura_migrations` created at `:81`.
+- **046 and 047 add CHECK constraints; 045 does not.** Instrument: `grep -c -i "CHECK *("` over `migrations/045_*.sql` 0, `046_users_status_vocabulary.sql` 1, `047_oauth_app_type_vocabulary.sql` 1.
+- **The checker's Required tokens.** Instrument: the insertion applied in the clone with `git apply`, then the section `## 2. The new demo shape` (`:26` to `:158`) scanned before/after: `KS-890` 0 → 1, `--no-deps` 0 → 2, `_secuura_migrations` 0 → 1.
+
+## Output
+
+Exactly ONE ```diff block, ONE file section `--- a/Blockchain/Dev/deployment/DEPLOYMENT-ARCHITECTURE.md` /
+`+++ b/Blockchain/Dev/deployment/DEPLOYMENT-ARCHITECTURE.md`, ONE hunk `@@ -94,6 +94,14 @@` with three
+context lines above (94-96) and three below (97-99) copied verbatim from `files[...]`, and the eight `+`
+lines exactly as above.
+
+## Notes for the raise (not for the model)
+
+- **Scope:** the ticket says "`deployment/DEPLOYMENT-ARCHITECTURE.md` (and any deploy runbook)". This
+  covers the named file only. `deployment/KINTSUGI-REBUILD-RUNBOOK.md` (merged later, #943) is a
+  SCHEMA-FIRST whole-estate rebuild — Phase 3 `up -d --force-recreate migrations` BEFORE Phase 4's
+  per-service `up -d --force-recreate <service>` (`:233-257`) — so "migrations last" does not apply to
+  it, and its Phase 4 without `--no-deps` only re-runs an already-applied migrations container. Whether
+  that runbook should also say `--no-deps` is a reviewer's call; not touched here.
+- **Same file as KS-987's brief** (same batch), disjoint regions: KS-987 inserts after `:73`, KS-890 after
+  `:96`. Each applies alone at the tip; the second to merge re-anchors.
