@@ -768,4 +768,14 @@ export ANTHROPIC_DEFAULT_OPUS_MODEL=claude-opus-5
 # exactly that; a promise is not a mechanism). Backup beside this file:
 # Launch_Wednesday.command.pre-0906-opus.
 # exec claude --dangerously-skip-permissions --model fable --fallback-model opus "$INITIAL_PROMPT"
-exec claude --dangerously-skip-permissions --model opus "$INITIAL_PROMPT"
+# 2026-09-17 (Tuesday's proposal 3, after her seat exited CLEANLY at ~09:06 and no record could say why —
+# the launcher kept no exit status): run claude WITHOUT exec so its exit code is recorded, then exit with
+# it. rc > 128 names the signal (129 SIGHUP · 130 SIGINT · 143 SIGTERM); 0 = a normal quit. The log is
+# machine-local (cockpit/logs/ is gitignored) — each machine records its own seats. exited_seat_check.sh
+# still finds claude under the pane (it is now a child of this bash, not its replacement).
+claude --dangerously-skip-permissions --model opus "$INITIAL_PROMPT"
+SEAT_RC=$?
+mkdir -p "$PROJECT_DIR/2_Project_Files/fleet/cockpit/logs"
+printf '%s seat=%s host=%s rc=%s\n' "$(date '+%F %T')" "${WED_AGENT:-wednesday}" "$(hostname -s)" "$SEAT_RC" >> "$PROJECT_DIR/2_Project_Files/fleet/cockpit/logs/seat_exit.log"
+echo "[launcher] claude exited rc=$SEAT_RC — recorded in 2_Project_Files/fleet/cockpit/logs/seat_exit.log"
+exit "$SEAT_RC"
