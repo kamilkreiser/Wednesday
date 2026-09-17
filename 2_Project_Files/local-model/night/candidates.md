@@ -429,3 +429,22 @@ Produced by the local model (`predicate_classify`, 2 batches, 87 tickets) over t
 - KS-1155 — description mentions guard files but paths array empty so cannot confirm exact product file from evidence
 - KS-1054 — description mentions migrations directory generally but paths array empty so cannot name specific migration file needing reorder
 
+
+## 🔎 ORNITH-TRIAGED **AUTH TIER** — 9 class A, **UNVERIFIED, AND AUTH IS STILL LAST** (added 2026-09-18 09:4x)
+
+`predicate_classify` over the 40 tickets excluded as *auth-shaped title*. **Kam's 2026-09-15 18:19 order is auth LAST, not auth NEVER** — this SORTS the tier, it does not open it. Nothing here is briefed until he says so. The predicate deliberately sent anything that changes **who may authenticate, what a token grants, or how a permission is decided** to class B even when it named one file, so class A here means *mechanical defect in an auth-adjacent file*, never *an authorisation decision*.
+
+⚠ **COVERAGE WAS NOT CLEAN ON THIS BATCH, unlike the first two: 40 sent, 40 rows, but 1 MISSING and 1 INVENTED.** `KS-1091` was never classified and a row appeared for `KS-1101` — which was not in the batch. **That is a DIGIT TRANSPOSITION (1091 → 1101), not a hallucination from nowhere, and it is the more dangerous shape: the wrong id is a REAL ticket, so the row looks legitimate.** Treat every identifier here as needing a check against the batch before use. **KS-1091 is unclassified and must be re-run.**
+
+- KS-1235 — state type = backlog but defect concrete in services/auth/src/db.ts with stated fix shape (route through GUC path)
+- KS-1225 — single file named services/auth/src/__tests__/ks799-consent-script-csp-and-execution.test.ts with mechanical jsdom absence defect
+- KS-1105 — single file named frontend/admin/src/pages/Login.tsx:81 with concrete placeholder text defect
+- KS-1006 — single file named services/auth/src/routes/users.ts with concrete MFA verification skip defect and stated shape
+- KS-1005 — single file named services/auth/src/repositories/userRepo.ts with USER_COLS omitting password_hash causing 404 on every user
+- KS-918 — single file named services/auth/package.js with vite incorrectly placed in production dependencies dragging esbuild/fsevents
+- KS-824 — two DDL defects in migration 047 affecting services/auth/src/routes/oauth.ts with concrete case-normalization fix shape
+- KS-805 — single PATCH /api/oauth/apps validation missing .min(1) with stated one-line fix closing the door for Q3
+- KS-756 — single write site in services/auth/src/services/session.ts:143 with zero read sites; concrete wiring-up prerequisite
+
+**Note on KS-805:** the model rates it class A — *"single PATCH /api/oauth/apps validation missing .min(1) with stated one-line fix"*. Wednesday removed KS-805 from **seat A's** queue at 09:4x because it had been carried as blocked-on-#922 by four consecutive seats. **Those are not in conflict:** it is off the SEAT's queue because #922 is not moving, but if the fix really is a one-line validation independent of #922 it may be an ORNITH candidate. **Read the ticket before believing either framing.**
+

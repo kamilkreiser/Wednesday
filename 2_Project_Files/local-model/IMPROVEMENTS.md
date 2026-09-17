@@ -528,3 +528,25 @@ The refusal owed above is built, beside the CONTEXT-AS-ADDITION gate, on the sam
 **How the output was recorded, and why not as a queue.** The 30 class-A rows went into `candidates.md` under a heading that says **UNVERIFIED, read the ticket before briefing**, with the model's own reason kept beside each. A classification list is a representation of the items, not an instruction (`learnings/2026-09-07_...`), and converting one into work without reading the items is that failure at the list layer. Two mechanical flags were added rather than trusted judgement: **`[MULTI?]` on the 4 rows whose reason names more than one file** (the predicate asked for exactly one, so those are its weakest calls) and **`[TEST?]` on the 2 that name only a test file**.
 
 **Method note worth keeping:** the input gave the model, per ticket, a `paths_mentioned_anywhere_in_the_full_description` array extracted by regex from the FULL text, alongside a truncated description. That makes truncation safe by construction — the model can still see every candidate path even where the prose was cut. Without it, a file named late in a long ticket would have been invisible and the answer would have been a confident B.
+
+## 09:4x 2026-09-18 — TIER GAP: a comment-only fix in a SHELL script has no tier
+
+**Found while trying to convert the first triaged candidate into work.** KS-902 is an ideal comment fix: `scripts/preflight/no-tracked-credentials.sh:81-82` tells the next reader that `bare-path-scripts-executable.sh` and `action-pins-labelled.sh` "already derive their root this way and are structurally immune; this is the same idiom". **Verified at the tip by Wednesday, not inherited from the ticket:** both use `REPO_ROOT="$(cd ../.. && pwd)"` (`action-pins-labelled.sh:56`, `bare-path-scripts-executable.sh:57`) — **cwd-relative**, where the comment's own idiom (`$(dirname "$0")/../..`, the line it sits above at `:83`) is script-relative. The comment points the next person at a worse form. (The ticket said `:46`; the tip says `:56` — a drift, and the claim still holds.)
+
+**Why it cannot be briefed today:** `build_comment_input.sh` **R1 refuses any `product=` that is not `.ts/.tsx/.js/.mjs/.cjs`**. `no-tracked-credentials.sh` is `.sh`. And `bash_patch` is the wrong shape too — it wants one script plus a `*.test.sh` proving a BEHAVIOUR change, and a comment edit changes no behaviour to red-proof.
+
+**So: comment-only edits to shell scripts fall between the two tiers and cannot be given to the local model at all.** That is a harness gap, not a ticket problem, and it is exactly the "gatekeeper widens the harness when the pool runs dry" case — several of the 30 newly-triaged candidates are shell.
+
+- **Widening proposal (not built, claim first):** allow `comment_patch` to take `.sh` when the edit is comment-only. The tier's grading already suits it — it grades by TOKEN EQUIVALENCE (`token_equiv.cjs`), not by a red cell, precisely because a comment has no behaviour to red. What needs adding is a shell-aware token check (`#` comments, here-doc bodies left alone) and R4's "a tip line inside a named range carries a code token" for shell syntax.
+- **Arms it would need:** this KS-902 hunk → accepted; a hunk that also changes a `REPO_ROOT=` line → refused by R4; a hunk touching a line inside a quoted here-doc → refused; a `.sh` hunk with a non-ASCII `+` line → refused by R6.
+- **Until then KS-902 is a Claude seat's**, and it is small enough to ride along with other work rather than justify its own session.
+
+## 09:4x 2026-09-18 — triage batch 3 (auth tier): a DIGIT TRANSPOSITION, and why the coverage check is not optional
+
+**TRIAGE-AUTH: 40 sent, 40 rows returned, and the counts still did not reconcile — 1 MISSING (`KS-1091`, never classified) and 1 INVENTED (`KS-1101`, never sent).** The first two batches were clean (87/87, 0/0), so this is not a systematic failure — it is an occasional one, which is worse to rely on.
+
+**The shape matters more than the count.** `KS-1091` → `KS-1101` is a **digit transposition**, and `KS-1101` is a REAL ticket on this board (the #1037 PR's ticket). So the invented row does not look invented: it carries a plausible id, a plausible reason, and nothing about it signals a defect. **A row-count check would have passed** (40 in, 40 out). Only a SET comparison against the batch caught it.
+
+- **Rule kept: every classify harvest reconciles the identifier SET both ways — missing AND invented — never the row count.** The count is the thing that looks right when the set is wrong.
+- **This is exactly what `tasks/predicate_classify/checker.sh` exists to do**, and it could not run on any of the three batches because Wednesday's hand-built input lacked the `tip` key it reads. So the harness has been doing this correctly all along and was disabled by the input shape. **The owed fix (recorded at 09:3x) is now more than tidiness** — it is the only automatic guard against a plausible wrong id reaching a brief.
+- `KS-1091` is unclassified and owed a re-run.
