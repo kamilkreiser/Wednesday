@@ -23,11 +23,7 @@
 #   R7  a '+' line byte-identical to a '-' line in its hunk (context-as-addition), or already present at the tip (C7
 #       could not prove it), or not a COMMENT line in the golden result (a code token touches it)
 #   R8  golden self-check: the brief's own diff applied to the tip must PASS C4, C4b, C5, C6, C7
-#   R9  a READY diff (night/READY_*) hunks the product file within 10 lines of a named range — UNLESS that READY's change
-#       is already at the tip (2026-09-17 21:2x, tests/r9_merged_ready_arms.sh): for the product file, every '+' line of
-#       the READY is present at the tip, every '-' line it does not also re-add (a moved line) is absent, and at least
-#       one '+' line carries text (a hunk with no '+' evidence is never proven merged). Skipped READYs are printed as
-#       "skipped: already at tip"; anything else refuses exactly as before. Content, not a merge-commit message.
+#   R9  a READY diff (night/READY_*) hunks the product file within 10 lines of a named range
 #   R10 the Linear ticket is archived, not Backlog/Todo, assigned to Peter/Stuart, or attached to an OPEN PR (the
 #       build_input.sh gates, mirrored; the key by NAME from the Secuura .env, no Bearer prefix; fail closed)
 #   R11 an OPEN GitHub PR changes the product file (REST GET pulls?state=open + pulls/<n>/files, GH_TOKEN by NAME;
@@ -164,62 +160,24 @@ bad = [f"{g} {msg}" for st, g, msg in res if st == "FAIL"]
 if bad:
     refuse("R8", f"the brief's own diff fails its gates: {bad[0][:300]}")
 
-# ---- R9 READY hunks near a range (a READY whose change is already at the tip does not block)
+# ---- R9 READY hunks near a range
 ready_dir = os.environ["NIGHT_READY_DIR"]
-def _is_prod(cur):
-    return bool(cur) and (cur == prod or prod.endswith("/" + cur) or cur.endswith("/" + prod.split("Blockchain/Dev/", 1)[-1]))
-def ready_at_tip(rf_lines):
-    """(True, detail) when the READY's change to the product file is present at the tip by CONTENT."""
-    plus, minus, cur, in_hunk = [], [], None, False
-    for i, ln in enumerate(rf_lines):
-        if ln.startswith("```"):
-            cur, in_hunk = None, False; continue
-        mh = re.match(r"^\+\+\+ (?:b/)?(\S+)", ln)
-        if mh:
-            cur, in_hunk = mh.group(1), False; continue
-        if ln.startswith("--- ") and i + 1 < len(rf_lines) and rf_lines[i + 1].startswith("+++ "):
-            continue
-        if ln.startswith("@@"):
-            in_hunk = True; continue
-        if not (in_hunk and _is_prod(cur)):
-            continue
-        if ln.startswith("+"):
-            plus.append(ln[1:])
-        elif ln.startswith("-"):
-            minus.append(ln[1:])
-    tipset, plusset = set(tip_lines), set(plus)
-    substantive = [p for p in plus if re.search(r"[A-Za-z0-9]", p)]
-    missing_plus = [p for p in plus if p not in tipset]
-    still_minus = [m_ for m_ in minus if m_ not in plusset and m_ in tipset]
-    moved = sum(1 for m_ in minus if m_ in plusset)
-    ok = bool(substantive) and not missing_plus and not still_minus
-    detail = (f"+{len(plus)} present at the tip, -{len(minus) - moved} absent ({moved} moved)" if ok else
-              f"not at tip: {len(substantive)} substantive '+', {len(missing_plus)} '+' missing, {len(still_minus)} '-' still present")
-    return ok, detail
-near, touching, skipped = [], [], []
+near, touching = [], []
 for rf in sorted(glob.glob(os.path.join(ready_dir, "READY_*"))):
-    cur = None; rf_near = []
-    rf_lines = open(rf, encoding="utf-8", errors="replace").read().split("\n")
-    for ln in rf_lines:
+    cur = None
+    for ln in open(rf, encoding="utf-8", errors="replace").read().split("\n"):
         mh = re.match(r"^\+\+\+ (?:b/)?(\S+)", ln)
         if mh:
             cur = mh.group(1); continue
         mm = re.match(r"^@@ -(\d+)(?:,(\d+))?", ln)
-        if mm and cur and _is_prod(cur):
+        if mm and cur and (cur == prod or prod.endswith("/" + cur) or cur.endswith("/" + prod.split("Blockchain/Dev/", 1)[-1])):
             s0 = int(mm.group(1)); e0 = s0 + max(int(mm.group(2) or 1), 1) - 1
             touching.append(os.path.basename(rf))
             if any(s0 <= b + 10 and e0 >= a - 10 for a, b in ranges):
-                rf_near.append(f"{os.path.basename(rf)} @@ -{s0},{e0 - s0 + 1}")
-    if rf_near:
-        merged, detail = ready_at_tip(rf_lines)
-        if merged:
-            skipped.append(os.path.basename(rf))
-            print(f"R9 READY skipped: already at tip: {os.path.basename(rf)} ({detail}; its hunks {[x.split(' ', 1)[1] for x in rf_near]} would otherwise block)")
-        else:
-            near += rf_near
+                near.append(f"{os.path.basename(rf)} @@ -{s0},{e0 - s0 + 1}")
 if near:
     refuse("R9", f"READY diff(s) hunk {prod} within 10 lines of a named range: {near[:3]}")
-print(f"R9 READY scan: {len(glob.glob(os.path.join(ready_dir, 'READY_*')))} READY files; hunks in this file: {sorted(set(touching)) or 'none'} (none within 10 lines of a range{'' if not skipped else ' except READY(s) already at the tip: ' + str(skipped)})")
+print(f"R9 READY scan: {len(glob.glob(os.path.join(ready_dir, 'READY_*')))} READY files; hunks in this file: {sorted(set(touching)) or 'none'} (none within 10 lines of a range)")
 
 # ---- R10 / R11 network gates (fail closed)
 env = {}

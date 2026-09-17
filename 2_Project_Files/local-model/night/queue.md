@@ -156,3 +156,7 @@
 # 21:24 - test-only vitest pair (brief writer 21:2x; both pre-measured 7/7 through the REAL checker on the built input; red BY ASSERTION under the tamper; + lines use String.fromCharCode, not backslash-u escapes - see IMPROVEMENTS 21:24). Inputs at develop 75ad0e55c.
 KS-1217 input=/Volumes/DevMASTER/WEDNESDAY/2_Project_Files/local-model/night/inputs/code_1217.json ctx=65536
 KS-1220 input=/Volumes/DevMASTER/WEDNESDAY/2_Project_Files/local-model/night/inputs/code_1220.json ctx=65536
+# 21:28 - comment_patch batch 3 (search 21:26; fences read by Wednesday; KS-1179 F-5 HELD until Wednesday re-runs the R9 arms - its build relied on the new R9 skip). Inputs at develop 75ad0e55c.
+KS-1140 input=/Volumes/DevMASTER/WEDNESDAY/2_Project_Files/local-model/night/inputs/comment_1140GF2GF4.json task=/Volumes/DevMASTER/WEDNESDAY/2_Project_Files/local-model/tasks/comment_patch/task.md ctx=65536
+KS-1181 input=/Volumes/DevMASTER/WEDNESDAY/2_Project_Files/local-model/night/inputs/comment_1181F3w.json task=/Volumes/DevMASTER/WEDNESDAY/2_Project_Files/local-model/tasks/comment_patch/task.md ctx=65536
+KS-1158 input=/Volumes/DevMASTER/WEDNESDAY/2_Project_Files/local-model/night/inputs/comment_1158R5b.json task=/Volumes/DevMASTER/WEDNESDAY/2_Project_Files/local-model/tasks/comment_patch/task.md ctx=65536

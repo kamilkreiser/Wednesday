@@ -577,3 +577,37 @@ A CENSUS for the coordinator to brief from, easy → hard (Kam 2026-09-15 16:40 
      FITS (briefed + built rc 0 at 75ad0e55c, NOT queued): KS-1120 F-3 (briefs/KS-1120-F3.md, inputs/comment_1120F3.json; pick "reword" to confirm) · KS-1156 A.2 + A.3 (briefs/KS-1156-A2A3.md, inputs/comment_1156A2.json + comment_1156A3.json) · KS-1179 F-4 (briefs/KS-1179-F4.md, inputs/comment_1179F4.json)
      KS-1179 F-5 docblock half (ssrf-guard.ts:460-461 "DNS-free connect")  REFUSED R9 at 20:59: READY_KS-932_ornith35b-q4_PASS-7of7_2026-09-15 @@ -471,7 is within 10 lines — that READY is already merged as 40fe4db69 (#1004), so the partition is stale; dropped from the KS-1179 F-4 brief, not worked around · unblocks: READY_KS-932 retired from night/ (or R9 skipping READYs whose change is at tip) · measured (builder)
 -->
+
+## SEARCH comment_patch 2026-09-17 21:26 (batch 3)
+<!-- COMMENT_PATCH BATCH 3, measured 2026-09-17 21:11–21:25 AEST by the comment_patch brief-writer commission (batch 3) — do NOT re-derive these.
+     Tip: origin develop 75ad0e55c at 21:13:35, 21:21:55 and 21:25:49 (did not move; object local). Linear: 329 KS Backlog/Todo at 21:11:58 (14 pages, hasNextPage false, 0 truncated comment pages), 19 Peter/Stuart; three wording screens (comment/docblock/overclaim/miscount; comment-drift/polish; citation/pointer/JSDoc) = 142 distinct non-Peter/Stuart hits, ~45 read at snippet level, 9 read in full. Open PRs 22 (builder R11). READY files 128. Seat heads: 71 refs since 09-16 12:00 AEST (three-dot + blob compare; control feature/ks-932 on ssrf-guard.ts). Builder build_comment_input.sh CHANGED at 21:20 (sha256 275d81f9…: R9 skips a READY already at the tip); all four builds below ran on that hash.
+     FITS (briefed + built rc 0 at 75ad0e55c, NOT queued):
+       KS-1140 GF-2 + GF-4  briefs/KS-1140-GF2GF4.md, inputs/comment_1140GF2GF4.json — ks879 guard :37 "files the sentence above counts" -> "files tracked at `6fd033c36`" (ticket's words; `--` mine), :161 798 -> 791 (ticket's); figures re-measured by ls-tree at 14914258c/6fd033c36/0f69129b3
+       KS-1181 F3 wording   briefs/KS-1181-F3w.md, inputs/comment_1181F3w.json — ks727 guard :34 "The 10th handler is" -> "The surplus handler is" (ticket's words); READY_KS-1181-F3's regexes read :32/:38/:52 only
+       KS-1158 R5 (ks1058)  briefs/KS-1158-R5b.md, inputs/comment_1158R5b.json — ks1058 header :5 `documentRepo.ts:480` -> `documentRepo.ts:540-544` (numbers measured at the tip; ticket's :510-514 moved again with #939)
+       KS-1179 F-5 docblock briefs/KS-1179-F5.md, inputs/comment_1179F5.json — ssrf-guard.ts :460 "— DNS-free connect," -> "-- DNS resolution, connect," (wording MINE). The 21:03 R9 refusal no longer holds: the 21:20 builder printed "R9 READY skipped: already at tip: READY_KS-932…"; READY_KS-1179-F4 (held) hunks :421/:519, outside the window; sequencing +2 lines if F-4 lands first
+     NON-FITS (one line each):
+     KS-1152 R1  jwt.ts:263 citation x5 — FIT-SHAPED, NOT BRIEFED (stopped at four). Measured: jwt.ts:263 is now blank; the quoted `...(meta.tenantId ? { tenantId } : {})` is generateConnectorToken :295; generateAccessToken :201 sets `tenantId: user.tenantId`, userRepo.ts:246 maps `tenant_id ?? undefined`, jws 3.2.3 lib/tostring.js:9 JSON.stringify drops undefined -> the claim holds by that mechanism. Sites (5 files, one brief each): packages/shared ks764-key-revoke-call-site-guard.test.ts:391-392, packages/shared middleware/index.ts:33-34, originate ks764-admin-api-keys-revoke-route-contract.test.ts:127, originate middleware/auth.ts:27-28 (identical to shared), originate routes/adminConfig.ts:1018-1019; 0 READY +++ on shared middleware/index.ts; wording would be mine · measured
+     KS-692      status.ts:36 "tracked on KS-586" -> KS-692 (KS-586 Done, archived 2026-08-16): READY_KS-692 (held, unmerged) hunks status.ts @@ -31,13 and already removes that pointer — R9 class, not briefed · measured
+     KS-1158 R5a ks1059 header :6/:28-35 — not a re-point: the quoted code itself changed (:329 inFlight has no `!bc.txHash`; sim leg :378 is `inFlight && !bc.txHash && simFields.simulated`), the "inFlight used to imply !bc.txHash" narrative needs re-analysis · measured
+     KS-1181 F3  :18-21 "if a count below is wrong, a test is red" — READY_KS-1181-F3 (parse arm, held) makes it true on merge; rewording now is a pick against a held READY · read
+     KS-1140 GF-3/R1  :42-43, :159-160 byte/file figures — ticket offers "at this commit" OR restate OR drop: a pick · read
+     KS-1123     F-1002-1 header :2 "(or falsy)" pairs with the describe title :146 (code) and is a pick (narrow vs twins); the "12 base-numbered pointers" point into gateway verification.ts, which READY_KS-1073 / READY_KS-1185-F1 hunk (unmerged) · read
+     KS-1179 F-5 runtime half  :574 deadline error string — code, unspelled wording · measured (21:03)
+     KS-1156     R-C3 wording is a response string (code); A.1 a decision · read
+     KS-928      "one clarifying sentence" on auth's vs originate's demo-seed gate: adminConfig.ts :1859-1880 already says "deliberately STRICTER than auth's"; wording mine, value unclear, attached PR #874 state not read · set aside (read)
+     KS-1111 KS-1110 KS-1117  JSDoc/why-comment arms in systemTest/performance (R1: not services/*/src, packages/shared/src or scripts/) and each a pick against a code arm · read
+     KS-981      "Never throws" docstring — systemTest, on frozen unmerged #892 only · read
+     KS-1047 KS-902  comment in a shell hook/script (bash_patch, R1) · read
+     KS-1085 KS-939 KS-925 KS-940  launcher prose (Launch_Claude.command, R1) · read (snippet)
+     KS-1097 KS-1048  markdown (doc_patch) · read (title)
+     KS-1141     docblock-sentence arm (a) is a QUESTION awaiting a ruling · read
+     KS-807      (B) "declare raw bodies out" in the doc comment is a decision (A vs B) + a leg · read
+     KS-975      "decide it deliberately, say so in the comment, and pin it" — decision + cells · read (snippet)
+     KS-1168 KS-1121 KS-1215  the comment follows (or is made true by) a code fix · read (snippet)
+     KS-1185     F2 "state in the doc comment that the bound is idle-based" OR add a wall-clock bound — a pick; file not measured · read (snippet)
+     KS-1209     Polish "missing expires" in lock-discovery.mjs :255/:257/:277 is runtime message text (code) · read
+     KS-980 KS-1017 KS-851  the fix is a test/fixture change (or SQL comment, G-1) · read (snippet)
+     KS-1143 KS-1147 KS-1217 KS-1199 KS-1205 KS-1125 KS-1188 KS-1133 KS-864  code / cells / spec strings · read (snippet)
+     POOL STATE: with the four above, the comment-class pool at 75ad0e55c holds KS-1152 R1 (five one-file briefs, wording mine) as the only measured fit left; next widenings: KS-1181 F3 :18-21 once READY_KS-1181-F3 merges (then ":19 the assertions in the file" moves to a sibling file), KS-692's pointer rides READY_KS-692, KS-1123's pointers once READY_KS-1073/-1185-F1 land.
+-->
