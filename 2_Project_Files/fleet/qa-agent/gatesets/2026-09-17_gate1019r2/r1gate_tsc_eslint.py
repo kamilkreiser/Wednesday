@@ -1,0 +1,51 @@
+#!/usr/bin/env python3
+"""drafter_tsc.py — #1019 (KS-1187); derived from the #1017 set's drafter_tsc.py. INCLUDING tsc (program {"extends": "./tsconfig.json", "include": ["src/**/*"], "exclude": ["node_modules","dist"]},
+from services/api-gateway) on base / head / merged17; --listFilesOnly proof the PR files are in the program; NEW vs base line-number-free; a PLANTED positive
+control in head's ks1187 test (+1 TS2322 expected), restored sha-identical. eslint BY RULE (line numbers removed) on the three product files (base, head) and the
+new test (head) — the PR files are proxy.ts and the ks843 test (base vs head) and the new ks1187 test — with a firing control via --stdin at the same path. Configs written in MY clone, quarantined by rename. Never rm."""
+import os, re, json, subprocess, collections, datetime, hashlib, sys
+sys.path.insert(0, os.path.dirname(os.path.abspath(__file__))); import run as R  # QA gate copy of drafter_tsc.py, bound to THIS gate clone; merged17r2 added
+T = R.T; CFG = '{"extends": "./tsconfig.json", "include": ["src/**/*"], "exclude": ["node_modules", "dist"]}'
+PR = ['src/routes/proxy.ts', 'src/__tests__/ks843-erasure-scope-gate.test.ts', 'src/middleware/normalisePath.ts', 'src/__tests__/ks1187-erasure-door-judges-the-canonical-path.test.ts']
+def ts(): return datetime.datetime.now().astimezone().strftime('%H:%M:%S %Z')
+def including(t, label):
+    d = T[t] + '/' + R.GW; cfg = d + '/tsconfig.qa-including.json'; open(cfg, 'w').write(CFG); tsc = T[t] + '/Blockchain/Dev/node_modules/.bin/tsc'
+    lfp = subprocess.run([tsc, '-p', 'tsconfig.qa-including.json', '--listFilesOnly'], cwd=d, capture_output=True, text=True); lf = lfp.stdout.splitlines()
+    inc = {p.split('/')[-1][:24]: any(x.endswith('/' + p) for x in lf) for p in PR}
+    p = subprocess.run([tsc, '--noEmit', '-p', 'tsconfig.qa-including.json'], cwd=d, capture_output=True, text=True)
+    errs = [l for l in (p.stdout + p.stderr).splitlines() if 'error TS' in l]; byf = collections.Counter(l.split('(')[0] for l in errs)
+    print(ts(), label, 'listFiles', len(lf), '| __tests__ in program', sum(1 for x in lf if '/__tests__/' in x), '| PR files in program', inc, '| rc', p.returncode, 'error lines', len(errs), 'files', len(byf), 'in PR files', sum(v for k, v in byf.items() if k in PR), flush=True)
+    q = R.W + '/_quarantine_2026-09-17'; os.makedirs(q, exist_ok=True); os.rename(cfg, q + '/tsconfig.qa-including.%s.%s.json' % (label, datetime.datetime.now().strftime('%H%M%S%f')))
+    return errs
+norm = lambda ls: collections.Counter(re.sub(r'\(\d+,\d+\)', '', l) for l in ls)
+print('including_tsc start', ts(), 'program', CFG)
+res = {t: including(t, t) for t in ('base', 'head', 'merged17', 'merged17r2')}
+for t, ref in (('head', 'base'), ('merged17', 'base'), ('merged17', 'head'), ('merged17r2', 'base'), ('merged17r2', 'head')):
+    new = norm(res[t]) - norm(res[ref]); gone = norm(res[ref]) - norm(res[t])
+    print('NEW vs', ref, t, sum(new.values()), list(new)[:5], '| GONE', sum(gone.values()), list(gone)[:5])
+tp = T['head'] + '/' + R.GW + '/' + PR[3]; saved = open(tp, 'rb').read(); before = hashlib.sha256(saved).hexdigest()
+s = saved.decode(); anchor = "import { describe"; assert s.count(anchor) == 1, s.count(anchor)
+open(tp, 'w').write(s.replace(anchor, "export const qaPlantTS2322: number = 'qa'; // QA-PLANT-INCLUDING\n" + anchor))
+assert open(tp).read().count('QA-PLANT-INCLUDING') == 1
+planted = including('head', 'head+PLANT')
+newp = norm(planted) - norm(res['head']); print('PLANT: NEW vs head', sum(newp.values()), list(newp))
+open(tp, 'wb').write(saved); print('plant restored sha256 identical', hashlib.sha256(open(tp, 'rb').read()).hexdigest() == before)
+dq = subprocess.run(['git', '-C', T['head'], 'status', '--porcelain', '--untracked-files=no'], capture_output=True, text=True); print('head tracked porcelain after', len(dq.stdout.splitlines()))
+def eslint(t, f, stdin_src=None):
+    dev = T[t] + '/Blockchain/Dev'; es = dev + '/node_modules/.bin/eslint'; full = T[t] + '/' + R.GW + '/' + f
+    args = [es, '--format', 'json'] + (['--stdin', '--stdin-filename', full] if stdin_src is not None else [full])
+    p = subprocess.run(args, input=stdin_src, cwd=dev, capture_output=True, text=True)
+    try: j = json.loads(p.stdout); msgs = [(m.get('ruleId'), m.get('severity'), m.get('message')) for x in j for m in x['messages']]
+    except Exception: msgs = None
+    return p.returncode, msgs, p.stderr[:200]
+byrule = {}
+for t, files in (('base', PR[:3]), ('head', PR), ('merged17r2', PR)):
+    for f in files:
+        rc, msgs, err = eslint(t, f)
+        crc, cm, _ = eslint(t, f, open(T[t] + '/' + R.GW + '/' + f).read() + "\nvar qaEslintControl = 1;\ndebugger;\n")
+        byrule[(t, f)] = collections.Counter((m[0], m[1], m[2]) for m in (msgs or []))
+        print(ts(), 'eslint', t, f.split('/')[-1][:40], 'rc', rc, 'messages', None if msgs is None else len(msgs), 'rules', sorted(collections.Counter(m[0] for m in (msgs or [])).items(), key=str), '| stderr', repr(err[:80]), '| CONTROL rc', crc, 'messages', None if cm is None else len(cm), 'rules', sorted({m[0] for m in (cm or [])}, key=str))
+for f in PR[:3]:
+    new = byrule[('head', f)] - byrule[('base', f)]; gone = byrule[('base', f)] - byrule[('head', f)]
+    print('eslint BY RULE+message (no lines) NEW head vs base', f.split('/')[-1], sum(new.values()), list(new)[:4], '| GONE', sum(gone.values()), list(gone)[:4])
+print('including_tsc end', ts())

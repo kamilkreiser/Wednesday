@@ -1,0 +1,1002 @@
+drafter_compare 2026-09-17 16:57:06 AEST
+== (1) r1 column vs ROUND 1 GATE rows
+  bytes sha: round1 rows_head.json ee8da02767327387 | drafter rows_r1 ee8da02767327387 | equal: True
+  bytes sha: round1 rows_origin_head.json 32a94464bb5070e0 | drafter rows_origin_r1 32a94464bb5070e0 | equal: True
+  rows round1 788 r1 788 | row diffs 0 | missing keys 0 | verdict table equal True | jwksFetches 729 729
+  originate rows round1 132 r1 132 | row diffs 0 | missing 0
+  CONTROL (instrument can see a diff): round1 rows_head vs drafter rows_r2 diffs = 266
+== (2) r2 vs r1 (the round-2 delta), every row diff
+  row diffs 266 | missing 0
+   test D34 erasures/. GET noscope 1 GET /api/gdpr/erasures/. | r1: [403, "INSUFFICIENT_SCOPE", [], null] | r2: [400, "NON_CANONICAL_PATH", [], null]
+   test D34 erasures/. GET scope 1 GET /api/gdpr/erasures/. | r1: [200, null, ["GET /api/gdpr/erasures/."], null] | r2: [400, "NON_CANONICAL_PATH", [], null]
+   test D35 erasures/abc/.. GET noscope 1 GET /api/gdpr/erasures/abc/.. | r1: [403, "INSUFFICIENT_SCOPE", [], null] | r2: [400, "NON_CANONICAL_PATH", [], null]
+   test D35 erasures/abc/.. GET scope 1 GET /api/gdpr/erasures/abc/.. | r1: [200, null, ["GET /api/gdpr/erasures/abc/.."], null] | r2: [400, "NON_CANONICAL_PATH", [], null]
+   test W01 erasures/.. GET noscope 1 GET /api/gdpr/erasures/.. | r1: [200, null, ["GET /api/gdpr/erasures/.."], null] | r2: [400, "NON_CANONICAL_PATH", [], null]
+   test W01 erasures/.. GET scope 1 GET /api/gdpr/erasures/.. | r1: [200, null, ["GET /api/gdpr/erasures/.."], null] | r2: [400, "NON_CANONICAL_PATH", [], null]
+   test W01 erasures/.. GET user 1 GET /api/gdpr/erasures/.. | r1: [200, null, ["GET /api/gdpr/erasures/.."], null] | r2: [400, "NON_CANONICAL_PATH", [], null]
+   test W01 erasures/.. GET noemail_noscope 1 GET /api/gdpr/erasures/.. | r1: [500, "INTERNAL_ERROR", [], null] | r2: [400, "NON_CANONICAL_PATH", [], null]
+   test W01 erasures/.. GET noscope 2 GET /api/gdpr/erasures/.. | r1: [200, null, ["GET /api/gdpr/erasures/.."], null] | r2: [400, "NON_CANONICAL_PATH", [], null]
+   test W01 erasures/.. GET scope 2 GET /api/gdpr/erasures/.. | r1: [200, null, ["GET /api/gdpr/erasures/.."], null] | r2: [400, "NON_CANONICAL_PATH", [], null]
+   test W01 erasures/.. GET user 2 GET /api/gdpr/erasures/.. | r1: [200, null, ["GET /api/gdpr/erasures/.."], null] | r2: [400, "NON_CANONICAL_PATH", [], null]
+   test W01 erasures/.. GET noemail_noscope 2 GET /api/gdpr/erasures/.. | r1: [500, "INTERNAL_ERROR", [], null] | r2: [400, "NON_CANONICAL_PATH", [], null]
+   test W02 erasures/%2e%2e GET noscope 1 GET /api/gdpr/erasures/%2e%2e | r1: [200, null, ["GET /api/gdpr/erasures/%2e%2e"], null] | r2: [400, "NON_CANONICAL_PATH", [], null]
+   test W02 erasures/%2e%2e GET scope 1 GET /api/gdpr/erasures/%2e%2e | r1: [200, null, ["GET /api/gdpr/erasures/%2e%2e"], null] | r2: [400, "NON_CANONICAL_PATH", [], null]
+   test W02 erasures/%2e%2e GET user 1 GET /api/gdpr/erasures/%2e%2e | r1: [200, null, ["GET /api/gdpr/erasures/%2e%2e"], null] | r2: [400, "NON_CANONICAL_PATH", [], null]
+   test W02 erasures/%2e%2e GET noemail_noscope 1 GET /api/gdpr/erasures/%2e%2e | r1: [500, "INTERNAL_ERROR", [], null] | r2: [400, "NON_CANONICAL_PATH", [], null]
+   test W02 erasures/%2e%2e GET noscope 2 GET /api/gdpr/erasures/%2e%2e | r1: [200, null, ["GET /api/gdpr/erasures/%2e%2e"], null] | r2: [400, "NON_CANONICAL_PATH", [], null]
+   test W02 erasures/%2e%2e GET scope 2 GET /api/gdpr/erasures/%2e%2e | r1: [200, null, ["GET /api/gdpr/erasures/%2e%2e"], null] | r2: [400, "NON_CANONICAL_PATH", [], null]
+   test W02 erasures/%2e%2e GET user 2 GET /api/gdpr/erasures/%2e%2e | r1: [200, null, ["GET /api/gdpr/erasures/%2e%2e"], null] | r2: [400, "NON_CANONICAL_PATH", [], null]
+   test W02 erasures/%2e%2e GET noemail_noscope 2 GET /api/gdpr/erasures/%2e%2e | r1: [500, "INTERNAL_ERROR", [], null] | r2: [400, "NON_CANONICAL_PATH", [], null]
+   test W03 erasures/..;x GET noscope 1 GET /api/gdpr/erasures/..;x | r1: [200, null, ["GET /api/gdpr/erasures/..;x"], null] | r2: [400, "NON_CANONICAL_PATH", [], null]
+   test W03 erasures/..;x GET scope 1 GET /api/gdpr/erasures/..;x | r1: [200, null, ["GET /api/gdpr/erasures/..;x"], null] | r2: [400, "NON_CANONICAL_PATH", [], null]
+   test W03 erasures/..;x GET user 1 GET /api/gdpr/erasures/..;x | r1: [200, null, ["GET /api/gdpr/erasures/..;x"], null] | r2: [400, "NON_CANONICAL_PATH", [], null]
+   test W03 erasures/..;x GET noemail_noscope 1 GET /api/gdpr/erasures/..;x | r1: [500, "INTERNAL_ERROR", [], null] | r2: [400, "NON_CANONICAL_PATH", [], null]
+   test W03 erasures/..;x GET noscope 2 GET /api/gdpr/erasures/..;x | r1: [200, null, ["GET /api/gdpr/erasures/..;x"], null] | r2: [400, "NON_CANONICAL_PATH", [], null]
+   test W03 erasures/..;x GET scope 2 GET /api/gdpr/erasures/..;x | r1: [200, null, ["GET /api/gdpr/erasures/..;x"], null] | r2: [400, "NON_CANONICAL_PATH", [], null]
+   test W03 erasures/..;x GET user 2 GET /api/gdpr/erasures/..;x | r1: [200, null, ["GET /api/gdpr/erasures/..;x"], null] | r2: [400, "NON_CANONICAL_PATH", [], null]
+   test W03 erasures/..;x GET noemail_noscope 2 GET /api/gdpr/erasures/..;x | r1: [500, "INTERNAL_ERROR", [], null] | r2: [400, "NON_CANONICAL_PATH", [], null]
+   test W04 erasures/%2e%2e%2fabc GET noscope 1 GET /api/gdpr/erasures/%2e%2e%2fabc | r1: [200, null, ["GET /api/gdpr/erasures/%2e%2e%2fabc"], null] | r2: [400, "NON_CANONICAL_PATH", [], null]
+   test W04 erasures/%2e%2e%2fabc GET scope 1 GET /api/gdpr/erasures/%2e%2e%2fabc | r1: [200, null, ["GET /api/gdpr/erasures/%2e%2e%2fabc"], null] | r2: [400, "NON_CANONICAL_PATH", [], null]
+   test W04 erasures/%2e%2e%2fabc GET user 1 GET /api/gdpr/erasures/%2e%2e%2fabc | r1: [200, null, ["GET /api/gdpr/erasures/%2e%2e%2fabc"], null] | r2: [400, "NON_CANONICAL_PATH", [], null]
+   test W04 erasures/%2e%2e%2fabc GET noemail_noscope 1 GET /api/gdpr/erasures/%2e%2e%2fabc | r1: [500, "INTERNAL_ERROR", [], null] | r2: [400, "NON_CANONICAL_PATH", [], null]
+   test W04 erasures/%2e%2e%2fabc GET noscope 2 GET /api/gdpr/erasures/%2e%2e%2fabc | r1: [200, null, ["GET /api/gdpr/erasures/%2e%2e%2fabc"], null] | r2: [400, "NON_CANONICAL_PATH", [], null]
+   test W04 erasures/%2e%2e%2fabc GET scope 2 GET /api/gdpr/erasures/%2e%2e%2fabc | r1: [200, null, ["GET /api/gdpr/erasures/%2e%2e%2fabc"], null] | r2: [400, "NON_CANONICAL_PATH", [], null]
+   test W04 erasures/%2e%2e%2fabc GET user 2 GET /api/gdpr/erasures/%2e%2e%2fabc | r1: [200, null, ["GET /api/gdpr/erasures/%2e%2e%2fabc"], null] | r2: [400, "NON_CANONICAL_PATH", [], null]
+   test W04 erasures/%2e%2e%2fabc GET noemail_noscope 2 GET /api/gdpr/erasures/%2e%2e%2fabc | r1: [500, "INTERNAL_ERROR", [], null] | r2: [400, "NON_CANONICAL_PATH", [], null]
+   test W05 erasures/.%2e GET noscope 1 GET /api/gdpr/erasures/.%2e | r1: [200, null, ["GET /api/gdpr/erasures/.%2e"], null] | r2: [400, "NON_CANONICAL_PATH", [], null]
+   test W05 erasures/.%2e GET scope 1 GET /api/gdpr/erasures/.%2e | r1: [200, null, ["GET /api/gdpr/erasures/.%2e"], null] | r2: [400, "NON_CANONICAL_PATH", [], null]
+   test W05 erasures/.%2e GET user 1 GET /api/gdpr/erasures/.%2e | r1: [200, null, ["GET /api/gdpr/erasures/.%2e"], null] | r2: [400, "NON_CANONICAL_PATH", [], null]
+   test W05 erasures/.%2e GET noemail_noscope 1 GET /api/gdpr/erasures/.%2e | r1: [500, "INTERNAL_ERROR", [], null] | r2: [400, "NON_CANONICAL_PATH", [], null]
+   test W05 erasures/.%2e GET noscope 2 GET /api/gdpr/erasures/.%2e | r1: [200, null, ["GET /api/gdpr/erasures/.%2e"], null] | r2: [400, "NON_CANONICAL_PATH", [], null]
+   test W05 erasures/.%2e GET scope 2 GET /api/gdpr/erasures/.%2e | r1: [200, null, ["GET /api/gdpr/erasures/.%2e"], null] | r2: [400, "NON_CANONICAL_PATH", [], null]
+   test W05 erasures/.%2e GET user 2 GET /api/gdpr/erasures/.%2e | r1: [200, null, ["GET /api/gdpr/erasures/.%2e"], null] | r2: [400, "NON_CANONICAL_PATH", [], null]
+   test W05 erasures/.%2e GET noemail_noscope 2 GET /api/gdpr/erasures/.%2e | r1: [500, "INTERNAL_ERROR", [], null] | r2: [400, "NON_CANONICAL_PATH", [], null]
+   test W08 erasures/%2E%2E GET noscope 1 GET /api/gdpr/erasures/%2E%2E | r1: [200, null, ["GET /api/gdpr/erasures/%2E%2E"], null] | r2: [400, "NON_CANONICAL_PATH", [], null]
+   test W08 erasures/%2E%2E GET scope 1 GET /api/gdpr/erasures/%2E%2E | r1: [200, null, ["GET /api/gdpr/erasures/%2E%2E"], null] | r2: [400, "NON_CANONICAL_PATH", [], null]
+   test W08 erasures/%2E%2E GET user 1 GET /api/gdpr/erasures/%2E%2E | r1: [200, null, ["GET /api/gdpr/erasures/%2E%2E"], null] | r2: [400, "NON_CANONICAL_PATH", [], null]
+   test W08 erasures/%2E%2E GET noemail_noscope 1 GET /api/gdpr/erasures/%2E%2E | r1: [500, "INTERNAL_ERROR", [], null] | r2: [400, "NON_CANONICAL_PATH", [], null]
+   test W08 erasures/%2E%2E GET noscope 2 GET /api/gdpr/erasures/%2E%2E | r1: [200, null, ["GET /api/gdpr/erasures/%2E%2E"], null] | r2: [400, "NON_CANONICAL_PATH", [], null]
+   test W08 erasures/%2E%2E GET scope 2 GET /api/gdpr/erasures/%2E%2E | r1: [200, null, ["GET /api/gdpr/erasures/%2E%2E"], null] | r2: [400, "NON_CANONICAL_PATH", [], null]
+   test W08 erasures/%2E%2E GET user 2 GET /api/gdpr/erasures/%2E%2E | r1: [200, null, ["GET /api/gdpr/erasures/%2E%2E"], null] | r2: [400, "NON_CANONICAL_PATH", [], null]
+   test W08 erasures/%2E%2E GET noemail_noscope 2 GET /api/gdpr/erasures/%2E%2E | r1: [500, "INTERNAL_ERROR", [], null] | r2: [400, "NON_CANONICAL_PATH", [], null]
+   test W09 erasures/%2e. GET noscope 1 GET /api/gdpr/erasures/%2e. | r1: [200, null, ["GET /api/gdpr/erasures/%2e."], null] | r2: [400, "NON_CANONICAL_PATH", [], null]
+   test W09 erasures/%2e. GET scope 1 GET /api/gdpr/erasures/%2e. | r1: [200, null, ["GET /api/gdpr/erasures/%2e."], null] | r2: [400, "NON_CANONICAL_PATH", [], null]
+   test W09 erasures/%2e. GET user 1 GET /api/gdpr/erasures/%2e. | r1: [200, null, ["GET /api/gdpr/erasures/%2e."], null] | r2: [400, "NON_CANONICAL_PATH", [], null]
+   test W09 erasures/%2e. GET noemail_noscope 1 GET /api/gdpr/erasures/%2e. | r1: [500, "INTERNAL_ERROR", [], null] | r2: [400, "NON_CANONICAL_PATH", [], null]
+   test W09 erasures/%2e. GET noscope 2 GET /api/gdpr/erasures/%2e. | r1: [200, null, ["GET /api/gdpr/erasures/%2e."], null] | r2: [400, "NON_CANONICAL_PATH", [], null]
+   test W09 erasures/%2e. GET scope 2 GET /api/gdpr/erasures/%2e. | r1: [200, null, ["GET /api/gdpr/erasures/%2e."], null] | r2: [400, "NON_CANONICAL_PATH", [], null]
+   test W09 erasures/%2e. GET user 2 GET /api/gdpr/erasures/%2e. | r1: [200, null, ["GET /api/gdpr/erasures/%2e."], null] | r2: [400, "NON_CANONICAL_PATH", [], null]
+   test W09 erasures/%2e. GET noemail_noscope 2 GET /api/gdpr/erasures/%2e. | r1: [500, "INTERNAL_ERROR", [], null] | r2: [400, "NON_CANONICAL_PATH", [], null]
+   test W10 erasures/../ GET (trailing slash) noscope 1 GET /api/gdpr/erasures/../ | r1: [200, null, ["GET /api/gdpr/erasures/../"], null] | r2: [400, "NON_CANONICAL_PATH", [], null]
+   test W10 erasures/../ GET (trailing slash) scope 1 GET /api/gdpr/erasures/../ | r1: [200, null, ["GET /api/gdpr/erasures/../"], null] | r2: [400, "NON_CANONICAL_PATH", [], null]
+   test W10 erasures/../ GET (trailing slash) user 1 GET /api/gdpr/erasures/../ | r1: [200, null, ["GET /api/gdpr/erasures/../"], null] | r2: [400, "NON_CANONICAL_PATH", [], null]
+   test W10 erasures/../ GET (trailing slash) noemail_noscope 1 GET /api/gdpr/erasures/../ | r1: [500, "INTERNAL_ERROR", [], null] | r2: [400, "NON_CANONICAL_PATH", [], null]
+   test W10 erasures/../ GET (trailing slash) noscope 2 GET /api/gdpr/erasures/../ | r1: [200, null, ["GET /api/gdpr/erasures/../"], null] | r2: [400, "NON_CANONICAL_PATH", [], null]
+   test W10 erasures/../ GET (trailing slash) scope 2 GET /api/gdpr/erasures/../ | r1: [200, null, ["GET /api/gdpr/erasures/../"], null] | r2: [400, "NON_CANONICAL_PATH", [], null]
+   test W10 erasures/../ GET (trailing slash) user 2 GET /api/gdpr/erasures/../ | r1: [200, null, ["GET /api/gdpr/erasures/../"], null] | r2: [400, "NON_CANONICAL_PATH", [], null]
+   test W10 erasures/../ GET (trailing slash) noemail_noscope 2 GET /api/gdpr/erasures/../ | r1: [500, "INTERNAL_ERROR", [], null] | r2: [400, "NON_CANONICAL_PATH", [], null]
+   test W11 erasures/..%2f GET noscope 1 GET /api/gdpr/erasures/..%2f | r1: [200, null, ["GET /api/gdpr/erasures/..%2f"], null] | r2: [400, "NON_CANONICAL_PATH", [], null]
+   test W11 erasures/..%2f GET scope 1 GET /api/gdpr/erasures/..%2f | r1: [200, null, ["GET /api/gdpr/erasures/..%2f"], null] | r2: [400, "NON_CANONICAL_PATH", [], null]
+   test W11 erasures/..%2f GET user 1 GET /api/gdpr/erasures/..%2f | r1: [200, null, ["GET /api/gdpr/erasures/..%2f"], null] | r2: [400, "NON_CANONICAL_PATH", [], null]
+   test W11 erasures/..%2f GET noemail_noscope 1 GET /api/gdpr/erasures/..%2f | r1: [500, "INTERNAL_ERROR", [], null] | r2: [400, "NON_CANONICAL_PATH", [], null]
+   test W11 erasures/..%2f GET noscope 2 GET /api/gdpr/erasures/..%2f | r1: [200, null, ["GET /api/gdpr/erasures/..%2f"], null] | r2: [400, "NON_CANONICAL_PATH", [], null]
+   test W11 erasures/..%2f GET scope 2 GET /api/gdpr/erasures/..%2f | r1: [200, null, ["GET /api/gdpr/erasures/..%2f"], null] | r2: [400, "NON_CANONICAL_PATH", [], null]
+   test W11 erasures/..%2f GET user 2 GET /api/gdpr/erasures/..%2f | r1: [200, null, ["GET /api/gdpr/erasures/..%2f"], null] | r2: [400, "NON_CANONICAL_PATH", [], null]
+   test W11 erasures/..%2f GET noemail_noscope 2 GET /api/gdpr/erasures/..%2f | r1: [500, "INTERNAL_ERROR", [], null] | r2: [400, "NON_CANONICAL_PATH", [], null]
+   test W12 erasures/%2e%2e%2fconsent GET noscope 1 GET /api/gdpr/erasures/%2e%2e%2fconsent | r1: [200, null, ["GET /api/gdpr/erasures/%2e%2e%2fconsent"], null] | r2: [400, "NON_CANONICAL_PATH", [], null]
+   test W12 erasures/%2e%2e%2fconsent GET scope 1 GET /api/gdpr/erasures/%2e%2e%2fconsent | r1: [200, null, ["GET /api/gdpr/erasures/%2e%2e%2fconsent"], null] | r2: [400, "NON_CANONICAL_PATH", [], null]
+   test W12 erasures/%2e%2e%2fconsent GET user 1 GET /api/gdpr/erasures/%2e%2e%2fconsent | r1: [200, null, ["GET /api/gdpr/erasures/%2e%2e%2fconsent"], null] | r2: [400, "NON_CANONICAL_PATH", [], null]
+   test W12 erasures/%2e%2e%2fconsent GET noemail_noscope 1 GET /api/gdpr/erasures/%2e%2e%2fconsent | r1: [500, "INTERNAL_ERROR", [], null] | r2: [400, "NON_CANONICAL_PATH", [], null]
+   test W12 erasures/%2e%2e%2fconsent GET noscope 2 GET /api/gdpr/erasures/%2e%2e%2fconsent | r1: [200, null, ["GET /api/gdpr/erasures/%2e%2e%2fconsent"], null] | r2: [400, "NON_CANONICAL_PATH", [], null]
+   test W12 erasures/%2e%2e%2fconsent GET scope 2 GET /api/gdpr/erasures/%2e%2e%2fconsent | r1: [200, null, ["GET /api/gdpr/erasures/%2e%2e%2fconsent"], null] | r2: [400, "NON_CANONICAL_PATH", [], null]
+   test W12 erasures/%2e%2e%2fconsent GET user 2 GET /api/gdpr/erasures/%2e%2e%2fconsent | r1: [200, null, ["GET /api/gdpr/erasures/%2e%2e%2fconsent"], null] | r2: [400, "NON_CANONICAL_PATH", [], null]
+   test W12 erasures/%2e%2e%2fconsent GET noemail_noscope 2 GET /api/gdpr/erasures/%2e%2e%2fconsent | r1: [500, "INTERNAL_ERROR", [], null] | r2: [400, "NON_CANONICAL_PATH", [], null]
+   test W13 erasures/.%2e;x GET noscope 1 GET /api/gdpr/erasures/.%2e;x | r1: [200, null, ["GET /api/gdpr/erasures/.%2e;x"], null] | r2: [400, "NON_CANONICAL_PATH", [], null]
+   test W13 erasures/.%2e;x GET scope 1 GET /api/gdpr/erasures/.%2e;x | r1: [200, null, ["GET /api/gdpr/erasures/.%2e;x"], null] | r2: [400, "NON_CANONICAL_PATH", [], null]
+   test W13 erasures/.%2e;x GET user 1 GET /api/gdpr/erasures/.%2e;x | r1: [200, null, ["GET /api/gdpr/erasures/.%2e;x"], null] | r2: [400, "NON_CANONICAL_PATH", [], null]
+   test W13 erasures/.%2e;x GET noemail_noscope 1 GET /api/gdpr/erasures/.%2e;x | r1: [500, "INTERNAL_ERROR", [], null] | r2: [400, "NON_CANONICAL_PATH", [], null]
+   test W13 erasures/.%2e;x GET noscope 2 GET /api/gdpr/erasures/.%2e;x | r1: [200, null, ["GET /api/gdpr/erasures/.%2e;x"], null] | r2: [400, "NON_CANONICAL_PATH", [], null]
+   test W13 erasures/.%2e;x GET scope 2 GET /api/gdpr/erasures/.%2e;x | r1: [200, null, ["GET /api/gdpr/erasures/.%2e;x"], null] | r2: [400, "NON_CANONICAL_PATH", [], null]
+   test W13 erasures/.%2e;x GET user 2 GET /api/gdpr/erasures/.%2e;x | r1: [200, null, ["GET /api/gdpr/erasures/.%2e;x"], null] | r2: [400, "NON_CANONICAL_PATH", [], null]
+   test W13 erasures/.%2e;x GET noemail_noscope 2 GET /api/gdpr/erasures/.%2e;x | r1: [500, "INTERNAL_ERROR", [], null] | r2: [400, "NON_CANONICAL_PATH", [], null]
+   test W14 ERASURES/.. GET noscope 1 GET /api/gdpr/ERASURES/.. | r1: [200, null, ["GET /api/gdpr/ERASURES/.."], null] | r2: [400, "NON_CANONICAL_PATH", [], null]
+   test W14 ERASURES/.. GET scope 1 GET /api/gdpr/ERASURES/.. | r1: [200, null, ["GET /api/gdpr/ERASURES/.."], null] | r2: [400, "NON_CANONICAL_PATH", [], null]
+   test W14 ERASURES/.. GET user 1 GET /api/gdpr/ERASURES/.. | r1: [200, null, ["GET /api/gdpr/ERASURES/.."], null] | r2: [400, "NON_CANONICAL_PATH", [], null]
+   test W14 ERASURES/.. GET noemail_noscope 1 GET /api/gdpr/ERASURES/.. | r1: [500, "INTERNAL_ERROR", [], null] | r2: [400, "NON_CANONICAL_PATH", [], null]
+   test W14 ERASURES/.. GET noscope 2 GET /api/gdpr/ERASURES/.. | r1: [200, null, ["GET /api/gdpr/ERASURES/.."], null] | r2: [400, "NON_CANONICAL_PATH", [], null]
+   test W14 ERASURES/.. GET scope 2 GET /api/gdpr/ERASURES/.. | r1: [200, null, ["GET /api/gdpr/ERASURES/.."], null] | r2: [400, "NON_CANONICAL_PATH", [], null]
+   test W14 ERASURES/.. GET user 2 GET /api/gdpr/ERASURES/.. | r1: [200, null, ["GET /api/gdpr/ERASURES/.."], null] | r2: [400, "NON_CANONICAL_PATH", [], null]
+   test W14 ERASURES/.. GET noemail_noscope 2 GET /api/gdpr/ERASURES/.. | r1: [500, "INTERNAL_ERROR", [], null] | r2: [400, "NON_CANONICAL_PATH", [], null]
+   test W15 //erasures/.. GET noscope 1 GET /api/gdpr//erasures/.. | r1: [200, null, ["GET /api/gdpr/erasures/.."], null] | r2: [400, "NON_CANONICAL_PATH", [], null]
+   test W15 //erasures/.. GET scope 1 GET /api/gdpr//erasures/.. | r1: [200, null, ["GET /api/gdpr/erasures/.."], null] | r2: [400, "NON_CANONICAL_PATH", [], null]
+   test W15 //erasures/.. GET user 1 GET /api/gdpr//erasures/.. | r1: [200, null, ["GET /api/gdpr/erasures/.."], null] | r2: [400, "NON_CANONICAL_PATH", [], null]
+   test W15 //erasures/.. GET noemail_noscope 1 GET /api/gdpr//erasures/.. | r1: [500, "INTERNAL_ERROR", [], null] | r2: [400, "NON_CANONICAL_PATH", [], null]
+   test W15 //erasures/.. GET noscope 2 GET /api/gdpr//erasures/.. | r1: [200, null, ["GET /api/gdpr/erasures/.."], null] | r2: [400, "NON_CANONICAL_PATH", [], null]
+   test W15 //erasures/.. GET scope 2 GET /api/gdpr//erasures/.. | r1: [200, null, ["GET /api/gdpr/erasures/.."], null] | r2: [400, "NON_CANONICAL_PATH", [], null]
+   test W15 //erasures/.. GET user 2 GET /api/gdpr//erasures/.. | r1: [200, null, ["GET /api/gdpr/erasures/.."], null] | r2: [400, "NON_CANONICAL_PATH", [], null]
+   test W15 //erasures/.. GET noemail_noscope 2 GET /api/gdpr//erasures/.. | r1: [500, "INTERNAL_ERROR", [], null] | r2: [400, "NON_CANONICAL_PATH", [], null]
+   test W16 erasures//.. GET noscope 1 GET /api/gdpr/erasures//.. | r1: [200, null, ["GET /api/gdpr/erasures/.."], null] | r2: [400, "NON_CANONICAL_PATH", [], null]
+   test W16 erasures//.. GET scope 1 GET /api/gdpr/erasures//.. | r1: [200, null, ["GET /api/gdpr/erasures/.."], null] | r2: [400, "NON_CANONICAL_PATH", [], null]
+   test W16 erasures//.. GET user 1 GET /api/gdpr/erasures//.. | r1: [200, null, ["GET /api/gdpr/erasures/.."], null] | r2: [400, "NON_CANONICAL_PATH", [], null]
+   test W16 erasures//.. GET noemail_noscope 1 GET /api/gdpr/erasures//.. | r1: [500, "INTERNAL_ERROR", [], null] | r2: [400, "NON_CANONICAL_PATH", [], null]
+   test W16 erasures//.. GET noscope 2 GET /api/gdpr/erasures//.. | r1: [200, null, ["GET /api/gdpr/erasures/.."], null] | r2: [400, "NON_CANONICAL_PATH", [], null]
+   test W16 erasures//.. GET scope 2 GET /api/gdpr/erasures//.. | r1: [200, null, ["GET /api/gdpr/erasures/.."], null] | r2: [400, "NON_CANONICAL_PATH", [], null]
+   test W16 erasures//.. GET user 2 GET /api/gdpr/erasures//.. | r1: [200, null, ["GET /api/gdpr/erasures/.."], null] | r2: [400, "NON_CANONICAL_PATH", [], null]
+   test W16 erasures//.. GET noemail_noscope 2 GET /api/gdpr/erasures//.. | r1: [500, "INTERNAL_ERROR", [], null] | r2: [400, "NON_CANONICAL_PATH", [], null]
+   test W17 erasures/..?x=1 GET noscope 1 GET /api/gdpr/erasures/..?x=1 | r1: [200, null, ["GET /api/gdpr/erasures/..?x=1"], null] | r2: [400, "NON_CANONICAL_PATH", [], null]
+   test W17 erasures/..?x=1 GET scope 1 GET /api/gdpr/erasures/..?x=1 | r1: [200, null, ["GET /api/gdpr/erasures/..?x=1"], null] | r2: [400, "NON_CANONICAL_PATH", [], null]
+   test W17 erasures/..?x=1 GET user 1 GET /api/gdpr/erasures/..?x=1 | r1: [200, null, ["GET /api/gdpr/erasures/..?x=1"], null] | r2: [400, "NON_CANONICAL_PATH", [], null]
+   test W17 erasures/..?x=1 GET noemail_noscope 1 GET /api/gdpr/erasures/..?x=1 | r1: [500, "INTERNAL_ERROR", [], null] | r2: [400, "NON_CANONICAL_PATH", [], null]
+   test W17 erasures/..?x=1 GET noscope 2 GET /api/gdpr/erasures/..?x=1 | r1: [200, null, ["GET /api/gdpr/erasures/..?x=1"], null] | r2: [400, "NON_CANONICAL_PATH", [], null]
+   test W17 erasures/..?x=1 GET scope 2 GET /api/gdpr/erasures/..?x=1 | r1: [200, null, ["GET /api/gdpr/erasures/..?x=1"], null] | r2: [400, "NON_CANONICAL_PATH", [], null]
+   test W17 erasures/..?x=1 GET user 2 GET /api/gdpr/erasures/..?x=1 | r1: [200, null, ["GET /api/gdpr/erasures/..?x=1"], null] | r2: [400, "NON_CANONICAL_PATH", [], null]
+   test W17 erasures/..?x=1 GET noemail_noscope 2 GET /api/gdpr/erasures/..?x=1 | r1: [500, "INTERNAL_ERROR", [], null] | r2: [400, "NON_CANONICAL_PATH", [], null]
+   test W07 abs erasures/.. GET noscope 1 GET http://127.0.0.1/api/gdpr/erasures/.. | r1: [200, null, ["GET /api/gdpr/erasures/.."], null] | r2: [400, "NON_CANONICAL_PATH", [], null]
+   test W07 abs erasures/.. GET scope 1 GET http://127.0.0.1/api/gdpr/erasures/.. | r1: [200, null, ["GET /api/gdpr/erasures/.."], null] | r2: [400, "NON_CANONICAL_PATH", [], null]
+   test W07 abs erasures/.. GET user 1 GET http://127.0.0.1/api/gdpr/erasures/.. | r1: [200, null, ["GET /api/gdpr/erasures/.."], null] | r2: [400, "NON_CANONICAL_PATH", [], null]
+   test W07 abs erasures/.. GET noemail_noscope 1 GET http://127.0.0.1/api/gdpr/erasures/.. | r1: [500, "INTERNAL_ERROR", [], null] | r2: [400, "NON_CANONICAL_PATH", [], null]
+   test W07 abs erasures/.. GET noscope 2 GET http://127.0.0.1/api/gdpr/erasures/.. | r1: [200, null, ["GET /api/gdpr/erasures/.."], null] | r2: [400, "NON_CANONICAL_PATH", [], null]
+   test W07 abs erasures/.. GET scope 2 GET http://127.0.0.1/api/gdpr/erasures/.. | r1: [200, null, ["GET /api/gdpr/erasures/.."], null] | r2: [400, "NON_CANONICAL_PATH", [], null]
+   test W07 abs erasures/.. GET user 2 GET http://127.0.0.1/api/gdpr/erasures/.. | r1: [200, null, ["GET /api/gdpr/erasures/.."], null] | r2: [400, "NON_CANONICAL_PATH", [], null]
+   test W07 abs erasures/.. GET noemail_noscope 2 GET http://127.0.0.1/api/gdpr/erasures/.. | r1: [500, "INTERNAL_ERROR", [], null] | r2: [400, "NON_CANONICAL_PATH", [], null]
+   test V1 W01 noscope 1 GET /api/v1/gdpr/erasures/.. | r1: [200, null, ["GET /api/v1/gdpr/erasures/.."], null] | r2: [400, "NON_CANONICAL_PATH", [], null]
+   test V1 W01 scope 1 GET /api/v1/gdpr/erasures/.. | r1: [200, null, ["GET /api/v1/gdpr/erasures/.."], null] | r2: [400, "NON_CANONICAL_PATH", [], null]
+   grace W01 erasures/.. GET noscope GET /api/gdpr/erasures/.. | r1: [200, null, ["GET /api/gdpr/erasures/.."], null] | r2: [400, "NON_CANONICAL_PATH", [], null]
+   grace W02 erasures/%2e%2e GET noscope GET /api/gdpr/erasures/%2e%2e | r1: [200, null, ["GET /api/gdpr/erasures/%2e%2e"], null] | r2: [400, "NON_CANONICAL_PATH", [], null]
+   grace W03 erasures/..;x GET noscope GET /api/gdpr/erasures/..;x | r1: [200, null, ["GET /api/gdpr/erasures/..;x"], null] | r2: [400, "NON_CANONICAL_PATH", [], null]
+   grace W04 erasures/%2e%2e%2fabc GET noscope GET /api/gdpr/erasures/%2e%2e%2fabc | r1: [200, null, ["GET /api/gdpr/erasures/%2e%2e%2fabc"], null] | r2: [400, "NON_CANONICAL_PATH", [], null]
+   grace W07 abs erasures/.. GET noscope GET http://127.0.0.1/api/gdpr/erasures/.. | r1: [200, null, ["GET /api/gdpr/erasures/.."], null] | r2: [400, "NON_CANONICAL_PATH", [], null]
+   prod D34 erasures/. GET noscope 1 GET /api/v1/gdpr/erasures/. | r1: [403, "INSUFFICIENT_SCOPE", [], null] | r2: [400, "NON_CANONICAL_PATH", [], null]
+   prod D34 erasures/. GET scope 1 GET /api/v1/gdpr/erasures/. | r1: [200, null, ["GET /api/v1/gdpr/erasures/."], null] | r2: [400, "NON_CANONICAL_PATH", [], null]
+   prod D35 erasures/abc/.. GET noscope 1 GET /api/v1/gdpr/erasures/abc/.. | r1: [403, "INSUFFICIENT_SCOPE", [], null] | r2: [400, "NON_CANONICAL_PATH", [], null]
+   prod D35 erasures/abc/.. GET scope 1 GET /api/v1/gdpr/erasures/abc/.. | r1: [200, null, ["GET /api/v1/gdpr/erasures/abc/.."], null] | r2: [400, "NON_CANONICAL_PATH", [], null]
+   prod W01 erasures/.. GET noscope 1 GET /api/v1/gdpr/erasures/.. | r1: [200, null, ["GET /api/v1/gdpr/erasures/.."], null] | r2: [400, "NON_CANONICAL_PATH", [], null]
+   prod W01 erasures/.. GET scope 1 GET /api/v1/gdpr/erasures/.. | r1: [200, null, ["GET /api/v1/gdpr/erasures/.."], null] | r2: [400, "NON_CANONICAL_PATH", [], null]
+   prod W01 erasures/.. GET user 1 GET /api/v1/gdpr/erasures/.. | r1: [200, null, ["GET /api/v1/gdpr/erasures/.."], null] | r2: [400, "NON_CANONICAL_PATH", [], null]
+   prod W01 erasures/.. GET noemail_noscope 1 GET /api/v1/gdpr/erasures/.. | r1: [500, "INTERNAL_ERROR", [], null] | r2: [400, "NON_CANONICAL_PATH", [], null]
+   prod W01 erasures/.. GET noscope 2 GET /api/v1/gdpr/erasures/.. | r1: [200, null, ["GET /api/v1/gdpr/erasures/.."], null] | r2: [400, "NON_CANONICAL_PATH", [], null]
+   prod W01 erasures/.. GET scope 2 GET /api/v1/gdpr/erasures/.. | r1: [200, null, ["GET /api/v1/gdpr/erasures/.."], null] | r2: [400, "NON_CANONICAL_PATH", [], null]
+   prod W01 erasures/.. GET user 2 GET /api/v1/gdpr/erasures/.. | r1: [200, null, ["GET /api/v1/gdpr/erasures/.."], null] | r2: [400, "NON_CANONICAL_PATH", [], null]
+   prod W01 erasures/.. GET noemail_noscope 2 GET /api/v1/gdpr/erasures/.. | r1: [500, "INTERNAL_ERROR", [], null] | r2: [400, "NON_CANONICAL_PATH", [], null]
+   prod W02 erasures/%2e%2e GET noscope 1 GET /api/v1/gdpr/erasures/%2e%2e | r1: [200, null, ["GET /api/v1/gdpr/erasures/%2e%2e"], null] | r2: [400, "NON_CANONICAL_PATH", [], null]
+   prod W02 erasures/%2e%2e GET scope 1 GET /api/v1/gdpr/erasures/%2e%2e | r1: [200, null, ["GET /api/v1/gdpr/erasures/%2e%2e"], null] | r2: [400, "NON_CANONICAL_PATH", [], null]
+   prod W02 erasures/%2e%2e GET user 1 GET /api/v1/gdpr/erasures/%2e%2e | r1: [200, null, ["GET /api/v1/gdpr/erasures/%2e%2e"], null] | r2: [400, "NON_CANONICAL_PATH", [], null]
+   prod W02 erasures/%2e%2e GET noemail_noscope 1 GET /api/v1/gdpr/erasures/%2e%2e | r1: [500, "INTERNAL_ERROR", [], null] | r2: [400, "NON_CANONICAL_PATH", [], null]
+   prod W02 erasures/%2e%2e GET noscope 2 GET /api/v1/gdpr/erasures/%2e%2e | r1: [200, null, ["GET /api/v1/gdpr/erasures/%2e%2e"], null] | r2: [400, "NON_CANONICAL_PATH", [], null]
+   prod W02 erasures/%2e%2e GET scope 2 GET /api/v1/gdpr/erasures/%2e%2e | r1: [200, null, ["GET /api/v1/gdpr/erasures/%2e%2e"], null] | r2: [400, "NON_CANONICAL_PATH", [], null]
+   prod W02 erasures/%2e%2e GET user 2 GET /api/v1/gdpr/erasures/%2e%2e | r1: [200, null, ["GET /api/v1/gdpr/erasures/%2e%2e"], null] | r2: [400, "NON_CANONICAL_PATH", [], null]
+   prod W02 erasures/%2e%2e GET noemail_noscope 2 GET /api/v1/gdpr/erasures/%2e%2e | r1: [500, "INTERNAL_ERROR", [], null] | r2: [400, "NON_CANONICAL_PATH", [], null]
+   prod W03 erasures/..;x GET noscope 1 GET /api/v1/gdpr/erasures/..;x | r1: [200, null, ["GET /api/v1/gdpr/erasures/..;x"], null] | r2: [400, "NON_CANONICAL_PATH", [], null]
+   prod W03 erasures/..;x GET scope 1 GET /api/v1/gdpr/erasures/..;x | r1: [200, null, ["GET /api/v1/gdpr/erasures/..;x"], null] | r2: [400, "NON_CANONICAL_PATH", [], null]
+   prod W03 erasures/..;x GET user 1 GET /api/v1/gdpr/erasures/..;x | r1: [200, null, ["GET /api/v1/gdpr/erasures/..;x"], null] | r2: [400, "NON_CANONICAL_PATH", [], null]
+   prod W03 erasures/..;x GET noemail_noscope 1 GET /api/v1/gdpr/erasures/..;x | r1: [500, "INTERNAL_ERROR", [], null] | r2: [400, "NON_CANONICAL_PATH", [], null]
+   prod W03 erasures/..;x GET noscope 2 GET /api/v1/gdpr/erasures/..;x | r1: [200, null, ["GET /api/v1/gdpr/erasures/..;x"], null] | r2: [400, "NON_CANONICAL_PATH", [], null]
+   prod W03 erasures/..;x GET scope 2 GET /api/v1/gdpr/erasures/..;x | r1: [200, null, ["GET /api/v1/gdpr/erasures/..;x"], null] | r2: [400, "NON_CANONICAL_PATH", [], null]
+   prod W03 erasures/..;x GET user 2 GET /api/v1/gdpr/erasures/..;x | r1: [200, null, ["GET /api/v1/gdpr/erasures/..;x"], null] | r2: [400, "NON_CANONICAL_PATH", [], null]
+   prod W03 erasures/..;x GET noemail_noscope 2 GET /api/v1/gdpr/erasures/..;x | r1: [500, "INTERNAL_ERROR", [], null] | r2: [400, "NON_CANONICAL_PATH", [], null]
+   prod W04 erasures/%2e%2e%2fabc GET noscope 1 GET /api/v1/gdpr/erasures/%2e%2e%2fabc | r1: [200, null, ["GET /api/v1/gdpr/erasures/%2e%2e%2fabc"], null] | r2: [400, "NON_CANONICAL_PATH", [], null]
+   prod W04 erasures/%2e%2e%2fabc GET scope 1 GET /api/v1/gdpr/erasures/%2e%2e%2fabc | r1: [200, null, ["GET /api/v1/gdpr/erasures/%2e%2e%2fabc"], null] | r2: [400, "NON_CANONICAL_PATH", [], null]
+   prod W04 erasures/%2e%2e%2fabc GET user 1 GET /api/v1/gdpr/erasures/%2e%2e%2fabc | r1: [200, null, ["GET /api/v1/gdpr/erasures/%2e%2e%2fabc"], null] | r2: [400, "NON_CANONICAL_PATH", [], null]
+   prod W04 erasures/%2e%2e%2fabc GET noemail_noscope 1 GET /api/v1/gdpr/erasures/%2e%2e%2fabc | r1: [500, "INTERNAL_ERROR", [], null] | r2: [400, "NON_CANONICAL_PATH", [], null]
+   prod W04 erasures/%2e%2e%2fabc GET noscope 2 GET /api/v1/gdpr/erasures/%2e%2e%2fabc | r1: [200, null, ["GET /api/v1/gdpr/erasures/%2e%2e%2fabc"], null] | r2: [400, "NON_CANONICAL_PATH", [], null]
+   prod W04 erasures/%2e%2e%2fabc GET scope 2 GET /api/v1/gdpr/erasures/%2e%2e%2fabc | r1: [200, null, ["GET /api/v1/gdpr/erasures/%2e%2e%2fabc"], null] | r2: [400, "NON_CANONICAL_PATH", [], null]
+   prod W04 erasures/%2e%2e%2fabc GET user 2 GET /api/v1/gdpr/erasures/%2e%2e%2fabc | r1: [200, null, ["GET /api/v1/gdpr/erasures/%2e%2e%2fabc"], null] | r2: [400, "NON_CANONICAL_PATH", [], null]
+   prod W04 erasures/%2e%2e%2fabc GET noemail_noscope 2 GET /api/v1/gdpr/erasures/%2e%2e%2fabc | r1: [500, "INTERNAL_ERROR", [], null] | r2: [400, "NON_CANONICAL_PATH", [], null]
+   prod W05 erasures/.%2e GET noscope 1 GET /api/v1/gdpr/erasures/.%2e | r1: [200, null, ["GET /api/v1/gdpr/erasures/.%2e"], null] | r2: [400, "NON_CANONICAL_PATH", [], null]
+   prod W05 erasures/.%2e GET scope 1 GET /api/v1/gdpr/erasures/.%2e | r1: [200, null, ["GET /api/v1/gdpr/erasures/.%2e"], null] | r2: [400, "NON_CANONICAL_PATH", [], null]
+   prod W05 erasures/.%2e GET user 1 GET /api/v1/gdpr/erasures/.%2e | r1: [200, null, ["GET /api/v1/gdpr/erasures/.%2e"], null] | r2: [400, "NON_CANONICAL_PATH", [], null]
+   prod W05 erasures/.%2e GET noemail_noscope 1 GET /api/v1/gdpr/erasures/.%2e | r1: [500, "INTERNAL_ERROR", [], null] | r2: [400, "NON_CANONICAL_PATH", [], null]
+   prod W05 erasures/.%2e GET noscope 2 GET /api/v1/gdpr/erasures/.%2e | r1: [200, null, ["GET /api/v1/gdpr/erasures/.%2e"], null] | r2: [400, "NON_CANONICAL_PATH", [], null]
+   prod W05 erasures/.%2e GET scope 2 GET /api/v1/gdpr/erasures/.%2e | r1: [200, null, ["GET /api/v1/gdpr/erasures/.%2e"], null] | r2: [400, "NON_CANONICAL_PATH", [], null]
+   prod W05 erasures/.%2e GET user 2 GET /api/v1/gdpr/erasures/.%2e | r1: [200, null, ["GET /api/v1/gdpr/erasures/.%2e"], null] | r2: [400, "NON_CANONICAL_PATH", [], null]
+   prod W05 erasures/.%2e GET noemail_noscope 2 GET /api/v1/gdpr/erasures/.%2e | r1: [500, "INTERNAL_ERROR", [], null] | r2: [400, "NON_CANONICAL_PATH", [], null]
+   prod W08 erasures/%2E%2E GET noscope 1 GET /api/v1/gdpr/erasures/%2E%2E | r1: [200, null, ["GET /api/v1/gdpr/erasures/%2E%2E"], null] | r2: [400, "NON_CANONICAL_PATH", [], null]
+   prod W08 erasures/%2E%2E GET scope 1 GET /api/v1/gdpr/erasures/%2E%2E | r1: [200, null, ["GET /api/v1/gdpr/erasures/%2E%2E"], null] | r2: [400, "NON_CANONICAL_PATH", [], null]
+   prod W08 erasures/%2E%2E GET user 1 GET /api/v1/gdpr/erasures/%2E%2E | r1: [200, null, ["GET /api/v1/gdpr/erasures/%2E%2E"], null] | r2: [400, "NON_CANONICAL_PATH", [], null]
+   prod W08 erasures/%2E%2E GET noemail_noscope 1 GET /api/v1/gdpr/erasures/%2E%2E | r1: [500, "INTERNAL_ERROR", [], null] | r2: [400, "NON_CANONICAL_PATH", [], null]
+   prod W08 erasures/%2E%2E GET noscope 2 GET /api/v1/gdpr/erasures/%2E%2E | r1: [200, null, ["GET /api/v1/gdpr/erasures/%2E%2E"], null] | r2: [400, "NON_CANONICAL_PATH", [], null]
+   prod W08 erasures/%2E%2E GET scope 2 GET /api/v1/gdpr/erasures/%2E%2E | r1: [200, null, ["GET /api/v1/gdpr/erasures/%2E%2E"], null] | r2: [400, "NON_CANONICAL_PATH", [], null]
+   prod W08 erasures/%2E%2E GET user 2 GET /api/v1/gdpr/erasures/%2E%2E | r1: [200, null, ["GET /api/v1/gdpr/erasures/%2E%2E"], null] | r2: [400, "NON_CANONICAL_PATH", [], null]
+   prod W08 erasures/%2E%2E GET noemail_noscope 2 GET /api/v1/gdpr/erasures/%2E%2E | r1: [500, "INTERNAL_ERROR", [], null] | r2: [400, "NON_CANONICAL_PATH", [], null]
+   prod W09 erasures/%2e. GET noscope 1 GET /api/v1/gdpr/erasures/%2e. | r1: [200, null, ["GET /api/v1/gdpr/erasures/%2e."], null] | r2: [400, "NON_CANONICAL_PATH", [], null]
+   prod W09 erasures/%2e. GET scope 1 GET /api/v1/gdpr/erasures/%2e. | r1: [200, null, ["GET /api/v1/gdpr/erasures/%2e."], null] | r2: [400, "NON_CANONICAL_PATH", [], null]
+   prod W09 erasures/%2e. GET user 1 GET /api/v1/gdpr/erasures/%2e. | r1: [200, null, ["GET /api/v1/gdpr/erasures/%2e."], null] | r2: [400, "NON_CANONICAL_PATH", [], null]
+   prod W09 erasures/%2e. GET noemail_noscope 1 GET /api/v1/gdpr/erasures/%2e. | r1: [500, "INTERNAL_ERROR", [], null] | r2: [400, "NON_CANONICAL_PATH", [], null]
+   prod W09 erasures/%2e. GET noscope 2 GET /api/v1/gdpr/erasures/%2e. | r1: [200, null, ["GET /api/v1/gdpr/erasures/%2e."], null] | r2: [400, "NON_CANONICAL_PATH", [], null]
+   prod W09 erasures/%2e. GET scope 2 GET /api/v1/gdpr/erasures/%2e. | r1: [200, null, ["GET /api/v1/gdpr/erasures/%2e."], null] | r2: [400, "NON_CANONICAL_PATH", [], null]
+   prod W09 erasures/%2e. GET user 2 GET /api/v1/gdpr/erasures/%2e. | r1: [200, null, ["GET /api/v1/gdpr/erasures/%2e."], null] | r2: [400, "NON_CANONICAL_PATH", [], null]
+   prod W09 erasures/%2e. GET noemail_noscope 2 GET /api/v1/gdpr/erasures/%2e. | r1: [500, "INTERNAL_ERROR", [], null] | r2: [400, "NON_CANONICAL_PATH", [], null]
+   prod W11 erasures/..%2f GET noscope 1 GET /api/v1/gdpr/erasures/..%2f | r1: [200, null, ["GET /api/v1/gdpr/erasures/..%2f"], null] | r2: [400, "NON_CANONICAL_PATH", [], null]
+   prod W11 erasures/..%2f GET scope 1 GET /api/v1/gdpr/erasures/..%2f | r1: [200, null, ["GET /api/v1/gdpr/erasures/..%2f"], null] | r2: [400, "NON_CANONICAL_PATH", [], null]
+   prod W11 erasures/..%2f GET user 1 GET /api/v1/gdpr/erasures/..%2f | r1: [200, null, ["GET /api/v1/gdpr/erasures/..%2f"], null] | r2: [400, "NON_CANONICAL_PATH", [], null]
+   prod W11 erasures/..%2f GET noemail_noscope 1 GET /api/v1/gdpr/erasures/..%2f | r1: [500, "INTERNAL_ERROR", [], null] | r2: [400, "NON_CANONICAL_PATH", [], null]
+   prod W11 erasures/..%2f GET noscope 2 GET /api/v1/gdpr/erasures/..%2f | r1: [200, null, ["GET /api/v1/gdpr/erasures/..%2f"], null] | r2: [400, "NON_CANONICAL_PATH", [], null]
+   prod W11 erasures/..%2f GET scope 2 GET /api/v1/gdpr/erasures/..%2f | r1: [200, null, ["GET /api/v1/gdpr/erasures/..%2f"], null] | r2: [400, "NON_CANONICAL_PATH", [], null]
+   prod W11 erasures/..%2f GET user 2 GET /api/v1/gdpr/erasures/..%2f | r1: [200, null, ["GET /api/v1/gdpr/erasures/..%2f"], null] | r2: [400, "NON_CANONICAL_PATH", [], null]
+   prod W11 erasures/..%2f GET noemail_noscope 2 GET /api/v1/gdpr/erasures/..%2f | r1: [500, "INTERNAL_ERROR", [], null] | r2: [400, "NON_CANONICAL_PATH", [], null]
+   prod W12 erasures/%2e%2e%2fconsent GET noscope 1 GET /api/v1/gdpr/erasures/%2e%2e%2fconsent | r1: [200, null, ["GET /api/v1/gdpr/erasures/%2e%2e%2fconsent"], null] | r2: [400, "NON_CANONICAL_PATH", [], null]
+   prod W12 erasures/%2e%2e%2fconsent GET scope 1 GET /api/v1/gdpr/erasures/%2e%2e%2fconsent | r1: [200, null, ["GET /api/v1/gdpr/erasures/%2e%2e%2fconsent"], null] | r2: [400, "NON_CANONICAL_PATH", [], null]
+   prod W12 erasures/%2e%2e%2fconsent GET user 1 GET /api/v1/gdpr/erasures/%2e%2e%2fconsent | r1: [200, null, ["GET /api/v1/gdpr/erasures/%2e%2e%2fconsent"], null] | r2: [400, "NON_CANONICAL_PATH", [], null]
+   prod W12 erasures/%2e%2e%2fconsent GET noemail_noscope 1 GET /api/v1/gdpr/erasures/%2e%2e%2fconsent | r1: [500, "INTERNAL_ERROR", [], null] | r2: [400, "NON_CANONICAL_PATH", [], null]
+   prod W12 erasures/%2e%2e%2fconsent GET noscope 2 GET /api/v1/gdpr/erasures/%2e%2e%2fconsent | r1: [200, null, ["GET /api/v1/gdpr/erasures/%2e%2e%2fconsent"], null] | r2: [400, "NON_CANONICAL_PATH", [], null]
+   prod W12 erasures/%2e%2e%2fconsent GET scope 2 GET /api/v1/gdpr/erasures/%2e%2e%2fconsent | r1: [200, null, ["GET /api/v1/gdpr/erasures/%2e%2e%2fconsent"], null] | r2: [400, "NON_CANONICAL_PATH", [], null]
+   prod W12 erasures/%2e%2e%2fconsent GET user 2 GET /api/v1/gdpr/erasures/%2e%2e%2fconsent | r1: [200, null, ["GET /api/v1/gdpr/erasures/%2e%2e%2fconsent"], null] | r2: [400, "NON_CANONICAL_PATH", [], null]
+   prod W12 erasures/%2e%2e%2fconsent GET noemail_noscope 2 GET /api/v1/gdpr/erasures/%2e%2e%2fconsent | r1: [500, "INTERNAL_ERROR", [], null] | r2: [400, "NON_CANONICAL_PATH", [], null]
+   prod W13 erasures/.%2e;x GET noscope 1 GET /api/v1/gdpr/erasures/.%2e;x | r1: [200, null, ["GET /api/v1/gdpr/erasures/.%2e;x"], null] | r2: [400, "NON_CANONICAL_PATH", [], null]
+   prod W13 erasures/.%2e;x GET scope 1 GET /api/v1/gdpr/erasures/.%2e;x | r1: [200, null, ["GET /api/v1/gdpr/erasures/.%2e;x"], null] | r2: [400, "NON_CANONICAL_PATH", [], null]
+   prod W13 erasures/.%2e;x GET user 1 GET /api/v1/gdpr/erasures/.%2e;x | r1: [200, null, ["GET /api/v1/gdpr/erasures/.%2e;x"], null] | r2: [400, "NON_CANONICAL_PATH", [], null]
+   prod W13 erasures/.%2e;x GET noemail_noscope 1 GET /api/v1/gdpr/erasures/.%2e;x | r1: [500, "INTERNAL_ERROR", [], null] | r2: [400, "NON_CANONICAL_PATH", [], null]
+   prod W13 erasures/.%2e;x GET noscope 2 GET /api/v1/gdpr/erasures/.%2e;x | r1: [200, null, ["GET /api/v1/gdpr/erasures/.%2e;x"], null] | r2: [400, "NON_CANONICAL_PATH", [], null]
+   prod W13 erasures/.%2e;x GET scope 2 GET /api/v1/gdpr/erasures/.%2e;x | r1: [200, null, ["GET /api/v1/gdpr/erasures/.%2e;x"], null] | r2: [400, "NON_CANONICAL_PATH", [], null]
+   prod W13 erasures/.%2e;x GET user 2 GET /api/v1/gdpr/erasures/.%2e;x | r1: [200, null, ["GET /api/v1/gdpr/erasures/.%2e;x"], null] | r2: [400, "NON_CANONICAL_PATH", [], null]
+   prod W13 erasures/.%2e;x GET noemail_noscope 2 GET /api/v1/gdpr/erasures/.%2e;x | r1: [500, "INTERNAL_ERROR", [], null] | r2: [400, "NON_CANONICAL_PATH", [], null]
+   prod W14 ERASURES/.. GET noscope 1 GET /api/v1/gdpr/ERASURES/.. | r1: [200, null, ["GET /api/v1/gdpr/ERASURES/.."], null] | r2: [400, "NON_CANONICAL_PATH", [], null]
+   prod W14 ERASURES/.. GET scope 1 GET /api/v1/gdpr/ERASURES/.. | r1: [200, null, ["GET /api/v1/gdpr/ERASURES/.."], null] | r2: [400, "NON_CANONICAL_PATH", [], null]
+   prod W14 ERASURES/.. GET user 1 GET /api/v1/gdpr/ERASURES/.. | r1: [200, null, ["GET /api/v1/gdpr/ERASURES/.."], null] | r2: [400, "NON_CANONICAL_PATH", [], null]
+   prod W14 ERASURES/.. GET noemail_noscope 1 GET /api/v1/gdpr/ERASURES/.. | r1: [500, "INTERNAL_ERROR", [], null] | r2: [400, "NON_CANONICAL_PATH", [], null]
+   prod W14 ERASURES/.. GET noscope 2 GET /api/v1/gdpr/ERASURES/.. | r1: [200, null, ["GET /api/v1/gdpr/ERASURES/.."], null] | r2: [400, "NON_CANONICAL_PATH", [], null]
+   prod W14 ERASURES/.. GET scope 2 GET /api/v1/gdpr/ERASURES/.. | r1: [200, null, ["GET /api/v1/gdpr/ERASURES/.."], null] | r2: [400, "NON_CANONICAL_PATH", [], null]
+   prod W14 ERASURES/.. GET user 2 GET /api/v1/gdpr/ERASURES/.. | r1: [200, null, ["GET /api/v1/gdpr/ERASURES/.."], null] | r2: [400, "NON_CANONICAL_PATH", [], null]
+   prod W14 ERASURES/.. GET noemail_noscope 2 GET /api/v1/gdpr/ERASURES/.. | r1: [500, "INTERNAL_ERROR", [], null] | r2: [400, "NON_CANONICAL_PATH", [], null]
+   prod W15 //erasures/.. GET noscope 1 GET /api/v1/gdpr//erasures/.. | r1: [200, null, ["GET /api/v1/gdpr/erasures/.."], null] | r2: [400, "NON_CANONICAL_PATH", [], null]
+   prod W15 //erasures/.. GET scope 1 GET /api/v1/gdpr//erasures/.. | r1: [200, null, ["GET /api/v1/gdpr/erasures/.."], null] | r2: [400, "NON_CANONICAL_PATH", [], null]
+   prod W15 //erasures/.. GET user 1 GET /api/v1/gdpr//erasures/.. | r1: [200, null, ["GET /api/v1/gdpr/erasures/.."], null] | r2: [400, "NON_CANONICAL_PATH", [], null]
+   prod W15 //erasures/.. GET noemail_noscope 1 GET /api/v1/gdpr//erasures/.. | r1: [500, "INTERNAL_ERROR", [], null] | r2: [400, "NON_CANONICAL_PATH", [], null]
+   prod W15 //erasures/.. GET noscope 2 GET /api/v1/gdpr//erasures/.. | r1: [200, null, ["GET /api/v1/gdpr/erasures/.."], null] | r2: [400, "NON_CANONICAL_PATH", [], null]
+   prod W15 //erasures/.. GET scope 2 GET /api/v1/gdpr//erasures/.. | r1: [200, null, ["GET /api/v1/gdpr/erasures/.."], null] | r2: [400, "NON_CANONICAL_PATH", [], null]
+   prod W15 //erasures/.. GET user 2 GET /api/v1/gdpr//erasures/.. | r1: [200, null, ["GET /api/v1/gdpr/erasures/.."], null] | r2: [400, "NON_CANONICAL_PATH", [], null]
+   prod W15 //erasures/.. GET noemail_noscope 2 GET /api/v1/gdpr//erasures/.. | r1: [500, "INTERNAL_ERROR", [], null] | r2: [400, "NON_CANONICAL_PATH", [], null]
+   prod W16 erasures//.. GET noscope 1 GET /api/v1/gdpr/erasures//.. | r1: [200, null, ["GET /api/v1/gdpr/erasures/.."], null] | r2: [400, "NON_CANONICAL_PATH", [], null]
+   prod W16 erasures//.. GET scope 1 GET /api/v1/gdpr/erasures//.. | r1: [200, null, ["GET /api/v1/gdpr/erasures/.."], null] | r2: [400, "NON_CANONICAL_PATH", [], null]
+   prod W16 erasures//.. GET user 1 GET /api/v1/gdpr/erasures//.. | r1: [200, null, ["GET /api/v1/gdpr/erasures/.."], null] | r2: [400, "NON_CANONICAL_PATH", [], null]
+   prod W16 erasures//.. GET noemail_noscope 1 GET /api/v1/gdpr/erasures//.. | r1: [500, "INTERNAL_ERROR", [], null] | r2: [400, "NON_CANONICAL_PATH", [], null]
+   prod W16 erasures//.. GET noscope 2 GET /api/v1/gdpr/erasures//.. | r1: [200, null, ["GET /api/v1/gdpr/erasures/.."], null] | r2: [400, "NON_CANONICAL_PATH", [], null]
+   prod W16 erasures//.. GET scope 2 GET /api/v1/gdpr/erasures//.. | r1: [200, null, ["GET /api/v1/gdpr/erasures/.."], null] | r2: [400, "NON_CANONICAL_PATH", [], null]
+   prod W16 erasures//.. GET user 2 GET /api/v1/gdpr/erasures//.. | r1: [200, null, ["GET /api/v1/gdpr/erasures/.."], null] | r2: [400, "NON_CANONICAL_PATH", [], null]
+   prod W16 erasures//.. GET noemail_noscope 2 GET /api/v1/gdpr/erasures//.. | r1: [500, "INTERNAL_ERROR", [], null] | r2: [400, "NON_CANONICAL_PATH", [], null]
+   prod W17 erasures/..?x=1 GET noscope 1 GET /api/v1/gdpr/erasures/..?x=1 | r1: [200, null, ["GET /api/v1/gdpr/erasures/..?x=1"], null] | r2: [400, "NON_CANONICAL_PATH", [], null]
+   prod W17 erasures/..?x=1 GET scope 1 GET /api/v1/gdpr/erasures/..?x=1 | r1: [200, null, ["GET /api/v1/gdpr/erasures/..?x=1"], null] | r2: [400, "NON_CANONICAL_PATH", [], null]
+   prod W17 erasures/..?x=1 GET user 1 GET /api/v1/gdpr/erasures/..?x=1 | r1: [200, null, ["GET /api/v1/gdpr/erasures/..?x=1"], null] | r2: [400, "NON_CANONICAL_PATH", [], null]
+   prod W17 erasures/..?x=1 GET noemail_noscope 1 GET /api/v1/gdpr/erasures/..?x=1 | r1: [500, "INTERNAL_ERROR", [], null] | r2: [400, "NON_CANONICAL_PATH", [], null]
+   prod W17 erasures/..?x=1 GET noscope 2 GET /api/v1/gdpr/erasures/..?x=1 | r1: [200, null, ["GET /api/v1/gdpr/erasures/..?x=1"], null] | r2: [400, "NON_CANONICAL_PATH", [], null]
+   prod W17 erasures/..?x=1 GET scope 2 GET /api/v1/gdpr/erasures/..?x=1 | r1: [200, null, ["GET /api/v1/gdpr/erasures/..?x=1"], null] | r2: [400, "NON_CANONICAL_PATH", [], null]
+   prod W17 erasures/..?x=1 GET user 2 GET /api/v1/gdpr/erasures/..?x=1 | r1: [200, null, ["GET /api/v1/gdpr/erasures/..?x=1"], null] | r2: [400, "NON_CANONICAL_PATH", [], null]
+   prod W17 erasures/..?x=1 GET noemail_noscope 2 GET /api/v1/gdpr/erasures/..?x=1 | r1: [500, "INTERNAL_ERROR", [], null] | r2: [400, "NON_CANONICAL_PATH", [], null]
+   prod W07 abs erasures/.. GET noscope 1 GET http://127.0.0.1/api/v1/gdpr/erasures/.. | r1: [200, null, ["GET /api/v1/gdpr/erasures/.."], null] | r2: [400, "NON_CANONICAL_PATH", [], null]
+   prod W07 abs erasures/.. GET scope 1 GET http://127.0.0.1/api/v1/gdpr/erasures/.. | r1: [200, null, ["GET /api/v1/gdpr/erasures/.."], null] | r2: [400, "NON_CANONICAL_PATH", [], null]
+   prod W07 abs erasures/.. GET user 1 GET http://127.0.0.1/api/v1/gdpr/erasures/.. | r1: [200, null, ["GET /api/v1/gdpr/erasures/.."], null] | r2: [400, "NON_CANONICAL_PATH", [], null]
+   prod W07 abs erasures/.. GET noemail_noscope 1 GET http://127.0.0.1/api/v1/gdpr/erasures/.. | r1: [500, "INTERNAL_ERROR", [], null] | r2: [400, "NON_CANONICAL_PATH", [], null]
+   prod W07 abs erasures/.. GET noscope 2 GET http://127.0.0.1/api/v1/gdpr/erasures/.. | r1: [200, null, ["GET /api/v1/gdpr/erasures/.."], null] | r2: [400, "NON_CANONICAL_PATH", [], null]
+   prod W07 abs erasures/.. GET scope 2 GET http://127.0.0.1/api/v1/gdpr/erasures/.. | r1: [200, null, ["GET /api/v1/gdpr/erasures/.."], null] | r2: [400, "NON_CANONICAL_PATH", [], null]
+   prod W07 abs erasures/.. GET user 2 GET http://127.0.0.1/api/v1/gdpr/erasures/.. | r1: [200, null, ["GET /api/v1/gdpr/erasures/.."], null] | r2: [400, "NON_CANONICAL_PATH", [], null]
+   prod W07 abs erasures/.. GET noemail_noscope 2 GET http://127.0.0.1/api/v1/gdpr/erasures/.. | r1: [500, "INTERNAL_ERROR", [], null] | r2: [400, "NON_CANONICAL_PATH", [], null]
+   limiter L7 W01 erasures/.. GET /api/gdpr/erasures/.. | r1: [200, null, ["GET /api/gdpr/erasures/.."], null] | r2: [400, "NON_CANONICAL_PATH", [], null]
+   urlspy GET /api/gdpr/erasures/.. | r1: [200, null, null, null] | r2: [400, null, null, null]
+   urlspy noscope GET /api/gdpr/erasures/.. | r1: [200, null, ["GET /api/gdpr/erasures/.."], null] | r2: [400, "NON_CANONICAL_PATH", [], null]
+  verdict table subs 90 | r1 != r2: 18
+   verdict '/erasures/.' | r1 ci door cs door | r2 ci undetermined cs undetermined
+   verdict '/erasures/abc/..' | r1 ci door cs door | r2 ci undetermined cs undetermined
+   verdict '/erasures/..' | r1 ci not-door cs not-door | r2 ci undetermined cs undetermined
+   verdict '/erasures/%2e%2e' | r1 ci not-door cs not-door | r2 ci undetermined cs undetermined
+   verdict '/erasures/..;x' | r1 ci not-door cs not-door | r2 ci undetermined cs undetermined
+   verdict '/erasures/%2e%2e%2fabc' | r1 ci not-door cs not-door | r2 ci undetermined cs undetermined
+   verdict '/erasures/.%2e' | r1 ci not-door cs not-door | r2 ci undetermined cs undetermined
+   verdict '/erasures/%2E%2E' | r1 ci not-door cs not-door | r2 ci undetermined cs undetermined
+   verdict '/erasures/%2e.' | r1 ci not-door cs not-door | r2 ci undetermined cs undetermined
+   verdict '/erasures/../' | r1 ci not-door cs not-door | r2 ci undetermined cs undetermined
+   verdict '/erasures/..%2f' | r1 ci not-door cs not-door | r2 ci undetermined cs undetermined
+   verdict '/erasures/%2e%2e%2fconsent' | r1 ci not-door cs not-door | r2 ci undetermined cs undetermined
+   verdict '/erasures/.%2e;x' | r1 ci not-door cs not-door | r2 ci undetermined cs undetermined
+   verdict '/ERASURES/..' | r1 ci not-door cs not-door | r2 ci undetermined cs not-door
+   verdict '//erasures/..' | r1 ci not-door cs not-door | r2 ci undetermined cs undetermined
+   verdict '/erasures//..' | r1 ci not-door cs not-door | r2 ci undetermined cs undetermined
+   verdict '/erasures/..?x=1' | r1 ci not-door cs not-door | r2 ci undetermined cs undetermined
+   verdict 'http://127.0.0.1/erasures/..' | r1 ci not-door cs not-door | r2 ci undetermined cs undetermined
+  originate row diffs r1->r2 90
+   originate test OC W01 .. noscope 1 GET /api/gdpr/erasures/.. | r1: [200, null, ["GET /api/gdpr/erasures/.."], null] | r2: [400, "NON_CANONICAL_PATH", [], null]
+   originate test OC W01 .. scope 1 GET /api/gdpr/erasures/.. | r1: [200, null, ["GET /api/gdpr/erasures/.."], null] | r2: [400, "NON_CANONICAL_PATH", [], null]
+   originate test OC W01 .. user 1 GET /api/gdpr/erasures/.. | r1: [403, "FORBIDDEN", ["GET /api/gdpr/erasures/.."], null] | r2: [400, "NON_CANONICAL_PATH", [], null]
+   originate test OC W01 .. noscope 2 GET /api/gdpr/erasures/.. | r1: [200, null, ["GET /api/gdpr/erasures/.."], null] | r2: [400, "NON_CANONICAL_PATH", [], null]
+   originate test OC W01 .. scope 2 GET /api/gdpr/erasures/.. | r1: [200, null, ["GET /api/gdpr/erasures/.."], null] | r2: [400, "NON_CANONICAL_PATH", [], null]
+   originate test OC W01 .. user 2 GET /api/gdpr/erasures/.. | r1: [403, "FORBIDDEN", ["GET /api/gdpr/erasures/.."], null] | r2: [400, "NON_CANONICAL_PATH", [], null]
+   originate test OC W02 %2e%2e noscope 1 GET /api/gdpr/erasures/%2e%2e | r1: [200, null, ["GET /api/gdpr/erasures/%2e%2e"], null] | r2: [400, "NON_CANONICAL_PATH", [], null]
+   originate test OC W02 %2e%2e scope 1 GET /api/gdpr/erasures/%2e%2e | r1: [200, null, ["GET /api/gdpr/erasures/%2e%2e"], null] | r2: [400, "NON_CANONICAL_PATH", [], null]
+   originate test OC W02 %2e%2e user 1 GET /api/gdpr/erasures/%2e%2e | r1: [403, "FORBIDDEN", ["GET /api/gdpr/erasures/%2e%2e"], null] | r2: [400, "NON_CANONICAL_PATH", [], null]
+   originate test OC W02 %2e%2e noscope 2 GET /api/gdpr/erasures/%2e%2e | r1: [200, null, ["GET /api/gdpr/erasures/%2e%2e"], null] | r2: [400, "NON_CANONICAL_PATH", [], null]
+   originate test OC W02 %2e%2e scope 2 GET /api/gdpr/erasures/%2e%2e | r1: [200, null, ["GET /api/gdpr/erasures/%2e%2e"], null] | r2: [400, "NON_CANONICAL_PATH", [], null]
+   originate test OC W02 %2e%2e user 2 GET /api/gdpr/erasures/%2e%2e | r1: [403, "FORBIDDEN", ["GET /api/gdpr/erasures/%2e%2e"], null] | r2: [400, "NON_CANONICAL_PATH", [], null]
+   originate test OC W03 ..;x noscope 1 GET /api/gdpr/erasures/..;x | r1: [200, null, ["GET /api/gdpr/erasures/..;x"], null] | r2: [400, "NON_CANONICAL_PATH", [], null]
+   originate test OC W03 ..;x scope 1 GET /api/gdpr/erasures/..;x | r1: [200, null, ["GET /api/gdpr/erasures/..;x"], null] | r2: [400, "NON_CANONICAL_PATH", [], null]
+   originate test OC W03 ..;x user 1 GET /api/gdpr/erasures/..;x | r1: [403, "FORBIDDEN", ["GET /api/gdpr/erasures/..;x"], null] | r2: [400, "NON_CANONICAL_PATH", [], null]
+   originate test OC W03 ..;x noscope 2 GET /api/gdpr/erasures/..;x | r1: [200, null, ["GET /api/gdpr/erasures/..;x"], null] | r2: [400, "NON_CANONICAL_PATH", [], null]
+   originate test OC W03 ..;x scope 2 GET /api/gdpr/erasures/..;x | r1: [200, null, ["GET /api/gdpr/erasures/..;x"], null] | r2: [400, "NON_CANONICAL_PATH", [], null]
+   originate test OC W03 ..;x user 2 GET /api/gdpr/erasures/..;x | r1: [403, "FORBIDDEN", ["GET /api/gdpr/erasures/..;x"], null] | r2: [400, "NON_CANONICAL_PATH", [], null]
+   originate test OC W04 %2e%2e%2fabc noscope 1 GET /api/gdpr/erasures/%2e%2e%2fabc | r1: [200, null, ["GET /api/gdpr/erasures/%2e%2e%2fabc"], null] | r2: [400, "NON_CANONICAL_PATH", [], null]
+   originate test OC W04 %2e%2e%2fabc scope 1 GET /api/gdpr/erasures/%2e%2e%2fabc | r1: [200, null, ["GET /api/gdpr/erasures/%2e%2e%2fabc"], null] | r2: [400, "NON_CANONICAL_PATH", [], null]
+   originate test OC W04 %2e%2e%2fabc user 1 GET /api/gdpr/erasures/%2e%2e%2fabc | r1: [403, "FORBIDDEN", ["GET /api/gdpr/erasures/%2e%2e%2fabc"], null] | r2: [400, "NON_CANONICAL_PATH", [], null]
+   originate test OC W04 %2e%2e%2fabc noscope 2 GET /api/gdpr/erasures/%2e%2e%2fabc | r1: [200, null, ["GET /api/gdpr/erasures/%2e%2e%2fabc"], null] | r2: [400, "NON_CANONICAL_PATH", [], null]
+   originate test OC W04 %2e%2e%2fabc scope 2 GET /api/gdpr/erasures/%2e%2e%2fabc | r1: [200, null, ["GET /api/gdpr/erasures/%2e%2e%2fabc"], null] | r2: [400, "NON_CANONICAL_PATH", [], null]
+   originate test OC W04 %2e%2e%2fabc user 2 GET /api/gdpr/erasures/%2e%2e%2fabc | r1: [403, "FORBIDDEN", ["GET /api/gdpr/erasures/%2e%2e%2fabc"], null] | r2: [400, "NON_CANONICAL_PATH", [], null]
+   originate test OC W05 .%2e noscope 1 GET /api/gdpr/erasures/.%2e | r1: [200, null, ["GET /api/gdpr/erasures/.%2e"], null] | r2: [400, "NON_CANONICAL_PATH", [], null]
+   originate test OC W05 .%2e scope 1 GET /api/gdpr/erasures/.%2e | r1: [200, null, ["GET /api/gdpr/erasures/.%2e"], null] | r2: [400, "NON_CANONICAL_PATH", [], null]
+   originate test OC W05 .%2e user 1 GET /api/gdpr/erasures/.%2e | r1: [403, "FORBIDDEN", ["GET /api/gdpr/erasures/.%2e"], null] | r2: [400, "NON_CANONICAL_PATH", [], null]
+   originate test OC W05 .%2e noscope 2 GET /api/gdpr/erasures/.%2e | r1: [200, null, ["GET /api/gdpr/erasures/.%2e"], null] | r2: [400, "NON_CANONICAL_PATH", [], null]
+   originate test OC W05 .%2e scope 2 GET /api/gdpr/erasures/.%2e | r1: [200, null, ["GET /api/gdpr/erasures/.%2e"], null] | r2: [400, "NON_CANONICAL_PATH", [], null]
+   originate test OC W05 .%2e user 2 GET /api/gdpr/erasures/.%2e | r1: [403, "FORBIDDEN", ["GET /api/gdpr/erasures/.%2e"], null] | r2: [400, "NON_CANONICAL_PATH", [], null]
+   originate test OC W10 ../ noscope 1 GET /api/gdpr/erasures/../ | r1: [200, null, ["GET /api/gdpr/erasures/../"], null] | r2: [400, "NON_CANONICAL_PATH", [], null]
+   originate test OC W10 ../ scope 1 GET /api/gdpr/erasures/../ | r1: [200, null, ["GET /api/gdpr/erasures/../"], null] | r2: [400, "NON_CANONICAL_PATH", [], null]
+   originate test OC W10 ../ user 1 GET /api/gdpr/erasures/../ | r1: [403, "FORBIDDEN", ["GET /api/gdpr/erasures/../"], null] | r2: [400, "NON_CANONICAL_PATH", [], null]
+   originate test OC W10 ../ noscope 2 GET /api/gdpr/erasures/../ | r1: [200, null, ["GET /api/gdpr/erasures/../"], null] | r2: [400, "NON_CANONICAL_PATH", [], null]
+   originate test OC W10 ../ scope 2 GET /api/gdpr/erasures/../ | r1: [200, null, ["GET /api/gdpr/erasures/../"], null] | r2: [400, "NON_CANONICAL_PATH", [], null]
+   originate test OC W10 ../ user 2 GET /api/gdpr/erasures/../ | r1: [403, "FORBIDDEN", ["GET /api/gdpr/erasures/../"], null] | r2: [400, "NON_CANONICAL_PATH", [], null]
+   originate test OC W12 %2e%2e%2fconsent noscope 1 GET /api/gdpr/erasures/%2e%2e%2fconsent | r1: [200, null, ["GET /api/gdpr/erasures/%2e%2e%2fconsent"], null] | r2: [400, "NON_CANONICAL_PATH", [], null]
+   originate test OC W12 %2e%2e%2fconsent scope 1 GET /api/gdpr/erasures/%2e%2e%2fconsent | r1: [200, null, ["GET /api/gdpr/erasures/%2e%2e%2fconsent"], null] | r2: [400, "NON_CANONICAL_PATH", [], null]
+   originate test OC W12 %2e%2e%2fconsent user 1 GET /api/gdpr/erasures/%2e%2e%2fconsent | r1: [403, "FORBIDDEN", ["GET /api/gdpr/erasures/%2e%2e%2fconsent"], null] | r2: [400, "NON_CANONICAL_PATH", [], null]
+   originate test OC W12 %2e%2e%2fconsent noscope 2 GET /api/gdpr/erasures/%2e%2e%2fconsent | r1: [200, null, ["GET /api/gdpr/erasures/%2e%2e%2fconsent"], null] | r2: [400, "NON_CANONICAL_PATH", [], null]
+   originate test OC W12 %2e%2e%2fconsent scope 2 GET /api/gdpr/erasures/%2e%2e%2fconsent | r1: [200, null, ["GET /api/gdpr/erasures/%2e%2e%2fconsent"], null] | r2: [400, "NON_CANONICAL_PATH", [], null]
+   originate test OC W12 %2e%2e%2fconsent user 2 GET /api/gdpr/erasures/%2e%2e%2fconsent | r1: [403, "FORBIDDEN", ["GET /api/gdpr/erasures/%2e%2e%2fconsent"], null] | r2: [400, "NON_CANONICAL_PATH", [], null]
+   originate test OC W14 ERASURES/.. noscope 1 GET /api/gdpr/ERASURES/.. | r1: [200, null, ["GET /api/gdpr/ERASURES/.."], null] | r2: [400, "NON_CANONICAL_PATH", [], null]
+   originate test OC W14 ERASURES/.. scope 1 GET /api/gdpr/ERASURES/.. | r1: [200, null, ["GET /api/gdpr/ERASURES/.."], null] | r2: [400, "NON_CANONICAL_PATH", [], null]
+   originate test OC W14 ERASURES/.. user 1 GET /api/gdpr/ERASURES/.. | r1: [403, "FORBIDDEN", ["GET /api/gdpr/ERASURES/.."], null] | r2: [400, "NON_CANONICAL_PATH", [], null]
+   originate test OC W14 ERASURES/.. noscope 2 GET /api/gdpr/ERASURES/.. | r1: [200, null, ["GET /api/gdpr/ERASURES/.."], null] | r2: [400, "NON_CANONICAL_PATH", [], null]
+   originate test OC W14 ERASURES/.. scope 2 GET /api/gdpr/ERASURES/.. | r1: [200, null, ["GET /api/gdpr/ERASURES/.."], null] | r2: [400, "NON_CANONICAL_PATH", [], null]
+   originate test OC W14 ERASURES/.. user 2 GET /api/gdpr/ERASURES/.. | r1: [403, "FORBIDDEN", ["GET /api/gdpr/ERASURES/.."], null] | r2: [400, "NON_CANONICAL_PATH", [], null]
+   originate production OC W01 .. noscope 1 GET /api/v1/gdpr/erasures/.. | r1: [404, null, ["GET /api/v1/gdpr/erasures/..", "GET /api/v1/gdpr/erasures/.. [originate-404]"], null] | r2: [400, "NON_CANONICAL_PATH", [], null]
+   originate production OC W01 .. scope 1 GET /api/v1/gdpr/erasures/.. | r1: [404, null, ["GET /api/v1/gdpr/erasures/..", "GET /api/v1/gdpr/erasures/.. [originate-404]"], null] | r2: [400, "NON_CANONICAL_PATH", [], null]
+   originate production OC W01 .. user 1 GET /api/v1/gdpr/erasures/.. | r1: [404, null, ["GET /api/v1/gdpr/erasures/..", "GET /api/v1/gdpr/erasures/.. [originate-404]"], null] | r2: [400, "NON_CANONICAL_PATH", [], null]
+   originate production OC W01 .. noscope 2 GET /api/v1/gdpr/erasures/.. | r1: [404, null, ["GET /api/v1/gdpr/erasures/..", "GET /api/v1/gdpr/erasures/.. [originate-404]"], null] | r2: [400, "NON_CANONICAL_PATH", [], null]
+   originate production OC W01 .. scope 2 GET /api/v1/gdpr/erasures/.. | r1: [404, null, ["GET /api/v1/gdpr/erasures/..", "GET /api/v1/gdpr/erasures/.. [originate-404]"], null] | r2: [400, "NON_CANONICAL_PATH", [], null]
+   originate production OC W01 .. user 2 GET /api/v1/gdpr/erasures/.. | r1: [404, null, ["GET /api/v1/gdpr/erasures/..", "GET /api/v1/gdpr/erasures/.. [originate-404]"], null] | r2: [400, "NON_CANONICAL_PATH", [], null]
+   originate production OC W02 %2e%2e noscope 1 GET /api/v1/gdpr/erasures/%2e%2e | r1: [404, null, ["GET /api/v1/gdpr/erasures/%2e%2e", "GET /api/v1/gdpr/erasures/%2e%2e [originate-404]"], null] | r2: [400, "NON_CANONICAL_PATH", [], null]
+   originate production OC W02 %2e%2e scope 1 GET /api/v1/gdpr/erasures/%2e%2e | r1: [404, null, ["GET /api/v1/gdpr/erasures/%2e%2e", "GET /api/v1/gdpr/erasures/%2e%2e [originate-404]"], null] | r2: [400, "NON_CANONICAL_PATH", [], null]
+   originate production OC W02 %2e%2e user 1 GET /api/v1/gdpr/erasures/%2e%2e | r1: [404, null, ["GET /api/v1/gdpr/erasures/%2e%2e", "GET /api/v1/gdpr/erasures/%2e%2e [originate-404]"], null] | r2: [400, "NON_CANONICAL_PATH", [], null]
+   originate production OC W02 %2e%2e noscope 2 GET /api/v1/gdpr/erasures/%2e%2e | r1: [404, null, ["GET /api/v1/gdpr/erasures/%2e%2e", "GET /api/v1/gdpr/erasures/%2e%2e [originate-404]"], null] | r2: [400, "NON_CANONICAL_PATH", [], null]
+   originate production OC W02 %2e%2e scope 2 GET /api/v1/gdpr/erasures/%2e%2e | r1: [404, null, ["GET /api/v1/gdpr/erasures/%2e%2e", "GET /api/v1/gdpr/erasures/%2e%2e [originate-404]"], null] | r2: [400, "NON_CANONICAL_PATH", [], null]
+   originate production OC W02 %2e%2e user 2 GET /api/v1/gdpr/erasures/%2e%2e | r1: [404, null, ["GET /api/v1/gdpr/erasures/%2e%2e", "GET /api/v1/gdpr/erasures/%2e%2e [originate-404]"], null] | r2: [400, "NON_CANONICAL_PATH", [], null]
+   originate production OC W03 ..;x noscope 1 GET /api/v1/gdpr/erasures/..;x | r1: [404, null, ["GET /api/v1/gdpr/erasures/..;x", "GET /api/v1/gdpr/erasures/..;x [originate-404]"], null] | r2: [400, "NON_CANONICAL_PATH", [], null]
+   originate production OC W03 ..;x scope 1 GET /api/v1/gdpr/erasures/..;x | r1: [404, null, ["GET /api/v1/gdpr/erasures/..;x", "GET /api/v1/gdpr/erasures/..;x [originate-404]"], null] | r2: [400, "NON_CANONICAL_PATH", [], null]
+   originate production OC W03 ..;x user 1 GET /api/v1/gdpr/erasures/..;x | r1: [404, null, ["GET /api/v1/gdpr/erasures/..;x", "GET /api/v1/gdpr/erasures/..;x [originate-404]"], null] | r2: [400, "NON_CANONICAL_PATH", [], null]
+   originate production OC W03 ..;x noscope 2 GET /api/v1/gdpr/erasures/..;x | r1: [404, null, ["GET /api/v1/gdpr/erasures/..;x", "GET /api/v1/gdpr/erasures/..;x [originate-404]"], null] | r2: [400, "NON_CANONICAL_PATH", [], null]
+   originate production OC W03 ..;x scope 2 GET /api/v1/gdpr/erasures/..;x | r1: [404, null, ["GET /api/v1/gdpr/erasures/..;x", "GET /api/v1/gdpr/erasures/..;x [originate-404]"], null] | r2: [400, "NON_CANONICAL_PATH", [], null]
+   originate production OC W03 ..;x user 2 GET /api/v1/gdpr/erasures/..;x | r1: [404, null, ["GET /api/v1/gdpr/erasures/..;x", "GET /api/v1/gdpr/erasures/..;x [originate-404]"], null] | r2: [400, "NON_CANONICAL_PATH", [], null]
+   originate production OC W04 %2e%2e%2fabc noscope 1 GET /api/v1/gdpr/erasures/%2e%2e%2fabc | r1: [404, null, ["GET /api/v1/gdpr/erasures/%2e%2e%2fabc", "GET /api/v1/gdpr/erasures/%2e%2e%2fabc [originate-404]"], null] | r2: [400, "NON_CANONICAL_PATH", [], null]
+   originate production OC W04 %2e%2e%2fabc scope 1 GET /api/v1/gdpr/erasures/%2e%2e%2fabc | r1: [404, null, ["GET /api/v1/gdpr/erasures/%2e%2e%2fabc", "GET /api/v1/gdpr/erasures/%2e%2e%2fabc [originate-404]"], null] | r2: [400, "NON_CANONICAL_PATH", [], null]
+   originate production OC W04 %2e%2e%2fabc user 1 GET /api/v1/gdpr/erasures/%2e%2e%2fabc | r1: [404, null, ["GET /api/v1/gdpr/erasures/%2e%2e%2fabc", "GET /api/v1/gdpr/erasures/%2e%2e%2fabc [originate-404]"], null] | r2: [400, "NON_CANONICAL_PATH", [], null]
+   originate production OC W04 %2e%2e%2fabc noscope 2 GET /api/v1/gdpr/erasures/%2e%2e%2fabc | r1: [404, null, ["GET /api/v1/gdpr/erasures/%2e%2e%2fabc", "GET /api/v1/gdpr/erasures/%2e%2e%2fabc [originate-404]"], null] | r2: [400, "NON_CANONICAL_PATH", [], null]
+   originate production OC W04 %2e%2e%2fabc scope 2 GET /api/v1/gdpr/erasures/%2e%2e%2fabc | r1: [404, null, ["GET /api/v1/gdpr/erasures/%2e%2e%2fabc", "GET /api/v1/gdpr/erasures/%2e%2e%2fabc [originate-404]"], null] | r2: [400, "NON_CANONICAL_PATH", [], null]
+   originate production OC W04 %2e%2e%2fabc user 2 GET /api/v1/gdpr/erasures/%2e%2e%2fabc | r1: [404, null, ["GET /api/v1/gdpr/erasures/%2e%2e%2fabc", "GET /api/v1/gdpr/erasures/%2e%2e%2fabc [originate-404]"], null] | r2: [400, "NON_CANONICAL_PATH", [], null]
+   originate production OC W05 .%2e noscope 1 GET /api/v1/gdpr/erasures/.%2e | r1: [404, null, ["GET /api/v1/gdpr/erasures/.%2e", "GET /api/v1/gdpr/erasures/.%2e [originate-404]"], null] | r2: [400, "NON_CANONICAL_PATH", [], null]
+   originate production OC W05 .%2e scope 1 GET /api/v1/gdpr/erasures/.%2e | r1: [404, null, ["GET /api/v1/gdpr/erasures/.%2e", "GET /api/v1/gdpr/erasures/.%2e [originate-404]"], null] | r2: [400, "NON_CANONICAL_PATH", [], null]
+   originate production OC W05 .%2e user 1 GET /api/v1/gdpr/erasures/.%2e | r1: [404, null, ["GET /api/v1/gdpr/erasures/.%2e", "GET /api/v1/gdpr/erasures/.%2e [originate-404]"], null] | r2: [400, "NON_CANONICAL_PATH", [], null]
+   originate production OC W05 .%2e noscope 2 GET /api/v1/gdpr/erasures/.%2e | r1: [404, null, ["GET /api/v1/gdpr/erasures/.%2e", "GET /api/v1/gdpr/erasures/.%2e [originate-404]"], null] | r2: [400, "NON_CANONICAL_PATH", [], null]
+   originate production OC W05 .%2e scope 2 GET /api/v1/gdpr/erasures/.%2e | r1: [404, null, ["GET /api/v1/gdpr/erasures/.%2e", "GET /api/v1/gdpr/erasures/.%2e [originate-404]"], null] | r2: [400, "NON_CANONICAL_PATH", [], null]
+   originate production OC W05 .%2e user 2 GET /api/v1/gdpr/erasures/.%2e | r1: [404, null, ["GET /api/v1/gdpr/erasures/.%2e", "GET /api/v1/gdpr/erasures/.%2e [originate-404]"], null] | r2: [400, "NON_CANONICAL_PATH", [], null]
+   originate production OC W12 %2e%2e%2fconsent noscope 1 GET /api/v1/gdpr/erasures/%2e%2e%2fconsent | r1: [404, null, ["GET /api/v1/gdpr/erasures/%2e%2e%2fconsent", "GET /api/v1/gdpr/erasures/%2e%2e%2fconsent [originate-404]"], null] | r2: [400, "NON_CANONICAL_PATH", [], null]
+   originate production OC W12 %2e%2e%2fconsent scope 1 GET /api/v1/gdpr/erasures/%2e%2e%2fconsent | r1: [404, null, ["GET /api/v1/gdpr/erasures/%2e%2e%2fconsent", "GET /api/v1/gdpr/erasures/%2e%2e%2fconsent [originate-404]"], null] | r2: [400, "NON_CANONICAL_PATH", [], null]
+   originate production OC W12 %2e%2e%2fconsent user 1 GET /api/v1/gdpr/erasures/%2e%2e%2fconsent | r1: [404, null, ["GET /api/v1/gdpr/erasures/%2e%2e%2fconsent", "GET /api/v1/gdpr/erasures/%2e%2e%2fconsent [originate-404]"], null] | r2: [400, "NON_CANONICAL_PATH", [], null]
+   originate production OC W12 %2e%2e%2fconsent noscope 2 GET /api/v1/gdpr/erasures/%2e%2e%2fconsent | r1: [404, null, ["GET /api/v1/gdpr/erasures/%2e%2e%2fconsent", "GET /api/v1/gdpr/erasures/%2e%2e%2fconsent [originate-404]"], null] | r2: [400, "NON_CANONICAL_PATH", [], null]
+   originate production OC W12 %2e%2e%2fconsent scope 2 GET /api/v1/gdpr/erasures/%2e%2e%2fconsent | r1: [404, null, ["GET /api/v1/gdpr/erasures/%2e%2e%2fconsent", "GET /api/v1/gdpr/erasures/%2e%2e%2fconsent [originate-404]"], null] | r2: [400, "NON_CANONICAL_PATH", [], null]
+   originate production OC W12 %2e%2e%2fconsent user 2 GET /api/v1/gdpr/erasures/%2e%2e%2fconsent | r1: [404, null, ["GET /api/v1/gdpr/erasures/%2e%2e%2fconsent", "GET /api/v1/gdpr/erasures/%2e%2e%2fconsent [originate-404]"], null] | r2: [400, "NON_CANONICAL_PATH", [], null]
+   originate production OC W14 ERASURES/.. noscope 1 GET /api/v1/gdpr/ERASURES/.. | r1: [404, null, ["GET /api/v1/gdpr/ERASURES/..", "GET /api/v1/gdpr/ERASURES/.. [originate-404]"], null] | r2: [400, "NON_CANONICAL_PATH", [], null]
+   originate production OC W14 ERASURES/.. scope 1 GET /api/v1/gdpr/ERASURES/.. | r1: [404, null, ["GET /api/v1/gdpr/ERASURES/..", "GET /api/v1/gdpr/ERASURES/.. [originate-404]"], null] | r2: [400, "NON_CANONICAL_PATH", [], null]
+   originate production OC W14 ERASURES/.. user 1 GET /api/v1/gdpr/ERASURES/.. | r1: [404, null, ["GET /api/v1/gdpr/ERASURES/..", "GET /api/v1/gdpr/ERASURES/.. [originate-404]"], null] | r2: [400, "NON_CANONICAL_PATH", [], null]
+   originate production OC W14 ERASURES/.. noscope 2 GET /api/v1/gdpr/ERASURES/.. | r1: [404, null, ["GET /api/v1/gdpr/ERASURES/..", "GET /api/v1/gdpr/ERASURES/.. [originate-404]"], null] | r2: [400, "NON_CANONICAL_PATH", [], null]
+   originate production OC W14 ERASURES/.. scope 2 GET /api/v1/gdpr/ERASURES/.. | r1: [404, null, ["GET /api/v1/gdpr/ERASURES/..", "GET /api/v1/gdpr/ERASURES/.. [originate-404]"], null] | r2: [400, "NON_CANONICAL_PATH", [], null]
+   originate production OC W14 ERASURES/.. user 2 GET /api/v1/gdpr/ERASURES/.. | r1: [404, null, ["GET /api/v1/gdpr/ERASURES/..", "GET /api/v1/gdpr/ERASURES/.. [originate-404]"], null] | r2: [400, "NON_CANONICAL_PATH", [], null]
+== (3) head vs r2 (the develop merge-in)
+  row diffs 332 | missing 0 | verdict table equal True
+   test D01 origin POST noscope 1 POST /api/gdpr/erasures | r2: [403, "INSUFFICIENT_SCOPE", [], null] | head: [403, "INSUFFICIENT_SCOPE", [], "99"]
+   test D01 origin POST scope 1 POST /api/gdpr/erasures | r2: [200, null, ["POST /api/gdpr/erasures"], null] | head: [200, null, ["POST /api/gdpr/erasures"], "99"]
+   test D01 origin POST noemail_noscope 1 POST /api/gdpr/erasures | r2: [403, "INSUFFICIENT_SCOPE", [], null] | head: [403, "INSUFFICIENT_SCOPE", [], "99"]
+   test D01 origin POST noemail_scope 1 POST /api/gdpr/erasures | r2: [500, "INTERNAL_ERROR", [], null] | head: [500, "INTERNAL_ERROR", [], "99"]
+   test D02 origin GET ref noscope 1 GET /api/gdpr/erasures/abc | r2: [403, "INSUFFICIENT_SCOPE", [], null] | head: [403, "INSUFFICIENT_SCOPE", [], "99"]
+   test D02 origin GET ref scope 1 GET /api/gdpr/erasures/abc | r2: [200, null, ["GET /api/gdpr/erasures/abc"], null] | head: [200, null, ["GET /api/gdpr/erasures/abc"], "99"]
+   test D02 origin GET ref noemail_noscope 1 GET /api/gdpr/erasures/abc | r2: [403, "INSUFFICIENT_SCOPE", [], null] | head: [403, "INSUFFICIENT_SCOPE", [], "99"]
+   test D02 origin GET ref noemail_scope 1 GET /api/gdpr/erasures/abc | r2: [500, "INTERNAL_ERROR", [], null] | head: [500, "INTERNAL_ERROR", [], "99"]
+   test D03 abs POST noscope 1 POST http://127.0.0.1/api/gdpr/erasures | r2: [403, "INSUFFICIENT_SCOPE", [], null] | head: [403, "INSUFFICIENT_SCOPE", [], "99"]
+   test D03 abs POST scope 1 POST http://127.0.0.1/api/gdpr/erasures | r2: [200, null, ["POST /api/gdpr/erasures"], null] | head: [200, null, ["POST /api/gdpr/erasures"], "99"]
+   test D03 abs POST noemail_noscope 1 POST http://127.0.0.1/api/gdpr/erasures | r2: [403, "INSUFFICIENT_SCOPE", [], null] | head: [403, "INSUFFICIENT_SCOPE", [], "99"]
+   test D03 abs POST noemail_scope 1 POST http://127.0.0.1/api/gdpr/erasures | r2: [500, "INTERNAL_ERROR", [], null] | head: [500, "INTERNAL_ERROR", [], "99"]
+   test D04 abs GET ref noscope 1 GET http://127.0.0.1/api/gdpr/erasures/abc | r2: [403, "INSUFFICIENT_SCOPE", [], null] | head: [403, "INSUFFICIENT_SCOPE", [], "99"]
+   test D04 abs GET ref scope 1 GET http://127.0.0.1/api/gdpr/erasures/abc | r2: [200, null, ["GET /api/gdpr/erasures/abc"], null] | head: [200, null, ["GET /api/gdpr/erasures/abc"], "99"]
+   test D04 abs GET ref noemail_noscope 1 GET http://127.0.0.1/api/gdpr/erasures/abc | r2: [403, "INSUFFICIENT_SCOPE", [], null] | head: [403, "INSUFFICIENT_SCOPE", [], "99"]
+   test D05 abs any host noscope 1 POST http://qa-anything.invalid/api/gdpr/erasures | r2: [403, "INSUFFICIENT_SCOPE", [], null] | head: [403, "INSUFFICIENT_SCOPE", [], "99"]
+   test D05 abs any host scope 1 POST http://qa-anything.invalid/api/gdpr/erasures | r2: [200, null, ["POST /api/gdpr/erasures"], null] | head: [200, null, ["POST /api/gdpr/erasures"], "99"]
+   test D07 abs HTTP upper scheme noscope 1 POST HTTP://127.0.0.1/api/gdpr/erasures | r2: [403, "INSUFFICIENT_SCOPE", [], null] | head: [403, "INSUFFICIENT_SCOPE", [], "99"]
+   test D07 abs HTTP upper scheme scope 1 POST HTTP://127.0.0.1/api/gdpr/erasures | r2: [200, null, ["POST /api/gdpr/erasures"], null] | head: [200, null, ["POST /api/gdpr/erasures"], "99"]
+   test D08 abs https:443 noscope 1 POST https://127.0.0.1:443/api/gdpr/erasures | r2: [403, "INSUFFICIENT_SCOPE", [], null] | head: [403, "INSUFFICIENT_SCOPE", [], "99"]
+   test D08 abs https:443 scope 1 POST https://127.0.0.1:443/api/gdpr/erasures | r2: [200, null, ["POST /api/gdpr/erasures"], null] | head: [200, null, ["POST /api/gdpr/erasures"], "99"]
+   test D09 abs userinfo noscope 1 POST http://u@127.0.0.1/api/gdpr/erasures | r2: [403, "INSUFFICIENT_SCOPE", [], null] | head: [403, "INSUFFICIENT_SCOPE", [], "99"]
+   test D09 abs userinfo scope 1 POST http://u@127.0.0.1/api/gdpr/erasures | r2: [200, null, ["POST /api/gdpr/erasures"], null] | head: [200, null, ["POST /api/gdpr/erasures"], "99"]
+   test D31 abs erasures#f noscope 1 POST http://127.0.0.1/api/gdpr/erasures#f | r2: [403, "INSUFFICIENT_SCOPE", [], null] | head: [403, "INSUFFICIENT_SCOPE", [], "99"]
+   test D31 abs erasures#f scope 1 POST http://127.0.0.1/api/gdpr/erasures#f | r2: [200, null, ["POST /api/gdpr/erasures"], null] | head: [200, null, ["POST /api/gdpr/erasures"], "99"]
+   test D32 abs GET ref #f noscope 1 GET http://qa-anything.invalid/api/gdpr/erasures/abc#f | r2: [403, "INSUFFICIENT_SCOPE", [], null] | head: [403, "INSUFFICIENT_SCOPE", [], "99"]
+   test D32 abs GET ref #f scope 1 GET http://qa-anything.invalid/api/gdpr/erasures/abc#f | r2: [200, null, ["GET /api/gdpr/erasures/abc"], null] | head: [200, null, ["GET /api/gdpr/erasures/abc"], "99"]
+   test D10 %65rasures noscope 1 POST /api/gdpr/%65rasures | r2: [403, "INSUFFICIENT_SCOPE", [], null] | head: [403, "INSUFFICIENT_SCOPE", [], "99"]
+   test D10 %65rasures scope 1 POST /api/gdpr/%65rasures | r2: [200, null, ["POST /api/gdpr/%65rasures"], null] | head: [200, null, ["POST /api/gdpr/%65rasures"], "99"]
+   test D11 %45RASURES noscope 1 POST /api/gdpr/%45RASURES | r2: [403, "INSUFFICIENT_SCOPE", [], null] | head: [403, "INSUFFICIENT_SCOPE", [], "99"]
+   test D11 %45RASURES scope 1 POST /api/gdpr/%45RASURES | r2: [200, null, ["POST /api/gdpr/%45RASURES"], null] | head: [200, null, ["POST /api/gdpr/%45RASURES"], "99"]
+   test D12 ./erasures noscope 1 POST /api/gdpr/./erasures | r2: [403, "INSUFFICIENT_SCOPE", [], null] | head: [403, "INSUFFICIENT_SCOPE", [], "99"]
+   test D12 ./erasures scope 1 POST /api/gdpr/./erasures | r2: [200, null, ["POST /api/gdpr/./erasures"], null] | head: [200, null, ["POST /api/gdpr/./erasures"], "99"]
+   test D13 erasures;x=1 noscope 1 POST /api/gdpr/erasures;x=1 | r2: [403, "INSUFFICIENT_SCOPE", [], null] | head: [403, "INSUFFICIENT_SCOPE", [], "99"]
+   test D13 erasures;x=1 scope 1 POST /api/gdpr/erasures;x=1 | r2: [200, null, ["POST /api/gdpr/erasures;x=1"], null] | head: [200, null, ["POST /api/gdpr/erasures;x=1"], "99"]
+   test D14 erasures/ noscope 1 POST /api/gdpr/erasures/ | r2: [403, "INSUFFICIENT_SCOPE", [], null] | head: [403, "INSUFFICIENT_SCOPE", [], "99"]
+   test D14 erasures/ scope 1 POST /api/gdpr/erasures/ | r2: [200, null, ["POST /api/gdpr/erasures/"], null] | head: [200, null, ["POST /api/gdpr/erasures/"], "99"]
+   test D15 ERASURES noscope 1 POST /api/gdpr/ERASURES | r2: [403, "INSUFFICIENT_SCOPE", [], null] | head: [403, "INSUFFICIENT_SCOPE", [], "99"]
+   test D15 ERASURES scope 1 POST /api/gdpr/ERASURES | r2: [200, null, ["POST /api/gdpr/ERASURES"], null] | head: [200, null, ["POST /api/gdpr/ERASURES"], "99"]
+   test D16 Erasures noscope 1 POST /api/gdpr/Erasures | r2: [403, "INSUFFICIENT_SCOPE", [], null] | head: [403, "INSUFFICIENT_SCOPE", [], "99"]
+   test D16 Erasures scope 1 POST /api/gdpr/Erasures | r2: [200, null, ["POST /api/gdpr/Erasures"], null] | head: [200, null, ["POST /api/gdpr/Erasures"], "99"]
+   test D17 x/../erasures noscope 1 POST /api/gdpr/x/../erasures | r2: [403, "INSUFFICIENT_SCOPE", [], null] | head: [403, "INSUFFICIENT_SCOPE", [], "99"]
+   test D17 x/../erasures scope 1 POST /api/gdpr/x/../erasures | r2: [200, null, ["POST /api/gdpr/x/../erasures"], null] | head: [200, null, ["POST /api/gdpr/x/../erasures"], "99"]
+   test D18 //erasures noscope 1 POST /api/gdpr//erasures | r2: [403, "INSUFFICIENT_SCOPE", [], null] | head: [403, "INSUFFICIENT_SCOPE", [], "99"]
+   test D18 //erasures scope 1 POST /api/gdpr//erasures | r2: [200, null, ["POST /api/gdpr/erasures"], null] | head: [200, null, ["POST /api/gdpr/erasures"], "99"]
+   test D19 erasures?x=1 noscope 1 POST /api/gdpr/erasures?x=1 | r2: [403, "INSUFFICIENT_SCOPE", [], null] | head: [403, "INSUFFICIENT_SCOPE", [], "99"]
+   test D19 erasures?x=1 scope 1 POST /api/gdpr/erasures?x=1 | r2: [200, null, ["POST /api/gdpr/erasures?x=1"], null] | head: [200, null, ["POST /api/gdpr/erasures?x=1"], "99"]
+   test D20 %2e/erasures noscope 1 POST /api/gdpr/%2e/erasures | r2: [403, "INSUFFICIENT_SCOPE", [], null] | head: [403, "INSUFFICIENT_SCOPE", [], "99"]
+   test D20 %2e/erasures scope 1 POST /api/gdpr/%2e/erasures | r2: [200, null, ["POST /api/gdpr/%2e/erasures"], null] | head: [200, null, ["POST /api/gdpr/%2e/erasures"], "99"]
+   test D21 x/%2e%2e/erasures noscope 1 POST /api/gdpr/x/%2e%2e/erasures | r2: [403, "INSUFFICIENT_SCOPE", [], null] | head: [403, "INSUFFICIENT_SCOPE", [], "99"]
+   test D21 x/%2e%2e/erasures scope 1 POST /api/gdpr/x/%2e%2e/erasures | r2: [200, null, ["POST /api/gdpr/x/%2e%2e/erasures"], null] | head: [200, null, ["POST /api/gdpr/x/%2e%2e/erasures"], "99"]
+   test D22 erasures%2fabc GET noscope 1 GET /api/gdpr/erasures%2fabc | r2: [403, "INSUFFICIENT_SCOPE", [], null] | head: [403, "INSUFFICIENT_SCOPE", [], "99"]
+   test D22 erasures%2fabc GET scope 1 GET /api/gdpr/erasures%2fabc | r2: [200, null, ["GET /api/gdpr/erasures%2fabc"], null] | head: [200, null, ["GET /api/gdpr/erasures%2fabc"], "99"]
+   test D23 %2ferasures noscope 1 POST /api/gdpr/%2ferasures | r2: [403, "INSUFFICIENT_SCOPE", [], null] | head: [403, "INSUFFICIENT_SCOPE", [], "99"]
+   test D23 %2ferasures scope 1 POST /api/gdpr/%2ferasures | r2: [200, null, ["POST /api/gdpr/%2ferasures"], null] | head: [200, null, ["POST /api/gdpr/%2ferasures"], "99"]
+   test D24 ;p/erasures noscope 1 POST /api/gdpr/;p/erasures | r2: [403, "INSUFFICIENT_SCOPE", [], null] | head: [403, "INSUFFICIENT_SCOPE", [], "99"]
+   test D24 ;p/erasures scope 1 POST /api/gdpr/;p/erasures | r2: [200, null, ["POST /api/gdpr/;p/erasures"], null] | head: [200, null, ["POST /api/gdpr/;p/erasures"], "99"]
+   test D26 abs %65rasures noscope 1 POST http://127.0.0.1/api/gdpr/%65rasures | r2: [403, "INSUFFICIENT_SCOPE", [], null] | head: [403, "INSUFFICIENT_SCOPE", [], "99"]
+   test D26 abs %65rasures scope 1 POST http://127.0.0.1/api/gdpr/%65rasures | r2: [200, null, ["POST /api/gdpr/%65rasures"], null] | head: [200, null, ["POST /api/gdpr/%65rasures"], "99"]
+   test D27 abs ./erasures noscope 1 POST http://127.0.0.1/api/gdpr/./erasures | r2: [403, "INSUFFICIENT_SCOPE", [], null] | head: [403, "INSUFFICIENT_SCOPE", [], "99"]
+   test D27 abs ./erasures scope 1 POST http://127.0.0.1/api/gdpr/./erasures | r2: [200, null, ["POST /api/gdpr/./erasures"], null] | head: [200, null, ["POST /api/gdpr/./erasures"], "99"]
+   test D28 abs x/../erasures noscope 1 POST http://127.0.0.1/api/gdpr/x/../erasures | r2: [403, "INSUFFICIENT_SCOPE", [], null] | head: [403, "INSUFFICIENT_SCOPE", [], "99"]
+   test D28 abs x/../erasures scope 1 POST http://127.0.0.1/api/gdpr/x/../erasures | r2: [200, null, ["POST /api/gdpr/x/../erasures"], null] | head: [200, null, ["POST /api/gdpr/x/../erasures"], "99"]
+   test D29 erasures/%zz GET noscope 1 GET /api/gdpr/erasures/%zz | r2: [403, "INSUFFICIENT_SCOPE", [], null] | head: [403, "INSUFFICIENT_SCOPE", [], "99"]
+   test D29 erasures/%zz GET scope 1 GET /api/gdpr/erasures/%zz | r2: [200, null, ["GET /api/gdpr/erasures/%zz"], null] | head: [200, null, ["GET /api/gdpr/erasures/%zz"], "99"]
+   test D30 erasures/abc;x GET noscope 1 GET /api/gdpr/erasures/abc;x | r2: [403, "INSUFFICIENT_SCOPE", [], null] | head: [403, "INSUFFICIENT_SCOPE", [], "99"]
+   test D30 erasures/abc;x GET scope 1 GET /api/gdpr/erasures/abc;x | r2: [200, null, ["GET /api/gdpr/erasures/abc;x"], null] | head: [200, null, ["GET /api/gdpr/erasures/abc;x"], "99"]
+   test D33 ERASURES/abc GET noscope 1 GET /api/gdpr/ERASURES/abc | r2: [403, "INSUFFICIENT_SCOPE", [], null] | head: [403, "INSUFFICIENT_SCOPE", [], "99"]
+   test D33 ERASURES/abc GET scope 1 GET /api/gdpr/ERASURES/abc | r2: [200, null, ["GET /api/gdpr/ERASURES/abc"], null] | head: [200, null, ["GET /api/gdpr/ERASURES/abc"], "99"]
+   test L10a erasures/ref.v2 GET noscope 1 GET /api/gdpr/erasures/ref.v2 | r2: [403, "INSUFFICIENT_SCOPE", [], null] | head: [403, "INSUFFICIENT_SCOPE", [], "99"]
+   test L10a erasures/ref.v2 GET scope 1 GET /api/gdpr/erasures/ref.v2 | r2: [200, null, ["GET /api/gdpr/erasures/ref.v2"], null] | head: [200, null, ["GET /api/gdpr/erasures/ref.v2"], "99"]
+   test L10b erasures/ref%20x GET noscope 1 GET /api/gdpr/erasures/ref%20x | r2: [403, "INSUFFICIENT_SCOPE", [], null] | head: [403, "INSUFFICIENT_SCOPE", [], "99"]
+   test L10b erasures/ref%20x GET scope 1 GET /api/gdpr/erasures/ref%20x | r2: [200, null, ["GET /api/gdpr/erasures/ref%20x"], null] | head: [200, null, ["GET /api/gdpr/erasures/ref%20x"], "99"]
+   test L10c erasures/u-1 GET noscope 1 GET /api/gdpr/erasures/c0ffee00-0000-4000-8000-000000000001 | r2: [403, "INSUFFICIENT_SCOPE", [], null] | head: [403, "INSUFFICIENT_SCOPE", [], "99"]
+   test L10c erasures/u-1 GET scope 1 GET /api/gdpr/erasures/c0ffee00-0000-4000-8000-000000000001 | r2: [200, null, ["GET /api/gdpr/erasures/c0ffee00-0000-4000-8000-000000000001"], null] | head: [200, null, ["GET /api/gdpr/erasures/c0ffee00-0000-4000-8000-000000000001"], "99"]
+   test L10d erasures/..ref GET noscope 1 GET /api/gdpr/erasures/..ref | r2: [403, "INSUFFICIENT_SCOPE", [], null] | head: [403, "INSUFFICIENT_SCOPE", [], "99"]
+   test L10d erasures/..ref GET scope 1 GET /api/gdpr/erasures/..ref | r2: [200, null, ["GET /api/gdpr/erasures/..ref"], null] | head: [200, null, ["GET /api/gdpr/erasures/..ref"], "99"]
+   test W18 erasures/%2e%2e%3bx GET noscope 1 GET /api/gdpr/erasures/%2e%2e%3bx | r2: [403, "INSUFFICIENT_SCOPE", [], null] | head: [403, "INSUFFICIENT_SCOPE", [], "99"]
+   test W18 erasures/%2e%2e%3bx GET scope 1 GET /api/gdpr/erasures/%2e%2e%3bx | r2: [200, null, ["GET /api/gdpr/erasures/%2e%2e%3bx"], null] | head: [200, null, ["GET /api/gdpr/erasures/%2e%2e%3bx"], "99"]
+   test W18 erasures/%2e%2e%3bx GET noemail_noscope 1 GET /api/gdpr/erasures/%2e%2e%3bx | r2: [403, "INSUFFICIENT_SCOPE", [], null] | head: [403, "INSUFFICIENT_SCOPE", [], "99"]
+   test W18 erasures/%2e%2e%3bx GET noscope 2 GET /api/gdpr/erasures/%2e%2e%3bx | r2: [403, "INSUFFICIENT_SCOPE", [], null] | head: [403, "INSUFFICIENT_SCOPE", [], "99"]
+   test W18 erasures/%2e%2e%3bx GET scope 2 GET /api/gdpr/erasures/%2e%2e%3bx | r2: [200, null, ["GET /api/gdpr/erasures/%2e%2e%3bx"], null] | head: [200, null, ["GET /api/gdpr/erasures/%2e%2e%3bx"], "99"]
+   test W18 erasures/%2e%2e%3bx GET noemail_noscope 2 GET /api/gdpr/erasures/%2e%2e%3bx | r2: [403, "INSUFFICIENT_SCOPE", [], null] | head: [403, "INSUFFICIENT_SCOPE", [], "99"]
+   test N01 %63onsent/check noscope 1 GET /api/gdpr/%63onsent/check | r2: [200, null, ["GET /api/gdpr/%63onsent/check"], null] | head: [200, null, ["GET /api/gdpr/%63onsent/check"], "99"]
+   test N01 %63onsent/check scope 1 GET /api/gdpr/%63onsent/check | r2: [200, null, ["GET /api/gdpr/%63onsent/check"], null] | head: [200, null, ["GET /api/gdpr/%63onsent/check"], "99"]
+   test N02 consent/%zz noscope 1 GET /api/gdpr/consent/%zz | r2: [200, null, ["GET /api/gdpr/consent/%zz"], null] | head: [200, null, ["GET /api/gdpr/consent/%zz"], "99"]
+   test N02 consent/%zz scope 1 GET /api/gdpr/consent/%zz | r2: [200, null, ["GET /api/gdpr/consent/%zz"], null] | head: [200, null, ["GET /api/gdpr/consent/%zz"], "99"]
+   test N03 CONSENT/check noscope 1 GET /api/gdpr/CONSENT/check | r2: [200, null, ["GET /api/gdpr/CONSENT/check"], null] | head: [200, null, ["GET /api/gdpr/CONSENT/check"], "99"]
+   test N03 CONSENT/check scope 1 GET /api/gdpr/CONSENT/check | r2: [200, null, ["GET /api/gdpr/CONSENT/check"], null] | head: [200, null, ["GET /api/gdpr/CONSENT/check"], "99"]
+   test N04 consent//check noscope 1 GET /api/gdpr/consent//check | r2: [200, null, ["GET /api/gdpr/consent/check"], null] | head: [200, null, ["GET /api/gdpr/consent/check"], "99"]
+   test N04 consent//check scope 1 GET /api/gdpr/consent//check | r2: [200, null, ["GET /api/gdpr/consent/check"], null] | head: [200, null, ["GET /api/gdpr/consent/check"], "99"]
+   test N05 erasuresX noscope 1 POST /api/gdpr/erasuresX | r2: [200, null, ["POST /api/gdpr/erasuresX"], null] | head: [200, null, ["POST /api/gdpr/erasuresX"], "99"]
+   test N05 erasuresX scope 1 POST /api/gdpr/erasuresX | r2: [200, null, ["POST /api/gdpr/erasuresX"], null] | head: [200, null, ["POST /api/gdpr/erasuresX"], "99"]
+   test N06 erasures.json noscope 1 POST /api/gdpr/erasures.json | r2: [200, null, ["POST /api/gdpr/erasures.json"], null] | head: [200, null, ["POST /api/gdpr/erasures.json"], "99"]
+   test N06 erasures.json scope 1 POST /api/gdpr/erasures.json | r2: [200, null, ["POST /api/gdpr/erasures.json"], null] | head: [200, null, ["POST /api/gdpr/erasures.json"], "99"]
+   test N07 erasures%3bx=1 noscope 1 POST /api/gdpr/erasures%3bx=1 | r2: [200, null, ["POST /api/gdpr/erasures%3bx=1"], null] | head: [200, null, ["POST /api/gdpr/erasures%3bx=1"], "99"]
+   test N07 erasures%3bx=1 scope 1 POST /api/gdpr/erasures%3bx=1 | r2: [200, null, ["POST /api/gdpr/erasures%3bx=1"], null] | head: [200, null, ["POST /api/gdpr/erasures%3bx=1"], "99"]
+   test N08 abs consent/check?next=/erasures noscope 1 GET http://127.0.0.1/api/gdpr/consent/check?next=/erasures | r2: [200, null, ["GET /api/gdpr/consent/check?next=/erasures"], null] | head: [200, null, ["GET /api/gdpr/consent/check?next=/erasures"], "99"]
+   test N08 abs consent/check?next=/erasures scope 1 GET http://127.0.0.1/api/gdpr/consent/check?next=/erasures | r2: [200, null, ["GET /api/gdpr/consent/check?next=/erasures"], null] | head: [200, null, ["GET /api/gdpr/consent/check?next=/erasures"], "99"]
+   test N09 consent/check?x=%zz noscope 1 GET /api/gdpr/consent/check?x=%zz | r2: [200, null, ["GET /api/gdpr/consent/check?x=%zz"], null] | head: [200, null, ["GET /api/gdpr/consent/check?x=%zz"], "99"]
+   test N09 consent/check?x=%zz scope 1 GET /api/gdpr/consent/check?x=%zz | r2: [200, null, ["GET /api/gdpr/consent/check?x=%zz"], null] | head: [200, null, ["GET /api/gdpr/consent/check?x=%zz"], "99"]
+   test N10 bare mount noscope 1 GET /api/gdpr | r2: [200, null, ["GET /api/gdpr"], null] | head: [200, null, ["GET /api/gdpr"], "99"]
+   test N10 bare mount scope 1 GET /api/gdpr | r2: [200, null, ["GET /api/gdpr"], null] | head: [200, null, ["GET /api/gdpr"], "99"]
+   test N11 consent/%E9 noscope 1 GET /api/gdpr/consent/%E9 | r2: [200, null, ["GET /api/gdpr/consent/%E9"], null] | head: [200, null, ["GET /api/gdpr/consent/%E9"], "99"]
+   test N11 consent/%E9 scope 1 GET /api/gdpr/consent/%E9 | r2: [200, null, ["GET /api/gdpr/consent/%E9"], null] | head: [200, null, ["GET /api/gdpr/consent/%E9"], "99"]
+   test N12 erasure/u-1 (admin, singular) noscope 1 POST /api/gdpr/erasure/u-1 | r2: [200, null, ["POST /api/gdpr/erasure/u-1"], null] | head: [200, null, ["POST /api/gdpr/erasure/u-1"], "99"]
+   test N12 erasure/u-1 (admin, singular) scope 1 POST /api/gdpr/erasure/u-1 | r2: [200, null, ["POST /api/gdpr/erasure/u-1"], null] | head: [200, null, ["POST /api/gdpr/erasure/u-1"], "99"]
+   test N13 consent/check?q=//x noscope 1 GET /api/gdpr/consent/check?q=//x | r2: [200, null, ["GET /api/gdpr/consent/check?q=//x"], null] | head: [200, null, ["GET /api/gdpr/consent/check?q=//x"], "99"]
+   test N13 consent/check?q=//x scope 1 GET /api/gdpr/consent/check?q=//x | r2: [200, null, ["GET /api/gdpr/consent/check?q=//x"], null] | head: [200, null, ["GET /api/gdpr/consent/check?q=//x"], "99"]
+   test O POST /consent noscope 1 POST /api/gdpr/consent | r2: [200, null, ["POST /api/gdpr/consent"], null] | head: [200, null, ["POST /api/gdpr/consent"], "99"]
+   test O POST /consent scope 1 POST /api/gdpr/consent | r2: [200, null, ["POST /api/gdpr/consent"], null] | head: [200, null, ["POST /api/gdpr/consent"], "99"]
+   test O POST /consent/withdraw noscope 1 POST /api/gdpr/consent/withdraw | r2: [200, null, ["POST /api/gdpr/consent/withdraw"], null] | head: [200, null, ["POST /api/gdpr/consent/withdraw"], "99"]
+   test O POST /consent/withdraw scope 1 POST /api/gdpr/consent/withdraw | r2: [200, null, ["POST /api/gdpr/consent/withdraw"], null] | head: [200, null, ["POST /api/gdpr/consent/withdraw"], "99"]
+   test O GET /consent/check noscope 1 GET /api/gdpr/consent/check | r2: [200, null, ["GET /api/gdpr/consent/check"], null] | head: [200, null, ["GET /api/gdpr/consent/check"], "99"]
+   test O GET /consent/check scope 1 GET /api/gdpr/consent/check | r2: [200, null, ["GET /api/gdpr/consent/check"], null] | head: [200, null, ["GET /api/gdpr/consent/check"], "99"]
+   test O GET /consent/:userId noscope 1 GET /api/gdpr/consent/u-1 | r2: [200, null, ["GET /api/gdpr/consent/u-1"], null] | head: [200, null, ["GET /api/gdpr/consent/u-1"], "99"]
+   test O GET /consent/:userId scope 1 GET /api/gdpr/consent/u-1 | r2: [200, null, ["GET /api/gdpr/consent/u-1"], null] | head: [200, null, ["GET /api/gdpr/consent/u-1"], "99"]
+   test O POST /dsr noscope 1 POST /api/gdpr/dsr | r2: [200, null, ["POST /api/gdpr/dsr"], null] | head: [200, null, ["POST /api/gdpr/dsr"], "99"]
+   test O POST /dsr scope 1 POST /api/gdpr/dsr | r2: [200, null, ["POST /api/gdpr/dsr"], null] | head: [200, null, ["POST /api/gdpr/dsr"], "99"]
+   test O GET /dsr/pending noscope 1 GET /api/gdpr/dsr/pending | r2: [200, null, ["GET /api/gdpr/dsr/pending"], null] | head: [200, null, ["GET /api/gdpr/dsr/pending"], "99"]
+   test O GET /dsr/pending scope 1 GET /api/gdpr/dsr/pending | r2: [200, null, ["GET /api/gdpr/dsr/pending"], null] | head: [200, null, ["GET /api/gdpr/dsr/pending"], "99"]
+   test O GET /dsr/:dsrId noscope 1 GET /api/gdpr/dsr/u-1 | r2: [200, null, ["GET /api/gdpr/dsr/u-1"], null] | head: [200, null, ["GET /api/gdpr/dsr/u-1"], "99"]
+   test O GET /dsr/:dsrId scope 1 GET /api/gdpr/dsr/u-1 | r2: [200, null, ["GET /api/gdpr/dsr/u-1"], null] | head: [200, null, ["GET /api/gdpr/dsr/u-1"], "99"]
+   test O GET /dsr/user/:userId noscope 1 GET /api/gdpr/dsr/user/u-1 | r2: [200, null, ["GET /api/gdpr/dsr/user/u-1"], null] | head: [200, null, ["GET /api/gdpr/dsr/user/u-1"], "99"]
+   test O GET /dsr/user/:userId scope 1 GET /api/gdpr/dsr/user/u-1 | r2: [200, null, ["GET /api/gdpr/dsr/user/u-1"], null] | head: [200, null, ["GET /api/gdpr/dsr/user/u-1"], "99"]
+   test O PATCH /dsr/:dsrId noscope 1 PATCH /api/gdpr/dsr/u-1 | r2: [200, null, ["PATCH /api/gdpr/dsr/u-1"], null] | head: [200, null, ["PATCH /api/gdpr/dsr/u-1"], "99"]
+   test O PATCH /dsr/:dsrId scope 1 PATCH /api/gdpr/dsr/u-1 | r2: [200, null, ["PATCH /api/gdpr/dsr/u-1"], null] | head: [200, null, ["PATCH /api/gdpr/dsr/u-1"], "99"]
+   test O GET /export/:userId noscope 1 GET /api/gdpr/export/u-1 | r2: [200, null, ["GET /api/gdpr/export/u-1"], null] | head: [200, null, ["GET /api/gdpr/export/u-1"], "99"]
+   test O GET /export/:userId scope 1 GET /api/gdpr/export/u-1 | r2: [200, null, ["GET /api/gdpr/export/u-1"], null] | head: [200, null, ["GET /api/gdpr/export/u-1"], "99"]
+   test O GET /export/:userId/download noscope 1 GET /api/gdpr/export/u-1/download | r2: [200, null, ["GET /api/gdpr/export/u-1/download"], null] | head: [200, null, ["GET /api/gdpr/export/u-1/download"], "99"]
+   test O GET /export/:userId/download scope 1 GET /api/gdpr/export/u-1/download | r2: [200, null, ["GET /api/gdpr/export/u-1/download"], null] | head: [200, null, ["GET /api/gdpr/export/u-1/download"], "99"]
+   test O POST /erasures noscope 1 POST /api/gdpr/erasures | r2: [403, "INSUFFICIENT_SCOPE", [], null] | head: [403, "INSUFFICIENT_SCOPE", [], "99"]
+   test O POST /erasures scope 1 POST /api/gdpr/erasures | r2: [200, null, ["POST /api/gdpr/erasures"], null] | head: [200, null, ["POST /api/gdpr/erasures"], "99"]
+   test O GET /erasures/:externalRef noscope 1 GET /api/gdpr/erasures/u-1 | r2: [403, "INSUFFICIENT_SCOPE", [], null] | head: [403, "INSUFFICIENT_SCOPE", [], "99"]
+   test O GET /erasures/:externalRef scope 1 GET /api/gdpr/erasures/u-1 | r2: [200, null, ["GET /api/gdpr/erasures/u-1"], null] | head: [200, null, ["GET /api/gdpr/erasures/u-1"], "99"]
+   test O POST /erasure/:userId noscope 1 POST /api/gdpr/erasure/u-1 | r2: [200, null, ["POST /api/gdpr/erasure/u-1"], null] | head: [200, null, ["POST /api/gdpr/erasure/u-1"], "99"]
+   test O POST /erasure/:userId scope 1 POST /api/gdpr/erasure/u-1 | r2: [200, null, ["POST /api/gdpr/erasure/u-1"], null] | head: [200, null, ["POST /api/gdpr/erasure/u-1"], "99"]
+   test O GET /retention noscope 1 GET /api/gdpr/retention | r2: [200, null, ["GET /api/gdpr/retention"], null] | head: [200, null, ["GET /api/gdpr/retention"], "99"]
+   test O GET /retention scope 1 GET /api/gdpr/retention | r2: [200, null, ["GET /api/gdpr/retention"], null] | head: [200, null, ["GET /api/gdpr/retention"], "99"]
+   test O POST /retention/enforce noscope 1 POST /api/gdpr/retention/enforce | r2: [200, null, ["POST /api/gdpr/retention/enforce"], null] | head: [200, null, ["POST /api/gdpr/retention/enforce"], "99"]
+   test O POST /retention/enforce scope 1 POST /api/gdpr/retention/enforce | r2: [200, null, ["POST /api/gdpr/retention/enforce"], null] | head: [200, null, ["POST /api/gdpr/retention/enforce"], "99"]
+   test O GET /deletion-log noscope 1 GET /api/gdpr/deletion-log | r2: [200, null, ["GET /api/gdpr/deletion-log"], null] | head: [200, null, ["GET /api/gdpr/deletion-log"], "99"]
+   test O GET /deletion-log scope 1 GET /api/gdpr/deletion-log | r2: [200, null, ["GET /api/gdpr/deletion-log"], null] | head: [200, null, ["GET /api/gdpr/deletion-log"], "99"]
+   test V1 abs POST noscope 1 POST http://127.0.0.1/api/v1/gdpr/erasures | r2: [403, "INSUFFICIENT_SCOPE", [], null] | head: [403, "INSUFFICIENT_SCOPE", [], "99"]
+   test V1 abs POST scope 1 POST http://127.0.0.1/api/v1/gdpr/erasures | r2: [200, null, ["POST /api/v1/gdpr/erasures"], null] | head: [200, null, ["POST /api/v1/gdpr/erasures"], "99"]
+   test V1 %65 noscope 1 POST /api/v1/gdpr/%65rasures | r2: [403, "INSUFFICIENT_SCOPE", [], null] | head: [403, "INSUFFICIENT_SCOPE", [], "99"]
+   test V1 %65 scope 1 POST /api/v1/gdpr/%65rasures | r2: [200, null, ["POST /api/v1/gdpr/%65rasures"], null] | head: [200, null, ["POST /api/v1/gdpr/%65rasures"], "99"]
+   test V1 origin noscope 1 POST /api/v1/gdpr/erasures | r2: [403, "INSUFFICIENT_SCOPE", [], null] | head: [403, "INSUFFICIENT_SCOPE", [], "99"]
+   test V1 origin scope 1 POST /api/v1/gdpr/erasures | r2: [200, null, ["POST /api/v1/gdpr/erasures"], null] | head: [200, null, ["POST /api/v1/gdpr/erasures"], "99"]
+   grace D01 origin POST noscope POST /api/gdpr/erasures | r2: [200, null, ["POST /api/gdpr/erasures"], null] | head: [200, null, ["POST /api/gdpr/erasures"], "99"]
+   grace D02 origin GET ref noscope GET /api/gdpr/erasures/abc | r2: [200, null, ["GET /api/gdpr/erasures/abc"], null] | head: [200, null, ["GET /api/gdpr/erasures/abc"], "99"]
+   grace D03 abs POST noscope POST http://127.0.0.1/api/gdpr/erasures | r2: [200, null, ["POST /api/gdpr/erasures"], null] | head: [200, null, ["POST /api/gdpr/erasures"], "99"]
+   grace D04 abs GET ref noscope GET http://127.0.0.1/api/gdpr/erasures/abc | r2: [200, null, ["GET /api/gdpr/erasures/abc"], null] | head: [200, null, ["GET /api/gdpr/erasures/abc"], "99"]
+   grace D10 %65rasures noscope POST /api/gdpr/%65rasures | r2: [200, null, ["POST /api/gdpr/%65rasures"], null] | head: [200, null, ["POST /api/gdpr/%65rasures"], "99"]
+   grace D13 erasures;x=1 noscope POST /api/gdpr/erasures;x=1 | r2: [200, null, ["POST /api/gdpr/erasures;x=1"], null] | head: [200, null, ["POST /api/gdpr/erasures;x=1"], "99"]
+   grace D15 ERASURES noscope POST /api/gdpr/ERASURES | r2: [200, null, ["POST /api/gdpr/ERASURES"], null] | head: [200, null, ["POST /api/gdpr/ERASURES"], "99"]
+   grace N01 %63onsent/check noscope GET /api/gdpr/%63onsent/check | r2: [200, null, ["GET /api/gdpr/%63onsent/check"], null] | head: [200, null, ["GET /api/gdpr/%63onsent/check"], "99"]
+   prod D01 origin POST noscope 1 POST /api/v1/gdpr/erasures | r2: [403, "INSUFFICIENT_SCOPE", [], null] | head: [403, "INSUFFICIENT_SCOPE", [], "99"]
+   prod D01 origin POST scope 1 POST /api/v1/gdpr/erasures | r2: [200, null, ["POST /api/v1/gdpr/erasures"], null] | head: [200, null, ["POST /api/v1/gdpr/erasures"], "99"]
+   prod D01 origin POST noemail_noscope 1 POST /api/v1/gdpr/erasures | r2: [403, "INSUFFICIENT_SCOPE", [], null] | head: [403, "INSUFFICIENT_SCOPE", [], "99"]
+   prod D01 origin POST noemail_scope 1 POST /api/v1/gdpr/erasures | r2: [500, "INTERNAL_ERROR", [], null] | head: [500, "INTERNAL_ERROR", [], "99"]
+   prod D02 origin GET ref noscope 1 GET /api/v1/gdpr/erasures/abc | r2: [403, "INSUFFICIENT_SCOPE", [], null] | head: [403, "INSUFFICIENT_SCOPE", [], "99"]
+   prod D02 origin GET ref scope 1 GET /api/v1/gdpr/erasures/abc | r2: [200, null, ["GET /api/v1/gdpr/erasures/abc"], null] | head: [200, null, ["GET /api/v1/gdpr/erasures/abc"], "99"]
+   prod D02 origin GET ref noemail_noscope 1 GET /api/v1/gdpr/erasures/abc | r2: [403, "INSUFFICIENT_SCOPE", [], null] | head: [403, "INSUFFICIENT_SCOPE", [], "99"]
+   prod D02 origin GET ref noemail_scope 1 GET /api/v1/gdpr/erasures/abc | r2: [500, "INTERNAL_ERROR", [], null] | head: [500, "INTERNAL_ERROR", [], "99"]
+   prod D03 abs POST noscope 1 POST http://127.0.0.1/api/v1/gdpr/erasures | r2: [403, "INSUFFICIENT_SCOPE", [], null] | head: [403, "INSUFFICIENT_SCOPE", [], "99"]
+   prod D03 abs POST scope 1 POST http://127.0.0.1/api/v1/gdpr/erasures | r2: [200, null, ["POST /api/v1/gdpr/erasures"], null] | head: [200, null, ["POST /api/v1/gdpr/erasures"], "99"]
+   prod D03 abs POST noemail_noscope 1 POST http://127.0.0.1/api/v1/gdpr/erasures | r2: [403, "INSUFFICIENT_SCOPE", [], null] | head: [403, "INSUFFICIENT_SCOPE", [], "99"]
+   prod D03 abs POST noemail_scope 1 POST http://127.0.0.1/api/v1/gdpr/erasures | r2: [500, "INTERNAL_ERROR", [], null] | head: [500, "INTERNAL_ERROR", [], "99"]
+   prod D04 abs GET ref noscope 1 GET http://127.0.0.1/api/v1/gdpr/erasures/abc | r2: [403, "INSUFFICIENT_SCOPE", [], null] | head: [403, "INSUFFICIENT_SCOPE", [], "99"]
+   prod D04 abs GET ref scope 1 GET http://127.0.0.1/api/v1/gdpr/erasures/abc | r2: [200, null, ["GET /api/v1/gdpr/erasures/abc"], null] | head: [200, null, ["GET /api/v1/gdpr/erasures/abc"], "99"]
+   prod D04 abs GET ref noemail_noscope 1 GET http://127.0.0.1/api/v1/gdpr/erasures/abc | r2: [403, "INSUFFICIENT_SCOPE", [], null] | head: [403, "INSUFFICIENT_SCOPE", [], "99"]
+   prod D05 abs any host noscope 1 POST http://qa-anything.invalid/api/v1/gdpr/erasures | r2: [403, "INSUFFICIENT_SCOPE", [], null] | head: [403, "INSUFFICIENT_SCOPE", [], "99"]
+   prod D05 abs any host scope 1 POST http://qa-anything.invalid/api/v1/gdpr/erasures | r2: [200, null, ["POST /api/v1/gdpr/erasures"], null] | head: [200, null, ["POST /api/v1/gdpr/erasures"], "99"]
+   prod D07 abs HTTP upper scheme noscope 1 POST HTTP://127.0.0.1/api/v1/gdpr/erasures | r2: [403, "INSUFFICIENT_SCOPE", [], null] | head: [403, "INSUFFICIENT_SCOPE", [], "99"]
+   prod D07 abs HTTP upper scheme scope 1 POST HTTP://127.0.0.1/api/v1/gdpr/erasures | r2: [200, null, ["POST /api/v1/gdpr/erasures"], null] | head: [200, null, ["POST /api/v1/gdpr/erasures"], "99"]
+   prod D08 abs https:443 noscope 1 POST https://127.0.0.1:443/api/v1/gdpr/erasures | r2: [403, "INSUFFICIENT_SCOPE", [], null] | head: [403, "INSUFFICIENT_SCOPE", [], "99"]
+   prod D08 abs https:443 scope 1 POST https://127.0.0.1:443/api/v1/gdpr/erasures | r2: [200, null, ["POST /api/v1/gdpr/erasures"], null] | head: [200, null, ["POST /api/v1/gdpr/erasures"], "99"]
+   prod D09 abs userinfo noscope 1 POST http://u@127.0.0.1/api/v1/gdpr/erasures | r2: [403, "INSUFFICIENT_SCOPE", [], null] | head: [403, "INSUFFICIENT_SCOPE", [], "99"]
+   prod D09 abs userinfo scope 1 POST http://u@127.0.0.1/api/v1/gdpr/erasures | r2: [200, null, ["POST /api/v1/gdpr/erasures"], null] | head: [200, null, ["POST /api/v1/gdpr/erasures"], "99"]
+   prod D31 abs erasures#f noscope 1 POST http://127.0.0.1/api/v1/gdpr/erasures#f | r2: [403, "INSUFFICIENT_SCOPE", [], null] | head: [403, "INSUFFICIENT_SCOPE", [], "99"]
+   prod D31 abs erasures#f scope 1 POST http://127.0.0.1/api/v1/gdpr/erasures#f | r2: [200, null, ["POST /api/v1/gdpr/erasures"], null] | head: [200, null, ["POST /api/v1/gdpr/erasures"], "99"]
+   prod D32 abs GET ref #f noscope 1 GET http://qa-anything.invalid/api/v1/gdpr/erasures/abc#f | r2: [403, "INSUFFICIENT_SCOPE", [], null] | head: [403, "INSUFFICIENT_SCOPE", [], "99"]
+   prod D32 abs GET ref #f scope 1 GET http://qa-anything.invalid/api/v1/gdpr/erasures/abc#f | r2: [200, null, ["GET /api/v1/gdpr/erasures/abc"], null] | head: [200, null, ["GET /api/v1/gdpr/erasures/abc"], "99"]
+   prod D10 %65rasures noscope 1 POST /api/v1/gdpr/%65rasures | r2: [403, "INSUFFICIENT_SCOPE", [], null] | head: [403, "INSUFFICIENT_SCOPE", [], "99"]
+   prod D10 %65rasures scope 1 POST /api/v1/gdpr/%65rasures | r2: [200, null, ["POST /api/v1/gdpr/%65rasures"], null] | head: [200, null, ["POST /api/v1/gdpr/%65rasures"], "99"]
+   prod D11 %45RASURES noscope 1 POST /api/v1/gdpr/%45RASURES | r2: [403, "INSUFFICIENT_SCOPE", [], null] | head: [403, "INSUFFICIENT_SCOPE", [], "99"]
+   prod D11 %45RASURES scope 1 POST /api/v1/gdpr/%45RASURES | r2: [200, null, ["POST /api/v1/gdpr/%45RASURES"], null] | head: [200, null, ["POST /api/v1/gdpr/%45RASURES"], "99"]
+   prod D12 ./erasures noscope 1 POST /api/v1/gdpr/./erasures | r2: [403, "INSUFFICIENT_SCOPE", [], null] | head: [403, "INSUFFICIENT_SCOPE", [], "99"]
+   prod D12 ./erasures scope 1 POST /api/v1/gdpr/./erasures | r2: [200, null, ["POST /api/v1/gdpr/./erasures"], null] | head: [200, null, ["POST /api/v1/gdpr/./erasures"], "99"]
+   prod D13 erasures;x=1 noscope 1 POST /api/v1/gdpr/erasures;x=1 | r2: [403, "INSUFFICIENT_SCOPE", [], null] | head: [403, "INSUFFICIENT_SCOPE", [], "99"]
+   prod D13 erasures;x=1 scope 1 POST /api/v1/gdpr/erasures;x=1 | r2: [200, null, ["POST /api/v1/gdpr/erasures;x=1"], null] | head: [200, null, ["POST /api/v1/gdpr/erasures;x=1"], "99"]
+   prod D14 erasures/ noscope 1 POST /api/v1/gdpr/erasures/ | r2: [403, "INSUFFICIENT_SCOPE", [], null] | head: [403, "INSUFFICIENT_SCOPE", [], "99"]
+   prod D14 erasures/ scope 1 POST /api/v1/gdpr/erasures/ | r2: [200, null, ["POST /api/v1/gdpr/erasures/"], null] | head: [200, null, ["POST /api/v1/gdpr/erasures/"], "99"]
+   prod D15 ERASURES noscope 1 POST /api/v1/gdpr/ERASURES | r2: [403, "INSUFFICIENT_SCOPE", [], null] | head: [403, "INSUFFICIENT_SCOPE", [], "99"]
+   prod D15 ERASURES scope 1 POST /api/v1/gdpr/ERASURES | r2: [200, null, ["POST /api/v1/gdpr/ERASURES"], null] | head: [200, null, ["POST /api/v1/gdpr/ERASURES"], "99"]
+   prod D16 Erasures noscope 1 POST /api/v1/gdpr/Erasures | r2: [403, "INSUFFICIENT_SCOPE", [], null] | head: [403, "INSUFFICIENT_SCOPE", [], "99"]
+   prod D16 Erasures scope 1 POST /api/v1/gdpr/Erasures | r2: [200, null, ["POST /api/v1/gdpr/Erasures"], null] | head: [200, null, ["POST /api/v1/gdpr/Erasures"], "99"]
+   prod D18 //erasures noscope 1 POST /api/v1/gdpr//erasures | r2: [403, "INSUFFICIENT_SCOPE", [], null] | head: [403, "INSUFFICIENT_SCOPE", [], "99"]
+   prod D18 //erasures scope 1 POST /api/v1/gdpr//erasures | r2: [200, null, ["POST /api/v1/gdpr/erasures"], null] | head: [200, null, ["POST /api/v1/gdpr/erasures"], "99"]
+   prod D19 erasures?x=1 noscope 1 POST /api/v1/gdpr/erasures?x=1 | r2: [403, "INSUFFICIENT_SCOPE", [], null] | head: [403, "INSUFFICIENT_SCOPE", [], "99"]
+   prod D19 erasures?x=1 scope 1 POST /api/v1/gdpr/erasures?x=1 | r2: [200, null, ["POST /api/v1/gdpr/erasures?x=1"], null] | head: [200, null, ["POST /api/v1/gdpr/erasures?x=1"], "99"]
+   prod D20 %2e/erasures noscope 1 POST /api/v1/gdpr/%2e/erasures | r2: [403, "INSUFFICIENT_SCOPE", [], null] | head: [403, "INSUFFICIENT_SCOPE", [], "99"]
+   prod D20 %2e/erasures scope 1 POST /api/v1/gdpr/%2e/erasures | r2: [200, null, ["POST /api/v1/gdpr/%2e/erasures"], null] | head: [200, null, ["POST /api/v1/gdpr/%2e/erasures"], "99"]
+   prod D21 x/%2e%2e/erasures noscope 1 POST /api/v1/gdpr/x/%2e%2e/erasures | r2: [403, "INSUFFICIENT_SCOPE", [], null] | head: [403, "INSUFFICIENT_SCOPE", [], "99"]
+   prod D21 x/%2e%2e/erasures scope 1 POST /api/v1/gdpr/x/%2e%2e/erasures | r2: [200, null, ["POST /api/v1/gdpr/x/%2e%2e/erasures"], null] | head: [200, null, ["POST /api/v1/gdpr/x/%2e%2e/erasures"], "99"]
+   prod D22 erasures%2fabc GET noscope 1 GET /api/v1/gdpr/erasures%2fabc | r2: [403, "INSUFFICIENT_SCOPE", [], null] | head: [403, "INSUFFICIENT_SCOPE", [], "99"]
+   prod D22 erasures%2fabc GET scope 1 GET /api/v1/gdpr/erasures%2fabc | r2: [200, null, ["GET /api/v1/gdpr/erasures%2fabc"], null] | head: [200, null, ["GET /api/v1/gdpr/erasures%2fabc"], "99"]
+   prod D23 %2ferasures noscope 1 POST /api/v1/gdpr/%2ferasures | r2: [403, "INSUFFICIENT_SCOPE", [], null] | head: [403, "INSUFFICIENT_SCOPE", [], "99"]
+   prod D23 %2ferasures scope 1 POST /api/v1/gdpr/%2ferasures | r2: [200, null, ["POST /api/v1/gdpr/%2ferasures"], null] | head: [200, null, ["POST /api/v1/gdpr/%2ferasures"], "99"]
+   prod D24 ;p/erasures noscope 1 POST /api/v1/gdpr/;p/erasures | r2: [403, "INSUFFICIENT_SCOPE", [], null] | head: [403, "INSUFFICIENT_SCOPE", [], "99"]
+   prod D24 ;p/erasures scope 1 POST /api/v1/gdpr/;p/erasures | r2: [200, null, ["POST /api/v1/gdpr/;p/erasures"], null] | head: [200, null, ["POST /api/v1/gdpr/;p/erasures"], "99"]
+   prod D26 abs %65rasures noscope 1 POST http://127.0.0.1/api/v1/gdpr/%65rasures | r2: [403, "INSUFFICIENT_SCOPE", [], null] | head: [403, "INSUFFICIENT_SCOPE", [], "99"]
+   prod D26 abs %65rasures scope 1 POST http://127.0.0.1/api/v1/gdpr/%65rasures | r2: [200, null, ["POST /api/v1/gdpr/%65rasures"], null] | head: [200, null, ["POST /api/v1/gdpr/%65rasures"], "99"]
+   prod D27 abs ./erasures noscope 1 POST http://127.0.0.1/api/v1/gdpr/./erasures | r2: [403, "INSUFFICIENT_SCOPE", [], null] | head: [403, "INSUFFICIENT_SCOPE", [], "99"]
+   prod D27 abs ./erasures scope 1 POST http://127.0.0.1/api/v1/gdpr/./erasures | r2: [200, null, ["POST /api/v1/gdpr/./erasures"], null] | head: [200, null, ["POST /api/v1/gdpr/./erasures"], "99"]
+   prod D29 erasures/%zz GET noscope 1 GET /api/v1/gdpr/erasures/%zz | r2: [403, "INSUFFICIENT_SCOPE", [], null] | head: [403, "INSUFFICIENT_SCOPE", [], "99"]
+   prod D29 erasures/%zz GET scope 1 GET /api/v1/gdpr/erasures/%zz | r2: [200, null, ["GET /api/v1/gdpr/erasures/%zz"], null] | head: [200, null, ["GET /api/v1/gdpr/erasures/%zz"], "99"]
+   prod D30 erasures/abc;x GET noscope 1 GET /api/v1/gdpr/erasures/abc;x | r2: [403, "INSUFFICIENT_SCOPE", [], null] | head: [403, "INSUFFICIENT_SCOPE", [], "99"]
+   prod D30 erasures/abc;x GET scope 1 GET /api/v1/gdpr/erasures/abc;x | r2: [200, null, ["GET /api/v1/gdpr/erasures/abc;x"], null] | head: [200, null, ["GET /api/v1/gdpr/erasures/abc;x"], "99"]
+   prod D33 ERASURES/abc GET noscope 1 GET /api/v1/gdpr/ERASURES/abc | r2: [403, "INSUFFICIENT_SCOPE", [], null] | head: [403, "INSUFFICIENT_SCOPE", [], "99"]
+   prod D33 ERASURES/abc GET scope 1 GET /api/v1/gdpr/ERASURES/abc | r2: [200, null, ["GET /api/v1/gdpr/ERASURES/abc"], null] | head: [200, null, ["GET /api/v1/gdpr/ERASURES/abc"], "99"]
+   prod L10a erasures/ref.v2 GET noscope 1 GET /api/v1/gdpr/erasures/ref.v2 | r2: [403, "INSUFFICIENT_SCOPE", [], null] | head: [403, "INSUFFICIENT_SCOPE", [], "99"]
+   prod L10a erasures/ref.v2 GET scope 1 GET /api/v1/gdpr/erasures/ref.v2 | r2: [200, null, ["GET /api/v1/gdpr/erasures/ref.v2"], null] | head: [200, null, ["GET /api/v1/gdpr/erasures/ref.v2"], "99"]
+   prod L10b erasures/ref%20x GET noscope 1 GET /api/v1/gdpr/erasures/ref%20x | r2: [403, "INSUFFICIENT_SCOPE", [], null] | head: [403, "INSUFFICIENT_SCOPE", [], "99"]
+   prod L10b erasures/ref%20x GET scope 1 GET /api/v1/gdpr/erasures/ref%20x | r2: [200, null, ["GET /api/v1/gdpr/erasures/ref%20x"], null] | head: [200, null, ["GET /api/v1/gdpr/erasures/ref%20x"], "99"]
+   prod L10c erasures/u-1 GET noscope 1 GET /api/v1/gdpr/erasures/c0ffee00-0000-4000-8000-000000000001 | r2: [403, "INSUFFICIENT_SCOPE", [], null] | head: [403, "INSUFFICIENT_SCOPE", [], "99"]
+   prod L10c erasures/u-1 GET scope 1 GET /api/v1/gdpr/erasures/c0ffee00-0000-4000-8000-000000000001 | r2: [200, null, ["GET /api/v1/gdpr/erasures/c0ffee00-0000-4000-8000-000000000001"], null] | head: [200, null, ["GET /api/v1/gdpr/erasures/c0ffee00-0000-4000-8000-000000000001"], "99"]
+   prod L10d erasures/..ref GET noscope 1 GET /api/v1/gdpr/erasures/..ref | r2: [403, "INSUFFICIENT_SCOPE", [], null] | head: [403, "INSUFFICIENT_SCOPE", [], "99"]
+   prod L10d erasures/..ref GET scope 1 GET /api/v1/gdpr/erasures/..ref | r2: [200, null, ["GET /api/v1/gdpr/erasures/..ref"], null] | head: [200, null, ["GET /api/v1/gdpr/erasures/..ref"], "99"]
+   prod W18 erasures/%2e%2e%3bx GET noscope 1 GET /api/v1/gdpr/erasures/%2e%2e%3bx | r2: [403, "INSUFFICIENT_SCOPE", [], null] | head: [403, "INSUFFICIENT_SCOPE", [], "99"]
+   prod W18 erasures/%2e%2e%3bx GET scope 1 GET /api/v1/gdpr/erasures/%2e%2e%3bx | r2: [200, null, ["GET /api/v1/gdpr/erasures/%2e%2e%3bx"], null] | head: [200, null, ["GET /api/v1/gdpr/erasures/%2e%2e%3bx"], "99"]
+   prod W18 erasures/%2e%2e%3bx GET noemail_noscope 1 GET /api/v1/gdpr/erasures/%2e%2e%3bx | r2: [403, "INSUFFICIENT_SCOPE", [], null] | head: [403, "INSUFFICIENT_SCOPE", [], "99"]
+   prod W18 erasures/%2e%2e%3bx GET noscope 2 GET /api/v1/gdpr/erasures/%2e%2e%3bx | r2: [403, "INSUFFICIENT_SCOPE", [], null] | head: [403, "INSUFFICIENT_SCOPE", [], "99"]
+   prod W18 erasures/%2e%2e%3bx GET scope 2 GET /api/v1/gdpr/erasures/%2e%2e%3bx | r2: [200, null, ["GET /api/v1/gdpr/erasures/%2e%2e%3bx"], null] | head: [200, null, ["GET /api/v1/gdpr/erasures/%2e%2e%3bx"], "99"]
+   prod W18 erasures/%2e%2e%3bx GET noemail_noscope 2 GET /api/v1/gdpr/erasures/%2e%2e%3bx | r2: [403, "INSUFFICIENT_SCOPE", [], null] | head: [403, "INSUFFICIENT_SCOPE", [], "99"]
+   prod N01 %63onsent/check noscope 1 GET /api/v1/gdpr/%63onsent/check | r2: [200, null, ["GET /api/v1/gdpr/%63onsent/check"], null] | head: [200, null, ["GET /api/v1/gdpr/%63onsent/check"], "99"]
+   prod N01 %63onsent/check scope 1 GET /api/v1/gdpr/%63onsent/check | r2: [200, null, ["GET /api/v1/gdpr/%63onsent/check"], null] | head: [200, null, ["GET /api/v1/gdpr/%63onsent/check"], "99"]
+   prod N02 consent/%zz noscope 1 GET /api/v1/gdpr/consent/%zz | r2: [200, null, ["GET /api/v1/gdpr/consent/%zz"], null] | head: [200, null, ["GET /api/v1/gdpr/consent/%zz"], "99"]
+   prod N02 consent/%zz scope 1 GET /api/v1/gdpr/consent/%zz | r2: [200, null, ["GET /api/v1/gdpr/consent/%zz"], null] | head: [200, null, ["GET /api/v1/gdpr/consent/%zz"], "99"]
+   prod N03 CONSENT/check noscope 1 GET /api/v1/gdpr/CONSENT/check | r2: [200, null, ["GET /api/v1/gdpr/CONSENT/check"], null] | head: [200, null, ["GET /api/v1/gdpr/CONSENT/check"], "99"]
+   prod N03 CONSENT/check scope 1 GET /api/v1/gdpr/CONSENT/check | r2: [200, null, ["GET /api/v1/gdpr/CONSENT/check"], null] | head: [200, null, ["GET /api/v1/gdpr/CONSENT/check"], "99"]
+   prod N04 consent//check noscope 1 GET /api/v1/gdpr/consent//check | r2: [200, null, ["GET /api/v1/gdpr/consent/check"], null] | head: [200, null, ["GET /api/v1/gdpr/consent/check"], "99"]
+   prod N04 consent//check scope 1 GET /api/v1/gdpr/consent//check | r2: [200, null, ["GET /api/v1/gdpr/consent/check"], null] | head: [200, null, ["GET /api/v1/gdpr/consent/check"], "99"]
+   prod N05 erasuresX noscope 1 POST /api/v1/gdpr/erasuresX | r2: [200, null, ["POST /api/v1/gdpr/erasuresX"], null] | head: [200, null, ["POST /api/v1/gdpr/erasuresX"], "99"]
+   prod N05 erasuresX scope 1 POST /api/v1/gdpr/erasuresX | r2: [200, null, ["POST /api/v1/gdpr/erasuresX"], null] | head: [200, null, ["POST /api/v1/gdpr/erasuresX"], "99"]
+   prod N06 erasures.json noscope 1 POST /api/v1/gdpr/erasures.json | r2: [200, null, ["POST /api/v1/gdpr/erasures.json"], null] | head: [200, null, ["POST /api/v1/gdpr/erasures.json"], "99"]
+   prod N06 erasures.json scope 1 POST /api/v1/gdpr/erasures.json | r2: [200, null, ["POST /api/v1/gdpr/erasures.json"], null] | head: [200, null, ["POST /api/v1/gdpr/erasures.json"], "99"]
+   prod N07 erasures%3bx=1 noscope 1 POST /api/v1/gdpr/erasures%3bx=1 | r2: [200, null, ["POST /api/v1/gdpr/erasures%3bx=1"], null] | head: [200, null, ["POST /api/v1/gdpr/erasures%3bx=1"], "99"]
+   prod N07 erasures%3bx=1 scope 1 POST /api/v1/gdpr/erasures%3bx=1 | r2: [200, null, ["POST /api/v1/gdpr/erasures%3bx=1"], null] | head: [200, null, ["POST /api/v1/gdpr/erasures%3bx=1"], "99"]
+   prod N08 abs consent/check?next=/erasures noscope 1 GET http://127.0.0.1/api/v1/gdpr/consent/check?next=/erasures | r2: [200, null, ["GET /api/v1/gdpr/consent/check?next=/erasures"], null] | head: [200, null, ["GET /api/v1/gdpr/consent/check?next=/erasures"], "99"]
+   prod N08 abs consent/check?next=/erasures scope 1 GET http://127.0.0.1/api/v1/gdpr/consent/check?next=/erasures | r2: [200, null, ["GET /api/v1/gdpr/consent/check?next=/erasures"], null] | head: [200, null, ["GET /api/v1/gdpr/consent/check?next=/erasures"], "99"]
+   prod N09 consent/check?x=%zz noscope 1 GET /api/v1/gdpr/consent/check?x=%zz | r2: [200, null, ["GET /api/v1/gdpr/consent/check?x=%zz"], null] | head: [200, null, ["GET /api/v1/gdpr/consent/check?x=%zz"], "99"]
+   prod N09 consent/check?x=%zz scope 1 GET /api/v1/gdpr/consent/check?x=%zz | r2: [200, null, ["GET /api/v1/gdpr/consent/check?x=%zz"], null] | head: [200, null, ["GET /api/v1/gdpr/consent/check?x=%zz"], "99"]
+   prod N10 bare mount noscope 1 GET /api/v1/gdpr | r2: [200, null, ["GET /api/v1/gdpr"], null] | head: [200, null, ["GET /api/v1/gdpr"], "99"]
+   prod N10 bare mount scope 1 GET /api/v1/gdpr | r2: [200, null, ["GET /api/v1/gdpr"], null] | head: [200, null, ["GET /api/v1/gdpr"], "99"]
+   prod N11 consent/%E9 noscope 1 GET /api/v1/gdpr/consent/%E9 | r2: [200, null, ["GET /api/v1/gdpr/consent/%E9"], null] | head: [200, null, ["GET /api/v1/gdpr/consent/%E9"], "99"]
+   prod N11 consent/%E9 scope 1 GET /api/v1/gdpr/consent/%E9 | r2: [200, null, ["GET /api/v1/gdpr/consent/%E9"], null] | head: [200, null, ["GET /api/v1/gdpr/consent/%E9"], "99"]
+   prod N12 erasure/u-1 (admin, singular) noscope 1 POST /api/v1/gdpr/erasure/u-1 | r2: [200, null, ["POST /api/v1/gdpr/erasure/u-1"], null] | head: [200, null, ["POST /api/v1/gdpr/erasure/u-1"], "99"]
+   prod N12 erasure/u-1 (admin, singular) scope 1 POST /api/v1/gdpr/erasure/u-1 | r2: [200, null, ["POST /api/v1/gdpr/erasure/u-1"], null] | head: [200, null, ["POST /api/v1/gdpr/erasure/u-1"], "99"]
+   prod N13 consent/check?q=//x noscope 1 GET /api/v1/gdpr/consent/check?q=//x | r2: [200, null, ["GET /api/v1/gdpr/consent/check?q=//x"], null] | head: [200, null, ["GET /api/v1/gdpr/consent/check?q=//x"], "99"]
+   prod N13 consent/check?q=//x scope 1 GET /api/v1/gdpr/consent/check?q=//x | r2: [200, null, ["GET /api/v1/gdpr/consent/check?q=//x"], null] | head: [200, null, ["GET /api/v1/gdpr/consent/check?q=//x"], "99"]
+   prod O POST /consent noscope 1 POST /api/v1/gdpr/consent | r2: [200, null, ["POST /api/v1/gdpr/consent"], null] | head: [200, null, ["POST /api/v1/gdpr/consent"], "99"]
+   prod O POST /consent scope 1 POST /api/v1/gdpr/consent | r2: [200, null, ["POST /api/v1/gdpr/consent"], null] | head: [200, null, ["POST /api/v1/gdpr/consent"], "99"]
+   prod O POST /consent/withdraw noscope 1 POST /api/v1/gdpr/consent/withdraw | r2: [200, null, ["POST /api/v1/gdpr/consent/withdraw"], null] | head: [200, null, ["POST /api/v1/gdpr/consent/withdraw"], "99"]
+   prod O POST /consent/withdraw scope 1 POST /api/v1/gdpr/consent/withdraw | r2: [200, null, ["POST /api/v1/gdpr/consent/withdraw"], null] | head: [200, null, ["POST /api/v1/gdpr/consent/withdraw"], "99"]
+   prod O GET /consent/check noscope 1 GET /api/v1/gdpr/consent/check | r2: [200, null, ["GET /api/v1/gdpr/consent/check"], null] | head: [200, null, ["GET /api/v1/gdpr/consent/check"], "99"]
+   prod O GET /consent/check scope 1 GET /api/v1/gdpr/consent/check | r2: [200, null, ["GET /api/v1/gdpr/consent/check"], null] | head: [200, null, ["GET /api/v1/gdpr/consent/check"], "99"]
+   prod O GET /consent/:userId noscope 1 GET /api/v1/gdpr/consent/u-1 | r2: [200, null, ["GET /api/v1/gdpr/consent/u-1"], null] | head: [200, null, ["GET /api/v1/gdpr/consent/u-1"], "99"]
+   prod O GET /consent/:userId scope 1 GET /api/v1/gdpr/consent/u-1 | r2: [200, null, ["GET /api/v1/gdpr/consent/u-1"], null] | head: [200, null, ["GET /api/v1/gdpr/consent/u-1"], "99"]
+   prod O POST /dsr noscope 1 POST /api/v1/gdpr/dsr | r2: [200, null, ["POST /api/v1/gdpr/dsr"], null] | head: [200, null, ["POST /api/v1/gdpr/dsr"], "99"]
+   prod O POST /dsr scope 1 POST /api/v1/gdpr/dsr | r2: [200, null, ["POST /api/v1/gdpr/dsr"], null] | head: [200, null, ["POST /api/v1/gdpr/dsr"], "99"]
+   prod O GET /dsr/pending noscope 1 GET /api/v1/gdpr/dsr/pending | r2: [200, null, ["GET /api/v1/gdpr/dsr/pending"], null] | head: [200, null, ["GET /api/v1/gdpr/dsr/pending"], "99"]
+   prod O GET /dsr/pending scope 1 GET /api/v1/gdpr/dsr/pending | r2: [200, null, ["GET /api/v1/gdpr/dsr/pending"], null] | head: [200, null, ["GET /api/v1/gdpr/dsr/pending"], "99"]
+   prod O GET /dsr/:dsrId noscope 1 GET /api/v1/gdpr/dsr/u-1 | r2: [200, null, ["GET /api/v1/gdpr/dsr/u-1"], null] | head: [200, null, ["GET /api/v1/gdpr/dsr/u-1"], "99"]
+   prod O GET /dsr/:dsrId scope 1 GET /api/v1/gdpr/dsr/u-1 | r2: [200, null, ["GET /api/v1/gdpr/dsr/u-1"], null] | head: [200, null, ["GET /api/v1/gdpr/dsr/u-1"], "99"]
+   prod O GET /dsr/user/:userId noscope 1 GET /api/v1/gdpr/dsr/user/u-1 | r2: [200, null, ["GET /api/v1/gdpr/dsr/user/u-1"], null] | head: [200, null, ["GET /api/v1/gdpr/dsr/user/u-1"], "99"]
+   prod O GET /dsr/user/:userId scope 1 GET /api/v1/gdpr/dsr/user/u-1 | r2: [200, null, ["GET /api/v1/gdpr/dsr/user/u-1"], null] | head: [200, null, ["GET /api/v1/gdpr/dsr/user/u-1"], "99"]
+   prod O PATCH /dsr/:dsrId noscope 1 PATCH /api/v1/gdpr/dsr/u-1 | r2: [200, null, ["PATCH /api/v1/gdpr/dsr/u-1"], null] | head: [200, null, ["PATCH /api/v1/gdpr/dsr/u-1"], "99"]
+   prod O PATCH /dsr/:dsrId scope 1 PATCH /api/v1/gdpr/dsr/u-1 | r2: [200, null, ["PATCH /api/v1/gdpr/dsr/u-1"], null] | head: [200, null, ["PATCH /api/v1/gdpr/dsr/u-1"], "99"]
+   prod O GET /export/:userId noscope 1 GET /api/v1/gdpr/export/u-1 | r2: [200, null, ["GET /api/v1/gdpr/export/u-1"], null] | head: [200, null, ["GET /api/v1/gdpr/export/u-1"], "99"]
+   prod O GET /export/:userId scope 1 GET /api/v1/gdpr/export/u-1 | r2: [200, null, ["GET /api/v1/gdpr/export/u-1"], null] | head: [200, null, ["GET /api/v1/gdpr/export/u-1"], "99"]
+   prod O GET /export/:userId/download noscope 1 GET /api/v1/gdpr/export/u-1/download | r2: [200, null, ["GET /api/v1/gdpr/export/u-1/download"], null] | head: [200, null, ["GET /api/v1/gdpr/export/u-1/download"], "99"]
+   prod O GET /export/:userId/download scope 1 GET /api/v1/gdpr/export/u-1/download | r2: [200, null, ["GET /api/v1/gdpr/export/u-1/download"], null] | head: [200, null, ["GET /api/v1/gdpr/export/u-1/download"], "99"]
+   prod O POST /erasures noscope 1 POST /api/v1/gdpr/erasures | r2: [403, "INSUFFICIENT_SCOPE", [], null] | head: [403, "INSUFFICIENT_SCOPE", [], "99"]
+   prod O POST /erasures scope 1 POST /api/v1/gdpr/erasures | r2: [200, null, ["POST /api/v1/gdpr/erasures"], null] | head: [200, null, ["POST /api/v1/gdpr/erasures"], "99"]
+   prod O GET /erasures/:externalRef noscope 1 GET /api/v1/gdpr/erasures/u-1 | r2: [403, "INSUFFICIENT_SCOPE", [], null] | head: [403, "INSUFFICIENT_SCOPE", [], "99"]
+   prod O GET /erasures/:externalRef scope 1 GET /api/v1/gdpr/erasures/u-1 | r2: [200, null, ["GET /api/v1/gdpr/erasures/u-1"], null] | head: [200, null, ["GET /api/v1/gdpr/erasures/u-1"], "99"]
+   prod O POST /erasure/:userId noscope 1 POST /api/v1/gdpr/erasure/u-1 | r2: [200, null, ["POST /api/v1/gdpr/erasure/u-1"], null] | head: [200, null, ["POST /api/v1/gdpr/erasure/u-1"], "99"]
+   prod O POST /erasure/:userId scope 1 POST /api/v1/gdpr/erasure/u-1 | r2: [200, null, ["POST /api/v1/gdpr/erasure/u-1"], null] | head: [200, null, ["POST /api/v1/gdpr/erasure/u-1"], "99"]
+   prod O GET /retention noscope 1 GET /api/v1/gdpr/retention | r2: [200, null, ["GET /api/v1/gdpr/retention"], null] | head: [200, null, ["GET /api/v1/gdpr/retention"], "99"]
+   prod O GET /retention scope 1 GET /api/v1/gdpr/retention | r2: [200, null, ["GET /api/v1/gdpr/retention"], null] | head: [200, null, ["GET /api/v1/gdpr/retention"], "99"]
+   prod O POST /retention/enforce noscope 1 POST /api/v1/gdpr/retention/enforce | r2: [200, null, ["POST /api/v1/gdpr/retention/enforce"], null] | head: [200, null, ["POST /api/v1/gdpr/retention/enforce"], "99"]
+   prod O POST /retention/enforce scope 1 POST /api/v1/gdpr/retention/enforce | r2: [200, null, ["POST /api/v1/gdpr/retention/enforce"], null] | head: [200, null, ["POST /api/v1/gdpr/retention/enforce"], "99"]
+   prod O GET /deletion-log noscope 1 GET /api/v1/gdpr/deletion-log | r2: [200, null, ["GET /api/v1/gdpr/deletion-log"], null] | head: [200, null, ["GET /api/v1/gdpr/deletion-log"], "99"]
+   prod O GET /deletion-log scope 1 GET /api/v1/gdpr/deletion-log | r2: [200, null, ["GET /api/v1/gdpr/deletion-log"], null] | head: [200, null, ["GET /api/v1/gdpr/deletion-log"], "99"]
+   limiter L1 origin admitted POST /api/gdpr/erasures | r2: [200, null, ["POST /api/gdpr/erasures"], null] | head: [200, null, ["POST /api/gdpr/erasures"], "99"]
+   limiter L2 abs admitted POST http://127.0.0.1/api/gdpr/erasures | r2: [200, null, ["POST /api/gdpr/erasures"], null] | head: [200, null, ["POST /api/gdpr/erasures"], "98"]
+   limiter L3 %65 admitted POST /api/gdpr/%65rasures | r2: [200, null, ["POST /api/gdpr/%65rasures"], null] | head: [200, null, ["POST /api/gdpr/%65rasures"], "97"]
+   limiter L4 abs refused 403 POST http://127.0.0.1/api/gdpr/erasures | r2: [403, "INSUFFICIENT_SCOPE", [], null] | head: [403, "INSUFFICIENT_SCOPE", [], "96"]
+   limiter L6 non-door consent GET /api/gdpr/consent/check | r2: [200, null, ["GET /api/gdpr/consent/check"], null] | head: [200, null, ["GET /api/gdpr/consent/check"], "95"]
+   limiter L8 origin refused 403 POST /api/gdpr/erasures | r2: [403, "INSUFFICIENT_SCOPE", [], null] | head: [403, "INSUFFICIENT_SCOPE", [], "94"]
+   noemail test NE gdpr door origin noemail_noscope POST /api/gdpr/erasures | r2: [403, "INSUFFICIENT_SCOPE", [], null] | head: [403, "INSUFFICIENT_SCOPE", [], "99"]
+   noemail test NE gdpr door origin noemail_scope POST /api/gdpr/erasures | r2: [500, "INTERNAL_ERROR", [], null] | head: [500, "INTERNAL_ERROR", [], "99"]
+   noemail test NE gdpr door origin scope POST /api/gdpr/erasures | r2: [200, null, ["POST /api/gdpr/erasures"], null] | head: [200, null, ["POST /api/gdpr/erasures"], "99"]
+   noemail test NE gdpr door abs noemail_noscope POST http://127.0.0.1/api/gdpr/erasures | r2: [403, "INSUFFICIENT_SCOPE", [], null] | head: [403, "INSUFFICIENT_SCOPE", [], "99"]
+   noemail test NE gdpr door abs noemail_scope POST http://127.0.0.1/api/gdpr/erasures | r2: [500, "INTERNAL_ERROR", [], null] | head: [500, "INTERNAL_ERROR", [], "99"]
+   noemail test NE gdpr door abs scope POST http://127.0.0.1/api/gdpr/erasures | r2: [200, null, ["POST /api/gdpr/erasures"], null] | head: [200, null, ["POST /api/gdpr/erasures"], "99"]
+   noemail test NE gdpr consent noemail_noscope GET /api/gdpr/consent/check | r2: [500, "INTERNAL_ERROR", [], null] | head: [500, "INTERNAL_ERROR", [], "99"]
+   noemail test NE gdpr consent noemail_scope GET /api/gdpr/consent/check | r2: [500, "INTERNAL_ERROR", [], null] | head: [500, "INTERNAL_ERROR", [], "99"]
+   noemail test NE gdpr consent scope GET /api/gdpr/consent/check | r2: [200, null, ["GET /api/gdpr/consent/check"], null] | head: [200, null, ["GET /api/gdpr/consent/check"], "99"]
+   noemail test NE anchors GET noemail_noscope GET /api/anchors/document/qa-doc-1 | r2: [500, "INTERNAL_ERROR", [], null] | head: [500, "INTERNAL_ERROR", [], "99"]
+   noemail test NE anchors GET noemail_scope GET /api/anchors/document/qa-doc-1 | r2: [500, "INTERNAL_ERROR", [], null] | head: [500, "INTERNAL_ERROR", [], "99"]
+   noemail test NE anchors GET scope GET /api/anchors/document/qa-doc-1 | r2: [200, null, ["GET /api/anchors/document/qa-doc-1"], null] | head: [200, null, ["GET /api/anchors/document/qa-doc-1"], "99"]
+   noemail test NE documents GET noemail_noscope GET /api/documents | r2: [500, "INTERNAL_ERROR", [], null] | head: [500, "INTERNAL_ERROR", [], "99"]
+   noemail test NE documents GET noemail_scope GET /api/documents | r2: [403, null, [], null] | head: [403, null, [], "99"]
+   noemail test NE documents GET scope GET /api/documents | r2: [403, null, [], null] | head: [403, null, [], "99"]
+   noemail production NE gdpr door origin noemail_noscope POST /api/v1/gdpr/erasures | r2: [403, "INSUFFICIENT_SCOPE", [], null] | head: [403, "INSUFFICIENT_SCOPE", [], "99"]
+   noemail production NE gdpr door origin noemail_scope POST /api/v1/gdpr/erasures | r2: [500, "INTERNAL_ERROR", [], null] | head: [500, "INTERNAL_ERROR", [], "99"]
+   noemail production NE gdpr door origin scope POST /api/v1/gdpr/erasures | r2: [200, null, ["POST /api/v1/gdpr/erasures"], null] | head: [200, null, ["POST /api/v1/gdpr/erasures"], "99"]
+   noemail production NE gdpr door abs noemail_noscope POST http://127.0.0.1/api/v1/gdpr/erasures | r2: [403, "INSUFFICIENT_SCOPE", [], null] | head: [403, "INSUFFICIENT_SCOPE", [], "99"]
+   noemail production NE gdpr door abs noemail_scope POST http://127.0.0.1/api/v1/gdpr/erasures | r2: [500, "INTERNAL_ERROR", [], null] | head: [500, "INTERNAL_ERROR", [], "99"]
+   noemail production NE gdpr door abs scope POST http://127.0.0.1/api/v1/gdpr/erasures | r2: [200, null, ["POST /api/v1/gdpr/erasures"], null] | head: [200, null, ["POST /api/v1/gdpr/erasures"], "99"]
+   noemail production NE gdpr consent noemail_noscope GET /api/v1/gdpr/consent/check | r2: [500, "INTERNAL_ERROR", [], null] | head: [500, "INTERNAL_ERROR", [], "99"]
+   noemail production NE gdpr consent noemail_scope GET /api/v1/gdpr/consent/check | r2: [500, "INTERNAL_ERROR", [], null] | head: [500, "INTERNAL_ERROR", [], "99"]
+   noemail production NE gdpr consent scope GET /api/v1/gdpr/consent/check | r2: [200, null, ["GET /api/v1/gdpr/consent/check"], null] | head: [200, null, ["GET /api/v1/gdpr/consent/check"], "99"]
+   noemail production NE anchors GET noemail_noscope GET /api/v1/anchors/document/qa-doc-1 | r2: [500, "INTERNAL_ERROR", [], null] | head: [500, "INTERNAL_ERROR", [], "99"]
+   noemail production NE anchors GET noemail_scope GET /api/v1/anchors/document/qa-doc-1 | r2: [500, "INTERNAL_ERROR", [], null] | head: [500, "INTERNAL_ERROR", [], "99"]
+   noemail production NE anchors GET scope GET /api/v1/anchors/document/qa-doc-1 | r2: [200, null, ["GET /api/v1/anchors/document/qa-doc-1"], null] | head: [200, null, ["GET /api/v1/anchors/document/qa-doc-1"], "99"]
+   noemail production NE documents GET noemail_noscope GET /api/v1/documents | r2: [500, "INTERNAL_ERROR", [], null] | head: [500, "INTERNAL_ERROR", [], "99"]
+   noemail production NE documents GET noemail_scope GET /api/v1/documents | r2: [403, null, [], null] | head: [403, null, [], "99"]
+   noemail production NE documents GET scope GET /api/v1/documents | r2: [403, null, [], null] | head: [403, null, [], "99"]
+  originate row diffs r2->head 24
+   originate test OC origin GET abc noscope 1 GET /api/gdpr/erasures/abc | r2: [403, "INSUFFICIENT_SCOPE", [], null] | head: [403, "INSUFFICIENT_SCOPE", [], "99"]
+   originate test OC origin GET abc scope 1 GET /api/gdpr/erasures/abc | r2: [200, null, ["GET /api/gdpr/erasures/abc"], null] | head: [200, null, ["GET /api/gdpr/erasures/abc"], "99"]
+   originate test OC origin GET abc noscope 2 GET /api/gdpr/erasures/abc | r2: [403, "INSUFFICIENT_SCOPE", [], null] | head: [403, "INSUFFICIENT_SCOPE", [], "99"]
+   originate test OC origin GET abc scope 2 GET /api/gdpr/erasures/abc | r2: [200, null, ["GET /api/gdpr/erasures/abc"], null] | head: [200, null, ["GET /api/gdpr/erasures/abc"], "99"]
+   originate test OC CTRL %65rasures POST noscope 1 POST /api/gdpr/%65rasures | r2: [403, "INSUFFICIENT_SCOPE", [], null] | head: [403, "INSUFFICIENT_SCOPE", [], "99"]
+   originate test OC CTRL %65rasures POST scope 1 POST /api/gdpr/%65rasures | r2: [404, null, ["POST /api/gdpr/%65rasures", "POST /api/gdpr/%65rasures [originate-404]"], null] | head: [404, null, ["POST /api/gdpr/%65rasures", "POST /api/gdpr/%65rasures [originate-404]"], "99"]
+   originate test OC CTRL %65rasures POST noscope 2 POST /api/gdpr/%65rasures | r2: [403, "INSUFFICIENT_SCOPE", [], null] | head: [403, "INSUFFICIENT_SCOPE", [], "99"]
+   originate test OC CTRL %65rasures POST scope 2 POST /api/gdpr/%65rasures | r2: [404, null, ["POST /api/gdpr/%65rasures", "POST /api/gdpr/%65rasures [originate-404]"], null] | head: [404, null, ["POST /api/gdpr/%65rasures", "POST /api/gdpr/%65rasures [originate-404]"], "99"]
+   originate test OC CTRL consent/check noscope 1 GET /api/gdpr/consent/check | r2: [400, "BAD_REQUEST", ["GET /api/gdpr/consent/check"], null] | head: [400, "BAD_REQUEST", ["GET /api/gdpr/consent/check"], "99"]
+   originate test OC CTRL consent/check scope 1 GET /api/gdpr/consent/check | r2: [400, "BAD_REQUEST", ["GET /api/gdpr/consent/check"], null] | head: [400, "BAD_REQUEST", ["GET /api/gdpr/consent/check"], "99"]
+   originate test OC CTRL consent/check noscope 2 GET /api/gdpr/consent/check | r2: [400, "BAD_REQUEST", ["GET /api/gdpr/consent/check"], null] | head: [400, "BAD_REQUEST", ["GET /api/gdpr/consent/check"], "99"]
+   originate test OC CTRL consent/check scope 2 GET /api/gdpr/consent/check | r2: [400, "BAD_REQUEST", ["GET /api/gdpr/consent/check"], null] | head: [400, "BAD_REQUEST", ["GET /api/gdpr/consent/check"], "99"]
+   originate production OC origin GET abc noscope 1 GET /api/v1/gdpr/erasures/abc | r2: [403, "INSUFFICIENT_SCOPE", [], null] | head: [403, "INSUFFICIENT_SCOPE", [], "99"]
+   originate production OC origin GET abc scope 1 GET /api/v1/gdpr/erasures/abc | r2: [404, null, ["GET /api/v1/gdpr/erasures/abc", "GET /api/v1/gdpr/erasures/abc [originate-404]"], null] | head: [404, null, ["GET /api/v1/gdpr/erasures/abc", "GET /api/v1/gdpr/erasures/abc [originate-404]"], "99"]
+   originate production OC origin GET abc noscope 2 GET /api/v1/gdpr/erasures/abc | r2: [403, "INSUFFICIENT_SCOPE", [], null] | head: [403, "INSUFFICIENT_SCOPE", [], "99"]
+   originate production OC origin GET abc scope 2 GET /api/v1/gdpr/erasures/abc | r2: [404, null, ["GET /api/v1/gdpr/erasures/abc", "GET /api/v1/gdpr/erasures/abc [originate-404]"], null] | head: [404, null, ["GET /api/v1/gdpr/erasures/abc", "GET /api/v1/gdpr/erasures/abc [originate-404]"], "99"]
+   originate production OC CTRL %65rasures POST noscope 1 POST /api/v1/gdpr/%65rasures | r2: [403, "INSUFFICIENT_SCOPE", [], null] | head: [403, "INSUFFICIENT_SCOPE", [], "99"]
+   originate production OC CTRL %65rasures POST scope 1 POST /api/v1/gdpr/%65rasures | r2: [404, null, ["POST /api/v1/gdpr/%65rasures", "POST /api/v1/gdpr/%65rasures [originate-404]"], null] | head: [404, null, ["POST /api/v1/gdpr/%65rasures", "POST /api/v1/gdpr/%65rasures [originate-404]"], "99"]
+   originate production OC CTRL %65rasures POST noscope 2 POST /api/v1/gdpr/%65rasures | r2: [403, "INSUFFICIENT_SCOPE", [], null] | head: [403, "INSUFFICIENT_SCOPE", [], "99"]
+   originate production OC CTRL %65rasures POST scope 2 POST /api/v1/gdpr/%65rasures | r2: [404, null, ["POST /api/v1/gdpr/%65rasures", "POST /api/v1/gdpr/%65rasures [originate-404]"], null] | head: [404, null, ["POST /api/v1/gdpr/%65rasures", "POST /api/v1/gdpr/%65rasures [originate-404]"], "99"]
+   originate production OC CTRL consent/check noscope 1 GET /api/v1/gdpr/consent/check | r2: [404, null, ["GET /api/v1/gdpr/consent/check", "GET /api/v1/gdpr/consent/check [originate-404]"], null] | head: [404, null, ["GET /api/v1/gdpr/consent/check", "GET /api/v1/gdpr/consent/check [originate-404]"], "99"]
+   originate production OC CTRL consent/check scope 1 GET /api/v1/gdpr/consent/check | r2: [404, null, ["GET /api/v1/gdpr/consent/check", "GET /api/v1/gdpr/consent/check [originate-404]"], null] | head: [404, null, ["GET /api/v1/gdpr/consent/check", "GET /api/v1/gdpr/consent/check [originate-404]"], "99"]
+   originate production OC CTRL consent/check noscope 2 GET /api/v1/gdpr/consent/check | r2: [404, null, ["GET /api/v1/gdpr/consent/check", "GET /api/v1/gdpr/consent/check [originate-404]"], null] | head: [404, null, ["GET /api/v1/gdpr/consent/check", "GET /api/v1/gdpr/consent/check [originate-404]"], "99"]
+   originate production OC CTRL consent/check scope 2 GET /api/v1/gdpr/consent/check | r2: [404, null, ["GET /api/v1/gdpr/consent/check", "GET /api/v1/gdpr/consent/check [originate-404]"], null] | head: [404, null, ["GET /api/v1/gdpr/consent/check", "GET /api/v1/gdpr/consent/check [originate-404]"], "99"]
+== (4) tallies per tree
+  r1 test | W no-scope (noscope/user/noemail_noscope): {(200, None, 1): 64, (500, 'INTERNAL_ERROR', 0): 32, (403, 'INSUFFICIENT_SCOPE', 0): 6, (405, 'METHOD_NOT_ALLOWED', 0): 1}
+  r1 test | W with scope: {(200, None, 1): 34, (405, 'METHOD_NOT_ALLOWED', 0): 1}
+  r1 test | door no-scope: {(403, 'INSUFFICIENT_SCOPE', 0): 45}
+  r1 test | door scope: {(200, None, 1): 37}
+  r1 test | not-door spellings N* (both toks): {(200, None, 1): 26}
+  r1 test | originate routes O* non-door: {(200, None, 1): 30} | O* door routes: {(403, 'INSUFFICIENT_SCOPE', 0): 2, (200, None, 1): 2}
+  r1 test | undetermined: {(400, 'NON_CANONICAL_PATH', 0): 19}
+  r1 prod | W no-scope (noscope/user/noemail_noscope): {(200, None, 1): 60, (500, 'INTERNAL_ERROR', 0): 30, (400, 'BAD_REQUEST', 0): 6, (403, 'INSUFFICIENT_SCOPE', 0): 6, (405, 'METHOD_NOT_ALLOWED', 0): 1}
+  r1 prod | W with scope: {(200, None, 1): 32, (400, 'BAD_REQUEST', 0): 2, (405, 'METHOD_NOT_ALLOWED', 0): 1}
+  r1 prod | door no-scope: {(403, 'INSUFFICIENT_SCOPE', 0): 43, (400, 'BAD_REQUEST', 0): 2}
+  r1 prod | door scope: {(200, None, 1): 35, (400, 'BAD_REQUEST', 0): 2}
+  r1 prod | not-door spellings N* (both toks): {(200, None, 1): 26}
+  r1 prod | originate routes O* non-door: {(200, None, 1): 30} | O* door routes: {(403, 'INSUFFICIENT_SCOPE', 0): 2, (200, None, 1): 2}
+  r1 prod | undetermined: {(400, 'NON_CANONICAL_PATH', 0): 13, (400, 'BAD_REQUEST', 0): 6}
+  r1 grace: [('D01 origin POS', 200, None, 1, 1), ('D02 origin GET', 200, None, 1, 1), ('D03 abs POST', 200, None, 1, 1), ('D04 abs GET re', 200, None, 1, 1), ('D10 %65rasures', 200, None, 1, 1), ('D13 erasures;x', 200, None, 1, 1), ('D15 ERASURES', 200, None, 1, 1), ('U01 %zzrasures', 400, 'NON_CANONICAL_PATH', 0, 0), ('W01 erasures/.', 200, None, 1, 0), ('W02 erasures/%', 200, None, 1, 0), ('W03 erasures/.', 200, None, 1, 0), ('W04 erasures/%', 200, None, 1, 0), ('W07 abs erasur', 200, None, 1, 0), ('N01 %63onsent/', 200, None, 1, 0)]
+  r1 limiter: [('L1 origin admitted', 200, None, None), ('L2 abs admitted', 200, None, None), ('L3 %65 admitted', 200, None, None), ('L4 abs refused 403', 403, 'INSUFFICIENT_SCOPE', None), ('L5 400 NON_CANONICAL', 400, 'NON_CANONICAL_PATH', None), ('L6 non-door consent', 200, None, None), ('L7 W01 erasures/..', 200, None, None), ('L8 origin refused 403', 403, 'INSUFFICIENT_SCOPE', None)]
+  r1 urlspy probes: [('POST', '/api/gdpr/erasures', 'scope', 200, None, 1), ('POST', '.0.0.1/api/gdpr/erasures', 'scope', 200, None, 1), ('POST', '/api/gdpr/%65rasures', 'scope', 200, None, 1), ('POST', '/api/gdpr/erasures?x=1', 'scope', 200, None, 1), ('POST', '/api/gdpr//erasures', 'scope', 200, None, 1), ('POST', '/api/gdpr/erasures', 'noscope', 403, 'INSUFFICIENT_SCOPE', 0), ('POST', '/api/gdpr/%65rasures', 'noscope', 403, 'INSUFFICIENT_SCOPE', 0), ('POST', '/api/gdpr/%zzrasures', 'scope', 400, 'NON_CANONICAL_PATH', 0), ('GET', '/api/gdpr/consent/check', 'scope', 200, None, 1), ('GET', '/api/gdpr/erasures/..', 'noscope', 200, None, 1)]
+  r1 originate stage (mode, id, tok, status, code, handler calls) x count:
+      ('production', 'OC CTRL %65r', 'noscope', 403, 'INSUFFICIENT_SCOPE', ()) x 2
+      ('production', 'OC CTRL %65r', 'scope', 404, None, ()) x 2
+      ('production', 'OC CTRL %65r', 'user', 403, 'INSUFFICIENT_SCOPE', ()) x 2
+      ('production', 'OC CTRL cons', 'noscope', 404, None, ()) x 2
+      ('production', 'OC CTRL cons', 'scope', 404, None, ()) x 2
+      ('production', 'OC CTRL cons', 'user', 404, None, ()) x 2
+      ('production', 'OC W01 ..', 'noscope', 404, None, ()) x 2
+      ('production', 'OC W01 ..', 'scope', 404, None, ()) x 2
+      ('production', 'OC W01 ..', 'user', 404, None, ()) x 2
+      ('production', 'OC W02 %2e%2', 'noscope', 404, None, ()) x 2
+      ('production', 'OC W02 %2e%2', 'scope', 404, None, ()) x 2
+      ('production', 'OC W02 %2e%2', 'user', 404, None, ()) x 2
+      ('production', 'OC W03 ..;x', 'noscope', 404, None, ()) x 2
+      ('production', 'OC W03 ..;x', 'scope', 404, None, ()) x 2
+      ('production', 'OC W03 ..;x', 'user', 404, None, ()) x 2
+      ('production', 'OC W04 %2e%2', 'noscope', 404, None, ()) x 2
+      ('production', 'OC W04 %2e%2', 'scope', 404, None, ()) x 2
+      ('production', 'OC W04 %2e%2', 'user', 404, None, ()) x 2
+      ('production', 'OC W05 .%2e', 'noscope', 404, None, ()) x 2
+      ('production', 'OC W05 .%2e', 'scope', 404, None, ()) x 2
+      ('production', 'OC W05 .%2e', 'user', 404, None, ()) x 2
+      ('production', 'OC W10 ../', 'noscope', 400, 'BAD_REQUEST', ()) x 2
+      ('production', 'OC W10 ../', 'scope', 400, 'BAD_REQUEST', ()) x 2
+      ('production', 'OC W10 ../', 'user', 400, 'BAD_REQUEST', ()) x 2
+      ('production', 'OC W12 %2e%2', 'noscope', 404, None, ()) x 2
+      ('production', 'OC W12 %2e%2', 'scope', 404, None, ()) x 2
+      ('production', 'OC W12 %2e%2', 'user', 404, None, ()) x 2
+      ('production', 'OC W14 ERASU', 'noscope', 404, None, ()) x 2
+      ('production', 'OC W14 ERASU', 'scope', 404, None, ()) x 2
+      ('production', 'OC W14 ERASU', 'user', 404, None, ()) x 2
+      ('production', 'OC origin GE', 'noscope', 403, 'INSUFFICIENT_SCOPE', ()) x 2
+      ('production', 'OC origin GE', 'scope', 404, None, ()) x 2
+      ('production', 'OC origin GE', 'user', 403, 'INSUFFICIENT_SCOPE', ()) x 2
+      ('test', 'OC CTRL %65r', 'noscope', 403, 'INSUFFICIENT_SCOPE', ()) x 2
+      ('test', 'OC CTRL %65r', 'scope', 404, None, ()) x 2
+      ('test', 'OC CTRL %65r', 'user', 403, 'INSUFFICIENT_SCOPE', ()) x 2
+      ('test', 'OC CTRL cons', 'noscope', 400, 'BAD_REQUEST', ()) x 2
+      ('test', 'OC CTRL cons', 'scope', 400, 'BAD_REQUEST', ()) x 2
+      ('test', 'OC CTRL cons', 'user', 400, 'BAD_REQUEST', ()) x 2
+      ('test', 'OC W01 ..', 'noscope', 200, None, ('getErasureStatusByExternalRef',)) x 2
+      ('test', 'OC W01 ..', 'scope', 200, None, ('getErasureStatusByExternalRef',)) x 2
+      ('test', 'OC W01 ..', 'user', 403, 'FORBIDDEN', ()) x 2
+      ('test', 'OC W02 %2e%2', 'noscope', 200, None, ('getErasureStatusByExternalRef',)) x 2
+      ('test', 'OC W02 %2e%2', 'scope', 200, None, ('getErasureStatusByExternalRef',)) x 2
+      ('test', 'OC W02 %2e%2', 'user', 403, 'FORBIDDEN', ()) x 2
+      ('test', 'OC W03 ..;x', 'noscope', 200, None, ('getErasureStatusByExternalRef',)) x 2
+      ('test', 'OC W03 ..;x', 'scope', 200, None, ('getErasureStatusByExternalRef',)) x 2
+      ('test', 'OC W03 ..;x', 'user', 403, 'FORBIDDEN', ()) x 2
+      ('test', 'OC W04 %2e%2', 'noscope', 200, None, ('getErasureStatusByExternalRef',)) x 2
+      ('test', 'OC W04 %2e%2', 'scope', 200, None, ('getErasureStatusByExternalRef',)) x 2
+      ('test', 'OC W04 %2e%2', 'user', 403, 'FORBIDDEN', ()) x 2
+      ('test', 'OC W05 .%2e', 'noscope', 200, None, ('getErasureStatusByExternalRef',)) x 2
+      ('test', 'OC W05 .%2e', 'scope', 200, None, ('getErasureStatusByExternalRef',)) x 2
+      ('test', 'OC W05 .%2e', 'user', 403, 'FORBIDDEN', ()) x 2
+      ('test', 'OC W10 ../', 'noscope', 200, None, ('getErasureStatusByExternalRef',)) x 2
+      ('test', 'OC W10 ../', 'scope', 200, None, ('getErasureStatusByExternalRef',)) x 2
+      ('test', 'OC W10 ../', 'user', 403, 'FORBIDDEN', ()) x 2
+      ('test', 'OC W12 %2e%2', 'noscope', 200, None, ('getErasureStatusByExternalRef',)) x 2
+      ('test', 'OC W12 %2e%2', 'scope', 200, None, ('getErasureStatusByExternalRef',)) x 2
+      ('test', 'OC W12 %2e%2', 'user', 403, 'FORBIDDEN', ()) x 2
+      ('test', 'OC W14 ERASU', 'noscope', 200, None, ('getErasureStatusByExternalRef',)) x 2
+      ('test', 'OC W14 ERASU', 'scope', 200, None, ('getErasureStatusByExternalRef',)) x 2
+      ('test', 'OC W14 ERASU', 'user', 403, 'FORBIDDEN', ()) x 2
+      ('test', 'OC origin GE', 'noscope', 403, 'INSUFFICIENT_SCOPE', ()) x 2
+      ('test', 'OC origin GE', 'scope', 200, None, ('getErasureStatusByExternalRef',)) x 2
+      ('test', 'OC origin GE', 'user', 403, 'INSUFFICIENT_SCOPE', ()) x 2
+  r2 test | W no-scope (noscope/user/noemail_noscope): {(400, 'NON_CANONICAL_PATH', 0): 96, (403, 'INSUFFICIENT_SCOPE', 0): 6, (405, 'METHOD_NOT_ALLOWED', 0): 1}
+  r2 test | W with scope: {(400, 'NON_CANONICAL_PATH', 0): 32, (200, None, 1): 2, (405, 'METHOD_NOT_ALLOWED', 0): 1}
+  r2 test | door no-scope: {(403, 'INSUFFICIENT_SCOPE', 0): 43, (400, 'NON_CANONICAL_PATH', 0): 2}
+  r2 test | door scope: {(200, None, 1): 35, (400, 'NON_CANONICAL_PATH', 0): 2}
+  r2 test | not-door spellings N* (both toks): {(200, None, 1): 26}
+  r2 test | originate routes O* non-door: {(200, None, 1): 30} | O* door routes: {(403, 'INSUFFICIENT_SCOPE', 0): 2, (200, None, 1): 2}
+  r2 test | undetermined: {(400, 'NON_CANONICAL_PATH', 0): 19}
+  r2 prod | W no-scope (noscope/user/noemail_noscope): {(400, 'NON_CANONICAL_PATH', 0): 90, (400, 'BAD_REQUEST', 0): 6, (403, 'INSUFFICIENT_SCOPE', 0): 6, (405, 'METHOD_NOT_ALLOWED', 0): 1}
+  r2 prod | W with scope: {(400, 'NON_CANONICAL_PATH', 0): 30, (400, 'BAD_REQUEST', 0): 2, (200, None, 1): 2, (405, 'METHOD_NOT_ALLOWED', 0): 1}
+  r2 prod | door no-scope: {(403, 'INSUFFICIENT_SCOPE', 0): 41, (400, 'BAD_REQUEST', 0): 2, (400, 'NON_CANONICAL_PATH', 0): 2}
+  r2 prod | door scope: {(200, None, 1): 33, (400, 'BAD_REQUEST', 0): 2, (400, 'NON_CANONICAL_PATH', 0): 2}
+  r2 prod | not-door spellings N* (both toks): {(200, None, 1): 26}
+  r2 prod | originate routes O* non-door: {(200, None, 1): 30} | O* door routes: {(403, 'INSUFFICIENT_SCOPE', 0): 2, (200, None, 1): 2}
+  r2 prod | undetermined: {(400, 'NON_CANONICAL_PATH', 0): 13, (400, 'BAD_REQUEST', 0): 6}
+  r2 grace: [('D01 origin POS', 200, None, 1, 1), ('D02 origin GET', 200, None, 1, 1), ('D03 abs POST', 200, None, 1, 1), ('D04 abs GET re', 200, None, 1, 1), ('D10 %65rasures', 200, None, 1, 1), ('D13 erasures;x', 200, None, 1, 1), ('D15 ERASURES', 200, None, 1, 1), ('U01 %zzrasures', 400, 'NON_CANONICAL_PATH', 0, 0), ('W01 erasures/.', 400, 'NON_CANONICAL_PATH', 0, 0), ('W02 erasures/%', 400, 'NON_CANONICAL_PATH', 0, 0), ('W03 erasures/.', 400, 'NON_CANONICAL_PATH', 0, 0), ('W04 erasures/%', 400, 'NON_CANONICAL_PATH', 0, 0), ('W07 abs erasur', 400, 'NON_CANONICAL_PATH', 0, 0), ('N01 %63onsent/', 200, None, 1, 0)]
+  r2 limiter: [('L1 origin admitted', 200, None, None), ('L2 abs admitted', 200, None, None), ('L3 %65 admitted', 200, None, None), ('L4 abs refused 403', 403, 'INSUFFICIENT_SCOPE', None), ('L5 400 NON_CANONICAL', 400, 'NON_CANONICAL_PATH', None), ('L6 non-door consent', 200, None, None), ('L7 W01 erasures/..', 400, 'NON_CANONICAL_PATH', None), ('L8 origin refused 403', 403, 'INSUFFICIENT_SCOPE', None)]
+  r2 urlspy probes: [('POST', '/api/gdpr/erasures', 'scope', 200, None, 1), ('POST', '.0.0.1/api/gdpr/erasures', 'scope', 200, None, 1), ('POST', '/api/gdpr/%65rasures', 'scope', 200, None, 1), ('POST', '/api/gdpr/erasures?x=1', 'scope', 200, None, 1), ('POST', '/api/gdpr//erasures', 'scope', 200, None, 1), ('POST', '/api/gdpr/erasures', 'noscope', 403, 'INSUFFICIENT_SCOPE', 0), ('POST', '/api/gdpr/%65rasures', 'noscope', 403, 'INSUFFICIENT_SCOPE', 0), ('POST', '/api/gdpr/%zzrasures', 'scope', 400, 'NON_CANONICAL_PATH', 0), ('GET', '/api/gdpr/consent/check', 'scope', 200, None, 1), ('GET', '/api/gdpr/erasures/..', 'noscope', 400, 'NON_CANONICAL_PATH', 0)]
+  r2 originate stage (mode, id, tok, status, code, handler calls) x count:
+      ('production', 'OC CTRL %65r', 'noscope', 403, 'INSUFFICIENT_SCOPE', ()) x 2
+      ('production', 'OC CTRL %65r', 'scope', 404, None, ()) x 2
+      ('production', 'OC CTRL %65r', 'user', 403, 'INSUFFICIENT_SCOPE', ()) x 2
+      ('production', 'OC CTRL cons', 'noscope', 404, None, ()) x 2
+      ('production', 'OC CTRL cons', 'scope', 404, None, ()) x 2
+      ('production', 'OC CTRL cons', 'user', 404, None, ()) x 2
+      ('production', 'OC W01 ..', 'noscope', 400, 'NON_CANONICAL_PATH', ()) x 2
+      ('production', 'OC W01 ..', 'scope', 400, 'NON_CANONICAL_PATH', ()) x 2
+      ('production', 'OC W01 ..', 'user', 400, 'NON_CANONICAL_PATH', ()) x 2
+      ('production', 'OC W02 %2e%2', 'noscope', 400, 'NON_CANONICAL_PATH', ()) x 2
+      ('production', 'OC W02 %2e%2', 'scope', 400, 'NON_CANONICAL_PATH', ()) x 2
+      ('production', 'OC W02 %2e%2', 'user', 400, 'NON_CANONICAL_PATH', ()) x 2
+      ('production', 'OC W03 ..;x', 'noscope', 400, 'NON_CANONICAL_PATH', ()) x 2
+      ('production', 'OC W03 ..;x', 'scope', 400, 'NON_CANONICAL_PATH', ()) x 2
+      ('production', 'OC W03 ..;x', 'user', 400, 'NON_CANONICAL_PATH', ()) x 2
+      ('production', 'OC W04 %2e%2', 'noscope', 400, 'NON_CANONICAL_PATH', ()) x 2
+      ('production', 'OC W04 %2e%2', 'scope', 400, 'NON_CANONICAL_PATH', ()) x 2
+      ('production', 'OC W04 %2e%2', 'user', 400, 'NON_CANONICAL_PATH', ()) x 2
+      ('production', 'OC W05 .%2e', 'noscope', 400, 'NON_CANONICAL_PATH', ()) x 2
+      ('production', 'OC W05 .%2e', 'scope', 400, 'NON_CANONICAL_PATH', ()) x 2
+      ('production', 'OC W05 .%2e', 'user', 400, 'NON_CANONICAL_PATH', ()) x 2
+      ('production', 'OC W10 ../', 'noscope', 400, 'BAD_REQUEST', ()) x 2
+      ('production', 'OC W10 ../', 'scope', 400, 'BAD_REQUEST', ()) x 2
+      ('production', 'OC W10 ../', 'user', 400, 'BAD_REQUEST', ()) x 2
+      ('production', 'OC W12 %2e%2', 'noscope', 400, 'NON_CANONICAL_PATH', ()) x 2
+      ('production', 'OC W12 %2e%2', 'scope', 400, 'NON_CANONICAL_PATH', ()) x 2
+      ('production', 'OC W12 %2e%2', 'user', 400, 'NON_CANONICAL_PATH', ()) x 2
+      ('production', 'OC W14 ERASU', 'noscope', 400, 'NON_CANONICAL_PATH', ()) x 2
+      ('production', 'OC W14 ERASU', 'scope', 400, 'NON_CANONICAL_PATH', ()) x 2
+      ('production', 'OC W14 ERASU', 'user', 400, 'NON_CANONICAL_PATH', ()) x 2
+      ('production', 'OC origin GE', 'noscope', 403, 'INSUFFICIENT_SCOPE', ()) x 2
+      ('production', 'OC origin GE', 'scope', 404, None, ()) x 2
+      ('production', 'OC origin GE', 'user', 403, 'INSUFFICIENT_SCOPE', ()) x 2
+      ('test', 'OC CTRL %65r', 'noscope', 403, 'INSUFFICIENT_SCOPE', ()) x 2
+      ('test', 'OC CTRL %65r', 'scope', 404, None, ()) x 2
+      ('test', 'OC CTRL %65r', 'user', 403, 'INSUFFICIENT_SCOPE', ()) x 2
+      ('test', 'OC CTRL cons', 'noscope', 400, 'BAD_REQUEST', ()) x 2
+      ('test', 'OC CTRL cons', 'scope', 400, 'BAD_REQUEST', ()) x 2
+      ('test', 'OC CTRL cons', 'user', 400, 'BAD_REQUEST', ()) x 2
+      ('test', 'OC W01 ..', 'noscope', 400, 'NON_CANONICAL_PATH', ()) x 2
+      ('test', 'OC W01 ..', 'scope', 400, 'NON_CANONICAL_PATH', ()) x 2
+      ('test', 'OC W01 ..', 'user', 400, 'NON_CANONICAL_PATH', ()) x 2
+      ('test', 'OC W02 %2e%2', 'noscope', 400, 'NON_CANONICAL_PATH', ()) x 2
+      ('test', 'OC W02 %2e%2', 'scope', 400, 'NON_CANONICAL_PATH', ()) x 2
+      ('test', 'OC W02 %2e%2', 'user', 400, 'NON_CANONICAL_PATH', ()) x 2
+      ('test', 'OC W03 ..;x', 'noscope', 400, 'NON_CANONICAL_PATH', ()) x 2
+      ('test', 'OC W03 ..;x', 'scope', 400, 'NON_CANONICAL_PATH', ()) x 2
+      ('test', 'OC W03 ..;x', 'user', 400, 'NON_CANONICAL_PATH', ()) x 2
+      ('test', 'OC W04 %2e%2', 'noscope', 400, 'NON_CANONICAL_PATH', ()) x 2
+      ('test', 'OC W04 %2e%2', 'scope', 400, 'NON_CANONICAL_PATH', ()) x 2
+      ('test', 'OC W04 %2e%2', 'user', 400, 'NON_CANONICAL_PATH', ()) x 2
+      ('test', 'OC W05 .%2e', 'noscope', 400, 'NON_CANONICAL_PATH', ()) x 2
+      ('test', 'OC W05 .%2e', 'scope', 400, 'NON_CANONICAL_PATH', ()) x 2
+      ('test', 'OC W05 .%2e', 'user', 400, 'NON_CANONICAL_PATH', ()) x 2
+      ('test', 'OC W10 ../', 'noscope', 400, 'NON_CANONICAL_PATH', ()) x 2
+      ('test', 'OC W10 ../', 'scope', 400, 'NON_CANONICAL_PATH', ()) x 2
+      ('test', 'OC W10 ../', 'user', 400, 'NON_CANONICAL_PATH', ()) x 2
+      ('test', 'OC W12 %2e%2', 'noscope', 400, 'NON_CANONICAL_PATH', ()) x 2
+      ('test', 'OC W12 %2e%2', 'scope', 400, 'NON_CANONICAL_PATH', ()) x 2
+      ('test', 'OC W12 %2e%2', 'user', 400, 'NON_CANONICAL_PATH', ()) x 2
+      ('test', 'OC W14 ERASU', 'noscope', 400, 'NON_CANONICAL_PATH', ()) x 2
+      ('test', 'OC W14 ERASU', 'scope', 400, 'NON_CANONICAL_PATH', ()) x 2
+      ('test', 'OC W14 ERASU', 'user', 400, 'NON_CANONICAL_PATH', ()) x 2
+      ('test', 'OC origin GE', 'noscope', 403, 'INSUFFICIENT_SCOPE', ()) x 2
+      ('test', 'OC origin GE', 'scope', 200, None, ('getErasureStatusByExternalRef',)) x 2
+      ('test', 'OC origin GE', 'user', 403, 'INSUFFICIENT_SCOPE', ()) x 2
+  head test | W no-scope (noscope/user/noemail_noscope): {(400, 'NON_CANONICAL_PATH', 0): 96, (403, 'INSUFFICIENT_SCOPE', 0): 6, (405, 'METHOD_NOT_ALLOWED', 0): 1}
+  head test | W with scope: {(400, 'NON_CANONICAL_PATH', 0): 32, (200, None, 1): 2, (405, 'METHOD_NOT_ALLOWED', 0): 1}
+  head test | door no-scope: {(403, 'INSUFFICIENT_SCOPE', 0): 43, (400, 'NON_CANONICAL_PATH', 0): 2}
+  head test | door scope: {(200, None, 1): 35, (400, 'NON_CANONICAL_PATH', 0): 2}
+  head test | not-door spellings N* (both toks): {(200, None, 1): 26}
+  head test | originate routes O* non-door: {(200, None, 1): 30} | O* door routes: {(403, 'INSUFFICIENT_SCOPE', 0): 2, (200, None, 1): 2}
+  head test | undetermined: {(400, 'NON_CANONICAL_PATH', 0): 19}
+  head prod | W no-scope (noscope/user/noemail_noscope): {(400, 'NON_CANONICAL_PATH', 0): 90, (400, 'BAD_REQUEST', 0): 6, (403, 'INSUFFICIENT_SCOPE', 0): 6, (405, 'METHOD_NOT_ALLOWED', 0): 1}
+  head prod | W with scope: {(400, 'NON_CANONICAL_PATH', 0): 30, (400, 'BAD_REQUEST', 0): 2, (200, None, 1): 2, (405, 'METHOD_NOT_ALLOWED', 0): 1}
+  head prod | door no-scope: {(403, 'INSUFFICIENT_SCOPE', 0): 41, (400, 'BAD_REQUEST', 0): 2, (400, 'NON_CANONICAL_PATH', 0): 2}
+  head prod | door scope: {(200, None, 1): 33, (400, 'BAD_REQUEST', 0): 2, (400, 'NON_CANONICAL_PATH', 0): 2}
+  head prod | not-door spellings N* (both toks): {(200, None, 1): 26}
+  head prod | originate routes O* non-door: {(200, None, 1): 30} | O* door routes: {(403, 'INSUFFICIENT_SCOPE', 0): 2, (200, None, 1): 2}
+  head prod | undetermined: {(400, 'NON_CANONICAL_PATH', 0): 13, (400, 'BAD_REQUEST', 0): 6}
+  head grace: [('D01 origin POS', 200, None, 1, 1), ('D02 origin GET', 200, None, 1, 1), ('D03 abs POST', 200, None, 1, 1), ('D04 abs GET re', 200, None, 1, 1), ('D10 %65rasures', 200, None, 1, 1), ('D13 erasures;x', 200, None, 1, 1), ('D15 ERASURES', 200, None, 1, 1), ('U01 %zzrasures', 400, 'NON_CANONICAL_PATH', 0, 0), ('W01 erasures/.', 400, 'NON_CANONICAL_PATH', 0, 0), ('W02 erasures/%', 400, 'NON_CANONICAL_PATH', 0, 0), ('W03 erasures/.', 400, 'NON_CANONICAL_PATH', 0, 0), ('W04 erasures/%', 400, 'NON_CANONICAL_PATH', 0, 0), ('W07 abs erasur', 400, 'NON_CANONICAL_PATH', 0, 0), ('N01 %63onsent/', 200, None, 1, 0)]
+  head limiter: [('L1 origin admitted', 200, None, '99'), ('L2 abs admitted', 200, None, '98'), ('L3 %65 admitted', 200, None, '97'), ('L4 abs refused 403', 403, 'INSUFFICIENT_SCOPE', '96'), ('L5 400 NON_CANONICAL', 400, 'NON_CANONICAL_PATH', None), ('L6 non-door consent', 200, None, '95'), ('L7 W01 erasures/..', 400, 'NON_CANONICAL_PATH', None), ('L8 origin refused 403', 403, 'INSUFFICIENT_SCOPE', '94')]
+  head urlspy probes: [('POST', '/api/gdpr/erasures', 'scope', 200, None, 1), ('POST', '.0.0.1/api/gdpr/erasures', 'scope', 200, None, 1), ('POST', '/api/gdpr/%65rasures', 'scope', 200, None, 1), ('POST', '/api/gdpr/erasures?x=1', 'scope', 200, None, 1), ('POST', '/api/gdpr//erasures', 'scope', 200, None, 1), ('POST', '/api/gdpr/erasures', 'noscope', 403, 'INSUFFICIENT_SCOPE', 0), ('POST', '/api/gdpr/%65rasures', 'noscope', 403, 'INSUFFICIENT_SCOPE', 0), ('POST', '/api/gdpr/%zzrasures', 'scope', 400, 'NON_CANONICAL_PATH', 0), ('GET', '/api/gdpr/consent/check', 'scope', 200, None, 1), ('GET', '/api/gdpr/erasures/..', 'noscope', 400, 'NON_CANONICAL_PATH', 0)]
+  head originate stage (mode, id, tok, status, code, handler calls) x count:
+      ('production', 'OC CTRL %65r', 'noscope', 403, 'INSUFFICIENT_SCOPE', ()) x 2
+      ('production', 'OC CTRL %65r', 'scope', 404, None, ()) x 2
+      ('production', 'OC CTRL %65r', 'user', 403, 'INSUFFICIENT_SCOPE', ()) x 2
+      ('production', 'OC CTRL cons', 'noscope', 404, None, ()) x 2
+      ('production', 'OC CTRL cons', 'scope', 404, None, ()) x 2
+      ('production', 'OC CTRL cons', 'user', 404, None, ()) x 2
+      ('production', 'OC W01 ..', 'noscope', 400, 'NON_CANONICAL_PATH', ()) x 2
+      ('production', 'OC W01 ..', 'scope', 400, 'NON_CANONICAL_PATH', ()) x 2
+      ('production', 'OC W01 ..', 'user', 400, 'NON_CANONICAL_PATH', ()) x 2
+      ('production', 'OC W02 %2e%2', 'noscope', 400, 'NON_CANONICAL_PATH', ()) x 2
+      ('production', 'OC W02 %2e%2', 'scope', 400, 'NON_CANONICAL_PATH', ()) x 2
+      ('production', 'OC W02 %2e%2', 'user', 400, 'NON_CANONICAL_PATH', ()) x 2
+      ('production', 'OC W03 ..;x', 'noscope', 400, 'NON_CANONICAL_PATH', ()) x 2
+      ('production', 'OC W03 ..;x', 'scope', 400, 'NON_CANONICAL_PATH', ()) x 2
+      ('production', 'OC W03 ..;x', 'user', 400, 'NON_CANONICAL_PATH', ()) x 2
+      ('production', 'OC W04 %2e%2', 'noscope', 400, 'NON_CANONICAL_PATH', ()) x 2
+      ('production', 'OC W04 %2e%2', 'scope', 400, 'NON_CANONICAL_PATH', ()) x 2
+      ('production', 'OC W04 %2e%2', 'user', 400, 'NON_CANONICAL_PATH', ()) x 2
+      ('production', 'OC W05 .%2e', 'noscope', 400, 'NON_CANONICAL_PATH', ()) x 2
+      ('production', 'OC W05 .%2e', 'scope', 400, 'NON_CANONICAL_PATH', ()) x 2
+      ('production', 'OC W05 .%2e', 'user', 400, 'NON_CANONICAL_PATH', ()) x 2
+      ('production', 'OC W10 ../', 'noscope', 400, 'BAD_REQUEST', ()) x 2
+      ('production', 'OC W10 ../', 'scope', 400, 'BAD_REQUEST', ()) x 2
+      ('production', 'OC W10 ../', 'user', 400, 'BAD_REQUEST', ()) x 2
+      ('production', 'OC W12 %2e%2', 'noscope', 400, 'NON_CANONICAL_PATH', ()) x 2
+      ('production', 'OC W12 %2e%2', 'scope', 400, 'NON_CANONICAL_PATH', ()) x 2
+      ('production', 'OC W12 %2e%2', 'user', 400, 'NON_CANONICAL_PATH', ()) x 2
+      ('production', 'OC W14 ERASU', 'noscope', 400, 'NON_CANONICAL_PATH', ()) x 2
+      ('production', 'OC W14 ERASU', 'scope', 400, 'NON_CANONICAL_PATH', ()) x 2
+      ('production', 'OC W14 ERASU', 'user', 400, 'NON_CANONICAL_PATH', ()) x 2
+      ('production', 'OC origin GE', 'noscope', 403, 'INSUFFICIENT_SCOPE', ()) x 2
+      ('production', 'OC origin GE', 'scope', 404, None, ()) x 2
+      ('production', 'OC origin GE', 'user', 403, 'INSUFFICIENT_SCOPE', ()) x 2
+      ('test', 'OC CTRL %65r', 'noscope', 403, 'INSUFFICIENT_SCOPE', ()) x 2
+      ('test', 'OC CTRL %65r', 'scope', 404, None, ()) x 2
+      ('test', 'OC CTRL %65r', 'user', 403, 'INSUFFICIENT_SCOPE', ()) x 2
+      ('test', 'OC CTRL cons', 'noscope', 400, 'BAD_REQUEST', ()) x 2
+      ('test', 'OC CTRL cons', 'scope', 400, 'BAD_REQUEST', ()) x 2
+      ('test', 'OC CTRL cons', 'user', 400, 'BAD_REQUEST', ()) x 2
+      ('test', 'OC W01 ..', 'noscope', 400, 'NON_CANONICAL_PATH', ()) x 2
+      ('test', 'OC W01 ..', 'scope', 400, 'NON_CANONICAL_PATH', ()) x 2
+      ('test', 'OC W01 ..', 'user', 400, 'NON_CANONICAL_PATH', ()) x 2
+      ('test', 'OC W02 %2e%2', 'noscope', 400, 'NON_CANONICAL_PATH', ()) x 2
+      ('test', 'OC W02 %2e%2', 'scope', 400, 'NON_CANONICAL_PATH', ()) x 2
+      ('test', 'OC W02 %2e%2', 'user', 400, 'NON_CANONICAL_PATH', ()) x 2
+      ('test', 'OC W03 ..;x', 'noscope', 400, 'NON_CANONICAL_PATH', ()) x 2
+      ('test', 'OC W03 ..;x', 'scope', 400, 'NON_CANONICAL_PATH', ()) x 2
+      ('test', 'OC W03 ..;x', 'user', 400, 'NON_CANONICAL_PATH', ()) x 2
+      ('test', 'OC W04 %2e%2', 'noscope', 400, 'NON_CANONICAL_PATH', ()) x 2
+      ('test', 'OC W04 %2e%2', 'scope', 400, 'NON_CANONICAL_PATH', ()) x 2
+      ('test', 'OC W04 %2e%2', 'user', 400, 'NON_CANONICAL_PATH', ()) x 2
+      ('test', 'OC W05 .%2e', 'noscope', 400, 'NON_CANONICAL_PATH', ()) x 2
+      ('test', 'OC W05 .%2e', 'scope', 400, 'NON_CANONICAL_PATH', ()) x 2
+      ('test', 'OC W05 .%2e', 'user', 400, 'NON_CANONICAL_PATH', ()) x 2
+      ('test', 'OC W10 ../', 'noscope', 400, 'NON_CANONICAL_PATH', ()) x 2
+      ('test', 'OC W10 ../', 'scope', 400, 'NON_CANONICAL_PATH', ()) x 2
+      ('test', 'OC W10 ../', 'user', 400, 'NON_CANONICAL_PATH', ()) x 2
+      ('test', 'OC W12 %2e%2', 'noscope', 400, 'NON_CANONICAL_PATH', ()) x 2
+      ('test', 'OC W12 %2e%2', 'scope', 400, 'NON_CANONICAL_PATH', ()) x 2
+      ('test', 'OC W12 %2e%2', 'user', 400, 'NON_CANONICAL_PATH', ()) x 2
+      ('test', 'OC W14 ERASU', 'noscope', 400, 'NON_CANONICAL_PATH', ()) x 2
+      ('test', 'OC W14 ERASU', 'scope', 400, 'NON_CANONICAL_PATH', ()) x 2
+      ('test', 'OC W14 ERASU', 'user', 400, 'NON_CANONICAL_PATH', ()) x 2
+      ('test', 'OC origin GE', 'noscope', 403, 'INSUFFICIENT_SCOPE', ()) x 2
+      ('test', 'OC origin GE', 'scope', 200, None, ('getErasureStatusByExternalRef',)) x 2
+      ('test', 'OC origin GE', 'user', 403, 'INSUFFICIENT_SCOPE', ()) x 2
+== (5) head vs r2 ignoring rlRemaining (status, code, hits, location, originateCalls, headerErr, graceSpyCalls equal?)
+  non-limiter row diffs r2->head 0 | missing 0
+  non-limiter originate row diffs r2->head 0
+  head test+prod rows with an X-RateLimit-Remaining header: 288 without: 338
+  head rows WITHOUT the header by (status, code): {(403, 'INSUFFICIENT_SCOPE'): 12, (401, 'UNAUTHORIZED'): 6, (400, 'NON_CANONICAL_PATH'): 290, (405, 'METHOD_NOT_ALLOWED'): 4, (400, 'BAD_REQUEST'): 18, (307, None): 8}

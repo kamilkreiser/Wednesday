@@ -1,0 +1,165 @@
+ultrathink
+
+You are the fleet QA agent running ONE TIER 1 ROUND 2 DELTA gate (round 2 of 2 under the cap) over Secuura/Blockchain PR #1019 (KS-1187, Seat A) at
+head 82f09c8bd1bfab28e4d23c180cbaffea251685be. Round 1 (head 8b8996f8b) returned NO GO on F-1019-1 (Major, NEW, widened by #1019): the canonical
+door verdict popped the door segment for a dot segment after it (`GET /api/gdpr/erasures/..`, `%2e%2e`, `.%2e`, `..;x`, `%2e%2e%2fabc` and 11 more),
+judged `not-door`, and the gateway forwarded the RAW path, which originate's real router sends to `/erasures/:externalRef` with the reference `..`: a
+connector WITHOUT subjects:erase reached the erasure status handler, test AND production. Plus F-1019-2 (Minor: no cell told Tightening B's router
+caseSensitive read from a constant) and F-1019-3 (Minor: the "req.url restored" control could not fail for its reason). The round-2 commit 4d551f104
+(parent 8b8996f8b): services/api-gateway/src/routes/proxy.ts +13 -3 (`namesDoor`: a `.` or `..` segment answers `undetermined` -> 400 NON_CANONICAL_PATH
+once the RESOLVED first segment names the door, under the door router's case rule) and the ks1187 test +148 (31 new cells: dot verdicts, real-app
+test + production cells, an F-1019-2 case-sensitive-router bare app, an F-1019-3 restore bare app). The head 82f09c8bd is a MERGE of develop f8c7aaa39
+(#1017's and #1020's squashes) into 4d551f104, no file overlap claimed. TIER 1 (Wednesday's ruling): an authorisation door on a GDPR erasure route.
+ROUND 2 of 2 is the CAP: a NO GO ships the closed instances and tickets the residue. No rendered surface changes: say whether the real-browser half of
+tier 1 applies.
+
+Read your brief FIRST and in full, then plan:
+/Volumes/DevMASTER/WEDNESDAY/2_Project_Files/fleet/qa-agent/briefs/2026-09-17_secuura-1019r2-ks1187-tier1.md
+Then the charter it names, the seat's ROUND-2 READY (gatesets/2026-09-17_gate1019/mail_1019_round2_ready.md), Wednesday's fix-round mail
+(gatesets/2026-09-17_gate1019/nogo_1019_fixround.md), the round-1 verdict relay (gatesets/2026-09-17_gate1019/verdict_1019.md) and the ROUND-1 REPORT,
+whole — the QA agent has no inbox; the prior round lives only there:
+/Volumes/DevMASTER/!CODING/Testing Agent MAIN/projects/secuura/reports/2026-09-17-ks1187-1019-8b8996f8b-tier1-r1/
+Its harness (evidence/qa1019-gate-probe.test.ts, sha256 c954d9cf9cf24277…) is the instrument item 1 re-runs VERBATIM, and its rows
+(evidence/rows_head.json sha256 ee8da02767327387…, evidence/rows_origin_head.json 32a94464bb5070e0…) are the external column your r1 must equal.
+
+Head (git ls-remote 16:44:13, 16:44:54, 16:48:17, 17:11:10 AEST and the PR API 16:48:57 agree; the launcher re-asserts it):
+  #1019 82f09c8bd1bfab28e4d23c180cbaffea251685be = refs/pull/1019/head = feature/ks-1187-security-an-absolute-form-request-target-bypasses-the-ks-843
+  four commits: 50a4b749a, 8b8996f8b (round-1 head), 4d551f104 (round 2), 82f09c8bd (merge of develop f8c7aaa39; parents 4d551f104 + f8c7aaa39).
+  r1 -> r2 delta: routes/proxy.ts db1534753 -> 795ae7ca3; ks1187 test 389e51e1d -> 76c0137ee; ks843 scope-gate test 06b499605 unchanged.
+  develop = f8c7aaa39dabfe6a3916e5be55d9ccd752e7d8ed = the head's merge-base AND an ANCESTOR of the head. compare develop...head = merge_base
+  f8c7aaa39, ahead 4, behind 0, files 3. Trees you run: r1 8b8996f8b, r2 4d551f104, head 82f09c8bd, develop f8c7aaa39, and merged = head + a local
+  --no-ff merge of the then-current develop (never pushed). Drafter merged-tree OID (merge-tree --write-tree 4d551f104 f8c7aaa39 in its OWN clone =
+  the head tree = the seat's prediction): 99df1503e4f18ac444baed015659fecbb912bbb0 — name yours. If develop moves, judge by content, name every tree,
+  and re-run items 1, 2 and 7 on the merged tree.
+Repo:    /Volumes/DevMASTER/!CODING/Secuura/Blockchain/2_Project_Files  (READ-ONLY — git clone --shared --no-checkout by SHA into your own
+  fresh mktemp -d; git write verbs there only, from a script file; never merge-tree --write-tree or git apply in the checkout (both write); never enter
+  any seat's worktree (Seat A's raise-0916-a; Seat B may be live) or another gate's clone (a #1020 gate may be live); never vitest inside the checkout;
+  pin by SHA, never origin/*. Record the checkout's porcelain count and worktree count before and after: they must be equal — other sessions moved
+  refs and worktrees during drafting, so attribute nothing to yourself without evidence)
+Farm node_modules per ENTRY in your clone (R-6 from the #1009 gate): Blockchain/Dev/node_modules (987), services/api-gateway/node_modules (8) and
+  packages/shared/node_modules (8), each per entry, .vite/.vitest/.cache skipped, @secuura/* relinked into your tree; shared dist built per tree,
+  IN TREE asserted. NEVER link a node_modules tree wholesale — not for any package; create no node_modules where nothing runs.
+  Node runs only with cwd inside your clone (a node run from another root drops a stray logs/ there).
+
+You are FINDINGS-ONLY. You never fix, never merge, never push, never deploy, never comment, never file, never tick an
+ack box, never `@`, never write to Linear or GitHub, and nothing goes to Peter or Stuart.
+
+NEVER run a push, the real pre-push hook, or preflight.sh inside the Secuura checkout or any of its worktrees.
+
+NEVER print a credential value, and never open, read or copy a secrets file into output — a script may read GH_TOKEN / LINEAR_API_KEY by
+NAME from /Volumes/DevMASTER/!CODING/Secuura/Blockchain/4_Credentials/.env and AGENTMAIL_API_KEY by NAME from
+/Volumes/DevMASTER/WEDNESDAY/4_Credentials/.env for the calls the brief allows (GitHub GET, Linear query, the one verdict mail), and never
+echoes them. Count, never echo. RSA keys and JWTs in your probe are THROWAWAY, generated per run.
+
+NO shared docker stack, no :6882 / :7082 slot, no kintsugi, no demo, no az, NEVER the wallet mnemonic (KS-535 HOLD). This gate needs NO
+container: the REAL index.ts app in-process (real normalisePath, real security detector, real versioning, real erasure door and requireScopeOrRole,
+real proxy) with ../db mocked and every *_SERVICE_URL as ONE loopback recording stub with an upstream HIT COUNTER (the gateway fetches
+/.well-known/jwks.json from AUTH_SERVICE_URL: those are NOT upstream hits), and originate's REAL gdprRouter in-process as the upstream for the
+originate stage. Run `docker info` ONCE and print its rc on its own line (UP is NOT permission; create no container). LOOPBACK ONLY: every
+listener binds 127.0.0.1:0. ANY LISTENER YOUR RUNS START, YOU END: identify it by port + argv + cwd, SIGTERM that pid, never a pattern kill, never
+pid 1, and recount after — the same for any login_stub.mjs process YOUR runs started (KS-1201's preflight leak exists; do not add to it; at drafting
+16 login_stub.mjs listeners from the #1020 drafter and gate clones were alive and are NOT yours: count them, leave them); quote an lsof TCP LISTEN
+census (+ cwd and argv per node pid + the login_stub.mjs count) at start and close. Absolute-form request targets and every dot / percent / ;param
+spelling ARE this gate's subject: probe them on the in-process app with raw http.request (fetch and URL normalise dot segments away). Do NOT probe
+through a real front end (nginx / Caddy / Container Apps ingress / any edge) and do not stand one up: the edge is NOT TESTED. Set
+UNHANDLED_REJECTION_MODE=survive before importing the app. No Akto, no k6, no Playwright, no Schemathesis run (Kam's 40% cap; NOT COMMISSIONED) —
+YOU rule whether Schemathesis/Akto are REQUIRED, with the measured reason. Time-box 40 minutes of work.
+
+What Wednesday requires (brief items 1-10; each carries drafter predictions marked predicted-by: drafter):
+
+1. F-1019-1 CLOSED ON THE REAL APP, BOTH MOUNTS (/api/gdpr in NODE_ENV=test AND /api/v1/gdpr in NODE_ENV=production), for every dot-segment
+   spelling after the door: plain, %2e, mixed case %2E, `;params`, encoded slash, absolute-form, a query or fragment after the dot, a prefix that
+   resolves to the door, and the mount itself spelled oddly. Re-run round 1's harness VERBATIM (assert its sha; all default stages + the originate
+   stage) on r1 / r2 / head / merged, with round 1's own rows as an external column: your r1 must equal round 1's rows, or your instrument is not
+   round 1's. Then hunt beyond round 1's census, replicated 2x. A no-scope row answering other than 400/401/403/405, or any upstream hit or originate
+   handler call for a no-scope principal = F-1019-1 STILL OPEN (Major). Drafter (measured): r1 column byte-identical to round 1's rows; r1 -> r2
+   266 row diffs, every one a refusal gained (W01-W17 + W07 -> 400 NON_CANONICAL_PATH, 0 hits, both modes; D34 erasures/. and D35 erasures/abc/..
+   403 -> 400); originate stage r2 0 handler calls on any W row; 7 extra spellings FORWARDED at r1 (e.g. erasures/%2e%2e;x=1, ./erasures/..,
+   erasures/..#frag, /API/GDPR/erasures/.., /api//gdpr/erasures/..) are 400 with 0 hits at r2. Predicted CLOSED.
+2. NO LEGITIMATE gdpr route or dotted erasure reference is refused: the 17 originate routes and the 26 not-door spellings (the seat did NOT re-run
+   this census) 200 + 1 hit on every tree and mode; dotted references (leading dots, a.b, trailing dot, ref..v2, W18 %2e%2e%3bx, ..%3bx, %252e%252e)
+   403 without / 200 + 1 hit with the scope. The one class change erasures/abc/..: 403 -> 400 without the scope, 0 upstream hits, confirmed
+   refused either way — AND state the WITH-scope flip the READY does not: drafter (measured) every dot-after-door spelling WITH the scope goes
+   200 + 1 hit (r1) -> 400 (r2). A real caller's route or reference refused = Blocker; rule the with-scope flip (predicted Record).
+3. F-1019-2 (the router's caseSensitive read) and F-1019-3 (req.url restored for the catch-all): their cells red under the seat's tampers
+   (GHARDFALSE 1, GNORESTORE 2) AND under a gate-authored tamper the seat did not write, per finding. Drafter (measured): G-READOUTER (the factory
+   router read instead of the door router) 0 reds — the doMock makes every Router case-sensitive; G-RESTORE-UNDONE (the restore line kept, then
+   undone) exactly 1 red, the F-1019-3 cell; G-RESTORE-PARAMS 1 red, the ks843 text pin only. Say which property each cell pins and cannot see.
+4. THE SEAT'S UNEXPLAINED MEASUREMENT: production refusals carry the door's NON_CANONICAL_PATH, not security.ts's BAD_REQUEST. READ why the
+   suspicious-path detector passes them (security.ts createDetectSuspiciousRequests, config/services.ts suspiciousPatterns, index.ts proxyPaths /
+   shouldParseBody / mount order) and whether the ordering is load-bearing: neuter the detector's `../` pattern and re-run the production stage.
+   Drafter (READ + measured): the detector runs only on paths outside proxyPaths (so on /api/v1/gdpr in any NODE_ENV, never on /api/gdpr) and matches
+   a literal `../` only; with it neutered 0 whole-suite reds and every row it answered is refused by the door, 0 hits — NOT load-bearing. Warning:
+   under that tamper the tail of the production stage answered 429 (the global per-IP limiter mounts after the detector) — the instrument.
+5. THE MERGE COMMIT: prove the PR's 3 files byte-identical to 4d551f104 and develop's 6 files to f8c7aaa39 at 82f09c8bd (with a control that
+   fires); re-predict the merged tree over current develop in YOUR clone (drafter 99df1503e = the head tree); head vs r2 on the harness, every
+   diff explained (drafter: X-RateLimit-Remaining only, #1017's limiter on develop; limiter L7 erasures/.. now 400 and not counted).
+6. ROUND-1 STANDING ITEMS THE DELTA COULD MOVE (head vs r1): the absolute-form bypass stays closed; every named spelling refused; Tightening A
+   (which refusal is which, and whether a dot-after-door 400 is "undetermined" by its words); Tightening B; ONE canonicaliser (drafter: 1
+   erasureDoorVerdict definition, 1 decodeURIComponent in api-gateway src/, 0 in the test); the WITH-scope connector; the grace (door rows 1 line,
+   W rows now 400); the x-user-email 500 (KS-744 class) unchanged; the 400 before authentication and during the grace.
+7. TAMPERS — the seat's 8 re-derived EXACTLY at HEAD — T0 0 · QWFIX 24 · GHARDFALSE 1 · GNORESTORE 2 · GONLYDOTDOT 1 · GCASEFOLD 2 · GWIDE 7 ·
+   TI 0 — each on the WHOLE api-gateway suite, denominator asserted 55 / 524, pending 0, project tsc rc per row (a tamper that does not compile is
+   VOID; state every form), sha-restored; PLUS the drafter's (measured, all tsc 0: G-READOUTER 0, G-HARDTRUE 3, G-RESTORE-UNDONE 1,
+   G-RESTORE-PARAMS 1, G-NODETECT 0) and at least one of your own aimed at F-1019-1 from a direction the seat's forms do not take. Red-proof:
+   drafter (measured) head with proxy.ts = round-1 bytes -> 70 run, 46 green, 24 red, all AssertionError (the READY exactly); round 1's 39-cell
+   test over the round-2 proxy -> 39 / 39.
+8. SUITES, tsc, eslint: api-gateway r1 54/481 · r2 54/512 · head 55/524 · develop 54/454 · merged <yours>, tsc -p rc 0 each; packages/shared 44/851
+   at head; THE TEST-INCLUDING tsc PROGRAM (not tsc -p, which excludes src/__tests__) on r1 / r2 / head / develop with --listFilesOnly proof the
+   ks1187 test is in it and a control that the project program excludes it, NEW only, a planted control (+1): 0 errors in the touched files
+   (drafter: 31 lines / 11 files on every tree, 0 in touched files, NEW 0). eslint by rule AND message with a firing control (drafter: proxy.ts 4
+   no-unused-vars r1 = r2 = head; the ks1187 test 0).
+9. LINEAR / GITHUB at run time and immediately before the mail: attachmentsForURL(pull/1019) = KS-1187 contributes AND KS-843 contributes, no
+   closes on either (controls pull/1017 -> KS-1195 contributes; pull/99999 -> 0); 0 closing phrases in the title, body and all four commit messages
+   (planted controls); KS-1187 stays In Progress on merge (§5f: the edge is unmeasured); no request-target spelling in the title or description.
+10. CARRY-FORWARD per finding CLOSED / STILL OPEN / NEW, each SHIPS-WITH or TICKET — F-1019-1, F-1019-2, F-1019-3 and the round-1 Records — plus
+   the Schemathesis/Akto ruling with its measured reason, the checkout bounds, and NOT TESTED at equal prominence: the edge, a real originate
+   service (its own /api/v1 handling), the platform suites, preflight legs 3/4/8.
+
+LEAD WITH item 1 and the drafter's disagreements 1-3 (brief §2): is F-1019-1 CLOSED for every spelling and mount you can build, with your r1
+column equal to round 1's rows; does any legitimate route or dotted reference change; and why the production 400 is the door's code.
+
+Hygiene: /bin/bash here is 3.2 — write runners in Python. zsh: no PIPESTATUS (`cmd > out 2>&1; rc=$?`), no timeout on macOS, `set -- $var`
+does not word-split, `"$VAR:path"` applies history modifiers (write `"${VAR}:path"`), never begin a line with `=====`. Your tool shell's grep may be a
+function: /usr/bin/grep -i with a same-file positive control; `git grep -c` prints nothing for a zero — silence is unread, not 0. Never `cd` in your
+own tool calls; absolute paths; git write verbs only inside script files. stderr is never discarded. Clocks from `date`, never estimated. Every
+scripted edit asserts its anchor count = 1 and a marker. Never edit index.ts for a probe; mount probes on a bare app. Quote the Secuura checkout's
+porcelain count, .git/config sha256, for-each-ref count, .git/worktrees count, origin develop SHA,
+refs/pull/1019/head and the checkout branch at start, mid and close as THREE timestamped readings, plus the checkout's .vite
+readings; if refs/pull/1019/head moves, STOP — the brief is about a different SHA. develop moving is expected; judge it by content, name it.
+Never `rm`: fresh mktemp -d per attempt; quarantine scratch tests and configs by rename. No container is created; never touch a
+secuura-* container.
+Do no memory maintenance of your own project's memory store inside this session.
+
+Report FOUND / TESTED / HOW, with controls, into
+<the report directory>
+(NOT-TESTED.written-first.md written FIRST, BEFORE any run; then report.md and evidence/): the trees with OIDs; round 1's harness rows per tree
+and mode with round 1's own rows as the external column and the equality proof; your class hunt and mount-prefix rows with the originate stage;
+the legitimate-route census and dotted references; the with-scope flip; the detector READ and the neutered-detector rows; F-1019-2 / F-1019-3
+and what their cells pin; the merge identity and merged-tree OID; the full tamper table with forms, tsc rc and VOID rows; the red-proof; suites,
+the test-including tsc program and eslint; Linear; the Schemathesis/Akto ruling; the listener census start / close; the CLOSED / STILL OPEN / NEW
+table; and what you did NOT test at the same prominence as the findings. Every finding carries its evidence class (MEASURED AT RUNTIME / PROBED /
+READ ONLY / RELAYED), severity, target (PR or TICKET), SHIPS-WITH or TICKET, disposition, and its oracle. Name every prediction slip against its
+predictor (the READY, the seat, the drafter, Wednesday, the round-1 gate).
+Client-facing communication = ticket comments only, and not from you; anything needing a push goes to Wednesday as an escalation candidate.
+Never delete; cleanup means quarantine.
+Verdict: ONE line — GO, GO WITH FINDINGS, or NO GO — on 82f09c8bd1bfab28e4d23c180cbaffea251685be, as the delta over round-1 head 8b8996f8b (the
+round-2 commit 4d551f104) and over develop f8c7aaa39, AND on the merged tree (name the develop and the merged-tree OID). Round 2 of 2: a NO GO ships
+the closed instances and tickets the residue — say which is which. Then plain statements on items 1-10 and the CLOSED / STILL OPEN / NEW table.
+Give the merge seat its MERGE ADDENDUM line: "squash 82f09c8bd onto develop <then-current develop; f8c7aaa39 at draft close = the head's
+merge-base> (merged tree <OID>; drafter 99df1503e = the head tree); #1019 attaches to KS-1187 and KS-843, both linkKind contributes, no closes —
+KS-1187 stays In Progress on merge (§5f: the edge's request-target handling is unmeasured); KS-843 unchanged; equality targets after the squash:
+proxy.ts blob 795ae7ca3 / ks1187 test 76c0137ee / ks843 scope-gate test 06b499605; api-gateway 54/454 at f8c7aaa39 -> 55/524 at head -> <merged
+n/n> (re-measure; drafter 55/524); packages/shared 44/851; dispositions: F-1019-1 <..>, F-1019-2 <..>, F-1019-3 <..>, each SHIPS-WITH or TICKET;
+NEW: <yours>; Records for KS-1187's facts comment at merge: the 400 before authentication and during the grace, the ks843 text pin, the x-user-email
+500 (KS-744 class), <yours>" — plus any finding with its target.
+
+MAIL YOUR VERDICT to wednesday-agent@agentmail.to when the pass is complete. Your pane holds ~19 lines of alternate screen with no
+scrollback, so a verdict that stays in the pane is one pane-close from being lost -- this is not a formality, it is the only durable
+copy; the verdict MAIL is the END STATE and the wait signal. Send it FROM coagent@agentmail.to. Subject, EXACTLY:
+[QA -> Wednesday] TIER 1 GATE #1019 ROUND 2 (KS-1187) 82f09c8bd — <GO | GO WITH FINDINGS | NO GO>
+(The QA project has no send_brief.sh of its own: POST https://api.agentmail.to/v0/inboxes/coagent@agentmail.to/messages/send with JSON
+{"to": ["wednesday-agent@agentmail.to"], "subject": "...", "text": "..."} and Authorization: Bearer $AGENTMAIL_API_KEY, the key by NAME
+from Wednesday's .env, never echoed. Build the body from a template file with no shell interpolation and assert the backtick spans survived.
+Confirm the API answered 2xx and quote the message id in your final pane line. Timestamps in the mail come from `date`, never estimated.
+The MAIL is the end state.)

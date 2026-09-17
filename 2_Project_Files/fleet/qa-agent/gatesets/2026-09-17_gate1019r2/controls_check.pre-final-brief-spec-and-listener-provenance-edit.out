@@ -1,0 +1,79 @@
+controls_check 2026-09-17 17:17:45 AEST | launcher sha256 99f68ccda6c561d7
+brief/prompt replacements: {'nosubject': 1, 'notier': 3, 'nosha': 4, 'nomail': 1, 'nofarm': 1, 'noreportdir': 1, 'nonottested': 1, 'nor1report prompt': 1, 'nor1report brief': 1, 'noaddendum': 1, 'nodisposition': 5, 'noround2': 3}
+proxy.ts fixtures (git blob): {'INTO the door region (the door chain)': '2726348e2', 'INTO the import-to-Factory region (a comment line)': '55368b4d8', 'a region anchor duplicated (anchor count 2)': 'e7f2acef2', 'OUTSIDE both regions (the ANCHORING banner)': '19af31b66'}
+pos_proxy_r2_blob_LANDED.ts git blob 795ae7ca3
+pos_proxy_r1_blob_LANDED.ts git blob db1534753
+N1 missing subject: prompt without the exact ROUND 2 verdict subject | stderr: REFUSING: prompt does not carry the exact ROUND 2 verdict subject, the coagent@ sender and the wednesday-agent@ recipient
+rc=23
+expected 23: OK
+N2 missing tier: brief without TIER 1 | stderr: REFUSING: brief and prompt disagree about the tier
+rc=7
+expected 7: OK
+N3 missing SHA: brief without the head SHA | stderr: REFUSING: brief or prompt does not name the head SHA 82f09c8bd1bfab28e4d23c180cbaffea251685be — a gate about another SHA is another gate
+rc=20
+expected 20: OK
+N4 missing mail step: prompt without MAIL YOUR VERDICT | stderr: REFUSING: prompt does not tell the agent to MAIL its verdict
+rc=12
+expected 12: OK
+N5 missing per-entry farm: prompt without node_modules per ENTRY | stderr: REFUSING: prompt does not require node_modules farmed per ENTRY (a wholesale link can write through to the checkout .vite cache)
+rc=22
+expected 22: OK
+N6 head override = 4d551f104 (the round-2 commit, not the branch head) | stderr: REFUSING: #1019 ROUND 2 — 4d551f1046b55209b9ca5e4281e2cb9a868f67c2 is not at refs/heads/feature/ks-1187-security-an-absolute-form-request-target-bypasses-the-ks-843 on origin — the head moved; the brief is about a different SHA
+rc=6
+expected 6: OK
+N7 develop = the #1019 head itself (proxy.ts 795ae7ca3 LANDED) | stderr: REFUSING: develop services/api-gateway/src/routes/proxy.ts blob 795ae7ca3 = #1019 round-2 own — #1019 has landed; this ROUND 2 brief is stale (develop 82f09c8bd1bfab28e4d23c180cbaffea251685be) — re-pin deliberately: a different brief
+rc=19
+expected 19 + text 'has landed': OK
+N8 develop = 4d551f104, the round-2 commit (proxy.ts 795ae7ca3 LANDED) | stderr: REFUSING: develop services/api-gateway/src/routes/proxy.ts blob 795ae7ca3 = #1019 round-2 own — #1019 has landed; this ROUND 2 brief is stale (develop 4d551f1046b55209b9ca5e4281e2cb9a868f67c2) — re-pin deliberately: a different brief
+rc=19
+expected 19 + text 'round-2 own': OK
+N9 develop = 8b8996f8b, the round-1 head (proxy.ts db1534753 LANDED) | stderr: REFUSING: develop services/api-gateway/src/routes/proxy.ts blob db1534753 = #1019 round-1 own — #1019 has landed; this ROUND 2 brief is stale (develop 8b8996f8b290ef55c35721c30f8671f982fa5a91) — re-pin deliberately: a different brief
+rc=19
+expected 19 + text 'round-1 own': OK
+N10 develop = fa887f382, round 1 develop (auth.ts 20311010d: a blob nobody pinned) | stderr: REFUSING: origin develop is at fa887f382b212b8da4a0a4a556bacb05ea34daaa (pinned f8c7aaa39dabfe6a3916e5be55d9ccd752e7d8ed) and the move is not provably disjoint: GUARDED develop services/api-gateway/src/middleware/auth.ts blob 20311010d — a version nobody pinned — confirm the delta, then re-pin deliberately (launcher DEVELOP_SHA / JUDGED blobs + brief TARGET + prompt)
+rc=18
+expected 18 + text 'nobody pinned': OK
+N11 develop = d7e95cd9f, #1017 squash before #1020 (every blob passes; compare f8c7aaa39...d7e95cd9f is not ahead) | stderr: REFUSING: origin develop is at d7e95cd9f153e9036ed77935a73c93504fa6e3dc (pinned f8c7aaa39dabfe6a3916e5be55d9ccd752e7d8ed) and the move is not provably disjoint: UNJUDGEABLE status=behind files=0 — confirm the delta, then re-pin deliberately (launcher DEVELOP_SHA / JUDGED blobs + brief TARGET + prompt)
+rc=18
+expected 18 + text 'UNJUDGEABLE': OK
+N12 develop proxy.ts moved INTO the door region (fixture) | stderr: REFUSING: origin develop is at f8c7aaa39dabfe6a3916e5be55d9ccd752e7d8ed (pinned f8c7aaa39dabfe6a3916e5be55d9ccd752e7d8ed) and the move is not provably disjoint: GUARDED develop services/api-gateway/src/routes/proxy.ts blob 2726348e2 — the #1019 region changed: region 88da84109f2e7673 vs pinned b550d7f0e8e0fc7d — confirm the delta, then re-pin deliberately (launcher DEVELOP_SHA / JUDGED blobs + brief TARGET + prompt)
+rc=18
+expected 18 + text 'region changed': OK
+N13 develop proxy.ts moved INTO the import-to-Factory region (fixture) | stderr: REFUSING: origin develop is at f8c7aaa39dabfe6a3916e5be55d9ccd752e7d8ed (pinned f8c7aaa39dabfe6a3916e5be55d9ccd752e7d8ed) and the move is not provably disjoint: GUARDED develop services/api-gateway/src/routes/proxy.ts blob 55368b4d8 — the #1019 region changed: region 4393aaddf4e465fd vs pinned b550d7f0e8e0fc7d — confirm the delta, then re-pin deliberately (launcher DEVELOP_SHA / JUDGED blobs + brief TARGET + prompt)
+rc=18
+expected 18 + text 'region changed': OK
+N14 develop proxy.ts with a region anchor duplicated (fixture) | stderr: REFUSING: origin develop is at f8c7aaa39dabfe6a3916e5be55d9ccd752e7d8ed (pinned f8c7aaa39dabfe6a3916e5be55d9ccd752e7d8ed) and the move is not provably disjoint: GUARDED develop services/api-gateway/src/routes/proxy.ts blob e7f2acef2 — the #1019 region changed: region anchor-count-2 vs pinned b550d7f0e8e0fc7d — confirm the delta, then re-pin deliberately (launcher DEVELOP_SHA / JUDGED blobs + brief TARGET + prompt)
+rc=18
+expected 18 + text 'anchor-count-2': OK
+N15 develop proxy.ts = the round-2 blob (fixture) LANDED | stderr: REFUSING: develop services/api-gateway/src/routes/proxy.ts blob 795ae7ca3 = #1019 round-2 own — #1019 has landed; this ROUND 2 brief is stale (develop f8c7aaa39dabfe6a3916e5be55d9ccd752e7d8ed) — re-pin deliberately: a different brief
+rc=19
+expected 19 + text 'round-2 own': OK
+N16 develop proxy.ts = the round-1 blob (fixture) LANDED | stderr: REFUSING: develop services/api-gateway/src/routes/proxy.ts blob db1534753 = #1019 round-1 own — #1019 has landed; this ROUND 2 brief is stale (develop f8c7aaa39dabfe6a3916e5be55d9ccd752e7d8ed) — re-pin deliberately: a different brief
+rc=19
+expected 19 + text 'round-1 own': OK
+P17 POSITIVE: develop proxy.ts moved OUTSIDE both regions (fixture) must PASS | stdout:   proxy.ts 19af31b66 = moved OUTSIDE the #1019 region, judged by content: region b550d7f0e8e0
+rc=0
+expected 0 + text 'moved OUTSIDE': OK
+N18 prompt without the report directory | stderr: REFUSING: brief or prompt does not name the report directory /Volumes/DevMASTER/!CODING/Testing Agent MAIN/projects/secuura/reports/2026-09-17-ks1187-1019r2-82f09c8bd-tier1-r2/ and the ROUND-1 REPORT /Volumes/DevMASTER/!CODING/Testing Agent MAIN/projects/secuura/reports/2026-09-17-ks1187-1019-8b8996f8b-tier1-r1/, or the prompt does not name NOT-TESTED.written-first.md — the QA agent has no inbox; a carry-forward with no pointer can only be answered with I could not
+rc=24
+expected 24: OK
+N19 prompt without NOT-TESTED.written-first.md | stderr: REFUSING: brief or prompt does not name the report directory /Volumes/DevMASTER/!CODING/Testing Agent MAIN/projects/secuura/reports/2026-09-17-ks1187-1019r2-82f09c8bd-tier1-r2/ and the ROUND-1 REPORT /Volumes/DevMASTER/!CODING/Testing Agent MAIN/projects/secuura/reports/2026-09-17-ks1187-1019-8b8996f8b-tier1-r1/, or the prompt does not name NOT-TESTED.written-first.md — the QA agent has no inbox; a carry-forward with no pointer can only be answered with I could not
+rc=24
+expected 24: OK
+N20 prompt without the ROUND-1 REPORT path | stderr: REFUSING: brief or prompt does not name the report directory /Volumes/DevMASTER/!CODING/Testing Agent MAIN/projects/secuura/reports/2026-09-17-ks1187-1019r2-82f09c8bd-tier1-r2/ and the ROUND-1 REPORT /Volumes/DevMASTER/!CODING/Testing Agent MAIN/projects/secuura/reports/2026-09-17-ks1187-1019-8b8996f8b-tier1-r1/, or the prompt does not name NOT-TESTED.written-first.md — the QA agent has no inbox; a carry-forward with no pointer can only be answered with I could not
+rc=24
+expected 24: OK
+N21 brief without the ROUND-1 REPORT path | stderr: REFUSING: brief or prompt does not name the report directory /Volumes/DevMASTER/!CODING/Testing Agent MAIN/projects/secuura/reports/2026-09-17-ks1187-1019r2-82f09c8bd-tier1-r2/ and the ROUND-1 REPORT /Volumes/DevMASTER/!CODING/Testing Agent MAIN/projects/secuura/reports/2026-09-17-ks1187-1019-8b8996f8b-tier1-r1/, or the prompt does not name NOT-TESTED.written-first.md — the QA agent has no inbox; a carry-forward with no pointer can only be answered with I could not
+rc=24
+expected 24: OK
+N22 brief without the MERGE ADDENDUM | stderr: REFUSING: brief or prompt does not carry the MERGE ADDENDUM and the per-finding CLOSED / STILL OPEN / NEW disposition — round 2 of 2: closed instances ship and residue is ticketed
+rc=25
+expected 25: OK
+N23 brief without CLOSED / STILL OPEN / NEW | stderr: REFUSING: brief or prompt does not carry the MERGE ADDENDUM and the per-finding CLOSED / STILL OPEN / NEW disposition — round 2 of 2: closed instances ship and residue is ticketed
+rc=25
+expected 25: OK
+N24 brief without ROUND 2 | stderr: REFUSING: brief and prompt disagree about the round (ROUND 2)
+rc=15
+expected 15: OK
+unexpected rows 0 of 24
+end 17:20:21 AEST
