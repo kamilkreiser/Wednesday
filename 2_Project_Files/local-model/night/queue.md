@@ -160,3 +160,5 @@ KS-1220 input=/Volumes/DevMASTER/WEDNESDAY/2_Project_Files/local-model/night/inp
 KS-1140 input=/Volumes/DevMASTER/WEDNESDAY/2_Project_Files/local-model/night/inputs/comment_1140GF2GF4.json task=/Volumes/DevMASTER/WEDNESDAY/2_Project_Files/local-model/tasks/comment_patch/task.md ctx=65536
 KS-1181 input=/Volumes/DevMASTER/WEDNESDAY/2_Project_Files/local-model/night/inputs/comment_1181F3w.json task=/Volumes/DevMASTER/WEDNESDAY/2_Project_Files/local-model/tasks/comment_patch/task.md ctx=65536
 KS-1158 input=/Volumes/DevMASTER/WEDNESDAY/2_Project_Files/local-model/night/inputs/comment_1158R5b.json task=/Volumes/DevMASTER/WEDNESDAY/2_Project_Files/local-model/tasks/comment_patch/task.md ctx=65536
+# 21:31 - KS-1179 F-5 docblock half released: R9 builder fix verified by Wednesday (tests/r9_merged_ready_arms.sh 15/15 incl. both negative controls). Input at develop 75ad0e55c.
+KS-1179 input=/Volumes/DevMASTER/WEDNESDAY/2_Project_Files/local-model/night/inputs/comment_1179F5.json task=/Volumes/DevMASTER/WEDNESDAY/2_Project_Files/local-model/tasks/comment_patch/task.md ctx=65536
