@@ -462,3 +462,25 @@ only artefact that stops the pool being re-searched from scratch.
 **Widening the leading context does NOT help** — five lines failed strict exactly as three did. Only moving the context to the far side of the insertion fixes it. A brief that ships a fuzzy-only fence is one indentation slip away from the 01:26 mis-placement class, so this is a correctness rule, not a tidiness one.
 
 - **Owed (claim first):** `build_input.sh` should REFUSE a brief whose fenced edit block has (a) any blank context line, or (b) context only BEFORE the `+` lines when the edit is a pure insertion (0 `-` lines). Arms: this brief's r1 fence → refuse (a); the 205-207 fence → refuse (b); the shipped trailing fence → pass; a genuine modify-in-place fence with `-` lines → pass.
+
+### 06:5x 2026-09-18 — FIXED IN THE SAME SESSION: the FENCE SHAPE GATE is in `build_input.sh`, red-proofed before reliance
+
+The refusal owed above is built, beside the CONTEXT-AS-ADDITION gate, on the same shape (refuse by name, env override printed):
+
+* **(a) BLANK CONTEXT line** → `REFUSED … has a BLANK CONTEXT line (fence line N)` · `ALLOW_BLANK_CONTEXT=1` overrides.
+* **(b) pure INSERTION with LEADING-ONLY context** → `REFUSED … is a pure INSERTION whose context is all LEADING` · `ALLOW_LEADING_ONLY_CONTEXT=1` overrides.
+
+**ARMS — 6, run against the REAL `build_input.sh` path (not a copy of its logic), ticket KS-1229:**
+
+| arm | shape | expected | got |
+|---|---|---|---|
+| 1 | r1's own fence: blank line in the LEADING context | refuse (a) | **rc 2, blank-context message** |
+| 1b | same + `ALLOW_BLANK_CONTEXT=1` | build | rc 0 |
+| 2 | leading-only, all non-blank (the 205-207 shape) | refuse (b) | **rc 2, leading-only message** |
+| 2b | same + `ALLOW_LEADING_ONLY_CONTEXT=1` | build | rc 0 |
+| 3 | **the SHIPPED trailing fence** (negative control) | build | rc 0 |
+| 4 | modify-in-place, has `-` lines, leading context | build (not a pure insertion) | rc 0 |
+
+**⚠ THE ARMS FOUND A HOLE IN THE GATE ON THEIR FIRST RUN, AND IT WAS THE GATE'S OWN FOUNDING CASE.** As first written, (a) scoped the blank search to lines strictly BETWEEN the first and last diff line. **r1's blank sat in the LEADING context, before the first `+`** — so ARM 1 passed `rc 0` and the gate would have shipped unable to catch the failure it was built from. `a-check-that-cannot-fail` in its purest form, caught only because the arm was written from the real r1 fence rather than from the rule as I had just stated it. Widened to: any blank line in a diff fence that is not itself a `+`/`-` line — a real unified diff carries no bare empty line otherwise (a blank ADDED line is `+`, a blank CONTEXT line is a lone space).
+
+**Not claimed:** the gate reads the brief's `## The exact change` fences only. A brief that states its edit somewhere else, or a non-diff sample fence, is untouched by it (blocks with no `+`/`-` line are skipped by design).

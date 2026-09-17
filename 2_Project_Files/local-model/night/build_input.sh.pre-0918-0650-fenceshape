@@ -529,55 +529,6 @@ if _brief_for_sites:
                "survives the edit gets a single leading SPACE, never a '+'. Offending: %r "
                "(ALLOW_CONTEXT_AS_ADDITION=1 overrides)" % (len(_dup), _dup[:3]))
 
-    # ------------------------------------------------ FENCE SHAPE GATE (2026-09-18 06:5x)
-    # Built from the KS-1229 Q-SIGNCERT-UNTYPED-SOURCE-SKIP r1 failure, MEASURED not reasoned.
-    # THE MODEL'S '+' LINES HAVE NEVER BEEN THE DEFECT — its CONTEXT lines have, three times
-    # (IMPROVEMENTS 04:13, 04:20, 06:2x). Two shapes cause it, and both are visible in the brief:
-    #   (a) a BLANK context line. The model will not emit one. It silently substitutes the nearest
-    #       non-blank lines and KEEPS the header the brief printed, so header and context disagree
-    #       and the harness reanchors — r1 landed one line early, inside the wrong describe, and
-    #       reddened three existing controls.
-    #   (b) a pure INSERTION whose context is all LEADING. Measured on one task, same '+' lines:
-    #       leading 205-207 -> fuzzy only; leading 203-207 (five lines) -> fuzzy only;
-    #       trailing 209-211 -> STRICT. Widening the leading context does NOT help. A fuzzy-only
-    #       fence is one indentation slip from the 01:26 mis-placement class, so this is a
-    #       correctness gate, not a tidiness one.
-    for _bi, _blk in enumerate(re.findall(r"^```[^\n]*\n(.*?)^```", _mx.group(1), re.M | re.S) if _mx else []):
-        _lines = _blk.split("\n")
-        if _lines and _lines[-1] == "":
-            _lines = _lines[:-1]                      # the fence's own trailing newline
-        _is_diff = [i for i, l in enumerate(_lines)
-                    if (l.startswith("+") and not l.startswith("+++"))
-                    or (l.startswith("-") and not l.startswith("---"))]
-        if not _is_diff:
-            continue                                  # not a diff fence (a plain sample) — not ours to judge
-        _first, _last = min(_is_diff), max(_is_diff)
-        # (a) ANY blank line in a diff fence is a blank CONTEXT line — a real unified diff never
-        # carries a bare empty line otherwise (a blank ADDED line is '+', a blank REMOVED line is '-',
-        # and a blank CONTEXT line is a lone space, which .strip() catches). Scoped to first..last
-        # at first writing, which MISSED r1's own case (its blank sat in the LEADING context, before
-        # the first '+') — caught by ARM 1 on 2026-09-18, which is why the arms exist.
-        _blank = [i + 1 for i, l in enumerate(_lines)
-                  if l.strip() == ""
-                  and not l.startswith("+") and not l.startswith("-")]
-        if _blank and os.environ.get("ALLOW_BLANK_CONTEXT") != "1":
-            refuse("edit block %d in `## The exact change` has a BLANK CONTEXT line (fence line %s). The model "
-                   "will not reproduce it: it substitutes the nearest non-blank lines, keeps the header this brief "
-                   "prints, and the harness then reanchors the hunk to the wrong place (KS-1229 r1, 2026-09-18). "
-                   "Move the anchor to the other side of the blank line so every context line is non-blank. "
-                   "(ALLOW_BLANK_CONTEXT=1 overrides)" % (_bi + 1, _blank[:3]))
-        # (b) a pure insertion with no TRAILING context applies fuzzy-only
-        _minus_here = [i for i in _is_diff if _lines[i].startswith("-")]
-        if not _minus_here:
-            _ctx_after = [i for i in range(_last + 1, len(_lines)) if _lines[i].startswith(" ")]
-            if not _ctx_after and os.environ.get("ALLOW_LEADING_ONLY_CONTEXT") != "1":
-                refuse("edit block %d in `## The exact change` is a pure INSERTION whose context is all LEADING "
-                       "(no context line after the last '+'). Measured 2026-09-18 on one task, same '+' lines: "
-                       "leading context applies FUZZY ONLY (git apply strict rc=1) at three AND at five lines, "
-                       "while TRAILING context applies STRICT. Widening the leading context does not help. Put the "
-                       "'+' lines FIRST and the context AFTER them, and set the header's old-start to the first "
-                       "context line. (ALLOW_LEADING_ONLY_CONTEXT=1 overrides)" % (_bi + 1,))
-
 # ---------------------------------------------------------------- 5b2. TEST-ONLY TAMPER (2026-09-15 12:xx)
 # A coverage-only ticket (the code is right at the tip; a PIN is owed — KS-1073, KS-1123-F3, KS-1130, KS-1120) cannot
 # pass RED-FIRST at the tip. The brief may carry a `## Tamper` block naming the ONE product line whose corruption the
