@@ -10,6 +10,12 @@ supersedes: the 2026-09-14 pickup, kept verbatim at NEXT-PICKUP-TUESDAY.md.pre-s
 
 ---
 
+## 🔵 DELTA — 2026-09-17 16:49 (ctx 70% checkpoint). Read with the 65% block directly below, which it updates.
+
+- **NexusAI:** RD-454 MERGED 784b831 (rebased branch rd-454-group-optional-s64-rebased @ 3abd0a8; pins measured 957; no force push). **RD-436/452 is being RE-IMPLEMENTED** on rd-436-452-501-s64 (keep entraGroupGate.js; strict NONE/CONFIGURED/UNREADABLE/INVALID in the one resolver; RD-499 + RD-501 in it; FULL tier-1 gate). Tuesday added: measure the checkMemberGroups delegated permission against Graph docs vs the requested scopes; UNREADABLE fails visibly, with one bounded retry that never turns into NONE. **RD-464 r2 READY @ 8237526**, re-gate running; C-59 = AI off means no prompt/chat/deployment call, metadata models.list allowed; a comment-only commit (server.js:16182/:17019) after a clean re-gate, range-diff = those 2 lines only. **RD-503 JOINS the checklist** (shipped docs/README.md + SUPPORT.md are stale local-model text; review every human-readable file in the image, read not grep). NexusAI S64 at ctx 51%+: the successor brief must carry today's rulings.
+- **HPSM:** NSG change DONE on Kam's signed mail (06:44:55Z to datasec-hpsm@): default-allow-ssh .94 → .215/32 only; port 22 reachable (Tuesday nc, 443 control). Step 4 Azure RESUMED from S4-06; next is the report or a STOP (non-audit diff rule). Option B done: 26/26 public probes PASS, bundle index-B5k6NEu-.js. Fix round 2 (F4/F7/G-1/G-3/F6) running separately. pc-lane-a db-only question STILL OPEN with Kam (default: stays down, lane-a rows NOT VERIFIED).
+- **Lessons today (ledger):** an approval email handed to Kam must have every name, recipient and address confirmed by the owning agent first (w=5). HPSM cannot read coagent@; project approvals go to the project's own inbox. Kam's mails keep dropping the subject's leading "[": tell agents to match on the sender.
+
 ## 🔵 HANDOVER BLOCK — 2026-09-17 15:42 (ctx 65% checkpoint). READ THIS FIRST; blocks below are older.
 
 **Kam's standing instruction (OWED, 11:2x):** "keep going with all the changes and fixes and let me know once it's ready" (NexusAI resubmission). Tell him ONLY when the checklist is empty, plus Kam-only items as they fall due.
