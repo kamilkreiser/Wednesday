@@ -2028,5 +2028,12 @@
   "project": "Datasec",
   "ts": "2026-09-17T17:31:07.251877+10:00",
   "text": "Datasec / NexusAI. One decision from you, because it touches your 'don't lose the deploy-time setup' rule: should we remove the 'use my own existing Key Vault' option from the Marketplace wizard for this submission?\n\nNexusAI's package test found that option can't deploy as built. The wizard tells the customer to give permissions to an identity that doesn't exist until the deployment creates it, and one secret goes into the wrong resource group. It has never deployed successfully, and no customer uses it.\n\nMy recommendation is to remove it for this submission and bring it back later if a customer asks. The default path, where the deployment creates its own Key Vault, is unaffected. The alternative is to keep it and have NexusAI redesign it: the customer supplies an identity already granted access to their vault, and we prove it with a real deploy. That's a day or more of work.\n\nReply 'remove' or 'keep'. Until you answer, everything else on the package carries on, but the final release test waits on this."
+ },
+ {
+  "role": "wednesday",
+  "seat": "Kamils-Mac-mini.localdomain",
+  "project": "Datasec",
+  "ts": "2026-09-17T17:39:12.325203+10:00",
+  "text": "Datasec / HPSM. A low-urgency yes or no, whenever suits: may HPSM do one more small fix round on its release toolkit?\n\nHPSM fixed both problems the test found. Its independent retest then found one more gap of the same kind: before a live upgrade, the toolkit now checks the database migrations' names, but not their contents. A migration that was altered after it ran would pass the check and then fail during the upgrade. It's small and well understood, and the same comparison was already done by hand in today's live check.\n\nYour round limit means a third round needs your word. My recommendation is yes, limited to that one gap and one related runbook step. It's offline work with nothing live touched. If you'd rather wait, the toolkit stays marked not safe for a live upgrade until you want one. It's already cleared for a live purge on its own, and nothing is planned either way.\n\nTwo earlier questions are also still open: the pc-lane-a database check, and whether to remove the bring-your-own Key Vault option."
  }
 ]
