@@ -484,3 +484,20 @@ The refusal owed above is built, beside the CONTEXT-AS-ADDITION gate, on the sam
 **⚠ THE ARMS FOUND A HOLE IN THE GATE ON THEIR FIRST RUN, AND IT WAS THE GATE'S OWN FOUNDING CASE.** As first written, (a) scoped the blank search to lines strictly BETWEEN the first and last diff line. **r1's blank sat in the LEADING context, before the first `+`** — so ARM 1 passed `rc 0` and the gate would have shipped unable to catch the failure it was built from. `a-check-that-cannot-fail` in its purest form, caught only because the arm was written from the real r1 fence rather than from the rule as I had just stated it. Widened to: any blank line in a diff fence that is not itself a `+`/`-` line — a real unified diff carries no bare empty line otherwise (a blank ADDED line is `+`, a blank CONTEXT line is a lone space).
 
 **Not claimed:** the gate reads the brief's `## The exact change` fences only. A brief that states its edit somewhere else, or a non-diff sample fence, is untouched by it (blocks with no `+`/`-` line are skipped by design).
+
+## 07:1x 2026-09-18 — HARNESS: `decl_splice.py` corrupted every MODIFY-IN-PLACE diff whose new lines touch a reference file-scope `let` — found on KS-1237, FIXED with arms
+
+- **Observed:** KS-1237's golden (api-gateway, vitest, TWO hunks) passed **A2 strict** and then failed **A4** with `error: corrupt patch at line 16`. Line 16 was hunk 2's first context line — i.e. git was reading hunk 2's `@@` header as hunk body.
+- **Cause, read not guessed:** `tasks/code_patch/decl_splice.py` is written for ONE case, and says so in its own docstring — the model COPIED the reference test into a NEW file and pruned a file-scope declaration. It sees `connectorAllowedTypes` used in the `+` lines and not declared among them, because **it only ever reads the REFERENCE file and the diff — never the existing file being modified**, where the identifier is in fact declared (`:186`). So it spliced a DUPLICATE declaration into hunk 1, and then recounted nothing: its recount regex is `^@@ -0,0 \+1,(\d+) @@`, a NEW-FILE header, which a modify-in-place diff does not have. Hunk 1 gained a line and kept its old count.
+- **Blast radius (why this is worth more than one ticket):** any modify-in-place brief whose new cell touches an identifier the pinned reference test also declares at file scope. It fails at A4 with a message that looks like a MODEL defect (`corrupt patch`) while the model's output was byte-perfect. **It would have failed the model identically**, spent the one rebrief under Kam's counter, and sent the ticket to a Claude seat for a harness bug.
+- **FIXED same session — SCOPE GUARD:** unless the section carries a `@@ -0,0 +1,N @@` header or a `--- /dev/null`, the tool writes the section through byte-identical and prints `spliced 0 — MODIFY-IN-PLACE section (no new-file hunk): out of this tool's scope`.
+- **ARMS (run against the real tool, old vs new):**
+
+| arm | input | expected | got |
+|---|---|---|---|
+| 1 | the real KS-1237 section (modify-in-place, 2 hunks) | pass through byte-identical | **byte-identical** ✓ |
+| 1-old | the same input through the PRE-FIX tool | must CHANGE it (the arm is red without the fix) | **changed — `spliced 1`** ✓ |
+| 2 | synthetic NEW-FILE section using a reference file-scope `const` | still splices and recounts | `spliced 1`, **new output == old output** ✓ |
+
+- **Verified end to end:** the same golden re-run after the fix is **PASS 7/7, apply_mode=strict** (A4 1 failed / 10, the declared cell only, `KS-1204 COMPLETENESS` green).
+- **Not claimed:** the guard does not make `decl_splice` correct for modify-in-place — it makes it *decline*. If a modify-in-place diff ever genuinely needs a declaration restored, that is a different repair and it does not exist yet.

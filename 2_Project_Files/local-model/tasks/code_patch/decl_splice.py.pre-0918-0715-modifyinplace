@@ -68,26 +68,6 @@ def used_in_new(name: str) -> bool:
             return True
     return False
 
-# ---- SCOPE GUARD (2026-09-18, the MORNING seat) -------------------------------------------------
-# This tool exists for ONE case, stated in its own docstring: the model COPIED the reference test into
-# a NEW file and pruned a file-scope declaration. Its repair splices a line and then recounts the
-# header — and the recount below only matches `@@ -0,0 +1,N @@`, a NEW-FILE header.
-#
-# On a MODIFY-IN-PLACE diff (test_file=) it misfires twice over: the identifier IS declared, just in the
-# existing file, which this tool never reads — it only sees the reference and the diff's `+` lines — so
-# `missing` is non-empty and it splices a DUPLICATE declaration; and then no `-0,0` header exists, so
-# NOTHING is recounted and the hunk's line count is left stale. Git then reads the next hunk's `@@`
-# header as hunk body: `error: corrupt patch`. Found 2026-09-18 on KS-1237 (two hunks, api-gateway),
-# where A2 passed strict and A4 — which applies the test hunk alone — died on the corrupt patch.
-#
-# So: unless this section CREATES a file, pass it through untouched.
-_is_new_file = any(re.match(r"^@@ -0,0 \+1,\d+ @@", x) for x in sec) or any(
-    x.startswith("--- ") and "/dev/null" in x for x in sec)
-if not _is_new_file:
-    open(out_path, "w", encoding="utf-8").write("\n".join(sec))
-    print("spliced 0 — MODIFY-IN-PLACE section (no new-file hunk): out of this tool's scope, passed through byte-identical")
-    sys.exit(0)
-
 missing = [n for n in ref_decls if used_in_new(n) and not declared_in_new(n)]
 unrepairable = [n for n in ref_multi if n not in ref_decls and used_in_new(n) and not declared_in_new(n)]
 
