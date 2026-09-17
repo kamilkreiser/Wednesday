@@ -10,6 +10,13 @@ supersedes: the 2026-09-14 pickup, kept verbatim at NEXT-PICKUP-TUESDAY.md.pre-s
 
 ---
 
+## 🔵 DELTA 4 — 2026-09-17 19:2x ROTATION HANDOVER (ctx 80%). READ FIRST, then DELTA 3.
+- **Kam has FOUR open decisions, consolidated on his panel 19:0x (numbered; he may reply '1 yes, 2 remove, 3 yes, 4 no'):** (1) NexusAI RD-464 narrow ROUND 3 for F-1 (headers-then-stall 300 s hang, a regression) + F-2 — rec yes; default no merge, RD-464 stays open. (2) RD-505 bring-your-own Key Vault — rec REMOVE; default unchanged, release gate waits. (3) HPSM toolkit ROUND 3 for N-1 (migration sha256) — rec yes; default none. (4) HPSM pc-lane-a db-only start — rec yes; default stays down, NOT VERIFIED. **When he answers, relay each to the owning agent by mail (1,2 → NexusAI S64; 3,4 → HPSM is WRAPPED: launch HPSM S51 from HANDOVER-S50 with the round-3 spec and/or the pc-lane-a start plan).**
+- **Merged today on NexusAI main e0ea198 (all CI green):** RD-465, RD-477, RD-454, RD-470.
+- **S64 lanes:** RD-436/452/501/499 re-implementation (Tuesday adds: measure checkMemberGroups permission; UNREADABLE fails visibly), RD-503+RD-442 docs/licence, RD-460 package round 2 (RD-506 fail-closed, RD-507, ACI region filter), RD-486 on its own branch. RD-464 waits on Kam (1). **Checklist additions today:** RD-510 (boot AI queries before listen → restart loop), RD-503, RD-495, RD-497, RD-490, RD-492, RD-442, RD-501, RD-499. RD-511 measured behind ingress at the release gate.
+- **S64B (%9):** RD-490 guard built, red-proofed, queued on the jest lock; next commit → verify → CI-only PR → READY FOR QA. Its gate: tier 1.
+- **This seat's rotation:** successor reads DELTA 4 → 3 → 2 → the 65% block. No agent question was open at rotation.
+
 ## 🔵 DELTA 3 — 2026-09-17 18:4x (ctx 77%, rotation due in the 80-90 band). READ FIRST.
 - **Accounts:** Kam /login'd BOTH this seat (4_Credentials/.claude, 7d 53%) AND the global ~/.claude via the NexusAI pane (S64 statusline 7d 54%, new account). Any new pane launched now uses the new account.
 - **Live panes:** `%1` Datasec/NexusAI **S64** (ctx ~61%; HANDOVER-S64.md written; lanes: RD-464 r2 re-gate, RD-436/452/501/499 re-implementation builder, RD-503+RD-442 docs/licence builder, RD-460 package round 2, CI watch e0ea198). `%9` Datasec/NexusAI-S64B **S64B** (RD-490 ONLY, tests/e2e; plan confirmed 18:4x: guard inside verify, PR for CI run only, permanent + scratch red cells). `%3` fleet-monitor. Both NexusAI seats SHARE datasec-nexusai@ — subjects addressed "S64B" belong to S64B. **`cockpit.sh say --mail` fails silently for the suffixed pane name; tap S64B with a short pointer (no authorising verbs) after the mail is sent.**
