@@ -10,6 +10,9 @@ supersedes: the 2026-09-14 pickup, kept verbatim at NEXT-PICKUP-TUESDAY.md.pre-s
 
 ---
 
+## 🔵 SETUP FACT (Kam, 2026-09-18 ~09:19) — read before flagging anything about the other seat
+Tuesday is RESIDENT on the Mac mini; the Datasec projects and their storage live on this drive (`/Volumes/KK_T9_External_HDD/!CODING/Datasec/`), which is why DevMASTER is not mounted here and that is normal. Wednesday runs on the Studio and is continuously on Secuura. **The `wednesday` pane on this mini is a bare shell by design — never raise it as a fault, and never treat an instruction on her tab as unread because of it.** Cross-seat mail stays coordination-only and should not expect quick replies.
+
 ## 🔵 DELTA 7 — 2026-09-18 07:06 (Tuesday ctx 71% checkpoint). READ FIRST, then DELTA 6.
 - **KAM, terminal ~06:4x today, verbatim: "Legal text is already in the marketplace. I don't need to rewrite it. Ignore that ticket. Create a fleet activity ticket for things that you need from me, like RD464 and 505. Don't pause anything. I need to resubmit today. So get it ready, please."** Receipted on the panel. Consequences, all live: RD-521 CLOSED (shipped PRIVACY/ToS never edited; contradictions are reported to him, not fixed into the file — C-65); the C-64 usage stop is LIFTED BY HIM (C-66) and this seat does NOT re-impose it; the single list of what he owes is **RD-536** (Highest, 8 rows with defaults, https://team-1634009483756.atlassian.net/browse/RD-536) — Tuesday mirrors it to his panel and keeps it current.
 - **Live panes:** `%10` NexusAI **S65** (RD-535 fold into the RD-436 r2 branch, RD-486 r2, RD-503 r2 minus legal items), `%11` NexusAI **S66** (second seat, successor to S64B: RD-490 round-2 re-gate on 23efec8, then the RD-491 tier-2 gate; owns tests/e2e + the rd-490/rd-491 branches), `%3` fleet-monitor. S64B wrapped, scored 0.93, pane closed. Usage at this checkpoint: 7d:93% renews:54m .
