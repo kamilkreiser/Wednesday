@@ -1937,5 +1937,12 @@
   "project": "Datasec",
   "ts": "2026-09-17T11:27:03.811169+10:00",
   "text": "Received: pre-built container versus shipping everything in the zip and building at deploy time. It's a good question, and I won't answer it from memory.\n\nNexusAI has already been reading Microsoft's Marketplace certification rules, including one that says everything needed to deploy must be in the zip. I've asked it to compare the two approaches against Microsoft's own documents and our template. The comparison covers certification, what the customer needs, deploy reliability, cost, and exposing our source code. I'll bring you its answer with a recommendation. Hold the registry choice until then, because this question may change it.\n\nMeanwhile NexusAI keeps working on the parts that apply either way."
+ },
+ {
+  "role": "wednesday",
+  "seat": "Kamils-Mac-mini.localdomain",
+  "project": "Datasec",
+  "ts": "2026-09-17T11:30:48.929259+10:00",
+  "text": "Datasec / NexusAI. The answer: keep the pre-built container. NexusAI checked Microsoft's documents, and building from the zip makes things worse, not better.\n\n- It doesn't fix certification. Microsoft's wording is that containers aren't currently supported for Solution templates at all, however they're built. Version 2.1.1 certified anyway. A build at deploy time would also still download from the internet: Docker Hub, and about 380 npm packages.\n- It costs every customer more: their own registry at about US$5 a month, extra permissions, and extra resources while it builds. Trial subscriptions can't run the build at all.\n- It's less reliable, and no two customers would run the exact version we tested.\n- It would put our source in everyone's hands: internal hostnames, tenant IDs, internal documents, and an old burned key inside a pen-test report.\n\nOne thing it found applies either way: the code is still labelled MIT licence, against your Terms of Service decision. The fix was built but never merged, so I've added it to the resubmission list.\n\nSo the registry question is back with you. A is a dedicated Azure registry at about US$20 a month, my recommendation. C is public GitHub, free. The full comparison is in NexusAI's project at 5_Project_History/2026-09-17_S64_prebuilt-image-vs-build-from-zip.md."
  }
 ]
