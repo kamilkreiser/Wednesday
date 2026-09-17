@@ -558,26 +558,11 @@ if "did not run any test" in verdict:
         txt = re.sub(r"\x1b\[[0-9;]*m", "", open(rf, encoding="utf-8", errors="replace").read())
         errs = [l.rstrip() for l in txt.split("\n") if re.search(r"error TS\d+|Cannot find|is not defined|SyntaxError|ReferenceError|TypeError", l)]
         verdict = verdict[:300] + " | COMPILER/LOADER SAID: " + " ⏎ ".join(errs[:25])[:1500]
-missed = []; proxy_note = ""
-# 2026-09-17 (HARNESS_WIDEN report OWED 1): a site carrying ascii_proxy is MATCHED by the checker on ascii_proxy.text
-# (a3b_proxy.py), and the model will not reproduce the non-ASCII tip line (KS-839 r1 + retry). For such a site the
-# fed-back `text_at_tip` (the field task.md tells the model to copy) IS ascii_proxy.text, tagged match_by, and the
-# tip text inside the verdict is swapped for the proxy text too. Sites without ascii_proxy are byte-for-byte unchanged.
-# Arms: local-model/tests/retry_proxy_feedback_arms.sh.
+missed = []
 for ln in re.findall(r":(\d+) `", verdict):
     for s_ in d.get("defect_line", {}).get("sites", []):
         if str(s_.get("line")) == ln:
-            _px = s_.get("ascii_proxy")
-            _pt = _px.get("text") if isinstance(_px, dict) else None
-            if _pt:
-                missed.append({"line": s_["line"], "text_at_tip": _pt, "match_by": "ascii_proxy.text"})
-                _tt = (s_.get("text_at_tip") or s_.get("text") or "").strip()
-                if _tt and _tt != _pt.strip():
-                    verdict = verdict.replace(_tt, _pt.strip())
-                proxy_note = ("A missed site with match_by=ascii_proxy.text is matched by that ASCII text: its text_at_tip here IS that text, "
-                              "so write it exactly, never the original non-ASCII character. ")
-            else:
-                missed.append({"line": s_["line"], "text_at_tip": s_.get("text_at_tip", s_.get("text", ""))})
+            missed.append({"line": s_["line"], "text_at_tip": s_.get("text_at_tip", s_.get("text", ""))})
 # 2026-09-15 23:5x (KS-1133 A r2): the retry FIXED the product hunk and replaced its attempt-1 test file (54 lines, 5
 # cells, A2b clean) with a 2-line stub patch to the REFERENCE file — the feedback said "emit the COMPLETE diff again" and
 # nothing told the model its test was already right. When attempt 1's TEST section was accepted (A2b did not fire and
@@ -605,7 +590,7 @@ d["retry_feedback"] = {
     "verdict": verdict[:600],
     "missed_sites": missed,
     "accepted_test_section": keep_test,
-    "instruction": ("Your first diff was REFUSED: " + verdict[:600] + ". " + a3i_note + proxy_note + "Emit the COMPLETE diff again. If the verdict carries COMPILER/LOADER lines, fix exactly what they name (remove an unused declaration/import, add a missing import, replace a vitest idiom with the jest one) and change nothing else. For every "
+    "instruction": ("Your first diff was REFUSED: " + verdict[:600] + ". " + a3i_note + "Emit the COMPLETE diff again. If the verdict carries COMPILER/LOADER lines, fix exactly what they name (remove an unused declaration/import, add a missing import, replace a vitest idiom with the jest one) and change nothing else. For every "
         "missed site the `-` line is `text_at_tip` copied character for character (do NOT edit the comment or the "
         "line beside it); keep the test exactly as specified. If the verdict names a PLACEHOLDER test file, write "
         "the full test file this time. If the verdict names CONTEXT MARKED AS ADDITION, the lines it lists ALREADY EXIST in the file: "
