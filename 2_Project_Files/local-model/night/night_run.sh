@@ -544,7 +544,7 @@ PYEOF
     python3 - "$INPUT" "$RUN/checker.out" "$RUN/retry/input.json" <<'PYR'
 import json, re, sys
 inp, chk, out = sys.argv[1:4]
-d = json.load(open(inp, encoding="utf-8")); c = open(chk, encoding="utf-8").read()
+d = json.load(open(inp, encoding="utf-8")); c = open(chk, encoding="utf-8", errors="replace").read()  # 2026-09-17 KS-1180-P1: the checker truncates a FAIL line by BYTES, splitting a multi-byte char; strict decode killed the builder and the retry never ran (harness rc 2)
 m = re.search(r"^(FAIL A3b PARTIAL FIX.*|FAIL A2b PLACEHOLDER.*|FAIL A3d CONTEXT MARKED AS ADDITION.*|FAIL A4 RED-FIRST: the test file did not run any test.*)$", c, re.M)
 verdict = m.group(1).strip() if m else "the checker refused the first attempt (see verdict)"
 # 2026-09-15 18:3x: a LOAD/COMPILE error (ts-jest TS6133, a vitest idiom under jest, a missing import) carries the
