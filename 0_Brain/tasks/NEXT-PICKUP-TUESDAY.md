@@ -10,6 +10,15 @@ supersedes: the 2026-09-14 pickup, kept verbatim at NEXT-PICKUP-TUESDAY.md.pre-s
 
 ---
 
+## 🔵 DELTA 3 — 2026-09-17 18:4x (ctx 77%, rotation due in the 80-90 band). READ FIRST.
+- **Accounts:** Kam /login'd BOTH this seat (4_Credentials/.claude, 7d 53%) AND the global ~/.claude via the NexusAI pane (S64 statusline 7d 54%, new account). Any new pane launched now uses the new account.
+- **Live panes:** `%1` Datasec/NexusAI **S64** (ctx ~61%; HANDOVER-S64.md written; lanes: RD-464 r2 re-gate, RD-436/452/501/499 re-implementation builder, RD-503+RD-442 docs/licence builder, RD-460 package round 2, CI watch e0ea198). `%9` Datasec/NexusAI-S64B **S64B** (RD-490 ONLY, tests/e2e; plan confirmed 18:4x: guard inside verify, PR for CI run only, permanent + scratch red cells). `%3` fleet-monitor. Both NexusAI seats SHARE datasec-nexusai@ — subjects addressed "S64B" belong to S64B. **`cockpit.sh say --mail` fails silently for the suffixed pane name; tap S64B with a short pointer (no authorising verbs) after the mail is sent.**
+- **Main e0ea198** (RD-470 merged; CI pending). Merged checklist: RD-465, RD-477, RD-454, RD-470. WIP snapshots on origin: wip/s64-rd436-452-501, wip/s64-rd503, wip/s64-mkt-pkg-r2 (do not merge).
+- **C-57 merge control now has 3 passes:** exact; digits normalised same file; gated rename (branch parent owns the new title, gate report cited, assertion counts not lower). Measured-pin rule. Merge pre-authorisation on GO / Minor-Low only.
+- **HPSM S50 WRAPPED** (0.93, pane closed). Toolkit main cd69e0f: LIVE UPGRADE NO GO (N-1 sha256), LIVE PURGE alone GO WITH FINDINGS. Step 4 Azure all PASS read-only. NSG ssh source now .215/32.
+- **Open with Kam (each has a default):** RD-505 BYO Key Vault remove/keep (default: no change, release gate waits); HPSM round 3 for N-1 (default: none, upgrade NO GO); pc-lane-a db-only start (default: stays down, NOT VERIFIED).
+- **Owed:** tell Kam when NexusAI is resubmission-ready (C-54 checklist empty + release gate); Partner Center published-package download before 24 Sep (Chrome often in use by gates — new window, role=tab only); seat_exit.log check at next launch.
+
 ## 🔵 DELTA 2 — 2026-09-17 18:3x (ctx ~75%). Read FIRST.
 - **Kam switched THIS seat to a new Claude account** (/login 18:2x; Tuesday 7d 53%). **NexusAI S64 still runs on the Mac's GLOBAL ~/.claude = old account, 7d 99%** (its claude pid has no CLAUDE_CONFIG_DIR). Asked Kam twice on the panel to /login in the NexusAI pane; **not done at 18:3x (statusline still 99%)**. NexusAI told to make every worktree durable + write HANDOVER-S64 now. **If S64 stops at the limit: launch S65 only AFTER the global login is on the new account (check with a fresh `claude` statusline or Kam's word), brief from HANDOVER-S64.**
 - Kam (terminal 18:3x): "great, keep going and let me know what you need". Plan once NexusAI is on the new account: a SECOND NexusAI seat on path-disjoint items (RD-503 docs/*, RD-442 LICENSE/package.json, RD-490 tests/e2e real-browser guard), partitioned from server.js lanes, both briefs warning of the shared inbox.
