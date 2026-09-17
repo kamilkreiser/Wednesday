@@ -611,3 +611,40 @@ A CENSUS for the coordinator to brief from, easy → hard (Kam 2026-09-15 16:40 
      KS-1143 KS-1147 KS-1217 KS-1199 KS-1205 KS-1125 KS-1188 KS-1133 KS-864  code / cells / spec strings · read (snippet)
      POOL STATE: with the four above, the comment-class pool at 75ad0e55c holds KS-1152 R1 (five one-file briefs, wording mine) as the only measured fit left; next widenings: KS-1181 F3 :18-21 once READY_KS-1181-F3 merges (then ":19 the assertions in the file" moves to a sibling file), KS-692's pointer rides READY_KS-692, KS-1123's pointers once READY_KS-1073/-1185-F1 land.
 -->
+
+## SEARCH 17o (22:1x commission: Ornith queue empty; today's gate tickets first, auth product last) — block appended 2026-09-17 22:43 AEST
+<!-- REJECTION TABLE, measured 2026-09-17 22:19–22:43 AEST by the search17o commission — do NOT re-derive these.
+     Tip: origin develop bb848b828 (#1030 KS-1211 vitest 4.1.11, merged 22:18:52) at 22:20:13, 22:25:32, 22:41:09, 22:42:43 (ls-remote from scratch clone search17o/clone; did not move after 22:20). Linear 22:20:22: 48 KS issues created since 09-16T14:00Z or updated since 09-17T10:00Z; 22:32:40: created after 11:55Z = KS-1224/1225/1226 (the #1030 gate F1/F3/F4+F5). Open PRs 21 (22:20:46) -> 22 (22:42:43, #1033 KS-763 mysql2 = Seat B PR-7). Seat heads since 09-16 12:00: 37 live, 26 differing paths. READY 134 (45 dated 09-17).
+     FITS (briefed, built rc 0 at bb848b828, real checker PASS on draft AND placed input, wrong variants FAIL; NOT queued):
+       KS-1152 R1 x4  comment_patch, the jwt.ts:263 tenantId citation -> generateAccessToken (21:26 lead): R1a shared middleware/index.ts:33-34, R1b originate middleware/auth.ts:27-28, R1c shared ks764-key-revoke-call-site-guard.test.ts:391-392, R1d originate ks764-admin-api-keys-revoke-route-contract.test.ts:127; PASS 9/9 x4; shared suite 851/851 before+after; site 5 adminConfig.ts:1019 NOT briefed (READY_KS-730-B file). Refs KS-1152.
+       KS-1219        code_patch AUTH/OAuth product (last tier, nothing easier fit): array-valued scope -> 400 invalid_request, two insertions in routes/oauth.ts (after :478 GET, after :632 POST) + new ks1219 test (R1 GET repeated query, R2 POST form repeated, R3 POST deny JSON array, CONTROL, COMPLETENESS); PASS 7/7, auth 762 -> 767. Refs KS-1219 (other non-string params not swept).
+     KS-1226  F5 (:99 regex misses "skipped") fit-shaped BUT systemTest/performance: build_input.sh rc 2 at 22:33:01 "names no product file under services/*/src or packages/shared/src"; F4 (15 s budget) is a decision in the same ticket · unblocks: a systemTest tier, or a Claude seat · builder
+     KS-1225  "Decide the shape": jsdom as an auth devDependency vs root-only suite record; lock/manifest change · read
+     KS-1224  "decide whether the exact KS-531 pin is now stale"; manifests + locks · read
+     KS-1223  "Owners measure it, then decide"; gateway strip + referral, reachability unmeasured · read
+     KS-1222  "The owners decide what the route should be"; measure first · read
+     KS-1218  "Either ... or" (a pick); systemTest/schemathesis constraints.txt + python runner, no tier · read
+     KS-1216  "a measurement, not a fix" (runtime load trace in a built image) · read
+     KS-1214  "Measure the deployed exposure first" · read
+     KS-1208  stands (17g/17h): 11:54Z #1028 N-1 comment widens the shape decision; gateway middleware/auth.ts is in Seat A's live KS-1215 head · read + measured (heads)
+     KS-1085  updated 10:05Z: Launch_Claude.command (outside Blockchain/Dev, no tier), master-template pass · read
+     KS-824   stands (17h): services/oauth.ts freed by #1026, but still two files / five sites + "measure which before choosing" · read
+     POOL STATE: with KS-1152 R1 (4 of 5) and KS-1219 briefed, no third fit at bb848b828 among today's gate tickets and the post-10:00Z updates. Next widenings: KS-1152 R1 site 5 (adminConfig.ts:1019) once READY_KS-730-B merges; the ks764 guard comment :419-420 ("contains `{ tenantId }`") after R1a/R1b land (needs backticks -> Claude seat or an A3c widening); KS-1219's other non-string authorize params after a probe; KS-1226 F5 if a systemTest tier is built.
+-->
+
+## SEARCH 17p (22:5x commission: Ornith queue empty after KS-1219; KS-1227 first, then post-12:00Z tickets) — block appended 2026-09-17 23:11 AEST
+<!-- REJECTION TABLE, measured 2026-09-17 22:53–23:11 AEST by the search17p commission — do NOT re-derive these.
+     Tip: origin develop 27e53ec3a (#1029, KS-1180 part 1) at 22:53:45 and 23:10:33 (ls-remote from scratch clone search17p/clone; did not move; source porcelain 0 each read). Linear 22:54:08 and 23:10:48: KS issues created or updated since 2026-09-17T12:00Z = 8, then 9 (KS-1215 updated 12:59Z). Open PRs 21 / 107 paths (22:54:07) -> 22 / 109 (23:10:48; #1034 NEW = Seat A's KS-1215: api-gateway middleware/auth.ts + ks1215 test). Seat heads since 09-16 12:00: 38 live, 69 differing paths (50 are Seat B's ks-763-qs-in-range). READY 138 (49 dated 09-17). Checker sha256 b9fd00065fba… before/after every run.
+     FIT (briefed, built rc 0 at 27e53ec3a, real checker PASS 7/7 on draft AND placed input, wrong variants FAIL at their gates; NOT queued):
+       KS-1227 (try/finally + pin half)  TEST-ONLY vitest, modify ks1072 in place (blob d9c98320e): E1 wraps postTier2's verify/status/body in try/finally (listener detached on every path, R-1029-3); E2 adds R1 (vi.stubEnv points the live chain scan at the stub, so a second non-hit request reaches it; asserts the witness reds, R-1029-4) and R2 (postTier2([]) status red, then listenerCount('request') == 1 = the ticket's Q-D4-LEAK regression proof). Tamper verification.ts:585 (scan ignores ANCHORING_SERVICE_URL) reds R1 only. Gaps measured: hit-only filter at the tip 6/6 green; tamper at the tip 6/6 green; E2 without E1 reds R2 [true, 2]. api-gateway 556 -> 558. Wrong variants: nofinally FAIL A3c (and A4 control-red with A3c emptied); noenv FAIL A3c (A5/A6 with A3c emptied); nocomment FAIL A3c; hitonly FAIL A5+A6. briefs/KS-1227.md + inputs/code_1227.json.
+     KS-1227 "decide the counting rule"  SKIPPED: "Either keep ... and say so in the comment, or filter by this document's path" is a pick. NOTE R1 pins the rule AS MERGED (every stub request counts); a "filter" ruling flips R1 · read
+     KS-1227 P-1029-1 message reword    optional per the ticket; left for KS-1180's tier-1 half · read
+     KS-1180  In Progress (updated 12:48Z = the KS-1227 relation); its tier-1 half is a seat lane; the builder's state gate refuses · read
+     KS-1215  In Progress, PR #1034 opened during this search (auth.ts + ks1215 test) · REST GET
+     KS-1194  In Progress, PR #1032 · read
+     KS-763   In Progress, PR #1033 (mysql2) + Seat B local PR-4 (qs) · read
+     KS-1211  In Progress (#1030 merged; remaining audit rows are Seat B's lane) · read
+     KS-1224 / KS-1225 / KS-1226  stand (17o): updatedAt unchanged 12:21Z · read (pool)
+     17o LEADS re-checked: KS-1152 R1 site 5 (adminConfig.ts:1019) stands, READY_KS-730-B still unraised (0 KS-730 commits at the tip); the ks764 guard :419-420 wording stands (needs backticks; R1a/R1b not merged); KS-1219's other params wait on KS-1219 itself (queued, its oauth.ts excluded); KS-1226 F5 stands (no systemTest tier) · read + git log
+     POOL STATE: with KS-1227 briefed, the post-12:00Z pool at 27e53ec3a holds no second fit (9 issues: 1 fit, 5 In Progress, 3 standing 17o refusals). Next widenings: KS-1227's counting rule once ruled (keep -> a one-line comment brief; filter -> rewrite R1 and pin the filter); KS-1152 R1 site 5 when READY_KS-730-B merges.
+-->
