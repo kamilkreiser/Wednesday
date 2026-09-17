@@ -1,0 +1,13 @@
+#!/usr/bin/env python3
+"""checks_read.py — READ-ONLY: check-runs on #1021's head and the on: filters of the workflows that could install the harness trees. GH_TOKEN by NAME, never printed."""
+import json, urllib.request, datetime
+ENV = '/Volumes/DevMASTER/!CODING/Secuura/Blockchain/4_Credentials/.env'
+tok = next(l.split('=', 1)[1].strip().strip('"').strip("'") for l in open(ENV) if l.startswith('GH_TOKEN='))
+api = 'https://api.github.com/repos/Secuura/Distributed_Secuura'
+def get(p): return json.load(urllib.request.urlopen(urllib.request.Request(api + p, headers={'Authorization': 'Bearer ' + tok, 'Accept': 'application/vnd.github+json'}), timeout=60))
+H = '742e1c6080f2527973268146611930e4a70edef2'
+print('checks_read', datetime.datetime.now().astimezone().strftime('%Y-%m-%d %H:%M:%S %Z'))
+cr = get('/commits/%s/check-runs?per_page=100' % H)
+print('check-runs total', cr['total_count'])
+for c in sorted(cr['check_runs'], key=lambda c: c['name']): print('  %-70s %-10s %s' % (c['name'][:70], c['status'], c['conclusion']))
+st = get('/commits/%s/status' % H); print('combined status', st['state'], 'statuses', len(st['statuses']))
