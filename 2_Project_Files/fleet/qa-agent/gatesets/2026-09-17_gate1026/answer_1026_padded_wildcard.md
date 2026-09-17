@@ -1,0 +1,16 @@
+Wednesday -> Seat A, 6th successor (Secuura/Blockchain)
+
+## BLUF
+**#1026 KS-839 needs a pre-gate fix round, and the gate is NOT launched yet.** This SUPERSEDES item 2 of your brief ("On #1026's GO: merge with the pre-step"). The #1026 tier-1 gate drafter MEASURED that the one-line fix closes the exact `'*'` but not a padded wildcard. Allow-list entries `' *'`, `'* '`, `'\t*'`, `'*\n'`, `',*'`, `'openid *'`, `'openid,*'` and `['openid',' *']` are accepted by registration and stored as sent. With `scope` omitted, the token route re-splits the raw entry on `/[\s,]+/`, the token holds `'*'`, and the gateway's `requireScope('documents:read')` and `requireScope('admin:everything')` both pass (head = develop). Kam's ruled property ("E - '*' grants no scopes", 15:09:35) is therefore not true end to end. Wednesday's reading: the ruling covers every allow-list entry that becomes `'*'`, not only the exact string. Wednesday does not narrow his ruling.
+
+## Recommendation
+1. **Order: finish item 1 (#1018 round-2 READY) first, then this round.** Both are on your lane. The gate for #1018 is drafted; this one waits for your round-2 head.
+2. **The fix:** in `services/auth/src/services/oauth.ts`, before the wildcard test at `:353`, tokenize each allowed entry with the SAME splitter the token route uses (the drafter names `parseScopeString`; read it and reuse it, never a second regex). Refuse, i.e. return `[]`, if ANY resulting token is `'*'`. Keep `:354` unchanged. Read the file before editing and tell Wednesday what the helper actually is. The shape is the drafter's proposal, measured to red nothing in the current suite (G-TRIMSTAR 0); it is not yet ratified by a gate. **If the splitter is not importable there without a layering change, STOP and ask.**
+3. **Cells (added to the ks839 test):** 🔴 each of the 8 padded carriers above, with `scope` omitted, grants nothing, and with `scope` named it is refused. 🟢 controls: a zero-width-space `*` and a fullwidth `*` stay literal (the drafter measured 403 at the gateway); explicit, empty and `documents:*` lists are unchanged. Red-proof at develop and at your round-1 head (the padded cells must be red at BOTH). Tampers: the six round-1 rows, plus G-TRIMSTAR reversed (the split removed) → the padded cells must red.
+4. **Out of this round, noted:** registration accepting any scope string is KS-1210; do not widen into it. `documents:*` granted as a literal, with the gateway `requireScope` and shared `hasScope` disagreeing, is a Record for the gate, not this round.
+5. Merge develop in, push to the SAME PR, run the post-push checks, and mail `READY FOR QA (round 2 delta)` for #1026 with the new head, the cell table, the tamper table and the stub count. The drafted gate set is then re-pinned to that head.
+
+## Detail
+- Evidence paths (Wednesday's tree, read-only for you): `/Volumes/DevMASTER/WEDNESDAY/2_Project_Files/fleet/qa-agent/gatesets/2026-09-17_gate1026/DRAFTER_REPORT.md` (D1 section) and `out/drafter_probe_padded.out`.
+- The drafter also measured: no seeded or in-repo OAuth app relies on `*` (0 inserts; its control found the 2 CREATE TABLE sites). Kam's ruling breaks nothing shipped. Live databases were not measured.
+- Holds unchanged: nothing to Peter or Stuart, no deploy, never Done on a runtime ticket, Refs never Closes, never delete.

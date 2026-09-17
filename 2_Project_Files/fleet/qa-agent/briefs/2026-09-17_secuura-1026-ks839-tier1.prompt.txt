@@ -1,0 +1,140 @@
+ultrathink
+
+You are the fleet QA agent running ONE TIER 1 ROUND 1 gate (round 1 of 2 under the cap) over Secuura/Blockchain PR #1026 (KS-839, Seat A) at
+head 8ab493354bbdb3fa52d2eb14654492db1a891e4a. KS-839: validateScopes (services/auth/src/services/oauth.ts:352-355) returned the request UNFILTERED
+when an OAuth app's allowedScopes held the wildcard '*', so a '*' app was granted any scope it named (admin:everything, '*' itself) and, with scope
+omitted, '*' — which passes every gateway requireScope. The fix commit cb2ed18d9: :353 `if (allowed.includes('*')) return [];` (was `return requested;`,
+em dash on the removed line) and a new 52-line vitest test (R1, R2, CONTROL, COMPLETENESS). The head merges develop twice (581c9db0d, then efaaa6034);
+tree 8158ff5da. Kam ruled card secuura-ks839-oauth-wildcard-scope-grants-everything `grants-nothing` = option E ("'*' grants no scopes", 15:09:35
+AEST) and said "yes, merge KS-839 on your go": Wednesday merges on YOUR tier-1 GO. Say in one line whether the real-browser half of tier 1 applies.
+
+Read your brief FIRST and in full, then plan:
+/Volumes/DevMASTER/WEDNESDAY/2_Project_Files/fleet/qa-agent/briefs/2026-09-17_secuura-1026-ks839-tier1.md
+Then the charter it names, the seat's READY (gatesets/2026-09-17_gate1026/mail_1026_ready.md), the brief the seat built from
+(/Volumes/DevMASTER/WEDNESDAY/2_Project_Files/local-model/night/briefs/KS-839.md — P3/P4 route rows, P6 red-proof), the KS-839 part of
+local-model/night/briefs/DEFAULTS_2026-09-17_KS805-855-839.REPORT.md (options E / D / R), Kam's ruling on KS-839
+(gatesets/2026-09-17_gate1026/out/linear/KS-839.comments.md) and gatesets/2026-09-17_gate1026/DRAFTER_REPORT.md.
+
+Head (git ls-remote 19:28:15 AEST and the PR API 19:34:10 agree; the launcher re-asserts it):
+  #1026 8ab493354bbdb3fa52d2eb14654492db1a891e4a = refs/pull/1026/head = feature/ks-839-security-an-allowedscopes-of-bypasses-the-invalid_scope
+  three commits: cb2ed18d9 (fix, parent f8c7aaa39), 83588c2bb (merge of 581c9db0d), 8ab493354 (merge of efaaa6034). services/oauth.ts e9953d376 ->
+  b10182890; ks839 test absent -> 4e847a4f0. develop efaaa6034f036dd9538ee35b189217b1d08b90a9 at draft close is an ANCESTOR of the head: compare
+  develop...head = merge_base efaaa6034, ahead 3, behind 0, files 2. Trees you run: develop efaaa6034, head 8ab493354, merged = head + a local --no-ff
+  merge of the then-current develop (never pushed). Drafter merged-tree OIDs (merge-tree --write-tree in its OWN clone): over efaaa6034 = 8158ff5da
+  (the head tree); over #1025's head 9954a7069 (audit-baseline.json only, may land first, disjoint) = 2455003d0 — name yours. If develop moves, judge
+  it by content, name every tree, and re-run items 1 and 4 on the merged tree.
+Repo:    /Volumes/DevMASTER/!CODING/Secuura/Blockchain/2_Project_Files  (READ-ONLY — git clone --shared --no-checkout by SHA into your own fresh
+  mktemp -d; git write verbs there only, from a script file; never merge-tree --write-tree, worktree add, fetch or git apply in the checkout; a new
+  develop is fetched by SHA into YOUR clone over https with GH_TOKEN handed to git by a GIT_ASKPASS helper reading an env var, never on a command line;
+  never enter any seat's worktree or another gate's clone; never vitest inside the checkout; pin by SHA, never origin/*. Record the checkout's
+  porcelain count and .git/worktrees count before and after: they must be equal)
+Farm node_modules per ENTRY in your clone (R-6 from the #1009 gate): Blockchain/Dev/node_modules (987), packages/shared/node_modules (8) and
+  services/auth/node_modules (9), each per entry, .vite/.vitest/.cache skipped, @secuura/* relinked into your tree; shared dist built per tree, IN
+  TREE asserted from services/auth/src. NEVER link a node_modules tree wholesale; create no node_modules where nothing runs. Node runs only with cwd
+  inside your clone.
+
+You are FINDINGS-ONLY. You never fix, never merge, never push, never deploy, never comment, never file, never tick an
+ack box, never `@`, never write to Linear or GitHub, and nothing goes to Peter or Stuart.
+
+NEVER run a push, the real pre-push hook, or preflight.sh inside the Secuura checkout or any of its worktrees.
+
+NEVER print a credential value, and never open, read or copy a secrets file into output — a script may read GH_TOKEN / LINEAR_API_KEY by
+NAME from /Volumes/DevMASTER/!CODING/Secuura/Blockchain/4_Credentials/.env and AGENTMAIL_API_KEY by NAME from
+/Volumes/DevMASTER/WEDNESDAY/4_Credentials/.env for the calls the brief allows (GitHub GET + a by-SHA fetch into your clone, Linear query, the one
+verdict mail), and never echoes them. Count, never echo. Keys and JWTs in your probes are THROWAWAY, generated per run.
+
+NO shared docker stack, no :6882 / :7082 slot, no kintsugi, no demo, no az, NEVER the wallet mnemonic (KS-535 HOLD). This gate needs NO
+container: the REAL auth oauthRouter in-process under vitest (the ks804-authorize-get-post-agree-per-rule harness shape: real resolver, real
+validateScopes / parseScopeString, createAuthorizationCode mocked only to capture the minted scope), the REAL generateAccessToken (await
+initJwtKeys() first), the REAL api-gateway requireScope and shared hasScope imported into the same process. Put probe files OUTSIDE src/__tests__ and
+outside vitest's default include (e.g. src/qa_probe/*.probe.ts + your own config merging vitest.config.ts) and assert the whole-suite denominator
+63 / 755 is unpolluted. Run `docker info` ONCE and print its rc on its own line (UP is NOT permission; create no container). LOOPBACK ONLY: every
+listener binds 127.0.0.1:0. ANY LISTENER YOUR RUNS START, YOU END: identify it by port + argv + cwd, SIGTERM that pid, never a pattern kill, never
+pid 1, and recount after; quote an lsof TCP LISTEN census (+ cwd and argv per node pid + the login_stub.mjs count) at start and close (at drafting
+17 LISTEN rows, 0 login_stub.mjs — not yours; count any login_stub.mjs YOU start and end them). No Akto, no k6, no Playwright, no Schemathesis run
+(Kam's 40% cap; NOT COMMISSIONED) — YOU rule whether Schemathesis/Akto are REQUIRED, with the measured reason. Time-box 35 minutes of work.
+
+What Wednesday requires (brief items 1-9; each carries drafter predictions marked predicted-by: drafter):
+
+1. RUNTIME, THE REAL AUTHORIZE PATH on develop / head / merged: GET and POST /api/oauth/authorize x apps ['*'], ['openid','*'], explicit
+   ['openid','profile'], empty [], ['documents:*'], ['documents:*','openid'] x scope admin:everything / * / omitted / '' / openid / openid profile /
+   documents:read / documents:* / openid admin:everything. Columns: GET status+message, consent hidden scope, POST status+message, codes minted,
+   minted scope, token scopes + authMethod (real mint), gateway requireScope documents:read and admin:everything, shared hasScope. Enumerate every
+   caller of validateScopes (git grep at head; the shared one-argument validateScopes is a DIFFERENT function — say so). FAIL (Blocker): at head or
+   merged a ['*'] app minting a code whose token passes a scope, or an explicit / empty / resource-wildcard app whose row differs from develop.
+   Drafter (measured, 72 rows x 2 trees): 18 rows change, all ['*'] / ['openid','*']: named scope -> GET+POST 400 invalid_scope, 0 minted (develop 302,
+   '*' token passing both gates); omitted / '' -> 302, code scope '', token [], gateway 403/403 (develop '*', next/next). 54 explicit / empty /
+   resource-wildcard rows identical. documents:* (RECORD): minted as a literal on both trees; gateway requireScope documents:read 403 (exact only)
+   while shared hasScope says true. LEAD WITH D1: padded carriers ' *', '* ', '\t*', '*\n', ',*', 'openid *', 'openid,*', ['openid',' *'] are
+   accepted by CreateOAuthAppSchema AND UpdateOAuthAppSchema and, with scope omitted, mint a code the token route RE-SPLITS into ['*'] ->
+   gateway next/next, develop = head (controls '*\u200b', fullwidth star -> 403). Rule it: STILL OPEN KS-839 (NO GO round 1) or a NEW Major carried
+   on KS-839 (GO WITH FINDINGS) — with your reason. The drafter does not pre-empt that ruling.
+2. NO LEGITIMATE CALLER BROKEN: census seeded and in-repo OAuth apps (seeds, migrations, docker init, startup-migrations, fixtures, demo, portals,
+   SDKs, docs samples) for '*' in allowedScopes. Any shipped/seeded app relying on '*' = Blocker-class for Kam: name each. Drafter (READ): 0 INSERT INTO
+   oauth_apps anywhere (control CREATE TABLE IF NOT EXISTS oauth_apps -> 2); column default and createApp default (services/oauth.ts:96) carry no '*';
+   developer-portal sample sends named scopes; live DBs NOT TESTED.
+3. TAMPERS on the WHOLE services/auth suite at head, denominator asserted 63 files / 755, pending 0, tsc -p rc per row, sha-restored + git diff
+   --quiet, vitest output to an ABSOLUTE path outside the worktree: re-derive T0 0 · DEL353 1 (R2) · REVERT 2 · NEVERFIRES includes('**') 1 (R2) ·
+   NOCOUNT 1 (COMPLETENESS) · TI 0 (state the TI form you ran; the READY does not give it). Add the property no cell sees — drafter (measured):
+   G-ROUTE-DEFAULT-BYPASS (omitted scope skips validateScopes in RULE 4) 0, G-TRIMSTAR (padded entries also grant nothing) 0; controls
+   G-EXACT-SINGLETON 1, G-STRIPSTAR 1. Red-proof: oauth.ts = develop bytes -> R1 + R2 red by AssertionError (drafter measured, 2 of 755).
+4. SUITES, tsc, eslint: services/auth vitest develop 62/751 · head 63/755 · merged <yours>; tsc --noEmit -p . rc 0 each; THE TEST-INCLUDING tsc
+   PROGRAM (not tsc -p: the project tsconfig EXCLUDES src/__tests__) with --listFilesOnly proof the ks839 test is in it, a control that the project
+   program excludes it, and a planted control — judge NEW errors (drafter: rc 2 with 37 PRE-EXISTING error lines on BOTH develop and head, 0 in the
+   ks839 test; plant -> +2); eslint by rule AND message with a firing control (drafter: 0 / 0; control fires @typescript-eslint/no-unused-vars).
+   Prove the PR's 2 files byte-identical cb2ed18d9 = head. vitest json numTotalTestSuites counts describes: count files as len(testResults).
+5. MERGE: merge-tree --write-tree over the then-current develop in YOUR clone; name the tree (drafter 8158ff5da / 2455003d0 over #1025).
+6. LINEAR / GITHUB at run time and immediately before the mail: attachmentsForURL(pull/1026) = KS-839 contributes only, no closes (controls
+   pull/1024 -> KS-1202 contributes; pull/99999 -> 0); 0 closing phrases in the title, body and all three commit messages (planted controls); KS-839
+   stays In Progress on merge (§5f).
+7. THE PUBLISHED CONTRACT: the wildcard sentence is owed after #922. Quote auth.openapi.ts:2553 and :2672 (and the yaml): does "(a) OMITTED ... the
+   default is the app's ENTIRE registered allow-list ... (b) PARTIAL overlap — the permitted subset is granted ... (c) a filter that removes everything
+   is REFUSED" now CONTRADICT head for ['*'] (omitted -> an empty grant, not refused) and ['openid','*'] (a permitted openid refused)? A finding with
+   its lines (drafter: yes, Minor, TICKET / carried on KS-839).
+8. SCHEMATHESIS / AKTO ruling, with the measured reason.
+9. CARRY-FORWARD per finding CLOSED / STILL OPEN / NEW, each SHIPS-WITH or TICKET — exact '*', D1 padded carriers, D2 route-default gap, D3 mixed
+   app (Record), D4 contract, resource wildcards, KS-1210 registration, the empty-grant 302 — plus the checkout bounds and NOT TESTED at equal
+   prominence: a live DB's oauth_apps, a real Postgres/Redis, the edge, a live OAuth client, the platform suites, preflight legs 3/4/8.
+
+Hygiene: /bin/bash here is 3.2 — write runners in Python. zsh: no PIPESTATUS (`cmd > out 2>&1; rc=$?`), no timeout on macOS, `set -- $var`
+does not word-split, `"$VAR:path"` applies history modifiers (write `"${VAR}:path"`), never begin a line with `=====`. Your tool shell's grep may be a
+function: /usr/bin/grep -i with a same-file positive control; `git grep -c` prints nothing for a zero — silence is unread, not 0. Never `cd` in your
+own tool calls; absolute paths; git write verbs only inside script files. stderr is never discarded. Clocks from `date`, never estimated. Every
+scripted edit asserts its anchor count = 1 and a marker. Quote the Secuura checkout's porcelain count, .git/config sha256, for-each-ref count,
+.git/worktrees count, origin develop SHA, refs/pull/1026/head and the checkout branch at start, mid and close as THREE timestamped readings, plus
+auth's node_modules/.vite reading; if refs/pull/1026/head moves, STOP — the brief is about a different SHA. develop moving is expected; judge it
+by content, name it. Never `rm`: fresh mktemp -d per attempt; quarantine scratch tests and configs by rename. No container is created; never touch a
+secuura-* container.
+Do no memory maintenance of your own project's memory store inside this session.
+
+Report FOUND / TESTED / HOW, with controls, into
+/Volumes/DevMASTER/!CODING/Testing Agent MAIN/projects/secuura/reports/2026-09-17-ks839-1026-8ab493354-tier1-r1/
+(NOT-TESTED.written-first.md written FIRST, BEFORE any run; then report.md and evidence/): the trees with OIDs; the authorize rows per tree with
+token and gateway columns; the padded-carrier rows and the registration safeParse rows; the seeded-app census with its control; the caller census;
+the full tamper table with forms, tsc rc and VOID rows; the red-proof; suites, the test-including tsc program and eslint; the contract read; Linear;
+the Schemathesis/Akto ruling; the listener census start / close; the CLOSED / STILL OPEN / NEW table; and what you did NOT test at the same
+prominence as the findings. Every finding carries its evidence class (MEASURED AT RUNTIME / PROBED / READ ONLY / RELAYED), severity, target (PR or
+TICKET), SHIPS-WITH or TICKET, disposition, and its oracle. Name every prediction slip against its predictor (the READY, the seat, the seat's brief,
+the drafter, Wednesday).
+Client-facing communication = ticket comments only, and not from you; anything needing a push goes to Wednesday as an escalation candidate.
+Never delete; cleanup means quarantine.
+Verdict: ONE line — GO, GO WITH FINDINGS, or NO GO — on 8ab493354bbdb3fa52d2eb14654492db1a891e4a, as the delta over develop efaaa6034, AND on the
+merged tree (name the develop and the merged-tree OID). Round 1 of 2: a NO GO goes back to the seat for one fix round. Then plain statements on
+items 1-9 and the CLOSED / STILL OPEN / NEW table.
+Give the merge seat its MERGE ADDENDUM line: "squash 8ab493354 onto develop <then-current develop; efaaa6034 at draft close> (merged tree <OID>;
+drafter 8158ff5da over efaaa6034, 2455003d0 over #1025's head); #1026 attaches to KS-839 only, linkKind contributes, no closes — KS-839 stays In
+Progress on merge (§5f: live sweep owed; contract sentence owed after #922; padded wildcard carriers: <your D1 ruling>); equality targets after the
+squash: services/oauth.ts blob b10182890 / ks839 test 4e847a4f0; services/auth vitest 62/751 at develop -> 63/755 at head -> <merged n/n>
+(re-measure); dispositions: <per finding, SHIPS-WITH or TICKET>; NEW: <yours>; Records for KS-839's facts comment at merge: a wildcard allow-list's
+named request -> 400 invalid_scope, its omitted scope -> an empty grant (302, token [], gateway 403), the mixed ['openid','*'] app refused per the
+card's E row, <yours>" — plus any finding with its target.
+
+MAIL YOUR VERDICT to wednesday-agent@agentmail.to when the pass is complete. Your pane holds ~19 lines of alternate screen with no
+scrollback, so a verdict that stays in the pane is one pane-close from being lost -- this is not a formality, it is the only durable
+copy; the verdict MAIL is the END STATE and the wait signal. Send it FROM coagent@agentmail.to. Subject, EXACTLY:
+[QA -> Wednesday] TIER 1 GATE #1026 (KS-839) 8ab493354 — <GO | GO WITH FINDINGS | NO GO>
+(The QA project has no send_brief.sh of its own: POST https://api.agentmail.to/v0/inboxes/coagent@agentmail.to/messages/send with JSON
+{"to": ["wednesday-agent@agentmail.to"], "subject": "...", "text": "..."} and Authorization: Bearer $AGENTMAIL_API_KEY, the key by NAME
+from Wednesday's .env, never echoed. Build the body from a template file with no shell interpolation and assert the backtick spans survived.
+Confirm the API answered 2xx and quote the message id in your final pane line. Timestamps in the mail come from `date`, never estimated.
+The MAIL is the end state.)
