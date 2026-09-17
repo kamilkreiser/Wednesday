@@ -1,11 +1,9 @@
-# Ornith candidates — derived 2026-09-18 06:35 from 340 KS Backlog/Todo tickets (read-only, unpaginated)
+# Ornith candidates — derived 2026-09-18 06:48 from 340 KS Backlog/Todo tickets (read-only, unpaginated)
 
 A CENSUS for the coordinator to brief from, easy → hard (Kam 2026-09-15 16:40 / 18:19). A ticket here is a candidate, not a task: read it, read the file at the tip, write `night/briefs/<id>.md`, then queue it. Auth-shaped titles are excluded (LAST); Peter/Stuart tickets and PR-attached tickets are excluded outright.
 
-## T1 services (vitest, one file) — 33
-- KS-1173 (P2) Flow verbs: add `note`, `certified` and `verified` to the lifecycle vocabulary ( — `services/anchoring/src/anchorSchema.ts`
+## T1 services (vitest, one file) — 30
 - KS-1175 (P2) [resolved:basename, a HINT — read the file] Anchor / originate / lifecycle-event — `services/anchoring/src/anchorSchema.ts`
-- KS-1184 (P2) workflow-approve persists the instance approved before the forward, so a refused — `services/api-gateway/src/routes/verification.ts`
 - KS-1233 (P2) In Redis mode platform-settings expires 24 h after the last admin write, which e — `services/api-gateway/src/services/redis.ts`
 - KS-678 (P2) [resolved:basename, a HINT — read the file] #568 publishes 17 URLs on secuura.io — `scripts/openapi-examples/synthesize.ts`
 - KS-683 (P2) Anchor-status standoff: a consumer repolls anchors K reports as terminally faile — `services/anchoring/src/index.ts`
@@ -16,7 +14,6 @@ A CENSUS for the coordinator to brief from, easy → hard (Kam 2026-09-15 16:40 
 - KS-1143 (P3) [resolved:basename, a HINT — read the file] ks781 LEG F guard walk: a MENTION of — `services/api-gateway/src/routes/admin.ts`
 - KS-1168 (P3) userRepo.ts: ILIKE search on encrypted PII columns can never match — :1017 and : — `services/auth/src/repositories/userRepo.ts`
 - KS-1190 (P3) api-gateway meetsVerificationLevel fails open on an unknown REQUIRED level: an o — `services/api-gateway/src/services/enforcement.ts`
-- KS-1191 (P3) Audit log records the caller's spelling: case splits the action namespace, /API/ — `services/api-gateway/src/middleware/audit.ts`
 - KS-1222 (P3) POST /api/documents/upload never reaches the gateway's blocked-extension / MIME  — `services/api-gateway/src/routes/proxy.ts`
 - KS-1230 (P3) PUT /api/admin/settings stores a connector's allowedDocumentTypes in any shape - — `services/api-gateway/src/routes/admin.ts`
 - KS-1234 (P3) POST /api/v1/documents with application/json never answers, and /api/documents a — `services/api-gateway/src/index.ts`
@@ -39,13 +36,11 @@ A CENSUS for the coordinator to brief from, easy → hard (Kam 2026-09-15 16:40 
 
 ## T2 tooling (systemTest/*, one file) — 0
 
-## T2b bash (bash_patch — one script + a *.test.sh beside the reference) — 7
-- KS-1148 (P2) CI-runner environment gaps (one class, two jobs): `Security Scanning` runs `audi — `scripts/run-shell-suites.sh`
+## T2b bash (bash_patch — one script + a *.test.sh beside the reference) — 5
 - KS-998 (P2) KS-989 gate residue: the formatting gate fails OPEN on missing deps and reads th — `.githooks/pre-push`
 - KS-1163 (P3) start-secuura.sh never waits for five default-profile, healthchecked services —  — `Start_Up/start-secuura.sh`
 - KS-630 (P3) Wire the status-page XSS probe into preflight (or decide not to) — it runs today — `scripts/preflight/preflight.sh`
 - KS-789 (P3) CONTRIBUTING.md justifies the hook's degradation and its --no-verify bypass with — `.githooks/pre-push`
-- KS-1162 (P4) Three retired GitHub workflows bake slot-2/3/4 port literals (6982/7182/6732…) i — `scripts/stack_env.sh`
 - KS-1209 (P4) Preflight's closing verdict says a run failed on the environment even when other — `scripts/preflight/preflight.sh`
 
 ## T3 jest services (originate, governance) — 5
@@ -55,9 +50,7 @@ A CENSUS for the coordinator to brief from, easy → hard (Kam 2026-09-15 16:40 
 - KS-759 (P3) tenantId is read through two `as unknown as` casts because it is not on JwtPaylo — `services/originate/src/middleware/auth.ts`
 - KS-1084 (P0) READ ONLY / unverified: the gateway's own Authorization-only calls to originate  — `services/originate/src/index.ts`
 
-## T4 docs (doc_patch) — 3
-- KS-709 (P2) [resolved:docs, a HINT — the ticket MENTIONS the file] Akto reports a PASS for a test that executed NOTHING — 'clean 0 / not-applicable — `docs/DEV-PROCESS.md`
-- KS-770 (P2) [resolved:docs, a HINT — the ticket MENTIONS the file] Review stream: API contract and the four platform suites — `docs/DEV-PROCESS.md`
+## T4 docs (doc_patch) — 1
 - KS-965 (P4) [resolved:docs, a HINT — the ticket MENTIONS the file] 87 documentary sites still publish the retired admin credential — wrong rather t — `docs/BROWSER-TESTING-GUIDE.md`
 
 ## T5 multi-file / later — 33
@@ -178,7 +171,7 @@ A CENSUS for the coordinator to brief from, easy → hard (Kam 2026-09-15 16:40 
 - KS-976 Rate-limit refusals name the wrong field: 400 says "Key required" when the key w
 - KS-979 KS-597's own bind test file repeats two claims that were corrected in the produc
 
-## SET ASIDE with a recorded reason — 26 (re-read only if the ticket's updatedAt moved)
+## SET ASIDE with a recorded reason — 33 (re-read only if the ticket's updatedAt moved)
 - KS-1063 — decision-class: its own words say the design question comes first (updated 2026-09-09)
 - KS-1076 — likely already fixed at M55 (docblock present since ec61abf8e/0882f7661) — measure with eslint in a tool-mode clone; item 2 is a Claude seat's (updated 2026-09-13)
 - KS-1088 — decision-class: 'filing only; decide whether the runner should enforce isolation' — a ruling, not a patch (updated 2026-09-11)
@@ -192,10 +185,17 @@ A CENSUS for the coordinator to brief from, easy → hard (Kam 2026-09-15 16:40 
 - KS-1132 — services/auth — security surface (Kam 16:40: auth LAST) (updated 2026-09-13)
 - KS-1135 — diagnosis-first: which of the six suites spawns tsx (direct vs shared preamble) is UNMEASURED; the fix shape is prose (updated 2026-09-13)
 - KS-1142 — a test refactor with no product tamper (updated 2026-09-13)
+- KS-1148 — its own words: 'Fixing either is a .github/workflows/ edit — Kam-class; nothing here is changed by the seat that filed this' (updated 2026-09-14)
 - KS-1159 — a guard widening with three fixture files — later tier (updated 2026-09-14)
+- KS-1162 — three .github/workflows/ files (Kam-class) AND decision-class ('Fix direction: Either 1 … or …') (updated 2026-09-14)
+- KS-1173 — ALREADY SHIPPED inside READY_KS-1172-B3 ('KS-1172 + KS-1173 PART B') — NOT visible to a held-check that keys on the READY filename's ticket id, which is how it keeps being re-picked (updated 2026-09-16)
+- KS-1184 — decision-class: the ticket's own words are 'A design call beside KS-1087 item 2, not a fix round on #1008' with two shapes offered (updated 2026-09-16)
+- KS-1191 — decision-class: 'Not built; Backlog. This is a design decision for the audit trail's owner, not a one-line fix' — two choices, and the edge behaviour is NOT TESTED (updated 2026-09-16)
 - KS-590 — verification.ts, security-adjacent (updated 2026-09-13)
+- KS-709 — its own 'Done means' requires reproduction from a real run, not a unit test — beyond the local model (updated 2026-09-10)
 - KS-755 — diagnosis-first (which side is wrong is unmeasured) (updated 2026-09-10)
 - KS-757 — blocked by the ticket's own measurement (updated 2026-09-08)
+- KS-770 — not a doc edit — the body is a review-stream test pass for Peter; the docs/ path came from a MENTION, not an edit target (updated 2026-09-14)
 - KS-777 — tracker ticket — all four findings FIXED on #795; a board close (updated 2026-09-05)
 - KS-808 — item 1 is a recorded decision; items 2–3 need psql → a Claude seat (updated 2026-09-07)
 - KS-849 — kyc has no in-process driver (app.listen at import) (updated 2026-09-06)
