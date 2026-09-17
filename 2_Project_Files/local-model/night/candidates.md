@@ -333,3 +333,28 @@ A CENSUS for the coordinator to brief from, easy → hard (Kam 2026-09-15 16:40 
 - KS-996 — names no product file (after basename/docs/route resolution)
 - KS-997 — names no product file (after basename/docs/route resolution)
 
+
+## SEARCH 17e (11:2x commission) — block appended 2026-09-17 11:28 AEST
+<!-- REJECTION TABLE, measured 2026-09-17 11:22–11:29 AEST by the search17e commission — do NOT re-derive these.
+     NOTE: the 05:20 derive dropped the older rejection blocks; they survive in git 3e68f4132 (SEARCH 2) and in briefs/NEXT_SEARCH_2026-09-17{,b,c,d}.REPORT.md. The 17c/17d tables are not repeated here.
+     Tip: origin develop fa887f382 (ls-remote 11:24:28, 11:28:14; did not move). Linear re-pulled 11:23:49: 34 KS Backlog/Todo updated since 2026-09-16 00:00 AEST (positive control: KS-1199 present). Open PRs 11:27:24: 21 / 107 paths.
+     FITS from this search: NONE. Nothing briefed, nothing queued.
+     KS-1200  owner decision: "The owner decides which schema source is authoritative for anchor_store" (10 CREATE TABLE sources); no patch until ruled · unblocks: Kam rules the authoritative source · read
+     KS-1203  owner decision: "apply the allow-list to the resolved default type, or require a restricted connector to name a type"; gateway + originate default (documents.ts:565) · unblocks: that ruling · read
+     KS-1185 F1  two fix shapes ("throw at construction, or fall back"); the listener-before-setTimeout half is a MOVE (re-adds a tip line, forbidden) and its failure is an unhandled 'error' event / process exit, not an assertion red; verification.ts is KS-1202's measure lane · unblocks: a ruling on throw-vs-fallback, then a Claude seat · read
+     KS-1185 F2 / F3  each is an either/or (doc comment OR wall-clock bound; skip the log OR reword it) · unblocks: a pick · read
+     KS-1186  4 of the 5 '-' lines are the SAME text at the tip (userRepo.ts :446 :512 :585 :627, grep -x count 4; only :594 legacy arm unique) — breaks the UNIQUE-'-'-line brief rule (the KS-1121 drift) and A3b matches sites by TEXT, so it cannot tell which of the four was edited. A :594-only partial would leave getUserByEmail's normal arm (:585, 9 lines above) unawaited in the same function, and the ticket wants one test pass + one gate on the login paths · unblocks: A3b keyed by line number (with the owed A3e line+text fix), or a Claude seat (5 one-word edits, one PR). Partition was clear: 0 open PRs and 0 held 09-16/17 READYs touch userRepo.ts (control: 45 READY test/users.ts paths) · measured
+     KS-1191  design decision for the audit trail's owner (normalisation + unrouted action), edge forwarding untested · unblocks: the ruling · read
+     KS-1192  no residue: READY_KS-1192 covers both rows (production witness + INSUFFICIENT_SCOPE) · read (brief report)
+     KS-1193 F3  KS-1018 item 3 (does the in-memory fallback exist) still open: KS-1018 In Progress, 21:14Z comment "Nothing is built", no ruling · unblocks: item 3 closes "fallback stays" · read
+     KS-1188 F3  "a product decision" (burn order vs retry wording); F1/F2 are held READYs · read
+     KS-1196  routes/admin.ts:682 collides with seat A's KS-1204 (cites routes/admin.ts); also two shapes (randomUUID OR refuse an existing key) · unblocks: KS-1204 merges + a pick · measured (tip :682) + read
+     KS-1190  "Do not make it fail closed yet. Two measurements come first" (stored level strings, who writes types) · unblocks: those measurements · read
+     KS-1189  R-5 closed by #1011; H29 remainder is "decide whether the attempted-email capture should work at all" · unblocks: the ruling · read
+     KS-1197  two files (middleware/auth.ts = open #1017, + verification.ts handler) · unblocks: #1017 merged, then a Claude seat · read
+     KS-1198  middleware/auth.ts (open #1017), refuse-or-attach two shapes, connector auth surface · unblocks: #1017 + a pick · read
+     KS-744   middleware/auth.ts:377 is in open #1017 (seat A merging now) · unblocks: #1017 merges; re-measure the line, then a 1-edit brief may fit · read
+     KS-1194 / KS-1202 / KS-1204  seat A's queue (users.ts build; verification.ts measure-first; admin.ts) · partition
+     KS-1123 KS-1129 KS-864 KS-960  PR attached / held · KS-1172 KS-1173 KS-1179 KS-1180 KS-1181 KS-1182 KS-1199 KS-1201 held (READY or reallocated) · KS-1175 KS-1177 KS-1178 KS-1184 KS-772 recorded refusals (SEARCH 2 / 17c)
+     POOL STATE: all 34 recently-updated Backlog/Todo tickets are held, in seat A's lane, or carry a recorded rejection. Next search should widen to: (1) KS-744 the moment #1017 merges (one guarded header line, api-gateway vitest); (2) KS-1186 if A3b is keyed by line number; (3) the older T1 rows whose updatedAt moved since their recorded refusal.
+-->
