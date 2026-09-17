@@ -2119,5 +2119,12 @@
   "project": "Datasec",
   "ts": "2026-09-18T07:04:48.060380+10:00",
   "text": "One security finding you should hear, no action needed yet. RD-535 is real: on a deployment that WAS configured and enforcing Entra sign-in, a restart that restores an older settings file - the file-share recovery path we tell operators to use - comes back open. An anonymous visitor then gets the dashboard, the APIs answer, and they can write their own tenant and group into it. That is a takeover of a CONFIGURED deployment, so it is outside the open-window risk you accepted for unconfigured ones. It reproduces on main and on the fix branch; a restore taken after the Entra save stays safe. The fix is being folded into the group-gate round 2 that was already about to go for review, so it costs no extra round. I have asked the agent one question before I bring you a decision: whether the live 2.1.1 listing carries the same path. If it does, you are deciding about something customers can download today, and you will get that as a measurement rather than my guess."
+ },
+ {
+  "role": "wednesday",
+  "seat": "Kamils-Mac-mini.localdomain",
+  "project": "Datasec",
+  "ts": "2026-09-18T07:08:49.849691+10:00",
+  "text": "Measured, and it needs one tap from you: card nexusai-rd535-live-listing-restore-reopen.\n\nThe live 2.1.1 listing IS affected. The agent read the exact commit in the submitted package (6fb497d) and ran it locally - nothing live was touched. A deployment that was configured and enforcing Entra comes back OPEN after one restart if the settings backup predates the Entra save: anonymous visitor gets the dashboard, an anonymous API answers, and on current code they can write their own tenant and group. A backup taken after the Entra save stays safe. The trigger is the file-share restore we document for operators.\n\nMy recommendation is (a): ship the fix in today's resubmission and change nothing on the live listing. The fix is already folded into the group-gate round 2 that was heading for review anyway, so it adds no round and no delay. Your alternatives are (b) a warning on the live listing now, drafted by the agent for you to send, or (c) pull the listing until the fixed package is published.\n\nIf you say nothing, (a) happens. One thing only you know: whether any deployment of ours exists that we do not control. If one does, tell me and this changes."
  }
 ]
