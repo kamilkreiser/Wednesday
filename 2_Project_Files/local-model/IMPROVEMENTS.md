@@ -501,3 +501,17 @@ The refusal owed above is built, beside the CONTEXT-AS-ADDITION gate, on the sam
 
 - **Verified end to end:** the same golden re-run after the fix is **PASS 7/7, apply_mode=strict** (A4 1 failed / 10, the declared cell only, `KS-1204 COMPLETENESS` green).
 - **Not claimed:** the guard does not make `decl_splice` correct for modify-in-place — it makes it *decline*. If a modify-in-place diff ever genuinely needs a declaration restored, that is a different repair and it does not exist yet.
+
+| 2026-09-18 07:4x-07:5x | KS-1237 X-MSG-MEMBER r1 FAIL A4 (two CONTROLS red), r2 FAIL A2 (malformed) — counter spent, row PARKED | **r1 BRIEF · r2 MODEL** | r1: the brief asked for a trailing EMPTY `+` line; the model emitted 13 `+` lines instead of 14 while keeping the header promising 14, so hunk 1 REANCHORED four lines late (to 247) and landed both new cells INSIDE the `control: an ARRAY allow-list` cell — that control and COMPLETENESS went red, 9 cells ran instead of 11. r2 (blank removed, golden re-proved PASS 7/7 strict): the model produced a structurally malformed sample — hunk 1 declared `+243,17` but carried 7 `+` and 9 context lines, and hunk 2 declared `-289,3 +289,3` with no `+` and no `-` at all. |
+
+## 07:5x 2026-09-18 — the blank-line rule WIDENS to the addition side, and a size hypothesis KILLED by measurement
+
+**RULE 1 WIDENED.** The 06:2x entry said *never make the model reproduce a BLANK CONTEXT line*. KS-1237 r1 shows the same refusal on the **addition** side: asked for a trailing empty `+`, the model simply omitted it, kept the header that counted it, and the hunk reanchored. **The rule is now: require NO blank line from the model anywhere — not as context, not as a `+`.** If the edit wants a blank separator, leave it out of the fence and accept the cosmetic loss, or place the insertion where an existing blank already separates.
+
+*(Note the asymmetry worth remembering: the KS-1229 SIGNCERT brief DID carry a leading empty `+` line and the model reproduced it, PASS 7/7 strict. So this is unreliable behaviour, not a hard incapacity — which is exactly why it must not be depended on.)*
+
+**A HYPOTHESIS I FORMED AND THEN KILLED, recorded because the killing is the useful part.** My first explanation for r2 was that the rebrief had grown — I had embedded the r1 post-mortem into the brief, so the model got the instruction plus a failure story. Measured before filing it: the r2 brief is **10,310 B** against the ARRAYLIKE brief's **10,771 B**, which passed on its first sample. **The failing brief is SMALLER.** The hypothesis is false and is not recorded as a cause.
+
+**What the evidence does support, stated as an observation with its sample size (one each), not a law:** the two briefs differ in HUNK COMPLEXITY, not length — ARRAYLIKE put **one** new cell and **8 `+` lines** in its hunk and passed first sample twice; MSG put **two** cells and **13 `+` lines** in one hunk and failed twice, differently each time. **Candidate rule for the next seat to test: one new cell per hunk.** It is cheap to test — the parked X-MSG-MEMBER row is the fixture.
+
+- **Owed:** nothing built here. The row is PARKED (original + one rebrief both spent, per Kam's 2026-09-16 counter); it goes to a Claude seat, which his 06:37 rule bars until Sunday. `READY_KS-1237-ARRAYLIKE_…` is UNTOUCHED and still held — the combined brief was written to supersede it only ON PASS, which is why a double failure cost nothing already banked.
