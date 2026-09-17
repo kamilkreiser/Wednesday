@@ -1,0 +1,27 @@
+build_input open-PR arms 2026-09-17 16:11:42 · new /Volumes/DevMASTER/WEDNESDAY/2_Project_Files/local-model/night/build_input.sh (52afcfbdec99) · old /Volumes/DevMASTER/WEDNESDAY/2_Project_Files/local-model/night/build_input.sh.pre-0917-widen (e6609410f7d2)
+  .. controls: PR 874 state=closed merged=True|PR 1019 state=open merged=False|
+  ok   C1 GitHub reads #874 closed + merged
+  ok   C2 GitHub reads #1019 (KS-1187's attached PR) as OPEN
+--- A: KS-928 (merged #874) now builds
+  .. A_new_928 rc=0 :: attached PR #874 (Secuura/Distributed_Secuura): merged|wrote /private/tmp/claude-501/night/widen_0917/opr_arms/A_new_928/input.json (148342 B; ~37112 prompt tokens at 4 B/token — num_ctx 65536 leaves ~28424 for the answer)|
+  ok   A  NEW builder KS-928 → rc 0, prints the merged state of #874, output byte-identical to night/inputs/code_928.json (5e366e59b1c0)
+  .. A2_scratchcopy_928 rc=0 :: wrote /private/tmp/claude-501/night/widen_0917/opr_arms/A2_scratchcopy_928/input.json (148342 B; ~37112 prompt tokens at 4 B/token — num_ctx 65536 leaves ~28424 for the answer)|
+  ok   A' NEW vs the scratch-copy builder on KS-928: output JSON identical; stdout differs ONLY in 2 PR line(s): < attached to pull request(s): ['https://github.com/Secuura/Distributed_Secuura/pull/874']|> attached PR #874 (Secuura/Distributed_Secuura): merged|
+--- B: a ticket with an OPEN attached PR still refuses
+  .. B_new_open rc=2 :: build_input: REFUSED KS-1187 — attached to OPEN pull request(s) ['#1019'] — a lane has it (merged/closed PRs do not refuse)|attached PR #1019 (Secuura/Distributed_Secuura): OPEN|
+  ok   B  NEW builder KS-1187 (open #1019) → rc 2 REFUSED naming OPEN #1019, no output written
+--- D: the PR state cannot be read -> refuse (fail closed)
+  .. D1_new_connrefused rc=2 :: build_input: REFUSED KS-928 — attached PR #874 (Secuura/Distributed_Secuura): its state could not be read (URLError: <urlopen error [Errno 61] Connection refused>) — refused, fail closed|
+  ok   D1 NEW builder, API unreachable (127.0.0.1:9) → rc 2 REFUSED 'could not be read … fail closed', no state printed, no file
+  .. D2_new_nostate rc=2 :: build_input: REFUSED KS-928 — attached PR #874 (Secuura/Distributed_Secuura): its state could not be read (KeyError: 'state') — refused, fail closed|
+  ok   D2 NEW builder, stub answers 200 with no state → rc 2 REFUSED (KeyError 'state'), the stub saw GET /repos/Secuura/Distributed_Secuura/pulls/874, no file
+  .. D3_new_fileseam rc=2 :: build_input: REFUSED KS-928 — attached to pull request(s) ['https://github.com/Secuura/Distributed_Secuura/pull/874'] and NIGHT_GITHUB_API is not an http(s) URL — the PR state cannot be read (fail clo|
+  ok   D3 NEW builder, NIGHT_GITHUB_API=file:/// → rc 2 REFUSED (the stub seam is http/https only; a file cannot fake a merged state)
+--- N: negative control
+  .. N_old_928 rc=2 :: build_input: REFUSED KS-928 — attached to pull request(s): ['https://github.com/Secuura/Distributed_Secuura/pull/874']|
+  ok   N  OLD builder KS-928 → rc 2 REFUSED 'attached to pull request(s)' (the merged PR refused, as before)
+--- L: a ticket with NO attached PR is untouched
+  .. L_old_839 rc=0 :: wrote /private/tmp/claude-501/night/widen_0917/opr_arms/L_old_839/input.json (45743 B; ~11433 prompt tokens at 4 B/token — num_ctx 65536 leaves ~54103 for the answer)|
+  .. L_new_839 rc=0 :: wrote /private/tmp/claude-501/night/widen_0917/opr_arms/L_new_839/input.json (45743 B; ~11433 prompt tokens at 4 B/token — num_ctx 65536 leaves ~54103 for the answer)|
+  ok   L  KS-839 (no attachment): OLD and NEW identical — rc 0, stdout identical (11 lines), output identical (4f7139f75454), no GitHub read
+build_input open-PR arms: 10 passed, 0 failed (16:12:21)

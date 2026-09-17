@@ -437,61 +437,18 @@ if m_where:
         txt = lines[ln - 1] if 0 < ln <= len(lines) else None
         _site = {"line": ln, "text_at_tip": txt, "note": site_note,
                  "must_change": ("**" in site_note) and ("(correct)" not in site_note.lower())}
-        # 2026-09-17 15:5x ASCII_PROXY (KS-839 r1 + retry, KS-1180-P1: the model will not reproduce a non-ASCII '-' line and
-        # deletes an ASCII neighbour instead). A LINE-KEYED must_change bullet may carry `ascii_proxy U+XXXX=<ascii> [...]`
-        # (outside its backticks): its quote is then the tip line with each declared character replaced by the ASCII
-        # stand-in (the line the model writes), stored as `ascii_proxy.text`; checker.sh (tasks/code_patch/a3b_proxy.py)
-        # restores the tip's bytes before A2 only where the model's '-' line equals it AND its hunk places it at the number.
-        # Refused here: ascii_proxy outside a line-keyed Where, on a stays site, a declared character absent from the tip
-        # line, a stand-in that is not ASCII, a proxy line still carrying non-ASCII, or one equal to a real tip line.
-        _px = re.search(r"\bascii_proxy((?:[ \t,]+U\+[0-9A-Fa-f]{4,6}=[!-_a-~]+)+)", site_note)
-        if re.search(r"\bascii_proxy\b", site_note) and not _px:
-            refuse(f"`## Where` :{ln}: `ascii_proxy` must be followed by one or more `U+XXXX=<ascii stand-in>` pairs (no backtick, no space in the stand-in)")
-        if _px and not _line_keyed:
-            refuse(f"`## Where` :{ln} declares ascii_proxy but the Where heading is not line-keyed — a proxy site is restored BY LINE NUMBER, so it needs `## Where (line-keyed ...)`")
         if _line_keyed:
             _q = re.search(r"`([^`\n]+)`", site_note)
             if not _q:
                 refuse(f"line-keyed `## Where`: the bullet for :{ln} quotes no exact line in backticks — every line-keyed site names its text")
             if txt is None:
                 refuse(f"line-keyed `## Where`: :{ln} is outside {product_rel} ({len(lines)} lines at the tip)")
-            _quote_vs = txt
-            if _px:
-                if not _site["must_change"]:
-                    refuse(f"line-keyed `## Where` :{ln}: ascii_proxy on a site that STAYS — only a must_change '-' line is written in proxy form")
-                _pmap = {}
-                for _cp, _sub in re.findall(r"U\+([0-9A-Fa-f]{4,6})=([!-_a-~]+)", _px.group(1)):
-                    _ch = chr(int(_cp, 16))
-                    if ord(_ch) < 128:
-                        refuse(f"line-keyed `## Where` :{ln}: ascii_proxy U+{_cp} is ASCII — only non-ASCII characters are proxied")
-                    if _ch not in txt:
-                        refuse(f"line-keyed `## Where` :{ln}: ascii_proxy U+{_cp.upper()} does not occur in the tip's line {ln} ({txt.strip()!r})")
-                    _pmap["U+" + _cp.upper()] = _sub
-                _ptext = txt
-                for _k, _v in _pmap.items():
-                    _ptext = _ptext.replace(chr(int(_k[2:], 16)), _v)
-                _left = sorted({f"U+{ord(c):04X}" for c in _ptext if ord(c) > 127})
-                if _left:
-                    refuse(f"line-keyed `## Where` :{ln}: the proxy line still carries non-ASCII {_left} — declare a stand-in for each")
-                if any(_ptext.strip() == _l.strip() for _l in lines):
-                    refuse(f"line-keyed `## Where` :{ln}: the proxy line {_ptext.strip()!r} is ALSO a real line of the tip file — the stand-in is ambiguous; pick another")
-                _quote_vs = _ptext
-                _site["ascii_proxy"] = {"map": _pmap, "text": _ptext}
-            if _q.group(1).strip() != _quote_vs.strip():
-                refuse(f"line-keyed `## Where`: :{ln} — the brief quotes {_q.group(1).strip()!r} but the tip's line {ln}{' after its ascii_proxy substitution' if _px else ''} is {_quote_vs.strip()!r} (stale line numbers or a wrong quote; re-read the tip)")
+            if _q.group(1).strip() != txt.strip():
+                refuse(f"line-keyed `## Where`: :{ln} — the brief quotes {_q.group(1).strip()!r} but the tip's line {ln} is {txt.strip()!r} (stale line numbers or a wrong quote; re-read the tip)")
             _site["key"] = "line+text"; _site["text_in_brief"] = _q.group(1)
         named_sites.append(_site)
     print(f"  named sites from '## Where' ({'BRIEF' if _src_for_sites is _brief_for_sites else 'ticket'}): {len(named_sites)} ({sum(1 for x in named_sites if x['must_change'])} must_change)"
           + (f" — LINE-KEYED: all {len(named_sites)} quoted texts == the tip at their numbers; A3b/A3e grade them by line number + text" if _line_keyed else ""))
-    # ASCII_PROXY neighbours: the model copies context lines around a proxy site; a non-ASCII one there is the same trap
-    # (and would stop the checker from placing the proxy line), so the three lines each side must be ASCII.
-    _px_lines = {x["line"] for x in named_sites if x.get("ascii_proxy")}
-    for _pl in sorted(_px_lines):
-        _bad_nb = [k for k in range(max(1, _pl - 3), min(len(lines), _pl + 3) + 1)
-                   if k not in _px_lines and any(ord(c) > 127 for c in lines[k - 1])]
-        if _bad_nb:
-            refuse(f"ascii_proxy site :{_pl}: context line(s) {_bad_nb} within 3 lines carry non-ASCII — the model will not reproduce them either; not a proxy-shaped site")
-        print(f"  ascii_proxy site :{_pl}: the model writes {next(x['ascii_proxy']['text'] for x in named_sites if x['line'] == _pl).strip()!r} ({next(x['ascii_proxy']['map'] for x in named_sites if x['line'] == _pl)}); the checker restores the tip's line by number")
 else:
     print("  named sites: no '## Where' section — checklist empty (A3b passes vacuously)")
 # 2026-09-15 22:0x (KS-976 B r1 dropped its insert-only helper hunk): the '+' lines of the brief's edit blocks
@@ -505,10 +462,6 @@ if _brief_for_sites:
                 if ln.startswith("+") and not ln.startswith("+++") and ln[1:].strip():
                     expected_plus.append(ln[1:].strip())
     print(f"  expected '+' lines from the brief's edit blocks: {len(expected_plus)} (A3c)")
-    if any(s.get("ascii_proxy") for s in named_sites):
-        _nonascii_plus = [p for p in expected_plus if any(ord(c) > 127 for c in p)]
-        if _nonascii_plus:
-            refuse(f"an ascii_proxy brief's '+' lines must be ASCII (the model will not reproduce non-ASCII there either; nothing restores a '+' line): {_nonascii_plus[:2]!r}")
     # ------------------------------------------------ CONTEXT-AS-ADDITION GATE (2026-09-16 17:4x)
     # The VITEST twin of the gate added to tasks/bash_patch/build_bash_input.sh the same afternoon.
     # A '+' line is a CLAIM that the line is not in the file. When a brief's '+' set repeats a line it
@@ -628,8 +581,7 @@ inp = {
     "product_file": product,
     "defect_line": {"line": defect_no, "text": defect_text, "sites": named_sites, "expected_plus": expected_plus,
                     "sites_rule": "every site with must_change=true MUST be changed by the product hunk (its text appears as a '-' line); the checker refuses a diff that leaves one untouched (A3b) before any test runs"
-                                  + ("; sites with key=line+text are matched by LINE NUMBER: the '-' line must be the file's line AT that number (several sites share the same text, so editing one copy does not satisfy another)" if any(s.get("key") == "line+text" for s in named_sites) else "")
-                                  + ("; a site with ascii_proxy is written as its ascii_proxy.text EXACTLY - the file's line with each listed non-ASCII character replaced by its ASCII stand-in (for example U+2014 written as --) - as the '-' line at that site's number, inside a hunk whose context lines are the file's own; the checker restores the real line" if any(s.get("ascii_proxy") for s in named_sites) else ""),
+                                  + ("; sites with key=line+text are matched by LINE NUMBER: the '-' line must be the file's line AT that number (several sites share the same text, so editing one copy does not satisfy another)" if any(s.get("key") == "line+text" for s in named_sites) else ""),
                     **({"tamper": tamper} if tamper else {}),
                     **({"red_cells": red_cells} if red_cells else {})},
     "test_dir": f"{subdir}/{test_dir_rel}",

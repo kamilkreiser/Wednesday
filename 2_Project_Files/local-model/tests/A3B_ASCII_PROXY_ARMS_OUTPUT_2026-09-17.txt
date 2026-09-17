@@ -1,0 +1,55 @@
+a3b ascii_proxy arms 2026-09-17 16:03:09 · checker /Volumes/DevMASTER/WEDNESDAY/2_Project_Files/local-model/tasks/code_patch/checker.sh (c6ee07e4c2cd) · old /Volumes/DevMASTER/WEDNESDAY/2_Project_Files/local-model/tasks/code_patch/checker.sh.pre-0917-widen (f3ce186cf515) · helper (612e008d7dd2) · input (80230168843a)
+fixtures written
+--- helper only (no vitest)
+  ok   HX1 header drifted to -300, context true → SUBSTITUTED :353 (the header is not the placement); the section now carries the tip's em-dash line; model section kept as .model.diff
+  ok   HX2 stale ascii_proxy.text → rc 2 MEASURE ERROR (never substitutes on an input that disagrees with the tip)
+  ok   HX3 legacy input (no ascii_proxy) → PROXY none, rc 0, section untouched
+--- red arms (real checker)
+  .. R1_new_real839 start 16:03:10
+  .. R1_new_real839 end 16:03:17 rc=1 :: A3b ascii_proxy: 1 site(s) declared (rc=0): NOPROXYLINE no '-' line equals a declared ascii_proxy text (sites [353]); nothing substituted |PASS A2 diff applies at the tip — with an accommodation: [Blockchain/Dev/services/auth/src/services/oauth.ts: --recount --ignore-whitespace needed; miscounted hunks=1; strict rc=128]|FAIL A3b PARTIAL FIX — the product hunk leaves 1 of 1 named site(s) untouched: :353 `if (allowed.includes('*')) return requested; // Wildcard — all scopes`|RESULT: FAIL (1 failed) — stopped at A3b (a partial fix; the tests are not run)|
+  ok   R1 KS-839's REAL r1 out.md (deletes :354) + proxy input → FAIL A3b naming :353, nothing substituted, stopped at A3b
+  .. R1b_new_real839_legacy start 16:03:17
+  .. R1b_new_real839_legacy end 16:03:24 rc=1 :: PASS A2 diff applies at the tip — with an accommodation: [Blockchain/Dev/services/auth/src/services/oauth.ts: --recount --ignore-whitespace needed; miscounted hunks=1; strict rc=128]|FAIL A3b PARTIAL FIX — the product hunk leaves 1 of 1 named site(s) untouched: :353 `if (allowed.includes('*')) return requested; // Wildcard — all scopes`|RESULT: FAIL (1 failed) — stopped at A3b (a partial fix; the tests are not run)|
+  ok   R1b the same REAL out.md + its ORIGINAL text-keyed input → 5 PASS/FAIL/RESULT lines identical to the 14:17 night run; no ascii_proxy line printed
+  .. R1c_new_retry839 start 16:03:24
+  .. R1c_new_retry839 end 16:03:31 rc=1 :: A3b ascii_proxy: 1 site(s) declared (rc=0): NOPROXYLINE no '-' line equals a declared ascii_proxy text (sites [353]); nothing substituted |PASS A2 diff applies at the tip — with an accommodation: [Blockchain/Dev/services/auth/src/services/oauth.ts: --recount --ignore-whitespace needed; miscounted hunks=1; strict rc=128]|FAIL A3b PARTIAL FIX — the product hunk leaves 1 of 1 named site(s) untouched: :353 `if (allowed.includes('*')) return requested; // Wildcard — all scopes`|RESULT: FAIL (1 failed) — stopped at A3b (a partial fix; the tests are not run)|
+  ok   R1c KS-839's REAL retry out.md + proxy input → FAIL A3b naming :353
+  .. R2_new_wrongline start 16:03:31
+  .. R2_new_wrongline end 16:03:37 rc=1 :: FAIL A3b PARTIAL FIX — the product hunk leaves 1 of 1 named site(s) untouched: :353 `if (allowed.includes('*')) return requested; // Wildcard -- all scopes` ascii_proxy MISPLACED (ascii_proxy '-' line at section line 8: the hunk's own lines do not place it at |RESULT: FAIL (1 failed) — stopped at A3b (a partial fix; the tests are not run)|
+  ok   R2 proxy '-' line at the WRONG line (:353 kept as context, the proxy where :354 is) → FAIL A3b … ascii_proxy MISPLACED, before A2
+  .. R3_new_onechar start 16:03:37
+  .. R3_new_onechar end 16:03:44 rc=1 :: FAIL A3b PARTIAL FIX — the product hunk leaves 1 of 1 named site(s) untouched: :353 `if (allowed.includes('*')) return requested; // Wildcard -- all scopes` ascii_proxy TEXTMISMATCH (the '-' line its hunk places at :353 is `if (allowed.includes('*')) return re|RESULT: FAIL (1 failed) — stopped at A3b (a partial fix; the tests are not run)|
+  ok   R3 proxy line with ONE other character changed (requested -> requestes) → FAIL A3b … ascii_proxy TEXTMISMATCH
+  .. R3b_new_hyphen start 16:03:44
+  .. R3b_new_hyphen end 16:03:50 rc=1 :: FAIL A3b PARTIAL FIX — the product hunk leaves 1 of 1 named site(s) untouched: :353 `if (allowed.includes('*')) return requested; // Wildcard -- all scopes` ascii_proxy TEXTMISMATCH (the '-' line its hunk places at :353 is `if (allowed.includes('*')) return re|RESULT: FAIL (1 failed) — stopped at A3b (a partial fix; the tests are not run)|
+  ok   R3b a single hyphen for the declared `--` → FAIL A3b … ascii_proxy TEXTMISMATCH
+--- green arms
+  .. G_new_golden start 16:03:50
+  .. G_new_golden end 16:04:06 rc=0 :: A3b ascii_proxy: 1 site(s) declared (rc=0): SUBSTITUTED :353 section=/private/tmp/claude-501/night/widen_0917/proxy_arms/G_new_golden/out.md.checker/section_1.diff line=7 (the model's ascii_proxy text -> the tip's bytes; the model's section kept as /private/tm|PASS A2 diff applies at the tip (strict git apply --check, every section, hunk headers consistent)|PASS A3b every must_change site the ticket names is changed by the product hunk (1 site(s); 3 line-keyed site(s), must_change and stays, matched by LINE NUMBER + text; the rest by text)|SUMMARY files=2 +53/-1 test=src/__tests__/ks839-security-an-allowedscopes-of-bypasses-the.test.ts red_first=yes apply_mode=strict|RESULT: PASS (7/7)|
+  ok   G  golden (proxy '-' line at :353) → SUBSTITUTED :353, A2 strict, REMOVED_LINES 353, A3i byte-exact, RESULT: PASS (7/7)
+  .. G0_old_golden start 16:04:06
+  .. G0_old_golden end 16:04:13 rc=1 :: FAIL A2 diff does NOT apply at the tip: [Blockchain/Dev/services/auth/src/services/oauth.ts: does not apply — strict: error: patch failed: Blockchain/Dev/services/auth/src/services/oauth.ts:350 error: Blockchain/Dev/services/auth/src/services/oauth.ts: patch d|RESULT: FAIL (1 failed) — stopped at A2|
+  ok   G0 OLD checker on the same golden → FAIL A2 (negative control: without the restore the stand-in line applies nowhere)
+  .. G2_new_realdash start 16:04:13
+  .. G2_new_realdash end 16:04:29 rc=0 :: A3b ascii_proxy: 1 site(s) declared (rc=0): NOPROXYLINE no '-' line equals a declared ascii_proxy text (sites [353]); nothing substituted |PASS A2 diff applies at the tip (strict git apply --check, every section, hunk headers consistent)|PASS A3b every must_change site the ticket names is changed by the product hunk (1 site(s); 3 line-keyed site(s), must_change and stays, matched by LINE NUMBER + text; the rest by text)|SUMMARY files=2 +53/-1 test=src/__tests__/ks839-security-an-allowedscopes-of-bypasses-the.test.ts red_first=yes apply_mode=strict|RESULT: PASS (7/7)|
+  ok   G2 the golden with the REAL em dash in its '-' line → NOPROXYLINE (nothing substituted), RESULT: PASS (7/7)
+--- builder (Linear read + git show on the source; writes only under /private/tmp/claude-501/night/widen_0917/proxy_arms)
+  .. B1 rc=0 ::   ascii_proxy site :353: the model writes "if (allowed.includes('*')) return requested; // Wildcard -- all scopes" ({'U+2014': '--'}); the checker restores the tip's line by number|wrote /private/tmp/claude-501/night/widen_0917/proxy_arms/B1/input.json (36240 B; ~9023 prompt tokens at 4 B/token — num_ctx 65536 leaves ~56513 for the answer)|
+  ok   B1 NEW builder + the proxy brief → rc 0, output byte-identical to code_839proxy.json
+  .. B2 rc=2 :: build_input: REFUSED KS-839-proxy — line-keyed `## Where`: :353 — the brief quotes "if (allowed.includes('*')) return requested; // Wildcard — all scopes" but the tip's line 353 after its ascii_proxy substitution is "if (allowed.includes('*')) return requested|
+  ok   B2 the Where quote is the REAL em-dash line (not the proxy form) → rc 2 REFUSED
+  .. B3 rc=2 :: build_input: REFUSED KS-839-proxy — line-keyed `## Where`: :353 — the brief quotes "if (allowed.includes('*')) return requestes; // Wildcard -- all scopes" but the tip's line 353 after its ascii_proxy substitution is "if (allowed.includes('*')) return requeste|
+  ok   B3 the quote one character off → rc 2 REFUSED
+  .. B4 rc=2 :: build_input: REFUSED KS-839-proxy — `## Where` :353 declares ascii_proxy but the Where heading is not line-keyed — a proxy site is restored BY LINE NUMBER, so it needs `## Where (line-keyed ...)`|
+  ok   B4 ascii_proxy under a NON-line-keyed Where → rc 2 REFUSED
+  .. B5 rc=2 :: build_input: REFUSED KS-839-proxy — line-keyed `## Where` :354: ascii_proxy on a site that STAYS — only a must_change '-' line is written in proxy form|
+  ok   B5 ascii_proxy on the STAYS site :354 → rc 2 REFUSED (ine-keyed `## Where` :354: ascii_proxy on a site that STAYS — only a must_change '-' line is written in proxy for)
+  .. B6 rc=2 :: build_input: REFUSED KS-839-proxy — line-keyed `## Where` :353: ascii_proxy U+2013 does not occur in the tip's line 353 ("if (allowed.includes('*')) return requested; // Wildcard — all scopes")|
+  ok   B6 a declared character absent from the line (U+2013) → rc 2 REFUSED
+  .. B7 rc=2 :: build_input: REFUSED KS-839-proxy — `## Where` :353: `ascii_proxy` must be followed by one or more `U+XXXX=<ascii stand-in>` pairs (no backtick, no space in the stand-in)|
+  ok   B7 `ascii_proxy` with no U+XXXX pair → rc 2 REFUSED
+  .. B8 rc=2 :: build_input: REFUSED KS-839-proxy — an ascii_proxy brief's '+' lines must be ASCII (the model will not reproduce non-ASCII there either; nothing restores a '+' line): ["if (allowed.includes('*')) return []; // KS-839: a wildcard grants nothing — ever"]|  ascii_proxy site :353: the model writes "if (allowed.includes('*')) return requested; // Wildcard -- all scopes" ({'U+2014': '--'}); the checker restores the tip's line by number|
+  ok   B8 a NON-ASCII '+' line in an ascii_proxy brief → rc 2 REFUSED (nothing restores a '+' line; A3c/A3i see only ASCII)
+  .. B0 rc=2 :: build_input: REFUSED KS-839-proxy — line-keyed `## Where`: :353 — the brief quotes "if (allowed.includes('*')) return requested; // Wildcard -- all scopes" but the tip's line 353 is "if (allowed.includes('*')) return requested; // Wildcard — all scopes" (stale|
+  ok   B0 OLD builder + the proxy brief → rc 2 REFUSED (negative control: the proxy quote is not the tip line)
+a3b ascii_proxy arms: 21 passed, 0 failed (16:05:24)

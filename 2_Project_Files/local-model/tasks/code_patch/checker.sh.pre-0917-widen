@@ -279,35 +279,6 @@ print(f"sections={len(out)} miscounted_sections={sum(1 for o in out if o['miscou
 PYEOF2
 cat "$REP/hunk_audit.out"
 N_SEC="$(python3 -c 'import json,sys; print(len(json.load(open(sys.argv[1]))))' "$REP/sections.json")"
-# ---------------------------------------------------------------- A3b ascii_proxy (2026-09-17 15:5x, BEFORE A2)
-# KS-839 r1 + retry (14:17/14:18) and KS-1180-P1: the model will not reproduce a '-' line carrying non-ASCII; it keeps it
-# as context and deletes an ASCII neighbour. A LINE-KEYED brief site may declare `ascii_proxy U+XXXX=<ascii>`
-# (night/build_input.sh stores the exact stand-in line as sites[].ascii_proxy.text). tasks/code_patch/a3b_proxy.py puts
-# the tip's real bytes back into the product section ONLY where the model's '-' text is byte-equal to that proxy text
-# AND the hunk's own old-side lines place it at the site's number; the model's section is kept as
-# <section>.model.diff. A proxy line its hunk places elsewhere (MISPLACED), or a '-' line its hunk places at the site
-# whose text is neither the tip's nor the declared proxy (TEXTMISMATCH), FAILS here as an A3b PARTIAL FIX naming the
-# site - before A2, because the unsubstituted stand-in could not apply anyway. An input with no ascii_proxy site
-# (every input built before this) skips the block without printing a line. a3b_line.py still measures the line the
-# applied section really removes. Arms: tests/a3b_ascii_proxy_arms.sh.
-N_PROXY="$(python3 -c 'import json,sys; d=json.load(open(sys.argv[1])); print(len([x for x in (d.get("defect_line") or {}).get("sites",[]) if x.get("ascii_proxy")]))' "$INPUT")"
-if [ "${N_PROXY:-0}" -gt 0 ]; then
-  python3 "$(dirname "$0")/a3b_proxy.py" "$INPUT" "$CLONE" "$REP/sections.json" "$PRODUCT" "$SUBDIR" > "$REP/a3b_proxy.out" 2>&1
-  PX_RC=$?
-  if [ "$PX_RC" -eq 0 ]; then
-    echo "A3b ascii_proxy: $N_PROXY site(s) declared (rc=0): $(tr '\n' ' ' < "$REP/a3b_proxy.out" | cut -c1-500)"
-  elif [ "$PX_RC" -eq 1 ]; then
-    PX_MC="$(python3 -c 'import json,sys; d=json.load(open(sys.argv[1])); print(len([x for x in (d.get("defect_line") or {}).get("sites",[]) if x.get("must_change")]))' "$INPUT")"
-    PX_N="$(/usr/bin/grep -E '^(MISPLACED|TEXTMISMATCH) :' "$REP/a3b_proxy.out" | sed -E 's/^[A-Z]+ :([0-9]+) .*/\1/' | sort -u | /usr/bin/grep -c .)"
-    fail "A3b PARTIAL FIX — the product hunk leaves $PX_N of $PX_MC named site(s) untouched: $(/usr/bin/grep -E '^(MISPLACED|TEXTMISMATCH) :' "$REP/a3b_proxy.out" | sed -E 's/^(MISPLACED|TEXTMISMATCH) (:[0-9]+ `[^`]*`) (.*)$/\2 ascii_proxy \1 \3/' | awk 'BEGIN{ORS=""} NR>1{print " · "} {print}' | cut -c1-700)"
-    echo "RESULT: FAIL ($FAILS failed) — stopped at A3b (a partial fix; the tests are not run)"
-    exit 1
-  else
-    fail "A3b PROXY MEASURE ERROR (rc=$PX_RC) — could not check the ascii_proxy sites: $(head -2 "$REP/a3b_proxy.out" | tr '\n' ' ' | cut -c1-300)"
-    echo "RESULT: FAIL ($FAILS failed) — stopped at the ascii_proxy measure (a harness or input error; the tests are not run)"
-    exit 1
-  fi
-fi
 A2_OK=1; A2_MODE="strict"; A2_NOTE=""
 k=1
 while [ "$k" -le "$N_SEC" ]; do
