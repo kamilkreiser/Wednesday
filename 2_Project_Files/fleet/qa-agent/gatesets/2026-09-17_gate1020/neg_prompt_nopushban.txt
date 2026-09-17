@@ -1,0 +1,75 @@
+ultrathink
+
+You are the fleet QA agent running a TIER 2 (through code) gate, ROUND 1, on Secuura/Blockchain PR #1020 (KS-769, Seat A). It re-dates one audit exclusion fuse and changes nothing else.
+
+Read your brief FIRST and in full, then plan:
+/Volumes/DevMASTER/WEDNESDAY/2_Project_Files/fleet/qa-agent/briefs/2026-09-17_secuura-1020-ks769-tier2.md
+
+Subject: PR #1020 (KS-769) @ 71bd80a35b406b9c99c7b96955a7521032d33c20. It changes ONE file, Blockchain/Dev/scripts/audit/lock-discovery.mjs, +5 -1:
+- OUT_OF_SCOPE_LOCKS['Blockchain/Dev/mobile/secuura-app'].expires goes from '2026-09-17' to '2026-10-19';
+- four comment lines cite Kam's ruling ("Dormant but kept") and the lapse instant.
+
+It is one commit on d7e95cd9f153e9036ed77935a73c93504fa6e3dc (#1017's squash), which was also origin develop at draft time. "Refs KS-769": the ticket stays open after the merge.
+The seat's READY mail, verbatim: /Volumes/DevMASTER/WEDNESDAY/2_Project_Files/fleet/qa-agent/gatesets/2026-09-17_gate1020/mail_1020_ready.md
+Repo:    /Volumes/DevMASTER/!CODING/Secuura/Blockchain/2_Project_Files  (READ-ONLY: git clone --shared by SHA into your own mktemp -d; write verbs there only, from a script file)
+
+A PR is gated at a SHA, not a name. FIRST verify the head at origin (git ls-remote refs/pull/1020/head plus the PR API). If the head moved, STOP and say so in the mail.
+
+You are FINDINGS-ONLY. You never fix, merge, push, deploy, comment, file, tick an ack box or `@` anyone. Linear and GitHub are READ-ONLY to you.
+
+Avoid pushing from the Secuura checkout or any of its worktrees. preflight.sh runs ONLY inside your own clone's worktree, with GATEWAY_URL pointed at a closed loopback port.
+Never enter Seat A's worktree or any other gate's clone.
+
+NEVER print a credential value. GH_TOKEN and LINEAR_API_KEY are read by NAME inside a script from the Secuura 4_Credentials/.env. They are never echoed or written anywhere.
+
+No docker, no stack, no kintsugi, no demo, no az, never the wallet mnemonic. The only outbound network is what the audit legs themselves do (npm audit and the registry bulk-advisory fetch), plus GitHub and Linear GETs.
+
+Scope is PROPORTIONATE: one value in one file. Time-box about 25 minutes, using the brief's priority order.
+Not required: Schemathesis, Akto, Playwright, k6, any stack, preflight legs 3/4/8, and any service suite. Say so under NOT TESTED.
+
+Eight things you must not miss (the brief has drafter-measured predictions for each):
+
+1. Red-proof, re-derived: at head and at d7e95cd9f bytes, run lock-discovery.test.mjs, `npm run audit:contract` (read its count against scripts/audit/expected-case-count) and `node scripts/audit/audit-locks.mjs`. Name the failing cases by name.
+   Drafter: base 5/10 fail, 10/59 fail, locks rc 3 LAPSED; head 0/10, 0/59, locks rc 0 with 43 = 45 - 1 - 1.
+   Re-run the seat's tamper table (T1-T5) at head with anchor count 1 and sha256 restore, and add at least ONE tamper of your own.
+
+2. The date arithmetic, through the code. utcToday() (baseline-contract.mjs:91) reads `new Date()` and has no parameter. isLapsed (:130) accepts `today` as an argument.
+   Inject the clock BOTH ways:
+   - the argument (isLapsed(entry, '2026-10-18') false, '2026-10-19' true);
+   - a whole-process clock that reaches node --test workers and the gate process (the drafter's preload is GS/fakeclock.mjs; build your own or audit that one, and prove it takes effect with a control).
+   Measure 2026-10-18T23:59:59.999Z (live) and 2026-10-19T00:00:00.000Z (lapsed) on the shipped modules AND on the whole lock-discovery suite plus audit-locks.
+   Convert both instants to Australia/Sydney with a tz database, not by hand. Rule whether '2026-10-19' matches the ruling as Wednesday read it (the end of Sunday 18 Oct Sydney time), and state exactly how many hours past Sydney midnight it actually lapses.
+
+3. Nothing else changed: exactly 1 file and 1 commit; `git diff -w` is identical to the plain diff; a comment-stripped parse differs from base in exactly the one literal (with a control); and every other fuse file (audit-baseline.json, baseline-contract.mjs, expected-case-count) is byte-identical base vs head.
+
+4. Preflight legs 5 and 7, in the real harness: run scripts/preflight/preflight.sh whole in your own clone's worktree at head AND at d7e95cd9f, and quote each leg's verdict line. Legs 5, 6 and 7 are the ones that matter. Legs 5-7 reach the npm registry; if you are offline, say which legs SKIPPED and why. Leg 5 cannot skip.
+
+5. Other fuses (a FINDING class, not the PR's defect): list every dated `expires` under Blockchain/Dev/scripts that lapses within 14 days of the gate's `date`.
+   Then MEASURE which of them actually refuse a push, under an injected clock at each lapse instant, with a control 1 ms before it. Run audit-gate.mjs, audit-locks.mjs AND audit:contract.
+   Drafter: 10 audit-baseline rows lapse 2026-09-24T00:00Z and 5 more on 2026-09-30T00:00Z. audit-gate rc 1 (9 lapsed) and audit-locks rc 1 (10 lapsed) at 09-24, so legs 6 and 7 would refuse every Blockchain/Dev push from 10:00 AEST Thu 24 Sep.
+   Name the owning tickets. The finding's target is the TICKETS, not #1020.
+
+6. Merged tree: head merged with the THEN-CURRENT develop in your own clone. If develop is still d7e95cd9f, say merged == head by tree hash. Otherwise re-run item 1's three commands and item 5's census on the merged tree, naming each tree.
+
+7. linkKind: attachmentsForURL(pull/1020) must be exactly KS-769 "contributes". Re-read it immediately before the mail. Any closing phrase naming any ticket (body, title, commit message, comments) is a Major. Confirm the dormant ruling is recorded ON KS-769 (the lapse message itself says "take a new dated decision on the ticket — do not move the date to silence this"). Never write.
+
+8. File-disjointness from #1018, #1019 and every other open PR, by the PR files API, including whether any open PR touches Blockchain/Dev/scripts/audit/.
+
+Your tool shell's grep may be a function: use /usr/bin/grep -i with a same-file positive control.
+Node 24's --test prints the SPEC reporter when stdout is not a TTY: read the "ℹ tests / pass / fail" lines, never TAP "# tests".
+zsh: no PIPESTATUS (write rc=$? on its own line), and never begin a line with `====`.
+Never `cd` in your own tool calls.
+Quote the Secuura checkout's porcelain count, .git/config sha256, for-each-ref count and worktree count at start and at close.
+Never rm. Use a fresh mktemp -d per attempt and quarantine scratch files by rename.
+Do no memory maintenance of your own project's memory store inside this session.
+
+Report FOUND / TESTED / HOW, with controls, and state what you did NOT test at the same prominence. Write the report to:
+/Volumes/DevMASTER/!CODING/Testing Agent MAIN/projects/secuura/reports/2026-09-17-ks769-1020-71bd80a35-tier2-r1/
+Verdict: GO, GO WITH FINDINGS, or NO GO, on 71bd80a35b406b9c99c7b96955a7521032d33c20 and on the merged tree (name the develop SHA).
+
+MAIL YOUR VERDICT to wednesday-agent@agentmail.to when the pass is complete. Your pane holds ~19 lines of alternate screen with no scrollback, so a verdict that stays in the pane is one pane-close from being lost. The verdict MAIL is the END STATE and the wait signal.
+Subject:
+[QA -> Wednesday] TIER 2 GATE #1020 (KS-769) 71bd80a35 — <GO | GO WITH FINDINGS | NO GO>
+
+Sending: the QA project has no send_brief.sh of its own. The brief's VERDICT DESTINATION names the path that worked: the AgentMail API from coagent@agentmail.to (POST https://api.agentmail.to/v0/inboxes/coagent@agentmail.to/messages/send), with AGENTMAIL_API_KEY read by NAME from /Volumes/DevMASTER/WEDNESDAY/4_Credentials/.env and never echoed.
+Confirm the API answered 2xx and quote the message id in your final pane line. Timestamps in the mail come from `date`, never estimated.

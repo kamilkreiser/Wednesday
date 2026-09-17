@@ -1,0 +1,124 @@
+drafter_run 2026-09-17 15:45:37 AEST sections ALL
+checkout readings START 15:45:37 AEST: porcelain 0 config_sha256 d7e7298b02c45f52 refs 918 worktrees 111
+workdir /private/tmp/claude-501/-Volumes-DevMASTER-WEDNESDAY/a5010d5c-6deb-4514-91ed-aa504c76f373/scratchpad/gate1020_draft_vpwflmo3
+clone rc 0 
+tree base HEAD + lock-discovery blob ['d7e95cd9f153e9036ed77935a73c93504fa6e3dc', '2f54840ce6470e4e8eadeab603a9db7fa3eb49b9']
+  scripts/audit npm ci base rc 0 secs 0.3 semver present True
+  porcelain after install 0
+tree head HEAD + lock-discovery blob ['71bd80a35b406b9c99c7b96955a7521032d33c20', '3dd903b527f26c758cc1da84b10cc0a0db3b1d46']
+  scripts/audit npm ci head rc 0 secs 0.3 semver present True
+  porcelain after install 0
+
+== B static 15:45:44 AEST
+  diff --name-only -> Blockchain/Dev/scripts/audit/lock-discovery.mjs
+  diff --numstat -> 5	1	Blockchain/Dev/scripts/audit/lock-discovery.mjs
+  diff -w --numstat -> 5	1	Blockchain/Dev/scripts/audit/lock-discovery.mjs
+  diff --ignore-blank-lines --numstat -> 5	1	Blockchain/Dev/scripts/audit/lock-discovery.mjs
+  commits base..head 1
+  removed lines 1 ["-      expires: '2026-09-17',"]
+  added lines 5
+   + COMMENT       // KS-769: Kam ruled dormant ("Dormant but kept", panel 2026-09-17 15:10 AEST);
+   + COMMENT       // exclusion kept, fuse re-dated to the end of Sunday 2026-10-18 Sydney time (AEDT).
+   + COMMENT       // isLapsed is `expires <= utcToday()`, so a date is dead ON that UTC date: this
+   + COMMENT       // value lapses 00:00Z Mon 19 Oct = 11:00 AEDT ('2026-10-18' would blow 13 h early).
+   + CODE          expires: '2026-10-19',
+  parser compare rc 0 {"ts":"5.9.3","lines_base":110,"lines_head":110,"differing_lines":[[52,"            expires: '2026-09-17',","            expires: '2026-10-19',"]],"anchor_count":1,"control_literal_restored_equals_base":true} 
+  blob audit-baseline.json 03d1680e3 03d1680e3 IDENTICAL
+  blob baseline-contract.mjs 2504d9a28 2504d9a28 IDENTICAL
+  blob expected-case-count 04f9fe460 04f9fe460 IDENTICAL
+  blob exceptions.yml d6401126e d6401126e IDENTICAL
+
+== C suites (real clock) 15:45:44 AEST utc now 2026-09-17T05:45:44.491283+00:00
+  C_base_d7e95cd9f           lock-discovery.test  rc 1 tests ? pass ? fail ? secs 0.2
+  C_base_d7e95cd9f           audit:contract       rc 1 tests ? pass ? fail ? (expected-case-count 59) secs 7.0
+  C_base_d7e95cd9f           audit-locks          rc 3 scanned/tracked/oos  LAPSED-text True secs 0.1 |   Every entry needs `reason`, `ticket` and a real `expires` date, and its key must be the directory of a tracked package-lock.json.
+  C_base_d7e95cd9f           audit-gate           rc 0 secs 1.6 | OK — no advisories outside the triaged baseline.
+  C_head_71bd80a35           lock-discovery.test  rc 0 tests ? pass ? fail ? secs 0.2
+  C_head_71bd80a35           audit:contract       rc 0 tests ? pass ? fail ? (expected-case-count 59) secs 7.8
+  C_head_71bd80a35           audit-locks          rc 0 scanned/tracked/oos ('43', '45', '1') LAPSED-text False secs 1.0 | OK — no standalone-lock advisories outside the triaged baseline.
+  C_head_71bd80a35           audit-gate           rc 0 secs 1.7 | OK — no advisories outside the triaged baseline.
+
+== D clock unit probe (shipped utcToday / isLapsed / validateOutOfScope) 15:46:03 AEST
+  REAL clock (control)  rc 0 {"fake":null,"clock":"2026-09-17T05:46:04.006Z","sydney":"Thursday, 17 September 2026 at 3:46:04 pm AEST","utcToday":"2026-09-17","expires":"2026-10-19","isLapsed":false,"validateOutOfScope":"passes"} 
+  PRELOAD control 2020  rc 0 {"fake":"2020-01-01T00:00:00Z","clock":"2020-01-01T00:00:00.000Z","sydney":"Wednesday, 1 January 2020 at 11:00:00 am AEDT","utcToday":"2020-01-01","expires":"2026-10-19","isLapsed":false,"validateOutOfScope":"passes"} 
+  head @ 2026-10-18T12:59:59.999Z   rc 0 {"fake":"2026-10-18T12:59:59.999Z","clock":"2026-10-18T12:59:59.999Z","sydney":"Sunday, 18 October 2026 at 11:59:59 pm AEDT","utcToday":"2026-10-18","expires":"2026-10-19","isLapsed":false,"validateOutOfScope":"passes"} 
+  head @ 2026-10-18T13:00:00.000Z   rc 0 {"fake":"2026-10-18T13:00:00.000Z","clock":"2026-10-18T13:00:00.000Z","sydney":"Monday, 19 October 2026 at 12:00:00 am AEDT","utcToday":"2026-10-18","expires":"2026-10-19","isLapsed":false,"validateOutOfScope":"passes"} 
+  head @ 2026-10-18T23:59:59.999Z   rc 0 {"fake":"2026-10-18T23:59:59.999Z","clock":"2026-10-18T23:59:59.999Z","sydney":"Monday, 19 October 2026 at 10:59:59 am AEDT","utcToday":"2026-10-18","expires":"2026-10-19","isLapsed":false,"validateOutOfScope":"passes"} 
+  head @ 2026-10-19T00:00:00.000Z   rc 0 {"fake":"2026-10-19T00:00:00.000Z","clock":"2026-10-19T00:00:00.000Z","sydney":"Monday, 19 October 2026 at 11:00:00 am AEDT","utcToday":"2026-10-19","expires":"2026-10-19","isLapsed":true,"validateOutOfScope":"THROWS (LAPSED)"} 
+  head @ 2026-10-19T00:00:00.001Z   rc 0 {"fake":"2026-10-19T00:00:00.001Z","clock":"2026-10-19T00:00:00.001Z","sydney":"Monday, 19 October 2026 at 11:00:00 am AEDT","utcToday":"2026-10-19","expires":"2026-10-19","isLapsed":true,"validateOutOfScope":"THROWS (LAPSED)"} 
+  base @ 2026-09-16T23:59:59.999Z rc 0 {"fake":"2026-09-16T23:59:59.999Z","clock":"2026-09-16T23:59:59.999Z","sydney":"Thursday, 17 September 2026 at 9:59:59 am AEST","utcToday":"2026-09-16","expires":"2026-09-17","isLapsed":false,"validateOutOfScope":"passes"}
+  base @ 2026-09-17T00:00:00.000Z rc 0 {"fake":"2026-09-17T00:00:00.000Z","clock":"2026-09-17T00:00:00.000Z","sydney":"Thursday, 17 September 2026 at 10:00:00 am AEST","utcToday":"2026-09-17","expires":"2026-09-17","isLapsed":true,"validateOutOfScope":"THROWS (LAPSED)"}
+  isLapsed(today injected by argument) rc 0 {"10-18":false,"10-19":true,"10-20":true,"ctrl_2026-10-18_on_10-18":true}
+   zoneinfo 2026-09-17T00:00:00+00:00 -> Thu 2026-09-17 10:00 AEST (UTC+1000)
+   zoneinfo 2026-10-18T13:00:00+00:00 -> Mon 2026-10-19 00:00 AEDT (UTC+1100)
+   zoneinfo 2026-10-19T00:00:00+00:00 -> Mon 2026-10-19 11:00 AEDT (UTC+1100)
+   zoneinfo 2026-10-18T00:00:00+00:00 -> Sun 2026-10-18 11:00 AEDT (UTC+1100)
+
+== E clock whole-suite on head (preload reaches node --test workers and the gate process) 15:46:04 AEST
+  head @ 2026-10-18T23:59:59.999Z lock-discovery.test rc 0 tests ? pass ? fail ?
+  head @ 2026-10-18T23:59:59.999Z audit-locks rc 1 LAPSED-text True |     KS-1024 (expired 2026-09-24)
+  head @ 2026-10-19T00:00:00.000Z lock-discovery.test rc 1 tests ? pass ? fail ?
+  head @ 2026-10-19T00:00:00.000Z audit-locks rc 3 LAPSED-text True |   Every entry needs `reason`, `ticket` and a real `expires` date, and its key must be the directory of a tracked package-lock.json.
+
+== F tampers on head (real clock unless fake named) 15:46:05 AEST
+  T1_2026-09-17: anchor count 1, sha 8f0b073a4e11 -> 705cde935e75, fake None, PREDICTED ld 5 fail; contract 10 fail; locks rc 3 (seat T1)
+     lock-discovery.test rc 1 tests ? pass ? fail ?
+     audit:contract rc 1 tests ? pass ? fail ?
+     audit-locks rc 3 |   - Blockchain/Dev/mobile/secuura-app: expires 2026-09-17 — the fuse has LAPSED. This tree is still being removed from the gate's corpus on an exclusion whose d
+     restored sha 8f0b073a4e11 identical True porcelain(file) 0
+  T2_2026-09-16: anchor count 1, sha 8f0b073a4e11 -> 5307a504eceb, fake None, PREDICTED ld 5 fail; locks rc 3 (seat T2)
+     lock-discovery.test rc 1 tests ? pass ? fail ?
+     audit-locks rc 3 |   - Blockchain/Dev/mobile/secuura-app: expires 2026-09-16 — the fuse has LAPSED. This tree is still being removed from the gate's corpus on an exclusion whose d
+     restored sha 8f0b073a4e11 identical True porcelain(file) 0
+  T3_soon: anchor count 1, sha 8f0b073a4e11 -> b4d9600022f6, fake None, PREDICTED ld 5 fail; locks rc 3 not an ISO (seat T3)
+     lock-discovery.test rc 1 tests ? pass ? fail ?
+     audit-locks rc 3 |   - Blockchain/Dev/mobile/secuura-app: missing expires (not an ISO YYYY-MM-DD date: "soon")
+     restored sha 8f0b073a4e11 identical True porcelain(file) 0
+  T4_2026-09-18: anchor count 1, sha 8f0b073a4e11 -> 3c102686f7fe, fake None, PREDICTED green, locks rc 0 (seat T4)
+     lock-discovery.test rc 0 tests ? pass ? fail ?
+     audit-locks rc 0 | OK — no standalone-lock advisories outside the triaged baseline.
+     restored sha 8f0b073a4e11 identical True porcelain(file) 0
+  T5_comment_removed: anchor count 1, sha 8f0b073a4e11 -> 5f7975d62088, fake None, PREDICTED green (seat T5)
+     lock-discovery.test rc 0 tests ? pass ? fail ?
+     audit-locks rc 0 | OK — no standalone-lock advisories outside the triaged baseline.
+     restored sha 8f0b073a4e11 identical True porcelain(file) 0
+  T6_2026-10-18_realclock: anchor count 1, sha 8f0b073a4e11 -> 568245e1d9cf, fake None, PREDICTED green today: nothing at real clock distinguishes 10-18 from 10-19 (drafter)
+     lock-discovery.test rc 0 tests ? pass ? fail ?
+     audit-locks rc 0 | OK — no standalone-lock advisories outside the triaged baseline.
+     restored sha 8f0b073a4e11 identical True porcelain(file) 0
+  T7_2026-10-18_at_1018T0000Z: anchor count 1, sha 8f0b073a4e11 -> 568245e1d9cf, fake 2026-10-18T00:00:00.000Z, PREDICTED ld 5 fail, locks rc 3: the 13 h-early date is dead at 11:00 AEDT Sunday (drafter)
+     lock-discovery.test rc 1 tests ? pass ? fail ?
+     audit-locks rc 3 |   - Blockchain/Dev/mobile/secuura-app: expires 2026-10-18 — the fuse has LAPSED. This tree is still being removed from the gate's corpus on an exclusion whose d
+     restored sha 8f0b073a4e11 identical True porcelain(file) 0
+  T8_head_value_at_1018T0000Z_CONTROL: anchor count 1, sha 8f0b073a4e11 -> 8f0b073a4e11, fake 2026-10-18T00:00:00.000Z, PREDICTED green: the shipped value is live at the same instant (drafter control for T7)
+     lock-discovery.test rc 0 tests ? pass ? fail ?
+     audit-locks rc 1 | FAIL — 18 temporary exception(s) LAPSED:
+     restored sha 8f0b073a4e11 identical True porcelain(file) 0
+
+== G fuse census: audit-baseline dated rows, head, injected clock 15:46:14 AEST
+  dated rows <= 2026-10-01: 15
+    ('2026-09-24', 'GHSA-2883-xcg3-v3hh', 'js-yaml', 'KS-1024')
+    ('2026-09-24', 'GHSA-2wm5-q62r-hmrv', 'colord', 'KS-1024')
+    ('2026-09-24', 'GHSA-4mjr-xmp4-gh2g', 'qs', 'KS-763')
+    ('2026-09-24', 'GHSA-82fw-gwwq-j7x9', 'vitest / @vitest/mocker', 'KS-1024')
+    ('2026-09-24', 'GHSA-crvj-82cr-hjcx', 'hono', 'KS-1024')
+    ('2026-09-24', 'GHSA-g6gw-c38x-mqfc', 'hono', 'KS-1024')
+    ('2026-09-24', 'GHSA-gqvv-2mrq-wpjv', 'hono', 'KS-1024')
+    ('2026-09-24', 'GHSA-rgwj-5xj2-c3m3', 'mysql2', 'KS-763')
+    ('2026-09-24', 'GHSA-w5vr-8v7q-w6rv', 'baseline-browser-mapping', 'KS-1024')
+    ('2026-09-24', 'GHSA-x5fp-wj9c-mxmx', 'qs', 'KS-763')
+    ('2026-09-30', 'GHSA-337j-9hxr-rhxg', 'react-router', 'KS-528')
+    ('2026-09-30', 'GHSA-frvp-7c67-39w9', '@hono/node-server', 'KS-530')
+    ('2026-09-30', 'GHSA-jjmj-jmhj-qwj2', 'react-router-dom', 'KS-528')
+    ('2026-09-30', 'GHSA-mwp4-54f8-5fhr', 'ip-address', 'KS-729')
+    ('2026-09-30', 'GHSA-wrjc-x8rr-h8h6', 'react-router', 'KS-528')
+  audit-gate   @ REAL                       rc 0 secs 1.6 lapsed 0 [] fresh-hdr [] | OK — no advisories outside the triaged baseline.
+  audit-locks  @ REAL                       rc 0 secs 1.0 lapsed 0 [] fresh-hdr [] | OK — no standalone-lock advisories outside the triaged baseline.
+  audit-gate   @ 2026-09-23T23:59:59.999Z   rc 0 secs 2.4 lapsed 0 [] fresh-hdr [] | OK — no advisories outside the triaged baseline.
+  audit-locks  @ 2026-09-23T23:59:59.999Z   rc 0 secs 1.0 lapsed 0 [] fresh-hdr [] | OK — no standalone-lock advisories outside the triaged baseline.
+  audit-gate   @ 2026-09-24T00:00:00.000Z   rc 1 secs 2.6 lapsed 9 ['GHSA-2883-xcg3-v3hh', 'GHSA-4mjr-xmp4-gh2g', 'GHSA-82fw-gwwq-j7x9', 'GHSA-crvj-82cr-hjcx', 'GHSA-g6gw-c38x-mqfc', 'GHSA-gqvv-2mrq-wpjv', 'GHSA-rgwj-5xj2-c3m3', 'GHSA-w5vr-8v7q-w6rv', 'GHSA-x5fp-wj9c-mxmx'] fresh-hdr [] |   - GHSA-4mjr-xmp4-gh2g [moderate] qs — KS-763 (expired 2026-09-24)
+  audit-locks  @ 2026-09-24T00:00:00.000Z   rc 1 secs 1.0 lapsed 10 ['GHSA-2883-xcg3-v3hh', 'GHSA-2wm5-q62r-hmrv', 'GHSA-4mjr-xmp4-gh2g', 'GHSA-82fw-gwwq-j7x9', 'GHSA-crvj-82cr-hjcx', 'GHSA-g6gw-c38x-mqfc', 'GHSA-gqvv-2mrq-wpjv', 'GHSA-rgwj-5xj2-c3m3', 'GHSA-w5vr-8v7q-w6rv', 'GHSA-x5fp-wj9c-mxmx'] fresh-hdr [] |     KS-1024 (expired 2026-09-24)
+  audit-gate   @ 2026-09-30T00:00:00.000Z   rc 1 secs 2.5 lapsed 14 ['GHSA-2883-xcg3-v3hh', 'GHSA-337j-9hxr-rhxg', 'GHSA-4mjr-xmp4-gh2g', 'GHSA-82fw-gwwq-j7x9', 'GHSA-crvj-82cr-hjcx', 'GHSA-frvp-7c67-39w9', 'GHSA-g6gw-c38x-mqfc', 'GHSA-gqvv-2mrq-wpjv', 'GHSA-jjmj-jmhj-qwj2', 'GHSA-mwp4-54f8-5fhr', 'GHSA-rgwj-5xj2-c3m3', 'GHSA-w5vr-8v7q-w6rv', 'GHSA-wrjc-x8rr-h8h6', 'GHSA-x5fp-wj9c-mxmx'] fresh-hdr [] |   - GHSA-jjmj-jmhj-qwj2 [moderate] react-router-dom — KS-528 (expired 2026-09-30)
+  audit-locks  @ 2026-09-30T00:00:00.000Z   rc 1 secs 0.9 lapsed 15 ['GHSA-2883-xcg3-v3hh', 'GHSA-2wm5-q62r-hmrv', 'GHSA-337j-9hxr-rhxg', 'GHSA-4mjr-xmp4-gh2g', 'GHSA-82fw-gwwq-j7x9', 'GHSA-crvj-82cr-hjcx', 'GHSA-frvp-7c67-39w9', 'GHSA-g6gw-c38x-mqfc', 'GHSA-gqvv-2mrq-wpjv', 'GHSA-jjmj-jmhj-qwj2', 'GHSA-mwp4-54f8-5fhr', 'GHSA-rgwj-5xj2-c3m3', 'GHSA-w5vr-8v7q-w6rv', 'GHSA-wrjc-x8rr-h8h6', 'GHSA-x5fp-wj9c-mxmx'] fresh-hdr [] |     KS-1024 (expired 2026-09-24)
+checkout readings CLOSE 15:46:28 AEST: porcelain 0 config_sha256 d7e7298b02c45f52 refs 918 worktrees 111
+done 15:46:28 AEST
