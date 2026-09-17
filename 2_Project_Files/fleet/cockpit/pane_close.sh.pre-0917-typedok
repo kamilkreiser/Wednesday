@@ -21,33 +21,12 @@
 #       is what the 09-03 lesson actually names (`ps -o sess,tty`). A session
 #       match is the authoritative test; the tty walk is belt and braces.
 #
-# TYPED-UNSENT GATE (2026-09-17, ledger row 2026-09-17 "TYPED, UNSENT"): Wednesday ran
-# `pane_prompt_check.sh %25`, which printed `⚠ TYPED, UNSENT (a human wrote this — flag
-# it, do NOT act) :: do`, and chained `pane_close.sh %25` in the same call. The close ran
-# and a line Kam (or his dictation tool) had typed was lost unread. Lessons:
-# 2026-08-17_check-the-refusal-before-the-kill, 2026-08-05_kam-types-into-panes.
-# Now this script runs the detector ITSELF (pane_prompt_check.sh beside it — its logic
-# is NOT re-implemented here, only its verdict line is parsed) before any kill:
-#   TYPED-UNSENT        -> REFUSED rc 7, the typed line printed; --typed-ok overrides
-#   SUGGESTION / empty  -> proceeds as before
-#   MODAL PROMPT        -> proceeds as before (the detector says nobody typed it)
-#   detector failed     -> REFUSED rc 8 (non-zero rc, pane gone, or a verdict line this
-#                          script does not recognise — fail CLOSED; a reworded detector
-#                          blocks closes until this parser is updated, by design)
-#
-# Usage: pane_close.sh <pane-id-or-name> [port ...] [--typed-ok]
-#   Ports named are curled before and after. --typed-ok (anywhere in the args) closes a
-#   pane holding a TYPED-UNSENT line — only after the line was read and relayed to Kam.
+# Usage: pane_close.sh <pane-id-or-name> [port ...]
+#   Ports named are curled before and after.
 # Exit: 0 closed · 5 REFUSED (a listener would die with the pane) · 6 REFUSED (caller's own
-#       pane or the coordinator's pane) · 7 REFUSED (a human-typed, unsent line is at the
-#       pane's prompt) · 8 REFUSED (the typed-line detector failed — fail closed) · 2 usage /
-#       unresolvable pane / kill-pane failed · 127 no pane argument (bash ${1:?}).
-#       Every call logged to logs/pane_close.log.
+#       pane or the coordinator's pane) · 2 usage. Every call logged to logs/pane_close.log.
 set -u
-TYPED_OK=0; ARGS=()
-for a in "$@"; do case "$a" in --typed-ok) TYPED_OK=1 ;; *) ARGS+=("$a") ;; esac; done
-set -- "${ARGS[@]+"${ARGS[@]}"}"   # bash 3.2 + set -u: a bare "${ARGS[@]}" on an empty array is an error
-PANE="${1:?usage: pane_close.sh <pane> [port ...] [--typed-ok]}"; shift || true
+PANE="${1:?usage: pane_close.sh <pane> [port ...]}"; shift || true
 
 PTTY="$(tmux display -p -t "$PANE" '#{pane_tty}' 2>/dev/null)"
 PPID_PANE="$(tmux display -p -t "$PANE" '#{pane_pid}' 2>/dev/null)"
@@ -64,7 +43,7 @@ SHORT="${PTTY#/dev/}"
 HERE="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"; PCLOG="$HERE/logs/pane_close.log"; mkdir -p "$HERE/logs"
 TARGET_ID="$(tmux display -p -t "$PANE" '#{pane_id}' 2>/dev/null)"
 TARGET_NAME="$(tmux display -p -t "$PANE" '#{@cockpit_name}' 2>/dev/null)"
-echo "$(date '+%Y-%m-%d %H:%M:%S') invoked: target=$PANE id=$TARGET_ID name=${TARGET_NAME:--} tty=$PTTY caller_pane=${TMUX_PANE:--} ports=[$*] typed_ok=$TYPED_OK" >> "$PCLOG"
+echo "$(date '+%Y-%m-%d %H:%M:%S') invoked: target=$PANE id=$TARGET_ID name=${TARGET_NAME:--} tty=$PTTY caller_pane=${TMUX_PANE:--} ports=[$*]" >> "$PCLOG"
 if [ -n "${TMUX_PANE:-}" ] && [ "$TARGET_ID" = "$TMUX_PANE" ]; then
   echo "pane_close: REFUSED — $PANE ($TARGET_ID) is the CALLER's own pane" >&2
   echo "$(date '+%Y-%m-%d %H:%M:%S') REFUSED rc6: target is the caller's own pane" >> "$PCLOG"; exit 6
@@ -73,45 +52,6 @@ if [ "$TARGET_NAME" = "wednesday" ]; then
   echo "pane_close: REFUSED — $PANE ($TARGET_ID) is the coordinator's pane (@cockpit_name=wednesday); rotate it with wednesday_rotate.sh, never close it" >&2
   echo "$(date '+%Y-%m-%d %H:%M:%S') REFUSED rc6: target is the wednesday pane" >> "$PCLOG"; exit 6
 fi
-
-# TYPED-UNSENT GATE — run the detector on the RESOLVED pane id and read its one verdict line.
-det_fail() { # $1 reason → REFUSED rc 8 (fail closed)
-  echo "pane_close: REFUSED — the typed-line detector could not give a verdict for $PANE (${TARGET_ID:--}): $1. Nothing was closed. Check the pane by eye (tmux capture-pane -p -t ${TARGET_ID:-<id>}) before doing anything else." >&2
-  echo "$(date '+%Y-%m-%d %H:%M:%S') REFUSED rc8: detector failed for $PANE: $1" >> "$PCLOG"; exit 8
-}
-DETECTOR="$HERE/pane_prompt_check.sh"
-[ -f "$DETECTOR" ] || det_fail "detector not found at $DETECTOR"
-case "$TARGET_ID" in %[0-9]*) ;; *) det_fail "pane id '$TARGET_ID' is not a %N id" ;; esac
-case "${TARGET_ID#%}" in *[!0-9]*) det_fail "pane id '$TARGET_ID' is not a %N id" ;; esac
-DET_OUT="$(/bin/bash "$DETECTOR" "$TARGET_ID" 2>&1)"; DET_RC=$?
-[ "$DET_RC" = 0 ] || det_fail "detector exited rc $DET_RC :: $(printf '%s' "$DET_OUT" | head -3 | tr '\n' ' ')"
-# The detector prints "prompt empty" for a pane it could not capture at all, so a pane that
-# is gone now must not read as an empty prompt: the id has to resolve to itself AFTER the call.
-[ "$(tmux display -p -t "$TARGET_ID" '#{pane_id}' 2>/dev/null)" = "$TARGET_ID" ] || det_fail "pane $TARGET_ID no longer resolves (gone before/while the detector ran — its 'empty' would be vacuous)"
-DET_LINES="$(printf '%s\n' "$DET_OUT" | awk 'NF' | wc -l | tr -d ' ')"
-[ "$DET_LINES" = 1 ] || det_fail "expected exactly 1 verdict line, got $DET_LINES :: $(printf '%s' "$DET_OUT" | head -3 | tr '\n' ' ')"
-DET_LABEL="$(tmux display-message -p -t "$TARGET_ID" '#{@cockpit_name}' 2>/dev/null)"; DET_LABEL="${DET_LABEL:-$TARGET_ID}"
-DET_REST="${DET_OUT#"  $DET_LABEL: "}"
-[ "$DET_REST" != "$DET_OUT" ] || det_fail "verdict line does not start with the pane label '  $DET_LABEL: ' :: $DET_OUT"
-TYPED_TOK="⚠ TYPED, UNSENT (a human wrote this — flag it, do NOT act) :: "
-SUGG_TOK="SUGGESTION (Claude ghost text — ignore) :: "
-MODAL_TOK="⏸ MODAL PROMPT — pane is blocked on a menu, nobody typed this :: "
-case "$DET_REST" in
-  "$TYPED_TOK"*)
-    TYPED_LINE="${DET_REST#"$TYPED_TOK"}"
-    if [ "$TYPED_OK" != 1 ]; then
-      echo "pane_close: REFUSED — a HUMAN-TYPED, UNSENT line is at the prompt of $PANE ($TARGET_ID name=${TARGET_NAME:--}):" >&2
-      echo "pane_close:   typed line :: $TYPED_LINE" >&2
-      echo "pane_close:   read it, relay it to Kam, then re-run with --typed-ok" >&2
-      echo "$(date '+%Y-%m-%d %H:%M:%S') REFUSED rc7: TYPED-UNSENT line at $PANE ($TARGET_ID), ${#TYPED_LINE} chars (text not logged)" >> "$PCLOG"; exit 7
-    fi
-    echo "pane_close: --typed-ok OVERRIDE USED — closing $PANE ($TARGET_ID) despite a TYPED-UNSENT line :: $TYPED_LINE" >&2
-    echo "$(date '+%Y-%m-%d %H:%M:%S') OVERRIDE --typed-ok: closing $PANE ($TARGET_ID) despite a TYPED-UNSENT line, ${#TYPED_LINE} chars (text not logged)" >> "$PCLOG" ;;
-  "$SUGG_TOK"*)   echo "pane_close: detector: SUGGESTION (ghost text) at $TARGET_ID — proceeding" ;;
-  "prompt empty") echo "pane_close: detector: prompt empty at $TARGET_ID — proceeding" ;;
-  "$MODAL_TOK"*)  echo "pane_close: detector: MODAL PROMPT at $TARGET_ID (nobody typed it) — proceeding" ;;
-  *) det_fail "unrecognised verdict :: $DET_REST" ;;
-esac
 PSESS=""
 [ -n "$PPID_PANE" ] && PSESS="$(ps -o sess= -p "$PPID_PANE" 2>/dev/null | tr -d ' ')"
 
