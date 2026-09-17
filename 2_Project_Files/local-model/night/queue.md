@@ -166,4 +166,3 @@
 # 04:32 - KS-1229 X-SIGNWALLET-SERVED queued by the 04:0x seat (IN-SEAT brief; golden PASS 7/7 at 34cdcfb26, A2 strict; tamper LINE-PINNED to documents.ts:2859). Raise: tier 2, Refs KS-1229, hunk 174-179 — no overlap with the three held KS-1229 hunks.
 # 04:38 - KS-1229 X-VERSION-TRIM queued by the 04:0x seat (IN-SEAT brief; golden PASS 7/7 at 34cdcfb26, A2 strict; tamper LINE-PINNED to documents.ts:1980). Raise: tier 2, Refs KS-1229, hunk 145-150 — disjoint from the four held KS-1229 hunks.
 # 05:17 - KS-1229 Q-SIGNWALLET-AFTER-VERIFY queued by the 04:0x seat (IN-SEAT brief; golden PASS 7/7 at 34cdcfb26, A2 strict; tamper LINE-PINNED to documents.ts:2859, two statements on one line). Raise: tier 2, Refs KS-1229, hunk 118-123 — disjoint from the five held.
-KS-1229 input=/Volumes/DevMASTER/WEDNESDAY/2_Project_Files/local-model/night/inputs/code_1229afterverify.json task=/Volumes/DevMASTER/WEDNESDAY/2_Project_Files/local-model/tasks/code_patch/task.md ctx=65536
