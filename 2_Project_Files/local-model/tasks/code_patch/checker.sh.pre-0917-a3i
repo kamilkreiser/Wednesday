@@ -551,49 +551,6 @@ for o in json.load(open(sys.argv[1])):
     echo "RESULT: FAIL ($FAILS failed) — stopped at A3c (a dropped addition; the tests are not run)"
     exit 1
   fi
-  # A3i INDENT-EXACT (2026-09-17 13:10 row, KS-623 r1): the model shifted every line of its product hunk right by 2
-  # spaces; only FUZZY (-C1, which carries --ignore-whitespace) applied it, the brief's `+` line landed at 4-space indent
-  # in a 2-space block, and A3c (whitespace-STRIPPED) plus the suite and tsc all passed: RESULT PASS 7/7. Rule: each
-  # brief `+` line must be in the APPLIED target file byte-exact INCLUDING leading whitespace, whatever the A2 mode.
-  # tasks/code_patch/a3i_indent.py applies the section with its recorded opts to a temp copy of the tip (the a3b_line.py
-  # pattern) and recovers the brief's unstripped lines from ticket.description (expected_plus is stored stripped). An
-  # input it cannot recover them from SKIPS with an INFO line (legacy behaviour). A refuse-only gate: success prints an
-  # `A3i:` line, NOT a PASS line, so every recorded PASS/FAIL/RESULT line set stays comparable. The FAIL line avoids the
-  # `:NNN \`` shape on purpose: night_run.sh's retry builder reads that shape as "missed sites".
-  # Arms: tests/a3i_indent_arms.sh.
-  A3I_F=""; A3I_O=""; ai=1
-  while [ "$ai" -le "$N_SEC" ]; do
-    aip="$(python3 -c 'import json,sys; print(json.load(open(sys.argv[1]))[int(sys.argv[2])-1]["path"])' "$REP/sections.json" "$ai")"
-    if [ "$aip" = "$A3_TARGET" ] || [ "$SUBDIR/$aip" = "$A3_TARGET" ]; then A3I_F="$(sed -n 1p "$REP/section_$ai.opts")"; A3I_O="$(sed -n 2p "$REP/section_$ai.opts")"; break; fi
-    ai=$((ai+1))
-  done
-  python3 "$(dirname "$0")/a3i_indent.py" "$INPUT" "$CLONE" "${A3I_F:-/dev/null}" "$A3_TARGET" "$A3I_O" > "$REP/a3i_indent.out" 2>&1
-  A3I_RC=$?
-  if [ "$A3I_RC" -eq 0 ]; then
-    echo "A3i: every '+' line the brief adds is in the applied $A3_TARGET byte-exact incl. leading whitespace (apply mode $A2_MODE): $(/usr/bin/grep '^OK ' "$REP/a3i_indent.out" | head -1)$( /usr/bin/grep -q '^NOTADDED' "$REP/a3i_indent.out" && echo " · NOTE not added by the diff: $(/usr/bin/grep '^NOTADDED' "$REP/a3i_indent.out" | head -3 | tr '\n' ' ')")"
-  elif [ "$A3I_RC" -eq 5 ]; then
-    echo "INFO A3i skipped — $(head -1 "$REP/a3i_indent.out" | sed 's/^INFO //')"
-  elif [ "$A3I_RC" -eq 1 ]; then
-    A3I_MSG="$(python3 - "$REP/a3i_indent.out" "$N_PLUS" <<'PY3I'
-import re, sys
-rows = [re.match(r"^SHIFT :(\d+) observed=(\S+(?: \(tab\))?) expected=(\S+(?: \(tab\))?) delta=([+-]\d+) `(.*)`$", l) for l in open(sys.argv[1], encoding="utf-8", errors="replace").read().split("\n")]
-rows = [m for m in rows if m]
-deltas = sorted({int(m.group(4)) for m in rows})
-by = (f"{abs(deltas[0])} space(s) {'right' if deltas[0] > 0 else 'left'}" if len(deltas) == 1 else "varying amounts (" + ", ".join(f"{d:+d}" for d in deltas) + ")")
-lines = " · ".join(f":{m.group(1)} indent {m.group(2)}, brief {m.group(3)} (shifted {m.group(4)}) `{m.group(5)[:80]}`" for m in rows[:3])
-print(f"{len(rows)} of {sys.argv[2]} line(s) the brief adds landed in the applied file with DIFFERENT leading whitespace: {lines} — indentation shifted by {by}; copy the brief's lines byte-for-byte, including leading whitespace")
-PY3I
-)"
-    fail "A3i INDENT SHIFT — $A3I_MSG (apply mode $A2_MODE)"
-    echo "RESULT: FAIL ($FAILS failed) — stopped at A3i (an indentation shift; the tests are not run)"
-    exit 1
-  else
-    fail "A3i INDENT MEASURE ERROR (rc=$A3I_RC) — could not measure the applied $A3_TARGET: $(head -2 "$REP/a3i_indent.out" | tr '\n' ' ')"
-    echo "RESULT: FAIL ($FAILS failed) — stopped at the A3i measure (a harness error; the tests are not run)"
-    exit 1
-  fi
-else
-  echo "INFO A3i skipped — the input carries no expected '+' lines (a legacy or brief-less input); indentation not measured"
 fi
 
 # ---------------------------------------------------------------- A4 red-first

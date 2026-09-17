@@ -1,0 +1,53 @@
+a3i indent arms 2026-09-17 13:19:51 · checker /Volumes/DevMASTER/WEDNESDAY/2_Project_Files/local-model/tasks/code_patch/checker.sh (f3ce186cf515) · old /Volumes/DevMASTER/WEDNESDAY/2_Project_Files/local-model/tasks/code_patch/checker.sh.pre-0917-a3i (2f0003a87b31) · helper (06264a51052a)
+D product hunk:
+---·a/Blockchain/Dev/services/auth/src/middleware/authenticate.ts
++++·b/Blockchain/Dev/services/auth/src/middleware/authenticate.ts
+@@·-18,7·+18,7·@@
+··*/
+·function·parseTestToken(token:·string):·JwtPayload·|·null·{
+···//·SECURITY:·Never·accept·test·tokens·in·production
+-··if·(process.env.NODE_ENV·===·'production')·{
++··if·(!['development',·'test'].includes(process.env.NODE_ENV·||·''))·{
+·····return·null;
+···}
+···//·Require·explicit·opt-in·for·test·tokens
+D2 '+' line: +····if·(!['development',·'test'].includes(process.env.NODE_ENV·||·''))·{
+B2 shifted out.md line 9: +······if·(result.rows.length·>·0)·retur
+fixtures written
+--- (a) KS-623 real run
+  .. A_new_ks623 start 13:19:51
+  .. A_new_ks623 end 13:19:58 rc=1 :: FAIL A3i INDENT SHIFT — 1 of 1 line(s) the brief adds landed in the applied file with DIFFERENT leading whitespace: :21 indent 4, brief 2 (shifted +2) `if (!['development', 'test'].includes(process.env.NODE_ENV || '')) {` — indentation shifted by 2 space(s) right; copy the brief's lines byte-for-byte, including leading whitespac|RESULT: FAIL (1 failed) — stopped at A3i (an indentation shift; the tests are not run)|
+  ok   A  NEW checker: KS-623 real out.md → FAIL A3i INDENT SHIFT :21 indent 4, brief 2 (shifted +2), stopped at A3i, A4 never ran
+  .. A0_old_ks623 start 13:19:58
+  .. A0_old_ks623 end 13:20:13 rc=0 :: RESULT: PASS (7/7)|
+  ok   A0 OLD checker on the same → RESULT: PASS (7/7), no A3i (the silent pass)
+  ok   A1 the night clone's APPLIED authenticate.ts:21 = the fixed line at indent 4; the tip's :21 is at indent 2 (the measure matches the real file)
+--- (b) KS-1186 held run: trailing comment beyond the brief
+  .. B_new_ks1186 start 13:20:13
+  .. B_new_ks1186 end 13:20:32 rc=0 :: A3i: every '+' line the brief adds is in the applied Blockchain/Dev/services/auth/src/repositories/userRepo.ts byte-exact incl. leading whitespace (apply mode lenient): OK 5 line(s) byte-exact incl. leading whitespace (of 5; 5 line(s) added by the apply)|RESULT: PASS (7/7)|
+  ok   B  NEW checker: KS-1186 → 10 PASS/FAIL/RESULT lines identical to its night run (PASS 7/7); A3i OK 5 of 5 with the trailing comments
+  .. B2_new_ks1186_shift start 13:20:32
+  .. B2_new_ks1186_shift end 13:20:39 rc=1 :: FAIL A3i INDENT SHIFT — 1 of 5 line(s) the brief adds landed in the applied file with DIFFERENT leading whitespace: :446 indent 6, brief 4 (shifted +2) `if (result.rows.length > 0) return await fromRow(result.rows[0]);` — indentation shifted by 2 space(s) right; copy the brief's lines byte-for-byte, including leading whitespace |RESULT: FAIL (1 failed) — stopped at A3i (an indentation shift; the tests are not run)|
+  ok   B2 NEW checker: one commented '+' line shifted +2 → FAIL A3i naming :446 indent 6, brief 4 (the FAIL quotes the BRIEF's text; the applied line kept its comment, which A3c's tolerance accepts, and the indent is still caught)
+--- (c) KS-1156 test-only, no product hunk
+  .. C_new_ks1156 start 13:20:39
+  .. C_new_ks1156 end 13:21:00 rc=0 :: INFO A3i skipped — the input carries no expected '+' lines (a legacy or brief-less input); indentation not measured|RESULT: PASS (7/7)|
+  ok   C  NEW checker: KS-1156 → 8 PASS/FAIL/RESULT lines identical to its night run; INFO A3i skipped
+--- (d) KS-623 with the brief's indent
+  .. D_new_ks623_ok start 13:21:00
+  .. D_new_ks623_ok end 13:21:18 rc=0 :: A3i: every '+' line the brief adds is in the applied Blockchain/Dev/services/auth/src/middleware/authenticate.ts byte-exact incl. leading whitespace (apply mode strict): OK 1 line(s) byte-exact incl. leading whitespace (of 1; 1 line(s) added by the apply)|RESULT: PASS (7/7)|
+  ok   D  NEW checker: KS-623 at the brief's 2-space indent → strict apply, A3i OK 1, RESULT: PASS (7/7)
+  .. D2_new_ks623_plusonly start 13:21:18
+  .. D2_new_ks623_plusonly end 13:21:25 rc=1 :: FAIL A3i INDENT SHIFT — 1 of 1 line(s) the brief adds landed in the applied file with DIFFERENT leading whitespace: :21 indent 4, brief 2 (shifted +2) `if (!['development', 'test'].includes(process.env.NODE_ENV || '')) {` — indentation shifted by 2 space(s) right; copy the brief's lines byte-for-byte, including leading whitespac|RESULT: FAIL (1 failed) — stopped at A3i (an indentation shift; the tests are not run)|
+  ok   D2 NEW checker: only the '+' line at 4 spaces → STRICT apply, FAIL A3i :21 indent 4, brief 2 (not a fuzzy-only gate)
+--- (e) legacy inputs: skipped with INFO, verdict unchanged
+  .. E_new_legacy start 13:21:25
+  .. E_new_legacy end 13:21:40 rc=0 :: INFO A3i skipped — the input carries no expected '+' lines (a legacy or brief-less input); indentation not measured|RESULT: PASS (7/7)|
+  ok   E  NEW checker: KS-623 input without expected_plus → INFO A3i skipped; 9 lines identical to the recorded run minus its one PASS A3c line (RESULT: PASS (7/7), the old blind spot kept)
+  .. E2_new_nodesc start 13:21:40
+  .. E2_new_nodesc end 13:21:56 rc=0 :: INFO A3i skipped — the input's ticket.description has no `## The exact change` section, so the brief's indentation cannot be recovered|RESULT: PASS (7/7)|
+  ok   E2 NEW checker: expected_plus kept, the exact-change section gone from the description → INFO A3i skipped; 10 lines identical to the recorded run
+--- census: the helper over every historical run with PASS A3c (no vitest)
+  ok   F  census: measured=13 rc={0: 12, 1: 1} skipped={} flips=1 — the one flip is KS-623
+a3i indent arms: 11 passed, 0 failed (13:22:04)
+arms rc=0

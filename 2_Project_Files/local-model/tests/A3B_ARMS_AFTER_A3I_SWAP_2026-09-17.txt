@@ -1,0 +1,59 @@
+a3b line-number arms 2026-09-17 13:22:14 · checker /Volumes/DevMASTER/WEDNESDAY/2_Project_Files/local-model/tasks/code_patch/checker.sh (f3ce186cf515) · old /Volumes/DevMASTER/WEDNESDAY/2_Project_Files/local-model/tasks/code_patch/checker.sh.pre-0917-a3bline (553aafe0ea7a)
+fixtures written
+--- (a) negative controls: the OLD checker
+  .. A_old_wrongsite start 13:22:14
+  .. A_old_wrongsite end 13:22:29 rc=1 :: PASS A3b every must_change site the ticket names is changed by the product hunk (2 site(s))|RESULT: FAIL (2 failed)|
+  ok   A  OLD checker PASSES A3b on the wrong-site diff (edits :512+:585, sites :446+:512) — it cannot tell the duplicates apart
+  .. A2_old_omit627 start 13:22:30
+  .. A2_old_omit627 end 13:22:45 rc=1 :: PASS A3b every must_change site the ticket names is changed by the product hunk (5 site(s))|RESULT: FAIL (2 failed)|
+  ok   A2 OLD checker PASSES A3b on the KS-1186 diff with the :627 hunk dropped
+--- (b) golden
+  .. B_new_golden start 13:22:45
+  .. B_new_golden end 13:23:01 rc=0 :: PASS A3b every must_change site the ticket names is changed by the product hunk (5 site(s); 7 line-keyed site(s), must_change and stays, matched by LINE NUMBER + text; the rest by text)|RESULT: PASS (7/7)|
+  ok   B  NEW checker: golden → PASS A3b (5 must_change, 7 line-keyed, removed lines 446,512,585,594,627) and RESULT: PASS (7/7)
+--- (c) wrong site
+  .. C_new_wrongsite start 13:23:01
+  .. C_new_wrongsite end 13:23:08 rc=1 :: FAIL A3b PARTIAL FIX — the product hunk leaves 1 of 2 named site(s) untouched: :446 `if (result.rows.length > 0) return fromRow(result.rows[0]);`|RESULT: FAIL (1 failed) — stopped at A3b (a partial fix; the tests are not run)|
+  ok   C  NEW checker: wrong-site diff → FAIL A3b naming :446 (and not :512), stopped at A3b
+  .. C2_new_omit627 start 13:23:08
+  .. C2_new_omit627 end 13:23:17 rc=1 :: FAIL A3b PARTIAL FIX — the product hunk leaves 1 of 5 named site(s) untouched: :627 `if (result.rows.length > 0) return fromRow(result.rows[0]);`|RESULT: FAIL (1 failed) — stopped at A3b (a partial fix; the tests are not run)|
+  ok   C2 NEW checker: KS-1186 with the :627 hunk dropped → FAIL A3b naming :627 only
+--- (d) legacy text-keyed inputs: unchanged verdicts
+  .. D1_new_ks744 start 13:23:17
+  .. D1_new_ks744 end 13:23:42 rc=0 :: PASS A3b every must_change site the ticket names is changed by the product hunk (2 site(s))|RESULT: PASS (7/7)|
+  ok   D1 KS-744 (legacy, 2 must_change by text): 10 PASS/FAIL/RESULT lines identical to the 12:05 fin2 run; the line-keyed path not entered
+  .. D2_new_ks1199 start 13:23:42
+  .. D2_new_ks1199 end 13:24:03 rc=0 :: RESULT: PASS (7/7)|
+  ok   D2 KS-1199 (legacy, test-only, held): 8 PASS/FAIL/RESULT lines identical to its night run
+  ok   D3 census over runs/: compared=316 differing=0 nonempty_old_outputs=24 skipped=46 inputs_with_key=1
+--- (e) a line number whose tip text disagrees with the brief
+  .. E_new_mismatch start 13:24:26
+  .. E_new_mismatch end 13:24:33 rc=1 :: FAIL A3b SITE TEXT MISMATCH — a line-keyed site's text in the brief is NOT the tip's line at that number: :513 must_change brief=`if (result.rows.length > 0) return fromRow(result.rows[0]);` tip=`return null;`· — the brief or its |RESULT: FAIL (1 failed) — stopped at the site-text check (a brief/tip defect, not a model slip; the tests are not run)|
+  ok   E  NEW checker: :512 renumbered :513 → FAIL A3b SITE TEXT MISMATCH naming :513 (tip `return null;`), no PASS A3b, RESULT does not trigger RETRY-ONCE
+  .. E0_old_mismatch start 13:24:33
+  .. E0_old_mismatch end 13:24:49 rc=0 :: PASS A3b every must_change site the ticket names is changed by the product hunk (5 site(s))|RESULT: PASS (7/7)|
+  ok   E0 OLD checker on the same input → PASS A3b (the silent pass the new arm refuses)
+--- A3e line-keyed (the owed 'A3e line+text' fix, IMPROVEMENTS row 411 item 2)
+  .. F_new_446only start 13:24:49
+  .. F_new_446only end 13:25:04 rc=1 :: PASS A3b every must_change site the ticket names is changed by the product hunk (1 site(s); 2 line-keyed site(s), must_change and stays, matched by LINE NUMBER + text; the rest by text)|RESULT: FAIL (2 failed)|
+  ok   F  NEW checker: stays :512 has the SAME text as must_change :446; diff edits :446 only → PASS A3b, no A3e refusal
+  .. F0_old_446only start 13:25:04
+  .. F0_old_446only end 13:25:11 rc=1 :: PASS A3b every must_change site the ticket names is changed by the product hunk (1 site(s))|FAIL A3e a line the brief says STAYS was REMOVED by the product hunk ('-' with no '+'): :512 `if (result.rows.length > 0) return fromRow(result.rows[0]);`|RESULT: FAIL (1 failed) — stopped at A3e (a stays-line removed; the tests are not run)|
+  ok   F0 OLD checker on the same → FAIL A3e naming :512 (a false refusal: :512 was never touched)
+  .. G_new_446_512 start 13:25:11
+  .. G_new_446_512 end 13:25:18 rc=1 :: PASS A3b every must_change site the ticket names is changed by the product hunk (1 site(s); 2 line-keyed site(s), must_change and stays, matched by LINE NUMBER + text; the rest by text)|FAIL A3e a line the brief says STAYS was REMOVED by the product hunk ('-' with no '+'): :512 `if (result.rows.length > 0) return fromRow(result.rows[0]);`|RESULT: FAIL (1 failed) — stopped at A3e (a stays-line removed; the tests are not run)|
+  ok   G  NEW checker: diff edits :446 AND the stays :512 → FAIL A3e naming :512
+--- the line measure under NON-strict apply opts (the section file / opts the checker recorded)
+  .. I_new_lenient start 13:25:18
+  .. I_new_lenient end 13:25:34 rc=0 :: PASS A3b every must_change site the ticket names is changed by the product hunk (5 site(s); 7 line-keyed site(s), must_change and stays, matched by LINE NUMBER + text; the rest by text)|RESULT: PASS (7/7)|
+  ok   I  NEW checker: drifted header + miscounted hunk → A2 lenient, line measure still 446,512,585,594,627, PASS A3b
+  .. J_new_reanchor start 13:25:34
+  .. J_new_reanchor end 13:25:50 rc=1 :: PASS A3b every must_change site the ticket names is changed by the product hunk (1 site(s); 1 line-keyed site(s), must_change and stays, matched by LINE NUMBER + text; the rest by text)|RESULT: FAIL (2 failed)|
+  ok   J  NEW checker: context the file lacks → A2 REANCHORED, the measure reads the reanchored file: REMOVED_LINES 446, PASS A3b
+--- builder: the brief opt-in (reads Linear + git show on the source checkout; no writes outside /private/tmp/claude-501/night/a3bline_0917/arms)
+  ok   H1 NEW builder + line-keyed brief → rc 0, 7 sites, 7 keyed line+text, every text_in_brief == text_at_tip
+  ok   H2 NEW builder + :512 renumbered :513 → rc 2 REFUSED naming :513, no input written
+  ok   H3 NEW builder + the brief WITHOUT 'line-keyed' in the heading → rc 0, 7 sites, 0 keyed (legacy shape)
+  ok   H0 OLD builder + the line-keyed brief → 7 sites, 0 keyed (negative control)
+a3b line-number arms: 19 passed, 0 failed (13:26:21)
+arms rc=0
