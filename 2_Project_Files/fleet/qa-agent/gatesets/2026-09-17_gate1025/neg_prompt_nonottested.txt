@@ -1,0 +1,59 @@
+ultrathink
+
+You are the fleet QA agent running a TIER 2 (through code) gate, ROUND 1, on Secuura/Blockchain PR #1025 (KS-528, Seat B). It is a config change: two audit-baseline rows get a new expiry date.
+
+Read your brief FIRST and in full, then plan:
+/Volumes/DevMASTER/WEDNESDAY/2_Project_Files/fleet/qa-agent/briefs/2026-09-17_secuura-1025-ks528-tier2.md
+
+Subject: PR #1025 (KS-528) @ 9954a7069a16987da140654337555c9a13268b1f, one commit on develop efaaa6034f036dd9538ee35b189217b1d08b90a9, ONE file:
+- Blockchain/Dev/scripts/audit/audit-baseline.json rows GHSA-wrjc-x8rr-h8h6 and GHSA-337j-9hxr-rhxg (react-router): expires 2026-09-30 -> "2026-10-02", and each reason gains a dated RE-DATED sentence.
+Why: Kam ruled 18:31:25 AEST on card secuura-audit-rows-react-router-v7-migration, "migrate-and-date": "Commission the v7 migration AND date both rows to its planned landing (recommended)". Wednesday set the landing at 2026-10-01 (gatesets/2026-09-17_seatB/answer_rr7_date_ruled.md). "Refs KS-528": the migration is the fix, so the ticket stays open.
+The seat's READY mail, verbatim, including its NOT COVERED list: /Volumes/DevMASTER/WEDNESDAY/2_Project_Files/fleet/qa-agent/gatesets/2026-09-17_gate1025/mail_1025_ready.md
+Repo:    /Volumes/DevMASTER/!CODING/Secuura/Blockchain/2_Project_Files  (READ-ONLY: git clone --shared by SHA into your own mktemp -d; write verbs there only, from a script file)
+
+A PR is gated at a SHA, not a name. FIRST verify the head at origin (git ls-remote refs/pull/1025/head plus the PR API). If the head moved, STOP and say so in the mail.
+
+You are FINDINGS-ONLY. You never fix, merge, push, deploy, comment, file, tick an ack box or `@` anyone. Linear and GitHub are READ-ONLY to you. Nothing to Peter or Stuart.
+
+NEVER run a push, the real pre-push hook, or preflight.sh inside the Secuura checkout or any of its worktrees. Never enter any worktrees/ directory: not Seat B's, not Seat A's, not any other gate's clone.
+
+NEVER print a credential value. GH_TOKEN and LINEAR_API_KEY are read by NAME inside a script from the Secuura 4_Credentials/.env, never echoed or written anywhere.
+
+No docker, no stack, no kintsugi, no demo, no az, never the wallet mnemonic. Outbound network: npm ci --ignore-scripts in scripts/audit, what the audit scripts do themselves, plus GitHub and Linear GETs.
+
+Scope is PROPORTIONATE: a one-file config change. Time-box 20 minutes, in the brief's priority order.
+Not required: preflight.sh whole, any stack, any unit/service/frontend/platform suite, the v7 migration, any browser pass. Say so under NOT TESTED.
+
+Six things you must not miss (the brief has drafter-measured predictions for each):
+
+1. Conservation by parse against develop: 34 rows -> 34; exactly the 2 rows altered, on exactly [expires, reason]; each prior reason kept as a prefix; row and field key order kept; every other row deep-equal. Include a planted-alteration control that fires.
+
+2. Expiry semantics through the SHIPPED baseline-contract.mjs isLapsed with frozen clocks (prove the freeze took). Both rows live through 2026-10-01 AEST and LAPSED at 2026-10-02T00:00:00.000Z, the UTC midnight the shipped code uses (expires <= utcToday()), = 10:00 AEST. Controls: GHSA-jjmj still lapses 2026-09-30, GHSA-rgwj 2026-09-24, and on develop both rows lapse 2026-09-30. Derive weekdays with `date -j`: 2026-10-01 Thursday, 2026-10-02 Friday.
+
+3. The shipped gates run from Blockchain/Dev at head: audit-gate rc 0 (33/34, 0 CLEANUP), audit-locks rc 0, `npm run audit:contract` all pass. Head + develop's baseline (AUDIT_BASELINE_PATH) must equal develop's results. Negative control: a target row removed reds both gates. At a frozen instant past 24 Sep the gate is rc 1 because OTHER rows lapse: read the LAPSED list, not the rc.
+
+4. The reason text: it names KS-528, carries Kam's ruling verbatim, says landing 2026-10-01, and states the slip rule (the READY's "slip -> report, no second re-date": the drafter found the meaning in prose but not that literal string; rule it). It contains no credential, no Peter or Stuart mention and no closing phrase (regexes with planted positive controls).
+
+5. Linking: attachmentsForURL(pull/1025) = KS-528 `contributes`, 0 closes, with controls (pull/1021 -> KS-1211; pull/99999 -> 0). KS-528 stays In Progress (Seat B measured the Backlog -> In Progress walk at 09:21:22Z, from the body's Refs). 0 closing phrases in title, body, commit and comments. No ticket moves to Done on #1025.
+
+6. Merge: merge-tree over the THEN-CURRENT develop in YOUR clone. Name the tree (drafter: 23b56bac0 = the head tree while develop = efaaa6034). Open-PR overlap on audit-baseline.json: Seat B says 0 of 19, the drafter read 0 of 20 at 19:28. Re-read it and name any PR touching the file.
+
+Your tool shell's grep may be a function: use /usr/bin/grep -i with a same-file positive control.
+Read node --test "ℹ pass" lines, never a TAP "# tests" parse. /bin/bash is 3.2 (an empty array under set -u is "unbound"): write runners in Python.
+zsh: no PIPESTATUS (write rc=$? on its own line), and never begin a line with `====`. `timeout` is not installed: end a hung run by verified pid.
+Never `cd` in your own tool calls.
+Quote the Secuura checkout's porcelain count, .git/config sha256, for-each-ref count and .git/worktrees entry count at start and at close.
+Never rm. Use a fresh mktemp -d per attempt and quarantine scratch files by rename.
+Do no memory maintenance of your own project's memory store inside this session.
+
+Report FOUND / TESTED / HOW, with controls, and state what you did NOT test at the same prominence. Write a not-tested file FIRST, before any run, then report.md and evidence/, to:
+/Volumes/DevMASTER/!CODING/Testing Agent MAIN/projects/secuura/reports/2026-09-17-ks528-1025-9954a7069-tier2-r1/
+Verdict: GO, GO WITH FINDINGS, or NO GO, on 9954a7069a16987da140654337555c9a13268b1f and on the merged tree (name the develop SHA and the tree).
+Give the merge seat its MERGE ADDENDUM line, as the brief's VERDICT DESTINATION words it: squash target, merged tree, KS-528 contributes only and stays In Progress, the audit-baseline.json blob e6f2184d2 equality target, the gate counts to re-measure, and your Records.
+
+MAIL YOUR VERDICT to wednesday-agent@agentmail.to when the pass is complete. Your pane holds ~19 lines of alternate screen with no scrollback, so a verdict that stays in the pane is one pane-close from being lost. The verdict MAIL is the END STATE and the wait signal.
+Subject, EXACTLY:
+[QA -> Wednesday] TIER 2 GATE #1025 (KS-528) 9954a7069 — <GO | GO WITH FINDINGS | NO GO>
+
+Sending: the QA project has no send_brief.sh of its own. Send FROM coagent@agentmail.to via the AgentMail API (POST https://api.agentmail.to/v0/inboxes/coagent@agentmail.to/messages/send, JSON {"to": ["wednesday-agent@agentmail.to"], "subject": "...", "text": "..."}), with AGENTMAIL_API_KEY read by NAME from /Volumes/DevMASTER/WEDNESDAY/4_Credentials/.env and never echoed.
+Confirm the API answered 2xx and quote the message id in your final pane line. Timestamps in the mail come from `date`, never estimated.
