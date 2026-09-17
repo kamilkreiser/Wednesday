@@ -157,3 +157,9 @@
 # 21:28 - comment_patch batch 3 (search 21:26; fences read by Wednesday; KS-1179 F-5 HELD until Wednesday re-runs the R9 arms - its build relied on the new R9 skip). Inputs at develop 75ad0e55c.
 # 21:31 - KS-1179 F-5 docblock half released: R9 builder fix verified by Wednesday (tests/r9_merged_ready_arms.sh 15/15 incl. both negative controls). Input at develop 75ad0e55c.
 # 22:14 - KS-1221 queued by the 22:08 seat: brief read whole (written at develop 0a2b1603f; premises P1-P8 measured; its own hunks PASS 7/7, R4+R5 red by assertion under the :398 tamper).
+# 22:45 - KS-1152 R1a-d queued by the 22:08 seat (search 17o; fences read; the new claim verified at develop bb848b828: generateAccessToken :187 copies tenantId :201, the conditional is the connector minter :295). Raise as ONE PR: Refs KS-1152 (R1, 4 of 5 sites).
+KS-1152 input=/Volumes/DevMASTER/WEDNESDAY/2_Project_Files/local-model/night/inputs/comment_1152R1b.json task=/Volumes/DevMASTER/WEDNESDAY/2_Project_Files/local-model/tasks/comment_patch/task.md ctx=65536
+KS-1152 input=/Volumes/DevMASTER/WEDNESDAY/2_Project_Files/local-model/night/inputs/comment_1152R1c.json task=/Volumes/DevMASTER/WEDNESDAY/2_Project_Files/local-model/tasks/comment_patch/task.md ctx=65536
+KS-1152 input=/Volumes/DevMASTER/WEDNESDAY/2_Project_Files/local-model/night/inputs/comment_1152R1d.json task=/Volumes/DevMASTER/WEDNESDAY/2_Project_Files/local-model/tasks/comment_patch/task.md ctx=65536
+# 22:45 - KS-1219 queued by the 22:08 seat (search 17o; auth/OAuth product tier, briefed last; brief read: two 5-line guards after :478 GET and :632 POST, 400 invalid_request, RFC 6749 3.1 forbids a repeated parameter; own hunks PASS 7/7). Raise: Refs KS-1219, TIER 1.
+KS-1219 input=/Volumes/DevMASTER/WEDNESDAY/2_Project_Files/local-model/night/inputs/code_1219.json task=/Volumes/DevMASTER/WEDNESDAY/2_Project_Files/local-model/tasks/code_patch/task.md ctx=65536
