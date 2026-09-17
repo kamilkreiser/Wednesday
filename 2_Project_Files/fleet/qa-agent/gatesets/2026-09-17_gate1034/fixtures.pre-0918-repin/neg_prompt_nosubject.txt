@@ -1,44 +1,42 @@
 ultrathink
 
 You are the fleet QA agent running ONE TIER 1 ROUND 1 gate (round 1 of 2 under the cap) over Secuura/Blockchain PR #1034 (KS-1215, Seat A) at
-head e4624218bc29cda4c07b2d31ca18bba422cfbc3e (RE-PINNED from fd81a75f0; no gate ran there). KS-1215 is the #1023 gate's N-1: a revoked session's JWT beside a VALID sk_ key whose connector-token
+head fd81a75f0688f6cbe1e5f79b061bb1369c88f477. KS-1215 is the #1023 gate's N-1: a revoked session's JWT beside a VALID sk_ key whose connector-token
 exchange failed was forwarded with the revoked Bearer and no session check (and a live JWT travelled under the connector principal). Wednesday ruled O3
 (11:22:22Z): the connector branch never carries the caller's Bearer. The change 6c6fdc94e: services/api-gateway/src/middleware/auth.ts +9 (one
 `delete req.headers.authorization;` as the first statement of the connector branch, before any await) plus the ks1215 test (+302, 16 cells, two
-STRUCTURAL direct-call cells). fd81a75f0 merged develop 27e53ec3a; 96d859467 merged develop 3961c2add; e4624218b = the PRE-GATE FIX (Wednesday
-13:51:51Z): routes/platform.ts authHeaders forwards req.headers.authorization, never rawAuthorization, +4 register-connector cells (20). Tree 6f912843b.
-No rendered surface changes: say in one line whether the real-browser half of tier 1 applies.
-A GO is a gate verdict: #1034 then merges on WEDNESDAY'S signed GO naming the head (the TESTED grant), NOT on Kam's tap (that is #1032's condition).
+STRUCTURAL direct-call cells per Wednesday's 11:59:12Z ruling). fd81a75f0 merged develop 27e53ec3a in; tree 6339c404c. No rendered surface changes:
+say in one line whether the real-browser half of tier 1 applies. A GO is a gate verdict, NOT a merge authorisation: the merge waits for Kam's tap.
 
 Read your brief FIRST and in full, then plan:
 /Volumes/DevMASTER/WEDNESDAY/2_Project_Files/fleet/qa-agent/briefs/2026-09-17_secuura-1034-ks1215-tier1.md
-Its RE-PIN section (near the top) wins wherever a number differs; its last section, RULE BEFORE LAUNCH, grades the register-connector forward.
+Its last section, RULE BEFORE LAUNCH, says how the register-connector forward is graded: grade it as that section says.
 Then read:
 - the charter it names;
-- the seat's READY (gatesets/2026-09-17_gate1034/mail_1034_ready.md), Wednesday's receipt (receipt_1034.md), the pre-gate ruling
-  (answer_pregate_register_connector.md) and the seat's HEAD MOVED mail (mail_1034_headmoved.md);
+- the seat's READY (gatesets/2026-09-17_gate1034/mail_1034_ready.md) and Wednesday's receipt (receipt_1034.md);
 - the two rulings and the seat's questions under gatesets/2026-09-17_gate1034/out/mail/, and KS-1215 (out/linear/KS-1215.comments.md);
-- gatesets/2026-09-17_gate1034/DRAFTER_REPORT.md (at fd81a75f0) and the re-pin outputs under out_repin/;
+- gatesets/2026-09-17_gate1034/DRAFTER_REPORT.md;
 - the PRIOR REPORT, the #1023 gate that found N-1:
   /Volumes/DevMASTER/!CODING/Testing Agent MAIN/projects/secuura/reports/2026-09-17-ks1207-1023-2f74491eb-tier1-r1/
 - the #1028 report (same file, real-app harness style; its own N-1 is a different finding).
 
-Head (git ls-remote 01:38:08 + 01:40:22 AEST 2026-09-18 and the PR API 01:38:38 agree; the launcher re-asserts it):
-  #1034 e4624218bc29cda4c07b2d31ca18bba422cfbc3e = refs/pull/1034/head = feature/ks-1215-api-gateway-a-revoked-session-jwt-plus-a-valid-key-whose
-  A fast-forward: 6c6fdc94e (the change) -> fd81a75f0 (merge 27e53ec3a) -> 96d859467 (merge 3961c2add, tree 92256f2df) -> e4624218b (the fix).
-  develop 3961c2add8e1637b32e638f8f0952c328c00833e = origin develop = the merge-base: compare develop...head = ahead 4, behind 0, files 3. Blobs:
-  auth.ts 6e1668362 -> bf09d315a; platform.ts 4550401f8 -> b80a8cd8d; ks1215 test absent -> 75006b5cf. develop then MOVED (02:02:48) to 34cdcfb26
-  (#1035: verification.ts f888e8cd0 + ks1204 test; 0 #1034 files): re-pinner merged tree e4624218b x 34cdcfb26 = f1c78bbb8, 0 conflicts, NOT head-equal,
-  59/585. Merge the then-current develop onto e4624218b in YOUR clone, name the OID, and run L0 and items 1, 3 and 6 on the merged tree too.
+Head (git ls-remote 23:03:08, 23:08:34, 23:34:33 AEST and the PR API 23:04:04 agree; the launcher re-asserts it):
+  #1034 fd81a75f0688f6cbe1e5f79b061bb1369c88f477 = refs/pull/1034/head = feature/ks-1215-api-gateway-a-revoked-session-jwt-plus-a-valid-key-whose
+  Commits: 6c6fdc94e (the change, parent 0a2b1603f), fd81a75f0 (merge of develop 27e53ec3a). Blobs: auth.ts 6e1668362 -> bf09d315a; ks1215 test
+  absent -> 5b7431af0.
+  develop pinned 27e53ec3aa010b50cd9b2e4a1d15cbb34605ba7d = the head merge-base and second parent. develop MOVED twice during drafting (#1031 originate;
+  #1033 the mysql2 override + audit baseline; 0 guarded paths) to 3961c2add: compare develop...head = merge_base 27e53ec3a, diverged, ahead 2, behind 2,
+  files 2. Drafter merged tree fd81a75f0 x 3961c2add = 92256f2df (api-gateway + shared subtrees = head). If develop moves again, merge it onto fd81a75f0 in YOUR clone, name the OID,
+  judge the move by content, and re-run items 1, 3 and 6 on the merged tree if it touches services/api-gateway/ or packages/shared/src/.
 Repo:    /Volumes/DevMASTER/!CODING/Secuura/Blockchain/2_Project_Files  (READ-ONLY)
   - git clone --shared --no-checkout by SHA into your own fresh mktemp -d; git write verbs there only, from a script file.
   - Never run merge-tree --write-tree, worktree, fetch, checkout or git apply in the checkout.
   - A new develop is fetched by SHA into YOUR clone over https, with GH_TOKEN handed to git by a GIT_ASKPASS helper reading an env var, never on a
     command line.
   - Never enter any seat's worktree or another gate's clone (other gates are live); never run vitest inside the checkout; pin by SHA, never origin/*.
-  - The seat's records (Blockchain/5_Project_History/2026-09-17_seatA-7th/ks1215/) are READ-ONLY files: parse r1-pregate/tamper_1215_r3_{auth,platform}.py's
-    ROWS literals, never execute them (they hard-code the seat worktree, now on KS-1101). Pattern: GS/repin_tamper_1034.py.
-  - Record the checkout's porcelain count and .git/worktrees count before and after: they must be equal (re-pinner 0 / 112).
+  - The seat's records (Blockchain/5_Project_History/2026-09-17_seatA-7th/ks1215/) are READ-ONLY files: parse build/tamper_1215_r2.py's ROWS literal,
+    never execute that runner (it hard-codes the seat worktree).
+  - Record the checkout's porcelain count and .git/worktrees count before and after: they must be equal (drafter 0 / 112).
 Farm node_modules per ENTRY in your clone (#1009's R-6): Blockchain/Dev/node_modules (987), services/api-gateway/node_modules (8) and
   packages/shared/node_modules (8), each per entry, .vite/.vitest/.cache skipped, @secuura/* relinked into your tree. Build the shared dist per tree and
   assert @secuura/shared IN TREE from api-gateway/src. NEVER link a node_modules tree wholesale; create no node_modules where nothing runs.
@@ -46,8 +44,8 @@ VITEST = develop's lock, 4.1.11 (the checkout install is 4.1.10): a side install
   optional deps left to npm), the 8 hoisted entries (vitest + 7 @vitest/*) farmed from it, runs via node <tree>/Blockchain/Dev/node_modules/vitest/vitest.mjs
   (.bin/vitest still points at 4.1.10). Print the version beside every count. Pattern: GS/drafter_vitest41111_1034.py + GS/drafter_farm_1034.py.
 PROBE, HARNESS AND SCRATCH FILES LIVE OUTSIDE services/api-gateway/ (the #1018 round-2 gate's F-3; #1029's R-1029-7):
-  - the real-app probe at <tree>/Blockchain/Dev/qa_probe_1034/ (template GS/src/qa1034r-repin-probe.template.ts: the drafter's + JWT-only SYSTEM_ADMIN
-    register-connector cells; __GW_SRC__ = the tree's api-gateway src), a scratch vitest config beside it (root = the service dir, setupFiles = its vitest.setup.ts, include = the probe only), passed with --config;
+  - the real-app probe at <tree>/Blockchain/Dev/qa_probe_1034/ (template GS/src/qa1034-drafter-probe.template.ts, __GW_SRC__ = the tree's api-gateway
+    src), a scratch vitest config beside it (root = the service dir, setupFiles = its vitest.setup.ts, include = the probe only), passed with --config;
   - the test-including tsconfig at <tree>/Blockchain/Dev/qa_tsc_1034/;
   - the HANG harness at <tree>/Blockchain/Dev/qa_hang_1034/harness.ts, run by tsx as a REAL node process (template GS/src/qa1034-hang-harness.template.cts).
   Before your first tamper row, PROVE the probe is out of both collectors: `vitest list --filesOnly` lists 0 qa_probe (control: ks1215 listed; drafter
@@ -68,69 +66,70 @@ NO real upstream: the REAL index.ts app in-process over one loopback recorder. R
 permission; create no container).
 LOOPBACK ONLY: every listener binds 127.0.0.1:0. ANY LISTENER, CHILD PROCESS OR LOGIN STUB YOUR RUNS START, YOU END: identify it by port + argv + cwd,
 SIGTERM that pid, never a pattern kill, never pid 1, and recount after (a tsx launcher spawns a child: the listening pid is the child's). Quote an lsof
-TCP LISTEN census (+ cwd and argv per node pid + the login_stub.mjs count) BEFORE your first run and at close. Re-pinner at 01:47:28: 18 rows, 0 node
+TCP LISTEN census (+ cwd and argv per node pid + the login_stub.mjs count) BEFORE your first run and at close. Drafter at 23:34:33: 17 rows, 0 node
 listeners, 0 stubs.
 No Akto, no k6, no Playwright, no Schemathesis run (NOT COMMISSIONED) — YOU rule whether Schemathesis/Akto are REQUIRED, with the
 measured reason. Time-box 45 minutes of work.
 
-What Wednesday requires (brief L0 + items 1-9; predictions marked drafter (fd81a75f0) or re-pinner (e4624218b)):
-
-L0. THE PRE-GATE ROUND (the LEAD). On the REAL gateway, does POST /api/platform/organizations/register-connector with a REVOKED (or LIVE) Bearer + a
-   valid key still send the caller's Authorization to /api/tenants, /api/keys (the mint) or /api/audit? Drafter at fd81a75f0: 24 (= develop); expected
-   at e4624218b: 0. Re-run the whole 3,258-request census per tree (develop 34cdcfb26, head e4624218b, merged f1c78bbb8). Must hold: a JWT-only
-   SYSTEM_ADMIN still 201 with its OWN Bearer; a key-only connector still connector-jwt; 0 status changes. Re-measure O1 (re-pinner: 2 STRUCTURAL
-   reds only). The cache-get HANG and the no-timeout exchange fetch stay TICKET leads unless you MEASURE them reachable. Numbers: brief RE-PIN.
+What Wednesday requires (brief items 1-9; each carries drafter predictions marked predicted-by: drafter):
 
 1. THE CALLER'S BEARER ON THE CONNECTOR BRANCH, on the REAL gateway (index.ts, real mount order), head vs develop 27e53ec3a vs merged, test /api +
    /api/v1 and production /api/v1 (assert the unversioned 307 first). Census every route where authenticateToken runs (drafter 85 with controls) plus
    /api/batch/*. Keys: none / junk / valid with exchange OK, refused 401, socket dropped, 200 non-JSON, never answers. Callers: none / live JWT / revoked
    JWT / the same JWTs with a lower-case `bearer` scheme. Per upstream hit: Authorization class AND byte-equality with the caller's.
    FAIL (Blocker): at head, any connector-branch cell whose upstream hit carries the caller's Authorization. Planted control: a develop N-1 row is flagged.
-   Drafter (3,258 cells per tree): develop 558 such cells; fd81a75f0 24, ALL on register-connector (authHeaders preferred rawAuthorization); 534 cells
-   user:<session> -> absent (or '' on the two fetch routes); 0 status differences. /api/batch/*: 401 to every caller, 0 hits, both trees.
-2. THE CACHE-GET-THROWS HANG (a TICKET lead, L0). (a) Can a production request make authenticateToken / getConnectorBearer reject (READ every
-   statement outside a try, positive control; try key shape, duplicated x-api-key, exchange response shapes)? (b) At develop too? (c) Did #1034 create,
-   widen or only expose it? (d) On a REAL process (vitest intercepts process.exit), per UNHANDLED_REJECTION_MODE unset (exit) and survive? Name which
+   Drafter (measured, 3,258 cells per tree): develop 558 such cells; head 24, ALL on POST /api/platform/organizations/register-connector (platform.ts
+   authHeaders prefers rawAuthorization captured at index.ts:345-350 before auth), on EVERY exchange outcome including OK, to /api/tenants, the security
+   key mint /api/keys and /api/audit; develop has the same 24. 534 cells differ head vs develop, all user:<session> -> absent (or '' on the two fetch
+   routes); 0 status differences; 0 on NOKEY/JUNK keys or Bearer-less callers. /api/batch/*: 401 to every caller, 0 hits, both trees.
+2. THE CACHE-GET-THROWS HANG (Wednesday's LEAD). (a) Can a production request make authenticateToken / getConnectorBearer reject (READ every statement
+   outside a try on the connector branch and in clientRateLimit, with a positive control; then try what a request controls: key shape, duplicated
+   x-api-key, validate / exchange response shapes)? (b) At develop too? (c) Did #1034 create, widen or only expose it? (d) On a REAL process, not vitest
+   (which intercepts process.exit), per UNHANDLED_REJECTION_MODE unset (default exit) and survive: exit, hang, or later requests refused? Name which
    deployments run which mode (READ). An availability kill reachable by a request = at least Major; on a path #1034 changed = NO GO.
-   Drafter (tsx harness, fd81a75f0 AND develop; auth.ts + index.ts blobs unchanged at e4624218b): unset -> the process exits 0, next requests refused;
-   survive -> that request never answers, the process serves on. Reachability PREDICTED none. The exchange with no fetch timeout hangs a request, both trees.
+   Drafter (measured, tsx harness, head AND develop x test AND production): unset -> the throwing request's socket closes, the process exits 0, the next
+   request and /health ECONNREFUSED; survive -> that request never answers, the process keeps serving (200, /health 200); head = develop on all 8 arms.
+   Reachability PREDICTED none (Map caches, every fetch inside try; 0 unhandled-rejection lines over 6,516 real-app cells). A REAL request-reachable
+   hang: an exchange that never answers leaves the request hanging (no fetch timeout), both trees.
 3. O3 PLACEMENT by tamper on the WHOLE api-gateway suite at HEAD (vitest 4.1.11, --testTimeout=60000 --hookTimeout=60000 unless the row says default;
-   denominator asserted 58 / 576 / pending 0; project tsc rc per row, non-zero = VOID; anchor 1 + marker; restored by blob sha + git diff --quiet).
-   - The seat's 11 r3 rows EXACTLY. Re-pinner at e4624218b: T0 0 · T0-DEFAULT 0 · RP-DEV 10 · DELETE-REMOVED 10 · O1 2 (STRUCTURAL) · AFTER-AWAIT 2 ·
-     NOSET 9 · TI 0 · platform T0 0 · RAW-BACK 2 (register revoked, live) · TI 0 = 11 / 11, 35 reds, all AssertionError.
-   - Drafter/re-pinner rows: X-DELETE-CASED 10, X-REQUIRED-ONLY 5, X-ONPROXYREQ-RAW 9, X-EMPTY-NOT-DELETE 3 (controls); X-BEARER-PREFIX-ONLY 0 and
-     X-FETCH-RAW 0 (consequence on the real app: lower-case bearer forwarded; signatories forwards the caller's Bearer even on exchange OK);
-     R-PLATFORM-RAW-FALLBACK (header || rawAuthorization) 1 red (register revoked only).
+   denominator asserted 58 / 572 / pending 0; project tsc rc per row, non-zero = VOID; anchor 1 + marker; restored by blob sha + git diff --quiet).
+   - The seat's 8 rows from its ROWS literal EXACTLY. Drafter (measured): T0 0 · T0-DEFAULT 0 · RP-DEV 9 · DELETE-REMOVED 9 · O1 2 (STRUCTURAL only) ·
+     AFTER-AWAIT 2 · NOSET 6 (ks1215 x4 + ks480 x2) · TI 0 = 8 / 8, 28 reds, all AssertionError.
+   - The drafter's 7: X-DELETE-CASED 9, X-REQUIRED-ONLY 5, X-ONPROXYREQ-RAW 9, X-EMPTY-NOT-DELETE 3 (controls) and X-BEARER-PREFIX-ONLY, X-FETCH-RAW,
+     X-PLATFORM-NO-RAW each 0 reds, with the consequence measured on the tampered real app (lower-case bearer forwarded; signatories forwards the
+     caller's Bearer even on exchange OK; register-connector forwards none).
    - PLUS your own aimed at what neither table pins. Say which property no cell sees.
-4. LEGITIMATE CALLERS: a valid key + a live JWT is unchanged on exchange OK and loses the user's Bearer on exchange failure; a JWT-only platform
-   admin keeps its Bearer on register-connector. Census (READ, case-insensitive git grep, positive controls) of upstream readers of the inbound
-   Authorization and of in-repo clients sending key AND Bearer together (drafter numbers: brief item 4). A legitimate flow that breaks = a finding.
-5. MERGE-IN: both merges (drafter: 6339c404c = merge-tree 6c6fdc94e x 27e53ec3a, 44 brought = develop's; re-pinner: 92256f2df = merge-tree
-   fd81a75f0 x 3961c2add, 8 brought = develop's own delta 27e53ec3a..3961c2add, blobs = develop's); 3961c2add..head = exactly the 3 files; auth.ts
-   patch-id 0a2b1603f..6c6fdc94e = 3961c2add..head (70144bde53f1). Merged tree over the CURRENT develop (re-pinner: f1c78bbb8 over 34cdcfb26).
-6. CHECKS: api-gateway develop 57/556 · head 58/576 at DEFAULT ceilings AND at 60 s on vitest 4.1.11 (re-pinner measured, 0 failed), load
+4. LEGITIMATE CALLERS: a valid key + a live JWT is unchanged on exchange OK and loses the user's Bearer on exchange failure. Census (READ, case-insensitive
+   git grep, positive controls) of upstream readers of the inbound Authorization beyond verifying it (drafter: originate re-forwards it to anchoring;
+   tenant-provisioning to security) and of in-repo clients sending key AND Bearer together (drafter: the JS and Python SDKs send either, else-if: 0).
+   A legitimate flow that breaks = a finding with its class.
+5. MERGE-IN: merge-tree --write-tree 6c6fdc94e x 27e53ec3a = head tree 6339c404c; brought files = develop's own delta 0a2b1603f..27e53ec3a (drafter
+   44 = 44, blobs = develop's); 27e53ec3a..head = exactly the 2 files; patch-id 0a2b1603f..6c6fdc94e = 27e53ec3a..head (drafter 975abd867785); auth.ts
+   6e1668362 at 0a2b1603f = 27e53ec3a. The merged tree over the CURRENT develop (drafter 92256f2df over 3961c2add).
+6. CHECKS: api-gateway develop 57/556 · head 58/572 at DEFAULT ceilings AND at 60 s on vitest 4.1.11 (drafter measured, 0 failed, load 7-9), load
    beside every run; tsc --noEmit -p . rc 0 each; THE TEST-INCLUDING tsc PROGRAM from a scratch tsconfig OUTSIDE services/ with --listFilesOnly proof the
    ks1215 test is in it and not in the project program, and a plant (drafter: 32 error lines in 11 test files on BOTH trees, 0 in ks1215; plant +1);
-   eslint by rule AND message on auth.ts + platform.ts (both trees) and the test with a firing control (re-pinner: no-unused-vars auth.ts :415 -> :424,
-   platform.ts :980 -> :983; test 0/0; the control fires).
-7. LINEAR / GITHUB at run time and immediately before the mail: attachmentsForURL(pull/1034) = KS-1215 contributes only (controls
-   pull/1028, pull/99999); 0 closing phrases in title, body and all 4 commit messages (planted controls); Refs KS-1215 in the body; KS-1215 stays In Progress on
+   eslint by rule AND message on auth.ts (both trees) and the test with a firing control (drafter: 1 pre-existing no-unused-vars warning :415 -> :424;
+   test 0/0; the control fires).
+7. LINEAR / GITHUB at run time and immediately before the mail: attachmentsForURL(pull/1034) = KS-1215 contributes only (controls pull/1028 -> KS-744;
+   pull/99999 -> 0); 0 closing phrases in title, body and both commit messages (planted controls); Refs KS-1215 in the body; KS-1215 stays In Progress on
    merge (§5f).
 8. SCHEMATHESIS / AKTO ruling, with the measured reason.
 9. CARRY-FORWARD per finding CLOSED / STILL OPEN / NEW, each SHIPS-WITH or TICKET: #1023 N-1 and the split principal per route; the register-connector
    forward (graded per RULE BEFORE LAUNCH); the HANG; the exchange no-timeout hang; /api/batch/*; POST /api/v1/documents never answering an authenticated
    request (drafter, both trees); the empty Authorization on fetch routes; the test gaps. Report the checkout bounds and NOT TESTED at equal prominence.
 
-LEAD WITH L0, then item 1 and item 2:
+LEAD WITH item 1 and item 2:
 - does the caller's Bearer reach any upstream on the connector branch at head, on which routes, and is each identical at develop;
 - the HANG: reachable by a request or not, pre-existing or not, and what the process does per rejection mode.
 
 Hygiene:
 - /bin/bash here is 3.2: write runners in Python.
-- zsh: no PIPESTATUS, no timeout, `set -- $var` does not word-split, write `"${VAR}:path"`, never begin a line with `=====`.
+- zsh: no PIPESTATUS (`cmd > out 2>&1; rc=$?`), no timeout on macOS, `set -- $var` does not word-split, `"$VAR:path"` applies history modifiers
+  (write `"${VAR}:path"`), never begin a line with `=====`.
 - Your tool shell's grep may be a function: use /usr/bin/grep -i with a same-file positive control.
 - `git grep -c` prints nothing for a zero (silence is unread, not 0); `rev-parse` of a missing path echoes its argument (use cat-file -e).
-- A scripted edit can comment out the rest of a Python line (the drafter's slip); a phrase your guard greps must stay on one line: assert the file.
+- A scripted edit that appends a comment to a Python line can comment out the rest of that line (the drafter's own slip): assert the written file.
 - Never `cd` in your own tool calls; absolute paths; git write verbs only inside script files.
 - stderr is never discarded. Clocks from `date`, never estimated. Every scripted edit asserts its anchor count = 1 and a marker.
 - Quote at start, mid and close as THREE timestamped readings: the Secuura checkout's porcelain count, .git/config sha256, for-each-ref count,
@@ -140,7 +139,7 @@ Hygiene:
 Do no memory maintenance of your own project's memory store inside this session.
 
 Report FOUND / TESTED / HOW, with controls, into
-/Volumes/DevMASTER/!CODING/Testing Agent MAIN/projects/secuura/reports/2026-09-18-ks1215-1034-e4624218b-tier1-r1/
+/Volumes/DevMASTER/!CODING/Testing Agent MAIN/projects/secuura/reports/2026-09-17-ks1215-1034-fd81a75f0-tier1-r1/
 NOT-TESTED.written-first.md is written FIRST, BEFORE any run; then report.md and evidence/. The report covers:
 - the trees with OIDs and the merge-in proof;
 - the real-app census per route per tree (connector-branch forwards of the caller's Authorization; the head vs develop difference table);
@@ -154,20 +153,20 @@ Every finding carries its evidence class (MEASURED AT RUNTIME / PROBED / READ ON
 disposition, and its oracle. Name every prediction slip against its predictor (the READY, the seat, the drafter, Wednesday).
 Client-facing communication = ticket comments only, and not from you; anything needing a push goes to Wednesday as an escalation candidate.
 Never delete; cleanup means quarantine.
-Verdict: ONE line — GO, GO WITH FINDINGS, or NO GO — on e4624218bc29cda4c07b2d31ca18bba422cfbc3e, as the delta over develop 3961c2add, AND on the
+Verdict: ONE line — GO, GO WITH FINDINGS, or NO GO — on fd81a75f0688f6cbe1e5f79b061bb1369c88f477, as the delta over develop 27e53ec3a, AND on the
 merged tree (name the then-current develop and the merged-tree OID). Round 1 of 2: a NO GO goes back to the seat for one fix round. Then plain
 statements on items 1-9 and the CLOSED / STILL OPEN / NEW table.
-Give the merge seat its MERGE ADDENDUM line: "on Wednesday's signed GO naming the head: squash e4624218b onto develop <then-current; 34cdcfb26 at
-re-pin close> (merged tree <OID>; re-pinner f1c78bbb8); #1034 attaches to KS-1215 only, linkKind contributes, no closes; KS-1215 stays In Progress on merge (§5f: the
-real exchange, real upstreams and the edge are unmeasured); equality targets after the squash: auth.ts bf09d315a / platform.ts b80a8cd8d / ks1215 test 75006b5cf;
-api-gateway 58/565 at 34cdcfb26 -> 58/576 at head -> <merged n/n> on vitest <version> (re-measure); dispositions: <per finding, SHIPS-WITH or TICKET>; NEW: <yours>;
+Give the merge seat its MERGE ADDENDUM line: "on Kam's tap only: squash fd81a75f0 onto develop <then-current develop; 3961c2add at draft close>
+(merged tree <OID>; drafter 92256f2df); #1034 attaches to KS-1215 only, linkKind contributes, no closes; KS-1215 stays In Progress on merge (§5f: the
+real exchange, real upstreams and the edge are unmeasured); equality targets after the squash: auth.ts bf09d315a / ks1215 test 5b7431af0; api-gateway
+57/556 at develop -> 58/572 at head -> <merged n/n> on vitest <version> (re-measure); dispositions: <per finding, SHIPS-WITH or TICKET>; NEW: <yours>;
 Records for KS-1215's facts comment at merge: <per route CLOSED / STILL OPEN>, the register-connector forward <ruling>, the cache-get-throws HANG
 <ruling per rejection mode>, the exchange no-timeout hang, /api/batch/* <ruling>, <yours>" — plus any finding with its target.
 
 MAIL YOUR VERDICT to wednesday-agent@agentmail.to when the pass is complete. Your pane holds ~19 lines of alternate screen with no
 scrollback, so a verdict that stays in the pane is one pane-close from being lost -- this is not a formality, it is the only durable
 copy; the verdict MAIL is the END STATE and the wait signal. Send it FROM coagent@agentmail.to. Subject, EXACTLY:
-[QA -> Wednesday] TIER 1 GATE #1034 (KS-1215) e4624218b — <GO | GO WITH FINDINGS | NO GO>
+[QA -> Wednesday] TIER 1 GATE #1034 KS-1215 fd81a75f0 — <GO | GO WITH FINDINGS | NO GO>
 - The QA project has no send_brief.sh of its own: POST https://api.agentmail.to/v0/inboxes/coagent@agentmail.to/messages/send with JSON
   {"to": ["wednesday-agent@agentmail.to"], "subject": "...", "text": "..."} and Authorization: Bearer $AGENTMAIL_API_KEY, the key by NAME from
   Wednesday's .env, never echoed.

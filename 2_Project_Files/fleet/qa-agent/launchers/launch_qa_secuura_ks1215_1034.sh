@@ -1,22 +1,29 @@
 #!/bin/bash
 # launch_qa_secuura_ks1215_1034.sh — cross-project QA agent, ONE TIER 1 ROUND 1 gate over Secuura/Blockchain PR #1034 (KS-1215, Seat A)
-# @ fd81a75f0688f6cbe1e5f79b061bb1369c88f477 — services/api-gateway: the connector branch never carries the caller's Bearer. authenticateToken's valid-key
+# @ e4624218bc29cda4c07b2d31ca18bba422cfbc3e (RE-PINNED 2026-09-18 from fd81a75f0) — services/api-gateway: the connector branch never carries the caller's Bearer. authenticateToken's valid-key
 # branch drops req.headers.authorization as its FIRST statement, before any await (Wednesday's ruling O3, 11:22:22Z); a successful connector-token exchange
 # still sets the connector JWT, a failed one forwards no Bearer. The change commit 6c6fdc94e (parent 0a2b1603f): middleware/auth.ts +9 (one delete + comment),
 # the ks1215 test +302 (16 cells: runtime on optional /api/credentials + required /api/documents, one production /api/v1 row, two STRUCTURAL direct-call
 # cells per Wednesday's 11:59:12Z ruling, completeness). fd81a75f0 = develop 27e53ec3a merged in; tree 6339c404c = merge-tree 6c6fdc94e x 27e53ec3a.
-# TIER 1: gateway authentication on every mount; the source is the #1023 gate's N-1 (a revoked session's Bearer forwarded beside a valid key). A GO is NOT a
-# merge authorisation: the merge waits for Kam's tap.
+# RE-PIN: 96d859467 = develop 3961c2add merged in (tree 92256f2df = merge-tree fd81a75f0 x 3961c2add); e4624218b = the PRE-GATE FIX (Wednesday 13:51:51Z):
+# routes/platform.ts authHeaders forwards req.headers.authorization, never rawAuthorization (register-connector sent the caller's Bearer to /api/tenants,
+# /api/keys, /api/audit), +4 register-connector cells (20 in the ks1215 test). Head tree 6f912843b; a fast-forward from fd81a75f0.
+# TIER 1: gateway authentication on every mount; the source is the #1023 gate's N-1 (a revoked session's Bearer forwarded beside a valid key). A GO is a gate
+# verdict: #1034 merges on WEDNESDAY'S signed GO naming the head (the TESTED grant), NOT on Kam's tap (corrected at the re-pin; exit 26 guards it).
 #
-# THE SHAPE, as read 23:03-23:40 AEST 2026-09-17 (git ls-remote + the PR and compare APIs agree): develop 27e53ec3a is the head merge-base AND its second
-# parent AND develop at drafting, so compare develop...head = merge_base 27e53ec3a, ahead 2, files 2 (asserted, exit 10; behind NOT asserted).
+# THE SHAPE, as re-read 01:38-01:40 AEST 2026-09-18 (git ls-remote + the PR and compare APIs agree): develop 3961c2add is the head merge-base AND the second
+# parent of 96d859467 AND origin develop, so compare develop...head = merge_base 3961c2add, status ahead, ahead 4 (6c6fdc94e, fd81a75f0, 96d859467, e4624218b),
+# behind 0, files 3 (auth.ts, platform.ts, the ks1215 test) (asserted, exit 10; behind NOT asserted). (Drafted at fd81a75f0: 27e53ec3a ahead 2 files 2.)
+# DEVELOP MOVED during the re-pin (02:02:48 ls-remote): 3961c2add -> 34cdcfb26 (#1035 squash: routes/verification.ts 28fb58343 -> f888e8cd0 + the ks1204
+# test; 0 #1034 files). The DEVELOP pin (not the merge-base, not the compare) was re-pinned to 34cdcfb26 with verification.ts f888e8cd0 JUDGED; merged tree
+# e4624218b x 34cdcfb26 = f1c78bbb8 (0 conflicts) != the head tree. Compare develop...head still reads merge_base 3961c2add ahead 4 files 3 (behind 1).
 #
-# The develop pin is judged by CONTENT — PATH BLOBS — never by develop's SHA: (a) TWENTY-FOUR files by blob at the CURRENT develop — the PR two (middleware/auth.ts
-# 6e1668362, the ks1215 test ABSENT; at a #1034 blob -> exit 19 LANDED), and what the gate runs and reads: index.ts (mount order, the rawAuthorization capture,
-# the unhandledRejection handler), routes/proxy.ts, platform.ts (authHeaders reads rawAuthorization), batch.ts, admin.ts, verification.ts, middleware
+# The develop pin is judged by CONTENT — PATH BLOBS — never by develop's SHA: (a) TWENTY-FOUR files by blob at the CURRENT develop — the PR three (middleware/auth.ts
+# 6e1668362, routes/platform.ts 4550401f8, the ks1215 test ABSENT; at a #1034 blob -> exit 19 LANDED), and what the gate runs and reads: index.ts (mount order, the
+# rawAuthorization capture, the unhandledRejection handler), routes/proxy.ts, batch.ts, admin.ts, verification.ts, middleware
 # rateLimitEnforce.ts and scopes.ts, services/redis.ts, utils/trustHeaders.ts, db.ts, the ks1207 and ks480 tests, gateway package.json / vitest.config.ts /
 # vitest.setup.ts / tsconfig.json, shared db/tenant-guc.ts, security/session-validation.ts, crypto/jwks.ts, utils/gracefulShutdown.ts, Dev eslint.config.mjs —
-# any blob nobody pinned -> exit 18; (b) if develop moved past 27e53ec3a, the compare pinned...develop REFUSES (exit 18) when the delta touches a GUARDED path —
+# any blob nobody pinned -> exit 18; (b) if develop moved past 3961c2add, the compare pinned...develop REFUSES (exit 18) when the delta touches a GUARDED path —
 # services/api-gateway/src/ and its package.json / vitest.config.ts / vitest.setup.ts / tsconfig.json, packages/shared/src/, eslint.config.mjs — or the move
 # cannot be judged. WHY these paths: they are the code and configuration the gate runs in-process (the real index.ts app, its middleware and routes, the shared
 # session / JWKS / tenant / shutdown helpers); a develop merge elsewhere (other services, frontends, audit baselines, lockfiles) cannot change what the gate
@@ -30,6 +37,7 @@
 # exit 24: brief AND prompt must name the REPORT DIRECTORY and the PRIOR REPORT (#1023, KS-1207: its N-1 is this ticket; the QA agent has no inbox), and the
 #          prompt must name NOT-TESTED.written-first.md (written FIRST, before any run).
 # exit 25: brief AND prompt must carry the MERGE ADDENDUM and require the per-finding CLOSED / STILL OPEN / NEW disposition.
+# exit 26: brief AND prompt must name WEDNESDAY'S signed GO as #1034's merge authority and carry no copied Kam's-tap merge condition (added at the re-pin).
 # QA1034_CUR_DEV (test override, --check only): stands in for origin develop so the LANDED / GUARDED refusals can be proven.
 # QA1034_AUTH_FILE (test fixture, --check only): a local file stands in for develop middleware/auth.ts (its git blob) so the LANDED and GUARDED
 # arms can be proven without a real develop commit.
@@ -37,9 +45,11 @@
 #
 # Generated by gatesets/2026-09-17_gate1034/gen_launcher_1034.py from launch_qa_secuura_ks1194_1032.sh (asserted substitutions + pins re-read from the repo +
 # residual guard + output controls + bash -n): same guard set and exit codes 2..25 (19 = LANDED), re-pointed at #1034 ROUND 1, no content-cleared blob.
+# RE-PINNED 2026-09-18 by gatesets/2026-09-17_gate1034/repin_launcher_1034.py (asserted substitutions; backup .pre-0918-repin): head, develop, compare,
+# JUDGED LANDED blobs (platform.ts b80a8cd8d, ks1215 test 75006b5cf + the superseded 5b7431af0), report directory, verdict subject, exit 26.
 #
 # Usage: launch_qa_secuura_ks1215_1034.sh [--check]
-# Exit: 0 launched (or guards passed under --check) · 2..25 a guard refused
+# Exit: 0 launched (or guards passed under --check) · 2..26 a guard refused
 set -u
 
 QA_DIR='/Volumes/DevMASTER/!CODING/Testing Agent MAIN'
@@ -49,10 +59,10 @@ PROMPT_FILE="${QA1034_PROMPT:-$WED/2_Project_Files/fleet/qa-agent/briefs/2026-09
 REPO='/Volumes/DevMASTER/!CODING/Secuura/Blockchain/2_Project_Files'
 SECUURA_ENV='/Volumes/DevMASTER/!CODING/Secuura/Blockchain/4_Credentials/.env'
 BRANCH='refs/heads/feature/ks-1215-api-gateway-a-revoked-session-jwt-plus-a-valid-key-whose'
-HEAD_SHA="${QA1034_HEAD:-fd81a75f0688f6cbe1e5f79b061bb1369c88f477}"
-MERGE_BASE='27e53ec3aa010b50cd9b2e4a1d15cbb34605ba7d'   # the merge-base of the head with develop (#1029s squash), the second parent of the head merge fd81a75f0
-DEVELOP_SHA='27e53ec3aa010b50cd9b2e4a1d15cbb34605ba7d'   # the pin = the merge-base = develop at drafting (moves judged by PATH BLOB and GUARDED paths, never by this SHA: git ls-remote 23:03:08 + 23:08:34; compare API 23:04:04 AEST)
-REPORT_DIR='/Volumes/DevMASTER/!CODING/Testing Agent MAIN/projects/secuura/reports/2026-09-17-ks1215-1034-fd81a75f0-tier1-r1/'
+HEAD_SHA="${QA1034_HEAD:-e4624218bc29cda4c07b2d31ca18bba422cfbc3e}"
+MERGE_BASE='3961c2add8e1637b32e638f8f0952c328c00833e'   # the merge-base of the head with develop = develop itself (#1033s squash), the second parent of the merge 96d859467
+DEVELOP_SHA='34cdcfb2663b9e4c31025044e6f842ad2c5a10a3'   # the pin = develop after #1035 landed mid-re-pin (NOT the merge-base 3961c2add; moves judged by PATH BLOB and GUARDED paths: git ls-remote 02:02:48 AEST 2026-09-18)
+REPORT_DIR='/Volumes/DevMASTER/!CODING/Testing Agent MAIN/projects/secuura/reports/2026-09-18-ks1215-1034-e4624218b-tier1-r1/'
 PRIOR_REPORT='/Volumes/DevMASTER/!CODING/Testing Agent MAIN/projects/secuura/reports/2026-09-17-ks1207-1023-2f74491eb-tier1-r1/'
 REAL_BRIEF="$WED/2_Project_Files/fleet/qa-agent/briefs/2026-09-17_secuura-1034-ks1215-tier1.md"
 
@@ -70,7 +80,7 @@ if ! printf '%s\n' "$LSR" | grep -q "^${HEAD_SHA}[[:space:]]${BRANCH}\$"; then
 fi
 
 # The compare (GitHub compare API), asserted whole (merge_base + ahead + files; NOT behind — see the header):
-# develop...#1034 = 27e53ec3a ahead 2 files 2 (behind 0 at draft close; behind deliberately not asserted).
+# develop...#1034 = 3961c2add ahead 4 files 3 (behind 0 at the re-pin; behind deliberately not asserted). Drafted at fd81a75f0: 27e53ec3a ahead 2 files 2.
 COMPARE="$(
   set -a; . "$SECUURA_ENV"; set +a
   HEAD_SHA="$HEAD_SHA" python3 - <<'PY'
@@ -83,7 +93,7 @@ print("%s ahead=%d files=%d" % (c["merge_base_commit"]["sha"], c["ahead_by"], le
 PY
 )"
 [ -n "$COMPARE" ] || { echo "REFUSING: could not read the compare develop...head from the GitHub compare API" >&2; exit 13; }
-[ "$COMPARE" = "$MERGE_BASE ahead=2 files=2" ] || { echo "REFUSING: #1034 develop...head reads '$COMPARE', brief pins '$MERGE_BASE ahead=2 files=2'" >&2; exit 10; }
+[ "$COMPARE" = "$MERGE_BASE ahead=4 files=3" ] || { echo "REFUSING: #1034 develop...head reads '$COMPARE', brief pins '$MERGE_BASE ahead=4 files=3'" >&2; exit 10; }
 
 # The develop pin, judged by CONTENT (see the header): twenty-four files by PATH BLOB at the CURRENT develop (no region judgement), then — if develop
 # moved — the pinned...develop delta against the GUARDED list with the DEV_CONTENT_ALLOWED blobs cleared.
@@ -107,13 +117,13 @@ DV = "develop"
 # file -> (develop-OK blobs {blob: label}, LANDED blobs {blob: label}); ABSENT = the contents API answers 404 at develop
 JUDGED = {
   AUTHTS:                                                               ({"6e16683624b3c38a365ece44cccb4fdfac892c71": DV}, {"bf09d315a64443b7f02bc27a74366b7a7f1dae81": "#1034 own"}),
-  A + "src/__tests__/ks1215-the-connector-branch-never-carries-the-callers-bearer.test.ts": ({"ABSENT": DV}, {"5b7431af0fbb203e7582d8f188eca3f15d5d05fe": "#1034 own"}),
+  A + "src/__tests__/ks1215-the-connector-branch-never-carries-the-callers-bearer.test.ts": ({"ABSENT": DV}, {"75006b5cf50fb8b42a5e7588a1d622b9168c1b07": "#1034 own", "5b7431af0fbb203e7582d8f188eca3f15d5d05fe": "#1034 own superseded fd81a75f0"}),
   A + "src/index.ts":                                                    ({"db127dbfa5dd899b0a8e0d844690890d91e27f10": DV}, {}),
   A + "src/routes/proxy.ts":                                             ({"795ae7ca3bdc76be3e563e87fc34a8cc221e5632": DV}, {}),
-  A + "src/routes/platform.ts":                                          ({"4550401f8d7d76afa848855cdf7558a35fd02de0": DV}, {}),
+  A + "src/routes/platform.ts":                                          ({"4550401f8d7d76afa848855cdf7558a35fd02de0": DV}, {"b80a8cd8d4e1af5a944817227f5ee6612c793954": "#1034 own"}),
   A + "src/routes/batch.ts":                                             ({"f2f48dca32e5611732d25c7d36b03da0e0d145cb": DV}, {}),
   A + "src/routes/admin.ts":                                             ({"f47dd6a655702ffbfc402ca920a33c4619d62c4b": DV}, {}),
-  A + "src/routes/verification.ts":                                      ({"28fb5834308a502f5f7b806e3b49a77627601eff": DV}, {}),
+  A + "src/routes/verification.ts":                                      ({"f888e8cd0bd10c98a508542d75902ab122595157": DV}, {}),
   A + "src/middleware/rateLimitEnforce.ts":                              ({"90bd29378508c8fee54e010b54cdc72ff992aafa": DV}, {}),
   A + "src/middleware/scopes.ts":                                        ({"7aef335b93acf7a94fbcadc61c353d7a5dde90c5": DV}, {}),
   A + "src/services/redis.ts":                                           ({"47659ee9c9f06acf9ac64e09b2dc207113ba92ea": DV}, {}),
@@ -131,7 +141,7 @@ JUDGED = {
   D + "packages/shared/src/utils/gracefulShutdown.ts":                   ({"5550416464de399e86f6c4041a3279962119af82": DV}, {}),
   D + "eslint.config.mjs":                                               ({"8c5374c6022eb0a3f449f41a570db61294aa63f1": DV}, {}),
 }
-# No REGION judgement: every file is judged by exact blob (a develop move of auth.ts, index.ts or platform.ts refuses, exit 18).
+# No REGION judgement: every file is judged by exact blob (a develop move of auth.ts, index.ts or platform.ts refuses, exit 18; a #1034 blob, exit 19).
 content_cleared = set()
 state = []
 for f, (ok, landed) in JUDGED.items():
@@ -156,7 +166,7 @@ for f, (ok, landed) in JUDGED.items():
     state.append(f.split("/")[-1] + " " + blob[:9] + " = " + ok[blob])
 state = "; ".join(state)
 if cur == pinned:
-    print("OK " + state + " | origin develop still " + pinned + " (= the head merge-base, an ANCESTOR of the head: merged tree = the head tree 6339c404c05fcfbfa3b6505b6bfb7955303c1ccd; git ls-remote)"); sys.exit(0)
+    print("OK " + state + " | origin develop still " + pinned + " (#1035 squash on the head merge-base 3961c2add, NOT an ancestor of the head: merged tree e4624218b x 34cdcfb26 = f1c78bbb888f5c0f875a7ab11ee09d810126f72a, 0 conflicts, re-pinner; git ls-remote)"); sys.exit(0)
 try:
     c = get("/compare/" + pinned + "..." + cur)
 except Exception as e:
@@ -181,7 +191,7 @@ cleared = sorted(h for h in hits if (h in DEV_CONTENT_ALLOWED and by_name.get(h,
 remaining = sorted(h for h in hits if h not in cleared)
 if remaining:
     print("GUARDED " + " ".join(remaining)); sys.exit(0)
-tail = "the gate merges the then-current develop onto fd81a75f0 in its own clone, asserts the merged services/api-gateway/src and shared subtrees equal the head, or re-runs the real-gateway matrix, the tamper table and the suites on the MERGED tree; names the merged-tree OID, drafter 27e53ec3a -> 6339c404c = the head tree (brief items 1, 3, 5, 6)"
+tail = "the gate merges the then-current develop onto e4624218b in its own clone, asserts the merged services/api-gateway/src and shared subtrees equal the head, or re-runs the real-gateway matrix, the tamper table and the suites on the MERGED tree; names the merged-tree OID, re-pinner 34cdcfb26 -> f1c78bbb8 (brief items 1, 3, 5, 6)"
 print("OK " + state + " | origin develop MOVED %s -> %s: commits=%d files=%d — GUARDED hits %d — disjoint from the GUARDED list (services/api-gateway/src/ + its package.json / vitest.config.ts / vitest.setup.ts / tsconfig.json, packages/shared/src/, eslint.config.mjs); %s" % (pinned, cur, c["ahead_by"], len(files), len(hits), tail)); sys.exit(0)
 PYJ
 )"
@@ -206,12 +216,14 @@ grep -qi 'NEVER print a credential value' "$PROMPT_FILE" \
   || { echo "REFUSING: prompt does not forbid printing a credential value" >&2; exit 17; }
 grep -qi 'node_modules per ENTRY' "$PROMPT_FILE" \
   || { echo "REFUSING: prompt does not require node_modules farmed per ENTRY (a wholesale link can write through to the checkout .vite cache)" >&2; exit 22; }
-grep -qF '[QA -> Wednesday] TIER 1 GATE #1034 (KS-1215) fd81a75f0' "$PROMPT_FILE" && grep -qF 'coagent@agentmail.to' "$PROMPT_FILE" && grep -qF 'wednesday-agent@agentmail.to' "$PROMPT_FILE" \
+grep -qF '[QA -> Wednesday] TIER 1 GATE #1034 (KS-1215) e4624218b' "$PROMPT_FILE" && grep -qF 'coagent@agentmail.to' "$PROMPT_FILE" && grep -qF 'wednesday-agent@agentmail.to' "$PROMPT_FILE" \
   || { echo "REFUSING: prompt does not carry the exact #1034 verdict subject, the coagent@ sender and the wednesday-agent@ recipient" >&2; exit 23; }
 grep -qF "$REPORT_DIR" "$PROMPT_FILE" && grep -qF "$REPORT_DIR" "$BRIEF" && grep -qF 'NOT-TESTED.written-first.md' "$PROMPT_FILE" && grep -qF "$PRIOR_REPORT" "$PROMPT_FILE" && grep -qF "$PRIOR_REPORT" "$BRIEF" \
   || { echo "REFUSING: brief or prompt does not name the report directory $REPORT_DIR and the PRIOR REPORT $PRIOR_REPORT (#1023, KS-1207: its N-1 is this ticket), or the prompt does not name NOT-TESTED.written-first.md — the QA agent has no inbox" >&2; exit 24; }
 grep -qF 'MERGE ADDENDUM' "$PROMPT_FILE" && grep -qF 'MERGE ADDENDUM' "$BRIEF" && grep -qF 'CLOSED / STILL OPEN / NEW' "$PROMPT_FILE" && grep -qF 'CLOSED / STILL OPEN / NEW' "$BRIEF" \
   || { echo "REFUSING: brief or prompt does not carry the MERGE ADDENDUM and the per-finding CLOSED / STILL OPEN / NEW disposition — the merge seat equality targets and the In Progress hold ride on it" >&2; exit 25; }
+grep -qiF "WEDNESDAY'S signed GO" "$PROMPT_FILE" && grep -qiF "WEDNESDAY'S signed GO" "$BRIEF" && ! grep -qiE "waits for Kam.s tap|on Kam.s tap only" "$PROMPT_FILE" "$BRIEF" \
+  || { echo "REFUSING: brief or prompt does not name WEDNESDAY'S signed GO as the #1034 merge authority, or carries a copied Kam's-tap merge condition (that is #1032's, not this PR's)" >&2; exit 26; }
 
 if [ "${1:-}" = "--check" ]; then
   echo "all guards pass:"
@@ -230,6 +242,7 @@ if [ "${1:-}" = "--check" ]; then
   echo "  prompt carries the exact #1034 verdict subject, coagent@ sender, wednesday-agent@ recipient"
   echo "  brief and prompt name the report directory and the #1023 PRIOR REPORT (KS-1207 N-1); prompt names NOT-TESTED.written-first.md"
   echo "  brief and prompt carry the MERGE ADDENDUM and require CLOSED / STILL OPEN / NEW per finding"
+  echo "  brief and prompt name WEDNESDAY'S signed GO as the merge authority; no copied Kam's-tap merge condition"
   [ -n "${QA1034_CUR_DEV:-}" ] && echo "  (develop read from the QA1034_CUR_DEV test override, not ls-remote)"
   [ -n "${QA1034_AUTH_FILE:-}" ] && echo "  (develop api-gateway middleware/auth.ts read from the QA1034_AUTH_FILE fixture, not the contents API)"
   echo "  a launch (not --check) will refuse unless stdin is a TTY (exit 21)"

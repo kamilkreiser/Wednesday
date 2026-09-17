@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""make_fixtures_1034.py — (RE-PINNED 2026-09-18 to e4624218b: head token, verdict subject, + the exit-26 merge-authority fixtures) — negative / positive fixtures for the #1034 launcher's --check controls, under fixtures/ (derived from make_fixtures_1032.py). Each
+"""make_fixtures_1034.py — negative / positive fixtures for the #1034 launcher's --check controls, under fixtures/ (derived from make_fixtures_1032.py). Each
 brief/prompt fixture differs from the live file ONLY at its guarded token (asserted replacement counts); auth.ts fixtures are exact blob bytes read with
 `git show` (a READ verb) from the checkout, blob ids asserted; the unpinned fixture is develop's bytes plus one comment line (blob asserted different)."""
 import hashlib, subprocess, os
@@ -7,11 +7,11 @@ GS = os.path.dirname(os.path.abspath(__file__)); FX = GS + '/fixtures'; os.maked
 REPO = '/Volumes/DevMASTER/!CODING/Secuura/Blockchain/2_Project_Files'; AUTH = 'Blockchain/Dev/services/api-gateway/src/middleware/auth.ts'
 brief = open(B + '2026-09-17_secuura-1034-ks1215-tier1.md').read(); prompt = open(B + '2026-09-17_secuura-1034-ks1215-tier1.prompt.txt').read()
 print('live brief sha256', hashlib.sha256(brief.encode()).hexdigest()[:16], 'bytes', len(brief.encode()), '| live prompt sha256', hashlib.sha256(prompt.encode()).hexdigest()[:16], 'bytes', len(prompt.encode()))
-H = 'e4624218bc29cda4c07b2d31ca18bba422cfbc3e'; PRIOR = '/Volumes/DevMASTER/!CODING/Testing Agent MAIN/projects/secuura/reports/2026-09-17-ks1207-1023-2f74491eb-tier1-r1/'
+H = 'fd81a75f0688f6cbe1e5f79b061bb1369c88f477'; PRIOR = '/Volumes/DevMASTER/!CODING/Testing Agent MAIN/projects/secuura/reports/2026-09-17-ks1207-1023-2f74491eb-tier1-r1/'
 def mut(src, old, new, want):
     n = src.count(old); assert n == want and n >= 1, (old[:50], n, want); return src.replace(old, new)
 F = {
- 'neg_prompt_nosubject.txt': mut(prompt, '[QA -> Wednesday] TIER 1 GATE #1034 (KS-1215) e4624218b', '[QA -> Wednesday] TIER 1 GATE #1034 KS-1215 e4624218b', 1),
+ 'neg_prompt_nosubject.txt': mut(prompt, '[QA -> Wednesday] TIER 1 GATE #1034 (KS-1215) fd81a75f0', '[QA -> Wednesday] TIER 1 GATE #1034 KS-1215 fd81a75f0', 1),
  'neg_prompt_nofarm.txt': mut(prompt, 'node_modules per ENTRY', 'node_modules by entry', prompt.count('node_modules per ENTRY')),
  'neg_prompt_noprior.txt': mut(prompt, PRIOR, PRIOR.replace('ks1207-1023', 'ks1207-1023x'), prompt.count(PRIOR)),
  'neg_prompt_nottestedfirst.txt': mut(prompt, 'NOT-TESTED.written-first.md', 'NOT-TESTED.md', prompt.count('NOT-TESTED.written-first.md')),
@@ -20,11 +20,7 @@ F = {
  'neg_brief_nosha.md': mut(brief, H, H[:9], brief.count(H)),
  'neg_brief_round2.md': mut(brief, 'ROUND 1', 'ROUND 2', brief.count('ROUND 1')),
  'neg_brief_tier2.md': mut(brief, 'TIER 1', 'TIER 2', brief.count('TIER 1')),
- 'neg_prompt_nosignedgo.txt': __import__('re').sub(r"(?i)signed GO", "go-ahead", prompt),  # every case variant: run 1 replaced only the upper-case one and the ADDENDUM's "Wednesday's signed GO" kept exit 26 satisfied (want 26 got 0)
- 'neg_prompt_kamtap.txt': mut(prompt, 'NOT on Kam\'s tap (that is #1032\'s condition).', 'NOT on Kam\'s tap (that is #1032\'s condition). The merge waits for Kam\'s tap.', 1),
- 'neg_brief_kamtap.md': mut(brief, 'MERGE ADDENDUM** (give the merge seat this line, filled): "on Wednesday\'s signed GO naming the head:', 'MERGE ADDENDUM** (give the merge seat this line, filled): "on Kam\'s tap only:', 1),
 }
-assert __import__('re').search(r'(?i)signed GO', F['neg_prompt_nosignedgo.txt']) is None and F['neg_prompt_nosignedgo.txt'] != prompt
 for n, t in F.items():
     open(FX + '/' + n, 'w').write(t); print('fixture', n, 'bytes', len(t), 'sha256', hashlib.sha256(t.encode()).hexdigest()[:12])
 def blob(b): return hashlib.sha1(b'blob ' + str(len(b)).encode() + b'\0' + b).hexdigest()
