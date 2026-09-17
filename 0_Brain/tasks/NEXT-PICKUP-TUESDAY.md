@@ -10,6 +10,11 @@ supersedes: the 2026-09-14 pickup, kept verbatim at NEXT-PICKUP-TUESDAY.md.pre-s
 
 ---
 
+## 🔵 DELTA 2 — 2026-09-17 18:3x (ctx ~75%). Read FIRST.
+- **Kam switched THIS seat to a new Claude account** (/login 18:2x; Tuesday 7d 53%). **NexusAI S64 still runs on the Mac's GLOBAL ~/.claude = old account, 7d 99%** (its claude pid has no CLAUDE_CONFIG_DIR). Asked Kam twice on the panel to /login in the NexusAI pane; **not done at 18:3x (statusline still 99%)**. NexusAI told to make every worktree durable + write HANDOVER-S64 now. **If S64 stops at the limit: launch S65 only AFTER the global login is on the new account (check with a fresh `claude` statusline or Kam's word), brief from HANDOVER-S64.**
+- Kam (terminal 18:3x): "great, keep going and let me know what you need". Plan once NexusAI is on the new account: a SECOND NexusAI seat on path-disjoint items (RD-503 docs/*, RD-442 LICENSE/package.json, RD-490 tests/e2e real-browser guard), partitioned from server.js lanes, both briefs warning of the shared inbox.
+- Open with Kam: RD-505 BYO vault remove/keep; HPSM round 3 (N-1); pc-lane-a db-only. HPSM S50 WRAPPED + scored 0.93, pane closed.
+
 ## 🔵 DELTA — 2026-09-17 16:49 (ctx 70% checkpoint). Read with the 65% block directly below, which it updates.
 
 - **NexusAI:** RD-454 MERGED 784b831 (rebased branch rd-454-group-optional-s64-rebased @ 3abd0a8; pins measured 957; no force push). **RD-436/452 is being RE-IMPLEMENTED** on rd-436-452-501-s64 (keep entraGroupGate.js; strict NONE/CONFIGURED/UNREADABLE/INVALID in the one resolver; RD-499 + RD-501 in it; FULL tier-1 gate). Tuesday added: measure the checkMemberGroups delegated permission against Graph docs vs the requested scopes; UNREADABLE fails visibly, with one bounded retry that never turns into NONE. **RD-464 r2 READY @ 8237526**, re-gate running; C-59 = AI off means no prompt/chat/deployment call, metadata models.list allowed; a comment-only commit (server.js:16182/:17019) after a clean re-gate, range-diff = those 2 lines only. **RD-503 JOINS the checklist** (shipped docs/README.md + SUPPORT.md are stale local-model text; review every human-readable file in the image, read not grep). NexusAI S64 at ctx 51%+: the successor brief must carry today's rulings.
