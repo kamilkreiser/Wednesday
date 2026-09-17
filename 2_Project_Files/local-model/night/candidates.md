@@ -571,3 +571,9 @@ A CENSUS for the coordinator to brief from, easy → hard (Kam 2026-09-15 16:40 
      KS-789   bash/doc rebrief owed (two doc_patch FAILs on record 09-16 20:47 and 22:13); not re-derived this search · read (done.md)
      POOL STATE: with KS-938's mfa.ts half briefed, no second fit at 81ee4b729: 0 unrecorded tickets, 2 post-17:36 updates (both refused), and the partition-freed screen's other 20 hits stand on shape. Next widening: KS-938 users.ts:1111 (two lines, + the missing mfaBackupCodes key) the moment #1018 merges; KS-1006 (users.ts) likewise; KS-1179 F-6 once READY_KS-1179-F1 merges.
 -->
+
+## SEARCH comment_patch 2026-09-17 21:03 — block appended 21:03 AEST
+<!-- COMMENT_PATCH BRIEFS, measured 2026-09-17 20:53–21:01 AEST by the comment_patch brief-writer commission — do NOT re-derive these.
+     FITS (briefed + built rc 0 at 75ad0e55c, NOT queued): KS-1120 F-3 (briefs/KS-1120-F3.md, inputs/comment_1120F3.json; pick "reword" to confirm) · KS-1156 A.2 + A.3 (briefs/KS-1156-A2A3.md, inputs/comment_1156A2.json + comment_1156A3.json) · KS-1179 F-4 (briefs/KS-1179-F4.md, inputs/comment_1179F4.json)
+     KS-1179 F-5 docblock half (ssrf-guard.ts:460-461 "DNS-free connect")  REFUSED R9 at 20:59: READY_KS-932_ornith35b-q4_PASS-7of7_2026-09-15 @@ -471,7 is within 10 lines — that READY is already merged as 40fe4db69 (#1004), so the partition is stale; dropped from the KS-1179 F-4 brief, not worked around · unblocks: READY_KS-932 retired from night/ (or R9 skipping READYs whose change is at tip) · measured (builder)
+-->
