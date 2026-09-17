@@ -249,39 +249,6 @@ for k, sec in enumerate(sections, 1):
     for ln in L:
         if ln.startswith("+++ b/"): path = ln[6:].strip(); break
         if ln.startswith("+++ "): path = ln[4:].strip(); break
-    # 2026-09-17 19:xx NEWFILE HEADER (KS-938 r1, runs/2026-09-17_ks938-ornith35b-night): the model wrote `--- /dev/null` /
-    # `+++ b/<test>` followed DIRECTLY by 141 `+` lines — no `@@ -0,0 +1,N @@` (the brief asked for `+1,141`) — and every
-    # apply mode said "No valid patches in input". A new file has exactly one hunk starting at line 1, so the header is
-    # determined by the body: synthesise `@@ -0,0 +1,N @@` (N = the body's line count) and let the normal apply modes run.
-    # Named in the verdict (A2 NEWFILE HEADER SYNTHESIZED), never silent; the as-written section is kept beside the
-    # repaired one as section_<k>.headerless.diff (both under out.md.checker/ — out.md itself is never touched).
-    # REFUSED (the section left as written, so A2 still FAILS, with the reason named) when: the section is not
-    # `--- /dev/null`; ANY line of the section begins `@@`; any body line after `+++` is not `+`-prefixed (a bare `+` is a
-    # blank line; a context/`-`/empty/`\` line is refused); or lines other than a git preamble precede the `---` header.
-    # The wider bash_patch twin (it also converts context lines) is NOT this: code_patch stays strict. Arms:
-    # tests/newfile_header_arms.sh.
-    nfh_n = 0; nfh_refused = ""
-    mi = next((i for i, l in enumerate(L) if l.startswith("--- ")), None)
-    pi = mi + 1 if (mi is not None and mi + 1 < len(L) and L[mi + 1].startswith("+++ ")) else None
-    if pi is not None and not any(l.startswith("@@") for l in L):
-        body = L[pi + 1:]
-        while body and body[-1] == "": body = body[:-1]
-        bad = [(i, l) for i, l in enumerate(body, 1) if not l.startswith("+")]
-        if not L[mi].startswith("--- /dev/null"):
-            nfh_refused = f"not a new file ({L[mi][:70]!r} is not --- /dev/null)"
-        elif any(not p.startswith(("diff --git ", "new file mode ", "index ")) for p in L[:mi]):
-            nfh_refused = "lines other than a git preamble precede the --- header"
-        elif not body:
-            nfh_refused = "no body lines after the +++ header"
-        elif bad:
-            nfh_refused = f"{len(bad)} body line(s) not '+'-prefixed (first: body line {bad[0][0]} {bad[0][1][:60]!r})"
-        if nfh_refused:
-            print(f"section {k} {path}: A2 NEWFILE HEADER NOT SYNTHESIZED — a headerless section, refused: {nfh_refused}")
-        else:
-            open(f"{rep}/section_{k}.headerless.diff", "w", encoding="utf-8").write("\n".join(L).rstrip("\n") + "\n")
-            nfh_n = len(body)
-            L = L[:pi + 1] + [f"@@ -0,0 +1,{nfh_n} @@"] + L[pi + 1:]; sec["lines"] = L
-            print(f"section {k} {path}: A2 NEWFILE HEADER SYNTHESIZED (model omitted it; N={nfh_n}) — `@@ -0,0 +1,{nfh_n} @@` inserted after the +++ line, every body line '+'; as written: section_{k}.headerless.diff (an accommodation the verdict names)")
     miscount = 0; hunks = 0; i = 0
     while i < len(L):
         m = re.match(r"^@@ -(\d+)(?:,(\d+))? \+(\d+)(?:,(\d+))? @@", L[i])
@@ -306,7 +273,7 @@ for k, sec in enumerate(sections, 1):
     while L and L[-1] == "":
         L.pop()
     open(fn, "w", encoding="utf-8").write("\n".join(L) + "\n")
-    out.append({"n": k, "path": path, "file": fn, "hunks": hunks, "miscount": miscount, "newfile_header_synth": nfh_n, "newfile_header_refused": nfh_refused})
+    out.append({"n": k, "path": path, "file": fn, "hunks": hunks, "miscount": miscount})
 json.dump(out, open(f"{rep}/sections.json", "w"), indent=1)
 print(f"sections={len(out)} miscounted_sections={sum(1 for o in out if o['miscount'])}")
 PYEOF2
@@ -341,20 +308,12 @@ if [ "${N_PROXY:-0}" -gt 0 ]; then
     exit 1
   fi
 fi
-A2_OK=1; A2_MODE="strict"; A2_NOTE=""; A2_SYNTH=0
+A2_OK=1; A2_MODE="strict"; A2_NOTE=""
 k=1
 while [ "$k" -le "$N_SEC" ]; do
   SEC_FILE="$(python3 -c 'import json,sys; print(json.load(open(sys.argv[1]))[int(sys.argv[2])-1]["file"])' "$REP/sections.json" "$k")"
   SEC_PATH="$(python3 -c 'import json,sys; print(json.load(open(sys.argv[1]))[int(sys.argv[2])-1]["path"])' "$REP/sections.json" "$k")"
   SEC_MIS="$(python3 -c 'import json,sys; print(json.load(open(sys.argv[1]))[int(sys.argv[2])-1]["miscount"])' "$REP/sections.json" "$k")"
-  # 2026-09-17 NEWFILE HEADER (KS-938 r1): the section audit above synthesised a missing `@@ -0,0 +1,N @@` (N>0) or refused to
-  # (a reason). A synthesised header is an accommodation even when the section then applies strict — A2_SYNTH keeps the
-  # PASS line from reading "strict … hunk headers consistent". Arms: tests/newfile_header_arms.sh.
-  SEC_NFH="$(python3 -c 'import json,sys; print(json.load(open(sys.argv[1]))[int(sys.argv[2])-1].get("newfile_header_synth",0))' "$REP/sections.json" "$k")"
-  SEC_NFR="$(python3 -c 'import json,sys; print(json.load(open(sys.argv[1]))[int(sys.argv[2])-1].get("newfile_header_refused",""))' "$REP/sections.json" "$k")"
-  if [ "${SEC_NFH:-0}" -gt 0 ]; then
-    A2_SYNTH=1; A2_NOTE="$A2_NOTE [$SEC_PATH: A2 NEWFILE HEADER SYNTHESIZED (model omitted it; N=$SEC_NFH) — \`@@ -0,0 +1,$SEC_NFH @@\` inserted, every body line '+']"
-  fi
   # 2026-09-15: the model writes paths RELATIVE TO THE SERVICE ROOT ("services/api-gateway/…") as often as
   # repo-relative ("Blockchain/Dev/services/…") — three of three runs on 09-15 08:4x lacked the prefix and every
   # one failed A2 with "No such file". A path form is not a code defect: when the section's path lacks the
@@ -411,13 +370,13 @@ while [ "$k" -le "$N_SEC" ]; do
         A2_MODE="reanchored"; A2_NOTE="$A2_NOTE [$SEC_PATH: REANCHORED — the model's context lines did not match the file; every hunk rebuilt from its -/+ lines at the file's real location ($REAN_NOTE); strict rc=$rc_strict lenient rc=$rc_lenient fuzzy rc=$rc_fuzzy]"
         echo "section $k $SEC_PATH: applies ONLY REANCHORED ($REAN_NOTE)"
       else
-        A2_OK=0; A2_NOTE="$A2_NOTE [$SEC_PATH: does not apply — strict: $(head -2 "$REP/apply_check_strict_$k.out" | tr '\n' ' ') | lenient: $(head -2 "$REP/apply_check_lenient_$k.out" | tr '\n' ' ') | fuzzy(-C1): $(head -2 "$REP/apply_check_fuzzy_$k.out" | tr '\n' ' ') | reanchored: $REAN_NOTE $(head -1 "$REP/apply_check_reanchored_$k.out" 2>/dev/null | tr '\n' ' ')${SEC_NFR:+ | newfile header NOT SYNTHESIZED: $SEC_NFR}]"
+        A2_OK=0; A2_NOTE="$A2_NOTE [$SEC_PATH: does not apply — strict: $(head -2 "$REP/apply_check_strict_$k.out" | tr '\n' ' ') | lenient: $(head -2 "$REP/apply_check_lenient_$k.out" | tr '\n' ' ') | fuzzy(-C1): $(head -2 "$REP/apply_check_fuzzy_$k.out" | tr '\n' ' ') | reanchored: $REAN_NOTE $(head -1 "$REP/apply_check_reanchored_$k.out" 2>/dev/null | tr '\n' ' ')]"
       fi
     fi
   fi
   k=$((k+1))
 done
-if [ "$A2_OK" -eq 1 ] && [ "$A2_MODE" = "strict" ] && [ "$A2_SYNTH" -eq 0 ]; then
+if [ "$A2_OK" -eq 1 ] && [ "$A2_MODE" = "strict" ]; then
   pass "A2 diff applies at the tip (strict git apply --check, every section, hunk headers consistent)"
 elif [ "$A2_OK" -eq 1 ]; then
   pass "A2 diff applies at the tip — with an accommodation:$A2_NOTE"
