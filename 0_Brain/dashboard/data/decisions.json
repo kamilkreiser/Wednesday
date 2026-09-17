@@ -11294,5 +11294,90 @@
    "CARD nexusai-rd245-audit-log-leaves-settings",
    "CARD secuura-audit-baseline-rows-lapse-24sep-block-pushes"
   ]
+ },
+ {
+  "id": "secuura-audit-rows-react-router-v7-migration",
+  "client_project": "Secuura/Blockchain",
+  "title": "Two react-router audit rows (expire Wed 30 Sep) are fixed only in v7: commission the KS-528 migration, and date the rows until it lands?",
+  "bluf": "Measured by Seat B (07:26Z, GitHub advisory + npm reads): two medium react-router advisories (an open redirect via a backslash in Link/useNavigate; constructor injection in SSR hydration) are fixed only in react-router 7.18.0, and the v6 line has no fix. It ships in the admin, issuer and verifier portal bundles. Reach leads, not proof: 0 of 48 navigate() calls build a target from user input; the portals use BrowserRouter and none of the SSR/data-router APIs (0 hits). A v7 upgrade is client source work in 3 portals (ticket KS-528), outside Seat B's package-and-lock-only scope, and will not land by 30 Sep. A third react-router-dom row IS fixable by a patch and is being fixed separately.",
+  "default_action": "Nothing is commissioned or re-dated until you tap. Wednesday re-raises this card with the other per-row decisions by Tue 22 Sep 18:00 AEST; if still unruled, pushes block on Wed 30 Sep 10:00 AEST.",
+  "options": [
+   {
+    "key": "migrate-and-date",
+    "label": "Commission the v7 migration AND date both rows to its planned landing (recommended)",
+    "detail": "A Secuura seat with source scope takes KS-528 (3 portals, QA gate with a real-browser pass). Wednesday re-dates the two rows to the planned landing date with the reach leads as the reason, so pushes are not blocked meanwhile."
+   },
+   {
+    "key": "migrate-only",
+    "label": "Commission the migration, no re-date",
+    "detail": "Pushes to Blockchain/Dev stop from Wed 30 Sep 10:00 AEST until the migration merges."
+   },
+   {
+    "key": "date-only",
+    "label": "Date the rows, no migration now",
+    "detail": "The advisories stay in the portals until a later decision."
+   }
+  ],
+  "recommended": "migrate-and-date",
+  "ts": "2026-09-17T17:28:32.354512+10:00",
+  "status": "open",
+  "ruled_choice": null,
+  "ruled_ts": null,
+  "prior_rulings_overridden": [
+   "2026-08-26 10:44",
+   "2026-08-26 10:46",
+   "2026-09-03 18:01",
+   "CARD nexusai-rd245-audit-log-leaves-settings",
+   "CARD secuura-793-the-four-rows-you-authorised-are-already-expired",
+   "CARD secuura-audit-baseline-rows-lapse-24sep-block-pushes"
+  ]
+ },
+ {
+  "id": "secuura-audit-row-ip-address-high-override",
+  "client_project": "Secuura/Blockchain",
+  "title": "HIGH audit row ip-address (expires Wed 30 Sep): override the Cardano SDK's pin in the issuer portal, or wait for a Mesh release?",
+  "bluf": "Measured by Seat B (07:27Z, GitHub advisory + npm reads): ip-address 9.0.5 carries a HIGH SSRF / trust-boundary bypass (leading-zero octets read as decimal; fixed 10.3.1). It sits in the issuer portal's client bundle via @cardano-sdk/core 0.46.12, which the latest Mesh SDK releases (1.9.1) pin exactly, so no Mesh release fixes it today. NEW 07:31 (Seat B, the two published SDK tarballs diffed read-only): the SDK moved to ip-address 10 in a patch release with NO runtime code change — its only ip-address consumer (ipUtils.js, used for stake-pool relay certificates) is byte-identical in both builds. That is upstream's evidence, not a test of our issuer. Not measured: whether the issuer ever reaches that code, and ip-address 10's behaviour for those calls.",
+  "default_action": "Seat B verifies the SDK's 9-to-10 change from the two published package tarballs (read-only) so the recommendation rests on a read, and builds nothing until you tap. Wednesday re-raises by Tue 22 Sep 18:00 AEST; unruled, pushes block Wed 30 Sep 10:00 AEST.",
+  "options": [
+   {
+    "key": "override",
+    "label": "Override to ip-address 10.3.1 (recommended)",
+    "detail": "Overrides in the issuer and root package.json, the issuer build + unit suites, tier-1 QA gate with a real-browser pass on the issuer. A full wallet flow needs a stack and would be stated NOT run. Risk: bends the Cardano SDK's declared ^9.0.5."
+   },
+   {
+    "key": "wait",
+    "label": "Wait for a Mesh release, with a dated decision",
+    "detail": "Wednesday re-dates the row with the reason; the HIGH advisory stays in the issuer bundle."
+   },
+   {
+    "key": "other",
+    "label": "Something else",
+    "detail": "Say what."
+   }
+  ],
+  "recommended": "override",
+  "ts": "2026-09-17T17:28:35.039227+10:00",
+  "status": "open",
+  "ruled_choice": null,
+  "ruled_ts": null,
+  "prior_rulings_overridden": [
+   "CARD nexusai-rd245-audit-log-leaves-settings",
+   "CARD secuura-advisories-high-and-prod-reaching",
+   "CARD hpsm-composer-remediate-high-reach",
+   "CARD secuura-audit-baseline-rows-lapse-24sep-block-pushes"
+  ],
+  "amendments": [
+   {
+    "ts": "2026-09-17T17:34:50.005562+10:00",
+    "reason": "Seat B's row-15 tarball diff arrived 07:31:47Z (spf/dkim/dmarc pass); the card's 'not yet verified' premise is now measured",
+    "changed": [
+     "bluf"
+    ],
+    "before": {
+     "bluf": "Measured by Seat B (07:27Z, GitHub advisory + npm reads): ip-address 9.0.5 carries a HIGH SSRF / trust-boundary bypass (leading-zero octets read as decimal; fixed 10.3.1). It sits in the issuer portal's client bundle via @cardano-sdk/core 0.46.12, which the latest Mesh SDK releases (1.9.1) pin exactly — so no Mesh release fixes it today, major or not. The SDK itself moved to ip-address 10 in a patch release, which suggests its code survives the change (not yet verified). Whether the SSRF shape matters in a browser is unmeasured."
+    }
+   }
+  ],
+  "amended_ts": "2026-09-17T17:34:50.005577+10:00"
  }
 ]

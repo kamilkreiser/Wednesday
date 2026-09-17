@@ -1,0 +1,35 @@
+mode: test_only (tamper at Blockchain/Dev/services/api-gateway/src/routes/verification.ts:624)
+diff_blocks=1 all_blocks=1 prose_outside_chars=0
+wrote /private/tmp/claude-501/night/s17l/k1123/ck/fin0_wrong_emptytwin/out.md.checker/patch.diff lines=116
+PASS A1 output is exactly one fenced ```diff block, nothing outside it
+clone clean at pinned tip f8c7aaa39dabfe6a3916e5be55d9ccd752e7d8ed
+runner: vitest
+--- baseline at the untouched tip (whole services/api-gateway suite + tsc)
+baseline suite rc=0 total=454 passed=454 failed=0 suites_failed=0 loaded=1 failed_names=[]
+baseline tsc rc=0 (0 lines)
+sections=1 miscounted_sections=0
+section 1 Blockchain/Dev/services/api-gateway/src/__tests__/ks1123-api-gateway-verify-an-empty-string.test.ts: applies (strict)
+PASS A2 diff applies at the tip (strict git apply --check, every section, hunk headers consistent)
+touched files (1): Blockchain/Dev/services/api-gateway/src/__tests__/ks1123-api-gateway-verify-an-empty-string.test.ts  (+113/-0)
+PASS A3 (test-only) touched-file set == { Blockchain/Dev/services/api-gateway/src/__tests__/ks1123-api-gateway-verify-an-empty-string.test.ts } — the product file is untouched, as the ticket requires
+A3b: no must_change sites in the input — skipped
+INFO A3i skipped — the input carries no expected '+' lines (a legacy or brief-less input); indentation not measured
+A4 (test-only): tampered /private/tmp/claude-501/night/s17l/clone/Blockchain/Dev/services/api-gateway/src/routes/verification.ts:624: '    const persistedStatus = (doc as any).blockchain?.status ?? null;' -> "    const persistedStatus = typeof (doc as any).blockchain?.status === 'string' ? (doc as any).blockchain.status : null; // TAMPER: KS-1123 red-proof, 0 and false read as statusless"
+test-only at tip: rc=1 total=4 passed=3 failed=1 suites_failed=2 loaded=1 failed_names=['KS-1123 F-1002-1 - a 0 or false anchor status stays off-chain-only on tier 1 KS-1123 R2 - a status of false with a real hash and height is off-chain-only']
+A4 (test-only): tamper reverted (Blockchain/Dev/services/api-gateway/src/routes/verification.ts back to the tip)
+A4 declared red cell(s) (brief ## Red cells, assertion red): KS-1123 R2 - a status of false with a real hash and height i
+PASS A4 RED-FIRST: src/__tests__/ks1123-api-gateway-verify-an-empty-string.test.ts fails at the untouched tip (1 failed / 4 run; controls green; assertion reds)
+test after product hunk: rc=0 total=4 passed=4 failed=0 suites_failed=0 loaded=1 failed_names=[]
+PASS A5 GREEN-AFTER: src/__tests__/ks1123-api-gateway-verify-an-empty-string.test.ts passes with the product hunk (4 passed / 4 run)
+INFO control cell present: 3 cell(s) passed BEFORE and 4 AFTER (the harness reaches the code both times)
+after suite rc=0 total=458 passed=458 failed=0 suites_failed=0 loaded=1 failed_names=[]
+baseline: total=454 failed=0 | after: total=458 failed=0
+develop's own reds (attributed, not counted): []
+NEW reds: []
+reds fixed by the patch: []
+tests added: 4
+PASS A6 whole services/api-gateway suite: no NEW red vs the untouched tip
+PASS A7 tsc --noEmit for services/api-gateway: rc 0 after the patch (baseline rc=0)
+INFO tsc on the test file alone: rc=0 (0 lines; not gated — vitest does not type-check and the service tsconfig excludes __tests__)
+SUMMARY files=1 +113/-0 test=src/__tests__/ks1123-api-gateway-verify-an-empty-string.test.ts red_first=yes apply_mode=strict
+RESULT: PASS (7/7)

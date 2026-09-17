@@ -1,0 +1,35 @@
+mode: test_only (tamper at Blockchain/Dev/services/api-gateway/src/middleware/auth.ts:300)
+diff_blocks=1 all_blocks=1 prose_outside_chars=0
+wrote /Volumes/DevMASTER/WEDNESDAY/2_Project_Files/local-model/runs/2026-09-17_ks1205-ornith35b-night/out.md.checker/patch.diff lines=80
+PASS A1 output is exactly one fenced ```diff block, nothing outside it
+clone clean at pinned tip f8c7aaa39dabfe6a3916e5be55d9ccd752e7d8ed
+runner: vitest
+--- baseline at the untouched tip (whole services/api-gateway suite + tsc)
+baseline suite rc=0 total=454 passed=454 failed=0 suites_failed=0 loaded=1 failed_names=[]
+baseline tsc rc=0 (0 lines)
+sections=1 miscounted_sections=0
+section 1 Blockchain/Dev/services/api-gateway/src/__tests__/ks1205-api-gateway-per-key-limiter-follow.test.ts: applies (strict)
+PASS A2 diff applies at the tip (strict git apply --check, every section, hunk headers consistent)
+touched files (1): Blockchain/Dev/services/api-gateway/src/__tests__/ks1205-api-gateway-per-key-limiter-follow.test.ts  (+77/-0)
+PASS A3 (test-only) touched-file set == { Blockchain/Dev/services/api-gateway/src/__tests__/ks1205-api-gateway-per-key-limiter-follow.test.ts } — the product file is untouched, as the ticket requires
+A3b: no must_change sites in the input — skipped
+INFO A3i skipped — the input carries no expected '+' lines (a legacy or brief-less input); indentation not measured
+A4 (test-only): tampered /private/tmp/claude-501/night/clone_ks1205/Blockchain/Dev/services/api-gateway/src/middleware/auth.ts:300: "        rateLimitBucket: `api_key:${createHash('sha256').update('secuura-rate-limit-bucket\\0').update(apiKey).digest('hex')}`," -> "        rateLimitBucket: `api_key:${createHash('sha256').update(apiKey).digest('hex')}`, // TAMPER: KS-1205 red-proof G-BUCKET-HASH, the bucket is the stored key_hash"
+test-only at tip: rc=1 total=3 passed=2 failed=1 suites_failed=2 loaded=1 failed_names=['KS-1205 G-BUCKET-HASH - a key bucket is never the stored key_hash KS-1205 R1 - neither key is bucketed as api_key plus the bare sha256 of the key']
+A4 (test-only): tamper reverted (Blockchain/Dev/services/api-gateway/src/middleware/auth.ts back to the tip)
+A4 declared red cell(s) (brief ## Red cells, assertion red): KS-1205 R1 - neither key is bucketed as api_key plus the bar
+PASS A4 RED-FIRST: src/__tests__/ks1205-api-gateway-per-key-limiter-follow.test.ts fails at the untouched tip (1 failed / 3 run; controls green; assertion reds)
+test after product hunk: rc=0 total=3 passed=3 failed=0 suites_failed=0 loaded=1 failed_names=[]
+PASS A5 GREEN-AFTER: src/__tests__/ks1205-api-gateway-per-key-limiter-follow.test.ts passes with the product hunk (3 passed / 3 run)
+INFO control cell present: 2 cell(s) passed BEFORE and 3 AFTER (the harness reaches the code both times)
+after suite rc=0 total=457 passed=457 failed=0 suites_failed=0 loaded=1 failed_names=[]
+baseline: total=454 failed=0 | after: total=457 failed=0
+develop's own reds (attributed, not counted): []
+NEW reds: []
+reds fixed by the patch: []
+tests added: 3
+PASS A6 whole services/api-gateway suite: no NEW red vs the untouched tip
+PASS A7 tsc --noEmit for services/api-gateway: rc 0 after the patch (baseline rc=0)
+INFO tsc on the test file alone: rc=2 (3 lines; not gated — vitest does not type-check and the service tsconfig excludes __tests__)
+SUMMARY files=1 +77/-0 test=src/__tests__/ks1205-api-gateway-per-key-limiter-follow.test.ts red_first=yes apply_mode=strict
+RESULT: PASS (7/7)

@@ -1,0 +1,41 @@
+{
+ "_source": "/Volumes/DevMASTER/WEDNESDAY/2_Project_Files/local-model/runs/2026-09-17_ks1123-ornith35b-night/input.json",
+ "_source_sha256": "7be645c978e529cf39e09cc1907e5c0737bc3e834e793b1a2c986a23cc3b5ac8",
+ "_note": "defect_line only; A4's classifier reads nothing else from the input",
+ "defect_line": {
+  "line": 624,
+  "text": "    const persistedStatus = (doc as any).blockchain?.status ?? null;",
+  "sites": [
+   {
+    "line": 624,
+    "text_at_tip": "    const persistedStatus = (doc as any).blockchain?.status ?? null;",
+    "note": "(correct) `    const persistedStatus = (doc as any).blockchain?.status ?? null;` - the status read. The tamper replaces this line. Stays.",
+    "must_change": false
+   },
+   {
+    "line": 722,
+    "text_at_tip": "      (persistedStatus === 'confirmed' || (persistedStatus == null && (doc as any)._source !== 'anchor_store')), // KS-1073: carve-out tier-1 only; anchor-store rows are never statusless",
+    "note": "(correct) the `persistedAnchored` conjunct that accepts `'confirmed'` or a null status on tier 1. Stays.",
+    "must_change": false
+   },
+   {
+    "line": 248,
+    "text_at_tip": "    case 'confirmed':",
+    "note": "(correct) `    case 'confirmed':` - the only status the confidence mapping calls on-chain. Stays.",
+    "must_change": false
+   }
+  ],
+  "expected_plus": [],
+  "sites_rule": "every site with must_change=true MUST be changed by the product hunk (its text appears as a '-' line); the checker refuses a diff that leaves one untouched (A3b) before any test runs",
+  "tamper": {
+   "line": 624,
+   "from": "    const persistedStatus = (doc as any).blockchain?.status ?? null;",
+   "to": "    const persistedStatus = typeof (doc as any).blockchain?.status === 'string' ? (doc as any).blockchain.status : null; // TAMPER: KS-1123 red-proof, 0 and false read as statusless",
+   "rule": "TEST-ONLY MODE: emit ONLY the new test file (no product hunk). The checker reddens your cells by replacing this product line with `to` in a clone, then expects them GREEN at the untouched tip."
+  },
+  "red_cells": [
+   "KS-1123 R1 - a status of 0 with a real hash and height is off-chain-only",
+   "KS-1123 R2 - a status of false with a real hash and height is off-chain-only"
+  ]
+ }
+}

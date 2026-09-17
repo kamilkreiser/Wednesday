@@ -695,18 +695,8 @@ red_total="$(getn "$RED" total)"; red_failed="$(getn "$RED" failed)"; red_passed
 # 2026-09-15 19:0x (KS-1172, modify-in-place): an EXISTING cell the brief DECLARES under `## Red cells`
 # (input defect_line.red_cells, title substrings) counts as a red when its failure is an ASSERTION —
 # a widened exact-set pin has no 🔴 in its title. Undeclared non-🔴 reds are still control reds.
-# 2026-09-17 17:xx A4 ALL-REDS (search 17l "Wednesday must read" item 2): A4 passed when ANY declared cell went red —
-# KS-1123 wrong_emptytwin (R1 fed '' instead of 0, so R1 GREEN under the tamper) got RESULT PASS (7/7) on 1 failed / 4
-# run. EVERY `## Red cells` entry must now fail BY ASSERTION in this run, or A4 FAILS naming the entries that did not.
-# Matching: a declaration that EQUALS a cell title (whitespace-normalised; every 09-16/09-17 brief) is satisfied only
-# by THAT cell failing — a longer failed title that merely contains it (a twin) does not count. A declaration equal to
-# no title is the documented "title substring" form (KS-1172 night9/10, KS-864-F1009): satisfied by >=1 assertion-red
-# title containing it at word boundaries ("KS-1 R1" never matches "KS-1 R10"). Declared-green names go to
-# $REP/a4_declared_green.out (always rewritten). The PASS line is byte-identical to before (golden checker.out arms
-# compare it). Arms: tests/a4_allreds_arms.sh.
-A4_NOTE="$(python3 - "$REP/red_first.json" "$INPUT" "$REP/a4_declared_green.out" <<'PY4'
+A4_NOTE="$(python3 - "$REP/red_first.json" "$INPUT" <<'PY4'
 import json, sys, re
-open(sys.argv[3], "w").close()
 try: j = json.load(open(sys.argv[1]))
 except Exception as e: print(f"UNREADABLE {e}"); sys.exit()
 declared = ((json.load(open(sys.argv[2])).get("defect_line") or {}).get("red_cells")) or []
@@ -725,36 +715,14 @@ out = []
 if ctrl_red: out.append("CONTROL cell(s) red at the tip: " + " | ".join(ctrl_red))
 if declared_hit: sys.stderr.write("A4 declared red cell(s) (brief ## Red cells, assertion red): " + " | ".join(declared_hit) + "\n")
 if nonassert: out.append("non-assertion failure(s): " + " | ".join(nonassert))
-nrm = lambda s: " ".join((s or "").split())
-cells = []
-for tf in j.get("testResults", []):
-    for a in tf.get("assertionResults", []):
-        msgs = " ".join(a.get("failureMessages") or [])
-        red = a.get("status") == "failed" and (("AssertionError" in msgs) or ("expected" in msgs.lower()))
-        cells.append((nrm(a.get("title", "")), red))
-green_decl = []
-for d in [nrm(x) for x in declared if nrm(x)]:
-    exact = [red for (t, red) in cells if t == d]
-    if exact:
-        if not all(exact): green_decl.append(d)
-        continue
-    pat = re.compile(("(?<!\\w)" if re.match(r"\w", d[0]) else "") + re.escape(d) + ("(?!\\w)" if re.match(r"\w", d[-1]) else ""))
-    if not any(red for (t, red) in cells if pat.search(t)): green_decl.append(d)
-if green_decl:
-    open(sys.argv[3], "w").write("\n".join(green_decl) + "\n")
 print(" ; ".join(out))
 PY4
 )"
-A4_GREEN_DECL="$(tr '\n' '|' < "$REP/a4_declared_green.out" 2>/dev/null | sed 's/|$//; s/|/ | /g')"
-if [ "$rc_red" -ne 0 ] && [ "$red_total" -gt 0 ] && [ "$red_failed" -ge 1 ] && [ -z "$A4_NOTE" ] && [ -z "$A4_GREEN_DECL" ]; then
+if [ "$rc_red" -ne 0 ] && [ "$red_total" -gt 0 ] && [ "$red_failed" -ge 1 ] && [ -z "$A4_NOTE" ]; then
   pass "A4 RED-FIRST: $TEST_REL fails at the untouched tip ($red_failed failed / $red_total run; controls green; assertion reds)"
-elif [ "$rc_red" -ne 0 ] && [ "$red_total" -gt 0 ] && [ "$red_failed" -ge 1 ] && [ -n "$A4_NOTE" ]; then
+elif [ "$rc_red" -ne 0 ] && [ "$red_total" -gt 0 ] && [ "$red_failed" -ge 1 ]; then
   fail "A4 RED-FIRST: the test is red at the tip but NOT for the right reason — $A4_NOTE ($red_failed failed / $red_total run); the harness does not reach the code, so the red proves nothing"
   echo "RESULT: FAIL ($FAILS failed) — stopped at A4 (a test-side defect, not a product red)"
-  exit 1
-elif [ "$rc_red" -ne 0 ] && [ "$red_total" -gt 0 ] && [ "$red_failed" -ge 1 ]; then
-  fail "A4 RED-FIRST: declared red cell(s) did NOT fail by assertion$( [ "$MODE" = test_only ] && echo " under the tamper" || echo " at the tip") — $A4_GREEN_DECL ($red_failed failed / $red_total run); every cell under the brief's ## Red cells must red, or the test does not prove what it declares"
-  echo "RESULT: FAIL ($FAILS failed) — stopped at A4 (a declared red cell stayed green)"
   exit 1
 elif [ "$red_total" -eq 0 ]; then
   fail "A4 RED-FIRST: the test file did not run any test at the tip (load/compile error, not a red) — $(head -c 300 "$REP/red_first.out" | tr '\n' ' ')"

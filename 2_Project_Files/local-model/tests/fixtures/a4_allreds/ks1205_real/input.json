@@ -1,0 +1,34 @@
+{
+ "_source": "/Volumes/DevMASTER/WEDNESDAY/2_Project_Files/local-model/runs/2026-09-17_ks1205-ornith35b-night/input.json",
+ "_source_sha256": "71c80dad9ff92eb4e99cd91b05583eb1276dfc51af0774eafab2024e1edc1f7d",
+ "_note": "defect_line only; A4's classifier reads nothing else from the input",
+ "defect_line": {
+  "line": 300,
+  "text": "        rateLimitBucket: `api_key:${createHash('sha256').update('secuura-rate-limit-bucket\\0').update(apiKey).digest('hex')}`,",
+  "sites": [
+   {
+    "line": 300,
+    "text_at_tip": "        rateLimitBucket: `api_key:${createHash('sha256').update('secuura-rate-limit-bucket\\0').update(apiKey).digest('hex')}`,",
+    "note": "(correct) the `rateLimitBucket:` line of the connector caller, the domained sha256. The tamper replaces this line. Stays.",
+    "must_change": false
+   },
+   {
+    "line": 218,
+    "text_at_tip": "export async function validateApiKey(key: string): Promise<ConnectorMeta | null> {",
+    "note": "(correct) `export async function validateApiKey(key: string): Promise<ConnectorMeta | null> {` - reads `fetch` for the security service. Stays.",
+    "must_change": false
+   }
+  ],
+  "expected_plus": [],
+  "sites_rule": "every site with must_change=true MUST be changed by the product hunk (its text appears as a '-' line); the checker refuses a diff that leaves one untouched (A3b) before any test runs",
+  "tamper": {
+   "line": 300,
+   "from": "        rateLimitBucket: `api_key:${createHash('sha256').update('secuura-rate-limit-bucket\\0').update(apiKey).digest('hex')}`,",
+   "to": "        rateLimitBucket: `api_key:${createHash('sha256').update(apiKey).digest('hex')}`, // TAMPER: KS-1205 red-proof G-BUCKET-HASH, the bucket is the stored key_hash",
+   "rule": "TEST-ONLY MODE: emit ONLY the new test file (no product hunk). The checker reddens your cells by replacing this product line with `to` in a clone, then expects them GREEN at the untouched tip."
+  },
+  "red_cells": [
+   "KS-1205 R1 - neither key is bucketed as api_key plus the bare sha256 of the key"
+  ]
+ }
+}
