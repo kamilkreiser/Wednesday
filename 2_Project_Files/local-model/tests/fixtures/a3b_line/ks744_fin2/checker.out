@@ -1,0 +1,34 @@
+mode: code_patch
+diff_blocks=1 all_blocks=1 prose_outside_chars=0
+wrote /private/tmp/claude-501/-Volumes-DevMASTER-WEDNESDAY/804c11ac-1249-4d9f-837c-27ce44211d2f/scratchpad/b744/fin2/out.md.checker/patch.diff lines=114
+PASS A1 output is exactly one fenced ```diff block, nothing outside it
+clone clean at pinned tip d7e95cd9f153e9036ed77935a73c93504fa6e3dc
+runner: vitest
+--- baseline at the untouched tip (whole services/api-gateway suite + tsc)
+baseline suite rc=0 total=454 passed=454 failed=0 suites_failed=0 loaded=1 failed_names=[]
+baseline tsc rc=0 (0 lines)
+sections=2 miscounted_sections=0
+section 1 Blockchain/Dev/services/api-gateway/src/middleware/auth.ts: applies (strict)
+section 2 Blockchain/Dev/services/api-gateway/src/__tests__/ks744-a-token-missing-a-claim-is-proxied-not-500.test.ts: applies (strict)
+PASS A2 diff applies at the tip (strict git apply --check, every section, hunk headers consistent)
+touched files (2): Blockchain/Dev/services/api-gateway/src/__tests__/ks744-a-token-missing-a-claim-is-proxied-not-500.test.ts Blockchain/Dev/services/api-gateway/src/middleware/auth.ts  (+96/-2)
+PASS A3 touched-file set == { Blockchain/Dev/services/api-gateway/src/middleware/auth.ts , Blockchain/Dev/services/api-gateway/src/__tests__/ks744-a-token-missing-a-claim-is-proxied-not-500.test.ts }
+PASS A3b every must_change site the ticket names is changed by the product hunk (2 site(s))
+PASS A3c every '+' line the brief adds is in the product hunk (3 line(s)), and no tip line is re-added as a '+' (A3d)
+test-only at tip: rc=1 total=5 passed=2 failed=3 suites_failed=2 loaded=1 failed_names=['KS-744 - a verified token missing a claim is proxied, not answered 500 KS-744 R1 - no email claim: 200, one upstream hit, no x-user-email forwarded', 'KS-744 - a verified token missing a claim is proxied, not answered 500 KS-744 R2 - no verificationLevel claim: 200, one upstream hit, no x-verification-level forwarded', 'KS-744 - a verified token missing a claim is proxied, not answered 500 KS-744 R3 - no verificationLevel claim: a client-supplied x-verification-level is dropped']
+A4 declared red cell(s) (brief ## Red cells, assertion red): KS-744 R1 - no email claim: 200, one upstream hit, no x-user | KS-744 R2 - no verificationLevel claim: 200, one upstream hi | KS-744 R3 - no verificationLevel claim: a client-supplied x-
+PASS A4 RED-FIRST: src/__tests__/ks744-a-token-missing-a-claim-is-proxied-not-500.test.ts fails at the untouched tip (3 failed / 5 run; controls green; assertion reds)
+test after product hunk: rc=0 total=5 passed=5 failed=0 suites_failed=0 loaded=1 failed_names=[]
+PASS A5 GREEN-AFTER: src/__tests__/ks744-a-token-missing-a-claim-is-proxied-not-500.test.ts passes with the product hunk (5 passed / 5 run)
+INFO control cell present: 2 cell(s) passed BEFORE and 5 AFTER (the harness reaches the code both times)
+after suite rc=0 total=459 passed=459 failed=0 suites_failed=0 loaded=1 failed_names=[]
+baseline: total=454 failed=0 | after: total=459 failed=0
+develop's own reds (attributed, not counted): []
+NEW reds: []
+reds fixed by the patch: []
+tests added: 5
+PASS A6 whole services/api-gateway suite: no NEW red vs the untouched tip
+PASS A7 tsc --noEmit for services/api-gateway: rc 0 after the patch (baseline rc=0)
+INFO tsc on the test file alone: rc=2 (3 lines; not gated — vitest does not type-check and the service tsconfig excludes __tests__)
+SUMMARY files=2 +96/-2 test=src/__tests__/ks744-a-token-missing-a-claim-is-proxied-not-500.test.ts red_first=yes apply_mode=strict
+RESULT: PASS (7/7)

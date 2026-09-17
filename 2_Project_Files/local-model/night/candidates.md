@@ -379,3 +379,6 @@ A CENSUS for the coordinator to brief from, easy → hard (Kam 2026-09-15 16:40 
      KS-1206  adminConfig.ts carries the held, unmerged READY_KS-730-B (0 KS-730 commits on develop; same-file partition); the fix is a validation block before a SQL template (:946 `${d.rateLimit || 1000},` is inside it); "reject anything else with 400" leaves 0/absent (today 1000) a pick; "decide whether this mint should take a connectorId" is a decision; API-key credential mint surface · unblocks: KS-730-B merged + a pick on 0/absent · read + measured (tip :946)
      POOL STATE: with KS-1156 R-C2 briefed, every Backlog/Todo KS ticket is held, in seat A's lane, or carries a recorded rejection. Next widening: KS-1205's test-only rows the moment KS-1207 merges and A.1 is ruled; KS-730 follow-ons (systemErrors admin catches, adminConfig ternaries) once READY_KS-730-A/-B merge.
 -->
+
+## UNBLOCKED BY WEDNESDAY 2026-09-17 12:51 — KS-1186 (the SEARCH 17e rejection no longer holds)
+- The A3b line-number checker is installed (tasks/code_patch/a3b_line.py; arms 19/19, re-run by Wednesday at 12:50). The line-keyed brief night/briefs/KS-1186.md (5 edits) FITS per tests/A3B_LINE_NUMBER_REPORT_2026-09-17.md. QUEUED 12:51. It is the first AUTH-tier product ticket for the local model: easier tiers exhausted by 17e + 17f, per Kam 09-15 18:19 order.

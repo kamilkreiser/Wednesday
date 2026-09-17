@@ -1,0 +1,46 @@
+--- a/Blockchain/Dev/services/auth/src/repositories/userRepo.ts
++++ b/Blockchain/Dev/services/auth/src/repositories/userRepo.ts
+@@ -443,7 +443,7 @@
+       `SELECT ${USER_COLS}, password_hash FROM users WHERE id = $1 LIMIT 1`,
+       [id],
+     );
+-    if (result.rows.length > 0) return fromRow(result.rows[0]);
++    if (result.rows.length > 0) return await fromRow(result.rows[0]);
+     return null;
+   } catch (err: any) {
+     logger.error('DB getUserByIdWithPasswordHash failed', { error: err?.message, code: err?.code });
+@@ -509,7 +509,7 @@
+ export async function getUserByIdPreAuth(id: string): Promise<User | null> {
+   try {
+     const result = await query(`SELECT ${USER_COLS} FROM auth_find_user_by_id($1)`, [id]);
+-    if (result.rows.length > 0) return fromRow(result.rows[0]);
++    if (result.rows.length > 0) return await fromRow(result.rows[0]);
+     return null;
+   } catch (err: any) {
+     logger.error('DB getUserByIdPreAuth failed', { error: err?.message, code: err?.code });
+@@ -582,7 +582,7 @@
+       'SELECT * FROM auth_find_user_by_email_hash($1)',
+       [hash],
+     );
+-    if (result.rows.length > 0) return fromRow(result.rows[0]);
++    if (result.rows.length > 0) return await fromRow(result.rows[0]);
+ 
+     // Legacy fallback: rows that pre-date the hash column still have
+     // plaintext email and no hash. They're identifiable by NOT starting
+@@ -591,7 +591,7 @@
+       'SELECT * FROM auth_find_user_by_email_legacy($1)',
+       [normalised],
+     );
+-    if (legacy.rows.length > 0) return fromRow(legacy.rows[0]);
++    if (legacy.rows.length > 0) return await fromRow(legacy.rows[0]);
+     return null;
+   } catch (err: any) {
+     // KS-253: a DB failure is NOT "user not found". Swallowing it here made
+@@ -624,6 +624,6 @@
+     // SECURITY DEFINER carve-out; the function whitelists the same provider
+     // columns as SOCIAL_ID_COLUMN_MAP.
+     const result = await query(`SELECT ${USER_COLS} FROM auth_find_user_by_social($1, $2)`, [provider, providerId]);
+-    if (result.rows.length > 0) return fromRow(result.rows[0]);
++    if (result.rows.length > 0) return await fromRow(result.rows[0]);
+     return null;
+   } catch (err: any) {

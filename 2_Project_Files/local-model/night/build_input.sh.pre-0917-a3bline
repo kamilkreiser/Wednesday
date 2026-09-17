@@ -382,35 +382,15 @@ if _bp and os.path.isfile(_bp): _brief_for_sites = open(_bp, encoding="utf-8").r
 _src_for_sites = _brief_for_sites if (_brief_for_sites and re.search(r"^##+\s*Where\b", _brief_for_sites, re.M)) else desc
 m_where = re.search(r"^##+\s*Where\b.*?$(.*?)(?=^##+\s|\Z)", _src_for_sites, re.M | re.S)
 if m_where:
-    # 2026-09-17 LINE-KEYED WHERE (KS-1186: four of its five '-' lines are byte-identical at the tip, so the checker's
-    # TEXT match could not tell which duplicate a diff edited). OPT-IN, brief only: a Where heading carrying the word
-    # `line-keyed` (e.g. `## Where (line-keyed — every **must change** line must appear as a '-' line AT ITS NUMBER)`)
-    # makes EVERY bullet a line+text site: its FIRST backtick span after `:NNN` is the exact line, it must equal the tip
-    # line at NNN (stripped) or the build is REFUSED here, and the site gets `key: "line+text"` + `text_in_brief`, which
-    # checker A3b/A3e grade by LINE NUMBER (tasks/code_patch/a3b_line.py). Without the word nothing changes: the sites
-    # carry no `key` and the checker's text match grades them exactly as before (the fallback).
-    _where_head = m_where.group(0).split("\n", 1)[0]
-    _line_keyed = bool(re.search(r"line-keyed", _where_head, re.I)) and (_src_for_sites is _brief_for_sites)
     for b in re.finditer(r"^\s*[*-]\s*`?:(\d+)`?\s*[—–-]?\s*(.*)$", m_where.group(1), re.M):
         # 2026-09-15 18:5x: this loop used the name `note` and CLOBBERED the reference_test_note built above
         # (every briefed run since 10:5x sent the last Where-line's text as the note) — found by the test_file
         # pin's positive arm reading the note back; renamed site_note.
         ln = int(b.group(1)); site_note = b.group(2).strip()
         txt = lines[ln - 1] if 0 < ln <= len(lines) else None
-        _site = {"line": ln, "text_at_tip": txt, "note": site_note,
-                 "must_change": ("**" in site_note) and ("(correct)" not in site_note.lower())}
-        if _line_keyed:
-            _q = re.search(r"`([^`\n]+)`", site_note)
-            if not _q:
-                refuse(f"line-keyed `## Where`: the bullet for :{ln} quotes no exact line in backticks — every line-keyed site names its text")
-            if txt is None:
-                refuse(f"line-keyed `## Where`: :{ln} is outside {product_rel} ({len(lines)} lines at the tip)")
-            if _q.group(1).strip() != txt.strip():
-                refuse(f"line-keyed `## Where`: :{ln} — the brief quotes {_q.group(1).strip()!r} but the tip's line {ln} is {txt.strip()!r} (stale line numbers or a wrong quote; re-read the tip)")
-            _site["key"] = "line+text"; _site["text_in_brief"] = _q.group(1)
-        named_sites.append(_site)
-    print(f"  named sites from '## Where' ({'BRIEF' if _src_for_sites is _brief_for_sites else 'ticket'}): {len(named_sites)} ({sum(1 for x in named_sites if x['must_change'])} must_change)"
-          + (f" — LINE-KEYED: all {len(named_sites)} quoted texts == the tip at their numbers; A3b/A3e grade them by line number + text" if _line_keyed else ""))
+        named_sites.append({"line": ln, "text_at_tip": txt, "note": site_note,
+                            "must_change": ("**" in site_note) and ("(correct)" not in site_note.lower())})
+    print(f"  named sites from '## Where' ({'BRIEF' if _src_for_sites is _brief_for_sites else 'ticket'}): {len(named_sites)} ({sum(1 for x in named_sites if x['must_change'])} must_change)")
 else:
     print("  named sites: no '## Where' section — checklist empty (A3b passes vacuously)")
 # 2026-09-15 22:0x (KS-976 B r1 dropped its insert-only helper hunk): the '+' lines of the brief's edit blocks
@@ -542,8 +522,7 @@ inp = {
     "repo": repo,
     "product_file": product,
     "defect_line": {"line": defect_no, "text": defect_text, "sites": named_sites, "expected_plus": expected_plus,
-                    "sites_rule": "every site with must_change=true MUST be changed by the product hunk (its text appears as a '-' line); the checker refuses a diff that leaves one untouched (A3b) before any test runs"
-                                  + ("; sites with key=line+text are matched by LINE NUMBER: the '-' line must be the file's line AT that number (several sites share the same text, so editing one copy does not satisfy another)" if any(s.get("key") == "line+text" for s in named_sites) else ""),
+                    "sites_rule": "every site with must_change=true MUST be changed by the product hunk (its text appears as a '-' line); the checker refuses a diff that leaves one untouched (A3b) before any test runs",
                     **({"tamper": tamper} if tamper else {}),
                     **({"red_cells": red_cells} if red_cells else {})},
     "test_dir": f"{subdir}/{test_dir_rel}",
