@@ -492,12 +492,7 @@ PYEOF
   # checker in a --shared clone at the pinned tip (night scratch only)
   VERDICT="HARNESS_ONLY"
   if [ "$NOCHECK" != "1" ]; then
-    # 2026-09-18: `.get`, not `['tip']`. A board-triage input (predicate_classify over
-    # Linear issues) has no tree and therefore no tip, and the hard subscript KeyError'd
-    # the whole run to CHECKER_NO_RESULT — which silently disabled the ONE automatic guard
-    # against a model returning a plausible WRONG identifier (a KS-1091 -> KS-1101
-    # transposition got through on 2026-09-18 because of this).
-    TIP="$(python3 -c "import json;print(json.load(open('$INPUT')).get('tip','(none - not a repo task)'))")"
+    TIP="$(python3 -c "import json;print(json.load(open('$INPUT'))['tip'])")"
     CLONE="$NIGHT_SCRATCH/clone_$(echo "$TICKET" | tr 'A-Z' 'a-z' | tr -d '-')"
     if [ -d "$CLONE/.git" ]; then
       HAVE="$(git -C "$CLONE" rev-parse HEAD 2>/dev/null)"

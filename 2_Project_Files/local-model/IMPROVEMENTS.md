@@ -560,3 +560,25 @@ The refusal owed above is built, beside the CONTEXT-AS-ADDITION gate, on the sam
 - **Observation, one data point, stated as such:** the 44- and 43-item batches produced reasons that genuinely engaged the predicate and named files; the 1-item batch produced the example. **Candidate rule: do not run this tier with a single item — batch it, or accept the verdict is unreliable.**
 - **Sharper candidate, and the cheaper fix:** the example reasons in `task.md` are drawn from a DIFFERENT predicate (the PR-number one in `sample_input.json`). An example that answers a different question is an invitation to answer that question. **Worth making the examples generic (`"<field> = <value>"`) so nothing concrete is there to copy.** Not built; claim first.
 - The verdict itself (`UNKNOWN`) is probably right for KS-1091 — it is a *"reasoned, never measured"* residual — but it was reached for the wrong reason, and a right answer reached the wrong way is not evidence the method works.
+
+## 09:5x 2026-09-18 — FIXED, with arms: the classify tier could only ever ask ONE question, and its guard was switched off by a missing key
+
+Two defects, both found by using the tier for real work rather than by reading it.
+
+**1. `night_run.sh:495` read `json.load(input)['tip']` as a hard subscript.** A board-triage input (Linear issues, no tree) has no tip, so it KeyError'd and every one of the three batches landed as `CHECKER_NO_RESULT`. **That silently disabled the only automatic guard against a wrong identifier — and one got through**: the auth batch returned `KS-1101` for `KS-1091`. → now `.get('tip', '(none - not a repo task)')`.
+
+**2. `tasks/predicate_classify/checker.sh` hard-coded the SAMPLE predicate.** Its "second read" reimplements *class A = state type is 'started' AND a PR number appears* — the question in `sample_input.json` — and graded **every** run against it, whatever predicate the input actually carried. The predicate is free text chosen per run, so for any other question a CORRECT model answer was scored as a disagreement. **The tier was usable with exactly one question, and nobody had noticed because it had only ever been asked that one.** → the second read now runs only when the input's predicate is the one it reimplements, and SKIPs loudly otherwise, saying the classifications are unverified leads rather than verdicts.
+
+**3. Added the check that actually caught the real defect: identifier SET reconciliation, both ways.** A row COUNT balances while the set is wrong — 40 in, 40 out, with one dropped and one invented. Plus an empty-reason check.
+
+**ARMS — 5, run against the real checker, rc captured directly (NOT through a pipe):**
+
+| arm | input | want | got |
+|---|---|---|---|
+| 1 | the REAL auth batch, which contains the KS-1091→KS-1101 transposition | rc 1 | **rc 1**, naming `MISSING ['KS-1091'] · INVENTED ['KS-1101']` |
+| 2 | the clean TRIAGE-1 batch (44) | rc 0 | rc 0, "set reconciles both ways (44 sent, 0 missing, 0 invented)" |
+| 3 | `sample_input.json` + a correct sample answer | rc 0 | rc 0, **and the second read still RUNS** — no regression to the original behaviour |
+| 4 | `sample_input.json` + every class flipped | rc 1 | rc 1 — the second read still catches semantics for its own predicate |
+| 5 | `sample_input.json` + empty reasons | rc 1 | rc 1 |
+
+**⚠ A trap I walked into while writing these arms, worth its own line.** My first run printed `rc=0` for ARM 1 **while the checker had failed** — I had piped the output to `tail` and read `$?` from the pipe, so I was reading `tail`'s status. The ledger already carries this exact costume (2026-09-16: *"`bash arms.sh | tail -10; echo rc=$?` PRINTED rc=0 WHILE ARM5 HAD FAILED"*). **I caught it only because I read the FAIL lines in the output rather than trusting the rc I had just printed.** The arms above capture rc directly from the checker call.

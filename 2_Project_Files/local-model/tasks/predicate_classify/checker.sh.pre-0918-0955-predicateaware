@@ -37,16 +37,7 @@ def classify(issue):
         return "A"
     return "B"
 
-# --- 2026-09-18: the second read is only VALID for the predicate it reimplements.
-# This checker hard-coded the SAMPLE predicate (state started + a PR number) and graded
-# EVERY run against it. For any other predicate — and the predicate is free text chosen
-# per run — a correct model answer was scored as a disagreement. The tier was therefore
-# usable with exactly one question, which nobody noticed because it had only ever been
-# asked that one. Structure is always checked; semantics only when we can honestly re-derive.
-_PRED = (data.get("predicate") or "")
-_SAMPLE_MARKERS = ("state type is 'started'", "PR number")
-_second_read_applies = all(m in _PRED for m in _SAMPLE_MARKERS)
-expected = {i["identifier"]: classify(i) for i in issues} if _second_read_applies else {}
+expected = {i["identifier"]: classify(i) for i in issues}
 expected_ids_in_order = [i["identifier"] for i in issues]
 
 lines = [l for l in out.splitlines() if l.strip()]
@@ -72,25 +63,6 @@ if parsed_ids != expected_ids_in_order[:len(parsed_ids)]:
 else:
     print("PASS: one line per input identifier, in input order")
 
-# --- 2026-09-18: reconcile the identifier SET both ways. A row COUNT passes while the
-# set is wrong: on the auth batch the model dropped KS-1091 and returned KS-1101 — a real
-# ticket, so the row looked legitimate and 40-in/40-out balanced. Only this catches it.
-_sent = set(expected_ids_in_order)
-_got = set(parsed_ids)
-_missing = sorted(_sent - _got)
-_invented = sorted(_got - _sent)
-if _missing or _invented:
-    print(f"FAIL: identifier set mismatch — MISSING {_missing} · INVENTED {_invented}")
-    print("      (a row count can balance while the set is wrong: a transposed id is a REAL ticket)")
-    ok = False
-else:
-    print(f"PASS: identifier set reconciles both ways ({len(_sent)} sent, 0 missing, 0 invented)")
-
-_empty = [pid for pid, cls, reason in parsed if not reason.strip()]
-if _empty:
-    print(f"FAIL: empty reason on {_empty}")
-    ok = False
-
 bad_class = [ (pid, cls) for pid, cls, _ in parsed if cls not in ("A", "B", "UNKNOWN") ]
 if bad_class:
     print(f"FAIL: class value(s) outside {{A,B,UNKNOWN}}: {bad_class}")
@@ -104,12 +76,7 @@ for pid, cls, reason in parsed:
     if exp is not None and cls != exp:
         disagreements.append((pid, "model="+cls, "second-read="+exp))
 
-if not _second_read_applies:
-    print("SKIP: second read NOT run — this input's predicate is not the one this checker "
-          "reimplements, so semantics cannot be honestly re-derived. STRUCTURE was checked "
-          "(set reconciliation, order, classes, non-empty reasons); the CLASSIFICATIONS are "
-          "unverified and must be read as leads, not verdicts.")
-elif disagreements:
+if disagreements:
     print(f"FAIL: second-read disagreement on {len(disagreements)} row(s): {disagreements}")
     ok = False
 else:
