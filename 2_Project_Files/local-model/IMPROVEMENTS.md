@@ -550,3 +550,13 @@ The refusal owed above is built, beside the CONTEXT-AS-ADDITION gate, on the sam
 - **Rule kept: every classify harvest reconciles the identifier SET both ways — missing AND invented — never the row count.** The count is the thing that looks right when the set is wrong.
 - **This is exactly what `tasks/predicate_classify/checker.sh` exists to do**, and it could not run on any of the three batches because Wednesday's hand-built input lacked the `tip` key it reads. So the harness has been doing this correctly all along and was disabled by the input shape. **The owed fix (recorded at 09:3x) is now more than tidiness** — it is the only automatic guard against a plausible wrong id reaching a brief.
 - `KS-1091` is unclassified and owed a re-run.
+
+## 09:5x 2026-09-18 — the KS-1091 re-run closed the set, and exposed EXAMPLE-ANCHORING on a single-item batch
+
+**The re-run reconciled:** 1 sent, 1 row, identifier `KS-1091` and not `KS-1101` — the transposition did not recur, so it was a one-off slip rather than a stable misreading of that ticket.
+
+**But the REASON it returned was not about my predicate at all.** It said: *"no PR number found in title or description; does not clearly satisfy small self-contained change criteria"*. **My predicate never mentions PR numbers.** That phrase is the **verbatim example reason in `tasks/predicate_classify/task.md`** (`e.g. "state type = started" or "no PR number found in title or description"`). On a one-item batch the model reached for the task file's example instead of reasoning from the predicate it was given.
+
+- **Observation, one data point, stated as such:** the 44- and 43-item batches produced reasons that genuinely engaged the predicate and named files; the 1-item batch produced the example. **Candidate rule: do not run this tier with a single item — batch it, or accept the verdict is unreliable.**
+- **Sharper candidate, and the cheaper fix:** the example reasons in `task.md` are drawn from a DIFFERENT predicate (the PR-number one in `sample_input.json`). An example that answers a different question is an invitation to answer that question. **Worth making the examples generic (`"<field> = <value>"`) so nothing concrete is there to copy.** Not built; claim first.
+- The verdict itself (`UNKNOWN`) is probably right for KS-1091 — it is a *"reasoned, never measured"* residual — but it was reached for the wrong reason, and a right answer reached the wrong way is not evidence the method works.
