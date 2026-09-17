@@ -1,0 +1,29 @@
+gh_read 2026-09-17 10:05:18 AEST | closing regex controls {'Fixes KS-1195': 1, 'closes #12': 1, 'Refs KS-1195': 0}
+PR #1017 open draft False merged False | head a067d4e3e80f0e31c1aecb278f06c4f6df4b1c66 feature/ks-1195-api-gateway-per-key-rate-limiter-never-fires | base develop 7e89318bcedbc9a35757d4298ace54a6a23020bd
+  head == pin: True | title: KS-1195: the per-key rate limiter runs after authentication, so a key's ceiling is enforced | title closing []
+  mergeable True unstable | commits 3 files 5 +316 -14 | review_comments 0 comments 1 | updated_at 2026-09-16T23:45:58Z
+  body chars 16118 at-signs 0 closing [] | Refs KS-1195 1 | KS-1187 0
+  "## Round 2" heading lines: 1 | control "## " headings: 4
+  unfilled {{PLACEHOLDER}} tokens: []
+  deploy-precondition lines (deploy AND unmeasured): 3 | of them naming F-1: 1
+    > - **Deploy precondition, extended:** F-1 is fixed here and must be gated before any deploy. Real keys' configured allowances and real connector traffic rates remain UNMEASURED.
+    > Gate at this head. **Before any DEPLOY of this change, measure real keys' configured allowances and real connector traffic rates.** Both are UNMEASURED here: no demo or DB read was made. Once merged, any API-key caller above its key's allowance within the wind
+    > - **Real keys' configured allowances and real connector traffic rates are UNMEASURED; measuring them is a precondition for any deploy of this change.**
+  lines naming "a067d4e3e": 3 | lines naming G-BUCKET: 1
+  file modified +16 -7 bc4815c4ec9cae2f065e29dec6b938cdf49f2d23 Blockchain/Dev/packages/shared/src/__tests__/ks781-p3-3-body-parser-order.test.ts
+  file added +261 -0 4b1fc017da158de4e7a3a47565b7dbccc1ea3872 Blockchain/Dev/services/api-gateway/src/__tests__/ks1195-per-key-rate-limiter-runs-after-authentication.test.ts
+  file modified +2 -3 db127dbfa5dd899b0a8e0d844690890d91e27f10 Blockchain/Dev/services/api-gateway/src/index.ts
+  file modified +20 -3 7c985bdcefc26293815bfbe0cbf315f929b48835 Blockchain/Dev/services/api-gateway/src/middleware/auth.ts
+  file modified +17 -1 90bd29378508c8fee54e010b54cdc72ff992aafa Blockchain/Dev/services/api-gateway/src/middleware/rateLimitEnforce.ts
+  commit 973eb49ef602ceee4bf2134ddb9405e00663e86f parents ['7e89318bc'] closing [] KS ids ['KS-1195', 'KS-164'] KS-1187 0 | KS-1195: the per-key rate limiter runs after authentication, so a key's ceiling is enforced
+  commit cbe29597d11e59f2e1a14519e9ba3dbf6de9a756 parents ['973eb49ef'] closing [] KS ids ['KS-1195', 'KS-953'] KS-1187 0 | KS-1195: re-measure the ks781 body-parser sites after index.ts moved them by -1
+  commit a067d4e3e80f0e31c1aecb278f06c4f6df4b1c66 parents ['cbe29597d'] closing [] KS ids ['KS-1195'] KS-1187 0 | KS-1195 round 2: the per-key limiter buckets by the key itself, not connectorId || userId
+  compare develop...head: merge_base 7e89318bcedbc9a35757d4298ace54a6a23020bd status diverged ahead 3 behind 1 files 5
+  reviews 0 | review comments 0
+  issue comment 5705457578 linear[bot] 2026-09-16T22:26:51Z chars 3404 closing [] KS-1187 0 at-signs 0
+  develop (branches API) fa887f382b212b8da4a0a4a556bacb05ea34daaa
+  open PRs: 21
+  open #1019 head 8b8996f8b files 3 | exact shared with #1017 [] | KS-1187: the gdpr erasure door judges the canonical path
+  open #1018 head 267bd8624 files 2 | exact shared with #1017 [] | KS-1050: a profile update that matched no row answers 500 PROFILE_UPDA
+  (open PRs with 0 exact shared files and not #1018/#1019 are not printed)
+gh_read end 10:05:32 AEST

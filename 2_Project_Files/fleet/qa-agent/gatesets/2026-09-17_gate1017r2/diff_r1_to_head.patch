@@ -1,0 +1,135 @@
+diff --git a/Blockchain/Dev/services/api-gateway/src/__tests__/ks1195-per-key-rate-limiter-runs-after-authentication.test.ts b/Blockchain/Dev/services/api-gateway/src/__tests__/ks1195-per-key-rate-limiter-runs-after-authentication.test.ts
+index ade08ac1e..4b1fc017d 100644
+--- a/Blockchain/Dev/services/api-gateway/src/__tests__/ks1195-per-key-rate-limiter-runs-after-authentication.test.ts
++++ b/Blockchain/Dev/services/api-gateway/src/__tests__/ks1195-per-key-rate-limiter-runs-after-authentication.test.ts
+@@ -16,6 +16,11 @@
+  * the in-memory degrade path. Placement cells mount the REAL `authenticateToken`
+  * on a bare express app. Harness shape: the gate's `qa1014-gate-census.test.ts`
+  * (report 2026-09-17-ks1176-1014-616c766a5-tier1-r1).
++ *
++ * Round 2 (NO GO on #1017, F-1): the bucket was `connectorId || userId`, and an
++ * admin-minted key has no connectorId, so every such key in every tenant shared
++ * the one bucket `connector:api-key`. The bucket is now per key (A5). F-2: a
++ * count-once cell on a REAL double-authenticated chain (POST /api/gdpr/erasures).
+  * =============================================================================
+  */
+ import { describe, it, expect, beforeAll, afterAll, vi } from 'vitest';
+@@ -32,6 +37,14 @@ const KEYS: Record<string, Record<string, unknown>> = {
+   sk_ks1195_anchors_01: { connectorId: 'ks1195-anchors', scopes: ['anchors:read'], organizationId: 'org-ks1195', tenantId: 't-ks1195-anchors', rateLimit: 2, rateLimitWindow: 60 },
+   sk_ks1195_twice_0001: { connectorId: 'ks1195-twice', scopes: [], tenantId: 't-ks1195', rateLimit: 2, rateLimitWindow: 60 },
+   sk_ks1195_tenant_001: { connectorId: 'ks1195-tenant', scopes: [], tenantId: 't-ks1195-als', rateLimit: 50, rateLimitWindow: 60 },
++  // Round 2 (A5). No connectorId, as originate's admin key mint writes them.
++  sk_ks1195_nocon_x_01: { scopes: [], tenantId: 't-ks1195-x', rateLimit: 2, rateLimitWindow: 60 },
++  sk_ks1195_nocon_y_01: { scopes: [], tenantId: 't-ks1195-y', rateLimit: 2, rateLimitWindow: 60 },
++  sk_ks1195_nocon_q_01: { scopes: [], tenantId: 't-ks1195-q', rateLimit: 5, rateLimitWindow: 60 },
++  sk_ks1195_adminmint1: { scopes: [], tenantId: 't-ks1195-z', rateLimit: 1000, rateLimitWindow: 3600 },
++  sk_ks1195_samecon_01: { connectorId: 'ks1195-shared-connector', scopes: [], tenantId: 't-ks1195', rateLimit: 2, rateLimitWindow: 60 },
++  sk_ks1195_samecon_02: { connectorId: 'ks1195-shared-connector', scopes: [], tenantId: 't-ks1195', rateLimit: 2, rateLimitWindow: 60 },
++  sk_ks1195_erase_0001: { connectorId: 'ks1195-erase', scopes: ['subjects:erase'], tenantId: 't-ks1195', rateLimit: 2, rateLimitWindow: 60 },
+ };
+ 
+ type Rec = { method: string; url: string; headers: http.IncomingHttpHeaders; body: string };
+@@ -96,6 +109,7 @@ beforeAll(async () => {
+     if (req.url === '/.well-known/jwks.json') return j(404, {});
+     if (req.method === 'POST' && req.url === '/api/documents') return j(201, { success: true, data: { id: 'doc-ks1195' } });
+     if (req.method === 'GET' && (req.url || '').startsWith('/api/anchors/')) return j(200, { success: true, data: [] });
++    if (req.method === 'POST' && req.url === '/api/gdpr/erasures') return j(200, { success: true, data: { erasure: 'recorded' } });
+     return j(404, { success: false });
+   });
+   stubUrl = await listen(stub);
+@@ -140,6 +154,7 @@ afterAll(async () => {
+ 
+ const docsPosted = (marker: string) => seen.filter((r) => r.method === 'POST' && r.url === '/api/documents' && r.body.includes(marker)).length;
+ const anchorsFetched = (marker: string) => seen.filter((r) => r.method === 'GET' && r.url.startsWith(`/api/anchors/${marker}`)).length;
++const erasuresPosted = () => seen.filter((r) => r.method === 'POST' && r.url === '/api/gdpr/erasures').length;
+ 
+ describe('KS-1195: the per-key limiter in the REAL app', () => {
+   const r1: Res[] = [];
+@@ -211,3 +226,36 @@ describe('KS-1195: placement inside the real authenticateToken', () => {
+     expect(r.json).toEqual({ tenant: 't-ks1195-als' });
+   });
+ });
++
++describe('KS-1195 round 2 (A5): the bucket is the caller\'s own key, in the REAL app', () => {
++  const get = (key: string, marker: string) => send(gwUrl, 'GET', `/api/anchors/${marker}`, { 'x-api-key': key });
++
++  it('🔴 (a) two keys with NO connectorId in two tenants have independent buckets', async () => {
++    const x = [await get('sk_ks1195_nocon_x_01', 'ks1195-a-x1'), await get('sk_ks1195_nocon_x_01', 'ks1195-a-x2')];
++    const y = await get('sk_ks1195_nocon_y_01', 'ks1195-a-y1');
++    expect(x.map((r) => r.status)).toEqual([200, 200]);
++    expect([y.status, y.headers['x-ratelimit-remaining']]).toEqual([200, '1']);
++  });
++
++  it('🔴 (b) two keys under the SAME connectorId have independent buckets (per key)', async () => {
++    const k1 = [await get('sk_ks1195_samecon_01', 'ks1195-b-1a'), await get('sk_ks1195_samecon_01', 'ks1195-b-1b')];
++    const k2 = await get('sk_ks1195_samecon_02', 'ks1195-b-2a');
++    expect(k1.map((r) => r.status)).toEqual([200, 200]);
++    expect([k2.status, k2.headers['x-ratelimit-remaining']]).toEqual([200, '1']);
++  });
++
++  it('🔴 (c) an admin-mint-shaped key (no connector_id, 1000 per 3600 s) counts only against itself', async () => {
++    const other = await get('sk_ks1195_nocon_q_01', 'ks1195-c-q');
++    const admin = await get('sk_ks1195_adminmint1', 'ks1195-c-admin');
++    expect(other.status).toBe(200);
++    expect([admin.status, admin.headers['x-ratelimit-limit'], admin.headers['x-ratelimit-remaining']]).toEqual([200, '1000', '999']);
++  });
++
++  it('F-2: a REAL double-authenticated chain (POST /api/gdpr/erasures) counts each request once', async () => {
++    const before = erasuresPosted();
++    const rs: Res[] = [];
++    for (let i = 0; i < 3; i++) rs.push(await send(gwUrl, 'POST', '/api/gdpr/erasures', { 'x-api-key': 'sk_ks1195_erase_0001' }, JSON.stringify({ externalRef: `ks1195-f2-${i}` })));
++    expect(rs.map((r) => r.status)).toEqual([200, 200, 429]);
++    expect(erasuresPosted() - before).toBe(2);
++  });
++});
+diff --git a/Blockchain/Dev/services/api-gateway/src/middleware/auth.ts b/Blockchain/Dev/services/api-gateway/src/middleware/auth.ts
+index 8fbe102eb..7c985bdce 100644
+--- a/Blockchain/Dev/services/api-gateway/src/middleware/auth.ts
++++ b/Blockchain/Dev/services/api-gateway/src/middleware/auth.ts
+@@ -9,6 +9,7 @@
+  * =============================================================================
+  */
+ 
++import { createHash } from 'crypto';
+ import { Request, Response, NextFunction, RequestHandler } from 'express';
+ import { isSessionActive, runWithTenantId } from '@secuura/shared';
+ import { verifyJwtRs256 } from '@secuura/shared/crypto/jwks';
+@@ -44,6 +45,13 @@ export interface UserPayload {
+   connectorId?: string;
+   rateLimit?: number;
+   rateLimitWindow?: number;
++  // KS-1195 (A5): the caller's OWN rate-limit bucket. An API key's validate
++  // response carries no key id, and connectorId is null for admin-minted keys, so
++  // `connectorId || userId` gave every such key the one userId
++  // `connector:api-key`: one bucket across all tenants. The key itself is the
++  // only per-key identity the gateway holds, so the bucket is a domain-separated
++  // SHA-256 of it (never the raw key, and never equal to the stored key_hash).
++  rateLimitBucket?: string;
+ }
+ 
+ export interface ConnectorMeta {
+@@ -289,6 +297,7 @@ export function authenticateToken(required: boolean = true): RequestHandler {
+         connectorId: meta.connectorId,
+         rateLimit: meta.rateLimit,
+         rateLimitWindow: meta.rateLimitWindow,
++        rateLimitBucket: `api_key:${createHash('sha256').update('secuura-rate-limit-bucket\0').update(apiKey).digest('hex')}`,
+         // KS-480: the key's scopes must live on the principal — requireScope
+         // reads user.scopes, and without this every scope-gated mount 403'd
+         // sk_ callers with `granted: []` regardless of the key's actual grants.
+diff --git a/Blockchain/Dev/services/api-gateway/src/middleware/rateLimitEnforce.ts b/Blockchain/Dev/services/api-gateway/src/middleware/rateLimitEnforce.ts
+index f4b66aa1a..90bd29378 100644
+--- a/Blockchain/Dev/services/api-gateway/src/middleware/rateLimitEnforce.ts
++++ b/Blockchain/Dev/services/api-gateway/src/middleware/rateLimitEnforce.ts
+@@ -105,7 +105,11 @@ export function enforceClientRateLimit(injectedClient?: any) {
+       );
+     }
+ 
+-    const clientId = user.connectorId || user.userId || 'unknown';
++    // KS-1195 (A5): bucket by the caller's own identity. The API-key path sets
++    // rateLimitBucket per key (auth.ts). The connectorId || userId fallback is
++    // left for machine principals that did not come through that path (test
++    // tokens; no production producer, READ), where it was before.
++    const clientId = user.rateLimitBucket || user.connectorId || user.userId || 'unknown';
+     const limit = user.rateLimit || DEFAULT_MACHINE_RATE_LIMIT;
+     const windowMs = (user.rateLimitWindow || DEFAULT_MACHINE_RATE_WINDOW) * 1000;
+ 

@@ -1,0 +1,210 @@
+[
+ {
+  "row": "T0",
+  "tsc_rc": 0,
+  "void": false,
+  "files": 53,
+  "tests": 436,
+  "failed": 0,
+  "pending": 0,
+  "failed_suites": 0,
+  "reds": [],
+  "decisive": [],
+  "predicted_by": "seat 0",
+  "denominator_ok": true
+ },
+ {
+  "row": "TA",
+  "tsc_rc": 0,
+  "void": false,
+  "files": 53,
+  "tests": 436,
+  "failed": 8,
+  "pending": 0,
+  "failed_suites": 4,
+  "reds": [
+   "ks1195-per-key-rate-limiter-runs-after-authentication.test.ts :: KS-1195: the per-key limiter in the REAL app R1 / A3: a key at 2 per 60 s creating documents is refused 429 from request 3, with Redis unavailable",
+   "ks1195-per-key-rate-limiter-runs-after-authentication.test.ts :: KS-1195: the per-key limiter in the REAL app A1: a refused create answers once and never reaches the handler (2 upstream creates, no double send)",
+   "ks1195-per-key-rate-limiter-runs-after-authentication.test.ts :: KS-1195: the per-key limiter in the REAL app R2: the same ceiling holds on a proxied family (GET /api/anchors), and a refused read is not forwarded",
+   "ks1195-per-key-rate-limiter-runs-after-authentication.test.ts :: KS-1195: placement inside the real authenticateToken R3: a chain that authenticates twice counts the request once (2 allowed, then 429)",
+   "ks1195-per-key-rate-limiter-runs-after-authentication.test.ts :: KS-1195 round 2 (A5): the bucket is the caller's own key, in the REAL app \ud83d\udd34 (a) two keys with NO connectorId in two tenants have independent buckets",
+   "ks1195-per-key-rate-limiter-runs-after-authentication.test.ts :: KS-1195 round 2 (A5): the bucket is the caller's own key, in the REAL app \ud83d\udd34 (b) two keys under the SAME connectorId have independent buckets (per key)",
+   "ks1195-per-key-rate-limiter-runs-after-authentication.test.ts :: KS-1195 round 2 (A5): the bucket is the caller's own key, in the REAL app \ud83d\udd34 (c) an admin-mint-shaped key (no connector_id, 1000 per 3600 s) counts only against itself",
+   "ks1195-per-key-rate-limiter-runs-after-authentication.test.ts :: KS-1195 round 2 (A5): the bucket is the caller's own key, in the REAL app F-2: a REAL double-authenticated chain (POST /api/gdpr/erasures) counts each request once"
+  ],
+  "decisive": [
+   "AssertionError: expected [ 201, 201, 201, 201, 201 ] to deeply equal [ 201, 201, 429, 429, 429 ]",
+   "AssertionError: expected 5 to be 2 // Object.is equality",
+   "AssertionError: expected [ 200, 200, 200, 200, 200 ] to deeply equal [ 200, 200, 429, 429, 429 ]",
+   "AssertionError: expected [ 200, 200, 200 ] to deeply equal [ 200, 200, 429 ]",
+   "AssertionError: expected [ 200, undefined ] to deeply equal [ 200, '1' ]",
+   "AssertionError: expected [ 200, undefined ] to deeply equal [ 200, '1' ]",
+   "AssertionError: expected [ 200, undefined, undefined ] to deeply equal [ 200, '1000', '999' ]",
+   "AssertionError: expected [ 200, 200, 200 ] to deeply equal [ 200, 200, 429 ]"
+  ],
+  "predicted_by": "seat 8: R1/A3, A1, R2, R3, (a), (b), (c), F-2",
+  "denominator_ok": true
+ },
+ {
+  "row": "G-ERASE",
+  "tsc_rc": 0,
+  "void": false,
+  "files": 53,
+  "tests": 436,
+  "failed": 2,
+  "pending": 0,
+  "failed_suites": 3,
+  "reds": [
+   "ks1195-per-key-rate-limiter-runs-after-authentication.test.ts :: KS-1195: placement inside the real authenticateToken R3: a chain that authenticates twice counts the request once (2 allowed, then 429)",
+   "ks1195-per-key-rate-limiter-runs-after-authentication.test.ts :: KS-1195 round 2 (A5): the bucket is the caller's own key, in the REAL app F-2: a REAL double-authenticated chain (POST /api/gdpr/erasures) counts each request once"
+  ],
+  "decisive": [
+   "AssertionError: expected [ 200, 429, 429 ] to deeply equal [ 200, 200, 429 ]",
+   "AssertionError: expected [ 200, 429, 429 ] to deeply equal [ 200, 200, 429 ]"
+  ],
+  "predicted_by": "seat 2: R3, F-2 (seat form: the guard block deleted, the add kept)",
+  "denominator_ok": true
+ },
+ {
+  "row": "TW",
+  "tsc_rc": 0,
+  "void": false,
+  "files": 53,
+  "tests": 436,
+  "failed": 6,
+  "pending": 0,
+  "failed_suites": 4,
+  "reds": [
+   "ks1195-per-key-rate-limiter-runs-after-authentication.test.ts :: KS-1195: the per-key limiter in the REAL app control: a JWT caller is not governed by the per-key limiter (5 of 5 forwarded, no X-RateLimit-Limit)",
+   "rateLimitEnforce.test.ts :: enforceClientRateLimit (KS-164) does NOT enforce the per-client limiter on interactive method \"email\"",
+   "rateLimitEnforce.test.ts :: enforceClientRateLimit (KS-164) does NOT enforce the per-client limiter on interactive method \"wallet\"",
+   "rateLimitEnforce.test.ts :: enforceClientRateLimit (KS-164) does NOT enforce the per-client limiter on interactive method \"federated\"",
+   "rateLimitEnforce.test.ts :: enforceClientRateLimit (KS-164) does NOT enforce the per-client limiter on interactive method \"social\"",
+   "rateLimitEnforce.test.ts :: enforceClientRateLimit (KS-164) does NOT enforce the per-client limiter on interactive method \"jwt\""
+  ],
+  "decisive": [
+   "AssertionError: expected [ '100', '100', '100', '100', '100' ] to deeply equal [ null, null, null, null, null ]",
+   "AssertionError: expected \"vi.fn()\" to not be called at all, but actually been called 3 times",
+   "AssertionError: expected \"vi.fn()\" to not be called at all, but actually been called 3 times",
+   "AssertionError: expected \"vi.fn()\" to not be called at all, but actually been called 3 times",
+   "AssertionError: expected \"vi.fn()\" to not be called at all, but actually been called 3 times",
+   "AssertionError: expected \"vi.fn()\" to not be called at all, but actually been called 3 times"
+  ],
+  "predicted_by": "seat 6: JWT control + 5 interactive-method cells",
+  "denominator_ok": true
+ },
+ {
+  "row": "TT",
+  "tsc_rc": 0,
+  "void": false,
+  "files": 53,
+  "tests": 436,
+  "failed": 1,
+  "pending": 0,
+  "failed_suites": 2,
+  "reds": [
+   "ks1195-per-key-rate-limiter-runs-after-authentication.test.ts :: KS-1195: placement inside the real authenticateToken A2: the handler after the limiter still runs inside the key's tenant context"
+  ],
+  "decisive": [
+   "AssertionError: expected { tenant: null } to deeply equal { tenant: 't-ks1195-als' }"
+  ],
+  "predicted_by": "seat 1: A2 context",
+  "denominator_ok": true
+ },
+ {
+  "row": "G-BUCKET",
+  "tsc_rc": 0,
+  "void": false,
+  "files": 53,
+  "tests": 436,
+  "failed": 3,
+  "pending": 0,
+  "failed_suites": 2,
+  "reds": [
+   "ks1195-per-key-rate-limiter-runs-after-authentication.test.ts :: KS-1195 round 2 (A5): the bucket is the caller's own key, in the REAL app \ud83d\udd34 (a) two keys with NO connectorId in two tenants have independent buckets",
+   "ks1195-per-key-rate-limiter-runs-after-authentication.test.ts :: KS-1195 round 2 (A5): the bucket is the caller's own key, in the REAL app \ud83d\udd34 (b) two keys under the SAME connectorId have independent buckets (per key)",
+   "ks1195-per-key-rate-limiter-runs-after-authentication.test.ts :: KS-1195 round 2 (A5): the bucket is the caller's own key, in the REAL app \ud83d\udd34 (c) an admin-mint-shaped key (no connector_id, 1000 per 3600 s) counts only against itself"
+  ],
+  "decisive": [
+   "AssertionError: expected [ 429, '0' ] to deeply equal [ 200, '1' ]",
+   "AssertionError: expected [ 429, '0' ] to deeply equal [ 200, '1' ]",
+   "AssertionError: expected [ 200, '1000', '995' ] to deeply equal [ 200, '1000', '999' ]"
+  ],
+  "predicted_by": "seat 3: (a), (b), (c)",
+  "denominator_ok": true
+ },
+ {
+  "row": "TI",
+  "tsc_rc": 0,
+  "void": false,
+  "files": 53,
+  "tests": 436,
+  "failed": 0,
+  "pending": 0,
+  "failed_suites": 0,
+  "reds": [],
+  "decisive": [],
+  "predicted_by": "seat 0",
+  "denominator_ok": true
+ },
+ {
+  "row": "G-BUCKET-HASH",
+  "tsc_rc": 0,
+  "void": false,
+  "files": 53,
+  "tests": 436,
+  "failed": 0,
+  "pending": 0,
+  "failed_suites": 0,
+  "reds": [],
+  "decisive": [],
+  "predicted_by": "Wednesday-commissioned; drafter predicts 0 reds (no cell reads the bucket name)",
+  "denominator_ok": true
+ },
+ {
+  "row": "G-BUCKET-CONNECTOR",
+  "tsc_rc": 0,
+  "void": false,
+  "files": 53,
+  "tests": 436,
+  "failed": 1,
+  "pending": 0,
+  "failed_suites": 2,
+  "reds": [
+   "ks1195-per-key-rate-limiter-runs-after-authentication.test.ts :: KS-1195 round 2 (A5): the bucket is the caller's own key, in the REAL app \ud83d\udd34 (b) two keys under the SAME connectorId have independent buckets (per key)"
+  ],
+  "decisive": [
+   "AssertionError: expected [ 429, '0' ] to deeply equal [ 200, '1' ]"
+  ],
+  "predicted_by": "Wednesday-commissioned; drafter predicts 1 red: (b)",
+  "denominator_ok": true
+ },
+ {
+  "row": "G-BUCKET-RAW",
+  "tsc_rc": 2,
+  "void": true,
+  "files": 53,
+  "tests": 436,
+  "failed": 0,
+  "pending": 0,
+  "failed_suites": 0,
+  "reds": [],
+  "decisive": [],
+  "predicted_by": "drafter: 0 reds predicted (no cell reads the bucket name)",
+  "denominator_ok": true
+ },
+ {
+  "row": "T0#after",
+  "tsc_rc": 0,
+  "void": false,
+  "files": 53,
+  "tests": 436,
+  "failed": 0,
+  "pending": 0,
+  "failed_suites": 0,
+  "reds": [],
+  "decisive": [],
+  "predicted_by": "seat 0",
+  "denominator_ok": true
+ }
+]

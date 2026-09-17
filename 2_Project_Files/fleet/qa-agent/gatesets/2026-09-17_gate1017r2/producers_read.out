@@ -1,0 +1,123 @@
+producers_read 2026-09-17 09:51:22 AEST
+--- control: lines naming authMethod anywhere under Blockchain/Dev (non-node_modules), count
+authMethod lines 102 files 28
+--- 'api_key' or 'oauth_app' as a string literal near authMethod, NON-TEST source (file:line:text)
+a067d4e3e80f0e31c1aecb278f06c4f6df4b1c66:Blockchain/Dev/services/api-gateway/src/middleware/auth.ts:293:        authMethod: 'api_key',
+a067d4e3e80f0e31c1aecb278f06c4f6df4b1c66:Blockchain/Dev/services/timestamping/src/tsa/qualified-tsa.ts:42:  authMethod?: 'none' | 'basic' | 'certificate' | 'api_key';
+rc=0
+--- 'oauth_app' literal anywhere NON-TEST (any context)
+a067d4e3e80f0e31c1aecb278f06c4f6df4b1c66:Blockchain/Dev/deployment/KINTSUGI-REBUILD-RUNBOOK.md:103:| `047_oauth_app_type_vocabulary` | `ADD CONSTRAINT … CHECK (lower(app_type) IN ('public','confidential'))` | **NO — contract** |
+a067d4e3e80f0e31c1aecb278f06c4f6df4b1c66:Blockchain/Dev/deployment/KINTSUGI-REBUILD-RUNBOOK.md:248:>   ('users_status_vocabulary','oauth_apps_app_type_vocabulary');   -- expect 2 rows
+a067d4e3e80f0e31c1aecb278f06c4f6df4b1c66:Blockchain/Dev/docker/init/08-oauth-tables.sql:7:CREATE TABLE IF NOT EXISTS oauth_apps (
+a067d4e3e80f0e31c1aecb278f06c4f6df4b1c66:Blockchain/Dev/docker/init/08-oauth-tables.sql:33:CREATE INDEX IF NOT EXISTS idx_oauth_apps_client_id ON oauth_apps(client_id);
+a067d4e3e80f0e31c1aecb278f06c4f6df4b1c66:Blockchain/Dev/docker/init/08-oauth-tables.sql:34:CREATE INDEX IF NOT EXISTS idx_oauth_apps_org ON oauth_apps(organization_id);
+a067d4e3e80f0e31c1aecb278f06c4f6df4b1c66:Blockchain/Dev/docker/init/08-oauth-tables.sql:60:    app_id UUID REFERENCES oauth_apps(id),
+a067d4e3e80f0e31c1aecb278f06c4f6df4b1c66:Blockchain/Dev/docs/RLS-CALLSITE-INVENTORY.md:21:| oauth_apps | | 7 | | | | |
+a067d4e3e80f0e31c1aecb278f06c4f6df4b1c66:Blockchain/Dev/docs/RLS-CALLSITE-INVENTORY.md:36:- **auth**: `getUserById` / session-user reads (the authenticated user's own row), `oauth_apps` reads scoped to the caller.
+a067d4e3e80f0e31c1aecb278f06c4f6df4b1c66:Blockchain/Dev/migrations/006_f18_webhook_secret_encryption.sql:11:-- `oauth_apps.client_secret_hash` column already stores only the SHA-256
+a067d4e3e80f0e31c1aecb278f06c4f6df4b1c66:Blockchain/Dev/migrations/009_rls_tenant_isolation.sql:27:--   m365_connections, oauth_apps, platform_document_registry,
+a067d4e3e80f0e31c1aecb278f06c4f6df4b1c66:Blockchain/Dev/migrations/009_rls_tenant_isolation.sql:53:    'oauth_apps',
+a067d4e3e80f0e31c1aecb278f06c4f6df4b1c66:Blockchain/Dev/migrations/009_rls_tenant_isolation.sql:120:    'm365_connections','oauth_apps','platform_document_registry',
+a067d4e3e80f0e31c1aecb278f06c4f6df4b1c66:Blockchain/Dev/migrations/038_rls_consolidate_policy.sql:41:    'm365_connections', 'oauth_apps', 'platform_document_registry',
+a067d4e3e80f0e31c1aecb278f06c4f6df4b1c66:Blockchain/Dev/migrations/039_rls_fail_closed.sql:37:--        oauth_apps: by client_id (OAuth token endpoint, pre-auth)
+a067d4e3e80f0e31c1aecb278f06c4f6df4b1c66:Blockchain/Dev/migrations/039_rls_fail_closed.sql:85:    'm365_connections', 'oauth_apps',
+a067d4e3e80f0e31c1aecb278f06c4f6df4b1c66:Blockchain/Dev/migrations/039_rls_fail_closed.sql:162:             WHERE table_schema='public' AND table_name='oauth_apps') THEN
+a067d4e3e80f0e31c1aecb278f06c4f6df4b1c66:Blockchain/Dev/migrations/039_rls_fail_closed.sql:163:    GRANT SELECT ON oauth_apps TO secuura_auth_lookup;
+a067d4e3e80f0e31c1aecb278f06c4f6df4b1c66:Blockchain/Dev/migrations/039_rls_fail_closed.sql:164:    DROP POLICY IF EXISTS oauth_apps_auth_lookup ON oauth_apps;
+a067d4e3e80f0e31c1aecb278f06c4f6df4b1c66:Blockchain/Dev/migrations/039_rls_fail_closed.sql:165:    CREATE POLICY oauth_apps_auth_lookup ON oauth_apps
+a067d4e3e80f0e31c1aecb278f06c4f6df4b1c66:Blockchain/Dev/migrations/039_rls_fail_closed.sql:224:CREATE OR REPLACE FUNCTION auth_find_oauth_app_by_client_id(p_client_id TEXT)
+a067d4e3e80f0e31c1aecb278f06c4f6df4b1c66:Blockchain/Dev/migrations/039_rls_fail_closed.sql:225:RETURNS SETOF oauth_apps LANGUAGE sql SECURITY DEFINER SET search_path = public STABLE
+a067d4e3e80f0e31c1aecb278f06c4f6df4b1c66:Blockchain/Dev/migrations/039_rls_fail_closed.sql:227:  SELECT * FROM oauth_apps WHERE client_id = p_client_id AND is_active = true LIMIT 1;
+a067d4e3e80f0e31c1aecb278f06c4f6df4b1c66:Blockchain/Dev/migrations/039_rls_fail_closed.sql:245:    'auth_find_oauth_app_by_client_id(TEXT)',
+a067d4e3e80f0e31c1aecb278f06c4f6df4b1c66:Blockchain/Dev/migrations/039_rls_fail_closed.sql:263:--   DROP POLICY IF EXISTS oauth_apps_auth_lookup ON oauth_apps;
+a067d4e3e80f0e31c1aecb278f06c4f6df4b1c66:Blockchain/Dev/migrations/039_rls_fail_closed.sql:268:--     auth_find_oauth_app_by_client_id(TEXT), security_find_api_key_by_hash(TEXT);
+a067d4e3e80f0e31c1aecb278f06c4f6df4b1c66:Blockchain/Dev/migrations/047_oauth_app_type_vocabulary.sql:2:-- KS-821 — constrain oauth_apps.app_type to the one closed set
+a067d4e3e80f0e31c1aecb278f06c4f6df4b1c66:Blockchain/Dev/migrations/047_oauth_app_type_vocabulary.sql:39:-- NOT MEASURED: the demo VM's `oauth_apps`. Same gap KS-804 carries. If a demo
+a067d4e3e80f0e31c1aecb278f06c4f6df4b1c66:Blockchain/Dev/migrations/047_oauth_app_type_vocabulary.sql:57:  FROM oauth_apps
+a067d4e3e80f0e31c1aecb278f06c4f6df4b1c66:Blockchain/Dev/migrations/047_oauth_app_type_vocabulary.sql:63:    UPDATE oauth_apps
+a067d4e3e80f0e31c1aecb278f06c4f6df4b1c66:Blockchain/Dev/migrations/047_oauth_app_type_vocabulary.sql:79:    WHERE conrelid = 'oauth_apps'::regclass AND conname = 'oauth_apps_app_type_vocabulary'
+a067d4e3e80f0e31c1aecb278f06c4f6df4b1c66:Blockchain/Dev/migrations/047_oauth_app_type_vocabulary.sql:81:    RAISE NOTICE 'KS-821: oauth_apps_app_type_vocabulary already present — left as it is';
+a067d4e3e80f0e31c1aecb278f06c4f6df4b1c66:Blockchain/Dev/migrations/047_oauth_app_type_vocabulary.sql:83:    ALTER TABLE oauth_apps
+a067d4e3e80f0e31c1aecb278f06c4f6df4b1c66:Blockchain/Dev/migrations/047_oauth_app_type_vocabulary.sql:84:      ADD CONSTRAINT oauth_apps_app_type_vocabulary
+a067d4e3e80f0e31c1aecb278f06c4f6df4b1c66:Blockchain/Dev/migrations/047_oauth_app_type_vocabulary.sql:86:    RAISE NOTICE 'KS-821: oauth_apps_app_type_vocabulary added';
+a067d4e3e80f0e31c1aecb278f06c4f6df4b1c66:Blockchain/Dev/scripts/rls/verify-fail-closed.sh:53:EXPECTED_TABLES="m365_connections oauth_apps svc_webhooks users vault_entries documents shares custody_events certifications signatories audit_logs api_keys did_documents credential_templates charge_events billing_charge_events svc_dids admin_verification_queue organizations svc_api_keys issuer_certs document_lifecycle_events action_provenance"
+a067d4e3e80f0e31c1aecb278f06c4f6df4b1c66:Blockchain/Dev/scripts/rls/verify-fail-closed.sh:140:  "auth_find_oauth_app_by_client_id('nonexistent')" \
+a067d4e3e80f0e31c1aecb278f06c4f6df4b1c66:Blockchain/Dev/services/api-gateway/src/middleware/rateLimitEnforce.ts:61:const MACHINE_AUTH_METHODS = new Set(['api_key', 'oauth_app']);
+a067d4e3e80f0e31c1aecb278f06c4f6df4b1c66:Blockchain/Dev/services/api-gateway/src/startup-migrations.ts:477:  `CREATE TABLE IF NOT EXISTS oauth_apps (
+a067d4e3e80f0e31c1aecb278f06c4f6df4b1c66:Blockchain/Dev/services/auth/src/routes/oauth.ts:93:// and fail-closed RLS (migration 039) returns ZERO rows on every oauth_apps
+a067d4e3e80f0e31c1aecb278f06c4f6df4b1c66:Blockchain/Dev/services/auth/src/routes/oauth.ts:1130:export const OAUTH_APP_TYPES = ['public', 'confidential'] as const;
+a067d4e3e80f0e31c1aecb278f06c4f6df4b1c66:Blockchain/Dev/services/auth/src/routes/oauth.ts:1144:    .pipe(z.enum(OAUTH_APP_TYPES))
+a067d4e3e80f0e31c1aecb278f06c4f6df4b1c66:Blockchain/Dev/services/auth/src/services/jwt.ts:36:  /** The OAuth client (`oauth_apps.client_id`) the token is issued to. */
+a067d4e3e80f0e31c1aecb278f06c4f6df4b1c66:Blockchain/Dev/services/auth/src/services/oauth.ts:17:// so oauth_apps creation must pin a real tenant and bundle the matching GUC.
+a067d4e3e80f0e31c1aecb278f06c4f6df4b1c66:Blockchain/Dev/services/auth/src/services/oauth.ts:106:    `INSERT INTO oauth_apps (name, description, client_id, client_secret_hash, redirect_uris, allowed_scopes, app_type,
+a067d4e3e80f0e31c1aecb278f06c4f6df4b1c66:Blockchain/Dev/services/auth/src/services/oauth.ts:133:    'SELECT * FROM auth_find_oauth_app_by_client_id($1)',
+a067d4e3e80f0e31c1aecb278f06c4f6df4b1c66:Blockchain/Dev/services/auth/src/services/oauth.ts:160:  const result = await query('SELECT * FROM auth_find_oauth_app_by_client_id($1)', [clientId]);
+a067d4e3e80f0e31c1aecb278f06c4f6df4b1c66:Blockchain/Dev/services/auth/src/services/oauth.ts:172:  const result = await query('SELECT * FROM oauth_apps WHERE id = $1', [id]);
+a067d4e3e80f0e31c1aecb278f06c4f6df4b1c66:Blockchain/Dev/services/auth/src/services/oauth.ts:179:    ? await query('SELECT * FROM oauth_apps WHERE created_by = $1 ORDER BY created_at DESC', [userId])
+a067d4e3e80f0e31c1aecb278f06c4f6df4b1c66:Blockchain/Dev/services/auth/src/services/oauth.ts:180:    : await query('SELECT * FROM oauth_apps ORDER BY created_at DESC');
+a067d4e3e80f0e31c1aecb278f06c4f6df4b1c66:Blockchain/Dev/services/auth/src/services/oauth.ts:210:  await query(`UPDATE oauth_apps SET ${sets.join(', ')} WHERE id = $${idx}`, values);
+a067d4e3e80f0e31c1aecb278f06c4f6df4b1c66:Blockchain/Dev/services/auth/src/services/oauth.ts:221:  await query('UPDATE oauth_apps SET client_secret_hash = $1, updated_at = NOW() WHERE id = $2', [hash, id]);
+rc=0
+--- same regex in TEST files: count per file
+a067d4e3e80f0e31c1aecb278f06c4f6df4b1c66:Blockchain/Dev/packages/shared/src/__tests__/ks764-key-revoke-call-site-guard.test.ts:10
+a067d4e3e80f0e31c1aecb278f06c4f6df4b1c66:Blockchain/Dev/services/anchoring/src/__tests__/threadMintRequest.test.ts:1
+a067d4e3e80f0e31c1aecb278f06c4f6df4b1c66:Blockchain/Dev/services/api-gateway/src/__tests__/ks1195-per-key-rate-limiter-runs-after-authentication.test.ts:1
+a067d4e3e80f0e31c1aecb278f06c4f6df4b1c66:Blockchain/Dev/services/api-gateway/src/__tests__/ks843-erasure-path-bypass.test.ts:1
+a067d4e3e80f0e31c1aecb278f06c4f6df4b1c66:Blockchain/Dev/services/api-gateway/src/__tests__/ks843-erasure-scope-gate.test.ts:2
+a067d4e3e80f0e31c1aecb278f06c4f6df4b1c66:Blockchain/Dev/services/api-gateway/src/__tests__/ks871-audit-path-captured-at-entry.test.ts:1
+a067d4e3e80f0e31c1aecb278f06c4f6df4b1c66:Blockchain/Dev/services/api-gateway/src/__tests__/ks871-real-app-canonical-audit-rows.test.ts:1
+a067d4e3e80f0e31c1aecb278f06c4f6df4b1c66:Blockchain/Dev/services/api-gateway/src/__tests__/ks871-the-audit-log-records-req-path.test.ts:1
+a067d4e3e80f0e31c1aecb278f06c4f6df4b1c66:Blockchain/Dev/services/api-gateway/src/__tests__/rateLimitEnforce.test.ts:8
+a067d4e3e80f0e31c1aecb278f06c4f6df4b1c66:Blockchain/Dev/services/auth/src/__tests__/auth.integration.test.ts:2
+a067d4e3e80f0e31c1aecb278f06c4f6df4b1c66:Blockchain/Dev/services/auth/src/__tests__/ks1150-code-grant-status-pin.test.ts:1
+a067d4e3e80f0e31c1aecb278f06c4f6df4b1c66:Blockchain/Dev/services/auth/src/__tests__/ks466-oauth-tenant-guc.test.ts:5
+a067d4e3e80f0e31c1aecb278f06c4f6df4b1c66:Blockchain/Dev/services/auth/src/__tests__/ks480-connector-token.test.ts:1
+a067d4e3e80f0e31c1aecb278f06c4f6df4b1c66:Blockchain/Dev/services/auth/src/__tests__/ks790-token-pre-auth-user-lookup.test.ts:1
+a067d4e3e80f0e31c1aecb278f06c4f6df4b1c66:Blockchain/Dev/services/auth/src/__tests__/ks820-821-token-client-auth-and-apptype.test.ts:1
+a067d4e3e80f0e31c1aecb278f06c4f6df4b1c66:Blockchain/Dev/services/auth/src/__tests__/ks823-refresh-grant-client-auth-and-binding.test.ts:1
+a067d4e3e80f0e31c1aecb278f06c4f6df4b1c66:Blockchain/Dev/services/auth/src/__tests__/ks835-oauth-mint-carries-granted-scope.test.ts:1
+a067d4e3e80f0e31c1aecb278f06c4f6df4b1c66:Blockchain/Dev/services/kyc/src/__tests__/callbackAuth.test.ts:14
+a067d4e3e80f0e31c1aecb278f06c4f6df4b1c66:Blockchain/Dev/services/originate/src/__tests__/ks597-issuer-org-bind.test.ts:1
+a067d4e3e80f0e31c1aecb278f06c4f6df4b1c66:Blockchain/Dev/services/security/src/__tests__/ks577-revoke-on-rotate.test.ts:4
+a067d4e3e80f0e31c1aecb278f06c4f6df4b1c66:Blockchain/Dev/services/security/src/__tests__/ks578-ks643-revoke-authorization.test.ts:2
+a067d4e3e80f0e31c1aecb278f06c4f6df4b1c66:Blockchain/Dev/services/security/src/__tests__/ks578-lookup-platform-scoping.test.ts:2
+a067d4e3e80f0e31c1aecb278f06c4f6df4b1c66:Blockchain/Dev/services/security/src/__tests__/ks764-key-revoke-organisation-arm.test.ts:1
+a067d4e3e80f0e31c1aecb278f06c4f6df4b1c66:Blockchain/Dev/services/security/src/__tests__/ks869-connector-id-persisted.test.ts:6
+a067d4e3e80f0e31c1aecb278f06c4f6df4b1c66:systemTest/performance/tests/unit/runner/k6DockerRedaction.test.ts:2
+--- rateLimitBucket anywhere (control: must be auth.ts + rateLimitEnforce.ts + the ks1195 test)
+a067d4e3e80f0e31c1aecb278f06c4f6df4b1c66:Blockchain/Dev/services/api-gateway/src/middleware/auth.ts:54:  rateLimitBucket?: string;
+a067d4e3e80f0e31c1aecb278f06c4f6df4b1c66:Blockchain/Dev/services/api-gateway/src/middleware/auth.ts:300:        rateLimitBucket: `api_key:${createHash('sha256').update('secuura-rate-limit-bucket\0').update(apiKey).digest('hex')}`,
+a067d4e3e80f0e31c1aecb278f06c4f6df4b1c66:Blockchain/Dev/services/api-gateway/src/middleware/rateLimitEnforce.ts:109:    // rateLimitBucket per key (auth.ts). The connectorId || userId fallback is
+a067d4e3e80f0e31c1aecb278f06c4f6df4b1c66:Blockchain/Dev/services/api-gateway/src/middleware/rateLimitEnforce.ts:112:    const clientId = user.rateLimitBucket || user.connectorId || user.userId || 'unknown';
+rc=0
+--- parseTestToken (the test-token branch's producer) and its NODE_ENV gate
+a067d4e3e80f0e31c1aecb278f06c4f6df4b1c66:Blockchain/Dev/services/api-gateway/src/middleware/auth.ts:118:export function parseTestToken(token: string): UserPayload | null {
+a067d4e3e80f0e31c1aecb278f06c4f6df4b1c66:Blockchain/Dev/services/api-gateway/src/middleware/auth.ts-119-  const env = process.env.NODE_ENV || '';
+a067d4e3e80f0e31c1aecb278f06c4f6df4b1c66:Blockchain/Dev/services/api-gateway/src/middleware/auth.ts-120-  if (!['development', 'test'].includes(env)) {
+a067d4e3e80f0e31c1aecb278f06c4f6df4b1c66:Blockchain/Dev/services/api-gateway/src/middleware/auth.ts-121-    return null;
+a067d4e3e80f0e31c1aecb278f06c4f6df4b1c66:Blockchain/Dev/services/api-gateway/src/middleware/auth.ts-122-  }
+a067d4e3e80f0e31c1aecb278f06c4f6df4b1c66:Blockchain/Dev/services/api-gateway/src/middleware/auth.ts-123-  // Require explicit opt-in for test tokens (security hardening)
+a067d4e3e80f0e31c1aecb278f06c4f6df4b1c66:Blockchain/Dev/services/api-gateway/src/middleware/auth.ts-124-  if (!ENABLE_TEST_TOKENS) {
+a067d4e3e80f0e31c1aecb278f06c4f6df4b1c66:Blockchain/Dev/services/api-gateway/src/middleware/auth.ts-125-    return null;
+a067d4e3e80f0e31c1aecb278f06c4f6df4b1c66:Blockchain/Dev/services/api-gateway/src/middleware/auth.ts-126-  }
+a067d4e3e80f0e31c1aecb278f06c4f6df4b1c66:Blockchain/Dev/services/api-gateway/src/middleware/auth.ts-127-
+a067d4e3e80f0e31c1aecb278f06c4f6df4b1c66:Blockchain/Dev/services/api-gateway/src/middleware/auth.ts-128-  if (!token.startsWith(TEST_TOKEN_PREFIX)) {
+a067d4e3e80f0e31c1aecb278f06c4f6df4b1c66:Blockchain/Dev/services/api-gateway/src/middleware/auth.ts-129-    return null;
+a067d4e3e80f0e31c1aecb278f06c4f6df4b1c66:Blockchain/Dev/services/api-gateway/src/middleware/auth.ts-130-  }
+--- auth service signers: authMethod set in services/auth/src (non-test)
+a067d4e3e80f0e31c1aecb278f06c4f6df4b1c66:Blockchain/Dev/services/auth/src/repositories/userRepo.ts:251:    authMethod: row.auth_method ?? 'email',
+a067d4e3e80f0e31c1aecb278f06c4f6df4b1c66:Blockchain/Dev/services/auth/src/repositories/userRepo.ts:720:      user.authMethod || 'email',
+a067d4e3e80f0e31c1aecb278f06c4f6df4b1c66:Blockchain/Dev/services/auth/src/repositories/userRepo.ts:819:    authMethod: 'auth_method',
+a067d4e3e80f0e31c1aecb278f06c4f6df4b1c66:Blockchain/Dev/services/auth/src/repositories/userRepo.ts:830:      if (['role', 'status', 'verificationLevel', 'authMethod'].includes(tsField) && typeof val === 'string') {
+a067d4e3e80f0e31c1aecb278f06c4f6df4b1c66:Blockchain/Dev/services/auth/src/routes/auth.ts:668:    // KS-823) and/or labelled `authMethod: 'oauth'` (KS-835) — is redeemable ONLY
+a067d4e3e80f0e31c1aecb278f06c4f6df4b1c66:Blockchain/Dev/services/auth/src/routes/auth.ts:677:    if (payload.client_id !== undefined || payload.authMethod === 'oauth') {
+a067d4e3e80f0e31c1aecb278f06c4f6df4b1c66:Blockchain/Dev/services/auth/src/routes/auth.ts:681:        authMethod: payload.authMethod ?? null,
+a067d4e3e80f0e31c1aecb278f06c4f6df4b1c66:Blockchain/Dev/services/auth/src/routes/auth.ts:1164:        authMethod: 'social',
+a067d4e3e80f0e31c1aecb278f06c4f6df4b1c66:Blockchain/Dev/services/auth/src/routes/wallet.ts:210:    authMethod: 'wallet',
+a067d4e3e80f0e31c1aecb278f06c4f6df4b1c66:Blockchain/Dev/services/auth/src/services/jwt.ts:17:// the scopes the user GRANTED, and an `authMethod: 'oauth'` label.
+a067d4e3e80f0e31c1aecb278f06c4f6df4b1c66:Blockchain/Dev/services/auth/src/services/jwt.ts:28:// granted, nothing allowed) and `authMethod: 'oauth'`, which the gateway gates
+a067d4e3e80f0e31c1aecb278f06c4f6df4b1c66:Blockchain/Dev/services/auth/src/services/jwt.ts:41:export type OAuthTokenClaims = JwtPayload & { client_id?: string; authMethod?: 'oauth' };
+a067d4e3e80f0e31c1aecb278f06c4f6df4b1c66:Blockchain/Dev/services/auth/src/services/jwt.ts:205:    ...(oauth ? { scopes: [...oauth.scopes], authMethod: 'oauth' as const } : scopes.length > 0 ? { scopes } : {}),
+a067d4e3e80f0e31c1aecb278f06c4f6df4b1c66:Blockchain/Dev/services/auth/src/services/jwt.ts:229:    ...(oauth ? { scopes: [...oauth.scopes], authMethod: 'oauth' as const } : scopes.length > 0 ? { scopes } : {}), // KS-835
+a067d4e3e80f0e31c1aecb278f06c4f6df4b1c66:Blockchain/Dev/services/auth/src/types/index.ts:204:  authMethod?: 'email' | 'wallet' | 'federated' | 'social';
+producers_read end 09:51:25 AEST

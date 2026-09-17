@@ -1,0 +1,70 @@
+one_canonicaliser_read 2026-09-17 09:37:30 AEST tree 8b8996f8b290ef55c35721c30f8671f982fa5a91 (git grep, read verb; -c prints nothing for 0, so every count is listed with -l and a positive control)
+--- decodeURIComponent, api-gateway src (all files):
+8b8996f8b290ef55c35721c30f8671f982fa5a91:Blockchain/Dev/services/api-gateway/src/routes/proxy.ts:356:      decoded = decodeURIComponent(raw.split(';')[0]);
+rc=0
+--- decodeURIComponent in the ks1187 test (expected none; positive control on the same file: erasureDoorVerdict):
+rc=1 (rc 1 = no match)
+8b8996f8b290ef55c35721c30f8671f982fa5a91:Blockchain/Dev/services/api-gateway/src/__tests__/ks1187-erasure-door-judges-the-canonical-path.test.ts:8
+rc=0
+--- erasureDoorVerdict definitions (function/const) anywhere in Blockchain/Dev:
+8b8996f8b290ef55c35721c30f8671f982fa5a91:Blockchain/Dev/services/api-gateway/src/routes/proxy.ts:340:export function erasureDoorVerdict(
+rc=0
+--- erasures string literals in gateway non-test src (who else matches the door):
+8b8996f8b290ef55c35721c30f8671f982fa5a91:Blockchain/Dev/services/api-gateway/src/index.ts:228:// handler; `/api/gdpr//erasures` did the same to a scope gate (KS-843, closed
+8b8996f8b290ef55c35721c30f8671f982fa5a91:Blockchain/Dev/services/api-gateway/src/middleware/audit.ts:111:  // mount-relative, so a refused POST /api/gdpr/erasures derived 'unknown.create'.
+8b8996f8b290ef55c35721c30f8671f982fa5a91:Blockchain/Dev/services/api-gateway/src/middleware/audit.ts:218:    // anything restores it, so a refused POST /api/gdpr/erasures was audited as '/'.
+8b8996f8b290ef55c35721c30f8671f982fa5a91:Blockchain/Dev/services/api-gateway/src/middleware/normalisePath.ts:10: *   - KS-843: `POST /api/gdpr//erasures` missed the `subjects:erase` scope gate.
+8b8996f8b290ef55c35721c30f8671f982fa5a91:Blockchain/Dev/services/api-gateway/src/routes/proxy.ts:332: * - `door`: the canonical path is `/erasures` or below it. The door judges it.
+8b8996f8b290ef55c35721c30f8671f982fa5a91:Blockchain/Dev/services/api-gateway/src/routes/proxy.ts:373:  if ((caseSensitive ? first : first.toLowerCase()) !== 'erasures') {
+8b8996f8b290ef55c35721c30f8671f982fa5a91:Blockchain/Dev/services/api-gateway/src/routes/proxy.ts:709:  // It is an express Router mounted at `/erasures`, fed the
+8b8996f8b290ef55c35721c30f8671f982fa5a91:Blockchain/Dev/services/api-gateway/src/routes/proxy.ts:733:   * `router.post('/api/gdpr/erasures')` and
+8b8996f8b290ef55c35721c30f8671f982fa5a91:Blockchain/Dev/services/api-gateway/src/routes/proxy.ts:734:   * `router.get('/api/gdpr/erasures/:externalRef')`, sitting above the
+8b8996f8b290ef55c35721c30f8671f982fa5a91:Blockchain/Dev/services/api-gateway/src/routes/proxy.ts:735:   * catch-all mount below. `POST /api/gdpr//erasures` matched NEITHER, fell
+8b8996f8b290ef55c35721c30f8671f982fa5a91:Blockchain/Dev/services/api-gateway/src/routes/proxy.ts:742:   *   /api/gdpr/erasures          HIT            HIT
+8b8996f8b290ef55c35721c30f8671f982fa5a91:Blockchain/Dev/services/api-gateway/src/routes/proxy.ts:743:   *   /api/gdpr//erasures         MISS           HIT
+8b8996f8b290ef55c35721c30f8671f982fa5a91:Blockchain/Dev/services/api-gateway/src/routes/proxy.ts:744:   *   /api/gdpr///erasures        MISS           HIT
+8b8996f8b290ef55c35721c30f8671f982fa5a91:Blockchain/Dev/services/api-gateway/src/routes/proxy.ts:745:   *   /api/gdpr/erasures/abc      HIT            HIT
+8b8996f8b290ef55c35721c30f8671f982fa5a91:Blockchain/Dev/services/api-gateway/src/routes/proxy.ts:746:   *   /api/gdpr//erasures/abc     MISS           HIT
+8b8996f8b290ef55c35721c30f8671f982fa5a91:Blockchain/Dev/services/api-gateway/src/routes/proxy.ts:747:   *   /api/gdpr/erasures//abc     HIT            HIT
+8b8996f8b290ef55c35721c30f8671f982fa5a91:Blockchain/Dev/services/api-gateway/src/routes/proxy.ts:749:   * — so mounting on the `/api/gdpr/erasures` PREFIX alone, the obvious fix,
+8b8996f8b290ef55c35721c30f8671f982fa5a91:Blockchain/Dev/services/api-gateway/src/routes/proxy.ts:756:   * nor originate sets `case sensitive routing`). So `ERASURES`, `Erasures`,
+8b8996f8b290ef55c35721c30f8671f982fa5a91:Blockchain/Dev/services/api-gateway/src/routes/proxy.ts:757:   * `Erasures/`, `//ERASURES`, `/API/GDPR/ERASURES` and `GET …/ERASURES/abc`
+8b8996f8b290ef55c35721c30f8671f982fa5a91:Blockchain/Dev/services/api-gateway/src/routes/proxy.ts:764:   * express Router mounted at `/erasures`, and express decides — which means
+8b8996f8b290ef55c35721c30f8671f982fa5a91:Blockchain/Dev/services/api-gateway/src/routes/proxy.ts:786:    '/erasures',
+8b8996f8b290ef55c35721c30f8671f982fa5a91:Blockchain/Dev/services/api-gateway/src/routes/proxy.ts:793:  // absolute-form target (`http://h/erasures` inside this mount) became
+8b8996f8b290ef55c35721c30f8671f982fa5a91:Blockchain/Dev/services/api-gateway/src/routes/proxy.ts:794:  // `http:/h/erasures`, the `/erasures` mount never matched, and the catch-all
+rc=0
+--- how the proxy picks the forwarded path (originalUrl vs url) in proxy.ts:
+8b8996f8b290ef55c35721c30f8671f982fa5a91:Blockchain/Dev/services/api-gateway/src/routes/proxy.ts:166:  pathRewrite?: Record<string, string>,
+8b8996f8b290ef55c35721c30f8671f982fa5a91:Blockchain/Dev/services/api-gateway/src/routes/proxy.ts:175:      pathRewrite: pathRewrite || { [`^/api/${serviceKey}`]: '' },
+8b8996f8b290ef55c35721c30f8671f982fa5a91:Blockchain/Dev/services/api-gateway/src/routes/proxy.ts:182:    pathRewrite: pathRewrite || { [`^/api/${serviceKey}`]: '' },
+8b8996f8b290ef55c35721c30f8671f982fa5a91:Blockchain/Dev/services/api-gateway/src/routes/proxy.ts:324: * CANONICAL path rather than the raw spelling. `subUrl` is `req.url` inside the
+8b8996f8b290ef55c35721c30f8671f982fa5a91:Blockchain/Dev/services/api-gateway/src/routes/proxy.ts:665:        const qs = req.url.includes('?') ? req.url.slice(req.url.indexOf('?')) : '';
+8b8996f8b290ef55c35721c30f8671f982fa5a91:Blockchain/Dev/services/api-gateway/src/routes/proxy.ts:771:   * `req.url` is restored before the request continues. A gateway that
+8b8996f8b290ef55c35721c30f8671f982fa5a91:Blockchain/Dev/services/api-gateway/src/routes/proxy.ts:773:   * forwarded, and the grace log — which records `req.originalUrl` — would
+8b8996f8b290ef55c35721c30f8671f982fa5a91:Blockchain/Dev/services/api-gateway/src/routes/proxy.ts:792:  // KS-1187: the door used to collapse `//` across the WHOLE req.url, so an
+8b8996f8b290ef55c35721c30f8671f982fa5a91:Blockchain/Dev/services/api-gateway/src/routes/proxy.ts:800:    const original = req.url;
+8b8996f8b290ef55c35721c30f8671f982fa5a91:Blockchain/Dev/services/api-gateway/src/routes/proxy.ts:813:    req.url = canonicalPath as string;
+8b8996f8b290ef55c35721c30f8671f982fa5a91:Blockchain/Dev/services/api-gateway/src/routes/proxy.ts:815:      req.url = original;
+8b8996f8b290ef55c35721c30f8671f982fa5a91:Blockchain/Dev/services/api-gateway/src/routes/proxy.ts:871:  // pathRewrite runs on the post-router-mount-stripped path, so
+rc=0
+--- ks843-erasure-path-bypass.test.ts harness shape:
+19: * These cells drive the REAL router (`createProxyRoutes`) against that stub —
+29:import { createProxyRoutes } from '../routes/proxy';
+99:  const app = express();
+102:    createProxyRoutes({
+106:    } as unknown as Parameters<typeof createProxyRoutes>[0]),
+127:describe('KS-843 F-7 — the erasure gate cannot be walked around by path spelling', () => {
+128:  it('CONTROL — the stub upstream IS reachable through this router, or every assertion below is vacuous', async () => {
+137:  it('🔴 ENFORCING — none of the bypass spellings reaches the upstream', async () => {
+148:  it('🔴 ENFORCING — the exact paths are refused too, BOTH verbs, so the fix did not merely move the hole', async () => {
+164:  it('🔴 the fix did not break the legitimate caller — a scope-holder still reaches originate on every spelling', async () => {
+176:  it('🔴 GRACE — a role-only caller still reaches the upstream on the collapsed spellings, and is not silently dropped', async () => {
+189:  it('🔴 F-9 ENFORCING — none of the CASE spellings reaches the upstream', async () => {
+206:  it('🔴 F-9 — a scope-holder still reaches originate on every CASE spelling', async () => {
+218:  it('🔴 F-9 GRACE — every CASE spelling is admitted AND logged exactly once', async () => {
+248:  it('CONTROL — a non-erasure /api/gdpr path is untouched by the gate', async () => {
+--- production suspicious path patterns (security config):
+8b8996f8b290ef55c35721c30f8671f982fa5a91:Blockchain/Dev/services/api-gateway/src/config/services.ts:70:  suspiciousPatterns: [
+8b8996f8b290ef55c35721c30f8671f982fa5a91:Blockchain/Dev/services/api-gateway/src/middleware/security.ts:36:  suspiciousPatterns: RegExp[];
+8b8996f8b290ef55c35721c30f8671f982fa5a91:Blockchain/Dev/services/api-gateway/src/middleware/security.ts:103:      config.suspiciousPatterns.some(pattern => pattern.test(str));

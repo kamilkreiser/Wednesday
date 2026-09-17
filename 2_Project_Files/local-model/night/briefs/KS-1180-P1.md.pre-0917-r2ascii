@@ -1,0 +1,166 @@
+# KS-1180 (P-1016-1 + P-1016-2 only) — Wednesday's task for Ornith, VITEST, **TEST-ONLY MODE, MODIFY THE EXISTING TEST IN PLACE** (written 10:31 on 2026-09-17)
+
+Written from origin develop `fa887f382b212b8da4a0a4a556bacb05ea34daaa` (#1014's squash, KS-1176; its parent `7e89318bc`
+is #1016's squash, KS-1072). The test file to modify, `ks1072-the-latest-anchor-selector-documents-a.test.ts` (177
+lines, blob `4ad1cdcd1`, the #1016 gate's equality target), was read whole. `routes/verification.ts` (1479 lines, blob
+`28fb58343`) was read at `:133-212` (the tier-1 fetches), `:277-380` (the tier-2 fetch) and `:488-781` (the verify
+handler). KS-1180 comment `da07a4c1` and the #1016 gate verdict (P-1016-1, P-1016-2) were read. **PRE-MEASURED** in a
+scratch clone at the tip; see `## Premises (measured)`. **This is a PARTIAL of KS-1180:** it closes P-1016-1's witness
+and, with it, P-1016-2. The owner's 0-hit tier-1 control and every P-1005 item stay open.
+
+## THE MODE — read this twice
+
+TEST-ONLY, MODIFY IN PLACE. Your diff contains EXACTLY ONE file: the EXISTING test file
+`Blockchain/Dev/services/api-gateway/src/__tests__/ks1072-the-latest-anchor-selector-documents-a.test.ts`, with the
+ordinary header `--- a/Blockchain/Dev/services/api-gateway/src/__tests__/ks1072-the-latest-anchor-selector-documents-a.test.ts`
+/ `+++ b/Blockchain/Dev/services/api-gateway/src/__tests__/ks1072-the-latest-anchor-selector-documents-a.test.ts`.
+**No hunk for `verification.ts`.** Do NOT create a new test file. Do NOT use `--- /dev/null`. Do NOT copy or modify the
+reference test (`ks466-documents-enforcement-envelope.test.ts`); ignore it. The file's full content is in files[...]:
+copy every context line of your hunks from it byte-for-byte. The checker plants the tamper named at the bottom into a
+clone of `verification.ts` and expects the five cells named under `## Red cells` RED and the 🟢 KS-1180 control GREEN,
+then expects all six cells GREEN at the untouched tip.
+
+## What is wrong (one paragraph)
+
+Every cell in this file calls the helper `postTier2`, and the helper "proves" tier 2 answered with
+`expect(body.blockchain.source).toBe('persisted');` (`:124`). It proves nothing about the tier: the handler sets `source`
+from the persisted HASH (`verification.ts:774`), and a tier-1 document with a hash reads `'persisted'` too. The #1016 gate
+made the stub originate answer each cell's expected hash itself (tier 1) and the file stayed 5/5 green, on head bytes AND
+on base bytes (**P-1016-1**). The same line is the file's only type error under a program that type-checks tests:
+`TS18046 'body' is of type 'unknown'` at `(124,10)` (**P-1016-2**). **This task:** `postTier2` listens to the stub anchor
+store's `'request'` events for the duration of the verify call and asserts it served exactly one request, the read of this
+document; the `source` guard and its comment go. One 🟢 control cell proves the listener sees a read that is NOT a hit: a
+document the anchor store does not have answers 404 after exactly one anchor-store request.
+
+## Where (no product site changes — this list is informational; every line below STAYS)
+
+- `:517` — (correct) `let doc = await fetchDocument(id, authHeader);` — tier 1 (the stub originate 404s every request in this file). Stays.
+- `:520` — (correct) `if (!doc) {` — tier 2 is asked only when tier 1 had nothing. Stays.
+- `:521` — (correct) `doc = await fetchDocFromAnchorStore(id, authHeader);` — the ONE anchor-store read the witness counts. The tamper replaces this line. Stays.
+- `:774` — (correct) `source: liveTxHash ? 'cardano-live' : (persistedTxHash ? 'persisted' : 'none'),` — keyed on the hash, not the tier, which is why the old guard cannot witness a tier. Stays.
+
+## The exact change — THREE edits in the TEST file, in this order, nothing else
+
+Each fence below holds ONLY the lines you add (`+`) and the lines you remove (`-`); it carries no context and no `@@`
+header. Build each hunk yourself: take the context lines from the file's content in files[...], byte-for-byte. Every `+`
+line is byte-exact: copy it, do not paraphrase the comments, do not re-indent, do not rename `anchorStoreUrls`,
+`onAnchorStoreRequest`, `missUrls` or `onMiss`. There is no backslash, no dollar sign and no backtick in any of these
+lines; the URLs are built with `+`, never with a template literal. The `🟢` in the new title is the character itself.
+
+E1 — inside `postTier2`, INSERT AFTER line 114 `  anchorStoreRows = rows.map((r) => ({ contentHash: CONTENT_HASH, ...r }));`
+(correct, it stays unchanged) and BEFORE line 115 (the `const res = await fetch(` line, which stays unchanged), 3 lines:
+```
++  const anchorStoreUrls: string[] = []; // KS-1180 (P-1016-1): the requests the stub anchor store receives during this verify
++  const onAnchorStoreRequest = (req: { url?: string }): void => { anchorStoreUrls.push(String(req.url)); };
++  anchorServer.on('request', onAnchorStoreRequest);
+```
+
+E2 — inside `postTier2`, REPLACE lines 122–124 (the two-line `KS-1072 (seat A): guard the whole family` comment and the
+`source` guard) with 4 lines. Line 121 `  const body = await res.json();` and line 125 `  return body;` stay unchanged:
+```
+-  // KS-1072 (seat A): guard the whole family — if tier 2 were not the tier that answered, every txHash below
+-  // would be about the wrong code path.
+-  expect(body.blockchain.source).toBe('persisted');
++  anchorServer.off('request', onAnchorStoreRequest);
++  // KS-1180 (P-1016-1): the tier witness. blockchain.source reads 'persisted' on BOTH tiers, so it cannot say which tier
++  // answered. Tier 2 answered only if the stub anchor store served this document exactly once.
++  expect(anchorStoreUrls, 'KS-1180: tier 2 answered, one anchor-store read of this document').toEqual(['/api/anchors/document/' + DOC_ID]);
+```
+
+E3 — INSERT AFTER line 128 `describe('KS-1072 — latest-anchor selector confirmedAt tiebreak', () => {` (correct, it stays
+unchanged) and BEFORE line 129 (the first existing `it(`, which stays unchanged), the new control cell, 9 lines, the last
+one blank:
+```
++  it('🟢 KS-1180 control — a document the anchor store does not have: 404, and the stub anchor store was asked once', async () => {
++    const missUrls: string[] = [];
++    const onMiss = (req: { url?: string }): void => { missUrls.push(String(req.url)); };
++    anchorServer.on('request', onMiss);
++    const res = await fetch('http://127.0.0.1:' + String(gatewayPort) + '/api/documents/doc-ks1180-absent/verify', { method: 'POST', headers: jsonHead, body: JSON.stringify({ purpose: 'test' }) });
++    anchorServer.off('request', onMiss);
++    expect([res.status, missUrls], 'KS-1180 control: a tier-2 miss is asked once and answers 404').toEqual([404, ['/api/anchors/document/doc-ks1180-absent']]);
++  }); // KS-1180 control
++
+```
+
+**Completeness:** that is 16 `+` lines (15 with text, 1 blank) and 3 `-` lines. Every other line of the file (the header
+comment, the imports, the declarations, `beforeAll`, `afterAll`, the rest of `postTier2`, and all five existing cells with
+their titles and bodies) stays byte-identical. Every name the new lines read is declared at the top of the file:
+`anchorServer` (`:27`), `gatewayPort` (`:28`), `DOC_ID` (`:23`), `jsonHead` (`:34`); `fetch` and `expect` are the ones the
+file already uses.
+
+Why each cell is what it is, after the edit:
+- **The five existing cells** at the tip: tier 1 404s, tier 2 reads the anchor store once, so `anchorStoreUrls` is
+  `['/api/anchors/document/doc-ks1072']` and each cell's own `txHash` assertion runs as before. Under the tamper the handler
+  reads the anchor store TWICE on a hit, so all five fail **by assertion** in `postTier2`:
+  `KS-1180: tier 2 answered, one anchor-store read of this document: expected [ …(2) ] to deeply equal [ '/api/anchors/document/doc-ks1072' ]`.
+  If tier 1 answered instead (the gate's GT2), the array is `[]` and all five fail the same way.
+- **🟢 KS-1180 control:** `doc-ks1180-absent` is not served, so tier 1 404s, the anchor store answers one 404, the
+  handler falls through to `checkDocumentExists` (originate 404) and answers 404. `[404, ['/api/anchors/document/doc-ks1180-absent']]`
+  at the tip AND under the tamper (the tamper's `&&` stops after a miss). It proves the listener really observes the stub's
+  requests, so an `[]` in a 🔴 cell is a tier that was not asked, not a listener that never fires.
+
+## Red cells
+
+- equal blockNumber: the most recent confirmedAt wins
+- a missing confirmedAt loses the tiebreak
+- a null and a 0 blockNumber tie, and the most recent confirmedAt wins
+- equal blockNumber with the newer anchor listed first: the newer still wins
+- a higher blockNumber still wins regardless of confirmedAt
+
+## Tamper (test-only mode — the checker plants this in a clone to prove your cells can go red)
+
+line: 521
+from: `      doc = await fetchDocFromAnchorStore(id, authHeader);`
+to: `      doc = (await fetchDocFromAnchorStore(id, authHeader)) && (await fetchDocFromAnchorStore(id, authHeader));`
+statement_ok: the `from` line is one whole assignment statement ending in `;`, the only statement that reads the anchor store in the verify handler (`fetchDocFromAnchorStore` occurs twice in the file: its declaration at `:476` and this call). `:520` `if (!doc) {` only decides whether it runs, and `:522` `if (doc) lookupSource = 'anchor_store';` only reads the result, so neither can undo a second read. `to` reads the anchor store a second time whenever the first read was a hit. Project tsc rc 0 with it planted.
+
+## Output
+
+Exactly ONE ```diff block containing ONLY the modified test file (`--- a/…` / `+++ b/…`, the path repo-relative
+`Blockchain/Dev/services/api-gateway/src/__tests__/ks1072-the-latest-anchor-selector-documents-a.test.ts`), with hunks
+that carry the three edits above and context lines copied from the file; blank context lines keep their leading space;
+correct hunk counts. No hunk for `verification.ts` or any other file.
+
+## Premises (measured)
+
+All times AEST 2026-09-17, each read from `date` or `datetime.now()` inside the run that produced it. Scratch clone =
+`local-model/runs/ks1199_pm.K4Xfmi/clone` (this session's KS-1199 clone, `git clone --shared` + `checkout --detach
+fa887f382`, farmed and built by `tasks/code_patch/prepare_clone.sh`; HEAD == tip and porcelain 0 at 10:25:30). Scripts in
+the session scratchpad `b1180/`: `gen.py` / `gen2.py` (every variant built from the tip bytes by exact replacements, each
+anchor asserted to occur once), `matrix.py` / `matrix2.py` (product tampers and file swaps restored from pristine bytes with
+the git blobs asserted == `28fb58343` / `4ad1cdcd1` after every row), `runvt.sh`, `tsc2.py`, `lin.py`, `gh_read.py`.
+**Every vitest run and the checker ran inside `sandbox-exec` with off-host outbound denied and loopback allowed.**
+
+- **P1 tip.** origin develop = `fa887f382b212b8da4a0a4a556bacb05ea34daaa` (`git ls-remote` 10:20:22; GitHub branches API 10:25:48; `cat-file -t` = commit). Clone HEAD equal.
+- **P2 bytes and anchors.** ks1072 blob `4ad1cdcd1` (177 lines), `verification.ts` blob `28fb58343` (`rev-parse <tip>:<path>`). Exact whole-line counts in the tip test file: each of the 3 `-` lines, the E1 anchor `:114` and the E3 anchor `:128` occurs once; each of the 15 non-blank `+` lines occurs 0 times (python over the tip bytes, `gen2.py`). In `verification.ts` the tamper `from` occurs once (`grep -c -F` = 1; positive control `fetchDocFromAnchorStore` = 2) and it is line 521.
+- **P3 the finding holds at this tip.** The tip file with the gate's GT2 (the stub originate answers the document itself with the hash the selector would pick): **5 / 5 green** (10:27:03). The golden with the same GT2: **5 red by assertion** (`expected [] to deeply equal [ '/api/anchors/document/doc-ks1072' ]`), the 🟢 control green (10:30:00).
+- **P4 the tamper is invisible today.** G-REREAD (this brief's tamper): project `tsc --noEmit -p .` rc 0, 0 lines. The tip file solo: 5 / 5 green (10:30:06). The WHOLE api-gateway suite with the tip file: **53 files, 442 / 442 green** (10:30:30); without the tamper also 442 / 442 (10:30:21).
+- **P5 golden at the tip.** Solo 6 / 6, twice (10:29:56). Whole suite with the golden in place of the tip file: 53 files, 443 / 443 (10:30:37).
+- **P6 golden under the checker's tamper.** Solo: 6 run, **5 failed, all five named in `## Red cells`, each by assertion** (`expected [ …(2) ] to deeply equal [ '/api/anchors/document/doc-ks1072' ]`), the 🟢 control green (10:30:00). Whole suite: 443 run, 438 passed, 5 failed, exactly those five (10:30:46).
+- **P7 types (P-1016-2).** An including program (`extends ./tsconfig.json`, include = the ks1072 file, types node + vitest/globals; `--listFilesOnly` names it once): tip **rc 2, 1 error, `(124,10): error TS18046: 'body' is of type 'unknown'`**; golden **rc 0, 0 errors**. Plant control (`const qaPlant: number = 'not-a-number'` added to the program): tip 2 errors, golden 1 error (TS2322 on the plant). The checker's own standalone test-file command: rc 0, 0 lines at the tip AND for the golden, so the checker cannot see P-1016-2; project tsc rc 0 both (10:31:03–10:31:14).
+- **P8 not in this part (measured).** Under T-TIER2 (`:520` `if (!doc) {` → `if (true) {`, tier 2 asked even when tier 1 answered) the golden stays 6 / 6 green (10:30:03): no cell here has tier 1 answer. The owner's full shape (this change plus a stub originate that answers a second document id and a 🔴 tier-1 cell asserting 0 anchor-store requests) was drafted and measured: 4 hunks; at the tip 6 / 6; under T-TIER2 exactly the tier-1 cell red by assertion; under G-REREAD the five red and the tier-1 cell green (10:27:06–10:27:11). Four edits exceed the three-edit limit, so the tier-1 half is a later part.
+- **P9 the brief's own fences, through the real checker.** `out.md` = the golden as ONE `--- a/` / `+++ b/` section (2 hunks, +16 / -3); its `+` and `-` lines are identical in sequence to this brief's three fences (python compare), and strict `git apply --check` gives rc 0. `checker.sh` with a scratch input built from this brief at `fa887f382` (`build_input.sh` rc 0, ~27.9K prompt tokens, 4 Where sites with 0 must_change, 15 expected `+` lines, 5 red cells, the tamper and `statement_ok` parsed) gave **RESULT: PASS (7/7)**, rc 0, `mode: test_only`, `apply_mode=strict` (10:34:19–10:34:41). A2 strict. A3 test-only, 1 file +16 / -3. A3b skipped. A3c 15 lines, A3d clean. A4: tamper planted at `:521`, 5 failed / 6, the three 🔴 and the two declared cells by assertion, the 🟢 control green; tamper reverted. A5 6 / 6 at the tip. A6 442 → 443, NEW reds `[]`. A7 tsc rc 0; the test file alone rc 0. The checker-applied file was byte-identical to the golden (`cmp` rc 0), and `verification.ts` hashed to `28fb58343` after. **Harness trap met and avoided:** the same round with `ref=` the ks1071 test FAILED at A4 (10:33:31–10:33:41): `decl_splice.py` saw `DOC_ID` read in a `+` line, did not see its declaration (it reads `+` lines only, and in a modify-in-place diff `DOC_ID` is declared in an unchanged line), spliced ks1071's `const DOC_ID = 'doc-ks1071';` into the section, and the spliced section no longer applied (`corrupt patch at line 14`). Measured over 10 candidate refs: 8 splice `DOC_ID`, and `ks466-documents-enforcement-envelope` and `ks815-verification-router-guards-its-own-body` splice 0. This brief pins ks466.
+- **P10 ticket and partition.** KS-1180: Backlog, priority 3, assignee kamil.kreiser@secuura.ai, **0 attachments**, 1 comment (`da07a4c1`), related KS-1073 (Linear GraphQL, read-only, 10:20:28). Open PRs: 21, 107 paths; **0** name the ks1072 test, `routes/verification.ts` or any `ks1180` path (positive controls: 60 `package.json` paths; 4 `api-gateway/src/__tests__/` paths, in #923, #1017, #1019) (GitHub REST GET, paginated, 10:25:48).
+
+## Notes for the raise (not for the model)
+
+- **PR note: "Refs KS-1180 (P-1016-1, P-1016-2)". Never "Closes" / "Fixes".** KS-1180 stays open: P-1005-1..4, R-1005-2
+  (the ks1073 file and the `verification.ts:353` comment) and the owner's 0-hit tier-1 control for ks1072 are not in
+  this part. Expected tier: **tier 1** (test-only, one existing test file, no product change, loopback only).
+- **What the checker grades and what it does not.** The checker grades the witness by G-REREAD (a hit read twice): five
+  declared reds by assertion, the 🟢 control green. The TIER property the gate asked for is test-side (GT2 is a change to
+  the stub originate, which no product-line tamper can plant); it is graded here by P3 only. P-1016-2 is graded by P7
+  only (the checker's standalone tsc is blind to it).
+- **The declared reds are existing cells.** Three already carry 🔴 (KS-1072's); the two `KS-1072 control` cells are
+  declared under `## Red cells` because every cell goes through `postTier2`. None of their titles or bodies change.
+- **Next part (P2, not built):** a stub originate that answers a second document id and one 🔴 cell asserting tier 1
+  answered with 0 anchor-store requests, graded by T-TIER2 (P8). Build it on a tip that contains this part.
+- **Partition.** This task edits only the ks1072 test. KS-1199 (held) is a NEW file and never touches ks1072, so the two
+  cannot collide. The input pins tip `fa887f382` and tamper `line: 521`. If `verification.ts` changes above `:521` first
+  (KS-1202 cites `:546/:551`, below it), a REBUILD refuses on the `from` mismatch (fail safe).
+- **Harness:** never queue this as bare `KS-1180`: `night/briefs/KS-1180.md` is the OLDER P-1005 brief, and the builder
+  would read it as the prompt. The id is `KS-1180-P1` (the builder reads 1180 from it), so the brief read is this file.
+- Builder pins used for `night/inputs/code_1180P1.json` (all required: `product=` pins the tamper file, `ref=` names a
+  test that imports the verification routes, is not the file under change, and declares no one-line name the `+` lines read (see P9), `test_file=` puts ks1072's full content in
+  files[...] and makes it the suggested file, `line=` the tamper line):
+  `product=Blockchain/Dev/services/api-gateway/src/routes/verification.ts ref=services/api-gateway/src/__tests__/ks466-documents-enforcement-envelope.test.ts test_file=services/api-gateway/src/__tests__/ks1072-the-latest-anchor-selector-documents-a.test.ts line=521 ctx=65536`.

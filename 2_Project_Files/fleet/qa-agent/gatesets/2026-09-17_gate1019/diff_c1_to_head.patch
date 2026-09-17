@@ -1,0 +1,26 @@
+diff --git a/Blockchain/Dev/services/api-gateway/src/__tests__/ks843-erasure-scope-gate.test.ts b/Blockchain/Dev/services/api-gateway/src/__tests__/ks843-erasure-scope-gate.test.ts
+index a3c554121..06b499605 100644
+--- a/Blockchain/Dev/services/api-gateway/src/__tests__/ks843-erasure-scope-gate.test.ts
++++ b/Blockchain/Dev/services/api-gateway/src/__tests__/ks843-erasure-scope-gate.test.ts
+@@ -199,7 +199,12 @@ describe('KS-843 — subjects:erase gate', () => {
+     expect(src).toMatch(/^[ \t]*erasureDoor\.use\($/m);
+     expect(src).toMatch(/^[ \t]*'\/erasures',$/m);
+     // The one normalisation express will not do, and the reason it is needed.
+-    expect(src).toMatch(/replace\(\/\\\/\{2,\}\/g, '\/'\)/);
++    // KS-1187: it goes through collapseRepeatedSlashes, which leaves an
++    // absolute-form target's scheme://authority alone, and the door is judged
++    // on the canonical path. The whole-string collapse this line used to pin
++    // was the KS-1187 bypass (`http://h/erasures` became `http:/h/erasures`, so
++    // the door never matched); the control at the end forbids it in code.
++    expect(src).toMatch(/erasureDoorVerdict\(collapseRepeatedSlashes\(original\), erasureDoorCaseSensitive\)/);
+     // ...and req.url must be put back, or the gateway forwards a normalised
+     // copy of what it was sent and the grace log disagrees with the upstream.
+     expect(src).toMatch(/^[ \t]*req\.url = original;$/m);
+@@ -211,6 +216,7 @@ describe('KS-843 — subjects:erase gate', () => {
+     const code = src.split('\n').filter((l) => !/^\s*(\*|\/\*|\/\/)/.test(l)).join('\n');
+     expect(code).not.toContain('ERASURE_SUBPATH');
+     expect(code, 'a bare /erasures regex tested by hand is what F-9 was').not.toMatch(/\/\^\\\/erasures\(/);
++    expect(code, 'KS-1187: a whole-string // collapse breaks absolute-form targets').not.toMatch(/replace\(\/\\\/\{2,\}\/g, '\/'\)/);
+   });
+ 
+   // RESTORED in round 3 (KS-843 F-10). The round-2 rewrite of this file went

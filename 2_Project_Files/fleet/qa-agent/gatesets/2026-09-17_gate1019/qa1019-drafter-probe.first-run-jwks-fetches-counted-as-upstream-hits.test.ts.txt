@@ -1,0 +1,260 @@
+/**
+ * qa1019-drafter-probe.test.ts — Wednesday DRAFTER probe for PR #1019 (KS-1187). NOT a product test; copied into a drafter worktree, run SOLO,
+ * quarantined by rename. The REAL index.ts app in-process (http.createServer(app) on 127.0.0.1:0), `../db` mocked, every *_SERVICE_URL pointed at
+ * ONE loopback recorder that counts upstream hits. Tokens are THROWAWAY RS256 JWTs signed with vitest.setup.ts's __TEST_JWT_PRIVATE_PEM, a FRESH
+ * userId per request (so #1017's per-key limiter, on the merged tree, never answers the matrix) except the `limiter` stage, which uses ONE userId.
+ * Stages (QA_STAGES, default all): verdict, test, grace, prod, limiter. Rows -> QA_OUT (JSON).
+ */
+import { describe, it, expect, beforeAll, afterAll, vi } from 'vitest';
+import http from 'http';
+import jwt from 'jsonwebtoken';
+import { randomUUID } from 'crypto';
+import { readFileSync, writeFileSync } from 'fs';
+import { join } from 'path';
+
+vi.mock('../db', async (orig) => {
+  const real = (await orig()) as Record<string, unknown>;
+  return { ...real, isDbAvailable: () => true, query: async () => ({ rows: [], rowCount: 0 }) };
+});
+
+const STAGES = (process.env.QA_STAGES || 'verdict,test,grace,prod,limiter').split(',');
+const OUT: any = { stages: STAGES, verdict: [], test: [], grace: [], prod: [], limiter: [], originateRoutes: [], logs: {} };
+const seen: string[] = [];
+let recorder: http.Server | undefined;
+let recorderUrl = '';
+const captured: string[] = [];
+
+function listen(server: http.Server): Promise<string> {
+  return new Promise((resolve) => server.listen(0, '127.0.0.1', () => resolve(`http://127.0.0.1:${(server.address() as any).port}`)));
+}
+async function closeServer(server: http.Server | undefined) {
+  if (!server) return;
+  (server as any).closeAllConnections?.();
+  await new Promise<void>((r) => server.close(() => r()));
+}
+function token(o: { scopes?: string[]; email?: boolean; userId?: string; role?: string; authMethod?: string }): string {
+  const p: any = { userId: o.userId || randomUUID(), role: o.role || 'connector', authMethod: o.authMethod || 'api_key', scopes: o.scopes || [],
+    tenantId: 'a0000000-0000-4000-8000-000000000001', organizationId: 'd0000000-0000-4000-8000-00000000118d', verificationLevel: 'BASIC' };
+  if (o.email !== false) p.email = 'qa-drafter@secuura.invalid';
+  return 'Bearer ' + jwt.sign(p, process.env.__TEST_JWT_PRIVATE_PEM as string, { algorithm: 'RS256', expiresIn: '10m' });
+}
+const TOK: Record<string, () => string | null> = {
+  noscope: () => token({ scopes: ['documents:read'] }),
+  scope: () => token({ scopes: ['subjects:erase'] }),
+  noemail_noscope: () => token({ scopes: ['documents:read'], email: false }),
+  noemail_scope: () => token({ scopes: ['subjects:erase'], email: false }),
+  user: () => token({ role: 'user', authMethod: 'email', scopes: [] }),
+  none: () => null,
+};
+function send(base: string, method: string, path: string, auth: string | null): Promise<any> {
+  return new Promise((resolve) => {
+    const t = new URL(base); const before = seen.length; const capBefore = captured.length;
+    const body = method === 'GET' ? undefined : '{"externalRef":"qa-drafter-ref"}';
+    const headers: Record<string, string> = {};
+    if (auth) headers.authorization = auth;
+    if (body !== undefined) { headers['content-type'] = 'application/json'; headers['content-length'] = String(Buffer.byteLength(body)); }
+    const req = http.request({ hostname: t.hostname, port: t.port, path, method, agent: false, headers }, (res) => {
+      const c: Buffer[] = [];
+      res.on('data', (d) => c.push(d));
+      res.on('end', () => {
+        const txt = Buffer.concat(c).toString(); let code: string | null = null; let msg: string | null = null;
+        try { const j = JSON.parse(txt); code = j?.error?.code ?? null; msg = (j?.error?.message ?? null) && String(j.error.message).slice(0, 120); } catch { /* non-JSON */ }
+        setTimeout(() => resolve({ status: res.statusCode, code, msg, hits: seen.slice(before), location: res.headers.location ?? null,
+          rlLimit: res.headers['x-ratelimit-limit'] ?? null, rlRemaining: res.headers['x-ratelimit-remaining'] ?? null,
+          graceLines: captured.slice(capBefore).filter((l) => l.includes('grace is ON')).length,
+          headerErr: captured.slice(capBefore).filter((l) => /Invalid value .*x-user-email/i.test(l)).length }), 60);
+      });
+    });
+    req.on('error', (e) => resolve({ status: -1, code: 'CLIENT_ERROR', msg: String(e).slice(0, 120), hits: seen.slice(before) }));
+    if (body !== undefined) req.end(body); else req.end();
+  });
+}
+async function bootApp(env: Record<string, string>) {
+  vi.resetModules();
+  for (const [k, v] of Object.entries(env)) vi.stubEnv(k, v);
+  delete process.env.JWT_JWKS_URL;
+  const app = (await import('../index')).default;
+  const server = http.createServer(app as any);
+  return { server, url: await listen(server) };
+}
+const SVC = ['ORIGINATE_SERVICE_URL', 'AUTH_SERVICE_URL', 'SECURITY_SERVICE_URL', 'ANCHORING_SERVICE_URL', 'VERIFICATION_SERVICE_URL', 'NOTIFICATION_SERVICE_URL'];
+
+// the shape matrix — sub = the part after the gdpr mount; abs = absolute-form host prefix or null
+type Shape = { id: string; cls: string; method: string; sub: string; abs?: string; v1?: boolean; toks: string[] };
+const D = ['noscope', 'scope'];
+const SHAPES: Shape[] = [
+  // door spellings
+  { id: 'D01 origin POST', cls: 'door', method: 'POST', sub: '/erasures', toks: [...D, 'user', 'none', 'noemail_noscope', 'noemail_scope'] },
+  { id: 'D02 origin GET ref', cls: 'door', method: 'GET', sub: '/erasures/abc', toks: D },
+  { id: 'D03 abs POST', cls: 'door', method: 'POST', sub: '/erasures', abs: 'http://127.0.0.1', toks: [...D, 'user', 'none', 'noemail_noscope', 'noemail_scope'] },
+  { id: 'D04 abs GET ref', cls: 'door', method: 'GET', sub: '/erasures/abc', abs: 'http://127.0.0.1', toks: D },
+  { id: 'D05 abs any host', cls: 'door', method: 'POST', sub: '/erasures', abs: 'http://qa-anything.invalid', toks: D },
+  { id: 'D06 abs v1', cls: 'door', method: 'POST', sub: '/erasures', abs: 'http://127.0.0.1', v1: true, toks: D },
+  { id: 'D07 abs HTTP upper scheme', cls: 'door', method: 'POST', sub: '/erasures', abs: 'HTTP://127.0.0.1', toks: D },
+  { id: 'D08 abs https:443', cls: 'door', method: 'POST', sub: '/erasures', abs: 'https://127.0.0.1:443', toks: D },
+  { id: 'D09 abs userinfo', cls: 'door', method: 'POST', sub: '/erasures', abs: 'http://u@127.0.0.1', toks: D },
+  { id: 'D10 %65rasures', cls: 'door', method: 'POST', sub: '/%65rasures', toks: D },
+  { id: 'D11 %45RASURES', cls: 'door', method: 'POST', sub: '/%45RASURES', toks: D },
+  { id: 'D12 ./erasures', cls: 'door', method: 'POST', sub: '/./erasures', toks: D },
+  { id: 'D13 erasures;x=1', cls: 'door', method: 'POST', sub: '/erasures;x=1', toks: D },
+  { id: 'D14 erasures/', cls: 'door', method: 'POST', sub: '/erasures/', toks: D },
+  { id: 'D15 ERASURES', cls: 'door', method: 'POST', sub: '/ERASURES', toks: D },
+  { id: 'D16 Erasures', cls: 'door', method: 'POST', sub: '/Erasures', toks: D },
+  { id: 'D17 x/../erasures', cls: 'door', method: 'POST', sub: '/x/../erasures', toks: D },
+  { id: 'D18 //erasures', cls: 'door', method: 'POST', sub: '//erasures', toks: D },
+  { id: 'D19 erasures?x=1', cls: 'door', method: 'POST', sub: '/erasures?x=1', toks: D },
+  { id: 'D20 %2e/erasures', cls: 'door', method: 'POST', sub: '/%2e/erasures', toks: D },
+  { id: 'D21 x/%2e%2e/erasures', cls: 'door', method: 'POST', sub: '/x/%2e%2e/erasures', toks: D },
+  { id: 'D22 erasures%2fabc GET', cls: 'door', method: 'GET', sub: '/erasures%2fabc', toks: D },
+  { id: 'D23 %2ferasures', cls: 'door', method: 'POST', sub: '/%2ferasures', toks: D },
+  { id: 'D24 ;p/erasures', cls: 'door', method: 'POST', sub: '/;p/erasures', toks: D },
+  { id: 'D25 v1 %65rasures', cls: 'door', method: 'POST', sub: '/%65rasures', v1: true, toks: D },
+  { id: 'D26 abs %65rasures', cls: 'door', method: 'POST', sub: '/%65rasures', abs: 'http://127.0.0.1', toks: D },
+  { id: 'D27 abs ./erasures', cls: 'door', method: 'POST', sub: '/./erasures', abs: 'http://127.0.0.1', toks: D },
+  { id: 'D28 abs x/../erasures', cls: 'door', method: 'POST', sub: '/x/../erasures', abs: 'http://127.0.0.1', toks: D },
+  { id: 'D29 erasures/%zz GET', cls: 'door', method: 'GET', sub: '/erasures/%zz', toks: D },
+  { id: 'D30 erasures/abc;x GET', cls: 'door', method: 'GET', sub: '/erasures/abc;x', toks: D },
+  { id: 'D31 abs erasures#f', cls: 'door', method: 'POST', sub: '/erasures#f', abs: 'http://127.0.0.1', toks: D },
+  // undetermined -> 400
+  { id: 'U01 %zzrasures', cls: 'undetermined', method: 'POST', sub: '/%zzrasures', toks: [...D, 'none'] },
+  { id: 'U02 ../gdpr/erasures', cls: 'undetermined', method: 'POST', sub: '/../gdpr/erasures', toks: D },
+  { id: 'U03 consent/../../erasures', cls: 'undetermined', method: 'POST', sub: '/consent/../../erasures', toks: D },
+  { id: 'U04 %E9rasures', cls: 'undetermined', method: 'POST', sub: '/%E9rasures', toks: D },
+  { id: 'U05 abs %zzrasures', cls: 'undetermined', method: 'POST', sub: '/%zzrasures', abs: 'http://127.0.0.1', toks: D },
+  { id: 'U06 %zz alone GET', cls: 'undetermined', method: 'GET', sub: '/%zz', toks: D },
+  { id: 'U07 /.. GET', cls: 'undetermined', method: 'GET', sub: '/..', toks: D },
+  { id: 'U08 erasures/../%zz GET', cls: 'undetermined', method: 'GET', sub: '/erasures/../%zz', toks: D },
+  // canonical says NOT the door while the raw path begins /erasures/ (the upstream routes on the RAW path)
+  { id: 'W01 erasures/.. GET', cls: 'raw-erasures-canon-not-door', method: 'GET', sub: '/erasures/..', toks: [...D, 'user'] },
+  { id: 'W02 erasures/%2e%2e GET', cls: 'raw-erasures-canon-not-door', method: 'GET', sub: '/erasures/%2e%2e', toks: D },
+  { id: 'W03 erasures/..;x GET', cls: 'raw-erasures-canon-not-door', method: 'GET', sub: '/erasures/..;x', toks: D },
+  { id: 'W04 erasures/%2e%2e%2fabc GET', cls: 'raw-erasures-canon-not-door', method: 'GET', sub: '/erasures/%2e%2e%2fabc', toks: D },
+  { id: 'W05 erasures/.%2e GET', cls: 'raw-erasures-canon-not-door', method: 'GET', sub: '/erasures/.%2e', toks: D },
+  { id: 'W06 erasures/.. POST', cls: 'raw-erasures-canon-not-door', method: 'POST', sub: '/erasures/..', toks: D },
+  { id: 'W07 abs erasures/.. GET', cls: 'raw-erasures-canon-not-door', method: 'GET', sub: '/erasures/..', abs: 'http://127.0.0.1', toks: D },
+  // non-door spellings (Tightening A)
+  { id: 'N01 %63onsent/check', cls: 'not-door', method: 'GET', sub: '/%63onsent/check', toks: D },
+  { id: 'N02 consent/%zz', cls: 'not-door', method: 'GET', sub: '/consent/%zz', toks: D },
+  { id: 'N03 CONSENT/check', cls: 'not-door', method: 'GET', sub: '/CONSENT/check', toks: D },
+  { id: 'N04 consent//check', cls: 'not-door', method: 'GET', sub: '/consent//check', toks: D },
+  { id: 'N05 erasuresX', cls: 'not-door', method: 'POST', sub: '/erasuresX', toks: D },
+  { id: 'N06 erasures.json', cls: 'not-door', method: 'POST', sub: '/erasures.json', toks: D },
+  { id: 'N07 erasures%3bx=1', cls: 'not-door', method: 'POST', sub: '/erasures%3bx=1', toks: D },
+  { id: 'N08 abs consent/check?next=/erasures', cls: 'not-door', method: 'GET', sub: '/consent/check?next=/erasures', abs: 'http://127.0.0.1', toks: D },
+  { id: 'N09 consent/check?x=%zz', cls: 'not-door', method: 'GET', sub: '/consent/check?x=%zz', toks: D },
+  { id: 'N10 bare mount', cls: 'not-door', method: 'GET', sub: '', toks: D },
+  { id: 'N11 consent/%E9', cls: 'not-door', method: 'GET', sub: '/consent/%E9', toks: D },
+];
+
+beforeAll(async () => {
+  const w1 = process.stdout.write.bind(process.stdout); const w2 = process.stderr.write.bind(process.stderr);
+  (process.stdout as any).write = (ch: any, ...a: any[]) => { captured.push(String(ch)); return w1(ch, ...a); };
+  (process.stderr as any).write = (ch: any, ...a: any[]) => { captured.push(String(ch)); return w2(ch, ...a); };
+  for (const k of ['warn', 'error', 'log', 'info'] as const) { const o = (console as any)[k].bind(console); (console as any)[k] = (...a: any[]) => { captured.push(a.map((x) => (typeof x === 'string' ? x : JSON.stringify(x))).join(' ')); o(...a); }; }
+  recorder = http.createServer((req, res) => { req.resume(); req.on('end', () => { seen.push(`${req.method} ${req.url}`); res.writeHead(200, { 'content-type': 'application/json' }); res.end('{"recorder":true}'); }); });
+  recorderUrl = await listen(recorder);
+  const src = readFileSync(join(__dirname, '..', '..', '..', 'originate', 'src', 'routes', 'gdpr.ts'), 'utf8');
+  OUT.originateRoutes = [...src.matchAll(/gdprRouter\.(get|post|put|patch|delete)\('([^']+)'/g)].map((m) => [m[1].toUpperCase(), m[2]]);
+});
+afterAll(async () => {
+  await closeServer(recorder);
+  vi.unstubAllEnvs();
+  OUT.capturedLines = captured.length;
+  writeFileSync(process.env.QA_OUT as string, JSON.stringify(OUT, null, 1));
+});
+
+async function runMatrix(stage: string, url: string, prefix: string, rows: any[]) {
+  for (const s of SHAPES) {
+    const path = (s.abs ? s.abs : '') + prefix + s.sub;
+    for (const t of s.toks) {
+      const r = await send(url, s.method, path, TOK[t]());
+      rows.push({ id: s.id, cls: s.cls, method: s.method, target: path, tok: t, ...r });
+    }
+  }
+  // Tightening A census: every originate gdprRouter route, params filled, admitted scope token and no-scope token
+  for (const [m, p] of OUT.originateRoutes as Array<[string, string]>) {
+    const filled = p.replace(/:[A-Za-z]+/g, 'u-1');
+    for (const t of D) {
+      const r = await send(url, m, prefix + filled, TOK[t]());
+      rows.push({ id: 'O ' + m + ' ' + p, cls: p.startsWith('/erasures') ? 'originate-door-route' : 'originate-route', method: m, target: prefix + filled, tok: t, ...r });
+    }
+  }
+}
+
+describe('qa1019 drafter probe', () => {
+  it('verdict: erasureDoorVerdict over every sub-path (head/merged only)', async () => {
+    if (!STAGES.includes('verdict')) return;
+    const mod: any = await import('../routes/proxy');
+    OUT.verdictExported = typeof mod.erasureDoorVerdict;
+    if (typeof mod.erasureDoorVerdict !== 'function') return;
+    const subs = new Set<string>();
+    for (const s of SHAPES) subs.add((s.abs ? s.abs : '') + s.sub);
+    for (const [, p] of OUT.originateRoutes) subs.add(p.replace(/:[A-Za-z]+/g, 'u-1'));
+    for (const p of subs) OUT.verdict.push({ sub: p, ci: mod.erasureDoorVerdict(p, false), cs: mod.erasureDoorVerdict(p, true) });
+    expect(OUT.verdict.length).toBeGreaterThan(40);
+  });
+
+  it('test mode (SUBJECTS_ERASE_SCOPE_ENFORCED=true): the matrix', async () => {
+    if (!STAGES.includes('test')) return;
+    const env: Record<string, string> = { NODE_ENV: 'test', GATEWAY_VOUCH_SECRET: '', SUBJECTS_ERASE_SCOPE_ENFORCED: 'true', UNHANDLED_REJECTION_MODE: 'survive' };
+    for (const k of SVC) env[k] = recorderUrl;
+    const g = await bootApp(env);
+    try {
+      await runMatrix('test', g.url, '/api/gdpr', OUT.test);
+      for (const s of SHAPES.filter((x) => x.v1)) { /* v1 rows already use the /api/v1 prefix below */ }
+      const v1rows: any[] = [];
+      for (const s of SHAPES.filter((x) => x.v1)) {
+        for (const t of s.toks) { const path = (s.abs || '') + '/api/v1/gdpr' + s.sub; v1rows.push({ id: s.id + ' [v1 prefix]', cls: s.cls, method: s.method, target: path, tok: t, ...(await send(g.url, s.method, path, TOK[t]())) }); }
+      }
+      OUT.test.push(...v1rows);
+    } finally { await closeServer(g.server); }
+    expect(OUT.test.length).toBeGreaterThan(100);
+  }, 120000);
+
+  it('grace (SUBJECTS_ERASE_SCOPE_ENFORCED unset): a role-only connector on door spellings — admitted through the door (grace line) or around it', async () => {
+    if (!STAGES.includes('grace')) return;
+    const env: Record<string, string> = { NODE_ENV: 'test', GATEWAY_VOUCH_SECRET: '', SUBJECTS_ERASE_SCOPE_ENFORCED: '', UNHANDLED_REJECTION_MODE: 'survive' };
+    for (const k of SVC) env[k] = recorderUrl;
+    const g = await bootApp(env);
+    try {
+      for (const s of SHAPES.filter((x) => ['D01 origin POST', 'D03 abs POST', 'D10 %65rasures', 'D15 ERASURES', 'W01 erasures/.. GET', 'U01 %zzrasures'].includes(x.id))) {
+        const path = (s.abs || '') + '/api/gdpr' + s.sub;
+        OUT.grace.push({ id: s.id, method: s.method, target: path, tok: 'noscope', ...(await send(g.url, s.method, path, TOK.noscope())) });
+      }
+    } finally { await closeServer(g.server); }
+    expect(OUT.grace.length).toBe(6);
+  }, 60000);
+
+  it('production mode: the matrix under /api/v1 plus unversioned 307 rows', async () => {
+    if (!STAGES.includes('prod')) return;
+    const env: Record<string, string> = { NODE_ENV: 'production', CSRF_SECRET: 'qa1019-drafter-stub-not-a-secret', DATABASE_URL: 'postgres://qa:qa@127.0.0.1:1/qa', REDIS_URL: 'redis://127.0.0.1:1',
+      ENABLE_TEST_TOKENS: '', ENABLE_MOCK_ENDPOINTS: '', GATEWAY_VOUCH_SECRET: '', SUBJECTS_ERASE_SCOPE_ENFORCED: 'true', UNHANDLED_REJECTION_MODE: 'survive' };
+    for (const k of SVC) env[k] = recorderUrl;
+    const g = await bootApp(env);
+    try {
+      await runMatrix('prod', g.url, '/api/v1/gdpr', OUT.prod);
+      for (const [id, m, p] of [['P307 origin', 'POST', '/api/gdpr/erasures'], ['P307 abs', 'POST', 'http://127.0.0.1/api/gdpr/erasures'], ['P307 %65', 'POST', '/api/gdpr/%65rasures']]) {
+        OUT.prod.push({ id, cls: 'unversioned', method: m, target: p, tok: 'noscope', ...(await send(g.url, m, p, TOK.noscope())) });
+      }
+    } finally { await closeServer(g.server); }
+    expect(OUT.prod.length).toBeGreaterThan(100);
+  }, 120000);
+
+  it('limiter (merged-tree interplay with #1017): ONE userId, api_key principal — X-RateLimit-Remaining across door shapes', async () => {
+    if (!STAGES.includes('limiter')) return;
+    const env: Record<string, string> = { NODE_ENV: 'test', GATEWAY_VOUCH_SECRET: '', SUBJECTS_ERASE_SCOPE_ENFORCED: 'true', UNHANDLED_REJECTION_MODE: 'survive' };
+    for (const k of SVC) env[k] = recorderUrl;
+    const g = await bootApp(env);
+    const uid = randomUUID();
+    try {
+      for (const [id, m, p, sc] of [
+        ['L1 origin admitted', 'POST', '/api/gdpr/erasures', true], ['L2 abs admitted', 'POST', 'http://127.0.0.1/api/gdpr/erasures', true],
+        ['L3 %65 admitted', 'POST', '/api/gdpr/%65rasures', true], ['L4 abs refused 403', 'POST', 'http://127.0.0.1/api/gdpr/erasures', false],
+        ['L5 400 NON_CANONICAL', 'POST', '/api/gdpr/%zzrasures', true], ['L6 non-door consent', 'GET', '/api/gdpr/consent/check', true],
+        ['L7 W01 erasures/..', 'GET', '/api/gdpr/erasures/..', false]] as Array<[string, string, string, boolean]>) {
+        OUT.limiter.push({ id, method: m, target: p, ...(await send(g.url, m, p, token({ userId: uid, scopes: sc ? ['subjects:erase'] : ['documents:read'] }))) });
+      }
+    } finally { await closeServer(g.server); }
+    expect(OUT.limiter.length).toBe(7);
+  }, 60000);
+});
