@@ -10,6 +10,21 @@ supersedes: the 2026-09-14 pickup, kept verbatim at NEXT-PICKUP-TUESDAY.md.pre-s
 
 ---
 
+## 🔵 HANDOVER BLOCK — 2026-09-17 15:42 (ctx 65% checkpoint). READ THIS FIRST; blocks below are older.
+
+**Kam's standing instruction (OWED, 11:2x):** "keep going with all the changes and fixes and let me know once it's ready" (NexusAI resubmission). Tell him ONLY when the checklist is empty, plus Kam-only items as they fall due.
+
+**NexusAI S64 (`%1`)** — merges PRE-AUTHORISED on GO / Minor-Low-only (NexusAI CLAUDE.md:273, S62 recipe). Standing merge rules given today: C-57 counts file regenerated + id-SUPERSET control (pass 1 exact, pass 2 digits normalised same file, absorptions listed verbatim); measured-page-quantity test pins resolved by re-measuring + red check on both parents; any logic/product conflict STOPS. Main = cc07700 (ls-remote).
+- MERGED: RD-465 (3c4760a, at round-2 cap), RD-477 (cc07700). RD-462/463 already on main (board fixed).
+- In flight: RD-454 rebase → new branch rd-454-group-optional-s64-rebased; RD-470 r2 re-gate @ f15a92a; RD-464 r2 build; RD-460 package branch tier-1 gate @ c7f62f2.
+- CHECKLIST still open (C-54 + additions): RD-464, RD-486 (stored key → any endpoint), RD-495 (anon csp-violations leaks URLs+tokens; design ruled: close + strip query + RD-498 log redaction; after RD-486, before RD-490), RD-436+452 (group gate fails open; + RD-501 group-members-only test + RD-499; after RD-454), RD-471 (+472), RD-490 (real-browser banner guard), RD-492 (false "Failed to enforce"), RD-497 (16 admin routes refuse admins), RD-442 (MIT → Terms of Service), RD-487/475/457/438; package RELEASE gate (main merged, deploy-dev.sh + provision-customer.sh, listing folds, real digest, Container Apps digest-ref check in dev).
+- REGISTRY DONE: nexusaireleaseacr.azurecr.io (nexusai-dev-rg, Kam's signed mail 01:56:52Z); anon pull verified by Tuesday. Production discipline. Release push only after the checklist merges.
+- Kam-only at the end: Partner Center preview deploy, upload + submit, credential rotation (RD-362), any history rewrite of the pen-test key.
+
+**HPSM S50 (`%2`)** — toolkit tier-1 gate: live NO GO (F4 count-not-name, F7 regenerated manifest). Fix round 2 of 2 running (F4, F7, G-1, G-3, F6; O1/O3/O8 must die). Step 4 AZURE rows GO read-only under (a) pin ef9ae60, (b) names, (c) persona — command list comes to Tuesday before the first live command. Lane-a rows: **question with Kam on the panel (15:4x) — db-only start of pc-lane-a; default = stays down, rows NOT VERIFIED.** Rows 3-4 lane-a not re-verifiable. C11 second GO parked for next live release.
+
+**Also owed:** Partner Center published-package download before 24 Sep (Chrome was in use by NexusAI's gate; NEW window, role=tab only). Wednesday: exit-code logging e7db53d39 takes effect at next launch — check seat_exit.log then. Every note/ledger write via safe_push in the same command.
+
 ## 🔵 HANDOVER BLOCK — 2026-09-17 11:03 (fresh-launch boot, ctx ~35%). READ THIS FIRST; the 08:2x block below is superseded.
 
 **What happened:** this seat stopped recording turns at 09:03, and 11 wake taps (09:20–10:41) read back "prompt clear" without reaching the model. Cause UNMEASURED. Five NexusAI asks and Kam's 09:39 and 10:39 messages went unanswered. Kam relaunched fresh at 10:53, which ended NexusAI S63, HPSM S49 and the fleet monitor. Ledger rows filed (silent seat w=1, own dirt blocking panel_sync w=4, cross-seat inbox read w=3). Kam answered 10:56 on the panel (verified at origin).
