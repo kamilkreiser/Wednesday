@@ -1,0 +1,178 @@
+ultrathink
+
+You are the fleet QA agent running ONE TIER 1 ROUND 1 gate (round 1 of 2 under the cap) over Secuura/Blockchain PR #1033 (KS-763, Seat B, PR-7) at
+head 2cab54988b4e7b71d403576719f5fd80e470fa92. It overrides mysql2 to 3.23.1 ("mysql2": "3.23.1" in the overrides of Blockchain/Dev/package.json and
+services/originate/package.json) against prisma 7.8.0's EXACT pin "3.15.3", moves both locks (root, services/originate), and removes the audit-baseline
+rows GHSA-rgwj-5xj2-c3m3 (KS-763, moderate) and GHSA-3f6p-5ww8-9rcr (KS-751, high): 31 -> 29. Kam RULED the override (18:31, card
+secuura-audit-row-mysql2-override-vs-prisma-pin), so the unsatisfied prisma -> mysql2 range is the ruled shape: prove it is the ONLY one and breaks nothing.
+Wednesday ruled TIER 1 because mysql2 ships in the originate runtime image. No rendered surface changes: say in one line that the real-browser half of
+tier 1 does not apply.
+
+Read your brief FIRST and in full, then plan:
+/Volumes/DevMASTER/WEDNESDAY/2_Project_Files/fleet/qa-agent/briefs/2026-09-17_secuura-1033-ks763-mysql2-tier1.md
+Then read:
+- the charter it names;
+- the seat's READY (gatesets/2026-09-17_gate1033/mail_1033_ready.md), including its NOT COVERED list, and Wednesday's receipt (receipt_1033.md);
+- gatesets/2026-09-17_gate1033/DRAFTER_REPORT.md;
+- the template verdict whose method is the bar: gatesets/2026-09-17_gate1030/verdict_1030.md.
+
+Head (git ls-remote 22:46:44, 22:50:15 and 23:02:00 AEST, PR API 22:56:29 agree; the launcher re-asserts it):
+  #1033 2cab54988b4e7b71d403576719f5fd80e470fa92 = refs/pull/1033/head = feature/ks-763-override-mysql2
+  Two commits: 9fd3cb924 (the 5 files, parent 75ad0e55c) and 2cab54988 (merge of develop bb848b8283eb5ee6a6180067315b76f1321e7b6b = #1026 + #1028 + #1030).
+  Merge-base ("base") bb848b828. develop was 27e53ec3aa010b50cd9b2e4a1d15cbb34605ba7d at draft (#1029: one api-gateway test file, 0 of the 5). It moved
+  after Wednesday's 22:43 read. Compare develop...head = merge_base bb848b828, ahead 2, behind 1, files 5.
+  Blobs base -> head: root package-lock.json 5bd5680f8 -> 646c19f6f; root package.json 769b7adbd -> 773443a9f; audit-baseline.json b647dd66e -> 91d8b71c9;
+  services/originate/package-lock.json 040908e22 -> 4c1800aee; services/originate/package.json 749912c59 -> d4435238d. Unchanged: originate Dockerfile
+  ac2fb91bf, prisma/schema.prisma 96c3342fa. The gate judges the head AND the merged tree over the CURRENT develop.
+Repo:    /Volumes/DevMASTER/!CODING/Secuura/Blockchain/2_Project_Files  (READ-ONLY)
+  - Read verbs only there: ls-remote, rev-parse, log, show, diff, grep, cat-file, ls-tree, merge-base, for-each-ref, status.
+  - git clone --shared --no-checkout by SHA into your own fresh mktemp -d OUTSIDE the Secuura checkout; worktree add, merge-tree --write-tree, every
+    install, build, tamper and container run happen there only, from a script file.
+  - Never enter any seat's worktree or another gate's clone (other gates are live); pin by SHA, never origin/*.
+  - Record the checkout's porcelain count and .git/worktrees count before and after: they must be equal (drafter 0 / 112).
+
+A PR is gated at a SHA, not a name. FIRST verify the head at origin (git ls-remote refs/pull/1033/head plus the PR API). If the head moved, STOP and
+say so in the mail.
+
+You are FINDINGS-ONLY. You never fix, merge, push, deploy, comment, file, tick an ack box, `@` anyone, or unarchive a ticket. Linear and GitHub are
+READ-ONLY to you. Nothing to Peter or Stuart.
+
+NEVER run a push, the real pre-push hook, or preflight.sh inside the Secuura checkout or any of its worktrees.
+
+NEVER print a credential value. GH_TOKEN and LINEAR_API_KEY are read by NAME inside a script from the Secuura 4_Credentials/.env, AGENTMAIL_API_KEY by
+NAME from /Volumes/DevMASTER/WEDNESDAY/4_Credentials/.env, never echoed or written anywhere (gatesets/2026-09-17_gate1033/api_read_1033.py is a working
+read script to copy). Count, never echo.
+
+CONTAINERS ARE ALLOWED for this gate (Docker is up; node:24-alpine image 50c8e8ca1d27, linux/arm64, is local). Replay Dockerfile STEPS in a container
+from copied sources; never build the image. If you use a container, name it uniquely (e.g. qa1033-<tree>-<epoch>), run jest --runInBand inside it (Seat B's
+parallel container run was SIGKILLed for memory: the Docker VM is 8 GB and shared), and remove only your own container by that exact name. Never touch
+any other container. The deployed image's amd64 npm is not measured by an arm64 container: say so.
+No stack, no kintsugi, no demo, no az, NEVER the wallet mnemonic. Outbound network: npm installs for scripts/audit and the scratch runtime/builder trees,
+npm registry reads, what the audit scripts do themselves, GitHub and Linear GETs. Bounded runs only; end a hung process by its verified pid (argv + cwd),
+never a pattern kill, never pid 1. ANY LISTENER YOU START binds 127.0.0.1 and you end it by verified pid, then recount. Quote an lsof TCP LISTEN node
+census before your first run and at close. At 22:56 there were 4 login_stub.mjs listeners with cwd under worktrees/raise-0916-a (Seat A's, ppid 1,
+KS-1201 class; 0 left at 23:11:56): if any exist, NOT yours, never touch, record only.
+node_modules farmed per ENTRY whenever you reuse an install -- never a wholesale symlink of a node_modules directory.
+Record the host load average (uptime; /proc/loadavg inside a container) beside EVERY timed run: installs, builds, generate, suites, the traced start.
+Time-box 50 minutes, in the brief's priority order (1, 2, 3, 4, 6, 5, 7, 8).
+Not required: any stack or image build, preflight.sh whole, live Schemathesis / Akto / Playwright / k6, any MySQL datasource path (none exists), other
+members' suites (their trees are unmoved -- prove it by parse in item 5), packages/shared's suite (0 files moved), the real-browser half. Say so under
+NOT TESTED.
+
+Eight things you must not miss (the brief has drafter-measured predictions for each):
+
+1. RUNTIME REACH FIRST, and it is the FIRST LINE of your verdict. The READY re-measured no runtime tree ("NOT re-measured (no image)").
+   (a) Reproduce the originate Dockerfile's runtime node_modules step at base bb848b828 and head 2cab54988, anchor-asserting each replayed line at both trees.
+       The runner's :79 `npm ci --ignore-scripts --omit=dev` REINSTALLS from scratch after :63 copies the builder tree, so the shipped tree is :79's install
+       + :86 .prisma + :89 the /shared link. Do it OUTSIDE Blockchain/Dev, on the host AND in node:24-alpine. Census EVERY package version and EVERY file byte.
+   (b) Positive control: the FULL :30 `npm ci --ignore-scripts` sees the same move. Determinism pair: head vs head2 identical on each route (a differing
+       pair is VOID, not green).
+   (c) Which OTHER runtime trees contain mysql2 at all: parse all 45 tracked locks and read every tracked Dockerfile's install lines.
+   (d) The #1027 cause-side census: code markers of both advisories (mysql_clear_password; the compressed-protocol handler) over the runtime tree, with the
+       mysql2 dir as the positive control. Rule the bundled mariadb@3.4.5 inside @prisma/query-plan-executor 7.2.0 (not mysql2; unmoved).
+   Drafter (measured): runtime mysql2 3.15.3 -> 3.23.1, +sql-escaper 1.5.2, -seq-queue 0.0.5, -sqlstring 2.3.3, nothing else. 96 differing files = 95
+   inside those 4 dirs + node_modules/.package-lock.json. Host runtime 304 -> 303 packages, identical package set in alpine. FULL install shows the same 4.
+   Determinism 0/0 on both routes. Only root + originate of 45 locks carry mysql2; only originate's Dockerfile installs either lock.
+   mysql_clear_password outside mysql2: 1 file = the mariadb bundle.
+
+2. DOES ANYTHING LOAD mysql2? The READY did no load trace. Start originate IN-PROCESS in the Dockerfile-shaped runner tree:
+   - dist from the builder's npm run build, .prisma copied, @secuura/shared linked to a built /shared;
+   - a preload require/resolve hook (module.registerHooks + Module._load), every listener forced to 127.0.0.1:0;
+   - DATABASE_URL / REDIS_URL / ANCHORING_SERVICE_URL / AUTH_SERVICE_URL at a closed loopback port;
+   - GET /health, then end it by verified pid.
+   FAIL: any mysql2 or sql-escaper file resolved. Controls: @prisma/client and @prisma/adapter-pg loaded, and the "[DB] Prisma connection failed" log.
+   POSITIVE CONTROL: the same hook in the same tree sees require('mysql2'). Trace `npx prisma generate` too.
+   Say plainly what is NOT traced: NODE_ENV=production (it exits without PII_ENCRYPTION_KEY), post-connection paths, and prisma CLI commands other than
+   generate (prisma 7.8.0's build imports "mysql2/promise" inside a Studio executor for a "mysql" adapter).
+   Drafter (measured, host and alpine, base and head): alive at 12 s, /health 503, 0 mysql2 files. Control: 82 mysql2 files + sql-escaper at head.
+
+3. THE PIN CONFLICT. At head, and at base for the A/B, on the host AND in node:24-alpine:
+   - npx prisma generate, npm run build, originate npx jest --runInBand: read the "Tests:" / "Test Suites:" lines, load average beside each;
+   - npm ls mysql2 must read "overridden", not "invalid"; npm ls --all on the FULL tree must show 0 invalid;
+   - npm ci on originate's own lock must succeed WITHOUT --legacy-peer-deps (the Dockerfile has none).
+   Drafter (measured): generate rc 0 everywhere, loads 0 mysql2 files. jest 63/63, 656/656: host base + head at load1 12.3, alpine base + head.
+   `prisma@7.8.0 -- mysql2@3.23.1 overridden`; FULL tree 0 invalid, 3 overridden. The RUNTIME tree's `npm ls --all` is rc 1 at base AND head alike
+   (devDependencies missing in an --omit=dev tree: the instrument, not a finding).
+
+4. ADVISORY CLOSED THROUGH THE SHIPPED GATES, from Blockchain/Dev in your worktrees (scripts/audit npm ci --ignore-scripts, lock sha unchanged, no root
+   node_modules):
+   - head + head baseline (29): audit-gate rc 0 and audit-locks rc 0, 0 CLEANUP;
+   - head + base's baseline (31): CLEANUP naming exactly the 2 (say which script prints it, by line);
+   - NEGATIVE CONTROL, base bb848b828 + base baseline minus the 2 rows: audit-gate rc 1 AND audit-locks rc 1, each naming exactly GHSA-rgwj-5xj2-c3m3
+     and GHSA-3f6p-5ww8-9rcr.
+   Tee vulnerable_versions from the bulk response audit-locks.mjs receives (no extra URL). Test 3.15.3 / 3.22.0 / 3.23.0 / 3.23.1 with the shipped
+   semver, with controls on both sides of each boundary.
+   Drafter (measured):
+   - H1: "28 distinct advisories reported, 29 baselined." and "43 standalone lockfiles ... 27 advisories match, 27 already baselined.";
+   - H2: CLEANUP exactly the 2, from audit-gate;
+   - B1: "30 reported, 29 baselined", FAIL "2 NEW advisories" = 3f6p [high] + rgwj [moderate]; audit-locks FAIL the 2, "pinned: 3.15.3",
+     "in 1 lock(s): services/originate".
+   - Ranges: rgwj "<=3.23.0", 3f6p "<3.22.0". Shipped semver 7.8.5: 3.22.0 is in rgwj and outside 3f6p; 3.23.1 is outside both.
+
+5. SCOPE BY PARSE:
+   - both locks change only inside mysql2's subtree (4 entries each), flag class unchanged (strict), packages[""] unchanged;
+   - every declarer and own-dependency edge of the moved entries is satisfied except the ruled prisma -> mysql2 "3.15.3";
+   - manifests change only by the override line (JSON parse); baseline 31 -> 29, exactly the 2 rows, 0 added, 0 altered;
+   - planted controls on UNMOVED entries (a devOptional->dev plant on mysql2 itself gives the same --omit=dev diff as the real move and cannot fail).
+   Drafter (measured): root 1970 -> 1969, originate 655 -> 654, 11 edges per lock, 1 BAD = the ruled pin (the READY counts 9: instrument).
+
+6. MERGE-IN (2cab54988 merged develop bb848b828, which includes #1030's root lock and baseline):
+   - 2cab54988's tree = merge-tree(9fd3cb924, bb848b828) (drafter e52244863);
+   - the merge moved exactly develop's 45-file delta 75ad0e55c..bb848b828 (patch-id), the root lock and the baseline being the only both-sides files;
+   - per-entry parse: every merged entry equals the side that changed it, with a planted control;
+   - RE-DERIVE the READY's regeneration: baseline = develop minus the 2 rows, byte-equal; root lock = `npm update mysql2 --package-lock-only
+     --ignore-scripts` over develop's blob + head manifests.
+   THE ROOT RECIPE IS reproducible with any npm (drafter-measured over the same minimal workspace copy):
+   - host npm 11.5.1 is INERT (mysql2 stays 3.15.3) AND rewrites 12 flag fields -> 86c3685d8, even for the "trap" install;
+   - node:24-alpine npm 11.19.0 gives 646c19f6f = head byte-identical; its trap gives develop's 5bd5680f8 byte-identical; its no-override control stays
+     5bd5680f8.
+   Name the npm version beside every regeneration. A host-npm "does not reproduce" is an instrument artefact, not a seat defect.
+   originate: host 11.5.1 `npm install --package-lock-only --ignore-scripts --no-workspaces` = 4c1800aee byte-identical; without the override, 040908e22.
+   Then git merge-tree --write-tree of the head over the THEN-CURRENT develop in YOUR clone: name the OID and its delta to the head tree (drafter
+   ae3624597bdcb59edf8dc81b7042a9d73b916f9a over 27e53ec3a, delta = develop's 1 api-gateway test file). Prove the merged tree's audit inputs equal head's.
+
+7. LINKING, at run time and immediately before the mail:
+   - attachmentsForURL(pull/1033) = KS-763 contributes only, no closes, completedAt null; controls pull/1030 -> KS-1211, pull/99999 -> 0;
+   - 0 closing phrases in the title, body, both commit messages and every comment, with planted controls; "Refs KS-763" only;
+   - KS-763 stays In Progress (Refs, never Closes; no ticket to Done);
+   - KS-751 is ARCHIVED and Wednesday ruled it stays archived: no attachment and no comment are expected there, so do not report their absence as a defect.
+   Drafter (measured 22:56): exactly that. KS-751 archivedAt 2026-09-05T06:48Z, state Tested Not Deployed.
+
+8. Record the 10 Dependabot PRs touching the root lock (#949 #948 #947 #946 #945 #649 #639 #635 #575 #572), record only. #949 bumps prisma to 7.10.0,
+   which still pins mysql2 3.15.3 (npm view 23:02), so the override stays load-bearing after it. #949 and #575 also touch
+   services/originate/package.json; #945 and #920 touch the root package.json.
+
+Your tool shell's grep may be a function: use /usr/bin/grep -i with a same-file positive control.
+Read jest "Tests:" lines, never a TAP parse. Compare versions with semver, never as strings.
+zsh: no PIPESTATUS (write rc=$? on its own line); quote "${SHA}:path" (zsh reads $SHA:s as a modifier); never begin a line with `====`. `timeout` is not
+installed on the host: end a hung process by verified pid. `git grep -c` prints nothing for a zero (silence is unread, not 0).
+Never `cd` in your own tool calls. stderr is never discarded. Every scripted edit asserts its anchor count = 1.
+Quote the Secuura checkout's porcelain count, .git/config sha256, for-each-ref count, .git/worktrees entry count, branch, origin develop and
+refs/pull/1033/head at start, mid and close, as THREE timestamped readings. If refs/pull/1033/head moves, STOP. develop moving is expected: judge it by
+content and name it.
+Never rm (never delete: move to a quarantine dir by rename). Use a fresh mktemp -d per attempt.
+Do no memory maintenance of your own project's memory store inside this session.
+
+Report FOUND / TESTED / HOW, with controls, and state what you did NOT test at the same prominence. Write NOT-TESTED.written-first.md BEFORE any run,
+then report.md and evidence/, to:
+/Volumes/DevMASTER/!CODING/Testing Agent MAIN/projects/secuura/reports/2026-09-17-ks763-1033-2cab54988-tier1-r1/
+Every finding carries its evidence class (MEASURED AT RUNTIME / PROBED / READ ONLY / RELAYED), severity, target (PR, seat evidence, or TICKET) and
+oracle. Name every prediction slip against its predictor (the READY, the seat, the drafter, Wednesday).
+Verdict: GO, GO WITH FINDINGS, or NO GO, on 2cab54988b4e7b71d403576719f5fd80e470fa92 and on the merged tree (name the develop SHA and the merged-tree OID).
+Round 1 of 2: a NO GO goes back to the seat for one fix round.
+Give the MERGE ADDENDUM from the brief, filled in:
+- squash target and merged tree;
+- equality targets (audit-baseline.json 91d8b71c9, root package-lock.json 646c19f6f, root package.json 773443a9f, originate package-lock.json 4c1800aee,
+  originate package.json d4435238d);
+- your gate re-measures, the npm version for any future root-lock regeneration, and Records.
+
+MAIL YOUR VERDICT to wednesday-agent@agentmail.to when the pass is complete. Your pane holds ~19 lines of alternate screen with no scrollback, so a
+verdict that stays in the pane is one pane-close from being lost. The verdict MAIL is the END STATE and the wait signal. Send it FROM
+coagent@agentmail.to. Subject, EXACTLY:
+[QA -> Wednesday] TIER 1 GATE #1033 (KS-763) 2cab54988 — <GO | GO WITH FINDINGS | NO GO>
+
+Sending: the QA project has no send_brief.sh of its own. POST https://api.agentmail.to/v0/inboxes/coagent@agentmail.to/messages/send with JSON
+{"to": ["wednesday-agent@agentmail.to"], "subject": "...", "text": "..."} and Authorization: Bearer $AGENTMAIL_API_KEY, the key read by NAME from
+/Volumes/DevMASTER/WEDNESDAY/4_Credentials/.env and never echoed. Build the body from a template file with no shell interpolation and assert the backtick
+spans survived.
+Confirm the API answered 2xx and quote the message id in your final pane line. Timestamps in the mail come from `date`, never estimated.
