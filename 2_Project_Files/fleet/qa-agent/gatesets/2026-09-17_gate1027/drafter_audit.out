@@ -1,0 +1,24 @@
+head scripts/audit npm ci rc 0 | lock sha 84ba271fc131d8a5 -> 84ba271fc131d8a5 | root node_modules present (must be False) False 20:08:41 AEST
+develop scripts/audit npm ci rc 0 | lock sha 84ba271fc131d8a5 -> 84ba271fc131d8a5 | root node_modules present (must be False) False 20:08:41 AEST
+H1 head audit-gate baseline=real rc 0 20:08:41 AEST->20:08:43 AEST | ['audit-gate: 31 distinct advisories reported, 32 baselined.'] | CLEANUP ids [] | FAIL-section ids [] | family lines []
+H1 head audit-locks baseline=real rc 0 20:08:43 AEST->20:08:44 AEST | ['audit-locks: 43 standalone lockfiles (45 tracked, minus the Blockchain/Dev/package-lock.json workspace root which audit-gate cover'] | CLEANUP ids [] | FAIL-section ids [] | family lines []
+H2 head audit-gate baseline=baseline_develop_copy.json rc 0 20:08:44 AEST->20:08:46 AEST | ['audit-gate: 31 distinct advisories reported, 34 baselined.'] | CLEANUP ids ['GHSA-2883-xcg3-v3hh', 'GHSA-w5vr-8v7q-w6rv'] | FAIL-section ids [] | family lines ['- GHSA-w5vr-8v7q-w6rv (baseline-browser-mapping, KS-1024)', '- GHSA-2883-xcg3-v3hh (js-yaml, KS-1024)']
+H2 head audit-locks baseline=baseline_develop_copy.json rc 0 20:08:46 AEST->20:08:47 AEST | ['audit-locks: 43 standalone lockfiles (45 tracked, minus the Blockchain/Dev/package-lock.json workspace root which audit-gate cover'] | CLEANUP ids [] | FAIL-section ids [] | family lines []
+B1 develop audit-gate baseline=baseline_head_copy.json rc 1 20:08:47 AEST->20:08:49 AEST | ['audit-gate: 33 distinct advisories reported, 32 baselined.'] | CLEANUP ids [] | FAIL-section ids ['GHSA-2883-xcg3-v3hh', 'GHSA-w5vr-8v7q-w6rv'] | family lines ['- GHSA-w5vr-8v7q-w6rv [moderate] baseline-browser-mapping: baseline-browser-mapping process termination on invalid input causes denial of service', '- GHSA-2883-xcg3-v3hh [high] js-yaml: js-yaml: maxTotalMergeKeys does not limit CPU use for empty merge sources']
+B1 develop audit-locks baseline=baseline_head_copy.json rc 1 20:08:49 AEST->20:08:50 AEST | ['audit-locks: 43 standalone lockfiles (45 tracked, minus the Blockchain/Dev/package-lock.json workspace root which audit-gate cover'] | CLEANUP ids [] | FAIL-section ids ['GHSA-2883-xcg3-v3hh', 'GHSA-w5vr-8v7q-w6rv'] | family lines ['- GHSA-2883-xcg3-v3hh [high] js-yaml: js-yaml: maxTotalMergeKeys does not limit CPU use for empty merge sources', 'pinned: 3.15.1', '- GHSA-w5vr-8v7q-w6rv [moderate] baseline-browser-mapping: baseline-browser-mapping process termination on invalid input causes denial of service', 'pinned: 2.10.11, 2.10.22, 2.10.23, 2.10.43']
+B1_audit-locks.tee.jsonl request baseline-browser-mapping ["2.10.43","2.11.14","2.10.11","2.10.22","2.10.23"] status 200
+B1_audit-locks.tee.jsonl request js-yaml ["3.15.1","4.3.2","5.4.1","5.2.3"] status 200
+H1_audit-locks.tee.jsonl request baseline-browser-mapping ["2.11.24","2.11.14"] status 200
+H1_audit-locks.tee.jsonl request js-yaml ["3.15.2","4.3.2","5.4.1","5.2.3"] status 200
+H2_audit-locks.tee.jsonl request baseline-browser-mapping ["2.11.24","2.11.14"] status 200
+H2_audit-locks.tee.jsonl request js-yaml ["3.15.2","4.3.2","5.4.1","5.2.3"] status 200
+ADVISORY baseline-browser-mapping GHSA-w5vr-8v7q-w6rv moderate vulnerable_versions=">=2.0.0 <2.11.0" :: 2.9.14:true 2.10.11:true 2.10.22:true 2.10.23:true 2.10.29:true 2.10.43:true 2.11.14:false 2.11.24:false
+ADVISORY js-yaml GHSA-2883-xcg3-v3hh high vulnerable_versions=">=3.0.0 <3.15.2" :: 3.15.1:true 3.15.2:false 3.14.2:true 4.1.1:false 4.3.2:false 5.2.3:false 5.4.1:false
+lexical trap '2.10.43' < '2.9.14' = true ; semver.lt = false
+declarer load-nyc-config js-yaml ^3.13.1: 3.15.2 inside=true | control 4.0.0/3.0.0 inside=false
+declarer browserslist bbm ^2.10.42: 2.11.24 inside=true | control 4.0.0/3.0.0 inside=false
+declarer browserslist bbm (outlook) ^2.9.0: 2.11.24 inside=true | control 4.0.0/3.0.0 inside=false
+declarer browserslist bbm (services) ^2.10.12: 2.11.24 inside=true | control 4.0.0/3.0.0 inside=false
+ 
+done 20:08:50 AEST
+audit rc 0

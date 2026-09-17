@@ -1,0 +1,61 @@
+ultrathink
+
+You are the fleet QA agent running a TIER 2 (through code) gate, ROUND 1, on Secuura/Blockchain PR #1027 (KS-1211, Seat B, PR-3a of Wednesday's regroup). It bumps two dependencies the seat calls dev-only across nine lockfiles and removes their two audit-baseline rows. RUNTIME REACH is your lead question and it decides the tier.
+
+Read your brief FIRST and in full, then plan:
+/Volumes/DevMASTER/WEDNESDAY/2_Project_Files/fleet/qa-agent/briefs/2026-09-17_secuura-1027-ks1211-jsyaml-bbm-tier2.md
+Then the charter it names, the READY (gatesets/2026-09-17_gate1027/mail_1027_ready.md, including its NOT COVERED list) and Wednesday's regroup ruling (gatesets/2026-09-17_seatB/answer_pr3_regroup_vitest.md), whole.
+
+Subject: PR #1027 (KS-1211) @ d7fc6cc5582b918c0773ec6f25f86407de6f86ab, two commits: b51ed77e18413301a0498d6845e77043b22530b1 (the change, on efaaa6034f036dd9538ee35b189217b1d08b90a9) and d7fc6cc55 (a --no-ff merge of develop 19f1e54750ce2b65312a687add2db4f5628edb7d, #1025). Three-dot vs develop: ten files, no manifest:
+- js-yaml 3.15.1 -> 3.15.2 in Blockchain/Dev/services/{governance,originate,referral,vc-issuer}/package-lock.json and the Blockchain/Dev root lock;
+- baseline-browser-mapping -> 2.11.24 in frontend/{admin,issuer,outlook-addin,verifier}, services/{governance,originate,referral} and the root lock;
+- GHSA-2883-xcg3-v3hh (js-yaml, HIGH) and GHSA-w5vr-8v7q-w6rv (bbm) removed from Blockchain/Dev/scripts/audit/audit-baseline.json (34 -> 32).
+origin develop is 19f1e5475 = the head's merge-base (drafter, 20:08). "Refs KS-1211": the vitest row remains (PR-3b), so the ticket stays open. The mobile lock stays out, as ruled.
+Repo:    /Volumes/DevMASTER/!CODING/Secuura/Blockchain/2_Project_Files  (READ-ONLY: git clone --shared by SHA into your own mktemp -d; write verbs there only, from a script file)
+
+A PR is gated at a SHA, not a name. FIRST verify the head at origin (git ls-remote refs/pull/1027/head plus the PR API). If the head moved, STOP and say so in the mail.
+
+You are FINDINGS-ONLY. You never fix, merge, push, deploy, comment, file, tick an ack box or `@` anyone. Linear and GitHub are READ-ONLY to you. Nothing to Peter or Stuart.
+
+NEVER run a push, the real pre-push hook, or preflight.sh inside the Secuura checkout or any of its worktrees. Never enter Seat B's worktrees (worktrees/raise-0917-b-audit*), Seat A's, or any other gate's clone.
+
+NEVER print a credential value. GH_TOKEN and LINEAR_API_KEY are read by NAME inside a script from the Secuura 4_Credentials/.env, never echoed or written anywhere.
+
+No docker (not even the clean-room container; reproduce every Dockerfile stage with host npm in a scratch dir and SAY so), no image build, no stack, no kintsugi, no demo, no az, never the wallet mnemonic. Outbound network: npm ci for scripts/audit, the scratch runtime-stage installs, the suites' install and frontend builds; what the audit scripts do themselves; GitHub and Linear GETs. Bounded runs only; end a hung process by its verified pid (argv + cwd), never a pattern kill.
+
+Scope is PROPORTIONATE: a ten-file lock change. Time-box 30 minutes, in the brief's priority order (1, 2, 3, 5, 6, then 4).
+Not required: preflight.sh whole, any stack or image, Schemathesis / Akto / Playwright / k6, any packages/* suite, the mobile tree. Say so under NOT TESTED.
+
+Six things you must not miss (the brief has drafter-measured predictions for each):
+
+1. LEAD: RUNTIME REACH, and it decides the tier. The seat says both packages are dev-only in every scanned lock. Verify per lock by parse (dev/devOptional/optional flags of every js-yaml and bbm entry, nested included, in the 9 locks and packages/shared's lock). Then reproduce each touched service's runtime node_modules step OUTSIDE Blockchain/Dev (npm ci inside a member dir installs from the workspace ROOT lock): governance npm ci -> npm prune --omit=dev; originate npm ci --omit=dev; referral sed + npm ci -> npm prune --omit=dev; vc-issuer npm ci --omit=dev; plus /shared. Census with the full install as positive control and jest/vitest absent as negative control. Frontends ship only dist/ (show it from the Dockerfiles), so rule whether bbm moves any dist/: issuer head vs develop with a determinism control, then the others if the box allows. IF js-yaml ships in ANY runtime image, or anything in one loads it, the tier becomes 1: say TIER BECAME 1 as the first BLUF line and exercise the loader (3.15.1 vs 3.15.2, the advisory's empty-merge-sources shape, bounded, with an in-bounds control). Otherwise record the dev-only proof with its controls.
+   Drafter (measured at d7fc6cc55): runtime census NONE in all four services and /shared; full-install controls find js-yaml 3.15.2 and bbm everywhere; jest/vitest absent after the runtime step; the only js-yaml importer is @istanbuljs/load-nyc-config/index.js:80, a lazy require for YAML nyc configs; 0 source importers; issuer dist/ 58 files byte-identical develop vs head (head vs head2 control identical).
+
+2. The advisories are gone, through the shipped gates from Blockchain/Dev: head + head baseline (32) -> audit-gate rc 0 "31 reported, 32 baselined" and audit-locks rc 0 (43 lockfiles), 0 CLEANUP; head + develop's baseline (34) -> CLEANUP naming exactly the 2 (say which script prints it, by line); develop + head's baseline -> both rc 1 naming exactly the 2. Tee vulnerable_versions from the bulk response the shipped audit-locks.mjs receives (no extra URL) and compare every census version with the shipped semver, controls on both sides. Drafter: js-yaml ">=3.0.0 <3.15.2" high, bbm ">=2.0.0 <2.11.0" moderate; 3.15.2 and 2.11.24 outside; mobile 4.1.1 also outside (the READY says "HIGH range": rule it).
+
+3. Scope by parse, develop 19f1e5475 vs head: only the named family entries move in each lock (name any nested ones), 0 OTHER, packages[""] and top-level keys identical, with a planted-change control; 0 manifests; baseline 32 = develop's 34 minus exactly the 2, 0 added, 0 altered, with a planted-alteration control; the mobile lock blob 2f5f8c1f4 untouched, as ruled.
+
+4. Suites Seat B reports (governance jest 115, originate jest 656, referral vitest 26, vc-issuer vitest 108; 4 frontend builds): re-run what fits the box, FIRST any suite that can load js-yaml (the jest ones, via babel-plugin-istanbul -> load-nyc-config), and say whether the run resolved js-yaml at all (say which instrument; jest bypasses Node resolve hooks). Clean-room: lockfile-cleanroom.sh over the 8 touched member dirs at head (host node-24 route) with a planted control that must FAIL, sha-restored.
+
+5. Merge: git merge-tree --write-tree of head over the THEN-CURRENT develop in YOUR clone; name the tree OID (drafter 39353b735 over 19f1e5475 = the head tree). Prove the merge commit d7fc6cc55 brought only develop: its tree equals merge-tree(19f1e5475, b51ed77e1), the files it moved equal develop's delta since efaaa6034 (drafter: 1 file, audit-baseline.json), and the 9 lock blobs equal b51ed77e1's.
+
+6. Linking: attachmentsForURL(pull/1027) exactly KS-1211 "contributes", no closes, completedAt null; control pull/99999 = 0; 0 closing phrases in title, body, both commits and every comment (planted controls); re-read immediately before the mail. KS-1211 stays In Progress. Rule §5f.
+
+Your tool shell's grep may be a function: use /usr/bin/grep -i with a same-file positive control.
+Read vitest "Tests N passed (N)" and jest "Tests: N passed" lines, never a TAP "# tests" parse. Compare versions with semver, never as strings.
+zsh: no PIPESTATUS (write rc=$? on its own line), and never begin a line with `====`. `timeout` is not installed: end a hung process by verified pid.
+Never `cd` in your own tool calls.
+Quote the Secuura checkout's porcelain count, .git/config sha256, for-each-ref count, .git/worktrees entry count, origin develop and refs/pull/1027/head at start, mid and close.
+Never rm. Use a fresh mktemp -d per attempt and quarantine scratch files by rename.
+Do no memory maintenance of your own project's memory store inside this session.
+
+Report FOUND / TESTED / HOW, with controls, and state what you did NOT test at the same prominence. Write NOT-TESTED.written-first.md BEFORE any run, then the report, to:
+/Volumes/DevMASTER/!CODING/Testing Agent MAIN/projects/secuura/reports/2026-09-17-ks1211-1027-d7fc6cc55-tier2-r1/
+Verdict: GO, GO WITH FINDINGS, or NO GO, on d7fc6cc5582b918c0773ec6f25f86407de6f86ab and on the merged tree (name the develop SHA and the merged-tree OID). Give the MERGE ADDENDUM line from the brief, filled in.
+
+REPORT YOUR VERDICT to wednesday-agent@agentmail.to when the pass is complete. Your pane holds ~19 lines of alternate screen with no scrollback, so a verdict that stays in the pane is one pane-close from being lost. The verdict MAIL is the END STATE and the wait signal.
+Subject:
+[QA -> Wednesday] TIER 2 GATE #1027 (KS-1211) d7fc6cc55 — <GO | GO WITH FINDINGS | NO GO>
+
+Sending: the QA project has no send_brief.sh of its own. The brief's VERDICT DESTINATION names the path that worked: the AgentMail API from coagent@agentmail.to (POST https://api.agentmail.to/v0/inboxes/coagent@agentmail.to/messages/send), with AGENTMAIL_API_KEY read by NAME from /Volumes/DevMASTER/WEDNESDAY/4_Credentials/.env and never echoed.
+Confirm the API answered 2xx and quote the message id in your final pane line. Timestamps in the mail come from `date`, never estimated.
