@@ -11256,6 +11256,43 @@
    "CARD secuura-793-the-four-rows-you-authorised-are-already-expired",
    "CARD secuura-ks1024-advisory-baseline",
    "CARD secuura-ks769-mobile-tree-fuse-lapsed-blocks-pushes"
+  ],
+  "delivered_artefact": "KS-1211 comment 0ec33ad8 + KS-763 comment b953f63d (read at source by Wednesday 17:2x)",
+  "delivered_ts": "2026-09-17T17:23:53.650063+10:00"
+ },
+ {
+  "id": "secuura-audit-row-mysql2-override-vs-prisma-pin",
+  "client_project": "Secuura/Blockchain",
+  "title": "Audit row mysql2 (expires Thu 24 Sep): override prisma's exact pin to remove it, or re-date it?",
+  "bluf": "Measured by Seat B (07:23Z, GitHub advisory + npm registry reads): mysql2 3.15.3 carries a medium decompression-bomb DoS (GHSA-rgwj, fixed 3.23.1). Every stable prisma 7.x including 7.10.0 pins mysql2 3.15.3 EXACTLY, so no normal bump fixes it. We use Postgres; the row's own 09-06 measurement found mysql2 in the originate image but never loaded (0 imports). It is 1 of the 15 rows that block every push from Thu 24 Sep 10:00 AEST; the other Sep-24 rows are being fixed by in-range bumps. On 3 Sep this row was EXTENDED by the card's default (you were only offered extend or leave); an override was never put to you.",
+  "default_action": "Seat B does NOT build the override until you tap. If nothing is ruled by Tue 22 Sep 18:00 AEST, Wednesday re-raises this card with the other per-row decisions; the row still blocks pushes on Thu 24 Sep 10:00 AEST unless you rule.",
+  "options": [
+   {
+    "key": "override",
+    "label": "Override to mysql2 3.23.1 (recommended)",
+    "detail": "Two package.json overrides (originate + the workspace root), both locks regenerated, originate's suites + a prisma generate smoke, tier-1 QA gate, row removed. Removes the vulnerable code, your 09-09 'bump beats accept' rule. Risk: bends prisma's declared dependency, only on a MySQL path we do not use."
+   },
+   {
+    "key": "redate",
+    "label": "Re-date the row with a reason",
+    "detail": "Keep mysql2 3.15.3 until a prisma release moves it; Wednesday re-dates the one row. The package stays in the image."
+   },
+   {
+    "key": "other",
+    "label": "Something else",
+    "detail": "Say what, e.g. drop mysql2 from the image entirely."
+   }
+  ],
+  "recommended": "override",
+  "ts": "2026-09-17T17:24:53.314808+10:00",
+  "status": "open",
+  "ruled_choice": null,
+  "ruled_ts": null,
+  "prior_rulings_overridden": [
+   "CARD secuura-mysql2-fuse-2026-09-03",
+   "CARD secuura-mysql2-fuse-measured-2026-09-03",
+   "CARD nexusai-rd245-audit-log-leaves-settings",
+   "CARD secuura-audit-baseline-rows-lapse-24sep-block-pushes"
   ]
  }
 ]
