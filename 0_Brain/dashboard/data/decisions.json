@@ -11134,5 +11134,54 @@
    "2026-09-17 08:47",
    "CARD secuura-kintsugi-build-cache-prune"
   ]
+ },
+ {
+  "id": "secuura-ks839-oauth-wildcard-scope-grants-everything",
+  "client_project": "Secuura/Blockchain",
+  "title": "KS-839: an OAuth app registered with scope '*' is granted everything - should the wildcard grant nothing?",
+  "bluf": "OVERRIDE REASON: the gate matched 18 items, all read. The only OAuth ones are the refresh-token laundering cards (denylist-at-deploy, marker-only), about a different defect. The rest share only the word 'scope' (KS-662, KS-739, the erasure connector scope, KS-764, demo scope, dark mode, HPSM, NexusAI) or are PR-triage pastes and slot/tenant grants. None rules the OAuth wildcard. THE MEASUREMENT (develop d7e95cd9f, an in-process probe on the real authorize route; report local-model/night/briefs/DEFAULTS_2026-09-17_KS805-855-839.REPORT.md): an app with allowedScopes ['*'] got a code scoped admin:everything, and code scope '*' for scope=* and for an omitted scope. A '*' token passes every scope check at the gateway and in originate (read, not driven). The suite stays 751/751, and the published spec never mentions the wildcard. RELATED: app registration accepts ANY scope list, including '*' and subjects:erase; who may register an app is unmeasured. Option E is already built as a held local-model fix; nothing merges or deploys without your tap. NOT measured: how many live apps carry '*' (if any, E cuts them off).",
+  "default_action": "The held E fix is raised as 'Refs KS-839' by the next Secuura seat, tier-1 gate, and its merge WAITS for Kam's tap; that seat also files a ticket for registration accepting any scope (searched first); nothing to Peter or Stuart",
+  "options": [
+   {
+    "key": "grants-nothing",
+    "label": "E - '*' grants no scopes (services/oauth.ts",
+    "detail": "353 returns an empty list); the wildcard paths get 400 or an empty grant; a Claude seat adds the wildcard sentence to the published contract after PR #922"
+   },
+   {
+    "key": "delete-branch",
+    "label": "D - remove the wildcard branch",
+    "detail": "unknown scopes refused, but '*' and an omitted scope still grant '*'"
+   },
+   {
+    "key": "ratify",
+    "label": "R - keep today's behaviour, pin it in a test and state it in the contract (the wildcard keeps granting everything)",
+    "detail": ""
+   }
+  ],
+  "recommended": "grants-nothing",
+  "ts": "2026-09-17T14:15:44.472443+10:00",
+  "status": "open",
+  "ruled_choice": null,
+  "ruled_ts": null,
+  "prior_rulings_overridden": [
+   "2026-08-21 13:31",
+   "2026-09-03 21:20",
+   "2026-09-07 10:50",
+   "2026-09-10 09:01",
+   "2026-09-10 09:08",
+   "2026-09-10 09:08",
+   "CARD secuura-ks662-scope",
+   "CARD secuura-ks739-lookup-role-scope",
+   "CARD nexusai-rd167-dark-mode-scope",
+   "CARD secuura-erasure-scope-gate",
+   "CARD secuura-ks764-key-revoke-org-scope",
+   "CARD secuura-demo-deploy-scope-2026-09-03",
+   "CARD secuura-891-workflow-scope-merge",
+   "CARD nexusai-three-lineages-in-scope-or-parked",
+   "CARD hpsm-phase1-imagepng-out-of-scope",
+   "CARD secuura-oauth-refresh-launder-forward-only-window",
+   "CARD secuura-oauth-refresh-window-iat-cutoff-or-marker",
+   "CARD nexusai-demo-deploy-finish-scope"
+  ]
  }
 ]
