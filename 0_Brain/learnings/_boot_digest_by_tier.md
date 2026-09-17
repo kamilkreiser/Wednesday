@@ -7,7 +7,7 @@ status: live
 
 # Boot digest BY TIER — W whole, M rules-only, every project case a handle
 
-Generated 2026-09-18 06:55 from 180 lesson files (900,950 B). M 33 · MIXED 5 · W 142. 28 project CASE sections inside MIXED files are reduced to one line each: the heading and the path to read it at. W blocks are exactly what the default digest carries; M blocks drop the section index and keep the rules; a P file is a single handle. The CASES behind every rule live only in the lesson files — open one the moment its rule fires.
+Generated 2026-09-18 09:18 from 181 lesson files (903,908 B). M 33 · MIXED 5 · W 143. 28 project CASE sections inside MIXED files are reduced to one line each: the heading and the path to read it at. W blocks are exactly what the default digest carries; M blocks drop the section index and keep the rules; a P file is a single handle. The CASES behind every rule live only in the lesson files — open one the moment its rule fires.
 
 ## The T9 SSD is the master — Wednesday must be fully portable
 `2026-07-31_fully-portable-drive.md` · principle · 2026-07-31 · status: superseded — the "T9 is the master" half by [[2026-08-25_one-drive-devmaster-is-master]] (2026-08-25); the portability principle itself still lives · tier: W
@@ -6132,4 +6132,22 @@ sections (open the file for these): Why this is not just "the 90% rule again" ·
 4. **On or after Monday 2026-09-21 this is DEAD** and the 90% gauge rule returns as the only cut. Do not renew it by inference ([[2026-09-06_a-scoped-override-carries-its-own-expiry]]); the parked four are then re-proposed to Kam, not launched on this file's authority.
 
 **Family:** [[2026-09-14_at-90pct-weekly-usage-no-new-agents-wednesday-plus-local-model]] (superseded in the strict direction, for these three days) · [[2026-09-15_ornith-q4-only-volume-week-qa-sunday-merge-once]] (same expiry, same Sunday QA) · [[2026-09-13_as-many-agents-as-possible-partitioned-by-code]] (the standing rule this suspends) · [[2026-09-06_a-scoped-override-carries-its-own-expiry]] · [[2026-09-14_kams-instruction-stands-until-he-withdraws-it]] (my unanswered question does not soften it).
+
+
+## STANDING RULE: the local agent works CONSTANTLY on the tickets it can — an idle Ornith is a rule being broken, not a gap to notice later
+`2026-09-18_ornith-works-constantly-standing-rule.md` · grant · 2026-09-18 · status: live · tier: W
+
+**His words, verbatim (09:16:16):**
+> *"The credits have reset, so please start up all agents and continue the work. Also, as a standing rule, I'd like the local agent to be constantly working on the tickets that it can."*
+
+sections (open the file for these): How to apply
+
+## How to apply
+
+1. **At boot and at EVERY checkpoint, check the queue before choosing your own next task.** `night/queue.md` empty + no runner = the standing rule is being broken right now.
+2. **Keep a scoped-and-ready next job in the pickup at all times**, so refilling costs minutes rather than an hour of triage. Today's is KS-1230, with its handler line, test target and pre-flight check already recorded.
+3. **When the pool genuinely thins, WIDEN rather than stop** ([[2026-09-15_never-idle-the-gatekeeper-widens-the-harness-when-the-pool-runs-dry]]) — and with agents available, the widening tool is a search commission, which is what a whole morning of hand-sampling proved slower than.
+4. **If the queue must be empty, write WHY where the next reader lands** — the reason is the artefact, and "I didn't find anything" is not one.
+
+**Family:** [[2026-09-15_never-idle-the-gatekeeper-widens-the-harness-when-the-pool-runs-dry]] (the correction this promotes) · [[2026-09-16_local-model-is-long-term-and-claude-takes-what-it-cannot-do]] (the router: Claude takes what Ornith cannot) · [[2026-09-16_if-something-blocks-move-on-to-the-next]] (a blocked item is skipped, never waited on) · [[2026-09-14_ornith-runs-at-night-in-the-downtime-a-standing-rule]] (the night shape this widens to all hours).
 

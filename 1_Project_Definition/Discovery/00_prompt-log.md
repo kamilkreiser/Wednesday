@@ -2541,3 +2541,15 @@ unparks anything. It CANCELS the 02:18 renewal sequence carried by three handove
 #1037 KS-1101 drafter · seat A 9th successor · #1036 + Seat B). One question put back to him,
 unanswered as at 06:4x: whether in-session research sub-agents count as "claude agents" — held as
 INCLUDED until he says otherwise.
+
+## 2026-09-18 09:12 / 09:15 / 09:16 — Kam, dashboard panel, VERBATIM (four messages in five minutes)
+
+> There's a very large list of backlog items. Have all those been deemed to be too difficult for the local model?
+
+> Okay, don't wait until Sunday. Merge, push, and deploy everything that's ready and archive all the items that have been done.
+
+> The credits have reset, so please start up all agents and continue the work. Also, as a standing rule, I'd like the local agent to be constantly working on the tickets that it can.
+
+> In the meantime, I have a question. Tell me when you're ready.
+
+**What was done with them:** the 09:12 challenge was answered with a measured breakdown of all 340 board tickets (and a correction issued minutes later when Wednesday's own path-extraction check proved faulty — see the daily note). 09:15 supersedes the "QA Sunday night, merge all at once" half of the 2026-09-15 Ornith grant. 09:16 **LIFTS the 06:37 no-Claude-agents restriction after 2 h 39 min** (it never reached its Sunday expiry; `usage_gate.sh` re-checked OK at 5%) and creates a new STANDING RULE recorded as `learnings/2026-09-18_ornith-works-constantly-standing-rule.md`. Receipted on the panel within the minute each time. Wednesday held one reading back for Kam rather than assuming it: **demo still waits for Peter's nod**, since "deploy everything that's ready" was not read as cutting across his own standing UAT rule.
