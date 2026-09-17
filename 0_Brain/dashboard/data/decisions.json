@@ -11139,8 +11139,8 @@
   "id": "secuura-ks839-oauth-wildcard-scope-grants-everything",
   "client_project": "Secuura/Blockchain",
   "title": "KS-839: an OAuth app registered with scope '*' is granted everything - should the wildcard grant nothing?",
-  "bluf": "OVERRIDE REASON: the gate matched 18 items, all read. The only OAuth ones are the refresh-token laundering cards (denylist-at-deploy, marker-only), about a different defect. The rest share only the word 'scope' (KS-662, KS-739, the erasure connector scope, KS-764, demo scope, dark mode, HPSM, NexusAI) or are PR-triage pastes and slot/tenant grants. None rules the OAuth wildcard. THE MEASUREMENT (develop d7e95cd9f, an in-process probe on the real authorize route; report local-model/night/briefs/DEFAULTS_2026-09-17_KS805-855-839.REPORT.md): an app with allowedScopes ['*'] got a code scoped admin:everything, and code scope '*' for scope=* and for an omitted scope. A '*' token passes every scope check at the gateway and in originate (read, not driven). The suite stays 751/751, and the published spec never mentions the wildcard. RELATED: app registration accepts ANY scope list, including '*' and subjects:erase; who may register an app is unmeasured. Option E is already built as a held local-model fix; nothing merges or deploys without your tap. NOT measured: how many live apps carry '*' (if any, E cuts them off).",
-  "default_action": "The held E fix is raised as 'Refs KS-839' by the next Secuura seat, tier-1 gate, and its merge WAITS for Kam's tap; that seat also files a ticket for registration accepting any scope (searched first); nothing to Peter or Stuart",
+  "bluf": "CORRECTED 14:2x: option E is NOT yet built. The local model failed it twice (its edit would have broken every ordinary app, and the checker refused both), so the next Secuura Claude seat applies the one-line fix by hand from the brief. The rest is unchanged. OVERRIDE REASON: all 18 prior-ruling matches read; the only OAuth ones are the refresh-token laundering cards, a different defect; the rest share only the word 'scope'. THE MEASUREMENT (develop d7e95cd9f, in-process probe on the real authorize route): an app with allowedScopes ['*'] got a code scoped admin:everything, and code scope '*' for scope=* and for an omitted scope. A '*' token passes every scope check at the gateway and in originate (read, not driven). The suite stays 751/751, and the published spec never mentions the wildcard. RELATED: app registration accepts ANY scope list, including '*' and subjects:erase; who may register is unmeasured. Nothing merges or deploys without your tap. NOT measured: how many live apps carry '*'.",
+  "default_action": "The next Secuura Claude seat applies option E by hand (services/oauth.ts:353 returns an empty list, with its test), tier-1 gate, 'Refs KS-839'; the merge WAITS for Kam's tap; that seat also files a ticket for registration accepting any scope (searched first); nothing to Peter or Stuart",
   "options": [
    {
     "key": "grants-nothing",
@@ -11182,6 +11182,21 @@
    "CARD secuura-oauth-refresh-launder-forward-only-window",
    "CARD secuura-oauth-refresh-window-iat-cutoff-or-marker",
    "CARD nexusai-demo-deploy-finish-scope"
-  ]
+  ],
+  "amendments": [
+   {
+    "ts": "2026-09-17T14:20:34.472341+10:00",
+    "reason": "Correction 14:2x: the local model FAILED the E fix twice (it would not copy the em-dash line at oauth.ts:353 and deleted the wrong line; the checker refused both). E is NOT built. It is a one-line fix a Claude seat applies by hand from the brief.",
+    "changed": [
+     "bluf",
+     "default_action"
+    ],
+    "before": {
+     "bluf": "OVERRIDE REASON: the gate matched 18 items, all read. The only OAuth ones are the refresh-token laundering cards (denylist-at-deploy, marker-only), about a different defect. The rest share only the word 'scope' (KS-662, KS-739, the erasure connector scope, KS-764, demo scope, dark mode, HPSM, NexusAI) or are PR-triage pastes and slot/tenant grants. None rules the OAuth wildcard. THE MEASUREMENT (develop d7e95cd9f, an in-process probe on the real authorize route; report local-model/night/briefs/DEFAULTS_2026-09-17_KS805-855-839.REPORT.md): an app with allowedScopes ['*'] got a code scoped admin:everything, and code scope '*' for scope=* and for an omitted scope. A '*' token passes every scope check at the gateway and in originate (read, not driven). The suite stays 751/751, and the published spec never mentions the wildcard. RELATED: app registration accepts ANY scope list, including '*' and subjects:erase; who may register an app is unmeasured. Option E is already built as a held local-model fix; nothing merges or deploys without your tap. NOT measured: how many live apps carry '*' (if any, E cuts them off).",
+     "default_action": "The held E fix is raised as 'Refs KS-839' by the next Secuura seat, tier-1 gate, and its merge WAITS for Kam's tap; that seat also files a ticket for registration accepting any scope (searched first); nothing to Peter or Stuart"
+    }
+   }
+  ],
+  "amended_ts": "2026-09-17T14:20:34.472354+10:00"
  }
 ]
