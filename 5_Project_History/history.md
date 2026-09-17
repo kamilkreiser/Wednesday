@@ -1,3 +1,28 @@
+## 2026-09-18 05:31 AEST — overnight coordinator seat (04:0x → 05:3x), Secuura scope
+
+**Six KS-1229 test-gap rows briefed IN-SEAT for the local model and all six held.** Five passed on the model's first sample; one
+(X-ISSUE-LOOSE) failed twice on a defect in Wednesday's own brief — two new `it.each` rows placed under three rows of identical
+shape, so the model's positional anchoring slipped — and passed after the single rebrief Kam's counter allows. Held, disjoint hunks,
+one PR, `Refs KS-1229`, tier 2: AFTERVERIFY (118-123) · VERSIONTRIM (145-150) · SIGNWALLET (174-179) · LOOSE (179-184) · RECHECK
+(204-209) · SIGNCERT (EOF).
+
+**Method for each:** fence verified against the tip by script with a shifted control → a golden answer through the REAL checker
+before queueing (7/7 each) → the model's `+` lines compared to the fence in sequence with a mutated control → placement re-derived
+independently of the checker. Every tamper LINE-PINNED, because the KS-1213 guard text occurs three times in `documents.ts`.
+
+**Constraint all night:** the weekly allowance sat at the 90% cut, so nothing could be launched — no agent, no gate, no sub-agent.
+Wednesday + Ornith only. Kam wrote nothing. Develop unchanged at `34cdcfb26`. At renewal (~08:00): #1034 gate → #1037 drafter →
+seat A 9th → #1036 + Seat B; the #1032 card still awaits Kam's tap.
+
+**Records:** two ledger rows (an inherited typed clock, and three hand-rolled-instrument slips of this seat — a short fence, a
+`patch` invocation BSD patch rejects, a mistyped grep needle — all caught before any claim); two IMPROVEMENTS rows (the brief-shape
+rule, and a model dialect in CONTEXT lines that is harmless because context is matched, never written). Digests regenerated and
+checked (179 files, 0 misses, 0 stale, by-tier OK). Handover mail sent to the morning seat and verified at the destination.
+
+**Honest gaps:** Ornith is IDLE from 05:19 — the 05:30 shift change forbade starting new work, so the next brief is the morning
+seat's first act and its specification is written out in NEXT-PICKUP. INDEX.md not refreshed. The partition census for the last four
+briefs was inherited from 01:00, not re-run.
+
 ## 2026-09-16 22:30 → 2026-09-17 05:30 — Wednesday overnight seats (Secuura + generic scope; the 21:36, 00:2x, 03:1x and 05:03 seats; quiet hours; Kam 0 lines)
 - **Product:** 14 Platform K PRs merged overnight, each tier-gated and verified at source — six before midnight (#999 · #1000 · #1001 · #1002 · #1003 · #1004) and eight after (#1005 · #1006 · #1007 · #1008 · #1009 · #1010 · #1012 · #1013, the last merged 05:35 and verified 17/17) after a tier-1 GO WITH FINDINGS; #1011 KS-871 NO GO round 1 → round 2 READY (gate being drafted). Filed from gates: KS-1177, KS-1179–KS-1187 (KS-1187 Urgent: a pre-existing absolute-form erasure-door bypass — carded for Kam, default WAIT). Nothing deployed.
 - **The §5f correction:** Wednesday's briefs had set runtime tickets Done on merge against the project's own `secuura-test-discipline` §5f; the seat asked; ruled (b) — four tickets back to In Progress, the live sweep batched into Sunday's QA pass (ledger w=2).
