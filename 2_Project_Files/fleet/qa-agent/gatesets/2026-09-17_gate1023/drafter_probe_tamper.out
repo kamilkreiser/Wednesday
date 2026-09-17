@@ -1,0 +1,51 @@
+18:16:52 G-PRECEDENCE applied True | a live Bearer beats a VALID key (principal precedence swapped): no seat cell sends JWT + valid key
+copied qa1023-drafter-probe.test.ts sha 974765eea2a8 into head label tamper_G-PRECEDENCE
+restored sha equal True git diff --quiet True
+   G-PRECEDENCE test rows differing from untampered head: 40
+      /api credentials LIVE_VALID | head (200, None, ('connector:qa1023-conn',), ('connector:qa1023-conn',), ('b0000000-0000-4000-8000-00000000c0de',), 0) | tampered (200, None, ('u-qa1023',), ('u-qa1023',), ('a0000000-0000-4000-8000-000000000001',), 0)
+      /api credentials REVOKED_VALID | head (200, None, ('connector:qa1023-conn',), ('connector:qa1023-conn',), ('b0000000-0000-4000-8000-00000000c0de',), 0) | tampered (401, 'SESSION_INVALIDATED', (), (), (), 0)
+      /api referrals LIVE_VALID | head (200, None, ('connector:qa1023-conn',), ('connector:qa1023-conn',), ('b0000000-0000-4000-8000-00000000c0de',), 0) | tampered (200, None, ('u-qa1023',), ('u-qa1023',), ('a0000000-0000-4000-8000-000000000001',), 0)
+      /api referrals REVOKED_VALID | head (200, None, ('connector:qa1023-conn',), ('connector:qa1023-conn',), ('b0000000-0000-4000-8000-00000000c0de',), 0) | tampered (401, 'SESSION_INVALIDATED', (), (), (), 0)
+      /api governance LIVE_VALID | head (200, None, ('connector:qa1023-conn',), ('connector:qa1023-conn',), ('b0000000-0000-4000-8000-00000000c0de',), 0) | tampered (200, None, ('u-qa1023',), ('u-qa1023',), ('a0000000-0000-4000-8000-000000000001',), 0)
+      /api governance REVOKED_VALID | head (200, None, ('connector:qa1023-conn',), ('connector:qa1023-conn',), ('b0000000-0000-4000-8000-00000000c0de',), 0) | tampered (401, 'SESSION_INVALIDATED', (), (), (), 0)
+      /api nft LIVE_VALID | head (200, None, ('connector:qa1023-conn',), ('connector:qa1023-conn',), ('b0000000-0000-4000-8000-00000000c0de',), 0) | tampered (200, None, ('u-qa1023',), ('u-qa1023',), ('a0000000-0000-4000-8000-000000000001',), 0)
+      /api nft REVOKED_VALID | head (200, None, ('connector:qa1023-conn',), ('connector:qa1023-conn',), ('b0000000-0000-4000-8000-00000000c0de',), 0) | tampered (401, 'SESSION_INVALIDATED', (), (), (), 0)
+   G-PRECEDENCE limiter rows differing from untampered head: 5
+       L-LIVE+VALID-rl3 #1  | head (200, None, ('connector:qa1023-conn',), ('connector:qa1023-conn',), ('b0000000-0000-4000-8000-00000000c0de',), 1) | tampered (200, None, ('u-qa1023',), ('u-qa1023',), ('a0000000-0000-4000-8000-000000000001',), 0)
+       L-LIVE+VALID-rl3 #2  | head (200, None, ('connector:qa1023-conn',), ('connector:qa1023-conn',), ('b0000000-0000-4000-8000-00000000c0de',), 1) | tampered (200, None, ('u-qa1023',), ('u-qa1023',), ('a0000000-0000-4000-8000-000000000001',), 0)
+       L-LIVE+VALID-rl3 #3  | head (200, None, ('connector:qa1023-conn',), ('connector:qa1023-conn',), ('b0000000-0000-4000-8000-00000000c0de',), 1) | tampered (200, None, ('u-qa1023',), ('u-qa1023',), ('a0000000-0000-4000-8000-000000000001',), 0)
+       L-LIVE+VALID-rl3 #4  | head (429, 'RATE_LIMIT_EXCEEDED', (), (), ('b0000000-0000-4000-8000-00000000c0de',), 1) | tampered (200, None, ('u-qa1023',), ('u-qa1023',), ('a0000000-0000-4000-8000-000000000001',), 0)
+       L-LIVE+VALID-rl3 #5  | head (429, 'RATE_LIMIT_EXCEEDED', (), (), ('b0000000-0000-4000-8000-00000000c0de',), 1) | tampered (200, None, ('u-qa1023',), ('u-qa1023',), ('a0000000-0000-4000-8000-000000000001',), 0)
+18:17:18 G-JUNKBUCKET applied True | a failed key consumes a limiter bucket on the fall-through
+copied qa1023-drafter-probe.test.ts sha 974765eea2a8 into head label tamper_G-JUNKBUCKET
+restored sha equal True git diff --quiet True
+   G-JUNKBUCKET test rows differing from untampered head: 0
+   G-JUNKBUCKET limiter rows differing from untampered head: 11
+       L-LIVE+JUNK #1  | head (200, None, ('u-qa1023',), ('u-qa1023',), ('a0000000-0000-4000-8000-000000000001',), 0) | tampered (200, None, ('u-qa1023',), ('u-qa1023',), ('a0000000-0000-4000-8000-000000000001',), 1)
+       L-LIVE+JUNK #2  | head (200, None, ('u-qa1023',), ('u-qa1023',), ('a0000000-0000-4000-8000-000000000001',), 0) | tampered (200, None, ('u-qa1023',), ('u-qa1023',), ('a0000000-0000-4000-8000-000000000001',), 1)
+       L-LIVE+JUNK #3  | head (200, None, ('u-qa1023',), ('u-qa1023',), ('a0000000-0000-4000-8000-000000000001',), 0) | tampered (200, None, ('u-qa1023',), ('u-qa1023',), ('a0000000-0000-4000-8000-000000000001',), 1)
+       L-LIVE+JUNK #4  | head (200, None, ('u-qa1023',), ('u-qa1023',), ('a0000000-0000-4000-8000-000000000001',), 0) | tampered (200, None, ('u-qa1023',), ('u-qa1023',), ('a0000000-0000-4000-8000-000000000001',), 1)
+       L-JUNK #1  | head (200, None, (None,), (None,), (), 0) | tampered (200, None, (None,), (None,), (), 1)
+       L-JUNK #2  | head (200, None, (None,), (None,), (), 0) | tampered (200, None, (None,), (None,), (), 1)
+       L-JUNK #3  | head (200, None, (None,), (None,), (), 0) | tampered (200, None, (None,), (None,), (), 1)
+       L-JUNK #4  | head (200, None, (None,), (None,), (), 0) | tampered (200, None, (None,), (None,), (), 1)
+18:17:45 G-TENANTDROP applied True | the Bearer fall-through loses its tenant context when a key header was presented
+copied qa1023-drafter-probe.test.ts sha 974765eea2a8 into head label tamper_G-TENANTDROP
+restored sha equal True git diff --quiet True
+   G-TENANTDROP test rows differing from untampered head: 64
+      /api credentials LIVE_JUNK | head (200, None, ('u-qa1023',), ('u-qa1023',), ('a0000000-0000-4000-8000-000000000001',), 0) | tampered (200, None, ('u-qa1023',), ('u-qa1023',), ('null',), 0)
+      /api credentials STOREDOWN_JUNK | head (200, None, ('u-qa1023',), ('u-qa1023',), ('a0000000-0000-4000-8000-000000000001',), 0) | tampered (200, None, ('u-qa1023',), ('u-qa1023',), ('null',), 0)
+      /api credentials DOWN500_LIVE | head (200, None, ('u-qa1023',), ('u-qa1023',), ('a0000000-0000-4000-8000-000000000001',), 0) | tampered (200, None, ('u-qa1023',), ('u-qa1023',), ('null',), 0)
+      /api credentials DESTROY_LIVE | head (200, None, ('u-qa1023',), ('u-qa1023',), ('a0000000-0000-4000-8000-000000000001',), 0) | tampered (200, None, ('u-qa1023',), ('u-qa1023',), ('null',), 0)
+      /api referrals LIVE_JUNK | head (200, None, ('u-qa1023',), ('u-qa1023',), ('a0000000-0000-4000-8000-000000000001',), 0) | tampered (200, None, ('u-qa1023',), ('u-qa1023',), ('null',), 0)
+      /api referrals STOREDOWN_JUNK | head (200, None, ('u-qa1023',), ('u-qa1023',), ('a0000000-0000-4000-8000-000000000001',), 0) | tampered (200, None, ('u-qa1023',), ('u-qa1023',), ('null',), 0)
+      /api referrals DOWN500_LIVE | head (200, None, ('u-qa1023',), ('u-qa1023',), ('a0000000-0000-4000-8000-000000000001',), 0) | tampered (200, None, ('u-qa1023',), ('u-qa1023',), ('null',), 0)
+      /api referrals DESTROY_LIVE | head (200, None, ('u-qa1023',), ('u-qa1023',), ('a0000000-0000-4000-8000-000000000001',), 0) | tampered (200, None, ('u-qa1023',), ('u-qa1023',), ('null',), 0)
+   G-TENANTDROP limiter rows differing from untampered head: 7
+       L-LIVE+JUNK #1  | head (200, None, ('u-qa1023',), ('u-qa1023',), ('a0000000-0000-4000-8000-000000000001',), 0) | tampered (200, None, ('u-qa1023',), ('u-qa1023',), ('null',), 0)
+       L-LIVE+JUNK #2  | head (200, None, ('u-qa1023',), ('u-qa1023',), ('a0000000-0000-4000-8000-000000000001',), 0) | tampered (200, None, ('u-qa1023',), ('u-qa1023',), ('null',), 0)
+       L-LIVE+JUNK #3  | head (200, None, ('u-qa1023',), ('u-qa1023',), ('a0000000-0000-4000-8000-000000000001',), 0) | tampered (200, None, ('u-qa1023',), ('u-qa1023',), ('null',), 0)
+       L-LIVE+JUNK #4  | head (200, None, ('u-qa1023',), ('u-qa1023',), ('a0000000-0000-4000-8000-000000000001',), 0) | tampered (200, None, ('u-qa1023',), ('u-qa1023',), ('null',), 0)
+       L-LIVE+DOWN500 #1  | head (200, None, ('u-qa1023',), ('u-qa1023',), ('a0000000-0000-4000-8000-000000000001',), 0) | tampered (200, None, ('u-qa1023',), ('u-qa1023',), ('null',), 0)
+       L-LIVE+DOWN500 #2  | head (200, None, ('u-qa1023',), ('u-qa1023',), ('a0000000-0000-4000-8000-000000000001',), 0) | tampered (200, None, ('u-qa1023',), ('u-qa1023',), ('null',), 0)
+       L-LIVE+DOWN500 #3  | head (200, None, ('u-qa1023',), ('u-qa1023',), ('a0000000-0000-4000-8000-000000000001',), 0) | tampered (200, None, ('u-qa1023',), ('u-qa1023',), ('null',), 0)

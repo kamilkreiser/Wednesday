@@ -1,0 +1,165 @@
+ultrathink
+
+You are the fleet QA agent running ONE TIER 1 ROUND 1 gate over Secuura/Blockchain PR #1023 (KS-1207, Seat A) at head
+2f74491ebd6211e722f778838339c55e8add008d. KS-1207 (High, measured): on the gateway's optional-auth mounts `authenticateToken(false)` tried the
+`x-api-key` path first and, when an `sk_` key failed validation, called next() at once, so the Bearer path and its KS-257 session-revocation check
+never ran: a revoked-session JWT plus any junk `x-api-key: sk_…` was forwarded, and the upstreams (shared authenticate(), signature only) accepted it.
+The fix commit 0f8b699b4 (parent d7e95cd9f): services/api-gateway/src/middleware/auth.ts +14 -10 (a presented key that fails validation on an
+OPTIONAL mount falls through to the Bearer path; with no Bearer the request stays anonymous; required mounts still 401 "Invalid API key"; the
+connector branch's `if` is now `apiKey && meta`, body unchanged) and a new test +185 (26 cells, 5 mounts). Shape (B) fall-through was ratified by
+Wednesday 12:1x (the SHAPE only); Kam ruled build-after-1019 (KS-1207 comment 1c90d0fc). The head 2f74491eb is a MERGE of develop 581c9db0d (#1019's
+squash) into 9bd0fd333 (itself a merge of f8c7aaa39 into 0f8b699b4); no file overlap claimed. auth.ts also carries #1017's (KS-1195) per-key limiter
+continuation, merged earlier today: #1023 sits on top of it. TIER 1 (Wednesday's receipt): authentication middleware on every optional mount.
+ROUND 1. No rendered surface changes: say whether the real-browser half of tier 1 applies.
+
+Read your brief FIRST and in full, then plan:
+/Volumes/DevMASTER/WEDNESDAY/2_Project_Files/fleet/qa-agent/briefs/2026-09-17_secuura-1023-ks1207-tier1.md
+Then the charter it names, the seat's READY (gatesets/2026-09-17_gate1023/mail_1023_ready.md), Wednesday's receipt (receipt_1023.md), the shape
+ruling (gatesets/2026-09-17_gate1019/answer_build_ks1207_now_local.md), and the drafter's gateset DRAFTER_REPORT.md whole. Prior reports that found
+the defect (Record R-4) and moved the limiter into auth.ts — read, do not re-derive:
+/Volumes/DevMASTER/!CODING/Testing Agent MAIN/projects/secuura/reports/2026-09-17-ks1195-1017-cbe29597d-tier1-r1/
+/Volumes/DevMASTER/!CODING/Testing Agent MAIN/projects/secuura/reports/2026-09-17-ks1195-1017r2-a067d4e3e-tier1-r2/
+The drafter's census probe (gatesets/2026-09-17_gate1023/qa1023-drafter-probe.test.ts, sha256 6977c8157e36…) and its rows (rows/rows_head_head.json,
+rows_dev_dev.json) are PREDICTIONS: you may reuse the probe as a starting instrument, but assert its sha, extend it, and re-measure every row.
+
+Head (git ls-remote 18:06:47 AEST and the PR API 18:19:23 agree; the launcher re-asserts it):
+  #1023 2f74491ebd6211e722f778838339c55e8add008d = refs/pull/1023/head = feature/ks-1207-security-an-unknown-sk_-key-on-an-optional-auth-mount-skips
+  three commits: 0f8b699b4 (fix), 9bd0fd333 (merge of develop f8c7aaa39), 2f74491eb (merge of develop 581c9db0d; parents 9bd0fd333 + 581c9db0d).
+  PR files vs develop: auth.ts 7c985bdce -> b8fce678a; NEW ks1207-a-failed-optional-api-key-falls-through-to-the-bearer-check.test.ts f56bd48b9.
+  develop = 581c9db0db4201c42cbbf702f339b750989acdb1 = the head's merge-base AND an ANCESTOR of the head. compare develop...head = merge_base
+  581c9db0d, ahead 3, behind 0, files 2. Trees you run: fix 0f8b699b4, head 2f74491eb, develop 581c9db0d, and merged = head + a local --no-ff merge of
+  the then-current develop (never pushed). Drafter merged-tree OID (merge-tree --write-tree in its OWN clone = the head tree = the seat's prediction):
+  4bdf1b8c7ea3a679e6b20a21c5970d375ba8776f — name yours. If develop moves, judge by content, name every tree, and re-run items 1, 2 and 3 on merged.
+Repo:    /Volumes/DevMASTER/!CODING/Secuura/Blockchain/2_Project_Files  (READ-ONLY — git clone --shared --no-checkout by SHA into your own
+  fresh mktemp -d; git write verbs there only, from a script file; never merge-tree --write-tree or git apply in the checkout (both write); never enter
+  Seat A's worktrees (raise-0916-a*) or Seat B's worktrees/raise-0917-b-audit*, or another gate's clone (a #1021 TIER 2 gate is live; a #1022 gate
+  may be); never vitest inside the checkout; pin by SHA, never origin/*. Record the checkout's porcelain count and .git/worktrees count before and
+  after: they must be equal (drafter 0 / 112) — other sessions move refs and worktrees, so attribute nothing to yourself without evidence)
+Farm node_modules per ENTRY in your clone (#1009's R-6): Blockchain/Dev/node_modules (987), services/api-gateway/node_modules (8) and
+  packages/shared/node_modules (8), each per entry, .vite/.vitest/.cache skipped, @secuura/* relinked into your tree; shared dist built per tree,
+  IN TREE asserted. NEVER link a node_modules tree wholesale — not for any package; create no node_modules where nothing runs.
+  Node runs only with cwd inside your clone.
+
+You are FINDINGS-ONLY. You never fix, never merge, never push, never deploy, never comment, never file, never tick an
+ack box, never `@`, never write to Linear or GitHub, and nothing goes to Peter or Stuart.
+
+NEVER run a push, the real pre-push hook, or preflight.sh inside the Secuura checkout or any of its worktrees.
+
+NEVER print a credential value, and never open, read or copy a secrets file into output — a script may read GH_TOKEN / LINEAR_API_KEY by
+NAME from /Volumes/DevMASTER/!CODING/Secuura/Blockchain/4_Credentials/.env and AGENTMAIL_API_KEY by NAME from
+/Volumes/DevMASTER/WEDNESDAY/4_Credentials/.env for the calls the brief allows (GitHub GET, Linear query, the one verdict mail), and never
+echoes them. Count, never echo. RSA keys, JWTs and sk_ keys in your probe are THROWAWAY, generated per run.
+
+NO shared docker stack, no :6882 / :7082 slot, no kintsugi, no demo, no az, no image, NEVER the wallet mnemonic (KS-535 HOLD). This gate needs NO
+container: the REAL index.ts app in-process (real spec auth gate, versioning, authenticateToken, per-key limiter, proxy) with
+../db mocked, the session store stubbed through a partial @secuura/shared mock (a revoked, a live and an unreachable session id), runWithTenantId
+wrapped to RECORD its tenant argument, and every *_SERVICE_URL (SECURITY for /api/keys/validate, AUTH for /internal/connector-token and JWKS) as ONE
+loopback recording stub with an upstream HIT COUNTER that also records the forwarded x-user-id, the forwarded Bearer's decoded subject and x-tenant-id
+(validate / connector-token / JWKS calls are NOT hits). Boot in NODE_ENV=test AND NODE_ENV=production (raise RATE_LIMIT_MAX_REQUESTS for the census:
+the production global limiter is 300/min — an instrument, say so). Run `docker info` ONCE and print its rc on its own line (UP is NOT permission;
+create no container). LOOPBACK ONLY: every listener binds 127.0.0.1:0. ANY LISTENER YOUR RUNS START, YOU END: identify it by port + argv + cwd,
+SIGTERM that pid, never a pattern kill, never pid 1, and recount after — the same for any login_stub.mjs process YOUR runs started (KS-1201's leak
+exists; do not add to it); quote an lsof TCP LISTEN census (+ cwd and argv per node pid + the login_stub.mjs count) at start and close. Do NOT probe
+through a real front end (nginx / Caddy / Container Apps ingress / any edge) and do not stand one up: the edge and the upstream services' own
+authenticate() are NOT TESTED. Set UNHANDLED_REJECTION_MODE=survive before importing the app. No Akto, no k6, no Playwright, no Schemathesis run
+(NOT COMMISSIONED) — YOU rule whether Schemathesis/Akto are REQUIRED, with the measured reason. Time-box 40 minutes of work.
+
+What Wednesday requires (brief items 1-10; each carries drafter predictions marked drafter):
+
+1. THE BYPASS CLOSED ON THE REAL APP FOR EVERY OPTIONAL MOUNT — not only the five the seat named. Census every authenticateToken(false) use
+   yourself (git grep at head; aliases; routers mounted twice). Drafter census: 8 — proxy.ts /api/certifications (then requireScope),
+   /api/credentials, /api/referrals, /api/governance, /api/nft, /api/billing; admin.ts GET /api/settings/notifications and GET
+   /api/privacy/settings (gateway-local). On EACH, under /api AND /api/v1 in test and /api/v1 in production, on head / develop / merged: revoked
+   JWT + junk sk_ key, revoked JWT + a key whose validation answers 5xx, revoked JWT + validation unreachable (socket destroyed); controls revoked
+   alone, live alone, anonymous. Any 2xx or upstream hit with a revoked session and a key that did NOT validate = STILL OPEN (Major). Beware the
+   oracle trap: revoked JWT + a VALID key is served as the connector on BOTH trees. Drafter (measured): head 0 such rows; develop forwarded on the
+   5 proxy mounts and 200 on the 2 local GETs per failed-key class; certifications 401 on develop via requireScope; production /api/* -> 307.
+2. NO LEGITIMATE CALLER BROKEN, head vs develop per mount: a valid key alone (prove the connector branch body byte-identical by diff; principal,
+   key tenant, connector-token Bearer forwarded); a live JWT alone; a live JWT + VALID key — which principal wins before vs after (drafter: the
+   connector on both); anonymous calls on optional mounts; a junk key alone (anonymous, as before); REQUIRED mounts unchanged (401 "Invalid API key"
+   on a bad key, with and without a JWT). A legitimate caller refused or re-principaled other than the intended live-JWT + failed-key -> JWT
+   principal = Blocker. Drafter: identical on every such cell; the intended change also reaches the 3 unnamed mounts with NO seat cell
+   (certifications live+junk 401 -> 200; the local GETs revoked+junk 200 -> 401, live+junk defaults -> the user's own settings) — rule it.
+3. #1017's PER-KEY LIMITER INSIDE auth.ts: a junk key (alone and beside a live JWT) must not create or consume a limiter bucket on the fall-through;
+   a VALID key is counted exactly once per request (rl=N -> the (N+1)th 429), alone and beside a live JWT; the once-per-request guard (find a chain
+   that passes authenticateToken twice on an optional mount, or say none exists); runWithTenantId on the Bearer fall-through receives the JWT's
+   tenant. Drafter (measured with a recording fake Redis): junk 0 incr both trees; valid rl3 1 incr per request, 429 on the 4th, both trees;
+   fall-through tenant = the JWT tenant at head, not called at develop; no double optional chain found by READ.
+4. COULD NOT VALIDATE vs INVALID: validation 5xx, validation unreachable, and {valid:false}, each with no Bearer / live / revoked, on an optional
+   AND a required mount. Does the fall-through turn an infra fault into a silent downgrade to the Bearer principal or anonymous? Separate what the PR
+   changed from what validateApiKey already did (null for all three; a non-ok response cached 30 s as invalid). Drafter: no Bearer -> anonymous as
+   before; revoked -> 401 (develop forwarded); live -> the JWT user (develop: anonymous with the Bearer forwarded): a principal switch connector ->
+   human when BOTH credentials are sent during an outage — predicted Record. THEN the drafter's NEW sibling: revoked JWT + a VALID key whose
+   connector-token exchange FAILS -> forwarded 200 as connector:… with the revoked user's Bearer forwarded unchanged and 0 session checks, on every
+   mount INCLUDING required /api/documents, IDENTICAL at develop. Re-measure both trees; if identical it is NOT this PR's: NEW, TICKET, severity yours.
+5. TAMPERS: re-derive the seat's 6 rows at HEAD — T0 0 · TBYPASS 10 · TSKIPSESSION 5 · TNOBEARER 5 · TREQ 1 · TI 0 — each on the WHOLE api-gateway
+   suite, denominator asserted 56 / 550, pending 0, project tsc rc per row (non-compiling = VOID; state every form; the seat's exact forms are in
+   Seat A's records — never enter a seat worktree for them: write your own and name them), sha-restored, git diff --quiet; PLUS the drafter's
+   (measured, all tsc 0: G-PRECEDENCE 0, G-ERRMETA 1 (auth.test.ts "returns null when fetch throws"), G-JUNKBUCKET 0, G-TENANTDROP 0, G-PREFIXFREE
+   0) and at least one of your own from a NEW direction (e.g. the session check skipped only when validation ERRORED; meta truthy on a non-ok
+   response). Red-proof: auth.ts = develop bytes -> 10 red / 16 green of the ks1207 test, all AssertionError (drafter: 10 on the whole suite).
+   Say which cells see which property and which property NO cell sees (drafter: precedence, limiter-on-fall-through, tenant-on-fall-through, the
+   sk_ prefix rule — a predicted Minor test-coverage finding).
+6. SUITES, tsc, eslint vs develop 581c9db0d: api-gateway head 56/550 · develop 55/524 · merged <yours>; packages/shared at head (seat 44/851;
+   drafter: not run); project tsc --noEmit -p . rc 0 each; THE TEST-INCLUDING tsc PROGRAM (not tsc -p, which excludes src/__tests__) on head
+   and develop with --listFilesOnly proof the ks1207 test is in it and a control that the project program excludes it, NEW only, a planted control
+   (+1) (drafter: head 592 files, develop 591, 31 lines / 11 files both, 0 in touched files, NEW 0, plant +1);
+   eslint by rule AND message with a firing control (drafter: auth.ts 1 no-unused-vars "'error' is defined but never used." head = develop; the
+   test 0).
+7. THE MERGE COMMITS: prove the PR's 2 files byte-identical at 0f8b699b4 and the head, and develop's files at the head = 581c9db0d (with a control
+   that fires); re-predict the merged tree over current develop in YOUR clone (drafter 4bdf1b8c7 = the head tree).
+8. LINEAR / GITHUB at run time and immediately before the mail: attachmentsForURL(pull/1023) = KS-1207 contributes, no closes (controls pull/1019
+   -> KS-843 + KS-1187 contributes; pull/99999 -> 0); 0 closing phrases in the title, body and all three commit messages (planted controls);
+   KS-1207 stays In Progress on merge (§5f: the upstream services' acceptance and the edge are unmeasured).
+9. THE KS-736 RESIDUAL stated as NOT this PR's: a junk key ALONE on a bearerAuth operation of each proxy mount is forwarded anonymous while no
+   credential is refused 401 (index.ts:1073-1074 counts header presence). Drafter: identical on both trees. Do not widen it into #1023.
+10. CARRY-FORWARD per finding CLOSED / STILL OPEN / NEW, each SHIPS-WITH or TICKET — KS-1207's bypass, the drafter's disagreements 1-5 (brief §2)
+   — plus the Schemathesis/Akto ruling with its measured reason, the checkout bounds, and NOT TESTED at equal prominence: the edge, the running
+   vc-issuer / referral / governance / nft-certificate / billing services and their authenticate(), a real security service and auth
+   /internal/connector-token, a real Redis session store, preflight legs 3/4/8, demo.
+
+LEAD WITH item 1 and the drafter's disagreements 1-3 (brief §2): is the bypass CLOSED on every optional mount you can census, both prefixes and
+both modes; does any legitimate caller change other than the intended live-JWT + failed-key principal; and does a validation outage become a silent
+downgrade.
+
+Hygiene: /bin/bash here is 3.2 — write runners in Python. zsh: no PIPESTATUS (`cmd > out 2>&1; rc=$?`), no timeout on macOS, `set -- $var`
+does not word-split, `"$VAR:path"` applies history modifiers (write `"${VAR}:path"`), never begin a line with `=====`. Your tool shell's grep may be a
+function: /usr/bin/grep -i with a same-file positive control; `git grep -c` prints nothing for a zero — silence is unread, not 0. Never `cd` in your
+own tool calls; absolute paths; git write verbs only inside script files. stderr is never discarded. Clocks from `date`, never estimated. Every
+scripted edit asserts its anchor count = 1 and a marker. Never edit index.ts for a probe. apiKeyCache and connectorBearerCache are module-level: a
+UNIQUE key per request or a cached result hides your class. Quote the Secuura checkout's porcelain count, .git/config sha256, for-each-ref count,
+.git/worktrees count, origin develop SHA, refs/pull/1023/head and the checkout branch at start, mid and close as THREE timestamped readings; if
+refs/pull/1023/head moves, STOP — the brief is about a different SHA. develop moving is expected; judge it by content, name it.
+Never `rm`: fresh mktemp -d per attempt; quarantine scratch tests and configs by rename. No container is created; never touch a
+secuura-* container.
+Do no memory maintenance of your own project's memory store inside this session.
+
+Report FOUND / TESTED / HOW, with controls, into
+/Volumes/DevMASTER/!CODING/Testing Agent MAIN/projects/secuura/reports/2026-09-17-ks1207-1023-2f74491eb-tier1-r1/
+(NOT-TESTED.written-first.md written FIRST, BEFORE any run; then report.md and evidence/): the trees with OIDs; the census and its rows per mount,
+prefix, mode and tree; the legitimate-caller table; the limiter and tenant rows; the could-not-validate rows and the valid-key-exchange-failure
+sibling; the full tamper table with forms, tsc rc and VOID rows; the red-proof; suites, the test-including tsc program and eslint; the merge identity
+and merged-tree OID; Linear; the KS-736 residual; the Schemathesis/Akto ruling; the listener census start / close; the CLOSED / STILL OPEN / NEW
+table; and what you did NOT test at the same prominence as the findings. Every finding carries its evidence class (MEASURED AT RUNTIME / PROBED /
+READ ONLY / RELAYED), severity, target (PR or TICKET), SHIPS-WITH or TICKET, disposition, and its oracle. Name every prediction slip against its
+predictor (the READY, the seat, the drafter, Wednesday).
+Client-facing communication = ticket comments only, and not from you; anything needing a push goes to Wednesday as an escalation candidate.
+Never delete; cleanup means quarantine.
+Verdict: ONE line — GO, GO WITH FINDINGS, or NO GO — on 2f74491ebd6211e722f778838339c55e8add008d, as the delta over develop 581c9db0d, AND on the
+merged tree (name the develop and the merged-tree OID). Then plain statements on items 1-10 and the CLOSED / STILL OPEN / NEW table.
+Give the merge seat its MERGE ADDENDUM line: "squash 2f74491eb onto develop <then-current develop; 581c9db0d at draft close = the head's second
+parent> (merged tree <OID>; drafter 4bdf1b8c7 = the head tree); #1023 attaches to KS-1207 only, linkKind contributes, no closes — KS-1207 stays
+In Progress on merge (§5f: the upstream services' acceptance and the edge are unmeasured); equality targets after the squash: auth.ts blob b8fce678a
+/ ks1207 test f56bd48b9; api-gateway 55/524 at 581c9db0d -> 56/550 at head -> <merged n/n> (re-measure); packages/shared <n/n>; dispositions:
+<per finding, SHIPS-WITH or TICKET>; NEW: <yours>; Records for KS-1207's facts comment at merge: the 3 unnamed optional mounts' behaviour change,
+could-not-validate -> the Bearer principal, the KS-736 residual NOT this PR's, <yours>" — plus any finding with its target.
+
+MAIL YOUR VERDICT to wednesday-agent@agentmail.to when the pass is complete. Your pane holds ~19 lines of alternate screen with no
+scrollback, so a verdict that stays in the pane is one pane-close from being lost -- this is not a formality, it is the only durable
+copy; the verdict MAIL is the END STATE and the wait signal. Send it FROM coagent@agentmail.to. Subject, EXACTLY:
+[QA -> Wednesday] TIER 1 GATE #1023 (KS-1207) — <GO | GO WITH FINDINGS | NO GO>
+(The QA project has no send_brief.sh of its own: POST https://api.agentmail.to/v0/inboxes/coagent@agentmail.to/messages/send with JSON
+{"to": ["wednesday-agent@agentmail.to"], "subject": "...", "text": "..."} and Authorization: Bearer $AGENTMAIL_API_KEY, the key by NAME
+from Wednesday's .env, never echoed. Build the body from a template file with no shell interpolation and assert the backtick spans survived.
+Confirm the API answered 2xx and quote the message id in your final pane line. Timestamps in the mail come from `date`, never estimated.
+The MAIL is the end state.)

@@ -1,0 +1,43 @@
+## BLUF
+
+On the gateway's optional-auth mounts, **any** `x-api-key` **header that starts with** `sk_` **switches off the Bearer check**. `authenticateToken(false)` tries the API-key path first; when the key fails validation it calls `next()` with no principal and **never looks at the** `Authorization` **header**, so the session-revocation check (KS-257) never runs. **Measured:** a revoked-session JWT alone is refused 401 `SESSION_INVALIDATED`, but the same JWT plus `x-api-key: sk_anything` is forwarded, and the shared package's real `authenticate()` (what the upstreams mount) accepts it 200 with the revoked session's principal. That holds on `/api/credentials` (list, read, **revoke**), `/api/referrals` (read, **apply**), `/api/governance` and `/api/nft`, and by READ on `/api/billing`. Only the gateway and originate check revocation, so for vc-issuer, referral, governance, nft-certificate and billing **logout, the session cap and a suspension do not stop a token whose holder adds a junk key header**, until the token expires (`JWT_EXPIRES_IN` default 1h). Pre-existing; not from #1017.
+
+## Recommendation
+
+Fix in `services/api-gateway/src/middleware/auth.ts`: when an `x-api-key` is presented and fails validation, **answer 401 regardless of** `required` (or fall through to the Bearer path instead of `next()`), and have the spec auth gate (`index.ts:1073-1074`) stop counting the header's presence as a credential. Add a cell per optional mount: revoked-session JWT + unknown `sk_` key → 401, 0 upstream hits. **High:** a measured revocation bypass on five services, bounded by the token lifetime and needing a token that was issued to someone. Not built; no deploy decision needed until a fix exists.
+
+## Detail
+
+**Source:** tier-1 QA gate round 1 on PR #1017, Record R-4 ("on optional-auth routes `/api/credentials*` and `/api/referrals/:sub`, no credential → 401 but an unknown `sk_` key → 200 forwarded"; report `Testing Agent MAIN/projects/secuura/reports/2026-09-17-ks1195-1017-cbe29597d-tier1-r1/report.md`), carried STILL OPEN by round 2. The gate also noted `admin.ts:1455` / `:1483` as optional-auth sites its list missed. The revoked-session route below is this ticket's own measurement, not the gate's.
+
+### The mechanism (READ at develop `d7e95cd9f153e9036ed77935a73c93504fa6e3dc`)
+
+* `index.ts:1073-1074`: the spec auth gate admits a `bearerAuth` operation when `x-api-key` is a string starting `sk_`. Presence only; nothing is validated there.
+* `middleware/auth.ts` `authenticateToken`: the API-key block runs first. On `!meta` it answers 401 only `if (required)`; otherwise `next()` and return. The Bearer block, which verifies the JWT and calls `isSessionActive` (`auth.ts:376`), is never reached.
+* Optional mounts in `routes/proxy.ts`: `/api/certifications` (`:573`, followed by `requireScope`), `/api/credentials` (`:859`), `/api/referrals` (`:942`), `/api/governance` (`:1031`), `/api/nft` (`:1048`), `/api/billing` (`:1097`). Every spec operation under the last five is `bearerAuth` except three verify ops (`POST /api/credentials/verify`, `POST /api/nft/verify/transaction`, `POST /api/nft/verify/asset`).
+* **Who checks revocation (READ, every** `isSessionActive(` **caller outside tests):** `api-gateway/src/middleware/auth.ts:376` and `originate/src/middleware/auth.ts:105` only. vc-issuer (`index.ts`), referral (`index.ts:81`), governance (`index.ts:132`), nft-certificate (`app.ts`) and billing (`index.ts:148`, mounted on `/billing`) use shared `authenticate()`, which verifies the RS256 signature and nothing else.
+
+### The measurement (in-process, 2026-09-17 01:41Z)
+
+* **Substrate:** the real assembled gateway app (`index.ts` default export) at `a067d4e3e`, whose `auth.ts`, `index.ts`, `proxy.ts`, `admin.ts`, `config/services.ts` and shared `middleware/index.ts` blobs equal develop `d7e95cd9f` (checked by blob id). Every `*_SERVICE_URL` pointed at one recording stub. The session store stubbed: session `r4-revoked` → revoked, `r4-active` → live. Tokens: throwaway RS256 JWTs from the test setup key. Each forwarded request was then replayed, with the headers the gateway actually forwarded, against shared `authenticate()` mounted on `/api` of a bare express app.
+* **Rows** (84 = 12 paths × 7 credentials; gateway status / upstream hits / replayed upstream status):
+
+| credential | credentials GET, GET :id, POST :id/revoke · referrals GET :code, POST apply · governance GET · nft GET |
+| -- | -- |
+| none | 401, 0 hits |
+| unknown `sk_` key | **200 forwarded, 1 hit**; no Authorization forwarded; upstream **401** |
+| known key (control) | 200, 1 hit, connector principal; upstream 200 |
+| live-session JWT (control) | 200, 1 hit, session check ran; upstream 200 |
+| revoked-session JWT (control) | **401** `SESSION_INVALIDATED`, 0 hits, session check ran |
+| **revoked-session JWT + unknown** `sk_` **key** | **200 forwarded, 1 hit, 0 session checks, the revoked JWT forwarded as sent; upstream 200 with the revoked session's principal** |
+| bad-signature JWT + unknown `sk_` key | 200 forwarded, 1 hit; upstream 401 (the signature is still checked upstream) |
+
+* **Controls that separate the mounts:** `/api/documents` (required) answers 401 to the unknown key and to revoked JWT + unknown key, 0 hits. `/api/certifications` answers 401 to both (its `requireScope` refuses a request with no principal). So the bypass is exactly the five optional mounts with no gate after `authenticateToken(false)`.
+* **Billing:** the gateway rows match the table (revoked JWT + unknown key → 200, 1 hit, 0 session checks). The upstream replay does not apply (billing mounts `authenticate()` on `/billing`, not `/api`), so billing's upstream acceptance is READ, not measured.
+* `/api/settings/notifications` **and** `/api/privacy/settings` (gateway-local, `admin.ts:1455` / `:1483`): 200 with no credential and 200 with any junk credential, so the key adds nothing there. One oddity: a revoked JWT alone is 401 while no credential at all is 200.
+* **Not measured:** the running vc-issuer / referral / governance / nft-certificate / billing services (their real routes, DB and error handlers), the edge (nginx / Caddy) and demo. A live repro is owed before calling it exploited anywhere.
+* **Evidence:** `5_Project_History/2026-09-17_seatA-4th/tickets/r4/`: `rows.json`, `rows-table.txt`, `probe-run.out`, and the probe itself (`zz-r4-probe.test.ts`, run once, then moved out of the worktree).
+
+### Search before filing
+
+`searchIssues` (includeArchived, includeComments), literal case-insensitive matches only: `SESSION_INVALIDATED` 109 fuzzy / 8 literal · `isSessionActive` 7 / 7 · `authenticateToken(false)` 80 / 8 · `optional auth` 94 / 1 (KS-719, archived: unauthenticated PUT on the two admin settings routes) · `session revocation` 106 / 11 · `unknown sk_` 104 / 0. Nearest: **KS-736** (In Review): the mount-auth check scores `authenticateToken(false)` as authenticated on these same six mounts. It is about the guard, and mentions neither `x-api-key` nor revocation. **KS-570** (archived) and **KS-257** (archived) are the same revocation-bypass class on other mounts. **KS-588** (Backlog) is revoked-session regression coverage for `/api/status`. None covers the API-key path pre-empting the Bearer check. Related: KS-1195, KS-736, KS-588 (KS-570 and KS-257 are archived, so they are named here, not related).
