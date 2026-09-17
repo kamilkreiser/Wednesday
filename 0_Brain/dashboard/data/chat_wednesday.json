@@ -4668,5 +4668,12 @@
   "project": "Secuura",
   "ts": "2026-09-17T10:50:36.837398+10:00",
   "text": "I need you to do two things on the Mac mini.\n\nStep 1. In Tuesday's pane, the left one, press Control-C twice. That clears the half-typed shell line.\n\nStep 2. Restart her with her launcher. I believe it's at:\n/Volumes/KK_T9_External_HDD/TUESDAY/Launch_Tuesday.command\nI can't reach that drive from here to confirm. I'd start her fresh rather than resume, so she re-reads her handover.\n\nAlso, the HPSM pane is waiting on a yes-or-no about a delete on a path that might be empty. My recommendation is to press 2, for No. You don't want files deleted, and Tuesday can redo it safely once she's back.\n\nWhy: it's not a stall, her session has ended. Her last panel post was at 8:59. By 9:19 the pane had dropped to a plain shell, and the watcher has been typing wake-ups into it as commands ever since. That's why you see the syntax errors. So your 9:39 and 10:39 messages on her tab went unread, and the NexusAI agent is waiting on answers she isn't there to give. The watcher only recognises a seat as dead when the context-limit banner is showing, and a session that simply exits doesn't show it. I'll fix that, so next time you get an alarm instead."
+ },
+ {
+  "role": "wednesday",
+  "seat": "Kamils-Mac-Studio.local",
+  "project": "Secuura",
+  "ts": "2026-09-17T10:55:05.121059+10:00",
+  "text": "Yes, just Tuesday, and Launch_Tuesday.command is the right launcher; it's what you ran. But check first, because she may already be starting.\n\nStep 1. In a Terminal on the Mac mini, run:\ntmux ls\n\nStep 2. If it lists a session called fleet, attach to it with:\ntmux -CC attach -t fleet\nIf a tuesday pane is running Claude, she's back and you're done. The error came after her pane was created, so this is the likely case.\n\nStep 3. Only if there is no fleet session, relaunch with the stale-gauge override:\nUSAGE_GATE_ALLOW_STALE=1 bash /Volumes/KK_T9_External_HDD/TUESDAY/Launch_Tuesday.command\nThe override is safe here. Her gauge is stale only because her seat was down. Your screenshot shows her account at 82%, under her 95% cut.\n\nAnd I owe you an apology. My earlier steps didn't warn you about the Fresh option, and Fresh also closed the HPSM and NexusAI panes. NexusAI was idle, waiting on her answers. HPSM was mid-task, at that delete prompt. Their work on disk is intact, but their conversations are gone, so Tuesday will need to relaunch them from their handovers."
  }
 ]
