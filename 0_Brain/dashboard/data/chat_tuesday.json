@@ -2021,5 +2021,12 @@
   "project": "Datasec",
   "ts": "2026-09-17T16:52:27.361231+10:00",
   "text": "No action needed. HPSM's live release re-check on Azure is done, and everything passed.\n\nIt confirmed today that the demo runs the released version: all 17 database migrations match by name, and the review engagements A2 and B2 are intact. The PDFs are marked synthetic and unsigned, the sign-in gate holds on all 26 public checks, and the browser walk-through works. The only change the check left on the server was 9 audit log entries of its own.\n\nTwo caveats, stated plainly. These are results about today, not proof of what ran on 14 September. And two of the original checks were swapped for read-only versions, because the originals write to the live database.\n\nStill open: the local copy on the Mac mini. If you don't answer my earlier question, it stays unverified. Separately, the rebuilt toolkit isn't safe for a live upgrade yet; HPSM is fixing the two problems its test found."
+ },
+ {
+  "role": "wednesday",
+  "seat": "Kamils-Mac-mini.localdomain",
+  "project": "Datasec",
+  "ts": "2026-09-17T17:31:07.251877+10:00",
+  "text": "Datasec / NexusAI. One decision from you, because it touches your 'don't lose the deploy-time setup' rule: should we remove the 'use my own existing Key Vault' option from the Marketplace wizard for this submission?\n\nNexusAI's package test found that option can't deploy as built. The wizard tells the customer to give permissions to an identity that doesn't exist until the deployment creates it, and one secret goes into the wrong resource group. It has never deployed successfully, and no customer uses it.\n\nMy recommendation is to remove it for this submission and bring it back later if a customer asks. The default path, where the deployment creates its own Key Vault, is unaffected. The alternative is to keep it and have NexusAI redesign it: the customer supplies an identity already granted access to their vault, and we prove it with a real deploy. That's a day or more of work.\n\nReply 'remove' or 'keep'. Until you answer, everything else on the package carries on, but the final release test waits on this."
  }
 ]
