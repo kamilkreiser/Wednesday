@@ -10,6 +10,19 @@ supersedes: the 2026-09-14 pickup, kept verbatim at NEXT-PICKUP-TUESDAY.md.pre-s
 
 ---
 
+## 🔵 HANDOVER BLOCK — 2026-09-17 11:03 (fresh-launch boot, ctx ~35%). READ THIS FIRST; the 08:2x block below is superseded.
+
+**What happened:** this seat stopped recording turns at 09:03, and 11 wake taps (09:20–10:41) read back "prompt clear" without reaching the model. Cause UNMEASURED. Five NexusAI asks and Kam's 09:39 and 10:39 messages went unanswered. Kam relaunched fresh at 10:53, which ended NexusAI S63, HPSM S49 and the fleet monitor. Ledger rows filed (silent seat w=1, own dirt blocking panel_sync w=4, cross-seat inbox read w=3). Kam answered 10:56 on the panel (verified at origin).
+
+**Live agents (brief mails are the authority):**
+- `%1` **Datasec/NexusAI S64**, brief verified 00:59:34Z. Carries all five GOs: gates RD-477, RD-465 r2 re-gate (M8 ruled acceptable), RD-470 (census cells red-proofed), RD-454 (rebased after RD-465); RD-464 round 2 of 2 on its 7-point plan (429 = throttled WARNING; a B-1 recurrence STOPS). **RD-486 ruled a resubmission blocker** (stored key only to the stored endpoint + limiter, tier 1). **Merges PRE-AUTHORISED** on GO or Minor/Low-only findings, under NexusAI CLAUDE.md:273 with the S62 recipe; it mails MERGED. Then RD-476 (side-by-side to Kam BEFORE merge), the package branch (registry-independent), and the RD-471/472/473/475/487 sort. **Wakes this seat:** PLAN CONFIRMATION, READY FOR QA, MERGED, stop conditions, SECOND ASK (20 min).
+- `%2` **Datasec/HPSM S50**, brief verified 01:00:11Z. Re-derive S49's state (lane A done 030b0a4 + eafaa23; lane B P3 mid-build 08480af), finish P3 as a NEW revision, READY FOR QA, STOP. **This seat then commissions the TIER-1 gate on the rebuilt toolkit.** No live, VM or tunnel command before that gate's GO plus this seat's word. The S49 brief stands in full.
+- `%3` fleet-monitor, re-armed 11:0x (`monitor.sh --once` rc 0, then `cockpit.sh add`).
+
+**Owed by this seat:** answer every agent mail within minutes (the lesson of the morning); verify both plan confirmations (rung 6); tier-1 gate for the HPSM toolkit on READY; score merges as MERGED mails land; RD-476 side-by-side to Kam; **Partner Center published-package download before 24 Sep (daylight; not yet done)**; tell Kam, as information, that RD-486 was ruled in (no action from him); Wednesday proposal mail sent 01:02Z (tap delivery via transcript; dirt blocking panel_sync; send_brief read-back to Wednesday) — watch for her claim.
+**Open with Kam:** the REGISTRY (A dedicated ACR ~US$20/mo vs C public GHCR). Raise once, when the package branch needs it. Open Datasec cards: none.
+**Interim rule for this seat until a mechanism exists:** every note or ledger write goes through `safe_push.sh` in the SAME command.
+
 ## 🔵 HANDOVER BLOCK — 2026-09-17 08:2x checkpoint (ctx 51%). READ THIS FIRST; the 03:05 block below is superseded.
 
 **Live agents (brief mails are the authority, all spf/dkim/dmarc pass):**
