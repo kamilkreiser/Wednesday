@@ -7,7 +7,7 @@ status: live
 
 # Boot digest BY TIER — W whole, M rules-only, every project case a handle
 
-Generated 2026-09-18 09:18 from 181 lesson files (903,908 B). M 33 · MIXED 5 · W 143. 28 project CASE sections inside MIXED files are reduced to one line each: the heading and the path to read it at. W blocks are exactly what the default digest carries; M blocks drop the section index and keep the rules; a P file is a single handle. The CASES behind every rule live only in the lesson files — open one the moment its rule fires.
+Generated 2026-09-18 09:24 from 182 lesson files (908,493 B). M 33 · MIXED 5 · W 144. 28 project CASE sections inside MIXED files are reduced to one line each: the heading and the path to read it at. W blocks are exactly what the default digest carries; M blocks drop the section index and keep the rules; a P file is a single handle. The CASES behind every rule live only in the lesson files — open one the moment its rule fires.
 
 ## The T9 SSD is the master — Wednesday must be fully portable
 `2026-07-31_fully-portable-drive.md` · principle · 2026-07-31 · status: superseded — the "T9 is the master" half by [[2026-08-25_one-drive-devmaster-is-master]] (2026-08-25); the portability principle itself still lives · tier: W
@@ -6114,6 +6114,34 @@ sections (open the file for these): How to apply
 5. **Scope:** Tuesday's seat and the Datasec projects, as he addressed it on the Tuesday tab. Whether Wednesday adopts it is hers and Kam's (a board message is not a fleet rule).
 
 **Family:** [[2026-08-13_establish-authority-before-reconciling]] (reconciliation destroys evidence) · [[2026-09-07_a-rule-for-creation-is-not-a-mandate-to-retrofit]] (enumerate what already occupies the slot) · [[2026-09-16_what-keeps-a-seat-correct-is-not-all-in-git]] · [[2026-09-14_the-coordinator-adds-value-or-it-is-waste-three-duties-not-watching]] (duty 2: check the output as a manager).
+
+
+## STANDING RULE: minimise gate DUPLICATION — batch gates, and never spend a second session on a round the first one should have carried
+`2026-09-18_minimise-gate-duplication-batch-them.md` · grant · 2026-09-18 · status: live · tier: W
+
+**His words, verbatim (09:22:42):**
+> *"Thank you very much. The clarification is great. In that case, can you please create a standing rule to minimize the duplication of the gates? If we don't need to, let's run it less frequently or on batches. Please keep going with the pulls, the merges, and the commits, as well as all the work with the agents and the local LLM."*
+
+sections (open the file for these): The distinction the rule turns on — not every second round is duplication · How to apply · Owed, and offered to Kam
+
+## The distinction the rule turns on — not every second round is duplication
+
+**A round 2 that follows a REAL FINDING is the gate earning its keep.** The seat fixed something the gate caught; that is the process working and it is not what Kam is asking me to cut.
+
+**Duplication is a second session that establishes nothing the first could not have:**
+- the pin went STALE (develop or the head moved between staging and launch), so the gate refuses or measures the wrong tree;
+- a HARNESS fault (a launcher refusal, a broken tool) killed a session that never reached a verdict — *2026-09-18: a bug in `decl_splice.py` would have sent a Claude seat to investigate a fault in our own toolkit*;
+- the SAME unchanged diff is gated twice because nobody recorded that a verdict already covered it;
+- a full-weight gate ran on a change whose tier did not call for one.
+
+## How to apply
+
+1. **BATCH BY DEFAULT.** One gate session covers every change that is **disjoint by file** and shares a tier. **The batching key already exists:** `local-model/night/SUNDAY_MERGE_AUDIT.md` is a generated collision table — 19 files carry more than one READY, 54 of 147 files need sequencing. Changes that touch no common file can be gated together; changes that collide must be sequenced anyway, so gate them in that order. **Normalise the path prefix first** (`services/…` vs `Blockchain/Dev/services/…`) or the collision check under-reports.
+2. **RE-PIN IMMEDIATELY BEFORE LAUNCH, never after a refusal.** Read `git ls-remote origin develop` and the head SHA in the same action as the launch. A stale pin costs a whole session and is the cheapest duplication to remove.
+3. **NEVER RE-GATE AN UNCHANGED DIFF.** If head and develop are unmoved and the diff is byte-identical, the previous verdict STANDS — record it rather than re-running. A verdict is evidence about a tree, and the tree has not moved.
+4. **A harness fault RESUMES the round, it does not spend a new one.** Fix the tool, re-run the same round, and record the fault in `IMPROVEMENTS.md` so it cannot repeat.
+5. **Tier honestly** — the tiered gate ([[2026-09-05_qa-gate-tiers-and-the-two-nogo-cap]]) already caps rounds at two per class and reserves full weight for security, data destruction, deploys and human handovers. **This rule is that one applied harder**, not a new scheme.
+6. **What must NOT be cut:** the gate itself on anything in a signature class. Kam asked to stop paying twice, not to stop checking. **A gate that misses things is worse than no gate — it comes with a receipt saying everything is fine** (the line that prompted him to ask for this).
 
 
 ## NO Claude agents at all until Sunday — the local model is the only worker, and the allowance renewing does NOT unpark anything
