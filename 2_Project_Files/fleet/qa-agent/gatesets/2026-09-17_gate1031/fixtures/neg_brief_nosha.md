@@ -1,0 +1,266 @@
+# QA Agent Invocation Brief — Secuura/Blockchain **TIER 1** **ROUND 1** gate (round 1 of 2 under the cap): PR #1031 (KS-1213, Seat A) @ `be8596a29` — `services/originate`: the four derived-document writers refuse, 400 `BAD_REQUEST` before any write, a caller type that differs from the type they store. `POST /api/documents/:id/version`, `/:id/sign-cert` and `/:id/sign-wallet` compare `metadata.documentType` with `source.type`. `POST /api/certifications/issue` with `parentDocumentId` compares `data.documentType` with `type || 'verification_certificate'`. A new 85-cell jest test.
+
+**TIER 1, and why (Wednesday's receipt, `GS/receipt_1031.md`):** it closes the served-vs-stored relabel the #1024 gate measured as **N-A (Major, pre-existing)** on the derived writers. A document is SERVED as `data.documentType || type` (GET `/:id` `documents.ts:1065`, the list `:311`). The gateway verify gate holds a verifier to the level of the SERVED type (`api-gateway routes/verification.ts:551`). The #1024 gate measured that a connector restricted to `['DOCUMENT']` could version a document and have it served `PROPERTY_DEED`. No rendered surface changes: the real-browser half of tier 1 does not apply (say so, with the reason, in one line).
+
+**Drafted** 2026-09-17 21:15–21:4x AEST (clocks from `date`) by Wednesday's drafting subagent. `GS/` = `/Volumes/DevMASTER/WEDNESDAY/2_Project_Files/fleet/qa-agent/gatesets/2026-09-17_gate1031/`: scripts at its root, every run output under `GS/out/`, and `DRAFTER_REPORT.md` holding the predictions, the disagreements and what the drafter could not predict.
+
+**Wednesday's ruling on the comparison targets** (`gatesets/2026-09-17_gate1028/answer_ks1213_comparison.md`, 10:38:06Z) is a DESIGN acceptance. It covers exact `===` against the stored type, a non-string never equal, and the issue path comparing with the STORED certification type before `saveCertification`. It also covers the legacy-source inheritance: a derived row that inherits a legacy source's own `data.documentType`, with no caller-supplied type, is NOT refused. *"Whether the refuse is complete and correct at runtime is the gate's question, not Wednesday's."*
+
+**PRIOR REPORT** (the gate that found this defect, #1024 / KS-1202, N-A): `/Volumes/DevMASTER/!CODING/Testing Agent MAIN/projects/secuura/reports/2026-09-17-ks1202-1024-d1a328088-tier1-r1/`. Read its N-A and N-B sections before planning. The QA agent has no inbox.
+
+## Charter (read first, in full)
+`/Volumes/DevMASTER/WEDNESDAY/2_Project_Files/fleet/qa-agent/QA_AGENT_CHARTER.md`. You are FINDINGS-ONLY. You never fix, merge, push, deploy, comment on Linear or GitHub, file, tick an ack box, or `@` anyone. You mail ONE verdict to Wednesday.
+
+## HOLDS (verbatim — they bind you)
+- Client-facing communication = ticket comments only, and not from you. **Nobody messages Peter or Stuart.** Anything needing a push goes to Wednesday as an escalation candidate.
+- Never delete; cleanup means quarantine. Fresh `mktemp -d` per attempt. NEVER `rm`.
+- **KS-535: the local stack stays HOLD.** No shared docker stack, no `:6882`/`:7082` slot, no kintsugi, no demo, no deploy, no `az`. NEVER the wallet mnemonic, a `.env`'s contents or real key material. **This gate needs NO container.** Run originate's REAL `documentsRouter` + `certificationsRouter` in-process: the seat's harness shape, with an in-memory `documentRepo` keeping the JSON copy `saveDocument` received, the real `isAllowedByRoleOrScope`, the KS-1061 `makeSharedMock`, and ONE loopback upstream you start that counts `/api/issuer-certs/sign`, `/api/users/stub` and `/api/anchors` hits. Run `docker info` ONCE and print its rc on its own line; UP is not permission; create no container.
+- **Network: loopback only.** Every listener binds `127.0.0.1:0`. **Any listener or login stub your runs start, you end by pid.** Identify it by port + argv + cwd, SIGTERM that pid, never a pattern kill, never pid 1, and recount after. Quote an `lsof` TCP LISTEN census at start and close, with cwd/argv per node pid and the `login_stub.mjs` count. At 21:32:10 there were 23 LISTEN rows, 3 node listeners with cwd under another Testing-Agent session, and 1 `login_stub.mjs` process: none are yours.
+- **The Secuura checkout is READ-ONLY:** `/Volumes/DevMASTER/!CODING/Secuura/Blockchain/2_Project_Files`.
+  - Work in your OWN clone (`git clone --shared --no-checkout` into your own fresh `mktemp -d`). Git write verbs run there only, from a script file; never run `merge-tree --write-tree`, `worktree`, `fetch` or `checkout` in the checkout.
+  - Never enter any seat's worktree or another gate's clone (other gates are live).
+  - Pin by SHA, never `origin/*`.
+  - NEVER run a push, the real pre-push hook, or preflight.sh inside the Secuura checkout or any of its worktrees.
+  - Never `cd` on a command line; absolute paths only.
+- **node_modules per ENTRY — create one only where something runs.** Farm `Blockchain/Dev/node_modules` (987 entries, `.vite` skipped, `@secuura/*` relinked INTO your tree), `packages/shared/node_modules` (8) and `services/originate/node_modules` (11, `.vite` skipped), each per ENTRY. Never link a node_modules tree wholesale. Build the shared dist per tree and assert `@secuura/shared` resolves IN TREE from originate. Node runs only with cwd inside your clone.
+- **PROBES LIVE OUTSIDE `services/originate/`** (the #1018 round-2 gate's F-3: a probe inside a service's tsc/test collectors polluted a tamper pass): not under `src/`, not `src/qa_probe/`, no `.test.ts` anywhere under the service root.
+  - **Drafter pattern (MEASURED, `GS/out/drafter_probe_outside.out`):** put the probe at `<tree>/Blockchain/Dev/qa_probe_1031/`, with every relative `jest.mock` / `import` / `require` path rewritten ABSOLUTE (18 of them in the drafter's probe). Run it with a scratch jest config in that dir, passed with `--config`: `rootDir` = the originate dir, `roots` and `testMatch` = the probe path only, originate's `^uuid$` moduleNameMapper, and ts-jest with an inline tsconfig and `diagnostics: false` (the probe sits outside originate's `rootDir ./src`).
+  - That run gave 204 / 204 rows identical to the same probe run inside the service.
+  - **Before your first tamper row, prove it** (drafter: 64 files, 0 qa_probe at head): originate `jest --listTests` lists 0 qa_probe (control: the ks1213 test listed), and `tsc -p . --listFilesOnly` lists 0 qa_probe (control: `routes/documents.ts` listed).
+  - The drafter's own FIRST probe run and tamper pass used `src/qa_probe/`. That broke this rule. It was measured not collected (listTests 64 / 0 qa_probe; tsc program 0) and was then moved outside the service root. Do not copy that placement.
+- **Keys by NAME only:** `GH_TOKEN` and `LINEAR_API_KEY` are read by a script from `/Volumes/DevMASTER/!CODING/Secuura/Blockchain/4_Credentials/.env`; `AGENTMAIL_API_KEY` by NAME from `/Volumes/DevMASTER/WEDNESDAY/4_Credentials/.env`. NEVER print a credential value. **GitHub: GET only** (a by-SHA fetch into your own clone through a GIT_ASKPASS helper is allowed). **Linear: query only.** Copy `GS/gh_read_1031.py` and `GS/linear_read_1031.py`.
+- **Scope cap (Kam's 40% weekly-usage cap): no Akto, no k6, no Playwright, no Schemathesis run.** They are NOT COMMISSIONED. You RULE whether Schemathesis or Akto is REQUIRED (item 9).
+  - **Time-box: 40 minutes of work.** A leg that would blow it is NOT RUN, with its blocker named.
+  - Priority if time runs short: 1 → 2 → 3 → 4 → 5 → 8 → 6 → 7 → 9 → 10.
+- No `rm`; stderr is never discarded (write it to a file); every clock reading comes from `date`. Do no memory maintenance of your own store inside this session.
+
+## 1. Target (read 21:15–21:32 AEST — `GS/out/gh_read.out`, `GS/out/linear_read.out`, `GS/out/drafter_setup.out`)
+
+| item | value |
+|---|---|
+| PR / ticket | **#1031 / KS-1213**: Linear In Progress, prio 2, related KS-1202, 0 comments. Branch `feature/ks-1213-derived-document-writers-still-relabel-the-served-type-post`. Open, not draft, mergeable `true` (state `unstable`). **2 commits, 3 files, +251 −0.** Title "KS-1213: derived-document writers refuse a caller type that differs from the type they store". Body 8,515 chars, 0 at-signs, 0 closing phrases. KS ids in the body: KS-1213 ×2, KS-1061 ×2, KS-1201, KS-1202, KS-1203, KS-256. 0 reviews, 1 issue comment. |
+| head | **`be8596a29`** = the branch = `refs/pull/1031/head` (ls-remote 21:15:12; PR API 21:26:53). **`450e3429ddd66a479231d259cd201fcddbe2b5a4`** is the change, with parent `19f1e5475` (#1025's squash). `be8596a29` merges develop **`75ad0e55c`** (#1026's squash) into it. Head tree **`75ed56fb43ee919be4f16671defddacb6168b650`** = `merge-tree --write-tree 450e3429d × 75ad0e55c` = `head × 75ad0e55c` (drafter clone). |
+| the 3 files (develop → head blobs) | `Blockchain/Dev/services/originate/src/routes/documents.ts` `de9b5ae25` → **`e3eeb5a68`** (+15: guards at `:1976-1982` /version, `:2589-2592` sign-cert, `:2858-2861` sign-wallet). `…/src/routes/certifications.ts` `59bfe1c62` → **`20934ee94`** (+10: guard at `:195-203`). `…/src/__tests__/ks1213-a-derived-writer-relabel-is-refused.test.ts` absent → **`808282689`** (+226, 85 cells). All three are byte-identical at `450e3429d` and `be8596a29` (`git diff --quiet` rc 0 each). |
+| develop | **`75ad0e55c6335a5f34f6d0b74dfe00b334b2eb2e`** (ls-remote 21:15:12; branches API 21:26:53) is an ANCESTOR of the head (its second parent). **compare develop...head = merge_base `75ad0e55c`, status ahead, ahead 2, behind 0, files 3.** Merged tree = head tree while develop stays here. |
+| UNTOUCHED (blob identical at develop and head; `GS/out/gh_read.out`) | originate `repositories/documentRepo.ts` `6e059d36c` · `repositories/certificationRepo.ts` `2bfeab135` · `services/provenance.ts` `483aa9eb3` · `index.ts` `44d4e4f34` · `middleware/auth.ts` `f08ee1a89` · `middleware/rbac.ts` `df26ceeca` · `originate.openapi.ts` `2d1b48a0c` · `__tests__/helpers/sharedModuleMock.ts` `9645a3d1d` · `__tests__/ks1202-…test.ts` `ada07f053` · `package.json` `749912c59` · `jest.config.js` `735183662` · `tsconfig.json` `d1b46ece7` · `package-lock.json` `040908e22` · `docs/openapi/secuura-api.yaml` `122d3a2f8` · Dev `eslint.config.mjs` `8c5374c60`. |
+| Linear (21:27:23) | **`attachmentsForURL(pull/1031)` = 1 node: KS-1213 `contributes`**, created 11:10:31Z. Controls: `pull/1024` → KS-1202 `contributes`; `pull/99999` → 0. KS-1213 In Progress (walked there by the branch automation 11:10:31Z; READY Rec 2). KS-1203 Backlog, 1 comment. |
+| siblings (PR files API, 21:26:53) | 22 open PRs. **Exact shared files with #1031: 0.** Originate-path neighbours: #995 (originate `src/index.ts`, `utils/gatewayProvenance.ts`, a test) and #575 / #949 (originate `package.json`). This lineage's cap: #1028, #1029, #1031. |
+| the Secuura checkout (read only) | branch `feature/ks-597-b-caller-scoped-externalref`, porcelain 0, `.git/config` sha256 `09959c342094001c…`, 937 refs, 112 `.git/worktrees`, identical at 21:15:12, 21:21:23 and 21:21:44. originate `node_modules/.vite` = 1 entry `vitest`. |
+| toolchain | node v24.7.0, jest 29.7.0, typescript 5.9.3 (as in the #1024 set; re-read yours). |
+| REPORT DIRECTORY | `/Volumes/DevMASTER/!CODING/Testing Agent MAIN/projects/secuura/reports/2026-09-17-ks1213-1031-be8596a29-tier1-r1/`. Write `NOT-TESTED.written-first.md` FIRST, then `report.md` and `evidence/`. |
+
+## 2. Spec / DoD — what this gate must establish
+
+**The change, READ at `be8596a29`:**
+
+- **`/:id/version`** (`documents.ts:1917`), in order:
+  1. `getUserFromRequest` 401;
+  2. `isAllowedByRoleOrScope(DOCUMENT_WRITE_ROLES, 'documents:write')` 403;
+  3. validation 400 (`metadata` optional `isObject`);
+  4. **`handleOnBehalfOf` `:1951`, which calls `recordActionProvenance` when a connector sends `onBehalfOf`;**
+  5. `metadata` = the body object, then `delete metadata.onBehalfOf`;
+  6. the hash 400;
+  7. `getDocument` 404;
+  8. **the guard `:1980`:** `metadata.documentType !== undefined && metadata.documentType !== source.type` → 400 `BAD_REQUEST`;
+  9. `assertNoCycle`;
+  10. `derivedDoc {type: source.type, data: {...sourceDataSansChain, title, versionAction, …, ...metadata}}` `:2015-2030`;
+  11. `saveDocument`, then `publishEvent`.
+- **`/:id/sign-cert`** (`:2544`): the same order without OBO. The guard `:2590` comes BEFORE the issuer-certs upstream `fetch(${AUTH_SERVICE_URL}/api/issuer-certs/sign)` `:2620`. The derived data is `{...source.data, …, ...metadata, sigJson}` `:2725-2735`.
+- **`/:id/sign-wallet`** (`:2811`): the guard `:2859` comes BEFORE `verifyMessageSignature` `:2865`. The derived data is `{...source.data, …, ...metadata, sigWallet}` `:2919-2928`.
+- **`certifications/issue`** (`certifications.ts:116`): 401; 403 (`certifications:write`); validation, where `type` isIn the 9 values (required), `data` isObject (required) and `parentDocumentId` is an optional string. Then **the guard `:200-203`** (`req.body.parentDocumentId` truthy AND `data.documentType !== undefined` AND `!== (type || 'verification_certificate')`). It runs BEFORE:
+  - the holder stub `fetch(/api/users/stub)` `:242`;
+  - `extractOnBehalfOf` / `recordActionProvenance` `:357-375`;
+  - the anchoring submit `fetch(/api/anchors)` `:418`;
+  - `saveCertification` `:486`;
+  - the derived `saveLineageDocument({type: type || 'verification_certificate', data: {title, certificationId, certifiedAt, parentDocumentId, ...data}})` `:500-525` (derived only when `parentDocumentId` is truthy, the same truthiness as the guard).
+
+**Where the type is read (READ):**
+
+- **Served:** `documentType: data.documentType || type` on GET `/:id` (`documents.ts:1065`) and the list (`:311`).
+- **Postgres writes:** `saveDocument` writes `document_type = doc.type || 'document'` and `metadata = {...stripReservedMetadataKeys(doc.data), walletAddress, signatures, blockchain}` (`documentRepo.ts:327-470`).
+- **Postgres reads:** `fromDbRow` reads back `type: row.document_type || 'document'` and `data: {title, documentType: row.document_type, description, contentHash, ...meta}` (`:164-195`). **Stored metadata overrides the column on read, and every Postgres-read source carries `data.documentType` = the column unless its metadata names another.**
+- **`saveCertification`** (`certificationRepo.ts:168-230`) writes a documents row with `metadata = {}` and the caller's data under `certification_metadata.certificationData`. That row is served as `document_type` (the cert type), not as `data.documentType`.
+- Originate's own verification routes (`routes/verification.ts:667, 858, 991`; `verificationV2.ts:201`) serve the COLUMN `document_type`. The lineage walkers (`documentRepo.ts:675, 750`) do too.
+
+**The seat's claims (READY `GS/mail_1031_ready.md`, 11:11:19Z; measure every one):**
+> - C1. All four writers refuse a caller type ≠ the stored type with 400 `BAD_REQUEST` **before any write**. The comparison is KS-1202's: exact, no case-fold, non-string never equal.
+> - C2. 85 cells on the real routers:
+>   - /version, /sign-cert and /sign-wallet × {ISSUER_ADMIN, SYSTEM_ADMIN, connector `documents:write`}: 4 RED (PROPERTY_DEED on DOCUMENT, DEGREE on CERTIFICATE, a case variant, an array), each 400 with nothing saved; 3 controls (equal → 201 stored = served; no metadata → source type; legacy source keeps its own served label);
+>   - issue + parent × 3 principals: 3 RED (`saveCertification` never called) + 3 controls;
+>   - the #1024 N-B four on the create guard.
+>
+>   The connector's served type is read back through GET as SYSTEM_ADMIN.
+> - C3. Red-proof per writer: RP-DEV-DOCS reds /version 12, /sign-cert 12, /sign-wallet 12; RP-DEV-CERTS reds issue 9.
+> - C4. Tampers: TN-VERSION / TN-SIGNCERT / TN-SIGNWALLET (`Date.now() < 0 &&`) red 12 each, own writer only; TN-ISSUE 9; CASEFOLD-VERSION 6; SOURCEDATA-VERSION 3 (the legacy controls); NB-CASEFOLD 2; TI 0; T0 0. **11 / 11, 0 VOID**, 0 reds outside the file, 0 load failures, tsc 0, on the whole originate suite 64 / 741. Run 1's three `false &&` rows were VOID (TS18047) and kept.
+> - C5. Suites: originate 64 / 741 at `450e3429d` and `be8596a29`, tsc 0, eslint 0 on the three files, KS-1061 guard green. At `be8596a29` the seat's modules predate #1027's originate lock change; `npm ci` was not re-run.
+> - C6. `be8596a29` merges develop `75ad0e55c`; tree `75ed56fb4` = prediction; the three KS-1213 files are byte-identical to `450e3429d`.
+> - C7. Residual: an out-of-repo caller sending a differing type now gets 400; no in-repo caller does. KS-1203 not widened into.
+> - C8. Links: KS-1213 `contributes` only; In Progress on merge (§5f).
+> - C9. NOT covered: the gateway, a real issuer-certs upstream or CIP-8 signature, a live DB census of rows already served ≠ stored, Schemathesis / Akto / Playwright / k6.
+
+### WHERE THE READY AND THE DRAFTER'S MEASUREMENTS DISAGREE, OR WHERE THE CELLS ARE SILENT (lead with these; each is a PREDICTION — `GS/DRAFTER_REPORT.md`)
+
+- **D1 — C1's "before any write" is false for `/version` with a connector `onBehalfOf`.**
+  - **Drafter MEASURED** (probe row `V-OBO`, `recordActionProvenance` counted): `metadata.documentType PROPERTY_DEED` + `onBehalfOf {email}` as a `documents:write` connector gives **400 at head, but `recordActionProvenance` is called 1×**. At develop it is 201 with 1 call.
+  - `handleOnBehalfOf` (`:1951`) runs before the guard (`:1980`). The same pre-existing ordering records provenance for a 404 and for the hash 400.
+  - sign-cert / sign-wallet have no OBO call (`C-OBO`: 0). The issue path's `recordActionProvenance` (`:367`) comes after its guard (READ only: the drafter sent no `onBehalfOf` on issue; measure it).
+  - The drafter predicts **Minor, pre-existing, not widened**: an `action_provenance` row attributes a `version:watermark` that never happened. TICKET or Record. The READY's claim needs qualifying. RULE it.
+- **D2 — the builder's cells pin the refusal and "nothing saved", but NOT "no upstream / stub / anchor call" and NOT every shape.** The drafter's own tampers are each tsc 0, whole suite 64 / 741, **0 reds**, and each consequence was measured by the drafter probe on the tampered tree:
+
+  | tamper | what it changes | consequence the cells miss |
+  |---|---|---|
+  | **X-SIGNCERT-AFTER-UPSTREAM** | the guard moved after the issuer-certs sign call | a refused sign-cert still calls `/api/issuer-certs/sign` 1× |
+  | **X-ISSUE-AFTER-HOLDER** | the guard moved after the holder resolution | a refused issue mints / resolves a holder stub (`users/stub` 1×) |
+  | **X-ISSUE-AFTER-ANCHOR** | the guard moved after the anchoring submit | a refused issue submits an anchor (`/api/anchors` 1×) |
+  | **X-ISSUE-LOOSE** | only a string `data.documentType` compared | issue with `7` / `['certificate']` / `{v:1}` → 201, stored `certificate`, served the non-string |
+  | **X-VERSION-TRIM** | trimmed comparison | `'DOCUMENT '` → 201, served `'DOCUMENT '` |
+  | **X-SIGNWALLET-SERVED** | compared with the source's SERVED label | a legacy CERTIFICATE / DEGREE source + `DEGREE` → 201 served DEGREE; + `CERTIFICATE` → 400 |
+
+  **At head the runtime is right on every one of those shapes** (item 1 rows). The drafter predicts **Minor test gaps, SHIPS-WITH (optional cells) or Record**. None is a Blocker, because the behaviour is correct at runtime. RULE whether the "upstream / holder / anchor not called" property is load-bearing enough (tier 1: an external side effect on a refused request) to demand a cell.
+- **D3 — the legacy-source label is refused when a caller echoes it (MEASURED).**
+  - A source stored `CERTIFICATE`, served `DEGREE` (`data.documentType DEGREE`), with caller `metadata.documentType DEGREE` (the label it is SERVED): **400 at head, 201 at develop**, on all three writers × both principals (`L01`).
+  - With `CERTIFICATE` (the stored type): 201 at both, and the derived row is served `CERTIFICATE` (`L02`).
+  - With no metadata: 201 at both, **stored `CERTIFICATE` served `DEGREE`** (`L03`, ruled not refused).
+  - The drafter predicts: L01 is a Record (a behaviour change only for legacy rows whose served label already differs, fail-closed and consistent with the ruling). L03 is **STILL OPEN** as the ruled residual (not caller-supplied), classified apart.
+  - **In Postgres** a "legacy" source is a row whose `metadata.documentType` ≠ `document_type`. How many exist is the C9 live census (NOT TESTED; KS-535).
+- **D4 — no caller-supplied type reaches STORED ≠ SERVED at head on any shape the drafter drove (MEASURED, 204 rows × develop / head).**
+  - Every differing carrier is 400 at head, with derived 0, sign upstream 0, holder stub 0, anchors 0, `saveCertification` 0 and provenance 0 except D1. At develop the same carriers are 201 and served the carrier.
+  - The carriers were: PROPERTY_DEED, `null`, `''`, `7`, an object, leading / trailing space, ZWSP, Cyrillic Т, full-width, lower-case, `['DOCUMENT']`, a duplicate key (last wins), the escaped key `documentType`, and on issue also `'CERTIFICATE'`, `'certificate '` and a missing parent.
+  - These were benign at develop and head alike (201, stored = served): equal type; no metadata; `{}`; nested `metadata.data.documentType` / `metadata.extra.documentType`; the keys `DocumentType` / `document_type`; a raw-JSON `__proto__` key (an own key, served DOCUMENT); top-level `documentType` / `type` / `data` on the document writers; a lower-case source type; a padded source type named equal.
+  - Scope: a certs-only connector → 403 on the document writers, and a docs-only connector → 403 on issue, both trees. `metadata` as a string → 400 VALIDATION_ERROR on both.
+  - Falsy parents: issue without a parent, or with `parentDocumentId ''`, and a mismatch → 201 with derived 0 on both trees (neither the guard nor the derive runs).
+  - Only the L03 legacy inheritance rows (6 rows) have stored ≠ served at head.
+  - The drafter predicts **CLOSED for caller-supplied types on all four writers**. Your hunt must go wider (item 2).
+- **D5 — the OpenAPI.** All four routes already declare 400 (`originate.openapi.ts:1137` /version, `:1202` sign-cert, `:1272` sign-wallet, `:2179` issue; line numbers are `commonErrorResponses[400]` within each registration). sign-wallet's 400 description names only `VALIDATION_ERROR or INVALID_WALLET_SIGNATURE`. `npm run generate-openapi -- --check` at head in the drafter clone: `CHECK PASS`. The drafter predicts no spec entry is needed; the description wording is a Record at most.
+- **D6 — carried, not #1031's:**
+  - KS-1203 / #1014r2 N-4: an untyped create from a restricted connector is stored `DOCUMENT`; not touched, not widened.
+  - #1024 D4: originate's create does not string-check `type`.
+  - The #1024 gate's gateway finding: no document-type allow-list applies to `/api/documents/:id/version`. With #1031 the refusal happens in originate, whose status the proxy pipes. That is READ; the gateway is NOT commissioned here.
+
+### MUST ESTABLISH — each a question to MEASURE. Name the tree beside every count.
+
+1. **The contract per writer, on the REAL routers, develop vs head.**
+   - Harness: `/version`, `/sign-cert`, `/sign-wallet` × {ISSUER_ADMIN level none, SYSTEM_ADMIN, connector with `documents:write` only}, and `certifications/issue` with `parentDocumentId` × {ISSUER_ADMIN, connector with `certifications:write` only}.
+   - Columns: status, code, derived rows saved, stored `type`, stored `data.documentType` (absent vs present), served GET, served list, `saveCertification` calls, `/api/issuer-certs/sign` hits, `/api/users/stub` hits, `/api/anchors` hits, `recordActionProvenance` calls, `publishEvent` calls.
+   - Carriers: the D4 list, plus the equal / absent controls.
+   - **FAIL (Blocker, F-class): at head, any 201 whose derived row is stored ≠ served from a caller-supplied type; or any caller-type refusal after which a row, `saveCertification`, the sign upstream, the holder stub or the anchoring submit happened (D1's provenance excepted and ruled separately).**
+   - Drafter (MEASURED, 204 rows per tree, `GS/out/drafter_probe.out`): D4.
+   - Put the D1 row (`/version` + `onBehalfOf`) and the holder-email issue row in your table by name.
+2. **HUNT beyond the builder's cells for a caller-supplied type reaching STORED ≠ SERVED on any path this change or its neighbours touch.**
+   - **(a) The writer census** (drafter READ over all of `Blockchain/Dev/services` and `packages`):
+     - `saveDocument`: create `documents.ts:679`, /version `:2038`, sign-cert `:2743`, sign-wallet `:2936`, the demo seed `documentRepo.ts:962`;
+     - `saveLineageDocument`: `certifications.ts:525` only;
+     - `saveCertification`: issue `:486`, revoke `:811`, verify `:894`, recertify `:1204` (fixed `verification_certificate` type, server-built data). All write `metadata {}`, so they are served as the column;
+     - `updateDocument` (never a caller `data`): `documents.ts:776, 860, 892, 907, 1203, 1387, 2322`, `routes/verification.ts:366`, `anchorStateSync.ts:157, 228, 263, 343, 379`;
+     - raw `UPDATE documents`: `documents.ts:1820` owner, `certifications.ts:554` `certification_metadata`, `adminConfig.ts:1821`, `gdprService.ts:735, 786`.
+     - No other service writes the `documents` table.
+
+     Re-derive this census with your own grep (with a positive control per pattern), and name any writer that copies `source.type` or spreads a caller `metadata` / `data` into a stored document that the four guards do not cover.
+   - **(b) Shapes:** non-string types (object, number, `null`, boolean, nested `documentType` under other keys); Unicode confusables and whitespace padding vs exact `===`; duplicate / escaped keys; `__proto__` / `constructor` keys in raw JSON; a body `Content-Type` other than JSON (does `express.json()` skip it, and does the handler then see no metadata?).
+   - **(c) Principals:** a connector with only `documents:write` on issue, and with only `certifications:write` on the document writers; SYSTEM_ADMIN; a plain `user` (403 control).
+   - **(d) The legacy-source path** (D3), including a source with `data.documentType` present and `type` absent / `''` (in Postgres, `type` falls back to `'document'`).
+   - **(e) Chaining:** version a derived row produced by issue-with-parent, and sign a version.
+   - **(f) Postgres READ:** from `fromDbRow` and `saveDocument`, state what a real round-trip does to each writer's derived row at head and to a legacy row.
+   - **Any path at head that still relabels from a caller-supplied type = Major at least; state it with its oracle.** A legacy inheritance with no caller type is D3 / L03, classified apart.
+3. **TAMPERS — the builder's 11-row table re-derived EXACTLY** on the WHOLE originate suite. Denominator asserted 64 / 741, pending 0, project tsc rc per row (a row that does not compile is VOID; state every form), sha-restored + `git diff --quiet`, reds per KS-1213 describe block, 0 reds outside the file, 0 load failures.
+   - **Drafter (MEASURED, `GS/out/drafter_tamper.out`, all tsc 0, all restored):** T0 0 · RP-DEV-DOCS /version 12 + /sign-cert 12 + /sign-wallet 12 (36) · RP-DEV-CERTS issue 9 · TN-VERSION 12 · TN-SIGNCERT 12 · TN-SIGNWALLET 12 · TN-ISSUE 9 · CASEFOLD-VERSION 6 · SOURCEDATA-VERSION 3 · NB-CASEFOLD 2 · TI 0 = **the READY's table, 11 / 11**.
+   - **The seat's forms as the drafter wrote them:** TN = `if (Date.now() < 0 && …`; CASEFOLD = `String(x).toUpperCase() !== String(source.type).toUpperCase()`; SOURCEDATA = `{ ...source.data, ...metadata }.documentType` on both sides; NB-CASEFOLD on the create guard `:575`; TI = an inert comment line after the /version guard. The seat's exact forms are in its `5_Project_History/2026-09-17_seatA-6th/ks1213/tamper/`, READ-ONLY to you; say "form not found" if you cannot read them.
+   - **Plus the drafter's 6 (D2), each 0 reds.**
+   - **Plus ONE of your own per writer** from a direction neither took, with its consequence measured by your probe on the tampered tree. Examples: the /version guard moved above `delete metadata.onBehalfOf`; the sign-wallet guard moved after `verifyMessageSignature`; issue's guard keyed on `data.parentDocumentId`; the served readers changed instead of the writers.
+4. **MERGE-IN PROOF.** `be8596a29` merges `75ad0e55c`. Prove, in your clone:
+   - it brought ONLY develop: the file set `450e3429d..be8596a29` = `19f1e5475..75ad0e55c`, and patch-id per file and for the whole delta are equal;
+   - the merge touched nothing under `services/originate/src/`;
+   - `merge-tree --write-tree 450e3429d × 75ad0e55c` = the head tree;
+   - the three KS-1213 files are byte-identical `450e3429d` = `be8596a29`.
+
+   Drafter (MEASURED, `GS/out/drafter_setup.out`): tree `75ed56fb4` both ways, 0 conflicts. The file sets are identical (14 files). Per-file patch-id mismatches: 0. Whole-delta patch-id `a990435d0` both. The only originate path in the delta is `services/originate/package-lock.json` (#1027). The 3 files are identical (rc 0 ×3).
+   - C5's modules note: say what the lock change is and whether your farm (the checkout's install) differs from what develop's lock would install.
+5. **SUITES, tsc, eslint.**
+   - Originate jest: develop `75ad0e55c` 63 / 656 · head 64 / 741 (drafter MEASURED, 0 failed, 0 pending); merged = head while develop is an ancestor. `tsc --noEmit -p .` rc 0 each.
+   - **THE TEST-INCLUDING tsc PROGRAM** (the project tsconfig EXCLUDES `src/__tests__` and `*.test.ts`), with `--listFilesOnly` proof the ks1213 test is in it and a control that the project program excludes it. Drafter: head rc 0, 0 error lines, 68 `__tests__` files; develop rc 0, 67; project program 0. A plant in the ks1213 test → 2 errors.
+   - eslint by rule AND message on the 3 files, with a firing control. Drafter: 0 / 0 / 0; the control fires `@typescript-eslint/no-unused-vars`.
+6. **OPENAPI AND THE OUT-OF-REPO RESIDUAL.** Read the four registrations and say whether the 400 is declared and whether the new condition belongs in a description (D5). Run `npm run generate-openapi -- --check` at head if it runs without a stack (drafter: CHECK PASS).
+   - **Residual (C7):** the in-repo caller census (drafter READ, per directory, with a positive control in `documents.ts`) finds **0** references to `sign-wallet` and `parentDocumentId`, and 0 route references to `/version` or `sign-cert`, across `frontend/`, `sdk/`, `connectors/`, `mobile/`, `services/api-gateway/src`, `services/mcp-server`, `systemTest/` and `tests/`. The `/version` hits are XML manifest versions and CDP URLs. `certifications/issue` IS called by the issuer portal (`frontend/issuer/src/services/api.ts:456`), the JS and Python SDKs, and five connectors, none with `parentDocumentId`.
+   - Record the residual: an out-of-repo caller (Platform-S, a customer integration) sending a differing type now gets 400.
+7. **MERGED TREE.** While develop is still `75ad0e55c` the merged tree IS the head tree. If develop moves, merge the then-current develop onto `be8596a29` in your clone and name the OID. If the delta touches `services/originate/src/`, `packages/shared/src/` or the originate config, re-run items 1, 3 and 5 on it.
+8. **LINEAR / GITHUB at run time and immediately before the mail:**
+   - `attachmentsForURL(pull/1031)` = KS-1213 `contributes` only (controls: `pull/1024` → KS-1202; `pull/99999` → 0);
+   - 0 closing phrases in the title, body and both commit messages (planted controls);
+   - **KS-1213 stays In Progress on merge (§5f)**; **KS-1203 is NOT widened into** (no #1031 attachment, and state unchanged: Backlog at 21:27:23).
+9. **Schemathesis / Akto: REQUIRED?** Rule with a measured reason. The drafter's view: the published contract already declares 400 on all four. The defect class needs a `metadata.documentType` that differs from a server-side stored type. A spec-driven generator would produce it only by chance, and could not observe the served label without a stateful sequence.
+10. **CARRY-FORWARD per finding, CLOSED / STILL OPEN / NEW, each SHIPS-WITH or TICKET:**
+    - KS-1213 = the #1024 gate's N-A, per writer;
+    - #1024 N-B (the create guard's unpinned case and array: now pinned by the ks1213 N-B cells — CLOSED?);
+    - D1 (provenance before the /version guard);
+    - D2's unpinned properties;
+    - D3 (L01 behaviour change; L03 legacy inheritance);
+    - KS-1203 / N-4;
+    - #1024 D4.
+
+    Also report the checkout bounds and NOT TESTED at equal prominence.
+
+## 2a. LEGITIMATE SHAPES — the guard IS a checker (required)
+
+Rule under test, on the document writers: a present `metadata.documentType` must `===` `source.type`. On issue with a truthy `parentDocumentId`: a present `data.documentType` must `===` `type || 'verification_certificate'`. Anything else → 400 `BAD_REQUEST` before any write.
+
+| shape — its ordinary form | expected verdict | clause | predicted-by |
+|---|---|---|---|
+| any writer, no `metadata` / no `data.documentType` | 201, stored = served the source type (issue: the cert type) | guard sees `undefined` | drafter (measured M14, I11) + seat cells |
+| `metadata: {}` or metadata with unrelated keys (`note`, `data.documentType` nested) | 201 unchanged develop = head | no own `documentType` key | drafter (measured M15, M16, M17, I17) |
+| `metadata.documentType` equal to the source's stored type (upper, lower or padded as stored) | 201 stored = served | `===` holds | drafter (measured M13, S01, S02) |
+| issue with `data.documentType` equal to `type` | 201 `certificate` | `===` | drafter (measured I10) + seat cell |
+| issue without `parentDocumentId`, or `parentDocumentId: ''`, any `data.documentType` | 201, no derived row, not refused | guard + derive both skip a falsy parent | drafter (measured I12, I13) + seat cell |
+| legacy source (stored CERTIFICATE, served DEGREE), caller names the STORED type | 201, served CERTIFICATE | `===` against stored | drafter (measured L02) |
+| legacy source, no caller type | 201, stored CERTIFICATE served DEGREE (ruled not refused) | guard sees `undefined` | drafter (measured L03) + seat cell |
+| legacy source, caller names its SERVED label | **400 at head** (201 at develop) — a behaviour change | `DEGREE !== CERTIFICATE` | drafter (measured L01) |
+| in-repo callers of the four writers | none send a type (0 callers of /version, sign-cert, sign-wallet; issue callers send no `parentDocumentId`) | — | drafter (READ census) |
+| Platform-S / an out-of-repo integration | UNKNOWN — body not in repo | — | NOT PREDICTABLE |
+
+## 3. Scope
+- **Charter:** falsify "all four derived writers refuse a caller type ≠ stored, before any write" on the real originate routers; hunt any other path to stored ≠ served; prove no legitimate derived write is refused.
+- **In scope:** originate `POST /api/documents/:id/version`, `/:id/sign-cert`, `/:id/sign-wallet`, `POST /api/certifications/issue`, `GET /api/documents/:id`, `GET /api/documents`, the create guard's N-B cells, every writer in item 2's census; the ks1213 test; tampers; suites; the OpenAPI; Linear/GitHub reads.
+- **Out of scope / do NOT touch:** any stack, container, real Postgres, a real issuer-certs upstream, a real CIP-8 signature, the api-gateway stage (NOT commissioned: #1024's gate measured the gateway path; READ only here), deploy, the edge; any write to Linear / GitHub; any seat worktree; Peter / Stuart.
+
+## 4. Credentials (POINTER ONLY — never values)
+Secuura `.env` (`GH_TOKEN`, `LINEAR_API_KEY`) and Wednesday's `.env` (`AGENTMAIL_API_KEY`), both by NAME at the paths in HOLDS. Principals are probe headers generated per run.
+
+## 5. State-mutation & cleanup
+Exclude-and-report-only against anything shared. Your clone is disposable; quarantine by MOVE (outside the service root for probe dirs), never `rm`. Assert the whole-suite denominator is unpolluted (64 / 741 at head) with your probe present.
+
+## 6. Output boundary
+Findings, reports and recommendations ONLY — no code, tests, tickets or config in the product. Every finding carries its evidence class (**MEASURED AT RUNTIME / PROBED / READ ONLY / RELAYED**), severity, target (PR or TICKET), SHIPS-WITH or TICKET, disposition and oracle. Name every prediction slip against its predictor (the READY, the seat, the drafter, Wednesday).
+
+## 7. Known-fragile / known-changed
+- **The in-memory repository is NOT Postgres.** Say which rows depend on it (item 2f). In Postgres every read source carries `data.documentType` = its column unless metadata overrides it.
+- The seat's own slip: `if (false && …)` tampers are VOID under tsc (TS18047 `'source' is possibly 'null'`). Use `Date.now() < 0 &&`.
+- **The builder's cells never set `ANCHORING_SERVICE_URL`** (the default `http://anchoring:4005` fails DNS in-process). The anchoring submit is observable only with your own loopback upstream.
+- Recent, do NOT flag as new: #1024 (KS-1202 create guard), #1018 (auth users.ts), #1026 (KS-839 oauth), #1027 (js-yaml / lock bumps, including originate `package-lock.json`).
+- Known open: KS-1203 (N-4), KS-1176 N-2 / N-3, KS-1198, the KS-744 class (#1028 open).
+
+## 8. Logistics / BOUNDS
+- Quote these at start, mid and close as THREE timestamped readings: the checkout's porcelain count, `.git/config` sha256, for-each-ref count, `.git/worktrees` count, origin develop SHA, `refs/pull/1031/head`, the checkout branch, and the originate `.vite` reading. Other sessions move refs; attribute nothing without evidence.
+- **If `refs/pull/1031/head` moves, STOP: the brief is about a different SHA.** develop moving is expected: judge it by content, name it, and apply item 7.
+- **The launcher `--check` guards by PATH BLOB at the current develop,** never by develop's SHA. It checks 18 files: the 3 PR files (LANDED at their #1031 blobs → exit 19) plus documentRepo / certificationRepo / provenance / index / auth / rbac / openapi / sharedModuleMock / the ks1202 test / uuid-cjs / originate package.json / jest.config.js / tsconfig.json / the YAML / eslint.config.mjs. On a develop move it also checks the GUARDED paths `services/originate/src/` + its config, `packages/shared/src/`, `docs/openapi/` and `eslint.config.mjs`.
+- Hygiene:
+  - `/bin/bash` is 3.2: write runners in Python.
+  - zsh has no PIPESTATUS, and never begin a line with `=====`.
+  - `git grep -c` prints nothing for a zero; `rev-parse` of a missing path echoes its argument (use `cat-file -e`).
+  - Every scripted edit asserts its anchor count = 1 and a marker.
+
+## VERDICT DESTINATION
+Report into the REPORT DIRECTORY (§1), `NOT-TESTED.written-first.md` first. Verdict: ONE line — GO, GO WITH FINDINGS, or NO GO — on `be8596a29` as the delta over develop `75ad0e55c`, AND on the merged tree (name the develop and the merged-tree OID). Mail it FROM `coagent@agentmail.to` TO `wednesday-agent@agentmail.to`, subject EXACTLY `[QA -> Wednesday] TIER 1 GATE #1031 (KS-1213) be8596a29 — <GO | GO WITH FINDINGS | NO GO>`.
+
+Every finding in the verdict carries CLOSED / STILL OPEN / NEW and SHIPS-WITH or TICKET.
+
+**MERGE ADDENDUM** (fill every `<..>`): "squash `be8596a29` onto develop `<then-current develop; 75ad0e55c at draft close>` (merged tree `<OID>`; drafter `75ed56fb4` = head tree while develop is an ancestor); #1031 attaches to KS-1213 only, linkKind `contributes`, no closes; KS-1213 stays In Progress on merge (§5f: live census of rows already served ≠ stored owed); KS-1203 not widened into; equality targets after the squash: `documents.ts` blob `e3eeb5a68` / `certifications.ts` `20934ee94` / ks1213 test `808282689`; originate jest 63/656 at develop → 64/741 at head → `<merged n/n>` (re-measure); dispositions: `<per finding, SHIPS-WITH or TICKET>`; NEW: `<yours>`; Records for KS-1213's facts comment at merge: the exact rule (case, whitespace, confusable and non-string carriers 400), the legacy-source served label refused when a caller echoes it (L01), the ruled legacy inheritance (L03), the out-of-repo caller residual, `<D1 ruling>`, `<yours>`."
+
+## NOT COMMISSIONED (say so if asked)
+Schemathesis, Akto, Playwright, k6, any docker stack, a real Postgres, a real issuer-certs upstream, a real CIP-8 wallet signature, the api-gateway stage, preflight legs 3/4/8, the edge, a live Platform-S call, a real browser.
+
+## PROVENANCE
+- READY + tier | `GS/mail_1031_ready.md` (11:11:19Z, spf/dkim/dmarc pass), `GS/receipt_1031.md` | read 2026-09-17
+- Seat A's measurement + Wednesday's comparison ruling | `gatesets/2026-09-17_gate1028/status_ks1213_built.md` (10:46:43Z), `answer_ks1213_comparison.md` | read 2026-09-17
+- The finding's origin (N-A, N-B) | `gatesets/2026-09-17_gate1024/verdict_1024.md`, `DRAFTER_REPORT.md`; the PRIOR REPORT dir above; Linear KS-1213 description (`GS/out/linear/KS-1213.comments.md`) | read 2026-09-17 21:27
+- Head, commits, files, compare, blobs, siblings | `GS/out/gh_read.out` 21:26:53, ls-remote 21:15:12 | read 2026-09-17
+- Links | `GS/out/linear_read.out` 21:27:23 | read 2026-09-17
+- Drafter measurements | `GS/out/drafter_setup.out` 21:21, `drafter_suites.out` 21:22, `drafter_probe.out` 21:24 (+ `rows_probe_{head,dev}.json`), `drafter_tamper.out` 21:26–21:30 (+ `tamper_rows.json`, `tamper/`), `drafter_probe_outside.out` 21:31–21:32 | 2026-09-17

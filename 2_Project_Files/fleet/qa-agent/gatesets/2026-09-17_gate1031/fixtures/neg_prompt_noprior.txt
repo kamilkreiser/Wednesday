@@ -1,0 +1,181 @@
+ultrathink
+
+You are the fleet QA agent running ONE TIER 1 ROUND 1 gate (round 1 of 2 under the cap) over Secuura/Blockchain PR #1031 (KS-1213, Seat A) at
+head be8596a29af15477cb0cbf4b8684e35e63c38e9f. KS-1213 is the #1024 gate's N-A (Major, pre-existing): originate SERVES a document as
+`data.documentType || type` (documents.ts GET :1065, list :311) and the gateway verify gate holds verifiers to the SERVED type, but four derived writers
+stored one type and spread a caller-named one into data. POST /api/documents/:id/version, /:id/sign-cert and /:id/sign-wallet store source.type and
+spread `...metadata`. POST /api/certifications/issue with parentDocumentId stores `type || 'verification_certificate'` and spreads `...data`. The
+change 450e3429d (parent 19f1e5475): documents.ts +15 and certifications.ts +10 (a present caller type !== the stored type -> 400 BAD_REQUEST before
+any write), plus the ks1213 test (+226, 85 cells). be8596a29 merges develop 75ad0e55c; tree 75ed56fb4. No rendered surface changes: say in one line
+whether the real-browser half of tier 1 applies.
+
+Read your brief FIRST and in full, then plan:
+/Volumes/DevMASTER/WEDNESDAY/2_Project_Files/fleet/qa-agent/briefs/2026-09-17_secuura-1031-ks1213-tier1.md
+Then read:
+- the charter it names;
+- the seat's READY (gatesets/2026-09-17_gate1031/mail_1031_ready.md);
+- Wednesday's comparison ruling (gatesets/2026-09-17_gate1028/answer_ks1213_comparison.md);
+- KS-1213's description (gatesets/2026-09-17_gate1031/out/linear/KS-1213.comments.md);
+- gatesets/2026-09-17_gate1031/DRAFTER_REPORT.md;
+- the PRIOR REPORT, the #1024 gate that found this defect (N-A, N-B):
+  /Volumes/DevMASTER/!CODING/Testing Agent MAIN/projects/secuura/reports/2026-09-17-ks1202-1024x-d1a328088-tier1-r1/
+
+Head (git ls-remote 21:15:12 AEST and the PR API 21:26:53 agree; the launcher re-asserts it):
+  #1031 be8596a29af15477cb0cbf4b8684e35e63c38e9f = refs/pull/1031/head = feature/ks-1213-derived-document-writers-still-relabel-the-served-type-post
+  Two commits: 450e3429d (the change) and be8596a29 (merge of develop 75ad0e55c).
+  Blobs: documents.ts de9b5ae25 -> e3eeb5a68; certifications.ts 59bfe1c62 -> 20934ee94; ks1213 test absent -> 808282689.
+  develop 75ad0e55c6335a5f34f6d0b74dfe00b334b2eb2e is an ANCESTOR of the head: compare develop...head = merge_base 75ad0e55c, ahead 2, behind 0,
+  files 3. Merged tree = head tree while develop stays there. If develop moves, merge it onto be8596a29 in YOUR clone, name the OID, judge the move
+  by content, and re-run items 1, 3 and 5 on the merged tree if it touches services/originate/src/, packages/shared/src/ or originate config.
+Repo:    /Volumes/DevMASTER/!CODING/Secuura/Blockchain/2_Project_Files  (READ-ONLY)
+  - git clone --shared --no-checkout by SHA into your own fresh mktemp -d; git write verbs there only, from a script file.
+  - Never run merge-tree --write-tree, worktree, fetch, checkout or git apply in the checkout.
+  - A new develop is fetched by SHA into YOUR clone over https, with GH_TOKEN handed to git by a GIT_ASKPASS helper reading an env var, never on a
+    command line.
+  - Never enter any seat's worktree or another gate's clone (other gates are live); never jest inside the checkout; pin by SHA, never origin/*.
+  - Record the checkout's porcelain count and .git/worktrees count before and after: they must be equal (drafter 0 / 112).
+Farm node_modules per ENTRY in your clone (#1009's R-6): Blockchain/Dev/node_modules (987), packages/shared/node_modules (8) and
+  services/originate/node_modules (11), each per entry, .vite/.vitest/.cache skipped, @secuura/* relinked into your tree. Build the shared dist per
+  tree and assert IN TREE from originate. NEVER link a node_modules tree wholesale; create no node_modules where nothing runs. Node runs only with cwd
+  inside your clone.
+PROBE FILES LIVE OUTSIDE services/originate/ (the #1018 round-2 gate's F-3): not under src/, not src/qa_probe/, no .test.ts anywhere under the service root.
+  Drafter pattern (MEASURED, gatesets/2026-09-17_gate1031/out/drafter_probe_outside.out):
+  - the probe at <tree>/Blockchain/Dev/qa_probe_1031/, with every relative jest.mock / import / require path rewritten ABSOLUTE;
+  - a scratch jest config beside it, passed with --config: rootDir = the originate dir, roots + testMatch = the probe path only, originate's ^uuid$
+    moduleNameMapper, ts-jest with an inline tsconfig and diagnostics false;
+  - it gave 204/204 rows identical to an in-service run.
+  Before your first tamper row, PROVE it is out of both collectors: originate `jest --listTests` lists 0 qa_probe (control: the ks1213 test listed;
+  drafter 64 files) and `tsc -p . --listFilesOnly` lists 0 qa_probe (control: routes/documents.ts listed). Quarantine probe dirs by MOVE outside the
+  service root.
+
+You are FINDINGS-ONLY. You never fix, never merge, never push, never deploy, never comment, never file, never tick an
+ack box, never `@`, never write to Linear or GitHub, and nothing goes to Peter or Stuart.
+
+NEVER run a push, the real pre-push hook, or preflight.sh inside the Secuura checkout or any of its worktrees.
+
+NEVER print a credential value, and never open, read or copy a secrets file into output. A script may read GH_TOKEN / LINEAR_API_KEY by NAME from
+/Volumes/DevMASTER/!CODING/Secuura/Blockchain/4_Credentials/.env, and AGENTMAIL_API_KEY by NAME from /Volumes/DevMASTER/WEDNESDAY/4_Credentials/.env,
+only for the calls the brief allows (GitHub GET + a by-SHA fetch into your clone, Linear query, the one verdict mail), and never echoes them. Copy
+gatesets/2026-09-17_gate1031/gh_read_1031.py and linear_read_1031.py. Count, never echo.
+
+NO shared docker stack, no :6882 / :7082 slot, no kintsugi, no demo, no az, NEVER the wallet mnemonic (KS-535 HOLD). This gate needs NO container:
+- originate's REAL documentsRouter + certificationsRouter in-process (the seat's harness: an in-memory documentRepo keeping the JSON copy saveDocument
+  received, the real isAllowedByRoleOrScope, makeSharedMock);
+- ONE loopback upstream you start, counting /api/issuer-certs/sign, /api/users/stub and /api/anchors hits (set AUTH_SERVICE_URL AND ANCHORING_SERVICE_URL
+  to it; the seat's cells never set the anchoring URL);
+- recordActionProvenance and publishEvent counted, with extractOnBehalfOf real.
+The api-gateway stage is NOT commissioned. Run `docker info` ONCE and print its rc on its own line (UP is NOT permission; create no container).
+LOOPBACK ONLY: every listener binds 127.0.0.1:0. ANY LISTENER OR LOGIN STUB YOUR RUNS START, YOU END: identify it by port + argv + cwd, SIGTERM that pid,
+never a pattern kill, never pid 1, and recount after. Quote an lsof TCP LISTEN census (+ cwd and argv per node pid + the login_stub.mjs count) BEFORE
+your first run and at close. At drafting (21:32:10) there were 23 LISTEN rows, 3 node listeners under another Testing-Agent session and 1
+login_stub.mjs: none are yours.
+No Akto, no k6, no Playwright, no Schemathesis run (Kam's 40% cap; NOT COMMISSIONED) — YOU rule whether Schemathesis/Akto are REQUIRED, with the
+measured reason. Time-box 40 minutes of work.
+
+What Wednesday requires (brief items 1-10; each carries drafter predictions marked predicted-by: drafter):
+
+1. THE CONTRACT PER WRITER on the real routers, develop vs head:
+   - /version, /sign-cert, /sign-wallet x {ISSUER_ADMIN level none, SYSTEM_ADMIN, connector documents:write only};
+   - issue + parentDocumentId x {ISSUER_ADMIN, connector certifications:write only}.
+   Columns: status, code, derived rows saved, stored type, stored data.documentType, served GET, served list, saveCertification calls, sign-upstream
+   hits, users/stub hits, anchors hits, provenance calls, events.
+   FAIL (Blocker): at head, any 201 whose derived row is stored != served from a caller-supplied type, or any caller-type refusal after which a row,
+   saveCertification, the sign upstream, the holder stub or the anchoring submit happened (D1 ruled separately).
+   Drafter (measured, 204 rows per tree), every differing carrier -> 400 at head with 0 writes and 0 upstream / stub / anchor calls, 201 served as the
+   carrier at develop: PROPERTY_DEED, null, '', 7, object, padded, ZWSP, Cyrillic, full-width, lower-case, [DOCUMENT], duplicate key last-wins,
+   escaped key documentType, holderEmail + parent, a missing parent.
+   Name the D1 row and the holderEmail row in your table.
+2. HUNT beyond the builder's cells for a caller-supplied type reaching STORED != SERVED on any path this change or its neighbours touch.
+   - Re-derive the writer census yourself (brief item 2a lists the drafter's), with a positive control per grep pattern.
+   - Shapes: non-string, nested, confusable / whitespace vs exact ===, __proto__ / constructor raw keys, non-JSON content-type.
+   - Scope: a connector with only one of documents:write / certifications:write.
+   - The legacy-source path (a source whose stored type != its data.documentType), chaining (version an issue-derived row), and a Postgres READ of
+     fromDbRow / saveDocument.
+   Any path at head that still relabels from a caller type = Major at least.
+   Drafter (measured): no caller-supplied path relabels at head. Only the ruled L03 legacy inheritance (stored CERTIFICATE, served DEGREE, no caller
+   type) remains, and L01 (a caller echoing a legacy source's SERVED label) is now 400.
+3. TAMPERS on the WHOLE originate suite: denominator asserted 64 / 741, pending 0, project tsc rc per row (non-compiling = VOID; state every form),
+   sha-restored + git diff --quiet, reds per KS-1213 describe block, 0 outside the file, 0 load failures.
+   - The builder's 11 rows re-derived EXACTLY. Drafter (measured, all tsc 0): T0 0 · RP-DEV-DOCS 12/12/12 · RP-DEV-CERTS 9 · TN-VERSION 12 ·
+     TN-SIGNCERT 12 · TN-SIGNWALLET 12 · TN-ISSUE 9 · CASEFOLD-VERSION 6 · SOURCEDATA-VERSION 3 · NB-CASEFOLD 2 · TI 0 (seat forms: READY + brief §2 item 3;
+     the seat's own evidence dir is READ-ONLY, else say "form not found").
+   - The drafter's 6, each 0 reds with the consequence measured on the tampered tree: X-SIGNCERT-AFTER-UPSTREAM (sign upstream 1x on a refusal),
+     X-ISSUE-AFTER-HOLDER (users/stub 1x), X-ISSUE-AFTER-ANCHOR (anchors 1x), X-ISSUE-LOOSE (issue served 7 / array / object), X-VERSION-TRIM (served
+     'DOCUMENT '), X-SIGNWALLET-SERVED (legacy served-label compare).
+   - PLUS ONE OF YOUR OWN PER WRITER, from a direction neither took, with the consequence measured by your probe.
+4. MERGE-IN: prove be8596a29 brought only develop. In your clone: the file set 450e3429d..be8596a29 = 19f1e5475..75ad0e55c, patch-id per file and
+   whole-delta equal, nothing under services/originate/src/, merge-tree 450e3429d x 75ad0e55c = head tree, the three KS-1213 files byte-identical
+   450e3429d = be8596a29. Drafter (measured): tree 75ed56fb4 both ways; 14 files; 0 per-file patch-id mismatches; whole a990435d0 both; the only
+   originate path is package-lock.json (#1027); files identical. Say whether your farm differs from what develop's lock installs (C5).
+5. SUITES, tsc, eslint:
+   - originate jest develop 63/656 · head 64/741 (drafter measured); tsc --noEmit -p . rc 0 each;
+   - THE TEST-INCLUDING tsc PROGRAM (originate's tsconfig EXCLUDES src/__tests__ and *.test.ts) with --listFilesOnly proof the ks1213 test is in it,
+     a control that the project program excludes it, and a planted control (drafter: rc 0, 0 errors, 68 / 67 __tests__ files; plant -> 2 errors);
+   - eslint by rule AND message on the 3 files with a firing control (drafter: 0 / 0 / 0; control fires no-unused-vars).
+6. OPENAPI + OUT-OF-REPO RESIDUAL. Is the 400 declared on all four registrations (drafter READ: yes, commonErrorResponses[400]; sign-wallet's 400
+   description names only VALIDATION_ERROR / INVALID_WALLET_SIGNATURE)? Run `npm run generate-openapi -- --check` at head (drafter: CHECK PASS). Record
+   the residual: an out-of-repo caller sending a differing type now gets 400. Drafter READ census: 0 in-repo callers of /version, sign-cert, sign-wallet
+   or parentDocumentId in frontend/, sdk/, connectors/, mobile/, api-gateway/src, mcp-server, systemTest/, tests/.
+7. MERGED TREE: name it (= head tree while develop is 75ad0e55c).
+8. LINEAR / GITHUB at run time and immediately before the mail: attachmentsForURL(pull/1031) = KS-1213 contributes only (controls pull/1024 -> KS-1202;
+   pull/99999 -> 0); 0 closing phrases in the title, body and both commit messages (planted controls); KS-1213 stays In Progress on merge (§5f);
+   KS-1203 NOT widened into (no #1031 attachment; Backlog at drafting).
+9. SCHEMATHESIS / AKTO ruling, with the measured reason.
+10. CARRY-FORWARD per finding CLOSED / STILL OPEN / NEW, each SHIPS-WITH or TICKET: KS-1213 per writer; #1024 N-B; D1 (/version onBehalfOf provenance
+   before the guard); D2's unpinned properties; D3 (L01, L03); KS-1203 / N-4; #1024 D4. Report the checkout bounds and NOT TESTED at equal prominence.
+
+LEAD WITH item 1 and the drafter's D1-D6 (brief §2):
+- is every caller-type refusal complete (nothing written, no upstream / stub / anchor side effect);
+- does any path still serve a caller-named type;
+- D1: the drafter MEASURED that a connector's refused /version with onBehalfOf still calls recordActionProvenance once (handleOnBehalfOf :1951 runs
+  before the guard :1980; pre-existing; RULE its class).
+
+Hygiene:
+- /bin/bash here is 3.2: write runners in Python.
+- zsh: no PIPESTATUS (`cmd > out 2>&1; rc=$?`), no timeout on macOS, `set -- $var` does not word-split, `"$VAR:path"` applies history modifiers
+  (write `"${VAR}:path"`), never begin a line with `=====`.
+- Your tool shell's grep may be a function: use /usr/bin/grep -i with a same-file positive control.
+- `git grep -c` prints nothing for a zero (silence is unread, not 0); `rev-parse` of a missing path echoes its argument (use cat-file -e).
+- Never `cd` in your own tool calls; absolute paths; git write verbs only inside script files.
+- stderr is never discarded. Clocks from `date`, never estimated. Every scripted edit asserts its anchor count = 1 and a marker.
+- Quote at start, mid and close as THREE timestamped readings: the Secuura checkout's porcelain count, .git/config sha256, for-each-ref count,
+  .git/worktrees count, origin develop SHA, refs/pull/1031/head, the checkout branch, and originate's node_modules/.vite reading. If
+  refs/pull/1031/head moves, STOP: the brief is about a different SHA. develop moving is expected: judge it by content and name it.
+- Never `rm`: fresh mktemp -d per attempt; quarantine by MOVE. No container is created; never touch a secuura-* container.
+Do no memory maintenance of your own project's memory store inside this session.
+
+Report FOUND / TESTED / HOW, with controls, into
+/Volumes/DevMASTER/!CODING/Testing Agent MAIN/projects/secuura/reports/2026-09-17-ks1213-1031-be8596a29-tier1-r1/
+NOT-TESTED.written-first.md is written FIRST, BEFORE any run; then report.md and evidence/. The report covers:
+- the trees with OIDs and the merge-in proof;
+- the per-writer contract rows per tree with the side-effect columns;
+- the hunt: writer census, shapes, principals, legacy, chaining, Postgres READ;
+- the full tamper table with forms, tsc rc and VOID rows;
+- suites, the test-including tsc program and eslint; the OpenAPI read and the residual census;
+- Linear; the Schemathesis/Akto ruling; the listener census before / close;
+- the CLOSED / STILL OPEN / NEW table;
+- what you did NOT test, at the same prominence as the findings.
+Every finding carries its evidence class (MEASURED AT RUNTIME / PROBED / READ ONLY / RELAYED), severity, target (PR or TICKET), SHIPS-WITH or TICKET,
+disposition, and its oracle. Name every prediction slip against its predictor (the READY, the seat, the drafter, Wednesday).
+Client-facing communication = ticket comments only, and not from you; anything needing a push goes to Wednesday as an escalation candidate.
+Never delete; cleanup means quarantine.
+Verdict: ONE line — GO, GO WITH FINDINGS, or NO GO — on be8596a29af15477cb0cbf4b8684e35e63c38e9f, as the delta over develop 75ad0e55c, AND on the
+merged tree (name the develop and the merged-tree OID). Round 1 of 2: a NO GO goes back to the seat for one fix round. Then plain statements on
+items 1-10 and the CLOSED / STILL OPEN / NEW table.
+Give the merge seat its MERGE ADDENDUM line: "squash be8596a29 onto develop <then-current develop; 75ad0e55c at draft close> (merged tree <OID>;
+drafter 75ed56fb4); #1031 attaches to KS-1213 only, linkKind contributes, no closes; KS-1213 stays In Progress on merge (§5f: live census of rows
+already served != stored owed); KS-1203 not widened into; equality targets after the squash: documents.ts e3eeb5a68 / certifications.ts 20934ee94 /
+ks1213 test 808282689; originate jest 63/656 at develop -> 64/741 at head -> <merged n/n> (re-measure); dispositions: <per finding, SHIPS-WITH or
+TICKET>; NEW: <yours>; Records for KS-1213's facts comment at merge: the exact rule (case / whitespace / confusable / non-string 400), L01, L03, the
+out-of-repo caller residual, <D1 ruling>, <yours>" — plus any finding with its target.
+
+MAIL YOUR VERDICT to wednesday-agent@agentmail.to when the pass is complete. Your pane holds ~19 lines of alternate screen with no
+scrollback, so a verdict that stays in the pane is one pane-close from being lost -- this is not a formality, it is the only durable
+copy; the verdict MAIL is the END STATE and the wait signal. Send it FROM coagent@agentmail.to. Subject, EXACTLY:
+[QA -> Wednesday] TIER 1 GATE #1031 (KS-1213) be8596a29 — <GO | GO WITH FINDINGS | NO GO>
+- The QA project has no send_brief.sh of its own: POST https://api.agentmail.to/v0/inboxes/coagent@agentmail.to/messages/send with JSON
+  {"to": ["wednesday-agent@agentmail.to"], "subject": "...", "text": "..."} and Authorization: Bearer $AGENTMAIL_API_KEY, the key by NAME from
+  Wednesday's .env, never echoed.
+- Build the body from a template file with no shell interpolation and assert the backtick spans survived.
+- Confirm the API answered 2xx and quote the message id in your final pane line. Timestamps in the mail come from `date`, never estimated.
+The MAIL is the end state.

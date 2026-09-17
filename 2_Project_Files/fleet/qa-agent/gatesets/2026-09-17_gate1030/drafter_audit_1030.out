@@ -1,0 +1,22 @@
+head scripts/audit npm ci rc 0 | lock sha 84ba271fc131d8a5 -> 84ba271fc131d8a5 | root node_modules present (must be False) False 21:11:25 AEST
+base scripts/audit npm ci rc 0 | lock sha 84ba271fc131d8a5 -> 84ba271fc131d8a5 | root node_modules present (must be False) False 21:11:37 AEST
+H1 head audit-gate baseline=real rc 0 21:11:37 AEST->21:11:41 AEST | ['audit-gate: 30 distinct advisories reported, 31 baselined.'] | CLEANUP ids [] | FAIL-section ids [] | family lines []
+H1 head audit-locks baseline=real rc 0 21:11:41 AEST->21:11:51 AEST | ['audit-locks: 43 standalone lockfiles (45 tracked, minus the Blockchain/Dev/package-lock.json workspace root which audit-gate cover'] | CLEANUP ids [] | FAIL-section ids [] | family lines []
+H2 head audit-gate baseline=baseline_base_copy.json rc 0 21:11:51 AEST->21:12:08 AEST | ['audit-gate: 30 distinct advisories reported, 32 baselined.'] | CLEANUP ids ['GHSA-82fw-gwwq-j7x9'] | FAIL-section ids [] | family lines ['- GHSA-82fw-gwwq-j7x9 (vitest / @vitest/mocker, KS-1024)']
+H2 head audit-locks baseline=baseline_base_copy.json rc 0 21:12:08 AEST->21:12:15 AEST | ['audit-locks: 43 standalone lockfiles (45 tracked, minus the Blockchain/Dev/package-lock.json workspace root which audit-gate cover'] | CLEANUP ids [] | FAIL-section ids [] | family lines []
+B1 base audit-gate baseline=baseline_head_copy.json rc 1 21:12:15 AEST->21:12:27 AEST | ['audit-gate: 31 distinct advisories reported, 31 baselined.'] | CLEANUP ids [] | FAIL-section ids ['GHSA-82fw-gwwq-j7x9'] | family lines ['- GHSA-82fw-gwwq-j7x9 [moderate] @vitest/mocker: Vitest: Path Traversal / Arbitrary File Read via @vitest/mocker Redirect Mock']
+B1 base audit-locks baseline=baseline_head_copy.json rc 1 21:12:27 AEST->21:12:37 AEST | ['audit-locks: 43 standalone lockfiles (45 tracked, minus the Blockchain/Dev/package-lock.json workspace root which audit-gate cover'] | CLEANUP ids [] | FAIL-section ids ['GHSA-82fw-gwwq-j7x9'] | family lines ['- GHSA-82fw-gwwq-j7x9 [moderate] @vitest/mocker: Vitest: Path Traversal / Arbitrary File Read via @vitest/mocker Redirect Mock', 'pinned: 4.1.10, 4.1.9']
+B1_audit-locks.tee.jsonl request @vitest/mocker ["4.1.10","4.1.9","4.1.11"] status 200
+B1_audit-locks.tee.jsonl request vitest ["4.1.10","4.1.9","4.1.11"] status 200
+H1_audit-locks.tee.jsonl request @vitest/mocker ["4.1.11"] status 200
+H1_audit-locks.tee.jsonl request vitest ["4.1.11"] status 200
+H2_audit-locks.tee.jsonl request @vitest/mocker ["4.1.11"] status 200
+H2_audit-locks.tee.jsonl request vitest ["4.1.11"] status 200
+ADVISORY @vitest/mocker GHSA-82fw-gwwq-j7x9 moderate vulnerable_versions=">=2.1.0 <4.1.11" :: 4.1.9:true 4.1.10:true 4.1.11:false 4.2.0:false 3.2.4:true
+ADVISORY vitest GHSA-82fw-gwwq-j7x9 moderate vulnerable_versions=">=2.1.0 <4.1.11" :: 4.1.9:true 4.1.10:true 4.1.11:false 4.1.12:false 4.2.0:false 3.2.4:true 4.0.0-beta.1:false
+lexical trap '4.1.10' < '4.1.9' = true ; semver.lt = false
+declarer manifest vitest ^4.1.11: 4.1.11 inside=true | control 4.1.10 inside=false 5.0.0 inside=false
+declarer manifest vitest old ^4.1.9: 4.1.11 inside=true | control 4.1.10 inside=true 5.0.0 inside=false
+declarer vitest -> @vitest/mocker 4.1.11: 4.1.11 inside=true | control 4.1.10 inside=false 5.0.0 inside=false
+ 
+done 21:12:38 AEST

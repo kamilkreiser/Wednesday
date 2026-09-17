@@ -1,0 +1,157 @@
+ultrathink
+
+You are the fleet QA agent running ONE TIER 1 ROUND 1 gate over Secuura/Blockchain PR #1028 (KS-744, Seat A) at head
+e39521cfb54cb5fd47c6bdae64ce707b3c9befce. KS-744: in authenticateToken's verified-JWT branch the gateway copied decoded.email and
+decoded.verificationLevel onto x-user-email / x-verification-level unguarded; a signed token missing either claim put undefined in the header bag,
+the proxy's outbound setHeader threw ERR_HTTP_INVALID_HEADER_VALUE and every proxied route answered 500. The fix commit 6252f06ac (parent d7e95cd9f):
+services/api-gateway/src/middleware/auth.ts +3 -2 (x-user-email set only when the claim is truthy; x-verification-level set only when truthy, else
+DELETED, because it is not in the edge strip TRUST_HEADER_PATTERN in utils/trustHeaders.ts) + a new ks744 test +93 (4 cells + completeness).
+The head e39521cfb is a MERGE of develop 19f1e5475 into fb503741a (itself a merge of 81ee4b729 into 6252f06ac). 19f1e5475 carries #1023 (KS-1207,
+the failed-optional-key fall-through) in the SAME auth.ts, so KS-1207's cells now run through this branch. TIER 1: auth middleware on every proxied
+route, deciding which identity headers reach the upstreams. ROUND 1. No rendered surface changes: say whether the real-browser half of tier 1 applies.
+
+Read your brief FIRST and in full, then plan:
+/Volumes/DevMASTER/WEDNESDAY/2_Project_Files/fleet/qa-agent/briefs/2026-09-17_secuura-1028-ks744-tier1.md
+Then the charter it names, the seat's READY (gatesets/2026-09-17_gate1028/mail_1028_ready.md), Wednesday's receipt (receipt_1028.md), the KS-744
+and KS-1208 descriptions (gatesets/2026-09-17_gate1028/out/linear/), and the drafter's gateset DRAFTER_REPORT.md whole. Prior report on the same
+file and harness (read, do not re-derive): /Volumes/DevMASTER/!CODING/Testing Agent MAIN/projects/secuura/reports/2026-09-17-ks1207-1023-2f74491eb-tier1-r1/
+and, for F-3 and F-4 ONLY (a probe inside the service's collectors polluted a tamper pass):
+/Volumes/DevMASTER/!CODING/Testing Agent MAIN/projects/secuura/reports/2026-09-17-ks1050-1018-efd677e98-tier2-r2/
+The drafter's probe template (gatesets/2026-09-17_gate1028/qa1028-drafter-probe.template.ts) and rows (out/rows_head.json, rows_dev.json) are
+PREDICTIONS: you may reuse the probe as a starting instrument, but assert its sha, extend it, and re-measure every row.
+
+Head (git ls-remote 20:37:33-20:54:44 AEST and the PR API 20:42 agree; the launcher re-asserts it):
+  #1028 e39521cfb54cb5fd47c6bdae64ce707b3c9befce = refs/pull/1028/head = feature/ks-744-gateway-500s-on-every-proxied-route-for-a-token-lacking
+  PR files vs develop: auth.ts b8fce678a -> 6e1668362; NEW ks744-a-token-missing-a-claim-is-proxied-not-500.test.ts 2ed41a338.
+  merge-base = 19f1e54750ce2b65312a687add2db4f5628edb7d (the head's second parent). compare develop...head = merge_base 19f1e5475, ahead 3, files 2.
+  DEVELOP MOVED while drafting: 19f1e5475 -> e02515f8f (#1018, services/auth) -> 20ab16f9a (#1027, lockfiles incl. the Dev root lock) -> 75ad0e55c (#1026,
+  services/auth). The api-gateway subtree (4fcee62db) and shared subtree (dbd72dea0) are identical at 19f1e5475 and 75ad0e55c. Head tree b61ed17766d282009b707053cbac6b5961076a0f (= the
+  READY's prediction = merge-tree fb503741a x 19f1e5475 in the drafter clone). Merged over 75ad0e55c: 557aa4de89bcd53e01b3916d2a46986e36dd4e65. Name yours.
+  If develop moves onto services/api-gateway/ or packages/shared/, run items 1, 3 and 4 on the merged tree.
+Repo:    /Volumes/DevMASTER/!CODING/Secuura/Blockchain/2_Project_Files  (READ-ONLY — git clone --shared --no-checkout into your own fresh mktemp -d;
+  git write verbs there only, from a script file; never merge-tree --write-tree, worktree, fetch or checkout in the checkout; never enter a seat worktree
+  or another gate's clone (other gates may be live); never vitest inside the checkout; pin by SHA, never origin/*. Record the checkout's porcelain
+  count and .git/worktrees count before and after: they must be equal (drafter 0 / 112) — other sessions move refs, attribute nothing without evidence)
+Farm node_modules by entry in your clone (#1009's R-6): Blockchain/Dev/node_modules (987), services/api-gateway/node_modules (8) and
+  packages/shared/node_modules (8), each per entry, .vite/.vitest/.cache skipped, @secuura/* relinked into your tree; shared dist built per tree,
+  IN TREE asserted. NEVER link a node_modules tree wholesale. Node runs only with cwd inside your clone.
+PROBE FILES LIVE OUTSIDE services/api-gateway/ (the #1018 round-2 gate's F-3): not under src/, not src/qa_probe/, no .test.ts anywhere under the
+  service root. Drafter pattern (measured): <tree>/Blockchain/Dev/qa_probe_1028/, absolute paths in vi.mock / import, run by a scratch vitest config
+  (root = the service dir, setupFiles = its vitest.setup.ts, include = the probe's absolute path) passed with --config. Before your first tamper row
+  PROVE it is out of both collectors: tsc -p . --listFilesOnly lists 0 qa_probe files (control: auth.ts listed) and a whole-suite run with the probe
+  present collects 57 files, 0 qa_probe. Quarantine probe dirs by MOVE outside the service root after each run; a quarantine inside src/ is not one.
+
+You are FINDINGS-ONLY. You never fix, never merge, never push, never deploy, never comment, never file, never tick an
+ack box, never `@`, never write to Linear or GitHub, and nothing goes to Peter or Stuart.
+
+NEVER run a push, the real pre-push hook, or preflight.sh inside the Secuura checkout or any of its worktrees.
+
+NEVER print a credential value, and never open, read or copy a secrets file into output — a script may read GH_TOKEN / LINEAR_API_KEY by
+NAME from /Volumes/DevMASTER/!CODING/Secuura/Blockchain/4_Credentials/.env and AGENTMAIL_API_KEY by NAME from
+/Volumes/DevMASTER/WEDNESDAY/4_Credentials/.env for the calls the brief allows (GitHub GET, Linear query, the one verdict mail), and never
+echoes them. Count, never echo. JWTs and sk_ keys in your probe are THROWAWAY, minted per run.
+
+NO shared docker stack, no :6882 / :7082 slot, no kintsugi, no demo, no az, no image, NEVER the wallet mnemonic (KS-535 HOLD). This gate needs NO
+container: the REAL index.ts app in-process (real edge strip, spec auth gate, versioning, authenticateToken, proxy) with ../db mocked, isSessionActive
+stubbed through a partial @secuura/shared mock (a live and a revoked session id), and every *_SERVICE_URL (SECURITY for /api/keys/validate, AUTH for
+/internal/connector-token) at ONE loopback recording stub that records, per upstream hit, every identity-ish header's value AND raw line count and the
+forwarded Bearer's decoded subject (validate / connector-token are NOT hits). Boot NODE_ENV=test (/api and /api/v1) AND NODE_ENV=production (/api/v1;
+raise RATE_LIMIT_MAX_REQUESTS — an instrument, say so). Set UNHANDLED_REJECTION_MODE=survive before importing the app. Run `docker info` ONCE and print
+its rc on its own line (UP is NOT permission; create no container). LOOPBACK ONLY: every listener binds 127.0.0.1:0. ANY LISTENER YOUR RUNS START, YOU
+END: identify it by port + argv + cwd, SIGTERM that pid, never a pattern kill, never pid 1, recount after — the same for any login_stub.mjs process
+YOUR runs started; quote an lsof TCP LISTEN census (+ cwd and argv per node pid + the login_stub.mjs count) at start and close. Do NOT probe through a
+real front end and do not stand one up: the edge and the upstream services' own authenticate() are NOT TESTED. No Akto, no k6, no Playwright, no
+Schemathesis run (NOT COMMISSIONED) — YOU rule whether they are REQUIRED, with the measured reason. Time-box: 40 minutes.
+KS-1208 (a token without role or userId still 500s) is OUT OF SCOPE: record it once, never grade #1028 on it, never widen into it.
+
+What Wednesday requires (brief items 1-9; drafter predictions marked drafter):
+
+1. THE CONTRACT ON THE REAL GATEWAY (lead). The seat's ks744 test is NOT the real app (a bare express app, its own error handler echoing
+   err.message, no edge strip). On the real index.ts, at head / develop 19f1e5475 / merged, drive an optional proxy mount, a required proxy mount,
+   certifications (requireScope), a gateway-local optional GET and one hand-forwarded route (forwardHeaders built from req.headers or req.user):
+   tokens FULL, NO_EMAIL, NO_VLEVEL, NO_BOTH; the claim PRESENT but '' / null / 0 / false / []; non-string level (number, boolean, object, array) and
+   non-string email; each with and without a junk sk_ key (the KS-1207 fall-through now reaches this branch); each with no client headers and with
+   every identity-ish client header (x-verification-level, every x-user-*, x-organization-id, x-tenant-id, x-tenant-slug, x-tenant-override,
+   x-wallet-address; mixed case; duplicated). Controls: anonymous, junk key alone, VALID key (connector), bad-signature Bearer, revoked session.
+   FAIL (Major): a missing-claim cell 5xx or 0 hits on a proxy mount at head/merged. FAIL (Blocker, NO GO): a client-controlled identity or level
+   header reaching the upstream on any verified-token cell, or on a cell where develop did not forward it. Drafter (410 cells per tree): develop
+   500 INTERNAL_ERROR "An unexpected error occurred", 0 hits, on 36 of 60 missing-claim cells (the other 24 are the local GET, 200 on both); head 0 of
+   60 fail; the ticket's "leaks an internal error string" reproduces on NEITHER tree in test or production mode (say whether any mode leaks);
+   falsy claims now dropped (develop forwarded '' / 'null' / '0' / 'false'); non-string claims forwarded coerced ('3', 'true', '[object Object]', an
+   array as TWO raw lines) on both trees; spoofed-header sets identical head vs develop on all 176 cells that reach upstream on both (planted
+   control fires); a client x-verification-level reaches upstream only on optional credentials with a bad-signature Bearer or a junk key and no
+   Bearer, identical at develop (#1023 R-5 / KS-736 paths); x-wallet-address (not stripped; read by referrals.ts:55) reaches upstream everywhere
+   on both trees — NOT this PR's: name it, rule TICKET or not, do not widen.
+2. THE DEVELOP MERGE-IN, BY CONTENT (lead). In YOUR clone: merge-tree --write-tree fb503741a x 19f1e5475 = the head tree b61ed1776 (0 conflicts);
+   merge-base fb503741a 19f1e5475 = 81ee4b729; the auth.ts +/- line multiset of 19f1e5475..head = that of 81ee4b729..fb503741a (+3 -2) and of
+   fb503741a..head = that of 81ee4b729..19f1e5475 (KS-1207, +14 -10), with controls that fire (the two sides unequal; a planted line breaks
+   equality); 19f1e5475..head = exactly the 2 PR files (control d7e95cd9f..head: drafter 15). RE-RUN the KS-1207 suite at head (drafter ks1207
+   26/26) and RP-PREMERGE (auth.ts = fb503741a bytes -> exactly the 10 ks1207 red cells, 0 ks744). Do NOT trust the READY's numbers
+   (57 files / 555 tests is the builder's claim): re-measure.
+3. TAMPERS on the WHOLE api-gateway suite at HEAD, denominator asserted (drafter 57 / 555, pending 0), project tsc rc per row (non-zero = VOID),
+   anchor count 1 and a marker asserted LANDED (a green is evidence only after the tamper is proven present), sha-restored, git diff --quiet. The
+   seat's 7 (drafter forms in gatesets/2026-09-17_gate1028/drafter_run_1028.py; never enter a seat worktree for the seat's): drafter T0 0 · RP-DEV 3
+   (R1 R2 R3) · RP-PREMERGE 10 ks1207 · EDIT1ONLY 2 (R2 R3) · EDIT2ONLY 1 (R1) · NOELSE 1 (R3) · TI 0. Drafter rows: G-UNDEFONLY 0 · G-VNEVER 1 ·
+   G-ENEVER 1 · G-STRIPUSER 3 (ks1041 x3, ks744 0: the email half is pinned by the strip suite, not ks744) · G-VDELETEFIRST 0 (equivalent refactor,
+   a green control). PLUS one of your own from a NEW direction. Say which property NO cell sees (drafter: the falsy / non-string claim classes).
+4. SUITES, tsc, eslint: api-gateway head 57/555 · develop 56/550 (drafter) · merged <yours>; packages/shared at head (seat: not run; shared subtree
+   identical on every tree); project tsc --noEmit -p . rc 0 each; THE TEST-INCLUDING tsc PROGRAM (not tsc -p, which excludes src/__tests__) on head
+   and develop with --listFilesOnly proof the ks744 test is in it, NEW-only lines, a planted control (+1) (seat: rc 2, 50 lines, 0 in touched
+   files); eslint by rule AND message with a firing control (seat: auth.ts 1 no-unused-vars "'error' is defined but never used." :415 = develop :414).
+5. MERGED TREE over the then-current develop in YOUR clone (drafter 557aa4de8 over 75ad0e55c); assert its api-gateway and shared subtrees equal the
+   head's, or run items 1, 3, 4 on it.
+6. LINEAR / GITHUB at run time and immediately before the mail: attachmentsForURL(pull/1028) = KS-744 contributes, no closes (controls pull/1023 ->
+   KS-1207 contributes; pull/99999 -> 0); 0 closing phrases in the title, body and all three commit messages (planted controls); KS-744 stays In
+   Progress on merge (§5f, .claude/skills/secuura-test-discipline/SKILL.md at develop: offline green alone never moves a runtime ticket).
+7. KS-1208 RECORDED, NOT GRADED: NO_ROLE / NO_USERID -> drafter 500 generic, 0 hits, both trees. NOT this PR's.
+8. CONSUMERS (READ, name the instrument): re-derive "0 non-test readers of x-verification-level" (case-insensitive git grep at head over services/ and
+   packages/, incl. req.get( / req.header( forms, a positive control on the gateway setters); what an absent header means to each consumer found;
+   and whether a route that 500'd before now reaches a gateway-local verificationLevel decision (routes/verification.ts:561,
+   services/enforcement.ts:151: missing = 'none') and forwards.
+9. RULINGS + CARRY-FORWARD per finding CLOSED / STILL OPEN / NEW, each SHIPS-WITH or TICKET — KS-744's 500, the drafter's disagreements 1-4
+   (brief §2) — plus the Schemathesis/Akto ruling with its measured reason, the checkout bounds, and NOT TESTED at equal prominence: the edge, real
+   upstreams and their authenticate(), a real auth-minted token missing the claim, a real Redis session store, preflight legs 3/4/8, demo,
+   NODE_ENV=development.
+
+LEAD WITH items 1 and 2: is the missing-claim 500 gone on the REAL gateway for every mount kind and both boots, does any client identity or level
+header newly reach an upstream, and does the KS-1207 merge-in hold by content and by suite.
+
+Hygiene: /bin/bash here is 3.2 — write runners in Python. zsh: no PIPESTATUS (`cmd > out 2>&1; rc=$?`), no timeout on macOS, never begin a line
+with `=====`. Your tool shell's grep may be a function: /usr/bin/grep -i with a same-file positive control; `git grep -c` prints nothing for a zero —
+silence is unread, not 0. Never `cd` in your own tool calls; absolute paths; git write verbs only inside script files. stderr is never discarded.
+Clocks from `date`, never estimated. Every scripted edit asserts its anchor count = 1 and a marker. Never edit index.ts for a probe. apiKeyCache and
+connectorBearerCache are module-level: a UNIQUE key per request. Quote the Secuura checkout's porcelain count, .git/config sha256, for-each-ref
+count, .git/worktrees count, origin develop SHA, refs/pull/1028/head and the checkout branch at start, mid and close as THREE timestamped readings;
+if refs/pull/1028/head moves, STOP — the brief is about a different SHA. develop moving is expected; judge it by content, name it.
+Never `rm`: fresh mktemp -d per attempt; quarantine scratch tests and configs by MOVE. No container is created; never touch a secuura-* container.
+Do no memory maintenance of your own project's memory store inside this session.
+
+Report FOUND / TESTED / HOW, with controls, into
+/Volumes/DevMASTER/!CODING/Testing Agent MAIN/projects/secuura/reports/2026-09-17-ks744-1028-e39521cfb-tier1-r1/
+(NOT-TESTED.written-first.md written FIRST, BEFORE any run; then report.md and evidence/): the trees with OIDs; the probe-location proof; the
+contract rows per mount kind, token class, client-header set, mode and tree; the spoofed-header table head vs develop; the merge-by-content
+derivation; the full tamper table with forms, tsc rc and VOID rows; suites, the test-including tsc program and eslint; the merged-tree OID; Linear;
+KS-1208; the consumer census; the Schemathesis/Akto ruling; the listener census start / close; the CLOSED / STILL OPEN / NEW table; and what you did
+NOT test at the same prominence as the findings. Every finding carries its evidence class (MEASURED AT RUNTIME / PROBED / READ ONLY / RELAYED),
+severity, target (PR or TICKET), SHIPS-WITH or TICKET, disposition, and its oracle. Name every prediction slip against its predictor.
+Client-facing communication = ticket comments only, and not from you; anything needing a push goes to Wednesday as an escalation candidate.
+Verdict: ONE line — GO, GO WITH FINDINGS, or NO GO — on e39521cfb54cb5fd47c6bdae64ce707b3c9befce, as the delta over develop 19f1e5475, AND on the
+merged tree (name the develop and the merged-tree OID). Then plain statements on items 1-9 and the CLOSED / STILL OPEN / NEW table.
+Give the merge seat its MERGE ADDENDUM line: "squash e39521cfb onto develop <then-current develop; 19f1e5475 = the head's second parent; 75ad0e55c
+at draft close> (merged tree <OID>; drafter b61ed1776 over 19f1e5475, 557aa4de8 over 75ad0e55c); #1028 attaches to KS-744 only, linkKind
+contributes, no closes — KS-744 stays In Progress on merge (§5f: the edge, the real upstreams and a real auth-minted claimless token are
+unmeasured); equality targets after the squash: auth.ts blob 6e1668362 / ks744 test 2ed41a338 (ks1207 test stays f56bd48b9); api-gateway 56/550
+at 19f1e5475 -> 57/555 at head -> <merged n/n> (re-measure); packages/shared <n/n>; dispositions: <per finding, SHIPS-WITH or TICKET>; NEW: <yours>;
+Records for KS-744's facts comment at merge: <the real-app 500 message and whether it leaked>, falsy claims now dropped, non-string claims still
+coerced (pre-existing), the email guard relies on the edge strip (pinned by ks1041), KS-1208 residue NOT this PR's, <yours>" — plus any finding
+with its target.
+
+MAIL YOUR VERDICT to wednesday-agent@agentmail.to when the pass is complete. Your pane holds ~19 lines of alternate screen with no
+scrollback, so a verdict that stays in the pane is one pane-close from being lost -- the verdict MAIL is the END STATE and the wait signal.
+Send it FROM coagent@agentmail.to. Subject, EXACTLY:
+[QA -> Wednesday] TIER 1 GATE #1028 (KS-744) e39521cfb — <GO | GO WITH FINDINGS | NO GO>
+(The QA project has no send_brief.sh of its own: POST https://api.agentmail.to/v0/inboxes/coagent@agentmail.to/messages/send with JSON
+{"to": ["wednesday-agent@agentmail.to"], "subject": "...", "text": "..."} and Authorization: Bearer $AGENTMAIL_API_KEY, the key by NAME
+from Wednesday's .env, never echoed. Build the body from a template file with no shell interpolation and assert the backtick spans survived.
+Confirm the API answered 2xx and quote the message id in your final pane line. Timestamps in the mail come from `date`, never estimated.
+The MAIL is the end state.)

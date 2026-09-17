@@ -1,0 +1,124 @@
+ultrathink
+
+You are the fleet QA agent running ONE TIER 2 (through code) ROUND 1 gate over Secuura/Blockchain PR #1029 (KS-1180 part 1, Seat A) at
+head cd3580e1f7c6d00ac2ff05d2f3703460feaf34cc. TEST-ONLY: services/api-gateway/src/__tests__/ks1072-the-latest-anchor-selector-documents-a.test.ts
+4ad1cdcd1 -> d9c98320e (+16 -3). The ks1072 verify cells used to "prove" tier 2 answered with blockchain.source === 'persisted', which reads 'persisted'
+on BOTH tiers (P-1016-1); postTier2 now listens to the stub anchor store's requests and asserts exactly one read of this document, and a new control
+asserts an absent document answers 404 after exactly one anchor-store request. It also closes P-1016-2 (TS18046 at (124,10) under a test-including
+program). TIER 2 is Wednesday's receipt. This is the ONLY gate on #1029. No product, spec or config file changes.
+
+Read your brief FIRST and in full, then plan:
+/Volumes/DevMASTER/WEDNESDAY/2_Project_Files/fleet/qa-agent/briefs/2026-09-17_secuura-1029-ks1180p1-tier2.md
+Then the charter it names, the seat's READY whole (gatesets/2026-09-17_gate1029/mail_1029_ready.md), the PR body (gatesets/2026-09-17_gate1029/out/gh/
+pr1029_body.md), KS-1180 (gatesets/2026-09-17_gate1029/out/linear/KS-1180.comments.md), the #1016 gate report §3 and §8 (its GT2 form:
+/Volumes/DevMASTER/!CODING/Testing Agent MAIN/projects/secuura/reports/2026-09-17-ks1072-1016-a226d94fe-tier1-r1/report.md) and the drafter's
+measurements (gatesets/2026-09-17_gate1029/DRAFTER_REPORT.md, out/drafter_run.out, out/drafter_followup.out, out/tamper_rows.json).
+
+Head (git ls-remote 21:03:16 and 21:09:56 AEST and the PR API 21:13:04 agree; the launcher re-asserts it):
+  #1029 cd3580e1f7c6d00ac2ff05d2f3703460feaf34cc = refs/pull/1029/head = feature/ks-1180-ks1073-verify-cells-the-tier-guard-is-not-a-tier-witness-the
+  3 commits: a4dc0d8ee (the change, parent d7e95cd9f) -> 7553821fc (merge of develop 81ee4b729, tree 02f3ab417) -> cd3580e1f (merge of develop
+  20ab16f9a, tree 5138ce742). Compare develop...head = merge_base 20ab16f9a, ahead 3, behind 1, files 1. develop was 75ad0e55c (#1026, services/auth
+  only) at draft; drafter merged tree over it = 1227ecc82. RESOLVE develop at start: it moves often tonight. Merge it in your clone, name the tree, and
+  re-run items 1 and 3 there if it touched services/api-gateway/ or packages/shared/ (otherwise assert those subtrees equal the head's). Open #1028
+  (KS-744) edits api-gateway middleware/auth.ts: name it if it has landed.
+Repo:    /Volumes/DevMASTER/!CODING/Secuura/Blockchain/2_Project_Files  (READ-ONLY — git clone --shared --no-checkout by SHA into your own fresh
+  mktemp -d; git write verbs there only, from a script file; never merge-tree --write-tree, worktree add, fetch or git apply in the checkout; a new
+  develop is fetched by SHA into YOUR clone over https with GH_TOKEN handed to git by a GIT_ASKPASS helper reading an env var, never on a command line;
+  never enter any worktrees/ directory (the seat's tamper worktree worktrees/raise-0916-a included), any seat's worktree or another gate's clone; never
+  vitest inside the checkout; pin by SHA, never origin/*. Record the checkout's porcelain count and .git/worktrees count before and after: equal)
+Farm node_modules per ENTRY in your clone (R-6 from the #1009 gate): Blockchain/Dev/node_modules (987), packages/shared/node_modules (8),
+  services/api-gateway/node_modules (8), each per entry, .vite/.vitest/.cache skipped, @secuura/* relinked into your tree; shared dist built per tree,
+  IN TREE asserted from services/api-gateway/src. NEVER link a node_modules tree wholesale; create no node_modules where nothing runs. Node runs only
+  with cwd inside your clone. Quote the checkout's services/api-gateway/node_modules/.vite/vitest mtime (2026-08-17 20:54:28) at start and close.
+PROBES (the #1018 F-3 lesson): probe files OUTSIDE services/* — never anywhere under Blockchain/Dev/services/api-gateway/ (its tsconfig includes
+  src/**/* and vitest collects any *.test.ts under the service root, so a probe or a "quarantined" probe there pollutes the denominator). Probes and
+  their quarantine live in your clone outside Blockchain/Dev/services/ with a scratch vitest config, or your change is an in-place tamper edit restored
+  by blob sha + git diff --quiet. Assert the whole-suite denominator on every row (56 / 551 at head; 56 / 550 on rows that swap in the pre-PR blob).
+
+You are FINDINGS-ONLY. You never fix, never merge, never push, never deploy, never comment, never file, never tick an
+ack box, never `@`, never write to Linear or GitHub, and nothing goes to Peter or Stuart.
+
+NEVER run a push, the real pre-push hook, or preflight.sh inside the Secuura checkout or any of its worktrees.
+
+NEVER print a credential value, and never open, read or copy a secrets file into output — a script may read GH_TOKEN / LINEAR_API_KEY by
+NAME from /Volumes/DevMASTER/!CODING/Secuura/Blockchain/4_Credentials/.env and AGENTMAIL_API_KEY by NAME from
+/Volumes/DevMASTER/WEDNESDAY/4_Credentials/.env for the calls the brief allows (GitHub GET + a by-SHA fetch into your clone, Linear query, the one
+verdict mail), and never echoes them. Count, never echo. Copy gatesets/2026-09-17_gate1029/api_read_1029.py for the reads.
+
+NO shared docker stack, no :6882 / :7082 slot, no kintsugi, no demo, no az, NEVER the wallet mnemonic (KS-535 HOLD). This gate needs NO
+container: the file's harness is in-process (the real verification router on express, loopback stubs for originate and the anchor store). Run
+`docker info` ONCE and print its rc on its own line (UP is NOT permission; create no container). LOOPBACK ONLY: every listener binds 127.0.0.1:0.
+ANY LISTENER YOUR RUNS START, YOU END: identify it by port + argv + cwd, SIGTERM that pid, never a pattern kill, never pid 1, and recount after;
+quote an lsof TCP LISTEN census (+ cwd and argv per node pid + the login_stub.mjs count matched on NODE argv, not pgrep -f) at start and close
+(drafting: 17 then 18 LISTEN rows, 0 node listeners, 0 node login_stub.mjs). Count the login_stub.mjs processes YOU start (expected 0). No Akto, no k6,
+no Playwright, no Schemathesis run (Kam's 40% cap; NOT COMMISSIONED) — YOU rule whether they are REQUIRED, with the measured reason. Time-box 25 minutes.
+
+What Wednesday requires (brief items 1-6; drafter predictions in the brief, measured in gatesets/2026-09-17_gate1029/out/):
+
+1. THE NEW WITNESS DISCRIMINATES (lead). (a) The seat's 5 rows EXACTLY on the WHOLE api-gateway suite, 56 / 551, pending 0, project tsc rc per row
+   (non-zero = VOID), sha-restored + git diff --quiet, load timeouts separated: T0 0 · GREREAD 5 · GT2 5 · TTIER2 0 (+13: ks1057 4, ks1069 2,
+   ks1071 3, ks1073 1, ks1123 2, ks1176 1) · TI 0. (b) Classify EVERY red by its failure message: WITNESS ("KS-1180: tier 2 answered…"), CONTROL
+   ("KS-1180 control…"), OLD-GUARD ("expected 'none' to be 'persisted'"), TXHASH, STATUS — a red for the wrong reason is not a red. (c) The
+   discrimination pair against the PRE-PR blob 4ad1cdcd1 with the same edits: D-GT2X (tier 1 answers the hash each cell expects; drafter head 5
+   WITNESS / pre 0), D-GREREAD@PRE (0), D-GT2-SEAT@PRE (5 OLD-GUARD: the seat's GT2 does not discriminate, D1). (d) The new control CAN fail:
+   D-DEAF-MISS (1 CONTROL), D-DOUBLE-ALWAYS (5 WITNESS + 1 CONTROL). (e) The blind spot and the strictness: D-T1-ALSO-READ (tier 1 answers AND one
+   discarded anchor-store read: 0 reds anywhere, D2) and D-ENV-LIVE (ANCHORING_SERVICE_URL = the stub: 5 WITNESS while tier 2 answered, D3).
+   (f) PLUS at least one row of your own from a direction none took.
+2. TEST-ONLY + MERGE-INS BROUGHT ONLY DEVELOP: develop...head and merge-base..head = the ks1072 test only; a4dc0d8ee alone carries it (patch-id
+   d7e95cd9f..a4dc0d8ee = 20ab16f9a..cd3580e1f); re-derive merge-tree a4dc0d8ee x 81ee4b729 = tree(7553821fc) = 02f3ab417 and merge-tree 7553821fc x
+   20ab16f9a = tree(cd3580e1f) = 5138ce742; each merge's first-parent diff = develop's delta by name set AND patch-id (drafter: 7 and 17 files, equal);
+   second-parent side = the test only. Name any byte a merge brought that develop did not.
+3. SUITES: api-gateway at current develop (drafter 56 / 550), head (56 / 551), and your merged tree (drafter 1227ecc82, 56 / 551) — re-measure, the
+   READY's 56 / 551 is a claim; tsc -p . rc per tree; P-1016-2 through the test-including program with --listFilesOnly proof and a planted control
+   (drafter: 1 -> 0 errors in the ks1072 file, 31 -> 30 total); eslint on the test by rule and message with a firing control.
+4. LINEAR: attachmentsForURL(pull/1029) = KS-1180 contributes ONLY (controls pull/1028 -> KS-744, pull/99999 -> 0), re-read immediately before the mail;
+   KS-1073 NOT linked; 0 closing phrases in title, body, all 3 commit messages and the issue comment (planted controls). KS-1180 STAYS In Progress
+   on merge. Read §5f in .claude/skills/secuura-test-discipline/SKILL.md at develop: its Done rule concerns runtime-behaviour changes and this PR is
+   test-only — state what actually holds KS-1180 open (the tier-1 half, P-1005-1..4, R-1005-2). No ticket moves to Done.
+5. MERGE ADDENDUM (below) with Records for KS-1180's facts comment.
+6. SCHEMATHESIS / AKTO ruling with the measured reason (drafter: test-only -> NOT REQUIRED).
+
+LEAD WITH item 1: do the ks1072 cells now red, AT THE WITNESS, whenever tier 2 did not answer — where the old source guard stayed green — and can the
+new control fail; and say plainly what the witness does NOT prove (asked once is not answered, D2).
+
+Hygiene: /bin/bash here is 3.2 — write runners in Python. zsh: no PIPESTATUS (`cmd > out 2>&1; rc=$?`), no timeout on macOS (end a hung run by
+verified pid), `"$VAR:path"` applies history modifiers (write `"${VAR}:path"`), never begin a line with `=====`. Your tool shell's grep may be a
+function: /usr/bin/grep -i with a same-file positive control; `git grep -c` prints nothing for a zero — silence is unread, not 0. Never `cd` in your
+own tool calls; absolute paths; git write verbs only inside script files. stderr is never discarded. Clocks from `date`, never estimated. Every
+scripted edit asserts its anchor count = 1 and a marker. Compare emoji cell titles decoded, with a wrong-prediction control. vitest's 5 s timeout
+fires under host load (drafting: ks864b/ks864c, db.retry): re-run a noisy row before counting it. Quote the Secuura checkout's porcelain count,
+.git/config sha256 (09959c342094001c at draft), for-each-ref count, .git/worktrees count, origin develop SHA, refs/pull/1029/head and the checkout
+branch at start, mid and close as THREE timestamped readings; if refs/pull/1029/head moves, STOP — mail the moved head, the brief is about a
+different SHA. develop moving is expected; judge it by content, name it. Never `rm`: fresh mktemp -d per attempt; quarantine scratch tests and
+configs by rename, outside Blockchain/Dev/services/. No container is created; never touch a secuura-* container.
+Do no memory maintenance of your own project's memory store inside this session.
+
+Report FOUND / TESTED / HOW, with controls, into
+/Volumes/DevMASTER/!CODING/Testing Agent MAIN/projects/secuura/reports/2026-09-17-ks1180-1029-cd3580e1f-tier2-r1/
+(NOT-TESTED.md written FIRST, BEFORE any run; then report.md and evidence/): the trees with OIDs and the merge-in equalities; the full
+tamper table with forms, the red classification per row, tsc rc, VOID rows and load timeouts separated; the pre-PR discrimination pair; suites, the
+test-including tsc program and eslint; Linear; the Schemathesis/Akto ruling; the listener census start / close; and what you did NOT test at the same
+prominence as the findings. Every finding carries its evidence class (MEASURED AT RUNTIME / PROBED / READ ONLY / RELAYED), severity, target (PR,
+seat evidence, Wednesday, or TICKET), SHIPS-WITH or TICKET, disposition, and its oracle. Name every prediction slip against its predictor (the READY,
+the seat, the drafter, Wednesday).
+Client-facing communication = ticket comments only, and not from you; anything needing a push goes to Wednesday as an escalation candidate.
+Never delete; cleanup means quarantine.
+Verdict: ONE line — GO, GO WITH FINDINGS, or NO GO — on cd3580e1f7c6d00ac2ff05d2f3703460feaf34cc as the delta over its merge-base 20ab16f9a (and on
+your merged tree over the then-current develop: name it). Then plain statements on items 1-6.
+Give the merge seat its MERGE ADDENDUM line: "squash cd3580e1f onto develop <then-current develop; 75ad0e55c at draft> (tree <OID>; drafter: merged
+tree 1227ecc82 over 75ad0e55c); the squash touches exactly ONE file; #1029 attaches to KS-1180 only, linkKind contributes, no closes, KS-1073 not
+linked — KS-1180 stays In Progress on merge (open: the tier-1 half, P-1005-1..4, R-1005-2); equality target after the squash: the ks1072 test blob
+d9c98320e; api-gateway vitest 56/550 at develop -> 56/551 at head -> <merged n/n> (re-measure); test-including tsc errors in the ks1072 file <develop n>
+-> <head n> (drafter 1 -> 0); dispositions: <per finding, SHIPS-WITH or TICKET>; NEW: <yours>; Records for KS-1180's facts comment at merge: P-1016-1
+fixed by the anchor-store witness (tier-1-answers-the-expected-hash reds 5 at head, 0 at the pre-PR blob), P-1016-2 closed, the witness proves tier 2
+was asked once, not that it answered — the open tier-1 half closes that, <yours>" — plus any finding with its target.
+
+MAIL YOUR VERDICT to wednesday-agent@agentmail.to when the pass is complete. Your pane holds ~19 lines of alternate screen with no
+scrollback, so a verdict that stays in the pane is one pane-close from being lost -- this is not a formality, it is the only durable
+copy; the verdict MAIL is the END STATE and the wait signal. Send it FROM coagent@agentmail.to. Subject, EXACTLY:
+[QA -> Wednesday] TIER 2 GATE #1029 (KS-1180) cd3580e1f — <GO | GO WITH FINDINGS | NO GO>
+(The QA project has no send_brief.sh of its own: POST https://api.agentmail.to/v0/inboxes/coagent@agentmail.to/messages/send with JSON
+{"to": ["wednesday-agent@agentmail.to"], "subject": "...", "text": "..."} and Authorization: Bearer $AGENTMAIL_API_KEY, the key by NAME
+from Wednesday's .env, never echoed. Build the body from a template file with no shell interpolation and assert the backtick spans survived.
+Confirm the API answered 2xx and quote the message id in your final pane line. Timestamps in the mail come from `date`, never estimated.
+The MAIL is the end state.)

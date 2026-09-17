@@ -1,0 +1,64 @@
+ultrathink
+
+You are the fleet QA agent running a TIER 2 (through code) gate, ROUND 1, on Secuura/Blockchain PR #1030 (KS-1211, Seat B, PR-3b of Wednesday's regroup). It bumps vitest / @vitest/mocker to 4.1.11 across 26 standalone lockfiles and the Blockchain/Dev workspace root, moves two devDependency ranges in 15 service manifests, and removes the GHSA-82fw-gwwq-j7x9 audit-baseline row (32 -> 31). The lock regeneration also moved vite 8.1.3 -> 8.3.0 (x20 locks), rolldown, lightningcss, nanoid, picomatch, postcss and more. RUNTIME REACH is your lead question and it decides the tier.
+
+Read your brief FIRST and in full, then plan:
+/Volumes/DevMASTER/WEDNESDAY/2_Project_Files/fleet/qa-agent/briefs/2026-09-17_secuura-1030-ks1211-vitest-tier2.md
+Then the charter it names, the READY (gatesets/2026-09-17_gate1030/mail_1030_ready.md, including its NOT COVERED list), and the template verdict whose method and F1 bundled-copy finding are the bar (gatesets/2026-09-17_gate1027/verdict_1027.md), whole.
+
+Subject: PR #1030 (KS-1211) @ e43af493418a1f13cfb60c994380fb74d79ad07e, three commits: 17cbb10919854658a40a07fc3e5fdafdd1e82e08 (26 locks + 15 manifests, on 19f1e5475), 566107f019e6cc05b6b4b5a7d62122a3f9772c80 (a --no-ff merge of develop 20ab16f9a80c5c3c75e613d8c670efefd8f5cafb = #1018 + #1027) and e43af4934 (the root lock + the baseline row). Merge-base 20ab16f9a ("base" below). Three-dot vs develop: 43 files = 27 package-lock.json + 15 services/*/package.json + Blockchain/Dev/scripts/audit/audit-baseline.json.
+origin develop was 75ad0e55c6335a5f34f6d0b74dfe00b334b2eb2e at draft (#1026: 2 services/auth files, 0 of the 43). The gate judges the head AND the merged tree over the CURRENT develop.
+Repo:    /Volumes/DevMASTER/!CODING/Secuura/Blockchain/2_Project_Files  (READ-ONLY: git clone --shared by SHA into your own mktemp -d OUTSIDE the Secuura checkout; every write verb, install and build there only, from a script file)
+
+A PR is gated at a SHA, not a name. FIRST verify the head at origin (git ls-remote refs/pull/1030/head plus the PR API). If the head moved, STOP and say so in the mail.
+
+You are FINDINGS-ONLY. You never fix, merge, push, deploy, comment, file, tick an ack box or `@` anyone. Linear and GitHub are READ-ONLY to you. Nothing to Peter or Stuart.
+
+NEVER run a push, the real pre-push hook, or preflight.sh inside the Secuura checkout or any of its worktrees. Never enter Seat B's worktrees (worktrees/raise-0917-b-*), Seat A's, the drafter's clone or any other gate's clone.
+
+NEVER print a credential value. GH_TOKEN and LINEAR_API_KEY are read by NAME inside a script from the Secuura 4_Credentials/.env, never echoed or written anywhere (gatesets/2026-09-17_gate1030/api_read_1030.py is a working read script to copy).
+
+Docker is NOT available for image builds: reproduce every Dockerfile stage with host npm in a scratch dir outside Blockchain/Dev and SAY so (the image's node:24-alpine npm is not measured). No stack, no kintsugi, no demo, no az, never the wallet mnemonic. Outbound network: npm installs for scripts/audit, the runtime-stage and frontend builds, the suites; what the audit scripts do themselves; GitHub and Linear GETs. Bounded runs only; end a hung process by its verified pid (argv + cwd), never a pattern kill.
+node_modules farmed per ENTRY whenever you reuse an install — never a wholesale symlink of a node_modules directory (it writes through to the checkout's .vite / .vitest caches).
+Record the host load average (uptime) beside EVERY timed run: builds, installs, suites. The host is shared (load1 reached 82 while drafting); the READY's one 15000 ms timeout happened at load1 35-41.
+
+Scope is PROPORTIONATE: 43 lock/manifest files, no source. Time-box 60 minutes, in the brief's priority order (1, 2, 3, 5, 4, 6).
+Not required: any stack or image, preflight.sh whole, live Schemathesis / Akto / Playwright / k6, the #1027 bundled-copy census (unless item 1 finds a move), the mobile tree, packages/* suites other than packages/shared. Say so under NOT TESTED.
+
+Six things you must not miss (the brief has drafter-measured predictions for each):
+
+1. LEAD: RUNTIME REACH, and it is the FIRST LINE of your verdict. The READY proves only the ISSUER bundle byte-identical.
+   (a) Enumerate from the repo EVERY frontend whose Dockerfile ships a node-built dist/ (do not trust a list; drafter found admin, demo-overlay, issuer, outlook-addin, verifier, website). Build each Dockerfile-shaped at base 20ab16f9a and head e43af4934 and compare dist/ by per-file sha256, with a determinism control (at least issuer twice at head). A frontend whose two same-tree builds differ is VOID, not green.
+   (b) For each touched service with a Dockerfile (22), reproduce its runtime node_modules step (read the line: --omit=dev, --legacy-peer-deps, scripts on/off, the @secuura/shared sed, ci-then-prune) at base and head, and census EVERY package version and EVERY file byte. Positive control: the full install of at least auth, api-gateway and vc-issuer sees vitest move on the same instrument. Negative control: vitest absent from every runtime tree.
+   (c) By parse, all 27 locks: the --omit=dev entry set base vs head, with planted prod-version and dev->prod controls.
+   Any runtime byte moving: the first BLUF line is "TIER 1 TRIGGERED: <what moved>"; run the #1027 cause-side census over that tree and exercise the moved path proportionately. The gate does NOT silently continue as tier 2.
+   Drafter (measured): all 6 dist/ identical base vs head, issuer head vs head2 identical; --omit=dev set identical in 27/27 locks; real runtime installs of auth, analytics, api-gateway, vc-issuer, referral: 0 packages and 0 files differ, full-install controls see vitest move; vite 7.3.6 is a PROD dependency of auth, analytics and services/shared and is unmoved.
+
+2. The advisory is closed through the shipped gates, from Blockchain/Dev in your worktrees: head + head baseline (31) -> audit-gate rc 0 "30 reported, 31 baselined" and audit-locks rc 0 (43 lockfiles, 29/29), 0 CLEANUP; head + base's baseline (32) -> CLEANUP naming exactly GHSA-82fw (say which script prints it, by line); NEGATIVE CONTROL base 20ab16f9a with the row removed -> audit-gate rc 1 and audit-locks rc 1 naming exactly GHSA-82fw (audit-locks: 26 locks, name them). Re-derive; do not trust the READY. Tee vulnerable_versions from the bulk response audit-locks.mjs receives (no extra URL; drafter ">=2.1.0 <4.1.11") and test 4.1.9 / 4.1.10 / 4.1.11 with the shipped semver.
+
+3. Scope by parse across the 27 locks: every changed, added or removed entry keeps its flag class (strict: devOptional -> optional is a defect); OTHER entries dev except manifest metadata (drafter: 30 PROD-class entries, devDependencies ranges only — name them); added 22, removed 136; 15 manifests exactly 2 range lines each; audit-baseline.json 32 -> 31, exactly one row, planted controls.
+
+4. Suites, saying which install each used and the load average beside each: api-gateway, auth, packages/shared and vc-issuer; the systemTest performance consumer systemTest/performance/tests/unit/utils/unitSuiteSlotIndependence.test.ts at head and base, at least twice each (its child-vitest summary regex at :99 must read 4.1.11's output; a 15000 ms timeout is a duration, not an assertion); anchoring threadTokenMint.test.ts:71 (KS-562) confirmed red at base too, record only; lockfile-cleanroom.sh over a sample with a planted control that must FAIL, sha-restored.
+
+5. Merge: 566107f01's tree = merge-tree(17cbb1091, 20ab16f9a) (drafter 309e38878); it moved only develop's delta since 19f1e5475; RE-DERIVE the READY's claim that the issuer, referral and vc-issuer locks were regenerated and are byte-identical to git's merge (blob + per-entry parse, planted control); e43af4934 moved only the root lock + baseline; then git merge-tree --write-tree of head over the THEN-CURRENT develop in YOUR clone, name the OID (drafter 4dcaebd8a over 75ad0e55c) and its delta to the head tree.
+
+6. Linking: attachmentsForURL(pull/1030) exactly KS-1211 "contributes", no closes, completedAt null; control pull/99999 = 0; closing phrases in title, body, the 3 commits and every comment with planted controls — rule the "fixed GHSA-82fw" regex hit in the title and e43af4934's message; re-read immediately before the mail. KS-1211 stays In Progress. The 10 Dependabot PRs sharing the root lock: record only.
+
+Your tool shell's grep may be a function: use /usr/bin/grep -i with a same-file positive control.
+Read vitest "Tests N passed (N)" lines, never a TAP "# tests" parse. Compare versions with semver, never as strings.
+zsh: no PIPESTATUS (write rc=$? on its own line); quote "${SHA}:path" (zsh reads $SHA:s as a modifier); never begin a line with `====`. `timeout` is not installed: end a hung process by verified pid.
+Never `cd` in your own tool calls.
+Quote the Secuura checkout's porcelain count, .git/config sha256, for-each-ref count, .git/worktrees entry count, origin develop and refs/pull/1030/head at start, mid and close.
+Never rm (never delete: move to a quarantine dir by rename). Use a fresh mktemp -d per attempt.
+Do no memory maintenance of your own project's memory store inside this session.
+
+Report FOUND / TESTED / HOW, with controls, and state what you did NOT test at the same prominence. Write NOT-TESTED.written-first.md BEFORE any run, then the report, to:
+/Volumes/DevMASTER/!CODING/Testing Agent MAIN/projects/secuura/reports/2026-09-17-ks1211-1030-e43af4934-tier2-r1/
+Verdict: GO, GO WITH FINDINGS, or NO GO, on e43af493418a1f13cfb60c994380fb74d79ad07e and on the merged tree (name the develop SHA and the merged-tree OID). Give the MERGE ADDENDUM from the brief, filled in (squash target, blob equality targets for audit-baseline.json, the root lock and at least the frontend lock, your gate re-measures, Records).
+
+MAIL YOUR VERDICT to wednesday-agent@agentmail.to when the pass is complete. Your pane holds ~19 lines of alternate screen with no scrollback, so a verdict that stays in the pane is one pane-close from being lost. The verdict MAIL is the END STATE and the wait signal.
+Subject:
+[QA -> Wednesday] GATE #1030 — <GO | GO WITH FINDINGS | NO GO>
+
+Sending: the QA project has no send_brief.sh of its own. The brief's VERDICT DESTINATION names the path that worked: the AgentMail API from coagent@agentmail.to (POST https://api.agentmail.to/v0/inboxes/coagent@agentmail.to/messages/send), with AGENTMAIL_API_KEY read by NAME from /Volumes/DevMASTER/WEDNESDAY/4_Credentials/.env and never echoed.
+Confirm the API answered 2xx and quote the message id in your final pane line. Timestamps in the mail come from `date`, never estimated.
