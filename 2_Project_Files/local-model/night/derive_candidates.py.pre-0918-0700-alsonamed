@@ -75,30 +75,6 @@ while True:
     cursor = d["pageInfo"]["endCursor"]
 
 ready = sorted({re.match(r"READY_(KS-\d+)", os.path.basename(f)).group(1) for f in glob.glob(os.path.join(HERE, "READY_*")) if re.match(r"READY_(KS-\d+)", os.path.basename(f))})
-
-# ---- ALSO-NAMED (2026-09-18, the MORNING seat) ---------------------------------------------------
-# A READY may carry the fix for MORE THAN ONE ticket, and `ready` above keys only on the FILENAME's
-# id — so the second ticket stays in the pool and is re-picked forever. KS-1173 is the live instance:
-# its change ships inside READY_KS-1172-B3, whose HEADLINE reads "KS-1172 + KS-1173 PART B", and it
-# had been re-read by several seats before anyone noticed.
-#
-# This SURFACES, it does not SUPPRESS, and the asymmetry is the whole design: under-claiming costs a
-# wasted read (what happened); over-claiming would silently delete a LIVE ticket from the pool, and
-# nobody would ever look for it. A headline also mentions tickets in prose ("Refs KS-1229", "disjoint
-# from KS-1194"), so an id found here is a QUESTION for the coordinator, never a verdict.
-also_named = {}
-for f in glob.glob(os.path.join(HERE, "READY_*")):
-    _m = re.match(r"READY_(KS-\d+)", os.path.basename(f))
-    if not _m:
-        continue
-    try:
-        with open(f, encoding="utf-8") as fh:
-            _head = fh.readline()
-    except OSError:
-        continue
-    for _other in re.findall(r"KS-\d+", _head):
-        if _other != _m.group(1):
-            also_named.setdefault(_other, set()).add(os.path.basename(f))
 done_pass = set()
 try:
     for l in open(os.path.join(HERE, "done.md"), encoding="utf-8"):
@@ -197,15 +173,8 @@ with open(OUT, "w", encoding="utf-8") as o:
     for t, rows in tiers.items():
         rows.sort(key=lambda r: (r[1] or 9, r[0]))
         o.write(f"## {t} — {len(rows)}\n")
-        for r in rows:
-            _flag = ""
-            if r[0] in also_named:
-                _flag = f" ⚠ ALSO NAMED in {', '.join(sorted(also_named[r[0]]))} — verify it is not already written before briefing"
-            o.write(f"- {r[0]} (P{r[1]}) {r[2]} — `{'`, `'.join(r[3])}`{_flag}\n")
+        for r in rows: o.write(f"- {r[0]} (P{r[1]}) {r[2]} — `{'`, `'.join(r[3])}`\n")
         o.write("\n")
-    _an = {i: v for i, v in also_named.items() if i not in {h[0] for h in held}}
-    o.write(f"## ⚠ ALSO NAMED IN A HELD READY's HEADLINE — {len(_an)} (verify before briefing; surfaced, NOT suppressed)\n"
-            + "".join(f"- {i} — named in {', '.join(sorted(v))}\n" for i, v in sorted(_an.items())) + "\n")
     o.write(f"## HELD (READY_* or done.md PASS) — {len(held)}\n" + "".join(f"- {i} {t}\n" for i, t in sorted(held)) + "\n")
     o.write(f"## SET ASIDE with a recorded reason — {len(aside)} (re-read only if the ticket's updatedAt moved)\n" + "".join(f"- {i} — {r} (updated {u})\n" for i, r, u in sorted(aside)) + "\n")
     o.write(f"## EXCLUDED by predicate — {len(excluded)}\n" + "".join(f"- {i} — {r}\n" for i, r in sorted(excluded)) + "\n")

@@ -1,4 +1,4 @@
-# Ornith candidates — derived 2026-09-18 06:48 from 340 KS Backlog/Todo tickets (read-only, unpaginated)
+# Ornith candidates — derived 2026-09-18 06:51 from 340 KS Backlog/Todo tickets (read-only, unpaginated)
 
 A CENSUS for the coordinator to brief from, easy → hard (Kam 2026-09-15 16:40 / 18:19). A ticket here is a candidate, not a task: read it, read the file at the tip, write `night/briefs/<id>.md`, then queue it. Auth-shaped titles are excluded (LAST); Peter/Stuart tickets and PR-attached tickets are excluded outright.
 
@@ -87,6 +87,31 @@ A CENSUS for the coordinator to brief from, easy → hard (Kam 2026-09-15 16:40 
 - KS-1153 (P4) L7 gate records (#918/#924/#925): run-code-guards.sh --check-unreached advisory  — `.githooks/pre-push`, `scripts/run-code-guards.sh`, `scripts/preflight/preflight.sh`
 - KS-1206 (P4) originate admin API-key mint writes no connector_id and an unclamped rate_limit: — `services/originate/src/routes/adminConfig.ts`, `services/security/src/index.ts`
 - KS-1083 (P0) GATEWAY_VOUCH_SECRET: nothing provisions it and no deploy order or rotation is w — `services/api-gateway/src/routes/verification.ts`, `packages/shared/src/db/tenant-context.ts`, `scripts/bootstrap-env.sh`
+
+## ⚠ ALSO NAMED IN A HELD READY's HEADLINE — 23 (verify before briefing; surfaced, NOT suppressed)
+- KS-1004 — named in READY_KS-1158-R1_ornith35b-q4_JEST-PASS-7of7_2026-09-15.diff.md
+- KS-1020 — named in READY_KS-1121_ornith35b-q4_VITEST-MODIFYINPLACE-REANCHORED-PASS-7of7_2026-09-16.diff.md
+- KS-1046 — named in READY_KS-1047_ornith35b-q4_BASHPATCH-RECOUNTED-PASS-7of7_2026-09-16.diff.md
+- KS-1069 — named in READY_KS-1130-E3twin_ornith35b-q4_TESTONLY-PASS-7of7_2026-09-15.diff.md
+- KS-1072 — named in READY_KS-1199_ornith35b-q4_TESTONLY-TAMPER-PASS-7of7_2026-09-17.diff.md
+- KS-1073 — named in READY_KS-1123-F2_ornith35b-q8_TESTONLY-PASS-7of7_2026-09-15.diff.md, READY_KS-1130-E1twin_ornith35b-q4_TESTONLY-PASS-7of7_2026-09-15.diff.md, READY_KS-1158-R1_ornith35b-q4_JEST-PASS-7of7_2026-09-15.diff.md
+- KS-1092 — named in READY_KS-1097-B_ornith35b-q4_DOCPATCH-REFLOW-INFERRED-PASS-7of7_2026-09-15.diff.md
+- KS-1099 — named in READY_KS-1108_ornith35b-q4_TOOLING-AKTO-PASS-7of7_2026-09-15.diff.md
+- KS-1173 — named in READY_KS-1172-A3_ornith35b-q4_JEST-MODIFYINPLACE-THREE-VERBS-PASS-7of7_2026-09-15.diff.md, READY_KS-1172-B3_ornith35b-q4_MODIFYINPLACE-THREE-VERBS-PASS-7of7_2026-09-15.diff.md, READY_KS-1172-D3_ornith35b-q4_DOCPATCH-THREE-VERBS-PASS-6of6_2026-09-15.diff.md
+- KS-202 — named in READY_KS-974-B_ornith35b-q4_PASS-7of7_2026-09-15.diff.md
+- KS-217 — named in READY_KS-1193-F1_ornith35b-q4_TESTONLY-TAMPER-PASS-7of7_2026-09-17.diff.md
+- KS-253 — named in READY_KS-999_ornith35b-q4_RECHECK-PASS-7of7_2026-09-15.diff.md
+- KS-430 — named in READY_KS-629-B_ornith35b-q4_VITEST-PASS-7of7_2026-09-16.diff.md
+- KS-666 — named in READY_KS-1011_ornith35b-q4_BASHPATCH-NEWTEST-PASS-7of7_2026-09-16.diff.md
+- KS-691 — named in READY_KS-1047_ornith35b-q4_BASHPATCH-RECOUNTED-PASS-7of7_2026-09-16.diff.md
+- KS-727 — named in READY_KS-1181-F3_ornith35b-q4_TESTONLY-TAMPER-PASS-7of7_2026-09-17.diff.md, READY_KS-1181-F3w_ornith35b-q4_comment-PASS-9of9_2026-09-17.diff.md
+- KS-754 — named in READY_KS-1028_ornith35b-q4_JEST-PASS-7of7_2026-09-15.diff.md, READY_KS-1031_ornith35b-q4_BASHPATCH-NEWTEST-PASS-7of7_2026-09-16.diff.md
+- KS-835 — named in READY_KS-1156-A2_ornith35b-q4_comment-PASS-9of9_2026-09-17.diff.md
+- KS-869 — named in READY_KS-887_ornith35b-q4_TESTONLY-MODIFYINPLACE-PASS-7of7_2026-09-16.diff.md
+- KS-930 — named in READY_KS-958_ornith35b-q4_BASHPATCH-REANCHORED-RECOUNTED-PASS-7of7_2026-09-16.diff.md
+- KS-932 — named in READY_KS-1179-F1_ornith35b-q4_TESTONLY-TAMPER-PASS-7of7_2026-09-17.diff.md
+- KS-966 — named in READY_KS-972_ornith35b-q4_BASHPATCH-REANCHORED-PASS-7of7_2026-09-16.diff.md
+- KS-999 — named in READY_KS-1186_ornith35b-q4_AUTH-5SITE-LINEKEYED-PASS-7of7_2026-09-17.diff.md
 
 ## HELD (READY_* or done.md PASS) — 81
 - KS-1009 Security: GET /api/auth/wallet/status returns userId + role to ANY anonymous cal
