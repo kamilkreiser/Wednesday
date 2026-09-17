@@ -4885,5 +4885,12 @@
   "project": "Secuura",
   "ts": "2026-09-17T16:42:00.443977+10:00",
   "text": "Fair challenge, and I agree: fixing beats re-dating. Here's what I'm doing unless you stop me.\n\nI'm launching a second Secuura seat now, Seat B, just for this, so Seat A stays on its security fixes. Seat B works through the fifteen expiring rows. For each one it checks the advisory is still real, bumps the package to the fixed version if one exists, runs the tests, and raises a pull request through the normal QA gate. I merge what passes. Seat B only touches package and lock files, so it can't collide with Seat A.\n\nWhat I read on develop just now: ten rows expire on the 24th. They're qs, mysql2, js-yaml, colord, hono, vitest and a browser-mapping library, all moderate. Five more expire on the 30th: react-router, @hono/node-server and ip-address.\n\nThe honest limit: I haven't measured whether a compatible fix exists for each one. The node-server and react-router fixes look like major-version upgrades, going by their own notes. Anything that can't be fixed safely before its date comes back to you as a per-row decision, not a quiet re-date."
+ },
+ {
+  "role": "wednesday",
+  "seat": "Kamils-Mac-Studio.local",
+  "project": "Secuura",
+  "ts": "2026-09-17T16:56:39.385940+10:00",
+  "text": "A correction to my 4:42 message. I said the ten rows expiring on the 24th were all moderate. I hadn't checked that. The baseline's own notes mark the js-yaml advisory as high, the hono notes mention high too, and a read of the lock files suggests hono ships inside the MCP server, not just in test tooling. So these are not all low-risk dev packages, which is one more reason to fix rather than re-date. Seat B will measure the severity and reach of each row first, and anything high or shipped gets its full QA gate."
  }
 ]
