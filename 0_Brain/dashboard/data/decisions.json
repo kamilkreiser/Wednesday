@@ -11096,5 +11096,43 @@
    "CARD nexusai-main-tree-is-a-stale-snapshot",
    "CARD secuura-934-blocks-every-push-needs-one-approval"
   ]
+ },
+ {
+  "id": "secuura-ks1202-build-refuse-mismatched-type",
+  "client_project": "Secuura/Blockchain",
+  "title": "KS-1202 measured: a document can be SERVED as a type its creator never had to be cleared for - build the refusal?",
+  "bluf": "OVERRIDE REASON: the gate matched Kam's 08:47 ruling on secuura-served-documenttype-unchecked-n1 ('measure-first - First run a real originate in-process ... then decide'); this card IS the 'then decide', and the other matches share only a word (PR-triage pastes, a Stuart anchor relay, the rate-limiter ruling, the kintsugi cache card via 'build'). THE MEASUREMENT (seat A, KS-1202 comment 00260d56, real originate documentsRouter in-process, 21 rows): a create stored as type DOCUMENT with data.documentType PROPERTY_DEED/SSD_DOCUMENT/DEGREE is SERVED as that documentType on GET /:id and the list, and the gateway's verify applies the SERVED type's verifier level (verification.ts:546, seat A's read). Narrower than the gate said: it needs a write-capable principal (a documents:write connector or ISSUER_ADMIN); plain users get 403 and the gate's two untitled carriers get 400 on real originate. NOT measured: a Postgres round-trip, the gateway end to end. Proposed fix (seat A): originate refuses 400 a create whose data.documentType differs from the resolved type (documents.ts:565). That changes behaviour for Platform S callers sending mismatched types, so it is your call.",
+  "default_action": "Seat A builds it LOCALLY after KS-1194 (nothing pushed under the KS-769 hold); the merge waits for Kam's tap; nothing to Peter or Stuart",
+  "options": [
+   {
+    "key": "build-local-merge-waits",
+    "label": "Seat A builds the 400 refusal locally now, tier-1 gate once pushes resume; the merge waits for your tap",
+    "detail": ""
+   },
+   {
+    "key": "build-and-merge",
+    "label": "Build it, and Wednesday merges on a tier-1 GO like other security fixes",
+    "detail": ""
+   },
+   {
+    "key": "wait",
+    "label": "Leave it filed; decide at Sunday's QA",
+    "detail": ""
+   }
+  ],
+  "recommended": "build-local-merge-waits",
+  "ts": "2026-09-17T12:33:43.164700+10:00",
+  "status": "open",
+  "ruled_choice": null,
+  "ruled_ts": null,
+  "prior_rulings_overridden": [
+   "2026-08-21 20:06",
+   "2026-09-10 09:01",
+   "2026-09-10 09:08",
+   "2026-09-10 09:08",
+   "2026-09-17 07:40",
+   "2026-09-17 08:47",
+   "CARD secuura-kintsugi-build-cache-prune"
+  ]
  }
 ]
