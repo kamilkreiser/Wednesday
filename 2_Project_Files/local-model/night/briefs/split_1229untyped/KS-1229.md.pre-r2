@@ -1,0 +1,135 @@
+# KS-1229 Q-SIGNCERT-UNTYPED-SOURCE-SKIP - Wednesday's task for Ornith, JEST (ts-jest), **TEST-ONLY MODE, MODIFY THE EXISTING TEST IN PLACE** (one hunk) (written 06:3x AEST on 2026-09-18)
+
+Written from origin develop `34cdcfb26` (read by `git ls-remote`). The test file
+`Blockchain/Dev/services/originate/src/__tests__/ks1213-a-derived-writer-relabel-is-refused.test.ts` (226 lines, blob `808282689`)
+was read whole; the product file `Blockchain/Dev/services/originate/src/routes/documents.ts` (3,041 lines) was read at `:2586-:2596`
+(the `/:id/sign-cert` KS-1213 guard at `:2590`, its 400 at `:2591`, the block close at `:2592` and the "Call auth-service DIRECTLY"
+comment at `:2594`). KS-1229 and the #1031 tier-1 gate report (section 4 row Q-SIGNCERT-UNTYPED-SOURCE-SKIP; section 3(d) D01-D05;
+section 9 "Q-tampers (mine)") were read.
+
+## THE MODE - read this twice
+
+TEST-ONLY, MODIFY IN PLACE. This service runs JEST, not vitest: use `jest` names only, never `vi`. Your diff contains EXACTLY ONE
+file: the EXISTING test file `Blockchain/Dev/services/originate/src/__tests__/ks1213-a-derived-writer-relabel-is-refused.test.ts`,
+with the ordinary header `--- a/Blockchain/Dev/services/originate/src/__tests__/ks1213-a-derived-writer-relabel-is-refused.test.ts` /
+`+++ b/Blockchain/Dev/services/originate/src/__tests__/ks1213-a-derived-writer-relabel-is-refused.test.ts` and ONE hunk.
+**No hunk for `documents.ts`.** Do NOT create a new test file. Do NOT copy the reference test - ignore it. The checker plants the
+tamper named at the bottom into a clone of `documents.ts` and expects the new cell RED by assertion, then expects the whole file
+GREEN at the untouched tip.
+
+## What is wrong (one paragraph)
+
+`POST /api/documents/:id/sign-cert` refuses a `metadata.documentType` that differs from the source type at `:2590`
+(`metadata.documentType !== undefined && metadata.documentType !== source.type`). When the source row carries **no `type` at all**,
+`source.type` is `undefined`, the second clause is still true for any named type, and the request is correctly refused 400. Nothing
+in the suite pins that. The #1031 gate measured it directly (section 4, row Q-SIGNCERT-UNTYPED-SOURCE-SKIP): prefixing the guard with
+`typeof source.type === 'string' &&` - so an untyped source SKIPS the guard - gives **0 reds on 64 / 741**, while the probe C-D02
+(untyped source + `DEGREE`) turns from 400 into **201, stored type absent, served DEGREE, sign upstream 1**. **This task:** a new
+`describe` block with two cells - RED (an untyped source is still refused) and a CONTROL (a typed source is still refused a differing
+relabel, which stays green under the tamper because its `source.type` IS a string). No product line changes.
+
+## Where (no product site changes - this list is informational; every line below STAYS)
+
+- `:2590` - (correct) `      if (metadata.documentType !== undefined && metadata.documentType !== source.type) {` - the sign-cert KS-1213 guard. The tamper replaces this line. **This exact text also occurs at `:1980` (`/version`) and `:2859` (`/sign-wallet`); the tamper is pinned to line 2590, so those two stay untouched.** Stays.
+- `:2591` - (correct) `        return res.status(400).json({ success: false, error: { code: 'BAD_REQUEST', message: 'metadata.documentType must equal the source document type' } });` - the guard's whole body. Stays.
+
+## The exact change - ONE EDIT in the TEST file (one hunk, 3 lines of context)
+
+E1 - INSERT a new top-level `describe` block BETWEEN the certifications-issue describe (which closes at line 207) and the KS-1202
+create-guard describe (which opens at line 209). Lines 207-209 stay byte-identical and are your only context; your `+` lines sit
+between the blank line 208 and the `describe('KS-1202 …` line 209. **This anchor was chosen because it is the only free one:** the
+six KS-1229 rows already held today occupy 118-123, 145-150, 174-179, 179-184, 204-206 and EOF 224-226. The context line
+`describe('KS-1202 create guard - the properties its gate left unpinned (#1024 N-B)', () => {` occurs EXACTLY ONCE in the file.
+
+```
+ });
+ 
++describe('KS-1229 Q-SIGNCERT-UNTYPED-SOURCE-SKIP - the sign-cert guard still refuses when the source has no type', () => {
++  const signCert = (metadata: Record<string, unknown>) => write(ISSUER, '/api/documents/' + SOURCE_ID + '/sign-cert', { metadata });
++  it('RED KS-1229 U1 - an untyped source is refused a relabel, nothing saved', async () => {
++    // KS-1229 (Q-SIGNCERT-UNTYPED-SOURCE-SKIP): an untyped in-memory source must not skip the guard.
++    seed(undefined as unknown as string);
++    expect(await signCert({ documentType: 'DEGREE' })).toEqual(REFUSED);
++  }); // KS-1229 U1
++  it('control - KS-1229 a typed source is still refused a differing relabel', async () => {
++    seed('DOCUMENT');
++    expect(await signCert({ documentType: 'PROPERTY_DEED' })).toEqual(REFUSED);
++  }); // KS-1229 U control
++});
++
+ describe('KS-1202 create guard - the properties its gate left unpinned (#1024 N-B)', () => {
+```
+
+The `+` lines are byte-exact - copy them; do not paraphrase the titles or the comment, do not drop the trailing `// KS-1229 U1` /
+`// KS-1229 U control` comments on the two closers (they are part of the line), do not re-indent (0 spaces for `describe(` and its
+closing `});`; 2 spaces for `const signCert` and the `it(` lines and their closers; 4 spaces for the statements inside each `it(`).
+The LAST `+` line is EMPTY (the blank line between your new block and the KS-1202 describe) - emit it as a `+` with nothing after it.
+Every other line of the file stays byte-identical. The new cells read only names declared ABOVE them in the file (`write`, `ISSUER`,
+`SOURCE_ID`, `seed`, `REFUSED`) or inside them (`signCert`, `metadata`); `jest`'s `describe`, `it` and `expect` are globals here.
+Do NOT import anything.
+
+The `+` lines contain no non-ASCII character, no backslash, no dollar sign, no backtick and no double quote. Keep it that way.
+
+Red under the tamper: U1 fails at `.toEqual` by assertion. With `typeof source.type === 'string' &&` prefixed, an untyped source makes
+the guard false, the handler signs and saves, and U1 reads `{ status: 201, code: null, saved: 1, stored: null, served: 'DEGREE' }`
+instead of `REFUSED` (`stored` is `null` because `saveDocument` round-trips the record through `JSON.stringify`, which drops an
+`undefined` `type`; `served` is `data.documentType || type` = `DEGREE`). Green at the tip: `source.type` is `undefined`,
+`'DEGREE' !== undefined` is true, and the guard returns 400 before any upstream call. The CONTROL is green on BOTH trees: its source
+type is the string `'DOCUMENT'`, so `typeof source.type === 'string'` is true and the guard evaluates exactly as it does at the tip,
+refusing `PROPERTY_DEED` 400. Every existing cell stays green on both trees - the tamper is pinned to line 2590, which is the
+sign-cert guard only, and every existing sign-cert cell seeds a STRING-typed source.
+
+## Red cells
+
+- RED KS-1229 U1
+
+## Tamper (test-only mode - the checker plants this in a clone of documents.ts to prove your new cell can go red)
+
+line: 2590
+from: `      if (metadata.documentType !== undefined && metadata.documentType !== source.type) {`
+to: `      if (typeof source.type === 'string' && metadata.documentType !== undefined && metadata.documentType !== source.type) { // TAMPER: KS-1229 red-proof, an untyped source skips the relabel guard entirely (the gate row Q-SIGNCERT-UNTYPED-SOURCE-SKIP)`
+statement_ok: the `from` line opens `if (...) {` whose body is the single 400 BAD_REQUEST return at `:2591` and whose block closes at `:2592`; nothing else is in the statement. The tamper only PREPENDS a conjunct, so the block, its body and its close are untouched and the guard still refuses every request whose source type is a string. `typeof` needs no import and cannot throw on an absent property. The identical guard text at `:1980` and `:2859` is NOT touched: the tamper is pinned to line 2590.
+
+## Output
+
+Exactly ONE ```diff block containing ONLY the modified test file: `--- a/Blockchain/Dev/services/originate/src/__tests__/ks1213-a-derived-writer-relabel-is-refused.test.ts`
+then `+++ b/Blockchain/Dev/services/originate/src/__tests__/ks1213-a-derived-writer-relabel-is-refused.test.ts`, then ONE hunk:
+`@@ -207,3 +207,16 @@` (three context lines, 13 `+` lines, the last of them EMPTY). No hunk for `documents.ts` or any other file.
+
+## Premises (measured)
+
+All times AEST 2026-09-18, read from `date` in the action that produced them. Written IN-SEAT by Wednesday (the 90% usage cut bars
+sub-agents; gauge 91%, renews ~08:00).
+
+- **P1 tip.** origin develop = `34cdcfb2663b9e4c31025044e6f842ad2c5a10a3` by `git ls-remote` on the Secuura checkout (06:0x), and
+  the checkout is clean (`git status --porcelain --untracked-files=no` = 0 lines). Only read verbs ran there (ls-remote, show, ls-tree).
+- **P2 the files at the tip.** ks1213 test blob `808282689`, 226 lines; lines 207-209 compared against this brief's fence by script:
+  3/3 equal, a shifted-by-one control unequal, and the anchor line `describe('KS-1202 create guard …` occurs exactly ONCE.
+  `documents.ts` = 3,041 lines; the tamper `from` line occurs **three times** (`:1980` /version, **`:2590` /sign-cert**, `:2859`
+  /sign-wallet) — the tamper is LINE-PINNED to 2590. Positive control on the same read: `source.type` occurs 15 times.
+- **P3 the gap.** The #1031 tier-1 gate measured Q-SIGNCERT-UNTYPED-SOURCE-SKIP directly (report
+  `Testing Agent MAIN/projects/secuura/reports/2026-09-17-ks1213-1031-be8596a29-tier1-r1/report.md` section 4): the
+  `typeof source.type === 'string' &&` prefix gives 0 reds on 64 / 741, with C-D02 turning 201 / served DEGREE / sign upstream 1, and
+  the `''`-typed D04 still 400. Not re-measured here (the gate's instrument, quoted).
+- **P4 the placement census.** The six KS-1229 READYs held today were read for their hunk headers: 118-123, 145-150, 174-179,
+  179-184, EOF 224-226, and the RECHECK fence at 204-206 (that file carries no `@@` header — its context lines were read instead).
+  207-209 is the only free top-level anchor left in this file.
+- **P5 this brief's hunk through the REAL checker** (draft input built rc 0 at 06:13, ~46,857 prompt tokens of a 65,536 window):
+  **RESULT PASS (7/7)** at 06:2x, apply_mode=**strict** (no fuzzy, no recount). A3 touched set = the ks1213 test only; A3c 12/12 and
+  A3d clean; A3i 12/12 byte-exact including leading whitespace; **A4 under the tamper 1 failed / 87 — the declared cell U1, by
+  assertion** (`failed_names` = exactly `RED KS-1229 U1 …`), the control green; A5 87/87 with the product hunk; A6 originate
+  741 -> 743, 0 new red; A7 tsc rc 0. Clone `/private/tmp/claude-501/night/clone_ks1229` at the pinned tip, farmed by
+  `prepare_clone.sh` (source tracked-modified count 0 before and after).
+- **P5b NOT tested.** No wrong-variant run for this brief, and no model round yet.
+- **P6 in-memory only.** Per the gate report, `fromDbRow` gives `type = document_type || 'document'`, so an untyped source is
+  unreachable through Postgres; this cell pins the handler's own guard, not a production-reachable path. That is why the row is a
+  test-only pin and the raise is TIER 2.
+
+## Notes for the raise (not for the model)
+
+- **Behaviour change: none.** Test-only: one new `describe` with two cells between the two existing top-level describes.
+- **Raise tier: TIER 2** (a coverage pin on #1031's guard).
+- **Refs KS-1229, not Closes.** This is the ticket's Q-SIGNCERT-UNTYPED-SOURCE-SKIP row. Its hunk (207-209) is disjoint from all six
+  held hunks, so all seven can raise as ONE PR.
+- Still NOT briefed on KS-1229 after this one: Q-VERSION-TRUTHY (a pick — "a cell, or a comment", decision-shaped) and R-a (an
+  OpenAPI wording fix plus yaml regeneration, not a test).
