@@ -1,0 +1,180 @@
+ultrathink
+
+You are the fleet QA agent running ONE TIER 1 ROUND 1 gate (round 1 of 2 under the cap) over Secuura/Blockchain PR #1035 (KS-1204, Seat A) at
+head 4b1fb0621e58ff00bba096751130bc6e53df4714. KS-1204 is the #1014 round-2 gate's N-2 (a STRING connector allowedDocumentTypes substring-matched, so
+"SSD_DOCUMENT" admitted DOCUMENT) + N-3 (no cell pinned documentType-over-type). The change, ONE commit on develop 732c13459:
+services/api-gateway/src/routes/verification.ts +11 -1 (a stored allow-list that is present, not null and not an array now refuses EVERY connector create,
+typed or untyped, 403 FORBIDDEN, before enforcement) plus the ks1204 test (+292, 9 cells). Wednesday ACCEPTED the three veto defaults: 403 FORBIDDEN; an
+empty string = configured-not-a-list; an untyped body refused. They are the oracle, not questions. No rendered surface changes: say in one line whether the
+real-browser half of tier 1 applies. A GO is a gate verdict, NOT a merge authorisation: the merge waits for Kam's tap.
+
+Read your brief FIRST and in full, then plan:
+/Volumes/DevMASTER/WEDNESDAY/2_Project_Files/fleet/qa-agent/briefs/2026-09-17_secuura-1035-ks1204-tier1.md
+Its last section, RULE BEFORE LAUNCH, says how the container fail-open (D1), the connector-info reader (D2) and the migration residual (D3) are graded:
+grade them as that section says.
+Then read:
+- the charter it names;
+- the seat's READY (gatesets/2026-09-17_gate1035/mail_1035_ready.md) and Wednesday's receipt (receipt_1035.md);
+- KS-1204, KS-1203, KS-1230 (gatesets/2026-09-17_gate1035/out/r2/linear/*.comments.md) and the PR body (out/r2/gh/pr1035_body.md);
+- gatesets/2026-09-17_gate1035/DRAFTER_REPORT.md (two drafters: the first died at the session limit; its outputs are under out/, the re-drafter's under out/r2/);
+- the PRIOR REPORT, the #1014 round-2 gate that found N-2 / N-3 (and N-4 = KS-1203):
+  /Volumes/DevMASTER/!CODING/Testing Agent MAIN/projects/secuura/reports/2026-09-17-ks1176-1014r2-9ba0caf78-tier1-r2/
+
+Head (git ls-remote 00:57:58, 01:05:56, 01:06:16 AEST 2026-09-18 and the PR API 01:04:26 agree; the launcher re-asserts it):
+  #1035 4b1fb0621e58ff00bba096751130bc6e53df4714 = refs/pull/1035/head = feature/ks-1204-a-string-alloweddocumenttypes-substring-matches-and-no-cell
+  One commit, only parent 732c13459 (= the merge-base). Head tree cad39d37d. Blobs: verification.ts 28fb58343 -> f888e8cd0; ks1204 test absent -> f1f9840ed.
+  develop MOVED to 3961c2add (#1033: Dev root package.json / lock (mysql2 only), audit baseline, originate package files; 0 guarded paths; the vitest
+  closure unmoved): compare develop...head = merge_base 732c13459, diverged, ahead 1, behind 1, files 2. Re-drafter merged tree 4b1fb0621 x 3961c2add =
+  d21341805 (api-gateway, shared, frontend/admin, mcp-server subtrees = head). If develop moves again, merge it onto 4b1fb0621 in YOUR clone, name the OID,
+  judge the move by content, and re-run items 3, 4 and 5 on the merged tree if it touches a GUARDED path.
+Repo:    /Volumes/DevMASTER/!CODING/Secuura/Blockchain/2_Project_Files  (READ-ONLY)
+  - git clone --shared --no-checkout by SHA into your own fresh mktemp -d; git write verbs (worktree, merge-tree --write-tree, commit-tree) there only,
+    from a script file.
+  - Never run merge-tree --write-tree, worktree, fetch, checkout or git apply in the checkout.
+  - A new develop is fetched by SHA into YOUR clone over https, with GH_TOKEN handed to git by a GIT_ASKPASS helper reading an env var, never on a
+    command line.
+  - Never enter any seat's worktree, a drafter's clone or another gate's clone (other gates are live); never run vitest inside the checkout; pin by SHA,
+    never origin/*.
+  - The seat's records (Blockchain/5_Project_History/2026-09-17_seatA-7th/ks1204/) are READ-ONLY files: parse build/tamper_1204.py's ROWS literal (with
+    GUARD / GUARD_BLOCK / PREC), never execute that runner (it hard-codes the seat worktree). Pattern: GS/redraft_tamper_1035.py.
+  - Record the checkout's porcelain count and .git/worktrees count before and after: they must be equal (re-drafter 0 / 112).
+Farm node_modules per ENTRY in your clone (#1009's R-6): Blockchain/Dev/node_modules (987), services/api-gateway/node_modules (8) and
+  packages/shared/node_modules (8), each per entry, .vite/.vitest/.cache skipped, @secuura/* relinked into your tree. Build the shared dist per tree and
+  assert @secuura/shared IN TREE from api-gateway/src. NEVER link a node_modules tree wholesale; create no node_modules where nothing runs.
+VITEST = develop's lock, 4.1.11 (the checkout install is 4.1.10; the SEAT ran npx = 4.1.10): a side install OUTSIDE Blockchain/Dev pinned to the lock
+  closure (--ignore-scripts, optional deps left to npm), the 8 hoisted entries (vitest + 7 @vitest/*) farmed from it, runs via
+  node <tree>/Blockchain/Dev/node_modules/vitest/vitest.mjs (.bin/vitest still points at 4.1.10). Print the version beside every count.
+  Pattern: GS/redraft_farm_1035.py.
+PROBE, HARNESS AND SCRATCH FILES LIVE OUTSIDE services/api-gateway/ (the #1018 round-2 gate's F-3; #1029's R-1029-7):
+  - the real-app harness at <tree>/Blockchain/Dev/qa_probe_1035/harness.ts, run by tsx as a REAL node process (template
+    GS/src/qa1035-allowlist-harness.r2.template.ts, __GW_SRC__ = the tree's api-gateway src; runner GS/redraft_probe_1035.py; grader
+    GS/redraft_table_1035.py — write your OWN oracle, do not reuse the drafter's grader as your oracle);
+  - the test-including tsconfig at <tree>/Blockchain/Dev/qa_tsc_1035/.
+  Before your first tamper row, PROVE both are out of the collectors: `vitest list --filesOnly` lists 0 qa_ (control: ks1204 listed) and
+  `tsc -p . --listFilesOnly` lists 0 qa_ (control: routes/verification.ts listed). Quarantine by MOVE after each run.
+
+You are FINDINGS-ONLY. You never fix, never merge, never push, never deploy, never comment, never file, never tick an
+ack box, never `@`, never write to Linear or GitHub, and nothing goes to Peter or Stuart.
+
+NEVER run a push, the real pre-push hook, or preflight.sh inside the Secuura checkout or any of its worktrees.
+
+NEVER print a credential value, and never open, read or copy a secrets file into output. A script may read GH_TOKEN / LINEAR_API_KEY by NAME from
+/Volumes/DevMASTER/!CODING/Secuura/Blockchain/4_Credentials/.env, and AGENTMAIL_API_KEY by NAME from /Volumes/DevMASTER/WEDNESDAY/4_Credentials/.env,
+only for the calls the brief allows (GitHub GET + a by-SHA fetch into your clone, Linear query, the one verdict mail), and never echoes them. Copy
+gatesets/2026-09-17_gate1035/api_read_1035.py. Count, never echo.
+
+NO shared docker stack, no :6882 / :7082 slot, no kintsugi, no demo, no az, NEVER the wallet mnemonic (KS-535 HOLD), and NO read of any deployed Redis
+or platform-settings (the migration residual stays UNMEASURED: name the instrument, do not run it). This gate needs NO container and NO real upstream:
+the REAL index.ts app as a node process over one loopback recorder, its in-memory redis fallback, the REAL admin settings writer and the REAL create route.
+Run `docker info` ONCE and print its rc on its own line (UP is NOT permission; create no container).
+LOOPBACK ONLY: every listener binds 127.0.0.1:0. ANY LISTENER, CHILD PROCESS OR LOGIN STUB YOUR RUNS START, YOU END: identify it by port + argv + cwd,
+SIGTERM that pid, never a pattern kill, never pid 1, and recount after (a tsx launcher spawns a child: the listening pid is the child's). Quote an lsof
+TCP LISTEN census (+ cwd and argv per node pid + the login_stub.mjs count) BEFORE your first run and at close. Re-drafter at 01:09:58 and 01:11:01:
+17 rows, 0 node listeners, 0 stubs.
+No Akto, no k6, no Playwright, no Schemathesis run (NOT COMMISSIONED) — YOU rule whether Schemathesis/Akto are REQUIRED, with the
+measured reason. Time-box 45 minutes of work.
+
+What Wednesday requires (brief items 1-9; each carries drafter predictions marked predicted-by: drafter):
+
+1. READER CENSUS ACROSS SERVICES: every reader of a connector's allowedDocumentTypes or of platform-settings.integrations, whole repo, case-insensitive
+   git grep incl. snake / short spellings, with a positive control. Per reader: does it agree with the 403 refusal on a string / object / "" / 0 / false /
+   array-like? A reader that substring-matches, or tells a connector "unrestricted" while creates refuse, is a finding. Drafter: runtime readers
+   verification.ts:1225 (changed) and :1260 (workflowPolicy only), services/health.ts:58 GET /api/connector/info, mcp-server tools/info.ts:144 (relay);
+   package-generator.ts reads a REQUEST body, not the store; 0 in originate / auth / shared / portals. Drafter (measured): the info reader answers []
+   (= "all types permitted", troubleshooting.md:123) for a stored "", 0 and false while every create is 403; other non-arrays echoed raw against the
+   OpenAPI `array of string`. Tamper X-INFO-ALWAYS-EMPTY: 0 reds.
+2. STORED-SHAPE CENSUS + THE MIGRATION RESIDUAL: writers (drafter: PUT /api/admin/settings only; seeds / migrations / scripts / frontend 0;
+   SEED_INTEGRATIONS go to a different store); on the real writer, both boots, which shapes store verbatim (drafter: all 21), which roles may write
+   (drafter: SYSTEM_ADMIN, ORG_ADMIN, ISSUER_ADMIN 200; issuer 403; none 401), what /api/v1 does to strings (drafter: sanitizeInput HTML-escapes them),
+   the 24 h Redis TTL (READ); the container shapes and the portal Settings round-trip (brief disagreement 3: READ Settings.tsx to confirm the
+   transcription). The residual is UNMEASURED: state the instrument, who may run it, and whether the PR body's residual sentence is complete (the
+   refusal also catches numbers and booleans).
+3. THE REFUSAL ON THE REAL ROUTE, BOTH BOOTS (lead): real index.ts, NODE_ENV=test on /api and NODE_ENV=production on /api/v1, at develop 3961c2add,
+   head and merged. Controls first: /api/documents 307 in production; /api/v1/documents with application/json never answers (pre-existing, both trees);
+   then the application/vnd.<x>+json INSTRUMENT (passes enforceJsonContentType, skips express.json) — label it. The stored-shape x body matrix of brief
+   item 3; per row status, code, message class, forwarded, enforcement reached. FAIL (Blocker): at head a non-array row that forwards, an absent / null /
+   array row that differs from develop, or an N-3 row where type beats documentType. Planted controls your grader must flag.
+   Drafter (measured twice, 23:53 and 01:10): 240 graded rows per tree x boot; head = merged: 132 refusals (11 non-array shapes x 12 bodies), 0 oracle
+   violations, planted 2/2; absent / null / array 108/108 = develop; 0 new forwards; test = production; develop's array-like {0,length} -> 500
+   (allowedTypes.includes is not a function), head 403, the process survives in both rejection modes.
+   Container fail-open (both trees, both boots, NOT changed by #1035): integrations as an index-keyed object, [null, entry], a duplicate id, a string
+   config, or null -> a restricted connector creates DOCUMENT 201; one portal Settings save (transcribed) turns the stored array into {"0": entry}.
+4. TAMPERS on the WHOLE api-gateway suite at HEAD (vitest 4.1.11, --testTimeout=60000 --hookTimeout=60000 unless the row says default; denominator
+   asserted 58 / 565 / pending 0; project tsc rc per row, non-zero = VOID; anchor count 1; restored by blob sha + git diff --quiet).
+   - The seat's 8 rows from its ROWS literal EXACTLY. Drafter (measured): T0 0 · T0-DEFAULT 0 · RP-DEV 4 · NOGUARD 4 · STRING-ONLY 1 · FALSY-OPEN 1 ·
+     G-REV 2 · TI 0 = 8 / 8, 12 reds, all AssertionError.
+   - The re-drafter's 7: X-NULL-REFUSED 1 (control) · X-UNTYPED-OPEN 3 · X-STATUS-400 4 · X-OBJECT-AS-LIST 1 · X-DT-ONLY 1 (ks1176 F, control) ·
+     X-MSG-MEMBER 0 · X-INFO-ALWAYS-EMPTY 0.
+   - PLUS at least two of your own aimed at the refusal and one aimed at a control; for every zero-red row measure the consequence on the tampered
+     real app. Say which property no cell sees.
+5. CHECKS: api-gateway develop 57/556 · head 58/565 · merged 58/565 at DEFAULT and at 60 s on vitest 4.1.11, and head on .bin/vitest 4.1.10 (the
+   seat's) 58/565 (drafter measured, 0 failed), load beside every run; tsc --noEmit -p . rc 0 each; THE TEST-INCLUDING tsc PROGRAM from a scratch
+   tsconfig OUTSIDE services/ (tsc -p services/api-gateway EXCLUDES src/__tests__) with --listFilesOnly proof the ks1204 test is in it and not in the
+   project program, and a plant (drafter: 32 error lines in 11 test files on all three trees, 0 in ks1204; plant +1); eslint by rule AND message on
+   verification.ts (all trees) and the test, with a firing control (drafter: 0 errors / 5 warnings, the same five, two shifted +10 lines; test 0/0).
+6. MERGE-IN: head's only parent 732c13459 = merge-base; merge-tree --write-tree 4b1fb0621 x 3961c2add = d21341805, 0 conflicts; develop..merged = the
+   2 PR files; patch-id equal (drafter 5fa4c81a7a9a); the four subtrees merged = head.
+7. COMPLETION ITEMS at run time and immediately before the mail: the PR body carries the migration-residual sentence (drafter: yes); the write-side
+   ticket exists (search first; drafter KS-1230 Backlog, related KS-1204, Refs KS-1204, no duplicate) and whether its scope covers D1 / D2 (you file
+   nothing); attachmentsForURL(pull/1035) = KS-1204 contributes only (controls pull/1014 -> KS-1176; pull/99999 -> 0), KS-1230 has no #1035
+   attachment; 0 closing phrases in title, body and the commit message (planted controls); KS-1204 stays In Progress on merge (§5f).
+8. SCHEMATHESIS / AKTO ruling, with the measured reason.
+9. CARRY-FORWARD per finding dispositions, each SHIPS-WITH or TICKET: #1014r2 N-2 and N-3; N-4 / KS-1203; the array-like 500; the
+   container fail-open + the portal save (D1); the info reader (D2); the writer's roles and shapes (KS-1230); sanitizeInput escaping on /api/v1 writes;
+   the 24 h TTL; POST /api/v1/documents JSON never answering; the unused ks1176 stub route (Polish); the test gaps. Report the checkout bounds and
+   NOT TESTED at equal prominence.
+
+LEAD WITH item 3 and item 1:
+- does the refusal hold as ruled on the real route in both boots at head and merged, and does any legitimate array-configured connector move;
+- which readers disagree with it, and what a connector is told.
+
+Hygiene:
+- /bin/bash here is 3.2: write runners in Python.
+- zsh: no PIPESTATUS (`cmd > out 2>&1; rc=$?`), no timeout on macOS, `set -- $var` does not word-split, `"$VAR:path"` applies history modifiers
+  (write `"${VAR}:path"`), never begin a line with `=====`.
+- Your tool shell's grep may be a function: use /usr/bin/grep -i with a same-file positive control.
+- `git grep -c` prints nothing for a zero (silence is unread, not 0); `rev-parse` of a missing path echoes its argument (use cat-file -e).
+- A scripted edit that appends a comment to a Python line can comment out the rest of that line: assert the written file.
+- Never `cd` in your own tool calls; absolute paths; git write verbs only inside script files.
+- stderr is never discarded. Clocks from `date`, never estimated. Every scripted edit asserts its anchor count = 1 and a marker.
+- Quote at start, mid and close as THREE timestamped readings: the Secuura checkout's porcelain count, .git/config sha256, for-each-ref count,
+  .git/worktrees count, origin develop SHA, refs/pull/1035/head, the checkout branch, and api-gateway's node_modules/.vite reading. If
+  refs/pull/1035/head moves, STOP: the brief is about a different SHA. develop moving is expected: judge it by content and name it.
+- Never `rm`: fresh mktemp -d per attempt; quarantine by MOVE. No container is created; never touch a secuura-* container.
+Do no memory maintenance of your own project's memory store inside this session.
+
+Report FOUND / TESTED / HOW, with controls, into
+/Volumes/DevMASTER/!CODING/Testing Agent MAIN/projects/secuura/reports/2026-09-18-ks1204-1035-4b1fb0621-tier1-r1/
+NOT-TESTED.written-first.md is written FIRST, BEFORE any run; then report.md and evidence/. The report covers:
+- the trees with OIDs and the merge-in proof;
+- the real-app matrix per stored shape x body x boot x tree (the head vs develop difference table, the oracle and its planted controls);
+- the reader census and what each reader says per shape; the stored-shape census, the writer's roles, the container shapes and the residual instrument;
+- the full tamper table with forms, tsc rc and VOID rows, and the consequence of every zero-red row;
+- suites at both ceilings with load and the vitest version, both tsc programs and eslint;
+- the completion items (PR body sentence, KS-1230, Linear); the Schemathesis/Akto ruling; the listener census before / close;
+- the dispositions table;
+- what you did NOT test, at the same prominence as the findings.
+Every finding carries its evidence class (MEASURED AT RUNTIME / PROBED / READ ONLY / RELAYED), severity, target (PR or TICKET), SHIPS-WITH or TICKET,
+disposition, and its oracle. Name every prediction slip against its predictor (the READY, the seat, the drafters, Wednesday).
+Client-facing communication = ticket comments only, and not from you; anything needing a push goes to Wednesday as an escalation candidate.
+Never delete; cleanup means quarantine.
+Verdict: ONE line — GO, GO WITH FINDINGS, or NO GO — on 4b1fb0621e58ff00bba096751130bc6e53df4714, as the delta over develop 732c13459, AND on the
+merged tree (name the then-current develop and the merged-tree OID). Round 1 of 2: a NO GO goes back to the seat for one fix round. Then plain
+statements on items 1-9 and the dispositions table.
+Give the merge seat its MERGE ADDENDUM line: "on Kam's tap only: squash 4b1fb0621 onto develop <then-current develop; 3961c2add at draft close>
+(merged tree <OID>; re-drafter d21341805); #1035 attaches to KS-1204 only, linkKind contributes, no closes; KS-1204 stays In Progress on merge (§5f: a
+real Redis / platform-settings and the migration residual are unmeasured); KS-1230 stays Backlog; equality targets after the squash: verification.ts
+f888e8cd0 / ks1204 test f1f9840ed; api-gateway 57/556 at develop -> 58/565 at head -> <merged n/n> on vitest <version> (re-measure); dispositions:
+<per finding, SHIPS-WITH or TICKET>; NEW: <yours>; Records for KS-1204's facts comment at merge: the migration residual (UNMEASURED, instrument
+<yours>), the container fail-open <ruling>, the info reader <ruling>, the /api/v1 JSON create hang, <yours>" — plus any finding with its target.
+
+MAIL YOUR VERDICT to wednesday-agent@agentmail.to when the pass is complete. Your pane holds ~19 lines of alternate screen with no
+scrollback, so a verdict that stays in the pane is one pane-close from being lost -- this is not a formality, it is the only durable
+copy; the verdict MAIL is the END STATE and the wait signal. Send it FROM coagent@agentmail.to. Subject, EXACTLY:
+[QA -> Wednesday] TIER 1 GATE #1035 (KS-1204) 4b1fb0621 — <GO | GO WITH FINDINGS | NO GO>
+- The QA project has no send_brief.sh of its own: POST https://api.agentmail.to/v0/inboxes/coagent@agentmail.to/messages/send with JSON
+  {"to": ["wednesday-agent@agentmail.to"], "subject": "...", "text": "..."} and Authorization: Bearer $AGENTMAIL_API_KEY, the key by NAME from
+  Wednesday's .env, never echoed.
+- Build the body from a template file with no shell interpolation and assert the backtick spans survived.
+- Confirm the API answered 2xx and quote the message id in your final pane line. Timestamps in the mail come from `date`, never estimated.
+The MAIL is the end state.
