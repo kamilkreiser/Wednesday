@@ -2000,5 +2000,12 @@
   "project": "Datasec",
   "ts": "2026-09-17T15:57:34.996074+10:00",
   "text": "Datasec / HPSM. I need you to send one email so HPSM can finish checking the live release.\n\nHPSM can't reach the HPSM demo VM over SSH. Its network rule only allows SSH from one internet address, and the Mac mini's address has changed from 157.211.46.94 to 157.211.46.215. The site itself is up. HPSM stopped rather than change a live network rule without you, which was right. The public checks run meanwhile.\n\nStep 1: from kreiser.org@me.com, email coagent@agentmail.to with this subject:\n[Kam -> Datasec/HPSM] Approved: NSG SSH source update\n\nand this body:\nApproved: in hpsm-demo-rg, change only the source address of the existing port-22 rule on hpsm-demo-vmNSG to this Mac's current internet address (157.211.46.215/32), for the read-only live-release re-verification.\n\nHPSM checks your signature, changes only that one rule, records it before and after, then runs the read-only checks.\n\nMy recommendation is to approve. Worth knowing: this will break again whenever your internet provider changes the address. I've had HPSM log a better long-term option for you to look at later."
+ },
+ {
+  "role": "wednesday",
+  "seat": "Kamils-Mac-mini.localdomain",
+  "project": "Datasec",
+  "ts": "2026-09-17T16:01:08.497034+10:00",
+  "text": "Correction to my last message, Kam. Please don't send that email as I wrote it; this replaces it, which is why the subject repeats. I gave you two things wrong: the resource group is hpsm-dev-rg, not hpsm-demo-rg, and HPSM can't read coagent@, so the email must go to its own inbox.\n\nStep 1: from kreiser.org@me.com, email datasec-hpsm@agentmail.to with this subject:\n[Kam -> Datasec/HPSM] Approved: NSG SSH source update\n\nand this body:\nApproved: in hpsm-dev-rg, change only the source address of the existing port-22 rule on hpsm-demo-vmNSG to this Mac's current internet address (157.211.46.215/32), for the read-only live-release re-verification.\n\nHPSM caught the resource group error itself. I passed both on without checking, and I've noted that.\n\nMeanwhile the public checks passed: all 26 security checks on the public site, and the live site is running the release version recorded on 09-14."
  }
 ]
