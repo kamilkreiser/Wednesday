@@ -9,6 +9,18 @@ supersede: replace wholesale at the next pickup; do not append
 
 # NEXT PICKUP — ⚡ **Kam's standing words:** 20:40–20:42 *"you have the approval to spin up other local agents [Claude agents] to test, approve, merge and move things forward … see what else needs our attention. highest priority and highest value items first"* (grant file `learnings/2026-09-16_new-account-spin-up-agents-to-test-approve-merge.md`) · 21:1x *"dont go overboard. try not to go beyond 40% token allocation"* (`fleet/USAGE_STOP` = 40, seat-scoped; gauge 11% at 22:36) · 21:1x *"keep working through easier tickets with the local LLM as well"* · 09:53 *"If something's blocking, move on to the next"* · email 07:57Z: failed local ticket = original + ONE rebrief, then Claude · **he leaves MONDAY NIGHT 2026-09-21.** First person on the panel. **A seat may END ITS TURN only with the model RUNNING or a batch QUEUED (or a search/brief commission whose completion wakes it).**
 
+## 🟢 STATE AT 09:5x 2026-09-18 (the 06:0x MORNING seat, ctx ~75%, below Kam's 80-90 band) — read with the 09:4x block below
+**FLEET HEALTHY:** `%0` wednesday · `%98` seat A 9th (proceeding on #1032) · `%97` #1034 gate LIVE · `%1` monitor. Everything committed and pushed; HEAD == origin.
+**ORNITH: queue EMPTY again** (KS-1091 re-run done — the set reconciled, identifier `KS-1091` not `KS-1101`, so the transposition was a one-off). **Under Kam's 09:16 standing rule this needs feeding; the reason it is empty is recorded, not ignored.** The pool is now RICH: 39 freshly-triaged class-A candidates in `candidates.md` (30 general + 9 auth, auth still LAST).
+**OWED BY WEDNESDAY, in priority order — this is your queue:**
+1. **Commission the #1037 KS-1101 tier-1 gate** (READY saved at `qa-agent/gatesets/2026-09-18_gate1037/mail_1037_ready.md`). **Apply Kam's 09:22 batching rule:** check whether #1037 and **#922** touch disjoint files and gate them TOGETHER if so.
+2. **#922 — decide its gate.** I took it off seat A at 09:4x; it is ungated only because agents were barred. Unmoved since 2026-09-14T10:33Z, 0 reviews. It blocks KS-805 + the KS-839 sentence.
+3. **Feed Ornith** from the 39 triaged candidates — but **read the ticket first** (they are UNVERIFIED leads, and one batch already produced a plausible-looking wrong id).
+4. **#1036 + Seat B.**
+5. **Relay the #1034 verdict** to seat A as a signed GO naming the head when the gate mails in.
+6. **The four `Tested Not Deployed` tickets** (KS-943, KS-732, KS-671, KS-1013) come to you from seat A as DEPLOY candidates, not archive candidates.
+**THREE FIXES OWED, all recorded in `local-model/IMPROVEMENTS.md` with arms sketched:** (a) `predicate_classify` input needs `tip` so the checker can grade — it is the only automatic guard against the digit transposition; (b) `comment_patch` R1 blocks shell files, so a comment-only `.sh` fix has NO tier (KS-902 is the live case); (c) `task.md`'s example reasons come from a different predicate and get copied verbatim on small batches.
+
 ## 🟢 CHECKPOINT 09:4x 2026-09-18 (the 06:0x MORNING seat, ctx ~74%) — FLEET WORKING, SEAT A UNBLOCKED. Supersedes the 09:3x block below
 **FLOOR:** `%0` wednesday · **`%98` seat A 9th — plan confirmed, ANSWERED, tapped, proceeding on #1032** · **`%97` #1034 tier-1 gate, LIVE** · `%1` monitor. **Ornith: 3 triage batches done.** Usage 7%.
 - **SEAT A 9th IS GOOD.** It verified everything first-hand at boot (DKIM four checks + five negative controls; develop unmoved; porcelain 0; #1032 `mergeable: true` with `base.sha` still `3961c2add`, which is exactly why the tree must be re-predicted). **I CONFIRMED its queue and ruled its two questions** (mail 23:39:58Z, tap verified at the destination inbox):
