@@ -78,10 +78,15 @@ rm -f "$LOG_DIR/.rotate_resolve_err.$$"
 if [ "$MODE" = "--dead" ]; then
   # 2026-09-14: same predicate as the watcher's DEAD leg (dead_banner_check.sh) — a bare
   # literal grep re-confirmed two false kills; the re-check must discriminate, not repeat.
-  if ! TMUX_BIN="$TMUX_BIN" bash "$HERE/dead_banner_check.sh" "$PANE_ID"; then
-    log "REFUSED (--dead): pane $PANE_ID does not show 'Context limit reached' — not killing a seat that may be alive"; exit 3
+  # 2026-09-17: an EXITED session (shell in the pane, the cockpit's exit marker, no claude process —
+  # exited_seat_check.sh) is dead too; before this the watcher could see it and this re-check refused it.
+  if TMUX_BIN="$TMUX_BIN" bash "$HERE/dead_banner_check.sh" "$PANE_ID"; then
+    REASON="the previous seat hit its hard context limit and could not act"
+  elif TMUX_BIN="$TMUX_BIN" bash "$HERE/exited_seat_check.sh" "$PANE_ID"; then
+    REASON="the previous seat's Claude session exited and left a shell in its pane"
+  else
+    log "REFUSED (--dead): pane $PANE_ID shows neither 'Context limit reached' nor an exited session — not killing a seat that may be alive"; exit 3
   fi
-  REASON="the previous seat hit its hard context limit and could not act"
 else
   # --self: everything durable must be on origin before the seat is replaced.
   #

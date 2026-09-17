@@ -116,7 +116,11 @@ add_pane() { # name, cmd
   # gate reads the seat's statusline-published 7d figure; rc 3 at/over the cut, rc 4 stale.
   # COCKPIT_SESSION (the test hook) bypasses it so the rebase-gate arms still run.
   if [ "$SESSION" = fleet ]; then
-    bash "$SCRIPT_DIR/../usage_gate.sh" || die "cockpit add: REFUSED by usage_gate (rc $?) — no new pane"
+    # 2026-09-17: `up` builds a fleet whose seat is not yet running, so that seat's statusline gauge is
+    # stale BY CONSTRUCTION (Tuesday 10:53: 206 min stale because her seat was the thing that died) —
+    # the stale refusal deadlocked the relaunch it follows. During `up` ONLY, stale is tolerated
+    # (usage_gate prints that it proceeded on the override); rc 3 (at/over the cut) still refuses.
+    USAGE_GATE_ALLOW_STALE="${COCKPIT_UP_ALLOW_STALE:-${USAGE_GATE_ALLOW_STALE:-0}}" bash "$SCRIPT_DIR/../usage_gate.sh" || die "cockpit add: REFUSED by usage_gate (rc $?) — no new pane"
   fi
   local waited=0
   while [ -d "$PROJECT_DIR/.git/rebase-merge" ] || [ -d "$PROJECT_DIR/.git/rebase-apply" ] || [ -f "$PROJECT_DIR/.git/MERGE_HEAD" ]; do
@@ -164,6 +168,7 @@ sys.exit(1)'
 
 case "${1:-}" in
   up)
+    COCKPIT_UP_ALLOW_STALE=1
     if "$TMUX_BIN" has-session -t "$SESSION" 2>/dev/null; then
       echo "fleet session already running"
     else

@@ -91,6 +91,14 @@ while [ $SECONDS -lt $end ]; do
   if [ -n "$wpane" ] && TMUX_BIN="$TMUX_BIN" bash "$(cd -P "$(dirname "${BASH_SOURCE[0]}")" && pwd)/dead_banner_check.sh" "$wpane"; then
     echo "WAKE: pane '$SEAT' DEAD — Context limit reached; the coordinator cannot act — respawn required"; exit 0
   fi
+  # (d2) EXITED COORDINATOR (2026-09-17, Tuesday on the mini): the session ENDED and the pane fell to the
+  # cockpit's `exec bash`. No banner is shown, so (d) never fired and this loop typed WAKE lines into
+  # bash for ~1.5 h. exited_seat_check.sh needs the cockpit's own exit marker AND no claude process under
+  # the pane. The wording carries "DEAD" + "respawn required" so the runner routes it to
+  # wednesday_rotate.sh --dead (which accepts the same predicate) and never taps the shell.
+  if [ -n "$wpane" ] && TMUX_BIN="$TMUX_BIN" bash "$(cd -P "$(dirname "${BASH_SOURCE[0]}")" && pwd)/exited_seat_check.sh" "$wpane"; then
+    echo "WAKE: pane '$SEAT' DEAD — session EXITED (a shell in the seat pane, no Claude process); the coordinator cannot act — respawn required"; exit 0
+  fi
   # (a) mail tripwire
   # SEAT-AWARE INBOX (Tuesday, 2026-09-09, on Kam's explicit instruction "fix things so
   # that next time I post it, you receive it"). Previously hardcoded to wednesday-agent@,
