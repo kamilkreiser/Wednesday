@@ -382,3 +382,63 @@ A CENSUS for the coordinator to brief from, easy → hard (Kam 2026-09-15 16:40 
 
 ## UNBLOCKED BY WEDNESDAY 2026-09-17 12:51 — KS-1186 (the SEARCH 17e rejection no longer holds)
 - The A3b line-number checker is installed (tasks/code_patch/a3b_line.py; arms 19/19, re-run by Wednesday at 12:50). The line-keyed brief night/briefs/KS-1186.md (5 edits) FITS per tests/A3B_LINE_NUMBER_REPORT_2026-09-17.md. QUEUED 12:51. It is the first AUTH-tier product ticket for the local model: easier tiers exhausted by 17e + 17f, per Kam 09-15 18:19 order.
+
+## SEARCH 17g (13:0x commission, auth tier) — block appended 2026-09-17 13:05 AEST
+<!-- REJECTION TABLE, measured 2026-09-17 12:54–13:04 AEST by the search17g commission — do NOT re-derive these.
+     Tip: origin develop d7e95cd9f (ls-remote of the source's origin URL from the scratch clone s17g/clone, 12:57:10 and 13:03:01; did not move; cat-file -t = commit). Linear pulled 12:55:50: 328 KS Backlog/Todo (first:50, 7 pages, hasNextPage false on the last). Open PRs 12:56:48: 20 / 102 paths (0 name middleware/authenticate.ts; control 2 name services/auth/src). Seat A's six local heads (diff --name-only d7e95cd9f <sha>, raise-0916-a): 15 distinct paths — api-gateway middleware/auth.ts (x3), index.ts, rateLimitEnforce.ts, routes/proxy.ts; auth routes/users.ts; originate routes/documents.ts; 7 test files. Plus userRepo.ts (KS-1186 held).
+     AUTH-TIER POOL PREDICATE: in the 328 AND (census "auth-shaped title (LAST)" 44 OR the auth-file/auth-hold rows KS-839 KS-915 KS-955 KS-986 KS-1132 KS-759 KS-1168 OR created since 2026-09-16T14:00Z with an auth/mfa/oauth/session/token/jwt/login/password/refresh/lockout/credential word in title or description). Result: 70. 18 of the 19 new-since rows already carry a 17e/17f/ROUTED/HELD record and were not re-derived; KS-1208 is new.
+     FITS from this search: KS-623 — auth-service test-token env guard (middleware/authenticate.ts:21, denylist === 'production' -> the gateway's allowlist ['development','test']), ONE edit, new in-process vitest file (2 assertion reds + CONTROL + COMPLETENESS). briefs/KS-623.md, inputs/code_623.json; checker PASS 7/7 strict (fin0 draft input, fin1 placed input), wrong-site variant (:25) FAIL A3b PARTIAL FIX. NOT queued. Held back since 09-15 only as "security surfaces ... kept for Opus builders" (queue.md comment) — the auth-tier hold.
+     SECOND FIT: none briefed (stopped at the first FITS; a second premeasure > 20 min). Likeliest next: KS-1009 (see row).
+     KS-1009  NOT BRIEFED, not measured past a read: one handler (routes/wallet.ts:402 status payload -> {exists}) but the published contract names the fields (auth.openapi.ts:1859 + docs/openapi/secuura-api.yaml) — likely multi-file + a public contract change; ks942 wallet-routes test may pin the body · unblocks: measure whether the contract/spec must move in the same PR · read + git grep
+     KS-1208  NEW (filed 02:24Z): middleware/auth.ts (seat A partition, 3 local heads) + "A shape decision first" (401 vs forward) · unblocks: KS-1207/KS-744 heads land + the ruling · read
+     KS-805   three items: PATCH .min(1) + deny-branch refusal + GET 500 -> refusal; the refusal's status/shape is unspelled (a pick), and a test "on both verbs" · unblocks: a pick of the refusal shape · read
+     KS-839   "pins whatever behaviour is then ruled correct" — wildcard semantics unruled (recorded SEARCH 2, reason stands) · read
+     KS-938   fix sites in routes/mfa.ts + routes/users.ts (users.ts = seat A partition, open #1018) — two files · unblocks: #1018 + KS-1194 land, then split per file · read
+     KS-1006  routes/users.ts (seat A partition + open #1018); "worth deciding whether this route should exist at all" · read
+     KS-1005  users.ts + userRepo.ts (both partitioned); no fix section · read
+     KS-1132  "Decision needed, then the build" (swallow vs rethrow for not-configured platform DB); userRepo.ts (KS-1186 held) · read
+     KS-855   "Fix shapes (not chosen)" derive vs pin; packages/shared scopes.ts · read
+     KS-824   "a HYPOTHESIS until run", normalise-in-SQL vs fold-case at three consumers (two files) · read
+     KS-840   decision/design (error code in message vs RFC 6749 redirect); no fix section · read
+     KS-836   OpenAPI request block + Schemathesis before/after run (live tool, no checker tier) · read
+     KS-1003  nginx map key (not a TS product file) + "decide whether the same gap exists" in two other configs · read
+     KS-619   api-gateway middleware/auth.ts (partition) + jwt.ts + originate; open question in acceptance · read
+     KS-1107  "Trace every consumer ... before choosing a fix", either/or; auth.ts + userRepo.ts + csrf.ts · read
+     KS-756   refresh-token wiring across session.ts/auth.ts/oauth.ts; KS-329 ruling prerequisite — design · read
+     KS-810   "not casually": import-cycle + hot-path checks before the one-line import change; Claude seat · read
+     KS-329   JWT algorithm feature (RS256 -> hybrid ML-DSA), 3 files, ruling · read
+     KS-618   nginx/demo client-IP platform-wide; live · read
+     KS-668   compose seed credentials (yml + userRepo.ts partition); owner call · read
+     KS-724   session-window design (either/or), live scan evidence · read
+     KS-782   [Decision] OAuth consent MFA challenge design · read
+     KS-787   S revoke lifecycle semantics across anchoring/originate + VOCABULARY.md; design · read
+     KS-793   already fixed at tip (BACKLOG.md), a board close (SEARCH 2 measured; stands) · read
+     KS-834   [Decision] certifications verify public-or-gated · read
+     KS-918   services/auth package.json dependency move — no checker tier grades a manifest · read
+     KS-925   launcher / vault skill file, outside the repo · read
+     KS-944   gateway spec security:[] pinning across index.ts/proxy.ts/specRouteMap.ts (partition) + decisions · read
+     KS-951   CI shell gate + compose + workflows; design · read
+     KS-977   systemTest setup/install pre-suite exemption; either/option; live auth · read
+     KS-1015  creator peter@obeden.com (sweep triage records) · read
+     KS-1017  test-estate CLASS across files; no single fix · read
+     KS-1032  9 trust-header reads across services, multi-file security guard · read
+     KS-1038  tests/e2e Playwright race; no checker · read
+     KS-1053  flake investigation (ks949), ruling · read
+     KS-1091  a live cross-tenant JWT probe run, not a patch · read
+     KS-1105  admin frontend Login.tsx placeholder — frontend, no vitest service tier · read
+     KS-1124  originate (jest) certifications honesty across 4+ files; ruling/options · read
+     KS-1146  push preflight leg (scripts/preflight.sh), decide/either · read
+     KS-1149  pre-push SSH idle timeout; feature/options · read
+     KS-1152  gate records: R1 auth + wording unruled (recorded SEARCH 2, stands) · read
+     KS-1157  OAuth session marker feature; unmeasured/design · read
+     KS-1177  owner decision (versioning vs CSRF order) · read (recorded 17c, stands)
+     KS-955   fresh-clone platform suites (compose/nginx), not accountLockout.ts product logic · read
+     KS-986   USER_TESTING docs + ruling on the published admin credential · read
+     KS-915   first privileged account — design/decision (recorded queue.md) · read
+     KS-1168  reallocated to Claude (Sunday batch); decision/owner · read
+     KS-759   originate (jest) middleware/auth.ts + shared JwtPayload type, own PR/reviewer (recorded 17d, stands) · read
+     KS-1181 KS-1186 KS-1188 KS-1189 KS-1190 KS-1192 KS-1193 KS-1194 KS-1196 KS-1197 KS-1198 KS-1200 KS-1201 KS-1202 KS-1203 KS-1204 KS-1205 KS-1207  recorded in 17e / 17f / ROUTED / HELD — not re-derived (KS-1186 queued 12:51)
+     KS-744   ROUTED 12:07 to seat A (a local head carries ks744 test + middleware/auth.ts) — stands
+     KS-1156  B R-C2 briefed 17f; A.1/A.2/A.3/R-C3 refusals stand
+     POOL STATE: with KS-623 briefed, the auth-tier pool's remaining single-file candidates are KS-1009 (contract spread unmeasured) and KS-805 (refusal shape unpicked). Everything else is a decision, multi-file, partitioned behind seat A's heads (gateway middleware/auth.ts, users.ts) or userRepo.ts (KS-1186), or not a vitest product file. Next widening: KS-1009 premeasure; KS-805 once the refusal shape is picked; KS-938/KS-1006 after #1018 + KS-1194 merge.
+-->
