@@ -8,9 +8,7 @@
 #   A1 output is exactly one fenced ```diff block, no prose outside it
 #   A2 the diff applies (`git apply --check`) at the pinned tip
 #      (strict first; then with --recount --ignore-whitespace, the ONE
-#      accommodation for model-miscounted hunk headers — reported apart;
-#      2026-09-18: then CONTEXT-WS REANCHORED at the header line, then FUZZY
-#      -C1 guarded by its measured offset — A2 FUZZY-MISPLACED never passes)
+#      accommodation for model-miscounted hunk headers — reported apart)
 #   A3 touched-file set == { product_file, ONE test file under test_dir }
 #      (never the reference test file, never a third file)
 #   A4 RED-FIRST: the test hunk ALONE, at the tip, runs and FAILS with >=1
@@ -343,7 +341,7 @@ if [ "${N_PROXY:-0}" -gt 0 ]; then
     exit 1
   fi
 fi
-A2_OK=1; A2_MODE="strict"; A2_NOTE=""; A2_SYNTH=0; A2_FZM=0
+A2_OK=1; A2_MODE="strict"; A2_NOTE=""; A2_SYNTH=0
 k=1
 while [ "$k" -le "$N_SEC" ]; do
   SEC_FILE="$(python3 -c 'import json,sys; print(json.load(open(sys.argv[1]))[int(sys.argv[2])-1]["file"])' "$REP/sections.json" "$k")"
@@ -382,57 +380,16 @@ while [ "$k" -le "$N_SEC" ]; do
     A2_MODE="lenient"; A2_NOTE="$A2_NOTE [$SEC_PATH: --recount --ignore-whitespace needed; miscounted hunks=$SEC_MIS; strict rc=$rc_strict]"
     echo "section $k $SEC_PATH: applies ONLY with --recount --ignore-whitespace (miscounted hunks=$SEC_MIS, strict rc=$rc_strict)"
   else
-    case "$SEC_PATH" in "$SUBDIR"/*) SEC_ABS="$CLONE/$SEC_PATH" ;; *) SEC_ABS="$CLONE/$SUBDIR/$SEC_PATH" ;; esac
-    # 2026-09-18 CONTEXT-WS REANCHOR (KS-1229 r1 + retry, runs/2026-09-18_ks1229-ornith35b-night; IMPROVEMENTS 01:26 row):
-    # 43 '+' lines byte-exact, ONE trailing context `});` (column 0) written `  });`. Strict and --ignore-whitespace both
-    # refuse ("no leading space" never matches "some"), and FUZZY -C1 then matched the first `  });` of nine — "apply
-    # fragment at 174" for `@@ -204` — putting the cells in a scope without `issue`. Before fuzzy: when every context/'-'
-    # line of every hunk equals the tip's lines at the header's old-start (searched within 3 lines, nearest first, a tie
-    # refused) AFTER stripping whitespace, tasks/code_patch/a2_placement.py `ctxws` rebuilds the hunks with the tip's exact
-    # text there and the checker applies the rebuilt section STRICTLY. '+' lines are copied byte for byte (A3c/A3i still
-    # judge them). Recorded LOUDLY as "A2 CONTEXT-WS REANCHORED at <line>"; the as-written section stays section_<k>.diff.
-    # The bash tier's REANCHORED shape (a rebuilt file, then a strict --check). Arms: tests/a2_fuzzy_placement_arms.sh.
-    CTXWS="$REP/section_${k}.ctxws.diff"; rc_ctxws=1; CTXWS_NOTE=""; rc_guard=1
-    if [ -f "$SEC_ABS" ] && python3 "$(dirname "$0")/a2_placement.py" ctxws "$SEC_FILE" "$SEC_ABS" "$CTXWS" > "$REP/ctxws_$k.out" 2>&1; then
-      CTXWS_NOTE="$(tr '\n' ';' < "$REP/ctxws_$k.out")"
-      git -C "$CLONE" apply --check -p1 $DIROPT "$CTXWS" > "$REP/apply_check_ctxws_$k.out" 2>&1
-      rc_ctxws=$?
-      [ "$rc_ctxws" -ne 0 ] && CTXWS_NOTE="$CTXWS_NOTE rebuilt section did not apply strictly: $(head -1 "$REP/apply_check_ctxws_$k.out" | tr '\n' ' ')"
-    else
-      CTXWS_NOTE="$(head -1 "$REP/ctxws_$k.out" 2>/dev/null | tr '\n' ' ')"; [ -f "$SEC_ABS" ] || CTXWS_NOTE="not attempted (no file at the tip: new file)"
-    fi
-    CTXWS_AT="$(sed -n -E 's/^hunk [0-9]+: CONTEXT-WS at ([0-9]+) .*/\1/p' "$REP/ctxws_$k.out" 2>/dev/null | paste -sd, -)"
-    if [ "$rc_ctxws" -eq 0 ]; then
-      echo "$CTXWS" > "$REP/section_$k.opts"; echo "$DIROPT" >> "$REP/section_$k.opts"
-      A2_MODE="context-ws"; A2_NOTE="$A2_NOTE [$SEC_PATH: A2 CONTEXT-WS REANCHORED at $CTXWS_AT — the model's context/'-' lines equal the tip's there only with whitespace stripped; rebuilt with the tip's exact text and applied strictly, every '+' line as written ($CTXWS_NOTE); strict rc=$rc_strict lenient rc=$rc_lenient]"
-      echo "section $k $SEC_PATH: applies ONLY CONTEXT-WS REANCHORED at $CTXWS_AT ($CTXWS_NOTE)"
-    else
     # 2026-09-15 third mode — FUZZY (-C1): the model's OUTER context line often differs by a word or a
     # space while the inner lines match (KS-871 think=1: hunk 3 landed at :281 for a stated :277 once
     # only one context line was required). Placement is then guarded by A4–A6 and the human source
     # read; the mode is recorded LOUDLY in the verdict so a PASS says "fuzzy" beside its counts.
-    # 2026-09-18 FUZZY OFFSET GUARD (KS-1229): A4–A6 guard nothing when the wrong scope COMPILES — a false green. Where
-    # -C1 applied each reduced fragment is measured (`git apply --check -v`: "Context reduced to (l/t) to apply fragment
-    # at N") against where its header puts it: B = old-start + earlier hunks' net delta, D = leading lines git dropped;
-    # N outside [B-3, B+D+3] FAILS A2 FUZZY-MISPLACED naming both numbers, and an unmeasurable fragment fails closed
-    # (the window and its census are in a2_placement.py's docstring: no recorded PASS moves, KS-1229's 174-for-204 does).
     git -C "$CLONE" apply --check -p1 $DIROPT --recount --ignore-whitespace -C1 "$SEC_FILE" > "$REP/apply_check_fuzzy_$k.out" 2>&1
     rc_fuzzy=$?
     if [ "$rc_fuzzy" -eq 0 ]; then
-      git -C "$CLONE" apply --check -v -p1 $DIROPT --recount --ignore-whitespace -C1 "$SEC_FILE" > "$REP/apply_check_fuzzy_v_$k.out" 2>&1
-      python3 "$(dirname "$0")/a2_placement.py" fuzzy "$SEC_FILE" "$REP/apply_check_fuzzy_v_$k.out" > "$REP/fuzzy_guard_$k.out" 2>&1
-      rc_guard=$?
-    fi
-    if [ "$rc_fuzzy" -eq 0 ] && [ "$rc_guard" -eq 0 ]; then
       echo "$SEC_FILE" > "$REP/section_$k.opts"; echo "$DIROPT --recount --ignore-whitespace -C1" >> "$REP/section_$k.opts"
       A2_MODE="fuzzy"; A2_NOTE="$A2_NOTE [$SEC_PATH: FUZZY — applies only with -C1 (one context line): $(head -1 "$REP/apply_check_fuzzy_$k.out" | tr '\n' ' '); strict rc=$rc_strict lenient rc=$rc_lenient]"
-      # the PASS A2 text above is kept byte-identical to the pre-0918 checker (recorded runs' PASS/FAIL lines stay comparable);
-      # the guard's measurement and the context-ws refusal go on the section line below and in fuzzy_guard_<k>.out / ctxws_<k>.out
-      echo "section $k $SEC_PATH: applies ONLY FUZZY (-C1): $(head -1 "$REP/apply_check_fuzzy_$k.out") — placement guard: $(tr '\n' ';' < "$REP/fuzzy_guard_$k.out") context-ws: $CTXWS_NOTE"
-    elif [ "$rc_fuzzy" -eq 0 ]; then
-      A2_OK=0; A2_FZM=1
-      A2_NOTE="$A2_NOTE [$SEC_PATH: $(/usr/bin/grep -E '^(MISPLACED|UNMEASURED)' "$REP/fuzzy_guard_$k.out" | sed -E 's/^MISPLACED hunk ([0-9]+) at ([0-9]+) \(header old-start ([0-9]+), expected ([0-9]+\.\.[0-9]+), off by ([-+0-9]+),/hunk \1: -C1 applied it at line \2 but its header says old-start \3 (expected \4, off by \5 — more than 3 lines),/' | tr '\n' ';') the placement is refused, not passed; strict rc=$rc_strict lenient rc=$rc_lenient context-ws: $CTXWS_NOTE]"
-      echo "section $k $SEC_PATH: FUZZY (-C1) applies but NOT where its header says (rc_guard=$rc_guard): $(tr '\n' ';' < "$REP/fuzzy_guard_$k.out")"
+      echo "section $k $SEC_PATH: applies ONLY FUZZY (-C1): $(head -1 "$REP/apply_check_fuzzy_$k.out")"
     else
       # 2026-09-15 fourth mode — REANCHORED: the model's `-`/`+` lines are kept and every hunk is rebuilt with the
       # FILE's own context around the unique (or nearest-to-declared) location of its `-` block (tasks/code_patch/
@@ -454,9 +411,8 @@ while [ "$k" -le "$N_SEC" ]; do
         A2_MODE="reanchored"; A2_NOTE="$A2_NOTE [$SEC_PATH: REANCHORED — the model's context lines did not match the file; every hunk rebuilt from its -/+ lines at the file's real location ($REAN_NOTE); strict rc=$rc_strict lenient rc=$rc_lenient fuzzy rc=$rc_fuzzy]"
         echo "section $k $SEC_PATH: applies ONLY REANCHORED ($REAN_NOTE)"
       else
-        A2_OK=0; A2_NOTE="$A2_NOTE [$SEC_PATH: does not apply — strict: $(head -2 "$REP/apply_check_strict_$k.out" | tr '\n' ' ') | lenient: $(head -2 "$REP/apply_check_lenient_$k.out" | tr '\n' ' ') | context-ws: $CTXWS_NOTE | fuzzy(-C1): $(head -2 "$REP/apply_check_fuzzy_$k.out" | tr '\n' ' ') | reanchored: $REAN_NOTE $(head -1 "$REP/apply_check_reanchored_$k.out" 2>/dev/null | tr '\n' ' ')${SEC_NFR:+ | newfile header NOT SYNTHESIZED: $SEC_NFR}]"
+        A2_OK=0; A2_NOTE="$A2_NOTE [$SEC_PATH: does not apply — strict: $(head -2 "$REP/apply_check_strict_$k.out" | tr '\n' ' ') | lenient: $(head -2 "$REP/apply_check_lenient_$k.out" | tr '\n' ' ') | fuzzy(-C1): $(head -2 "$REP/apply_check_fuzzy_$k.out" | tr '\n' ' ') | reanchored: $REAN_NOTE $(head -1 "$REP/apply_check_reanchored_$k.out" 2>/dev/null | tr '\n' ' ')${SEC_NFR:+ | newfile header NOT SYNTHESIZED: $SEC_NFR}]"
       fi
-    fi
     fi
   fi
   k=$((k+1))
@@ -465,10 +421,6 @@ if [ "$A2_OK" -eq 1 ] && [ "$A2_MODE" = "strict" ] && [ "$A2_SYNTH" -eq 0 ]; the
   pass "A2 diff applies at the tip (strict git apply --check, every section, hunk headers consistent)"
 elif [ "$A2_OK" -eq 1 ]; then
   pass "A2 diff applies at the tip — with an accommodation:$A2_NOTE"
-elif [ "$A2_FZM" -eq 1 ]; then
-  fail "A2 FUZZY-MISPLACED — the diff applies only with -C1, and not where its hunk header says (more than 3 lines outside it), so it is refused:$A2_NOTE"
-  echo "RESULT: FAIL ($FAILS failed) — stopped at A2 (a fuzzy placement the hunk header contradicts)"
-  exit 1
 else
   fail "A2 diff does NOT apply at the tip:$A2_NOTE"
   echo "RESULT: FAIL ($FAILS failed) — stopped at A2"
