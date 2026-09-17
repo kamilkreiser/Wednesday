@@ -358,3 +358,8 @@ A CENSUS for the coordinator to brief from, easy → hard (Kam 2026-09-15 16:40 
      KS-1123 KS-1129 KS-864 KS-960  PR attached / held · KS-1172 KS-1173 KS-1179 KS-1180 KS-1181 KS-1182 KS-1199 KS-1201 held (READY or reallocated) · KS-1175 KS-1177 KS-1178 KS-1184 KS-772 recorded refusals (SEARCH 2 / 17c)
      POOL STATE: all 34 recently-updated Backlog/Todo tickets are held, in seat A's lane, or carry a recorded rejection. Next search should widen to: (1) KS-744 the moment #1017 merges (one guarded header line, api-gateway vitest); (2) KS-1186 if A3b is keyed by line number; (3) the older T1 rows whose updatedAt moved since their recorded refusal.
 -->
+
+## ROUTED BY WEDNESDAY 2026-09-17 12:07 — KS-744 briefed (FITS, PASS 7/7 strict at d7e95cd9f) but NOT queued
+| id | reason | what unblocks it |
+|---|---|---|
+| KS-744 | a PRODUCT edit to `services/api-gateway/src/middleware/auth.ts` (:389/:394 header guards): auth product edits stay out of the local-model week grant until Kam names them (EXPIRING-GRANTS, Wednesday's 09-15 reading), AND seat A's KS-1207 (B) fix edits the same file next — two agents never on one file | routed to seat A's Claude queue AFTER KS-1207 (same file, serial); the brief `night/briefs/KS-744.md` is usable by that seat as its spec; the residual (tokens missing role/userId still 500) needs a ruling — PR says "Refs KS-744" |
