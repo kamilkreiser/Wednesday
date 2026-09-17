@@ -64,17 +64,6 @@ insert_after = int(_ia.group(1)) if _ia else None
 if insert_after is not None and insert_after > len(tipl_raw := r.stdout.split("\n")):
     sys.stderr.write(f"build_doc_input: REFUSED — 'Insert AFTER line {insert_after}' is past the file's end ({len(tipl_raw)} lines)\n"); sys.exit(2)
 tipl=[l.rstrip() for l in r.stdout.split("\n")]
-# H1 (2026-09-17, proposal in runs/2026-09-16_rebriefs-docs-evidence/): an "Insert AFTER line N" whose tip line N is BLANK or
-# whitespace-only is REFUSED. The checker's D9 compares the line before the insert with the anchor, and a blank anchor matches
-# every blank-preceded line — a misplaced insert PASSED (KS-987 r0 against a blank-anchored build; KS-866's 20:11 PASS rested
-# on one). Re-anchor the brief on a non-blank line; the refusal names the nearest non-blank neighbours.
-if insert_after is not None and insert_after < 1:
-    sys.stderr.write(f"build_doc_input: REFUSED — 'Insert AFTER line {insert_after}' names no line (lines count from 1)\n"); sys.exit(2)
-if insert_after is not None and tipl[insert_after-1].strip() == "":
-    up = next((k for k in range(insert_after-1, 0, -1) if tipl[k-1].strip()), None)
-    dn = next((k for k in range(insert_after+1, len(tipl)+1) if tipl[k-1].strip()), None)
-    nm = lambda k: f"line {k} ({tipl[k-1][:60]!r})" if k else "none"
-    sys.stderr.write(f"build_doc_input: REFUSED — 'Insert AFTER line {insert_after}' names a BLANK line at the tip; a blank anchor matches every blank-preceded line, so D9 could not prove placement. Re-anchor on a non-blank line: nearest non-blank above is {nm(up)}, below is {nm(dn)}\n"); sys.exit(2)
 missing=[m for m in must_remove if m not in tipl]
 if missing: sys.stderr.write(f"build_doc_input: REFUSED — {len(missing)} brief '-' line(s) do not exist at the tip (read the file, not the ticket): {missing[:2]}\n"); sys.exit(2)
 inp = {"ticket": {"identifier": ident, "title": text.splitlines()[0].lstrip("# ").strip()[:200], "description": text},

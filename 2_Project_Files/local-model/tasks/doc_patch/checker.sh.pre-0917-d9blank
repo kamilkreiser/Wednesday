@@ -5,8 +5,6 @@
 #   D3 touched-file set == { product_file }         D4 BEFORE: every required token ABSENT in its section (else nothing to prove)
 #   D5 AFTER: every required token PRESENT in its section
 #   D6 every hunk lies inside a required section (nothing outside the brief's sections changed)
-#   D7 must-remove lines gone · D8 brief '+' lines present exactly · D9 insert follows its "Insert AFTER line N" anchor
-#      (a BLANK anchor is held on the nearest non-blank line above + the blank count + the line below — 2026-09-17)
 # Sections = from a line matching `## …<section substring>` to the next `## ` heading, measured on the TIP file.
 set -uo pipefail
 INPUT="${1:-}"; OUT="${2:-}"; CLONE="${3:-}"
@@ -156,36 +154,6 @@ if ia and ep:
     pos=[i for i,l in enumerate(al_) if l==first]
     if anchor is None: print(f"FAIL D9 instrument: insert_after={ia} outside the BEFORE file"); fails+=1
     elif not pos: print(f"FAIL D9 the first brief '+' line is not in AFTER (see D8)"); fails+=1
-    elif anchor=="":
-        # 2026-09-17 (row "D9 vacuous on a blank anchor", proposal H1 in runs/2026-09-16_rebriefs-docs-evidence/): a BLANK
-        # anchor made the test below compare against '' — every blank-preceded line in the file satisfies it, so a misplaced
-        # insert PASSED (measured: KS-987 r0 against a blank-anchored build; KS-866's 20:11 PASS rested on one). The builder
-        # now REFUSES such a brief; an input built before that still reaches here. Placement is then held on the NEAREST
-        # NON-BLANK line above the anchor: the brief's '+' lines, blanks included, must form ONE contiguous run in AFTER,
-        # preceded by exactly that non-blank line plus the same k blank lines as the tip, and followed by tip line N+1.
-        # A non-blank anchor never enters this branch — its verdict and wording are unchanged.
-        bl_=[l.rstrip() for l in before]
-        a=ia-2
-        while a>=0 and bl_[a]=="": a-=1
-        k=(ia-1)-a
-        above=([bl_[a]] if a>=0 else [])+[""]*k
-        below=bl_[ia] if ia < len(bl_) else None
-        n=len(ep); runs=[i for i in range(len(al_)-n+1) if al_[i:i+n]==ep]
-        held=f"tip line {ia} is blank; held on {'tip line %d: %r' % (a+1, bl_[a][:50]) if a>=0 else 'the start of the file'} + {k} blank line(s), and tip line {ia+1}: {str(below)[:40]!r} below"
-        why=[]; ok=False
-        for i in runs:
-            a_ok=(i==len(above) and al_[:i]==above) if a<0 else (i-len(above)>=0 and al_[i-len(above):i]==above)
-            b_ok=below is None or (i+n<len(al_) and al_[i+n]==below)
-            if a_ok and b_ok: ok=True; break
-            j=i-1
-            while j>=0 and al_[j]=="": j-=1
-            why.append(f"run at AFTER :{i+1}: above={'ok' if a_ok else 'NO (%d blank(s) then %r)' % (i-1-j, al_[j][:40] if j>=0 else '<start>')} below={'ok' if b_ok else 'NO (%r)' % (al_[i+n][:40] if i+n<len(al_) else '<end>')}")
-        if not runs:
-            j=pos[0]-1
-            while j>=0 and al_[j]=="": j-=1
-            why.append(f"the brief's {n} '+' line(s), blanks included, are not ONE contiguous run in AFTER (first text line at AFTER :{pos[0]+1}, after {pos[0]-1-j} blank(s) then {al_[j][:40] if j>=0 else '<start>'!r})")
-        if ok: print(f"PASS D9 the insert follows its named anchor — BLANK ANCHOR held on a non-blank line ({held})")
-        else: print(f"FAIL D9 INSERT MISPLACED — BLANK ANCHOR: the brief says 'Insert AFTER line {ia}' ({held}) but no placement in AFTER matches: {'; '.join(why)[:300]}"); fails+=1
     else:
         ok=any(i>0 and al_[i-1]==anchor for i in pos)
         # a leading blank '+' line: the anchor sits one line further up
