@@ -1,0 +1,202 @@
+#!/usr/bin/env python3
+"""gen_launcher_1022.py — derive launch_qa_secuura_ks1211_1022.sh from the TIER 2 launcher launchers/launch_qa_secuura_ks769_1020.sh
+(same guard family: head on origin exit 6, compare exit 10/13, develop judged BY CONTENT exit 18/19, head SHA named in brief+prompt exit 20,
+TTY exit 21), re-pointed at a TIER 1 gate, by ASSERTED substitutions: every anchor must occur exactly as often as stated, or the generator
+refuses and writes nothing. Then a RESIDUAL GUARD (any token of the source gate left, after stripping the one permitted template-name mention,
+is a refusal), output controls ('#1022' ENUMERATED first with --enumerate, which writes only to the scratch path given), PY/PYJ heredoc
+apostrophe/paren parity, no git write verbs, no control bytes, bash -n. Never overwrites an existing output without a .pre-* copy.
+Adapted from gatesets/2026-09-17_gate1021/gen_launcher_1021.py.
+Usage: gen_launcher_1022.py <template launcher> <output launcher> [--enumerate]
+Exit: 0 written · 1 an anchor/control count disagreed · 2 a residual token survived · 3 bash -n failed"""
+import datetime, hashlib, os, re, shutil, subprocess, sys
+
+src_path, out_path = sys.argv[1], sys.argv[2]
+ENUMERATE = '--enumerate' in sys.argv[3:]
+s = open(src_path, encoding='utf-8').read()
+def refuse(msg, code):
+    print('REFUSING: ' + msg, file=sys.stderr); sys.exit(code)
+
+HEAD = '58684e6534b4d420c9fb9ea246d3a32c70c70828'
+BASE = 'f8c7aaa39dabfe6a3916e5be55d9ccd752e7d8ed'     # the PR parent = the merge-base
+DEV = '581c9db0db4201c42cbbf702f339b750989acdb1'      # origin develop at draft time (#1019 squash), NOT the parent
+OLD_HEAD = '71bd80a35b406b9c99c7b96955a7521032d33c20'
+OLD_BASE = 'd7e95cd9f153e9036ed77935a73c93504fa6e3dc'
+BRANCH = 'refs/heads/feature/ks-1211-bump-hono'
+STEM = '2026-09-17_secuura-1022-ks1211-hono-tier1'
+OLD_STEM = '2026-09-17_secuura-1020-ks769-tier2'
+TEMPLATE_NAME = 'launch_qa_secuura_ks769_1020.sh'
+COUNT_1022 = None if ENUMERATE else int(os.environ.get('COUNT_1022', '-1'))  # MEASURED by --enumerate first; passed in, never guessed
+
+NEW_HEADER = '''#!/bin/bash
+# launch_qa_secuura_ks1211_1022.sh — cross-project QA agent, ONE TIER 1 ROUND 1 gate over Secuura/Blockchain PR #1022
+# (KS-1211, Seat B, rows 8-10 of the audit-baseline fix work: hono GHSA-gqvv-2mrq-wpjv, GHSA-g6gw-c38x-mqfc, GHSA-crvj-82cr-hjcx)
+# @ 58684e6534b4d420c9fb9ea246d3a32c70c70828 — ONE commit on f8c7aaa39, FOUR files: hono 4.13.0 -> 4.13.8 in
+# Blockchain/Dev/services/mcp-server/package-lock.json, services/originate/package-lock.json and the Blockchain/Dev root package-lock.json
+# (which also carries the 12-entry flag reconciliation Wednesday ruled), and the three hono rows removed from
+# Blockchain/Dev/scripts/audit/audit-baseline.json (38 -> 35). No manifest. Tier 1: hono ships in the mcp-server (and originate) images.
+#
+# THE SHAPE, as read 17:57-18:11 AEST 2026-09-17 (git ls-remote + the compare API agree): the head parent is f8c7aaa39 (the develop tip before #1019);
+# origin develop is 581c9db0d (#1019 squash, 3 api-gateway files, disjoint). compare develop...head = merge_base f8c7aaa39, status diverged,
+# ahead 1, behind 1, files 4. The compare is asserted as merge_base + ahead + files (exit 10); `behind` is deliberately NOT asserted, so a
+# develop that moves on does not trip this guard — the develop arm judges the move by CONTENT.
+#
+# The develop pin is judged by CONTENT, not bare: (a) EIGHTEEN files by blob at the CURRENT develop — the four PR files (root lock base
+# 17d2061b3 / own 99db3e7c2, audit-baseline.json base 03d1680e3 / own b78691b4c, mcp-server lock base 5171f5586 / own f942d659b, originate
+# lock base 2d3439a8a / own d91d746ef; an own blob -> exit 19 LANDED), the Dev, mcp-server and originate package.json, audit-gate.mjs,
+# audit-locks.mjs, lock-discovery.mjs, baseline-contract.mjs, scripts/audit/package.json, preflight.sh, lockfile-cleanroom.sh, both service
+# Dockerfiles, and mcp-server src/http-server.ts + src/index.ts (the runtime-reach reading rests on them) — any blob nobody pinned -> exit 18;
+# (b) if develop moved past 581c9db0d, the compare pinned...develop REFUSES (exit 18) only when the delta touches a GUARDED path — anything
+# under Blockchain/Dev/scripts/audit/, Blockchain/Dev/scripts/preflight/ or Blockchain/Dev/services/mcp-server/, the Dev package.json or
+# root package-lock.json, originate package.json / package-lock.json / Dockerfile, or .githooks/pre-push — or cannot be judged; anything else
+# proceeds and the gate re-derives on the merged tree. #1021 (same ticket) edits audit-baseline.json, so #1021 landing first REFUSES here
+# by design (the second PR merges develop in and gets a new head): re-pin deliberately. DEV_CONTENT_ALLOWED is empty.
+#
+# exit 21: the LAUNCH path refuses when stdin is not a TTY. This launcher execs an interactive agent; run it in a cockpit
+# pane, never inside a Bash tool. `--check` still runs headless (it launches nothing).
+#
+# Adapted from launch_qa_secuura_ks769_1020.sh by gen_launcher_1022.py (asserted substitutions + residual guard + output
+# controls + bash -n): same guards and exit codes, re-pointed at #1022 and TIER 1. Exit codes 2..21 (19 = LANDED).
+# Written by the generator because it contains a legitimate directory change.
+#
+# Usage: launch_qa_secuura_ks1211_1022.sh [--check]
+# Exit: 0 launched (or guards passed under --check) · 2..21 a guard refused
+'''
+marker = 'set -u\n'
+if s.count(marker) != 1: refuse('header marker set -u count %d' % s.count(marker), 1)
+s = NEW_HEADER + s[s.index(marker):]
+
+J = lambda *lines: '\n'.join(lines)
+BLOBS = [
+ ('D + "package-lock.json"',                          '17d2061b397595677ae789683b0ca1d4b8398bec', '99db3e7c2434f65eb64ab0d8db5775e11eefd6bd'),
+ ('D + "scripts/audit/audit-baseline.json"',          '03d1680e3c7a87f8df70e71082b67775536acde5', 'b78691b4c7c75096e191b58af91d86fd1a824ca3'),
+ ('D + "services/mcp-server/package-lock.json"',      '5171f55862ea4354b7d3a3a050113c463794c96a', 'f942d659b90b2314ccb5737cb41ecc3c0a70a306'),
+ ('D + "services/originate/package-lock.json"',       '2d3439a8a99b293a98b6a221414ee041d7d83466', 'd91d746efb2b7fcd6d3168838925f40d7282ea32'),
+ ('D + "package.json"',                               '769b7adbda124bb200dd9827d2e4fbc5883e6124', None),
+ ('D + "services/mcp-server/package.json"',           'a97eaaab5b029ea2edfeba4bb9db5c83ef20e728', None),
+ ('D + "services/originate/package.json"',            '749912c592e8630fff348cc60e1bf49677c18ab1', None),
+ ('D + "scripts/audit/audit-gate.mjs"',               '8e236ee70ce1a4634552596fb86fcffce234f221', None),
+ ('D + "scripts/audit/audit-locks.mjs"',              'aff23b0420ced863884787443a35f28cf727bd09', None),
+ ('D + "scripts/audit/lock-discovery.mjs"',           '3dd903b527f26c758cc1da84b10cc0a0db3b1d46', None),
+ ('D + "scripts/audit/baseline-contract.mjs"',        '2504d9a28dc017fcaabfc88248bf1c64431eb38a', None),
+ ('D + "scripts/audit/package.json"',                 'd5977b6a13638558ef57e8c294809d7ada8be6cd', None),
+ ('D + "scripts/preflight/preflight.sh"',             '28d3636c13a4259bbdade8b15ac527cbe93742c3', None),
+ ('D + "scripts/preflight/lockfile-cleanroom.sh"',    '518bffeeaf4a3c47a4660f594f822f34e26c2d15', None),
+ ('D + "services/mcp-server/Dockerfile"',             '60485f4a67ac8110f204777adf2df36dc2645da7', None),
+ ('D + "services/originate/Dockerfile"',              'ac2fb91bf7d814b407f41bcca904793b6d6d91c1', None),
+ ('D + "services/mcp-server/src/http-server.ts"',     'fce4a31793b3765de96fc387a2f306da5db15744', None),
+ ('D + "services/mcp-server/src/index.ts"',           '687512fe63fcec74342035c67e8ce99656b3e1a6', None),
+]
+NEW_JUDGED = J('# file -> (develop-OK blobs {blob: label}, LANDED blobs {blob: label})', 'JUDGED = {',
+  *['  %-48s ({"%s": "base"}, %s),' % (f + ':', b, '{"%s": "#1022 own"}' % o if o else '{}') for f, b, o in BLOBS], '}\n')
+NEW_GUARDED = J(
+ 'GUARDED = [D + "scripts/audit/",',
+ '           D + "scripts/preflight/",',
+ '           D + "services/mcp-server/",',
+ '           D + "package.json",',
+ '           D + "package-lock.json",',
+ '           D + "services/originate/package.json",',
+ '           D + "services/originate/package-lock.json",',
+ '           D + "services/originate/Dockerfile",',
+ '           ".githooks/pre-push"]\n')
+
+def block(start, end_marker):
+    if s.count(start) != 1: refuse('block start %r count %d' % (start[:50], s.count(start)), 1)
+    i = s.find(start); j = s.find(end_marker, i)
+    if j < 0: refuse('block end %r not found' % end_marker[:40], 1)
+    return s[i:j + len(end_marker)]
+old_judged = block('# file -> (develop-OK blobs {blob: label}, LANDED blobs {blob: label})', '}\n')
+old_guarded = block('GUARDED = [D + "scripts/audit/",', '".githooks/pre-push"]\n')
+
+subs = [
+    (old_judged, NEW_JUDGED, 1),
+    (old_guarded, NEW_GUARDED, 1),
+    ('QA1020_BRIEF', 'QA1022_BRIEF', 2),
+    ('QA1020_PROMPT', 'QA1022_PROMPT', 2),
+    ('QA1020_HEAD', 'QA1022_HEAD', 2),
+    (OLD_STEM, STEM, 3),
+    ('refs/heads/chore/audit-fuse-mobile-tree-dormant-redate', BRANCH, 1),
+    (OLD_HEAD, HEAD, 1),
+    ("MERGE_BASE='" + OLD_BASE + "'   # the merge-base of the head with develop = the PR parent (the KS-1195 #1017 squash; develop has not moved)",
+     "MERGE_BASE='" + BASE + "'   # the merge-base of the head with develop = the PR parent (the develop tip before #1019)", 1),
+    ("DEVELOP_SHA='" + OLD_BASE + "'   # develop at draft time = the PR parent itself (ls-remote 15:42:00, compare API 15:46:12 AEST)",
+     "DEVELOP_SHA='" + DEV + "'   # develop at draft time = the #1019 squash, NOT the PR parent (ls-remote 17:57:05 + 18:11:01, compare API 17:57:27 AEST)", 1),
+    ('echo "REFUSING: #1020 — $HEAD_SHA is not at', 'echo "REFUSING: #1022 — $HEAD_SHA is not at', 1),
+    ('# develop...#1020 = d7e95cd9f ahead 1 files 1 (behind 0 at draft time — deliberately not asserted).',
+     '# develop...#1022 = f8c7aaa39 ahead 1 files 4 (behind 1 at draft time — deliberately not asserted).', 1),
+    ('ahead=1 files=1', 'ahead=1 files=4', 2),
+    ('''{ echo "REFUSING: #1020 develop...head reads''', '''{ echo "REFUSING: #1022 develop...head reads''', 1),
+    ('# The develop pin, judged by CONTENT (see the header): twelve files by blob at the CURRENT develop, then — if develop',
+     '# The develop pin, judged by CONTENT (see the header): eighteen files by blob at the CURRENT develop, then — if develop', 1),
+    ('" — #1020 has landed; this brief is stale")', '" — #1022 has landed; this brief is stale")', 1),
+    ('" (= the PR parent, the KS-1195 #1017 squash; git ls-remote)")', '" (= the #1019 squash, the develop tip at draft time, NOT the PR parent; git ls-remote)")', 1),
+    ('# pinned here. EMPTY for this gate: at draft time 15:46 AEST no open PR touched a guarded path (PR files API, 20 open PRs),',
+     '# pinned here. EMPTY for this gate: at draft time 17:57 AEST #1021 touched audit-baseline.json and ten Dependabot PRs the root lock (PR files API, 21 open PRs),', 1),
+    ('tail = "the gate merges the then-current develop onto 71bd80a35 in its own clone, runs the audit legs on the MERGED tree beside the base and head trees, names the delta and re-derives every count and the fuse census (brief item 6)"',
+     'tail = "the gate merges the then-current develop onto 58684e653 in its own clone, names the merged tree and its delta, and proves the audit inputs blob-identical to head or re-runs the gates there (brief item 5)"', 1),
+    ('— disjoint from the GUARDED list (Blockchain/Dev/scripts/audit/, scripts/preflight/preflight.sh, the Dev package.json, .githooks/pre-push); %s"',
+     '— disjoint from the GUARDED list (Blockchain/Dev/scripts/audit/, scripts/preflight/, services/mcp-server/, the Dev package.json and root lock, originate package.json / lock / Dockerfile, .githooks/pre-push); %s"', 1),
+    ("grep -q 'TIER 2'", "grep -q 'TIER 1'", 2),
+    ('echo "  brief and prompt agree on TIER 2 and ROUND 1"', 'echo "  brief and prompt agree on TIER 1 and ROUND 1"', 1),
+    ('echo "  head on origin: #1020 $HEAD_SHA at $BRANCH"', 'echo "  head on origin: #1022 $HEAD_SHA at $BRANCH"', 1),
+    ('echo "  compare (GitHub API): develop...#1020 = $COMPARE"', 'echo "  compare (GitHub API): develop...#1022 = $COMPARE"', 1),
+]
+for old, new, n in subs:
+    c = s.count(old)
+    if c != n: refuse('anchor %r occurs %d times, expected %d' % (old[:70], c, n), 1)
+    s = s.replace(old, new)
+
+permitted = 'Adapted from ' + TEMPLATE_NAME
+if s.count(permitted) != 1: refuse('permitted template mention count %d' % s.count(permitted), 1)
+body = s.replace(permitted, 'Adapted from <template>')
+residual = ['1020', '71bd80a3', 'd7e95cd9', 'ks769', 'KS-769', 'KS-1195', '#1017', 'Dormant', 'dormant', 'fuse was', 'mobile', 'twelve', 'TWELVE',
+            '15:42', '15:46', 'expected-case-count', 'gate-exit-codes', 'lock-discovery.test', 'baseline-contract.test', 'TIER 2', '2f54840ce',
+            'f102d9d4c', '2379c0aee', '40079f6fb', '04f9fe460']
+hits = []
+for tok in residual:
+    pat = r'(?<![0-9a-fA-F])' + re.escape(tok) + r'(?![0-9a-fA-F])' if tok.isdigit() else re.escape(tok)
+    for m in re.finditer(pat, body): hits.append((tok, body.count('\n', 0, m.start()) + 1))
+lines = body.split('\n')
+if hits:
+    for tok, line in hits: print('REFUSING: residual token %r at line %d: %s' % (tok, line, lines[line - 1][:120]), file=sys.stderr)
+    sys.exit(2)
+
+if ENUMERATE:
+    open(out_path, 'w', encoding='utf-8').write(s)
+    for i, l in enumerate(s.split('\n'), 1):
+        if '#1022' in l: print('#1022 at line %d: %s' % (i, l[:110]))
+    print('ENUMERATED count #1022 = %d (scratch copy written to %s; nothing written to launchers/)' % (s.count('#1022'), out_path)); sys.exit(0)
+
+controls = [
+    ('HEAD_SHA="${QA1022_HEAD:-' + HEAD + '}"', 1), ("MERGE_BASE='" + BASE + "'", 1), ("DEVELOP_SHA='" + DEV + "'", 1),
+    ("BRANCH='" + BRANCH + "'", 1), (STEM + '.md', 2), (STEM + '.prompt.txt', 1),
+    ('exit 2;', 1), ('exit 3;', 1), ('exit 4;', 1), ('exit 5;', 1), ('exit 6', 1), ('exit 7;', 1), ('exit 8;', 1), ('exit 9;', 1),
+    ('exit 10;', 1), ('exit 11;', 1), ('exit 12;', 1), ('exit 13;', 1), ('exit 14;', 1), ('exit 15;', 1), ('exit 16;', 2), ('exit 17;', 1),
+    ('exit 18; }', 1), ('exit 18 ;;', 1), ('exit 19 ;;', 1), ('exit 20;', 1), ('exit 21;', 1),
+    ('DEV_CONTENT_ALLOWED = {', 1), ('print("LANDED ', 1), ('print("GUARDED ', 2), ('print("UNJUDGEABLE ', 3), ('LANDED*)', 1), ('OK*)', 1),
+    ('"base"}', 18), ('"#1022 own"}', 4),
+    ('ahead=1 files=4', 2), ('[ -t 0 ]', 1), ('exec claude --dangerously-skip-permissions --model opus', 1),
+    ('git -C "$REPO"', 2), ('set -u', 1), ('MAIL YOUR VERDICT', 1), ('NEVER print a credential value', 1), ('no memory maintenance', 1),
+    ("grep -q 'TIER 1'", 2), ("grep -q 'ROUND 1'", 2), ('GUARDED = [D + "scripts/audit/",', 1), ('".githooks/pre-push"]', 1),
+    ('#1022', COUNT_1022),
+] + [(b, 1) for _, b, _o in BLOBS] + [(o, 1) for _, _b, o in BLOBS if o]
+bad = [(k, want, s.count(k)) for k, want in controls if s.count(k) != want]
+if bad: refuse('output controls %r' % bad, 1)
+if 'git -C $' in s: refuse('git -C $VAR form', 1)
+verbs = re.findall(r'git (?:-C "\$REPO" )?(fetch|checkout|worktree|merge-tree|merge|pull|push|reset|switch|clone)\b', s)
+if verbs: refuse('git write verbs in the launcher %r' % verbs, 1)
+pyj = s.split("<<'PYJ'")[1].split('PYJ\n')[0]
+if pyj.count("'") % 2: refuse('odd apostrophes inside the PYJ heredoc (%d)' % pyj.count("'"), 1)
+if pyj.count('(') != pyj.count(')'): refuse('unbalanced parentheses inside the PYJ heredoc (%d/%d)' % (pyj.count('('), pyj.count(')')), 1)
+py = s.split("<<'PY'")[1].split('PY\n')[0]
+if py.count("'") % 2: refuse('odd apostrophes inside the PY heredoc (%d)' % py.count("'"), 1)
+raw = s.encode('utf-8')
+if sum(1 for b in raw if (b < 0x20 and b not in (9, 10, 13)) or b == 0x7f): refuse('control bytes', 1)
+if os.path.exists(out_path):
+    bak = out_path + '.pre-' + datetime.datetime.now().strftime('%m%d%H%M%S')
+    shutil.copyfile(out_path, bak); print('existing output copied to', bak)
+open(out_path, 'w', encoding='utf-8').write(s)
+os.chmod(out_path, 0o755)
+rc = subprocess.run(['bash', '-n', out_path]).returncode
+print(datetime.datetime.now().astimezone().strftime('%H:%M:%S %Z'), 'wrote', out_path, 'lines', s.count('\n'), 'sha256', hashlib.sha256(raw).hexdigest()[:16],
+      'subs', len(subs), 'controls', len(controls), 'residual guard clean', 'bash -n rc', rc, 'pyj apostrophes', pyj.count("'"))
+sys.exit(0 if rc == 0 else 3)

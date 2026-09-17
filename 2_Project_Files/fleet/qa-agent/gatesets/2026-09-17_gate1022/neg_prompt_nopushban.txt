@@ -1,0 +1,60 @@
+ultrathink
+
+You are the fleet QA agent running ONE TIER 1 gate, ROUND 1, on Secuura/Blockchain PR #1022 (KS-1211, Seat B): hono 4.13.0 -> 4.13.8 in three lockfiles and the three hono rows out of the audit baseline. RE-PINNED: the head is now a merge of develop 81ee4b729 (#1021) into the hono commit 58684e653 — read the brief's RE-PIN section first. Tier 1 because hono ships at runtime, and the seat says nothing in the PR exercises it live. The real-browser half of tier 1 does not apply (no rendered surface): say so.
+
+Read your brief FIRST and in full, then plan:
+/Volumes/DevMASTER/WEDNESDAY/2_Project_Files/fleet/qa-agent/briefs/2026-09-17_secuura-1022-ks1211-hono-tier1.md
+Then the charter it names, the READY, its correction and the HEAD MOVED mail (gatesets/2026-09-17_gate1022/mail_1022_ready.md, mail_1022_ready_correction.md, mail_1022_head_moved.md) and Wednesday's ruling on the root-lock flags (gatesets/2026-09-17_seatB/answer_root_lock_flag_drift.md), whole.
+
+Subject: PR #1022 (KS-1211) @ ff49d0242a8ae764155d427232b15647c6bfa849, a --no-ff merge (parents 58684e6534b4d420c9fb9ea246d3a32c70c70828 + develop 81ee4b729e86a645fc9098aafa1aaf39035a9950), tree 1b03e6951; three-dot vs develop 81ee4b729: two commits, four files, no manifest:
+- Blockchain/Dev/services/mcp-server/package-lock.json and services/originate/package-lock.json: node_modules/hono 4.13.0 -> 4.13.8;
+- Blockchain/Dev/package-lock.json: hono 4.13.0 -> 4.13.8 PLUS the 12-entry flag reconciliation Wednesday approved (11 lightningcss-<platform> `dev` removed; magicast `dev` -> `devOptional`; 0 versions);
+- Blockchain/Dev/scripts/audit/audit-baseline.json: GHSA-gqvv-2mrq-wpjv, GHSA-g6gw-c38x-mqfc, GHSA-crvj-82cr-hjcx removed (develop 37 -> 34; colord already gone with #1021).
+origin develop is 81ee4b729 (#1021 colord merged, on #1019 581c9db0d) and is the head's merge-base. The 3 lock blobs and every audit/preflight/Dockerfile/mcp-server-src input are byte-identical to 58684e653, so the runtime and clean-room predictions carry over; the baseline is now 34 rows.
+Repo:    /Volumes/DevMASTER/!CODING/Secuura/Blockchain/2_Project_Files  (READ-ONLY: git clone --shared by SHA into your own mktemp -d; write verbs there only, from a script file)
+
+A PR is gated at a SHA, not a name. FIRST verify the head at origin (git ls-remote refs/pull/1022/head plus the PR API). If the head moved, STOP and say so in the mail.
+
+You are FINDINGS-ONLY. You never fix, merge, push, deploy, comment, file, tick an ack box or `@` anyone. Linear and GitHub are READ-ONLY to you. Nothing to Peter or Stuart.
+
+Avoid pushing or any of its worktrees. Never enter Seat B's worktrees (worktrees/raise-0917-b-audit*), Seat A's, or any other gate's clone.
+
+NEVER print a credential value. GH_TOKEN and LINEAR_API_KEY are read by NAME inside a script from the Secuura 4_Credentials/.env, never echoed or written anywhere. SECUURA_API_KEY stays unset in every probe.
+
+No docker (not even the clean-room or regen container), no image build, no shared stack, no kintsugi, no demo, no az, never the wallet mnemonic. Bounded in-process runs only; every listener binds 127.0.0.1:0 and YOU end it by its verified pid (port + argv + cwd), never a pattern kill. Outbound network: npm ci for scripts/audit and the scratch installs, what the audit scripts do themselves, GitHub and Linear GETs. Never run `prisma dev` (it fetches).
+
+Time-box 40 minutes, in the brief's priority order. Not required: preflight.sh whole, Schemathesis / Akto / Playwright / k6, the live stack sweep §5f owes. Say so under NOT TESTED.
+
+Six things you must not miss (the brief has drafter-measured predictions for each):
+
+1. LEAD: RUNTIME REACH. The drafter READ that mcp-server does NOT use the SDK's HTTP transport: src/index.ts connects StdioServerTransport, src/http-server.ts is plain express, and the image CMD is dist/http-server.js. Verify that at source. Install mcp-server the Dockerfile way OUTSIDE Blockchain/Dev (npm ci inside the member dir silently installs from the workspace ROOT lock — the drafter fell in), at head AND base, build it, and with a per-process module census (positive controls: ESM import('hono') AND CJS require('hono') on the same instrument) drive: (a) dist/index.js via the SDK Client over stdio — initialize, tools/list, secuura_hash_document on a scratch file, one fail-closed call (SECUURA_API_URL at a closed loopback port), an unknown tool, a bad argument; (b) dist/http-server.js on 127.0.0.1:0 (pin the host from a preload; never edit source) over real HTTP; (c) the SDK StreamableHTTPServerTransport with the real compiled tools, labelled NOT shipped (a stateless GET opens an SSE stream that never ends: read the status, then abort). Compare base vs head responses. Then exercise hono 4.13.8 itself on the advisories (query read after '#', parseBody dot nesting; in-bounds controls). originate: reproduce its `npm ci --omit=dev` runtime stage and say whether hono ships and whether anything loads it. State what could not be driven and why. LISTEN census (lsof) at start, MID-RUN while (b) is up, and at close.
+   Drafter (measured at 58684e653 vs f8c7aaa39; the same lock and source blobs as ff49d0242 vs 81ee4b729): hono resolved 0 times in (a), (b) and (c) on both trees (c loads @hono/node-server only); control import('hono') 39/43; responses identical base vs head; 4.13.0 reads a=1 after '#', 4.13.8 null; depth-5000 parseBody 200 on 4.13.0, "Nesting limit exceeded" on 4.13.8; hono 4.13.8 IS installed in originate's --omit=dev runtime stage (devOptional).
+
+2. The advisories are gone, through the shipped gates from Blockchain/Dev: head ff49d0242 + real baseline -> audit-gate rc 0 (33 reported, 34 baselined) and audit-locks rc 0 (43), 0 CLEANUP; head + develop 81ee4b729's baseline (37) -> audit-gate CLEANUP naming exactly the 3, audit-locks none; develop 81ee4b729 + head's baseline (34) -> both rc 1 naming exactly the 3 (locks: 4.13.0 in mcp-server + originate). Tee vulnerable_versions from the bulk response the shipped audit-locks.mjs receives (no extra URL) and npm audit's via[].range; 4.13.8 outside all three, and inside sdk ^4.11.4, @prisma/dev ^4.12.8, @hono/node-server peer ^4, read from the locks, with shipped semver and out-of-range controls. Drafter: all three "<4.13.5", moderate.
+
+3. Scope by parse, develop 81ee4b729 vs head (and the 3 lock blobs identical to 58684e653, so the merge commit brought nothing into them): exactly node_modules/hono moves in each lock; in the root lock the ONLY other changes are the 12 ruled entries, checked entry by entry against the ruling, flags only, 0 version fields, with a control that an unruled flag or a version is caught; 0 manifests; baseline 34 rows = develop's 37 minus only the 3, 0 added, 0 altered, with a planted-alteration control.
+
+4. lockfile-cleanroom.sh services/originate services/mcp-server at head and develop 81ee4b729 with a control that must FAIL (sha-restored); mcp-server build head and base; originate suites vs base if the root install fits (else NOT RUN, blocker named).
+
+5. Merge: re-derive the merged tree over the THEN-CURRENT develop in your own clone (drafter: head tree 1b03e6951 over 81ee4b729, a no-op merge), prove the audit inputs blob-identical to head or re-run item 2 there; confirm #1021-then-#1022 landed as predicted (1b03e6951, clean, 34 rows) and that the seat's HEAD MOVED re-measure covered what the second PR owed (it did NOT re-run the suites: rule it).
+
+6. linkKind: attachmentsForURL(pull/1022) exactly KS-1211 "contributes", no closes, completedAt null; 0 closing phrases anywhere (planted controls); re-read immediately before the mail. KS-1211 must stay In Progress (§5f: hono ships in two images; a live stack sweep is owed). Rule whether a shipped-but-unloaded dependency is a §5f runtime-behaviour change.
+
+Your tool shell's grep may be a function: use /usr/bin/grep -i with a same-file positive control.
+Read vitest "Tests N passed (N)", jest "Tests: N passed" and node --test "ℹ pass" lines, never a TAP "# tests" parse. Compare versions with semver, never as strings.
+zsh: no PIPESTATUS (write rc=$? on its own line), and never begin a line with `====`. `timeout` is not installed: end a hung process by verified pid.
+Never `cd` in your own tool calls.
+Quote the Secuura checkout's porcelain count, .git/config sha256, for-each-ref count, .git/worktrees entry count, origin develop and refs/pull/1022/head at start, mid and close.
+Never rm. Use a fresh mktemp -d per attempt and quarantine scratch files by rename.
+Do no memory maintenance of your own project's memory store inside this session.
+
+Report FOUND / TESTED / HOW, with controls, and state what you did NOT test at the same prominence (NOT-TESTED.written-first.md BEFORE any run). Write the report to:
+/Volumes/DevMASTER/!CODING/Testing Agent MAIN/projects/secuura/reports/2026-09-17-ks1211-1022-ff49d0242-tier1-r1/
+Verdict: GO, GO WITH FINDINGS, or NO GO, on ff49d0242a8ae764155d427232b15647c6bfa849 and on the merged tree (name the develop SHA and the merged-tree OID). Give the merge ADDENDUM line from the brief.
+
+MAIL YOUR VERDICT to wednesday-agent@agentmail.to when the pass is complete. Your pane holds ~19 lines of alternate screen with no scrollback, so a verdict that stays in the pane is one pane-close from being lost. The verdict MAIL is the END STATE and the wait signal.
+Subject:
+[QA -> Wednesday] TIER 1 GATE #1022 (KS-1211) ff49d0242 — <GO | GO WITH FINDINGS | NO GO>
+
+Sending: the QA project has no send_brief.sh of its own. The brief's VERDICT DESTINATION names the path that worked: the AgentMail API from coagent@agentmail.to (POST https://api.agentmail.to/v0/inboxes/coagent@agentmail.to/messages/send), with AGENTMAIL_API_KEY read by NAME from /Volumes/DevMASTER/WEDNESDAY/4_Credentials/.env and never echoed.
+Confirm the API answered 2xx and quote the message id in your final pane line. Timestamps in the mail come from `date`, never estimated.

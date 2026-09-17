@@ -1,0 +1,24 @@
+head scripts/audit npm ci rc 0 | lock sha 84ba271fc131d8a5 -> 84ba271fc131d8a5 | semver present True | root node_modules present (must be False) False 18:08:47 AEST
+base scripts/audit npm ci rc 0 | lock sha 84ba271fc131d8a5 -> 84ba271fc131d8a5 | semver present True | root node_modules present (must be False) False 18:08:47 AEST
+baseline copies sha256: head 9e1b85e5191e1020 base 6409a37c4dbd9ba8
+H1 head audit-gate baseline=real rc 0 18:08:47 AEST->18:08:49 AEST | audit-gate: 33 distinct advisories reported, 35 baselined. | CLEANUP ids [] | FAIL ids [] | hono lines: []
+H1 head audit-locks baseline=real rc 0 18:08:49 AEST->18:08:50 AEST | audit-locks: 43 standalone lockfiles (45 tracked, minus the Blockchain/Dev/package-lock.json workspace root which audit- | CLEANUP ids [] | FAIL ids [] | hono lines: []
+H2 head audit-gate baseline=override:baseline_base_copy.json rc 0 18:08:50 AEST->18:08:52 AEST | audit-gate: 33 distinct advisories reported, 38 baselined. | CLEANUP ids ['GHSA-crvj-82cr-hjcx', 'GHSA-g6gw-c38x-mqfc', 'GHSA-gqvv-2mrq-wpjv'] | FAIL ids [] | hono lines: ['- GHSA-gqvv-2mrq-wpjv (hono, KS-1024)', '- GHSA-g6gw-c38x-mqfc (hono, KS-1024)', '- GHSA-crvj-82cr-hjcx (hono, KS-1024)']
+H2 head audit-locks baseline=override:baseline_base_copy.json rc 0 18:08:52 AEST->18:08:53 AEST | audit-locks: 43 standalone lockfiles (45 tracked, minus the Blockchain/Dev/package-lock.json workspace root which audit- | CLEANUP ids [] | FAIL ids [] | hono lines: []
+B0 base audit-gate baseline=real rc 0 18:08:53 AEST->18:08:54 AEST | audit-gate: 36 distinct advisories reported, 38 baselined. | CLEANUP ids [] | FAIL ids [] | hono lines: []
+B0 base audit-locks baseline=real rc 0 18:08:54 AEST->18:08:56 AEST | audit-locks: 43 standalone lockfiles (45 tracked, minus the Blockchain/Dev/package-lock.json workspace root which audit- | CLEANUP ids [] | FAIL ids [] | hono lines: []
+B1 base audit-gate baseline=override:baseline_head_copy.json rc 1 18:08:56 AEST->18:08:57 AEST | audit-gate: 36 distinct advisories reported, 35 baselined. | CLEANUP ids [] | FAIL ids ['GHSA-crvj-82cr-hjcx', 'GHSA-g6gw-c38x-mqfc', 'GHSA-gqvv-2mrq-wpjv'] | hono lines: ['- GHSA-gqvv-2mrq-wpjv [moderate] hono: Hono: Incomplete fix for CVE-2026-39408: `toSSG()` still writes files outside the output directory', '- GHSA-g6gw-c38x-mqfc [moderate] hono: Hono: Unbounded dot-notation nesting in `parseBody()` can cause memory exhaustion', '- GHSA-crvj-82cr-hjcx [moderate] hono: Hono: Query parser reads parameters after the URL fragment, causing cache-key and proxy interpretatio']
+B1 base audit-locks baseline=override:baseline_head_copy.json rc 1 18:08:57 AEST->18:08:58 AEST | audit-locks: 43 standalone lockfiles (45 tracked, minus the Blockchain/Dev/package-lock.json workspace root which audit- | CLEANUP ids [] | FAIL ids ['GHSA-crvj-82cr-hjcx', 'GHSA-g6gw-c38x-mqfc', 'GHSA-gqvv-2mrq-wpjv'] | hono lines: ['- GHSA-gqvv-2mrq-wpjv [moderate] hono: Hono: Incomplete fix for CVE-2026-39408: `toSSG()` still writes files outside the output directory', '- GHSA-g6gw-c38x-mqfc [moderate] hono: Hono: Unbounded dot-notation nesting in `parseBody()` can cause memory exhaustion', '- GHSA-crvj-82cr-hjcx [moderate] hono: Hono: Query parser reads parameters after the URL fragment, causing cache-key and proxy interpretatio']
+npm audit (base root) hono: range <=4.13.4 | fixAvailable True | nodes ['node_modules/hono']
+   via GHSA-gqvv-2mrq-wpjv moderate range <4.13.5 | Hono: Incomplete fix for CVE-2026-39408: `toSSG()` still writes files outside the output directory
+   via GHSA-g6gw-c38x-mqfc moderate range <4.13.5 | Hono: Unbounded dot-notation nesting in `parseBody()` can cause memory exhaustion
+   via GHSA-crvj-82cr-hjcx moderate range <4.13.5 | Hono: Query parser reads parameters after the URL fragment, causing cache-key and proxy interpretation differentials
+bulk 200 GHSA-gqvv-2mrq-wpjv moderate vulnerable_versions="<4.13.5" 4.13.0:true 4.13.8:false
+bulk 200 GHSA-g6gw-c38x-mqfc moderate vulnerable_versions="<4.13.5" 4.13.0:true 4.13.8:false
+bulk 200 GHSA-crvj-82cr-hjcx moderate vulnerable_versions="<4.13.5" 4.13.0:true 4.13.8:false
+declarer @modelcontextprotocol/sdk ^4.11.4: 4.13.8 inside=true | control 5.0.0 inside=false
+declarer @prisma/dev ^4.12.8: 4.13.8 inside=true | control 5.0.0 inside=false
+declarer @hono/node-server peer ^4: 4.13.8 inside=true | control 5.0.0 inside=false
+control: semver.satisfies('4.13.0','<4.13.8') = true
+ 
+done 18:09:00 AEST

@@ -1,0 +1,58 @@
+probe D base rc 0 18:07:59 
+{
+ "hono": "4.13.0",
+ "crvj_getQueryParam": {
+  "afterFragment": "1",
+  "control_beforeFragment": "1#frag"
+ },
+ "crvj_nodeServer": {
+  "afterFragment": {
+   "status": 200,
+   "body": "{\"a\":\"1\"}"
+  },
+  "control_plainQuery": {
+   "status": 200,
+   "body": "{\"a\":\"1\"}"
+  }
+ },
+ "g6gw_parseBody": {
+  "depth5000": {
+   "status": 200,
+   "body": "{\"depth\":5000,\"ms\":6}"
+  },
+  "control_depth3": {
+   "status": 200,
+   "body": "{\"depth\":3,\"ms\":1}"
+  }
+ },
+ "listenerClosed": true
+}
+probe D head rc 0 18:07:59 
+{
+ "hono": "4.13.8",
+ "crvj_getQueryParam": {
+  "afterFragment": null,
+  "control_beforeFragment": "1"
+ },
+ "crvj_nodeServer": {
+  "afterFragment": {
+   "status": 200,
+   "body": "{\"a\":null}"
+  },
+  "control_plainQuery": {
+   "status": 200,
+   "body": "{\"a\":\"1\"}"
+  }
+ },
+ "g6gw_parseBody": {
+  "depth5000": {
+   "status": 500,
+   "body": "{\"error\":\"Error: Nesting limit exceeded\"}"
+  },
+  "control_depth3": {
+   "status": 200,
+   "body": "{\"depth\":3,\"ms\":1}"
+  }
+ },
+ "listenerClosed": true
+}

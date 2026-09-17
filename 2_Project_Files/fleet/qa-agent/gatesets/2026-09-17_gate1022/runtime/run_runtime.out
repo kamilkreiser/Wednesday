@@ -1,0 +1,41 @@
+sample sha256 676441f57b53c56f878cb71784bdc9b5ab2409c77279f5e9acef3d463238e5cb
+closed loopback port 50245
+LISTEN before 18:07:05 AEST: lsof rows 18 (rc 0) | node LISTEN rows 0 | node pids 0 | login_stub.mjs procs 0
+TREE base hono 4.13.0 | cwd /private/tmp/claude-501/drafter1022/clone-rew8njcr/img-base/prod
+  probe A base rc 0 18:07:05 AEST->18:07:06 AEST | census urls 511 (distinct 221) | hono resolved 0 | @hono/node-server resolved 0 | @modelcontextprotocol/sdk 24 | express 0 | processes 1
+  probe B base rc 0 18:07:06 AEST->18:07:07 AEST | census urls 1377 (distinct 687) | hono resolved 0 | @hono/node-server resolved 0 | @modelcontextprotocol/sdk 0 | express 28 | processes 1
+  probe C base rc 0 18:07:07 AEST->18:07:07 AEST | census urls 576 (distinct 262) | hono resolved 0 | @hono/node-server resolved 1 | @modelcontextprotocol/sdk 40 | express 0 | processes 1 | CONTROL after import(hono): hono resolved 39
+TREE head hono 4.13.8 | cwd /private/tmp/claude-501/drafter1022/clone-rew8njcr/img-head/prod
+  probe A head rc 0 18:07:07 AEST->18:07:08 AEST | census urls 511 (distinct 221) | hono resolved 0 | @hono/node-server resolved 0 | @modelcontextprotocol/sdk 24 | express 0 | processes 1
+  probe B head rc 0 18:07:08 AEST->18:07:09 AEST | census urls 1377 (distinct 687) | hono resolved 0 | @hono/node-server resolved 0 | @modelcontextprotocol/sdk 0 | express 28 | processes 1
+  probe C head rc 0 18:07:09 AEST->18:07:09 AEST | census urls 580 (distinct 263) | hono resolved 0 | @hono/node-server resolved 1 | @modelcontextprotocol/sdk 40 | express 0 | processes 1 | CONTROL after import(hono): hono resolved 43
+LISTEN after 18:07:09 AEST: lsof rows 18 (rc 0) | node LISTEN rows 0 | node pids 0 | login_stub.mjs procs 0
+node listener pids new after the runs: [] | gone: []
+COMPARE A base vs head: keys 11 | differing (volatile ['serverPid', 'serverStderr'] excluded): []
+   callBadArgs: {"content": [{"type": "text", "text": "MCP error -32602: Input validation error: Invalid arguments for tool secuura_hash_document: [\n  {\n    \"code\": \"invalid_type\",\n    \"expected\": \"string\",\n    \"received\": \"number\",\n    \"path\": [\n      \"f
+   callConnectorInfoClosedApi: {"content": [{"type": "text", "text": "{\n  \"apiUrl\": \"http://127.0.0.1:50245\",\n  \"authenticated\": false,\n  \"connector\": {\n    \"note\": \"Connector info not available (endpoint may not exist yet or no API key set)\"\n  },\n  \"verificationPolicy\":
+   callHash: {"content": [{"type": "text", "text": "{\n  \"success\": true,\n  \"filePath\": \"/private/tmp/claude-501/drafter1022/clone-rew8njcr/sample-1022.txt\",\n  \"fileName\": \"sample-1022.txt\",\n  \"contentHash\": \"sha256:676441f57b53c56f878cb71784bdc9b5ab2409c77
+   callUnknown: {"content": [{"type": "text", "text": "MCP error -32602: Tool no_such_tool not found"}], "isError": true}
+   capabilities: {"tools": {"listChanged": true}}
+   probe: "A stdio dist/index.js"
+   serverAliveAfterClose: false
+   serverVersion: {"name": "secuura", "version": "1.0.0"}
+   tools: [{"name": "secuura_hash_document", "inputSchema": {"type": "object", "properties": {"filePath": {"type": "string", "description": "Absolute or relative path to the document file"}}, "required": ["filePath"], "additionalProperties": false, "$schema": "http://js
+COMPARE B base vs head: keys 12 | differing (volatile ['addr', 'childPid', 'stderr'] excluded): []
+   exit: {"code": null, "signal": "SIGTERM"}
+   genBadType: {"status": 400, "contentType": "application/json; charset=utf-8", "body": {"success": false, "error": {"code": "BAD_REQUEST", "message": "Invalid agentType. Must be one of: cursor, claude_desktop, chatgpt_actions, openai_assistants, windsurf, generic_http, ci_
+   hashContent: {"status": 200, "contentType": "application/json; charset=utf-8", "body": {"success": true, "fileName": "x.txt", "contentHash": "sha256:6123091ece13ba6991b0c9f438c2a49cfa9caa2585b59d2381427fc0ebaa2640", "algorithm": "SHA-256"}}
+   hashEmpty: {"status": 400, "contentType": "application/json; charset=utf-8", "body": {"success": false, "error": {"code": "BAD_REQUEST", "message": "Provide filePath or base64-encoded content"}}}
+   hashNul: {"status": 400, "contentType": "application/json; charset=utf-8", "body": {"success": false, "error": {"code": "VALIDATION_ERROR", "message": "Must not contain a NUL (U+0000) byte", "details": [{"path": "content", "message": "Must not contain a NUL (U+0000) by
+   health: {"status": 200, "contentType": "application/json; charset=utf-8", "body": {"status": "ok", "service": "secuura-mcp-http", "version": "1.0.0"}}
+   policyClosedApi: {"status": 500, "contentType": "application/json; charset=utf-8", "body": {"success": false, "error": {"code": "INTERNAL_ERROR", "message": "fetch failed"}}}
+   probe: "B express dist/http-server.js"
+   unknownRouteMcp: {"status": 404, "contentType": "text/html; charset=utf-8", "body": {"bytes": 142}}
+COMPARE C base vs head: keys 8 | differing (volatile ['addr', 'pid'] excluded): []
+   callHash: {"content": [{"type": "text", "text": "{\n  \"success\": true,\n  \"filePath\": \"/private/tmp/claude-501/drafter1022/clone-rew8njcr/sample-1022.txt\",\n  \"fileName\": \"sample-1022.txt\",\n  \"contentHash\": \"sha256:676441f57b53c56f878cb71784bdc9b5ab2409c77
+   honoControl: {"exportsHono": "function", "query": "1"}
+   probe: "C SDK StreamableHTTP (not shipped)"
+   rawGetStateless: {"status": 200, "contentType": "text/event-stream"}
+   serverVersion: {"name": "secuura", "version": "1.0.0"}
+   tools: ["secuura_hash_document", "secuura_register_document", "secuura_register_documents", "secuura_verify_by_id", "secuura_verify_by_file", "secuura_verify_documents", "secuura_list_documents", "secuura_check_workflow", "secuura_get_connector_info"]
+done 18:07:09 AEST
