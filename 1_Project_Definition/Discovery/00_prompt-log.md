@@ -2527,3 +2527,17 @@ Done with it: Dynamics → Kam's team decision (no action); QuickQuote masthead/
 > thanks for fixing it.  I am glad you are onto it.  please keep going through the day with the local agent
 
 *Note:* receipted on the panel; the day standing instruction — Wednesday + the local model, never idle
+
+## 2026-09-18 06:37:13 — Kam, dashboard panel (view=wednesday), VERBATIM
+
+> we are at 92% can you move to no more claude agents and only using the local LLM until sunday
+
+**What was done with it:** receipted on the panel within the minute (06:38) with Wednesday's reading
+put back to him. Recorded as a time-scoped RESTRICTION in `0_Brain/tasks/EXPIRING-GRANTS.md`
+(expires end of Sunday 2026-09-20 — weekday and date derived against each other with `date -j`) and
+as a lesson, `0_Brain/learnings/2026-09-18_no-claude-agents-local-model-only-until-sunday.md`.
+It SUPERSEDES the 90% gauge cut in the strict direction: the ~08:00 allowance renewal no longer
+unparks anything. It CANCELS the 02:18 renewal sequence carried by three handovers (#1034 gate ·
+#1037 KS-1101 drafter · seat A 9th successor · #1036 + Seat B). One question put back to him,
+unanswered as at 06:4x: whether in-session research sub-agents count as "claude agents" — held as
+INCLUDED until he says otherwise.

@@ -7,7 +7,7 @@ status: live
 
 # Boot digest BY TIER — W whole, M rules-only, every project case a handle
 
-Generated 2026-09-18 06:01 from 179 lesson files (896,023 B). M 33 · MIXED 5 · W 141. 28 project CASE sections inside MIXED files are reduced to one line each: the heading and the path to read it at. W blocks are exactly what the default digest carries; M blocks drop the section index and keep the rules; a P file is a single handle. The CASES behind every rule live only in the lesson files — open one the moment its rule fires.
+Generated 2026-09-18 06:38 from 180 lesson files (900,950 B). M 33 · MIXED 5 · W 142. 28 project CASE sections inside MIXED files are reduced to one line each: the heading and the path to read it at. W blocks are exactly what the default digest carries; M blocks drop the section index and keep the rules; a P file is a single handle. The CASES behind every rule live only in the lesson files — open one the moment its rule fires.
 
 ## The T9 SSD is the master — Wednesday must be fully portable
 `2026-07-31_fully-portable-drive.md` · principle · 2026-07-31 · status: superseded — the "T9 is the master" half by [[2026-08-25_one-drive-devmaster-is-master]] (2026-08-25); the portability principle itself still lives · tier: W
@@ -6114,4 +6114,22 @@ sections (open the file for these): How to apply
 5. **Scope:** Tuesday's seat and the Datasec projects, as he addressed it on the Tuesday tab. Whether Wednesday adopts it is hers and Kam's (a board message is not a fleet rule).
 
 **Family:** [[2026-08-13_establish-authority-before-reconciling]] (reconciliation destroys evidence) · [[2026-09-07_a-rule-for-creation-is-not-a-mandate-to-retrofit]] (enumerate what already occupies the slot) · [[2026-09-16_what-keeps-a-seat-correct-is-not-all-in-git]] · [[2026-09-14_the-coordinator-adds-value-or-it-is-waste-three-duties-not-watching]] (duty 2: check the output as a manager).
+
+
+## NO Claude agents at all until Sunday — the local model is the only worker, and the allowance renewing does NOT unpark anything
+`2026-09-18_no-claude-agents-local-model-only-until-sunday.md` · grant · 2026-09-18 · status: live · tier: W
+
+**His words, verbatim (06:37:13):**
+> *"we are at 92% can you move to no more claude agents and only using the local LLM until sunday"*
+
+sections (open the file for these): Why this is not just "the 90% rule again" · What it cancelled, by name · The open question, and the reading taken until he answers · How to apply
+
+## How to apply
+
+1. **Do not launch anything Claude-shaped** — seat, gate, drafter, successor — before end of Sunday 2026-09-20. `usage_gate.sh` rc 0 is NOT permission; this file is the gate.
+2. **Read the date, not the gauge.** `EXPIRING-GRANTS.md` carries the row and the expiry; the weekday and the date were derived against each other (`date -j`: 2026-09-20 IS a Sunday) per [[2026-09-10_a-weekday-and-a-date-are-two-claims]].
+3. **Keep Ornith fed by hand,** and when the pool thins, say so to Kam rather than idling quietly — the gatekeeper widens the harness ([[2026-09-15_never-idle-the-gatekeeper-widens-the-harness-when-the-pool-runs-dry]]), but it may not widen it with a Claude agent this week.
+4. **On or after Monday 2026-09-21 this is DEAD** and the 90% gauge rule returns as the only cut. Do not renew it by inference ([[2026-09-06_a-scoped-override-carries-its-own-expiry]]); the parked four are then re-proposed to Kam, not launched on this file's authority.
+
+**Family:** [[2026-09-14_at-90pct-weekly-usage-no-new-agents-wednesday-plus-local-model]] (superseded in the strict direction, for these three days) · [[2026-09-15_ornith-q4-only-volume-week-qa-sunday-merge-once]] (same expiry, same Sunday QA) · [[2026-09-13_as-many-agents-as-possible-partitioned-by-code]] (the standing rule this suspends) · [[2026-09-06_a-scoped-override-carries-its-own-expiry]] · [[2026-09-14_kams-instruction-stands-until-he-withdraws-it]] (my unanswered question does not soften it).
 
