@@ -156,6 +156,4 @@
 # 21:24 - test-only vitest pair (brief writer 21:2x; both pre-measured 7/7 through the REAL checker on the built input; red BY ASSERTION under the tamper; + lines use String.fromCharCode, not backslash-u escapes - see IMPROVEMENTS 21:24). Inputs at develop 75ad0e55c.
 # 21:28 - comment_patch batch 3 (search 21:26; fences read by Wednesday; KS-1179 F-5 HELD until Wednesday re-runs the R9 arms - its build relied on the new R9 skip). Inputs at develop 75ad0e55c.
 # 21:31 - KS-1179 F-5 docblock half released: R9 builder fix verified by Wednesday (tests/r9_merged_ready_arms.sh 15/15 incl. both negative controls). Input at develop 75ad0e55c.
-KS-1179 input=/Volumes/DevMASTER/WEDNESDAY/2_Project_Files/local-model/night/inputs/comment_1179F5.json task=/Volumes/DevMASTER/WEDNESDAY/2_Project_Files/local-model/tasks/comment_patch/task.md ctx=65536
 # 22:14 - KS-1221 queued by the 22:08 seat: brief read whole (written at develop 0a2b1603f; premises P1-P8 measured; its own hunks PASS 7/7, R4+R5 red by assertion under the :398 tamper).
-KS-1221 input=/Volumes/DevMASTER/WEDNESDAY/2_Project_Files/local-model/night/inputs/code_1221.json ctx=65536
