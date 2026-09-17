@@ -153,7 +153,6 @@
 # 21:31 — KS-1036 item 3 (docs, insert-only dated note: review-stream counts are a 09-03 snapshot; 40 of 71 measured via Linear 21:2x). Pre-measured: git apply rc 0, Required KS-1036/decayed/snapshot 0 -> 1/1/1; input built rc 0.
 # 20:40 — comment_patch tier OPENED (arms 53/53 re-run by the 20:32 Wednesday seat at 20:39). KS-979 first, then KS-1118 F-3a (verification.ts), then F-3b (ks1103 test; em-dash risk). Inputs built at develop 19f1e5475 by the build agent (19:55).
 # 21:04 — comment_patch batch 2 (brief writer 21:0x; premises + fences READ by Wednesday; KS-1156 A.2's '#984' verified: jwt.ts label introduced by 2c3315f37 'KS-835 … (#984)'; KS-1120 F-3 = the REWORD option, Wednesday's routing call — the pgModel rewrite stays open on the ticket). Inputs at develop 75ad0e55c.
-KS-1179 input=/Volumes/DevMASTER/WEDNESDAY/2_Project_Files/local-model/night/inputs/comment_1179F4.json task=/Volumes/DevMASTER/WEDNESDAY/2_Project_Files/local-model/tasks/comment_patch/task.md ctx=65536
-KS-1156 input=/Volumes/DevMASTER/WEDNESDAY/2_Project_Files/local-model/night/inputs/comment_1156A2.json task=/Volumes/DevMASTER/WEDNESDAY/2_Project_Files/local-model/tasks/comment_patch/task.md ctx=65536
-KS-1156 input=/Volumes/DevMASTER/WEDNESDAY/2_Project_Files/local-model/night/inputs/comment_1156A3.json task=/Volumes/DevMASTER/WEDNESDAY/2_Project_Files/local-model/tasks/comment_patch/task.md ctx=65536
-KS-1120 input=/Volumes/DevMASTER/WEDNESDAY/2_Project_Files/local-model/night/inputs/comment_1120F3.json task=/Volumes/DevMASTER/WEDNESDAY/2_Project_Files/local-model/tasks/comment_patch/task.md ctx=65536
+# 21:24 - test-only vitest pair (brief writer 21:2x; both pre-measured 7/7 through the REAL checker on the built input; red BY ASSERTION under the tamper; + lines use String.fromCharCode, not backslash-u escapes - see IMPROVEMENTS 21:24). Inputs at develop 75ad0e55c.
+KS-1217 input=/Volumes/DevMASTER/WEDNESDAY/2_Project_Files/local-model/night/inputs/code_1217.json ctx=65536
+KS-1220 input=/Volumes/DevMASTER/WEDNESDAY/2_Project_Files/local-model/night/inputs/code_1220.json ctx=65536
