@@ -385,3 +385,47 @@ A CENSUS for the coordinator to brief from, easy → hard (Kam 2026-09-15 16:40 
 - KS-996 — names no product file (after basename/docs/route resolution)
 - KS-997 — names no product file (after basename/docs/route resolution)
 
+
+## 🔎 ORNITH-TRIAGED CANDIDATES — 30 class A, **UNVERIFIED: read the ticket before briefing** (added 2026-09-18 09:3x)
+
+Produced by the local model (`predicate_classify`, 2 batches, 87 tickets) over the tickets this file EXCLUDED as *'names no product file'*. **Coverage checked by hand: 87 sent, 87 classified, 0 missing, 0 invented** — the run's own checker returned CHECKER_NO_RESULT because Wednesday's hand-built input lacked the `tip` key it wants, so the grading below is Wednesday's, not the harness's.
+
+**This is a CLASSIFICATION LIST, which is a representation of the tickets and NOT an instruction** (`learnings/2026-09-07_a-classification-list-is-a-representation-not-an-instruction.md`). Every row is a lead to be checked at the ticket and the tip, never a brief input. The model's own words are kept so you can judge its reasoning rather than inherit its verdict.
+
+⚠ **Rows whose reason names MORE THAN ONE file are flagged `[MULTI?]` — the predicate asked for exactly one, so those are the model's weakest calls.** A row naming only a `.test.` file is flagged `[TEST?]`: the predicate says a test file is not the product file unless the ticket is explicitly test-only.
+
+- KS-1224 — root package.json with overrides.postcss pin named as single fix target
+- KS-1218 — constraints.txt under systemTest/schemathesis named as sole product file to edit
+- KS-1161 — Blockchain/Dev/docker-compose.yml named as single product file needing healthcheck rewrite
+- KS-1154 — Blockchain/Dev/package-lock.json named as single lockfile requiring rollup-linux-x64-gnu addition
+- KS-1138 — .github/workflows/pr-security-gates.yml named as workflow file to retire dormant step
+- KS-1134 — Blockchain/Testing/ci/orchestrate.sh:119 bash idiom named as specific line to fix for Stage-1 JOIN crash
+- KS-1131 — services/auth/src/__tests__/ks963-preauth-rethrow.test.ts named as the structural cell helper away from closing `[TEST?]`
+- KS-1115 — Blockchain/Dev/migrations/001_initial-schema.sql named alongside 003_consolidate-anchors.sql as migration adding CHECK constraint `[MULTI?]`
+- KS-1110 — utils/yaml.ts named as module to import readYaml into both tests in systemTest/performance
+- KS-1080 — systemTest/akto/docker-compose.yml named as compose file where akto-autoheal runs as root with docker.sock RW
+- KS-1030 — HERE/../044_vault_entries_repair.sql referenced as hard-wired migration path that test:migrations must take parameter instead
+- KS-1023 — Blockchain/Dev/deployment/azure/migrate/init.sql and Blockchain/Dev/docker/init/01-schema.sql named alongside initial-schema.sql as three disagreeing definitions requiring reconciliation `[MULTI?]`
+- KS-1010 — tests/e2e/.../happy-path-wallet.spec.ts:255 calls non-existent route with passing assertion on 404
+- KS-997 — scripts/audit/audit-baseline.json carries four expired advisories needing re-triage action
+- KS-990 — runner/actor_manifest.ts TS2540 error cited as pre-existing lint failure preventing quality pass in systemTest/performance
+- KS-982 — systemTest/__tests__/pre_suite.test.sh silently quarantines manifest causing false green report `[TEST?]`
+- KS-940 — .claude/settings.local.js mentioned alongside SECUURA_SEAT_SCAN escape hatch gap in launcher suite findings
+- KS-902 — fixes comment in no-tracked-credentials.sh citing bare-path-scripts-executable.sh and action-pins-labelled.sh `[MULTI?]`
+- KS-872 — names src/crypto/jwks.ts as the source file needing import or local declaration for JsonWebKey
+- KS-812 — names connectors/whatsapp-bot/src/index.ts as the file whose default API URL needs repointing
+- KS-768 — names Blockchain/Dev/scripts/audit/audit-locks.mjs as the hardcoded scan list to extend
+- KS-752 — names systemTest/schemathesis/scripts/run.py as the file where success check skips baseline gate
+- KS-738 — names scripts/run.py as the bootstrap file entering os.execv loop on symlinked venv
+- KS-723 — names docs/openapi/secuura-api.yaml as the spec to declare remaining operations in
+- KS-716 — names config/secrets.yml and config/secrets.example.yml as files lacking system_admin block `[MULTI?]`
+- KS-638 — names secuura-extranet/ci/build-dashboard.mjs as the dashboard producing misleading red status
+- KS-636 — names .github/workflows/base-image-refresh.yml as the workflow that fired unread alarm
+- KS-598 — names platform_document_registry UNIQUE constraint and registerInPlatformRegistry upsert to defuse
+- KS-595 — names tests/test_undeclared_method_safety.py as the test skipping closed tickets
+- KS-530 — names scripts/audit/audit-baseline.js as the baseline exception file to remove after bumping @hono/node-server
+
+**UNKNOWN (2) — the model said the text does not decide it:**
+- KS-1155 — description mentions guard files but paths array empty so cannot confirm exact product file from evidence
+- KS-1054 — description mentions migrations directory generally but paths array empty so cannot name specific migration file needing reorder
+
