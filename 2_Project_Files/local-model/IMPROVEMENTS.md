@@ -582,3 +582,11 @@ Two defects, both found by using the tier for real work rather than by reading i
 | 5 | `sample_input.json` + empty reasons | rc 1 | rc 1 |
 
 **⚠ A trap I walked into while writing these arms, worth its own line.** My first run printed `rc=0` for ARM 1 **while the checker had failed** — I had piped the output to `tail` and read `$?` from the pipe, so I was reading `tail`'s status. The ledger already carries this exact costume (2026-09-16: *"`bash arms.sh | tail -10; echo rc=$?` PRINTED rc=0 WHILE ARM5 HAD FAILED"*). **I caught it only because I read the FAIL lines in the output rather than trusting the rc I had just printed.** The arms above capture rc directly from the checker call.
+
+### 10:0x — and the fix for that nearly made it worse: a task file IS the prompt
+
+Making `task.md`'s example reasons shape-only, I first wrote the rationale INTO the file — including the offending clause in quotes, to explain what had gone wrong. **`task.md` is the model's prompt.** So the exact string I was trying to stop it copying went back in front of it, now quoted and emphasised. **The de-anchoring would have anchored harder.**
+
+Caught before commit, by asking what the MODEL sees rather than what a maintainer sees. The rationale now describes the instance without restating it, and says so in-line (*"the worked instance is deliberately NOT restated here, because this file is itself the prompt"*). The full record, with the literal clause, lives here in IMPROVEMENTS — which the model never reads.
+
+**Rule kept: before writing an explanation into a task file, ask whether the reader is the model or the maintainer. A cautionary example inside a prompt is still an example.** Verified with a positive control: the clause is now 0 occurrences in `task.md` while `predicate` is 8, so the zero is real and not a broken grep.
