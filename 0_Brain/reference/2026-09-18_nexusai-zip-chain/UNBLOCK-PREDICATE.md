@@ -53,6 +53,15 @@ a safety rule with his name on it, not a build preference.
 ### The minimum set, MERGED to `origin/main`
 - [ ] RD-436 + 452 + 501 + 499 **+ RD-535** — restore reopens a configured deployment to anonymous takeover
 - [ ] RD-486 + RD-523 — stored Azure OpenAI key sendable to a caller-named host and to a redirect target
+      ✅ **GATED: GO at `2d83967`, worst severity Low (2026-09-18 01:38:50Z). DO NOT RE-GATE IT.**
+      B-1 closed at every caller incl. `GET /api/chat/stream` (not in the brief); mutation Q4 proved the
+      'count at first byte' relaxation CANNOT hide a real leak; 10/10 mutations, sha256-identical
+      reverts; verify PASS 3275/3275. **Merge-eligible and deliberately QUEUED BEHIND RD-436+RD-535**
+      — the release image is built from `main`, so merging it before RD-516 exists would put the
+      ai-test dial path for a planted endpoint onto the exact ref the customer image is built from.
+      Second merge hand-resolves the mechanical overlap under C-57; **any logic/product conflict STOPS.**
+      Its MERGE commit must state that the branch commit's PRIOR WORK claims a change the diff does not
+      contain (RD-551 O-3) — corrected FORWARD, never by amending a gated head (C-68).
 - [ ] RD-516 — anonymous SSRF via ai-test (same class as RD-486; one without the other half-closes it)
 - [ ] RD-518 — `KEYVAULT_NAME` vs `KEY_VAULT_NAME`: Key Vault silently does nothing in every deployment
 - [ ] RD-503 + 442 — SUPPORT.md's only AI-settings fix does nothing on a real deployment
