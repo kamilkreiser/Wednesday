@@ -12,6 +12,17 @@ supersede: replace wholesale at the next pickup; do not append
 
 **⚙ This file was SPLIT at 10:0x 2026-09-18** — 600 lines of self-declared superseded blocks moved verbatim to `NEXT-PICKUP-archive.md` under this file's own `supersede:` rule (it had reached 220 KB, of which 19 KB was live, and every seat was ordered to read it WHOLE at boot). **Keep replacing, never append.** The archive is read on demand, never at boot.
 
+## 🟢 UPDATE 12:3x 2026-09-18 (the 10:0x seat, ctx ~50%, usage ~25% of the 90 cap) — READ FIRST
+
+**✅ KINTSUGI REBUILD COMPLETE: kintsugi runs develop `a105cd32b`** (97 commits since `4554b25e2`), 31 swapped / 0 blocked / 5 skipped, **nothing rolled back**, 02:23Z. **Verified by behaviour:** the KS-1215 fix is present inside the RUNNING api-gateway (the control, the `:pre-20260918` image, has 0); the KS-535 wallet check PASSES (REAL, preview, correct wallet, demo's wallet ×0); 32 healthy; `secuura-demo-service` fails the SAME way. **#1037 is NOT on kintsugi** (it merged afterwards at `207716440`), so the next deploy lands it. **Rollback tags `pre-20260918` stay on the box.** Kam told 12:2x.
+
+**SEAT A IS WRAPPING (~63% ctx).** Approved: **(a)** the rule-7 batched ticket comment (Secuura `CLAUDE.md:185`: Peter on **KS-485**, Stuart on **KS-772**, `@peter` / `@stuart.jamieson`, mentions verified via `bodyData`). It covers today's merges, kintsugi at a105cd32b (not #1037), and demo BEHIND including the KS-732 MFA security fix for Peter's next pass. **It deliberately leaves out #922 and Peter's open review** (Kam's call). **(b)** the wrap itself. Its handover must name the **#922 fix round, unstarted**. Scored 1.00.
+**⚠ My earlier "don't contact Stuart" was about a new, ad-hoc pre-rebuild heads-up (Kam didn't take it up). It NEVER covered the rule-7 wrap comment, which is Kam's own standing channel.** I clarified this to seat A.
+
+**AFTER SEAT A WRAPS, THE FLOOR IS:** `%0` wednesday + Ornith. **No Secuura seat is live.** Remaining Secuura work needs a NEW seat: **(1) the #922 fix round** (my 11:1x mail; then gate the DELTA); **(2) raising the Ornith holds** (KS-1233, KS-1125, KS-1209, KS-1248; **NOT KS-1250 without Kam**); and **(3) the next kintsugi deploy for #1037**. Launch one only for real work, and brief it through `send_brief.sh`.
+**ORNITH:** running **KS-1228** (jest, `/version` slice; ~48K-token prompt at ctx 65536; red/green measured by the brief-writer under real jest).
+**OPEN WITH KAM:** #922 (merge over Peter / wait / nudge), asked 11:1x, unanswered as of 12:3x (**checked against a FRESHLY PULLED copy**, per the rulings tool's own warning).
+
 ## 🟢 UPDATE 11:5x 2026-09-18 (the 10:0x seat, ctx ~48%) — READ FIRST
 
 **ORNITH FED FROM A NEW SOURCE:** the tickets the QA gates filed TODAY (KS-1238..1250) weren't in the 06:51 `candidates.md`. The brief-writer (4 for 4 on reachability predictions so far) wrote **KS-1248** (vitest: `/system/status` troubleshooting calls a degraded required service *critical* and says *restart*; red and green measured with the repo's esbuild, vitest itself not run) and **KS-1250** (bash: `smoke-test.sh` ignores `SMOKE_BASE_URL`; red and green FULLY measured on bash 3.2.57). **Both queued, runner live.**
