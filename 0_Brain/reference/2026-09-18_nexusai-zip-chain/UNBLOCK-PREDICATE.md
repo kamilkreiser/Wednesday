@@ -122,7 +122,9 @@ a safety rule with his name on it, not a build preference.
       **Verdict shape agreed:** YES → blocker, joins the minimum set, remedy is clear-at-setup or
       surface-to-admin, **never RD-516's host policy**. NO → withdrawn to a ticket, with the
       measurement and the file:line of whatever stops it.
-- [x] **RD-529 O-8 — MERGED to main 2026-09-18 01:04:46Z as `d881f953`** (merge of `470510e`; one file, one line, verified wording-only by Tuesday at source before and after). **RD-529 O-8** — the one-line placeholder wording fix in `DEPLOYMENT_GUIDE.md`, **which IS shipped
+- [x] **RD-529 O-8 — MERGED to main as `d881f953`, CI ALL GREEN (Build 35293779197, Gitleaks 35293779244, npm-audit 35293779237, all complete 02:05Z). Merged tree byte-identical to the branch tree (`91cbf6b` both, tree ids COMPARED not assumed), so the branch's PASS 3207/3207 IS the merged tree's run. No static files touched, so nothing for S66 to re-run.**
+      **✅ 2 OF 3 PUSH PRECONDITIONS ARE NOW MET** — version `2.2.0` (Kam's ruling) and RD-529 O-8 on main. **Only THE MINIMUM SET remains.**
+      _(original line)_ **RD-529 O-8 — merged 01:04:46Z** (merge of `470510e`; one file, one line, verified wording-only by Tuesday at source before and after). **RD-529 O-8** — the one-line placeholder wording fix in `DEPLOYMENT_GUIDE.md`, **which IS shipped
       in the image**. Ruled by Tuesday: it lands on main BEFORE the push rather than being baked in.
 - [x] **The release version string is `2.2.0` — RULED BY KAM.**
       **His words, verbatim, TERMINAL channel (not the panel): *"2.2.0 is fine, keep going"*.**
