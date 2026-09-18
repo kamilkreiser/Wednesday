@@ -62,4 +62,4 @@ sees the claim rather than discovering it in a conflict.
 | 2026-09-18 14:53 | Kamils-Mac-Studio | doctor.sh: warn when NEXT-PICKUP.md has >1 live ## block or >15 KB (ledger 2026-09-18 w=2 owed) | CLOSED |  2026-09-18 14:54 built + armed 3/3, pushed 3df7bed56 |
 | 2026-09-18 16:42 | Kamils-Mac-Studio | local-model checker.sh:921 standalone tsc --types by the service's own runner (jest vs vitest) + arms | CLOSED |  2026-09-18 16:50 built + arms 9/9, swapped 16:48 |
 | 2026-09-18 16:51 | Kamils-Mac-Studio | local-model: test_only tier (N named tampers, cells-red-per-tamper) with arms; golden = KS-1254 | CLOSED |  2026-09-18 17:12 built, arms 18/18 re-run by Wednesday, e2e golden PASS 8/8 |
-| 2026-09-18 17:28 | Kamils-Mac-Studio | local-model code_patch A4: classify reds by AssertionError/expect(, not the substring 'expected'; arms + spot-check today's PASSes | OPEN | |
+| 2026-09-18 17:28 | Kamils-Mac-Studio | local-model code_patch A4: classify reds by AssertionError/expect(, not the substring 'expected'; arms + spot-check today's PASSes | CLOSED |  2026-09-18 17:40 fixed, arms 14/14 re-run by Wednesday, audit 0/55 affected |
