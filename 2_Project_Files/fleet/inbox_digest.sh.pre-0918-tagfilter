@@ -61,7 +61,7 @@ MODE="${1:-digest}"
 for inbox in "${INBOXES[@]}"; do
   curl -s "https://api.agentmail.to/v0/inboxes/$inbox/messages?limit=50" \
     -H "Authorization: Bearer $AGENTMAIL_API_KEY" | \
-  INBOX="$inbox" SEEN_FILE="$SEEN_FILE" MODE="$MODE" SEAT="${WED_AGENT:-wednesday}" python3 -c "
+  INBOX="$inbox" SEEN_FILE="$SEEN_FILE" MODE="$MODE" python3 -c "
 import json, sys, os, re
 
 inbox = os.environ['INBOX']
@@ -82,27 +82,15 @@ if mode == 'mark-seen':
     sys.exit(0)
 
 show = msgs if mode == '--all' else new
-# R0 AT THE TOOL LAYER (ledger _ledger_laptop_datasec 2026-09-18, w=4 cross-seat-read family;
-# learnings/2026-08-13_shared-bus-tag-filter-or-leak rule 1): the Tuesday seat is Datasec-only, and the
-# shared bus carries every client. Filter on the tag BEFORE any subject or preview is printed; the rest
-# is a COUNT, so the seat knows mail exists and never sees its text. Wednesday's seat is unchanged.
-seat = os.environ.get('SEAT', 'wednesday')
-withheld = 0
-if seat == 'tuesday' and inbox == 'coagent@agentmail.to':
-    keep = [m for m in show if re.search(r'datasec/', m.get('subject') or '', re.I)]
-    withheld = len(show) - len(keep)
-    show = keep
 LIMIT = 50
 if len(msgs) >= LIMIT and len(new) == len(msgs):
     print(f'⚠ CAP: {inbox} — every one of the {len(msgs)} fetched messages is NEW; the listing may be TRUNCATED at the fetch limit — paginate before trusting it')
 
 if mode == '--inbound':
-    n_in = sum(1 for m in (show if withheld else new) if not re.match(r'\[Wednesday -> ', m.get('subject','')))
+    n_in = sum(1 for m in new if not re.match(r'\[Wednesday -> ', m.get('subject','')))
     print(f'===== {inbox} — {len(new)} new ({n_in} inbound shown; own outbound copies absorbed) =====')
 else:
     print(f'===== {inbox} — {len(new)} new =====')
-if withheld:
-    print(f'        ({withheld} other-client message(s) withheld on the shared bus: tag filter for the Tuesday seat; subject and preview not shown)')
 for m in show:
     subj = m.get('subject', '(no subject)')
     # Routing classification from the subject convention
