@@ -10,6 +10,15 @@ supersedes: the 2026-09-14 pickup, kept verbatim at NEXT-PICKUP-TUESDAY.md.pre-s
 
 ---
 
+## 🔵 DELTA 18 — 2026-09-18 18:4x (Tuesday ctx 70% CHECKPOINT; band 80-90). READ FIRST; supersedes DELTA 17 on round 3.
+- **ROUND 3 CAME BACK NO GO (06:37Z) and it is WITH KAM:** card `nexusai-round3-nogo-round4-or-merge`, rec (b) merge round 3 now and run round 4 alongside, before the zip; (a) S65's rec, round 4 first; (c) accept the ~60 s race. **Default: NOTHING PROCEEDS.** It is unruled as of 18:4x (reconcile: 0). Kam was told on the panel (verified at origin). **Do not chase.**
+- **When he rules (a) or (b):** S65's round-4 brief is WRITTEN (`qa-briefs/2026-09-18_nexusai-rd436-round4-BRIEF-READY.md`): B-1 enforce writes the stamp; F-1 status ordering; F-3 fail-open cell; RD-561 as a tier-2 section. **The rd554 merge input is `rd-554-cells-s66 @ 6b8ca5b`** (F-2 identity cells; the M6 run proved it: 3 red vs 46/46 on fc8ba61; verified 8 rd554 files only). On (b): S65 merges fc8ba61 plus 6b8ca5b to main first (narrow re-verify, 13 cells named, R3d-NOSTAMP "removed >= 1" or STOP), then RD-486, and round 4 runs alongside. Relay his ruling to S65 by mail in the same action, and mark the card delivered once S65 records it.
+- **RD-561** (npm eats `--maxWorkers`; verify-suite now refuses) is READY at `a8f61b8` and RIDES the round-4 re-gate; there is no standalone gate. After it merges, the first CI Build at 2 workers is its measurement.
+- **Ledger today, this seat:** +4 rows (the inbox_digest R0 at w=4, the digest swallowing replies, R1-CTL endorsed without its mutation, and the earlier ones). **inbox_digest.sh is fixed (77770bba1 + 6b470ba9c) and safe to run bare at this seat.**
+- **Kam OWED, unchanged:** zip by email to kreiser.org@me.com when it exists; one message when the push is unblocked; the Partner Center download is with him (DELTA 16). He is quiet since 14:06 (terminal) / 13:43 (panel).
+- **Watcher:** re-armed 08:45Z, expires ~11:45Z (21:45 local). **Both agents are idle BY DESIGN** (acked): S65 ctx ~74%+ (if it wraps, launch its successor from HANDOVER-S65); S66 ctx ~60%.
+- **safe_push rc 24 / "Cannot rebase onto multiple branches"** hit this seat 3 times today; a retry clears it (likely a FETCH_HEAD race with panel_sync, unmeasured). Worth raising with Wednesday (shared tooling).
+
 ## 🔵 DELTA 17 — 2026-09-18 15:5x (Tuesday ctx 65% CHECKPOINT; band 80-90, NOT rotating). READ FIRST; DELTA 13-16 still hold.
 - **ROUND 3 IS IN ITS RE-GATE.** rd-436-452-501-s64 @ `fc8ba61` (READY 05:33Z: verify PASS 3405/194; 8 red to green; 4 guards held; this seat verified the head and that NO rd554 file was touched after 8ff4963). Gate brief `qa-briefs/2026-09-18_nexusai-rd436-r3-fc8ba61-regate.md`.
 - **The gate was AMENDED mid-run (05:54Z):** fc8ba61 carries S66's pre-fix racy harness (PORT_LOW=5240, read at source), so the 12 rd554 suites are re-run at `--maxWorkers=1`; any parallel rd554 result is VOID. **Do not move fc8ba61 while it runs.**
