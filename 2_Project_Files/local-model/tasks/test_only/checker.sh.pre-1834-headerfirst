@@ -157,12 +157,13 @@ else fail "T2 touched-file set must be exactly { $TEST_FILE }: the diff's header
 DIROPT=""; /usr/bin/grep -q -E "^\+\+\+ b/$SUBDIR/" "$DIFF" || DIROPT="--directory=$SUBDIR"
 
 # ---------------------------------------------------------------- T3 applies strictly
-# 2026-09-18 18:4x (KS-1153 r1): a hunk whose HEADER disagrees with its BODY can still pass strict `git apply --check`
-# (`-156,0` + a trailing context line: git reads 0 old lines, drops the context line, and inserts AFTER line 156 instead
-# of before it) — the insertion lands in the wrong place and no later gate checks PLACEMENT. So the header is measured
-# FIRST, and a miscounted header always takes the --recount path, even when strict apply "succeeds".
-# the ONE accommodation: header arithmetic. Every line must still match byte for byte (no --ignore-whitespace, no -C).
-MIS="$(python3 - "$DIFF" <<'PYC'
+git -C "$CLONE" apply --check -p1 $DIROPT "$DIFF" > "$REP/apply_strict.out" 2>&1; rc_s=$?
+APPLY_OPTS="$DIROPT"; T3_NOTE=""
+if [ "$rc_s" -eq 0 ]; then
+  pass "T3 diff applies at the tip (strict git apply --check${DIROPT:+, $DIROPT})"
+else
+  # the ONE accommodation: header arithmetic. Every line must still match byte for byte (no --ignore-whitespace, no -C).
+  MIS="$(python3 - "$DIFF" <<'PYC'
 import re, sys
 L = open(sys.argv[1], encoding="utf-8").read().split("\n"); n = 0; i = 0
 while i < len(L):
@@ -175,11 +176,6 @@ while i < len(L):
     i = j
 PYC
 )"
-git -C "$CLONE" apply --check -p1 $DIROPT "$DIFF" > "$REP/apply_strict.out" 2>&1; rc_s=$?
-APPLY_OPTS="$DIROPT"; T3_NOTE=""
-if [ "$rc_s" -eq 0 ] && [ -z "$MIS" ]; then
-  pass "T3 diff applies at the tip (strict git apply --check${DIROPT:+, $DIROPT})"
-else
   git -C "$CLONE" apply --check -p1 $DIROPT --recount "$DIFF" > "$REP/apply_recount.out" 2>&1; rc_r=$?
   if [ -n "$MIS" ] && [ "$rc_r" -eq 0 ]; then
     APPLY_OPTS="$DIROPT --recount"; T3_NOTE="--recount (miscounted header: $(echo "$MIS" | head -2 | tr '\n' ' '))"
