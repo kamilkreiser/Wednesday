@@ -1,0 +1,69 @@
+NEW /Volumes/DevMASTER/WEDNESDAY/2_Project_Files/local-model/tasks/code_patch/checker.sh sha256 d824fa3a6930
+OLD /Volumes/DevMASTER/WEDNESDAY/2_Project_Files/local-model/tasks/code_patch/checker.sh.pre-1735-a4assert sha256 20bb5ae88331
+scratch /private/tmp/claude-501/-Volumes-DevMASTER-WEDNESDAY/9b05af00-d7be-4a1b-951b-52959709cae5/scratchpad/arms_post
+cut /Volumes/DevMASTER/WEDNESDAY/2_Project_Files/local-model/tasks/code_patch/checker.sh: summ 160-178, getn 179, A4 decision 779-865
+cut /Volumes/DevMASTER/WEDNESDAY/2_Project_Files/local-model/tasks/code_patch/checker.sh.pre-1735-a4assert: summ 160-178, getn 179, A4 decision 779-853
+=== ARM0 predicate: test_only=1 new=1 ; substring test in NEW=0 (OLD=2, positive control)
+ARM0 rc=0
+  ok   the test_only predicate is the code_patch predicate; no '"expected" in msgs.lower()' left in NEW
+synthetic fixtures written: j_eoj, v_eoj, v_html, v_mix, v_mod, v_plus_loadfile, v_tok, v_type
+=== ARM1 REAL vitest assertion red -> ASSERTION, NEW PASS A4
+  [new arm1 mode=code_patch] PASS A4 RED-FIRST: src/__tests__/fixture.test.ts fails at the untouched tip (1 failed / 3 run; controls green; assertion reds)
+ARM1 rc=0
+  ok   vitest AssertionError red classed ASSERTION (PASS A4)
+=== ARM2 REAL jest assertion red -> ASSERTION, NEW PASS A4
+  [new arm2 mode=test_only] PASS A4 RED-FIRST: src/__tests__/fixture.test.ts fails at the untouched tip (1 failed / 87 run; controls green; assertion reds)
+ARM2 rc=0
+  ok   jest expect(received).toEqual(expected) red classed ASSERTION (PASS A4, 1/87)
+=== ARM3a Unexpected end of JSON input
+  [new ARM3a mode=code_patch] FAIL A4 RED-FIRST: the test is red at the tip but NOT for the right reason — non-assertion failure(s): 🔴 a DEGRADED optional service (billing answers 200 degraded) -> SyntaxError: Unexpected end of JSON input (1 failed / 3 run); the harness does not reach the code, so the red proves nothing
+  [old ARM3a mode=code_patch] PASS A4 RED-FIRST: src/__tests__/fixture.test.ts fails at the untouched tip (1 failed / 3 run; controls green; assertion reds)
+ARM3a rc=0
+  ok   🔴 cell, Unexpected end of JSON input: NEW FAIL (non-assertion, names 'SyntaxError: Unexpected end of JSON input'); OLD PASS (the negative control reproduces the defect)
+=== ARM3b Unexpected token 'export'
+  [new ARM3b mode=code_patch] FAIL A4 RED-FIRST: the test is red at the tip but NOT for the right reason — non-assertion failure(s): 🔴 a DEGRADED optional service (billing answers 200 degraded) -> SyntaxError: Unexpected token 'export' (1 failed / 3 run); the harness does not reach the code, so the red proves nothing
+  [old ARM3b mode=code_patch] PASS A4 RED-FIRST: src/__tests__/fixture.test.ts fails at the untouched tip (1 failed / 3 run; controls green; assertion reds)
+ARM3b rc=0
+  ok   🔴 cell, Unexpected token (import/parse): NEW FAIL (non-assertion, names 'SyntaxError: Unexpected token 'export''); OLD PASS (the negative control reproduces the defect)
+=== ARM3c Unexpected token '<' (not valid JSON)
+  [new ARM3c mode=code_patch] FAIL A4 RED-FIRST: the test is red at the tip but NOT for the right reason — non-assertion failure(s): 🔴 a DEGRADED optional service (billing answers 200 degraded) -> SyntaxError: Unexpected token '<', "<html>" is not valid JSON (1 failed / 3 run); the harness does not reach the code, so the red pro
+  [old ARM3c mode=code_patch] PASS A4 RED-FIRST: src/__tests__/fixture.test.ts fails at the untouched tip (1 failed / 3 run; controls green; assertion reds)
+ARM3c rc=0
+  ok   🔴 cell, Unexpected token '<': NEW FAIL (non-assertion, names 'SyntaxError: Unexpected token '<''); OLD PASS (the negative control reproduces the defect)
+=== ARM3d jest declared cell, Unexpected end of JSON input
+  [new ARM3d mode=test_only] FAIL A4 RED-FIRST: the test is red at the tip but NOT for the right reason — CONTROL cell(s) red at the tip: RED KS-1229 VT1 - a trailing-space carrier is refused, never ; non-assertion failure(s): RED KS-1229 VT1 - a trailing-space carrier is refused, never -> SyntaxError: Unexpected end of JSON in
+  [old ARM3d mode=test_only] PASS A4 RED-FIRST: src/__tests__/fixture.test.ts fails at the untouched tip (1 failed / 87 run; controls green; assertion reds)
+ARM3d rc=0
+  ok   jest declared red cell (no 🔴) failing Unexpected end of JSON: NEW FAIL; OLD PASS (control)
+=== ARM4a TypeError
+  [new ARM4a mode=code_patch] FAIL A4 RED-FIRST: the test is red at the tip but NOT for the right reason — non-assertion failure(s): 🔴 a DEGRADED optional service (billing answers 200 degraded) -> TypeError: Cannot read properties of undefined (reading 'isOptional') (1 failed / 3 run); the harness does not reach the code, so the
+ARM4a rc=0
+  ok   TypeError load/type failure: NEW FAIL (not an assertion)
+=== ARM4b Cannot find module (declared cell)
+  [new ARM4b mode=code_patch] FAIL A4 RED-FIRST: the test is red at the tip but NOT for the right reason — non-assertion failure(s): 🔴 a DEGRADED optional service (billing answers 200 degraded) -> Error: Cannot find module './no-such-module-ks' (1 failed / 3 run); the harness does not reach the code, so the red proves nothing
+ARM4b rc=0
+  ok   module-not-found: NEW FAIL, named as a non-assertion failure
+=== ARM4e Cannot find module, brief declares no red_cells
+  [new ARM4e mode=code_patch] FAIL A4 RED-FIRST: the test is red at the tip but NOT for the right reason — non-assertion failure(s): 🔴 a DEGRADED optional service (billing answers 200 degraded) -> Error: Cannot find module './no-such-module-ks' (1 failed / 3 run); the harness does not reach the code, so the red proves nothing
+  [old ARM4e mode=code_patch] PASS A4 RED-FIRST: src/__tests__/fixture.test.ts fails at the untouched tip (1 failed / 3 run; controls green; assertion reds)
+ARM4e rc=0
+  ok   undeclared 🔴 cell, module-not-found: NEW FAIL (non-assertion, names 'Error: Cannot find module './no-such-module-ks''); OLD PASS (the negative control reproduces the defect)
+=== ARM4c REAL jest TS6133 load failure (0 tests run)
+  [new ARM4c mode=code_patch] FAIL A4 RED-FIRST: the test file did not run any test at the tip (load/compile error, not a red) — 
+ARM4c rc=0
+  ok   TS type error, suite failed to run: NEW FAIL A4 (did not run any test)
+=== ARM4d assertion file + a load-failed file
+  [new ARM4d mode=code_patch] FAIL A4 RED-FIRST: the test is red at the tip but NOT for the right reason — non-assertion failure(s): (file) ks1074-the-poller-reconcile-blob-writers-also.test.ts -> ● Test suite failed to run (1 failed / 3 run); the harness does not reach the code, so the red proves nothing
+ARM4d rc=0
+  ok   a file that failed to load beside an assertion red: NEW FAIL naming the (file)
+=== ARM5 mix: one assertion red + one Unexpected end of JSON red
+  [new ARM5 mode=code_patch] FAIL A4 RED-FIRST: the test is red at the tip but NOT for the right reason — non-assertion failure(s): 🔴 the advice JSON parses (a second red) -> SyntaxError: Unexpected end of JSON input (2 failed / 4 run); the harness does not reach the code, so the red proves nothing
+  [old ARM5 mode=code_patch] PASS A4 RED-FIRST: src/__tests__/fixture.test.ts fails at the untouched tip (2 failed / 4 run; controls green; assertion reds)
+ARM5 rc=0
+  ok   mixed file: NEW FAIL (non-assertion, names '🔴 the advice JSON parses (a second red) -> SyntaxError: Unexpected end of JSON input'); OLD PASS (the negative control reproduces the defect)
+=== ARM6 census: OLD vs NEW A4 on every stored red_first.json with an input.json
+census inputs: 152
+  census: 152 runs, 0 flip(s) (list: /private/tmp/claude-501/-Volumes-DevMASTER-WEDNESDAY/9b05af00-d7be-4a1b-951b-52959709cae5/scratchpad/arms_post/census_flips.tsv)
+ARM6 rc=0
+  ok   census 152 runs, 0 flip(s), every flip OLD PASS -> NEW FAIL on a real non-assertion red
+RESULT: 14 ok, 0 bad

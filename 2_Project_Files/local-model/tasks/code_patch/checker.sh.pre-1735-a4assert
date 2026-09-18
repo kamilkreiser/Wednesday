@@ -793,14 +793,6 @@ red_total="$(getn "$RED" total)"; red_failed="$(getn "$RED" failed)"; red_passed
 # title containing it at word boundaries ("KS-1 R1" never matches "KS-1 R10"). Declared-green names go to
 # $REP/a4_declared_green.out (always rewritten). The PASS line is byte-identical to before (golden checker.out arms
 # compare it). Arms: tests/a4_allreds_arms.sh.
-# 2026-09-18 A4-ASSERT (found by the test_only tier's ARM8): a red was classed as an assertion when its message contained
-# the substring "expected" (any case) — so `SyntaxError: Unexpected end of JSON input` / `Unexpected token` (a test that
-# never reached its assertion) counted as an assertion red, and a 🔴 cell failing that way passed A4. The predicate is now
-# the test_only tier's (tasks/test_only/checker.sh cells_of): `AssertionError` (vitest/chai) or an `expect(` frame (jest
-# `expect(received).toBe(expected)`), byte-identical — tests/code_patch_a4_assertion_arms.sh guards the two against drift.
-# EVERY failed cell that is not an assertion is now a non-assertion red (was: only a message naming Reference/Type/Syntax/
-# RangeError and lacking "expected" — "Error: Cannot find module …" or "Error: Cannot nest a describe …" slipped through),
-# and a file-level load error (a testResult failed with no assertionResults) is one too. Arms: tests/code_patch_a4_assertion_arms.sh.
 A4_NOTE="$(python3 - "$REP/red_first.json" "$INPUT" "$REP/a4_declared_green.out" <<'PY4'
 import json, sys, re
 open(sys.argv[3], "w").close()
@@ -808,19 +800,15 @@ try: j = json.load(open(sys.argv[1]))
 except Exception as e: print(f"UNREADABLE {e}"); sys.exit()
 declared = ((json.load(open(sys.argv[2])).get("defect_line") or {}).get("red_cells")) or []
 ctrl_red = []; nonassert = []; declared_hit = []
-# the predicate of the test_only tier, verbatim: tasks/test_only/checker.sh cells_of. NOT a substring test for "expected"
-assertion = lambda msgs: ("AssertionError" in msgs) or bool(re.search(r"\bexpect\(", msgs))
 for tf in j.get("testResults", []):
-    if tf.get("status") == "failed" and not tf.get("assertionResults"):
-        nonassert.append("(file) " + (tf.get("name", "?").rsplit("/", 1)[-1]) + " -> " + (tf.get("message") or "").strip().split("\n")[0][:90])
     for a in tf.get("assertionResults", []):
         t = a.get("title", ""); msgs = " ".join(a.get("failureMessages") or [])
         if a.get("status") == "failed":
-            is_assert = assertion(msgs)
+            is_assert = ("AssertionError" in msgs) or ("expected" in msgs.lower())
             if "🔴" not in t:
                 if any(d and d in t for d in declared) and is_assert: declared_hit.append(t[:60])
                 else: ctrl_red.append(t[:60])
-            if not is_assert:
+            if re.search(r"\b(ReferenceError|TypeError|SyntaxError|RangeError)\b", msgs) and "AssertionError" not in msgs and "expected" not in msgs.lower():
                 nonassert.append(t[:60] + " -> " + msgs.strip().split("\n")[0][:90])
 out = []
 if ctrl_red: out.append("CONTROL cell(s) red at the tip: " + " | ".join(ctrl_red))
@@ -831,7 +819,7 @@ cells = []
 for tf in j.get("testResults", []):
     for a in tf.get("assertionResults", []):
         msgs = " ".join(a.get("failureMessages") or [])
-        red = a.get("status") == "failed" and assertion(msgs)
+        red = a.get("status") == "failed" and (("AssertionError" in msgs) or ("expected" in msgs.lower()))
         cells.append((nrm(a.get("title", "")), red))
 green_decl = []
 for d in [nrm(x) for x in declared if nrm(x)]:
